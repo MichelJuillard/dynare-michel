@@ -77,8 +77,10 @@ end
 
 if M_.maximum_lead == 0;  % backward model
   dr.ghx = -a;
-  dr.ghu = -fu;
-  oo_.eigenvalues = -eig(a);
+  if M_.exo_nbr & cheik == 0
+    dr.ghu = -fu;
+  end
+  oo_.eigenvalues = -eig(a(nstatic+1:end,:));
   dr.rank = 0;
   return;
 end

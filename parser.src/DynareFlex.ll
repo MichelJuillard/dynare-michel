@@ -56,7 +56,7 @@ int sigma_e = 0;
 <INITIAL>Sigma_e {BEGIN DYNARE_STATEMENT;sigma_e = 1; return SIGMA_E;}
 
  /* End of a Dynare statement */
-<DYNARE_STATEMENT>[ \t\n]*; {if (!sigma_e) BEGIN INITIAL; return yytext[0];}
+<DYNARE_STATEMENT>; {if (!sigma_e) BEGIN INITIAL; return yytext[0];}
 
 
  /* Begin of a Dynare block */
