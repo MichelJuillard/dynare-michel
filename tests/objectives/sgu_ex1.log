@@ -1,0 +1,15 @@
+
+
+MATRIX OF COVARIANCE OF EXOGENOUS SHOCKS
+
+Variables    e         
+e            1.000000
+POLICY AND TRANSITION FUNCTIONS
+                                       k               a               c
+Constant                   -1.552215               0       -0.969516
+(correction)                0.241022               0       -0.096072
+k(-1)                       0.419109               0        0.252523
+e                           1.397031        1.000000        0.841743
+k(-1)k(-1)                 -0.003501               0       -0.002559
+e e                        -0.038899               0       -0.028434
+k(-1) e                    -0.023340               0       -0.017061
