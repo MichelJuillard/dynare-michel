@@ -41,8 +41,8 @@ void  NumericalInitialization::SetConstant (string name, string expression)
       		(* error) (msg.c_str());
     }
     // Writing expression
-    *output << "M_.param( " << SymbolTable::getID(name)+1 << " ) = " << expression << ";\n";
-    *output << name << " = M_.param( " << SymbolTable::getID(name)+1 << " );\n";
+    *output << "M_.params( " << SymbolTable::getID(name)+1 << " ) = " << expression << ";\n";
+    *output << name << " = M_.params( " << SymbolTable::getID(name)+1 << " );\n";
     // Deleting expression
     //TODO
 		

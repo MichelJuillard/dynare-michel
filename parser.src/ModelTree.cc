@@ -750,16 +750,22 @@ string 	ModelTree::setStaticModelM(void)
 	StaticOutput << "if nargout >= 1,\n";
 	StaticOutput << "  residual = zeros( " << ModelParameters::eq_nbr << ", 1);\n";
 	StaticOutput << "\n\t%\n\t% Model equations\n\t%\n\n";
-    StaticOutput << model_tmp_output.str() << "\n";
-    StaticOutput << model_output.str();
-    StaticOutput << "end\n";
+	StaticOutput << model_tmp_output.str() << "\n";
+	StaticOutput << model_output.str();
+	StaticOutput << "  if ~isreal(residual)\n";
+	StaticOutput << "    residual = real(residual)+imag(residual).^2;\n";
+	StaticOutput << "  end\n";
+	StaticOutput << "end\n";
 	StaticOutput << "if nargout >= 2,\n";
 	StaticOutput << "  g1 = " << 
-		"zeros(" << ModelParameters::eq_nbr << ", " <<
-		ModelParameters::endo_nbr << ");\n" ;
+	  "zeros(" << ModelParameters::eq_nbr << ", " <<
+	  ModelParameters::endo_nbr << ");\n" ;
 	StaticOutput << "\n\t%\n\t% Jacobian matrix\n\t%\n\n";
-    StaticOutput << jacobian_tmp_output.str() << "\n";
+	StaticOutput << jacobian_tmp_output.str() << "\n";
 	StaticOutput << jacobian_output.str();		
+	StaticOutput << "  if ~isreal(g1)\n";
+	StaticOutput << "    residual = real(residual)+2*imag(residual);\n";
+	StaticOutput << "  end\n";
 	StaticOutput << "end\n";
 	current_order = d;
 	return StaticOutput.str();
@@ -2107,7 +2113,7 @@ void ModelTree::ModelInitialization(void)
 	if (ModelParameters::exo_nbr)
 		output << "oo_.exo_steady_state = zeros(" << ModelParameters::exo_nbr << ", 1);\n";
 	if (ModelParameters::parameter_nbr)
-		output << "M_.param = zeros(" << ModelParameters::parameter_nbr << ", 1);\n";
+		output << "M_.params = zeros(" << ModelParameters::parameter_nbr << ", 1);\n";
 	if (ModelParameters::exo_det_nbr)
 		output << "oo_exdet_ = zeros(" << ModelParameters::exo_det_nbr << ", 1);\n";
 	if (ModelParameters::exo_det_nbr)
