@@ -1,0 +1,34 @@
+:ext:pythie.cepremap.cnrs.fr/var/lib/cvs
+2004-03-31  michel@MICHEL-LAT  <michel@michel-lat>
+
+	* makefile: dynare.exe is now copied into ../../matlab/dynare_m.exe
+
+2004-03-30  benzougar  <benzougar@michel-lat>
+
+	* makefile: Adding doc generation fonctionnality with "make doc".
+
+2004-03-29  benzougar  <benzougar@michel-lat>
+
+	* makefile: Resolving some dependencies problem
+
+	* makefile:
+	Update : this version contains new 2 files : DataTree.h and DataTree.cc
+
+2004-03-22  benzougar  <benzougar@michel-lat>
+
+	* makefile: Update
+
+2004-03-12  benzougar  <benzougar@michel-lat>
+
+	* makefile: Update
+
+2004-03-09  benzougar  <benzougar@michel-lat>
+
+	* makefile: Update
+
+2004-03-09  michel@MICHEL-LAT  <michel@michel-lat>
+
+	* makefile: New file.
+
+	* makefile: starting version 4
+

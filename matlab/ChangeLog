@@ -1,0 +1,488 @@
+:ext:pythie.cepremap.cnrs.fr/var/lib/cvs
+2004-03-31  michel@MICHEL-LAT  <michel@michel-lat>
+
+	* dynare.m: set path for c:\dynare_v4\matlab
+
+2004-03-30  benzougar  <benzougar@michel-lat>
+
+	* sim1.m: global variable start_simul removed : defined only here
+
+	* not_used/ff1_.m:
+	Moving this file to main root dir  : ff1_.m is used by dr1.m, m2html fails
+	declaring this file unused.
+
+	* ff1_.m:
+	Moving this file from not_used  : ff1_.m is used by dr1.m, m2html fails
+	declaring this file unused.
+
+2004-03-29  michel@MICHEL-LAT  <michel@michel-lat>
+
+	* ChangeLog, not_used/brm.m, not_used/cols.m: *** empty log message ***
+
+	* not_used/datatomfile.m, not_used/diffext.m, not_used/equiv.m, not_used/ff1_.m, not_used/ff2_.m, not_used/ff2a_.m, not_used/ff_simul.m, not_used/ff_simul1.m, not_used/ff_simul2.m, not_used/fff.m, not_used/fs_dyn.m, not_used/fx_.m, not_used/hessext.m, not_used/hpfast.m, not_used/jacob2.m, not_used/lpdfig.m, not_used/pdfig.m, not_used/reshapel.m, not_used/resid0.m, not_used/rfrot.m, not_used/set_start_date.m, not_used/testifft.m, not_used/transition_matrix.m, not_used/var_index.m, not_used/var_state_index.m:
+	registering unreferenced functions
+
+:ext:pythie.cepremap.cnrs.fr/var/lib/cvs
+2004-03-29  michel@MICHEL-LAT  <michel@michel-lat>
+
+	* not_used/datatomfile.m, not_used/diffext.m, not_used/equiv.m, not_used/ff1_.m, not_used/ff2_.m, not_used/ff2a_.m, not_used/ff_simul.m, not_used/ff_simul1.m, not_used/ff_simul2.m, not_used/fff.m, not_used/fs_dyn.m, not_used/fx_.m, not_used/hessext.m, not_used/hpfast.m, not_used/jacob2.m, not_used/lpdfig.m, not_used/pdfig.m, not_used/reshapel.m, not_used/resid0.m, not_used/rfrot.m, not_used/set_start_date.m, not_used/testifft.m, not_used/transition_matrix.m, not_used/var_index.m, not_used/var_state_index.m:
+	registering unreferenced functions
+
+2004-03-27  michel@MICHEL-LAT  <michel@michel-lat>
+
+	* ChangeLog, dr1.m, sylvester3a.m, th_autocovariances.m:
+	merged changes in r0327
+
+	* ChangeLog, brm.m, cols.m, datatomfile.m, diffext.m, equiv.m, ff1_.m, ff2_.m, ff2a_.m, ff_simul.m, ff_simul1.m, ff_simul2.m, fff.m, fs_dyn.m, fx_.m, hessext.m, hpfast.m, jacob2.m, lpdfig.m, pdfig.m, reshapel.m, resid0.m, rfrot.m, set_start_date.m, testifft.m, transition_matrix.m, var_index.m, var_state_index.m:
+	*** empty log message ***
+
+	* brm.m, cols.m, datatomfile.m, diffext.m, equiv.m, ff1_.m, ff2_.m, ff2a_.m, ff_simul.m, ff_simul1.m, ff_simul2.m, fff.m, fs_dyn.m, fx_.m, hessext.m, hpfast.m, jacob2.m, lpdfig.m, pdfig.m, reshapel.m, resid0.m, rfrot.m, set_start_date.m, testifft.m, transition_matrix.m, var_index.m, var_state_index.m:
+	adding abdel change
+
+	* brm.m, cols.m, datatomfile.m, diffext.m, equiv.m, ff1_.m, ff2_.m, ff2a_.m, ff_simul.m, ff_simul1.m, ff_simul2.m, fff.m, fs_dyn.m, fx_.m, hessext.m, hpfast.m, jacob2.m, lpdfig.m, not_used/brm.m, not_used/cols.m, not_used/datatomfile.m, not_used/diffext.m, not_used/equiv.m, not_used/ff1_.m, not_used/ff2_.m, not_used/ff2a_.m, not_used/ff_simul.m, not_used/ff_simul1.m, not_used/ff_simul2.m, not_used/fff.m, not_used/fs_dyn.m, not_used/fx_.m, not_used/hessext.m, not_used/hpfast.m, not_used/jacob2.m, not_used/lpdfig.m, not_used/pdfig.m, not_used/reshapel.m, not_used/resid0.m, not_used/rfrot.m, not_used/set_start_date.m, not_used/testifft.m, not_used/transition_matrix.m, not_used/var_index.m, not_used/var_state_index.m, pdfig.m, reshapel.m, resid0.m, rfrot.m, set_start_date.m, testifft.m, transition_matrix.m, var_index.m, var_state_index.m:
+	adding Abdel change
+
+	* ChangeLog, asamin.dll, asamin.m: abdels sorting unused functions
+
+	* th_autocovariances.m:
+	corrected bug in computation of theoretical mean of 2nd order approximation of models with lags on more than 1 period
+
+	* sylvester3a.m:
+	new function: increases accuracy of sylvester solution by running iterations
+
+	* dr1.m: call sylvester3a after sylvester3 to increase accuracy
+
+:ext:pythie.cepremap.cnrs.fr/var/lib/cvs
+=======
+2004-03-27  michel@MICHEL-LAT  <michel@michel-lat>
+
+	* th_autocovariances.m:
+	corrected bug in computation of theoretical mean of 2nd order approximation of models with lags on more than 1 period
+
+	* sylvester3a.m:
+	new function: increases accuracy of sylvester solution by running iterations
+
+	* dr1.m: call sylvester3a after sylvester3 to increase accuracy
+
+2004-02-28  michel@MICHEL-LAT  <michel@michel-lat>
+
+	* dynare_m.exe: *** empty log message ***
+
+	* initial_estimation_checks.m: new function
+
+	* mj_optmumlik.m:
+	set dr1_test_(1)=4 when f matrix is singular in Kalman filter
+
+	* dynare_estimation.m: added call to init_estimation_check()
+
+:ext:pythie.cepremap.cnrs.fr/var/lib/cvs
+2004-02-28  michel@MICHEL-LAT  <michel@michel-lat>
+
+	* dynare_m.exe: *** empty log message ***
+
+	* initial_estimation_checks.m: new function
+
+	* mj_optmumlik.m:
+	set dr1_test_(1)=4 when f matrix is singular in Kalman filter
+
+	* dynare_estimation.m: added call to init_estimation_check()
+
+2004-02-24  michel@MICHEL-LAT  <michel@michel-lat>
+
+	* dynare_estimation.m: - set default for option loglinear
+
+2004-02-20  michel@MICHEL-LAT  <michel@michel-lat>
+
+	* rplot.m: added legend when several curves
+
+	* rplot.m: corrected bug for several variables
+
+	* varprior.m, rfvar3.m: new file
+
+	* prior_bounds.m: replaced qgamma by mj_qgamma to avoid overflow
+
+	* numgrad.m, mj_qgamma.m, mgnldnsty.m, matrictint.m: new file
+
+	* marginal_density.m: use maxpost as standardization factor
+
+	* fs_dyn.m: new file
+
+	* dynare_m.exe, asamin.dll: *** empty log message ***
+
+	* dynare_estimation.m: added option nodiagnostic
+
+	* csminwel.m, csminit.m: new file
+
+	* compDist.m: -replaced qgamma by mj_qgamma to avoid overflow problems
+	-added 'Interpreter' 'none' to title()
+
+	* bfgsi.m: new file
+
+	* ChangeLog: *** empty log message ***
+
+:ext:pythie.cepremap.cnrs.fr/var/lib/cvs
+2004-02-20  michel@MICHEL-LAT  <michel@michel-lat>
+
+	* rplot.m: added legend when several curves
+
+	* rplot.m: corrected bug for several variables
+
+	* varprior.m, rfvar3.m: new file
+
+	* prior_bounds.m: replaced qgamma by mj_qgamma to avoid overflow
+
+	* numgrad.m, mj_qgamma.m, mgnldnsty.m, matrictint.m: new file
+
+	* marginal_density.m: use maxpost as standardization factor
+
+	* fs_dyn.m: new file
+
+	* dynare_m.exe, asamin.dll: *** empty log message ***
+
+	* dynare_estimation.m: added option nodiagnostic
+
+	* csminwel.m, csminit.m: new file
+
+	* compDist.m: -replaced qgamma by mj_qgamma to avoid overflow problems
+	-added 'Interpreter' 'none' to title()
+
+	* bfgsi.m: new file
+
+	* ChangeLog: *** empty log message ***
+
+:ext:pythie.cepremap.cnrs.fr/var/lib/cvs
+2004-02-17  michel@MICHEL-LAT  <michel@michel-lat>
+
+	* set_prior.m: -bug correction (options_ must be global)
+
+	* posterior_density_estimate.m: -bug removal
+
+	* mj_optmumlik.m: -adapted for non zero means and linear trend
+	-modified for use with different optimizers
+
+	* dynare_resolve.m:
+	-now returns also steady state for current parameter values
+
+	* dynare_m.exe: -added new options
+
+	* dynare_estimation.m: -added trend_coeff
+	-prefilter default is now zero
+	-default optimizer is Sims' csminwel
+	-prints priors first
+	-added non zero means
+	-different report for ML and Bayesian estimation
+	-corrected bug in sscanf syntax
+	-added automatic loglinear approximation
+
+	* dr11.m: added option loglinear
+	non-unique steady state triggers dir_test(1) = 5
+
+	* dr1.m: added option loglinear
+
+	* compDist.m:
+	-Changed to display first priors, then priors and posterior
+	-various bugs corrected
+
+2004-02-13  michel@MICHEL-LAT  <michel@michel-lat>
+
+	* prior_bounds.m: added offset for gamma distribution (p3)
+
+2004-02-11  michel@MICHEL-LAT  <michel@michel-lat>
+
+	* priordens.m: added shift parameter p3(i) to gamma density
+
+2004-02-09  michel@MICHEL-LAT  <michel@michel-lat>
+
+	* posterior_moments.m: post_mean is now a column instead of a row
+
+2004-02-03  michel@MICHEL-LAT  <michel@michel-lat>
+
+	* mcmc_diagnostic.m:
+	corrected bug (missing parentheses) in parameter offsets
+
+2004-01-27  michel@MICHEL-LAT  <michel@michel-lat>
+
+	* metropolis.m:
+	corrected computation of logpo2 for initial value of MH chain
+
+	* dynare_estimation.m:
+	added initialization of logpo2 when mh_load_file == 0 and included it in argument of metropolis()
+
+:ext:pythie.cepremap.cnrs.fr/var/lib/cvs
+2004-01-27  michel@MICHEL-LAT  <michel@michel-lat>
+
+	* metropolis.m:
+	corrected computation of logpo2 for initial value of MH chain
+
+	* dynare_estimation.m:
+	added initialization of logpo2 when mh_load_file == 0 and included it in argument of metropolis()
+
+2004-01-26  michel@MICHEL-LAT  <michel@michel-lat>
+
+	* dynare_m.exe: corrected option bugs
+
+	* dynare_estimation.m: changed options defaults to match manual
+
+	* disp_th_moments.m: removed bugs in writing moments to oo_
+
+	* disp_moments.m: write moments in global variable oo_
+
+:ext:pythie.cepremap.cnrs.fr/var/lib/cvs
+2004-01-26  michel@MICHEL-LAT  <michel@michel-lat>
+
+	* dynare_m.exe: corrected option bugs
+
+	* dynare_estimation.m: changed options defaults to match manual
+
+	* disp_th_moments.m: removed bugs in writing moments to oo_
+
+	* disp_moments.m: write moments in global variable oo_
+
+2004-01-24  michel@MICHEL-LAT  <michel@michel-lat>
+
+	* simult_.m: corrected 02 instead of o2 for simul_algo == 1
+
+	* disp_th_moments.m: put mean, var and autocorr in global variable oo_
+
+2004-01-23  michel@MICHEL-LAT  <michel@michel-lat>
+
+	* priordens.m: changed pmean into p1
+
+	* marginal_density.m: suppressed debug printings
+
+	* mj_optmumlik.m: suppressed message when singularity in Kalman filter
+
+	* set_prior.m: suppressed debug printing
+
+	* set_prior.m: new function
+
+	* qchisq.m: new function from stixbox
+
+	* priordens.m:
+	changed calling sequence of inverse gamma 1 and added inverse gamma 2
+
+	* mj_optmumlik.m:
+	-added early return if singularity inside Kalman filter
+	-now passes p1 and not pmean to priordens
+
+	* metropolis.m:
+	add logpo2 (log of posterior density) to function output
+
+	* mcmc_diagnostic.m: added 'Interpreter','none' to graph titles
+
+	* marginal_density.m, lpdfig2.m, lpdfig1.m, inverse_gamma_specification.m:
+	new function
+
+	* dynare_m.exe: added new estimation options
+
+	* dynare_estimation.m: -mh_init_scale set to 2*mh_jscale
+	-priors are now set in set_prior()
+	-p2 is now pstdev (as specified by the user)
+	-modified code for load_mh_file option when mh_replic = 0
+	-metropolis now returns x2 and logpo2
+	-added call to marginal density and report
+	-smoothed observation error graph only if observation errors
+
+	* dr11.m: removed warnings for singularity and other conditions
+
+	* ChangeLog: *** empty log message ***
+
+:ext:pythie.cepremap.cnrs.fr/var/lib/cvs
+2004-01-23  michel@MICHEL-LAT  <michel@michel-lat>
+
+	* set_prior.m: new function
+
+	* qchisq.m: new function from stixbox
+
+	* priordens.m:
+	changed calling sequence of inverse gamma 1 and added inverse gamma 2
+
+	* mj_optmumlik.m:
+	-added early return if singularity inside Kalman filter
+	-now passes p1 and not pmean to priordens
+
+	* metropolis.m:
+	add logpo2 (log of posterior density) to function output
+
+	* mcmc_diagnostic.m: added 'Interpreter','none' to graph titles
+
+	* marginal_density.m, lpdfig2.m, lpdfig1.m, inverse_gamma_specification.m:
+	new function
+
+	* dynare_m.exe: added new estimation options
+
+	* dynare_estimation.m: -mh_init_scale set to 2*mh_jscale
+	-priors are now set in set_prior()
+	-p2 is now pstdev (as specified by the user)
+	-modified code for load_mh_file option when mh_replic = 0
+	-metropolis now returns x2 and logpo2
+	-added call to marginal density and report
+	-smoothed observation error graph only if observation errors
+
+	* dr11.m: removed warnings for singularity and other conditions
+
+	* ChangeLog: *** empty log message ***
+
+2004-01-20  michel@MICHEL-LAT  <michel@michel-lat>
+
+	* mcmcdiags.m: added deletion of temporary files
+
+2004-01-17  michel@MICHEL-LAT  <michel@michel-lat>
+
+	* mj_optmumlik.m:
+	changed filter so that first observation is used. State variables go now from period 0 to T
+
+	* dynare_estimation.m:
+	change code at the end of the function to match the fact that aTt starts now in period 0 instead of 1.
+
+:ext:pythie.cepremap.cnrs.fr/var/lib/cvs
+2004-01-17  michel@MICHEL-LAT  <michel@michel-lat>
+
+	* mj_optmumlik.m:
+	changed filter so that first observation is used. State variables go now from period 0 to T
+
+	* dynare_estimation.m:
+	change code at the end of the function to match the fact that aTt starts now in period 0 instead of 1.
+
+:ext:pythie.cepremap.cnrs.fr/var/lib/cvs
+2004-01-17  michel@MICHEL-LAT  <michel@michel-lat>
+
+	* dynare_estimation.m:
+	change code at the end of the function to match the fact that aTt starts now in period 0 instead of 1.
+
+2004-01-16  michel@MICHEL-LAT  <michel@michel-lat>
+
+	* asamin.dll, asamin.m, check_mh.m, generalized_cholesky.m, generalized_cholesky2.m, hessian2.m, lpdfnorm.m, mcmc_diagnostic.m, mcmcdiags.m, mode_check.m, my_subplot.m, pdfig.m, pgamma.m, pnorm.m, posterior_density_estimate.m, prior_bounds.m, qbeta.m, qgamma.m, qnorm.m:
+	*** empty log message ***
+
+	* resol1.m: changed specification of invalid conditions
+
+	* posterior_moments.m: adapted for several chains
+
+	* metropolis.m: added random initial point and several chains
+
+	* dynare_resolve.m: changed specification of invalid conditions
+
+	* dynare_m.exe: new version of parser
+
+	* dynare_estimation.m:
+	added options for partial processing and MCMC convergence diagnostics
+
+	* dr11.m: changed specification of invalid conditions
+
+	* dr1.m: *** empty log message ***
+
+	* compDist.m:
+	corrected bug on density of lognormal instead of log of normal density
+
+	* mj_optmumlik.m:
+	corrected bug that included presample observations in computing log likelihood constant
+
+2004-01-01  michel@MICHEL-LAT  <michel@michel-lat>
+
+	* stoch_simul.m: corrects bug in orthogonalized shocks
+
+	* th_autocovariances.m:
+	corrects bug in computing second order theorectical mean
+
+	* priordens.m:
+	corrected bug in priordens: log of normal density was in fact density of lognormal...
+
+	* metropolis.m: now keeps track of rejected draws in x3
+
+	* make_ex_.m:
+	corrected bug in initialization of exe_ in absecnce of initval data
+
+	* dynare_m.exe: *** empty log message ***
+
+2003-12-31  michel@MICHEL-LAT  <michel@michel-lat>
+
+	* priordens.m:
+	corrected bug for uniform distribution (ln instead of log)
+
+2003-12-04  michel@MICHEL-LAT  <michel@michel-lat>
+
+	* dynare_estimation.m, dynare_m.exe:
+	corrected bug in setting estimated parameter value with ML estimation
+
+2003-12-03  michel@MICHEL-LAT  <michel@michel-lat>
+
+	* dynare_estimation.m: corrected typo
+
+2003-12-02  michel@MICHEL-LAT  <michel@michel-lat>
+
+	* dynare_estimation.m: firt release of dynare_test to testers
+
+2003-12-01  michel@MICHEL-LAT  <michel@michel-lat>
+
+	* compDist.m, dynare_estimation.m, dynare_m.exe, metropolis.m:
+	added jscale option and minor changes
+
+	* compDist.m, dynare_estimation.m, dynare_m.exe, lpdfig.m, metropolis.m, mj_optmumlik.m, posterior_moments.m, priordens.m:
+	integrates metropolis hasting
+
+2003-11-26  michel@MICHEL-LAT  <michel@michel-lat>
+
+	* hessian_sparse.m, hessian.m:
+	resolved name conflict between hessian matrix and hessian function
+
+2003-11-25  michel@MICHEL-LAT  <michel@michel-lat>
+
+	* dgamma.m, dbeta.m, dynare_estimation.m, metropolis.m:
+	recompute hessian after optimization in dynare_estimation
+
+	* dynare_m.exe, hessian.m, hessian_sparse.m: *** empty log message ***
+
+	* dr11.m, dr1.m: replaced jacob2 by hessian_sparse
+
+	* mjdgges.dll, compDist.m, metropolis.m, rndprior.m:
+	*** empty log message ***
+
+	* compDist.m:
+	debugging metropolis, corrected call for gamma_rnd in rndprior
+
+2003-11-24  michel@MICHEL-LAT  <michel@michel-lat>
+
+	* dynare_estimation.m: removed comments that inhibited graphs
+
+	* resol1.m: put back in computation of steady state if necessary. 
+	It should matter for models where estimated parameters don't change 
+	the steady state
+
+2003-11-23  michel@MICHEL-LAT  <michel@michel-lat>
+
+	* stoch_simul.m: changed to orthogonalized IRFs
+
+	* rndprior.m, priordens.m: need to check parameters
+
+	* metropolis.m: adapted for Dynare
+
+	* lpdfig.m: need to check arguments
+
+	* irf.m: changed input for orthogonalized IRF
+
+	* dynare_estimation.m: added metropolis
+
+	* compDist.m: need to check distribution arguments
+
+	* dynare.m: changed directory name
+
+2003-11-18  michel@MICHEL-LAT  <michel@michel-lat>
+
+	* mj_optmumlik.m: changed input parameters for priordens()
+
+2003-11-17  michel@MICHEL-LAT  <michel@michel-lat>
+
+	* beta_rnd.m, gamm_rnd.m, rand_beta.m: *** empty log message ***
+
+2003-11-16  michel@MICHEL-LAT  <michel@michel-lat>
+
+	* rand_beta.m: *** empty log message ***
+
+2003-11-14  michel@MICHEL-LAT  <michel@michel-lat>
+
+	* bicgstab.m, bksup.m, bksup1.m, bksupk.m, brm.m, bseastr.m, calib.m, calib_obj.m, calib_obj2.m, check.m, cols.m, compDist.m, datatomfile.m, dcompare.m, diffext.m, disp_dr.m, disp_moments.m, disp_th_moments.m, dlognorm.m, dnorm.m, dr1.m, dr11.m, dr2.m, dsample.m, dy_date.m, dyn2vec.m, dynare.m, dynare_estimation.m, dynare_resolve.m, dynare_solve.m, dynasave.m, dynatype.m, equiv.m, f_var.m, fbeta.m, ff1_.m, ff2_.m, ff2a_.m, ff_simul.m, ff_simul1.m, ff_simul2.m, fff.m, ffill.m, fgamma.m, figamm.m, fnorm.m, forcst.m, ftest.m, fx_.m, gcompare.m, hessext.m, hpfast.m, indnv.m, initvalf_.m, irf.m, jacob.m, jacob2.m, jacob_a.m, kalman_transition_matrix.m, linear.m, lnsrch.m, lnsrch1.m, lpdfbeta.m, lpdfgam.m, lpdfig.m, lyapunov_symm.m, make_ex_.m, make_y_.m, mcompare.m, metropolis.m, mj_optmumlik.m, olr.m, olr1.m, olr2.m, osr.m, osr1.m, osr_obj.m, p2toperc.m, priordens.m, qzdiv.m, qzswitch.m, reshapel.m, resid.m, resid0.m, resol.m, resol1.m, rfrot.m, rndprior.m, rows.m, rplot.m, selif.m, set_default_option.m, set_shocks.m, set_start_date.m, set_state_space.m, sim1.m, simk.m, simul.m, simult.m, simult_.m, solve1.m, steady.m, steady_.m, sylvester3.m, table.m, testifft.m, th_autocovariances.m, transition_matrix.m, union.m, var_index.m, var_state_index.m:
+	start
+
+	* stoch_simul.m: New file.
+
