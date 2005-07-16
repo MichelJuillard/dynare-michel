@@ -19,8 +19,8 @@ void (* SymbolTable::error) (const char* ) = NULL;
 //------------------------------------------------------------------------------
 SymbolTable::SymbolTable()
 {
-	  name_table.resize(6);
-	  tex_name_table.resize(6);
+	  name_table.resize(10);
+	  tex_name_table.resize(10);
 }
 //------------------------------------------------------------------------------
 SymbolTable::~SymbolTable()
@@ -79,8 +79,7 @@ int SymbolTable::AddSymbolDeclar(string name,Type type, string tex_name)
 		//The symbol exists, testing its type
 		if (symboltable[name].type == type){
 			cout << "Warning : symbol " << name << " declared more than once.\n";
-			return getID(name);
-		}
+			return getID(name);		}
 		else{
 			string msg = "symbol " + name + " declared more than once with different types.";
 			(* error) (msg.c_str());

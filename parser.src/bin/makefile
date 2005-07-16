@@ -1,6 +1,7 @@
 CPP = c++
 ifeq ($(DEBUG),yes)
 	CPPFLAGS = -mno-cygwin -ggdb -Wall
+	CPPFLAGS = -ggdb -Wall
 else
 	CPPFLAGS = -mno-cygwin -O1
 endif
