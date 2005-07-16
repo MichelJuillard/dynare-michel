@@ -331,8 +331,8 @@ namespace ylmm
   basic_parser<T,L,id,M>::trace(int lookahead, 
 				const token_type& token) 
   {
-    if (!_messenger) return;
-    _messenger->message_stream() << " " << lookahead 
+    if (!basic_parser::_messenger) return;
+    basic_parser::_messenger->message_stream() << " " << lookahead 
 				      << " [" << token << "]" 
 				      << std::flush;
   }

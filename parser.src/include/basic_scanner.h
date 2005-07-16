@@ -467,13 +467,13 @@ namespace ylmm
   inline void 
   basic_scanner<T,L,id,M>::where(location_type& l, bool first) 
   {
-    if (!_current) return;
+    if (!basic_scanner::_current) return;
     if (first) {
       l.first_line(l.last_line());
       l.first_column(l.last_column());
     }
-    l.last_line(_current->line());
-    l.last_column(_current->column());
+    l.last_line(basic_scanner::_current->line());
+    l.last_column(basic_scanner::_current->column());
   }  
   //__________________________________________________________________
   template<typename T, typename L, int id, typename M>
