@@ -6,7 +6,7 @@
 using namespace std;
 //------------------------------------------------------------------------------
 #include "VariableTable.h"
-#include "d_tab.h"
+#include "DynareBison.h"
 #include "NumericalConstants.h"
 #include "DataTree.h"
 //------------------------------------------------------------------------------

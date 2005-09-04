@@ -99,14 +99,14 @@ inline bool SymbolTable::Exist(std::string name)
 //------------------------------------------------------------------------------
 inline std::string  SymbolTable::getNameByID(Type type,int id)
 {		
-	if (id >= 0 && name_table[type].size() > id)
+  if (id >= 0 && (int)name_table[type].size() > id)
 		return(name_table[type][id]);
 	else return "";
 }
 //------------------------------------------------------------------------------
 inline std::string  SymbolTable::getTexNameByID(Type type,int id)
 {		
-	if (id >= 0 && tex_name_table[type].size() > id)
+  if (id >= 0 && (int)tex_name_table[type].size() > id)
 		return(tex_name_table[type][id]);
 	else return "";
 }

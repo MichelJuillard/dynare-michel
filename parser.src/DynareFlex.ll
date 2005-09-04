@@ -1,4 +1,5 @@
 %{
+#define YY_BUF_SIZE 1000000
 #include <unistd.h>
 #include <string.h>
 #include "DynareScanner.h" 
@@ -8,7 +9,8 @@
 #define YLMM_SCANNER_CLASS dynare::scanner
 #define LEXDEBUG 1
 #define FINISH 0
-#include "lexmm.h"
+#define YY_READ_BUF_SIZE 1000000
+#include "ylmm/lexmm.hh"
 int lineno = 1; 
 int comment_caller;
 /* Particular value : when sigma_e command is found 
@@ -43,16 +45,28 @@ int sigma_e = 0;
 <INITIAL>var {BEGIN DYNARE_STATEMENT; return VAR;}
 <INITIAL>varexo {BEGIN DYNARE_STATEMENT; return VAREXO;}
 <INITIAL>varexo_det {BEGIN DYNARE_STATEMENT; return VAREXO_DET;}
-<INITIAL>parameters {BEGIN DYNARE_STATEMENT; return PARAMETER;}
+<INITIAL>parameters {BEGIN DYNARE_STATEMENT; return PARAMETERS;}
 <INITIAL>periods 	{BEGIN DYNARE_STATEMENT; return PERIODS;}
+<INITIAL>initvalf 	{BEGIN DYNARE_STATEMENT; return INITVALF;}
 <INITIAL>estimation {BEGIN DYNARE_STATEMENT; return ESTIMATION;}
 <INITIAL>varobs 	{BEGIN DYNARE_STATEMENT; return VAROBS;}
 <INITIAL>unit_root_vars	{BEGIN DYNARE_STATEMENT; return UNIT_ROOT_VARS;}
+<INITIAL>dyn2vec 	{BEGIN DYNARE_STATEMENT; return DYN2VEC;}
+<INITIAL>rplot	 	{BEGIN DYNARE_STATEMENT; return RPLOT;}
+<INITIAL>osr_params 	{BEGIN DYNARE_STATEMENT; return OSR_PARAMS;}
+<INITIAL>osr	 	{BEGIN DYNARE_STATEMENT; return OSR;}
+<INITIAL>calib_var 	{BEGIN DYNARE_STATEMENT; return CALIB_VAR;}
+<INITIAL>dynatype	{BEGIN DYNARE_STATEMENT; return DYNATYPE;}
+<INITIAL>dynasave 	{BEGIN DYNARE_STATEMENT; return DYNASAVE;}
+<INITIAL>olr	 	{BEGIN DYNARE_STATEMENT; return OLR;}
+<INITIAL>olr_inst	 	{BEGIN DYNARE_STATEMENT; return OLR_INST;}
+<INITIAL>model_comparison 	{BEGIN DYNARE_STATEMENT; return MODEL_COMPARISON;}
 
 <INITIAL>steady {BEGIN DYNARE_STATEMENT; return STEADY;}
 <INITIAL>check {BEGIN DYNARE_STATEMENT; return CHECK;}
 <INITIAL>simul {BEGIN DYNARE_STATEMENT; return SIMUL;}
 <INITIAL>stoch_simul {BEGIN DYNARE_STATEMENT; return STOCH_SIMUL;}
+<INITIAL>dsample {BEGIN DYNARE_STATEMENT; return DSAMPLE;}
 <INITIAL>Sigma_e {BEGIN DYNARE_STATEMENT;sigma_e = 1; return SIGMA_E;}
 
  /* End of a Dynare statement */
@@ -66,7 +80,10 @@ int sigma_e = 0;
 <INITIAL>histval {BEGIN DYNARE_BLOCK;return HISTVAL;}
 <INITIAL>shocks {BEGIN DYNARE_BLOCK;return SHOCKS;}
 <INITIAL>estimated_params {BEGIN DYNARE_BLOCK;return ESTIMATED_PARAMS;}
+<INITIAL>estimated_params_init 		{BEGIN DYNARE_BLOCK;return ESTIMATED_PARAMS_INIT;}
+<INITIAL>estimated_params_bounds 	{BEGIN DYNARE_BLOCK;return ESTIMATED_PARAMS_BOUNDS;}
 <INITIAL>observation_trends {BEGIN DYNARE_BLOCK;return OBSERVATION_TRENDS;}
+<INITIAL>optim_weights {BEGIN DYNARE_BLOCK;return OPTIM_WEIGHTS;}
 
  /* End of a Dynare block */
 <DYNARE_BLOCK>end 	{BEGIN INITIAL;return END;}   
@@ -79,11 +96,14 @@ int sigma_e = 0;
 <DYNARE_STATEMENT>presample 		{return PRESAMPLE;} 
 <DYNARE_STATEMENT>lik_algo  		{return LIK_ALGO;}  
 <DYNARE_STATEMENT>lik_init  		{return LIK_INIT;}  
+<DYNARE_STATEMENT>graph   		{return GRAPH;}  	  
 <DYNARE_STATEMENT>nograph   		{return NOGRAPH;}  	  
+<DYNARE_STATEMENT>print   		{return PRINT;}  	  
+<DYNARE_STATEMENT>noprint   		{return NOPRINT;}  	  
 <DYNARE_STATEMENT>conf_sig  		{return CONF_SIG;}  
 <DYNARE_STATEMENT>mh_replic 		{return MH_REPLIC;} 
 <DYNARE_STATEMENT>mh_drop   		{return MH_DROP;}   
-<DYNARE_STATEMENT>mh_jscale   	{return MH_JSCALE;}   
+<DYNARE_STATEMENT>mh_jscale   		{return MH_JSCALE;}   
 <DYNARE_STATEMENT>mh_init_scale 	{return MH_INIT_SCALE;}
 <DYNARE_STATEMENT>mode_file 		{return MODE_FILE;}
 <DYNARE_STATEMENT>mode_compute 	{return MODE_COMPUTE;}
@@ -103,6 +123,17 @@ int sigma_e = 0;
 <DYNARE_STATEMENT>filtered_vars	{return FILTERED_VARS;}
 <DYNARE_STATEMENT>relative_irf 	{return RELATIVE_IRF;}
 <DYNARE_STATEMENT>tex		{return TEX;}
+<DYNARE_STATEMENT>shock_size	{return SHOCK_SIZE;}
+<DYNARE_STATEMENT>moments	{return MOMENTS;}
+<DYNARE_STATEMENT>nomoments	{return NOMOMENTS;}
+<DYNARE_STATEMENT>corr		{return CORR;}
+<DYNARE_STATEMENT>nocorr	{return NOCORR;}
+<DYNARE_STATEMENT>optim		{return OPTIM;}
+<DYNARE_STATEMENT>diffuse_d {return DIFFUSE_D;}
+<DYNARE_STATEMENT>nk {return NK;}
+<DYNARE_STATEMENT>model_comparison_approximation {return MODEL_COMPARISON;}
+<DYNARE_STATEMENT>laplace {return LAPLACE;}
+<DYNARE_STATEMENT>modifiedharmonicmean {return MODIFIEDHARMONICMEAN;}
 
 <DYNARE_STATEMENT>[\$][^$]*[\$] {
 	strtok(yytext+1,"$");
@@ -122,34 +153,38 @@ int sigma_e = 0;
 <DYNARE_BLOCK>inv_gamma_pdf {return INV_GAMMA_PDF;}
 <DYNARE_BLOCK>inv_gamma1_pdf {return INV_GAMMA_PDF;}
 <DYNARE_BLOCK>inv_gamma2_pdf {return INV_GAMMA_PDF;}
-<DYNARE_BLOCK>unif_pdf {return UNIFORM_PDF;}
+<DYNARE_BLOCK>uniform_pdf {return UNIFORM_PDF;}
 <DYNARE_BLOCK>corr {return CORR;}
 
 <DYNARE_BLOCK>; {return yytext[0];}
 
 
- /* Inside Dynare block or statement */
-<DYNARE_STATEMENT,DYNARE_BLOCK>solve_algo {return SOLVE_ALGO;}
-<DYNARE_STATEMENT,DYNARE_BLOCK>dr_algo {return DR_ALGO;}
-<DYNARE_STATEMENT,DYNARE_BLOCK>simul_algo {return SIMUL_ALGO;}
-<DYNARE_STATEMENT,DYNARE_BLOCK>solve_algo {return SOLVE_ALGO;}
-<DYNARE_STATEMENT,DYNARE_BLOCK>drop {return DROP;}
-<DYNARE_STATEMENT,DYNARE_BLOCK>order {return ORDER;}
-<DYNARE_STATEMENT,DYNARE_BLOCK>replic {return REPLIC;}
-<DYNARE_STATEMENT,DYNARE_BLOCK>nomoments {return NOMOMENTS;}
-<DYNARE_STATEMENT,DYNARE_BLOCK>nocorr {return NOCORR;}
-<DYNARE_STATEMENT,DYNARE_BLOCK>ar {return AR;}
-<DYNARE_STATEMENT,DYNARE_BLOCK>nofunctions {return NOFUNCTIONS;}
-<DYNARE_STATEMENT,DYNARE_BLOCK>irf {return IRF;}
-<DYNARE_STATEMENT,DYNARE_BLOCK>hp_filter {return HP_FILTER;}
-<DYNARE_STATEMENT,DYNARE_BLOCK>hp_ngrid {return HP_NGRID;}
-<DYNARE_STATEMENT,DYNARE_BLOCK>simul_seed {return SIMUL_SEED;}
-<DYNARE_STATEMENT,DYNARE_BLOCK>qz_criterium {return QZ_CRITERIUM;}
+ /* Inside Dynare statement */
+<DYNARE_STATEMENT>solve_algo {return SOLVE_ALGO;}
+<DYNARE_STATEMENT>dr_algo {return DR_ALGO;}
+<DYNARE_STATEMENT>simul_algo {return SIMUL_ALGO;}
+<DYNARE_STATEMENT>solve_algo {return SOLVE_ALGO;}
+<DYNARE_STATEMENT>drop {return DROP;}
+<DYNARE_STATEMENT>order {return ORDER;}
+<DYNARE_STATEMENT>replic {return REPLIC;}
+<DYNARE_STATEMENT>nomoments {return NOMOMENTS;}
+<DYNARE_STATEMENT>nocorr {return NOCORR;}
+<DYNARE_STATEMENT>ar {return AR;}
+<DYNARE_STATEMENT>nofunctions {return NOFUNCTIONS;}
+<DYNARE_STATEMENT>irf {return IRF;}
+<DYNARE_STATEMENT>hp_filter {return HP_FILTER;}
+<DYNARE_STATEMENT>hp_ngrid {return HP_NGRID;}
+<DYNARE_STATEMENT>simul_seed {return SIMUL_SEED;}
+<DYNARE_STATEMENT>qz_criterium {return QZ_CRITERIUM;}
+<DYNARE_STATEMENT>simul {return SIMUL;}
+<DYNARE_STATEMENT>autocorr {return AUTOCORR;}
+<DYNARE_STATEMENT>olr_beta {return OLR_BETA;}
+<DYNARE_STATEMENT>xtick   		{return XTICK;}  	  
+<DYNARE_STATEMENT>xticklabel   		{return XTICKLABEL;}  	  
+
 <DYNARE_STATEMENT,DYNARE_BLOCK>use_dll {return USE_DLL;}
 <DYNARE_STATEMENT,DYNARE_BLOCK>linear {return LINEAR;}
-<DYNARE_STATEMENT,DYNARE_BLOCK>simul {return SIMUL;}
-
-<DYNARE_STATEMENT,DYNARE_BLOCK>[,] {return yytext[0];}
+<DYNARE_STATEMENT,DYNARE_BLOCK>[,] {_scanner->do_operator(COMMA); return COMMA;}
 <DYNARE_STATEMENT,DYNARE_BLOCK>[\(\)] {return yytext[0];} 
 <DYNARE_STATEMENT,DYNARE_BLOCK>[\[] {return yytext[0];}
 <DYNARE_STATEMENT,DYNARE_BLOCK>[\]] {if (sigma_e) sigma_e=0; return yytext[0];}

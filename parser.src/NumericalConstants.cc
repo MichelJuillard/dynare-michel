@@ -35,7 +35,7 @@ int NumericalConstants::AddConstant(string iConst)
 //------------------------------------------------------------------------------
 string NumericalConstants::get(int ID)
 {
-	if (ID < mNumericalConstants.size())
+  if (ID < (int)mNumericalConstants.size())
 	{
 		return mNumericalConstants[ID];
 	}

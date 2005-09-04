@@ -140,6 +140,11 @@ struct MetaToken : public MToken
 	/*! Operator name */
 	std::string  					op_name;
 	/*! Cast MetaToken -> MToken */
+  // set to one when left node has been treated
+  int left_done;
+  // set to one when right node has been treated
+  int right_done;
+
 	inline operator MToken() const					
 	{
 		MToken lToken(id1,type1,id2, op_code);
@@ -163,6 +168,8 @@ struct MetaToken : public MToken
 		exp[1] = exp[1];
 		idx = t1.idx;
 		tmp_status = t1.tmp_status;
+		left_done = t1.left_done;
+		right_done = t1.right_done;
 		//cout << "Creation by equality\n";
 		return *this;
 	}
@@ -173,6 +180,8 @@ struct MetaToken : public MToken
 		cost = 0;
 		followed1 = followed2 = false; 
 		tmp_status = 0;
+		left_done = 0;
+		right_done = 0;
 	}
 	/* Copy constructor */
 	inline MetaToken(const MetaToken& mt)
@@ -189,7 +198,8 @@ struct MetaToken : public MToken
 		exp[1] = mt.exp[1];
 		idx = mt.idx;
 		tmp_status = mt.tmp_status;
-
+		left_done = mt.left_done;
+		right_done = mt.right_done;
 	}
 	/* Destructor */
 	~MetaToken()

@@ -48,7 +48,7 @@ void Shocks::AddShock(shocktype type, int id1, int id2, string value)
 				string msg = "in shocks statement, number of periods and values dont agree";
 		   		(* error) (msg.c_str());
 			}
-			for (int i = 0; i < mPeriod1.size(); i++)
+			for (unsigned int i = 0; i < mPeriod1.size(); i++)
 			{
 				string period1 = mPeriod1[i];
 				string period2 = mPeriod2[i];

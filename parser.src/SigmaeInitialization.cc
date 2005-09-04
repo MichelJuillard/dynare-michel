@@ -39,8 +39,9 @@ void SigmaeInitialization::EndOfRow()
 //------------------------------------------------------------------------------
 void SigmaeInitialization::CheckMatrix(void)
 {
-	vector<vector<string> >::iterator ir, irend;
-	int 						inc, nbe;
+	vector<vector<string> >::iterator ir;
+	unsigned int nbe;
+	int inc;
 	// Checking if first or last row has one element. 
 	if (matrix.front().size() == 1)
 	{
@@ -72,10 +73,10 @@ void SigmaeInitialization::CheckMatrix(void)
 //------------------------------------------------------------------------------
 void SigmaeInitialization::SetMatrix(void)
 {
-	int ic, ic1;
-	int ir, ir1;
+	unsigned int ic, ic1;
+	unsigned int ir, ir1;
 	
-    *output << "M_.Sigma_e = [...\n";
+	*output << "M_.Sigma_e = [...\n";
 	for (ir = 0; ir < matrix.size(); ir++)
 	{
 		*output << "\t";

@@ -15,8 +15,8 @@ using namespace std;
 #include <time.h>
 
 //------------------------------------------------------------------------------
+#include "DynareBison.h"
 #include "VariableTable.h"
-#include "d_tab.h"
 #include "NumericalConstants.h"
 #include "DataTree.h"
 //------------------------------------------------------------------------------

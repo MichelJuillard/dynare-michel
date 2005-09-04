@@ -107,7 +107,7 @@ void	VariableTable::Sort(void)
 		return;
 	}
 	// First putting types into TypesToSort
-	for (int id=0; id < mVariableIndex.size(); id++)
+	for (unsigned int id=0; id < mVariableIndex.size(); id++)
 	{
 		key = mVariableIndex[id];
 		variable = mVariableTable[key];
@@ -146,7 +146,7 @@ void	VariableTable::Sort(void)
 	mPrintFormatIndex.resize(VarToSort.size());
 	Type type = Types[VarToSort[0].second];
 	int index = 0;
-	for (int id = 0; id < VarToSort.size(); id++)
+	for (unsigned int id = 0; id < VarToSort.size(); id++)
 	{	
 		int id2 = VarToSort[id].second;
 		mSortedVariableID[id2] = id;

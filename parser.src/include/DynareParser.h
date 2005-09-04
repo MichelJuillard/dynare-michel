@@ -20,10 +20,10 @@
 #include "TmpSymbolTable.h"
 #include "Objects.h"
 #ifndef YLMM_basic_parser 
-#include "basic_parser.h"
+#include "ylmm/basic_parser.hh"
 #endif
 #ifndef YLMM_basic_scanner
-#include "basic_scanner.h"
+#include "ylmm/basic_scanner.hh"
 #endif
 #ifndef __IOSTREAM__
 #include <iostream>
@@ -145,9 +145,11 @@ namespace dynare
     /*! Adds a binary token to an expression */
     Objects* add_expression_token( Objects* arg1,  Objects* arg2,  Objects* op);
     /*! Adds an unary token to an expression */
-	Objects* add_expression_token( Objects* arg1, Objects* op);
+    Objects* add_expression_token( Objects* arg1, Objects* op);
     /*! Gets literal expression string */
-	Objects* get_expression(Objects* exp);
+    Objects* get_expression(Objects* exp);
+    /* Concatenates two string objects */
+    Objects* cat(Objects* string1, Objects* string2);
     /*! Writes parameter intitialisation expression */
 	void init_param(Objects* lhs,  Objects* rhs);
     /*! Writes parameter intitialisation expression */
@@ -196,6 +198,7 @@ namespace dynare
 	void steady(void);
     /*! Sets an option to a numerical value */
 	void option_num(string name_option, Objects* opt);
+	void option_num(string name_option, Objects* opt1, Objects* opt2);
     /*! Sets an option to a string value */
 	void option_str(string name_option, Objects* opt);
     /*! Sets an option to a numerical value */
@@ -208,7 +211,9 @@ namespace dynare
 	void add_tmp_var(Objects* tmp_var);
     /*! Gets temp symbol table output */
 	Objects* get_tmp_var(void);
-    /*! Writes a stock_simul command */
+	/*! Writes a rplot() command */
+	void rplot(void);
+	/*! Writes a stock_simul command */
 	void stoch_simul(void);
     /*! Writes a simul command */
 	void simul(void);
@@ -228,6 +233,23 @@ namespace dynare
 	void set_trend_init(void);
 	void set_trend_element(Objects*, Objects*);
 	void set_unit_root_vars(void);
+	void begin_optim_weights(void);
+	void set_optim_weights(Objects*,Objects*);
+	void set_optim_weights(Objects*,Objects*,Objects*);
+	void set_osr_params(void);
+	void run_osr(void);
+	void set_olr_inst(void);
+	void run_olr(void);
+	void begin_calib_var(void);
+	void set_calib_var(Objects*,Objects*,Objects*);
+	void set_calib_var(Objects*,Objects*,Objects*,Objects*);
+	void set_calib_ac(Objects*,Objects*,Objects*,Objects*);
+	void run_calib(int);
+	void run_dynasave(Objects* arg1,Objects* arg2 = new Objects(""));
+	void run_dynatype(Objects* arg1,Objects* arg2 = new Objects(""));
+	void begin_model_comparison(void);
+	void add_mc_filename(Objects* filename, Objects* prior = new Objects("1"));
+	void run_model_comparison();
     /*! Writes token "arg1=arg2" to model tree */
 	Objects*	add_equal(Objects* arg1,  Objects* arg2 = new Objects("0.0",ModelTree::Zero, eTempResult));
     /*! Writes token "arg1+arg2" to model tree */

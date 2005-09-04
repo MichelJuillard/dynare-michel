@@ -13,7 +13,7 @@
 #define YYERROR_VERBOSE
 #define YLMM_PARSER_CLASS dynare::parser 
 #define YLMM_LEX_STATIC
-#include "yaccmm.h"
+#include "ylmm/yaccmm.hh"
 #ifdef yyerror
 #undef yyerror
 #define yyerror _parser->error 
@@ -21,22 +21,29 @@
 %}
 /* %pure_parser */
 
-%token SIGMA_E INITVAL ENDVAL HISTVAL SHOCKS  VALUES STDERR CORR MODEL  END
-%token VAR VAREXO VAREXO_DET PARAMETER PERIODS
-%token  NAME TEX_NAME INT_NUMBER FLOAT_NUMBER EQUAL
-%token DR_ALGO SOLVE_ALGO STOCH_SIMUL STEADY SIMUL CHECK
-%token ORDER NOFUNCTIONS REPLIC DROP IRF AR LINEAR HP_FILTER NOCORR SIMUL_SEED USE_DLL
-%token HP_NGRID HP_NGRIDDR_ALGO SIMUL_ALGO QZ_CRITERIUM NOMOMENTS
-%token VAROBS ESTIMATION OBSERVATION_TRENDS UNIT_ROOT_VARS
-%token PERC DATAFILE NOBS FIRST_OBS
-%token MH_REPLIC MH_DROP
-%token MH_JSCALE OPTIM MH_INIT_SCALE MODE_FILE MODE_COMPUTE MODE_CHECK
-%token PRIOR_TRUNC MH_MODE MH_NBLOCKS LOAD_MH_FILE LOGLINEAR
-%token NODIAGNOSTIC NOGRAPH PRESAMPLE CONF_SIG LIK_INIT PREFILTER LIK_ALGO
-%token ESTIMATED_PARAMS GAMMA_PDF BETA_PDF NORMAL_PDF INV_GAMMA_PDF UNIFORM_PDF
-%token INV_GAMMA1_PDF INV_GAMMA2_PDF
-%token KALMAN_ALGO KALMAN_TOL FORECAST SMOOTHER BAYESIAN_IRF MOMENTS_VARENDO
-%token FILTERED_VARS RELATIVE_IRF TEX
+%token AR AUTOCORR
+%token BAYESIAN_IRF BETA_PDF
+%token CALIB CALIB_VAR CHECK CONF_SIG CORR COVAR
+%token DATAFILE DIAGNOSTIC DIFFUSE_D DOLLAR DR_ALGO DROP DSAMPLE DYN2VEC DYNASAVE DYNATYPE 
+%token END ENDVAL EQUAL ESTIMATION ESTIMATED_PARAMS ESTIMATED_PARAMS_BOUNDS ESTIMATED_PARAMS_INIT
+%token FILTERED_VARS FIRST_OBS FLOAT_NUMBER FORECAST FUNCTIONS
+%token GAMMA_PDF GRAPH
+%token HISTVAL HP_FILTER HP_NGRID    
+%token INITVAL INITVALF INT_NUMBER INV_GAMMA_PDF INV_GAMMA1_PDF INV_GAMMA2_PDF IRF
+%token KALMAN_ALGO KALMAN_TOL
+%token LAPLACE LIK_ALGO LIK_INIT LINEAR LOAD_MH_FILE LOGLINEAR
+%token MH_DROP MH_INIT_SCALE MH_JSCALE MH_MODE MH_NBLOCKS MH_REPLIC MODE_CHECK MODE_COMPUTE MODE_FILE MODEL MODEL_COMPARISON MODEL_COMPARISON_APPROXIMATION MODIFIEDHARMONICMEAN MOMENTS MOMENTS_VARENDO MSHOCKS
+%token NAME NK NOBS NOCORR NODIAGNOSTIC NOFUNCTIONS NOGRAPH NOMOMENTS NOPRINT NORMAL_PDF
+%token OBSERVATION_TRENDS OLR OLR_INST OLR_BETA OPTIM OPTIM_WEIGHTS ORDER OSR OSR_PARAMS 
+%token PARAMETERS PERIODS PREFILTER PRESAMPLE PRINT PRIOR_TRUNC
+%token QZ_CRITERIUM
+%token RELATIVE_IRF REPLIC RESOL RPLOT
+%token SHOCKS SHOCK_SIZE SIGMA_E SIMUL SIMUL_ALGO SIMUL_SEED SMOOTHER SOLVE_ALGO STDERR STEADY STOCH_SIMUL  
+%token TEX TEX_NAME
+%token UNIFORM_PDF UNIT_ROOT_VARS USE_DLL
+%token VALUES VAR VAREXO VAREXO_DET VAROBS
+%token XTICK XTICKLABEL  
+%left COMMA
 %left PLUS MINUS 
 %left TIMES DIVIDE
 %left UMINUS
@@ -47,8 +54,8 @@
 
  statement_list
  	: statement
-    | statement_list statement
-    ;
+        | statement_list statement
+        ;
 
  statement
   	: declaration
@@ -66,10 +73,11 @@
  	| stoch_simul
  	| estimation
 	| estimated_params
+	| estimated_params_bounds
+	| estimated_params_init
 	| varobs
 	| observation_trends
 	| unit_root_vars
-	  /*
 	| dsample
 	| rplot
 	| optim_weights
@@ -81,7 +89,7 @@
 	| dynasave
 	| olr
 	| olr_inst
-	  */
+        | model_comparison
 	;
 
     
@@ -93,6 +101,12 @@
  	;
 
  	
+ dsample : DSAMPLE INT_NUMBER ';' {_parser->option_num("dsample",$2);}
+         | DSAMPLE INT_NUMBER INT_NUMBER ';' {_parser->option_num("dsample",$2,$3);}
+         ; 
+
+ rplot : RPLOT tmp_var_list ';' {_parser->rplot();}
+      ; 
  var 
  	: VAR var_list ';' 
  	;
@@ -106,19 +120,19 @@
 	;
       	
  parameters
- 	: PARAMETER parameter_list ';'
+ 	: PARAMETERS parameter_list ';'
  	;
  
  var_list
  	: var_list NAME  
  		{$$  = _parser->add_endogenous($2);}
- 	| var_list ',' NAME  
+ 	| var_list COMMA NAME  
  		{$$  = _parser->add_endogenous($3);}
  	| NAME
  		{$$  = _parser->add_endogenous($1);}
  	| var_list NAME  TEX_NAME 
  		{$$  = _parser->add_endogenous($2,$3);}
- 	| var_list ',' NAME  TEX_NAME
+ 	| var_list COMMA NAME  TEX_NAME
  		{$$  = _parser->add_endogenous($3,$4);}
  	| NAME TEX_NAME
  		{$$  = _parser->add_endogenous($1,$2);}
@@ -127,13 +141,13 @@
  varexo_list
  	: varexo_list NAME
  		{$$  = _parser->add_exogenous($2);}              
- 	| varexo_list ',' NAME
+ 	| varexo_list COMMA NAME
  		{$$  = _parser->add_exogenous($3);}              
  	| NAME
  		{$$  = _parser->add_exogenous($1);}
  	| varexo_list NAME TEX_NAME
  		{$$  = _parser->add_exogenous($2, $3);}              
- 	| varexo_list ',' NAME TEX_NAME
+ 	| varexo_list COMMA NAME TEX_NAME
  		{$$  = _parser->add_exogenous($3, $4);}              
  	| NAME TEX_NAME
  		{$$  = _parser->add_exogenous($1, $2);}
@@ -142,13 +156,13 @@
  varexo_det_list
  	: varexo_det_list NAME
  		{$$  = _parser->add_exogenous_det($2);}              
- 	| varexo_det_list ',' NAME
+ 	| varexo_det_list COMMA NAME
  		{$$  = _parser->add_exogenous_det($3);}              
  	| NAME
  		{$$  = _parser->add_exogenous_det($1);}
  	| varexo_det_list NAME TEX_NAME
  		{$$  = _parser->add_exogenous_det($2, $3);}              
- 	| varexo_det_list ',' NAME TEX_NAME
+ 	| varexo_det_list COMMA NAME TEX_NAME
  		{$$  = _parser->add_exogenous_det($3, $4);}              
  	| NAME TEX_NAME
  		{$$  = _parser->add_exogenous_det($1, $2);}
@@ -157,13 +171,13 @@
  parameter_list
  	: parameter_list NAME
  		{$$  = _parser->add_parameter($2);}
- 	| parameter_list ',' NAME
+ 	| parameter_list COMMA NAME
  		{$$  = _parser->add_parameter($3);}
  	| NAME
  		{$$  = _parser->add_parameter($1);}
  	| parameter_list NAME TEX_NAME
  		{$$  = _parser->add_parameter($2, $3);}
- 	| parameter_list ',' NAME TEX_NAME
+ 	| parameter_list COMMA NAME TEX_NAME
  		{$$  = _parser->add_parameter($3,$4);}
  	| NAME TEX_NAME
  		{$$  = _parser->add_parameter($1, $2);}
@@ -233,8 +247,15 @@
     	{$$ = _parser->add_expression_token($3, $1);}
 	| SQRT '(' expression ')'
     	{$$ = _parser->add_expression_token($3, $1);}
+        | NAME '(' expression ')' 
+    	{$$ = _parser->add_expression_token($3, $1);}
+        | NAME '(' comma_expression ')' 
+    	{$$ = _parser->add_expression_token($3, $1);}
 	; 
-	
+
+ comma_expression : expression COMMA expression {$$ = _parser->add_expression_token($1,$3,$2);}
+        | comma_expression COMMA expression {$$ = _parser->add_expression_token($1,$3,$2);}
+
  initval
  	: INITVAL ';' {_parser->begin_initval();} initval_list END ';'
  		{_parser->end_initval();}
@@ -357,9 +378,9 @@
 		{_parser->add_stderr_shock($2, $6);}
 	| VAR NAME EQUAL expression {$$ = _parser->get_expression($4);} ';'
 		{_parser->add_var_shock($2, $5);}	
-	| VAR NAME ',' NAME EQUAL expression {$$ = _parser->get_expression($6);} ';'
+	| VAR NAME COMMA NAME EQUAL expression {$$ = _parser->get_expression($6);} ';'
 		{_parser->add_covar_shock($2, $4, $7);}
-	| CORR NAME ',' NAME EQUAL expression {$$ = _parser->get_expression($6);} ';'
+	| CORR NAME COMMA NAME EQUAL expression {$$ = _parser->get_expression($6);} ';'
 		{_parser->add_correl_shock($2, $4, $7);}
 	;
 
@@ -368,9 +389,9 @@
  		{_parser->add_period($2);}
 	| period_list INT_NUMBER ':' INT_NUMBER 
  		{_parser->add_period($2,$4);}
-        | period_list ',' INT_NUMBER
+        | period_list COMMA INT_NUMBER
  		{_parser->add_period($3);}
-	| period_list ',' INT_NUMBER ':' INT_NUMBER 
+	| period_list COMMA INT_NUMBER ':' INT_NUMBER 
  		{_parser->add_period($3,$5);}
 	| INT_NUMBER ':' INT_NUMBER
  		{_parser->add_period($1,$3);}
@@ -411,11 +432,11 @@
 	;
 	
  triangular_row 
- 	: triangular_row ',' '(' expression {$$ = _parser->get_expression($4);} ')' 
+ 	: triangular_row COMMA '(' expression {$$ = _parser->get_expression($4);} ')' 
  		{_parser->add_to_row($5);}
-	| triangular_row ',' FLOAT_NUMBER 
+	| triangular_row COMMA FLOAT_NUMBER 
 		{_parser->add_to_row($3);}
-	| triangular_row ',' INT_NUMBER 
+	| triangular_row COMMA INT_NUMBER 
 		{_parser->add_to_row($3);}
 	| triangular_row '(' expression {$$ = _parser->get_expression($3);} ')' 
 		{_parser->add_to_row($4);}
@@ -441,7 +462,7 @@
     	 {_parser->steady();}
     ;
     
- steady_options_list : steady_options_list ',' steady_options
+ steady_options_list : steady_options_list COMMA steady_options
                      | steady_options
                      ;
 
@@ -455,7 +476,7 @@
 		{_parser->check();} 
 	;
 
- check_options_list : check_options_list ',' check_options
+ check_options_list : check_options_list COMMA check_options
         | check_options
         ;
 
@@ -469,7 +490,7 @@
 		{_parser->simul();}
         ;
 
- simul_options_list: simul_options_list ',' simul_options
+ simul_options_list: simul_options_list COMMA simul_options
                    | simul_options
                    ;
 
@@ -487,7 +508,7 @@
 		{_parser->stoch_simul();}
 	;
 	
- stoch_simul_options_list: stoch_simul_options_list ',' stoch_simul_options
+ stoch_simul_options_list: stoch_simul_options_list COMMA stoch_simul_options
                          | stoch_simul_options
                          ;
 
@@ -517,9 +538,9 @@
 		{_parser->add_tmp_var($2);}
 	| tmp_var_list NAME EQUAL NAME
 		{_parser->add_tmp_var($2,$4);}
-	| tmp_var_list ',' NAME
+	| tmp_var_list COMMA NAME
 		{_parser->add_tmp_var($3);}
-	| tmp_var_list ',' NAME EQUAL NAME
+	| tmp_var_list COMMA NAME EQUAL NAME
 		{_parser->add_tmp_var($3,$5);}
 	| NAME
 		{_parser->add_tmp_var($1);}
@@ -557,7 +578,7 @@
 	;
 
  estimated_elem 
-	: estimated_elem1 ',' estimated_elem2 ';'
+	: estimated_elem1 COMMA estimated_elem2 ';'
 	;
 
  estimated_elem1 
@@ -569,16 +590,21 @@
 		{_parser->estim_params.type = 2;
 		 _parser->estim_params.name = *$1;
 		}
+	| CORR NAME COMMA NAME
+		{_parser->estim_params.type = 3;
+		 _parser->estim_params.name = *$2;
+		 _parser->estim_params.name2 = *$4;
+		}
 	;
 
  estimated_elem2 
-	: prior ',' estimated_elem3 
+	: prior COMMA estimated_elem3 
 		{_parser->estim_params.prior=*$1;}
-	| value ',' prior ',' estimated_elem3 
+	| value COMMA prior COMMA estimated_elem3 
 		{_parser->estim_params.init_val=*$1;
 		 _parser->estim_params.prior=*$3;
 		}
-	| value ',' value ',' value ',' prior ',' estimated_elem3 
+	| value COMMA value COMMA value COMMA prior COMMA estimated_elem3 
 		{_parser->estim_params.init_val=*$1;
 		 _parser->estim_params.low_bound=*$3;
 		 _parser->estim_params.up_bound=*$5;
@@ -586,7 +612,7 @@
 		}
 	| value 
 		{_parser->estim_params.init_val=*$1;}
-	| value ',' value ',' value 
+	| value COMMA value COMMA value 
 		{_parser->estim_params.init_val=*$1;
 		 _parser->estim_params.low_bound=*$3;
 		 _parser->estim_params.up_bound=*$5;
@@ -594,17 +620,17 @@
 	;
 
  estimated_elem3 
- 	: value ',' value 
+ 	: value COMMA value 
  		{_parser->estim_params.mean=*$1;
  		 _parser->estim_params.std=*$3;
  		}
-	| value ',' value ',' value ',' value 
+	| value COMMA value COMMA value COMMA value 
 		{_parser->estim_params.mean=*$1;
 		 _parser->estim_params.std=*$3;
 		 _parser->estim_params.p3=*$5;
 		 _parser->estim_params.p4=*$7;
 		}
-	| value ',' value ',' value ',' value ',' value 
+	| value COMMA value COMMA value COMMA value COMMA value 
 		{_parser->estim_params.mean=*$1;
 		 _parser->estim_params.std=*$3;
 		 _parser->estim_params.p3=*$5;
@@ -612,6 +638,59 @@
 		 _parser->estim_params.jscale=*$9;
 		}
 	;
+
+ estimated_params_init: ESTIMATED_PARAMS_INIT ';' estimated_init_list END
+                      ;
+
+ estimated_init_list : estimated_init_list estimated_init_elem
+                     | estimated_init_elem
+                     ;
+
+ estimated_init_elem : STDERR NAME COMMA value ';'
+ 		     		{_parser->estim_params.type = 1;
+				 _parser->estim_params.name = *$2;
+				 _parser->estim_params.init_val=*$4;
+				}
+                     | CORR NAME COMMA NAME COMMA value ';'
+ 		     		{_parser->estim_params.type = 3;
+				 _parser->estim_params.name = *$2;
+				 _parser->estim_params.name2 = *$4;
+				 _parser->estim_params.init_val=*$6;
+				}
+                     | NAME COMMA value ';'
+ 		     		{_parser->estim_params.type = 2;
+				 _parser->estim_params.name = *$1;
+				 _parser->estim_params.init_val=*$3;
+				}
+                     ;
+
+ estimated_params_bounds: ESTIMATED_PARAMS_BOUNDS ';' estimated_bounds_list END
+                      ;
+
+ estimated_bounds_list : estimated_bounds_list estimated_bounds_elem
+                     | estimated_bounds_elem
+                     ;
+
+ estimated_bounds_elem : STDERR NAME COMMA value COMMA value ';'
+ 		     		{_parser->estim_params.type = 1;
+				 _parser->estim_params.name = *$2;
+				 _parser->estim_params.low_bound=*$4;
+				 _parser->estim_params.up_bound=*$6;
+				}
+                     | CORR NAME COMMA NAME COMMA value COMMA value ';'
+ 		     		{_parser->estim_params.type = 3;
+				 _parser->estim_params.name = *$2;
+				 _parser->estim_params.name2 = *$4;
+				 _parser->estim_params.low_bound=*$6;
+				 _parser->estim_params.up_bound=*$8;
+				}
+                     | NAME COMMA value COMMA value ';'
+ 		     		{_parser->estim_params.type = 2;
+				 _parser->estim_params.name = *$1;
+				 _parser->estim_params.low_bound=*$3;
+				 _parser->estim_params.up_bound=*$5;
+				}
+                     ;
 
  prior
 	: BETA_PDF 
@@ -650,7 +729,7 @@
 	;
 
  estimation_options_list 
-	: estimation_options_list ',' estimation_options
+	: estimation_options_list COMMA estimation_options
 	| estimation_options
 	;
 
@@ -688,13 +767,13 @@
                    ;
 	
  list_optim_option
- 	: '\'' NAME '\'' ',' '\'' NAME '\'' {_parser->optim_options($2,$6,2);}
-	| '\'' NAME '\'' ',' value {_parser->optim_options($2,$5,2);}
+ 	: '\'' NAME '\'' COMMA '\'' NAME '\'' {_parser->optim_options($2,$6,2);}
+	| '\'' NAME '\'' COMMA value {_parser->optim_options($2,$5,2);}
 	;
 
  optim_options
 	: list_optim_option
-	| optim_options ',' list_optim_option;
+	| optim_options COMMA list_optim_option;
 	;
 	
  varobs 
@@ -716,6 +795,106 @@
 
  unit_root_vars : UNIT_ROOT_VARS tmp_var_list ';' {_parser->set_unit_root_vars();}
                 ;
+
+ optim_weights : OPTIM_WEIGHTS ';' {_parser->begin_optim_weights();} optim_weights_list END
+               ;
+
+ optim_weights_list : optim_weights_list NAME expression {$$=_parser->get_expression($3);} ';'  {_parser->set_optim_weights($2, $4);}
+                    | optim_weights_list NAME COMMA NAME expression {$$=_parser->get_expression($3);} ';' {_parser->set_optim_weights($2, $4, $6);}
+                    | NAME expression {$$=_parser->get_expression($2);} ';' {_parser->set_optim_weights($1, $3);}
+                    | NAME COMMA NAME expression {$$=_parser->get_expression($3);} ';' {_parser->set_optim_weights($1, $3, $5);}
+                    ;
+
+ osr_params : OSR_PARAMS tmp_var_list ';' {_parser->set_osr_params();}
+            ;
+
+ osr : OSR ';' {_parser->run_osr();}
+     | OSR '(' olr_options ')' ';' {_parser->run_osr();}
+     | OSR tmp_var_list ';' {_parser->run_osr();}
+     | OSR '(' olr_options ')' tmp_var_list ';' {_parser->run_osr();}
+     ;
+ 
+ olr : OLR ';' {_parser->run_olr();}
+     | OLR '(' olr_options ')' ';' {_parser->run_olr();}
+     | OLR tmp_var_list ';' {_parser->run_olr();}
+     | OLR '(' olr_options ')' tmp_var_list ';' {_parser->run_olr();}
+     ;
+ 
+ olr_option : o_olr_beta
+     | stoch_simul_options_list
+     ;
+ 
+ olr_options : olr_option
+     | olr_options COMMA olr_option
+     ;
+
+ olr_inst : OLR_INST tmp_var_list ';' {_parser->set_olr_inst();}
+          ;
+
+ calib_var : CALIB_VAR ';' {_parser->begin_calib_var();} calib_var_list END
+           ;
+
+ calib_var_list : calib_var_list calib_arg1
+                | calib_arg1
+                ;
+
+ calib_arg1 : NAME calib_arg2 EQUAL expression ';' {_parser->set_calib_var($1,$2,$4);}
+            | NAME COMMA NAME calib_arg2 EQUAL expression ';' {_parser->set_calib_var($1,$3,$4,$6);}
+            | AUTOCORR NAME '(' INT_NUMBER ')' calib_arg2 EQUAL expression ';' {_parser->set_calib_ac($2,$4,$6,$8);}
+            ;
+
+ calib_arg2 : {$$ = new dynare::Objects("1");}
+            | '(' INT_NUMBER ')' {$$ = $2;}
+            | '(' FLOAT_NUMBER ')' {$$ = $2;}
+            ;
+
+ calib : CALIB ';' {_parser->run_calib(0);}
+       | CALIB '(' COVAR ')' ';' {_parser->run_calib(1);}
+       ;
+
+ dynatype : DYNATYPE '(' NAME ')'';' {_parser->run_dynatype($3);}
+          | DYNATYPE '(' NAME ')' tmp_var_list ';' {_parser->run_dynatype($3);}
+          | DYNATYPE NAME ';' {_parser->run_dynatype($2);}
+          | DYNATYPE '(' NAME '.' NAME ')'';' {_parser->run_dynatype($3,$5);}
+          | DYNATYPE '(' NAME '.' NAME ')' tmp_var_list ';' {_parser->run_dynatype($3,$5);}
+          | DYNATYPE NAME '.' NAME ';' {_parser->run_dynatype($2,$4);};
+
+ dynasave : DYNASAVE '(' NAME ')'';' {_parser->run_dynasave($3);}
+          | DYNASAVE '(' NAME ')' tmp_var_list ';' {_parser->run_dynasave($3);}
+          | DYNASAVE NAME ';' {_parser->run_dynasave($2);}
+          | DYNASAVE '(' NAME '.' NAME ')'';' {_parser->run_dynasave($3,$5);}
+          | DYNASAVE '(' NAME '.' NAME ')' tmp_var_list ';' {_parser->run_dynasave($3,$5);}
+          | DYNASAVE NAME '.' NAME ';' {_parser->run_dynasave($2,$4);};
+
+ model_comparison : MODEL_COMPARISON '(' model_comparison_options ')' {_parser->begin_model_comparison();} 
+                       filename_list ';' {_parser->run_model_comparison();}
+                  ;
+
+ model_comparison_options: model_comparison_options ',' model_comparison_option
+              | model_comparison_option
+              ;
+
+ model_comparison_option : o_model_comparison_approximation
+              | o_print
+              | o_noprint
+              ;
+
+ filename_list : filename {_parser->add_mc_filename($1);}
+        | filename_list ',' filename {_parser->add_mc_filename($3);}
+	| filename '(' value ')' {_parser->add_mc_filename($1,$3);}
+        | filename_list ',' filename '(' value ')' {_parser->add_mc_filename($3,$5);}
+        ;
+
+ filename : filename_elem {$$=$1;}
+        | filename filename_elem {$$ = _parser->cat($1,$2);}
+        ;
+
+ filename_elem : NAME
+        | '\\' {$$ = new dynare::Objects("\\");}
+        | '/' {$$ = new dynare::Objects("/");}
+        | ':' {$$ = new dynare::Objects(":");}
+        | '.' {$$ = new dynare::Objects(".");}
+        ;
 
  o_dr_algo: DR_ALGO EQUAL INT_NUMBER {_parser->option_num("dr_algo",$3);};
  o_solve_algo: SOLVE_ALGO EQUAL INT_NUMBER {_parser->option_num("solve_algo",$3);};
@@ -770,5 +949,12 @@
  o_relative_irf : RELATIVE_IRF {_parser->option_num("relative_irf","1");};
  o_kalman_algo : KALMAN_ALGO EQUAL INT_NUMBER {_parser->option_num("kalman_algo",$3);};
  o_kalman_tol : KALMAN_TOL EQUAL INT_NUMBER {_parser->option_num("kalman_tol",$3);};
+ o_olr_beta: OLR_BETA EQUAL value {_parser->option_num("olr_beta",$3);};
+ o_model_comparison_approximation: MODEL_COMPARISON_APPROXIMATION EQUAL LAPLACE {dynare::Objects* tmp = new dynare::Objects("Laplace");_parser->option_str("model_comparison_approximation",tmp);}
+   | MODEL_COMPARISON_APPROXIMATION EQUAL MODIFIEDHARMONICMEAN {dynare::Objects* tmp = new dynare::Objects("MODIFIEDHARMONICMEAN");_parser->option_str("model_comparison_approximation",tmp);}
+   ;
+ o_print : PRINT {_parser->option_num("noprint","0");};
+ o_noprint : NOPRINT {_parser->option_num("noprint","1");};
+ o_nograph : GRAPH {_parser->option_num("nograph","0");};	
+
  %%
- 

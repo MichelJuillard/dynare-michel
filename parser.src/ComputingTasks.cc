@@ -59,10 +59,21 @@ void ComputingTasks::setOption(string name, string value)
   	*output << "options_." << name << " = " << value << ";\n";  
 }
 //------------------------------------------------------------------------------
+void ComputingTasks::setOption(string name, string value1, string value2)
+{
+  *output << "options_." << name << " = [" << value1 << "; " << value2 << "];\n";  
+}
+//------------------------------------------------------------------------------
 void ComputingTasks::runEstimation(string tmp1)			
 {
   *output << tmp1;
   *output << "dynare_estimation(var_list_);\n";
+}
+//------------------------------------------------------------------------------
+void ComputingTasks::runRplot(string tmp1)			
+{
+  *output << tmp1;
+  *output << "rplot(var_list_,rplottype_);\n";
 }
 //------------------------------------------------------------------------------
 void ComputingTasks::setEstimationInit(void)
@@ -118,56 +129,54 @@ void ComputingTasks::setOptimOptions(string str1, string str2, int task)
 //------------------------------------------------------------------------------
 void ComputingTasks::setEstimatedElements(void)
 {
-	if (!SymbolTable::Exist(EstimParams->name))
+  if (!SymbolTable::Exist(EstimParams->name))
+    {
+      string msg = "Unknown symbol : "+EstimParams->name;
+      error(msg.c_str());
+    }
+  if (SymbolTable::isReferenced(EstimParams->name) == eNotReferenced)
+    {
+      return;
+    }
+  if ((EstimParams->init_val).size() == 0)
+    {
+      EstimParams->init_val = EstimParams->mean;
+    }
+  switch(EstimParams->type)
+    {
+    case 1:
+      if( SymbolTable::getType(EstimParams->name) == eExogenous)
 	{
-		string msg = "Unknown symbol : "+EstimParams->name;
-		error(msg.c_str());
+	  *output << "estim_params_.var_exo = [estim_params_.var_exo; ";
 	}
-	if (SymbolTable::isReferenced(EstimParams->name) == eNotReferenced)
+      else if ( SymbolTable::getType(EstimParams->name) == eEndogenous)
 	{
-		return;
+	  *output << "estim_params_.var_endo = [estim_params_.var_endo; ";
 	}
-	if ((EstimParams->init_val).size() == 0)
+      *output << SymbolTable::getID(EstimParams->name)+1; 
+      break;
+    case 2:
+      *output << "estim_params_.param_vals = [estim_params_.param_vals; ";
+      *output << SymbolTable::getID(EstimParams->name)+1; 
+      break;
+    case 3:
+      if( SymbolTable::getType(EstimParams->name) == eExogenous)
 	{
-		EstimParams->init_val = EstimParams->mean;
+	  *output << "estim_params_.corrx = [estim_params_.corrx; ";
 	}
-	if (EstimParams->type == 2)
+      else if ( SymbolTable::getType(EstimParams->name) == eEndogenous)
 	{
-			// Setting user parameter name
-			*output << "estim_params_.user_param_names = strvcat(estim_params_.user_param_names, ";
-			*output << "'" << EstimParams->name << "');\n";
-			// Setting Dynare parameter name
-			*output << "estim_params_.param_names = strvcat(estim_params_.param_names, ";
-			*output << "'M_.params(" << SymbolTable::getID(EstimParams->name)+1 << ")');\n";
+	  *output << "estim_params_.corrn = [estim_params_.corrn; ";
 	}
-	if( SymbolTable::getType(EstimParams->name) == eExogenous)
-	{
-		*output << "estim_params_.var_exo = [estim_params_.var_exo; ";
-	}
-	else if ( SymbolTable::getType(EstimParams->name) == eEndogenous)
-	{
-		*output << "estim_params_.var_endo = [estim_params_.var_endo; ";
-	}
-	else if ( SymbolTable::getType(EstimParams->name) == eParameter)
-	{
-		*output << "estim_params_.param_vals = [estim_params_.param_vals; ";
-	}
-	if (EstimParams->type == 1)
-	{
-		*output << SymbolTable::getID(EstimParams->name)+1 << " " << 
-			EstimParams->init_val << " " <<  EstimParams->low_bound << " " <<
-			EstimParams->up_bound << " " <<  EstimParams->prior << " ";
-		*output <<  EstimParams->mean << " " <<  EstimParams->std << " " <<
-			EstimParams->p3 << " " <<  EstimParams->p4  << " " <<  EstimParams->jscale << "];\n";	
-	}
-	else if (EstimParams->type == 2)
-	{
-		*output << EstimParams->init_val << " " <<  EstimParams->low_bound << " " <<
-			EstimParams->up_bound << " " <<  EstimParams->prior << " ";
-		*output <<  EstimParams->mean << " " <<  EstimParams->std << " " <<  
-			EstimParams->p3 << " " <<  EstimParams->p4  << " " <<  EstimParams->jscale << "];\n";
-	}
-	EstimParams->clear();
+      *output << SymbolTable::getID(EstimParams->name)+1; 
+      *output << " " << SymbolTable::getID(EstimParams->name2)+1; 
+      break;
+    }
+  *output << " " << EstimParams->init_val << " " <<  EstimParams->low_bound << " " <<
+    EstimParams->up_bound << " " <<  EstimParams->prior << " ";
+  *output <<  EstimParams->mean << " " <<  EstimParams->std << " " <<  
+    EstimParams->p3 << " " <<  EstimParams->p4  << " " <<  EstimParams->jscale << "];\n";
+  EstimParams->clear();
 }
 void ComputingTasks::set_trend_element (string name, string expression)
 {
@@ -178,7 +187,7 @@ void ComputingTasks::set_trend_element (string name, string expression)
       (* error) (msg.c_str());
     }
     Type 	type = SymbolTable::getType(name);
-    int 	id = SymbolTable::getID(name);
+    //    int 	id = SymbolTable::getID(name);
     if (type == eEndogenous)
       {
 	*output << "tmp1 = strmatch(" << name << ",options_.varobs,'exact');\n";
@@ -191,185 +200,217 @@ void ComputingTasks::set_trend_element (string name, string expression)
 }
 
 //------------------------------------------------------------------------------
-void ComputingTasks::setCalibInit(void)
+void ComputingTasks::BeginCalibVar(void)
 {
 	  
-	*output << "%\n% CALIB_VAR \n%\n";
-	for(int i=1;i<4;++i)
-	{
-		*output << "calib_var_index{" << i << "} = [];\n";
-    	*output << "calib_targets{" << i << "} = [];\n";
-		*output << "calib_weights{" << i << "}=[];\n";
-	}
+  *output << "%\n% CALIB_VAR \n%\n";
+  for(int i=1;i<4;++i)
+    {
+      *output << "calib_var_index{" << i << "} = [];\n";
+      *output << "calib_targets{" << i << "} = [];\n";
+      *output << "calib_weights{" << i << "}=[];\n";
+    }
 }
 //------------------------------------------------------------------------------
-void ComputingTasks::setCalibVariance(void)
+void ComputingTasks::setCalibVar(string name, string weight, string expression)
 {
-/*	
-  char buffer[200];
-  if (p_t->endo_exo == 1 || p_t->endo_exo == 3)
+  if (!SymbolTable::Exist(name))
     {
-      sprintf(buffer,"calib_var_index{1} = [calib_var_index{1};%d];\n",p_t->nbr+1);
-      str_output(buffer);
-      str_output("calib_targets{1} =[calib_targets{1}; ");
-      p_expression(p_q);
-      str_output("];\n");
-      sprintf(buffer,"calib_weights{1} = [calib_weights{1}; %s];\n",weight);
-      str_output(buffer);
+      string msg = "calib_var: " + name + " doesn't exist";
+      error(msg.c_str());
     }
-  else if (p_t->endo_exo == 0)
+  int id = SymbolTable::getID(name)+1;
+  if (SymbolTable::getType(name) == eEndogenous)
     {
-      sprintf(buffer,"calib_var_index{3} = [calib_var_index{3};%d %d];\n",p_t->nbr+1,p_t->nbr+1);
-      str_output(buffer);
-      str_output("calib_targets{3} =[calib_targets{3}; ");
-      p_expression(p_q);
-      str_output("];\n");
-      sprintf(buffer,"calib_weights{3} = [calib_weights{3}; %s];\n",weight);
-      str_output(buffer);
+      *output << "calib_var_index{1} = [calib_var_index{1};" <<  id << "," << id << "];\n";
+      *output << "calib_weights{1} = [calib_weights{1}; " << weight << "];\n";
+      *output << "calib_targets{1} =[calib_targets{1}; " << expression << "];\n";
+    }
+  else if (SymbolTable::getType(name) == eExogenous)
+    {
+      *output << "calib_var_index{3} = [calib_var_index{3};" <<  id << "," << id << "];\n";
+      *output << "calib_weights{3} = [calib_weights{3}; " << weight << "];\n";
+      *output << "calib_targets{3} =[calib_targets{3}; " << expression << "];\n";
     }
   else
     {
-      printf("ERROR in CALIB: one of the targets isn't legitimate\n");
-    }	
-*/
+      string msg = "calib_var: " + name + "isn't a endogenous or an exogenous variable";
+      error(msg.c_str());
+    }
 }
 //------------------------------------------------------------------------------
-void ComputingTasks::setCalibCovariance(void)
+void ComputingTasks::setCalibVar(string name1, string name2, string weight, string expression)
 {
-/*
-0 : exo
-1 endo
-  char buffer[200];
-  if ((p_t1->endo_exo == 0 && p_t2->endo_exo == 1)|| (p_t1->endo_exo == 1 && p_t2->endo_exo == 0))
+  if (!SymbolTable::Exist(name1))
     {
-      printf("ERROR in CALIB: can't target correlation between an Endogenousous and an Exogenousous variable\n");
-      exit(1);
+      string msg = "calib_var: " + name1 + " doesn't exist";
+      error(msg.c_str());
     }
-  else if (p_t1->endo_exo == 1 || p_t1->endo_exo == 3)
+  if (!SymbolTable::Exist(name2))
     {
-      sprintf(buffer,"calib_var_index{2} = [calib_var_index{2};%d %d];\n",p_t1->nbr+1,p_t2->nbr+1);
-      str_output(buffer);
-      str_output("calib_targets{2} =[calib_targets{2}; ");
-      p_expression(p_q);
-      str_output("];\n");
-      sprintf(buffer,"calib_weights{2} = [calib_weights{2}; %s];\n",weight);
-      str_output(buffer);
+      string msg = "calib_var: " + name2 + " doesn't exist";
+      error(msg.c_str());
     }
-  else if (p_t1->endo_exo == 0)
+  if (SymbolTable::getType(name1) != SymbolTable::getType(name2))
     {
-      sprintf(buffer,"calib_var_index{3} = [calib_var_index{2};%d %d];\n",p_t1->nbr+1,p_t2->nbr+1);
-      str_output(buffer);
-      str_output("calib_targets{3} =[calib_targets{3}; ");
-      p_expression(p_q);
-      str_output("];\n");
-      sprintf(buffer,"calib_weights{3} = [calib_weights{3}; %s];\n",weight);
-      str_output(buffer);
+      string msg = "calib_var: " + name1 + " and " + name2 + " don't have the same type";
+      error(msg.c_str());
+    }
+  int id1 = SymbolTable::getID(name1)+1;
+  int id2 = SymbolTable::getID(name2)+1;
+  if (SymbolTable::getType(name1) == eEndogenous)
+    {
+      *output << "calib_var_index{1} = [calib_var_index{1};" <<  id1 << "," << id2 << "];\n";
+      *output << "calib_weights{1} = [calib_weights{1}; " << weight << "];\n";
+      *output << "calib_targets{1} =[calib_targets{1}; " << expression << "];\n";
+    }
+  else if (SymbolTable::getType(name1) == eExogenous)
+    {
+      *output << "calib_var_index{3} = [calib_var_index{3};" <<  id1 << "," << id2 << "];\n";
+      *output << "calib_weights{3} = [calib_weights{3}; " << weight << "];\n";
+      *output << "calib_targets{3} =[calib_targets{3}; " << expression << "];\n";
     }
   else
     {
-      printf("ERROR in CALIB: one of the targets isn''t legitimate\n");
-      exit(1);
+      string msg = "calib_var: " + name1 + " and " + name2 + "aren't endogenous or exogenous variables";
+      error(msg.c_str());
     }
-*/
 }
-//------------------------------------------------------------------------------
-void ComputingTasks::setCalibAutoCorrelation(void)
+void ComputingTasks::setCalibAc(string name, string ar, string weight, string expression)
 {
-/*
-  char buffer[200];
-  int i, iar;
-
-  iar = atoi(ar)+3;
+  static int max_iar = 3;
+  if (!SymbolTable::Exist(name))
+    {
+      string msg = "calib_var: " + name + " doesn't exist";
+      error(msg.c_str());
+    }
+  int id = SymbolTable::getID(name)+1;
+  int iar = atoi(ar.c_str())+3;
   if (iar > max_iar)
     {
-      for(i=max_iar+1; i <= iar; ++i)
+      // creates new variables
+      for(int i=max_iar+1; i <= iar; ++i)
 	{
-	  sprintf(buffer,"calib_var_index{%d} = [];\ncalib_targets{%d} = [];\ncalib_weights{%d}=[];\n",i,i,i);
-	  str_output(buffer);
+	  *output << "calib_var_index{" << i << "} = [];\n";
+	  *output << "calib_targets{" << i << "} = [];\n";
+	  *output << "calib_weights{" << i << "}=[];\n";
 	}
       max_iar = iar;
     }
-  sprintf(buffer,"calib_var_index{%d} = [calib_var_index{%d};%d];\n",iar,iar,p_t->nbr+1);
-  str_output(buffer);
-  sprintf(buffer,"calib_targets{%d} =[calib_targets{%d}; ",iar,iar);
-  str_output(buffer);
-  p_expression(p_q);
-  str_output("];\n");
-  sprintf(buffer,"calib_weights{%d} = [calib_weights{%d}; %s];\n",iar,iar,weight);
-  str_output(buffer);
-*/
-}
-//------------------------------------------------------------------------------
-void ComputingTasks::setCalib(void)
-{
-/*	
-	sprintf(buffer,"M_.Sigma_e=calib(calib_var_index,calib_targets,calib_weights,%d,%d,Sigma_e_);\n",max_iar-3,cova);
-  	str_output(buffer);
-*/
-}
-//------------------------------------------------------------------------------
-void ComputingTasks::setOsr(string tmp1)
-{
-	*output << tmp1;
-	*output << "osr(var1_list_,osr_params_,optim_weights_);\n";
-}
-//------------------------------------------------------------------------------
-void ComputingTasks::setOlr(string tmp1, string tmp2)
-{
-	*output << tmp1 << tmp2;
-	*output << "olr(var_list_,olr_inst_,obj_var_,optim_weights_);\n";
-	
-}
-//------------------------------------------------------------------------------
-void ComputingTasks::setOptimWeightsInit(void)
-{
-	*output << "% OPTIM_WEIGHTS\n\n";
-	*output << "optim_weights_ = sparse(endo_nbr,endo_nbr);\n";
-	*output << "obj_var_ = [];\n\n";
-}
-//------------------------------------------------------------------------------
-void ComputingTasks::setOptimWeights1(void)
-{
-/*	
-  char buffer[200];
-
-  if (p_t->endo_exo != 1 && p_t->endo_exo != 3)
+  if (SymbolTable::getType(name) == eEndogenous)
     {
-      fprintf(stdout,"OPTIM_WEIGHTS ERROR: only Endogenousous variables can have weights" );
-      exit(1);
+      *output << "calib_var_index{" << iar << "} = [calib_var_index{" << iar << "};" <<  id << "];\n";
+      *output << "calib_weights{" << iar << "} = [calib_weights{" << iar << "}; " << weight << "];\n";
+      *output << "calib_targets{" << iar << "} =[calib_targets{" << iar << "}; " << expression << "];\n";
     }
-
-  sprintf(buffer,"optim_weights_(%d,%d) = ",p_t->nbr+1,p_t->nbr+1);
-  str_output(buffer);
-  p_expression(p_q);
-  str_output(";\n");
-  sprintf(buffer,"obj_var_ = [obj_var_; %d];\n",p_t->nbr+1);
-  str_output(buffer);
-*/  
-}
-//------------------------------------------------------------------------------
-void ComputingTasks::setOptimWeights2(void)
-{
-/*	
-   char buffer[200];
-
-  if ((p_t1->endo_exo != 1 && p_t1->endo_exo != 3) || (p_t2->endo_exo != 1 && p_t2->endo_exo != 3))
+  else
     {
-      fprintf(stdout,"OPTIM_WEIGHTS ERROR: only Endogenousous variables can have weights" );
-      exit(1);
+      string msg = "calib_var: " + name + "isn't a endogenous variable";
+      error(msg.c_str());
     }
-
-  sprintf(buffer,"optim_weights_(%d,%d) = ",p_t1->nbr+1,p_t2->nbr+1);
-  str_output(buffer);
-  p_expression(p_q);
-  str_output(";\n");
-  sprintf(buffer,"optim_weights_(%d,%d) = optim_weights_(%d,%d);\n",p_t2->nbr+1,p_t1->nbr+1,p_t1->nbr+1,p_t2->nbr+1);
-  str_output(buffer);
-  sprintf(buffer,"obj_var_ = [obj_var_; %d];\n",p_t1->nbr+1);
-  sprintf(buffer,"obj_var_ = [obj_var_; %d];\n",p_t2->nbr+1);
-*/  
 }
 //------------------------------------------------------------------------------
+void ComputingTasks::runCalib(int cova)
+{
+  *output << "M_.Sigma_e=calib(calib_var_index,calib_targets,calib_weights," << cova << ",Sigma_e_);\n";
+}
+//------------------------------------------------------------------------------
+void ComputingTasks::setOsrParams(string tmp)
+{
+  *output << tmp;
+}
+//------------------------------------------------------------------------------
+void ComputingTasks::runOsr(string tmp1)
+{
+  *output << tmp1;
+  *output << "osr(var1_list_,osr_params_,optim_weights_);\n";
+}
+//------------------------------------------------------------------------------
+void ComputingTasks::setOlrInst(string tmp)
+{
+  *output << tmp;
+}
+//------------------------------------------------------------------------------
+void ComputingTasks::runOlr(string tmp1)
+{
+  *output << tmp1;
+  *output << "options_.olr = 1;\n";
+  *output << "options_.olr_w = optim_weights_;\n";
+  *output << "options_.olr_inst = olr_inst_;\n";
+  *output << "info = stoch_simul(var_list_);\n";
+}
+//------------------------------------------------------------------------------
+void ComputingTasks::BeginOptimWeights(void)
+{
+  *output << "% OPTIM_WEIGHTS\n\n";
+  *output << "optim_weights_ = sparse(endo_nbr,endo_nbr);\n";
+  *output << "obj_var_ = [];\n\n";
+}
+//------------------------------------------------------------------------------
+void ComputingTasks::setOptimWeights(string name, string exp)
+{
+  if (!SymbolTable::Exist(name) || SymbolTable::getType(name) != eEndogenous)
+    {
+      string msg = "optim_weights: " + name + " isn't an endogenous variable";
+      error(msg.c_str());
+    }
+  int id = SymbolTable::getID(name)+1;
+  *output <<  "optim_weights_(" << id << "," << id << ") = " << exp << ";\n";
+  *output << "obj_var_ = [obj_var_; " << id << "];\n";
+}
+//------------------------------------------------------------------------------
+void ComputingTasks::setOptimWeights(string name1, string name2, string exp)
+{
+  if (!SymbolTable::Exist(name1) || SymbolTable::getType(name1) != eEndogenous)
+    {
+      string msg = "optim_weights: " + name1 + " isn't an endogenous variable";
+      error(msg.c_str());
+    }
+  if (!SymbolTable::Exist(name2) || SymbolTable::getType(name2) != eEndogenous)
+    {
+      string msg = "optim_weights: " + name2 + " isn't an endogenous variable";
+      error(msg.c_str());
+    }
+  int id1 = SymbolTable::getID(name1)+1;
+  int id2 = SymbolTable::getID(name2)+1;
+  *output <<  "optim_weights_(" << id1 << "," << id2 << ") = " << exp << ";\n";
+  *output << "obj_var_ = [obj_var_; " << id1 << " " << id2 << "];\n";
+}
+//------------------------------------------------------------------------------
+void ComputingTasks::runDynasave(string filename, string ext, string varlist)
+{
+  *output << varlist;
+  *output << "dynasave(" << filename;
+  if (ext.size() > 0)
+    {
+      *output << "," << ext;
+    }
+  *output << ",varlist_);\n";
+} 
+void ComputingTasks::runDynatype(string filename, string ext, string varlist)
+{
+  *output << varlist;
+  *output << "dynatype(" << filename;
+  if (ext.size() > 0)
+    {
+      *output << "," << ext;
+    }
+  *output << ",varlist_);\n";
+} 
+void ComputingTasks::beginModelComparison(void)
+{
+  *output << "ModelNames_ = {};\n";
+  *output << "ModelPriors_ = {};\n";
+}
+void ComputingTasks::addMcFilename(string filename, string prior)
+{
+  *output << "ModelNames_ = { ModelNames_{:} '" << filename << "};\n";
+  *output << "ModelPriors_ = { ModelPriors_{:} '" << prior << "};\n";
+}
+void ComputingTasks::runModelComparison(void)
+{
+  *output << "model_comparison(ModelNames_,ModelPriors_);\n";
+}
 /*
 string ComputingTasks::get(void)
 {

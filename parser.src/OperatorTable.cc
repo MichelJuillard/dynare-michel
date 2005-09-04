@@ -65,6 +65,7 @@ OperatorTable::OperatorTable()
     operator_table[SQRT].precedence 	= 
     operator_table[NAME].precedence 	= 6;
 
+
 	// Operator costs for M files
 	operator_table[COMMA].cost[1] 	= 0;
 	operator_table[EQUAL].cost[1] 	= 0;
@@ -126,7 +127,7 @@ OperatorTable::OperatorTable()
     operator_table[TIMES].isfunction 	= false;
     operator_table[DIVIDE].isfunction 	= false;
     operator_table[UMINUS].isfunction 	= false;
-    operator_table[POWER].isfunction 	= true;
+    operator_table[POWER].isfunction 	= false;
     operator_table[EXP].isfunction 		= true;
     operator_table[LOG].isfunction 		= true;
     operator_table[LOG10].isfunction 	= true;

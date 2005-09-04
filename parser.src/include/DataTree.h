@@ -187,7 +187,7 @@ inline std::string DataTree::Key(MToken iToken)
 	char key[100];
 	//ostringstream key;
 	//key << iToken.id1 << " " << iToken.id2 << " " << iToken.type1 << " " << iToken.op_code;
-	sprintf(key,"%X %X %d %d", iToken.id1, iToken.id2,
+	sprintf(key,"%X %X %d %d", (int)iToken.id1, (int)iToken.id2,
 	 iToken.type1, iToken.op_code);
 	//std::cout << key << endl;
 	return std::string(key);

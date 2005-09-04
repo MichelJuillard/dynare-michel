@@ -33,28 +33,29 @@ void dynare::parser::setoutput(ostringstream* ostr)
 
 dynare::Objects* dynare::parser::add_endogenous(Objects* obj, Objects* tex_name)
 {
-	//cout << "add_endogenous \n";
-	obj->ID = (NodeID) symbol_table.AddSymbolDeclar(obj->symbol,eEndogenous, tex_name->symbol);
-	obj->type = eEndogenous;
-	return (obj);
+  //cout << "add_endogenous \n";
+  
+  obj->ID = (NodeID) symbol_table.AddSymbolDeclar(obj->symbol,eEndogenous, tex_name->symbol);
+  obj->type = eEndogenous;
+  return (obj);
 }
 dynare::Objects* dynare::parser::add_exogenous(Objects* obj, Objects* tex_name)
 {
-	obj->ID = (NodeID) symbol_table.AddSymbolDeclar(obj->symbol,eExogenous, tex_name->symbol);
-	obj->type = eExogenous;
-	return (obj);
+  obj->ID = (NodeID) symbol_table.AddSymbolDeclar(obj->symbol,eExogenous, tex_name->symbol);
+  obj->type = eExogenous;
+  return (obj);
 }
 dynare::Objects* dynare::parser::add_exogenous_det(Objects* obj, Objects* tex_name)                                    
 {
-	obj->ID = (NodeID) symbol_table.AddSymbolDeclar(obj->symbol,eExogenousDet, tex_name->symbol);
-	obj->type = eExogenousDet;
-	return (obj);
+  obj->ID = (NodeID) symbol_table.AddSymbolDeclar(obj->symbol,eExogenousDet, tex_name->symbol);
+  obj->type = eExogenousDet;
+  return (obj);
 }
 dynare::Objects* dynare::parser::add_parameter(Objects* obj, Objects* tex_name)
 {
-	obj->ID = (NodeID) symbol_table.AddSymbolDeclar(obj->symbol,eParameter, tex_name->symbol);
-	obj->type = eParameter;
-	return (obj);
+  obj->ID = (NodeID) symbol_table.AddSymbolDeclar(obj->symbol,eParameter, tex_name->symbol);
+  obj->type = eParameter;
+  return (obj);
 }
 dynare::Objects* dynare::parser::add_constant(Objects* obj)
 {
@@ -146,11 +147,20 @@ dynare::Objects* dynare::parser::add_expression_token( Objects* arg1,  Objects* 
 }
 dynare::Objects* dynare::parser::add_expression_token( Objects* arg1, Objects* op)
 {
-	
-	int id = expression.AddToken((int) arg1->ID,arg1->type,
+  int id;
+  if (op->opcode != NAME)
+    {
+      id = expression.AddToken((int) arg1->ID,arg1->type,
 						op->opcode);
-	//cout << "after add_expression_token\n";
-	return new Objects("", (NodeID) id, eTempResult);
+    }
+  else
+    {
+      id = expression.AddToken((int) arg1->ID,arg1->type,
+						op->symbol);
+    }
+
+  //cout << "after add_expression_token\n";
+  return new Objects("", (NodeID) id, eTempResult);
 }
 dynare::Objects* dynare::parser::get_expression(Objects* exp) 
 {
@@ -163,6 +173,12 @@ dynare::Objects* dynare::parser::get_expression(Objects* exp)
 	}
 	else
 		return exp;
+}
+dynare::Objects* dynare::parser::cat(Objects* string1, Objects* string2)
+{
+  dynare::Objects* result = new dynare::Objects;
+  result->symbol = string1->symbol+string2->symbol;
+  return result;
 }
 void dynare::parser::init_param(Objects* lhs,  Objects* rhs)
 {
@@ -203,67 +219,47 @@ void dynare::parser::check_model(void)
 void dynare::parser::finish(void)
 {
 	
-	string model_file_name(file_name);   
+  string model_file_name(file_name);   
 
-	// Setting flags to compute what is necessary	
-	if (order == 1 || linear == 1)
-	{
-		model_tree.computeJacobianExo = true;
-		model_tree.computeJacobian = false;
-	}
-	else if (order != -1 && linear != -1)
-	{
-		model_tree.computeHessian = true;
-		model_tree.computeJacobianExo = true;
-	}
-	// Removing extension chars
-	model_file_name.erase(model_file_name.size()-4,4);
-	model_tree.ModelInitialization();
+  // Setting flags to compute what is necessary	
+  if (order == 1 || linear == 1)
+    {
+      model_tree.computeJacobianExo = true;
+      model_tree.computeJacobian = false;
+    }
+  else if (order != -1 && linear != -1)
+    {
+      model_tree.computeHessian = true;
+      model_tree.computeJacobianExo = true;
+    }
+  // Removing extension chars
+  model_file_name.erase(model_file_name.size()-4,4);
+  model_tree.ModelInitialization();
 
-
-	if ((model_tree.computeJacobian || model_tree.computeJacobianExo) &&
-		!model_tree.computeHessian)
-	{
-		model_tree.derive(1);
-		cout << "Processing outputs ...\n";
-		if (model_tree.offset == 0)
-		{
-			model_tree.setStaticModelC();
-		}
-		else
-		{
-			model_tree.setStaticModelM();
-		}
-	}
-	else if (model_tree.computeHessian)
-	{
-		model_tree.derive(2);	
-		cout << "Processing outputs ...\n";
-		if (model_tree.offset == 0)
-		{
-			model_tree.setStaticModelC();
-		}
-		else
-		{
-			model_tree.setStaticModelM();
-		}
-	}
+  if ( model_tree.computeHessian )
+    {
+      model_tree.derive(2);
+    }
+  else
+    {
+      model_tree.derive(1);
+    }
 	
-	if (model_tree.computeJacobian || model_tree.computeJacobianExo || model_tree.computeHessian)
-	{
-		if (model_tree.offset == 0)
-		{
-			model_tree.setDynamicModelC();
-			model_tree.OpenCFiles(model_file_name+"_static", model_file_name+"_dynamic");
-			model_tree.SaveCFiles();
-		}
-		else
-		{
-			model_tree.setDynamicModelM();
-			model_tree.OpenMFiles(model_file_name+"_static", model_file_name+"_dynamic");
-			model_tree.SaveMFiles();
-		}
-	}
+  cout << "Processing outputs ...\n";
+  model_tree.setStaticModel();
+  model_tree.setDynamicModel();
+
+  if (model_tree.offset == 0)
+    {
+      model_tree.OpenCFiles(model_file_name+"_static", model_file_name+"_dynamic");
+      model_tree.SaveCFiles();
+    }
+  else
+    {
+      model_tree.OpenMFiles(model_file_name+"_static", model_file_name+"_dynamic");
+      model_tree.SaveMFiles();
+    }
+
 	
 }
 void dynare::parser::begin_initval(void)
@@ -389,6 +385,10 @@ void dynare::parser::option_num(string name_option, Objects* opt)
 	else if (name_option == "linear")
 		linear = atoi((opt->symbol).c_str());
 }
+void dynare::parser::option_num(string name_option, Objects* opt1, Objects* opt2)
+{
+  computing_tasks.setOption(name_option, opt1->symbol, opt2->symbol);
+}
 void dynare::parser::option_num(string name_option, string opt)
 {
 	computing_tasks.setOption(name_option, opt);
@@ -417,9 +417,15 @@ void dynare::parser::add_tmp_var(Objects* tmp_var)
 {
 	tmp_symbol_table.AddTempSymbol(tmp_var->symbol);
 }
-dynare::Objects* get_tmp_var(string)
+// dynare::Objects* get_tmp_var(string)
+// {
+// 	//string str = tmp_symbol_table.get
+// }
+void dynare::parser::rplot()
 {
-	//string str = tmp_symbol_table.get
+  tmp_symbol_table.set("var_list_");
+  string tmp = tmp_symbol_table.get();
+  computing_tasks.runRplot(tmp);
 }
 void dynare::parser::stoch_simul()
 {
@@ -488,6 +494,89 @@ void dynare::parser::set_trend_init()
 void dynare::parser::set_trend_element(Objects* arg1, Objects* arg2)
 {
   computing_tasks.set_trend_element(arg1->symbol, arg2->symbol);
+}
+void dynare::parser::begin_optim_weights(void)
+{
+  computing_tasks.BeginOptimWeights();
+}
+void dynare::parser::set_optim_weights(Objects* arg1, Objects* arg2)
+{
+  computing_tasks.setOptimWeights(arg1->symbol, arg2->symbol);
+}
+void dynare::parser::set_optim_weights(Objects* arg1, Objects* arg2, Objects* arg3)
+{
+  computing_tasks.setOptimWeights(arg1->symbol, arg2->symbol, arg3->symbol);
+}
+void dynare::parser::set_osr_params(void)
+{
+  tmp_symbol_table.set("osr_params_");
+  string tmp = tmp_symbol_table.get();
+  computing_tasks.setOsrParams(tmp);
+}
+void dynare::parser::run_osr(void)
+{
+  tmp_symbol_table.set("var_list_");
+  string tmp = tmp_symbol_table.get();
+  computing_tasks.runOsr(tmp);
+}
+void dynare::parser::set_olr_inst(void)
+{
+  tmp_symbol_table.set("options_.olr_inst");
+  string tmp = tmp_symbol_table.get();
+  computing_tasks.setOlrInst(tmp);
+}
+void dynare::parser::run_olr(void)
+{
+  tmp_symbol_table.set("var_list_");
+  string tmp = tmp_symbol_table.get();
+  computing_tasks.runOlr(tmp);
+}
+void dynare::parser::begin_calib_var(void)
+{
+  computing_tasks.BeginCalibVar();
+}
+void dynare::parser::set_calib_var(Objects* name, Objects* weight, Objects* expression)
+{
+  Objects* exp = get_expression(expression);
+  computing_tasks.setCalibVar(name->symbol,weight->symbol,exp->symbol);
+}
+void dynare::parser::set_calib_var(Objects* name1, Objects* name2, Objects* weight, Objects* expression)
+{
+  Objects* exp = get_expression(expression);
+  computing_tasks.setCalibVar(name1->symbol,name2->symbol,weight->symbol,exp->symbol);
+}
+void dynare::parser::set_calib_ac(Objects* name, Objects* ar, Objects* weight, Objects* expression)
+{
+  Objects* exp = get_expression(expression);
+  computing_tasks.setCalibAc(name->symbol,ar->symbol,weight->symbol,exp->symbol);
+}
+void dynare::parser::run_calib(int flag)
+{
+  computing_tasks.runCalib(flag);
+}
+void dynare::parser::run_dynatype(Objects* filename, Objects* ext)
+{
+  tmp_symbol_table.set("var_list_");
+  string tmp = tmp_symbol_table.get();
+  computing_tasks.runDynatype(filename->symbol,ext->symbol,tmp);
+}
+void dynare::parser::run_dynasave(Objects* filename, Objects* ext)
+{
+  tmp_symbol_table.set("var_list_");
+  string tmp = tmp_symbol_table.get();
+  computing_tasks.runDynasave(filename->symbol,ext->symbol,tmp);
+}
+void dynare::parser::begin_model_comparison(void)
+{
+  computing_tasks.beginModelComparison();
+}
+void dynare::parser::add_mc_filename(Objects* filename, Objects* prior)
+{
+  computing_tasks.addMcFilename(filename->symbol, prior->symbol);
+}
+void dynare::parser::run_model_comparison(void)
+{
+  computing_tasks.runModelComparison();
 }
 dynare::Objects*	dynare::parser::add_equal(Objects* arg1,  Objects* arg2)
 {

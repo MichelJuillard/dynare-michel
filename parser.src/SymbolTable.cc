@@ -35,36 +35,32 @@ int SymbolTable::AddSymbol(string name,Type type, string tex_name)
   name_table[(int) type].push_back(name);  
   tex_name_table[(int) type].push_back(tex_name);  
   
-  if (type == eExogenous)
-  {
+  switch (type)
+    {
+    case eExogenous:
 	symboltable[name].id = ModelParameters::exo_nbr;
-    ModelParameters::exo_nbr++;   
-    return  ModelParameters::exo_nbr-1;
-  }
-  else if (type == eExogenousDet)
-  {
+	ModelParameters::exo_nbr++;   
+	return  ModelParameters::exo_nbr-1;
+    case eExogenousDet:
 	symboltable[name].id = ModelParameters::exo_det_nbr;
 	ModelParameters::exo_det_nbr++;
 	return  ModelParameters::exo_det_nbr-1;
-  }
-  else if (type == eEndogenous)
-  {
+    case eEndogenous:
 	symboltable[name].id = ModelParameters::endo_nbr;
 	ModelParameters::endo_nbr++;
 	return  ModelParameters::endo_nbr-1;
-  }
-  else if (type == eParameter)
-  {
+    case eParameter:
 	symboltable[name].id = ModelParameters::parameter_nbr;
 	ModelParameters::parameter_nbr++;
 	return  ModelParameters::parameter_nbr-1;
-  }
-  else if (type == eRecursiveVariable)
-  {
+    case eRecursiveVariable:
 	symboltable[name].id = ModelParameters::recur_nbr;
 	ModelParameters::recur_nbr++;
 	return  ModelParameters::recur_nbr-1;
-  }
+    default:
+  // should never happen
+      return -1;
+    }
   
 }
 //------------------------------------------------------------------------------
@@ -83,6 +79,7 @@ int SymbolTable::AddSymbolDeclar(string name,Type type, string tex_name)
 		else{
 			string msg = "symbol " + name + " declared more than once with different types.";
 			(* error) (msg.c_str());
+			return -1;
 		}
 	}
 
@@ -159,11 +156,12 @@ void SymbolTable::clean()
 				nb_type[t]--;
 				unused += "fprintf(1,'%-30s";
 				switch(types[t])
-				{
-					case eEndogenous 	: unused += "Endogenous variable\\n','";break;
-					case eExogenous 	: unused += "Exogenous variable\\n','";break;
-					case eExogenousDet 	: unused += "Exogenous deterministic variable\\n','";break;
-				}
+				  {
+				  case eEndogenous 	: unused += "Endogenous variable\\n','";break;
+				  case eExogenous 	: unused += "Exogenous variable\\n','";break;
+				  case eExogenousDet 	: unused += "Exogenous deterministic variable\\n','";break;
+				  default : ;
+				  }
 				unused += name;
 				unused += "');\n";
 				warning = true;

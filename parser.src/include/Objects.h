@@ -39,14 +39,16 @@ namespace dynare
 			/*! Constrcutor of object with known symbol name */
 			Objects(string name) 
 			{
-				symbol = name;					
+			  opcode = NAME;
+			  symbol = name;					
 			}
 			/*! Constrcutor of object with known symbol name */
 			Objects(const char* name, NodeID id = NULL, Type t = eUNDEF)  
 			{
-				symbol = name;					
-				type = t;	
-				ID = id;
+			  opcode = NAME;
+			  symbol = name;					
+			  type = t;	
+			  ID = id;
 			}
 			/*! Constrcutor of object with known symbol name, ID and type */
 			Objects(string name,NodeID id, Type t) 

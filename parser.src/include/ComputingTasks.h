@@ -19,6 +19,7 @@
 struct EstimationParams{
 	int type;
 	std::string name;
+	std::string name2;
 	std::string init_val;
 	std::string prior;
 	std::string low_bound;
@@ -37,6 +38,7 @@ struct EstimationParams{
 	{
 		type = 0;
 		name = "";
+		name2 = "";
 		init_val = "NaN";
 		prior = "NaN";
 		low_bound = "-Inf";
@@ -86,8 +88,10 @@ class ComputingTasks
 			option_.<iName> = <iValue>
 		*/
 		void 	setOption(std::string iName, std::string iValue);
+		void 	setOption(std::string iName, std::string iValue1, std::string iValue2);
 		/*! Prints "dynare_estimation;" */
-		void 	runEstimation(std::string);							
+		void 	runEstimation(std::string);
+		void    runRplot(std::string);
 		/*! Prints some estimation initialisation */
 		void 	setEstimationInit(void);
 		//! Prints optimization options */
@@ -97,26 +101,40 @@ class ComputingTasks
 		void 	setEstimationStandardError(void);
 		void    set_trend_element(std::string, std::string);
 
-		void 	setCalibInit(void);
+		void 	BeginCalibVar(void);
 		
-		void 	setCalibVariance(void);
+		void 	setCalibVar(std::string, std::string, std::string);
+
+		void 	setCalibVar(std::string, std::string, std::string, std::string);
 		
-		void 	setCalibCovariance(void);
+		void 	setCalibAc(std::string, std::string, std::string, std::string);
 		
-		void 	setCalibAutoCorrelation(void);
-		
-		void 	setCalib(void);
+		void 	runCalib(int);
 		// write "osr(var_list_,osr_params_,optim_weights_);" 
-		void 	setOsr(std::string tmp1);				
+		void setOsrParams(std::string);
+
+		void 	runOsr(std::string);				
 		// writes "olr(var_list_,olr_inst_,obj_var_,optim_weights_);"
-		void 	setOlr(std::string tmp1, std::string tmp2);	 													
+		void setOlrInst(std::string);
+
+		void 	runOlr(std::string);
 		
-		void 	setOptimWeightsInit(void);
+		void 	BeginOptimWeights(void);
 		
-		void 	setOptimWeights1(void);
+		void 	setOptimWeights(std::string, std::string);
 		
-		void 	setOptimWeights2(void);
-		
+		void 	setOptimWeights(std::string, std::string, std::string);
+
+		void    runDynasave(std::string,std::string,std::string);
+
+		void    runDynatype(std::string,std::string,std::string);
+
+		void    beginModelComparison(void);
+
+		void    addMcFilename(std::string,std::string);
+
+		void    runModelComparison(void);
+
 		void	set(void);
 		
 		static 	std::string	get(void);

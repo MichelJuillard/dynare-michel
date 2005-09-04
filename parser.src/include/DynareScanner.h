@@ -6,12 +6,13 @@
  \date 04/27/2004
  \par This file defines the scanner class.
 */
-//------------------------------------------------------------------------------#include <iostream>
+//------------------------------------------------------------------------------
+#include <iostream>
 #include <sstream>
 #include <string>
 #include "DynareBison.h"
 #ifndef YLMM_basic_scanner
-#include "basic_scanner.h"
+#include "ylmm/basic_scanner.hh"
 #endif
 #include "Objects.h"
 #include "SymbolTable.h"

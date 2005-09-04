@@ -56,6 +56,7 @@ class ModelTree : public DataTree
 		char 					lpar, rpar;
 		/*! Name of parameter variables ("params" for C output, and M_.params for Matlab) */
 		std::string 			param_name;
+
 	private :
 		/*! Computes argument derivative */
 		inline NodeID 		DeriveArgument(NodeID iArg, Type iType, int iVarID);
@@ -74,7 +75,7 @@ class ModelTree : public DataTree
 		//void 		RemoveUnref(int iBeginID, int iEndID, int iOrder);
 		/*! Decrementing reference couter of unreferenced tokens in last derivative */
 		void 		DecrementUnref(int iBeginID, int iEndID, int iOrder);
-
+		inline int optimize(NodeID id);
 	public :
 		/*! When Jacobian (vs endogenous) is writen this flag is set to true */
 		bool		computeJacobian;
@@ -97,29 +98,17 @@ class ModelTree : public DataTree
 		/*! Computes derivatives of ModelTree */
 		void 		derive(int iOrder);
 		/*!
-		  Writes M output file for static model :
+		  Writes output file for static model :
 			- equations 
 			- 1st order derivatives with respect to endogenous variables (without lags) 
 		*/
-		std::string 		setStaticModelM(void);
+		std::string 		setStaticModel(void);
 		/*! 
-		  Writes M output file for dynamic stochastic model :
+		  Writes output file for dynamic stochastic model :
 		  - equations 
 		  - 1st order and 2nd order derivatives with respect to endogenous, exogenous, exogenous_det (in specific order) 
 		*/
-		std::string 		setDynamicModelM(void);
-		/*!
-		  Writes C output file for static model :
-			- equations 
-			- 1st order derivatives with respect to endogenous variables (without lags) 
-		*/
-		std::string 		setStaticModelC(void);
-		/*! 
-		  Writes C output file for dynamic stochastic model :
-		  - equations 
-		  - 1st order and 2nd order derivatives with respect to endogenous, exogenous, exogenous_det (in specific order) 
-		*/
-		std::string 		setDynamicModelC(void);
+		std::string 		setDynamicModel(void);
 		/*! Writes initialization of various Matlab variables */
 		void 		ModelInitialization(void);
 		/*! Returns string output for main file */
