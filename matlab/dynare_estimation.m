@@ -53,6 +53,12 @@ options_ = set_default_option(options_,'filtered_vars',0);
 options_ = set_default_option(options_,'kalman_algo',1);
 options_ = set_default_option(options_,'kalman_tol',10^(-12));
 options_ = set_default_option(options_,'posterior_mode_estimation',1);
+options_ = set_default_option(options_,'MaxNumberOfBytes',10000);
+
+%% Add something to the parser ++>
+M_.dname = M_.fname; % The user should be able to choose another name
+                     % for the directory...
+
 
 optim_options = optimset('display','iter','LargeScale','off', ...
 			 'MaxFunEvals',100000,'TolFun',1e-8,'TolX',1e-6);
@@ -629,7 +635,21 @@ if (any(bayestopt_.pshape  >0 ) & options_.mh_replic) | (any(bayestopt_.pshape >
     find(xparam1 > bounds(:,2))
     error('Mode values are outside prior bounds. Reduce prior_trunc.')
   end  
-  metropolis(xparam1,invhess,gend,data,rawdata,bounds);
+  if options_.mh_replic
+    metropolis(xparam1,invhess,gend,data,rawdata,bounds);
+  end
+  if ~options_.nodiagnostic
+    McMCDiagnostics;
+  end
+  %% Here i discard first half of the draws:
+  CutSample();
+  %% Estimation of the marginal density from the Mh draws:
+  marginal = marginal_density;
+  %% 
+  GetPosteriorParametersStatistics();
+  
+  return
+  
 end
 
 if ~((any(bayestopt_.pshape > 0) & options_.mh_replic) | (any(bayestopt_.pshape ...
