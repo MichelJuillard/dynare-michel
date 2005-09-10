@@ -1,5 +1,5 @@
 //
-// $Id: basic_parser.h,v 1.2 2004/09/13 07:46:31 benzougar Exp $ 
+// $Id: basic_parser.hh,v 1.15 2005/03/09 17:19:43 cholm Exp $ 
 //  
 //  basic_parser.hh
 //  Copyright (C) 2002 Christian Holm Christensen <cholm@nbi.dk> 
@@ -22,10 +22,10 @@
 #ifndef YLMM_basic_parser
 #define YLMM_basic_parser
 #ifndef YLMM_basic_messenger
-# include "basic_messenger.h"
+# include <ylmm/basic_messenger.hh>
 #endif
 #ifndef YLMM_basic_location
-# include "basic_location.h"
+# include <ylmm/basic_location.hh>
 #endif
 
 /**  @file   basic_parser.hh
@@ -39,6 +39,7 @@ namespace ylmm
   //=====================================================================
   /** @class parser_base basic_parser.hh <ylmm/basic_parser.hh>
       @brief ABC for parser classes.  
+
       This defines the common interface for parser classes, that
       doesn't depend on the semantic and location type.  It's
       interface can safely be used in the application or via some
@@ -70,9 +71,9 @@ namespace ylmm
     virtual bool tracing() const = 0;
     /** Set whether the parser is tracing or not. 
 	This member function is implmented via yaccmm.hh. 
-	@param d if true, trace the parse
+	@param t if true, trace the parse
 	@return true if we're tracing the parse */
-    virtual bool tracing(bool d) = 0;
+    virtual bool tracing(bool t) = 0;
     /** The main function member.  
 	@param arg Optional parameter
 	@return 0 on success, non-zero on failure */
@@ -97,12 +98,6 @@ namespace ylmm
     
     //@{
     /// @name message handling
-    /** Debug printing. 
-	When the generated parser wants to output trace information,
-	this is the member function that will be invoked. Per default
-	it outputs the message to standard error. 
-	@param message The debug message to print */ 
-    virtual void trace(const char* message, ...);
     /** Called on errors. 
 	When the generated parser detects a parse error, this member
 	function is called.  Per default, it simply outputs the error
@@ -116,11 +111,13 @@ namespace ylmm
 	it outputs the message to standard error. 
 	@param message The message to print */ 
     virtual void error(const char* message, ...);
-    /** Message printing - service function. 
-	When the generated parser wants to output various information,
-	this is the member function that will be invoked. Per default
-	it outputs the message to standard output. 
-	@param text The message to print */ 
+    /** Message printing - service function.  When the generated
+	parser wants to output various information, this is the member
+	function that will be invoked. Per default it outputs the
+	message to standard output.  Also, when the generated parser
+	wants to output trace information, this is the member function
+	that will be invoked. Per default it outputs the message to
+	standard error.  @param text The message to print */ 
     virtual void message(const char* text, ...);
     //@}
   };
@@ -147,16 +144,6 @@ namespace ylmm
     return *_messenger;
   }
 
-  //__________________________________________________________________
-  template <typename L>
-  inline void parser_base<L>::trace(const char* message, ...) 
-  {
-    if (!_messenger) return;
-    va_list ap;
-    va_start(ap, message);
-    _messenger->message(message, ap);
-    va_end(ap);
-  }
   //__________________________________________________________________
   template <typename L>
   inline void parser_base<L>::error(const char* message, ...) 
@@ -188,6 +175,7 @@ namespace ylmm
   //=====================================================================
   /** @class basic_parser basic_parser.hh <ylmm/basic_parser.hh>
       @brief Basic parser implementation. 
+
       This templated class implements a parser, or rather, a specific
       instantation of this tempalte implmentes it.  To use it, define
       the the processor macro @c YLMM_PARSER_CLASS to a specific
@@ -219,6 +207,7 @@ namespace ylmm
     /// The Id of the parser class 
     enum { parser_id = id };
   protected:
+    typedef parser_base<Lock> base_type;
     token_type* _token;		/** Address of the current token */
     location_type* _location;	/** The current location. */
   public:
@@ -235,9 +224,9 @@ namespace ylmm
     virtual bool tracing() const;
     /** Set whether the parser is tracing or not. 
 	This member function is implmented via yaccmm.hh. 
-	@param d if true, trace the parse
+	@param t if true, trace the parse
 	@return true if we're tracing the parse */
-    virtual bool tracing(bool d);
+    virtual bool tracing(bool t);
     //@}
 
     //@{
@@ -331,10 +320,10 @@ namespace ylmm
   basic_parser<T,L,id,M>::trace(int lookahead, 
 				const token_type& token) 
   {
-    if (!basic_parser::_messenger) return;
-    basic_parser::_messenger->message_stream() << " " << lookahead 
-				      << " [" << token << "]" 
-				      << std::flush;
+    if (!base_type::_messenger) return;
+    base_type::_messenger->message_stream() << " " << lookahead 
+					    << " [" << token << "]" 
+					    << std::flush;
   }
 }
 

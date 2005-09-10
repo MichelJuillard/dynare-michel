@@ -1,5 +1,4 @@
-//
-// $Id: basic_buffer.h,v 1.3 2004/07/29 15:16:36 benzougar Exp $ 
+// $Id: basic_buffer.hh,v 1.13 2004/03/09 02:38:01 cholm Exp $ 
 //  
 //  basic_buffer.hh
 //  Copyright (C) 2002 Christian Holm Christensen <cholm@nbi.dk> 
@@ -40,6 +39,7 @@ namespace ylmm
 {
   /** @class basic_buffer basic_buffer.hh <ylmm/basic_buffer.hh>
       @brief ABC for scanner buffers. 
+
       This class is used by the ylmm::basic_scanner class to read
       input.  Internally it uses a std::istream to read from.  User
       code can sub-class this class if need the client code needs to
@@ -244,13 +244,9 @@ namespace ylmm
       _is_owner = false;
     }
     else {
-      _stream   = new std::ifstream(filename.data(),std::ios::in);
-      if (!*_stream || _stream->bad()) 
-      {
-      	std::string message = filename.data();
-      	message = "Failed to open file " + message;
-		throw std::runtime_error(message);
-	  }
+      _stream   = new std::ifstream(filename.data());
+      if (!_stream || _stream->bad()) 
+	throw std::runtime_error("failed to open file");
       _is_owner = true;
     }
     _line           = 0;
@@ -268,7 +264,7 @@ namespace ylmm
     delete_extra();
     if (_is_owner && _stream) {
       std::ifstream* is;
-      if (is = dynamic_cast<std::ifstream*>(_stream)) is->close();
+      if ((is = dynamic_cast<std::ifstream*>(_stream))) is->close();
       delete _stream;
     }
   }
@@ -286,7 +282,7 @@ namespace ylmm
   inline int basic_buffer::read_buffered(char* buf, int max) 
   {
     if (!_stream || _stream->eof()) return 0;
-    _stream->read(buf, max); 
+    _stream->read(buf, max);
     if (_stream->bad()) return -1;
     int c = _stream->gcount();
     _last_read = buf[c-1];
@@ -383,7 +379,7 @@ ylmm::basic_buffer::new_extra(int size)
   // If size is not given (0 or less), then use the default. 
   if (size < 0) { _extra = 0; return; }
   if (size == 0) size = YY_BUF_SIZE;
-  _extra = (YY_BUFFER_STATE)yy_create_buffer(0, size);
+  _extra = static_cast<YY_BUFFER_STATE>(yy_create_buffer(0, size));
 }
 
 //__________________________________________________________________
@@ -394,7 +390,7 @@ extern void yy_delete_buffer(YY_BUFFER_STATE b);
 inline void 
 ylmm::basic_buffer::delete_extra() 
 {
-  yy_delete_buffer((YY_BUFFER_STATE)_extra);
+  yy_delete_buffer(static_cast<YY_BUFFER_STATE>(_extra));
 }
 
 //__________________________________________________________________
@@ -405,22 +401,22 @@ extern void yy_switch_to_buffer(YY_BUFFER_STATE b);
 inline bool 
 ylmm::basic_buffer::activate() 
 {
-  yy_switch_to_buffer((YY_BUFFER_STATE)_extra);
-  return (YY_BUFFER_STATE)_extra == YY_CURRENT_BUFFER;
+  yy_switch_to_buffer(static_cast<YY_BUFFER_STATE>(_extra));
+  return static_cast<YY_BUFFER_STATE>(_extra) == YY_CURRENT_BUFFER;
 }
 
 //__________________________________________________________________
 inline void 
 ylmm::basic_buffer::interactive_extra(bool inter) 
 {
-  ((YY_BUFFER_STATE)_extra)->yy_is_interactive = inter ? 1 : 0;
+  (static_cast<YY_BUFFER_STATE>(_extra))->yy_is_interactive = inter ? 1 : 0;
 }
 
 //__________________________________________________________________
 inline void 
 ylmm::basic_buffer::at_bol_extra(bool inter) 
 {
-  ((YY_BUFFER_STATE)_extra)->yy_at_bol = inter ? 1 : 0;
+  (static_cast<YY_BUFFER_STATE>(_extra))->yy_at_bol = inter ? 1 : 0;
 }
 
 //__________________________________________________________________
@@ -431,7 +427,7 @@ extern void yy_flush_buffer(YY_BUFFER_STATE b);
 inline void 
 ylmm::basic_buffer::flush_extra() 
 {
-  yy_flush_buffer((YY_BUFFER_STATE)_extra);
+  yy_flush_buffer(static_cast<YY_BUFFER_STATE>(_extra));
 }
 #else 
 

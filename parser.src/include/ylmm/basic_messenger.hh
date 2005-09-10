@@ -1,5 +1,5 @@
 //
-// $Id: basic_messenger.h,v 1.1 2004/03/29 15:15:53 benzougar Exp $ 
+// $Id: basic_messenger.hh,v 1.4 2003/11/18 11:27:31 cholm Exp $ 
 //  
 //  ylmm::basic_messenger
 //  Copyright (C) 2002 Christian Holm Christensen <cholm@nbi.dk> 
@@ -43,6 +43,7 @@ namespace ylmm
   //================================================================
   /** @class basic_lock basic_messenger.hh <ylmm/basic_messenger.hh>
       @brief Single threaded locking object.  
+
       Used by ylmm::basic_messenger to insure thread safe static
       creation of the default output handler. This implementation does
       nothing.  In a real multi-threaded application, the user should

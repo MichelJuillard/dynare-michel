@@ -1,5 +1,5 @@
 //
-// $Id: basic_location.h,v 1.1 2004/03/29 15:15:53 benzougar Exp $ 
+// $Id: basic_location.hh,v 1.6 2004/03/03 12:56:18 cholm Exp $ 
 //  
 //  basic_location.hh
 //  Copyright (C) 2002 Christian Holm Christensen <cholm@nbi.dk> 
@@ -33,6 +33,7 @@ namespace ylmm
 {
   /** @class basic_location basic_location.hh <ylmm/basic_location.hh>
       @brief Class to handle basic location inforamtion.  
+
       This class embeds information on where in a parse stream the
       parser encountered what tokens.  The class defines a region
       starting at a line number, column number pair, extending until
@@ -43,7 +44,7 @@ namespace ylmm
   */ 
   class basic_location 
   {
-  private:
+  protected:
     int _first_line;		/** The first line of the current
 				    region */ 
     int _first_column;		/** The first column of the current
@@ -60,6 +61,16 @@ namespace ylmm
 	@param l2 new last line 
 	@param c2 new last column. */	
     basic_location(int l1=0, int c1=0, int l2=0, int c2=0); 
+    /** Constructor.  Make a new basic_location as a region of two
+	other locations. 
+	@param f The position of the first line/column, taken from the
+	first line/column of @a f
+	@param l The position of the last line/column, taken from the
+	last line/column of @a l */
+    basic_location(const basic_location& f, const basic_location& l) 
+    {
+      region(f, l);
+    }
     /** Make a copy of a basic_location. 
 	@param l the basic_location to copy. */ 
     basic_location(const basic_location& l) { copy(l); }

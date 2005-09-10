@@ -1,5 +1,5 @@
 //
-// $Id: basic_scanner.h,v 1.1 2004/03/29 15:15:53 benzougar Exp $ 
+// $Id: basic_scanner.hh,v 1.14 2004/10/30 10:52:50 cholm Exp $ 
 //  
 //  basic_scanner.hh
 //  Copyright (C) 2002 Christian Holm Christensen <cholm@nbi.dk> 
@@ -25,13 +25,13 @@
 # include <vector>
 #endif
 #ifndef YLMM_basic_messenger
-# include "basic_messenger.h"
+# include <ylmm/basic_messenger.hh>
 #endif
 #ifndef YLMM_basic_buffer
-# include "basic_buffer.h"
+# include <ylmm/basic_buffer.hh>
 #endif
 #ifndef YLMM_basic_location
-# include "basic_location.h"
+# include <ylmm/basic_location.hh>
 #endif
 #ifdef output
 # undef output
@@ -53,6 +53,7 @@ namespace ylmm
   //=====================================================================
   /** @class scanner_base basic_scanner.hh <ylmm/basic_scanner.hh>
       @brief ABC for scanner classes.  
+
       This defines the common interface for scanner classes, that
       doesn't depend on the semantic and location type.  It's
       interface can safely be used in the application or via some
@@ -306,7 +307,7 @@ namespace ylmm
   }
   //__________________________________________________________________
   template <typename L>
-  inline void scanner_base<L>::echo(const char* text, int len) 
+  inline void scanner_base<L>::echo(const char* text, int) 
   {
     if (!_messenger) return;
     _messenger->message(text);
@@ -354,6 +355,7 @@ namespace ylmm
   //=====================================================================
   /** @class basic_scanner basic_scanner.hh <ylmm/basic_scanner.hh>
       @brief Basic scanner implementation. 
+
       This templated class implements a scanner, or rather, a specific
       instantation of this tempalte implmentes it.  To use it, define
       the the processor macro @c YLMM_SCANNER_CLASS to a specific
@@ -385,6 +387,7 @@ namespace ylmm
     /// Scanner id 
     enum { scanner_id = id };
   protected:
+    typedef scanner_base<Lock> base_type;
     int _type;			/** The last token type read via yylex
 				 */
     token_type _token;		/** The last token read. */
@@ -467,13 +470,13 @@ namespace ylmm
   inline void 
   basic_scanner<T,L,id,M>::where(location_type& l, bool first) 
   {
-    if (!basic_scanner::_current) return;
+    if (!base_type::_current) return;
     if (first) {
       l.first_line(l.last_line());
       l.first_column(l.last_column());
     }
-    l.last_line(basic_scanner::_current->line());
-    l.last_column(basic_scanner::_current->column());
+    l.last_line(base_type::_current->line());
+    l.last_column(base_type::_current->column());
   }  
   //__________________________________________________________________
   template<typename T, typename L, int id, typename M>

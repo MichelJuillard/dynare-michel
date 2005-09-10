@@ -1,5 +1,5 @@
 //
-// $Id: lexmm.h,v 1.1 2004/03/29 15:15:53 benzougar Exp $ 
+// $Id: lexmm.hh,v 1.12 2004/03/09 02:38:01 cholm Exp $ 
 //  
 //  lexmm.hh
 //  Copyright (C) 2002 Christian Holm Christensen <cholm@nbi.dk> 
@@ -30,9 +30,9 @@
     These classes are used by the lexical scanner classes, and wraps
     the @b Flex generated C function. */
 
-#if !defined(FLEX_SCANNER) && !defined(YYV7LEX) 
-# error Only for inclussion in Flex input file 
-#endif
+// #if !defined(FLEX_SCANNER) && !defined(YYV7LEX) 
+// # error Only for inclussion in Flex input file 
+// #endif
 #ifndef YLMM_SCANNER_CLASS
 # error Scanner class not defined, please define YLMM_SCANNER_CLASS
 #endif
@@ -67,6 +67,7 @@ static YLMM_SCANNER_CLASS * _scanner;
 
 //____________________________________________________________________
 /** Specialisations of some member functions of basic_scanner */
+template <>
 int
 ylmm::basic_scanner<YLMM_SCANNER_CLASS::token_type,
 		    YLMM_SCANNER_CLASS::location_type,
@@ -78,6 +79,7 @@ ylmm::basic_scanner<YLMM_SCANNER_CLASS::token_type,
 
 //____________________________________________________________________
 /** Specialisations of some member functions of basic_scanner */
+template <>
 int
 ylmm::basic_scanner<YLMM_SCANNER_CLASS::token_type,
 		    YLMM_SCANNER_CLASS::location_type,
@@ -90,6 +92,7 @@ ylmm::basic_scanner<YLMM_SCANNER_CLASS::token_type,
 
 //____________________________________________________________________
 /** Specialisations of some member functions of basic_scanner */
+template <>
 const char*
 ylmm::basic_scanner<YLMM_SCANNER_CLASS::token_type,
 		    YLMM_SCANNER_CLASS::location_type,
@@ -101,6 +104,7 @@ ylmm::basic_scanner<YLMM_SCANNER_CLASS::token_type,
 
 //____________________________________________________________________
 /** Specialisations of some member functions of basic_scanner */
+template <>
 int
 ylmm::basic_scanner<YLMM_SCANNER_CLASS::token_type,
 		    YLMM_SCANNER_CLASS::location_type,

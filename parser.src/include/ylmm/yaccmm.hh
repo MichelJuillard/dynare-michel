@@ -1,5 +1,5 @@
 //
-// $Id: yaccmm.h,v 1.1 2004/03/29 15:15:53 benzougar Exp $ 
+// $Id: yaccmm.hh,v 1.15 2004/03/09 02:38:01 cholm Exp $ 
 //  
 //  yaccmm.hh
 //  Copyright (C) 2002 Christian Holm Christensen <cholm@nbi.dk> 
@@ -29,14 +29,14 @@
 /** @defgroup yacc Semantic Parser Classes.  
     These classes are used by the semantic parser classes, and wraps 
     the @b Bison generated C function. */
-#if !defined(YYBISON) && !defined(YYBYACC) && !defined(YYV7YACC)
-# error Only for inclussion in Yacc input file 
-#endif
+// #if !defined(YYBISON) && !defined(YYBYACC) && !defined(YYV7YACC)
+// # error Only for inclussion in Yacc input file 
+// #endif
 #ifndef YLMM_PARSER_CLASS 
 # error Parser class not defined, please define YLMM_PARSER_CLASS
 #endif
 #ifndef YLMM_basic_parser
-# include "basic_parser.h"
+# include <ylmm/basic_parser.hh>
 #endif
 
 //____________________________________________________________________
@@ -54,7 +54,7 @@
 #define YYLTYPE YLMM_PARSER_CLASS::location_type
 
 //____________________________________________________________________
-#if !defined(YYDEBUG) && !defined(YYBYACC) && !defined(YYV7YACC)
+#if !defined(YYDEBUG)
 static int yydebug;
 #endif
 
@@ -75,34 +75,43 @@ int yyparse(void* YYPARSE_PARAM);
 static int yyparse() { return yyparse(0); }
 #else
 int yyparse(); 
-static int yyparse(void* arg) { return yyparse(); }
+static int yyparse(void*) { return yyparse(); }
 #endif
 
 //____________________________________________________________________
 /** Specialisation of some basic_parser methods for this grammar. */
+template <>
 bool 
 ylmm::basic_parser<YLMM_PARSER_CLASS::token_type, 
 		   YLMM_PARSER_CLASS::location_type, 
 		   YLMM_PARSER_CLASS::parser_id,
 		   YLMM_PARSER_CLASS::lock_type>::tracing() const 
 {
+#ifdef YYDEBUG
   return yydebug != 0 ? true : false;
+#else 
+  return false;
+#endif
 }
 
 //____________________________________________________________________
 /** Specialisation of some basic_parser methods for this grammar. */
+template <>
 bool
 ylmm::basic_parser<YLMM_PARSER_CLASS::token_type, 
 		   YLMM_PARSER_CLASS::location_type, 
 		   YLMM_PARSER_CLASS::parser_id,
 		   YLMM_PARSER_CLASS::lock_type>::tracing(bool t)
 {
+#ifdef YYDEBUG
   yydebug = (t ? 1 : 0);
+#endif
   return t;
 }
 
 //____________________________________________________________________
 /** Specialisation of some basic_parser methods for this grammar. */
+template <>
 int
 ylmm::basic_parser<YLMM_PARSER_CLASS::token_type, 
 		   YLMM_PARSER_CLASS::location_type, 
@@ -160,7 +169,7 @@ namespace
 #endif
 
 //____________________________________________________________________
-/** (Re)define YYFFPRINTF to call parser member function debug.
+/** (Re)define YYFFPRINTF to call parser member function trace.
     @param f FILE argument (ignored) 
     @param l Lock-ahead character 
     @param t the token. 
@@ -169,9 +178,9 @@ namespace
 # undef YYFFPRINTF
 #endif
 #if defined(YLMM_CXXCPP_STD_VARIADIC) || (defined(__GNUC__) && __GNUC__ >= 3)
-# define YYFFPRINTF(f,...) _parser->trace(__VA_ARGS__)
+# define YYFFPRINTF(f,...) _parser->message(__VA_ARGS__)
 #elif defined(YLMM_CXXCPP_GNU_VARIADIC) || (defined(__GNUC__) && __GNUC__ < 3)
-# define YYFFPRINTF(f,a...) _parser->trace(a)
+# define YYFFPRINTF(f,a...) _parser->message(a)
 #else
 # define YYFFPRINTF(f,l,t) _parser->trace(l,t)
 #endif
