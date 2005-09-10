@@ -706,7 +706,8 @@
 	;
 
  value 
-	: INT_NUMBER
+	: {$$ = new dynare::Objects("NaN");} 
+        | INT_NUMBER
 	| FLOAT_NUMBER
 	| NAME
         | MINUS INT_NUMBER
