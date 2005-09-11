@@ -26,16 +26,16 @@ if M_.exo_det_nbr > 0
   tempexdet = oo_.exo_det_simul;
   oo_.exo_det_simul = ones(M_.maximum_lag+1,1)*oo_.exo_steady_statedet_';
 end
-fh = str2func([M_.fname '_fff']);
-if max(abs(feval(fh,ys))) > dynatol_ & options_.olr == 0
+fh = str2func([M_.fname '_static']);
+if max(abs(feval(fh,ys,oo_.exo_steady_state))) > options_.dynatol & options_.olr == 0
   if exist([M_.fname '_steadystate'])
-    [dr.ys,check1] = feval([M_.fname '_steadystate'],ys);
+    [dr.ys,check1] = feval([M_.fname '_steadystate'],ys,oo_.exo_steady_state);
   else
-    [dr.ys,check1] = dynare_solve([M_.fname '_fff'],ys);
+    [dr.ys,check1] = dynare_solve([M_.fname '_static'],ys,oo_.exo_steady_state);
   end
   if check1
     info(1) = 20;
-    resid = feval(fh,ys);
+    resid = feval(fh,ys,oo_.exo_steady_state);
     info(2) = resid'*resid; % penalty...
     return
   end
@@ -52,7 +52,7 @@ end
 
 if options_.dr_algo == 1 & options_.order > 1
   dr.ys = dynare_solve('dr2',ys,dr);
-  dr.fbias = 2*feval([M_.fname '_fff'],dr.ys);
+  dr.fbias = 2*feval([M_.fname '_static'],dr.ys,oo_.exo_steady_state);
   [dr, info1] = dr1(dr,check_flag);
   if info1(1)
     info(1) = info(1)+10;
