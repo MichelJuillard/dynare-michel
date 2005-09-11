@@ -84,17 +84,17 @@ function [xparam1,estim_params_,bayestopt_,lb,ub]=set_prior(estim_params_)
 						  cellstr(M_.endo_names(estim_params_.corrn(:,2),:))))));
   end
   if np
-    xparam1 = [xparam1; estim_params_.param_vals(:,1)];
-    ub = [ub; estim_params_.param_vals(:,3)];
-    lb = [lb; estim_params_.param_vals(:,2)];
-    bayestopt_.pshape = [ bayestopt_.pshape; estim_params_.param_vals(:,4)];
-    bayestopt_.pmean = [ bayestopt_.pmean; estim_params_.param_vals(:,5)];
-    bayestopt_.pstdev = [ bayestopt_.pstdev; estim_params_.param_vals(:,6)];
-    bayestopt_.p3 = [ bayestopt_.p3; estim_params_.param_vals(:,7)];
-    bayestopt_.p4 = [ bayestopt_.p4; estim_params_.param_vals(:,8)];
+    xparam1 = [xparam1; estim_params_.param_vals(:,2)];
+    ub = [ub; estim_params_.param_vals(:,4)];
+    lb = [lb; estim_params_.param_vals(:,3)];
+    bayestopt_.pshape = [ bayestopt_.pshape; estim_params_.param_vals(:,5)];
+    bayestopt_.pmean = [ bayestopt_.pmean; estim_params_.param_vals(:,6)];
+    bayestopt_.pstdev = [ bayestopt_.pstdev; estim_params_.param_vals(:,7)];
+    bayestopt_.p3 = [ bayestopt_.p3; estim_params_.param_vals(:,8)];
+    bayestopt_.p4 = [ bayestopt_.p4; estim_params_.param_vals(:,9)];
     bayestopt_.jscale = [ bayestopt_.jscale; estim_params_.param_vals(:, ...
-						  9)];
-    bayestopt_.name = cellstr(strvcat(char(bayestopt_.name),estim_params_.param_names));
+						  10)];
+    bayestopt_.name = cellstr(strvcat(char(bayestopt_.name),M_.param_names(estim_params_.param_vals(:,1),:)));
   end
 
   bayestopt_.ub = ub;
