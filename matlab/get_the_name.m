@@ -41,10 +41,12 @@ elseif  k <= (estim_params_.nvx+estim_params_.nvn+estim_params_.ncx+ ...
         texnam =['$ CC_{' tname '} $'];
     end
 else
-    jj = k - (estim_params_.nvx+estim_params_.nvn+estim_params_.ncx+estim_params_.ncn); 
-    nam = deblank(estim_params_.user_param_names(jj,:));
+    jj = k - (estim_params_.nvx+estim_params_.nvn+estim_params_.ncx+ ...
+	      estim_params_.ncn); 
+    jj1 = estim_params_.param_vals(jj,1);
+    nam = deblank(M_.param_names(jj1,:));
     if TeX
-        texnam = ['$ '  deblank(estim_params_.tex(jj,:))  ' $'];
+        texnam = ['$ '  deblank(M_.param_names_tex(jj1,:))  ' $'];
     end    
 end
 

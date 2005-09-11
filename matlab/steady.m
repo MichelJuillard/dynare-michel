@@ -9,8 +9,10 @@ function steady(linear)
   disp(' ')
   disp('STEADY-STATE RESULTS:')
   disp(' ')
+  endo_names = M_.endo_names;
+  steady_state = oo_.steady_state;
   for i=1:size(oo_.steady_state,1)
-    disp(sprintf('%s \t\t %g',M_.endo_names(i,:),oo_.steady_state(i)));
+    disp(sprintf('%s \t\t %g',endo_names(i,:),steady_state(i)));
   end
   
   if isempty(ys0_)
