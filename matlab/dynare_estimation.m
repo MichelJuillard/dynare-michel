@@ -283,12 +283,12 @@ if any(bayestopt_.pshape > 0) & options_.posterior_mode_estimation
     disp(tit1)
     for i=1:np
       disp(sprintf('%12s %7.3f %8.4f %7.4f %7.4f %4s %6.4f', ...
-		   deblank(estim_params_.user_param_names(i,:)), ...
+		   bayestopt_.name{ip}, ...
 		   bayestopt_.pmean(ip),xparam1(ip),stdh(ip),tstath(ip), ...
 		   pnames(bayestopt_.pshape(ip)+1,:), ...
 		   bayestopt_.pstdev(ip)));
-      eval(['oo_.posterior_mode.parameters.' deblank(estim_params_.param_names(i,:)) ' = xparam1(ip);']);
-      eval(['oo_.posterior_std.parameters.' deblank(estim_params_.param_names(i,:)) ' = stdh(ip);']); 
+      eval(['oo_.posterior_mode.parameters.' bayestopt_.name{ip} ' = xparam1(ip);']);
+      eval(['oo_.posterior_std.parameters.' bayestopt_.name{ip} ' = stdh(ip);']); 
       ip = ip+1;
     end
   end
@@ -380,10 +380,10 @@ elseif ~any(bayestopt_.pshape > 0) & options_.posterior_mode_estimation
     disp(tit1)
     for i=1:np
       disp(sprintf('%12s %8.4f %7.4f %7.4f', ...
-		   deblank(estim_params_.user_param_names(i,:)), ...
+		   bayestopt_.name{ip}, ...
 		   xparam1(ip),stdh(ip),tstath(ip)));
-      eval(['oo_.mle_mode.parameters.' deblank(estim_params_.param_names(i,:)) ' = xparam1(ip);']);
-      eval(['oo_.mle_std.parameters.' deblank(estim_params_.param_names(i,:)) ' = stdh(ip);']); 
+      eval(['oo_.mle_mode.parameters.' bayestopt_.name{ip} ' = xparam1(ip);']);
+      eval(['oo_.mle_std.parameters.' bayestopt_.name{ip} ' = stdh(ip);']); 
       ip = ip+1;
     end
   end
