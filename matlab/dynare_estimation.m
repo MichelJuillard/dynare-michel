@@ -245,7 +245,8 @@ if options_.mode_compute > 0 & options_.posterior_mode_estimation
     disp(sprintf('Objective function at mode: %f',fval))
     disp(sprintf('Objective function at mode: %f',DsgeLikelihood(xparam1,gend,data)))
   elseif options_.mode_compute == 5
-    [xparam1, hh, gg, fval] = newrat('DsgeLikelihood',xparam1,[],[],gend,data);
+    flag = 0;
+    [xparam1, hh, gg, fval] = newrat('DsgeLikelihood',xparam1,[],[],flag,gend,data);
     eval(['save ' M_.fname '_mode xparam1 hh gg fval;']);
   end
   if options_.mode_compute ~= 5
