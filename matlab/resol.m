@@ -1,60 +1,66 @@
 % Copyright (C) 2001 Michel Juillard
 %
-function dr=resol(ys,algo,linear,iorder)
-
+function [dr,info]=resol(ys,check_flag)
 global M_ options_ oo_
-global  it_  means_ stderrs_
+% info: same as dr1 
+global it_
+% plus: 
+% 11 .... same as dr1 for dr_algo = 2
+% 20: can't find steady state info(2) contains sum of sqare residuals
 
+  
 
-if linear == 1
-  iorder =1;
-end
+options_ = set_default_option(options_,'olr',0);
+info = 0;
 
-xlen = M_.maximum_lead + M_.maximum_lag + 1;
-klen = M_.maximum_lag + M_.maximum_lead + 1;
-iyv = M_.lead_lag_incidence';
-iyv = iyv(:);
-iyr0 = find(iyv) ;
 it_ = M_.maximum_lag + 1 ;
 
 if M_.exo_nbr == 0
   oo_.exo_steady_state = [] ;
 end
 
-if ~ M_.lead_lag_incidence(M_.maximum_lag+1,:) > 0
-  error ('RESOL: Error in model specification: some variables don"t appear as current') ;
-end
-
-%if xlen > 1
-%  error (['RESOL: stochastic exogenous variables must appear only at the' ...
-%	  ' current period. Use additional endogenous variables']) ;
-%end
-
-
 % check if ys is steady state
 tempex = oo_.exo_simul;
-oo_.exo_simul = repmat(oo_.exo_steady_state',options_.periods + M_.maximum_lag + M_.maximum_lead,1);
-fh = str2func([M_.fname '_static']);
-if max(abs(feval(fh,ys,oo_.exo_simul))) > options_.dynatol
+oo_.exo_simul = repmat(oo_.exo_steady_state',M_.maximum_lag+M_.maximum_lead+1,1);
+if M_.exo_det_nbr > 0 
+  tempexdet = oo_.exo_det_simul;
+  oo_.exo_det_simul = ones(M_.maximum_lag+1,1)*oo_.exo_steady_statedet_';
+end
+fh = str2func([M_.fname '_fff']);
+if max(abs(feval(fh,ys))) > dynatol_ & options_.olr == 0
   if exist([M_.fname '_steadystate'])
-    [dr.ys,check] = feval([M_.fname '_steadystate'],ys,oo_.exo_simul);
+    [dr.ys,check1] = feval([M_.fname '_steadystate'],ys);
   else
-    [dr.ys, check] = dynare_solve([M_.fname '_static'],ys,oo_.exo_simul);
+    [dr.ys,check1] = dynare_solve([M_.fname '_fff'],ys);
   end
-  if check
-    error('RESOL: convergence problem in DYNARE_SOLVE')
+  if check1
+    info(1) = 20;
+    resid = feval(fh,ys);
+    info(2) = resid'*resid; % penalty...
+    return
   end
-else
+else 
   dr.ys = ys;
 end
 
 dr.fbias = zeros(M_.endo_nbr,1);
-dr = dr1(iorder,dr,0);
+[dr,info] = dr1(dr,check_flag);
 
-if algo == 1 & iorder > 1
+if info(1)
+  return
+end
+
+if options_.dr_algo == 1 & options_.order > 1
   dr.ys = dynare_solve('dr2',ys,dr);
-  dr.fbias = 2*feval([M_.fname '_static'],dr.ys,oo_.exo_simul);
-  dr = dr1(iorder,dr,0);
+  dr.fbias = 2*feval([M_.fname '_fff'],dr.ys);
+  [dr, info1] = dr1(dr,check_flag);
+  if info1(1)
+    info(1) = info(1)+10;
+    return
+  end
+end
+if M_.exo_det_nbr > 0
+  oo_.exo_det_simul = tempexdet;
 end
 oo_.exo_simul = tempex;
 tempex = [];
@@ -63,6 +69,3 @@ tempex = [];
 % 08/24/2001 MJ uses Schmitt-Grohe and Uribe (2001) constant correction
 %               in dr.ghs2 
 % 05/26/2003 MJ added temporary values for oo_.exo_simul
-
-
-
