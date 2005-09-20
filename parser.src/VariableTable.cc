@@ -62,10 +62,56 @@ int VariableTable::AddVariable(string iName, int iLag)
   	if (type == eEndogenous)	ModelParameters::var_endo_nbr++;
   	if (type == eExogenous)	ModelParameters::var_exo_nbr++;
   	// Setting Maximum and minimum lags
-	if (ModelParameters::max_lead < iLag && iLag >= 0)
-			ModelParameters::max_lead = iLag;
-	if (ModelParameters::max_lag < -iLag && iLag <= 0)
-			ModelParameters::max_lag = -iLag;
+	if (ModelParameters::max_lead < iLag)
+	  {
+	    ModelParameters::max_lead = iLag;
+	  }
+	else if (-ModelParameters::max_lag > iLag)
+	  {
+	    ModelParameters::max_lag = -iLag;
+	  }
+	switch(type)
+	  {
+	  case eEndogenous:
+	    if (ModelParameters::max_endo_lead < iLag)
+	      {
+		ModelParameters::max_endo_lead = iLag;
+	      }
+	    else if (-ModelParameters::max_endo_lag > iLag)
+	      {
+		ModelParameters::max_endo_lag = -iLag;
+	      }
+	  case eExogenous:
+	    if (ModelParameters::max_exo_lead < iLag)
+	      {
+		ModelParameters::max_exo_lead = iLag;
+	      }
+	    else if (-ModelParameters::max_exo_lag > iLag)
+	      {
+		ModelParameters::max_exo_lag = -iLag;
+	      }
+	  case eExogenousDet:
+	    if (ModelParameters::max_exo_det_lead < iLag)
+	      {
+		ModelParameters::max_exo_det_lead = iLag;
+	      }
+	    else if (-ModelParameters::max_exo_det_lag > iLag)
+	      {
+		ModelParameters::max_exo_det_lag = -iLag;
+	      }
+	  case eRecursiveVariable:
+	    if (ModelParameters::max_recur_lead < iLag)
+	      {
+		ModelParameters::max_recur_lead = iLag;
+	      }
+	    else if (-ModelParameters::max_recur_lag > iLag)
+	      {
+		ModelParameters::max_recur_lag = -iLag;
+	      }
+	  default:
+	    ; 
+	  }
+
   	return mVariableIndex.size()-1;
 }
 //------------------------------------------------------------------------------

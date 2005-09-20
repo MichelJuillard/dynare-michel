@@ -1012,6 +1012,7 @@ inline string ModelTree::getExpression(NodeID StartID, EquationType  iEquationTy
   
   stack_token.push(StartID);
   int precedence_last_op = operator_table.precedence(StartID->op_code);
+  int last_op_code = 0;
 
   while (stack_token.size() > 0)
     {
@@ -1042,17 +1043,17 @@ inline string ModelTree::getExpression(NodeID StartID, EquationType  iEquationTy
 	{
 	  // if current operator is not a temporary variable and 
 	  // of lesser precedence than previous one, insert '('
-	  if ( precedence_current_op < precedence_last_op )
-	    {
-	      exp << "(";
-	    }
-      if ( current_op_code == UMINUS)
+	  if ( precedence_current_op < precedence_last_op ||
+	       (last_op_code == MINUS & 
+		precedence_current_op == precedence_last_op) ||
+	       current_op_code == UMINUS)
 	    {
 	      exp << "(";
 	    }
 	  // set flag: left argument has been explored
 	  current_token_ID->left_done = 1;
 	  precedence_last_op = precedence_current_op;
+	  last_op_code = current_op_code;
 	  if ( offset == 0 && current_op_code == POWER)
 	    {
 	      exp << "pow(";
@@ -1093,12 +1094,15 @@ inline string ModelTree::getExpression(NodeID StartID, EquationType  iEquationTy
 	{
 	  if ( (offset == 0 && current_op_code == POWER) || 
 	       ( precedence_current_op > precedence_last_op &&
-		 operator_table.isfunction(current_op_code) == false) || 
+		 operator_table.isfunction(current_op_code) == false) ||
+	       (current_op_code == MINUS &&
+		precedence_current_op == precedence_last_op) ||
 	       current_op_code == UMINUS)
 	    {
 	      exp << ")";
 	    }
 	  precedence_last_op = precedence_current_op;
+	  last_op_code = current_op_code;
 	  current_token_ID->left_done=0;
 	  current_token_ID->right_done=0;
 	  stack_token.pop();
@@ -1406,16 +1410,45 @@ void ModelTree::ModelInitialization(void)
   output << "M_.exo_names_orig_ord = [1:" << ModelParameters::exo_nbr << "];\n";
   output << "M_.maximum_lag = " << ModelParameters::max_lag << ";\n";
   output << "M_.maximum_lead = " << ModelParameters::max_lead<< ";\n";
+  if (ModelParameters::exo_nbr > 0)
+    {
+    }
+  if (ModelParameters::exo_nbr > 0)
+    {
+    }
+  if (ModelParameters::exo_nbr > 0)
+    {
+      output << "M_.maximum_exo_lag = " << ModelParameters::max_exo_lag << ";\n";
+      output << "M_.maximum_exo_lead = " << ModelParameters::max_exo_lead<< ";\n";
+    }
   if (ModelParameters::endo_nbr)
-    output << "oo_.steady_state = zeros(" << ModelParameters::endo_nbr << ", 1);\n";
+    {
+      output << "M_.maximum_endo_lag = " << ModelParameters::max_endo_lag << ";\n";
+      output << "M_.maximum_endo_lead = " << ModelParameters::max_endo_lead<< ";\n";
+      output << "oo_.steady_state = zeros(" << ModelParameters::endo_nbr << ", 1);\n";
+    }
   if (ModelParameters::exo_nbr)
-    output << "oo_.exo_steady_state = zeros(" << ModelParameters::exo_nbr << ", 1);\n";
+    {
+      output << "M_.maximum_exo_lag = " << ModelParameters::max_exo_lag << ";\n";
+      output << "M_.maximum_exo_lead = " << ModelParameters::max_exo_lead<< ";\n";
+      output << "oo_.exo_steady_state = zeros(" << ModelParameters::exo_nbr << ", 1);\n";
+    }
+  if (ModelParameters::exo_det_nbr)
+    {
+      output << "M_.maximum_exo_det_lag = " << ModelParameters::max_exo_det_lag << ";\n";
+      output << "M_.maximum_exo_det_lead = " << ModelParameters::max_exo_det_lead<< ";\n";
+      output << "oo_.exo_det_steadystate = zeros(" << ModelParameters::exo_det_nbr << ", 1);\n";
+    }
+  if (ModelParameters::recur_nbr)
+    {
+      output << "M_.maximum_recur_lag = " << ModelParameters::max_recur_lag << ";\n";
+      output << "M_.maximum_recur_lead = " << ModelParameters::max_recur_lead<< ";\n";
+      output << "oo_.recur_steadystate = zeros(" << ModelParameters::recur_nbr << ", 1);\n";
+    }
   if (ModelParameters::parameter_nbr)
-    output << "M_.params = zeros(" << ModelParameters::parameter_nbr << ", 1);\n";
-  if (ModelParameters::exo_det_nbr)
-    output << "oo_exdet_ = zeros(" << ModelParameters::exo_det_nbr << ", 1);\n";
-  if (ModelParameters::exo_det_nbr)
-    output << "oo_exedet_ = zeros(" << ModelParameters::exo_det_nbr << ", 1);\n";
+    {
+      output << "M_.params = zeros(" << ModelParameters::parameter_nbr << ", 1);\n";
+    }
 }
 //------------------------------------------------------------------------------
 string ModelTree::get()

@@ -49,6 +49,15 @@ class ModelParameters
 		
 		static int max_lag;
 		static int max_lead;
+		static int max_endo_lag;
+		static int max_endo_lead;
+		static int max_exo_lag;
+		static int max_exo_lead;
+		static int max_exo_det_lag;
+		static int max_exo_det_lead;
+		static int max_recur_lag;
+		static int max_recur_lead;
+
 		/*!  Minimum lag for endogenous variables */
 		//static int endo_min_lag;	
 		/*! Maximum lag  for endogenous variables*/

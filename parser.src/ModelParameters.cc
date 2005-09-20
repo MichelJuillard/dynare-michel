@@ -21,15 +21,17 @@ int ModelParameters::static_nbr = 0;
 int ModelParameters::forward_nbr = 0;
 int ModelParameters::both_nbr = 0;
 int ModelParameters::recur_nbr = 0;
-int ModelParameters::max_lag=INT_MIN;
-int ModelParameters::max_lead=INT_MIN;
+int ModelParameters::max_lag = 0;
+int ModelParameters::max_lead = 0;
+int ModelParameters::max_endo_lag = 0;
+int ModelParameters::max_endo_lead = 0;
+int ModelParameters::max_exo_lag = 0;
+int ModelParameters::max_exo_lead = 0;
+int ModelParameters::max_exo_det_lag = 0;
+int ModelParameters::max_exo_det_lead = 0;
+int ModelParameters::max_recur_lag = 0;
+int ModelParameters::max_recur_lead = 0;
 using namespace std;
-//int ModelParameters::endo_min_lag=INT_MAX;
-//int ModelParameters::endo_max_lag=INT_MIN;
-//int ModelParameters::exo_min_lag=INT_MAX;
-//int ModelParameters::exo_max_lag=INT_MIN;
-//int ModelParameters::recur_min_lag=INT_MAX;
-//int ModelParameters::recur_max_lag=INT_MIN;
 //------------------------------------------------------------------------------
 ModelParameters::ModelParameters()
 {
