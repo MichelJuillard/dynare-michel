@@ -42,7 +42,11 @@ else
   z = repmat(dr.ys,1,klen);
 end
 z = z(iyr0) ;
-[junk,jacobia_] = feval([M_.fname '_dynamic'],z,tempex);
+if options_.order == 1
+  [junk,jacobia_] = feval([M_.fname '_dynamic'],z,tempex);
+elseif options_.order == 2
+    [junk,jacobia_,hessian] = feval([M_.fname '_dynamic'],z,tempex);
+end
 
 oo_.exo_simul = tempex ;
 tempex = [];
@@ -104,7 +108,7 @@ if options_.olr
   jacobia_ = jacobia1;
   clear jacobia1
   % computes steady state
-  resid = feval([fname_ '_fff'],zeros(olr_state_.old_M_.endo_nbr,1));
+  resid = feval([M_.fname '_steady'],zeros(olr_state_.old_M_.endo_nbr,1));
   if resid'*resid < 1e-12
     dr.ys =[dr.ys; zeros(nj,1)];
   else
@@ -316,7 +320,7 @@ if options_.order == 1
 end
 
 % Second order
-tempex = oo_.exo_simul ;
+%tempex = oo_.exo_simul ;
 
 %hessian = real(hessext('ff1_',[z; oo_.exo_steady_state]))' ;
 kk = flipud(cumsum(flipud(M_.lead_lag_incidence(M_.maximum_lag+1:end,order_var)),1));
@@ -335,11 +339,11 @@ kk1(k1(k2)) = k2;
 kk1 = [kk1 length(k1)+1:length(k1)+M_.exo_nbr];
 kk = reshape([1:nk^2],nk,nk);
 kk1 = kk(kk1,kk1);
-hessian = zeros(M_.endo_nbr,nk^2);
-hessian(:,kk1(:)) = real(hessian_sparse('ff1_',[z; oo_.exo_steady_state])) ;
+%[junk,junk,hessian] = feval([M_.fname '_dynamic'],z, oo_.exo_steady_state);
+hessian(:,kk1(:)) = hessian;
 
-oo_.exo_simul = tempex ;
-clear tempex
+%oo_.exo_simul = tempex ;
+%clear tempex
 
 n1 = 0;
 n2 = np;
@@ -536,7 +540,7 @@ for i=1:M_.maximum_lead
 
   H = E1 + hx*H;
 end
-RHS = RHS*Sigma_e_(:);
+RHS = RHS*M_.Sigma_e(:);
 dr.fuu = RHS;
 RHS = -RHS-dr.fbias;
 dr.ghs2 = LHS\RHS;

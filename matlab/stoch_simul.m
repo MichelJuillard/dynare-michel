@@ -61,10 +61,10 @@ global it_
 	  int2str(length(find(dr_.kstate(:,2) == M_.maximum_lag+2)))])
     disp(['  Number of static variables:  ' int2str(dr_.nstatic)])
     my_title='MATRIX OF COVARIANCE OF EXOGENOUS SHOCKS';
-    labels = deblank(lgx_);
+    labels = deblank(M_.exo_names);
     headers = strvcat('Variables',labels);
     lh = size(labels,2)+2;
-    table(my_title,headers,labels,Sigma_e_,lh,10,6);
+    table(my_title,headers,labels,M_.Sigma_e,lh,10,6);
     disp(' ')
     disp_dr(dr_,options_.order,var_list);
   end
@@ -94,9 +94,9 @@ global it_
     if n == 0
       n = M_.endo_nbr;
       ivar = [1:n]';
-      var_list = lgoo_.endo_simul;
+      var_list = M_.endo_names;
       if TeX
-	var_listTeX = lgoo_.endo_simulToo_.exo_simul;
+	var_listTeX = M_.endo_names_tex;
       end
     else
       ivar=zeros(n,1);
@@ -104,13 +104,13 @@ global it_
 	var_listTeX = [];
       end
       for i=1:n
-	i_tmp = strmatch(var_list(i,:),lgoo_.endo_simul,'exact');
+	i_tmp = strmatch(var_list(i,:),M_.endo_names,'exact');
 	if isempty(i_tmp)
 	  error (['One of the specified variables does not exist']) ;
 	else
 	  ivar(i) = i_tmp;
 	  if TeX
-	    var_listTeX = strvcat(var_listTeX,deblank(lgoo_.endo_simulToo_.exo_simul(i_tmp,:)));
+	    var_listTeX = strvcat(var_listTeX,deblank(M_.endo_names_tex(i_tmp,:)));
 	  end
 	end
       end
@@ -122,15 +122,15 @@ global it_
       fprintf(fidTeX,' \n');
     end
     olditer = iter_;% Est-ce vraiment utile ? Il y a la même ligne dans irf... 
-    SS(lgx_orig_ord_,lgx_orig_ord_)=Sigma_e_+1e-14*eye(M_.exo_nbr);
+    SS(M_.exo_names_orig_order,M_.exo_names_orig_order)=M_.Sigma_e+1e-14*eye(M_.exo_nbr);
     cs = transpose(chol(SS));
-    tit(lgx_orig_ord_,:) = lgx_;
+    tit(M_.exo_names_orig_order,:) = M_.exo_names;
     if TeX
-      titTeX(lgx_orig_ord_,:) = lgx_Too_.exo_simul;
+      titTeX(M_.exo_names_orig_order,:) = M_.exo_names_tex;
     end
     for i=1:M_.exo_nbr
       if SS(i,i) > 1e-13
-	y=irf(dr_,cs(lgx_orig_ord_,i), options_.irf, options_.drop, ...
+	y=irf(dr_,cs(M_.exo_names_orig_order,i), options_.irf, options_.drop, ...
 	      options_.replic, options_.order);
 	if options_.relative_irf
 	  y = 100*y/cs(i,i); 
