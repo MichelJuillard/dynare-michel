@@ -298,7 +298,8 @@ if any(bayestopt_.pshape > 0) & options_.posterior_mode_estimation
     disp('standard deviation of shocks')
     disp(tit1)
     for i=1:nvx
-      name = deblank(M_.exo_names(estim_params_.var_exo(i,1),:));
+      k = estim_params_.var_exo(i,1);
+      name = deblank(M_.exo_names(k,:));
       disp(sprintf('%12s %7.3f %8.4f %7.4f %7.4f %4s %6.4f', ...
 		   name,bayestopt_.pmean(ip),xparam1(ip), ...
 		   stdh(ip),tstath(ip),pnames(bayestopt_.pshape(ip)+1,:), ...
@@ -361,7 +362,7 @@ if any(bayestopt_.pshape > 0) & options_.posterior_mode_estimation
       ip = ip+1;
     end
   end
-  %% Laplace approximation to the marginal log density: 
+  %% Laplace approximation to the marginal log density:
   md_Laplace = .5*size(xparam1,1)*log(2*pi) + .5*log(det(invhess)) ...
       - DsgeLikelihood(xparam1,gend,data);
   oo_.MarginalDensity.LaplaceApproximation = md_Laplace;    
@@ -394,7 +395,8 @@ elseif ~any(bayestopt_.pshape > 0) & options_.posterior_mode_estimation
     disp('standard deviation of shocks')
     disp(tit1)
     for i=1:nvx
-      name = deblank(M_.exo_names(estim_params_.var_exo(i,1),:));
+      k = estim_params_.var_exo(i,1);
+      name = deblank(M_.exo_names(k,:));
       disp(sprintf('%12s %8.4f %7.4f %7.4f',name,xparam1(ip),stdh(ip),tstath(ip)));
       M_.Sigma_e(k,k) = xparam1(ip)*xparam1(ip);
       eval(['oo_.mle_mode.shocks_std.' name ' = xparam1(ip);']);

@@ -10,14 +10,14 @@ nvn = estim_params_.nvn;
 ncx = estim_params_.ncx;
 ncx = estim_params_.ncn;
 
-if k <= estim_params_.nvx
+if k <= nvx
     vname = deblank(M_.exo_names(estim_params_.var_exo(k,1),:));
     nam = ['SE_',vname];
     if TeX
         tname  = deblank(M_.exo_names_tex(estim_params_.var_exo(k,1),:));
         texnam = ['$ SE_{' tname '} $'];
     end
-elseif  k <= (estim_params_.nvx+estim_params_.nvn)
+elseif  k <= (nvx+nvn)
     vname = deblank(options_.varobs(estim_params_.var_endo(k-estim_params_.nvx,1),:));
     nam=['SE_EOBS_',vname];
     if TeX

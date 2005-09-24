@@ -6,7 +6,7 @@ function [fval,cost_flag,ys,trend_coeff] = DsgeLikelihood(xparam1,gend,data)
   global dr1_test_
 
   fval		= [];
-  ys			= [];
+  ys		= [];
   trend_coeff	= [];
   cost_flag  	= 1;
   nobs 		= size(options_.varobs,1);
