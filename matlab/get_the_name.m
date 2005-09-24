@@ -5,9 +5,14 @@ global M_ estim_params_ options_
 nam = [];
 texnam = [];
 
+nvx = estim_params_.nvx;
+nvn = estim_params_.nvn;
+ncx = estim_params_.ncx;
+ncx = estim_params_.ncn;
+
 if k <= estim_params_.nvx
     vname = deblank(M_.exo_names(estim_params_.var_exo(k,1),:));
-    nam=['SE_',vname];
+    nam = ['SE_',vname];
     if TeX
         tname  = deblank(M_.exo_names_tex(estim_params_.var_exo(k,1),:));
         texnam = ['$ SE_{' tname '} $'];

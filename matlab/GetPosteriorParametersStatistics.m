@@ -28,15 +28,15 @@ disp(' ')
 disp(sprintf('Log data density is %f.',oo_.MarginalDensity.ModifiedHarmonicMean))
 pnames=['     ';'beta ';'gamm ';'norm ';'invg ';'unif ';'invg2'];
 tit2 = sprintf('%10s %7s %10s %14s %4s %6s\n',' ','prior mean','post. mean','conf. interval','prior','pstdev');
-ip = nvx+nvn+ncx+ncn+1;
 if np
   disp(' ')
   disp('parameters')
   disp(tit2)
+  ip = nvx+nvn+ncx+ncn+1;
   for i=1:np
     Draws = GetAllPosteriorDraws(ip,FirstMhFile,FirstLine,TotalNumberOfMhFiles,NumberOfDraws);
     [post_mean, post_median, post_var, hpd_interval, post_deciles, density] = posterior_moments(Draws,1);
-    name = deblank(estim_params_.user_param_names(i,:));
+    name = bayestopt_.name{ip};
     disp(sprintf('%12s %7.3f %8.4f %7.4f %7.4f %4s %6.4f', ...
 		 name, ...
 		 bayestopt_.pmean(ip),post_mean,hpd_interval, ...
