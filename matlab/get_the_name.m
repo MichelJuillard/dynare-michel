@@ -8,7 +8,7 @@ texnam = [];
 nvx = estim_params_.nvx;
 nvn = estim_params_.nvn;
 ncx = estim_params_.ncx;
-ncx = estim_params_.ncn;
+ncn = estim_params_.ncn;
 
 if k <= nvx
     vname = deblank(M_.exo_names(estim_params_.var_exo(k,1),:));
@@ -24,8 +24,8 @@ elseif  k <= (nvx+nvn)
         tname  = deblank(options_.TeX_varobs(estim_params_.var_endo(k-estim_params_.nvx,1),:));
         texnam = ['$ SE_{' tname '} $'];
     end
-elseif  k <= (estim_params_.nvx+estim_params_.nvn+estim_params_.ncx)
-    jj = k - (estim_params_.nvx+estim_params_.nvn);
+elseif  k <= (nvx+nvn+ncx)
+    jj = k - (nvx+nvn);
     k1 = estim_params_.corrx(jj,1);
     k2 = estim_params_.corrx(jj,2);
     vname = [deblank(M_.exo_names(k1,:)) '_' deblank(M_.exo_names(k2,:))];
@@ -34,9 +34,8 @@ elseif  k <= (estim_params_.nvx+estim_params_.nvn+estim_params_.ncx)
         tname  = [deblank(M_.exo_names_tex(k1,:)) ',' deblank(M_.exo_names_tex(k2,:))];
         texnam = ['$ CC_{' tname '} $'];
     end
-elseif  k <= (estim_params_.nvx+estim_params_.nvn+estim_params_.ncx+ ...
-		            estim_params_.ncn)
-    jj = k - (estim_params_.nvx+estim_params_.nvn+estim_params_.ncx);
+elseif  k <= (nvx+nvn+ncx+ncn)
+    jj = k - (nvx+nvn+ncx);
     k1 = estim_params_.corrn(jj,1);
     k2 = estim_params_.corrn(jj,2);
     vname = [deblank(M_.endo_names(k1,:)) '_' deblank(M_.endo_names(k2,:))];
@@ -46,8 +45,7 @@ elseif  k <= (estim_params_.nvx+estim_params_.nvn+estim_params_.ncx+ ...
         texnam =['$ CC_{' tname '} $'];
     end
 else
-    jj = k - (estim_params_.nvx+estim_params_.nvn+estim_params_.ncx+ ...
-	      estim_params_.ncn); 
+    jj = k - (nvx+nvn+ncx+ncn); 
     jj1 = estim_params_.param_vals(jj,1);
     nam = deblank(M_.param_names(jj1,:));
     if TeX

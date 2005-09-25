@@ -156,7 +156,3 @@ if ncn
     ip = ip+1;
   end
 end
-  
-  
-
-

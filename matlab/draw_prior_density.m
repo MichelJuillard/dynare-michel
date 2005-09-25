@@ -1,5 +1,5 @@
 function [x,f,abscissa,dens,binf,bsup] = draw_prior_density(indx);
-% stephane.adjemian@cepremap.cnrs.fr [07-15-2004]
+% stephane.adjemian@ens.fr [07-15-2004]
 
 global bayestopt_
 

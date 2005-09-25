@@ -1,5 +1,5 @@
 function McmcDiagnostic
-% stephane.adjemian.cepremap.cnrs.fr [06-04-2005]
+% stephane.adjemian@ens.fr [06-04-2005]
 
 global options_ estim_params_ M_ 
 
@@ -23,7 +23,7 @@ NumberOfDraws  = PastDraws(1);
 
 Origin = 1000;
 StepSize = ceil((NumberOfDraws-Origin)/100);% So that the computational time does not 
-ALPHA = 0.2;    						% increase too much with the number of simulations. 
+ALPHA = 0.2;				% increase too much with the number of simulations. 
 time = 1:NumberOfDraws;
 xx = Origin:StepSize:NumberOfDraws;
 NumberOfLines = length(xx);

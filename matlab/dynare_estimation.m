@@ -649,7 +649,7 @@ if (any(bayestopt_.pshape  >0 ) & options_.mh_replic) | (any(bayestopt_.pshape >
   marginal = marginal_density;
   %% 
   GetPosteriorParametersStatistics();
-  
+  PlotPosteriorDistributions();
   return
   
 end
