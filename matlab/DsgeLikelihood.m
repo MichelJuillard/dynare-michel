@@ -88,9 +88,10 @@ function [fval,cost_flag,ys,trend_coeff] = DsgeLikelihood(xparam1,gend,data)
     end
     offset = offset+estim_params_.ncn;
   end
-  for i=1:estim_params_.np
-    M_.params(estim_params_.param_vals(i,1)) = xparam1(i+offset);
-  end
+  M_.params(estim_params_.param_vals(:,1)) = xparam1(offset+1:end);  
+  % for i=1:estim_params_.np
+  %  M_.params(estim_params_.param_vals(i,1)) = xparam1(i+offset);
+  %end
   M_.Sigma_e = Q;
   %------------------------------------------------------------------------------
   % 2. call model setup & reduction program

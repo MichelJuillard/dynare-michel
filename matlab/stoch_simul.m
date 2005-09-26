@@ -122,15 +122,15 @@ global it_
       fprintf(fidTeX,' \n');
     end
     olditer = iter_;% Est-ce vraiment utile ? Il y a la même ligne dans irf... 
-    SS(M_.exo_names_orig_order,M_.exo_names_orig_order)=M_.Sigma_e+1e-14*eye(M_.exo_nbr);
+    SS(M_.exo_names_orig_ord,M_.exo_names_orig_ord)=M_.Sigma_e+1e-14*eye(M_.exo_nbr);
     cs = transpose(chol(SS));
-    tit(M_.exo_names_orig_order,:) = M_.exo_names;
+    tit(M_.exo_names_orig_ord,:) = M_.exo_names;
     if TeX
-      titTeX(M_.exo_names_orig_order,:) = M_.exo_names_tex;
+      titTeX(M_.exo_names_orig_ord,:) = M_.exo_names_tex;
     end
     for i=1:M_.exo_nbr
       if SS(i,i) > 1e-13
-	y=irf(dr_,cs(M_.exo_names_orig_order,i), options_.irf, options_.drop, ...
+	y=irf(dr_,cs(M_.exo_names_orig_ord,i), options_.irf, options_.drop, ...
 	      options_.replic, options_.order);
 	if options_.relative_irf
 	  y = 100*y/cs(i,i); 
@@ -150,6 +150,7 @@ global it_
 	  end
 	end
 	number_of_plots_to_draw = size(irfs,1);
+	number_of_plots_to_draw
 	[nbplt,nr,nc,lr,lc,nstar] = pltorg(number_of_plots_to_draw);
 	if nbplt == 0
 	elseif nbplt == 1
@@ -185,7 +186,7 @@ global it_
 	    fprintf(fidTeX,'\\end{figure}\n');
 	    fprintf(fidTeX,' \n');
 	  end
-	  %				close(hh)
+	  %	close(hh)
 	else
 	  for fig = 1:nbplt-1
 	    if options_.relative_irf == 1

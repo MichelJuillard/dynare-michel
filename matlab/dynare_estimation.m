@@ -10,7 +10,8 @@ for i = 1:size(M_.endo_names,1)
   if ~isempty(tmp)
     options_.lgyidx2varobs(i,1) = tmp;
   end
-end
+end  
+
 options_ = set_default_option(options_,'first_obs',1);
 options_ = set_default_option(options_,'prefilter',0);
 options_ = set_default_option(options_,'presample',0);
@@ -361,7 +362,7 @@ if any(bayestopt_.pshape > 0) & options_.posterior_mode_estimation
       eval(['oo_.posterior_std.measurement_errors_corr.' NAME ' = stdh(ip);']); 
       ip = ip+1;
     end
-  end
+  end  
   %% Laplace approximation to the marginal log density:
   md_Laplace = .5*size(xparam1,1)*log(2*pi) + .5*log(det(invhess)) ...
       - DsgeLikelihood(xparam1,gend,data);
@@ -650,6 +651,9 @@ if (any(bayestopt_.pshape  >0 ) & options_.mh_replic) | (any(bayestopt_.pshape >
   %% 
   GetPosteriorParametersStatistics();
   PlotPosteriorDistributions();
+  if options_.bayesian_irf
+    PosteriorIRF();
+  end  
   return
   
 end

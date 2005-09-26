@@ -13,7 +13,8 @@ function y_=irf(dr, e1, long_, drop_, replic, iorder)
     ex2_ = zeros(options_.periods,M_.exo_nbr);
     ex2_(1,:) = e1';
     y2_ = simult_(repmat(dr.ys,1,M_.maximum_lag),dr,ex2_,iorder);
-    y_ = y2_(:,M_.maximum_lag+1:end)-y1_;
+    y_ = y2_(:,M_.maximum_lag:end)-y1_;% <-- y2_(:,M_.maximum_lag+1:end)-y1_
+  
   else
     % eliminate shocks with 0 variance
     i_exo_var = setdiff([1:M_.exo_nbr],find(diag(M_.Sigma_e) == 0));
