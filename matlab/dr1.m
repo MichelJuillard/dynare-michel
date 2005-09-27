@@ -138,7 +138,12 @@ sdyn = M_.endo_nbr - nstatic;
 
 k1 = M_.lead_lag_incidence(find([1:klen] ~= M_.maximum_lag+1),:);
 b = jacobia_(:,M_.lead_lag_incidence(M_.maximum_lag+1,order_var));
-a = b\jacobia_(:,nonzeros(k1')); 
+a = b(1:M_.nstatic,1:M_.nstatic)\jacobia_(1:M_.nstatic,:);
+a = [ a; jacobia_(M_.nstatic+1:end,:)-b(M_.nstatic+1:end,1:M_.nstatic)* ...
+      a];
+b1 = b(1:M_.nstatic,1:M_.nstatic)\b(1:M_.nstatic,M_.nstatic+1:end);
+b2 = b(M_.nstatic+1:end,M_.nstatic+1:end)-b(M_.nstatic+1:end,1:M_.nstatic)* ...
+      b1;
 nz = nnz(M_.lead_lag_incidence);
 if any(isinf(a(:)))
   info = 1;
@@ -178,13 +183,12 @@ e = d ;
 k = find(kstate(:,2) >= M_.maximum_lag+2 & kstate(:,3));
 d(1:sdyn,k) = a(nstatic+1:end,kstate(k,3)) ;
 k1 = find(kstate(:,2) == M_.maximum_lag+2);
-a1 = eye(sdyn);
-e(1:sdyn,k1) =  -a1(:,kstate(k1,1)-nstatic);
+e(1:sdyn,k1) =  -b2(:,kstate(k1,1)-nstatic);
 k = find(kstate(:,2) <= M_.maximum_lag+1 & kstate(:,4));
 e(1:sdyn,k) = -a(nstatic+1:end,kstate(k,4)) ;
 k2 = find(kstate(:,2) == M_.maximum_lag+1);
 k2 = k2(~ismember(kstate(k2,1),kstate(k1,1)));
-d(1:sdyn,k2) = a1(:,kstate(k2,1)-nstatic);
+d(1:sdyn,k2) = b2(:,kstate(k2,1)-nstatic);
 
 if ~isempty(kad)
   for j = 1:size(kad,1)
@@ -279,6 +283,7 @@ if nstatic > 0
   temp = -a(1:nstatic,j3)*gx(j4,:)*hx;
   j5 = find(kstate(n4:nd,4));
   temp(:,j5) = temp(:,j5)-a(1:nstatic,nonzeros(kstate(:,4)));
+  temp = temp-b1*dr.ghx;
   dr.ghx = [temp; dr.ghx];
   temp = [];
 end
