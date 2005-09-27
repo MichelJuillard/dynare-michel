@@ -3,7 +3,7 @@
 function [x,cheik] = dynare_solve(func,x,varargin)
   global options_
   
-  options_ = set_default_option(options_,'solve_algo',0);
+  options_ = set_default_option(options_,'solve_algo',2);
   cheik = 0;
   func = str2func(func);
   if options_.solve_algo == 0

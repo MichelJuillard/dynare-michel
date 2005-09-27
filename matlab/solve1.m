@@ -48,6 +48,8 @@ function [x,check] = solve1(func,x,j1,j2,varargin)
     %  g(j) = fvec'*fjac(:,j) ;
     %end
     [fvec,fjac] = feval(func,x,varargin{:});
+    fvec = fvec(j1);
+    fjac = fjac(j1,j2);
     g = (fvec'*fjac)';
     if options_.debug
       disp(['cond(fjac) ' num2str(cond(fjac))])

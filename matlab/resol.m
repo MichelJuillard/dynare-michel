@@ -32,21 +32,27 @@ if M_.exo_det_nbr > 0
   tempexdet = oo_.exo_det_simul;
   oo_.exo_det_simul = ones(M_.maximum_lag+1,1)*oo_.exo_steady_statedet_';
 end
+dr.ys = ys;
 fh = str2func([M_.fname '_static']);
-if max(abs(feval(fh,ys,oo_.exo_steady_state))) > options_.dynatol & options_.olr == 0
-  if exist([M_.fname '_steadystate'])
-    [dr.ys,check1] = feval([M_.fname '_steadystate'],ys,oo_.exo_steady_state);
-  else
-    [dr.ys,check1] = dynare_solve([M_.fname '_static'],ys,oo_.exo_steady_state);
+if options_.linear == 0
+  if max(abs(feval(fh,dr.ys,oo_.exo_steady_state))) > options_.dynatol & options_.olr == 0
+    if exist([M_.fname '_steadystate'])
+      [dr.ys,check1] = feval([M_.fname '_steadystate'],dr.ys,oo_.exo_steady_state);
+    else
+      [dr.ys,check1] = dynare_solve(fh,dr.ys,oo_.exo_steady_state);
+    end
+    if check1
+      info(1) = 20;
+      resid = feval(fh,ys,oo_.exo_steady_state);
+      info(2) = resid'*resid; % penalty...
+      return
+    end
   end
-  if check1
-    info(1) = 20;
-    resid = feval(fh,ys,oo_.exo_steady_state);
-    info(2) = resid'*resid; % penalty...
-    return
+else
+  [fvec,jacob] = feval(fh,dr.ys,oo_.exo_steady_state);
+  if max(abs(fvec)) > options_.dynatol & options_.olr == 0
+    dr.ys = dr.ys-jacob\fvec;
   end
-else 
-  dr.ys = ys;
 end
 
 dr.fbias = zeros(M_.endo_nbr,1);
