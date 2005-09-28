@@ -753,7 +753,7 @@ string 	ModelTree::setStaticModel(void)
   if (offset == 1)
     {
       StaticOutput << "global M_ \n";
-      StaticOutput << "params = M_.params;\n";
+      StaticOutput << "if M_.param_nbr > 0\n  params = M_.params;\nend\n";
 
       StaticOutput << "  residual = zeros( " << ModelParameters::eq_nbr << ", 1);\n";
       StaticOutput << "\n\t%\n\t% Model equations\n\t%\n\n";
@@ -944,7 +944,7 @@ string  ModelTree::setDynamicModel(void)
   if (offset == 1)
     {
       DynamicOutput << "global M_ it_\n";
-      DynamicOutput << "params =  M_.params;\n";
+      DynamicOutput << "if M_.param_nbr > 0\n  params =  M_.params;\nend\n";
       DynamicOutput << "\n\t%\n\t% Model equations\n\t%\n\n";
       DynamicOutput << "residual = zeros(" << nrows << ", 1);\n";
 
@@ -1045,10 +1045,11 @@ inline string ModelTree::getExpression(NodeID StartID, EquationType  iEquationTy
 	  // of lesser precedence than previous one, insert '('
 	  if ( precedence_current_op < precedence_last_op ||
 	       (last_op_code == MINUS & 
-		precedence_current_op == precedence_last_op) ||
+		precedence_current_op == precedence_last_op)||
 	       current_op_code == UMINUS)
 	    {
 	      exp << "(";
+	      current_token_ID->close_parenthesis = 1;
 	    }
 	  // set flag: left argument has been explored
 	  current_token_ID->left_done = 1;
@@ -1058,15 +1059,18 @@ inline string ModelTree::getExpression(NodeID StartID, EquationType  iEquationTy
 	    {
 	      exp << "pow(";
 	      precedence_last_op = 0;
+	      current_token_ID->close_parenthesis = 1;
 	    }
 	  else if ( current_op_code == UMINUS)
 	    {
 	      exp << "-";
+	      current_token_ID->close_parenthesis = 1;
 	    }
 	  else if ( operator_table.isfunction(current_op_code) == true)
 	    {
 	      exp << current_token_ID->op_name << "(";
 	      precedence_last_op = 0;
+	      current_token_ID->close_parenthesis = 1;
 	    }
 	  stack_token.push(current_token_ID->id1);
 	}
@@ -1078,11 +1082,7 @@ inline string ModelTree::getExpression(NodeID StartID, EquationType  iEquationTy
 	    {
 	      exp << ",";
 	    }
-	  else if ( operator_table.isfunction(current_op_code) == true ||
-		    precedence_current_op > precedence_last_op )
-	    {
-	      exp << ")";
-	    }
+
 	  if ( current_token_ID->id2 != NullID )
 	    {
 	      exp << current_token_ID->op_name;
@@ -1092,12 +1092,13 @@ inline string ModelTree::getExpression(NodeID StartID, EquationType  iEquationTy
 	}
       else
 	{
-	  if ( (offset == 0 && current_op_code == POWER) || 
-	       ( precedence_current_op > precedence_last_op &&
-		 operator_table.isfunction(current_op_code) == false) ||
-	       (current_op_code == MINUS &&
-		precedence_current_op == precedence_last_op) ||
-	       current_op_code == UMINUS)
+// 	  if ( (offset == 0 && current_op_code == POWER) || 
+// 	       ( precedence_current_op > precedence_last_op &&
+// 		 operator_table.isfunction(current_op_code) == false) ||
+// 	       (current_op_code == MINUS &&
+// 		precedence_current_op == precedence_last_op) ||
+// 	       current_op_code == UMINUS)
+	  if ( current_token_ID->close_parenthesis == 1)
 	    {
 	      exp << ")";
 	    }
@@ -1105,6 +1106,7 @@ inline string ModelTree::getExpression(NodeID StartID, EquationType  iEquationTy
 	  last_op_code = current_op_code;
 	  current_token_ID->left_done=0;
 	  current_token_ID->right_done=0;
+	  current_token_ID->close_parenthesis=0;
 	  stack_token.pop();
 	}
     }

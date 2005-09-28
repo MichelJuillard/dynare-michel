@@ -144,6 +144,8 @@ struct MetaToken : public MToken
   int left_done;
   // set to one when right node has been treated
   int right_done;
+  // set to one if closing parenthesis after token
+  int close_parenthesis;
 
 	inline operator MToken() const					
 	{
@@ -170,6 +172,7 @@ struct MetaToken : public MToken
 		tmp_status = t1.tmp_status;
 		left_done = t1.left_done;
 		right_done = t1.right_done;
+		close_parenthesis = t1.close_parenthesis;
 		//cout << "Creation by equality\n";
 		return *this;
 	}
@@ -182,6 +185,7 @@ struct MetaToken : public MToken
 		tmp_status = 0;
 		left_done = 0;
 		right_done = 0;
+		close_parenthesis = 0;
 	}
 	/* Copy constructor */
 	inline MetaToken(const MetaToken& mt)

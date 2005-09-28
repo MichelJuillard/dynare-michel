@@ -81,6 +81,7 @@ int VariableTable::AddVariable(string iName, int iLag)
 	      {
 		ModelParameters::max_endo_lag = -iLag;
 	      }
+	    break;
 	  case eExogenous:
 	    if (ModelParameters::max_exo_lead < iLag)
 	      {
@@ -90,6 +91,7 @@ int VariableTable::AddVariable(string iName, int iLag)
 	      {
 		ModelParameters::max_exo_lag = -iLag;
 	      }
+	    break;
 	  case eExogenousDet:
 	    if (ModelParameters::max_exo_det_lead < iLag)
 	      {
@@ -99,6 +101,7 @@ int VariableTable::AddVariable(string iName, int iLag)
 	      {
 		ModelParameters::max_exo_det_lag = -iLag;
 	      }
+	    break;
 	  case eRecursiveVariable:
 	    if (ModelParameters::max_recur_lead < iLag)
 	      {
@@ -108,6 +111,7 @@ int VariableTable::AddVariable(string iName, int iLag)
 	      {
 		ModelParameters::max_recur_lag = -iLag;
 	      }
+	    break;
 	  default:
 	    ; 
 	  }
