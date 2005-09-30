@@ -1,7 +1,7 @@
 % Copyright (C) 2001 Michel Juillard
 %
 function info=stoch_simul(var_list)
-global M_ options_ oo_
+global M_ options_ oo_ dr_
 
 global it_
   options_ = set_default_option(options_,'TeX',0);  

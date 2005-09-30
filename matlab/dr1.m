@@ -136,22 +136,29 @@ nd = size(kstate,1);
 
 sdyn = M_.endo_nbr - nstatic;
 
+k0 = M_.lead_lag_incidence(M_.maximum_lag+1,order_var);
 k1 = M_.lead_lag_incidence(find([1:klen] ~= M_.maximum_lag+1),:);
-b = jacobia_(:,M_.lead_lag_incidence(M_.maximum_lag+1,order_var));
-a = b(1:M_.nstatic,1:M_.nstatic)\jacobia_(1:M_.nstatic,:);
-a = [ a; jacobia_(M_.nstatic+1:end,:)-b(M_.nstatic+1:end,1:M_.nstatic)* ...
-      a];
-b1 = b(1:M_.nstatic,1:M_.nstatic)\b(1:M_.nstatic,M_.nstatic+1:end);
-b2 = b(M_.nstatic+1:end,M_.nstatic+1:end)-b(M_.nstatic+1:end,1:M_.nstatic)* ...
-      b1;
+b = jacobia_(:,k0);
+if nstatic > 0
+  [Q,R] = qr(b(:,1:nstatic));
+  aa = Q'*jacobia_;
+else
+  aa = jacobia_;
+end
+a = aa(:,nonzeros(k1'));
+b = aa(:,k0);
+b10 = b(1:nstatic,1:nstatic);
+b11 = b(1:nstatic,nstatic+1:end);
+b2 = b(nstatic+1:end,nstatic+1:end);
 nz = nnz(M_.lead_lag_incidence);
 if any(isinf(a(:)))
   info = 1;
   return
 end
 if M_.exo_nbr
-  fu = b\jacobia_(:,nz+1:end);
+  fu = aa(:,nz+1:end);
 end
+clear aa;
 
 if M_.maximum_lead == 0;  % backward model
   dr.ghx = zeros(size(a));
@@ -269,7 +276,7 @@ j3 = nonzeros(kstate(:,3));
 j4  = find(kstate(:,3));
 % derivatives with respect to exogenous variables
 if M_.exo_nbr
-  a1 = eye(M_.endo_nbr);
+  a1 = b;
   aa1 = [];
   if nstatic > 0
     aa1 = a1(:,1:nstatic);
@@ -283,7 +290,7 @@ if nstatic > 0
   temp = -a(1:nstatic,j3)*gx(j4,:)*hx;
   j5 = find(kstate(n4:nd,4));
   temp(:,j5) = temp(:,j5)-a(1:nstatic,nonzeros(kstate(:,4)));
-  temp = temp-b1*dr.ghx;
+  temp = b10\(temp-b11*dr.ghx);
   dr.ghx = [temp; dr.ghx];
   temp = [];
 end
@@ -395,11 +402,7 @@ rhs = -rhs;
 n = M_.endo_nbr+sum(kstate(:,2) > M_.maximum_lag+1 & kstate(:,2) < M_.maximum_lag+M_.maximum_lead+1);
 A = zeros(n,n);
 B = zeros(n,n);
-[junk,k1,k2] = find(M_.lead_lag_incidence(M_.maximum_lag+M_.maximum_lead+1,order_var));
-gx2 = dr.ghx(k1,:);
 A(1:M_.endo_nbr,1:M_.endo_nbr) = jacobia_(:,M_.lead_lag_incidence(M_.maximum_lag+1,order_var));
-A(1:M_.endo_nbr,nstatic+1:nstatic+npred)=...
-    A(1:M_.endo_nbr,nstatic+[1:npred])+jacobia_(:,k2)*gx2(:,1:npred);
 % variables with the highest lead
 k1 = find(kstate(:,2) == M_.maximum_lag+M_.maximum_lead+1);
 if M_.maximum_lead > 1
@@ -413,12 +416,14 @@ end
 B(1:M_.endo_nbr,end-length(k2)+k3) = jacobia_(:,kstate(k1,3)+M_.endo_nbr);
 offset = M_.endo_nbr;
 k0 = [1:M_.endo_nbr];
+gx1 = dr.ghx
 for i=1:M_.maximum_lead-1
   k1 = find(kstate(:,2) == M_.maximum_lag+i+1);
   [k2,junk,k3] = find(kstate(k1,3));
   A(1:M_.endo_nbr,offset+k2) = jacobia_(:,k3+M_.endo_nbr);
   n1 = length(k1);
-  A(offset+[1:n1],nstatic+[1:npred]) = -gx(k1,1:npred); 
+  A(offset+[1:n1],nstatic+[1:npred]) = -gx1(kstate(k1,1),1:npred);
+  gx1 = gx1*hx;
   A(offset+[1:n1],offset+[1:n1]) = eye(n1);
   n0 = length(k0);
   E = eye(n0);
@@ -432,6 +437,9 @@ for i=1:M_.maximum_lead-1
   k0 = k1;
   offset = offset + n1;
 end
+[junk,k1,k2] = find(M_.lead_lag_incidence(M_.maximum_lag+M_.maximum_lead+1,order_var));
+A(1:M_.endo_nbr,nstatic+1:nstatic+npred)=...
+    A(1:M_.endo_nbr,nstatic+[1:npred])+jacobia_(:,k2)*gx1(k1,1:npred);
 %C = kron(hx,hx);
 C = hx;
 D = [rhs; zeros(n-M_.endo_nbr,size(rhs,2))];
@@ -459,8 +467,8 @@ else
 end
 nyf1 = sum(kstate(:,2) == M_.maximum_lag+2);
 hu1 = [hu;zeros(np-npred,M_.exo_nbr)];
-B1 = [B(1:M_.endo_nbr,:);zeros(size(A,1)-M_.endo_nbr,size(B,2))];
-rhs = -[rhs; zeros(n-M_.endo_nbr,size(rhs,2))]-B1*dr.ghxx*kron(hx,hu1);
+%B1 = [B(1:M_.endo_nbr,:);zeros(size(A,1)-M_.endo_nbr,size(B,2))];
+rhs = -[rhs; zeros(n-M_.endo_nbr,size(rhs,2))]-B*dr.ghxx*kron(hx,hu1);
 
 %lhs
 dr.ghxu = A\rhs;
