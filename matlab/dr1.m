@@ -470,6 +470,7 @@ hu1 = [hu;zeros(np-npred,M_.exo_nbr)];
 %B1 = [B(1:M_.endo_nbr,:);zeros(size(A,1)-M_.endo_nbr,size(B,2))];
 rhs = -[rhs; zeros(n-M_.endo_nbr,size(rhs,2))]-B*dr.ghxx*kron(hx,hu1);
 
+
 %lhs
 dr.ghxu = A\rhs;
 
