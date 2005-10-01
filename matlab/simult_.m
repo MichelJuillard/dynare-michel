@@ -23,22 +23,21 @@ global M_ options_ it_
     [junk, k5] = sort(dr.order_var(o1:o2));
     [junk, k6] = sort(dr.order_var(o3:end));
   end
-  
-  if iorder == 1
+
+  if iorder == 1    
     for i = M_.maximum_lag+1: iter+M_.maximum_lag
       tempx1 = y_(dr.order_var,k1);
       tempx2 = tempx1-repmat(dr.ys(dr.order_var),1,M_.maximum_lag);
       tempx = tempx2(k2);
       if options_.simul_algo == 0
 	y_(dr.order_var,i) = dr.ys(dr.order_var)+dr.ghx*tempx+dr.ghu* ...
-	    ex_(i+M_.maximum_lag-M_.maximum_lag,:)';
+	    ex_(i-M_.maximum_lag,:)';
       elseif options_.simul_algo == 1
 	it_ = i;
 	m = dr.ys(dr.order_var);
 	[y_(:,i), check] = dynare_solve('ff_simul1',y_(:,i-1),tempx1(k3), ...
 					m(o3:end),tempx(k4),o1,o2,o3,k6);
       end
-	
       k1 = k1+1;
     end
   elseif iorder == 2
@@ -46,7 +45,7 @@ global M_ options_ it_
       tempx1 = y_(dr.order_var,k1);
       tempx2 = tempx1-repmat(dr.ys(dr.order_var),1,M_.maximum_lag);
       tempx = tempx2(k2);
-      tempu = ex_(i+M_.maximum_lag-M_.maximum_lag,:)';
+      tempu = ex_(i-M_.maximum_lag,:)';
       tempuu = kron(tempu,tempu);
       if options_.simul_algo == 0
 	tempxx = kron(tempx,tempx);

@@ -150,7 +150,6 @@ global it_
 	  end
 	end
 	number_of_plots_to_draw = size(irfs,1);
-	number_of_plots_to_draw
 	[nbplt,nr,nc,lr,lc,nstar] = pltorg(number_of_plots_to_draw);
 	if nbplt == 0
 	elseif nbplt == 1
