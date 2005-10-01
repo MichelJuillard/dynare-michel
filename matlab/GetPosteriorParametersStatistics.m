@@ -98,7 +98,7 @@ if nvn
     eval(['oo_.posterior_median.measurement_errors_std.' name ' = post_median;']);
     eval(['oo_.posterior_variance.measurement_errors_std.' name ' = post_var;']);
     eval(['oo_.posterior_deciles.measurement_errors_std.' name ' = post_deciles;']);
-    eval(['oo_.posterior_density.measurement_errors_std.' name ' = post_density;']);    
+    eval(['oo_.posterior_density.measurement_errors_std.' name ' = density;']);    
     ip = ip+1;
   end
 end
@@ -152,7 +152,7 @@ if ncn
     eval(['oo_.posterior_median.measurement_errors_corr.' NAME ' = post_median;']);
     eval(['oo_.posterior_variance.measurement_errors_corr.' NAME ' = post_var;']);
     eval(['oo_.posterior_deciles.measurement_errors_corr.' NAME ' = post_decile;']);
-    eval(['oo_.posterior_density.measurement_errors_corr.' NAME ' = post_density;']);
+    eval(['oo_.posterior_density.measurement_errors_corr.' NAME ' = density;']);
     ip = ip+1;
   end
 end
