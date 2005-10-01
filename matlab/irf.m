@@ -17,7 +17,7 @@ function y_=irf(dr, e1, long_, drop_, replic, iorder)
   
   else
     % eliminate shocks with 0 variance
-    i_exo_var = setdiff([1:M_.exo_nbr],find(diag(M_.Sigma_e) == 0));
+    i_exo_var = setdiff([1:M_.exo_nbr],find(diag(M_.Sigma_e) == 0 ));
     nxs = length(i_exo_var);
     ex1_ = zeros(long_+drop_+M_.maximum_lag,M_.exo_nbr);
     ex2_ = ex1_;
@@ -35,9 +35,7 @@ function y_=irf(dr, e1, long_, drop_, replic, iorder)
     y_=y_/replic;
   end
   options_.periods = old_iter;
-
 % 01/18/02 MJ corrected for many lags
-% 03/11/22 MJ input is now entire shock vector e1 (for orthogonalized
-%              IRFs)
+% 03/11/22 MJ input is now entire shock vector e1 (for orthogonalized IRFs)
 
 
