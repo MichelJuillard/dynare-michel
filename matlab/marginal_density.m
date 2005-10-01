@@ -13,7 +13,7 @@ FirstLine = record.KeepedDraws.FirstLine; ifil = FirstLine;
 TotalNumberOfMhFiles = sum(record.MhDraws(:,2));
 TotalNumberOfMhDraws = sum(record.MhDraws(:,1));
 MAX_nruns = ceil(options_.MaxNumberOfBytes/(npar+2)/8);
-AJETER = floor(options_.mh_drop*TotalNumberOfMhDraws);
+TODROP = floor(options_.mh_drop*TotalNumberOfMhDraws);
 
 MU = zeros(1,npar);
 SIGMA = zeros(npar,npar);
@@ -22,26 +22,29 @@ lpost_mode = -Inf;
 fprintf('MH: I''m computing the posterior mean... ');
 for n = FirstMhFile:TotalNumberOfMhFiles
   for b = 1:nblck
-    eval(['load ' DirectoryName '\' M_.fname '_mh' int2str(n) '_blck' int2str(b)]);
-    MU(1,:) = MU(1,:) + sum(x2(ifil:end,:));
+    load([ DirectoryName '\' M_.fname '_mh' int2str(n) '_blck' ...
+	   int2str(b)],'x2','logpo2'); 
+    MU = MU + sum(x2(ifil:end,:));
     lpost_mode = max(lpost_mode,max(logpo2));
   end
   ifil = 1;
 end
-MU = MU/((TotalNumberOfMhDraws-AJETER)*nblck);
+MU = MU/((TotalNumberOfMhDraws-TODROP)*nblck);
+MU1 = repmat(MU,MAX_nruns,1);
 %% lpost_mode is the value of the log posterior kernel at the mode.	
 fprintf(' Done!\n');
 fprintf('MH: I''m computing the posterior covariance matrix... ');
 ifil = FirstLine;
 for n = FirstMhFile:TotalNumberOfMhFiles
   for b = 1:nblck
-    eval(['load ' DirectoryName '\' M_.fname '_mh' int2str(n) '_blck' int2str(b)]);
-    SIGMA = SIGMA + (x2(ifil:end,:)-repmat(MU,length(x2(ifil:end,:)),1))'*...
-	    (x2(ifil:end,:)-repmat(MU,length(x2(ifil:end,:)),1));
+    load([DirectoryName '\' M_.fname '_mh' int2str(n) '_blck' ...
+	  int2str(b)],'x2');
+    x = x2(ifil:end,:)-MU1(1:size(x2(ifil:end,:),1),:);
+    SIGMA = SIGMA + x'*x;
   end
   ifil = 1;
 end
-SIGMA =  SIGMA/((TotalNumberOfMhDraws-AJETER)*nblck);%<=== Variance of the parameters (ok!)
+SIGMA =  SIGMA/((TotalNumberOfMhDraws-TODROP)*nblck);%<=== Variance of the parameters (ok!)
 fprintf(' Done!\n');
 disp(' ');
 disp('MH: I''m computing the posterior log marginale density (modified harmonic mean)... ');
@@ -58,7 +61,8 @@ while check_coverage
     tmp = 0;
     for n = FirstMhFile:TotalNumberOfMhFiles
       for b=1:nblck
-	eval(['load ' DirectoryName '\' M_.fname '_mh' int2str(n) '_blck' int2str(b)]);
+	load([ DirectoryName '\' M_.fname '_mh' int2str(n) '_blck' ...
+	       int2str(b)],'x2','logpo2');
 	EndOfFile = size(x2,1);
 	for i = ifil:EndOfFile
 	  deviation  = (x2(i,:)-MU)*invSIGMA*(x2(i,:)-MU)';
@@ -72,7 +76,7 @@ while check_coverage
     end
     linee = linee + 1;
     warning off all
-    marginal(linee,:) = [p, lpost_mode-log(tmp/((TotalNumberOfMhDraws-AJETER)*nblck))];
+    marginal(linee,:) = [p, lpost_mode-log(tmp/((TotalNumberOfMhDraws-TODROP)*nblck))];
     warning on all
   end
   if abs((marginal(9,2)-marginal(1,2))/marginal(9,2)) > 0.01 | isinf(marginal(1,2))
