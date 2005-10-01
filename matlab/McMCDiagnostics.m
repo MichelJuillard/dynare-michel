@@ -7,6 +7,10 @@ DirectoryName = CheckPath('Plots\Diagnostics');
 
 TeX = options_.TeX;
 nblck = options_.mh_nblck;
+% Brooks and Gelman tests need more than one block 
+if nblck == 1
+  return;
+end
 npar = estim_params_.nvx;
 npar = npar + estim_params_.nvn;
 npar = npar + estim_params_.ncx;
