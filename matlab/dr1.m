@@ -440,12 +440,16 @@ end
 [junk,k1,k2] = find(M_.lead_lag_incidence(M_.maximum_lag+M_.maximum_lead+1,order_var));
 A(1:M_.endo_nbr,nstatic+1:nstatic+npred)=...
     A(1:M_.endo_nbr,nstatic+[1:npred])+jacobia_(:,k2)*gx1(k1,1:npred);
-%C = kron(hx,hx);
 C = hx;
 D = [rhs; zeros(n-M_.endo_nbr,size(rhs,2))];
-%x0 = sylvester3(A,B,C,D);
-%dr.ghxx = sylvester3a(x0,A,B,C,D);
 dr.ghxx = gensylv(2,A,B,C,D);
+if exist('gensylv')
+  dr.ghxx = gensylv(2,A,B,C,D);
+else
+  C = kron(hx,hx); 
+  x0 = sylvester3(A,B,C,D);
+  dr.ghxx = sylvester3a(x0,A,B,C,D);
+end
 
 %ghxu
 %rhs
