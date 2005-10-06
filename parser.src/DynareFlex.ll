@@ -129,6 +129,7 @@ int sigma_e = 0;
 <DYNARE_STATEMENT>corr		{return CORR;}
 <DYNARE_STATEMENT>nocorr	{return NOCORR;}
 <DYNARE_STATEMENT>optim		{return OPTIM;}
+<DYNARE_STATEMENT>periods	{return PERIODS;}
 <DYNARE_STATEMENT>diffuse_d {return DIFFUSE_D;}
 <DYNARE_STATEMENT>nk {return NK;}
 <DYNARE_STATEMENT>model_comparison_approximation {return MODEL_COMPARISON;}
