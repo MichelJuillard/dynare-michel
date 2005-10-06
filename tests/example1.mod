@@ -2,7 +2,7 @@
 var y, c, k, a, h, b;
 varexo e,u;
 
-parameters beta, rho, beta, alpha, delta, theta, psi, tau;
+parameters beta, rho, alpha, delta, theta, psi, tau, phi;
 
 alpha = 0.36;
 rho   = 0.95;
@@ -41,4 +41,4 @@ var u; stderr 0.009;
 var e, u = phi*0.009*0.009;
 end;
 
-stoch_simul(periods=2100);
+stoch_simul;
