@@ -54,18 +54,12 @@ options_ = set_default_option(options_,'filtered_vars',0);
 options_ = set_default_option(options_,'kalman_algo',1);
 options_ = set_default_option(options_,'kalman_tol',10^(-12));
 options_ = set_default_option(options_,'posterior_mode_estimation',1);
-options_ = set_default_option(options_,'MaxNumberOfBytes',10000);
+options_ = set_default_option(options_,'MaxNumberOfBytes',1e6);
 
 %% Add something to the parser ++>
 M_.dname = M_.fname; % The user should be able to choose another name
                      % for the directory...
 
-
-optim_options = optimset('display','iter','LargeScale','off', ...
-			 'MaxFunEvals',100000,'TolFun',1e-8,'TolX',1e-6);
-if isfield(options_,'optim_opt')
-	eval(['optim_options = optimset(optim_options,' options_.optim_opt ');']);
-end
 
 pnames 		= ['     ';'beta ';'gamm ';'norm ';'invg ';'unif ';'invg2'];
 n_varobs 	= size(options_.varobs,1);
@@ -226,6 +220,12 @@ initial_estimation_checks(xparam1,gend,data);
 if options_.mode_compute > 0 & options_.posterior_mode_estimation
   fh=str2func('DsgeLikelihood');
   if options_.mode_compute == 1  
+    optim_options = optimset('display','iter','LargeScale','off', ...
+			     'MaxFunEvals',100000,'TolFun',1e-8,'TolX',1e-6);
+    if isfield(options_,'optim_opt')
+      eval(['optim_options = optimset(optim_options,' options_.optim_opt ');']);
+    end
+
     [xparam1,fval,exitflag,output,lamdba,grad,hessian_fmincon] = ...
 	fmincon(fh,xparam1,[],[],[],[],lb,ub,[],optim_options,gend,data);
   elseif options_.mode_compute == 2
@@ -234,6 +234,12 @@ if options_.mode_compute > 0 & options_.posterior_mode_estimation
 	asamin('minimize','DsgeLikelihood',xparam1,lb,ub,- ...
 	       ones(size(xparam1)),gend,data);   
   elseif options_.mode_compute == 3
+    optim_options = optimset('display','iter',...
+			     'MaxFunEvals',100000,'TolFun',1e-8,'TolX',1e-6);
+    if isfield(options_,'optim_opt')
+      eval(['optim_options = optimset(optim_options,' options_.optim_opt ');']);
+    end
+
     [xparam1,fval,exitflag] = fminunc(fh,xparam1,optim_options,gend, ...
 				      data);
   elseif options_.mode_compute == 4
