@@ -1044,7 +1044,7 @@ inline string ModelTree::getExpression(NodeID StartID, EquationType  iEquationTy
 	  // if current operator is not a temporary variable and 
 	  // of lesser precedence than previous one, insert '('
 	  if ( precedence_current_op < precedence_last_op ||
-	       (last_op_code == MINUS & 
+	       ((last_op_code == MINUS || last_op_code == DIVIDE) & 
 		precedence_current_op == precedence_last_op)||
 	       current_op_code == UMINUS)
 	    {
