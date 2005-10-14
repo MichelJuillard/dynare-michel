@@ -639,7 +639,7 @@
 		}
 	;
 
- estimated_params_init: ESTIMATED_PARAMS_INIT ';' estimated_init_list END
+ estimated_params_init: ESTIMATED_PARAMS_INIT ';' estimated_init_list END ';'
                       ;
 
  estimated_init_list : estimated_init_list estimated_init_elem
@@ -664,7 +664,7 @@
 				}
                      ;
 
- estimated_params_bounds: ESTIMATED_PARAMS_BOUNDS ';' estimated_bounds_list END
+ estimated_params_bounds: ESTIMATED_PARAMS_BOUNDS ';' estimated_bounds_list END ';'
                       ;
 
  estimated_bounds_list : estimated_bounds_list estimated_bounds_elem
