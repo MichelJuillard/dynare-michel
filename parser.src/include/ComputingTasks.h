@@ -98,6 +98,8 @@ class ComputingTasks
 		void 	setOptimOptions(std::string str1, std::string str2, int task);
 		/*! Prints estimated elements */	
 		void 	setEstimatedElements(void);
+		void 	setEstimatedInitElements(void);
+		void 	setEstimatedBoundsElements(void);
 		void 	setEstimationStandardError(void);
 		void    set_trend_element(std::string, std::string);
 

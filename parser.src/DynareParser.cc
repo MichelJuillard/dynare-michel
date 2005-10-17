@@ -463,6 +463,14 @@ void dynare::parser::set_estimated_elements(void)
 {
 	computing_tasks.setEstimatedElements();
 }
+void dynare::parser::set_estimated_init_elements(void)
+{
+  computing_tasks.setEstimatedInitElements();
+}
+void dynare::parser::set_estimated_bounds_elements(void)
+{
+  computing_tasks.setEstimatedBoundsElements();
+}
 void dynare::parser::set_unit_root_vars()
 {
   tmp_symbol_table.set("options_.unit_root_vars");

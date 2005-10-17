@@ -223,6 +223,8 @@ namespace dynare
 	void estimation_init(void);
 	/*! Writes instructions for estimated elements */
 	void set_estimated_elements(void);
+	void set_estimated_init_elements(void);
+	void set_estimated_bounds_elements(void);
 	/*! Runs estimation process */
 	void run_estimation(void);
 	/*! Prints optimization options */

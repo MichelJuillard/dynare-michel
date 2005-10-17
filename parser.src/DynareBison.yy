@@ -643,7 +643,9 @@
                       ;
 
  estimated_init_list : estimated_init_list estimated_init_elem
+                       {_parser->set_estimated_init_elements();}
                      | estimated_init_elem
+                       {_parser->set_estimated_init_elements();}
                      ;
 
  estimated_init_elem : STDERR NAME COMMA value ';'
@@ -668,7 +670,9 @@
                       ;
 
  estimated_bounds_list : estimated_bounds_list estimated_bounds_elem
+                       {_parser->set_estimated_bounds_elements();}
                      | estimated_bounds_elem
+                       {_parser->set_estimated_bounds_elements();}
                      ;
 
  estimated_bounds_elem : STDERR NAME COMMA value COMMA value ';'

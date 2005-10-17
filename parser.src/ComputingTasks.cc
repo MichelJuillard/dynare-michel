@@ -131,7 +131,7 @@ void ComputingTasks::setEstimatedElements(void)
 {
   if (!SymbolTable::Exist(EstimParams->name))
     {
-      string msg = "Unknown symbol : "+EstimParams->name;
+      string msg = "Unknown symbol: "+EstimParams->name;
       error(msg.c_str());
     }
   if (SymbolTable::isReferenced(EstimParams->name) == eNotReferenced)
@@ -178,6 +178,110 @@ void ComputingTasks::setEstimatedElements(void)
     EstimParams->p3 << " " <<  EstimParams->p4  << " " <<  EstimParams->jscale << "];\n";
   EstimParams->clear();
 }
+//------------------------------------------------------------------------------
+void ComputingTasks::setEstimatedInitElements(void)
+{
+  if (!SymbolTable::Exist(EstimParams->name))
+    {
+      string msg = "Unknown symbol: "+EstimParams->name;
+      error(msg.c_str());
+    }
+  if (SymbolTable::isReferenced(EstimParams->name) == eNotReferenced)
+    {
+      return;
+    }
+  if ((EstimParams->init_val).size() == 0)
+    {
+      EstimParams->init_val = EstimParams->mean;
+    }
+  if (EstimParams->type < 3)
+    {
+      if( SymbolTable::getType(EstimParams->name) == eExogenous)
+	{
+	  *output << "tmp1 = find(estim_params_.var_exo(:,1)==" << SymbolTable::getID(EstimParams->name)+1 << ");\n";
+	  *output << "estim_params_.var_exo(tmp1,2) = " << EstimParams->init_val << ";\n";
+	}
+      else if ( SymbolTable::getType(EstimParams->name) == eEndogenous)
+	{
+	  *output << "tmp1 = find(estim_params_.var_endo(:,1)==" << SymbolTable::getID(EstimParams->name)+1 << ");\n";
+	  *output << "estim_params_.var_endo(tmp1,2) = " << EstimParams->init_val << ";\n";
+	}
+      else if ( SymbolTable::getType(EstimParams->name) == eParameter)
+	{
+	  *output << "tmp1 = find(estim_params_.param_vals(:,1)==" << SymbolTable::getID(EstimParams->name)+1 << ");\n";
+	  *output << "estim_params_.param_vals(tmp1,2) = " << EstimParams->init_val << ";\n";
+	}
+    }
+  else
+    {
+      if( SymbolTable::getType(EstimParams->name) == eExogenous)
+	{
+	  *output << "tmp1 = find((estim_params_.corrx(:,1)==" << SymbolTable::getID(EstimParams->name)+1 << ")) & (estim_params_.corrx(:,2)==SymbolTable::getID(EstimParams->name2)+1);\n";
+	  *output << "estim_params_.corrx(tmp1,3) = " << EstimParams->init_val << ";\n";
+	}
+      else if ( SymbolTable::getType(EstimParams->name) == eEndogenous)
+	{
+	  *output << "tmp1 = find((estim_params_.corrn(:,1)==" << SymbolTable::getID(EstimParams->name)+1 << ")) & (estim_params_.corrn(:,2)==" << SymbolTable::getID(EstimParams->name2)+1 << ";\n";
+	  *output << "estim_params_.corrx(tmp1,3) = " << EstimParams->init_val << ";\n";
+	}
+    }
+  EstimParams->clear();
+}
+//------------------------------------------------------------------------------
+void ComputingTasks::setEstimatedBoundsElements(void)
+{
+  if (!SymbolTable::Exist(EstimParams->name))
+    {
+      string msg = "Unknown symbol: "+EstimParams->name;
+      error(msg.c_str());
+    }
+  if (SymbolTable::isReferenced(EstimParams->name) == eNotReferenced)
+    {
+      return;
+    }
+  if ((EstimParams->init_val).size() == 0)
+    {
+      EstimParams->init_val = EstimParams->mean;
+    }
+  if (EstimParams->type < 3)
+    {
+      if( SymbolTable::getType(EstimParams->name) == eExogenous)
+	{
+	  *output << "tmp1 = find(estim_params_.var_exo(:,1)==" << SymbolTable::getID(EstimParams->name)+1 << ");\n";
+	  *output << "estim_params_.var_exo(tmp1,3) = " << EstimParams->low_bound << ";\n";
+	  *output << "estim_params_.var_exo(tmp1,4) = " << EstimParams->up_bound << ";\n";
+	}
+      else if ( SymbolTable::getType(EstimParams->name) == eEndogenous)
+	{
+	  *output << "tmp1 = find(estim_params_.var_endo(:,1)==" << SymbolTable::getID(EstimParams->name)+1 << ");\n";
+	  *output << "estim_params_.var_endo(tmp1,3) = " << EstimParams->low_bound << ";\n";
+	  *output << "estim_params_.var_endo(tmp1,4) = " << EstimParams->up_bound << ";\n";
+	}
+      else if ( SymbolTable::getType(EstimParams->name) == eParameter)
+	{
+	  *output << "tmp1 = find(estim_params_.param_vals(:,1)==" << SymbolTable::getID(EstimParams->name)+1 << ");\n";
+	  *output << "estim_params_.param_vals(tmp1,3) = " << EstimParams->low_bound << ";\n";
+	  *output << "estim_params_.param_vals(tmp1,4) = " << EstimParams->up_bound << ";\n";
+	}
+    }
+  else
+    {
+      if( SymbolTable::getType(EstimParams->name) == eExogenous)
+	{
+	  *output << "tmp1 = find((estim_params_.corrx(:,1)==" << SymbolTable::getID(EstimParams->name)+1 << ")) & (estim_params_.corrx(:,2)==SymbolTable::getID(EstimParams->name2)+1);\n";
+	  *output << "estim_params_.corrx(tmp1,4) = " << EstimParams->low_bound << ";\n";
+	  *output << "estim_params_.corrx(tmp1,5) = " << EstimParams->up_bound << ";\n";
+	}
+      else if ( SymbolTable::getType(EstimParams->name) == eEndogenous)
+	{
+	  *output << "tmp1 = find((estim_params_.corrn(:,1)==" << SymbolTable::getID(EstimParams->name)+1 << ")) & (estim_params_.corrn(:,2)==" << SymbolTable::getID(EstimParams->name2)+1 << ";\n";
+	  *output << "estim_params_.corrx(tmp1,4) = " << EstimParams->low_bound << ";\n";
+	  *output << "estim_params_.corrx(tmp1,5) = " << EstimParams->up_bound << ";\n";
+	}
+    }
+  EstimParams->clear();
+}
+//-----------------------------------------------------------------------
 void ComputingTasks::set_trend_element (string name, string expression)
 {
   //Testing if symbol exists 
