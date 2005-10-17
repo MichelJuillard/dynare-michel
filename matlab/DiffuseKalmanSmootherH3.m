@@ -31,6 +31,7 @@ QQ      	= R*Q*transpose(R);
 QRt			= Q*transpose(R);
 alphahat   	= zeros(mm,smpl);
 etahat	   	= zeros(rr,smpl);
+epsilonhat      = zeros(size(Y));
 r 		   	= zeros(mm,smpl);
 
 Z = zeros(pp,mm);

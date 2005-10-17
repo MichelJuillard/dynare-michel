@@ -3,7 +3,7 @@
 function simk
 
 global M_ options_ oo_
-global c it_ iyr0 ct_ ncc  broyden_
+global it_ iyr0 ct_ broyden_
 
 func_name = [M_.fname '_static'];
 nk = M_.maximum_lag + M_.maximum_lead + 1 ;
@@ -134,7 +134,6 @@ for iter = 1:options_.maxit
 	ofs = ((it_-M_.maximum_lag-M_.maximum_lag+j-2)*ny)*ncc*8 ;
 	junk = fseek(fid,ofs,-1) ;
 	c = fread(fid,[ncc,ny],'float64') ;
-	c = c' ;
 
 	if isempty(jwci)
 	  w = -w0*c(j1i,1:ncc1) ;
@@ -191,7 +190,7 @@ for iter = 1:options_.maxit
     clear w w0 ;
 
     junk = fseek(fid,0,1) ;
-    fwrite(fid,c','float64') ;
+    fwrite(fid,c,'float64') ;
     clear c ;
 
     it_ = it_ + 1;
@@ -219,7 +218,6 @@ for iter = 1:options_.maxit
       ofs = ((icr0+(j-1)*ny+1)-1)*ncc*8 ;
       junk = fseek(fid,ofs,-1) ;
       c = fread(fid,[ncc,ny],'float64') ;
-      c = c' ;
 
       temp = zeros(ny,ltemp(j)) ;
       if ljwc(j) > 0
@@ -246,7 +244,7 @@ for iter = 1:options_.maxit
     d1 = [] ;
     clear w w0 ;
     junk = fseek(fid,0,1) ;
-    fwrite(fid,c','float64') ;
+    fwrite(fid,c,'float64') ;
     clear c ;
     it_ = it_ + 1 ;
     ic = ic + ny ;
@@ -258,7 +256,6 @@ for iter = 1:options_.maxit
     ofs = (((it_-M_.maximum_lag-2)*ny+1)-1)*ncc*8 ;
     junk = fseek(fid,ofs,-1) ;
     c = fread(fid,[ncc,ny],'float64') ;
-    c = c' ;
 
     for i = 1:M_.maximum_lead
       w = tril(triu(ones(ny,ny+ncc1))) ;
@@ -266,7 +263,7 @@ for iter = 1:options_.maxit
       c = [w(:,ny+1:size(w,2))' c(:,ncc)]/w(:,1:ny) ;
 
       junk = fseek(fid,0,1) ;
-      fwrite(fid,c','float64') ;
+      fwrite(fid,c,'float64') ;
 
       it_ = it_+1 ;
       ic = ic + ny ;
