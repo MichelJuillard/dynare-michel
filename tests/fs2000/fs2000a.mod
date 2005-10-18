@@ -45,7 +45,7 @@ m-1+d = l;
 e = exp(e_a);
 y = k(-1)^alp*n^(1-alp)*exp(-alp*(gam+e_a));
 gy_obs = dA*y/y(-1);
-gp_obs = (p/p(-1))*m(-1)/dA;
+gp_obs = (P/P(-1))*m(-1)/dA;
 Y_obs/Y_obs(-1) = gy_obs;
 P_obs/P_obs(-1) = gp_obs;
 end;
