@@ -416,7 +416,7 @@ end
 B(1:M_.endo_nbr,end-length(k2)+k3) = jacobia_(:,kstate(k1,3)+M_.endo_nbr);
 offset = M_.endo_nbr;
 k0 = [1:M_.endo_nbr];
-gx1 = dr.ghx
+gx1 = dr.ghx;
 for i=1:M_.maximum_lead-1
   k1 = find(kstate(:,2) == M_.maximum_lag+i+1);
   [k2,junk,k3] = find(kstate(k1,3));
