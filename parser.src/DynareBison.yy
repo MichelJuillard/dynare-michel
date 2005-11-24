@@ -257,12 +257,12 @@
         | comma_expression COMMA expression {$$ = _parser->add_expression_token($1,$3,$2);}
 
  initval
- 	: INITVAL ';' {_parser->begin_initval();} initval_list END ';'
+ 	: INITVAL ';' {_parser->begin_initval();} initval_list END
  		{_parser->end_initval();}
  	;
  	
  endval
- 	: ENDVAL ';' {_parser->begin_endval();} initval_list END ';'
+ 	: ENDVAL ';' {_parser->begin_endval();} initval_list END
  		{_parser->end_endval();}
  	; 	
 
@@ -277,7 +277,7 @@
  	; 	
  	
  histval
- 	: HISTVAL ';' {_parser->begin_histval();} histval_list END ';' 
+ 	: HISTVAL ';' {_parser->begin_histval();} histval_list END 
 
  histval_list
  	: histval_list histval_elem
@@ -290,11 +290,11 @@
  	;
 	
  model
- 	: MODEL ';' equation_list END ';' 
+ 	: MODEL ';' equation_list END 
  		{_parser->check_model();}
- 	| MODEL '(' LINEAR ')' ';' {_parser->option_num("linear","1");} equation_list END ';'
+ 	| MODEL '(' LINEAR ')' ';' {_parser->option_num("linear","1");} equation_list END
  		{_parser->check_model();}
- 	| MODEL '(' USE_DLL ')' ';' {_parser->use_dll();} equation_list END ';'
+ 	| MODEL '(' USE_DLL ')' ';' {_parser->use_dll();} equation_list END
  		{_parser->check_model();}
  	;
 
@@ -363,7 +363,7 @@
 	;
 	
  shocks
- 	: SHOCKS  ';' {_parser->begin_shocks();} shock_list END ';'
+ 	: SHOCKS  ';' {_parser->begin_shocks();} shock_list END
  	;
 
  shock_list 
@@ -567,7 +567,7 @@
  	;
 
  estimated_params 
-	: ESTIMATED_PARAMS ';' {_parser->estimation_init();} estimated_list END ';'
+	: ESTIMATED_PARAMS ';' {_parser->estimation_init();} estimated_list END
 	;
 	
  estimated_list 
@@ -639,7 +639,7 @@
 		}
 	;
 
- estimated_params_init: ESTIMATED_PARAMS_INIT ';' estimated_init_list END ';'
+ estimated_params_init: ESTIMATED_PARAMS_INIT ';' estimated_init_list END
                       ;
 
  estimated_init_list : estimated_init_list estimated_init_elem
@@ -666,7 +666,7 @@
 				}
                      ;
 
- estimated_params_bounds: ESTIMATED_PARAMS_BOUNDS ';' estimated_bounds_list END ';'
+ estimated_params_bounds: ESTIMATED_PARAMS_BOUNDS ';' estimated_bounds_list END
                       ;
 
  estimated_bounds_list : estimated_bounds_list estimated_bounds_elem
@@ -787,7 +787,7 @@
 	;
 
  observation_trends
-        : OBSERVATION_TRENDS ';' {_parser->set_trend_init();} trend_list END ';'
+        : OBSERVATION_TRENDS ';' {_parser->set_trend_init();} trend_list END
 	;
 
  trend_list 

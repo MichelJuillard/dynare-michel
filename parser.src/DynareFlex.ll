@@ -86,7 +86,7 @@ int sigma_e = 0;
 <INITIAL>optim_weights {BEGIN DYNARE_BLOCK;return OPTIM_WEIGHTS;}
 
  /* End of a Dynare block */
-<DYNARE_BLOCK>end 	{BEGIN INITIAL;return END;}   
+<DYNARE_BLOCK>end[ \t\n]*; 	{BEGIN INITIAL;return END;}   
 
  /* Inside  of a Dynare statement */
 <DYNARE_STATEMENT>datafile 		{return DATAFILE;}
@@ -242,6 +242,7 @@ int sigma_e = 0;
 	 		_scanner->do_as_is(yytext);
 	 	}
  }
+<INITIAL>. {BEGIN NATIVE; _scanner->do_as_is(yytext);}
 
  /* NATIVE Block */
 <NATIVE>.* {BEGIN INITIAL;_scanner->do_as_is(yytext);_scanner->do_as_is("\n");}
