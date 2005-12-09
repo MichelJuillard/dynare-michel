@@ -5,7 +5,6 @@ function [x,cheik] = dynare_solve(func,x,varargin)
   
   options_ = set_default_option(options_,'solve_algo',2);
   cheik = 0;
-  func = str2func(func);
   if options_.solve_algo == 0
     if ~isempty(which('fsolve')) & sscanf(version('-release'),'%d') >= 13;
       options=optimset('fsolve');
