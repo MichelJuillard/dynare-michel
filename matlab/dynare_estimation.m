@@ -819,7 +819,7 @@ if ~((any(bayestopt_.pshape > 0) & options_.mh_replic) | (any(bayestopt_.pshape 
 	%%
   	yf = zeros(gend,n_varobs);
   	if options_.prefilter == 1
-    	yf = atT(bayestopt_.mf,:)+repmat(transpose(mean_varobs),1,gend);
+    	yf = atT(bayestopt_.mf,:)+repmat(transpose(bayestopt_.mean_varobs),1,gend);
   	elseif options_.loglinear == 1
     	yf = atT(bayestopt_.mf,:)+repmat(log(ys(bayestopt_.mfys)),1,gend)+...
 	 		trend_coeff*[1:gend];

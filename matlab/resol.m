@@ -19,12 +19,6 @@ if M_.exo_nbr == 0
   oo_.exo_steady_state = [] ;
 end
 
-if M_.maximum_exo_lag > 0 || M_.maximum_exo_lead > 0
-  error (['RESOL: stochastic exogenous variables must appear only at the' ...
-	  ' current period. Use additional endogenous variables']) ;
-end
-
-
 % check if ys is steady state
 tempex = oo_.exo_simul;
 oo_.exo_simul = repmat(oo_.exo_steady_state',M_.maximum_lag+M_.maximum_lead+1,1);
