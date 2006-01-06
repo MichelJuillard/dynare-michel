@@ -165,7 +165,7 @@ if M_.maximum_lead == 0;  % backward model
   m = 0;
   for i=M_.maximum_lag:-1:1
     k = nonzeros(M_.lead_lag_incidence(i,order_var));
-    dr.ghx(:,m+[1:length(k)]) = -a(:,k);
+    dr.ghx(:,m+[1:length(k)]) = -b\a(:,k);
     m = m+length(k);
   end
   if M_.exo_nbr
