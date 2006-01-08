@@ -294,8 +294,8 @@ void ComputingTasks::set_trend_element (string name, string expression)
     //    int 	id = SymbolTable::getID(name);
     if (type == eEndogenous)
       {
-	*output << "tmp1 = strmatch(" << name << ",options_.varobs,'exact');\n";
-	*output << "options_.trend_coeffs{tmp1} = " << expression << ";\n";
+	*output << "tmp1 = strmatch('" << name << "',options_.varobs,'exact');\n";
+	*output << "options_.trend_coeffs{tmp1} = '" << expression << "';\n";
       }
     else
       {
