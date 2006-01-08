@@ -91,7 +91,7 @@ end;
 varobs P_obs Y_obs;
 
 observation_trends;
-P_obs (log(exp(gam)/mst));
+P_obs (log(mst)-gam);
 Y_obs (gam);
 end;
 
