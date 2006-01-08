@@ -1,13 +1,13 @@
-function [fval,cost_flag,ys,trend_coeff] = DsgeLikelihood(xparam1,gend,data)
+function [fval,cost_flag,ys,trend_coeff,info] = DsgeLikelihood(xparam1,gend,data)
 % stephane.adjemian@cepremap.cnrs.fr [09-07-2004]
 %
 % Adapted from mj_optmumlik.m
-  global bayestopt_ estim_params_ options_ trend_coeff_ M_ oo_
-  global dr1_test_
+  global bayestopt_ estim_params_ options_ trend_coeff_ M_ oo_ xparam1_test
 
   fval		= [];
   ys		= [];
   trend_coeff	= [];
+  xparam1_test  = xparam1;
   cost_flag  	= 1;
   nobs 		= size(options_.varobs,1);
   %------------------------------------------------------------------------------
@@ -15,13 +15,13 @@ function [fval,cost_flag,ys,trend_coeff] = DsgeLikelihood(xparam1,gend,data)
   %------------------------------------------------------------------------------
   if options_.mode_compute ~= 1 & any(xparam1 < bayestopt_.lb)
     k = find(xparam1 < bayestopt_.lb);
-    fval = bayestopt_.penalty*min(1e3,exp(sum(bayestopt_.lb(k)-xparam1(k))));
+    fval = bayestopt_.penalty+sum((bayestopt_.lb(k)-xparam1(k)).^2);
     cost_flag = 0;
     return;
   end
   if options_.mode_compute ~= 1 & any(xparam1 > bayestopt_.ub)
     k = find(xparam1 > bayestopt_.ub);
-    fval = bayestopt_.penalty*min(1e3,exp(sum(xparam1(k)-bayestopt_.ub(k))));
+    fval = bayestopt_.penalty+sum((xparam1(k)-bayestopt_.ub(k)).^2);
     cost_flag = 0;
     return;
   end
@@ -50,9 +50,12 @@ function [fval,cost_flag,ys,trend_coeff] = DsgeLikelihood(xparam1,gend,data)
     if testQ 	%% The variance-covariance matrix of the structural innovations is not definite positive.
 		%% We have to compute the eigenvalues of this matrix in order to build the penalty.
 		a = diag(eig(Q));
-		fval = bayestopt_.penalty*min(1e3,exp(sum(-a(a<=0))));
-		cost_flag = 0;
-		return
+		k = find(a < 0);
+		if k > 0
+		  fval = bayestopt_.penalty+sum(-a(k));
+		  cost_flag = 0;
+		  return
+		end
     end
     offset = offset+estim_params_.ncx;
   end
@@ -66,24 +69,11 @@ function [fval,cost_flag,ys,trend_coeff] = DsgeLikelihood(xparam1,gend,data)
     [CholH,testH] = chol(H);
     if testH
       a = diag(eig(H));
-      if nobs == estim_params_.nvn
-	fval = bayestopt_.penalty*min(1e3,exp(sum(-a(a<=0))));
+      k = find(a < 0);
+      if k > 0
+	fval = bayestopt_.penalty+sum(-a(k));
 	cost_flag = 0;
 	return
-      else
-	if sum(abs(a)<crit) == nobs-estim_params_.nvn
-	  if any(a<0)
-	    fval = bayestopt_.penalty*min(1e3,exp(sum(-a(a<0))));
-	    cost_flag = 0;
-	    return					
-	  else
-	    % All is fine, there's nothing to do here...
-	  end 					
-	else
-	  fval = bayestopt_.penalty*min(1e3,exp(sum(-a(a<=0))));
-	  cost_flag = 0;
-	  return			
-	end 
       end
     end
     offset = offset+estim_params_.ncn;
@@ -96,17 +86,13 @@ function [fval,cost_flag,ys,trend_coeff] = DsgeLikelihood(xparam1,gend,data)
   %------------------------------------------------------------------------------
   % 2. call model setup & reduction program
   %------------------------------------------------------------------------------
-  [T,R,SteadyState] = dynare_resolve;
-  if dr1_test_(1) == 1
-    fval = bayestopt_.penalty*min(1e3,exp(dr1_test_(2)));
+  [T,R,SteadyState,info] = dynare_resolve;
+  if info(1) == 1 | info(1) == 2 | info(1) == 5
+    fval = bayestopt_.penalty+1;
     cost_flag = 0;
     return
-  elseif dr1_test_(1) == 2
-    fval = bayestopt_.penalty*min(1e3,exp(dr1_test_(2)));
-    cost_flag = 0;
-    return
-  elseif dr1_test_(1) == 3
-    fval = bayestopt_.penalty*min(1e3,exp(dr1_test_(2)));
+  elseif info(1) == 3 | info(1) == 4 | info(1) == 20
+    fval = bayestopt_.penalty+info(2)^2;
     cost_flag = 0;
     return
   end
@@ -120,9 +106,9 @@ function [fval,cost_flag,ys,trend_coeff] = DsgeLikelihood(xparam1,gend,data)
     for i=1:nobs
       trend_coeff(i) = evalin('base',bayestopt_.trend_coeff{i});
     end
-    trend = constant*ones(1,gend)+trend_coeff*(1:gend);
+    trend = repmat(constant,1,gend)+trend_coeff*[1:gend];
   else
-    trend = constant*ones(1,gend);
+    trend = repmat(constant,1,gend);
   end
   start = options_.presample+1;
   np    = size(T,1);

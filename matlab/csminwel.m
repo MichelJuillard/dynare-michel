@@ -16,7 +16,8 @@ function [fh,xh,gh,H,itct,fcount,retcodeh] = csminwel(fcn,x0,H0,grad,crit,nit,va
 %        hessian update, respectively.  (When the routine hits certain kinds of difficulty, it
 %        write g2.mat and g3.mat as well.  If all were written at about the same time, any of them
 %        may be a decent starting point.  One can also start from the one with best function value.)
-[nx,no]=size(x0);
+global bayestopt_
+  [nx,no]=size(x0);
 nx=max(nx,no);
 Verbose=1;
 NumGrad= isempty(grad);
@@ -60,7 +61,8 @@ f=f0;
 H=H0;
 cliff=0;
 while ~done
-   g1=[]; g2=[]; g3=[];
+  bayestopt_.penalty = f;
+  g1=[]; g2=[]; g3=[];
    %addition fj. 7/6/94 for control
    disp('-----------------')
    disp('-----------------')

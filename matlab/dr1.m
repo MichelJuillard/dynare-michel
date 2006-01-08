@@ -139,6 +139,32 @@ sdyn = M_.endo_nbr - nstatic;
 k0 = M_.lead_lag_incidence(M_.maximum_lag+1,order_var);
 k1 = M_.lead_lag_incidence(find([1:klen] ~= M_.maximum_lag+1),:);
 b = jacobia_(:,k0);
+
+if M_.maximum_lead == 0;  % backward models
+  a = jacobia_(:,nonzeros(k1'));
+  dr.ghx = zeros(size(a));
+  m = 0;
+  for i=M_.maximum_lag:-1:1
+    k = nonzeros(M_.lead_lag_incidence(i,order_var));
+    dr.ghx(:,m+[1:length(k)]) = -b\a(:,k);
+    m = m+length(k);
+  end
+  if M_.exo_nbr
+    dr.ghu = -b\fu;
+  end
+  dr.eigval = eig(transition_matrix(dr));
+  dr.rank = 0;
+  if any(abs(dr.eigval) > options_.qz_criterium)
+    temp = sort(abs(dr.eigval));
+    nba = nnz(abs(dr.eigval) > options_.qz_criterium);
+    temp = temp(nd-nba+1:nd)-1-options_.qz_criterium;
+    info(1) = 3;
+    info(2) = temp'*temp;
+  end
+  return;
+end
+
+%forward--looking models
 if nstatic > 0
   [Q,R] = qr(b(:,1:nstatic));
   aa = Q'*jacobia_;
@@ -159,29 +185,6 @@ if M_.exo_nbr
   fu = aa(:,nz+1:end);
 end
 clear aa;
-
-if M_.maximum_lead == 0;  % backward model
-  dr.ghx = zeros(size(a));
-  m = 0;
-  for i=M_.maximum_lag:-1:1
-    k = nonzeros(M_.lead_lag_incidence(i,order_var));
-    dr.ghx(:,m+[1:length(k)]) = -b\a(:,k);
-    m = m+length(k);
-  end
-  if M_.exo_nbr
-    dr.ghu = -fu;
-  end
-  dr.eigval = eig(transition_matrix(dr));
-  dr.rank = 0;
-  if any(abs(dr.eigval) > options_.qz_criterium)
-    temp = sort(abs(dr.eigval));
-    nba = nnz(abs(dr.eigval) > options_.qz_criterium);
-    temp = temp(nd-nba+1:nd)-1-options_.qz_criterium;
-    info(1) = 3;
-    info(2) = temp'*temp;
-  end
-  return;
-end
 
 % buildind D and E
 d = zeros(nd,nd) ;

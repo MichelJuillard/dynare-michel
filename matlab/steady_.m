@@ -12,14 +12,22 @@ function steady_()
   temp = oo_.exo_simul ;
   oo_.exo_simul = ones(xlen,1)*transpose(oo_.exo_steady_state);
 
-  [oo_.steady_state,cheik] = dynare_solve([M_.fname '_static'],x,oo_.exo_simul);
+  if M_.exo_det_nbr > 0
+    tempdet = oo_.exo_det_simul ;
+    oo_.exo_det_simul = repmat(oo_.exo_det_steady_state',M_.maximum_lag+1,1) ;
+  end
 
-  if cheik ~= 0
+  if exist([M_.fname '_steadystate'])
+    [oo_.steady_state,check] = feval([M_.fname '_steadystate'],x);
+  else
+    [oo_.staedy_state,check] = dynare_solve([M_.fname '_static'],x);
+  end
+
+  if check ~= 0
     error('STEADY: convergence problems')
   end
 
+  if M_.exo_det_nbr > 0
+    oo_.exo_det_simul = tempdet;
+  end
   oo_.exo_simul = temp ;
-
-% 06/24/01 MJ: steady_ no results printer; steady with printed results
-% 07/31/03 MJ: in case of convergence problem steady stops with an error
-% 01/22/05 SA: check --> cheik (to avoid confusion with function check.m)

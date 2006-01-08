@@ -1,7 +1,7 @@
 function dynare_estimation(var_list_)
 
 global M_ options_ oo_ estim_params_ 
-global bayestopt_ trend_coeff_
+global bayestopt_
 
 options_.varlist = var_list_;
 options_.lgyidx2varobs = zeros(size(M_.endo_names,1),1);
@@ -43,7 +43,7 @@ options_ = set_default_option(options_,'relative_irf',0);
 options_ = set_default_option(options_,'order',1);
 options_ = set_default_option(options_,'ar',5);
 options_ = set_default_option(options_,'dr_algo',0);
-options_ = set_default_option(options_,'linear',1);
+options_ = set_default_option(options_,'linear',0);
 options_ = set_default_option(options_,'drop',0);
 options_ = set_default_option(options_,'replic',1);
 options_ = set_default_option(options_,'hp_filter',0);
@@ -86,16 +86,18 @@ ub = bounds(:,2);
 bayestopt_.lb = lb;
 bayestopt_.ub = ub;
 
-if isempty(trend_coeff_)
+if isempty(options_.trend_coeffs)
   bayestopt_.with_trend = 0;
 else
   bayestopt_.with_trend = 1;
   bayestopt_.trend_coeff = {};
+  trend_coeffs = options_.trend_coeffs;
+  nt = length(trend_coeffs);
   for i=1:n_varobs
-    if i > length(trend_coeff_) | isempty(trend_coeff_{i})
+    if i > length(trend_coeffs) | isempty(trend_coeffs{i})
       bayestopt_.trend_coeff{i} = '0';
     else
-      bayestopt_.trend_coeff{i} = trend_coeff_{i};
+      bayestopt_.trend_coeff{i} = trend_coeffs{i};
     end
   end
 end
