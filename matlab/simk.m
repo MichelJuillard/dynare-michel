@@ -290,7 +290,6 @@ for iter = 1:options_.maxit
   h2 = etime(clock,h2) ;
   [junk,i1] = max(abs(c));
   [junk,i2] = max(junk);
-  global M_.endo_names
   disp(['variable ' M_.endo_names(i2,:) ' period ' num2str(i1(i2))])
   err = max(max(abs(c./options_.scalv'))) ;
   disp ([num2str(iter) '-	err = ' num2str(err)]) ;

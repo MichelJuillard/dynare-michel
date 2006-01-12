@@ -5,18 +5,21 @@ function sim1
 global M_ options_ oo_
 global  iyp iyf ct_ M_ it_ c
 
+lead_lag_incidence = M_.lead_lag_incidence;
+
 ny = size(oo_.y_simul,1) ;
-nyp = nnz(M_.lead_lag_incidence(1,:)) ;
-nyf = nnz(M_.lead_lag_incidence(3,:)) ;
+nyp = nnz(lead_lag_incidence(1,:)) ;
+nyf = nnz(lead_lag_incidence(3,:)) ;
 nrs = ny+nyp+nyf+1 ;
 nrc = nyf+1 ;
-iyf = find(M_.lead_lag_incidence(3,:)>0) ;
-iyp = find(M_.lead_lag_incidence(1,:)>0) ;
+iyf = find(lead_lag_incidence(3,:)>0) ;
+iyp = find(lead_lag_incidence(1,:)>0) ;
 isp = [1:nyp] ;
 is = [nyp+1:ny+nyp] ;
 isf = iyf+nyp ;
 isf1 = [nyp+ny+1:nyf+nyp+ny+1] ;
 stop = 0 ;
+iz = [1:ny+nyp+nyf];
 
 disp (['-----------------------------------------------------']) ;
 disp (['MODEL SIMULATION :']) ;
@@ -37,14 +40,14 @@ for iter = 1:options_.maxit
 	it_ = it_init ;
 	z = [oo_.y_simul(iyp,it_-1) ; oo_.y_simul(:,it_) ; oo_.y_simul(iyf,it_+1)] ;
 	[d1,M_.jacobia] = feval([M_.fname '_dynamic'],z,oo_.exo_simul);
-	M_.jacobia = [M_.jacobia -d1] ;
+	M_.jacobia = [M_.jacobia(:,iz) -d1] ;
 	ic = [1:ny] ;
 	icp = iyp ;
 	c (ic,:) = M_.jacobia(:,is)\M_.jacobia(:,isf1) ;
 	for it_ = it_init+1:options_.periods+1
 		z = [oo_.y_simul(iyp,it_-1) ; oo_.y_simul(:,it_) ; oo_.y_simul(iyf,it_+1)] ;
 		[d1,M_.jacobia] = feval([M_.fname '_dynamic'],z,oo_.exo_simul);
-		M_.jacobia = [M_.jacobia -d1] ;
+		M_.jacobia = [M_.jacobia(:,iz) -d1] ;
 		M_.jacobia(:,[isf nrs]) = M_.jacobia(:,[isf nrs])-M_.jacobia(:,isp)*c(icp,:) ;
 		ic = ic + ny ;
 		icp = icp + ny ;
