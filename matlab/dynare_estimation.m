@@ -86,7 +86,7 @@ ub = bounds(:,2);
 bayestopt_.lb = lb;
 bayestopt_.ub = ub;
 
-if isempty(options_.trend_coeffs)
+if ~isfield(options_,'trend_coeffs')
   bayestopt_.with_trend = 0;
 else
   bayestopt_.with_trend = 1;
@@ -94,7 +94,7 @@ else
   trend_coeffs = options_.trend_coeffs;
   nt = length(trend_coeffs);
   for i=1:n_varobs
-    if i > length(trend_coeffs) | isempty(trend_coeffs{i})
+    if i > length(trend_coeffs)
       bayestopt_.trend_coeff{i} = '0';
     else
       bayestopt_.trend_coeff{i} = trend_coeffs{i};
