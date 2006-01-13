@@ -2,7 +2,7 @@ function PlotPosteriorDistributions()
 % stephane.adjemian@ens.fr [09-09-2005]
 global estim_params_ M_ options_ bayestopt_ oo_
 
-DirectoryName = CheckPath('Plots\Densities')
+DirectoryName = CheckPath('Plots\Densities');
 
 TeX   	= options_.TeX;
 nblck 	= options_.mh_nblck;
