@@ -133,6 +133,7 @@ npred = dr.npred;
 nboth = dr.nboth;
 order_var = dr.order_var;
 nd = size(kstate,1);
+nz = nnz(M_.lead_lag_incidence);
 
 sdyn = M_.endo_nbr - nstatic;
 
@@ -150,7 +151,7 @@ if M_.maximum_lead == 0;  % backward models
     m = m+length(k);
   end
   if M_.exo_nbr
-    dr.ghu = -b\fu;
+    dr.ghu = -b\jacobia_(:,nz+1:end);
   end
   dr.eigval = eig(transition_matrix(dr));
   dr.rank = 0;
@@ -176,7 +177,6 @@ b = aa(:,k0);
 b10 = b(1:nstatic,1:nstatic);
 b11 = b(1:nstatic,nstatic+1:end);
 b2 = b(nstatic+1:end,nstatic+1:end);
-nz = nnz(M_.lead_lag_incidence);
 if any(isinf(a(:)))
   info = 1;
   return
