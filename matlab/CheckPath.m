@@ -5,5 +5,5 @@ global M_
 DirectoryName = [ M_.dname '\' type ];
 
 if ~isdir(DirectoryName) 
-    system([ 'md ' DirectoryName]); 
+    mkdir('.',DirectoryName); 
 end
