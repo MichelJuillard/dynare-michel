@@ -227,7 +227,7 @@ elseif options_.load_mh_file == -1% The previous metropolis-hastings
   % (if there was a complete session before the crash) ?
   if OldMh
     ante = sum(record.MhDraws(1:end-1,2),1);
-    load(['.\' DirectoryName '/' M_.fname '_mh' int2str(ante) '_blck' ...
+    load(['./' DirectoryName '/' M_.fname '_mh' int2str(ante) '_blck' ...
 	  int2str(CrashedBlck) '.mat'],'logpo2');
     if length(logpo2) == MAX_nruns
       IsTheLastFileOfThePreviousMhFull = 1;
@@ -243,7 +243,7 @@ elseif options_.load_mh_file == -1% The previous metropolis-hastings
     MhFileNumber = ante;
     while MhFileExist
       MhFileNumber = MhFileNumber + 1;
-      if ~exist(['.\' DirectoryName '/' M_.fname '_mh' int2str(MhFileNumber) '_blck' int2str(CrashedBlck) '.mat'])
+      if ~exist(['./' DirectoryName '/' M_.fname '_mh' int2str(MhFileNumber) '_blck' int2str(CrashedBlck) '.mat'])
 	MhFileExist = 0;
       end
     end
@@ -265,7 +265,7 @@ elseif options_.load_mh_file == -1% The previous metropolis-hastings
     nruns(CrashedBlck) = nruns(CrashedBlck)-NumberOfSavedDraws; 
     % I initialize with the last saved mh file of the inccomplete
     % block:
-    load(['.\' DirectoryName '/' M_.fname '_mh' int2str(MhFileNumber-1) '_blck' int2str(CrashedBlck) '.mat']);
+    load(['./' DirectoryName '/' M_.fname '_mh' int2str(MhFileNumber-1) '_blck' int2str(CrashedBlck) '.mat']);
     ilogpo2(CrashedBlck) = logpo2(end);
     ix2(CrashedBlck,:) = x2(end,:);
     NewFile(CrashedBlck) = MhFileNumber;
@@ -282,7 +282,7 @@ end% of (if options_.load_mh_file == {0,1 or -1})
 InitSizeArray = min([MAX_nruns*ones(nblck) nruns],[],2);
 for b = fblck:nblck
   if (options_.load_mh_file~=0)  & (fline(b)>1) & OpenOldFile(b)
-    load(['.\' DirectoryName '/' M_.fname '_mh' int2str(NewFile(b)) ...
+    load(['./' DirectoryName '/' M_.fname '_mh' int2str(NewFile(b)) ...
 	  '_blck' int2str(b) '.'])
     x2 = [x2;zeros(InitSizeArray(b)-fline(b)+1,npar)];
     logpo2 = [logpo2;zeros(InitSizeArray(b)-fline(b)+1,1)];
