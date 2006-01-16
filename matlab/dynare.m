@@ -24,7 +24,7 @@ else
 	end;
 end;
 dynareroot = strrep(which('dynare.m'),'dynare.m','');
-command = [dynareroot 'dynare_m.exe ' fname] ;
+command = [dynareroot 'dynare_m ' fname] ;
 for i=2:nargin
   command = [command ' ' varargin{i-1}];
 end
