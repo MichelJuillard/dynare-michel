@@ -649,7 +649,7 @@ if (any(bayestopt_.pshape  >0 ) & options_.mh_replic) | (any(bayestopt_.pshape >
   if options_.mh_replic
     metropolis(xparam1,invhess,gend,data,rawdata,bounds);
   end
-  if ~options_.nodiagnostic
+  if ~options_.nodiagnostic & options_.mh_replic > 1000 & options_.nblocks > 1
     McMCDiagnostics;
   end
   %% Here i discard first half of the draws:
