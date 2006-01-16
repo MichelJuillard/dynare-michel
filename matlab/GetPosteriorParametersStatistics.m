@@ -12,7 +12,7 @@ np    	= estim_params_.np ;
 nx    	= nvx+nvn+ncx+ncn+np;
 
 DirectoryName = CheckPath('metropolis');
-load([ DirectoryName '\'  M_.fname '_mh_history'])
+load([ DirectoryName '/'  M_.fname '_mh_history'])
 FirstMhFile = record.KeepedDraws.FirstMhFile;
 FirstLine = record.KeepedDraws.FirstLine; ifil = FirstLine;
 TotalNumberOfMhFiles = sum(record.MhDraws(:,2))

@@ -14,5 +14,5 @@ else
   MhLine = DrawNumber-(MhFilNumber-FirstMhFile-1)*nn;
 end
 
-load([DirectoryName '\' M_.fname '_mh' int2str(MhFilNumber) '_blck' int2str(ChainNumber) '.mat' ],'x2');
+load([DirectoryName '/' M_.fname '_mh' int2str(MhFilNumber) '_blck' int2str(ChainNumber) '.mat' ],'x2');
 xparams = x2(MhLine,:);

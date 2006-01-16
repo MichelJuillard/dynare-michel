@@ -3,7 +3,7 @@ function McmcDiagnostic
 
 global options_ estim_params_ M_ 
 
-DirectoryName = CheckPath('Plots\Diagnostics');
+DirectoryName = CheckPath('Plots/Diagnostics');
 
 TeX = options_.TeX;
 nblck = options_.mh_nblck;
@@ -131,9 +131,9 @@ for i = 1:pages
             boxplot = boxplot + 1;
         end
     end
-    eval(['print -depsc2 ' DirectoryName '\' M_.fname '_udiag' int2str(i)]);
-    eval(['print -dpdf ' DirectoryName '\' M_.fname '_udiag' int2str(i)]);
-    saveas(h,[DirectoryName '\' M_.fname '_udiag' int2str(i) '.fig']);
+    eval(['print -depsc2 ' DirectoryName '/' M_.fname '_udiag' int2str(i)]);
+    eval(['print -dpdf ' DirectoryName '/' M_.fname '_udiag' int2str(i)]);
+    saveas(h,[DirectoryName '/' M_.fname '_udiag' int2str(i) '.fig']);
     if options_.nograph, close(h), end
     if TeX
         fprintf(fidTeX,'\\begin{figure}[H]\n');
@@ -196,9 +196,9 @@ if reste
             boxplot = boxplot + 1;
         end
     end
-    eval(['print -depsc2 ' DirectoryName '\' M_.fname '_udiag' int2str(pages+1)]);
-    eval(['print -dpdf ' DirectoryName '\' M_.fname '_udiag' int2str(pages+1)]);
-    saveas(h,[DirectoryName '\' M_.fname '_udiag' int2str(pages+1) '.fig']);
+    eval(['print -depsc2 ' DirectoryName '/' M_.fname '_udiag' int2str(pages+1)]);
+    eval(['print -dpdf ' DirectoryName '/' M_.fname '_udiag' int2str(pages+1)]);
+    saveas(h,[DirectoryName '/' M_.fname '_udiag' int2str(pages+1) '.fig']);
     if options_.nograph, close(h), end
     if TeX
         fprintf(fidTeX,'\\begin{figure}[H]\n');
@@ -303,9 +303,9 @@ for crit = 1:3
     title(namnam,'Interpreter','none');
     boxplot = boxplot + 1;
 end
-eval(['print -depsc2 ' DirectoryName '\' M_.fname '_mdiag']);
-eval(['print -dpdf ' DirectoryName '\' M_.fname '_mdiag']);
-saveas(h,[DirectoryName '\' M_.fname '_mdiag.fig']);
+eval(['print -depsc2 ' DirectoryName '/' M_.fname '_mdiag']);
+eval(['print -dpdf ' DirectoryName '/' M_.fname '_mdiag']);
+saveas(h,[DirectoryName '/' M_.fname '_mdiag.fig']);
 if options_.nograph, close(h), end
 if TeX
     fprintf(fidTeX,'\\begin{figure}[H]\n');

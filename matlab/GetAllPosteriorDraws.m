@@ -11,7 +11,7 @@ Draws = zeros(NumberOfDraws*nblck,1);
 
 for file = FirstMhFile:TotalNumberOfMhFile
   for blck = 1:nblck
-    load([DirectoryName '\'  M_.fname '_mh' int2str(file) '_blck' int2str(blck)],'x2')
+    load([DirectoryName '/'  M_.fname '_mh' int2str(file) '_blck' int2str(blck)],'x2')
     NumberOfLines = size(x2(iline:end,:),1);
     Draws(linee:linee+NumberOfLines-1) = x2(iline:end,column);
     linee = linee+NumberOfLines;

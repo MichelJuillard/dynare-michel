@@ -6,7 +6,7 @@ npar = estim_params_.np+estim_params_.nvn+estim_params_.ncx+estim_params_.ncn+es
 nblck = options_.mh_nblck;
 
 DirectoryName = CheckPath('metropolis');
-load([ DirectoryName '\'  M_.fname '_mh_history'])
+load([ DirectoryName '/'  M_.fname '_mh_history'])
 
 FirstMhFile = record.KeepedDraws.FirstMhFile;
 FirstLine = record.KeepedDraws.FirstLine; ifil = FirstLine;
@@ -22,7 +22,7 @@ lpost_mode = -Inf;
 fprintf('MH: I''m computing the posterior mean... ');
 for n = FirstMhFile:TotalNumberOfMhFiles
   for b = 1:nblck
-    load([ DirectoryName '\' M_.fname '_mh' int2str(n) '_blck' ...
+    load([ DirectoryName '/' M_.fname '_mh' int2str(n) '_blck' ...
 	   int2str(b)],'x2','logpo2'); 
     MU = MU + sum(x2(ifil:end,:));
     lpost_mode = max(lpost_mode,max(logpo2));
@@ -37,7 +37,7 @@ fprintf('MH: I''m computing the posterior covariance matrix... ');
 ifil = FirstLine;
 for n = FirstMhFile:TotalNumberOfMhFiles
   for b = 1:nblck
-    load([DirectoryName '\' M_.fname '_mh' int2str(n) '_blck' ...
+    load([DirectoryName '/' M_.fname '_mh' int2str(n) '_blck' ...
 	  int2str(b)],'x2');
     x = x2(ifil:end,:)-MU1(1:size(x2(ifil:end,:),1),:);
     SIGMA = SIGMA + x'*x;
@@ -61,7 +61,7 @@ while check_coverage
     tmp = 0;
     for n = FirstMhFile:TotalNumberOfMhFiles
       for b=1:nblck
-	load([ DirectoryName '\' M_.fname '_mh' int2str(n) '_blck' ...
+	load([ DirectoryName '/' M_.fname '_mh' int2str(n) '_blck' ...
 	       int2str(b)],'x2','logpo2');
 	EndOfFile = size(x2,1);
 	for i = ifil:EndOfFile

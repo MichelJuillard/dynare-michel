@@ -5,8 +5,8 @@ global M_ options_ estim_params_
 npar = estim_params_.np+estim_params_.nvn+estim_params_.ncx+estim_params_.ncn+estim_params_.nvx;
 
 DirectoryName = CheckPath('metropolis');
-file = eval(['dir(''' DirectoryName '\'  M_.fname '_mh_history.mat'');']);
-files = eval(['dir(''' DirectoryName '\' M_.fname '_mh*.mat'');']);
+file = eval(['dir(''' DirectoryName '/'  M_.fname '_mh_history.mat'');']);
+files = eval(['dir(''' DirectoryName '/' M_.fname '_mh*.mat'');']);
 if ~length(files)
   disp('MH:: FAILURE! there is no MH file to load here!')
   return
@@ -15,7 +15,7 @@ if ~length(file)
   disp('MH:: FAILURE! there is no MH-history file!')
   return
 else
-  load([ DirectoryName '\'  M_.fname '_mh_history'])
+  load([ DirectoryName '/'  M_.fname '_mh_history'])
 end
 TotalNumberOfMhFiles = sum(record.MhDraws(:,2));
 TotalNumberOfMhDraws = sum(record.MhDraws(:,1));
@@ -34,7 +34,7 @@ elseif TotalNumberOfMhFiles == 1
 elseif TotalNumberOfMhFiles == 2 & FirstMhFile > 1
   record.KeepedDraws.Distribution = [MAX_nruns-FirstLine+1 ; record.MhDraws(end,3)];  
 end
-save([DirectoryName '\' M_.fname '_mh_history'],'record');
+save([DirectoryName '/' M_.fname '_mh_history'],'record');
 fprintf('MH: Total number of Mh draws: %d.\n',TotalNumberOfMhDraws);
 fprintf('MH: Total number of generated Mh files: %d.\n',TotalNumberOfMhFiles);
 fprintf('MH: I''ll use mh-files %d to %d.\n',FirstMhFile,TotalNumberOfMhFiles);

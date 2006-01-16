@@ -13,10 +13,10 @@ offset = npar-np;
 MaxNumberOfPlotPerFigure = 4;% The square root must be an integer!
 nn = sqrt(MaxNumberOfPlotPerFigure);
 %%
-CheckPath('Plots\IRFs');
-CheckPath('metropolis\IRFs');
+CheckPath('Plots/IRFs');
+CheckPath('metropolis/IRFs');
 DirectoryName = CheckPath('metropolis');
-load([ DirectoryName '\'  M_.fname '_mh_history'])
+load([ DirectoryName '/'  M_.fname '_mh_history'])
 FirstMhFile = record.KeepedDraws.FirstMhFile;
 FirstLine = record.KeepedDraws.FirstLine; 
 TotalNumberOfMhFiles = sum(record.MhDraws(:,2)); LastMhFile = TotalNumberOfMhFiles; 

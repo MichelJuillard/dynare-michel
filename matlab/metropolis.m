@@ -21,9 +21,9 @@ if options_.load_mh_file == 0
     disp('MH: One Chain mode.')
   end
   % Delete old mh files...
-  files = eval(['dir(''' DirectoryName '\'  M_.fname '_mh*_blck*.mat'');']);
+  files = eval(['dir(''' DirectoryName '/'  M_.fname '_mh*_blck*.mat'');']);
   if length(files)
-    delete([ DirectoryName '\' M_.fname '_mh*_blck*.mat']);
+    delete([ DirectoryName '/' M_.fname '_mh*_blck*.mat']);
     disp('MH: Old _mh files succesfully erased!')
   end
   % Initial values...
@@ -76,9 +76,9 @@ if options_.load_mh_file == 0
   fline = ones(nblck,1);
   NewFile = ones(nblck,1);
   % Creation of the mh-history file:
-  file = eval(['dir(''' DirectoryName '\'  M_.fname '_mh_history.mat'');']);
+  file = eval(['dir(''' DirectoryName '/'  M_.fname '_mh_history.mat'');']);
   if length(files)
-    delete([ DirectoryName '\' M_.fname '_mh_history.mat']);
+    delete([ DirectoryName '/' M_.fname '_mh_history.mat']);
     disp('MH: Old mh_history file succesfully erased!')
   end
   AnticipatedNumberOfFiles = floor(nruns(1)/MAX_nruns);
@@ -97,11 +97,11 @@ if options_.load_mh_file == 0
   record.LastLogLiK = zeros(nblck,1);
   record.LastFileNumber = AnticipatedNumberOfFiles+1;
   record.LastLineNumber = AnticipatedNumberOfLinesInTheLastFile;
-  save([DirectoryName '\' M_.fname '_mh_history'],'record');  
+  save([DirectoryName '/' M_.fname '_mh_history'],'record');  
 elseif options_.load_mh_file == 1% Here we consider previous mh files (previous mh did not crash).
   disp('MH: I''m loading past metropolis-hastings simulations...')
-  file = eval(['dir(''' DirectoryName '\'  M_.fname '_mh_history.mat'');']);
-  files = eval(['dir(''' DirectoryName '\' M_.fname '_mh*.mat'');']);
+  file = eval(['dir(''' DirectoryName '/'  M_.fname '_mh_history.mat'');']);
+  files = eval(['dir(''' DirectoryName '/' M_.fname '_mh*.mat'');']);
   if ~length(files)
     disp('MH:: FAILURE! there is no MH file to load here!')
     return  
@@ -110,7 +110,7 @@ elseif options_.load_mh_file == 1% Here we consider previous mh files (previous 
     disp('MH:: FAILURE! there is no MH-history file!')
     return
   else
-    load([ DirectoryName '\'  M_.fname '_mh_history'])
+    load([ DirectoryName '/'  M_.fname '_mh_history'])
   end
   past_number_of_blocks = record.Nblck;
   if past_number_of_blocks ~= nblck
@@ -146,7 +146,7 @@ elseif options_.load_mh_file == 1% Here we consider previous mh files (previous 
   record.MhDraws(end,3) = AnticipatedNumberOfLinesInTheLastFile;
   randn('state',record.Seeds.Normal);
   rand('state',record.Seeds.Unifor);
-  save([DirectoryName '\' M_.fname '_mh_history'],'record');
+  save([DirectoryName '/' M_.fname '_mh_history'],'record');
   disp(['MH: ... It''s done. I''ve loaded ' int2str(NumberOfPreviousSimulations) ' simulations.'])
   disp(' ')
 elseif options_.load_mh_file == -1% The previous metropolis-hastings
@@ -154,12 +154,12 @@ elseif options_.load_mh_file == -1% The previous metropolis-hastings
                                   % recover the saved draws...
   disp('MH: Recover mode!')
   disp(' ')
-  file = eval(['dir(''' DirectoryName '\'  M_.fname '_mh_history.mat'');']);
+  file = eval(['dir(''' DirectoryName '/'  M_.fname '_mh_history.mat'');']);
   if ~length(file)
     disp('MH:: FAILURE! there is no MH-history file!')
     return
   else
-    load([ DirectoryName '\'  M_.fname '_mh_history'])
+    load([ DirectoryName '/'  M_.fname '_mh_history'])
   end 
   nblck = record.Nblck;
   options_.mh_nblck = nblck;
@@ -200,12 +200,12 @@ elseif options_.load_mh_file == -1% The previous metropolis-hastings
   ExpectedNumberOfMhFilesPerBlock = sum(record.MhDraws(:,2),1);
   ExpectedNumberOfMhFiles = ExpectedNumberOfMhFilesPerBlock*nblck;
   % I count the total number of saved mh files...
-  AllMhFiles = eval(['dir(''' DirectoryName '\' M_.fname '_mh*_blck*.mat'');']);
+  AllMhFiles = eval(['dir(''' DirectoryName '/' M_.fname '_mh*_blck*.mat'');']);
   TotalNumberOfMhFiles = length(AllMhFiles);
   % I count the number of saved mh files per block
   NumberOfMhFilesPerBlock = zeros(nblck,1);
   for i = 1:nblck
-    BlckMhFiles = eval(['dir(''' DirectoryName '\' M_.fname '_mh*_blck' int2str(i) '.mat'');']);
+    BlckMhFiles = eval(['dir(''' DirectoryName '/' M_.fname '_mh*_blck' int2str(i) '.mat'');']);
     NumberOfMhFilesPerBlock(i) = length(BlckMhFiles);
   end
   tmp = NumberOfMhFilesPerBlock(1); b = 1;
@@ -227,7 +227,7 @@ elseif options_.load_mh_file == -1% The previous metropolis-hastings
   % (if there was a complete session before the crash) ?
   if OldMh
     ante = sum(record.MhDraws(1:end-1,2),1);
-    load(['.\' DirectoryName '\' M_.fname '_mh' int2str(ante) '_blck' ...
+    load(['.\' DirectoryName '/' M_.fname '_mh' int2str(ante) '_blck' ...
 	  int2str(CrashedBlck) '.mat'],'logpo2');
     if length(logpo2) == MAX_nruns
       IsTheLastFileOfThePreviousMhFull = 1;
@@ -243,7 +243,7 @@ elseif options_.load_mh_file == -1% The previous metropolis-hastings
     MhFileNumber = ante;
     while MhFileExist
       MhFileNumber = MhFileNumber + 1;
-      if ~exist(['.\' DirectoryName '\' M_.fname '_mh' int2str(MhFileNumber) '_blck' int2str(CrashedBlck) '.mat'])
+      if ~exist(['.\' DirectoryName '/' M_.fname '_mh' int2str(MhFileNumber) '_blck' int2str(CrashedBlck) '.mat'])
 	MhFileExist = 0;
       end
     end
@@ -265,7 +265,7 @@ elseif options_.load_mh_file == -1% The previous metropolis-hastings
     nruns(CrashedBlck) = nruns(CrashedBlck)-NumberOfSavedDraws; 
     % I initialize with the last saved mh file of the inccomplete
     % block:
-    load(['.\' DirectoryName '\' M_.fname '_mh' int2str(MhFileNumber-1) '_blck' int2str(CrashedBlck) '.mat']);
+    load(['.\' DirectoryName '/' M_.fname '_mh' int2str(MhFileNumber-1) '_blck' int2str(CrashedBlck) '.mat']);
     ilogpo2(CrashedBlck) = logpo2(end);
     ix2(CrashedBlck,:) = x2(end,:);
     NewFile(CrashedBlck) = MhFileNumber;
@@ -282,7 +282,7 @@ end% of (if options_.load_mh_file == {0,1 or -1})
 InitSizeArray = min([MAX_nruns*ones(nblck) nruns],[],2);
 for b = fblck:nblck
   if (options_.load_mh_file~=0)  & (fline(b)>1) & OpenOldFile(b)
-    load(['.\' DirectoryName '\' M_.fname '_mh' int2str(NewFile(b)) ...
+    load(['.\' DirectoryName '/' M_.fname '_mh' int2str(NewFile(b)) ...
 	  '_blck' int2str(b) '.'])
     x2 = [x2;zeros(InitSizeArray(b)-fline(b)+1,npar)];
     logpo2 = [logpo2;zeros(InitSizeArray(b)-fline(b)+1,1)];
@@ -317,7 +317,7 @@ for b = fblck:nblck
     prtfrc = j/nruns(b);
     waitbar(prtfrc,hh,[ '(' int2str(b) '/' int2str(nblck) ') ' sprintf('%f done, acceptation rate %f',prtfrc,isux/j)]);
     if (irun == InitSizeArray(b)) | (j == nruns(b)) % Now I save the simulations
-      save([DirectoryName '\' M_.fname '_mh' int2str(NewFile(b)) '_blck' int2str(b)],'x2','logpo2');
+      save([DirectoryName '/' M_.fname '_mh' int2str(NewFile(b)) '_blck' int2str(b)],'x2','logpo2');
       InitSizeArray(b) = min(nruns(b)-j,MAX_nruns);
       if j == nruns(b) % I record the last draw...
 	record.LastParameters(b,:) = x2(end,:);
@@ -340,7 +340,7 @@ for b = fblck:nblck
 end% End of the loop over the mh-blocks.
 record.Seeds.Normal = randn('state');
 record.Seeds.Unifor = rand('state');
-save([DirectoryName '\' M_.fname '_mh_history'],'record');
+save([DirectoryName '/' M_.fname '_mh_history'],'record');
 disp(['MH: Number of mh files				: ' int2str(NewFile(1)) ' per block.'])
 disp(['MH: Total number of generated files	: ' int2str(NewFile(1)*nblck) '.'])
 disp(['MH: Total number of iterations 		: ' int2str((NewFile(1)-1)*MAX_nruns+irun-1) '.'])
