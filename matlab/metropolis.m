@@ -2,6 +2,8 @@ function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
 % stephane.adjemian@ens.fr [09-02-2005]
 global M_ oo_ options_ bayestopt_ estim_params_
 
+bayestopt_.penalty = 1e8;
+
 DirectoryName = CheckPath('metropolis');
 
 nblck = options_.mh_nblck;
