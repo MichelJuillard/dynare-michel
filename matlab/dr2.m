@@ -7,5 +7,5 @@ function ghs2=dr2(ys,dr)
   dr.ys = ys;
   fh = str2func([M_.fname '_static']);
   dr.fbias = 2*feval(fh,dr.ys);
-  dr=dr1(2,dr,0);
+  dr=dr1(dr,0);
   ghs2 = dr.ghs2;

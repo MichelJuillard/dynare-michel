@@ -1,7 +1,7 @@
 % Copyright (C) 2001 Michel Juillard
 %
 function info=stoch_simul(var_list)
-global M_ options_ oo_ dr_
+global M_ options_ oo_
 
 global it_
   options_ = set_default_option(options_,'TeX',0);  
@@ -42,7 +42,7 @@ global it_
 
   check_model;
 
-  [dr_, info] = resol(oo_.steady_state,0);
+  [oo_.dr, info] = resol(oo_.steady_state,0);
 
   if info(1)
     print_info(info);
@@ -56,21 +56,21 @@ global it_
     disp(['  Number of variables:         ' int2str(M_.endo_nbr)])
     disp(['  Number of stochastic shocks: ' int2str(M_.exo_nbr)])
     disp(['  Number of state variables:   ' ...
-	  int2str(length(find(dr_.kstate(:,2) <= M_.maximum_lag+1)))])
+	  int2str(length(find(oo_.dr.kstate(:,2) <= M_.maximum_lag+1)))])
     disp(['  Number of jumpers:           ' ...
-	  int2str(length(find(dr_.kstate(:,2) == M_.maximum_lag+2)))])
-    disp(['  Number of static variables:  ' int2str(dr_.nstatic)])
+	  int2str(length(find(oo_.dr.kstate(:,2) == M_.maximum_lag+2)))])
+    disp(['  Number of static variables:  ' int2str(oo_.dr.nstatic)])
     my_title='MATRIX OF COVARIANCE OF EXOGENOUS SHOCKS';
     labels = deblank(M_.exo_names);
     headers = strvcat('Variables',labels);
     lh = size(labels,2)+2;
     table(my_title,headers,labels,M_.Sigma_e,lh,10,6);
     disp(' ')
-    disp_dr(dr_,options_.order,var_list);
+    disp_dr(oo_.dr,options_.order,var_list);
   end
 
   if options_.simul == 0 & options_.nomoments == 0
-    disp_th_moments(dr_,var_list); 
+    disp_th_moments(oo_.dr,var_list); 
   elseif options_.simul == 1
     if options_.periods == 0
       error('STOCH_SIMUL error: number of periods for the simulation isn''t specified')
@@ -80,7 +80,7 @@ global it_
 	    ' than the number of observations to be DROPed'])
       return
     end
-    oo_.endo_simul = simult(repmat(dr_.ys,1,M_.maximum_lag),dr_);
+    oo_.endo_simul = simult(repmat(oo_.dr.ys,1,M_.maximum_lag),oo_.dr);
     dyn2vec;
     if options_.nomoments == 0
       disp_moments(oo_.endo_simul,var_list);
@@ -130,7 +130,7 @@ global it_
     end
     for i=1:M_.exo_nbr
       if SS(i,i) > 1e-13
-	y=irf(dr_,cs(M_.exo_names_orig_ord,i), options_.irf, options_.drop, ...
+	y=irf(oo_.dr,cs(M_.exo_names_orig_ord,i), options_.irf, options_.drop, ...
 	      options_.replic, options_.order);
 	if options_.relative_irf
 	  y = 100*y/cs(i,i); 
@@ -273,28 +273,3 @@ global it_
       fclose(fidTeX);
     end
   end
-  % 02/20/01 MJ oo_.steady_state removed from calling sequence for simult (all in dr_)
-  % 02/23/01 MJ added dyn2vec()
-  % 06/24/01 MJ steady -> steadoo_.endo_simul
-  % 08/28/02 MJ added var_list
-  % 10/09/02 MJ no simulation and theoretical moments for order 1 
-  % 10/14/02 MJ added plot of IRFs
-  % 10/30/02 MJ options_ are now a structure
-  % 01/01/03 MJ added dr_algo
-  % 01/09/03 MJ set default values for options_ (correct absence of autocorr
-  %             when order == 1)
-  % 01/12/03 MJ removed call to steadoo_.endo_simul as already checked in resol()
-  % 02/09/03 MJ oo_.steady_state reset with value declared in initval after computations
-  % 02/18/03 MJ removed above change. oo_.steady_state shouldn't be affected by
-  %             computations in this function
-  %             new option SIMUL computes a stochastic simulation and save
-  %             results in oo_.endo_simul and via dyn2vec
-  % 04/03/03 MJ corrected bug for simulation with M_.maximum_lag > 1
-  % 05/20/03 MJ eliminates exogenous shocks with 0 variance
-  % 05/20/03 MJ don't plot IRF if variation < 1e-10
-  % 11/14/03 MJ corrected bug on number of replications for IRF when
-  %             order=2
-  % 11/22/03 MJ replaced IRFs by orthogonalized IRFs
-  % 08/30/04 SA The maximum number of plots is not constrained for the IRFs and 
-  %			  all the plots are saved in *.eps, *.pdf and *.fig files (added
-  % 09/03/04 SA Tex output for IRFs added

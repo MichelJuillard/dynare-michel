@@ -1,6 +1,6 @@
 % Copyright (C) 2001 Michel Juillard
 %
-function [x,check] = solve1(func,x,j1,j2,varargin)
+function [x,check] = solve1(func,x,j1,j2,jacobian_flag,varargin)
 
   global M_ options_ fjac  
 
@@ -37,17 +37,19 @@ function [x,check] = solve1(func,x,j1,j2,varargin)
   stpmax = stpmx*max([sqrt(x'*x);nn]) ;
   first_time = 1;
   for its = 1:maxit
-
-    %dh = max(abs(x(j2)),options_.gstep*ones(nn,1))*eps^(1/3);
-    
-    %for j = 1:nn
-    %  xdh = x ;
-    %  xdh(j2(j)) = xdh(j2(j))+dh(j) ;
-    %  t = feval(func,xdh,varargin{:});
-    %  fjac(:,j) = (t(j1) - fvec)./dh(j) ;
-    %  g(j) = fvec'*fjac(:,j) ;
-    %end
-    [fvec,fjac] = feval(func,x,varargin{:});
+    if jacobian_flag
+      [fvec,fjac] = feval(func,x,varargin{:});
+    else
+      dh = max(abs(x(j2)),options_.gstep*ones(nn,1))*eps^(1/3);
+      
+      for j = 1:nn
+	xdh = x ;
+	xdh(j2(j)) = xdh(j2(j))+dh(j) ;
+	t = feval(func,xdh,varargin{:});
+	fjac(:,j) = (t(j1) - fvec)./dh(j) ;
+	g(j) = fvec'*fjac(:,j) ;
+      end
+    end
     fvec = fvec(j1);
     fjac = fjac(j1,j2);
     g = (fvec'*fjac)';

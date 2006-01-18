@@ -18,7 +18,7 @@ function steady_()
   if exist([M_.fname '_steadystate'])
     [oo_.steady_state,check] = feval([M_.fname '_steadystate'],oo_.steady_state,x);
   else
-    [oo_.staedy_state,check] = dynare_solve([M_.fname '_static'],oo_.steady_state,x);
+    [oo_.steady_state,check] = dynare_solve([M_.fname '_static'],oo_.steady_state,1,x);
   end
 
   if check ~= 0

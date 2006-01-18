@@ -57,7 +57,7 @@ if info(1)
 end
 
 if options_.dr_algo == 1 & options_.order > 1
-  dr.ys = dynare_solve('dr2',ys,dr);
+  dr.ys = dynare_solve('dr2',ys,0,dr);
   dr.fbias = 2*feval([M_.fname '_static'],dr.ys,oo_.exo_steady_state);
   [dr, info1] = dr1(dr,check_flag);
   if info1(1)
