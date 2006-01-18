@@ -65,12 +65,12 @@ int main(int argc, char** argv)
     if (retval != 0)	exit(-1);
     // Execute final instructions
     p.finish();
-	string name = argv[1];
-  	name.erase(name.size()-4,4);
-	// Opening and init main Output file (M file)
-  	output_file.Open(name+".m");
-  	// Writing remaining string output to output file 
-  	output_file.Save(output);
+    string name = argv[1];
+    name.erase(name.size()-4,4);
+    // Opening and init main Output file (M file)
+    output_file.Open(name+".m");
+    // Writing remaining string output to output file 
+    output_file.Save(output);
 	  	
   }
   // Handeling parser and scanner exeptions
