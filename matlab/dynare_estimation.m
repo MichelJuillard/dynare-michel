@@ -109,7 +109,7 @@ nvn = estim_params_.nvn;
 ncx = estim_params_.ncx;
 ncn = estim_params_.ncn;
 np  = estim_params_.np ;
-nx 	= nvx+nvn+ncx+ncn+np;
+nx  = nvx+nvn+ncx+ncn+np;
 
 %% Static solver
 if exist([M_.fname '_steadystate'])
@@ -227,7 +227,6 @@ if options_.mode_compute > 0 & options_.posterior_mode_estimation
     if isfield(options_,'optim_opt')
       eval(['optim_options = optimset(optim_options,' options_.optim_opt ');']);
     end
-
     [xparam1,fval,exitflag,output,lamdba,grad,hessian_fmincon] = ...
 	fmincon(fh,xparam1,[],[],[],[],lb,ub,[],optim_options,gend,data);
   elseif options_.mode_compute == 2
@@ -241,7 +240,6 @@ if options_.mode_compute > 0 & options_.posterior_mode_estimation
     if isfield(options_,'optim_opt')
       eval(['optim_options = optimset(optim_options,' options_.optim_opt ');']);
     end
-
     [xparam1,fval,exitflag] = fminunc(fh,xparam1,optim_options,gend, ...
 				      data);
   elseif options_.mode_compute == 4
@@ -653,14 +651,14 @@ if (any(bayestopt_.pshape  >0 ) & options_.mh_replic) | (any(bayestopt_.pshape >
     McMCDiagnostics;
   end
   %% Here i discard first half of the draws:
-  CutSample();
+  CutSample;
   %% Estimation of the marginal density from the Mh draws:
   marginal = marginal_density;
   %% 
-  GetPosteriorParametersStatistics();
-  PlotPosteriorDistributions();
+  GetPosteriorParametersStatistics;
+  PlotPosteriorDistributions;
   if options_.bayesian_irf
-    PosteriorIRF();
+    PosteriorIRF;
   end  
   return
   
