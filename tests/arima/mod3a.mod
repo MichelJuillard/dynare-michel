@@ -1,4 +1,4 @@
-var dx dy x y;
+var dx dy;
 varexo e_x e_y;
 
 parameters rho_x rho_y;
@@ -9,8 +9,6 @@ rho_y = -0.3;
 model;
 dx = rho_x*dx(-1)+e_x;
 dy = rho_y*dy(-1)+e_y;
-x = x(-1)+dx;
-y = y(-1)+dy;
 end;
 
 estimated_params;
@@ -20,6 +18,7 @@ stderr e_x,INV_GAMMA_PDF,0.01,inf;
 stderr e_y,INV_GAMMA_PDF,0.01,inf;
 end;
 
-varobs x y;
-unit_root_vars x y;
-estimation(datafile=data1,nobs=1000,mh_replic=0);
+varobs dx dy;
+check;
+estimation(datafile=data1,nobs=1000,mh_replic=0,load_mh_file);
+stab_map_;
