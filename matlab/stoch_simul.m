@@ -32,9 +32,6 @@ global it_
 
   TeX = options_.TeX;
 
-%  if options_.simul & ~isempty(iter_) & options_.periods == 0
-%    options_.periods = iter_;
-%  end
   iter_ = max(options_.periods,1);
   if M_.exo_nbr > 0
     oo_.exo_simul= ones(iter_ + M_.maximum_lag + M_.maximum_lead,1) * oo_.exo_steady_state';
