@@ -29,8 +29,8 @@ int sigma_e = 0;
 %x NATIVE
 
 %%
- /* \r is always ignored */
-<*>\r ;
+ /* spaces, tabs and EOL are ignored */
+<*>[ \t\n\r\f] ;
 
  /* Comments */
 <INITIAL,DYNARE_STATEMENT,DYNARE_BLOCK>["%"].*
@@ -253,10 +253,7 @@ int sigma_e = 0;
 [\]] {return yytext[0];}
 [\[] {return yytext[0];}
 
- /* spaces, tabs and EOL are ignored */
-<*>[ \t] {;}
-<*>[\n] {;}
-<*>[" "\t\n] {;}
+
 
  /* Any other entry is writen as is */
 . {_scanner->do_as_is(yytext);}
