@@ -218,7 +218,7 @@ int sigma_e = 0;
 	_scanner->do_name(yytext); 
 	return NAME;}
 
-<DYNARE_STATEMENT,DYNARE_BLOCK>(([0-9]*\.[0-9]+)|([0-9]+\.))([edED][-+]?[0-9]+)? {
+<DYNARE_STATEMENT,DYNARE_BLOCK>((([0-9]*\.[0-9]+)|([0-9]+\.))([edED][-+]?[0-9]+)?)|([0-9]+[edED][-+]?[0-9]+) {
 	_scanner->do_num_constant(yytext);
 	 return FLOAT_NUMBER;}
 
