@@ -1,0 +1,16 @@
+\ifx\undefined\bysame
+\newcommand{\bysame}{\leavevmode\hbox to\leftmargin{\hrulefill\,\,}}
+\fi
+\begin{thebibliography}{xx}
+
+\harvarditem[Collard and Juillard]{Collard and Juillard}{2001}{COLL/JUIL/01a}
+{ Collard, F. and M.~Juillard}, Accuracy of stochastic perturbation methods:
+  The case of asset pricing models, {\it Journal of Economic Dynamics and
+  Control}, 2001, {\it 25}, 979--999.
+
+\harvarditem[Schmitt-Grohe and Uribe]{Schmitt-Grohe and Uribe}{2002}{SGU/02}
+{ Schmitt-Grohe, S. and M.~Uribe}, {\it Solving Dynamic General Equilibrium
+  Models Using a Second-Order Approximation to the Policy Function}, technical
+  working paper, Rutgers Univsersity 2002.
+
+\end{thebibliography}

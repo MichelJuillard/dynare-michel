@@ -1,0 +1,2919 @@
+<?xml version="1.0"?>
+<!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.2//EN" "http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd">
+
+<book>
+  <bookinfo>
+    <title>DYNARE MANUAL</title>
+    <subtitle>Version 3.0</subtitle>
+    <titleabbrev>DYNARE</titleabbrev>
+    <author><firstname>Michel</firstname><surname>Juillard</surname>
+<affiliation><orgname>CEPREMAP and University Paris 8</orgname></affiliation>
+<email>michel.juillard@cepremap.cnrs.fr</email>
+<address>
+<street>142 rue du Chevaleret</street>
+<postcode>75013</postcode><city>Paris</city><country>France</country>
+</address>
+</author>
+
+<copyright><year>1996, 2005</year><holder> Michel Juillard</holder>
+
+</copyright>
+<legalnotice>
+<para>
+Permission is granted to make and distribute verbatim copies of
+this manual provided the copyright notice and this permission notice
+are preserved on all copies.
+</para>
+
+<para>
+Permission is granted to copy and distribute modified versions of
+this manual under the conditions for verbatim copying, provided that
+the entire resulting derived work is distributed under the terms of
+a permission notice identical to this one.
+</para>
+<para>
+Permission is granted to copy and distribute translations of this
+manual into another language, under the above conditions for
+modified versions.
+</para>
+</legalnotice>
+<indexterm zone="Dynare"><primary>Dynare</primary></indexterm>
+<indexterm zone="var"><primary>var</primary></indexterm>
+<indexterm zone="varexo"><primary>varexo</primary></indexterm>
+<indexterm zone="varexo_det"><primary>varexo_det</primary></indexterm>
+<indexterm zone="parameters"><primary>parameters</primary></indexterm>
+<indexterm zone="model"><primary>model</primary></indexterm>
+<indexterm zone="initval"><primary>initval</primary></indexterm>
+<indexterm zone="endval"><primary>endval</primary></indexterm>
+<indexterm zone="histval"><primary>histval</primary></indexterm>
+<indexterm zone="shocks"><primary>shocks</primary></indexterm>
+<indexterm zone="periods"><primary>periods</primary></indexterm>
+<indexterm zone="simul"><primary>simul</primary></indexterm>
+<indexterm zone="check"><primary>check</primary></indexterm>
+<indexterm zone="stoch_simul"><primary>stoch_simul</primary></indexterm>
+<indexterm zone="estimated_params"><primary>estimated_params</primary></indexterm>
+<indexterm zone="estimated_params_init"><primary>estimated_params_init</primary></indexterm>
+<indexterm zone="estimated_params_bounds"><primary>estimated_params_bounds</primary></indexterm>
+<indexterm zone="varobs"><primary>varobs</primary></indexterm>
+<indexterm zone="observation_trends"><primary>observation_trends</primary></indexterm>
+<indexterm zone="estimation"><primary>estimation</primary></indexterm>
+<indexterm zone="rplot"><primary>rplot</primary></indexterm>
+<indexterm zone="dynasave"><primary>dynasave</primary></indexterm>
+<indexterm zone="dynatype"><primary>dynatype</primary></indexterm>
+<indexterm zone="unit_root_vars"><primary>unit_root_vars</primary></indexterm>
+<indexterm zone="olr"><primary>olr</primary></indexterm>
+<indexterm zone="olr_inst"><primary>olr_inst</primary></indexterm>
+<indexterm zone="optim_weights"><primary>optim_weights</primary></indexterm>
+<indexterm zone="osr"><primary>osr</primary></indexterm>
+<indexterm zone="osr_params"><primary>osr_params</primary></indexterm>
+<indexterm zone="define"><primary>@define</primary></indexterm>
+<indexterm zone="forecast"><primary>forecast</primary></indexterm>
+<indexterm zone="if_elseif_else_end"><primary>@if...@elseif...@else...@end</primary></indexterm>
+  </bookinfo>
+
+<preface><title>Preface</title><para>
+Dynare is a pre-processor and a collection of Matlab, Scilab or Gauss routines which solve, simulate and estimate non-linear
+models with forward looking variables. It is the result of research carried at
+CEPREMAP by several people (see Laffargue, 1990, Boucekkine, 1995, and
+Juillard, 1996, Collard and Juillard 2001a and 2001b).
+</para>
+<para>
+When the framework is deterministic, Dynare can be used for models with the assumption of perfect
+foresight. Typically, the system is supposed to be in a state of
+equilibrium before a period ``1'' when the news of a contemporaneous
+or of a future shock is learned by the agents in the model. The
+purpose of the simulation is to describe the reaction in anticipation of,
+then in reaction to the shock, until the system returns to the old or
+to a new state of equilibrium. In most models, this return to
+equilibrium is only an asymptotic phenomenon, which one must
+approximate by an horizon of simulation far enough in the future.
+Another exercise for which Dynare is well suited is to study the
+transition path to a new equilibrium following a permanent shock.
+</para>
+<para>
+For deterministic simulations, Dynare uses a Newton-type algorithm, first
+proposed by Laffargue (1990), instead of a first order technique like
+the one proposed by Fair and Taylor (1983), and used in earlier generation simulation programs. We believe
+this approach to be in general both faster and more robust. The
+details of the algorithm used in Dynare can be found in Juillard (1996).
+</para>
+<para>
+In a stochastic context, Dynare computes one or several simulations corresponding to a random draw of the shocks. Starting with version 2.3 (not available for Gauss), Dynare uses a second order Taylor approximation of the expectation functions (see Judd, 1996, Collard and Juillard, 2001a, 2001b, and Schmitt-Grohe and Uribe, 2002).
+</para>
+<para>
+Starting with version 3.0, it is possible to use Dynare to estimate model parameters either by maximum likelihood as in Ireland (2004) or using a Bayesian approach as in Rabanal and Rubio-Ramirez (2002), Schorfheide (2000) or Smets and Wouters (2002).
+</para>
+
+<para>
+Currently the development team of Dynare is composed of S. Adjemian, M. Juillard and O. Kamenik. Several parts of Dynare use or have strongly benefited from publicly available programs by F. Collard, L. Ingber, P. Klein, S. Sakata, F. Schorfheide, C. Sims, P. Soederlind and R. Wouters.  
+</para>
+
+<section><title>Changes</title>
+<para>December 30, 2005</para>
+<itemizedlist>
+<listitem><para>added details about parameter transformation in <xref linkend="model"/> and in <xref linkend="estimated_params"/></para></listitem>
+<listitem><para>added conditional compilation commands <xref linkend="define"/> and <xref linkend="if_elseif_else_end"/></para></listitem>
+<listitem><para>enhanced output section of command <xref linkend="estimation"/></para></listitem>
+<listitem><para>added exogenous deterministic shocks in stochastic models. See <xref linkend="varexo_det"/>, <xref linkend="forecast"/>, <xref linkend="shocks"/>, <xref linkend="stoch_simul"/></para></listitem>
+<listitem><para>added a forecast command for calibrated models. See <xref linkend="forecast"/>.</para></listitem>
+</itemizedlist>
+<para>October 14, 2005</para>
+<itemizedlist>
+<listitem><para>added syntax for computing optimal policy. See <xref linkend='olr'/>, <xref linkend='olr_inst'/>, <xref linkend='optim_weights'/>, <xref linkend='osr'/>, <xref linkend='osr_params'/>.</para></listitem>
+<listitem><para>added syntax for estimating correlation between two shocks or two measurment errors in <xref linkend="estimated_params"/>, <xref linkend="estimated_params_bounds"/> and <xref linkend="estimated_params_init"/>
+</para></listitem>
+</itemizedlist>
+<para>July 20, 2005</para>
+<itemizedlist>
+<listitem><para>Expanded description of <xref linkend="unit_root_vars"/> statement</para></listitem>
+<listitem><para>changed the default for nonlinear solver in <xref linkend="steady"/></para></listitem>
+<listitem><para>added a mention of the possibility to write explicitly a steady state function in <xref linkend="steady"/>, <xref linkend="stoch_simul"/>, <xref linkend="estimation"/> and <xref linkend="unit_root_vars"/></para></listitem>
+<listitem><para>added a brief <emphasis>Ouput</emphasis> section in <xref linkend="estimation"/></para></listitem>
+<listitem><para>corrected misleading description of option <command>prefilter</command> in <xref linkend="estimation"/></para></listitem>
+<listitem><para>added variance decomposition among the statistics computed with option <command>moments_varendo</command> in <xref linkend="estimation"/></para></listitem>
+<listitem><para>tex option in <xref linkend="estimation"/> isn't yet implemented</para></listitem>
+</itemizedlist>
+<para>May 3, 2005</para>
+<itemizedlist>
+<listitem><para>added option <command>noprint</command> in <xref linkend="stoch_simul"/></para></listitem>
+<listitem><para>modified option <command>irf</command> in <xref linkend="stoch_simul"/></para></listitem>
+<listitem><para>modified option <command>simul_seed</command> in <xref linkend="stoch_simul"/></para></listitem>
+</itemizedlist>
+<para>March 6, 2005</para>
+<itemizedlist>
+<listitem><para>corrected typos in equations for 1st and 2nd order approximation formulas in <xref linkend="stoch_simul"/>.</para></listitem>
+<listitem><para>temporarily removed description of output variables in <xref linkend="estimation"/> as old content was outdated and the new one isn't ready yet.</para></listitem>
+<listitem><para>added cross-references</para></listitem>
+</itemizedlist>
+</section>
+</preface>
+
+<chapter><title>Introduction</title>
+
+<para>
+In order to give instructions to Dynare, the user has to write a <emphasis>model file</emphasis> whose file name must terminate by ".mod". This file contains the description of the model and the computing tasks required by the user.
+</para>
+<para>
+In practice, the handling of your model file is done in two
+steps: in the first one, the model and the processing instructions
+written by the user in a <emphasis>model file</emphasis> are
+interpreted and the proper Gauss, Matlab or Scilab instructions are generated; in the
+second step, the program actually runs the computations. Both steps
+are triggered by a single keyword: <command>Dynare</command>.
+</para>
+
+<sect1><title>Software requirements</title>
+<para>
+This version of Dynare works only under Windows 98/NT/2000/XP. For a Unix version, please, write me.
+</para>
+<para>
+The Matlab version has been written with Matlab 6.5.1.
+</para>
+<para>
+The Scilab version has been tested with Scilab 3.0.
+</para>
+<para>
+The Gauss version of Dynare has been written with Gauss version 3.2. It most likely doesn't work with previous versions.
+</para>
+</sect1>
+
+<sect1><title>Installation</title>
+<para>
+In case of update from a previous version, it is a good idea to copy
+the old version in a backup directory so as to be able to revert to it
+in case of problems. None of the previous files are usefull anymore, so you are strongly encouraged to remove them from directory <filename>c:\dynare</filename>. The Matlab version of Dynare lets you now easily have different versions of Dynare on your computer.
+</para>
+
+<para>
+After installation, Dynare can be used in any directory on your computer. It is best practive to keep your model files in directories different from the one containing the Dynare toolbox. That way you can upgrade Dynare and discard the previous version without having to worry about your own files.
+</para>
+ 
+<sect2><title>Installing the Matlab version</title>
+<para>
+Starting with version 3.0, by default, Dynare is installed in a directory whose name contains the version number. For example
+<informalexample><programlisting>
+Dynare_v3.0
+</programlisting>
+</informalexample>
+This directory contains several sub-directories, among which <filename>matlab</filename>, <filename>doc</filename> and <filename>examples</filename>.
+</para>
+<para>
+After unpacking the archive, start the Matlab program and use the menu <command>File/Set path</command> to add the path to Dynare <filename>matlab</filename> subdirectory. For example
+<informalexample>
+<programlisting>
+c:\dynare_v3.0\matlab
+</programlisting>
+</informalexample>
+</para>
+</sect2>
+
+
+<sect2><title>Installing the Scilab version</title>
+<para>
+Unpack the zip file in the directory <filename>c:\</filename> (If you want to use another
+directory, see below). The Scilab version in automatically installed in <filename>c:\dynare\scilab</filename>.
+</para>
+<para>
+Then, find the <filename>scilab.star</filename> file, in the top directory of your Scilab distribution. Edit this file and add the following line after similar statements:
+<informalexample>
+<programlisting>
+load('c:/dynare/scilab/lib');
+</programlisting>
+</informalexample>
+</para>
+<para>
+If you installed Dynare for Scilab in a directory different from <filename>c:\dynare\scilab</filename>, change the above instructions accordingly and edit the following line in <filename>Dynare.sci</filename>
+<informalexample>
+<programlisting>
+command = 'c:\dynare\scilab\dynare_s '+fname;
+</programlisting>
+</informalexample>
+Then, restart Scilab and run the command <command>uplib()</command>.
+</para>
+</sect2>
+
+<sect2><title>Installing the Gauss version</title>
+<para>
+Unpack the zip file in the directory <filename>c:\</filename> (If you want to use another
+directory, see below). The Gauss version in automatically installed in <filename>c:\dynare\gauss</filename>.
+</para>
+<para>
+If you had any previous version of Dynare, use the Gauss editor or any text editor to remove all references to it from the library file <filename>user.lcg</filename>.
+</para>
+<para>
+After unpacking the archive, start the Gauss program and type the following:
+<informalexample>
+<programlisting>
+   library pgraph
+   lib user c:\dynare\gauss\dynare.src
+   lib user c:\dynare\gauss\dynare1.src
+   lib user c:\dynare\gauss\dynare2.src
+   lib user c:\dynare\gauss\dynare3.src
+</programlisting>
+</informalexample>
+</para>
+<para>
+If you installed Dynare for Gauss in a directory different from <filename>c:\dynare\gauss</filename>, change the above instructions accordingly and edit the following line in <filename>Dynare.src</filename>
+<informalexample>
+  <programlisting>
+declare string PARSER = "c:\\dynare\\gauss\\dynare_g ";
+  </programlisting>
+</informalexample>
+</para>
+</sect2>
+
+</sect1>
+</chapter>
+
+<chapter><title>Commands</title>
+<para>
+Dynare commands are either single instructions or a block of instructions. Each single instructions or block elements are terminated by <command>;</command>. Block of instructions are terminated by <command>end;</command>.
+</para>
+
+<para>
+Most Dynare commands have arguments and several accept options, indicated in parentheses after the command keyword.
+</para>
+<para>
+In the description of Dynare commands, the following conventions are observed:
+<itemizedlist>
+<listitem><para>optional arguments or options are indicated between square brackets <command>[]</command></para></listitem>
+<listitem><para>repreated arguments are indicated by ellipses <command>...</command></para></listitem>
+<listitem><para><command><replaceable>INTEGER</replaceable></command> indicates an integer number</para></listitem>
+<listitem><para><command><replaceable>DOUBLE</replaceable></command> indicates a double precision number. The following syntaxes are valid: 1.1e3, 1.1E3, 1.1d3, 1.1D3.</para></listitem>
+<listitem><para><command><replaceable>EXPRESSION</replaceable></command> indicates a mathematical expression valid in the underlying language (Matlab, Scilab or Gauss)</para></listitem>
+<listitem><para><command><replaceable>VARIABLE_NAME</replaceable></command> indicates a variable name starting with an alphabetical character and can't contain ()+-*/^=!;:@#. or accentuated characters</para></listitem>
+<listitem><para><command><replaceable>PARAMETER_NAME</replaceable></command> indicates a parameter name starting with an alphabetical charcater and can't contain ()+-*/^=!;:@#. or accentuated characters</para></listitem>
+<listitem><para><command><replaceable>FILENAME</replaceable></command> indicates a file name valid under your operating system (Windows, Linux or Unix)</para></listitem>
+</itemizedlist>
+</para>
+
+<sect1><title>Executing Dynare</title>
+
+<refentry id="Dynare">
+  <refmeta>
+    <refentrytitle>dynare</refentrytitle>
+  </refmeta>
+
+  <refnamediv>
+    <refname>dynare</refname>
+    <refpurpose>executes Dynare</refpurpose>
+  </refnamediv>
+
+  <refsynopsisdiv>
+    <cmdsynopsis>
+      <command>dynare</command>
+      <arg choice="plain">
+      <replaceable>FILENAME</replaceable>[.mod]
+      </arg>
+    </cmdsynopsis>
+  </refsynopsisdiv>
+
+<refsect1><title>Description</title>
+<para>
+<command>dynare</command> executes instruction included in <filename>filename.mod</filename>.
+<filename>filename.mod</filename> is the name of the model file containing the
+model and the processing instructions.
+</para>
+</refsect1>
+
+<refsect1><title>Details</title>
+<para>
+In Matlab, <command>dynare</command> creates three intermediary files:
+<itemizedlist spacing='compact'>
+<listitem><para> <filename>filename.m</filename> with the instructions for the simulations</para></listitem>
+<listitem><para> <filename>filename_ff.m</filename> with the dynamic model equations</para></listitem>
+<listitem><para> <filename>filename_fff.m</filename> with the long run static model equations</para></listitem>
+</itemizedlist>
+</para>
+<para>
+In Scilab, <command>dynare</command> creates three intermediary files:
+<itemizedlist spacing='compact'>
+<listitem><para> <filename>filename.sci</filename> with the instructions for the simulations</para></listitem>
+<listitem><para> <filename>filename_ff.sci</filename> with the dynamic model equations</para></listitem>
+<listitem><para> <filename>filename_fff.sci</filename> with the long run static model equations</para></listitem>
+</itemizedlist>
+</para>
+<para>
+In Gauss, <command>dynare</command> creates an intermediary file <filename>filename.gau</filename> with the instructions for the simulations. The Gauss version still accepts the former <filename>.mdl</filename> extension, but it is now deprecated.
+</para>
+<para>
+These files may be looked at to understand errors reported at the simulation stage.
+</para>
+</refsect1>
+
+<refsect1><title>Output</title>
+<para>
+Depending on the computing tasks requested in the *.mod file, executing command <command>dynare</command> will leave in the workspace variables containing results available for further processing. More details are given under the relevant computing tasks.
+</para>
+
+<para>
+Under Matlab, some results are also saved in a file called <replaceable>FILENAME</replaceable><filename>_results.mat</filename>. Currently, this file contains when available the structures <varname>dr_</varname> and <varname>oo_</varname>.
+</para>
+</refsect1>
+
+<refsect1><title>Examples</title>
+<programlisting>
+dynare ramst
+</programlisting>
+<para>or</para>
+<programlisting>
+dynare ramst.mod
+</programlisting>
+</refsect1>
+</refentry>
+</sect1>
+
+<sect1><title>General declarations</title>
+
+<para>General declarations of variables and parameters are made with the following commands:</para>
+<itemizedlist>
+<listitem><para><xref linkend='periods'/> (deprecated)</para></listitem>
+<listitem><para><xref linkend='var'/></para></listitem>
+<listitem><para><xref linkend='varexo'/></para></listitem>
+<listitem><para><xref linkend='varexo_det'/></para></listitem>
+<listitem><para><xref linkend='parameters'/></para></listitem>
+</itemizedlist>
+
+<refentry id="periods">
+  <refmeta>
+    <refentrytitle>periods</refentrytitle>
+  </refmeta>
+
+  <refnamediv>
+    <refname>periods</refname>
+    <refpurpose>specifies the number of simulation periods</refpurpose>
+  </refnamediv>
+
+  <refsynopsisdiv>
+    <cmdsynopsis>
+      <command>periods</command> <arg choice="plain">
+      <replaceable>INTEGER</replaceable>;
+      </arg>
+    </cmdsynopsis>
+  </refsynopsisdiv>
+
+<refsect1><title>Description</title>
+<para>
+This command is now deprecated (but will still work for older model files). It is not necessary when no simulation is performed and is replaced by an option PERIODS in SIMUL and STOCH_SIMUL.
+</para>
+<para>
+Set the number of periods in the simulation. The periods are numbered from 1 to <replaceable>INTEGER</replaceable>. In perfect foresight simulations, it is assumed that all future events are perfectly known at the beginning of period 1.
+</para>
+</refsect1>
+
+<refsect1><title>Example</title>
+<programlisting>
+periods 100;
+</programlisting>
+</refsect1>
+</refentry>
+
+<refentry id="var">
+  <refmeta>
+    <refentrytitle>var</refentrytitle>
+  </refmeta>
+
+  <refnamediv>
+    <refname>var</refname>
+    <refpurpose>declares endogenous variables</refpurpose>
+  </refnamediv>
+
+  <refsynopsisdiv>
+    <cmdsynopsis>
+      <command>var</command>
+      <arg choice="plain">
+	<replaceable>VARIABLE_NAME</replaceable>
+      </arg>
+      <arg>
+	,
+      </arg>
+      <arg rep="repeat">
+	<replaceable>VARIABLE_NAME</replaceable>
+      </arg>
+    <arg choice="plain">;</arg>
+    </cmdsynopsis>
+  </refsynopsisdiv>
+
+<refsect1><title>Description</title>
+<para>
+This required command declares the endogenous variables in the model. The variable names must start with a letter and can't contain the following characters : ()+-*/^=!;:@#. or accentuated characters.
+</para>
+<para>
+In Gauss, setting <varname>_longname = 1</varname> allows the use of more than 8 characters in the variable names and makes a distinction between lower and upper case letters.
+</para>
+</refsect1>
+
+<refsect1><title>Example</title>
+<programlisting>
+var c gnp q1 q2;
+</programlisting>
+</refsect1>
+</refentry>
+
+<refentry id="varexo">
+  <refmeta>
+    <refentrytitle>varexo</refentrytitle>
+  </refmeta>
+
+  <refnamediv>
+    <refname>varexo</refname>
+    <refpurpose>declares exogenous variables</refpurpose>
+  </refnamediv>
+
+  <refsynopsisdiv>
+    <cmdsynopsis>
+      <command>varexo</command>
+      <arg choice="plain">
+	<replaceable>VARIABLE_NAME</replaceable>
+      </arg>
+      <arg>
+	,
+      </arg>
+      <arg rep="repeat">
+	<replaceable>VARIABLE_NAME</replaceable>
+      </arg>
+    <arg choice="plain">;</arg>
+    </cmdsynopsis>
+  </refsynopsisdiv>
+
+<refsect1><title>Description</title>
+<para>
+This optional command declares the exogenous variables in the model. See command <xref linkend="var"/> for the syntax of <replaceable>VARIABLE_NAME</replaceable>.
+</para>
+<para>
+Exogenous variables are required if the user wants to be able to apply shocks to her model. 
+</para>
+</refsect1>
+
+<refsect1><title>Example</title>
+<programlisting>
+varexo m gov;
+</programlisting>
+</refsect1>
+</refentry>
+
+<refentry id="varexo_det">
+  <refmeta>
+    <refentrytitle>varexo_det</refentrytitle>
+  </refmeta>
+
+  <refnamediv>
+    <refname>varexo_det</refname>
+    <refpurpose>declares exogenous deterministic variables in a stochastic  model</refpurpose>
+  </refnamediv>
+
+  <refsynopsisdiv>
+    <cmdsynopsis>
+      <command>varexo_det</command>
+      <arg choice="plain">
+	<replaceable>VARIABLE_NAME</replaceable>
+      </arg>
+      <arg>
+	,
+      </arg>
+      <arg rep="repeat">
+	<replaceable>VARIABLE_NAME</replaceable>
+      </arg>
+    <arg choice="plain">;</arg>
+    </cmdsynopsis>
+  </refsynopsisdiv>
+
+<refsect1><title>Description</title>
+<para>
+This optional command declares exogenous deterministic variables in a stochastic model. See command <xref linkend="var"/> for the syntax of <replaceable>VARIABLE_NAME</replaceable>.
+</para>
+<para>It is possible to mix deterministic and stochastic shocks to build models where agents know from the start of the simulation about future exogenous changes. In that case <xref linkend="stoch_simul"/> will compute the rational expectation solution adding future information to the state space (nothing is shown in the output of <xref linkend="stoch_simul"/>) and <xref linkend="forecast"/> will compute a simulation conditional on initial  conditions and future information.
+</para>
+</refsect1>
+
+<refsect1><title>Example</title>
+<programlisting>
+varexo m gov;
+varexo_det tau;
+</programlisting>
+</refsect1>
+</refentry>
+
+<refentry id="parameters">
+  <refmeta>
+    <refentrytitle>parameters</refentrytitle>
+  </refmeta>
+
+  <refnamediv>
+    <refname>parameters</refname>
+    <refpurpose>declares parameters</refpurpose>
+  </refnamediv>
+
+  <refsynopsisdiv>
+    <cmdsynopsis>
+      <command>parameters</command>
+      <arg choice="plain">
+	<replaceable>PARAMETER_NAME</replaceable>
+      </arg>
+      <arg>
+	,
+      </arg>
+      <arg rep="repeat">
+	<replaceable>PARAMETER_NAME</replaceable>
+      </arg>
+    <arg choice="plain">;</arg>
+    </cmdsynopsis>
+  </refsynopsisdiv>
+
+<refsect1><title>Description</title>
+<para>
+This optional command declares parameters used in the model, in variable initialization or in shock declarations. The parameters must then be assigned values using standard syntax of underlying matrix programming language. Be carefull not to use names reserved by Dynare or the underlying language (Matlab, Scilab or Gauss).
+</para>
+</refsect1>
+
+<refsect1><title>Example</title>
+<programlisting>
+parameters alpha, bet;
+
+alpha = 0.3;
+bet = sqrt(2);
+</programlisting>
+</refsect1>
+</refentry>
+</sect1>
+
+<sect1><title>Model declaration</title>
+
+<para>The model is declared inside a <xref linkend="model"/> block.</para>
+
+<refentry id="model">
+  <refmeta>
+    <refentrytitle>model</refentrytitle>
+  </refmeta>
+
+  <refnamediv>
+    <refname>model</refname>
+    <refpurpose>declares the model equations</refpurpose>
+  </refnamediv>
+
+  <refsynopsisdiv>
+    <cmdsynopsis>
+      <command>model</command>
+      <arg>
+	(linear)
+      </arg>
+      <arg choice="plain">
+      ;
+      </arg><sbr/>
+      <arg choice="plain">
+	<synopfragmentref linkend="pound_exp">MATLAB EXPRESSION</synopfragmentref>;
+      </arg><sbr/>
+      <arg rep="repeat">
+	<synopfragmentref linkend="pound_exp">MATLAB EXPRESSION</synopfragmentref>;
+      </arg><sbr/>
+      <arg choice="plain">
+	end;
+      </arg>
+
+      <arg choice="plain">
+	<synopfragmentref linkend="eq">EQUATION</synopfragmentref>;
+      </arg><sbr/>
+      <arg rep="repeat">
+	<synopfragmentref linkend="eq">EQUATION</synopfragmentref>;
+      </arg><sbr/>
+      <arg choice="plain">
+	end;
+      </arg>
+
+      <synopfragment id="pound_exp">
+	<arg choice="plain">#<replaceable>EXPRESSION</replaceable></arg>
+	<arg>= #<replaceable>EXPRESSION</replaceable></arg>
+	<arg choice="plain">;</arg>
+      </synopfragment>
+
+      <synopfragment id="eq">
+	<arg choice="plain"><replaceable>EXPRESSION</replaceable></arg>
+	<arg>= <replaceable>EXPRESSION</replaceable></arg>
+	<arg choice="plain">;</arg>
+      </synopfragment>
+    </cmdsynopsis>
+  </refsynopsisdiv>
+
+<refsect1><title>Description</title>
+<para>
+The equations of the model are written in a block delimited by <command>model;</command> and <command>end;</command>.
+</para>
+<para>
+There must be as many equations as there are endogenous variables in the model, except when used to compute the unconstrained optimal policy with <command>olr</command>. The lead and lag of the variables are written in parenthesis immediately after the variable name. Leads or lags of more than one period are allowed. All the functions available in Matlab, Scilab or Gauss, respectively, are recognized. Each equation must be terminated by a semicolon (;).
+</para>
+<para>
+When the equations are written in homogenous form, it is possible to omit the "= 0" part and write only the left hand side of the equation.
+</para>
+<para>
+It is possible to include arbitrary Matlab expressions in a model. It must be preceeded by a pound sign (#) as the first character of the line. This is particularily usefull to declare tansformation of parameters for estimation purpose (see <xref linkend="estimated_params"/>).
+</para>
+
+<para>
+The option <command>linear</command> declares the model as being linear. It avoids to have to declare initial values for computing the steady state and it sets automatically <command>order=1</command> in <command>stoch_simul</command>.
+</para>
+</refsect1>
+
+<refsect1><title>Example 1</title>
+<programlisting>
+model;
+c =  - k + aa*x*k(-1)^alph + (1-delt)*k(-1);
+c^(-gam) = (aa*alph*x(+1)*k^(alph-1) + 1 - delt)*c(+1)^(-gam)/(1+bet);
+end;
+</programlisting>
+</refsect1>
+
+<refsect1><title>Example 2</title>
+<programlisting>
+model;
+c + k - aa*x*k(-1)^alph - (1-delt)*k(-1);
+c^(-gam) - (aa*alph*x(+1)*k^(alph-1) + 1 - delt)*c(+1)^(-gam)/(1+bet);
+end;
+</programlisting>
+</refsect1>
+
+<refsect1><title>Example 3</title>
+<programlisting>
+model(linear);
+# b = 1/c;
+x = a*x(-1)+b*y(+1)+e_x;
+y = d*y(-1)+e_y;
+end;
+</programlisting>
+</refsect1>
+</refentry>
+</sect1>
+
+<sect1><title>Initial and terminal conditions</title>
+<para>
+In many contexts, it is necessary to compute the steady state of a non-linear model <xref linkend='initval'/> specifies then numerical initial values for the non-linear solver.
+</para>
+<para>
+Used in perfect foresight mode, the types of forward-loking models for which Dynare was designed require both initial and terminal conditions. Most often these initial and terminal conditions are static equilibria, but not necessarily. 
+</para>
+<para>
+One typical application is to consider an economy at the equilibrium, trigger a shock in first period, and study the trajectory of return at the initial equilbrium. To do that, one needs <xref linkend='initval'/> and <xref linkend='shocks'/>(see next section). 
+</para>
+<para>
+Another one is to study, how an economy, starting from arbitrary initial conditions converges toward equilibrium. To do that, one needs <xref linkend='initval'/> and <xref linkend='endval'/>; 
+</para>
+<para>
+For models with lags on more than one period, the command <xref linkend='histval'/> permits to specify different historical initial values in different periods. 
+</para>
+<itemizedlist>
+<listitem><para><xref linkend='initval'/></para></listitem>
+<listitem><para><xref linkend='endval'/></para></listitem>
+<listitem><para><xref linkend='histval'/></para></listitem>
+</itemizedlist>
+
+<refentry id="initval">
+  <refmeta>
+    <refentrytitle>initval</refentrytitle>
+  </refmeta>
+
+  <refnamediv>
+    <refname>initval</refname>
+    <refpurpose>specifies numerical starting values for finding the steady state and/or initial values for simulations</refpurpose>
+  </refnamediv>
+
+  <refsynopsisdiv>
+    <cmdsynopsis>
+      <command>initval;</command><sbr/>
+      <arg choice="plain">
+	<replaceable>VARIABLE_NAME</replaceable> = <replaceable>EXPRESSION</replaceable>;
+	</arg><sbr/>
+	<arg rep="repeat">
+	<replaceable>VARIABLE_NAME</replaceable> = <replaceable>EXPRESSION</replaceable>;
+	  </arg><sbr/>
+	  <arg choice="plain">
+	    end;
+	  </arg>
+    </cmdsynopsis>
+  </refsynopsisdiv>
+
+<refsect1><title>Description</title>
+<para>
+<replaceable>EXPRESSION</replaceable> is any valid expression returning a numerical value and can contain already initialized variable names.
+</para>
+<para>
+The <command>initval;</command> ... <command>end;</command> block serves two purposes. It set the initial and, possibly, terminal conditions for the simulation and provides numerical initialization for various computation tasks (<xref linkend='steady'/>, <xref linkend='simul'/>, <xref linkend='stoch_simul'/>).  
+</para>
+<para>
+Theoreticaly, initial conditions are only necessary for lagged variables. However, as <command>initval</command> provides also numerical initialization, it is necessary to provide values for all variables in the model, except if the model is declared as linear.
+</para>
+<para>
+For stochastic models, it isn't necessary to delcare 0 as initial values for exogneous stochastic variables as it is the only possible value.
+</para>
+<para>
+When the <command>initval</command> block is followed by the command <xref linkend='steady'/>, it is not necessary to provide exact initialization values for the endogenous variables. <xref linkend='steady'/> will use the values provided in the <command>initval</command> block as initial guess in the non-linear equation solver and computes exact values for the endogenous variables at the steady state. The steady state is defined by keeping constant the value of the exogenous variables.  
+</para>
+</refsect1>
+
+<refsect1><title>Example</title>
+<programlisting>
+initval;
+c = 1.2;
+k = 12;
+x = 1;
+end;
+
+steady;
+</programlisting>
+</refsect1>
+</refentry>
+
+<refentry id="endval">
+  <refmeta>
+    <refentrytitle>endval</refentrytitle>
+  </refmeta>
+
+  <refnamediv>
+    <refname>endval</refname>
+    <refpurpose>specifies terminal values for deterministic simulations</refpurpose>
+  </refnamediv>
+
+  <refsynopsisdiv>
+    <cmdsynopsis>
+      <command>endval;</command><sbr/>
+      <arg choice="plain">
+	<replaceable>VARIABLE_NAME</replaceable> = <replaceable>EXPRESSION</replaceable>;
+	</arg><sbr/>
+	<arg rep="repeat">
+	<replaceable>VARIABLE_NAME</replaceable> = <replaceable>EXPRESSION</replaceable>;
+	  </arg><sbr/>
+	  <arg choice="plain">
+	    end;
+	  </arg>
+    </cmdsynopsis>
+  </refsynopsisdiv>
+
+<refsect1><title>Description</title>
+<para>
+<replaceable>EXPRESSION</replaceable> is any valid expression returning a numerical value and can contain already initialized variable names.
+</para>
+<para>
+The optional <command>endval;</command> ... <command>end;</command> block serves two purposes. It set the terminal conditions for the simulation with the LBJ alogrithm, when those differ from the initial conditions. When it is the case, the <command>endval</command> block also provides the numerical initialization for various computation tasks (<xref linkend='steady'/>, <xref linkend='simul'/>), starting in period 1.  
+</para>
+<para>
+Theoreticaly, terminal conditions are required in the LBJ algorithm only for forward variables. However, as <command>endval</command> provides also numerical initialization, it is necessary to provide values for all variables in the model.
+</para>
+<para>
+When the <command>endval</command> block is followed by the command <xref linkend='steady'/>, it is not necessary to provide exact values for the endogenous variables. <xref linkend='steady'/> will use the values provided in the <command>endval</command> block as initial guess in the non-linear equation solver and computes exact values for the endogenous variables at the steady state. The steady state is defined by keeping constant the value of the exogenous variables.  
+</para>
+</refsect1>
+
+<refsect1><title>Example</title>
+<programlisting>
+var c k;
+varexo x;
+...
+initval;
+c = 1.2;
+k = 12;
+x = 1;
+end;
+
+steady;
+
+endval;
+c = 2;
+k = 20;
+x = 2;
+end;
+
+steady;
+</programlisting>
+<para>
+The initial equilibrium is comptuted by <xref linkend='steady'/> for x=1, and the terminal one, for x=2.
+</para>
+</refsect1>
+</refentry>
+
+<refentry id="histval">
+  <refmeta>
+    <refentrytitle>histval</refentrytitle>
+  </refmeta>
+
+  <refnamediv>
+    <refname>histval</refname>
+    <refpurpose>specifies historical values before the start of a simulation</refpurpose>
+  </refnamediv>
+
+  <refsynopsisdiv>
+    <cmdsynopsis>
+      <command>histval;</command><sbr/>
+      <arg choice="plain">
+	<replaceable>VARIABLE_NAME</replaceable> (<replaceable>INTEGER</replaceable>) = <replaceable>EXPRESSION</replaceable>;
+	</arg><sbr/>
+	<arg rep="repeat">
+	<replaceable>VARIABLE_NAME</replaceable> (<replaceable>INTEGER</replaceable>) = <replaceable>EXPRESSION</replaceable>;
+	  </arg><sbr/>
+	  <arg choice="plain">
+	    end;
+	  </arg>
+    </cmdsynopsis>
+  </refsynopsisdiv>
+
+<refsect1><title>Description</title>
+<para>
+<replaceable>EXPRESSION</replaceable> is any valid expression returning a numerical value and can contain already initialized variable names.
+</para>
+<para>
+In models with lags on more than one period, the optional <command>histval;</command> ... <command>end;</command> block permits to specify different historical initial values for different periods.
+</para>
+<para>
+By convention in Dynare, period 1 is the first period of the simulation. Going backward in time, the first period before the start of the simulation is period 0, then period -1, and so on.
+</para>
+<para>
+If your lagged variables are linked by identities, be careful to satisfy these identities when you set historical initial values.
+</para>
+</refsect1>
+
+<refsect1><title>Example</title>
+<programlisting>
+var x y;
+varexo e;
+
+model;
+x = y(-1)^alpha*y(-2)^(1-alpha)+e;
+...
+end;
+
+initval;
+x = 1;
+y = 1;
+e = 0.5;
+end;
+
+steady;
+
+histval;
+y(0) = 1.1;
+y(-1) = 0.9;
+end;
+</programlisting>
+</refsect1>
+
+</refentry>
+</sect1>
+
+<sect1><title>Shocks on exogenous variables</title>
+<para>
+In a deterministic context, when one wants to study the transition of one equilibrium position to another, it is equivalent to analyze the consequences of a permanent shock and this in done in Dynare through the proper use of <xref linkend='initval'/> and <xref linkend='endval'/>.
+</para>
+<para>
+Another typical experiment is to study the effects of a temporary shock after which the system goes back to the original equilibrium (if the model is stable ...). A temporary shock is a temporary change of value of one or several exogenous variables in the model. Temporary shocks are specified with the command <xref linkend='shocks'/>.
+</para>
+<para>
+In a stochastic framework, the exogenous variables take random values in each period. In Dynare, these random values follow a normal distribution with zero mean, but it belongs to the user to specify the variability of these shocks. The non-zero elements of the matrix of variance-covariance of the shocks can be entered with the <xref linkend='shocks'/> command. Or, the entire matrix can be direclty entered with <xref linkend='Sigma_e'/>. Note that, starting with version 2.5.2, the direct specification of the <emphasis>internal</emphasis> matrix <varname>Sigma_e_</varname>, prone to errors, is discouraged.
+</para>
+<para>
+If the variance of an exogenous variable is set to zero, this variable will appear in the report on policy and transition functions, but isn't used in the computation of moments and of Impulse Response Functions. Setting a variance to zero is an easy way of removing an exogenous shock.
+</para>
+<itemizedlist>
+<listitem><para><xref linkend='shocks'/></para></listitem>
+<listitem><para><xref linkend='Sigma_e'/></para></listitem>
+</itemizedlist>
+
+<refentry id="shocks">
+  <refmeta>
+    <refentrytitle>shocks</refentrytitle>
+  </refmeta>
+
+  <refnamediv>
+    <refname>shocks</refname>
+    <refpurpose>specifies shocks on deterministic or stochastic exogenous variables</refpurpose>
+  </refnamediv>
+
+  <refsynopsisdiv>
+    <cmdsynopsis>
+      <command>shocks</command>
+      <arg>(<arg rep="repeat" choice="plain"><replaceable>OPTION</replaceable>,</arg>);</arg><sbr/>
+      <group choice="plain">
+	<arg choice="plain">
+	  <synopfragmentref linkend="det_shock">DETERMINISTIC SHOCK STATEMENT</synopfragmentref>
+	</arg>
+	<arg choice="plain">
+	  <synopfragmentref linkend="st_shock">STOCHASTIC SHOCK STATEMENT</synopfragmentref>
+	</arg>
+      </group><sbr/>
+      <group rep="repeat">
+	<arg choice="plain">
+	  <synopfragmentref linkend="det_shock">DETERMINISTIC SHOCK STATEMENT</synopfragmentref>
+	</arg>
+	<arg choice="plain">
+	  <synopfragmentref linkend="st_shock">STOCHASTIC SHOCK STATEMENT</synopfragmentref>
+	</arg>
+      </group><sbr/>
+      <arg choice ="plain">end;</arg>
+      <synopfragment id="det_shock">
+	<arg choice="plain">var <replaceable>VARIABLE_NAME</replaceable>;</arg>
+	<arg choice="plain">periods <synopfragmentref linkend="period_st">PERIOD STATEMENT</synopfragmentref>;</arg>
+	<arg choice="plain">values EXPRESSION;</arg>
+      </synopfragment>
+      <synopfragment id="period_st">
+	    <arg choice="plain"><replaceable>INTEGER</replaceable></arg>
+	    <arg>: <replaceable>INTEGER</replaceable></arg>
+	    <arg rep="repeat"><replaceable>INTEGER</replaceable>
+	    <arg>: <replaceable>INTEGER</replaceable></arg>
+	    </arg><arg choice="plain">;</arg>
+      </synopfragment>
+      <synopfragment id="st_shock">
+	<group choice="plain">
+	  <arg choice="plain">
+	    <synopfragmentref linkend="var_st">VARIANCE STATEMENT</synopfragmentref>
+	  </arg>
+	  <arg choice="plain">
+	    <synopfragmentref linkend="covar_st">COVARIANCE STATEMENT</synopfragmentref>
+	  </arg>
+	  <arg choice="plain">
+	    <synopfragmentref linkend="stderr_st">STANDARD ERROR STATEMENT</synopfragmentref>
+	  </arg>
+	</group>
+      </synopfragment>
+      <synopfragment id="var_st">
+	<arg choice="plain">
+	  var <replaceable>VARIABLE_NAME</replaceable> = <replaceable>EXPRESSION</replaceable>;
+	</arg>
+      </synopfragment>
+      <synopfragment id="covar_st">
+	<arg choice="plain">
+	  var <replaceable>VARIABLE_NAME</replaceable> , <replaceable>VARIABLE_NAME</replaceable> = <replaceable>EXPRESSION</replaceable>;
+	</arg>
+      </synopfragment>
+      <synopfragment id="stderr_st">
+	<arg choice="plain">
+	  var <replaceable>VARIABLE_NAME</replaceable>; stderr <replaceable>EXPRESSION</replaceable>;
+	</arg>
+      </synopfragment>
+    </cmdsynopsis>
+  </refsynopsisdiv>
+<refsect1><title>Options</title>
+<itemizedlist spacing='compact'>
+<listitem>
+  <para><command>shocks_file</command> = FILENAME: reads sequence of deterministic shocks from FILENAME. It can be either a *.m or a *.mat file. The file must create vectors with the same names as the deterministic exogenous variables.</para>
+</listitem>
+</itemizedlist>
+</refsect1>
+
+<refsect1><title>Description</title>
+<refsect2><title>In deterministic context</title>
+<para>
+For deterministic simulations, the <command>shocks</command> block specifies temporary changes in the value of an exogenous variables. For permanent shocks, use an <xref linkend='endval'/> block.
+</para>
+
+<para>
+  When specifying shocks on several periods, the <command>values</command> <replaceable>EXPRESSION</replaceable> must return either a scalar value common to all periods with a shock or a column vector with as many elements as there are periods in the <command>periods</command> statement just before it.
+</para>
+
+<refsect3><title>Example</title> 
+<programlisting>
+shocks;
+var e;
+periods 1;
+values 0.5;
+var u;
+periods 4:5;
+values 0;
+var v;
+periods 4 5 6;
+values 0;
+var u;
+periods 4  5   6;
+values  1 1.1 0.9;
+end;
+</programlisting>
+</refsect3>
+</refsect2>
+
+<refsect2><title>In stochastic context</title>
+<para>
+For stochastic simulations (available only in the Matlab or Scilab versions), the <command>shocks</command> block specifies the non zero elements of the covariance matrix of the shocks.
+</para>
+
+<refsect3><title>Example</title> 
+<programlisting>
+shocks;
+var e = 0.000081;
+var e,u = phi*0.009*0.009;
+var u = 0.000081;
+var v; stderr 0.009;
+end;
+</programlisting>
+</refsect3>
+<refsect3><title>See also</title>
+<para>
+<command>Sigma_e</command>
+</para>
+</refsect3>
+</refsect2>
+
+<refsect2><title>Mixing determininistic and stochastic shocks</title>
+<para>It is possible to mix deterministic and stochastic shocks to build models where agents know from the start of the simulation about future exogenous changes. In that case <xref linkend="stoch_simul"/> will compute the rational expectation solution adding future information to the state space (nothing is shown in the output of <xref linkend="stoch_simul"/>) and <xref linkend="forecast"/> will compute a simulation conditional on initial  conditions and future information.
+</para>
+
+<refsect3><title>Example</title>
+<informalexample>
+  <programlisting>
+varexo_det tau;
+varexo e;
+
+...
+
+shocks;
+var e; stderr 0.01;
+var tau;
+periods 1:9;
+values -0.15;
+end;
+
+stoch_simul(irf=0);
+
+forecast;
+  </programlisting>
+</informalexample>
+</refsect3>
+</refsect2>
+
+</refsect1>
+</refentry>
+
+<refentry id="Sigma_e">
+  <refmeta>
+    <refentrytitle>Sigma_e</refentrytitle>
+  </refmeta>
+
+  <refnamediv>
+    <refname>Sigma_e</refname>
+    <refpurpose>specifies directly the covariance matrix of the stochastic shocks</refpurpose>
+  </refnamediv>
+
+  <refsynopsisdiv>
+    <cmdsynopsis>
+      <command>Sigma_e</command>
+      <arg choice="plain">
+	= [<synopfragmentref linkend="matrix_el">MATRIX ELEMENT</synopfragmentref>
+	<arg rep="repeat"><arg>,</arg><synopfragmentref linkend="matrix_el">MATRIX ELEMENT</synopfragmentref></arg>
+	<arg rep="repeat"><arg choice="plain">;</arg><synopfragmentref linkend="matrix_el">MATRIX ELEMENT</synopfragmentref></arg>];
+      </arg>
+
+      <synopfragment id="matrix_el">
+	<group choice="plain">
+	  <arg choice="plain">
+	    <replaceable>INTEGER</replaceable>
+	  </arg>
+	  <arg choice="plain">
+	    <replaceable>DOUBLE</replaceable>
+	  </arg>
+	  <arg choice="plain">
+	    (<replaceable>EXPRESSION</replaceable>)
+	  </arg>
+	</group>
+      </synopfragment>
+    </cmdsynopsis>
+    <para>
+      WARNING: the matrix elements are actually written beween square brackets ([]). Here, the initial [ and final ] don't have the meaning of "optional element" as elsewhere.
+    </para>
+  </refsynopsisdiv>
+
+
+<refsect1><title>Description</title>
+
+<para>
+The matrix of variance-covariance of the shocks can be directly specified as a upper (or lower) triangular matrix. Dynare builds the corresponding symmetrix matrix. Each row of the triangular matrix, except the last one, must be terminated by a semi-colon ';'. For a given element, an <replaceable>EXPRESSION</replaceable> using predefined parameters is allowed but must be placed between parentheses. THE ORDER OF THE COVARIANCES IN THE MATRIX IS THE SAME AS THE ONE USED IN THE VAREXO DECLARATION.
+</para>
+<note>
+<para>In previous versions, it was possible to directly set Dynare's internal covariance matrix <varname>Sigma_e_</varname>. This is still possible for compatibility with older .mod files, but STRONGLY DISCOURAGED as too prone to error. When setting <varname>Sigma_e_</varname> directly, the order of the exogenous shocks is the ALPHABETICAL order of their names.
+</para>
+</note>
+</refsect1>
+
+<refsect1><title>Example</title>
+<programlisting>
+varexo u, e;
+...
+Sigma_e = [ 0.81 (phi*0.9*0.009); 0.000081];
+</programlisting>
+<para>
+where the variance of <varname>u</varname> is 0.81, the variance of <varname>e</varname>, 0.000081, and the correlation between <varname>e</varname> and <varname>u</varname> is <varname>phi</varname>.
+</para>
+</refsect1>
+</refentry>
+</sect1>
+
+<sect1><title>Solving and simulating</title>
+<para>
+Dynare has special commands for the computation of the static equilibrium of the model (<xref linkend='steady'/>, of the eigenvalues of the linearized model (<xref linkend='check'/>) for dynamics local analysis, of a deterministic simulation (<xref linkend='simul'/>) and for solving and/or simulating a stochastic model (<xref linkend='stoch_simul'/>).
+</para>
+<itemizedlist>
+<listitem><para><xref linkend='steady'/></para></listitem>
+<listitem><para><xref linkend='check'/></para></listitem>
+<listitem><para><xref linkend='forecast'/></para></listitem>
+<listitem><para><xref linkend='simul'/></para></listitem>
+<listitem><para><xref linkend='stoch_simul'/></para></listitem>
+</itemizedlist>
+
+<refentry id="steady">
+  <refmeta>
+    <refentrytitle>steady</refentrytitle>
+  </refmeta>
+
+  <refnamediv>
+    <refname>steady</refname>
+    <refpurpose>copmutes the steady state of a model</refpurpose>
+  </refnamediv>
+
+  <refsynopsisdiv>
+    <cmdsynopsis>
+      <command>steady</command>
+      <arg>
+      (solve_algo = 
+      <group choice="plain">
+	<arg choice="plain">0</arg>
+	<arg choice="plain">1</arg>
+	<arg choice="plain">2</arg>
+      </group>)
+      </arg>
+      <arg choice='plain'>;</arg>
+    </cmdsynopsis>
+  </refsynopsisdiv>
+
+<refsect1><title>Options</title>
+<itemizedlist spacing='compact'>
+<listitem><para><command>solve_algo = 0</command>: uses Matlab Optimization Toolbox FSOLVE</para></listitem>
+<listitem><para><command>solve_algo = 1</command>: uses Dynare's own nonlinear equation solver</para></listitem>
+<listitem><para><command>solve_algo = 2</command>: splits the model into recursive blocks and solves each block in turn. (Thanks to Manfred Gilli for showing me Matlab's function DMPERM) (this is the default since Dynare version 3.046).</para>
+</listitem>
+</itemizedlist>
+</refsect1>
+
+<refsect1><title>Description</title>
+
+<para>
+Computes the equilibrium value of the endogenous variables for the value of the exogenous variables specified in the previous <xref linkend='initval'/> or <xref linkend='endval'/> block.
+</para>
+<para>
+<command>steady</command> uses an iterative procedure and takes as initial guess the value of the endogenous variables set in the previous <xref linkend='initval'/> or <xref linkend='endval'/> block.
+</para>
+<para>
+For complicated models, finding good numerical initial values for the endogenous variables is the trickiest part of finding the equilibrium of that model. Often, it is better to start with a smaller model and add new variables one by one.
+</para>
+
+<para>If you know how to compute the steady state for your model, you can provide a Matlab function doing the computation instead of using <command>steady</command>. The function should be called with the name of the <filename>.mod</filename> file followed by <filename>_steadystate</filename>. See <filename>fs2000a_steadystate.m</filename> in <filename>examples/fs2000</filename> directory.
+</para>
+
+</refsect1>
+
+<refsect1><title>Output variables</title>
+<para>
+  The steeady state is available in <varname>ys_</varname>. Endogenous variables are ordered alphabeticaly as in <varname>lgy_</varname>.  
+</para>
+</refsect1>
+
+<refsect1><title>Examples</title>
+<para>
+See <xref linkend='initval'/> and <xref linkend='endval'/>.
+</para>
+</refsect1>
+</refentry>     
+
+<refentry id="check">
+  <refmeta>
+    <refentrytitle>check</refentrytitle>
+  </refmeta>
+
+  <refnamediv>
+    <refname>check</refname>
+    <refpurpose>computes the eigenvalues of the (linearized) model</refpurpose>
+  </refnamediv>
+
+  <refsynopsisdiv>
+    <cmdsynopsis>
+      <command>check</command>
+      <arg choice='plain'>;</arg>
+    </cmdsynopsis>
+  </refsynopsisdiv>
+
+<refsect1><title>Description</title>
+<para>
+Computes the eigenvalues of the model linearized around the values specified by the last <xref linkend='initval'/>, <xref linkend='endval'/> or <xref linkend='steady'/> statement. Generally, the eigenvalues are only meaningfull if the linearization is done around a steady state of the model. It is a device for local analysis in the neighborhood of this steady state.
+</para>
+<para>
+A necessary condition for the uniqueness of a stable equilibrium in the neighborhood of the steady state is that there are as many eigenvalues larger than one in modulus as there are forward looking variables in the system. An additional rank condition requires that the square submatrix of the right Schur vectors corresponding to the forward looking variables (jumpers) and to the explosive eigenvalues must have full rank.
+</para>
+</refsect1>
+
+<refsect1><title>Output variables</title>
+<para>
+<command>check</command> returns the eigenvalues in the global variable <varname>eigenvalues_</varname>.
+</para>
+</refsect1>
+</refentry>
+
+<refentry id="forecast">
+  <refmeta>
+    <refentrytitle>forecast</refentrytitle>
+  </refmeta>
+
+  <refnamediv>
+    <refname>forecast</refname>
+    <refpurpose>computes a simulation of a stochastic model from a given state</refpurpose>
+  </refnamediv>
+
+  <refsynopsisdiv>
+    <cmdsynopsis>
+      <command>forecast</command>
+      <arg>(<arg rep="repeat" choice="plain"><replaceable>OPTION</replaceable>,</arg>)</arg>
+      <arg choice="plain"><replaceable>VARIABLE_NAME</replaceable></arg>
+      <arg rep="repeat"><replaceable>VARIABLE_NAME</replaceable></arg>
+      <arg choice='plain'>;</arg>
+    </cmdsynopsis>
+  </refsynopsisdiv>
+
+<refsect1><title>Options</title>
+<itemizedlist spacing='compact'>
+<listitem><para><command>periods</command> = INTEGER: number of periods of the forecast (default = 40)</para></listitem>
+<listitem><para><command>conf_sig</command> = DOUBLE: level of significance for confidence interval (default = 0.90)</para></listitem>
+</itemizedlist>
+</refsect1>
+
+<refsect1><title>Description</title>
+<para><command>forecast</command> computes a simulation of a stochastic model from an arbitrary initial point.</para>
+<para>When the model also contains deterministic exogenous shocks, the simulation is computed conditionaly to the agents knowing the future values of the deterministic exogenous variables.</para>
+
+<para><command>forecast</command> must be called after <xref linkend="stoch_simul"/>.</para>
+
+<para> <command>forecast</command> plots the trajectory of endogenous variables. When a list of variable names follows the command, only those variables are ploted. A 90% confidence interval is ploted around the mean trajectory. Use option <command>conf_sig</command> to change the level of the confidence interval.</para>
+</refsect1>
+
+<refsect1><title>Output variables</title>
+<para>The following variables are set in structure <varname>oo_</varname>:
+<itemizedlist spacing="compact">
+<listitem><para><varname>oo_.forecast.Mean.</varname><replaceable>VARIABLE NAME</replaceable>: mean forecast of endogenous variables</para></listitem>
+<listitem><para><varname>oo_.forecast.HPDinf.</varname><replaceable>VARIABLE NAME</replaceable>: lower bound of a confidence interval around the forecast</para></listitem>
+<listitem><para><varname>oo_.forecast.HPDsup.</varname><replaceable>VARIABLE NAME</replaceable>: upper bound of a confidence interval around the forecast</para></listitem>
+<listitem><para><varname>oo_.forecast.Exogenous.</varname><replaceable>VARIABLE NAME</replaceable>: trajectory of the deterministic exogenous variables</para></listitem>
+</itemizedlist>
+</para>
+</refsect1>
+
+
+<refsect1><title>Example</title>
+<informalexample>
+  <programlisting>
+varexo_det tau;
+varexo e;
+
+...
+
+shocks;
+var e; stderr 0.01;
+var tau;
+periods 1:9;
+values -0.15;
+end;
+
+stoch_simul(irf=0);
+
+forecast;
+  </programlisting>
+</informalexample>
+</refsect1>
+</refentry>
+
+<refentry id="simul">
+  <refmeta>
+    <refentrytitle>simul</refentrytitle>
+  </refmeta>
+
+  <refnamediv>
+    <refname>simul</refname>
+    <refpurpose>simulates a deterministic model</refpurpose>
+  </refnamediv>
+
+  <refsynopsisdiv>
+    <cmdsynopsis>
+      <command>simul</command>
+      <arg>
+	(periods=<replaceable>INTEGER</replaceable>)
+      </arg>
+      <arg choice='plain'>;</arg>
+    </cmdsynopsis>
+  </refsynopsisdiv>
+
+  <refsect1><title>Description</title>
+  <para>
+    Triggers the computation of a deterministic simulation of the model for the number of periods set in the option <command>periods=</command>. <command>simul</command> uses a Newton method to solve simultaneously all the equations for every period (see Juillard, 1996).
+  </para>
+  </refsect1>
+<refsect1><title>Output variables</title>
+<para>
+the simulated variables are available in global matrix <varname>y_</varname>. The variables are arranged row by row, in alphabetical order.
+</para>
+</refsect1>
+</refentry>
+
+
+<refentry id="stoch_simul">
+  <refmeta>
+    <refentrytitle>stoch_simul</refentrytitle>
+  </refmeta>
+
+  <refnamediv>
+    <refname>stoch_simul</refname>
+    <refpurpose>computes the solution and simulates the model</refpurpose>
+  </refnamediv>
+
+  <refsynopsisdiv>
+    <cmdsynopsis>
+      <command>stoch_simul</command>
+      <arg>(<arg rep="repeat" choice="plain"><replaceable>OPTION</replaceable>,</arg>)</arg>
+      <arg choice="plain"><replaceable>VARIABLE_NAME</replaceable></arg>
+      <arg rep="repeat"><replaceable>VARIABLE_NAME</replaceable></arg>
+      <arg choice='plain'>;</arg>
+    </cmdsynopsis>
+  </refsynopsisdiv>
+
+<refsect1><title>Options</title>
+<itemizedlist spacing='compact'>
+<listitem><para><anchor id="ar" xreflabel="ar"/> <command>ar</command> = <replaceable>INTEGER</replaceable>:
+Order of autocorrelation coefficients to compute and to print (default = 5)
+n</para></listitem>
+<listitem><para> <command>dr_algo = 0 | 1</command>: 
+specifies the algorithm used for computing the quadratic approximation of the decision rules:
+<itemizedlist spacing='compact'>
+<listitem><para> 0: uses a <emphasis>pure</emphasis> perturbation approach as in Schmitt-Grohe and Uribe (2002) (default)
+</para></listitem>
+<listitem><para> 1: moves the point around which the Taylor expansion is computed toward the means of the distribution as in Collard and Juillard (2001)
+</para></listitem>
+</itemizedlist>
+</para></listitem>
+<listitem><para> <command>drop</command> = <replaceable>INTEGER</replaceable>:
+number of points dropped at the beginning of simulation before computing the summary statistics (default = 100)
+</para></listitem>
+<listitem><para> <command>hp_filter</command> = <replaceable>INTEGER</replaceable>:
+ uses HP filter with lambda = <replaceable>INTEGER</replaceable> before computing moments (default: no filter)
+</para></listitem>
+<listitem><para> <command>hp_ngrid</command> = <replaceable>INTEGER</replaceable>:
+number of points in the grid for the discreet Inverse Fast Fourier Transform used in the HP filter computation. It may be necessary to increase it for highly autocorrelated processes (default = 512) 
+</para></listitem>
+<listitem><para> <command>irf</command> = <replaceable>INTEGER</replaceable>:
+ number of periods on which to compute the IRFs (default = 40). Setting IRF=0, suppresses the plotting of IRF's. 
+</para></listitem>
+<listitem><para><command>relative_irf</command> requests the computation of normalized IRFs in percentage of the standard error of each shock</para></listitem>
+<listitem><para> <command>linear</command>:
+ indicates that the original model is linear (put it rather in the MODEL command).
+</para></listitem>
+<listitem><para> <command>nocorr</command>: 
+doesn't print the correlation matrix (printing them is the default)
+</para></listitem>
+<listitem><para> <command>nofunctions</command>:
+ doesn't print the coefficients of the approximated solution (printing them is the default)
+</para></listitem>
+<listitem><para> <command>nomoments</command>: 
+doesn't print moments of the endogenous variables (printing them is the default)</para></listitem>
+<listitem><para> <command>noprint</command>: cancel any printing. Usefull for loops.</para></listitem>
+<listitem><para> <command>order</command> = 1 | 2 :
+order of Taylor approximation (default = 2)
+</para></listitem>
+<listitem><para> <command>periods</command> = <replaceable>INTEGER</replaceable>: specifies the number of periods to use in simulations. At order=1, no simulation is necessary to compute theoretical moments and IRFs. A number of periods larger than one triggers automatically option <command>simul</command> (default = 0).
+</para></listitem>
+<listitem><para> <command>qz_criterium</command> = <replaceable>INTEGER</replaceable> | <replaceable>DOUBLE</replaceable>:
+value used to split stable from unstable eigenvalues in reordering the Generalized Schur decomposition used for solving 1st order problems (default 1.000001)
+</para></listitem>
+<listitem><para> <command>replic</command> = <replaceable>INTEGER</replaceable>: number of simulated series used to compute the IRFs (default = 1, if order = 1, and 50 otherwise)
+</para></listitem>
+<listitem><para> <command>simul</command>: 
+computes a stochastic simulation of the model for the number of periods specified in the <command>periods</command> statement. Uses <xref linkend='initval'/> values, possibly recomputed by <xref linkend='steady'/>, as initial values for the simulation. The simulated endogenous variables are made available to the user in a vector for each variable and in the global matrix <varname>y_</varname>. The variables are ordered alphabeticaly in the <varname>y_</varname> matrix (default: no simulation)
+</para></listitem>
+<listitem><para> <command>simul_seed</command> = <replaceable>INTEGER</replaceable>|<replaceable>DOUBLE</replaceable>|<replaceable>(EXPRESSION)</replaceable>:
+ specifies a seed for the random generator so as to obtain the same random sample at each run of the program. Otherwise a different sample is used for each run (default: seed not specified). Note that if you use an EXPRESSION rather than an INTEGER or a DOUBLE, the EXPRESSION must be in parenthesis.
+</para></listitem>
+<listitem><para> all <command>steady</command> options (see <xref linkend='steady'/>)</para></listitem>
+</itemizedlist>
+<para>
+When a list of VARIABLE_NAMEs is specified, results are displayed only for these variables.
+</para>
+</refsect1>
+<refsect1><title>Description</title>
+<para>
+<command>stoch_simul</command> computes a Taylor approximation of the decision and transition functions for the model, impulse response functions and various descriptive statistics (moments, variance decomposition, correlation and autocorrelation coefficients). For correlated shocks, the variance decomposition is computed as in the VAR literature through a Cholesky decomposition of the covariance matrix of the exogenous variables. When the shocks are correlated, the variance decomposition depends upon the order of the variables in the <xref linkend='varexo'/> command.
+</para>
+
+<para>The Taylor approximation is computed around the steady state (except whith option <command>dr_algo=1</command>). If you know how to compute the steady state for your model, you can provide a Matlab function doing the computation instead of using the nonlinear solver. The function should be called with the name of the <filename>.mod</filename> file followed by <filename>_steadystate</filename>. See <filename>fs2000a_steadystate.m</filename> in <filename>examples/fs2000</filename> directory.
+</para>
+
+<para>
+Variance decomposition, correlation, autocorrelation are only displayed for variables with positive variance. Impulse response functions are only ploted for variables with response larger than 1e-10.
+</para>
+<para>
+Currently, the IRF's are only ploted for 12 variables. Select the ones you want to see, if your model contains more than 12 endogenous variables.
+</para>
+<para>Currently, the HP filter is only available when computing theoretical moments, not for for moments of simulated variables.
+</para>
+<para>
+The covariance matrix of the shocks is specified either with the <xref linkend='shocks'/> command or with the <xref linkend='Sigma_e'/> command.
+</para>
+</refsect1>
+
+<refsect1><title>Decision rules</title>
+<para>
+The approximated solution of a model takes the form of a set of decision rules or transition equations expressing the current value of the endogenous variables of the model as function of the previous state of the model and shocks oberved at the beginning of the period.
+</para>
+<refsect2><title>First order approximation</title>
+<blockquote><para>
+y<subscript>t</subscript> = ys + A yh<subscript>t-1</subscript> + B u<subscript>t</subscript>
+</para>
+<para>
+where ys is the steady state value of y and yh<subscript>t</subscript>=y<subscript>t</subscript>-ys.
+</para>
+</blockquote>
+</refsect2>
+<refsect2><title>Second order approximation</title>
+<blockquote><para>
+y<subscript>t</subscript> = ys + 0.5&Delta;<superscript>2</superscript> + A yh<subscript>t-1</subscript> + B u<subscript>t</subscript> + 0.5C(yh<subscript>t-1</subscript>&otimes;yh<subscript>t-1</subscript>) + 0.5D(u<subscript>t</subscript>&otimes;u<subscript>t</subscript>) + E(yh<subscript>t-1</subscript>&otimes;u<subscript>t</subscript>)
+</para>
+<para>
+where ys is the steady state value of y, yh<subscript>t</subscript>=y<subscript>t</subscript>-ys, and &Delta;<superscript>2</superscript> is the shift effect of the variance of future shocks.
+</para>
+</blockquote>
+</refsect2>
+</refsect1>
+
+<refsect1><title>Output variables</title>
+<para>
+<command>stoch_simul</command> sets several fields in global variable <varname>oo_</varname>. The descriptive statistics are theoretical moments when no simulation is requested and otherwise represent the moments of the simulated variables. 
+<itemizedlist>
+<listitem><para>the coefficients of the decision rules are stored in global structure<varname>dr_</varname>. Here is the correspondance with the symbols used in the above description of the decision rules:
+<itemizedlist><title>Decision rule coefficients</title>
+
+<listitem><para><varname>ys</varname>: <varname>dr_.ys</varname>. The vector rows correspond to variables in alphabetical order of the variable names.</para></listitem>
+<listitem><para>&Delta;<superscript>2</superscript>: <varname>dr_.ghs2</varname>. The vector rows correspond to re-ordered variables (see below).</para></listitem>
+<listitem><para><varname>A</varname>: <varname>dr_.ghx</varname>. The matrix rows correspond to re-ordered variables. The matrix columns correspond to state variables (see below).</para></listitem>
+<listitem><para><varname>B</varname>: <varname>dr_.ghu</varname>. The matrix rows correspond to re-ordered variables (see below). The matrix columns correspond to exogenous variables in alphabetical order.</para></listitem>
+<listitem><para><varname>C</varname>: <varname>dr_.ghxx</varname>. The matrix rows correspond to re-ordered variables. The matrix columns correspond to the Kronecker product of the vector of state variables (see below).</para></listitem>
+<listitem><para><varname>D</varname>: <varname>dr_.ghuu</varname>. The matrix rows correspond to re-ordered variables (see below). The matrix columns correspond to the Kronecker product of exogenous variables in alphabetical order.</para></listitem>
+<listitem><para><varname>E</varname>: <varname>dr_.ghxu</varname>. The matrix rows correspond to re-ordered variables. The matrix columns correspond to the Kronecker product of the vector of state variables (see below) by the vector of exogenous variables in alphabetical order.</para></listitem>
+</itemizedlist>
+When reordered, the variables are stored in the following order: static variables, purely predetermined variables (variables that appear only at the current and lagged periods in the model), variables that are both predetermined and forward-looking (variables that appear at the current, future and lagged periods in the model), purely forward-looking variables (variables that appear only at the current and future periods in the model). In each category, the variables are arranged alphabetically.</para>
+<para>
+The state variables of the model are purely predetermined variables and variables that are both predetermined and forward-looking. They are ordered in that order. When there are lags on more than one period, the state variables are ordered first according to their lag: first variables from the previous period, then variables from two periods before and so on. Note also that when a variable appears in the model at a lag larger than one period, it is automatically included at all inferior lags.
+</para>
+</listitem>
+<listitem><para>The mean of the endogenous variables is available in the vector <varname>oo_.mean</varname>. The variables are arranged in alphabetical order.
+</para></listitem>
+<listitem><para>The matrix of variance-covariance of the endogenous variables in the matrix <varname>oo_.var</varname>. The variables are arranged in alphabetical order.</para></listitem>
+<listitem><para>The matrix of autocorrelation of the endogenous variables are made available in cell array <varname>oo_.autocorr</varname>. The element number of the matrix in the cell array corresponds to the order of autocorrelation. The option <varname>AR</varname> (default ar=5) specifies the number of autocorrelation matrices available.
+</para></listitem>
+<listitem>
+<para>
+  Simulated variables, when they have been computed, are available in Matlab
+vectors with the same name as the endogenous variables.</para>
+</listitem>
+<listitem>
+<para>
+  Impulse responses, when they have been computed, are available in Matlab vectors witht the following naming convention <replaceable>VARIABLE_NAME</replaceable>_<replaceable>shock name</replaceable>.
+</para>
+<informalexample><para>
+  <varname>gnp_ea</varname> contains the effect on <varname>gnp</varname> of a one standard deviation shock on <varname>ea</varname>.
+</para>
+</informalexample>
+</listitem>
+</itemizedlist>
+</para>
+</refsect1>
+
+<refsect1><title>Example 1</title>
+<programlisting>
+shocks;
+var e;
+stderr 0.0348;
+end;
+
+stoch_simul;
+</programlisting>
+<para>
+performs the simulation of the 2nd order approximation of a model with a single stochastic shock, e, with a standard error of 0.0348.
+</para>
+</refsect1>
+
+<refsect1><title>Example 2</title>
+<programlisting>
+stoch_simul(linear,irf=60) y k;
+</programlisting>
+<para>
+performs the simulation of a linear model and displays impulse response functions on 60 periods for variables <varname>y</varname> and <varname>k</varname>.
+</para>
+</refsect1>
+</refentry>
+</sect1>
+
+<sect1><title>Estimation</title>
+<para>
+Provided that you have observations on some endogenous variables, it is possible to use Dynare to estimate some or all parameters. Both maximum likelihood and Bayesian techniques are available.
+</para>
+
+<para>
+Note that in order to avoid stochastic singularity, you must have at least as many shocks or measurement errors in your model as you have observed variables. 
+</para>
+<itemizedlist>
+<listitem><para><xref linkend='varobs'/></para></listitem>
+<listitem><para><xref linkend='observation_trends'/></para></listitem>
+<listitem><para><xref linkend='estimated_params'/></para></listitem>
+<listitem><para><xref linkend='estimated_params_init'/></para></listitem>
+<listitem><para><xref linkend='estimated_params_bounds'/></para></listitem>
+<listitem><para><xref linkend='estimated_params_init'/></para></listitem>
+<listitem><para><xref linkend='estimation'/></para></listitem>
+<listitem><para><xref linkend='unit_root_vars'/></para></listitem>
+</itemizedlist>
+
+<refentry id="varobs">
+  <refmeta>
+    <refentrytitle>varobs</refentrytitle>
+  </refmeta>
+
+  <refnamediv>
+    <refname>varobs</refname>
+    <refpurpose>lists the observed variables</refpurpose>
+  </refnamediv>
+
+  <refsynopsisdiv>
+    <cmdsynopsis>
+      <command>varobs</command>
+      <arg choice="plain" rep="repeat">
+	<replaceable>VARIABLE_NAME</replaceable>
+      </arg>
+      <arg rep="repeat">
+	<replaceable>VARIABLE_NAME</replaceable>
+      </arg>
+      <arg choice="plain">;</arg>
+    </cmdsynopsis>
+  </refsynopsisdiv>
+
+<refsect1><title>Description</title>
+<para>
+<command>varobs</command> lists the name of observed endogenous variables for the estimation procedure. These variables must be available in the data file (see <xref linkend='estimation'/>).
+</para>
+</refsect1>
+
+<refsect1><title>Example</title>
+<para>
+  <informalexample>
+    <programlisting>
+      varobs C y rr;
+    </programlisting>
+  </informalexample>
+</para>
+</refsect1>
+
+</refentry>
+
+<refentry id="observation_trends">
+  <refmeta>
+    <refentrytitle>observation_trends</refentrytitle>
+  </refmeta>
+
+  <refnamediv>
+    <refname>observation_trends</refname>
+    <refpurpose>specifies linear trends for observed variables</refpurpose>
+  </refnamediv>
+
+  <refsynopsisdiv>
+    <cmdsynopsis>
+      <command>observation_trends;</command><sbr/>
+      <arg choice="plain">
+	<replaceable>VARIABLE_NAME</replaceable>
+      </arg>
+      <arg choice="plain">
+	(<replaceable>EXPRESSION</replaceable>);
+      </arg><sbr/>
+      <arg choice="plain">
+	end;
+      </arg>
+    </cmdsynopsis>
+  </refsynopsisdiv>
+
+<refsect1><title>Description</title>
+<para>
+<command>observation_trends</command> specifies trends for observed variables as functions of model parameters. In most cases, variables shouldn't be centered when <command>observation_trends</command> is used. 
+</para>
+</refsect1>
+
+<refsect1><title>Example</title>
+<para>
+  <informalexample>
+    <programlisting>
+      observation_trends;
+      Y (eta);
+      P (mu/eta);
+      end;
+    </programlisting>
+  </informalexample>
+</para>
+</refsect1>
+
+</refentry>
+
+<refentry id="estimated_params">
+  <refmeta>
+    <refentrytitle>estimated_params</refentrytitle>
+  </refmeta>
+
+  <refnamediv>
+    <refname>estimated_params</refname>
+    <refpurpose>specifies the estimated parameters and their prior</refpurpose>
+  </refnamediv>
+
+  <refsynopsisdiv>
+    <para>Syntax I (maximum likelihood estimation)</para>
+    <cmdsynopsis>
+      <command>estimated_params;</command><sbr/>
+      <group choice="req">
+      <arg choice="plain">
+	stderr <replaceable>VARIABLE_NAME</replaceable>
+      </arg>
+      <arg choice="plain">
+	corr <replaceable>VARIABLE_NAME_1, VARIABLE_NAME_2</replaceable>
+      </arg>
+      <arg choice="plain">
+	<replaceable>PARAMETER_NAME</replaceable>
+	</arg>
+      </group>
+	<arg choice="plain">
+	  <replaceable>, INITIAL_VALUE</replaceable>
+	</arg>
+	<arg choice="opt">
+	  <replaceable>, LOWER_BOUND</replaceable>
+	</arg>
+	<arg choice="opt">
+	  <replaceable>, UPPER_BOUND</replaceable>
+	</arg>
+	<arg choice="plain">;</arg><sbr/>
+	<arg choice='plain'>...</arg><sbr/>
+	  <arg choice="plain">end;</arg>
+    </cmdsynopsis>
+    <para>Syntax II (Bayesian estimation)</para>
+    <cmdsynopsis>
+      <command>estimated_params;</command><sbr/>
+      <group choice="req">
+      <arg choice="plain">
+	stderr <replaceable>VARIABLE_NAME</replaceable>
+      </arg>
+      <arg choice="plain">
+	corr <replaceable>VARIABLE_NAME_1, VARIABLE_NAME_2</replaceable>
+      </arg>
+      <arg choice="plain">
+	<replaceable>PARAMETER_NAME</replaceable>
+	</arg>
+      </group>
+      <arg choice="plain">
+	<replaceable>, PRIOR_SHAPE</replaceable>
+      </arg>
+      <arg choice="plain">
+	<replaceable>, PRIOR_MEAN</replaceable>
+      </arg>
+      <arg choice="plain">
+	<replaceable>, PRIOR_STANDARD_ERROR</replaceable>
+      </arg>
+      <arg choice="opt">
+	  <replaceable>, PRIOR_3RD_PARAMETER</replaceable>
+      </arg>
+      <arg choice="opt">
+	<replaceable>, PRIOR_4TH_PARAMETER</replaceable>
+      </arg>
+      <arg choice="opt">
+	<replaceable>, SCALE_PARAMETER</replaceable>
+      </arg>
+	<arg choice="plain">;</arg>
+	<sbr/>
+	<arg choice="plain">...</arg><sbr/>
+	<arg choice="plain">end;</arg>
+    </cmdsynopsis>
+  </refsynopsisdiv>
+
+<refsect1><title>Description</title>
+<para>
+  The <command>estimated_params;....end;</command> block lists all parameters to be estimated and specifies bounds and priors as necessary.
+</para>
+</refsect1>
+
+<refsect1><title>Estimated parameter specification</title>
+<para>
+Each line corresponds to an estimated parameter and follows this syntax:
+<itemizedlist spacing='compact'> 
+  <listitem><para><command>stderr</command> is a keyword indicating that the standard error of the exogenous variable, <replaceable>VARIABLE_NAME</replaceable>, or of the observation error associated with endogenous observed variable, <replaceable>VARIABLE_NAME</replaceable>, is to be estimated</para></listitem>
+  <listitem><para><command>corr</command> is a keyword indicating that the correlation between the exogenous variables, <replaceable>VARIABLE_NAME_1</replaceable> and <replaceable>VARIABLE_NAME_2</replaceable>, or the correlation of the observation errors associated with endogenous observed variables, <replaceable>VARIABLE_NAME_1</replaceable> and <replaceable>VARIABLE_NAME_2</replaceable>, is to be estimated</para></listitem>
+  <listitem><para> <replaceable>PARAMETER_NAME</replaceable> is the name of a model parameter to be estimated</para></listitem>
+<listitem><para> <replaceable>INITIAL_VALUE</replaceable> specifies a starting value for maximum likelihood estimation</para></listitem>
+<listitem><para> <replaceable>LOWER_BOUND</replaceable> specifies a lower bound for the parameter value in maximum likelihood estimation</para></listitem>
+<listitem><para> <replaceable>UPPER_BOUND</replaceable> specifies an upper bound for the parameter value in maximum likelihood estimation</para></listitem>
+  <listitem><para> <replaceable>PRIOR_SHAPE</replaceable> is prior density among <command>beta_pdf</command>, <command>gamma_pdf</command>, <command>normal_pdf</command>, <command>inv_gamma_pdf</command>, <command>inv_gamma1_pdf</command>, <command>inv_gamma2_pdf</command>, <command>uniform_pdf</command></para></listitem>
+  <listitem><para> <replaceable>PRIOR_MEAN</replaceable> is the mean of the prior distribution</para></listitem>
+  <listitem><para> <replaceable>PRIOR_STANDARD_ERROR</replaceable> is the standard error of the prior distribution</para></listitem>
+  <listitem><para> <replaceable>PRIOR_3RD_PARAMETER</replaceable> is a third parameter of the prior used for generalized beta distribution, generalized gamma and for the uniform distribution (default 0)</para></listitem>
+  <listitem><para> <replaceable>PRIOR_4TH_PARAMETER</replaceable> is a fourth parameter of the prior used for generalized beta distribution, generalized gamma and for the uniform distribution (default 1)</para></listitem>
+  <listitem><para> <replaceable>SCALE_PARAMETER</replaceable> is the scale parameter to be used for the jump distribution of the Metropolis-Hasting algorithm</para></listitem>
+</itemizedlist>
+
+<note><para> At minimum, one must specify the name of the parameter and an initial guess. That will trigger unconstrained maximum likelihood estimation.
+</para></note>
+
+<note><para> As one uses options more towards the end of the list, all previous options must be filled: if you want to specify <replaceable>jscale</replaceable>, you must specify <replaceable>prior_p3</replaceable> and <replaceable>prior_p4</replaceable>. Use default values, if these parameters don't apply. 
+</para></note>
+</para>
+</refsect1>
+
+<refsect1><title>Parameter transformation</title>
+<para>
+Sometimes, it is desirable to estimate a transformation of a parameter appearing in the model, rather than the parameter itself. It is of course possible to replace the original parameter by a function of the estimated parameter everywhere is the model, but it is often unpractical.
+</para>
+
+<para>
+In such a case, it is possible to declare the parameter to be estimated in the <xref linkend="parameters"/> statement and to define the transformation at the top of the <xref linkend="model"/> section, as a Matlab expression. The first character of the line must be a pound  sign (#).
+</para>
+</refsect1>
+
+<refsect1><title>Example</title>
+<informalexample>
+    <programlisting>
+      parameters bet;
+
+      model;
+      # sig = 1/bet;
+      c = sig*c(+1)*mpk;
+      end;
+
+      estimated_params;
+      bet,normal_pdf,1,0.05;
+      end;
+    </programlisting>
+  </informalexample>
+</refsect1>
+
+
+
+</refentry>
+
+<refentry id="estimated_params_init">
+  <refmeta>
+    <refentrytitle>estimated_params_init</refentrytitle>
+  </refmeta>
+
+  <refnamediv>
+    <refname>estimated_params_init</refname>
+    <refpurpose>specifies initial values for optimization</refpurpose>
+  </refnamediv>
+
+  <refsynopsisdiv>
+    <cmdsynopsis>
+      <command>estimated_params_init;</command><sbr/>
+      <group choice="req">
+      <arg choice="plain">
+	stderr <replaceable>VARIABLE_NAME</replaceable>
+      </arg>
+      <arg choice="plain">
+	corr <replaceable>VARIABLE_NAME_1, VARIABLE_NAME_2</replaceable>
+      </arg>
+      <arg choice="plain">
+	<replaceable>PARAMETER_NAME</replaceable>
+	</arg>
+      </group>
+	<arg choice="plain">
+	  <replaceable>, INITIAL_VALUE</replaceable>
+	</arg> 
+	<arg choice="plain">;</arg><sbr/>
+	<arg choice='plain'>...</arg><sbr/>
+	  <arg choice="plain">end;</arg>
+    </cmdsynopsis>
+  </refsynopsisdiv>
+
+<refsect1><title>Description</title>
+<para>
+  The <command>estimated_params_init;....end;</command> block declares numerical initial values for the optimizer when these ones are different from the prior mean
+</para>
+</refsect1>
+
+<refsect1><title>Estimated parameter initial value specification</title>
+<para>
+Each line corresponds to an estimated parameter and follows this syntax:
+<itemizedlist spacing='compact'> 
+  <listitem><para><command>stderr</command> is a keyword indicating that the standard error of the exogenous variable, <replaceable>VARIABLE_NAME</replaceable>, or of the observation error associated with endogenous observed variable, <replaceable>VARIABLE_NAME</replaceable>, is to be estimated</para></listitem>
+  <listitem><para><command>corr</command> is a keyword indicating that the correlation between the exogenous variables, <replaceable>VARIABLE_NAME_1</replaceable> and <replaceable>VARIABLE_NAME_2</replaceable>, or the correlation of the observation errors associated with endogenous observed variables, <replaceable>VARIABLE_NAME_1</replaceable> and <replaceable>VARIABLE_NAME_2</replaceable>, is to be estimated</para></listitem>
+  <listitem><para> <replaceable>PARAMETER_NAME</replaceable> is the name of a model parameter to be estimated</para></listitem>
+<listitem><para> <replaceable>INITIAL_VALUE</replaceable> specifies a starting value for maximum likelihood estimation</para></listitem>
+</itemizedlist>
+</para>
+</refsect1>
+
+</refentry>
+
+<refentry id="estimated_params_bounds">
+  <refmeta>
+    <refentrytitle>estimated_params_bounds</refentrytitle>
+  </refmeta>
+
+  <refnamediv>
+    <refname>estimated_params_bounds</refname>
+    <refpurpose>specifies lower and upper bounds for the estimated parameters</refpurpose>
+  </refnamediv>
+
+  <refsynopsisdiv>
+    <cmdsynopsis>
+      <command>estimated_params_bounds;</command><sbr/>
+      <group choice="req">
+      <arg choice="plain">
+	stderr <replaceable>VARIABLE_NAME</replaceable>
+      </arg>
+      <arg choice="plain">
+	corr <replaceable>VARIABLE_NAME_1, VARIABLE_NAME_2</replaceable>
+      </arg>
+      <arg choice="plain">
+	<replaceable>PARAMETER_NAME</replaceable>
+	</arg>
+      </group>
+	<arg choice="plain">
+	  <replaceable>, LOWER_BOUND</replaceable>
+	</arg>
+	<arg choice="plain">
+	  <replaceable>, UPPER_BOUND</replaceable>
+	</arg>
+	<arg choice="plain">;</arg><sbr/>
+	<arg choice='plain'>...</arg><sbr/>
+	  <arg choice="plain">end;</arg>
+    </cmdsynopsis>
+  </refsynopsisdiv>
+
+<refsect1><title>Description</title>
+<para>
+  The <command>estimated_params;....end;</command> block lists all parameter to be estimated and specifies bounds and priors when required.
+</para>
+</refsect1>
+
+<refsect1><title>Estimated parameter specification</title>
+<para>
+Each line corresponds to an estimated parameter and follows this syntax:
+<itemizedlist spacing='compact'> 
+  <listitem><para><command>stderr</command> is a keyword indicating that the standard error of the exogenous variable, <replaceable>VARIABLE_NAME</replaceable>, or of the observation error associated with endogenous observed variable, <replaceable>VARIABLE_NAME</replaceable>, is to be estimated</para></listitem>
+  <listitem><para><command>corr</command> is a keyword indicating that the correlation between the exogenous variables, <replaceable>VARIABLE_NAME_1</replaceable> and <replaceable>VARIABLE_NAME_2</replaceable>, or the correlation of the observation errors associated with endogenous observed variables, <replaceable>VARIABLE_NAME_1</replaceable> and <replaceable>VARIABLE_NAME_2</replaceable>, is to be estimated</para></listitem>
+  <listitem><para> <replaceable>PARAMETER_NAME</replaceable> is the name of a model parameter to be estimated</para></listitem>
+<listitem><para> <replaceable>LOWER_BOUND</replaceable> specifies a lower bound for the parameter value in maximum likelihood estimation</para></listitem>
+<listitem><para> <replaceable>UPPER_BOUND</replaceable> specifies an upper bound for the parameter value in maximum likelihood estimation</para></listitem>
+</itemizedlist>
+</para>
+</refsect1>
+</refentry>
+
+<refentry id="estimation">
+ <refmeta>
+    <refentrytitle>estimation</refentrytitle>
+  </refmeta>
+
+  <refnamediv>
+    <refname>estimation</refname>
+    <refpurpose>computes estimation.</refpurpose>
+  </refnamediv>
+
+  <refsynopsisdiv>
+    <cmdsynopsis>
+      <command>estimation</command>
+      <arg>(OPTIONS)</arg>
+      <arg choice='plain'>;</arg>
+    </cmdsynopsis>
+  </refsynopsisdiv>
+
+<refsect1><title>OPTIONS</title>
+<itemizedlist spacing='compact'>
+<listitem><para> <command>datafile</command> =
+	  <replaceable>FILENAME</replaceable>: the datafile (a .m file or a .mat file)</para></listitem>
+<listitem><para><command>nobs</command> = <replaceable>INTEGER</replaceable>: the number of observations to be used (default: all observations in the file)</para>
+<para><command>nobs</command> = ([<replaceable>INTEGER_1</replaceable>:<replaceable>INTEGER_2</replaceable>]): runs a recursive estimation and forecast for samples of size ranging of <varname>INTEGER_1</varname> to <varname>INTEGER_2</varname>. Option <varname>FORECAST</varname> must also be specified.</para> 
+</listitem>
+<listitem><para> <command>first_obs</command> = <replaceable>INTEGER</replaceable>: the number of the first observation to be used (default = 1)</para></listitem>
+<listitem><para> <command>prefilter</command> = 1: the estimation procedure demeans the data (default=0, no prefiltering)</para></listitem>
+<listitem><para> <command>presample</command> = <replaceable>INTEGER</replaceable>: the number of observations to be skipped before evaluating the likelihood (default = 1)</para></listitem>
+<listitem><para> <command>loglinear</command>: computes a log--linear approximation of the model instead of a linear (default) approximation. The data must correspond to the definition of the variables used in the modelx.</para></listitem>
+<listitem><para> <command>nograph</command>: no graphs should be plotted</para></listitem>
+<listitem><para> <command>lik_init</command>: <replaceable>INTEGER</replaceable>: type of initialization of Kalman filter.
+<itemizedlist spacing='compact'>
+  <listitem><para>1 (default): for stationary models, the initial matrix of variance of the error of forecast is set equal to the unconditional variance of the state variables.</para></listitem>
+  <listitem><para>2: for nonstationary models: a wide prior is used with an initial matrix of variance of the error of forecast diagonal with 10 on the diagonal.</para></listitem>
+</itemizedlist>
+</para></listitem>
+<listitem><anchor id="conf_sig" xreflabel="conf_sig"/><para><command>conf_sig</command> = <replaceable>{INTEGER | DOUBLE}</replaceable>: the level for the confidence intervals reported in the results (default = 0.90)</para></listitem>
+<listitem><anchor id="mh_replic" xreflabel="mh_replic"/><para> <command>mh_replic</command> = <replaceable>INTEGER</replaceable>: number of replication for Metropolis Hasting algorithm. For the time being, mh_replic should be larger than 1200 (default = 20000.)</para></listitem>
+<listitem><para> <command>mh_nblocks</command> = <replaceable>INTEGER</replaceable>: number of paralletl chains for Metropolis Hasting algorithm (default = 2).</para></listitem>
+<listitem><para> <command>mh_drop</command> = <replaceable>DOUBLE</replaceable>: the fraction of initially generated parameter vectors to be dropped before using posterior simulations (default = 0.5)</para></listitem>
+<listitem><para> <command>mh_jscale</command> = <replaceable>DOUBLE</replaceable>: the scale to be used for the jumping distribution in MH algorithm. The default value is rarely satisfactory. This option must be tune to obtain, ideally, an accpetation rate of 25% in the Metropolis-Hastings algorithm (default = 0.2).</para></listitem>
+<listitem><para><command>mh_init_scale</command>=<replaceable>DOUBLE</replaceable>: the scale to be used for drawing the initial value of the Metropolis-Hastings chain (default=2*mh_scale).</para>
+</listitem>
+<listitem><para><command>mode_file</command>=<replaceable>FILENAME</replaceable>: name of the file containing previous value for the mode. When computing the mode, Dynare stores the mode (<varname>xparam1</varname>) and the hessian (<varname>hh</varname>) in a file called <filename><replaceable>MODEL NAME</replaceable>_mode</filename>.</para></listitem>
+<listitem><para><command>mode_compute</command>=<replaceable>INTEGER</replaceable>: specifies the optimizer for the mode computation.
+<itemizedlist spacing='compact'>
+  <listitem><para>0: the mode isn't computed. mode_file must be specified</para></listitem>
+  <listitem><para>1: uses Matlab <command>fmincon</command>.</para></listitem>
+  <listitem><para>2: uses Lester Ingber's Adaptive Simulated Annealing.</para></listitem>
+  <listitem><para>3: uses Matlab <command>fminunc</command>.</para></listitem>
+  <listitem><para>4 (default): uses Chris Sim's <command>csminwel</command>.</para></listitem>
+</itemizedlist></para></listitem>
+<listitem><para><command>mode_check</command>: when <command>mode_check</command> is set, Dynare plots the posterior density for values around the computed mode for each estimated parameter in turn. This is helpful to diagnose problems with the optimizer.</para></listitem>
+<listitem><para><command>prior_trunc</command>=<replaceable>DOUBLE</replaceable>: probability of extreme values of the prior density that is ignored when computing bounds for the parameters (default=1e-32).</para></listitem>
+<listitem><anchor id="load_mh_file" xreflabel="load_mh_file"/><para><command>load_mh_file</command>: when <command>load_mh_file</command> is declared, Dynare adds to previous Metropolis-Hastings simulations instead of starting from scratch.</para></listitem>
+<listitem><para><command>optim</command>=(<replaceable>fmincon options</replaceable>): can be used to set options for fmincon, the optimizing function of Matlab Optimizaiton toolbox. Use Matlab syntax for these options</para>
+<para> (default: ('display','iter','LargeScale','off','MaxFunEvals',100000,'TolFun',1e-8,'TolX',1e-6))</para></listitem>
+<listitem>
+  <para>
+    <command>nodiagnostic</command>: doesn't compute the convergence diagnostics for Metropolis (default: diagnostics are computed and displayed).
+  </para>
+</listitem>
+<listitem><para><anchor id="bayesian_irf" xreflabel="bayesian_irf"/><command>bayesian_irf</command> triggers the computation of the posterior distribution of IRFs. The length of the IRFs are controlled by the <command>irf</command> option</para></listitem>
+<listitem><para><anchor id="moments_varendo" xreflabel="moments_varendo"/><command>moments_varendo</command> triggers the computation of the posterior distribution of the theoretical moments of the endogenous variables</para></listitem>
+<listitem><para><anchor id="filtered_vars" xreflabel="filtered_vars"/><command>filtered_vars</command> triggers the computation of the posterior distribution of filtered endogenous variables and shocks</para></listitem>
+<listitem><anchor id="smoother" xreflabel="smoother"/><para><command>smoother</command> triggers the computation of the posterior distribution of smoothered endogenous variables and shocks</para></listitem>
+<listitem><para><anchor id="forecast_opt" xreflabel="forecast"/><command>forecast = </command><replaceable>INTEGER</replaceable> computes the posterior distribution of a forecast on <replaceable>INTEGER</replaceable> periods after the end of the sample used in estimation</para></listitem>
+<listitem><para><command>tex</command> requests the printing of results and graphs in TeX tables and graphics that can be later directly included in Latex files (not yet implemented)</para></listitem>
+<listitem><para>All options for <xref linkend="stoch_simul"/></para></listitem>
+</itemizedlist>
+
+<note><para> If no <command>mh_jscale</command> parameter is used in estimated_params, the procedure uses <command>mh_jscale</command> for all parameters. If <command>mh_jscale</command> option isn't set, the procedure uses 0.2 for all parameters.
+</para></note>
+</refsect1>
+
+<refsect1><title>Results</title>
+<itemizedlist spacing='compact'>
+<listitem><para> results from posterior optimization (also for maximum likelihood)</para></listitem>
+<listitem><para> marginal log density</para></listitem>
+<listitem><para> mean and shortest confidence interval from posterior simulation</para></listitem>
+<listitem><para>Metropolis-Hastings convergence graphs that still need to be documented</para></listitem>
+<listitem><para> graphs with prior, posterior and mode</para></listitem>
+<listitem><para> graphs of smoothed shocks, smoothed observation errors, smoothed and historical variables</para></listitem>
+</itemizedlist>
+</refsect1>
+
+<refsect1><title>Output</title>
+<para>After running <command>estimation</command>, the parameters and the variance matrix of the shocks are set to the mode for maximum likelihood estimation or posterior mode computation without Metropolis iterations.
+</para>
+<para>After <command>estimation</command> with Metropolis iterations (option <command>mh_replic</command> > 0 or option <command>load_mh_file</command> set) the parameters and the variance matrix of the shocks are set to the posterior mean.</para>
+
+<para>Depending on the options, <command>estimation</command> stores results in the following fields of structure <varname>oo_</varname>:
+<table orient="land"><title>Content of <varname>oo_</varname></title><tgroup cols='2'>
+<thead>
+<row><entry>Field 1</entry><entry>Field 2</entry><entry>Field 3</entry><entry>Field 4</entry><entry>Field 5</entry><entry>Required options</entry></row>
+</thead>
+<tbody>
+<row><entry><varname>Forecast</varname></entry><entry>See <xref linkend="ForecastsMoments"/></entry><entry><replaceable>Variable name</replaceable></entry><entry></entry><entry></entry><entry><xref linkend="forecast_opt"/></entry></row>
+<row><entry morerows='1'><varname>MarginalDensity</varname></entry><entry><varname>LaplaceApproximation</varname></entry><entry/><entry></entry><entry></entry><entry>Always provided</entry></row>
+<row><entry><varname>ModifiedHarmonicMean</varname></entry><entry></entry><entry></entry><entry></entry><entry><para><xref linkend="mh_replic"/>&gt; 0 or <xref linkend="load_mh_file"/></para></entry></row>
+<row><entry><varname>PosteriorFilteredVariables</varname></entry><entry>See <xref linkend="MomentsNames"/></entry><entry><replaceable>Variable name</replaceable></entry><entry></entry><entry></entry><entry><para><xref linkend="filtered_vars"/></para></entry></row>
+<row><entry><varname>PosteriorIRF</varname></entry><entry><varname>Dsge</varname></entry><entry>See <xref linkend="MomentsNames"/></entry><entry><para>IRF name: name of endogenous variable '_' name of shock</para></entry><entry></entry><entry><xref linkend="bayesian_irf"/></entry></row>
+<row><entry><varname>PosteriorSmoothedObservationErrors</varname></entry><entry>See <xref linkend="MomentsNames"/></entry><entry><replaceable>Variable name</replaceable></entry><entry></entry><entry></entry><entry><para><xref linkend="smoother"/></para></entry></row>
+<row><entry><varname>PosteriorSmoothedShocks</varname></entry><entry>See <xref linkend="MomentsNames"/></entry><entry><replaceable>Variable name</replaceable></entry><entry></entry><entry></entry><entry><para><xref linkend="smoother"/></para></entry></row>
+<row><entry><varname>PosteriorSmoothedVariables</varname></entry><entry>See <xref linkend="MomentsNames"/></entry><entry><replaceable>Variable name</replaceable></entry><entry></entry><entry></entry><entry><para><xref linkend="smoother"/></para></entry></row>
+<row><entry><varname>PosteriorTheoreticalMoments</varname></entry><entry>See <xref linkend="TheoreticalMoments"/></entry><entry>See <xref linkend="EstimatedObjects"/></entry><entry>See <xref linkend="MomentsNames"/></entry><entry><replaceable>Variable name</replaceable></entry><entry><xref linkend="moments_varendo"/></entry></row>
+<row><entry><varname>posterior_density</varname></entry><entry><replaceable>Parameter name</replaceable></entry><entry></entry><entry></entry><entry></entry><entry><para><xref linkend="mh_replic"/>&gt; 0 or <xref linkend="load_mh_file"/></para></entry></row>
+<row><entry><varname>posterior_hpdinf</varname></entry><entry>See <xref linkend="EstimatedObjects"/></entry><entry><replaceable>Variable name</replaceable></entry><entry></entry><entry></entry><entry><para><xref linkend="mh_replic"/>&gt; 0 or <xref linkend="load_mh_file"/></para></entry></row>
+<row><entry><varname>posterior_hpdsup</varname></entry><entry>See <xref linkend="EstimatedObjects"/></entry><entry><replaceable>Variable name</replaceable></entry><entry></entry><entry></entry><entry><para><xref linkend="mh_replic"/>&gt; 0 or <xref linkend="load_mh_file"/></para></entry></row>
+<row><entry><varname>posterior_mean</varname></entry><entry>See <xref linkend="EstimatedObjects"/></entry><entry><replaceable>Variable name</replaceable></entry><entry></entry><entry></entry><entry><para><xref linkend="mh_replic"/>&gt; 0 or <xref linkend="load_mh_file"/></para></entry></row>
+<row><entry><varname>posterior_mode</varname></entry><entry>See <xref linkend="EstimatedObjects"/></entry><entry><replaceable>Variable name</replaceable></entry><entry></entry><entry></entry><entry><para><xref linkend="mh_replic"/>&gt; 0 or <xref linkend="load_mh_file"/></para></entry></row>
+<row><entry><varname>posterior_std</varname></entry><entry>See <xref linkend="EstimatedObjects"/></entry><entry><replaceable>Variable name</replaceable></entry><entry></entry><entry></entry><entry><para><xref linkend="mh_replic"/>&gt; 0 or <xref linkend="load_mh_file"/></para></entry></row>
+</tbody>
+</tgroup>
+</table>
+</para>
+
+<para><anchor id="ForecastsMoments" xreflabel="Moments of forecasts"/>
+<table><title>Moments of forecasts</title>
+<tgroup cols='2'>
+<thead>
+<row><entry>Field name</entry><entry>Description</entry></row>
+</thead>
+<tbody>
+<row><entry><varname>HPDinf</varname></entry><entry>Lower bound of a 90% HPD interval<footnote id="see_conf_sig"><para>See option <xref linkend="conf_sig"/> to change the size of the HPD interval</para></footnote> of forecast  due to parameter uncertainty</entry></row> 
+<row><entry><varname>HPDsup</varname></entry><entry>Lower bound of a 90% HPD interval <footnoteref linkend="see_conf_sig"/> due to parameter uncertainty</entry></row> 
+<row><entry><varname>HPDTotalinf</varname></entry><entry>Lower bound of a 90% HPD interval of forecast <footnoteref linkend="see_conf_sig"/> due to parameter uncertainty and future shocks</entry></row> 
+<row><entry><varname>HPDTotalsup</varname></entry><entry>Lower bound of a 90% HPD interval <footnoteref linkend="see_conf_sig"/> due to parameter uncertainty and future shocks</entry></row>
+<row><entry><varname>Mean</varname></entry><entry>Mean of the posterior distribution of forecasts</entry></row> 
+<row><entry><varname>Median</varname></entry><entry>Median of the posterior distribution of forecasts</entry></row>  
+<row><entry><varname>Std</varname></entry> <entry>Standard deviation of the posterior distribution of forecasts</entry></row> 
+</tbody>
+</tgroup>
+</table>
+</para>
+<para><anchor id="MomentsNames" xreflabel="Moments Names"/>
+<table><title>Moments Names</title>
+<tgroup cols='2'>
+<thead>
+<row><entry>Field name</entry><entry>Description</entry></row>
+</thead>
+<tbody>
+<row><entry><varname>HPDinf</varname></entry><entry>Lower bound of a 90% HPD interval<footnote id="see_conf_sig1"><para>See option <xref linkend="conf_sig"/> to change the size of the HPD interval</para></footnote></entry></row> 
+<row><entry><varname>HPDsup</varname></entry><entry>Upper bound of a 90% HPD interval <footnoteref linkend="see_conf_sig1"/> </entry></row> 
+<row><entry><varname>Mean</varname></entry><entry>Mean of the posterior distribution</entry></row> 
+<row><entry><varname>Median</varname></entry><entry>Median of the posterior distribution</entry></row>  
+<row><entry><varname>Std</varname></entry> <entry>Standard deviation of the posterior distribution</entry></row> 
+</tbody>
+</tgroup>
+</table>
+</para>
+<para><anchor id="TheoreticalMoments" xreflabel="Theoretical Moments"/>
+<table><title>Theoretical Moments</title>
+<tgroup cols='2'>
+<thead>
+<row><entry>Field name</entry><entry>Description</entry></row>
+</thead>
+<tbody>
+<row><entry><varname>Autocorrelation</varname></entry><entry>Autocorrelation of endogenous variables<footnote><para>The autocorrlation coefficients are computed for the number of periods specified in option <xref linkend="ar"/>.</para></footnote></entry></row>
+<row><entry><varname>Correlation</varname></entry><entry>Correlation between two endogenous variables</entry></row>
+<row><entry><varname>Decomp</varname></entry><entry>Decomposition of variance<footnote><para>When the shocks are correlated, it is the decomposition of orthogonalized shocks via Cholesky decompostion according to the order of declaration of shocks (see <xref linkend="varexo"/>).</para></footnote> </entry></row>
+<row><entry><varname>Expectation</varname></entry><entry>Expectation of endogenous variables</entry></row>
+<row><entry><varname>Variance</varname></entry><entry>(co-)variance of endogenous variables</entry></row>
+</tbody>
+</tgroup>
+</table>
+</para>
+
+<para><anchor id="EstimatedObjects" xreflabel="Estimated Objects"/>
+<table><title>Estimated objects</title>
+<tgroup cols='2'>
+<thead>
+<row><entry>Field name</entry><entry>Description</entry></row>
+</thead>
+<tbody>
+<row><entry><varname>measurement_errors_corr</varname></entry><entry>Correlation between two measurement errors</entry></row>
+<row><entry><varname>measurement_errors_std</varname></entry><entry>Standard deviation of measurement errors</entry></row>
+<row><entry><varname>parameters</varname></entry><entry>Parameters</entry></row>
+<row><entry><varname>shocks_corr</varname></entry><entry>Correlation between two structural shocks</entry></row>
+<row><entry><varname>shocks_std</varname></entry><entry>Standard deviation of structural shocks</entry></row>
+</tbody>
+</tgroup>
+</table>
+</para>
+
+<refsect2><title>Examples</title>
+<para>
+<informalexample>
+<programlisting>
+oo_.posterior_mode.parameters.alp
+oo_.posterior_mean.shocks_std.ex
+oo_.posterior_hpdsup.measurement_errors_corr.gdp_conso
+</programlisting>
+</informalexample>
+</para>
+</refsect2>
+
+</refsect1>
+
+<refsect1><title>Note on steady state computation</title>
+<para>If you know how to compute the steady state for your model, you can provide a Matlab function doing the computation instead of using <command>steady</command>. The function should be called with the name of the <filename>.mod</filename> file followed by <filename>_steadystate</filename>. See <filename>fs2000a_steadystate.m</filename> in <filename>examples/fs2000</filename> directory.
+</para>
+</refsect1>
+</refentry>
+
+<refentry id="unit_root_vars">
+  <refmeta>
+    <refentrytitle>unit_root_vars</refentrytitle>
+  </refmeta>
+
+  <refnamediv>
+    <refname>unit_root_vars</refname>
+    <refpurpose>declares unit-root variables for estimation</refpurpose>
+  </refnamediv>
+
+  <refsynopsisdiv>
+    <cmdsynopsis>
+      <command>unit_root_vars</command>
+      <arg choice="plain">
+      <replaceable>VARIABLE_NAME</replaceable>
+      </arg>
+      <arg rep="repeat">
+      <replaceable>VARIABLE_NAME</replaceable>
+      </arg>
+      <arg choice="plain">;</arg>
+    </cmdsynopsis>
+  </refsynopsisdiv>
+
+<refsect1><title>Description</title>
+<para>
+<command>unit_root_vars</command> is used to declare unit-root variables of a model so that a diffuse prior can be used in the initialization of the Kalman filter for these variables only. For stationary variables, the unconditional covariance matrix of these variables is used for initialization. The algorithm to compute a true diffuse prior is taken from Durbin and Koopman (2001, 2003).
+</para>
+
+<para>When <command>unit_root_vars</command> is used the <command>lik_init</command> option of <xref linkend="estimation"/> has no effect.
+</para>
+
+<para>When there are nonstationary variables in a model, there is no unique deterministic steady state. The user must supply a Matlab function that computes the steady state values of the stationary variables in the model and returns dummy values for the nonstationary ones. The function should be called with the name of the <filename>.mod</filename> file followed by <filename>_steadystate</filename>. See <filename>fs2000a_steadystate.m</filename> in <filename>examples/fs2000</filename> directory.
+</para>
+
+<para>Note that the nonstationary variables in the model must be integrated processes(their first difference or k-difference must be stationary).</para>
+</refsect1>
+</refentry>
+</sect1>
+
+<sect1><title>Optimal policy</title>
+<para>Dynare has tools to compute optimal policies for quadratic objectives. You can either solve for optimal policy under commitment with <xref linkend='olr'/> or for optimal simple rule with <xref linkend='osr'/>.
+</para>
+
+<itemizedlist>
+<listitem><para><xref linkend='olr'/></para></listitem>
+<listitem><para><xref linkend='olr_inst'/></para></listitem>
+<listitem><para><xref linkend='optim_weights'/></para></listitem>
+<listitem><para><xref linkend='osr'/></para></listitem>
+<listitem><para><xref linkend='osr_params'/></para></listitem>
+</itemizedlist>
+
+<refentry id="olr">
+  <refmeta>
+    <refentrytitle>olr</refentrytitle>
+  </refmeta>
+
+  <refnamediv>
+    <refname>olr</refname>
+    <refpurpose>computes optimal policy under commitment</refpurpose>
+  </refnamediv>
+
+  <refsynopsisdiv>
+    <cmdsynopsis>
+      <command>olr</command>
+      <arg>(<arg rep="repeat" choice="plain"><replaceable>OPTION</replaceable>,</arg>)</arg>
+      <arg choice="plain"><replaceable>VARIABLE_NAME</replaceable></arg>
+      <arg rep="repeat"><replaceable>VARIABLE_NAME</replaceable></arg>
+      <arg choice='plain'>;</arg>
+    </cmdsynopsis>
+  </refsynopsisdiv>
+
+<refsect1><title>OPTIONS</title>
+<itemizedlist spacing='compact'>
+<listitem><para><command>olr_beta=VALUE</command> sets the value of the discount factor for the intertemporal optimization problem</para></listitem>
+<listitem><para>All options for <xref linkend="stoch_simul"/></para></listitem>
+</itemizedlist>
+</refsect1>
+
+<refsect1><title>Description</title>
+<para>
+<command>olr</command> computes optimal policies under commitment (Ramsey plans) for linear--quadratic problems of the form
+</para>
+<blockquote><para>
+max<subscript>u</subscript> E<subscript>0</subscript>&Sigma;<subscript>t=0</subscript><superscript>&infin;</superscript>&beta;<superscript>t</superscript>(y<subscript>t</subscript>&prime;W<subscript>11</subscript>y<subscript>t</subscript>+2y<subscript>t</subscript>&prime;W<subscript>12</subscript>u<subscript>t</subscript>+u<subscript>t</subscript>&prime;W<subscript>22</subscript>u<subscript>t</subscript>)
+</para>
+<para>s.t.</para>
+<para>
+  A<subscript>1</subscript>E<subscript>t</subscript>(y<subscript>t+1</subscript>)+A<subscript>2</subscript>y<subscript>t</subscript>+A<subscript>3</subscript>y<subscript>t-1</subscript>+Bu<subscript>t</subscript>+Ce<subscript>t</subscript>=0
+</para>
+</blockquote>
+<para>with</para>
+<itemizedlist>
+<listitem><para>y: endogenous variables</para></listitem>
+<listitem><para>u: policiy instrument</para></listitem>
+<listitem><para>e: exogenous stochastic shocks</para></listitem>
+<listitem><para>&beta;: discount factor</para></listitem>
+</itemizedlist>
+<para>The policy instruments must be listed with <xref linkend='olr_inst'/>.
+</para>
+<para>The quadratic objectives must be listed with <xref linkend='optim_weights'/>.
+</para>
+<para>Multipliers are automatically added to the model. Note, however, that the representation isn't minimal and that, in the solution, some multipliers could be sustituted off.
+</para>
+<para>
+Forward-looking endogenous variables don't need to be present in the dynamics of the economy.
+</para>
+<para>
+Dynare automatically builds the corresponding linear rational expectation model and solves it as with <xref linkend='stoch_simul'/>.
+</para>
+</refsect1>
+</refentry>
+
+<refentry id="olr_inst">
+  <refmeta>
+    <refentrytitle>olr_inst</refentrytitle>
+  </refmeta>
+
+  <refnamediv>
+    <refname>olr_inst</refname>
+    <refpurpose>declares instruments for optimal policy under commitment</refpurpose>
+  </refnamediv>
+
+  <refsynopsisdiv>
+    <cmdsynopsis>
+      <command>olr_inst</command>
+      <arg choice="plain"><replaceable>VARIABLE_NAME</replaceable></arg>
+      <arg rep="repeat"><replaceable>VARIABLE_NAME</replaceable></arg>
+      <arg choice='plain'>;</arg>
+    </cmdsynopsis>
+  </refsynopsisdiv>
+
+
+<refsect1><title>Description</title>
+<para>
+<command>olr_inst</command> declares instruments for optimal policy computed by <xref linkend='olr'/>.
+</para>
+</refsect1>
+</refentry>
+
+<refentry id="optim_weights">
+  <refmeta>
+    <refentrytitle>optim_weights</refentrytitle>
+  </refmeta>
+
+  <refnamediv>
+    <refname>optim_weights</refname>
+    <refpurpose>specifies quadratic objectives for optimal policy problems</refpurpose>
+  </refnamediv>
+
+  <refsynopsisdiv>
+    <cmdsynopsis>
+      <command>optim_weights;</command><sbr/>
+	<group choice="plain">
+	  <arg choice="plain">
+	    <synopfragmentref linkend="var_st1">VARIANCE STATEMENT</synopfragmentref>
+	  </arg>
+	  <arg choice="plain">
+	    <synopfragmentref linkend="covar_st1">COVARIANCE STATEMENT</synopfragmentref>
+	  </arg>
+	  <arg choice="plain">
+	    <synopfragmentref linkend="stderr_st1">STANDARD ERROR STATEMENT</synopfragmentref>
+	  </arg>
+	</group>
+      <arg choice ="plain">end;</arg>
+      <synopfragment id="var_st1">
+	<arg choice="plain">
+	  var <replaceable>VARIABLE_NAME</replaceable> = <replaceable>EXPRESSION</replaceable>;
+	</arg>
+      </synopfragment>
+      <synopfragment id="covar_st1">
+	<arg choice="plain">
+	  var <replaceable>VARIABLE_NAME</replaceable> , <replaceable>VARIABLE_NAME</replaceable> = <replaceable>EXPRESSION</replaceable>;
+	</arg>
+      </synopfragment>
+      <synopfragment id="stderr_st1">
+	<arg choice="plain">
+	  var <replaceable>VARIABLE_NAME</replaceable>; stderr <replaceable>EXPRESSION</replaceable>;
+	</arg>
+      </synopfragment>
+    </cmdsynopsis>
+  </refsynopsisdiv>
+<refsect1><title>Description</title>
+<para>
+<command>optim_weights</command> secifies the nonzero elements of the quadratic weight matrices for the objectives in <xref linkend='olr'/> and <xref linkend='osr'/>
+</para>
+</refsect1>
+</refentry>
+
+<refentry id="osr">
+  <refmeta>
+    <refentrytitle>osr</refentrytitle>
+  </refmeta>
+
+  <refnamediv>
+    <refname>osr</refname>
+    <refpurpose>computes optimal simple policy rules</refpurpose>
+  </refnamediv>
+
+  <refsynopsisdiv>
+    <cmdsynopsis>
+      <command>osr</command>
+      <arg>(<arg rep="repeat" choice="plain"><replaceable>OPTION</replaceable>,</arg>)</arg>
+      <arg choice="plain"><replaceable>VARIABLE_NAME</replaceable></arg>
+      <arg rep="repeat"><replaceable>VARIABLE_NAME</replaceable></arg>
+      <arg choice='plain'>;</arg>
+    </cmdsynopsis>
+  </refsynopsisdiv>
+
+<refsect1><title>OPTIONS</title>
+<itemizedlist spacing='compact'>
+<listitem><para>All options for <xref linkend="stoch_simul"/></para></listitem>
+</itemizedlist>
+</refsect1>
+
+<refsect1><title>Description</title>
+<para>
+<command>osr</command> computes optimal simple policy rules for linear--quadratic problems of the form
+</para>
+<blockquote><para>
+max<subscript>&gamma;</subscript> E(y<subscript>t</subscript>&prime;Wy<subscript>t</subscript>)
+</para>
+<para>s.t.</para>
+<para>
+  A<subscript>1</subscript>E<subscript>t</subscript>(y<subscript>t+1</subscript>)+A<subscript>2</subscript>y<subscript>t</subscript>+A<subscript>3</subscript>y<subscript>t-1</subscript>+Ce<subscript>t</subscript>=0
+</para>
+</blockquote>
+<para>with</para>
+<itemizedlist>
+<listitem><para>&gamma;: parameters to be optimized. They must be elements of matrices A<subscript>1</subscript>, A<subscript>2</subscript>, A<subscript>3</subscript>.</para></listitem>
+<listitem><para>y: endogenous variables</para></listitem>
+<listitem><para>e: exogenous stochastic shocks</para></listitem>
+</itemizedlist>
+<para>The parameters to be optimized must be listed with <xref linkend='osr_params'/>.
+</para>
+<para>The quadratic objectives must be listed with <xref linkend='optim_weights'/>.
+</para>
+<para>
+This problem is solved using a numerical optimizer.
+</para>
+</refsect1>
+</refentry>
+
+<refentry id="osr_params">
+  <refmeta>
+    <refentrytitle>osr_params</refentrytitle>
+  </refmeta>
+
+  <refnamediv>
+    <refname>osr_params</refname>
+    <refpurpose>declares the parameters to be optimized for optimal simple rules</refpurpose>
+  </refnamediv>
+
+  <refsynopsisdiv>
+    <cmdsynopsis>
+      <command>osr_params</command>
+      <arg choice="plain"><replaceable>PARAMETER_NAME</replaceable></arg>
+      <arg rep="repeat"><replaceable>PARAMETER_NAME</replaceable></arg>
+      <arg choice='plain'>;</arg>
+    </cmdsynopsis>
+  </refsynopsisdiv>
+
+
+<refsect1><title>Description</title>
+<para>
+<command>osr_params</command> declares parameters to be optimized  by <xref linkend='osr'/>.
+</para>
+</refsect1>
+</refentry>
+
+
+</sect1>
+<sect1><title>Displaying and saving results</title>
+<para>
+Dynare has comments to plot the results of a simulation and to save the results.
+</para>
+<itemizedlist>
+<listitem><para><xref linkend='rplot'/></para></listitem>
+<listitem><para><xref linkend='dynatype'/></para></listitem>
+<listitem><para><xref linkend='dynasave'/></para></listitem>
+</itemizedlist>
+
+<refentry id="rplot">
+  <refmeta>
+    <refentrytitle>rplot</refentrytitle>
+  </refmeta>
+
+  <refnamediv>
+    <refname>rplot</refname>
+    <refpurpose>plot variables</refpurpose>
+  </refnamediv>
+
+  <refsynopsisdiv>
+    <cmdsynopsis>
+      <command>rplot</command>
+      <arg choice="plain">
+      <replaceable>VARIABLE_NAME</replaceable>
+      </arg>
+      <arg rep="repeat">
+      <replaceable>VARIABLE_NAME</replaceable>
+      </arg>
+      <arg choice="plain">;</arg>
+    </cmdsynopsis>
+  </refsynopsisdiv>
+<refsect1><title>Description</title>
+<para>
+Plots one or several variables
+</para>
+</refsect1>
+</refentry>
+
+<refentry id="dynatype">
+  <refmeta>
+    <refentrytitle>dynatype</refentrytitle>
+  </refmeta>
+
+  <refnamediv>
+    <refname>dynatype</refname>
+    <refpurpose>print simulated variables</refpurpose>
+  </refnamediv>
+
+  <refsynopsisdiv>
+    <cmdsynopsis>
+      <command>dynatype</command>
+      <arg>
+      (<replaceable>FILENAME</replaceable>)
+      </arg>
+      <arg choice="plain">
+      <replaceable>VARIABLE_NAME</replaceable>
+      </arg>
+      <arg rep="repeat">
+      <replaceable>VARIABLE_NAME</replaceable>
+      </arg>
+      <arg choice="plain">;</arg>
+    </cmdsynopsis>
+  </refsynopsisdiv>
+
+<refsect1><title>Description</title>
+<para>
+<command>dynatype</command> prints the listed variables in a text file named <replaceable>FILENAME</replaceable>. If no <replaceable>VARIABLE_NAME</replaceable> are listed, all endogenous variables are printed.
+</para>
+</refsect1>
+
+</refentry>
+
+<refentry id="dynasave">
+  <refmeta>
+    <refentrytitle>dynasave</refentrytitle>
+  </refmeta>
+
+  <refnamediv>
+    <refname>dynasave</refname>
+    <refpurpose>save simulated variables in a binary file</refpurpose>
+  </refnamediv>
+
+  <refsynopsisdiv>
+    <cmdsynopsis>
+      <command>dynasave</command>
+      <arg>
+      (<replaceable>FILENAME</replaceable>)
+      </arg>
+      <arg choice="plain">
+      <replaceable>VARIABLE_NAME</replaceable>
+      </arg>
+      <arg rep="repeat">
+      <replaceable>VARIABLE_NAME</replaceable>
+      </arg>
+      <arg choice="plain">;</arg>
+    </cmdsynopsis>
+  </refsynopsisdiv>
+
+<refsect1><title>Description</title>
+<para>
+<command>dynasave</command> saves the listed variables in a binary file named <replaceable>FILENAME</replaceable>. If no <replaceable>VARIABLE_NAME</replaceable> are listed, all endogenous variables are saved.
+</para>
+<para>
+In Matlab, variables saved with the <command>dynasave</command> command can be retrieved by the Matlab command <command>load -mat <replaceable>FILENAME</replaceable></command>.
+</para>
+</refsect1>
+</refentry>
+</sect1>
+
+<sect1><title>Conditional compilation</title>
+<para>
+Dynare has the following commands to choose which part of the *.mod file is executed. This is useful to maintain several versions of a model in the same *.mod file.
+</para>
+<itemizedlist>
+<listitem><para><xref linkend='define'/></para></listitem>
+<listitem><para><xref linkend='if_elseif_else_end'/></para></listitem>
+</itemizedlist>
+
+<refentry id="define">
+  <refmeta>
+    <refentrytitle>@define</refentrytitle>
+  </refmeta>
+
+  <refnamediv>
+    <refname>@define</refname>
+    <refpurpose>defines a macro</refpurpose>
+  </refnamediv>
+
+  <refsynopsisdiv>
+    <cmdsynopsis>
+      <command>@define</command>
+      <arg choice="plain">
+      <replaceable>VARIABLE_NAME</replaceable>
+      </arg>
+      <arg choice="plain">
+      <replaceable>INTEGER</replaceable>
+      </arg>
+      <arg choice="plain">;</arg>
+    </cmdsynopsis>
+  </refsynopsisdiv>
+<refsect1><title>Description</title>
+<para>
+<command>@define</command> defines a macro with name <replaceable>VARIABLE_NAME</replaceable> and value <replaceable>INTEGER</replaceable>. This macro can be used later in the *.mod file only in <command>@if</command> or <command>@elseif</command> statements. The macros can't be used to replace arbitrary part of codes like in C, for example.
+</para>
+</refsect1>
+
+<refsect1><title>Example</title>
+<para>
+<informalexample>
+<programlisting>
+  @define version 1;
+</programlisting>
+</informalexample>
+</para>
+</refsect1>
+
+</refentry>
+
+<refentry id="if_elseif_else_end">
+  <refmeta>
+    <refentrytitle>@if ... @elseif ... @else ... @end</refentrytitle>
+  </refmeta>
+
+  <refnamediv>
+    <refname>@if ... @elseif ... @else ... @end</refname>
+    <refpurpose>defines conditional compilation of the *.mod file</refpurpose>
+  </refnamediv>
+
+  <refsynopsisdiv>
+    <cmdsynopsis>
+      <command>@if</command>
+      <arg choice="plain">
+      <replaceable>VARIABLE_NAME</replaceable>
+      </arg>
+      <arg choice="plain">
+      <replaceable>LOGICAL_OPERATOR</replaceable>
+      </arg>
+      <arg choice="plain">
+      <replaceable>INTEGER</replaceable>
+      </arg>
+      <arg choice="plain">;</arg><sbr/>
+      <arg choice="plain">...</arg><sbr/>
+        
+    </cmdsynopsis>
+  </refsynopsisdiv>
+<refsect1><title>Description</title>
+<para><replaceable>LOGICAL_OPERATOR</replaceable> are
+<itemizedlist>
+<listitem><para>== equal</para></listitem>
+<listitem><para>!= not equal</para></listitem>
+<listitem><para>&lt; lesser than</para></listitem>
+<listitem><para>&gt; greater than</para></listitem>
+<listitem><para>&lt;= lesser or equal than</para></listitem>
+<listitem><para>&gt;= greater or equal than</para></listitem>
+</itemizedlist>
+</para>
+
+<para>
+These commands let the user define which part of the *.mod file should be handled by Dynare
+</para>
+</refsect1>
+
+<refsect1><title>Example</title>
+<para>
+<informalexample>
+<programlisting>
+  @define version 1;
+  parameters alph bet;
+  alph = 0.3;
+  @if version == 1;
+    bet = 0.9;
+  @elseif version == 2;
+    bet = 0.95;
+  @else;
+    bet = 0.98;
+  @end;
+</programlisting>
+</informalexample>
+</para>
+</refsect1>
+
+</refentry>
+
+</sect1>
+</chapter>
+
+<chapter><title>Examples</title>
+<para>
+Fabrice Collard (GREMAQ, University of Toulouse) has written a guide to stochastic simulations with Dynare entitled "Dynare in Practice" which is in <filename>guide.pdf</filename>.
+</para>
+</chapter>
+
+<bibliography>
+<biblioentry>
+  <biblioset relation="article">
+    <author>
+      <surname> Boucekkine</surname>
+      <firstname> Raouf</firstname>
+    </author>
+    <pubdate>1995</pubdate>
+    <title>An alternative methodology for solving nonlinear forward-looking models</title>
+  </biblioset>
+  <biblioset relation="journal">
+    <title>Journal of Economic Dynamics and Control</title>
+    <volumenum>19</volumenum>
+    <pagenums>711-734</pagenums>
+  </biblioset>
+</biblioentry>
+<biblioentry>
+  <biblioset relation="article">
+    <authorgroup>
+      <author>
+	<surname>Collard</surname>
+	<firstname>Fabrice</firstname>
+      </author>
+      <author>
+	<surname>Juillard</surname>
+	<firstname>Michel</firstname>
+      </author>
+    </authorgroup>
+    <pubdate>2001</pubdate>
+    <title>Accuracy of stochastic perturbation methods: The case of asset pricing models</title>
+  </biblioset>
+  <biblioset relation="journal">
+    <title>Journal of Economic Dynamics and Control</title>
+    <volumenum>25</volumenum>
+    <pagenums>979-999</pagenums>
+  </biblioset>
+</biblioentry>
+
+<biblioentry> 
+  <biblioset relation="article">
+    <authorgroup>
+      <author>
+	<surname>Collard</surname>
+	<firstname>Fabrice</firstname>
+      </author>
+      <author>
+	<surname>Juillard</surname>
+	<firstname>Michel</firstname>
+      </author>
+    </authorgroup>
+    <pubdate>2001</pubdate>
+    <title>A Higher-Order Taylor Expansion Approach to Simulation of Stochastic Forward-Looking Models with an Application to a Non-Linear Phillips Curve</title>
+  </biblioset>
+  <biblioset relation="journal">
+    <title>Computational Economics</title>
+    <volumenum>17</volumenum>
+    <pagenums>125-139</pagenums>
+  </biblioset>
+</biblioentry>
+
+<biblioentry>
+  <biblioset relation="book">
+    <authorgroup>
+      <author>
+	<surname>Durbin</surname>
+	<firstname>J.</firstname>
+      </author>
+      <author>
+	<surname>Koopman</surname>
+	<firstname>S.J.</firstname>
+      </author>
+    </authorgroup>
+    <pubdate>2001</pubdate>
+    <title>Time Series Analysis by State Space Methods</title>
+    <publishername>Oxford University Press</publishername>
+  </biblioset>
+</biblioentry>
+
+<biblioentry>
+  <biblioset relation="article">
+    <authorgroup>
+      <author>
+	<surname>Fair</surname>
+	<firstname>Ray</firstname>
+      </author>
+      <author>
+	<surname>Taylor</surname>
+	<firstname>John</firstname>
+      </author>
+    </authorgroup>
+    <pubdate>1983</pubdate>
+    <title>Solution and Maximum Likelihood Estimation of Dynamic Nonlinear Rational Expectation Models</title>
+  </biblioset>
+  <biblioset relation="journal">
+    <title>Econometrica</title>
+    <volumenum>51</volumenum>
+    <pagenums>1169-1185</pagenums>
+  </biblioset>
+</biblioentry>
+
+<biblioentry>
+  <biblioset relation="article">
+    <authorgroup>
+      <author>
+	<surname>Fernandez-Villaverde</surname>
+	<firstname>Jesus</firstname>
+      </author>
+      <author>
+	<surname>Rubio-Ramirez</surname>
+	<firstname>Juan</firstname>
+      </author>
+    </authorgroup>
+    <pubdate>2004</pubdate>
+    <title>Comparing Dynamic Equilibrium Economies to Data: A Bayesian Approach</title>
+  </biblioset>
+  <biblioset relation="journal">
+  <title>Journal of Econometrics</title>
+  <volumenum>123</volumenum>
+    <pagenums>153-187</pagenums>
+  </biblioset>
+</biblioentry>
+
+<biblioentry>   
+  <biblioset relation="article">
+    <author>
+      <surname>Ireland</surname>
+      <firstname>Peter</firstname>
+    </author>
+    <pubdate>2004</pubdate>
+    <title>A Method for Taking Models to the Data</title>
+  </biblioset>
+  <biblioset relation="journal">
+    <title>Journal of Economic Dynamics and Control</title>
+    <volumenum>28</volumenum>
+    <pagenums>1205-26</pagenums>
+  </biblioset>
+</biblioentry>
+
+<biblioentry>  
+  <biblioset relation="article">
+    <author>
+      <surname>Judd</surname>
+      <firstname>Kenneth</firstname>
+    </author>
+    <pubdate>1996</pubdate>    
+    <title>Approximation, Perturbation, and Projection Methods in Economic Analysis</title>
+  </biblioset>
+  <biblioset relation="book">
+    <authorgroup>
+      <author>
+	<surname>Amman</surname>
+	<firstname>Hans</firstname>
+      </author>
+      <author>
+	<surname>Kendrick</surname>
+	<firstname>David</firstname>
+      </author>
+      <author>
+	<surname>Rust</surname>
+	<firstname>John</firstname>
+      </author>
+    </authorgroup>
+    <title>Handbook of Computational Economics</title>
+    <pubdate>1996</pubdate>
+    <publishername>North Holland Press</publishername>
+    <pagenums>511-585</pagenums>
+  </biblioset>
+</biblioentry>
+
+<biblioentry> 
+      <author>
+	<surname>Juillard</surname>
+	<firstname>Michel</firstname>
+      </author>
+      <pubdate>1996</pubdate>
+      <title>Dynare: A program for the resolution and simulation of dynamic models with forward variables through the use of a relaxation algorithm</title>
+      <orgname>CEPREMAP</orgname>
+      <citetitle>Couverture Orange</citetitle>
+      <volumenum>9602</volumenum>
+</biblioentry>
+
+<biblioentry>
+  <biblioset relation="article">
+    <authorgroup>
+      <author>
+	<surname>Koopman</surname>
+	<firstname>S.J.</firstname>
+      </author>
+      <author>
+	<surname>Durbin</surname>
+	<firstname>J.</firstname>
+      </author>
+    </authorgroup>
+    <pubdate>2003</pubdate>
+    <title>Filtering and Smoothing of State Vector for Diffuse State Space Models</title>
+  </biblioset>
+  <biblioset relation="journal">
+    <title>Journal of Time Series Analysis</title>
+    <volumenum>24</volumenum>
+    <pagenums>85-98</pagenums>
+  </biblioset>
+</biblioentry>
+
+<biblioentry>   
+  <biblioset relation="article">
+    <author>
+      <surname>Laffargue</surname>
+      <firstname>Jean-Pierre</firstname>
+    </author>
+    <title>Résolution d'un modèle macroéconomique avec anticipations rationnelles</title>
+    <pubdate>1990</pubdate>
+  </biblioset>
+  <biblioset relation="journal">
+    <title>Annales d'Economie et Statistique</title>
+    <volumenum>17</volumenum>
+    <pagenums>97-119</pagenums>
+  </biblioset>
+</biblioentry>
+<biblioentry> 
+  <authorgroup>
+  <author>
+    <surname>Lubik</surname>
+    <firstname>Thomas</firstname>
+  </author>
+  <author>
+    <surname>Schorfheide</surname>
+    <firstname>Frank</firstname>
+  </author>
+  </authorgroup>
+  <pubdate>2003</pubdate>
+  <title>Do Central Banks Target Exchange Rates? A Structural Investigation</title>
+  <orgname>University of Pennsylvania</orgname>
+</biblioentry>
+<biblioentry> 
+  <authorgroup>
+    <author>
+      <surname>Rabanal</surname>
+      <firstname>Pau</firstname>
+    </author>
+    <author>
+      <surname>Rubio-Ramirez</surname>
+      <firstname>Juan</firstname>
+    </author>
+  </authorgroup>
+  <pubdate>2003</pubdate>
+  <title>Comparing New Keynesian Models of the Business Cycle: A Bayesian Approach</title>
+  <orgname>Atlanta Fed</orgname>
+<citetitle>Working Paper</citetitle>
+<volumenum>2001-22a, rev 2003</volumenum>
+</biblioentry>
+
+<biblioentry> 
+  <biblioset relation="article">
+    <author>
+      <surname>Schorfheide</surname>
+      <firstname>Frank</firstname>
+    </author>
+  <pubdate>2000</pubdate>
+  <title>Loss Function-based evaluation of DSGE models</title>
+  </biblioset>
+  <biblioset relation="journal">
+    <title>Journal of Applied Econometrics</title>
+    <volumenum>15</volumenum>
+    <pagenums>645-70</pagenums>
+  </biblioset>
+</biblioentry>
+
+<biblioentry> 
+  <authorgroup>
+    <author>
+      <surname>Schmitt-Grohe</surname>
+      <firstname>Stephanie</firstname>
+    </author>
+    <author>
+      <surname>Uribe</surname>
+      <firstname>Martin</firstname>
+    </author>
+  </authorgroup>
+  <pubdate>2002</pubdate>
+  <title>Solving Dynamic General Equilibrium Models Using a Second-Order Approximation to the Policy Function</title>
+  <orgname>Rutgers University</orgname>
+</biblioentry>
+
+<biblioentry> 
+  <authorgroup>
+    <author>
+      <surname>Smets</surname>
+      <firstname>Frank</firstname>
+    </author>
+    <author>
+      <surname>Wouters</surname>
+      <firstname>Rafael</firstname>
+    </author>
+  </authorgroup>
+  <pubdate>2002</pubdate>
+  <title>An Estimated Stochastic Dynamic General
+Equilibrium Model of the Euro Area</title>
+  <orgname>European Central Bank</orgname>
+      <citetitle>ECB Working Paper</citetitle>
+      <volumenum>171</volumenum>
+</biblioentry>
+</bibliography>
+<index>
+</index>
+</book>
+

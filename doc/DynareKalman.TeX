@@ -1,0 +1,196 @@
+% ----------------------------------------------------------------
+% AMS-LaTeX Paper ************************************************
+% **** -----------------------------------------------------------
+\documentclass{amsart}
+\usepackage{graphicx}
+% ----------------------------------------------------------------
+\vfuzz2pt % Don't report over-full v-boxes if over-edge is small
+\hfuzz2pt % Don't report over-full h-boxes if over-edge is small
+% THEOREMS -------------------------------------------------------
+\newtheorem{thm}{Theorem}[section]
+\newtheorem{cor}[thm]{Corollary}
+\newtheorem{lem}[thm]{Lemma}
+\newtheorem{prop}[thm]{Proposition}
+\theoremstyle{definition}
+\newtheorem{defn}[thm]{Definition}
+\theoremstyle{remark}
+\newtheorem{rem}[thm]{Remark}
+\numberwithin{equation}{section}
+% MATH -----------------------------------------------------------
+\newcommand{\norm}[1]{\left\Vert#1\right\Vert}
+\newcommand{\abs}[1]{\left\vert#1\right\vert}
+\newcommand{\set}[1]{\left\{#1\right\}}
+\newcommand{\Real}{\mathbb R}
+\newcommand{\eps}{\varepsilon}
+\newcommand{\To}{\longrightarrow}
+\newcommand{\BX}{\mathbf{B}(X)}
+\newcommand{\A}{\mathcal{A}}
+% ----------------------------------------------------------------
+\begin{document}
+
+\title{Kalman filtering and smoothing in Dynare}%
+% ----------------------------------------------------------------
+\maketitle
+% ----------------------------------------------------------------
+
+\section*{Introduction}
+
+\noindent \textbf{``Filtering and Smoothing of State Vector for
+Diffuse State Space Models''}, S.J. Koopman and J. Durbin (2003,
+in \textit{Journal of Time Series Analysis}, vol. 24(1), pp.
+85-98).\newline
+
+\noindent \textbf{``Fast Filtering and Smoothing for Multivariate
+State Space Models''}, S.J. Koopman and J. Durbin (2000, in
+\textit{Journal of Time Series Analysis}, vol. 21(3), pp.
+282-296).\newline
+
+
+\bigskip
+
+\noindent \textsc{The State-Space Model}\footnote{Note that in
+Dynare, matrices $T$, $Z$, $R$, $H$ and $Q$ are assumed to be time
+invariant.}:
+
+\[y_t =   Z\alpha_t + \varepsilon_t\]
+\[\alpha_{t+1} = T \alpha_t + R\eta_t\]
+with:
+\[\alpha_1 = a + A\delta + R_0\eta_0\]
+
+\noindent $m\times q$ matrix $A$ and $m\times(m-q)$ matrix $R_0$
+are selection matrices (their columns constitue all the columns of
+the $m\times m$ identity matrix) so that $A'R_0 = 0$ and
+$A'\alpha_1 = \delta$. We assume that the vector $\delta$ is
+distributed as a $\mathcal{N}(0,\kappa I_q)$ for a given  $\kappa
+> 0$. So that the expectation of $\alpha_1$ is a and its variance
+is $P$, with
+
+\[ P = \kappa P_{\infty} + P_{\star}\]
+\[           P_{\infty} = A A'\]
+\[ P_{\star}  = R_0 Q_0 R_0'\]
+
+\noindent $P_{\infty}$ is a $m\times m$ diagonal matrix with $q$
+ones and $m-q$ zeros. and where: $y_t$ is a $pp\times 1$ vector,
+$\alpha_t$ is a $mm\times 1$ vector, $\varepsilon_t$ is a
+$pp\times 1$ multivariate random variable (iid
+$\mathcal{N}(0,H)$), $\eta_t$ is a $rr\times 1$ multivariate
+random variable (iid $\mathcal{N}(0,Q)$), $a_1$ is a $mm\times 1$
+vector, $Z_t$ is a $pp\times mm$ matrix, $T$ is a $mm \times mm$
+matrix, $H$ is a $pp\times pp$ matrix, $R$ is a $mm\times rr$
+matrix, $Q$ is a $rr\times rr$ matrix and $P_1$ is a $mm\times mm$
+matrix. \newline
+
+\section{Filtering}
+
+\noindent The filtering equations are given by:
+\begin{equation}
+\begin{split}
+v_t &= y_t - Z  a_t\\
+F_t &= Z P_t Z' + H\\
+K_t &= P_t Z' F_t^{-1}\\
+a_{t+1} &= T (a_t + K_t v_t)\\
+P_{t+1} &= T (P_t - P_tZ'K') T' + R Q R'\\
+\end{split}
+\end{equation}
+$\{F_t\}$ and $\{v_t\}$ are used to evaluate the likelihood. A
+potentially faster algorithm (unfortunately not with matlab) is to
+consider a univariate approach to the multivariate Kalman filter
+(the covariance matrix associated to the measurement errors has to
+be diagonal: $H=diag(\sigma_1^2,\dots,\sigma_{pp}^2)$). Let $Z_i$
+be line $i$ of the selection matrix $Z$. The univariate algorithm
+is as follows :
+\begin{equation}
+\begin{split}
+v_{t,i} &= y_{t,i} - Z_i  a_t^{(i)}\\
+F_t^{(i)} &= Z_i P_t^{(i)} Z_i' + \sigma_{i}^2\\
+K_t^{(i)} &= P_t^{(i)} Z_i'\\
+a_{t}^{(i+1)} &= a_t^{(i)} + K_t^{(i)} v_{t,i} / F_t^{(i)}\\
+P_{t}^{(i+1)} &= P_{t}^{(i)} - K_{t}^{(i)} \left.K_t^{(i)}\right.' / F_t^{(i)}\\
+a_{t+1}^{(1)} &= T a_t^{(pp)}\\
+P_{t+1}^{(1)} &= T P_t^{(pp)} T' + R Q R'\\
+\end{split}
+\end{equation}
+when $F_t^{(i)}$ is equal to zero we simply have
+$a_{t}^{(i+1)}=a_{t}^{(i)}$ and $P_{t}^{(i+1)}=P_{t}^{(i)}$. The
+log-likelihood is evaluated as follows:
+\begin{equation}
+\mathcal{L}_T = const -\frac{1}{2}\sum_{i=1}^{pp}\sum_{t=1}^n \log
+F_{t}^{(i)} + v_{t,i}^2 / F_{t}^{(i)}
+\end{equation}
+
+\bigskip
+
+\noindent The diffuse filtering equations are given by:
+\begin{equation}
+\begin{split}
+v_t &= y_t - Z  a_t\\
+F_{\infty,t} &= Z P_{\infty,t} Z' + H\\
+K_{\infty,t} &= P_{\infty,t} Z' F_{\infty,t}^{-1}\\
+F_{\ast,t} &= Z P_{\ast,t} Z' + H\\
+K_{\ast,t} &= \left(P_{\ast,t} Z' - K_{\infty,t}F_{\ast,t}\right)F_{\infty,t}^{-1}\\
+P_{\ast,t+1} &= T (P_{\ast,t}-P_{\ast,t}Z'K_{\infty,t}' - P_{\infty,t}Z'K_{\ast,t}') T' + R Q R'\\
+P_{\infty,t+1} &= T(P_{\infty,t}-P_{\infty,t}Z'K_{\infty,t}')T'\\
+a_{t+1} &= T (a_t + K_{\infty,t} v_t)\\
+\end{split}
+\end{equation}
+When the condition $rank(P_{\infty,t+1})=0$ is satisfied we set
+$d=t$ and go back to the standard Kalman filtering equations. Here
+$F_{\infty,t}$ is assumed to be a full rank matrix. If this is not
+the case we switch to another algorithm. If $F_{\infty,t}=0$:
+\begin{equation}
+\begin{split}
+v_t &= y_t - Z  a_t\\
+F_{\ast,t} &= Z P_{\ast,t} Z' + H\\
+K_{\ast,t} &= P_{\ast,t} Z'F_{\infty,t}^{-1}\\
+P_{\ast,t+1} &= T (P_{\ast,t}-P_{\ast,t}Z'K_{\ast,t}') T' + R Q R'\\
+P_{\infty,t+1} &= TP_{\infty,t}T'\\
+a_{t+1} &= T (a_t + K_{\ast,t} v_t)\\
+L_t &= T(I - K_t Z)\\
+\end{split}
+\end{equation}
+otherwise, we consider a diffuse version of the univariate
+approach described above.
+
+\section{Smoothing}
+
+\noindent The smoothing equations are given by:
+\begin{equation}
+\begin{split}
+r_{t-1} &= Z' F_t^{-1}v_t + L_t' r_t\\
+\widehat{\alpha}_t &= a_t + P_t r_{t-1} \\
+\widehat{\eta}_t &= Q R r_t\\
+\widehat{\varepsilon}_t &= H \left(F_t^{-1}v_t-K_t'r_t\right)\\
+\end{split}
+\end{equation}
+initializing with $r_n = 0$ and with $L_t = T-K_tZ$. The diffuse
+smoothing equations are given by :
+\begin{equation}
+\begin{split}
+r_{t-1}^{(0)} &= L_{\infty,t}r_{t}^{(0)}\\
+r_{t-1}^{(1)} &= Z' F_{\infty,t}^{-1}v_t - K_{\ast,t}'r_{t}^{(0)}+ L_{\infty,t}' r_t^{(1)}\\
+\widehat{\alpha}_t &= a_t + P_{\ast,t} r_{t-1}^{(0)} + P_{\infty,t}r_{t-1}^{(1)}\\
+\widehat{\eta}_t &= Q R r_t^{(0)}\\
+\widehat{\varepsilon}_t &= -H K_{\infty,t}'r_t^{(0)}\\
+\end{split}
+\end{equation}
+for $t = d,d-1,...,1$, where $d$ is such that $P_{\infty,d+1}=0$.
+This backward recurrence is initialized with $r_{d}^{(0)}=r_{d}$,
+obtained from the non diffuse Kalman smoother, and
+$r_{d}^{(1)}=0$. $L_{\infty,t} = T-K_{\infty,t}Z$.\newline
+
+
+\noindent A univariate smoothing algorithm has to be coded... In
+the smoothing part the matrix $F_t$ (or $F_{\infty,t}$) is assumed
+to be full rank...
+
+
+
+
+
+% ----------------------------------------------------------------
+%\bibliographystyle{amsplain}
+%\bibliography{}
+\end{document}
+% ----------------------------------------------------------------
+
+
