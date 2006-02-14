@@ -1,0 +1,41 @@
+% Copyright (C) 2005 Michel Juillard
+%
+% all local variables have complicated names in order to avoid name
+% conflicts with possible user variable names
+
+function dyn_data_01=read_variables(file_name_01,var_names_01,dyn_data_01,xls_sheet,xls_range)
+  
+  dyn_size_01 = size(dyn_data_01,1);
+  var_size_01 = size(var_names_01,1);
+  if exist(file_name_01)
+    dyn_instr_01 = file_name_01;
+    eval(dyn_instr_01);
+    for dyn_i_01=1:var_size_01
+      dyn_tmp_01 = eval(var_names_01(dyn_i_01,:));
+      if length(dyn_tmp_01) > dyn_size_01 & dyn_size_01 > 0
+	error('data size is too large')
+      end
+      dyn_data_01(:,dyn_i_01) = dyn_tmp_01;
+    end
+  elseif exist([file_name_01 '.mat'])
+    s = load(file_name_01);
+    for dyn_i_01=1:var_size_01
+      dyn_tmp_01 = s.(var_names_01(dyn_i_01,:));
+      if length(dyn_tmp_01) > dyn_size_01 & dyn_size_01 > 0
+	error('data size is too large')
+      end
+      dyn_data_01(:,dyn_i_01) = dyn_tmp_01;
+    end
+  elseif exist([file_name_01 '.xls'])
+    [num,txt,raw] = xlsread(file_name_01,xls_sheet,xls_range);
+    for dyn_i_01=1:var_size_01
+      iv = strmatch(var_names_01(dyn_i_01,:),raw(1,:),'exact');
+      dyn_tmp_01 = [raw{2:end,iv}]';
+      if length(dyn_tmp_01) > dyn_size_01 & dyn_size_01 > 0
+	error('data size is too large')
+      end
+      dyn_data_01(:,dyn_i_01) = dyn_tmp_01;
+    end
+    
+  end
+  

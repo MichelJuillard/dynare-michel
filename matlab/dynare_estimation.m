@@ -55,6 +55,8 @@ options_ = set_default_option(options_,'kalman_algo',1);
 options_ = set_default_option(options_,'kalman_tol',10^(-12));
 options_ = set_default_option(options_,'posterior_mode_estimation',1);
 options_ = set_default_option(options_,'MaxNumberOfBytes',1e6);
+options_ = set_default_option(options_,'xls_sheet','');
+options_ = set_default_option(options_,'xls_range','');
 
 %% Add something to the parser ++>
 M_.dname = M_.fname; % The user should be able to choose another name
@@ -175,17 +177,11 @@ k = find(isnan(bayestopt_.jscale));
 bayestopt_.jscale(k) = options_.mh_jscale;
 
 %% Read and demean data 
-if exist(options_.datafile)
-  instr = options_.datafile;
-else
-  instr = ['load ' options_.datafile];
-end
-eval(instr);
-rawdata = [];
+rawdata = read_variables(options_.datafile,options_.varobs,[],options_.xls_sheet,options_.xls_range);
+
 k = [];
 k1 = [];
 for i=1:n_varobs
-  rawdata = [rawdata eval(deblank(options_.varobs(i,:)))];
   k = [k strmatch(deblank(options_.varobs(i,:)),M_.endo_names(dr.order_var,:), ...
 		  'exact')];
   k1 = [k1 strmatch(deblank(options_.varobs(i,:)),M_.endo_names, 'exact')];
