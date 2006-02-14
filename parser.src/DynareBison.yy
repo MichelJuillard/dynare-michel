@@ -33,7 +33,8 @@
 %token KALMAN_ALGO KALMAN_TOL
 %token LAPLACE LIK_ALGO LIK_INIT LINEAR LOAD_MH_FILE LOGLINEAR
 %token MH_DROP MH_INIT_SCALE MH_JSCALE MH_MODE MH_NBLOCKS MH_REPLIC MODE_CHECK MODE_COMPUTE MODE_FILE MODEL MODEL_COMPARISON MODEL_COMPARISON_APPROXIMATION MODIFIEDHARMONICMEAN MOMENTS MOMENTS_VARENDO MSHOCKS
-%token NAME NK NOBS NOCORR NODIAGNOSTIC NOFUNCTIONS NOGRAPH NOMOMENTS NOPRINT NORMAL_PDF
+%token NAME NOBS NOCORR NODIAGNOSTIC NOFUNCTIONS NOGRAPH XLS_SHEET XLS_RANGE
+%token NOMOMENTS NOPRINT NORMAL_PDF
 %token OBSERVATION_TRENDS OLR OLR_INST OLR_BETA OPTIM OPTIM_WEIGHTS ORDER OSR OSR_PARAMS 
 %token PARAMETERS PERIODS PREFILTER PRESAMPLE PRINT PRIOR_TRUNC
 %token QZ_CRITERIUM
@@ -769,6 +770,8 @@
                    | o_filtered_vars
                    | o_kalman_algo
                    | o_kalman_tol
+                   | o_xls_sheet
+                   | o_xls_range
                    ;
 	
  list_optim_option
@@ -961,5 +964,8 @@
  o_print : PRINT {_parser->option_num("noprint","0");};
  o_noprint : NOPRINT {_parser->option_num("noprint","1");};
  o_nograph : GRAPH {_parser->option_num("nograph","0");};	
+ o_xls_sheet : XLS_SHEET EQUAL NAME {_parser->option_str("xls_sheet",$3);} 
+ o_xls_range : XLS_RANGE EQUAL range {_parser->option_str("xls_range",$3);} 
 
+ range : NAME ':' NAME {$$ = new dynare::Objects(":");$$ = _parser->cat($1,$$);$$ = _parser->cat($$,$3);}
  %%

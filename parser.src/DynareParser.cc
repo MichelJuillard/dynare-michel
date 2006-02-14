@@ -259,7 +259,8 @@ void dynare::parser::finish(void)
       model_tree.OpenMFiles(model_file_name+"_static", model_file_name+"_dynamic");
       model_tree.SaveMFiles();
     }
-
+  
+  *output << "save('" << model_file_name << "_results', 'oo_');\n";
 	
 }
 void dynare::parser::begin_initval(void)

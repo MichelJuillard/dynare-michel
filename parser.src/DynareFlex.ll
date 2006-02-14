@@ -131,7 +131,6 @@ int sigma_e = 0;
 <DYNARE_STATEMENT>optim		{return OPTIM;}
 <DYNARE_STATEMENT>periods	{return PERIODS;}
 <DYNARE_STATEMENT>diffuse_d {return DIFFUSE_D;}
-<DYNARE_STATEMENT>nk {return NK;}
 <DYNARE_STATEMENT>model_comparison_approximation {return MODEL_COMPARISON;}
 <DYNARE_STATEMENT>laplace {return LAPLACE;}
 <DYNARE_STATEMENT>modifiedharmonicmean {return MODIFIEDHARMONICMEAN;}
@@ -182,6 +181,8 @@ int sigma_e = 0;
 <DYNARE_STATEMENT>olr_beta {return OLR_BETA;}
 <DYNARE_STATEMENT>xtick   		{return XTICK;}  	  
 <DYNARE_STATEMENT>xticklabel   		{return XTICKLABEL;}  	  
+<DYNARE_STATEMENT>xls_sheet {return XLS_SHEET;}
+<DYNARE_STATEMENT>xls_range {return XLS_RANGE;}
 
 <DYNARE_STATEMENT,DYNARE_BLOCK>use_dll {return USE_DLL;}
 <DYNARE_STATEMENT,DYNARE_BLOCK>linear {return LINEAR;}
