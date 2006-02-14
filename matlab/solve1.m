@@ -40,6 +40,7 @@ function [x,check] = solve1(func,x,j1,j2,jacobian_flag,varargin)
     if jacobian_flag
       [fvec,fjac] = feval(func,x,varargin{:});
     else
+      fvec = feval(func,x,varargin{:});
       dh = max(abs(x(j2)),options_.gstep*ones(nn,1))*eps^(1/3);
       
       for j = 1:nn
