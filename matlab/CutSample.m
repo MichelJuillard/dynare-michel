@@ -5,8 +5,8 @@ global M_ options_ estim_params_
 npar = estim_params_.np+estim_params_.nvn+estim_params_.ncx+estim_params_.ncn+estim_params_.nvx;
 
 DirectoryName = CheckPath('metropolis');
-file = eval(['dir(''' DirectoryName '/'  M_.fname '_mh_history.mat'');']);
-files = eval(['dir(''' DirectoryName '/' M_.fname '_mh*.mat'');']);
+file = dir([ DirectoryName '/'  M_.fname '_mh_history.mat']);
+files = dir([ DirectoryName '/' M_.fname '_mh*.mat' ]);
 if ~length(files)
   disp('MH:: FAILURE! there is no MH file to load here!')
   return
