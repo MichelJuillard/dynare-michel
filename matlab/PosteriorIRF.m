@@ -27,11 +27,6 @@ MAX_nruns = ceil(options_.MaxNumberOfBytes/(npar+2)/8);
 MAX_nirfs = ceil(options_.MaxNumberOfBytes/(options_.irf*length(oo_.steady_state)*M_.exo_nbr)/8)+50;
 %%
 B = round(0.25*NumberOfDraws);
-if B <= MAX_nirfs
-  stock_irf = zeros(options_.irf,size(M_.endo_names,1),M_.exo_nbr,B);
-elseif nvn & B > MAX_nirfs
-  stock_irf = zeros(options_.irf,size(M_.endo_names,1),M_.exo_nbr,MAX_nirfs);
-end
 %%
 irun = 0;
 ifil = 1;
