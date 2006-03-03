@@ -1,144 +1,237 @@
-function [xparam1, hh, gg, fval] = newrat(func0,x,hh,gg,flag,varargin)
+function [xparam1, hh, gg, fval, igg] = newrat(func0, x, hh, gg, igg, ftol0, nit, flagg, varargin)
 %
-%  [xparam1, hh, gg, fval] = newrat(func0,x,hh,gg,flag,varargin)
+%  Copyright (C) 2004 Marco Ratto
 %
-%  Standard Newton search
+%  [xparam1, hh, gg, fval, igg] = newrat(func0, x, hh, gg, igg, ftol0, nit, flagg, varargin)
 %
-%  flag = 0, to begin with a pure gradient search (the program shifts to
-%  pure Newton when improvement of pure gradient is below ftol)
+%  Optimiser with outer product gradient and 'Gibbs type' steps
+%  uses Chris Sims subroutine for line search
 %
-%  flag = 1, to start with the compelte Newton search
+%  func0 = name of the function
+%  there must be a version of the function called [func0,'_hh.m'], that also
+%  gives as second OUTPUT the single contributions at times t=1,...,T
+%    of the log-likelihood to compute outer product gradient
+%
+%  x = starting guess
+%  hh = initial Hessian [OPTIONAL]
+%  gg = initial gradient [OPTIONAL]
+%  igg = initial inverse Hessian [OPTIONAL]
+%  ftol0 = ending criterion for function change 
+%  nit = maximum number of iterations
+%
+%  In each iteration, Hessian is computed with outer product gradient.
+%  for final Hessian (to start Metropolis):
+%  flagg = 0, final Hessian computed with outer product gradient
+%  flagg = 1, final 'mixed' Hessian: diagonal elements computed with numerical second order derivatives
+%             with correlation structure as from outer product gradient, 
+%  flagg = 2, full numerical Hessian
+%
+%  varargin = list of parameters for func0 
+%
 
+  global bayestopt_
 icount=0;
 nx=length(x);
 xparam1=x;
-lamtol=1.e-7;
-ftol=1.e-5;
-options=optimset('fminunc');
-options.MaxFunEvals=200;
-options.TolFun= 1.0000e-005;
-options.MaxIter=1;
-options.LargeScale='off';
+%ftol0=1.e-6;
+flagit=0;  % mode of computation of hessian in each iteration
+ftol=ftol0;
+gtol=1.e-3;
+htol=ftol0;
+htol0=ftol0;
 
-optim_options=optimset('fminsearch');
-optim_options.display='iter';
-optim_options.MaxFunEvals=1000;
-optim_options.TolFun= 1.0000e-003;
-optim_options.TolX= 1.0000e-006;
-
-
+func_hh = [func0,'_hh'];
 func = str2func(func0);
 fval0=feval(func,x,varargin{:});
+fval=fval0;
 if isempty(hh)
-    [dum, gg]=mr_hessian(func0,x,flag,varargin{:});
-    hh = reshape(dum,nx,nx);
+    [dum, gg, htol0, igg, hhg]=mr_hessian(func_hh,x,flagit,htol,varargin{:});
+    hh0 = reshape(dum,nx,nx);
+    hh=hhg;
+    if min(eig(hh0))<0,
+        hh0=hhg; %generalized_cholesky(hh0);
+    elseif flagit==2,
+        hh=hh0;
+        igg=inv(hh);
+    end
+    if htol0>htol,
+        htol=htol0;
+        ftol=htol0;
+    end
+else
+    hh0=hh;
+    hhg=hh;
+    igg=inv(hh);
 end
 disp(['Gradient norm ',num2str(norm(gg))])
-disp(['Minimum Hessian eigenvalue ',num2str(min(eig(hh)))])
-disp(['Maximum Hessian eigenvalue ',num2str(max(eig(hh)))])
+ee=eig(hh);
+disp(['Minimum Hessian eigenvalue ',num2str(min(ee))])
+disp(['Maximum Hessian eigenvalue ',num2str(max(ee))])
 g=gg;
-h{1}=hh;
 check=0;
 if max(eig(hh))<0, disp('Negative definite Hessian! Local maximum!'), pause, end,
-while norm(gg)>1.e-3 & check==0,
+save m1 x hh g hhg igg fval0
+
+igrad=1;
+igibbs=1;
+inx=eye(nx);
+jit=0;
+while norm(gg)>gtol & check==0 & jit<nit,
+    jit=jit+1;
+    tic
     icount=icount+1;
+    bayestopt_.penalty = fval0(icount);
     disp([' '])
     disp(['Iteration ',num2str(icount)])
-    x0=xparam1-inv(hh)*gg;
-    c=mr_nlincon(x0,varargin{:},1);
-    lam=1;
-    while c
-        lam=lam*0.9;
-        x0=xparam1-inv(hh)*gg.*lam;
-        c=mr_nlincon(x0,varargin{:},1);
-    end        
-    fval=feval(func,x0,varargin{:});
-%     if (fval0(icount)-fval)<ftol & flag==0,
-%         fvala=fval;
-%         x0a=x0;
-%         disp('Try to modify Hessian')
-%         x0=xparam1-inv(gg*gg')*gg;
-%         c=mr_nlincon(x0,varargin{:},1);
-%         lam=1;
-%         while c
-%             lam=lam*0.9;
-%             x0=xparam1-inv(gg*gg')*gg.*lam;
-%             c=mr_nlincon(x0,varargin{:},1);
-%         end        
-%         fval=feval(func,x0,varargin{:});
-%         if fvala<=fval, 
-%             x0=x0a;
-%             fval=fvala;
-%         end            
-%     end            
-    if (fval0(icount)-fval)<ftol,
-        disp('Try line search')
-        [lam,fval,EXITFLAG,OUTPUT,GRAD,HESSIAN]=fminunc(@lsearch, 0, options, func, xparam1, inv(hh)*gg , varargin{:});
-        x0=xparam1-inv(hh)*gg.*lam;
-    end
-    if (fval0(icount)-fval)<ftol & flag==1,
-        fvala=fval;
-        x0a=x0;
-        disp('Try gradient direction')
-        [lam,fval,EXITFLAG,OUTPUT,GRAD,HESSIAN]=fminunc(@lsearch, 0, options, func, xparam1, gg , varargin{:});
-        if fvala<=fval, 
-            x0=x0a;
-            fval=fvala;
+    [fval x0 fc retcode] = csminit(func0,xparam1,fval0(icount),gg,0,igg,varargin{:});
+    if igrad,
+        [fval1 x01 fc retcode1] = csminit(func0,xparam1,fval0(icount),gg,0,inx,varargin{:});
+        if fval1<fval,
+            fval=fval1;
+            x0=x01;        
+            disp('Gradient step!!')
         else
-            x0=xparam1-gg*lam;
-            if (fval0(icount)-fval)>ftol,
-                flag=0;
+            igrad=0;
+        end
+    end
+    if (fval0(icount)-fval)<1.e-2*(gg'*(igg*gg))/2 & igibbs,
+        [fvala, x0] = mr_gstep(func0,x0,htol,varargin{:});
+         if (fval-fvala)<5*(fval0(icount)-fval),
+             igibbs=0;
+             disp('Last Gibbs step, gain too small!!')
+         else
+            disp('Gibbs step!!')
+        end
+        fval=fvala;
+    end
+    if (fval0(icount)-fval)<ftol & flagit==0,
+        disp('Try diagonal Hessian')
+        ihh=diag(1./(diag(hhg)));        
+        [fval2 x02 fc retcode2] = csminit(func2str(func),xparam1,fval0(icount),gg,0,ihh,varargin{:});
+        if fval2<fval,
+            x0=x02;
+            fval=fval2;
+            if (fval0(icount)-fval2)>=ftol ,
+                %hh=diag(diag(hh));
+                disp('Diagonal Hessian successful')            
             end
         end
-    end
-    if (fval0(icount)-fval)<ftol,
-        fvala=fval;
-        x0a=x0;
-        disp('Try some simplex iterations')
-        [x0,fval,EXITFLAG,OUTPUT] = fminsearch(func, xparam1, optim_options, varargin{:});
-        if fvala<fval, 
-            x0=x0a;
-            fval=fvala;
-        else
-            lam = NaN;
+    end        
+    if (fval0(icount)-fval)<ftol & flagit==0,
+        disp('Try gradient direction')
+        ihh0=inx.*1.e-4;        
+        [fval3 x03 fc retcode3] = csminit(func2str(func),xparam1,fval0(icount),gg,0,ihh0,varargin{:});
+        if fval3<fval,
+            x0=x03;
+            fval=fval3;
+            if (fval0(icount)-fval3)>=ftol ,
+                %hh=hh0;
+                %ihh=ihh0;
+                disp('Gradient direction successful')            
+            end
         end
-    end
-    if (fval0(icount)-fval)<ftol*ftol & flag==1;,
-        %         if fvala<fval,
-        %             fval=fvala;
-        %             x0=x0a;
-        %         end
+    end        
+    xparam1=x0;
+    x(:,icount+1)=xparam1;
+    fval0(icount+1)=fval;
+    %if (fval0(icount)-fval)<ftol*ftol & flagg==1;,
+    if (fval0(icount)-fval)<ftol,
         disp('No further improvement is possible!')
         check=1;
-    else
-        
-        if (fval0(icount)-fval)<ftol & flag==0,
-            flag=1;
+        if flagit==2,
+            hh=hh0;
+        elseif flagg>0,
+            [dum, gg, htol0, igg, hhg]=mr_hessian(func_hh,xparam1,flagg,ftol0,varargin{:});   
+            if flagg==2,
+                hh = reshape(dum,nx,nx);
+                ee=eig(hh);
+                if min(ee)<0
+                    hh=hhg;
+                end
+            else
+                hh=hhg;
+            end
         end
-        
-        xparam1=x0;
-        x(:,icount+1)=xparam1;
-        fval0(icount+1)=fval;
-        disp(['LAMBDA        ',num2str(lam)])
-        %disp(['DX norm       ',num2str(norm(inv(hh)*gg.*lam))])
-        disp(['DX norm       ',num2str(norm(x(:,end)-x(:,end-1)))])
+        disp(['Actual dxnorm ',num2str(norm(x(:,end)-x(:,end-1)))])
         disp(['FVAL          ',num2str(fval)])
         disp(['Improvement   ',num2str(fval0(icount)-fval)])
+        disp(['Ftol          ',num2str(ftol)])
+        disp(['Htol          ',num2str(htol0)])
+        disp(['Gradient norm  ',num2str(norm(gg))])
+        ee=eig(hh);
+        disp(['Minimum Hessian eigenvalue ',num2str(min(ee))])
+        disp(['Maximum Hessian eigenvalue ',num2str(max(ee))])
+         g(:,icount+1)=gg;
+    else
+        
+        df = fval0(icount)-fval;
+        disp(['Actual dxnorm ',num2str(norm(x(:,end)-x(:,end-1)))])
+        disp(['FVAL          ',num2str(fval)])
+        disp(['Improvement   ',num2str(df)])
+        disp(['Ftol          ',num2str(ftol)])
+        disp(['Htol          ',num2str(htol0)])
+
+        if df<htol0,
+            htol=max(ftol0,df/10);
+        end
         
         if norm(x(:,icount)-xparam1)>1.e-12,
-            %[dum, gg]=hessian('mj_optmumlik',xparam1,gend,data,1);
-            [dum, gg]=mr_hessian(func0,xparam1,flag,varargin{:});
-            hh = reshape(dum,nx,nx);
+            save m1 x fval0 -append
+            [dum, gg, htol0, igg, hhg]=mr_hessian(func_hh,xparam1,flagit,htol,varargin{:});
+            if htol0>ftol,
+                ftol=htol0;
+                htol=htol0;
+                disp(' ')
+                disp('Numerical noise in the likelihood')
+                disp('Tolerance has to be relaxed')
+                disp(' ')
+            elseif htol0<ftol,
+                ftol=max(htol0, ftol0);
+            end
+            hh0 = reshape(dum,nx,nx);
+            hh=hhg;
+            if flagit==2,
+                if min(eig(hh0))<=0,
+                    hh0=hhg; %generalized_cholesky(hh0);
+                else 
+                    hh=hh0;
+                    igg=inv(hh);
+                end
+            end
         end
         disp(['Gradient norm  ',num2str(norm(gg))])
-        disp(['Minimum Hessian eigenvalue ',num2str(min(eig(hh)))])
-        disp(['Maximum Hessian eigenvalue ',num2str(max(eig(hh)))])
+        ee=eig(hh);
+        disp(['Minimum Hessian eigenvalue ',num2str(min(ee))])
+        disp(['Maximum Hessian eigenvalue ',num2str(max(ee))])
         if max(eig(hh))<0, disp('Negative definite Hessian! Local maximum!'), pause, end,
+        t=toc;
+        disp(['Elapsed time for iteration ',num2str(t),' s.'])
         
-        h{icount+1}=hh;
-        g(:,icount+1)=gg;
-        save m1 x h g fval0
+         g(:,icount+1)=gg;
+        save m1 x hh g hhg igg fval0
     end
+end
+
+save m1 x hh g hhg igg fval0
+if ftol>ftol0,
+    disp(' ')
+    disp('Numerical noise in the likelihood')
+    disp('Tolerance had to be relaxed')
+    disp(' ')
+end
+
+if jit==nit,
+    disp(' ')
+    disp('Maximum number of iterations reached')
+    disp(' ')
+end
+
+if norm(gg)<=gtol,
+    disp(['Estimation ended:'])
+    disp(['Gradient norm < ', num2str(gtol)])
+end
+if check==1,
+    disp(['Estimation successful.'])
 end
 
 return

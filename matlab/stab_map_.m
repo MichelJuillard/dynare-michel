@@ -20,7 +20,8 @@ function x0 = stab_map_(Nsam, fload, alpha2, alpha)
 % x0: one parameter vector for which the model is stable.
 %
 % GRAPHS
-% 1) Histograms of marginal distributions under the stability regions
+% 1) Pdf's of marginal distributions under the stability (dotted
+%     lines) and unstability (solid lines) regions
 % 2) Cumulative distributions of: 
 %   - stable subset (dotted lines) 
 %   - unstable subset (solid lines)
@@ -47,8 +48,13 @@ function x0 = stab_map_(Nsam, fload, alpha2, alpha)
 %global bayestopt_ estim_params_ dr_ options_ ys_ fname_
 global bayestopt_ estim_params_ options_ oo_ M_
 
-ys_ = oo_.dr.ys;
 dr_ = oo_.dr;
+if isfield(dr_,'ghx'),
+    ys_ = oo_.dr.ys;
+    nspred = size(dr_.ghx,2);
+    nboth = dr_.nboth;
+    nfwrd = dr_.nfwrd;
+end
 fname_ = M_.fname;
 
 nshock = estim_params_.nvx;
@@ -110,6 +116,11 @@ if fload==0 | nargin<2 | isempty(fload),
         %egg(:,j) = sort(dr_.eigval);
         if isfield(dr_,'eigval'),
             egg(:,j) = sort(dr_.eigval);
+            if ~exist('nspred')
+                nspred = size(dr_.ghx,2);
+                nboth = dr_.nboth;
+                nfwrd = dr_.nfwrd;
+            end
         else
             egg(:,j)=ones(size(egg,1),1).*1.1;
         end
@@ -123,9 +134,10 @@ if fload==0 | nargin<2 | isempty(fload),
     % map stable samples
     ix=[1:Nsam];
     for j=1:Nsam,
-        if abs(egg(dr_.npred,j))>=options_.qz_criterium; %(1-(options_.qz_criterium-1)); %1-1.e-5;
+        if abs(egg(nspred,j))>=options_.qz_criterium; %(1-(options_.qz_criterium-1)); %1-1.e-5;
             ix(j)=0;
-        elseif (dr_.nboth | dr_.nfwrd) & abs(egg(dr_.npred+1,j))<=options_.qz_criterium; %1+1.e-5;
+            %elseif (dr_.nboth | dr_.nfwrd) & abs(egg(nspred+1,j))<=options_.qz_criterium; %1+1.e-5;
+        elseif (nboth | nfwrd) & abs(egg(nspred+1,j))<=options_.qz_criterium; %1+1.e-5;
             ix(j)=0;
         end
     end
@@ -135,12 +147,13 @@ if fload==0 | nargin<2 | isempty(fload),
     ixx=[1:Nsam];
     for j=1:Nsam,
         %if abs(egg(dr_.npred+1,j))>1+1.e-5 & abs(egg(dr_.npred,j))<1-1.e-5;
-        if (dr_.nboth | dr_.nfwrd),
-            if abs(egg(dr_.npred+1,j))>options_.qz_criterium & abs(egg(dr_.npred,j))<options_.qz_criterium; %(1-(options_.qz_criterium-1));
+        %if (dr_.nboth | dr_.nfwrd),
+        if (nboth | nfwrd),
+            if abs(egg(nspred+1,j))>options_.qz_criterium & abs(egg(nspred,j))<options_.qz_criterium; %(1-(options_.qz_criterium-1));
                 ixx(j)=0;
             end
         else
-            if abs(egg(dr_.npred,j))<options_.qz_criterium; %(1-(options_.qz_criterium-1));
+            if abs(egg(nspred,j))<options_.qz_criterium; %(1-(options_.qz_criterium-1));
                 ixx(j)=0;
             end
         end
@@ -211,9 +224,9 @@ disp('Starting bivariate analysis:')
 c0=corrcoef(lpmat(ix,:));
 c00=tril(c0,-1);
 
-    stab_map_2(lpmat(ix,:),alpha2, 1);
-    stab_map_2(lpmat(ixx,:),alpha2, 0);
-    
+stab_map_2(lpmat(ix,:),alpha2, 1);
+stab_map_2(lpmat(ixx,:),alpha2, 0);
+
 else
     if length(ixx)==0,
         disp('All parameter values in the prior ranges are stable!')
@@ -228,7 +241,7 @@ end
 % thex=[];
 % for j=1:Nsam,
 %     %cyc(j)=max(abs(imag(egg(1:34,j))));
-%     ic = find(imag(egg(1:dr_.npred,j)));
+%     ic = find(imag(egg(1:nspred,j)));
 %     i=find( abs(egg( ic ,j) )>0.9); %only consider complex dominant eigenvalues 
 %     if ~isempty(i),
 %         i=i(1:2:end);

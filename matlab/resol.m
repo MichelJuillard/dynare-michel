@@ -33,7 +33,8 @@ if options_.linear == 0
     if exist([M_.fname '_steadystate'])
       [dr.ys,check1] = feval([M_.fname '_steadystate'],dr.ys,oo_.exo_steady_state);
     else
-      [dr.ys,check1] = dynare_solve(fh,dr.ys,oo_.exo_steady_state);
+      %[dr.ys,check1] = dynare_solve(fh,dr.ys,oo_.exo_steady_state);
+      [dr.ys,check1] = dynare_solve(fh,dr.ys,1,oo_.exo_steady_state);
     end
     if check1
       info(1) = 20;

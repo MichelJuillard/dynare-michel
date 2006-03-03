@@ -1,4 +1,4 @@
-function [fval,cost_flag,ys,trend_coeff,info] = DsgeLikelihood(xparam1,gend,data)
+function [fval,llik,cost_flag,ys,trend_coeff,info] = DsgeLikelihood_hh(xparam1,gend,data)
 % stephane.adjemian@cepremap.cnrs.fr [09-07-2004]
 %
 % Adapted from mj_optmumlik.m
@@ -16,12 +16,14 @@ function [fval,cost_flag,ys,trend_coeff,info] = DsgeLikelihood(xparam1,gend,data
   if options_.mode_compute ~= 1 & any(xparam1 < bayestopt_.lb)
     k = find(xparam1 < bayestopt_.lb);
     fval = bayestopt_.penalty+sum((bayestopt_.lb(k)-xparam1(k)).^2);
+    llik=fval;
     cost_flag = 0;
     return;
   end
   if options_.mode_compute ~= 1 & any(xparam1 > bayestopt_.ub)
     k = find(xparam1 > bayestopt_.ub);
     fval = bayestopt_.penalty+sum((xparam1(k)-bayestopt_.ub(k)).^2);
+    llik=fval;
     cost_flag = 0;
     return;
   end
@@ -53,6 +55,7 @@ function [fval,cost_flag,ys,trend_coeff,info] = DsgeLikelihood(xparam1,gend,data
 		k = find(a < 0);
 		if k > 0
 		  fval = bayestopt_.penalty+sum(-a(k));
+      llik=fval;
 		  cost_flag = 0;
 		  return
 		end
@@ -72,6 +75,7 @@ function [fval,cost_flag,ys,trend_coeff,info] = DsgeLikelihood(xparam1,gend,data
       k = find(a < 0);
       if k > 0
 	fval = bayestopt_.penalty+sum(-a(k));
+  llik=fval;
 	cost_flag = 0;
 	return
       end
@@ -89,10 +93,12 @@ function [fval,cost_flag,ys,trend_coeff,info] = DsgeLikelihood(xparam1,gend,data
   [T,R,SteadyState,info] = dynare_resolve;
   if info(1) == 1 | info(1) == 2 | info(1) == 5
     fval = bayestopt_.penalty+1;
+    llik=fval;
     cost_flag = 0;
     return
   elseif info(1) == 3 | info(1) == 4 | info(1) == 20
     fval = bayestopt_.penalty+info(2)^2;
+    llik=fval;
     cost_flag = 0;
     return
   end
@@ -141,33 +147,34 @@ function [fval,cost_flag,ys,trend_coeff,info] = DsgeLikelihood(xparam1,gend,data
   %------------------------------------------------------------------------------
   if estim_params_.nvn
     if options_.kalman_algo == 1
-      LIK = DiffuseLikelihoodH1(T,R,Q,H,Pinf,Pstar,data,trend,start);
+      [LIK, lik] = DiffuseLikelihoodH1(T,R,Q,H,Pinf,Pstar,data,trend,start);
       if isinf(LIK) & ~estim_params_.ncn %% The univariate approach considered here doesn't 
 					 %%	apply when H has some off-diagonal elements.
-					 LIK = DiffuseLikelihoodH3(T,R,Q,H,Pinf,Pstar,data,trend,start);
+					 [LIK, lik] = DiffuseLikelihoodH3(T,R,Q,H,Pinf,Pstar,data,trend,start);
       elseif isinf(LIK) & estim_params_.ncn
-	LIK = DiffuseLikelihoodH3corr(T,R,Q,H,Pinf,Pstar,data,trend,start);
+	[LIK, lik] = DiffuseLikelihoodH3corr(T,R,Q,H,Pinf,Pstar,data,trend,start);
       end
     elseif options_.kalman_algo == 3
       if ~estim_params_.ncn %% The univariate approach considered here doesn't 
 			    %%	apply when H has some off-diagonal elements.
-			    LIK = DiffuseLikelihoodH3(T,R,Q,H,Pinf,Pstar,data,trend,start);
+			    [LIK, lik] = DiffuseLikelihoodH3(T,R,Q,H,Pinf,Pstar,data,trend,start);
       else
-	LIK = DiffuseLikelihoodH3corr(T,R,Q,H,Pinf,Pstar,data,trend,start);
+	[LIK, lik] = DiffuseLikelihoodH3corr(T,R,Q,H,Pinf,Pstar,data,trend,start);
       end	
     end	  
   else
     if options_.kalman_algo == 1
-      LIK = DiffuseLikelihood1(T,R,Q,Pinf,Pstar,data,trend,start);
+      [LIK, lik] = DiffuseLikelihood1(T,R,Q,Pinf,Pstar,data,trend,start);
       if isinf(LIK)
-	LIK = DiffuseLikelihood3(T,R,Q,Pinf,Pstar,data,trend,start);
+	[LIK, lik] = DiffuseLikelihood3(T,R,Q,Pinf,Pstar,data,trend,start);
       end
     elseif options_.kalman_algo == 3
-      LIK = DiffuseLikelihood3(T,R,Q,Pinf,Pstar,data,trend,start);
+      [LIK, lik] = DiffuseLikelihood3(T,R,Q,Pinf,Pstar,data,trend,start);
     end 	
   end
   if imag(LIK) ~= 0
     likelihood = bayestopt_.penalty;
+    lik=ones(size(lik)).*bayestopt_.penalty;
   else
     likelihood = LIK;
   end
@@ -176,3 +183,4 @@ function [fval,cost_flag,ys,trend_coeff,info] = DsgeLikelihood(xparam1,gend,data
   % ------------------------------------------------------------------------------
   lnprior = priordens(xparam1,bayestopt_.pshape,bayestopt_.p1,bayestopt_.p2,bayestopt_.p3,bayestopt_.p4);
   fval    = (likelihood-lnprior);
+  llik=[-lnprior; .5*lik(start:end)];

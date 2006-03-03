@@ -26,9 +26,10 @@
 %
 
 function [hessian_mat, gg, htol1, ihh, hh_mat0] = mr_hessian(func,x,hflag,htol0,varargin)
-global gstep_ bayestopt_
+global options_ bayestopt_
 persistent h1 htol
 
+gstep_=options_.gstep;
 if isempty(htol), htol = 1.e-4; end
 func = str2func(func);
 [f0, ff0]=feval(func,x,varargin{:});
@@ -61,19 +62,19 @@ while i<n,
     it=1;
     dx=(fx-f0);
     ic=0;
-    if abs(dx)>(2*htol),
-        c=mr_nlincon(xh1,varargin{:});
-        while c
-            h1(i)=h1(i)*0.9;
-            xh1(i)=x(i)+h1(i);
-            c=mr_nlincon(xh1,varargin{:});        
-            ic=1;
-        end   
-        if ic,
-            [fx, ffx]=feval(func,xh1,varargin{:});
-            dx=(fx-f0);
-        end
-    end
+%     if abs(dx)>(2*htol),
+%         c=mr_nlincon(xh1,varargin{:});
+%         while c
+%             h1(i)=h1(i)*0.9;
+%             xh1(i)=x(i)+h1(i);
+%             c=mr_nlincon(xh1,varargin{:});        
+%             ic=1;
+%         end   
+%         if ic,
+%             [fx, ffx]=feval(func,xh1,varargin{:});
+%             dx=(fx-f0);
+%         end
+%     end
     
     icount = 0;
     h0=h1(i);
@@ -88,13 +89,13 @@ while i<n,
                 h1(i)=2.1*h1(i);
             end
             xh1(i)=x(i)+h1(i);
-            c=mr_nlincon(xh1,varargin{:});
-            while c
-                h1(i)=h1(i)*0.9;
-                xh1(i)=x(i)+h1(i);
-                c=mr_nlincon(xh1,varargin{:});        
-                ic=1;
-            end  
+%             c=mr_nlincon(xh1,varargin{:});
+%             while c
+%                 h1(i)=h1(i)*0.9;
+%                 xh1(i)=x(i)+h1(i);
+%                 c=mr_nlincon(xh1,varargin{:});        
+%                 ic=1;
+%             end  
             [fx, ffx]=feval(func,xh1,varargin{:});
         end
         if abs(dx(it))>(2*htol),
@@ -135,21 +136,21 @@ while i<n,
     ff1=ffx;
     if hflag,  % two point based derivatives
         xh1(i)=x(i)-h1(i);
-        c=mr_nlincon(xh1,varargin{:});
-        ic=0;
-        while c
-            h1(i)=h1(i)*0.9;
-            xh1(i)=x(i)-h1(i);
-            c=mr_nlincon(xh1,varargin{:});  
-            ic = 1;
-        end    
+%         c=mr_nlincon(xh1,varargin{:});
+%        ic=0;
+%         while c
+%             h1(i)=h1(i)*0.9;
+%             xh1(i)=x(i)-h1(i);
+%             c=mr_nlincon(xh1,varargin{:});  
+%             ic = 1;
+%         end    
         [fx, ffx]=feval(func,xh1,varargin{:});
         f_1(:,i)=fx;
         ff_1=ffx;
-        if ic,
-            xh1(i)=x(i)+h1(i);
-            [f1(:,i), ff1]=feval(func,xh1,varargin{:});
-        end
+%         if ic,
+%             xh1(i)=x(i)+h1(i);
+%             [f1(:,i), ff1]=feval(func,xh1,varargin{:});
+%         end
         ggh(:,i)=(ff1-ff_1)./(2.*h1(i));
     else
         ggh(:,i)=(ff1-ff0)./h1(i);
@@ -190,27 +191,28 @@ if hflag==2,
             xh_1(j)=x(j)-h_1(j);
             %hessian_mat(:,(i-1)*n+j)=-(-feval(func,xh1,varargin{:})-feval(func,xh_1,varargin{:})+temp(:,i)+temp(:,j))./(2*h1(i)*h_1(j));
             %temp1 = feval(func,xh1,varargin{:});
-            c=mr_nlincon(xh1,varargin{:});
-            lam=1;
-            while c, 
-                lam=lam*0.9;
-                xh1(i)=x(i)+h1(i)*lam;
-                xh1(j)=x(j)+h_1(j)*lam;
-                %disp( ['hessian warning cross ', num2str(c) ]), 
-                c=mr_nlincon(xh1,varargin{:});
-            end
-            temp1 = f0+(feval(func,xh1,varargin{:})-f0)/lam;
+%             c=mr_nlincon(xh1,varargin{:});
+%             lam=1;
+%             while c, 
+%                 lam=lam*0.9;
+%                 xh1(i)=x(i)+h1(i)*lam;
+%                 xh1(j)=x(j)+h_1(j)*lam;
+%                 %disp( ['hessian warning cross ', num2str(c) ]), 
+%                 c=mr_nlincon(xh1,varargin{:});
+%             end
+%             temp1 = f0+(feval(func,xh1,varargin{:})-f0)/lam;
+            temp1 = feval(func,xh1,varargin{:});
             
-            %temp2 = feval(func,xh_1,varargin{:});
-            c=mr_nlincon(xh_1,varargin{:});
-            while c, 
-                lam=lam*0.9;
-                xh_1(i)=x(i)-h1(i)*lam;
-                xh_1(j)=x(j)-h_1(j)*lam;
-                %disp( ['hessian warning cross ', num2str(c) ]), 
-                c=mr_nlincon(xh_1,varargin{:});
-            end
-            temp2 = f0+(feval(func,xh_1,varargin{:})-f0)/lam;
+%             c=mr_nlincon(xh_1,varargin{:});
+%             while c, 
+%                 lam=lam*0.9;
+%                 xh_1(i)=x(i)-h1(i)*lam;
+%                 xh_1(j)=x(j)-h_1(j)*lam;
+%                 %disp( ['hessian warning cross ', num2str(c) ]), 
+%                 c=mr_nlincon(xh_1,varargin{:});
+%             end
+%             temp2 = f0+(feval(func,xh_1,varargin{:})-f0)/lam;
+            temp2 = feval(func,xh_1,varargin{:});
             
             hessian_mat(:,(i-1)*n+j)=-(-temp1 -temp2+temp(:,i)+temp(:,j))./(2*h1(i)*h_1(j));
             xh1(i)=x(i);
@@ -240,19 +242,36 @@ gga=ggh.*kron(ones(size(ff1)),2.*h1');  % re-scaled gradient
 hh_mat=gga'*gga;  % rescaled outer product hessian 
 hh_mat0=ggh'*ggh;  % outer product hessian
 A=diag(2.*h1);  % rescaling matrix
-if hflag>0 & min(eig(reshape(hessian_mat,n,n)))>0,
-    hh0 = A*reshape(hessian_mat,n,n)*A';  %rescaled second order derivatives
-    sd0=sqrt(diag(hh0));   %rescaled 'standard errors' using second order derivatives
-    sd=sqrt(diag(hh_mat));  %rescaled 'standard errors' using outer product
-    hh_mat=hh_mat./(sd*sd').*(sd0*sd0');  %rescaled outer product with 'true' std's
-    hh0 = reshape(hessian_mat,n,n);  % second order derivatives
-    sd0=sqrt(diag(hh0));   % 'standard errors' using second order derivatives
-    sd=sqrt(diag(hh_mat0));  % 'standard errors' using outer product
-    hh_mat0=hh_mat0./(sd*sd').*(sd0*sd0');  % rescaled outer product with 'true' std's
-end
 igg=inv(hh_mat);  % inverted rescaled outer product hessian
 ihh=A'*igg*A;  % inverted outer product hessian
-if hflag==0,
+if hflag>0 & min(eig(reshape(hessian_mat,n,n)))>0,
+    hh0 = A*reshape(hessian_mat,n,n)*A';  %rescaled second order derivatives
+    hh = reshape(hessian_mat,n,n);  %rescaled second order derivatives
+    sd0=sqrt(diag(hh0));   %rescaled 'standard errors' using second order derivatives
+    sd=sqrt(diag(hh_mat));  %rescaled 'standard errors' using outer product
+    hh_mat=hh_mat./(sd*sd').*(sd0*sd0');  %rescaled inverse outer product with 'true' std's
+    igg=inv(hh_mat);   % rescaled outer product hessian with 'true' std's
+    ihh=A'*igg*A;  % inverted outer product hessian
+    hh_mat0=inv(A)'*hh_mat*inv(A);  % outer product hessian with 'true' std's
+    sd=sqrt(diag(ihh));   %standard errors
+    sdh=sqrt(1./diag(hh));   %diagonal standard errors
+    for j=1:length(sd),
+        sd0(j,1)=min(bayestopt_.pstdev(j), sd(j));  %prior std
+        sd0(j,1)=10^(0.5*(log10(sd0(j,1))+log10(sdh(j,1))));
+        %sd0(j,1)=0.5*(sd0(j,1)+sdh(j,1));
+    end
+    ihh=ihh./(sd*sd').*(sd0*sd0');  %inverse outer product with modified std's
+    igg=inv(A)'*ihh*inv(A);  % inverted rescaled outer product hessian with modified std's
+    hh_mat=inv(igg);   % outer product rescaled hessian with modified std's
+    hh_mat0=inv(A)'*hh_mat*inv(A);  % outer product hessian with modified std's
+%     sd0=sqrt(1./diag(hh0));   %rescaled 'standard errors' using second order derivatives
+%     sd=sqrt(diag(igg));  %rescaled 'standard errors' using outer product
+%     igg=igg./(sd*sd').*(sd0*sd0');  %rescaled inverse outer product with 'true' std's
+%     hh_mat=inv(igg);   % rescaled outer product hessian with 'true' std's
+%     ihh=A'*igg*A;  % inverted outer product hessian
+%     hh_mat0=inv(A)'*hh_mat*inv(A);  % outer product hessian with 'true' std's
+end
+if hflag<2,
     hessian_mat=hh_mat0(:);
 end
 

@@ -88,6 +88,13 @@ function [alphahat,etahat,epsilonhat,ahat,SteadyState,trend_coeff] = DsgeSmoothe
     Pstar(ivs,ivs) = lyapunov_symm(T(ivs,ivs),R(ivs,:)*Q* ...
 				   transpose(R(ivs,:)));
     Pinf  = bayestopt_.Pinf;
+    % by M. Ratto
+    RR=T(:,find(~ismember([1:np],ivs)));
+    i=find(abs(RR)>1.e-10);
+    R0=zeros(size(RR));
+    R0(i)=sign(RR(i));
+    Pinf=R0*R0';
+    % by M. Ratto
   end
   % -----------------------------------------------------------------------------
   %  4. Kalman smoother

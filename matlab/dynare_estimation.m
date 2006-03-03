@@ -248,9 +248,29 @@ if options_.mode_compute > 0 & options_.posterior_mode_estimation
     disp(sprintf('Objective function at mode: %f',fval))
     disp(sprintf('Objective function at mode: %f',DsgeLikelihood(xparam1,gend,data)))
   elseif options_.mode_compute == 5
-    flag = 0;
-    [xparam1, hh, gg, fval] = newrat('DsgeLikelihood',xparam1,[],[],flag,gend,data);
-    eval(['save ' M_.fname '_mode xparam1 hh gg fval;']);
+      if isfield(options_,'hess')
+          flag = options_.hess;
+      else
+          flag = 1;
+      end
+      if ~exist('igg'),  % by M. Ratto
+          hh=[];
+          gg=[];
+          igg=[];
+      end   % by M. Ratto
+      if isfield(options_,'ftol')
+          crit = options_.ftol;
+      else
+          crit = 1.e-7;
+      end
+      if isfield(options_,'nit')
+          nit = options_.nit;
+      else
+          nit=1000;
+      end
+    %[xparam1, hh, gg, fval] = newrat('DsgeLikelihood',xparam1,[],[],flag,gend,data);
+    [xparam1, hh, gg, fval, invhess] = newrat('DsgeLikelihood',xparam1,hh,gg,igg,crit,nit,flag,gend,data);
+    eval(['save ' M_.fname '_mode xparam1 hh gg fval invhess;']);
   end
   if options_.mode_compute ~= 5
     hh = reshape(hessian('DsgeLikelihood',xparam1,gend,data),nx,nx);
