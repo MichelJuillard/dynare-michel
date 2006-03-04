@@ -1,4 +1,10 @@
-function [alphahat,etahat,a] = DiffuseKalmanSmoother1(T,R,Q,Pinf1,Pstar1,Y,trend,pp,mm,smpl,mf)
+function [alphahat,etahat,a, aK] = DiffuseKalmanSmoother1(T,R,Q,Pinf1,Pstar1,Y,trend,pp,mm,smpl,mf)
+% modified by M. Ratto:
+% new output argument aK (1-step to k-step predictions)
+% new options_.nk: the max step ahed prediction in aK (default is 4)
+% new crit1 value for rank of Pinf
+% it is assured that P is symmetric 
+%
 % stephane.adjemian@cepremap.cnrs.fr [09-16-2004]
 % 
 %   See "Filtering and Smoothing of State Vector for Diffuse State Space
@@ -7,10 +13,12 @@ function [alphahat,etahat,a] = DiffuseKalmanSmoother1(T,R,Q,Pinf1,Pstar1,Y,trend
 
 global options_
 
+nk = options_.nk;
 spinf   	= size(Pinf1);
 spstar  	= size(Pstar1);
 v       	= zeros(pp,smpl);
 a       	= zeros(mm,smpl+1);
+aK              = zeros(nk,mm,smpl+1);
 iF      	= zeros(pp,pp,smpl);
 Fstar   	= zeros(pp,pp,smpl);
 iFinf   	= zeros(pp,pp,smpl);
@@ -22,6 +30,7 @@ P       	= zeros(mm,mm,smpl+1);
 Pstar   	= zeros(spstar(1),spstar(2),smpl+1); Pstar(:,:,1) = Pstar1;
 Pinf    	= zeros(spinf(1),spinf(2),smpl+1); Pinf(:,:,1) = Pinf1;
 crit    	= options_.kalman_tol;
+crit1       = 1.e-8;
 steady  	= smpl;
 rr      	= size(Q,1);
 QQ      	= R*Q*transpose(R);
@@ -36,7 +45,7 @@ for i=1:pp;
 end
 
 t = 0;
-while rank(Pinf(:,:,t+1),crit) & t<smpl
+while rank(Pinf(:,:,t+1),crit1) & t<smpl
     t = t+1;
     v(:,t) 		 	= Y(:,t) - a(mf,t) - trend(:,t);
     if rcond(Pinf(mf,mf,t)) < crit
@@ -45,6 +54,10 @@ while rank(Pinf(:,:,t+1),crit) & t<smpl
     iFinf(:,:,t) 	= inv(Pinf(mf,mf,t));
     Kinf(:,:,t)	 	= T*Pinf(:,mf,t)*iFinf(:,:,t);
     a(:,t+1) 	 	= T*a(:,t) + Kinf(:,:,t)*v(:,t);
+    aK(1,:,t+1) 	 	= a(:,t+1);
+    for jnk=2:nk,
+        aK(jnk,:,t+jnk) 	 	= T^(jnk-1)*a(:,t+1);
+    end
     Linf(:,:,t)  	= T - Kinf(:,:,t)*Z;
     Fstar(:,:,t) 	= Pstar(mf,mf,t);
     Kstar(:,:,t) 	= (T*Pstar(:,mf,t)-Kinf(:,:,t)*Fstar(:,:,t))*iFinf(:,:,t);
@@ -63,6 +76,7 @@ notsteady = 1;
 while notsteady & t<smpl
     t = t+1;
     v(:,t)      = Y(:,t) - a(mf,t) - trend(:,t);
+    P(:,:,t)=tril(P(:,:,t))+transpose(tril(P(:,:,t),-1));
     if rcond(P(mf,mf,t)) < crit
     	return		
     end    
@@ -70,6 +84,10 @@ while notsteady & t<smpl
     K(:,:,t)    = T*P(:,mf,t)*iF(:,:,t);
     L(:,:,t)    = T-K(:,:,t)*Z;
     a(:,t+1)    = T*a(:,t) + K(:,:,t)*v(:,t);    
+    aK(1,:,t+1) 	 	= a(:,t+1);
+    for jnk=2:nk,
+        aK(jnk,:,t+jnk) 	 	= T^(jnk-1)*a(:,t+1);
+    end
     P(:,:,t+1)  = T*P(:,:,t)*transpose(T)-T*P(:,mf,t)*transpose(K(:,:,t)) + QQ;
     notsteady   = ~(max(max(abs(P(:,:,t+1)-P(:,:,t))))<crit);
 end
@@ -87,6 +105,10 @@ while t<smpl
     t=t+1;
     v(:,t) = Y(:,t) - a(mf,t) - trend(:,t);
     a(:,t+1) = T*a(:,t) + K_s*v(:,t);
+    aK(1,:,t+1) 	 	= a(:,t+1);
+    for jnk=2:nk,
+        aK(jnk,:,t+jnk) 	 	= T^(jnk-1)*a(:,t+1);
+    end
 end
 t = smpl+1;
 while t>d+1 & t>2
