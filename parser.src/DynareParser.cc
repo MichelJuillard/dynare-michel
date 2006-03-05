@@ -180,6 +180,12 @@ dynare::Objects* dynare::parser::cat(Objects* string1, Objects* string2)
   result->symbol = string1->symbol+string2->symbol;
   return result;
 }
+dynare::Objects* dynare::parser::cat_with_space(Objects* string1, Objects* string2)
+{
+  dynare::Objects* result = new dynare::Objects;
+  result->symbol = string1->symbol+" "+string2->symbol;
+  return result;
+}
 void dynare::parser::init_param(Objects* lhs,  Objects* rhs)
 {
 	numerical_initialization.SetConstant(lhs->symbol, rhs->symbol);

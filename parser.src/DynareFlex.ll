@@ -121,6 +121,7 @@ int sigma_e = 0;
 <DYNARE_STATEMENT>bayesian_irf 	{return BAYESIAN_IRF;}
 <DYNARE_STATEMENT>moments_varendo {return MOMENTS_VARENDO;}
 <DYNARE_STATEMENT>filtered_vars	{return FILTERED_VARS;}
+<DYNARE_STATEMENT>filter_step_ahead	{return FILTER_STEP_AHEAD;}
 <DYNARE_STATEMENT>relative_irf 	{return RELATIVE_IRF;}
 <DYNARE_STATEMENT>tex		{return TEX;}
 <DYNARE_STATEMENT>shock_size	{return SHOCK_SIZE;}
@@ -248,11 +249,11 @@ int sigma_e = 0;
  /* NATIVE Block */
 <NATIVE>.* {BEGIN INITIAL;_scanner->do_as_is(yytext);_scanner->do_as_is("\n");}
 
-; {return yytext[0];}
-: {return yytext[0];}
-, {return yytext[0];}
-[\]] {return yytext[0];}
-[\[] {return yytext[0];}
+<*>; {return yytext[0];}
+<*>: {return yytext[0];}
+<*>, {return yytext[0];}
+<*>[\]] {return yytext[0];}
+<*>[\[] {return yytext[0];}
 
 
 

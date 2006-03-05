@@ -1,7 +1,7 @@
-/* A Bison parser, made by GNU Bison 1.875b.  */
+/* A Bison parser, made by GNU Bison 2.1.  */
 
 /* Skeleton parser for Yacc-like parsing with Bison,
-   Copyright (C) 1984, 1989, 1990, 2000, 2001, 2002, 2003 Free Software Foundation, Inc.
+   Copyright (C) 1984, 1989, 1990, 2000, 2001, 2002, 2003, 2004, 2005 Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -15,8 +15,8 @@
 
    You should have received a copy of the GNU General Public License
    along with this program; if not, write to the Free Software
-   Foundation, Inc., 59 Temple Place - Suite 330,
-   Boston, MA 02111-1307, USA.  */
+   Foundation, Inc., 51 Franklin Street, Fifth Floor,
+   Boston, MA 02110-1301, USA.  */
 
 /* As a special exception, when this file is copied by Bison into a
    Bison output file, you may use that output file without restriction.
@@ -123,61 +123,63 @@
      PRESAMPLE = 349,
      PRINT = 350,
      PRIOR_TRUNC = 351,
-     QZ_CRITERIUM = 352,
-     RELATIVE_IRF = 353,
-     REPLIC = 354,
-     RESOL = 355,
-     RPLOT = 356,
-     SHOCKS = 357,
-     SHOCK_SIZE = 358,
-     SIGMA_E = 359,
-     SIMUL = 360,
-     SIMUL_ALGO = 361,
-     SIMUL_SEED = 362,
-     SMOOTHER = 363,
-     SOLVE_ALGO = 364,
-     STDERR = 365,
-     STEADY = 366,
-     STOCH_SIMUL = 367,
-     TEX = 368,
-     TEX_NAME = 369,
-     UNIFORM_PDF = 370,
-     UNIT_ROOT_VARS = 371,
-     USE_DLL = 372,
-     VALUES = 373,
-     VAR = 374,
-     VAREXO = 375,
-     VAREXO_DET = 376,
-     VAROBS = 377,
-     XTICK = 378,
-     XTICKLABEL = 379,
-     COMMA = 380,
-     MINUS = 381,
-     PLUS = 382,
-     DIVIDE = 383,
-     TIMES = 384,
-     UMINUS = 385,
-     POWER = 386,
-     FACTORIAL = 387,
-     EXP = 388,
-     LOG = 389,
-     LOG10 = 390,
-     LN = 391,
-     SIN = 392,
-     COS = 393,
-     TAN = 394,
-     ASIN = 395,
-     ACOS = 396,
-     ATAN = 397,
-     SINH = 398,
-     COSH = 399,
-     TANH = 400,
-     ASINH = 401,
-     ACOSH = 402,
-     ATANH = 403,
-     SQRT = 404
+     FILTER_STEP_AHEAD = 352,
+     QZ_CRITERIUM = 353,
+     RELATIVE_IRF = 354,
+     REPLIC = 355,
+     RESOL = 356,
+     RPLOT = 357,
+     SHOCKS = 358,
+     SHOCK_SIZE = 359,
+     SIGMA_E = 360,
+     SIMUL = 361,
+     SIMUL_ALGO = 362,
+     SIMUL_SEED = 363,
+     SMOOTHER = 364,
+     SOLVE_ALGO = 365,
+     STDERR = 366,
+     STEADY = 367,
+     STOCH_SIMUL = 368,
+     TEX = 369,
+     TEX_NAME = 370,
+     UNIFORM_PDF = 371,
+     UNIT_ROOT_VARS = 372,
+     USE_DLL = 373,
+     VALUES = 374,
+     VAR = 375,
+     VAREXO = 376,
+     VAREXO_DET = 377,
+     VAROBS = 378,
+     XTICK = 379,
+     XTICKLABEL = 380,
+     COMMA = 381,
+     MINUS = 382,
+     PLUS = 383,
+     DIVIDE = 384,
+     TIMES = 385,
+     UMINUS = 386,
+     POWER = 387,
+     FACTORIAL = 388,
+     EXP = 389,
+     LOG = 390,
+     LOG10 = 391,
+     LN = 392,
+     SIN = 393,
+     COS = 394,
+     TAN = 395,
+     ASIN = 396,
+     ACOS = 397,
+     ATAN = 398,
+     SINH = 399,
+     COSH = 400,
+     TANH = 401,
+     ASINH = 402,
+     ACOSH = 403,
+     ATANH = 404,
+     SQRT = 405
    };
 #endif
+/* Tokens.  */
 #define AR 258
 #define AUTOCORR 259
 #define BAYESIAN_IRF 260
@@ -272,59 +274,60 @@
 #define PRESAMPLE 349
 #define PRINT 350
 #define PRIOR_TRUNC 351
-#define QZ_CRITERIUM 352
-#define RELATIVE_IRF 353
-#define REPLIC 354
-#define RESOL 355
-#define RPLOT 356
-#define SHOCKS 357
-#define SHOCK_SIZE 358
-#define SIGMA_E 359
-#define SIMUL 360
-#define SIMUL_ALGO 361
-#define SIMUL_SEED 362
-#define SMOOTHER 363
-#define SOLVE_ALGO 364
-#define STDERR 365
-#define STEADY 366
-#define STOCH_SIMUL 367
-#define TEX 368
-#define TEX_NAME 369
-#define UNIFORM_PDF 370
-#define UNIT_ROOT_VARS 371
-#define USE_DLL 372
-#define VALUES 373
-#define VAR 374
-#define VAREXO 375
-#define VAREXO_DET 376
-#define VAROBS 377
-#define XTICK 378
-#define XTICKLABEL 379
-#define COMMA 380
-#define MINUS 381
-#define PLUS 382
-#define DIVIDE 383
-#define TIMES 384
-#define UMINUS 385
-#define POWER 386
-#define FACTORIAL 387
-#define EXP 388
-#define LOG 389
-#define LOG10 390
-#define LN 391
-#define SIN 392
-#define COS 393
-#define TAN 394
-#define ASIN 395
-#define ACOS 396
-#define ATAN 397
-#define SINH 398
-#define COSH 399
-#define TANH 400
-#define ASINH 401
-#define ACOSH 402
-#define ATANH 403
-#define SQRT 404
+#define FILTER_STEP_AHEAD 352
+#define QZ_CRITERIUM 353
+#define RELATIVE_IRF 354
+#define REPLIC 355
+#define RESOL 356
+#define RPLOT 357
+#define SHOCKS 358
+#define SHOCK_SIZE 359
+#define SIGMA_E 360
+#define SIMUL 361
+#define SIMUL_ALGO 362
+#define SIMUL_SEED 363
+#define SMOOTHER 364
+#define SOLVE_ALGO 365
+#define STDERR 366
+#define STEADY 367
+#define STOCH_SIMUL 368
+#define TEX 369
+#define TEX_NAME 370
+#define UNIFORM_PDF 371
+#define UNIT_ROOT_VARS 372
+#define USE_DLL 373
+#define VALUES 374
+#define VAR 375
+#define VAREXO 376
+#define VAREXO_DET 377
+#define VAROBS 378
+#define XTICK 379
+#define XTICKLABEL 380
+#define COMMA 381
+#define MINUS 382
+#define PLUS 383
+#define DIVIDE 384
+#define TIMES 385
+#define UMINUS 386
+#define POWER 387
+#define FACTORIAL 388
+#define EXP 389
+#define LOG 390
+#define LOG10 391
+#define LN 392
+#define SIN 393
+#define COS 394
+#define TAN 395
+#define ASIN 396
+#define ACOS 397
+#define ATAN 398
+#define SINH 399
+#define COSH 400
+#define TANH 401
+#define ASINH 402
+#define ACOSH 403
+#define ATANH 404
+#define SQRT 405
 
 
 

@@ -150,6 +150,7 @@ namespace dynare
     Objects* get_expression(Objects* exp);
     /* Concatenates two string objects */
     Objects* cat(Objects* string1, Objects* string2);
+    Objects* cat_with_space(Objects* string1, Objects* string2);
     /*! Writes parameter intitialisation expression */
 	void init_param(Objects* lhs,  Objects* rhs);
     /*! Writes parameter intitialisation expression */

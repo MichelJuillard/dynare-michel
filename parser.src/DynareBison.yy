@@ -36,7 +36,7 @@
 %token NAME NOBS NOCORR NODIAGNOSTIC NOFUNCTIONS NOGRAPH XLS_SHEET XLS_RANGE
 %token NOMOMENTS NOPRINT NORMAL_PDF
 %token OBSERVATION_TRENDS OLR OLR_INST OLR_BETA OPTIM OPTIM_WEIGHTS ORDER OSR OSR_PARAMS 
-%token PARAMETERS PERIODS PREFILTER PRESAMPLE PRINT PRIOR_TRUNC
+%token PARAMETERS PERIODS PREFILTER PRESAMPLE PRINT PRIOR_TRUNC FILTER_STEP_AHEAD
 %token QZ_CRITERIUM
 %token RELATIVE_IRF REPLIC RESOL RPLOT
 %token SHOCKS SHOCK_SIZE SIGMA_E SIMUL SIMUL_ALGO SIMUL_SEED SMOOTHER SOLVE_ALGO STDERR STEADY STOCH_SIMUL  
@@ -772,6 +772,7 @@
                    | o_kalman_tol
                    | o_xls_sheet
                    | o_xls_range
+                   | o_filter_step_ahead
                    ;
 	
  list_optim_option
@@ -925,7 +926,7 @@
                | QZ_CRITERIUM EQUAL FLOAT_NUMBER { _parser->option_num("qz_criterium",$3)}
                ;
  o_datafile: DATAFILE EQUAL NAME {_parser->option_str("datafile",$3);};   
- o_nobs: NOBS EQUAL INT_NUMBER {_parser->option_num("nobs",$3);};	      
+ o_nobs: NOBS EQUAL vec_int {_parser->option_num("nobs",$3);};	      
  o_first_obs: FIRST_OBS EQUAL INT_NUMBER {_parser->option_num("first_obs",$3);};
  o_prefilter: PREFILTER EQUAL INT_NUMBER {_parser->option_num("prefilter",$3);};
  o_presample: PRESAMPLE EQUAL INT_NUMBER {_parser->option_num("presample",$3);};
@@ -966,6 +967,18 @@
  o_nograph : GRAPH {_parser->option_num("nograph","0");};	
  o_xls_sheet : XLS_SHEET EQUAL NAME {_parser->option_str("xls_sheet",$3);} 
  o_xls_range : XLS_RANGE EQUAL range {_parser->option_str("xls_range",$3);} 
+ o_filter_step_ahead : FILTER_STEP_AHEAD EQUAL vec_int {_parser->option_num("filter_step_ahead",$3);}
 
  range : NAME ':' NAME {$$ = new dynare::Objects(":");$$ = _parser->cat($1,$$);$$ = _parser->cat($$,$3);}
+ vec_int_elem : INT_NUMBER
+ 	      | INT_NUMBER ':' {$$ = new dynare::Objects(":"); $$ = _parser->cat($1,$$); }
+	        INT_NUMBER {$$ = _parser->cat($3,$4);}   		    	        
+	      ;
+
+ vec_int_1 : '[' vec_int_elem {$$ = new dynare::Objects("["); $$ =_parser->cat($$,$2);}
+           | vec_int_1 vec_int_elem {$$ = _parser->cat_with_space($1,$2);}
+           ;
+
+ vec_int : vec_int_1 ']' {$$ = new dynare::Objects("]"); $$ = _parser->cat($1,$$);};
+
  %%
