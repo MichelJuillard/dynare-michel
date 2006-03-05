@@ -17,7 +17,7 @@ function [fh,xh,gh,H,itct,fcount,retcodeh] = csminwel(fcn,x0,H0,grad,crit,nit,va
 %        write g2.mat and g3.mat as well.  If all were written at about the same time, any of them
 %        may be a decent starting point.  One can also start from the one with best function value.)
 global bayestopt_
-  [nx,no]=size(x0);
+[nx,no]=size(x0);
 nx=max(nx,no);
 Verbose=1;
 NumGrad= isempty(grad);
@@ -61,15 +61,15 @@ f=f0;
 H=H0;
 cliff=0;
 while ~done
-  bayestopt_.penalty = f;
-  g1=[]; g2=[]; g3=[];
+   bayestopt_.penalty = f;
+   g1=[]; g2=[]; g3=[];
    %addition fj. 7/6/94 for control
    disp('-----------------')
    disp('-----------------')
    %disp('f and x at the beginning of new iteration')
    disp(sprintf('f at the beginning of new iteration, %20.10f',f))
    %-----------Comment out this line if the x vector is long----------------
-   %      disp([sprintf('x = ') sprintf('%15.8g %15.8g %15.8g %15.8g\n',x(1:12))]);
+   %   disp([sprintf('x = ') sprintf('%15.8g %15.8g %15.8g %15.8g\n',x)]);
    %-------------------------
    itct=itct+1;
    [f1 x1 fc retcode1] = csminit(fcn,x,f,g,badg,H,varargin{:});
@@ -147,6 +147,7 @@ while ~done
                   f3=f; x3=x; badg3=1;retcode3=101;
                else
                   gcliff=((f2-f1)/((norm(x2-x1))^2))*(x2-x1);
+                  if(size(x0,2)>1), gcliff=gcliff', end
                   [f3 x3 fc retcode3] = csminit(fcn,x,f,gcliff,0,eye(nx),varargin{:});
                   %ARGLIST
                   %[f3 x3 fc retcode3] = csminit(fcn,x,f,gcliff,0,eye(nx),P1,P2,P3,...
@@ -189,13 +190,13 @@ while ~done
       f2=f;f3=f;f1=f;retcode2=retcode1;retcode3=retcode1;
    end
    %how to pick gh and xh
-   if f3<f & badg3==0
+   if f3 < f - crit & badg3==0
       ih=3
       fh=f3;xh=x3;gh=g3;badgh=badg3;retcodeh=retcode3;
-   elseif f2<f & badg2==0
+   elseif f2 < f - crit & badg2==0
       ih=2
       fh=f2;xh=x2;gh=g2;badgh=badg2;retcodeh=retcode2;
-   elseif f1<f & badg1==0
+   elseif f1 < f - crit & badg1==0
       ih=1
       fh=f1;xh=x1;gh=g1;badgh=badg1;retcodeh=retcode1;
    else
@@ -242,7 +243,7 @@ while ~done
       disp('----')
       disp(sprintf('Improvement on iteration %d = %18.9f',itct,f-fh))
    end
-   if Verbose
+   % if Verbose
       if itct > nit
          disp('iteration count termination')
          done = 1;
@@ -264,7 +265,7 @@ while ~done
       elseif rc == 7
          disp('warning: possible inaccuracy in H matrix')
       end
-   end
+   % end
    f=fh;
    x=xh;
    g=gh;
