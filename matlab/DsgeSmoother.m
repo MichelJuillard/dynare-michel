@@ -1,4 +1,4 @@
-function [alphahat,etahat,epsilonhat,ahat,SteadyState,trend_coeff] = DsgeSmoother(xparam1,gend,Y)
+function [alphahat,etahat,epsilonhat,ahat,SteadyState,trend_coeff,aK] = DsgeSmoother(xparam1,gend,Y)
 % stephane.adjemian@cepremap.cnrs.fr [09-07-2004]
 %
 % Adapted from mj_optmumlik.m
@@ -10,41 +10,8 @@ function [alphahat,etahat,epsilonhat,ahat,SteadyState,trend_coeff] = DsgeSmoothe
   nobs 		= size(options_.varobs,1);
   smpl        = size(Y,2);
 
-  Q = M_.Sigma_e;
-  for i=1:estim_params_.nvx
-    k =estim_params_.var_exo(i,1);
-    Q(k,k) = xparam1(i)*xparam1(i);
-  end
-  offset = estim_params_.nvx;
-  if estim_params_.nvn
-    H = zeros(nobs,nobs);
-    for i=1:estim_params_.nvn
-      k = estim_params_.var_endo(i,1);
-      H(k,k) = xparam1(i+offset)*xparam1(i+offset);
-    end
-  end	
-  offset = offset+estim_params_.nvn;
-  for i=1:estim_params_.ncx
-    k1 =estim_params_.corrx(i,1);
-    k2 =estim_params_.corrx(i,2);
-    Q(k1,k2) = xparam1(i+offset)*sqrt(Q(k1,k1)*Q(k2,k2));
-    Q(k2,k1) = Q(k1,k2);
-  end
-  offset = offset+estim_params_.ncx;
+  set_all_parameters(xparam1);
 
-  if estim_params_.nvn & estim_params_.ncn 
-    for i=1:estim_params_.ncn
-      k1 = options_.lgyidx2varobs(estim_params_.corrn(i,1));
-      k2 = options_.lgyidx2varobs(estim_params_.corrn(i,2));
-      H(k1,k2) = xparam1(i+offset)*sqrt(H(k1,k1)*H(k2,k2));
-      H(k2,k1) = H(k1,k2);
-    end
-    offset = offset+estim_params_.ncn;
-  end	
-  for i=1:estim_params_.np
-    M_.params(estim_params_.param_vals(i,1)) = xparam1(i+offset);
-  end
-  M_.Sigma_e = Q;
   %------------------------------------------------------------------------------
   % 2. call model setup & reduction program
   %------------------------------------------------------------------------------
@@ -76,6 +43,9 @@ function [alphahat,etahat,epsilonhat,ahat,SteadyState,trend_coeff] = DsgeSmoothe
   %  alors il suffit de poser Pstar comme la solution de l'éuation de Lyapounov et
   %  Pinf=[].
   %
+  Q = M_.Sigma_e;
+  H = M_.H;
+  
   if options_.lik_init == 1		% Kalman filter
     Pstar = lyapunov_symm(T,R*Q*transpose(R));
     Pinf	= [];
@@ -101,20 +71,20 @@ function [alphahat,etahat,epsilonhat,ahat,SteadyState,trend_coeff] = DsgeSmoothe
   % -----------------------------------------------------------------------------
   if estim_params_.nvn
     if options_.kalman_algo == 1
-      [alphahat,epsilonhat,etahat,ahat] = DiffuseKalmanSmootherH1(T,R,Q,H,Pinf,Pstar,Y,trend,nobs,np,smpl,mf);
+      [alphahat,epsilonhat,etahat,ahat,aK] = DiffuseKalmanSmootherH1(T,R,Q,H,Pinf,Pstar,Y,trend,nobs,np,smpl,mf);
       if all(alphahat(:)==0)
-	[alphahat,epsilonhat,etahat,ahat] = DiffuseKalmanSmootherH3(T,R,Q,H,Pinf,Pstar,Y,trend,nobs,np,smpl,mf);
+	[alphahat,epsilonhat,etahat,ahat,aK] = DiffuseKalmanSmootherH3(T,R,Q,H,Pinf,Pstar,Y,trend,nobs,np,smpl,mf);
       end
     elseif options_.kalman_algo == 3
-      [alphahat,epsilonhat,etahat,ahat] = DiffuseKalmanSmootherH3(T,R,Q,H,Pinf,Pstar,Y,trend,nobs,np,smpl,mf);
+      [alphahat,epsilonhat,etahat,ahat,aK] = DiffuseKalmanSmootherH3(T,R,Q,H,Pinf,Pstar,Y,trend,nobs,np,smpl,mf);
     end
   else
     if options_.kalman_algo == 1
-      [alphahat,etahat,ahat] = DiffuseKalmanSmoother1(T,R,Q,Pinf,Pstar,Y,trend,nobs,np,smpl,mf);
+      [alphahat,etahat,ahat,aK] = DiffuseKalmanSmoother1(T,R,Q,Pinf,Pstar,Y,trend,nobs,np,smpl,mf);
       if all(alphahat(:)==0)
 	[alphahat,etahat,ahat] = DiffuseKalmanSmoother3(T,R,Q,Pinf,Pstar,Y,trend,nobs,np,smpl,mf);
       end
     elseif options_.kalman_algo == 3
-      [alphahat,etahat,ahat] = DiffuseKalmanSmoother3(T,R,Q,Pinf,Pstar,Y,trend,nobs,np,smpl,mf);
+      [alphahat,etahat,ahat,aK] = DiffuseKalmanSmoother3(T,R,Q,Pinf,Pstar,Y,trend,nobs,np,smpl,mf);
     end
   end

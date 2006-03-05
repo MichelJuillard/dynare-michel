@@ -14,16 +14,6 @@ MaxNumberOfPlotPerFigure = 4;% The square root must be an integer!
 nn = sqrt(MaxNumberOfPlotPerFigure);
 %%
 CheckPath('Plots/IRFs');
-CheckPath('metropolis/IRFs');
-DirectoryName = CheckPath('metropolis');
-load([ DirectoryName '/'  M_.fname '_mh_history'])
-FirstMhFile = record.KeepedDraws.FirstMhFile;
-FirstLine = record.KeepedDraws.FirstLine; 
-TotalNumberOfMhFiles = sum(record.MhDraws(:,2)); LastMhFile = TotalNumberOfMhFiles; 
-TotalNumberOfMhDraws = sum(record.MhDraws(:,1));
-NumberOfDraws = TotalNumberOfMhDraws-floor(options_.mh_drop*TotalNumberOfMhDraws);
-clear record;
-MAX_nruns = ceil(options_.MaxNumberOfBytes/(npar+2)/8);
 MAX_nirfs = ceil(options_.MaxNumberOfBytes/(options_.irf*length(oo_.steady_state)*M_.exo_nbr)/8)+50;
 %%
 B = round(0.25*NumberOfDraws);
@@ -39,26 +29,9 @@ end
 for b=1:B
   irun = irun+1;
   deep = GetOneDraw(NumberOfDraws,FirstMhFile,LastMhFile,FirstLine,MAX_nruns,DirectoryName);
-  M_.params(estim_params_.param_vals(:,1)) = deep(offset+1:end);
+  set_parameters(deep);
   dr = resol(oo_.steady_state,0);
-  if nvx
-    ip = 1;
-    for i=1:nvx
-      k = estim_params_.var_exo(i,1);
-      M_.Sigma_e(k,k) = deep(ip)*deep(ip);
-      ip = ip+1;
-    end
-  end
-  if ncx
-    ip = nvx+nvn+1;
-    for i=1:ncx
-      k1 = estim_params_.corrx(i,1);
-      k2 = estim_params_.corrx(i,2);
-      M_.Sigma_e(k1,k2) = deep(ip)*sqrt(M_.Sigma_e(k1,k1)*M_.Sigma_e(k2,k2));
-      M_.Sigma_e(k2,k1) = M_.Sigma_e(k1,k2);
-      ip = ip+1;
-    end
-  end
+
   SS(M_.exo_names_orig_ord,M_.exo_names_orig_ord) = M_.Sigma_e+1e-14*eye(M_.exo_nbr);
   SS = transpose(chol(SS));
   for i = 1:M_.exo_nbr
