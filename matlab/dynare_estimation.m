@@ -57,6 +57,12 @@ options_ = set_default_option(options_,'posterior_mode_estimation',1);
 options_ = set_default_option(options_,'MaxNumberOfBytes',1e6);
 options_ = set_default_option(options_,'xls_sheet','');
 options_ = set_default_option(options_,'xls_range','');
+options_ = set_default_option(options_.'filter_step_ahead',0);
+if options_.filter_step_ahead ~= 0
+  options_.nk = max(options_.filter_step_ahead);
+else
+  options_.nk = 0;
+end
 
 %% Add something to the parser ++>
 M_.dname = M_.fname; % The user should be able to choose another name
