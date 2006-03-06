@@ -4,6 +4,6 @@ global M_
 
 DirectoryName = [ M_.dname '/' type ];
 
-if ~isdir(DirectoryName) 
-    mkdir('.',DirectoryName); 
+if ~isdir(DirectoryName)
+    mkdir('.',DirectoryName);
 end

@@ -99,7 +99,7 @@ if options_.load_mh_file == 0
   record.LastLogLiK = zeros(nblck,1);
   record.LastFileNumber = AnticipatedNumberOfFiles+1;
   record.LastLineNumber = AnticipatedNumberOfLinesInTheLastFile;
-  save([DirectoryName '/' M_.fname '_mh_history'],'record');  
+  save([MhDirectoryName '/' M_.fname '_mh_history'],'record');  
 elseif options_.load_mh_file == 1% Here we consider previous mh files (previous mh did not crash).
   disp('MH: I''m loading past metropolis-hastings simulations...')
   file = dir([ MhDirectoryName '/'  M_.fname '_mh_history.mat' ]);
