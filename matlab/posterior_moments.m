@@ -39,6 +39,5 @@ else
   bandwidth = 0;                    % Rule of thumb optimal bandwidth parameter.
   kernel_function = 'gaussian';     % Gaussian kernel for Fast Fourrier Transform approximaton.  
   optimal_bandwidth = mh_optimal_bandwidth(xx,length(xx),bandwidth,kernel_function);
-  % [abscissa,f] = kernel_density_estimate(,,,)
   [density(:,1),density(:,2)] = kernel_density_estimate(xx,number_of_grid_points,optimal_bandwidth,kernel_function);
 end
