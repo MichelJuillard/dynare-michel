@@ -1011,8 +1011,9 @@ inline string ModelTree::getExpression(NodeID StartID, EquationType  iEquationTy
   NodeID current_token_ID;
   
   stack_token.push(StartID);
-  int precedence_last_op = operator_table.precedence(StartID->op_code);
+  int precedence_last_op = 0;
   int last_op_code = 0;
+  int on_the_right_of_upper_node = 0;
 
   while (stack_token.size() > 0)
     {
@@ -1044,8 +1045,9 @@ inline string ModelTree::getExpression(NodeID StartID, EquationType  iEquationTy
 	  // if current operator is not a temporary variable and 
 	  // of lesser precedence than previous one, insert '('
 	  if ( precedence_current_op < precedence_last_op ||
-	       ((last_op_code == MINUS || last_op_code == DIVIDE) & 
-		precedence_current_op == precedence_last_op)||
+	       (on_the_right_of_upper_node == 1 &&
+		(last_op_code == MINUS || last_op_code == DIVIDE) && 
+		(precedence_current_op == precedence_last_op))||
 	       current_op_code == UMINUS)
 	    {
 	      exp << "(";
@@ -1072,6 +1074,7 @@ inline string ModelTree::getExpression(NodeID StartID, EquationType  iEquationTy
 	      precedence_last_op = 0;
 	      current_token_ID->close_parenthesis = 1;
 	    }
+	  on_the_right_of_upper_node = 0;
 	  stack_token.push(current_token_ID->id1);
 	}
       // deal with right argument when left branch is entirely explored
@@ -1087,17 +1090,13 @@ inline string ModelTree::getExpression(NodeID StartID, EquationType  iEquationTy
 	    {
 	      exp << current_token_ID->op_name;
 	      precedence_last_op = precedence_current_op;
+	      last_op_code = current_op_code;
+	      on_the_right_of_upper_node = 1;
 	      stack_token.push(current_token_ID->id2);
 	    }
 	}
       else
 	{
-// 	  if ( (offset == 0 && current_op_code == POWER) || 
-// 	       ( precedence_current_op > precedence_last_op &&
-// 		 operator_table.isfunction(current_op_code) == false) ||
-// 	       (current_op_code == MINUS &&
-// 		precedence_current_op == precedence_last_op) ||
-// 	       current_op_code == UMINUS)
 	  if ( current_token_ID->close_parenthesis == 1)
 	    {
 	      exp << ")";
