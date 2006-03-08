@@ -642,7 +642,8 @@ if any(bayestopt_.pshape > 0) & options_.TeX %% Bayesian estimation (posterior m
   end
 end
 
-if (any(bayestopt_.pshape  >0 ) & options_.mh_replic) | (any(bayestopt_.pshape >0 ) & options_.load_mh_file)  %% not ML estimation
+if (any(bayestopt_.pshape  >0 ) & options_.mh_replic) | ...
+      (any(bayestopt_.pshape >0 ) & options_.load_mh_file)  %% not ML estimation
   bounds = prior_bounds(bayestopt_);
   bayestopt_.lb = bounds(:,1);
   bayestopt_.ub = bounds(:,2);

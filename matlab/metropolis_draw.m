@@ -10,8 +10,8 @@ function xparam=metropolis_draw(init)
     np   = estim_params_.np ;
     npar = nvx+nvn+ncx+ncn+np;
     DirectoryName = CheckPath('metropolis');
-    fname = [ DirectoryName '/' M_.fname]
-    load([ fname '_mh_history'])
+    fname = [ DirectoryName '/' M_.fname];
+    load([ fname '_mh_history']);
     FirstMhFile = record.KeepedDraws.FirstMhFile;
     FirstLine = record.KeepedDraws.FirstLine; 
     TotalNumberOfMhFiles = sum(record.MhDraws(:,2)); LastMhFile = TotalNumberOfMhFiles; 

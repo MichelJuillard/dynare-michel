@@ -61,16 +61,12 @@ for j=1:npar
   for b = 1:nblck
     startline = 0;
     for n = 1:NumberOfMcFilesPerBlock-1
-      %eval(['load ' M_.dname '/metropolis/' M_.fname '_mh' int2str(n) '_blck' int2str(b)]);
       load([MhDirectoryName '/' mcfiles(n,1,b).name],'x2');
-      %clear logpo2 post2;
       tmp((b-1)*NumberOfDraws+startline+1:(b-1)*NumberOfDraws+MAX_nruns*n,1) = x2(:,j);
       clear x2;
       startline = startline + MAX_nruns;
     end
     load([MhDirectoryName '/' mcfiles(NumberOfMcFilesPerBlock,1,b).name],'x2');
-    % eval(['load ' M_.dname '/metropolis/' M_.fname '_mh' int2str(LastFileNumber) '_blck' int2str(b)]);
-    % clear logpo2 post2;
     tmp((b-1)*NumberOfDraws+startline+1:(b-1)*NumberOfDraws+MAX_nruns*(LastFileNumber-1)+LastLineNumber,1) = x2(:,j);
     clear x2;
     startline = startline + LastLineNumber;
@@ -261,15 +257,11 @@ MDIAG = zeros(NumberOfLines,6);
 for b = 1:nblck
   startline = 0;
   for n = 1:NumberOfMcFilesPerBlock-1
-    % eval(['load ' M_.dname '/metropolis/' M_.fname '_mh' int2str(n) '_blck' int2str(b)]);
-    % clear x2 post2;
     load([MhDirectoryName '/' mcfiles(n,1,b).name],'logpo2');
     tmp((b-1)*NumberOfDraws+startline+1:(b-1)*NumberOfDraws+MAX_nruns*n,1) = logpo2;
     startline = startline+MAX_nruns;
   end
   load([MhDirectoryName '/' mcfiles(NumberOfMcFilesPerBlock,1,b).name],'logpo2');
-  % eval(['load ' M_.dname '/metropolis/' M_.fname '_mh' int2str(LastFileNumber) '_blck' int2str(b)]);
-  % clear x2 post2;
   tmp((b-1)*NumberOfDraws+startline+1:(b-1)*NumberOfDraws+ MAX_nruns*(LastFileNumber-1)+LastLineNumber,1) = logpo2;
 end
 clear logpo2;
