@@ -7,7 +7,8 @@ function set_all_parameters(xparam1)
   ncn = estim_params_.ncn;
   np = estim_params_.np;
   Sigma_e = M_.Sigma_e;
-  
+  H = M_.H;
+
   if nvx
     var_exo = estim_params_.var_exo;
     for i=1:nvx
@@ -48,9 +49,12 @@ function set_all_parameters(xparam1)
   end
   
   if np
-    offset = offset+estim_params_.ncx+estim_params_.ncn;
-    M_.params(estim_params_.param_vals(:,1)) = deep(offset+1:end);
+    offset = nvx+ncx+nvn+ncn;
+    M_.params(estim_params_.param_vals(:,1)) = xparam1(offset+1:end);
   end
   
-  M_.Sigma_e = Sigma_e;
+  if nvx
+    M_.Sigma_e = Sigma_e;
+  end
+  if 
   M_.H = H;
