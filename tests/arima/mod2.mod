@@ -23,4 +23,4 @@ end;
 
 stoch_simul(order=1,periods=1000,irf=0,nomoments);
 
-save data2 dx dy x y;
+datatomfile('data2',[]);
