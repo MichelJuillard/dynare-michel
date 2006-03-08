@@ -926,7 +926,9 @@
                | QZ_CRITERIUM EQUAL FLOAT_NUMBER { _parser->option_num("qz_criterium",$3)}
                ;
  o_datafile: DATAFILE EQUAL NAME {_parser->option_str("datafile",$3);};   
- o_nobs: NOBS EQUAL vec_int {_parser->option_num("nobs",$3);};	      
+ o_nobs: NOBS EQUAL vec_int {_parser->option_num("nobs",$3);}
+       | NOBS EQUAL INT_NUMBER {_parser->option_num("nobs",$3);}
+       ;	      
  o_first_obs: FIRST_OBS EQUAL INT_NUMBER {_parser->option_num("first_obs",$3);};
  o_prefilter: PREFILTER EQUAL INT_NUMBER {_parser->option_num("prefilter",$3);};
  o_presample: PRESAMPLE EQUAL INT_NUMBER {_parser->option_num("presample",$3);};
