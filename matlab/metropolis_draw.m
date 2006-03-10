@@ -1,6 +1,6 @@
-function xparam=metropolis_draw(init)
-  global options_ estim_params_
-  persistent mh_nblck NumberofDraws fname FirstLine FirstMhFile MAX_nruns
+function xparams=metropolis_draw(init)
+  global options_ estim_params_ M_
+  persistent mh_nblck NumberOfDraws fname FirstLine FirstMhFile MAX_nruns
   
   if init
     nvx  = estim_params_.nvx;
@@ -14,12 +14,12 @@ function xparam=metropolis_draw(init)
     load([ fname '_mh_history']);
     FirstMhFile = record.KeepedDraws.FirstMhFile;
     FirstLine = record.KeepedDraws.FirstLine; 
-    TotalNumberOfMhFiles = sum(record.MhDraws(:,2)); LastMhFile = TotalNumberOfMhFiles; 
+    TotalNumberOfMhFiles = sum(record.MhDraws(:,2)); 
+    LastMhFile = TotalNumberOfMhFiles; 
     TotalNumberOfMhDraws = sum(record.MhDraws(:,1));
-    NumberOfDraws = TotalNumberOfMhDraws-floor(options_.mh_drop* ...
-					       TotalNumberOfMhDraws);
+    NumberOfDraws = TotalNumberOfMhDraws-floor(options_.mh_drop*TotalNumberOfMhDraws);
     MAX_nruns = ceil(options_.MaxNumberOfBytes/(npar+2)/8);
-    mh_nblck = options_.nblck;
+    mh_nblck = options_.mh_nblck;
     return
   end
   

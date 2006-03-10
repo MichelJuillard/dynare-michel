@@ -1,4 +1,4 @@
-function PosteriorIRF()
+function PosteriorIRF(type)
 % stephane.adjemian@ens.fr [09-25-2005]
 global options_ estim_params_ oo_ M_
 nvx  = estim_params_.nvx;
@@ -11,16 +11,32 @@ offset = npar-np;
 %%
 MaxNumberOfPlotPerFigure = 9;% The square root must be an integer!
 nn = sqrt(MaxNumberOfPlotPerFigure);
-%%
-MhDirectoryName = CheckPath('Output');
+
 DirectoryName = CheckPath('Output');
+if strcmpi(type,'posterior')
+  MhDirectoryName = CheckPath('metropolis');
+else
+  MhDirectoryName = CheckPath('prior');
+end
+
 MAX_nirfs = ceil(options_.MaxNumberOfBytes/(options_.irf*length(oo_.steady_state)*M_.exo_nbr)/8)+50;
-%%
+
+if strcmpi(type,'posterior')
+  load([ MhDirectoryName '/'  M_.fname '_mh_history'])
+    TotalNumberOfMhDraws = sum(record.MhDraws(:,1));
+    NumberOfDraws = TotalNumberOfMhDraws-floor(options_.mh_drop*TotalNumberOfMhDraws);
+else% type = 'prior'
+  NumberOfDraws = 500;
+end
 B = min([round(.5*NumberOfDraws),500]);
-%%
+
 irun = 0;
 ifil = 1;
-h = waitbar(0,'Bayesian IRFs...');
+if strcmpi(type,'posterior')
+  h = waitbar(0,'Bayesian (posterior) IRFs...');
+else
+  h = waitbar(0,'Bayesian (prior) IRFs...');
+end
 if B >= MAX_nirfs 
   stock_irf = zeros(options_.irf,M_.endo_nbr,M_.exo_nbr,MAX_nirfs);
 else
@@ -28,7 +44,7 @@ else
 end
 for b=1:B
   irun = irun+1;
-  deep = GetOneDraw('posterior');
+  deep = GetOneDraw(type);
   set_parameters(deep);
   dr = resol(oo_.steady_state,0);
   SS(M_.exo_names_orig_ord,M_.exo_names_orig_ord) = M_.Sigma_e+1e-14*eye(M_.exo_nbr);
