@@ -11,14 +11,12 @@ offset = npar-np;
 %%
 MaxNumberOfPlotPerFigure = 9;% The square root must be an integer!
 nn = sqrt(MaxNumberOfPlotPerFigure);
-
 DirectoryName = CheckPath('Output');
 if strcmpi(type,'posterior')
   MhDirectoryName = CheckPath('metropolis');
 else
   MhDirectoryName = CheckPath('prior');
-end
-
+end  
 MAX_nirfs = ceil(options_.MaxNumberOfBytes/(options_.irf*length(oo_.steady_state)*M_.exo_nbr)/8)+50;
 
 if strcmpi(type,'posterior')
@@ -29,7 +27,9 @@ else% type = 'prior'
   NumberOfDraws = 500;
 end
 B = min([round(.5*NumberOfDraws),500]);
-
+try delete([MhDirectoryName '/' M_.fname '_IRFs*']);
+catch disp('No _IRFs files to delete!')
+end
 irun = 0;
 ifil = 1;
 if strcmpi(type,'posterior')
@@ -37,7 +37,7 @@ if strcmpi(type,'posterior')
 else
   h = waitbar(0,'Bayesian (prior) IRFs...');
 end
-if B >= MAX_nirfs 
+if B >= MAX_nirfs
   stock_irf = zeros(options_.irf,M_.endo_nbr,M_.exo_nbr,MAX_nirfs);
 else
   stock_irf = zeros(options_.irf,M_.endo_nbr,M_.exo_nbr,B);
@@ -73,7 +73,40 @@ for b=1:B
   waitbar(b/B,h);
 end
 ifil = ifil-1;
-close(h)
+close(h);
+
+%% Now I reshape the _irf files...
+IRFfiles = dir([MhDirectoryName '/' M_.fname '_irf*']);
+NumberOfIRFfiles = length(IRFfiles);
+if NumberOfIRFfiles>1
+  NumberOfPeriodsPerIRFfiles = ceil(options_.irf/NumberOfIRFfiles);
+  reste = options_.irf-NumberOfPeriodsPerIRFfiles*(NumberOfIRFfiles-1);
+  idx = 0;
+  jdx = 0;
+  for f1=1:NumberOfIRFfiles-1
+    STOCK_IRF = zeros(NumberOfPeriodsPerIRFfiles,M_.endo_nbr,M_.exo_nbr,B);
+    for f2 = 1:NumberOfIRFfiles
+      load([MhDirectoryName '/' M_.fname '_irf' int2str(f2)]);
+      STOCK_IRF(:,:,:,idx+1:idx+size(stock_irf,4)) = stock_irf(jdx+1:jdx+NumberOfPeriodsPerIRFfiles,:,:,:);
+      idx = idx+size(stock_irf,4);
+    end
+    save([MhDirectoryName '/' M_.fname '_IRFs' int2str(f1)],'STOCK_IRF');
+    jdx = jdx + NumberOfPeriodsPerIRFfiles;
+    idx = 0;
+  end
+  STOCK_IRF = zeros(reste,M_.endo_nbr,M_.exo_nbr,B);
+  for f2 = 1:NumberOfIRFfiles
+    load([MhDirectoryName '/' M_.fname '_irf' int2str(f2)]);
+    STOCK_IRF(:,:,:,idx+1:idx+size(stock_irf,4)) = stock_irf(jdx+1:jdx+reste,:,:,:);
+    idx = idx+size(stock_irf,4);
+  end
+  save([MhDirectoryName '/' M_.fname '_IRFs' int2str(NumberOfIRFfiles)],'STOCK_IRF');
+end
+for file = 1:NumberOfIRFfiles
+  delete([MhDirectoryName '/' M_.fname '_irf' int2str(file) '.mat'])
+end
+%% ... Done!
+
 varlist = options_.varlist;
 if isempty(varlist)
   varlist = M_.endo_names;
@@ -101,23 +134,21 @@ if options_.TeX
 end
 fprintf('MH: Posterior IRFs...\n');
 tit(M_.exo_names_orig_ord,:) = M_.exo_names;
-for i = 1:M_.exo_nbr
-  for j = 1:nvar
-    for k = 1:options_.irf
-      StartLine = 0;
-      tmp = zeros(B,1);
-      for file = 1:ifil
-	load([MhDirectoryName '/' M_.fname '_irf' int2str(file)]);
-	DeProfundis = size(stock_irf,4); 
-	tmp(StartLine+1:StartLine+DeProfundis) = squeeze(stock_irf(k,SelecVariables(j),i,:)); 
-	StartLine = StartLine+DeProfundis;
+kdx = 0;
+for file = 1:NumberOfIRFfiles
+  load([MhDirectoryName '/' M_.fname '_IRFs' int2str(file)]);
+  for i = 1:M_.exo_nbr
+    for j = 1:nvar
+      for k = 1:size(STOCK_IRF,1)
+        kk = k+kdx;
+        [MeanIRF(kk,j,i),MedianIRF(kk,j,i),VarIRF(kk,j,i),HPDIRF(kk,:,j,i),DistribIRF(kk,:,j,i)] = ...
+            posterior_moments(squeeze(STOCK_IRF(k,SelecVariables(j),i,:)),0);
       end
-      [MeanIRF(k,j,i),MedianIRF(k,j,i),VarIRF(k,j,i),HPDIRF(k,:,j,i),DistribIRF(k,:,j,i)] = posterior_moments(tmp,0);
     end
-    disp(['    Variable: ' deblank(M_.endo_names(SelecVariables(j),:)) ', orthogonalized shock to ' deblank(tit(i,:))])
   end
-end  
-clear stock_irf;
+  kdx = kdx + size(STOCK_IRF,1);
+end
+clear STOCK_IRF;
 for i = 1:M_.exo_nbr
   for j = 1:nvar
     name = [deblank(M_.endo_names(SelecVariables(j),:)) '_' deblank(tit(i,:))];
