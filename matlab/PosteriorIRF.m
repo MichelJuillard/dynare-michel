@@ -101,6 +101,10 @@ if NumberOfIRFfiles>1
     idx = idx+size(stock_irf,4);
   end
   save([MhDirectoryName '/' M_.fname '_IRFs' int2str(NumberOfIRFfiles)],'STOCK_IRF');
+else
+  load([MhDirectoryName '/' M_.fname '_irf1']);
+  STOCK_IRF = stock_irf;
+  save([MhDirectoryName '/' M_.fname '_IRFs' int2str(1)],'STOCK_IRF');  
 end
 for file = 1:NumberOfIRFfiles
   delete([MhDirectoryName '/' M_.fname '_irf' int2str(file) '.mat'])
@@ -121,17 +125,20 @@ else
     end
   end
 end
+
 MeanIRF = zeros(options_.irf,nvar,M_.exo_nbr);
 MedianIRF = zeros(options_.irf,nvar,M_.exo_nbr);
 StdIRF = zeros(options_.irf,nvar,M_.exo_nbr);
 DistribIRF = zeros(options_.irf,9,nvar,M_.exo_nbr);
 HPDIRF = zeros(options_.irf,2,nvar,M_.exo_nbr);
+
 if options_.TeX
   varlist_TeX = [];
   for i=1:nvar
     varlist_TeX = strvcat(varlist_TeX,M_.endo_names_tex(SelecVariables(i),:));
   end
 end
+
 fprintf('MH: Posterior IRFs...\n');
 tit(M_.exo_names_orig_ord,:) = M_.exo_names;
 kdx = 0;
@@ -149,6 +156,7 @@ for file = 1:NumberOfIRFfiles
   kdx = kdx + size(STOCK_IRF,1);
 end
 clear STOCK_IRF;
+
 for i = 1:M_.exo_nbr
   for j = 1:nvar
     name = [deblank(M_.endo_names(SelecVariables(j),:)) '_' deblank(tit(i,:))];
