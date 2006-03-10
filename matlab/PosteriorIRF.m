@@ -28,7 +28,7 @@ else% type = 'prior'
 end
 B = min([round(.5*NumberOfDraws),500]);
 try delete([MhDirectoryName '/' M_.fname '_IRFs*']);
-catch disp('No _IRFs files to delete!')
+catch disp('No _IRFs files to be deleted!')
 end
 irun = 0;
 ifil = 1;
@@ -62,8 +62,8 @@ for b=1:B
       end
     end
   end
-  if irun == MAX_nirfs | irun == B | i == B
-    if i == B
+  if irun == MAX_nirfs | irun == B | b == B
+    if b == B
       stock_irf = stock_irf(:,:,:,1:irun);
     end
     save([MhDirectoryName '/' M_.fname '_irf' int2str(ifil)],'stock_irf');
