@@ -87,6 +87,7 @@ void ComputingTasks::setEstimationInit(void)
   *output << "estim_params_.param_names = [];\n";
   *output << "estim_params_.user_param_names = [];\n";
   *output << "estim_params_.param_vals = [];\n";
+  *output << "M_.H = 0;\n";
 }
 //------------------------------------------------------------------------------
 void ComputingTasks::setOptimOptions(string str1, string str2, int task)
