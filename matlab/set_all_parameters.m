@@ -56,5 +56,5 @@ function set_all_parameters(xparam1)
   if nvx
     M_.Sigma_e = Sigma_e;
   end
-  if 
+
   M_.H = H;
