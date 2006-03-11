@@ -155,7 +155,6 @@ int sigma_e = 0;
 <DYNARE_BLOCK>inv_gamma1_pdf {return INV_GAMMA_PDF;}
 <DYNARE_BLOCK>inv_gamma2_pdf {return INV_GAMMA_PDF;}
 <DYNARE_BLOCK>uniform_pdf {return UNIFORM_PDF;}
-<DYNARE_BLOCK>corr {return CORR;}
 
 <DYNARE_BLOCK>; {return yytext[0];}
 
@@ -164,12 +163,9 @@ int sigma_e = 0;
 <DYNARE_STATEMENT>solve_algo {return SOLVE_ALGO;}
 <DYNARE_STATEMENT>dr_algo {return DR_ALGO;}
 <DYNARE_STATEMENT>simul_algo {return SIMUL_ALGO;}
-<DYNARE_STATEMENT>solve_algo {return SOLVE_ALGO;}
 <DYNARE_STATEMENT>drop {return DROP;}
 <DYNARE_STATEMENT>order {return ORDER;}
 <DYNARE_STATEMENT>replic {return REPLIC;}
-<DYNARE_STATEMENT>nomoments {return NOMOMENTS;}
-<DYNARE_STATEMENT>nocorr {return NOCORR;}
 <DYNARE_STATEMENT>ar {return AR;}
 <DYNARE_STATEMENT>nofunctions {return NOFUNCTIONS;}
 <DYNARE_STATEMENT>irf {return IRF;}
@@ -249,14 +245,3 @@ int sigma_e = 0;
  /* NATIVE Block */
 <NATIVE>.* {BEGIN INITIAL;_scanner->do_as_is(yytext);_scanner->do_as_is("\n");}
 
-<*>; {return yytext[0];}
-<*>: {return yytext[0];}
-<*>, {return yytext[0];}
-<*>[\]] {return yytext[0];}
-<*>[\[] {return yytext[0];}
-
-
-
- /* Any other entry is writen as is */
-. {_scanner->do_as_is(yytext);}
-%%

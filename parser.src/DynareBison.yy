@@ -763,6 +763,7 @@
                    | o_loglinear
                    | o_nodiagnostic
                    | o_bayesian_irf
+                   | o_irf
                    | o_tex
                    | o_forecast
                    | o_smoother
