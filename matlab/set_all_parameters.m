@@ -7,7 +7,8 @@ function set_all_parameters(xparam1)
   ncn = estim_params_.ncn;
   np = estim_params_.np;
   Sigma_e = M_.Sigma_e;
-
+  H = M_.H;
+  
   if nvx
     var_exo = estim_params_.var_exo;
     for i=1:nvx
