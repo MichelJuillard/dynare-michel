@@ -1,4 +1,5 @@
-function LIK = DiffuseLikelihood1(T,R,Q,Pinf,Pstar,Y,trend,start)
+function [LIK, lik] = DiffuseLikelihood1(T,R,Q,Pinf,Pstar,Y,trend,start)
+% M. Ratto added lik in output
 % stephane.adjemian@cepremap.cnrs.fr [07-19-2004]
 %
 % Same as DiffuseLikelihoodH1 without measurement error.
@@ -65,7 +66,7 @@ function LIK = DiffuseLikelihood1(T,R,Q,Pinf,Pstar,Y,trend,start)
       end
     else
       F_singular = 0;
-      iF		  = inv(F);
+      iF        = inv(F);
       lik(t)    = log(dF)+transpose(v)*iF*v;
       K         = Pstar(:,mf)*iF; %% premultiplication by the transition matrix T is removed (stephane)
       a         = T*(a+K*v);		%% --> factorization of the transition matrix...
@@ -75,7 +76,7 @@ function LIK = DiffuseLikelihood1(T,R,Q,Pinf,Pstar,Y,trend,start)
   end
   if F_singular == 1
     error(['The variance of the forecast error remains singular until the' ...
-	   'end of the sample'])
+	  'end of the sample'])
   end
   reste = smpl-t;
   while t < smpl
@@ -87,6 +88,4 @@ function LIK = DiffuseLikelihood1(T,R,Q,Pinf,Pstar,Y,trend,start)
   lik(t) = lik(t) + reste*log(dF);
 
 
-  LIK    = .5*(sum(lik(start:end))-(start-1)*lik(smpl+1)/smpl);% Minus the
-							       % log-likelihood.
-							       
+  LIK    = .5*(sum(lik(start:end))-(start-1)*lik(smpl+1)/smpl);% Minus the log-likelihood.

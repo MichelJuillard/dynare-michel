@@ -1,4 +1,5 @@
-function LIK = DiffuseLikelihoodH1(T,R,Q,H,Pinf,Pstar,Y,trend,start)
+function [LIK, lik] = DiffuseLikelihoodH1(T,R,Q,H,Pinf,Pstar,Y,trend,start)
+% M. Ratto added lik in output
 % stephane.adjemian@cepremap.cnrs.fr [07-19-2004]
 %
 %   See "Filtering and Smoothing of State Vector for Diffuse State Space
@@ -156,4 +157,6 @@ function LIK = DiffuseLikelihoodH1(T,R,Q,H,Pinf,Pstar,Y,trend,start)
     lik(t) = transpose(v)*iF*v;
   end
   lik(t) = lik(t) + reste*log(dF);
-  LIK    = .5*(sum(lik(start:end))-(start-1)*lik(smpl+1)/smpl);% Minus the log-likelihood.
+  LIK    = .5*(sum(lik(start:end))-(start-1)*lik(smpl+1)/smpl);% Minus the
+							       % log-likelihood.
+							       
