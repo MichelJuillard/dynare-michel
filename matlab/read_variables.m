@@ -22,7 +22,7 @@ function dyn_data_01=read_variables(file_name_01,var_names_01,dyn_data_01,xls_sh
     file_name_02 = [file_name_01 '.mat']
     s = load(file_name_01);
     for dyn_i_01=1:var_size_01
-      dyn_tmp_01 = s.(var_names_01(dyn_i_01,:));
+      dyn_tmp_01 = s.(deblank(var_names_01(dyn_i_01,:)));
       if length(dyn_tmp_01) > dyn_size_01 & dyn_size_01 > 0
 	error('data size is too large')
       end
