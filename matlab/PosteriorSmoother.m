@@ -55,11 +55,6 @@ ifil2 = 1;
 ifil3 = 1;
 ifil4 = 1;
 h = waitbar(0,'Bayesian smoother...');
-if B >= MAX_nirfs 
-  stock_irf = zeros(options_.irf,M_.endo_nbr,M_.exo_nbr,MAX_nirfs);
-else
-  stock_irf = zeros(options_.irf,M_.endo_nbr,M_.exo_nbr,B);
-end
 if options_.smoother
   if B <= MAX_nsmoo
     stock_smooth = zeros(endo_nbr,gend,B);
@@ -106,38 +101,42 @@ for b=1:B
   irun3 = irun3 + 1;
   irun4 = irun4 + 1;
 
-  if irun1 == MAX_nsmoo | b == B
+  if irun1 > MAX_nsmoo | b == B
     if b == B
       stock_smooth = stock_smoo(:,:,1:irun1);
     end
-    save([DirectoryName M_.fname '_smooth' int2str(ifil1)],'stock_smooth');
+    stock = stock_smooth;
+    save([DirectoryName M_.fname '_smooth' int2str(ifil1)],'stock');
     ifil1 = ifil1 + 1;
     irun1 = 1;
   end
   
-  if nvx & (irun2 == MAX_inno | b == B)
+  if nvx & (irun2 > MAX_inno | b == B)
     if b == B
       stock_innov = stock_innov(:,:,1:irun2);
     end
-    save([DirectoryName M_.fname '_inno' int2str(ifil2)],'stock_inno');
+    stock = stock_inno'
+    save([DirectoryName M_.fname '_inno' int2str(ifil2)],'stock');
     ifil2 = ifil2 + 1;
     irun2 = 1;
   end
     
-  if nvn & (irun3 == MAX_error | b == B)
+  if nvn & (irun3 > MAX_error | b == B)
     if b == B
       stock_error = stock_error(:,:,1:irun3);
     end
-    save([DirectoryName M_.fname '_error' int2str(ifil3)],'stock_error');
+    stock = stock_error;
+    save([DirectoryName M_.fname '_error' int2str(ifil3)],'stock');
     ifil3 = ifil3 + 1;
     irun3 = 1;
   end
     
-  if naK & (irun3 == MAX_naK | b == B)
+  if naK & (irun3 > MAX_naK | b == B)
     if b == B
       stock_filter = stock_filter(:,:,:,1:irun4);
     end
-    save([DirectoryName M_.fname '_filter' int2str(ifil4)],'stock_filter');
+    stock = stock_filter;
+    save([DirectoryName M_.fname '_filter' int2str(ifil4)],'stock');
     ifil4 = ifil4 + 1;
     irun4 = 1;
   end
@@ -145,3 +144,4 @@ for b=1:B
   waitbar(b/B,h);
 end
 close(h)
+

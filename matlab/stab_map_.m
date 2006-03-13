@@ -1,6 +1,6 @@
-function x0 = stab_map_(Nsam, fload, alpha2, alpha)
+function x0 = stab_map_(Nsam, fload, alpha2, alpha, prepSA, pprior)
 %
-% function x0 = stab_map_(Nsam, fload, alpha2, alpha)
+% function x0 = stab_map_(Nsam, fload, alpha2, alpha, prepSA, pprior)
 %
 % Mapping of stability regions in the prior ranges applying
 % Monte Carlo filtering techniques.
@@ -15,7 +15,12 @@ function x0 = stab_map_(Nsam, fload, alpha2, alpha)
 % [abs(corrcoef) > alpha2]
 % alpha =  significance level for univariate sensitivity analysis 
 %  (uses smirnov)
-%
+% prepSA = 1: save transition matrices for mapping reduced form
+%        = 0: no transition matrix saved (default)
+% pprior = 1: sample from prior ranges (default): sample saved in
+%            _stab.mat   file
+%        = 0: sample from posterior ranges: sample saved in
+%            _mc.mat file
 % OUTPUT: 
 % x0: one parameter vector for which the model is stable.
 %
@@ -29,7 +34,7 @@ function x0 = stab_map_(Nsam, fload, alpha2, alpha)
 %  ( abs(corrcoef) > alpha2) under the stable subset
 %
 % USES lptauSEQ, 
-%      smirnov
+%      stab_map_1, stab_map_2
 %
 % Copyright (C) 2005 Marco Ratto
 % THIS PROGRAM WAS WRITTEN FOR MATLAB BY
@@ -61,10 +66,6 @@ nshock = estim_params_.nvx;
 nshock = nshock + estim_params_.nvn;
 nshock = nshock + estim_params_.ncx;
 nshock = nshock + estim_params_.ncn;
-number_of_grid_points = 2^9;      % 2^9 = 512 !... Must be a power of two.
-bandwidth = 0;                    % Rule of thumb optimal bandwidth parameter.
-kernel_function = 'gaussian';     % Gaussian kernel for Fast Fourrier Transform approximaton.  
-%kernel_function = 'uniform';     % Gaussian kernel for Fast Fourrier Transform approximaton.  
 
 
 if nargin==0,
@@ -73,13 +74,24 @@ end
 if nargin<2,
     fload=0;
 end
-if nargin<4,
-    alpha=0.002;
-end
 if nargin<3,
     alpha2=0.3;
 end
+if nargin<4 | isempty(alpha),
+    alpha=0.002;
+end
+if nargin<5,
+    prepSA=0;
+end
+if nargin<6,
+    pprior=1;
+end
 
+    options_.periods=0;
+    options_.nomoments=1;
+    options_.irf=0;
+    options_.noprint=1;
+    
 if fload==0 | nargin<2 | isempty(fload),
     if estim_params_.np<52,
         [lpmat] = lptauSEQ(Nsam,estim_params_.np);
@@ -90,39 +102,71 @@ if fload==0 | nargin<2 | isempty(fload),
         end
     end
     
-    
-    for j=1:estim_params_.np,
-        if estim_params_.np>30 & estim_params_.np<52 
-            lpmat(:,j)=lpmat(randperm(Nsam),j).*(bayestopt_.ub(j+nshock)-bayestopt_.lb(j+nshock))+bayestopt_.lb(j+nshock);
-        else
-            lpmat(:,j)=lpmat(:,j).*(bayestopt_.ub(j+nshock)-bayestopt_.lb(j+nshock))+bayestopt_.lb(j+nshock);
+    if pprior,
+        for j=1:estim_params_.np,
+            if estim_params_.np>30 & estim_params_.np<52 
+                lpmat(:,j)=lpmat(randperm(Nsam),j).*(bayestopt_.ub(j+nshock)-bayestopt_.lb(j+nshock))+bayestopt_.lb(j+nshock);
+            else
+                lpmat(:,j)=lpmat(:,j).*(bayestopt_.ub(j+nshock)-bayestopt_.lb(j+nshock))+bayestopt_.lb(j+nshock);
+            end
+        end
+    else
+        for j=1:nshock,
+            xparam1(j) = oo_.posterior_mode.shocks_std.(bayestopt_.name{j});
+            sd(j) = oo_.posterior_std.shocks_std.(bayestopt_.name{j});
+            lpmat0(:,j) = randperm(Nsam)'./(Nsam+1); %latin hypercube
+            lb = max(bayestopt_.lb(j), xparam1(j)-2*sd(j));
+            ub1=xparam1(j)+(xparam1(j) - lb); % define symmetric range around the mode!
+            ub = min(bayestopt_.ub(j),ub1);
+            if ub<ub1,
+                lb=xparam1(j)-(ub-xparam1(j)); % define symmetric range around the mode!
+            end
+            lpmat0(:,j) = lpmat0(:,j).*(ub-lb)+lb;
+        end
+        % 
+        for j=1:estim_params_.np,
+            xparam1(j+nshock) = oo_.posterior_mode.parameters.(bayestopt_.name{j+nshock});
+            sd(j+nshock) = oo_.posterior_std.parameters.(bayestopt_.name{j+nshock});
+            lb = max(bayestopt_.lb(j+nshock),xparam1(j+nshock)-2*sd(j+nshock));
+            ub1=xparam1(j+nshock)+(xparam1(j+nshock) - lb); % define symmetric range around the mode!
+            ub = min(bayestopt_.ub(j+nshock),ub1);
+            if ub<ub1,
+                lb=xparam1(j+nshock)-(ub-xparam1(j+nshock)); % define symmetric range around the mode!
+            end
+            %ub = min(bayestopt_.ub(j+nshock),xparam1(j+nshock)+2*sd(j+nshock));
+            if estim_params_.np>30 & estim_params_.np<52
+                lpmat(:,j) = lpmat(randperm(Nsam),j).*(ub-lb)+lb;
+            else
+                lpmat(:,j) = lpmat(:,j).*(ub-lb)+lb;
+            end
         end
     end
     % 
     h = waitbar(0,'Please wait...');
-    options_.periods=0;
-    options_.nomoments=1;
-    options_.irf=0;
-    options_.noprint=1;
+    istable=[1:Nsam];
+    iunstable=[1:Nsam];
     for j=1:Nsam,
-%         for i=1:estim_params_.np,
-%             evalin('base',[bayestopt_.name{i+nshock}, '= ',sprintf('%0.15e',lpmat(j,i)),';'])
-%         end
         M_.params(estim_params_.param_vals(:,1)) = lpmat(j,:)';
-        %evalin('base','stoch_simul(var_list_);');
         stoch_simul([]);
         dr_ = oo_.dr;
-        %egg(:,j) = sort(eigenvalues_);
-        %egg(:,j) = sort(dr_.eigval);
-        if isfield(dr_,'eigval'),
+        if isfield(dr_,'ghx'),
             egg(:,j) = sort(dr_.eigval);
-            if ~exist('nspred')
+            iunstable(j)=0;
+            if prepSA
+                T(:,:,j) = [dr_.ghx dr_.ghu];
+            end            
+            if ~exist('nspred'),
                 nspred = size(dr_.ghx,2);
                 nboth = dr_.nboth;
                 nfwrd = dr_.nfwrd;
             end
         else
-            egg(:,j)=ones(size(egg,1),1).*1.1;
+            istable(j)=0;
+            if isfield(dr_,'eigval')
+                egg(:,j) = sort(dr_.eigval);
+            else
+                egg(:,j)=ones(size(egg,1),1).*1.1;
+            end
         end
         ys_=real(dr_.ys);
         yys(:,j) = ys_;
@@ -130,160 +174,140 @@ if fload==0 | nargin<2 | isempty(fload),
         waitbar(j/Nsam,h,['MC iteration ',int2str(j),'/',int2str(Nsam)])
     end
     close(h)
+    istable=istable(find(istable));  % stable params
+    iunstable=iunstable(find(iunstable));   % unstable params
     
-    % map stable samples
-    ix=[1:Nsam];
-    for j=1:Nsam,
-        if abs(egg(nspred,j))>=options_.qz_criterium; %(1-(options_.qz_criterium-1)); %1-1.e-5;
-            ix(j)=0;
-            %elseif (dr_.nboth | dr_.nfwrd) & abs(egg(nspred+1,j))<=options_.qz_criterium; %1+1.e-5;
-        elseif (nboth | nfwrd) & abs(egg(nspred+1,j))<=options_.qz_criterium; %1+1.e-5;
-            ix(j)=0;
-        end
-    end
-    ix=ix(find(ix));  % stable params
-    
-    % map unstable samples
-    ixx=[1:Nsam];
-    for j=1:Nsam,
-        %if abs(egg(dr_.npred+1,j))>1+1.e-5 & abs(egg(dr_.npred,j))<1-1.e-5;
-        %if (dr_.nboth | dr_.nfwrd),
-        if (nboth | nfwrd),
-            if abs(egg(nspred+1,j))>options_.qz_criterium & abs(egg(nspred,j))<options_.qz_criterium; %(1-(options_.qz_criterium-1));
-                ixx(j)=0;
-            end
+%     % map stable samples
+%     istable=[1:Nsam];
+%     for j=1:Nsam,
+%         if any(isnan(egg(1:nspred,j)))
+%             istable(j)=0;
+%         else
+%             if abs(egg(nspred,j))>=options_.qz_criterium; %(1-(options_.qz_criterium-1)); %1-1.e-5;
+%                 istable(j)=0;
+%                 %elseif (dr_.nboth | dr_.nfwrd) & abs(egg(nspred+1,j))<=options_.qz_criterium; %1+1.e-5;
+%             elseif (nboth | nfwrd) & abs(egg(nspred+1,j))<=options_.qz_criterium; %1+1.e-5;
+%                 istable(j)=0;
+%             end
+%         end
+%     end
+%     istable=istable(find(istable));  % stable params
+%     
+%     % map unstable samples
+%     iunstable=[1:Nsam];
+%     for j=1:Nsam,
+%         %if abs(egg(dr_.npred+1,j))>1+1.e-5 & abs(egg(dr_.npred,j))<1-1.e-5;
+%         %if (dr_.nboth | dr_.nfwrd),
+%         if ~any(isnan(egg(1:5,j)))
+%             if (nboth | nfwrd),
+%                 if abs(egg(nspred+1,j))>options_.qz_criterium & abs(egg(nspred,j))<options_.qz_criterium; %(1-(options_.qz_criterium-1));
+%                     iunstable(j)=0;
+%                 end
+%             else
+%                 if abs(egg(nspred,j))<options_.qz_criterium; %(1-(options_.qz_criterium-1));
+%                     iunstable(j)=0;
+%                 end
+%             end
+%         end
+%     end
+%     iunstable=iunstable(find(iunstable));   % unstable params
+    if pprior,
+        if ~prepSA
+            save([fname_,'_stab'],'lpmat','iunstable','istable','egg','yys','nspred','nboth','nfwrd')
         else
-            if abs(egg(nspred,j))<options_.qz_criterium; %(1-(options_.qz_criterium-1));
-                ixx(j)=0;
-            end
+            save([fname_,'_stab'],'lpmat','iunstable','istable','egg','yys','T','nspred','nboth','nfwrd')
         end
-    end
-    ixx=ixx(find(ixx));   % unstable params
-    save([fname_,'_stab'],'lpmat','ixx','ix','egg','yys')
+        
+    else
+         if ~prepSA
+            save([fname_,'_mc'],'lpmat','lpmat0','iunstable','istable','egg','yys','nspred','nboth','nfwrd')
+        else
+            save([fname_,'_mc'],'lpmat','lpmat0','iunstable','istable','egg','yys','T','nspred','nboth','nfwrd')
+        end
+   end
 else
-    load([fname_,'_stab'])
+    if pprior,
+        load([fname_,'_stab'])
+    else
+        load([fname_,'_mc'])
+    end
     Nsam = size(lpmat,1);    
 end
 
-delete([fname_,'_stab_*.*']);
-delete([fname_,'_stab_SA_*.*']);
-delete([fname_,'_stab_corr_*.*']);
-delete([fname_,'_unstab_corr_*.*']);
-
-if length(ixx)>0 & length(ixx)<Nsam,
-% Blanchard Kahn
-for i=1:ceil(estim_params_.np/12),
-    figure,
-    for j=1+12*(i-1):min(estim_params_.np,12*i),
-        subplot(3,4,j-12*(i-1))
-        optimal_bandwidth = mh_optimal_bandwidth(lpmat(ix,j),length(ix),bandwidth,kernel_function); 
-        [x1,f1] = kernel_density_estimate(lpmat(ix,j),number_of_grid_points,...
-            optimal_bandwidth,kernel_function);
-        plot(x1, f1,':k','linewidth',2)
-        optimal_bandwidth = mh_optimal_bandwidth(lpmat(ixx,j),length(ixx),bandwidth,kernel_function); 
-        [x1,f1] = kernel_density_estimate(lpmat(ixx,j),number_of_grid_points,...
-            optimal_bandwidth,kernel_function);
-        hold on, plot(x1, f1,'k','linewidth',2)
-
-        %hist(lpmat(ix,j),30)
-        title(bayestopt_.name{j+nshock})
-    end
-    saveas(gcf,[fname_,'_stab_',int2str(i)])
-end
-
-% Smirnov test for Blanchard; 
-for i=1:ceil(estim_params_.np/12),
-    figure,
-    for j=1+12*(i-1):min(estim_params_.np,12*i),
-        subplot(3,4,j-12*(i-1))
-        if ~isempty(ix),
-            h=cumplot(lpmat(ix,j));
-            set(h,'color',[0 0 0], 'linestyle',':')
+if prepSA & ~exist('T'),
+    h = waitbar(0,'Please wait...');
+    options_.periods=0;
+    options_.nomoments=1;
+    options_.irf=0;
+    options_.noprint=1;
+    stoch_simul([]);
+    T=zeros(size(dr_.ghx,1),size(dr_.ghx,2)+size(dr_.ghu,2),length(istable));
+    
+    for j=1:length(istable),
+        M_.params(estim_params_.param_vals(:,1)) = lpmat(istable(j),:)';
+        stoch_simul([]);
+        dr_ = oo_.dr;
+        T(:,:,j) = [dr_.ghx dr_.ghu];
+        if ~exist('nspred')
+            nspred = size(dr_.ghx,2);
+            nboth = dr_.nboth;
+            nfwrd = dr_.nfwrd;
         end
-        hold on,
-        if ~isempty(ixx),
-             h=cumplot(lpmat(ixx,j));
-             set(h,'color',[0 0 0])
-        end
-%         if exist('kstest2')==2 & length(ixx)>0 & length(ixx)<Nsam,
-%             [H,P,KSSTAT] = kstest2(lpmat(ix,j),lpmat(ixx,j));
-%             title([bayestopt_.name{j+nshock},'. K-S prob ', num2str(P)])
-%         else
-            [H,P,KSSTAT] = smirnov(lpmat(ix,j),lpmat(ixx,j));
-            title([bayestopt_.name{j+nshock},'. K-S prob ', num2str(P)])
-%         end
+        ys_=real(dr_.ys);
+        yys(:,j) = ys_;
+        ys_=yys(:,1);
+        waitbar(j/Nsam,h,['MC iteration ',int2str(j),'/',int2str(Nsam)])
     end
-    saveas(gcf,[fname_,'_stab_SA_',int2str(i)])
-end
-
-
-disp(' ')
-disp(' ')
-disp('Starting bivariate analysis:')
-
-c0=corrcoef(lpmat(ix,:));
-c00=tril(c0,-1);
-
-stab_map_2(lpmat(ix,:),alpha2, 1);
-stab_map_2(lpmat(ixx,:),alpha2, 0);
-
-else
-    if length(ixx)==0,
-        disp('All parameter values in the prior ranges are stable!')
+    close(h)
+    if pprior
+        save([fname_,'_stab'],'T','-append')    
     else
-        disp('All parameter values in the prior ranges are unstable!')        
+        save([fname_,'_mc'],'T','-append')    
     end
-
 end
 
+if pprior
+    aname='stab';
+    auname='unstable';
+    asname='stable';
+else
+    aname='mc_stab';
+    auname='mc_unstable';
+    asname='mc_stable';
+end
+delete([fname_,'_',aname,'_*.*']);
+delete([fname_,'_',aname,'_SA_*.*']);
+delete([fname_,'_',asname,'_corr_*.*']);
+delete([fname_,'_',auname,'_corr_*.*']);
 
-% % optional map cyclicity of dominant eigenvalues, if
-% thex=[];
-% for j=1:Nsam,
-%     %cyc(j)=max(abs(imag(egg(1:34,j))));
-%     ic = find(imag(egg(1:nspred,j)));
-%     i=find( abs(egg( ic ,j) )>0.9); %only consider complex dominant eigenvalues 
-%     if ~isempty(i),
-%         i=i(1:2:end);
-%         thedum=[];
-%         for ii=1:length(i),
-%             idum = ic( i(ii) );
-%             thedum(ii)=abs(angle(egg(idum,j)));
-%         end
-%         [dum, icx]=max(thedum);
-%         icy(j) = ic( i(icx) );
-%         thet(j)=max(thedum);
-%         if thet(j)<0.05 & find(ix==j),  % keep stable runs with freq smaller than 0.05 
-%             thex=[thex; j];
-%         end
-%     else
-%         if find(ix==j),
-%             thex=[thex; j];
-%         end
-%     end
-% end
-% % cyclicity
-% for i=1:ceil(estim_params_.np/12),
-%     figure,
-%     for j=1+12*(i-1):min(estim_params_.np,12*i),
-%         subplot(3,4,j-12*(i-1))
-%         hist(lpmat(thex,j),30)
-%         title(bayestopt_.name{j+nshock})
-%     end
-% end
-% 
-% % TFP STEP & Blanchard; & cyclicity
-% for i=1:ceil(estim_params_.np/12),
-%     figure,
-%     for j=1+12*(i-1):min(estim_params_.np,12*i),
-%         [H,P,KSSTAT] = kstest2(lpmat(1:Nsam,j),lpmat(ixx,j));
-%         subplot(3,4,j-12*(i-1))
-%         cdfplot(lpmat(1:Nsam,j))
-%         hold on,
-%         cdfplot(lpmat(ixx,j))
-%         title([bayestopt_.name{j+nshock},'. K-S prob ', num2str(P)])
-%     end
-% end
-
-x0=0.5.*(bayestopt_.ub(1:nshock)-bayestopt_.lb(1:nshock))+bayestopt_.lb(1:nshock);
-x0 = [x0; lpmat(ix(1),:)'];
+if length(iunstable)>0 & length(iunstable)<Nsam,
+    disp([num2str(length(istable)/Nsam*100),'\% of the prior support is stable.'])
+    % Blanchard Kahn
+    proba = stab_map_1(lpmat, istable, iunstable, aname);
+    disp(' ')
+    disp(' ')
+    disp('Starting bivariate analysis:')
+    
+    c0=corrcoef(lpmat(istable,:));
+    c00=tril(c0,-1);
+    
+    stab_map_2(lpmat(istable,:),alpha2, asname);
+    stab_map_2(lpmat(iunstable,:),alpha2, auname);
+    
+    x0=0.5.*(bayestopt_.ub(1:nshock)-bayestopt_.lb(1:nshock))+bayestopt_.lb(1:nshock);
+    x0 = [x0; lpmat(istable(1),:)'];
+    if istable(end)~=Nsam
+        M_.params(estim_params_.param_vals(:,1)) = lpmat(istable(1),:)';
+        stoch_simul([]);        
+    end
+else
+    if length(iunstable)==0,
+        disp('All parameter values in the specified ranges are stable!')
+        x0=0.5.*(bayestopt_.ub(1:nshock)-bayestopt_.lb(1:nshock))+bayestopt_.lb(1:nshock);
+        x0 = [x0; lpmat(istable(1),:)'];
+    else
+        disp('All parameter values in the specified ranges are unstable!')        
+        x0=[];
+    end
+    
+end

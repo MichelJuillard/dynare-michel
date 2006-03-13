@@ -34,11 +34,13 @@ icount=0;
 nx=length(x);
 xparam1=x;
 %ftol0=1.e-6;
+htol_base = max(1.e-5, ftol0);
 flagit=0;  % mode of computation of hessian in each iteration
 ftol=ftol0;
 gtol=1.e-3;
-htol=ftol0;
-htol0=ftol0;
+htol=htol_base;
+htol0=htol_base;
+gibbstol=length(bayestopt_.pshape)/12;
 
 func_hh = [func0,'_hh'];
 func = str2func(func0);
@@ -56,7 +58,7 @@ if isempty(hh)
     end
     if htol0>htol,
         htol=htol0;
-        ftol=htol0;
+        %ftol=htol0;
     end
 else
     hh0=hh;
@@ -85,18 +87,18 @@ while norm(gg)>gtol & check==0 & jit<nit,
     disp(['Iteration ',num2str(icount)])
     [fval x0 fc retcode] = csminit(func0,xparam1,fval0(icount),gg,0,igg,varargin{:});
     if igrad,
-        [fval1 x01 fc retcode1] = csminit(func0,xparam1,fval0(icount),gg,0,inx,varargin{:});
-        if fval1<fval,
-            fval=fval1;
-            x0=x01;        
+        [fval1 x01 fc retcode1] = csminit(func0,x0,fval,gg,0,inx,varargin{:});
+        if (fval-fval1)>1, %(fval0(icount)-fval),
             disp('Gradient step!!')
         else
             igrad=0;
         end
+        fval=fval1;
+        x0=x01;        
     end
     if (fval0(icount)-fval)<1.e-2*(gg'*(igg*gg))/2 & igibbs,
         [fvala, x0] = mr_gstep(func0,x0,htol,varargin{:});
-         if (fval-fvala)<5*(fval0(icount)-fval),
+         if (fval-fvala)<gibbstol*(fval0(icount)-fval),
              igibbs=0;
              disp('Last Gibbs step, gain too small!!')
          else
@@ -107,29 +109,23 @@ while norm(gg)>gtol & check==0 & jit<nit,
     if (fval0(icount)-fval)<ftol & flagit==0,
         disp('Try diagonal Hessian')
         ihh=diag(1./(diag(hhg)));        
-        [fval2 x02 fc retcode2] = csminit(func2str(func),xparam1,fval0(icount),gg,0,ihh,varargin{:});
-        if fval2<fval,
-            x0=x02;
-            fval=fval2;
-            if (fval0(icount)-fval2)>=ftol ,
+        [fval2 x0 fc retcode2] = csminit(func2str(func),x0,fval,gg,0,ihh,varargin{:});
+            if (fval-fval2)>=ftol ,
                 %hh=diag(diag(hh));
                 disp('Diagonal Hessian successful')            
             end
-        end
+        fval=fval2;
     end        
     if (fval0(icount)-fval)<ftol & flagit==0,
         disp('Try gradient direction')
         ihh0=inx.*1.e-4;        
-        [fval3 x03 fc retcode3] = csminit(func2str(func),xparam1,fval0(icount),gg,0,ihh0,varargin{:});
-        if fval3<fval,
-            x0=x03;
-            fval=fval3;
-            if (fval0(icount)-fval3)>=ftol ,
+        [fval3 x0 fc retcode3] = csminit(func2str(func),x0,fval,gg,0,ihh0,varargin{:});
+            if (fval-fval3)>=ftol ,
                 %hh=hh0;
                 %ihh=ihh0;
                 disp('Gradient direction successful')            
             end
-        end
+            fval=fval3;
     end        
     xparam1=x0;
     x(:,icount+1)=xparam1;
@@ -172,21 +168,21 @@ while norm(gg)>gtol & check==0 & jit<nit,
         disp(['Htol          ',num2str(htol0)])
 
         if df<htol0,
-            htol=max(ftol0,df/10);
+            htol=max(htol_base,df/10);
         end
         
         if norm(x(:,icount)-xparam1)>1.e-12,
             save m1 x fval0 -append
             [dum, gg, htol0, igg, hhg]=mr_hessian(func_hh,xparam1,flagit,htol,varargin{:});
-            if htol0>ftol,
-                ftol=htol0;
+            if htol0>htol, %ftol,
+                %ftol=htol0;
                 htol=htol0;
                 disp(' ')
                 disp('Numerical noise in the likelihood')
                 disp('Tolerance has to be relaxed')
                 disp(' ')
-            elseif htol0<ftol,
-                ftol=max(htol0, ftol0);
+%             elseif htol0<ftol,
+%                 ftol=max(htol0, ftol0);
             end
             hh0 = reshape(dum,nx,nx);
             hh=hhg;

@@ -3,6 +3,9 @@ function dynare_estimation(var_list_)
 global M_ options_ oo_ estim_params_ 
 global bayestopt_
 
+% temporary fix until M_.H is initialized by the parser
+M_.H = [];
+
 options_.varlist = var_list_;
 options_.lgyidx2varobs = zeros(size(M_.endo_names,1),1);
 for i = 1:size(M_.endo_names,1)
@@ -58,6 +61,7 @@ options_ = set_default_option(options_,'MaxNumberOfBytes',1e6);
 options_ = set_default_option(options_,'xls_sheet','');
 options_ = set_default_option(options_,'xls_range','');
 options_ = set_default_option(options_,'filter_step_ahead',0);
+options_ = set_default_option(options_,'diffuse_d',[]);
 if options_.filtered_vars ~= 0 & options_filter_step_ahead == 0
   options_.filter_step_ahead = 1;
 end
@@ -256,9 +260,29 @@ if options_.mode_compute > 0 & options_.posterior_mode_estimation
     disp(sprintf('Objective function at mode: %f',fval))
     disp(sprintf('Objective function at mode: %f',DsgeLikelihood(xparam1,gend,data)))
   elseif options_.mode_compute == 5
-    flag = 0;
-    [xparam1, hh, gg, fval] = newrat('DsgeLikelihood',xparam1,[],[],flag,gend,data);
-    eval(['save ' M_.fname '_mode xparam1 hh gg fval;']);
+      if isfield(options_,'hess')
+          flag = options_.hess;
+      else
+          flag = 1;
+      end
+      if ~exist('igg'),  % by M. Ratto
+          hh=[];
+          gg=[];
+          igg=[];
+      end   % by M. Ratto
+      if isfield(options_,'ftol')
+          crit = options_.ftol;
+      else
+          crit = 1.e-7;
+      end
+      if isfield(options_,'nit')
+          nit = options_.nit;
+      else
+          nit=1000;
+      end
+    %[xparam1, hh, gg, fval] = newrat('DsgeLikelihood',xparam1,[],[],flag,gend,data);
+    [xparam1, hh, gg, fval, invhess] = newrat('DsgeLikelihood',xparam1,hh,gg,igg,crit,nit,flag,gend,data);
+    eval(['save ' M_.fname '_mode xparam1 hh gg fval invhess;']);
   end
   if options_.mode_compute ~= 5
     hh = reshape(hessian('DsgeLikelihood',xparam1,gend,data),nx,nx);
@@ -665,9 +689,8 @@ if (any(bayestopt_.pshape  >0 ) & options_.mh_replic) | ...
   %% 
   GetPosteriorParametersStatistics;
   PlotPosteriorDistributions;
-  metropolis_draw(1);% Initialization.
   if options_.bayesian_irf
-    PosteriorIRF('posterior');
+    PosteriorIRF;
   end  
   return
   
