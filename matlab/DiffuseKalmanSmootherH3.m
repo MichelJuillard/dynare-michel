@@ -102,9 +102,9 @@ while newRank & t < smpl
 	  options_.diffuse_d = icc;
 	end                    
       end,
-      if newRank==0, 
-	options_.diffuse_d=i;
-      end                    
+%       if newRank==0, 
+% 	options_.diffuse_d=i;   % this line is buggy!
+%       end                    
       % end new terminiation criteria by M. Ratto
     else 
       %% Note that : (1) rank(Pinf)=0 implies that Finf = 0, (2) outside this loop (when for some i and t the condition
