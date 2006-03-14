@@ -1,6 +1,6 @@
-function x0 = stab_map_(Nsam, fload, alpha2, alpha, prepSA, pprior)
+function x0 = stab_map_(Nsam, fload, alpha2, prepSA, pprior)
 %
-% function x0 = stab_map_(Nsam, fload, alpha2, alpha, prepSA, pprior)
+% function x0 = stab_map_(Nsam, fload, alpha2, prepSA, pprior)
 %
 % Mapping of stability regions in the prior ranges applying
 % Monte Carlo filtering techniques.
@@ -13,8 +13,6 @@ function x0 = stab_map_(Nsam, fload, alpha2, alpha, prepSA, pprior)
 % fload = 0 to run new MC; 1 to load prevoiusly generated analysis
 % alpha2 =  significance level for bivariate sensitivity analysis
 % [abs(corrcoef) > alpha2]
-% alpha =  significance level for univariate sensitivity analysis 
-%  (uses smirnov)
 % prepSA = 1: save transition matrices for mapping reduced form
 %        = 0: no transition matrix saved (default)
 % pprior = 1: sample from prior ranges (default): sample saved in
@@ -31,7 +29,7 @@ function x0 = stab_map_(Nsam, fload, alpha2, alpha, prepSA, pprior)
 %   - stable subset (dotted lines) 
 %   - unstable subset (solid lines)
 % 3) Bivariate plots of significant correlation patterns 
-%  ( abs(corrcoef) > alpha2) under the stable subset
+%  ( abs(corrcoef) > alpha2) under the stable and unstable subsets
 %
 % USES lptauSEQ, 
 %      stab_map_1, stab_map_2
@@ -77,13 +75,10 @@ end
 if nargin<3,
     alpha2=0.3;
 end
-if nargin<4 | isempty(alpha),
-    alpha=0.002;
-end
-if nargin<5,
+if nargin<4,
     prepSA=0;
 end
-if nargin<6,
+if nargin<5,
     pprior=1;
 end
 
