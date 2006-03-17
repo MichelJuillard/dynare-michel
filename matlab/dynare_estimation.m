@@ -689,8 +689,9 @@ if (any(bayestopt_.pshape  >0 ) & options_.mh_replic) | ...
   %% 
   GetPosteriorParametersStatistics;
   PlotPosteriorDistributions;
+  metropolis_draw(1);
   if options_.bayesian_irf
-    PosteriorIRF;
+    PosteriorIRF('posterior');
   end  
   return
   

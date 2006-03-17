@@ -21,12 +21,12 @@ MAX_nirfs = ceil(options_.MaxNumberOfBytes/(options_.irf*length(oo_.steady_state
 
 if strcmpi(type,'posterior')
   load([ MhDirectoryName '/'  M_.fname '_mh_history'])
-    TotalNumberOfMhDraws = sum(record.MhDraws(:,1));
-    NumberOfDraws = TotalNumberOfMhDraws-floor(options_.mh_drop*TotalNumberOfMhDraws);
+  TotalNumberOfMhDraws = sum(record.MhDraws(:,1));
+  NumberOfDraws = TotalNumberOfMhDraws-floor(options_.mh_drop*TotalNumberOfMhDraws);
 else% type = 'prior'
   NumberOfDraws = 500;
 end
-B = min([round(.5*NumberOfDraws),500]);
+B = min([round(.5*NumberOfDraws),500]); options_.B = B;
 try delete([MhDirectoryName '/' M_.fname '_IRFs*']);
 catch disp('No _IRFs files to be deleted!')
 end
@@ -75,41 +75,7 @@ end
 ifil = ifil-1;
 close(h);
 
-%% Now I reshape the _irf files...
-IRFfiles = dir([MhDirectoryName '/' M_.fname '_irf*']);
-NumberOfIRFfiles = length(IRFfiles);
-if NumberOfIRFfiles>1
-  NumberOfPeriodsPerIRFfiles = ceil(options_.irf/NumberOfIRFfiles);
-  reste = options_.irf-NumberOfPeriodsPerIRFfiles*(NumberOfIRFfiles-1);
-  idx = 0;
-  jdx = 0;
-  for f1=1:NumberOfIRFfiles-1
-    STOCK_IRF = zeros(NumberOfPeriodsPerIRFfiles,M_.endo_nbr,M_.exo_nbr,B);
-    for f2 = 1:NumberOfIRFfiles
-      load([MhDirectoryName '/' M_.fname '_irf' int2str(f2)]);
-      STOCK_IRF(:,:,:,idx+1:idx+size(stock_irf,4)) = stock_irf(jdx+1:jdx+NumberOfPeriodsPerIRFfiles,:,:,:);
-      idx = idx+size(stock_irf,4);
-    end
-    save([MhDirectoryName '/' M_.fname '_IRFs' int2str(f1)],'STOCK_IRF');
-    jdx = jdx + NumberOfPeriodsPerIRFfiles;
-    idx = 0;
-  end
-  STOCK_IRF = zeros(reste,M_.endo_nbr,M_.exo_nbr,B);
-  for f2 = 1:NumberOfIRFfiles
-    load([MhDirectoryName '/' M_.fname '_irf' int2str(f2)]);
-    STOCK_IRF(:,:,:,idx+1:idx+size(stock_irf,4)) = stock_irf(jdx+1:jdx+reste,:,:,:);
-    idx = idx+size(stock_irf,4);
-  end
-  save([MhDirectoryName '/' M_.fname '_IRFs' int2str(NumberOfIRFfiles)],'STOCK_IRF');
-else
-  load([MhDirectoryName '/' M_.fname '_irf1']);
-  STOCK_IRF = stock_irf;
-  save([MhDirectoryName '/' M_.fname '_IRFs' int2str(1)],'STOCK_IRF');  
-end
-for file = 1:NumberOfIRFfiles
-  delete([MhDirectoryName '/' M_.fname '_irf' int2str(file) '.mat'])
-end
-%% ... Done!
+ReshapeMatFiles('irf')
 
 varlist = options_.varlist;
 if isempty(varlist)

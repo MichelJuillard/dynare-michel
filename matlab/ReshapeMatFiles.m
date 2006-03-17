@@ -40,29 +40,29 @@ function ReshapeMatFiles(type)
     TYPEsize = [ M_.endo_nbr , options_.forecast ];
     TYPEarray = 3;
    otherwise
-    disp('ReshapeMatFiles :: Unknown format!')
+    disp('ReshapeMatFiles :: Unknown argument!')
     return
   end
   
   TYPEfiles = dir([MhDirectoryName M_.fname '_' type '*']);
   NumberOfTYPEfiles = length(TYPEfiles);
+  B = options_.B;
   
   switch TYPEarray
    case 4
-    if NumberOfTYPEfiles>1
+    if NumberOfTYPEfiles > 1
       NumberOfPeriodsPerTYPEfiles = ceil(TYPEsize(1)/NumberOfTYPEfiles);
       reste = TYPEsize(1)-NumberOfPeriodsPerTYPEfiles*(NumberOfTYPEfiles-1);
       idx = 0;
       jdx = 0;
       for f1=1:NumberOfTYPEfiles-1
         eval(['STOCK_' CAPtype ' = zeros(NumberOfPeriodsPerTYPEfiles,TYPEsize(2),TYPEsize(3),B);'])
-        for f2 = 1:NumberOfIRFfiles
+        for f2 = 1:NumberOfTYPEfiles
           load([MhDirectoryName M_.fname '_' type int2str(f2)]);
-          eval(['STOCK_' CAPtype '(:,:,:,idx+1:idx+size(stock_ ' type ',4))=stock_' type ...
-                '(jdx+1:jdx+NumberOfPeriodsPerTYPEfiles,:,:,:);'])
+          eval(['STOCK_' CAPtype '(:,:,:,idx+1:idx+size(stock_' type ',4))=stock_' type '(jdx+1:jdx+NumberOfPeriodsPerTYPEfiles,:,:,:);'])
           eval(['idx = idx + size(stock_' type ',4);'])          
         end
-        eval(['STOCK_' CAPtype ' = sort(STOCK_ ' CAPtype ',4);'])
+        eval(['STOCK_' CAPtype ' = sort(STOCK_' CAPtype ',4);'])
         save([MhDirectoryName M_.fname '_' CAPtype 's' int2str(f1)],['STOCK_' CAPtype]);
         jdx = jdx + NumberOfPeriodsPerTYPEfiles;
         idx = 0;
@@ -70,17 +70,17 @@ function ReshapeMatFiles(type)
       eval(['STOCK_' CAPtype ' = zeros(reste,TYPEsize(2),TYPEsize(3),B);'])
       for f2 = 1:NumberOfTYPEfiles
         load([MhDirectoryName M_.fname '_' type int2str(f2)]);
-        eval(['STOCK_' CAPtype '(:,:,:,idx+1:idx+size(stock_ ' type ',4))=stock_' type '(jdx+1:jdx+reste,:,:,:);'])
+        eval(['STOCK_' CAPtype '(:,:,:,idx+1:idx+size(stock_' type ',4))=stock_' type '(jdx+1:jdx+reste,:,:,:);'])
         eval(['idx = idx + size(stock_' type ',4);'])
       end
-      eval(['STOCK_' CAPtype ' = sort(STOCK_ ' CAPtype ',4);'])
+      eval(['STOCK_' CAPtype ' = sort(STOCK_' CAPtype ',4);'])
       save([MhDirectoryName M_.fname '_' CAPtype 's' int2str(NumberOfTYPEfiles)],['STOCK_' CAPtype]);      
     else
       load([MhDirectoryName M_.fname '_' type '1']);
       eval(['STOCK_' CAPtype ' = sort(stock_' type ',4);'])
       save([MhDirectoryName M_.fname '_' CAPtype 's' int2str(1)],['STOCK_' CAPtype ]);
     end
-    for file = 1:NumberOfIRFfiles
+    for file = 1:NumberOfTYPEfiles
       delete([MhDirectoryName M_.fname '_' type int2str(file) '.mat'])
     end
    case 3
@@ -89,14 +89,14 @@ function ReshapeMatFiles(type)
       reste = TYPEsize(2)-NumberOfPeriodsPerTYPEfiles*(NumberOfTYPEfiles-1);
       idx = 0;
       jdx = 0;
-      for f1=1:NumberOfIRFfiles-1
+      for f1=1:NumberOfTYPEfiles-1
         eval(['STOCK_' CAPtype ' = zeros(TYPEsize(1),NumberOfPeriodsPerTYPEfiles,B);'])
-        for f2 = 1:NumberOfIRFfiles
+        for f2 = 1:NumberOfTYPEfiles
           load([MhDirectoryName M_.fname '_' type int2str(f2)]);
           eval(['STOCK_' CAPtype '(:,:,idx+1:idx+size(stock_ ' type ',3))=stock_' type '(:,jdx+1:jdx+NumberOfPeriodsPerTYPEfiles,:);'])
           eval(['idx = idx + size(stock_' type ',3);'])
         end
-        eval(['STOCK_' CAPtype ' = sort(STOCK_ ' CAPtype ',3);'])
+        eval(['STOCK_' CAPtype ' = sort(STOCK_' CAPtype ',3);'])
         save([MhDirectoryName M_.fname '_' CAPtype 's' int2str(f1)],['STOCK_' CAPtype]);
         jdx = jdx + NumberOfPeriodsPerTYPEfiles;
         idx = 0;
@@ -104,10 +104,10 @@ function ReshapeMatFiles(type)
       eval(['STOCK_' CAPtype ' = zeros(TYPEsize(1),reste,B);'])
       for f2 = 1:NumberOfTYPEfiles
         load([MhDirectoryName M_.fname '_' type int2str(f2)]);
-        eval(['STOCK_' CAPtype '(:,:,idx+1:idx+size(stock_ ' type ',3))=stock_' type '(:,jdx+1:jdx+reste,:);'])
+        eval(['STOCK_' CAPtype '(:,:,idx+1:idx+size(stock_' type ',3))=stock_' type '(:,jdx+1:jdx+reste,:);'])
         eval(['idx = idx + size(stock_' type ',3);'])
       end
-      eval(['STOCK_' CAPtype ' = sort(STOCK_ ' CAPtype ',3);'])
+      eval(['STOCK_' CAPtype ' = sort(STOCK_' CAPtype ',3);'])
       save([MhDirectoryName M_.fname '_' CAPtype 's' int2str(NumberOfTYPEfiles)],['STOCK_' CAPtype]);
     else
       load([MhDirectoryName M_.fname '_' type '1']);
@@ -115,6 +115,6 @@ function ReshapeMatFiles(type)
       save([MhDirectoryName M_.fname '_' CAPtype 's' int2str(1)],['STOCK_' CAPtype ]);      
     end
     for file = 1:NumberOfTYPEfiles
-      delete([MhDirectoryName M_.fname '_' type ' int2str(file) '.mat'])
+      delete([MhDirectoryName M_.fname '_' type  int2str(file) '.mat'])
     end
   end
