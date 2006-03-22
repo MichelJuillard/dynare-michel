@@ -98,6 +98,10 @@ if fload==0 | nargin<2 | isempty(fload),
     end
     
     if pprior,
+        for j=1:nshock,
+            lpmat0(:,j) = randperm(Nsam)'./(Nsam+1); %latin hypercube
+            lpmat0(:,j)=lpmat0(:,j).*(bayestopt_.ub(j)-bayestopt_.lb(j))+bayestopt_.lb(j);
+        end
         for j=1:estim_params_.np,
             if estim_params_.np>30 & estim_params_.np<52 
                 lpmat(:,j)=lpmat(randperm(Nsam),j).*(bayestopt_.ub(j+nshock)-bayestopt_.lb(j+nshock))+bayestopt_.lb(j+nshock);
@@ -106,40 +110,47 @@ if fload==0 | nargin<2 | isempty(fload),
             end
         end
     else
-        for j=1:nshock,
-            xparam1(j) = oo_.posterior_mode.shocks_std.(bayestopt_.name{j});
-            sd(j) = oo_.posterior_std.shocks_std.(bayestopt_.name{j});
-            lpmat0(:,j) = randperm(Nsam)'./(Nsam+1); %latin hypercube
-            lb = max(bayestopt_.lb(j), xparam1(j)-2*sd(j));
-            ub1=xparam1(j)+(xparam1(j) - lb); % define symmetric range around the mode!
-            ub = min(bayestopt_.ub(j),ub1);
-            if ub<ub1,
-                lb=xparam1(j)-(ub-xparam1(j)); % define symmetric range around the mode!
-            end
-            lpmat0(:,j) = lpmat0(:,j).*(ub-lb)+lb;
-        end
-        % 
-        for j=1:estim_params_.np,
-            xparam1(j+nshock) = oo_.posterior_mode.parameters.(bayestopt_.name{j+nshock});
-            sd(j+nshock) = oo_.posterior_std.parameters.(bayestopt_.name{j+nshock});
-            lb = max(bayestopt_.lb(j+nshock),xparam1(j+nshock)-2*sd(j+nshock));
-            ub1=xparam1(j+nshock)+(xparam1(j+nshock) - lb); % define symmetric range around the mode!
-            ub = min(bayestopt_.ub(j+nshock),ub1);
-            if ub<ub1,
-                lb=xparam1(j+nshock)-(ub-xparam1(j+nshock)); % define symmetric range around the mode!
-            end
-            %ub = min(bayestopt_.ub(j+nshock),xparam1(j+nshock)+2*sd(j+nshock));
-            if estim_params_.np>30 & estim_params_.np<52
-                lpmat(:,j) = lpmat(randperm(Nsam),j).*(ub-lb)+lb;
-            else
-                lpmat(:,j) = lpmat(:,j).*(ub-lb)+lb;
-            end
-        end
+%         for j=1:nshock,
+%             xparam1(j) = oo_.posterior_mode.shocks_std.(bayestopt_.name{j});
+%             sd(j) = oo_.posterior_std.shocks_std.(bayestopt_.name{j});
+%             lpmat0(:,j) = randperm(Nsam)'./(Nsam+1); %latin hypercube
+%             lb = max(bayestopt_.lb(j), xparam1(j)-2*sd(j));
+%             ub1=xparam1(j)+(xparam1(j) - lb); % define symmetric range around the mode!
+%             ub = min(bayestopt_.ub(j),ub1);
+%             if ub<ub1,
+%                 lb=xparam1(j)-(ub-xparam1(j)); % define symmetric range around the mode!
+%             end
+%             lpmat0(:,j) = lpmat0(:,j).*(ub-lb)+lb;
+%         end
+%         % 
+%         for j=1:estim_params_.np,
+%             xparam1(j+nshock) = oo_.posterior_mode.parameters.(bayestopt_.name{j+nshock});
+%             sd(j+nshock) = oo_.posterior_std.parameters.(bayestopt_.name{j+nshock});
+%             lb = max(bayestopt_.lb(j+nshock),xparam1(j+nshock)-2*sd(j+nshock));
+%             ub1=xparam1(j+nshock)+(xparam1(j+nshock) - lb); % define symmetric range around the mode!
+%             ub = min(bayestopt_.ub(j+nshock),ub1);
+%             if ub<ub1,
+%                 lb=xparam1(j+nshock)-(ub-xparam1(j+nshock)); % define symmetric range around the mode!
+%             end
+%             %ub = min(bayestopt_.ub(j+nshock),xparam1(j+nshock)+2*sd(j+nshock));
+%             if estim_params_.np>30 & estim_params_.np<52
+%                 lpmat(:,j) = lpmat(randperm(Nsam),j).*(ub-lb)+lb;
+%             else
+%                 lpmat(:,j) = lpmat(:,j).*(ub-lb)+lb;
+%             end
+%         end
+      load([fname_,'_mode'])  
+      d = chol(inv(hh));
+      lp=randn(Nsam,nshock+estim_params_.np)*d+kron(ones(Nsam,1),xparam1');
+      lpmat0=lp(:,1:nshock);
+      lpmat=lp(:,nshock+1:end);
     end
     % 
     h = waitbar(0,'Please wait...');
     istable=[1:Nsam];
     iunstable=[1:Nsam];
+    iindeterm=zeros(1,Nsam);
+    iwrong=zeros(1,Nsam);
     for j=1:Nsam,
         M_.params(estim_params_.param_vals(:,1)) = lpmat(j,:)';
         stoch_simul([]);
@@ -159,8 +170,16 @@ if fload==0 | nargin<2 | isempty(fload),
             istable(j)=0;
             if isfield(dr_,'eigval')
                 egg(:,j) = sort(dr_.eigval);
+                if any(isnan(egg(1:nspred,j)))
+                  iwrong(j)=j;
+                else
+                  if (nboth | nfwrd) & abs(egg(nspred+1,j))<=options_.qz_criterium,
+                    iindeterm(j)=j;
+                  end                                      
+                end  
             else
                 egg(:,j)=ones(size(egg,1),1).*1.1;
+                iwrong(j)=j;
             end
         end
         ys_=real(dr_.ys);
@@ -171,6 +190,8 @@ if fload==0 | nargin<2 | isempty(fload),
     close(h)
     istable=istable(find(istable));  % stable params
     iunstable=iunstable(find(iunstable));   % unstable params
+    iindeterm=iindeterm(find(iindeterm));  % indeterminacy
+    iwrong=iwrong(find(iwrong));  % dynare could not find solution
     
 %     % map stable samples
 %     istable=[1:Nsam];
@@ -208,16 +229,16 @@ if fload==0 | nargin<2 | isempty(fload),
 %     iunstable=iunstable(find(iunstable));   % unstable params
     if pprior,
         if ~prepSA
-            save([fname_,'_stab'],'lpmat','iunstable','istable','egg','yys','nspred','nboth','nfwrd')
+            save([fname_,'_stab'],'lpmat','lpmat0','iunstable','istable','iindeterm','iwrong','egg','yys','nspred','nboth','nfwrd')
         else
-            save([fname_,'_stab'],'lpmat','iunstable','istable','egg','yys','T','nspred','nboth','nfwrd')
+            save([fname_,'_stab'],'lpmat','lpmat0','iunstable','istable','iindeterm','iwrong','egg','yys','T','nspred','nboth','nfwrd')
         end
         
     else
          if ~prepSA
-            save([fname_,'_mc'],'lpmat','lpmat0','iunstable','istable','egg','yys','nspred','nboth','nfwrd')
+            save([fname_,'_mc'],'lpmat','lpmat0','iunstable','istable','iindeterm','iwrong','egg','yys','nspred','nboth','nfwrd')
         else
-            save([fname_,'_mc'],'lpmat','lpmat0','iunstable','istable','egg','yys','T','nspred','nboth','nfwrd')
+            save([fname_,'_mc'],'lpmat','lpmat0','iunstable','istable','iindeterm','iwrong','egg','yys','T','nspred','nboth','nfwrd')
         end
    end
 else
@@ -277,6 +298,12 @@ delete([fname_,'_',auname,'_corr_*.*']);
 
 if length(iunstable)>0 & length(iunstable)<Nsam,
     disp([num2str(length(istable)/Nsam*100),'\% of the prior support is stable.'])
+    if ~isempty(iwrong),
+      disp(['For ',num2str(length(iwrong)/Nsam*100),'\% of the prior support dynare could not find a solution.'])      
+    end
+    if ~isempty(iindeterm),
+      disp([num2str(length(iindeterm)/Nsam*100),'\% of the prior support gives indeterminacy.'])
+    end
     % Blanchard Kahn
     proba = stab_map_1(lpmat, istable, iunstable, aname);
     disp(' ')
