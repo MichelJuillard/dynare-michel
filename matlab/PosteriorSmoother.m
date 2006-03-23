@@ -12,6 +12,10 @@ offset = npar-np;
 naK = length(options_.filter_step_ahead);
 %%
 MaxNumberOfPlotPerFigure = 4;% The square root must be an integer!
+MaxNumberOfBytes=options_.MaxNumberOfBytes;
+endo_nbr=M_.endo_nbr;
+exo_nbr=M_.exo_nbr;
+nvobs     = size(options_.varobs,1);
 nn = sqrt(MaxNumberOfPlotPerFigure);
 %%
 CheckPath('Plots/');
@@ -50,11 +54,18 @@ irun1 = 1;
 irun2 = 1;
 irun3 = 1;
 irun4 = 1;
+irun5 = 1;
 ifil1 = 1;
 ifil2 = 1;
 ifil3 = 1;
 ifil4 = 1;
+ifil5 = 1;
 h = waitbar(0,'Bayesian smoother...');
+if B <= MAX_nruns
+  stock_param = zeros(B, npar);
+else
+  stock_param = zeros(MAX_nruns, npar);
+end
 if options_.smoother
   if B <= MAX_nsmoo
     stock_smooth = zeros(endo_nbr,gend,B);
@@ -79,68 +90,82 @@ if options_.filter_step_ahead ~= 0
     stock_filter = zeros(naK,endo_nbr,gend+1,MAX_naK);
   end
 end
+metropolis_draw(1);
 for b=1:B
-  deep = GetOneDraw(NumberOfDraws,FirstMhFile,LastMhFile,FirstLine,MAX_nruns,DirectoryName);
+  %deep = GetOneDraw(NumberOfDraws,FirstMhFile,LastMhFile,FirstLine,MAX_nruns,DirectoryName);
+  deep = GetOneDraw('posterior');
   set_all_parameters(deep);
   dr = resol(oo_.steady_state,0);
-  [alphahat,etahat,epsilonhat,ahat,SteadyState,trend_coeff,aK] = DsgeSmoother(deep,gend,Y)
+  [alphahat,etahat,epsilonhat,ahat,SteadyState,trend_coeff,aK] = DsgeSmoother(deep,gend,Y);
   
-  stock_smooth(:,:,b) = alphahat;
+  stock_smooth(:,:,irun1) = alphahat;
   if nvx
-    stock_innov(:,:,b)  = etahat;
+    stock_innov(:,:,irun2)  = etahat;
   end
   if nvn
-    stock_error(:,:,b)  = epsilonhat;
+    stock_error(:,:,irun3)  = epsilonhat;
   end
   if naK
-    stock_filter(:,:,:,b) = aK;
+    stock_filter(:,:,:,irun4) = aK;
   end
+  stock_param(irun5,:) = deep;
 
   irun1 = irun1 + 1;
   irun2 = irun2 + 1;
   irun3 = irun3 + 1;
   irun4 = irun4 + 1;
+  irun5 = irun5 + 1;
 
   if irun1 > MAX_nsmoo | b == B
     if b == B
-      stock_smooth = stock_smoo(:,:,1:irun1);
+      stock_smooth = stock_smooth(:,:,1:irun1-1);
     end
     stock = stock_smooth;
-    save([DirectoryName M_.fname '_smooth' int2str(ifil1)],'stock');
+    save([DirectoryName '/' M_.fname '_smooth' int2str(ifil1)],'stock');
     ifil1 = ifil1 + 1;
     irun1 = 1;
   end
   
-  if nvx & (irun2 > MAX_inno | b == B)
+  if nvx & (irun2 > MAX_ninno | b == B)
     if b == B
-      stock_innov = stock_innov(:,:,1:irun2);
+      stock_innov = stock_innov(:,:,1:irun2-1);
     end
-    stock = stock_inno'
-    save([DirectoryName M_.fname '_inno' int2str(ifil2)],'stock');
+    stock = stock_innov;
+    save([DirectoryName '/' M_.fname '_inno' int2str(ifil2)],'stock');
     ifil2 = ifil2 + 1;
     irun2 = 1;
   end
     
   if nvn & (irun3 > MAX_error | b == B)
     if b == B
-      stock_error = stock_error(:,:,1:irun3);
+      stock_error = stock_error(:,:,1:irun3-1);
     end
     stock = stock_error;
-    save([DirectoryName M_.fname '_error' int2str(ifil3)],'stock');
+    save([DirectoryName '/' M_.fname '_error' int2str(ifil3)],'stock');
     ifil3 = ifil3 + 1;
     irun3 = 1;
   end
     
-  if naK & (irun3 > MAX_naK | b == B)
+  if naK & (irun4 > MAX_naK | b == B)
     if b == B
-      stock_filter = stock_filter(:,:,:,1:irun4);
+      stock_filter = stock_filter(:,:,:,1:irun4-1);
     end
     stock = stock_filter;
-    save([DirectoryName M_.fname '_filter' int2str(ifil4)],'stock');
+    save([DirectoryName '/' M_.fname '_filter' int2str(ifil4)],'stock');
     ifil4 = ifil4 + 1;
     irun4 = 1;
   end
     
+  if irun5 > MAX_nruns | b == B
+    if b == B
+      stock_param = stock_param(1:irun5-1,:);
+    end
+    stock = stock_param;
+    save([DirectoryName '/' M_.fname '_param' int2str(ifil5)],'stock');
+    ifil5 = ifil5 + 1;
+    irun5 = 1;
+  end
+
   waitbar(b/B,h);
 end
 close(h)
