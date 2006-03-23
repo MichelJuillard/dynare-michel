@@ -62,7 +62,7 @@ options_ = set_default_option(options_,'xls_sheet','');
 options_ = set_default_option(options_,'xls_range','');
 options_ = set_default_option(options_,'filter_step_ahead',0);
 options_ = set_default_option(options_,'diffuse_d',[]);
-if options_.filtered_vars ~= 0 & options_filter_step_ahead == 0
+if options_.filtered_vars ~= 0 & options_.filter_step_ahead == 0
   options_.filter_step_ahead = 1;
 end
 if options_.filter_step_ahead ~= 0
