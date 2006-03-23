@@ -2,7 +2,7 @@
 %
 function dynare(fname, varargin)
 %	DYNARE ( 'Filename' )
-%	This command runs dyanre with specified model file in argument
+%	This command runs dynare with specified model file in argument
 % 	Filename.
 %	The name of model file begins with an alphabetic character, 
 %	and has a filename extension of .mod or .dyn.

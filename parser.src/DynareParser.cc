@@ -267,6 +267,7 @@ void dynare::parser::finish(void)
     }
   
   *output << "save('" << model_file_name << "_results', 'oo_');\n";
+  *output << "diary off\n";
 	
 }
 void dynare::parser::begin_initval(void)

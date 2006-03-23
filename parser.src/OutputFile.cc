@@ -58,8 +58,9 @@ void OutputFile::Open(string iFileName)
 	mOutputFile << "oo_.exo_simul = [];\n";
 	mOutputFile << "oo_.y_simul = [];\n";
 	mOutputFile << "oo_.dr = struct([]);\n";
-	mOutputFile << "diary off;\nwarning off;\nwarning on;\nwarning backtrace;\n";
+	mOutputFile << "diary off;\nwarning off;\n";
 	mOutputFile << "\ndelete " << iFileName << ".log;\n";
+	mOutputFile << "warning on;\nwarning backtrace;\n";
 	mOutputFile << "logname_ = '" << iFileName << ".log';\n";
 	mOutputFile << "diary '" << iFileName << ".log';\n";
 	if (ModelTree::offset == 0)
