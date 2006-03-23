@@ -90,7 +90,6 @@ if options_.filter_step_ahead ~= 0
     stock_filter = zeros(naK,endo_nbr,gend+1,MAX_naK);
   end
 end
-metropolis_draw(1);
 for b=1:B
   %deep = GetOneDraw(NumberOfDraws,FirstMhFile,LastMhFile,FirstLine,MAX_nruns,DirectoryName);
   deep = GetOneDraw('posterior');
