@@ -16,7 +16,7 @@ function x0 = stab_map_(Nsam, fload, alpha2, prepSA, pprior, ilptau)
 % prepSA = 1: save transition matrices for mapping reduced form
 %        = 0: no transition matrix saved (default)
 % pprior = 1: sample from prior ranges (default): sample saved in
-%            _stab.mat   file
+%            _prior.mat   file
 %        = 0: sample from posterior ranges: sample saved in
 %            _mc.mat file
 % OUTPUT: 
@@ -27,9 +27,9 @@ function x0 = stab_map_(Nsam, fload, alpha2, prepSA, pprior, ilptau)
 %     lines) and unstability (solid lines) regions
 % 2) Cumulative distributions of: 
 %   - stable subset (dotted lines) 
-%   - unstable subset (solid lines)
+%   - unacceptable subset (solid lines)
 % 3) Bivariate plots of significant correlation patterns 
-%  ( abs(corrcoef) > alpha2) under the stable and unstable subsets
+%  ( abs(corrcoef) > alpha2) under the stable and unacceptable subsets
 %
 % USES lptauSEQ, 
 %      stab_map_1, stab_map_2
@@ -234,9 +234,9 @@ if fload==0 | nargin<2 | isempty(fload),
   %     iunstable=iunstable(find(iunstable));   % unstable params
   if pprior,
     if ~prepSA
-      save([fname_,'_stab'],'lpmat','lpmat0','iunstable','istable','iindeterm','iwrong','egg','yys','nspred','nboth','nfwrd')
+      save([fname_,'_prior'],'lpmat','lpmat0','iunstable','istable','iindeterm','iwrong','egg','yys','nspred','nboth','nfwrd')
     else
-      save([fname_,'_stab'],'lpmat','lpmat0','iunstable','istable','iindeterm','iwrong','egg','yys','T','nspred','nboth','nfwrd')
+      save([fname_,'_prior'],'lpmat','lpmat0','iunstable','istable','iindeterm','iwrong','egg','yys','T','nspred','nboth','nfwrd')
     end
     
   else
@@ -248,7 +248,7 @@ if fload==0 | nargin<2 | isempty(fload),
   end
 else
   if pprior,
-    load([fname_,'_stab'])
+    load([fname_,'_prior'])
   else
     load([fname_,'_mc'])
   end
@@ -281,19 +281,19 @@ if prepSA & ~exist('T'),
   end
   close(h)
   if pprior
-    save([fname_,'_stab'],'T','-append')    
+    save([fname_,'_prior'],'T','-append')    
   else
     save([fname_,'_mc'],'T','-append')    
   end
 end
 
 if pprior
-  aname='stab';
-  auname='unstable';
-  asname='stable';
+  aname='prior_stab';
+  auname='prior_unacceptable';
+  asname='prior_stable';
 else
   aname='mc_stab';
-  auname='mc_unstable';
+  auname='mc_unacceptable';
   asname='mc_stable';
 end
 delete([fname_,'_',aname,'_*.*']);
@@ -333,7 +333,7 @@ else
     x0=0.5.*(bayestopt_.ub(1:nshock)-bayestopt_.lb(1:nshock))+bayestopt_.lb(1:nshock);
     x0 = [x0; lpmat(istable(1),:)'];
   else
-    disp('All parameter values in the specified ranges are unstable!')        
+    disp('All parameter values in the specified ranges are not acceptable!')        
     x0=[];
   end
   
