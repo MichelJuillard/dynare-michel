@@ -49,7 +49,7 @@ options_gsa_ = set_default_option(options_gsa_,'alpha2_rmse',0.5);
 options_.opt_gsa = options_gsa_;
 if options_gsa_.rmse,
   if options_gsa_.pprior
-    a=load([fname_,'_stab']);
+    a=load([fname_,'_prior']);
   else
     a=load([fname_,'_mc']);
   end
@@ -65,8 +65,11 @@ end
 options_gsa_ = set_default_option(options_gsa_,'glue',0);
 if options_gsa_.glue,
   dr_ = oo_.dr;
-  load([fname_,'_stab']);
-  load([fname_,'_SA']);
+  if options_gsa_.pprior
+    load([fname_,'_prior']);
+  else
+    load([fname_,'_mc']);
+  end
   nruns=size(x,1);
   gend = options_.nobs;
   rawdata = read_variables(options_.datafile,options_.varobs,[],options_.xls_sheet,options_.xls_range);
