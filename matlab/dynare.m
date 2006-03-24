@@ -15,14 +15,24 @@ end
 % Testing if file have extension
 % If no extension defalut .mod is added
 if isempty(strfind(fname,'.'))
-	fname=[fname '.mod'];
-% Checking file extension
+  fname1 = [fname '.dyn'];
+  d = dir(fname1);
+  if length(d) == 0
+    fname1 = [fname '.mod'];
+  end
+  fname = fname1;
+  % Checking file extension
 else
-	if ~strcmp(upper(fname(size(fname,2)-3:size(fname,2))),'.MOD') ...
-		&& ~strcmp(upper(fname(size(fname,2)-3:size(fname,2))),'.DYN')
-		error ('Argument is a file name with .mod or .dyn extension');
-	end;
+  if ~strcmp(upper(fname(size(fname,2)-3:size(fname,2))),'.MOD') ...
+	&& ~strcmp(upper(fname(size(fname,2)-3:size(fname,2))),'.DYN')
+    error ('Argument is a file name with .mod or .dyn extension');
+  end;
 end;
+d = dir(fname);
+if length(d) == 0
+  disp(['DYNARE: can''t open ' fname])
+  return
+end
 dynareroot = strrep(which('dynare.m'),'dynare.m','');
 command = [dynareroot 'dynare_m ' fname] ;
 for i=2:nargin
