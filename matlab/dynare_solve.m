@@ -75,7 +75,7 @@ function [x,cheik] = dynare_solve(func,x,jacobian_flag,varargin)
 	error(sprintf('Solve block = %d check = %d\n',i,cheik));
       end
     end
-    [x,cheik]=solve1(func,x,1:nn,1:nn,varargin{:});
+    [x,cheik]=solve1(func,x,1:nn,1:nn,jacobian_flag,varargin{:});
       
   end
 %    fvec1 = feval(func,x,varargin{:})
