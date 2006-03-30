@@ -283,7 +283,7 @@ end% of (if options_.load_mh_file == {0,1 or -1})
 InitSizeArray = min([MAX_nruns*ones(nblck) nruns],[],2);
 for b = fblck:nblck
   if (options_.load_mh_file~=0)  & (fline(b)>1) & OpenOldFile(b)
-    load(['./' DirectoryName '/' M_.fname '_mh' int2str(NewFile(b)) ...
+    load(['./' MhDirectoryName '/' M_.fname '_mh' int2str(NewFile(b)) ...
 	  '_blck' int2str(b) '.'])
     x2 = [x2;zeros(InitSizeArray(b)-fline(b)+1,npar)];
     logpo2 = [logpo2;zeros(InitSizeArray(b)-fline(b)+1,1)];
