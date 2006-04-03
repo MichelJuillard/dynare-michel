@@ -240,6 +240,7 @@ int sigma_e = 0;
 	 		_scanner->do_as_is(yytext);
 	 	}
  }
+<DYNARE_BLOCK># {return POUND_SIGN;}
 <INITIAL>. {BEGIN NATIVE; _scanner->do_as_is(yytext);}
 
  /* NATIVE Block */

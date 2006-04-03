@@ -120,6 +120,8 @@ namespace dynare
     void check_model(void);
     /*! Executes final instructions */
     void finish(void);
+    /*! Initializes the model */
+    void initialize_model(void);
     /*! Sets variable offset of ModelTree class to use C output */
     void use_dll(void);
     /*! Adds an endogenous variable to SymbolTable*/
@@ -130,6 +132,8 @@ namespace dynare
     Objects* add_exogenous_det(Objects* name, Objects* tex_name = new Objects("",NULL, eUNDEF));
     /*! Adds a parameter to SymbolTable*/
     Objects* add_parameter(Objects* name, Objects* tex_name = new Objects("",NULL, eUNDEF));
+    Objects* add_local_parameter(Objects* name);
+    Objects* init_local_parameter(Objects*, Objects*);
     /*! Adds a constant to NumericalConstants */
     Objects* add_constant(Objects* obj);
     /*! Adds a constant to ModelTree */

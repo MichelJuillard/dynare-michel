@@ -34,6 +34,8 @@ class ModelParameters
 		static int var_endo_nbr;
 		/*!  Number of parameters */
 		static int parameter_nbr;
+		/*!  Number of local parameters */
+		static int local_parameter_nbr;
 		/*!  Number of lagged variables */
 		static int lagged_nbr;
 		/*!  Number of static variables */

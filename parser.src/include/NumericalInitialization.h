@@ -39,6 +39,7 @@ class NumericalInitialization
 		  - in C++, evaluate expression and set value for Name in Parameters_Table\n
 		 */
 		void SetConstant(std::string name,std::string expression);
+		void SetLocalConstant(std::string name,std::string expression);
 		/*!
 		 \par Description
 		 Initializes an initval block to set initial values for variables 

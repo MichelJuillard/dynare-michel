@@ -20,7 +20,7 @@
 #endif
 %}
 /* %pure_parser */
-
+%token POUND_SIGN
 %token AR AUTOCORR
 %token BAYESIAN_IRF BETA_PDF
 %token CALIB CALIB_VAR CHECK CONF_SIG CORR COVAR
@@ -291,17 +291,21 @@
  	;
 	
  model
- 	: MODEL ';' equation_list END 
+ 	: MODEL {_parser->initialize_model();} ';' equation_list END 
  		{_parser->check_model();}
- 	| MODEL '(' LINEAR ')' ';' {_parser->option_num("linear","1");} equation_list END
- 		{_parser->check_model();}
- 	| MODEL '(' USE_DLL ')' ';' {_parser->use_dll();} equation_list END
- 		{_parser->check_model();}
+ 	| MODEL '(' LINEAR ')' ';' {_parser->option_num("linear","1");
+	  	    	       	   _parser->initialize_model();} 
+		equation_list END {_parser->check_model();}
+ 	| MODEL '(' USE_DLL ')' ';' {_parser->use_dll();
+	  	    	    	    _parser->initialize_model();} 
+		equation_list END {_parser->check_model();}
  	;
 
  equation_list
     : equation_list equation     	
+    | equation_list pound_expression
     | equation
+    | pound_expression
     ;
     
  equation
@@ -356,6 +360,11 @@
     	{$$ = _parser->add_sqrt($3);}
 	;
 	
+ pound_expression: POUND_SIGN NAME 
+                   {$$ = _parser->add_local_parameter($2);}
+		   EQUAL hand_side ';'
+                   {$$ = _parser->init_local_parameter($3,$5);}
+
  model_var
  	: NAME 
  		{$$ = _parser->add_variable($1);}
@@ -774,6 +783,7 @@
                    | o_xls_sheet
                    | o_xls_range
                    | o_filter_step_ahead
+                   | o_solve_algo
                    ;
 	
  list_optim_option

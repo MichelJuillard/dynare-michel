@@ -17,7 +17,7 @@ enum Type
 	eExogenousDet = 2, 		//!< Exogenousous deterministic (new) 
 	eRecursiveVariable = 3,	//!< Recursive variable (reserved for future use) 
 	eParameter = 4,			//!< Parameter 
-	eLocalParameter = 41,           //!< Parameter  local to a model
+	eLocalParameter = 10,           //!< Parameter  local to a model
 	eLoopIndex = 5,			//!< Loop index 
 	eTempResult = 6,		//!< Temporary result, used only in Expression class 
 	eNumericalConstant = 7,	//!< Numerical constant,  used only in Expression class  

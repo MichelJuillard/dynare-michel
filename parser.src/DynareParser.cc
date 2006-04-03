@@ -57,6 +57,13 @@ dynare::Objects* dynare::parser::add_parameter(Objects* obj, Objects* tex_name)
   obj->type = eParameter;
   return (obj);
 }
+dynare::Objects* dynare::parser::add_local_parameter(Objects* obj)
+{
+  obj->ID = (NodeID) symbol_table.AddSymbolDeclar(obj->symbol,eLocalParameter, obj->symbol);
+  obj->type = eLocalParameter;
+  NodeID id = model_tree.AddTerminal(obj->symbol);
+  return new Objects("", id, eTempResult);
+}
 dynare::Objects* dynare::parser::add_constant(Objects* obj)
 {
 	obj->ID = (NodeID) num_constants.AddConstant(obj->symbol);
@@ -133,6 +140,10 @@ dynare::Objects* dynare::parser::translate_symbol(Objects* obj)
 	  {
 	    symbol << "M_.params(" << (int)obj->ID+1 << ")";
 	    obj->symbol = symbol.str();
+	  }
+	else if (obj->type == eLocalParameter)
+	  {
+	    symbol << obj->symbol;
 	  }
 	return obj;
 }
@@ -213,6 +224,9 @@ void dynare::parser::hist_val(Objects* lhs, Objects* slag)
 	numerical_initialization.SetHist(lhs->symbol, lag, expression.get());
 	expression.clear();
 }
+void dynare::parser::initialize_model(void)
+{
+}
 void dynare::parser::use_dll(void)
 {
 	// Seetting variable momber offset to use C outputs
@@ -268,7 +282,8 @@ void dynare::parser::finish(void)
   
   *output << "save('" << model_file_name << "_results', 'oo_');\n";
   *output << "diary off\n";
-	
+
+  symbol_table.erase_local_parameters();
 }
 void dynare::parser::begin_initval(void)
 {
@@ -598,6 +613,12 @@ dynare::Objects*	dynare::parser::add_equal(Objects* arg1,  Objects* arg2)
 {
 	NodeID id = model_tree.AddEqual(arg1->ID, arg2->ID);
 	model_parameters.eq_nbr++;
+	return new Objects("", id, eTempResult);
+}
+		
+dynare::Objects*	dynare::parser::init_local_parameter(Objects* arg1,  Objects* arg2)
+{
+	NodeID id = model_tree.AddEqual(arg1->ID, arg2->ID);
 	return new Objects("", id, eTempResult);
 }
 		

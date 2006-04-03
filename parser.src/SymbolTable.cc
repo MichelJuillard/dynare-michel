@@ -19,8 +19,8 @@ void (* SymbolTable::error) (const char* ) = NULL;
 //------------------------------------------------------------------------------
 SymbolTable::SymbolTable()
 {
-	  name_table.resize(10);
-	  tex_name_table.resize(10);
+	  name_table.resize(20);
+	  tex_name_table.resize(20);
 }
 //------------------------------------------------------------------------------
 SymbolTable::~SymbolTable()
@@ -57,6 +57,10 @@ int SymbolTable::AddSymbol(string name,Type type, string tex_name)
 	symboltable[name].id = ModelParameters::recur_nbr;
 	ModelParameters::recur_nbr++;
 	return  ModelParameters::recur_nbr-1;
+    case eLocalParameter:
+	symboltable[name].id = ModelParameters::local_parameter_nbr;
+	ModelParameters::local_parameter_nbr++;
+	return  ModelParameters::local_parameter_nbr-1;
     default:
   // should never happen
       return -1;
@@ -266,8 +270,18 @@ string SymbolTable::get()
 	output << "M_.param_nbr = " << ModelParameters::parameter_nbr << ";\n";
 	return output.str();
 }
-
-
+//------------------------------------------------------------------------------
+void SymbolTable::erase_local_parameters(void)
+{
+  std::map<std::string, Symbol, std::less<std::string> >::iterator i = symboltable.begin();
+  for(; i != symboltable.end(); ++i)
+    {
+      if ((i->second).type == eLocalParameter)
+	{
+	  symboltable.erase(i);
+	}
+    }
+}
 //------------------------------------------------------------------------------
 /*
 ostream & operator << (ostream & output, Symbol s)

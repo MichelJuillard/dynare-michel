@@ -642,6 +642,9 @@ inline NodeID ModelTree::DeriveArgument(NodeID iArg, Type iType, int iVarID)
 		case eParameter 			: 
 			return Zero; 
 			break;
+		case eLocalParameter 			: 
+			return Zero; 
+			break;
 		case eUNDEF					:
 			return NullID;
 			break;
@@ -690,12 +693,18 @@ string 	ModelTree::setStaticModel(void)
     {
       if ((*tree_it)->op_code == EQUAL)
 	{
-	  if  (lEquationNBR < ModelParameters::eq_nbr) 
+	  if ((*tree_it)->id1->type1 == eLocalParameter)
+	    {
+	      model_output << getExpression((*tree_it)->id1, eStaticEquations, lEquationNBR);
+	      model_output << " = ";
+	      model_output << getExpression((*tree_it)->id2, eStaticEquations, lEquationNBR) << ";" << endl;
+	    }	      
+	  else if  (lEquationNBR < ModelParameters::eq_nbr) 
 	    {
 	      model_output << "lhs =";
-	      model_output << getExpression(((*tree_it)->id1), eStaticEquations, lEquationNBR) << ";" << endl;
+	      model_output << getExpression((*tree_it)->id1, eStaticEquations, lEquationNBR) << ";" << endl;
 	      model_output << "rhs =";
-	      model_output << getExpression(((*tree_it)->id2), eStaticEquations, lEquationNBR) << ";" << endl;
+	      model_output << getExpression((*tree_it)->id2, eStaticEquations, lEquationNBR) << ";" << endl;
 	      model_output << "residual" << lpar << lEquationNBR+1 << rpar << "= lhs-rhs;" << endl;
 	      lEquationNBR++;
 	    }
@@ -830,7 +839,13 @@ string  ModelTree::setDynamicModel(void)
     {
       if ((*tree_it)->op_code == EQUAL)
 	{
-	  if  (lEquationNBR < ModelParameters::eq_nbr) 
+	  if ((*tree_it)->id1->type1 == eLocalParameter)
+	    {
+	      model_output << getExpression((*tree_it)->id1, eStaticEquations, lEquationNBR);
+	      model_output << " = ";
+	      model_output << getExpression((*tree_it)->id2, eStaticEquations, lEquationNBR) << ";" << endl;
+	    }	      
+	  else if  (lEquationNBR < ModelParameters::eq_nbr) 
 	    {
 	      model_output << "lhs =";
 	      model_output << getExpression(((*tree_it)->id1), eDynamicEquations, lEquationNBR) << ";" << endl;
@@ -1245,6 +1260,10 @@ inline string ModelTree::getArgument(NodeID id, Type type, EquationType iEquatio
   if (type == eParameter)
     {
       argument << param_name << lpar << (int)id+offset << rpar;
+    }
+  else if (type == eLocalParameter)
+    {
+      argument << SymbolTable::getNameByID(eLocalParameter,(int)id);
     }
   else if (type == eNumericalConstant)
     {		

@@ -16,6 +16,7 @@ int ModelParameters::exo_det_nbr = 0;
 int ModelParameters::endo_nbr = 0;
 int ModelParameters::var_endo_nbr = 0;
 int ModelParameters::parameter_nbr = 0;
+int ModelParameters::local_parameter_nbr = 0;
 int ModelParameters::lagged_nbr = 0;
 int ModelParameters::static_nbr = 0;
 int ModelParameters::forward_nbr = 0;
