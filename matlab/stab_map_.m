@@ -95,7 +95,7 @@ if fload==0 | nargin<2 | isempty(fload),
     [lpmat] = lptauSEQ(Nsam,estim_params_.np);
     if estim_params_.np>30
       for j=1:estim_params_.np,
-        lpmat(:,j)=lpmat(randperm(Nsam),j).*(bayestopt_.ub(j+nshock)-bayestopt_.lb(j+nshock))+bayestopt_.lb(j+nshock);
+        lpmat(:,j)=lpmat(randperm(Nsam),j);
       end
     end
   else
