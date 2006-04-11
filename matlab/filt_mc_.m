@@ -35,10 +35,14 @@ disp('for the fit of EACH observed series ...')
 disp(' ')
 disp('Deleting old SA figures...')
 a=dir('*.fig');
-if options_.opt_gsa.pprior
+if options_.opt_gsa.ppost,
+  tmp=['_SA_fit_post'];
+else
+  if options_.opt_gsa.pprior
   tmp=['_SA_fit_prior'];
 else
   tmp=['_SA_fit_mc'];
+end
 end
 for j=1:length(a), 
   if strmatch([fname_,tmp],a(j).name), 
@@ -59,24 +63,38 @@ for j=1:npar+nshock,
   end
 end
 
-if options_.opt_gsa.pprior
-  fnamtmp=[fname_,'_prior'];
+if options_.opt_gsa.ppost,
+  fnamtmp=[fname_,'_post'];
+  DirectoryName = CheckPath('metropolis');
 else
-  fnamtmp=[fname_,'_mc'];      
+  if options_.opt_gsa.pprior
+    fnamtmp=[fname_,'_prior'];
+  else
+    fnamtmp=[fname_,'_mc'];      
+  end
 end
-
 if ~loadSA,
   set_all_parameters(xparam1);
   steady_;
   eval(options_.datafile)
-  load(fnamtmp);
+  if ~options_.opt_gsa.ppost
+    load(fnamtmp);
+  else
+    filfilt = dir([DirectoryName '/' M_.fname '_filter*.mat']);
+    filparam = dir([DirectoryName '/' M_.fname '_param*.mat']);
+    x=[];
+    for j=1:length(filparam),
+      load([DirectoryName '/' M_.fname '_param1.mat']);
+      x=[x; stock];  
+      clear stock;
+    end
+  end
   nruns=size(x,1);
   nfilt=floor(pfilt*nruns);
   disp(' ')
   disp('Computing RMSE''s...')
   fobs = options_.first_obs;
   nobs=options_.nobs;
-  pp= corrcoef(x);
   for i=1:size(vvarvecm,1),
     vj=deblank(vvarvecm(i,:));
     if options_.prefilter == 1
@@ -87,9 +105,19 @@ if ~loadSA,
     js = strmatch(vj,lgy_,'exact');
     eval(['rmse_mode(i) = sqrt(mean((',vj,'(fobs-1+istart:fobs-1+nobs)-oo_.steady_state(js)-oo_.FilteredVariables.',vj,'(istart:end-1)).^2));'])
     y0=zeros(nobs+1,nruns);
-    nb = size(stock_filter,3);
-    y0 = squeeze(stock_filter(:,jxj,:)) + ...
-      kron(stock_ys(js,:),ones(size(stock_filter,1),1));
+    if options_.opt_gsa.ppost
+      nbb=0;
+      for j=1:length(filfilt),
+        load([DirectoryName '/' M_.fname '_filter',num2str(j),'.mat']);
+        nb = size(stock,4);
+        y0(:,nbb+1:nbb+nb)=squeeze(stock(1,jxj,:,:));
+          %y0(:,:,size(y0,3):size(y0,3)+size(stock,3))=stock;
+        nbb=nbb+nb;
+      end
+    else
+      y0 = squeeze(stock_filter(:,jxj,:)) + ...
+        kron(stock_ys(js,:),ones(size(stock_filter,1),1));
+    end
     y0M=mean(y0,2);
     for j=1:nruns,
       eval(['rmse_MC(j,i) = sqrt(mean((',vj,'(fobs-1+istart:fobs-1+nobs)-y0(istart:end-1,j)).^2));'])
@@ -98,7 +126,11 @@ if ~loadSA,
   end
   disp('... done!')
   
-  save(fnamtmp, 'rmse_MC', 'rmse_mode','-append')    
+  if options_.opt_gsa.ppost
+    save(fnamtmp, 'x', 'rmse_MC', 'rmse_mode')    
+  else
+    save(fnamtmp, 'rmse_MC', 'rmse_mode','-append')    
+  end
 else
   tmp=load(fnamtmp);
   x=tmp.x;
@@ -110,7 +142,10 @@ else
   nfilt=floor(pfilt*nruns);
 end
 % smirnov tests
+
+if ~options_.opt_gsa.ppost
 [dum, ipost]=sort(logpo2);
+end
 for i=1:size(vvarvecm,1),
   [dum, ixx(:,i)]=sort(rmse_MC(:,i));
   for j=1:npar+nshock,
@@ -127,7 +162,6 @@ for i=1:size(vvarvecm,1),
     PP(j,i)=P;
   end
 end
-
 param_names='';
 for j=1:npar+nshock,
   param_names=str2mat(param_names, bayestopt_.name{j});
@@ -244,10 +278,14 @@ for ix=1:ceil(length(nsnam)/6),
     xlabel('')
     set(findobj(get(h0,'children'),'type','text'),'interpreter','none')
     title([pnam{nsnam(j)}],'interpreter','none')
-    if options_.opt_gsa.pprior
-      saveas(gcf,[fname_,'_SA_fit_prior_',num2str(ix)])
+    if options_.opt_gsa.ppost
+        saveas(gcf,[fname_,'_SA_fit_post_',num2str(ix)])
     else
-      saveas(gcf,[fname_,'_SA_fit_mc_',num2str(ix)])
+      if options_.opt_gsa.pprior
+        saveas(gcf,[fname_,'_SA_fit_prior_',num2str(ix)])
+      else
+        saveas(gcf,[fname_,'_SA_fit_mc_',num2str(ix)])
+      end
     end
   end
 end
@@ -327,11 +365,15 @@ disp(' ')
 disp('Starting bivariate analysis:')
 
 for i=1:size(vvarvecm,1)
+  if options_.opt_gsa.ppost
+    fnam = ['SA_fit_post_',deblank(vvarvecm(i,:))];
+  else
   if options_.opt_gsa.pprior
     fnam = ['SA_fit_prior_',deblank(vvarvecm(i,:))];
   else
     fnam = ['SA_fit_mc_',deblank(vvarvecm(i,:))];
   end
+end
   stab_map_2(x(ixx(1:nfilt,i),:),alpha2,fnam, 1);
   
   %     [pc,latent,explained] = pcacov(c0);
