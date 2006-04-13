@@ -1,11 +1,13 @@
-function [proba, dproba] = stab_map_marginal(lpmat, ibehaviour, inonbehaviour, aname, ishock)
-%function stab_map_1(lpmat, ibehaviour, inonbehaviour, aname, ishock)
+function stab_map_marginal(lpmat, ibehaviour, inonbehaviour, aname, ipar, dirname)
+%function stab_map_1(lpmat, ibehaviour, inonbehaviour, aname, ipar, dirname)
 %
 % lpmat =  Monte Carlo matrix
 % ibehaviour = index of behavioural runs
 % inonbehaviour = index of non-behavioural runs
-% ishock = 1 estimated shocks included
-% ishock = 0 estimated shocks excluded (default)
+% aname = label of the analysis
+% ipar = index array of parameters to plot
+% dirname = (OPTIONAL) path of the directory where to save 
+%            (default: current directory)
 %
 % Plots: dotted lines for BEHAVIOURAL
 %        solid lines for NON BEHAVIOURAL
@@ -13,29 +15,33 @@ function [proba, dproba] = stab_map_marginal(lpmat, ibehaviour, inonbehaviour, a
 
 global estim_params_ bayestopt_ M_ options_
 
-if nargin<5,
-    ishock=0;
-end
 fname_ = M_.fname;
+if nargin<5,
+  ipar=[1:npar];
+end
+nparplot=length(ipar);
+if nargin<6,
+  dirname='';;
+end
 
 nshock = estim_params_.nvx;
 nshock = nshock + estim_params_.nvn;
 nshock = nshock + estim_params_.ncx;
 nshock = nshock + estim_params_.ncn;
 
+npar=size(lpmat,2);
+ishock= npar>estim_params_.np;
+
 number_of_grid_points = 2^9;      % 2^9 = 512 !... Must be a power of two.
 bandwidth = 0;                    % Rule of thumb optimal bandwidth parameter.
 kernel_function = 'gaussian';     % Gaussian kernel for Fast Fourrier Transform approximaton.  
 %kernel_function = 'uniform';     % Gaussian kernel for Fast Fourrier Transform approximaton.  
 
-if ishock,
-    npar = nshock + estim_params_.np;
-else
-    npar = estim_params_.np;
-end
+lpmat=lpmat(:,ipar);
+ftit=bayestopt_.name(ipar+nshock*(1-ishock));
 
 for i=1:ceil(npar/12),
-    figure,
+    figure('name',aname),
     for j=1+12*(i-1):min(npar,12*i),
         subplot(3,4,j-12*(i-1))
         optimal_bandwidth = mh_optimal_bandwidth(lpmat(ibehaviour,j),length(ibehaviour),bandwidth,kernel_function); 
@@ -47,15 +53,10 @@ for i=1:ceil(npar/12),
             optimal_bandwidth,kernel_function);
         hold on, plot(x1, f1,'k','linewidth',2)
         
-        %hist(lpmat(ibehaviour,j),30)
-        if ishock,
-            title(bayestopt_.name{j},'interpreter','none')
-        else
-            title(bayestopt_.name{j+nshock},'interpreter','none')
-        end
+        title(ftit{j},'interpreter','none')
     end
-    saveas(gcf,[fname_,'_',aname,'_',int2str(i)])
-    eval(['print -depsc2 ' fname_ '_' aname '_' int2str(i)]);
-    eval(['print -dpdf ' fname_ '_' aname '_' int2str(i)]);
+    saveas(gcf,[dirname,'/',fname_,'_',aname,'_',int2str(i)])
+    eval(['print -depsc2 ' dirname '\' fname_ '_' aname '_' int2str(i)]);
+    eval(['print -dpdf ' dirname '\' fname_ '_' aname '_' int2str(i)]);
     if options_.nograph, close(gcf), end
 end
