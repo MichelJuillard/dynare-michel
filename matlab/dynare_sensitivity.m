@@ -19,11 +19,15 @@ options_gsa_ = set_default_option(options_gsa_,'ilptau',1);
 options_gsa_ = set_default_option(options_gsa_,'Nsam',2048);
 options_gsa_ = set_default_option(options_gsa_,'load_stab',0);
 options_gsa_ = set_default_option(options_gsa_,'alpha2_stab',0.3);
+options_gsa_ = set_default_option(options_gsa_,'ksstat',0.1);
 options_gsa_ = set_default_option(options_gsa_,'load_mh',0);
 
+OutputDirectoryName = CheckPath('GSA');  
+
+
 if options_gsa_.stab & ~options_gsa_.load_mh,
-  x0 = stab_map_(options_gsa_.Nsam, options_gsa_.load_stab, options_gsa_.alpha2_stab, ...
-    options_gsa_.redform, options_gsa_.pprior, options_gsa_.ilptau);
+  x0 = stab_map_(options_gsa_.Nsam, options_gsa_.load_stab, options_gsa_.ksstat, options_gsa_.alpha2_stab, ...
+    options_gsa_.redform, options_gsa_.pprior, options_gsa_.ilptau, OutputDirectoryName);
 end
 
 % reduced form
@@ -31,13 +35,17 @@ end
 options_gsa_ = set_default_option(options_gsa_,'load_redform',0);
 options_gsa_ = set_default_option(options_gsa_,'logtrans_redform',0);
 options_gsa_ = set_default_option(options_gsa_,'threshold_redform',[]);
+options_gsa_ = set_default_option(options_gsa_,'ksstat_redform',0.1);
+options_gsa_ = set_default_option(options_gsa_,'alpha2_redform',0.4);
 options_gsa_ = set_default_option(options_gsa_,'namendo',[]);
 options_gsa_ = set_default_option(options_gsa_,'namlagendo',[]);
 options_gsa_ = set_default_option(options_gsa_,'namexo',[]);
 
 if options_gsa_.redform & ~isempty(options_gsa_.namendo) & ~options_gsa_.load_mh,
   redform_map(options_gsa_.namendo, options_gsa_.namlagendo, options_gsa_.namexo, ...
-    options_gsa_.load_redform, options_gsa_.pprior, options_gsa_.logtrans_redform, options_gsa_.threshold_redform);
+    options_gsa_.load_redform, options_gsa_.pprior, options_gsa_.logtrans_redform, ...
+    options_gsa_.threshold_redform, options_gsa_.ksstat_redform, ...
+    options_gsa_.alpha2_redform, OutputDirectoryName);
 end
 % RMSE mapping
 % function [rmse_MC, ixx] = filt_mc_(vvarvecm, loadSA, pfilt, alpha, alpha2)
