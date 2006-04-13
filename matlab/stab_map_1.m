@@ -1,89 +1,71 @@
-function proba = stab_map_1(lpmat, ibehaviour, inonbehaviour, aname, ishock)
-%function stab_map_1(lpmat, ibehaviour, inonbehaviour, aname, ishock)
+function [proba, dproba] = stab_map_1(lpmat, ibehaviour, inonbehaviour, aname, iplot, ipar, dirname)
+%function stab_map_1(lpmat, ibehaviour, inonbehaviour, aname, iplot, ipar)
 %
 % lpmat =  Monte Carlo matrix
 % ibehaviour = index of behavioural runs
 % inonbehaviour = index of non-behavioural runs
-% ishock = 1 estimated shocks included
-% ishock = 0 estimated shocks excluded (default)
+% aname = label of the analysis
+% iplot = 1 plot cumulative distributions (default)
+% iplot = 0 no plots
+% ipar = index array of parameters to plot
+% dirname = (OPTIONAL) path of the directory where to save 
+%            (default: current directory)
 %
 % Plots: dotted lines for BEHAVIOURAL
 %        solid lines for NON BEHAVIOURAL
 % USES smirnov
 
-global estim_params_ bayestopt_ M_
+global estim_params_ bayestopt_ M_ options_
 
 if nargin<5,
-    ishock=0;
+  iplot=1;
 end
 fname_ = M_.fname;
+if nargin<7,
+  dirname='';;
+end
 
 nshock = estim_params_.nvx;
 nshock = nshock + estim_params_.nvn;
 nshock = nshock + estim_params_.ncx;
 nshock = nshock + estim_params_.ncn;
 
-number_of_grid_points = 2^9;      % 2^9 = 512 !... Must be a power of two.
-bandwidth = 0;                    % Rule of thumb optimal bandwidth parameter.
-kernel_function = 'gaussian';     % Gaussian kernel for Fast Fourrier Transform approximaton.  
-%kernel_function = 'uniform';     % Gaussian kernel for Fast Fourrier Transform approximaton.  
+npar=size(lpmat,2);
+ishock= npar>estim_params_.np;
 
-if ishock,
-    npar = nshock + estim_params_.np;
-else
-    npar = estim_params_.np;
+if nargin<6,
+  ipar=[1:npar];
 end
-
-for i=1:ceil(npar/12),
-    figure,
-    for j=1+12*(i-1):min(npar,12*i),
-        subplot(3,4,j-12*(i-1))
-        optimal_bandwidth = mh_optimal_bandwidth(lpmat(ibehaviour,j),length(ibehaviour),bandwidth,kernel_function); 
-        [x1,f1] = kernel_density_estimate(lpmat(ibehaviour,j),number_of_grid_points,...
-            optimal_bandwidth,kernel_function);
-        plot(x1, f1,':k','linewidth',2)
-        optimal_bandwidth = mh_optimal_bandwidth(lpmat(inonbehaviour,j),length(inonbehaviour),bandwidth,kernel_function); 
-        [x1,f1] = kernel_density_estimate(lpmat(inonbehaviour,j),number_of_grid_points,...
-            optimal_bandwidth,kernel_function);
-        hold on, plot(x1, f1,'k','linewidth',2)
-        
-        %hist(lpmat(ibehaviour,j),30)
-        if ishock,
-            title(bayestopt_.name{j},'interpreter','none')
-        else
-            title(bayestopt_.name{j+nshock},'interpreter','none')
-        end
-    end
-    saveas(gcf,[fname_,'_',aname,'_',int2str(i)])
-end
+nparplot=length(ipar);
 
 % Smirnov test for Blanchard; 
-for i=1:ceil(npar/12),
-    figure,
-    for j=1+12*(i-1):min(npar,12*i),
-        subplot(3,4,j-12*(i-1))
-        if ~isempty(ibehaviour),
-            h=cumplot(lpmat(ibehaviour,j));
-            set(h,'color',[0 0 0], 'linestyle',':')
-        end
-        hold on,
-        if ~isempty(inonbehaviour),
-            h=cumplot(lpmat(inonbehaviour,j));
-            set(h,'color',[0 0 0])
-        end
-        %         if exist('kstest2')==2 & length(inonbehaviour)>0 & length(inonbehaviour)<Nsam,
-        %             [H,P,KSSTAT] = kstest2(lpmat(ibehaviour,j),lpmat(inonbehaviour,j));
-        %             title([bayestopt_.name{j+nshock},'. K-S prob ', num2str(P)])
-        %         else
-        [H,P,KSSTAT] = smirnov(lpmat(ibehaviour,j),lpmat(inonbehaviour,j));
-        if ishock,
-            tittxt = bayestopt_.name{j};
-        else
-            tittxt = bayestopt_.name{j+nshock};
-        end
-        title([tittxt,'. K-S prob ', num2str(P)],'interpreter','none')
-        proba(j)=P;
-        %         end
+for j=1:npar,
+  [H,P,KSSTAT] = smirnov(lpmat(ibehaviour,j),lpmat(inonbehaviour,j));
+  proba(j)=P;
+  dproba(j)=KSSTAT;
+end
+if iplot
+  lpmat=lpmat(:,ipar);
+  ftit=bayestopt_.name(ipar+nshock*(1-ishock));
+  
+for i=1:ceil(nparplot/12),
+  figure('name',aname),
+  for j=1+12*(i-1):min(nparplot,12*i),
+    subplot(3,4,j-12*(i-1))
+    if ~isempty(ibehaviour),
+      h=cumplot(lpmat(ibehaviour,j));
+      set(h,'color',[0 0 0], 'linestyle',':')
     end
-    saveas(gcf,[fname_,'_',aname,'_SA_',int2str(i)])
+    hold on,
+    if ~isempty(inonbehaviour),
+      h=cumplot(lpmat(inonbehaviour,j));
+      set(h,'color',[0 0 0])
+    end
+    title([ftit{j},'. K-S prob ', num2str(proba(ipar(j)))],'interpreter','none')
+  end
+  saveas(gcf,[dirname,'\',fname_,'_',aname,'_SA_',int2str(i)])
+  eval(['print -depsc2 ' dirname '\' fname_ '_' aname '_SA_' int2str(i)]);
+  eval(['print -dpdf ' dirname '\' fname_ '_' aname '_SA_' int2str(i)]);
+  if options_.nograph, close(gcf), end
+end
 end
