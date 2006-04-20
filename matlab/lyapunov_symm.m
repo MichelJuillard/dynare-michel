@@ -1,13 +1,24 @@
 % solves x-a*x*a'=b for b (and then x) symmetrical
-function x=lyapunov_symm(a,b)
-  n = size(b,1);
-  if n == 1
+function [x,ns_var]=lyapunov_symm(a,b)
+  global options_ 
+  
+  info = 0;
+  if size(a,1) == 1
     x=b/(1-a*a);
     return
   end
+  [u,t] = schur(a);
+  if exist('ordeig','builtin')
+    e1 = abs(ordeig(t)) > 2-options_.qz_criterium;
+  else
+    e1 = abs(my_ordeig(t)) > 2-options_.qz_criterium;
+  end
+  k = sum(e1);
+  [u,t] = ordschur(u,t,e1); 
+  n = length(e1)-k;
+  b=u(:,k+1:end)'*b*u(:,k+1:end);
+  t = t(k+1:end,k+1:end);
   x=zeros(n,n);
-  [u,t]=schur(a);
-  b=u'*b*u;
   for i=n:-1:2
     if t(i,i-1) == 0
       if i == n
@@ -16,8 +27,9 @@ function x=lyapunov_symm(a,b)
 	c = t(1:i,:)*(x(:,i+1:end)*t(i,i+1:end)')+...
 	    t(i,i)*t(1:i,i+1:end)*x(i+1:end,i);
       end
-      x(1:i,i)=(eye(i)-t(1:i,1:i)*t(i,i))\(b(1:i,i)+c);
-      x(i,1:i-1)=x(1:i-1,i)';
+      q = eye(i)-t(1:i,1:i)*t(i,i);
+      x(1:i,i) = q\(b(1:i,i)+c);
+      x(i,1:i-1) = x(1:i-1,i)';
     else
       if i == n
 	c = zeros(n,1);
@@ -30,9 +42,9 @@ function x=lyapunov_symm(a,b)
 	     t(i-1,i-1)*t(1:i,i+1:end)*x(i+1:end,i-1)+...
 	     t(i-1,i)*t(1:i,i+1:end)*x(i+1:end,i);
       end
-      z = [eye(i)-t(1:i,1:i)*t(i,i) -t(1:i,1:i)*t(i,i-1);...
-	   -t(1:i,1:i)*t(i-1,i) eye(i)-t(1:i,1:i)*t(i-1,i-1)]...
-	  \[b(1:i,i)+c;b(1:i,i-1)+c1];
+      q = [eye(i)-t(1:i,1:i)*t(i,i) -t(1:i,1:i)*t(i,i-1);...
+	   -t(1:i,1:i)*t(i-1,i) eye(i)-t(1:i,1:i)*t(i-1,i-1)];
+      z =  q\[b(1:i,i)+c;b(1:i,i-1)+c1];
       x(1:i,i) = z(1:i);
       x(1:i,i-1) = z(i+1:end);
       x(i,1:i-1)=x(1:i-1,i)';
@@ -44,4 +56,6 @@ function x=lyapunov_symm(a,b)
     c = t(1,:)*(x(:,2:end)*t(1,2:end)')+t(1,1)*t(1,2:end)*x(2:end,1);
     x(1,1)=(b(1,1)+c)/(1-t(1,1)*t(1,1));
   end
-  x=u*x*u';
+  x=u(:,k+1:end)*x*u(:,k+1:end)';
+  ns_var = [];
+  ns_var = find(any(abs(u(:,1:k)) > 1e-8,2)); 
