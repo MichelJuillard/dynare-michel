@@ -52,12 +52,7 @@ void OutputFile::Open(string iFileName)
 	iFileName.erase(iFileName.size()-2);
 	mOutputFile << "M_.fname = '" << iFileName << "';\n";
 	mOutputFile << "%\n% Some global variables initialisation\n%\n";
-	mOutputFile << "options_.smpl=0;\noptions_.dynatol = 0.00001;\noptions_.maxit_=10;\noptions_.slowc=1;\noptions_.timing=0;\nct_=0;\noptions_.gstep=1e-2;\n";
-	mOutputFile << "options_.debug=0\n";
-	mOutputFile << "endval_=0;rplottype_=0;\noptions_.initval_file=0;\n";
-	mOutputFile << "oo_.exo_simul = [];\n";
-	mOutputFile << "oo_.y_simul = [];\n";
-	mOutputFile << "oo_.dr = struct([]);\n";
+	mOutputFile << "global_initialization;\n";
 	mOutputFile << "diary off;\nwarning off;\n";
 	mOutputFile << "\ndelete " << iFileName << ".log;\n";
 	mOutputFile << "warning on;\nwarning backtrace;\n";
