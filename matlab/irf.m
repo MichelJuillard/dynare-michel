@@ -14,12 +14,12 @@ function y = irf(dr, e1, long, drop, replic, iorder)
     % eliminate shocks with 0 variance
     i_exo_var = setdiff([1:M_.exo_nbr],find(diag(M_.Sigma_e) == 0 ));
     nxs = length(i_exo_var);
-    ex1 = zeros(long+drop+M_.maximum_lag,M_.exo_nbr);
+    ex1 = zeros(long+drop,M_.exo_nbr);
     ex2 = ex1;
     chol_S = chol(M_.Sigma_e(i_exo_var,i_exo_var));
     for j = 1: replic
       randn('seed',j);
-      ex1(:,i_exo_var) = randn(long+drop+M_.maximum_lag,nxs)*chol_S;
+      ex1(:,i_exo_var) = randn(long+drop,nxs)*chol_S;
       ex2 = ex1;
       ex2(drop+1,:) = ex2(drop+1,:)+e1';   
       y1 = simult_(temps,dr,ex1,iorder);
