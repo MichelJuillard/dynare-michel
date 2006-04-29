@@ -31,7 +31,7 @@ try delete([MhDirectoryName '/' M_.fname '_IRFs*']);
 catch disp('No _IRFs files to be deleted!')
 end
 irun = 0;
-ifil = 1;
+NumberOfIRFfiles = 1;
 if strcmpi(type,'posterior')
   h = waitbar(0,'Bayesian (posterior) IRFs...');
 else
@@ -66,13 +66,13 @@ for b=1:B
     if b == B
       stock_irf = stock_irf(:,:,:,1:irun);
     end
-    save([MhDirectoryName '/' M_.fname '_irf' int2str(ifil)],'stock_irf');
-    ifil = ifil+1;
+    save([MhDirectoryName '/' M_.fname '_irf' int2str(NumberOfIRFfiles)],'stock_irf');
+    NumberOfIRFfiles = NumberOfIRFfiles+1;
     irun = 0;
   end
   waitbar(b/B,h);
 end
-ifil = ifil-1;
+NumberOfIRFfiles = NumberOfIRFfiles-1;
 close(h);
 
 ReshapeMatFiles('irf')
