@@ -73,7 +73,7 @@ void ComputingTasks::runEstimation(string tmp1)
 void ComputingTasks::runRplot(string tmp1)			
 {
   *output << tmp1;
-  *output << "rplot(var_list_,rplottype_);\n";
+  *output << "rplot(var_list_);\n";
 }
 //------------------------------------------------------------------------------
 void ComputingTasks::setEstimationInit(void)

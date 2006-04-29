@@ -1,7 +1,7 @@
 % Copyright (C) 2001 Michel Juillard
 %
-function rplot(s1,rplottype)
-% RPLOT :		RPLOT ( ['var1'; 'var2';  ...] , rplottype )	
+function rplot(s1)
+% RPLOT :		RPLOT ( ['var1'; 'var2';  ...] )	
 %		This optionnal command creates the plot of the variable
 %		trajectory. By default, the entire simulation period is 
 %		ploted. The instruction DSAMPLE permits to reduce the 
@@ -9,9 +9,7 @@ function rplot(s1,rplottype)
 		
 global M_ oo_ options_
 
-if nargin == 1
-	rplottype = 0;
-end
+rplottype = options_.rplottype;
 
 col = ['y','c','r','g','b','w','m'] ;
 ix = [1 - M_.maximum_lag:size(oo_.y_simul,2)-M_.maximum_lag]' ;
