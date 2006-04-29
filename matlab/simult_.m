@@ -3,7 +3,7 @@
 
 function y_=simult_(y0,dr,ex_,iorder)
 global M_ options_ it_
-  iter = size(ex_,1)-M_.maximum_lag;
+  iter = size(ex_,1);
   nx = size(dr.ghu,2);
   y_ = zeros(size(y0,1),iter+M_.maximum_lag);
   y_(:,1:M_.maximum_lag) = y0;
