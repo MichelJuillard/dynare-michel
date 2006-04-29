@@ -66,6 +66,7 @@
  	| histval
  	| equality_expression
  	| shocks
+ 	| mshocks
  	| sigma_e
  	| steady
  	| check
