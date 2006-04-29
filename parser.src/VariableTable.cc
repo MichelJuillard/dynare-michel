@@ -61,6 +61,7 @@ int VariableTable::AddVariable(string iName, int iLag)
   	Type type = getType(lVariableID);
   	if (type == eEndogenous)	ModelParameters::var_endo_nbr++;
   	if (type == eExogenous)	ModelParameters::var_exo_nbr++;
+  	if (type == eExogenousDet)	ModelParameters::var_exo_det_nbr++;
   	// Setting Maximum and minimum lags
 	if (ModelParameters::max_lead < iLag)
 	  {

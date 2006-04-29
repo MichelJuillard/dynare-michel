@@ -18,6 +18,7 @@ using namespace std;
 #include "DynareBison.h"
 #include "NumericalConstants.h"
 #include "ModelTree.h"
+#include "ModelParameters.h"
 //------------------------------------------------------------------------------
 ostringstream ModelTree::output;
 //------------------------------------------------------------------------------
@@ -1283,7 +1284,8 @@ inline string ModelTree::getArgument(NodeID id, Type type, EquationType iEquatio
 	  }
 	else if (type == eExogenousDet)
 	  {
-	    argument <<  "exedet_" << lpar << idx << rpar;
+	    idx += ModelParameters::exo_nbr;
+	    argument <<  "x" << lpar << idx << rpar;
 	  }
       }
     else
@@ -1324,30 +1326,30 @@ inline string ModelTree::getArgument(NodeID id, Type type, EquationType iEquatio
 	  }
 	else if (type == eExogenousDet)
 	  {
-	    int idx = VariableTable::getSymbolID((int) id)+offset;
+	    int idx = VariableTable::getSymbolID((int) id)+ModelParameters::exo_nbr+offset;
 	    int lag = VariableTable::getLag((int) id);
 	    if (offset == 1)
 	      {
 		if (lag != 0)
 		  {
-		    argument <<  "exdet_" << lpar << "it_ + " << lag 
+		    argument <<  "x" << lpar << "it_ + " << lag 
 			     << ", " << idx << rpar;
 		  }
 		else
 		  {
-		    argument <<  "exdet_" << lpar << "it_, " << idx << rpar;
+		    argument <<  "x" << lpar << "it_, " << idx << rpar;
 		  }
 	      }   
 	    else
 	      {
 		if (lag != 0)
 		  {
-		    argument <<  "exdet_" << lpar << "it_ + " << lag 
+		    argument <<  "x" << lpar << "it_ + " << lag 
 			     << "+" << idx <<  "*nb_row_xd" << rpar;
 		  }
 		else
 		  {
-		    argument <<  "exdet_" << lpar << "it_+" << idx << "*nb_row_xd" <<  rpar;
+		    argument <<  "x" << lpar << "it_+" << idx << "*nb_row_xd" <<  rpar;
 		  }
 	      }
 
@@ -1457,13 +1459,13 @@ void ModelTree::ModelInitialization(void)
     {
       output << "M_.maximum_exo_det_lag = " << ModelParameters::max_exo_det_lag << ";\n";
       output << "M_.maximum_exo_det_lead = " << ModelParameters::max_exo_det_lead<< ";\n";
-      output << "oo_.exo_det_steadystate = zeros(" << ModelParameters::exo_det_nbr << ", 1);\n";
+      output << "oo_.exo_det_steady_state = zeros(" << ModelParameters::exo_det_nbr << ", 1);\n";
     }
   if (ModelParameters::recur_nbr)
     {
       output << "M_.maximum_recur_lag = " << ModelParameters::max_recur_lag << ";\n";
       output << "M_.maximum_recur_lead = " << ModelParameters::max_recur_lead<< ";\n";
-      output << "oo_.recur_steadystate = zeros(" << ModelParameters::recur_nbr << ", 1);\n";
+      output << "oo_.recur_steady_state = zeros(" << ModelParameters::recur_nbr << ", 1);\n";
     }
   if (ModelParameters::parameter_nbr)
     {

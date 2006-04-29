@@ -28,6 +28,7 @@ class ModelParameters
 		static int var_exo_nbr;
 		/*!  Number of deterministic Exogenous variables */
 		static int exo_det_nbr;
+		static int var_exo_det_nbr;
 		/*!  Number of declared Endogenous variables */
 		static int endo_nbr;
 		/*!  Number of Endogenous variables that apear in model equations*/

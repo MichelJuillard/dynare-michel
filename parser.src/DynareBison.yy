@@ -20,7 +20,6 @@
 #endif
 %}
 /* %pure_parser */
-%token POUND_SIGN
 %token AR AUTOCORR
 %token BAYESIAN_IRF BETA_PDF
 %token CALIB CALIB_VAR CHECK CONF_SIG CORR COVAR
@@ -39,7 +38,7 @@
 %token PARAMETERS PERIODS PREFILTER PRESAMPLE PRINT PRIOR_TRUNC FILTER_STEP_AHEAD
 %token QZ_CRITERIUM
 %token RELATIVE_IRF REPLIC RESOL RPLOT
-%token SHOCKS SHOCK_SIZE SIGMA_E SIMUL SIMUL_ALGO SIMUL_SEED SMOOTHER SOLVE_ALGO STDERR STEADY STOCH_SIMUL  
+%token SHOCKS SIGMA_E SIMUL SIMUL_ALGO SIMUL_SEED SMOOTHER SOLVE_ALGO STDERR STEADY STOCH_SIMUL  
 %token TEX TEX_NAME
 %token UNIFORM_PDF UNIT_ROOT_VARS USE_DLL
 %token VALUES VAR VAREXO VAREXO_DET VAROBS
@@ -360,7 +359,7 @@
     	{$$ = _parser->add_sqrt($3);}
 	;
 	
- pound_expression: POUND_SIGN NAME 
+ pound_expression: '#' NAME 
                    {$$ = _parser->add_local_parameter($2);}
 		   EQUAL hand_side ';'
                    {$$ = _parser->init_local_parameter($3,$5);}
@@ -373,7 +372,11 @@
 	;
 	
  shocks
- 	: SHOCKS  ';' {_parser->begin_shocks();} shock_list END
+ 	: SHOCKS  ';' {_parser->begin_shocks();} shock_list END {_parser->end_shocks();} 
+ 	;
+
+ mshocks
+ 	: MSHOCKS  ';' {_parser->begin_mshocks();} shock_list END {_parser->end_shocks();} 
  	;
 
  shock_list 

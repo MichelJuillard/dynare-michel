@@ -80,7 +80,9 @@ dynare::Objects* dynare::parser::add_variable(Objects* var)
 {
 	//cout << "add_variable1 : " << var->symbol << endl;
 	var = get_symbol(var);
-	if((var->type == eEndogenous) || (var->type == eExogenous))
+	if((var->type == eEndogenous) 
+	   || (var->type == eExogenous)
+	   || (var->type == eExogenousDet))
 		variable_table.AddVariable(var->symbol,0);
 	//cout   << "add_model_token : " << var->ID << endl;
 	NodeID id = model_tree.AddTerminal(var->symbol);
@@ -309,15 +311,33 @@ void dynare::parser::begin_shocks(void)
 {
 	shocks.BeginShocks();
 }
+void dynare::parser::begin_mshocks(void)
+{
+	shocks.BeginMShocks();
+}
+void dynare::parser::end_shocks(void)
+{
+  shocks.EndShocks();
+}
 void dynare::parser::add_det_shock(Objects* var)
 {
-	if (!symbol_table.Exist(var->symbol))
-	{
-		string msg = "Unknown symbol : "+var->symbol;
-		error(msg.c_str());
-	}
-	int id = symbol_table.getID(var->symbol);
-	shocks.AddShock(eDeterministic, id);
+  if (!symbol_table.Exist(var->symbol))
+    {
+      string msg = "Unknown symbol : "+var->symbol;
+      error(msg.c_str());
+    }
+  int id = symbol_table.getID(var->symbol);
+  switch (symbol_table.getType(var->symbol))
+    {
+    case eExogenous:
+      shocks.AddDetShockExo(id);
+      return;
+    case eExogenousDet:
+      shocks.AddDetShockExoDet(id);
+      return;
+    default:	    
+      error("Shocks can only be applied to exogenous variables");
+    }
 }
 void dynare::parser::add_stderr_shock(Objects* var, Objects* value)
 {
@@ -327,7 +347,7 @@ void dynare::parser::add_stderr_shock(Objects* var, Objects* value)
 		error(msg.c_str());
 	}
 	int id = symbol_table.getID(var->symbol);
-	shocks.AddShock(eSTDerror, id, 0, value->symbol);
+	shocks.AddSTDShock(id, value->symbol);
 }
 void dynare::parser::add_var_shock(Objects* var, Objects* value)
 {
@@ -337,7 +357,7 @@ void dynare::parser::add_var_shock(Objects* var, Objects* value)
 		error(msg.c_str());
 	}
 	int id = symbol_table.getID(var->symbol);
-	shocks.AddShock(eVariance, id, 0, value->symbol);
+	shocks.AddVARShock(id, value->symbol);
 }
 void dynare::parser::add_covar_shock(Objects* var1, Objects* var2, Objects* value)
 {
@@ -353,7 +373,7 @@ void dynare::parser::add_covar_shock(Objects* var1, Objects* var2, Objects* valu
 	}
 	int id1 = symbol_table.getID(var1->symbol);
 	int id2 = symbol_table.getID(var2->symbol);
-	shocks.AddShock(eCovariance, id1, id2, value->symbol);
+	shocks.AddCOVAShock(id1, id2, value->symbol);
 }
 void dynare::parser::add_correl_shock(Objects* var1, Objects* var2, Objects* value)
 {
@@ -369,7 +389,7 @@ void dynare::parser::add_correl_shock(Objects* var1, Objects* var2, Objects* val
 	}
 	int id1 = symbol_table.getID(var1->symbol);
 	int id2 = symbol_table.getID(var2->symbol);
-	shocks.AddShock(eCorrelation, id1, id2, value->symbol);
+	shocks.AddCORRShock(id1, id2, value->symbol);
 }
 void dynare::parser::add_period(Objects* p1, Objects* p2)
 {

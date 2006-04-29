@@ -105,9 +105,12 @@ void  NumericalInitialization::SetInit (string name, string expression)
     {
     	*output << "oo_.exo_steady_state( " << id+1 << " ) = " << expression << ";\n";
     }
+    else if (type == eExogenousDet)
+    {
+    	*output << "oo_.exo_det_steady_state( " << id+1 << " ) = " << expression << ";\n";
+    }
     // Testing if symbol is a variable (Exogenousous deterministic or recursive) 
-    else if ((type != eExogenousDet) || 
-    	 (type != eRecursiveVariable)) 
+    else if ( type != eRecursiveVariable ) 
     {
     	cout << "Error : Non-variable symbol used in INITVAL: " << name << endl;
 	}
@@ -118,6 +121,9 @@ void  NumericalInitialization::EndInitval(void)
 	*output << "oo_.y_simul=[oo_.steady_state*ones(1,M_.maximum_lag)];\n";
   	*output << "if M_.exo_nbr > 0;\n";
   	*output << "\too_.exo_simul = [ones(M_.maximum_lag,1)*oo_.exo_steady_state'];\n";
+  	*output <<"end;\n";
+  	*output << "if M_.exo_det_nbr > 0;\n";
+  	*output << "\too_.exo_det_simul = [ones(M_.maximum_lag,1)*oo_.exo_det_steady_state'];\n";
   	*output <<"end;\n";
 }
 //------------------------------------------------------------------------------
@@ -134,10 +140,12 @@ void  NumericalInitialization::EndEndval (void)
 {
 	
 	*output << "oo_.y_simul = [oo_.y_simul oo_.steady_state*ones(1,M_.maximum_lead+M_.maximum_lead)];\n";
-	*output << "if M_.exo_nbr > 0;\n";
-	*output << "\too_.exo_steady_state = [ones(M_.maximum_lag,1)*ex0_';ones(M_.maximum_lead+M_.maximum_lead,1)*oo_.exo_steady_state'];\n";
-	*output << "end;\n";
-	
+  	*output << "if M_.exo_nbr > 0;\n";
+  	*output << "\too_.exo_simul = [ones(M_.maximum_lag,1)*oo_.exo_steady_state'];\n";
+  	*output <<"end;\n";
+  	*output << "if M_.exo_det_nbr > 0;\n";
+  	*output << "\too_.exo_det_simul = [ones(M_.maximum_lag,1)*oo_.exo_det_steady_state'];\n";
+  	*output <<"end;\n";
 }
 //------------------------------------------------------------------------------
 void  NumericalInitialization::BeginHistval (void) 

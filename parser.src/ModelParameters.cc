@@ -13,6 +13,7 @@ int ModelParameters::eq_nbr = 0;
 int ModelParameters::exo_nbr = 0;
 int ModelParameters::var_exo_nbr = 0;
 int ModelParameters::exo_det_nbr = 0;
+int ModelParameters::var_exo_det_nbr = 0;
 int ModelParameters::endo_nbr = 0;
 int ModelParameters::var_endo_nbr = 0;
 int ModelParameters::parameter_nbr = 0;

@@ -124,7 +124,6 @@ int sigma_e = 0;
 <DYNARE_STATEMENT>filter_step_ahead	{return FILTER_STEP_AHEAD;}
 <DYNARE_STATEMENT>relative_irf 	{return RELATIVE_IRF;}
 <DYNARE_STATEMENT>tex		{return TEX;}
-<DYNARE_STATEMENT>shock_size	{return SHOCK_SIZE;}
 <DYNARE_STATEMENT>moments	{return MOMENTS;}
 <DYNARE_STATEMENT>nomoments	{return NOMOMENTS;}
 <DYNARE_STATEMENT>corr		{return CORR;}
@@ -240,9 +239,10 @@ int sigma_e = 0;
 	 		_scanner->do_as_is(yytext);
 	 	}
  }
-<DYNARE_BLOCK># {return POUND_SIGN;}
+
 <INITIAL>. {BEGIN NATIVE; _scanner->do_as_is(yytext);}
 
  /* NATIVE Block */
 <NATIVE>.* {BEGIN INITIAL;_scanner->do_as_is(yytext);_scanner->do_as_is("\n");}
 
+<*>. {return yytext[0];}

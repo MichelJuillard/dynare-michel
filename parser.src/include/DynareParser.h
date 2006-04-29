@@ -177,6 +177,8 @@ namespace dynare
 	void begin_histval(void);
 	/*! Write begining of a shock block */
 	void begin_shocks(void);
+	void begin_mshocks(void);
+	void end_shocks(void);
     /*! Adds a deterministic chock */
 	void add_det_shock(Objects* var);
     /*! Adds a std error chock */
