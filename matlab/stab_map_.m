@@ -1,4 +1,4 @@
-function x0 = stab_map_(Nsam, fload, alpha2, prepSA, pprior, ilptau)
+function x0 = stab_map_(Nsam, fload, ksstat, alpha2, prepSA, pprior, ilptau, OutputDirectoryName)
 %
 % function x0 = stab_map_(Nsam, fload, alpha2, prepSA, pprior)
 %
@@ -73,16 +73,22 @@ if nargin<2,
   fload=0;
 end
 if nargin<3,
-  alpha2=0.3;
+  ksstat=0.1;
 end
 if nargin<4,
-  prepSA=0;
+  alpha2=0.3;
 end
 if nargin<5,
-  pprior=1;
+  prepSA=0;
 end
 if nargin<6,
+  pprior=1;
+end
+if nargin<7,
   ilptau=1;
+end
+if nargin<8,
+  OutputDirectoryName='';
 end
 
 options_.periods=0;
@@ -91,6 +97,11 @@ options_.irf=0;
 options_.noprint=1;
 
 if fload==0 | nargin<2 | isempty(fload),
+  if prepSA
+    T=zeros(size(dr_.ghx,1),size(dr_.ghx,2)+size(dr_.ghu,2),Nsam/2);
+  end
+  
+  
   if estim_params_.np<52 & ilptau,
     [lpmat] = lptauSEQ(Nsam,estim_params_.np);
     if estim_params_.np>30
@@ -146,13 +157,22 @@ if fload==0 | nargin<2 | isempty(fload),
     %load([fname_,'_mode'])  
     eval(['load ' options_.mode_file ';']');
     d = chol(inv(hh));
-    lp=randn(Nsam,nshock+estim_params_.np)*d+kron(ones(Nsam,1),xparam1');
-    lpmat0=lp(:,1:nshock);
-    lpmat=lp(:,nshock+1:end);
+    lp=randn(Nsam*2,nshock+estim_params_.np)*d+kron(ones(Nsam*2,1),xparam1');
+    for j=1:Nsam*2,
+        lnprior(j) = any(lp(j,:)'<=bayestopt_.lb | lp(j,:)'>=bayestopt_.ub);
+    end
+    ireal=[1:2*Nsam]; 
+    ireal=ireal(find(lnprior==0));
+    lp=lp(ireal,:);
+    Nsam=min(Nsam, length(ireal));
+    lpmat0=lp(1:Nsam,1:nshock);
+    lpmat=lp(1:Nsam,nshock+1:end);
+    clear lp lnprior ireal;
   end
   % 
   h = waitbar(0,'Please wait...');
   istable=[1:Nsam];
+  jstab=0;
   iunstable=[1:Nsam];
   iindeterm=zeros(1,Nsam);
   iwrong=zeros(1,Nsam);
@@ -164,7 +184,8 @@ if fload==0 | nargin<2 | isempty(fload),
       egg(:,j) = sort(dr_.eigval);
       iunstable(j)=0;
       if prepSA
-        T(:,:,j) = [dr_.ghx dr_.ghu];
+        jstab=jstab+1;
+        T(:,:,jstab) = [dr_.ghx dr_.ghu];
       end            
       if ~exist('nspred'),
         nspred = size(dr_.ghx,2);
@@ -193,6 +214,9 @@ if fload==0 | nargin<2 | isempty(fload),
     waitbar(j/Nsam,h,['MC iteration ',int2str(j),'/',int2str(Nsam)])
   end
   close(h)
+  if prepSA,
+    T=T(:,:,1:jstab);
+  end
   istable=istable(find(istable));  % stable params
   iunstable=iunstable(find(iunstable));   % unstable params
   iindeterm=iindeterm(find(iindeterm));  % indeterminacy
@@ -234,92 +258,124 @@ if fload==0 | nargin<2 | isempty(fload),
   %     iunstable=iunstable(find(iunstable));   % unstable params
   if pprior,
     if ~prepSA
-      save([fname_,'_prior'],'lpmat','lpmat0','iunstable','istable','iindeterm','iwrong','egg','yys','nspred','nboth','nfwrd')
+      save([OutputDirectoryName '\' fname_ '_prior'],'lpmat','lpmat0','iunstable','istable','iindeterm','iwrong','egg','yys','nspred','nboth','nfwrd')
     else
-      save([fname_,'_prior'],'lpmat','lpmat0','iunstable','istable','iindeterm','iwrong','egg','yys','T','nspred','nboth','nfwrd')
+      save([OutputDirectoryName '\' fname_ '_prior'],'lpmat','lpmat0','iunstable','istable','iindeterm','iwrong','egg','yys','T','nspred','nboth','nfwrd')
     end
     
   else
     if ~prepSA
-      save([fname_,'_mc'],'lpmat','lpmat0','iunstable','istable','iindeterm','iwrong','egg','yys','nspred','nboth','nfwrd')
+      save([OutputDirectoryName '\' fname_ '_mc'], ...
+        'lpmat','lpmat0','iunstable','istable','iindeterm','iwrong','egg','yys','nspred','nboth','nfwrd')
     else
-      save([fname_,'_mc'],'lpmat','lpmat0','iunstable','istable','iindeterm','iwrong','egg','yys','T','nspred','nboth','nfwrd')
+      save([OutputDirectoryName '\' fname_ '_mc'], ...
+        'lpmat','lpmat0','iunstable','istable','iindeterm','iwrong','egg','yys','T','nspred','nboth','nfwrd')
     end
   end
 else
   if pprior,
-    load([fname_,'_prior'])
+    filetoload=[OutputDirectoryName '\' fname_ '_prior'];
   else
-    load([fname_,'_mc'])
+    filetoload=[OutputDirectoryName '\' fname_ '_mc'];
   end
+  load(filetoload,'lpmat','lpmat0','iunstable','istable','iindeterm','iwrong','egg','yys','nspred','nboth','nfwrd')
   Nsam = size(lpmat,1);    
-end
-
-if prepSA & ~exist('T'),
-  h = waitbar(0,'Please wait...');
-  options_.periods=0;
-  options_.nomoments=1;
-  options_.irf=0;
-  options_.noprint=1;
-  stoch_simul([]);
-  T=zeros(size(dr_.ghx,1),size(dr_.ghx,2)+size(dr_.ghu,2),length(istable));
   
-  for j=1:length(istable),
-    M_.params(estim_params_.param_vals(:,1)) = lpmat(istable(j),:)';
+  if prepSA & isempty(strmatch('T',who('-file', filetoload),'exact')),
+    h = waitbar(0,'Please wait...');
+    options_.periods=0;
+    options_.nomoments=1;
+    options_.irf=0;
+    options_.noprint=1;
     stoch_simul([]);
-    dr_ = oo_.dr;
-    T(:,:,j) = [dr_.ghx dr_.ghu];
-    if ~exist('nspred')
-      nspred = size(dr_.ghx,2);
-      nboth = dr_.nboth;
-      nfwrd = dr_.nfwrd;
+    T=zeros(size(dr_.ghx,1),size(dr_.ghx,2)+size(dr_.ghu,2),length(istable));
+    ntrans=length(istable);
+    for j=1:ntrans,
+      M_.params(estim_params_.param_vals(:,1)) = lpmat(istable(j),:)';
+      stoch_simul([]);
+      dr_ = oo_.dr;
+      T(:,:,j) = [dr_.ghx dr_.ghu];
+      if ~exist('nspred')
+        nspred = size(dr_.ghx,2);
+        nboth = dr_.nboth;
+        nfwrd = dr_.nfwrd;
+      end
+      ys_=real(dr_.ys);
+      yys(:,j) = ys_;
+      ys_=yys(:,1);
+      waitbar(j/ntrans,h,['MC iteration ',int2str(j),'/',int2str(ntrans)])
     end
-    ys_=real(dr_.ys);
-    yys(:,j) = ys_;
-    ys_=yys(:,1);
-    waitbar(j/Nsam,h,['MC iteration ',int2str(j),'/',int2str(Nsam)])
-  end
-  close(h)
-  if pprior
-    save([fname_,'_prior'],'T','-append')    
-  else
-    save([fname_,'_mc'],'T','-append')    
+    close(h)
+    save(filetoload,'T','-append')    
   end
 end
 
 if pprior
   aname='prior_stab';
   auname='prior_unacceptable';
+  aunstname='prior_unstable';
+  aindname='prior_indeterm';
   asname='prior_stable';
 else
   aname='mc_stab';
   auname='mc_unacceptable';
+  aunstname='mc_unstable';
+  aindname='mc_indeterm';
   asname='mc_stable';
 end
-delete([fname_,'_',aname,'_*.*']);
-delete([fname_,'_',aname,'_SA_*.*']);
-delete([fname_,'_',asname,'_corr_*.*']);
-delete([fname_,'_',auname,'_corr_*.*']);
+delete([OutputDirectoryName,'\',fname_,'_',aname,'_*.*']);
+%delete([OutputDirectoryName,'\',fname_,'_',aname,'_SA_*.*']);
+delete([OutputDirectoryName,'\',fname_,'_',asname,'_corr_*.*']);
+delete([OutputDirectoryName,'\',fname_,'_',auname,'_corr_*.*']);
+delete([OutputDirectoryName,'\',fname_,'_',aunstname,'_corr_*.*']);
+delete([OutputDirectoryName,'\',fname_,'_',aindname,'_corr_*.*']);
 
 if length(iunstable)>0 & length(iunstable)<Nsam,
   disp([num2str(length(istable)/Nsam*100),'\% of the prior support is stable.'])
-  if ~isempty(iwrong),
-    disp(['For ',num2str(length(iwrong)/Nsam*100),'\% of the prior support dynare could not find a solution.'])      
-  end
+  disp([num2str( (length(iunstable)-length(iwrong)-length(iindeterm) )/Nsam*100),'\% of the prior support is unstable.'])
   if ~isempty(iindeterm),
     disp([num2str(length(iindeterm)/Nsam*100),'\% of the prior support gives indeterminacy.'])
   end
+  if ~isempty(iwrong),
+    disp(' ');
+    disp(['For ',num2str(length(iwrong)/Nsam*100),'\% of the prior support dynare could not find a solution.'])      
+  end
   % Blanchard Kahn
-  proba = stab_map_1(lpmat, istable, iunstable, aname);
-  disp(' ')
+  [proba, dproba] = stab_map_1(lpmat, istable, iunstable, aname,0);
+  indstab=find(dproba>ksstat);
+  disp('The following parameters mostly drive acceptable behaviour')
+  disp(M_.param_names(estim_params_.param_vals(indstab,1),:))  
+  stab_map_1(lpmat, istable, iunstable, aname, 1, indstab, OutputDirectoryName);
+  if ~isempty(iindeterm),
+    ixun=iunstable(find(~ismember(iunstable,[iindeterm,iwrong])));
+    [proba, dproba] = stab_map_1(lpmat, [1:Nsam], iindeterm, [aname, '_indet'],0);
+    indindet=find(dproba>ksstat);
+    disp('The following parameters mostly drive indeterminacy')
+    disp(M_.param_names(estim_params_.param_vals(indindet,1),:))  
+    stab_map_1(lpmat, [1:Nsam], iindeterm, [aname, '_indet'], 1, indindet, OutputDirectoryName);
+    if ~isempty(ixun),
+      [proba, dproba] = stab_map_1(lpmat, [1:Nsam], ixun, [aname, '_unst'],0);
+      indunst=find(dproba>ksstat);
+      disp('The following parameters mostly drive instability')
+      disp(M_.param_names(estim_params_.param_vals(indunst,1),:))  
+      stab_map_1(lpmat, [1:Nsam], ixun, [aname, '_unst'], 1, indunst, OutputDirectoryName);
+    end
+  end
+  
   disp(' ')
   disp('Starting bivariate analysis:')
   
   c0=corrcoef(lpmat(istable,:));
   c00=tril(c0,-1);
   
-  stab_map_2(lpmat(istable,:),alpha2, asname);
-  stab_map_2(lpmat(iunstable,:),alpha2, auname);
+  stab_map_2(lpmat(istable,:),alpha2, asname, OutputDirectoryName);
+  stab_map_2(lpmat(iunstable,:),alpha2, auname, OutputDirectoryName);
+  if ~isempty(iindeterm),
+    stab_map_2(lpmat(iindeterm,:),alpha2, aindname, OutputDirectoryName);
+    if ~isempty(ixun),
+      stab_map_2(lpmat(ixun,:),alpha2, aunstname, OutputDirectoryName);
+    end
+  end
   
   x0=0.5.*(bayestopt_.ub(1:nshock)-bayestopt_.lb(1:nshock))+bayestopt_.lb(1:nshock);
   x0 = [x0; lpmat(istable(1),:)'];
