@@ -1,4 +1,4 @@
-function xparams=metropolis_draw(init)
+function [xparams, logpost]=metropolis_draw(init)
   global options_ estim_params_ M_
   persistent mh_nblck NumberOfDraws fname FirstLine FirstMhFile MAX_nruns
   
@@ -35,5 +35,6 @@ function xparams=metropolis_draw(init)
     MhLine = DrawNumber-(MhFilNumber-FirstMhFile-1)*MAX_nruns;
   end
 
-  load( [ fname '_mh' int2str(MhFilNumber) '_blck' int2str(ChainNumber) '.mat' ],'x2');
+  load( [ fname '_mh' int2str(MhFilNumber) '_blck' int2str(ChainNumber) '.mat' ],'x2','logpo2');
   xparams = x2(MhLine,:);
+  logpost= logpo2(MhLine);
