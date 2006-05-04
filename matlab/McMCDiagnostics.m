@@ -61,12 +61,14 @@ for j=1:npar
   for b = 1:nblck
     startline = 0;
     for n = 1:NumberOfMcFilesPerBlock-1
-      load([MhDirectoryName '/' mcfiles(n,1,b).name],'x2');
+      %load([MhDirectoryName '/' mcfiles(n,1,b).name],'x2');
+      load([MhDirectoryName '/' M_.fname '_mh',int2str(n),'_blck' int2str(b) '.mat'],'x2');
       tmp((b-1)*NumberOfDraws+startline+1:(b-1)*NumberOfDraws+MAX_nruns*n,1) = x2(:,j);
       clear x2;
       startline = startline + MAX_nruns;
     end
-    load([MhDirectoryName '/' mcfiles(NumberOfMcFilesPerBlock,1,b).name],'x2');
+    %load([MhDirectoryName '/' mcfiles(NumberOfMcFilesPerBlock,1,b).name],'x2');
+    load([MhDirectoryName '/' M_.fname '_mh',int2str(NumberOfMcFilesPerBlock),'_blck' int2str(b) '.mat'],'x2');
     tmp((b-1)*NumberOfDraws+startline+1:(b-1)*NumberOfDraws+MAX_nruns*(LastFileNumber-1)+LastLineNumber,1) = x2(:,j);
     clear x2;
     startline = startline + LastLineNumber;
@@ -147,6 +149,7 @@ for i = 1:pages
   end
   eval(['print -depsc2 ' DirectoryName '/' M_.fname '_udiag' int2str(i)]);
   eval(['print -dpdf ' DirectoryName '/' M_.fname '_udiag' int2str(i)]);
+  if options_.nograph, set(h,'visible','on'), end
   saveas(h,[DirectoryName '/' M_.fname '_udiag' int2str(i) '.fig']);
   if options_.nograph, close(h), end
   if TeX
@@ -216,6 +219,7 @@ if reste
   end
   eval(['print -depsc2 ' DirectoryName '/' M_.fname '_udiag' int2str(pages+1)]);
   eval(['print -dpdf ' DirectoryName '/' M_.fname '_udiag' int2str(pages+1)]);
+  if options_.nograph, set(h,'visible','on'), end
   saveas(h,[DirectoryName '/' M_.fname '_udiag' int2str(pages+1) '.fig']);
   if options_.nograph, close(h), end
   if TeX
@@ -257,11 +261,13 @@ MDIAG = zeros(NumberOfLines,6);
 for b = 1:nblck
   startline = 0;
   for n = 1:NumberOfMcFilesPerBlock-1
-    load([MhDirectoryName '/' mcfiles(n,1,b).name],'logpo2');
+    %load([MhDirectoryName '/' mcfiles(n,1,b).name],'logpo2');
+    load([MhDirectoryName '/' M_.fname '_mh',int2str(n),'_blck' int2str(b) '.mat'],'logpo2');
     tmp((b-1)*NumberOfDraws+startline+1:(b-1)*NumberOfDraws+MAX_nruns*n,1) = logpo2;
     startline = startline+MAX_nruns;
   end
-  load([MhDirectoryName '/' mcfiles(NumberOfMcFilesPerBlock,1,b).name],'logpo2');
+  %load([MhDirectoryName '/' mcfiles(NumberOfMcFilesPerBlock,1,b).name],'logpo2');
+  load([MhDirectoryName '/' M_.fname '_mh',int2str(NumberOfMcFilesPerBlock),'_blck' int2str(b) '.mat'],'logpo2');
   tmp((b-1)*NumberOfDraws+startline+1:(b-1)*NumberOfDraws+ MAX_nruns*(LastFileNumber-1)+LastLineNumber,1) = logpo2;
 end
 clear logpo2;
@@ -325,6 +331,7 @@ for crit = 1:3
 end
 eval(['print -depsc2 ' DirectoryName '/' M_.fname '_mdiag']);
 eval(['print -dpdf ' DirectoryName '/' M_.fname '_mdiag']);
+if options_.nograph, set(h,'visible','on'), end
 saveas(h,[DirectoryName '/' M_.fname '_mdiag.fig']);
 if options_.nograph, close(h), end
 if TeX
