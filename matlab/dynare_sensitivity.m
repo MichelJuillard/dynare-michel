@@ -36,7 +36,7 @@ options_gsa_ = set_default_option(options_gsa_,'load_redform',0);
 options_gsa_ = set_default_option(options_gsa_,'logtrans_redform',0);
 options_gsa_ = set_default_option(options_gsa_,'threshold_redform',[]);
 options_gsa_ = set_default_option(options_gsa_,'ksstat_redform',0.1);
-options_gsa_ = set_default_option(options_gsa_,'alpha2_redform',0.4);
+options_gsa_ = set_default_option(options_gsa_,'alpha2_redform',0.3);
 options_gsa_ = set_default_option(options_gsa_,'namendo',[]);
 options_gsa_ = set_default_option(options_gsa_,'namlagendo',[]);
 options_gsa_ = set_default_option(options_gsa_,'namexo',[]);
@@ -53,21 +53,23 @@ options_gsa_ = set_default_option(options_gsa_,'rmse',0);
 options_gsa_ = set_default_option(options_gsa_,'var_rmse',options_.varobs);
 options_gsa_ = set_default_option(options_gsa_,'load_rmse',0);
 options_gsa_ = set_default_option(options_gsa_,'pfilt_rmse',0.1);
+options_gsa_ = set_default_option(options_gsa_,'istart_rmse',1);
 options_gsa_ = set_default_option(options_gsa_,'alpha_rmse',0.002);
 options_gsa_ = set_default_option(options_gsa_,'alpha2_rmse',0.5);
 options_.opt_gsa = options_gsa_;
 if options_gsa_.rmse,
   if options_gsa_.pprior
-    a=load([fname_,'_prior']);
+    a=load([OutputDirectoryName,'\',fname_,'_prior']);
   else
-    a=load([fname_,'_mc']);
+    a=load([OutputDirectoryName,'\',fname_,'_mc']);
   end
   if ~isfield(a,'stock_filter'),
-    dynare_MC([]);
+    dynare_MC([],OutputDirectoryName);
     options_gsa_.load_rmse=0;
   end
   filt_mc_(options_gsa_.var_rmse, options_gsa_.load_rmse, options_gsa_.pfilt_rmse, ...
-    options_gsa_.alpha_rmse, options_gsa_.alpha2_rmse);
+    options_gsa_.alpha_rmse, options_gsa_.alpha2_rmse, OutputDirectoryName, ...
+    options_gsa_.istart_rmse);
 end
 
 
@@ -75,13 +77,13 @@ options_gsa_ = set_default_option(options_gsa_,'glue',0);
 if options_gsa_.glue,
   dr_ = oo_.dr;
   if options_gsa_.ppost
-    load([fname_,'_post']);
+    load([OutputDirectoryName,'\',fname_,'_post']);
     DirectoryName = CheckPath('metropolis');
   else
     if options_gsa_.pprior
-      load([fname_,'_prior']);
+      load([OutputDirectoryName,'\',fname_,'_prior']);
     else
-      load([fname_,'_mc']);
+      load([OutputDirectoryName,'\',fname_,'_mc']);
     end
   end
   nruns=size(x,1);
@@ -175,18 +177,18 @@ if options_gsa_.glue,
   if options_gsa_.ppost
     Info.dynare=M_.fname;
     Out=Out1;
-    save([fname_,'_post_glue'], 'Out', 'Sam', 'Lik', 'Obs', 'Rem','Info', 'Exo')
+    save([OutputDirectoryName,'\',fname_,'_post_glue'], 'Out', 'Sam', 'Lik', 'Obs', 'Rem','Info', 'Exo')
     %save([fname_,'_post_glue_smooth'], 'Out', 'Sam', 'Lik', 'Obs', 'Rem','Info')
     
   else
     if options_gsa_.pprior
-      save([fname_,'_prior_glue'], 'Out', 'Sam', 'Lik', 'Obs', 'Rem')
+      save([OutputDirectoryName,'\',fname_,'_prior_glue'], 'Out', 'Sam', 'Lik', 'Obs', 'Rem')
       Out=Out1;
-      save([fname_,'_prior_glue_smooth'], 'Out', 'Sam', 'Lik', 'Obs', 'Rem')
+      save([OutputDirectoryName,'\',fname_,'_prior_glue_smooth'], 'Out', 'Sam', 'Lik', 'Obs', 'Rem')
     else
-      save([fname_,'_mc_glue'], 'Out', 'Sam', 'Lik', 'Obs', 'Rem')
+      save([OutputDirectoryName,'\',fname_,'_mc_glue'], 'Out', 'Sam', 'Lik', 'Obs', 'Rem')
       Out=Out1;
-      save([fname_,'_mc_glue_smooth'], 'Out', 'Sam', 'Lik', 'Obs', 'Rem')
+      save([OutputDirectoryName,'\',fname_,'_mc_glue_smooth'], 'Out', 'Sam', 'Lik', 'Obs', 'Rem')
     end
   end
   
