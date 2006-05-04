@@ -104,6 +104,9 @@ for i=1:npar
   if subplotnum == MaxNumberOfPlotPerFigure | i == npar;
     eval(['print -depsc2 ' OutputDirectoryName '/' M_.fname '_PriorsAndPosteriors' int2str(figunumber)]);
     eval(['print -dpdf ' OutputDirectoryName '/' M_.fname '_PriorsAndPosteriors' int2str(figunumber)]);
+    if options_.nograph, 
+      set(hfig,'Visible','on');
+    end
     saveas(hfig,[OutputDirectoryName '/' M_.fname '_PriorsAndPosteriors' int2str(figunumber) '.fig']);
     if TeX
       fprintf(fidTeX,'\\begin{figure}[H]\n');
@@ -121,7 +124,9 @@ for i=1:npar
 	fclose(fidTeX);
       end
     end
-    if options_.nograph, close(hfig), end
+    if options_.nograph, 
+      close(hfig), 
+    end
     subplotnum = 0;
   end
 end
