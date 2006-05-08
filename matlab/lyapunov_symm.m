@@ -14,10 +14,21 @@ function [x,ns_var]=lyapunov_symm(a,b)
     e1 = abs(my_ordeig(t)) > 2-options_.qz_criterium;
   end
   k = sum(e1);
-  [u,t] = ordschur(u,t,e1); 
-  n = length(e1)-k;
-  b=u(:,k+1:end)'*b*u(:,k+1:end);
-  t = t(k+1:end,k+1:end);
+  if exist('ordschur','builtin')
+    % selects stable roots
+    [u,t] = ordschur(u,t,e1); 
+    n = length(e1)-k;
+    b=u(:,k+1:end)'*b*u(:,k+1:end);
+    t = t(k+1:end,k+1:end);
+  elseif k > 0
+    % problem for Matlab version that don't have ordschur
+    error(['lyapunov_sym: you need a Matlab version > 6.5 to handle models' ...
+	   ' with unit roots'])
+  else
+    % no unit root
+    n = length(e1);
+    b=u'*b*u;
+  end
   x=zeros(n,n);
   for i=n:-1:2
     if t(i,i-1) == 0
