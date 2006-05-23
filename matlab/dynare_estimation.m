@@ -82,7 +82,9 @@ n_varobs 	= size(options_.varobs,1);
 [xparam1,estim_params_,bayestopt_,lb,ub] = set_prior(estim_params_);
 
 if any(bayestopt_.pshape > 0)
-  plot_priors
+  if options_.mode_compute
+    plot_priors
+  end
 else
   options_.mh_replic = 0;
 end
