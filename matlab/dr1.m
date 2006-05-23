@@ -244,7 +244,7 @@ if nba ~= nyf
     temp = temp(nd-nba+1:nd-nyf)-1-options_.qz_criterium;
     info(1) = 3;
   elseif nba < nyf;
-    temp = temp(nd-nyf+1:nd-nba)-1-options_.qz_criterium
+    temp = temp(nd-nyf+1:nd-nba)-1-options_.qz_criterium;
     info(1) = 4;
   end
   info(2) = temp'*temp;
