@@ -144,14 +144,14 @@ function [fval,cost_flag,ys,trend_coeff,info] = DsgeLikelihood(xparam1,gend,data
       LIK = DiffuseLikelihoodH1(T,R,Q,H,Pinf,Pstar,data,trend,start);
       if isinf(LIK) & ~estim_params_.ncn %% The univariate approach considered here doesn't 
 					 %%	apply when H has some off-diagonal elements.
-					 LIK = DiffuseLikelihoodH3(T,R,Q,H,Pinf,Pstar,data,trend,start);
+        LIK = DiffuseLikelihoodH3(T,R,Q,H,Pinf,Pstar,data,trend,start);
       elseif isinf(LIK) & estim_params_.ncn
 	LIK = DiffuseLikelihoodH3corr(T,R,Q,H,Pinf,Pstar,data,trend,start);
       end
     elseif options_.kalman_algo == 3
       if ~estim_params_.ncn %% The univariate approach considered here doesn't 
 			    %%	apply when H has some off-diagonal elements.
-			    LIK = DiffuseLikelihoodH3(T,R,Q,H,Pinf,Pstar,data,trend,start);
+        LIK = DiffuseLikelihoodH3(T,R,Q,H,Pinf,Pstar,data,trend,start);
       else
 	LIK = DiffuseLikelihoodH3corr(T,R,Q,H,Pinf,Pstar,data,trend,start);
       end	
