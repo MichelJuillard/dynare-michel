@@ -270,3 +270,7 @@ global it_
       fclose(fidTeX);
     end
   end
+
+  
+
+  [omega,f] = UnivariateSpectralDensity(oo_.dr,var_list);

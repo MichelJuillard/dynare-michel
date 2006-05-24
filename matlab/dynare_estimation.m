@@ -694,7 +694,7 @@ if (any(bayestopt_.pshape  >0 ) & options_.mh_replic) | ...
   metropolis_draw(1);
   if options_.bayesian_irf
     PosteriorIRF('posterior');
-  end  
+  end
   return
   
 end
@@ -1157,7 +1157,11 @@ if ~((any(bayestopt_.pshape > 0) & options_.mh_replic) | (any(bayestopt_.pshape 
       fclose(fidTeX);
     end    
   end
-end %	<--	if ML estimation, posterior mode without metropolis-hastings or metropolis 
+end 
+
+
+
+%	<--	if ML estimation, posterior mode without metropolis-hastings or metropolis 
     %		without bayesian posterior forecasts.
 
 % SA 07-31-2004		* Added TeX output.
