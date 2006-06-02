@@ -11,6 +11,7 @@ global it_
   
 
 options_ = set_default_option(options_,'olr',0);
+options_ = set_default_option(options_,'jacobian_flag',1);
 info = 0;
 
 it_ = M_.maximum_lag + 1 ;
@@ -24,17 +25,18 @@ tempex = oo_.exo_simul;
 oo_.exo_simul = repmat(oo_.exo_steady_state',M_.maximum_lag+M_.maximum_lead+1,1);
 if M_.exo_det_nbr > 0 
   tempexdet = oo_.exo_det_simul;
-  oo_.exo_det_simul = ones(M_.maximum_lag+1,1)*oo_.exo_steady_statedet_';
+  oo_.exo_det_simul = repmat(oo_.exo_det_steady_state',M_.maximum_lag+M_.maximum_lead+1,1);
 end
 dr.ys = ys;
 fh = str2func([M_.fname '_static']);
 if options_.linear == 0
-  if max(abs(feval(fh,dr.ys,oo_.exo_steady_state))) > options_.dynatol & options_.olr == 0
+  if max(abs(feval(fh,dr.ys,[oo_.exo_steady_state; oo_.exo_det_steady_state]))) > options_.dynatol & options_.olr == 0
     if exist([M_.fname '_steadystate'])
-      [dr.ys,check1] = feval([M_.fname '_steadystate'],dr.ys,oo_.exo_steady_state);
+      [dr.ys,check1] = feval([M_.fname '_steadystate'],dr.ys,...
+			     [oo_.exo_steady_state; oo_.exo_det_steady_state]);
     else
-      %[dr.ys,check1] = dynare_solve(fh,dr.ys,oo_.exo_steady_state);
-      [dr.ys,check1] = dynare_solve(fh,dr.ys,1,oo_.exo_steady_state);
+      [dr.ys,check1] = dynare_solve(fh,dr.ys,options_.jacobian_flag,...
+				    [oo_.exo_steady_state; oo_.exo_det_steady_state]);
     end
     if check1
       info(1) = 20;

@@ -4,6 +4,8 @@ function steady(linear)
 
   global M_ oo_ options_ ys0_ 
 
+  options_ = set_default_option(options_,'jacobian_flag',1);
+
   steady_;
   
   disp(' ')

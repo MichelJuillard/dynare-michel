@@ -2,23 +2,19 @@
 %
 function steady_()
 
-  global M_ oo_ it_
-
-
-  x = oo_.steady_state ;
-  xlen = M_.maximum_lag + M_.maximum_lead + 1 ;
-  nn = size(M_.lead_lag_incidence,2) ;
-  it_ = M_.maximum_lag+1 ;
-  x = repmat(oo_.exo_steady_state',xlen,1);
-
-  if M_.exo_det_nbr > 0
-    x = [x, repmat(oo_.exo_det_steady_state',M_.maximum_lag+1,1)] ;
-  end
+  global M_ oo_ it_ options_
 
   if exist([M_.fname '_steadystate'])
-    [oo_.steady_state,check] = feval([M_.fname '_steadystate'],oo_.steady_state,x);
+    [oo_.steady_state,check] = feval([M_.fname '_steadystate'],...
+				     oo_.steady_state,...
+				     [oo_.exo_steady_state; ...
+		                      oo_.exo_det_steady_state]);
   else
-    [oo_.steady_state,check] = dynare_solve([M_.fname '_static'],oo_.steady_state,1,x);
+    [oo_.steady_state,check] = dynare_solve([M_.fname '_static'],...
+				     oo_.steady_state,...
+				     options_.jacobian_flag, ...	    
+			             [oo_.exo_steady_state; ...
+		                      oo_.exo_det_steady_state]);
   end
 
   if check ~= 0
