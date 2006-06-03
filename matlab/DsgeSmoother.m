@@ -16,6 +16,7 @@ function [alphahat,etahat,epsilonhat,ahat,SteadyState,trend_coeff,aK] = DsgeSmoo
   % 2. call model setup & reduction program
   %------------------------------------------------------------------------------
   [T,R,SteadyState] = dynare_resolve;
+  bayestopt_.mf = bayestopt_.mf2;
   if options_.loglinear == 1
     constant = log(SteadyState(bayestopt_.mfys));
   else

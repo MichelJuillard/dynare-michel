@@ -200,8 +200,20 @@ for i=1:n_varobs
   k = [k strmatch(deblank(options_.varobs(i,:)),M_.endo_names(dr.order_var,:),'exact')];
   k1 = [k1 strmatch(deblank(options_.varobs(i,:)),M_.endo_names, 'exact')];
 end
+% union of observed and state variables
+k2 = union(k',[dr.nstatic+1:dr.nstatic+dr.npred]');
+% including variables in t-2 and earlier, if any
+k2 = [k2;[M_.endo_nbr+(1:dr.nspred-dr.npred)]'];
 
-bayestopt_.mf 	= k;
+% set restrict_state to postion of observed + state variables
+% in expanded state vector
+bayestopt_.restrict_state = k2;
+% set mf1 to positions of observed variables in restricted state vector
+% for likelihood computation
+[junk,bayestopt_.mf1] = ismember(k,k2); 
+% set mf2 to positions of observed variables in expanded state vector
+% for filtering and smoothing
+bayestopt_.mf2 	= k;
 bayestopt_.mfys = k1;
 options_ = set_default_option(options_,'nobs',size(rawdata,1)-options_.first_obs+1);
 gend = options_.nobs;

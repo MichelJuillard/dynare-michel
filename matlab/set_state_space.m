@@ -78,7 +78,7 @@ dr.kad = kad;
 dr.kae = kae;
 dr.nboth = nboth;
 dr.nfwrd = nfwrd;
-
-% 06/01/03 MJ removed negative entries for kstate(:,3) when lags on more
-%             than 1 period
-% 06/25/03 MJ corrected logic for kmask computation when M_.maximum_lead == 0
+% number of forward variables in the state vector
+dr.nsfwrd = sum(kstate(:,2) > M_.maximum_lag+1);
+% number of predetermined variables in the state vector
+dr.nspred = sum(kstate(:,2) <= M_.maximum_lag+1);

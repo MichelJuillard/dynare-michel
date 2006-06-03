@@ -87,6 +87,7 @@ function [fval,cost_flag,ys,trend_coeff,info] = DsgeLikelihood(xparam1,gend,data
   % 2. call model setup & reduction program
   %------------------------------------------------------------------------------
   [T,R,SteadyState,info] = dynare_resolve;
+  rs = bayestopt_.restrict_state;
   if info(1) == 1 | info(1) == 2 | info(1) == 5
     fval = bayestopt_.penalty+1;
     cost_flag = 0;
@@ -96,6 +97,9 @@ function [fval,cost_flag,ys,trend_coeff,info] = DsgeLikelihood(xparam1,gend,data
     cost_flag = 0;
     return
   end
+  T = T(rs,rs);
+  R = R(rs,:);
+  bayestopt_.mf = bayestopt_.mf1;
   if options_.loglinear == 1
     constant = log(SteadyState(bayestopt_.mfys));
   else

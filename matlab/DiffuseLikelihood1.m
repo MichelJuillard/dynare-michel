@@ -70,7 +70,7 @@ function [LIK, lik] = DiffuseLikelihood1(T,R,Q,Pinf,Pstar,Y,trend,start)
       lik(t)    = log(dF)+transpose(v)*iF*v;
       K         = Pstar(:,mf)*iF; %% premultiplication by the transition matrix T is removed (stephane)
       a         = T*(a+K*v);		%% --> factorization of the transition matrix...
-      Pstar     = T*(Pstar-Pstar(:,mf)*iF*Pstar(mf,:))*transpose(T)+QQ;	%% ... idem (stephane)
+      Pstar     = T*(Pstar-K*Pstar(mf,:))*transpose(T)+QQ;	%% ... idem (stephane)
     end
     notsteady = ~(max(max(abs(Pstar-oldPstar)))<crit);
   end
