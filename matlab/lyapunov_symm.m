@@ -1,6 +1,33 @@
-% solves x-a*x*a'=b for b (and then x) symmetrical
 function [x,ns_var]=lyapunov_symm(a,b)
+% solves the Lyapunov equation 
+% x-a*x*a' = b 
+% for b (and then x) symmetrical
+% if a has some unit roots, the function computes only
+% the solution of the stable subsystem
+%  
+% INPUTS:
+%   a: coefficient matrix (n x n)  
+%   b: coefficient square matrix (n x n)
+%
+% OUTPUTS
+%   x: solution matrix (m x m)
+%   ns_var: vector of indices of non-stationary variables (p x 1)
+%           (m + p = n)
+%
+% ALGORITHM
+%   uses reordered Schur decomposition
+%
+% SPECIAL REQUIREMENTS
+%   needs Matlab version with ordeig function
+  
+  
+% part of DYNARE, copyright S. Adjemian, M. Juillard (2006)
+% Gnu Public License  
+
+  
+  
   global options_ 
+  ns_var = [];
   
   info = 0;
   if size(a,1) == 1
@@ -68,5 +95,4 @@ function [x,ns_var]=lyapunov_symm(a,b)
     x(1,1)=(b(1,1)+c)/(1-t(1,1)*t(1,1));
   end
   x=u(:,k+1:end)*x*u(:,k+1:end)';
-  ns_var = [];
   ns_var = find(any(abs(u(:,1:k)) > 1e-8,2)); 
