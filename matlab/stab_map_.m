@@ -196,6 +196,7 @@ if fload==0 | nargin<2 | isempty(fload),
       istable(j)=0;
       if isfield(dr_,'eigval')
         egg(:,j) = sort(dr_.eigval);
+        if exist('nspred')
         if any(isnan(egg(1:nspred,j)))
           iwrong(j)=j;
         else
@@ -203,6 +204,7 @@ if fload==0 | nargin<2 | isempty(fload),
             iindeterm(j)=j;
           end                                      
         end  
+        end
       else
         egg(:,j)=ones(size(egg,1),1).*1.1;
         iwrong(j)=j;
