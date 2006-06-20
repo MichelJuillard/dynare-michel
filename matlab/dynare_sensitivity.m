@@ -20,12 +20,12 @@ options_gsa_ = set_default_option(options_gsa_,'Nsam',2048);
 options_gsa_ = set_default_option(options_gsa_,'load_stab',0);
 options_gsa_ = set_default_option(options_gsa_,'alpha2_stab',0.3);
 options_gsa_ = set_default_option(options_gsa_,'ksstat',0.1);
-options_gsa_ = set_default_option(options_gsa_,'load_mh',0);
+%options_gsa_ = set_default_option(options_gsa_,'load_mh',0);
 
 OutputDirectoryName = CheckPath('GSA');  
 
 
-if options_gsa_.stab & ~options_gsa_.load_mh,
+if options_gsa_.stab & ~options_gsa_.ppost,
   x0 = stab_map_(options_gsa_.Nsam, options_gsa_.load_stab, options_gsa_.ksstat, options_gsa_.alpha2_stab, ...
     options_gsa_.redform, options_gsa_.pprior, options_gsa_.ilptau, OutputDirectoryName);
 end
@@ -41,7 +41,7 @@ options_gsa_ = set_default_option(options_gsa_,'namendo',[]);
 options_gsa_ = set_default_option(options_gsa_,'namlagendo',[]);
 options_gsa_ = set_default_option(options_gsa_,'namexo',[]);
 
-if options_gsa_.redform & ~isempty(options_gsa_.namendo) & ~options_gsa_.load_mh,
+if options_gsa_.redform & ~isempty(options_gsa_.namendo) & ~options_gsa_.ppost,
   redform_map(options_gsa_.namendo, options_gsa_.namlagendo, options_gsa_.namexo, ...
     options_gsa_.load_redform, options_gsa_.pprior, options_gsa_.logtrans_redform, ...
     options_gsa_.threshold_redform, options_gsa_.ksstat_redform, ...
@@ -55,9 +55,10 @@ options_gsa_ = set_default_option(options_gsa_,'load_rmse',0);
 options_gsa_ = set_default_option(options_gsa_,'pfilt_rmse',0.1);
 options_gsa_ = set_default_option(options_gsa_,'istart_rmse',1);
 options_gsa_ = set_default_option(options_gsa_,'alpha_rmse',0.002);
-options_gsa_ = set_default_option(options_gsa_,'alpha2_rmse',0.5);
-options_.opt_gsa = options_gsa_;
+options_gsa_ = set_default_option(options_gsa_,'alpha2_rmse',1);
+%options_.opt_gsa = options_gsa_;
 if options_gsa_.rmse,
+  if ~options_gsa_.ppost
   if options_gsa_.pprior
     a=load([OutputDirectoryName,'\',fname_,'_prior']);
   else
@@ -66,6 +67,7 @@ if options_gsa_.rmse,
   if ~isfield(a,'stock_filter'),
     dynare_MC([],OutputDirectoryName);
     options_gsa_.load_rmse=0;
+  end
   end
   filt_mc_(options_gsa_.var_rmse, options_gsa_.load_rmse, options_gsa_.pfilt_rmse, ...
     options_gsa_.alpha_rmse, options_gsa_.alpha2_rmse, OutputDirectoryName, ...
@@ -94,7 +96,8 @@ if options_gsa_.glue,
     rawdata = log(rawdata);
   end
   if options_.prefilter == 1
-    data = transpose(rawdata-ones(gend,1)*bayestopt_.mean_varobs);
+    %data = transpose(rawdata-ones(gend,1)*bayestopt_.mean_varobs);
+    data = transpose(rawdata-ones(gend,1)*mean(rawdata,1));
   else
     data = transpose(rawdata);
   end
@@ -176,6 +179,7 @@ if options_gsa_.glue,
   
   if options_gsa_.ppost
     Info.dynare=M_.fname;
+    Info.order_var=dr_.order_var;
     Out=Out1;
     save([OutputDirectoryName,'\',fname_,'_post_glue'], 'Out', 'Sam', 'Lik', 'Obs', 'Rem','Info', 'Exo')
     %save([fname_,'_post_glue_smooth'], 'Out', 'Sam', 'Lik', 'Obs', 'Rem','Info')
