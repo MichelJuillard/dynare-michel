@@ -125,7 +125,8 @@ if ~loadSA,
   for i=1:size(vvarvecm,1),
     vj=deblank(vvarvecm(i,:));
     if options_.prefilter == 1
-      eval([vj,'=',vj,'-bayestopt_.mean_varobs(i);'])
+      %eval([vj,'=',vj,'-bayestopt_.mean_varobs(i);'])
+      eval([vj,'=',vj,'-mean(',vj,',1);'])
     end
     
     jxj = strmatch(vj,lgy_(dr_.order_var,:),'exact');
@@ -135,12 +136,15 @@ if ~loadSA,
     end
     y0=zeros(nobs+1,nruns);
     if options_.opt_gsa.ppost
+      %y0=zeros(nobs+max(options_.filter_step_ahead),nruns);
       nbb=0;
       for j=1:length(filfilt),
         load([DirectoryName '/' M_.fname '_filter',num2str(j),'.mat']);
         nb = size(stock,4);
-        y0(:,nbb+1:nbb+nb)=squeeze(stock(1,jxj,:,:)); + ...
-          kron(sto_ys(nbb+1:nbb+nb,js)',ones(size(stock,3),1));
+%         y0(:,nbb+1:nbb+nb)=squeeze(stock(1,jxj,:,:)) + ...
+%           kron(sto_ys(nbb+1:nbb+nb,js)',ones(size(stock,3),1));
+        y0(:,nbb+1:nbb+nb)=squeeze(stock(1,jxj,1:nobs+1,:)) + ...
+          kron(sto_ys(nbb+1:nbb+nb,js)',ones(nobs+1,1));
         %y0(:,:,size(y0,3):size(y0,3)+size(stock,3))=stock;
         nbb=nbb+nb;
         clear stock;
@@ -212,84 +216,102 @@ for i=1:size(vvarvecm,1),
     PP(j,i)=P;
   end
 end
-figure('name','prior')
+ifig=0;
 for i=1:size(vvarvecm,1),
-  subplot(3,3,i)
+  if mod(i,9)==1,
+    ifig=ifig+1;
+    figure('name',['Prior ',int2str(ifig)])
+  end
+  subplot(3,3,i-9*(ifig-1))
   h=cumplot(lnprior(ixx(1:nfilt0(i),i)));
   set(h,'color','red')
   hold on, cumplot(lnprior)
   h=cumplot(lnprior(ixx(nfilt0(i)+1:end,i)));
   set(h,'color','green')
   title(vvarvecm(i,:))
-end
-if options_.opt_gsa.ppost
-  saveas(gcf,[OutDir,'\',fname_,'_SA_fit_post_lnprior'])
-  eval(['print -depsc2 ' OutDir '\' fname_ '_SA_fit_post_lnprior']);
-  eval(['print -dpdf ' OutDir '\' fname_ '_SA_fit_post_lnprior']);
-else
-  if options_.opt_gsa.pprior
-    saveas(gcf,[OutDir,'\',fname_,'_SA_fit_prior_lnprior'])
-    eval(['print -depsc2 ' OutDir '\' fname_ '_SA_fit_prior_lnprior']);
-    eval(['print -dpdf ' OutDir '\' fname_ '_SA_fit_prior_lnprior']);
-  else
-    saveas(gcf,[OutDir,'\',fname_,'_SA_fit_mc_lnprior'])
-    eval(['print -depsc2 ' OutDir '\' fname_ '_SA_fit_mc_lnprior']);
-    eval(['print -dpdf ' OutDir '\' fname_ '_SA_fit_mc_lnprior']);
+  if mod(i,9)==0 | i==size(vvarvecm,1)
+    if options_.opt_gsa.ppost
+      saveas(gcf,[OutDir,'\',fname_,'_SA_fit_post_lnprior',int2str(ifig)])
+      eval(['print -depsc2 ' OutDir '\' fname_ '_SA_fit_post_lnprior',int2str(ifig)]);
+      eval(['print -dpdf ' OutDir '\' fname_ '_SA_fit_post_lnprior',int2str(ifig)]);
+    else
+      if options_.opt_gsa.pprior
+        saveas(gcf,[OutDir,'\',fname_,'_SA_fit_prior_lnprior',int2str(ifig)])
+        eval(['print -depsc2 ' OutDir '\' fname_ '_SA_fit_prior_lnprior',int2str(ifig)]);
+        eval(['print -dpdf ' OutDir '\' fname_ '_SA_fit_prior_lnprior',int2str(ifig)]);
+      else
+        saveas(gcf,[OutDir,'\',fname_,'_SA_fit_mc_lnprior',int2str(ifig)])
+        eval(['print -depsc2 ' OutDir '\' fname_ '_SA_fit_mc_lnprior',int2str(ifig)]);
+        eval(['print -dpdf ' OutDir '\' fname_ '_SA_fit_mc_lnprior',int2str(ifig)]);
+      end
+    end
+    close(gcf)
   end
 end
-close(gcf)
-figure('name','likelihood')
+ifig=0;
 for i=1:size(vvarvecm,1),
-  subplot(3,3,i)
+  if mod(i,9)==1,
+    ifig=ifig+1;
+    figure('name',['Likelihood ',int2str(ifig)])
+  end
+  subplot(3,3,i-9*(ifig-1))
   h=cumplot(likelihood(ixx(1:nfilt0(i),i)));
   set(h,'color','red')
   hold on, h=cumplot(likelihood);
   h=cumplot(likelihood(ixx(nfilt0(i)+1:end,i)));
   set(h,'color','green')
   title(vvarvecm(i,:))
-end
-if options_.opt_gsa.ppost
-  saveas(gcf,[OutDir,'\',fname_,'_SA_fit_post_lnlik'])
-  eval(['print -depsc2 ' OutDir '\' fname_ '_SA_fit_post_lnlik']);
-  eval(['print -dpdf ' OutDir '\' fname_ '_SA_fit_post_lnlik']);
-else
-  if options_.opt_gsa.pprior
-    saveas(gcf,[OutDir,'\',fname_,'_SA_fit_prior_lnlik'])
-    eval(['print -depsc2 ' OutDir '\' fname_ '_SA_fit_prior_lnlik']);
-    eval(['print -dpdf ' OutDir '\' fname_ '_SA_fit_prior_lnlik']);
-  else
-    saveas(gcf,[OutDir,'\',fname_,'_SA_fit_mc_lnlik'])
-    eval(['print -depsc2 ' OutDir '\' fname_ '_SA_fit_mc_lnlik']);
-    eval(['print -dpdf ' OutDir '\' fname_ '_SA_fit_mc_lnlik']);
+  if mod(i,9)==0 | i==size(vvarvecm,1)
+    if options_.opt_gsa.ppost
+      saveas(gcf,[OutDir,'\',fname_,'_SA_fit_post_lnlik',int2str(ifig)])
+      eval(['print -depsc2 ' OutDir '\' fname_ '_SA_fit_post_lnlik',int2str(ifig)]);
+      eval(['print -dpdf ' OutDir '\' fname_ '_SA_fit_post_lnlik',int2str(ifig)]);
+    else
+      if options_.opt_gsa.pprior
+        saveas(gcf,[OutDir,'\',fname_,'_SA_fit_prior_lnlik',int2str(ifig)])
+        eval(['print -depsc2 ' OutDir '\' fname_ '_SA_fit_prior_lnlik',int2str(ifig)]);
+        eval(['print -dpdf ' OutDir '\' fname_ '_SA_fit_prior_lnlik',int2str(ifig)]);
+      else
+        saveas(gcf,[OutDir,'\',fname_,'_SA_fit_mc_lnlik',int2str(ifig)])
+        eval(['print -depsc2 ' OutDir '\' fname_ '_SA_fit_mc_lnlik',int2str(ifig)]);
+        eval(['print -dpdf ' OutDir '\' fname_ '_SA_fit_mc_lnlik',int2str(ifig)]);
+      end
+    end
+    close(gcf)
   end
 end
-close(gcf)
-figure('name','posterior')
+ifig=0;
 for i=1:size(vvarvecm,1),
-  subplot(3,3,i)
+  if mod(i,9)==1,
+    ifig=ifig+1;
+    figure('name',['Posterior ',int2str(ifig)])
+  end
+  subplot(3,3,i-9*(ifig-1))
   h=cumplot(logpo2(ixx(1:nfilt0(i),i)));
   set(h,'color','red')
   hold on, h=cumplot(logpo2);
   h=cumplot(logpo2(ixx(nfilt0(i)+1:end,i)));
-  set(h,'color','green')  
+  set(h,'color','green')
   title(vvarvecm(i,:))
-end
-if options_.opt_gsa.ppost
-  saveas(gcf,[OutDir,'\',fname_,'_SA_fit_post_lnpost'])
-  eval(['print -depsc2 ' OutDir '\' fname_ '_SA_fit_post_lnpost']);
-  eval(['print -dpdf ' OutDir '\' fname_ '_SA_fit_post_lnpost']);
-else
-  if options_.opt_gsa.pprior
-    saveas(gcf,[OutDir,'\',fname_,'_SA_fit_prior_lnpost'])
-    eval(['print -depsc2 ' OutDir '\' fname_ '_SA_fit_prior_lnpost']);
-    eval(['print -dpdf ' OutDir '\' fname_ '_SA_fit_prior_lnpost']);
-  else
-    saveas(gcf,[OutDir,'\',fname_,'_SA_fit_mc_lnpost'])
-    eval(['print -depsc2 ' OutDir '\' fname_ '_SA_fit_mc_lnpost']);
-    eval(['print -dpdf ' OutDir '\' fname_ '_SA_fit_mc_lnpost']);
+  if mod(i,9)==0 | i==size(vvarvecm,1)
+    if options_.opt_gsa.ppost
+      saveas(gcf,[OutDir,'\',fname_,'_SA_fit_post_lnpost',int2str(ifig)])
+      eval(['print -depsc2 ' OutDir '\' fname_ '_SA_fit_post_lnpost',int2str(ifig)]);
+      eval(['print -dpdf ' OutDir '\' fname_ '_SA_fit_post_lnpost',int2str(ifig)]);
+    else
+      if options_.opt_gsa.pprior
+        saveas(gcf,[OutDir,'\',fname_,'_SA_fit_prior_lnpost',int2str(ifig)])
+        eval(['print -depsc2 ' OutDir '\' fname_ '_SA_fit_prior_lnpost',int2str(ifig)]);
+        eval(['print -dpdf ' OutDir '\' fname_ '_SA_fit_prior_lnpost',int2str(ifig)]);
+      else
+        saveas(gcf,[OutDir,'\',fname_,'_SA_fit_mc_lnpost',int2str(ifig)])
+        eval(['print -depsc2 ' OutDir '\' fname_ '_SA_fit_mc_lnpost',int2str(ifig)]);
+        eval(['print -dpdf ' OutDir '\' fname_ '_SA_fit_mc_lnpost',int2str(ifig)]);
+      end
+    end
+    close(gcf)
   end
 end
-close(gcf)
 
 param_names='';
 for j=1:npar+nshock,
@@ -399,7 +421,7 @@ for ix=1:ceil(length(nsnam)/6),
     subplot(2,3,j-6*(ix-1))
     %h0=cumplot(x(:,nsnam(j)+nshock));
     h0=cumplot(x(:,nsnam(j)));
-    %set(h0,'color',[1 1 1])
+    set(h0,'color',[0 0 0])
     hold on,
     np=find(SP(nsnam(j),:));
     %a0=jet(nsp(nsnam(j)));
@@ -455,7 +477,7 @@ for ix=1:ceil(length(nsnam)/6),
     optimal_bandwidth = mh_optimal_bandwidth(x(:,nsnam(j)),size(x,1),bandwidth,kernel_function); 
     [x1,f1] = kernel_density_estimate(x(:,nsnam(j)),number_of_grid_points,...
         optimal_bandwidth,kernel_function);
-    h0 = plot(x1, f1);
+    h0 = plot(x1, f1,'k');
     hold on,
     np=find(SP(nsnam(j),:));
     %a0=jet(nsp(nsnam(j)));
