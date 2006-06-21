@@ -27,9 +27,22 @@ function resid(period)
     iyr0 = iyr0 + n;
   end
 
-  disp([[1:period]' z']); 
+  % disp([[1:period]' z']); 
 
-
+  for i = 1:4
+    disp(' ')
+  end
+  
+  for i=1:length(z)
+    if abs(z(i)) < 10^(-12)
+      z(i) = 0;
+    end
+    disp(['Residual for equation number ' int2str(i) ' is equal to ' num2str(z(i))])
+  end  
+  
+  for i = 1:2
+    disp(' ')
+  end
 
 
 
