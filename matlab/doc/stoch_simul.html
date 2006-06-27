@@ -1,0 +1,322 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of stoch_simul</title>
+  <meta name="keywords" content="stoch_simul">
+  <meta name="description" content="Copyright (C) 2001 Michel Juillard">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2003 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../index.html">Home</a> &gt;  <a href="index.html">.</a> &gt; stoch_simul.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../index.html"><img alt="<" border="0" src="../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="index.html">Index for .&nbsp;<img alt=">" border="0" src="../right.png"></a></td></tr></table>-->
+
+<h1>stoch_simul
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>Copyright (C) 2001 Michel Juillard</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function info=stoch_simul(var_list) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> Copyright (C) 2001 Michel Juillard</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="UnivariateSpectralDensity.html" class="code" title="function [omega,f] = UnivariateSpectralDensity(dr,var_list)">UnivariateSpectralDensity</a>	stephane.adjemian@ens.fr</li><li><a href="check_model.html" class="code" title="function check_model()">check_model</a>	</li><li><a href="disp_dr.html" class="code" title="function disp_dr(dr,order,var_list)">disp_dr</a>	Copyright (C) 2001 Michel Juillard</li><li><a href="disp_moments.html" class="code" title="function disp_moments(y,var_list)">disp_moments</a>	Copyright (C) 2001 Michel Juillard</li><li><a href="disp_th_moments.html" class="code" title="function disp_th_moments(dr,var_list)">disp_th_moments</a>	Copyright (C) 2001 Michel Juillard</li><li><a href="dyn2vec.html" class="code" title="function [z,zss]=dyn2vec(s1,s2);">dyn2vec</a>	Copyright (C) 2001 Michel Juillard</li><li><a href="irf.html" class="code" title="function y = irf(dr, e1, long, drop, replic, iorder)">irf</a>	</li><li><a href="pltorg.html" class="code" title="function [nbplt,nr,nc,lr,lc,nstar] = pltorg(number)">pltorg</a>	stephane.adjemian@cepremap.cnrs.fr [06-07-2004]</li><li><a href="print_info.html" class="code" title="function print_info(info)">print_info</a>	Copyright (C) 2005 Michel Juillard</li><li><a href="resol.html" class="code" title="function [dr,info]=resol(ys,check_flag)">resol</a>	Copyright (C) 2001 Michel Juillard</li><li><a href="set_default_option.html" class="code" title="function options=set_default_option(options,field,default)">set_default_option</a>	</li><li><a href="simult.html" class="code" title="function y_=simult(ys, dr)">simult</a>	Copyright (C) 2001 Michel Juillard</li><li><a href="table.html" class="code" title="function table(title,headers,labels,values,label_width,val_width,val_precis)">table</a>	Copyright (C) 2002 Michel Juillard</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="stab_map_.html" class="code" title="function x0 = stab_map_(Nsam, fload, ksstat, alpha2, prepSA, pprior, ilptau, OutputDirectoryName)">stab_map_</a>	</li></ul>
+<!-- crossreference -->
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <span class="comment">% Copyright (C) 2001 Michel Juillard</span>
+0002 <span class="comment">%</span>
+0003 <a name="_sub0" href="#_subfunctions" class="code">function info=stoch_simul(var_list)</a>
+0004 <span class="keyword">global</span> M_ options_ oo_
+0005 
+0006 <span class="keyword">global</span> it_
+0007   options_ = <a href="set_default_option.html" class="code" title="function options=set_default_option(options,field,default)">set_default_option</a>(options_,<span class="string">'TeX'</span>,0);  
+0008   options_ = <a href="set_default_option.html" class="code" title="function options=set_default_option(options,field,default)">set_default_option</a>(options_,<span class="string">'order'</span>,2);
+0009   options_ = <a href="set_default_option.html" class="code" title="function options=set_default_option(options,field,default)">set_default_option</a>(options_,<span class="string">'linear'</span>,0);
+0010   <span class="keyword">if</span> options_.linear
+0011     options_.order = 1;
+0012   <span class="keyword">end</span>
+0013   options_ = <a href="set_default_option.html" class="code" title="function options=set_default_option(options,field,default)">set_default_option</a>(options_,<span class="string">'ar'</span>,5);
+0014   options_ = <a href="set_default_option.html" class="code" title="function options=set_default_option(options,field,default)">set_default_option</a>(options_,<span class="string">'irf'</span>,40);
+0015   options_ = <a href="set_default_option.html" class="code" title="function options=set_default_option(options,field,default)">set_default_option</a>(options_,<span class="string">'relative_irf'</span>,0);
+0016   options_ = <a href="set_default_option.html" class="code" title="function options=set_default_option(options,field,default)">set_default_option</a>(options_,<span class="string">'dr_algo'</span>,0);
+0017   options_ = <a href="set_default_option.html" class="code" title="function options=set_default_option(options,field,default)">set_default_option</a>(options_,<span class="string">'simul_algo'</span>,0);
+0018   options_ = <a href="set_default_option.html" class="code" title="function options=set_default_option(options,field,default)">set_default_option</a>(options_,<span class="string">'drop'</span>,100);
+0019   <span class="keyword">if</span> options_.order == 1
+0020     options_.replic = 1;
+0021   <span class="keyword">else</span>
+0022     options_ = <a href="set_default_option.html" class="code" title="function options=set_default_option(options,field,default)">set_default_option</a>(options_,<span class="string">'replic'</span>,50);
+0023   <span class="keyword">end</span>
+0024   options_ = <a href="set_default_option.html" class="code" title="function options=set_default_option(options,field,default)">set_default_option</a>(options_,<span class="string">'nomoments'</span>,0);
+0025   options_ = <a href="set_default_option.html" class="code" title="function options=set_default_option(options,field,default)">set_default_option</a>(options_,<span class="string">'nocorr'</span>,0);
+0026   options_ = <a href="set_default_option.html" class="code" title="function options=set_default_option(options,field,default)">set_default_option</a>(options_,<span class="string">'simul_seed'</span>,[]);
+0027   options_ = <a href="set_default_option.html" class="code" title="function options=set_default_option(options,field,default)">set_default_option</a>(options_,<span class="string">'hp_filter'</span>,0);
+0028   options_ = <a href="set_default_option.html" class="code" title="function options=set_default_option(options,field,default)">set_default_option</a>(options_,<span class="string">'hp_ngrid'</span>,512);
+0029   options_ = <a href="set_default_option.html" class="code" title="function options=set_default_option(options,field,default)">set_default_option</a>(options_,<span class="string">'simul'</span>,0);
+0030   options_ = <a href="set_default_option.html" class="code" title="function options=set_default_option(options,field,default)">set_default_option</a>(options_,<span class="string">'periods'</span>,0);
+0031   options_ = <a href="set_default_option.html" class="code" title="function options=set_default_option(options,field,default)">set_default_option</a>(options_,<span class="string">'noprint'</span>,0);
+0032 
+0033   TeX = options_.TeX;
+0034 
+0035   iter_ = max(options_.periods,1);
+0036   <span class="keyword">if</span> M_.exo_nbr &gt; 0
+0037     oo_.exo_simul= ones(iter_ + M_.maximum_lag + M_.maximum_lead,1) * oo_.exo_steady_state';
+0038   <span class="keyword">end</span>
+0039 
+0040   <a href="check_model.html" class="code" title="function check_model()">check_model</a>;
+0041 
+0042   [oo_.dr, info] = <a href="resol.html" class="code" title="function [dr,info]=resol(ys,check_flag)">resol</a>(oo_.steady_state,0);
+0043 
+0044   <span class="keyword">if</span> info(1)
+0045     <a href="print_info.html" class="code" title="function print_info(info)">print_info</a>(info);
+0046     <span class="keyword">return</span>
+0047   <span class="keyword">end</span>  
+0048 
+0049   <span class="keyword">if</span> ~options_.noprint
+0050     disp(<span class="string">' '</span>)
+0051     disp(<span class="string">'MODEL SUMMARY'</span>)
+0052     disp(<span class="string">' '</span>)
+0053     disp([<span class="string">'  Number of variables:         '</span> int2str(M_.endo_nbr)])
+0054     disp([<span class="string">'  Number of stochastic shocks: '</span> int2str(M_.exo_nbr)])
+0055     disp([<span class="string">'  Number of state variables:   '</span> <span class="keyword">...</span>
+0056       int2str(length(find(oo_.dr.kstate(:,2) &lt;= M_.maximum_lag+1)))])
+0057     disp([<span class="string">'  Number of jumpers:           '</span> <span class="keyword">...</span>
+0058       int2str(length(find(oo_.dr.kstate(:,2) == M_.maximum_lag+2)))])
+0059     disp([<span class="string">'  Number of static variables:  '</span> int2str(oo_.dr.nstatic)])
+0060     my_title=<span class="string">'MATRIX OF COVARIANCE OF EXOGENOUS SHOCKS'</span>;
+0061     labels = deblank(M_.exo_names);
+0062     headers = strvcat(<span class="string">'Variables'</span>,labels);
+0063     lh = size(labels,2)+2;
+0064     <a href="table.html" class="code" title="function table(title,headers,labels,values,label_width,val_width,val_precis)">table</a>(my_title,headers,labels,M_.Sigma_e,lh,10,6);
+0065     disp(<span class="string">' '</span>)
+0066     <a href="disp_dr.html" class="code" title="function disp_dr(dr,order,var_list)">disp_dr</a>(oo_.dr,options_.order,var_list);
+0067   <span class="keyword">end</span>
+0068 
+0069   <span class="keyword">if</span> options_.simul == 0 &amp; options_.nomoments == 0
+0070     <a href="disp_th_moments.html" class="code" title="function disp_th_moments(dr,var_list)">disp_th_moments</a>(oo_.dr,var_list); 
+0071   <span class="keyword">elseif</span> options_.simul == 1
+0072     <span class="keyword">if</span> options_.periods == 0
+0073       error(<span class="string">'STOCH_SIMUL error: number of periods for the simulation isn''t specified'</span>)
+0074     <span class="keyword">end</span>
+0075     <span class="keyword">if</span> options_.periods &lt; options_.drop
+0076       disp([<span class="string">'STOCH_SIMUL error: The horizon of simulation is shorter'</span> <span class="keyword">...</span>
+0077         <span class="string">' than the number of observations to be DROPed'</span>])
+0078       <span class="keyword">return</span>
+0079     <span class="keyword">end</span>
+0080     oo_.endo_simul = <a href="simult.html" class="code" title="function y_=simult(ys, dr)">simult</a>(repmat(oo_.dr.ys,1,M_.maximum_lag),oo_.dr);
+0081     <a href="dyn2vec.html" class="code" title="function [z,zss]=dyn2vec(s1,s2);">dyn2vec</a>;
+0082     <span class="keyword">if</span> options_.nomoments == 0
+0083       <a href="disp_moments.html" class="code" title="function disp_moments(y,var_list)">disp_moments</a>(oo_.endo_simul,var_list);
+0084     <span class="keyword">end</span>
+0085   <span class="keyword">end</span>
+0086 
+0087 
+0088 
+0089   <span class="keyword">if</span> options_.irf 
+0090     n = size(var_list,1);
+0091     <span class="keyword">if</span> n == 0
+0092       n = M_.endo_nbr;
+0093       ivar = [1:n]';
+0094       var_list = M_.endo_names;
+0095       <span class="keyword">if</span> TeX
+0096     var_listTeX = M_.endo_names_tex;
+0097       <span class="keyword">end</span>
+0098     <span class="keyword">else</span>
+0099       ivar=zeros(n,1);
+0100       <span class="keyword">if</span> TeX
+0101     var_listTeX = [];
+0102       <span class="keyword">end</span>
+0103       <span class="keyword">for</span> i=1:n
+0104     i_tmp = strmatch(var_list(i,:),M_.endo_names,<span class="string">'exact'</span>);
+0105     <span class="keyword">if</span> isempty(i_tmp)
+0106       error ([<span class="string">'One of the specified variables does not exist'</span>]) ;
+0107     <span class="keyword">else</span>
+0108       ivar(i) = i_tmp;
+0109       <span class="keyword">if</span> TeX
+0110         var_listTeX = strvcat(var_listTeX,deblank(M_.endo_names_tex(i_tmp,:)));
+0111       <span class="keyword">end</span>
+0112     <span class="keyword">end</span>
+0113       <span class="keyword">end</span>
+0114     <span class="keyword">end</span>
+0115     <span class="keyword">if</span> TeX
+0116       fidTeX = fopen([M_.fname <span class="string">'_IRF.TeX'</span>],<span class="string">'w'</span>);
+0117       fprintf(fidTeX,<span class="string">'%% TeX eps-loader file generated by stoch_simul.m (Dynare).\n'</span>);
+0118       fprintf(fidTeX,[<span class="string">'%% '</span> datestr(now,0) <span class="string">'\n'</span>]);
+0119       fprintf(fidTeX,<span class="string">' \n'</span>);
+0120     <span class="keyword">end</span>
+0121     olditer = iter_;<span class="comment">% Est-ce vraiment utile ? Il y a la mme ligne dans irf...</span>
+0122     SS(M_.exo_names_orig_ord,M_.exo_names_orig_ord)=M_.Sigma_e+1e-14*eye(M_.exo_nbr);
+0123     cs = transpose(chol(SS));
+0124     tit(M_.exo_names_orig_ord,:) = M_.exo_names;
+0125     <span class="keyword">if</span> TeX
+0126       titTeX(M_.exo_names_orig_ord,:) = M_.exo_names_tex;
+0127     <span class="keyword">end</span>
+0128     <span class="keyword">for</span> i=1:M_.exo_nbr
+0129       <span class="keyword">if</span> SS(i,i) &gt; 1e-13
+0130     y=<a href="irf.html" class="code" title="function y = irf(dr, e1, long, drop, replic, iorder)">irf</a>(oo_.dr,cs(M_.exo_names_orig_ord,i), options_.irf, options_.drop, <span class="keyword">...</span>
+0131           options_.replic, options_.order);
+0132     <span class="keyword">if</span> options_.relative_irf
+0133       y = 100*y/cs(i,i); 
+0134     <span class="keyword">end</span>
+0135     irfs   = [];
+0136     mylist = [];
+0137     <span class="keyword">if</span> TeX
+0138       mylistTeX = [];
+0139     <span class="keyword">end</span>
+0140     <span class="keyword">for</span> j = 1:n
+0141       <span class="keyword">if</span> max(y(ivar(j),:)) - min(y(ivar(j),:)) &gt; 1e-10
+0142         irfs  = cat(1,irfs,y(ivar(j),:));
+0143         mylist = strvcat(mylist,deblank(var_list(j,:)));
+0144         <span class="keyword">if</span> TeX
+0145           mylistTeX = strvcat(mylistTeX,deblank(var_listTeX(j,:)));
+0146         <span class="keyword">end</span>
+0147       <span class="keyword">end</span>
+0148     <span class="keyword">end</span>
+0149     number_of_plots_to_draw = size(irfs,1);
+0150     [nbplt,nr,nc,lr,lc,nstar] = <a href="pltorg.html" class="code" title="function [nbplt,nr,nc,lr,lc,nstar] = pltorg(number)">pltorg</a>(number_of_plots_to_draw);
+0151     <span class="keyword">if</span> nbplt == 0
+0152     <span class="keyword">elseif</span> nbplt == 1
+0153       <span class="keyword">if</span> options_.relative_irf
+0154         hh = figure(<span class="string">'Name'</span>,[<span class="string">'Relative response to'</span> <span class="keyword">...</span>
+0155                 <span class="string">' orthogonalized shock to '</span> tit(i,:)]);
+0156       <span class="keyword">else</span>
+0157         hh = figure(<span class="string">'Name'</span>,[<span class="string">'Orthogonalized shock to'</span> <span class="keyword">...</span>
+0158                 <span class="string">' '</span> tit(i,:)]);
+0159       <span class="keyword">end</span>
+0160       <span class="keyword">for</span> j = 1:number_of_plots_to_draw
+0161         subplot(nr,nc,j);
+0162         plot(1:options_.irf,transpose(irfs(j,:)),<span class="string">'-k'</span>,<span class="string">'linewidth'</span>,1);
+0163         hold on
+0164         plot([1 options_.irf],[0 0],<span class="string">'-r'</span>,<span class="string">'linewidth'</span>,0.5);
+0165         hold off
+0166         xlim([1 options_.irf]);
+0167         title(deblank(mylist(j,:)),<span class="string">'Interpreter'</span>,<span class="string">'none'</span>);
+0168         assignin(<span class="string">'base'</span>,[deblank(mylist(j,:)) <span class="string">'_'</span> deblank(tit(i,:))],transpose(irfs(j,:)));
+0169       <span class="keyword">end</span>
+0170       eval([<span class="string">'print -depsc2 '</span> M_.fname <span class="string">'_IRF_'</span> deblank(tit(i,:))]);
+0171       eval([<span class="string">'print -dpdf '</span> M_.fname  <span class="string">'_IRF_'</span> deblank(tit(i,:))]);
+0172       saveas(hh,[M_.fname  <span class="string">'_IRF_'</span> deblank(tit(i,:)) <span class="string">'.fig'</span>]);
+0173       <span class="keyword">if</span> TeX
+0174         fprintf(fidTeX,<span class="string">'\\begin{figure}[H]\n'</span>);
+0175         <span class="keyword">for</span> j = 1:number_of_plots_to_draw
+0176           fprintf(fidTeX,[<span class="string">'\\psfrag{%s}[1][][0.5][0]{$%s$}\n'</span>],deblank(mylist(j,:)),deblank(mylistTeX(j,:)));
+0177         <span class="keyword">end</span>
+0178         fprintf(fidTeX,<span class="string">'\\centering \n'</span>);
+0179         fprintf(fidTeX,<span class="string">'\\includegraphics[scale=0.5]{%s_IRF_%s}\n'</span>,M_.fname,deblank(tit(i,:)));
+0180         fprintf(fidTeX,<span class="string">'\\caption{Impulse response functions (orthogonalized shock to $%s$).}'</span>,titTeX(i,:));
+0181         fprintf(fidTeX,<span class="string">'\\label{Fig:IRF:%s}\n'</span>,deblank(tit(i,:)));
+0182         fprintf(fidTeX,<span class="string">'\\end{figure}\n'</span>);
+0183         fprintf(fidTeX,<span class="string">' \n'</span>);
+0184       <span class="keyword">end</span>
+0185       <span class="comment">%    close(hh)</span>
+0186     <span class="keyword">else</span>
+0187       <span class="keyword">for</span> fig = 1:nbplt-1
+0188         <span class="keyword">if</span> options_.relative_irf == 1
+0189           hh = figure(<span class="string">'Name'</span>,[<span class="string">'Relative response to orthogonalized shock'</span> <span class="keyword">...</span>
+0190                   <span class="string">' to '</span> tit(i,:) <span class="string">' figure '</span> int2str(fig)]);
+0191         <span class="keyword">else</span>
+0192           hh = figure(<span class="string">'Name'</span>,[<span class="string">'Orthogonalized shock to '</span> tit(i,:) <span class="keyword">...</span>
+0193                   <span class="string">' figure '</span> int2str(fig)]);
+0194         <span class="keyword">end</span>
+0195         <span class="keyword">for</span> plt = 1:nstar
+0196           subplot(nr,nc,plt);
+0197           plot(1:options_.irf,transpose(irfs((fig-1)*nstar+plt,:)),<span class="string">'-k'</span>,<span class="string">'linewidth'</span>,1);
+0198           hold on
+0199           plot([1 options_.irf],[0 0],<span class="string">'-r'</span>,<span class="string">'linewidth'</span>,0.5);
+0200           hold off
+0201           xlim([1 options_.irf]);
+0202           title(deblank(mylist((fig-1)*nstar+plt,:)),<span class="string">'Interpreter'</span>,<span class="string">'none'</span>);
+0203           assignin(<span class="string">'base'</span>,[deblank(mylist((fig-1)*nstar+plt,:)) <span class="string">'_'</span> deblank(tit(i,:))],transpose(irfs((fig-1)*nstar+plt,:)));
+0204         <span class="keyword">end</span>
+0205         eval([<span class="string">'print -depsc2 '</span> M_.fname <span class="string">'_IRF_'</span> deblank(tit(i,:)) int2str(fig)]);
+0206         eval([<span class="string">'print -dpdf '</span> M_.fname  <span class="string">'_IRF_'</span> deblank(tit(i,:)) int2str(fig)]);
+0207         saveas(hh,[M_.fname  <span class="string">'_IRF_'</span> deblank(tit(i,:)) int2str(fig) <span class="string">'.fig'</span>]);
+0208         <span class="keyword">if</span> TeX
+0209           fprintf(fidTeX,<span class="string">'\\begin{figure}[H]\n'</span>);
+0210           <span class="keyword">for</span> j = 1:nstar
+0211         fprintf(fidTeX,[<span class="string">'\\psfrag{%s}[1][][0.5][0]{$%s$}\n'</span>],deblank(mylist((fig-1)*nstar+j,:)),deblank(mylistTeX((fig-1)*nstar+j,:)));
+0212           <span class="keyword">end</span>
+0213           fprintf(fidTeX,<span class="string">'\\centering \n'</span>);
+0214           fprintf(fidTeX,<span class="string">'\\includegraphics[scale=0.5]{%s_IRF_%s%s}\n'</span>,M_.fname,deblank(tit(i,:)),int2str(fig));
+0215           <span class="keyword">if</span> options_.relative_irf
+0216         fprintf(fidTeX,[<span class="string">'\\caption{Relative impulse response'</span> <span class="keyword">...</span>
+0217                 <span class="string">' functions (orthogonalized shock to $%s$).}'</span>],deblank(titTeX(i,:)));
+0218           <span class="keyword">else</span>
+0219         fprintf(fidTeX,[<span class="string">'\\caption{Impulse response functions'</span> <span class="keyword">...</span>
+0220                 <span class="string">' (orthogonalized shock to $%s$).}'</span>],deblank(titTeX(i,:)));
+0221           <span class="keyword">end</span>
+0222           fprintf(fidTeX,<span class="string">'\\label{Fig:BayesianIRF:%s:%s}\n'</span>,deblank(tit(i,:)),int2str(fig));
+0223           fprintf(fidTeX,<span class="string">'\\end{figure}\n'</span>);
+0224           fprintf(fidTeX,<span class="string">' \n'</span>);
+0225         <span class="keyword">end</span>
+0226         <span class="comment">%                    close(hh);</span>
+0227       <span class="keyword">end</span>
+0228       hh = figure(<span class="string">'Name'</span>,[<span class="string">'Orthogonalized shock to '</span> tit(i,:) <span class="string">' figure '</span> int2str(nbplt) <span class="string">'.'</span>]);
+0229       m = 0; 
+0230       <span class="keyword">for</span> plt = 1:number_of_plots_to_draw-(nbplt-1)*nstar;
+0231         m = m+1;
+0232         subplot(lr,lc,m);
+0233         plot(1:options_.irf,transpose(irfs((nbplt-1)*nstar+plt,:)),<span class="string">'-k'</span>,<span class="string">'linewidth'</span>,1);
+0234         hold on
+0235         plot([1 options_.irf],[0 0],<span class="string">'-r'</span>,<span class="string">'linewidth'</span>,0.5);
+0236         hold off
+0237         xlim([1 options_.irf]);
+0238         title(deblank(mylist((nbplt-1)*nstar+plt,:)),<span class="string">'Interpreter'</span>,<span class="string">'none'</span>);
+0239         assignin(<span class="string">'base'</span>,[deblank(mylist((nbplt-1)*nstar+plt,:)) <span class="string">'_'</span> deblank(tit(i,:))],transpose(irfs((nbplt-1)*nstar+plt,:)));
+0240       <span class="keyword">end</span>
+0241       eval([<span class="string">'print -depsc2 '</span> M_.fname <span class="string">'_IRF_'</span> deblank(tit(i,:)) int2str(nbplt)]);
+0242       eval([<span class="string">'print -dpdf '</span> M_.fname  <span class="string">'_IRF_'</span> deblank(tit(i,:)) int2str(nbplt)]);
+0243       saveas(hh,[M_.fname  <span class="string">'_IRF_'</span> deblank(tit(i,:)) int2str(nbplt) <span class="string">'.fig'</span>]);
+0244       <span class="keyword">if</span> TeX
+0245         fprintf(fidTeX,<span class="string">'\\begin{figure}[H]\n'</span>);
+0246         <span class="keyword">for</span> j = 1:m
+0247           fprintf(fidTeX,[<span class="string">'\\psfrag{%s}[1][][0.5][0]{$%s$}\n'</span>],deblank(mylist((nbplt-1)*nstar+j,:)),deblank(mylistTeX((nbplt-1)*nstar+j,:)));
+0248         <span class="keyword">end</span>
+0249         fprintf(fidTeX,<span class="string">'\\centering \n'</span>);
+0250         fprintf(fidTeX,<span class="string">'\\includegraphics[scale=0.5]{%s_IRF_%s%s}\n'</span>,M_.fname,deblank(tit(i,:)),int2str(nbplt));
+0251         <span class="keyword">if</span> options_.relative_irf
+0252           fprintf(fidTeX,[<span class="string">'\\caption{Relative impulse response functions'</span> <span class="keyword">...</span>
+0253                   <span class="string">' (orthogonalized shock to $%s$).}'</span>],deblank(titTeX(i,:)));
+0254         <span class="keyword">else</span>
+0255           fprintf(fidTeX,[<span class="string">'\\caption{Impulse response functions'</span> <span class="keyword">...</span>
+0256                   <span class="string">' (orthogonalized shock to $%s$).}'</span>],deblank(titTeX(i,:)));
+0257         <span class="keyword">end</span>
+0258         fprintf(fidTeX,<span class="string">'\\label{Fig:IRF:%s:%s}\n'</span>,deblank(tit(i,:)),int2str(nbplt));
+0259         fprintf(fidTeX,<span class="string">'\\end{figure}\n'</span>);
+0260         fprintf(fidTeX,<span class="string">' \n'</span>);
+0261       <span class="keyword">end</span>
+0262       <span class="comment">%                close(hh);</span>
+0263     <span class="keyword">end</span>
+0264       <span class="keyword">end</span>
+0265     <span class="keyword">end</span>
+0266     iter_ = olditer;
+0267     <span class="keyword">if</span> TeX
+0268       fprintf(fidTeX,<span class="string">' \n'</span>);
+0269       fprintf(fidTeX,<span class="string">'%% End Of TeX file. \n'</span>);
+0270       fclose(fidTeX);
+0271     <span class="keyword">end</span>
+0272   <span class="keyword">end</span>
+0273 
+0274   
+0275 
+0276   [omega,f] = <a href="UnivariateSpectralDensity.html" class="code" title="function [omega,f] = UnivariateSpectralDensity(dr,var_list)">UnivariateSpectralDensity</a>(oo_.dr,var_list);</pre></div>
+<hr><address>Generated on Fri 16-Jun-2006 09:09:06 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/">m2html</a></strong> &copy; 2003</address>
+</body>
+</html>

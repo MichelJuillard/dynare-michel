@@ -215,6 +215,11 @@ bayestopt_.restrict_state = k2;
 % for filtering and smoothing
 bayestopt_.mf2 	= k;
 bayestopt_.mfys = k1;
+bayestopt_.Z = zeros(n_varobs,length(k2));
+for i=1:n_varobs
+   bayestopt_.Z(i,bayestopt_.mf1(i)) = 1;
+end
+
 options_ = set_default_option(options_,'nobs',size(rawdata,1)-options_.first_obs+1);
 gend = options_.nobs;
 

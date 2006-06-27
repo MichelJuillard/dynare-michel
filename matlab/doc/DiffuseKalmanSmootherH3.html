@@ -1,0 +1,317 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of DiffuseKalmanSmootherH3</title>
+  <meta name="keywords" content="DiffuseKalmanSmootherH3">
+  <meta name="description" content="Modified by M. Ratto">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2003 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../index.html">Home</a> &gt;  <a href="index.html">.</a> &gt; DiffuseKalmanSmootherH3.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../index.html"><img alt="<" border="0" src="../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="index.html">Index for .&nbsp;<img alt=">" border="0" src="../right.png"></a></td></tr></table>-->
+
+<h1>DiffuseKalmanSmootherH3
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>Modified by M. Ratto</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function [alphahat,epsilonhat,etahat,a1, aK] = DiffuseKalmanSmootherH3(T,R,Q,H,Pinf1,Pstar1,Y,trend,pp,mm,smpl,mf) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> Modified by M. Ratto
+ New output argument aK: 1-step to nk-stpe ahed predictions)
+ New input argument nk: max order of predictions in aK
+ New global variable id_ where the DKF stops (common with
+ diffuselikelihood3)
+ New icc variable to count number of iterations for Finf steps
+ Pstar % Pinf simmetric
+ New termination of DKF iterations based on id_
+ Li also stored during DKF iterations !!
+ some bugs corrected in the DKF part of the smoother (Z matrix and
+ alphahat)
+
+ stephane.adjemian@cepremap.cnrs.fr [09-16-2004]
+ 
+   See &quot;Fast Filtering and Smoothing for Multivariate State Space
+   Models&quot;, S.J. Koopman and J. Durbin (2000, in Journal of Time Series 
+   Analysis, vol. 21(3), pp. 281-296).</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="steady.html" class="code" title="function steady(linear)">steady</a>	Copyright (C) 2001 Michel Juillard</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="DsgeSmoother.html" class="code" title="function [alphahat,etahat,epsilonhat,ahat,SteadyState,trend_coeff,aK] = DsgeSmoother(xparam1,gend,Y)">DsgeSmoother</a>	stephane.adjemian@cepremap.cnrs.fr [09-07-2004]</li></ul>
+<!-- crossreference -->
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function [alphahat,epsilonhat,etahat,a1, aK] = DiffuseKalmanSmootherH3(T,R,Q,H,Pinf1,Pstar1,Y,trend,pp,mm,smpl,mf)</a>
+0002 <span class="comment">% Modified by M. Ratto</span>
+0003 <span class="comment">% New output argument aK: 1-step to nk-stpe ahed predictions)</span>
+0004 <span class="comment">% New input argument nk: max order of predictions in aK</span>
+0005 <span class="comment">% New global variable id_ where the DKF stops (common with</span>
+0006 <span class="comment">% diffuselikelihood3)</span>
+0007 <span class="comment">% New icc variable to count number of iterations for Finf steps</span>
+0008 <span class="comment">% Pstar % Pinf simmetric</span>
+0009 <span class="comment">% New termination of DKF iterations based on id_</span>
+0010 <span class="comment">% Li also stored during DKF iterations !!</span>
+0011 <span class="comment">% some bugs corrected in the DKF part of the smoother (Z matrix and</span>
+0012 <span class="comment">% alphahat)</span>
+0013 <span class="comment">%</span>
+0014 <span class="comment">% stephane.adjemian@cepremap.cnrs.fr [09-16-2004]</span>
+0015 <span class="comment">%</span>
+0016 <span class="comment">%   See &quot;Fast Filtering and Smoothing for Multivariate State Space</span>
+0017 <span class="comment">%   Models&quot;, S.J. Koopman and J. Durbin (2000, in Journal of Time Series</span>
+0018 <span class="comment">%   Analysis, vol. 21(3), pp. 281-296).</span>
+0019 
+0020 <span class="keyword">global</span> options_
+0021 
+0022 nk = options_.nk;
+0023 spinf       = size(Pinf1);
+0024 spstar      = size(Pstar1);
+0025 v           = zeros(pp,smpl);
+0026 a           = zeros(mm,smpl+1);
+0027 a1            = a;
+0028 aK          = zeros(nk,mm,smpl+nk);
+0029 Fstar       = zeros(pp,smpl);
+0030 Finf        = zeros(pp,smpl);
+0031 Ki           = zeros(mm,pp,smpl);
+0032 Li          = zeros(mm,mm,pp,smpl);
+0033 Linf        = zeros(mm,mm,pp,smpl);
+0034 L0          = zeros(mm,mm,pp,smpl);
+0035 Kstar       = zeros(mm,pp,smpl);
+0036 P           = zeros(mm,mm,smpl+1);
+0037 P1            = P;
+0038 Pstar       = zeros(spstar(1),spstar(2),smpl+1); Pstar(:,:,1) = Pstar1;
+0039 Pinf        = zeros(spinf(1),spinf(2),smpl+1); Pinf(:,:,1) = Pinf1;
+0040 Pstar1         = Pstar;
+0041 Pinf1          = Pinf;
+0042 crit            = options_.kalman_tol;
+0043 crit1       = 1.e-6;
+0044 <a href="steady.html" class="code" title="function steady(linear)">steady</a>      = smpl;
+0045 rr          = size(Q,1);
+0046 QQ          = R*Q*transpose(R);
+0047 QRt            = Q*transpose(R);
+0048 alphahat       = zeros(mm,smpl);
+0049 etahat           = zeros(rr,smpl);
+0050 epsilonhat      = zeros(size(Y));
+0051 r                = zeros(mm,smpl);
+0052 
+0053 Z = zeros(pp,mm);
+0054 <span class="keyword">for</span> i=1:pp;
+0055     Z(i,mf(i)) = 1;
+0056 <span class="keyword">end</span>
+0057 
+0058 t = 0;
+0059 icc=0;
+0060 newRank      = rank(Pinf(:,:,1),crit1);
+0061 <span class="keyword">while</span> newRank &amp; t &lt; smpl
+0062   t = t+1;
+0063   a1(:,t) = a(:,t);
+0064   Pstar(:,:,t)=tril(Pstar(:,:,t))+transpose(tril(Pstar(:,:,t),-1));
+0065   Pinf(:,:,t)=tril(Pinf(:,:,t))+transpose(tril(Pinf(:,:,t),-1));
+0066   Pstar1(:,:,t) = Pstar(:,:,t);
+0067   Pinf1(:,:,t) = Pinf(:,:,t);
+0068   <span class="keyword">for</span> i=1:pp
+0069     v(i,t)     = Y(i,t)-a(mf(i),t)-trend(i,t);
+0070     Fstar(i,t)     = Pstar(mf(i),mf(i),t) + H(i,i);
+0071     Finf(i,t)    = Pinf(mf(i),mf(i),t);
+0072     Kstar(:,i,t)     = Pstar(:,mf(i),t);
+0073     <span class="keyword">if</span> Finf(i,t) &gt; crit &amp; newRank,  <span class="comment">% original MJ: if Finf(i,t) &gt; crit</span>
+0074       icc=icc+1;
+0075       Kinf(:,i,t)    = Pinf(:,mf(i),t);
+0076       Linf(:,:,i,t)      = eye(mm) - Kinf(:,i,t)*Z(i,:)/Finf(i,t);
+0077       L0(:,:,i,t)      = (Kinf(:,i,t)*Fstar(i,t)/Finf(i,t) - Kstar(:,i,t))*Z(i,:)/Finf(i,t);
+0078       a(:,t)        = a(:,t) + Kinf(:,i,t)*v(i,t)/Finf(i,t);
+0079       Pstar(:,:,t)    = Pstar(:,:,t) + <span class="keyword">...</span>
+0080       Kinf(:,i,t)*transpose(Kinf(:,i,t))*Fstar(i,t)/(Finf(i,t)*Finf(i,t)) - <span class="keyword">...</span>
+0081       (Kstar(:,i,t)*transpose(Kinf(:,i,t)) +<span class="keyword">...</span>
+0082        Kinf(:,i,t)*transpose(Kstar(:,i,t)))/Finf(i,t);
+0083       Pinf(:,:,t)    = Pinf(:,:,t) - Kinf(:,i,t)*transpose(Kinf(:,i,t))/Finf(i,t);
+0084       Pstar(:,:,t)=tril(Pstar(:,:,t))+transpose(tril(Pstar(:,:,t),-1));
+0085       Pinf(:,:,t)=tril(Pinf(:,:,t))+transpose(tril(Pinf(:,:,t),-1));
+0086       <span class="comment">% new terminiation criteria by M. Ratto</span>
+0087       P0=Pinf(:,:,t);
+0088       <span class="comment">%             newRank = any(diag(P0(mf,mf))&gt;crit);</span>
+0089       <span class="comment">%             if newRank==0, options_.diffuse_d = i; end,</span>
+0090       <span class="keyword">if</span> ~isempty(options_.diffuse_d),  
+0091     newRank = (icc&lt;options_.diffuse_d);  
+0092     <span class="comment">%if newRank &amp; any(diag(P0(mf,mf))&gt;crit)==0;</span>
+0093     <span class="keyword">if</span> newRank &amp; (any(diag(P0(mf,mf))&gt;crit)==0 &amp; rank(P0,crit1)==0); 
+0094       disp(<span class="string">'WARNING!! Change in OPTIONS_.DIFFUSE_D in univariate DKF'</span>)
+0095       options_.diffuse_d = icc;
+0096       newRank=0;
+0097     <span class="keyword">end</span>
+0098       <span class="keyword">else</span>
+0099     <span class="comment">%newRank = any(diag(P0(mf,mf))&gt;crit);</span>
+0100     newRank = (any(diag(P0(mf,mf))&gt;crit) | rank(P0,crit1));                 
+0101     <span class="keyword">if</span> newRank==0, 
+0102       options_.diffuse_d = icc;
+0103     <span class="keyword">end</span>                    
+0104       <span class="keyword">end</span>,
+0105 <span class="comment">%       if newRank==0,</span>
+0106 <span class="comment">%     options_.diffuse_d=i;   % this line is buggy!</span>
+0107 <span class="comment">%       end</span>
+0108       <span class="comment">% end new terminiation criteria by M. Ratto</span>
+0109     <span class="keyword">else</span> 
+0110       <span class="comment">%% Note that : (1) rank(Pinf)=0 implies that Finf = 0, (2) outside this loop (when for some i and t the condition</span>
+0111       <span class="comment">%% rank(Pinf)=0 is satisfied we have P = Pstar and F = Fstar and (3) Finf = 0 does not imply that</span>
+0112       <span class="comment">%% rank(Pinf)=0. [stphane,11-03-2004].</span>
+0113       Li(:,:,i,t)    = eye(mm)-Kstar(:,i,t)*Z(i,:)/Fstar(i,t);  <span class="comment">% we need to store Li for DKF smoother</span>
+0114       a(:,t)         = a(:,t) + Kstar(:,i,t)*v(i,t)/Fstar(i,t);
+0115       Pstar(:,:,t)    = Pstar(:,:,t) - Kstar(:,i,t)*transpose(Kstar(:,i,t))/Fstar(i,t);
+0116       Pstar(:,:,t)=tril(Pstar(:,:,t))+transpose(tril(Pstar(:,:,t),-1));
+0117     <span class="keyword">end</span>
+0118   <span class="keyword">end</span>
+0119   a(:,t+1)          = T*a(:,t);
+0120   <span class="keyword">for</span> jnk=1:nk,
+0121     aK(jnk,:,t+jnk)          = T^jnk*a(:,t);
+0122   <span class="keyword">end</span>
+0123   Pstar(:,:,t+1)    = T*Pstar(:,:,t)*transpose(T)+ QQ;
+0124   Pinf(:,:,t+1)    = T*Pinf(:,:,t)*transpose(T);
+0125   P0=Pinf(:,:,t+1);
+0126   <span class="keyword">if</span> newRank,
+0127     <span class="comment">%newRank = any(diag(P0(mf,mf))&gt;crit);</span>
+0128     newRank      = rank(P0,crit1);
+0129   <span class="keyword">end</span>
+0130 <span class="keyword">end</span>
+0131 
+0132 
+0133 d = t;
+0134 P(:,:,d+1) = Pstar(:,:,d+1);
+0135 Linf  = Linf(:,:,:,1:d);
+0136 L0  = L0(:,:,:,1:d);
+0137 Fstar = Fstar(:,1:d);
+0138 Finf = Finf(:,1:d);
+0139 Kstar = Kstar(:,:,1:d);
+0140 Pstar = Pstar(:,:,1:d);
+0141 Pinf  = Pinf(:,:,1:d);
+0142 Pstar1 = Pstar1(:,:,1:d);
+0143 Pinf1  = Pinf1(:,:,1:d);
+0144 notsteady = 1;
+0145 <span class="keyword">while</span> notsteady &amp; t&lt;smpl
+0146   t = t+1;
+0147   a1(:,t) = a(:,t);
+0148   P(:,:,t)=tril(P(:,:,t))+transpose(tril(P(:,:,t),-1));
+0149   P1(:,:,t) = P(:,:,t);
+0150   <span class="keyword">for</span> i=1:pp
+0151     v(i,t)  = Y(i,t) - a(mf(i),t) - trend(i,t);
+0152     Fi(i,t) = P(mf(i),mf(i),t);
+0153     Ki(:,i,t) = P(:,mf(i),t) + H(i,i);
+0154     <span class="keyword">if</span> Fi(i,t) &gt; crit
+0155       Li(:,:,i,t)    = eye(mm)-Ki(:,i,t)*Z(i,:)/Fi(i,t);
+0156       a(:,t) = a(:,t) + Ki(:,i,t)*v(i,t)/Fi(i,t);
+0157       P(:,:,t) = P(:,:,t) - Ki(:,i,t)*transpose(Ki(:,i,t))/Fi(i,t);
+0158       P(:,:,t)=tril(P(:,:,t))+transpose(tril(P(:,:,t),-1));
+0159     <span class="keyword">end</span>
+0160   <span class="keyword">end</span>
+0161   a(:,t+1) = T*a(:,t);
+0162   <span class="keyword">for</span> jnk=1:nk,
+0163     aK(jnk,:,t+jnk)          = T^jnk*a(:,t);
+0164   <span class="keyword">end</span>
+0165   P(:,:,t+1) = T*P(:,:,t)*transpose(T) + QQ;
+0166   notsteady   = ~(max(max(abs(P(:,:,t+1)-P(:,:,t))))&lt;crit);
+0167 <span class="keyword">end</span>
+0168 P_s=tril(P(:,:,t))+transpose(tril(P(:,:,t),-1));
+0169 Fi_s = Fi(:,t);
+0170 Ki_s = Ki(:,:,t);
+0171 L_s  =Li(:,:,:,t);
+0172 <span class="keyword">if</span> t&lt;smpl
+0173   t_steady = t+1;
+0174   P  = cat(3,P(:,:,1:t),repmat(P(:,:,t),[1 1 smpl-t_steady+1]));
+0175   Fi = cat(2,Fi(:,1:t),repmat(Fi_s,[1 1 smpl-t_steady+1]));
+0176   Li  = cat(4,Li(:,:,:,1:t),repmat(L_s,[1 1 smpl-t_steady+1]));
+0177   Ki  = cat(3,Ki(:,:,1:t),repmat(Ki_s,[1 1 smpl-t_steady+1]));
+0178 <span class="keyword">end</span>
+0179 <span class="keyword">while</span> t&lt;smpl
+0180   t=t+1;
+0181   a1(:,t) = a(:,t);
+0182   <span class="keyword">for</span> i=1:pp
+0183     v(i,t)      = Y(i,t) - a(mf(i),t) - trend(i,t);
+0184     <span class="keyword">if</span> Fi_s(i) &gt; crit
+0185       a(:,t) = a(:,t) + Ki_s(:,i)*v(i,t)/Fi_s(i);
+0186     <span class="keyword">end</span>
+0187   <span class="keyword">end</span>
+0188   a(:,t+1) = T*a(:,t);
+0189   <span class="keyword">for</span> jnk=1:nk,
+0190     aK(jnk,:,t+jnk)    = T^jnk*a(:,t);
+0191   <span class="keyword">end</span>
+0192 <span class="keyword">end</span>
+0193 a1(:,t+1) = a(:,t+1);
+0194 ri=r;
+0195 t = smpl+1;
+0196 <span class="keyword">while</span> t&gt;d+1 &amp; t&gt;2,
+0197   t = t-1;
+0198   <span class="keyword">for</span> i=pp:-1:1
+0199     <span class="keyword">if</span> Fi(i,t) &gt; crit
+0200       ri(:,t)=transpose(Z(i,:))/Fi(i,t)*v(i,t)+transpose(Li(:,:,i,t))*ri(:,t);
+0201     <span class="keyword">end</span>
+0202   <span class="keyword">end</span>
+0203   r(:,t-1) = ri(:,t);
+0204   alphahat(:,t)    = a1(:,t) + P1(:,:,t)*r(:,t-1);
+0205   etahat(:,t)        = QRt*r(:,t);
+0206   ri(:,t-1) = transpose(T)*ri(:,t);
+0207 <span class="keyword">end</span>
+0208 <span class="keyword">if</span> d
+0209   r0 = zeros(mm,d); r0(:,d) = ri(:,d);
+0210   r1 = zeros(mm,d);
+0211   <span class="keyword">for</span> t = d:-1:2
+0212     <span class="keyword">for</span> i=pp:-1:1
+0213       <span class="keyword">if</span> Finf(i,t) &gt; crit &amp; ~(t==d &amp; i&gt;options_.diffuse_d),  <span class="comment">% use of options_.diffuse_d to be sure of DKF termination</span>
+0214                          <span class="comment">%r1(:,t) = transpose(Z)*v(:,t)/Finf(i,t) + ... BUG HERE in transpose(Z)</span>
+0215                          r1(:,t) = transpose(Z(i,:))*v(i,t)/Finf(i,t) + <span class="keyword">...</span>
+0216                                transpose(L0(:,:,i,t))*r0(:,t) + transpose(Linf(:,:,i,t))*r1(:,t);
+0217                          r0(:,t) = transpose(Linf(:,:,i,t))*r0(:,t);
+0218       <span class="keyword">elseif</span> Fstar(i,t) &gt; crit <span class="comment">% step needed whe Finf == 0</span>
+0219     r0(:,t)=transpose(Z(i,:))/Fstar(i,t)*v(i,t)+Li(:,:,i,t)'*r0(:,t);
+0220       <span class="keyword">end</span>
+0221     <span class="keyword">end</span>
+0222     alphahat(:,t)    = a1(:,t) + Pstar1(:,:,t)*r0(:,t) + Pinf1(:,:,t)*r1(:,t);
+0223     r(:,t-1)        = r0(:,t);
+0224     etahat(:,t)        = QRt*r(:,t);
+0225     r0(:,t-1) = transpose(T)*r0(:,t);
+0226     r1(:,t-1) = transpose(T)*r1(:,t);
+0227   <span class="keyword">end</span>
+0228   r0_0 = r0(:,1);
+0229   r1_0 = r1(:,1);
+0230   <span class="keyword">for</span> i=pp:-1:1
+0231     <span class="keyword">if</span> Finf(i,1) &gt; crit,
+0232       <span class="comment">%r1_0 = transpose(Z)*v(:,1)/Finf(i,1) + ... %bug with Z here</span>
+0233       r1_0 = transpose(Z(i,:))*v(i,1)/Finf(i,1) + <span class="keyword">...</span>
+0234          transpose(L0(:,:,i,1))*r0_0 + transpose(Linf(:,:,i,1))*r1_0;
+0235       r0_0 = transpose(Linf(:,:,i,1))*r0_0;
+0236     <span class="keyword">elseif</span> Fstar(i,1) &gt; crit, <span class="comment">% step needed when Finf=0</span>
+0237       r0_0=transpose(Z(i,:))/Fstar(i,1)*v(i,1)+Li(:,:,i,1)'*r0_0;
+0238     <span class="keyword">end</span>
+0239   <span class="keyword">end</span>
+0240   <span class="comment">%alphahat(:,1)      = a(:,1) + Pstar(:,:,1)*r0_0 + Pinf(:,:,1)*r1_0; %this line is buggy</span>
+0241   alphahat(:,1)      = a1(:,1) + Pstar1(:,:,1)*r0_0 + Pinf1(:,:,1)*r1_0;
+0242   etahat(:,1)        = QRt*r(:,1);
+0243 <span class="keyword">else</span>
+0244   r0 = ri(:,1);
+0245   <span class="keyword">for</span> i=pp:-1:1
+0246     <span class="keyword">if</span> Fi(i,1) &gt; crit
+0247       r0=transpose(Z(i,:))/Fi(i,1)*v(i,1)+transpose(Li(:,:,i,1))*r0;
+0248     <span class="keyword">end</span>
+0249   <span class="keyword">end</span> 
+0250   <span class="comment">%alphahat(:,1)    = a(:,1) + P(:,:,1)*r0;  % this line is buggy</span>
+0251   alphahat(:,1)    = a1(:,1) + P1(:,:,1)*r0;
+0252   etahat(:,1)    = QRt*r(:,1);
+0253 <span class="keyword">end</span>
+0254 epsilonhat = Y-alphahat(mf,:)-trend;
+0255</pre></div>
+<hr><address>Generated on Fri 16-Jun-2006 09:09:06 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/">m2html</a></strong> &copy; 2003</address>
+</body>
+</html>

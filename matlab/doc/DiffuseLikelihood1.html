@@ -1,0 +1,140 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of DiffuseLikelihood1</title>
+  <meta name="keywords" content="DiffuseLikelihood1">
+  <meta name="description" content="M. Ratto added lik in output">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2003 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../index.html">Home</a> &gt;  <a href="index.html">.</a> &gt; DiffuseLikelihood1.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../index.html"><img alt="<" border="0" src="../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="index.html">Index for .&nbsp;<img alt=">" border="0" src="../right.png"></a></td></tr></table>-->
+
+<h1>DiffuseLikelihood1
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>M. Ratto added lik in output</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function [LIK, lik] = DiffuseLikelihood1(T,R,Q,Pinf,Pstar,Y,trend,start) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> M. Ratto added lik in output
+ stephane.adjemian@cepremap.cnrs.fr [07-19-2004]
+
+ Same as DiffuseLikelihoodH1 without measurement error.</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+</ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+</ul>
+<!-- crossreference -->
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function [LIK, lik] = DiffuseLikelihood1(T,R,Q,Pinf,Pstar,Y,trend,start)</a>
+0002 <span class="comment">% M. Ratto added lik in output</span>
+0003 <span class="comment">% stephane.adjemian@cepremap.cnrs.fr [07-19-2004]</span>
+0004 <span class="comment">%</span>
+0005 <span class="comment">% Same as DiffuseLikelihoodH1 without measurement error.</span>
+0006   <span class="keyword">global</span> bayestopt_ options_
+0007   
+0008   mf = bayestopt_.mf;
+0009   smpl = size(Y,2);
+0010   mm   = size(T,2);
+0011   pp   = size(Y,1);
+0012   a    = zeros(mm,1);
+0013   dF = 1;
+0014   QQ   = R*Q*transpose(R);
+0015   t    = 0;
+0016   lik  = zeros(smpl+1,1);
+0017   LIK  = Inf;
+0018   lik(smpl+1) = smpl*pp*log(2*pi);
+0019   notsteady   = 1;
+0020   crit        = options_.kalman_tol;
+0021   reste       = 0;
+0022   <span class="keyword">while</span> rank(Pinf,crit) &amp; t &lt; smpl
+0023     t     = t+1;
+0024     v        = Y(:,t)-a(mf)-trend(:,t);
+0025     Finf  = Pinf(mf,mf);
+0026     <span class="keyword">if</span> rcond(Finf) &lt; crit 
+0027       <span class="keyword">if</span> ~all(abs(Finf(:)) &lt; crit)
+0028     <span class="keyword">return</span>
+0029       <span class="keyword">else</span>
+0030     iFstar    = inv(Pstar(mf,mf));
+0031     dFstar    = det(Pstar(mf,mf));
+0032     Kstar    = Pstar(:,mf)*iFstar;
+0033     lik(t)    = log(dFstar) + transpose(v)*iFstar*v;
+0034     Pinf    = T*Pinf*transpose(T);
+0035     Pstar    = T*(Pstar-Pstar(:,mf)*transpose(Kstar))*transpose(T)+QQ;
+0036     a        = T*(a+Kstar*v);
+0037       <span class="keyword">end</span>
+0038     <span class="keyword">else</span>
+0039       lik(t)    = log(det(Finf));
+0040       iFinf    = inv(Finf);
+0041       Kinf    = Pinf(:,mf)*iFinf;                    <span class="comment">%%    premultiplication by the transition matrix T is removed (stephane)</span>
+0042       Fstar    = Pstar(mf,mf);
+0043       Kstar    = (Pstar(:,mf)-Kinf*Fstar)*iFinf;     <span class="comment">%%    premultiplication by the transition matrix T is removed (stephane)</span>
+0044       Pstar    = T*(Pstar-Pstar(:,mf)*transpose(Kinf)-Pinf(:,mf)*transpose(Kstar))*transpose(T)+QQ;
+0045       Pinf    = T*(Pinf-Pinf(:,mf)*transpose(Kinf))*transpose(T);
+0046       a        = T*(a+Kinf*v);                    
+0047     <span class="keyword">end</span>  
+0048   <span class="keyword">end</span>
+0049   <span class="keyword">if</span> t == smpl                                                           
+0050     error([<span class="string">'There isn''t enough information to estimate the initial'</span> <span class="keyword">...</span><span class="comment"> </span>
+0051        <span class="string">' conditions of the nonstationary variables'</span>]);                   
+0052   <span class="keyword">end</span>                                                                    
+0053   F_singular = 1;
+0054   <span class="keyword">while</span> notsteady &amp; t &lt; smpl
+0055     t  = t+1;
+0056     v        = Y(:,t)-a(mf)-trend(:,t);
+0057     F  = Pstar(mf,mf);
+0058     oldPstar  = Pstar;
+0059     dF = det(F);
+0060     <span class="keyword">if</span> rcond(F) &lt; crit 
+0061       <span class="keyword">if</span> ~all(abs(F(:))&lt;crit)
+0062     <span class="keyword">return</span>
+0063       <span class="keyword">else</span>
+0064     a         = T*a;
+0065     Pstar     = T*Pstar*transpose(T)+QQ;
+0066       <span class="keyword">end</span>
+0067     <span class="keyword">else</span>
+0068       F_singular = 0;
+0069       iF        = inv(F);
+0070       lik(t)    = log(dF)+transpose(v)*iF*v;
+0071       K         = Pstar(:,mf)*iF; <span class="comment">%% premultiplication by the transition matrix T is removed (stephane)</span>
+0072       a         = T*(a+K*v);        <span class="comment">%% --&gt; factorization of the transition matrix...</span>
+0073       Pstar     = T*(Pstar-K*Pstar(mf,:))*transpose(T)+QQ;    <span class="comment">%% ... idem (stephane)</span>
+0074     <span class="keyword">end</span>
+0075     notsteady = ~(max(max(abs(Pstar-oldPstar)))&lt;crit);
+0076   <span class="keyword">end</span>
+0077   <span class="keyword">if</span> F_singular == 1
+0078     error([<span class="string">'The variance of the forecast error remains singular until the'</span> <span class="keyword">...</span>
+0079       <span class="string">'end of the sample'</span>])
+0080   <span class="keyword">end</span>
+0081   reste = smpl-t;
+0082   <span class="keyword">while</span> t &lt; smpl
+0083     t = t+1;
+0084     v = Y(:,t)-a(mf)-trend(:,t);
+0085     a = T*(a+K*v);
+0086     lik(t) = transpose(v)*iF*v;
+0087   <span class="keyword">end</span>
+0088   lik(t) = lik(t) + reste*log(dF);
+0089 
+0090 
+0091   LIK    = .5*(sum(lik(start:end))-(start-1)*lik(smpl+1)/smpl);<span class="comment">% Minus the log-likelihood.</span></pre></div>
+<hr><address>Generated on Fri 16-Jun-2006 09:09:06 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/">m2html</a></strong> &copy; 2003</address>
+</body>
+</html>

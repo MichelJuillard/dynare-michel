@@ -1,0 +1,241 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of dynare_sensitivity</title>
+  <meta name="keywords" content="dynare_sensitivity">
+  <meta name="description" content="copyright Marco Ratto 2006">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2003 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../index.html">Home</a> &gt;  <a href="index.html">.</a> &gt; dynare_sensitivity.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../index.html"><img alt="<" border="0" src="../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="index.html">Index for .&nbsp;<img alt=">" border="0" src="../right.png"></a></td></tr></table>-->
+
+<h1>dynare_sensitivity
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>copyright Marco Ratto 2006</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function x0=dynare_sensitivity() </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> copyright Marco Ratto 2006</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="CheckPath.html" class="code" title="function DirectoryName = CheckPath(type)">CheckPath</a>	06-03-2005</li><li><a href="dynare_MC.html" class="code" title="function dynare_MC(var_list_)">dynare_MC</a>	</li><li><a href="filt_mc_.html" class="code" title="function [rmse_MC, ixx] = filt_mc_(vvarvecm, loadSA, pfilt, alpha, alpha2, OutDir, istart, alphaPC)">filt_mc_</a>	copyright Marco Ratto 2006</li><li><a href="read_variables.html" class="code" title="function dyn_data_01=read_variables(file_name_01,var_names_01,dyn_data_01,xls_sheet,xls_range)">read_variables</a>	Copyright (C) 2005 Michel Juillard</li><li><a href="set_default_option.html" class="code" title="function options=set_default_option(options,field,default)">set_default_option</a>	</li><li><a href="stab_map_.html" class="code" title="function x0 = stab_map_(Nsam, fload, ksstat, alpha2, prepSA, pprior, ilptau, OutputDirectoryName)">stab_map_</a>	</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+</ul>
+<!-- crossreference -->
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function x0=dynare_sensitivity()</a>
+0002 <span class="comment">% copyright Marco Ratto 2006</span>
+0003 
+0004 <span class="keyword">global</span> M_ options_ oo_ bayestopt_
+0005 
+0006 fname_ = M_.fname;
+0007 lgy_ = M_.endo_names;
+0008 x0=[];
+0009 
+0010 options_ = <a href="set_default_option.html" class="code" title="function options=set_default_option(options,field,default)">set_default_option</a>(options_,<span class="string">'opt_gsa'</span>,1);
+0011 options_gsa_ = options_.opt_gsa;
+0012 
+0013 <span class="comment">% map stability</span>
+0014 options_gsa_ = <a href="set_default_option.html" class="code" title="function options=set_default_option(options,field,default)">set_default_option</a>(options_gsa_,<span class="string">'stab'</span>,1);
+0015 options_gsa_ = <a href="set_default_option.html" class="code" title="function options=set_default_option(options,field,default)">set_default_option</a>(options_gsa_,<span class="string">'redform'</span>,0);
+0016 options_gsa_ = <a href="set_default_option.html" class="code" title="function options=set_default_option(options,field,default)">set_default_option</a>(options_gsa_,<span class="string">'pprior'</span>,1);
+0017 options_gsa_ = <a href="set_default_option.html" class="code" title="function options=set_default_option(options,field,default)">set_default_option</a>(options_gsa_,<span class="string">'ppost'</span>,0);
+0018 options_gsa_ = <a href="set_default_option.html" class="code" title="function options=set_default_option(options,field,default)">set_default_option</a>(options_gsa_,<span class="string">'ilptau'</span>,1);
+0019 options_gsa_ = <a href="set_default_option.html" class="code" title="function options=set_default_option(options,field,default)">set_default_option</a>(options_gsa_,<span class="string">'Nsam'</span>,2048);
+0020 options_gsa_ = <a href="set_default_option.html" class="code" title="function options=set_default_option(options,field,default)">set_default_option</a>(options_gsa_,<span class="string">'load_stab'</span>,0);
+0021 options_gsa_ = <a href="set_default_option.html" class="code" title="function options=set_default_option(options,field,default)">set_default_option</a>(options_gsa_,<span class="string">'alpha2_stab'</span>,0.3);
+0022 options_gsa_ = <a href="set_default_option.html" class="code" title="function options=set_default_option(options,field,default)">set_default_option</a>(options_gsa_,<span class="string">'ksstat'</span>,0.1);
+0023 options_gsa_ = <a href="set_default_option.html" class="code" title="function options=set_default_option(options,field,default)">set_default_option</a>(options_gsa_,<span class="string">'load_mh'</span>,0);
+0024 
+0025 OutputDirectoryName = <a href="CheckPath.html" class="code" title="function DirectoryName = CheckPath(type)">CheckPath</a>(<span class="string">'GSA'</span>);  
+0026 
+0027 
+0028 <span class="keyword">if</span> options_gsa_.stab &amp; ~options_gsa_.load_mh,
+0029   x0 = <a href="stab_map_.html" class="code" title="function x0 = stab_map_(Nsam, fload, ksstat, alpha2, prepSA, pprior, ilptau, OutputDirectoryName)">stab_map_</a>(options_gsa_.Nsam, options_gsa_.load_stab, options_gsa_.ksstat, options_gsa_.alpha2_stab, <span class="keyword">...</span>
+0030     options_gsa_.redform, options_gsa_.pprior, options_gsa_.ilptau, OutputDirectoryName);
+0031 <span class="keyword">end</span>
+0032 
+0033 <span class="comment">% reduced form</span>
+0034 <span class="comment">% redform_map(namendo, namlagendo, namexo, icomp, pprior, ilog, threshold)</span>
+0035 options_gsa_ = <a href="set_default_option.html" class="code" title="function options=set_default_option(options,field,default)">set_default_option</a>(options_gsa_,<span class="string">'load_redform'</span>,0);
+0036 options_gsa_ = <a href="set_default_option.html" class="code" title="function options=set_default_option(options,field,default)">set_default_option</a>(options_gsa_,<span class="string">'logtrans_redform'</span>,0);
+0037 options_gsa_ = <a href="set_default_option.html" class="code" title="function options=set_default_option(options,field,default)">set_default_option</a>(options_gsa_,<span class="string">'threshold_redform'</span>,[]);
+0038 options_gsa_ = <a href="set_default_option.html" class="code" title="function options=set_default_option(options,field,default)">set_default_option</a>(options_gsa_,<span class="string">'ksstat_redform'</span>,0.1);
+0039 options_gsa_ = <a href="set_default_option.html" class="code" title="function options=set_default_option(options,field,default)">set_default_option</a>(options_gsa_,<span class="string">'alpha2_redform'</span>,0.3);
+0040 options_gsa_ = <a href="set_default_option.html" class="code" title="function options=set_default_option(options,field,default)">set_default_option</a>(options_gsa_,<span class="string">'namendo'</span>,[]);
+0041 options_gsa_ = <a href="set_default_option.html" class="code" title="function options=set_default_option(options,field,default)">set_default_option</a>(options_gsa_,<span class="string">'namlagendo'</span>,[]);
+0042 options_gsa_ = <a href="set_default_option.html" class="code" title="function options=set_default_option(options,field,default)">set_default_option</a>(options_gsa_,<span class="string">'namexo'</span>,[]);
+0043 
+0044 <span class="keyword">if</span> options_gsa_.redform &amp; ~isempty(options_gsa_.namendo) &amp; ~options_gsa_.load_mh,
+0045   redform_map(options_gsa_.namendo, options_gsa_.namlagendo, options_gsa_.namexo, <span class="keyword">...</span>
+0046     options_gsa_.load_redform, options_gsa_.pprior, options_gsa_.logtrans_redform, <span class="keyword">...</span>
+0047     options_gsa_.threshold_redform, options_gsa_.ksstat_redform, <span class="keyword">...</span>
+0048     options_gsa_.alpha2_redform, OutputDirectoryName);
+0049 <span class="keyword">end</span>
+0050 <span class="comment">% RMSE mapping</span>
+0051 <span class="comment">% function [rmse_MC, ixx] = filt_mc_(vvarvecm, loadSA, pfilt, alpha, alpha2)</span>
+0052 options_gsa_ = <a href="set_default_option.html" class="code" title="function options=set_default_option(options,field,default)">set_default_option</a>(options_gsa_,<span class="string">'rmse'</span>,0);
+0053 options_gsa_ = <a href="set_default_option.html" class="code" title="function options=set_default_option(options,field,default)">set_default_option</a>(options_gsa_,<span class="string">'var_rmse'</span>,options_.varobs);
+0054 options_gsa_ = <a href="set_default_option.html" class="code" title="function options=set_default_option(options,field,default)">set_default_option</a>(options_gsa_,<span class="string">'load_rmse'</span>,0);
+0055 options_gsa_ = <a href="set_default_option.html" class="code" title="function options=set_default_option(options,field,default)">set_default_option</a>(options_gsa_,<span class="string">'pfilt_rmse'</span>,0.1);
+0056 options_gsa_ = <a href="set_default_option.html" class="code" title="function options=set_default_option(options,field,default)">set_default_option</a>(options_gsa_,<span class="string">'istart_rmse'</span>,1);
+0057 options_gsa_ = <a href="set_default_option.html" class="code" title="function options=set_default_option(options,field,default)">set_default_option</a>(options_gsa_,<span class="string">'alpha_rmse'</span>,0.002);
+0058 options_gsa_ = <a href="set_default_option.html" class="code" title="function options=set_default_option(options,field,default)">set_default_option</a>(options_gsa_,<span class="string">'alpha2_rmse'</span>,0.5);
+0059 options_.opt_gsa = options_gsa_;
+0060 <span class="keyword">if</span> options_gsa_.rmse,
+0061   <span class="keyword">if</span> options_gsa_.pprior
+0062     a=load([OutputDirectoryName,<span class="string">'\'</span>,fname_,<span class="string">'_prior'</span>]);
+0063   <span class="keyword">else</span>
+0064     a=load([OutputDirectoryName,<span class="string">'\'</span>,fname_,<span class="string">'_mc'</span>]);
+0065   <span class="keyword">end</span>
+0066   <span class="keyword">if</span> ~isfield(a,<span class="string">'stock_filter'</span>),
+0067     <a href="dynare_MC.html" class="code" title="function dynare_MC(var_list_)">dynare_MC</a>([],OutputDirectoryName);
+0068     options_gsa_.load_rmse=0;
+0069   <span class="keyword">end</span>
+0070   <a href="filt_mc_.html" class="code" title="function [rmse_MC, ixx] = filt_mc_(vvarvecm, loadSA, pfilt, alpha, alpha2, OutDir, istart, alphaPC)">filt_mc_</a>(options_gsa_.var_rmse, options_gsa_.load_rmse, options_gsa_.pfilt_rmse, <span class="keyword">...</span>
+0071     options_gsa_.alpha_rmse, options_gsa_.alpha2_rmse, OutputDirectoryName, <span class="keyword">...</span>
+0072     options_gsa_.istart_rmse);
+0073 <span class="keyword">end</span>
+0074 
+0075 
+0076 options_gsa_ = <a href="set_default_option.html" class="code" title="function options=set_default_option(options,field,default)">set_default_option</a>(options_gsa_,<span class="string">'glue'</span>,0);
+0077 <span class="keyword">if</span> options_gsa_.glue,
+0078   dr_ = oo_.dr;
+0079   <span class="keyword">if</span> options_gsa_.ppost
+0080     load([OutputDirectoryName,<span class="string">'\'</span>,fname_,<span class="string">'_post'</span>]);
+0081     DirectoryName = <a href="CheckPath.html" class="code" title="function DirectoryName = CheckPath(type)">CheckPath</a>(<span class="string">'metropolis'</span>);
+0082   <span class="keyword">else</span>
+0083     <span class="keyword">if</span> options_gsa_.pprior
+0084       load([OutputDirectoryName,<span class="string">'\'</span>,fname_,<span class="string">'_prior'</span>]);
+0085     <span class="keyword">else</span>
+0086       load([OutputDirectoryName,<span class="string">'\'</span>,fname_,<span class="string">'_mc'</span>]);
+0087     <span class="keyword">end</span>
+0088   <span class="keyword">end</span>
+0089   nruns=size(x,1);
+0090   gend = options_.nobs;
+0091   rawdata = <a href="read_variables.html" class="code" title="function dyn_data_01=read_variables(file_name_01,var_names_01,dyn_data_01,xls_sheet,xls_range)">read_variables</a>(options_.datafile,options_.varobs,[],options_.xls_sheet,options_.xls_range);
+0092   rawdata = rawdata(options_.first_obs:options_.first_obs+gend-1,:);
+0093   <span class="keyword">if</span> options_.loglinear == 1
+0094     rawdata = log(rawdata);
+0095   <span class="keyword">end</span>
+0096   <span class="keyword">if</span> options_.prefilter == 1
+0097     data = transpose(rawdata-ones(gend,1)*bayestopt_.mean_varobs);
+0098   <span class="keyword">else</span>
+0099     data = transpose(rawdata);
+0100   <span class="keyword">end</span>
+0101   
+0102   Obs.data = data;
+0103   Obs.time = [1:gend];
+0104   Obs.num  = gend;
+0105   <span class="keyword">for</span> j=1:size(options_.varobs,1)
+0106     Obs.name{j} = deblank(options_.varobs(j,:));
+0107     vj=deblank(options_.varobs(j,:));
+0108     
+0109     jxj = strmatch(vj,lgy_(dr_.order_var,:),<span class="string">'exact'</span>);
+0110     js = strmatch(vj,lgy_,<span class="string">'exact'</span>);
+0111     <span class="keyword">if</span> ~options_gsa_.ppost
+0112       y0=zeros(gend+1,nruns);
+0113       nb = size(stock_filter,3);
+0114       y0 = squeeze(stock_filter(:,jxj,:)) + <span class="keyword">...</span>
+0115         kron(stock_ys(js,:),ones(size(stock_filter,1),1));
+0116       Out(j).data = y0';
+0117       Out(j).time = [1:size(y0,1)];
+0118     <span class="keyword">else</span>
+0119       Out(j).data = jxj;
+0120       Out(j).time = [pwd,<span class="string">'\'</span>,DirectoryName];
+0121     <span class="keyword">end</span>
+0122     Out(j).name = vj;
+0123     Out(j).ini  = <span class="string">'yes'</span>;
+0124     Lik(j).name = [<span class="string">'rmse_'</span>,vj];
+0125     Lik(j).ini  = <span class="string">'yes'</span>;
+0126     Lik(j).isam = 1;
+0127     Lik(j).data = rmse_MC(:,j)';
+0128     
+0129     <span class="keyword">if</span> ~options_gsa_.ppost
+0130       y0 = squeeze(stock_smooth(:,jxj,:)) + <span class="keyword">...</span>
+0131         kron(stock_ys(js,:),ones(size(stock_smooth,1),1));
+0132       Out1(j).name = vj;
+0133       Out1(j).ini  = <span class="string">'yes'</span>;
+0134       Out1(j).time = [1:size(y0,1)];
+0135       Out1(j).data = y0';
+0136     <span class="keyword">else</span>
+0137       Out1=Out;
+0138     <span class="keyword">end</span>
+0139     ismoo(j)=jxj;
+0140     
+0141   <span class="keyword">end</span>
+0142   jsmoo = size(options_.varobs,1);
+0143   <span class="keyword">for</span> j=1:M_.endo_nbr,
+0144     <span class="keyword">if</span> ~ismember(j,ismoo),
+0145       jsmoo=jsmoo+1;
+0146       vj=deblank(M_.endo_names(dr_.order_var(j),:));
+0147       <span class="keyword">if</span> ~options_gsa_.ppost        
+0148         y0 = squeeze(stock_smooth(:,j,:)) + <span class="keyword">...</span>
+0149           kron(stock_ys(j,:),ones(size(stock_smooth,1),1));
+0150         Out1(jsmoo).time = [1:size(y0,1)];
+0151         Out1(jsmoo).data = y0';
+0152       <span class="keyword">else</span>
+0153         Out1(jsmoo).data = j;
+0154         Out1(jsmoo).time = [pwd,<span class="string">'\'</span>,DirectoryName];
+0155       <span class="keyword">end</span>
+0156       Out1(jsmoo).name = vj;
+0157       Out1(jsmoo).ini  = <span class="string">'yes'</span>;
+0158     <span class="keyword">end</span>
+0159   <span class="keyword">end</span>
+0160   tit(M_.exo_names_orig_ord,:) = M_.exo_names;
+0161   <span class="keyword">for</span> j=1:M_.exo_nbr,
+0162       Exo(j).name = deblank(tit(j,:));    
+0163   <span class="keyword">end</span>
+0164   <span class="keyword">if</span> ~options_gsa_.ppost
+0165     Lik(size(options_.varobs,1)+1).name = <span class="string">'logpo'</span>;
+0166     Lik(size(options_.varobs,1)+1).ini  = <span class="string">'yes'</span>;
+0167     Lik(size(options_.varobs,1)+1).isam = 1;
+0168     Lik(size(options_.varobs,1)+1).data = -logpo2;
+0169   <span class="keyword">end</span>
+0170   Sam.name = bayestopt_.name;
+0171   Sam.dim  = [size(x) 0];
+0172   Sam.data = [x];
+0173   
+0174   Rem.id = <span class="string">'Original'</span>;
+0175   Rem.ind= [1:size(x,1)];
+0176   
+0177   <span class="keyword">if</span> options_gsa_.ppost
+0178     Info.dynare=M_.fname;
+0179     Out=Out1;
+0180     save([OutputDirectoryName,<span class="string">'\'</span>,fname_,<span class="string">'_post_glue'</span>], <span class="string">'Out'</span>, <span class="string">'Sam'</span>, <span class="string">'Lik'</span>, <span class="string">'Obs'</span>, <span class="string">'Rem'</span>,<span class="string">'Info'</span>, <span class="string">'Exo'</span>)
+0181     <span class="comment">%save([fname_,'_post_glue_smooth'], 'Out', 'Sam', 'Lik', 'Obs', 'Rem','Info')</span>
+0182     
+0183   <span class="keyword">else</span>
+0184     <span class="keyword">if</span> options_gsa_.pprior
+0185       save([OutputDirectoryName,<span class="string">'\'</span>,fname_,<span class="string">'_prior_glue'</span>], <span class="string">'Out'</span>, <span class="string">'Sam'</span>, <span class="string">'Lik'</span>, <span class="string">'Obs'</span>, <span class="string">'Rem'</span>)
+0186       Out=Out1;
+0187       save([OutputDirectoryName,<span class="string">'\'</span>,fname_,<span class="string">'_prior_glue_smooth'</span>], <span class="string">'Out'</span>, <span class="string">'Sam'</span>, <span class="string">'Lik'</span>, <span class="string">'Obs'</span>, <span class="string">'Rem'</span>)
+0188     <span class="keyword">else</span>
+0189       save([OutputDirectoryName,<span class="string">'\'</span>,fname_,<span class="string">'_mc_glue'</span>], <span class="string">'Out'</span>, <span class="string">'Sam'</span>, <span class="string">'Lik'</span>, <span class="string">'Obs'</span>, <span class="string">'Rem'</span>)
+0190       Out=Out1;
+0191       save([OutputDirectoryName,<span class="string">'\'</span>,fname_,<span class="string">'_mc_glue_smooth'</span>], <span class="string">'Out'</span>, <span class="string">'Sam'</span>, <span class="string">'Lik'</span>, <span class="string">'Obs'</span>, <span class="string">'Rem'</span>)
+0192     <span class="keyword">end</span>
+0193   <span class="keyword">end</span>
+0194   
+0195 <span class="keyword">end</span></pre></div>
+<hr><address>Generated on Fri 16-Jun-2006 09:09:06 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/">m2html</a></strong> &copy; 2003</address>
+</body>
+</html>

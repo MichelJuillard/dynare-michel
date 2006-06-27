@@ -1,0 +1,66 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of lpdfig1</title>
+  <meta name="keywords" content="lpdfig1">
+  <meta name="description" content="log INVERSE GAMMA (type 1)">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2003 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../index.html">Home</a> &gt;  <a href="index.html">.</a> &gt; lpdfig1.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../index.html"><img alt="<" border="0" src="../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="index.html">Index for .&nbsp;<img alt=">" border="0" src="../right.png"></a></td></tr></table>-->
+
+<h1>lpdfig1
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>log INVERSE GAMMA (type 1)</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function ldens = lpdfig1(x,s,nu) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> log INVERSE GAMMA (type 1)
+
+ X ~ IG1(s,nu)
+ X = sqrt(Y) where Y ~ IG2(s,nu) and Y = inv(Z) with Z ~ G(nu/2,2/s) (Gamma distribution) 
+ 
+ See L. Bauwens, M. Lubrano and J-F. Richard [1999, appendix A] for more
+ details.
+
+ stephane.adjemian@cepremap.cnrs.fr [01/16/2004]</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+</ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="priordens.html" class="code" title="function lnprior = priordens(para, pshape, p1, p2, p3, p4)">priordens</a>	This procedure computes a prior density for</li></ul>
+<!-- crossreference -->
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function ldens = lpdfig1(x,s,nu)</a>
+0002 <span class="comment">% log INVERSE GAMMA (type 1)</span>
+0003 <span class="comment">%</span>
+0004 <span class="comment">% X ~ IG1(s,nu)</span>
+0005 <span class="comment">% X = sqrt(Y) where Y ~ IG2(s,nu) and Y = inv(Z) with Z ~ G(nu/2,2/s) (Gamma distribution)</span>
+0006 <span class="comment">%</span>
+0007 <span class="comment">% See L. Bauwens, M. Lubrano and J-F. Richard [1999, appendix A] for more</span>
+0008 <span class="comment">% details.</span>
+0009 <span class="comment">%</span>
+0010 <span class="comment">% stephane.adjemian@cepremap.cnrs.fr [01/16/2004]</span>
+0011 
+0012 ldens = log(2) - gammaln(nu/2) - (nu/2).*log(2/s) - (nu+1)*log(x) - .5*s./(x.^2);</pre></div>
+<hr><address>Generated on Fri 16-Jun-2006 09:09:06 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/">m2html</a></strong> &copy; 2003</address>
+</body>
+</html>

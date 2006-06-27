@@ -1,0 +1,188 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of solve1</title>
+  <meta name="keywords" content="solve1">
+  <meta name="description" content="Copyright (C) 2001 Michel Juillard">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2003 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../index.html">Home</a> &gt;  <a href="index.html">.</a> &gt; solve1.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../index.html"><img alt="<" border="0" src="../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="index.html">Index for .&nbsp;<img alt=">" border="0" src="../right.png"></a></td></tr></table>-->
+
+<h1>solve1
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>Copyright (C) 2001 Michel Juillard</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function [x,check] = solve1(func,x,j1,j2,jacobian_flag,varargin) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> Copyright (C) 2001 Michel Juillard</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="check.html" class="code" title="function result = check">check</a>	Copyright (C) 2001 Michel Juillard</li><li><a href="lnsrch1.html" class="code" title="function [x,f,fvec,check]=lnsrch(xold,fold,g,p,stpmax,func,j1,j2,varargin)">lnsrch1</a>	Copyright (C) 2001 Michel Juillard</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="dynare_solve.html" class="code" title="function [x,cheik] = dynare_solve(func,x,jacobian_flag,varargin)">dynare_solve</a>	Copyright (C) 2001 Michel Juillard</li></ul>
+<!-- crossreference -->
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <span class="comment">% Copyright (C) 2001 Michel Juillard</span>
+0002 <span class="comment">%</span>
+0003 <a name="_sub0" href="#_subfunctions" class="code">function [x,check] = solve1(func,x,j1,j2,jacobian_flag,varargin)</a>
+0004 
+0005   <span class="keyword">global</span> M_ options_ fjac  
+0006 
+0007   nn = length(j1);
+0008   fjac = zeros(nn,nn) ;
+0009   g = zeros(nn,1) ;
+0010 
+0011   tolf = eps^(2/3) ;
+0012   tolmin = 3.7e-11 ;
+0013   tolx = 3.7e-11 ;
+0014 
+0015   stpmx = 100 ;
+0016   maxit = 2000 ;
+0017 
+0018   <a href="check.html" class="code" title="function result = check">check</a> = 0 ;
+0019 
+0020   fvec = feval(func,x,varargin{:});
+0021   fvec = fvec(j1);
+0022   
+0023   i = find(~isfinite(fvec));
+0024   
+0025   <span class="keyword">if</span> ~isempty(i)
+0026     disp([<span class="string">'STEADY:  numerical initial values incompatible with the following'</span> <span class="keyword">...</span>
+0027       <span class="string">' equations'</span>])
+0028     disp(j1(i)')
+0029   <span class="keyword">end</span>
+0030   
+0031   f = 0.5*fvec'*fvec ;
+0032 
+0033   <span class="keyword">if</span> max(abs(fvec)) &lt; 0.01*tolf
+0034     <span class="keyword">return</span> ;
+0035   <span class="keyword">end</span>
+0036 
+0037   stpmax = stpmx*max([sqrt(x'*x);nn]) ;
+0038   first_time = 1;
+0039   <span class="keyword">for</span> its = 1:maxit
+0040     <span class="keyword">if</span> jacobian_flag
+0041       [fvec,fjac] = feval(func,x,varargin{:});
+0042     <span class="keyword">else</span>
+0043       fvec = feval(func,x,varargin{:});
+0044       dh = max(abs(x(j2)),options_.gstep*ones(nn,1))*eps^(1/3);
+0045       
+0046       <span class="keyword">for</span> j = 1:nn
+0047     xdh = x ;
+0048     xdh(j2(j)) = xdh(j2(j))+dh(j) ;
+0049     t = feval(func,xdh,varargin{:});
+0050     fjac(:,j) = (t(j1) - fvec)./dh(j) ;
+0051     g(j) = fvec'*fjac(:,j) ;
+0052       <span class="keyword">end</span>
+0053     <span class="keyword">end</span>
+0054     fvec = fvec(j1);
+0055     fjac = fjac(j1,j2);
+0056     g = (fvec'*fjac)';
+0057     <span class="keyword">if</span> options_.debug
+0058       disp([<span class="string">'cond(fjac) '</span> num2str(cond(fjac))])
+0059     <span class="keyword">end</span>
+0060     M_.unit_root = 0;
+0061     <span class="keyword">if</span> M_.unit_root
+0062       <span class="keyword">if</span> first_time
+0063         first_time = 0;
+0064     [q,r,e]=qr(fjac);
+0065     n = sum(abs(diag(r)) &lt; 1e-12);
+0066     fvec = q'*fvec;
+0067     p = e*[-r(1:end-n,1:end-n)\fvec(1:end-n);zeros(n,1)];
+0068     disp(<span class="string">' '</span>)
+0069     disp(<span class="string">'STEADY with unit roots:'</span>)
+0070     disp(<span class="string">' '</span>)
+0071     <span class="keyword">if</span> n &gt; 0
+0072       disp([<span class="string">'   The following variable(s) kept their value given in INITVAL'</span> <span class="keyword">...</span>
+0073         <span class="string">' or ENDVAL'</span>])
+0074       disp(char(e(:,end-n+1:end)'*M_.endo_names))
+0075     <span class="keyword">else</span>
+0076       disp(<span class="string">'   STEADY can''t find any unit root!'</span>)
+0077     <span class="keyword">end</span>
+0078       <span class="keyword">else</span>
+0079     [q,r]=qr(fjac*e);
+0080     fvec = q'*fvec;
+0081     p = e*[-r(1:end-n,1:end-n)\fvec(1:end-n);zeros(n,1)];
+0082       <span class="keyword">end</span>    
+0083 <span class="comment">%    elseif cond(fjac) &gt; 10*sqrt(eps)</span>
+0084     <span class="keyword">elseif</span> cond(fjac) &gt; 1/sqrt(eps)
+0085     fjac2=fjac'*fjac;
+0086     p=-(fjac2+sqrt(nn*eps)*max(sum(abs(fjac2)))*eye(nn))\(fjac'*fvec);
+0087     <span class="keyword">else</span>
+0088       p = -fjac\fvec ;
+0089     <span class="keyword">end</span>
+0090     xold = x ;
+0091     fold = f ;
+0092 
+0093     [x,f,fvec,<a href="check.html" class="code" title="function result = check">check</a>]=<a href="lnsrch1.html" class="code" title="function [x,f,fvec,check]=lnsrch(xold,fold,g,p,stpmax,func,j1,j2,varargin)">lnsrch1</a>(xold,fold,g,p,stpmax,func,j1,j2,varargin{:});
+0094 
+0095     <span class="keyword">if</span> options_.debug
+0096       disp([its f])
+0097       disp([xold x])
+0098     <span class="keyword">end</span>
+0099       
+0100     <span class="keyword">if</span> <a href="check.html" class="code" title="function result = check">check</a> &gt; 0
+0101       den = max([f;0.5*nn]) ;
+0102       <span class="keyword">if</span> max(abs(g).*max([abs(x');ones(1,nn)])')/den &lt; tolmin
+0103     <span class="keyword">return</span>
+0104       <span class="keyword">else</span>
+0105     disp (<span class="string">' '</span>)
+0106     disp ([<span class="string">'SOLVE: Iteration '</span> num2str(its)])
+0107     disp ([<span class="string">'Spurious convergence.'</span>])
+0108     disp (x)
+0109     <span class="keyword">return</span>
+0110       <span class="keyword">end</span>
+0111 
+0112       <span class="keyword">if</span> max(abs(x-xold)./max([abs(x);ones(1,nn)])') &lt; tolx
+0113     disp (<span class="string">' '</span>)
+0114     disp ([<span class="string">'SOLVE: Iteration '</span> num2str(its)])
+0115     disp ([<span class="string">'Convergence on dX.'</span>])
+0116     disp (x)
+0117     <span class="keyword">return</span>
+0118       <span class="keyword">end</span>
+0119     <span class="keyword">elseif</span> f &lt; tolf
+0120       <span class="keyword">return</span>
+0121     <span class="keyword">end</span>
+0122   <span class="keyword">end</span>
+0123   
+0124   <a href="check.html" class="code" title="function result = check">check</a> = 1;
+0125   disp(<span class="string">' '</span>)
+0126   disp(<span class="string">'SOLVE: maxit has been reached'</span>)
+0127 
+0128 <span class="comment">% 01/14/01 MJ lnsearch is now a separate function</span>
+0129 <span class="comment">% 01/16/01 MJ added varargin to function evaluation</span>
+0130 <span class="comment">% 04/13/01 MJ added test  f &lt; tolf !!</span>
+0131 <span class="comment">% 05/11/01 MJ changed tests for 'check' so as to remove 'continue' which is</span>
+0132 <span class="comment">%             an instruction which appears only in version 6</span>
+0133 
+0134 
+0135 
+0136 
+0137 
+0138 
+0139 
+0140 
+0141 
+0142</pre></div>
+<hr><address>Generated on Fri 16-Jun-2006 09:09:06 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/">m2html</a></strong> &copy; 2003</address>
+</body>
+</html>

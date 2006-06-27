@@ -1,0 +1,369 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of simk</title>
+  <meta name="keywords" content="simk">
+  <meta name="description" content="Copyright (C) 2001 Michel Juillard">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2003 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../index.html">Home</a> &gt;  <a href="index.html">.</a> &gt; simk.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../index.html"><img alt="<" border="0" src="../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="index.html">Index for .&nbsp;<img alt=">" border="0" src="../right.png"></a></td></tr></table>-->
+
+<h1>simk
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>Copyright (C) 2001 Michel Juillard</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function simk </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> Copyright (C) 2001 Michel Juillard</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="bksupk.html" class="code" title="function d1 = bksupk(ny,fid,jcf,icc1)">bksupk</a>	</li><li><a href="ffill.html" class="code" title="function [a,b] = ffill(x,ixc,y)">ffill</a>	Copyright (C) 2001 Michel Juillard</li><li><a href="indnv.html" class="code" title="function a=indnv(x,y)">indnv</a>	Copyright (C) 2001 Michel Juillard</li><li><a href="selif.html" class="code" title="function x = selif(a,b)">selif</a>	Copyright (C) 2001 Michel Juillard</li><li><a href="union.html" class="code" title="function x = union(a,b)">union</a>	</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="simul.html" class="code" title="function simul(dr)">simul</a>	Copyright (C) 2001 Michel Juillard</li></ul>
+<!-- crossreference -->
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <span class="comment">% Copyright (C) 2001 Michel Juillard</span>
+0002 <span class="comment">%</span>
+0003 <a name="_sub0" href="#_subfunctions" class="code">function simk</a>
+0004 
+0005 <span class="keyword">global</span> M_ options_ oo_
+0006 <span class="keyword">global</span> it_ iyr0 ct_ broyden_
+0007 
+0008 func_name = [M_.fname <span class="string">'_static'</span>];
+0009 nk = M_.maximum_lag + M_.maximum_lead + 1 ;
+0010 ny = size(M_.lead_lag_incidence,2) ;
+0011 icc1 = M_.lead_lag_incidence(nk,:) &gt; 0;
+0012 
+0013 <span class="keyword">for</span> i = 1:M_.maximum_lead -1
+0014   icc1 = [M_.lead_lag_incidence(nk-i,:) | icc1(1,:); icc1] ;
+0015 <span class="keyword">end</span>
+0016 
+0017 icc1 = find(icc1') ;
+0018 iy = M_.lead_lag_incidence &gt; 0 ;
+0019 isc = cumsum(sum(iy',1))' ;
+0020 iyr0 = find(M_.lead_lag_incidence') ;
+0021 ncc1 = size(icc1,1) ;
+0022 ncc = ncc1 + 1 ;
+0023 ncs = size(iyr0,1) ;
+0024 
+0025 ky = zeros(ny,nk) ;            <span class="comment">% indices of variables at each lead or lag</span>
+0026 lky = zeros(nk,1) ;
+0027 <span class="keyword">for</span> i = 1:nk
+0028   j = find(M_.lead_lag_incidence(i,:))' ;
+0029   <span class="keyword">if</span> isempty(j)
+0030     lky(i) = 0;
+0031   <span class="keyword">else</span>
+0032     lky(i) = size(j,1) ;
+0033     ky(1:lky(i),i) = j ;
+0034   <span class="keyword">end</span>
+0035 <span class="keyword">end</span>
+0036 
+0037 jwc = find(iy(2:M_.maximum_lead+1,:)') ; <span class="comment">% indices of columns for</span>
+0038                                 <span class="comment">% triangularization</span>
+0039                 <span class="comment">% as many rows as lags in model</span>
+0040 
+0041 <span class="keyword">if</span> isempty(jwc)
+0042   jwc = 0 ;
+0043   ljwc = 0 ;
+0044   temp = icc1 ;
+0045 <span class="keyword">else</span>
+0046   ljwc = size(jwc,1) ;          <span class="comment">% length of each row in jwc</span>
+0047   temp = <a href="union.html" class="code" title="function x = union(a,b)">union</a>(jwc,icc1) ;      <span class="comment">% prepares next iteration</span>
+0048 <span class="keyword">end</span>
+0049 
+0050 j1 = ky(1:lky(1),1) ;
+0051 lj1 = lky(1) ;
+0052 
+0053 <span class="keyword">for</span> i = 2:M_.maximum_lag
+0054   [j1,lj1] = <a href="ffill.html" class="code" title="function [a,b] = ffill(x,ixc,y)">ffill</a>(j1,lj1,<a href="selif.html" class="code" title="function x = selif(a,b)">selif</a>(temp+(i-1)*ny,temp &lt;= ny)) ;
+0055   <span class="keyword">if</span> M_.maximum_lead == 1
+0056     <span class="keyword">if</span> lky(i+M_.maximum_lead) &gt; 0
+0057       [jwc,ljwc] = <a href="ffill.html" class="code" title="function [a,b] = ffill(x,ixc,y)">ffill</a>(jwc,ljwc, ky(1:lky(i+M_.maximum_lead),i+M_.maximum_lead)+(M_.maximum_lead-1)*ny) ;
+0058       <span class="keyword">if</span> ljwc(i) == 0
+0059      temp = icc1;
+0060       <span class="keyword">else</span>
+0061      temp = <a href="union.html" class="code" title="function x = union(a,b)">union</a>(jwc(1:ljwc(i),i),icc1) ;
+0062       <span class="keyword">end</span>
+0063     <span class="keyword">else</span>
+0064       [jwc,ljwc] = <a href="ffill.html" class="code" title="function [a,b] = ffill(x,ixc,y)">ffill</a>(jwc,ljwc,[]) ;
+0065       temp = icc1 ;
+0066     <span class="keyword">end</span>
+0067   <span class="keyword">else</span>
+0068     temp = temp(lj1(i)+1:size(temp,1),:) - ny ;
+0069     <span class="keyword">if</span> lky(i+M_.maximum_lead) &gt; 0
+0070       [jwc,ljwc] = <a href="ffill.html" class="code" title="function [a,b] = ffill(x,ixc,y)">ffill</a>(jwc,ljwc,[temp;ky(1:lky(i+M_.maximum_lead),i+M_.maximum_lead)+(M_.maximum_lead-1)*ny]);
+0071     <span class="keyword">else</span>
+0072       [jwc,ljwc] = <a href="ffill.html" class="code" title="function [a,b] = ffill(x,ixc,y)">ffill</a>(jwc,ljwc,temp) ;
+0073     <span class="keyword">end</span>
+0074     temp = <a href="union.html" class="code" title="function x = union(a,b)">union</a>(jwc(1:ljwc(i),i),icc1) ;
+0075   <span class="keyword">end</span>
+0076 <span class="keyword">end</span>
+0077 
+0078 [j1,lj1] = <a href="ffill.html" class="code" title="function [a,b] = ffill(x,ixc,y)">ffill</a>(j1,lj1,<a href="selif.html" class="code" title="function x = selif(a,b)">selif</a>(temp+M_.maximum_lag*ny, temp &lt;= ny)) ;
+0079 ltemp = zeros(M_.maximum_lag,1) ;
+0080 jwc1 = zeros(ncc1,M_.maximum_lag) ;
+0081 
+0082 <span class="keyword">for</span> i = 1:M_.maximum_lag
+0083   temp = <a href="union.html" class="code" title="function x = union(a,b)">union</a>(jwc(1:ljwc(i),i),icc1) ;
+0084   ltemp(i) = size(temp,1) ;
+0085   <span class="keyword">if</span> ljwc(i) &gt; 0
+0086     jwc(1:ljwc(i),i) = <a href="indnv.html" class="code" title="function a=indnv(x,y)">indnv</a>(jwc(1:ljwc(i),i),temp) ;
+0087   <span class="keyword">end</span>
+0088   jwc1(:,i) = <a href="indnv.html" class="code" title="function a=indnv(x,y)">indnv</a>(icc1,temp) ;
+0089 <span class="keyword">end</span>
+0090 
+0091 h1 = clock ;
+0092 
+0093 disp ([<span class="string">'-----------------------------------------------------'</span>]) ;
+0094 disp (<span class="string">'MODEL SIMULATION'</span>) ;
+0095 fprintf (<span class="string">'\n'</span>) ;
+0096 
+0097 <span class="keyword">for</span> iter = 1:options_.maxit
+0098   h2 = clock ;
+0099   oo_.y_simul = oo_.y_simul(:);
+0100   err_f = 0;
+0101   
+0102   fid = fopen(<span class="string">'dynare.swp'</span>,<span class="string">'w+'</span>) ;
+0103 
+0104   it_ = 1+M_.maximum_lag ;
+0105   ic = [1:ny] ;
+0106   iyr = iyr0 ;
+0107   i = M_.maximum_lag+1 ;
+0108   <span class="keyword">while</span> (i&gt;1) &amp; (it_&lt;=options_.periods+M_.maximum_lag)
+0109     h3 = clock ;
+0110     <span class="keyword">if</span> broyden_ &amp; iter &gt; 1
+0111       <span class="comment">%d1_ = -feval(fh,oo_.y_simul(iyr));</span>
+0112       d1 = -feval([M_.fname <span class="string">'_dynamic'</span>],oo_.y_simul(iyr),z,oo_.exo_simul);
+0113     <span class="keyword">else</span>
+0114       <span class="comment">%jacob(func_name,oo_.y_simul(iyr)) ;</span>
+0115       [d1,M_.jacobia] = feval([M_.fname <span class="string">'_dynamic'</span>],oo_.y_simul(iyr),oo_.exo_simul);
+0116       d1 = -d1 ;
+0117     <span class="keyword">end</span>
+0118     err_f = max(err_f,max(abs(d1)));
+0119     <span class="keyword">if</span> lky(i) ~= 0
+0120       j1i = ky(1:lky(i),i) ;
+0121       w0 = M_.jacobia(:,isc(i-1)+1:isc(i)) ;
+0122     <span class="keyword">else</span>
+0123       w0 = [];
+0124     <span class="keyword">end</span>
+0125     ttemp = iy(i+1:i+M_.maximum_lead,:)' ;
+0126     jwci = find(ttemp) ;
+0127     <span class="keyword">if</span> ~ isempty(jwci)
+0128       w = M_.jacobia(:,isc(i)+1:isc(i+M_.maximum_lead)) ;
+0129     <span class="keyword">end</span>
+0130     j = i ;
+0131     <span class="keyword">while</span> j &lt;= M_.maximum_lag
+0132       <span class="keyword">if</span> ~isempty(w0)
+0133 
+0134     ofs = ((it_-M_.maximum_lag-M_.maximum_lag+j-2)*ny)*ncc*8 ;
+0135     junk = fseek(fid,ofs,-1) ;
+0136     c = fread(fid,[ncc,ny],<span class="string">'float64'</span>) ;
+0137 
+0138     <span class="keyword">if</span> isempty(jwci)
+0139       w = -w0*c(j1i,1:ncc1) ;
+0140       jwci = icc1 ;
+0141     <span class="keyword">else</span>
+0142       iz = <a href="union.html" class="code" title="function x = union(a,b)">union</a>(jwci,icc1) ;
+0143       ix = <a href="indnv.html" class="code" title="function a=indnv(x,y)">indnv</a>(jwci,iz) ;
+0144       iy__ = <a href="indnv.html" class="code" title="function a=indnv(x,y)">indnv</a>(icc1,iz) ;
+0145       temp = zeros(size(w,1),size(iz,1)) ;
+0146       temp(:,ix) = w ;
+0147       temp(:,iy__) = temp(:,iy__)-w0*c(j1i,1:ncc1) ;
+0148       w = temp ;
+0149       jwci = iz ;
+0150       clear temp iz ix iy__ ;
+0151     <span class="keyword">end</span>
+0152     d1 = d1-w0*c(j1i,ncc) ;
+0153     clear c ;
+0154       <span class="keyword">end</span>
+0155       j = j + 1 ;
+0156       <span class="keyword">if</span> isempty(jwci)
+0157     j1i = [];
+0158     <span class="keyword">if</span> lky(j+M_.maximum_lead) ~= 0
+0159       jwci = ky(1:lky(j+M_.maximum_lead),j+M_.maximum_lead) + (M_.maximum_lead-1)*ny ;
+0160       w = M_.jacobia(:,isc(j+M_.maximum_lead-1)+1:isc(j+M_.maximum_lead)) ;
+0161     <span class="keyword">else</span>
+0162       jwci = [] ;
+0163     <span class="keyword">end</span>
+0164       <span class="keyword">else</span>
+0165     j1i = <a href="selif.html" class="code" title="function x = selif(a,b)">selif</a>(jwci,jwci&lt;(ny+1)) ;
+0166     w0 = w(:,1:size(j1i,1)) ;
+0167     <span class="keyword">if</span> size(jwci,1) == size(j1i,1)
+0168       <span class="keyword">if</span> lky(j+M_.maximum_lead) ~= 0
+0169         jwci = ky(1:lky(j+M_.maximum_lead),j+M_.maximum_lead)+(M_.maximum_lead-1)*ny ;
+0170         w = M_.jacobia(:,isc(j+M_.maximum_lead-1)+1:isc(j+M_.maximum_lead)) ;
+0171       <span class="keyword">else</span>
+0172         jwci = [] ;
+0173       <span class="keyword">end</span>
+0174     <span class="keyword">else</span>
+0175       jwci = jwci(size(j1i,1)+1:size(jwci,1),:)-ny ;
+0176       w = w(:,size(j1i,1)+1:size(w,2)) ; 
+0177       <span class="keyword">if</span> lky(j+M_.maximum_lead) ~= 0
+0178         jwci = [ jwci; ky(1: lky(j+M_.maximum_lead),j+M_.maximum_lead)+(M_.maximum_lead-1)*ny] ;
+0179         w = [w M_.jacobia(:,isc(j+M_.maximum_lead-1)+1:isc(j+M_.maximum_lead))] ;
+0180 <span class="comment">%      else</span>
+0181 <span class="comment">%        jwci = [] ;</span>
+0182       <span class="keyword">end</span>
+0183     <span class="keyword">end</span>
+0184       <span class="keyword">end</span>
+0185     <span class="keyword">end</span>
+0186     jwci = [<a href="indnv.html" class="code" title="function a=indnv(x,y)">indnv</a>(jwci,icc1);ncc] ;
+0187     w = [w d1] ;
+0188     c = zeros(ny,ncc) ;
+0189     c(:,jwci) = w0\w ;
+0190     clear w w0 ;
+0191 
+0192     junk = fseek(fid,0,1) ;
+0193     fwrite(fid,c,<span class="string">'float64'</span>) ;
+0194     clear c ;
+0195 
+0196     it_ = it_ + 1;
+0197     ic = ic + ny ;
+0198     iyr = iyr + ny ;
+0199     i = i - 1 ;
+0200   <span class="keyword">end</span>
+0201   icr0 = (it_-M_.maximum_lag-M_.maximum_lag -1)*ny ;
+0202   <span class="keyword">while</span> it_ &lt;= options_.periods+M_.maximum_lag
+0203     <span class="keyword">if</span> broyden_
+0204       <span class="comment">%d1_ = -feval(fh,oo_.y_simul(iyr));</span>
+0205        d1 = -feval([M_.fname <span class="string">'_dynamic'</span>],oo_.y_simul(iyr),z,oo_.exo_simul);
+0206     <span class="keyword">else</span>
+0207       <span class="comment">%jacob(func_name,oo_.y_simul(iyr)) ;</span>
+0208       [d1,M_.jacobia] = feval([M_.fname <span class="string">'_dynamic'</span>],oo_.y_simul(iyr),oo_.exo_simul);
+0209       d1 = -d1 ;
+0210     <span class="keyword">end</span>
+0211     err_f = max(err_f,max(abs(d1)));
+0212     w0 = M_.jacobia(:,1:isc(1)) ;
+0213     w = M_.jacobia(:,isc(1)+1:isc(1+M_.maximum_lead)) ;
+0214     j = 1 ;
+0215     <span class="keyword">while</span> j &lt;= M_.maximum_lag
+0216       icr = j1(1:lj1(j),j)-(j-1)*ny ;
+0217 
+0218       ofs = ((icr0+(j-1)*ny+1)-1)*ncc*8 ;
+0219       junk = fseek(fid,ofs,-1) ;
+0220       c = fread(fid,[ncc,ny],<span class="string">'float64'</span>) ;
+0221 
+0222       temp = zeros(ny,ltemp(j)) ;
+0223       <span class="keyword">if</span> ljwc(j) &gt; 0
+0224     temp(:,jwc(1:ljwc(j),j)) = w ;
+0225       <span class="keyword">end</span>
+0226       temp(:,jwc1(:,j))=temp(:,jwc1(:,j))-w0*c(icr,1:ncc1) ;
+0227       w = temp ;
+0228       clear temp ;
+0229       d1 = d1-w0*c(icr,ncc) ;
+0230       clear c ;
+0231       j = j + 1 ;
+0232       w0 = w(:,1:lj1(j)) ;
+0233       <span class="keyword">if</span> M_.maximum_lead == 1
+0234     w = M_.jacobia(:,isc(j+M_.maximum_lead-1)+1:isc(j+M_.maximum_lead)) ;
+0235       <span class="keyword">else</span>
+0236     w = w(:,lj1(j)+1:size(w,2)) ;
+0237 
+0238     <span class="keyword">if</span> lky(j+M_.maximum_lead) &gt; 0
+0239       w = [w M_.jacobia(:,isc(j+M_.maximum_lead-1)+1:isc(j+M_.maximum_lead))] ;
+0240     <span class="keyword">end</span>
+0241       <span class="keyword">end</span>
+0242     <span class="keyword">end</span>
+0243     c = w0\[w d1] ;
+0244     d1 = [] ;
+0245     clear w w0 ;
+0246     junk = fseek(fid,0,1) ;
+0247     fwrite(fid,c,<span class="string">'float64'</span>) ;
+0248     clear c ;
+0249     it_ = it_ + 1 ;
+0250     ic = ic + ny ;
+0251     iyr = iyr + ny ;
+0252     icr0 = icr0 + ny ;
+0253   <span class="keyword">end</span>
+0254   <span class="keyword">if</span> ct_ == 1
+0255 
+0256     ofs = (((it_-M_.maximum_lag-2)*ny+1)-1)*ncc*8 ;
+0257     junk = fseek(fid,ofs,-1) ;
+0258     c = fread(fid,[ncc,ny],<span class="string">'float64'</span>) ;
+0259 
+0260     <span class="keyword">for</span> i = 1:M_.maximum_lead
+0261       w = tril(triu(ones(ny,ny+ncc1))) ;
+0262       w(:,jwc1(:,M_.maximum_lag)) = w(:,jwc1(:,M_.maximum_lag))+c(:,1:ncc1) ;
+0263       c = [w(:,ny+1:size(w,2))' c(:,ncc)]/w(:,1:ny) ;
+0264 
+0265       junk = fseek(fid,0,1) ;
+0266       fwrite(fid,c,<span class="string">'float64'</span>) ;
+0267 
+0268       it_ = it_+1 ;
+0269       ic = ic + ny ;
+0270 
+0271     <span class="keyword">end</span>
+0272   <span class="keyword">end</span>
+0273   oo_.y_simul = reshape(oo_.y_simul,ny,options_.periods+M_.maximum_lag+M_.maximum_lead) ;
+0274   <span class="keyword">if</span> ct_ == 1
+0275     hbacsup = clock ;
+0276     c = <a href="bksupk.html" class="code" title="function d1 = bksupk(ny,fid,jcf,icc1)">bksupk</a>(ny,fid,ncc,icc1) ;
+0277     hbacsup = etime(clock,hbacsup) ;
+0278     c = reshape(c,ny,options_.periods+M_.maximum_lead)' ;
+0279     y(:,1+M_.maximum_lag:(options_.periods+M_.maximum_lead+M_.maximum_lag)) = y(:,1+M_.maximum_lag:(options_.periods+M_.maximum_lead+M_.maximum_lag))+options_.slowc*c' ;
+0280   <span class="keyword">else</span>
+0281     hbacsup = clock ;
+0282     c = <a href="bksupk.html" class="code" title="function d1 = bksupk(ny,fid,jcf,icc1)">bksupk</a>(ny,fid,ncc,icc1) ;
+0283     hbacsup = etime(clock,hbacsup) ;
+0284     c = reshape(c,ny,options_.periods)' ;
+0285     oo_.y_simul(:,1+M_.maximum_lag:(options_.periods+M_.maximum_lag)) = oo_.y_simul(:,1+M_.maximum_lag:(options_.periods+M_.maximum_lag))+options_.slowc*c' ;
+0286   <span class="keyword">end</span>
+0287 
+0288   fclose(fid) ;
+0289 
+0290   h2 = etime(clock,h2) ;
+0291   [junk,i1] = max(abs(c));
+0292   [junk,i2] = max(junk);
+0293   disp([<span class="string">'variable '</span> M_.endo_names(i2,:) <span class="string">' period '</span> num2str(i1(i2))])
+0294   err = max(max(abs(c./options_.scalv'))) ;
+0295   disp ([num2str(iter) <span class="string">'-    err = '</span> num2str(err)]) ;
+0296   disp ([<span class="string">'err_f = '</span> num2str(err_f)])
+0297   disp ([<span class="string">'    Time of this iteration    : '</span> num2str(h2)]) ;
+0298   <span class="keyword">if</span> options_.timing
+0299     disp ([<span class="string">'    Back substitution        : '</span> num2str(hbacsup)]) ;
+0300   <span class="keyword">end</span>
+0301   <span class="keyword">if</span> err &lt; options_.dynatol
+0302     h1 = etime(clock,h1) ;
+0303     fprintf (<span class="string">'\n'</span>) ;
+0304     disp ([<span class="string">'    Total time of simulation    : '</span> num2str(h1)]) ;
+0305     fprintf (<span class="string">'\n'</span>) ;
+0306     disp ([<span class="string">'    Convergence achieved.'</span>]) ;
+0307     disp ([<span class="string">'-----------------------------------------------------'</span>]) ;
+0308     fprintf (<span class="string">'\n'</span>) ;
+0309     <span class="keyword">return</span> ;
+0310   <span class="keyword">end</span>
+0311 <span class="keyword">end</span>
+0312 disp([<span class="string">'WARNING : the maximum number of iterations is reached.'</span>]) ;
+0313 fprintf (<span class="string">'\n'</span>) ;
+0314 disp ([<span class="string">'-----------------------------------------------------'</span>]) ;
+0315 <span class="keyword">return</span> ;
+0316 
+0317 <span class="comment">% 2/11/99 MJ took out reshapel</span>
+0318 
+0319 
+0320 
+0321 
+0322 
+0323</pre></div>
+<hr><address>Generated on Fri 16-Jun-2006 09:09:06 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/">m2html</a></strong> &copy; 2003</address>
+</body>
+</html>

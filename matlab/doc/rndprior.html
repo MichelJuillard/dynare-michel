@@ -1,0 +1,98 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of rndprior</title>
+  <meta name="keywords" content="rndprior">
+  <meta name="description" content="">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2003 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../index.html">Home</a> &gt;  <a href="index.html">.</a> &gt; rndprior.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../index.html"><img alt="<" border="0" src="../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="index.html">Index for .&nbsp;<img alt=">" border="0" src="../right.png"></a></td></tr></table>-->
+
+<h1>rndprior
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong></strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function y = rndprior(bayestopt_) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment"></pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="beta_rnd.html" class="code" title="function rnd = beta_rnd (n, a, b)">beta_rnd</a>	PURPOSE: random draws from the beta(a,b) distribution</li><li><a href="gamm_rnd.html" class="code" title="function gb = gamm_rnd(nrow,m,k)">gamm_rnd</a>	PURPOSE: a matrix of random draws from the gamma distribution</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+</ul>
+<!-- crossreference -->
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function y = rndprior(bayestopt_)</a>
+0002 
+0003 pshape=bayestopt_.pshape;
+0004 pmean=bayestopt_.pmean;
+0005 p2=bayestopt_.p2;
+0006 p3=bayestopt_.p3;
+0007 p4=bayestopt_.p4;
+0008  
+0009 <span class="keyword">for</span> i=1:length(pmean),
+0010     
+0011     <span class="keyword">switch</span> pshape(i)
+0012         
+0013      <span class="keyword">case</span> 1 <span class="comment">%'beta'</span>
+0014       mu = (pmean(i)-p3(i))/(p4(i)-p3(i));
+0015       stdd = p2(i)/(p4(i)-p3(i));
+0016       A = (1-mu)*mu^2/stdd^2 - mu;
+0017       B = A*(1/mu - 1);
+0018       y(1,i) = <a href="beta_rnd.html" class="code" title="function rnd = beta_rnd (n, a, b)">beta_rnd</a>(1, A, B);
+0019       y(1,i) = y(1,i) * (p4(i)-p3(i)) + p3(i);
+0020       
+0021      <span class="keyword">case</span> 2 <span class="comment">%'gamma'</span>
+0022       mu = pmean(i)-p3(i);
+0023       B = mu/p2(i)^2;              <span class="comment">%gamm_rnd uses 1/B instead of B as param.</span>
+0024       A = mu/B;
+0025       y(1,i) = <a href="gamm_rnd.html" class="code" title="function gb = gamm_rnd(nrow,m,k)">gamm_rnd</a>(1, A, B);
+0026       y(1,i) = y(1,i) + p3(i);
+0027       
+0028      <span class="keyword">case</span> 3 <span class="comment">%'normal'</span>
+0029       MU = pmean(i);
+0030       SIGMA = p2(i);
+0031       y(1,i) = randn*SIGMA+ MU;
+0032       
+0033      <span class="keyword">case</span> 4 <span class="comment">%'invgamma'</span>
+0034       nu = p2(i);
+0035       mu = pmean(i);
+0036       a = nu/2;;
+0037       b = ( gamma( (nu-1)/2 ) / mu / gamma( nu/2 ) )^2;
+0038       A = b/2;
+0039       B = 2/a;
+0040       y(1,i) = <a href="gamm_rnd.html" class="code" title="function gb = gamm_rnd(nrow,m,k)">gamm_rnd</a>(1, A, B);        
+0041       y(1,i) = 1/y(1,i)^(0.5);
+0042       
+0043      <span class="keyword">case</span> 5 <span class="comment">%'uniform'</span>
+0044       y(1,i) = rand*(p4(i)-p3(i)) + p3(i);
+0045       
+0046     <span class="keyword">end</span>
+0047 <span class="keyword">end</span>
+0048 
+0049 <span class="comment">% initial version by Marco Ratto</span>
+0050 <span class="comment">% 11/17/03 MJ made Uniform case 5</span>
+0051 <span class="comment">% 11/17/03 MJ changed pstdd -&gt; p2, lb -&gt; p3, ub -&gt; p4</span>
+0052</pre></div>
+<hr><address>Generated on Fri 16-Jun-2006 09:09:06 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/">m2html</a></strong> &copy; 2003</address>
+</body>
+</html>

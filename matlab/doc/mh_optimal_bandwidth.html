@@ -1,0 +1,209 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of mh_optimal_bandwidth</title>
+  <meta name="keywords" content="mh_optimal_bandwidth">
+  <meta name="description" content="%  This function gives the optimal bandwidth parameter of a kernel estimator">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2003 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../index.html">Home</a> &gt;  <a href="index.html">.</a> &gt; mh_optimal_bandwidth.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../index.html"><img alt="<" border="0" src="../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="index.html">Index for .&nbsp;<img alt=">" border="0" src="../right.png"></a></td></tr></table>-->
+
+<h1>mh_optimal_bandwidth
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>%  This function gives the optimal bandwidth parameter of a kernel estimator</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function optimal_bandwidth = mh_optimal_bandwidth(data,n,bandwidth,kernel_function) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment">%  This function gives the optimal bandwidth parameter of a kernel estimator 
+%  used to estimate a posterior univariate density from realisations of a 
+%  Metropolis-Hastings algorithm.  
+% 
+%  * M. Skold and G.O. Roberts [2003], &quot;Density estimation for the Metropolis-Hastings algorithm&quot;. 
+%  * Silverman [1986], &quot;Density estimation for statistics and data analysis&quot;. 
+%
+%  data            :: a vector with n elements.
+%  bandwidth       :: a scalar equal to 0,-1 or -2. For a value different from 0,-1 or -2 the
+%                     function will return optimal_bandwidth = bandwidth.
+%  kernel_function :: 'gaussian','uniform','triangle','epanechnikov',
+%                     'quartic','triweight','cosinus'.
+%
+%  stephane.adjemian@cepremap.cnrs.fr [07-15-2004] &lt;-- [01/16/2004]</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+</ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="filt_mc_.html" class="code" title="function [rmse_MC, ixx] = filt_mc_(vvarvecm, loadSA, pfilt, alpha, alpha2, OutDir, istart, alphaPC)">filt_mc_</a>	copyright Marco Ratto 2006</li><li><a href="posterior_distribution.html" class="code" title="function [borneinf,bornesup,x1,x2,f1,f2,top,nam,texnam] =posterior_distribution(indx,number_of_mh_files,first_mh_file,first_line,number_of_blocks,number_of_simulations,number_of_simulations_per_file,TeX);">posterior_distribution</a>	stephane.adjemian@cepremap.cnrs.fr [07-15-2004]</li><li><a href="posterior_moments.html" class="code" title="function [post_mean, post_median, post_var, hpd_interval, post_deciles, density] = posterior_moments(xx,info)">posterior_moments</a>	stephane.adjemian@ens.fr [09-09-2005]</li><li><a href="stab_map_marginal.html" class="code" title="function stab_map_marginal(lpmat, ibehaviour, inonbehaviour, aname, ipar, dirname)">stab_map_marginal</a>	function stab_map_1(lpmat, ibehaviour, inonbehaviour, aname, ipar, dirname)</li></ul>
+<!-- crossreference -->
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function optimal_bandwidth = mh_optimal_bandwidth(data,n,bandwidth,kernel_function) </a>
+0002 <span class="comment">%%  This function gives the optimal bandwidth parameter of a kernel estimator</span>
+0003 <span class="comment">%%  used to estimate a posterior univariate density from realisations of a</span>
+0004 <span class="comment">%%  Metropolis-Hastings algorithm.</span>
+0005 <span class="comment">%%</span>
+0006 <span class="comment">%%  * M. Skold and G.O. Roberts [2003], &quot;Density estimation for the Metropolis-Hastings algorithm&quot;.</span>
+0007 <span class="comment">%%  * Silverman [1986], &quot;Density estimation for statistics and data analysis&quot;.</span>
+0008 <span class="comment">%%</span>
+0009 <span class="comment">%%  data            :: a vector with n elements.</span>
+0010 <span class="comment">%%  bandwidth       :: a scalar equal to 0,-1 or -2. For a value different from 0,-1 or -2 the</span>
+0011 <span class="comment">%%                     function will return optimal_bandwidth = bandwidth.</span>
+0012 <span class="comment">%%  kernel_function :: 'gaussian','uniform','triangle','epanechnikov',</span>
+0013 <span class="comment">%%                     'quartic','triweight','cosinus'.</span>
+0014 <span class="comment">%%</span>
+0015 <span class="comment">%%  stephane.adjemian@cepremap.cnrs.fr [07-15-2004] &lt;-- [01/16/2004]</span>
+0016 
+0017 
+0018 <span class="comment">%% KERNEL SPECIFICATION...</span>
+0019 <span class="keyword">if</span> strcmpi(kernel_function,<span class="string">'gaussian'</span>) 
+0020     k    = inline(<span class="string">'inv(sqrt(2*pi))*exp(-0.5*x.^2)'</span>); 
+0021     k2   = inline(<span class="string">'inv(sqrt(2*pi))*(-exp(-0.5*x.^2)+(x.^2).*exp(-0.5*x.^2))'</span>); <span class="comment">% second derivate of the gaussian kernel</span>
+0022     k4   = inline(<span class="string">'inv(sqrt(2*pi))*(3*exp(-0.5*x.^2)-6*(x.^2).*exp(-0.5*x.^2)+(x.^4).*exp(-0.5*x.^2))'</span>); <span class="comment">% fourth derivate...</span>
+0023     k6   = inline(<span class="string">'inv(sqrt(2*pi))*(-15*exp(-0.5*x.^2)+45*(x.^2).*exp(-0.5*x.^2)-15*(x.^4).*exp(-0.5*x.^2)+(x.^6).*exp(-0.5*x.^2))'</span>); <span class="comment">% sixth derivate...</span>
+0024     mu02 = inv(2*sqrt(pi)); 
+0025     mu21 = 1; 
+0026 <span class="keyword">elseif</span> strcmpi(kernel_function,<span class="string">'uniform'</span>) 
+0027     k    = inline(<span class="string">'0.5*(abs(x) &lt;= 1)'</span>); 
+0028     mu02 = 0.5; 
+0029     mu21 = 1/3; 
+0030 <span class="keyword">elseif</span> strcmpi(kernel_function,<span class="string">'triangle'</span>) 
+0031     k    = inline(<span class="string">'(1-abs(x)).*(abs(x) &lt;= 1)'</span>); 
+0032     mu02 = 2/3; 
+0033     mu21 = 1/6; 
+0034 <span class="keyword">elseif</span> strcmpi(kernel_function,<span class="string">'epanechnikov'</span>) 
+0035     k    = inline(<span class="string">'0.75*(1-x.^2).*(abs(x) &lt;= 1)'</span>); 
+0036     mu02 = 3/5; 
+0037     mu21 = 1/5;     
+0038 <span class="keyword">elseif</span> strcmpi(kernel_function,<span class="string">'quartic'</span>) 
+0039     k    = inline(<span class="string">'0.9375*((1-x.^2).^2).*(abs(x) &lt;= 1)'</span>); 
+0040     mu02 = 15/21; 
+0041     mu21 = 1/7; 
+0042 <span class="keyword">elseif</span> strcmpi(kernel_function,<span class="string">'triweight'</span>) 
+0043     k    = inline(<span class="string">'1.09375*((1-x.^2).^3).*(abs(x) &lt;= 1)'</span>); 
+0044     k2   = inline(<span class="string">'(105/4*(1-x.^2).*x.^2-105/16*(1-x.^2).^2).*(abs(x) &lt;= 1)'</span>); 
+0045     k4   = inline(<span class="string">'(-1575/4*x.^2+315/4).*(abs(x) &lt;= 1)'</span>); 
+0046     k6   = inline(<span class="string">'(-1575/2).*(abs(x) &lt;= 1)'</span>); 
+0047     mu02 = 350/429; 
+0048     mu21 = 1/9;     
+0049 <span class="keyword">elseif</span> strcmpi(kernel_function,<span class="string">'cosinus'</span>) 
+0050     k    = inline(<span class="string">'(pi/4)*cos((pi/2)*x).*(abs(x) &lt;= 1)'</span>); 
+0051     k2   = inline(<span class="string">'(-1/16*cos(pi*x/2)*pi^3).*(abs(x) &lt;= 1)'</span>); 
+0052     k4   = inline(<span class="string">'(1/64*cos(pi*x/2)*pi^5).*(abs(x) &lt;= 1)'</span>); 
+0053     k6   = inline(<span class="string">'(-1/256*cos(pi*x/2)*pi^7).*(abs(x) &lt;= 1)'</span>); 
+0054     mu02 = (pi^2)/16; 
+0055     mu21 = (pi^2-8)/pi^2;     
+0056 <span class="keyword">else</span>
+0057     disp(<span class="string">'mh_optimal_bandwidth :: '</span>);
+0058     error(<span class="string">'This kernel function is not yet implemented in Dynare!'</span>);        
+0059 <span class="keyword">end</span>     
+0060 
+0061 
+0062 <span class="comment">%% OPTIMAL BANDWIDTH PARAMETER....</span>
+0063 <span class="keyword">if</span> bandwidth == 0;  <span class="comment">%  Rule of thumb bandwidth parameter (Silverman [1986] corrected by</span>
+0064                     <span class="comment">%  Skold and Roberts [2003] for Metropolis-Hastings).</span>
+0065     sigma = std(data); 
+0066     h = 2*sigma*(sqrt(pi)*mu02/(12*(mu21^2)*n))^(1/5); <span class="comment">% Silverman's optimal bandwidth parameter.</span>
+0067     A = 0; 
+0068     <span class="keyword">for</span> i=1:n; 
+0069         j = i; 
+0070         <span class="keyword">while</span> j&lt;= n &amp; data(j,1)==data(i,1); 
+0071             j = j+1; 
+0072         <span class="keyword">end</span>;     
+0073         A = A + 2*(j-i) - 1; 
+0074     <span class="keyword">end</span>; 
+0075     A = A/n; 
+0076     h = h*A^(1/5); <span class="comment">% correction</span>
+0077 <span class="keyword">elseif</span> bandwidth == -1;     <span class="comment">% Adaptation of the Sheather and Jones [1991] plug-in estimation of the optimal bandwidth</span>
+0078                             <span class="comment">% parameter for metropolis hastings algorithm.</span>
+0079     <span class="keyword">if</span> strcmp(kernel_function,<span class="string">'uniform'</span>)      | <span class="keyword">...</span><span class="comment"> </span>
+0080        strcmp(kernel_function,<span class="string">'triangle'</span>)     | <span class="keyword">...</span><span class="comment"> </span>
+0081        strcmp(kernel_function,<span class="string">'epanechnikov'</span>) | <span class="keyword">...</span><span class="comment"> </span>
+0082        strcmp(kernel_function,<span class="string">'quartic'</span>); 
+0083        error(<span class="string">'I can''t compute the optimal bandwidth with this kernel... Try the gaussian, triweight or cosinus kernels.'</span>); 
+0084     <span class="keyword">end</span>;         
+0085     sigma = std(data); 
+0086     A = 0; 
+0087     <span class="keyword">for</span> i=1:n; 
+0088         j = i; 
+0089         <span class="keyword">while</span> j&lt;= n &amp; data(j,1)==data(i,1); 
+0090             j = j+1; 
+0091         <span class="keyword">end</span>;     
+0092         A = A + 2*(j-i) - 1; 
+0093     <span class="keyword">end</span>; 
+0094     A = A/n; 
+0095     Itilda4 = 8*7*6*5/(((2*sigma)^9)*sqrt(pi)); 
+0096     g3      = abs(2*A*k6(0)/(mu21*Itilda4*n))^(1/9); 
+0097     Ihat3 = 0; 
+0098     <span class="keyword">for</span> i=1:n; 
+0099         Ihat3 = Ihat3 + sum(k6((data(i,1)-data)/g3)); 
+0100     <span class="keyword">end</span>;     
+0101     Ihat3 = -Ihat3/((n^2)*g3^7); 
+0102     g2      = abs(2*A*k4(0)/(mu21*Ihat3*n))^(1/7); 
+0103     Ihat2 = 0; 
+0104     <span class="keyword">for</span> i=1:n; 
+0105         Ihat2 = Ihat2 + sum(k4((data(i)-data)/g2)); 
+0106     <span class="keyword">end</span>;     
+0107     Ihat2 = Ihat2/((n^2)*g2^5); 
+0108     h       = (A*mu02/(n*Ihat2*mu21^2))^(1/5);    <span class="comment">% equation (22) in Skold and Roberts [2003] --&gt; h_{MH}</span>
+0109 <span class="keyword">elseif</span> bandwidth == -2;     <span class="comment">% Bump killing... We construct local bandwith parameters in order to remove</span>
+0110                             <span class="comment">% spurious bumps introduced by long rejecting periods.</span>
+0111     <span class="keyword">if</span> strcmp(kernel_function,<span class="string">'uniform'</span>)      | <span class="keyword">...</span><span class="comment"> </span>
+0112        strcmp(kernel_function,<span class="string">'triangle'</span>)     | <span class="keyword">...</span><span class="comment"> </span>
+0113        strcmp(kernel_function,<span class="string">'epanechnikov'</span>) | <span class="keyword">...</span><span class="comment"> </span>
+0114        strcmp(kernel_function,<span class="string">'quartic'</span>); 
+0115         error(<span class="string">'I can''t compute the optimal bandwidth with this kernel... Try the gaussian, triweight or cosinus kernels.'</span>); 
+0116     <span class="keyword">end</span>;         
+0117     sigma = std(data); 
+0118     A = 0; 
+0119     T = zeros(n,1); 
+0120     <span class="keyword">for</span> i=1:n; 
+0121         j = i; 
+0122         <span class="keyword">while</span> j&lt;= n &amp; data(j,1)==data(i,1); 
+0123             j = j+1; 
+0124         <span class="keyword">end</span>;     
+0125         T(i) = (j-i); 
+0126         A = A + 2*T(i) - 1; 
+0127     <span class="keyword">end</span>; 
+0128     A = A/n; 
+0129     Itilda4 = 8*7*6*5/(((2*sigma)^9)*sqrt(pi)); 
+0130     g3      = abs(2*A*k6(0)/(mu21*Itilda4*n))^(1/9); 
+0131     Ihat3 = 0; 
+0132     <span class="keyword">for</span> i=1:n; 
+0133         Ihat3 = Ihat3 + sum(k6((data(i,1)-data)/g3)); 
+0134     <span class="keyword">end</span>;     
+0135     Ihat3 = -Ihat3/((n^2)*g3^7); 
+0136     g2      = abs(2*A*k4(0)/(mu21*Ihat3*n))^(1/7); 
+0137     Ihat2 = 0; 
+0138     <span class="keyword">for</span> i=1:n; 
+0139         Ihat2 = Ihat2 + sum(k4((data(i)-data)/g2)); 
+0140     <span class="keyword">end</span>;     
+0141     Ihat2 = Ihat2/((n^2)*g2^5); 
+0142     h = ((2*T-1)*mu02/(n*Ihat2*mu21^2)).^(1/5); <span class="comment">% Note that h is a column vector (local banwidth parameters).</span>
+0143 <span class="keyword">elseif</span> bandwidth &gt; 0 
+0144     h = bandwidth; 
+0145 <span class="keyword">else</span>
+0146     disp(<span class="string">'mh_optimal_bandwidth :: '</span>);
+0147     error(<span class="string">'Parameter bandwidth must be a real parameter value or equal to 0,-1 or -2.'</span>); 
+0148 <span class="keyword">end</span>
+0149 
+0150 optimal_bandwidth = h;</pre></div>
+<hr><address>Generated on Fri 16-Jun-2006 09:09:06 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/">m2html</a></strong> &copy; 2003</address>
+</body>
+</html>

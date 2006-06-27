@@ -1,0 +1,136 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of draw_prior_density</title>
+  <meta name="keywords" content="draw_prior_density">
+  <meta name="description" content="stephane.adjemian@ens.fr [07-15-2004]">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2003 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../index.html">Home</a> &gt;  <a href="index.html">.</a> &gt; draw_prior_density.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../index.html"><img alt="<" border="0" src="../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="index.html">Index for .&nbsp;<img alt=">" border="0" src="../right.png"></a></td></tr></table>-->
+
+<h1>draw_prior_density
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>stephane.adjemian@ens.fr [07-15-2004]</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function [x,f,abscissa,dens,binf,bsup] = draw_prior_density(indx); </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> stephane.adjemian@ens.fr [07-15-2004]</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="lpdfgam.html" class="code" title="function  ldens = lpdfgam(x,a,b);">lpdfgam</a>	log GAMMA PDF</li><li><a href="mj_qgamma.html" class="code" title="function x = mj_qgamma(p,a)">mj_qgamma</a>	MJ_QGAMMA   The gamma inverse distribution function</li><li><a href="qbeta.html" class="code" title="function x = qbeta(p,a,b)">qbeta</a>	QBETA    The beta inverse distribution function</li><li><a href="qgamma.html" class="code" title="function x = qgamma(p,a)">qgamma</a>	QGAMMA   The gamma inverse distribution function</li><li><a href="qnorm.html" class="code" title="function  x = qnorm(p,m,s)">qnorm</a>	QNORM 	  The normal inverse distribution function</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="PlotPosteriorDistributions.html" class="code" title="function PlotPosteriorDistributions()">PlotPosteriorDistributions</a>	stephane.adjemian@ens.fr [09-09-2005]</li><li><a href="plot_priors.html" class="code" title="function plot_priors">plot_priors</a>	stephane.adjemian@cepremap.cnrs.fr [07-31-2004]</li><li><a href="posterior_distribution.html" class="code" title="function [borneinf,bornesup,x1,x2,f1,f2,top,nam,texnam] =posterior_distribution(indx,number_of_mh_files,first_mh_file,first_line,number_of_blocks,number_of_simulations,number_of_simulations_per_file,TeX);">posterior_distribution</a>	stephane.adjemian@cepremap.cnrs.fr [07-15-2004]</li></ul>
+<!-- crossreference -->
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function [x,f,abscissa,dens,binf,bsup] = draw_prior_density(indx);</a>
+0002 <span class="comment">% stephane.adjemian@ens.fr [07-15-2004]</span>
+0003 
+0004 <span class="keyword">global</span> bayestopt_
+0005 
+0006 pmean   = bayestopt_.pmean;
+0007 pshape  = bayestopt_.pshape; 
+0008 p1      = bayestopt_.p1;
+0009 p2      = bayestopt_.p2;
+0010 p3      = bayestopt_.p3;
+0011 p4      = bayestopt_.p4;
+0012 
+0013 truncprior = 10^(-3);
+0014 
+0015 <span class="keyword">if</span> pshape(indx) == 1     <span class="comment">%/* BETA Prior */</span>
+0016     density = inline(<span class="string">'((bb-x).^(b-1)).*(x-aa).^(a-1)./(beta(a,b)*(bb-aa)^(a+b-1))'</span>,<span class="string">'x'</span>,<span class="string">'a'</span>,<span class="string">'b'</span>,<span class="string">'aa'</span>,<span class="string">'bb'</span>);
+0017     mu = (p1(indx)-p3(indx))/(p4(indx)-p3(indx));
+0018     stdd = p2(indx)/(p4(indx)-p3(indx));
+0019     a = (1-mu)*mu^2/stdd^2 - mu;
+0020     b = a*(1/mu-1);
+0021     aa = p3(indx);
+0022     bb = p4(indx);
+0023     infbound = <a href="qbeta.html" class="code" title="function x = qbeta(p,a,b)">qbeta</a>(truncprior,a,b)*(bb-aa)+aa;
+0024     supbound = <a href="qbeta.html" class="code" title="function x = qbeta(p,a,b)">qbeta</a>(1-truncprior,a,b)*(bb-aa)+aa;
+0025     stepsize = (supbound-infbound)/200;
+0026     abscissa = infbound:stepsize:supbound;
+0027     dens = density(abscissa,a,b,aa,bb);
+0028 <span class="keyword">elseif</span> pshape(indx) == 2  <span class="comment">%/* GAMMA PRIOR */</span>
+0029     mu = p1(indx)-p3(indx);
+0030     b  = p2(indx)^2/mu;
+0031     a  = mu/b;
+0032     infbound = <a href="mj_qgamma.html" class="code" title="function x = mj_qgamma(p,a)">mj_qgamma</a>(truncprior,a)*b; 
+0033     supbound = <a href="mj_qgamma.html" class="code" title="function x = mj_qgamma(p,a)">mj_qgamma</a>(1-truncprior,a)*b;
+0034     stepsize = (supbound-infbound)/200;
+0035     abscissa = infbound:stepsize:supbound;
+0036     dens = exp(<a href="lpdfgam.html" class="code" title="function  ldens = lpdfgam(x,a,b);">lpdfgam</a>(abscissa,a,b));
+0037     abscissa = abscissa + p3(indx);
+0038 <span class="keyword">elseif</span> pshape(indx) == 3  <span class="comment">%/* GAUSSIAN PRIOR */</span>
+0039     density = inline(<span class="string">'inv(sqrt(2*pi)*b)*exp(-0.5*((x-a)/b).^2)'</span>,<span class="string">'x'</span>,<span class="string">'a'</span>,<span class="string">'b'</span>);
+0040     a = p1(indx);
+0041     b = p2(indx);
+0042     infbound = <a href="qnorm.html" class="code" title="function  x = qnorm(p,m,s)">qnorm</a>(truncprior,a,b); 
+0043     supbound = <a href="qnorm.html" class="code" title="function  x = qnorm(p,m,s)">qnorm</a>(1-truncprior,a,b);
+0044     stepsize = (supbound-infbound)/200;
+0045     abscissa = infbound:stepsize:supbound;
+0046     dens = density(abscissa,a,b);  
+0047 <span class="keyword">elseif</span> pshape(indx) == 4  <span class="comment">%/* INVGAMMA PRIOR type 1 */</span>
+0048     density = inline(<span class="string">'2*inv(gamma(nu/2))*(x.^(-nu-1))*((s/2)^(nu/2)).*exp(-s./(2*x.^2))'</span>,<span class="string">'x'</span>,<span class="string">'s'</span>,<span class="string">'nu'</span>);
+0049     nu = p2(indx);
+0050     s  = p1(indx);
+0051     a  = nu/2;
+0052     b  = 2/s;
+0053     infbound = 1/sqrt(<a href="mj_qgamma.html" class="code" title="function x = mj_qgamma(p,a)">mj_qgamma</a>(1-10*truncprior,a)*b); 
+0054     supbound = 1/sqrt(<a href="mj_qgamma.html" class="code" title="function x = mj_qgamma(p,a)">mj_qgamma</a>(10*truncprior,a)*b);
+0055     stepsize = (supbound-infbound)/200;
+0056     abscissa = infbound:stepsize:supbound;
+0057     dens = density(abscissa,s,nu);  
+0058 <span class="keyword">elseif</span> pshape(indx) == 5  <span class="comment">%/* UNIFORM PRIOR */</span>
+0059     density = inline(<span class="string">'(x.^0)/(b-a)'</span>,<span class="string">'x'</span>,<span class="string">'a'</span>,<span class="string">'b'</span>);
+0060     a  = p1(indx);
+0061     b  = p2(indx);
+0062     infbound = a; 
+0063     supbound = b;
+0064     stepsize = (supbound-infbound)/200;
+0065     abscissa = infbound:stepsize:supbound;
+0066     dens = density(abscissa,a,b);  
+0067 <span class="keyword">elseif</span> pshape(indx) == 6  <span class="comment">%/*  INVGAMMA PRIOR type 2 */</span>
+0068     density = inline(<span class="string">'inv(gamma(nu/2))*(x.^(-.5(nu+2)))*((s/2)^(nu/2)).*exp(-s./(2*x))'</span>,<span class="string">'x'</span>,<span class="string">'s'</span>,<span class="string">'nu'</span>);
+0069     nu = p2(indx);
+0070     s  = p1(indx);
+0071     a  = nu/2;
+0072     b  = 2/s;
+0073     infbound = 1/(<a href="qgamma.html" class="code" title="function x = qgamma(p,a)">qgamma</a>(1-truncprior,a)*b); 
+0074     supbound = 1/(<a href="qgamma.html" class="code" title="function x = qgamma(p,a)">qgamma</a>(truncprior,a)*b);
+0075     stepsize = (supbound-infbound)/200;
+0076     abscissa = infbound:stepsize:supbound;
+0077     dens = density(abscissa,s,nu);  
+0078 <span class="keyword">end</span> 
+0079 
+0080 k = [1:length(dens)];
+0081 <span class="keyword">if</span> pshape(indx) ~= 5 
+0082     [junk,k1] = max(dens);
+0083     <span class="keyword">if</span> k1 == 1 | k1 == length(dens)
+0084         k = find(dens &lt; 10);
+0085     <span class="keyword">end</span>
+0086 <span class="keyword">end</span>
+0087 binf = abscissa(k(1));
+0088 bsup = abscissa(k(length(k)));
+0089 x = abscissa(k);
+0090 f = dens(k);</pre></div>
+<hr><address>Generated on Fri 16-Jun-2006 09:09:06 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/">m2html</a></strong> &copy; 2003</address>
+</body>
+</html>

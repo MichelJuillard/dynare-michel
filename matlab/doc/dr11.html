@@ -1,0 +1,301 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of dr11</title>
+  <meta name="keywords" content="dr11">
+  <meta name="description" content="Copyright (C) 2001 Michel Juillard">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2003 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../index.html">Home</a> &gt;  <a href="index.html">.</a> &gt; dr11.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../index.html"><img alt="<" border="0" src="../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="index.html">Index for .&nbsp;<img alt=">" border="0" src="../right.png"></a></td></tr></table>-->
+
+<h1>dr11
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>Copyright (C) 2001 Michel Juillard</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function dr=dr11(iorder,dr,cheik) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> Copyright (C) 2001 Michel Juillard</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="qzdiv.html" class="code" title="function [A,B,Q,Z] = qzdiv(stake,A,B,Q,Z)">qzdiv</a>	from Chris Sims web site</li><li><a href="set_default_option.html" class="code" title="function options=set_default_option(options,field,default)">set_default_option</a>	</li><li><a href="set_state_space.html" class="code" title="function dr=set_state_space(dr)">set_state_space</a>	Copyright (C) 2001 Michel Juillard</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="resol1.html" class="code" title="function dr=resol1(ys,algo,linear,iorder)">resol1</a>	Copyright (C) 2001 Michel Juillard</li></ul>
+<!-- crossreference -->
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <span class="comment">% Copyright (C) 2001 Michel Juillard</span>
+0002 <span class="comment">%</span>
+0003 <a name="_sub0" href="#_subfunctions" class="code">function dr=dr11(iorder,dr,cheik)</a>
+0004 
+0005 <span class="keyword">global</span> M_ options_ oo_
+0006 <span class="keyword">global</span> it_ stdexo_ means_ dr1_test_ bayestopt_
+0007 
+0008 <span class="comment">% hack for Bayes</span>
+0009 <span class="keyword">global</span> dr1_test_ bayestopt_
+0010 
+0011 options_ = <a href="set_default_option.html" class="code" title="function options=set_default_option(options,field,default)">set_default_option</a>(options_,<span class="string">'loglinear'</span>,0);
+0012 
+0013 xlen = M_.maximum_lead + M_.maximum_lag + 1;
+0014 klen = M_.maximum_lag + M_.maximum_lead + 1;
+0015 iyv  = transpose(M_.lead_lag_incidence);
+0016 iyv = iyv(:);
+0017 iyr0 = find(iyv) ;
+0018 it_ = M_.maximum_lag + 1 ;
+0019 
+0020 
+0021 <span class="keyword">if</span> M_.exo_nbr == 0
+0022   oo_.exo_steady_state = [] ;
+0023 <span class="keyword">end</span>
+0024 
+0025 <span class="keyword">if</span> ~ M_.lead_lag_incidence(M_.maximum_lag+1,:) &gt; 0
+0026   error (<span class="string">'Error in model specification: some variables don&quot;t appear as current'</span>) ;
+0027 <span class="keyword">end</span>
+0028 
+0029 <span class="keyword">if</span> ~cheik
+0030 <span class="comment">%  if xlen &gt; 1</span>
+0031 <span class="comment">%    error (['SS: stochastic exogenous variables must appear only at the' ...</span>
+0032 <span class="comment">%      ' current period. Use additional endogenous variables']) ;</span>
+0033 <span class="comment">%  end</span>
+0034 <span class="keyword">end</span>
+0035   
+0036 <span class="keyword">if</span> M_.maximum_lead &gt; 1 &amp; iorder &gt; 1
+0037   error ([<span class="string">'Models with leads on more than one period can only be solved'</span> <span class="keyword">...</span>
+0038       <span class="string">' at order 1'</span>])
+0039 <span class="keyword">end</span>
+0040 
+0041 dr=<a href="set_state_space.html" class="code" title="function dr=set_state_space(dr)">set_state_space</a>(dr);
+0042 kstate = dr.kstate;
+0043 kad = dr.kad;
+0044 kae = dr.kae;
+0045 nstatic = dr.nstatic;
+0046 nfwrd = dr.nfwrd;
+0047 npred = dr.npred;
+0048 nboth = dr.nboth;           
+0049 order_var = dr.order_var;
+0050 nd = size(kstate,1);
+0051 
+0052 sdyn = M_.endo_nbr - nstatic;
+0053 
+0054 
+0055 tempex = oo_.exo_simul;
+0056 
+0057 it_ = M_.maximum_lag + 1;
+0058 z = repmat(dr.ys,1,klen);
+0059 z = z(iyr0) ;
+0060 <span class="comment">%M_.jacobia=real(diffext('ff1_',[z; oo_.exo_steady_state])) ;</span>
+0061 <span class="comment">%M_.jacobia=real(jacob_a('ff1_',[z; oo_.exo_steady_state])) ;</span>
+0062 [junk,M_.jacobia] = feval([M_.fname <span class="string">'_dynamic'</span>],z,oo_.exo_simul);
+0063 oo_.exo_simul = tempex ;
+0064 tempex = [];
+0065 
+0066 nz = size(z,1);
+0067 k1 = M_.lead_lag_incidence(find([1:klen] ~= M_.maximum_lag+1),:);
+0068 b = M_.jacobia(:,M_.lead_lag_incidence(M_.maximum_lag+1,order_var));
+0069 a = b\M_.jacobia(:,nonzeros(k1')); 
+0070 <span class="keyword">if</span> any(isinf(a(:)))
+0071   dr1_test_(1) = 5;
+0072   dr1_test_(2) = bayestopt_.penalty;
+0073 <span class="keyword">end</span>
+0074 <span class="keyword">if</span> M_.exo_nbr
+0075   fu = b\M_.jacobia(:,nz+1:end);
+0076 <span class="keyword">end</span>
+0077 
+0078 <span class="keyword">if</span> M_.maximum_lead == 0 &amp; M_.maximum_lag == 1;  <span class="comment">% backward model with one lag</span>
+0079   dr.ghx = -a;
+0080   dr.ghu = -fu;
+0081   <span class="keyword">return</span>;
+0082 <span class="keyword">elseif</span> M_.maximum_lead == 0 &amp; M_.maximum_lag &gt; 1 <span class="comment">% backward model with lags on more than</span>
+0083                    <span class="comment">% one period</span>
+0084   e = zeros(endo_nbr,nd);                
+0085   k = find(kstate(:,2) &lt;= M_.maximum_lag+1 &amp; kstate(:,4));
+0086   e(:,k) = -a(:,kstate(k,4)) ;
+0087   dr.ghx = e;
+0088   dr.ghu = -fu;
+0089 <span class="keyword">end</span>
+0090 
+0091 <span class="comment">% buildind D and E</span>
+0092 d = zeros(nd,nd) ;
+0093 e = d ;
+0094 
+0095 k = find(kstate(:,2) &gt;= M_.maximum_lag+2 &amp; kstate(:,3));
+0096 d(1:sdyn,k) = a(nstatic+1:<span class="keyword">end</span>,kstate(k,3)) ;
+0097 k1 = find(kstate(:,2) == M_.maximum_lag+2);
+0098 a1 = eye(sdyn);
+0099 e(1:sdyn,k1) =  -a1(:,kstate(k1,1)-nstatic);
+0100 k = find(kstate(:,2) &lt;= M_.maximum_lag+1 &amp; kstate(:,4));
+0101 e(1:sdyn,k) = -a(nstatic+1:<span class="keyword">end</span>,kstate(k,4)) ;
+0102 k2 = find(kstate(:,2) == M_.maximum_lag+1);
+0103 k2 = k2(~ismember(kstate(k2,1),kstate(k1,1)));
+0104 d(1:sdyn,k2) = a1(:,kstate(k2,1)-nstatic);
+0105 
+0106 <span class="keyword">if</span> ~isempty(kad)
+0107   <span class="keyword">for</span> j = 1:size(kad,1)
+0108     d(sdyn+j,kad(j)) = 1 ;
+0109     e(sdyn+j,kae(j)) = 1 ;
+0110   <span class="keyword">end</span>
+0111 <span class="keyword">end</span>
+0112 options_ = <a href="set_default_option.html" class="code" title="function options=set_default_option(options,field,default)">set_default_option</a>(options_,<span class="string">'qz_criterium'</span>,1.000001);
+0113   
+0114 <span class="keyword">if</span>  ~exist(<span class="string">'mjdgges'</span>)
+0115   <span class="comment">% using Chris Sim's routines</span>
+0116   use_qzdiv = 1;
+0117   [ss,tt,qq,w] = qz(e,d);
+0118   [tt,ss,qq,w] = <a href="qzdiv.html" class="code" title="function [A,B,Q,Z] = qzdiv(stake,A,B,Q,Z)">qzdiv</a>(options_.qz_criterium,tt,ss,qq,w);
+0119   ss1=diag(ss);
+0120   tt1=diag(tt);
+0121   warning_state = warning;
+0122   warning off;
+0123   oo_.eigenvalues = ss1./tt1 ;
+0124   warning warning_state;
+0125   nba = nnz(abs(eigval) &gt; options_.qz_criterium);
+0126 <span class="keyword">else</span>
+0127   use_qzdiv = 0;
+0128   [ss,tt,w,sdim,oo_.eigenvalues,info] = mjdgges(e,d,options_.qz_criterium);
+0129   <span class="keyword">if</span> info &amp; info ~= nd+2;
+0130     error([<span class="string">'ERROR'</span> info <span class="string">' in MJDGGES.DLL'</span>]);
+0131   <span class="keyword">end</span>
+0132   nba = nd-sdim;
+0133 <span class="keyword">end</span>
+0134 
+0135 nyf = sum(kstate(:,2) &gt; M_.maximum_lag+1);
+0136 
+0137 <span class="keyword">if</span> cheik
+0138   dr.rank = rank(w(1:nyf,nd-nyf+1:end));
+0139   <span class="comment">% dr.eigval = oo_.eigenvalues;</span>
+0140   <span class="keyword">return</span>
+0141 <span class="keyword">end</span>
+0142 
+0143 eigenvalues = sort(oo_.eigenvalues);
+0144 
+0145 <span class="keyword">if</span> nba &gt; nyf;
+0146 <span class="comment">%  disp('Instability !');</span>
+0147   dr1_test_(1) = 3; <span class="comment">%% More eigenvalues superior to unity than forward variables ==&gt; instability.</span>
+0148   dr1_test_(2) = (abs(eigenvalues(nd-nba+1:nd-nyf))-1-1e-5)'*<span class="keyword">...</span>
+0149       (abs(eigenvalues(nd-nba+1:nd-nyf))-1-1e-5);<span class="comment">% Distance to Blanchard-Khan conditions (penalty)</span>
+0150   <span class="keyword">return</span>
+0151 <span class="keyword">elseif</span> nba &lt; nyf;
+0152 <span class="comment">%  disp('Indeterminacy !');</span>
+0153   dr1_test_(1) = 2; <span class="comment">%% ==&gt; Indeterminacy.</span>
+0154   dr1_test_(2) = (abs(eigenvalues(nd-nyf+1:nd-nba))-1-1e-5)'*<span class="keyword">...</span>
+0155       (abs(eigenvalues(nd-nyf+1:nd-nba))-1-1e-5);<span class="comment">% Distance to Blanchard-Khan conditions (penality)</span>
+0156   <span class="comment">%% warning('DR1: Blanchard-Kahn conditions are not satisfied. Run CHEIK to learn more!');</span>
+0157   <span class="keyword">return</span>
+0158 <span class="keyword">end</span>
+0159 
+0160 np = nd - nyf;
+0161 n2 = np + 1;
+0162 n3 = nyf;
+0163 n4 = n3 + 1;
+0164 <span class="comment">% derivatives with respect to dynamic state variables</span>
+0165 <span class="comment">% forward variables</span>
+0166 
+0167 <span class="keyword">if</span> condest(w(1:n3,n2:nd)) &gt; 1e9
+0168 <span class="comment">%  disp('Indeterminacy !!');</span>
+0169   dr1_test_(1) = 2; 
+0170   dr1_test_(2) = 1;
+0171   <span class="keyword">return</span>
+0172 <span class="keyword">end</span>
+0173 
+0174 warning_state = warning;
+0175 lastwarn(<span class="string">''</span>);
+0176 warning off;
+0177 gx = -w(1:n3,n2:nd)'\w(n4:nd,n2:nd)';
+0178 
+0179 <span class="keyword">if</span> length(lastwarn) &gt; 0;
+0180 <span class="comment">%  disp('Indeterminacy !!');</span>
+0181   dr1_test_(1) = 2; 
+0182   dr1_test_(2) = 1;
+0183   warning(warning_state);
+0184   <span class="keyword">return</span>
+0185 <span class="keyword">end</span>
+0186 
+0187 <span class="comment">% predetermined variables</span>
+0188 hx = w(1:n3,1:np)'*gx+w(n4:nd,1:np)';
+0189 hx = (tt(1:np,1:np)*hx)\(ss(1:np,1:np)*hx);
+0190 
+0191 lastwarn(<span class="string">''</span>);
+0192 <span class="keyword">if</span> length(lastwarn) &gt; 0;
+0193 <span class="comment">%  disp('Singularity problem in dr11.m');</span>
+0194   dr1_test_(1) = 2; 
+0195   dr1_test_(2) = 1;
+0196   warning(warning_state);
+0197   <span class="keyword">return</span>
+0198 <span class="keyword">end</span>
+0199 
+0200 k1 = find(kstate(n4:nd,2) == M_.maximum_lag+1);
+0201 k2 = find(kstate(1:n3,2) == M_.maximum_lag+2);
+0202 dr.ghx = [hx(k1,:); gx(k2(nboth+1:end),:)];
+0203   
+0204 <span class="comment">%lead variables actually present in the model</span>
+0205 j3 = nonzeros(kstate(:,3));
+0206 j4  = find(kstate(:,3));
+0207 <span class="comment">% derivatives with respect to exogenous variables</span>
+0208 <span class="keyword">if</span> M_.exo_nbr
+0209   a1 = eye(M_.endo_nbr);
+0210   aa1 = [];
+0211   <span class="keyword">if</span> nstatic &gt; 0
+0212     aa1 = a1(:,1:nstatic);
+0213   <span class="keyword">end</span>
+0214   dr.ghu = -[aa1 a(:,j3)*gx(j4,1:npred)+a1(:,nstatic+1:nstatic+ <span class="keyword">...</span>
+0215                           npred) a1(:,nstatic+npred+1:end)]\fu;
+0216 
+0217 
+0218     lastwarn(<span class="string">''</span>);
+0219     <span class="keyword">if</span> length(lastwarn) &gt; 0;
+0220 <span class="comment">%    disp('Singularity problem in dr11.m');</span>
+0221         dr1_test_(1) = 2; 
+0222         dr1_test_(2) = 1;
+0223         <span class="keyword">return</span>
+0224     <span class="keyword">end</span>
+0225 <span class="keyword">end</span>
+0226 warning(warning_state);
+0227 
+0228 <span class="comment">% static variables</span>
+0229 <span class="keyword">if</span> nstatic &gt; 0
+0230   temp = -a(1:nstatic,j3)*gx(j4,:)*hx;
+0231   j5 = find(kstate(n4:nd,4));
+0232   temp(:,j5) = temp(:,j5)-a(1:nstatic,nonzeros(kstate(:,4)));
+0233   dr.ghx = [temp; dr.ghx];
+0234   temp = [];
+0235 <span class="keyword">end</span>
+0236 
+0237 <span class="keyword">if</span> options_.loglinear == 1
+0238     k = find(dr.kstate(:,2) &lt;= M_.maximum_lag+1);
+0239     klag = dr.kstate(k,[1 2]);
+0240     k1 = dr.order_var;
+0241 
+0242     dr.ghx = repmat(1./dr.ys(k1),1,size(dr.ghx,2)).*dr.ghx.* <span class="keyword">...</span>
+0243          repmat(dr.ys(k1(klag(:,1)))',size(dr.ghx,1),1);
+0244     dr.ghu = repmat(1./dr.ys(k1),1,size(dr.ghu,2)).*dr.ghu;
+0245 <span class="keyword">end</span>
+0246 
+0247 <span class="comment">% necessary when using Sims' routines</span>
+0248 <span class="keyword">if</span> use_qzdiv
+0249   gx = real(gx);
+0250   hx = real(hx);
+0251   dr.ghx = real(dr.ghx);
+0252   dr.ghu = real(dr.ghu);
+0253 <span class="keyword">end</span>
+0254 
+0255</pre></div>
+<hr><address>Generated on Fri 16-Jun-2006 09:09:06 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/">m2html</a></strong> &copy; 2003</address>
+</body>
+</html>

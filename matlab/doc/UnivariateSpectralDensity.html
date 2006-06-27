@@ -1,0 +1,178 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of UnivariateSpectralDensity</title>
+  <meta name="keywords" content="UnivariateSpectralDensity">
+  <meta name="description" content="stephane.adjemian@ens.fr">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2003 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../index.html">Home</a> &gt;  <a href="index.html">.</a> &gt; UnivariateSpectralDensity.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../index.html"><img alt="<" border="0" src="../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="index.html">Index for .&nbsp;<img alt=">" border="0" src="../right.png"></a></td></tr></table>-->
+
+<h1>UnivariateSpectralDensity
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>stephane.adjemian@ens.fr</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function [omega,f] = UnivariateSpectralDensity(dr,var_list) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> stephane.adjemian@ens.fr
+ This function computes the theoretical spectral density of each
+ endogenous variable declared in var_list. Results are stored in 
+ oo_ and may be plotted.
+ 
+ Adapted from th_autocovariances.m.</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="kalman_transition_matrix.html" class="code" title="function [A,B] = kalman_transition_matrix(dr)">kalman_transition_matrix</a>	makes transition matrices out of ghx and ghu for Kalman filter</li><li><a href="lyapunov_symm.html" class="code" title="function [x,ns_var]=lyapunov_symm(a,b)">lyapunov_symm</a>	solves x-a*x*a'=b for b (and then x) symmetrical</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="stoch_simul.html" class="code" title="function info=stoch_simul(var_list)">stoch_simul</a>	Copyright (C) 2001 Michel Juillard</li></ul>
+<!-- crossreference -->
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <span class="comment">% stephane.adjemian@ens.fr</span>
+0002 <a name="_sub0" href="#_subfunctions" class="code">function [omega,f] = UnivariateSpectralDensity(dr,var_list)</a>
+0003 <span class="comment">% This function computes the theoretical spectral density of each</span>
+0004 <span class="comment">% endogenous variable declared in var_list. Results are stored in</span>
+0005 <span class="comment">% oo_ and may be plotted.</span>
+0006 <span class="comment">%</span>
+0007 <span class="comment">% Adapted from th_autocovariances.m.</span>
+0008 <span class="keyword">global</span> options_ oo_ M_
+0009 
+0010 omega = []; f = [];
+0011 
+0012 <span class="keyword">if</span> options_.order &gt; 1
+0013   disp(<span class="string">'UnivariateSpectralDensity :: I Cannot compute the theoretical spectral density'</span>) 
+0014   disp(<span class="string">'with a second order approximation of the DSGE model!'</span>)
+0015   disp(<span class="string">'Set order = 1.'</span>)
+0016   <span class="keyword">return</span>
+0017 <span class="keyword">end</span>
+0018 
+0019 pltinfo  = 1;<span class="comment">%options_.SpectralDensity.Th.plot;</span>
+0020 cutoff   = 100;<span class="comment">%options_.SpectralDensity.Th.cutoff;</span>
+0021 sdl      = 0.1;<span class="comment">%options_.SepctralDensity.Th.sdl;</span>
+0022 omega    = (0:sdl:pi)';
+0023 GridSize = length(omega);
+0024 exo_names_orig_ord  = M_.exo_names_orig_ord;
+0025 <span class="keyword">if</span> sscanf(version(<span class="string">'-release'</span>),<span class="string">'%d'</span>) &lt; 13
+0026   warning off
+0027 <span class="keyword">else</span>
+0028   eval(<span class="string">'warning off MATLAB:dividebyzero'</span>)
+0029 <span class="keyword">end</span>
+0030 <span class="keyword">if</span> nargin&lt;2
+0031   var_list = [];
+0032 <span class="keyword">end</span>
+0033 nvar = size(var_list,1);
+0034 <span class="keyword">if</span> nvar == 0
+0035   nvar = length(dr.order_var);
+0036   ivar = [1:nvar]';
+0037 <span class="keyword">else</span>
+0038     ivar=zeros(nvar,1);
+0039     <span class="keyword">for</span> i=1:nvar
+0040       i_tmp = strmatch(var_list(i,:),M_.endo_names,<span class="string">'exact'</span>);
+0041       <span class="keyword">if</span> isempty(i_tmp)
+0042           error ([<span class="string">'One of the variable specified does not exist'</span>]) ;
+0043       <span class="keyword">else</span>
+0044     ivar(i) = i_tmp;
+0045       <span class="keyword">end</span>
+0046     <span class="keyword">end</span>
+0047 <span class="keyword">end</span>
+0048 f = zeros(nvar,GridSize);
+0049 ghx = dr.ghx;
+0050 ghu = dr.ghu;
+0051 npred = dr.npred;
+0052 nstatic = dr.nstatic;
+0053 kstate = dr.kstate;
+0054 order = dr.order_var;
+0055 iv(order) = [1:length(order)];
+0056 nx = size(ghx,2);
+0057 ikx = [nstatic+1:nstatic+npred];
+0058 A = zeros(nx,nx);
+0059 k0 = kstate(find(kstate(:,2) &lt;= M_.maximum_lag+1),:);
+0060 i0 = find(k0(:,2) == M_.maximum_lag+1);
+0061 i00 = i0;
+0062 n0 = length(i0);
+0063 A(i0,:) = ghx(ikx,:);
+0064 AS = ghx(:,i0);
+0065 ghu1 = zeros(nx,M_.exo_nbr);
+0066 ghu1(i0,:) = ghu(ikx,:);
+0067 <span class="keyword">for</span> i=M_.maximum_lag:-1:2
+0068   i1 = find(k0(:,2) == i);
+0069   n1 = size(i1,1);
+0070   j1 = zeros(n1,1);
+0071   j2 = j1;
+0072   <span class="keyword">for</span> k1 = 1:n1
+0073     j1(k1) = find(k0(i00,1)==k0(i1(k1),1));
+0074     j2(k1) = find(k0(i0,1)==k0(i1(k1),1));
+0075   <span class="keyword">end</span>
+0076   AS(:,j1) = AS(:,j1)+ghx(:,i1);
+0077   i0 = i1;
+0078 <span class="keyword">end</span>
+0079 b = ghu1*M_.Sigma_e*ghu1';
+0080 [A,B] = <a href="kalman_transition_matrix.html" class="code" title="function [A,B] = kalman_transition_matrix(dr)">kalman_transition_matrix</a>(dr);
+0081 <span class="comment">% index of predetermined variables in A</span>
+0082 i_pred = [nstatic+(1:npred) M_.endo_nbr+1:length(A)];
+0083 A = A(i_pred,i_pred);
+0084 [vx, ns_var] =  <a href="lyapunov_symm.html" class="code" title="function [x,ns_var]=lyapunov_symm(a,b)">lyapunov_symm</a>(A,b);
+0085 i_ivar = find(~ismember(ivar,dr.order_var(ns_var+nstatic)));
+0086 ivar = ivar(i_ivar);
+0087 iky = iv(ivar);  
+0088 aa = ghx(iky,:);
+0089 bb = ghu(iky,:);
+0090 Gamma = zeros(nvar,cutoff+1);
+0091 tmp = aa*vx*aa'+ bb*M_.Sigma_e*bb';
+0092 k = find(abs(tmp) &lt; 1e-12);
+0093 tmp(k) = 0;
+0094 Gamma(:,1) = diag(tmp);
+0095 vxy = (A*vx*aa'+ghu1*M_.Sigma_e*bb');
+0096 tmp = aa*vxy;
+0097 k = find(abs(tmp) &lt; 1e-12);
+0098 tmp(k) = 0;
+0099 Gamma(:,2) = diag(tmp);
+0100 <span class="keyword">for</span> i=2:cutoff
+0101   vxy = A*vxy;
+0102   tmp = aa*vxy;
+0103   k = find(abs(tmp) &lt; 1e-12);
+0104   tmp(k) = 0;
+0105   Gamma(:,i+1) = diag(tmp);
+0106 <span class="keyword">end</span>
+0107 H = 1:cutoff;
+0108 <span class="keyword">for</span> i=1:nvar
+0109   f(i,:) = Gamma(i,1)/(2*pi) + Gamma(i,H+1)*cos(H'*omega')/pi;
+0110 <span class="keyword">end</span>  
+0111 
+0112 <span class="keyword">if</span> sscanf(version(<span class="string">'-release'</span>),<span class="string">'%d'</span>) &lt; 13
+0113   warning on
+0114 <span class="keyword">else</span>
+0115   eval(<span class="string">'warning on MATLAB:dividebyzero'</span>)
+0116 <span class="keyword">end</span>
+0117 
+0118 <span class="keyword">if</span> pltinfo
+0119   <span class="keyword">for</span> i= 1:nvar
+0120     figure(<span class="string">'Name'</span>,[<span class="string">'Spectral Density of '</span> deblank(M_.endo_names(ivar(i),:)) <span class="string">'.'</span>])
+0121     plot(omega,f(i,:),<span class="string">'-k'</span>,<span class="string">'linewidth'</span>,2)
+0122     xlabel(<span class="string">'0 \leq \omega \leq \pi'</span>)
+0123     ylabel(<span class="string">'f(\omega)'</span>)
+0124     box on
+0125     axis tight
+0126   <span class="keyword">end</span>
+0127 <span class="keyword">end</span></pre></div>
+<hr><address>Generated on Fri 16-Jun-2006 09:09:06 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/">m2html</a></strong> &copy; 2003</address>
+</body>
+</html>

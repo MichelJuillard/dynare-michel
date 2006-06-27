@@ -1,0 +1,89 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of CutSample</title>
+  <meta name="keywords" content="CutSample">
+  <meta name="description" content="stephane.adjemian@ens.fr [09-09-2005]">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2003 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../index.html">Home</a> &gt;  <a href="index.html">.</a> &gt; CutSample.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../index.html"><img alt="<" border="0" src="../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="index.html">Index for .&nbsp;<img alt=">" border="0" src="../right.png"></a></td></tr></table>-->
+
+<h1>CutSample
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>stephane.adjemian@ens.fr [09-09-2005]</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function CutSample() </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> stephane.adjemian@ens.fr [09-09-2005]</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="CheckPath.html" class="code" title="function DirectoryName = CheckPath(type)">CheckPath</a>	06-03-2005</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="dynare_estimation.html" class="code" title="function dynare_estimation(var_list_)">dynare_estimation</a>	</li></ul>
+<!-- crossreference -->
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function CutSample()</a>
+0002 <span class="comment">% stephane.adjemian@ens.fr [09-09-2005]</span>
+0003 <span class="keyword">global</span> M_ options_ estim_params_
+0004 
+0005 npar = estim_params_.np+estim_params_.nvn+estim_params_.ncx+estim_params_.ncn+estim_params_.nvx;
+0006 
+0007 DirectoryName = <a href="CheckPath.html" class="code" title="function DirectoryName = CheckPath(type)">CheckPath</a>(<span class="string">'metropolis'</span>);
+0008 file = dir([ DirectoryName <span class="string">'/'</span>  M_.fname <span class="string">'_mh_history.mat'</span>]);
+0009 files = dir([ DirectoryName <span class="string">'/'</span> M_.fname <span class="string">'_mh*.mat'</span> ]);
+0010 <span class="keyword">if</span> ~length(files)
+0011   disp(<span class="string">'MH:: FAILURE! there is no MH file to load here!'</span>)
+0012   <span class="keyword">return</span>
+0013 <span class="keyword">end</span>
+0014 <span class="keyword">if</span> ~length(file)
+0015   disp(<span class="string">'MH:: FAILURE! there is no MH-history file!'</span>)
+0016   <span class="keyword">return</span>
+0017 <span class="keyword">else</span>
+0018   load([ DirectoryName <span class="string">'/'</span>  M_.fname <span class="string">'_mh_history'</span>])
+0019 <span class="keyword">end</span>
+0020 TotalNumberOfMhFiles = sum(record.MhDraws(:,2));
+0021 TotalNumberOfMhDraws = sum(record.MhDraws(:,1));
+0022 MAX_nruns = ceil(options_.MaxNumberOfBytes/(npar+2)/8)
+0023 FirstDraw = floor(options_.mh_drop*TotalNumberOfMhDraws);
+0024 FirstMhFile = ceil(FirstDraw/MAX_nruns);
+0025 FirstLine = FirstDraw-(FirstMhFile-1)*MAX_nruns+1;
+0026 record.KeepedDraws.FirstMhFile = FirstMhFile;
+0027 record.KeepedDraws.FirstLine = FirstLine;
+0028 <span class="keyword">if</span> (TotalNumberOfMhFiles-1)-(FirstMhFile+1)+1 &gt; 0
+0029   record.KeepedDraws.Distribution = [ MAX_nruns-FirstLine+1 ; <span class="keyword">...</span>
+0030             ones((TotalNumberOfMhFiles-1)-(FirstMhFile+1)+1,1)*MAX_nruns ; <span class="keyword">...</span>
+0031             record.MhDraws(<span class="keyword">end</span>,3) ];
+0032 <span class="keyword">elseif</span> TotalNumberOfMhFiles == 1
+0033   record.KeepedDraws.Distribution = [];
+0034 <span class="keyword">elseif</span> TotalNumberOfMhFiles == 2 &amp; FirstMhFile &gt; 1
+0035   record.KeepedDraws.Distribution = [MAX_nruns-FirstLine+1 ; record.MhDraws(<span class="keyword">end</span>,3)];  
+0036 <span class="keyword">end</span>
+0037 save([DirectoryName <span class="string">'/'</span> M_.fname <span class="string">'_mh_history'</span>],<span class="string">'record'</span>);
+0038 fprintf(<span class="string">'MH: Total number of Mh draws: %d.\n'</span>,TotalNumberOfMhDraws);
+0039 fprintf(<span class="string">'MH: Total number of generated Mh files: %d.\n'</span>,TotalNumberOfMhFiles);
+0040 fprintf(<span class="string">'MH: I''ll use mh-files %d to %d.\n'</span>,FirstMhFile,TotalNumberOfMhFiles);
+0041 fprintf(<span class="string">'MH: In mh-file number %d i''ll start at line %d.\n'</span>,FirstMhFile,FirstLine);
+0042 fprintf(<span class="string">'MH: Finally I keep %d draws.\n'</span>,TotalNumberOfMhDraws-FirstDraw);
+0043 disp(<span class="string">' '</span>);</pre></div>
+<hr><address>Generated on Fri 16-Jun-2006 09:09:06 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/">m2html</a></strong> &copy; 2003</address>
+</body>
+</html>

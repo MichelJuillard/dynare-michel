@@ -1,0 +1,142 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of disp_th_moments</title>
+  <meta name="keywords" content="disp_th_moments">
+  <meta name="description" content="Copyright (C) 2001 Michel Juillard">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2003 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../index.html">Home</a> &gt;  <a href="index.html">.</a> &gt; disp_th_moments.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../index.html"><img alt="<" border="0" src="../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="index.html">Index for .&nbsp;<img alt=">" border="0" src="../right.png"></a></td></tr></table>-->
+
+<h1>disp_th_moments
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>Copyright (C) 2001 Michel Juillard</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function disp_th_moments(dr,var_list) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> Copyright (C) 2001 Michel Juillard</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="table.html" class="code" title="function table(title,headers,labels,values,label_width,val_width,val_precis)">table</a>	Copyright (C) 2002 Michel Juillard</li><li><a href="th_autocovariances.html" class="code" title="function [Gamma_y,ivar]=th_autocovariances(dr,ivar)">th_autocovariances</a>	Copyright (C) 2001 Michel Juillard</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="olr.html" class="code" title="function olr(var_list,olr_inst,obj_var,W)">olr</a>	Copyright (C) 2001 Michel Juillard</li><li><a href="osr.html" class="code" title="function osr(var_list,params,W)">osr</a>	Copyright (C) 2001 Michel Juillard</li><li><a href="stoch_simul.html" class="code" title="function info=stoch_simul(var_list)">stoch_simul</a>	Copyright (C) 2001 Michel Juillard</li></ul>
+<!-- crossreference -->
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <span class="comment">% Copyright (C) 2001 Michel Juillard</span>
+0002 <span class="comment">%</span>
+0003 <a name="_sub0" href="#_subfunctions" class="code">function disp_th_moments(dr,var_list)</a>
+0004   <span class="keyword">global</span> M_ oo_ options_
+0005   
+0006   nvar = size(var_list,1);
+0007   <span class="keyword">if</span> nvar == 0
+0008     nvar = length(dr.order_var);
+0009     ivar = [1:nvar]';
+0010   <span class="keyword">else</span>
+0011     ivar=zeros(nvar,1);
+0012     <span class="keyword">for</span> i=1:nvar
+0013       i_tmp = strmatch(var_list(i,:),M_.endo_names,<span class="string">'exact'</span>);
+0014       <span class="keyword">if</span> isempty(i_tmp)
+0015           error ([<span class="string">'One of the variable specified does not exist'</span>]) ;
+0016       <span class="keyword">else</span>
+0017     ivar(i) = i_tmp;
+0018       <span class="keyword">end</span>
+0019     <span class="keyword">end</span>
+0020   <span class="keyword">end</span>
+0021   
+0022   m = dr.ys(ivar);
+0023 
+0024   oo_.gamma_y = <a href="th_autocovariances.html" class="code" title="function [Gamma_y,ivar]=th_autocovariances(dr,ivar)">th_autocovariances</a>(dr,ivar);
+0025   
+0026   i1 = find(abs(diag(oo_.gamma_y{1})) &gt; 1e-12);
+0027   s2 = diag(oo_.gamma_y{1});
+0028   sd = sqrt(s2);
+0029   <span class="keyword">if</span> options_.order == 2
+0030     m = m+oo_.gamma_y{options_.ar+3};
+0031   <span class="keyword">end</span>
+0032   
+0033   z = [ m sd s2 ];
+0034   oo_.mean = m;
+0035   oo_.var = oo_.gamma_y{1};
+0036   
+0037   lh = size(deblank(M_.endo_names(ivar,:)),2)+2;
+0038   <span class="keyword">if</span> options_.nomoments == 0
+0039     title=<span class="string">'THEORETICAL MOMENTS'</span>;
+0040     <span class="keyword">if</span> options_.hp_filter == 1
+0041       title = [title <span class="string">' (HP filter, lambda = '</span> int2str(options_.hp_filter) <span class="string">')'</span>];
+0042     <span class="keyword">end</span>
+0043     headers=strvcat(<span class="string">'VARIABLE'</span>,<span class="string">'MEAN'</span>,<span class="string">'STD. DEV.'</span>,<span class="string">'VARIANCE'</span>);
+0044     <a href="table.html" class="code" title="function table(title,headers,labels,values,label_width,val_width,val_precis)">table</a>(title,headers,deblank(M_.endo_names(ivar,:)),z,lh,11,4);
+0045     <span class="keyword">if</span> M_.exo_nbr &gt; 1
+0046       disp(<span class="string">' '</span>)
+0047       title=<span class="string">'VARIANCE DECOMPOSITION (in percent)'</span>;
+0048       <span class="keyword">if</span> options_.hp_filter == 1
+0049     title = [title <span class="string">' (HP filter, lambda = '</span> <span class="keyword">...</span>
+0050          int2str(options_.hp_filter) <span class="string">')'</span>];
+0051       <span class="keyword">end</span>
+0052       headers = M_.exo_names;
+0053       headers(M_.exo_names_orig_ord,:) = headers;
+0054       headers = strvcat(<span class="string">' '</span>,headers);
+0055       <a href="table.html" class="code" title="function table(title,headers,labels,values,label_width,val_width,val_precis)">table</a>(title,headers,deblank(M_.endo_names(ivar(i1),:)),100*oo_.gamma_y{options_.ar+2}(i1,:), <span class="keyword">...</span>
+0056         lh,8,2);
+0057     <span class="keyword">end</span>
+0058   <span class="keyword">end</span>
+0059   
+0060   <span class="keyword">if</span> options_.nocorr == 0
+0061     disp(<span class="string">' '</span>)
+0062     title=<span class="string">'MATRIX OF CORRELATIONS'</span>;
+0063     <span class="keyword">if</span> options_.hp_filter == 1
+0064       title = [title <span class="string">' (HP filter, lambda = '</span> int2str(options_.hp_filter) <span class="string">')'</span>];
+0065     <span class="keyword">end</span>
+0066     labels = deblank(M_.endo_names(ivar,:));
+0067     headers = strvcat(<span class="string">'Variables'</span>,labels(i1,:));
+0068     corr = oo_.gamma_y{1}(i1,i1)./(sd(i1)*sd(i1)');
+0069     <a href="table.html" class="code" title="function table(title,headers,labels,values,label_width,val_width,val_precis)">table</a>(title,headers,labels(i1,:),corr,lh,8,4);
+0070   <span class="keyword">end</span>
+0071   
+0072   <span class="keyword">if</span> options_.ar &gt; 0
+0073     disp(<span class="string">' '</span>)
+0074     title=<span class="string">'COEFFICIENTS OF AUTOCORRELATION'</span>;
+0075     <span class="keyword">if</span> options_.hp_filter == 1
+0076       title = [title <span class="string">' (HP filter, lambda = '</span> int2str(options_.hp_filter) <span class="string">')'</span>];
+0077     <span class="keyword">end</span>
+0078     labels = deblank(M_.endo_names(ivar(i1),:));
+0079     headers = strvcat(<span class="string">'Order '</span>,int2str([1:options_.ar]'));
+0080     z=[];
+0081     <span class="keyword">for</span> i=1:options_.ar
+0082       oo_.autocorr{i} = oo_.gamma_y{i+1};
+0083       z(:,i) = diag(oo_.gamma_y{i+1}(i1,i1));
+0084     <span class="keyword">end</span>
+0085     <a href="table.html" class="code" title="function table(title,headers,labels,values,label_width,val_width,val_precis)">table</a>(title,headers,labels,z,0,8,4);
+0086   <span class="keyword">end</span>
+0087   
+0088 <span class="comment">% 10/09/02 MJ</span>
+0089 <span class="comment">% 10/18/02 MJ added th_autocovariances() and provided for lags on several</span>
+0090 <span class="comment">% periods</span>
+0091 <span class="comment">% 10/30/02 MJ added correlations and autocorrelations, uses table()</span>
+0092 <span class="comment">%             oo_.gamma_y is now a cell array.</span>
+0093 <span class="comment">% 02/18/03 MJ added subtitles for HP filter</span>
+0094 <span class="comment">% 05/01/03 MJ corrected options_.hp_filter</span>
+0095 <span class="comment">% 05/21/03 MJ variance decomposition: test M_.exo_nbr &gt; 1</span>
+0096 <span class="comment">% 05/21/03 MJ displays only variables with positive variance</span></pre></div>
+<hr><address>Generated on Fri 16-Jun-2006 09:09:06 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/">m2html</a></strong> &copy; 2003</address>
+</body>
+</html>

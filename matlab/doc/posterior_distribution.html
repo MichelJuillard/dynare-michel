@@ -1,0 +1,118 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of posterior_distribution</title>
+  <meta name="keywords" content="posterior_distribution">
+  <meta name="description" content="stephane.adjemian@cepremap.cnrs.fr [07-15-2004]">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2003 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../index.html">Home</a> &gt;  <a href="index.html">.</a> &gt; posterior_distribution.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../index.html"><img alt="<" border="0" src="../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="index.html">Index for .&nbsp;<img alt=">" border="0" src="../right.png"></a></td></tr></table>-->
+
+<h1>posterior_distribution
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>stephane.adjemian@cepremap.cnrs.fr [07-15-2004]</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function [borneinf,bornesup,x1,x2,f1,f2,top,nam,texnam] =posterior_distribution(indx,number_of_mh_files,first_mh_file,first_line,number_of_blocks,number_of_simulations,number_of_simulations_per_file,TeX); </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> stephane.adjemian@cepremap.cnrs.fr [07-15-2004]</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="draw_prior_density.html" class="code" title="function [x,f,abscissa,dens,binf,bsup] = draw_prior_density(indx);">draw_prior_density</a>	stephane.adjemian@ens.fr [07-15-2004]</li><li><a href="get_the_name.html" class="code" title="function [nam,texnam] = get_the_name(k,TeX)">get_the_name</a>	stephane.adjemian@cepremap.cnrs.fr [07-13-2004]</li><li><a href="kernel_density_estimate.html" class="code" title="function [abscissa,f] = kernel_density_estimate(data,number_of_grid_points,bandwidth,kernel_function)">kernel_density_estimate</a>	%  This function aims at estimating a continuous density. A kernel density</li><li><a href="mh_optimal_bandwidth.html" class="code" title="function optimal_bandwidth = mh_optimal_bandwidth(data,n,bandwidth,kernel_function)">mh_optimal_bandwidth</a>	%  This function gives the optimal bandwidth parameter of a kernel estimator</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+</ul>
+<!-- crossreference -->
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function [borneinf,bornesup,x1,x2,f1,f2,top,nam,texnam] = </a><span class="keyword">...</span>
+0002     posterior_distribution(indx,number_of_mh_files,first_mh_file,first_line,<span class="keyword">...</span>
+0003                     number_of_blocks,number_of_simulations,<span class="keyword">...</span>
+0004                     number_of_simulations_per_file,TeX);
+0005 <span class="comment">% stephane.adjemian@cepremap.cnrs.fr [07-15-2004]</span>
+0006 
+0007 <span class="keyword">global</span> M_ bayestopt_ estim_params_ options_
+0008 
+0009 number_of_grid_points = 2^9;      <span class="comment">% 2^9 = 512 !... Must be a power of two.</span>
+0010 bandwidth = 0;                    <span class="comment">% Rule of thumb optimal bandwidth parameter.</span>
+0011 kernel_function = <span class="string">'gaussian'</span>;     <span class="comment">% Gaussian kernel for Fast Fourrier Transform approximaton.</span>
+0012              
+0013 
+0014 mcsimulations = zeros(number_of_simulations,1);
+0015 
+0016 <span class="keyword">if</span> number_of_blocks == 1
+0017     EndOfFile = number_of_simulations_per_file(first_mh_file+1)-first_line+1;
+0018     instr = [M_.fname <span class="string">'_mh'</span> int2str(first_mh_file)];
+0019     eval([<span class="string">'load '</span> instr]);
+0020     clear post2 logpo2;
+0021     mcsimulations(1:EndOfFile) = x2(first_line:<span class="keyword">end</span>,indx);
+0022     OldEndOfFile = EndOfFile;
+0023     <span class="keyword">for</span> f = first_mh_file+1:number_of_mh_files
+0024         NewEndOfFile = number_of_simulations_per_file(f+1);
+0025            instr = [M_.fname <span class="string">'_mh'</span> int2str(f)];
+0026         eval([<span class="string">'load '</span> instr]);
+0027         clear post2 logpo2;
+0028         mcsimulations(OldEndOfFile+1:OldEndOfFile+NewEndOfFile) = x2(:,indx);
+0029         OldEndOfFile = OldEndOfFile + NewEndOfFile;
+0030     <span class="keyword">end</span>
+0031     clear x2;
+0032 <span class="keyword">else</span>
+0033     EndOfFile = number_of_simulations_per_file(first_mh_file+1)-first_line+1;
+0034     NewStartLine = 0;
+0035     inst = [M_.fname <span class="string">'_mh'</span> int2str(first_mh_file)];
+0036     <span class="keyword">for</span> b = 1:number_of_blocks
+0037         instr = [inst <span class="string">'_blck'</span> int2str(b)];
+0038         eval([<span class="string">'load '</span> instr]);
+0039         clear post2 logpo2;
+0040            mcsimulations(NewStartLine+1:NewStartLine+EndOfFile,1) = x2(first_line:<span class="keyword">end</span>,indx);
+0041         NewStartLine = NewStartLine + EndOfFile;
+0042     <span class="keyword">end</span>
+0043     <span class="keyword">for</span> f = first_mh_file+1:number_of_mh_files
+0044         EndOfFile = number_of_simulations_per_file(f+1);
+0045            inst = [M_.fname <span class="string">'_mh'</span> int2str(f)];
+0046         <span class="keyword">for</span> B = 1:number_of_blocks
+0047             instr = [inst <span class="string">'_blck'</span> int2str(b)];
+0048             eval([<span class="string">'load '</span> instr]);
+0049             clear post2 logpo2;
+0050             mcsimulations(NewStartLine+1:NewStartLine+EndOfFile,1) = x2(:,indx);
+0051             NewStartLine = NewStartLine + EndOfFile;
+0052         <span class="keyword">end</span>
+0053     <span class="keyword">end</span>
+0054     clear x2;
+0055 <span class="keyword">end</span>
+0056 
+0057 [nam,texnam] = <a href="get_the_name.html" class="code" title="function [nam,texnam] = get_the_name(k,TeX)">get_the_name</a>(indx,TeX);
+0058 
+0059 <span class="comment">%% Kernel estimator of the posterior density:</span>
+0060 optimal_bandwidth = <a href="mh_optimal_bandwidth.html" class="code" title="function optimal_bandwidth = mh_optimal_bandwidth(data,n,bandwidth,kernel_function)">mh_optimal_bandwidth</a>(mcsimulations,number_of_simulations,bandwidth,kernel_function); 
+0061 [x1,f1] = <a href="kernel_density_estimate.html" class="code" title="function [abscissa,f] = kernel_density_estimate(data,number_of_grid_points,bandwidth,kernel_function)">kernel_density_estimate</a>(mcsimulations,number_of_grid_points,<span class="keyword">...</span>
+0062     optimal_bandwidth,kernel_function);
+0063 binf1 = x1(1);
+0064 bsup1 = x1(length(x1));
+0065 
+0066 <span class="comment">%% Prior density:</span>
+0067 [x2,f2,abscissa,dens,binf2,bsup2] = <a href="draw_prior_density.html" class="code" title="function [x,f,abscissa,dens,binf,bsup] = draw_prior_density(indx);">draw_prior_density</a>(indx);
+0068 clear abscissa dens;
+0069 
+0070 borneinf = min(binf1,binf2);
+0071 bornesup = max(bsup1,bsup2);
+0072 top      = max([max(f1);max(f2)]);</pre></div>
+<hr><address>Generated on Fri 16-Jun-2006 09:09:06 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/">m2html</a></strong> &copy; 2003</address>
+</body>
+</html>

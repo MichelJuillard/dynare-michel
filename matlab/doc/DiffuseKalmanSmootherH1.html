@@ -1,0 +1,194 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of DiffuseKalmanSmootherH1</title>
+  <meta name="keywords" content="DiffuseKalmanSmootherH1">
+  <meta name="description" content="modified by M. Ratto:">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2003 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../index.html">Home</a> &gt;  <a href="index.html">.</a> &gt; DiffuseKalmanSmootherH1.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../index.html"><img alt="<" border="0" src="../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="index.html">Index for .&nbsp;<img alt=">" border="0" src="../right.png"></a></td></tr></table>-->
+
+<h1>DiffuseKalmanSmootherH1
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>modified by M. Ratto:</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function [alphahat,epsilonhat,etahat,a, aK] = DiffuseKalmanSmootherH1(T,R,Q,H,Pinf1,Pstar1,Y,trend,pp,mm,smpl,mf) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> modified by M. Ratto:
+ new output argument aK (1-step to k-step predictions)
+ new options_.nk: the max step ahed prediction in aK (default is 4)
+ new crit1 value for rank of Pinf
+ it is assured that P is symmetric 
+
+ stephane.adjemian@cepremap.cnrs.fr [09-16-2004]
+ 
+   See &quot;Filtering and Smoothing of State Vector for Diffuse State Space
+   Models&quot;, S.J. Koopman and J. Durbin (2003, in Journal of Time Series 
+   Analysis, vol. 24(1), pp. 85-98).</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="steady.html" class="code" title="function steady(linear)">steady</a>	Copyright (C) 2001 Michel Juillard</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="DsgeSmoother.html" class="code" title="function [alphahat,etahat,epsilonhat,ahat,SteadyState,trend_coeff,aK] = DsgeSmoother(xparam1,gend,Y)">DsgeSmoother</a>	stephane.adjemian@cepremap.cnrs.fr [09-07-2004]</li></ul>
+<!-- crossreference -->
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function [alphahat,epsilonhat,etahat,a, aK] = DiffuseKalmanSmootherH1(T,R,Q,H,Pinf1,Pstar1,Y,trend,pp,mm,smpl,mf)</a>
+0002 <span class="comment">% modified by M. Ratto:</span>
+0003 <span class="comment">% new output argument aK (1-step to k-step predictions)</span>
+0004 <span class="comment">% new options_.nk: the max step ahed prediction in aK (default is 4)</span>
+0005 <span class="comment">% new crit1 value for rank of Pinf</span>
+0006 <span class="comment">% it is assured that P is symmetric</span>
+0007 <span class="comment">%</span>
+0008 <span class="comment">% stephane.adjemian@cepremap.cnrs.fr [09-16-2004]</span>
+0009 <span class="comment">%</span>
+0010 <span class="comment">%   See &quot;Filtering and Smoothing of State Vector for Diffuse State Space</span>
+0011 <span class="comment">%   Models&quot;, S.J. Koopman and J. Durbin (2003, in Journal of Time Series</span>
+0012 <span class="comment">%   Analysis, vol. 24(1), pp. 85-98).</span>
+0013 
+0014 <span class="keyword">global</span> options_
+0015 
+0016 nk = options_.nk;
+0017 spinf       = size(Pinf1);
+0018 spstar      = size(Pstar1);
+0019 v           = zeros(pp,smpl);
+0020 a           = zeros(mm,smpl+1);
+0021 iF          = zeros(pp,pp,smpl);
+0022 Fstar       = zeros(pp,pp,smpl);
+0023 iFinf       = zeros(pp,pp,smpl);
+0024 K           = zeros(mm,pp,smpl);
+0025 L           = zeros(mm,mm,smpl);
+0026 Linf        = zeros(mm,mm,smpl);
+0027 Kstar       = zeros(mm,pp,smpl);
+0028 P           = zeros(mm,mm,smpl+1);
+0029 Pstar       = zeros(spstar(1),spstar(2),smpl+1); Pstar(:,:,1) = Pstar1;
+0030 Pinf        = zeros(spinf(1),spinf(2),smpl+1); Pinf(:,:,1) = Pinf1;
+0031 crit        = options_.kalman_tol;
+0032 crit1       = 1.e-8;
+0033 <a href="steady.html" class="code" title="function steady(linear)">steady</a>      = smpl;
+0034 rr          = size(Q,1);
+0035 QQ          = R*Q*transpose(R);
+0036 QRt            = Q*transpose(R);
+0037 alphahat       = zeros(mm,smpl);
+0038 etahat           = zeros(rr,smpl);
+0039 epsilonhat      = zeros(size(Y));
+0040 r                = zeros(mm,smpl);
+0041 
+0042 Z = zeros(pp,mm);
+0043 <span class="keyword">for</span> i=1:pp;
+0044     Z(i,mf(i)) = 1;
+0045 <span class="keyword">end</span>
+0046 
+0047 t = 0;
+0048 <span class="keyword">while</span> rank(Pinf(:,:,t+1),crit1) &amp; t&lt;smpl
+0049     t = t+1;
+0050     v(:,t)              = Y(:,t) - a(mf,t) - trend(:,t);
+0051     <span class="keyword">if</span> rcond(Pinf(mf,mf,t)) &lt; crit
+0052         <span class="keyword">return</span>        
+0053     <span class="keyword">end</span>
+0054     iFinf(:,:,t)     = inv(Pinf(mf,mf,t));
+0055     Kinf(:,:,t)         = T*Pinf(:,mf,t)*iFinf(:,:,t);
+0056     a(:,t+1)          = T*a(:,t) + Kinf(:,:,t)*v(:,t);
+0057     aK(1,:,t+1)          = a(:,t+1);
+0058     <span class="keyword">for</span> jnk=2:nk,
+0059         aK(jnk,:,t+jnk)          = T^(jnk-1)*a(:,t+1);
+0060     <span class="keyword">end</span>
+0061     Linf(:,:,t)      = T - Kinf(:,:,t)*Z;
+0062     Fstar(:,:,t)     = Pstar(mf,mf,t) + H;
+0063     Kstar(:,:,t)     = (T*Pstar(:,mf,t)-Kinf(:,:,t)*Fstar(:,:,t))*iFinf(:,:,t);
+0064     Pstar(:,:,t+1)    = T*Pstar(:,:,t)*transpose(T)-T*Pstar(:,mf,t)*transpose(Kinf(:,:,t))-Kinf(:,:,t)*Pinf(mf,mf,t)*transpose(Kstar(:,:,t)) + QQ;
+0065     Pinf(:,:,t+1)    = T*Pinf(:,:,t)*transpose(T)-T*Pinf(:,mf,t)*transpose(Kinf(:,:,t));
+0066 <span class="keyword">end</span>
+0067 d = t;
+0068 P(:,:,d+1) = Pstar(:,:,d+1);
+0069 iFinf = iFinf(:,:,1:d);
+0070 Linf  = Linf(:,:,1:d);
+0071 Fstar = Fstar(:,:,1:d);
+0072 Kstar = Kstar(:,:,1:d);
+0073 Pstar = Pstar(:,:,1:d);
+0074 Pinf  = Pinf(:,:,1:d);
+0075 notsteady = 1;
+0076 <span class="keyword">while</span> notsteady &amp; t&lt;smpl
+0077     t = t+1;
+0078     v(:,t)      = Y(:,t) - a(mf,t) - trend(:,t);
+0079     P(:,:,t)=tril(P(:,:,t))+transpose(tril(P(:,:,t),-1));
+0080     <span class="keyword">if</span> rcond(P(mf,mf,t) + H) &lt; crit
+0081         <span class="keyword">return</span>        
+0082     <span class="keyword">end</span>    
+0083     iF(:,:,t)   = inv(P(mf,mf,t) + H);
+0084     K(:,:,t)    = T*P(:,mf,t)*iF(:,:,t);
+0085     L(:,:,t)    = T-K(:,:,t)*Z;
+0086     a(:,t+1)    = T*a(:,t) + K(:,:,t)*v(:,t);    
+0087     aK(1,:,t+1)          = a(:,t+1);
+0088     <span class="keyword">for</span> jnk=2:nk,
+0089         aK(jnk,:,t+jnk)          = T^(jnk-1)*a(:,t+1);
+0090     <span class="keyword">end</span>
+0091     P(:,:,t+1)  = T*P(:,:,t)*transpose(T)-T*P(:,mf,t)*transpose(K(:,:,t)) + QQ;
+0092     notsteady   = ~(max(max(abs(P(:,:,t+1)-P(:,:,t))))&lt;crit);
+0093 <span class="keyword">end</span>
+0094 K_s = K(:,:,t);
+0095 iF_s = iF(:,:,t);
+0096 P_s = P(:,:,t+1);
+0097 <span class="keyword">if</span> t&lt;smpl
+0098     t_steady = t+1;
+0099     P  = cat(3,P(:,:,1:t),repmat(P(:,:,t),[1 1 smpl-t_steady+1]));
+0100     iF = cat(3,iF(:,:,1:t),repmat(inv(P_s(mf,mf)+H),[1 1 smpl-t_steady+1]));
+0101     L  = cat(3,L(:,:,1:t),repmat(T-K_s*Z,[1 1 smpl-t_steady+1]));
+0102     K  = cat(3,K(:,:,1:t),repmat(T*P_s(:,mf)*iF_s,[1 1 smpl-t_steady+1]));
+0103 <span class="keyword">end</span>
+0104 <span class="keyword">while</span> t&lt;smpl
+0105     t=t+1;
+0106     v(:,t) = Y(:,t) - a(mf,t) - trend(:,t);
+0107     a(:,t+1) = T*a(:,t) + K_s*v(:,t);
+0108     aK(1,:,t+1)          = a(:,t+1);
+0109     <span class="keyword">for</span> jnk=2:nk,
+0110         aK(jnk,:,t+jnk)          = T^(jnk-1)*a(:,t+1);
+0111     <span class="keyword">end</span>
+0112 <span class="keyword">end</span>
+0113 t = smpl+1;
+0114 <span class="keyword">while</span> t&gt;d+1 &amp; t&gt;2
+0115     t = t-1;
+0116     r(:,t-1) = transpose(Z)*iF(:,:,t)*v(:,t) + transpose(L(:,:,t))*r(:,t);
+0117     alphahat(:,t)    = a(:,t) + P(:,:,t)*r(:,t-1);
+0118     etahat(:,t)        = QRt*r(:,t);
+0119 <span class="keyword">end</span>
+0120 <span class="keyword">if</span> d
+0121     r0 = zeros(mm,d); r0(:,d) = r(:,d);
+0122     r1 = zeros(mm,d);
+0123     <span class="keyword">for</span> t = d:-1:2
+0124         r0(:,t-1) = transpose(Linf(:,:,t))*r0(:,t);
+0125         r1(:,t-1) = transpose(Z)*(iFinf(:,:,t)*v(:,t)-transpose(Kstar(:,:,t))*r0(:,t)) + transpose(Linf(:,:,t))*r1(:,t);
+0126         alphahat(:,t)    = a(:,t) + Pstar(:,:,t)*r0(:,t-1) + Pinf(:,:,t)*r1(:,t-1);
+0127         etahat(:,t)        = QRt*r0(:,t);
+0128     <span class="keyword">end</span>
+0129     r0_0 = transpose(Linf(:,:,1))*r0(:,1);
+0130     r1_0 = transpose(Z)*(iFinf(:,:,1)*v(:,1)-transpose(Kstar(:,:,1))*r0(:,1)) + transpose(Linf(:,:,1))*r1(:,1);
+0131     alphahat(:,1)      = a(:,1) + Pstar(:,:,1)*r0_0 + Pinf(:,:,1)*r1_0;
+0132     etahat(:,1)        = QRt*r0(:,1);
+0133 <span class="keyword">else</span>
+0134     r0 = transpose(Z)*iF(:,:,1)*v(:,1) + transpose(L(:,:,1))*r(:,1);
+0135     alphahat(:,1)    = a(:,1) + P(:,:,1)*r0;
+0136     etahat(:,1)    = QRt*r(:,1);
+0137 <span class="keyword">end</span>
+0138 epsilonhat = Y-alphahat(mf,:)-trend;</pre></div>
+<hr><address>Generated on Fri 16-Jun-2006 09:09:06 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/">m2html</a></strong> &copy; 2003</address>
+</body>
+</html>

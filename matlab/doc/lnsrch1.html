@@ -1,0 +1,134 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of lnsrch1</title>
+  <meta name="keywords" content="lnsrch1">
+  <meta name="description" content="Copyright (C) 2001 Michel Juillard">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2003 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../index.html">Home</a> &gt;  <a href="index.html">.</a> &gt; lnsrch1.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../index.html"><img alt="<" border="0" src="../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="index.html">Index for .&nbsp;<img alt=">" border="0" src="../right.png"></a></td></tr></table>-->
+
+<h1>lnsrch1
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>Copyright (C) 2001 Michel Juillard</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function [x,f,fvec,check]=lnsrch(xold,fold,g,p,stpmax,func,j1,j2,varargin) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> Copyright (C) 2001 Michel Juillard</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="check.html" class="code" title="function result = check">check</a>	Copyright (C) 2001 Michel Juillard</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="solve1.html" class="code" title="function [x,check] = solve1(func,x,j1,j2,jacobian_flag,varargin)">solve1</a>	Copyright (C) 2001 Michel Juillard</li></ul>
+<!-- crossreference -->
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <span class="comment">% Copyright (C) 2001 Michel Juillard</span>
+0002 <span class="comment">%</span>
+0003 <a name="_sub0" href="#_subfunctions" class="code">function [x,f,fvec,check]=lnsrch(xold,fold,g,p,stpmax,func,j1,j2,varargin)</a>
+0004 
+0005   alf = 1e-4 ;
+0006   tolx = 3.7e-11 ;
+0007   alam = 1;
+0008   
+0009   x = xold;
+0010   nn = length(j2);
+0011   summ = sqrt(sum(p.*p)) ;
+0012   <span class="keyword">if</span> ~isfinite(summ)
+0013     error([<span class="string">'Some element of Newton direction isn''t finite. Jacobian maybe'</span> <span class="keyword">...</span>
+0014        <span class="string">' singular or there is a problem with initial values'</span>])
+0015   <span class="keyword">end</span>
+0016   
+0017   <span class="keyword">if</span> summ &gt; stpmax
+0018     p=p.*stpmax/summ ;
+0019   <span class="keyword">end</span>
+0020 
+0021   slope = g'*p ;
+0022   
+0023   test = max(abs(p)'./max([abs(xold(j2))';ones(1,nn)])) ;
+0024   alamin = tolx/test ;
+0025 
+0026   <span class="keyword">if</span> alamin &gt; 0.1
+0027     alamin = 0.1;
+0028   <span class="keyword">end</span>
+0029   
+0030   <span class="keyword">while</span> 1
+0031     <span class="keyword">if</span> alam &lt; alamin
+0032       <a href="check.html" class="code" title="function result = check">check</a> = 1 ;
+0033       <span class="keyword">return</span>
+0034     <span class="keyword">end</span>
+0035     
+0036     x(j2) = xold(j2) + (alam*p) ;
+0037     fvec = feval(func,x,varargin{:}) ;
+0038     fvec = fvec(j1);
+0039     f = 0.5*fvec'*fvec ;
+0040 
+0041     <span class="keyword">if</span> any(isnan(fvec))
+0042       alam = alam/2 ;
+0043       alam2 = alam ;
+0044       f2 = f ;
+0045       fold2 = fold ;
+0046     <span class="keyword">else</span>
+0047 
+0048       <span class="keyword">if</span> f &lt;= fold+alf*alam*slope
+0049     <a href="check.html" class="code" title="function result = check">check</a> = 0;
+0050     <span class="keyword">break</span> ;
+0051       <span class="keyword">else</span>
+0052     <span class="keyword">if</span> alam == 1
+0053       tmplam = -slope/(2*(f-fold-slope)) ;
+0054     <span class="keyword">else</span>
+0055       rhs1 = f-fold-alam*slope ;
+0056       rhs2 = f2-fold2-alam2*slope ;
+0057       a = (rhs1/(alam^2)-rhs2/(alam2^2))/(alam-alam2) ;
+0058       b = (-alam2*rhs1/(alam^2)+alam*rhs2/(alam2^2))/(alam-alam2) ;
+0059       <span class="keyword">if</span> a == 0
+0060         tmplam = -slope/(2*b) ;
+0061       <span class="keyword">else</span>
+0062         disc = (b^2)-3*a*slope ;
+0063 
+0064         <span class="keyword">if</span> disc &lt; 0
+0065           error (<span class="string">'Roundoff problem in nlsearch'</span>) ;
+0066         <span class="keyword">else</span>
+0067           tmplam = (-b+sqrt(disc))/(3*a) ;
+0068         <span class="keyword">end</span>
+0069 
+0070       <span class="keyword">end</span>
+0071 
+0072       <span class="keyword">if</span> tmplam &gt; 0.5*alam
+0073         tmplam = 0.5*alam;
+0074       <span class="keyword">end</span>
+0075 
+0076     <span class="keyword">end</span>
+0077 
+0078     alam2 = alam ;
+0079     f2 = f ;
+0080     fold2 = fold ;
+0081     alam = max([tmplam;(0.1*alam)]) ;
+0082       <span class="keyword">end</span>
+0083     <span class="keyword">end</span>
+0084   <span class="keyword">end</span>
+0085 
+0086 <span class="comment">% 01/14/01 MJ lnsearch is now a separate function</span>
+0087 <span class="comment">% 01/12/03 MJ check for finite summ to avoid infinite loop when Jacobian</span>
+0088 <span class="comment">%             is singular or model is denormalized</span></pre></div>
+<hr><address>Generated on Fri 16-Jun-2006 09:09:06 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/">m2html</a></strong> &copy; 2003</address>
+</body>
+</html>

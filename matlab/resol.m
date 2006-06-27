@@ -8,7 +8,9 @@ global it_
 % 11 .... same as dr1 for dr_algo = 2
 % 20: can't find steady state info(2) contains sum of sqare residuals
 
-  
+ 
+%unfinished
+jacobian_flag = 0; 
 
 options_ = set_default_option(options_,'olr',0);
 options_ = set_default_option(options_,'jacobian_flag',1);

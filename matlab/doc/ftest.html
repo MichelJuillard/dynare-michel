@@ -1,0 +1,115 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of ftest</title>
+  <meta name="keywords" content="ftest">
+  <meta name="description" content="Copyright (C) 2001 Michel Juillard">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2003 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../index.html">Home</a> &gt;  <a href="index.html">.</a> &gt; ftest.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../index.html"><img alt="<" border="0" src="../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="index.html">Index for .&nbsp;<img alt=">" border="0" src="../right.png"></a></td></tr></table>-->
+
+<h1>ftest
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>Copyright (C) 2001 Michel Juillard</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function ftest (s1,s2) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> Copyright (C) 2001 Michel Juillard</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+</ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="dcompare.html" class="code" title="function dcompare(s1)">dcompare</a>	Copyright (C) 2001 Michel Juillard</li><li><a href="gcompare.html" class="code" title="function gcompare(s1,s2)">gcompare</a>	Copyright (C) 2001 Michel Juillard</li><li><a href="mcompare.html" class="code" title="function mcompare(s1,s2)">mcompare</a>	Copyright (C) 2001 Michel Juillard</li></ul>
+<!-- crossreference -->
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <span class="comment">% Copyright (C) 2001 Michel Juillard</span>
+0002 <span class="comment">%</span>
+0003 <a name="_sub0" href="#_subfunctions" class="code">function ftest (s1,s2)</a>
+0004 
+0005 <span class="keyword">global</span> nvx nvy x y lag1
+0006 
+0007 <span class="keyword">if</span> size(s1,1) ~= 2
+0008     error (<span class="string">'Spcifiez deux fichiers pour la comparaison.'</span>) ;
+0009 <span class="keyword">end</span>
+0010 
+0011 <span class="keyword">for</span> i = 1:2
+0012     <span class="keyword">if</span> ~ isempty(find(abs(s1(i,:)) == 46))
+0013         error (<span class="string">'Entrez les noms de fichiers sans extensions.'</span>) ;
+0014     <span class="keyword">end</span>
+0015 <span class="keyword">end</span>
+0016 
+0017 s1 = [s1 [<span class="string">' '</span>;<span class="string">' '</span>]] ;
+0018 file1 = [s1(1,1:min(find(abs(s1(1,:)) == 32))-1) <span class="string">'.BIN'</span>] ;
+0019 file2 = [s1(2,1:min(find(abs(s1(2,:)) == 32))-1) <span class="string">'.BIN'</span>] ;
+0020 
+0021 fid=fopen(file1,<span class="string">'r'</span>) ;
+0022 n1 = fread(fid,1,<span class="string">'int'</span>) ;
+0023 n2 = fread(fid,1,<span class="string">'int'</span>) ;
+0024 n3 = fread(fid,1,<span class="string">'int'</span>) ;
+0025 lag1 = fread(fid,4,<span class="string">'int'</span>) ;
+0026 nvx = fread(fid,[n1,n3],<span class="string">'int'</span>) ;
+0027 x = fread(fid,[n1,n2],<span class="string">'float64'</span>) ;
+0028 fclose(fid) ;
+0029 nvx = setstr(nvx) ;
+0030 
+0031 fid=fopen(file2,<span class="string">'r'</span>) ;
+0032 n1 = fread(fid,1,<span class="string">'int'</span>) ;
+0033 n2 = fread(fid,1,<span class="string">'int'</span>) ;
+0034 n3 = fread(fid,1,<span class="string">'int'</span>) ;
+0035 lag2 = fread(fid,4,<span class="string">'int'</span>) ;
+0036 nvy = fread(fid,[n1,n3],<span class="string">'int'</span>) ;
+0037 y = fread(fid,[n1,n2],<span class="string">'float64'</span>) ;
+0038 fclose(fid) ;
+0039 nvy = setstr(nvy) ;
+0040 
+0041 <span class="keyword">if</span> size(x,1) ~= size(y,1)
+0042     error (<span class="string">'FTEST: The two files don''t have the same number of variables.'</span>);
+0043 <span class="keyword">end</span>
+0044 
+0045 <span class="keyword">for</span> i = 1:size(x,1)
+0046     <span class="keyword">if</span> ~ strcmp(nvx(i,:),nvy(i,:))
+0047         error (<span class="string">'FTEST: The two files don''t have the same  variables.'</span>) ;    
+0048     <span class="keyword">end</span>
+0049 <span class="keyword">end</span>
+0050 
+0051 <span class="keyword">if</span> nnz(lag1 - lag2) &gt; 0
+0052     error (<span class="string">'FTEST: Leads and lags aren''t the same in both files.'</span>) ;
+0053 <span class="keyword">end</span>
+0054 
+0055 j = zeros(size(s2,1),1);
+0056 <span class="keyword">for</span> i=1:size(s2,1)
+0057     k = strmatch(s2(i,:),nvx,<span class="string">'exact'</span>) ;
+0058     <span class="keyword">if</span> isempty(k)
+0059       t = [<span class="string">'FTEST: Variable '</span> s2(i) <span class="string">'doesn''t exist'</span>] ;
+0060       error (t) ;
+0061     <span class="keyword">else</span>
+0062       j(i) =k;
+0063     <span class="keyword">end</span>
+0064 <span class="keyword">end</span>
+0065 
+0066 y = y(j,:) ;
+0067 x = x(j,:) ;
+0068 
+0069 <span class="comment">%06/18/01 MJ replaced beastr by strmatch</span></pre></div>
+<hr><address>Generated on Fri 16-Jun-2006 09:09:06 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/">m2html</a></strong> &copy; 2003</address>
+</body>
+</html>

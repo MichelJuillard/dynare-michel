@@ -1,0 +1,74 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of qbeta</title>
+  <meta name="keywords" content="qbeta">
+  <meta name="description" content="QBETA    The beta inverse distribution function">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2003 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../index.html">Home</a> &gt;  <a href="index.html">.</a> &gt; qbeta.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../index.html"><img alt="<" border="0" src="../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="index.html">Index for .&nbsp;<img alt=">" border="0" src="../right.png"></a></td></tr></table>-->
+
+<h1>qbeta
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>QBETA    The beta inverse distribution function</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function x = qbeta(p,a,b) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment">QBETA    The beta inverse distribution function
+
+         x = qbeta(p,a,b)</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="dbeta.html" class="code" title="function d = dbeta(x,a,b)">dbeta</a>	DBETA    The beta density function</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="compDist.html" class="code" title="function compdist(xparam1, x2, pltopt, figurename)">compDist</a>	</li><li><a href="draw_prior_density.html" class="code" title="function [x,f,abscissa,dens,binf,bsup] = draw_prior_density(indx);">draw_prior_density</a>	stephane.adjemian@ens.fr [07-15-2004]</li><li><a href="prior_bounds.html" class="code" title="function bounds = prior_bounds(bayestopt)">prior_bounds</a>	</li></ul>
+<!-- crossreference -->
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function x = qbeta(p,a,b)</a>
+0002 <span class="comment">%QBETA    The beta inverse distribution function</span>
+0003 <span class="comment">%</span>
+0004 <span class="comment">%         x = qbeta(p,a,b)</span>
+0005 
+0006 <span class="comment">%       Anders Holtsberg, 27-07-95</span>
+0007 <span class="comment">%       Copyright (c) Anders Holtsberg</span>
+0008 
+0009 <span class="keyword">if</span> any(any((a&lt;=0)|(b&lt;=0)))
+0010    error(<span class="string">'Parameter a or b is nonpositive'</span>)
+0011 <span class="keyword">end</span>
+0012 <span class="keyword">if</span> any(any(abs(2*p-1)&gt;1))
+0013    error(<span class="string">'A probability should be 0&lt;=p&lt;=1, please!'</span>)
+0014 <span class="keyword">end</span>
+0015 b = min(b,100000);
+0016 
+0017 x = a ./ (a+b);
+0018 dx = 1;
+0019 <span class="keyword">while</span> any(any(abs(dx)&gt;256*eps*max(x,1)))
+0020    dx = (betainc(x,a,b) - p) ./ <a href="dbeta.html" class="code" title="function d = dbeta(x,a,b)">dbeta</a>(x,a,b);
+0021    x = x - dx;
+0022    x = x + (dx - x) / 2 .* (x&lt;0);
+0023    x = x + (1 + (dx - x)) / 2 .* (x&gt;1);
+0024 <span class="keyword">end</span>
+0025 
+0026</pre></div>
+<hr><address>Generated on Fri 16-Jun-2006 09:09:06 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/">m2html</a></strong> &copy; 2003</address>
+</body>
+</html>

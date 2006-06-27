@@ -1,0 +1,99 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of hessian</title>
+  <meta name="keywords" content="hessian">
+  <meta name="description" content="Copyright (C) 2001 Michel Juillard">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2003 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../index.html">Home</a> &gt;  <a href="index.html">.</a> &gt; hessian.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../index.html"><img alt="<" border="0" src="../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="index.html">Index for .&nbsp;<img alt=">" border="0" src="../right.png"></a></td></tr></table>-->
+
+<h1>hessian
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>Copyright (C) 2001 Michel Juillard</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function hessian_mat = hessian(func,x,varargin) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> Copyright (C) 2001 Michel Juillard
+% computes second order partial derivatives
+ uses Abramowitz and Stegun (1965) formulas 25.3.24 and 25.3.27 p. 884</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+</ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="dr1.html" class="code" title="function [dr,info]=dr1(dr,task)">dr1</a>	Copyright (C) 2001 Michel Juillard</li><li><a href="dynare_estimation.html" class="code" title="function dynare_estimation(var_list_)">dynare_estimation</a>	</li><li><a href="mode_check.html" class="code" title="function mode_check(x,fval,hessian,gend,data,lb,ub)">mode_check</a>	</li></ul>
+<!-- crossreference -->
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <span class="comment">% Copyright (C) 2001 Michel Juillard</span>
+0002 <span class="comment">%% computes second order partial derivatives</span>
+0003 <span class="comment">% uses Abramowitz and Stegun (1965) formulas 25.3.24 and 25.3.27 p. 884</span>
+0004 
+0005 <a name="_sub0" href="#_subfunctions" class="code">function hessian_mat = hessian(func,x,varargin)</a>
+0006   <span class="keyword">global</span> options_
+0007   func = str2func(func);
+0008   n=size(x,1);
+0009   <span class="comment">%h1=max(abs(x),options_.gstep*ones(n,1))*eps^(1/3);</span>
+0010   h1=max(abs(x),sqrt(options_.gstep)*ones(n,1))*eps^(1/6);
+0011   h_1=h1;
+0012   xh1=x+h1;
+0013   h1=xh1-x;
+0014   xh1=x-h_1;
+0015   h_1=x-xh1;
+0016   xh1=x;
+0017   f0=feval(func,x,varargin{:});
+0018   f1=zeros(size(f0,1),n);
+0019   f_1=f1;
+0020   <span class="keyword">for</span> i=1:n    
+0021     xh1(i)=x(i)+h1(i);
+0022     f1(:,i)=feval(func,xh1,varargin{:});
+0023     xh1(i)=x(i)-h_1(i);
+0024     f_1(:,i)=feval(func,xh1,varargin{:});
+0025     xh1(i)=x(i);
+0026     i=i+1;
+0027   <span class="keyword">end</span>
+0028   xh_1=xh1;
+0029   hessian_mat = zeros(size(f0,1),n*n);
+0030   <span class="keyword">for</span> i=1:n    
+0031     <span class="keyword">if</span> i &gt; 1        
+0032       k=[i:n:n*(i-1)];
+0033       hessian_mat(:,(i-1)*n+1:(i-1)*n+i-1)=hessian_mat(:,k);
+0034     <span class="keyword">end</span>     
+0035     hessian_mat(:,(i-1)*n+i)=(f1(:,i)+f_1(:,i)-2*f0)./(h1(i)*h_1(i));
+0036     temp=f1+f_1-f0*ones(1,n);
+0037     <span class="keyword">for</span> j=i+1:n        
+0038       xh1(i)=x(i)+h1(i);
+0039       xh1(j)=x(j)+h_1(j);
+0040       xh_1(i)=x(i)-h1(i);
+0041       xh_1(j)=x(j)-h_1(j);
+0042       hessian_mat(:,(i-1)*n+j)=-(-feval(func,xh1,varargin{:})-feval(func,xh_1,varargin{:})+temp(:,i)+temp(:,j))./(2*h1(i)*h_1(j));
+0043       xh1(i)=x(i);
+0044       xh1(j)=x(j);
+0045       xh_1(i)=x(i);
+0046       xh_1(j)=x(j);
+0047       j=j+1;
+0048     <span class="keyword">end</span>    
+0049     i=i+1;
+0050   <span class="keyword">end</span> 
+0051   <span class="comment">% 11/25/03 SA Created from Hessian_sparse (removed sparse)</span></pre></div>
+<hr><address>Generated on Fri 16-Jun-2006 09:09:06 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/">m2html</a></strong> &copy; 2003</address>
+</body>
+</html>

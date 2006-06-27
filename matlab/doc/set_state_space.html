@@ -1,0 +1,130 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of set_state_space</title>
+  <meta name="keywords" content="set_state_space">
+  <meta name="description" content="Copyright (C) 2001 Michel Juillard">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2003 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../index.html">Home</a> &gt;  <a href="index.html">.</a> &gt; set_state_space.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../index.html"><img alt="<" border="0" src="../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="index.html">Index for .&nbsp;<img alt=">" border="0" src="../right.png"></a></td></tr></table>-->
+
+<h1>set_state_space
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>Copyright (C) 2001 Michel Juillard</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function dr=set_state_space(dr) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> Copyright (C) 2001 Michel Juillard</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="union.html" class="code" title="function x = union(a,b)">union</a>	</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="dr1.html" class="code" title="function [dr,info]=dr1(dr,task)">dr1</a>	Copyright (C) 2001 Michel Juillard</li><li><a href="dr11.html" class="code" title="function dr=dr11(iorder,dr,cheik)">dr11</a>	Copyright (C) 2001 Michel Juillard</li><li><a href="dynare_MC.html" class="code" title="function dynare_MC(var_list_)">dynare_MC</a>	</li><li><a href="dynare_estimation.html" class="code" title="function dynare_estimation(var_list_)">dynare_estimation</a>	</li></ul>
+<!-- crossreference -->
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <span class="comment">% Copyright (C) 2001 Michel Juillard</span>
+0002 <span class="comment">%</span>
+0003 <a name="_sub0" href="#_subfunctions" class="code">function dr=set_state_space(dr)</a>
+0004 
+0005 <span class="keyword">global</span> M_ oo_ options_ it_
+0006 
+0007 xlen = M_.maximum_lead + M_.maximum_lag + 1;
+0008 klen = M_.maximum_lag + M_.maximum_lead + 1;
+0009 
+0010 <span class="keyword">if</span> ~ M_.lead_lag_incidence(M_.maximum_lag+1,:) &gt; 0
+0011   error (<span class="string">'Error in model specification: some variables don&quot;t appear as current'</span>) ;
+0012 <span class="keyword">end</span>
+0013 
+0014 fwrd_var = find(any(M_.lead_lag_incidence(M_.maximum_lag+2:<span class="keyword">end</span>,:),1))';
+0015 <span class="keyword">if</span> M_.maximum_lag &gt; 0
+0016   pred_var = find(any(M_.lead_lag_incidence(1:M_.maximum_lag,:),1))';
+0017   both_var = intersect(pred_var,fwrd_var);
+0018   pred_var = setdiff(pred_var,both_var);
+0019   fwrd_var = setdiff(fwrd_var,both_var);
+0020   stat_var = setdiff([1:M_.endo_nbr]',<a href="union.html" class="code" title="function x = union(a,b)">union</a>(<a href="union.html" class="code" title="function x = union(a,b)">union</a>(pred_var,both_var),fwrd_var));  <span class="comment">% static variables</span>
+0021 <span class="keyword">else</span>
+0022   pred_var = [];
+0023   both_var = [];
+0024   stat_var = setdiff([1:M_.endo_nbr]',fwrd_var);
+0025 <span class="keyword">end</span>
+0026 nboth = length(both_var);
+0027 npred = length(pred_var);
+0028 nfwrd = length(fwrd_var);
+0029 nstatic = length(stat_var);
+0030 order_var = [ stat_var; pred_var; both_var; fwrd_var];
+0031 
+0032 <span class="comment">% building kmask for z state vector in t+1</span>
+0033 <span class="keyword">if</span> M_.maximum_lag &gt; 0
+0034   kmask = [];
+0035   <span class="keyword">if</span> M_.maximum_lead &gt; 0 
+0036     kmask = [cumsum(flipud(M_.lead_lag_incidence(M_.maximum_lag+2:<span class="keyword">end</span>,order_var)),1)] ;
+0037   <span class="keyword">end</span>
+0038   kmask = [kmask; flipud(cumsum(M_.lead_lag_incidence(1:M_.maximum_lag,order_var),1))] ;
+0039 <span class="keyword">else</span>
+0040   kmask = cumsum(flipud(M_.lead_lag_incidence(M_.maximum_lag+2:klen,order_var)),1) ;
+0041 <span class="keyword">end</span>
+0042 
+0043 kmask = kmask';
+0044 kmask = kmask(:);
+0045 i_kmask = find(kmask);          <span class="comment">% index of nonzero entries in kmask</span>
+0046 nd = size(i_kmask,1);           <span class="comment">% size of the state vector</span>
+0047 kmask(i_kmask) = [1:nd];
+0048 
+0049 <span class="comment">% auxiliary equations</span>
+0050 
+0051 <span class="comment">% elements that are both in z(t+1) and z(t)</span>
+0052 k1 = find([kmask(1:end-M_.endo_nbr) &amp; kmask(M_.endo_nbr+1:end)] );
+0053 kad = [];
+0054 kae = [];
+0055 <span class="keyword">if</span> ~isempty(k1)
+0056   kad = kmask(k1+M_.endo_nbr);
+0057   kae = kmask(k1);
+0058 <span class="keyword">end</span>
+0059 
+0060 <span class="comment">% composition of state vector</span>
+0061 <span class="comment">% col 1: variable;           col 2: lead/lag in z(t+1);</span>
+0062 <span class="comment">% col 3: A cols for t+1 (D); col 4: A cols for t (E)</span>
+0063 kstate = [ repmat([1:M_.endo_nbr]',klen-1,1) kron([klen:-1:2]',ones(M_.endo_nbr,1)) <span class="keyword">...</span>
+0064        zeros((klen-1)*M_.endo_nbr,2)];
+0065 kiy = flipud(M_.lead_lag_incidence(:,order_var))';
+0066 kiy = kiy(:);
+0067 kstate(1:M_.maximum_lead*M_.endo_nbr,3) = kiy(1:M_.maximum_lead*M_.endo_nbr)-M_.endo_nbr;  
+0068 kstate(find(kstate(:,3) &lt; 0),3) = 0;
+0069 kstate(M_.maximum_lead*M_.endo_nbr+1:<span class="keyword">end</span>,4) = kiy((M_.maximum_lead+1)*M_.endo_nbr+1:end);  
+0070 <span class="comment">% put in E only the current variables that are not already in D</span>
+0071 kstate = kstate(i_kmask,:);
+0072 
+0073 dr.order_var = order_var;
+0074 dr.nstatic = nstatic;
+0075 dr.npred = npred+nboth;
+0076 dr.kstate = kstate;
+0077 dr.kad = kad;
+0078 dr.kae = kae;
+0079 dr.nboth = nboth;
+0080 dr.nfwrd = nfwrd;
+0081 <span class="comment">% number of forward variables in the state vector</span>
+0082 dr.nsfwrd = sum(kstate(:,2) &gt; M_.maximum_lag+1);
+0083 <span class="comment">% number of predetermined variables in the state vector</span>
+0084 dr.nspred = sum(kstate(:,2) &lt;= M_.maximum_lag+1);</pre></div>
+<hr><address>Generated on Fri 16-Jun-2006 09:09:06 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/">m2html</a></strong> &copy; 2003</address>
+</body>
+</html>

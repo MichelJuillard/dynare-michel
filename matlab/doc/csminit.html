@@ -1,0 +1,257 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of csminit</title>
+  <meta name="keywords" content="csminit">
+  <meta name="description" content="[fhat,xhat,fcount,retcode] = csminit(fcn,x0,f0,g0,badg,H0,...">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2003 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../index.html">Home</a> &gt;  <a href="index.html">.</a> &gt; csminit.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../index.html"><img alt="<" border="0" src="../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="index.html">Index for .&nbsp;<img alt=">" border="0" src="../right.png"></a></td></tr></table>-->
+
+<h1>csminit
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>[fhat,xhat,fcount,retcode] = csminit(fcn,x0,f0,g0,badg,H0,...</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function [fhat,xhat,fcount,retcode] = csminit(fcn,x0,f0,g0,badg,H0,varargin) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> [fhat,xhat,fcount,retcode] = csminit(fcn,x0,f0,g0,badg,H0,...
+                                       P1,P2,P3,P4,P5,P6,P7,P8)
+ retcodes: 0, normal step.  5, largest step still improves too fast.
+ 4,2 back and forth adjustment of stepsize didn't finish.  3, smallest
+ stepsize still improves too slow.  6, no improvement found.  1, zero
+ gradient.
+---------------------
+ Modified 7/22/96 to omit variable-length P list, for efficiency and compilation.
+ Places where the number of P's need to be altered or the code could be returned to
+ its old form are marked with ARGLIST comments.
+
+ Fixed 7/17/93 to use inverse-hessian instead of hessian itself in bfgs
+ update.
+
+ Fixed 7/19/93 to flip eigenvalues of H to get better performance when
+ it's not psd.
+
+tailstr = ')';
+for i=nargin-6:-1:1
+   tailstr=[ ',P' num2str(i)  tailstr];
+end
+ANGLE = .03;</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+</ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="csminwel.html" class="code" title="function [fh,xh,gh,H,itct,fcount,retcodeh] = csminwel(fcn,x0,H0,grad,crit,nit,varargin)">csminwel</a>	[fhat,xhat,ghat,Hhat,itct,fcount,retcodehat] = csminwel(fcn,x0,H0,grad,crit,nit,varargin)</li><li><a href="mr_gstep.html" class="code" title="function [f0, x] = mr_gstep(func0,x,htol0,varargin)">mr_gstep</a>	Copyright (C) 2005 Marco Ratto</li><li><a href="newrat.html" class="code" title="function [xparam1, hh, gg, fval, igg] = newrat(func0, x, hh, gg, igg, ftol0, nit, flagg, varargin)">newrat</a>	</li></ul>
+<!-- crossreference -->
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function [fhat,xhat,fcount,retcode] = csminit(fcn,x0,f0,g0,badg,H0,varargin)</a>
+0002 <span class="comment">% [fhat,xhat,fcount,retcode] = csminit(fcn,x0,f0,g0,badg,H0,...</span>
+0003 <span class="comment">%                                       P1,P2,P3,P4,P5,P6,P7,P8)</span>
+0004 <span class="comment">% retcodes: 0, normal step.  5, largest step still improves too fast.</span>
+0005 <span class="comment">% 4,2 back and forth adjustment of stepsize didn't finish.  3, smallest</span>
+0006 <span class="comment">% stepsize still improves too slow.  6, no improvement found.  1, zero</span>
+0007 <span class="comment">% gradient.</span>
+0008 <span class="comment">%---------------------</span>
+0009 <span class="comment">% Modified 7/22/96 to omit variable-length P list, for efficiency and compilation.</span>
+0010 <span class="comment">% Places where the number of P's need to be altered or the code could be returned to</span>
+0011 <span class="comment">% its old form are marked with ARGLIST comments.</span>
+0012 <span class="comment">%</span>
+0013 <span class="comment">% Fixed 7/17/93 to use inverse-hessian instead of hessian itself in bfgs</span>
+0014 <span class="comment">% update.</span>
+0015 <span class="comment">%</span>
+0016 <span class="comment">% Fixed 7/19/93 to flip eigenvalues of H to get better performance when</span>
+0017 <span class="comment">% it's not psd.</span>
+0018 <span class="comment">%</span>
+0019 <span class="comment">%tailstr = ')';</span>
+0020 <span class="comment">%for i=nargin-6:-1:1</span>
+0021 <span class="comment">%   tailstr=[ ',P' num2str(i)  tailstr];</span>
+0022 <span class="comment">%end</span>
+0023 <span class="comment">%ANGLE = .03;</span>
+0024 ANGLE = .005;
+0025 <span class="comment">%THETA = .03;</span>
+0026 THETA = .3; <span class="comment">%(0&lt;THETA&lt;.5) THETA near .5 makes long line searches, possibly fewer iterations.</span>
+0027 FCHANGE = 1000;
+0028 MINLAMB = 1e-9;
+0029 <span class="comment">% fixed 7/15/94</span>
+0030 <span class="comment">% MINDX = .0001;</span>
+0031 <span class="comment">% MINDX = 1e-6;</span>
+0032 MINDFAC = .01;
+0033 fcount=0;
+0034 lambda=1;
+0035 xhat=x0;
+0036 f=f0;
+0037 fhat=f0;
+0038 g = g0;
+0039 gnorm = norm(g);
+0040 <span class="comment">%</span>
+0041 <span class="keyword">if</span> (gnorm &lt; 1.e-12) &amp; ~badg <span class="comment">% put ~badg 8/4/94</span>
+0042    retcode =1;
+0043    dxnorm=0;
+0044    <span class="comment">% gradient convergence</span>
+0045 <span class="keyword">else</span>
+0046    <span class="comment">% with badg true, we don't try to match rate of improvement to directional</span>
+0047    <span class="comment">% derivative.  We're satisfied just to get some improvement in f.</span>
+0048    <span class="comment">%</span>
+0049    <span class="comment">%if(badg)</span>
+0050    <span class="comment">%   dx = -g*FCHANGE/(gnorm*gnorm);</span>
+0051    <span class="comment">%  dxnorm = norm(dx);</span>
+0052    <span class="comment">%  if dxnorm &gt; 1e12</span>
+0053    <span class="comment">%     disp('Bad, small gradient problem.')</span>
+0054    <span class="comment">%     dx = dx*FCHANGE/dxnorm;</span>
+0055    <span class="comment">%   end</span>
+0056    <span class="comment">%else</span>
+0057    <span class="comment">% Gauss-Newton step;</span>
+0058    <span class="comment">%---------- Start of 7/19/93 mod ---------------</span>
+0059    <span class="comment">%[v d] = eig(H0);</span>
+0060    <span class="comment">%toc</span>
+0061    <span class="comment">%d=max(1e-10,abs(diag(d)));</span>
+0062    <span class="comment">%d=abs(diag(d));</span>
+0063    <span class="comment">%dx = -(v.*(ones(size(v,1),1)*d'))*(v'*g);</span>
+0064 <span class="comment">%      toc</span>
+0065    dx = -H0*g;
+0066 <span class="comment">%      toc</span>
+0067    dxnorm = norm(dx);
+0068    <span class="keyword">if</span> dxnorm &gt; 1e12
+0069       disp(<span class="string">'Near-singular H problem.'</span>)
+0070       dx = dx*FCHANGE/dxnorm;
+0071    <span class="keyword">end</span>
+0072    dfhat = dx'*g0;
+0073    <span class="comment">%end</span>
+0074    <span class="comment">%</span>
+0075    <span class="comment">%</span>
+0076    <span class="keyword">if</span> ~badg
+0077       <span class="comment">% test for alignment of dx with gradient and fix if necessary</span>
+0078       a = -dfhat/(gnorm*dxnorm);
+0079       <span class="keyword">if</span> a&lt;ANGLE
+0080          dx = dx - (ANGLE*dxnorm/gnorm+dfhat/(gnorm*gnorm))*g;
+0081          dfhat = dx'*g;
+0082          dxnorm = norm(dx);
+0083          disp(sprintf(<span class="string">'Correct for low angle: %g'</span>,a))
+0084       <span class="keyword">end</span>
+0085    <span class="keyword">end</span>
+0086    disp(sprintf(<span class="string">'Predicted improvement: %18.9f'</span>,-dfhat/2))
+0087    <span class="comment">%</span>
+0088    <span class="comment">% Have OK dx, now adjust length of step (lambda) until min and</span>
+0089    <span class="comment">% max improvement rate criteria are met.</span>
+0090    done=0;
+0091    factor=3;
+0092    shrink=1;
+0093    lambdaMin=0;
+0094    lambdaMax=inf;
+0095    lambdaPeak=0;
+0096    fPeak=f0;
+0097    lambdahat=0;
+0098    <span class="keyword">while</span> ~done
+0099       <span class="keyword">if</span> size(x0,2)&gt;1
+0100          dxtest=x0+dx'*lambda;
+0101       <span class="keyword">else</span>
+0102          dxtest=x0+dx*lambda;
+0103       <span class="keyword">end</span>
+0104       <span class="comment">% home</span>
+0105       f = eval([fcn <span class="string">'(dxtest,varargin{:})'</span>]);
+0106       <span class="comment">%ARGLIST</span>
+0107       <span class="comment">%f = feval(fcn,dxtest,P1,P2,P3,P4,P5,P6,P7,P8,P9,P10,P11,P12,P13);</span>
+0108       <span class="comment">% f = feval(fcn,x0+dx*lambda,P1,P2,P3,P4,P5,P6,P7,P8);</span>
+0109       disp(sprintf(<span class="string">'lambda = %10.5g; f = %20.7f'</span>,lambda,f ))
+0110       <span class="comment">%debug</span>
+0111       <span class="comment">%disp(sprintf('Improvement too great? f0-f: %g, criterion: %g',f0-f,-(1-THETA)*dfhat*lambda))</span>
+0112       <span class="keyword">if</span> f&lt;fhat
+0113          fhat=f;
+0114          xhat=dxtest;
+0115          lambdahat = lambda;
+0116       <span class="keyword">end</span>
+0117       fcount=fcount+1;
+0118       shrinkSignal = (~badg &amp; (f0-f &lt; max([-THETA*dfhat*lambda 0]))) | (badg &amp; (f0-f) &lt; 0) ;
+0119       growSignal = ~badg &amp; ( (lambda &gt; 0)  &amp;  (f0-f &gt; -(1-THETA)*dfhat*lambda) );
+0120       <span class="keyword">if</span>  shrinkSignal  &amp;   ( (lambda&gt;lambdaPeak) | (lambda&lt;0) )
+0121          <span class="keyword">if</span> (lambda&gt;0) &amp; ((~shrink) | (lambda/factor &lt;= lambdaPeak))
+0122             shrink=1;
+0123             factor=factor^.6;
+0124             <span class="keyword">while</span> lambda/factor &lt;= lambdaPeak
+0125                factor=factor^.6;
+0126             <span class="keyword">end</span>
+0127             <span class="comment">%if (abs(lambda)*(factor-1)*dxnorm &lt; MINDX) | (abs(lambda)*(factor-1) &lt; MINLAMB)</span>
+0128             <span class="keyword">if</span> abs(factor-1)&lt;MINDFAC
+0129                <span class="keyword">if</span> abs(lambda)&lt;4
+0130                   retcode=2;
+0131                <span class="keyword">else</span>
+0132                   retcode=7;
+0133                <span class="keyword">end</span>
+0134                done=1;
+0135             <span class="keyword">end</span>
+0136          <span class="keyword">end</span>
+0137          <span class="keyword">if</span> (lambda&lt;lambdaMax) &amp; (lambda&gt;lambdaPeak)
+0138             lambdaMax=lambda;
+0139          <span class="keyword">end</span>
+0140          lambda=lambda/factor;
+0141          <span class="keyword">if</span> abs(lambda) &lt; MINLAMB
+0142             <span class="keyword">if</span> (lambda &gt; 0) &amp; (f0 &lt;= fhat)
+0143                <span class="comment">% try going against gradient, which may be inaccurate</span>
+0144                lambda = -lambda*factor^6
+0145             <span class="keyword">else</span>
+0146                <span class="keyword">if</span> lambda &lt; 0
+0147                   retcode = 6;
+0148                <span class="keyword">else</span>
+0149                   retcode = 3;
+0150                <span class="keyword">end</span>
+0151                done = 1;
+0152             <span class="keyword">end</span>
+0153          <span class="keyword">end</span>
+0154       <span class="keyword">elseif</span>  (growSignal &amp; lambda&gt;0) |  (shrinkSignal &amp; ((lambda &lt;= lambdaPeak) &amp; (lambda&gt;0)))
+0155          <span class="keyword">if</span> shrink
+0156             shrink=0;
+0157             factor = factor^.6;
+0158             <span class="comment">%if ( abs(lambda)*(factor-1)*dxnorm&lt; MINDX ) | ( abs(lambda)*(factor-1)&lt; MINLAMB)</span>
+0159             <span class="keyword">if</span> abs(factor-1)&lt;MINDFAC
+0160                <span class="keyword">if</span> abs(lambda)&lt;4
+0161                   retcode=4;
+0162                <span class="keyword">else</span>
+0163                   retcode=7;
+0164                <span class="keyword">end</span>
+0165                done=1;
+0166             <span class="keyword">end</span>
+0167          <span class="keyword">end</span>
+0168          <span class="keyword">if</span> ( f&lt;fPeak ) &amp; (lambda&gt;0)
+0169             fPeak=f;
+0170             lambdaPeak=lambda;
+0171             <span class="keyword">if</span> lambdaMax&lt;=lambdaPeak
+0172                lambdaMax=lambdaPeak*factor*factor;
+0173             <span class="keyword">end</span>
+0174          <span class="keyword">end</span>
+0175          lambda=lambda*factor;
+0176          <span class="keyword">if</span> abs(lambda) &gt; 1e20;
+0177             retcode = 5;
+0178             done =1;
+0179          <span class="keyword">end</span>
+0180       <span class="keyword">else</span>
+0181          done=1;
+0182          <span class="keyword">if</span> factor &lt; 1.2
+0183             retcode=7;
+0184          <span class="keyword">else</span>
+0185             retcode=0;
+0186          <span class="keyword">end</span>
+0187       <span class="keyword">end</span>
+0188    <span class="keyword">end</span>
+0189 <span class="keyword">end</span>
+0190 disp(sprintf(<span class="string">'Norm of dx %10.5g'</span>, dxnorm))</pre></div>
+<hr><address>Generated on Fri 16-Jun-2006 09:09:06 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/">m2html</a></strong> &copy; 2003</address>
+</body>
+</html>

@@ -1,0 +1,109 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of dynare</title>
+  <meta name="keywords" content="dynare">
+  <meta name="description" content="Copyright (C) 2001 Michel Juillard">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2003 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../index.html">Home</a> &gt;  <a href="index.html">.</a> &gt; dynare.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../index.html"><img alt="<" border="0" src="../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="index.html">Index for .&nbsp;<img alt=">" border="0" src="../right.png"></a></td></tr></table>-->
+
+<h1>dynare
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>Copyright (C) 2001 Michel Juillard</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function dynare(fname, varargin) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> Copyright (C) 2001 Michel Juillard
+
+    DYNARE ( 'Filename' )
+    This command runs dynare with specified model file in argument
+     Filename.
+    The name of model file begins with an alphabetic character, 
+    and has a filename extension of .mod or .dyn.
+    When extension is omitted, a model file with .mod extension
+    is processed.</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+</ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+</ul>
+<!-- crossreference -->
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <span class="comment">% Copyright (C) 2001 Michel Juillard</span>
+0002 <span class="comment">%</span>
+0003 <a name="_sub0" href="#_subfunctions" class="code">function dynare(fname, varargin)</a>
+0004 <span class="comment">%    DYNARE ( 'Filename' )</span>
+0005 <span class="comment">%    This command runs dynare with specified model file in argument</span>
+0006 <span class="comment">%     Filename.</span>
+0007 <span class="comment">%    The name of model file begins with an alphabetic character,</span>
+0008 <span class="comment">%    and has a filename extension of .mod or .dyn.</span>
+0009 <span class="comment">%    When extension is omitted, a model file with .mod extension</span>
+0010 <span class="comment">%    is processed.</span>
+0011 
+0012 <span class="keyword">if</span> ~isstr(fname)
+0013     error (<span class="string">'The argument in DYNARE must be a text string.'</span>) ;
+0014 <span class="keyword">end</span>
+0015 <span class="comment">% Testing if file have extension</span>
+0016 <span class="comment">% If no extension defalut .mod is added</span>
+0017 <span class="keyword">if</span> isempty(strfind(fname,<span class="string">'.'</span>))
+0018   fname1 = [fname <span class="string">'.dyn'</span>];
+0019   d = dir(fname1);
+0020   <span class="keyword">if</span> length(d) == 0
+0021     fname1 = [fname <span class="string">'.mod'</span>];
+0022   <span class="keyword">end</span>
+0023   fname = fname1;
+0024   <span class="comment">% Checking file extension</span>
+0025 <span class="keyword">else</span>
+0026   <span class="keyword">if</span> ~strcmp(upper(fname(size(fname,2)-3:size(fname,2))),<span class="string">'.MOD'</span>) <span class="keyword">...</span>
+0027     &amp;&amp; ~strcmp(upper(fname(size(fname,2)-3:size(fname,2))),<span class="string">'.DYN'</span>)
+0028     error (<span class="string">'Argument is a file name with .mod or .dyn extension'</span>);
+0029   <span class="keyword">end</span>;
+0030 <span class="keyword">end</span>;
+0031 d = dir(fname);
+0032 <span class="keyword">if</span> length(d) == 0
+0033   disp([<span class="string">'DYNARE: can''t open '</span> fname])
+0034   <span class="keyword">return</span>
+0035 <span class="keyword">end</span>
+0036 dynareroot = strrep(which(<span class="string">'dynare.m'</span>),<span class="string">'dynare.m'</span>,<span class="string">''</span>);
+0037 command = [dynareroot <span class="string">'dynare_m '</span> fname] ;
+0038 <span class="keyword">for</span> i=2:nargin
+0039   command = [command <span class="string">' '</span> varargin{i-1}];
+0040 <span class="keyword">end</span>
+0041 [status, result] = system(command);
+0042 <span class="keyword">if</span> status
+0043   error(result)
+0044 <span class="keyword">end</span>
+0045 
+0046 <span class="keyword">if</span> ~ isempty(find(abs(fname) == 46))
+0047     fname = fname(:,1:find(abs(fname) == 46)-1) ;
+0048 <span class="keyword">end</span>
+0049 evalin(<span class="string">'base'</span>,fname) ;
+0050 
+0051 
+0052 <span class="comment">% MJ 2/9/99: replace clear function by clear ff_</span>
+0053 <span class="comment">% MJ 4/7/00: change the path of dynare_m</span>
+0054 <span class="comment">% MJ 02/26/01: replaced local variable x by fname</span>
+0055 <span class="comment">% MJ 09/19/01: evaluates mod script in 'base' workspace</span></pre></div>
+<hr><address>Generated on Fri 16-Jun-2006 09:09:06 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/">m2html</a></strong> &copy; 2003</address>
+</body>
+</html>

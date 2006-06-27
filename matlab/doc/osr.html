@@ -1,0 +1,193 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of osr</title>
+  <meta name="keywords" content="osr">
+  <meta name="description" content="Copyright (C) 2001 Michel Juillard">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2003 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../index.html">Home</a> &gt;  <a href="index.html">.</a> &gt; osr.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../index.html"><img alt="<" border="0" src="../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="index.html">Index for .&nbsp;<img alt=">" border="0" src="../right.png"></a></td></tr></table>-->
+
+<h1>osr
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>Copyright (C) 2001 Michel Juillard</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function osr(var_list,params,W) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> Copyright (C) 2001 Michel Juillard</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="disp_dr.html" class="code" title="function disp_dr(dr,order,var_list)">disp_dr</a>	Copyright (C) 2001 Michel Juillard</li><li><a href="disp_moments.html" class="code" title="function disp_moments(y,var_list)">disp_moments</a>	Copyright (C) 2001 Michel Juillard</li><li><a href="disp_th_moments.html" class="code" title="function disp_th_moments(dr,var_list)">disp_th_moments</a>	Copyright (C) 2001 Michel Juillard</li><li><a href="dyn2vec.html" class="code" title="function [z,zss]=dyn2vec(s1,s2);">dyn2vec</a>	Copyright (C) 2001 Michel Juillard</li><li><a href="irf.html" class="code" title="function y = irf(dr, e1, long, drop, replic, iorder)">irf</a>	</li><li><a href="make_ex_.html" class="code" title="function make_ex_">make_ex_</a>	Copyright (C) 2001 Michel Juillard</li><li><a href="osr1.html" class="code" title="function oo_.dr=osr1(params,weights)">osr1</a>	</li><li><a href="set_default_option.html" class="code" title="function options=set_default_option(options,field,default)">set_default_option</a>	</li><li><a href="simult.html" class="code" title="function y_=simult(ys, dr)">simult</a>	Copyright (C) 2001 Michel Juillard</li><li><a href="table.html" class="code" title="function table(title,headers,labels,values,label_width,val_width,val_precis)">table</a>	Copyright (C) 2002 Michel Juillard</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+</ul>
+<!-- crossreference -->
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <span class="comment">% Copyright (C) 2001 Michel Juillard</span>
+0002 <span class="comment">%</span>
+0003 <a name="_sub0" href="#_subfunctions" class="code">function osr(var_list,params,W)</a>
+0004   <span class="keyword">global</span> M_ options_ oo_  
+0005 
+0006   options_.order = 1;
+0007   options_.linear = 1;
+0008   options_ = <a href="set_default_option.html" class="code" title="function options=set_default_option(options,field,default)">set_default_option</a>(options_,<span class="string">'ar'</span>,5);
+0009   options_ = <a href="set_default_option.html" class="code" title="function options=set_default_option(options,field,default)">set_default_option</a>(options_,<span class="string">'irf'</span>,40);
+0010   options_ = <a href="set_default_option.html" class="code" title="function options=set_default_option(options,field,default)">set_default_option</a>(options_,<span class="string">'dr_algo'</span>,0);
+0011   options_ = <a href="set_default_option.html" class="code" title="function options=set_default_option(options,field,default)">set_default_option</a>(options_,<span class="string">'simul_algo'</span>,0);
+0012   options_ = <a href="set_default_option.html" class="code" title="function options=set_default_option(options,field,default)">set_default_option</a>(options_,<span class="string">'drop'</span>,100);
+0013   options_ = <a href="set_default_option.html" class="code" title="function options=set_default_option(options,field,default)">set_default_option</a>(options_,<span class="string">'replic'</span>,1);
+0014   options_ = <a href="set_default_option.html" class="code" title="function options=set_default_option(options,field,default)">set_default_option</a>(options_,<span class="string">'nomoments'</span>,0);
+0015   options_ = <a href="set_default_option.html" class="code" title="function options=set_default_option(options,field,default)">set_default_option</a>(options_,<span class="string">'nocorr'</span>,0);
+0016   options_ = <a href="set_default_option.html" class="code" title="function options=set_default_option(options,field,default)">set_default_option</a>(options_,<span class="string">'simul_seed'</span>,[]);
+0017   options_ = <a href="set_default_option.html" class="code" title="function options=set_default_option(options,field,default)">set_default_option</a>(options_,<span class="string">'hp_filter'</span>,0);
+0018   options_ = <a href="set_default_option.html" class="code" title="function options=set_default_option(options,field,default)">set_default_option</a>(options_,<span class="string">'hp_ngrid'</span>,512);
+0019   options_ = <a href="set_default_option.html" class="code" title="function options=set_default_option(options,field,default)">set_default_option</a>(options_,<span class="string">'simul'</span>,0);
+0020   options_ = <a href="set_default_option.html" class="code" title="function options=set_default_option(options,field,default)">set_default_option</a>(options_,<span class="string">'periods'</span>,1);
+0021   <span class="keyword">if</span> options_.simul &amp; ~isempty(options_.periods) &amp; options_.periods == 0
+0022     options_.periods = options_.periods;
+0023   <span class="keyword">end</span>
+0024 
+0025   options_.periods = max(options_.periods,1);
+0026   options_.periods = options_.periods;
+0027   
+0028   <a href="make_ex_.html" class="code" title="function make_ex_">make_ex_</a>;
+0029 
+0030   disp(<span class="string">' '</span>)
+0031   disp(<span class="string">'OPTIMAL SIMPLE RULE'</span>)
+0032   disp(<span class="string">' '</span>)
+0033   oo_.dr = <a href="osr1.html" class="code" title="function oo_.dr=osr1(params,weights)">osr1</a>(params,W);
+0034   disp(<span class="string">'MODEL SUMMARY'</span>)
+0035   disp(<span class="string">' '</span>)
+0036   disp([<span class="string">'  Number of variables:         '</span> int2str(M_.endo_nbr)])
+0037   disp([<span class="string">'  Number of stochastic shocks: '</span> int2str(M_.exo_nbr)])
+0038   disp([<span class="string">'  Number of state variables:   '</span> <span class="keyword">...</span>
+0039     int2str(length(find(oo_.dr.kstate(:,2) &lt;= M_.maximum_lag+1)))])
+0040   disp([<span class="string">'  Number of jumpers:           '</span> <span class="keyword">...</span>
+0041     int2str(length(find(oo_.dr.kstate(:,2) == M_.maximum_lag+2)))])
+0042   disp([<span class="string">'  Number of static variables:  '</span> int2str(oo_.dr.nstatic)])
+0043   my_title=<span class="string">'MATRIX OF COVARIANCE OF EXOGENOUS SHOCKS'</span>;
+0044   labels = deblank(M_.exo_name);
+0045   headers = strvcat(<span class="string">'Variables'</span>,labels);
+0046   lh = size(labels,2)+2;
+0047   <a href="table.html" class="code" title="function table(title,headers,labels,values,label_width,val_width,val_precis)">table</a>(my_title,headers,labels,M_.Sigma_e,lh,10,6);
+0048   disp(<span class="string">' '</span>)
+0049   <a href="disp_dr.html" class="code" title="function disp_dr(dr,order,var_list)">disp_dr</a>(oo_.dr,options_.order,var_list);
+0050   <span class="keyword">if</span> options_.order == 1 &amp; options_.simul == 0 &amp; options_.nomoments == 0
+0051     <a href="disp_th_moments.html" class="code" title="function disp_th_moments(dr,var_list)">disp_th_moments</a>(oo_.dr,var_list);
+0052   <span class="keyword">elseif</span> options_.simul == 1 | options_.nomoments == 0
+0053     <span class="keyword">if</span> options_.periods == 0
+0054       error(<span class="string">'OSR error: number of periods for the simulation isn''t specified'</span>)
+0055     <span class="keyword">end</span>
+0056     <span class="keyword">if</span> options_.periods &lt; options_.drop
+0057       disp([<span class="string">'OSR error: The horizon of simulation is shorter'</span> <span class="keyword">...</span>
+0058         <span class="string">' than the number of observations to be DROPed'</span>])
+0059       <span class="keyword">return</span>
+0060     <span class="keyword">end</span>
+0061     
+0062     oo_.y_simul = <a href="simult.html" class="code" title="function y_=simult(ys, dr)">simult</a>(repmat(oo_.dr.ys,1,M_.maximum_lag),oo_.dr);
+0063     <a href="dyn2vec.html" class="code" title="function [z,zss]=dyn2vec(s1,s2);">dyn2vec</a>;
+0064     <span class="keyword">if</span> options_.nomoments == 0
+0065       <a href="disp_moments.html" class="code" title="function disp_moments(y,var_list)">disp_moments</a>(oo_.y_simul,var_list);
+0066     <span class="keyword">end</span>
+0067   <span class="keyword">end</span>
+0068   
+0069   n = size(var_list,1);
+0070   <span class="keyword">if</span> n == 0
+0071     n = length(oo_.dr.order_var);
+0072     ivar = [1:n]';
+0073     var_list = M_.endo_names;
+0074   <span class="keyword">else</span>
+0075     ivar=zeros(n,1);
+0076     <span class="keyword">for</span> i=1:n
+0077       i_tmp = strmatch(var_list(i,:),M_.endo_names,<span class="string">'exact'</span>);
+0078       <span class="keyword">if</span> isempty(i_tmp)
+0079           error ([<span class="string">'One of the specified variables does not exist'</span>]) ;
+0080       <span class="keyword">else</span>
+0081     ivar(i) = i_tmp;
+0082       <span class="keyword">end</span>
+0083     <span class="keyword">end</span>
+0084   <span class="keyword">end</span>
+0085 
+0086   <span class="keyword">if</span> n &lt; 13 &amp; options_.irf &gt; 0
+0087     <span class="keyword">if</span> n == 1
+0088       nr = 1;
+0089       nc = 1;
+0090     <span class="keyword">elseif</span> n == 2
+0091       nr = 1;
+0092       nc = 2;
+0093     <span class="keyword">elseif</span> n &lt;= 4
+0094       nr = 2;
+0095       nc = 2;
+0096     <span class="keyword">elseif</span> n &lt;= 6
+0097       nr = 2;
+0098       nc = 3;
+0099     <span class="keyword">elseif</span> n &lt;= 9
+0100       nr = 3;
+0101       nc = 3;
+0102     <span class="keyword">elseif</span> n &lt;= 12
+0103       nr = 3;
+0104       nc = 4;
+0105     <span class="keyword">end</span>
+0106     olditer = options_.periods;
+0107     <span class="keyword">if</span> options_.order == 1
+0108       options_.replic = 1;
+0109     <span class="keyword">else</span>
+0110       <span class="keyword">if</span> options_.replic == 0
+0111     options_.replic = 50;
+0112       <span class="keyword">end</span>
+0113     <span class="keyword">end</span>
+0114     <span class="keyword">for</span> i = 1:M_.exo_nbr
+0115       figure(<span class="string">'Name'</span>,[<span class="string">'Shock to '</span> M_.exo_name(i,:)]);
+0116       y=<a href="irf.html" class="code" title="function y = irf(dr, e1, long, drop, replic, iorder)">irf</a>(oo_.dr,M_.exo_name(i,:),sqrt(M_.Sigma_e(i,i)), options_.irf, options_.drop, options_.replic, options_.order);
+0117       <span class="keyword">for</span> j = 1:n
+0118     subplot(nr,nc,j);
+0119     plot([y(ivar(j),:)']);
+0120     title(var_list(j,:),<span class="string">'Interpreter'</span>,<span class="string">'none'</span>);
+0121     assignin(<span class="string">'base'</span>,[deblank(var_list(j,:)) <span class="string">'_'</span> deblank(M_.exo_name(i,:))],y(ivar(j),:)');
+0122       <span class="keyword">end</span>
+0123     
+0124     <span class="keyword">end</span>
+0125     options_.periods = olditer;
+0126   <span class="keyword">end</span>
+0127       
+0128 <span class="comment">% 01/10/01 FC oo_.dr and oo_.y_simul made global</span>
+0129 <span class="comment">% 02/20/01 MJ oo_.steady_state removed from calling sequence for simult (all in oo_.dr)</span>
+0130 <span class="comment">% 02/23/01 MJ added dyn2vec()</span>
+0131 <span class="comment">% 06/24/01 MJ steady -&gt; steady_</span>
+0132 <span class="comment">% 09/24/01 MJ oo_.dr made global</span>
+0133 <span class="comment">% 08/28/02 MJ added var_list</span>
+0134 <span class="comment">% 10/09/02 MJ no simulation and theoretical moments for order 1</span>
+0135 <span class="comment">% 10/14/02 MJ added plot of IRFs</span>
+0136 <span class="comment">% 10/30/02 MJ options_ are now a structure</span>
+0137 <span class="comment">% 01/01/03 MJ added dr_algo</span>
+0138 <span class="comment">% 01/09/03 MJ set default values for options_ (correct absence of autocorr</span>
+0139 <span class="comment">%             when order == 1)</span>
+0140 <span class="comment">% 01/12/03 MJ removed call to steady_ as already checked in resol()</span>
+0141 <span class="comment">% 01/31/03 MJ make IRF global with varname_shockname</span>
+0142 <span class="comment">% 02/09/03 MJ oo_.steady_state reset with value declared in initval after computations</span>
+0143 <span class="comment">% 02/18/03 MJ removed above change. oo_.steady_state shouldn't be affected by</span>
+0144 <span class="comment">%             computations in this function</span>
+0145 <span class="comment">%             new option SIMUL computes a stochastic simulation and save</span>
+0146 <span class="comment">%             results in oo_.y_simul and via dyn2vec</span>
+0147 <span class="comment">% 04/03/03 MJ corrected bug for simulation with M_.maximum_lag &gt; 1</span></pre></div>
+<hr><address>Generated on Fri 16-Jun-2006 09:09:06 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/">m2html</a></strong> &copy; 2003</address>
+</body>
+</html>

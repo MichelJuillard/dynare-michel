@@ -1,0 +1,399 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of McMCDiagnostics</title>
+  <meta name="keywords" content="McMCDiagnostics">
+  <meta name="description" content="stephane.adjemian@ens.fr [06-04-2005]">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2003 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../index.html">Home</a> &gt;  <a href="index.html">.</a> &gt; McMCDiagnostics.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../index.html"><img alt="<" border="0" src="../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="index.html">Index for .&nbsp;<img alt=">" border="0" src="../right.png"></a></td></tr></table>-->
+
+<h1>McMCDiagnostics
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>stephane.adjemian@ens.fr [06-04-2005]</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function McmcDiagnostic </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> stephane.adjemian@ens.fr [06-04-2005]</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="CheckPath.html" class="code" title="function DirectoryName = CheckPath(type)">CheckPath</a>	06-03-2005</li><li><a href="get_the_name.html" class="code" title="function [nam,texnam] = get_the_name(k,TeX)">get_the_name</a>	stephane.adjemian@cepremap.cnrs.fr [07-13-2004]</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="dynare_estimation.html" class="code" title="function dynare_estimation(var_list_)">dynare_estimation</a>	</li></ul>
+<!-- crossreference -->
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function McmcDiagnostic</a>
+0002 <span class="comment">% stephane.adjemian@ens.fr [06-04-2005]</span>
+0003 
+0004 <span class="keyword">global</span> options_ estim_params_ M_ 
+0005 
+0006 DirectoryName = <a href="CheckPath.html" class="code" title="function DirectoryName = CheckPath(type)">CheckPath</a>(<span class="string">'Output'</span>);
+0007 MhDirectoryName = <a href="CheckPath.html" class="code" title="function DirectoryName = CheckPath(type)">CheckPath</a>(<span class="string">'metropolis'</span>);
+0008 
+0009 TeX = options_.TeX;
+0010 nblck = options_.mh_nblck;
+0011 <span class="comment">% Brooks and Gelman tests need more than one block</span>
+0012 <span class="keyword">if</span> nblck == 1
+0013   <span class="keyword">return</span>;
+0014 <span class="keyword">end</span>
+0015 npar = estim_params_.nvx;
+0016 npar = npar + estim_params_.nvn;
+0017 npar = npar + estim_params_.ncx;
+0018 npar = npar + estim_params_.ncn;
+0019 npar = npar + estim_params_.np ;
+0020 MAX_nruns = ceil(options_.MaxNumberOfBytes/(npar+2)/8);
+0021 
+0022 load([MhDirectoryName <span class="string">'/'</span>  M_.fname <span class="string">'_mh_history.mat'</span>])
+0023 
+0024 mcfiles = [];
+0025 <span class="keyword">for</span> blck = 1:nblck
+0026   mcfiles = cat(3,mcfiles,dir([MhDirectoryName <span class="string">'/'</span> M_.fname <span class="string">'_mh*_blck'</span> int2str(blck) <span class="string">'.mat'</span>]));
+0027 <span class="keyword">end</span>
+0028 NumberOfMcFilesPerBlock = size(mcfiles,1);
+0029 
+0030   
+0031 PastDraws = sum(record.MhDraws,1);
+0032 LastFileNumber = PastDraws(2);
+0033 LastLineNumber = record.MhDraws(<span class="keyword">end</span>,3);
+0034 NumberOfDraws  = PastDraws(1);
+0035 
+0036 Origin = 1000;
+0037 StepSize = ceil((NumberOfDraws-Origin)/100);<span class="comment">% So that the computational time does not</span>
+0038 ALPHA = 0.2;                    <span class="comment">% increase too much with the number of simulations.</span>
+0039 time = 1:NumberOfDraws;
+0040 xx = Origin:StepSize:NumberOfDraws;
+0041 NumberOfLines = length(xx);
+0042 tmp = zeros(NumberOfDraws*nblck,3);
+0043 UDIAG = zeros(NumberOfLines,6,npar);
+0044 
+0045 <span class="keyword">if</span> NumberOfDraws &lt; Origin
+0046     disp(<span class="string">'MCMC Diagnostics :: The number of simulations is to small to compute the MCMC convergence diagnostics.'</span>)
+0047     <span class="keyword">return</span>
+0048 <span class="keyword">end</span>
+0049 
+0050 <span class="keyword">if</span> TeX
+0051   fidTeX = fopen([DirectoryName <span class="string">'/'</span> M_.fname <span class="string">'_UnivariateDiagnostics.TeX'</span>],<span class="string">'w'</span>);
+0052   fprintf(fidTeX,<span class="string">'%% TeX eps-loader file generated by McmcDiagnostics.m (Dynare).\n'</span>);
+0053   fprintf(fidTeX,[<span class="string">'%% '</span> datestr(now,0) <span class="string">'\n'</span>]);
+0054   fprintf(fidTeX,<span class="string">' \n'</span>);
+0055 <span class="keyword">end</span>
+0056 
+0057 
+0058 disp(<span class="string">'MCMC Diagnostics: Univariate convergence diagnostic, Brooks and Gelman (1998):'</span>)
+0059 <span class="keyword">for</span> j=1:npar
+0060   fprintf(<span class="string">'    Parameter %d...  '</span>,j);
+0061   <span class="keyword">for</span> b = 1:nblck
+0062     startline = 0;
+0063     <span class="keyword">for</span> n = 1:NumberOfMcFilesPerBlock-1
+0064       <span class="comment">%load([MhDirectoryName '/' mcfiles(n,1,b).name],'x2');</span>
+0065       load([MhDirectoryName <span class="string">'/'</span> M_.fname <span class="string">'_mh'</span>,int2str(n),<span class="string">'_blck'</span> int2str(b) <span class="string">'.mat'</span>],<span class="string">'x2'</span>);
+0066       tmp((b-1)*NumberOfDraws+startline+1:(b-1)*NumberOfDraws+MAX_nruns*n,1) = x2(:,j);
+0067       clear x2;
+0068       startline = startline + MAX_nruns;
+0069     <span class="keyword">end</span>
+0070     <span class="comment">%load([MhDirectoryName '/' mcfiles(NumberOfMcFilesPerBlock,1,b).name],'x2');</span>
+0071     load([MhDirectoryName <span class="string">'/'</span> M_.fname <span class="string">'_mh'</span>,int2str(NumberOfMcFilesPerBlock),<span class="string">'_blck'</span> int2str(b) <span class="string">'.mat'</span>],<span class="string">'x2'</span>);
+0072     tmp((b-1)*NumberOfDraws+startline+1:(b-1)*NumberOfDraws+MAX_nruns*(LastFileNumber-1)+LastLineNumber,1) = x2(:,j);
+0073     clear x2;
+0074     startline = startline + LastLineNumber;
+0075   <span class="keyword">end</span>
+0076   tmp(:,2) = kron(transpose(1:nblck),ones(NumberOfDraws,1));
+0077   tmp(:,3) = kron(ones(nblck,1),time'); 
+0078   tmp = sortrows(tmp,1);
+0079   ligne   = 0;
+0080   <span class="keyword">for</span> iter  = Origin:StepSize:NumberOfDraws
+0081     ligne = ligne+1;
+0082     linea = ceil(0.5*iter);
+0083     n     = iter-linea+1;
+0084     cinf  = round(n*ALPHA/2);
+0085     csup  = round(n*(1-ALPHA/2));
+0086     CINF  = round(nblck*n*ALPHA/2);
+0087     CSUP  = round(nblck*n*(1-ALPHA/2));
+0088     temp  = tmp(find((tmp(:,3)&gt;=linea) &amp; (tmp(:,3)&lt;=iter)),1:2);
+0089     UDIAG(ligne,1,j) = temp(CSUP,1)-temp(CINF,1);
+0090     moyenne = mean(temp(:,1));<span class="comment">%% Pooled mean.</span>
+0091     UDIAG(ligne,3,j) = sum((temp(:,1)-moyenne).^2)/(nblck*n-1);
+0092     UDIAG(ligne,5,j) = sum(abs(temp(:,1)-moyenne).^3)/(nblck*n-1);
+0093     <span class="keyword">for</span> i=1:nblck
+0094       pmet = temp(find(temp(:,2)==i));
+0095       UDIAG(ligne,2,j) = UDIAG(ligne,2,j) + pmet(csup,1)-pmet(cinf,1);
+0096       moyenne = mean(pmet,1); <span class="comment">%% Within mean.</span>
+0097       UDIAG(ligne,4,j) = UDIAG(ligne,4,j) + sum((pmet(:,1)-moyenne).^2)/(n-1);
+0098       UDIAG(ligne,6,j) = UDIAG(ligne,6,j) + sum(abs(pmet(:,1)-moyenne).^3)/(n-1);
+0099     <span class="keyword">end</span>
+0100   <span class="keyword">end</span>
+0101   fprintf(<span class="string">'Done! \n'</span>);
+0102 <span class="keyword">end</span>
+0103 UDIAG(:,[2 4 6],:) = UDIAG(:,[2 4 6],:)/nblck;
+0104 disp(<span class="string">' '</span>)
+0105 clear pmet temp moyenne CSUP CINF csup cinf n linea iter tmp;    
+0106 pages = floor(npar/3);
+0107 k = 0;  
+0108 <span class="keyword">for</span> i = 1:pages
+0109   <span class="keyword">if</span> options_.nograph
+0110     h = figure(<span class="string">'Name'</span>,<span class="string">'MCMC univariate diagnostic (Brooks and Gelman,1998)'</span>,<span class="string">'Visible'</span>,<span class="string">'off'</span>);
+0111   <span class="keyword">else</span>
+0112     h = figure(<span class="string">'Name'</span>,<span class="string">'MCMC univariate diagnostic (Brooks and Gelman,1998)'</span>);
+0113   <span class="keyword">end</span>    
+0114   boxplot = 1;
+0115   <span class="keyword">if</span> TeX
+0116     NAMES = [];
+0117     TEXNAMES = [];
+0118   <span class="keyword">end</span>
+0119   <span class="keyword">for</span> j = 1:3 <span class="comment">% Loop over parameters</span>
+0120     k = k+1;
+0121     [nam,namtex] = <a href="get_the_name.html" class="code" title="function [nam,texnam] = get_the_name(k,TeX)">get_the_name</a>(k,TeX);
+0122     <span class="keyword">for</span> crit = 1:3<span class="comment">% Loop over criteria</span>
+0123       <span class="keyword">if</span> crit == 1
+0124         plt1 = UDIAG(:,1,k);
+0125         plt2 = UDIAG(:,2,k);
+0126         namnam  = [nam , <span class="string">' (Interval)'</span>]; 
+0127       <span class="keyword">elseif</span> crit == 2
+0128         plt1 = UDIAG(:,3,k);
+0129         plt2 = UDIAG(:,4,k);
+0130         namnam  = [nam , <span class="string">' (m2)'</span>];
+0131       <span class="keyword">elseif</span> crit == 3    
+0132         plt1 = UDIAG(:,5,k);
+0133         plt2 = UDIAG(:,6,k);
+0134         namnam  = [nam , <span class="string">' (m3)'</span>];
+0135       <span class="keyword">end</span>
+0136       <span class="keyword">if</span> TeX
+0137         NAMES = strvcat(NAMES,deblank(namnam));
+0138         TEXNAMES = strvcat(TEXNAMES,deblank(namtex));
+0139       <span class="keyword">end</span>
+0140       subplot(3,3,boxplot);
+0141       plot(xx,plt1,<span class="string">'-b'</span>);     <span class="comment">% Pooled</span>
+0142       hold on;
+0143       plot(xx,plt2,<span class="string">'-r'</span>);     <span class="comment">% Within (mean)</span>
+0144       hold off;
+0145       xlim([xx(1) xx(NumberOfLines)])
+0146       title(namnam,<span class="string">'Interpreter'</span>,<span class="string">'none'</span>)
+0147       boxplot = boxplot + 1;
+0148     <span class="keyword">end</span>
+0149   <span class="keyword">end</span>
+0150   eval([<span class="string">'print -depsc2 '</span> DirectoryName <span class="string">'/'</span> M_.fname <span class="string">'_udiag'</span> int2str(i)]);
+0151   eval([<span class="string">'print -dpdf '</span> DirectoryName <span class="string">'/'</span> M_.fname <span class="string">'_udiag'</span> int2str(i)]);
+0152   <span class="keyword">if</span> options_.nograph, set(h,<span class="string">'visible'</span>,<span class="string">'on'</span>), <span class="keyword">end</span>
+0153   saveas(h,[DirectoryName <span class="string">'/'</span> M_.fname <span class="string">'_udiag'</span> int2str(i) <span class="string">'.fig'</span>]);
+0154   <span class="keyword">if</span> options_.nograph, close(h), <span class="keyword">end</span>
+0155   <span class="keyword">if</span> TeX
+0156     fprintf(fidTeX,<span class="string">'\\begin{figure}[H]\n'</span>);
+0157     <span class="keyword">for</span> jj = 1:size(NAMES,1)
+0158       fprintf(fidTeX,<span class="string">'\\psfrag{%s}[1][][0.5][0]{%s}\n'</span>,deblank(NAMES(jj,:)),deblank(TEXNAMES(jj,:)));
+0159     <span class="keyword">end</span>    
+0160     fprintf(fidTeX,<span class="string">'\\centering \n'</span>);
+0161     fprintf(fidTeX,<span class="string">'\\includegraphics[scale=0.5]{%s_udiag%s}\n'</span>,M_.fname,int2str(i));
+0162     fprintf(fidTeX,<span class="string">'\\caption{Univariate convergence diagnostics for the Metropolis-Hastings.\n'</span>);
+0163     fprintf(fidTeX,<span class="string">'The first, second and third columns are respectively the criteria based on\n'</span>);
+0164     fprintf(fidTeX,<span class="string">'the eighty percent interval, the second and third moments.}'</span>);
+0165     fprintf(fidTeX,<span class="string">'\\label{Fig:UnivariateDiagnostics:%s}\n'</span>,int2str(i));
+0166     fprintf(fidTeX,<span class="string">'\\end{figure}\n'</span>);
+0167     fprintf(fidTeX,<span class="string">'\n'</span>);
+0168   <span class="keyword">end</span>
+0169 <span class="keyword">end</span>
+0170 reste = npar-k;
+0171 <span class="keyword">if</span> reste
+0172   <span class="keyword">if</span> reste == 1
+0173     nr = 3;
+0174     nc = 1;
+0175   <span class="keyword">elseif</span> reste == 2;
+0176     nr = 2;
+0177     nc = 3;
+0178   <span class="keyword">end</span>
+0179   <span class="keyword">if</span> TeX
+0180     NAMES = [];
+0181     TEXNAMES = [];
+0182   <span class="keyword">end</span>
+0183   <span class="keyword">if</span> options_.nograph
+0184     h = figure(<span class="string">'Name'</span>,<span class="string">'MCMC univariate diagnostic (Brooks and Gelman, 1998)'</span>,<span class="string">'Visible'</span>,<span class="string">'off'</span>);
+0185   <span class="keyword">else</span>
+0186     h = figure(<span class="string">'Name'</span>,<span class="string">'MCMC univariate diagnostic (Brooks and Gelman, 1998)'</span>);
+0187   <span class="keyword">end</span>  
+0188   boxplot = 1;
+0189   <span class="keyword">for</span> j = 1:reste
+0190     k = k+1;
+0191     [nam,namtex] = <a href="get_the_name.html" class="code" title="function [nam,texnam] = get_the_name(k,TeX)">get_the_name</a>(k,TeX);
+0192     <span class="keyword">for</span> crit = 1:3
+0193       <span class="keyword">if</span> crit == 1
+0194         plt1 = UDIAG(:,1,k);
+0195         plt2 = UDIAG(:,2,k);
+0196         namnam  = [nam , <span class="string">' (Interval)'</span>]; 
+0197       <span class="keyword">elseif</span> crit == 2
+0198         plt1 = UDIAG(:,3,k);
+0199         plt2 = UDIAG(:,4,k);
+0200         namnam  = [nam , <span class="string">' (m2)'</span>];
+0201       <span class="keyword">elseif</span> crit == 3    
+0202         plt1 = UDIAG(:,5,k);
+0203         plt2 = UDIAG(:,6,k);
+0204         namnam  = [nam , <span class="string">' (m3)'</span>];
+0205       <span class="keyword">end</span>
+0206       <span class="keyword">if</span> TeX
+0207         NAMES = strvcat(NAMES,deblank(namnam));
+0208         TEXNAMES = strvcat(TEXNAMES,deblank(namtex));
+0209       <span class="keyword">end</span>
+0210       subplot(nr,nc,boxplot);
+0211       plot(xx,plt1,<span class="string">'-b'</span>);                    <span class="comment">% Pooled</span>
+0212       hold on;
+0213       plot(xx,plt2,<span class="string">'-r'</span>);                    <span class="comment">% Within (mean)</span>
+0214       hold off;
+0215       xlim([xx(1) xx(NumberOfLines)]);
+0216       title(namnam,<span class="string">'Interpreter'</span>,<span class="string">'none'</span>);
+0217       boxplot = boxplot + 1;
+0218     <span class="keyword">end</span>
+0219   <span class="keyword">end</span>
+0220   eval([<span class="string">'print -depsc2 '</span> DirectoryName <span class="string">'/'</span> M_.fname <span class="string">'_udiag'</span> int2str(pages+1)]);
+0221   eval([<span class="string">'print -dpdf '</span> DirectoryName <span class="string">'/'</span> M_.fname <span class="string">'_udiag'</span> int2str(pages+1)]);
+0222   <span class="keyword">if</span> options_.nograph, set(h,<span class="string">'visible'</span>,<span class="string">'on'</span>), <span class="keyword">end</span>
+0223   saveas(h,[DirectoryName <span class="string">'/'</span> M_.fname <span class="string">'_udiag'</span> int2str(pages+1) <span class="string">'.fig'</span>]);
+0224   <span class="keyword">if</span> options_.nograph, close(h), <span class="keyword">end</span>
+0225   <span class="keyword">if</span> TeX
+0226     fprintf(fidTeX,<span class="string">'\\begin{figure}[H]\n'</span>);
+0227     <span class="keyword">for</span> jj = 1:size(NAMES,1);
+0228       fprintf(fidTeX,<span class="string">'\\psfrag{%s}[1][][0.5][0]{%s}\n'</span>,deblank(NAMES(jj,:)),deblank(TEXNAMES(jj,:)));
+0229     <span class="keyword">end</span>    
+0230     fprintf(fidTeX,<span class="string">'\\centering \n'</span>);
+0231     fprintf(fidTeX,<span class="string">'\\includegraphics[scale=0.5]{%s_udiag%s}\n'</span>,M_.fname,int2str(pages+1));
+0232     <span class="keyword">if</span> reste == 2
+0233       fprintf(fidTeX,<span class="string">'\\caption{Univariate convergence diagnostics for the Metropolis-Hastings.\n'</span>);
+0234       fprintf(fidTeX,<span class="string">'The first, second and third columns are respectively the criteria based on\n'</span>);
+0235       fprintf(fidTeX,<span class="string">'the eighty percent interval, the second and third moments.}'</span>);
+0236     <span class="keyword">elseif</span> reste == 1
+0237       fprintf(fidTeX,<span class="string">'\\caption{Univariate convergence diagnostics for the Metropolis-Hastings.\n'</span>);
+0238       fprintf(fidTeX,<span class="string">'The first, second and third rows are respectively the criteria based on\n'</span>);
+0239       fprintf(fidTeX,<span class="string">'the eighty percent interval, the second and third moments.}'</span>);
+0240     <span class="keyword">end</span>
+0241     fprintf(fidTeX,<span class="string">'\\label{Fig:UnivariateDiagnostics:%s}\n'</span>,int2str(pages+1));
+0242     fprintf(fidTeX,<span class="string">'\\end{figure}\n'</span>);
+0243     fprintf(fidTeX,<span class="string">'\n'</span>);
+0244     fprintf(fidTeX,<span class="string">'% End Of TeX file.'</span>);
+0245     fclose(fidTeX);
+0246   <span class="keyword">end</span>
+0247 <span class="keyword">end</span> <span class="comment">% if reste &gt; 0</span>
+0248 clear UDIAG;
+0249 <span class="comment">%%</span>
+0250 <span class="comment">%% Multivariate diagnostic.</span>
+0251 <span class="comment">%%</span>
+0252 <span class="keyword">if</span> TeX
+0253   fidTeX = fopen([DirectoryName <span class="string">'/'</span> M_.fname <span class="string">'_MultivariateDiagnostics.TeX'</span>],<span class="string">'w'</span>);
+0254   fprintf(fidTeX,<span class="string">'%% TeX eps-loader file generated by McmcDiagnostics.m (Dynare).\n'</span>);
+0255   fprintf(fidTeX,[<span class="string">'%% '</span> datestr(now,0) <span class="string">'\n'</span>]);
+0256   fprintf(fidTeX,<span class="string">' \n'</span>);
+0257   NAMES = [];
+0258 <span class="keyword">end</span>
+0259 tmp = zeros(NumberOfDraws*nblck,3);
+0260 MDIAG = zeros(NumberOfLines,6);
+0261 <span class="keyword">for</span> b = 1:nblck
+0262   startline = 0;
+0263   <span class="keyword">for</span> n = 1:NumberOfMcFilesPerBlock-1
+0264     <span class="comment">%load([MhDirectoryName '/' mcfiles(n,1,b).name],'logpo2');</span>
+0265     load([MhDirectoryName <span class="string">'/'</span> M_.fname <span class="string">'_mh'</span>,int2str(n),<span class="string">'_blck'</span> int2str(b) <span class="string">'.mat'</span>],<span class="string">'logpo2'</span>);
+0266     tmp((b-1)*NumberOfDraws+startline+1:(b-1)*NumberOfDraws+MAX_nruns*n,1) = logpo2;
+0267     startline = startline+MAX_nruns;
+0268   <span class="keyword">end</span>
+0269   <span class="comment">%load([MhDirectoryName '/' mcfiles(NumberOfMcFilesPerBlock,1,b).name],'logpo2');</span>
+0270   load([MhDirectoryName <span class="string">'/'</span> M_.fname <span class="string">'_mh'</span>,int2str(NumberOfMcFilesPerBlock),<span class="string">'_blck'</span> int2str(b) <span class="string">'.mat'</span>],<span class="string">'logpo2'</span>);
+0271   tmp((b-1)*NumberOfDraws+startline+1:(b-1)*NumberOfDraws+ MAX_nruns*(LastFileNumber-1)+LastLineNumber,1) = logpo2;
+0272 <span class="keyword">end</span>
+0273 clear logpo2;
+0274 tmp(:,2) = kron(transpose(1:nblck),ones(NumberOfDraws,1));
+0275 tmp(:,3) = kron(ones(nblck,1),time'); 
+0276 tmp = sortrows(tmp,1);
+0277 ligne   = 0;
+0278 <span class="keyword">for</span> iter  = Origin:StepSize:NumberOfDraws
+0279   ligne = ligne+1;
+0280   linea = ceil(0.5*iter);
+0281   n     = iter-linea+1;
+0282   cinf  = round(n*ALPHA/2);
+0283   csup  = round(n*(1-ALPHA/2));
+0284   CINF  = round(nblck*n*ALPHA/2);
+0285   CSUP  = round(nblck*n*(1-ALPHA/2));
+0286   temp  = tmp(find((tmp(:,3)&gt;=linea) &amp; (tmp(:,3)&lt;=iter)),1:2);
+0287   MDIAG(ligne,1) = temp(CSUP,1)-temp(CINF,1);
+0288   moyenne = mean(temp(:,1));<span class="comment">%% Pooled mean.</span>
+0289   MDIAG(ligne,3) = sum((temp(:,1)-moyenne).^2)/(nblck*n-1);
+0290   MDIAG(ligne,5) = sum(abs(temp(:,1)-moyenne).^3)/(nblck*n-1);
+0291   <span class="keyword">for</span> i=1:nblck
+0292     pmet = temp(find(temp(:,2)==i));
+0293     MDIAG(ligne,2) = MDIAG(ligne,2) + pmet(csup,1)-pmet(cinf,1);
+0294     moyenne = mean(pmet,1); <span class="comment">%% Within mean.</span>
+0295     MDIAG(ligne,4) = MDIAG(ligne,4) + sum((pmet(:,1)-moyenne).^2)/(n-1);
+0296     MDIAG(ligne,6) = MDIAG(ligne,6) + sum(abs(pmet(:,1)-moyenne).^3)/(n-1);
+0297   <span class="keyword">end</span>
+0298 <span class="keyword">end</span>
+0299 MDIAG(:,[2 4 6],:) = MDIAG(:,[2 4 6],:)/nblck;    
+0300 <span class="keyword">if</span> options_.nograph
+0301   h = figure(<span class="string">'Name'</span>,<span class="string">'Multivatiate diagnostic'</span>,<span class="string">'Visible'</span>,<span class="string">'off'</span>);
+0302 <span class="keyword">else</span>
+0303   h = figure(<span class="string">'Name'</span>,<span class="string">'Multivatiate diagnostic'</span>);
+0304 <span class="keyword">end</span>
+0305 boxplot = 1;
+0306 <span class="keyword">for</span> crit = 1:3
+0307   <span class="keyword">if</span> crit == 1
+0308     plt1 = MDIAG(:,1);
+0309     plt2 = MDIAG(:,2);
+0310     namnam  = <span class="string">'Interval'</span>; 
+0311   <span class="keyword">elseif</span> crit == 2
+0312     plt1 = MDIAG(:,3);
+0313     plt2 = MDIAG(:,4);
+0314     namnam  = <span class="string">'m2'</span>;
+0315   <span class="keyword">elseif</span> crit == 3    
+0316     plt1 = MDIAG(:,5);
+0317     plt2 = MDIAG(:,6);
+0318     namnam  = <span class="string">'m3'</span>;
+0319   <span class="keyword">end</span>
+0320   <span class="keyword">if</span> TeX
+0321     NAMES = strvcat(NAMES,namnam);
+0322   <span class="keyword">end</span>
+0323   subplot(3,1,boxplot);
+0324   plot(xx,plt1,<span class="string">'-b'</span>);  <span class="comment">% Pooled</span>
+0325   hold on
+0326   plot(xx,plt2,<span class="string">'-r'</span>);  <span class="comment">% Within (mean)</span>
+0327   hold off
+0328   xlim([xx(1) xx(NumberOfLines)])
+0329   title(namnam,<span class="string">'Interpreter'</span>,<span class="string">'none'</span>);
+0330   boxplot = boxplot + 1;
+0331 <span class="keyword">end</span>
+0332 eval([<span class="string">'print -depsc2 '</span> DirectoryName <span class="string">'/'</span> M_.fname <span class="string">'_mdiag'</span>]);
+0333 eval([<span class="string">'print -dpdf '</span> DirectoryName <span class="string">'/'</span> M_.fname <span class="string">'_mdiag'</span>]);
+0334 <span class="keyword">if</span> options_.nograph, set(h,<span class="string">'visible'</span>,<span class="string">'on'</span>), <span class="keyword">end</span>
+0335 saveas(h,[DirectoryName <span class="string">'/'</span> M_.fname <span class="string">'_mdiag.fig'</span>]);
+0336 <span class="keyword">if</span> options_.nograph, close(h), <span class="keyword">end</span>
+0337 <span class="keyword">if</span> TeX
+0338   fprintf(fidTeX,<span class="string">'\\begin{figure}[H]\n'</span>);
+0339   <span class="keyword">for</span> jj = 1:3
+0340     fprintf(fidTeX,<span class="string">'\\psfrag{%s}[1][][0.5][0]{%s}\n'</span>,deblank(NAMES(jj,:)),<span class="string">' '</span>);
+0341   <span class="keyword">end</span>    
+0342   fprintf(fidTeX,<span class="string">'\\centering \n'</span>);
+0343   fprintf(fidTeX,<span class="string">'\\includegraphics[scale=0.5]{%s_mdiag}\n'</span>,M_.fname);
+0344   fprintf(fidTeX,<span class="string">'\\caption{Multivariate convergence diagnostics for the Metropolis-Hastings.\n'</span>);
+0345   fprintf(fidTeX,<span class="string">'The first, second and third rows are respectively the criteria based on\n'</span>);
+0346   fprintf(fidTeX,<span class="string">'the eighty percent interval, the second and third moments. The different \n'</span>);
+0347   fprintf(fidTeX,<span class="string">'parameters are aggregated using the posterior kernel.}'</span>);
+0348   fprintf(fidTeX,<span class="string">'\\label{Fig:MultivariateDiagnostics}\n'</span>);
+0349   fprintf(fidTeX,<span class="string">'\\end{figure}\n'</span>);
+0350   fprintf(fidTeX,<span class="string">'\n'</span>);
+0351   fprintf(fidTeX,<span class="string">'% End Of TeX file.'</span>);
+0352   fclose(fidTeX);
+0353 <span class="keyword">end</span></pre></div>
+<hr><address>Generated on Fri 16-Jun-2006 09:09:06 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/">m2html</a></strong> &copy; 2003</address>
+</body>
+</html>

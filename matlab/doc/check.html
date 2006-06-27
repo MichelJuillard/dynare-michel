@@ -1,0 +1,115 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of check</title>
+  <meta name="keywords" content="check">
+  <meta name="description" content="Copyright (C) 2001 Michel Juillard">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2003 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../index.html">Home</a> &gt;  <a href="index.html">.</a> &gt; check.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../index.html"><img alt="<" border="0" src="../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="index.html">Index for .&nbsp;<img alt=">" border="0" src="../right.png"></a></td></tr></table>-->
+
+<h1>check
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>Copyright (C) 2001 Michel Juillard</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function result = check </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> Copyright (C) 2001 Michel Juillard</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="print_info.html" class="code" title="function print_info(info)">print_info</a>	Copyright (C) 2005 Michel Juillard</li><li><a href="resol.html" class="code" title="function [dr,info]=resol(ys,check_flag)">resol</a>	Copyright (C) 2001 Michel Juillard</li><li><a href="set_default_option.html" class="code" title="function options=set_default_option(options,field,default)">set_default_option</a>	</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="lnsrch.html" class="code" title="function [x,f,fvec,check]=lnsrch(xold,fold,g,p,stpmax,func,varargin)">lnsrch</a>	Copyright (C) 2001 Michel Juillard</li><li><a href="lnsrch1.html" class="code" title="function [x,f,fvec,check]=lnsrch(xold,fold,g,p,stpmax,func,j1,j2,varargin)">lnsrch1</a>	Copyright (C) 2001 Michel Juillard</li><li><a href="newrat.html" class="code" title="function [xparam1, hh, gg, fval, igg] = newrat(func0, x, hh, gg, igg, ftol0, nit, flagg, varargin)">newrat</a>	</li><li><a href="olr1.html" class="code" title="function dr = olr1(ys,algo,olr_inst,bet,obj_var,W)">olr1</a>	Copyright (C) 2001 Michel Juillard</li><li><a href="osr1.html" class="code" title="function oo_.dr=osr1(params,weights)">osr1</a>	</li><li><a href="simult_.html" class="code" title="function y_=simult_(y0,dr,ex_,iorder)">simult_</a>	Copyright (C) 2001 Michel Juillard</li><li><a href="solve1.html" class="code" title="function [x,check] = solve1(func,x,j1,j2,jacobian_flag,varargin)">solve1</a>	Copyright (C) 2001 Michel Juillard</li><li><a href="steady_.html" class="code" title="function steady_()">steady_</a>	Copyright (C) 2001 Michel Juillard</li></ul>
+<!-- crossreference -->
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <span class="comment">% Copyright (C) 2001 Michel Juillard</span>
+0002 <span class="comment">%</span>
+0003 
+0004 <a name="_sub0" href="#_subfunctions" class="code">function result = check</a>
+0005 <span class="keyword">global</span> M_ options_ oo_
+0006 <span class="keyword">global</span> it_
+0007   
+0008   temp_options = options_;
+0009   tempex = oo_.exo_simul;
+0010   <span class="keyword">if</span> ~options_.initval_file
+0011     oo_.exo_simul = ones(M_.maximum_lead+M_.maximum_lag+1,1)*oo_.exo_steady_state';
+0012   <span class="keyword">end</span>
+0013   
+0014   options_ = <a href="set_default_option.html" class="code" title="function options=set_default_option(options,field,default)">set_default_option</a>(options_,<span class="string">'noprint'</span>,0);
+0015   options_ = <a href="set_default_option.html" class="code" title="function options=set_default_option(options,field,default)">set_default_option</a>(options_,<span class="string">'order'</span>,1);  
+0016   options_ = <a href="set_default_option.html" class="code" title="function options=set_default_option(options,field,default)">set_default_option</a>(options_,<span class="string">'linear'</span>,0);  
+0017   options_ = <a href="set_default_option.html" class="code" title="function options=set_default_option(options,field,default)">set_default_option</a>(options_,<span class="string">'dr_algo'</span>,0);  
+0018 
+0019   [dr, info] = <a href="resol.html" class="code" title="function [dr,info]=resol(ys,check_flag)">resol</a>(oo_.steady_state,1);
+0020   
+0021   <span class="keyword">if</span> info(1) ~= 0 &amp; info(1) ~= 3 &amp; info(1) ~= 4
+0022     <a href="print_info.html" class="code" title="function print_info(info)">print_info</a>(info);
+0023   <span class="keyword">end</span>  
+0024 
+0025   oo_.exo_simul = tempex;
+0026   
+0027   eigenvalues_ = dr.eigval;
+0028   nyf = nnz(dr.kstate(:,2)&gt;M_.maximum_lag+1);
+0029   [m_lambda,i]=sort(abs(eigenvalues_));
+0030   
+0031   <span class="keyword">if</span> options_.noprint == 0
+0032     disp(<span class="string">' '</span>)
+0033     disp(<span class="string">'EIGENVALUES:'</span>)
+0034     disp(sprintf(<span class="string">'%16s %16s %16s\n'</span>,<span class="string">'Modulus'</span>,<span class="string">'Real'</span>,<span class="string">'Imaginary'</span>))
+0035     z=[m_lambda real(eigenvalues_(i)) imag(eigenvalues_(i))]';
+0036     disp(sprintf(<span class="string">'%16.4g %16.4g %16.4g\n'</span>,z))
+0037     options_ = <a href="set_default_option.html" class="code" title="function options=set_default_option(options,field,default)">set_default_option</a>(options_,<span class="string">'qz_criterium'</span>,1.000001);
+0038     disp(sprintf(<span class="string">'\nThere are %d eigenvalue(s) larger than 1 in modulus '</span>, <span class="keyword">...</span>
+0039          nnz(abs(eigenvalues_) &gt; options_.qz_criterium)));
+0040     disp(sprintf(<span class="string">'for %d forward-looking variable(s)'</span>,nyf));
+0041     disp(<span class="string">' '</span>)
+0042     <span class="keyword">if</span> info(1) == 0
+0043       <span class="keyword">if</span> dr.rank == nyf
+0044     disp(<span class="string">'The rank condition is verified.'</span>)
+0045       <span class="keyword">else</span>
+0046     disp(<span class="string">'The rank conditions ISN''T verified!'</span>)
+0047       <span class="keyword">end</span>
+0048       disp(<span class="string">' '</span>)
+0049     <span class="keyword">end</span>
+0050   <span class="keyword">end</span>
+0051   
+0052   <span class="comment">% keep lambda_ for backward compatibility</span>
+0053   lambda_ = eigenvalues_;
+0054 
+0055   options_ = temp_options;
+0056   
+0057   <span class="comment">% 2/9/99 MJ: line 15, added test for absence of exogenous variable.</span>
+0058   <span class="comment">% 8/27/2000 MJ: change JACOB call. Added ...,1 to cumsum()</span>
+0059   <span class="comment">% 6/24/01 MJ: added count of abs(eigenvalues) &gt; 1</span>
+0060   <span class="comment">% 2/21/02 MJ: count eigenvalues &gt; 1[+1e-5]</span>
+0061   <span class="comment">% 01/22/03 MJ: warning(warning_state) needs parentheses for Matlab 6.5</span>
+0062   <span class="comment">%              name conflicts with parameters</span>
+0063   <span class="comment">% 05/21/03 MJ: replace computation by dr1.m and add rank check</span>
+0064   <span class="comment">% 06/05/03 MJ: corrected bug when M_.maximum_lag &gt; 0</span>
+0065   
+0066 
+0067 
+0068 
+0069</pre></div>
+<hr><address>Generated on Fri 16-Jun-2006 09:09:06 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/">m2html</a></strong> &copy; 2003</address>
+</body>
+</html>

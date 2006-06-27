@@ -1,0 +1,75 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of p2toperc</title>
+  <meta name="keywords" content="p2toperc">
+  <meta name="description" content="">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2003 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../index.html">Home</a> &gt;  <a href="index.html">.</a> &gt; p2toperc.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../index.html"><img alt="<" border="0" src="../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="index.html">Index for .&nbsp;<img alt=">" border="0" src="../right.png"></a></td></tr></table>-->
+
+<h1>p2toperc
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong></strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function y=p2toperc(x) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment"></pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="fbeta.html" class="code" title="function e = fbeta(p2,p,p1,perc)">fbeta</a>	must restrict p2 such that a>0 and b>0 ....</li><li><a href="fgamma.html" class="code" title="function e = fgamma(p2,p,p1,perc)">fgamma</a>	</li><li><a href="figamm.html" class="code" title="function e = figamm(p2,p,p1,perc)">figamm</a>	</li><li><a href="qnorm.html" class="code" title="function  x = qnorm(p,m,s)">qnorm</a>	QNORM 	  The normal inverse distribution function</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+</ul>
+<!-- crossreference -->
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function y=p2toperc(x)</a>
+0002   
+0003   n = size(x,1);
+0004   y = zeros(n,1);
+0005   
+0006   <span class="keyword">for</span> i=1:n
+0007 <span class="comment">%    if x(i,6) == 0  have to wait until the 2nd part works</span>
+0008     <span class="keyword">if</span> 1
+0009       y(i) = x(i,3);
+0010     <span class="keyword">else</span>
+0011       <span class="keyword">if</span> x(i,3) &lt; x(i,2)
+0012     p = 0.05;
+0013       <span class="keyword">else</span>
+0014     p = 0.95;
+0015       <span class="keyword">end</span>
+0016     
+0017       <span class="keyword">if</span> x(i,1) == 1
+0018     y(i) = fsolve(@<a href="fbeta.html" class="code" title="function e = fbeta(p2,p,p1,perc)">fbeta</a>,1,p,x(i,2),x(i,3));
+0019       <span class="keyword">elseif</span> x(i,1) == 2
+0020     y(i) = fsolve(@<a href="fgamma.html" class="code" title="function e = fgamma(p2,p,p1,perc)">fgamma</a>,1,p,x(i,2),x(i,3));
+0021       <span class="keyword">elseif</span> x(i,1) == 3
+0022     y(i) = (x(i,3)-x(i,2))/<a href="qnorm.html" class="code" title="function  x = qnorm(p,m,s)">qnorm</a>(p,0,1);
+0023       <span class="keyword">elseif</span> x(i,1) == 4
+0024     y(i) = fsolve(@<a href="figamm.html" class="code" title="function e = figamm(p2,p,p1,perc)">figamm</a>,1,p,x(i,2),x(i,3));
+0025       <span class="keyword">elseif</span> x(i,1) == 5
+0026 <span class="comment">%    y(i) = fsolve(@fgamma,1,p,x(i,2));</span>
+0027       <span class="keyword">end</span>
+0028     <span class="keyword">end</span>
+0029   <span class="keyword">end</span></pre></div>
+<hr><address>Generated on Fri 16-Jun-2006 09:09:06 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/">m2html</a></strong> &copy; 2003</address>
+</body>
+</html>

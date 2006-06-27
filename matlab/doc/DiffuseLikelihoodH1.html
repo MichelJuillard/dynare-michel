@@ -1,0 +1,282 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of DiffuseLikelihoodH1</title>
+  <meta name="keywords" content="DiffuseLikelihoodH1">
+  <meta name="description" content="M. Ratto added lik in output">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2003 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../index.html">Home</a> &gt;  <a href="index.html">.</a> &gt; DiffuseLikelihoodH1.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../index.html"><img alt="<" border="0" src="../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="index.html">Index for .&nbsp;<img alt=">" border="0" src="../right.png"></a></td></tr></table>-->
+
+<h1>DiffuseLikelihoodH1
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>M. Ratto added lik in output</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function [LIK, lik] = DiffuseLikelihoodH1(T,R,Q,H,Pinf,Pstar,Y,trend,start) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> M. Ratto added lik in output
+ stephane.adjemian@cepremap.cnrs.fr [07-19-2004]
+
+   See &quot;Filtering and Smoothing of State Vector for Diffuse State Space
+   Models&quot;, S.J. Koopman and J. Durbin (2003, in Journal of Time Series 
+   Analysis, vol. 24(1), pp. 85-98).  
+
+   THE PROBLEM:
+
+   y_t =   Z_t * \alpha_t + \varepsilon_t
+   \alpha_{t+1} = T_t  * \alpha_t + R_t * \eta_t
+
+   with:
+
+   \alpha_1 = a + A*\delta + R_0*\eta_0
+
+   m*q matrix A and m*(m-q) matrix R_0 are selection matrices (their
+   columns constitue all the columns of the m*m identity matrix) so that 
+
+       A'*R_0 = 0 and A'*\alpha_1 = \delta
+
+   We assume that the vector \delta is distributed as a N(0,\kappa*I_q)
+   for a given  \kappa &gt; 0. So that the expectation of \alpha_1 is a and
+   its variance is P, with
+
+       P = \kappa*P_{\infty} + P_{\star}
+
+           P_{\infty} = A*A'
+           P_{\star}  = R_0*Q_0*R_0'
+
+   P_{\infty} is a m*m diagonal matrix with q ones and m-q zeros. 
+
+
+   and where:
+
+   y_t             is a pp*1 vector
+   \alpha_t        is a mm*1 vector
+   \varepsilon_t   is a pp*1 multivariate random variable (iid N(0,H_t))
+   \eta_t          is a rr*1 multivariate random variable (iid N(0,Q_t))
+   a_1             is a mm*1 vector
+
+   Z_t     is a pp*mm matrix
+   T_t     is a mm*mm matrix
+   H_t     is a pp*pp matrix
+   R_t     is a mm*rr matrix
+   Q_t     is a rr*rr matrix
+   P_1     is a mm*mm matrix
+
+
+   FILTERING EQUATIONS:
+
+   v_t = y_t - Z_t* a_t
+   F_t = Z_t * P_t * Z_t' + H_t
+   K_t = T_t * P_t * Z_t' * F_t^{-1}
+   L_t = T_t - K_t * Z_t
+   a_{t+1} = T_t * a_t + K_t * v_t
+   P_{t+1} = T_t * P_t * L_t' + R_t*Q_t*R_t'
+
+
+   DIFFUSE FILTERING EQUATIONS:
+
+   a_{t+1} = T_t*a_t + K_{\infty,t}v_t
+   P_{\infty,t+1} = T_t*P_{\infty,t}*L_{\infty,t}'
+   P_{\ast,t+1}  = T_t*P_{\ast,t}*L_{\infty,t}' - K_{\infty,t}*F_{\infty,t}*K_{\ast,t}' + R_t*Q_t*R_t'
+   K_{\infty,t}   = T_t*P_{\infty,t}*Z_t'*F_{\infty,t}^{-1}
+   v_t = y_t - Z_t*a_t
+   L_{\infty,t} = T_t - K_{\infty,t}*Z_t
+   F_{\infty,t} = Z_t*P_{\infty,t}*Z_t'
+   K_{\ast,t}  = (T_t*P_{\ast,t}*Z_t' + K_{\infty,t}*F_{\ast,t})*F_{\infty,t}^{-1}
+   F_{\ast,t}  = Z_t*P_{\ast,t}*Z_t' + H_t
+
+    Matrix Finf is assumed to be non singular. If this is not the case we have
+   to switch to another algorithm (NewAlg=3).
+
+    start = options_.presample</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+</ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="DsgeLikelihood.html" class="code" title="function [fval,cost_flag,ys,trend_coeff,info] = DsgeLikelihood(xparam1,gend,data)">DsgeLikelihood</a>	stephane.adjemian@cepremap.cnrs.fr [09-07-2004]</li></ul>
+<!-- crossreference -->
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function [LIK, lik] = DiffuseLikelihoodH1(T,R,Q,H,Pinf,Pstar,Y,trend,start)</a>
+0002 <span class="comment">% M. Ratto added lik in output</span>
+0003 <span class="comment">% stephane.adjemian@cepremap.cnrs.fr [07-19-2004]</span>
+0004 <span class="comment">%</span>
+0005 <span class="comment">%   See &quot;Filtering and Smoothing of State Vector for Diffuse State Space</span>
+0006 <span class="comment">%   Models&quot;, S.J. Koopman and J. Durbin (2003, in Journal of Time Series</span>
+0007 <span class="comment">%   Analysis, vol. 24(1), pp. 85-98).</span>
+0008 <span class="comment">%</span>
+0009 <span class="comment">%   THE PROBLEM:</span>
+0010 <span class="comment">%</span>
+0011 <span class="comment">%   y_t =   Z_t * \alpha_t + \varepsilon_t</span>
+0012 <span class="comment">%   \alpha_{t+1} = T_t  * \alpha_t + R_t * \eta_t</span>
+0013 <span class="comment">%</span>
+0014 <span class="comment">%   with:</span>
+0015 <span class="comment">%</span>
+0016 <span class="comment">%   \alpha_1 = a + A*\delta + R_0*\eta_0</span>
+0017 <span class="comment">%</span>
+0018 <span class="comment">%   m*q matrix A and m*(m-q) matrix R_0 are selection matrices (their</span>
+0019 <span class="comment">%   columns constitue all the columns of the m*m identity matrix) so that</span>
+0020 <span class="comment">%</span>
+0021 <span class="comment">%       A'*R_0 = 0 and A'*\alpha_1 = \delta</span>
+0022 <span class="comment">%</span>
+0023 <span class="comment">%   We assume that the vector \delta is distributed as a N(0,\kappa*I_q)</span>
+0024 <span class="comment">%   for a given  \kappa &gt; 0. So that the expectation of \alpha_1 is a and</span>
+0025 <span class="comment">%   its variance is P, with</span>
+0026 <span class="comment">%</span>
+0027 <span class="comment">%       P = \kappa*P_{\infty} + P_{\star}</span>
+0028 <span class="comment">%</span>
+0029 <span class="comment">%           P_{\infty} = A*A'</span>
+0030 <span class="comment">%           P_{\star}  = R_0*Q_0*R_0'</span>
+0031 <span class="comment">%</span>
+0032 <span class="comment">%   P_{\infty} is a m*m diagonal matrix with q ones and m-q zeros.</span>
+0033 <span class="comment">%</span>
+0034 <span class="comment">%</span>
+0035 <span class="comment">%   and where:</span>
+0036 <span class="comment">%</span>
+0037 <span class="comment">%   y_t             is a pp*1 vector</span>
+0038 <span class="comment">%   \alpha_t        is a mm*1 vector</span>
+0039 <span class="comment">%   \varepsilon_t   is a pp*1 multivariate random variable (iid N(0,H_t))</span>
+0040 <span class="comment">%   \eta_t          is a rr*1 multivariate random variable (iid N(0,Q_t))</span>
+0041 <span class="comment">%   a_1             is a mm*1 vector</span>
+0042 <span class="comment">%</span>
+0043 <span class="comment">%   Z_t     is a pp*mm matrix</span>
+0044 <span class="comment">%   T_t     is a mm*mm matrix</span>
+0045 <span class="comment">%   H_t     is a pp*pp matrix</span>
+0046 <span class="comment">%   R_t     is a mm*rr matrix</span>
+0047 <span class="comment">%   Q_t     is a rr*rr matrix</span>
+0048 <span class="comment">%   P_1     is a mm*mm matrix</span>
+0049 <span class="comment">%</span>
+0050 <span class="comment">%</span>
+0051 <span class="comment">%   FILTERING EQUATIONS:</span>
+0052 <span class="comment">%</span>
+0053 <span class="comment">%   v_t = y_t - Z_t* a_t</span>
+0054 <span class="comment">%   F_t = Z_t * P_t * Z_t' + H_t</span>
+0055 <span class="comment">%   K_t = T_t * P_t * Z_t' * F_t^{-1}</span>
+0056 <span class="comment">%   L_t = T_t - K_t * Z_t</span>
+0057 <span class="comment">%   a_{t+1} = T_t * a_t + K_t * v_t</span>
+0058 <span class="comment">%   P_{t+1} = T_t * P_t * L_t' + R_t*Q_t*R_t'</span>
+0059 <span class="comment">%</span>
+0060 <span class="comment">%</span>
+0061 <span class="comment">%   DIFFUSE FILTERING EQUATIONS:</span>
+0062 <span class="comment">%</span>
+0063 <span class="comment">%   a_{t+1} = T_t*a_t + K_{\infty,t}v_t</span>
+0064 <span class="comment">%   P_{\infty,t+1} = T_t*P_{\infty,t}*L_{\infty,t}'</span>
+0065 <span class="comment">%   P_{\ast,t+1}  = T_t*P_{\ast,t}*L_{\infty,t}' - K_{\infty,t}*F_{\infty,t}*K_{\ast,t}' + R_t*Q_t*R_t'</span>
+0066 <span class="comment">%   K_{\infty,t}   = T_t*P_{\infty,t}*Z_t'*F_{\infty,t}^{-1}</span>
+0067 <span class="comment">%   v_t = y_t - Z_t*a_t</span>
+0068 <span class="comment">%   L_{\infty,t} = T_t - K_{\infty,t}*Z_t</span>
+0069 <span class="comment">%   F_{\infty,t} = Z_t*P_{\infty,t}*Z_t'</span>
+0070 <span class="comment">%   K_{\ast,t}  = (T_t*P_{\ast,t}*Z_t' + K_{\infty,t}*F_{\ast,t})*F_{\infty,t}^{-1}</span>
+0071 <span class="comment">%   F_{\ast,t}  = Z_t*P_{\ast,t}*Z_t' + H_t</span>
+0072 <span class="comment">%</span>
+0073 <span class="comment">%    Matrix Finf is assumed to be non singular. If this is not the case we have</span>
+0074 <span class="comment">%   to switch to another algorithm (NewAlg=3).</span>
+0075 <span class="comment">%</span>
+0076 <span class="comment">%    start = options_.presample</span>
+0077   <span class="keyword">global</span> bayestopt_ options_
+0078   
+0079   mf = bayestopt_.mf;
+0080   smpl = size(Y,2);
+0081   mm   = size(T,2);
+0082   pp   = size(Y,1);
+0083   a    = zeros(mm,1);
+0084   dF = 1;
+0085   QQ   = R*Q*transpose(R);
+0086   t    = 0;
+0087   lik  = zeros(smpl+1,1);
+0088   LIK  = Inf;
+0089   lik(smpl+1) = smpl*pp*log(2*pi);
+0090   notsteady   = 1;
+0091   crit        = options_.kalman_tol;
+0092   reste       = 0;
+0093   <span class="keyword">while</span> rank(Pinf,crit) &amp; t &lt; smpl
+0094     t     = t+1;
+0095     v        = Y(:,t)-a(mf)-trend(:,t);
+0096     Finf  = Pinf(mf,mf);
+0097     <span class="keyword">if</span> rcond(Finf) &lt; crit 
+0098       <span class="keyword">if</span> ~all(abs(Finf(:))&lt;crit)
+0099     <span class="keyword">return</span>
+0100       <span class="keyword">else</span>
+0101     iFstar    = inv(Pstar(mf,mf)+H);
+0102     dFstar    = det(Pstar(mf,mf)+H);
+0103     Kstar    = Pstar(:,mf)*iFstar;
+0104     lik(t)    = log(dFstar) + transpose(v)*iFstar*v;
+0105     Pinf    = T*Pinf*transpose(T);
+0106     Pstar    = T*(Pstar-Pstar(:,mf)*transpose(Kstar))*transpose(T)+QQ;
+0107     a        = T*(a+Kstar*v);
+0108       <span class="keyword">end</span>
+0109     <span class="keyword">else</span>
+0110       lik(t)    = log(det(Finf));
+0111       iFinf    = inv(Finf);
+0112       Kinf    = Pinf(:,mf)*iFinf;                    <span class="comment">%%    premultiplication by the transition matrix T is removed (stephane)</span>
+0113       Fstar    = Pstar(mf,mf)+H;
+0114       Kstar    = (Pstar(:,mf)-Kinf*Fstar)*iFinf;     <span class="comment">%%    premultiplication by the transition matrix T is removed (stephane)</span>
+0115       Pstar    = T*(Pstar-Pstar(:,mf)*transpose(Kinf)-Pinf(:,mf)*transpose(Kstar))*transpose(T)+QQ;
+0116       Pinf    = T*(Pinf-Pinf(:,mf)*transpose(Kinf))*transpose(T);
+0117       a        = T*(a+Kinf*v);                    
+0118     <span class="keyword">end</span>  
+0119   <span class="keyword">end</span>
+0120   <span class="keyword">if</span> t == smpl                                                           
+0121     error([<span class="string">'There isn''t enough information to estimate the initial'</span> <span class="keyword">...</span><span class="comment"> </span>
+0122        <span class="string">' conditions of the nonstationary variables'</span>]);                   
+0123   <span class="keyword">end</span>                                                                    
+0124   F_singular = 1;
+0125   <span class="keyword">while</span> notsteady &amp; t &lt; smpl
+0126     t  = t+1;
+0127     v  = Y(:,t)-a(mf)-trend(:,t);
+0128     F  = Pstar(mf,mf)+H;
+0129     oldPstar  = Pstar;
+0130     dF = det(F);
+0131     <span class="keyword">if</span> rcond(F) &lt; crit 
+0132       <span class="keyword">if</span> ~all(abs(F(:))&lt;crit)
+0133     <span class="keyword">return</span>
+0134       <span class="keyword">else</span>
+0135     a         = T*a;
+0136     Pstar     = T*Pstar*transpose(T)+QQ;
+0137       <span class="keyword">end</span>
+0138     <span class="keyword">else</span>  
+0139       F_singular = 0;
+0140       iF          = inv(F);
+0141       lik(t)    = log(dF)+transpose(v)*iF*v;
+0142       K         = Pstar(:,mf)*iF; <span class="comment">%% premultiplication by the transition matrix T is removed (stephane)</span>
+0143       a         = T*(a+K*v);        <span class="comment">%% --&gt; factorization of the transition matrix...</span>
+0144       Pstar     = T*(Pstar-K*Pstar(mf,:))*transpose(T)+QQ;    <span class="comment">%% ... idem (stephane)</span>
+0145     <span class="keyword">end</span>
+0146     notsteady = ~(max(max(abs(Pstar-oldPstar)))&lt;crit);
+0147   <span class="keyword">end</span>
+0148   <span class="keyword">if</span> F_singular == 1
+0149     error([<span class="string">'The variance of the forecast error remains singular until the'</span> <span class="keyword">...</span>
+0150        <span class="string">'end of the sample'</span>])
+0151   <span class="keyword">end</span>
+0152   reste = smpl-t;
+0153   <span class="keyword">while</span> t &lt; smpl
+0154     t = t+1;
+0155     v = Y(:,t)-a(mf)-trend(:,t);
+0156     a = T*(a+K*v);
+0157     lik(t) = transpose(v)*iF*v;
+0158   <span class="keyword">end</span>
+0159   lik(t) = lik(t) + reste*log(dF);
+0160   LIK    = .5*(sum(lik(start:end))-(start-1)*lik(smpl+1)/smpl);<span class="comment">% Minus the</span>
+0161                                    <span class="comment">% log-likelihood.</span>
+0162</pre></div>
+<hr><address>Generated on Fri 16-Jun-2006 09:09:06 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/">m2html</a></strong> &copy; 2003</address>
+</body>
+</html>

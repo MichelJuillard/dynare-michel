@@ -1,0 +1,1242 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of dynare_estimation</title>
+  <meta name="keywords" content="dynare_estimation">
+  <meta name="description" content="">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2003 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../index.html">Home</a> &gt;  <a href="index.html">.</a> &gt; dynare_estimation.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../index.html"><img alt="<" border="0" src="../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="index.html">Index for .&nbsp;<img alt=">" border="0" src="../right.png"></a></td></tr></table>-->
+
+<h1>dynare_estimation
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong></strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function dynare_estimation(var_list_) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment"></pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="CheckPath.html" class="code" title="function DirectoryName = CheckPath(type)">CheckPath</a>	06-03-2005</li><li><a href="CutSample.html" class="code" title="function CutSample()">CutSample</a>	stephane.adjemian@ens.fr [09-09-2005]</li><li><a href="DsgeLikelihood.html" class="code" title="function [fval,cost_flag,ys,trend_coeff,info] = DsgeLikelihood(xparam1,gend,data)">DsgeLikelihood</a>	stephane.adjemian@cepremap.cnrs.fr [09-07-2004]</li><li><a href="DsgeSmoother.html" class="code" title="function [alphahat,etahat,epsilonhat,ahat,SteadyState,trend_coeff,aK] = DsgeSmoother(xparam1,gend,Y)">DsgeSmoother</a>	stephane.adjemian@cepremap.cnrs.fr [09-07-2004]</li><li><a href="GetPosteriorParametersStatistics.html" class="code" title="function GetPosteriorParametersStatistics()">GetPosteriorParametersStatistics</a>	stephane.adjemian@ens.fr [09-09-2005]</li><li><a href="McMCDiagnostics.html" class="code" title="function McmcDiagnostic">McMCDiagnostics</a>	stephane.adjemian@ens.fr [06-04-2005]</li><li><a href="PlotPosteriorDistributions.html" class="code" title="function PlotPosteriorDistributions()">PlotPosteriorDistributions</a>	stephane.adjemian@ens.fr [09-09-2005]</li><li><a href="PosteriorIRF.html" class="code" title="function PosteriorIRF(type)">PosteriorIRF</a>	stephane.adjemian@ens.fr [09-25-2005]</li><li><a href="asamin.html" class="code" title="">asamin</a>	ASAMIN A gateway function to Adaptive Simulated Annealing (ASA)</li><li><a href="csminwel.html" class="code" title="function [fh,xh,gh,H,itct,fcount,retcodeh] = csminwel(fcn,x0,H0,grad,crit,nit,varargin)">csminwel</a>	[fhat,xhat,ghat,Hhat,itct,fcount,retcodehat] = csminwel(fcn,x0,H0,grad,crit,nit,varargin)</li><li><a href="generalized_cholesky.html" class="code" title="function AA = generalized_cholesky(A);">generalized_cholesky</a>	proc gmchol(A);</li><li><a href="hessian.html" class="code" title="function hessian_mat = hessian(func,x,varargin)">hessian</a>	Copyright (C) 2001 Michel Juillard</li><li><a href="initial_estimation_checks.html" class="code" title="function initial_estimation_checks(xparam1,gend,data)">initial_estimation_checks</a>	</li><li><a href="marginal_density.html" class="code" title="function marginal = marginal_density()">marginal_density</a>	stephane.adjemian@ens.fr [09-09-2005]</li><li><a href="metropolis.html" class="code" title="function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)">metropolis</a>	stephane.adjemian@ens.fr [09-02-2005]</li><li><a href="metropolis_draw.html" class="code" title="function [xparams, logpost]=metropolis_draw(init)">metropolis_draw</a>	</li><li><a href="mode_check.html" class="code" title="function mode_check(x,fval,hessian,gend,data,lb,ub)">mode_check</a>	</li><li><a href="newrat.html" class="code" title="function [xparam1, hh, gg, fval, igg] = newrat(func0, x, hh, gg, igg, ftol0, nit, flagg, varargin)">newrat</a>	</li><li><a href="plot_priors.html" class="code" title="function plot_priors">plot_priors</a>	stephane.adjemian@cepremap.cnrs.fr [07-31-2004]</li><li><a href="pltorg.html" class="code" title="function [nbplt,nr,nc,lr,lc,nstar] = pltorg(number)">pltorg</a>	stephane.adjemian@cepremap.cnrs.fr [06-07-2004]</li><li><a href="prior_bounds.html" class="code" title="function bounds = prior_bounds(bayestopt)">prior_bounds</a>	</li><li><a href="read_variables.html" class="code" title="function dyn_data_01=read_variables(file_name_01,var_names_01,dyn_data_01,xls_sheet,xls_range)">read_variables</a>	Copyright (C) 2005 Michel Juillard</li><li><a href="set_default_option.html" class="code" title="function options=set_default_option(options,field,default)">set_default_option</a>	</li><li><a href="set_prior.html" class="code" title="function [xparam1,estim_params_,bayestopt_,lb,ub]=set_prior(estim_params_)">set_prior</a>	</li><li><a href="set_state_space.html" class="code" title="function dr=set_state_space(dr)">set_state_space</a>	Copyright (C) 2001 Michel Juillard</li><li><a href="union.html" class="code" title="function x = union(a,b)">union</a>	</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+</ul>
+<!-- crossreference -->
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function dynare_estimation(var_list_)</a>
+0002 
+0003 <span class="keyword">global</span> M_ options_ oo_ estim_params_ 
+0004 <span class="keyword">global</span> bayestopt_
+0005 
+0006 <span class="comment">% temporary fix until M_.H is initialized by the parser</span>
+0007 M_.H = [];
+0008 
+0009 options_.varlist = var_list_;
+0010 options_.lgyidx2varobs = zeros(size(M_.endo_names,1),1);
+0011 <span class="keyword">for</span> i = 1:size(M_.endo_names,1)
+0012   tmp = strmatch(deblank(M_.endo_names(i,:)),options_.varobs,<span class="string">'exact'</span>);
+0013   <span class="keyword">if</span> ~isempty(tmp)
+0014     options_.lgyidx2varobs(i,1) = tmp;
+0015   <span class="keyword">end</span>
+0016 <span class="keyword">end</span>  
+0017 
+0018 options_ = <a href="set_default_option.html" class="code" title="function options=set_default_option(options,field,default)">set_default_option</a>(options_,<span class="string">'first_obs'</span>,1);
+0019 options_ = <a href="set_default_option.html" class="code" title="function options=set_default_option(options,field,default)">set_default_option</a>(options_,<span class="string">'prefilter'</span>,0);
+0020 options_ = <a href="set_default_option.html" class="code" title="function options=set_default_option(options,field,default)">set_default_option</a>(options_,<span class="string">'presample'</span>,0);
+0021 options_ = <a href="set_default_option.html" class="code" title="function options=set_default_option(options,field,default)">set_default_option</a>(options_,<span class="string">'lik_algo'</span>,1);
+0022 options_ = <a href="set_default_option.html" class="code" title="function options=set_default_option(options,field,default)">set_default_option</a>(options_,<span class="string">'lik_init'</span>,1);
+0023 options_ = <a href="set_default_option.html" class="code" title="function options=set_default_option(options,field,default)">set_default_option</a>(options_,<span class="string">'nograph'</span>,0);
+0024 options_ = <a href="set_default_option.html" class="code" title="function options=set_default_option(options,field,default)">set_default_option</a>(options_,<span class="string">'mh_conf_sig'</span>,0.90);
+0025 options_ = <a href="set_default_option.html" class="code" title="function options=set_default_option(options,field,default)">set_default_option</a>(options_,<span class="string">'mh_replic'</span>,20000);
+0026 options_ = <a href="set_default_option.html" class="code" title="function options=set_default_option(options,field,default)">set_default_option</a>(options_,<span class="string">'mh_drop'</span>,0.5);
+0027 options_ = <a href="set_default_option.html" class="code" title="function options=set_default_option(options,field,default)">set_default_option</a>(options_,<span class="string">'mh_jscale'</span>,0.2);
+0028 options_ = <a href="set_default_option.html" class="code" title="function options=set_default_option(options,field,default)">set_default_option</a>(options_,<span class="string">'mh_init_scale'</span>,2*options_.mh_jscale);
+0029 options_ = <a href="set_default_option.html" class="code" title="function options=set_default_option(options,field,default)">set_default_option</a>(options_,<span class="string">'mode_file'</span>,<span class="string">''</span>);
+0030 options_ = <a href="set_default_option.html" class="code" title="function options=set_default_option(options,field,default)">set_default_option</a>(options_,<span class="string">'mode_compute'</span>,4);
+0031 options_ = <a href="set_default_option.html" class="code" title="function options=set_default_option(options,field,default)">set_default_option</a>(options_,<span class="string">'mode_check'</span>,0);
+0032 options_ = <a href="set_default_option.html" class="code" title="function options=set_default_option(options,field,default)">set_default_option</a>(options_,<span class="string">'prior_trunc'</span>,1e-10);
+0033 options_ = <a href="set_default_option.html" class="code" title="function options=set_default_option(options,field,default)">set_default_option</a>(options_,<span class="string">'mh_mode'</span>,1);     
+0034 options_ = <a href="set_default_option.html" class="code" title="function options=set_default_option(options,field,default)">set_default_option</a>(options_,<span class="string">'mh_nblck'</span>,2);    
+0035 options_ = <a href="set_default_option.html" class="code" title="function options=set_default_option(options,field,default)">set_default_option</a>(options_,<span class="string">'load_mh_file'</span>,0);
+0036 options_ = <a href="set_default_option.html" class="code" title="function options=set_default_option(options,field,default)">set_default_option</a>(options_,<span class="string">'nodiagnostic'</span>,0);
+0037 options_ = <a href="set_default_option.html" class="code" title="function options=set_default_option(options,field,default)">set_default_option</a>(options_,<span class="string">'loglinear'</span>,0);
+0038 options_ = <a href="set_default_option.html" class="code" title="function options=set_default_option(options,field,default)">set_default_option</a>(options_,<span class="string">'unit_root_vars'</span>,[]);
+0039 options_ = <a href="set_default_option.html" class="code" title="function options=set_default_option(options,field,default)">set_default_option</a>(options_,<span class="string">'XTick'</span>,[]);
+0040 options_ = <a href="set_default_option.html" class="code" title="function options=set_default_option(options,field,default)">set_default_option</a>(options_,<span class="string">'XTickLabel'</span>,[]);
+0041 options_ = <a href="set_default_option.html" class="code" title="function options=set_default_option(options,field,default)">set_default_option</a>(options_,<span class="string">'bayesian_irf'</span>,0);
+0042 options_ = <a href="set_default_option.html" class="code" title="function options=set_default_option(options,field,default)">set_default_option</a>(options_,<span class="string">'bayesian_th_moments'</span>,0);
+0043 options_ = <a href="set_default_option.html" class="code" title="function options=set_default_option(options,field,default)">set_default_option</a>(options_,<span class="string">'TeX'</span>,0);
+0044 options_ = <a href="set_default_option.html" class="code" title="function options=set_default_option(options,field,default)">set_default_option</a>(options_,<span class="string">'irf'</span>,40);
+0045 options_ = <a href="set_default_option.html" class="code" title="function options=set_default_option(options,field,default)">set_default_option</a>(options_,<span class="string">'relative_irf'</span>,0);
+0046 options_ = <a href="set_default_option.html" class="code" title="function options=set_default_option(options,field,default)">set_default_option</a>(options_,<span class="string">'order'</span>,1);
+0047 options_ = <a href="set_default_option.html" class="code" title="function options=set_default_option(options,field,default)">set_default_option</a>(options_,<span class="string">'ar'</span>,5);
+0048 options_ = <a href="set_default_option.html" class="code" title="function options=set_default_option(options,field,default)">set_default_option</a>(options_,<span class="string">'dr_algo'</span>,0);
+0049 options_ = <a href="set_default_option.html" class="code" title="function options=set_default_option(options,field,default)">set_default_option</a>(options_,<span class="string">'linear'</span>,0);
+0050 options_ = <a href="set_default_option.html" class="code" title="function options=set_default_option(options,field,default)">set_default_option</a>(options_,<span class="string">'drop'</span>,0);
+0051 options_ = <a href="set_default_option.html" class="code" title="function options=set_default_option(options,field,default)">set_default_option</a>(options_,<span class="string">'replic'</span>,1);
+0052 options_ = <a href="set_default_option.html" class="code" title="function options=set_default_option(options,field,default)">set_default_option</a>(options_,<span class="string">'hp_filter'</span>,0);
+0053 options_ = <a href="set_default_option.html" class="code" title="function options=set_default_option(options,field,default)">set_default_option</a>(options_,<span class="string">'forecast'</span>,0);
+0054 options_ = <a href="set_default_option.html" class="code" title="function options=set_default_option(options,field,default)">set_default_option</a>(options_,<span class="string">'smoother'</span>,0);
+0055 options_ = <a href="set_default_option.html" class="code" title="function options=set_default_option(options,field,default)">set_default_option</a>(options_,<span class="string">'moments_varendo'</span>,0);
+0056 options_ = <a href="set_default_option.html" class="code" title="function options=set_default_option(options,field,default)">set_default_option</a>(options_,<span class="string">'filtered_vars'</span>,0);
+0057 options_ = <a href="set_default_option.html" class="code" title="function options=set_default_option(options,field,default)">set_default_option</a>(options_,<span class="string">'kalman_algo'</span>,1);
+0058 options_ = <a href="set_default_option.html" class="code" title="function options=set_default_option(options,field,default)">set_default_option</a>(options_,<span class="string">'kalman_tol'</span>,10^(-12));
+0059 options_ = <a href="set_default_option.html" class="code" title="function options=set_default_option(options,field,default)">set_default_option</a>(options_,<span class="string">'posterior_mode_estimation'</span>,1);
+0060 options_ = <a href="set_default_option.html" class="code" title="function options=set_default_option(options,field,default)">set_default_option</a>(options_,<span class="string">'MaxNumberOfBytes'</span>,1e6);
+0061 options_ = <a href="set_default_option.html" class="code" title="function options=set_default_option(options,field,default)">set_default_option</a>(options_,<span class="string">'xls_sheet'</span>,<span class="string">''</span>);
+0062 options_ = <a href="set_default_option.html" class="code" title="function options=set_default_option(options,field,default)">set_default_option</a>(options_,<span class="string">'xls_range'</span>,<span class="string">''</span>);
+0063 options_ = <a href="set_default_option.html" class="code" title="function options=set_default_option(options,field,default)">set_default_option</a>(options_,<span class="string">'filter_step_ahead'</span>,0);
+0064 options_ = <a href="set_default_option.html" class="code" title="function options=set_default_option(options,field,default)">set_default_option</a>(options_,<span class="string">'diffuse_d'</span>,[]);
+0065 <span class="keyword">if</span> options_.filtered_vars ~= 0 &amp; options_.filter_step_ahead == 0
+0066   options_.filter_step_ahead = 1;
+0067 <span class="keyword">end</span>
+0068 <span class="keyword">if</span> options_.filter_step_ahead ~= 0
+0069   options_.nk = max(options_.filter_step_ahead);
+0070 <span class="keyword">else</span>
+0071   options_.nk = 0;
+0072 <span class="keyword">end</span>
+0073 
+0074 <span class="comment">%% Add something to the parser ++&gt;</span>
+0075 M_.dname = M_.fname; <span class="comment">% The user should be able to choose another name</span>
+0076                      <span class="comment">% for the directory...</span>
+0077 
+0078 
+0079 pnames         = [<span class="string">'     '</span>;<span class="string">'beta '</span>;<span class="string">'gamm '</span>;<span class="string">'norm '</span>;<span class="string">'invg '</span>;<span class="string">'unif '</span>;<span class="string">'invg2'</span>];
+0080 n_varobs     = size(options_.varobs,1);
+0081 
+0082 [xparam1,estim_params_,bayestopt_,lb,ub] = <a href="set_prior.html" class="code" title="function [xparam1,estim_params_,bayestopt_,lb,ub]=set_prior(estim_params_)">set_prior</a>(estim_params_);
+0083 
+0084 <span class="keyword">if</span> any(bayestopt_.pshape &gt; 0)
+0085   <span class="keyword">if</span> options_.mode_compute
+0086     <a href="plot_priors.html" class="code" title="function plot_priors">plot_priors</a>
+0087   <span class="keyword">end</span>
+0088 <span class="keyword">else</span>
+0089   options_.mh_replic = 0;
+0090 <span class="keyword">end</span>
+0091 
+0092 bounds = <a href="prior_bounds.html" class="code" title="function bounds = prior_bounds(bayestopt)">prior_bounds</a>(bayestopt_);
+0093 bounds(:,1)=max(bounds(:,1),lb);
+0094 bounds(:,2)=min(bounds(:,2),ub);
+0095 
+0096 <span class="keyword">if</span> any(xparam1 &lt; bounds(:,1)) | any(xparam1 &gt; bounds(:,2))
+0097   find(xparam1 &lt; bounds(:,1))
+0098   find(xparam1 &gt; bounds(:,2))
+0099   error(<span class="string">'Initial parameter values are outside parameter bounds'</span>)
+0100 <span class="keyword">end</span>
+0101 lb = bounds(:,1);
+0102 ub = bounds(:,2);
+0103 bayestopt_.lb = lb;
+0104 bayestopt_.ub = ub;
+0105 
+0106 <span class="keyword">if</span> ~isfield(options_,<span class="string">'trend_coeffs'</span>)
+0107   bayestopt_.with_trend = 0;
+0108 <span class="keyword">else</span>
+0109   bayestopt_.with_trend = 1;
+0110   bayestopt_.trend_coeff = {};
+0111   trend_coeffs = options_.trend_coeffs;
+0112   nt = length(trend_coeffs);
+0113   <span class="keyword">for</span> i=1:n_varobs
+0114     <span class="keyword">if</span> i &gt; length(trend_coeffs)
+0115       bayestopt_.trend_coeff{i} = <span class="string">'0'</span>;
+0116     <span class="keyword">else</span>
+0117       bayestopt_.trend_coeff{i} = trend_coeffs{i};
+0118     <span class="keyword">end</span>
+0119   <span class="keyword">end</span>
+0120 <span class="keyword">end</span>
+0121 
+0122 bayestopt_.penalty = 1e8;    <span class="comment">% penalty</span>
+0123 
+0124 nvx = estim_params_.nvx;
+0125 nvn = estim_params_.nvn;
+0126 ncx = estim_params_.ncx;
+0127 ncn = estim_params_.ncn;
+0128 np  = estim_params_.np ;
+0129 nx  = nvx+nvn+ncx+ncn+np;
+0130 
+0131 <span class="comment">%% Static solver</span>
+0132 <span class="keyword">if</span> exist([M_.fname <span class="string">'_steadystate'</span>])
+0133   bayestopt_.static_solve = [M_.fname <span class="string">'_steadystate'</span>];
+0134 <span class="keyword">else</span>
+0135   bayestopt_.static_solve = <span class="string">'dynare_solve'</span>;
+0136 <span class="keyword">end</span>
+0137 
+0138 dr = <a href="set_state_space.html" class="code" title="function dr=set_state_space(dr)">set_state_space</a>([]);
+0139 
+0140 <span class="comment">%% Initialization with unit-root variables</span>
+0141 <span class="keyword">if</span> ~isempty(options_.unit_root_vars)
+0142   n_ur = size(options_.unit_root_vars,1);
+0143   i_ur = zeros(n_ur,1);
+0144   <span class="keyword">for</span> i=1:n_ur
+0145     i1 = strmatch(deblank(options_.unit_root_vars(i,:)),M_.endo_names(dr.order_var,:),<span class="string">'exact'</span>);
+0146     <span class="keyword">if</span> isempty(i1)
+0147       error(<span class="string">'Undeclared variable in unit_root_vars statement'</span>)
+0148     <span class="keyword">end</span>
+0149     i_ur(i) = i1;
+0150   <span class="keyword">end</span>
+0151   <span class="keyword">if</span> M_.maximum_lag &gt; 1
+0152     l1 = flipud([cumsum(M_.lead_lag_incidence(1:M_.maximum_lag-1,dr.order_var),1);ones(1,M_.endo_nbr)]);
+0153     n1 = nnz(l1);
+0154     bayestopt_.Pinf = zeros(n1,n1);
+0155     l2 = find(l1');
+0156     l3 = zeros(M_.endo_nbr,M_.maximum_lag);
+0157     l3(i_ur,:) = l1(:,i_ur)';
+0158     l3 = l3(:);
+0159     i_ur1 = find(l3(l2));
+0160     i_stable = ones(M_.endo_nbr,1);
+0161     i_stable(i_ur) = zeros(n_ur,1);
+0162     i_stable = find(i_stable);
+0163     bayestopt_.Pinf(i_ur1,i_ur1) = diag(ones(1,length(i_ur1)));
+0164     bayestopt_.i_var_stable = i_stable;
+0165     l3 = zeros(M_.endo_nbr,M_.maximum_lag);
+0166     l3(i_stable,:) = l1(:,i_stable)';
+0167     l3 = l3(:);
+0168     bayestopt_.i_T_var_stable = find(l3(l2));
+0169   <span class="keyword">else</span>
+0170     n1 = M_.endo_nbr;
+0171     bayestopt_.Pinf = zeros(n1,n1);
+0172     bayestopt_.Pinf(i_ur,i_ur) = diag(ones(1,length(i_ur)));
+0173     l1 = ones(M_.endo_nbr,1);
+0174     l1(i_ur,:) = zeros(length(i_ur),1);
+0175     bayestopt_.i_T_var_stable = find(l1);
+0176   <span class="keyword">end</span>
+0177   options_.lik_init = 3;
+0178 <span class="keyword">end</span> <span class="comment">% if ~isempty(options_.unit_root_vars)</span>
+0179 
+0180 <span class="keyword">if</span> isempty(options_.datafile)
+0181   error(<span class="string">'ESTIMATION: datafile option is missing'</span>)
+0182 <span class="keyword">end</span>
+0183 
+0184 <span class="keyword">if</span> isempty(options_.varobs)
+0185   error(<span class="string">'ESTIMATION: VAROBS is missing'</span>)
+0186 <span class="keyword">end</span>
+0187 
+0188 
+0189 <span class="comment">%% If jscale isn't specified for an estimated parameter, use</span>
+0190 <span class="comment">%% global option options_.jscale, set to 0.2, by default</span>
+0191 k = find(isnan(bayestopt_.jscale));
+0192 bayestopt_.jscale(k) = options_.mh_jscale;
+0193 
+0194 <span class="comment">%% Read and demean data</span>
+0195 rawdata = <a href="read_variables.html" class="code" title="function dyn_data_01=read_variables(file_name_01,var_names_01,dyn_data_01,xls_sheet,xls_range)">read_variables</a>(options_.datafile,options_.varobs,[],options_.xls_sheet,options_.xls_range);
+0196 
+0197 k = [];
+0198 k1 = [];
+0199 <span class="keyword">for</span> i=1:n_varobs
+0200   k = [k strmatch(deblank(options_.varobs(i,:)),M_.endo_names(dr.order_var,:),<span class="string">'exact'</span>)];
+0201   k1 = [k1 strmatch(deblank(options_.varobs(i,:)),M_.endo_names, <span class="string">'exact'</span>)];
+0202 <span class="keyword">end</span>
+0203 <span class="comment">% union of observed and state variables</span>
+0204 k2 = <a href="union.html" class="code" title="function x = union(a,b)">union</a>(k',[dr.nstatic+1:dr.nstatic+dr.npred]');
+0205 <span class="comment">% including variables in t-2 and earlier, if any</span>
+0206 k2 = [k2;[M_.endo_nbr+(1:dr.nspred-dr.npred)]'];
+0207 
+0208 <span class="comment">% set restrict_state to postion of observed + state variables</span>
+0209 <span class="comment">% in expanded state vector</span>
+0210 bayestopt_.restrict_state = k2;
+0211 <span class="comment">% set mf1 to positions of observed variables in restricted state vector</span>
+0212 <span class="comment">% for likelihood computation</span>
+0213 [junk,bayestopt_.mf1] = ismember(k,k2); 
+0214 <span class="comment">% set mf2 to positions of observed variables in expanded state vector</span>
+0215 <span class="comment">% for filtering and smoothing</span>
+0216 bayestopt_.mf2     = k;
+0217 bayestopt_.mfys = k1;
+0218 bayestopt_.Z = zeros(n_varobs,length(k2));
+0219 <span class="keyword">for</span> i=1:n_varobs
+0220    bayestopt_.Z(i,bayestopt_.mf1(i)) = 1;
+0221 <span class="keyword">end</span>
+0222 
+0223 options_ = <a href="set_default_option.html" class="code" title="function options=set_default_option(options,field,default)">set_default_option</a>(options_,<span class="string">'nobs'</span>,size(rawdata,1)-options_.first_obs+1);
+0224 gend = options_.nobs;
+0225 
+0226 rawdata = rawdata(options_.first_obs:options_.first_obs+gend-1,:);
+0227 <span class="keyword">if</span> options_.loglinear == 1
+0228   rawdata = log(rawdata);
+0229 <span class="keyword">end</span>
+0230 <span class="keyword">if</span> options_.prefilter == 1
+0231   bayestopt_.mean_varobs = mean(rawdata,1);
+0232   data = transpose(rawdata-ones(gend,1)*bayestopt_.mean_varobs);
+0233 <span class="keyword">else</span>
+0234   data = transpose(rawdata);
+0235 <span class="keyword">end</span>
+0236 
+0237 <span class="keyword">if</span> ~isreal(rawdata)
+0238   error([<span class="string">'There are complex values in the data. Probably  a wrong'</span> <span class="keyword">...</span>
+0239      <span class="string">' transformation'</span>])
+0240 <span class="keyword">end</span>
+0241 
+0242 <span class="keyword">if</span> length(options_.mode_file) &gt; 0 &amp; options_.posterior_mode_estimation
+0243   eval([<span class="string">'load '</span> options_.mode_file <span class="string">';'</span>]');
+0244 <span class="keyword">end</span>
+0245 
+0246 <a href="initial_estimation_checks.html" class="code" title="function initial_estimation_checks(xparam1,gend,data)">initial_estimation_checks</a>(xparam1,gend,data);
+0247 
+0248 <span class="comment">%% Estimation of the posterior mode or likelihood mode</span>
+0249 <span class="keyword">if</span> options_.mode_compute &gt; 0 &amp; options_.posterior_mode_estimation
+0250   fh=str2func(<span class="string">'DsgeLikelihood'</span>);
+0251   <span class="keyword">if</span> options_.mode_compute == 1  
+0252     optim_options = optimset(<span class="string">'display'</span>,<span class="string">'iter'</span>,<span class="string">'LargeScale'</span>,<span class="string">'off'</span>, <span class="keyword">...</span>
+0253                  <span class="string">'MaxFunEvals'</span>,100000,<span class="string">'TolFun'</span>,1e-8,<span class="string">'TolX'</span>,1e-6);
+0254     <span class="keyword">if</span> isfield(options_,<span class="string">'optim_opt'</span>)
+0255       eval([<span class="string">'optim_options = optimset(optim_options,'</span> options_.optim_opt <span class="string">');'</span>]);
+0256     <span class="keyword">end</span>
+0257     [xparam1,fval,exitflag,output,lamdba,grad,hessian_fmincon] = <span class="keyword">...</span>
+0258     fmincon(fh,xparam1,[],[],[],[],lb,ub,[],optim_options,gend,data);
+0259   <span class="keyword">elseif</span> options_.mode_compute == 2
+0260     <span class="comment">% asamin('set','maximum_cost_repeat',0);</span>
+0261     [fval,xparam1,grad,hessian_asamin,exitflag] = <span class="keyword">...</span>
+0262     <a href="asamin.html" class="code" title="">asamin</a>(<span class="string">'minimize'</span>,<span class="string">'DsgeLikelihood'</span>,xparam1,lb,ub,- <span class="keyword">...</span>
+0263            ones(size(xparam1)),gend,data);   
+0264   <span class="keyword">elseif</span> options_.mode_compute == 3
+0265     optim_options = optimset(<span class="string">'display'</span>,<span class="string">'iter'</span>,<span class="keyword">...</span>
+0266                  <span class="string">'MaxFunEvals'</span>,100000,<span class="string">'TolFun'</span>,1e-8,<span class="string">'TolX'</span>,1e-6);
+0267     <span class="keyword">if</span> isfield(options_,<span class="string">'optim_opt'</span>)
+0268       eval([<span class="string">'optim_options = optimset(optim_options,'</span> options_.optim_opt <span class="string">');'</span>]);
+0269     <span class="keyword">end</span>
+0270     [xparam1,fval,exitflag] = fminunc(fh,xparam1,optim_options,gend, <span class="keyword">...</span>
+0271                       data);
+0272   <span class="keyword">elseif</span> options_.mode_compute == 4
+0273     H0 = 1e-4*eye(nx);
+0274     crit = 1e-7;
+0275     nit = 1000;
+0276     verbose = 2;
+0277     [fval,xparam1,grad,hessian_csminwel,itct,fcount,retcodehat] = <span class="keyword">...</span>
+0278     <a href="csminwel.html" class="code" title="function [fh,xh,gh,H,itct,fcount,retcodeh] = csminwel(fcn,x0,H0,grad,crit,nit,varargin)">csminwel</a>(<span class="string">'DsgeLikelihood'</span>,xparam1,H0,[],crit,nit,gend,data);
+0279     disp(sprintf(<span class="string">'Objective function at mode: %f'</span>,fval))
+0280     disp(sprintf(<span class="string">'Objective function at mode: %f'</span>,<a href="DsgeLikelihood.html" class="code" title="function [fval,cost_flag,ys,trend_coeff,info] = DsgeLikelihood(xparam1,gend,data)">DsgeLikelihood</a>(xparam1,gend,data)))
+0281   <span class="keyword">elseif</span> options_.mode_compute == 5
+0282       <span class="keyword">if</span> isfield(options_,<span class="string">'hess'</span>)
+0283           flag = options_.hess;
+0284       <span class="keyword">else</span>
+0285           flag = 1;
+0286       <span class="keyword">end</span>
+0287       <span class="keyword">if</span> ~exist(<span class="string">'igg'</span>),  <span class="comment">% by M. Ratto</span>
+0288           hh=[];
+0289           gg=[];
+0290           igg=[];
+0291       <span class="keyword">end</span>   <span class="comment">% by M. Ratto</span>
+0292       <span class="keyword">if</span> isfield(options_,<span class="string">'ftol'</span>)
+0293           crit = options_.ftol;
+0294       <span class="keyword">else</span>
+0295           crit = 1.e-7;
+0296       <span class="keyword">end</span>
+0297       <span class="keyword">if</span> isfield(options_,<span class="string">'nit'</span>)
+0298           nit = options_.nit;
+0299       <span class="keyword">else</span>
+0300           nit=1000;
+0301       <span class="keyword">end</span>
+0302     <span class="comment">%[xparam1, hh, gg, fval] = newrat('DsgeLikelihood',xparam1,[],[],flag,gend,data);</span>
+0303     [xparam1, hh, gg, fval, invhess] = <a href="newrat.html" class="code" title="function [xparam1, hh, gg, fval, igg] = newrat(func0, x, hh, gg, igg, ftol0, nit, flagg, varargin)">newrat</a>(<span class="string">'DsgeLikelihood'</span>,xparam1,hh,gg,igg,crit,nit,flag,gend,data);
+0304     eval([<span class="string">'save '</span> M_.fname <span class="string">'_mode xparam1 hh gg fval invhess;'</span>]);
+0305   <span class="keyword">end</span>
+0306   <span class="keyword">if</span> options_.mode_compute ~= 5
+0307     hh = reshape(<a href="hessian.html" class="code" title="function hessian_mat = hessian(func,x,varargin)">hessian</a>(<span class="string">'DsgeLikelihood'</span>,xparam1,gend,data),nx,nx);
+0308     eval([<span class="string">'save '</span> M_.fname <span class="string">'_mode xparam1 hh fval;'</span>]);
+0309   <span class="keyword">end</span>
+0310   eval([<span class="string">'save '</span> M_.fname <span class="string">'_mode xparam1 hh;'</span>]);
+0311 <span class="keyword">end</span>
+0312 
+0313 <span class="keyword">if</span> options_.mode_check == 1 &amp; options_.posterior_mode_estimation
+0314   <a href="mode_check.html" class="code" title="function mode_check(x,fval,hessian,gend,data,lb,ub)">mode_check</a>(xparam1,0,hh,gend,data,lb,ub);
+0315 <span class="keyword">end</span>
+0316 
+0317 <span class="keyword">if</span> options_.posterior_mode_estimation
+0318   hh = <a href="generalized_cholesky.html" class="code" title="function AA = generalized_cholesky(A);">generalized_cholesky</a>(hh);
+0319   invhess = inv(hh);
+0320   stdh = sqrt(diag(invhess));
+0321 <span class="keyword">else</span>
+0322   invhess = eye(length(xparam1));
+0323 <span class="keyword">end</span>
+0324   
+0325 <span class="keyword">if</span> any(bayestopt_.pshape &gt; 0) &amp; options_.posterior_mode_estimation
+0326   disp(<span class="string">' '</span>)
+0327   disp(<span class="string">'RESULTS FROM POSTERIOR MAXIMIZATION'</span>)
+0328   tstath = zeros(nx,1);
+0329   <span class="keyword">for</span> i = 1:nx
+0330     tstath(i) = abs(xparam1(i))/stdh(i);
+0331   <span class="keyword">end</span>
+0332   tit1 = sprintf(<span class="string">'%10s %7s %8s %7s %6s %4s %6s\n'</span>,<span class="string">' '</span>,<span class="string">'prior mean'</span>, <span class="keyword">...</span>
+0333          <span class="string">'mode'</span>,<span class="string">'s.d.'</span>,<span class="string">'t-stat'</span>,<span class="string">'prior'</span>,<span class="string">'pstdev'</span>);
+0334   <span class="keyword">if</span> np
+0335     ip = nvx+nvn+ncx+ncn+1;
+0336     disp(<span class="string">'parameters'</span>)
+0337     disp(tit1)
+0338     <span class="keyword">for</span> i=1:np
+0339       name = bayestopt_.name{ip};
+0340       disp(sprintf(<span class="string">'%12s %7.3f %8.4f %7.4f %7.4f %4s %6.4f'</span>, <span class="keyword">...</span>
+0341            name, <span class="keyword">...</span>
+0342            bayestopt_.pmean(ip),xparam1(ip),stdh(ip),tstath(ip), <span class="keyword">...</span>
+0343            pnames(bayestopt_.pshape(ip)+1,:), <span class="keyword">...</span>
+0344            bayestopt_.pstdev(ip)));
+0345       eval([<span class="string">'oo_.posterior_mode.parameters.'</span> name <span class="string">' = xparam1(ip);'</span>]);
+0346       eval([<span class="string">'oo_.posterior_std.parameters.'</span> name <span class="string">' = stdh(ip);'</span>]); 
+0347       ip = ip+1;
+0348     <span class="keyword">end</span>
+0349   <span class="keyword">end</span>
+0350   <span class="keyword">if</span> nvx
+0351     ip = 1;
+0352     disp(<span class="string">'standard deviation of shocks'</span>)
+0353     disp(tit1)
+0354     <span class="keyword">for</span> i=1:nvx
+0355       k = estim_params_.var_exo(i,1);
+0356       name = deblank(M_.exo_names(k,:));
+0357       disp(sprintf(<span class="string">'%12s %7.3f %8.4f %7.4f %7.4f %4s %6.4f'</span>, <span class="keyword">...</span>
+0358            name,bayestopt_.pmean(ip),xparam1(ip), <span class="keyword">...</span>
+0359            stdh(ip),tstath(ip),pnames(bayestopt_.pshape(ip)+1,:), <span class="keyword">...</span>
+0360            bayestopt_.pstdev(ip))); 
+0361       M_.Sigma_e(k,k) = xparam1(ip)*xparam1(ip);
+0362       eval([<span class="string">'oo_.posterior_mode.shocks_std.'</span> name <span class="string">' = xparam1(ip);'</span>]);
+0363       eval([<span class="string">'oo_.posterior_std.shocks_std.'</span> name <span class="string">' = stdh(ip);'</span>]); 
+0364       ip = ip+1;
+0365     <span class="keyword">end</span>
+0366   <span class="keyword">end</span>
+0367   <span class="keyword">if</span> nvn
+0368     disp(<span class="string">'standard deviation of measurement errors'</span>)
+0369     disp(tit1)
+0370     ip = nvx+1;
+0371     <span class="keyword">for</span> i=1:nvn
+0372       name = deblank(options_.varobs(estim_params_.var_endo(i,1),:));
+0373       disp(sprintf(<span class="string">'%12s %7.3f %8.4f %7.4f %7.4f %4s %6.4f'</span>, <span class="keyword">...</span>
+0374            name,bayestopt_.pmean(ip), <span class="keyword">...</span>
+0375            xparam1(ip),stdh(ip),tstath(ip), <span class="keyword">...</span>
+0376            pnames(bayestopt_.pshape(ip)+1,:), <span class="keyword">...</span>
+0377            bayestopt_.pstdev(ip)));
+0378       eval([<span class="string">'oo_.posterior_mode.measurement_errors_std.'</span> name <span class="string">' = xparam1(ip);'</span>]);
+0379       eval([<span class="string">'oo_.posterior_std.measurement_errors_std.'</span> name <span class="string">' = stdh(ip);'</span>]); 
+0380       ip = ip+1;
+0381     <span class="keyword">end</span>
+0382   <span class="keyword">end</span>
+0383   <span class="keyword">if</span> ncx
+0384     disp(<span class="string">'correlation of shocks'</span>)
+0385     disp(tit1)
+0386     ip = nvx+nvn+1;
+0387     <span class="keyword">for</span> i=1:ncx
+0388       k1 = estim_params_.corrx(i,1);
+0389       k2 = estim_params_.corrx(i,2);
+0390       name = [deblank(M_.exo_names(k1,:)) <span class="string">','</span> deblank(M_.exo_names(k2,:))];
+0391       NAME = [deblank(M_.exo_names(k1,:)) <span class="string">'_'</span> deblank(M_.exo_names(k2,:))];
+0392       disp(sprintf(<span class="string">'%12s %7.3f %8.4f %7.4f %7.4f %4s %6.4f'</span>, name, <span class="keyword">...</span>
+0393            bayestopt_.pmean(ip),xparam1(ip),stdh(ip),tstath(ip),  <span class="keyword">...</span>
+0394            pnames(bayestopt_.pshape(ip)+1,:), bayestopt_.pstdev(ip)));
+0395       M_.Sigma_e(k1,k2) = xparam1(ip)*sqrt(M_.Sigma_e(k1,k1)*M_.Sigma_e(k2,k2));
+0396       M_.Sigma_e(k2,k1) = M_.Sigma_e(k1,k2);
+0397       eval([<span class="string">'oo_.posterior_mode.shocks_corr.'</span> NAME <span class="string">' = xparam1(ip);'</span>]);
+0398       eval([<span class="string">'oo_.posterior_std.shocks_corr.'</span> NAME <span class="string">' = stdh(ip);'</span>]); 
+0399       ip = ip+1;
+0400     <span class="keyword">end</span>
+0401   <span class="keyword">end</span>
+0402   <span class="keyword">if</span> ncn
+0403     disp(<span class="string">'correlation of measurement errors'</span>)
+0404     disp(tit1)
+0405     ip = nvx+nvn+ncx+1;
+0406     <span class="keyword">for</span> i=1:ncn
+0407       k1 = estim_params_.corrn(i,1);
+0408       k2 = estim_params_.corrn(i,2);
+0409       name = [deblank(M_.endo_names(k1,:)) <span class="string">','</span> deblank(M_.endo_names(k2,:))];
+0410       NAME = [deblank(M_.endo_names(k1,:)) <span class="string">'_'</span> deblank(M_.endo_names(k2,:))];
+0411       disp(sprintf(<span class="string">'%12s %7.3f %8.4f %7.4f %7.4f %4s %6.4f'</span>, name, <span class="keyword">...</span>
+0412            bayestopt_.pmean(ip),xparam1(ip),stdh(ip),tstath(ip), <span class="keyword">...</span>
+0413            pnames(bayestopt_.pshape(ip)+1,:), bayestopt_.pstdev(ip)));
+0414       eval([<span class="string">'oo_.posterior_mode.measurement_errors_corr.'</span> NAME <span class="string">' = xparam1(ip);'</span>]);
+0415       eval([<span class="string">'oo_.posterior_std.measurement_errors_corr.'</span> NAME <span class="string">' = stdh(ip);'</span>]); 
+0416       ip = ip+1;
+0417     <span class="keyword">end</span>
+0418   <span class="keyword">end</span>  
+0419   <span class="comment">%% Laplace approximation to the marginal log density:</span>
+0420   md_Laplace = .5*size(xparam1,1)*log(2*pi) + .5*log(det(invhess)) <span class="keyword">...</span>
+0421       - <a href="DsgeLikelihood.html" class="code" title="function [fval,cost_flag,ys,trend_coeff,info] = DsgeLikelihood(xparam1,gend,data)">DsgeLikelihood</a>(xparam1,gend,data);
+0422   oo_.MarginalDensity.LaplaceApproximation = md_Laplace;    
+0423   disp(<span class="string">' '</span>)
+0424   disp(sprintf(<span class="string">'Log data density [Laplace approximation] is %f.'</span>,md_Laplace))
+0425   disp(<span class="string">' '</span>)
+0426 <span class="keyword">elseif</span> ~any(bayestopt_.pshape &gt; 0) &amp; options_.posterior_mode_estimation
+0427   disp(<span class="string">' '</span>)
+0428   disp(<span class="string">'RESULTS FROM MAXIMUM LIKELIHOOD'</span>)
+0429   tstath = zeros(nx,1);
+0430   <span class="keyword">for</span> i = 1:nx
+0431     tstath(i) = abs(xparam1(i))/stdh(i);
+0432   <span class="keyword">end</span>
+0433   tit1 = sprintf(<span class="string">'%10s %10s %7s %6s\n'</span>,<span class="string">' '</span>,<span class="string">'Estimate'</span>,<span class="string">'s.d.'</span>,<span class="string">'t-stat'</span>);
+0434   <span class="keyword">if</span> np
+0435     ip = nvx+nvn+ncx+ncn+1;
+0436     disp(<span class="string">'parameters'</span>)
+0437     disp(tit1)
+0438     <span class="keyword">for</span> i=1:np
+0439       name = bayestopt_.name{ip};
+0440       disp(sprintf(<span class="string">'%12s %8.4f %7.4f %7.4f'</span>, <span class="keyword">...</span>
+0441            name,xparam1(ip),stdh(ip),tstath(ip)));
+0442       eval([<span class="string">'oo_.mle_mode.parameters.'</span> name <span class="string">' = xparam1(ip);'</span>]);
+0443       eval([<span class="string">'oo_.mle_std.parameters.'</span> name <span class="string">' = stdh(ip);'</span>]); 
+0444       ip = ip+1;
+0445     <span class="keyword">end</span>
+0446   <span class="keyword">end</span>
+0447   <span class="keyword">if</span> nvx
+0448     ip = 1;
+0449     disp(<span class="string">'standard deviation of shocks'</span>)
+0450     disp(tit1)
+0451     <span class="keyword">for</span> i=1:nvx
+0452       k = estim_params_.var_exo(i,1);
+0453       name = deblank(M_.exo_names(k,:));
+0454       disp(sprintf(<span class="string">'%12s %8.4f %7.4f %7.4f'</span>,name,xparam1(ip),stdh(ip),tstath(ip)));
+0455       M_.Sigma_e(k,k) = xparam1(ip)*xparam1(ip);
+0456       eval([<span class="string">'oo_.mle_mode.shocks_std.'</span> name <span class="string">' = xparam1(ip);'</span>]);
+0457       eval([<span class="string">'oo_.mle_std.shocks_std.'</span> name <span class="string">' = stdh(ip);'</span>]); 
+0458       ip = ip+1;
+0459     <span class="keyword">end</span>
+0460   <span class="keyword">end</span>
+0461   <span class="keyword">if</span> nvn
+0462     disp(<span class="string">'standard deviation of measurement errors'</span>)
+0463     disp(tit1)
+0464     ip = nvx+1;
+0465     <span class="keyword">for</span> i=1:nvn
+0466       name = deblank(options_.varobs(estim_params_.var_endo(i,1),:));
+0467       disp(sprintf(<span class="string">'%12s %8.4f %7.4f %7.4f'</span>,name,xparam1(ip),stdh(ip),tstath(ip)))
+0468       eval([<span class="string">'oo_.mle_mode.measurement_errors_std.'</span> name <span class="string">' = xparam1(ip);'</span>]);
+0469       eval([<span class="string">'oo_.mle_std.measurement_errors_std.'</span> name <span class="string">' = stdh(ip);'</span>]);      
+0470       ip = ip+1;
+0471     <span class="keyword">end</span>
+0472   <span class="keyword">end</span>
+0473   <span class="keyword">if</span> ncx
+0474     disp(<span class="string">'correlation of shocks'</span>)
+0475     disp(tit1)
+0476     ip = nvx+nvn+1;
+0477     <span class="keyword">for</span> i=1:ncx
+0478       k1 = estim_params_.corrx(i,1);
+0479       k2 = estim_params_.corrx(i,2);
+0480       name = [deblank(M_.exo_names(k1,:)) <span class="string">','</span> deblank(M_.exo_names(k2,:))];
+0481       NAME = [deblank(M_.exo_names(k1,:)) <span class="string">'_'</span> deblank(M_.exo_names(k2,:))];
+0482       disp(sprintf(<span class="string">'%12s %8.4f %7.4f %7.4f'</span>, name,xparam1(ip),stdh(ip),tstath(ip)));
+0483       M_.Sigma_e(k1,k2) = xparam1(ip)*sqrt(M_.Sigma_e(k1,k1)*M_.Sigma_e(k2,k2));
+0484       M_.Sigma_e(k2,k1) = M_.Sigma_e(k1,k2);
+0485       eval([<span class="string">'oo_.mle_mode.shocks_corr.'</span> NAME <span class="string">' = xparam1(ip);'</span>]);
+0486       eval([<span class="string">'oo_.mle_std.shocks_corr.'</span> NAME <span class="string">' = stdh(ip);'</span>]);      
+0487       ip = ip+1;
+0488     <span class="keyword">end</span>
+0489   <span class="keyword">end</span>
+0490   <span class="keyword">if</span> ncn
+0491     disp(<span class="string">'correlation of measurement errors'</span>)
+0492     disp(tit1)
+0493     ip = nvx+nvn+ncx+1;
+0494     <span class="keyword">for</span> i=1:ncn
+0495       k1 = estim_params_.corrn(i,1);
+0496       k2 = estim_params_.corrn(i,2);
+0497       name = [deblank(M_.endo_names(k1,:)) <span class="string">','</span> deblank(M_.endo_names(k2,:))];
+0498       NAME = [deblank(M_.endo_names(k1,:)) <span class="string">'_'</span> deblank(M_.endo_names(k2,:))];
+0499       disp(sprintf(<span class="string">'%12s %8.4f %7.4f %7.4f'</span>,name,xparam1(ip),stdh(ip),tstath(ip)));
+0500       eval([<span class="string">'oo_.mle_mode.measurement_error_corr.'</span> NAME <span class="string">' = xparam1(ip);'</span>]);
+0501       eval([<span class="string">'oo_.mle_std.measurement_error_corr.'</span> NAME <span class="string">' = stdh(ip);'</span>]);
+0502       ip = ip+1;
+0503     <span class="keyword">end</span>
+0504   <span class="keyword">end</span>
+0505 <span class="keyword">end</span>
+0506 
+0507 
+0508 OutputDirectoryName = <a href="CheckPath.html" class="code" title="function DirectoryName = CheckPath(type)">CheckPath</a>(<span class="string">'Output'</span>);
+0509 
+0510 <span class="keyword">if</span> any(bayestopt_.pshape &gt; 0) &amp; options_.TeX <span class="comment">%% Bayesian estimation (posterior mode) Latex output</span>
+0511   <span class="keyword">if</span> np
+0512     filename = [OutputDirectoryName <span class="string">'\'</span> M_.fname <span class="string">'_Posterior_Mode_1.TeX'</span>];
+0513     fidTeX = fopen(filename,<span class="string">'w'</span>);
+0514     fprintf(fidTeX,<span class="string">'%% TeX-table generated by dynare_estimation (Dynare).\n'</span>);
+0515     fprintf(fidTeX,<span class="string">'%% RESULTS FROM POSTERIOR MAXIMIZATION (parameters)\n'</span>);
+0516     fprintf(fidTeX,[<span class="string">'%% '</span> datestr(now,0)]);
+0517     fprintf(fidTeX,<span class="string">' \n'</span>);
+0518     fprintf(fidTeX,<span class="string">' \n'</span>);
+0519     fprintf(fidTeX,<span class="string">'{\\tiny \n'</span>)
+0520     fprintf(fidTeX,<span class="string">'\\begin{table}\n'</span>);
+0521     fprintf(fidTeX,<span class="string">'\\centering\n'</span>);
+0522     fprintf(fidTeX,<span class="string">'\\begin{tabular}{l|lcccc} \n'</span>);
+0523     fprintf(fidTeX,<span class="string">'\\hline\\hline \\\\ \n'</span>);
+0524     fprintf(fidTeX,<span class="string">'  &amp; Prior distribution &amp; Prior mean  &amp; Prior s.d. &amp; Posterior mode &amp; s.d. \\\\ \n'</span>);
+0525     fprintf(fidTeX,<span class="string">'\\hline \\\\ \n'</span>);
+0526     ip = nvx+nvn+ncx+ncn+1;
+0527     <span class="keyword">for</span> i=1:np
+0528       fprintf(fidTeX,<span class="string">'$%s$ &amp; %s &amp; %7.3f &amp; %6.4f &amp; %8.4f &amp; %7.4f \\\\ \n'</span>,<span class="keyword">...</span>
+0529           M_.param_names_tex(estim_params_.param_vals(i,1),:),<span class="keyword">...</span>
+0530           deblank(pnames(bayestopt_.pshape(ip)+1,:)),<span class="keyword">...</span>
+0531           bayestopt_.pmean(ip),<span class="keyword">...</span>
+0532           estim_params_.param_vals(i,6),<span class="keyword">...</span>
+0533           xparam1(ip),<span class="keyword">...</span>
+0534           stdh(ip));
+0535       ip = ip + 1;    
+0536     <span class="keyword">end</span>
+0537     fprintf(fidTeX,<span class="string">'\\hline\\hline \n'</span>);
+0538     fprintf(fidTeX,<span class="string">'\\end{tabular}\n '</span>);    
+0539     fprintf(fidTeX,<span class="string">'\\caption{Results from posterior parameters (parameters)}\n '</span>);
+0540     fprintf(fidTeX,<span class="string">'\\label{Table:Posterior:1}\n'</span>);
+0541     fprintf(fidTeX,<span class="string">'\\end{table}\n'</span>);
+0542     fprintf(fidTeX,<span class="string">'} \n'</span>)
+0543     fprintf(fidTeX,<span class="string">'%% End of TeX file.\n'</span>);
+0544     fclose(fidTeX);
+0545   <span class="keyword">end</span>
+0546   <span class="keyword">if</span> nvx
+0547     TeXfile = [OutputDirectoryName <span class="string">'\'</span> M_.fname <span class="string">'_Posterior_Mode_2.TeX'</span>];
+0548     fidTeX = fopen(TeXfile,<span class="string">'w'</span>);
+0549     fprintf(fidTeX,<span class="string">'%% TeX-table generated by dynare_estimation (Dynare).\n'</span>);
+0550     fprintf(fidTeX,<span class="string">'%% RESULTS FROM POSTERIOR MAXIMIZATION (standard deviation of structural shocks)\n'</span>);
+0551     fprintf(fidTeX,[<span class="string">'%% '</span> datestr(now,0)]);
+0552     fprintf(fidTeX,<span class="string">' \n'</span>);
+0553     fprintf(fidTeX,<span class="string">' \n'</span>);
+0554     fprintf(fidTeX,<span class="string">'{\\tiny \n'</span>);
+0555     fprintf(fidTeX,<span class="string">'\\begin{table}\n'</span>);
+0556     fprintf(fidTeX,<span class="string">'\\centering\n'</span>);
+0557     fprintf(fidTeX,<span class="string">'\\begin{tabular}{l|lcccc} \n'</span>);
+0558     fprintf(fidTeX,<span class="string">'\\hline\\hline \\\\ \n'</span>);
+0559     fprintf(fidTeX,<span class="string">'  &amp; Prior distribution &amp; Prior mean  &amp; Prior s.d. &amp; Posterior mode &amp; s.d. \\\\ \n'</span>)
+0560     fprintf(fidTeX,<span class="string">'\\hline \\\\ \n'</span>);
+0561     ip = 1;
+0562     <span class="keyword">for</span> i=1:nvx
+0563       k = estim_params_.var_exo(i,1);
+0564       fprintf(fidTeX,[ <span class="string">'$%s$ &amp; %4s &amp; %7.3f &amp; %6.4f &amp; %8.4f &amp; %7.4f \\\\ \n'</span>],<span class="keyword">...</span>
+0565           deblank(M_.exo_names_tex(k,:)),<span class="keyword">...</span>
+0566           deblank(pnames(bayestopt_.pshape(ip)+1,:)),<span class="keyword">...</span>
+0567           bayestopt_.pmean(ip),<span class="keyword">...</span>
+0568           estim_params_.var_exo(i,7),<span class="keyword">...</span>
+0569           xparam1(ip), <span class="keyword">...</span>
+0570           stdh(ip)); 
+0571       ip = ip+1;
+0572     <span class="keyword">end</span>
+0573     fprintf(fidTeX,<span class="string">'\\hline\\hline \n'</span>);
+0574     fprintf(fidTeX,<span class="string">'\\end{tabular}\n '</span>);    
+0575     fprintf(fidTeX,<span class="string">'\\caption{Results from posterior parameters (standard deviation of structural shocks)}\n '</span>);
+0576     fprintf(fidTeX,<span class="string">'\\label{Table:Posterior:2}\n'</span>);
+0577     fprintf(fidTeX,<span class="string">'\\end{table}\n'</span>);
+0578     fprintf(fidTeX,<span class="string">'} \n'</span>)
+0579     fprintf(fidTeX,<span class="string">'%% End of TeX file.\n'</span>);
+0580     fclose(fidTeX);
+0581   <span class="keyword">end</span>
+0582   <span class="keyword">if</span> nvn
+0583     TeXfile = [OutputDirectoryName <span class="string">'\'</span> M_.fname <span class="string">'_Posterior_Mode_3.TeX'</span>];
+0584     fidTeX  = fopen(TeXfile,<span class="string">'w'</span>);
+0585     fprintf(fidTeX,<span class="string">'%% TeX-table generated by dynare_estimation (Dynare).\n'</span>);
+0586     fprintf(fidTeX,<span class="string">'%% RESULTS FROM POSTERIOR MAXIMIZATION (standard deviation of measurement errors)\n'</span>);
+0587     fprintf(fidTeX,[<span class="string">'%% '</span> datestr(now,0)]);
+0588     fprintf(fidTeX,<span class="string">' \n'</span>);
+0589     fprintf(fidTeX,<span class="string">' \n'</span>);
+0590     fprintf(fidTeX,<span class="string">'\\begin{table}\n'</span>);
+0591     fprintf(fidTeX,<span class="string">'\\centering\n'</span>);
+0592     fprintf(fidTeX,<span class="string">'\\begin{tabular}{l|lcccc} \n'</span>);
+0593     fprintf(fidTeX,<span class="string">'\\hline\\hline \\\\ \n'</span>);
+0594     fprintf(fidTeX,<span class="string">'  &amp; Prior distribution &amp; Prior mean  &amp; Prior s.d. &amp;  Posterior mode &amp; s.d. \\\\ \n'</span>)
+0595     fprintf(fidTeX,<span class="string">'\\hline \\\\ \n'</span>);
+0596     ip = nvx+1;
+0597     <span class="keyword">for</span> i=1:nvn
+0598       idx = strmatch(options_.varobs(estim_params_.var_endo(i,1),:),M_.endo_names);
+0599       fprintf(fidTeX,<span class="string">'$%s$ &amp; %4s &amp; %7.3f &amp; %6.4f &amp; %8.4f &amp; %7.4f \\\\ \n'</span>,<span class="keyword">...</span>
+0600           deblank(M_.endo_names_tex(idx,:)), <span class="keyword">...</span>
+0601           deblank(pnames(bayestopt_.pshape(ip)+1,:)), <span class="keyword">...</span><span class="comment">        </span>
+0602           bayestopt_.pmean(ip), <span class="keyword">...</span>
+0603           estim_params_.var_endo(i,7),<span class="keyword">...</span><span class="comment">        </span>
+0604           xparam1(ip),<span class="keyword">...</span>
+0605           stdh(ip)); 
+0606       ip = ip+1;
+0607     <span class="keyword">end</span>
+0608     fprintf(fidTeX,<span class="string">'\\hline\\hline \n'</span>);
+0609     fprintf(fidTeX,<span class="string">'\\end{tabular}\n '</span>);    
+0610     fprintf(fidTeX,<span class="string">'\\caption{Results from posterior parameters (standard deviation of measurement errors)}\n '</span>);
+0611     fprintf(fidTeX,<span class="string">'\\label{Table:Posterior:3}\n'</span>);
+0612     fprintf(fidTeX,<span class="string">'\\end{table}\n'</span>);
+0613     fprintf(fidTeX,<span class="string">'%% End of TeX file.\n'</span>);
+0614     fclose(fidTeX);
+0615   <span class="keyword">end</span>
+0616   <span class="keyword">if</span> ncx
+0617     TeXfile = [OutputDirectoryName <span class="string">'\'</span> M_.fname <span class="string">'_Posterior_Mode_4.TeX'</span>];
+0618     fidTeX = fopen(TeXfile,<span class="string">'w'</span>);
+0619     fprintf(fidTeX,<span class="string">'%% TeX-table generated by dynare_estimation (Dynare).\n'</span>);
+0620     fprintf(fidTeX,<span class="string">'%% RESULTS FROM POSTERIOR MAXIMIZATION (correlation of structural shocks)\n'</span>);
+0621     fprintf(fidTeX,[<span class="string">'%% '</span> datestr(now,0)]);
+0622     fprintf(fidTeX,<span class="string">' \n'</span>);
+0623     fprintf(fidTeX,<span class="string">' \n'</span>);
+0624     fprintf(fidTeX,<span class="string">'\\begin{table}\n'</span>);
+0625     fprintf(fidTeX,<span class="string">'\\centering\n'</span>);
+0626     fprintf(fidTeX,<span class="string">'\\begin{tabular}{l|lcccc} \n'</span>);
+0627     fprintf(fidTeX,<span class="string">'\\hline\\hline \\\\ \n'</span>);
+0628     fprintf(fidTeX,<span class="string">'  &amp; Prior distribution &amp; Prior mean  &amp; Prior s.d. &amp;  Posterior mode &amp; s.d. \\\\ \n'</span>)
+0629     fprintf(fidTeX,<span class="string">'\\hline \\\\ \n'</span>);
+0630     ip = nvx+nvn+1;
+0631     <span class="keyword">for</span> i=1:ncx
+0632       k1 = estim_params_.corrx(i,1);
+0633       k2 = estim_params_.corrx(i,2);
+0634       fprintf(fidTeX,[ <span class="string">'$%s$ &amp; %s &amp; %7.3f &amp; %6.4f &amp; %8.4f &amp; %7.4f \\\\ \n'</span>],<span class="keyword">...</span>
+0635           [deblank(M_.exo_names_tex(k1,:)) <span class="string">','</span> deblank(M_.exo_names_tex(k2,:))], <span class="keyword">...</span>
+0636           deblank(pnames(bayestopt_.pshape(ip)+1,:)), <span class="keyword">...</span>
+0637           bayestopt_.pmean(ip), <span class="keyword">...</span>
+0638           estim_params_.corrx(i,8), <span class="keyword">...</span>
+0639           xparam1(ip), <span class="keyword">...</span>
+0640           stdh(ip));
+0641       ip = ip+1;
+0642     <span class="keyword">end</span>
+0643     fprintf(fidTeX,<span class="string">'\\hline\\hline \n'</span>);
+0644     fprintf(fidTeX,<span class="string">'\\end{tabular}\n '</span>);    
+0645     fprintf(fidTeX,<span class="string">'\\caption{Results from posterior parameters (correlation of structural shocks)}\n '</span>);
+0646     fprintf(fidTeX,<span class="string">'\\label{Table:Posterior:4}\n'</span>);
+0647     fprintf(fidTeX,<span class="string">'\\end{table}\n'</span>);
+0648     fprintf(fidTeX,<span class="string">'%% End of TeX file.\n'</span>);
+0649     fclose(fidTeX);
+0650   <span class="keyword">end</span>
+0651   <span class="keyword">if</span> ncn
+0652     TeXfile = [OutputDirectoryName <span class="string">'\'</span> M_.fname <span class="string">'_Posterior_Mode_5.TeX'</span>];
+0653     fidTeX = fopen(TeXfile,<span class="string">'w'</span>);
+0654     fprintf(fidTeX,<span class="string">'%% TeX-table generated by dynare_estimation (Dynare).\n'</span>);
+0655     fprintf(fidTeX,<span class="string">'%% RESULTS FROM POSTERIOR MAXIMIZATION (correlation of measurement errors)\n'</span>);
+0656     fprintf(fidTeX,[<span class="string">'%% '</span> datestr(now,0)]);
+0657     fprintf(fidTeX,<span class="string">' \n'</span>);
+0658     fprintf(fidTeX,<span class="string">' \n'</span>);
+0659     fprintf(fidTeX,<span class="string">'\\begin{table}\n'</span>);
+0660     fprintf(fidTeX,<span class="string">'\\centering\n'</span>);
+0661     fprintf(fidTeX,<span class="string">'\\begin{tabular}{l|lcccc} \n'</span>);
+0662     fprintf(fidTeX,<span class="string">'\\hline\\hline \\\\ \n'</span>);
+0663     fprintf(fidTeX,<span class="string">'  &amp; Prior distribution &amp; Prior mean  &amp; Prior s.d. &amp;  Posterior mode &amp; s.d. \\\\ \n'</span>)
+0664     fprintf(fidTeX,<span class="string">'\\hline \\\\ \n'</span>);
+0665     ip = nvx+nvn+ncx+1;
+0666     <span class="keyword">for</span> i=1:ncn
+0667       k1 = estim_params_.corrn(i,1);
+0668       k2 = estim_params_.corrn(i,2);
+0669       fprintf(fidTeX,<span class="string">'$%s$ &amp; %s &amp; %7.3f &amp; %6.4f &amp; %8.4f &amp; %7.4f \\\\ \n'</span>,<span class="keyword">...</span>
+0670           [deblank(M_.endo_names_tex(k1,:)) <span class="string">','</span> deblank(M_.endo_names_tex(k2,:))], <span class="keyword">...</span>
+0671           pnames(bayestopt_.pshape(ip)+1,:), <span class="keyword">...</span>
+0672           bayestopt_.pmean(ip), <span class="keyword">...</span>
+0673           estim_params_.corrn(i,8), <span class="keyword">...</span>
+0674           xparam1(ip), <span class="keyword">...</span>
+0675           stdh(ip));
+0676       ip = ip+1;
+0677     <span class="keyword">end</span>
+0678     fprintf(fidTeX,<span class="string">'\\hline\\hline \n'</span>);
+0679     fprintf(fidTeX,<span class="string">'\\end{tabular}\n '</span>);    
+0680     fprintf(fidTeX,<span class="string">'\\caption{Results from posterior parameters (correlation of measurement errors)}\n '</span>);
+0681     fprintf(fidTeX,<span class="string">'\\label{Table:Posterior:5}\n'</span>);
+0682     fprintf(fidTeX,<span class="string">'\\end{table}\n'</span>);
+0683     fprintf(fidTeX,<span class="string">'%% End of TeX file.\n'</span>);
+0684     fclose(fidTeX);
+0685   <span class="keyword">end</span>
+0686 <span class="keyword">end</span>
+0687 
+0688 <span class="keyword">if</span> (any(bayestopt_.pshape  &gt;0 ) &amp; options_.mh_replic) | <span class="keyword">...</span>
+0689       (any(bayestopt_.pshape &gt;0 ) &amp; options_.load_mh_file)  <span class="comment">%% not ML estimation</span>
+0690   bounds = <a href="prior_bounds.html" class="code" title="function bounds = prior_bounds(bayestopt)">prior_bounds</a>(bayestopt_);
+0691   bayestopt_.lb = bounds(:,1);
+0692   bayestopt_.ub = bounds(:,2);
+0693   <span class="keyword">if</span> any(xparam1 &lt; bounds(:,1)) | any(xparam1 &gt; bounds(:,2))
+0694     find(xparam1 &lt; bounds(:,1))
+0695     find(xparam1 &gt; bounds(:,2))
+0696     error(<span class="string">'Mode values are outside prior bounds. Reduce prior_trunc.'</span>)
+0697   <span class="keyword">end</span>  
+0698   <span class="keyword">if</span> options_.mh_replic
+0699     <a href="metropolis.html" class="code" title="function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)">metropolis</a>(xparam1,invhess,gend,data,rawdata,bounds);
+0700   <span class="keyword">end</span>
+0701   <span class="keyword">if</span> ~options_.nodiagnostic &amp; options_.mh_replic &gt; 1000 &amp; options_.mh_nblck &gt; 1
+0702     <a href="McMCDiagnostics.html" class="code" title="function McmcDiagnostic">McMCDiagnostics</a>;
+0703   <span class="keyword">end</span>
+0704   <span class="comment">%% Here i discard first half of the draws:</span>
+0705   <a href="CutSample.html" class="code" title="function CutSample()">CutSample</a>;
+0706   <span class="comment">%% Estimation of the marginal density from the Mh draws:</span>
+0707   marginal = <a href="marginal_density.html" class="code" title="function marginal = marginal_density()">marginal_density</a>;
+0708   <span class="comment">%%</span>
+0709   <a href="GetPosteriorParametersStatistics.html" class="code" title="function GetPosteriorParametersStatistics()">GetPosteriorParametersStatistics</a>;
+0710   <a href="PlotPosteriorDistributions.html" class="code" title="function PlotPosteriorDistributions()">PlotPosteriorDistributions</a>;
+0711   <a href="metropolis_draw.html" class="code" title="function [xparams, logpost]=metropolis_draw(init)">metropolis_draw</a>(1);
+0712   <span class="keyword">if</span> options_.bayesian_irf
+0713     <a href="PosteriorIRF.html" class="code" title="function PosteriorIRF(type)">PosteriorIRF</a>(<span class="string">'posterior'</span>);
+0714   <span class="keyword">end</span>
+0715   <span class="keyword">return</span>
+0716   
+0717 <span class="keyword">end</span>
+0718 
+0719 <span class="keyword">if</span> ~((any(bayestopt_.pshape &gt; 0) &amp; options_.mh_replic) | (any(bayestopt_.pshape <span class="keyword">...</span>
+0720                           &gt; 0) &amp; options_.load_mh_file)) | ~options_.smoother  
+0721     <span class="comment">%% ML estimation, or posterior mode without metropolis-hastings or metropolis without bayesian smooth variables</span>
+0722   options_.lik_algo = 2;
+0723   [atT,innov,measurement_error,filtered_state_vector,ys,trend_coeff] = <a href="DsgeSmoother.html" class="code" title="function [alphahat,etahat,epsilonhat,ahat,SteadyState,trend_coeff,aK] = DsgeSmoother(xparam1,gend,Y)">DsgeSmoother</a>(xparam1,gend,data);
+0724   <span class="keyword">for</span> i=1:M_.endo_nbr
+0725     eval([<span class="string">'oo_.SmoothedVariables.'</span> deblank(M_.endo_names(dr.order_var(i),:)) <span class="string">' = atT(i,:)'';'</span>]);
+0726     eval([<span class="string">'oo_.FilteredVariables.'</span> deblank(M_.endo_names(dr.order_var(i),:)) <span class="string">' = filtered_state_vector(i,:)'';'</span>]);
+0727   <span class="keyword">end</span>
+0728   [nbplt,nr,nc,lr,lc,nstar] = <a href="pltorg.html" class="code" title="function [nbplt,nr,nc,lr,lc,nstar] = pltorg(number)">pltorg</a>(M_.exo_nbr);
+0729   <span class="keyword">if</span> options_.TeX
+0730     fidTeX = fopen([M_.fname <span class="string">'_SmoothedShocks.TeX'</span>],<span class="string">'w'</span>);
+0731     fprintf(fidTeX,<span class="string">'%% TeX eps-loader file generated by dynare_estimation.m (Dynare).\n'</span>);
+0732     fprintf(fidTeX,[<span class="string">'%% '</span> datestr(now,0) <span class="string">'\n'</span>]);
+0733     fprintf(fidTeX,<span class="string">' \n'</span>);
+0734   <span class="keyword">end</span>    
+0735   <span class="keyword">if</span> nbplt == 1
+0736     hh = figure(<span class="string">'Name'</span>,<span class="string">'Smoothed shocks'</span>);
+0737     NAMES = [];
+0738     <span class="keyword">if</span> options_.TeX, TeXNAMES = [], <span class="keyword">end</span>
+0739     <span class="keyword">for</span> i=1:M_.exo_nbr
+0740       subplot(nr,nc,i);
+0741       plot(1:gend,innov(i,:),<span class="string">'-k'</span>,<span class="string">'linewidth'</span>,1)
+0742       hold on
+0743       plot([1 gend],[0 0],<span class="string">'-r'</span>,<span class="string">'linewidth'</span>,.5)
+0744       hold off
+0745       xlim([1 gend])
+0746       name    = deblank(M_.exo_names(i,:));
+0747       NAMES   = strvcat(NAMES,name);
+0748       <span class="keyword">if</span> ~isempty(options_.XTick)
+0749     set(gca,<span class="string">'XTick'</span>,options_.XTick)
+0750     set(gca,<span class="string">'XTickLabel'</span>,options_.XTickLabel)
+0751       <span class="keyword">end</span>
+0752       <span class="keyword">if</span> options_.TeX
+0753     texname = M_.exo_names_tex(i,1);
+0754     TeXNAMES   = strvcat(TeXNAMES,[<span class="string">'$ '</span> deblank(texname) <span class="string">' $'</span>]);
+0755       <span class="keyword">end</span>
+0756       title(name,<span class="string">'Interpreter'</span>,<span class="string">'none'</span>)
+0757       eval([<span class="string">'oo_.SmoothedShocks.'</span> deblank(M_.exo_names(i,:)) <span class="string">' = innov(i,:)'';'</span>]);
+0758     <span class="keyword">end</span>
+0759     eval([<span class="string">'print -depsc2 '</span> M_.fname <span class="string">'_SmoothedShocks'</span> int2str(1)]);
+0760     eval([<span class="string">'print -dpdf '</span> M_.fname <span class="string">'_SmoothedShocks'</span> int2str(1)]);
+0761     saveas(hh,[M_.fname <span class="string">'_SmoothedShocks'</span> int2str(1) <span class="string">'.fig'</span>]);
+0762     <span class="keyword">if</span> options_.nograph, close(hh), <span class="keyword">end</span>
+0763     <span class="keyword">if</span> options_.TeX
+0764       fprintf(fidTeX,<span class="string">'\\begin{figure}[H]\n'</span>);
+0765       <span class="keyword">for</span> jj = 1:M_.exo_nbr
+0766     fprintf(fidTeX,<span class="string">'\\psfrag{%s}[1][][0.5][0]{%s}\n'</span>,deblank(NAMES(jj,:)),deblank(TeXNAMES(jj,:)));
+0767       <span class="keyword">end</span>
+0768       fprintf(fidTeX,<span class="string">'\\centering \n'</span>);
+0769       fprintf(fidTeX,<span class="string">'\\includegraphics[scale=0.5]{%s_SmoothedShocks%s}\n'</span>,M_.fname,int2str(1));
+0770       fprintf(fidTeX,<span class="string">'\\caption{Smoothed shocks.}'</span>);
+0771       fprintf(fidTeX,<span class="string">'\\label{Fig:SmoothedShocks:%s}\n'</span>,int2str(1));
+0772       fprintf(fidTeX,<span class="string">'\\end{figure}\n'</span>);
+0773       fprintf(fidTeX,<span class="string">'\n'</span>);
+0774       fprintf(fidTeX,<span class="string">'%% End of TeX file.\n'</span>);
+0775       fclose(fidTeX);
+0776     <span class="keyword">end</span>
+0777   <span class="keyword">else</span>
+0778     <span class="keyword">for</span> plt = 1:nbplt-1
+0779       hh = figure(<span class="string">'Name'</span>,<span class="string">'Smoothed shocks'</span>);
+0780       set(0,<span class="string">'CurrentFigure'</span>,hh)
+0781       NAMES = [];
+0782       <span class="keyword">if</span> options_.TeX, TeXNAMES = [], <span class="keyword">end</span>
+0783       <span class="keyword">for</span> i=1:nstar
+0784     k = (plt-1)*nstar+i;
+0785     subplot(nr,nc,i);
+0786     plot([1 gend],[0 0],<span class="string">'-r'</span>,<span class="string">'linewidth'</span>,.5)
+0787     hold on
+0788     plot(1:gend,innov(k,:),<span class="string">'-k'</span>,<span class="string">'linewidth'</span>,1)
+0789     hold off
+0790     name = deblank(M_.exo_names(k,:));
+0791     NAMES = strvcat(NAMES,name);
+0792     <span class="keyword">if</span> ~isempty(options_.XTick)
+0793       set(gca,<span class="string">'XTick'</span>,options_.XTick)
+0794       set(gca,<span class="string">'XTickLabel'</span>,options_.XTickLabel)
+0795     <span class="keyword">end</span>
+0796     xlim([1 gend])
+0797     <span class="keyword">if</span> options_.TeX
+0798       texname = M_.exo_names_tex(k,:);
+0799       TeXNAMES = strvcat(TeXNAMES,[<span class="string">'$ '</span> deblank(texname) <span class="string">' $'</span>]);
+0800     <span class="keyword">end</span>    
+0801     title(name,<span class="string">'Interpreter'</span>,<span class="string">'none'</span>)
+0802     eval([<span class="string">'oo_.SmoothedShocks.'</span> deblank(name) <span class="string">' = innov(k,:)'';'</span>]);
+0803       <span class="keyword">end</span>
+0804       eval([<span class="string">'print -depsc2 '</span> M_.fname <span class="string">'_SmoothedShocks'</span> int2str(plt)]);
+0805       eval([<span class="string">'print -dpdf '</span> M_.fname <span class="string">'_SmoothedShocks'</span> int2str(plt)]);
+0806       saveas(hh,[M_.fname <span class="string">'_SmoothedShocks'</span> int2str(plt) <span class="string">'.fig'</span>]);
+0807       <span class="keyword">if</span> options_.nograph, close(hh), <span class="keyword">end</span>
+0808       <span class="keyword">if</span> options_.TeX
+0809     fprintf(fidTeX,<span class="string">'\\begin{figure}[H]\n'</span>);
+0810     <span class="keyword">for</span> jj = 1:nstar
+0811       fprintf(fidTeX,<span class="string">'\\psfrag{%s}[1][][0.5][0]{%s}\n'</span>,deblank(NAMES(jj,:)),deblank(TeXNAMES(jj,:)));
+0812     <span class="keyword">end</span>    
+0813     fprintf(fidTeX,<span class="string">'\\centering \n'</span>);
+0814     fprintf(fidTeX,<span class="string">'\\includegraphics[scale=0.5]{%s_SmoothedShocks%s}\n'</span>,M_.fname,int2str(plt));
+0815     fprintf(fidTeX,<span class="string">'\\caption{Smoothed shocks.}'</span>);
+0816     fprintf(fidTeX,<span class="string">'\\label{Fig:SmoothedShocks:%s}\n'</span>,int2str(plt));
+0817     fprintf(fidTeX,<span class="string">'\\end{figure}\n'</span>);
+0818     fprintf(fidTeX,<span class="string">'\n'</span>);
+0819       <span class="keyword">end</span>    
+0820     <span class="keyword">end</span>
+0821     hh = figure(<span class="string">'Name'</span>,<span class="string">'Smoothed shocks'</span>);
+0822     set(0,<span class="string">'CurrentFigure'</span>,hh)
+0823     NAMES = [];
+0824     <span class="keyword">if</span> options_.TeX, TeXNAMES = [], <span class="keyword">end</span>
+0825     <span class="keyword">for</span> i=1:M_.exo_nbr-(nbplt-1)*nstar
+0826       k = (nbplt-1)*nstar+i;
+0827       <span class="keyword">if</span> lr ~= 0
+0828         subplot(lr,lc,i);
+0829       <span class="keyword">else</span>
+0830         subplot(nr,nc,i);
+0831       <span class="keyword">end</span>    
+0832       plot([1 gend],[0 0],<span class="string">'-r'</span>,<span class="string">'linewidth'</span>,0.5)
+0833       hold on
+0834       plot(1:gend,innov(k,:),<span class="string">'-k'</span>,<span class="string">'linewidth'</span>,1)
+0835       hold off
+0836       name     = deblank(M_.exo_names(k,:));
+0837       NAMES    = strvcat(NAMES,name);
+0838       <span class="keyword">if</span> ~isempty(options_.XTick)
+0839         set(gca,<span class="string">'XTick'</span>,options_.XTick)
+0840         set(gca,<span class="string">'XTickLabel'</span>,options_.XTickLabel)
+0841       <span class="keyword">end</span>
+0842       xlim([1 gend])
+0843       <span class="keyword">if</span> options_.TeX
+0844         texname  = M_.exo_names_tex(k,:);
+0845         TeXNAMES = strvcat(TeXNAMES,[<span class="string">'$ '</span> deblank(texname) <span class="string">' $'</span>]);
+0846       <span class="keyword">end</span>
+0847       title(name,<span class="string">'Interpreter'</span>,<span class="string">'none'</span>)
+0848       eval([<span class="string">'oo_.SmoothedShocks.'</span> deblank(name) <span class="string">' = innov(k,:)'';'</span>]);
+0849     <span class="keyword">end</span>
+0850     eval([<span class="string">'print -depsc2 '</span> M_.fname <span class="string">'_SmoothedShocks'</span> int2str(nbplt)]);
+0851     eval([<span class="string">'print -dpdf '</span> M_.fname <span class="string">'_SmoothedShocks'</span> int2str(nbplt)]);
+0852     saveas(hh,[M_.fname <span class="string">'_SmoothedShocks'</span> int2str(nbplt) <span class="string">'.fig'</span>]);
+0853     <span class="keyword">if</span> options_.nograph, close(hh), <span class="keyword">end</span>
+0854     <span class="keyword">if</span> options_.TeX
+0855       fprintf(fidTeX,<span class="string">'\\begin{figure}[H]\n'</span>);
+0856       <span class="keyword">for</span> jj = 1:size(NAMES,1);
+0857         fprintf(fidTeX,<span class="string">'\\psfrag{%s}[1][][0.5][0]{%s}\n'</span>,deblank(NAMES(jj,:)),deblank(TeXNAMES(jj,:)));
+0858       <span class="keyword">end</span>    
+0859       fprintf(fidTeX,<span class="string">'\\centering \n'</span>);
+0860       fprintf(fidTeX,<span class="string">'\\includegraphics[scale=0.5]{%s_SmoothedShocks%s}\n'</span>,M_.fname,int2str(nbplt));
+0861       fprintf(fidTeX,<span class="string">'\\caption{Smoothed shocks.}'</span>);
+0862       fprintf(fidTeX,<span class="string">'\\label{Fig:SmoothedShocks:%s}\n'</span>,int2str(nbplt));
+0863       fprintf(fidTeX,<span class="string">'\\end{figure}\n'</span>);
+0864       fprintf(fidTeX,<span class="string">'\n'</span>);
+0865       fprintf(fidTeX,<span class="string">'%% End of TeX file.\n'</span>);
+0866       fclose(fidTeX);
+0867     <span class="keyword">end</span>    
+0868   <span class="keyword">end</span>
+0869   <span class="comment">%%</span>
+0870   <span class="comment">%%    Smooth observational errors...</span>
+0871   <span class="comment">%%</span>
+0872   yf = zeros(gend,n_varobs);
+0873   <span class="keyword">if</span> options_.prefilter == 1
+0874     yf = atT(bayestopt_.mf,:)+repmat(transpose(bayestopt_.mean_varobs),1,gend);
+0875   <span class="keyword">elseif</span> options_.loglinear == 1
+0876     yf = atT(bayestopt_.mf,:)+repmat(log(ys(bayestopt_.mfys)),1,gend)+<span class="keyword">...</span>
+0877          trend_coeff*[1:gend];
+0878   <span class="keyword">else</span>
+0879     yf = atT(bayestopt_.mf,:)+repmat(ys(bayestopt_.mfys),1,gend)+<span class="keyword">...</span>
+0880          trend_coeff*[1:gend];
+0881   <span class="keyword">end</span>
+0882   <span class="keyword">if</span> nvn
+0883     number_of_plots_to_draw = 0;
+0884     index = [];
+0885     <span class="keyword">for</span> i=1:n_varobs
+0886       <span class="keyword">if</span> max(abs(measurement_error(10:end))) &gt; 0.000000001
+0887         number_of_plots_to_draw = number_of_plots_to_draw + 1;
+0888         index = cat(1,index,i);
+0889       <span class="keyword">end</span>
+0890       eval([<span class="string">'oo_.SmoothedMeasurementErrors.'</span> deblank(options_.varobs(i,:)) <span class="keyword">...</span>
+0891             <span class="string">' = measurement_error(i,:)'';'</span>]);
+0892     <span class="keyword">end</span>
+0893     [nbplt,nr,nc,lr,lc,nstar] = <a href="pltorg.html" class="code" title="function [nbplt,nr,nc,lr,lc,nstar] = pltorg(number)">pltorg</a>(number_of_plots_to_draw);
+0894     <span class="keyword">if</span> options_.TeX
+0895       fidTeX = fopen([M_.fname <span class="string">'_SmoothedObservationErrors.TeX'</span>],<span class="string">'w'</span>);
+0896       fprintf(fidTeX,<span class="string">'%% TeX eps-loader file generated by dynare_estimation.m (Dynare).\n'</span>);
+0897       fprintf(fidTeX,[<span class="string">'%% '</span> datestr(now,0) <span class="string">'\n'</span>]);
+0898       fprintf(fidTeX,<span class="string">' \n'</span>);
+0899     <span class="keyword">end</span>
+0900     <span class="keyword">if</span> nbplt == 1
+0901       hh = figure(<span class="string">'Name'</span>,<span class="string">'Smoothed observation errors'</span>);
+0902       set(0,<span class="string">'CurrentFigure'</span>,hh)
+0903       NAMES = [];
+0904       <span class="keyword">if</span> options_.TeX, TeXNAMES = [], <span class="keyword">end</span>
+0905       <span class="keyword">for</span> i=1:number_of_plots_to_draw
+0906         subplot(nr,nc,i);
+0907         plot(1:gend,measurement_error(index(i),:),<span class="string">'-k'</span>,<span class="string">'linewidth'</span>,1)
+0908         hold on
+0909         plot([1 gend],[0 0],<span class="string">'-r'</span>,<span class="string">'linewidth'</span>,.5)
+0910         hold off
+0911         name    = deblank(options_.varobs(index(i),:));
+0912         NAMES   = strvcat(NAMES,name);
+0913         <span class="keyword">if</span> ~isempty(options_.XTick)
+0914           set(gca,<span class="string">'XTick'</span>,options_.XTick)
+0915           set(gca,<span class="string">'XTickLabel'</span>,options_.XTickLabel)
+0916         <span class="keyword">end</span>
+0917         <span class="keyword">if</span> options_.TeX
+0918           idx = strmatch(options_.varobs(indx(i),:),M_.endo_names,<span class="string">'exact'</span>);
+0919           texname = M_.endo_names_tex(idx,:);
+0920           TeXNAMES   = strvcat(TeXNAMES,[<span class="string">'$ '</span> deblank(texname) <span class="string">' $'</span>]);
+0921         <span class="keyword">end</span>
+0922         title(name,<span class="string">'Interpreter'</span>,<span class="string">'none'</span>)
+0923       <span class="keyword">end</span>
+0924       eval([<span class="string">'print -depsc2 '</span> M_.fname <span class="string">'_SmoothedObservationErrors'</span> int2str(1)]);
+0925       eval([<span class="string">'print -dpdf '</span> M_.fname <span class="string">'_SmoothedObservationErrors'</span> int2str(1)]);
+0926       saveas(hh,[M_.fname <span class="string">'_SmoothedObservationErrors'</span> int2str(1) <span class="string">'.fig'</span>]);
+0927       <span class="keyword">if</span> options_.nograph, close(hh), <span class="keyword">end</span>
+0928       <span class="keyword">if</span> options_.TeX
+0929         fprintf(fidTeX,<span class="string">'\\begin{figure}[H]\n'</span>);
+0930         <span class="keyword">for</span> jj = 1:number_of_plots_to_draw
+0931           fprintf(fidTeX,<span class="string">'\\psfrag{%s}[1][][0.5][0]{%s}\n'</span>,deblank(NAMES(jj,:)),deblank(TeXNAMES(jj,:)));
+0932         <span class="keyword">end</span>    
+0933         fprintf(fidTeX,<span class="string">'\\centering \n'</span>);
+0934         fprintf(fidTeX,<span class="string">'\\includegraphics[scale=0.5]{%s_SmoothedObservationErrors%s}\n'</span>,M_.fname,int2str(1));
+0935         fprintf(fidTeX,<span class="string">'\\caption{Smoothed observation errors.}'</span>);
+0936         fprintf(fidTeX,<span class="string">'\\label{Fig:SmoothedObservationErrors:%s'</span>,int2str(1));
+0937         fprintf(fidTeX,<span class="string">'\\end{figure}\n'</span>);
+0938         fprintf(fidTeX,<span class="string">'\n'</span>);
+0939         fprintf(fidTeX,<span class="string">'%% End of TeX file.\n'</span>);
+0940         fclose(fidTeX);
+0941       <span class="keyword">end</span>
+0942     <span class="keyword">else</span>
+0943       <span class="keyword">for</span> plt = 1:nbplt-1
+0944         hh = figure(<span class="string">'Name'</span>,<span class="string">'Smoothed observation errors'</span>);
+0945         set(0,<span class="string">'CurrentFigure'</span>,hh)
+0946         NAMES = [];
+0947         <span class="keyword">if</span> options_.TeX, TeXNAMES = [], <span class="keyword">end</span>
+0948         <span class="keyword">for</span> i=1:nstar
+0949           k = (plt-1)*nstar+i;
+0950           subplot(nr,nc,i);
+0951           plot([1 gend],[0 0],<span class="string">'-r'</span>,<span class="string">'linewidth'</span>,.5)
+0952           hold on
+0953           plot(1:gend,measurement_error(index(k),:),<span class="string">'-k'</span>,<span class="string">'linewidth'</span>,1)
+0954           hold off
+0955           name = deblank(options_.varobs(index(k),:));
+0956           NAMES = strvcat(NAMES,name);
+0957           <span class="keyword">if</span> ~isempty(options_.XTick)
+0958             set(gca,<span class="string">'XTick'</span>,options_.XTick)
+0959             set(gca,<span class="string">'XTickLabel'</span>,options_.XTickLabel)
+0960           <span class="keyword">end</span>
+0961           <span class="keyword">if</span> options_.TeX
+0962             idx = strmatch(options_.varobs(k),M_.endo_names,<span class="string">'exact'</span>);
+0963             texname = M_.endo_names_tex(idx,:);
+0964             TeXNAMES = strvcat(TeXNAMES,[<span class="string">'$ '</span> deblank(texname) <span class="string">' $'</span>]);
+0965           <span class="keyword">end</span>    
+0966           title(name,<span class="string">'Interpreter'</span>,<span class="string">'none'</span>)
+0967         <span class="keyword">end</span>
+0968         eval([<span class="string">'print -depsc2 '</span> M_.fname <span class="string">'_SmoothedObservationErrors'</span> int2str(plt)]);
+0969         eval([<span class="string">'print -dpdf '</span> M_.fname <span class="string">'_SmoothedObservationErrors'</span> int2str(plt)]);
+0970         saveas(hh,[M_.fname <span class="string">'_SmoothedObservationErrors'</span> int2str(plt) <span class="string">'.fig'</span>]);
+0971         <span class="keyword">if</span> options_.nograph, close(hh), <span class="keyword">end</span>
+0972         <span class="keyword">if</span> options_.TeX
+0973           fprintf(fidTeX,<span class="string">'\\begin{figure}[H]\n'</span>);
+0974           <span class="keyword">for</span> jj = 1:nstar
+0975             fprintf(fidTeX,<span class="string">'\\psfrag{%s}[1][][0.5][0]{%s}\n'</span>,deblank(NAMES(jj,:)),deblank(TeXNAMES(jj,:)));
+0976           <span class="keyword">end</span>    
+0977           fprintf(fidTeX,<span class="string">'\\centering \n'</span>);
+0978           fprintf(fidTeX,<span class="string">'\\includegraphics[scale=0.5]{%s_SmoothedObservationErrors%s}\n'</span>,M_.fname,int2str(plt));
+0979           fprintf(fidTeX,<span class="string">'\\caption{Smoothed observation errors.}'</span>);
+0980           fprintf(fidTeX,<span class="string">'\\label{Fig:SmoothedObservationErrors:%s}\n'</span>,int2str(plt));
+0981           fprintf(fidTeX,<span class="string">'\\end{figure}\n'</span>);
+0982           fprintf(fidTeX,<span class="string">'\n'</span>);
+0983         <span class="keyword">end</span>    
+0984       <span class="keyword">end</span>
+0985       hh = figure(<span class="string">'Name'</span>,<span class="string">'Smoothed observation errors'</span>);
+0986       set(0,<span class="string">'CurrentFigure'</span>,hh)
+0987       NAMES = [];
+0988       <span class="keyword">if</span> options_.TeX, TeXNAMES = [], <span class="keyword">end</span>
+0989       <span class="keyword">for</span> i=1:number_of_plots_to_draw-(nbplt-1)*nstar
+0990         k = (nbplt-1)*nstar+i;
+0991         <span class="keyword">if</span> lr ~= 0
+0992           subplot(lr,lc,i);
+0993         <span class="keyword">else</span>
+0994           subplot(nr,nc,i);
+0995         <span class="keyword">end</span>    
+0996         plot([1 gend],[0 0],<span class="string">'-r'</span>,<span class="string">'linewidth'</span>,0.5)
+0997         hold on
+0998         plot(1:gend,measurement_error(index(k),:),<span class="string">'-k'</span>,<span class="string">'linewidth'</span>,1)
+0999         hold off
+1000         name     = deblank(options_.varobs(index(k),:));
+1001         NAMES    = strvcat(NAMES,name);
+1002         <span class="keyword">if</span> ~isempty(options_.XTick)
+1003           set(gca,<span class="string">'XTick'</span>,options_.XTick)
+1004           set(gca,<span class="string">'XTickLabel'</span>,options_.XTickLabel)
+1005         <span class="keyword">end</span>
+1006         <span class="keyword">if</span> options_.TeX
+1007           idx = strmatch(options_.varobs(index(k)),M_.endo_names,<span class="string">'exact'</span>);
+1008           texname = M_.endo_names_tex(idx,:);
+1009           TeXNAMES = strvcat(TeXNAMES,[<span class="string">'$ '</span> deblank(texname) <span class="string">' $'</span>]);
+1010         <span class="keyword">end</span>
+1011         title(name,<span class="string">'Interpreter'</span>,<span class="string">'none'</span>);
+1012       <span class="keyword">end</span>
+1013       eval([<span class="string">'print -depsc2 '</span> M_.fname <span class="string">'_SmoothedObservationErrors'</span> int2str(nbplt)]);
+1014       eval([<span class="string">'print -dpdf '</span> M_.fname <span class="string">'_SmoothedObservationErrors'</span> int2str(nbplt)]);
+1015       saveas(hh,[M_.fname <span class="string">'_SmoothedObservationErrors'</span> int2str(nbplt) <span class="string">'.fig'</span>]);
+1016       <span class="keyword">if</span> options_.nograph, close(hh), <span class="keyword">end</span>
+1017       <span class="keyword">if</span> options_.TeX
+1018         fprintf(fidTeX,<span class="string">'\\begin{figure}[H]\n'</span>);
+1019         <span class="keyword">for</span> jj = 1:size(NAMES,1);
+1020           fprintf(fidTeX,<span class="string">'\\psfrag{%s}[1][][0.5][0]{%s}\n'</span>,deblank(NAMES(jj,:)),deblank(TeXNAMES(jj,:)));
+1021         <span class="keyword">end</span>    
+1022         fprintf(fidTeX,<span class="string">'\\centering \n'</span>);
+1023         fprintf(fidTeX,<span class="string">'\\includegraphics[scale=0.5]{%s_SmoothedObservedErrors%s}\n'</span>,M_.fname,int2str(nbplt));
+1024         fprintf(fidTeX,<span class="string">'\\caption{Smoothed observed errors.}'</span>);
+1025         fprintf(fidTeX,<span class="string">'\\label{Fig:SmoothedObservedErrors:%s}\n'</span>,int2str(nbplt));
+1026         fprintf(fidTeX,<span class="string">'\\end{figure}\n'</span>);
+1027         fprintf(fidTeX,<span class="string">'\n'</span>);
+1028         fprintf(fidTeX,<span class="string">'%% End of TeX file.\n'</span>);
+1029         fclose(fidTeX);
+1030       <span class="keyword">end</span>    
+1031     <span class="keyword">end</span>
+1032   <span class="keyword">end</span>    
+1033   <span class="comment">%%</span>
+1034   <span class="comment">%%    Historical and smoothed variabes</span>
+1035   <span class="comment">%%</span>
+1036   [nbplt,nr,nc,lr,lc,nstar] = <a href="pltorg.html" class="code" title="function [nbplt,nr,nc,lr,lc,nstar] = pltorg(number)">pltorg</a>(n_varobs);
+1037   <span class="keyword">if</span> options_.TeX
+1038     fidTeX = fopen([M_.fname <span class="string">'_HistoricalAndSmoothedVariables.TeX'</span>],<span class="string">'w'</span>);
+1039     fprintf(fidTeX,<span class="string">'%% TeX eps-loader file generated by dynare_estimation.m (Dynare).\n'</span>);
+1040     fprintf(fidTeX,[<span class="string">'%% '</span> datestr(now,0) <span class="string">'\n'</span>]);
+1041     fprintf(fidTeX,<span class="string">' \n'</span>);
+1042   <span class="keyword">end</span>    
+1043   <span class="keyword">if</span> nbplt == 1
+1044     hh = figure(<span class="string">'Name'</span>,<span class="string">'Historical and smoothed variables'</span>);
+1045     NAMES = [];
+1046     <span class="keyword">if</span> options_.TeX, TeXNAMES = [], <span class="keyword">end</span>
+1047     <span class="keyword">for</span> i=1:n_varobs
+1048       subplot(nr,nc,i);
+1049       plot(1:gend,yf(i,:),<span class="string">'-r'</span>,<span class="string">'linewidth'</span>,1)
+1050       hold on
+1051       plot(1:gend,rawdata(:,i),<span class="string">'-k'</span>,<span class="string">'linewidth'</span>,1)
+1052       hold off
+1053       name    = deblank(options_.varobs(i,:));
+1054       NAMES   = strvcat(NAMES,name);
+1055       <span class="keyword">if</span> ~isempty(options_.XTick)
+1056         set(gca,<span class="string">'XTick'</span>,options_.XTick)
+1057         set(gca,<span class="string">'XTickLabel'</span>,options_.XTickLabel)
+1058       <span class="keyword">end</span>
+1059       xlim([1 gend])
+1060       <span class="keyword">if</span> options_.TeX
+1061         idx = strmatch(options_.varobs(i),M_.endo_names,<span class="string">'exact'</span>);
+1062         texname = M_.endo_names_tex(idx,:);
+1063         TeXNAMES   = strvcat(TeXNAMES,[<span class="string">'$ '</span> deblank(texname) <span class="string">' $'</span>]);
+1064       <span class="keyword">end</span>
+1065       title(name,<span class="string">'Interpreter'</span>,<span class="string">'none'</span>)
+1066     <span class="keyword">end</span>
+1067     eval([<span class="string">'print -depsc2 '</span> M_.fname <span class="string">'_HistoricalAndSmoothedVariables'</span> int2str(1)]);
+1068     eval([<span class="string">'print -dpdf '</span> M_.fname <span class="string">'_HistoricalAndSmoothedVariables'</span> int2str(1)]);
+1069     saveas(hh,[M_.fname <span class="string">'_HistoricalAndSmoothedVariables'</span> int2str(1) <span class="string">'.fig'</span>]);
+1070     <span class="keyword">if</span> options_.nograph, close(hh), <span class="keyword">end</span>
+1071     <span class="keyword">if</span> options_.TeX
+1072       fprintf(fidTeX,<span class="string">'\\begin{figure}[H]\n'</span>);
+1073       <span class="keyword">for</span> jj = 1:n_varobs
+1074         fprintf(fidTeX,<span class="string">'\\psfrag{%s}[1][][0.5][0]{%s}\n'</span>,deblank(NAMES(jj,:)),deblank(TeXNAMES(jj,:)));
+1075       <span class="keyword">end</span>    
+1076       fprintf(fidTeX,<span class="string">'\\centering \n'</span>);
+1077       fprintf(fidTeX,<span class="string">'\\includegraphics[scale=0.5]{%s_HistoricalAndSmoothedVariables%s}\n'</span>,M_.fname,int2str(1));
+1078       fprintf(fidTeX,<span class="string">'\\caption{Historical and smoothed variables.}'</span>);
+1079       fprintf(fidTeX,<span class="string">'\\label{Fig:HistoricalAndSmoothedVariables:%s}\n'</span>,int2str(1));
+1080       fprintf(fidTeX,<span class="string">'\\end{figure}\n'</span>);
+1081       fprintf(fidTeX,<span class="string">'\n'</span>);
+1082       fprintf(fidTeX,<span class="string">'%% End of TeX file.\n'</span>);
+1083       fclose(fidTeX);
+1084     <span class="keyword">end</span>    
+1085   <span class="keyword">else</span>
+1086     <span class="keyword">for</span> plt = 1:nbplt-1
+1087       hh = figure(<span class="string">'Name'</span>,<span class="string">'Historical and smoothed variables'</span>);
+1088       set(0,<span class="string">'CurrentFigure'</span>,hh)
+1089       NAMES = [];
+1090       <span class="keyword">if</span> options_.TeX, TeXNAMES = [], <span class="keyword">end</span>
+1091       <span class="keyword">for</span> i=1:nstar
+1092         k = (plt-1)*nstar+i;
+1093         subplot(nr,nc,i);
+1094         plot(1:gend,yf(k,:),<span class="string">'-r'</span>,<span class="string">'linewidth'</span>,1)
+1095         hold on
+1096         plot(1:gend,rawdata(:,k),<span class="string">'-k'</span>,<span class="string">'linewidth'</span>,1)
+1097         hold off
+1098         name = deblank(options_.varobs(k,:));
+1099         NAMES = strvcat(NAMES,name);
+1100         <span class="keyword">if</span> ~isempty(options_.XTick)
+1101           set(gca,<span class="string">'XTick'</span>,options_.XTick)
+1102           set(gca,<span class="string">'XTickLabel'</span>,options_.XTickLabel)
+1103         <span class="keyword">end</span>
+1104         xlim([1 gend])
+1105         <span class="keyword">if</span> options_.TeX
+1106           idx = strmatch(options_.varobs(k),M_.endo_names,<span class="string">'exact'</span>);
+1107           texname = M_.endo_names_tex(idx,:);
+1108           TeXNAMES = strvcat(TeXNAMES,[<span class="string">'$ '</span> deblank(texname) <span class="string">' $'</span>]);
+1109         <span class="keyword">end</span>    
+1110         title(name,<span class="string">'Interpreter'</span>,<span class="string">'none'</span>)
+1111       <span class="keyword">end</span>
+1112       eval([<span class="string">'print -depsc2 '</span> M_.fname <span class="string">'_HistoricalAndSmoothedVariables'</span> int2str(plt)]);
+1113       eval([<span class="string">'print -dpdf '</span> M_.fname <span class="string">'_HistoricalAndSmoothedVariables'</span> int2str(plt)]);
+1114       saveas(hh,[M_.fname <span class="string">'_HistoricalAndSmoothedVariables'</span> int2str(plt) <span class="string">'.fig'</span>]);
+1115       <span class="keyword">if</span> options_.nograph, close(hh), <span class="keyword">end</span>
+1116       <span class="keyword">if</span> options_.TeX
+1117         fprintf(fidTeX,<span class="string">'\\begin{figure}[H]\n'</span>);
+1118         <span class="keyword">for</span> jj = 1:nstar
+1119           fprintf(fidTeX,<span class="string">'\\psfrag{%s}[1][][0.5][0]{%s}\n'</span>,deblank(NAMES(jj,:)),deblank(TeXNAMES(jj,:)));
+1120         <span class="keyword">end</span>    
+1121         fprintf(fidTeX,<span class="string">'\\centering \n'</span>);
+1122         fprintf(fidTeX,<span class="string">'\\includegraphics[scale=0.5]{%s_HistoricalAndSmoothedVariables%s}\n'</span>,M_.fname,int2str(plt));
+1123         fprintf(fidTeX,<span class="string">'\\caption{Historical and smoothed variables.}'</span>);
+1124         fprintf(fidTeX,<span class="string">'\\label{Fig:HistoricalAndSmoothedVariables:%s}\n'</span>,int2str(plt));
+1125         fprintf(fidTeX,<span class="string">'\\end{figure}\n'</span>);
+1126         fprintf(fidTeX,<span class="string">'\n'</span>);
+1127       <span class="keyword">end</span>    
+1128     <span class="keyword">end</span>
+1129     hh = figure(<span class="string">'Name'</span>,<span class="string">'Historical and smoothed variables'</span>);
+1130     set(0,<span class="string">'CurrentFigure'</span>,hh)
+1131     NAMES = [];
+1132     <span class="keyword">if</span> options_.TeX, TeXNAMES = [], <span class="keyword">end</span>
+1133     <span class="keyword">for</span> i=1:n_varobs-(nbplt-1)*nstar
+1134       k = (nbplt-1)*nstar+i;
+1135       <span class="keyword">if</span> lr ~= 0
+1136         subplot(lr,lc,i);
+1137       <span class="keyword">else</span>
+1138         subplot(nr,nc,i);
+1139       <span class="keyword">end</span>    
+1140       plot(1:gend,yf(k,:),<span class="string">'-r'</span>,<span class="string">'linewidth'</span>,1)
+1141       hold on
+1142       plot(1:gend,rawdata(:,k),<span class="string">'-k'</span>,<span class="string">'linewidth'</span>,1)
+1143       hold off
+1144       name = deblank(options_.varobs(k,:));
+1145       NAMES    = strvcat(NAMES,name);
+1146       <span class="keyword">if</span> ~isempty(options_.XTick)
+1147         set(gca,<span class="string">'XTick'</span>,options_.XTick)
+1148         set(gca,<span class="string">'XTickLabel'</span>,options_.XTickLabel)
+1149       <span class="keyword">end</span>
+1150       xlim([1 gend])
+1151       <span class="keyword">if</span> options_.TeX
+1152         idx = strmatch(options_.varobs(i),M_.endo_names,<span class="string">'exact'</span>);
+1153         texname = M_.endo_names_tex(idx,:);
+1154         TeXNAMES = strvcat(TeXNAMES,[<span class="string">'$ '</span> deblank(texname) <span class="string">' $'</span>]);
+1155       <span class="keyword">end</span>
+1156       title(name,<span class="string">'Interpreter'</span>,<span class="string">'none'</span>);
+1157     <span class="keyword">end</span>
+1158     eval([<span class="string">'print -depsc2 '</span> M_.fname <span class="string">'_HistoricalAndSmoothedVariables'</span> int2str(nbplt)]);
+1159     eval([<span class="string">'print -dpdf '</span> M_.fname <span class="string">'_HistoricalAndSmoothedVariables'</span> int2str(nbplt)]);
+1160     saveas(hh,[M_.fname <span class="string">'_HistoricalAndSmoothedVariables'</span> int2str(nbplt) <span class="string">'.fig'</span>]);
+1161     <span class="keyword">if</span> options_.nograph, close(hh), <span class="keyword">end</span>
+1162     <span class="keyword">if</span> options_.TeX
+1163       fprintf(fidTeX,<span class="string">'\\begin{figure}[H]\n'</span>);
+1164       <span class="keyword">for</span> jj = 1:size(NAMES,1);
+1165         fprintf(fidTeX,<span class="string">'\\psfrag{%s}[1][][0.5][0]{%s}\n'</span>,deblank(NAMES(jj,:)),deblank(TeXNAMES(jj,:)));
+1166       <span class="keyword">end</span>    
+1167       fprintf(fidTeX,<span class="string">'\\centering \n'</span>);
+1168       fprintf(fidTeX,<span class="string">'\\includegraphics[scale=0.5]{%s_HistoricalAndSmoothedVariables%s}\n'</span>,M_.fname,int2str(nbplt));
+1169       fprintf(fidTeX,<span class="string">'\\caption{Historical and smoothed variables.}'</span>);
+1170       fprintf(fidTeX,<span class="string">'\\label{Fig:HistoricalAndSmoothedVariables:%s}\n'</span>,int2str(nbplt));
+1171       fprintf(fidTeX,<span class="string">'\\end{figure}\n'</span>);
+1172       fprintf(fidTeX,<span class="string">'\n'</span>);
+1173       fprintf(fidTeX,<span class="string">'%% End of TeX file.\n'</span>);
+1174       fclose(fidTeX);
+1175     <span class="keyword">end</span>    
+1176   <span class="keyword">end</span>
+1177 <span class="keyword">end</span> 
+1178 
+1179 
+1180 
+1181 <span class="comment">%    &lt;--    if ML estimation, posterior mode without metropolis-hastings or metropolis</span>
+1182     <span class="comment">%        without bayesian posterior forecasts.</span>
+1183 
+1184 <span class="comment">% SA 07-31-2004        * Added TeX output.</span>
+1185 <span class="comment">%                    * Prior plots are done by calling plot_priors.m.</span>
+1186 <span class="comment">%                    * All the computations related to the metropolis-hastings are made</span>
+1187 <span class="comment">%                    in a new version of metropolis.m.</span>
+1188 <span class="comment">%                    * Corrected a bug related to prior's bounds.</span>
+1189 <span class="comment">%                    * ...</span>
+1190 <span class="comment">%                    * If you do not want to see all the figures generated by dynare, you can use the option</span>
+1191 <span class="comment">%                    nograph. The figures will be done and saved in formats eps, pdf and fig (so that you</span>
+1192 <span class="comment">%                    should be able to modify the plots within matlab) but each figure will be erased from the</span>
+1193 <span class="comment">%                    workspace when completed.</span>
+1194 <span class="comment">% SA 08-04-2004        Corrected a bug related to the display of the Smooth shocks and variables plots,</span>
+1195 <span class="comment">%                    for ML and posterior mode estimation.</span>
+1196 <span class="comment">%  SA 09-03-2004        Compilation of TeX appendix moved to dynare.m.</span></pre></div>
+<hr><address>Generated on Fri 16-Jun-2006 09:09:06 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/">m2html</a></strong> &copy; 2003</address>
+</body>
+</html>

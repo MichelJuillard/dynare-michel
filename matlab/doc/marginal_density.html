@@ -1,0 +1,152 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of marginal_density</title>
+  <meta name="keywords" content="marginal_density">
+  <meta name="description" content="stephane.adjemian@ens.fr [09-09-2005]">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2003 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../index.html">Home</a> &gt;  <a href="index.html">.</a> &gt; marginal_density.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../index.html"><img alt="<" border="0" src="../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="index.html">Index for .&nbsp;<img alt=">" border="0" src="../right.png"></a></td></tr></table>-->
+
+<h1>marginal_density
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>stephane.adjemian@ens.fr [09-09-2005]</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function marginal = marginal_density() </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> stephane.adjemian@ens.fr [09-09-2005]</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="CheckPath.html" class="code" title="function DirectoryName = CheckPath(type)">CheckPath</a>	06-03-2005</li><li><a href="qchisq.html" class="code" title="function x = qchisq(p,a)">qchisq</a>	QCHISQ   The chisquare inverse distribution function</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="dynare_estimation.html" class="code" title="function dynare_estimation(var_list_)">dynare_estimation</a>	</li></ul>
+<!-- crossreference -->
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function marginal = marginal_density()</a>
+0002 <span class="comment">% stephane.adjemian@ens.fr [09-09-2005]</span>
+0003 <span class="keyword">global</span> M_ options_ estim_params_ oo_
+0004 
+0005 npar = estim_params_.np+estim_params_.nvn+estim_params_.ncx+estim_params_.ncn+estim_params_.nvx;
+0006 nblck = options_.mh_nblck;
+0007 
+0008 MhDirectoryName = <a href="CheckPath.html" class="code" title="function DirectoryName = CheckPath(type)">CheckPath</a>(<span class="string">'metropolis'</span>);
+0009 load([ MhDirectoryName <span class="string">'/'</span>  M_.fname <span class="string">'_mh_history'</span>])
+0010 
+0011 FirstMhFile = record.KeepedDraws.FirstMhFile;
+0012 FirstLine = record.KeepedDraws.FirstLine; ifil = FirstLine;
+0013 TotalNumberOfMhFiles = sum(record.MhDraws(:,2));
+0014 TotalNumberOfMhDraws = sum(record.MhDraws(:,1));
+0015 MAX_nruns = ceil(options_.MaxNumberOfBytes/(npar+2)/8);
+0016 TODROP = floor(options_.mh_drop*TotalNumberOfMhDraws);
+0017 
+0018 MU = zeros(1,npar);
+0019 SIGMA = zeros(npar,npar);
+0020 lpost_mode = -Inf;
+0021 
+0022 fprintf(<span class="string">'MH: I''m computing the posterior mean... '</span>);
+0023 <span class="keyword">for</span> n = FirstMhFile:TotalNumberOfMhFiles
+0024   <span class="keyword">for</span> b = 1:nblck
+0025     load([ MhDirectoryName <span class="string">'/'</span> M_.fname <span class="string">'_mh'</span> int2str(n) <span class="string">'_blck'</span> int2str(b)],<span class="string">'x2'</span>,<span class="string">'logpo2'</span>); 
+0026     MU = MU + sum(x2(ifil:<span class="keyword">end</span>,:));
+0027     lpost_mode = max(lpost_mode,max(logpo2));
+0028   <span class="keyword">end</span>
+0029   ifil = 1;
+0030 <span class="keyword">end</span>
+0031 MU = MU/((TotalNumberOfMhDraws-TODROP)*nblck);
+0032 MU1 = repmat(MU,MAX_nruns,1);
+0033 <span class="comment">%% lpost_mode is the value of the log posterior kernel at the mode.</span>
+0034 fprintf(<span class="string">' Done!\n'</span>);
+0035 fprintf(<span class="string">'MH: I''m computing the posterior covariance matrix... '</span>);
+0036 ifil = FirstLine;
+0037 <span class="keyword">for</span> n = FirstMhFile:TotalNumberOfMhFiles
+0038   <span class="keyword">for</span> b = 1:nblck
+0039     load([MhDirectoryName <span class="string">'/'</span> M_.fname <span class="string">'_mh'</span> int2str(n) <span class="string">'_blck'</span> int2str(b)],<span class="string">'x2'</span>);
+0040     x = x2(ifil:<span class="keyword">end</span>,:)-MU1(1:size(x2(ifil:<span class="keyword">end</span>,:),1),:);
+0041     SIGMA = SIGMA + x'*x;
+0042   <span class="keyword">end</span>
+0043   ifil = 1;
+0044 <span class="keyword">end</span>
+0045 SIGMA =  SIGMA/((TotalNumberOfMhDraws-TODROP)*nblck);<span class="comment">%&lt;=== Variance of the parameters (ok!)</span>
+0046 fprintf(<span class="string">' Done!\n'</span>);
+0047 disp(<span class="string">' '</span>);
+0048 disp(<span class="string">'MH: I''m computing the posterior log marginale density (modified harmonic mean)... '</span>);
+0049 detSIGMA = det(SIGMA);
+0050 invSIGMA = inv(SIGMA);
+0051 marginal = zeros(9,2);
+0052 linee = 0;
+0053 check_coverage = 1;
+0054 increase = 1;
+0055 <span class="keyword">while</span> check_coverage
+0056   <span class="keyword">for</span> p = 0.1:0.1:0.9;
+0057     critval = <a href="qchisq.html" class="code" title="function x = qchisq(p,a)">qchisq</a>(p,npar);
+0058     ifil = FirstLine;
+0059     tmp = 0;
+0060     <span class="keyword">for</span> n = FirstMhFile:TotalNumberOfMhFiles
+0061       <span class="keyword">for</span> b=1:nblck
+0062     load([ MhDirectoryName <span class="string">'/'</span> M_.fname <span class="string">'_mh'</span> int2str(n) <span class="string">'_blck'</span> int2str(b)],<span class="string">'x2'</span>,<span class="string">'logpo2'</span>);
+0063     EndOfFile = size(x2,1);
+0064     <span class="keyword">for</span> i = ifil:EndOfFile
+0065       deviation  = (x2(i,:)-MU)*invSIGMA*(x2(i,:)-MU)';
+0066       <span class="keyword">if</span> deviation &lt;= critval
+0067         lftheta = -log(p)-(npar*log(2*pi)+log(detSIGMA)+deviation)/2;
+0068         tmp = tmp + exp(lftheta - logpo2(i) + lpost_mode);
+0069       <span class="keyword">end</span>
+0070     <span class="keyword">end</span>
+0071       <span class="keyword">end</span>
+0072       ifil = 1;
+0073     <span class="keyword">end</span>
+0074     linee = linee + 1;
+0075     warning off all
+0076     marginal(linee,:) = [p, lpost_mode-log(tmp/((TotalNumberOfMhDraws-TODROP)*nblck))];
+0077     warning on all
+0078   <span class="keyword">end</span>
+0079   <span class="keyword">if</span> abs((marginal(9,2)-marginal(1,2))/marginal(9,2)) &gt; 0.01 | isinf(marginal(1,2))
+0080     <span class="keyword">if</span> increase == 1
+0081       disp(<span class="string">'MH: The support of the weighting density function is not large enough...'</span>)
+0082       disp(<span class="string">'MH: I increase the variance of this distribution.'</span>)
+0083       increase = 1.2*increase;
+0084       invSIGMA = inv(SIGMA*increase);
+0085       detSIGMA = det(SIGMA*increase);
+0086       linee    = 0;   
+0087     <span class="keyword">else</span>
+0088       disp(<span class="string">'MH: Let me try again.'</span>)
+0089       increase = 1.2*increase;
+0090       invSIGMA = inv(SIGMA*increase);
+0091       detSIGMA = det(SIGMA*increase);
+0092       linee    = 0;
+0093       <span class="keyword">if</span> increase &gt; 20
+0094     check_coverage = 0;
+0095     clear invSIGMA detSIGMA increase;
+0096     disp(<span class="string">'MH: There''s probably a problem with the modified harmonic mean estimator.'</span>)    
+0097       <span class="keyword">end</span>
+0098     <span class="keyword">end</span>  
+0099   <span class="keyword">else</span>
+0100     check_coverage = 0;
+0101     clear invSIGMA detSIGMA increase;
+0102     disp(<span class="string">'MH: Modified harmonic mean estimator, done!'</span>)
+0103   <span class="keyword">end</span>
+0104 <span class="keyword">end</span>
+0105 
+0106 oo_.MarginalDensity.ModifiedHarmonicMean = mean(marginal(:,2));</pre></div>
+<hr><address>Generated on Fri 16-Jun-2006 09:09:06 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/">m2html</a></strong> &copy; 2003</address>
+</body>
+</html>

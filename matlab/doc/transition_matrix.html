@@ -1,0 +1,73 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of transition_matrix</title>
+  <meta name="keywords" content="transition_matrix">
+  <meta name="description" content="makes transition matrices out of ghx and ghu">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2003 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../index.html">Home</a> &gt;  <a href="index.html">.</a> &gt; transition_matrix.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../index.html"><img alt="<" border="0" src="../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="index.html">Index for .&nbsp;<img alt=">" border="0" src="../right.png"></a></td></tr></table>-->
+
+<h1>transition_matrix
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>makes transition matrices out of ghx and ghu</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function [A,B] = transition_matrix(dr) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> makes transition matrices out of ghx and ghu</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+</ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="dr1.html" class="code" title="function [dr,info]=dr1(dr,task)">dr1</a>	Copyright (C) 2001 Michel Juillard</li></ul>
+<!-- crossreference -->
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <span class="comment">% makes transition matrices out of ghx and ghu</span>
+0002 
+0003 <a name="_sub0" href="#_subfunctions" class="code">function [A,B] = transition_matrix(dr)</a>
+0004   <span class="keyword">global</span> M_
+0005   exo_nbr = M_.exo_nbr;
+0006   ykmin_ = M_.maximum_endo_lag;
+0007   
+0008   nx = size(dr.ghx,2);
+0009   kstate = dr.kstate;
+0010   ikx = [dr.nstatic+1:dr.nstatic+dr.npred];
+0011   
+0012   A = zeros(nx,nx);
+0013   k0 = kstate(find(kstate(:,2) &lt;= ykmin_+1),:);
+0014   i0 = find(k0(:,2) == ykmin_+1);
+0015   A(i0,:) = dr.ghx(ikx,:);
+0016   B = zeros(nx,exo_nbr);
+0017   B(i0,:) = dr.ghu(ikx,:);
+0018   <span class="keyword">for</span> i=ykmin_:-1:2
+0019     i1 = find(k0(:,2) == i);
+0020     n1 = size(i1,1);
+0021     j = zeros(n1,1);
+0022     <span class="keyword">for</span> j1 = 1:n1
+0023       j(j1) = find(k0(i0,1)==k0(i1(j1),1));
+0024     <span class="keyword">end</span>
+0025     A(i1,i0(j))=eye(n1);
+0026     i0 = i1;
+0027   <span class="keyword">end</span></pre></div>
+<hr><address>Generated on Fri 16-Jun-2006 09:09:06 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/">m2html</a></strong> &copy; 2003</address>
+</body>
+</html>

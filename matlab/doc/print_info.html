@@ -1,0 +1,85 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of print_info</title>
+  <meta name="keywords" content="print_info">
+  <meta name="description" content="Copyright (C) 2005 Michel Juillard">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2003 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../index.html">Home</a> &gt;  <a href="index.html">.</a> &gt; print_info.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../index.html"><img alt="<" border="0" src="../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="index.html">Index for .&nbsp;<img alt=">" border="0" src="../right.png"></a></td></tr></table>-->
+
+<h1>print_info
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>Copyright (C) 2005 Michel Juillard</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function print_info(info) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> Copyright (C) 2005 Michel Juillard</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="set_default_option.html" class="code" title="function options=set_default_option(options,field,default)">set_default_option</a>	</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="check.html" class="code" title="function result = check">check</a>	Copyright (C) 2001 Michel Juillard</li><li><a href="stoch_simul.html" class="code" title="function info=stoch_simul(var_list)">stoch_simul</a>	Copyright (C) 2001 Michel Juillard</li></ul>
+<!-- crossreference -->
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <span class="comment">% Copyright (C) 2005 Michel Juillard</span>
+0002 <span class="comment">%</span>
+0003 <a name="_sub0" href="#_subfunctions" class="code">function print_info(info)</a>
+0004   <span class="keyword">global</span> options_
+0005 
+0006   options_ = <a href="set_default_option.html" class="code" title="function options=set_default_option(options,field,default)">set_default_option</a>(options_,<span class="string">'noprint'</span>,0);
+0007   
+0008   <span class="keyword">if</span> ~options_.noprint
+0009     <span class="keyword">if</span> info(1) &gt; 10 &amp; info(1) &lt; 20
+0010       disp(<span class="string">'Failure in dr_algo=2'</span>)
+0011       info(1) = info(1) - 10;
+0012     <span class="keyword">end</span>
+0013     <span class="keyword">switch</span> info(1)
+0014      <span class="keyword">case</span> 1
+0015       error([<span class="string">'The model doesn''t determine the current variables'</span> <span class="keyword">...</span>
+0016          <span class="string">' uniquely'</span>])
+0017      <span class="keyword">case</span> 2
+0018       error([<span class="string">'MJDGGES returns the following error code'</span> <span class="keyword">...</span>
+0019          int2str(info(2))])
+0020      <span class="keyword">case</span> 3
+0021       error([<span class="string">'Blanchard Kahn conditions are not satisfied: no stable'</span> <span class="keyword">...</span>
+0022          <span class="string">' equilibrium'</span>])
+0023      <span class="keyword">case</span> 4
+0024       error([<span class="string">'Blanchard Kahn conditions are not satisfied:'</span> <span class="keyword">...</span>
+0025          <span class="string">' indeterminacy'</span>])
+0026      <span class="keyword">case</span> 5
+0027       error([<span class="string">'Blanchard Kahn conditions are not satisfied:'</span> <span class="keyword">...</span>
+0028          <span class="string">' indeterminacy due to rank failure'</span>])
+0029      <span class="keyword">case</span> 20
+0030       error([<span class="string">'Impossible to find the steady state. Either the model'</span> <span class="keyword">...</span>
+0031          <span class="string">' doesn''t have a unique steady state of the guess values'</span> <span class="keyword">...</span>
+0032          <span class="string">' are too far from the solution'</span>]) 
+0033      <span class="keyword">case</span> 30
+0034       error(<span class="string">'Variance can''t be computed'</span>)
+0035      <span class="keyword">otherwise</span>
+0036       error(<span class="string">'This case shouldn''t happen. Contact the authors of Dynare'</span>)
+0037     <span class="keyword">end</span>
+0038   <span class="keyword">end</span>
+0039</pre></div>
+<hr><address>Generated on Fri 16-Jun-2006 09:09:06 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/">m2html</a></strong> &copy; 2003</address>
+</body>
+</html>

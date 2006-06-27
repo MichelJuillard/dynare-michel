@@ -1,0 +1,112 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of simult_</title>
+  <meta name="keywords" content="simult_">
+  <meta name="description" content="Copyright (C) 2001 Michel Juillard">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2003 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../index.html">Home</a> &gt;  <a href="index.html">.</a> &gt; simult_.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../index.html"><img alt="<" border="0" src="../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="index.html">Index for .&nbsp;<img alt=">" border="0" src="../right.png"></a></td></tr></table>-->
+
+<h1>simult_
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>Copyright (C) 2001 Michel Juillard</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function y_=simult_(y0,dr,ex_,iorder) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> Copyright (C) 2001 Michel Juillard</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="check.html" class="code" title="function result = check">check</a>	Copyright (C) 2001 Michel Juillard</li><li><a href="dynare_solve.html" class="code" title="function [x,cheik] = dynare_solve(func,x,jacobian_flag,varargin)">dynare_solve</a>	Copyright (C) 2001 Michel Juillard</li><li><a href="set_default_option.html" class="code" title="function options=set_default_option(options,field,default)">set_default_option</a>	</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="forcst.html" class="code" title="function [yf,var_yf]=forcst(dr,y0,k,m)">forcst</a>	</li><li><a href="irf.html" class="code" title="function y = irf(dr, e1, long, drop, replic, iorder)">irf</a>	</li><li><a href="simult.html" class="code" title="function y_=simult(ys, dr)">simult</a>	Copyright (C) 2001 Michel Juillard</li></ul>
+<!-- crossreference -->
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <span class="comment">% Copyright (C) 2001 Michel Juillard</span>
+0002 <span class="comment">%</span>
+0003 
+0004 <a name="_sub0" href="#_subfunctions" class="code">function y_=simult_(y0,dr,ex_,iorder)</a>
+0005 <span class="keyword">global</span> M_ options_ it_
+0006   iter = size(ex_,1);
+0007   nx = size(dr.ghu,2);
+0008   y_ = zeros(size(y0,1),iter+M_.maximum_lag);
+0009   y_(:,1:M_.maximum_lag) = y0;
+0010   k1 = [M_.maximum_lag:-1:1];
+0011   k2 = dr.kstate(find(dr.kstate(:,2) &lt;= M_.maximum_lag+1),[1 2]);
+0012   k2 = k2(:,1)+(M_.maximum_lag+1-k2(:,2))*M_.endo_nbr;
+0013   k3 = M_.lead_lag_incidence(1:M_.maximum_lag,:)';
+0014   k3 = find(k3(:));
+0015   k4 = dr.kstate(find(dr.kstate(:,2) &lt; M_.maximum_lag+1),[1 2]);
+0016   k4 = k4(:,1)+(M_.maximum_lag+1-k4(:,2))*M_.endo_nbr;
+0017   
+0018   options_ = <a href="set_default_option.html" class="code" title="function options=set_default_option(options,field,default)">set_default_option</a>(options_,<span class="string">'simul_algo'</span>,0);
+0019   <span class="keyword">if</span> options_.simul_algo == 1
+0020     o1 = dr.nstatic+1;
+0021     o2 = dr.nstatic+dr.npred;
+0022     o3 = o2-dr.nboth+1;
+0023     [junk, k5] = sort(dr.order_var(o1:o2));
+0024     [junk, k6] = sort(dr.order_var(o3:end));
+0025   <span class="keyword">end</span>
+0026 
+0027   <span class="keyword">if</span> iorder == 1    
+0028     <span class="keyword">for</span> i = M_.maximum_lag+1: iter+M_.maximum_lag
+0029       tempx1 = y_(dr.order_var,k1);
+0030       tempx2 = tempx1-repmat(dr.ys(dr.order_var),1,M_.maximum_lag);
+0031       tempx = tempx2(k2);
+0032       <span class="keyword">if</span> options_.simul_algo == 0
+0033     y_(dr.order_var,i) = dr.ys(dr.order_var)+dr.ghx*tempx+dr.ghu* <span class="keyword">...</span>
+0034         ex_(i-M_.maximum_lag,:)';
+0035       <span class="keyword">elseif</span> options_.simul_algo == 1
+0036     it_ = i;
+0037     m = dr.ys(dr.order_var);
+0038     [y_(:,i), <a href="check.html" class="code" title="function result = check">check</a>] = <a href="dynare_solve.html" class="code" title="function [x,cheik] = dynare_solve(func,x,jacobian_flag,varargin)">dynare_solve</a>(<span class="string">'ff_simul1'</span>,y_(:,i-1),tempx1(k3), <span class="keyword">...</span>
+0039                     m(o3:end),tempx(k4),o1,o2,o3,k6);
+0040       <span class="keyword">end</span>
+0041       k1 = k1+1;
+0042     <span class="keyword">end</span>
+0043   <span class="keyword">elseif</span> iorder == 2
+0044     <span class="keyword">for</span> i = M_.maximum_lag+1: iter+M_.maximum_lag
+0045       tempx1 = y_(dr.order_var,k1);
+0046       tempx2 = tempx1-repmat(dr.ys(dr.order_var),1,M_.maximum_lag);
+0047       tempx = tempx2(k2);
+0048       tempu = ex_(i-M_.maximum_lag,:)';
+0049       tempuu = kron(tempu,tempu);
+0050       <span class="keyword">if</span> options_.simul_algo == 0
+0051     tempxx = kron(tempx,tempx);
+0052     tempxu = kron(tempx,tempu);
+0053     y_(dr.order_var,i) = dr.ys(dr.order_var)+dr.ghs2/2+dr.ghx*tempx+ <span class="keyword">...</span>
+0054         dr.ghu*tempu+0.5*(dr.ghxx*tempxx+dr.ghuu*tempuu)+dr.ghxu*tempxu;
+0055       <span class="keyword">elseif</span> options_.simul_algo == 1
+0056     it_ = i;
+0057     m = dr.ys(dr.order_var)+dr.ghs2/2;
+0058     tempx1 = y_(:,k1);
+0059     [y_(:,i), <a href="check.html" class="code" title="function result = check">check</a>] = <a href="dynare_solve.html" class="code" title="function [x,cheik] = dynare_solve(func,x,jacobian_flag,varargin)">dynare_solve</a>(<span class="string">'ff_simul2'</span>,y_(:,i-1),tempx1(k3), <span class="keyword">...</span>
+0060                     m(o3:end),tempx(k4),o1,o2,o3,k6);
+0061       <span class="keyword">end</span>
+0062       k1 = k1+1;
+0063     <span class="keyword">end</span>
+0064   <span class="keyword">end</span>
+0065 
+0066 <span class="comment">% MJ 08/30/02 corrected bug at order 2</span></pre></div>
+<hr><address>Generated on Fri 16-Jun-2006 09:09:06 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/">m2html</a></strong> &copy; 2003</address>
+</body>
+</html>

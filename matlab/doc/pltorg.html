@@ -1,0 +1,131 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of pltorg</title>
+  <meta name="keywords" content="pltorg">
+  <meta name="description" content="stephane.adjemian@cepremap.cnrs.fr [06-07-2004]">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2003 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../index.html">Home</a> &gt;  <a href="index.html">.</a> &gt; pltorg.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../index.html"><img alt="<" border="0" src="../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="index.html">Index for .&nbsp;<img alt=">" border="0" src="../right.png"></a></td></tr></table>-->
+
+<h1>pltorg
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>stephane.adjemian@cepremap.cnrs.fr [06-07-2004]</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function [nbplt,nr,nc,lr,lc,nstar] = pltorg(number) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> stephane.adjemian@cepremap.cnrs.fr [06-07-2004]</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+</ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="dynare_estimation.html" class="code" title="function dynare_estimation(var_list_)">dynare_estimation</a>	</li><li><a href="mode_check.html" class="code" title="function mode_check(x,fval,hessian,gend,data,lb,ub)">mode_check</a>	</li><li><a href="plot_priors.html" class="code" title="function plot_priors">plot_priors</a>	stephane.adjemian@cepremap.cnrs.fr [07-31-2004]</li><li><a href="stoch_simul.html" class="code" title="function info=stoch_simul(var_list)">stoch_simul</a>	Copyright (C) 2001 Michel Juillard</li></ul>
+<!-- crossreference -->
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function [nbplt,nr,nc,lr,lc,nstar] = pltorg(number)</a>
+0002 <span class="comment">% stephane.adjemian@cepremap.cnrs.fr [06-07-2004]</span>
+0003 nrstar = 3;
+0004 ncstar = 3;
+0005 nstar  = nrstar*ncstar;
+0006 nbplt  = 0;
+0007 nr     = 0;
+0008 nc     = 0;
+0009 lr     = 0;
+0010 lc     = 0;
+0011 <span class="keyword">if</span> number == 1
+0012     nbplt = 1;
+0013     nr    = 1;
+0014     nc    = 1;
+0015 <span class="keyword">elseif</span> number == 2
+0016     nbplt = 1;
+0017     nr    = 2;
+0018     nc    = 1;
+0019 <span class="keyword">elseif</span> number == 3
+0020     nbplt = 1;
+0021     nr    = 3;
+0022     nc    = 1;
+0023 <span class="keyword">elseif</span> number == 4
+0024     nbplt = 1;
+0025     nr    = 2;
+0026     nc    = 2;
+0027 <span class="keyword">elseif</span> number == 5
+0028     nbplt = 1;
+0029     nr    = 3;
+0030     nc    = 2;
+0031 <span class="keyword">elseif</span> number == 6
+0032     nbplt = 1;
+0033     nr    = 3;
+0034     nc    = 2;    
+0035 <span class="keyword">elseif</span> number == 7
+0036     nbplt = 1;
+0037     nr    = 3;
+0038     nc    = 3;    
+0039 <span class="keyword">elseif</span> number == 8
+0040     nbplt = 1;
+0041     nr    = 3;
+0042     nc    = 3;
+0043 <span class="keyword">elseif</span> number == 9
+0044     nbplt = 1;
+0045     nr    = 3;
+0046     nc    = 3;
+0047 <span class="keyword">else</span>
+0048     <span class="keyword">if</span> number/nstar == round(number/nstar)
+0049         nbplt = number/nstar;
+0050         nr    = nrstar;
+0051         nc    = ncstar;
+0052         lr    = nr;
+0053         lc    = nc; 
+0054     <span class="keyword">else</span>
+0055         nbplt = ceil(number/nstar);
+0056         nr    = nrstar;
+0057         nc    = ncstar;
+0058         reste = number-(nbplt-1)*nstar;
+0059         <span class="keyword">if</span> reste == 1
+0060             lr    = 1;
+0061             lc    = 1;
+0062         <span class="keyword">elseif</span> reste == 2
+0063             lr    = 2;
+0064             lc    = 1;
+0065         <span class="keyword">elseif</span> reste == 3
+0066             lr    = 3;
+0067             lc    = 1;
+0068         <span class="keyword">elseif</span> reste == 4
+0069             lr    = 2;
+0070             lc    = 2;
+0071         <span class="keyword">elseif</span> reste == 5
+0072             lr    = 3;
+0073             lc    = 2;
+0074         <span class="keyword">elseif</span> reste == 6
+0075             lr    = 3;
+0076             lc    = 2;    
+0077         <span class="keyword">elseif</span> reste == 7
+0078             lr    = 3;
+0079             lc    = 3;    
+0080         <span class="keyword">elseif</span> reste == 8
+0081             lr    = 3;
+0082             lc    = 3;
+0083         <span class="keyword">end</span>
+0084     <span class="keyword">end</span>
+0085 <span class="keyword">end</span></pre></div>
+<hr><address>Generated on Fri 16-Jun-2006 09:09:06 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/">m2html</a></strong> &copy; 2003</address>
+</body>
+</html>

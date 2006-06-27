@@ -1,0 +1,139 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of DsgeSmoother</title>
+  <meta name="keywords" content="DsgeSmoother">
+  <meta name="description" content="stephane.adjemian@cepremap.cnrs.fr [09-07-2004]">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2003 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../index.html">Home</a> &gt;  <a href="index.html">.</a> &gt; DsgeSmoother.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../index.html"><img alt="<" border="0" src="../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="index.html">Index for .&nbsp;<img alt=">" border="0" src="../right.png"></a></td></tr></table>-->
+
+<h1>DsgeSmoother
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>stephane.adjemian@cepremap.cnrs.fr [09-07-2004]</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function [alphahat,etahat,epsilonhat,ahat,SteadyState,trend_coeff,aK] = DsgeSmoother(xparam1,gend,Y) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> stephane.adjemian@cepremap.cnrs.fr [09-07-2004]
+
+ Adapted from mj_optmumlik.m</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="DiffuseKalmanSmoother1.html" class="code" title="function [alphahat,etahat,a, aK] = DiffuseKalmanSmoother1(T,R,Q,Pinf1,Pstar1,Y,trend,pp,mm,smpl,mf)">DiffuseKalmanSmoother1</a>	modified by M. Ratto:</li><li><a href="DiffuseKalmanSmoother3.html" class="code" title="function [alphahat,etahat,a1, aK] = DiffuseKalmanSmoother3(T,R,Q,Pinf1,Pstar1,Y,trend,pp,mm,smpl,mf)">DiffuseKalmanSmoother3</a>	function [a,etahat,a1, aK] = DiffuseKalmanSmoother3(T,R,Q,Pinf1,Pstar1,Y,trend,pp,mm,smpl,mf)</li><li><a href="DiffuseKalmanSmootherH1.html" class="code" title="function [alphahat,epsilonhat,etahat,a, aK] = DiffuseKalmanSmootherH1(T,R,Q,H,Pinf1,Pstar1,Y,trend,pp,mm,smpl,mf)">DiffuseKalmanSmootherH1</a>	modified by M. Ratto:</li><li><a href="DiffuseKalmanSmootherH3.html" class="code" title="function [alphahat,epsilonhat,etahat,a1, aK] = DiffuseKalmanSmootherH3(T,R,Q,H,Pinf1,Pstar1,Y,trend,pp,mm,smpl,mf)">DiffuseKalmanSmootherH3</a>	Modified by M. Ratto</li><li><a href="dynare_resolve.html" class="code" title="function [A,B,ys,info] = dynare_resolve()">dynare_resolve</a>	</li><li><a href="lyapunov_symm.html" class="code" title="function [x,ns_var]=lyapunov_symm(a,b)">lyapunov_symm</a>	solves x-a*x*a'=b for b (and then x) symmetrical</li><li><a href="set_all_parameters.html" class="code" title="function set_all_parameters(xparam1)">set_all_parameters</a>	</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="PosteriorSmoother.html" class="code" title="function PosteriorSmoother(Y,gend, type)">PosteriorSmoother</a>	stephane.adjemian@ens.fr [09-25-2005]</li><li><a href="dynare_MC.html" class="code" title="function dynare_MC(var_list_)">dynare_MC</a>	</li><li><a href="dynare_estimation.html" class="code" title="function dynare_estimation(var_list_)">dynare_estimation</a>	</li><li><a href="filt_mc_.html" class="code" title="function [rmse_MC, ixx] = filt_mc_(vvarvecm, loadSA, pfilt, alpha, alpha2, OutDir, istart, alphaPC)">filt_mc_</a>	copyright Marco Ratto 2006</li></ul>
+<!-- crossreference -->
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function [alphahat,etahat,epsilonhat,ahat,SteadyState,trend_coeff,aK] = DsgeSmoother(xparam1,gend,Y)</a>
+0002 <span class="comment">% stephane.adjemian@cepremap.cnrs.fr [09-07-2004]</span>
+0003 <span class="comment">%</span>
+0004 <span class="comment">% Adapted from mj_optmumlik.m</span>
+0005   <span class="keyword">global</span> bayestopt_ M_ oo_ estim_params_ options_
+0006 
+0007   alphahat     = [];
+0008   epsilonhat    = [];
+0009   etahat        = [];
+0010   nobs         = size(options_.varobs,1);
+0011   smpl        = size(Y,2);
+0012 
+0013   <a href="set_all_parameters.html" class="code" title="function set_all_parameters(xparam1)">set_all_parameters</a>(xparam1);
+0014 
+0015   <span class="comment">%------------------------------------------------------------------------------</span>
+0016   <span class="comment">% 2. call model setup &amp; reduction program</span>
+0017   <span class="comment">%------------------------------------------------------------------------------</span>
+0018   [T,R,SteadyState] = <a href="dynare_resolve.html" class="code" title="function [A,B,ys,info] = dynare_resolve()">dynare_resolve</a>;
+0019   bayestopt_.mf = bayestopt_.mf2;
+0020   <span class="keyword">if</span> options_.loglinear == 1
+0021     constant = log(SteadyState(bayestopt_.mfys));
+0022   <span class="keyword">else</span>
+0023     constant = SteadyState(bayestopt_.mfys);
+0024   <span class="keyword">end</span>
+0025   trend_coeff = zeros(nobs,1);
+0026   <span class="keyword">if</span> bayestopt_.with_trend == 1
+0027     trend_coeff = zeros(nobs,1);
+0028     nx1 = estim_params_.nvx+estim_params_.nvn+estim_params_.ncx+estim_params_.ncn;
+0029     <span class="keyword">for</span> i=1:nobs
+0030       trend_coeff(i) = evalin(<span class="string">'base'</span>,bayestopt_.trend_coeff{i});
+0031     <span class="keyword">end</span>
+0032     trend = constant*ones(1,gend)+trend_coeff*(1:gend);
+0033   <span class="keyword">else</span>
+0034     trend = constant*ones(1,gend);
+0035   <span class="keyword">end</span>
+0036   start = options_.presample+1;
+0037   np    = size(T,1);
+0038   mf    = bayestopt_.mf;
+0039   <span class="comment">% ------------------------------------------------------------------------------</span>
+0040   <span class="comment">%  3. Initial condition of the Kalman filter</span>
+0041   <span class="comment">% ------------------------------------------------------------------------------</span>
+0042   <span class="comment">%</span>
+0043   <span class="comment">%  C'est ici qu'il faut dterminer Pinf et Pstar. Si le modle est stationnaire,</span>
+0044   <span class="comment">%  alors il suffit de poser Pstar comme la solution de l'uation de Lyapounov et</span>
+0045   <span class="comment">%  Pinf=[].</span>
+0046   <span class="comment">%</span>
+0047   Q = M_.Sigma_e;
+0048   H = M_.H;
+0049   
+0050   <span class="keyword">if</span> options_.lik_init == 1        <span class="comment">% Kalman filter</span>
+0051     Pstar = <a href="lyapunov_symm.html" class="code" title="function [x,ns_var]=lyapunov_symm(a,b)">lyapunov_symm</a>(T,R*Q*transpose(R));
+0052     Pinf    = [];
+0053   <span class="keyword">elseif</span> options_.lik_init == 2 <span class="comment">% Old Diffuse Kalman filter</span>
+0054     Pstar = 10*eye(np);
+0055     Pinf    = [];
+0056   <span class="keyword">elseif</span> options_.lik_init == 3 <span class="comment">% Diffuse Kalman filter</span>
+0057     Pstar = zeros(np,np);
+0058     ivs = bayestopt_.i_T_var_stable;
+0059     Pstar(ivs,ivs) = <a href="lyapunov_symm.html" class="code" title="function [x,ns_var]=lyapunov_symm(a,b)">lyapunov_symm</a>(T(ivs,ivs),R(ivs,:)*Q* <span class="keyword">...</span>
+0060                    transpose(R(ivs,:)));
+0061     Pinf  = bayestopt_.Pinf;
+0062     <span class="comment">% by M. Ratto</span>
+0063     RR=T(:,find(~ismember([1:np],ivs)));
+0064     i=find(abs(RR)&gt;1.e-10);
+0065     R0=zeros(size(RR));
+0066     R0(i)=sign(RR(i));
+0067     Pinf=R0*R0';
+0068     <span class="comment">% by M. Ratto</span>
+0069   <span class="keyword">end</span>
+0070   <span class="comment">% -----------------------------------------------------------------------------</span>
+0071   <span class="comment">%  4. Kalman smoother</span>
+0072   <span class="comment">% -----------------------------------------------------------------------------</span>
+0073   <span class="keyword">if</span> estim_params_.nvn
+0074     <span class="keyword">if</span> options_.kalman_algo == 1
+0075       [alphahat,epsilonhat,etahat,ahat,aK] = <a href="DiffuseKalmanSmootherH1.html" class="code" title="function [alphahat,epsilonhat,etahat,a, aK] = DiffuseKalmanSmootherH1(T,R,Q,H,Pinf1,Pstar1,Y,trend,pp,mm,smpl,mf)">DiffuseKalmanSmootherH1</a>(T,R,Q,H,Pinf,Pstar,Y,trend,nobs,np,smpl,mf);
+0076       <span class="keyword">if</span> all(alphahat(:)==0)
+0077     [alphahat,epsilonhat,etahat,ahat,aK] = <a href="DiffuseKalmanSmootherH3.html" class="code" title="function [alphahat,epsilonhat,etahat,a1, aK] = DiffuseKalmanSmootherH3(T,R,Q,H,Pinf1,Pstar1,Y,trend,pp,mm,smpl,mf)">DiffuseKalmanSmootherH3</a>(T,R,Q,H,Pinf,Pstar,Y,trend,nobs,np,smpl,mf);
+0078       <span class="keyword">end</span>
+0079     <span class="keyword">elseif</span> options_.kalman_algo == 3
+0080       [alphahat,epsilonhat,etahat,ahat,aK] = <a href="DiffuseKalmanSmootherH3.html" class="code" title="function [alphahat,epsilonhat,etahat,a1, aK] = DiffuseKalmanSmootherH3(T,R,Q,H,Pinf1,Pstar1,Y,trend,pp,mm,smpl,mf)">DiffuseKalmanSmootherH3</a>(T,R,Q,H,Pinf,Pstar,Y,trend,nobs,np,smpl,mf);
+0081     <span class="keyword">end</span>
+0082   <span class="keyword">else</span>
+0083     <span class="keyword">if</span> options_.kalman_algo == 1
+0084       [alphahat,etahat,ahat,aK] = <a href="DiffuseKalmanSmoother1.html" class="code" title="function [alphahat,etahat,a, aK] = DiffuseKalmanSmoother1(T,R,Q,Pinf1,Pstar1,Y,trend,pp,mm,smpl,mf)">DiffuseKalmanSmoother1</a>(T,R,Q,Pinf,Pstar,Y,trend,nobs,np,smpl,mf);
+0085       <span class="keyword">if</span> all(alphahat(:)==0)
+0086     [alphahat,etahat,ahat,aK] = <a href="DiffuseKalmanSmoother3.html" class="code" title="function [alphahat,etahat,a1, aK] = DiffuseKalmanSmoother3(T,R,Q,Pinf1,Pstar1,Y,trend,pp,mm,smpl,mf)">DiffuseKalmanSmoother3</a>(T,R,Q,Pinf,Pstar,Y,trend,nobs,np,smpl,mf);
+0087       <span class="keyword">end</span>
+0088     <span class="keyword">elseif</span> options_.kalman_algo == 3
+0089       [alphahat,etahat,ahat,aK] = <a href="DiffuseKalmanSmoother3.html" class="code" title="function [alphahat,etahat,a1, aK] = DiffuseKalmanSmoother3(T,R,Q,Pinf1,Pstar1,Y,trend,pp,mm,smpl,mf)">DiffuseKalmanSmoother3</a>(T,R,Q,Pinf,Pstar,Y,trend,nobs,np,smpl,mf);
+0090     <span class="keyword">end</span>
+0091   <span class="keyword">end</span></pre></div>
+<hr><address>Generated on Fri 16-Jun-2006 09:09:06 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/">m2html</a></strong> &copy; 2003</address>
+</body>
+</html>

@@ -1,0 +1,698 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of dr1</title>
+  <meta name="keywords" content="dr1">
+  <meta name="description" content="Copyright (C) 2001 Michel Juillard">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2003 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../index.html">Home</a> &gt;  <a href="index.html">.</a> &gt; dr1.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../index.html"><img alt="<" border="0" src="../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="index.html">Index for .&nbsp;<img alt=">" border="0" src="../right.png"></a></td></tr></table>-->
+
+<h1>dr1
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>Copyright (C) 2001 Michel Juillard</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function [dr,info]=dr1(dr,task) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> Copyright (C) 2001 Michel Juillard</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="hessian.html" class="code" title="function hessian_mat = hessian(func,x,varargin)">hessian</a>	Copyright (C) 2001 Michel Juillard</li><li><a href="qzdiv.html" class="code" title="function [A,B,Q,Z] = qzdiv(stake,A,B,Q,Z)">qzdiv</a>	from Chris Sims web site</li><li><a href="resid.html" class="code" title="function resid(period)">resid</a>	Copyright (C) 2001 Michel Juillard</li><li><a href="set_default_option.html" class="code" title="function options=set_default_option(options,field,default)">set_default_option</a>	</li><li><a href="set_state_space.html" class="code" title="function dr=set_state_space(dr)">set_state_space</a>	Copyright (C) 2001 Michel Juillard</li><li><a href="sylvester3.html" class="code" title="function x=sylvester3(a,b,c,d)">sylvester3</a>	solves a*x+b*x*c=d</li><li><a href="sylvester3a.html" class="code" title="function x=sylvester3a(x0,a,b,c,d)">sylvester3a</a>	solves iteratively ax+bxc=d</li><li><a href="transition_matrix.html" class="code" title="function [A,B] = transition_matrix(dr)">transition_matrix</a>	makes transition matrices out of ghx and ghu</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="dr2.html" class="code" title="function ghs2=dr2(ys,dr)">dr2</a>	Copyright (C) 2001 Michel Juillard</li><li><a href="resol.html" class="code" title="function [dr,info]=resol(ys,check_flag)">resol</a>	Copyright (C) 2001 Michel Juillard</li></ul>
+<!-- crossreference -->
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <span class="comment">% Copyright (C) 2001 Michel Juillard</span>
+0002 <span class="comment">%</span>
+0003 <a name="_sub0" href="#_subfunctions" class="code">function [dr,info]=dr1(dr,task)</a>
+0004 <span class="keyword">global</span> M_ options_ oo_
+0005 
+0006 <span class="keyword">global</span> olr_state
+0007 <span class="comment">% info = 1: the model doesn't define current variables uniquely</span>
+0008 <span class="comment">% info = 2: problem in mjdgges.dll info(2) contains error code</span>
+0009 <span class="comment">% info = 3: BK order condition not satisfied info(2) contains &quot;distance&quot;</span>
+0010 <span class="comment">%           absence of stable trajectory</span>
+0011 <span class="comment">% info = 4: BK order condition not satisfied info(2) contains &quot;distance&quot;</span>
+0012 <span class="comment">%           indeterminacy</span>
+0013 <span class="comment">% info = 5: BK rank condition not satisfied</span>
+0014 
+0015 
+0016 
+0017   info = 0;
+0018   
+0019   options_ = <a href="set_default_option.html" class="code" title="function options=set_default_option(options,field,default)">set_default_option</a>(options_,<span class="string">'loglinear'</span>,0);
+0020   options_ = <a href="set_default_option.html" class="code" title="function options=set_default_option(options,field,default)">set_default_option</a>(options_,<span class="string">'noprint'</span>,0);
+0021   options_ = <a href="set_default_option.html" class="code" title="function options=set_default_option(options,field,default)">set_default_option</a>(options_,<span class="string">'olr'</span>,0);
+0022   options_ = <a href="set_default_option.html" class="code" title="function options=set_default_option(options,field,default)">set_default_option</a>(options_,<span class="string">'olr_beta'</span>,1);
+0023   options_ = <a href="set_default_option.html" class="code" title="function options=set_default_option(options,field,default)">set_default_option</a>(options_,<span class="string">'qz_criterium'</span>,1.000001);
+0024 
+0025 xlen = M_.maximum_lead + M_.maximum_lag + 1;
+0026 klen = M_.maximum_lag + M_.maximum_lead + 1;
+0027 iyv = M_.lead_lag_incidence';
+0028 iyv = iyv(:);
+0029 iyr0 = find(iyv) ;
+0030 it_ = M_.maximum_lag + 1 ;
+0031 
+0032 <span class="keyword">if</span> M_.exo_nbr == 0
+0033   oo_.exo_steady_state = [] ;
+0034 <span class="keyword">end</span>
+0035 
+0036 tempex = oo_.exo_simul;
+0037 
+0038 it_ = M_.maximum_lag + 1;
+0039 <span class="keyword">if</span> options_.olr
+0040   z = repmat(zeros(M_.endo_nbr,1),1,klen);
+0041 <span class="keyword">else</span>
+0042   z = repmat(dr.ys,1,klen);
+0043 <span class="keyword">end</span>
+0044 z = z(iyr0) ;
+0045 <span class="keyword">if</span> options_.order == 1
+0046   [junk,jacobia_] = feval([M_.fname <span class="string">'_dynamic'</span>],z,tempex);
+0047 <span class="keyword">elseif</span> options_.order == 2
+0048     [junk,jacobia_,<a href="hessian.html" class="code" title="function hessian_mat = hessian(func,x,varargin)">hessian</a>] = feval([M_.fname <span class="string">'_dynamic'</span>],z,<span class="keyword">...</span>
+0049                     [oo_.exo_simul <span class="keyword">...</span>
+0050                              oo_.exo_det_simul]);
+0051 <span class="keyword">end</span>
+0052 
+0053 oo_.exo_simul = tempex ;
+0054 tempex = [];
+0055 
+0056 <span class="comment">% expanding system for Optimal Linear Regulator</span>
+0057 <span class="keyword">if</span> options_.olr
+0058   bet = options_.olr_beta;
+0059   jacobia1 = [];
+0060   n_inst = size(options_.olr_inst,1);
+0061 
+0062   <span class="keyword">if</span> ~isfield(olr_state_,<span class="string">'done'</span>)
+0063     olr_state_.done = 1;
+0064     olr_state_.old_M_.maximum_lag = M_.maximum_lag;
+0065     olr_state_.old_M_.maximum_lead = M_.maximum_lead;
+0066     olr_state_.old_M_.endo_nbr = M_.endo_nbr;
+0067     olr_state_.old_M_.lead_lag_incidence = M_.lead_lag_incidence;
+0068     
+0069     <span class="keyword">for</span> i=1:M_.endo_nbr
+0070       temp = [<span class="string">'mult_'</span> int2str(i)];
+0071       lgoo_.endo_simul = strvcat(lgoo_.endo_simul,temp);
+0072     <span class="keyword">end</span>
+0073     M_.endo_nbr = 2*M_.endo_nbr-n_inst;
+0074     M_.maximum_lag = max(M_.maximum_lag,M_.maximum_lead);
+0075     M_.maximum_lead = M_.maximum_lag;
+0076   <span class="keyword">end</span>    
+0077   nj = olr_state_.old_M_.endo_nbr-n_inst;
+0078   offset_min = M_.maximum_lag - olr_state_.old_M_.maximum_lag;
+0079   offset_max = M_.maximum_lead - olr_state_.old_M_.maximum_lead;
+0080   newiy = zeros(2*M_.maximum_lag+1,nj+olr_state_.old_M_.endo_nbr);
+0081   jacobia_ = jacobia_(1:nj,:);
+0082   <span class="keyword">for</span> i=1:2*M_.maximum_lag+1
+0083     <span class="keyword">if</span> i &gt; offset_min &amp; i &lt;= 2*M_.maximum_lag+1-offset_max
+0084       [junk,k1,k2] = find(olr_state_.old_M_.lead_lag_incidence(i-offset_min,:));
+0085       <span class="keyword">if</span> i == M_.maximum_lag+1
+0086     jacobia1 = [jacobia1 [jacobia_(:,k2); 2*options_.olr_w]];
+0087       <span class="keyword">else</span>
+0088     jacobia1 = [jacobia1 [jacobia_(:,k2); <span class="keyword">...</span>
+0089             zeros(olr_state_.old_M_.endo_nbr,length(k1))]];
+0090       <span class="keyword">end</span>
+0091       newiy(i,k1) = ones(1,length(k1));
+0092     <span class="keyword">end</span>
+0093     i1  = 2*M_.maximum_lag+2-i;
+0094     <span class="keyword">if</span> i1 &lt;= 2*M_.maximum_lag+1-offset_max &amp; i1 &gt; offset_min 
+0095       [junk,k1,k2] = find(olr_state_.old_M_.lead_lag_incidence(i1-offset_min,:));
+0096       k3 = find(any(jacobia_(:,k2),2));
+0097       x = zeros(olr_state_.old_M_.endo_nbr,length(k3));
+0098       x(k1,:) = bet^(-i1+M_.maximum_lag+1)*jacobia_(k3,k2)';
+0099       jacobia1  = [jacobia1 [zeros(nj,length(k3)); x]];
+0100       newiy(i,k3+olr_state_.old_M_.endo_nbr) = ones(1,length(k3));
+0101     <span class="keyword">end</span>      
+0102   <span class="keyword">end</span>
+0103   jacobia1 = [jacobia1 [jacobia_(:,end-M_.exo_nbr+1:end); <span class="keyword">...</span>
+0104             zeros(olr_state_.old_M_.endo_nbr, M_.exo_nbr)]];
+0105   newiy = newiy';
+0106   newiy = find(newiy(:));
+0107   M_.lead_lag_incidence = zeros(M_.endo_nbr*(M_.maximum_lag+M_.maximum_lead+1),1);
+0108   M_.lead_lag_incidence(newiy) = [1:length(newiy)]';
+0109   M_.lead_lag_incidence =reshape(M_.lead_lag_incidence,M_.endo_nbr,M_.maximum_lag+M_.maximum_lead+1)';
+0110   jacobia_ = jacobia1;
+0111   clear jacobia1
+0112   <span class="comment">% computes steady state</span>
+0113   <a href="resid.html" class="code" title="function resid(period)">resid</a> = feval([M_.fname <span class="string">'_steady'</span>],zeros(olr_state_.old_M_.endo_nbr,1));
+0114   <span class="keyword">if</span> <a href="resid.html" class="code" title="function resid(period)">resid</a>'*<a href="resid.html" class="code" title="function resid(period)">resid</a> &lt; 1e-12
+0115     dr.ys =[dr.ys; zeros(nj,1)];
+0116   <span class="keyword">else</span>
+0117     AA = zeros(M_.endo_nbr,M_.endo_nbr);
+0118     <span class="keyword">for</span> i=1:M_.maximum_lag+M_.maximum_lead+1
+0119       [junk,k1,k2] = find(M_.lead_lag_incidence(i,:));
+0120       AA(:,k1) = AA(:,k1)+jacobia_(:,k2);
+0121     <span class="keyword">end</span>
+0122     dr.ys = -AA\[<a href="resid.html" class="code" title="function resid(period)">resid</a>; zeros(nj,1)];
+0123   <span class="keyword">end</span>
+0124 <span class="keyword">end</span>
+0125 <span class="comment">% end of code section for Optimal Linear Regulator</span>
+0126 
+0127 klen = M_.maximum_lag + M_.maximum_lead + 1;
+0128 dr=<a href="set_state_space.html" class="code" title="function dr=set_state_space(dr)">set_state_space</a>(dr);
+0129 kstate = dr.kstate;
+0130 kad = dr.kad;
+0131 kae = dr.kae;
+0132 nstatic = dr.nstatic;
+0133 nfwrd = dr.nfwrd;
+0134 npred = dr.npred;
+0135 nboth = dr.nboth;
+0136 order_var = dr.order_var;
+0137 nd = size(kstate,1);
+0138 nz = nnz(M_.lead_lag_incidence);
+0139 
+0140 sdyn = M_.endo_nbr - nstatic;
+0141 
+0142 k0 = M_.lead_lag_incidence(M_.maximum_lag+1,order_var);
+0143 k1 = M_.lead_lag_incidence(find([1:klen] ~= M_.maximum_lag+1),:);
+0144 b = jacobia_(:,k0);
+0145 
+0146 <span class="keyword">if</span> M_.maximum_lead == 0;  <span class="comment">% backward models</span>
+0147   a = jacobia_(:,nonzeros(k1'));
+0148   dr.ghx = zeros(size(a));
+0149   m = 0;
+0150   <span class="keyword">for</span> i=M_.maximum_lag:-1:1
+0151     k = nonzeros(M_.lead_lag_incidence(i,order_var));
+0152     dr.ghx(:,m+[1:length(k)]) = -b\a(:,k);
+0153     m = m+length(k);
+0154   <span class="keyword">end</span>
+0155   <span class="keyword">if</span> M_.exo_nbr
+0156     dr.ghu = -b\jacobia_(:,nz+1:end);
+0157   <span class="keyword">end</span>
+0158   dr.eigval = eig(<a href="transition_matrix.html" class="code" title="function [A,B] = transition_matrix(dr)">transition_matrix</a>(dr));
+0159   dr.rank = 0;
+0160   <span class="keyword">if</span> any(abs(dr.eigval) &gt; options_.qz_criterium)
+0161     temp = sort(abs(dr.eigval));
+0162     nba = nnz(abs(dr.eigval) &gt; options_.qz_criterium);
+0163     temp = temp(nd-nba+1:nd)-1-options_.qz_criterium;
+0164     info(1) = 3;
+0165     info(2) = temp'*temp;
+0166   <span class="keyword">end</span>
+0167   <span class="keyword">return</span>;
+0168 <span class="keyword">end</span>
+0169 
+0170 <span class="comment">%forward--looking models</span>
+0171 <span class="keyword">if</span> nstatic &gt; 0
+0172   [Q,R] = qr(b(:,1:nstatic));
+0173   aa = Q'*jacobia_;
+0174 <span class="keyword">else</span>
+0175   aa = jacobia_;
+0176 <span class="keyword">end</span>
+0177 a = aa(:,nonzeros(k1'));
+0178 b = aa(:,k0);
+0179 b10 = b(1:nstatic,1:nstatic);
+0180 b11 = b(1:nstatic,nstatic+1:end);
+0181 b2 = b(nstatic+1:<span class="keyword">end</span>,nstatic+1:end);
+0182 <span class="keyword">if</span> any(isinf(a(:)))
+0183   info = 1;
+0184   <span class="keyword">return</span>
+0185 <span class="keyword">end</span>
+0186 <span class="keyword">if</span> M_.exo_nbr
+0187   fu = aa(:,nz+(1:M_.exo_nbr));
+0188 <span class="keyword">end</span>
+0189 clear aa;
+0190 
+0191 <span class="comment">% buildind D and E</span>
+0192 d = zeros(nd,nd) ;
+0193 e = d ;
+0194 
+0195 k = find(kstate(:,2) &gt;= M_.maximum_lag+2 &amp; kstate(:,3));
+0196 d(1:sdyn,k) = a(nstatic+1:<span class="keyword">end</span>,kstate(k,3)) ;
+0197 k1 = find(kstate(:,2) == M_.maximum_lag+2);
+0198 e(1:sdyn,k1) =  -b2(:,kstate(k1,1)-nstatic);
+0199 k = find(kstate(:,2) &lt;= M_.maximum_lag+1 &amp; kstate(:,4));
+0200 e(1:sdyn,k) = -a(nstatic+1:<span class="keyword">end</span>,kstate(k,4)) ;
+0201 k2 = find(kstate(:,2) == M_.maximum_lag+1);
+0202 k2 = k2(~ismember(kstate(k2,1),kstate(k1,1)));
+0203 d(1:sdyn,k2) = b2(:,kstate(k2,1)-nstatic);
+0204 
+0205 <span class="keyword">if</span> ~isempty(kad)
+0206   <span class="keyword">for</span> j = 1:size(kad,1)
+0207     d(sdyn+j,kad(j)) = 1 ;
+0208     e(sdyn+j,kae(j)) = 1 ;
+0209   <span class="keyword">end</span>
+0210 <span class="keyword">end</span>
+0211 
+0212 <span class="keyword">if</span> ~exist(<span class="string">'mjdgges'</span>)
+0213   <span class="comment">% using Chris Sim's routines</span>
+0214   use_qzdiv = 1;
+0215   [ss,tt,qq,w] = qz(e,d);
+0216   [tt,ss,qq,w] = <a href="qzdiv.html" class="code" title="function [A,B,Q,Z] = qzdiv(stake,A,B,Q,Z)">qzdiv</a>(options_.qz_criterium,tt,ss,qq,w);
+0217   ss1=diag(ss);
+0218   tt1=diag(tt);
+0219   warning_state = warning;
+0220   warning off;
+0221   dr.eigval = ss1./tt1 ;
+0222   warning warning_state;
+0223   nba = nnz(abs(dr.eigval) &gt; options_.qz_criterium);
+0224 <span class="keyword">else</span>
+0225   use_qzdiv = 0;
+0226   [ss,tt,w,sdim,dr.eigval,info1] = mjdgges(e,d,options_.qz_criterium);
+0227   <span class="keyword">if</span> info1
+0228     info(1) = 2;
+0229     info(2) = info1;
+0230     <span class="keyword">return</span>
+0231   <span class="keyword">end</span>
+0232   nba = nd-sdim;
+0233 <span class="keyword">end</span>
+0234 
+0235 nyf = sum(kstate(:,2) &gt; M_.maximum_lag+1);
+0236 
+0237 <span class="keyword">if</span> task == 1
+0238   dr.rank = rank(w(1:nyf,nd-nyf+1:end));
+0239   dr.eigval = eig(e,d);
+0240   <span class="keyword">return</span>
+0241 <span class="keyword">end</span>
+0242 
+0243 <span class="keyword">if</span> nba ~= nyf
+0244   temp = sort(abs(dr.eigval));
+0245   <span class="keyword">if</span> nba &gt; nyf
+0246     temp = temp(nd-nba+1:nd-nyf)-1-options_.qz_criterium;
+0247     info(1) = 3;
+0248   <span class="keyword">elseif</span> nba &lt; nyf;
+0249     temp = temp(nd-nyf+1:nd-nba)-1-options_.qz_criterium;
+0250     info(1) = 4;
+0251   <span class="keyword">end</span>
+0252   info(2) = temp'*temp;
+0253   <span class="keyword">return</span>
+0254 <span class="keyword">end</span>
+0255 
+0256 np = nd - nyf;
+0257 n2 = np + 1;
+0258 n3 = nyf;
+0259 n4 = n3 + 1;
+0260 <span class="comment">% derivatives with respect to dynamic state variables</span>
+0261 <span class="comment">% forward variables</span>
+0262 w1 =w(1:n3,n2:nd);
+0263 <span class="keyword">if</span> condest(w1) &gt; 1e9;
+0264   info(1) = 5;
+0265   info(2) = condest(w1);
+0266   <span class="keyword">return</span>;
+0267 <span class="keyword">else</span>
+0268   gx = -w1'\w(n4:nd,n2:nd)';
+0269 <span class="keyword">end</span>  
+0270 
+0271 <span class="comment">% predetermined variables</span>
+0272 hx = w(1:n3,1:np)'*gx+w(n4:nd,1:np)';
+0273 hx = (tt(1:np,1:np)*hx)\(ss(1:np,1:np)*hx);
+0274 
+0275 k1 = find(kstate(n4:nd,2) == M_.maximum_lag+1);
+0276 k2 = find(kstate(1:n3,2) == M_.maximum_lag+2);
+0277 dr.ghx = [hx(k1,:); gx(k2(nboth+1:end),:)];
+0278 
+0279 <span class="comment">%lead variables actually present in the model</span>
+0280 j3 = nonzeros(kstate(:,3));
+0281 j4  = find(kstate(:,3));
+0282 <span class="comment">% derivatives with respect to exogenous variables</span>
+0283 <span class="keyword">if</span> M_.exo_nbr
+0284   a1 = b;
+0285   aa1 = [];
+0286   <span class="keyword">if</span> nstatic &gt; 0
+0287     aa1 = a1(:,1:nstatic);
+0288   <span class="keyword">end</span>
+0289   dr.ghu = -[aa1 a(:,j3)*gx(j4,1:npred)+a1(:,nstatic+1:nstatic+ <span class="keyword">...</span>
+0290                           npred) a1(:,nstatic+npred+1:end)]\fu;
+0291 <span class="keyword">end</span>
+0292 
+0293 <span class="comment">% static variables</span>
+0294 <span class="keyword">if</span> nstatic &gt; 0
+0295   temp = -a(1:nstatic,j3)*gx(j4,:)*hx;
+0296   j5 = find(kstate(n4:nd,4));
+0297   temp(:,j5) = temp(:,j5)-a(1:nstatic,nonzeros(kstate(:,4)));
+0298   temp = b10\(temp-b11*dr.ghx);
+0299   dr.ghx = [temp; dr.ghx];
+0300   temp = [];
+0301 <span class="keyword">end</span>
+0302 
+0303 <span class="keyword">if</span> options_.loglinear == 1
+0304     k = find(dr.kstate(:,2) &lt;= M_.maximum_lag+1);
+0305     klag = dr.kstate(k,[1 2]);
+0306     k1 = dr.order_var;
+0307 
+0308     dr.ghx = repmat(1./dr.ys(k1),1,size(dr.ghx,2)).*dr.ghx.* <span class="keyword">...</span>
+0309          repmat(dr.ys(k1(klag(:,1)))',size(dr.ghx,1),1);
+0310     dr.ghu = repmat(1./dr.ys(k1),1,size(dr.ghu,2)).*dr.ghu;
+0311 <span class="keyword">end</span>
+0312 
+0313 <span class="comment">%necessary when using Sims' routines</span>
+0314 <span class="keyword">if</span> use_qzdiv
+0315   gx = real(gx);
+0316   hx = real(hx);
+0317   dr.ghx = real(dr.ghx);
+0318   dr.ghu = real(dr.ghu);
+0319 <span class="keyword">end</span>
+0320 
+0321 <span class="comment">%exogenous deterministic variables</span>
+0322 <span class="keyword">if</span> M_.exo_det_nbr &gt; 0
+0323   f1 = sparse(jacobia_(:,nonzeros(M_.lead_lag_incidence(M_.maximum_lag+2:<span class="keyword">end</span>,order_var))));
+0324   f0 = sparse(jacobia_(:,nonzeros(M_.lead_lag_incidence(M_.maximum_lag+1,order_var))));
+0325   fudet = sparse(jacobia_(:,nz+M_.exo_nbr+1:end));
+0326   M1 = inv(f0+[zeros(M_.endo_nbr,nstatic) f1*gx zeros(M_.endo_nbr,nyf-nboth)]);
+0327   M2 = M1*f1;
+0328   dr.ghud = cell(M_.exo_det_length,1);
+0329   dr.ghud{1} = -M1*fudet;
+0330   <span class="keyword">for</span> i = 2:M_.exo_det_length
+0331     dr.ghud{i} = -M2*dr.ghud{i-1}(end-nyf+1:<span class="keyword">end</span>,:);
+0332   <span class="keyword">end</span>
+0333 <span class="keyword">end</span>
+0334 
+0335 <span class="keyword">if</span> options_.order == 1
+0336   <span class="keyword">return</span>
+0337 <span class="keyword">end</span>
+0338 
+0339 <span class="comment">% Second order</span>
+0340 <span class="comment">%tempex = oo_.exo_simul ;</span>
+0341 
+0342 <span class="comment">%hessian = real(hessext('ff1_',[z; oo_.exo_steady_state]))' ;</span>
+0343 kk = flipud(cumsum(flipud(M_.lead_lag_incidence(M_.maximum_lag+1:<span class="keyword">end</span>,order_var)),1));
+0344 <span class="keyword">if</span> M_.maximum_lag &gt; 0
+0345   kk = [cumsum(M_.lead_lag_incidence(1:M_.maximum_lag,order_var),1); kk];
+0346 <span class="keyword">end</span>
+0347 kk = kk';
+0348 kk = find(kk(:));
+0349 nk = size(kk,1) + M_.exo_nbr + M_.exo_det_nbr;
+0350 k1 = M_.lead_lag_incidence(:,order_var);
+0351 k1 = k1';
+0352 k1 = k1(:);
+0353 k1 = k1(kk);
+0354 k2 = find(k1);
+0355 kk1(k1(k2)) = k2;
+0356 kk1 = [kk1 length(k1)+1:length(k1)+M_.exo_nbr+M_.exo_det_nbr];
+0357 kk = reshape([1:nk^2],nk,nk);
+0358 kk1 = kk(kk1,kk1);
+0359 <span class="comment">%[junk,junk,hessian] = feval([M_.fname '_dynamic'],z, oo_.exo_steady_state);</span>
+0360 <a href="hessian.html" class="code" title="function hessian_mat = hessian(func,x,varargin)">hessian</a>(:,kk1(:)) = <a href="hessian.html" class="code" title="function hessian_mat = hessian(func,x,varargin)">hessian</a>;
+0361 
+0362 <span class="comment">%oo_.exo_simul = tempex ;</span>
+0363 <span class="comment">%clear tempex</span>
+0364 
+0365 n1 = 0;
+0366 n2 = np;
+0367 zx = zeros(np,np);
+0368 zu=zeros(np,M_.exo_nbr);
+0369 <span class="keyword">for</span> i=2:M_.maximum_lag+1
+0370   k1 = sum(kstate(:,2) == i);
+0371   zx(n1+1:n1+k1,n2-k1+1:n2)=eye(k1);
+0372   n1 = n1+k1;
+0373   n2 = n2-k1;
+0374 <span class="keyword">end</span>
+0375 kk = flipud(cumsum(flipud(M_.lead_lag_incidence(M_.maximum_lag+1:<span class="keyword">end</span>,order_var)),1));
+0376 k0 = [1:M_.endo_nbr];
+0377 gx1 = dr.ghx;
+0378 hu = dr.ghu(nstatic+[1:npred],:);
+0379 zx = [zx; gx1];
+0380 zu = [zu; dr.ghu];
+0381 <span class="keyword">for</span> i=1:M_.maximum_lead
+0382   k1 = find(kk(i+1,k0) &gt; 0);
+0383   zu = [zu; gx1(k1,1:npred)*hu];
+0384   gx1 = gx1(k1,:)*hx;
+0385   zx = [zx; gx1];
+0386   kk = kk(:,k0);
+0387   k0 = k1;
+0388 <span class="keyword">end</span>
+0389 zx=[zx; zeros(M_.exo_nbr,np);zeros(M_.exo_det_nbr,np)];
+0390 zu=[zu; eye(M_.exo_nbr);zeros(M_.exo_det_nbr,M_.exo_nbr)];
+0391 [n1,n2] = size(zx);
+0392 <span class="keyword">if</span> n1*n1*n2*n2 &gt; 1e7
+0393   rhs = zeros(M_.endo_nbr,n2*n2);
+0394   k1 = 1;
+0395   <span class="keyword">for</span> i1 = 1:n2
+0396       <span class="keyword">for</span> i2 = 1:n2
+0397     rhs(:,k1) = <a href="hessian.html" class="code" title="function hessian_mat = hessian(func,x,varargin)">hessian</a>*kron(zx(:,i1),zx(:,i2));
+0398     k1 = k1 + 1; 
+0399       <span class="keyword">end</span>
+0400   <span class="keyword">end</span>
+0401 <span class="keyword">else</span>
+0402   rhs = <a href="hessian.html" class="code" title="function hessian_mat = hessian(func,x,varargin)">hessian</a>*kron(zx,zx);
+0403 <span class="keyword">end</span>
+0404 rhs = -rhs;
+0405 
+0406 <span class="comment">%lhs</span>
+0407 n = M_.endo_nbr+sum(kstate(:,2) &gt; M_.maximum_lag+1 &amp; kstate(:,2) &lt; M_.maximum_lag+M_.maximum_lead+1);
+0408 A = zeros(n,n);
+0409 B = zeros(n,n);
+0410 A(1:M_.endo_nbr,1:M_.endo_nbr) = jacobia_(:,M_.lead_lag_incidence(M_.maximum_lag+1,order_var));
+0411 <span class="comment">% variables with the highest lead</span>
+0412 k1 = find(kstate(:,2) == M_.maximum_lag+M_.maximum_lead+1);
+0413 <span class="keyword">if</span> M_.maximum_lead &gt; 1
+0414   k2 = find(kstate(:,2) == M_.maximum_lag+M_.maximum_lead);
+0415   [junk,junk,k3] = intersect(kstate(k1,1),kstate(k2,1));
+0416 <span class="keyword">else</span>
+0417   k2 = [1:M_.endo_nbr];
+0418   k3 = kstate(k1,1);
+0419 <span class="keyword">end</span>
+0420 <span class="comment">% Jacobian with respect to the variables with the highest lead</span>
+0421 B(1:M_.endo_nbr,end-length(k2)+k3) = jacobia_(:,kstate(k1,3)+M_.endo_nbr);
+0422 offset = M_.endo_nbr;
+0423 k0 = [1:M_.endo_nbr];
+0424 gx1 = dr.ghx;
+0425 <span class="keyword">for</span> i=1:M_.maximum_lead-1
+0426   k1 = find(kstate(:,2) == M_.maximum_lag+i+1);
+0427   [k2,junk,k3] = find(kstate(k1,3));
+0428   A(1:M_.endo_nbr,offset+k2) = jacobia_(:,k3+M_.endo_nbr);
+0429   n1 = length(k1);
+0430   A(offset+[1:n1],nstatic+[1:npred]) = -gx1(kstate(k1,1),1:npred);
+0431   gx1 = gx1*hx;
+0432   A(offset+[1:n1],offset+[1:n1]) = eye(n1);
+0433   n0 = length(k0);
+0434   E = eye(n0);
+0435   <span class="keyword">if</span> i == 1
+0436     [junk,junk,k4]=intersect(kstate(k1,1),[1:M_.endo_nbr]);
+0437   <span class="keyword">else</span>
+0438     [junk,junk,k4]=intersect(kstate(k1,1),kstate(k0,1));
+0439   <span class="keyword">end</span>
+0440   i1 = offset-n0+n1;
+0441   B(offset+[1:n1],offset-n0+[1:n0]) = -E(k4,:);
+0442   k0 = k1;
+0443   offset = offset + n1;
+0444 <span class="keyword">end</span>
+0445 [junk,k1,k2] = find(M_.lead_lag_incidence(M_.maximum_lag+M_.maximum_lead+1,order_var));
+0446 A(1:M_.endo_nbr,nstatic+1:nstatic+npred)=<span class="keyword">...</span>
+0447     A(1:M_.endo_nbr,nstatic+[1:npred])+jacobia_(:,k2)*gx1(k1,1:npred);
+0448 C = hx;
+0449 D = [rhs; zeros(n-M_.endo_nbr,size(rhs,2))];
+0450 dr.ghxx = gensylv(2,A,B,C,D);
+0451 <span class="keyword">if</span> exist(<span class="string">'gensylv'</span>)
+0452   dr.ghxx = gensylv(2,A,B,C,D);
+0453 <span class="keyword">else</span>
+0454   C = kron(hx,hx); 
+0455   x0 = <a href="sylvester3.html" class="code" title="function x=sylvester3(a,b,c,d)">sylvester3</a>(A,B,C,D);
+0456   dr.ghxx = <a href="sylvester3a.html" class="code" title="function x=sylvester3a(x0,a,b,c,d)">sylvester3a</a>(x0,A,B,C,D);
+0457 <span class="keyword">end</span>
+0458 
+0459 <span class="comment">%ghxu</span>
+0460 <span class="comment">%rhs</span>
+0461 hu = dr.ghu(nstatic+1:nstatic+npred,:);
+0462 <span class="comment">%kk = reshape([1:np*np],np,np);</span>
+0463 <span class="comment">%kk = kk(1:npred,1:npred);</span>
+0464 <span class="comment">%rhs = -hessian*kron(zx,zu)-f1*dr.ghxx(end-nyf+1:end,kk(:))*kron(hx(1:npred,:),hu(1:npred,:));</span>
+0465 <span class="keyword">if</span> n1*n1*n2*M_.exo_nbr &gt; 1e7
+0466   rhs = zeros(M_.endo_nbr,n2*M_.exo_nbr);
+0467   k1 = 1;
+0468   <span class="keyword">for</span> i1 = 1:n2
+0469       <span class="keyword">for</span> i2 = 1:M_.exo_nbr
+0470     rhs(:,k1) = <a href="hessian.html" class="code" title="function hessian_mat = hessian(func,x,varargin)">hessian</a>*kron(zx(:,i1),zu(:,i2));
+0471     k1 = k1 + 1; 
+0472       <span class="keyword">end</span>
+0473   <span class="keyword">end</span>
+0474 <span class="keyword">else</span>
+0475   rhs = <a href="hessian.html" class="code" title="function hessian_mat = hessian(func,x,varargin)">hessian</a>*kron(zx,zu);
+0476 <span class="keyword">end</span>
+0477 nyf1 = sum(kstate(:,2) == M_.maximum_lag+2);
+0478 hu1 = [hu;zeros(np-npred,M_.exo_nbr)];
+0479 <span class="comment">%B1 = [B(1:M_.endo_nbr,:);zeros(size(A,1)-M_.endo_nbr,size(B,2))];</span>
+0480 rhs = -[rhs; zeros(n-M_.endo_nbr,size(rhs,2))]-B*dr.ghxx*kron(hx,hu1);
+0481 
+0482 
+0483 <span class="comment">%lhs</span>
+0484 dr.ghxu = A\rhs;
+0485 
+0486 <span class="comment">%ghuu</span>
+0487 <span class="comment">%rhs</span>
+0488 kk = reshape([1:np*np],np,np);
+0489 kk = kk(1:npred,1:npred);
+0490 <span class="keyword">if</span> n1*n1*M_.exo_nbr*M_.exo_nbr &gt; 1e7
+0491   rhs = zeros(M_.endo_nbr,M_.exo_nbr*M_.exo_nbr);
+0492   k1 = 1;
+0493   <span class="keyword">for</span> i1 = 1:M_.exo_nbr
+0494       <span class="keyword">for</span> i2 = 1:M_.exo_nbr
+0495     rhs(:,k1) = <a href="hessian.html" class="code" title="function hessian_mat = hessian(func,x,varargin)">hessian</a>*kron(zu(:,i1),zu(:,i2));
+0496     k1 = k1 + 1; 
+0497       <span class="keyword">end</span>
+0498   <span class="keyword">end</span>
+0499 <span class="keyword">else</span>
+0500   rhs = <a href="hessian.html" class="code" title="function hessian_mat = hessian(func,x,varargin)">hessian</a>*kron(zu,zu);
+0501 <span class="keyword">end</span>
+0502 
+0503 rhs = -[rhs; zeros(n-M_.endo_nbr,size(rhs,2))]-B*dr.ghxx*kron(hu1,hu1);
+0504 
+0505 <span class="comment">%lhs</span>
+0506 dr.ghuu = A\rhs;
+0507 
+0508 dr.ghxx = dr.ghxx(1:M_.endo_nbr,:);
+0509 dr.ghxu = dr.ghxu(1:M_.endo_nbr,:);
+0510 dr.ghuu = dr.ghuu(1:M_.endo_nbr,:);
+0511 
+0512 
+0513 <span class="comment">% dr.ghs2</span>
+0514 <span class="comment">% derivatives of F with respect to forward variables</span>
+0515 <span class="comment">% reordering predetermined variables in diminishing lag order</span>
+0516 O1 = zeros(M_.endo_nbr,nstatic);
+0517 O2 = zeros(M_.endo_nbr,M_.endo_nbr-nstatic-npred);
+0518 LHS = jacobia_(:,M_.lead_lag_incidence(M_.maximum_lag+1,order_var));
+0519 RHS = zeros(M_.endo_nbr,M_.exo_nbr^2);
+0520 kk = find(kstate(:,2) == M_.maximum_lag+2);
+0521 gu = dr.ghu; 
+0522 guu = dr.ghuu; 
+0523 Gu = [dr.ghu(nstatic+[1:npred],:); zeros(np-npred,M_.exo_nbr)];
+0524 Guu = [dr.ghuu(nstatic+[1:npred],:); zeros(np-npred,M_.exo_nbr*M_.exo_nbr)];
+0525 E = eye(M_.endo_nbr);
+0526 M_.lead_lag_incidenceordered = flipud(cumsum(flipud(M_.lead_lag_incidence(M_.maximum_lag+1:<span class="keyword">end</span>,order_var)),1));
+0527 <span class="keyword">if</span> M_.maximum_lag &gt; 0
+0528   M_.lead_lag_incidenceordered = [cumsum(M_.lead_lag_incidence(1:M_.maximum_lag,order_var),1); M_.lead_lag_incidenceordered];
+0529 <span class="keyword">end</span>
+0530 M_.lead_lag_incidenceordered = M_.lead_lag_incidenceordered';
+0531 M_.lead_lag_incidenceordered = M_.lead_lag_incidenceordered(:);
+0532 k1 = find(M_.lead_lag_incidenceordered);
+0533 M_.lead_lag_incidenceordered(k1) = [1:length(k1)]';
+0534 M_.lead_lag_incidenceordered =reshape(M_.lead_lag_incidenceordered,M_.endo_nbr,M_.maximum_lag+M_.maximum_lead+1)';
+0535 kh = reshape([1:nk^2],nk,nk);
+0536 kp = sum(kstate(:,2) &lt;= M_.maximum_lag+1);
+0537 E1 = [eye(npred); zeros(kp-npred,npred)];
+0538 H = E1;
+0539 hxx = dr.ghxx(nstatic+[1:npred],:);
+0540 <span class="keyword">for</span> i=1:M_.maximum_lead
+0541   <span class="keyword">for</span> j=i:M_.maximum_lead
+0542     [junk,k2a,k2] = find(M_.lead_lag_incidence(M_.maximum_lag+j+1,order_var));
+0543     [junk,k3a,k3] = find(M_.lead_lag_incidenceordered(M_.maximum_lag+j+1,:));
+0544     RHS = RHS + jacobia_(:,k2)*guu(k2a,:)+<a href="hessian.html" class="code" title="function hessian_mat = hessian(func,x,varargin)">hessian</a>(:,kh(k3,k3))* <span class="keyword">...</span>
+0545       kron(gu(k3a,:),gu(k3a,:));
+0546   <span class="keyword">end</span>
+0547 
+0548   <span class="comment">% LHS</span>
+0549   [junk,k2a,k2] = find(M_.lead_lag_incidence(M_.maximum_lag+i+1,order_var));
+0550   LHS = LHS + jacobia_(:,k2)*(E(k2a,:)+[O1(k2a,:) dr.ghx(k2a,:)*H O2(k2a,:)]);
+0551   
+0552   <span class="keyword">if</span> i == M_.maximum_lead 
+0553     <span class="keyword">break</span>
+0554   <span class="keyword">end</span>
+0555   
+0556   kk = find(kstate(:,2) == M_.maximum_lag+i+1);
+0557   gu = dr.ghx*Gu;
+0558   GuGu = kron(Gu,Gu);
+0559   guu = dr.ghx*Guu+dr.ghxx*GuGu;
+0560   Gu = hx*Gu;
+0561   Guu = hx*Guu;
+0562   Guu(end-npred+1:<span class="keyword">end</span>,:) = Guu(end-npred+1:<span class="keyword">end</span>,:) + hxx*GuGu;
+0563 
+0564   H = E1 + hx*H;
+0565 <span class="keyword">end</span>
+0566 RHS = RHS*M_.Sigma_e(:);
+0567 dr.fuu = RHS;
+0568 RHS = -RHS-dr.fbias;
+0569 dr.ghs2 = LHS\RHS;
+0570 
+0571 <span class="comment">% deterministic exogenous variables</span>
+0572 <span class="keyword">if</span> M_.exo_det_nbr &gt; 0
+0573   hud = dr.ghud{1}(nstatic+1:nstatic+npred,:);
+0574   zud=[zeros(np,M_.exo_det_nbr);dr.ghud{1};gx(:,1:npred)*hud;zeros(M_.exo_nbr,M_.exo_det_nbr);eye(M_.exo_det_nbr)];
+0575   R1 = <a href="hessian.html" class="code" title="function hessian_mat = hessian(func,x,varargin)">hessian</a>*kron(zx,zud);
+0576   dr.ghxud = cell(M_.exo_det_length,1);
+0577   kf = [M_.endo_nbr-nyf+1:M_.endo_nbr];
+0578   kp = nstatic+[1:npred];
+0579   dr.ghxud{1} = -M1*(R1+f1*dr.ghxx(kf,:)*kron(dr.ghx(kp,:),dr.ghud{1}(kp,:)));
+0580   Eud = eye(M_.exo_det_nbr);
+0581   <span class="keyword">for</span> i = 2:M_.exo_det_length
+0582     hudi = dr.ghud{i}(kp,:);
+0583     zudi=[zeros(np,M_.exo_det_nbr);dr.ghud{i};gx(:,1:npred)*hudi;zeros(M_.exo_nbr+M_.exo_det_nbr,M_.exo_det_nbr)];
+0584     R2 = <a href="hessian.html" class="code" title="function hessian_mat = hessian(func,x,varargin)">hessian</a>*kron(zx,zudi);
+0585     dr.ghxud{i} = -M2*(dr.ghxud{i-1}(kf,:)*kron(hx,Eud)+dr.ghxx(kf,:)*kron(dr.ghx(kp,:),dr.ghud{i}(kp,:)))-M1*R2;
+0586   <span class="keyword">end</span>
+0587   R1 = <a href="hessian.html" class="code" title="function hessian_mat = hessian(func,x,varargin)">hessian</a>*kron(zu,zud);
+0588   dr.ghudud = cell(M_.exo_det_length,1);
+0589   kf = [M_.endo_nbr-nyf+1:M_.endo_nbr];
+0590 
+0591   dr.ghuud{1} = -M1*(R1+f1*dr.ghxx(kf,:)*kron(dr.ghu(kp,:),dr.ghud{1}(kp,:)));
+0592   Eud = eye(M_.exo_det_nbr);
+0593   <span class="keyword">for</span> i = 2:M_.exo_det_length
+0594     hudi = dr.ghud{i}(kp,:);
+0595     zudi=[zeros(np,M_.exo_det_nbr);dr.ghud{i};gx(:,1:npred)*hudi;zeros(M_.exo_nbr+M_.exo_det_nbr,M_.exo_det_nbr)];
+0596     R2 = <a href="hessian.html" class="code" title="function hessian_mat = hessian(func,x,varargin)">hessian</a>*kron(zu,zudi);
+0597     dr.ghuud{i} = -M2*dr.ghxud{i-1}(kf,:)*kron(hu,Eud)-M1*R2;
+0598   <span class="keyword">end</span>
+0599   R1 = <a href="hessian.html" class="code" title="function hessian_mat = hessian(func,x,varargin)">hessian</a>*kron(zud,zud);
+0600   dr.ghudud = cell(M_.exo_det_length,M_.exo_det_length);
+0601   dr.ghudud{1,1} = -M1*R1-M2*dr.ghxx(kf,:)*kron(hud,hud);
+0602   <span class="keyword">for</span> i = 2:M_.exo_det_length
+0603     hudi = dr.ghud{i}(nstatic+1:nstatic+npred,:);
+0604     zudi=[zeros(np,M_.exo_det_nbr);dr.ghud{i};gx(:,1:npred)*hudi+dr.ghud{i-1}(kf,:);zeros(M_.exo_nbr+M_.exo_det_nbr,M_.exo_det_nbr)];
+0605     R2 = <a href="hessian.html" class="code" title="function hessian_mat = hessian(func,x,varargin)">hessian</a>*kron(zudi,zudi);
+0606     dr.ghudud{i,i} = -M2*(dr.ghudud{i-1,i-1}(kf,:)+<span class="keyword">...</span>
+0607               2*dr.ghxud{i-1}(kf,:)*kron(hudi,Eud) <span class="keyword">...</span>
+0608               +dr.ghxx(kf,:)*kron(hudi,hudi))-M1*R2;
+0609     R2 = <a href="hessian.html" class="code" title="function hessian_mat = hessian(func,x,varargin)">hessian</a>*kron(zud,zudi);
+0610     dr.ghudud{1,i} = -M2*(dr.ghxud{i-1}(kf,:)*kron(hud,Eud)+<span class="keyword">...</span>
+0611               dr.ghxx(kf,:)*kron(hud,hudi))<span class="keyword">...</span>
+0612     -M1*R2;
+0613     <span class="keyword">for</span> j=2:i-1
+0614       hudj = dr.ghud{j}(kp,:);
+0615       zudj=[zeros(np,M_.exo_det_nbr);dr.ghud{j};gx(:,1:npred)*hudj;zeros(M_.exo_nbr+M_.exo_det_nbr,M_.exo_det_nbr)];
+0616       R2 = <a href="hessian.html" class="code" title="function hessian_mat = hessian(func,x,varargin)">hessian</a>*kron(zudj,zudi);
+0617       dr.ghudud{j,i} = -M2*(dr.ghudud{j-1,i-1}(kf,:)+dr.ghxud{j-1}(kf,:)* <span class="keyword">...</span>
+0618                 kron(hudi,Eud)+dr.ghxud{i-1}(kf,:)* <span class="keyword">...</span>
+0619                 kron(hudj,Eud)+dr.ghxx(kf,:)*kron(hudj,hudi))-M1*R2;
+0620     <span class="keyword">end</span>
+0621     
+0622   <span class="keyword">end</span>
+0623 <span class="keyword">end</span>
+0624 <span class="comment">% 01/08/2001 MJ put return on iorder == 1 after defining dr.kstate and dr.kdyn</span>
+0625 <span class="comment">% 01/17/2001 MJ added dr.delta_s: correction factor for order = 2</span>
+0626 <span class="comment">% 01/21/2001 FC correction of delta_s for more than 1 shock</span>
+0627 <span class="comment">% 01/23/2001 MJ suppression of redundant sum() in delta_s formula</span>
+0628 <span class="comment">% 02/22/2001 MJ stderr_ replaced by Sigma_e_</span>
+0629 <span class="comment">% 08/24/2001 MJ changed the order of the variables, separates static</span>
+0630 <span class="comment">%               variables and handles only one instance of variables both</span>
+0631 <span class="comment">%               in lead and lag</span>
+0632 <span class="comment">% 08/24/2001 MJ added sigma to state variables as in Schmitt-Grohe and</span>
+0633 <span class="comment">%               Uribe (2001)</span>
+0634 <span class="comment">% 10/20/2002 MJ corrected lags on several periods bug</span>
+0635 <span class="comment">% 10/30/2002 MJ corrected lags on several periods bug on static when some</span>
+0636 <span class="comment">%               intermediary lags are missing</span>
+0637 <span class="comment">% 12/08/2002 MJ uses sylvester3 to solve for dr.ghxx</span>
+0638 <span class="comment">% 01/01/2003 MJ added dr.fbias for iterative for dr_algo == 1</span>
+0639 <span class="comment">% 02/21/2003 MJ corrected bug for models without lagged variables</span>
+0640 <span class="comment">% 03/02/2003 MJ fixed second order for lag on several periods</span>
+0641 <span class="comment">% 05/21/2003 MJ add check call argument and make computation for CHECK</span>
+0642 <span class="comment">% 06/01/2003 MJ added a test for M_.maximum_lead &gt; 1 and order &gt; 1</span>
+0643 <span class="comment">% 08/28/2003 MJ corrected bug in computation of 2nd order (ordering of</span>
+0644 <span class="comment">%               forward variable in LHS)</span>
+0645 <span class="comment">% 08/29/2003 MJ use Sims routine if mjdgges isn't available</span>
+0646 
+0647    
+0648 
+0649 
+0650 
+0651 
+0652</pre></div>
+<hr><address>Generated on Fri 16-Jun-2006 09:09:06 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/">m2html</a></strong> &copy; 2003</address>
+</body>
+</html>

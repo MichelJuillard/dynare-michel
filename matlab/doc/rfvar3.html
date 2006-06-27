@@ -1,0 +1,179 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of rfvar3</title>
+  <meta name="keywords" content="rfvar3">
+  <meta name="description" content="function var=rfvar3(ydata,lags,xdata,breaks,lambda,mu)">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2003 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../index.html">Home</a> &gt;  <a href="index.html">.</a> &gt; rfvar3.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../index.html"><img alt="<" border="0" src="../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="index.html">Index for .&nbsp;<img alt=">" border="0" src="../right.png"></a></td></tr></table>-->
+
+<h1>rfvar3
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function var=rfvar3(ydata,lags,xdata,breaks,lambda,mu)</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function var=rfvar3(ydata,lags,xdata,breaks,lambda,mu) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment">function var=rfvar3(ydata,lags,xdata,breaks,lambda,mu)
+ This algorithm goes for accuracy without worrying about memory requirements.
+ ydata:   dependent variable data matrix
+ xdata:   exogenous variable data matrix
+ lags:    number of lags
+ breaks:  rows in ydata and xdata after which there is a break.  This allows for
+          discontinuities in the data (e.g. war years) and for the possibility of
+          adding dummy observations to implement a prior.  This must be a column vector.
+          Note that a single dummy observation becomes lags+1 rows of the data matrix,
+          with a break separating it from the rest of the data.  The function treats the 
+          first lags observations at the top and after each &quot;break&quot; in ydata and xdata as
+          initial conditions. 
+ lambda:  weight on &quot;co-persistence&quot; prior dummy observations.  This expresses
+          belief that when data on *all* y's are stable at their initial levels, they will
+          tend to persist at that level.  lambda=5 is a reasonable first try.  With lambda&lt;0,
+          constant term is not included in the dummy observation, so that stationary models
+          with means equal to initial ybar do not fit the prior mean.  With lambda&gt;0, the prior
+          implies that large constants are unlikely if unit roots are present.
+ mu:      weight on &quot;own persistence&quot; prior dummy observation.  Expresses belief
+          that when y_i has been stable at its initial level, it will tend to persist
+          at that level, regardless of the values of other variables.  There is
+          one of these for each variable.  A reasonable first guess is mu=2.
+      The program assumes that the first lags rows of ydata and xdata are real data, not dummies.
+      Dummy observations should go at the end, if any.  If pre-sample x's are not available,
+      repeating the initial xdata(lags+1,:) row or copying xdata(lags+1:2*lags,:) into 
+      xdata(1:lags,:) are reasonable subsititutes.  These values are used in forming the
+      persistence priors.
+ Code written by Christopher Sims.  This version 6/15/03.</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+</ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="mgnldnsty.html" class="code" title="function w=mgnldnsty(ydata,lags,xdata,breaks,lambda,mu,mnprior,vprior,train,flat)">mgnldnsty</a>	function w=mgnldnsty(ydata,lags,xdata,breaks,lambda,mu,mnprior,vprior,train,flat)</li></ul>
+<!-- crossreference -->
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function var=rfvar3(ydata,lags,xdata,breaks,lambda,mu)</a>
+0002 <span class="comment">%function var=rfvar3(ydata,lags,xdata,breaks,lambda,mu)</span>
+0003 <span class="comment">% This algorithm goes for accuracy without worrying about memory requirements.</span>
+0004 <span class="comment">% ydata:   dependent variable data matrix</span>
+0005 <span class="comment">% xdata:   exogenous variable data matrix</span>
+0006 <span class="comment">% lags:    number of lags</span>
+0007 <span class="comment">% breaks:  rows in ydata and xdata after which there is a break.  This allows for</span>
+0008 <span class="comment">%          discontinuities in the data (e.g. war years) and for the possibility of</span>
+0009 <span class="comment">%          adding dummy observations to implement a prior.  This must be a column vector.</span>
+0010 <span class="comment">%          Note that a single dummy observation becomes lags+1 rows of the data matrix,</span>
+0011 <span class="comment">%          with a break separating it from the rest of the data.  The function treats the</span>
+0012 <span class="comment">%          first lags observations at the top and after each &quot;break&quot; in ydata and xdata as</span>
+0013 <span class="comment">%          initial conditions.</span>
+0014 <span class="comment">% lambda:  weight on &quot;co-persistence&quot; prior dummy observations.  This expresses</span>
+0015 <span class="comment">%          belief that when data on *all* y's are stable at their initial levels, they will</span>
+0016 <span class="comment">%          tend to persist at that level.  lambda=5 is a reasonable first try.  With lambda&lt;0,</span>
+0017 <span class="comment">%          constant term is not included in the dummy observation, so that stationary models</span>
+0018 <span class="comment">%          with means equal to initial ybar do not fit the prior mean.  With lambda&gt;0, the prior</span>
+0019 <span class="comment">%          implies that large constants are unlikely if unit roots are present.</span>
+0020 <span class="comment">% mu:      weight on &quot;own persistence&quot; prior dummy observation.  Expresses belief</span>
+0021 <span class="comment">%          that when y_i has been stable at its initial level, it will tend to persist</span>
+0022 <span class="comment">%          at that level, regardless of the values of other variables.  There is</span>
+0023 <span class="comment">%          one of these for each variable.  A reasonable first guess is mu=2.</span>
+0024 <span class="comment">%      The program assumes that the first lags rows of ydata and xdata are real data, not dummies.</span>
+0025 <span class="comment">%      Dummy observations should go at the end, if any.  If pre-sample x's are not available,</span>
+0026 <span class="comment">%      repeating the initial xdata(lags+1,:) row or copying xdata(lags+1:2*lags,:) into</span>
+0027 <span class="comment">%      xdata(1:lags,:) are reasonable subsititutes.  These values are used in forming the</span>
+0028 <span class="comment">%      persistence priors.</span>
+0029 <span class="comment">% Code written by Christopher Sims.  This version 6/15/03.</span>
+0030 [T,nvar]=size(ydata);
+0031 nox=isempty(xdata);
+0032 <span class="keyword">if</span> ~nox
+0033    [T2,nx]=size(xdata);
+0034 <span class="keyword">else</span>
+0035    T2=T;nx=0;xdata=zeros(T2,0);
+0036 <span class="keyword">end</span>
+0037 <span class="comment">% note that x must be same length as y, even though first part of x will not be used.</span>
+0038 <span class="comment">% This is so that the lags parameter can be changed without reshaping the xdata matrix.</span>
+0039 <span class="keyword">if</span> T2 ~= T, disp(<span class="string">'Mismatch of x and y data lengths'</span>),<span class="keyword">end</span>
+0040 <span class="keyword">if</span> nargin&lt;4
+0041    nbreaks=0;breaks=[];
+0042 <span class="keyword">else</span>
+0043    nbreaks=length(breaks);
+0044 <span class="keyword">end</span>
+0045 breaks=[0;breaks;T];
+0046 smpl=[];
+0047 <span class="keyword">for</span> nb=1:nbreaks+1
+0048    smpl=[smpl;[breaks(nb)+lags+1:breaks(nb+1)]'];
+0049 <span class="keyword">end</span>
+0050 Tsmpl=size(smpl,1);
+0051 X=zeros(Tsmpl,nvar,lags);
+0052 <span class="keyword">for</span> is=1:length(smpl)
+0053     X(is,:,:)=ydata(smpl(is)-(1:lags),:)';
+0054 <span class="keyword">end</span>
+0055 X=[X(:,:) xdata(smpl,:)];
+0056 y=ydata(smpl,:);
+0057 <span class="comment">% Everything now set up with input data for y=Xb+e</span>
+0058 <span class="comment">% ------------------Form persistence dummies-------------------</span>
+0059 <span class="keyword">if</span> lambda~=0 | mu&gt;0
+0060    ybar=mean(ydata(1:lags,:),1);
+0061    <span class="keyword">if</span> ~nox 
+0062       xbar=mean(xdata(1:lags,:),1);
+0063    <span class="keyword">else</span>
+0064       xbar=[];
+0065    <span class="keyword">end</span>
+0066    <span class="keyword">if</span> lambda~=0
+0067       <span class="keyword">if</span> lambda&gt;0
+0068          xdum=lambda*[repmat(ybar,1,lags) xbar];
+0069       <span class="keyword">else</span>
+0070          lambda=-lambda;
+0071          xdum=lambda*[repmat(ybar,1,lags) zeros(size(xbar))];
+0072       <span class="keyword">end</span>
+0073       ydum=zeros(1,nvar);
+0074       ydum(1,:)=lambda*ybar;
+0075       y=[y;ydum];
+0076       X=[X(:,:);xdum];
+0077    <span class="keyword">end</span>
+0078    <span class="keyword">if</span> mu&gt;0
+0079       xdum=[repmat(diag(ybar),1,lags) zeros(nvar,nx)]*mu;
+0080       ydum=mu*diag(ybar);
+0081       X=[X;xdum];
+0082       y=[y;ydum];
+0083    <span class="keyword">end</span>
+0084 <span class="keyword">end</span>
+0085 [vl,d,vr]=svd(X(:,:),0);
+0086 di=1../diag(d);
+0087 B=vl'*y;
+0088 B=(vr.*repmat(di',nvar*lags+nx,1))*B;
+0089 u=y-X(:,:)*B;
+0090 xxi=vr.*repmat(di',nvar*lags+nx,1);
+0091 xxi=xxi*xxi';
+0092 B=reshape(B,[nvar*lags+nx,nvar]); <span class="comment">% rhs variables, equations</span>
+0093 By=B(1:nvar*lags,:);
+0094 By=reshape(By,nvar,lags,nvar);<span class="comment">% variables, lags, equations</span>
+0095 By=permute(By,[3,1,2]); <span class="comment">%equations, variables, lags to match impulsdt.m</span>
+0096 <span class="keyword">if</span> nox
+0097    Bx=[];
+0098 <span class="keyword">else</span>
+0099    Bx=B(nvar*lags+(1:nx),:)';
+0100 <span class="keyword">end</span>
+0101 <span class="comment">%logintlh=matrictint(u'*u,xxi,size(X,1)-nvar-1)-.5*nvar*(nvar+1)*log(2*pi);</span>
+0102 var.By=By;var.Bx=Bx;var.u=u;var.xxi=xxi;<span class="comment">%var.logintlh=logintlh;</span>
+0103 <span class="comment">% Desired features: 1) automatic dummies for vcv prior</span>
+0104 <span class="comment">%                   2) automatic calculation of integrated pdf, accounting</span>
+0105 <span class="comment">%                      for the dummy variables as a prior</span>
+0106 <span class="comment">%                   3) automatic dummies for &quot;Minnesota prior&quot;</span></pre></div>
+<hr><address>Generated on Fri 16-Jun-2006 09:09:06 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/">m2html</a></strong> &copy; 2003</address>
+</body>
+</html>

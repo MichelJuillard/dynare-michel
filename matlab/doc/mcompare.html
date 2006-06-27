@@ -1,0 +1,111 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of mcompare</title>
+  <meta name="keywords" content="mcompare">
+  <meta name="description" content="Copyright (C) 2001 Michel Juillard">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2003 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../index.html">Home</a> &gt;  <a href="index.html">.</a> &gt; mcompare.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../index.html"><img alt="<" border="0" src="../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="index.html">Index for .&nbsp;<img alt=">" border="0" src="../right.png"></a></td></tr></table>-->
+
+<h1>mcompare
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>Copyright (C) 2001 Michel Juillard</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function mcompare(s1,s2) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> Copyright (C) 2001 Michel Juillard
+
+ MCOMPARE :    MCOMPARE ( [ 'file1' ; 'file2' ] , [ 'var1' ; 'var2' ...] )    
+        This optional command plots the relative differences between
+        two different simulations for a list of variables. One plot 
+        is drawn for each variable. The trajectories must have been
+        previously saved by the instruction DYNASAVE. The simulation
+        in file1 serves as the base simulation and the ploted quantity
+        is equal to the difference between the two simulation reported
+        to the first one. If, for a given variable, zero is one of the
+        value of the base simulation, the absolute difference is ploted
+        instead of the relative one.</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="ftest.html" class="code" title="function ftest (s1,s2)">ftest</a>	Copyright (C) 2001 Michel Juillard</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+</ul>
+<!-- crossreference -->
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <span class="comment">% Copyright (C) 2001 Michel Juillard</span>
+0002 <span class="comment">%</span>
+0003 <a name="_sub0" href="#_subfunctions" class="code">function mcompare(s1,s2)</a>
+0004 <span class="comment">% MCOMPARE :    MCOMPARE ( [ 'file1' ; 'file2' ] , [ 'var1' ; 'var2' ...] )</span>
+0005 <span class="comment">%        This optional command plots the relative differences between</span>
+0006 <span class="comment">%        two different simulations for a list of variables. One plot</span>
+0007 <span class="comment">%        is drawn for each variable. The trajectories must have been</span>
+0008 <span class="comment">%        previously saved by the instruction DYNASAVE. The simulation</span>
+0009 <span class="comment">%        in file1 serves as the base simulation and the ploted quantity</span>
+0010 <span class="comment">%        is equal to the difference between the two simulation reported</span>
+0011 <span class="comment">%        to the first one. If, for a given variable, zero is one of the</span>
+0012 <span class="comment">%        value of the base simulation, the absolute difference is ploted</span>
+0013 <span class="comment">%        instead of the relative one.</span>
+0014 
+0015 <span class="keyword">global</span> options_
+0016 <span class="keyword">global</span> nvx nvy x y lag1
+0017 
+0018 <a href="ftest.html" class="code" title="function ftest (s1,s2)">ftest</a>(s1,s2) ;
+0019 
+0020 ix = [1-lag1(1):size(x,2)-lag1(1)]' ;
+0021 i = [lag1(1):size(ix,1)-lag1(2)+1]' ;
+0022 
+0023 <span class="keyword">if</span> size(options_.smpl,1) == 1
+0024     error([<span class="string">'DSAMPLE not specified.'</span>]) ;
+0025 <span class="keyword">end</span>
+0026 
+0027 <span class="keyword">if</span> options_.smpl(3) &gt; 0
+0028     <span class="keyword">if</span> options_.smpl(3) == 2
+0029         <span class="keyword">if</span> options_.smpl(1)&lt;0 | options_.smpl(2)&gt;size(x,2)-lag1(2)
+0030             error (<span class="string">'Wrong sample.'</span>) ;
+0031         <span class="keyword">end</span>
+0032         i = [options_.smpl(1)+lag1(1):options_.smpl(2)+lag1(1)]' ;
+0033     <span class="keyword">elseif</span> options_.smpl(3) == 1
+0034         <span class="keyword">if</span> options_.smpl(1)&gt;size(x,2)-lag1(2)
+0035             error (<span class="string">'Wrong sample.'</span>) ;
+0036         <span class="keyword">end</span>
+0037         i = [lag1(1):options_.smpl(1)+lag1(1)]' ;
+0038     <span class="keyword">end</span>
+0039 <span class="keyword">end</span>
+0040 
+0041 <span class="keyword">for</span> k = 1:size(x,1)
+0042     figure ;
+0043     x1 = x(k,i) ;
+0044     y1 = y(k,i) ;
+0045     <span class="keyword">if</span> nnz(x1) &lt; length(x1)
+0046         plot(ix(i),(y1-x1)) ;
+0047     <span class="keyword">else</span>
+0048         plot(ix(i),(y1-x1)./x1) ;
+0049     <span class="keyword">end</span>
+0050     xlabel([<span class="string">'Periods'</span>]) ;
+0051     title([<span class="string">'Variable '</span> s2(k)]) ;
+0052 <span class="keyword">end</span>
+0053 
+0054 <span class="keyword">return</span> ;</pre></div>
+<hr><address>Generated on Fri 16-Jun-2006 09:09:06 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/">m2html</a></strong> &copy; 2003</address>
+</body>
+</html>

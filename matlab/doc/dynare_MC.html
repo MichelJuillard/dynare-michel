@@ -1,0 +1,302 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of dynare_MC</title>
+  <meta name="keywords" content="dynare_MC">
+  <meta name="description" content="">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2003 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../index.html">Home</a> &gt;  <a href="index.html">.</a> &gt; dynare_MC.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../index.html"><img alt="<" border="0" src="../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="index.html">Index for .&nbsp;<img alt=">" border="0" src="../right.png"></a></td></tr></table>-->
+
+<h1>dynare_MC
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong></strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function dynare_MC(var_list_) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment"></pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="DsgeLikelihood.html" class="code" title="function [fval,cost_flag,ys,trend_coeff,info] = DsgeLikelihood(xparam1,gend,data)">DsgeLikelihood</a>	stephane.adjemian@cepremap.cnrs.fr [09-07-2004]</li><li><a href="DsgeSmoother.html" class="code" title="function [alphahat,etahat,epsilonhat,ahat,SteadyState,trend_coeff,aK] = DsgeSmoother(xparam1,gend,Y)">DsgeSmoother</a>	stephane.adjemian@cepremap.cnrs.fr [09-07-2004]</li><li><a href="prior_bounds.html" class="code" title="function bounds = prior_bounds(bayestopt)">prior_bounds</a>	</li><li><a href="read_variables.html" class="code" title="function dyn_data_01=read_variables(file_name_01,var_names_01,dyn_data_01,xls_sheet,xls_range)">read_variables</a>	Copyright (C) 2005 Michel Juillard</li><li><a href="set_default_option.html" class="code" title="function options=set_default_option(options,field,default)">set_default_option</a>	</li><li><a href="set_prior.html" class="code" title="function [xparam1,estim_params_,bayestopt_,lb,ub]=set_prior(estim_params_)">set_prior</a>	</li><li><a href="set_state_space.html" class="code" title="function dr=set_state_space(dr)">set_state_space</a>	Copyright (C) 2001 Michel Juillard</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="dynare_sensitivity.html" class="code" title="function x0=dynare_sensitivity()">dynare_sensitivity</a>	copyright Marco Ratto 2006</li></ul>
+<!-- crossreference -->
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function dynare_MC(var_list_)</a>
+0002 
+0003 <span class="keyword">global</span> M_ options_ oo_ estim_params_ 
+0004 <span class="keyword">global</span> bayestopt_
+0005 
+0006 options_.varlist = var_list_;
+0007 options_.lgyidx2varobs = zeros(size(M_.endo_names,1),1);
+0008 <span class="keyword">for</span> i = 1:size(M_.endo_names,1)
+0009   tmp = strmatch(deblank(M_.endo_names(i,:)),options_.varobs,<span class="string">'exact'</span>);
+0010   <span class="keyword">if</span> ~isempty(tmp)
+0011     options_.lgyidx2varobs(i,1) = tmp;
+0012   <span class="keyword">end</span>
+0013 <span class="keyword">end</span>  
+0014 
+0015 options_ = <a href="set_default_option.html" class="code" title="function options=set_default_option(options,field,default)">set_default_option</a>(options_,<span class="string">'first_obs'</span>,1);
+0016 options_ = <a href="set_default_option.html" class="code" title="function options=set_default_option(options,field,default)">set_default_option</a>(options_,<span class="string">'prefilter'</span>,0);
+0017 options_ = <a href="set_default_option.html" class="code" title="function options=set_default_option(options,field,default)">set_default_option</a>(options_,<span class="string">'presample'</span>,0);
+0018 options_ = <a href="set_default_option.html" class="code" title="function options=set_default_option(options,field,default)">set_default_option</a>(options_,<span class="string">'lik_algo'</span>,1);
+0019 options_ = <a href="set_default_option.html" class="code" title="function options=set_default_option(options,field,default)">set_default_option</a>(options_,<span class="string">'lik_init'</span>,1);
+0020 options_ = <a href="set_default_option.html" class="code" title="function options=set_default_option(options,field,default)">set_default_option</a>(options_,<span class="string">'nograph'</span>,0);
+0021 options_ = <a href="set_default_option.html" class="code" title="function options=set_default_option(options,field,default)">set_default_option</a>(options_,<span class="string">'mh_conf_sig'</span>,0.90);
+0022 options_ = <a href="set_default_option.html" class="code" title="function options=set_default_option(options,field,default)">set_default_option</a>(options_,<span class="string">'mh_replic'</span>,20000);
+0023 options_ = <a href="set_default_option.html" class="code" title="function options=set_default_option(options,field,default)">set_default_option</a>(options_,<span class="string">'mh_drop'</span>,0.5);
+0024 options_ = <a href="set_default_option.html" class="code" title="function options=set_default_option(options,field,default)">set_default_option</a>(options_,<span class="string">'mh_jscale'</span>,0.2);
+0025 options_ = <a href="set_default_option.html" class="code" title="function options=set_default_option(options,field,default)">set_default_option</a>(options_,<span class="string">'mh_init_scale'</span>,2*options_.mh_jscale);
+0026 options_ = <a href="set_default_option.html" class="code" title="function options=set_default_option(options,field,default)">set_default_option</a>(options_,<span class="string">'mode_file'</span>,<span class="string">''</span>);
+0027 options_ = <a href="set_default_option.html" class="code" title="function options=set_default_option(options,field,default)">set_default_option</a>(options_,<span class="string">'mode_compute'</span>,4);
+0028 options_ = <a href="set_default_option.html" class="code" title="function options=set_default_option(options,field,default)">set_default_option</a>(options_,<span class="string">'mode_check'</span>,0);
+0029 options_ = <a href="set_default_option.html" class="code" title="function options=set_default_option(options,field,default)">set_default_option</a>(options_,<span class="string">'prior_trunc'</span>,1e-10);
+0030 options_ = <a href="set_default_option.html" class="code" title="function options=set_default_option(options,field,default)">set_default_option</a>(options_,<span class="string">'mh_mode'</span>,1);     
+0031 options_ = <a href="set_default_option.html" class="code" title="function options=set_default_option(options,field,default)">set_default_option</a>(options_,<span class="string">'mh_nblck'</span>,2);    
+0032 options_ = <a href="set_default_option.html" class="code" title="function options=set_default_option(options,field,default)">set_default_option</a>(options_,<span class="string">'load_mh_file'</span>,0);
+0033 options_ = <a href="set_default_option.html" class="code" title="function options=set_default_option(options,field,default)">set_default_option</a>(options_,<span class="string">'nodiagnostic'</span>,0);
+0034 options_ = <a href="set_default_option.html" class="code" title="function options=set_default_option(options,field,default)">set_default_option</a>(options_,<span class="string">'loglinear'</span>,0);
+0035 options_ = <a href="set_default_option.html" class="code" title="function options=set_default_option(options,field,default)">set_default_option</a>(options_,<span class="string">'unit_root_vars'</span>,[]);
+0036 options_ = <a href="set_default_option.html" class="code" title="function options=set_default_option(options,field,default)">set_default_option</a>(options_,<span class="string">'XTick'</span>,[]);
+0037 options_ = <a href="set_default_option.html" class="code" title="function options=set_default_option(options,field,default)">set_default_option</a>(options_,<span class="string">'XTickLabel'</span>,[]);
+0038 options_ = <a href="set_default_option.html" class="code" title="function options=set_default_option(options,field,default)">set_default_option</a>(options_,<span class="string">'bayesian_irf'</span>,0);
+0039 options_ = <a href="set_default_option.html" class="code" title="function options=set_default_option(options,field,default)">set_default_option</a>(options_,<span class="string">'bayesian_th_moments'</span>,0);
+0040 options_ = <a href="set_default_option.html" class="code" title="function options=set_default_option(options,field,default)">set_default_option</a>(options_,<span class="string">'TeX'</span>,0);
+0041 options_ = <a href="set_default_option.html" class="code" title="function options=set_default_option(options,field,default)">set_default_option</a>(options_,<span class="string">'irf'</span>,0);
+0042 options_ = <a href="set_default_option.html" class="code" title="function options=set_default_option(options,field,default)">set_default_option</a>(options_,<span class="string">'relative_irf'</span>,0);
+0043 options_ = <a href="set_default_option.html" class="code" title="function options=set_default_option(options,field,default)">set_default_option</a>(options_,<span class="string">'order'</span>,1);
+0044 options_ = <a href="set_default_option.html" class="code" title="function options=set_default_option(options,field,default)">set_default_option</a>(options_,<span class="string">'ar'</span>,5);
+0045 options_ = <a href="set_default_option.html" class="code" title="function options=set_default_option(options,field,default)">set_default_option</a>(options_,<span class="string">'dr_algo'</span>,0);
+0046 options_ = <a href="set_default_option.html" class="code" title="function options=set_default_option(options,field,default)">set_default_option</a>(options_,<span class="string">'linear'</span>,0);
+0047 options_ = <a href="set_default_option.html" class="code" title="function options=set_default_option(options,field,default)">set_default_option</a>(options_,<span class="string">'drop'</span>,0);
+0048 options_ = <a href="set_default_option.html" class="code" title="function options=set_default_option(options,field,default)">set_default_option</a>(options_,<span class="string">'replic'</span>,1);
+0049 options_ = <a href="set_default_option.html" class="code" title="function options=set_default_option(options,field,default)">set_default_option</a>(options_,<span class="string">'hp_filter'</span>,0);
+0050 options_ = <a href="set_default_option.html" class="code" title="function options=set_default_option(options,field,default)">set_default_option</a>(options_,<span class="string">'forecast'</span>,0);
+0051 options_ = <a href="set_default_option.html" class="code" title="function options=set_default_option(options,field,default)">set_default_option</a>(options_,<span class="string">'smoother'</span>,0);
+0052 options_ = <a href="set_default_option.html" class="code" title="function options=set_default_option(options,field,default)">set_default_option</a>(options_,<span class="string">'moments_varendo'</span>,0);
+0053 options_ = <a href="set_default_option.html" class="code" title="function options=set_default_option(options,field,default)">set_default_option</a>(options_,<span class="string">'filtered_vars'</span>,0);
+0054 options_ = <a href="set_default_option.html" class="code" title="function options=set_default_option(options,field,default)">set_default_option</a>(options_,<span class="string">'kalman_algo'</span>,1);
+0055 options_ = <a href="set_default_option.html" class="code" title="function options=set_default_option(options,field,default)">set_default_option</a>(options_,<span class="string">'kalman_tol'</span>,10^(-12));
+0056 options_ = <a href="set_default_option.html" class="code" title="function options=set_default_option(options,field,default)">set_default_option</a>(options_,<span class="string">'posterior_mode_estimation'</span>,1);
+0057 options_ = <a href="set_default_option.html" class="code" title="function options=set_default_option(options,field,default)">set_default_option</a>(options_,<span class="string">'MaxNumberOfBytes'</span>,1e6);
+0058 options_ = <a href="set_default_option.html" class="code" title="function options=set_default_option(options,field,default)">set_default_option</a>(options_,<span class="string">'xls_sheet'</span>,<span class="string">''</span>);
+0059 options_ = <a href="set_default_option.html" class="code" title="function options=set_default_option(options,field,default)">set_default_option</a>(options_,<span class="string">'xls_range'</span>,<span class="string">''</span>);
+0060 
+0061 <span class="comment">%% Add something to the parser ++&gt;</span>
+0062 M_.dname = M_.fname; <span class="comment">% The user should be able to choose another name</span>
+0063                      <span class="comment">% for the directory...</span>
+0064 
+0065 
+0066 pnames         = [<span class="string">'     '</span>;<span class="string">'beta '</span>;<span class="string">'gamm '</span>;<span class="string">'norm '</span>;<span class="string">'invg '</span>;<span class="string">'unif '</span>;<span class="string">'invg2'</span>];
+0067 n_varobs     = size(options_.varobs,1);
+0068 
+0069 [xparam1,estim_params_,bayestopt_,lb,ub] = <a href="set_prior.html" class="code" title="function [xparam1,estim_params_,bayestopt_,lb,ub]=set_prior(estim_params_)">set_prior</a>(estim_params_);
+0070 
+0071 options_.mh_replic = 0;
+0072 
+0073 bounds = <a href="prior_bounds.html" class="code" title="function bounds = prior_bounds(bayestopt)">prior_bounds</a>(bayestopt_);
+0074 bounds(:,1)=max(bounds(:,1),lb);
+0075 bounds(:,2)=min(bounds(:,2),ub);
+0076 
+0077 <span class="keyword">if</span> any(xparam1 &lt; bounds(:,1)) | any(xparam1 &gt; bounds(:,2))
+0078   find(xparam1 &lt; bounds(:,1))
+0079   find(xparam1 &gt; bounds(:,2))
+0080   error(<span class="string">'Initial parameter values are outside parameter bounds'</span>)
+0081 <span class="keyword">end</span>
+0082 lb = bounds(:,1);
+0083 ub = bounds(:,2);
+0084 bayestopt_.lb = lb;
+0085 bayestopt_.ub = ub;
+0086 
+0087 <span class="keyword">if</span> ~isfield(options_,<span class="string">'trend_coeffs'</span>)
+0088   bayestopt_.with_trend = 0;
+0089 <span class="keyword">else</span>
+0090   bayestopt_.with_trend = 1;
+0091   bayestopt_.trend_coeff = {};
+0092   trend_coeffs = options_.trend_coeffs;
+0093   nt = length(trend_coeffs);
+0094   <span class="keyword">for</span> i=1:n_varobs
+0095     <span class="keyword">if</span> i &gt; length(trend_coeffs)
+0096       bayestopt_.trend_coeff{i} = <span class="string">'0'</span>;
+0097     <span class="keyword">else</span>
+0098       bayestopt_.trend_coeff{i} = trend_coeffs{i};
+0099     <span class="keyword">end</span>
+0100   <span class="keyword">end</span>
+0101 <span class="keyword">end</span>
+0102 
+0103 bayestopt_.penalty = 1e8;    <span class="comment">% penalty</span>
+0104 
+0105 nvx = estim_params_.nvx;
+0106 nvn = estim_params_.nvn;
+0107 ncx = estim_params_.ncx;
+0108 ncn = estim_params_.ncn;
+0109 np  = estim_params_.np ;
+0110 nx  = nvx+nvn+ncx+ncn+np;
+0111 
+0112 <span class="comment">%% Static solver</span>
+0113 <span class="keyword">if</span> exist([M_.fname <span class="string">'_steadystate'</span>])
+0114   bayestopt_.static_solve = [M_.fname <span class="string">'_steadystate'</span>];
+0115 <span class="keyword">else</span>
+0116   bayestopt_.static_solve = <span class="string">'dynare_solve'</span>;
+0117 <span class="keyword">end</span>
+0118 
+0119 dr = <a href="set_state_space.html" class="code" title="function dr=set_state_space(dr)">set_state_space</a>([]);
+0120 
+0121 <span class="comment">%% Initialization with unit-root variables</span>
+0122 <span class="keyword">if</span> ~isempty(options_.unit_root_vars)
+0123   n_ur = size(options_.unit_root_vars,1);
+0124   i_ur = zeros(n_ur,1);
+0125   <span class="keyword">for</span> i=1:n_ur
+0126     i1 = strmatch(deblank(options_.unit_root_vars(i,:)),M_.endo_names(dr.order_var,:),<span class="string">'exact'</span>);
+0127     <span class="keyword">if</span> isempty(i1)
+0128       error(<span class="string">'Undeclared variable in unit_root_vars statement'</span>)
+0129     <span class="keyword">end</span>
+0130     i_ur(i) = i1;
+0131   <span class="keyword">end</span>
+0132   <span class="keyword">if</span> M_.maximum_lag &gt; 1
+0133     l1 = flipud([cumsum(M_.lead_lag_incidence(1:M_.maximum_lag-1,dr.order_var),1);ones(1,M_.endo_nbr)]);
+0134     n1 = nnz(l1);
+0135     bayestopt_.Pinf = zeros(n1,n1);
+0136     l2 = find(l1');
+0137     l3 = zeros(M_.endo_nbr,M_.maximum_lag);
+0138     l3(i_ur,:) = l1(:,i_ur)';
+0139     l3 = l3(:);
+0140     i_ur1 = find(l3(l2));
+0141     i_stable = ones(M_.endo_nbr,1);
+0142     i_stable(i_ur) = zeros(n_ur,1);
+0143     i_stable = find(i_stable);
+0144     bayestopt_.Pinf(i_ur1,i_ur1) = diag(ones(1,length(i_ur1)));
+0145     bayestopt_.i_var_stable = i_stable;
+0146     l3 = zeros(M_.endo_nbr,M_.maximum_lag);
+0147     l3(i_stable,:) = l1(:,i_stable)';
+0148     l3 = l3(:);
+0149     bayestopt_.i_T_var_stable = find(l3(l2));
+0150   <span class="keyword">else</span>
+0151     n1 = M_.endo_nbr;
+0152     bayestopt_.Pinf = zeros(n1,n1);
+0153     bayestopt_.Pinf(i_ur,i_ur) = diag(ones(1,length(i_ur)));
+0154     l1 = ones(M_.endo_nbr,1);
+0155     l1(i_ur,:) = zeros(length(i_ur),1);
+0156     bayestopt_.i_T_var_stable = find(l1);
+0157   <span class="keyword">end</span>
+0158   options_.lik_init = 3;
+0159 <span class="keyword">end</span> <span class="comment">% if ~isempty(options_.unit_root_vars)</span>
+0160 
+0161 <span class="keyword">if</span> isempty(options_.datafile)
+0162   error(<span class="string">'ESTIMATION: datafile option is missing'</span>)
+0163 <span class="keyword">end</span>
+0164 
+0165 <span class="keyword">if</span> isempty(options_.varobs)
+0166   error(<span class="string">'ESTIMATION: VAROBS is missing'</span>)
+0167 <span class="keyword">end</span>
+0168 
+0169 
+0170 <span class="comment">%% If jscale isn't specified for an estimated parameter, use</span>
+0171 <span class="comment">%% global option options_.jscale, set to 0.2, by default</span>
+0172 k = find(isnan(bayestopt_.jscale));
+0173 bayestopt_.jscale(k) = options_.mh_jscale;
+0174 
+0175 <span class="comment">%% Read and demean data</span>
+0176 rawdata = <a href="read_variables.html" class="code" title="function dyn_data_01=read_variables(file_name_01,var_names_01,dyn_data_01,xls_sheet,xls_range)">read_variables</a>(options_.datafile,options_.varobs,[],options_.xls_sheet,options_.xls_range);
+0177 
+0178 k = [];
+0179 k1 = [];
+0180 <span class="keyword">for</span> i=1:n_varobs
+0181   k = [k strmatch(deblank(options_.varobs(i,:)),M_.endo_names(dr.order_var,:), <span class="keyword">...</span>
+0182           <span class="string">'exact'</span>)];
+0183   k1 = [k1 strmatch(deblank(options_.varobs(i,:)),M_.endo_names, <span class="string">'exact'</span>)];
+0184 <span class="keyword">end</span>
+0185 
+0186 bayestopt_.mf     = k;
+0187 bayestopt_.mfys = k1;
+0188 options_ = <a href="set_default_option.html" class="code" title="function options=set_default_option(options,field,default)">set_default_option</a>(options_,<span class="string">'nobs'</span>,size(rawdata,1)-options_.first_obs+1);
+0189 gend = options_.nobs;
+0190 
+0191 rawdata = rawdata(options_.first_obs:options_.first_obs+gend-1,:);
+0192 <span class="keyword">if</span> options_.loglinear == 1
+0193   rawdata = log(rawdata);
+0194 <span class="keyword">end</span>
+0195 <span class="keyword">if</span> options_.prefilter == 1
+0196   bayestopt_.mean_varobs = mean(rawdata,1);
+0197   data = transpose(rawdata-ones(gend,1)*bayestopt_.mean_varobs);
+0198 <span class="keyword">else</span>
+0199   data = transpose(rawdata);
+0200 <span class="keyword">end</span>
+0201 
+0202 <span class="keyword">if</span> ~isreal(rawdata)
+0203   error([<span class="string">'There are complex values in the data. Probably  a wrong'</span> <span class="keyword">...</span>
+0204      <span class="string">' transformation'</span>])
+0205 <span class="keyword">end</span>
+0206 
+0207 nvx  = estim_params_.nvx;
+0208 nvn  = estim_params_.nvn;
+0209 ncx  = estim_params_.ncx;
+0210 ncn  = estim_params_.ncn;
+0211 np   = estim_params_.np ;
+0212 npar = nvx+nvn+ncx+ncn+np;
+0213 offset = npar-np;
+0214 fname_=M_.fname;
+0215 
+0216 options_ = <a href="set_default_option.html" class="code" title="function options=set_default_option(options,field,default)">set_default_option</a>(options_,<span class="string">'opt_gsa'</span>,1);
+0217 options_gsa_ = options_.opt_gsa;
+0218 
+0219 <span class="keyword">if</span> options_gsa_.pprior,
+0220   load([fname_,<span class="string">'_prior'</span>])
+0221   namfile=[fname_,<span class="string">'_prior'</span>];
+0222 <span class="keyword">else</span>
+0223   load([fname_,<span class="string">'_mc'</span>])
+0224   namfile=[fname_,<span class="string">'_mc'</span>];
+0225 <span class="keyword">end</span>
+0226 load(options_.mode_file)
+0227 <span class="comment">%%</span>
+0228 <span class="comment">%%</span>
+0229 <span class="comment">%%</span>
+0230 x=[lpmat0(istable,:) lpmat(istable,:)];
+0231 clear lpmat lpmat0 istable iunstable egg yys T
+0232 B = size(x,1);
+0233 <span class="keyword">if</span> M_.maximum_lag &gt; 1
+0234     l1 = flipud([cumsum(M_.lead_lag_incidence(1:M_.maximum_lag-1,dr.order_var),1);ones(1,M_.endo_nbr)]);
+0235     n1 = nnz(l1);
+0236 <span class="keyword">else</span>
+0237     n1 = M_.endo_nbr;
+0238 <span class="keyword">end</span>
+0239 stock_smooth = zeros(gend,n1,B);
+0240 stock_filter = zeros(gend+1,n1,B);
+0241 stock_ys = zeros(M_.endo_nbr,B);
+0242 <span class="comment">%%</span>
+0243 h = waitbar(0,<span class="string">'MC smoother ...'</span>);
+0244 <span class="keyword">for</span> b=1:B
+0245   deep = x(b,:);
+0246   <span class="comment">%deep(1:offset) = xparam1(1:offset);</span>
+0247   logpo2(b) = <a href="DsgeLikelihood.html" class="code" title="function [fval,cost_flag,ys,trend_coeff,info] = DsgeLikelihood(xparam1,gend,data)">DsgeLikelihood</a>(deep',gend,data);
+0248   [atT,innov,measurement_error,filtered_state_vector,ys,trend_coeff] = <a href="DsgeSmoother.html" class="code" title="function [alphahat,etahat,epsilonhat,ahat,SteadyState,trend_coeff,aK] = DsgeSmoother(xparam1,gend,Y)">DsgeSmoother</a>(deep,gend,data);
+0249   stock_smooth(:,:,b)=atT';
+0250   stock_filter(:,:,b)=filtered_state_vector';
+0251   stock_ys(:,b)=ys;
+0252   waitbar(b/B,h,[<span class="string">'MC smoother ...'</span>,num2str(b),<span class="string">'/'</span>,num2str(B)]);
+0253 <span class="keyword">end</span>
+0254 close(h)
+0255 
+0256 save(namfile,<span class="string">'x'</span>,<span class="string">'logpo2'</span>,<span class="string">'stock_smooth'</span>,<span class="string">'stock_filter'</span>,<span class="string">'stock_ys'</span>,<span class="string">'-append'</span>)</pre></div>
+<hr><address>Generated on Fri 16-Jun-2006 09:09:06 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/">m2html</a></strong> &copy; 2003</address>
+</body>
+</html>

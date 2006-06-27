@@ -1,0 +1,71 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of set_shocks</title>
+  <meta name="keywords" content="set_shocks">
+  <meta name="description" content="Copyright (C) 2003 Michel Juillard">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2003 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../index.html">Home</a> &gt;  <a href="index.html">.</a> &gt; set_shocks.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../index.html"><img alt="<" border="0" src="../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="index.html">Index for .&nbsp;<img alt=">" border="0" src="../right.png"></a></td></tr></table>-->
+
+<h1>set_shocks
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>Copyright (C) 2003 Michel Juillard</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function set_shocks(flag,k,ivar,values) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> Copyright (C) 2003 Michel Juillard</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+</ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+</ul>
+<!-- crossreference -->
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <span class="comment">% Copyright (C) 2003 Michel Juillard</span>
+0002 <span class="comment">%</span>
+0003 <a name="_sub0" href="#_subfunctions" class="code">function set_shocks(flag,k,ivar,values)</a>
+0004   <span class="keyword">global</span> oo_ M_
+0005   
+0006   k = k + M_.maximum_lag;
+0007   n1 = size(oo_.exo_simul,1);
+0008   n2 = size(oo_.exo_det_simul,1);
+0009   <span class="keyword">if</span> k(end) &gt; n1 &amp; flag &lt;= 1
+0010     oo_.exo_simul = [oo_.exo_simul; repmat(oo_.exo_steady_state',k(end)-n1,1)];
+0011   <span class="keyword">elseif</span> k(end) &gt; n2 &amp; flag &gt; 1
+0012     oo_.exo_det_simul = [oo_.exo_det_simul; repmat(oo_.exo_steady_state',k(end)-n2,1)];
+0013   <span class="keyword">end</span>
+0014   
+0015   <span class="keyword">switch</span> flag
+0016    <span class="keyword">case</span> 0
+0017     oo_.exo_simul(k,ivar) = repmat(values,length(k),1);
+0018    <span class="keyword">case</span> 1
+0019     oo_.exo_simul(k,ivar) = oo_.exo_simul(k,ivar).*values;
+0020    <span class="keyword">case</span> 2
+0021     oo_.exo_det_simul(k,ivar) = repmat(values,length(k),1);
+0022    <span class="keyword">case</span> 3
+0023     oo_.exo_det_simul(k,ivar) = oo_.exo_det_simul(k,ivar).*values;
+0024   <span class="keyword">end</span>
+0025</pre></div>
+<hr><address>Generated on Fri 16-Jun-2006 09:09:06 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/">m2html</a></strong> &copy; 2003</address>
+</body>
+</html>

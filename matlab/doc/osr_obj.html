@@ -1,0 +1,105 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of osr_obj</title>
+  <meta name="keywords" content="osr_obj">
+  <meta name="description" content="the beginning and the end of this function may be adapted by the userx">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2003 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../index.html">Home</a> &gt;  <a href="index.html">.</a> &gt; osr_obj.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../index.html"><img alt="<" border="0" src="../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="index.html">Index for .&nbsp;<img alt=">" border="0" src="../right.png"></a></td></tr></table>-->
+
+<h1>osr_obj
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>the beginning and the end of this function may be adapted by the userx</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function [z,vx]=osr_obj(x,params,weights); </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> the beginning and the end of this function may be adapted by the userx</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="resol.html" class="code" title="function [dr,info]=resol(ys,check_flag)">resol</a>	Copyright (C) 2001 Michel Juillard</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="osr1.html" class="code" title="function oo_.dr=osr1(params,weights)">osr1</a>	</li></ul>
+<!-- crossreference -->
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <span class="comment">% the beginning and the end of this function may be adapted by the userx</span>
+0002 <a name="_sub0" href="#_subfunctions" class="code">function [z,vx]=osr_obj(x,params,weights);</a>
+0003   <span class="keyword">global</span> M_ oo_ optimal_Q_ it_
+0004   
+0005   <span class="comment">% set parameters of the policiy rule</span>
+0006   np = size(params,1);
+0007   <span class="keyword">for</span> i=1:np
+0008     assignin(<span class="string">'base'</span>,deblank(params(i,:)),x(i))
+0009   <span class="keyword">end</span>
+0010   
+0011   <span class="comment">% don't change below until the part where the loss function is computed</span>
+0012   it_ = M_.maximum_lag+1;
+0013   oo_.dr = <a href="resol.html" class="code" title="function [dr,info]=resol(ys,check_flag)">resol</a>(oo_.steady_state,1,0,1);
+0014   nstatic = oo_.dr.nstatic;
+0015   npred = oo_.dr.npred;
+0016   ghx = oo_.dr.ghx;
+0017   ghu = oo_.dr.ghu;
+0018   order = oo_.dr.order_var;
+0019   k=[nstatic+1:nstatic+npred]';
+0020   vx1 = ghu(k,:)*M_.Sigma_e*ghu(k,:)';
+0021   
+0022   <span class="comment">% compute variance of predetermined variables</span>
+0023   vx = (eye(npred*npred)-kron(ghx(k,:),oo_.dr.ghx(k,:)))\vx1(:);
+0024   vx=reshape(vx,npred,npred);
+0025 
+0026   <span class="comment">% compute variance of all variables</span>
+0027   <span class="keyword">if</span> M_.endo_nbr &gt; npred
+0028     qx = eye(npred);
+0029     qu = zeros(npred,M_.exo_nbr);
+0030     <span class="keyword">if</span> nstatic &gt; 0
+0031       qx = [ghx(1:nstatic,:);qx];
+0032       qu = [ghu(1:nstatic,:);qu];
+0033     <span class="keyword">end</span>
+0034     <span class="keyword">if</span> M_.endo_nbr &gt; nstatic+npred
+0035       qx = [qx;ghx(nstatic+npred+1:<span class="keyword">end</span>,:)];
+0036       qu = [qu;ghu(nstatic+npred+1:<span class="keyword">end</span>,:)];
+0037     <span class="keyword">end</span>
+0038     vx = qx*vx*qx'+qu*M_.Sigma_e*qu';
+0039   <span class="keyword">end</span>
+0040   <span class="comment">% end of the non touch region of the program</span>
+0041   
+0042   <span class="comment">% computes the loss function</span>
+0043   weights = weights(order,order);
+0044   z = weights(:)'*vx(:);
+0045   
+0046 
+0047 
+0048 
+0049 
+0050 
+0051 
+0052 
+0053 
+0054 
+0055 
+0056 
+0057 
+0058 
+0059</pre></div>
+<hr><address>Generated on Fri 16-Jun-2006 09:09:06 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/">m2html</a></strong> &copy; 2003</address>
+</body>
+</html>

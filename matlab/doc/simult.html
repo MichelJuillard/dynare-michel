@@ -1,0 +1,100 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of simult</title>
+  <meta name="keywords" content="simult">
+  <meta name="description" content="Copyright (C) 2001 Michel Juillard">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2003 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../index.html">Home</a> &gt;  <a href="index.html">.</a> &gt; simult.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../index.html"><img alt="<" border="0" src="../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="index.html">Index for .&nbsp;<img alt=">" border="0" src="../right.png"></a></td></tr></table>-->
+
+<h1>simult
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>Copyright (C) 2001 Michel Juillard</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function y_=simult(ys, dr) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> Copyright (C) 2001 Michel Juillard</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="simult_.html" class="code" title="function y_=simult_(y0,dr,ex_,iorder)">simult_</a>	Copyright (C) 2001 Michel Juillard</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="olr.html" class="code" title="function olr(var_list,olr_inst,obj_var,W)">olr</a>	Copyright (C) 2001 Michel Juillard</li><li><a href="osr.html" class="code" title="function osr(var_list,params,W)">osr</a>	Copyright (C) 2001 Michel Juillard</li><li><a href="simul.html" class="code" title="function simul(dr)">simul</a>	Copyright (C) 2001 Michel Juillard</li><li><a href="stoch_simul.html" class="code" title="function info=stoch_simul(var_list)">stoch_simul</a>	Copyright (C) 2001 Michel Juillard</li></ul>
+<!-- crossreference -->
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <span class="comment">% Copyright (C) 2001 Michel Juillard</span>
+0002 <span class="comment">%</span>
+0003 
+0004 <a name="_sub0" href="#_subfunctions" class="code">function y_=simult(ys, dr)</a>
+0005 <span class="keyword">global</span> M_ options_ oo_
+0006 <span class="keyword">global</span>  it_ means_
+0007 
+0008 order = options_.order;
+0009 replic = options_.replic;
+0010 seed = options_.simul_seed;
+0011 options_.periods = options_.periods;
+0012 
+0013 it_ = M_.maximum_lag + 1 ;
+0014 
+0015 <span class="keyword">if</span> replic &gt; 1
+0016   fname = [M_.fname,<span class="string">'_simul'</span>];
+0017   fh = fopen(fname,<span class="string">'w+'</span>);
+0018 <span class="keyword">end</span>
+0019 
+0020 <span class="comment">% eliminate shocks with 0 variance</span>
+0021 i_exo_var = setdiff([1:M_.exo_nbr],find(diag(M_.Sigma_e) == 0));
+0022 nxs = length(i_exo_var);
+0023 oo_.exo_simul = zeros(M_.maximum_lag+M_.maximum_lead+options_.periods,M_.exo_nbr);
+0024 chol_S = chol(M_.Sigma_e(i_exo_var,i_exo_var));
+0025 
+0026 <span class="keyword">for</span> i=1:replic
+0027   <span class="keyword">if</span> isempty(seed)
+0028     randn(<span class="string">'state'</span>,sum(100*clock));
+0029   <span class="keyword">else</span>
+0030     randn(<span class="string">'state'</span>,seed+i-1);
+0031   <span class="keyword">end</span>
+0032   <span class="keyword">if</span> ~isempty(M_.Sigma_e)
+0033     oo_.exo_simul(:,i_exo_var) = randn(M_.maximum_lag+M_.maximum_lead+options_.periods,nxs)*chol_S;
+0034   <span class="keyword">end</span>
+0035   y_ = <a href="simult_.html" class="code" title="function y_=simult_(y0,dr,ex_,iorder)">simult_</a>(ys,dr,oo_.exo_simul,order);
+0036   <span class="keyword">if</span> replic &gt; 1
+0037     fwrite(fh,oo_.y_simul(:,M_.maximum_lag+1:end),<span class="string">'float64'</span>);
+0038   <span class="keyword">end</span>
+0039 <span class="keyword">end</span>
+0040 
+0041 <span class="keyword">if</span> replic &gt; 1
+0042   fclose(fh);
+0043 <span class="keyword">end</span>
+0044 
+0045 
+0046 <span class="comment">% 02/20/01 MJ replaced ys by dr.ys</span>
+0047 <span class="comment">% 02/22/01 MJ removed commented out lines</span>
+0048 <span class="comment">%             removed useless temps</span>
+0049 <span class="comment">%             stderr_ replaced by M_.Sigma_e</span>
+0050 <span class="comment">% 02/28/01 MJ changed expression for M_.Sigma_e</span>
+0051 <span class="comment">% 02/18/03 MJ added ys in the calling sequence for arbitrary initial values</span>
+0052 <span class="comment">%             suppressed useless calling parameter istoch</span>
+0053 <span class="comment">% 05/10/03 MJ removed repmat() in call to simult_() for lag &gt; 1</span>
+0054 <span class="comment">% 05/29/03 MJ test for 0 variances</span></pre></div>
+<hr><address>Generated on Fri 16-Jun-2006 09:09:06 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/">m2html</a></strong> &copy; 2003</address>
+</body>
+</html>

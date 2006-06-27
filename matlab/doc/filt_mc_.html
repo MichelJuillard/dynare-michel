@@ -1,0 +1,647 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of filt_mc_</title>
+  <meta name="keywords" content="filt_mc_">
+  <meta name="description" content="copyright Marco Ratto 2006">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2003 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../index.html">Home</a> &gt;  <a href="index.html">.</a> &gt; filt_mc_.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../index.html"><img alt="<" border="0" src="../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="index.html">Index for .&nbsp;<img alt=">" border="0" src="../right.png"></a></td></tr></table>-->
+
+<h1>filt_mc_
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>copyright Marco Ratto 2006</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function [rmse_MC, ixx] = filt_mc_(vvarvecm, loadSA, pfilt, alpha, alpha2, OutDir, istart, alphaPC) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> copyright Marco Ratto 2006</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="CheckPath.html" class="code" title="function DirectoryName = CheckPath(type)">CheckPath</a>	06-03-2005</li><li><a href="DsgeSmoother.html" class="code" title="function [alphahat,etahat,epsilonhat,ahat,SteadyState,trend_coeff,aK] = DsgeSmoother(xparam1,gend,Y)">DsgeSmoother</a>	stephane.adjemian@cepremap.cnrs.fr [09-07-2004]</li><li><a href="cumplot.html" class="code" title="function h = cumplot(x);">cumplot</a>	function h =cumplot(x)</li><li><a href="kernel_density_estimate.html" class="code" title="function [abscissa,f] = kernel_density_estimate(data,number_of_grid_points,bandwidth,kernel_function)">kernel_density_estimate</a>	%  This function aims at estimating a continuous density. A kernel density</li><li><a href="mh_optimal_bandwidth.html" class="code" title="function optimal_bandwidth = mh_optimal_bandwidth(data,n,bandwidth,kernel_function)">mh_optimal_bandwidth</a>	%  This function gives the optimal bandwidth parameter of a kernel estimator</li><li><a href="priordens.html" class="code" title="function lnprior = priordens(para, pshape, p1, p2, p3, p4)">priordens</a>	This procedure computes a prior density for</li><li><a href="set_all_parameters.html" class="code" title="function set_all_parameters(xparam1)">set_all_parameters</a>	</li><li><a href="smirnov.html" class="code" title="function [H,prob,d] = smirnov(x1 , x2 , alpha, iflag )">smirnov</a>	Smirnov test for 2 distributions</li><li><a href="stab_map_2.html" class="code" title="function stab_map_2(x,alpha2,fnam, dirname)">stab_map_2</a>	function stab_map_2(x,alpha2,istab,fnam)</li><li><a href="steady_.html" class="code" title="function steady_()">steady_</a>	Copyright (C) 2001 Michel Juillard</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="dynare_sensitivity.html" class="code" title="function x0=dynare_sensitivity()">dynare_sensitivity</a>	copyright Marco Ratto 2006</li></ul>
+<!-- crossreference -->
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function [rmse_MC, ixx] = filt_mc_(vvarvecm, loadSA, pfilt, alpha, alpha2, OutDir, istart, alphaPC)</a>
+0002 <span class="comment">% copyright Marco Ratto 2006</span>
+0003 <span class="keyword">global</span> bayestopt_ estim_params_ M_ options_ oo_
+0004 
+0005 <span class="keyword">if</span> nargin&lt;1 | isempty(vvarvecm),
+0006   vvarvecm = options_.varobs;
+0007 <span class="keyword">end</span>
+0008 <span class="keyword">if</span> nargin&lt;2,
+0009   loadSA=0;
+0010 <span class="keyword">end</span>
+0011 <span class="keyword">if</span> nargin&lt;3 | isempty(pfilt),
+0012   pfilt=0.1;  <span class="comment">% cut the best 10% of runs</span>
+0013 <span class="keyword">end</span>
+0014 <span class="keyword">if</span> nargin&lt;4 | isempty(alpha),
+0015   alpha=0.002;
+0016 <span class="keyword">end</span>
+0017 <span class="keyword">if</span> nargin&lt;5 | isempty(alpha2),
+0018   alpha2=0.5;
+0019 <span class="keyword">end</span>
+0020 <span class="keyword">if</span> nargin&lt;7 | isempty(istart),
+0021   istart=1;
+0022 <span class="keyword">end</span>
+0023 <span class="keyword">if</span> nargin&lt;8,
+0024   alphaPC=0.5;
+0025 <span class="keyword">end</span>
+0026 
+0027 fname_ = M_.fname;
+0028 lgy_ = M_.endo_names;
+0029 dr_ = oo_.dr;
+0030 
+0031 disp(<span class="string">' '</span>)
+0032 disp(<span class="string">' '</span>)
+0033 disp(<span class="string">'Starting sensitivity analysis'</span>)
+0034 disp(<span class="string">'for the fit of EACH observed series ...'</span>)
+0035 disp(<span class="string">' '</span>)
+0036 disp(<span class="string">'Deleting old SA figures...'</span>)
+0037 a=dir([OutDir,<span class="string">'\*.*'</span>]);
+0038 <span class="keyword">if</span> options_.opt_gsa.ppost,
+0039   tmp=[<span class="string">'_SA_fit_post'</span>];
+0040 <span class="keyword">else</span>
+0041   <span class="keyword">if</span> options_.opt_gsa.pprior
+0042     tmp=[<span class="string">'_SA_fit_prior'</span>];
+0043   <span class="keyword">else</span>
+0044     tmp=[<span class="string">'_SA_fit_mc'</span>];
+0045   <span class="keyword">end</span>
+0046 <span class="keyword">end</span>
+0047 <span class="keyword">for</span> j=1:length(a), 
+0048   <span class="keyword">if</span> strmatch([fname_,tmp],a(j).name), 
+0049     disp(a(j).name)
+0050     delete([OutDir,<span class="string">'\'</span>,a(j).name])
+0051   <span class="keyword">end</span>, 
+0052 <span class="keyword">end</span>
+0053 disp(<span class="string">'done !'</span>)
+0054 
+0055 
+0056 nshock=estim_params_.nvx + estim_params_.nvn + estim_params_.ncx + estim_params_.ncn;
+0057 npar=estim_params_.np;
+0058 <span class="keyword">for</span> j=1:npar+nshock,
+0059   <span class="keyword">if</span> j&gt;nshock
+0060     <span class="keyword">if</span> isfield(oo_,<span class="string">'posterior_mode'</span>),
+0061       xparam1(j)=oo_.posterior_mode.parameters.(bayestopt_.name{j});
+0062     <span class="keyword">end</span>
+0063     <span class="keyword">if</span> isfield(oo_,<span class="string">'posterior_mean'</span>),
+0064       xparam1_mean(j)=oo_.posterior_mean.parameters.(bayestopt_.name{j});
+0065     <span class="keyword">end</span>
+0066   <span class="keyword">else</span>
+0067     <span class="keyword">if</span> isfield(oo_,<span class="string">'posterior_mode'</span>),
+0068       xparam1(j)=oo_.posterior_mode.shocks_std.(bayestopt_.name{j});
+0069     <span class="keyword">end</span>
+0070     <span class="keyword">if</span> isfield(oo_,<span class="string">'posterior_mean'</span>),
+0071       xparam1_mean(j)=oo_.posterior_mean.shocks_std.(bayestopt_.name{j});
+0072     <span class="keyword">end</span>
+0073   <span class="keyword">end</span>
+0074 <span class="keyword">end</span>
+0075 
+0076 <span class="keyword">if</span> options_.opt_gsa.ppost,
+0077   fnamtmp=[fname_,<span class="string">'_post'</span>];
+0078   DirectoryName = <a href="CheckPath.html" class="code" title="function DirectoryName = CheckPath(type)">CheckPath</a>(<span class="string">'metropolis'</span>);
+0079 <span class="keyword">else</span>
+0080   <span class="keyword">if</span> options_.opt_gsa.pprior
+0081     fnamtmp=[fname_,<span class="string">'_prior'</span>];
+0082   <span class="keyword">else</span>
+0083     fnamtmp=[fname_,<span class="string">'_mc'</span>];      
+0084   <span class="keyword">end</span>
+0085 <span class="keyword">end</span>
+0086 <span class="keyword">if</span> ~loadSA,
+0087   <span class="keyword">if</span> exist(<span class="string">'xparam1'</span>,<span class="string">'var'</span>)
+0088     <a href="set_all_parameters.html" class="code" title="function set_all_parameters(xparam1)">set_all_parameters</a>(xparam1);
+0089     <a href="steady_.html" class="code" title="function steady_()">steady_</a>;
+0090     ys_mode=oo_.steady_state;
+0091   <span class="keyword">end</span>
+0092   <span class="keyword">if</span> exist(<span class="string">'xparam1_mean'</span>,<span class="string">'var'</span>)
+0093     <a href="set_all_parameters.html" class="code" title="function set_all_parameters(xparam1)">set_all_parameters</a>(xparam1_mean);
+0094     <a href="steady_.html" class="code" title="function steady_()">steady_</a>;
+0095     ys_mean=oo_.steady_state;
+0096   <span class="keyword">end</span>
+0097   eval(options_.datafile)
+0098   <span class="keyword">if</span> ~options_.opt_gsa.ppost
+0099     load([OutDir,<span class="string">'\'</span>,fnamtmp]);
+0100   <span class="keyword">else</span>
+0101     load([DirectoryName <span class="string">'/'</span> M_.fname <span class="string">'_data.mat'</span>]);
+0102     filfilt = dir([DirectoryName <span class="string">'/'</span> M_.fname <span class="string">'_filter*.mat'</span>]);
+0103     filparam = dir([DirectoryName <span class="string">'/'</span> M_.fname <span class="string">'_param*.mat'</span>]);
+0104     x=[];
+0105     logpo2=[];
+0106     sto_ys=[];
+0107     <span class="keyword">for</span> j=1:length(filparam),
+0108       <span class="comment">%load([DirectoryName '/' M_.fname '_param',int2str(j),'.mat']);</span>
+0109       <span class="keyword">if</span> isempty(strmatch([M_.fname <span class="string">'_param_irf'</span>],filparam(j).name))
+0110         load([DirectoryName <span class="string">'/'</span> filparam(j).name]);
+0111         x=[x; stock]; 
+0112         logpo2=[logpo2; stock_logpo];
+0113         sto_ys=[sto_ys; stock_ys];
+0114         clear stock stock_logpo stock_ys;
+0115       <span class="keyword">end</span>
+0116     <span class="keyword">end</span>
+0117     logpo2=-logpo2;
+0118   <span class="keyword">end</span>
+0119   nruns=size(x,1);
+0120   nfilt=floor(pfilt*nruns);
+0121   disp(<span class="string">' '</span>)
+0122   disp(<span class="string">'Computing RMSE''s...'</span>)
+0123   fobs = options_.first_obs;
+0124   nobs=options_.nobs;
+0125   <span class="keyword">for</span> i=1:size(vvarvecm,1),
+0126     vj=deblank(vvarvecm(i,:));
+0127     <span class="keyword">if</span> options_.prefilter == 1
+0128       eval([vj,<span class="string">'='</span>,vj,<span class="string">'-bayestopt_.mean_varobs(i);'</span>])
+0129     <span class="keyword">end</span>
+0130     
+0131     jxj = strmatch(vj,lgy_(dr_.order_var,:),<span class="string">'exact'</span>);
+0132     js = strmatch(vj,lgy_,<span class="string">'exact'</span>);
+0133     <span class="keyword">if</span> exist(<span class="string">'xparam1'</span>,<span class="string">'var'</span>)
+0134       eval([<span class="string">'rmse_mode(i) = sqrt(mean(('</span>,vj,<span class="string">'(fobs-1+istart:fobs-1+nobs)-oo_.steady_state(js)-oo_.FilteredVariables.'</span>,vj,<span class="string">'(istart:end-1)).^2));'</span>])
+0135     <span class="keyword">end</span>
+0136     y0=zeros(nobs+1,nruns);
+0137     <span class="keyword">if</span> options_.opt_gsa.ppost
+0138       nbb=0;
+0139       <span class="keyword">for</span> j=1:length(filfilt),
+0140         load([DirectoryName <span class="string">'/'</span> M_.fname <span class="string">'_filter'</span>,num2str(j),<span class="string">'.mat'</span>]);
+0141         nb = size(stock,4);
+0142         y0(:,nbb+1:nbb+nb)=squeeze(stock(1,jxj,:,:)); + <span class="keyword">...</span>
+0143           kron(sto_ys(nbb+1:nbb+nb,js)',ones(size(stock,3),1));
+0144         <span class="comment">%y0(:,:,size(y0,3):size(y0,3)+size(stock,3))=stock;</span>
+0145         nbb=nbb+nb;
+0146         clear stock;
+0147       <span class="keyword">end</span>
+0148     <span class="keyword">else</span>
+0149       y0 = squeeze(stock_filter(:,jxj,:)) + <span class="keyword">...</span>
+0150         kron(stock_ys(js,:),ones(size(stock_filter,1),1));
+0151     <span class="keyword">end</span>
+0152     y0M=mean(y0,2);
+0153     <span class="keyword">for</span> j=1:nruns,
+0154       eval([<span class="string">'rmse_MC(j,i) = sqrt(mean(('</span>,vj,<span class="string">'(fobs-1+istart:fobs-1+nobs)-y0(istart:end-1,j)).^2));'</span>])
+0155     <span class="keyword">end</span>
+0156     <span class="keyword">if</span> exist(<span class="string">'xparam1_mean'</span>,<span class="string">'var'</span>)
+0157       <span class="comment">%eval(['rmse_pmean(i) = sqrt(mean((',vj,'(fobs-1+istart:fobs-1+nobs)-y0M(istart:end-1)).^2));'])</span>
+0158       [alphahat,etahat,epsilonhat,ahat,SteadyState,trend_coeff,aK] = <a href="DsgeSmoother.html" class="code" title="function [alphahat,etahat,epsilonhat,ahat,SteadyState,trend_coeff,aK] = DsgeSmoother(xparam1,gend,Y)">DsgeSmoother</a>(xparam1_mean,stock_gend,stock_data);
+0159       y0 = ahat(jxj,:)' + <span class="keyword">...</span>
+0160         kron(ys_mean(js,:),ones(size(ahat,2),1));
+0161       eval([<span class="string">'rmse_pmean(i) = sqrt(mean(('</span>,vj,<span class="string">'(fobs-1+istart:fobs-1+nobs)-y0(istart:end-1)).^2));'</span>])
+0162     <span class="keyword">end</span>
+0163   <span class="keyword">end</span>
+0164   clear stock_filter;
+0165   <span class="keyword">for</span> j=1:nruns,
+0166     lnprior(j,1) = <a href="priordens.html" class="code" title="function lnprior = priordens(para, pshape, p1, p2, p3, p4)">priordens</a>(x(j,:),bayestopt_.pshape,bayestopt_.p1,bayestopt_.p2,bayestopt_.p3,bayestopt_.p4);
+0167   <span class="keyword">end</span>
+0168   likelihood=logpo2(:)+lnprior(:);
+0169   disp(<span class="string">'... done!'</span>)
+0170   
+0171   <span class="keyword">if</span> options_.opt_gsa.ppost
+0172     save([OutDir,<span class="string">'\'</span>,fnamtmp], <span class="string">'x'</span>, <span class="string">'logpo2'</span>, <span class="string">'likelihood'</span>, <span class="string">'rmse_MC'</span>, <span class="string">'rmse_mode'</span>,<span class="string">'rmse_pmean'</span>)    
+0173   <span class="keyword">else</span>
+0174     save([OutDir,<span class="string">'\'</span>,fnamtmp], <span class="string">'likelihood'</span>, <span class="string">'rmse_MC'</span>, <span class="string">'rmse_mode'</span>,<span class="string">'rmse_pmean'</span>,<span class="string">'-append'</span>)    
+0175   <span class="keyword">end</span>
+0176 <span class="keyword">else</span>
+0177   load([OutDir,<span class="string">'\'</span>,fnamtmp],<span class="string">'x'</span>,<span class="string">'logpo2'</span>,<span class="string">'likelihood'</span>,<span class="string">'rmse_MC'</span>,<span class="string">'rmse_mode'</span>,<span class="string">'rmse_pmean'</span>);
+0178   lnprior=likelihood(:)-logpo2(:);
+0179   nruns=size(x,1);
+0180   nfilt=floor(pfilt*nruns);
+0181 <span class="keyword">end</span>
+0182 <span class="comment">% smirnov tests</span>
+0183 nfilt0=nfilt*ones(size(vvarvecm,1),1);
+0184 logpo2=logpo2(:);
+0185 <span class="keyword">if</span> ~options_.opt_gsa.ppost
+0186   [dum, ipost]=sort(logpo2);
+0187 <span class="keyword">end</span>
+0188 <span class="keyword">for</span> i=1:size(vvarvecm,1),
+0189   [dum, ixx(:,i)]=sort(rmse_MC(:,i));
+0190   <span class="keyword">if</span> options_.opt_gsa.ppost,
+0191     <span class="comment">%nfilt0(i)=length(find(rmse_MC(:,i)&lt;rmse_pmean(i)));</span>
+0192     rmse_txt=rmse_pmean;
+0193   <span class="keyword">else</span>
+0194     <span class="keyword">if</span> options_.opt_gsa.pprior,
+0195       rmse_txt=rmse_mode;
+0196     <span class="keyword">else</span>
+0197       <span class="comment">%nfilt0(i)=length(find(rmse_MC(:,i)&lt;rmse_pmean(i)));</span>
+0198       rmse_txt=rmse_pmean;
+0199     <span class="keyword">end</span>
+0200   <span class="keyword">end</span>
+0201   <span class="keyword">for</span> j=1:npar+nshock,
+0202     [H,P,KSSTAT] = <a href="smirnov.html" class="code" title="function [H,prob,d] = smirnov(x1 , x2 , alpha, iflag )">smirnov</a>(x(ixx(nfilt0(i)+1:<span class="keyword">end</span>,i),j),x(ixx(1:nfilt0(i),i),j), alpha);
+0203     [H1,P1,KSSTAT1] = <a href="smirnov.html" class="code" title="function [H,prob,d] = smirnov(x1 , x2 , alpha, iflag )">smirnov</a>(x(ixx(nfilt0(i)+1:<span class="keyword">end</span>,i),j),x(ixx(1:nfilt0(i),i),j),alpha,1);
+0204     [H2,P2,KSSTAT2] = <a href="smirnov.html" class="code" title="function [H,prob,d] = smirnov(x1 , x2 , alpha, iflag )">smirnov</a>(x(ixx(nfilt0(i)+1:<span class="keyword">end</span>,i),j),x(ixx(1:nfilt0(i),i),j),alpha,-1);
+0205     <span class="keyword">if</span> H1 &amp; H2==0,
+0206       SS(j,i)=1;      
+0207     <span class="keyword">elseif</span> H1==0,
+0208       SS(j,i)=-1;     
+0209     <span class="keyword">else</span>
+0210       SS(j,i)=0;     
+0211     <span class="keyword">end</span>
+0212     PP(j,i)=P;
+0213   <span class="keyword">end</span>
+0214 <span class="keyword">end</span>
+0215 figure(<span class="string">'name'</span>,<span class="string">'prior'</span>)
+0216 <span class="keyword">for</span> i=1:size(vvarvecm,1),
+0217   subplot(3,3,i)
+0218   h=<a href="cumplot.html" class="code" title="function h = cumplot(x);">cumplot</a>(lnprior(ixx(1:nfilt0(i),i)));
+0219   set(h,<span class="string">'color'</span>,<span class="string">'red'</span>)
+0220   hold on, <a href="cumplot.html" class="code" title="function h = cumplot(x);">cumplot</a>(lnprior)
+0221   h=<a href="cumplot.html" class="code" title="function h = cumplot(x);">cumplot</a>(lnprior(ixx(nfilt0(i)+1:<span class="keyword">end</span>,i)));
+0222   set(h,<span class="string">'color'</span>,<span class="string">'green'</span>)
+0223   title(vvarvecm(i,:))
+0224 <span class="keyword">end</span>
+0225 <span class="keyword">if</span> options_.opt_gsa.ppost
+0226   saveas(gcf,[OutDir,<span class="string">'\'</span>,fname_,<span class="string">'_SA_fit_post_lnprior'</span>])
+0227   eval([<span class="string">'print -depsc2 '</span> OutDir <span class="string">'\'</span> fname_ <span class="string">'_SA_fit_post_lnprior'</span>]);
+0228   eval([<span class="string">'print -dpdf '</span> OutDir <span class="string">'\'</span> fname_ <span class="string">'_SA_fit_post_lnprior'</span>]);
+0229 <span class="keyword">else</span>
+0230   <span class="keyword">if</span> options_.opt_gsa.pprior
+0231     saveas(gcf,[OutDir,<span class="string">'\'</span>,fname_,<span class="string">'_SA_fit_prior_lnprior'</span>])
+0232     eval([<span class="string">'print -depsc2 '</span> OutDir <span class="string">'\'</span> fname_ <span class="string">'_SA_fit_prior_lnprior'</span>]);
+0233     eval([<span class="string">'print -dpdf '</span> OutDir <span class="string">'\'</span> fname_ <span class="string">'_SA_fit_prior_lnprior'</span>]);
+0234   <span class="keyword">else</span>
+0235     saveas(gcf,[OutDir,<span class="string">'\'</span>,fname_,<span class="string">'_SA_fit_mc_lnprior'</span>])
+0236     eval([<span class="string">'print -depsc2 '</span> OutDir <span class="string">'\'</span> fname_ <span class="string">'_SA_fit_mc_lnprior'</span>]);
+0237     eval([<span class="string">'print -dpdf '</span> OutDir <span class="string">'\'</span> fname_ <span class="string">'_SA_fit_mc_lnprior'</span>]);
+0238   <span class="keyword">end</span>
+0239 <span class="keyword">end</span>
+0240 close(gcf)
+0241 figure(<span class="string">'name'</span>,<span class="string">'likelihood'</span>)
+0242 <span class="keyword">for</span> i=1:size(vvarvecm,1),
+0243   subplot(3,3,i)
+0244   h=<a href="cumplot.html" class="code" title="function h = cumplot(x);">cumplot</a>(likelihood(ixx(1:nfilt0(i),i)));
+0245   set(h,<span class="string">'color'</span>,<span class="string">'red'</span>)
+0246   hold on, h=<a href="cumplot.html" class="code" title="function h = cumplot(x);">cumplot</a>(likelihood);
+0247   h=<a href="cumplot.html" class="code" title="function h = cumplot(x);">cumplot</a>(likelihood(ixx(nfilt0(i)+1:<span class="keyword">end</span>,i)));
+0248   set(h,<span class="string">'color'</span>,<span class="string">'green'</span>)
+0249   title(vvarvecm(i,:))
+0250 <span class="keyword">end</span>
+0251 <span class="keyword">if</span> options_.opt_gsa.ppost
+0252   saveas(gcf,[OutDir,<span class="string">'\'</span>,fname_,<span class="string">'_SA_fit_post_lnlik'</span>])
+0253   eval([<span class="string">'print -depsc2 '</span> OutDir <span class="string">'\'</span> fname_ <span class="string">'_SA_fit_post_lnlik'</span>]);
+0254   eval([<span class="string">'print -dpdf '</span> OutDir <span class="string">'\'</span> fname_ <span class="string">'_SA_fit_post_lnlik'</span>]);
+0255 <span class="keyword">else</span>
+0256   <span class="keyword">if</span> options_.opt_gsa.pprior
+0257     saveas(gcf,[OutDir,<span class="string">'\'</span>,fname_,<span class="string">'_SA_fit_prior_lnlik'</span>])
+0258     eval([<span class="string">'print -depsc2 '</span> OutDir <span class="string">'\'</span> fname_ <span class="string">'_SA_fit_prior_lnlik'</span>]);
+0259     eval([<span class="string">'print -dpdf '</span> OutDir <span class="string">'\'</span> fname_ <span class="string">'_SA_fit_prior_lnlik'</span>]);
+0260   <span class="keyword">else</span>
+0261     saveas(gcf,[OutDir,<span class="string">'\'</span>,fname_,<span class="string">'_SA_fit_mc_lnlik'</span>])
+0262     eval([<span class="string">'print -depsc2 '</span> OutDir <span class="string">'\'</span> fname_ <span class="string">'_SA_fit_mc_lnlik'</span>]);
+0263     eval([<span class="string">'print -dpdf '</span> OutDir <span class="string">'\'</span> fname_ <span class="string">'_SA_fit_mc_lnlik'</span>]);
+0264   <span class="keyword">end</span>
+0265 <span class="keyword">end</span>
+0266 close(gcf)
+0267 figure(<span class="string">'name'</span>,<span class="string">'posterior'</span>)
+0268 <span class="keyword">for</span> i=1:size(vvarvecm,1),
+0269   subplot(3,3,i)
+0270   h=<a href="cumplot.html" class="code" title="function h = cumplot(x);">cumplot</a>(logpo2(ixx(1:nfilt0(i),i)));
+0271   set(h,<span class="string">'color'</span>,<span class="string">'red'</span>)
+0272   hold on, h=<a href="cumplot.html" class="code" title="function h = cumplot(x);">cumplot</a>(logpo2);
+0273   h=<a href="cumplot.html" class="code" title="function h = cumplot(x);">cumplot</a>(logpo2(ixx(nfilt0(i)+1:<span class="keyword">end</span>,i)));
+0274   set(h,<span class="string">'color'</span>,<span class="string">'green'</span>)  
+0275   title(vvarvecm(i,:))
+0276 <span class="keyword">end</span>
+0277 <span class="keyword">if</span> options_.opt_gsa.ppost
+0278   saveas(gcf,[OutDir,<span class="string">'\'</span>,fname_,<span class="string">'_SA_fit_post_lnpost'</span>])
+0279   eval([<span class="string">'print -depsc2 '</span> OutDir <span class="string">'\'</span> fname_ <span class="string">'_SA_fit_post_lnpost'</span>]);
+0280   eval([<span class="string">'print -dpdf '</span> OutDir <span class="string">'\'</span> fname_ <span class="string">'_SA_fit_post_lnpost'</span>]);
+0281 <span class="keyword">else</span>
+0282   <span class="keyword">if</span> options_.opt_gsa.pprior
+0283     saveas(gcf,[OutDir,<span class="string">'\'</span>,fname_,<span class="string">'_SA_fit_prior_lnpost'</span>])
+0284     eval([<span class="string">'print -depsc2 '</span> OutDir <span class="string">'\'</span> fname_ <span class="string">'_SA_fit_prior_lnpost'</span>]);
+0285     eval([<span class="string">'print -dpdf '</span> OutDir <span class="string">'\'</span> fname_ <span class="string">'_SA_fit_prior_lnpost'</span>]);
+0286   <span class="keyword">else</span>
+0287     saveas(gcf,[OutDir,<span class="string">'\'</span>,fname_,<span class="string">'_SA_fit_mc_lnpost'</span>])
+0288     eval([<span class="string">'print -depsc2 '</span> OutDir <span class="string">'\'</span> fname_ <span class="string">'_SA_fit_mc_lnpost'</span>]);
+0289     eval([<span class="string">'print -dpdf '</span> OutDir <span class="string">'\'</span> fname_ <span class="string">'_SA_fit_mc_lnpost'</span>]);
+0290   <span class="keyword">end</span>
+0291 <span class="keyword">end</span>
+0292 close(gcf)
+0293 
+0294 param_names=<span class="string">''</span>;
+0295 <span class="keyword">for</span> j=1:npar+nshock,
+0296   param_names=str2mat(param_names, bayestopt_.name{j});
+0297 <span class="keyword">end</span>
+0298 param_names=param_names(2:<span class="keyword">end</span>,:);
+0299 
+0300 disp(<span class="string">' '</span>)
+0301 disp(<span class="string">'RMSE over the MC sample:'</span>)
+0302 disp(<span class="string">'            min yr RMSE    max yr RMSE'</span>)
+0303 <span class="keyword">for</span> j=1:size(vvarvecm,1),
+0304   disp([vvarvecm(j,:), sprintf(<span class="string">'%15.5g'</span>,[(min(rmse_MC(:,j))) [(max(rmse_MC(:,j)))]])])
+0305 <span class="keyword">end</span>
+0306 invar = find( std(rmse_MC)./mean(rmse_MC)&lt;=0.0001 );
+0307 <span class="keyword">if</span> ~isempty(invar)
+0308   disp(<span class="string">' '</span>)
+0309   disp(<span class="string">' '</span>)
+0310   disp(<span class="string">'RMSE is not varying significantly over the MC sample for the following variables:'</span>)
+0311   disp(vvarvecm(invar,:))
+0312   disp(<span class="string">'These variables are excluded from SA'</span>)
+0313   disp(<span class="string">'[Unless you treat these series as exogenous, there is something wrong in your estimation !]'</span>)
+0314 <span class="keyword">end</span>
+0315 ivar = find( std(rmse_MC)./mean(rmse_MC)&gt;0.0001 );
+0316 vvarvecm=vvarvecm(ivar,:);
+0317 rmse_MC=rmse_MC(:,ivar);
+0318 
+0319 disp(<span class="string">' '</span>)
+0320 <span class="keyword">if</span> options_.opt_gsa.ppost==0 &amp; options_.opt_gsa.pprior,
+0321   disp([<span class="string">'Sample filtered the '</span>,num2str(pfilt*100),<span class="string">'% best RMSE''s for each observed series ...'</span> ])
+0322 <span class="keyword">else</span>
+0323   disp([<span class="string">'Sample filtered the best RMSE''s smaller than RMSE at the posterior mean ...'</span> ])
+0324 <span class="keyword">end</span>
+0325 <span class="comment">% figure, boxplot(rmse_MC)</span>
+0326 <span class="comment">% set(gca,'xticklabel',vvarvecm)</span>
+0327 <span class="comment">% saveas(gcf,[fname_,'_SA_RMSE'])</span>
+0328 
+0329 disp(<span class="string">' '</span>)
+0330 disp(<span class="string">' '</span>)
+0331 disp(<span class="string">'RMSE ranges after filtering:'</span>)
+0332 <span class="keyword">if</span> options_.opt_gsa.ppost==0 &amp; options_.opt_gsa.pprior,
+0333   disp([<span class="string">'             best '</span>,num2str(pfilt*100),<span class="string">'% filtered             remaining 90%'</span>])
+0334   disp([<span class="string">'             min            max            min            max            posterior mode'</span>])
+0335 <span class="keyword">else</span>
+0336   disp([<span class="string">'             best  filtered             remaining '</span>])
+0337   disp([<span class="string">'             min            max            min            max            posterior mean'</span>])
+0338 <span class="keyword">end</span>
+0339 <span class="keyword">for</span> j=1:size(vvarvecm,1),
+0340   disp([vvarvecm(j,:), sprintf(<span class="string">'%15.5g'</span>,[min(rmse_MC(ixx(1:nfilt0(j),j),j)) <span class="keyword">...</span>
+0341         max(rmse_MC(ixx(1:nfilt0(j),j),j))  <span class="keyword">...</span>
+0342         min(rmse_MC(ixx(nfilt0(j)+1:<span class="keyword">end</span>,j),j)) <span class="keyword">...</span>
+0343         max(rmse_MC(ixx(nfilt0(j)+1:<span class="keyword">end</span>,j),j)) <span class="keyword">...</span>
+0344         rmse_txt(j)])])
+0345   <span class="comment">%   disp([vvarvecm(j,:), sprintf('%15.5g',[min(logpo2(ixx(1:nfilt,j))) ...</span>
+0346   <span class="comment">%         max(logpo2(ixx(1:nfilt,j)))  ...</span>
+0347   <span class="comment">%         min(logpo2(ixx(nfilt+1:end,j))) ...</span>
+0348   <span class="comment">%         max(logpo2(ixx(nfilt+1:end,j)))])])</span>
+0349 <span class="keyword">end</span>
+0350 
+0351 <span class="comment">%stab_map_1(x, ipost(1:nfilt), ipost(nfilt+1:end), 'SA_post', 1);</span>
+0352 <span class="comment">%stab_map_2(x(ipost(1:nfilt),:),alpha2,'SA_post', 1);</span>
+0353 <span class="comment">% for i=1:size(vvarvecm,1),</span>
+0354 <span class="comment">%     aname=['SA_fit_ALL_',deblank(vvarvecm(i,:))];</span>
+0355 <span class="comment">%     stab_map_1(x, ixx(1:nfilt,i), ixx(nfilt+1:end,i), aname, 1);</span>
+0356 <span class="comment">%     close all</span>
+0357 <span class="comment">% end</span>
+0358 
+0359 SP=zeros(npar+nshock,size(vvarvecm,1));
+0360 <span class="keyword">for</span> j=1:size(vvarvecm,1),
+0361   ns=find(PP(:,j)&lt;alpha);
+0362   SP(ns,j)=ones(size(ns));
+0363   SS(:,j)=SS(:,j).*SP(:,j);
+0364 <span class="keyword">end</span>
+0365 
+0366 <span class="keyword">for</span> j=1:npar+nshock, <span class="comment">%estim_params_.np,</span>
+0367   nsp(j)=length(find(SP(j,:)));
+0368 <span class="keyword">end</span>
+0369 snam0=param_names(find(nsp==0),:);
+0370 snam1=param_names(find(nsp==1),:);
+0371 snam2=param_names(find(nsp&gt;1),:);
+0372 snam=param_names(find(nsp&gt;0),:);
+0373 <span class="comment">% snam0=bayestopt_.name(find(nsp==0));</span>
+0374 <span class="comment">% snam1=bayestopt_.name(find(nsp==1));</span>
+0375 <span class="comment">% snam2=bayestopt_.name(find(nsp&gt;1));</span>
+0376 <span class="comment">% snam=bayestopt_.name(find(nsp&gt;0));</span>
+0377 nsnam=(find(nsp&gt;1));
+0378 
+0379 disp(<span class="string">' '</span>)
+0380 disp(<span class="string">' '</span>)
+0381 disp(<span class="string">'These parameters do not affect significantly the fit of ANY observed series:'</span>)
+0382 disp(snam0)
+0383 disp(<span class="string">' '</span>)
+0384 disp(<span class="string">'These parameters affect ONE single observed series:'</span>)
+0385 disp(snam1)
+0386 disp(<span class="string">' '</span>)
+0387 disp(<span class="string">'These parameters affect MORE THAN ONE observed series: trade off exists!'</span>)
+0388 disp(snam2)
+0389 
+0390 
+0391 <span class="comment">%pnam=bayestopt_.name(end-estim_params_.np+1:end);</span>
+0392 pnam=bayestopt_.name;
+0393 
+0394 <span class="comment">% plot trade-offs</span>
+0395 a00=jet(size(vvarvecm,1));
+0396 <span class="keyword">for</span> ix=1:ceil(length(nsnam)/6),
+0397   figure,
+0398   <span class="keyword">for</span> j=1+6*(ix-1):min(size(snam2,1),6*ix),
+0399     subplot(2,3,j-6*(ix-1))
+0400     <span class="comment">%h0=cumplot(x(:,nsnam(j)+nshock));</span>
+0401     h0=<a href="cumplot.html" class="code" title="function h = cumplot(x);">cumplot</a>(x(:,nsnam(j)));
+0402     <span class="comment">%set(h0,'color',[1 1 1])</span>
+0403     hold on,
+0404     np=find(SP(nsnam(j),:));
+0405     <span class="comment">%a0=jet(nsp(nsnam(j)));</span>
+0406     a0=a00(np,:);
+0407     <span class="keyword">for</span> i=1:nsp(nsnam(j)), <span class="comment">%size(vvarvecm,1),</span>
+0408       <span class="comment">%h0=cumplot(x(ixx(1:nfilt,np(i)),nsnam(j)+nshock));</span>
+0409       h0=<a href="cumplot.html" class="code" title="function h = cumplot(x);">cumplot</a>(x(ixx(1:nfilt0(np(i)),np(i)),nsnam(j)));
+0410       set(h0,<span class="string">'color'</span>,a0(i,:))
+0411     <span class="keyword">end</span>
+0412     ydum=get(gca,<span class="string">'ylim'</span>);
+0413     <span class="comment">%xdum=xparam1(nshock+nsnam(j));</span>
+0414     xdum=xparam1(nsnam(j));
+0415     h1=plot([xdum xdum],ydum);
+0416     set(h1,<span class="string">'color'</span>,[0.85 0.85 0.85],<span class="string">'linewidth'</span>,2)
+0417     h0=legend(str2mat(<span class="string">'base'</span>,vvarvecm(np,:)),0); 
+0418     set(h0,<span class="string">'fontsize'</span>,6)
+0419     <span class="comment">%h0=legend({'base',vnam{np}}',0);</span>
+0420     xlabel(<span class="string">''</span>)
+0421     set(findobj(get(h0,<span class="string">'children'</span>),<span class="string">'type'</span>,<span class="string">'text'</span>),<span class="string">'interpreter'</span>,<span class="string">'none'</span>)
+0422     title([pnam{nsnam(j)}],<span class="string">'interpreter'</span>,<span class="string">'none'</span>)
+0423     <span class="keyword">if</span> options_.opt_gsa.ppost
+0424       saveas(gcf,[OutDir,<span class="string">'\'</span>,fname_,<span class="string">'_SA_fit_post_'</span>,num2str(ix)])
+0425       eval([<span class="string">'print -depsc2 '</span> OutDir <span class="string">'\'</span> fname_ <span class="string">'_SA_fit_post_'</span> int2str(ix)]);
+0426       eval([<span class="string">'print -dpdf '</span> OutDir <span class="string">'\'</span> fname_ <span class="string">'_SA_fit_post_'</span> int2str(ix)]);
+0427     <span class="keyword">else</span>
+0428       <span class="keyword">if</span> options_.opt_gsa.pprior
+0429         saveas(gcf,[OutDir,<span class="string">'\'</span>,fname_,<span class="string">'_SA_fit_prior_'</span>,num2str(ix)])
+0430         eval([<span class="string">'print -depsc2 '</span> OutDir <span class="string">'\'</span> fname_ <span class="string">'_SA_fit_prior_'</span> int2str(ix)]);
+0431         eval([<span class="string">'print -dpdf '</span> OutDir <span class="string">'\'</span> fname_ <span class="string">'_SA_fit_prior_'</span> int2str(ix)]);
+0432       <span class="keyword">else</span>
+0433         saveas(gcf,[OutDir,<span class="string">'\'</span>,fname_,<span class="string">'_SA_fit_mc_'</span>,num2str(ix)])
+0434         eval([<span class="string">'print -depsc2 '</span> OutDir <span class="string">'\'</span> fname_ <span class="string">'_SA_fit_mc_'</span> int2str(ix)]);
+0435         eval([<span class="string">'print -dpdf '</span> OutDir <span class="string">'\'</span> fname_ <span class="string">'_SA_fit_mc_'</span> int2str(ix)]);
+0436       <span class="keyword">end</span>
+0437     <span class="keyword">end</span>
+0438   <span class="keyword">end</span>
+0439 <span class="keyword">end</span>
+0440 close all
+0441 
+0442 <span class="keyword">for</span> j=1:size(SP,2),
+0443   nsx(j)=length(find(SP(:,j)));
+0444 <span class="keyword">end</span>
+0445 
+0446 number_of_grid_points = 2^9;      <span class="comment">% 2^9 = 512 !... Must be a power of two.</span>
+0447 bandwidth = 0;                    <span class="comment">% Rule of thumb optimal bandwidth parameter.</span>
+0448 kernel_function = <span class="string">'gaussian'</span>;     <span class="comment">% Gaussian kernel for Fast Fourrier Transform approximaton.</span>
+0449 <span class="comment">%kernel_function = 'uniform';     % Gaussian kernel for Fast Fourrier Transform approximaton.</span>
+0450 
+0451 <span class="keyword">for</span> ix=1:ceil(length(nsnam)/6),
+0452   figure,
+0453   <span class="keyword">for</span> j=1+6*(ix-1):min(size(snam2,1),6*ix),
+0454     subplot(2,3,j-6*(ix-1))
+0455     optimal_bandwidth = <a href="mh_optimal_bandwidth.html" class="code" title="function optimal_bandwidth = mh_optimal_bandwidth(data,n,bandwidth,kernel_function)">mh_optimal_bandwidth</a>(x(:,nsnam(j)),size(x,1),bandwidth,kernel_function); 
+0456     [x1,f1] = <a href="kernel_density_estimate.html" class="code" title="function [abscissa,f] = kernel_density_estimate(data,number_of_grid_points,bandwidth,kernel_function)">kernel_density_estimate</a>(x(:,nsnam(j)),number_of_grid_points,<span class="keyword">...</span>
+0457         optimal_bandwidth,kernel_function);
+0458     h0 = plot(x1, f1);
+0459     hold on,
+0460     np=find(SP(nsnam(j),:));
+0461     <span class="comment">%a0=jet(nsp(nsnam(j)));</span>
+0462     a0=a00(np,:);
+0463     <span class="keyword">for</span> i=1:nsp(nsnam(j)), <span class="comment">%size(vvarvecm,1),</span>
+0464       optimal_bandwidth = <a href="mh_optimal_bandwidth.html" class="code" title="function optimal_bandwidth = mh_optimal_bandwidth(data,n,bandwidth,kernel_function)">mh_optimal_bandwidth</a>(x(ixx(1:nfilt0(np(i)),np(i)),nsnam(j)),nfilt,bandwidth,kernel_function); 
+0465       [x1,f1] = <a href="kernel_density_estimate.html" class="code" title="function [abscissa,f] = kernel_density_estimate(data,number_of_grid_points,bandwidth,kernel_function)">kernel_density_estimate</a>(x(ixx(1:nfilt0(np(i)),np(i)),nsnam(j)),number_of_grid_points,<span class="keyword">...</span>
+0466           optimal_bandwidth,kernel_function);
+0467       h0 = plot(x1, f1);
+0468       set(h0,<span class="string">'color'</span>,a0(i,:))
+0469     <span class="keyword">end</span>
+0470     ydum=get(gca,<span class="string">'ylim'</span>);
+0471     set(gca,<span class="string">'ylim'</span>,[0 ydum(2)]);
+0472     <span class="comment">%xdum=xparam1(nshock+nsnam(j));</span>
+0473     xdum=xparam1(nsnam(j));
+0474     h1=plot([xdum xdum],[0 ydum(2)]);
+0475     set(h1,<span class="string">'color'</span>,[0.85 0.85 0.85],<span class="string">'linewidth'</span>,2)
+0476     h0=legend(str2mat(<span class="string">'base'</span>,vvarvecm(np,:)),0); 
+0477     set(h0,<span class="string">'fontsize'</span>,6)
+0478     <span class="comment">%h0=legend({'base',vnam{np}}',0);</span>
+0479     xlabel(<span class="string">''</span>)
+0480     set(findobj(get(h0,<span class="string">'children'</span>),<span class="string">'type'</span>,<span class="string">'text'</span>),<span class="string">'interpreter'</span>,<span class="string">'none'</span>)
+0481     title([pnam{nsnam(j)}],<span class="string">'interpreter'</span>,<span class="string">'none'</span>)
+0482     <span class="keyword">if</span> options_.opt_gsa.ppost
+0483       saveas(gcf,[OutDir,<span class="string">'\'</span>,fname_,<span class="string">'_SA_fit_post_dens_'</span>,num2str(ix)])
+0484       eval([<span class="string">'print -depsc2 '</span> OutDir <span class="string">'\'</span> fname_ <span class="string">'_SA_fit_post_dens_'</span> int2str(ix)]);
+0485       eval([<span class="string">'print -dpdf '</span> OutDir <span class="string">'\'</span> fname_ <span class="string">'_SA_fit_post_dens_'</span> int2str(ix)]);
+0486     <span class="keyword">else</span>
+0487       <span class="keyword">if</span> options_.opt_gsa.pprior
+0488         saveas(gcf,[OutDir,<span class="string">'\'</span>,fname_,<span class="string">'_SA_fit_prior_dens_'</span>,num2str(ix)])
+0489         eval([<span class="string">'print -depsc2 '</span> OutDir <span class="string">'\'</span> fname_ <span class="string">'_SA_fit_prior_dens_'</span> int2str(ix)]);
+0490         eval([<span class="string">'print -dpdf '</span> OutDir <span class="string">'\'</span> fname_ <span class="string">'_SA_fit_prior_dens_'</span> int2str(ix)]);
+0491       <span class="keyword">else</span>
+0492         saveas(gcf,[OutDir,<span class="string">'\'</span>,fname_,<span class="string">'_SA_fit_mc_dens_'</span>,num2str(ix)])
+0493         eval([<span class="string">'print -depsc2 '</span> OutDir <span class="string">'\'</span> fname_ <span class="string">'_SA_fit_mc_dens_'</span> int2str(ix)]);
+0494         eval([<span class="string">'print -dpdf '</span> OutDir <span class="string">'\'</span> fname_ <span class="string">'_SA_fit_mc_dens_'</span> int2str(ix)]);
+0495       <span class="keyword">end</span>
+0496     <span class="keyword">end</span>
+0497   <span class="keyword">end</span>
+0498 <span class="keyword">end</span>
+0499 close all
+0500 
+0501 <span class="comment">% for j=1:size(SP,2),</span>
+0502 <span class="comment">%     nfig=0;</span>
+0503 <span class="comment">%     np=find(SP(:,j));</span>
+0504 <span class="comment">%     for i=1:nsx(j), %size(vvarvecm,1),</span>
+0505 <span class="comment">%         if mod(i,12)==1,</span>
+0506 <span class="comment">%             nfig=nfig+1;</span>
+0507 <span class="comment">%             %figure('name',['Sensitivity of fit of ',vnam{j}]),</span>
+0508 <span class="comment">%             figure('name',['Sensitivity of fit of ',deblank(vvarvecm(j,:)),' ',num2str(nfig)]),</span>
+0509 <span class="comment">%         end</span>
+0510 <span class="comment">%</span>
+0511 <span class="comment">%         subplot(3,4,i-12*(nfig-1))</span>
+0512 <span class="comment">%         optimal_bandwidth = mh_optimal_bandwidth(x(ixx(1:nfilt,j),np(i)),nfilt,bandwidth,kernel_function);</span>
+0513 <span class="comment">%         [x1,f1] = kernel_density_estimate(x(ixx(1:nfilt,j),np(i)),number_of_grid_points,...</span>
+0514 <span class="comment">%             optimal_bandwidth,kernel_function);</span>
+0515 <span class="comment">%         plot(x1, f1,':k','linewidth',2)</span>
+0516 <span class="comment">%         optimal_bandwidth = mh_optimal_bandwidth(x(ixx(nfilt+1:end,j),np(i)),nruns-nfilt,bandwidth,kernel_function);</span>
+0517 <span class="comment">%         [x1,f1] = kernel_density_estimate(x(ixx(nfilt+1:end,j),np(i)),number_of_grid_points,...</span>
+0518 <span class="comment">%             optimal_bandwidth,kernel_function);</span>
+0519 <span class="comment">%         hold on, plot(x1, f1,'k','linewidth',2)</span>
+0520 <span class="comment">%         ydum=get(gca,'ylim');</span>
+0521 <span class="comment">%         %xdum=xparam1(nshock+np(i));</span>
+0522 <span class="comment">%         xdum=xparam1(np(i));</span>
+0523 <span class="comment">%         h1=plot([xdum xdum],ydum);</span>
+0524 <span class="comment">%         set(h1,'color',[0.85 0.85 0.85],'linewidth',2)</span>
+0525 <span class="comment">%         %xdum1=mean(x(ixx(1:nfilt,j),np(i)+nshock));</span>
+0526 <span class="comment">%         xdum1=mean(x(ixx(1:nfilt,j),np(i)));</span>
+0527 <span class="comment">%         h2=plot([xdum1 xdum1],ydum);</span>
+0528 <span class="comment">%         set(h2,'color',[0 1 0],'linewidth',2)</span>
+0529 <span class="comment">%         %         h0=cumplot(x(nfilt+1:end,np(i)+nshock));</span>
+0530 <span class="comment">%         %         set(h0,'color',[1 1 1])</span>
+0531 <span class="comment">%         %         hold on,</span>
+0532 <span class="comment">%         %         h0=cumplot(x(ixx(1:nfilt,j),np(i)+nshock));</span>
+0533 <span class="comment">%         %         set(h0,'linestyle',':','color',[1 1 1])</span>
+0534 <span class="comment">%         %title([pnam{np(i)}])</span>
+0535 <span class="comment">%         title([pnam{np(i)},'. K-S prob ', num2str(PP(np(i),j))],'interpreter','none')</span>
+0536 <span class="comment">%         xlabel('')</span>
+0537 <span class="comment">%         if mod(i,12)==0 | i==nsx(j),</span>
+0538 <span class="comment">%             saveas(gcf,[fname_,'_SA_fit_',deblank(vvarvecm(j,:)),'_',int2str(nfig)])</span>
+0539 <span class="comment">%             close(gcf)</span>
+0540 <span class="comment">%         end</span>
+0541 <span class="comment">%     end</span>
+0542 <span class="comment">% end</span>
+0543 
+0544 
+0545 disp(<span class="string">' '</span>)
+0546 disp(<span class="string">' '</span>)
+0547 disp(<span class="string">'Sensitivity table (significance and direction):'</span>)
+0548 vav=char(zeros(1, size(param_names,2)+3 ));
+0549 ibl = 12-size(vvarvecm,2);
+0550 <span class="keyword">for</span> j=1:size(vvarvecm,1), 
+0551   vav = [vav, char(zeros(1,ibl)),vvarvecm(j,:)];
+0552 <span class="keyword">end</span>
+0553 disp(vav)
+0554 <span class="keyword">for</span> j=1:npar+nshock, <span class="comment">%estim_params_.np,</span>
+0555   <span class="comment">%disp([param_names(j,:), sprintf('%8.5g',SP(j,:))])</span>
+0556   disp([param_names(j,:),<span class="string">'   '</span>, sprintf(<span class="string">'%12.3g'</span>,PP(j,:))])    
+0557   disp([char(zeros(1, size(param_names,2)+3 )),sprintf(<span class="string">'    (%6g)'</span>,SS(j,:))])    
+0558 <span class="keyword">end</span>
+0559 
+0560 
+0561 disp(<span class="string">' '</span>)
+0562 disp(<span class="string">' '</span>)
+0563 disp(<span class="string">'Starting bivariate analysis:'</span>)
+0564 
+0565 <span class="keyword">for</span> i=1:size(vvarvecm,1)
+0566   <span class="keyword">if</span> options_.opt_gsa.ppost
+0567     fnam = [<span class="string">'SA_fit_post_'</span>,deblank(vvarvecm(i,:))];
+0568   <span class="keyword">else</span>
+0569     <span class="keyword">if</span> options_.opt_gsa.pprior
+0570       fnam = [<span class="string">'SA_fit_prior_'</span>,deblank(vvarvecm(i,:))];
+0571     <span class="keyword">else</span>
+0572       fnam = [<span class="string">'SA_fit_mc_'</span>,deblank(vvarvecm(i,:))];
+0573     <span class="keyword">end</span>
+0574   <span class="keyword">end</span>
+0575   <a href="stab_map_2.html" class="code" title="function stab_map_2(x,alpha2,fnam, dirname)">stab_map_2</a>(x(ixx(1:nfilt0(i),i),:),alpha2,fnam, OutDir);
+0576   
+0577   <span class="comment">%     [pc,latent,explained] = pcacov(c0);</span>
+0578   <span class="comment">%     %figure, bar([explained cumsum(explained)])</span>
+0579   <span class="comment">%     ifig=0;</span>
+0580   <span class="comment">%     j2=0;</span>
+0581   <span class="comment">%     for j=1:npar+nshock,</span>
+0582   <span class="comment">%         i2=find(abs(pc(:,j))&gt;alphaPC);</span>
+0583   <span class="comment">%         if ~isempty(i2),</span>
+0584   <span class="comment">%             j2=j2+1;</span>
+0585   <span class="comment">%             if mod(j2,12)==1,</span>
+0586   <span class="comment">%                 ifig=ifig+1;</span>
+0587   <span class="comment">%                 figure('name',['PCA of the filtered sample ',deblank(vvarvecm(i,:)),' ',num2str(ifig)]),</span>
+0588   <span class="comment">%             end</span>
+0589   <span class="comment">%             subplot(3,4,j2-(ifig-1)*12)</span>
+0590   <span class="comment">%             bar(pc(i2,j)),</span>
+0591   <span class="comment">%             set(gca,'xticklabel',bayestopt_.name(i2)),</span>
+0592   <span class="comment">%             set(gca,'xtick',[1:length(i2)])</span>
+0593   <span class="comment">%             title(['PC ',num2str(j),'. Explained ',num2str(explained(j)),'%'])</span>
+0594   <span class="comment">%         end</span>
+0595   <span class="comment">%         if (mod(j2,12)==0 | j==(npar+nshock)) &amp; j2,</span>
+0596   <span class="comment">%             saveas(gcf,[fname_,'_SA_PCA_',deblank(vvarvecm(i,:)),'_',int2str(ifig)])</span>
+0597   <span class="comment">%         end</span>
+0598   <span class="comment">%     end</span>
+0599   <span class="comment">%     close all</span>
+0600 <span class="keyword">end</span>
+0601</pre></div>
+<hr><address>Generated on Fri 16-Jun-2006 09:09:06 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/">m2html</a></strong> &copy; 2003</address>
+</body>
+</html>

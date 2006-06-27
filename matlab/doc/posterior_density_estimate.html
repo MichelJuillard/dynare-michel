@@ -1,0 +1,234 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of posterior_density_estimate</title>
+  <meta name="keywords" content="posterior_density_estimate">
+  <meta name="description" content="%">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2003 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../index.html">Home</a> &gt;  <a href="index.html">.</a> &gt; posterior_density_estimate.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../index.html"><img alt="<" border="0" src="../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="index.html">Index for .&nbsp;<img alt=">" border="0" src="../right.png"></a></td></tr></table>-->
+
+<h1>posterior_density_estimate
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>%</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function [abscissa,f,h] = posterior_density_estimate(data,number_of_grid_points,bandwidth,kernel_function) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment">%   
+%  This function aims at estimating posterior univariate densities from realisations of a Metropolis-Hastings 
+%  algorithm. A kernel density estimator is used (see Silverman [1986]) and the main task of this function is 
+%  to obtain an optimal bandwidth parameter. 
+% 
+%  * Silverman [1986], &quot;Density estimation for statistics and data analysis&quot;. 
+%  * M. Skold and G.O. Roberts [2003], &quot;Density estimation for the Metropolis-Hastings algorithm&quot;. 
+%
+%  The last section is adapted from Anders Holtsberg's matlab toolbox (stixbox).
+%
+%  stephane.adjemian@cepremap.cnrs.fr [01/16/2004].</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+</ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="compDist.html" class="code" title="function compdist(xparam1, x2, pltopt, figurename)">compDist</a>	</li></ul>
+<!-- crossreference -->
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function [abscissa,f,h] = posterior_density_estimate(data,number_of_grid_points,bandwidth,kernel_function) </a>
+0002 <span class="comment">%%</span>
+0003 <span class="comment">%%  This function aims at estimating posterior univariate densities from realisations of a Metropolis-Hastings</span>
+0004 <span class="comment">%%  algorithm. A kernel density estimator is used (see Silverman [1986]) and the main task of this function is</span>
+0005 <span class="comment">%%  to obtain an optimal bandwidth parameter.</span>
+0006 <span class="comment">%%</span>
+0007 <span class="comment">%%  * Silverman [1986], &quot;Density estimation for statistics and data analysis&quot;.</span>
+0008 <span class="comment">%%  * M. Skold and G.O. Roberts [2003], &quot;Density estimation for the Metropolis-Hastings algorithm&quot;.</span>
+0009 <span class="comment">%%</span>
+0010 <span class="comment">%%  The last section is adapted from Anders Holtsberg's matlab toolbox (stixbox).</span>
+0011 <span class="comment">%%</span>
+0012 <span class="comment">%%  stephane.adjemian@cepremap.cnrs.fr [01/16/2004].</span>
+0013 
+0014 <span class="keyword">if</span> size(data,2) &gt; 1 &amp; size(data,1) == 1; 
+0015     data = data'; 
+0016 <span class="keyword">elseif</span> size(data,2)&gt;1 &amp; size(data,1)&gt;1; 
+0017     error(<span class="string">'density_estimate: data must be a one dimensional array.'</span>); 
+0018 <span class="keyword">end</span>;
+0019 test = log(number_of_grid_points)/log(2);
+0020 <span class="keyword">if</span> ( abs(test-round(test)) &gt; 10^(-12));
+0021     error(<span class="string">'The number of grid points must be a power of 2.'</span>);
+0022 <span class="keyword">end</span>;
+0023 
+0024 n = size(data,1); 
+0025 
+0026 
+0027 <span class="comment">%% KERNEL SPECIFICATION...</span>
+0028 
+0029 <span class="keyword">if</span> strcmp(kernel_function,<span class="string">'gaussian'</span>); 
+0030     k    = inline(<span class="string">'inv(sqrt(2*pi))*exp(-0.5*x.^2)'</span>); 
+0031     k2   = inline(<span class="string">'inv(sqrt(2*pi))*(-exp(-0.5*x.^2)+(x.^2).*exp(-0.5*x.^2))'</span>); <span class="comment">% second derivate of the gaussian kernel</span>
+0032     k4   = inline(<span class="string">'inv(sqrt(2*pi))*(3*exp(-0.5*x.^2)-6*(x.^2).*exp(-0.5*x.^2)+(x.^4).*exp(-0.5*x.^2))'</span>); <span class="comment">% fourth derivate...</span>
+0033     k6   = inline(<span class="string">'inv(sqrt(2*pi))*(-15*exp(-0.5*x.^2)+45*(x.^2).*exp(-0.5*x.^2)-15*(x.^4).*exp(-0.5*x.^2)+(x.^6).*exp(-0.5*x.^2))'</span>); <span class="comment">% sixth derivate...</span>
+0034     mu02 = inv(2*sqrt(pi)); 
+0035     mu21 = 1; 
+0036 <span class="keyword">elseif</span> strcmp(kernel_function,<span class="string">'uniform'</span>); 
+0037     k    = inline(<span class="string">'0.5*(abs(x) &lt;= 1)'</span>); 
+0038     mu02 = 0.5; 
+0039     mu21 = 1/3; 
+0040 <span class="keyword">elseif</span> strcmp(kernel_function,<span class="string">'triangle'</span>); 
+0041     k    = inline(<span class="string">'(1-abs(x)).*(abs(x) &lt;= 1)'</span>); 
+0042     mu02 = 2/3; 
+0043     mu21 = 1/6; 
+0044 <span class="keyword">elseif</span> strcmp(kernel_function,<span class="string">'epanechnikov'</span>); 
+0045     k    = inline(<span class="string">'0.75*(1-x.^2).*(abs(x) &lt;= 1)'</span>); 
+0046     mu02 = 3/5; 
+0047     mu21 = 1/5;     
+0048 <span class="keyword">elseif</span> strcmp(kernel_function,<span class="string">'quartic'</span>); 
+0049     k    = inline(<span class="string">'0.9375*((1-x.^2).^2).*(abs(x) &lt;= 1)'</span>); 
+0050     mu02 = 15/21; 
+0051     mu21 = 1/7; 
+0052 <span class="keyword">elseif</span> strcmp(kernel_function,<span class="string">'triweight'</span>); 
+0053     k    = inline(<span class="string">'1.09375*((1-x.^2).^3).*(abs(x) &lt;= 1)'</span>); 
+0054     k2   = inline(<span class="string">'(105/4*(1-x.^2).*x.^2-105/16*(1-x.^2).^2).*(abs(x) &lt;= 1)'</span>); 
+0055     k4   = inline(<span class="string">'(-1575/4*x.^2+315/4).*(abs(x) &lt;= 1)'</span>); 
+0056     k6   = inline(<span class="string">'(-1575/2).*(abs(x) &lt;= 1)'</span>); 
+0057     mu02 = 350/429; 
+0058     mu21 = 1/9;     
+0059 <span class="keyword">elseif</span> strcmp(kernel_function,<span class="string">'cosinus'</span>); 
+0060     k    = inline(<span class="string">'(pi/4)*cos((pi/2)*x).*(abs(x) &lt;= 1)'</span>); 
+0061     k2   = inline(<span class="string">'(-1/16*cos(pi*x/2)*pi^3).*(abs(x) &lt;= 1)'</span>); 
+0062     k4   = inline(<span class="string">'(1/64*cos(pi*x/2)*pi^5).*(abs(x) &lt;= 1)'</span>); 
+0063     k6   = inline(<span class="string">'(-1/256*cos(pi*x/2)*pi^7).*(abs(x) &lt;= 1)'</span>); 
+0064     mu02 = (pi^2)/16; 
+0065     mu21 = (pi^2-8)/pi^2;     
+0066 <span class="keyword">end</span>;     
+0067 
+0068 
+0069 <span class="comment">%% OPTIMAL BANDWIDTH PARAMETER....</span>
+0070 
+0071 <span class="keyword">if</span> bandwidth == 0;  <span class="comment">%  Rule of thumb bandwidth parameter (Silverman [1986] corrected by</span>
+0072                     <span class="comment">%  Skold and Roberts [2003] for Metropolis-Hastings).</span>
+0073     sigma = std(data); 
+0074     h = 2*sigma*(sqrt(pi)*mu02/(12*(mu21^2)*n))^(1/5); <span class="comment">% Silverman's optimal bandwidth parameter.</span>
+0075     A = 0; 
+0076     <span class="keyword">for</span> i=1:n; 
+0077         j = i; 
+0078         <span class="keyword">while</span> j&lt;= n &amp; data(j,1)==data(i,1); 
+0079             j = j+1; 
+0080         <span class="keyword">end</span>;     
+0081         A = A + 2*(j-i) - 1; 
+0082     <span class="keyword">end</span>; 
+0083     A = A/n; 
+0084     h = h*A^(1/5); <span class="comment">% correction</span>
+0085 <span class="keyword">elseif</span> bandwidth == -1;     <span class="comment">% Adaptation of the Sheather and Jones [1991] plug-in estimation of the optimal bandwidth</span>
+0086                             <span class="comment">% parameter for metropolis hastings algorithm.</span>
+0087     <span class="keyword">if</span> strcmp(kernel_function,<span class="string">'uniform'</span>)      | <span class="keyword">...</span><span class="comment"> </span>
+0088        strcmp(kernel_function,<span class="string">'triangle'</span>)     | <span class="keyword">...</span><span class="comment"> </span>
+0089        strcmp(kernel_function,<span class="string">'epanechnikov'</span>) | <span class="keyword">...</span><span class="comment"> </span>
+0090        strcmp(kernel_function,<span class="string">'quartic'</span>); 
+0091        error(<span class="string">'I can''t compute the optimal bandwidth with this kernel... Try the gaussian, triweight or cosinus kernels.'</span>); 
+0092     <span class="keyword">end</span>;         
+0093     sigma = std(data); 
+0094     A = 0; 
+0095     <span class="keyword">for</span> i=1:n; 
+0096         j = i; 
+0097         <span class="keyword">while</span> j&lt;= n &amp; data(j,1)==data(i,1); 
+0098             j = j+1; 
+0099         <span class="keyword">end</span>;     
+0100         A = A + 2*(j-i) - 1; 
+0101     <span class="keyword">end</span>; 
+0102     A = A/n; 
+0103     Itilda4 = 8*7*6*5/(((2*sigma)^9)*sqrt(pi)); 
+0104     g3      = abs(2*A*k6(0)/(mu21*Itilda4*n))^(1/9); 
+0105     Ihat3 = 0; 
+0106     <span class="keyword">for</span> i=1:n; 
+0107         Ihat3 = Ihat3 + sum(k6((data(i,1)-data)/g3)); 
+0108     <span class="keyword">end</span>;     
+0109     Ihat3 = -Ihat3/((n^2)*g3^7); 
+0110     g2      = abs(2*A*k4(0)/(mu21*Ihat3*n))^(1/7); 
+0111     Ihat2 = 0; 
+0112     <span class="keyword">for</span> i=1:n; 
+0113         Ihat2 = Ihat2 + sum(k4((data(i)-data)/g2)); 
+0114     <span class="keyword">end</span>;     
+0115     Ihat2 = Ihat2/((n^2)*g2^5); 
+0116     h       = (A*mu02/(n*Ihat2*mu21^2))^(1/5);    <span class="comment">% equation (22) in Skold and Roberts [2003] --&gt; h_{MH}</span>
+0117 <span class="keyword">elseif</span> bandwidth == -2;     <span class="comment">% Bump killing... We construct local bandwith parameters in order to remove</span>
+0118                             <span class="comment">% spurious bumps introduced by long rejecting periods.</span>
+0119     <span class="keyword">if</span> strcmp(kernel_function,<span class="string">'uniform'</span>)      | <span class="keyword">...</span><span class="comment"> </span>
+0120        strcmp(kernel_function,<span class="string">'triangle'</span>)     | <span class="keyword">...</span><span class="comment"> </span>
+0121        strcmp(kernel_function,<span class="string">'epanechnikov'</span>) | <span class="keyword">...</span><span class="comment"> </span>
+0122        strcmp(kernel_function,<span class="string">'quartic'</span>); 
+0123         error(<span class="string">'I can''t compute the optimal bandwidth with this kernel... Try the gaussian, triweight or cosinus kernels.'</span>); 
+0124     <span class="keyword">end</span>;         
+0125     sigma = std(data); 
+0126     A = 0; 
+0127     T = zeros(n,1); 
+0128     <span class="keyword">for</span> i=1:n; 
+0129         j = i; 
+0130         <span class="keyword">while</span> j&lt;= n &amp; data(j,1)==data(i,1); 
+0131             j = j+1; 
+0132         <span class="keyword">end</span>;     
+0133         T(i) = (j-i); 
+0134         A = A + 2*T(i) - 1; 
+0135     <span class="keyword">end</span>; 
+0136     A = A/n; 
+0137     Itilda4 = 8*7*6*5/(((2*sigma)^9)*sqrt(pi)); 
+0138     g3      = abs(2*A*k6(0)/(mu21*Itilda4*n))^(1/9); 
+0139     Ihat3 = 0; 
+0140     <span class="keyword">for</span> i=1:n; 
+0141         Ihat3 = Ihat3 + sum(k6((data(i,1)-data)/g3)); 
+0142     <span class="keyword">end</span>;     
+0143     Ihat3 = -Ihat3/((n^2)*g3^7); 
+0144     g2      = abs(2*A*k4(0)/(mu21*Ihat3*n))^(1/7); 
+0145     Ihat2 = 0; 
+0146     <span class="keyword">for</span> i=1:n; 
+0147         Ihat2 = Ihat2 + sum(k4((data(i)-data)/g2)); 
+0148     <span class="keyword">end</span>;     
+0149     Ihat2 = Ihat2/((n^2)*g2^5); 
+0150     h = ((2*T-1)*mu02/(n*Ihat2*mu21^2)).^(1/5); <span class="comment">% Note that h is a column vector (local banwidth parameters).</span>
+0151 <span class="keyword">elseif</span> bandwidth &gt; 0; 
+0152     h = bandwidth; 
+0153 <span class="keyword">else</span>; 
+0154     error(<span class="string">'density_estimate: bandwidth must be positive or equal to 0,-1 or -2.'</span>); 
+0155 <span class="keyword">end</span>; 
+0156 
+0157 <span class="comment">%% COMPUTE DENSITY ESTIMATE, using the optimal bandwidth parameter.</span>
+0158 <span class="comment">%%</span>
+0159 <span class="comment">%% This section is adapted from Anders Holtsberg's matlab toolbox</span>
+0160 <span class="comment">%% (stixbox --&gt; plotdens.m).</span>
+0161 
+0162 
+0163 a  = min(data) - (max(data)-min(data))/3;
+0164 b  = max(data) + (max(data)-min(data))/3;
+0165 abscissa = linspace(a,b,number_of_grid_points)';
+0166 d  = abscissa(2)-abscissa(1); 
+0167 xi = zeros(number_of_grid_points,1);
+0168 xa = (data-a)/(b-a)*number_of_grid_points; 
+0169 <span class="keyword">for</span> i = 1:n;
+0170     indx = floor(xa(i));
+0171     temp = xa(i)-indx;
+0172     xi(indx+[1 2]) = xi(indx+[1 2]) + [1-temp,temp]';
+0173 <span class="keyword">end</span>;    
+0174 xk = [-number_of_grid_points:number_of_grid_points-1]'*d;
+0175 kk = k(xk/h);
+0176 kk = kk / (sum(kk)*d*n);
+0177 f = ifft(fft(fftshift(kk)).*fft([xi ;zeros(size(xi))]));
+0178 f = real(f(1:number_of_grid_points));</pre></div>
+<hr><address>Generated on Fri 16-Jun-2006 09:09:06 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/">m2html</a></strong> &copy; 2003</address>
+</body>
+</html>

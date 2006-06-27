@@ -1,0 +1,90 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of prior_bounds</title>
+  <meta name="keywords" content="prior_bounds">
+  <meta name="description" content="">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2003 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../index.html">Home</a> &gt;  <a href="index.html">.</a> &gt; prior_bounds.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../index.html"><img alt="<" border="0" src="../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="index.html">Index for .&nbsp;<img alt=">" border="0" src="../right.png"></a></td></tr></table>-->
+
+<h1>prior_bounds
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong></strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function bounds = prior_bounds(bayestopt) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment"></pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="mj_qgamma.html" class="code" title="function x = mj_qgamma(p,a)">mj_qgamma</a>	MJ_QGAMMA   The gamma inverse distribution function</li><li><a href="qbeta.html" class="code" title="function x = qbeta(p,a,b)">qbeta</a>	QBETA    The beta inverse distribution function</li><li><a href="qnorm.html" class="code" title="function  x = qnorm(p,m,s)">qnorm</a>	QNORM 	  The normal inverse distribution function</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="dynare_MC.html" class="code" title="function dynare_MC(var_list_)">dynare_MC</a>	</li><li><a href="dynare_estimation.html" class="code" title="function dynare_estimation(var_list_)">dynare_estimation</a>	</li></ul>
+<!-- crossreference -->
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function bounds = prior_bounds(bayestopt)</a>
+0002 <span class="keyword">global</span> options_
+0003 
+0004 pshape = bayestopt.pshape;
+0005 pmean = bayestopt.pmean;
+0006 p2 = bayestopt.p2;
+0007 p3 = bayestopt.p3;
+0008 p4 = bayestopt.p4;
+0009 
+0010 n = length(pmean);
+0011 bounds = zeros(n,2);
+0012 
+0013 <span class="keyword">for</span> i=1:n
+0014     <span class="keyword">switch</span> pshape(i)
+0015         <span class="keyword">case</span> 1
+0016             mu = (pmean(i)-p3(i))/(p4(i)-p3(i));
+0017             stdd = p2(i)/(p4(i)-p3(i));
+0018             A = (1-mu)*mu^2/stdd^2 - mu;
+0019             B = A*(1/mu - 1);
+0020             bounds(i,1) = <a href="qbeta.html" class="code" title="function x = qbeta(p,a,b)">qbeta</a>(options_.prior_trunc,A,B)*(p4(i)-p3(i))+p3(i);
+0021             bounds(i,2) = <a href="qbeta.html" class="code" title="function x = qbeta(p,a,b)">qbeta</a>(1-options_.prior_trunc,A,B)*(p4(i)-p3(i))+p3(i);
+0022         <span class="keyword">case</span> 2
+0023             b = p2(i)^2/(pmean(i)-p3(i));
+0024             a = (pmean(i)-p3(i))/b;
+0025             bounds(i,1) = <a href="mj_qgamma.html" class="code" title="function x = mj_qgamma(p,a)">mj_qgamma</a>(options_.prior_trunc,a)*b+p3(i);
+0026             bounds(i,2) = <a href="mj_qgamma.html" class="code" title="function x = mj_qgamma(p,a)">mj_qgamma</a>(1-options_.prior_trunc,a)*b+p3(i);
+0027         <span class="keyword">case</span> 3
+0028             bounds(i,1) = <a href="qnorm.html" class="code" title="function  x = qnorm(p,m,s)">qnorm</a>(options_.prior_trunc,pmean(i),p2(i));
+0029             bounds(i,2) = <a href="qnorm.html" class="code" title="function  x = qnorm(p,m,s)">qnorm</a>(1-options_.prior_trunc,pmean(i),p2(i));
+0030         <span class="keyword">case</span> 4
+0031             nu = p2(i);
+0032             mu = pmean(i);
+0033             beta = ( gamma( (nu-1)/2 ) / mu / gamma( nu/2 ) )^2;
+0034             a=2/beta;
+0035             bounds(i,1) = 1/sqrt(<a href="mj_qgamma.html" class="code" title="function x = mj_qgamma(p,a)">mj_qgamma</a>(1-options_.prior_trunc,p2(i)/2)*beta);
+0036             bounds(i,2) = 1/sqrt(<a href="mj_qgamma.html" class="code" title="function x = mj_qgamma(p,a)">mj_qgamma</a>(options_.prior_trunc,p2(i)/2)*beta);
+0037         <span class="keyword">case</span> 5
+0038             bounds(i,1) = p3(i);
+0039             bounds(i,2) = p4(i);
+0040         <span class="keyword">otherwise</span>
+0041             bounds(i,1) = -Inf;
+0042             bounds(i,2) = Inf;
+0043     <span class="keyword">end</span>
+0044 <span class="keyword">end</span></pre></div>
+<hr><address>Generated on Fri 16-Jun-2006 09:09:06 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/">m2html</a></strong> &copy; 2003</address>
+</body>
+</html>
