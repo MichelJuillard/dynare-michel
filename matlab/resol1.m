@@ -13,10 +13,10 @@ end
 
 xlen = M_.maximum_lead + M_.maximum_lag + 1;
 klen = M_.maximum_lag + M_.maximum_lead + 1;
-iyv = M_.lead_lag_incidence';
-iyv = iyv(:);
+iyv  = M_.lead_lag_incidence';
+iyv  = iyv(:);
 iyr0 = find(iyv) ;
-it_ = M_.maximum_lag + 1 ;
+it_  = M_.maximum_lag + 1 ;
 
 if M_.exo_nbr == 0
   oo_.exo_steady_state = [] ;

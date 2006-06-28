@@ -62,6 +62,9 @@ options_ = set_default_option(options_,'xls_sheet','');
 options_ = set_default_option(options_,'xls_range','');
 options_ = set_default_option(options_,'filter_step_ahead',0);
 options_ = set_default_option(options_,'diffuse_d',[]);
+options_ = set_default_option(options_,'Opt6Iter',2);
+options_ = set_default_option(options_,'Opt6Numb',20000);
+
 if options_.filtered_vars ~= 0 & options_.filter_step_ahead == 0
   options_.filter_step_ahead = 1;
 end
@@ -131,6 +134,7 @@ nx  = nvx+nvn+ncx+ncn+np;
 %% Static solver
 if exist([M_.fname '_steadystate'])
   bayestopt_.static_solve = [M_.fname '_steadystate'];
+  eval(['[ys,check] = ' bayestopt_.static_solve '([],[]);'])
 else
   bayestopt_.static_solve = 'dynare_solve';
 end
@@ -243,6 +247,10 @@ if length(options_.mode_file) > 0 & options_.posterior_mode_estimation
   eval(['load ' options_.mode_file ';']');
 end
 
+% Compute the steadyn state if the _steadystate.m file is provided
+if strcmpi(bayestopt_.static_solve,[M_.fname '_steadystate'])
+      [oo_.steady_state,tchek] = feval(bayestopt_.static_solve,[],[]);
+end
 initial_estimation_checks(xparam1,gend,data);
 
 %% Estimation of the posterior mode or likelihood mode
@@ -302,10 +310,69 @@ if options_.mode_compute > 0 & options_.posterior_mode_estimation
     %[xparam1, hh, gg, fval] = newrat('DsgeLikelihood',xparam1,[],[],flag,gend,data);
     [xparam1, hh, gg, fval, invhess] = newrat('DsgeLikelihood',xparam1,hh,gg,igg,crit,nit,flag,gend,data);
     eval(['save ' M_.fname '_mode xparam1 hh gg fval invhess;']);
+  elseif options_.mode_compute == 6
+    fval = DsgeLikelihood(xparam1,gend,data);
+    OldMode = fval;
+    if ~exist('MeanPar')
+      MeanPar = xparam1;
+    end
+    if exist('hh')
+      CovJump = inv(hh);
+    else% The covariance matrix is initialized with the prior
+        % covariance (a diagonal matrix) % Except for infinite variances ;-)
+      stdev = bayestopt_.pstdev;
+      indx = find(isinf(stdev));
+      stdev(indx) = sqrt(2)*ones(length(indx),1);
+      CovJump = diag(stdev).^2;
+    end
+    OldPostVar = CovJump;
+    Scale = options_.mh_jscale;
+    for i=1:options_.Opt6Iter
+      if i == 1
+        if options_.Opt6Iter > 1
+          flag = '';
+        else
+          flag = 'LastCall';
+        end
+        [xparam1,PostVar,Scale,PostMean] = ...
+            gmhmaxlik('DsgeLikelihood',xparam1,bounds,...
+                      options_.Opt6Numb,Scale,flag,MeanPar,CovJump,gend,data);
+        options_.mh_jscale = Scale;
+        mouvement = max(max(abs(PostVar-OldPostVar)));
+        fval = DsgeLikelihood(xparam1,gend,data);
+        disp(['Change in the covariance matrix = ' num2str(mouvement) '.'])
+        disp(['Mode improvement = ' num2str(abs(OldMode-fval))])
+        OldMode = fval;
+      else
+        OldPostVar = PostVar;
+        if i<options_.Opt6Iter
+          flag = '';
+        else
+          flag = 'LastCall';
+        end
+        [xparam1,PostVar,Scale,PostMean] = ...
+            gmhmaxlik('DsgeLikelihood',xparam1,bounds,...
+                      options_.Opt6Numb,Scale,flag,PostMean,PostVar,gend,data);
+        options_.mh_jscale = Scale;
+        mouvement = max(max(abs(PostVar-OldPostVar)));
+        fval = DsgeLikelihood(xparam1,gend,data);
+        disp(['Change in the covariance matrix = ' num2str(mouvement) '.'])
+        disp(['Mode improvement = ' num2str(abs(OldMode-fval))])
+        OldMode = fval;
+      end
+      % options_.mh_jscale = Scale;
+      bayestopt_.jscale = ones(length(xparam1),1)*Scale;%??!
+    end
+    hh = inv(PostVar);
+    %fval = DsgeLikelihood(xparam1,gend,data);
   end
   if options_.mode_compute ~= 5
-    hh = reshape(hessian('DsgeLikelihood',xparam1,gend,data),nx,nx);
-    eval(['save ' M_.fname '_mode xparam1 hh fval;']);
+    if options_.mode_compute ~= 6
+      hh = reshape(hessian('DsgeLikelihood',xparam1,gend,data),nx,nx);
+      eval(['save ' M_.fname '_mode xparam1 hh fval;']);
+    else
+      eval(['save ' M_.fname '_mode xparam1 hh fval;']);
+    end
   end
   eval(['save ' M_.fname '_mode xparam1 hh;']);
 end
