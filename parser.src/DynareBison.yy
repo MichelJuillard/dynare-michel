@@ -469,7 +469,6 @@
  steady 
  	: STEADY ';' 
  		{
- 			_parser->option_num("solve_algo","0");
  			_parser->steady();
  		}
     | STEADY '(' steady_options_list ')' ';'
