@@ -14,7 +14,7 @@ function [x,cheik] = dynare_solve(func,x,jacobian_flag,varargin)
       if jacobian_flag
 	options.Jacobian = 'on';
       else
-	options.Jacobian = 'on';
+	options.Jacobian = 'off';
       end
       [x,fval,exitval,output] = fsolve(func,x,options,varargin{:});
       if exitval > 0
