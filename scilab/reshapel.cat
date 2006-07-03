@@ -1,0 +1,6 @@
+ Copyright (C) 2001 Michel Juillard
+
+RESHAPEL Change size.
+ RESHAPEL(X,M,N) returns the M-by-N matrix whose elements
+ are taken linewise from X.  An error results if X does
+ not have M*N elements.
