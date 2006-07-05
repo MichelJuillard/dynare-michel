@@ -162,9 +162,9 @@ function [fval,cost_flag,ys,trend_coeff,info] = DsgeLikelihood(xparam1,gend,data
     end	  
   else
     if options_.kalman_algo == 1
-       nv = size(bayestopt_.Z,1);
-       LIK = kalman_filter(bayestopt_.Z,zeros(nv,nv),T,R,Q,data,zeros(size(T,1),1),Pstar,'u');
-%      LIK = DiffuseLikelihood1(T,R,Q,Pinf,Pstar,data,trend,start);
+       %nv = size(bayestopt_.Z,1);
+       %LIK = kalman_filter(bayestopt_.Z,zeros(nv,nv),T,R,Q,data,zeros(size(T,1),1),Pstar,'u');
+      LIK = DiffuseLikelihood1(T,R,Q,Pinf,Pstar,data,trend,start);
       if isinf(LIK)
 	LIK = DiffuseLikelihood3(T,R,Q,Pinf,Pstar,data,trend,start);
       end

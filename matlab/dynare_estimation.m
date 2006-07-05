@@ -62,8 +62,8 @@ options_ = set_default_option(options_,'xls_sheet','');
 options_ = set_default_option(options_,'xls_range','');
 options_ = set_default_option(options_,'filter_step_ahead',0);
 options_ = set_default_option(options_,'diffuse_d',[]);
-options_ = set_default_option(options_,'Opt6Iter',2);
-options_ = set_default_option(options_,'Opt6Numb',20000);
+options_ = set_default_option(options_,'Opt6Iter',3);
+options_ = set_default_option(options_,'Opt6Numb',100000);
 
 if options_.filtered_vars ~= 0 & options_.filter_step_ahead == 0
   options_.filter_step_ahead = 1;
@@ -219,11 +219,6 @@ bayestopt_.restrict_state = k2;
 % for filtering and smoothing
 bayestopt_.mf2 	= k;
 bayestopt_.mfys = k1;
-bayestopt_.Z = zeros(n_varobs,length(k2));
-for i=1:n_varobs
-   bayestopt_.Z(i,bayestopt_.mf1(i)) = 1;
-end
-
 options_ = set_default_option(options_,'nobs',size(rawdata,1)-options_.first_obs+1);
 gend = options_.nobs;
 

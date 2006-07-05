@@ -67,8 +67,8 @@ options_.lik_algo = 1;
 npar = length(xparam1);
 
 NumberOfIterations = num;
-MaxNumberOfTuningSimulations   = 100000;
-MaxNumberOfClimbingSimulations = 100000;
+MaxNumberOfTuningSimulations   = 200000;
+MaxNumberOfClimbingSimulations = 200000;
 AcceptanceTarget               = 1/3;
 
 CovJump = VarCov;
@@ -188,7 +188,7 @@ if strcmpi(info,'LastCall')
     end% ... otherwise I don't move.
     prtfrc = j/MaxNumberOfTuningSimulations;
     waitbar(prtfrc,hh,sprintf('Acceptation rates: %f [%f]',isux/j,jsux/jj));
-    if j/500 == round(j/500) 
+    if j/1000 == round(j/1000) 
       test1 = jsux/jj;  
       cfactor = test1/AcceptanceTarget;
       iScale = iScale*cfactor;

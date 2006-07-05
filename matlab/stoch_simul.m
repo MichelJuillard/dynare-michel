@@ -271,7 +271,6 @@ global it_
     end
   end
 
-  
 if isfield(options_,'SpectralDensity')
   if options_.SpectralDensity == 1
     [omega,f] = UnivariateSpectralDensity(oo_.dr,var_list);
