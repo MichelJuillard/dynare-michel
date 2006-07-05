@@ -1,6 +1,29 @@
-function metropolis(xparam1,vv,gend,data,rawdata,mh_bounds)
-% stephane.adjemian@ens.fr [09-02-2005]
-global M_ oo_ options_ bayestopt_ estim_params_
+function metropolis(TargetFun,xparam1,vv,mh_bounds,varargin)
+% Metropolis-Hastings algorithm. 
+% 
+% INPUTS 
+%   o TargetFun  [char]     string specifying the name of the objective
+%                           function (posterior kernel).
+%   o xparam1    [double]   (p*1) vector of parameters to be estimated (initial values).
+%   o vv         [double]   (p*p) matrix, posterior covariance matrix (at the mode).
+%   o mh_bounds  [double]   (p*2) matrix defining lower and upper bounds for the parameters. 
+%   o gend       [integer]  scalar specifying the number of observations ==> varargin{1}.
+%   o data       [double]   (T*n) matrix of data ==> varargin{2}.
+%  
+% OUTPUTS 
+%   None.  
+%
+%
+% ALGORITHM 
+%   Metropolis-Hastings.       
+%
+% SPECIAL REQUIREMENTS
+%   None.
+%  
+%  
+% part of DYNARE, copyright S. Adjemian, M. Juillard (2006)
+% Gnu Public License.
+global M_ options_ bayestopt_
 
 bayestopt_.penalty = 1e8;
 
@@ -41,7 +64,7 @@ if options_.load_mh_file == 0
 	candidate = options_.mh_init_scale*randn(1,npar)*d + transpose(xparam1);
 	if all(candidate' > mh_bounds(:,1)) & all(candidate' < mh_bounds(:,2)) 
 	  ix2(j,:) = candidate;
-	  ilogpo2(j) = -DsgeLikelihood(ix2(j,:)',gend,data);
+          ilogpo2(j) = - feval(TargetFun,ix2(j,:)',varargin{:});
 	  j = j+1;
 	  validate = 1;
 	end
@@ -65,7 +88,7 @@ if options_.load_mh_file == 0
     candidate = transpose(xparam1);
     if all(candidate' > mh_bounds(:,1)) & all(candidate' < mh_bounds(:,2)) 
       ix2 = candidate;
-      ilogpo2 = -DsgeLikelihood(ix2',gend,data);
+      ilogpo2 = - feval(TargetFun,ix2',varargin{:});
       disp('MH: Initialization at the posterior mode.')
       disp(' ')
     else
@@ -130,7 +153,7 @@ elseif options_.load_mh_file == 1% Here we consider previous mh files (previous 
     NewFile = ones(nblck,1)*LastFileNumber;
   else
     NewFile = ones(nblck,1)*(LastFileNumber+1);
-  end  
+  end
   ilogpo2 = record.LastLogLiK;
   ix2 = record.LastParameters;
   fblck = 1;
@@ -295,13 +318,13 @@ for b = fblck:nblck
   hh = waitbar(0,['Please wait... Metropolis-Hastings (' int2str(b) '/' int2str(nblck) ')...']);
   set(hh,'Name','Metropolis-Hastings')
   isux = 0;
-  irun = fline(b);  
+  irun = fline(b);
   j = 1;
   while j <= nruns(b)
     par = randn(1,npar)*d;
     par = par.*bayestopt_.jscale' + ix2(b,:);  
     if all(par'>mh_bounds(:,1)) & all(par'<mh_bounds(:,2))
-      logpost = -DsgeLikelihood(par',gend,data);
+      logpost = - feval(TargetFun,par',varargin{:});
     else
       logpost = -inf;
     end    

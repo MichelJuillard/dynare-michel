@@ -758,7 +758,7 @@ if (any(bayestopt_.pshape  >0 ) & options_.mh_replic) | ...
     error('Mode values are outside prior bounds. Reduce prior_trunc.')
   end  
   if options_.mh_replic
-    metropolis(xparam1,invhess,gend,data,rawdata,bounds);
+    metropolis('DsgeLikelihood',xparam1,invhess,bounds,gend,data);
   end
   if ~options_.nodiagnostic & options_.mh_replic > 1000 & options_.mh_nblck > 1
     McMCDiagnostics;
