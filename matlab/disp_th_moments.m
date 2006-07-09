@@ -19,9 +19,9 @@ function disp_th_moments(dr,var_list)
     end
   end
   
+  [oo_.gamma_y,ivar] = th_autocovariances(dr,ivar);
   m = dr.ys(ivar);
 
-  oo_.gamma_y = th_autocovariances(dr,ivar);
   
   i1 = find(abs(diag(oo_.gamma_y{1})) > 1e-12);
   s2 = diag(oo_.gamma_y{1});
