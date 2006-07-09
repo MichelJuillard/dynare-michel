@@ -428,7 +428,7 @@ void ComputingTasks::setOsrParams(string tmp)
 void ComputingTasks::runOsr(string tmp1)
 {
   *output << tmp1;
-  *output << "osr(var1_list_,osr_params_,optim_weights_);\n";
+  *output << "osr(var_list_,osr_params_,optim_weights_);\n";
 }
 //------------------------------------------------------------------------------
 void ComputingTasks::setOlrInst(string tmp)
@@ -448,7 +448,7 @@ void ComputingTasks::runOlr(string tmp1)
 void ComputingTasks::BeginOptimWeights(void)
 {
   *output << "% OPTIM_WEIGHTS\n\n";
-  *output << "optim_weights_ = sparse(endo_nbr,endo_nbr);\n";
+  *output << "optim_weights_ = sparse(M_.endo_nbr,M_.endo_nbr);\n";
   *output << "obj_var_ = [];\n\n";
 }
 //------------------------------------------------------------------------------
