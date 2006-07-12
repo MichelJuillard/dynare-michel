@@ -27,6 +27,7 @@ global it_
   eigenvalues_ = dr.eigval;
   nyf = nnz(dr.kstate(:,2)>M_.maximum_lag+1);
   [m_lambda,i]=sort(abs(eigenvalues_));
+  n_explod = nnz(abs(eigenvalues_) > options_.qz_criterium);
   
   if options_.noprint == 0
     disp(' ')
@@ -36,17 +37,15 @@ global it_
     disp(sprintf('%16.4g %16.4g %16.4g\n',z))
     options_ = set_default_option(options_,'qz_criterium',1.000001);
     disp(sprintf('\nThere are %d eigenvalue(s) larger than 1 in modulus ', ...
-		 nnz(abs(eigenvalues_) > options_.qz_criterium)));
+		 n_explod));
     disp(sprintf('for %d forward-looking variable(s)',nyf));
     disp(' ')
-    if info(1) == 0
-      if dr.rank == nyf
-	disp('The rank condition is verified.')
-      else
-	disp('The rank conditions ISN''T verified!')
-      end
-      disp(' ')
+    if dr.rank == nyf & nyf == n_explod
+      disp('The rank condition is verified.')
+    else
+      disp('The rank conditions ISN''T verified!')
     end
+    disp(' ')
   end
   
   % keep lambda_ for backward compatibility
