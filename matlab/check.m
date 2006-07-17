@@ -15,6 +15,10 @@ global it_
   options_ = set_default_option(options_,'order',1);  
   options_ = set_default_option(options_,'linear',0);  
   options_ = set_default_option(options_,'dr_algo',0);  
+  options_ = set_default_option(options_,'steadystate_flag',0);
+  if exist([M_.fname '_steadystate.m'])
+    options_.steadystate_flag = 1;
+  end
 
   [dr, info] = resol(oo_.steady_state,1);
   

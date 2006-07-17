@@ -64,6 +64,10 @@ options_ = set_default_option(options_,'filter_step_ahead',0);
 options_ = set_default_option(options_,'diffuse_d',[]);
 options_ = set_default_option(options_,'Opt6Iter',3);
 options_ = set_default_option(options_,'Opt6Numb',100000);
+options_ = set_default_option(options_,'steadystate_flag',0);
+if exist([M_.fname '_steadystate.m'])
+  options_.steadystate_flag = 1;
+end
 
 if options_.filtered_vars ~= 0 & options_.filter_step_ahead == 0
   options_.filter_step_ahead = 1;
@@ -130,14 +134,6 @@ ncx = estim_params_.ncx;
 ncn = estim_params_.ncn;
 np  = estim_params_.np ;
 nx  = nvx+nvn+ncx+ncn+np;
-
-%% Static solver
-if exist([M_.fname '_steadystate'])
-  bayestopt_.static_solve = [M_.fname '_steadystate'];
-  eval(['[ys,check] = ' bayestopt_.static_solve '([],[]);'])
-else
-  bayestopt_.static_solve = 'dynare_solve';
-end
 
 dr = set_state_space([]);
 
@@ -243,8 +239,8 @@ if length(options_.mode_file) > 0 & options_.posterior_mode_estimation
 end
 
 % Compute the steadyn state if the _steadystate.m file is provided
-if strcmpi(bayestopt_.static_solve,[M_.fname '_steadystate'])
-      [oo_.steady_state,tchek] = feval(bayestopt_.static_solve,[],[]);
+if options_.steadystate_flag
+  [oo_.steady_state,tchek] = feval([M_.fname '_steadystate'],[],[]);
 end
 initial_estimation_checks(xparam1,gend,data);
 

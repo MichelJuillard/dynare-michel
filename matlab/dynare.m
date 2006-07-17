@@ -10,7 +10,7 @@ function dynare(fname, varargin)
 %	is processed.
 
 if ~isstr(fname)
-	error ('The argument in DYNARE must be a text string.') ;
+  error ('The argument in DYNARE must be a text string.') ;
 end
 % Testing if file have extension
 % If no extension defalut .mod is added

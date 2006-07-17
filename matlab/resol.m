@@ -33,8 +33,8 @@ dr.ys = ys;
 fh = str2func([M_.fname '_static']);
 if options_.linear == 0
   if max(abs(feval(fh,dr.ys,[oo_.exo_steady_state; oo_.exo_det_steady_state]))) > options_.dynatol & options_.olr == 0
-    if strcmpi(bayestopt_.static_solve,[M_.fname '_steadystate'])
-      [dr.ys,check1] = feval(bayestopt_.static_solve,dr.ys,...
+    if options_.steadystate_flag
+      [dr.ys,check1] = feval([M_.fname '_steadystate'],dr.ys,...
 			     [oo_.exo_steady_state; oo_.exo_det_steady_state]);
     else
       [dr.ys,check1] = dynare_solve(fh,dr.ys,options_.jacobian_flag,...

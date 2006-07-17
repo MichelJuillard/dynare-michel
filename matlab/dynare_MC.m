@@ -57,6 +57,10 @@ options_ = set_default_option(options_,'posterior_mode_estimation',1);
 options_ = set_default_option(options_,'MaxNumberOfBytes',1e6);
 options_ = set_default_option(options_,'xls_sheet','');
 options_ = set_default_option(options_,'xls_range','');
+options_ = set_default_option(options_,'steadystate_flag',0);
+if exist([M_.fname '_steadystate.m'])
+  options_.steadystate_flag = 1;
+end
 
 %% Add something to the parser ++>
 M_.dname = M_.fname; % The user should be able to choose another name
@@ -108,13 +112,6 @@ ncx = estim_params_.ncx;
 ncn = estim_params_.ncn;
 np  = estim_params_.np ;
 nx  = nvx+nvn+ncx+ncn+np;
-
-%% Static solver
-if exist([M_.fname '_steadystate'])
-  bayestopt_.static_solve = [M_.fname '_steadystate'];
-else
-  bayestopt_.static_solve = 'dynare_solve';
-end
 
 dr = set_state_space([]);
 

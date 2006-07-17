@@ -5,7 +5,11 @@ function steady(linear)
   global M_ oo_ options_ ys0_ 
 
   options_ = set_default_option(options_,'jacobian_flag',1);
-
+  options_ = set_default_option(options_,'steadystate_flag',0);
+  if exist([M_.fname 'steadystate.m'])
+    options_.steadystate_flag = 1;
+  end 
+    
   steady_;
   
   disp(' ')

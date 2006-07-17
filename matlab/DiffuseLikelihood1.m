@@ -10,7 +10,7 @@ function [LIK, lik] = DiffuseLikelihood1(T,R,Q,Pinf,Pstar,Y,trend,start)
   mm   = size(T,2);
   pp   = size(Y,1);
   a    = zeros(mm,1);
-  dF = 1;
+  dF   = 1;
   QQ   = R*Q*transpose(R);
   t    = 0;
   lik  = zeros(smpl+1,1);
@@ -33,12 +33,12 @@ function [LIK, lik] = DiffuseLikelihood1(T,R,Q,Pinf,Pstar,Y,trend,start)
 	lik(t)	= log(dFstar) + transpose(v)*iFstar*v;
 	Pinf	= T*Pinf*transpose(T);
 	Pstar	= T*(Pstar-Pstar(:,mf)*transpose(Kstar))*transpose(T)+QQ;
-	a		= T*(a+Kstar*v);
+	a	= T*(a+Kstar*v);
       end
     else
       lik(t)	= log(det(Finf));
       iFinf	= inv(Finf);
-      Kinf	= Pinf(:,mf)*iFinf;					%%	premultiplication by the transition matrix T is removed (stephane) 
+      Kinf	= Pinf(:,mf)*iFinf;			%%	premultiplication by the transition matrix T is removed (stephane) 
       Fstar	= Pstar(mf,mf);
       Kstar	= (Pstar(:,mf)-Kinf*Fstar)*iFinf; 	%%	premultiplication by the transition matrix T is removed (stephane)
       Pstar	= T*(Pstar-Pstar(:,mf)*transpose(Kinf)-Pinf(:,mf)*transpose(Kstar))*transpose(T)+QQ;
