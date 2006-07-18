@@ -34,7 +34,6 @@ if M_.exo_nbr == 0
 end
 
 tempex = oo_.exo_simul;
-
 it_ = M_.maximum_lag + 1;
 if options_.olr
   z = repmat(zeros(M_.endo_nbr,1),1,klen);

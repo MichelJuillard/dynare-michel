@@ -219,9 +219,9 @@ options_ = set_default_option(options_,'nobs',size(rawdata,1)-options_.first_obs
 gend = options_.nobs;
 
 rawdata = rawdata(options_.first_obs:options_.first_obs+gend-1,:);
-if options_.loglinear == 1
-  rawdata = log(rawdata);
-end
+% if options_.loglinear == 1
+%  rawdata = log(rawdata);
+% end
 if options_.prefilter == 1
   bayestopt_.mean_varobs = mean(rawdata,1);
   data = transpose(rawdata-ones(gend,1)*bayestopt_.mean_varobs);
