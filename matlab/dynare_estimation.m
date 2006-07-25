@@ -65,6 +65,8 @@ options_ = set_default_option(options_,'diffuse_d',[]);
 options_ = set_default_option(options_,'Opt6Iter',3);
 options_ = set_default_option(options_,'Opt6Numb',100000);
 options_ = set_default_option(options_,'steadystate_flag',0);
+options_ = set_default_option(options_,'logdata',0);
+
 if exist([M_.fname '_steadystate.m'])
   options_.steadystate_flag = 1;
 end
@@ -219,9 +221,9 @@ options_ = set_default_option(options_,'nobs',size(rawdata,1)-options_.first_obs
 gend = options_.nobs;
 
 rawdata = rawdata(options_.first_obs:options_.first_obs+gend-1,:);
-% if options_.loglinear == 1
-%  rawdata = log(rawdata);
-% end
+if options_.loglinear == 1 & ~options_.logdata
+  rawdata = log(rawdata);
+end
 if options_.prefilter == 1
   bayestopt_.mean_varobs = mean(rawdata,1);
   data = transpose(rawdata-ones(gend,1)*bayestopt_.mean_varobs);
@@ -313,7 +315,7 @@ if options_.mode_compute > 0 & options_.posterior_mode_estimation
         % covariance (a diagonal matrix) % Except for infinite variances ;-)
       stdev = bayestopt_.pstdev;
       indx = find(isinf(stdev));
-      stdev(indx) = sqrt(2)*ones(length(indx),1);
+      stdev(indx) = sqrt(2)*ones(length(indx),1)*0.1;
       CovJump = diag(stdev).^2;
     end
     OldPostVar = CovJump;

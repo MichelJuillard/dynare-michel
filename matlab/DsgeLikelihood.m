@@ -165,6 +165,10 @@ function [fval,cost_flag,ys,trend_coeff,info] = DsgeLikelihood(xparam1,gend,data
        %nv = size(bayestopt_.Z,1);
        %LIK = kalman_filter(bayestopt_.Z,zeros(nv,nv),T,R,Q,data,zeros(size(T,1),1),Pstar,'u');
       LIK = DiffuseLikelihood1(T,R,Q,Pinf,Pstar,data,trend,start);
+      % LIK = diffuse_likelihood1(T,R,Q,Pinf,Pstar,data-trend,start);
+      %if abs(LIK1-LIK)>0.0000000001
+      %  disp(['LIK1 and LIK are not equal! ' num2str(abs(LIK1-LIK))])
+      %end
       if isinf(LIK)
 	LIK = DiffuseLikelihood3(T,R,Q,Pinf,Pstar,data,trend,start);
       end
