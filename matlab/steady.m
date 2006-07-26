@@ -6,7 +6,7 @@ function steady(linear)
 
   options_ = set_default_option(options_,'jacobian_flag',1);
   options_ = set_default_option(options_,'steadystate_flag',0);
-  if exist([M_.fname 'steadystate.m'])
+  if exist([M_.fname '_steadystate.m'])
     options_.steadystate_flag = 1;
   end 
     
