@@ -208,6 +208,8 @@ if strcmpi(info,'LastCall')
   %%
   %% Now I climb the hill
   %%
+  climb = 0;
+  if climb
   hh = waitbar(0,' ');
   set(hh,'Name','Now I am climbing the hill...')
   j = 1; jj  = 1;
@@ -247,6 +249,7 @@ if strcmpi(info,'LastCall')
     jj = jj + 1;
   end
   close(hh);
+  end%climb
 else
   Scale = iScale;
 end

@@ -66,6 +66,7 @@ options_ = set_default_option(options_,'Opt6Iter',3);
 options_ = set_default_option(options_,'Opt6Numb',100000);
 options_ = set_default_option(options_,'steadystate_flag',0);
 options_ = set_default_option(options_,'logdata',0);
+options_ = set_default_option(options_,'use_mh_covariance_matrix',0);
 
 if exist([M_.fname '_steadystate.m'])
   options_.steadystate_flag = 1;
@@ -315,8 +316,11 @@ if options_.mode_compute > 0 & options_.posterior_mode_estimation
         % covariance (a diagonal matrix) % Except for infinite variances ;-)
       stdev = bayestopt_.pstdev;
       indx = find(isinf(stdev));
-      stdev(indx) = sqrt(2)*ones(length(indx),1)*0.1;
+      stdev(indx) = ones(length(indx),1)*0.1;
+      indx = find(stdev>2);
+      stdev(indx) = ones(length(indx),1)*0.1;      
       CovJump = diag(stdev).^2;
+      CovJump = eye(length(stdev))*0.5;
     end
     OldPostVar = CovJump;
     Scale = options_.mh_jscale;
@@ -379,7 +383,9 @@ if options_.posterior_mode_estimation
   invhess = inv(hh);
   stdh = sqrt(diag(invhess));
 else
-  invhess = eye(length(xparam1));
+  variances = bayestopt_.pstdev.^2;
+  invhess = 0.001*diag(variances);
+  invhess = 0.001*eye(length(variances));
 end
   
 if any(bayestopt_.pshape > 0) & options_.posterior_mode_estimation
@@ -756,7 +762,14 @@ if (any(bayestopt_.pshape  >0 ) & options_.mh_replic) | ...
     error('Mode values are outside prior bounds. Reduce prior_trunc.')
   end  
   if options_.mh_replic
-    metropolis('DsgeLikelihood',xparam1,invhess,bounds,gend,data);
+    if ~options_.load_mh_file
+      metropolis('DsgeLikelihood',xparam1,invhess,bounds,gend,data);
+    else
+      if options_.use_mh_covariance_matrix
+        invhess = compute_mh_covariance_matrix();
+      end
+      metropolis('DsgeLikelihood',xparam1,invhess,bounds,gend,data);
+    end
   end
   if ~options_.nodiagnostic & options_.mh_replic > 1000 & options_.mh_nblck > 1
     McMCDiagnostics;
@@ -773,7 +786,6 @@ if (any(bayestopt_.pshape  >0 ) & options_.mh_replic) | ...
     PosteriorIRF('posterior');
   end
   return
-  
 end
 
 if ~((any(bayestopt_.pshape > 0) & options_.mh_replic) | (any(bayestopt_.pshape ...
