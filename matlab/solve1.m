@@ -99,7 +99,7 @@ function [x,check] = solve1(func,x,j1,j2,jacobian_flag,varargin)
       
     if check > 0
       den = max([f;0.5*nn]) ;
-      if max(abs(g).*max([abs(x');ones(1,nn)])')/den < tolmin
+      if max(abs(g).*max([abs(x(j2)') ones(1,nn)])')/den < tolmin
 	return
       else
 	disp (' ')
@@ -109,7 +109,7 @@ function [x,check] = solve1(func,x,j1,j2,jacobian_flag,varargin)
 	return
       end
 
-      if max(abs(x-xold)./max([abs(x);ones(1,nn)])') < tolx
+      if max(abs(x(j2)-xold(j2))./max([abs(x(j2)') ones(1,nn)])') < tolx
 	disp (' ')
 	disp (['SOLVE: Iteration ' num2str(its)])
 	disp (['Convergence on dX.'])
