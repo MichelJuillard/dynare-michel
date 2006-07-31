@@ -53,7 +53,7 @@ else
   else
     set_defaut_option('order',1);
   end
-  oo_.y_simul=simult(oo_.steady_state,dr,options_);
+  oo_.endo_simul=simult(oo_.steady_state,dr,options_);
 end
 
 dyn2vec;

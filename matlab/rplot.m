@@ -12,7 +12,7 @@ global M_ oo_ options_
 rplottype = options_.rplottype;
 
 col = ['y','c','r','g','b','w','m'] ;
-ix = [1 - M_.maximum_lag:size(oo_.y_simul,2)-M_.maximum_lag]' ;
+ix = [1 - M_.maximum_lag:size(oo_.endo_simul,2)-M_.maximum_lag]' ;
 
 y = [];
 for k=1:size(s1,1)
@@ -20,11 +20,11 @@ for k=1:size(s1,1)
     error (['One of the variable specified does not exist']) ;
   end
 
-  y = [y; oo_.y_simul(strmatch(s1(k,:),M_.endo_names,'exact'),:)] ;
+  y = [y; oo_.endo_simul(strmatch(s1(k,:),M_.endo_names,'exact'),:)] ;
 end
 
 if options_.smpl == 0
-        i = [M_.maximum_lag:size(oo_.y_simul,2)]' ;
+        i = [M_.maximum_lag:size(oo_.endo_simul,2)]' ;
 else
 	i = [options_.smpl(1)+M_.maximum_lag:options_.smpl(2)+M_.maximum_lag]' ;
 end

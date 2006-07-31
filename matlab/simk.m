@@ -96,7 +96,7 @@ fprintf ('\n') ;
 
 for iter = 1:options_.maxit
   h2 = clock ;
-  oo_.y_simul = oo_.y_simul(:);
+  oo_.endo_simul = oo_.endo_simul(:);
   err_f = 0;
   
   fid = fopen('dynare.swp','w+') ;
@@ -108,11 +108,11 @@ for iter = 1:options_.maxit
   while (i>1) & (it_<=options_.periods+M_.maximum_lag)
     h3 = clock ;
     if broyden_ & iter > 1
-      %d1_ = -feval(fh,oo_.y_simul(iyr));
-      d1 = -feval([M_.fname '_dynamic'],oo_.y_simul(iyr),z,oo_.exo_simul);
+      %d1_ = -feval(fh,oo_.endo_simul(iyr));
+      d1 = -feval([M_.fname '_dynamic'],oo_.endo_simul(iyr),z,oo_.exo_simul);
     else
-      %jacob(func_name,oo_.y_simul(iyr)) ;
-      [d1,M_.jacobia] = feval([M_.fname '_dynamic'],oo_.y_simul(iyr),oo_.exo_simul);
+      %jacob(func_name,oo_.endo_simul(iyr)) ;
+      [d1,M_.jacobia] = feval([M_.fname '_dynamic'],oo_.endo_simul(iyr),oo_.exo_simul);
       d1 = -d1 ;
     end
     err_f = max(err_f,max(abs(d1)));
@@ -201,11 +201,11 @@ for iter = 1:options_.maxit
   icr0 = (it_-M_.maximum_lag-M_.maximum_lag -1)*ny ;
   while it_ <= options_.periods+M_.maximum_lag
     if broyden_
-      %d1_ = -feval(fh,oo_.y_simul(iyr));
-       d1 = -feval([M_.fname '_dynamic'],oo_.y_simul(iyr),z,oo_.exo_simul);
+      %d1_ = -feval(fh,oo_.endo_simul(iyr));
+       d1 = -feval([M_.fname '_dynamic'],oo_.endo_simul(iyr),z,oo_.exo_simul);
     else
-      %jacob(func_name,oo_.y_simul(iyr)) ;
-      [d1,M_.jacobia] = feval([M_.fname '_dynamic'],oo_.y_simul(iyr),oo_.exo_simul);
+      %jacob(func_name,oo_.endo_simul(iyr)) ;
+      [d1,M_.jacobia] = feval([M_.fname '_dynamic'],oo_.endo_simul(iyr),oo_.exo_simul);
       d1 = -d1 ;
     end
     err_f = max(err_f,max(abs(d1)));
@@ -270,7 +270,7 @@ for iter = 1:options_.maxit
 
     end
   end
-  oo_.y_simul = reshape(oo_.y_simul,ny,options_.periods+M_.maximum_lag+M_.maximum_lead) ;
+  oo_.endo_simul = reshape(oo_.endo_simul,ny,options_.periods+M_.maximum_lag+M_.maximum_lead) ;
   if ct_ == 1
     hbacsup = clock ;
     c = bksupk(ny,fid,ncc,icc1) ;
@@ -282,7 +282,7 @@ for iter = 1:options_.maxit
     c = bksupk(ny,fid,ncc,icc1) ;
     hbacsup = etime(clock,hbacsup) ;
     c = reshape(c,ny,options_.periods)' ;
-    oo_.y_simul(:,1+M_.maximum_lag:(options_.periods+M_.maximum_lag)) = oo_.y_simul(:,1+M_.maximum_lag:(options_.periods+M_.maximum_lag))+options_.slowc*c' ;
+    oo_.endo_simul(:,1+M_.maximum_lag:(options_.periods+M_.maximum_lag)) = oo_.endo_simul(:,1+M_.maximum_lag:(options_.periods+M_.maximum_lag))+options_.slowc*c' ;
   end
 
   fclose(fid) ;

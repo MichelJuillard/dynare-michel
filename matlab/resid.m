@@ -5,21 +5,21 @@ function resid(period)
   
   oo_.exo_simul = ones(M_.maximum_lag+M_.maximum_lead+period,1)*oo_.exo_steady_state';
   n = size(M_.lead_lag_incidence,2);
-%  if ~ options_.initval_file | size(oo_.y_simul,2) ~= period+M_.maximum_lag+M_.maximum_lead
+%  if ~ options_.initval_file | size(oo_.endo_simul,2) ~= period+M_.maximum_lag+M_.maximum_lead
   if ~ options_.initval_file 
     if size(oo_.steady_state,1) == 1 & oo_.steady_state == 0
       oo_.steady_state = zeros(size(oo_.steady_state,1),1) ;
     end
-    oo_.y_simul = oo_.steady_state*ones(1,period+M_.maximum_lag+M_.maximum_lead) ;
+    oo_.endo_simul = oo_.steady_state*ones(1,period+M_.maximum_lag+M_.maximum_lead) ;
     if endval_ == 1
-      oo_.y_simul(:,1:M_.maximum_lag) = ys0_*ones(1,M_.maximum_lag) ;
+      oo_.endo_simul(:,1:M_.maximum_lag) = ys0_*ones(1,M_.maximum_lag) ;
     end
   end
 
   i = M_.lead_lag_incidence';
   iyr0 = find(i(:));
 
-  y =oo_.y_simul(:);
+  y =oo_.endo_simul(:);
   z = zeros(n,period);
   fh = str2func([M_.fname '_dynamic']);
   for it_=M_.maximum_lag+1:period+M_.maximum_lag

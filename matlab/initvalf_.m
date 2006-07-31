@@ -50,20 +50,20 @@ function initvalf_(fname,period,varargin)
   clear y1, p1;
   
   options_.initval_file = 1;
-  oo_.y_simul = [];
+  oo_.endo_simul = [];
   oo_.exo_simul = [];
   
   for i=1:size(M_.endo_names,1)
     if series == 1
       x = eval([M_.endo_names(i,:) '(period-M_.maximum_lag:period+options_.periods+M_.maximum_lead-1);']);
-      oo_.y_simul = [oo_.y_simul; x'];
+      oo_.endo_simul = [oo_.endo_simul; x'];
     else
       k = strmatch(upper(M_.endo_names(i,:)),names_v,'exact');
       if isempty(k)
 	error(['INITVALF: ' M_.endo_names(i,:) ' not found'])
       end
       x = data(:,k);
-      oo_.y_simul = [oo_.y_simul; x(period-M_.maximum_lag:period+options_.periods+M_.maximum_lead-1)']; 
+      oo_.endo_simul = [oo_.endo_simul; x(period-M_.maximum_lag:period+options_.periods+M_.maximum_lead-1)']; 
     end
   end
   
@@ -81,15 +81,7 @@ function initvalf_(fname,period,varargin)
     end
   end
     
-% $$$   if any(isnan(oo_.y_simul(:,1))) | any(isnan(oo_.exo_simul(1,:)))
-% $$$     error('INITVALF: missing value in first period')
-% $$$   end
-% $$$   
-% $$$   if any(isnan(oo_.y_simul(:,end))) | any(isnan(oo_.exo_simul(end,:)))
-% $$$     error('INITVALF: missing value in last period')
-% $$$   end
-  
-% 8/23/01 MJ changed argument 'FILE' to 'MAT'
+
 
 
 

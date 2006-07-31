@@ -15,7 +15,7 @@ function global_initialization()
   options_.initval_file = 0;
 
   oo_.exo_simul = [];
-  oo_.y_simul = [];
+  oo_.endo_simul = [];
   oo_.dr = struct([]);
   oo_.exo_det_steady_state = [];
   oo_.exo_det_simul = [];

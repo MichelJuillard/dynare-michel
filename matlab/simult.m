@@ -34,7 +34,7 @@ for i=1:replic
   end
   y_ = simult_(ys,dr,oo_.exo_simul,order);
   if replic > 1
-    fwrite(fh,oo_.y_simul(:,M_.maximum_lag+1:end),'float64');
+    fwrite(fh,oo_.endo_simul(:,M_.maximum_lag+1:end),'float64');
   end
 end
 

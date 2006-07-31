@@ -22,12 +22,9 @@ function steady(linear)
   end
   
   if isempty(ys0_)
-    oo_.y_simul(:,1:M_.maximum_lag) = oo_.steady_state * ones(1,M_.maximum_lag);
+    oo_.endo_simul(:,1:M_.maximum_lag) = oo_.steady_state * ones(1,M_.maximum_lag);
   else
     options_ =set_default_option(options_,'periods',1);
-    oo_.y_simul(:,M_.maximum_lag+1:M_.maximum_lag+options_.periods+M_.maximum_lead) = oo_.steady_state * ones(1,options_.periods+M_.maximum_lead);
+    oo_.endo_simul(:,M_.maximum_lag+1:M_.maximum_lag+options_.periods+M_.maximum_lead) = oo_.steady_state * ones(1,options_.periods+M_.maximum_lead);
   end
   
-% 06/24/01 MJ steady print results; steady_ doesn't
-% 09/22/01 FC corrected lgy(i,:)
-% 05/29/03 MJ sets initial values of oo_.y_simul

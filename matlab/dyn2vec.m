@@ -5,7 +5,7 @@ function [z,zss]=dyn2vec(s1,s2);
   global M_ oo_ options_
 
   if options_.smpl == 0
-    k = [1:size(oo_.y_simul,2)];
+    k = [1:size(oo_.endo_simul,2)];
   else
     k = [M_.maximum_lag+options_.smpl(1):M_.maximum_lag+options_.smpl(2)];
   end
@@ -16,14 +16,14 @@ function [z,zss]=dyn2vec(s1,s2);
 	   ' used without input argument'];
       error(t);
     end
-    for i=1:size(oo_.y_simul,1)
-      assignin('base',deblank(M_.endo_names(i,:)),oo_.y_simul(i,k)');
+    for i=1:size(oo_.endo_simul,1)
+      assignin('base',deblank(M_.endo_names(i,:)),oo_.endo_simul(i,k)');
     end
     return
   else
     j = strmatch(s1,M_.endo_names,'exact'); 
     if ~ isempty(j)
-      z = oo_.y_simul(j,k)';
+      z = oo_.endo_simul(j,k)';
     else
       j = strmatch(s1,M_.exo_names,'exact');
       if ~ isempty(j)
