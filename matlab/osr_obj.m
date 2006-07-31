@@ -1,47 +1,49 @@
-% the beginning and the end of this function may be adapted by the userx
-function [z,vx]=osr_obj(x,params,weights);
+function [loss,vx,info]=osr_obj(x,i_params,weights);
+  % objective function for optimal simple rules (OSR)
   global M_ oo_ optimal_Q_ it_
+%  global ys_ Sigma_e_ endo_nbr exo_nbr optimal_Q_ it_ ykmin_ options_
   
+  vx = [];
   % set parameters of the policiy rule
-  np = size(params,1);
-  for i=1:np
-    assignin('base',deblank(params(i,:)),x(i))
-  end
+  M_.params(i_params) = x;
   
   % don't change below until the part where the loss function is computed
   it_ = M_.maximum_lag+1;
-  oo_.dr = resol(oo_.steady_state,1,0,1);
-  nstatic = oo_.dr.nstatic;
-  npred = oo_.dr.npred;
-  ghx = oo_.dr.ghx;
-  ghu = oo_.dr.ghu;
-  order = oo_.dr.order_var;
-  k=[nstatic+1:nstatic+npred]';
-  vx1 = ghu(k,:)*M_.Sigma_e*ghu(k,:)';
+  [dr,info] = resol(oo_.steady_state,0);
   
-  % compute variance of predetermined variables
-  vx = (eye(npred*npred)-kron(ghx(k,:),oo_.dr.ghx(k,:)))\vx1(:);
-  vx=reshape(vx,npred,npred);
-
-  % compute variance of all variables
-  if M_.endo_nbr > npred
-    qx = eye(npred);
-    qu = zeros(npred,M_.exo_nbr);
-    if nstatic > 0
-      qx = [ghx(1:nstatic,:);qx];
-      qu = [ghu(1:nstatic,:);qu];
-    end
-    if M_.endo_nbr > nstatic+npred
-      qx = [qx;ghx(nstatic+npred+1:end,:)];
-      qu = [qu;ghu(nstatic+npred+1:end,:)];
-    end
-    vx = qx*vx*qx'+qu*M_.Sigma_e*qu';
+  switch info(1)
+   case 1
+    loss = 1e8;
+    return
+   case 2
+    loss = 1e8*min(1e3,info(2));
+    return
+   case 3
+    loss = 1e8*min(1e3,info(2));
+    return
+   case 4
+    loss = 1e8*min(1e3,info(2));
+    return
+   case 5
+    loss = 1e8;
+    return
+   case 20
+    loss = 1e8*min(1e3,info(2));
+    return
+   otherwise
   end
-  % end of the non touch region of the program
   
-  % computes the loss function
-  weights = weights(order,order);
-  z = weights(:)'*vx(:);
+  [A,B] = kalman_transition_matrix(dr);
+  [vx,ns_var] = lyapunov_symm(A,B*M_.Sigma_e*B');
+  endo_nbr = M_.endo_nbr;
+  i_var = (1:endo_nbr)';
+  i_var(ns_var) = zeros(length(ns_var),1);
+  i_var = nonzeros(i_var);
+  vx = vx(i_var,i_var);
+  weights = weights(dr.order_var,dr.order_var);
+  weights = sparse(weights(i_var,i_var));
+  
+  loss = weights(:)'*vx(:);
   
 
 

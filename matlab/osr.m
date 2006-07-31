@@ -4,7 +4,7 @@ function osr(var_list,params,W)
   global M_ options_ oo_  
 
   options_.order = 1;
-  options_.linear = 1;
+  options_ = set_default_option(options_,'linear',0);
   options_ = set_default_option(options_,'ar',5);
   options_ = set_default_option(options_,'irf',40);
   options_ = set_default_option(options_,'dr_algo',0);
@@ -27,10 +27,16 @@ function osr(var_list,params,W)
   
   make_ex_;
 
+  np = size(params,1);
+  i_params = zeros(np,1);
+  for i=1:np
+    i_params(i) = strmatch(deblank(params(i,:)),M_.param_names,'exact');
+  end
+    
   disp(' ')
   disp('OPTIMAL SIMPLE RULE')
   disp(' ')
-  oo_.dr = osr1(params,W);
+  osr1(i_params,W);
   disp('MODEL SUMMARY')
   disp(' ')
   disp(['  Number of variables:         ' int2str(M_.endo_nbr)])
@@ -41,7 +47,7 @@ function osr(var_list,params,W)
 	int2str(length(find(oo_.dr.kstate(:,2) == M_.maximum_lag+2)))])
   disp(['  Number of static variables:  ' int2str(oo_.dr.nstatic)])
   my_title='MATRIX OF COVARIANCE OF EXOGENOUS SHOCKS';
-  labels = deblank(M_.exo_name);
+  labels = deblank(M_.exo_names);
   headers = strvcat('Variables',labels);
   lh = size(labels,2)+2;
   table(my_title,headers,labels,M_.Sigma_e,lh,10,6);
@@ -59,10 +65,10 @@ function osr(var_list,params,W)
       return
     end
     
-    oo_.y_simul = simult(repmat(oo_.dr.ys,1,M_.maximum_lag),oo_.dr);
+    oo_.endo_simul = simult(repmat(oo_.dr.ys,1,M_.maximum_lag),oo_.dr);
     dyn2vec;
     if options_.nomoments == 0
-      disp_moments(oo_.y_simul,var_list);
+      disp_moments(oo_.endo_simul,var_list);
     end
   end
   
@@ -112,36 +118,15 @@ function osr(var_list,params,W)
       end
     end
     for i = 1:M_.exo_nbr
-      figure('Name',['Shock to ' M_.exo_name(i,:)]);
-      y=irf(oo_.dr,M_.exo_name(i,:),sqrt(M_.Sigma_e(i,i)), options_.irf, options_.drop, options_.replic, options_.order);
+      figure('Name',['Shock to ' M_.exo_names(i,:)]);
+      y=irf(oo_.dr,M_.exo_names(i,:),sqrt(M_.Sigma_e(i,i)), options_.irf, options_.drop, options_.replic, options_.order);
       for j = 1:n
 	subplot(nr,nc,j);
 	plot([y(ivar(j),:)']);
 	title(var_list(j,:),'Interpreter','none');
-	assignin('base',[deblank(var_list(j,:)) '_' deblank(M_.exo_name(i,:))],y(ivar(j),:)');
+	assignin('base',[deblank(var_list(j,:)) '_' deblank(M_.exo_names(i,:))],y(ivar(j),:)');
       end
     
     end
     options_.periods = olditer;
   end
-      
-% 01/10/01 FC oo_.dr and oo_.y_simul made global
-% 02/20/01 MJ oo_.steady_state removed from calling sequence for simult (all in oo_.dr)
-% 02/23/01 MJ added dyn2vec()
-% 06/24/01 MJ steady -> steady_
-% 09/24/01 MJ oo_.dr made global
-% 08/28/02 MJ added var_list
-% 10/09/02 MJ no simulation and theoretical moments for order 1 
-% 10/14/02 MJ added plot of IRFs
-% 10/30/02 MJ options_ are now a structure
-% 01/01/03 MJ added dr_algo
-% 01/09/03 MJ set default values for options_ (correct absence of autocorr
-%             when order == 1)
-% 01/12/03 MJ removed call to steady_ as already checked in resol()
-% 01/31/03 MJ make IRF global with varname_shockname
-% 02/09/03 MJ oo_.steady_state reset with value declared in initval after computations
-% 02/18/03 MJ removed above change. oo_.steady_state shouldn't be affected by
-%             computations in this function
-%             new option SIMUL computes a stochastic simulation and save
-%             results in oo_.y_simul and via dyn2vec
-% 04/03/03 MJ corrected bug for simulation with M_.maximum_lag > 1
