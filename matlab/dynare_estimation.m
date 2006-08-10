@@ -68,10 +68,6 @@ options_ = set_default_option(options_,'steadystate_flag',0);
 options_ = set_default_option(options_,'logdata',0);
 options_ = set_default_option(options_,'use_mh_covariance_matrix',0);
 
-if exist([M_.fname '_steadystate.m'])
-  options_.steadystate_flag = 1;
-end
-
 if options_.filtered_vars ~= 0 & options_.filter_step_ahead == 0
   options_.filter_step_ahead = 1;
 end
@@ -246,6 +242,10 @@ if options_.steadystate_flag
   [oo_.steady_state,tchek] = feval([M_.fname '_steadystate'],[],[]);
 end
 initial_estimation_checks(xparam1,gend,data);
+
+if options_.mode_compute == 0 & length(options_.mode_file) == 0
+  return;
+end
 
 %% Estimation of the posterior mode or likelihood mode
 if options_.mode_compute > 0 & options_.posterior_mode_estimation
