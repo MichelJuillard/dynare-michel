@@ -20,23 +20,15 @@ if r < nv
  	   ' correlated']);
 end
 
-
-
-fval = DsgeLikelihood(xparam1,gend,data);
-if exist(dr1_test)
-	disp(dr1_test)
-	switch(dr1_test(1))
-		case 1
-			error('The steady state can''t be found');
-		case 2
-			error(['Estimation can''t take place because there are an infinity of' ...
-					' stable solutions']);
-		case 3
-			error(['Estimation can''t take place because there is no stable' ...
-					' solution']);
-		case 4
-			error(['Estimation can''t take place because of singularity in Kalman' ...
-					' filter']);
-		otherwise
-	end
+if ~isempty(strmatch('dsge_prior_weight',estim_params_.param_names)) | ~isempty(dsge_prior_weight)
+  [fval,cost_flag,ys,trend_coeff,info] = DsgeVarLikelihood(xparam1,gend);
+else
+  [fval,cost_flag,ys,trend_coeff,info] = DsgeLikelihood(xparam1,gend,data);
 end
+
+if info(1) > 0
+  disp('Error in computing likelihood for initial parameter values')
+  print_info(info)
+end
+
+disp(['Initial value of the posterior (or likelihood): ' num2str(fval)]);
