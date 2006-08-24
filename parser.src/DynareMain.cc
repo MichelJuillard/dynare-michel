@@ -14,6 +14,7 @@ using namespace std;
 #include "DynareParser.h"  
 #include "DynareScanner.h"
 #include "OutputFile.h"
+#include "Interface.h"
 //------------------------------------------------------------------------------
 /*!  main function
     \brief Main function of Dynare.
@@ -24,6 +25,11 @@ int main(int argc, char** argv)
 {
   OutputFile output_file;  
   ostringstream output;
+#ifdef SCILAB
+  interfaces interface(eScilab);
+#else
+  interfaces interface(eMatlab);
+#endif
   int retval = 0;
   try {
     if (argc <2)
@@ -67,8 +73,8 @@ int main(int argc, char** argv)
     p.finish();
     string name = argv[1];
     name.erase(name.size()-4,4);
-    // Opening and init main Output file (M file)
-    output_file.Open(name+".m");
+    // Opening and init main Output file (.m or .sci file)
+    output_file.Open(name);
     // Writing remaining string output to output file 
     output_file.Save(output);
 	  	

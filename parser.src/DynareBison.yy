@@ -50,6 +50,9 @@
 %right POWER 
 %nonassoc FACTORIAL 
 %token EXP LOG LOG10 LN SIN COS TAN ASIN ACOS ATAN SINH COSH TANH ASINH ACOSH ATANH SQRT
+/* isn't parsed from the *.mod file, but used to distinguish EQUAL in equation and EQUAL in assignment in    operation codes
+*/
+%token ASSIGN
 %%
 
  statement_list

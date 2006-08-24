@@ -11,6 +11,9 @@ else
 	FLEXFLAGS = -i
 endif
 endif
+ifeq ($(PROFILE),yes)
+	CPPFLAGS = -mno-cygwin -O2 -pg
+endif
 OBJ=\
 	DynareFlex.o\
 	DynareBison.o\
@@ -29,8 +32,8 @@ OBJ=\
 	TmpSymbolTable.o\
 	VariableTable.o\
 	DynareParser.o\
-	DataTree.o
-
+	DataTree.o\
+	Interface.o
 
 ################################################################################
 ### Build ######################################################################
@@ -41,6 +44,11 @@ all: dynare.exe
 dynare.exe: $(OBJ) 
 	$(CPP) $(CPPFLAGS) -o  dynare.exe $(OBJ);\
 	cp dynare.exe ../matlab/dynare_m.exe;\
+
+dynare_s.exe: $(OBJ) 
+	$(CPP) $(CPPFLAGS) -Iinclude -DSCILAB -o DynareMain.o -c DynareMain.cc
+	$(CPP) $(CPPFLAGS) -o  dynare_s.exe $(OBJ);\
+	cp dynare_s.exe ../scilab/dynare_s.exe;\
 
 
 

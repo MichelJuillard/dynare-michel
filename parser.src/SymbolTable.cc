@@ -8,7 +8,7 @@
 #include <algorithm>
 //------------------------------------------------------------------------------
 #include "SymbolTable.h"
-
+#include "Interface.h"
 using namespace std;
 //------------------------------------------------------------------------------
 map<string, Symbol, less<string> > SymbolTable::symboltable;// = *(new symbolmap);
@@ -216,8 +216,8 @@ string SymbolTable::get()
 		output << "M_.exo_names_tex = '" << getTexNameByID(eExogenous, 0) << "';\n";
 		for (int id = 1; id < ModelParameters::exo_nbr; id++)
 		{
-			output << "M_.exo_names = str2mat(M_.exo_names,'" << getNameByID(eExogenous, id) << "');\n";
-			output << "M_.exo_names_tex = str2mat(M_.exo_names_tex,'" << getTexNameByID(eExogenous, id) << "');\n";
+		  output << "M_.exo_names = " + interfaces::strvcat("M_.exo_names","'"+getNameByID(eExogenous, id)+"'") + ";\n";
+		  output << "M_.exo_names_tex = " + interfaces::strvcat("M_.exo_names_tex","'"+getTexNameByID(eExogenous, id)+"'") + ";\n";
 		}
 	}
 	if (ModelParameters::exo_det_nbr > 0)
@@ -226,8 +226,8 @@ string SymbolTable::get()
 		output << "lgxdet_tex_ = '" << getTexNameByID(eExogenousDet, 0) << "';\n";
 		for (int id = 1; id < ModelParameters::exo_det_nbr; id++)
 		{
-			output << "lgxdet_ = str2mat(lgxdet_,'" << getNameByID(eExogenousDet, id) << "');\n";
-			output << "lgxdet_tex_ = str2mat(lgxdet_tex_,'" << getTexNameByID(eExogenousDet, id) << "');\n";
+		  output << "lgxdet_ = " + interfaces::strvcat("lgxdet_","'"+getNameByID(eExogenousDet, id)+"'") + ";\n";
+		  output << "lgxdet_tex_ = " + interfaces::strvcat("lgxdet_tex_","'"+getTexNameByID(eExogenousDet, id)+"'") + ";\n";
 		}
 	}
 	if (ModelParameters::endo_nbr > 0)
@@ -236,8 +236,8 @@ string SymbolTable::get()
 		output << "M_.endo_names_tex = '" << getTexNameByID(eEndogenous, 0) << "';\n";
 		for (int id = 1; id < ModelParameters::endo_nbr; id++)
 		{
-			output << "M_.endo_names = str2mat(M_.endo_names,'" << getNameByID(eEndogenous, id) << "');\n";
-			output << "M_.endo_names_tex = str2mat(M_.endo_names_tex,'" << getTexNameByID(eEndogenous, id) << "');\n";
+		  output << "M_.endo_names = " + interfaces::strvcat("M_.endo_names","'"+getNameByID(eEndogenous, id)+"'") + ";\n";
+		  output << "M_.endo_names_tex = " + interfaces::strvcat("M_.endo_names_tex","'"+getTexNameByID(eEndogenous, id)+"'") + ";\n";
 		}
 	}
 	if (ModelParameters::recur_nbr > 0)
@@ -246,8 +246,8 @@ string SymbolTable::get()
 		output << "M_.recur_names_tex = '" << getTexNameByID(eRecursiveVariable, 0) << "';\n";
 		for (int id = 1; id < ModelParameters::recur_nbr; id++)
 		{
-			output << "M_.recur_names = str2mat(M_.recur_names,'" << getNameByID(eRecursiveVariable, id) << "');\n";
-			output << "M_.recur_names_tex = str2mat(M_.recur_names_tex,'" << getTexNameByID(eRecursiveVariable, id) << "');\n";
+		  output << "M_.recur_names = " + interfaces::strvcat("M_.recur_names","'"+getNameByID(eRecursiveVariable, id)+"'") + ";\n";
+		  output << "M_.recur_names_tex = " + interfaces::strvcat("M_.recur_names_tex","'"+getTexNameByID(eRecursiveVariable, id)+"'") + ";\n";
 		}
 	}
 	if (ModelParameters::parameter_nbr > 0)
@@ -256,8 +256,8 @@ string SymbolTable::get()
 		output << "M_.param_names_tex = '" << getTexNameByID(eParameter, 0) << "';\n";
 		for (int id = 1; id < ModelParameters::parameter_nbr; id++)
 		{
-			output << "M_.param_names = str2mat(M_.param_names,'" << getNameByID(eParameter, id) << "');\n";
-			output << "M_.param_names_tex = str2mat(M_.param_names_tex,'" << getTexNameByID(eParameter, id) << "');\n";
+		  output << "M_.param_names = " + interfaces::strvcat("M_.param_names","'"+getNameByID(eParameter, id)+"'") + ";\n";
+		  output << "M_.param_names_tex = " + interfaces::strvcat("M_.param_names_tex","'"+getTexNameByID(eParameter, id)+"'") + ";\n";
 		}
 	}
 

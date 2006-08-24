@@ -117,6 +117,8 @@ class DataTree
 		inline NodeID 		AddSqRt(NodeID iArg1);
 		/*! Adds "arg1=arg2" to model tree */
 		inline NodeID 		AddEqual(NodeID iArg1, NodeID iArg2);
+		/*! Adds "arg1=arg2" as assignment to model tree */
+		inline NodeID 		AddAssign(NodeID iArg1, NodeID iArg2);
 	public :
 		/*! Constructor */
 		DataTree();
@@ -751,6 +753,17 @@ inline NodeID	DataTree::AddEqual(NodeID iArg1, NodeID iArg2=Zero)
 		return ID;
 	}
 	return PushToken(iArg1,EQUAL,iArg2);
+}
+inline NodeID	DataTree::AddAssign(NodeID iArg1, NodeID iArg2=Zero)
+{
+	MToken 	lToken(iArg1, eTempResult, iArg2, ASSIGN);
+
+	NodeID ID = getIDOfToken(lToken);
+	if (ID != NullID)
+	{			
+		return ID;
+	}
+	return PushToken(iArg1,ASSIGN,iArg2);
 }
 //------------------------------------------------------------------------------
 #endif

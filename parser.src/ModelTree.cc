@@ -19,6 +19,7 @@ using namespace std;
 #include "NumericalConstants.h"
 #include "ModelTree.h"
 #include "ModelParameters.h"
+#include "Interface.h"
 //------------------------------------------------------------------------------
 ostringstream ModelTree::output;
 //------------------------------------------------------------------------------
@@ -38,7 +39,7 @@ void ModelTree::OpenMFiles(string iModelFileName1, string iModelFileName2)
 {
 	if (iModelFileName1.size())
 	{
-		iModelFileName1 += ".m"; 
+		iModelFileName1 += interfaces::function_file_extension(); 
 		mStaticModelFile.open(iModelFileName1.c_str(),ios::out|ios::binary);
 		if (!mStaticModelFile.is_open())
 		{
@@ -49,12 +50,15 @@ void ModelTree::OpenMFiles(string iModelFileName1, string iModelFileName2)
 		iModelFileName1.erase(iModelFileName1.end()-2,iModelFileName1.end());
 		//Writing comments and function definition command
 		mStaticModelFile << "function [residual, g1] = " <<  iModelFileName1 << "( y, x )\n";
-		mStaticModelFile << "%\n% Status : Computes static model for Dynare\n%\n";
-		mStaticModelFile << "% Warning : this file is generated automatically by Dynare\n";
-		mStaticModelFile << "%			from model file (.mod)\n\n";
+		mStaticModelFile << interfaces::comment()+"\n"+interfaces::comment();
+		mStaticModelFile << "Status : Computes static model for Dynare\n%\n";
+		mStaticModelFile << interfaces::comment();
+		mStaticModelFile << "Warning : this file is generated automatically by Dynare\n";
+		mStaticModelFile << interfaces::comment();
+		mStaticModelFile << "		from model file (.mod)\n\n";
 		if (iModelFileName2.size() && (computeJacobian||computeJacobianExo||computeHessian))
 		{
-			iModelFileName2 += ".m"; 
+			iModelFileName2 += interfaces::function_file_extension(); 
 			mDynamicModelFile.open(iModelFileName2.c_str(),ios::out|ios::binary);
 			if (!mDynamicModelFile.is_open())
 			{
@@ -64,9 +68,12 @@ void ModelTree::OpenMFiles(string iModelFileName1, string iModelFileName2)
 			}
 			iModelFileName2.erase(iModelFileName2.end()-2,iModelFileName2.end());
 			mDynamicModelFile << "function [residual, g1, g2] = " <<  iModelFileName2 << "(y, x)\n";
-			mDynamicModelFile << "%\n% Status : Computes dynamic model for Dynare\n%\n";
-			mDynamicModelFile << "%Warning : this file is generated automatically by Dynare\n";
-			mDynamicModelFile << "%			from model file (.mod)\n\n";
+			mDynamicModelFile << interfaces::comment()+"\n"+interfaces::comment();
+			mDynamicModelFile << "Status : Computes dynamic model for Dynare\n%\n";
+			mDynamicModelFile << interfaces::comment();
+			mDynamicModelFile << "Warning : this file is generated automatically by Dynare\n";
+			mDynamicModelFile << interfaces::comment();
+			mDynamicModelFile << "		from model file (.mod)\n\n";
 		
 		}
 	}
@@ -137,11 +144,13 @@ void ModelTree::SaveMFiles()
 	if (mStaticModelFile.is_open())
 	{
 		mStaticModelFile << StaticOutput.str();
+		interfaces::function_close();
 		mStaticModelFile.close();
 	}
 	if (mDynamicModelFile.is_open() && (computeJacobian||computeJacobianExo||computeHessian))
 	{
 		mDynamicModelFile << DynamicOutput.str();
+		interfaces::function_close();
 		mDynamicModelFile.close();
 	}
 }
@@ -285,6 +294,7 @@ void ModelTree::derive(int iOrder)
 	  (*currentIT)->reference_count[0]++;
 	}
     } 
+  std::cout << "size " << EqualTokenIDs.size() << "\n";
   mDerivativeIndex.resize(iOrder);
   // Uncomment this to print model tree data
   /*	
@@ -340,6 +350,7 @@ void ModelTree::derive(int iOrder)
 		  lArg2 = lToken->id2;
 		  lType1 = lToken->type1;
 		  lD1 = DeriveArgument(lArg1, lType1, var);
+		  lD2 = Zero;
 		  if (lArg2 != NullID) 
 		    lD2 = DeriveArgument(lArg2, eTempResult, var);
 		  // Case where token is a final argument
@@ -347,9 +358,12 @@ void ModelTree::derive(int iOrder)
 		    {
 		      setDerivativeAdress(*currentIT, lD1, var);
 		    }
+		  else if (lD1 == Zero && lD2 == Zero)
+		    {
+			  setDerivativeAdress(*currentIT, Zero, var);
+		    }
 		  else
 		    {
-
 		      switch (lToken->op_code)
 			{
 			case UMINUS:
@@ -692,7 +706,7 @@ string 	ModelTree::setStaticModel(void)
   tree_it = BeginModel;
   for (; tree_it != mModelTree.end(); tree_it++)
     {
-      if ((*tree_it)->op_code == EQUAL)
+      if ((*tree_it)->op_code == EQUAL || (*tree_it)->op_code == ASSIGN )
 	{
 	  if ((*tree_it)->id1->type1 == eLocalParameter)
 	    {
@@ -728,7 +742,9 @@ string 	ModelTree::setStaticModel(void)
   // Writing Jacobian for endogenous variables without lag
   for(; tree_it != mModelTree.end(); tree_it++)
     {
-      if ((*tree_it)->op_code != NoOpCode && (*tree_it)->op_code != EQUAL)
+      if ((*tree_it)->op_code != NoOpCode 
+	  && (*tree_it)->op_code != EQUAL 
+	  && (*tree_it)->op_code != ASSIGN)
 	{
 	  if (optimize(*tree_it) == 1)
 	    {
@@ -766,7 +782,9 @@ string 	ModelTree::setStaticModel(void)
       StaticOutput << "if M_.param_nbr > 0\n  params = M_.params;\nend\n";
 
       StaticOutput << "  residual = zeros( " << ModelParameters::eq_nbr << ", 1);\n";
-      StaticOutput << "\n\t%\n\t% Model equations\n\t%\n\n";
+      StaticOutput << "\n\t"+interfaces::comment()+"\n\t"+interfaces::comment(); 
+      StaticOutput << "Model equations\n\t";
+      StaticOutput << interfaces::comment() + "\n\n";
       StaticOutput << model_output.str();
       StaticOutput << "if ~isreal(residual)\n";
       StaticOutput << "  residual = real(residual)+imag(residual).^2;\n";
@@ -775,7 +793,9 @@ string 	ModelTree::setStaticModel(void)
       StaticOutput << "  g1 = " << 
 	"zeros(" << ModelParameters::eq_nbr << ", " <<
 	ModelParameters::endo_nbr << ");\n" ;
-      StaticOutput << "\n\t%\n\t% Jacobian matrix\n\t%\n\n";
+      StaticOutput << "\n\t"+interfaces::comment()+"\n\t"+interfaces::comment(); 
+      StaticOutput << "Jacobian matrix\n\t";
+      StaticOutput << interfaces::comment() + "\n\n";
       StaticOutput << jacobian_output.str();		
       StaticOutput << "  if ~isreal(g1)\n";
       StaticOutput << "    g1 = real(g1)+2*imag(g1);\n";
@@ -838,7 +858,7 @@ string  ModelTree::setDynamicModel(void)
   tree_it = BeginModel;
   for (; tree_it != mModelTree.end(); tree_it++)
     {
-      if ((*tree_it)->op_code == EQUAL)
+      if ((*tree_it)->op_code == EQUAL || (*tree_it)->op_code == ASSIGN)
 	{
 	  if ((*tree_it)->id1->type1 == eLocalParameter)
 	    {
@@ -873,7 +893,9 @@ string  ModelTree::setDynamicModel(void)
 
   for(; tree_it != mModelTree.end(); tree_it++)
     {
-      if ((*tree_it)->op_code != NoOpCode && (*tree_it)->op_code != EQUAL)
+      if ((*tree_it)->op_code != NoOpCode 
+	  && (*tree_it)->op_code != EQUAL
+	  && (*tree_it)->op_code != ASSIGN)
 	{
 	  if (optimize(*tree_it) == 1)
 	    {
@@ -893,7 +915,9 @@ string  ModelTree::setDynamicModel(void)
       cout << "\tJacobian .. ";
       for(; tree_it != mModelTree.end(); tree_it++)
 	{
-	  if ((*tree_it)->op_code != NoOpCode && (*tree_it)->op_code != EQUAL)
+	  if ((*tree_it)->op_code != NoOpCode 
+	      && (*tree_it)->op_code != EQUAL
+	      && (*tree_it)->op_code != ASSIGN)
 	    {
 	      if (optimize(*tree_it) == 1)
 		{
@@ -961,7 +985,9 @@ string  ModelTree::setDynamicModel(void)
     {
       DynamicOutput << "global M_ it_\n";
       DynamicOutput << "if M_.param_nbr > 0\n  params =  M_.params;\nend\n";
-      DynamicOutput << "\n\t%\n\t% Model equations\n\t%\n\n";
+      DynamicOutput << "\n\t"+interfaces::comment()+"\n\t"+interfaces::comment();
+      DynamicOutput << "Model equations\n\t";
+      DynamicOutput << interfaces::comment() + "\n\n";
       DynamicOutput << "residual = zeros(" << nrows << ", 1);\n";
 
       DynamicOutput << model_output.str();
@@ -972,7 +998,9 @@ string  ModelTree::setDynamicModel(void)
 	  // Writing initialization instruction for matrix g1
 	  DynamicOutput << "  g1 = " << 
 	    "zeros(" << nrows << ", " << VariableTable::size() << ");\n" ;
-	  DynamicOutput << "\n\t%\n\t% Jacobian matrix\n\t%\n\n";
+	  DynamicOutput << "\n\t"+interfaces::comment()+"\n\t"+interfaces::comment();
+	  DynamicOutput << "Jacobian matrix\n\t";
+	  DynamicOutput << interfaces::comment()+"\n\n";
 	  DynamicOutput << jacobian_output.str();
 	  DynamicOutput << "end\n";
 	}
@@ -984,7 +1012,9 @@ string  ModelTree::setDynamicModel(void)
 	  DynamicOutput << "  g2 = " << 
 	    "sparse([],[],[]," << nrows << ", " << ncols << ", " <<
 	    5*ncols << ");\n";
-	  DynamicOutput << "\n\t%\n\t% Hessian matrix\n\t%\n\n";
+	  DynamicOutput << "\n\t"+interfaces::comment()+"\n\t"+interfaces::comment();
+	  DynamicOutput << "Hessian matrix\n\t";
+	  DynamicOutput << interfaces::comment() + "\n\n";
 	  DynamicOutput << hessian_output.str() << lsymetric.str();
 	  DynamicOutput << "end;\n";
 	}

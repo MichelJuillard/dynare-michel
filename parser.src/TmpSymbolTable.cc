@@ -8,6 +8,7 @@ using namespace std;
 //------------------------------------------------------------------------------
 #include "SymbolTable.h"
 #include "TmpSymbolTable.h"
+#include "Interface.h"
 //------------------------------------------------------------------------------
 TmpSymbolTable::TmpSymbolTable()
 {
@@ -64,7 +65,8 @@ void TmpSymbolTable::set(string varname)
 	{
 		if (SymbolTable::isReferenced(*it) == eReferenced)
 		{
-			output << varname << " = strvcat(" << varname << ", '" << *it << "');\n";			
+		  output << varname << " = ";
+		  output << interfaces::strvcat(varname,"'"+*it+"'")+";\n";			
 		}
 	}
 }

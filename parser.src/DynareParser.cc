@@ -96,6 +96,12 @@ dynare::Objects* dynare::parser::add_variable(Objects* var,Objects* olag)
 	int lag = atoi((olag->symbol).c_str());
 	//cout << "symbol = " << olag->symbol << endl;
 	//cout << "lag = " << lag << endl;
+	if ((var->type == eExogenous) && lag != 0)
+	  {
+	    std::cout << "Warning: exogenous variable " 
+		      << var->symbol
+		      << " has lag " << lag << "\n";
+	  }
 	if ((var->type == eEndogenous) || (var->type == eExogenous))
 		variable_table.AddVariable(var->symbol,lag);
 	//cout   << "add_model_token : " << var->ID << endl;
@@ -638,7 +644,7 @@ dynare::Objects*	dynare::parser::add_equal(Objects* arg1,  Objects* arg2)
 		
 dynare::Objects*	dynare::parser::init_local_parameter(Objects* arg1,  Objects* arg2)
 {
-	NodeID id = model_tree.AddEqual(arg1->ID, arg2->ID);
+	NodeID id = model_tree.AddAssign(arg1->ID, arg2->ID);
 	return new Objects("", id, eTempResult);
 }
 		
