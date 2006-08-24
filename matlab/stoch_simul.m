@@ -1,9 +1,9 @@
 % Copyright (C) 2001 Michel Juillard
 %
 function info=stoch_simul(var_list)
-global M_ options_ oo_
-
-global it_
+  global M_ options_ oo_
+  
+  global it_
   options_ = set_default_option(options_,'TeX',0);  
   options_ = set_default_option(options_,'order',2);
   options_ = set_default_option(options_,'linear',0);
@@ -138,6 +138,8 @@ global it_
 	  mylistTeX = [];
 	end
 	for j = 1:n
+	  assignin('base',[deblank(M_.endo_names(j,:)) '_' deblank(M_.exo_names(i,:))],...
+		   y(j,:)');
 	  if max(y(ivar(j),:)) - min(y(ivar(j),:)) > 1e-10
 	    irfs  = cat(1,irfs,y(ivar(j),:));
 	    mylist = strvcat(mylist,deblank(var_list(j,:)));
@@ -165,7 +167,6 @@ global it_
 	    hold off
 	    xlim([1 options_.irf]);
 	    title(deblank(mylist(j,:)),'Interpreter','none');
-	    assignin('base',[deblank(mylist(j,:)) '_' deblank(tit(i,:))],transpose(irfs(j,:)));
 	  end
 	  eval(['print -depsc2 ' M_.fname '_IRF_' deblank(tit(i,:))]);
 	  eval(['print -dpdf ' M_.fname  '_IRF_' deblank(tit(i,:))]);
@@ -200,7 +201,6 @@ global it_
 	      hold off
 	      xlim([1 options_.irf]);
 	      title(deblank(mylist((fig-1)*nstar+plt,:)),'Interpreter','none');
-	      assignin('base',[deblank(mylist((fig-1)*nstar+plt,:)) '_' deblank(tit(i,:))],transpose(irfs((fig-1)*nstar+plt,:)));
 	    end
 	    eval(['print -depsc2 ' M_.fname '_IRF_' deblank(tit(i,:)) int2str(fig)]);
 	    eval(['print -dpdf ' M_.fname  '_IRF_' deblank(tit(i,:)) int2str(fig)]);
@@ -236,7 +236,6 @@ global it_
 	    hold off
 	    xlim([1 options_.irf]);
 	    title(deblank(mylist((nbplt-1)*nstar+plt,:)),'Interpreter','none');
-	    assignin('base',[deblank(mylist((nbplt-1)*nstar+plt,:)) '_' deblank(tit(i,:))],transpose(irfs((nbplt-1)*nstar+plt,:)));
 	  end
 	  eval(['print -depsc2 ' M_.fname '_IRF_' deblank(tit(i,:)) int2str(nbplt)]);
 	  eval(['print -dpdf ' M_.fname  '_IRF_' deblank(tit(i,:)) int2str(nbplt)]);

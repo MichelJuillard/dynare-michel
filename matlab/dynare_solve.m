@@ -1,10 +1,10 @@
 % Copyright (C) 2001 Michel Juillard
 %
-function [x,cheik] = dynare_solve(func,x,jacobian_flag,varargin)
+function [x,info] = dynare_solve(func,x,jacobian_flag,varargin)
   global options_
   
   options_ = set_default_option(options_,'solve_algo',2);
-  cheik = 0;
+  info = 0;
   if options_.solve_algo == 0
     if ~isempty(which('fsolve')) & sscanf(version('-release'),'%d') >= 13;
       options=optimset('fsolve');
@@ -18,9 +18,9 @@ function [x,cheik] = dynare_solve(func,x,jacobian_flag,varargin)
       end
       [x,fval,exitval,output] = fsolve(func,x,options,varargin{:});
       if exitval > 0
-	cheik = 0;
+	info = 0;
       else
-	cheik = 1;
+	info = 1;
       end
       return
     else 
@@ -30,7 +30,7 @@ function [x,cheik] = dynare_solve(func,x,jacobian_flag,varargin)
 
   if options_.solve_algo == 1
     nn = size(x,1) ;
-    [x,cheik]=solve1(func,x,1:nn,1:nn,jacobian_flag,varargin{:});
+    [x,info]=solve1(func,x,1:nn,1:nn,jacobian_flag,varargin{:});
   elseif options_.solve_algo == 2
     nn = size(x,1) ;
     tolf = eps^(2/3) ;
@@ -70,12 +70,12 @@ function [x,cheik] = dynare_solve(func,x,jacobian_flag,varargin)
     [j1,j2,r,s] = dmperm(fjac);
     
     for i=length(r)-1:-1:1
-      [x,cheik]=solve1(func,x,j1(r(i):r(i+1)-1),j2(r(i):r(i+1)-1),jacobian_flag,varargin{:});
-      if cheik
-	error(sprintf('Solve block = %d check = %d\n',i,cheik));
-      end
+      [x,info]=solve1(func,x,j1(r(i):r(i+1)-1),j2(r(i):r(i+1)-1),jacobian_flag,varargin{:});
+%      if info
+%	error(sprintf('Solve block = %d check = %d\n',i,info));
+%      end
     end
-    [x,cheik]=solve1(func,x,1:nn,1:nn,jacobian_flag,varargin{:});
+    [x,info]=solve1(func,x,1:nn,1:nn,jacobian_flag,varargin{:});
       
   end
 %    fvec1 = feval(func,x,varargin{:})

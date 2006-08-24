@@ -20,7 +20,7 @@ if r < nv
  	   ' correlated']);
 end
 
-if ~isempty(strmatch('dsge_prior_weight',estim_params_.param_names)) | ~isempty(dsge_prior_weight)
+if ~isempty(strmatch('dsge_prior_weight',estim_params_.param_names))
   [fval,cost_flag,ys,trend_coeff,info] = DsgeVarLikelihood(xparam1,gend);
 else
   [fval,cost_flag,ys,trend_coeff,info] = DsgeLikelihood(xparam1,gend,data);

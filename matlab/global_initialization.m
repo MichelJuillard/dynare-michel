@@ -1,4 +1,6 @@
 function global_initialization()
+  % initializes global variables and options for DYNARE
+    
   global oo_ M_ options_ ct_ endval_ rplottype_
   
   ct_=0;
@@ -13,7 +15,12 @@ function global_initialization()
   options_.gstep = 1e-2;
   options_.debug = 0
   options_.initval_file = 0;
-
+  if exist([M_.fname '_steadystate'])
+    options_.steadystate_flag = 1;
+  else
+    options_.steadystate_flag = 0;
+  end
+  
   oo_.exo_simul = [];
   oo_.endo_simul = [];
   oo_.dr = struct([]);
