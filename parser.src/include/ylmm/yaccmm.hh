@@ -78,6 +78,7 @@ int yyparse();
 static int yyparse(void*) { return yyparse(); }
 #endif
 
+namespace ylmm {
 //____________________________________________________________________
 /** Specialisation of some basic_parser methods for this grammar. */
 template <>
@@ -121,7 +122,7 @@ ylmm::basic_parser<YLMM_PARSER_CLASS::token_type,
   _parser = static_cast<YLMM_PARSER_CLASS*>(this);
   return yyparse(arg);
 }
-
+}
 //____________________________________________________________________
 /** (Re)define YYPRINT to call parser member function print.
     @param f FILE argument, which is ignored. 

@@ -65,6 +65,7 @@ extern int yyleng;
 int yylex();
 static YLMM_SCANNER_CLASS * _scanner;
 
+namespace ylmm {
 //____________________________________________________________________
 /** Specialisations of some member functions of basic_scanner */
 template <>
@@ -113,7 +114,7 @@ ylmm::basic_scanner<YLMM_SCANNER_CLASS::token_type,
 {
   return yyleng;
 }
-
+}
 //____________________________________________________________________
 /** Forward calls to class */
 extern "C" {
