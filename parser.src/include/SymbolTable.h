@@ -85,8 +85,8 @@ class SymbolTable
   /*! Gets output string of this class */
   static std::string 	get();
   /*! Checks if symbols are used in model equations, removes unused symbol */
-  void SymbolTable::clean();
-  void SymbolTable::erase_local_parameters();
+  void clean();
+  void erase_local_parameters();
   //void PrintSymbolTable(void);
 };
 inline bool SymbolTable::Exist(std::string name)

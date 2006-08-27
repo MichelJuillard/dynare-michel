@@ -43,12 +43,12 @@ all: dynare.exe
 
 dynare.exe: $(OBJ) 
 	$(CPP) $(CPPFLAGS) -o  dynare.exe $(OBJ);\
-	cp dynare.exe ../matlab/dynare_m.exe;\
+	cp dynare.exe ../matlab/
 
 dynare_s.exe: $(OBJ) 
 	$(CPP) $(CPPFLAGS) -Iinclude -DSCILAB -o DynareMain.o -c DynareMain.cc
 	$(CPP) $(CPPFLAGS) -o  dynare_s.exe $(OBJ);\
-	cp dynare_s.exe ../scilab/dynare_s.exe;\
+	cp dynare_s.exe ../scilab/
 
 
 
