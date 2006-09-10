@@ -575,6 +575,7 @@ void dynare::parser::run_osr(void)
   tmp_symbol_table.set("var_list_");
   string tmp = tmp_symbol_table.get();
   computing_tasks.runOsr(tmp);
+  model_tree.computeJacobianExo = true;
 }
 void dynare::parser::set_olr_inst(void)
 {
