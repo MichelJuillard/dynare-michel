@@ -17,12 +17,14 @@ function [fval,cost_flag,ys,trend_coeff,info] = DsgeLikelihood(xparam1,gend,data
     k = find(xparam1 < bayestopt_.lb);
     fval = bayestopt_.penalty+sum((bayestopt_.lb(k)-xparam1(k)).^2);
     cost_flag = 0;
+    info = 41;
     return;
   end
   if options_.mode_compute ~= 1 & any(xparam1 > bayestopt_.ub)
     k = find(xparam1 > bayestopt_.ub);
     fval = bayestopt_.penalty+sum((xparam1(k)-bayestopt_.ub(k)).^2);
     cost_flag = 0;
+    info = 42;
     return;
   end
   Q = M_.Sigma_e;
@@ -54,6 +56,7 @@ function [fval,cost_flag,ys,trend_coeff,info] = DsgeLikelihood(xparam1,gend,data
 		if k > 0
 		  fval = bayestopt_.penalty+sum(-a(k));
 		  cost_flag = 0;
+		  info = 43;
 		  return
 		end
     end
@@ -73,6 +76,7 @@ function [fval,cost_flag,ys,trend_coeff,info] = DsgeLikelihood(xparam1,gend,data
       if k > 0
 	fval = bayestopt_.penalty+sum(-a(k));
 	cost_flag = 0;
+	info = 44;
 	return
       end
     end
@@ -128,12 +132,14 @@ function [fval,cost_flag,ys,trend_coeff,info] = DsgeLikelihood(xparam1,gend,data
     Pinf	= [];
   elseif options_.lik_init == 3	% Diffuse Kalman filter
     Pstar = zeros(np,np);
-    ivs = bayestopt_.i_T_var_stable;
+%    ivs = bayestopt_.i_T_var_stable;
+%    Pstar(ivs,ivs) = lyapunov_symm(T(ivs,ivs),R(ivs,:)*Q* ...
+%				   transpose(R(ivs,:)));
     Pstar(ivs,ivs) = lyapunov_symm(T(ivs,ivs),R(ivs,:)*Q* ...
 				   transpose(R(ivs,:)));
     Pinf  = bayestopt_.Pinf;
     % by M. Ratto
-    RR=T(:,find(~ismember([1:np],ivs)));
+%    RR=T(:,find(~ismember([1:np],ivs)));
     i=find(abs(RR)>1.e-10);
     R0=zeros(size(RR));
     R0(i)=sign(RR(i));
