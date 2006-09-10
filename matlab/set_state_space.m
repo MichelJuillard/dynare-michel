@@ -28,6 +28,7 @@ npred = length(pred_var);
 nfwrd = length(fwrd_var);
 nstatic = length(stat_var);
 order_var = [ stat_var; pred_var; both_var; fwrd_var];
+inv_order_var(order_var) = (1:M_.endo_nbr)';
 
 % building kmask for z state vector in t+1
 if M_.maximum_lag > 0
@@ -71,6 +72,7 @@ kstate(M_.maximum_lead*M_.endo_nbr+1:end,4) = kiy((M_.maximum_lead+1)*M_.endo_nb
 kstate = kstate(i_kmask,:);
 
 dr.order_var = order_var;
+dr.inv_order_var = inv_order_var;
 dr.nstatic = nstatic;
 dr.npred = npred+nboth;
 dr.kstate = kstate;
