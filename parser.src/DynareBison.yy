@@ -29,7 +29,7 @@
 %token GAMMA_PDF GRAPH
 %token HISTVAL HP_FILTER HP_NGRID    
 %token INITVAL INITVALF INT_NUMBER INV_GAMMA_PDF INV_GAMMA1_PDF INV_GAMMA2_PDF IRF
-%token KALMAN_ALGO KALMAN_TOL
+%token KALMAN_ALGO KALMAN_TOL CONSTANT NOCONSTANT
 %token LAPLACE LIK_ALGO LIK_INIT LINEAR LOAD_MH_FILE LOGLINEAR
 %token MH_DROP MH_INIT_SCALE MH_JSCALE MH_MODE MH_NBLOCKS MH_REPLIC MODE_CHECK MODE_COMPUTE MODE_FILE MODEL MODEL_COMPARISON MODEL_COMPARISON_APPROXIMATION MODIFIEDHARMONICMEAN MOMENTS MOMENTS_VARENDO MSHOCKS
 %token NAME NOBS NOCORR NODIAGNOSTIC NOFUNCTIONS NOGRAPH XLS_SHEET XLS_RANGE
@@ -790,6 +790,7 @@
                    | o_xls_range
                    | o_filter_step_ahead
                    | o_solve_algo
+                   | o_noconstant
                    ;
 	
  list_optim_option
@@ -987,6 +988,8 @@
  o_xls_sheet : XLS_SHEET EQUAL NAME {_parser->option_str("xls_sheet",$3);} 
  o_xls_range : XLS_RANGE EQUAL range {_parser->option_str("xls_range",$3);} 
  o_filter_step_ahead : FILTER_STEP_AHEAD EQUAL vec_int {_parser->option_num("filter_step_ahead",$3);}
+ o_constant : NOCONSTANT {_parser->option_num("noconstant","0");}
+ o_noconstant : NOCONSTANT {_parser->option_num("noconstant","1");}
 
  range : NAME ':' NAME {$$ = new dynare::Objects(":");$$ = _parser->cat($1,$$);$$ = _parser->cat($$,$3);}
  vec_int_elem : INT_NUMBER

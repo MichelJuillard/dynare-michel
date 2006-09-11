@@ -134,6 +134,8 @@ int sigma_e = 0;
 <DYNARE_STATEMENT>model_comparison_approximation {return MODEL_COMPARISON;}
 <DYNARE_STATEMENT>laplace {return LAPLACE;}
 <DYNARE_STATEMENT>modifiedharmonicmean {return MODIFIEDHARMONICMEAN;}
+<DYNARE_STATEMENT>constant	{return CONSTANT;}
+<DYNARE_STATEMENT>noconstant	{return NOCONSTANT;}
 
 <DYNARE_STATEMENT>[\$][^$]*[\$] {
 	strtok(yytext+1,"$");
