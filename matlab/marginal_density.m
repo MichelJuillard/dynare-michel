@@ -29,6 +29,7 @@ for n = FirstMhFile:TotalNumberOfMhFiles
   ifil = 1;
 end
 MU = MU/((TotalNumberOfMhDraws-TODROP)*nblck);
+xparam1 = MU;
 MU1 = repmat(MU,MAX_nruns,1);
 %% lpost_mode is the value of the log posterior kernel at the mode.	
 fprintf(' Done!\n');
@@ -43,7 +44,13 @@ for n = FirstMhFile:TotalNumberOfMhFiles
   ifil = 1;
 end
 SIGMA =  SIGMA/((TotalNumberOfMhDraws-TODROP)*nblck);%<=== Variance of the parameters (ok!)
+hh = inv(SIGMA);
 fprintf(' Done!\n');
+%% save the posterior mean and the inverse of the covariance matrix
+%% (usefull if the user wants to perform some computations using
+%% the posterior mean instead of the posterior mode ==> ). 
+save([M_.fname '_mean'],'xparam1','hh','SIGMA');
+%% end%Save.
 disp(' ');
 disp('MH: I''m computing the posterior log marginale density (modified harmonic mean)... ');
 detSIGMA = det(SIGMA);

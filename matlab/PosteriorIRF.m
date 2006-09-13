@@ -1,6 +1,24 @@
-function PosteriorIRF(type)
-% stephane.adjemian@ens.fr [09-25-2005]
-global options_ estim_params_ oo_ M_
+function posterior_irf(type)
+% Metropolis-Hastings algorithm. 
+% 
+% INPUTS 
+%   o type       [char]     string specifying the joint density of the
+%   deep parameters ('prior','posterior'). 
+%  
+% OUTPUTS 
+%   None (oo_ and plots).
+%
+%
+% ALGORITHM 
+%   None.       
+%
+% SPECIAL REQUIREMENTS
+%   None.
+%  
+%  
+% part of DYNARE, copyright S. Adjemian, M. Juillard (2006)
+% Gnu Public License.
+global options_ estim_params_ oo_ M_ dsge_prior_weight
 nvx  = estim_params_.nvx;
 nvn  = estim_params_.nvn;
 ncx  = estim_params_.ncx;
@@ -233,7 +251,7 @@ for i=1:M_.exo_nbr
       subplotnum = 0;
     end
   end% loop over selected endo_var
-end% loop over exo_var  
+end% loop over exo_var
 %%
 if options_.TeX
   fprintf(fidTeX,'%% End of TeX file.\n');

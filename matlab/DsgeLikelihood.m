@@ -104,10 +104,14 @@ function [fval,cost_flag,ys,trend_coeff,info] = DsgeLikelihood(xparam1,gend,data
   T = T(rs,rs);
   R = R(rs,:);
   bayestopt_.mf = bayestopt_.mf1;
-  if options_.loglinear == 1
-    constant = log(SteadyState(bayestopt_.mfys));
+  if ~options_.noconstant
+    if options_.loglinear == 1
+      constant = log(SteadyState(bayestopt_.mfys));
+    else
+      constant = SteadyState(bayestopt_.mfys);
+    end
   else
-    constant = SteadyState(bayestopt_.mfys);
+    constant = zeros(nobs,1);
   end
   if bayestopt_.with_trend == 1
     trend_coeff = zeros(nobs,1);
