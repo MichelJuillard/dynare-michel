@@ -84,3 +84,21 @@ dr.nfwrd = nfwrd;
 dr.nsfwrd = sum(kstate(:,2) > M_.maximum_lag+1);
 % number of predetermined variables in the state vector
 dr.nspred = sum(kstate(:,2) <= M_.maximum_lag+1);
+
+aux = zeros(0,2);
+k0 = kstate(find(kstate(:,2) <= M_.maximum_lag+1),:);;
+offset_col = nstatic;
+for i=M_.maximum_lag:-1:2
+  i1 = find(k0(:,2) == i);
+  n1 = size(i1,1);
+  j = zeros(n1,1);
+  for j1 = 1:n1
+    j(j1) = find(k0(i0,1)==k0(i1(j1),1));
+  end
+  if i == M_.maximum_lag-1
+    offset_col = dr.nstatic+dr.nfwrd;
+  end
+  aux = [aux; offset_col+i0(j)];
+  i0 = i1;
+end
+dr.transition_auxiliary_variables = [(1:size(aux,1))' aux];

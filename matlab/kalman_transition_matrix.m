@@ -2,31 +2,48 @@
 % still needs to eliminate unobserved static variables
 % order of variables s p b f p_1
 
-function [A,B] = kalman_transition_matrix(dr)
+function [A,B] = kalman_transition_matrix(dr,iv,ic,aux)
   global M_
-  nx = size(dr.ghx,2)+dr.nfwrd+dr.nstatic;
-  kstate = dr.kstate;
-  ikx = [dr.nstatic+1:dr.nstatic+dr.npred];
   
-  A = zeros(nx,nx);
-  k0 = kstate(find(kstate(:,2) <= M_.maximum_lag+1),:);
-  i0 = find(k0(:,2) == M_.maximum_lag+1);
-  n0 = size(dr.ghx,1);
-  A(1:n0,dr.nstatic+1:dr.nstatic+dr.npred) = dr.ghx(:,1:dr.npred);
-  A(1:n0,dr.nstatic+dr.npred+dr.nfwrd+1:end) = dr.ghx(:,dr.npred+1:end);
-  B = zeros(nx,M_.exo_nbr);
-  B(1:n0,:) = dr.ghu;
-  offset_col = dr.nstatic;
-  for i=M_.maximum_lag:-1:2
-    i1 = find(k0(:,2) == i);
-    n1 = size(i1,1);
-    j = zeros(n1,1);
-    for j1 = 1:n1
-      j(j1) = find(k0(i0,1)==k0(i1(j1),1));
-    end
-    if i == M_.maximum_lag-1
-      offset_col = dr.nstatic+dr.nfwrd;
-    end
-    A(n0+i1-dr.npred,offset_col+i0(j))=eye(n1);
-    i0 = i1;
-  end
+  n_iv = length(iv);
+  n_ir1 = size(aux,1);
+  nr = n_iv + n_ir1;
+  
+  A = zeros(nr,nr);
+  B = zeros(nr,M_.exo_nbr);
+  
+  i_n_iv = 1:n_iv;
+  A(i_n_iv,ic) = dr.ghx(iv,:);
+  A(n_iv+1:end,i_n_iv) = sparse(aux(:,1),aux(:,2),ones(n_ir1,1),n_ir1,n_iv);
+  
+  B(i_n_iv,:) = dr.ghu(iv,:);
+
+
+% $$$ function [A,B] = kalman_transition_matrix(dr)
+% $$$   global M_
+% $$$   nx = size(dr.ghx,2)+dr.nfwrd+dr.nstatic;
+% $$$   kstate = dr.kstate;
+% $$$   ikx = [dr.nstatic+1:dr.nstatic+dr.npred];
+% $$$   
+% $$$   A = zeros(nx,nx);
+% $$$   k0 = kstate(find(kstate(:,2) <= M_.maximum_lag+1),:);
+% $$$   i0 = find(k0(:,2) == M_.maximum_lag+1);
+% $$$   n0 = size(dr.ghx,1);
+% $$$   A(1:n0,dr.nstatic+1:dr.nstatic+dr.npred) = dr.ghx(:,1:dr.npred);
+% $$$   A(1:n0,dr.nstatic+dr.npred+dr.nfwrd+1:end) = dr.ghx(:,dr.npred+1:end);
+% $$$   B = zeros(nx,M_.exo_nbr);
+% $$$   B(1:n0,:) = dr.ghu;
+% $$$   offset_col = dr.nstatic;
+% $$$   for i=M_.maximum_lag:-1:2
+% $$$     i1 = find(k0(:,2) == i);
+% $$$     n1 = size(i1,1);
+% $$$     j = zeros(n1,1);
+% $$$     for j1 = 1:n1
+% $$$       j(j1) = find(k0(i0,1)==k0(i1(j1),1));
+% $$$     end
+% $$$     if i == M_.maximum_lag-1
+% $$$       offset_col = dr.nstatic+dr.nfwrd;
+% $$$     end
+% $$$     A(n0+i1-dr.npred,offset_col+i0(j))=eye(n1);
+% $$$     i0 = i1;
+% $$$   end

@@ -32,12 +32,10 @@ function [Gamma_y,ivar]=th_autocovariances(dr,ivar)
   
   ikx = [nstatic+1:nstatic+npred];
   
-  A = zeros(nx,nx);
   k0 = kstate(find(kstate(:,2) <= M_.maximum_lag+1),:);
   i0 = find(k0(:,2) == M_.maximum_lag+1);
   i00 = i0;
   n0 = length(i0);
-  A(i0,:) = ghx(ikx,:);
   AS = ghx(:,i0);
   ghu1 = zeros(nx,M_.exo_nbr);
   ghu1(i0,:) = ghu(ikx,:);
@@ -45,10 +43,8 @@ function [Gamma_y,ivar]=th_autocovariances(dr,ivar)
     i1 = find(k0(:,2) == i);
     n1 = size(i1,1);
     j1 = zeros(n1,1);
-    j2 = j1;
     for k1 = 1:n1
       j1(k1) = find(k0(i00,1)==k0(i1(k1),1));
-      j2(k1) = find(k0(i0,1)==k0(i1(k1),1));
     end
     AS(:,j1) = AS(:,j1)+ghx(:,i1);
     i0 = i1;
@@ -56,31 +52,26 @@ function [Gamma_y,ivar]=th_autocovariances(dr,ivar)
   b = ghu1*M_.Sigma_e*ghu1';
 
 
-  [A,B] = kalman_transition_matrix(dr);
-  % index of predetermined variables in A
-  i_pred = [nstatic+(1:npred) M_.endo_nbr+1:length(A)];
-  A = A(i_pred,i_pred);
-
-  if options_.order == 2
-    [vx,ns_var] =  lyapunov_symm(A,b);
-    i_ivar = find(~ismember(ivar,dr.order_var(ns_var+nstatic)));
-    ivar = ivar(i_ivar);
-    iky = iv(ivar);  
+  ipred = nstatic+(1:npred)';
+  % state space representation for state variables only
+  [A,B] = kalman_transition_matrix(dr,ipred,1:nx,dr.transition_auxiliary_variables);
+  if options_.order == 2 | options_.hp_filter == 0
+    [vx, u] =  lyapunov_symm(A,B*M_.Sigma_e*B');
+    iky = iv(ivar);
+    if ~isempty(u)
+      iky = iky(find(any(abs(ghx(iky,:)*u) < 1e-8,2)));
+      ivar = dr.order_var(iky);
+    end
     aa = ghx(iky,:);
     bb = ghu(iky,:);
-    Ex = (dr.ghs2(ikx)+dr.ghxx(ikx,:)*vx(:)+dr.ghuu(ikx,:)*M_.Sigma_e(:))/2;
-    Ex = (eye(n0)-AS(ikx,:))\Ex;
-    Gamma_y{nar+3} = AS(iky,:)*Ex+(dr.ghs2(iky)+dr.ghxx(iky,:)*vx(:)+dr.ghuu(iky,:)*M_.Sigma_e(:))/2;
+    if options_.order == 2         % mean correction for 2nd order
+      Ex = (dr.ghs2(ikx)+dr.ghxx(ikx,:)*vx(:)+dr.ghuu(ikx,:)*M_.Sigma_e(:))/2;
+      Ex = (eye(n0)-AS(ikx,:))\Ex;
+      Gamma_y{nar+3} = AS(iky,:)*Ex+(dr.ghs2(iky)+dr.ghxx(iky,:)*vx(:)+...
+				     dr.ghuu(iky,:)*M_.Sigma_e(:))/2;
+    end
   end
   if options_.hp_filter == 0
-    if options_.order < 2
-      [vx, ns_var] =  lyapunov_symm(A,b);
-      i_ivar = find(~ismember(ivar,dr.order_var(ns_var+nstatic)));
-      ivar = ivar(i_ivar);
-      iky = iv(ivar);  
-      aa = ghx(iky,:);
-      bb = ghu(iky,:);
-    end
     Gamma_y{1} = aa*vx*aa'+ bb*M_.Sigma_e*bb';
     k = find(abs(Gamma_y{1}) < 1e-12);
     Gamma_y{1}(k) = 0;

@@ -1,4 +1,4 @@
-function [x,ns_var]=lyapunov_symm(a,b)
+function [x,u]=lyapunov_symm(a,b)
 % solves the Lyapunov equation 
 % x-a*x*a' = b 
 % for b (and then x) symmetrical
@@ -13,6 +13,7 @@ function [x,ns_var]=lyapunov_symm(a,b)
 %   x: solution matrix (m x m)
 %   ns_var: vector of indices of non-stationary variables (p x 1)
 %           (m + p = n)
+%   u: Schur vectors associated with unit roots  
 %
 % ALGORITHM
 %   uses reordered Schur decomposition
@@ -24,10 +25,10 @@ function [x,ns_var]=lyapunov_symm(a,b)
 % part of DYNARE, copyright S. Adjemian, M. Juillard (2006)
 % Gnu Public License  
 
-  
-  
   global options_ 
+
   ns_var = [];
+  u = [];
   
   info = 0;
   if size(a,1) == 1
@@ -94,5 +95,5 @@ function [x,ns_var]=lyapunov_symm(a,b)
     c = t(1,:)*(x(:,2:end)*t(1,2:end)')+t(1,1)*t(1,2:end)*x(2:end,1);
     x(1,1)=(b(1,1)+c)/(1-t(1,1)*t(1,1));
   end
-  x=u(:,k+1:end)*x*u(:,k+1:end)';
-  ns_var = find(any(abs(u(:,1:k)) > 1e-8,2)); 
+  x = u(:,k+1:end)*x*u(:,k+1:end)';
+  u = u(:,1:k);
