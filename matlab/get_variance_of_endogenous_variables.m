@@ -1,4 +1,4 @@
-function [vx,i_ns] = get_variance_of_endogenous_variables(dr,i_var,aux)
+function [vx,i_ns] = get_variance_of_endogenous_variables(dr,i_var)
 
   global M_ options_
   
@@ -10,7 +10,7 @@ function [vx,i_ns] = get_variance_of_endogenous_variables(dr,i_var,aux)
   ghu = dr.ghu(i_var,:);
   nc = size(ghx,2);
   
-  [A,B] = kalman_transition_matrix(dr,nstatic+(1:npred),1:nc,aux);
+  [A,B] = kalman_transition_matrix(dr,nstatic+(1:npred),1:nc,dr.transition_auxiliary_variables);
   
   [vx,u] = lyapunov_symm(A,B*Sigma_e*B');
   
