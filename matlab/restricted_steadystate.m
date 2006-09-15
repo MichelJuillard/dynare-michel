@@ -12,9 +12,3 @@ function [sR,sG] = restricted_steadystate(y,x,indx)
 
   sR = R(inde);
   sG = G(inde,indx);
-  
-  sG
- 
-  null(sG)
-  
-  pause
