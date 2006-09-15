@@ -68,6 +68,8 @@ options_ = set_default_option(options_,'steadystate_flag',0);
 options_ = set_default_option(options_,'logdata',0);
 options_ = set_default_option(options_,'use_mh_covariance_matrix',0);
 options_ = set_default_option(options_,'noconstant',0);
+options_ = set_default_option(options_,'steadystate_partial',[]);
+
 
 if options_.prefilter == 1
   options_.noconstant = 1;

@@ -24,6 +24,7 @@ function global_initialization()
   else
     options_.steadystate_flag = 0;
   end
+  options_.steadystate_partial = [];
   
   oo_.exo_simul = [];
   oo_.endo_simul = [];
