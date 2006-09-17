@@ -11,19 +11,26 @@ function steady_()
 		                      oo_.exo_det_steady_state]);
     % Check if the steady state obtained from the _steadystate file is a 
     % steady state.
-    cheick = max(abs(feval(fh,dr.ys,[oo_.exo_steady_state; ...
-                        oo_.exo_det_steady_state]))) > options_.dynatol
+    cheick = 0;
+    if isfield(options_,'unit_root_vars')
+      if isempty(options_.unit_root_vars)
+	cheick = max(abs(feval([M_.fname '_steadystate'],...
+			       oo_.steady_state,...
+			       [oo_.exo_steady_state; ...
+		    oo_.exo_det_steady_state]))) > options_.dynatol
+      end
+    end
     if ~isempty(options_.steadystate_partial)
-        ssvar = options_.steadystate_partial.ssvar;
-        nov   = length(ssvar);
-        indv  = zeros(nov,1);
-        for i = 1:nov
-          indv(i) = strmatch(ssvar(i),M_.endo_names,'exact');
-        end
-        [oo_.steady_state,check] = dynare_solve('restricted_steadystate',...
-                                                oo_.steady_state(indv),...
-                                                options_.jacobian_flag, ...	    
-                                                [oo_.exo_steady_state;oo_.exo_det_steady_state],indv);
+      ssvar = options_.steadystate_partial.ssvar;
+      nov   = length(ssvar);
+      indv  = zeros(nov,1);
+      for i = 1:nov
+	indv(i) = strmatch(ssvar(i),M_.endo_names,'exact');
+      end
+      [oo_.steady_state,check] = dynare_solve('restricted_steadystate',...
+					      oo_.steady_state(indv),...
+					      options_.jacobian_flag, ...	    
+					      [oo_.exo_steady_state;oo_.exo_det_steady_state],indv);
     end
     if cheick
       [oo_.steady_state,check] = dynare_solve([M_.fname '_static'],...
