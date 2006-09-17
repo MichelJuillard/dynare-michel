@@ -142,63 +142,15 @@ np  = estim_params_.np ;
 nx  = nvx+nvn+ncx+ncn+np;
 
 dr = set_state_space([]);
-
-%% Initialization with unit-root variables
-if ~isempty(options_.unit_root_vars)
-  n_ur = size(options_.unit_root_vars,1);
-  i_ur = zeros(n_ur,1);
-  for i=1:n_ur
-    i1 = strmatch(deblank(options_.unit_root_vars(i,:)),M_.endo_names(dr.order_var,:),'exact');
-    if isempty(i1)
-      error('Undeclared variable in unit_root_vars statement')
-    end
-    i_ur(i) = i1;
-  end
-  if M_.maximum_lag > 1
-    l1 = flipud([cumsum(M_.lead_lag_incidence(1:M_.maximum_lag-1,dr.order_var),1);ones(1,M_.endo_nbr)]);
-    n1 = nnz(l1);
-    bayestopt_.Pinf = zeros(n1,n1);
-    l2 = find(l1');
-    l3 = zeros(M_.endo_nbr,M_.maximum_lag);
-    l3(i_ur,:) = l1(:,i_ur)';
-    l3 = l3(:);
-    i_ur1 = find(l3(l2));
-    i_stable = ones(M_.endo_nbr,1);
-    i_stable(i_ur) = zeros(n_ur,1);
-    i_stable = find(i_stable);
-    bayestopt_.Pinf(i_ur1,i_ur1) = diag(ones(1,length(i_ur1)));
-    bayestopt_.i_var_stable = i_stable;
-    l3 = zeros(M_.endo_nbr,M_.maximum_lag);
-    l3(i_stable,:) = l1(:,i_stable)';
-    l3 = l3(:);
-    bayestopt_.i_T_var_stable = find(l3(l2));
-  else
-    n1 = M_.endo_nbr;
-    bayestopt_.Pinf = zeros(n1,n1);
-    bayestopt_.Pinf(i_ur,i_ur) = diag(ones(1,length(i_ur)));
-    l1 = ones(M_.endo_nbr,1);
-    l1(i_ur,:) = zeros(length(i_ur),1);
-    bayestopt_.i_T_var_stable = find(l1);
-  end
-  options_.lik_init = 3;
-end % if ~isempty(options_.unit_root_vars)
-
-if isempty(options_.datafile)
-  error('ESTIMATION: datafile option is missing')
-end
+nstatic = dr.nstatic;
+npred = dr.npred;
+nspred = dr.nspred;
 
 if isempty(options_.varobs)
   error('ESTIMATION: VAROBS is missing')
 end
 
-
-%% If jscale isn't specified for an estimated parameter, use
-%% global option options_.jscale, set to 0.2, by default
-k = find(isnan(bayestopt_.jscale));
-bayestopt_.jscale(k) = options_.mh_jscale;
-
-%% Read and demean data 
-rawdata = read_variables(options_.datafile,options_.varobs,[],options_.xls_sheet,options_.xls_range);
+%% Setting resticted state space (observed + predetermined variables)
 
 k = [];
 k1 = [];
@@ -213,7 +165,7 @@ k2 = [k2;[M_.endo_nbr+(1:dr.nspred-dr.npred)]'];
 
 % set restrict_state to postion of observed + state variables
 % in expanded state vector
-bayestopt_.restrict_state = k2;
+bayestopt_.restrict_var_list = k2;
 % set mf1 to positions of observed variables in restricted state vector
 % for likelihood computation
 [junk,bayestopt_.mf1] = ismember(k,k2); 
@@ -221,6 +173,55 @@ bayestopt_.restrict_state = k2;
 % for filtering and smoothing
 bayestopt_.mf2 	= k;
 bayestopt_.mfys = k1;
+
+[junk,ic] = intersect(k2,nstatic+(1:npred)');
+bayestopt_.restrict_columns = [ic length(k2)+(1:nspred-npred)]';
+aux = dr.transition_auxiliary_variables;
+k = find(aux(:,2) > npred);
+aux(:,2) = aux(:,2)+sum(k2 <= nstatic);
+bayestopt_.restrict_aux = aux;
+
+
+%% Initialization with unit-root variables
+if ~isempty(options_.unit_root_vars)
+  n_ur = size(options_.unit_root_vars,1);
+  i_ur = zeros(n_ur,1);
+  for i=1:n_ur
+    i1 = strmatch(deblank(options_.unit_root_vars(i,:)),M_.endo_names(dr.order_var,:),'exact');
+    if isempty(i1)
+      error('Undeclared variable in unit_root_vars statement')
+    end
+    i_ur(i) = i1;
+  end
+  [junk,bayestopt_.restrict_var_list_stationary] = ...
+      setdiff(bayestopt_.restrict_var_list,i_ur);
+  [junk,bayestopt_.restrict_var_list_nonstationary] = ...
+      setdiff(bayestopt_.restrict_var_list,i_ur);
+  if M_.maximum_lag > 1
+    l1 = flipud([cumsum(M_.lead_lag_incidence(1:M_.maximum_lag-1,dr.order_var),1);ones(1,M_.endo_nbr)]);
+    l2 = l1(:,restrict_var_list);
+    il2 = find(l2' > 0);
+    l2(il2) = (1:length(il2))';
+    bayestopt_.restict_var_list_stationary = ...
+	nonzeros(l2(:,restrict_var_list_stationary)); 
+    bayestopt_.restict_var_list_nonstationary = ...
+	nonzeros(l2(:,restrict_var_list_nonstationary)); 
+  end
+  options_.lik_init = 3;
+end % if ~isempty(options_.unit_root_vars)
+
+if isempty(options_.datafile)
+  error('ESTIMATION: datafile option is missing')
+end
+
+%% If jscale isn't specified for an estimated parameter, use
+%% global option options_.jscale, set to 0.2, by default
+k = find(isnan(bayestopt_.jscale));
+bayestopt_.jscale(k) = options_.mh_jscale;
+
+%% Read and demean data 
+rawdata = read_variables(options_.datafile,options_.varobs,[],options_.xls_sheet,options_.xls_range);
+
 options_ = set_default_option(options_,'nobs',size(rawdata,1)-options_.first_obs+1);
 gend = options_.nobs;
 

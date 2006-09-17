@@ -90,8 +90,9 @@ function [fval,cost_flag,ys,trend_coeff,info] = DsgeLikelihood(xparam1,gend,data
   %------------------------------------------------------------------------------
   % 2. call model setup & reduction program
   %------------------------------------------------------------------------------
-  [T,R,SteadyState,info] = dynare_resolve;
-  rs = bayestopt_.restrict_state;
+  [T,R,SteadyState,info] = dynare_resolve(bayestopt_.restrict_var_list,...
+					  bayestopt_.restrict_columns,...
+					  bayestopt_.restrict_aux);
   if info(1) == 1 | info(1) == 2 | info(1) == 5
     fval = bayestopt_.penalty+1;
     cost_flag = 0;
@@ -101,8 +102,6 @@ function [fval,cost_flag,ys,trend_coeff,info] = DsgeLikelihood(xparam1,gend,data
     cost_flag = 0;
     return
   end
-  T = T(rs,rs);
-  R = R(rs,:);
   bayestopt_.mf = bayestopt_.mf1;
   if ~options_.noconstant
     if options_.loglinear == 1
@@ -129,21 +128,19 @@ function [fval,cost_flag,ys,trend_coeff,info] = DsgeLikelihood(xparam1,gend,data
   % 3. Initial condition of the Kalman filter
   %------------------------------------------------------------------------------
   if options_.lik_init == 1		% Kalman filter
-    Pstar = lyapunov_symm(T,R*Q*transpose(R));
+    Pstar = lyapunov_symm(T,R*Q*R');
     Pinf	= [];
   elseif options_.lik_init == 2	% Old Diffuse Kalman filter
     Pstar = 10*eye(np);
     Pinf	= [];
   elseif options_.lik_init == 3	% Diffuse Kalman filter
     Pstar = zeros(np,np);
-%    ivs = bayestopt_.i_T_var_stable;
-%    Pstar(ivs,ivs) = lyapunov_symm(T(ivs,ivs),R(ivs,:)*Q* ...
-%				   transpose(R(ivs,:)));
-    Pstar(ivs,ivs) = lyapunov_symm(T(ivs,ivs),R(ivs,:)*Q* ...
-				   transpose(R(ivs,:)));
-    Pinf  = bayestopt_.Pinf;
+    ivs = bayestopt_.restrict_var_list_stationary;
+    R1 = R(ivs,:);
+    Pstar(ivs,ivs) = lyapunov_symm(T(ivs,ivs),R1*Q*R1');
+%    Pinf  = bayestopt_.Pinf;
     % by M. Ratto
-%    RR=T(:,find(~ismember([1:np],ivs)));
+    RR=T(:,bayestopt_.restrict_var_list_nonstationary);
     i=find(abs(RR)>1.e-10);
     R0=zeros(size(RR));
     R0(i)=sign(RR(i));

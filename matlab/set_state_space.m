@@ -28,7 +28,7 @@ npred = length(pred_var);
 nfwrd = length(fwrd_var);
 nstatic = length(stat_var);
 order_var = [ stat_var; pred_var; both_var; fwrd_var];
-inv_order_var(order_var) = (1:M_.endo_nbr)';
+inv_order_var(order_var) = (1:M_.endo_nbr);
 
 % building kmask for z state vector in t+1
 if M_.maximum_lag > 0
@@ -72,7 +72,7 @@ kstate(M_.maximum_lead*M_.endo_nbr+1:end,4) = kiy((M_.maximum_lead+1)*M_.endo_nb
 kstate = kstate(i_kmask,:);
 
 dr.order_var = order_var;
-dr.inv_order_var = inv_order_var;
+dr.inv_order_var = inv_order_var';
 dr.nstatic = nstatic;
 dr.npred = npred+nboth;
 dr.kstate = kstate;
@@ -85,18 +85,16 @@ dr.nsfwrd = sum(kstate(:,2) > M_.maximum_lag+1);
 % number of predetermined variables in the state vector
 dr.nspred = sum(kstate(:,2) <= M_.maximum_lag+1);
 
+% copmutes column position of auxiliary variables for 
+% compact transition matrix (only state variables)
 aux = zeros(0,2);
 k0 = kstate(find(kstate(:,2) <= M_.maximum_lag+1),:);;
-offset_col = nstatic;
 for i=M_.maximum_lag:-1:2
   i1 = find(k0(:,2) == i);
   n1 = size(i1,1);
   j = zeros(n1,1);
   for j1 = 1:n1
     j(j1) = find(k0(i0,1)==k0(i1(j1),1));
-  end
-  if i == M_.maximum_lag-1
-    offset_col = dr.nstatic+dr.nfwrd;
   end
   aux = [aux; offset_col+i0(j)];
   i0 = i1;

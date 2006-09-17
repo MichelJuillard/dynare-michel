@@ -1,4 +1,4 @@
-function [loss,vx,info]=osr_obj(x,i_params,weights);
+function [loss,vx,info]=osr_obj(x,i_params,i_var,weights);
   % objective function for optimal simple rules (OSR)
   global M_ oo_ optimal_Q_ it_
 %  global ys_ Sigma_e_ endo_nbr exo_nbr optimal_Q_ it_ ykmin_ options_
@@ -33,16 +33,7 @@ function [loss,vx,info]=osr_obj(x,i_params,weights);
    otherwise
   end
   
-  [A,B] = kalman_transition_matrix(dr);
-  [vx,ns_var] = lyapunov_symm(A,B*M_.Sigma_e*B');
-  endo_nbr = M_.endo_nbr;
-  i_var = (1:endo_nbr)';
-  i_var(ns_var) = zeros(length(ns_var),1);
-  i_var = nonzeros(i_var);
-  vx = vx(i_var,i_var);
-  weights = weights(dr.order_var,dr.order_var);
-  weights = sparse(weights(i_var,i_var));
-  
+  vx = get_variance_of_endogenous_variables(dr,i_var);  
   loss = weights(:)'*vx(:);
   
 
