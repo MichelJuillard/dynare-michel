@@ -1,4 +1,3 @@
-periods 20000;
 var c k a;
 varexo e;
 parameters alpha beta delta gamma rho;
@@ -29,10 +28,10 @@ stoch_simul(nomoments,nocorr,ar=0,irf=0);
 global dr_
 load objectives/sgu_ex1;
 
-test(dr_.ghx,dr_obj_.ghx,1);
-test(dr_.ghu,dr_obj_.ghu,2);
-test(dr_.ghxx,dr_obj_.ghxx,3);
-test(dr_.ghxu,dr_obj_.ghxu,4);
-test(dr_.ghuu,dr_obj_.ghuu,5);
+test(oo_.dr.ghx,dr_obj_.ghx,1);
+test(oo_.dr.ghu,dr_obj_.ghu,2);
+test(oo_.dr.ghxx,dr_obj_.ghxx,3);
+test(oo_.dr.ghxu,dr_obj_.ghxu,4);
+test(oo_.dr.ghuu,dr_obj_.ghuu,5);
 
 disp('TESTS OK');
