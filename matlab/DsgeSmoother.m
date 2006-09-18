@@ -55,10 +55,10 @@ function [alphahat,etahat,epsilonhat,ahat,SteadyState,trend_coeff,aK] = DsgeSmoo
     Pinf	= [];
   elseif options_.lik_init == 3 % Diffuse Kalman filter
     Pstar = zeros(np,np);
-    ivs = bayestopt_.i_T_var_stable;
+    ivs = bayestopt_.var_list_stationary;
     Pstar(ivs,ivs) = lyapunov_symm(T(ivs,ivs),R(ivs,:)*Q* ...
 				   transpose(R(ivs,:)));
-    Pinf  = bayestopt_.Pinf;
+%    Pinf  = bayestopt_.Pinf;
     % by M. Ratto
     RR=T(:,find(~ismember([1:np],ivs)));
     i=find(abs(RR)>1.e-10);

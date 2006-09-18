@@ -14,7 +14,9 @@ function [A,B] = kalman_transition_matrix(dr,iv,ic,aux)
   
   i_n_iv = 1:n_iv;
   A(i_n_iv,ic) = dr.ghx(iv,:);
-  A(n_iv+1:end,i_n_iv) = sparse(aux(:,1),aux(:,2),ones(n_ir1,1),n_ir1,n_iv);
+  if n_ir1 > 0
+    A(n_iv+1:end,i_n_iv) = sparse(aux(:,1),aux(:,2),ones(n_ir1,1),n_ir1,n_iv);
+  end
   
   B(i_n_iv,:) = dr.ghu(iv,:);
 

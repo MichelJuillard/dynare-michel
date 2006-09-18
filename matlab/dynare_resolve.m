@@ -12,12 +12,14 @@ function [A,B,ys,info] = dynare_resolve(iv,ic,aux)
   
   if nargin == 0
     endo_nbr = M_.endo_nbr;
+    nstatic = oo_.dr.nstatic;
+    npred = oo_.dr.npred;
     iv = (1:endo_nbr)';
-    ic = [ nstatic+(1:npred) endo_nbr+(1:size(dr.ghx,2)-npred) ]';
-    aux = oo_.dr.transtion_auxiliary_variables(:,2);
-    k = find(aux > oo_.dr.npred);
+    ic = [ nstatic+(1:npred) endo_nbr+(1:size(oo_.dr.ghx,2)-npred) ]';
+    aux = oo_.dr.transition_auxiliary_variables(:,2);
+    k = find(aux > npred);
     aux = aux + nstatic;
-    aux(k) = aux(k) + oo_.dr.nfrwd;
+    aux(k) = aux(k) + oo_.dr.nfwrd;
   end
   
   [A,B] = kalman_transition_matrix(oo_.dr,iv,ic,aux);

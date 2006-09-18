@@ -193,6 +193,9 @@ if ~isempty(options_.unit_root_vars)
     end
     i_ur(i) = i1;
   end
+  
+  [junk,bayestopt_.var_list_stationary] = ...
+      setdiff((1:M_.endo_nbr)',i_ur);
   [junk,bayestopt_.restrict_var_list_stationary] = ...
       setdiff(bayestopt_.restrict_var_list,i_ur);
   [junk,bayestopt_.restrict_var_list_nonstationary] = ...
