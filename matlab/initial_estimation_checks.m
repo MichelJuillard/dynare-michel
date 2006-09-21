@@ -31,4 +31,4 @@ if info(1) > 0
   print_info(info)
 end
 
-disp(['Initial value of the posterior (or likelihood): ' num2str(fval)]);
+disp(['Initial value of the log posterior (or likelihood): ' num2str(-fval)]);
