@@ -89,6 +89,7 @@ dr.nspred = sum(kstate(:,2) <= M_.maximum_lag+1);
 % compact transition matrix (only state variables)
 aux = zeros(0,2);
 k0 = kstate(find(kstate(:,2) <= M_.maximum_lag+1),:);;
+i0 = find(k0(:,2) == M_.maximum_lag+1);
 for i=M_.maximum_lag:-1:2
   i1 = find(k0(:,2) == i);
   n1 = size(i1,1);
@@ -96,7 +97,7 @@ for i=M_.maximum_lag:-1:2
   for j1 = 1:n1
     j(j1) = find(k0(i0,1)==k0(i1(j1),1));
   end
-  aux = [aux; offset_col+i0(j)];
+  aux = [aux; i0(j)];
   i0 = i1;
 end
 dr.transition_auxiliary_variables = [(1:size(aux,1))' aux];
