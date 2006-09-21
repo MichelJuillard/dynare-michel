@@ -87,7 +87,7 @@ dr.nspred = sum(kstate(:,2) <= M_.maximum_lag+1);
 
 % copmutes column position of auxiliary variables for 
 % compact transition matrix (only state variables)
-aux = zeros(0,2);
+aux = zeros(0,1);
 k0 = kstate(find(kstate(:,2) <= M_.maximum_lag+1),:);;
 i0 = find(k0(:,2) == M_.maximum_lag+1);
 for i=M_.maximum_lag:-1:2
