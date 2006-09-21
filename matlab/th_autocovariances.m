@@ -59,7 +59,7 @@ function [Gamma_y,ivar]=th_autocovariances(dr,ivar)
     [vx, u] =  lyapunov_symm(A,B*M_.Sigma_e*B');
     iky = iv(ivar);
     if ~isempty(u)
-      iky = iky(find(any(abs(ghx(iky,:)*u) < 1e-8,2)));
+      iky = iky(find(any(abs(ghx(iky,:)*u) < options_.Schur_vec_tol,2)));
       ivar = dr.order_var(iky);
     end
     aa = ghx(iky,:);

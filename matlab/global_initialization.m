@@ -15,9 +15,12 @@ function global_initialization()
   options_.gstep = 1e-2;
   options_.debug = 0
   options_.initval_file = 0;
-  optinos_.Schur_vec_tol = 1e-8; % used to find nonstationary variables
+  options_.Schur_vec_tol = 1e-8; % used to find nonstationary variables
                                  % in Schur decomposition of the
                                  % transition matrix
+  options_.solve_tolf = eps^(2/3);
+  options_.solve_tolx = 3.7e-11;
+  options_.solve_maxit = 500;
 				 
   if exist([M_.fname '_steadystate'])
     options_.steadystate_flag = 1;

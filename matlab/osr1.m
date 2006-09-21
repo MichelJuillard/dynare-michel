@@ -1,4 +1,4 @@
-function osr1(i_params,weights)
+function osr1(i_params,i_var,weights)
   global M_ oo_ options_ it_
 
   klen = M_.maximum_lag + M_.maximum_lead + 1;
@@ -21,6 +21,9 @@ function osr1(i_params,weights)
   end
 
   exe =zeros(M_.exo_nbr,1);
+  
+  oo_.dr = set_state_space(oo_.dr);
+  
   % check if ys is steady state
   fh = str2func([M_.fname '_static']);
   if max(abs(feval(fh,oo_.steady_state,exe))) > options_.dynatol
@@ -29,17 +32,26 @@ function osr1(i_params,weights)
       error('OLR: convergence problem in DYNARE_SOLVE')
     end
   else
-    dr.ys = oo_.steady_state;
-    oo_.dr = dr;
+    oo_.dr.ys = oo_.steady_state;
   end
 
   
   np = size(i_params,1);
   t0 = M_.params(i_params);
-  
-  options = optimset('fminunc');
-  options = optimset('display','iter');
-  [p,f]=fminunc(@osr_obj,t0,options,i_params,weights);
+  inv_order_var = oo_.dr.inv_order_var;
+
+  H0 = 1e-4*eye(np);
+  crit = 1e-7;
+  nit = 1000;
+  verbose = 2;
+
+  [f,p]=csminwel('osr_obj',t0,H0,[],crit,nit,i_params,...
+		inv_order_var(i_var),weights(i_var,i_var));
+
+  %  options = optimset('fminunc');
+%  options = optimset('display','iter');
+%  [p,f]=fminunc(@osr_obj,t0,options,i_params,...
+%		inv_order_var(i_var),weights(i_var,i_var));
 
 
   

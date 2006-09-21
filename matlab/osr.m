@@ -1,6 +1,6 @@
 % Copyright (C) 2001 Michel Juillard
 %
-function osr(var_list,params,W)
+function osr(var_list,params,i_var,W)
   global M_ options_ oo_  
 
   options_.order = 1;
@@ -36,7 +36,7 @@ function osr(var_list,params,W)
   disp(' ')
   disp('OPTIMAL SIMPLE RULE')
   disp(' ')
-  osr1(i_params,W);
+  osr1(i_params,i_var,W);
   disp('MODEL SUMMARY')
   disp(' ')
   disp(['  Number of variables:         ' int2str(M_.endo_nbr)])
