@@ -8,12 +8,12 @@ function [x,check] = solve1(func,x,j1,j2,jacobian_flag,varargin)
   fjac = zeros(nn,nn) ;
   g = zeros(nn,1) ;
 
-  tolf = eps^(2/3) ;
-  tolmin = 3.7e-11 ;
-  tolx = 3.7e-11 ;
+  tolf = options_.solve_tolf ;
+  tolx = options_.solve_tolx;
+  tolmin = tolx ;
 
   stpmx = 100 ;
-  maxit = 2000 ;
+  maxit = options_.solve_maxit ;
 
   check = 0 ;
 
@@ -30,7 +30,7 @@ function [x,check] = solve1(func,x,j1,j2,jacobian_flag,varargin)
   
   f = 0.5*fvec'*fvec ;
 
-  if max(abs(fvec)) < 0.01*tolf
+  if max(abs(fvec)) < tolf
     return ;
   end
 

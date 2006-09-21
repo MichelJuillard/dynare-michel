@@ -1,9 +1,10 @@
 % Copyright (C) 2001 Michel Juillard
 %
 function [x,f,fvec,check]=lnsrch(xold,fold,g,p,stpmax,func,j1,j2,varargin)
-
+  global options_
+  
   alf = 1e-4 ;
-  tolx = 3.7e-11 ;
+  tolx = options_.solve_tolx;
   alam = 1;
   
   x = xold;

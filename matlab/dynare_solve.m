@@ -33,7 +33,7 @@ function [x,info] = dynare_solve(func,x,jacobian_flag,varargin)
     [x,info]=solve1(func,x,1:nn,1:nn,jacobian_flag,varargin{:});
   elseif options_.solve_algo == 2
     nn = size(x,1) ;
-    tolf = eps^(2/3) ;
+    tolf = options_.solve_tolf ;
 
     if jacobian_flag
       [fvec,fjac] = feval(func,x,varargin{:});
@@ -53,7 +53,7 @@ function [x,info] = dynare_solve(func,x,jacobian_flag,varargin)
     
     f = 0.5*fvec'*fvec ;
 
-    if max(abs(fvec)) < 0.01*tolf
+    if max(abs(fvec)) < tolf
       return ;
     end
 
