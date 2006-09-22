@@ -135,7 +135,7 @@ void ComputingTasks::setEstimatedElements(void)
       string msg = "Unknown symbol: "+EstimParams->name;
       error(msg.c_str());
     }
-  if (SymbolTable::isReferenced(EstimParams->name) == eNotReferenced)
+  if (SymbolTable::isReferenced(EstimParams->name) == eNotReferenced & EstimParams->name != "dsge_prior_weight")
     {
       return;
     }
@@ -428,7 +428,7 @@ void ComputingTasks::setOsrParams(string tmp)
 void ComputingTasks::runOsr(string tmp1)
 {
   *output << tmp1;
-  *output << "osr(var_list_,osr_params_,optim_weights_);\n";
+  *output << "osr(var_list_,osr_params_,obj_var_,optim_weights_);\n";
 }
 //------------------------------------------------------------------------------
 void ComputingTasks::setOlrInst(string tmp)
