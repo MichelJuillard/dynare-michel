@@ -640,6 +640,11 @@
  		{_parser->estim_params.mean=*$1;
  		 _parser->estim_params.std=*$3;
  		}
+	| value COMMA value COMMA value
+		{_parser->estim_params.mean=*$1;
+		 _parser->estim_params.std=*$3;
+		 _parser->estim_params.p3=*$5;
+		}	
 	| value COMMA value COMMA value COMMA value 
 		{_parser->estim_params.mean=*$1;
 		 _parser->estim_params.std=*$3;
@@ -790,6 +795,7 @@
                    | o_xls_range
                    | o_filter_step_ahead
                    | o_solve_algo
+                   | o_constant
                    | o_noconstant
                    ;
 	
@@ -988,7 +994,7 @@
  o_xls_sheet : XLS_SHEET EQUAL NAME {_parser->option_str("xls_sheet",$3);} 
  o_xls_range : XLS_RANGE EQUAL range {_parser->option_str("xls_range",$3);} 
  o_filter_step_ahead : FILTER_STEP_AHEAD EQUAL vec_int {_parser->option_num("filter_step_ahead",$3);}
- o_constant : NOCONSTANT {_parser->option_num("noconstant","0");}
+ o_constant : CONSTANT {_parser->option_num("noconstant","0");}
  o_noconstant : NOCONSTANT {_parser->option_num("noconstant","1");}
 
  range : NAME ':' NAME {$$ = new dynare::Objects(":");$$ = _parser->cat($1,$$);$$ = _parser->cat($$,$3);}
