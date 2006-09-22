@@ -103,7 +103,9 @@ dsge_prior_weight = M_.params(strmatch('dsge_prior_weight',M_.param_names));
 %------------------------------------------------------------------------------
 % 2. call model setup & reduction program
 %------------------------------------------------------------------------------
-[T,R,SteadyState,info] = dynare_resolve;
+[T,R,SteadyState,info] = dynare_resolve(bayestopt_.restrict_var_list,...
+                                        bayestopt_.restrict_columns,...
+                                        bayestopt_.restrict_aux);
 if info(1) == 1 | info(1) == 2 | info(1) == 5
   fval = bayestopt_.penalty;
   cost_flag = 0;
@@ -131,11 +133,9 @@ end
 %------------------------------------------------------------------------------
 % 3. theorretical moments (second order)
 %------------------------------------------------------------------------------
-rs  = bayestopt_.restrict_state;
-T   = T(rs,rs);
-R   = R(rs,:);
 tmp = lyapunov_symm(T,R*Q*R');% I compute the variance-covariance matrix
                               % of the restricted state vector.
+bayestopt_.mf = bayestopt_.mf1;
 mf  = bayestopt_.mf1;
 
 NumberOfObservedVariables = size(options_.varobs,1);

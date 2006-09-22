@@ -29,6 +29,16 @@ function global_initialization()
   end
   options_.steadystate_partial = [];
   
+  options_.ParamSubSet = 'None';
+  
+  % bvar-dsge
+  options_.varlag = 4;
+  
+  % Optimization algorithm [6] gmhmaxlik
+  options_.Opt6Iter = 3;
+  options_.Opt6Numb = 100000;
+  
+  
   oo_.exo_simul = [];
   oo_.endo_simul = [];
   oo_.dr = struct([]);
