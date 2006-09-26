@@ -160,8 +160,6 @@ for i=1:n_varobs
 end
 % union of observed and state variables
 k2 = union(k',[dr.nstatic+1:dr.nstatic+dr.npred]');
-% including variables in t-2 and earlier, if any
-k2 = [k2;[M_.endo_nbr+(1:dr.nspred-dr.npred)]'];
 
 % set restrict_state to postion of observed + state variables
 % in expanded state vector
@@ -175,7 +173,7 @@ bayestopt_.mf2 	= k;
 bayestopt_.mfys = k1;
 
 [junk,ic] = intersect(k2,nstatic+(1:npred)');
-bayestopt_.restrict_columns = [ic length(k2)+(1:nspred-npred)]';
+bayestopt_.restrict_columns = [ic; length(k2)+(1:nspred-npred)'];
 aux = dr.transition_auxiliary_variables;
 k = find(aux(:,2) > npred);
 aux(:,2) = aux(:,2)+sum(k2 <= nstatic);
