@@ -175,8 +175,9 @@ bayestopt_.mfys = k1;
 [junk,ic] = intersect(k2,nstatic+(1:npred)');
 bayestopt_.restrict_columns = [ic; length(k2)+(1:nspred-npred)'];
 aux = dr.transition_auxiliary_variables;
+aux(:,2) = aux(:,2) + sum(k2 <= nstatic);
 k = find(aux(:,2) > npred);
-aux(:,2) = aux(:,2)+sum(k2 <= nstatic);
+aux(k,2) = aux(k,2) + sum(k2 > nstatic+npred);
 bayestopt_.restrict_aux = aux;
 
 
