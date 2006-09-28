@@ -1,4 +1,4 @@
-function [f0, x] = mr_gstep(func0,x,htol0,varargin)
+function [f0, x, ig] = mr_gstep(func0,x,htol0,varargin)
 % Copyright (C) 2005 Marco Ratto
 %
 % function [f0, x] = mr_gstep(func0,x,htol0,varargin)
@@ -28,6 +28,7 @@ f1=zeros(size(f0,1),n);
 f_1=f1;
 %for i=1:n,
 i=0;
+ig=zeros(n,1);
 while i<n,
     i=i+1;
     h10=h1(i);
@@ -119,6 +120,7 @@ while i<n,
             
         if gg(i)*(hh(i)*gg(i))/2 > htol,
             [f0 x fc retcode] = csminit(func0,x,f0,gg,0,diag(hh),varargin{:});
+            ig(i)=1;
         end
         xh1=x;
     end
