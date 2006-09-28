@@ -1323,5 +1323,5 @@ if ~((any(bayestopt_.pshape > 0) & options_.mh_replic) | (any(bayestopt_.pshape 
 end 
 
 if options_.forecast > 0 & options_.mh_replic == 0 & ~options_.load_mh_file 
-  forecast(var_list);
+  forecast(var_list_);
 end
