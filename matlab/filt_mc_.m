@@ -118,6 +118,7 @@ if ~loadSA,
   end
   nruns=size(x,1);
   nfilt=floor(pfilt*nruns);
+  if options_.opt_gsa.ppost | (options_.opt_gsa.ppost==0 & options_.opt_gsa.lik_only==0)
   disp(' ')
   disp('Computing RMSE''s...')
   fobs = options_.first_obs;
@@ -166,6 +167,7 @@ if ~loadSA,
     end
   end
   clear stock_filter;
+  end
   for j=1:nruns,
     lnprior(j,1) = priordens(x(j,:),bayestopt_.pshape,bayestopt_.p1,bayestopt_.p2,bayestopt_.p3,bayestopt_.p4);
   end
@@ -175,10 +177,18 @@ if ~loadSA,
   if options_.opt_gsa.ppost
     save([OutDir,'\',fnamtmp], 'x', 'logpo2', 'likelihood', 'rmse_MC', 'rmse_mode','rmse_pmean')    
   else
-    save([OutDir,'\',fnamtmp], 'likelihood', 'rmse_MC', 'rmse_mode','rmse_pmean','-append')    
+    if options_.opt_gsa.lik_only
+      save([OutDir,'\',fnamtmp], 'likelihood', '-append')    
+    else
+      save([OutDir,'\',fnamtmp], 'likelihood', 'rmse_MC', 'rmse_mode','rmse_pmean','-append')    
+    end
   end
 else
-  load([OutDir,'\',fnamtmp],'x','logpo2','likelihood','rmse_MC','rmse_mode','rmse_pmean');
+  if options_.opt_gsa.lik_only & options_.opt_gsa.ppost==0
+    load([OutDir,'\',fnamtmp],'x','logpo2','likelihood');
+  else
+    load([OutDir,'\',fnamtmp],'x','logpo2','likelihood','rmse_MC','rmse_mode','rmse_pmean');
+  end
   lnprior=likelihood(:)-logpo2(:);
   nruns=size(x,1);
   nfilt=floor(pfilt*nruns);
@@ -188,8 +198,25 @@ nfilt0=nfilt*ones(size(vvarvecm,1),1);
 logpo2=logpo2(:);
 if ~options_.opt_gsa.ppost
   [dum, ipost]=sort(logpo2);
+  [dum, ilik]=sort(likelihood);
 end
-for i=1:size(vvarvecm,1),
+if ~options_.opt_gsa.ppost & options_.opt_gsa.lik_only
+  if options_.opt_gsa.pprior
+    anam='SA_fit_prior_post';
+  else
+    anam='SA_fit_mc_post';
+  end
+  stab_map_1(x, ipost(1:nfilt), ipost(nfilt+1:end), anam, 1,[],OutDir);
+  stab_map_2(x(ipost(1:nfilt),:),alpha2,anam, OutDir);
+  if options_.opt_gsa.pprior
+    anam='SA_fit_prior_lik';
+  else
+    anam='SA_fit_mc_lik';
+  end
+  stab_map_1(x, ilik(1:nfilt), ilik(nfilt+1:end), anam, 1,[],OutDir);
+  stab_map_2(x(ilik(1:nfilt),:),alpha2,anam, OutDir);
+else
+  for i=1:size(vvarvecm,1),
   [dum, ixx(:,i)]=sort(rmse_MC(:,i));
   if options_.opt_gsa.ppost,
     %nfilt0(i)=length(find(rmse_MC(:,i)<rmse_pmean(i)));
@@ -369,14 +396,6 @@ for j=1:size(vvarvecm,1),
   %         min(logpo2(ixx(nfilt+1:end,j))) ...
   %         max(logpo2(ixx(nfilt+1:end,j)))])])
 end
-
-%stab_map_1(x, ipost(1:nfilt), ipost(nfilt+1:end), 'SA_post', 1);
-%stab_map_2(x(ipost(1:nfilt),:),alpha2,'SA_post', 1);
-% for i=1:size(vvarvecm,1),
-%     aname=['SA_fit_ALL_',deblank(vvarvecm(i,:))];        
-%     stab_map_1(x, ixx(1:nfilt,i), ixx(nfilt+1:end,i), aname, 1);
-%     close all
-% end
 
 SP=zeros(npar+nshock,size(vvarvecm,1));
 for j=1:size(vvarvecm,1),
@@ -621,3 +640,4 @@ for i=1:size(vvarvecm,1)
   %     close all
 end
 
+end
