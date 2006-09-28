@@ -50,25 +50,27 @@ end
 % RMSE mapping
 % function [rmse_MC, ixx] = filt_mc_(vvarvecm, loadSA, pfilt, alpha, alpha2)
 options_gsa_ = set_default_option(options_gsa_,'rmse',0);
+options_gsa_ = set_default_option(options_gsa_,'lik_only',0);
 options_gsa_ = set_default_option(options_gsa_,'var_rmse',options_.varobs);
 options_gsa_ = set_default_option(options_gsa_,'load_rmse',0);
 options_gsa_ = set_default_option(options_gsa_,'pfilt_rmse',0.1);
 options_gsa_ = set_default_option(options_gsa_,'istart_rmse',1);
 options_gsa_ = set_default_option(options_gsa_,'alpha_rmse',0.002);
 options_gsa_ = set_default_option(options_gsa_,'alpha2_rmse',1);
-%options_.opt_gsa = options_gsa_;
+options_.opt_gsa = options_gsa_;
 if options_gsa_.rmse,
   if ~options_gsa_.ppost
   if options_gsa_.pprior
-    a=load([OutputDirectoryName,'\',fname_,'_prior']);
+    a=whos('-file',[OutputDirectoryName,'\',fname_,'_prior'],'logpo2');
   else
-    a=load([OutputDirectoryName,'\',fname_,'_mc']);
+    a=whos('-file',[OutputDirectoryName,'\',fname_,'_mc'],'logpo2');
   end
-  if ~isfield(a,'stock_filter'),
+  if isempty(a),
     dynare_MC([],OutputDirectoryName);
     options_gsa_.load_rmse=0;
   end
   end
+  clear a;
   filt_mc_(options_gsa_.var_rmse, options_gsa_.load_rmse, options_gsa_.pfilt_rmse, ...
     options_gsa_.alpha_rmse, options_gsa_.alpha2_rmse, OutputDirectoryName, ...
     options_gsa_.istart_rmse);
