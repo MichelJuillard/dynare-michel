@@ -40,7 +40,7 @@ ftol=ftol0;
 gtol=1.e-3;
 htol=htol_base;
 htol0=htol_base;
-gibbstol=length(bayestopt_.pshape)/12;
+gibbstol=length(bayestopt_.pshape)/50; %25;
 
 func_hh = [func0,'_hh'];
 func = str2func(func0);
@@ -78,6 +78,9 @@ igrad=1;
 igibbs=1;
 inx=eye(nx);
 jit=0;
+nig=[];
+ig=ones(nx,1);
+ggx=zeros(nx,1);
 while norm(gg)>gtol & check==0 & jit<nit,
     jit=jit+1;
     tic
@@ -97,7 +100,16 @@ while norm(gg)>gtol & check==0 & jit<nit,
         x0=x01;        
     end
     if (fval0(icount)-fval)<1.e-2*(gg'*(igg*gg))/2 & igibbs,
-        [fvala, x0] = mr_gstep(func0,x0,htol,varargin{:});
+        if length(find(ig))<nx,
+            ggx=ggx*0;
+            ggx(find(ig))=gg(find(ig));
+            hhx = reshape(dum,nx,nx);
+            iggx=eye(length(gg));
+            iggx(find(ig),find(ig)) = inv( hhx(find(ig),find(ig)) );
+            [fvala x0 fc retcode] = csminit(func0,x0,fval,ggx,0,iggx,varargin{:});
+        end
+        [fvala, x0, ig] = mr_gstep(func0,x0,htol,varargin{:});
+        nig=[nig ig];
          if (fval-fvala)<gibbstol*(fval0(icount)-fval),
              igibbs=0;
              disp('Last Gibbs step, gain too small!!')
@@ -172,7 +184,7 @@ while norm(gg)>gtol & check==0 & jit<nit,
         end
         
         if norm(x(:,icount)-xparam1)>1.e-12,
-            save m1 x fval0 -append
+            save m1 x fval0 nig -append
             [dum, gg, htol0, igg, hhg]=mr_hessian(func_hh,xparam1,flagit,htol,varargin{:});
             if htol0>htol, %ftol,
                 %ftol=htol0;
@@ -204,11 +216,11 @@ while norm(gg)>gtol & check==0 & jit<nit,
         disp(['Elapsed time for iteration ',num2str(t),' s.'])
         
          g(:,icount+1)=gg;
-        save m1 x hh g hhg igg fval0
+        save m1 x hh g hhg igg fval0 nig
     end
 end
 
-save m1 x hh g hhg igg fval0
+save m1 x hh g hhg igg fval0 nig
 if ftol>ftol0,
     disp(' ')
     disp('Numerical noise in the likelihood')
