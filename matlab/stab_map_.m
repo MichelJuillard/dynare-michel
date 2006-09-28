@@ -101,6 +101,11 @@ if fload==0 | nargin<2 | isempty(fload),
     T=zeros(size(dr_.ghx,1),size(dr_.ghx,2)+size(dr_.ghu,2),Nsam/2);
   end
   
+  if isfield(dr_,'ghx'),
+    egg=zeros(length(dr_.eigval),Nsam);
+  end
+  yys=zeros(length(dr_.ys),Nsam);
+  
   
   if estim_params_.np<52 & ilptau,
     [lpmat] = lptauSEQ(Nsam,estim_params_.np);
@@ -206,7 +211,9 @@ if fload==0 | nargin<2 | isempty(fload),
         end  
         end
       else
+        if exist('egg'),
         egg(:,j)=ones(size(egg,1),1).*1.1;
+        end
         iwrong(j)=j;
       end
     end
