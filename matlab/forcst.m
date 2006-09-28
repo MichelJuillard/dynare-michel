@@ -7,7 +7,8 @@ function [yf,var_yf]=forcst(dr,y0,k,m)
 
   nstatic = dr.nstatic;
   npred = dr.npred;
-  j = find(kstate(dr.kae,2) <= ykmin_+1);
+  %j = find(dr.kstate(dr.kae,2) <= ykmin_+1);
+  j = find(dr.kstate(dr.kae,2) <= M_.maximum_lag+1);
   kae = dr.kae(j);
   nh = size(dr.ghx,2);
   hx = dr.ghx(nstatic+1:nstatic+npred,:);

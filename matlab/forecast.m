@@ -1,7 +1,7 @@
 % Copyright (C) 2005 Michel Juillard
 %
 function forecast(var_list)
-  global options_ dr_ oo_
+  global options_ dr_ oo_ M_
   
   old_options = options_;
   options_ = set_default_option(options_,'periods',40);
@@ -17,7 +17,7 @@ function forecast(var_list)
   end
   
   if M_.exo_det_nbr == 0
-    [yf,int_width] = forcst(dr_,y0,options_.periods,var_list);
+    [yf,int_width] = forcst(oo_.dr,y0,options_.periods,var_list);
   else
     exo_det_length = size(oo_.exo_det_simul,1);
     if options_.periods > exo_det_length
@@ -25,7 +25,8 @@ function forecast(var_list)
       oo_.ex_det_simul = [ oo_.exo_det_simul;...
 		    repmat(oo_.exo_det_steady_state',...
 			   options_.periods- ... 
-			   ex_det_length,1),1)];
+			   ex_det_length,1)];
+			   %ex_det_length,1),1)];
     elseif options_.periods < exo_det_length 
       ex = zeros(exo_det_length,M_.exo_nbr); 
     end
