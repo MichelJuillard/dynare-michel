@@ -16,7 +16,7 @@ function set_parameters(xparam1)
   end
   
   if ncx
-    offset = nvx + nvn;
+    offset = nvx + estim_params_.nvn;
     corrx = estim_params_.corrx;
     for i=1:ncx
       k1 = corrx(i,1);
