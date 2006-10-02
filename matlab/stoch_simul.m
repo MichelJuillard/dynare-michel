@@ -138,8 +138,8 @@ function info=stoch_simul(var_list)
 	  mylistTeX = [];
 	end
 	for j = 1:n
-	  assignin('base',[deblank(M_.endo_names(j,:)) '_' deblank(M_.exo_names(i,:))],...
-		   y(j,:)');
+	  assignin('base',[deblank(M_.endo_names(ivar(j),:)) '_' deblank(M_.exo_names(i,:))],...
+		   y(ivar(j),:)');
 	  if max(y(ivar(j),:)) - min(y(ivar(j),:)) > 1e-10
 	    irfs  = cat(1,irfs,y(ivar(j),:));
 	    mylist = strvcat(mylist,deblank(var_list(j,:)));
