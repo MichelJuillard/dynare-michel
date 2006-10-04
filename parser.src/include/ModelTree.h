@@ -1,7 +1,7 @@
 #ifndef MODELTREE_H
 #define MODELTREE_H
 //------------------------------------------------------------------------------
-/*! \file
+/*! \file 
  \version 1.0
  \date 04/13/2003
  \par This file defines the ModelTree class.
@@ -20,9 +20,6 @@
 #include "NumericalConstants.h"
 #include "ModelTypes.h"
 #include "DataTree.h"
-/*New*/
-#include "BlockTriangular.h"
-/*EndNew*/
 //------------------------------------------------------------------------------
 /*!
  \class  ModelTree
@@ -71,9 +68,9 @@ class ModelTree : public DataTree
 		inline std::string		getExpression(NodeID StartID, EquationType  iEquationType, int iEquationID = -1);
 		/*!
 		  Return true if node is to be writen as temp result
-		  depending on its time cost and number of times it is referenced in model tree
+		  depending on its time cost and number of times it is referenced in model tree 
 		*/
-		inline bool		writeAsTemp(NodeID id);
+		inline bool		writeAsTemp(NodeID id);		
 		/*! Remove unreferenced tokens after a derivation */
 		//void 		RemoveUnref(int iBeginID, int iEndID, int iOrder);
 		/*! Decrementing reference couter of unreferenced tokens in last derivative */
@@ -96,31 +93,22 @@ class ModelTree : public DataTree
 		void OpenCFiles(std::string iModelFileName1, std::string iModelFileName2 = "");
 		/*! Saves output string into output M files */
 		void SaveMFiles();
-
 		/*! Saves output string into output C files */
-		/*New*/
-        void SaveCFiles(Model_Block* ModelBlock);
-        /*EndNew*/
+		void SaveCFiles();
 		/*! Computes derivatives of ModelTree */
 		void 		derive(int iOrder);
 		/*!
 		  Writes output file for static model :
-			- equations
-			- 1st order derivatives with respect to endogenous variables (without lags)
+			- equations 
+			- 1st order derivatives with respect to endogenous variables (without lags) 
 		*/
 		std::string 		setStaticModel(void);
-		/*!
+		/*! 
 		  Writes output file for dynamic stochastic model :
-		  - equations
-		  - 1st order and 2nd order derivatives with respect to endogenous, exogenous, exogenous_det (in specific order)
+		  - equations 
+		  - 1st order and 2nd order derivatives with respect to endogenous, exogenous, exogenous_det (in specific order) 
 		*/
 		std::string 		setDynamicModel(void);
-
-        /*New*/
-		std::string  setDynamicModel_New(Model_Block* ModelBlock, simple* Index_Var_IM);
-		/*EndNew*/
-
-
 		/*! Writes initialization of various Matlab variables */
 		void 		ModelInitialization(void);
 		/*! Returns string output for main file */

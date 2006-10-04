@@ -1,4 +1,4 @@
-/*! \file
+/*! \file 
  \version 1.0
  \date 04/09/2004
  \par This file implements the VariableTable class methodes.
@@ -12,13 +12,13 @@ using namespace std;
 #include "VariableTable.h"
 //------------------------------------------------------------------------------
 map<varKey,int> VariableTable::mVariableTable = *(new map<varKey,int>);
-vector<varKey> VariableTable::mVariableIndex = *(new vector<varKey>);
+vector<varKey> VariableTable::mVariableIndex = *(new vector<varKey>);	
 vector<int>	VariableTable::mSortedVariableID = *(new vector<int>);
 vector<int>	VariableTable::mPrintFormatIndex = *(new vector<int>);
 void (* VariableTable::error) (const char* ) = NULL;
 //------------------------------------------------------------------------------
 VariableTable::VariableTable()
-{
+{ 
 	// Empty
 }
 //------------------------------------------------------------------------------
@@ -29,10 +29,10 @@ VariableTable::~VariableTable()
 //------------------------------------------------------------------------------
 int VariableTable::AddVariable(string iName, int iLag)
 {
-	int 		lVariableID;
+	int 		lVariableID;	
 	//Variable 	lVariable;
 	varKey			key;
-	// Testing if symbol exists
+	// Testing if symbol exists 
 	if (!SymbolTable::Exist(iName))
     {
       		string msg = "unknown symbol: " + iName;
@@ -51,7 +51,7 @@ int VariableTable::AddVariable(string iName, int iLag)
     //lVariable.symbol_id = SymbolTable::getID(iName);
     //lVariable.variable_id = lVariableID;
     key = make_pair(iName,iLag);
-    // Pushing variable on VariableTable
+    // Pushing variable on VariableTable 
   	//mVariableTable[key] = lVariable;
   	mVariableTable[key] = lVariableID;
   	mVariableIndex.push_back(key);
@@ -114,7 +114,7 @@ int VariableTable::AddVariable(string iName, int iLag)
 	      }
 	    break;
 	  default:
-	    ;
+	    ; 
 	  }
 
   	return mVariableIndex.size()-1;
@@ -122,7 +122,7 @@ int VariableTable::AddVariable(string iName, int iLag)
 //------------------------------------------------------------------------------
 void VariableTable::decSymbolID(string iName, int id, int iLag, Type iType)
 {
-	int 		lVariableID;
+	int 		lVariableID;	
 	Variable 	lVariable;
 	varKey			key;
 
@@ -150,7 +150,7 @@ void	VariableTable::Sort(void)
 	vector<int>				IDs;
 	vector<int>				Lags;
 	vector<Type>			Types;
-
+	
 	if (mVariableIndex.size() == 1)
 	{
 		mSortedVariableID.push_back(0);
@@ -172,20 +172,20 @@ void	VariableTable::Sort(void)
 		unsigned long long int  type = Types[id];
 		type = type <<  8*sizeof(int);
 		unsigned long long int sort_pound = IDs[id]+lag+type;
-		VarToSort.push_back(make_pair(sort_pound,id));
+		VarToSort.push_back(make_pair(sort_pound,id));	
 	}
 	// Uncomment this to debug
 	/*
 	cout << "Before sorting\n";
 	cout << "S T L ID  pound \n";
 	for (int id=0; id < VarToSort.size(); id++)
-	{
+	{	
 		Type type = Types[VarToSort[id].second];
 		int lag = Lags[VarToSort[id].second];
 		int ID = IDs[VarToSort[id].second];
-		cout << SymbolTable::getNameByID(type, ID) << " "
-			 << type << " "
-			 << lag <<  " "
+		cout << SymbolTable::getNameByID(type, ID) << " " 
+			 << type << " " 
+			 << lag <<  " " 
 			 << ID << " "
 			 << VarToSort[id].first << "\n";
 	}
@@ -198,7 +198,7 @@ void	VariableTable::Sort(void)
 	Type type = Types[VarToSort[0].second];
 	int index = 0;
 	for (unsigned int id = 0; id < VarToSort.size(); id++)
-	{
+	{	
 		int id2 = VarToSort[id].second;
 		mSortedVariableID[id2] = id;
 		if (type == Types[id2])
@@ -207,7 +207,7 @@ void	VariableTable::Sort(void)
 			index++;
 		}
 		else
-		{
+		{						
 			mPrintFormatIndex[id2] = 0;
 			type = Types[id2];
 			index = 1;
@@ -218,105 +218,17 @@ void	VariableTable::Sort(void)
 	cout << "After sorting\n";
 	cout << "S T L ID   SVID PIDX\n";
 	for (int id=0; id < VarToSort.size(); id++)
-	{
+	{	
 		Type type = Types[VarToSort[id].second];
 		int lag = Lags[VarToSort[id].second];
 		int ID = IDs[VarToSort[id].second];
-		cout << SymbolTable::getNameByID(Types[id], IDs[id]) << " "
-			 << Types[id] << " "
-			 << Lags[id] << " "
+		cout << SymbolTable::getNameByID(Types[id], IDs[id]) << " " 
+			 << Types[id] << " " 
+			 << Lags[id] << " " 
 			 << IDs[id] << " "
 			 << mSortedVariableID[id] << " "
 			 << mPrintFormatIndex[id] << "\n";
 	}
 	*/
 }
-//------------------------------------------------------------------------------
-/*New*/
-int* VariableTable::GetVariableTable(int* Size)
-{
-    int* Table;
-    varKey key;
-    int variable,id, ind;
-    *Size=0;
-    //cout << "S T L ID   SVID PIDX\n";
-    //cout << "mVariableIndex.size() : " << mVariableIndex.size() << "\n";
-    for (id=0; id < mVariableIndex.size(); id++)
-     {
-        key = mVariableIndex[id];
-		variable = mVariableTable[key];
-        if(getType(variable)==eEndogenous)
-          (*Size)++;
-     }
-    //cout << "*Size : " << (*Size) << "\n";
-    Table=(int*)malloc((*Size)*sizeof(*Table)*4);
-    ind=0;
-    for (id=0; id < mVariableIndex.size(); id++)
-	 {
-		//Type type = Types[VarToSort[id].second];
-		//int lag = Lags[VarToSort[id].second];
-		//int ID = IDs[VarToSort[id].second];
-		key = mVariableIndex[id];
-		variable = mVariableTable[key];
-		if (getType(variable)==eEndogenous)
-		 {
-		   Table[ind*4]= getSymbolID(id);
-		   Table[ind*4+1]= key.second;
-		   Table[ind*4+2]= mPrintFormatIndex[id];
-		   Table[ind*4+3]= 1;
-		   ind++;
-		 //cout << SymbolTable::getNameByID(Types[id], IDs[id]) << " "
-			// << Types[id] << " "
-			// << Lags[id] << " "
-			// << IDs[id] << " "
-			// << mSortedVariableID[id] << " "
-			// << mPrintFormatIndex[id] << "\n";
-		 }
-	}
-	return(Table);
-}
-
-int VariableTable::GetVariableID(std::string name, int lead_lag)
- {
-     int found=-1;
-     varKey key;
-	 int variable;
-     for (int id=0; id < mVariableIndex.size(); id++)
-      {
-         key=mVariableIndex[id];
-         variable = mVariableTable[key];
-         if((SymbolTable::getNameByID(getType(id), getSymbolID(variable))==name) && (lead_lag==key.second))
-          found=mPrintFormatIndex[id];
-      }
-     return(found);
- }
-
-
-
-int VariableTable::getIDS(int id, int lead_lag)
- {
-     /*int found=-1;*/
-     varKey key;
-	 int variable;
-     /*for (int id=0; id < mVariableIndex.size(); id++)
-      {*/
-         key=mVariableIndex[id];
-         variable = mVariableTable[key];
-         /*if((SymbolTable::getNameByID(getType(id), getSymbolID(variable))==name) && (lead_lag==key.second))
-          found=mPrintFormatIndex[id];
-      }*/
-     return(variable);
- }
-
-
-
-std::string  VariableTable::GetVariableName(int id)
- {
-     varKey key;
-	 int variable;
-	 key=mVariableIndex[id];
-     variable = mVariableTable[key];
-     return SymbolTable::getNameByID(getType(id), getSymbolID(variable));
- }
-/*EndNew*/
 //------------------------------------------------------------------------------

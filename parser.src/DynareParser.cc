@@ -1,4 +1,4 @@
-/*! \file
+/*! \file 
  \version 1.0
  \date 04/09/2004
  \par This file implements the parser class methodes.
@@ -15,10 +15,6 @@
 #include "ComputingTasks.h"
 #include "TmpSymbolTable.h"
 #include "DynareParser.h"
-/*New*/
-#include "BlockTriangular.h"
-/*EndNew*/
-
 
 string dynare::parser::file_name = "";
 void dynare::parser::set_file_name(string fname)
@@ -26,9 +22,9 @@ void dynare::parser::set_file_name(string fname)
 	file_name = fname;
 }
 
-void dynare::parser::setoutput(ostringstream* ostr)
+void dynare::parser::setoutput(ostringstream* ostr) 
 {
-	output = ostr;
+	output = ostr;	
 	numerical_initialization.setOutput(ostr);
 	shocks.setOutput(ostr);
 	sigmae.setOutput(ostr);
@@ -38,7 +34,7 @@ void dynare::parser::setoutput(ostringstream* ostr)
 dynare::Objects* dynare::parser::add_endogenous(Objects* obj, Objects* tex_name)
 {
   //cout << "add_endogenous \n";
-
+  
   obj->ID = (NodeID) symbol_table.AddSymbolDeclar(obj->symbol,eEndogenous, tex_name->symbol);
   obj->type = eEndogenous;
   return (obj);
@@ -49,7 +45,7 @@ dynare::Objects* dynare::parser::add_exogenous(Objects* obj, Objects* tex_name)
   obj->type = eExogenous;
   return (obj);
 }
-dynare::Objects* dynare::parser::add_exogenous_det(Objects* obj, Objects* tex_name)
+dynare::Objects* dynare::parser::add_exogenous_det(Objects* obj, Objects* tex_name)                                    
 {
   obj->ID = (NodeID) symbol_table.AddSymbolDeclar(obj->symbol,eExogenousDet, tex_name->symbol);
   obj->type = eExogenousDet;
@@ -84,31 +80,25 @@ dynare::Objects* dynare::parser::add_variable(Objects* var)
 {
 	//cout << "add_variable1 : " << var->symbol << endl;
 	var = get_symbol(var);
-	if((var->type == eEndogenous)
+	if((var->type == eEndogenous) 
 	   || (var->type == eExogenous)
 	   || (var->type == eExogenousDet))
 		variable_table.AddVariable(var->symbol,0);
 	//cout   << "add_model_token : " << var->ID << endl;
 	NodeID id = model_tree.AddTerminal(var->symbol);
-	/*New*/
-	if (var->type == eEndogenous)
-	 {
-	  block_triangular.fill_IM(ModelParameters::eq_nbr, symbol_table.getID(var->symbol), 0);
-	 }
-	 /*EndNew*/
 	return new Objects("", id, eTempResult);
 }
 dynare::Objects* dynare::parser::add_variable(Objects* var,Objects* olag)
 {
 	//cout << "add_variable2\n";
-
+	
 	var = get_symbol(var);
 	int lag = atoi((olag->symbol).c_str());
 	//cout << "symbol = " << olag->symbol << endl;
 	//cout << "lag = " << lag << endl;
 	if ((var->type == eExogenous) && lag != 0)
 	  {
-	    std::cout << "Warning: exogenous variable "
+	    std::cout << "Warning: exogenous variable " 
 		      << var->symbol
 		      << " has lag " << lag << "\n";
 	  }
@@ -116,14 +106,6 @@ dynare::Objects* dynare::parser::add_variable(Objects* var,Objects* olag)
 		variable_table.AddVariable(var->symbol,lag);
 	//cout   << "add_model_token : " << var->ID << endl;
 	NodeID id = model_tree.AddTerminal(var->symbol,lag);
-	/*New*/
-	if (var->type == eEndogenous)
-	 {
-      //cout << "var->symbol : " << var->symbol << symbol_table.getID(var->symbol) << "\n";
-      //cout << "ModelParameters::eq_nbr : " << ModelParameters::eq_nbr << "\n";
-	  block_triangular.fill_IM(ModelParameters::eq_nbr, symbol_table.getID(var->symbol), lag);
-	 }
-    /*EndNew*/
 	return new Objects("", id, eTempResult);
 }
 dynare::Objects* dynare::parser::get_symbol(Objects* obj)
@@ -199,7 +181,7 @@ dynare::Objects* dynare::parser::add_expression_token( Objects* arg1, Objects* o
   //cout << "after add_expression_token\n";
   return new Objects("", (NodeID) id, eTempResult);
 }
-dynare::Objects* dynare::parser::get_expression(Objects* exp)
+dynare::Objects* dynare::parser::get_expression(Objects* exp) 
 {
 	if (exp->type == eTempResult)
 	{
@@ -230,7 +212,7 @@ void dynare::parser::init_param(Objects* lhs,  Objects* rhs)
 void dynare::parser::init_param(Objects* lhs)
 {
 	//cout << "Befor set\n";
-	expression.set();
+	expression.set();   	
 	numerical_initialization.SetConstant(lhs->symbol, expression.get());
 	expression.clear();
 }
@@ -246,52 +228,28 @@ void dynare::parser::hist_val(Objects* lhs, Objects* slag, Objects* rhs)
 void dynare::parser::hist_val(Objects* lhs, Objects* slag)
 {
 	int lag = atoi((slag->symbol).c_str());
-	expression.set();
+	expression.set();  	
 	numerical_initialization.SetHist(lhs->symbol, lag, expression.get());
 	expression.clear();
 }
 void dynare::parser::initialize_model(void)
 {
-    /*New*/
-    block_triangular.init_incidence_matrix();
-    /*EndNew*/
 }
 void dynare::parser::use_dll(void)
 {
-	// Setting variable mumber offset to use C outputs
+	// Seetting variable momber offset to use C outputs
 	model_tree.offset = 0;
 }
-
-/*New*/
-void dynare::parser::dll(void)
-{
-	// Seetting variable mumber offset to use C outputs
-	model_tree.offset = 2;
-}
-/*EndNew*/
-
 void dynare::parser::check_model(void)
 {
-    /*New*/
-    if (block_triangular.bt_verbose)
-     {
-      /*cout << "block_triangular.bt_verbose : " << block_triangular.bt_verbose << "\n";
-      cout << "----------------------------------------------------------------------------\n";*/
-      cout << "The gross incidence matrix \n";
-	  block_triangular.Print_IM(ModelParameters::endo_nbr);
-	  cout << "First ordering \n";
-     }
-	//block_triangular.Normalize_and_BlockDecompose_0();
-	block_triangular.Normalize_and_BlockDecompose_Static_Model();
-	/*EndNew*/
 	symbol_table.clean();
 }
 void dynare::parser::finish(void)
 {
+	
+  string model_file_name(file_name);   
 
-  string model_file_name(file_name);
-
-  // Setting flags to compute what is necessary
+  // Setting flags to compute what is necessary	
   if (order == 1 || linear == 1)
     {
       model_tree.computeJacobianExo = true;
@@ -314,28 +272,22 @@ void dynare::parser::finish(void)
     {
       model_tree.derive(1);
     }
-
+	
   cout << "Processing outputs ...\n";
   model_tree.setStaticModel();
-  /*New*/
-  if (model_tree.offset == 2)
-   model_tree.setDynamicModel_New(block_triangular.ModelBlock,block_triangular.Index_Var_IM);
-  else
-   model_tree.setDynamicModel();
-  if (model_tree.offset != 1)
-  /*EndNew*/
+  model_tree.setDynamicModel();
+
+  if (model_tree.offset == 0)
     {
       model_tree.OpenCFiles(model_file_name+"_static", model_file_name+"_dynamic");
-      /*New*/
-      model_tree.SaveCFiles(block_triangular.ModelBlock);
-      /*EndNew*/
+      model_tree.SaveCFiles();
     }
   else
     {
       model_tree.OpenMFiles(model_file_name+"_static", model_file_name+"_dynamic");
       model_tree.SaveMFiles();
     }
-
+  
   *output << "save('" << model_file_name << "_results', 'oo_');\n";
   *output << "diary off\n";
 
@@ -389,7 +341,7 @@ void dynare::parser::add_det_shock(Objects* var)
     case eExogenousDet:
       shocks.AddDetShockExoDet(id);
       return;
-    default:
+    default:	    
       error("Shocks can only be applied to exogenous variables");
     }
 }
@@ -690,13 +642,13 @@ dynare::Objects*	dynare::parser::add_equal(Objects* arg1,  Objects* arg2)
 	model_parameters.eq_nbr++;
 	return new Objects("", id, eTempResult);
 }
-
+		
 dynare::Objects*	dynare::parser::init_local_parameter(Objects* arg1,  Objects* arg2)
 {
 	NodeID id = model_tree.AddAssign(arg1->ID, arg2->ID);
 	return new Objects("", id, eTempResult);
 }
-
+		
 dynare::Objects*	dynare::parser::add_plus(Objects* arg1,  Objects* arg2)
 {
 	NodeID id = model_tree.AddPlus(arg1->ID, arg2->ID);

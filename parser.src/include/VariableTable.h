@@ -1,7 +1,7 @@
 #ifndef VARIABLETABLE_H
 #define VARIABLETABLE_H
 //------------------------------------------------------------------------------
-/** \file
+/** \file 
  * \version 1.0
  * \date 12/16/2003
  * \par This file defines the VariableTable class .
@@ -11,11 +11,11 @@
 #include <string>
 #include <vector>
 //------------------------------------------------------------------------------
-#include "SymbolTable.h"
+#include "SymbolTable.h" 
 //------------------------------------------------------------------------------
-/*!
+/*! 
  \class Variable
- \brief	Variable struct
+ \brief	Variable struct 
 */
 struct Variable {
   /*! Variable type */
@@ -29,12 +29,12 @@ struct Variable {
 typedef std::pair<std::string, int> varKey;
 //------------------------------------------------------------------------------
 /*!
- \class VariableTable
- \brief  This class is used to store variables as they appear
+ \class VariableTable 
+ \brief  This class is used to store variables as they appear 
  in the model (with their lead or lag)
 */
 class VariableTable
-{
+{ 
 	private :
 		/*!  Variable table data */
 		//static std::map<varKey,Variable>	mVariableTable;
@@ -44,19 +44,19 @@ class VariableTable
 		/*! Variable IDs of sorted variable table */
 		static std::vector<int>			mSortedVariableID;
 		/*! Output index for variable table */
-		static std::vector<int>			mPrintFormatIndex;
+		static std::vector<int>			mPrintFormatIndex;			
 	public :
 		/*! */
 		VariableTable();
 		/*! */
 		~VariableTable();
-		/*! Find type and ID in SymbolTable
-		 - Increment variable_id;
-		 - Make variable
-		 - Push variable on variabletable
-		*/
-		static int 	AddVariable(std::string iName, int iLag);
-		/*! Pointer to error function of parser class */
+		/*! Find type and ID in SymbolTable 
+		 - Increment variable_id; 
+		 - Make variable 
+		 - Push variable on variabletable 
+		*/	
+		static int 	AddVariable(std::string iName, int iLag);	
+		/*! Pointer to error function of parser class */                               
 		static void (* error) (const char* m);
 		/*! Decremente a symbol id of a variable */
 		static void decSymbolID(std::string iName, int id, int iLag, Type iType);
@@ -76,12 +76,6 @@ class VariableTable
 		inline static int 	getPrintIndex(int iVarID);
 		/*! Sorts variable table */
 		static void	Sort(void);
-		/*New*/
-		static int* GetVariableTable(int* Size);
-        static int GetVariableID(std::string name, int lead_lag);
-		static std::string  GetVariableName(int id);
-		static int getIDS(int id, int lead_lag);
-		/*EndNew*/
 };
 inline int  VariableTable::getSortID(int iVarID)
 {

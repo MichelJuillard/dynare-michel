@@ -1,7 +1,7 @@
 #ifndef DYNAREPARSER_H
 #define DYNAREPARSER_H
 //------------------------------------------------------------------------------
-/*! \file
+/*! \file 
  \version 1.0
  \date 04/27/2004
  \par This file defines the parser class.
@@ -19,10 +19,7 @@
 #include "ComputingTasks.h"
 #include "TmpSymbolTable.h"
 #include "Objects.h"
-/*New*/
-#include "BlockTriangular.h"
-/*EndNew*/
-#ifndef YLMM_basic_parser
+#ifndef YLMM_basic_parser 
 #include "ylmm/basic_parser.hh"
 #endif
 #ifndef YLMM_basic_scanner
@@ -36,13 +33,13 @@
 extern int yylineno;
 /*! \namespace dynare
  */
-namespace dynare
+namespace dynare 
 {
   /*!
     \class  parser
-    \brief  Member functions of this class are called from DyanreBison.y
+    \brief  Member functions of this class are called from DyanreBison.y  
   */
-  class parser : public ylmm::basic_parser<Objects*>
+  class parser : public ylmm::basic_parser<Objects*> 
   {
   private:
     ylmm::basic_scanner<Objects*>& _scanner;
@@ -80,20 +77,17 @@ namespace dynare
 	/*! Value of option linear */
 	int 					linear;
 	EstimationParams		estim_params;
-	/*New*/
-    BlockTriangular         block_triangular;
-    /*EndNew*/
     /*! Prints an arror to stdout */
 	static void error(const char* m)
-	{
+	{ 
 		std::cout << file_name << " : Error in line " << yylineno << " : " << m << endl;
 		exit(-1);
 	}
     /*!
      Constuctor
-	 \param s reference to scanner
+	 \param s reference to scanner  
 	 */
-    parser(ylmm::basic_scanner<Objects*>& s) : _scanner(s)
+    parser(ylmm::basic_scanner<Objects*>& s) : _scanner(s) 
     {
     	order = -1;
     	linear = -1;
@@ -106,17 +100,17 @@ namespace dynare
     	tmp_symbol_table.error = error;
     }
     /*! Destructor */
-    virtual ~parser() {}
+    virtual ~parser() {}                    
     /*!
-     Scan input
-	 \param arg Optional argument
-	 \return The next token ID
+     Scan input                          
+	 \param arg Optional argument            
+	 \return The next token ID 
 	 */
-    int scan(void* arg=0) {
-      if (need_where())
-		return _scanner.next(*_token,*_location);
+    int scan(void* arg=0) {                 
+      if (need_where())                     
+		return _scanner.next(*_token,*_location); 
       return _scanner.next(*_token);
-
+      
     }
     /*! Sets output file name */
     void set_file_name(string fname);
@@ -130,9 +124,6 @@ namespace dynare
     void initialize_model(void);
     /*! Sets variable offset of ModelTree class to use C output */
     void use_dll(void);
-    /*New*/
-    void dll(void);
-    /*EndNew*/
     /*! Adds an endogenous variable to SymbolTable*/
     Objects* add_endogenous(Objects* name, Objects* tex_name = new Objects("",NULL, eUNDEF));
     /*! Adds an exogenous variable to SymbolTable*/

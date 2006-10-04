@@ -2,7 +2,7 @@
 #define YY_BUF_SIZE 1000000
 #include <unistd.h>
 #include <string.h>
-#include "DynareScanner.h"
+#include "DynareScanner.h" 
 #ifdef HAVE_CONFIG_H
 # include "config.hh"
 #endif
@@ -11,13 +11,13 @@
 #define FINISH 0
 #define YY_READ_BUF_SIZE 1000000
 #include "ylmm/lexmm.hh"
-int lineno = 1;
+int lineno = 1; 
 int comment_caller;
-/* Particular value : when sigma_e command is found
+/* Particular value : when sigma_e command is found 
  this flag is set to 1, when command finished it is set to 0
  */
 int sigma_e = 0;
-%}
+%} 
 
 
 %option stack
@@ -34,11 +34,11 @@ int sigma_e = 0;
 
  /* Comments */
 <INITIAL,SET_STATEMENT,DYNARE_STATEMENT,DYNARE_BLOCK>["%"].*
-<INITIAL,SET_STATEMENT,DYNARE_STATEMENT,DYNARE_BLOCK>["/"]["/"].*
+<INITIAL,SET_STATEMENT,DYNARE_STATEMENT,DYNARE_BLOCK>["/"]["/"].* 
 <INITIAL,SET_STATEMENT,DYNARE_STATEMENT,DYNARE_BLOCK>"/*"   {comment_caller = YYSTATE; BEGIN COMMENT;}
 
-<COMMENT>[^*\n]*
-<COMMENT>"*"+[^*/\n]*
+<COMMENT>[^*\n]* 		
+<COMMENT>"*"+[^*/\n]*	
 <COMMENT>"*"+"/"        {BEGIN comment_caller;}
 
  /* Begin of a Dynare statement */
@@ -86,24 +86,24 @@ int sigma_e = 0;
 <INITIAL>optim_weights {BEGIN DYNARE_BLOCK;return OPTIM_WEIGHTS;}
 
  /* End of a Dynare block */
-<DYNARE_BLOCK>end[ \t\n]*; 	{BEGIN INITIAL;return END;}
+<DYNARE_BLOCK>end[ \t\n]*; 	{BEGIN INITIAL;return END;}   
 
  /* Inside  of a Dynare statement */
 <DYNARE_STATEMENT>datafile 		{return DATAFILE;}
 <DYNARE_STATEMENT>nobs 			{return NOBS;}
 <DYNARE_STATEMENT>first_obs 		{return FIRST_OBS;}
-<DYNARE_STATEMENT>prefilter 		{return PREFILTER;}
-<DYNARE_STATEMENT>presample 		{return PRESAMPLE;}
-<DYNARE_STATEMENT>lik_algo  		{return LIK_ALGO;}
-<DYNARE_STATEMENT>lik_init  		{return LIK_INIT;}
-<DYNARE_STATEMENT>graph   		{return GRAPH;}
-<DYNARE_STATEMENT>nograph   		{return NOGRAPH;}
-<DYNARE_STATEMENT>print   		{return PRINT;}
-<DYNARE_STATEMENT>noprint   		{return NOPRINT;}
-<DYNARE_STATEMENT>conf_sig  		{return CONF_SIG;}
-<DYNARE_STATEMENT>mh_replic 		{return MH_REPLIC;}
-<DYNARE_STATEMENT>mh_drop   		{return MH_DROP;}
-<DYNARE_STATEMENT>mh_jscale   		{return MH_JSCALE;}
+<DYNARE_STATEMENT>prefilter 		{return PREFILTER;} 
+<DYNARE_STATEMENT>presample 		{return PRESAMPLE;} 
+<DYNARE_STATEMENT>lik_algo  		{return LIK_ALGO;}  
+<DYNARE_STATEMENT>lik_init  		{return LIK_INIT;}  
+<DYNARE_STATEMENT>graph   		{return GRAPH;}  	  
+<DYNARE_STATEMENT>nograph   		{return NOGRAPH;}  	  
+<DYNARE_STATEMENT>print   		{return PRINT;}  	  
+<DYNARE_STATEMENT>noprint   		{return NOPRINT;}  	  
+<DYNARE_STATEMENT>conf_sig  		{return CONF_SIG;}  
+<DYNARE_STATEMENT>mh_replic 		{return MH_REPLIC;} 
+<DYNARE_STATEMENT>mh_drop   		{return MH_DROP;}   
+<DYNARE_STATEMENT>mh_jscale   		{return MH_JSCALE;}   
 <DYNARE_STATEMENT>mh_init_scale 	{return MH_INIT_SCALE;}
 <DYNARE_STATEMENT>mode_file 		{return MODE_FILE;}
 <DYNARE_STATEMENT>mode_compute 	{return MODE_COMPUTE;}
@@ -139,7 +139,7 @@ int sigma_e = 0;
 
 <DYNARE_STATEMENT>[\$][^$]*[\$] {
 	strtok(yytext+1,"$");
-	_scanner->do_name(yytext+1);
+	_scanner->do_name(yytext+1); 
 	return TEX_NAME;}
 
  /* Inside a Dynare block */
@@ -177,20 +177,15 @@ int sigma_e = 0;
 <DYNARE_STATEMENT>simul {return SIMUL;}
 <DYNARE_STATEMENT>autocorr {return AUTOCORR;}
 <DYNARE_STATEMENT>olr_beta {return OLR_BETA;}
-<DYNARE_STATEMENT>xtick   		{return XTICK;}
-<DYNARE_STATEMENT>xticklabel   		{return XTICKLABEL;}
+<DYNARE_STATEMENT>xtick   		{return XTICK;}  	  
+<DYNARE_STATEMENT>xticklabel   		{return XTICKLABEL;}  	  
 <DYNARE_STATEMENT>xls_sheet {return XLS_SHEET;}
 <DYNARE_STATEMENT>xls_range {return XLS_RANGE;}
 
 <DYNARE_STATEMENT,DYNARE_BLOCK>use_dll {return USE_DLL;}
-
- /* New */
-<DYNARE_STATEMENT,DYNARE_BLOCK>dll {return DLL;}
- /* EndNew */
-
 <DYNARE_STATEMENT,DYNARE_BLOCK>linear {return LINEAR;}
 <DYNARE_STATEMENT,DYNARE_BLOCK>[,] {_scanner->do_operator(COMMA); return COMMA;}
-<DYNARE_STATEMENT,DYNARE_BLOCK>[\(\)] {return yytext[0];}
+<DYNARE_STATEMENT,DYNARE_BLOCK>[\(\)] {return yytext[0];} 
 <DYNARE_STATEMENT,DYNARE_BLOCK>[\[] {return yytext[0];}
 <DYNARE_STATEMENT,DYNARE_BLOCK>[\]] {if (sigma_e) sigma_e=0; return yytext[0];}
 <DYNARE_STATEMENT,DYNARE_BLOCK>[+] {_scanner->do_operator(PLUS); return PLUS;}
@@ -219,7 +214,7 @@ int sigma_e = 0;
 <DYNARE_STATEMENT,DYNARE_BLOCK>sqrt  {_scanner->do_operator(SQRT);return SQRT;}
 
 <DYNARE_STATEMENT,DYNARE_BLOCK>[A-Za-z_][A-Za-z0-9_]* {
-	_scanner->do_name(yytext);
+	_scanner->do_name(yytext); 
 	return NAME;}
 
 <DYNARE_STATEMENT,DYNARE_BLOCK>((([0-9]*\.[0-9]+)|([0-9]+\.))([edED][-+]?[0-9]+)?)|([0-9]+[edED][-+]?[0-9]+) {
@@ -229,11 +224,11 @@ int sigma_e = 0;
 <DYNARE_STATEMENT,DYNARE_BLOCK>[0-9]+ {
 	_scanner->do_num_constant(yytext);
    	return INT_NUMBER;}
-
+   	
  /* an instruction starting with a recognized symbol is passed as NAME,
     otherwise it is a native statement until the end of the line
  */
-<INITIAL>[A-Za-z_][A-Za-z0-9_]* {
+<INITIAL>[A-Za-z_][A-Za-z0-9_]* {	      
 		if (SymbolTable::getID(yytext) != -1)
 		{
 		 	BEGIN DYNARE_STATEMENT;
