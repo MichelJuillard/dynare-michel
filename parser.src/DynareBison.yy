@@ -854,7 +854,7 @@
      ;
  
  olr_option : o_olr_beta
-     | stoch_simul_options_list
+     | stoch_simul_options
      ;
  
  olr_options : olr_option
