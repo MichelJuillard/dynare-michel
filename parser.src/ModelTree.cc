@@ -636,7 +636,7 @@ inline NodeID ModelTree::DeriveArgument(NodeID iArg, Type iType, int iVarID)
 		case eExogenousDet 			:
 		case eEndogenous			:
 		case eRecursiveVariable		:
-			if ((int) iArg == iVarID)
+			if ((long int) iArg == iVarID)
 			//if ((VariableTable::getSymbolID(iArg) == VariableTable::getSymbolID(iVarID)) &&
 			//   (VariableTable::getType(iArg) == VariableTable::getType(iVarID)))
 			{
@@ -1290,20 +1290,20 @@ inline string ModelTree::getArgument(NodeID id, Type type, EquationType iEquatio
 
   if (type == eParameter)
     {
-      argument << param_name << lpar << (int)id+offset << rpar;
+      argument << param_name << lpar << (long int)id+offset << rpar;
     }
   else if (type == eLocalParameter)
     {
-      argument << SymbolTable::getNameByID(eLocalParameter,(int)id);
+      argument << SymbolTable::getNameByID(eLocalParameter,(long int)id);
     }
   else if (type == eNumericalConstant)
     {		
-      argument << NumericalConstants::get((int) id);
+      argument << NumericalConstants::get((long int) id);
     }	
   else if (type == eEndogenous || type == eExogenous || type == eExogenousDet)
     if (iEquationType == eStaticEquations || iEquationType == eStaticDerivatives)
       {		
-	int idx = VariableTable::getSymbolID((int) id)+offset;
+	int idx = VariableTable::getSymbolID((long int) id)+offset;
 	if (type == eEndogenous)
 	  {
 	    argument <<  "y" << lpar << idx << rpar;
@@ -1322,13 +1322,13 @@ inline string ModelTree::getArgument(NodeID id, Type type, EquationType iEquatio
       {
 	if (type == eEndogenous)
 	  {
-	    int idx = VariableTable::getPrintIndex((int) id)+offset;
+	    int idx = VariableTable::getPrintIndex((long int) id)+offset;
 	    argument <<  "y" << lpar << idx << rpar;
 	  }
 	else if (type == eExogenous)
 	  {	
-	    int idx = VariableTable::getSymbolID((int) id)+offset;
-	    int lag = VariableTable::getLag((int) id);
+	    int idx = VariableTable::getSymbolID((long int) id)+offset;
+	    int lag = VariableTable::getLag((long int) id);
 	    if (offset == 1)
 	      {
 		if ( lag != 0)
@@ -1356,8 +1356,8 @@ inline string ModelTree::getArgument(NodeID id, Type type, EquationType iEquatio
 	  }
 	else if (type == eExogenousDet)
 	  {
-	    int idx = VariableTable::getSymbolID((int) id)+ModelParameters::exo_nbr+offset;
-	    int lag = VariableTable::getLag((int) id);
+	    int idx = VariableTable::getSymbolID((long int) id)+ModelParameters::exo_nbr+offset;
+	    int lag = VariableTable::getLag((long int) id);
 	    if (offset == 1)
 	      {
 		if (lag != 0)

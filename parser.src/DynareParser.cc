@@ -131,22 +131,22 @@ dynare::Objects* dynare::parser::translate_symbol(Objects* obj)
 	ostringstream symbol;
 	if (obj->type == eEndogenous)
 	  {
-	    symbol << "oo_.steady_state(" << (int)obj->ID+1 << ")";
+	    symbol << "oo_.steady_state(" << (long int)obj->ID+1 << ")";
 	    obj->symbol = symbol.str();
 	  }
 	else if (obj->type == eExogenous)
 	  {
-	    symbol << "oo_.exo_steady_state(" << (int)obj->ID+1 << ")";
+	    symbol << "oo_.exo_steady_state(" << (long int)obj->ID+1 << ")";
 	    obj->symbol = symbol.str();
 	  }
 	else if (obj->type == eExogenousDet)
 	  {
-	    symbol << "oo_.exo_det_steady_state(" << (int)obj->ID+1 << ")";
+	    symbol << "oo_.exo_det_steady_state(" << (long int)obj->ID+1 << ")";
 	    obj->symbol = symbol.str();
 	  }
 	else if (obj->type == eParameter)
 	  {
-	    symbol << "M_.params(" << (int)obj->ID+1 << ")";
+	    symbol << "M_.params(" << (long int)obj->ID+1 << ")";
 	    obj->symbol = symbol.str();
 	  }
 	else if (obj->type == eLocalParameter)
@@ -158,8 +158,8 @@ dynare::Objects* dynare::parser::translate_symbol(Objects* obj)
 
 dynare::Objects* dynare::parser::add_expression_token( Objects* arg1,  Objects* arg2,  Objects* op)
 {
-	int id = expression.AddToken((int) arg1->ID,arg1->type,
-						(int) arg2->ID,arg2->type,
+	int id = expression.AddToken((long int) arg1->ID,arg1->type,
+						(long int) arg2->ID,arg2->type,
 						op->opcode);
 	//cout << "after add_expression_token\n";
 	return new Objects("", (NodeID) id, eTempResult);
@@ -169,12 +169,12 @@ dynare::Objects* dynare::parser::add_expression_token( Objects* arg1, Objects* o
   int id;
   if (op->opcode != NAME)
     {
-      id = expression.AddToken((int) arg1->ID,arg1->type,
+      id = expression.AddToken((long int) arg1->ID,arg1->type,
 						op->opcode);
     }
   else
     {
-      id = expression.AddToken((int) arg1->ID,arg1->type,
+      id = expression.AddToken((long int) arg1->ID,arg1->type,
 						op->symbol);
     }
 
