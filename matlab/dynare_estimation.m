@@ -817,6 +817,9 @@ if any(bayestopt_.pshape > 0) & options_.TeX %% Bayesian estimation (posterior m
   end
 end
 
+pindx = estim_params_.param_vals(:,1);
+save([M_.fname '_params'],'pindx');
+
 if (any(bayestopt_.pshape  >0 ) & options_.mh_replic) | ...
       (any(bayestopt_.pshape >0 ) & options_.load_mh_file)  %% not ML estimation
   bounds = prior_bounds(bayestopt_);
@@ -1323,5 +1326,8 @@ if ~((any(bayestopt_.pshape > 0) & options_.mh_replic) | (any(bayestopt_.pshape 
 end 
 
 if options_.forecast > 0 & options_.mh_replic == 0 & ~options_.load_mh_file 
-  forecast(var_list_);
+  forecast(var_list);
 end
+
+pindx = estim_params_.param_vals(:,1);
+save([M_.fname '_pindx','pindx']);

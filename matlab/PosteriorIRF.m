@@ -26,7 +26,7 @@ ncn  = estim_params_.ncn;
 np   = estim_params_.np ;
 npar = nvx+nvn+ncx+ncn+np;
 offset = npar-np;
-%%
+%
 MaxNumberOfPlotPerFigure = 9;% The square root must be an integer!
 nn = sqrt(MaxNumberOfPlotPerFigure);
 DirectoryName = CheckPath('Output');

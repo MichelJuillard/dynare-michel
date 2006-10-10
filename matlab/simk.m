@@ -143,7 +143,6 @@ for iter = 1:options_.maxit
 	  ix = indnv(jwci,iz) ;
 	  iy__ = indnv(icc1,iz) ;
 	  temp = zeros(size(w,1),size(iz,1)) ;
-	  temp(:,ix) = w ;
 	  temp(:,iy__) = temp(:,iy__)-w0*c(j1i,1:ncc1) ;
 	  w = temp ;
 	  jwci = iz ;
