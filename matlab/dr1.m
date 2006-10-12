@@ -446,7 +446,6 @@ A(1:M_.endo_nbr,nstatic+1:nstatic+npred)=...
     A(1:M_.endo_nbr,nstatic+[1:npred])+jacobia_(:,k2)*gx1(k1,1:npred);
 C = hx;
 D = [rhs; zeros(n-M_.endo_nbr,size(rhs,2))];
-dr.ghxx = gensylv(2,A,B,C,D);
 if exist('gensylv')
   dr.ghxx = gensylv(2,A,B,C,D);
 else
