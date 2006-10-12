@@ -3,13 +3,8 @@ ifeq ($(DEBUG),yes)
 	CPPFLAGS = -ggdb -pg -Wall
 	FLEXFLAGS = -i -d
 else
-ifeq ($(MINGW),yes)
-	CPPFLAGS = -O2
-	FLEXFLAGS = -i -d
-else
-	CPPFLAGS =  -O2
+	CPPFLAGS = -O2 -Wall
 	FLEXFLAGS = -i
-endif
 endif
 OBJ=\
 	DynareFlex.o\
@@ -75,26 +70,14 @@ DynareBison.cc include/DynareBison.h: DynareBison.yy include/DynareParser.h
 ################################################################################
 
 clean:
-	rm "ComputingTasks.o" \
-	"DynareParser.o" \
-	"DynareBison.o" \
-	"DynareFlex.o" \
-	"DynareMain.o" \
-	"Expression.o" \
-	"ModelParameters.o" \
-	"ModelTree.o" \
-	"NumericalConstants.o" \
-	"NumericalInitialization.o" \
-	"OperatorTable.o" \
-	"OutputFile.o" \
-	"Shocks.o" \
-	"SigmaeInitialization.o" \
-	"SymbolTable.o" \
-	"TmpSymbolTable.o" \
-	"VariableTable.o" \
-	"DataTree.o" \
-	"dynare.exe" \
-	"DynareBison.cc" \
-	"include/DynareBison.h" \
-	"DynareFlex.cc"
+	rm -f *.o *.P \
+		DynareBison.cc \
+		include/DynareBison.h \
+		DynareBison.output \
+		DynareFlex.cc \
+		dynare_m \
+		dynare_s
 
+# Local variables:
+# mode: makefile
+# End:

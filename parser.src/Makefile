@@ -1,11 +1,11 @@
 CPP = c++
 ifeq ($(DEBUG),yes)
 	CPPFLAGS = -mno-cygwin -ggdb -pg -Wall
-	FLEXFLAGS = -i
+	FLEXFLAGS = -i -d
 else
 ifeq ($(MINGW),yes)
 	CPPFLAGS = -O2
-	FLEXFLAGS = -i -d
+	FLEXFLAGS = -i
 else
 	CPPFLAGS = -mno-cygwin -O2
 	FLEXFLAGS = -i
@@ -77,26 +77,10 @@ DynareBison.cc include/DynareBison.h: DynareBison.yy include/DynareParser.h
 ################################################################################
 
 clean:
-	rm "ComputingTasks.o" \
-	"DynareParser.o" \
-	"DynareBison.o" \
-	"DynareFlex.o" \
-	"DynareMain.o" \
-	"Expression.o" \
-	"ModelParameters.o" \
-	"ModelTree.o" \
-	"NumericalConstants.o" \
-	"NumericalInitialization.o" \
-	"OperatorTable.o" \
-	"OutputFile.o" \
-	"Shocks.o" \
-	"SigmaeInitialization.o" \
-	"SymbolTable.o" \
-	"TmpSymbolTable.o" \
-	"VariableTable.o" \
-	"DataTree.o" \
-	"dynare.exe" \
-	"DynareBison.cc" \
-	"include/DynareBison.h" \
-	"DynareFlex.cc"
-
+	rm -f *.o *.P \
+		DynareBison.cc \
+		include/DynareBison.h \
+		DynareBison.output \
+		DynareFlex.cc \
+		dynare.exe \
+		dynare_s.exe
