@@ -53,7 +53,7 @@ struct DerivativeIndex{
 };
 /*!
   \struct  MToken
-  \brief  Basic token structure 
+  \brief  Basic token structure, essentially for computing hash keys
 */
 //------------------------------------------------------------------------------
 struct MToken
@@ -67,30 +67,16 @@ struct MToken
 	NodeID 	id2;
 	/*! Operator code */	
 	int 	op_code;
-	/*! Equal oparator */
-	/*
-	inline bool operator == (const MToken &t1)
-	{
-		return (t1.op_code == op_code && t1.id1 == id1 && 
-				t1.id2 == id2 && t1.type1 == type1);
-	}
-	*/
-	/*! Not equal operator */
-	/*
-	inline bool operator != (const MToken &t1)
-	{
-		return !(*this == t1);
-	}
-	*/
-	/* Construcor */
-	inline MToken(NodeID iId1 = NULL, Type iType1 = eUNDEF,NodeID iId2 = NULL, int iOpCode = -1)
+	/*! Constructor */
+	inline MToken(NodeID iId1 = NULL, Type iType1 = eUNDEF, NodeID iId2 = NULL, int iOpCode = -1)
 	{ 
-		id1 = iId1;type1 = iType1;
+		id1 = iId1;
+        type1 = iType1;
 		id2 = iId2;
 		op_code = iOpCode;
 
 	}
-	/* Copy constructor  */
+	/*! Copy constructor */
 	inline MToken(const MToken& t)
 	{
 		id1 = t.id1;
@@ -101,6 +87,14 @@ struct MToken
 	/*! Destructor */
 	~MToken() {	}
 
+    /*! Computes the hash key */
+    inline std::string Key() const
+    {
+        char key[100];
+        snprintf(key, 100, "%p %p %d %d", id1, id2, type1, op_code);
+        // std::cout << key << std::endl;
+        return std::string(key);
+    }
 };
 //------------------------------------------------------------------------------
 /*!
@@ -139,14 +133,14 @@ struct MetaToken : public MToken
 	bool						followed2;
 	/*! Operator name */
 	std::string  					op_name;
-	/*! Cast MetaToken -> MToken */
-  // set to one when left node has been treated
-  int left_done;
-  // set to one when right node has been treated
-  int right_done;
-  // set to one if closing parenthesis after token
-  int close_parenthesis;
+    /*! set to one when left node has been treated */
+    int left_done;
+    /*! set to one when right node has been treated */
+    int right_done;
+    /*! set to one if closing parenthesis after token */
+    int close_parenthesis;
 
+	/*! Cast MetaToken -> MToken */
 	inline operator MToken() const					
 	{
 		MToken lToken(id1,type1,id2, op_code);
@@ -187,7 +181,7 @@ struct MetaToken : public MToken
 		right_done = 0;
 		close_parenthesis = 0;
 	}
-	/* Copy constructor */
+	/*! Copy constructor */
 	inline MetaToken(const MetaToken& mt)
 		: MToken(mt)
 	{
@@ -205,11 +199,16 @@ struct MetaToken : public MToken
 		left_done = mt.left_done;
 		right_done = mt.right_done;
 	}
-	/* Destructor */
+	/*! Destructor */
 	~MetaToken()
 	{
 	}
 
+    /*! Sets derivative with respect to iVarID equal to iDerivative */
+    inline void setDerivativeAddress(NodeID iDerivative, int iVarID)
+    {
+        d1[iVarID] = iDerivative;
+    }
 };
 //------------------------------------------------------------------------------
 /*!

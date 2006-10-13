@@ -51,8 +51,7 @@ class DataTree
 		int					current_order;
 		/*! Pushs token into model tree */
 		inline NodeID 		PushToken(NodeID iArg1,int iOpCode, NodeID iArg2 = NULL, Type iType1 = eTempResult);
-		inline std::string	Key(MToken iToken);
-		inline NodeID		getIDOfToken(MToken iToken);
+		inline NodeID		getIDOfToken(const MToken &iToken);
 	public :
 		/*! Flag for empty operator (final toekn) */
 		static const int				NoOpCode;
@@ -156,7 +155,7 @@ inline NodeID DataTree::PushToken(NodeID iArg1,int iOpCode, NodeID iArg2, Type i
 		lToken->cost += iArg2->cost;
 		IncrementReferenceCount(iArg2);
 	}
-	mIndexOfTokens[Key(*lToken)]=lToken;
+	mIndexOfTokens[lToken->Key()]=lToken;
 	
 	
 	/*
@@ -184,24 +183,15 @@ inline void DataTree::IncrementReferenceCount(NodeID token)
 
 }
 //------------------------------------------------------------------------------
-inline std::string DataTree::Key(MToken iToken)
-{
-	char key[100];
-	//ostringstream key;
-	//key << iToken.id1 << " " << iToken.id2 << " " << iToken.type1 << " " << iToken.op_code;
-	sprintf(key,"%X %X %d %d", (long int)iToken.id1, (long int)iToken.id2,
-	 iToken.type1, iToken.op_code);
-	//std::cout << key << endl;
-	return std::string(key);
-}
-//------------------------------------------------------------------------------
-inline NodeID DataTree::getIDOfToken(MToken iToken)
+inline NodeID DataTree::getIDOfToken(const MToken &iToken)
 {
 	TreeMap::iterator iter;
 	
-	iter = mIndexOfTokens.find(Key(iToken));
-	if (iter != mIndexOfTokens.end()) return (*iter).second;
-	else return NullID;
+	iter = mIndexOfTokens.find(iToken.Key());
+	if (iter != mIndexOfTokens.end())
+        return iter->second;
+	else
+        return NullID;
 }
 //------------------------------------------------------------------------------
 inline NodeID	DataTree::AddTerminal(NodeID iArg1, Type iType1)

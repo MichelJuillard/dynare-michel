@@ -356,11 +356,11 @@ void ModelTree::derive(int iOrder)
 		  // Case where token is a final argument
 		  if (lToken->op_code == NoOpCode)
 		    {
-		      setDerivativeAdress(*currentIT, lD1, var);
+		      (*currentIT)->setDerivativeAddress(lD1, var);
 		    }
 		  else if (lD1 == Zero && lD2 == Zero)
 		    {
-			  setDerivativeAdress(*currentIT, Zero, var);
+			  (*currentIT)->setDerivativeAddress(Zero, var);
 		    }
 		  else
 		    {
@@ -368,21 +368,21 @@ void ModelTree::derive(int iOrder)
 			{
 			case UMINUS:
 			  t1 = AddUMinus(lD1);
-			  setDerivativeAdress(*currentIT, t1, var);
+			  (*currentIT)->setDerivativeAddress(t1, var);
 			  break;
 			case PLUS:
 			  t1 = AddPlus(lD1, lD2);
-			  setDerivativeAdress(*currentIT, t1, var);
+			  (*currentIT)->setDerivativeAddress(t1, var);
 			  break;
 			case MINUS:
 			  t1 = AddMinus(lD1, lD2);
-			  setDerivativeAdress(*currentIT, t1, var);
+			  (*currentIT)->setDerivativeAddress(t1, var);
 			  break;
 			case TIMES:
 			  t11 = AddTimes(lD1, lArg2);
 			  t12 = AddTimes(lD2, lArg1);
 			  t1 = AddPlus(t11, t12);
-			  setDerivativeAdress(*currentIT, t1, var);
+			  (*currentIT)->setDerivativeAddress(t1, var);
 			  break;
 			case DIVIDE:
 			  t11 = AddTimes(lD1, lArg2);
@@ -390,12 +390,12 @@ void ModelTree::derive(int iOrder)
 			  t13 = AddMinus(t11, t12);
 			  t14 =  AddTimes(lArg2, lArg2);
 			  t1 = AddDivide(t13, t14);
-			  setDerivativeAdress(*currentIT, t1, var);
+			  (*currentIT)->setDerivativeAddress(t1, var);
 			  break;	
 			case SQRT:
 			  t11 = AddPlus(*currentIT, *currentIT);
 			  t1 = AddDivide(lD1, t11);
-			  setDerivativeAdress(*currentIT, t1,var);
+			  (*currentIT)->setDerivativeAddress(t1, var);
 			  break;
 			case POWER:
 			  if (lD2 == Zero)
@@ -419,88 +419,88 @@ void ModelTree::derive(int iOrder)
 			      t15 = AddPlus(t12, t14);
 			      t1 = AddTimes(t15, *currentIT);
 			    }
-			  setDerivativeAdress(*currentIT, t1, var);
+			  (*currentIT)->setDerivativeAddress(t1, var);
 			  break;
 			case EXP:
 			  t1 = AddTimes(lD1, *currentIT);
-			  setDerivativeAdress(*currentIT, t1, var);
+			  (*currentIT)->setDerivativeAddress(t1, var);
 			  break;
 			case LOG:
 			  t1 = AddDivide(lD1, lArg1);
-			  setDerivativeAdress(*currentIT, t1, var);
+			  (*currentIT)->setDerivativeAddress(t1, var);
 			  break;
 			case LOG10:
 			  t11 = AddExp(One);
 			  t12 = AddLog10(t11);
 			  t13 = AddDivide(lD1, lArg1);
 			  t1 = AddTimes(t12, t13);
-			  setDerivativeAdress(*currentIT, t1, var);
+			  (*currentIT)->setDerivativeAddress(t1, var);
 			  break;
 			case COS:
 			  t11 = AddSin(lArg1);
 			  t12 = AddUMinus(t11);
 			  t1 = AddTimes( lD1, t12);
-			  setDerivativeAdress(*currentIT, t1, var);
+			  (*currentIT)->setDerivativeAddress(t1, var);
 			  break;
 			case SIN:
 			  t11 = AddCos(lArg1);
 			  t1 = AddTimes(lD1,t11);
-			  setDerivativeAdress(*currentIT, t1, var);
+			  (*currentIT)->setDerivativeAddress(t1, var);
 			  break;
 			case TAN:
 			  t11 = AddTimes(*currentIT, *currentIT);
 			  t12 = AddPlus(t11, One);
 			  t1 = AddTimes(lD1, t12);
-			  setDerivativeAdress(*currentIT, t1, var);
+			  (*currentIT)->setDerivativeAddress(t1, var);
 			  break;
 			case ACOS:
 			  t11 = AddSin(*currentIT);
 			  t12 = AddDivide(lD1, t11);
 			  t1 = AddUMinus(t12);
-			  setDerivativeAdress(*currentIT, t1, var);
+			  (*currentIT)->setDerivativeAddress(t1, var);
 			  break;
 			case ASIN:
 			  t11 = AddCos(*currentIT);
 			  t1 = AddDivide(lD1, t11);
-			  setDerivativeAdress(*currentIT, t1, var);
+			  (*currentIT)->setDerivativeAddress(t1, var);
 			  break;
 			case ATAN:
 			  t11 = AddTimes(lArg1, lArg1);
 			  t12 = AddPlus(One, t11);
 			  t1 = AddDivide(lD1, t12);
-			  setDerivativeAdress(*currentIT, t1,var);
+			  (*currentIT)->setDerivativeAddress(t1,var);
 			  break;
 			case COSH:
 			  t11 = AddSinH(lArg1);
 			  t1 = AddTimes( lD1,t11);
-			  setDerivativeAdress(*currentIT, t1, var);
+			  (*currentIT)->setDerivativeAddress(t1, var);
 			  break;
 			case SINH:
 			  t11 = AddCosH(lArg1);
 			  t1 = AddTimes( lD1, t11);
-			  setDerivativeAdress(*currentIT, t1, var);
+			  (*currentIT)->setDerivativeAddress(t1, var);
 			  break;
 			case TANH:
 			  t11 = AddTimes(*currentIT, *currentIT);
 			  t12 = AddMinus(One, t11);
 			  t1 = AddTimes(lD1, t12);
-			  setDerivativeAdress(*currentIT, t1,var);
+			  (*currentIT)->setDerivativeAddress(t1,var);
 			  break;
 			case ACOSH:
 			  t11 = AddSinH(*currentIT);
 			  t1 = AddDivide(lD1, t11);
-			  setDerivativeAdress(*currentIT, t1,var);
+			  (*currentIT)->setDerivativeAddress(t1,var);
 			  break;
 			case ASINH:
 			  t11 = AddCosH(*currentIT);
 			  t1 = AddDivide(lD1, t11);
-			  setDerivativeAdress(*currentIT, t1,var);
+			  (*currentIT)->setDerivativeAddress(t1,var);
 			  break;
 			case ATANH:
 			  t11 = AddTimes(lArg1, lArg1);
 			  t12 = AddMinus(One, t11);
 			  t1 = AddTimes(lD1, t12);
-			  setDerivativeAdress(*currentIT, t1,var);
+			  (*currentIT)->setDerivativeAddress(t1,var);
 			  break;
 			}
 		    }
@@ -539,7 +539,7 @@ void ModelTree::derive(int iOrder)
 	      // The derivative is forced to be in Model Tree as refferenced
 	      // This is usfull to remove symetric elements
 	      IncrementReferenceCount(t1);
-	      setDerivativeAdress(EqualTokenIDs[i], t1, var);
+	      EqualTokenIDs[i]->setDerivativeAddress(t1, var);
 	      if (Order == 1)
 		{
 		  mDerivativeIndex[0].push_back(DerivativeIndex(t1, i-starti, var));					
@@ -625,13 +625,10 @@ inline bool ModelTree::writeAsTemp(NodeID id)
 //------------------------------------------------------------------------------
 inline NodeID ModelTree::DeriveArgument(NodeID iArg, Type iType, int iVarID)
 {
-	NodeID d;
 	switch(iType)
 	{
 		case eTempResult			:
-				d = iArg->d1[iVarID];
-				return d;
-			break;
+            return iArg->d1[iVarID];
 		case eExogenous 			:
 		case eExogenousDet 			:
 		case eEndogenous			:
@@ -656,32 +653,18 @@ inline NodeID ModelTree::DeriveArgument(NodeID iArg, Type iType, int iVarID)
 		case eNumericalConstant  	:
 		case eParameter 			: 
 			return Zero; 
-			break;
 		case eLocalParameter 			: 
 			return Zero; 
-			break;
 		case eUNDEF					:
 			return NullID;
-			break;
 		case eLoopIndex			:
 		case eUnkownFunction		:
 			return Zero;
-			break;
 		default				:
-			cout << "ModelTree::DeriveArgument : Error :Unkown Type \n";
+			cout << "ModelTree::DeriveArgument : Error: Unknown Type\n";
 			exit(-1);
 	};
 	
-}
-//------------------------------------------------------------------------------
-inline void ModelTree::setDerivativeAdress(NodeID iTokenID, NodeID iDerivative,int iVarID)
-{
-	//Derivative	lDerivative;
-	
-	//lDerivative.variable_id = iVarID;
-	//lDerivative.derivative_address = iDerivative;
-	iTokenID->d1[iVarID] = iDerivative;
-	//mModelTree[iDerivative].p1[iVarID] = iTokenID;
 }
 //------------------------------------------------------------------------------
 string 	ModelTree::setStaticModel(void)
