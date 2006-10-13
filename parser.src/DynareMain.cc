@@ -25,11 +25,6 @@ int main(int argc, char** argv)
 {
   OutputFile output_file;  
   ostringstream output;
-#ifdef SCILAB
-  interfaces interface(eScilab);
-#else
-  interfaces interface(eMatlab);
-#endif
   int retval = 0;
   try {
     if (argc <2)

@@ -6,7 +6,8 @@ else
 	CPPFLAGS = -O2 -Wall
 	FLEXFLAGS = -i
 endif
-OBJ=\
+
+COMMON_OBJ=\
 	DynareFlex.o\
 	DynareBison.o\
 	ComputingTasks.o\
@@ -24,24 +25,25 @@ OBJ=\
 	TmpSymbolTable.o\
 	VariableTable.o\
 	DynareParser.o\
-	DataTree.o\
-	Interface.o
+	DataTree.o
 
+MATLAB_OBJ = InterfaceMatlab.o
+
+SCILAB_OBJ = InterfaceScilab.o
 
 
 ################################################################################
 ### Build ######################################################################
 ################################################################################
 
-all: dynare_m
+all: dynare_m dynare_s
 
-dynare_m: $(OBJ) 
-	$(CPP) $(CPPFLAGS) -o  dynare_m $(OBJ);\
+dynare_m: $(COMMON_OBJ) $(MATLAB_OBJ)
+	$(CPP) $(CPPFLAGS) -o  dynare_m $(COMMON_OBJ) $(MATLAB_OBJ) ;\
 	cp dynare_m ../matlab/
 
-dynare_s: $(OBJ) 
-	$(CPP) $(CPPFLAGS) -Iinclude -DSCILAB -o DynareMain.o -c DynareMain.cc
-	$(CPP) $(CPPFLAGS) -o  dynare_s $(OBJ);\
+dynare_s: $(COMMON_OBJ) $(SCILAB_OBJ)
+	$(CPP) $(CPPFLAGS) -o  dynare_s $(COMMON_OBJ) $(SCILAB_OBJ) ;\
 	cp dynare_s ../scilab/
 
 
@@ -56,7 +58,7 @@ dynare_s: $(OBJ)
 	      -e '/^$$/ d' -e 's/$$/ :/' < $*.d >> $*.P; \
 	  rm -f $*.d
 
--include $(OBJ:.o=.P)
+-include $(COMMON_OBJ:.o=.P) $(MATLAB_OBJ:.o=.P) $(SCILAB_OBJ:.o=.P)
 
 DynareFlex.cc: DynareFlex.ll include/DynareScanner.h
 	flex $(FLEXFLAGS) -oDynareFlex.cc DynareFlex.ll

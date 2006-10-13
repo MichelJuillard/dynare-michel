@@ -14,7 +14,8 @@ endif
 ifeq ($(PROFILE),yes)
 	CPPFLAGS = -mno-cygwin -O2 -pg
 endif
-OBJ=\
+
+COMMON_OBJ=\
 	DynareFlex.o\
 	DynareBison.o\
 	ComputingTasks.o\
@@ -32,22 +33,25 @@ OBJ=\
 	TmpSymbolTable.o\
 	VariableTable.o\
 	DynareParser.o\
-	DataTree.o\
-	Interface.o
+	DataTree.o
+
+MATLAB_OBJ = InterfaceMatlab.o
+
+SCILAB_OBJ = InterfaceScilab.o
+
 
 ################################################################################
 ### Build ######################################################################
 ################################################################################
 
-all: dynare.exe
+all: dynare.exe dynare_s.exe
 
-dynare.exe: $(OBJ) 
-	$(CPP) $(CPPFLAGS) -o  dynare.exe $(OBJ);\
+dynare.exe: $(COMMON_OBJ) $(MATLAB_OBJ)
+	$(CPP) $(CPPFLAGS) -o  dynare.exe $(COMMON_OBJ) $(MATLAB_OBJ);\
 	cp dynare.exe ../matlab/
 
-dynare_s.exe: $(OBJ) 
-	$(CPP) $(CPPFLAGS) -Iinclude -DSCILAB -o DynareMain.o -c DynareMain.cc
-	$(CPP) $(CPPFLAGS) -o  dynare_s.exe $(OBJ);\
+dynare_s.exe: $(COMMON_OBJ) $(SCILAB_OBJ)
+	$(CPP) $(CPPFLAGS) -o  dynare_s.exe $(COMMON_OBJ) $(SCILAB_OBJ);\
 	cp dynare_s.exe ../scilab/
 
 
@@ -63,7 +67,7 @@ dynare_s.exe: $(OBJ)
 	      -e '/^$$/ d' -e 's/$$/ :/' < $*.d >> $*.P; \
 	  rm -f $*.d
 
--include $(OBJ:.o=.P)
+-include $(COMMON_OBJ:.o=.P) $(MATLAB_OBJ:.o=.P) $(SCILAB_OBJ:.o=.P)
 
 DynareFlex.cc: DynareFlex.ll include/DynareScanner.h
 	flex $(FLEXFLAGS) -oDynareFlex.cc DynareFlex.ll
