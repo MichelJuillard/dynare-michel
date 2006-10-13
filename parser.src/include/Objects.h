@@ -11,12 +11,12 @@ using namespace std;
 #include "SymbolTable.h"
 #include "ModelTypes.h"
 //------------------------------------------------------------------------------
-/*!
-  \class  Objects
-  \brief  This class defines data associeted to parsed tokens.
-*/
 namespace dynare 
 {
+    /*!
+      \class  Objects
+      \brief  This class defines data associated to parsed tokens.
+    */
 	class Objects
 	{
 		public :
@@ -29,20 +29,20 @@ namespace dynare
 			/*! In case of operator object, this is set to its code */
 			int				opcode;
 		public :
-			/*! Constrcutor with default values */
+			/*! Constructor with default values */
 			Objects() 
 			{
 				ID = NULL;				
 				symbol = "";
 				type = eUNDEF;
 			}
-			/*! Constrcutor of object with known symbol name */
+			/*! Constructor of object with known symbol name */
 			Objects(string name) 
 			{
 			  opcode = NAME;
 			  symbol = name;					
 			}
-			/*! Constrcutor of object with known symbol name */
+			/*! Constructor of object with known symbol name */
 			Objects(const char* name, NodeID id = NULL, Type t = eUNDEF)  
 			{
 			  opcode = NAME;
@@ -50,14 +50,14 @@ namespace dynare
 			  type = t;	
 			  ID = id;
 			}
-			/*! Constrcutor of object with known symbol name, ID and type */
+			/*! Constructor of object with known symbol name, ID and type */
 			Objects(string name,NodeID id, Type t) 
 			{
 				symbol = name;
 				type = t;	
 				ID = id;					
 			}
-			/*! Constrcutor of object with known operator code */
+			/*! Constructor of object with known operator code */
 			Objects(int op) 
 			{
 				opcode = op;				
