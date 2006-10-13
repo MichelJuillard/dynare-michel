@@ -1462,17 +1462,6 @@ void ModelTree::ModelInitialization(void)
   output << "M_.exo_names_orig_ord = [1:" << ModelParameters::exo_nbr << "];\n";
   output << "M_.maximum_lag = " << ModelParameters::max_lag << ";\n";
   output << "M_.maximum_lead = " << ModelParameters::max_lead<< ";\n";
-  if (ModelParameters::exo_nbr > 0)
-    {
-    }
-  if (ModelParameters::exo_nbr > 0)
-    {
-    }
-  if (ModelParameters::exo_nbr > 0)
-    {
-      output << "M_.maximum_exo_lag = " << ModelParameters::max_exo_lag << ";\n";
-      output << "M_.maximum_exo_lead = " << ModelParameters::max_exo_lead<< ";\n";
-    }
   if (ModelParameters::endo_nbr)
     {
       output << "M_.maximum_endo_lag = " << ModelParameters::max_endo_lag << ";\n";
