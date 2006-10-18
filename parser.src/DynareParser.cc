@@ -209,13 +209,6 @@ void dynare::parser::init_param(Objects* lhs,  Objects* rhs)
 {
 	numerical_initialization.SetConstant(lhs->symbol, rhs->symbol);
 }
-void dynare::parser::init_param(Objects* lhs)
-{
-	//cout << "Befor set\n";
-	expression.set();   	
-	numerical_initialization.SetConstant(lhs->symbol, expression.get());
-	expression.clear();
-}
 void dynare::parser::init_val(Objects* lhs,  Objects* rhs)
 {
 	numerical_initialization.SetInit(lhs->symbol, rhs->symbol);
@@ -224,16 +217,6 @@ void dynare::parser::hist_val(Objects* lhs, Objects* slag, Objects* rhs)
 {
 	int lag = atoi((slag->symbol).c_str());
 	numerical_initialization.SetHist(lhs->symbol, lag, rhs->symbol);
-}
-void dynare::parser::hist_val(Objects* lhs, Objects* slag)
-{
-	int lag = atoi((slag->symbol).c_str());
-	expression.set();  	
-	numerical_initialization.SetHist(lhs->symbol, lag, expression.get());
-	expression.clear();
-}
-void dynare::parser::initialize_model(void)
-{
 }
 void dynare::parser::use_dll(void)
 {

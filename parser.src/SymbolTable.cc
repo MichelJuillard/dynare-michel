@@ -116,11 +116,6 @@ void  SymbolTable::SetReferenced(string name)
 	symboltable[name].referenced = eReferenced;
 }
 //------------------------------------------------------------------------------
-void SymbolTable::SetOutOfScoop(string name)
-{
-	symboltable[name].referenced = eOutOfScoop;
-}
-//------------------------------------------------------------------------------
 Reference 	SymbolTable::isReferenced(std::string name)
 {
 	return symboltable[name].referenced;
@@ -283,34 +278,3 @@ void SymbolTable::erase_local_parameters(void)
     }
 }
 //------------------------------------------------------------------------------
-/*
-ostream & operator << (ostream & output, Symbol s)
-{
-	switch (s.type) {
-    		case eExogenous    : output << "Exogenous    , "; break;
-    		case eExogenousDet : output << "ExogenousDet ,"; break;
-    		case eEndogenous   : output << "Endogenous   , "; break;
-    		case eRecursiveVariable : output << "RecursiveVariable , "; break;
-    		case eParameter : output << "Parameter , "; break;
-     		case eLoopIndex : output << "LoopIndex , "; break; 
-    	}
-	output << s.id;
-	switch (s.referenced) {
-		case eReferenced    : cout << ", Referenced, "; break; 
-		case eNotReferenced : cout << ", NotReferenced, "; break; 
-		case eOutOfScoop    : cout << ", OutOfScoop, "; break; 
-
-	}
-	return output;
-}
-//------------------------------------------------------------------------------
-void SymbolTable::PrintSymbolTable(void)
-{
-	map<string, Symbol, less<string> >::iterator iter;
-	cout << "\nCurrent Map :\n";
-	for (iter = symboltable.begin();iter != symboltable.end(); iter++)
-		cout << (*iter).first << " , " << (*iter).second << endl;;
-}
-//------------------------------------------------------------------------------
-*/
-  

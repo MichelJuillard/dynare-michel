@@ -294,13 +294,11 @@
  	;
 	
  model
- 	: MODEL {_parser->initialize_model();} ';' equation_list END 
+ 	: MODEL ';' equation_list END 
  		{_parser->check_model();}
- 	| MODEL '(' LINEAR ')' ';' {_parser->option_num("linear","1");
-	  	    	       	   _parser->initialize_model();} 
+ 	| MODEL '(' LINEAR ')' ';' {_parser->option_num("linear","1");} 
 		equation_list END {_parser->check_model();}
- 	| MODEL '(' USE_DLL ')' ';' {_parser->use_dll();
-	  	    	    	    _parser->initialize_model();} 
+ 	| MODEL '(' USE_DLL ')' ';' {_parser->use_dll();} 
 		equation_list END {_parser->check_model();}
  	;
 

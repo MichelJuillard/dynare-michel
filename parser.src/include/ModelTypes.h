@@ -212,7 +212,6 @@ struct MetaToken : public MToken
 };
 //------------------------------------------------------------------------------
 /*!
-  \function  oparator <
   \brief  Less operator define comparaison function for map class
 */
 

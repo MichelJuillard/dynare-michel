@@ -48,28 +48,6 @@ void  NumericalInitialization::SetConstant (string name, string expression)
 		
 } 
 //------------------------------------------------------------------------------
-void  NumericalInitialization::SetLocalConstant (string name, string expression)
-{	  	
-  
-  //Testing if symbol exists 
-  if (SymbolTable::Exist(name))
-    {
-      if (SymbolTable::getType(name) != eLocalParameter)
-	{
-	  string msg = "Using existing symbol " + name + 
-	    " as local parameter name";
-	  (* error) (msg.c_str());
-	}
-    }
-  else
-    {
-      SymbolTable::AddSymbolDeclar(name,eLocalParameter,name);
-    }
-
-  // Writing expression
-  *output << name << " = " << expression << ";\n";
-} 
-//------------------------------------------------------------------------------
 void  NumericalInitialization::BeginInitval (void) 
 {
 	

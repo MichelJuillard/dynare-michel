@@ -34,8 +34,6 @@ class SymbolTable
     - set Name and Type\n
     - increase corresponding counter in ModelParameters class\n
   */
-  /*! Pointer to current parssing line to set by class parser*/
-  //int						*current_line; 
   static int AddSymbol(std::string name,Type type, std::string tex_name);
  protected : 
   /*! Symbol table map */		
@@ -51,28 +49,26 @@ class SymbolTable
   SymbolTable();
   /*! Destructor*/		
   ~SymbolTable();
+  /*! Pointer to error function of parser class */                               
+  static void (* error) (const char* m);
   /*! Adds a symbol apearing in declaration
     - warning if symbol is already set with same type 
     - error if symbol is already set with different type 
     - set name, type
     - increase corresponding counter in ModelParameters 
   */
-  /*! Pointer to error function of parser class */                               
-  static void (* error) (const char* m);
   static 	int 	AddSymbolDeclar(std::string name,Type type, std::string tex_name);
   /*! Adds symbol range */		
   static	void 	AddSymbolRange(std::string name,int nbr,Type type, std::string tex_name);
   /*! Adds a lag to field lags */
   static void AddLag(std::string name,int lag);
-  /*! Tests if symbol exists in symbol table 
-    \return true if exists, false outherwise
-  */
   /*! Sets a symbol as referenced */		
   static	void 	SetReferenced(std::string name);
   /*! Return eReferenced if symbol is referenced eNotReferenced otherwise*/
   static	Reference 	isReferenced(std::string name);
-  /*! Sets a symbol as out of scoop */
-  static	void 	SetOutOfScoop(std::string name);		
+  /*! Tests if symbol exists in symbol table 
+    \return true if exists, false outherwise
+  */
   inline static 	bool 	Exist(std::string name);
   /*! Gets name by type and ID */
   inline static	std::string	getNameByID(Type type,int id);		
@@ -87,7 +83,6 @@ class SymbolTable
   /*! Checks if symbols are used in model equations, removes unused symbol */
   void clean();
   void erase_local_parameters();
-  //void PrintSymbolTable(void);
 };
 inline bool SymbolTable::Exist(std::string name)
 {

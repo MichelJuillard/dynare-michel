@@ -658,7 +658,6 @@ inline NodeID ModelTree::DeriveArgument(NodeID iArg, Type iType, int iVarID)
 		case eUNDEF					:
 			return NullID;
 		case eLoopIndex			:
-		case eUnkownFunction		:
 			return Zero;
 		default				:
 			cout << "ModelTree::DeriveArgument : Error: Unknown Type\n";
@@ -1140,130 +1139,6 @@ inline string ModelTree::getExpression(NodeID StartID, EquationType  iEquationTy
     }
   return exp.str();
 }
-//------------------------------------------------------------------------------
-/*
-void ModelTree::RemoveUnref(int iBeginID, int iEndID, int iOrder)
-{
-	int id =  iEndID;
-	while (id >= iBeginID)
-	{
-		//cout << id;
-		if (accumulate(mModelTree[id].reference_count.begin(),mModelTree[id].reference_count.end(),0) == 0)
-		{
-			//cout << " Removed" << endl;
-			//Decreasing reference count of arguments model tree
-			// First argument is a temporary result,
-			if (mModelTree[id].type1 == eTempResult)
-			{					
-				//Decreasing reference count of argument 1 in model tree
-				int arg = mModelTree[id].id1;
-				mModelTree[arg].reference_count[iOrder]--;
-			}
-			// Second argument has id >=0 (temporary result),
-			if (mModelTree[id].id2 >= 0)
-			{
-				//Decreasing reference count of argument 2 in model tree
-				int arg = mModelTree[id].id2;
-				mModelTree[arg].reference_count[iOrder]--;
-			}
-			//Updating equals ids in mDerivativeIndex
-			for (int d=0; d<mDerivativeIndex[iOrder-1].size();d++)
-			{
-				if (mDerivativeIndex[iOrder-1][d].token_id>id)
-					mDerivativeIndex[iOrder-1][d].token_id--;
-			}
-			//cout << "ModelTree size : " << mModelTree.size() << endl;
-			//Updatting upper token ids in model tree and map
-			mIndexOfTokens.erase(Key((MToken) mModelTree[id]));
-			for (int id2 = id+1; id2 <= iEndID; id2++)
-			{
-				//cout << " - " << mIndexOfTokens[Key((MToken) mModelTree[id2])];
-				mIndexOfTokens.erase(Key((MToken) mModelTree[id2]));
-			}
-			//cout << endl;
-			for (int id2 = id+1; id2 <= iEndID; id2++)
-			{
-				// Updating derivative ids
-				map<int, int, less<int> >::iterator it;
-				for (it = mModelTree[id2].p1.begin(); it != mModelTree[id2].p1.end(); it++)
-				{
-					int p1 = (*it).second;
-					int var = (*it).first;
-					//cout << "===========" << mModelTree[p1].d1[var] << "/";
-					mModelTree[p1].d1[var] = id2-1;
-					//cout <<  mModelTree[p1].d1[var] << endl;						
-				}
-				// Updating ModelTree map
-				if (mModelTree[id2].type1 == eTempResult)
-				{	
-					if (mModelTree[id2].id1>id)
-					{
-						mModelTree[id2].id1--;
-					}
-				}
-				if (mModelTree[id2].id2>id)
-				{
-					mModelTree[id2].id2--;
-				}
-			}
-			mModelTree.erase(mModelTree.begin()+id);
-			for (int id2 = id; id2 < iEndID; id2++)
-			{
-				mIndexOfTokens[Key((MToken) mModelTree[id2])] = id2;
-				//cout << " - " << mIndexOfTokens[Key((MToken) mModelTree[id2])];
-			}
-			//Removing token from model tree
-			//cout << "ModelTree size : " << mModelTree.size() << endl;
-
-
-			iEndID--;
-			id--;
-		}
-		else
-		{
-			id--;
-			//cout << endl;
-		}
-	}
-
-}
-//------------------------------------------------------------------------------
-*/
-/*
-void ModelTree::DecrementUnref(int iBeginID, int iEndID, int iOrder)
-{
-	int id =  iEndID;
-	while (id >= iBeginID)
-	{
-		//cout << id;
-		if (accumulate(mModelTree[id].reference_count.begin(),mModelTree[id].reference_count.end(),0) == 0)
-		{
-			//Decreasing reference count of arguments model tree
-			// First argument is a temporary result,
-			if (mModelTree[id].type1 == eTempResult)
-			{					
-				//Decreasing reference count of argument 1 in model tree
-				int arg = mModelTree[id].id1;
-				mModelTree[arg].reference_count[iOrder]--;
-			}
-			// Second argument has id >=0 (temporary result),
-			if (mModelTree[id].id2 >= 0)
-			{
-				//Decreasing reference count of argument 2 in model tree
-				int arg = mModelTree[id].id2;
-				mModelTree[arg].reference_count[iOrder]--;
-			}
-			id--;
-		}
-		else
-		{
-			id--;
-			//cout << endl;
-		}
-	}
-
-}
-*/
 //------------------------------------------------------------------------------
 inline string ModelTree::getArgument(NodeID id, Type type, EquationType iEquationType)
 {

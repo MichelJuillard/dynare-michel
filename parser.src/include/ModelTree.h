@@ -13,7 +13,6 @@
 #include <stack>
 #include <sstream>
 #include <fstream>
-//#include <ext/hash_map>
 //------------------------------------------------------------------------------
 #include "SymbolTable.h"
 #include "OperatorTable.h"
@@ -31,10 +30,6 @@ class ModelTree : public DataTree
 		/*! Stores ID of equations and their derivatives */
 		std::vector<std::vector<DerivativeIndex> > mDerivativeIndex;
 
-		/*! Stores ID of equations and their 1st ordre derivatives */
-		//vector<DerivativeIndex> mDerivative1Index;
-		/*! Stores ID of equations and their 2nd ordre derivatives */
-		//vector<DerivativeIndex> mDerivative2Index;
 		/*! Only used for C++ standalone version */
 		std::vector<double> 			mResults;
 		/*! Output for static model */
@@ -71,10 +66,6 @@ class ModelTree : public DataTree
 		  depending on its time cost and number of times it is referenced in model tree 
 		*/
 		inline bool		writeAsTemp(NodeID id);		
-		/*! Remove unreferenced tokens after a derivation */
-		//void 		RemoveUnref(int iBeginID, int iEndID, int iOrder);
-		/*! Decrementing reference couter of unreferenced tokens in last derivative */
-		void 		DecrementUnref(int iBeginID, int iEndID, int iOrder);
 		inline int optimize(NodeID id);
 	public :
 		/*! When Jacobian (vs endogenous) is writen this flag is set to true */

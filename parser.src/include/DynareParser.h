@@ -120,8 +120,6 @@ namespace dynare
     void check_model(void);
     /*! Executes final instructions */
     void finish(void);
-    /*! Initializes the model */
-    void initialize_model(void);
     /*! Sets variable offset of ModelTree class to use C output */
     void use_dll(void);
     /*! Adds an endogenous variable to SymbolTable*/
@@ -152,19 +150,16 @@ namespace dynare
     Objects* add_expression_token( Objects* arg1, Objects* op);
     /*! Gets literal expression string */
     Objects* get_expression(Objects* exp);
-    /* Concatenates two string objects */
+    /*! Concatenates two string objects */
     Objects* cat(Objects* string1, Objects* string2);
+    /*! Concatenates two string objects with a space between */
     Objects* cat_with_space(Objects* string1, Objects* string2);
     /*! Writes parameter intitialisation expression */
 	void init_param(Objects* lhs,  Objects* rhs);
-    /*! Writes parameter intitialisation expression */
-	void init_param(Objects* lhs);
     /*! Writes an initval block */
 	void init_val(Objects* lhs,  Objects* rhs);
     /*! Writes an histval block */
 	void hist_val(Objects* lhs, Objects* lag, Objects* rhs);
-    /*! Writes an histval block */
-	void hist_val(Objects* lhs, Objects* lag);
     /*! Writes begining of an initval block */
 	void begin_initval(void);
     /*! Writes end of an initval block */
