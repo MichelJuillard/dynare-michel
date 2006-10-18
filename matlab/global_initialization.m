@@ -41,6 +41,6 @@ function global_initialization()
   
   oo_.exo_simul = [];
   oo_.endo_simul = [];
-  oo_.dr = struct([]);
+  oo_.dr = [];
   oo_.exo_det_steady_state = [];
   oo_.exo_det_simul = [];
