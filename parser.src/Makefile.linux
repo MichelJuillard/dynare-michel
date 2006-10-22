@@ -60,7 +60,7 @@ dynare_s: $(COMMON_OBJ) $(SCILAB_OBJ)
 
 -include $(COMMON_OBJ:.o=.P) $(MATLAB_OBJ:.o=.P) $(SCILAB_OBJ:.o=.P)
 
-DynareFlex.cc: DynareFlex.ll include/DynareScanner.h
+DynareFlex.cc: DynareFlex.ll include/DynareScanner.h include/DynareBison.h
 	flex $(FLEXFLAGS) -oDynareFlex.cc DynareFlex.ll
 
 DynareBison.cc include/DynareBison.h: DynareBison.yy include/DynareParser.h

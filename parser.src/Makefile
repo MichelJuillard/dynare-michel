@@ -47,7 +47,7 @@ SCILAB_OBJ = InterfaceScilab.o
 all: dynare.exe dynare_s.exe
 
 dynare.exe: $(COMMON_OBJ) $(MATLAB_OBJ)
-	$(CPP) $(CPPFLAGS) -o  dynare.exe $(COMMON_OBJ) $(MATLAB_OBJ);\
+#	$(CPP) $(CPPFLAGS) -o  dynare.exe $(COMMON_OBJ) $(MATLAB_OBJ) -l stdc++;\
 	cp dynare.exe ../matlab/
 
 dynare_s.exe: $(COMMON_OBJ) $(SCILAB_OBJ)
@@ -69,7 +69,7 @@ dynare_s.exe: $(COMMON_OBJ) $(SCILAB_OBJ)
 
 -include $(COMMON_OBJ:.o=.P) $(MATLAB_OBJ:.o=.P) $(SCILAB_OBJ:.o=.P)
 
-DynareFlex.cc: DynareFlex.ll include/DynareScanner.h
+DynareFlex.cc: DynareFlex.ll include/DynareScanner.h include/DynareBison.h
 	flex $(FLEXFLAGS) -oDynareFlex.cc DynareFlex.ll
 
 DynareBison.cc include/DynareBison.h: DynareBison.yy include/DynareParser.h
