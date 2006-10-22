@@ -47,7 +47,7 @@ SCILAB_OBJ = InterfaceScilab.o
 all: dynare.exe dynare_s.exe
 
 dynare.exe: $(COMMON_OBJ) $(MATLAB_OBJ)
-#	$(CPP) $(CPPFLAGS) -o  dynare.exe $(COMMON_OBJ) $(MATLAB_OBJ) -l stdc++;\
+	$(CPP) $(CPPFLAGS) -o  dynare.exe $(COMMON_OBJ) $(MATLAB_OBJ) -l stdc++;\
 	cp dynare.exe ../matlab/
 
 dynare_s.exe: $(COMMON_OBJ) $(SCILAB_OBJ)
