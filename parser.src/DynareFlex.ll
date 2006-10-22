@@ -2,6 +2,7 @@
 #include "DynareScanner.h" 
 #define YLMM_SCANNER_CLASS dynare::scanner
 #define LEXDEBUG 1
+#include <unistd.h>          /* needed for -mno-cygwin */
 #include "ylmm/lexmm.hh"
 int comment_caller;
 /* Particular value : when sigma_e command is found 
