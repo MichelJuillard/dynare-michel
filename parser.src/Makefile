@@ -1,6 +1,6 @@
 CPP = c++
 ifeq ($(DEBUG),yes)
-	CPPFLAGS = -mno-cygwin -ggdb -pg -Wall
+	CPPFLAGS = -ggdb -pg -Wall
 	FLEXFLAGS = -i -d
 else
 ifeq ($(MINGW),yes)
