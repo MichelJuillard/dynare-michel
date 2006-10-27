@@ -44,7 +44,7 @@ SCILAB_OBJ = InterfaceScilab.o
 ### Build ######################################################################
 ################################################################################
 
-all: dynare.exe dynare_s.exe
+all: dynare_m.exe dynare_s.exe
 
 dynare_m.exe: $(COMMON_OBJ) $(MATLAB_OBJ)
 	$(CPP) $(CPPFLAGS) -o  dynare_m.exe $(COMMON_OBJ) $(MATLAB_OBJ) -l stdc++;\
