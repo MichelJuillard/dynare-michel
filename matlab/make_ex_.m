@@ -1,6 +1,21 @@
 % Copyright (C) 2001 Michel Juillard
 %
 function make_ex_
+% function make_ex_
+% forms oo_.exo_simul and oo_.exo_det_simul
+% INPUTS
+%   ...
+% OUTPUTS
+%   ...
+% ALGORITHM
+%   ...
+% SPECIAL REQUIREMENTS
+%   none
+%  
+%  
+% part of DYNARE, copyright S. Adjemian, M. Juillard (1996-2006)
+% Gnu Public License.
+  
   global M_ options_ oo_ ex0_ ex_det0_
   
   options_ = set_default_option(options_,'periods',0);
@@ -17,22 +32,10 @@ function make_ex_
     else
       oo_.exo_simul = [ones(M_.maximum_lag,1)*ex0_';ones(options_.periods+M_.maximum_lead,1)*oo_.exo_steady_state'];
     end
-  elseif size(oo_.exo_simul,2) < length(oo_.exo_steady_state)
-    k = size(oo_.exo_simul,2)+1:length(oo_.exo_steady_state);
-    if isempty(ex0_)
-      oo_.exo_simul = [oo_.exo_simul ones(M_.maximum_lag+size(oo_.exo_simul,1)+M_.maximum_lead,1)*oo_.exo_steady_state(k)'];
-    else
-      oo_.exo_simul = [oo_.exo_simul [ones(M_.maximum_lag,1)*ex0_(k)'; ones(size(oo_.exo_simul,1)-M_.maximum_lag+M_.maximum_lead, ...
-						1)*oo_.exo_steady_state(k)']];
-    end
   elseif size(oo_.exo_simul,1) < M_.maximum_lag+M_.maximum_lead+options_.periods
-    if isempty(ex0_)
-      oo_.exo_simul = [oo_.exo_simul; ones(M_.maximum_lag+options_.periods+M_.maximum_lead-size(oo_.exo_simul,1),1)*oo_.exo_steady_state'];
-    else
-      oo_.exo_simul = [ones(M_.maximum_lag,1)*ex0_'; oo_.exo_simul; ones(options_.periods+M_.maximum_lead-size(oo_.exo_simul, ...
-						  1),1)*oo_.exo_steady_state'];
-    end
+    oo_.exo_simul = [oo_.exo_simul; ones(M_.maximum_lag+options_.periods+M_.maximum_lead-size(oo_.exo_simul,1),1)*oo_.exo_steady_state'];
   end
+
   if M_.exo_det_nbr > 0
     if isempty(oo_.exo_det_simul)
       if isempty(ex_det0_)
@@ -40,21 +43,8 @@ function make_ex_
       else
 	oo_.exo_det_simul = [ones(M_.maximum_lag,1)*ex_det0_';ones(options_.periods+M_.maximum_lead,1)*oo_.exo_det_steady_state'];
       end
-    elseif size(oo_.exo_det_simul,2) < length(oo_.exo_det_steady_state)
-      k = size(oo_.exo_det_simul,2)+1:length(oo_.exo_det_steady_state);
-      if isempty(ex_det0_)
-	oo_.exo_det_simul = [oo_.exo_det_simul ones(M_.maximum_lag+size(oo_.exo_det_simul,1)+M_.maximum_lead,1)*oo_.exo_det_steady_state(k)'];
-      else
-	oo_.exo_det_simul = [oo_.exo_det_simul [ones(M_.maximum_lag,1)*ex_det0_(k)'; ones(size(oo_.exo_det_simul,1)-M_.maximum_lag+M_.maximum_lead, ...
-						  1)*oo_.exo_det_steady_state(k)']];
-      end
     elseif size(oo_.exo_det_simul,1) < M_.maximum_lag+M_.maximum_lead+options_.periods
-      if isempty(ex_det0_)
-	oo_.exo_det_simul = [oo_.exo_det_simul; ones(M_.maximum_lag+options_.periods+M_.maximum_lead-size(oo_.exo_det_simul,1),1)*oo_.exo_det_steady_state'];
-      else
-	oo_.exo_det_simul = [ones(M_.maximum_lag,1)*ex_det0_'; oo_.exo_det_simul; ones(options_.periods+M_.maximum_lead-size(oo_.exo_det_simul, ...
-						  1),1)*oo_.exo_det_steady_state'];
-      end
+      oo_.exo_det_simul = [oo_.exo_det_simul; ones(M_.maximum_lag+options_.periods+M_.maximum_lead-size(oo_.exo_det_simul,1),1)*oo_.exo_det_steady_state'];
     end
   end
     

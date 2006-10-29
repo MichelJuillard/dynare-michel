@@ -1,12 +1,29 @@
-% Copyright (C) 2001 Michel Juillard
-%
 function simk
-
+% function simk
+% performs deterministic simulations with lead or lag on more than one
+% period
+%
+% INPUTS
+%   ...
+% OUTPUTS
+%   ...
+% ALGORITHM
+%   Laffargue, Boucekkine, Juillard (LBJ)
+%   see Juillard (1996) Dynare: A program for the resolution and
+%   simulation of dynamic models with forward variables through the use
+%   of a relaxation algorithm. CEPREMAP. Couverture Orange. 9602.
+%
+% SPECIAL REQUIREMENTS
+%   None.
+%  
+%  
+% part of DYNARE, copyright S. Adjemian, M. Juillard (1996-2006)
+% Gnu Public License.
 global M_ options_ oo_
 global it_ iyr0 ct_ broyden_
 
 func_name = [M_.fname '_static'];
-nk = M_.maximum_lag + M_.maximum_lead + 1 ;
+nk = M_.maximum_endo_lag + M_.maximum_endo_lead + 1 ;
 ny = size(M_.lead_lag_incidence,2) ;
 icc1 = M_.lead_lag_incidence(nk,:) > 0;
 
@@ -34,7 +51,7 @@ for i = 1:nk
   end
 end
 
-jwc = find(iy(2:M_.maximum_lead+1,:)') ; % indices of columns for
+jwc = find(iy(2:M_.maximum_endo_lead+1,:)') ; % indices of columns for
                                 % triangularization
 				% as many rows as lags in model
 
@@ -50,11 +67,11 @@ end
 j1 = ky(1:lky(1),1) ;
 lj1 = lky(1) ;
 
-for i = 2:M_.maximum_lag
+for i = 2:M_.maximum_endo_lag
   [j1,lj1] = ffill(j1,lj1,selif(temp+(i-1)*ny,temp <= ny)) ;
-  if M_.maximum_lead == 1
-    if lky(i+M_.maximum_lead) > 0
-      [jwc,ljwc] = ffill(jwc,ljwc, ky(1:lky(i+M_.maximum_lead),i+M_.maximum_lead)+(M_.maximum_lead-1)*ny) ;
+  if M_.maximum_endo_lead == 1
+    if lky(i+M_.maximum_endo_lead) > 0
+      [jwc,ljwc] = ffill(jwc,ljwc, ky(1:lky(i+M_.maximum_endo_lead),i+M_.maximum_endo_lead)+(M_.maximum_endo_lead-1)*ny) ;
       if ljwc(i) == 0
  	temp = icc1;
       else
@@ -66,8 +83,8 @@ for i = 2:M_.maximum_lag
     end
   else
     temp = temp(lj1(i)+1:size(temp,1),:) - ny ;
-    if lky(i+M_.maximum_lead) > 0
-      [jwc,ljwc] = ffill(jwc,ljwc,[temp;ky(1:lky(i+M_.maximum_lead),i+M_.maximum_lead)+(M_.maximum_lead-1)*ny]);
+    if lky(i+M_.maximum_endo_lead) > 0
+      [jwc,ljwc] = ffill(jwc,ljwc,[temp;ky(1:lky(i+M_.maximum_endo_lead),i+M_.maximum_endo_lead)+(M_.maximum_endo_lead-1)*ny]);
     else
       [jwc,ljwc] = ffill(jwc,ljwc,temp) ;
     end
@@ -75,11 +92,11 @@ for i = 2:M_.maximum_lag
   end
 end
 
-[j1,lj1] = ffill(j1,lj1,selif(temp+M_.maximum_lag*ny, temp <= ny)) ;
-ltemp = zeros(M_.maximum_lag,1) ;
-jwc1 = zeros(ncc1,M_.maximum_lag) ;
+[j1,lj1] = ffill(j1,lj1,selif(temp+M_.maximum_endo_lag*ny, temp <= ny)) ;
+ltemp = zeros(M_.maximum_endo_lag,1) ;
+jwc1 = zeros(ncc1,M_.maximum_endo_lag) ;
 
-for i = 1:M_.maximum_lag
+for i = 1:M_.maximum_endo_lag
   temp = union(jwc(1:ljwc(i),i),icc1) ;
   ltemp(i) = size(temp,1) ;
   if ljwc(i) > 0
@@ -104,8 +121,8 @@ for iter = 1:options_.maxit
   it_ = 1+M_.maximum_lag ;
   ic = [1:ny] ;
   iyr = iyr0 ;
-  i = M_.maximum_lag+1 ;
-  while (i>1) & (it_<=options_.periods+M_.maximum_lag)
+  i = M_.maximum_endo_lag+1 ;
+  while (i>1) & (it_<=options_.periods+M_.maximum_endo_lag)
     h3 = clock ;
     if broyden_ & iter > 1
       %d1_ = -feval(fh,oo_.endo_simul(iyr));
@@ -122,16 +139,16 @@ for iter = 1:options_.maxit
     else
       w0 = [];
     end
-    ttemp = iy(i+1:i+M_.maximum_lead,:)' ;
+    ttemp = iy(i+1:i+M_.maximum_endo_lead,:)' ;
     jwci = find(ttemp) ;
     if ~ isempty(jwci)
-      w = M_.jacobia(:,isc(i)+1:isc(i+M_.maximum_lead)) ;
+      w = M_.jacobia(:,isc(i)+1:isc(i+M_.maximum_endo_lead)) ;
     end
     j = i ;
-    while j <= M_.maximum_lag
+    while j <= M_.maximum_endo_lag
       if ~isempty(w0)
 
-	ofs = ((it_-M_.maximum_lag-M_.maximum_lag+j-2)*ny)*ncc*8 ;
+	ofs = ((it_-M_.maximum_lag-M_.maximum_endo_lag+j-2)*ny)*ncc*8 ;
 	junk = fseek(fid,ofs,-1) ;
 	c = fread(fid,[ncc,ny],'float64') ;
 
@@ -143,6 +160,7 @@ for iter = 1:options_.maxit
 	  ix = indnv(jwci,iz) ;
 	  iy__ = indnv(icc1,iz) ;
 	  temp = zeros(size(w,1),size(iz,1)) ;
+	  temp(:,ix) = w;
 	  temp(:,iy__) = temp(:,iy__)-w0*c(j1i,1:ncc1) ;
 	  w = temp ;
 	  jwci = iz ;
@@ -154,9 +172,9 @@ for iter = 1:options_.maxit
       j = j + 1 ;
       if isempty(jwci)
 	j1i = [];
-	if lky(j+M_.maximum_lead) ~= 0
-	  jwci = ky(1:lky(j+M_.maximum_lead),j+M_.maximum_lead) + (M_.maximum_lead-1)*ny ;
-	  w = M_.jacobia(:,isc(j+M_.maximum_lead-1)+1:isc(j+M_.maximum_lead)) ;
+	if lky(j+M_.maximum_endo_lead) ~= 0
+	  jwci = ky(1:lky(j+M_.maximum_endo_lead),j+M_.maximum_endo_lead) + (M_.maximum_endo_lead-1)*ny ;
+	  w = M_.jacobia(:,isc(j+M_.maximum_endo_lead-1)+1:isc(j+M_.maximum_endo_lead)) ;
 	else
 	  jwci = [] ;
 	end
@@ -164,18 +182,18 @@ for iter = 1:options_.maxit
 	j1i = selif(jwci,jwci<(ny+1)) ;
 	w0 = w(:,1:size(j1i,1)) ;
 	if size(jwci,1) == size(j1i,1)
-	  if lky(j+M_.maximum_lead) ~= 0
-	    jwci = ky(1:lky(j+M_.maximum_lead),j+M_.maximum_lead)+(M_.maximum_lead-1)*ny ;
-	    w = M_.jacobia(:,isc(j+M_.maximum_lead-1)+1:isc(j+M_.maximum_lead)) ;
+	  if lky(j+M_.maximum_endo_lead) ~= 0
+	    jwci = ky(1:lky(j+M_.maximum_endo_lead),j+M_.maximum_endo_lead)+(M_.maximum_endo_lead-1)*ny ;
+	    w = M_.jacobia(:,isc(j+M_.maximum_endo_lead-1)+1:isc(j+M_.maximum_endo_lead)) ;
 	  else
 	    jwci = [] ;
 	  end
 	else
 	  jwci = jwci(size(j1i,1)+1:size(jwci,1),:)-ny ;
 	  w = w(:,size(j1i,1)+1:size(w,2)) ; 
-	  if lky(j+M_.maximum_lead) ~= 0
-	    jwci = [ jwci; ky(1: lky(j+M_.maximum_lead),j+M_.maximum_lead)+(M_.maximum_lead-1)*ny] ;
-	    w = [w M_.jacobia(:,isc(j+M_.maximum_lead-1)+1:isc(j+M_.maximum_lead))] ;
+	  if lky(j+M_.maximum_endo_lead) ~= 0
+	    jwci = [ jwci; ky(1: lky(j+M_.maximum_endo_lead),j+M_.maximum_endo_lead)+(M_.maximum_endo_lead-1)*ny] ;
+	    w = [w M_.jacobia(:,isc(j+M_.maximum_endo_lead-1)+1:isc(j+M_.maximum_endo_lead))] ;
 %	  else
 %	    jwci = [] ;
 	  end
@@ -197,7 +215,7 @@ for iter = 1:options_.maxit
     iyr = iyr + ny ;
     i = i - 1 ;
   end
-  icr0 = (it_-M_.maximum_lag-M_.maximum_lag -1)*ny ;
+  icr0 = (it_-M_.maximum_lag-M_.maximum_endo_lag -1)*ny ;
   while it_ <= options_.periods+M_.maximum_lag
     if broyden_
       %d1_ = -feval(fh,oo_.endo_simul(iyr));
@@ -209,9 +227,9 @@ for iter = 1:options_.maxit
     end
     err_f = max(err_f,max(abs(d1)));
     w0 = M_.jacobia(:,1:isc(1)) ;
-    w = M_.jacobia(:,isc(1)+1:isc(1+M_.maximum_lead)) ;
+    w = M_.jacobia(:,isc(1)+1:isc(1+M_.maximum_endo_lead)) ;
     j = 1 ;
-    while j <= M_.maximum_lag
+    while j <= M_.maximum_endo_lag
       icr = j1(1:lj1(j),j)-(j-1)*ny ;
 
       ofs = ((icr0+(j-1)*ny+1)-1)*ncc*8 ;
@@ -229,13 +247,13 @@ for iter = 1:options_.maxit
       clear c ;
       j = j + 1 ;
       w0 = w(:,1:lj1(j)) ;
-      if M_.maximum_lead == 1
-	w = M_.jacobia(:,isc(j+M_.maximum_lead-1)+1:isc(j+M_.maximum_lead)) ;
+      if M_.maximum_endo_lead == 1
+	w = M_.jacobia(:,isc(j+M_.maximum_endo_lead-1)+1:isc(j+M_.maximum_endo_lead)) ;
       else
 	w = w(:,lj1(j)+1:size(w,2)) ;
 
-	if lky(j+M_.maximum_lead) > 0
-	  w = [w M_.jacobia(:,isc(j+M_.maximum_lead-1)+1:isc(j+M_.maximum_lead))] ;
+	if lky(j+M_.maximum_endo_lead) > 0
+	  w = [w M_.jacobia(:,isc(j+M_.maximum_endo_lead-1)+1:isc(j+M_.maximum_endo_lead))] ;
 	end
       end
     end
@@ -256,9 +274,9 @@ for iter = 1:options_.maxit
     junk = fseek(fid,ofs,-1) ;
     c = fread(fid,[ncc,ny],'float64') ;
 
-    for i = 1:M_.maximum_lead
+    for i = 1:M_.maximum_endo_lead
       w = tril(triu(ones(ny,ny+ncc1))) ;
-      w(:,jwc1(:,M_.maximum_lag)) = w(:,jwc1(:,M_.maximum_lag))+c(:,1:ncc1) ;
+      w(:,jwc1(:,M_.maximum_endo_lag)) = w(:,jwc1(:,M_.maximum_endo_lag))+c(:,1:ncc1) ;
       c = [w(:,ny+1:size(w,2))' c(:,ncc)]/w(:,1:ny) ;
 
       junk = fseek(fid,0,1) ;
@@ -269,19 +287,19 @@ for iter = 1:options_.maxit
 
     end
   end
-  oo_.endo_simul = reshape(oo_.endo_simul,ny,options_.periods+M_.maximum_lag+M_.maximum_lead) ;
+  oo_.endo_simul = reshape(oo_.endo_simul,ny,options_.periods+M_.maximum_lag+M_.maximum_endo_lead) ;
   if ct_ == 1
     hbacsup = clock ;
     c = bksupk(ny,fid,ncc,icc1) ;
     hbacsup = etime(clock,hbacsup) ;
-    c = reshape(c,ny,options_.periods+M_.maximum_lead)' ;
-    y(:,1+M_.maximum_lag:(options_.periods+M_.maximum_lead+M_.maximum_lag)) = y(:,1+M_.maximum_lag:(options_.periods+M_.maximum_lead+M_.maximum_lag))+options_.slowc*c' ;
+    c = reshape(c,ny,options_.periods+M_.maximum_endo_lead)' ;
+    y(:,1+M_.maximum_endo_lag:(options_.periods+M_.maximum_endo_lead+M_.maximum_endo_lag)) = y(:,1+M_.maximum_endo_lag:(options_.periods+M_.maximum_endo_lead+M_.maximum_endo_lag))+options_.slowc*c' ;
   else
     hbacsup = clock ;
     c = bksupk(ny,fid,ncc,icc1) ;
     hbacsup = etime(clock,hbacsup) ;
     c = reshape(c,ny,options_.periods)' ;
-    oo_.endo_simul(:,1+M_.maximum_lag:(options_.periods+M_.maximum_lag)) = oo_.endo_simul(:,1+M_.maximum_lag:(options_.periods+M_.maximum_lag))+options_.slowc*c' ;
+    oo_.endo_simul(:,1+M_.maximum_endo_lag:(options_.periods+M_.maximum_endo_lag)) = oo_.endo_simul(:,1+M_.maximum_endo_lag:(options_.periods+M_.maximum_endo_lag))+options_.slowc*c' ;
   end
 
   fclose(fid) ;

@@ -1,6 +1,25 @@
 % Copyright (C) 2001 Michel Juillard
 %
 function sim1
+% function sim1
+% performs deterministic simulations with lead or lag on one period
+%
+% INPUTS
+%   ...
+% OUTPUTS
+%   ...
+% ALGORITHM
+%   Laffargue, Boucekkine, Juillard (LBJ)
+%   see Juillard (1996) Dynare: A program for the resolution and
+%   simulation of dynamic models with forward variables through the use
+%   of a relaxation algorithm. CEPREMAP. Couverture Orange. 9602.
+%
+% SPECIAL REQUIREMENTS
+%   None.
+%  
+%  
+% part of DYNARE, copyright S. Adjemian, M. Juillard (1996-2006)
+% Gnu Public License.
 
 global M_ options_ oo_
 global  iyp iyf ct_ M_ it_ c
@@ -25,7 +44,7 @@ disp (['-----------------------------------------------------']) ;
 disp (['MODEL SIMULATION :']) ;
 fprintf('\n') ;
 
-it_init = 2 ;
+it_init = M_.maximum_lag+1 ;
 
 h1 = clock ;
 for iter = 1:options_.maxit
@@ -44,7 +63,7 @@ for iter = 1:options_.maxit
 	ic = [1:ny] ;
 	icp = iyp ;
 	c (ic,:) = M_.jacobia(:,is)\M_.jacobia(:,isf1) ;
-	for it_ = it_init+1:options_.periods+1
+	for it_ = it_init+(1:options_.periods-1)
 		z = [oo_.endo_simul(iyp,it_-1) ; oo_.endo_simul(:,it_) ; oo_.endo_simul(iyf,it_+1)] ;
 		[d1,M_.jacobia] = feval([M_.fname '_dynamic'],z,oo_.exo_simul);
 		M_.jacobia = [M_.jacobia(:,iz) -d1] ;
@@ -61,11 +80,11 @@ for iter = 1:options_.maxit
 		c(ic,nrc) = s\c(:,nrc) ;
 		c = bksup1(ny,nrc) ;
 		c = reshape(c,ny,options_.periods+1) ;
-		oo_.endo_simul(:,it_init:options_.periods+2) = oo_.endo_simul(:,it_init:options_.periods+2)+options_.slowc*c ;
+		oo_.endo_simul(:,it_init+(0:options_.periods)) = oo_.endo_simul(:,it_init+(0:options_.periods))+options_.slowc*c ;
 	else
 		c = bksup1(ny,nrc) ;
 		c = reshape(c,ny,options_.periods) ;
-		oo_.endo_simul(:,it_init:options_.periods+1) = oo_.endo_simul(:,it_init:options_.periods+1)+options_.slowc*c ;
+		oo_.endo_simul(:,it_init+(0:options_.periods-1)) = oo_.endo_simul(:,it_init+(0:options_.periods-1))+options_.slowc*c ;
 	end
 
 	err = max(max(abs(c./options_.scalv')));

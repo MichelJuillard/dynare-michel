@@ -1,11 +1,25 @@
-% Copyright (C) 2001 Michel Juillard
-%
 function simul(dr)
+% function simul(dr)
+% computes simulations
+%  
+% INPUTS
+%   dr: structure of decision rules for stochastic simulations
+%  
+% OUTPUTS
+%   ...
+% ALGORITHM
+%   ...
+% SPECIAL REQUIREMENTS
+%   none
+%  
+%  
+% part of DYNARE, copyright S. Adjemian, M. Juillard (1996-2006)
+% Gnu Public License.
 
 global M_ options_ oo_ 
 global ys0_ ct_ endval_ 
 
-if size(M_.lead_lag_incidence,2)-nnz(M_.lead_lag_incidence(M_.maximum_lag+1,:)) > 0
+if size(M_.lead_lag_incidence,2)-nnz(M_.lead_lag_incidence(M_.maximum_endo_lag+1,:)) > 0
   mess = ['DYNARE: error in model specification : variable ' M_.endo_names(find(M_.lead_lag_incidence(M_.maximum_lag+1,:)==0),:)] ;
   mess = [mess ' doesn''t appear as current variable.'] ; 
   error (mess) ;
@@ -40,7 +54,7 @@ if options_.simul_algo == 0
 
   options_.scalv= 1 ;
 
-  if M_.maximum_lag ==1 & M_.maximum_lead <= 1
+  if M_.maximum_endo_lag ==1 & M_.maximum_endo_lead <= 1
     sim1 ;
   else
     simk ;
