@@ -1294,7 +1294,7 @@ void ModelTree::ModelInitialization(void)
     {
       output << "\n\t";
       // Loop on periods
-      for (int lag = -ModelParameters::max_lag; lag <= ModelParameters::max_lead; lag++)
+      for (int lag = -ModelParameters::max_endo_lag; lag <= ModelParameters::max_endo_lead; lag++)
 	{
 	  // Getting name of symbol
 	  string name = SymbolTable::getNameByID(eEndogenous, endoID);

@@ -116,14 +116,6 @@ void  NumericalInitialization::BeginEndval (void)
 //------------------------------------------------------------------------------
 void  NumericalInitialization::EndEndval (void) 
 {
-	
-	*output << "oo_.y_simul = [oo_.y_simul oo_.steady_state*ones(1,M_.maximum_lead+M_.maximum_lead)];\n";
-  	*output << "if M_.exo_nbr > 0;\n";
-  	*output << "\too_.exo_simul = [ones(M_.maximum_lag,1)*oo_.exo_steady_state'];\n";
-  	*output <<"end;\n";
-  	*output << "if M_.exo_det_nbr > 0;\n";
-  	*output << "\too_.exo_det_simul = [ones(M_.maximum_lag,1)*oo_.exo_det_steady_state'];\n";
-  	*output <<"end;\n";
 }
 //------------------------------------------------------------------------------
 void  NumericalInitialization::BeginHistval (void) 
