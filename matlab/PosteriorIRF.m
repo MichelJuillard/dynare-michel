@@ -76,7 +76,7 @@ for b=1:B
   set_parameters(deep);
   dr = resol(oo_.steady_state,0);
   SS(M_.exo_names_orig_ord,M_.exo_names_orig_ord) = M_.Sigma_e+1e-14*eye(M_.exo_nbr);
-  SS = transpose(chol(SS));
+  cs = transpose(chol(SS));
   for i = 1:M_.exo_nbr
     if SS(i,i) > 1e-13
       y=irf(dr,SS(M_.exo_names_orig_ord,i), options_.irf, options_.drop,options_.replic,options_.order);
