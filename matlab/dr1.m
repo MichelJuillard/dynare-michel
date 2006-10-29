@@ -1,16 +1,33 @@
-% Copyright (C) 2001 Michel Juillard
-%
 function [dr,info]=dr1(dr,task)
-global M_ options_ oo_
+% function dr = dr1(dr,task)
+% finds the state vector for structural state space representation
+% sets many fields of dr 
+%
+% INPUTS
+%   dr: structure of decision rules for stochastic simulations
+%   task = 0:  computes decision rules
+%   task = 1:  computes eigenvalues
+%  
+% OUTPUTS
+%   dr: structure of decision rules for stochastic simulations
+%   info = 1: the model doesn't define current variables uniquely
+%   info = 2: problem in mjdgges.dll info(2) contains error code
+%   info = 3: BK order condition not satisfied info(2) contains "distance"
+%             absence of stable trajectory
+%   info = 4: BK order condition not satisfied info(2) contains "distance"
+%             indeterminacy
+%   info = 5: BK rank condition not satisfied
+%  
+% ALGORITHM
+%   ...
+% SPECIAL REQUIREMENTS
+%   none
+%  
+%  
+% part of DYNARE, copyright S. Adjemian, M. Juillard (1996-2006)
+% Gnu Public License.
 
-global olr_state
-% info = 1: the model doesn't define current variables uniquely
-% info = 2: problem in mjdgges.dll info(2) contains error code
-% info = 3: BK order condition not satisfied info(2) contains "distance"
-%           absence of stable trajectory
-% info = 4: BK order condition not satisfied info(2) contains "distance"
-%           indeterminacy
-% info = 5: BK rank condition not satisfied
+  global M_ options_ oo_ olr_state
 
 
 
@@ -22,8 +39,8 @@ global olr_state
   options_ = set_default_option(options_,'olr_beta',1);
   options_ = set_default_option(options_,'qz_criterium',1.000001);
 
-xlen = M_.maximum_lead + M_.maximum_lag + 1;
-klen = M_.maximum_lag + M_.maximum_lead + 1;
+xlen = M_.maximum_endo_lead + M_.maximum_endo_lag + 1;
+klen = M_.maximum_endo_lag + M_.maximum_endo_lead + 1;
 iyv = M_.lead_lag_incidence';
 iyv = iyv(:);
 iyr0 = find(iyv) ;
@@ -60,8 +77,8 @@ if options_.olr
 
   if ~isfield(olr_state_,'done')
     olr_state_.done = 1;
-    olr_state_.old_M_.maximum_lag = M_.maximum_lag;
-    olr_state_.old_M_.maximum_lead = M_.maximum_lead;
+    olr_state_.old_M_.maximum_endo_lag = M_.maximum_endo_lag;
+    olr_state_.old_M_.maximum_endo_lead = M_.maximum_endo_lead;
     olr_state_.old_M_.endo_nbr = M_.endo_nbr;
     olr_state_.old_M_.lead_lag_incidence = M_.lead_lag_incidence;
     
@@ -70,18 +87,18 @@ if options_.olr
       lgoo_.endo_simul = strvcat(lgoo_.endo_simul,temp);
     end
     M_.endo_nbr = 2*M_.endo_nbr-n_inst;
-    M_.maximum_lag = max(M_.maximum_lag,M_.maximum_lead);
-    M_.maximum_lead = M_.maximum_lag;
+    M_.maximum_endo_lag = max(M_.maximum_endo_lag,M_.maximum_endo_lead);
+    M_.maximum_endo_lead = M_.maximum_endo_lag;
   end    
   nj = olr_state_.old_M_.endo_nbr-n_inst;
-  offset_min = M_.maximum_lag - olr_state_.old_M_.maximum_lag;
-  offset_max = M_.maximum_lead - olr_state_.old_M_.maximum_lead;
-  newiy = zeros(2*M_.maximum_lag+1,nj+olr_state_.old_M_.endo_nbr);
+  offset_min = M_.maximum_endo_lag - olr_state_.old_M_.maximum_endo_lag;
+  offset_max = M_.maximum_endo_lead - olr_state_.old_M_.maximum_endo_lead;
+  newiy = zeros(2*M_.maximum_endo_lag+1,nj+olr_state_.old_M_.endo_nbr);
   jacobia_ = jacobia_(1:nj,:);
-  for i=1:2*M_.maximum_lag+1
-    if i > offset_min & i <= 2*M_.maximum_lag+1-offset_max
+  for i=1:2*M_.maximum_endo_lag+1
+    if i > offset_min & i <= 2*M_.maximum_endo_lag+1-offset_max
       [junk,k1,k2] = find(olr_state_.old_M_.lead_lag_incidence(i-offset_min,:));
-      if i == M_.maximum_lag+1
+      if i == M_.maximum_endo_lag+1
 	jacobia1 = [jacobia1 [jacobia_(:,k2); 2*options_.olr_w]];
       else
 	jacobia1 = [jacobia1 [jacobia_(:,k2); ...
@@ -89,12 +106,12 @@ if options_.olr
       end
       newiy(i,k1) = ones(1,length(k1));
     end
-    i1  = 2*M_.maximum_lag+2-i;
-    if i1 <= 2*M_.maximum_lag+1-offset_max & i1 > offset_min 
+    i1  = 2*M_.maximum_endo_lag+2-i;
+    if i1 <= 2*M_.maximum_endo_lag+1-offset_max & i1 > offset_min 
       [junk,k1,k2] = find(olr_state_.old_M_.lead_lag_incidence(i1-offset_min,:));
       k3 = find(any(jacobia_(:,k2),2));
       x = zeros(olr_state_.old_M_.endo_nbr,length(k3));
-      x(k1,:) = bet^(-i1+M_.maximum_lag+1)*jacobia_(k3,k2)';
+      x(k1,:) = bet^(-i1+M_.maximum_endo_lag+1)*jacobia_(k3,k2)';
       jacobia1  = [jacobia1 [zeros(nj,length(k3)); x]];
       newiy(i,k3+olr_state_.old_M_.endo_nbr) = ones(1,length(k3));
     end      
@@ -103,9 +120,9 @@ if options_.olr
 		    zeros(olr_state_.old_M_.endo_nbr, M_.exo_nbr)]];
   newiy = newiy';
   newiy = find(newiy(:));
-  M_.lead_lag_incidence = zeros(M_.endo_nbr*(M_.maximum_lag+M_.maximum_lead+1),1);
+  M_.lead_lag_incidence = zeros(M_.endo_nbr*(M_.maximum_endo_lag+M_.maximum_endo_lead+1),1);
   M_.lead_lag_incidence(newiy) = [1:length(newiy)]';
-  M_.lead_lag_incidence =reshape(M_.lead_lag_incidence,M_.endo_nbr,M_.maximum_lag+M_.maximum_lead+1)';
+  M_.lead_lag_incidence =reshape(M_.lead_lag_incidence,M_.endo_nbr,M_.maximum_endo_lag+M_.maximum_endo_lead+1)';
   jacobia_ = jacobia1;
   clear jacobia1
   % computes steady state
@@ -114,7 +131,7 @@ if options_.olr
     dr.ys =[dr.ys; zeros(nj,1)];
   else
     AA = zeros(M_.endo_nbr,M_.endo_nbr);
-    for i=1:M_.maximum_lag+M_.maximum_lead+1
+    for i=1:M_.maximum_endo_lag+M_.maximum_endo_lead+1
       [junk,k1,k2] = find(M_.lead_lag_incidence(i,:));
       AA(:,k1) = AA(:,k1)+jacobia_(:,k2);
     end
@@ -123,7 +140,7 @@ if options_.olr
 end
 % end of code section for Optimal Linear Regulator
 
-klen = M_.maximum_lag + M_.maximum_lead + 1;
+klen = M_.maximum_endo_lag + M_.maximum_endo_lead + 1;
 dr=set_state_space(dr);
 kstate = dr.kstate;
 kad = dr.kad;
@@ -138,15 +155,15 @@ nz = nnz(M_.lead_lag_incidence);
 
 sdyn = M_.endo_nbr - nstatic;
 
-k0 = M_.lead_lag_incidence(M_.maximum_lag+1,order_var);
-k1 = M_.lead_lag_incidence(find([1:klen] ~= M_.maximum_lag+1),:);
+k0 = M_.lead_lag_incidence(M_.maximum_endo_lag+1,order_var);
+k1 = M_.lead_lag_incidence(find([1:klen] ~= M_.maximum_endo_lag+1),:);
 b = jacobia_(:,k0);
 
-if M_.maximum_lead == 0;  % backward models
+if M_.maximum_endo_lead == 0;  % backward models
   a = jacobia_(:,nonzeros(k1'));
   dr.ghx = zeros(size(a));
   m = 0;
-  for i=M_.maximum_lag:-1:1
+  for i=M_.maximum_endo_lag:-1:1
     k = nonzeros(M_.lead_lag_incidence(i,order_var));
     dr.ghx(:,m+[1:length(k)]) = -b\a(:,k);
     m = m+length(k);
@@ -191,13 +208,13 @@ clear aa;
 d = zeros(nd,nd) ;
 e = d ;
 
-k = find(kstate(:,2) >= M_.maximum_lag+2 & kstate(:,3));
+k = find(kstate(:,2) >= M_.maximum_endo_lag+2 & kstate(:,3));
 d(1:sdyn,k) = a(nstatic+1:end,kstate(k,3)) ;
-k1 = find(kstate(:,2) == M_.maximum_lag+2);
+k1 = find(kstate(:,2) == M_.maximum_endo_lag+2);
 e(1:sdyn,k1) =  -b2(:,kstate(k1,1)-nstatic);
-k = find(kstate(:,2) <= M_.maximum_lag+1 & kstate(:,4));
+k = find(kstate(:,2) <= M_.maximum_endo_lag+1 & kstate(:,4));
 e(1:sdyn,k) = -a(nstatic+1:end,kstate(k,4)) ;
-k2 = find(kstate(:,2) == M_.maximum_lag+1);
+k2 = find(kstate(:,2) == M_.maximum_endo_lag+1);
 k2 = k2(~ismember(kstate(k2,1),kstate(k1,1)));
 d(1:sdyn,k2) = b2(:,kstate(k2,1)-nstatic);
 
@@ -231,7 +248,7 @@ else
   nba = nd-sdim;
 end
 
-nyf = sum(kstate(:,2) > M_.maximum_lag+1);
+nyf = sum(kstate(:,2) > M_.maximum_endo_lag+1);
 
 if task == 1
   dr.rank = rank(w(1:nyf,nd-nyf+1:end));
@@ -271,8 +288,8 @@ end
 hx = w(1:n3,1:np)'*gx+w(n4:nd,1:np)';
 hx = (tt(1:np,1:np)*hx)\(ss(1:np,1:np)*hx);
 
-k1 = find(kstate(n4:nd,2) == M_.maximum_lag+1);
-k2 = find(kstate(1:n3,2) == M_.maximum_lag+2);
+k1 = find(kstate(n4:nd,2) == M_.maximum_endo_lag+1);
+k2 = find(kstate(1:n3,2) == M_.maximum_endo_lag+2);
 dr.ghx = [hx(k1,:); gx(k2(nboth+1:end),:)];
 
 %lead variables actually present in the model
@@ -300,7 +317,7 @@ if nstatic > 0
 end
 
 if options_.loglinear == 1
-    k = find(dr.kstate(:,2) <= M_.maximum_lag+1);
+    k = find(dr.kstate(:,2) <= M_.maximum_endo_lag+1);
     klag = dr.kstate(k,[1 2]);
     k1 = dr.order_var;
 
@@ -319,8 +336,8 @@ end
 
 %exogenous deterministic variables
 if M_.exo_det_nbr > 0
-  f1 = sparse(jacobia_(:,nonzeros(M_.lead_lag_incidence(M_.maximum_lag+2:end,order_var))));
-  f0 = sparse(jacobia_(:,nonzeros(M_.lead_lag_incidence(M_.maximum_lag+1,order_var))));
+  f1 = sparse(jacobia_(:,nonzeros(M_.lead_lag_incidence(M_.maximum_endo_lag+2:end,order_var))));
+  f0 = sparse(jacobia_(:,nonzeros(M_.lead_lag_incidence(M_.maximum_endo_lag+1,order_var))));
   fudet = sparse(jacobia_(:,nz+M_.exo_nbr+1:end));
   M1 = inv(f0+[zeros(M_.endo_nbr,nstatic) f1*gx zeros(M_.endo_nbr,nyf-nboth)]);
   M2 = M1*f1;
@@ -339,9 +356,9 @@ end
 %tempex = oo_.exo_simul ;
 
 %hessian = real(hessext('ff1_',[z; oo_.exo_steady_state]))' ;
-kk = flipud(cumsum(flipud(M_.lead_lag_incidence(M_.maximum_lag+1:end,order_var)),1));
-if M_.maximum_lag > 0
-  kk = [cumsum(M_.lead_lag_incidence(1:M_.maximum_lag,order_var),1); kk];
+kk = flipud(cumsum(flipud(M_.lead_lag_incidence(M_.maximum_endo_lag+1:end,order_var)),1));
+if M_.maximum_endo_lag > 0
+  kk = [cumsum(M_.lead_lag_incidence(1:M_.maximum_endo_lag,order_var),1); kk];
 end
 kk = kk';
 kk = find(kk(:));
@@ -365,19 +382,19 @@ n1 = 0;
 n2 = np;
 zx = zeros(np,np);
 zu=zeros(np,M_.exo_nbr);
-for i=2:M_.maximum_lag+1
+for i=2:M_.maximum_endo_lag+1
   k1 = sum(kstate(:,2) == i);
   zx(n1+1:n1+k1,n2-k1+1:n2)=eye(k1);
   n1 = n1+k1;
   n2 = n2-k1;
 end
-kk = flipud(cumsum(flipud(M_.lead_lag_incidence(M_.maximum_lag+1:end,order_var)),1));
+kk = flipud(cumsum(flipud(M_.lead_lag_incidence(M_.maximum_endo_lag+1:end,order_var)),1));
 k0 = [1:M_.endo_nbr];
 gx1 = dr.ghx;
 hu = dr.ghu(nstatic+[1:npred],:);
 zx = [zx; gx1];
 zu = [zu; dr.ghu];
-for i=1:M_.maximum_lead
+for i=1:M_.maximum_endo_lead
   k1 = find(kk(i+1,k0) > 0);
   zu = [zu; gx1(k1,1:npred)*hu];
   gx1 = gx1(k1,:)*hx;
@@ -403,14 +420,14 @@ end
 rhs = -rhs;
 
 %lhs
-n = M_.endo_nbr+sum(kstate(:,2) > M_.maximum_lag+1 & kstate(:,2) < M_.maximum_lag+M_.maximum_lead+1);
+n = M_.endo_nbr+sum(kstate(:,2) > M_.maximum_endo_lag+1 & kstate(:,2) < M_.maximum_endo_lag+M_.maximum_endo_lead+1);
 A = zeros(n,n);
 B = zeros(n,n);
-A(1:M_.endo_nbr,1:M_.endo_nbr) = jacobia_(:,M_.lead_lag_incidence(M_.maximum_lag+1,order_var));
+A(1:M_.endo_nbr,1:M_.endo_nbr) = jacobia_(:,M_.lead_lag_incidence(M_.maximum_endo_lag+1,order_var));
 % variables with the highest lead
-k1 = find(kstate(:,2) == M_.maximum_lag+M_.maximum_lead+1);
-if M_.maximum_lead > 1
-  k2 = find(kstate(:,2) == M_.maximum_lag+M_.maximum_lead);
+k1 = find(kstate(:,2) == M_.maximum_endo_lag+M_.maximum_endo_lead+1);
+if M_.maximum_endo_lead > 1
+  k2 = find(kstate(:,2) == M_.maximum_endo_lag+M_.maximum_endo_lead);
   [junk,junk,k3] = intersect(kstate(k1,1),kstate(k2,1));
 else
   k2 = [1:M_.endo_nbr];
@@ -421,8 +438,8 @@ B(1:M_.endo_nbr,end-length(k2)+k3) = jacobia_(:,kstate(k1,3)+M_.endo_nbr);
 offset = M_.endo_nbr;
 k0 = [1:M_.endo_nbr];
 gx1 = dr.ghx;
-for i=1:M_.maximum_lead-1
-  k1 = find(kstate(:,2) == M_.maximum_lag+i+1);
+for i=1:M_.maximum_endo_lead-1
+  k1 = find(kstate(:,2) == M_.maximum_endo_lag+i+1);
   [k2,junk,k3] = find(kstate(k1,3));
   A(1:M_.endo_nbr,offset+k2) = jacobia_(:,k3+M_.endo_nbr);
   n1 = length(k1);
@@ -441,7 +458,7 @@ for i=1:M_.maximum_lead-1
   k0 = k1;
   offset = offset + n1;
 end
-[junk,k1,k2] = find(M_.lead_lag_incidence(M_.maximum_lag+M_.maximum_lead+1,order_var));
+[junk,k1,k2] = find(M_.lead_lag_incidence(M_.maximum_endo_lag+M_.maximum_endo_lead+1,order_var));
 A(1:M_.endo_nbr,nstatic+1:nstatic+npred)=...
     A(1:M_.endo_nbr,nstatic+[1:npred])+jacobia_(:,k2)*gx1(k1,1:npred);
 C = hx;
@@ -472,7 +489,7 @@ if n1*n1*n2*M_.exo_nbr > 1e7
 else
   rhs = hessian*kron(zx,zu);
 end
-nyf1 = sum(kstate(:,2) == M_.maximum_lag+2);
+nyf1 = sum(kstate(:,2) == M_.maximum_endo_lag+2);
 hu1 = [hu;zeros(np-npred,M_.exo_nbr)];
 %B1 = [B(1:M_.endo_nbr,:);zeros(size(A,1)-M_.endo_nbr,size(B,2))];
 rhs = -[rhs; zeros(n-M_.endo_nbr,size(rhs,2))]-B*dr.ghxx*kron(hx,hu1);
@@ -513,45 +530,45 @@ dr.ghuu = dr.ghuu(1:M_.endo_nbr,:);
 % reordering predetermined variables in diminishing lag order
 O1 = zeros(M_.endo_nbr,nstatic);
 O2 = zeros(M_.endo_nbr,M_.endo_nbr-nstatic-npred);
-LHS = jacobia_(:,M_.lead_lag_incidence(M_.maximum_lag+1,order_var));
+LHS = jacobia_(:,M_.lead_lag_incidence(M_.maximum_endo_lag+1,order_var));
 RHS = zeros(M_.endo_nbr,M_.exo_nbr^2);
-kk = find(kstate(:,2) == M_.maximum_lag+2);
+kk = find(kstate(:,2) == M_.maximum_endo_lag+2);
 gu = dr.ghu; 
 guu = dr.ghuu; 
 Gu = [dr.ghu(nstatic+[1:npred],:); zeros(np-npred,M_.exo_nbr)];
 Guu = [dr.ghuu(nstatic+[1:npred],:); zeros(np-npred,M_.exo_nbr*M_.exo_nbr)];
 E = eye(M_.endo_nbr);
-M_.lead_lag_incidenceordered = flipud(cumsum(flipud(M_.lead_lag_incidence(M_.maximum_lag+1:end,order_var)),1));
-if M_.maximum_lag > 0
-  M_.lead_lag_incidenceordered = [cumsum(M_.lead_lag_incidence(1:M_.maximum_lag,order_var),1); M_.lead_lag_incidenceordered];
+M_.lead_lag_incidenceordered = flipud(cumsum(flipud(M_.lead_lag_incidence(M_.maximum_endo_lag+1:end,order_var)),1));
+if M_.maximum_endo_lag > 0
+  M_.lead_lag_incidenceordered = [cumsum(M_.lead_lag_incidence(1:M_.maximum_endo_lag,order_var),1); M_.lead_lag_incidenceordered];
 end
 M_.lead_lag_incidenceordered = M_.lead_lag_incidenceordered';
 M_.lead_lag_incidenceordered = M_.lead_lag_incidenceordered(:);
 k1 = find(M_.lead_lag_incidenceordered);
 M_.lead_lag_incidenceordered(k1) = [1:length(k1)]';
-M_.lead_lag_incidenceordered =reshape(M_.lead_lag_incidenceordered,M_.endo_nbr,M_.maximum_lag+M_.maximum_lead+1)';
+M_.lead_lag_incidenceordered =reshape(M_.lead_lag_incidenceordered,M_.endo_nbr,M_.maximum_endo_lag+M_.maximum_endo_lead+1)';
 kh = reshape([1:nk^2],nk,nk);
-kp = sum(kstate(:,2) <= M_.maximum_lag+1);
+kp = sum(kstate(:,2) <= M_.maximum_endo_lag+1);
 E1 = [eye(npred); zeros(kp-npred,npred)];
 H = E1;
 hxx = dr.ghxx(nstatic+[1:npred],:);
-for i=1:M_.maximum_lead
-  for j=i:M_.maximum_lead
-    [junk,k2a,k2] = find(M_.lead_lag_incidence(M_.maximum_lag+j+1,order_var));
-    [junk,k3a,k3] = find(M_.lead_lag_incidenceordered(M_.maximum_lag+j+1,:));
+for i=1:M_.maximum_endo_lead
+  for j=i:M_.maximum_endo_lead
+    [junk,k2a,k2] = find(M_.lead_lag_incidence(M_.maximum_endo_lag+j+1,order_var));
+    [junk,k3a,k3] = find(M_.lead_lag_incidenceordered(M_.maximum_endo_lag+j+1,:));
     RHS = RHS + jacobia_(:,k2)*guu(k2a,:)+hessian(:,kh(k3,k3))* ...
 	  kron(gu(k3a,:),gu(k3a,:));
   end
 
   % LHS
-  [junk,k2a,k2] = find(M_.lead_lag_incidence(M_.maximum_lag+i+1,order_var));
+  [junk,k2a,k2] = find(M_.lead_lag_incidence(M_.maximum_endo_lag+i+1,order_var));
   LHS = LHS + jacobia_(:,k2)*(E(k2a,:)+[O1(k2a,:) dr.ghx(k2a,:)*H O2(k2a,:)]);
   
-  if i == M_.maximum_lead 
+  if i == M_.maximum_endo_lead 
     break
   end
   
-  kk = find(kstate(:,2) == M_.maximum_lag+i+1);
+  kk = find(kstate(:,2) == M_.maximum_endo_lag+i+1);
   gu = dr.ghx*Gu;
   GuGu = kron(Gu,Gu);
   guu = dr.ghx*Guu+dr.ghxx*GuGu;
@@ -619,30 +636,6 @@ if M_.exo_det_nbr > 0
     
   end
 end
-% 01/08/2001 MJ put return on iorder == 1 after defining dr.kstate and dr.kdyn
-% 01/17/2001 MJ added dr.delta_s: correction factor for order = 2
-% 01/21/2001 FC correction of delta_s for more than 1 shock
-% 01/23/2001 MJ suppression of redundant sum() in delta_s formula
-% 02/22/2001 MJ stderr_ replaced by Sigma_e_
-% 08/24/2001 MJ changed the order of the variables, separates static
-%               variables and handles only one instance of variables both
-%               in lead and lag
-% 08/24/2001 MJ added sigma to state variables as in Schmitt-Grohe and
-%               Uribe (2001)
-% 10/20/2002 MJ corrected lags on several periods bug
-% 10/30/2002 MJ corrected lags on several periods bug on static when some
-%               intermediary lags are missing
-% 12/08/2002 MJ uses sylvester3 to solve for dr.ghxx
-% 01/01/2003 MJ added dr.fbias for iterative for dr_algo == 1
-% 02/21/2003 MJ corrected bug for models without lagged variables
-% 03/02/2003 MJ fixed second order for lag on several periods
-% 05/21/2003 MJ add check call argument and make computation for CHECK
-% 06/01/2003 MJ added a test for M_.maximum_lead > 1 and order > 1
-% 08/28/2003 MJ corrected bug in computation of 2nd order (ordering of
-%               forward variable in LHS)
-% 08/29/2003 MJ use Sims routine if mjdgges isn't available
-
-   
 
 
 
