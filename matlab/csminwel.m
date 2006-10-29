@@ -17,6 +17,8 @@ function [fh,xh,gh,H,itct,fcount,retcodeh] = csminwel(fcn,x0,H0,grad,crit,nit,va
 %        write g2.mat and g3.mat as well.  If all were written at about the same time, any of them
 %        may be a decent starting point.  One can also start from the one with best function value.)
 global bayestopt_
+fh = [];
+xh = [];
 [nx,no]=size(x0);
 nx=max(nx,no);
 Verbose=1;
