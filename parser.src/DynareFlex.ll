@@ -1,9 +1,17 @@
 %{
+#define YY_BUF_SIZE 1000000
+#include <unistd.h>
+#include <string.h>
 #include "DynareScanner.h" 
+#ifdef HAVE_CONFIG_H
+# include "config.hh"
+#endif
 #define YLMM_SCANNER_CLASS dynare::scanner
 #define LEXDEBUG 1
-#include <unistd.h>          /* needed for -mno-cygwin */
+#define FINISH 0
+#define YY_READ_BUF_SIZE 1000000
 #include "ylmm/lexmm.hh"
+int lineno = 1; 
 int comment_caller;
 /* Particular value : when sigma_e command is found 
  this flag is set to 1, when command finished it is set to 0
@@ -12,6 +20,7 @@ int sigma_e = 0;
 %} 
 
 
+%option stack
 %option yylineno
 %x COMMENT
 %x SET_STATEMENT
@@ -26,7 +35,7 @@ int sigma_e = 0;
  /* Comments */
 <INITIAL,SET_STATEMENT,DYNARE_STATEMENT,DYNARE_BLOCK>["%"].*
 <INITIAL,SET_STATEMENT,DYNARE_STATEMENT,DYNARE_BLOCK>["/"]["/"].* 
-<INITIAL,SET_STATEMENT,DYNARE_STATEMENT,DYNARE_BLOCK>"/*"   {comment_caller = YY_START; BEGIN COMMENT;}
+<INITIAL,SET_STATEMENT,DYNARE_STATEMENT,DYNARE_BLOCK>"/*"   {comment_caller = YYSTATE; BEGIN COMMENT;}
 
 <COMMENT>[^*\n]* 		
 <COMMENT>"*"+[^*/\n]*	
