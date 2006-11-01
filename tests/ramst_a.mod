@@ -27,8 +27,8 @@ check;
 
 shocks;
 var x;
-periods 1:4 ;
-values ([1.1, 1.2, 1.3, 1.4]') ;
+periods 1 2 3 4;
+values 1.1 1.2 1.3 1.4;
 end;
 
 simul(periods=200);
