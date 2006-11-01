@@ -71,9 +71,9 @@ function [x,info] = dynare_solve(func,x,jacobian_flag,varargin)
     
     for i=length(r)-1:-1:1
       [x,info]=solve1(func,x,j1(r(i):r(i+1)-1),j2(r(i):r(i+1)-1),jacobian_flag,varargin{:});
-%      if info
-%	error(sprintf('Solve block = %d check = %d\n',i,info));
-%      end
+      if info & options_.debug
+	error(sprintf('Solve block = %d check = %d\n',i,info));
+      end
     end
     [x,info]=solve1(func,x,1:nn,1:nn,jacobian_flag,varargin{:});
       
