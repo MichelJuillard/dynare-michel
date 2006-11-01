@@ -9,6 +9,7 @@
 using namespace std;
 //------------------------------------------------------------------------------
 #include "ComputingTasks.h"
+#include "Interface.h"
 //------------------------------------------------------------------------------
 //ostringstream	ComputingTasks::output;
 //------------------------------------------------------------------------------
@@ -308,7 +309,8 @@ void ComputingTasks::set_trend_element (string name, string expression)
 void ComputingTasks::BeginCalibVar(void)
 {
 	  
-  *output << "%\n% CALIB_VAR \n%\n";
+  *output << interfaces::comment() << "\n" << interfaces::comment() << "CALIB_VAR \n"
+          << interfaces::comment() << "\n";
   for(int i=1;i<4;++i)
     {
       *output << "calib_var_index{" << i << "} = [];\n";
@@ -447,7 +449,7 @@ void ComputingTasks::runOlr(string tmp1)
 //------------------------------------------------------------------------------
 void ComputingTasks::BeginOptimWeights(void)
 {
-  *output << "% OPTIM_WEIGHTS\n\n";
+  *output << interfaces::comment() << "OPTIM_WEIGHTS\n\n";
   *output << "optim_weights_ = sparse(M_.endo_nbr,M_.endo_nbr);\n";
   *output << "obj_var_ = [];\n\n";
 }

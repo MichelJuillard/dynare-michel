@@ -9,6 +9,7 @@ using namespace std;
 //------------------------------------------------------------------------------
 #include "Shocks.h"
 #include "ModelParameters.h"
+#include "Interface.h"
 
 static int mshock_flag = 0;
 static int exo_det_length = 0;
@@ -35,7 +36,8 @@ void Shocks::BeginShocks(void)
 {	
   mshock_flag = 0;
   // Writing a Matlab comment
-  *output << "%\n% SHOCKS instructions \n%\n";
+  *output << interfaces::comment() << "\n" << interfaces::comment() << "SHOCKS instructions \n"
+          << interfaces::comment() << "\n";
   //Writing intstruction that initialize a shocks 
   *output << "make_ex_;\n";
 }							
@@ -44,7 +46,8 @@ void Shocks::BeginMShocks(void)
 {	
   mshock_flag = 1;
   // Writing a Matlab comment
-  *output << "%\n% MSHOCKS instructions \n%\n";
+  *output << interfaces::comment() << "\n" << interfaces::comment() << "MSHOCKS instructions \n"
+          << interfaces::comment() << "\n";
   //Writing intstruction that initialize a shocks 
   *output << "make_ex_;\n";
 }

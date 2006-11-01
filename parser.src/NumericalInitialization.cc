@@ -7,6 +7,7 @@
 using namespace std;
 //------------------------------------------------------------------------------
 #include "NumericalInitialization.h"
+#include "Interface.h"
 //------------------------------------------------------------------------------
 //ostringstream	NumericalInitialization::output;	
 //------------------------------------------------------------------------------
@@ -52,7 +53,8 @@ void  NumericalInitialization::BeginInitval (void)
 {
 	
 	// Writing a Matlab comment
-	*output << "%\n% INITVAL instructions \n%\n";
+	*output << interfaces::comment() << "\n" << interfaces::comment() << "INITVAL instructions \n"
+          << interfaces::comment() << "\n";
 	// Writing initval block to set initial values for variables 
 	*output << "options_.initval_file = 0;\nendval_=0;\n";
 	if(ModelParameters::recur_nbr > 0)
@@ -108,7 +110,8 @@ void  NumericalInitialization::EndInitval(void)
 void  NumericalInitialization::BeginEndval (void) 
 {
 	// Writing a Matlab comment
-	*output << "%\n% ENDVAL instructions\n%\n";
+	*output << interfaces::comment() << "\n" << interfaces::comment() << "ENDVAL instructions\n"
+          << interfaces::comment() << "\n";
 	// Writing endval block to set terminal values for variables 
 	*output << "ys0_= oo_.steady_state;\nex0_ = oo_.exo_steady_state;\nrecurs0_ = recurs_;\nendval_ = 1;\n";
 
@@ -121,7 +124,8 @@ void  NumericalInitialization::EndEndval (void)
 void  NumericalInitialization::BeginHistval (void) 
 {
 	// Writing a Matlab comment
-	*output << "%\n% HISTVAL instructions\n%\n";
+	*output << interfaces::comment() << "\n" << interfaces::comment() << "HISTVAL instructions\n"
+          << interfaces::comment() << "\n";
 	
 }
 //------------------------------------------------------------------------------

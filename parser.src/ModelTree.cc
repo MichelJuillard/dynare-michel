@@ -51,7 +51,7 @@ void ModelTree::OpenMFiles(string iModelFileName1, string iModelFileName2)
 		//Writing comments and function definition command
 		mStaticModelFile << "function [residual, g1] = " <<  iModelFileName1 << "( y, x )\n";
 		mStaticModelFile << interfaces::comment()+"\n"+interfaces::comment();
-		mStaticModelFile << "Status : Computes static model for Dynare\n%\n";
+		mStaticModelFile << "Status : Computes static model for Dynare\n" << interfaces::comment() << "\n";
 		mStaticModelFile << interfaces::comment();
 		mStaticModelFile << "Warning : this file is generated automatically by Dynare\n";
 		mStaticModelFile << interfaces::comment();
@@ -69,7 +69,7 @@ void ModelTree::OpenMFiles(string iModelFileName1, string iModelFileName2)
 			iModelFileName2.erase(iModelFileName2.end()-2,iModelFileName2.end());
 			mDynamicModelFile << "function [residual, g1, g2] = " <<  iModelFileName2 << "(y, x)\n";
 			mDynamicModelFile << interfaces::comment()+"\n"+interfaces::comment();
-			mDynamicModelFile << "Status : Computes dynamic model for Dynare\n%\n";
+			mDynamicModelFile << "Status : Computes dynamic model for Dynare\n" << interfaces::comment() << "\n";
 			mDynamicModelFile << interfaces::comment();
 			mDynamicModelFile << "Warning : this file is generated automatically by Dynare\n";
 			mDynamicModelFile << interfaces::comment();
