@@ -30,8 +30,6 @@ class ModelTree : public DataTree
 		/*! Stores ID of equations and their derivatives */
 		std::vector<std::vector<DerivativeIndex> > mDerivativeIndex;
 
-		/*! Only used for C++ standalone version */
-		std::vector<double> 			mResults;
 		/*! Output for static model */
 		std::ostringstream			StaticOutput;
 		/*! Output for dynamic model */
@@ -55,17 +53,10 @@ class ModelTree : public DataTree
 	private :
 		/*! Computes argument derivative */
 		inline NodeID 		DeriveArgument(NodeID iArg, Type iType, int iVarID);
-		/*! Sets derivative adresse of token in modeltree */
-		inline void 		setDerivativeAdress(NodeID iTokenID, NodeID iDerivative,int iVarID);
 		/*! Gets output argument of terminal token */
 		inline std::string 		getArgument(NodeID id, Type type, EquationType  iEquationType);
 		/*! Gets expression of part of model tree */
 		inline std::string		getExpression(NodeID StartID, EquationType  iEquationType, int iEquationID = -1);
-		/*!
-		  Return true if node is to be writen as temp result
-		  depending on its time cost and number of times it is referenced in model tree 
-		*/
-		inline bool		writeAsTemp(NodeID id);		
 		inline int optimize(NodeID id);
 	public :
 		/*! When Jacobian (vs endogenous) is writen this flag is set to true */

@@ -38,8 +38,6 @@ class DataTree
 		TreeList		mModelTree;
 		/*! matches key with entry id in list of token */
 		TreeMap					mIndexOfTokens;
-		/*! A stack of in-scope loop indices */
-		std::stack<std::string> 			mLoopIndices;
 		/*! Operator table : names and precedence of oparator */
 		OperatorTable			operator_table;
 		/*! ID of first token in model tree (first tokens are "0", "1" and "0=" */
@@ -123,10 +121,6 @@ class DataTree
 		DataTree();
 		/*! Destructor */
 		~DataTree();		
-		double getIDOfToken_time;
-		double PushToken_time;
-		double Key_time;
-		double IncrementReferenceCount_time;
 };
 //------------------------------------------------------------------------------
 inline NodeID DataTree::PushToken(NodeID iArg1,int iOpCode, NodeID iArg2, Type iType1)

@@ -614,15 +614,6 @@ void ModelTree::derive(int iOrder)
     }
 }
 //------------------------------------------------------------------------------
-inline bool ModelTree::writeAsTemp(NodeID id)
-{
-	int ref_count = id->reference_count[current_order];
-	if (( ref_count > 1) && (ref_count*(id->cost) > min_cost))
-		return true;
-	else
-		return false;
-}
-//------------------------------------------------------------------------------
 inline NodeID ModelTree::DeriveArgument(NodeID iArg, Type iType, int iVarID)
 {
 	switch(iType)
