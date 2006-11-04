@@ -18,8 +18,6 @@ class ModelParameters
 		ModelParameters();
 		/*! Destructor */
 		~ModelParameters();
-		/*! Number of sub-models */
-		static int model_nbr;
 		/*!  Number of equations*/
 		static int eq_nbr;
 		/*!  Number of declared Exogenous variables */
@@ -37,16 +35,6 @@ class ModelParameters
 		static int parameter_nbr;
 		/*!  Number of local parameters */
 		static int local_parameter_nbr;
-		/*!  Number of lagged variables */
-		static int lagged_nbr;
-		/*!  Number of static variables */
-		static int static_nbr;
-		/*!  Number of forward-looking variables */
-		static int forward_nbr;
-		/*!  Number of variables that are both lagged and forward-looking */
-		static int both_nbr;
-		/*!  Number of equations */
-		static int equation_nbr;
 		/*!  Number of recursive variables */
 		static int recur_nbr;		
 		
@@ -60,19 +48,6 @@ class ModelParameters
 		static int max_exo_det_lead;
 		static int max_recur_lag;
 		static int max_recur_lead;
-
-		/*!  Minimum lag for endogenous variables */
-		//static int endo_min_lag;	
-		/*! Maximum lag  for endogenous variables*/
-		//static int endo_max_lag;
-		/*! Miniimum lag  for exogenous variables*/
-		//static int exo_min_lag;
-		/*! Maximum lag  for exogenous variables*/
-		//static int exo_max_lag;
-		/*! Minimum lag  for recusive variables*/
-		//static int recur_min_lag;
-		/*! Maximum lag  for recursive variables*/
-		//static int recur_max_lag;
 };
 //------------------------------------------------------------------------------
 #endif

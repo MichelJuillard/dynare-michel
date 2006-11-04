@@ -8,7 +8,6 @@
 #include "ModelParameters.h"
 #include "limits.h"
 //------------------------------------------------------------------------------
-int ModelParameters::model_nbr = 0;
 int ModelParameters::eq_nbr = 0;
 int ModelParameters::exo_nbr = 0;
 int ModelParameters::var_exo_nbr = 0;
@@ -18,10 +17,6 @@ int ModelParameters::endo_nbr = 0;
 int ModelParameters::var_endo_nbr = 0;
 int ModelParameters::parameter_nbr = 0;
 int ModelParameters::local_parameter_nbr = 0;
-int ModelParameters::lagged_nbr = 0;
-int ModelParameters::static_nbr = 0;
-int ModelParameters::forward_nbr = 0;
-int ModelParameters::both_nbr = 0;
 int ModelParameters::recur_nbr = 0;
 int ModelParameters::max_lag = 0;
 int ModelParameters::max_lead = 0;
