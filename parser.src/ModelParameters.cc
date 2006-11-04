@@ -1,7 +1,7 @@
-/*! \file 
- \version 1.0
- \date 04/09/2004
- \par This file implements the ModelParemeters class methodes.
+/*! \file
+  \version 1.0
+  \date 04/09/2004
+  \par This file implements the ModelParemeters class methodes.
 */
 //------------------------------------------------------------------------------
 #include <iostream>
@@ -31,11 +31,13 @@ using namespace std;
 //------------------------------------------------------------------------------
 ModelParameters::ModelParameters()
 {
-	// Empty
+  // Empty
 }
+
 //------------------------------------------------------------------------------
 ModelParameters::~ModelParameters()
 {
-	// Empty
+  // Empty
 }
+
 //------------------------------------------------------------------------------

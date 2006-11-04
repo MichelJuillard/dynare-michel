@@ -1,7 +1,7 @@
-/*! \file 
- \version 1.0
- \date 04/09/2004
- \par This file implements the OutputFile class methodes.
+/*! \file
+  \version 1.0
+  \date 04/09/2004
+  \par This file implements the OutputFile class methodes.
 */
 //------------------------------------------------------------------------------
 #include <iostream>
@@ -15,13 +15,15 @@ using namespace std;
 //------------------------------------------------------------------------------
 OutputFile::OutputFile()
 {
-   	clear_all = true;
+  clear_all = true;
 }
+
 //------------------------------------------------------------------------------
-OutputFile::~OutputFile() 
+OutputFile::~OutputFile()
 {
-	// Empty
+  // Empty
 }
+
 //------------------------------------------------------------------------------
 void OutputFile::Open(string iFileName)
 {
@@ -31,11 +33,11 @@ void OutputFile::Open(string iFileName)
       fname += interfaces::function_file_extension();
       mOutputFile.open(fname.c_str(),ios::out|ios::binary);
       if (!mOutputFile.is_open())
-	{
-	  cout << "OutputFile::Open : Error : Can't open file " << iFileName
-	       << " for writing\n";
-	  exit(-1);
-	}
+        {
+          cout << "OutputFile::Open : Error : Can't open file " << iFileName
+               << " for writing\n";
+          exit(-1);
+        }
     }
   else
     {
@@ -66,7 +68,7 @@ void OutputFile::Open(string iFileName)
   mOutputFile << "logname_ = '" << iFileName << ".log';\n";
   mOutputFile << "diary '" << iFileName << ".log';\n";
   if (ModelTree::offset == 0)
-    {	
+    {
       mOutputFile << "if ";
       mOutputFile << interfaces::file_exist(iFileName + "_static.c)")+"\n";
       mOutputFile << "   clear " << iFileName << "_static\n";
@@ -85,6 +87,7 @@ void OutputFile::Open(string iFileName)
       mOutputFile << interfaces::load_model_function_files(iFileName);
     }
 }
+
 //------------------------------------------------------------------------------
 void OutputFile::Save(ostringstream& iOutput)
 {
@@ -94,58 +97,69 @@ void OutputFile::Save(ostringstream& iOutput)
   mOutputFile << "\ndisp(['Total computing time : ' sec2hms(round(toc)) ]);\n";
   mOutputFile.close();
 }
+
 //------------------------------------------------------------------------------
 #ifdef TEST_OUTPUTFILE
 #include "NumericalInitialization.h"
 #include "ComputingTasks.h"
 #include "Expression.h"
 #include "Shocks.h"
-#include "SigmaeInitialization.h" 
+#include "SigmaeInitialization.h"
 #include "TmpSymbolTable.h"
 int main(void)
 {
   OutputFile outputfile;
   SymbolTable st;
-  Expression	exp;
+  Expression  exp;
   NumericalConstants numconst;
-  NumericalInitialization numinit;	
-	
+  NumericalInitialization numinit;
+
   outputfile.Open("Test.m");
-	
-  SymbolTable::AddSymbolDeclar("a",eExogenous);//0
-  SymbolTable::AddSymbolDeclar("b",eParameter);//1
-  SymbolTable::AddSymbolDeclar("c",eExogenous);//2
-  SymbolTable::AddSymbolDeclar("d",eExogenousDet);//3
-  SymbolTable::AddSymbolDeclar("x",eParameter);//3      
-  SymbolTable::AddSymbolDeclar("y",eExogenous);//3  
-		                                                        
-	
+
+  //0
+  SymbolTable::AddSymbolDeclar("a",eExogenous);
+  //1
+  SymbolTable::AddSymbolDeclar("b",eParameter);
+  //2
+  SymbolTable::AddSymbolDeclar("c",eExogenous);
+  //3
+  SymbolTable::AddSymbolDeclar("d",eExogenousDet);
+  //3
+  SymbolTable::AddSymbolDeclar("x",eParameter);
+  //3
+  SymbolTable::AddSymbolDeclar("y",eExogenous);
+
   numconst.AddConstant("alpha");
-  exp.AddToken(0,eExogenous,EXP);				//0
-  exp.AddToken(0,eParameter,0,eExogenousDet,PLUS);			//1
-  exp.AddToken(0,eTempResult,UMINUS);	//2
-  exp.AddToken(1,eExogenous,1,eTempResult,TIMES);			//3
-  exp.AddToken(3,eTempResult,0,eNumericalConstant,TIMES);		//4	
-  exp.AddToken(4,eTempResult,0,eTempResult,COMMA);		//5	
-  exp.AddToken(5,eTempResult,0,eExogenous,COMMA);		//6	  
-  exp.AddToken(6,eTempResult,"function1");		//6	  
-  exp.set();	
+  exp.AddToken(0,eExogenous,EXP);//0
+                                 //1
+  exp.AddToken(0,eParameter,0,eExogenousDet,PLUS);
+  //2
+  exp.AddToken(0,eTempResult,UMINUS);
+  //3
+  exp.AddToken(1,eExogenous,1,eTempResult,TIMES);
+  //4
+  exp.AddToken(3,eTempResult,0,eNumericalConstant,TIMES);
+  //5
+  exp.AddToken(4,eTempResult,0,eTempResult,COMMA);
+  //6
+  exp.AddToken(5,eTempResult,0,eExogenous,COMMA);
+  //6
+  exp.AddToken(6,eTempResult,"function1");
+  exp.set();
   //cout << exp.get();
 
-	
   numinit.SetConstant("x","1");
   numinit.InitInitval();
   numinit.SetInit("y",exp.get());
   numinit.EndInitval();
   numinit.InitEndval();
   numinit.EndEndval();
-  numinit.InitHistval();		
-  numinit.SetHist("y",3, exp.get());			
+  numinit.InitHistval();
+  numinit.SetHist("y",3, exp.get());
   //cout << numinit.get();
 
-	
   SigmaeInitialization siginit;
-	
+
   siginit.AddExpression("00");
   siginit.EndOfRow();
   siginit.AddExpression("10");
@@ -161,27 +175,25 @@ int main(void)
   siginit.AddExpression("33");
   siginit.EndOfRow();
   siginit.set();
-	
-  TmpSymbolTable tmp_symbol_table1, tmp_symbol_table2;
-	
 
-	
+  TmpSymbolTable tmp_symbol_table1, tmp_symbol_table2;
+
   ComputingTasks computing_tasks;
-	
-  computing_tasks.set();	
+
+  computing_tasks.set();
   computing_tasks.SetSteady();
   computing_tasks.SetCheck();
   computing_tasks.SetSimul();
-	
+
   tmp_symbol_table1.AddTempSymbol("tmp1");
   tmp_symbol_table1.AddTempSymbol("tmp2");
   tmp_symbol_table1.AddTempSymbol("tmp3");
   tmp_symbol_table1.set("var_list_");
 
   computing_tasks.SetStochSimul(tmp_symbol_table1.get());
-	
-  computing_tasks.SetOption("DROP", "500");				
-  computing_tasks.RunEstimation();					
+
+  computing_tasks.SetOption("DROP", "500");
+  computing_tasks.RunEstimation();
   computing_tasks.SetEstimationInit();
   computing_tasks.SetEstimation("d", "init_val", "lo_bound", "up_bound", "prior", "p1", "p2", "p3","p4");
   computing_tasks.SetEstimation("a", "c", "init_val", "lo_bound", "up_bound", "prior", "p1", "p2", "p3", "p4");
@@ -190,13 +202,13 @@ int main(void)
   computing_tasks.SetCalibCovariance();
   computing_tasks.SetCalibAutoCorrelation();
   computing_tasks.SetCalib();
-	
+
   tmp_symbol_table1.AddTempSymbol("tmp11");
-  tmp_symbol_table1.AddTempSymbol("tmp22"); 
+  tmp_symbol_table1.AddTempSymbol("tmp22");
   tmp_symbol_table1.AddTempSymbol("tmp33");
   tmp_symbol_table1.set("varl_list_");
-  computing_tasks.SetOsr(tmp_symbol_table1.get());				
-	
+  computing_tasks.SetOsr(tmp_symbol_table1.get());
+
   tmp_symbol_table1.AddTempSymbol("tmp11");
   tmp_symbol_table1.AddTempSymbol("tmp22");
   tmp_symbol_table1.AddTempSymbol("tmp33");
@@ -206,11 +218,11 @@ int main(void)
   tmp_symbol_table2.AddTempSymbol("tmp6");
   tmp_symbol_table2.set("olr_inst_");
   computing_tasks.SetOlr(tmp_symbol_table1.get(), tmp_symbol_table2.get());
-	
+
   computing_tasks.SetOptimWeightsInit();
   computing_tasks.SetOptimWeights1();
   computing_tasks.SetOptimWeights2();
-  outputfile.Save();	
+  outputfile.Save();
 }
 #endif
 //------------------------------------------------------------------------------
