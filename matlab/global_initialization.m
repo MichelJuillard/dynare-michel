@@ -38,6 +38,24 @@ function global_initialization()
   options_.Opt6Iter = 3;
   options_.Opt6Numb = 100000;
   
+  % Graphics
+  options_.graphics.nrows = 3;
+  options_.graphics.ncols = 3;
+  options_.graphics.line_types = {'b-'};
+  options_.graphics.line_width = 1;
+  
+  % Prior draws
+  options_.forecast.replic = 1000;
+  
+  % Model
+  options_.linear = 0;
+  
+  % Solution
+  options_.order = 2;
+  options_.dr_algo = 0;
+  
+  % Misc
+  options_.conf_sig = 0.9;
   
   oo_.exo_simul = [];
   oo_.endo_simul = [];
