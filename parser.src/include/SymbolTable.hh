@@ -1,5 +1,5 @@
-#ifndef SYMBOLTABLE_H
-#define SYMBOLTABLE_H
+#ifndef _SYMBOLTABLE_HH
+#define _SYMBOLTABLE_HH
 //------------------------------------------------------------------------------
 /*! \file 
  \version 1.0
@@ -12,8 +12,8 @@
 #include <vector>
 #include <sstream>
 //------------------------------------------------------------------------------
-#include "ModelParameters.h"
-#include "SymbolTableTypes.h"
+#include "ModelParameters.hh"
+#include "SymbolTableTypes.hh"
 //------------------------------------------------------------------------------
 /*!
  \class SymbolTable 

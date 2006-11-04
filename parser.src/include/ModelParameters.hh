@@ -1,5 +1,5 @@
-#ifndef MODELPARAMETERS_H
-#define MODELPARAMETERS_H
+#ifndef _MODELPARAMETERS_HH
+#define _MODELPARAMETERS_HH
 //------------------------------------------------------------------------------
 /*! \file 
  \version 1.0

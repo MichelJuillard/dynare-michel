@@ -2,7 +2,7 @@
 #define YY_BUF_SIZE 1000000
 #include <unistd.h>
 #include <string.h>
-#include "DynareScanner.h" 
+#include "DynareScanner.hh"
 #ifdef HAVE_CONFIG_H
 # include "config.hh"
 #endif

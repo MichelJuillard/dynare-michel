@@ -14,12 +14,12 @@
 #include <time.h>
 using namespace std;
 //------------------------------------------------------------------------------
-#include "VariableTable.h"
-#include "DynareBison.h"
-#include "NumericalConstants.h"
-#include "ModelTree.h"
-#include "ModelParameters.h"
-#include "Interface.h"
+#include "VariableTable.hh"
+#include "DynareBison.hh"
+#include "NumericalConstants.hh"
+#include "ModelTree.hh"
+#include "ModelParameters.hh"
+#include "Interface.hh"
 //------------------------------------------------------------------------------
 ostringstream ModelTree::output;
 //------------------------------------------------------------------------------

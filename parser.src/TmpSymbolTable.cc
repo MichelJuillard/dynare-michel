@@ -6,9 +6,9 @@
 //------------------------------------------------------------------------------
 using namespace std;
 //------------------------------------------------------------------------------
-#include "SymbolTable.h"
-#include "TmpSymbolTable.h"
-#include "Interface.h"
+#include "SymbolTable.hh"
+#include "TmpSymbolTable.hh"
+#include "Interface.hh"
 //------------------------------------------------------------------------------
 TmpSymbolTable::TmpSymbolTable()
 {

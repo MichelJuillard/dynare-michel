@@ -1,6 +1,6 @@
 %{
   /* Declarations */
-#include "DynareParser.h"
+#include "DynareParser.hh"
 #define yyparse tcparse 
 #define yylex tclex
 //#define yyerror tcerror

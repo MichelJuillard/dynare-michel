@@ -1,5 +1,5 @@
-#ifndef MODELTYPES
-#define MODELTYPES
+#ifndef _MODELTYPES_HH
+#define _MODELTYPES_HH
 //------------------------------------------------------------------------------
 /*! \file 
  \version 1.0

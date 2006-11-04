@@ -1,5 +1,5 @@
-#ifndef MODELTREE_H
-#define MODELTREE_H
+#ifndef _MODELTREE_HH
+#define _MODELTREE_HH
 //------------------------------------------------------------------------------
 /*! \file 
  \version 1.0
@@ -14,11 +14,11 @@
 #include <sstream>
 #include <fstream>
 //------------------------------------------------------------------------------
-#include "SymbolTable.h"
-#include "OperatorTable.h"
-#include "NumericalConstants.h"
-#include "ModelTypes.h"
-#include "DataTree.h"
+#include "SymbolTable.hh"
+#include "OperatorTable.hh"
+#include "NumericalConstants.hh"
+#include "ModelTypes.hh"
+#include "DataTree.hh"
 //------------------------------------------------------------------------------
 /*!
  \class  ModelTree

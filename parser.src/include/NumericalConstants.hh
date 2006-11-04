@@ -1,5 +1,5 @@
-#ifndef NUMERICALCONSTANTS_H
-#define NUMERICALCONSTANTS_H
+#ifndef _NUMERICALCONSTANTS_HH
+#define _NUMERICALCONSTANTS_HH
 //------------------------------------------------------------------------------
 /** \file 
  * \version 1.0

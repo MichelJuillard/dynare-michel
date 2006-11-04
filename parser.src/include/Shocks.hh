@@ -1,5 +1,5 @@
-#ifndef SHOCKS_H
-#define SHOCKS_H
+#ifndef _SHOCKS_HH
+#define _SHOCKS_HH
 //------------------------------------------------------------------------------
 /** \file 
  * \version 1.0

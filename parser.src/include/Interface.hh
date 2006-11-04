@@ -1,3 +1,6 @@
+#ifndef _INTERFACE_HH
+#define _INTERFACE_HH
+
 namespace interfaces {
     std::string comment();
     std::string delete_file(std::string s);
@@ -8,3 +11,5 @@ namespace interfaces {
     std::string strvcat(std::string s1, std::string s2);
     std::string load_model_function_files(std::string filename);
 }
+
+#endif

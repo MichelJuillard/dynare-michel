@@ -1,5 +1,5 @@
-#ifndef COMPUTINGTASKS_H
-#define COMPUTINGTASKS_H
+#ifndef _COMPUTINGTASKS_HH
+#define _COMPUTINGTASKS_HH
 //------------------------------------------------------------------------------
 /** \file 
  * \version 1.0
@@ -9,8 +9,8 @@
 //------------------------------------------------------------------------------
 #include <sstream>
 //------------------------------------------------------------------------------
-#include "TmpSymbolTable.h"
-#include "SymbolTable.h"
+#include "TmpSymbolTable.hh"
+#include "SymbolTable.hh"
 //------------------------------------------------------------------------------
 /*! 
  \class EstimationParams

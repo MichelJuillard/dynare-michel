@@ -69,11 +69,11 @@ dynare_s.exe: $(COMMON_OBJ) $(SCILAB_OBJ)
 
 -include $(COMMON_OBJ:.o=.P) $(MATLAB_OBJ:.o=.P) $(SCILAB_OBJ:.o=.P)
 
-DynareFlex.cc: DynareFlex.ll include/DynareScanner.h include/DynareBison.h
+DynareFlex.cc: DynareFlex.ll include/DynareScanner.hh include/DynareBison.hh
 	flex $(FLEXFLAGS) -oDynareFlex.cc DynareFlex.ll
 
-DynareBison.cc include/DynareBison.h: DynareBison.yy include/DynareParser.h
-	 (bison  -v -d -b --verbose -o DynareBison.cc DynareBison.yy; mv DynareBison.hh include/DynareBison.h)
+DynareBison.cc include/DynareBison.hh: DynareBison.yy include/DynareParser.hh
+	 (bison  -v -d -b --verbose -o DynareBison.cc DynareBison.yy; mv DynareBison.hh include/)
 
 
 ################################################################################
@@ -83,7 +83,7 @@ DynareBison.cc include/DynareBison.h: DynareBison.yy include/DynareParser.h
 clean:
 	rm -f *.o *.P \
 		DynareBison.cc \
-		include/DynareBison.h \
+		include/DynareBison.hh \
 		DynareBison.output \
 		DynareFlex.cc \
 		dynare.exe \

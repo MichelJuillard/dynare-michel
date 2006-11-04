@@ -8,7 +8,7 @@
 
 using namespace std;
 
-#include "SigmaeInitialization.h"
+#include "SigmaeInitialization.hh"
 //------------------------------------------------------------------------------
 SigmaeInitialization::SigmaeInitialization()
 {

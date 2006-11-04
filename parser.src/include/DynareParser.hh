@@ -1,5 +1,5 @@
-#ifndef DYNAREPARSER_H
-#define DYNAREPARSER_H
+#ifndef _DYNAREPARSER_HH
+#define _DYNAREPARSER_HH
 //------------------------------------------------------------------------------
 /*! \file 
  \version 1.0
@@ -8,17 +8,17 @@
 */
 //------------------------------------------------------------------------------
 #include <sstream>
-#include "ModelParameters.h"
-#include "SymbolTable.h"
-#include "Expression.h"
-#include "NumericalInitialization.h"
-#include "ModelTree.h"
-#include "VariableTable.h"
-#include "Shocks.h"
-#include "SigmaeInitialization.h"
-#include "ComputingTasks.h"
-#include "TmpSymbolTable.h"
-#include "Objects.h"
+#include "ModelParameters.hh"
+#include "SymbolTable.hh"
+#include "Expression.hh"
+#include "NumericalInitialization.hh"
+#include "ModelTree.hh"
+#include "VariableTable.hh"
+#include "Shocks.hh"
+#include "SigmaeInitialization.hh"
+#include "ComputingTasks.hh"
+#include "TmpSymbolTable.hh"
+#include "Objects.hh"
 #ifndef YLMM_basic_parser 
 #include "ylmm/basic_parser.hh"
 #endif

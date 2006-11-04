@@ -1,6 +1,6 @@
 #include <string>
 
-#include "Interface.h"
+#include "Interface.hh"
 
 namespace interfaces
 {

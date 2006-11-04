@@ -11,10 +11,10 @@
 
 using namespace std;
 
-#include "DynareParser.h"  
-#include "DynareScanner.h"
-#include "OutputFile.h"
-#include "Interface.h"
+#include "DynareParser.hh"
+#include "DynareScanner.hh"
+#include "OutputFile.hh"
+#include "Interface.hh"
 //------------------------------------------------------------------------------
 /*!  main function
     \brief Main function of Dynare.

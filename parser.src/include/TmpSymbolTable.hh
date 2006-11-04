@@ -1,5 +1,5 @@
-#ifndef TMPSYMBOLTABLE_H
-#define TMPSYMBOLTABLE_H
+#ifndef _TMPSYMBOLTABLE_HH
+#define _TMPSYMBOLTABLE_HH
 //------------------------------------------------------------------------------
 /** \file 
  * \version 1.0

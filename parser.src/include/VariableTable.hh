@@ -1,5 +1,5 @@
-#ifndef VARIABLETABLE_H
-#define VARIABLETABLE_H
+#ifndef _VARIABLETABLE_HH
+#define _VARIABLETABLE_HH
 //------------------------------------------------------------------------------
 /** \file 
  * \version 1.0
@@ -11,7 +11,7 @@
 #include <string>
 #include <vector>
 //------------------------------------------------------------------------------
-#include "SymbolTable.h" 
+#include "SymbolTable.hh"
 //------------------------------------------------------------------------------
 /*! 
  \class Variable

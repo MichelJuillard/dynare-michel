@@ -15,10 +15,10 @@ using namespace std;
 #include <time.h>
 
 //------------------------------------------------------------------------------
-#include "DynareBison.h"
-#include "VariableTable.h"
-#include "NumericalConstants.h"
-#include "DataTree.h"
+#include "DynareBison.hh"
+#include "VariableTable.hh"
+#include "NumericalConstants.hh"
+#include "DataTree.hh"
 //------------------------------------------------------------------------------
 const int DataTree::NoOpCode = -1;
 const NodeID DataTree::NullID = NULL;                                    

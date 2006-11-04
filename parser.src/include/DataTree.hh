@@ -1,5 +1,5 @@
-#ifndef DATATREE_H
-#define DATATREE_H
+#ifndef _DATATREE_HH
+#define _DATATREE_HH
 //------------------------------------------------------------------------------
 /*! \file 
  \version 1.0
@@ -17,11 +17,11 @@
 #include <map>
 #include <stdio.h>
 //------------------------------------------------------------------------------
-#include "SymbolTable.h"
-#include "OperatorTable.h"
-#include "NumericalConstants.h"
-#include "ModelTypes.h"
-#include "VariableTable.h"
+#include "SymbolTable.hh"
+#include "OperatorTable.hh"
+#include "NumericalConstants.hh"
+#include "ModelTypes.hh"
+#include "VariableTable.hh"
 //------------------------------------------------------------------------------
 
 typedef std::map<std::string,NodeID, std::less<std::string> > TreeMap;

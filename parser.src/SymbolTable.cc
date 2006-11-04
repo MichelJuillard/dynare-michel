@@ -7,8 +7,8 @@
 #include <iostream>
 #include <algorithm>
 //------------------------------------------------------------------------------
-#include "SymbolTable.h"
-#include "Interface.h"
+#include "SymbolTable.hh"
+#include "Interface.hh"
 using namespace std;
 //------------------------------------------------------------------------------
 map<string, Symbol, less<string> > SymbolTable::symboltable;// = *(new symbolmap);

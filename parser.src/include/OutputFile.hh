@@ -1,5 +1,5 @@
-#ifndef OUTPUTFILE
-#define OUTPUTFILE
+#ifndef _OUTPUTFILE_HH
+#define _OUTPUTFILE_HH
 //------------------------------------------------------------------------------
 /*! \file 
  \version 1.0

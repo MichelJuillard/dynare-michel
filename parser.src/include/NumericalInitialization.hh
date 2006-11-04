@@ -1,5 +1,5 @@
-#ifndef NUMERICALINITIALIZATION_H
-#define NUMERICALINITIALIZATION_H
+#ifndef _NUMERICALINITIALIZATION_HH
+#define _NUMERICALINITIALIZATION_HH
 //------------------------------------------------------------------------------
 /*! \file 
  \version 1.0
@@ -11,7 +11,7 @@
 #include <string>
 #include <sstream>
 //------------------------------------------------------------------------------
-#include "SymbolTable.h"
+#include "SymbolTable.hh"
 //------------------------------------------------------------------------------
 /*! \class  NumericalInitialization
  \brief  Handles numerical initialization of Endogenousous and Exogenousous variables.

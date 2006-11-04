@@ -1,5 +1,5 @@
-#ifndef EXPRESSION_H
-#define EXPRESSION_H
+#ifndef _EXPRESSION_HH
+#define _EXPRESSION_HH
 //------------------------------------------------------------------------------
 /** \file 
  * \version 1.0
@@ -11,9 +11,9 @@
 #include <vector>
 #include <sstream>
 //------------------------------------------------------------------------------
-#include "SymbolTable.h"
-#include "OperatorTable.h"
-#include "NumericalConstants.h"
+#include "SymbolTable.hh"
+#include "OperatorTable.hh"
+#include "NumericalConstants.hh"
 //------------------------------------------------------------------------------
 struct Token
 {

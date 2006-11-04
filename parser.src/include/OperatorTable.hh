@@ -1,5 +1,5 @@
-#ifndef OPERATORTABLE_H
-#define OPERATORTABLE_H
+#ifndef _OPERATORTABLE_HH
+#define _OPERATORTABLE_HH
 //------------------------------------------------------------------------------
 /** \file 
  * \version 1.0
@@ -11,7 +11,7 @@
 #include <string>
 #include <vector>
 //------------------------------------------------------------------------------
-#include "DynareBison.h"
+#include "DynareBison.hh"
 //------------------------------------------------------------------------------
 /*!
   \class  OperatorTable

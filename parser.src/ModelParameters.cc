@@ -5,8 +5,7 @@
 */
 //------------------------------------------------------------------------------
 #include <iostream>
-#include "ModelParameters.h"
-#include "limits.h"
+#include "ModelParameters.hh"
 //------------------------------------------------------------------------------
 int ModelParameters::eq_nbr = 0;
 int ModelParameters::exo_nbr = 0;

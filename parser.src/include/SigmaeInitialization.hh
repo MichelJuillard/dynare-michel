@@ -1,5 +1,5 @@
-#ifndef SIGMAEINITIALIZATION_H
-#define SIGMAEINITIALIZATION_H
+#ifndef _SIGMAEINITIALIZATION_HH
+#define _SIGMAEINITIALIZATION_HH
 //------------------------------------------------------------------------------
 /*! \file 
  \version 1.0

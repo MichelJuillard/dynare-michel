@@ -1,5 +1,5 @@
-#ifndef OBJECTS_HH
-#define OBJECTS_HH
+#ifndef _OBJECTS_HH
+#define _OBJECTS_HH
 //------------------------------------------------------------------------------
 /*! \file 
  \version 1.0
@@ -8,8 +8,8 @@
 */
 //------------------------------------------------------------------------------
 using namespace std;
-#include "SymbolTable.h"
-#include "ModelTypes.h"
+#include "SymbolTable.hh"
+#include "ModelTypes.hh"
 //------------------------------------------------------------------------------
 namespace dynare 
 {

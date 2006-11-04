@@ -8,8 +8,8 @@
 
 using namespace std;
 //------------------------------------------------------------------------------
-#include "ComputingTasks.h"
-#include "Interface.h"
+#include "ComputingTasks.hh"
+#include "Interface.hh"
 //------------------------------------------------------------------------------
 //ostringstream	ComputingTasks::output;
 //------------------------------------------------------------------------------

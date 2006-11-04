@@ -7,9 +7,9 @@
 #include <iostream>
 using namespace std;
 //------------------------------------------------------------------------------
-#include "Shocks.h"
-#include "ModelParameters.h"
-#include "Interface.h"
+#include "Shocks.hh"
+#include "ModelParameters.hh"
+#include "Interface.hh"
 
 static int mshock_flag = 0;
 static int exo_det_length = 0;

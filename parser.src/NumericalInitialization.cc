@@ -6,8 +6,8 @@
 //------------------------------------------------------------------------------
 using namespace std;
 //------------------------------------------------------------------------------
-#include "NumericalInitialization.h"
-#include "Interface.h"
+#include "NumericalInitialization.hh"
+#include "Interface.hh"
 //------------------------------------------------------------------------------
 //ostringstream	NumericalInitialization::output;	
 //------------------------------------------------------------------------------

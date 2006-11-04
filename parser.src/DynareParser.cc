@@ -4,17 +4,17 @@
  \par This file implements the parser class methodes.
 */
 //------------------------------------------------------------------------------
-#include "ModelParameters.h"
-#include "SymbolTable.h"
-#include "Expression.h"
-#include "NumericalInitialization.h"
-#include "ModelTree.h"
-#include "VariableTable.h"
-#include "Shocks.h"
-#include "SigmaeInitialization.h"
-#include "ComputingTasks.h"
-#include "TmpSymbolTable.h"
-#include "DynareParser.h"
+#include "ModelParameters.hh"
+#include "SymbolTable.hh"
+#include "Expression.hh"
+#include "NumericalInitialization.hh"
+#include "ModelTree.hh"
+#include "VariableTable.hh"
+#include "Shocks.hh"
+#include "SigmaeInitialization.hh"
+#include "ComputingTasks.hh"
+#include "TmpSymbolTable.hh"
+#include "DynareParser.hh"
 
 string dynare::parser::file_name = "";
 void dynare::parser::set_file_name(string fname)

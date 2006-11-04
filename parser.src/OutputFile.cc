@@ -8,10 +8,10 @@
 #include <sstream>
 using namespace std;
 //------------------------------------------------------------------------------
-#include "OutputFile.h"
-#include "SymbolTable.h"
-#include "ModelTree.h"
-#include "Interface.h"
+#include "OutputFile.hh"
+#include "SymbolTable.hh"
+#include "ModelTree.hh"
+#include "Interface.hh"
 //------------------------------------------------------------------------------
 OutputFile::OutputFile()
 {

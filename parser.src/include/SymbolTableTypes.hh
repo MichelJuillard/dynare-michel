@@ -1,5 +1,5 @@
-#ifndef SYMBOLTABLETYPES_H
-#define SYMBOLTABLETYPES_H
+#ifndef _SYMBOLTABLETYPES_HH
+#define _SYMBOLTABLETYPES_HH
 //------------------------------------------------------------------------------
 /*! \file 
  \version 1.0

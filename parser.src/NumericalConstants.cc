@@ -7,7 +7,7 @@
 #include <iostream>
 using namespace std;
 //------------------------------------------------------------------------------
-#include "NumericalConstants.h"
+#include "NumericalConstants.hh"
 //------------------------------------------------------------------------------
 vector<string> NumericalConstants::mNumericalConstants = *(new vector<string>);	
 //------------------------------------------------------------------------------

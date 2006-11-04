@@ -8,7 +8,7 @@
 #include <string>
 using namespace std;
 //------------------------------------------------------------------------------
-#include "OperatorTable.h"
+#include "OperatorTable.hh"
 //------------------------------------------------------------------------------
 OperatorTable::OperatorTable()
 {			

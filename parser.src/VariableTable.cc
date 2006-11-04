@@ -9,7 +9,7 @@
 #include <algorithm>
 using namespace std;
 //------------------------------------------------------------------------------
-#include "VariableTable.h"
+#include "VariableTable.hh"
 //------------------------------------------------------------------------------
 map<varKey,int> VariableTable::mVariableTable = *(new map<varKey,int>);
 vector<varKey> VariableTable::mVariableIndex = *(new vector<varKey>);	

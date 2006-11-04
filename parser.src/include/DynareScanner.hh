@@ -1,5 +1,5 @@
-#ifndef DYNARESCANNER_H
-#define DYNARESCANNER_H
+#ifndef _DYNARESCANNER_HH
+#define _DYNARESCANNER_HH
 //------------------------------------------------------------------------------
 /*! \file 
  \version 1.0
@@ -10,12 +10,12 @@
 #include <iostream>
 #include <sstream>
 #include <string>
-#include "DynareBison.h"
+#include "DynareBison.hh"
 #ifndef YLMM_basic_scanner
 #include "ylmm/basic_scanner.hh"
 #endif
-#include "Objects.h"
-#include "SymbolTable.h"
+#include "Objects.hh"
+#include "SymbolTable.hh"
 //------------------------------------------------------------------------------
 /*! \namespace scanner
  */
