@@ -289,8 +289,9 @@
 	;
 	
  histval_elem
- 	: NAME '(' signed_integer ')' EQUAL expression ';'
- 		{_parser->hist_val($1, $3, $6);}
+ 	: NAME '(' signed_integer ')' EQUAL expression 
+                {$$ = _parser->get_expression($6);} ';'
+ 		{_parser->hist_val($1, $3, $7);}
  	;
 	
  model

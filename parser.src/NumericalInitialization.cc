@@ -79,11 +79,11 @@ void  NumericalInitialization::SetInit (string name, string expression)
     // for a variable 
     if (type == eEndogenous)
     {
-    	*output << "oo_.steady_state( " << id+1 << " ) = " << expression << ";\n";
+      *output << "oo_.steady_state( " << id+1 << " ) = " << expression << ";\n";
     }
     else if (type == eExogenous)
     {
-    	*output << "oo_.exo_steady_state( " << id+1 << " ) = " << expression << ";\n";
+      *output << "oo_.exo_steady_state( " << id+1 << " ) = " << expression << ";\n";
     }
     else if (type == eExogenousDet)
     {
@@ -131,29 +131,30 @@ void  NumericalInitialization::BeginHistval (void)
 //------------------------------------------------------------------------------
 void  NumericalInitialization::SetHist (string name, int lag, string expression) 
 {
-
-	
 	//Testing if symbol exists 
-	if (!SymbolTable::Exist(name))
+  if (!SymbolTable::Exist(name))
     {
-    	string msg = "Unknown parameter: " + name;
-      	(* error) (msg.c_str());
+      string msg = "Unknown parameter: " + name;
+      (* error) (msg.c_str());
     }
-    Type 	type = SymbolTable::getType(name);
-    int 	id = SymbolTable::getID(name);
-    // Testing symbol type
-	if (type == eEndogenous)
+  Type 	type = SymbolTable::getType(name);
+  int 	id = SymbolTable::getID(name);
+  // Testing symbol type
+  if (type == eEndogenous)
     {
-    	*output << "oo_.y_simul( " << id+1 << ", MP.max_lag + " << lag + 1 << ") = " << expression << ";\n";
+    	*output << "oo_.endo_simul( " << id+1 << ", M_.maximum_lag + " << lag + 1 << ") = " << expression << ";\n";
     }
-    else if (type == eExogenous)
+  else if (type == eExogenous)
     {
-    	*output << "oo_.exo_simul( MP.max_lag + " << lag + 1 << ", " << id+1 << " ) = " << expression << ";\n";
-    }
+    	*output << "oo_.exo_simul( M_.maximum_lag + " << lag + 1 << ", " << id+1 << " ) = " << expression << ";\n";
+      }
     // Tetsting if symbol is a variable (Exogenousous deterministic or recursive) 
-    else if ((type != eExogenousDet) || 
-    	 (type != eRecursiveVariable))   		
-    {
+    else if (type != eExogenousDet) 
+      {
+	*output << "oo_.exo_det_simul( M_.maximum_lag + " << lag + 1 << ", " << id+1 << " ) = " << expression << ";\n";
+      }
+    else if (type != eRecursiveVariable)   		
+      {
     	string msg = "Non-variable symbol : " + name;
    		(* error) (msg.c_str());
 	}
