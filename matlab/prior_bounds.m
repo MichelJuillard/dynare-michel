@@ -3,6 +3,7 @@ global options_
 
 pshape = bayestopt.pshape;
 pmean = bayestopt.pmean;
+p1 = bayestopt.p1;
 p2 = bayestopt.p2;
 p3 = bayestopt.p3;
 p4 = bayestopt.p4;
@@ -35,8 +36,8 @@ for i=1:n
       bounds(i,1) = 1/sqrt(mj_qgamma(1-options_.prior_trunc,p2(i)/2)*beta);
       bounds(i,2) = 1/sqrt(mj_qgamma(options_.prior_trunc,p2(i)/2)*beta);
     case 5
-      bounds(i,1) = p3(i);
-      bounds(i,2) = p4(i);
+      bounds(i,1) = p1(i);
+      bounds(i,2) = p2(i);
     otherwise
       bounds(i,1) = -Inf;
       bounds(i,2) = Inf;
