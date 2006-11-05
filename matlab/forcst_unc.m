@@ -34,7 +34,8 @@ function forcst_unc(y0,var_list)
   exo_nbr = M_.exo_nbr;
   replic = options_.forecast.replic;
   order = options_.order;
-  params = prior_draw(1);
+  %  params = prior_draw(1);
+  params = rndprior(bayestopt_);
   set_parameters(params);
   % eliminate shocks with 0 variance
   i_exo_var = setdiff([1:exo_nbr],find(diag(M_.Sigma_e) == 0));
@@ -48,7 +49,8 @@ function forcst_unc(y0,var_list)
   m2 = 0;
   for i=1:replic
     % draw parameter values from the prior
-    params = prior_draw(0);
+    % params = prior_draw(0);
+    params = rndprior(bayestopt_);
     set_parameters(params);
     % solve the model
     [dr,info] = resol(oo_.steady_state,0);
