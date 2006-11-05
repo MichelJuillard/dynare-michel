@@ -32,7 +32,7 @@ VariableTable::~VariableTable()
 int VariableTable::AddVariable(string iName, int iLag)
 {
   int     lVariableID;
-  //Variable 	lVariable;
+  //Variable  lVariable;
   varKey      key;
   // Testing if symbol exists
   if (!SymbolTable::Exist(iName))
@@ -61,9 +61,12 @@ int VariableTable::AddVariable(string iName, int iLag)
   SymbolTable::AddLag(iName, iLag);
   // Setting variable numbers
   Type type = getType(lVariableID);
-  if (type == eEndogenous)  ModelParameters::var_endo_nbr++;
-  if (type == eExogenous) ModelParameters::var_exo_nbr++;
-  if (type == eExogenousDet)  ModelParameters::var_exo_det_nbr++;
+  if (type == eEndogenous)
+    ModelParameters::var_endo_nbr++;
+  if (type == eExogenous)
+    ModelParameters::var_exo_nbr++;
+  if (type == eExogenousDet)
+    ModelParameters::var_exo_det_nbr++;
   // Setting Maximum and minimum lags
   if (ModelParameters::max_lead < iLag)
     {
@@ -146,7 +149,7 @@ void VariableTable::decSymbolID(string iName, int id, int iLag, Type iType)
 }
 
 //------------------------------------------------------------------------------
-void  VariableTable::Sort(void)
+void VariableTable::Sort(void)
 {
   varKey          key;
   int           variable;
