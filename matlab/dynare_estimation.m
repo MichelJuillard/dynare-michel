@@ -70,6 +70,9 @@ options_ = set_default_option(options_,'use_mh_covariance_matrix',0);
 options_ = set_default_option(options_,'noconstant',0);
 options_ = set_default_option(options_,'steadystate_partial',[]);
 
+if options_.order > 1
+  options_.order = 1;
+end
 
 if options_.prefilter == 1
   options_.noconstant = 1;
