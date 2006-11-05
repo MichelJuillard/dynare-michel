@@ -57,7 +57,7 @@ void ModelTree::OpenMFiles(string iModelFileName1, string iModelFileName2)
       mStaticModelFile << interfaces::comment();
       mStaticModelFile << "Warning : this file is generated automatically by Dynare\n";
       mStaticModelFile << interfaces::comment();
-      mStaticModelFile << "		from model file (.mod)\n\n";
+      mStaticModelFile << "  from model file (.mod)\n\n";
       if (iModelFileName2.size() && (computeJacobian||computeJacobianExo||computeHessian))
         {
           iModelFileName2 += interfaces::function_file_extension();
@@ -75,7 +75,7 @@ void ModelTree::OpenMFiles(string iModelFileName1, string iModelFileName2)
           mDynamicModelFile << interfaces::comment();
           mDynamicModelFile << "Warning : this file is generated automatically by Dynare\n";
           mDynamicModelFile << interfaces::comment();
-          mDynamicModelFile << "		from model file (.mod)\n\n";
+          mDynamicModelFile << "  from model file (.mod)\n\n";
 
         }
     }
@@ -103,7 +103,7 @@ void ModelTree::OpenCFiles(string iModelFileName1, string iModelFileName2)
       mStaticModelFile << "/*\n";
       mStaticModelFile << " *" << iModelFileName1 << ".c  : Computes static model for Dynare\n";
       mStaticModelFile << " * Warning : this file is generated automatically by Dynare\n";
-      mStaticModelFile << " *	          from model file (.mod)\n\n";
+      mStaticModelFile << " *           from model file (.mod)\n\n";
       mStaticModelFile << " */\n";
       mStaticModelFile << "#include <math.h>\n";
       mStaticModelFile << "#include \"mex.h\"\n";
@@ -124,7 +124,7 @@ void ModelTree::OpenCFiles(string iModelFileName1, string iModelFileName2)
           mDynamicModelFile << " *" << iModelFileName2 << ".c  : Computes dynamic model for Dynare\n";
           mDynamicModelFile  << " *\n";
           mDynamicModelFile << " * Warning : this file is generated automatically by Dynare\n";
-          mDynamicModelFile << " *	          from model file (.mod)\n\n";
+          mDynamicModelFile << " *           from model file (.mod)\n\n";
           mDynamicModelFile << " */\n";
           mDynamicModelFile << "#include <math.h>\n";
           mDynamicModelFile << "#include \"mex.h\"\n";
@@ -280,9 +280,9 @@ void ModelTree::derive(int iOrder)
   NodeID  lToken;                // To store current working token
   NodeID    lD1, lD2;            // To store derivative arguments of
   // current argument
-  NodeID    lArg1, lArg2;        // To store	current arguments
+  NodeID   lArg1, lArg2;         // To store current arguments
   Type    lType1;                // Type of first argument
-  NodeID    t1,t11,t12,t13,
+  NodeID   t1,t11,t12,t13,
     t14, t15;                    // To store temoporary result arguments
   TreeIterator  BeginIT;         // Iterator of the 1st token to derive
   TreeIterator  EndIT;           // Iterator of the last token to derive
@@ -303,7 +303,7 @@ void ModelTree::derive(int iOrder)
   std::cout << "size " << EqualTokenIDs.size() << "\n";
   mDerivativeIndex.resize(iOrder);
   // Uncomment this to print model tree data
-  /*	
+  /*
   //cout << "ModelTree==================================\n";
   for (currentIT = mModelTree.begin(); currentIT != mModelTree.end(); currentIT++)
   {
@@ -510,7 +510,8 @@ void ModelTree::derive(int iOrder)
                         }
                     }
                 }
-              if (currentIT == EndIT) break;
+              if (currentIT == EndIT)
+                break;
             }
 
           // Treating equal tokens
@@ -562,13 +563,13 @@ void ModelTree::derive(int iOrder)
 
         }
       // Uncomment to debug : prints unreferenced tokens
-      /*	
-                cout << "Order : " << Order << "\n";
-                for (TokenCount = BeginModel; TokenCount < mModelTree.size() ; TokenCount++ )
-                {
-                if (accumulate(mModelTree[TokenCount].reference_count.begin(),mModelTree[TokenCount].reference_count.end(),0) == 0)
-                cout << "\tNot referenced : token ID :" << TokenCount << endl;
-                }
+      /*
+        cout << "Order : " << Order << "\n";
+        for (TokenCount = BeginModel; TokenCount < mModelTree.size() ; TokenCount++ )
+        {
+        if (accumulate(mModelTree[TokenCount].reference_count.begin(),mModelTree[TokenCount].reference_count.end(),0) == 0)
+        cout << "\tNot referenced : token ID :" << TokenCount << endl;
+        }
       */
       // Uncomment this to debug : mDerivative(1and2)Index data
       // before removing unreferenced tokens
@@ -704,7 +705,8 @@ string  ModelTree::setStaticModel(void)
               model_output << "residual" << lpar << lEquationNBR+1 << rpar << "= lhs-rhs;" << endl;
               lEquationNBR++;
             }
-          else break;
+          else
+            break;
         }
       else if ((*tree_it)->op_code != NoOpCode)
         {
@@ -857,7 +859,8 @@ string  ModelTree::setDynamicModel(void)
               model_output << "residual" << lpar << lEquationNBR+1 << rpar << "= lhs-rhs;" << endl;
               lEquationNBR++;
             }
-          else break;
+          else
+            break;
         }
       else if ((*tree_it)->op_code != NoOpCode)
         {
@@ -1465,8 +1468,8 @@ int main(void)
   //}
   //catch(Error err)
   //{
-  //	cout << "error---------------------\n";
-  //	exit(-1);
+  // cout << "error---------------------\n";
+  // exit(-1);
   //}
   //cout << model.getDynamicDeterministicModel() << endl;
   //cout << model.getDynamicStochasticModel() << endl;
