@@ -19,7 +19,7 @@ function pdraw = prior_draw(init,cc)
 %  
 % part of DYNARE, copyright S. Adjemian, M. Juillard (2006)
 % Gnu Public License.
-global M_ options_ estim_params_  
+global M_ options_ estim_params_ bayestopt_ 
 persistent fname npar bounds pshape pmean pstd a b p3 p4 condition
   
 if init
@@ -29,8 +29,8 @@ if init
     ncn  = estim_params_.ncn;
     np   = estim_params_.np ;
     npar = nvx+nvn+ncx+ncn+np;
-    MhDirectoryName = CheckPath('metropolis');
-    fname = [ MhDirectoryName '/' M_.fname];
+%    MhDirectoryName = CheckPath('metropolis');
+%    fname = [ MhDirectoryName '/' M_.fname];
     pshape = bayestopt_.pshape;
     pmean = bayestopt_.pmean;
     pstd  = bayestopt_.pstdev;
@@ -47,33 +47,33 @@ if init
     end
     for i = 1:npar
         switch pshape(i)
-          case 3% Gaussian prior
-            b(i) = pstd(i)^2/(pmean(i)-p3(i));
-            a(i) = (pmean(i)-p3(i))/b(i);
-          case 1% Beta prior
-            mu = (p1(i)-p3(i))/(p4(i)-p3(i));
-            stdd = p2(i)/(p4(i)-p3(i));
-            a(i) = (1-mu)*mu^2/stdd^2 - mu;
-            b(i) = a*(1/mu - 1);        
-          case 2;%Gamma prior
-            mu = p1(i)-p3(i);
-            b(i) = p2(i)^2/mu;
-            a(i) = mu/b;
-          case {5,4,6}
-            % Nothing to do here
-            %
-            % 4: Inverse gamma, type 1, prior
-            %    p2(i) = nu
-            %    p1(i) = s
-            % 6: Inverse gamma, type 2, prior
-            %    p2(i) = nu
-            %    p1(i) = s
-            % 5: Uniform prior
-            %    p3(i) and p4(i) are used.
-          otherwise
-            disp('prior_draw :: Error!')
-            disp('Unknown prior shape.')
-            return
+	 case 3 % Gaussian prior
+%            b(i) = pstd(i)^2/(pmean(i)-p3(i));
+%            a(i) = (pmean(i)-p3(i))/b(i);
+	 case 1 % Beta prior
+	  mu = (p1(i)-p3(i))/(p4(i)-p3(i));
+	  stdd = p2(i)/(p4(i)-p3(i));
+	  a(i) = (1-mu)*mu^2/stdd^2 - mu;
+	  b(i) = a*(1/mu - 1);        
+	 case 2;%Gamma prior
+	  mu = p1(i)-p3(i);
+	  b(i) = p2(i)^2/mu;
+	  a(i) = mu/b;
+	 case {5,4,6}
+	  % Nothing to do here
+	  %
+	  % 4: Inverse gamma, type 1, prior
+	  %    p2(i) = nu
+	  %    p1(i) = s
+	  % 6: Inverse gamma, type 2, prior
+	  %    p2(i) = nu
+	  %    p1(i) = s
+	  % 5: Uniform prior
+	  %    p3(i) and p4(i) are used.
+	 otherwise
+	  disp('prior_draw :: Error!')
+	  disp('Unknown prior shape.')
+	  return
         end
         pdraw = zeros(npar,1);  
     end
