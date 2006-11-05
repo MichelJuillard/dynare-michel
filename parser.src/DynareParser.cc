@@ -294,7 +294,7 @@ void dynare::parser::finish(void)
   *output << "save('" << model_file_name << "_results', 'oo_');\n";
   *output << "diary off\n";
 
-  symbol_table.erase_local_parameters();
+  //  symbol_table.erase_local_parameters();
 }
 
 void dynare::parser::begin_initval(void)
