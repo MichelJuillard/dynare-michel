@@ -363,74 +363,6 @@ operator<<(std::ostream& o, const ylmm::basic_buffer& b)
   return o << b.line() << "," << b.column();
 }
 
-#if defined(FLEX_SCANNER) && !defined(YLMM_flex_buffer_impl)
-#define YLMM_flex_buffer_impl
-
-//__________________________________________________________________
-/** Create a new Flex buffer. 
-    @param file The file to associate with the buffer. Can be NULL.
-    @param size The size of the buffer
-    @return A newly allocated buffer. */
-extern YY_BUFFER_STATE yy_create_buffer(FILE *file, int size);  
-
-inline void 
-ylmm::basic_buffer::new_extra(int size) 
-{
-  // If size is not given (0 or less), then use the default. 
-  if (size < 0) { _extra = 0; return; }
-  if (size == 0) size = YY_BUF_SIZE;
-  _extra = static_cast<YY_BUFFER_STATE>(yy_create_buffer(0, size));
-}
-
-//__________________________________________________________________
-/** De-allocate a Flex buffer. 
-    @param b The buffer to de-allocate.  */
-extern void yy_delete_buffer(YY_BUFFER_STATE b);
-
-inline void 
-ylmm::basic_buffer::delete_extra() 
-{
-  yy_delete_buffer(static_cast<YY_BUFFER_STATE>(_extra));
-}
-
-//__________________________________________________________________
-/** Switch to another Flex buffer 
-    @param b The buffer to switch to. */
-extern void yy_switch_to_buffer(YY_BUFFER_STATE b);
-
-inline bool 
-ylmm::basic_buffer::activate() 
-{
-  yy_switch_to_buffer(static_cast<YY_BUFFER_STATE>(_extra));
-  return static_cast<YY_BUFFER_STATE>(_extra) == YY_CURRENT_BUFFER;
-}
-
-//__________________________________________________________________
-inline void 
-ylmm::basic_buffer::interactive_extra(bool inter) 
-{
-  (static_cast<YY_BUFFER_STATE>(_extra))->yy_is_interactive = inter ? 1 : 0;
-}
-
-//__________________________________________________________________
-inline void 
-ylmm::basic_buffer::at_bol_extra(bool inter) 
-{
-  (static_cast<YY_BUFFER_STATE>(_extra))->yy_at_bol = inter ? 1 : 0;
-}
-
-//__________________________________________________________________
-/** Flush a buffer. 
-    @param b The buffer to flush. */
-extern void yy_flush_buffer(YY_BUFFER_STATE b);
-
-inline void 
-ylmm::basic_buffer::flush_extra() 
-{
-  yy_flush_buffer(static_cast<YY_BUFFER_STATE>(_extra));
-}
-#else 
-
 //__________________________________________________________________
 inline void ylmm::basic_buffer::new_extra(int size) {}
 inline void ylmm::basic_buffer::delete_extra() {}
@@ -440,8 +372,3 @@ inline void ylmm::basic_buffer::at_bol_extra(bool inter) {}
 inline bool ylmm::basic_buffer::activate() { return true; }
 
 #endif
-#endif
-
-
-    
-    
