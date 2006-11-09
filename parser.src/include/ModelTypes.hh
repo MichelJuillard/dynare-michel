@@ -8,30 +8,10 @@
 */
 //------------------------------------------------------------------------------
 #include <string>
-#include <list>
-//#include <ext/hash_map>
 #include <map>
 
 typedef class MetaToken* NodeID;
 
-/*!
-  \struct  Derivative
-  \brief  Derivative structure
-*/
-//------------------------------------------------------------------------------
-struct Derivative
-{
-  /*! ID of variable in VariableTable with respect to which token is derived */
-  int variable_id;
-  /*! "Forward" address of starting token of derivative */
-  int derivative_address;
-  /*! Constructor */
-  inline Derivative(int iVarID = -1, int iDerivAdr = -1, Type iDerivType = eUNDEF)
-  {
-    variable_id = iVarID;
-    derivative_address = iDerivAdr;
-  }
-};
 /*!
   \struct  DerivativeIndex
   \brief  Derivative index structure
@@ -142,36 +122,6 @@ public :
   /*! set to one if closing parenthesis after token */
   int close_parenthesis;
 
-  /*! Cast MetaToken -> MToken */
-  inline operator MToken() const
-  {
-    MToken lToken(id1,type1,id2, op_code);
-    return lToken;
-  }
-  /*! Equal operator */
-  inline MetaToken operator = (const MetaToken& t1)
-  {
-    id1 = t1.id1;
-    type1 = t1.type1;
-    id2 = t1.id2;
-    op_code = t1.op_code;
-    op_name = t1.op_name;
-    reference_count = t1.reference_count;
-    cost = t1.cost;
-    func_name = t1.func_name;
-    d1 = t1.d1;
-    followed1 = t1.followed1;
-    followed2 = t1.followed2;
-    exp[0] = exp[0];
-    exp[1] = exp[1];
-    idx = t1.idx;
-    tmp_status = t1.tmp_status;
-    left_done = t1.left_done;
-    right_done = t1.right_done;
-    close_parenthesis = t1.close_parenthesis;
-    //cout << "Creation by equality\n";
-    return *this;
-  }
   /*! Constructor */
   inline MetaToken(NodeID iId1 = NULL, Type iType1 = eUNDEF,NodeID iId2= NULL, int iOpCode = -1)
     : MToken(iId1, iType1,iId2,iOpCode)
@@ -212,31 +162,6 @@ public :
     d1[iVarID] = iDerivative;
   }
 };
-//------------------------------------------------------------------------------
-/*!
-  \brief  Less operator define comparaison function for map class
-*/
-
-inline  bool operator < (const MToken &t1, const MToken &t2)
-{
-  if  (t1.op_code != t2.op_code)
-    {
-      return (t1.op_code < t2.op_code);
-    }
-  if (t1.id1 != t2.id1)
-    {
-      return (t1.id1 < t2.id1);
-    }
-  if (t1.id2 != t2.id2)
-    {
-      return (t1.id2 < t2.id2);
-    }
-  if (t1.type1 != t2.type1)
-    return (t1.type1 < t2.type1);
-  else return false;
-
-}
-
 //------------------------------------------------------------------------------
 /*! Equation type enum */
 enum EquationType
