@@ -9,7 +9,7 @@ using namespace std;
 //------------------------------------------------------------------------------
 #include "NumericalConstants.hh"
 //------------------------------------------------------------------------------
-vector<string> NumericalConstants::mNumericalConstants = *(new vector<string>);
+vector<string> NumericalConstants::mNumericalConstants;
 //------------------------------------------------------------------------------
 NumericalConstants::NumericalConstants()
 {

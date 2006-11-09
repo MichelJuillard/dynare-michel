@@ -11,10 +11,10 @@ using namespace std;
 //------------------------------------------------------------------------------
 #include "VariableTable.hh"
 //------------------------------------------------------------------------------
-map<varKey,int> VariableTable::mVariableTable = *(new map<varKey,int>);
-vector<varKey> VariableTable::mVariableIndex = *(new vector<varKey>);
-vector<int> VariableTable::mSortedVariableID = *(new vector<int>);
-vector<int> VariableTable::mPrintFormatIndex = *(new vector<int>);
+map<varKey,int> VariableTable::mVariableTable;
+vector<varKey> VariableTable::mVariableIndex;
+vector<int> VariableTable::mSortedVariableID;
+vector<int> VariableTable::mPrintFormatIndex;
 void (* VariableTable::error) (const char* ) = NULL;
 //------------------------------------------------------------------------------
 VariableTable::VariableTable()

@@ -13,8 +13,8 @@ using namespace std;
 //------------------------------------------------------------------------------
 // = *(new symbolmap);
 map<string, Symbol, less<string> > SymbolTable::symboltable;
-vector< vector<string> > SymbolTable::name_table = *(new vector< vector<string> >);
-vector< vector<string> > SymbolTable::tex_name_table = *(new vector< vector<string> >);
+vector< vector<string> > SymbolTable::name_table;
+vector< vector<string> > SymbolTable::tex_name_table;
 ostringstream SymbolTable::output;
 void (* SymbolTable::error) (const char* ) = NULL;
 //------------------------------------------------------------------------------
