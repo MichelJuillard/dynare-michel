@@ -755,14 +755,18 @@ inline NodeID DataTree::AddSqRt(NodeID iArg1)
 
 inline NodeID DataTree::AddEqual(NodeID iArg1, NodeID iArg2=Zero)
 {
-  MToken  lToken(iArg1, eTempResult, iArg2, EQUAL);
-
-  NodeID ID = getIDOfToken(lToken);
-  if (ID != NullID)
+  if (iArg1 == Zero && iArg2 == Zero)
+    return ZeroEqZero;
+  else
     {
-      return ID;
+      MToken  lToken(iArg1, eTempResult, iArg2, EQUAL);
+
+      NodeID ID = getIDOfToken(lToken);
+      if (ID != NullID)
+        return ID;
+
+      return PushToken(iArg1, EQUAL, iArg2);
     }
-  return PushToken(iArg1,EQUAL,iArg2);
 }
 
 inline NodeID DataTree::AddAssign(NodeID iArg1, NodeID iArg2=Zero)
