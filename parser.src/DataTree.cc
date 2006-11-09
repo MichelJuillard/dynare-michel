@@ -8,10 +8,7 @@
 #include <string>
 #include <vector>
 #include <map>
-//#include <ext/hash_map>
 using namespace std;
-//using __gnu_cxx::hash;
-//using __gnu_cxx::hash_map;
 #include <time.h>
 
 //------------------------------------------------------------------------------
@@ -40,26 +37,26 @@ DataTree::DataTree()
   Zero->reference_count.resize(current_order+1,2);
   Zero->idx = 0;
   mModelTree.push_back(Zero);
-  mIndexOfTokens[Zero->Key()]=Zero;
+  mIndexOfTokens[*Zero]=Zero;
 
   One->op_name = "";
   One->reference_count.resize(current_order+1,1);
   One->idx = 1;
   mModelTree.push_back(One);
-  mIndexOfTokens[One->Key()]=One;
+  mIndexOfTokens[*One]=One;
 
   MinusOne->op_name = operator_table.str(UMINUS);
   MinusOne->reference_count.resize(current_order+1,1);
   MinusOne->idx = 2;
   mModelTree.push_back(MinusOne);
-  mIndexOfTokens[MinusOne->Key()]=MinusOne;
+  mIndexOfTokens[*MinusOne]=MinusOne;
 
   // Pushing "0=0" into mModelTree
   ZeroEqZero->op_name = operator_table.str(EQUAL);
   ZeroEqZero->reference_count.resize(current_order+1,1);
   ZeroEqZero->idx = 3;
   mModelTree.push_back(ZeroEqZero);
-  mIndexOfTokens[ZeroEqZero->Key()]=ZeroEqZero;
+  mIndexOfTokens[*ZeroEqZero]=ZeroEqZero;
 
   BeginModel = mModelTree.end();
   BeginModel--;

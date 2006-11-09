@@ -68,16 +68,27 @@ public :
   }
   /*! Destructor */
   ~MToken() { }
+};
 
-  /*! Computes the hash key */
-  inline std::string Key() const
+/*!
+  \struct MTokenLess
+  \brief Class which defines a lexicographic order over MToken, used in std::map
+*/
+struct MTokenLess
+{
+  bool operator()(const MToken &n1, const MToken &n2) const
   {
-    char key[100];
-    snprintf(key, 100, "%p %p %d %d", id1, id2, type1, op_code);
-    // std::cout << key << std::endl;
-    return std::string(key);
+    if (n1.id1 != n2.id1)
+      return(n1.id1 < n2.id1);
+    else if (n1.id2 != n2.id2)
+      return(n1.id2 < n2.id2);
+    else if (n1.type1 != n2.type1)
+      return(n1.type1 < n2.type1);
+    else
+      return(n1.op_code < n2.op_code);
   }
 };
+
 //------------------------------------------------------------------------------
 /*!
   \struct  MetaToken

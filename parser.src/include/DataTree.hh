@@ -13,7 +13,6 @@
 #include <stack>
 #include <sstream>
 #include <fstream>
-//#include <ext/hash_map>
 #include <map>
 #include <stdio.h>
 //------------------------------------------------------------------------------
@@ -24,7 +23,7 @@
 #include "VariableTable.hh"
 //------------------------------------------------------------------------------
 
-typedef std::map<std::string,NodeID, std::less<std::string> > TreeMap;
+typedef std::map<MToken, NodeID, MTokenLess> TreeMap;
 typedef std::list<NodeID> TreeList;
 typedef TreeList::iterator TreeIterator;
 /*!
@@ -149,7 +148,7 @@ inline NodeID DataTree::PushToken(NodeID iArg1,int iOpCode, NodeID iArg2, Type i
       lToken->cost += iArg2->cost;
       IncrementReferenceCount(iArg2);
     }
-  mIndexOfTokens[lToken->Key()]=lToken;
+  mIndexOfTokens[*lToken] = lToken;
 
   /*
     std::cout << "ID = " << ID << " / " << mIndexOfTokens.size()-1<< " - " << getIDOfToken(lToken2) << " " <<
@@ -180,9 +179,7 @@ inline void DataTree::IncrementReferenceCount(NodeID token)
 //------------------------------------------------------------------------------
 inline NodeID DataTree::getIDOfToken(const MToken &iToken)
 {
-  TreeMap::iterator iter;
-
-  iter = mIndexOfTokens.find(iToken.Key());
+  TreeMap::iterator iter = mIndexOfTokens.find(iToken);
   if (iter != mIndexOfTokens.end())
     return iter->second;
   else
