@@ -37,6 +37,8 @@ protected :
   TreeList    mModelTree;
   /*! matches key with entry id in list of token */
   TreeMap         mIndexOfTokens;
+  /*! A counter for filling MetatToken's idx field */
+  int nodeCounter;
   /*! Operator table : names and precedence of oparator */
   OperatorTable     operator_table;
   /*! ID of first token in model tree (first tokens are "0", "1" and "0=" */
@@ -135,7 +137,7 @@ inline NodeID DataTree::PushToken(NodeID iArg1,int iOpCode, NodeID iArg2, Type i
       lToken->op_name = "";
     }
   lToken->reference_count.resize(current_order+1,0);
-  lToken->idx = mModelTree.size();
+  lToken->idx = nodeCounter++;
   mModelTree.push_back(lToken);
   //Updating reference counters and time costs
   if (iType1 == eTempResult )

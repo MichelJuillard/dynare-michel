@@ -58,6 +58,9 @@ DataTree::DataTree()
   mModelTree.push_back(ZeroEqZero);
   mIndexOfTokens[*ZeroEqZero]=ZeroEqZero;
 
+  // Initialise global node counter
+  nodeCounter = 4;
+
   BeginModel = mModelTree.end();
   BeginModel--;
 }
