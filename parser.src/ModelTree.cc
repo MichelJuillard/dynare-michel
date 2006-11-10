@@ -23,6 +23,20 @@ using namespace std;
 //------------------------------------------------------------------------------
 ostringstream ModelTree::output;
 //------------------------------------------------------------------------------
+
+inline NodeID MetaToken::getDerivativeAddress(int iVarID)
+{
+  std::map<int, NodeID, std::less<int> >::iterator iter = d1.find(iVarID);
+  if (iter == d1.end())
+    // No entry in map, derivative is therefore null
+    if (op_code == EQUAL)
+      return DataTree::ZeroEqZero;
+    else
+      return DataTree::Zero;
+  else
+    return iter->second;
+}
+
 ModelTree::ModelTree()
 {
   computeJacobian = false;
@@ -278,8 +292,7 @@ void ModelTree::SaveCFiles()
 void ModelTree::derive(int iOrder)
 {
   NodeID  lToken;                // To store current working token
-  NodeID    lD1, lD2;            // To store derivative arguments of
-  // current argument
+  NodeID    lD1, lD2;            // To store derivative arguments of current argument
   NodeID   lArg1, lArg2;         // To store current arguments
   Type    lType1;                // Type of first argument
   NodeID   t1,t11,t12,t13,
@@ -295,12 +308,12 @@ void ModelTree::derive(int iOrder)
       if ((*currentIT)->op_code == EQUAL)
         {
           EqualTokenIDs.push_back(*currentIT);
-          // Equation is forced to be in Model Tree as refferenced
-          // This is usfull to remove symetric elements
+          // Equation is forced to be in Model Tree as referenced
+          // This is useful to remove symmetric elements
           (*currentIT)->reference_count[0]++;
         }
     }
-  std::cout << "size " << EqualTokenIDs.size() << "\n";
+  //std::cout << "size " << EqualTokenIDs.size() << "\n";
   mDerivativeIndex.resize(iOrder);
   // Uncomment this to print model tree data
   /*
@@ -339,18 +352,20 @@ void ModelTree::derive(int iOrder)
               (*it)->reference_count.push_back(rc);
             }
         }
-      // Loop on variables of derivation
-      for (int var = 0; var < VariableTable::size(); var++)
-        {
 
-          // Loop on tokens
-          for (currentIT = BeginIT;; currentIT++)
+      // Loop on tokens
+      for (currentIT = BeginIT;; currentIT++)
+        {
+          lToken = *currentIT;
+
+          // Loop on variables of derivation which may give non null result for this token
+          for (vector<int>::iterator varIt = lToken->non_null_derivatives.begin();
+               varIt != lToken->non_null_derivatives.end(); varIt++)
             {
+              int var = *varIt;
               //cout << "Token " << (*currentIT)->idx << endl;
               if (accumulate((*currentIT)->reference_count.begin(), (*currentIT)->reference_count.end(),0) > 0)
                 {
-                  lToken = *currentIT;   //mModelTree[TokenCount];
-
                   lArg1 = lToken->id1;
                   lArg2 = lToken->id2;
                   lType1 = lToken->type1;
@@ -358,7 +373,7 @@ void ModelTree::derive(int iOrder)
                   lD2 = Zero;
                   if (lArg2 != NullID)
                     lD2 = DeriveArgument(lArg2, eTempResult, var);
-                  // Case where token is a final argument
+                  // Case where token is a terminal
                   if (lToken->op_code == NoOpCode)
                     {
                       (*currentIT)->setDerivativeAddress(lD1, var);
@@ -507,61 +522,55 @@ void ModelTree::derive(int iOrder)
                           t1 = AddTimes(lD1, t12);
                           (*currentIT)->setDerivativeAddress(t1,var);
                           break;
+                        case EQUAL:
+                          // Force the derivative to have zero on right hand side
+                          // (required for setStaticModel and setDynamicModel)
+                          if (lD1 == Zero && lD2 != Zero)
+                            {
+                              t11 = AddUMinus(lD2);
+                              t1 = AddEqual(t11, Zero);
+                            }
+                          else if (lD1 != Zero && lD2 == Zero)
+                            t1 = AddEqual(lD1, Zero);
+                          else
+                            {
+                              t11 = AddMinus(lD1, lD2);
+                              t1 = AddEqual(t11, Zero);
+                            }
+                          // The derivative is forced to be in Model Tree as referenced
+                          // This is useful to remove symmetric elements
+                          IncrementReferenceCount(t1);
+                          lToken->setDerivativeAddress(t1, var);
+                          break;
                         }
                     }
                 }
-              if (currentIT == EndIT)
-                break;
             }
+          if (currentIT == EndIT)
+            break;
+        }
 
-          // Treating equal tokens
-          // Skeeping symetric elements
-          //vector<MetaToken>::iterator tree_it2 = mModelTree.begin();
-          //int id = 0;
+      // Filling mDerivativeIndex
+      // Loop on variables of derivation, skipping symmetric elements
+      for (int var = 0; var < VariableTable::size(); var++)
+        {
           int starti = var*Order*(Order-1)*ModelParameters::eq_nbr/2;
           for (unsigned int i = starti; i < EqualTokenIDs.size() ; i++ )
             {
-              lToken = EqualTokenIDs[i];
-              lArg1 = lToken->id1;
-              lArg2 = lToken->id2;
-              lType1 = lToken->type1;
-              lD1 = DeriveArgument(lArg1, lType1, var);
-              lD2 = DeriveArgument(lArg2, eTempResult, var);
-              // If one hand sid is null, take the other
-              if (lD1 == Zero && lD2 != Zero)
-                {
-                  t11 = AddUMinus(lD2);
-                  t1 = AddEqual(t11, Zero);
-                }
-              else if (lD1 != Zero && lD2 == Zero)
-                {
-                  t1 = AddEqual(lD1, Zero);
-                }
-              else
-                {
-                  t11 = AddMinus(lD1, lD2);
-                  t1 = AddEqual(t11, Zero);
-                }
-              // The derivative is forced to be in Model Tree as refferenced
-              // This is usfull to remove symetric elements
-              IncrementReferenceCount(t1);
-              EqualTokenIDs[i]->setDerivativeAddress(t1, var);
+              t1 = EqualTokenIDs[i]->getDerivativeAddress(var);
               if (Order == 1)
-                {
-                  mDerivativeIndex[0].push_back(DerivativeIndex(t1, i-starti, var));
-                }
+                mDerivativeIndex[0].push_back(DerivativeIndex(t1, i-starti, var));
               else if (Order == 2)
                 {
                   int var1 = VariableTable::getSortID(i/ModelParameters::eq_nbr);
                   int var2 = VariableTable::getSortID(var);
-                  mDerivativeIndex[1].push_back(DerivativeIndex(
-                                                                t1,
+                  mDerivativeIndex[1].push_back(DerivativeIndex(t1,
                                                                 i-ModelParameters::eq_nbr*(i/ModelParameters::eq_nbr),
                                                                 var1*VariableTable::size()+var2));
                 }
             }
-
         }
+
       // Uncomment to debug : prints unreferenced tokens
       /*
         cout << "Order : " << Order << "\n";
@@ -615,8 +624,7 @@ void ModelTree::derive(int iOrder)
         //if (mDerivativeIndex[1][i].token_id != 3)
         cout << "\t" << mDerivativeIndex[1][i].token_id << endl;
       */
-      cout << "done \n";
-
+      cout << "done" << endl;
     }
 }
 
@@ -626,7 +634,7 @@ inline NodeID ModelTree::DeriveArgument(NodeID iArg, Type iType, int iVarID)
   switch(iType)
     {
     case eTempResult      :
-      return iArg->d1[iVarID];
+      return iArg->getDerivativeAddress(iVarID);
     case eExogenous       :
     case eExogenousDet      :
     case eEndogenous      :

@@ -96,6 +96,9 @@ struct MTokenLess
 */
 struct MetaToken : public MToken
 {
+private:
+  /*! Address of first order partial derivative */
+  std::map<int, NodeID, std::less<int> >  d1;
 public :
   /*! Index of token starting from zero */
   int             idx;
@@ -115,8 +118,6 @@ public :
   int             tmp_status;
   /*! Name of unkown functions */
   std::string             func_name;
-  /*! Address of first order partial derivative */
-  std::map<int, NodeID, std::less<int> >  d1;
   /*! Expression of token, exp[0] for static model
     exp[1] for dynamic model */
   std::string           exp[2];
@@ -133,6 +134,9 @@ public :
   /*! set to one if closing parenthesis after token */
   int close_parenthesis;
 
+  /*! Ordered list of variable IDs with respect to which the derivative is potentially non-null */ 
+  std::vector<int> non_null_derivatives;
+
   /*! Constructor */
   inline MetaToken(NodeID iId1 = NULL, Type iType1 = eUNDEF,NodeID iId2= NULL, int iOpCode = -1)
     : MToken(iId1, iType1,iId2,iOpCode)
@@ -143,24 +147,53 @@ public :
     left_done = 0;
     right_done = 0;
     close_parenthesis = 0;
-  }
-  /*! Copy constructor */
-  inline MetaToken(const MetaToken& mt)
-    : MToken(mt)
-  {
-    followed1 = mt.followed1;
-    followed2 = mt.followed2;
-    cost = mt.cost;
-    reference_count = mt.reference_count;
-    func_name = mt.func_name;
-    d1 = mt.d1;
-    op_name = mt.op_name;
-    exp[0] = mt.exp[0];
-    exp[1] = mt.exp[1];
-    idx = mt.idx;
-    tmp_status = mt.tmp_status;
-    left_done = mt.left_done;
-    right_done = mt.right_done;
+
+    switch(type1)
+      {
+      case eEndogenous:
+      case eExogenous:
+      case eExogenousDet:
+      case eRecursiveVariable:
+        // For a variable, the only non-null derivative is with respect to itself
+        non_null_derivatives.push_back((long int) id1);
+        break;
+      case eParameter:
+      case eLocalParameter:
+      case eNumericalConstant:
+      case eLoopIndex:
+      case eUNDEF:
+        // All derivatives are null
+        break;
+      case eTempResult:
+        if (!id2)
+          non_null_derivatives = id1->non_null_derivatives;
+        else
+          {
+            // Compute set union of id1->non_null_derivates and id2->non_null_derivatives
+            // The result is ordered by ascending order
+            std::vector<int>::iterator it1, it2;
+            it1 = id1->non_null_derivatives.begin();
+            it2 = id2->non_null_derivatives.begin();
+            while(it1 != id1->non_null_derivatives.end()
+                  && it2 != id2->non_null_derivatives.end())
+              {
+                if (*it1 == *it2)
+                  {
+                    non_null_derivatives.push_back(*it1++);
+                    it2++;
+                  }
+                else if (*it1 < *it2)
+                  non_null_derivatives.push_back(*it1++);
+                else
+                  non_null_derivatives.push_back(*it2++);
+              }
+            while(it1 != id1->non_null_derivatives.end())
+                non_null_derivatives.push_back(*it1++);
+            while(it2 != id2->non_null_derivatives.end())
+              non_null_derivatives.push_back(*it2++);
+          }
+        break;
+      }
   }
   /*! Destructor */
   ~MetaToken()
@@ -172,6 +205,12 @@ public :
   {
     d1[iVarID] = iDerivative;
   }
+
+  /*! Get derivative with respect to iVarID.
+    Defined in ModelTree.cc because it needs DataTree::Zero and DataTree::ZeroEqZero
+    and is only used in that source file.
+  */
+  inline NodeID getDerivativeAddress(int iVarID);
 };
 //------------------------------------------------------------------------------
 /*! Equation type enum */
