@@ -46,6 +46,7 @@ function global_initialization()
   
   % Prior draws
   options_.forecast.replic = 1000;
+  options_.forecast.periods = 0;
   
   % Model
   options_.linear = 0;

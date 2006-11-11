@@ -50,7 +50,6 @@ options_ = set_default_option(options_,'linear',0);
 options_ = set_default_option(options_,'drop',0);
 options_ = set_default_option(options_,'replic',1);
 options_ = set_default_option(options_,'hp_filter',0);
-options_ = set_default_option(options_,'forecast',0);
 options_ = set_default_option(options_,'smoother',0);
 options_ = set_default_option(options_,'moments_varendo',0);
 options_ = set_default_option(options_,'filtered_vars',0);
@@ -1328,7 +1327,7 @@ if ~((any(bayestopt_.pshape > 0) & options_.mh_replic) | (any(bayestopt_.pshape 
   end
 end 
 
-if options_.forecast > 0 & options_.mh_replic == 0 & ~options_.load_mh_file 
+if options_.forecast.periods > 0 & options_.mh_replic == 0 & ~options_.load_mh_file 
   forecast(var_list);
 end
 
