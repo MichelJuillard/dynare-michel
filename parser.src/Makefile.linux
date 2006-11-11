@@ -3,8 +3,13 @@ ifeq ($(DEBUG),yes)
 	CPPFLAGS = -ggdb -pg -Wall
 	FLEXFLAGS = -i -d
 else
-	CPPFLAGS = -O2 -Wall
-	FLEXFLAGS = -i
+	ifeq ($(VALGRIND), yes)
+		CPPFLAGS = -Wall -O -g -fno-inline
+		FLEXFLAGS = -i
+	else
+		CPPFLAGS = -O2 -Wall
+		FLEXFLAGS = -i
+	endif
 endif
 
 COMMON_OBJ=\
