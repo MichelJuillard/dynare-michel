@@ -974,6 +974,7 @@ string  ModelTree::setDynamicModel(void)
       cout << "done \n";
     }
   int nrows = ModelParameters::eq_nbr;
+  int nvars = ModelParameters::var_endo_nbr+ModelParameters::exo_nbr+ModelParameters::exo_det_nbr;
   if (offset == 1)
     {
       DynamicOutput << "global M_ it_\n";
@@ -990,7 +991,7 @@ string  ModelTree::setDynamicModel(void)
           DynamicOutput << "if nargout >= 2,\n";
           // Writing initialization instruction for matrix g1
           DynamicOutput << "  g1 = " <<
-            "zeros(" << nrows << ", " << VariableTable::size() << ");\n" ;
+            "zeros(" << nrows << ", " << nvars << ");\n" ;
           DynamicOutput << "\n\t"+interfaces::comment()+"\n\t"+interfaces::comment();
           DynamicOutput << "Jacobian matrix\n\t";
           DynamicOutput << interfaces::comment()+"\n\n";
@@ -1001,7 +1002,7 @@ string  ModelTree::setDynamicModel(void)
         {
           DynamicOutput << "if nargout >= 3,\n";
           // Writing initialization instruction for matrix g2
-          int ncols = VariableTable::size()*VariableTable::size();
+          int ncols = nvars*nvars;
           DynamicOutput << "  g2 = " <<
             "sparse([],[],[]," << nrows << ", " << ncols << ", " <<
             5*ncols << ");\n";
