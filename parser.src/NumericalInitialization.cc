@@ -74,7 +74,7 @@ void  NumericalInitialization::SetInit (string name, string expression)
   //Testing if symbol exists
   if (!SymbolTable::Exist(name))
     {
-      string msg = "Unknown parameter: " + name;
+      string msg = "Unknown variable: " + name;
       (* error) (msg.c_str());
     }
   Type  type = SymbolTable::getType(name);
