@@ -244,7 +244,8 @@ void dynare::parser::use_dll(void)
 
 void dynare::parser::check_model(void)
 {
-  symbol_table.clean();
+  // creates too many problems MJ 11/12/06
+  //  symbol_table.clean();
 }
 
 void dynare::parser::finish(void)
