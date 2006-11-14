@@ -33,11 +33,11 @@ function ReshapeMatFiles(type)
     TYPEarray = 3;
    case 'forcst'
     CAPtype = 'FORCST';
-    TYPEsize = [ M_.endo_nbr , options_.forecast.periods ];
+    TYPEsize = [ M_.endo_nbr , options_.forecast ];
     TYPEarray = 3;
    case 'forcst1'
     CAPtype = 'FORCST1';
-    TYPEsize = [ M_.endo_nbr , options_.forecast.periods ];
+    TYPEsize = [ M_.endo_nbr , options_.forecast ];
     TYPEarray = 3;
    otherwise
     disp('ReshapeMatFiles :: Unknown argument!')

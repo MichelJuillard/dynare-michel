@@ -45,8 +45,8 @@ function global_initialization()
   options_.graphics.line_width = 1;
   
   % Prior draws
-  options_.forecast.replic = 1000;
-  options_.forecast.periods = 0;
+  options_.forecast = 0;
+  options_.replic = 0;
   
   % Model
   options_.linear = 0;

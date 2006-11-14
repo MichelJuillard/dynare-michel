@@ -30,9 +30,9 @@ function forcst_unc(y0,var_list)
   else
     n = size(var_list,1);
   end
-  periods = options_.forecast.periods;
+  periods = options_.forecast;
   exo_nbr = M_.exo_nbr;
-  replic = options_.forecast.replic;
+  replic = options_.replic;
   order = options_.order;
   %  params = prior_draw(1);
   params = rndprior(bayestopt_);
