@@ -18,7 +18,6 @@ enum Type
     eRecursiveVariable = 3,        //!< Recursive variable (reserved for future use)
     eParameter = 4,                //!< Parameter
     eLocalParameter = 10,          //!< Parameter  local to a model
-    eLoopIndex = 5,                //!< Loop index
     eTempResult = 6,               //!< Temporary result, used only in Expression class
     eNumericalConstant = 7,        //!< Numerical constant,  used only in Expression class
     eUNDEF = 9                     //!< Undefined

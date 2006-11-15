@@ -663,8 +663,6 @@ inline NodeID ModelTree::DeriveArgument(NodeID iArg, Type iType, int iVarID)
       return Zero;
     case eUNDEF         :
       return NullID;
-    case eLoopIndex     :
-      return Zero;
     default       :
       cout << "ModelTree::DeriveArgument : Error: Unknown Type\n";
       exit(-1);

@@ -160,7 +160,6 @@ public :
       case eParameter:
       case eLocalParameter:
       case eNumericalConstant:
-      case eLoopIndex:
       case eUNDEF:
         // All derivatives are null
         break;
