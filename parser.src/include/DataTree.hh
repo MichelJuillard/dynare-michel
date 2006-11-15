@@ -474,7 +474,7 @@ inline NodeID DataTree::AddLog(NodeID iArg1)
 {
   if (iArg1 != Zero && iArg1 != One)
     {
-      MToken  lToken(iArg1, eTempResult, NullID, EXP);
+      MToken  lToken(iArg1, eTempResult, NullID, LOG);
 
       NodeID ID = getIDOfToken(lToken);
       if (ID != NullID)
@@ -498,7 +498,7 @@ inline NodeID DataTree::AddLog10(NodeID iArg1)
 {
   if (iArg1 != Zero && iArg1 != One)
     {
-      MToken  lToken(iArg1, eTempResult, NullID, EXP);
+      MToken  lToken(iArg1, eTempResult, NullID, LOG10);
 
       NodeID ID = getIDOfToken(lToken);
       if (ID != NullID)
@@ -506,7 +506,7 @@ inline NodeID DataTree::AddLog10(NodeID iArg1)
           return ID;
         }
 
-      return PushToken(iArg1, LOG);
+      return PushToken(iArg1, LOG10);
     }
   else if (iArg1 == One)
     {
@@ -523,7 +523,7 @@ inline NodeID DataTree::AddCos(NodeID iArg1)
 {
   if (iArg1 != Zero)
     {
-      MToken  lToken(iArg1, eTempResult, NullID, EXP);
+      MToken  lToken(iArg1, eTempResult, NullID, COS);
 
       NodeID ID = getIDOfToken(lToken);
       if (ID != NullID)
@@ -542,7 +542,7 @@ inline NodeID DataTree::AddSin(NodeID iArg1)
 {
   if (iArg1 != Zero)
     {
-      MToken  lToken(iArg1, eTempResult, NullID, EXP);
+      MToken  lToken(iArg1, eTempResult, NullID, SIN);
 
       NodeID ID = getIDOfToken(lToken);
       if (ID != NullID)
@@ -561,7 +561,7 @@ inline NodeID DataTree::AddTan(NodeID iArg1)
 {
   if (iArg1 != Zero)
     {
-      MToken  lToken(iArg1, eTempResult, NullID, EXP);
+      MToken  lToken(iArg1, eTempResult, NullID, TAN);
 
       NodeID ID = getIDOfToken(lToken);
       if (ID != NullID)
@@ -585,21 +585,21 @@ inline NodeID DataTree::AddACos(NodeID iArg1)
     {
       return ID;
     }
-  return PushToken(iArg1, COS);
+  return PushToken(iArg1, ACOS);
 }
 
 inline NodeID DataTree::AddASin(NodeID iArg1)
 {
   if (iArg1 != Zero)
     {
-      MToken  lToken(iArg1, eTempResult, NullID, EXP);
+      MToken  lToken(iArg1, eTempResult, NullID, ASIN);
 
       NodeID ID = getIDOfToken(lToken);
       if (ID != NullID)
         {
           return ID;
         }
-      return PushToken(iArg1, SIN);
+      return PushToken(iArg1, ASIN);
     }
   else
     {
@@ -611,7 +611,7 @@ inline NodeID DataTree::AddATan(NodeID iArg1)
 {
   if (iArg1 != Zero)
     {
-      MToken  lToken(iArg1, eTempResult, NullID, EXP);
+      MToken  lToken(iArg1, eTempResult, NullID, ATAN);
 
       NodeID ID = getIDOfToken(lToken);
       if (ID != NullID)
@@ -630,7 +630,7 @@ inline NodeID DataTree::AddCosH(NodeID iArg1)
 {
   if (iArg1 != Zero)
     {
-      MToken  lToken(iArg1, eTempResult, NullID, EXP);
+      MToken  lToken(iArg1, eTempResult, NullID, COSH);
 
       NodeID ID = getIDOfToken(lToken);
       if (ID != NullID)
@@ -649,7 +649,7 @@ inline NodeID DataTree::AddSinH(NodeID iArg1)
 {
   if (iArg1 != Zero)
     {
-      MToken  lToken(iArg1, eTempResult, NullID, EXP);
+      MToken  lToken(iArg1, eTempResult, NullID, SINH);
 
       NodeID ID = getIDOfToken(lToken);
       if (ID != NullID)
@@ -668,7 +668,7 @@ inline NodeID DataTree::AddTanH(NodeID iArg1)
 {
   if (iArg1 != Zero)
     {
-      MToken  lToken(iArg1, eTempResult, NullID, EXP);
+      MToken  lToken(iArg1, eTempResult, NullID, TANH);
 
       NodeID ID = getIDOfToken(lToken);
       if (ID != NullID)
@@ -699,7 +699,7 @@ inline NodeID DataTree::AddASinH(NodeID iArg1)
 {
   if (iArg1 != Zero)
     {
-      MToken  lToken(iArg1, eTempResult, NullID, EXP);
+      MToken  lToken(iArg1, eTempResult, NullID, ASINH);
 
       NodeID ID = getIDOfToken(lToken);
       if (ID != NullID)
@@ -718,7 +718,7 @@ inline NodeID DataTree::AddATanH(NodeID iArg1)
 {
   if (iArg1 != Zero)
     {
-      MToken  lToken(iArg1, eTempResult, NullID, EXP);
+      MToken  lToken(iArg1, eTempResult, NullID, ATANH);
 
       NodeID ID = getIDOfToken(lToken);
       if (ID != NullID)
@@ -737,7 +737,7 @@ inline NodeID DataTree::AddSqRt(NodeID iArg1)
 {
   if (iArg1 != Zero)
     {
-      MToken  lToken(iArg1, eTempResult, NullID, EXP);
+      MToken  lToken(iArg1, eTempResult, NullID, SQRT);
 
       NodeID ID = getIDOfToken(lToken);
       if (ID != NullID)
