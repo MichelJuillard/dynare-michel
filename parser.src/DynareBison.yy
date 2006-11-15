@@ -49,7 +49,7 @@
 %left UMINUS
 %right POWER 
 %nonassoc FACTORIAL 
-%token EXP LOG LOG10 LN SIN COS TAN ASIN ACOS ATAN SINH COSH TANH ASINH ACOSH ATANH SQRT
+%token EXP LOG LOG10 SIN COS TAN ASIN ACOS ATAN SINH COSH TANH ASINH ACOSH ATANH SQRT
 /* isn't parsed from the *.mod file, but used to distinguish EQUAL in equation and EQUAL in assignment in    operation codes
 */
 %token ASSIGN
@@ -235,8 +235,6 @@
     	{$$ = _parser->add_expression_token($3, $1);}
 	| LOG10 '(' expression ')'
     	{$$ = _parser->add_expression_token($3, $1);}
-	| LN '(' expression ')'
-    	{$$ = _parser->add_expression_token($3, $1);}
 	| SIN '(' expression ')'
     	{$$ = _parser->add_expression_token($3, $1);}
 	| COS '(' expression ')'
@@ -344,8 +342,6 @@
     	{$$ = _parser->add_log($3);}
 	| LOG10 '(' hand_side ')'
     	{$$ = _parser->add_log10($3);}
-	| LN '(' hand_side ')'
-    	{$$ = _parser->add_log($3);}
 	| SIN '(' hand_side ')'
     	{$$ = _parser->add_sin($3);}
 	| COS '(' hand_side ')'

@@ -198,7 +198,7 @@ int sigma_e = 0;
 <DYNARE_STATEMENT,DYNARE_BLOCK>exp {_scanner->do_operator(EXP);return EXP;}
 <DYNARE_STATEMENT,DYNARE_BLOCK>log {_scanner->do_operator(LOG);return LOG;}
 <DYNARE_STATEMENT,DYNARE_BLOCK>log10 {_scanner->do_operator(LOG10);return LOG10;}
-<DYNARE_STATEMENT,DYNARE_BLOCK>ln {_scanner->do_operator(LN);return LN;}
+<DYNARE_STATEMENT,DYNARE_BLOCK>ln {_scanner->do_operator(LOG);return LOG;}
 <DYNARE_STATEMENT,DYNARE_BLOCK>sin {_scanner->do_operator(SIN);return SIN;}
 <DYNARE_STATEMENT,DYNARE_BLOCK>cos {_scanner->do_operator(COS);return COS;}
 <DYNARE_STATEMENT,DYNARE_BLOCK>tan {_scanner->do_operator(TAN);return TAN;}
