@@ -194,7 +194,6 @@ int sigma_e = 0;
 <DYNARE_STATEMENT,DYNARE_BLOCK>[/] {_scanner->do_operator(DIVIDE);return DIVIDE;}
 <DYNARE_STATEMENT,DYNARE_BLOCK>[=] {_scanner->do_operator(EQUAL); return EQUAL;}
 <DYNARE_STATEMENT,DYNARE_BLOCK>[\^] {_scanner->do_operator(POWER);return POWER;}
-<DYNARE_STATEMENT,DYNARE_BLOCK>[!] {_scanner->do_operator(FACTORIAL);return FACTORIAL;}
 <DYNARE_STATEMENT,DYNARE_BLOCK>exp {_scanner->do_operator(EXP);return EXP;}
 <DYNARE_STATEMENT,DYNARE_BLOCK>log {_scanner->do_operator(LOG);return LOG;}
 <DYNARE_STATEMENT,DYNARE_BLOCK>log10 {_scanner->do_operator(LOG10);return LOG10;}
