@@ -86,7 +86,7 @@ public :
   //! Prints tmp1 and "stoch_simul(var_list_);"  to output
   void  setStochSimul(std::string tmp1);
   /*! Sets an option by printing
-    option_.<iName> = <iValue>
+    option_.iName = iValue
   */
   void  setOption(std::string iName, std::string iValue);
   void  setOption(std::string iName, std::string iValue1, std::string iValue2);
@@ -95,7 +95,7 @@ public :
   void    runRplot(std::string);
   /*! Prints some estimation initialisation */
   void  setEstimationInit(void);
-  //! Prints optimization options */
+  //! Prints optimization options
   void  setOptimOptions(std::string str1, std::string str2, int task);
   /*! Prints estimated elements */
   void  setEstimatedElements(void);
@@ -113,11 +113,13 @@ public :
   void  setCalibAc(std::string, std::string, std::string, std::string);
 
   void  runCalib(int);
-  // write "osr(var_list_,osr_params_,optim_weights_);"
+
+  //! Prints "osr(var_list_,osr_params_,optim_weights_);"
   void setOsrParams(std::string);
 
   void  runOsr(std::string);
-  // writes "olr(var_list_,olr_inst_,obj_var_,optim_weights_);"
+
+  //! Prints "olr(var_list_,olr_inst_,obj_var_,optim_weights_);"
   void setOlrInst(std::string);
 
   void  runOlr(std::string);

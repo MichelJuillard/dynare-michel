@@ -32,7 +32,7 @@ private :
     std::string value;
   };
   /*!
-    \class ShockElement
+    \class Shock
     \brief Shock Structure
   */
   struct Shock

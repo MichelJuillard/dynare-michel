@@ -28,9 +28,9 @@ public :
   /*! Destructor */
   ~OutputFile();
   /*! Opens a given file and writes some initialization */
-  void Open(string iFileName);
+  void Open(std::string iFileName);
   /*! Writes output data from SymbolTable and passed strings to output file */
-  void Save(ostringstream& iOutput);
+  void Save(std::ostringstream& iOutput);
 };
 //------------------------------------------------------------------------------
 #endif

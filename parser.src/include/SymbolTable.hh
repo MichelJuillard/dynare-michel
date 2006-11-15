@@ -28,11 +28,12 @@ private :
   /*! Adds symbol into symbol table
     \param name a string.
     \param type a Type struct.
+    \param tex_name a string for the TeX name.
     \par Description
-    - warning if symbol is already set with same type \n
-    - error if symbol is already set with different type\n
-    - set Name and Type\n
-    - increase corresponding counter in ModelParameters class\n
+    - warning if symbol is already set with same type
+    - error if symbol is already set with different type
+    - set Name and Type
+    - increase corresponding counter in ModelParameters class
   */
   static int AddSymbol(std::string name,Type type, std::string tex_name);
 protected :
