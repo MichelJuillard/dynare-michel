@@ -63,7 +63,7 @@ int Expression::AddToken(int id1,Type type1, string ufunction)
   token.type1 = type1;
   token.id2 = -1;
   token.type2 = eUNDEF;
-  token.op_code = NAME;
+  token.op_code = token::NAME;
   token.op_name = ufunction;
   //  Inserting token into expression_list
   expression_list.push_back(token);
@@ -213,7 +213,7 @@ void Expression::set(void)
             {
               // Comma operator, no parentheses
               // parentheses are writing with function operator
-              if (current_op == COMMA)
+              if (current_op == token::COMMA)
                 {
                   exp <<  argument1 << op_name << argument2 ;
                 }

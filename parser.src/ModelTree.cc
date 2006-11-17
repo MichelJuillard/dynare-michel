@@ -29,7 +29,7 @@ inline NodeID MetaToken::getDerivativeAddress(int iVarID)
   std::map<int, NodeID, std::less<int> >::iterator iter = d1.find(iVarID);
   if (iter == d1.end())
     // No entry in map, derivative is therefore null
-    if (op_code == EQUAL)
+    if (op_code == token::EQUAL)
       return DataTree::ZeroEqZero;
     else
       return DataTree::Zero;
@@ -305,7 +305,7 @@ void ModelTree::derive(int iOrder)
   // Capturing equation IDs
   for (currentIT = BeginModel; currentIT != mModelTree.end(); currentIT++)
     {
-      if ((*currentIT)->op_code == EQUAL)
+      if ((*currentIT)->op_code == token::EQUAL)
         {
           EqualTokenIDs.push_back(*currentIT);
           // Equation is forced to be in Model Tree as referenced
@@ -386,25 +386,25 @@ void ModelTree::derive(int iOrder)
                     {
                       switch (lToken->op_code)
                         {
-                        case UMINUS:
+                        case token::UMINUS:
                           t1 = AddUMinus(lD1);
                           (*currentIT)->setDerivativeAddress(t1, var);
                           break;
-                        case PLUS:
+                        case token::PLUS:
                           t1 = AddPlus(lD1, lD2);
                           (*currentIT)->setDerivativeAddress(t1, var);
                           break;
-                        case MINUS:
+                        case token::MINUS:
                           t1 = AddMinus(lD1, lD2);
                           (*currentIT)->setDerivativeAddress(t1, var);
                           break;
-                        case TIMES:
+                        case token::TIMES:
                           t11 = AddTimes(lD1, lArg2);
                           t12 = AddTimes(lD2, lArg1);
                           t1 = AddPlus(t11, t12);
                           (*currentIT)->setDerivativeAddress(t1, var);
                           break;
-                        case DIVIDE:
+                        case token::DIVIDE:
                           t11 = AddTimes(lD1, lArg2);
                           t12 = AddTimes(lD2, lArg1);
                           t13 = AddMinus(t11, t12);
@@ -412,12 +412,12 @@ void ModelTree::derive(int iOrder)
                           t1 = AddDivide(t13, t14);
                           (*currentIT)->setDerivativeAddress(t1, var);
                           break;
-                        case SQRT:
+                        case token::SQRT:
                           t11 = AddPlus(*currentIT, *currentIT);
                           t1 = AddDivide(lD1, t11);
                           (*currentIT)->setDerivativeAddress(t1, var);
                           break;
-                        case POWER:
+                        case token::POWER:
                           if (lD2 == Zero)
                             {
                               if (lD1 == Zero)
@@ -441,88 +441,88 @@ void ModelTree::derive(int iOrder)
                             }
                           (*currentIT)->setDerivativeAddress(t1, var);
                           break;
-                        case EXP:
+                        case token::EXP:
                           t1 = AddTimes(lD1, *currentIT);
                           (*currentIT)->setDerivativeAddress(t1, var);
                           break;
-                        case LOG:
+                        case token::LOG:
                           t1 = AddDivide(lD1, lArg1);
                           (*currentIT)->setDerivativeAddress(t1, var);
                           break;
-                        case LOG10:
+                        case token::LOG10:
                           t11 = AddExp(One);
                           t12 = AddLog10(t11);
                           t13 = AddDivide(lD1, lArg1);
                           t1 = AddTimes(t12, t13);
                           (*currentIT)->setDerivativeAddress(t1, var);
                           break;
-                        case COS:
+                        case token::COS:
                           t11 = AddSin(lArg1);
                           t12 = AddUMinus(t11);
                           t1 = AddTimes( lD1, t12);
                           (*currentIT)->setDerivativeAddress(t1, var);
                           break;
-                        case SIN:
+                        case token::SIN:
                           t11 = AddCos(lArg1);
                           t1 = AddTimes(lD1,t11);
                           (*currentIT)->setDerivativeAddress(t1, var);
                           break;
-                        case TAN:
+                        case token::TAN:
                           t11 = AddTimes(*currentIT, *currentIT);
                           t12 = AddPlus(t11, One);
                           t1 = AddTimes(lD1, t12);
                           (*currentIT)->setDerivativeAddress(t1, var);
                           break;
-                        case ACOS:
+                        case token::ACOS:
                           t11 = AddSin(*currentIT);
                           t12 = AddDivide(lD1, t11);
                           t1 = AddUMinus(t12);
                           (*currentIT)->setDerivativeAddress(t1, var);
                           break;
-                        case ASIN:
+                        case token::ASIN:
                           t11 = AddCos(*currentIT);
                           t1 = AddDivide(lD1, t11);
                           (*currentIT)->setDerivativeAddress(t1, var);
                           break;
-                        case ATAN:
+                        case token::ATAN:
                           t11 = AddTimes(lArg1, lArg1);
                           t12 = AddPlus(One, t11);
                           t1 = AddDivide(lD1, t12);
                           (*currentIT)->setDerivativeAddress(t1,var);
                           break;
-                        case COSH:
+                        case token::COSH:
                           t11 = AddSinH(lArg1);
                           t1 = AddTimes( lD1,t11);
                           (*currentIT)->setDerivativeAddress(t1, var);
                           break;
-                        case SINH:
+                        case token::SINH:
                           t11 = AddCosH(lArg1);
                           t1 = AddTimes( lD1, t11);
                           (*currentIT)->setDerivativeAddress(t1, var);
                           break;
-                        case TANH:
+                        case token::TANH:
                           t11 = AddTimes(*currentIT, *currentIT);
                           t12 = AddMinus(One, t11);
                           t1 = AddTimes(lD1, t12);
                           (*currentIT)->setDerivativeAddress(t1,var);
                           break;
-                        case ACOSH:
+                        case token::ACOSH:
                           t11 = AddSinH(*currentIT);
                           t1 = AddDivide(lD1, t11);
                           (*currentIT)->setDerivativeAddress(t1,var);
                           break;
-                        case ASINH:
+                        case token::ASINH:
                           t11 = AddCosH(*currentIT);
                           t1 = AddDivide(lD1, t11);
                           (*currentIT)->setDerivativeAddress(t1,var);
                           break;
-                        case ATANH:
+                        case token::ATANH:
                           t11 = AddTimes(lArg1, lArg1);
                           t12 = AddMinus(One, t11);
                           t1 = AddTimes(lD1, t12);
                           (*currentIT)->setDerivativeAddress(t1,var);
                           break;
-                        case EQUAL:
+                        case token::EQUAL:
                           // Force the derivative to have zero on right hand side
                           // (required for setStaticModel and setDynamicModel)
                           if (lD1 == Zero && lD2 != Zero)
@@ -694,7 +694,7 @@ string  ModelTree::setStaticModel(void)
   tree_it = BeginModel;
   for (; tree_it != mModelTree.end(); tree_it++)
     {
-      if ((*tree_it)->op_code == EQUAL || (*tree_it)->op_code == ASSIGN )
+      if ((*tree_it)->op_code == token::EQUAL || (*tree_it)->op_code == token::ASSIGN )
         {
           if ((*tree_it)->id1->type1 == eLocalParameter)
             {
@@ -732,8 +732,8 @@ string  ModelTree::setStaticModel(void)
   for(; tree_it != mModelTree.end(); tree_it++)
     {
       if ((*tree_it)->op_code != NoOpCode
-          && (*tree_it)->op_code != EQUAL
-          && (*tree_it)->op_code != ASSIGN)
+          && (*tree_it)->op_code != token::EQUAL
+          && (*tree_it)->op_code != token::ASSIGN)
         {
           if (optimize(*tree_it) == 1)
             {
@@ -848,7 +848,7 @@ string  ModelTree::setDynamicModel(void)
   tree_it = BeginModel;
   for (; tree_it != mModelTree.end(); tree_it++)
     {
-      if ((*tree_it)->op_code == EQUAL || (*tree_it)->op_code == ASSIGN)
+      if ((*tree_it)->op_code == token::EQUAL || (*tree_it)->op_code == token::ASSIGN)
         {
           if ((*tree_it)->id1->type1 == eLocalParameter)
             {
@@ -885,8 +885,8 @@ string  ModelTree::setDynamicModel(void)
   for(; tree_it != mModelTree.end(); tree_it++)
     {
       if ((*tree_it)->op_code != NoOpCode
-          && (*tree_it)->op_code != EQUAL
-          && (*tree_it)->op_code != ASSIGN)
+          && (*tree_it)->op_code != token::EQUAL
+          && (*tree_it)->op_code != token::ASSIGN)
         {
           if (optimize(*tree_it) == 1)
             {
@@ -907,8 +907,8 @@ string  ModelTree::setDynamicModel(void)
       for(; tree_it != mModelTree.end(); tree_it++)
         {
           if ((*tree_it)->op_code != NoOpCode
-              && (*tree_it)->op_code != EQUAL
-              && (*tree_it)->op_code != ASSIGN)
+              && (*tree_it)->op_code != token::EQUAL
+              && (*tree_it)->op_code != token::ASSIGN)
             {
               if (optimize(*tree_it) == 1)
                 {
@@ -1085,9 +1085,9 @@ inline string ModelTree::getExpression(NodeID StartID, EquationType  iEquationTy
           // of lesser precedence than previous one, insert '('
           if ( precedence_current_op < precedence_last_op ||
                (on_the_right_of_upper_node == 1 &&
-                (last_op_code == MINUS || last_op_code == DIVIDE) &&
+                (last_op_code == token::MINUS || last_op_code == token::DIVIDE) &&
                 (precedence_current_op == precedence_last_op))||
-               current_op_code == UMINUS)
+               current_op_code == token::UMINUS)
             {
               exp << "(";
               current_token_ID->close_parenthesis = 1;
@@ -1096,13 +1096,13 @@ inline string ModelTree::getExpression(NodeID StartID, EquationType  iEquationTy
           current_token_ID->left_done = 1;
           precedence_last_op = precedence_current_op;
           last_op_code = current_op_code;
-          if ( offset == 0 && current_op_code == POWER)
+          if (offset == 0 && current_op_code == token::POWER)
             {
               exp << "pow(";
               precedence_last_op = 0;
               current_token_ID->close_parenthesis = 1;
             }
-          else if ( current_op_code == UMINUS)
+          else if (current_op_code == token::UMINUS)
             {
               exp << "-";
               current_token_ID->close_parenthesis = 1;
@@ -1120,7 +1120,7 @@ inline string ModelTree::getExpression(NodeID StartID, EquationType  iEquationTy
       else if ( current_token_ID->right_done == 0 )
         {
           current_token_ID->right_done = 1;
-          if ( offset == 0 && current_op_code == POWER)
+          if (offset == 0 && current_op_code == token::POWER)
             {
               exp << ",";
             }
@@ -1272,7 +1272,7 @@ void ModelTree::ModelInitialization(void)
   // Setting number of equations in ModelParameters class
   // Here no derivative are computed
   BeginModel++;
-  min_cost = 40*operator_table.cost(PLUS,offset);
+  min_cost = 40 * operator_table.cost(token::PLUS, offset);
   // Setting format of parentheses
   if (offset == 1)
     {

@@ -39,13 +39,13 @@ namespace dynare
     /*! Constructor of object with known symbol name */
     Objects(string name)
     {
-      opcode = NAME;
+      opcode = yy::parser::token::NAME;
       symbol = name;
     }
     /*! Constructor of object with known symbol name */
     Objects(const char* name, NodeID id = NULL, Type t = eUNDEF)
     {
-      opcode = NAME;
+      opcode = yy::parser::token::NAME;
       symbol = name;
       type = t;
       ID = id;

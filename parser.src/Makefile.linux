@@ -1,14 +1,11 @@
 CPP = c++
 ifeq ($(DEBUG),yes)
 	CPPFLAGS = -ggdb -pg -Wall
-	FLEXFLAGS = -i -d
 else
 	ifeq ($(VALGRIND), yes)
 		CPPFLAGS = -Wall -O -g -fno-inline
-		FLEXFLAGS = -i
 	else
 		CPPFLAGS = -O2 -Wall
-		FLEXFLAGS = -i
 	endif
 endif
 
@@ -29,7 +26,7 @@ COMMON_OBJ=\
 	SymbolTable.o\
 	TmpSymbolTable.o\
 	VariableTable.o\
-	DynareParser.o\
+	ParsingDriver.o\
 	DataTree.o
 
 MATLAB_OBJ = InterfaceMatlab.o
@@ -44,11 +41,11 @@ SCILAB_OBJ = InterfaceScilab.o
 all: dynare_m dynare_s
 
 dynare_m: $(COMMON_OBJ) $(MATLAB_OBJ)
-	$(CPP) $(CPPFLAGS) -o  dynare_m $(COMMON_OBJ) $(MATLAB_OBJ) ;\
+	$(CPP) $(CPPFLAGS) -o  dynare_m $(COMMON_OBJ) $(MATLAB_OBJ)
 	cp dynare_m ../matlab/
 
 dynare_s: $(COMMON_OBJ) $(SCILAB_OBJ)
-	$(CPP) $(CPPFLAGS) -o  dynare_s $(COMMON_OBJ) $(SCILAB_OBJ) ;\
+	$(CPP) $(CPPFLAGS) -o  dynare_s $(COMMON_OBJ) $(SCILAB_OBJ)
 	cp dynare_s ../scilab/
 
 
@@ -65,11 +62,12 @@ dynare_s: $(COMMON_OBJ) $(SCILAB_OBJ)
 
 -include $(COMMON_OBJ:.o=.P) $(MATLAB_OBJ:.o=.P) $(SCILAB_OBJ:.o=.P)
 
-DynareFlex.cc: DynareFlex.ll include/DynareScanner.hh include/DynareBison.hh
-	flex $(FLEXFLAGS) -oDynareFlex.cc DynareFlex.ll
+DynareFlex.cc: DynareFlex.ll include/DynareBison.hh include/ParsingDriver.hh
+	flex -oDynareFlex.cc DynareFlex.ll
 
-DynareBison.cc include/DynareBison.hh: DynareBison.yy include/DynareParser.hh
-	 (bison  -v -d -b --verbose -o DynareBison.cc DynareBison.yy; mv DynareBison.hh include/)
+DynareBison.cc include/DynareBison.hh: DynareBison.yy include/ParsingDriver.hh
+	bison --verbose -o DynareBison.cc DynareBison.yy
+	mv DynareBison.hh location.hh stack.hh position.hh include/
 
 
 ################################################################################

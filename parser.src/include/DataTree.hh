@@ -21,7 +21,6 @@
 #include "NumericalConstants.hh"
 #include "ModelTypes.hh"
 #include "VariableTable.hh"
-//------------------------------------------------------------------------------
 
 typedef std::map<MToken, NodeID, MTokenLess> TreeMap;
 typedef std::list<NodeID> TreeList;
@@ -258,9 +257,9 @@ inline NodeID DataTree::AddPlus(NodeID iArg1, NodeID iArg2)
       MToken  lToken;
 
       if (iArg1 <= iArg2)
-        lToken = MToken(iArg1, eTempResult, iArg2, PLUS);
+        lToken = MToken(iArg1, eTempResult, iArg2, token::PLUS);
       else
-        lToken = MToken(iArg2, eTempResult, iArg1, PLUS);
+        lToken = MToken(iArg2, eTempResult, iArg1, token::PLUS);
       NodeID ID = getIDOfToken(lToken);
       if (ID != NullID)
         {
@@ -270,9 +269,9 @@ inline NodeID DataTree::AddPlus(NodeID iArg1, NodeID iArg2)
       // To treat commutativity of "+"
       // Token id (iArg1 and iArg2) are sorted
       if (iArg1 <= iArg2)
-        return PushToken(iArg1,PLUS,iArg2);
+        return PushToken(iArg1, token::PLUS, iArg2);
       else
-        return PushToken(iArg2,PLUS,iArg1);
+        return PushToken(iArg2, token::PLUS, iArg1);
     }
   else if (iArg1 != Zero)
     {
@@ -293,14 +292,14 @@ inline NodeID DataTree::AddMinus(NodeID iArg1, NodeID iArg2)
 
   if (iArg1 != Zero && iArg2 != Zero)
     {
-      MToken  lToken(iArg1, eTempResult, iArg2, MINUS);
+      MToken  lToken(iArg1, eTempResult, iArg2, token::MINUS);
 
       NodeID ID = getIDOfToken(lToken);
       if (ID != NullID)
         {
           return ID;
         }
-      return PushToken(iArg1,MINUS, iArg2);
+      return PushToken(iArg1, token::MINUS, iArg2);
     }
   else if (iArg1 != Zero)
     {
@@ -320,7 +319,7 @@ inline NodeID DataTree::AddUMinus(NodeID iArg1)
 {
   if (iArg1 != Zero )
     {
-      MToken  lToken(iArg1, eTempResult, NullID, UMINUS);
+      MToken  lToken(iArg1, eTempResult, NullID, token::UMINUS);
 
       NodeID ID = getIDOfToken(lToken);
       if (ID != NullID)
@@ -328,13 +327,13 @@ inline NodeID DataTree::AddUMinus(NodeID iArg1)
           return ID;
         }
       if (iArg1->type1 == eTempResult &&
-          iArg1->op_code == UMINUS)
+          iArg1->op_code == token::UMINUS)
         {
           IncrementReferenceCount(iArg1->id1);
           return iArg1->id1;
 
         }
-      return PushToken(iArg1, UMINUS);
+      return PushToken(iArg1, token::UMINUS);
     }
   else
     {
@@ -351,9 +350,9 @@ inline NodeID DataTree::AddTimes(NodeID iArg1, NodeID iArg2)
       MToken  lToken;
 
       if (iArg1 <= iArg2)
-        lToken = MToken(iArg1, eTempResult, iArg2, TIMES);
+        lToken = MToken(iArg1, eTempResult, iArg2, token::TIMES);
       else
-        lToken = MToken(iArg2, eTempResult, iArg1, TIMES);
+        lToken = MToken(iArg2, eTempResult, iArg1, token::TIMES);
 
       NodeID ID = getIDOfToken(lToken);
       if (ID != NullID)
@@ -371,9 +370,9 @@ inline NodeID DataTree::AddTimes(NodeID iArg1, NodeID iArg2)
           // To treat commutativity of "*"
           // Token id (iArg1 and iArg2) are sorted
           if (iArg1 <= iArg2)
-            return PushToken(iArg1, TIMES, iArg2);
+            return PushToken(iArg1, token::TIMES, iArg2);
           else
-            return PushToken(iArg2, TIMES, iArg1);
+            return PushToken(iArg2, token::TIMES, iArg1);
         }
     }
   else if (iArg1 != Zero && iArg1 != One && iArg2 == One)
@@ -399,13 +398,13 @@ inline NodeID DataTree::AddDivide(NodeID iArg1, NodeID iArg2)
 
   if (iArg1 != Zero && iArg2 != Zero && iArg2 != One)
     {
-      MToken  lToken(iArg1, eTempResult, iArg2, DIVIDE);
+      MToken  lToken(iArg1, eTempResult, iArg2, token::DIVIDE);
       NodeID ID = getIDOfToken(lToken);
       if (ID != NullID)
         {
           return ID;
         }
-      return PushToken(iArg1,DIVIDE,iArg2);
+      return PushToken(iArg1, token::DIVIDE, iArg2);
     }
   else if (iArg2 == One)
     {
@@ -426,13 +425,13 @@ inline NodeID DataTree::AddPower(NodeID iArg1, NodeID iArg2)
 {
   if (iArg1 != Zero && iArg2 != Zero && iArg2 != One)
     {
-      MToken  lToken(iArg1, eTempResult, iArg2, POWER);
+      MToken  lToken(iArg1, eTempResult, iArg2, token::POWER);
       NodeID ID = getIDOfToken(lToken);
       if (ID != NullID)
         {
           return ID;
         }
-      return PushToken(iArg1,POWER,iArg2);
+      return PushToken(iArg1, token::POWER, iArg2);
     }
   else if (iArg2 == One)
     {
@@ -454,7 +453,7 @@ inline NodeID DataTree::AddExp(NodeID iArg1)
 
   if (iArg1 != Zero)
     {
-      MToken  lToken(iArg1, eTempResult, NullID, EXP);
+      MToken  lToken(iArg1, eTempResult, NullID, token::EXP);
 
       NodeID ID = getIDOfToken(lToken);
       if (ID != NullID)
@@ -462,7 +461,7 @@ inline NodeID DataTree::AddExp(NodeID iArg1)
           return ID;
         }
 
-      return PushToken(iArg1, EXP);
+      return PushToken(iArg1, token::EXP);
     }
   else
     {
@@ -474,14 +473,14 @@ inline NodeID DataTree::AddLog(NodeID iArg1)
 {
   if (iArg1 != Zero && iArg1 != One)
     {
-      MToken  lToken(iArg1, eTempResult, NullID, LOG);
+      MToken  lToken(iArg1, eTempResult, NullID, token::LOG);
 
       NodeID ID = getIDOfToken(lToken);
       if (ID != NullID)
         {
           return ID;
         }
-      return PushToken(iArg1, LOG);
+      return PushToken(iArg1, token::LOG);
     }
   else if (iArg1 == One)
     {
@@ -498,7 +497,7 @@ inline NodeID DataTree::AddLog10(NodeID iArg1)
 {
   if (iArg1 != Zero && iArg1 != One)
     {
-      MToken  lToken(iArg1, eTempResult, NullID, LOG10);
+      MToken  lToken(iArg1, eTempResult, NullID, token::LOG10);
 
       NodeID ID = getIDOfToken(lToken);
       if (ID != NullID)
@@ -506,7 +505,7 @@ inline NodeID DataTree::AddLog10(NodeID iArg1)
           return ID;
         }
 
-      return PushToken(iArg1, LOG10);
+      return PushToken(iArg1, token::LOG10);
     }
   else if (iArg1 == One)
     {
@@ -523,14 +522,14 @@ inline NodeID DataTree::AddCos(NodeID iArg1)
 {
   if (iArg1 != Zero)
     {
-      MToken  lToken(iArg1, eTempResult, NullID, COS);
+      MToken  lToken(iArg1, eTempResult, NullID, token::COS);
 
       NodeID ID = getIDOfToken(lToken);
       if (ID != NullID)
         {
           return ID;
         }
-      return PushToken(iArg1, COS);
+      return PushToken(iArg1, token::COS);
     }
   else
     {
@@ -542,14 +541,14 @@ inline NodeID DataTree::AddSin(NodeID iArg1)
 {
   if (iArg1 != Zero)
     {
-      MToken  lToken(iArg1, eTempResult, NullID, SIN);
+      MToken  lToken(iArg1, eTempResult, NullID, token::SIN);
 
       NodeID ID = getIDOfToken(lToken);
       if (ID != NullID)
         {
           return ID;
         }
-      return PushToken(iArg1, SIN);
+      return PushToken(iArg1, token::SIN);
     }
   else
     {
@@ -561,14 +560,14 @@ inline NodeID DataTree::AddTan(NodeID iArg1)
 {
   if (iArg1 != Zero)
     {
-      MToken  lToken(iArg1, eTempResult, NullID, TAN);
+      MToken  lToken(iArg1, eTempResult, NullID, token::TAN);
 
       NodeID ID = getIDOfToken(lToken);
       if (ID != NullID)
         {
           return ID;
         }
-      return PushToken(iArg1, TAN);
+      return PushToken(iArg1, token::TAN);
     }
   else
     {
@@ -578,28 +577,28 @@ inline NodeID DataTree::AddTan(NodeID iArg1)
 
 inline NodeID DataTree::AddACos(NodeID iArg1)
 {
-  MToken  lToken(iArg1, eTempResult, NullID, ACOS);
+  MToken  lToken(iArg1, eTempResult, NullID, token::ACOS);
 
   NodeID ID = getIDOfToken(lToken);
   if (ID != NullID)
     {
       return ID;
     }
-  return PushToken(iArg1, ACOS);
+  return PushToken(iArg1, token::ACOS);
 }
 
 inline NodeID DataTree::AddASin(NodeID iArg1)
 {
   if (iArg1 != Zero)
     {
-      MToken  lToken(iArg1, eTempResult, NullID, ASIN);
+      MToken  lToken(iArg1, eTempResult, NullID, token::ASIN);
 
       NodeID ID = getIDOfToken(lToken);
       if (ID != NullID)
         {
           return ID;
         }
-      return PushToken(iArg1, ASIN);
+      return PushToken(iArg1, token::ASIN);
     }
   else
     {
@@ -611,14 +610,14 @@ inline NodeID DataTree::AddATan(NodeID iArg1)
 {
   if (iArg1 != Zero)
     {
-      MToken  lToken(iArg1, eTempResult, NullID, ATAN);
+      MToken  lToken(iArg1, eTempResult, NullID, token::ATAN);
 
       NodeID ID = getIDOfToken(lToken);
       if (ID != NullID)
         {
           return ID;
         }
-      return PushToken(iArg1, ATAN);
+      return PushToken(iArg1, token::ATAN);
     }
   else
     {
@@ -630,14 +629,14 @@ inline NodeID DataTree::AddCosH(NodeID iArg1)
 {
   if (iArg1 != Zero)
     {
-      MToken  lToken(iArg1, eTempResult, NullID, COSH);
+      MToken  lToken(iArg1, eTempResult, NullID, token::COSH);
 
       NodeID ID = getIDOfToken(lToken);
       if (ID != NullID)
         {
           return ID;
         }
-      return PushToken(iArg1, COSH);
+      return PushToken(iArg1, token::COSH);
     }
   else
     {
@@ -649,14 +648,14 @@ inline NodeID DataTree::AddSinH(NodeID iArg1)
 {
   if (iArg1 != Zero)
     {
-      MToken  lToken(iArg1, eTempResult, NullID, SINH);
+      MToken  lToken(iArg1, eTempResult, NullID, token::SINH);
 
       NodeID ID = getIDOfToken(lToken);
       if (ID != NullID)
         {
           return ID;
         }
-      return PushToken(iArg1, SINH);
+      return PushToken(iArg1, token::SINH);
     }
   else
     {
@@ -668,14 +667,14 @@ inline NodeID DataTree::AddTanH(NodeID iArg1)
 {
   if (iArg1 != Zero)
     {
-      MToken  lToken(iArg1, eTempResult, NullID, TANH);
+      MToken  lToken(iArg1, eTempResult, NullID, token::TANH);
 
       NodeID ID = getIDOfToken(lToken);
       if (ID != NullID)
         {
           return ID;
         }
-      return PushToken(iArg1, TANH);
+      return PushToken(iArg1, token::TANH);
     }
   else
     {
@@ -685,28 +684,28 @@ inline NodeID DataTree::AddTanH(NodeID iArg1)
 
 inline NodeID DataTree::AddACosH(NodeID iArg1)
 {
-  MToken  lToken(iArg1, eTempResult, NullID, ACOSH);
+  MToken  lToken(iArg1, eTempResult, NullID, token::ACOSH);
 
   NodeID ID = getIDOfToken(lToken);
   if (ID != NullID)
     {
       return ID;
     }
-  return PushToken(iArg1, ACOSH);
+  return PushToken(iArg1, token::ACOSH);
 }
 
 inline NodeID DataTree::AddASinH(NodeID iArg1)
 {
   if (iArg1 != Zero)
     {
-      MToken  lToken(iArg1, eTempResult, NullID, ASINH);
+      MToken  lToken(iArg1, eTempResult, NullID, token::ASINH);
 
       NodeID ID = getIDOfToken(lToken);
       if (ID != NullID)
         {
           return ID;
         }
-      return PushToken(iArg1, ASINH);
+      return PushToken(iArg1, token::ASINH);
     }
   else
     {
@@ -718,14 +717,14 @@ inline NodeID DataTree::AddATanH(NodeID iArg1)
 {
   if (iArg1 != Zero)
     {
-      MToken  lToken(iArg1, eTempResult, NullID, ATANH);
+      MToken  lToken(iArg1, eTempResult, NullID, token::ATANH);
 
       NodeID ID = getIDOfToken(lToken);
       if (ID != NullID)
         {
           return ID;
         }
-      return PushToken(iArg1, ATANH);
+      return PushToken(iArg1, token::ATANH);
     }
   else
     {
@@ -737,14 +736,14 @@ inline NodeID DataTree::AddSqRt(NodeID iArg1)
 {
   if (iArg1 != Zero)
     {
-      MToken  lToken(iArg1, eTempResult, NullID, SQRT);
+      MToken  lToken(iArg1, eTempResult, NullID, token::SQRT);
 
       NodeID ID = getIDOfToken(lToken);
       if (ID != NullID)
         {
           return ID;
         }
-      return PushToken(iArg1, SQRT);
+      return PushToken(iArg1, token::SQRT);
     }
   else
     {
@@ -758,26 +757,26 @@ inline NodeID DataTree::AddEqual(NodeID iArg1, NodeID iArg2=Zero)
     return ZeroEqZero;
   else
     {
-      MToken  lToken(iArg1, eTempResult, iArg2, EQUAL);
+      MToken  lToken(iArg1, eTempResult, iArg2, token::EQUAL);
 
       NodeID ID = getIDOfToken(lToken);
       if (ID != NullID)
         return ID;
 
-      return PushToken(iArg1, EQUAL, iArg2);
+      return PushToken(iArg1, token::EQUAL, iArg2);
     }
 }
 
 inline NodeID DataTree::AddAssign(NodeID iArg1, NodeID iArg2=Zero)
 {
-  MToken  lToken(iArg1, eTempResult, iArg2, ASSIGN);
+  MToken  lToken(iArg1, eTempResult, iArg2, token::ASSIGN);
 
   NodeID ID = getIDOfToken(lToken);
   if (ID != NullID)
     {
       return ID;
     }
-  return PushToken(iArg1,ASSIGN,iArg2);
+  return PushToken(iArg1, token::ASSIGN, iArg2);
 }
 
 //------------------------------------------------------------------------------

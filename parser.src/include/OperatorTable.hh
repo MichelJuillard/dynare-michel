@@ -10,8 +10,12 @@
 #include <map>
 #include <string>
 #include <vector>
-//------------------------------------------------------------------------------
+
 #include "DynareBison.hh"
+
+//! Shortcut to access tokens defined by Bison
+typedef yy::parser::token token;
+
 //------------------------------------------------------------------------------
 /*!
   \class  OperatorTable

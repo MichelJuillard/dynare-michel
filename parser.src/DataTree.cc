@@ -21,8 +21,8 @@ const int DataTree::NoOpCode = -1;
 const NodeID DataTree::NullID = NULL;
 const NodeID DataTree::Zero = new MetaToken(reinterpret_cast <NodeID> (0), eNumericalConstant, NULL, -1);
 const NodeID DataTree::One = new MetaToken(reinterpret_cast <NodeID> (1), eNumericalConstant, NULL, -1);
-const NodeID DataTree::MinusOne = new MetaToken(One, eTempResult, NULL, UMINUS);
-const NodeID DataTree::ZeroEqZero = new MetaToken(Zero, eTempResult, Zero, EQUAL);
+const NodeID DataTree::MinusOne = new MetaToken(One, eTempResult, NULL, token::UMINUS);
+const NodeID DataTree::ZeroEqZero = new MetaToken(Zero, eTempResult, Zero, token::EQUAL);
 int      DataTree::offset = 1;
 //------------------------------------------------------------------------------
 DataTree::DataTree()
@@ -45,14 +45,14 @@ DataTree::DataTree()
   mModelTree.push_back(One);
   mIndexOfTokens[*One]=One;
 
-  MinusOne->op_name = operator_table.str(UMINUS);
+  MinusOne->op_name = operator_table.str(token::UMINUS);
   MinusOne->reference_count.resize(current_order+1,1);
   MinusOne->idx = 2;
   mModelTree.push_back(MinusOne);
   mIndexOfTokens[*MinusOne]=MinusOne;
 
   // Pushing "0=0" into mModelTree
-  ZeroEqZero->op_name = operator_table.str(EQUAL);
+  ZeroEqZero->op_name = operator_table.str(token::EQUAL);
   ZeroEqZero->reference_count.resize(current_order+1,1);
   ZeroEqZero->idx = 3;
   mModelTree.push_back(ZeroEqZero);
