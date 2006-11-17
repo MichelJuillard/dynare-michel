@@ -40,10 +40,10 @@ else
     tmp = strmatch(ExcludedParamNames{i},M_.exo_names);
     if ~isempty(tmp) & ( strcmpi(info,'All') | strcmpi(info,'StructuralShocks') | ...
 			 strcmpi(info,'StructuralShocksWithoutCorrelations') | ...
-			 strcmpi(info,'AllWithoutMeasurementErros') )
+			 strcmpi(info,'AllWithoutMeasurementErrors') )
       % The parameter the user wants to exclude is related to the size of the structural innovations.
       if ncx
-	disp(['I cannot exclude some the structural variances if the'])
+	disp(['I cannot exclude some of the structural variances if the'])
 	disp(['structural innovations are correlated...'])
 	error
       end
@@ -62,7 +62,7 @@ else
 	tt = [tt;tmp];
       end
     else% Excluded parameters are deep parameters...
-      tmp = strmatch(ExcludedParamNames{i},M_.param_names,'exact');
+      tmp = strmatch(ExcludedParamNames{i},M_.param_names(estim_params_.param_vals(:,1),:),'exact');
       if ~isempty(tmp)
 	tt = [tt;nvx+nvn+ncx+ncn+tmp];
       else
