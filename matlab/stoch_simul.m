@@ -1,9 +1,9 @@
 % Copyright (C) 2001 Michel Juillard
 %
 function info=stoch_simul(var_list)
-  global M_ options_ oo_
-  
-  global it_
+   global M_ options_ oo_ it_
+
+   options_old = options_;
   options_ = set_default_option(options_,'TeX',0);  
   options_ = set_default_option(options_,'order',2);
   options_ = set_default_option(options_,'linear',0);
@@ -42,6 +42,7 @@ function info=stoch_simul(var_list)
   [oo_.dr, info] = resol(oo_.steady_state,0);
 
   if info(1)
+    options_ = options_old;
     print_info(info);
     return
   end  
@@ -75,6 +76,7 @@ function info=stoch_simul(var_list)
     if options_.periods < options_.drop
       disp(['STOCH_SIMUL error: The horizon of simulation is shorter' ...
 	    ' than the number of observations to be DROPed'])
+      options_ =options_old;
       return
     end
     oo_.endo_simul = simult(repmat(oo_.dr.ys,1,M_.maximum_lag),oo_.dr);
@@ -275,3 +277,5 @@ if isfield(options_,'SpectralDensity')
     [omega,f] = UnivariateSpectralDensity(oo_.dr,var_list);
   end
 end
+
+options_ = options_old;

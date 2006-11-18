@@ -46,7 +46,7 @@ function global_initialization()
   
   % Prior draws
   options_.forecast = 0;
-  options_.replic = 0;
+  options_.replic = 1;
   
   % Model
   options_.linear = 0;
