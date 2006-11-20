@@ -1,16 +1,28 @@
-CPP = c++
+CPP = g++
+
+CPPFLAGS = -Wall
+
+ifeq ($(shell uname -o), Cygwin)
+	# Detection of uninitialized variables is buggy in Cygwin and generates spurious warnings
+	CPPFLAGS += -Wno-uninitialized
+	CPPFLAGS += -mno-cygwin
+	DYNARE_M = dynare_m.exe
+	DYNARE_S = dynare_s.exe
+else
+	DYNARE_M = dynare_m
+	DYNARE_S = dynare_s
+endif
+
 ifeq ($(DEBUG),yes)
-	CPPFLAGS = -ggdb -pg -Wall
+	CPPFLAGS += -ggdb
 else
-ifeq ($(MINGW),yes)
-	CPPFLAGS = -O2
-else
-	CPPFLAGS = -mno-cygwin -O2
+	CPPFLAGS += -O3
 endif
+
+ifeq ($(VALGRIND), yes)
+	CPPFLAGS = -Wall -O -g -fno-inline
 endif
-ifeq ($(PROFILE),yes)
-	CPPFLAGS = -mno-cygwin -O2 -pg
-endif
+
 
 COMMON_OBJ=\
 	DynareFlex.o\
@@ -41,16 +53,15 @@ SCILAB_OBJ = InterfaceScilab.o
 ### Build ######################################################################
 ################################################################################
 
-all: dynare_m.exe dynare_s.exe
+all: $(DYNARE_M) $(DYNARE_S)
 
-dynare_m.exe: $(COMMON_OBJ) $(MATLAB_OBJ)
-	$(CPP) $(CPPFLAGS) -o  dynare_m.exe $(COMMON_OBJ) $(MATLAB_OBJ)
-	cp dynare_m.exe ../matlab/
+$(DYNARE_M): $(COMMON_OBJ) $(MATLAB_OBJ)
+	$(CPP) $(CPPFLAGS) -o $(DYNARE_M) $(COMMON_OBJ) $(MATLAB_OBJ)
+	cp $(DYNARE_M) ../matlab/
 
-dynare_s.exe: $(COMMON_OBJ) $(SCILAB_OBJ)
-	$(CPP) $(CPPFLAGS) -o  dynare_s.exe $(COMMON_OBJ) $(SCILAB_OBJ)
-	cp dynare_s.exe ../scilab/
-
+$(DYNARE_S): $(COMMON_OBJ) $(SCILAB_OBJ)
+	$(CPP) $(CPPFLAGS) -o $(DYNARE_S) $(COMMON_OBJ) $(SCILAB_OBJ)
+	cp $(DYNARE_S) ../scilab/
 
 
 ################################################################################
@@ -80,9 +91,11 @@ DynareBison.cc include/DynareBison.hh: DynareBison.yy include/ParsingDriver.hh
 
 clean:
 	rm -f *.o *.P \
+		*~ include/*~ \
 		DynareBison.cc \
 		include/DynareBison.hh \
 		DynareBison.output \
 		DynareFlex.cc \
-		dynare_m.exe \
-		dynare_s.exe
+		$(DYNARE_M) \
+		$(DYNARE_S)
+
