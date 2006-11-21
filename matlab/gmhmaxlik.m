@@ -107,7 +107,9 @@ while j<=MaxNumberOfTuningSimulations
     test1 = jsux/jj;
     cfactor = test1/AcceptanceTarget;
     if cfactor>0
-    iScale = iScale*cfactor;
+        iScale = iScale*cfactor;
+    else
+        iScale = iScale/10;
     end
     jsux = 0; jj = 0;
     if cfactor>0.90 && cfactor<1.10

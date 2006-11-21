@@ -357,18 +357,25 @@ if options_.mode_compute > 0 & options_.posterior_mode_estimation
     if exist('hh')
       CovJump = inv(hh);
     else% The covariance matrix is initialized with the prior
-        % covariance (a diagonal matrix) % Except for infinite variances ;-)
-      stdev = bayestopt_.pstdev;
-      indx = find(isinf(stdev));
-      stdev(indx) = ones(length(indx),1)*0.1;
-      indx = find(stdev>2);
-      stdev(indx) = ones(length(indx),1)*0.1;      
-      CovJump = diag(stdev).^2;
-      CovJump = eye(length(stdev))*0.5;
+        % covariance (a diagonal matrix) %%Except for infinite variances ;-)
+      varinit = 'prior';
+      if strcmpi(varinit,'prior')  
+          stdev = bayestopt_.pstdev;
+          indx = find(isinf(stdev));
+          stdev(indx) = ones(length(indx),1)*sqrt(10);
+          vars = stdev.^2;
+          CovJump = diag(vars);
+      elseif strcmpi(varinit,'eye')
+          vars = ones(length(bayestopt_.pstdev),1)*0.1;  
+          CovJump = diag(vars);          
+      else
+          disp('gmhmaxlik :: Error!')
+          return
+      end
     end
     OldPostVar = CovJump;
     Scale = options_.mh_jscale;
-    for i=1:options_.Opt6Iter
+    for i=1:options_.Opt6Iter  
       if i == 1
         if options_.Opt6Iter > 1
           flag = '';
