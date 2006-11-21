@@ -113,13 +113,18 @@ if fload==0 | nargin<2 | isempty(fload),
   yys=zeros(length(dr_.ys),Nsam);
   
   if opt_gsa.morris
-    [lpmat, OutFact] = Sampling_Function_2(nliv, estim_params_.np, ntra, ones(estim_params_.np, 1), zeros(estim_params_.np,1), []);
-    lpmat = lpmat.*(nliv-1)/nliv+1/nliv/2;
-    Nsam=size(lpmat,1);
+    if opt_gsa.morris == 1
+      [lpmat, OutFact] = Sampling_Function_2(nliv, estim_params_.np, ntra, ones(estim_params_.np, 1), zeros(estim_params_.np,1), []);
+      lpmat = lpmat.*(nliv-1)/nliv+1/nliv/2;
+      Nsam=size(lpmat,1);
+    elseif opt_gsa.morris==2
+      lpmat = prep_ide(Nsam,estim_params_.np,5);
+      Nsam=size(lpmat,1);
+    end
   else
   if estim_params_.np<52 & ilptau>0,
-    [lpmat] = lptauSEQ(Nsam,estim_params_.np);
-    if estim_params_.np>30 | ilptau==2,
+    [lpmat] = lptauSEQ(Nsam,estim_params_.np); % lptau
+    if estim_params_.np>30 | ilptau==2, % scrambled lptau
       for j=1:estim_params_.np,
         lpmat(:,j)=lpmat(randperm(Nsam),j);
       end
@@ -332,6 +337,8 @@ else
     end
     close(h)
     save(filetoload,'T','-append')    
+  else
+    load(filetoload,'T')        
   end
 end
 
@@ -420,22 +427,180 @@ else
   
 end
 
-if opt_gsa.morris & opt_gsa.redform,
+if opt_gsa.redform,
   [nr,nc,nn]=size(T);
   j0=0;
   for j=1:nr,
     for i=1:nc,
-      if max(squeeze(T(j,i,:)))-min(squeeze(T(j,i,:)))>1.e-10,
+      y0=squeeze(T(j,i,:));
+      if max(y0)-min(y0)>1.e-10,
         j0=j0+1;
-        [SAmeas, SAMorris(:,:,j0)] = Morris_Measure_Groups(estim_params_.np, lpmat, squeeze(T(j,i,:)),nliv);
+        y1=ones(size(lpmat,1),1)*NaN;
+        y1(istable,1)=y0;
+        yt(:,j0)=y1;
       end
     end
+  end
+  
+end
+
+if opt_gsa.morris==1 & opt_gsa.redform,
+  OutputDir = CheckPath('GSA');  
+
+  for j=1:j0,
+    [SAmeas, SAMorris(:,:,j)] = Morris_Measure_Groups(estim_params_.np, lpmat, yt(:,j),nliv);
   end
 
   SAM = squeeze(SAMorris(:,1,:));
   for j=1:j0
     SAnorm(:,j)=SAM(:,j)./max(SAM(:,j));
+    irex(j)=length(find(SAnorm(:,j)>0.01));
   end
+  [dum, irel]=sort(irex);
 
-  bar(SAnorm)
+  figure, bar(SAnorm(:,irel))
+  set(gca,'xtick',[1:estim_params_.np])
+  set(gca,'xlim',[0.5 estim_params_.np+0.5])
+  title('Elementary effects parameters')
+  saveas(gcf,[OutputDir,'\',fname_,'_morris_par'])
+  eval(['print -depsc2 ' OutputDir '\' fname_ '_morris_par']);
+  eval(['print -dpdf ' OutputDir '\' fname_ '_morris_par']);
+  figure, bar(SAnorm(:,irel)')
+  set(gca,'xtick',[1:j0])
+  set(gca,'xlim',[0.5 j0+0.5])
+  title('Elementary effects relationships')
+  saveas(gcf,[OutputDir,'\',fname_,'_morris_redform'])
+  eval(['print -depsc2 ' OutputDir '\' fname_ '_morris_redform']);
+  eval(['print -dpdf ' OutputDir '\' fname_ '_morris_redform']);
+elseif opt_gsa.morris==2 & opt_gsa.redform,
+  np=estim_params_.np;
+  na=(4*np+1)*opt_gsa.Nsam;
+  for j=1:j0,
+    [idex(j,:), yd(j,:)] = spop_ide(lpmat, yt(:,j), opt_gsa.Nsam, 5-1);
+  end
+  iok=find(~isnan(yt(1:opt_gsa.Nsam,1)));
+  yr=NaN*ones(size(lpmat,1),j0);
+  for j=1:j0, 
+    ys(j,:)=yd(j,:)./max(yd(j,:));
+    [dum, is]=sort(yt(iok,j));
+    yr(iok(is),j)=[1:length(iok)]'./length(iok);
+    yr(istable(length(iok)+1:end),j) = interp1(yt(iok,j),yr(iok,j),yt(istable(length(iok)+1:end),j),'','extrap');
+    ineg=find(yr(:,j)<0);
+    if any(ineg),
+      [dum, is]=sort(yr(ineg,j));
+      yr(ineg(is),j)=-[length(ineg):-1:1]./length(iok);
+      
+    end
+    [idex_r(j,:), yd_r(j,:)] = spop_ide(lpmat, yr(:,j), opt_gsa.Nsam, 5-1);
+    ys_r(j,:)=yd_r(j,:)./max(yd_r(j,:));
+      
+  end,
+  figure, bar((idex.*ys)./opt_gsa.Nsam), title('Relationships')
+  figure, bar((idex.*ys)'./opt_gsa.Nsam), title('Parameters')
+  figure, bar((idex_r.*ys_r)./opt_gsa.Nsam), title('Relationships rank')
+  figure, bar((idex_r.*ys_r)'./opt_gsa.Nsam), title('Parameters rank')
+  [v0,d0]=eig(corrcoef(yt(iok,:)));
+  ee=diag(d0);
+  ee=ee([end:-1:1])./j0;
+  i0=length(find(ee>0.01));
+  v0=v0(:,[end:-1:1]);
+  for j=1:i0,
+    [idex_pc(j,:), yd_pc(j,:)] = spop_ide(lpmat, yt*v0(:,j), opt_gsa.Nsam, 5-1);
+  end
+  for j=1:i0, 
+    ys_pc(j,:)=yd_pc(j,:)./max(yd_pc(j,:));
+  end,
+  figure, bar((idex_pc.*ys_pc)./opt_gsa.Nsam), title('Relationships PCA')
+  figure, bar((idex_pc.*ys_pc)'./opt_gsa.Nsam), title('Parameters PCA')
+  
+  [vr,dr]=eig(corrcoef(yr(iok,:)));
+  er=diag(dr);
+  er=er([end:-1:1])./j0;
+  ir0=length(find(er>0.01));
+  vr=vr(:,[end:-1:1]);
+  for j=1:ir0,
+    [idex_pcr(j,:), yd_pcr(j,:)] = spop_ide(lpmat, yr*vr(:,j), opt_gsa.Nsam, 5-1);
+  end
+  for j=1:ir0, 
+    ys_pcr(j,:)=yd_pcr(j,:)./max(yd_pcr(j,:));
+  end,
+  figure, bar((idex_pcr.*ys_pcr)./opt_gsa.Nsam), title('Relationships rank PCA')
+  figure, bar((idex_pcr.*ys_pcr)'./opt_gsa.Nsam), title('Parameters rank PCA')
+elseif opt_gsa.redform
+  yr=[];
+  for j=1:j0,
+    [dum, is]=sort(yt(istable,j));
+    yr(is,j)=[1:length(istable)]'./length(istable);
+  end
+  gsa_flag=0; %-2 for GSA estimation
+  RividDir = CheckPath('GSA/rivid');
+  for j=1:j0,
+    gsa_(j) = gsa_sdp_fn(yt(istable,j), lpmat(istable,:), ...
+      bayestopt_.pshape, [bayestopt_.p1 bayestopt_.p2 bayestopt_.p3 bayestopt_.p4], ...
+      gsa_flag, [RividDir,'/map_T',int2str(j)], M_.param_names);
+    gsa_r(j) = gsa_sdp_fn(yr(:,j), lpmat(istable,:), ...
+      bayestopt_.pshape, [bayestopt_.p1 bayestopt_.p2 bayestopt_.p3 bayestopt_.p4], ...
+      gsa_flag, [RividDir,'/map_T_rank',int2str(j)], M_.param_names);
+    S(j,:)=gsa_(j).multivariate.si; 
+    Sr(j,:)=gsa_r(j).multivariate.si; 
+  end
+  figure, bar(S')
+  set(gca,'xtick',[1:estim_params_.np])
+  set(gca,'xlim',[0.5 estim_params_.np+0.5])
+  title('Main effects parameters')
+  saveas(gcf,[RividDir,'\',fname_,'_SA_par'])
+  eval(['print -depsc2 ' RividDir '\' fname_ '_SA_par']);
+  eval(['print -dpdf ' RividDir '\' fname_ '_SA_par']);
+  figure, bar(S)
+  set(gca,'xtick',[1:j0])
+  set(gca,'xlim',[0.5 j0+0.5])
+  title('Main effects relationships')
+  saveas(gcf,[RividDir,'\',fname_,'_SA_redform'])
+  eval(['print -depsc2 ' RividDir '\' fname_ '_SA_redform']);
+  eval(['print -dpdf ' RividDir '\' fname_ '_SA_redform']);
+  
+  figure, bar(Sr')
+  set(gca,'xtick',[1:estim_params_.np])
+  set(gca,'xlim',[0.5 estim_params_.np+0.5])
+  title('Main effects parameters rank')
+  saveas(gcf,[RividDir,'\',fname_,'_SA_par'])
+  eval(['print -depsc2 ' RividDir '\' fname_ '_SA_par_rank']);
+  eval(['print -dpdf ' RividDir '\' fname_ '_SA_par']);
+  figure, bar(Sr)
+  set(gca,'xtick',[1:j0])
+  set(gca,'xlim',[0.5 j0+0.5])
+  title('Main effects relationships rank')
+  saveas(gcf,[RividDir,'\',fname_,'_SA_redform_rank'])
+  eval(['print -depsc2 ' RividDir '\' fname_ '_SA_redform_rank']);
+  eval(['print -dpdf ' RividDir '\' fname_ '_SA_redform_rank']);
+
+  [v0,d0]=eig(corrcoef(yt(istable,:)));
+  ee=diag(d0);
+  ee=ee(end:-1:1);
+  v0=v0(:,end:-1:1);
+  %id=find((er./length(er))>0.01);
+  id=find(cumsum(ee)./j0<0.99);
+  jpc=length(id)+1;
+  gsa_flag=-2;
+  for j=1:jpc,
+    gsa_pca(j) = gsa_sdp_fn(yt(istable,:)*v0(:,j), lpmat(istable,:), ...
+      bayestopt_.pshape, [bayestopt_.p1 bayestopt_.p2 bayestopt_.p3 bayestopt_.p4], ...
+      gsa_flag, [RividDir,'/map_T_pca',int2str(j)], M_.param_names);
+    S_pca(j,:)=gsa_pca(j).multivariate.si;
+  end
+  figure, bar(S_pca')
+  set(gca,'xtick',[1:estim_params_.np])
+  set(gca,'xlim',[0.5 estim_params_.np+0.5])
+  title('Main effects parameters PCA')
+  saveas(gcf,[RividDir,'\',fname_,'_SA_par_PCA'])
+  eval(['print -depsc2 ' RividDir '\' fname_ '_SA_par_PCA']);
+  eval(['print -dpdf ' RividDir '\' fname_ '_SA_par_PCA']);
+  figure, bar(S_pca)
+  set(gca,'xtick',[1:j0])
+  set(gca,'xlim',[0.5 j0+0.5])
+  title('Main effects relationships PCA')
+  saveas(gcf,[RividDir,'\',fname_,'_SA_redform_PCA'])
+  eval(['print -depsc2 ' RividDir '\' fname_ '_SA_redform_PCA']);
+  eval(['print -dpdf ' RividDir '\' fname_ '_SA_redform_PCA']);
+  
 end

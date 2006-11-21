@@ -40,7 +40,7 @@ MAX_nruns = ceil(options_.MaxNumberOfBytes/(npar+2)/8);
 
 load([ MhDirectoryName '/'  M_.fname '_prior'],'lpmat','istable')
 x=lpmat(istable,:);
-clear lpmat istable
+clear lpmat 
 NumberOfDraws=size(x,1);
 B=NumberOfDraws; options_.B = B;
 
@@ -237,7 +237,6 @@ close(h)
 i1=find(~ismember([i2],izp));
 save([MhDirectoryName '/' M_.fname '_rivid'],'r00','a00','-append');
 
-
 if options_.opt_gsa.morris,
   load([MhDirectoryName '/' M_.fname '_prior'],'lpmat');
   lmat=[];
@@ -249,118 +248,135 @@ if options_.opt_gsa.morris,
       lmat=[lmat; lpmat([1+12*(j-1):12*j],:)];
     end
   end,
-  nliv = options_.opt_gsa.morris_nliv;
-  j0=0;
-  for j=1:nroot,
-    if (max(a00(inx,j+1))-min(a00(inx,j+1)))>1.e-10,
-      j0=j0+1;
-      [SAmeas, SAMorris(:,:,j0)] = Morris_Measure_Groups(estim_params_.np, lmat, a00(inx,j+1),nliv);
+  i1=inx;
+end
+x=x(i1,:);
+ya=a00(i1,2:end);
+j0=size(ya,2);
+for j=1:M_.exo_nbr,
+  j00=0;
+  yb=[];
+  yr=[];
+  y=am{j,1}(i1,:);
+  for l=1:size(y,2),
+    y0=y(:,l);
+    if max(y0)-min(y0)>1.e-10,
+      j00=j00+1;
+      yb=[yb y0];
     end
   end
-  j1=j0;
-  for j=1:M_.exo_nbr,
-    SAMo=[];
-    j00=0;
-    yb=[];
-    y=am{j,1};
-    for l=1:size(y,2),
-      y0=y(:,l);
-      if max(y0(inx))-min(y0(inx))>1.e-10,
-        j00=j00+1;
-        yb=[yb y0(inx)];
-        [SAmeas, SAMo(:,:,j00)] = Morris_Measure_Groups(estim_params_.np, lmat, y0(inx),nliv);
-      end
-    end
-    for i=1:size(var_list_,1),
-      y=bm{j,i};
-      for l=1:size(y,2),
-        y0=y(:,l);
-        if max(y0(inx))-min(y0(inx))>1.e-10,
-          j00=j00+1;
-          yb=[yb y0(inx)];
-          [SAmeas, SAMo(:,:,j00)] = Morris_Measure_Groups(estim_params_.np, lmat, y0(inx),nliv);
-          j0=j0+1;
-          [SAmeas, SAMorris(:,:,j0)] = Morris_Measure_Groups(estim_params_.np, lmat, y0(inx),nliv);
-        end
-      end
-    end
-    SAM = squeeze(SAMo(:,1,:));
-    SAno=[];
-    for jj=1:j00
-      SAno(:,jj)=SAM(:,jj)./max(SAM(:,jj));
-    end
-    ybb(j)={yb};
-    figure, bar(SAno), title(M_.exo_names(j,:))
-  end
-
-  SAM = squeeze(SAMorris(:,1,:));
-  for j=1:j0,
-    SAnorm(:,j)=SAM(:,j)./max(SAM(:,j));
-  end
-
-  figure, bar(SAnorm), title('All')
-else
-  gsa_flag=0; %0; %-2 for GSA estimation
-  x=x(i1,:);
-  ya=a00(i1,2:end);
-  j0=size(ya,2);
-  for j=1:M_.exo_nbr,
-    j00=0;
-    yb=[];
-    yr=[];
-    y=am{j,1}(i1,:);
+  for i=1:size(var_list_,1),
+    y=bm{j,i}(i1,:);
     for l=1:size(y,2),
       y0=y(:,l);
       if max(y0)-min(y0)>1.e-10,
         j00=j00+1;
         yb=[yb y0];
+        j0=j0+1;
+        ya=[ya y0];
       end
     end
-    for i=1:size(var_list_,1),
-      y=bm{j,i}(i1,:);
-      for l=1:size(y,2),
-        y0=y(:,l);
-        if max(y0)-min(y0)>1.e-10,
-          j00=j00+1;
-          yb=[yb y0];
-          j0=j0+1;
-          ya=[ya y0];
-        end
-      end
-    end
-    ybb(j)={yb};
-    for jj=1:j00,
-      [dum, is]=sort(yb(:,jj));
-      yr(is,jj)=[1:length(i1)]'./length(i1);
-    end
-    ybr(j)={yr};
   end
+  ybb(j)={yb};
+  if ~options_.opt_gsa.morris,
+  for jj=1:j00,
+    [dum, is]=sort(yb(:,jj));
+    yr(is,jj)=[1:length(i1)]'./length(i1);
+  end
+  ybr(j)={yr};
+  end
+end
+
+if options_.opt_gsa.morris==1,
+  nliv = options_.opt_gsa.morris_nliv;
+  for j=1:j0,
+    [SAmeas, SAMorris(:,:,j)] = Morris_Measure_Groups(estim_params_.np, x, ya(:,j),nliv);
+  end
+  SAM = squeeze(SAMorris(:,1,:));
+  for j=1:j0,
+    SAnorm(:,j)=SAM(:,j)./max(SAM(:,j));
+  end
+  figure, bar(SAnorm), title('All')
+  figure, bar(SAnorm'), title('All Relationships')
+  
+  if exist('d0')
+    er=diag(d0);
+    %id=find((er./length(er))>0.01);
+    id=find(cumsum(er(end:-1:1))./j0<0.99);
+    id=length(id)+1;
+    jpc=0;
+    for j=j0:-1:(j0-id(1)+1),
+      jpc=jpc+1;
+      [SAmeas_r, SAMorris_r(:,:,jpc)] = Morris_Measure_Groups(estim_params_.np, x, ya*v0(:,j),nliv);
+    end
+    SAM = squeeze(SAMorris_r(:,1,:));
+    for j=1:jpc,
+      SAnorm_r(:,j)=SAM(:,j)./max(SAM(:,j));
+    end
+    figure, bar(SAnorm_r), title('All PCA')
+
+    for jj=1:27, yr(:,jj) = interp1(c.ya(:,jj),c.yr(:,jj),ya(:,jj)); end,
+    er=diag(d);
+    %id=find((er./length(er))>0.01);
+    id=find(cumsum(er(end:-1:1))./j0<0.99);
+    id=length(id)+1;
+    jpc=0;
+    for j=j0:-1:(j0-id(1)+1),
+      jpc=jpc+1;
+      [SAmeas_r, SAMorris_r(:,:,jpc)] = Morris_Measure_Groups(estim_params_.np, x, yr*v(:,j),nliv);
+    end
+    SAM = squeeze(SAMorris_r(:,1,:));
+    for j=1:jpc,
+      SAnorm_r(:,j)=SAM(:,j)./max(SAM(:,j));
+    end
+    figure, bar(SAnorm_r), title('All PCA rank')
+  end
+
+  for j=1:M_.exo_nbr,
+    SAMo=[];
+    yb = ybb{j};
+    for l=1:size(yb,2),
+      y0=yb(:,l);
+      [SAmeas, SAMo(:,:,l)] = Morris_Measure_Groups(estim_params_.np, x, y0,nliv);
+    end
+    SAM = squeeze(SAMo(:,1,:));
+    SAno=[];
+    for jj=1:size(yb,2),
+      SAno(:,jj)=SAM(:,jj)./max(SAM(:,jj));
+    end
+    figure, bar(SAno), title(M_.exo_names(j,:))
+    figure, bar(SAno'), title([M_.exo_names(j,:),' relationships' ])
+  end
+
+elseif options_.opt_gsa.morris==0,
   yr=[];
   for j=1:j0,
     [dum, is]=sort(ya(:,j));
     yr(is,j)=[1:length(i1)]'./length(i1);
   end
+  gsa_flag=0; %0; %-2 for GSA estimation
   RividDir = CheckPath('GSA/rivid');
   for j=1:j0,
-  gsa_(j) = gsa_sdp_fn(ya(:,j), x, gsa_flag, [RividDir,'/map',int2str(j)], M_.param_names);
+    gsa_(j) = gsa_sdp_fn(ya(:,j), x, gsa_flag, [RividDir,'/map',int2str(j)], M_.param_names);
   end
-%   for j=1:j0,
-%   gsa_y(j) = gsa_sdp_fn(ya(:,j), ya(:,[1:j-1,j+1:j0]), 0, [RividDir,'/map_y',int2str(j)], M_.param_names);
-%   end
+  %   for j=1:j0,
+  %   gsa_y(j) = gsa_sdp_fn(ya(:,j), ya(:,[1:j-1,j+1:j0]), 0, [RividDir,'/map_y',int2str(j)], M_.param_names);
+  %   end
   for j=1:j0, S(j,:)=gsa_(j).multivariate.si; end,
-  [v,d]=eig(corrcoef(ya));
-  ee=diag(d);
+  [v0,d0]=eig(corrcoef(ya));
+  save([MhDirectoryName '/' M_.fname '_rivid'],'v0','d0','-append');
+  ee=diag(d0);
   %id=find((er./length(er))>0.01);
   id=find(cumsum(ee(end:-1:1))./j0<0.99);
   id=length(id)+1;
   jpc=0;
   for j=j0:-1:(j0-id(1)+1),
     jpc=jpc+1;
-    gsa_pca(jpc) = gsa_sdp_fn(ya*v(:,j), x, gsa_flag, [RividDir,'/map_pca',int2str(jpc)], M_.param_names);
+    gsa_pca(jpc) = gsa_sdp_fn(ya*v0(:,j), x, gsa_flag, [RividDir,'/map_pca',int2str(jpc)], M_.param_names);
   end
   for j=1:jpc, S_pca(j,:)=gsa_pca(j).multivariate.si; end,
   for j=1:j0,
-  gsar_(j) = gsa_sdp_fn(yr(:,j), x, gsa_flag, [RividDir,'/map_rank',int2str(j)], M_.param_names);
+    gsar_(j) = gsa_sdp_fn(yr(:,j), x, gsa_flag, [RividDir,'/map_rank',int2str(j)], M_.param_names);
   end
   for j=1:j0, Sr(j,:)=gsar_(j).multivariate.si; end,
   [v,d]=eig(corrcoef(yr));
@@ -381,22 +397,22 @@ else
       fi(j,yup)=ones(1,length(yup));
     end
   end
-%   for j=1:j0-id,
-%     gsar_pca_0(j) = gsa_sdp_fn(yr*v(:,j), x, gsa_flag, [RividDir,'/rivid/map_rank_pca_0',int2str(j)], M_.param_names);
-%   end
-%   for j=1:j0-id, Sr_pca_0(j,:)=gsar_pca_0(j).multivariate.si; end,
-%   yr0=zeros(length(i1),1);
-%   for j=1:10, %j0-id,
-%     yr0 = yr0+yr*v(:,j);
-%   end
-%   gsar_pca_00 = gsa_sdp_fn(yr0, x, gsa_flag, [RividDir,'/map_rank_pca_00'], M_.param_names);
-%   Sr_pca_00=gsar_pca_00.multivariate.si;
-%   y0 = getIRFRuns(1,1,'gsa');
-%   prc=[2.5 16 84 97.5];
-%   [paths_avg,res,bounds,res1]=probam(y0',prc,2);
-%   figure,
-%   plot([1:options_.irf],paths_avg,'k-',[1:options_.irf],bounds(1,:),'k:', [1:options_.irf], bounds(2,:),'k:');
-  save([MhDirectoryName '/' M_.fname '_rivid'],'v','d','-append');
+  %   for j=1:j0-id,
+  %     gsar_pca_0(j) = gsa_sdp_fn(yr*v(:,j), x, gsa_flag, [RividDir,'/rivid/map_rank_pca_0',int2str(j)], M_.param_names);
+  %   end
+  %   for j=1:j0-id, Sr_pca_0(j,:)=gsar_pca_0(j).multivariate.si; end,
+  %   yr0=zeros(length(i1),1);
+  %   for j=1:10, %j0-id,
+  %     yr0 = yr0+yr*v(:,j);
+  %   end
+  %   gsar_pca_00 = gsa_sdp_fn(yr0, x, gsa_flag, [RividDir,'/map_rank_pca_00'], M_.param_names);
+  %   Sr_pca_00=gsar_pca_00.multivariate.si;
+  %   y0 = getIRFRuns(1,1,'gsa');
+  %   prc=[2.5 16 84 97.5];
+  %   [paths_avg,res,bounds,res1]=probam(y0',prc,2);
+  %   figure,
+  %   plot([1:options_.irf],paths_avg,'k-',[1:options_.irf],bounds(1,:),'k:', [1:options_.irf], bounds(2,:),'k:');
+  save([MhDirectoryName '/' M_.fname '_rivid'],'v','d','ya','yr','-append');
 jpc=0;
 for j=j0:-1:(j0-id(1)+1),
   jpc=jpc+1;
