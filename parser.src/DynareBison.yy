@@ -3,16 +3,19 @@
 %defines
 
 %{
-namespace dynare
-{
-  class Objects;
-}
+using namespace std;
 
 class ParsingDriver;
+
+#include "SymbolTableTypes.hh"
+#include "ModelTypes.hh"
+
+//! Type for semantic value of non-derivable expressions
+typedef pair<int, Type> ExpObj;
 %}
 
-%parse-param { ParsingDriver& driver }
-%lex-param { ParsingDriver& driver }
+%parse-param { ParsingDriver &driver }
+%lex-param { ParsingDriver &driver }
 
 %locations
 %initial-action
@@ -26,7 +29,9 @@ class ParsingDriver;
 
 %union
 {
-  dynare::Objects *obj;
+  string *string_val;
+  ExpObj *exp_val;
+  NodeID model_val;
 };
 
 %{
@@ -39,17 +44,17 @@ class ParsingDriver;
 %token DATAFILE DIAGNOSTIC DIFFUSE_D DOLLAR DR_ALGO DROP DSAMPLE DYN2VEC DYNASAVE DYNATYPE 
 %token END ENDVAL EQUAL ESTIMATION ESTIMATED_PARAMS ESTIMATED_PARAMS_BOUNDS ESTIMATED_PARAMS_INIT
 %token FILTERED_VARS FIRST_OBS
-%token <obj> FLOAT_NUMBER
+%token <string_val> FLOAT_NUMBER
 %token FORECAST FUNCTIONS
 %token GAMMA_PDF GRAPH
 %token HISTVAL HP_FILTER HP_NGRID    
 %token INITVAL INITVALF
-%token <obj> INT_NUMBER
+%token <string_val> INT_NUMBER
 %token INV_GAMMA_PDF INV_GAMMA1_PDF INV_GAMMA2_PDF IRF
 %token KALMAN_ALGO KALMAN_TOL CONSTANT NOCONSTANT
 %token LAPLACE LIK_ALGO LIK_INIT LINEAR LOAD_MH_FILE LOGLINEAR
 %token MH_DROP MH_INIT_SCALE MH_JSCALE MH_MODE MH_NBLOCKS MH_REPLIC MODE_CHECK MODE_COMPUTE MODE_FILE MODEL MODEL_COMPARISON MODEL_COMPARISON_APPROXIMATION MODIFIEDHARMONICMEAN MOMENTS MOMENTS_VARENDO MSHOCKS
-%token <obj> NAME
+%token <string_val> NAME
 %token NOBS NOCORR NODIAGNOSTIC NOFUNCTIONS NOGRAPH XLS_SHEET XLS_RANGE
 %token NOMOMENTS NOPRINT NORMAL_PDF
 %token OBSERVATION_TRENDS OLR OLR_INST OLR_BETA OPTIM OPTIM_WEIGHTS ORDER OSR OSR_PARAMS 
@@ -58,25 +63,25 @@ class ParsingDriver;
 %token RELATIVE_IRF REPLIC RESOL RPLOT
 %token SHOCKS SIGMA_E SIMUL SIMUL_ALGO SIMUL_SEED SMOOTHER SOLVE_ALGO STDERR STEADY STOCH_SIMUL  
 %token TEX
-%token <obj> TEX_NAME
+%token <string_val> TEX_NAME
 %token UNIFORM_PDF UNIT_ROOT_VARS USE_DLL
 %token VALUES VAR VAREXO VAREXO_DET VAROBS
 %token XTICK XTICKLABEL
-%left <obj> COMMA
-%left <obj> PLUS MINUS
-%left <obj> TIMES DIVIDE
+%left COMMA
+%left PLUS MINUS
+%left TIMES DIVIDE
 %left UMINUS
-%right <obj> POWER 
-%token <obj> EXP LOG LOG10 SIN COS TAN ASIN ACOS ATAN SINH COSH TANH ASINH ACOSH ATANH SQRT
+%right POWER 
+%token EXP LOG LOG10 SIN COS TAN ASIN ACOS ATAN SINH COSH TANH ASINH ACOSH ATANH SQRT
 /* isn't parsed from the *.mod file, but used to distinguish EQUAL in equation and EQUAL in assignment in    operation codes
 */
 %token ASSIGN
 
-%type <obj> var_list varexo_list varexo_det_list parameter_list equality_expression
-%type <obj> expression comma_expression initval_elem histval_elem equation hand_side
-%type <obj> pound_expression model_var shock_elem value_list triangular_row signed_integer
-%type <obj> signed_float prior value trend_element optim_weights_list calib_arg2 filename
-%type <obj> filename_elem range vec_int_elem vec_int_1 vec_int
+%type <exp_val> expression comma_expression
+%type <model_val> equation hand_side model_var
+%type <string_val> signed_float signed_integer prior
+%type <string_val> value filename filename_elem vec_int_elem vec_int_1 vec_int
+%type <string_val> calib_arg2 range
 
 %%
 
@@ -156,62 +161,62 @@ class ParsingDriver;
  
  var_list
  	: var_list NAME  
- 		{$$  = driver.add_endogenous($2);}
+ 		{ driver.declare_endogenous($2); }
  	| var_list COMMA NAME  
- 		{$$  = driver.add_endogenous($3);}
+ 		{ driver.declare_endogenous($3); }
  	| NAME
- 		{$$  = driver.add_endogenous($1);}
- 	| var_list NAME  TEX_NAME 
- 		{$$  = driver.add_endogenous($2,$3);}
- 	| var_list COMMA NAME  TEX_NAME
- 		{$$  = driver.add_endogenous($3, $4);}
+ 		{ driver.declare_endogenous($1); }
+ 	| var_list NAME TEX_NAME 
+ 		{ driver.declare_endogenous($2, $3); }
+ 	| var_list COMMA NAME TEX_NAME
+ 		{ driver.declare_endogenous($3, $4); }
  	| NAME TEX_NAME
- 		{$$  = driver.add_endogenous($1, $2);}
+ 		{ driver.declare_endogenous($1, $2); }
 	; 
 	
  varexo_list
  	: varexo_list NAME
- 		{$$  = driver.add_exogenous($2);}              
+ 		{ driver.declare_exogenous($2); }
  	| varexo_list COMMA NAME
- 		{$$  = driver.add_exogenous($3);}              
+ 		{ driver.declare_exogenous($3); }
  	| NAME
- 		{$$  = driver.add_exogenous($1);}
+ 		{ driver.declare_exogenous($1); }
  	| varexo_list NAME TEX_NAME
- 		{$$  = driver.add_exogenous($2, $3);}              
+ 		{ driver.declare_exogenous($2, $3); }
  	| varexo_list COMMA NAME TEX_NAME
- 		{$$  = driver.add_exogenous($3, $4);}              
+ 		{ driver.declare_exogenous($3, $4); }
  	| NAME TEX_NAME
- 		{$$  = driver.add_exogenous($1, $2);}
+ 		{ driver.declare_exogenous($1, $2); }
 	; 
 
  varexo_det_list
  	: varexo_det_list NAME
- 		{$$  = driver.add_exogenous_det($2);}              
+ 		{ driver.declare_exogenous_det($2); }
  	| varexo_det_list COMMA NAME
- 		{$$  = driver.add_exogenous_det($3);}              
+ 		{ driver.declare_exogenous_det($3); }
  	| NAME
- 		{$$  = driver.add_exogenous_det($1);}
+ 		{ driver.declare_exogenous_det($1); }
  	| varexo_det_list NAME TEX_NAME
- 		{$$  = driver.add_exogenous_det($2, $3);}              
+ 		{ driver.declare_exogenous_det($2, $3); }
  	| varexo_det_list COMMA NAME TEX_NAME
- 		{$$  = driver.add_exogenous_det($3, $4);}              
+ 		{ driver.declare_exogenous_det($3, $4); }
  	| NAME TEX_NAME
- 		{$$  = driver.add_exogenous_det($1, $2);}
+ 		{ driver.declare_exogenous_det($1, $2); }
 	; 
 
  parameter_list
  	: parameter_list NAME
- 		{$$  = driver.add_parameter($2);}
+ 		{ driver.declare_parameter($2); }
  	| parameter_list COMMA NAME
- 		{$$  = driver.add_parameter($3);}
+ 		{ driver.declare_parameter($3); }
  	| NAME
- 		{$$  = driver.add_parameter($1);}
+ 		{ driver.declare_parameter($1); }
  	| parameter_list NAME TEX_NAME
- 		{$$  = driver.add_parameter($2, $3);}
+ 		{ driver.declare_parameter($2, $3); }
  	| parameter_list COMMA NAME TEX_NAME
- 		{$$  = driver.add_parameter($3, $4);}
+ 		{ driver.declare_parameter($3, $4); }
  	| NAME TEX_NAME
- 		{$$  = driver.add_parameter($1, $2);}
+ 		{ driver.declare_parameter($1, $2); }
 	; 	
 
  periods 
@@ -229,61 +234,64 @@ class ParsingDriver;
 
  		   
  equality_expression
- 	: NAME EQUAL expression {$$ = driver.get_expression($3);} ';' 
-    {driver.init_param($1, $<obj>4);} 
+ 	: NAME EQUAL expression ';'
+    {driver.init_param($1, $3);} 
 	;
  	
  expression
 	: '(' expression ')'
 		{ $$ = $2;}
 	| NAME
-		{$$ = driver.translate_symbol($1);}
+		{$$ = driver.add_expression_variable($1);}
 	| FLOAT_NUMBER
-		{$$ = driver.add_constant($1);}
+		{$$ = driver.add_expression_constant($1);}
 	| INT_NUMBER
-		{$$ = driver.add_constant($1);}
+		{$$ = driver.add_expression_constant($1);}
 	| expression PLUS expression 
-    	{$$ = driver.add_expression_token($1, $3, $2);}
+    {$$ = driver.add_expression_token($1, $3, token::PLUS);}
 	| expression MINUS expression
-    	{$$ = driver.add_expression_token($1, $3, $2);}
+    {$$ = driver.add_expression_token($1, $3, token::MINUS);}
 	| expression DIVIDE expression	 
-    	{$$ = driver.add_expression_token($1, $3, $2);}
+    {$$ = driver.add_expression_token($1, $3, token::DIVIDE);}
 	| expression TIMES expression 
-    	{$$ = driver.add_expression_token($1, $3, $2);}
+    {$$ = driver.add_expression_token($1, $3, token::TIMES);}
 	| expression POWER expression 
-    	{$$ = driver.add_expression_token($1, $3, $2);}	
+    {$$ = driver.add_expression_token($1, $3, token::POWER);}	
 	| MINUS expression %prec UMINUS
-      {$1->opcode = token::UMINUS; $$ = driver.add_expression_token($2, $1);}
+    {$$ = driver.add_expression_token($2, token::UMINUS);}
 	| PLUS expression
-	{$$ = $2;}
+	  {$$ = $2;}
 	| EXP '(' expression ')'
-    	{$$ = driver.add_expression_token($3, $1);}
+    {$$ = driver.add_expression_token($3, token::EXP);}
 	| LOG '(' expression ')'
-    	{$$ = driver.add_expression_token($3, $1);}
+    {$$ = driver.add_expression_token($3, token::LOG);}
 	| LOG10 '(' expression ')'
-    	{$$ = driver.add_expression_token($3, $1);}
+    {$$ = driver.add_expression_token($3, token::LOG10);}
 	| SIN '(' expression ')'
-    	{$$ = driver.add_expression_token($3, $1);}
+    {$$ = driver.add_expression_token($3, token::SIN);}
 	| COS '(' expression ')'
-    	{$$ = driver.add_expression_token($3, $1);}
+    {$$ = driver.add_expression_token($3, token::COS);}
 	| TAN '(' expression ')'
-    	{$$ = driver.add_expression_token($3, $1);}
+    {$$ = driver.add_expression_token($3, token::TAN);}
 	| ASIN '(' expression ')'
-    	{$$ = driver.add_expression_token($3, $1);}
+    {$$ = driver.add_expression_token($3, token::ASIN);}
 	| ACOS '(' expression ')'
-    	{$$ = driver.add_expression_token($3, $1);}
+    {$$ = driver.add_expression_token($3, token::ACOS);}
 	| ATAN '(' expression ')'
-    	{$$ = driver.add_expression_token($3, $1);}
+    {$$ = driver.add_expression_token($3, token::ATAN);}
 	| SQRT '(' expression ')'
-    	{$$ = driver.add_expression_token($3, $1);}
-        | NAME '(' expression ')' 
-    	{$$ = driver.add_expression_token($3, $1);}
-        | NAME '(' comma_expression ')' 
-    	{$$ = driver.add_expression_token($3, $1);}
+    {$$ = driver.add_expression_token($3, token::SQRT);}
+  | NAME '(' expression ')' 
+    {$$ = driver.add_expression_token($3, $1);}
+  | NAME '(' comma_expression ')' 
+   	{$$ = driver.add_expression_token($3, $1);}
 	; 
 
- comma_expression : expression COMMA expression {$$ = driver.add_expression_token($1, $3, $2);}
-        | comma_expression COMMA expression {$$ = driver.add_expression_token($1, $3, $2);}
+ comma_expression :
+          expression COMMA expression
+          {$$ = driver.add_expression_token($1, $3, token::COMMA);}
+        | comma_expression COMMA expression
+          {$$ = driver.add_expression_token($1, $3, token::COMMA);}
 
  initval
  	: INITVAL ';' {driver.begin_initval();} initval_list END
@@ -301,8 +309,8 @@ class ParsingDriver;
 	;
 
  initval_elem 
- 	: NAME EQUAL expression {$$ = driver.get_expression($3);} ';'
-    {driver.init_val($1, $<obj>4);}
+ 	: NAME EQUAL expression ';'
+    {driver.init_val($1, $3);}
  	; 	
  	
  histval
@@ -314,9 +322,8 @@ class ParsingDriver;
 	;
 	
  histval_elem
- 	: NAME '(' signed_integer ')' EQUAL expression 
-                {$$ = driver.get_expression($6);} ';'
-    {driver.hist_val($1, $3, $<obj>7);}
+ 	: NAME '(' signed_integer ')' EQUAL expression ';'
+    {driver.hist_val($1, $3, $6);}
  	;
 	
  model
@@ -337,9 +344,9 @@ class ParsingDriver;
     
  equation
  	: hand_side EQUAL hand_side ';'
- 		{$$ = driver.add_equal($1, $3);}
+ 		{$$ = driver.add_model_equal($1, $3);}
  	| hand_side ';'
- 		{$$ = driver.add_equal($1);}
+ 		{$$ = driver.add_model_equal($1);}
 	;
  
  hand_side
@@ -348,53 +355,51 @@ class ParsingDriver;
 	| FLOAT_NUMBER
 		{$$ = driver.add_model_constant($1);}
 	| INT_NUMBER
-		{$1->symbol += ".0"; $$ = driver.add_model_constant($1);}
+    {$1->append(".0"); $$ = driver.add_model_constant($1);}
 	| hand_side PLUS hand_side 
-    	{$$ = driver.add_plus($1, $3);}
+    	{$$ = driver.add_model_plus($1, $3);}
 	| hand_side MINUS hand_side
-    	{$$ = driver.add_minus($1, $3);}
+    	{$$ = driver.add_model_minus($1, $3);}
 	| hand_side DIVIDE hand_side	 
-    	{$$ = driver.add_divide($1, $3);}
+    	{$$ = driver.add_model_divide($1, $3);}
 	| hand_side TIMES hand_side 
-    	{$$ = driver.add_times($1, $3);}
+    	{$$ = driver.add_model_times($1, $3);}
 	| hand_side POWER hand_side 
-    	{$$ = driver.add_power($1, $3);}	
+    	{$$ = driver.add_model_power($1, $3);}	
         | MINUS hand_side %prec UMINUS
-      {$1->opcode = token::UMINUS; $$ = driver.add_uminus($2);}
+      { $$ = driver.add_model_uminus($2);}
 	| PLUS hand_side
 	{$$ = $2;}
 	| EXP '(' hand_side ')'
-    	{$$ = driver.add_exp($3);}
+    	{$$ = driver.add_model_exp($3);}
 	| LOG '(' hand_side ')'
-    	{$$ = driver.add_log($3);}
+    	{$$ = driver.add_model_log($3);}
 	| LOG10 '(' hand_side ')'
-    	{$$ = driver.add_log10($3);}
+    	{$$ = driver.add_model_log10($3);}
 	| SIN '(' hand_side ')'
-    	{$$ = driver.add_sin($3);}
+    	{$$ = driver.add_model_sin($3);}
 	| COS '(' hand_side ')'
-    	{$$ = driver.add_cos($3);}
+    	{$$ = driver.add_model_cos($3);}
 	| TAN '(' hand_side ')'
-    	{$$ = driver.add_tan($3);}
+    	{$$ = driver.add_model_tan($3);}
 	| ASIN '(' hand_side ')'
-    	{$$ = driver.add_asin($3);}
+    	{$$ = driver.add_model_asin($3);}
 	| ACOS '(' hand_side ')'
-    	{$$ = driver.add_acos($3);}
+    	{$$ = driver.add_model_acos($3);}
 	| ATAN '(' hand_side ')'
-    	{$$ = driver.add_atan($3);}
+    	{$$ = driver.add_model_atan($3);}
 	| SQRT '(' hand_side ')'
-    	{$$ = driver.add_sqrt($3);}
+    	{$$ = driver.add_model_sqrt($3);}
 	;
 	
- pound_expression: '#' NAME 
-                   {$$ = driver.add_local_parameter($2);}
-		   EQUAL hand_side ';'
-                   {$$ = driver.init_local_parameter($<obj>3, $5);}
+ pound_expression: '#' NAME EQUAL hand_side ';'
+                   {driver.declare_and_init_local_parameter($2, $4);}
 
  model_var
  	: NAME 
- 		{$$ = driver.add_variable($1);}
+ 		{$$ = driver.add_model_variable($1);}
 	| NAME '(' signed_integer ')'
-		{$$ = driver.add_variable($1, $3);}
+		{$$ = driver.add_model_variable($1, $3);}
 	;
 	
  shocks
@@ -413,14 +418,14 @@ class ParsingDriver;
  shock_elem 
 	: VAR NAME ';' PERIODS period_list ';' VALUES value_list ';'
 		{driver.add_det_shock($2);}
-	| VAR NAME ';' STDERR expression {$$ = driver.get_expression($5);} ';'
-    {driver.add_stderr_shock($2, $<obj>6);}
-	| VAR NAME EQUAL expression {$$ = driver.get_expression($4);} ';'
-    {driver.add_var_shock($2, $<obj>5);}	
-	| VAR NAME COMMA NAME EQUAL expression {$$ = driver.get_expression($6);} ';'
-    {driver.add_covar_shock($2, $4, $<obj>7);}
-	| CORR NAME COMMA NAME EQUAL expression {$$ = driver.get_expression($6);} ';'
-    {driver.add_correl_shock($2, $4, $<obj>7);}
+	| VAR NAME ';' STDERR expression ';'
+    {driver.add_stderr_shock($2, $5);}
+	| VAR NAME EQUAL expression ';'
+    {driver.add_var_shock($2, $4);}	
+	| VAR NAME COMMA NAME EQUAL expression ';'
+    {driver.add_covar_shock($2, $4, $6);}
+	| CORR NAME COMMA NAME EQUAL expression ';'
+    {driver.add_correl_shock($2, $4, $6);}
 	;
 
  period_list
@@ -452,10 +457,10 @@ class ParsingDriver;
 		{driver.add_value($1);}
 	| NAME
 		{driver.add_value($1);}
-	| value_list '(' expression {$$ = driver.get_expression($3);} ')'
-    {driver.add_value($<obj>4);}
-	| '(' expression {$$ = driver.get_expression($2);} ')'
-    {driver.add_value($<obj>3);}
+	| value_list '(' expression ')'
+    {driver.add_value($3);}
+	| '(' expression ')'
+    {driver.add_value($2);}
 	;
 	
  sigma_e 
@@ -471,20 +476,20 @@ class ParsingDriver;
 	;
 	
  triangular_row 
- 	: triangular_row COMMA '(' expression {$$ = driver.get_expression($4);} ')' 
-    {driver.add_to_row($<obj>5);}
+ 	: triangular_row COMMA '(' expression ')' 
+    {driver.add_to_row($4);}
 	| triangular_row COMMA FLOAT_NUMBER 
 		{driver.add_to_row($3);}
 	| triangular_row COMMA INT_NUMBER 
 		{driver.add_to_row($3);}
-	| triangular_row '(' expression {$$ = driver.get_expression($3);} ')' 
-    {driver.add_to_row($<obj>4);}
+	| triangular_row '(' expression ')'
+    {driver.add_to_row($3);}
 	| triangular_row FLOAT_NUMBER 
 		{driver.add_to_row($2);}
 	| triangular_row INT_NUMBER 
 		{driver.add_to_row($2);}
-	| '(' expression {$$ = driver.get_expression($2);} ')' 
-    {driver.add_to_row($<obj>3);}
+	| '(' expression ')'
+    {driver.add_to_row($2);}
 	| FLOAT_NUMBER 
 		{driver.add_to_row($1);}
 	| INT_NUMBER 
@@ -590,7 +595,7 @@ class ParsingDriver;
  	: PLUS INT_NUMBER
  		{$$ = $2;}
  	| MINUS INT_NUMBER
- 		{$2->symbol.insert(0, "-"); $$ = $2;}
+ 		{$2->insert(0, "-"); $$ = $2;}
  	| INT_NUMBER
  		{$$ = $1;}
  	;
@@ -599,7 +604,7 @@ class ParsingDriver;
  	: PLUS FLOAT_NUMBER
  		{$$ = $2;}
  	| MINUS FLOAT_NUMBER
- 		{$2->symbol.insert(0, "-"); $$ = $2;}
+ 		{$2->insert(0, "-"); $$ = $2;}
  	| FLOAT_NUMBER
  		{$$ = $1;}
  	;
@@ -623,37 +628,56 @@ class ParsingDriver;
 	: STDERR NAME 
 		{driver.estim_params.type = 1;
 		 driver.estim_params.name = *$2;
+     delete $2;
 		}
 	| NAME
 		{driver.estim_params.type = 2;
 		 driver.estim_params.name = *$1;
+     delete $1;
 		}
 	| CORR NAME COMMA NAME
 		{driver.estim_params.type = 3;
 		 driver.estim_params.name = *$2;
 		 driver.estim_params.name2 = *$4;
+     delete $2;
+     delete $4;
 		}
 	;
 
  estimated_elem2 
 	: prior COMMA estimated_elem3 
-		{driver.estim_params.prior=*$1;}
+		{
+      driver.estim_params.prior=*$1;
+      delete $1;
+    }
 	| value COMMA prior COMMA estimated_elem3 
 		{driver.estim_params.init_val=*$1;
 		 driver.estim_params.prior=*$3;
+     delete $1;
+     delete $3;
 		}
 	| value COMMA value COMMA value COMMA prior COMMA estimated_elem3 
 		{driver.estim_params.init_val=*$1;
 		 driver.estim_params.low_bound=*$3;
 		 driver.estim_params.up_bound=*$5;
 		 driver.estim_params.prior=*$7;
+     delete $1;
+     delete $3;
+     delete $5;
+     delete $7;
 		}
 	| value 
-		{driver.estim_params.init_val=*$1;}
+		{
+      driver.estim_params.init_val=*$1;
+      delete $1;
+    }
 	| value COMMA value COMMA value 
 		{driver.estim_params.init_val=*$1;
 		 driver.estim_params.low_bound=*$3;
 		 driver.estim_params.up_bound=*$5;
+     delete $1;
+     delete $3;
+     delete $5;
 		}
 	;
 
@@ -661,17 +685,26 @@ class ParsingDriver;
  	: value COMMA value 
  		{driver.estim_params.mean=*$1;
  		 driver.estim_params.std=*$3;
+     delete $1;
+     delete $3;
  		}
 	| value COMMA value COMMA value
 		{driver.estim_params.mean=*$1;
 		 driver.estim_params.std=*$3;
 		 driver.estim_params.p3=*$5;
+     delete $1;
+     delete $3;
+     delete $5;
 		}	
 	| value COMMA value COMMA value COMMA value 
 		{driver.estim_params.mean=*$1;
 		 driver.estim_params.std=*$3;
 		 driver.estim_params.p3=*$5;
 		 driver.estim_params.p4=*$7;
+     delete $1;
+     delete $3;
+     delete $5;
+     delete $7;
 		}
 	| value COMMA value COMMA value COMMA value COMMA value 
 		{driver.estim_params.mean=*$1;
@@ -679,6 +712,11 @@ class ParsingDriver;
 		 driver.estim_params.p3=*$5;
 		 driver.estim_params.p4=*$7;
 		 driver.estim_params.jscale=*$9;
+     delete $1;
+     delete $3;
+     delete $5;
+     delete $7;
+     delete $9;
 		}
 	;
 
@@ -695,17 +733,24 @@ class ParsingDriver;
  		     		{driver.estim_params.type = 1;
 				 driver.estim_params.name = *$2;
 				 driver.estim_params.init_val=*$4;
+         delete $2;
+         delete $4;
 				}
                      | CORR NAME COMMA NAME COMMA value ';'
  		     		{driver.estim_params.type = 3;
 				 driver.estim_params.name = *$2;
 				 driver.estim_params.name2 = *$4;
 				 driver.estim_params.init_val=*$6;
+         delete $2;
+         delete $4;
+         delete $6;
 				}
                      | NAME COMMA value ';'
  		     		{driver.estim_params.type = 2;
 				 driver.estim_params.name = *$1;
 				 driver.estim_params.init_val=*$3;
+         delete $1;
+         delete $3;
 				}
                      ;
 
@@ -723,6 +768,9 @@ class ParsingDriver;
 				 driver.estim_params.name = *$2;
 				 driver.estim_params.low_bound=*$4;
 				 driver.estim_params.up_bound=*$6;
+         delete $2;
+         delete $4;
+         delete $6;
 				}
                      | CORR NAME COMMA NAME COMMA value COMMA value ';'
  		     		{driver.estim_params.type = 3;
@@ -730,37 +778,44 @@ class ParsingDriver;
 				 driver.estim_params.name2 = *$4;
 				 driver.estim_params.low_bound=*$6;
 				 driver.estim_params.up_bound=*$8;
+         delete $2;
+         delete $4;
+         delete $6;
+         delete $8;
 				}
                      | NAME COMMA value COMMA value ';'
  		     		{driver.estim_params.type = 2;
 				 driver.estim_params.name = *$1;
 				 driver.estim_params.low_bound=*$3;
 				 driver.estim_params.up_bound=*$5;
+         delete $1;
+         delete $3;
+         delete $5;
 				}
                      ;
 
  prior
 	: BETA_PDF 
-		{$$ = new dynare::Objects("1");}
+    {$$ = new string("1");}
 	| GAMMA_PDF 
-		{$$ = new dynare::Objects("2");}
+    {$$ = new string("2");}
 	| NORMAL_PDF 
-		{$$ = new dynare::Objects("3");}
+    {$$ = new string("3");}
 	| INV_GAMMA_PDF 
-		{$$ = new dynare::Objects("4");}
+    {$$ = new string("4");}
 	| UNIFORM_PDF 
-		{$$ = new dynare::Objects("5");}
+    {$$ = new string("5");}
 	;
 
  value 
-	: {$$ = new dynare::Objects("NaN");} 
-        | INT_NUMBER
+  : {$$ = new string("NaN");} 
+  | INT_NUMBER
 	| FLOAT_NUMBER
 	| NAME
-        | MINUS INT_NUMBER
- 		{$2->symbol.insert(0, "-"); $$ = $2;}
-        | MINUS FLOAT_NUMBER
- 		{$2->symbol.insert(0, "-"); $$ = $2;}
+  | MINUS INT_NUMBER
+    {$2->insert(0, "-"); $$ = $2;}
+  | MINUS FLOAT_NUMBER
+    {$2->insert(0, "-"); $$ = $2;}
 	;
 
  
@@ -845,7 +900,8 @@ class ParsingDriver;
 	| trend_element
 	;
 
- trend_element :  NAME '(' expression {$$ = driver.get_expression($3);} ')' ';' {driver.set_trend_element($1, $<obj>4);}
+ trend_element :  NAME '(' expression ')' ';' 
+{driver.set_trend_element($1, $3);}
                ;
 
  unit_root_vars : UNIT_ROOT_VARS tmp_var_list ';' {driver.set_unit_root_vars();}
@@ -854,10 +910,14 @@ class ParsingDriver;
  optim_weights : OPTIM_WEIGHTS ';' {driver.begin_optim_weights();} optim_weights_list END
                ;
 
- optim_weights_list : optim_weights_list NAME expression {$$ = driver.get_expression($3);} ';'  {driver.set_optim_weights($2, $<obj>4);}
-                    | optim_weights_list NAME COMMA NAME expression {$$ = driver.get_expression($3);} ';' {driver.set_optim_weights($2, $4, $<obj>6);}
-                    | NAME expression {$$ = driver.get_expression($2);} ';' {driver.set_optim_weights($1, $<obj>3);}
-                    | NAME COMMA NAME expression {$$ = driver.get_expression($3);} ';' {driver.set_optim_weights($1, $3, $<obj>5);}
+ optim_weights_list : optim_weights_list NAME expression ';' 
+                      {driver.set_optim_weights($2, $3);}
+                    | optim_weights_list NAME COMMA NAME expression ';'
+                      {driver.set_optim_weights($2, $4, $5);}
+                    | NAME expression ';'
+                      {driver.set_optim_weights($1, $2);}
+                    | NAME COMMA NAME expression ';'
+                      {driver.set_optim_weights($1, $3, $4);}
                     ;
 
  osr_params : OSR_PARAMS tmp_var_list ';' {driver.set_osr_params();}
@@ -898,7 +958,7 @@ class ParsingDriver;
             | AUTOCORR NAME '(' INT_NUMBER ')' calib_arg2 EQUAL expression ';' {driver.set_calib_ac($2, $4, $6, $8);}
             ;
 
- calib_arg2 : {$$ = new dynare::Objects("1");}
+ calib_arg2 : { $$ = new string("1"); }
             | '(' INT_NUMBER ')' {$$ = $2;}
             | '(' FLOAT_NUMBER ')' {$$ = $2;}
             ;
@@ -941,15 +1001,15 @@ class ParsingDriver;
         ;
 
  filename : filename_elem {$$ = $1;}
-        | filename filename_elem {$$ = driver.cat($1, $2);}
+          | filename filename_elem {$1->append(*$2); delete $2; $$ = $1;}
         ;
 
  filename_elem : NAME
-        | '\\' {$$ = new dynare::Objects("\\");}
-        | '/' {$$ = new dynare::Objects("/");}
-        | ':' {$$ = new dynare::Objects(":");}
-        | '.' {$$ = new dynare::Objects(".");}
-        ;
+               | '\\' { $$ = new string("\\"); }
+               | '/' { $$ = new string("/"); }
+               | ':' { $$ = new string(":"); }
+               | '.' { $$ = new string("."); }
+               ;
 
  o_dr_algo: DR_ALGO EQUAL INT_NUMBER {driver.option_num("dr_algo", $3);};
  o_solve_algo: SOLVE_ALGO EQUAL INT_NUMBER {driver.option_num("solve_algo", $3);};
@@ -1007,8 +1067,11 @@ class ParsingDriver;
  o_kalman_algo : KALMAN_ALGO EQUAL INT_NUMBER {driver.option_num("kalman_algo", $3);};
  o_kalman_tol : KALMAN_TOL EQUAL INT_NUMBER {driver.option_num("kalman_tol", $3);};
  o_olr_beta: OLR_BETA EQUAL value {driver.option_num("olr_beta", $3);};
- o_model_comparison_approximation: MODEL_COMPARISON_APPROXIMATION EQUAL LAPLACE {dynare::Objects* tmp = new dynare::Objects("Laplace"); driver.option_str("model_comparison_approximation", tmp);}
-   | MODEL_COMPARISON_APPROXIMATION EQUAL MODIFIEDHARMONICMEAN {dynare::Objects* tmp = new dynare::Objects("MODIFIEDHARMONICMEAN"); driver.option_str("model_comparison_approximation", tmp);}
+ o_model_comparison_approximation:
+     MODEL_COMPARISON_APPROXIMATION EQUAL LAPLACE
+     { driver.option_str("model_comparison_approximation", "Laplace"); }
+   | MODEL_COMPARISON_APPROXIMATION EQUAL MODIFIEDHARMONICMEAN
+     { driver.option_str("model_comparison_approximation", "MODIFIEDHARMONICMEAN"); }
    ;
  o_print : PRINT {driver.option_num("noprint", "0");};
  o_noprint : NOPRINT {driver.option_num("noprint", "1");};
@@ -1019,23 +1082,35 @@ class ParsingDriver;
  o_constant : CONSTANT {driver.option_num("noconstant", "0");}
  o_noconstant : NOCONSTANT {driver.option_num("noconstant", "1");}
 
- range : NAME ':' NAME {$$ = new dynare::Objects(":");$$ = driver.cat($1, $$);$$ = driver.cat($$, $3);}
+ range : NAME ':' NAME
+  {
+    $1->append(":");
+    $1->append(*$3);
+    delete $3;
+    $$ = $1;
+  }
  vec_int_elem : INT_NUMBER
- 	      | INT_NUMBER ':' {$$ = new dynare::Objects(":"); $$ = driver.cat($1, $$); }
-          INT_NUMBER {$$ = driver.cat($<obj>3,$4);}   		    	        
-	      ;
+              | INT_NUMBER ':' INT_NUMBER
+                { $1->append(":"); $1->append(*$3); delete $3; $$ = $1; }
+	            ;
 
- vec_int_1 : '[' vec_int_elem {$$ = new dynare::Objects("["); $$ = driver.cat($$, $2);}
-           | vec_int_1 vec_int_elem {$$ = driver.cat_with_space($1, $2);}
+ vec_int_1 : '[' vec_int_elem { $2->insert(0, "["); $$ = $2;}
+           | vec_int_1 vec_int_elem
+             {
+               $1->append(" ");
+               $1->append(*$2);
+               delete $2;
+               $$ = $1;
+             }
            ;
 
- vec_int : vec_int_1 ']' {$$ = new dynare::Objects("]"); $$ = driver.cat($1, $$);};
+ vec_int : vec_int_1 ']' { $1->append("]"); $$ = $1; };
 
 %%
 
 void
-yy::parser::error(const yy::parser::location_type& l,
-                  const std::string& m)
+yy::parser::error(const yy::parser::location_type &l,
+                  const string &m)
 {
   driver.error(l, m);
 }

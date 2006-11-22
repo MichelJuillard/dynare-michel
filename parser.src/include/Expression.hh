@@ -10,11 +10,10 @@
 #include <map>
 #include <vector>
 #include <sstream>
-//------------------------------------------------------------------------------
-#include "SymbolTable.hh"
+
 #include "OperatorTable.hh"
 #include "NumericalConstants.hh"
-//------------------------------------------------------------------------------
+
 struct Token
 {
   /*! ID of first operand */
@@ -69,9 +68,8 @@ public :
   void  clear(void);
   /*! Print expression to output string */
   void  set(void);
-private :
   /*! Gets output argument name */
-  std::string   getArgument(Type type,int id);
+  static std::string   getArgument(Type type,int id);
 };
 //------------------------------------------------------------------------------
 #endif

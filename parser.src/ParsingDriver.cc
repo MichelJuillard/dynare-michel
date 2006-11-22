@@ -1,19 +1,3 @@
-/*! \file
-  \version 1.0
-  \date 04/09/2004
-  \par This file implements the parser class methodes.
-*/
-//------------------------------------------------------------------------------
-#include "ModelParameters.hh"
-#include "SymbolTable.hh"
-#include "Expression.hh"
-#include "NumericalInitialization.hh"
-#include "ModelTree.hh"
-#include "VariableTable.hh"
-#include "Shocks.hh"
-#include "SigmaeInitialization.hh"
-#include "ComputingTasks.hh"
-#include "TmpSymbolTable.hh"
 #include "ParsingDriver.hh"
 
 ParsingDriver::ParsingDriver() : trace_scanning(false), trace_parsing(false)
@@ -34,7 +18,29 @@ ParsingDriver::~ParsingDriver()
 }
 
 void
-ParsingDriver::parse(const std::string& f)
+ParsingDriver::check_symbol_existence(const string &name)
+{
+  if (!symbol_table.Exist(name))
+    error("Unknown symbol: " + name);
+}
+
+string
+ParsingDriver::get_expression(ExpObj *exp)
+{
+  // Here we don't call "delete exp", since this will be done by the calling function
+  if (exp->second == eTempResult)
+    {
+      expression.set();
+      string sexp = expression.get();
+      expression.clear();
+      return sexp;
+    }
+  else
+    return Expression::getArgument(exp->second, exp->first);
+}
+
+void
+ParsingDriver::parse(const string &f)
 {
   file = f;
   scan_begin();
@@ -45,20 +51,22 @@ ParsingDriver::parse(const std::string& f)
 }
 
 void
-ParsingDriver::error(const yy::parser::location_type& l, const std::string& m)
+ParsingDriver::error(const yy::parser::location_type &l, const string &m)
 {
-  std::cerr << l << ": " << m << std::endl;
+  cerr << l << ": " << m << endl;
   exit(-1);
 }
 
 void
-ParsingDriver::error(const std::string& m)
+ParsingDriver::error(const string &m)
 {
-  std::cerr << file << ": " << m << std::endl;
+  extern int yylineno;
+  cerr << file << ":" << yylineno << ": " << m << endl;
   exit(-1);
 }
 
-void ParsingDriver::setoutput(ostringstream* ostr)
+void
+ParsingDriver::setoutput(ostringstream *ostr)
 {
   output = ostr;
   numerical_initialization.setOutput(ostr);
@@ -67,226 +75,174 @@ void ParsingDriver::setoutput(ostringstream* ostr)
   computing_tasks.setOutput(ostr);
 }
 
-dynare::Objects* ParsingDriver::add_endogenous(Objects* obj, Objects* tex_name)
+void
+ParsingDriver::declare_endogenous(string *name, string *tex_name)
 {
-  //cout << "add_endogenous \n";
-
-  obj->ID = (NodeID) symbol_table.AddSymbolDeclar(obj->symbol,eEndogenous, tex_name->symbol);
-  obj->type = eEndogenous;
-  return (obj);
+  symbol_table.AddSymbolDeclar(*name, eEndogenous, *tex_name);
+  delete name;
+  delete tex_name;
 }
 
-dynare::Objects* ParsingDriver::add_exogenous(Objects* obj, Objects* tex_name)
+void
+ParsingDriver::declare_exogenous(string *name, string *tex_name)
 {
-  obj->ID = (NodeID) symbol_table.AddSymbolDeclar(obj->symbol,eExogenous, tex_name->symbol);
-  obj->type = eExogenous;
-  return (obj);
+  symbol_table.AddSymbolDeclar(*name, eExogenous, *tex_name);
+  delete name;
+  delete tex_name;
 }
 
-dynare::Objects* ParsingDriver::add_exogenous_det(Objects* obj, Objects* tex_name)
+void
+ParsingDriver::declare_exogenous_det(string *name, string *tex_name)
 {
-  obj->ID = (NodeID) symbol_table.AddSymbolDeclar(obj->symbol,eExogenousDet, tex_name->symbol);
-  obj->type = eExogenousDet;
-  return (obj);
+  symbol_table.AddSymbolDeclar(*name, eExogenousDet, *tex_name);
+  delete name;
+  delete tex_name;
 }
 
-dynare::Objects* ParsingDriver::add_parameter(Objects* obj, Objects* tex_name)
+void
+ParsingDriver::declare_parameter(string *name, string *tex_name)
 {
-  obj->ID = (NodeID) symbol_table.AddSymbolDeclar(obj->symbol,eParameter, tex_name->symbol);
-  obj->type = eParameter;
-  return (obj);
+  symbol_table.AddSymbolDeclar(*name, eParameter, *tex_name);
+  delete name;
+  delete tex_name;
 }
 
-dynare::Objects* ParsingDriver::add_local_parameter(Objects* obj)
+ExpObj *
+ParsingDriver::add_expression_constant(string *constant)
 {
-  obj->ID = (NodeID) symbol_table.AddSymbolDeclar(obj->symbol,eLocalParameter, obj->symbol);
-  obj->type = eLocalParameter;
-  NodeID id = model_tree.AddTerminal(obj->symbol);
-  return new Objects("", id, eTempResult);
+  int id = num_constants.AddConstant(*constant);
+  delete constant;
+  return new ExpObj(id, eNumericalConstant);
 }
 
-dynare::Objects* ParsingDriver::add_constant(Objects* obj)
+NodeID
+ParsingDriver::add_model_constant(string *constant)
 {
-  obj->ID = (NodeID) num_constants.AddConstant(obj->symbol);
-  obj->type = eNumericalConstant;
-  return obj;
+  int id = num_constants.AddConstant(*constant);
+  delete constant;
+  return model_tree.AddTerminal((NodeID) id, eNumericalConstant);
 }
 
-dynare::Objects* ParsingDriver::add_model_constant(Objects* constant)
+NodeID
+ParsingDriver::add_model_variable(string *name)
 {
-  constant = add_constant(constant);
-  NodeID id = model_tree.AddTerminal(constant->ID, eNumericalConstant);
-  return new Objects("", id, eTempResult);
+  check_symbol_existence(*name);
+  Type type = symbol_table.getType(*name);
+
+  if ((type == eEndogenous)
+      || (type == eExogenous)
+      || (type == eExogenousDet))
+    variable_table.AddVariable(*name, 0);
+
+  NodeID id = model_tree.AddTerminal(*name);
+  delete name;
+  return id;
 }
 
-dynare::Objects* ParsingDriver::add_variable(Objects* var)
+NodeID
+ParsingDriver::add_model_variable(string *name, string *olag)
 {
-  //cout << "add_variable1 : " << var->symbol << endl;
-  var = get_symbol(var);
-  if((var->type == eEndogenous)
-     || (var->type == eExogenous)
-     || (var->type == eExogenousDet))
-    variable_table.AddVariable(var->symbol,0);
-  //cout   << "add_model_token : " << var->ID << endl;
-  NodeID id = model_tree.AddTerminal(var->symbol);
-  return new Objects("", id, eTempResult);
-}
+  check_symbol_existence(*name);
+  Type type = symbol_table.getType(*name);
+  int lag = atoi(olag->c_str());
 
-dynare::Objects* ParsingDriver::add_variable(Objects* var,Objects* olag)
-{
-  //cout << "add_variable2\n";
-
-  var = get_symbol(var);
-  int lag = atoi((olag->symbol).c_str());
-  //cout << "symbol = " << olag->symbol << endl;
-  //cout << "lag = " << lag << endl;
-  if ((var->type == eExogenous) && lag != 0)
+  if ((type == eExogenous) && lag != 0)
     {
-      std::cout << "Warning: exogenous variable "
-                << var->symbol
-                << " has lag " << lag << "\n";
-    }
-  if ((var->type == eEndogenous) || (var->type == eExogenous))
-    variable_table.AddVariable(var->symbol,lag);
-  //cout   << "add_model_token : " << var->ID << endl;
-  NodeID id = model_tree.AddTerminal(var->symbol,lag);
-  return new Objects("", id, eTempResult);
-}
-
-dynare::Objects* ParsingDriver::get_symbol(Objects* obj)
-{
-  if (!symbol_table.Exist(obj->symbol))
-    {
-      string msg = "Unknown symbol : "+obj->symbol;
-      error(msg.c_str());
-    }
-  obj->ID = (NodeID) symbol_table.getID(obj->symbol);
-  obj->type = symbol_table.getType(obj->symbol);
-  return obj;
-}
-
-dynare::Objects* ParsingDriver::translate_symbol(Objects* obj)
-{
-  if (!symbol_table.Exist(obj->symbol))
-    {
-      string msg = "Unknown symbol : "+obj->symbol;
-      error(msg.c_str());
-    }
-  obj->ID = (NodeID) symbol_table.getID(obj->symbol);
-  obj->type = symbol_table.getType(obj->symbol);
-  ostringstream symbol;
-  if (obj->type == eEndogenous)
-    {
-      symbol << "oo_.steady_state(" << (long int)obj->ID+1 << ")";
-      obj->symbol = symbol.str();
-    }
-  else if (obj->type == eExogenous)
-    {
-      symbol << "oo_.exo_steady_state(" << (long int)obj->ID+1 << ")";
-      obj->symbol = symbol.str();
-    }
-  else if (obj->type == eExogenousDet)
-    {
-      symbol << "oo_.exo_det_steady_state(" << (long int)obj->ID+1 << ")";
-      obj->symbol = symbol.str();
-    }
-  else if (obj->type == eParameter)
-    {
-      symbol << "M_.params(" << (long int)obj->ID+1 << ")";
-      obj->symbol = symbol.str();
-    }
-  else if (obj->type == eLocalParameter)
-    {
-      symbol << obj->symbol;
-    }
-  return obj;
-}
-
-dynare::Objects* ParsingDriver::add_expression_token( Objects* arg1,  Objects* arg2,  Objects* op)
-{
-  int id = expression.AddToken((long int) arg1->ID,arg1->type,
-                               (long int) arg2->ID,arg2->type,
-                               op->opcode);
-  //cout << "after add_expression_token\n";
-  return new Objects("", (NodeID) id, eTempResult);
-}
-
-dynare::Objects* ParsingDriver::add_expression_token( Objects* arg1, Objects* op)
-{
-  int id;
-  if (op->opcode != token::NAME)
-    {
-      id = expression.AddToken((long int) arg1->ID,arg1->type,
-                               op->opcode);
-    }
-  else
-    {
-      id = expression.AddToken((long int) arg1->ID,arg1->type,
-                               op->symbol);
+      cout << "Warning: exogenous variable "
+           << *name
+           << " has lag " << lag << endl;
     }
 
-  //cout << "after add_expression_token\n";
-  return new Objects("", (NodeID) id, eTempResult);
+  if ((type == eEndogenous) || (type == eExogenous))
+    variable_table.AddVariable(*name, lag);
+
+  NodeID id = model_tree.AddTerminal(*name, lag);
+  delete name;
+  delete olag;
+  return id;
 }
 
-dynare::Objects* ParsingDriver::get_expression(Objects* exp)
+ExpObj *
+ParsingDriver::add_expression_variable(string *name)
 {
-  if (exp->type == eTempResult)
-    {
-      expression.set();
-      string exp = expression.get();
-      expression.clear();
-      return new Objects(exp);
-    }
-  else
-    return exp;
+  check_symbol_existence(*name);
+  int id = symbol_table.getID(*name);
+  Type type = symbol_table.getType(*name);
+  delete name;
+  return new ExpObj(id, type);
 }
 
-dynare::Objects* ParsingDriver::cat(Objects* string1, Objects* string2)
+ExpObj *
+ParsingDriver::add_expression_token(ExpObj *arg1, ExpObj *arg2, int op)
 {
-  dynare::Objects* result = new dynare::Objects;
-  result->symbol = string1->symbol+string2->symbol;
-  return result;
+  int id = expression.AddToken(arg1->first, arg1->second,
+                               arg2->first, arg2->second,
+                               op);
+  delete arg1;
+  delete arg2;
+  return new ExpObj(id, eTempResult);
 }
 
-dynare::Objects* ParsingDriver::cat_with_space(Objects* string1, Objects* string2)
+ExpObj *
+ParsingDriver::add_expression_token(ExpObj *arg1, int op)
 {
-  dynare::Objects* result = new dynare::Objects;
-  result->symbol = string1->symbol+" "+string2->symbol;
-  return result;
+  int id = expression.AddToken(arg1->first, arg1->second, op);
+  delete arg1;
+  return new ExpObj(id, eTempResult);
 }
 
-void ParsingDriver::init_param(Objects* lhs,  Objects* rhs)
+ExpObj *
+ParsingDriver::add_expression_token(ExpObj *arg1, string *op_name)
 {
-  numerical_initialization.SetConstant(lhs->symbol, rhs->symbol);
+  int id = expression.AddToken(arg1->first, arg1->second, *op_name);
+  delete arg1;
+  delete op_name;
+  return new ExpObj(id, eTempResult);
 }
 
-void ParsingDriver::init_val(Objects* lhs,  Objects* rhs)
+void
+ParsingDriver::init_param(string *name, ExpObj *rhs)
 {
-  numerical_initialization.SetInit(lhs->symbol, rhs->symbol);
+  numerical_initialization.SetConstant(*name, get_expression(rhs));
+  delete name;
+  delete rhs;
 }
 
-void ParsingDriver::hist_val(Objects* lhs, Objects* slag, Objects* rhs)
+void
+ParsingDriver::init_val(string *name, ExpObj *rhs)
 {
-  int lag = atoi((slag->symbol).c_str());
-  numerical_initialization.SetHist(lhs->symbol, lag, rhs->symbol);
+  numerical_initialization.SetInit(*name, get_expression(rhs));
+  delete name;
+  delete rhs;
 }
 
-void ParsingDriver::use_dll(void)
+void
+ParsingDriver::hist_val(string *name, string *lag, ExpObj *rhs)
+{
+  int ilag = atoi(lag->c_str());
+  numerical_initialization.SetHist(*name, ilag, get_expression(rhs));
+  delete name;
+  delete lag;
+  delete rhs;
+}
+
+void
+ParsingDriver::use_dll()
 {
   // Seetting variable momber offset to use C outputs
   model_tree.offset = 0;
 }
 
-void ParsingDriver::check_model(void)
+void
+ParsingDriver::check_model()
 {
   // creates too many problems MJ 11/12/06
   //  symbol_table.clean();
 }
 
-void ParsingDriver::finish(void)
+void
+ParsingDriver::finish()
 {
-
   string model_file_name(file);
 
   // Setting flags to compute what is necessary
@@ -313,7 +269,7 @@ void ParsingDriver::finish(void)
       model_tree.derive(1);
     }
 
-  cout << "Processing outputs ...\n";
+  cout << "Processing outputs ..." << endl;
   model_tree.setStaticModel();
   model_tree.setDynamicModel();
 
@@ -334,174 +290,198 @@ void ParsingDriver::finish(void)
   //  symbol_table.erase_local_parameters();
 }
 
-void ParsingDriver::begin_initval(void)
+void
+ParsingDriver::begin_initval()
 {
   numerical_initialization.BeginInitval();
 }
 
-void ParsingDriver::end_initval(void)
+void
+ParsingDriver::end_initval()
 {
   numerical_initialization.EndInitval();
 }
 
-void ParsingDriver::begin_endval(void)
+void
+ParsingDriver::begin_endval()
 {
   numerical_initialization.BeginEndval();
 }
 
-void ParsingDriver::end_endval(void)
+void
+ParsingDriver::end_endval()
 {
   numerical_initialization.EndEndval();
 }
 
-void ParsingDriver::begin_histval(void)
+void
+ParsingDriver::begin_histval()
 {
   numerical_initialization.BeginHistval();
 }
 
-void ParsingDriver::begin_shocks(void)
+void
+ParsingDriver::begin_shocks()
 {
   shocks.BeginShocks();
 }
 
-void ParsingDriver::begin_mshocks(void)
+void
+ParsingDriver::begin_mshocks()
 {
   shocks.BeginMShocks();
 }
 
-void ParsingDriver::end_shocks(void)
+void
+ParsingDriver::end_shocks()
 {
   shocks.EndShocks();
 }
 
-void ParsingDriver::add_det_shock(Objects* var)
+void
+ParsingDriver::add_det_shock(string *var)
 {
-  if (!symbol_table.Exist(var->symbol))
-    {
-      string msg = "Unknown symbol : "+var->symbol;
-      error(msg.c_str());
-    }
-  int id = symbol_table.getID(var->symbol);
-  switch (symbol_table.getType(var->symbol))
+  check_symbol_existence(*var);
+  int id = symbol_table.getID(*var);
+  switch (symbol_table.getType(*var))
     {
     case eExogenous:
       shocks.AddDetShockExo(id);
-      return;
+      break;
     case eExogenousDet:
       shocks.AddDetShockExoDet(id);
-      return;
+      break;
     default:
       error("Shocks can only be applied to exogenous variables");
     }
+  delete var;
 }
 
-void ParsingDriver::add_stderr_shock(Objects* var, Objects* value)
+void
+ParsingDriver::add_stderr_shock(string *var, ExpObj *value)
 {
-  if (!symbol_table.Exist(var->symbol))
-    {
-      string msg = "Unknown symbol : "+var->symbol;
-      error(msg.c_str());
-    }
-  int id = symbol_table.getID(var->symbol);
-  shocks.AddSTDShock(id, value->symbol);
+  check_symbol_existence(*var);
+  int id = symbol_table.getID(*var);
+  shocks.AddSTDShock(id, get_expression(value));
+  delete var;
+  delete value;
 }
 
-void ParsingDriver::add_var_shock(Objects* var, Objects* value)
+void
+ParsingDriver::add_var_shock(string *var, ExpObj *value)
 {
-  if (!symbol_table.Exist(var->symbol))
-    {
-      string msg = "Unknown symbol : "+var->symbol;
-      error(msg.c_str());
-    }
-  int id = symbol_table.getID(var->symbol);
-  shocks.AddVARShock(id, value->symbol);
+  check_symbol_existence(*var);
+  int id = symbol_table.getID(*var);
+  shocks.AddVARShock(id, get_expression(value));
+  delete var;
+  delete value;
 }
 
-void ParsingDriver::add_covar_shock(Objects* var1, Objects* var2, Objects* value)
+void
+ParsingDriver::add_covar_shock(string *var1, string *var2, ExpObj *value)
 {
-  if (!symbol_table.Exist(var1->symbol))
-    {
-      string msg = "Unknown symbol : "+var1->symbol;
-      error(msg.c_str());
-    }
-  if (!symbol_table.Exist(var2->symbol))
-    {
-      string msg = "Unknown symbol : "+var2->symbol;
-      error(msg.c_str());
-    }
-  int id1 = symbol_table.getID(var1->symbol);
-  int id2 = symbol_table.getID(var2->symbol);
-  shocks.AddCOVAShock(id1, id2, value->symbol);
+  check_symbol_existence(*var1);
+  check_symbol_existence(*var2);
+  int id1 = symbol_table.getID(*var1);
+  int id2 = symbol_table.getID(*var2);
+  shocks.AddCOVAShock(id1, id2, get_expression(value));
+  delete var1;
+  delete var2;
+  delete value;
 }
 
-void ParsingDriver::add_correl_shock(Objects* var1, Objects* var2, Objects* value)
+void
+ParsingDriver::add_correl_shock(string *var1, string *var2, ExpObj *value)
 {
-  if (!symbol_table.Exist(var1->symbol))
-    {
-      string msg = "Unknown symbol : "+var1->symbol;
-      error(msg.c_str());
-    }
-  if (!symbol_table.Exist(var2->symbol))
-    {
-      string msg = "Unknown symbol : "+var2->symbol;
-      error(msg.c_str());
-    }
-  int id1 = symbol_table.getID(var1->symbol);
-  int id2 = symbol_table.getID(var2->symbol);
-  shocks.AddCORRShock(id1, id2, value->symbol);
+  check_symbol_existence(*var1);
+  check_symbol_existence(*var2);
+  int id1 = symbol_table.getID(*var1);
+  int id2 = symbol_table.getID(*var2);
+  shocks.AddCORRShock(id1, id2, get_expression(value));
+  delete var1;
+  delete var2;
+  delete value;
 }
 
-void ParsingDriver::add_period(Objects* p1, Objects* p2)
+void
+ParsingDriver::add_period(string *p1, string *p2)
 {
-  shocks.AddPeriod(p1->symbol, p2->symbol);
+  shocks.AddPeriod(*p1, *p2);
+  delete p1;
+  delete p2;
 }
 
-void ParsingDriver::add_period(Objects* p1)
+void
+ParsingDriver::add_period(string *p1)
 {
-  shocks.AddPeriod(p1->symbol, p1->symbol);
+  shocks.AddPeriod(*p1, *p1);
+  delete p1;
 }
 
-void ParsingDriver::add_value(Objects* value)
+void
+ParsingDriver::add_value(string *value)
 {
-  shocks.AddValue(value->symbol);
+  shocks.AddValue(*value);
+  delete value;
 }
 
-void ParsingDriver::do_sigma_e(void)
+void
+ParsingDriver::add_value(ExpObj *value)
+{
+  shocks.AddValue(get_expression(value));
+  delete value;
+}
+
+void
+ParsingDriver::do_sigma_e()
 {
   sigmae.set();
 }
 
-void ParsingDriver::end_of_row(void)
+void
+ParsingDriver::end_of_row()
 {
   sigmae.EndOfRow();
 }
 
-void ParsingDriver::add_to_row(Objects* s)
+void
+ParsingDriver::add_to_row(string *s)
 {
-  sigmae.AddExpression(s->symbol);
+  sigmae.AddExpression(*s);
+  delete s;
 }
 
-void ParsingDriver::steady(void)
+void
+ParsingDriver::add_to_row(ExpObj *v)
+{
+  sigmae.AddExpression(get_expression(v));
+  delete v;
+}
+
+void
+ParsingDriver::steady()
 {
   computing_tasks.setSteady();
   model_tree.computeJacobian = true;
 }
 
-void ParsingDriver::option_num(string name_option, Objects* opt)
+void
+ParsingDriver::option_num(const string &name_option, string *opt1, string *opt2)
 {
-  computing_tasks.setOption(name_option, opt->symbol);
-  if (name_option == "order")
-    order = atoi((opt->symbol).c_str());
-  else if (name_option == "linear")
-    linear = atoi((opt->symbol).c_str());
+  computing_tasks.setOption(name_option, *opt1, *opt2);
+  delete opt1;
+  delete opt2;
 }
 
-void ParsingDriver::option_num(string name_option, Objects* opt1, Objects* opt2)
+void
+ParsingDriver::option_num(const string &name_option, string *opt)
 {
-  computing_tasks.setOption(name_option, opt1->symbol, opt2->symbol);
+  option_num(name_option, *opt);
+  delete opt;
 }
 
-void ParsingDriver::option_num(string name_option, string opt)
+void
+ParsingDriver::option_num(const string &name_option, const string &opt)
 {
   computing_tasks.setOption(name_option, opt);
   if (name_option == "order")
@@ -510,34 +490,34 @@ void ParsingDriver::option_num(string name_option, string opt)
     linear = atoi(opt.c_str());
 }
 
-void ParsingDriver::option_str(string name_option, Objects* opt)
+void
+ParsingDriver::option_str(const string &name_option, string *opt)
 {
-  opt->symbol = "'"+opt->symbol;
-  opt->symbol += "'";
-  computing_tasks.setOption(name_option, opt->symbol);
+  option_str(name_option, *opt);
+  delete opt;
 }
 
-void ParsingDriver::option_str(string name_option, string opt)
+void
+ParsingDriver::option_str(const string &name_option, const string &opt)
 {
-  opt = "'"+opt;
-  opt += "'";
-  computing_tasks.setOption(name_option, opt);
+  computing_tasks.setOption(name_option, "'" + opt + "'");
 }
 
-void ParsingDriver::add_tmp_var(Objects* tmp_var1, Objects* tmp_var2)
+void
+ParsingDriver::add_tmp_var(string *tmp_var1, string *tmp_var2)
 {
-  tmp_symbol_table.AddTempSymbol(tmp_var1->symbol, tmp_var2->symbol);
+  tmp_symbol_table.AddTempSymbol(*tmp_var1, *tmp_var2);
+  delete tmp_var1;
+  delete tmp_var2;
 }
 
-void ParsingDriver::add_tmp_var(Objects* tmp_var)
+void
+ParsingDriver::add_tmp_var(string *tmp_var)
 {
-  tmp_symbol_table.AddTempSymbol(tmp_var->symbol);
+  tmp_symbol_table.AddTempSymbol(*tmp_var);
+  delete tmp_var;
 }
 
-// dynare::Objects* get_tmp_var(string)
-// {
-// 	//string str = tmp_symbol_table.get
-// }
 void ParsingDriver::rplot()
 {
   tmp_symbol_table.set("var_list_");
@@ -562,102 +542,123 @@ void ParsingDriver::stoch_simul()
   computing_tasks.setStochSimul(tmp);
 }
 
-void ParsingDriver::simul()
+void
+ParsingDriver::simul()
 {
   computing_tasks.setSimul();
   model_tree.computeJacobian = true;
 }
 
-void ParsingDriver::check()
+void
+ParsingDriver::check()
 {
   computing_tasks.setCheck();
   model_tree.computeJacobian = true;
 }
 
-void ParsingDriver::estimation_init()
+void
+ParsingDriver::estimation_init()
 {
   computing_tasks.EstimParams = &estim_params;
   computing_tasks.setEstimationInit();
   model_tree.computeJacobianExo = true;
 }
 
-void ParsingDriver::set_estimated_elements(void)
+void
+ParsingDriver::set_estimated_elements()
 {
   computing_tasks.setEstimatedElements();
 }
 
-void ParsingDriver::set_estimated_init_elements(void)
+void
+ParsingDriver::set_estimated_init_elements()
 {
   computing_tasks.setEstimatedInitElements();
 }
 
-void ParsingDriver::set_estimated_bounds_elements(void)
+void
+ParsingDriver::set_estimated_bounds_elements()
 {
   computing_tasks.setEstimatedBoundsElements();
 }
 
-void ParsingDriver::set_unit_root_vars()
+void
+ParsingDriver::set_unit_root_vars()
 {
   tmp_symbol_table.set("options_.unit_root_vars");
   *output << tmp_symbol_table.get();
 }
 
-void ParsingDriver::run_estimation()
+void
+ParsingDriver::run_estimation()
 {
   tmp_symbol_table.set("var_list_");
   string tmp = tmp_symbol_table.get();
   computing_tasks.runEstimation(tmp);
 }
 
-void ParsingDriver::optim_options(Objects* str1, Objects* str2, int task)
+void
+ParsingDriver::optim_options(string *str1, string *str2, int task)
 {
-  computing_tasks.setOptimOptions(str1->symbol, str2->symbol, task);
+  computing_tasks.setOptimOptions(*str1, *str2, task);
+  delete str1;
+  delete str2;
 }
 
-void ParsingDriver::optim_options(int task)
-{
-  computing_tasks.setOptimOptions("", "", task);
-}
-
-void ParsingDriver::set_varobs()
+void
+ParsingDriver::set_varobs()
 {
   tmp_symbol_table.set("options_.varobs");
   *output << tmp_symbol_table.get();
 }
 
-void ParsingDriver::set_trend_init()
+void
+ParsingDriver::set_trend_init()
 {
-  *output << "options_.trend_coeff_ = {};\n";
+  *output << "options_.trend_coeff_ = {};" << endl;
 }
 
-void ParsingDriver::set_trend_element(Objects* arg1, Objects* arg2)
+void
+ParsingDriver::set_trend_element(string *arg1, ExpObj *arg2)
 {
-  computing_tasks.set_trend_element(arg1->symbol, arg2->symbol);
+  computing_tasks.set_trend_element(*arg1, get_expression(arg2));
+  delete arg1;
+  delete arg2;
 }
 
-void ParsingDriver::begin_optim_weights(void)
+void
+ParsingDriver::begin_optim_weights()
 {
   computing_tasks.BeginOptimWeights();
 }
 
-void ParsingDriver::set_optim_weights(Objects* arg1, Objects* arg2)
+void
+ParsingDriver::set_optim_weights(string *arg1, ExpObj *arg2)
 {
-  computing_tasks.setOptimWeights(arg1->symbol, arg2->symbol);
+  computing_tasks.setOptimWeights(*arg1, get_expression(arg2));
+  delete arg1;
+  delete arg2;
 }
 
-void ParsingDriver::set_optim_weights(Objects* arg1, Objects* arg2, Objects* arg3)
+void
+ParsingDriver::set_optim_weights(string *arg1, string *arg2, ExpObj *arg3)
 {
-  computing_tasks.setOptimWeights(arg1->symbol, arg2->symbol, arg3->symbol);
+  computing_tasks.setOptimWeights(*arg1, *arg2, get_expression(arg3));
+  delete arg1;
+  delete arg2;
+  delete arg3;
 }
 
-void ParsingDriver::set_osr_params(void)
+void
+ParsingDriver::set_osr_params()
 {
   tmp_symbol_table.set("osr_params_");
   string tmp = tmp_symbol_table.get();
   computing_tasks.setOsrParams(tmp);
 }
 
-void ParsingDriver::run_osr(void)
+void
+ParsingDriver::run_osr()
 {
   tmp_symbol_table.set("var_list_");
   string tmp = tmp_symbol_table.get();
@@ -665,218 +666,250 @@ void ParsingDriver::run_osr(void)
   model_tree.computeJacobianExo = true;
 }
 
-void ParsingDriver::set_olr_inst(void)
+void
+ParsingDriver::set_olr_inst()
 {
   tmp_symbol_table.set("options_.olr_inst");
   string tmp = tmp_symbol_table.get();
   computing_tasks.setOlrInst(tmp);
 }
 
-void ParsingDriver::run_olr(void)
+void
+ParsingDriver::run_olr()
 {
   tmp_symbol_table.set("var_list_");
   string tmp = tmp_symbol_table.get();
   computing_tasks.runOlr(tmp);
 }
 
-void ParsingDriver::begin_calib_var(void)
+void
+ParsingDriver::begin_calib_var()
 {
   computing_tasks.BeginCalibVar();
 }
 
-void ParsingDriver::set_calib_var(Objects* name, Objects* weight, Objects* expression)
+void
+ParsingDriver::set_calib_var(string *name, string *weight, ExpObj *expression)
 {
-  Objects* exp = get_expression(expression);
-  computing_tasks.setCalibVar(name->symbol,weight->symbol,exp->symbol);
+  computing_tasks.setCalibVar(*name, *weight, get_expression(expression));
+  delete name;
+  delete weight;
+  delete expression;
 }
 
-void ParsingDriver::set_calib_var(Objects* name1, Objects* name2, Objects* weight, Objects* expression)
+void
+ParsingDriver::set_calib_var(string *name1, string *name2,
+                             string *weight, ExpObj *expression)
 {
-  Objects* exp = get_expression(expression);
-  computing_tasks.setCalibVar(name1->symbol,name2->symbol,weight->symbol,exp->symbol);
+  computing_tasks.setCalibVar(*name1, *name2, *weight, get_expression(expression));
+  delete name1;
+  delete name2;
+  delete weight;
+  delete expression;
 }
 
-void ParsingDriver::set_calib_ac(Objects* name, Objects* ar, Objects* weight, Objects* expression)
+void
+ParsingDriver::set_calib_ac(string *name, string *ar,
+                            string *weight, ExpObj *expression)
 {
-  Objects* exp = get_expression(expression);
-  computing_tasks.setCalibAc(name->symbol,ar->symbol,weight->symbol,exp->symbol);
+  computing_tasks.setCalibAc(*name, *ar, *weight, get_expression(expression));
+  delete name;
+  delete ar;
+  delete weight;
+  delete expression;
 }
 
-void ParsingDriver::run_calib(int flag)
+void
+ParsingDriver::run_calib(int flag)
 {
   computing_tasks.runCalib(flag);
 }
 
-void ParsingDriver::run_dynatype(Objects* filename, Objects* ext)
+void
+ParsingDriver::run_dynatype(string *filename, string *ext)
 {
   tmp_symbol_table.set("var_list_");
   string tmp = tmp_symbol_table.get();
-  computing_tasks.runDynatype(filename->symbol,ext->symbol,tmp);
+  computing_tasks.runDynatype(*filename, *ext, tmp);
+  delete filename;
+  delete ext;
 }
 
-void ParsingDriver::run_dynasave(Objects* filename, Objects* ext)
+void
+ParsingDriver::run_dynasave(string *filename, string *ext)
 {
   tmp_symbol_table.set("var_list_");
   string tmp = tmp_symbol_table.get();
-  computing_tasks.runDynasave(filename->symbol,ext->symbol,tmp);
+  computing_tasks.runDynasave(*filename, *ext, tmp);
+  delete filename;
+  delete ext;
 }
 
-void ParsingDriver::begin_model_comparison(void)
+void
+ParsingDriver::begin_model_comparison()
 {
   computing_tasks.beginModelComparison();
 }
 
-void ParsingDriver::add_mc_filename(Objects* filename, Objects* prior)
+void
+ParsingDriver::add_mc_filename(string *filename, string *prior)
 {
-  computing_tasks.addMcFilename(filename->symbol, prior->symbol);
+  computing_tasks.addMcFilename(*filename, *prior);
+  delete filename;
+  delete prior;
 }
 
-void ParsingDriver::run_model_comparison(void)
+void
+ParsingDriver::run_model_comparison()
 {
   computing_tasks.runModelComparison();
 }
 
-dynare::Objects*  ParsingDriver::add_equal(Objects* arg1,  Objects* arg2)
+NodeID
+ParsingDriver::add_model_equal(NodeID arg1, NodeID arg2)
 {
-  NodeID id = model_tree.AddEqual(arg1->ID, arg2->ID);
+  NodeID id = model_tree.AddEqual(arg1, arg2);
   model_parameters.eq_nbr++;
-  return new Objects("", id, eTempResult);
+  return id;
 }
 
-dynare::Objects*  ParsingDriver::init_local_parameter(Objects* arg1,  Objects* arg2)
+void
+ParsingDriver::declare_and_init_local_parameter(string *name, NodeID rhs)
 {
-  NodeID id = model_tree.AddAssign(arg1->ID, arg2->ID);
-  return new Objects("", id, eTempResult);
+  symbol_table.AddSymbolDeclar(*name, eLocalParameter, *name);
+  NodeID id = model_tree.AddTerminal(*name);
+  model_tree.AddAssign(id, rhs);
+  delete name;
 }
 
-dynare::Objects*  ParsingDriver::add_plus(Objects* arg1,  Objects* arg2)
+NodeID
+ParsingDriver::add_model_plus(NodeID arg1, NodeID arg2)
 {
-  NodeID id = model_tree.AddPlus(arg1->ID, arg2->ID);
-  return new Objects("", id, eTempResult);
+  return model_tree.AddPlus(arg1, arg2);
 }
 
-dynare::Objects*  ParsingDriver::add_minus(Objects* arg1,  Objects* arg2)
+NodeID
+ParsingDriver::add_model_minus(NodeID arg1, NodeID arg2)
 {
-  NodeID id = model_tree.AddMinus(arg1->ID, arg2->ID);
-  return new Objects("", id, eTempResult);
+  return model_tree.AddMinus(arg1, arg2);
 }
 
-dynare::Objects*  ParsingDriver::add_uminus(Objects* arg1)
+NodeID
+ParsingDriver::add_model_uminus(NodeID arg1)
 {
-  NodeID id = model_tree.AddUMinus(arg1->ID);
-  return new Objects("", id, eTempResult);
+  return model_tree.AddUMinus(arg1);
 }
 
-dynare::Objects*  ParsingDriver::add_times(Objects* arg1,  Objects* arg2)
+NodeID
+ParsingDriver::add_model_times(NodeID arg1, NodeID arg2)
 {
-  NodeID id = model_tree.AddTimes(arg1->ID, arg2->ID);
-  return new Objects("", id, eTempResult);
+  return model_tree.AddTimes(arg1, arg2);
 }
 
-dynare::Objects*  ParsingDriver::add_divide(Objects* arg1,  Objects* arg2)
+NodeID
+ParsingDriver::add_model_divide(NodeID arg1, NodeID arg2)
 {
-  NodeID id = model_tree.AddDivide(arg1->ID, arg2->ID);
-  return new Objects("", id, eTempResult);
+  return model_tree.AddDivide(arg1, arg2);
 }
 
-dynare::Objects*  ParsingDriver::add_power(Objects* arg1,  Objects* arg2)
+NodeID
+ParsingDriver::add_model_power(NodeID arg1, NodeID arg2)
 {
-  NodeID id = model_tree.AddPower(arg1->ID, arg2->ID);
-  return new Objects("", id, eTempResult);
+  return model_tree.AddPower(arg1, arg2);
 }
 
-dynare::Objects*  ParsingDriver::add_exp(Objects* arg1)
+NodeID
+ParsingDriver::add_model_exp(NodeID arg1)
 {
-  NodeID id = model_tree.AddExp(arg1->ID);
-  return new Objects("", id, eTempResult);
+  return model_tree.AddExp(arg1);
 }
 
-dynare::Objects*  ParsingDriver::add_log(Objects* arg1)
+NodeID
+ParsingDriver::add_model_log(NodeID arg1)
 {
-  NodeID id = model_tree.AddLog(arg1->ID);
-  return new Objects("", id, eTempResult);
+  return model_tree.AddLog(arg1);
 }
 
-dynare::Objects*  ParsingDriver::add_log10(Objects* arg1)
+NodeID
+ParsingDriver::add_model_log10(NodeID arg1)
 {
-  NodeID id = model_tree.AddLog10(arg1->ID);
-  return new Objects("", id, eTempResult);
+  return model_tree.AddLog10(arg1);
 }
 
-dynare::Objects*  ParsingDriver::add_cos(Objects* arg1)
+NodeID
+ParsingDriver::add_model_cos(NodeID arg1)
 {
-  NodeID id = model_tree.AddCos(arg1->ID);
-  return new Objects("", id, eTempResult);
+  return model_tree.AddCos(arg1);
 }
 
-dynare::Objects*  ParsingDriver::add_sin(Objects* arg1)
+NodeID
+ParsingDriver::add_model_sin(NodeID arg1)
 {
-  NodeID id = model_tree.AddSin(arg1->ID);
-  return new Objects("", id, eTempResult);
+  return model_tree.AddSin(arg1);
 }
 
-dynare::Objects*  ParsingDriver::add_tan(Objects* arg1)
+NodeID
+ParsingDriver::add_model_tan(NodeID arg1)
 {
-  NodeID id = model_tree.AddTan(arg1->ID);
-  return new Objects("", id, eTempResult);
+  return model_tree.AddTan(arg1);
 }
 
-dynare::Objects*  ParsingDriver::add_acos(Objects* arg1)
+NodeID
+ParsingDriver::add_model_acos(NodeID arg1)
 {
-  NodeID id = model_tree.AddACos(arg1->ID);
-  return new Objects("", id, eTempResult);
+  return model_tree.AddACos(arg1);
 }
 
-dynare::Objects*  ParsingDriver::add_asin(Objects* arg1)
+NodeID
+ParsingDriver::add_model_asin(NodeID arg1)
 {
-  NodeID id = model_tree.AddASin(arg1->ID);
-  return new Objects("", id, eTempResult);
+  return model_tree.AddASin(arg1);
 }
 
-dynare::Objects*  ParsingDriver::add_atan(Objects* arg1)
+NodeID
+ParsingDriver::add_model_atan(NodeID arg1)
 {
-  NodeID id = model_tree.AddATan(arg1->ID);
-  return new Objects("", id, eTempResult);
+  return model_tree.AddATan(arg1);
 }
 
-dynare::Objects*  ParsingDriver::add_cosh(Objects* arg1)
+NodeID
+ParsingDriver::add_model_cosh(NodeID arg1)
 {
-  NodeID id = model_tree.AddCosH(arg1->ID);
-  return new Objects("", id, eTempResult);
+  return model_tree.AddCosH(arg1);
 }
 
-dynare::Objects*  ParsingDriver::add_sinh(Objects* arg1)
+NodeID
+ParsingDriver::add_model_sinh(NodeID arg1)
 {
-  NodeID id = model_tree.AddSinH(arg1->ID);
-  return new Objects("", id, eTempResult);
+  return model_tree.AddSinH(arg1);
 }
 
-dynare::Objects*  ParsingDriver::add_tanh(Objects* arg1)
+NodeID
+ParsingDriver::add_model_tanh(NodeID arg1)
 {
-  NodeID id = model_tree.AddTanH(arg1->ID);
-  return new Objects("", id, eTempResult);
+  return model_tree.AddTanH(arg1);
 }
 
-dynare::Objects*  ParsingDriver::add_acosh(Objects* arg1)
+NodeID
+ParsingDriver::add_model_acosh(NodeID arg1)
 {
-  NodeID id = model_tree.AddACosH(arg1->ID);
-  return new Objects("", id, eTempResult);
+  return model_tree.AddACosH(arg1);
 }
 
-dynare::Objects*  ParsingDriver::add_asinh(Objects* arg1)
+NodeID
+ParsingDriver::add_model_asinh(NodeID arg1)
 {
-  NodeID id = model_tree.AddASinH(arg1->ID);
-  return new Objects("", id, eTempResult);
+  return model_tree.AddASinH(arg1);
 }
 
-dynare::Objects*  ParsingDriver::add_atanh(Objects* arg1)
+NodeID
+ParsingDriver::add_model_atanh(NodeID arg1)
 {
-  NodeID id = model_tree.AddATanH(arg1->ID);
-  return new Objects("", id, eTempResult);
+  return model_tree.AddATanH(arg1);
 }
 
-dynare::Objects*  ParsingDriver::add_sqrt(Objects* arg1)
+NodeID
+ParsingDriver::add_model_sqrt(NodeID arg1)
 {
-  NodeID id = model_tree.AddSqRt(arg1->ID);
-  return new Objects("", id, eTempResult);
+  return model_tree.AddSqRt(arg1);
 }

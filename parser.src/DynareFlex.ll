@@ -1,4 +1,6 @@
 %{
+using namespace std;
+
 /* The prototype for yylex() is defined in ParsingDriver.hh */
 
 #include "ParsingDriver.hh"
@@ -155,7 +157,7 @@ int sigma_e = 0;
 
 <DYNARE_STATEMENT>[\$][^$]*[\$] {
   strtok(yytext+1, "$");
-  yylval->obj = new Objects(yytext + 1); 
+  yylval->string_val = new string(yytext + 1); 
   return token::TEX_NAME;
 }
 
@@ -201,7 +203,7 @@ int sigma_e = 0;
 
 <DYNARE_STATEMENT,DYNARE_BLOCK>use_dll {return token::USE_DLL;}
 <DYNARE_STATEMENT,DYNARE_BLOCK>linear {return token::LINEAR;}
-<DYNARE_STATEMENT,DYNARE_BLOCK>[,] { yylval->obj = new Objects(token::COMMA); return token::COMMA;}
+<DYNARE_STATEMENT,DYNARE_BLOCK>[,] {return token::COMMA;}
 <DYNARE_STATEMENT,DYNARE_BLOCK>[\(\)] {return yy::parser::token_type (yytext[0]);} 
 <DYNARE_STATEMENT,DYNARE_BLOCK>[\[] {return yy::parser::token_type (yytext[0]);}
 <DYNARE_STATEMENT,DYNARE_BLOCK>[\]] {
@@ -209,42 +211,42 @@ int sigma_e = 0;
     sigma_e = 0;
   return yy::parser::token_type (yytext[0]);
 }
-<DYNARE_STATEMENT,DYNARE_BLOCK>[+] {yylval->obj = new Objects(token::PLUS); return token::PLUS;}
-<DYNARE_STATEMENT,DYNARE_BLOCK>[-] {yylval->obj = new Objects(token::MINUS); return token::MINUS;}
-<DYNARE_STATEMENT,DYNARE_BLOCK>[*] {yylval->obj = new Objects(token::TIMES); return token::TIMES;}
-<DYNARE_STATEMENT,DYNARE_BLOCK>[/] {yylval->obj = new Objects(token::DIVIDE); return token::DIVIDE;}
-<DYNARE_STATEMENT,DYNARE_BLOCK>[=] {yylval->obj = new Objects(token::EQUAL); return token::EQUAL;}
-<DYNARE_STATEMENT,DYNARE_BLOCK>[\^] {yylval->obj = new Objects(token::POWER); return token::POWER;}
-<DYNARE_STATEMENT,DYNARE_BLOCK>exp {yylval->obj = new Objects(token::EXP); return token::EXP;}
-<DYNARE_STATEMENT,DYNARE_BLOCK>log {yylval->obj = new Objects(token::LOG); return token::LOG;}
-<DYNARE_STATEMENT,DYNARE_BLOCK>log10 {yylval->obj = new Objects(token::LOG10); return token::LOG10;}
-<DYNARE_STATEMENT,DYNARE_BLOCK>ln {yylval->obj = new Objects(token::LOG); return token::LOG;}
-<DYNARE_STATEMENT,DYNARE_BLOCK>sin {yylval->obj = new Objects(token::SIN); return token::SIN;}
-<DYNARE_STATEMENT,DYNARE_BLOCK>cos {yylval->obj = new Objects(token::COS); return token::COS;}
-<DYNARE_STATEMENT,DYNARE_BLOCK>tan {yylval->obj = new Objects(token::TAN); return token::TAN;}
-<DYNARE_STATEMENT,DYNARE_BLOCK>asin {yylval->obj = new Objects(token::ASIN); return token::ASIN;}
-<DYNARE_STATEMENT,DYNARE_BLOCK>acos {yylval->obj = new Objects(token::ACOS); return token::ACOS;}
-<DYNARE_STATEMENT,DYNARE_BLOCK>atan {yylval->obj = new Objects(token::ATAN); return token::ATAN;}
-<DYNARE_STATEMENT,DYNARE_BLOCK>sinh {yylval->obj = new Objects(token::SINH); return token::SINH;}
-<DYNARE_STATEMENT,DYNARE_BLOCK>cosh {yylval->obj = new Objects(token::COSH); return token::COSH;}
-<DYNARE_STATEMENT,DYNARE_BLOCK>tanh {yylval->obj = new Objects(token::TANH); return token::TANH;}
-<DYNARE_STATEMENT,DYNARE_BLOCK>asinh {yylval->obj = new Objects(token::ASINH); return token::ASINH;}
-<DYNARE_STATEMENT,DYNARE_BLOCK>acosh {yylval->obj = new Objects(token::ACOSH); return token::ACOSH;}
-<DYNARE_STATEMENT,DYNARE_BLOCK>atanh {yylval->obj = new Objects(token::ATANH); return token::ATANH;}
-<DYNARE_STATEMENT,DYNARE_BLOCK>sqrt  {yylval->obj = new Objects(token::SQRT); return token::SQRT;}
+<DYNARE_STATEMENT,DYNARE_BLOCK>[+] {return token::PLUS;}
+<DYNARE_STATEMENT,DYNARE_BLOCK>[-] {return token::MINUS;}
+<DYNARE_STATEMENT,DYNARE_BLOCK>[*] {return token::TIMES;}
+<DYNARE_STATEMENT,DYNARE_BLOCK>[/] {return token::DIVIDE;}
+<DYNARE_STATEMENT,DYNARE_BLOCK>[=] {return token::EQUAL;}
+<DYNARE_STATEMENT,DYNARE_BLOCK>[\^] {return token::POWER;}
+<DYNARE_STATEMENT,DYNARE_BLOCK>exp {return token::EXP;}
+<DYNARE_STATEMENT,DYNARE_BLOCK>log {return token::LOG;}
+<DYNARE_STATEMENT,DYNARE_BLOCK>log10 {return token::LOG10;}
+<DYNARE_STATEMENT,DYNARE_BLOCK>ln {return token::LOG;}
+<DYNARE_STATEMENT,DYNARE_BLOCK>sin {return token::SIN;}
+<DYNARE_STATEMENT,DYNARE_BLOCK>cos {return token::COS;}
+<DYNARE_STATEMENT,DYNARE_BLOCK>tan {return token::TAN;}
+<DYNARE_STATEMENT,DYNARE_BLOCK>asin {return token::ASIN;}
+<DYNARE_STATEMENT,DYNARE_BLOCK>acos {return token::ACOS;}
+<DYNARE_STATEMENT,DYNARE_BLOCK>atan {return token::ATAN;}
+<DYNARE_STATEMENT,DYNARE_BLOCK>sinh {return token::SINH;}
+<DYNARE_STATEMENT,DYNARE_BLOCK>cosh {return token::COSH;}
+<DYNARE_STATEMENT,DYNARE_BLOCK>tanh {return token::TANH;}
+<DYNARE_STATEMENT,DYNARE_BLOCK>asinh {return token::ASINH;}
+<DYNARE_STATEMENT,DYNARE_BLOCK>acosh {return token::ACOSH;}
+<DYNARE_STATEMENT,DYNARE_BLOCK>atanh {return token::ATANH;}
+<DYNARE_STATEMENT,DYNARE_BLOCK>sqrt  {return token::SQRT;}
 
 <DYNARE_STATEMENT,DYNARE_BLOCK>[A-Za-z_][A-Za-z0-9_]* {
-  yylval->obj = new Objects(yytext); 
+  yylval->string_val = new string(yytext);
   return token::NAME;
 }
 
 <DYNARE_STATEMENT,DYNARE_BLOCK>((([0-9]*\.[0-9]+)|([0-9]+\.))([edED][-+]?[0-9]+)?)|([0-9]+[edED][-+]?[0-9]+) {
-  yylval->obj = new Objects(yytext);
+  yylval->string_val = new string(yytext);
   return token::FLOAT_NUMBER;
 }
 
 <DYNARE_STATEMENT,DYNARE_BLOCK>[0-9]+ {
-  yylval->obj = new Objects(yytext);
+  yylval->string_val = new string(yytext);
   return token::INT_NUMBER;
 }
    	
@@ -255,7 +257,7 @@ int sigma_e = 0;
   if (SymbolTable::getID(yytext) != -1)
     {
       BEGIN DYNARE_STATEMENT;
-      yylval->obj = new Objects(yytext);
+      yylval->string_val = new string(yytext);
       return token::NAME;
     }
   else
@@ -268,7 +270,7 @@ int sigma_e = 0;
 <INITIAL>. {BEGIN NATIVE; *(driver.output) << yytext;}
 
  /* NATIVE Block */
-<NATIVE>.* {BEGIN INITIAL; *(driver.output) << yytext << std::endl;}
+<NATIVE>.* {BEGIN INITIAL; *(driver.output) << yytext << endl;}
 
 <*>. {return yy::parser::token_type (yytext[0]);}
 
@@ -279,7 +281,7 @@ ParsingDriver::scan_begin()
 {
   yy_flex_debug = trace_scanning;
   if (!(yyin = fopen(file.c_str(), "r")))
-    error(std::string("cannot open file"));
+    error(string("cannot open file"));
 }
 
 void

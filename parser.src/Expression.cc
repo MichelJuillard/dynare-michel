@@ -249,7 +249,7 @@ string Expression::getArgument(Type type,int id)
     }
   else if (type == eExogenousDet)
     {
-      argument <<  "exedet_" << "(" << id+1 << ")";
+      argument <<  "oo_.exo_det_steady_state" << "(" << id+1 << ")";
     }
   else if (type == eEndogenous)
     {
