@@ -16,7 +16,7 @@ function prior_analysis(var_list)
 % Gnu Public License.
 
   global M_ options_ oo_ estim_params_ bayestopt_
-  
+
   old_options = options_;
   if options_.replic < 100
   warning('Prior analysis requires at least 100 replications, preferably many more! options replic reset to 100')
