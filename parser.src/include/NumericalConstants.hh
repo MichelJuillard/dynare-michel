@@ -9,6 +9,7 @@
 //------------------------------------------------------------------------------
 #include <string>
 #include <vector>
+#include <map>
 //------------------------------------------------------------------------------
 /*!
   \class  NumericalConstants
@@ -19,6 +20,8 @@ class NumericalConstants
 private :
   /*! Vector of numerical constants */
   static std::vector<std::string>  mNumericalConstants;
+  //! Map matching constants to their id
+  static std::map<std::string, int, std::less<std::string> > numConstantsIndex;
 public :
   /*! Construcor */
   NumericalConstants();

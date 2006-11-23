@@ -10,12 +10,13 @@ using namespace std;
 #include "NumericalConstants.hh"
 //------------------------------------------------------------------------------
 vector<string> NumericalConstants::mNumericalConstants;
+map<string, int, less<string> > NumericalConstants::numConstantsIndex;
+
 //------------------------------------------------------------------------------
 NumericalConstants::NumericalConstants()
 {
-  mNumericalConstants.push_back("0.0");
-  mNumericalConstants.push_back("1.0");
-
+  AddConstant("0.0");
+  AddConstant("1.0");
 }
 
 //------------------------------------------------------------------------------
@@ -27,12 +28,15 @@ NumericalConstants::~NumericalConstants()
 //------------------------------------------------------------------------------
 int NumericalConstants::AddConstant(string iConst)
 {
-  if (iConst == "0.0")
-    return 0;
-  else if (iConst == "1.0")
-    return 1;
+  map<string, int, less<string> >::iterator iter = numConstantsIndex.find(iConst);
+
+  if (iter != numConstantsIndex.end())
+    return iter->second;
+
+  int id = (int) mNumericalConstants.size();
   mNumericalConstants.push_back(iConst);
-  return (int) mNumericalConstants.size()-1;
+  numConstantsIndex[iConst] = id;
+  return id;
 }
 
 //------------------------------------------------------------------------------
