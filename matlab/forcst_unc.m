@@ -23,6 +23,10 @@ function forcst_unc(y0,var_list)
   % setting up estim_params_
   [xparam1,estim_params_,bayestopt_,lb,ub] = set_prior(estim_params_);
 
+  options_.TeX = 0;
+  options_.nograph = 0;
+  plot_priors;
+  
   % workspace initialization
   if isempty(var_list)
     var_list = M_.endo_names;
@@ -34,6 +38,7 @@ function forcst_unc(y0,var_list)
   exo_nbr = M_.exo_nbr;
   replic = options_.replic;
   order = options_.order;
+  maximum_lag = M_.maximum_lag;
   %  params = prior_draw(1);
   params = rndprior(bayestopt_);
   set_parameters(params);
@@ -103,11 +108,25 @@ function forcst_unc(y0,var_list)
     k2(2) = 1;
   end
 
+  % compute shock uncertainty around forecast with mean prior
+  set_parameters(bayestopt_.pmean);
+  [dr,info] = resol(oo_.steady_state,0);
+  [yf3,yf3_intv] = forcst(dr,y0,periods,var_list);
+  yf3_1 = yf3'-[zeros(maximum_lag,n); yf3_intv];
+  yf3_2 = yf3'+[zeros(maximum_lag,n); yf3_intv];
+  
   % graphs
   
-  dynare_graph_init('Forecasts',n,{'b-' 'g-' 'g-' 'r-' 'r-'});
+  dynare_graph_init('Forecasts type I',n,{'b-' 'g-' 'g-' 'r-' 'r-'});
   for i=1:n
     dynare_graph([yf_mean(:,i) squeeze(yf1(:,i,k1)) squeeze(yf2(:,i,k2))],...
+		 var_list(i,:));
+  end
+  dynare_graph_close;
+  
+  dynare_graph_init('Forecasts type II',n,{'b-' 'k-' 'k-' 'r-' 'r-'});
+  for i=1:n
+    dynare_graph([yf_mean(:,i) yf3_1(:,i) yf3_2(:,i) squeeze(yf2(:,i,k2))],...
 		 var_list(i,:));
   end
   dynare_graph_close;

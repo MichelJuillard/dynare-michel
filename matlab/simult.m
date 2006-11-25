@@ -7,6 +7,9 @@ global  it_ means_
 
 order = options_.order;
 replic = options_.replic;
+if replic == 0
+  replic = 1;
+end
 seed = options_.simul_seed;
 options_.periods = options_.periods;
 
