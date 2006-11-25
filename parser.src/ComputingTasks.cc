@@ -82,6 +82,20 @@ void ComputingTasks::runEstimation(string tmp1)
 }
 
 //------------------------------------------------------------------------------
+void ComputingTasks::runPriorAnalysis(string tmp1)
+{
+  *output << tmp1;
+  *output << "prior_analysis(var_list_);\n";
+}
+
+//------------------------------------------------------------------------------
+void ComputingTasks::runPosteriorAnalysis(string tmp1)
+{
+  *output << tmp1;
+  *output << "posterior_analysis(var_list_);\n";
+}
+
+//------------------------------------------------------------------------------
 void ComputingTasks::runRplot(string tmp1)
 {
   *output << tmp1;

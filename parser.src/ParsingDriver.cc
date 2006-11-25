@@ -598,6 +598,22 @@ ParsingDriver::run_estimation()
 }
 
 void
+ParsingDriver::run_prior_analysis()
+{
+  tmp_symbol_table.set("var_list_");
+  string tmp = tmp_symbol_table.get();
+  computing_tasks.runPriorAnalysis(tmp);
+}
+
+void
+ParsingDriver::run_posterior_analysis()
+{
+  tmp_symbol_table.set("var_list_");
+  string tmp = tmp_symbol_table.get();
+  computing_tasks.runPosteriorAnalysis(tmp);
+}
+
+void
 ParsingDriver::optim_options(string *str1, string *str2, int task)
 {
   computing_tasks.setOptimOptions(*str1, *str2, task);

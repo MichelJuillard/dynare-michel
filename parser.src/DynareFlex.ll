@@ -63,6 +63,8 @@ int sigma_e = 0;
 <INITIAL>periods 	{BEGIN DYNARE_STATEMENT; return token::PERIODS;}
 <INITIAL>initvalf 	{BEGIN DYNARE_STATEMENT; return token::INITVALF;}
 <INITIAL>estimation {BEGIN DYNARE_STATEMENT; return token::ESTIMATION;}
+<INITIAL>prior_analysis {BEGIN DYNARE_STATEMENT; return token::PRIOR_ANALYSIS;}
+<INITIAL>posterior_analysis {BEGIN DYNARE_STATEMENT; return token::POSTERIOR_ANALYSIS;}
 <INITIAL>varobs 	{BEGIN DYNARE_STATEMENT; return token::VAROBS;}
 <INITIAL>unit_root_vars	{BEGIN DYNARE_STATEMENT; return token::UNIT_ROOT_VARS;}
 <INITIAL>dyn2vec 	{BEGIN DYNARE_STATEMENT; return token::DYN2VEC;}
@@ -98,6 +100,8 @@ int sigma_e = 0;
 <INITIAL>histval {BEGIN DYNARE_BLOCK; return token::HISTVAL;}
 <INITIAL>shocks {BEGIN DYNARE_BLOCK; return token::SHOCKS;}
 <INITIAL>estimated_params {BEGIN DYNARE_BLOCK; return token::ESTIMATED_PARAMS;}
+ /* priors is an alias for estimated_params */
+<INITIAL>priors {BEGIN DYNARE_BLOCK;return token::ESTIMATED_PARAMS;}
 <INITIAL>estimated_params_init 		{BEGIN DYNARE_BLOCK; return token::ESTIMATED_PARAMS_INIT;}
 <INITIAL>estimated_params_bounds 	{BEGIN DYNARE_BLOCK; return token::ESTIMATED_PARAMS_BOUNDS;}
 <INITIAL>observation_trends {BEGIN DYNARE_BLOCK; return token::OBSERVATION_TRENDS;}

@@ -43,6 +43,7 @@ typedef pair<int, Type> ExpObj;
 %token CALIB CALIB_VAR CHECK CONF_SIG CORR COVAR
 %token DATAFILE DIAGNOSTIC DIFFUSE_D DOLLAR DR_ALGO DROP DSAMPLE DYN2VEC DYNASAVE DYNATYPE 
 %token END ENDVAL EQUAL ESTIMATION ESTIMATED_PARAMS ESTIMATED_PARAMS_BOUNDS ESTIMATED_PARAMS_INIT
+%token PRIOR_ANALYSIS POSTERIOR_ANALYSIS
 %token FILTERED_VARS FIRST_OBS
 %token <string_val> FLOAT_NUMBER
 %token FORECAST FUNCTIONS
@@ -108,6 +109,8 @@ typedef pair<int, Type> ExpObj;
  	| simul
  	| stoch_simul
  	| estimation
+        | prior_analysis
+        | posterior_analysis
 	| estimated_params
 	| estimated_params_bounds
 	| estimated_params_init
@@ -876,6 +879,41 @@ typedef pair<int, Type> ExpObj;
                    | o_noconstant
                    ;
 	
+ prior_analysis 
+	: PRIOR_ANALYSIS '(' prior_posterior_options_list ')' ';' 
+                {driver.run_prior_analysis();}
+	| PRIOR_ANALYSIS '(' prior_posterior_options_list ')' tmp_var_list ';' 
+                {driver.run_prior_analysis();}
+	;
+
+ prior_posterior_options_list 
+	: prior_posterior_options_list COMMA prior_posterior_options
+	| prior_posterior_options
+	;
+
+ prior_posterior_options 
+                   : o_nograph
+                   | o_conf_sig 
+                   | o_prior_trunc 
+                   | o_bayesian_irf
+                   | o_irf
+                   | o_tex
+                   | o_forecast
+                   | o_smoother
+                   | o_moments_varendo
+                   | o_filtered_vars
+                   | o_xls_sheet
+                   | o_xls_range
+                   | o_filter_step_ahead
+                   ;
+	
+ posterior_analysis 
+	: POSTERIOR_ANALYSIS '(' prior_posterior_options_list ')' ';' 
+		{driver.run_posterior_analysis();}
+	| POSTERIOR_ANALYSIS '(' prior_posterior_options_list ')' tmp_var_list ';' 
+		{driver.run_posterior_analysis();}
+	;
+
  list_optim_option
  	: '\'' NAME '\'' COMMA '\'' NAME '\'' {driver.optim_options($2, $6, 2);}
 	| '\'' NAME '\'' COMMA value {driver.optim_options($2, $5, 2);}

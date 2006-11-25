@@ -228,6 +228,10 @@ public:
   void set_estimated_bounds_elements();
   //! Runs estimation process
   void run_estimation();
+  //! Runs prior_analysis();
+  void run_prior_analysis();
+  //! Runs posterior_analysis();
+  void run_posterior_analysis();
   //! Prints optimization options
   void optim_options(string *str1, string *str2, int task);
   //! Prints varops instructions

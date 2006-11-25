@@ -92,6 +92,8 @@ public :
   void  setOption(std::string iName, std::string iValue1, std::string iValue2);
   /*! Prints "dynare_estimation;" */
   void  runEstimation(std::string);
+  void  runPriorAnalysis(std::string);
+  void  runPosteriorAnalysis(std::string);
   void    runRplot(std::string);
   /*! Prints some estimation initialisation */
   void  setEstimationInit(void);
