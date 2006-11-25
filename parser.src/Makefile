@@ -8,9 +8,15 @@ ifeq ($(shell uname -o), Cygwin)
 	CPPFLAGS += -mno-cygwin
 	DYNARE_M = dynare_m.exe
 	DYNARE_S = dynare_s.exe
-else
-	DYNARE_M = dynare_m
-	DYNARE_S = dynare_s
+else 
+	ifeq ($(CROSS_WIN32), yes)
+		CPP = i586-mingw32msvc-g++
+		DYNARE_M = dynare_m.exe
+		DYNARE_S = dynare_s.exe
+	else
+		DYNARE_M = dynare_m
+		DYNARE_S = dynare_s
+	endif
 endif
 
 ifeq ($(DEBUG),yes)
