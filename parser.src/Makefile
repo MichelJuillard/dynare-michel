@@ -9,14 +9,14 @@ ifeq ($(shell uname -o), Cygwin)
 	DYNARE_M = dynare_m.exe
 	DYNARE_S = dynare_s.exe
 else 
-	ifeq ($(CROSS_WIN32), yes)
-		CPP = i586-mingw32msvc-g++
-		DYNARE_M = dynare_m.exe
-		DYNARE_S = dynare_s.exe
-	else
-		DYNARE_M = dynare_m
-		DYNARE_S = dynare_s
-	endif
+	DYNARE_M = dynare_m
+	DYNARE_S = dynare_s
+endif
+
+ifeq ($(CROSS_WIN32), yes)
+	CPP = i586-mingw32msvc-g++
+	DYNARE_M = dynare_m.exe
+	DYNARE_S = dynare_s.exe
 endif
 
 ifeq ($(DEBUG),yes)
