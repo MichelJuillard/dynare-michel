@@ -1,4 +1,3 @@
-
 function [yf,int_width]=forcst(dr,y0,k,var_list)
   global M_  oo_ options_ 
   
