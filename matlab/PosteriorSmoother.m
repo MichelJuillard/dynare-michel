@@ -33,7 +33,7 @@ MAX_ninno = ceil(MaxNumberOfBytes/(exo_nbr*gend)/8);
 MAX_nerro = ceil(MaxNumberOfBytes/(size(options_.varobs,1)*gend)/8);
 MAX_naK   = ceil(MaxNumberOfBytes/(size(options_.varobs,1)*length(options_.filter_step_ahead)*gend)/8);
 %%
-B = round(0.25*NumberOfDraws);
+B = min(1200, round(0.25*NumberOfDraws));
 %%
 varlist = options_.varlist;
 if isempty(varlist)
