@@ -27,17 +27,24 @@ v       	= zeros(pp,smpl);
 a       	= zeros(mm,smpl+1);
 a1			= a;
 aK          = zeros(nk,mm,smpl+nk);
-Fstar   	= zeros(pp,smpl);
-Finf		= zeros(pp,smpl);
+
+if isempty(options_.diffuse_d),
+  smpl_diff = 1;
+else
+  smpl_diff=rank(Pinf1);
+end
+
+Fstar   	= zeros(pp,smpl_diff);
+Finf		= zeros(pp,smpl_diff);
 Ki       	= zeros(mm,pp,smpl);
 Li      	= zeros(mm,mm,pp,smpl);
-Linf    	= zeros(mm,mm,pp,smpl);
-L0      	= zeros(mm,mm,pp,smpl);
-Kstar   	= zeros(mm,pp,smpl);
+Linf    	= zeros(mm,mm,pp,smpl_diff);
+L0      	= zeros(mm,mm,pp,smpl_diff);
+Kstar   	= zeros(mm,pp,smpl_diff);
 P       	= zeros(mm,mm,smpl+1);
 P1			= P;
-Pstar   	= zeros(spstar(1),spstar(2),smpl+1); Pstar(:,:,1) = Pstar1;
-Pinf    	= zeros(spinf(1),spinf(2),smpl+1); Pinf(:,:,1) = Pinf1;
+Pstar   	= zeros(spstar(1),spstar(2),smpl_diff+1); Pstar(:,:,1) = Pstar1;
+Pinf    	= zeros(spinf(1),spinf(2),smpl_diff+1); Pinf(:,:,1) = Pinf1;
 Pstar1 		= Pstar;
 Pinf1  		= Pinf;
 crit   	 	= options_.kalman_tol;
