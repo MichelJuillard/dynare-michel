@@ -18,6 +18,7 @@ spinf   	= size(Pinf1);
 spstar  	= size(Pstar1);
 v       	= zeros(pp,smpl);
 a       	= zeros(mm,smpl+1);
+aK          = zeros(nk,mm,smpl+nk);  
 iF      	= zeros(pp,pp,smpl);
 Fstar   	= zeros(pp,pp,smpl);
 iFinf   	= zeros(pp,pp,smpl);
