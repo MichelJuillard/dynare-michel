@@ -32,6 +32,8 @@ nn = sqrt(MaxNumberOfPlotPerFigure);
 DirectoryName = CheckPath('Output');
 if strcmpi(type,'posterior')
   MhDirectoryName = CheckPath('metropolis');
+elseif strcmpi(type,'gsa')
+  MhDirectoryName = CheckPath('GSA');
 else
   MhDirectoryName = CheckPath('prior');
 end  
@@ -42,10 +44,18 @@ if strcmpi(type,'posterior')
   load([ MhDirectoryName '/'  M_.fname '_mh_history'])
   TotalNumberOfMhDraws = sum(record.MhDraws(:,1));
   NumberOfDraws = TotalNumberOfMhDraws-floor(options_.mh_drop*TotalNumberOfMhDraws);
+elseif strcmpi(type,'gsa')
+  load([ MhDirectoryName '/'  M_.fname '_prior'],'lpmat','istable')
+  x=lpmat(istable,:);
+  clear lpmat istable
+  NumberOfDraws=size(x,1);
+  B=NumberOfDraws; options_.B = B;
 else% type = 'prior'
   NumberOfDraws = 500;
 end
-B = min([round(.5*NumberOfDraws),500]); options_.B = B;
+if ~strcmpi(type,'gsa')
+  B = min([round(.5*NumberOfDraws),500]); options_.B = B;
+end
 try delete([MhDirectoryName '\' M_.fname '_IRFs*']);
 catch disp('No _IRFs files to be deleted!')
 end
@@ -55,6 +65,8 @@ NumberOfIRFfiles = 1;
 ifil2 = 1;
 if strcmpi(type,'posterior')
   h = waitbar(0,'Bayesian (posterior) IRFs...');
+elseif strcmpi(type,'gsa')
+  h = waitbar(0,'GSA (prior) IRFs...');
 else
   h = waitbar(0,'Bayesian (prior) IRFs...');
 end
@@ -71,7 +83,11 @@ end
 for b=1:B
   irun = irun+1;
   irun2 = irun2+1;
-  deep = GetOneDraw(type);
+  if ~strcmpi(type,'gsa')
+    deep = GetOneDraw(type);
+  else
+    deep = x(b,:);
+  end
   stock_param(irun2,:) = deep;  
   set_parameters(deep);
   dr = resol(oo_.steady_state,0);
@@ -98,14 +114,14 @@ for b=1:B
     NumberOfIRFfiles = NumberOfIRFfiles+1;
     irun = 0;
   end
-  if irun2 > MAX_nruns | b == B
+  if irun2 == MAX_nruns | b == B
     if b == B
       stock_param = stock_param(1:irun2,:);
     end
     stock = stock_param;
     save([MhDirectoryName '/' M_.fname '_param_irf' int2str(ifil2)],'stock');
     ifil2 = ifil2 + 1;
-    irun2 = 1;
+    irun2 = 0;
   end
   waitbar(b/B,h);
 end
@@ -113,7 +129,12 @@ NumberOfIRFfiles = NumberOfIRFfiles-1;
 ifil2 = ifil2-1;
 close(h);
 
-ReshapeMatFiles('irf')
+ReshapeMatFiles('irf',type)
+
+if strcmpi(type,'gsa')
+  return
+end  
+
 
 varlist = options_.varlist;
 if isempty(varlist)
@@ -251,7 +272,7 @@ for i=1:M_.exo_nbr
       subplotnum = 0;
     end
   end% loop over selected endo_var
-end% loop over exo_var
+end% loop over exo_var  
 %%
 if options_.TeX
   fprintf(fidTeX,'%% End of TeX file.\n');
