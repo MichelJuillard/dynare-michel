@@ -181,6 +181,7 @@ int sigma_e = 0;
 <DYNARE_BLOCK>uniform_pdf {return token::UNIFORM_PDF;}
 
 <DYNARE_BLOCK>; {return yy::parser::token_type (yytext[0]);}
+<DYNARE_BLOCK># {return yy::parser::token_type (yytext[0]);}
 
 
  /* Inside Dynare statement */
@@ -275,8 +276,6 @@ int sigma_e = 0;
 
  /* NATIVE Block */
 <NATIVE>.* {BEGIN INITIAL; driver.add_native(yytext); driver.add_native("\n"); }
-
-<*>. {return yy::parser::token_type (yytext[0]);}
 
 %%
 
