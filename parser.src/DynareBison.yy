@@ -72,7 +72,7 @@ typedef pair<int, Type> ExpObj;
 %left PLUS MINUS
 %left TIMES DIVIDE
 %left UMINUS
-%right POWER 
+%nonassoc POWER 
 %token EXP LOG LOG10 SIN COS TAN ASIN ACOS ATAN SINH COSH TANH ASINH ACOSH ATANH SQRT
 /* isn't parsed from the *.mod file, but used to distinguish EQUAL in equation and EQUAL in assignment in    operation codes
 */

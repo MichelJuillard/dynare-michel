@@ -1074,11 +1074,12 @@ inline string ModelTree::getExpression(NodeID StartID, EquationType  iEquationTy
         {
           // if current operator is not a temporary variable and
           // of lesser precedence than previous one, insert '('
-          if ( precedence_current_op < precedence_last_op ||
-               (on_the_right_of_upper_node == 1 &&
-                (last_op_code == token::MINUS || last_op_code == token::DIVIDE) &&
-                (precedence_current_op == precedence_last_op))||
-               current_op_code == token::UMINUS)
+          if (precedence_current_op < precedence_last_op
+              || (on_the_right_of_upper_node == 1
+                  && (last_op_code == token::MINUS || last_op_code == token::DIVIDE)
+                  && (precedence_current_op == precedence_last_op))
+              || (last_op_code == token::POWER && current_op_code == token::POWER)
+              || current_op_code == token::UMINUS)
             {
               exp << "(";
               current_token_ID->close_parenthesis = 1;
