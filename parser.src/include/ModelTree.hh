@@ -35,7 +35,7 @@ private :
   /*! Output for dynamic model */
   std::ostringstream      DynamicOutput;
   /*! Output for main file */
-  static std::ostringstream output;
+  std::ostringstream output;
   /*! Output file stream for static model */
   std::ofstream       mStaticModelFile;
   /*! Output file stream for dynamic model */
@@ -49,6 +49,10 @@ private :
   char          lpar, rpar;
   /*! Name of parameter variables ("params" for C output, and M_.params for Matlab) */
   std::string       param_name;
+  //! Reference to model parameters
+  ModelParameters &mod_param;
+  //! Reference to numerical constants table
+  const NumericalConstants &num_constants;
 
 private :
   /*! Computes argument derivative */
@@ -66,7 +70,7 @@ public :
   /*! When Hessian  is writen this flag is set to true */
   bool    computeHessian;
   /*! Constructor */
-  ModelTree();
+  ModelTree(SymbolTable &symbol_table_arg, VariableTable &variable_table_arg, ModelParameters &mod_param_arg, const NumericalConstants &num_constants);
   /*! Destructor */
   ~ModelTree();
   /*! Opens output M files (1st and 2nd derivatives) */
@@ -94,7 +98,7 @@ public :
   /*! Writes initialization of various Matlab variables */
   void    ModelInitialization(void);
   /*! Returns string output for main file */
-  static    std::string get();
+  std::string get();
 };
 //------------------------------------------------------------------------------
 #endif

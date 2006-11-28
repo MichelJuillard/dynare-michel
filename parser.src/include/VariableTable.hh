@@ -37,18 +37,21 @@ typedef std::pair<std::string, int> varKey;
 class VariableTable
 {
 private :
+  //! A reference to the symbol table
+  const SymbolTable &symbol_table;
+  //! A reference to model parameters
+  ModelParameters &mod_param;
   /*!  Variable table data */
-  //static std::map<varKey,Variable>	mVariableTable;
-  static std::map<varKey,int> mVariableTable;
+  std::map<varKey,int> mVariableTable;
   /*! Index (IDs) of variables in variable table */
-  static std::vector<varKey>      mVariableIndex;
+  std::vector<varKey> mVariableIndex;
   /*! Variable IDs of sorted variable table */
-  static std::vector<int>     mSortedVariableID;
+  std::vector<int> mSortedVariableID;
   /*! Output index for variable table */
-  static std::vector<int>     mPrintFormatIndex;
+  std::vector<int> mPrintFormatIndex;
 public :
   /*! */
-  VariableTable();
+  VariableTable(const SymbolTable &symbol_table_arg, ModelParameters &mod_param_arg);
   /*! */
   ~VariableTable();
   /*! Find type and ID in SymbolTable
@@ -56,27 +59,27 @@ public :
     - Make variable
     - Push variable on variabletable
   */
-  static int  AddVariable(std::string iName, int iLag);
+  int AddVariable(std::string iName, int iLag);
   /*! Pointer to error function of parser class */
-  static void (* error) (const char* m);
+  void (* error) (const char* m);
   /*! Decremente a symbol id of a variable */
-  static void decSymbolID(std::string iName, int id, int iLag, Type iType);
+  void decSymbolID(std::string iName, int id, int iLag, Type iType);
   /*! Return VariableTable[name,lag].variable_id  */
-  inline static int   getID(std::string iName, int iLag);
+  inline int getID(std::string iName, int iLag);
   /*! Return lag of variable */
-  inline static int   getLag(int iID);
+  inline int getLag(int iID);
   /*! Return symbol ID of variable */
-  inline static int  getSymbolID(int ivarID);
+  inline int getSymbolID(int ivarID);
   /*! Gets varibale type */
-  inline static Type  getType(int ivarID);
+  inline Type getType(int ivarID);
   /*! Gets nomber of variables in mVariableTable */
-  inline static int  size(void);
+  inline int size();
   /*! Gets variable ID of sorted variable table */
-  inline static int  getSortID(int);
+  inline int getSortID(int);
   /*! Return variable index to print in format : y(index) or oo_.y_simul(index) ... */
-  inline static int   getPrintIndex(int iVarID);
+  inline int getPrintIndex(int iVarID);
   /*! Sorts variable table */
-  static void Sort(void);
+  void Sort();
 };
 inline int  VariableTable::getSortID(int iVarID)
 {
@@ -107,7 +110,7 @@ inline Type VariableTable::getType(int ivarID)
 {
   varKey key = mVariableIndex[ivarID];
   //return mVariableTable[key].type;
-  return SymbolTable::getType(key.first);
+  return symbol_table.getType(key.first);
 }
 
 //------------------------------------------------------------------------------
@@ -115,7 +118,7 @@ inline int VariableTable::getSymbolID(int ivarID)
 {
   varKey key = mVariableIndex[ivarID];
   //return mVariableTable[key].symbol_id;
-  return SymbolTable::getID(key.first);
+  return symbol_table.getID(key.first);
 }
 
 //------------------------------------------------------------------------------
@@ -125,12 +128,9 @@ inline int VariableTable::getLag(int iID)
 }
 
 //------------------------------------------------------------------------------
-inline int VariableTable::size(void)
+inline int VariableTable::size()
 {
   return mVariableTable.size();
 }
 
-//------------------------------------------------------------------------------
-
-//------------------------------------------------------------------------------
 #endif

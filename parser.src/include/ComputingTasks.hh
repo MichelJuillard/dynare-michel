@@ -62,10 +62,12 @@ class ComputingTasks
 private :
   //! Output of this class
   std::ostringstream  *output;
+  //! A reference to the symbol table
+  const SymbolTable &symbol_table;
 
 public :
   //! Constructor
-  ComputingTasks();
+  ComputingTasks(const SymbolTable &symbol_table_arg);
   //! Destructor
   ~ComputingTasks();
   /*! Pointer to error function of parser class */
@@ -144,7 +146,7 @@ public :
 
   void  set(void);
 
-  static  std::string get(void);
+  std::string get(void);
 };
 //------------------------------------------------------------------------------
 #endif

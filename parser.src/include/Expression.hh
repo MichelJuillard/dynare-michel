@@ -49,13 +49,17 @@ private :
   /*! Operator table : names and precedences */
   OperatorTable operator_table;
   /*! Output string of the class */
-  static std::ostringstream output;
+  std::ostringstream output;
+  //! Pointer to numerical constants table
+  NumericalConstants *num_constants;
 
 public :
   /*! Constructor */
   Expression();
   /*! Destructor */
   ~Expression();
+  //! Set numerical constants pointer
+  void setNumericalConstants(NumericalConstants *num_constants_arg);
   /*! Adds binary token to expression list */
   int   AddToken(int id1,Type type1, int id2,Type type2,int op_code);
   /*! Adds unary token to expression list */
@@ -63,13 +67,13 @@ public :
   /*! Adds unkown function to expression list */
   int   AddToken(int id1,Type type1, std::string ufunction);
   /*! Returns output string */
-  static  std::string get(void);
+  std::string get();
   /*! Clear expression list */
   void  clear(void);
   /*! Print expression to output string */
   void  set(void);
   /*! Gets output argument name */
-  static std::string   getArgument(Type type,int id);
+  std::string getArgument(Type type, int id);
 };
 //------------------------------------------------------------------------------
 #endif

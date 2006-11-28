@@ -10,7 +10,6 @@
 #include <map>
 #include <string>
 #include <vector>
-#include <sstream>
 //------------------------------------------------------------------------------
 #include "ModelParameters.hh"
 #include "SymbolTableTypes.hh"
@@ -19,12 +18,11 @@
   \class SymbolTable
   \brief This class keeps track of symbols
 */
-
 class SymbolTable
 {
-
-private :
-  static std::ostringstream output;
+private:
+  //! A reference to the model parameters
+  ModelParameters &mod_param;
   /*! Adds symbol into symbol table
     \param name a string.
     \param type a Type struct.
@@ -35,64 +33,60 @@ private :
     - set Name and Type
     - increase corresponding counter in ModelParameters class
   */
-  static int AddSymbol(std::string name,Type type, std::string tex_name);
-protected :
+  int AddSymbol(std::string name, Type type, std::string tex_name);
   /*! Symbol table map */
-  static std::map<std::string, Symbol, std::less<std::string> > symboltable;
+  std::map<std::string, Symbol, std::less<std::string> > symboltable;
+  //! Typedef for const iterator on symboltable map
+  typedef std::map<std::string, Symbol, std::less<std::string> >::const_iterator symboltable_const_iterator;
   /*! Symbol name table indexed by type and ID */
-  static std::vector< std::vector<std::string> >          name_table;
-  static std::vector< std::vector<std::string> >          tex_name_table;
-protected :
+  std::vector< std::vector<std::string> > name_table;
+  std::vector< std::vector<std::string> > tex_name_table;
   /*! Changes type of a symbol */
-  static  void  ResetType(std::string name,Type new_type);
+  void ResetType(std::string name, Type new_type);
 public :
   /*! Constructor */
-  SymbolTable();
+  SymbolTable(ModelParameters &mod_param_arg);
   /*! Destructor*/
   ~SymbolTable();
   /*! Pointer to error function of parser class */
-  static void (* error) (const char* m);
+  void (* error) (const char* m);
   /*! Adds a symbol apearing in declaration
     - warning if symbol is already set with same type
     - error if symbol is already set with different type
     - set name, type
     - increase corresponding counter in ModelParameters
   */
-  static  int   AddSymbolDeclar(std::string name,Type type, std::string tex_name);
+  int AddSymbolDeclar(std::string name, Type type, std::string tex_name);
   /*! Adds symbol range */
-  static  void  AddSymbolRange(std::string name,int nbr,Type type, std::string tex_name);
-  /*! Adds a lag to field lags */
-  static void AddLag(std::string name,int lag);
+  void AddSymbolRange(std::string name, int nbr, Type type, std::string tex_name);
   /*! Sets a symbol as referenced */
-  static  void  SetReferenced(std::string name);
+  void SetReferenced(std::string name);
   /*! Return eReferenced if symbol is referenced eNotReferenced otherwise*/
-  static  Reference   isReferenced(std::string name);
+  Reference isReferenced(const std::string &name) const;
   /*! Tests if symbol exists in symbol table
     \return true if exists, false outherwise
   */
-  inline static   bool  Exist(std::string name);
+  inline bool Exist(const std::string &name) const;
   /*! Gets name by type and ID */
-  inline static std::string getNameByID(Type type,int id);
+  inline std::string getNameByID(Type type, int id);
   /*! Gets tex name by type and ID */
-  inline static std::string getTexNameByID(Type type,int id);
+  inline std::string getTexNameByID(Type type, int id);
   /*! Gets type by name */
-  inline static Type  getType(std::string name);
+  inline Type getType(const std::string &name) const;
   /*! Gets ID by name */
-  inline static int   getID(std::string name);
+  inline int getID(const std::string &name) const;
   /*! Gets output string of this class */
-  static std::string  get();
+  std::string get();
+#if 0 // Commented out on 27/11/2006, SV
   /*! Checks if symbols are used in model equations, removes unused symbol */
   void clean();
-  void erase_local_parameters();
+#endif // Comment
 };
-inline bool SymbolTable::Exist(std::string name)
-{
-  std::map<std::string, Symbol, std::less<std::string> >::iterator iter;
 
-  iter = symboltable.find(name);
-  //Testing if symbol exists
-  if (iter == symboltable.end()) return false;
-  else return true;
+inline bool SymbolTable::Exist(const std::string &name) const
+{
+  symboltable_const_iterator iter = symboltable.find(name);
+  return (iter != symboltable.end());
 }
 
 //------------------------------------------------------------------------------
@@ -112,21 +106,23 @@ inline std::string  SymbolTable::getTexNameByID(Type type,int id)
 }
 
 //------------------------------------------------------------------------------
-inline Type SymbolTable::getType(std::string name)
+inline Type SymbolTable::getType(const std::string &name) const
 {
-  if (Exist(name))
-    return(symboltable[name].type);
-  else
+  symboltable_const_iterator iter = symboltable.find(name);
+  if (iter == symboltable.end())
     return eUNDEF;
+  else
+    return iter->second.type;
 }
 
 //------------------------------------------------------------------------------
-inline int  SymbolTable::getID(std::string name)
+inline int SymbolTable::getID(const std::string &name) const
 {
-  if (Exist(name))
-    return(symboltable[name].id);
-  else
+  symboltable_const_iterator iter = symboltable.find(name);
+  if (iter == symboltable.end())
     return -1;
+  else
+    return(iter->second.id);
 }
 
 //------------------------------------------------------------------------------

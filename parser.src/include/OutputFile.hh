@@ -9,6 +9,8 @@
 //------------------------------------------------------------------------------
 #include <fstream>
 #include <string>
+
+#include "ModFile.hh"
 //------------------------------------------------------------------------------
 /*!
   \class  OutputFile
@@ -28,9 +30,9 @@ public :
   /*! Destructor */
   ~OutputFile();
   /*! Opens a given file and writes some initialization */
-  void Open(std::string iFileName);
+  void Open(std::string iFileName, ModFile *mod_file);
   /*! Writes output data from SymbolTable and passed strings to output file */
-  void Save(std::ostringstream& iOutput);
+  void Save(std::ostringstream& iOutput, ModFile *mod_file);
 };
 //------------------------------------------------------------------------------
 #endif

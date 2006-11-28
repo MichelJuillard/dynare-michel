@@ -16,35 +16,30 @@ using namespace std;
 #include "VariableTable.hh"
 #include "NumericalConstants.hh"
 #include "DataTree.hh"
-//------------------------------------------------------------------------------
-const int DataTree::NoOpCode = -1;
-const NodeID DataTree::NullID = NULL;
-const NodeID DataTree::Zero = new MetaToken(reinterpret_cast <NodeID> (0), eNumericalConstant, NULL, -1);
-const NodeID DataTree::One = new MetaToken(reinterpret_cast <NodeID> (1), eNumericalConstant, NULL, -1);
-const NodeID DataTree::MinusOne = new MetaToken(One, eTempResult, NULL, token::UMINUS);
-const NodeID DataTree::ZeroEqZero = new MetaToken(Zero, eTempResult, Zero, token::EQUAL);
-int      DataTree::offset = 1;
-//------------------------------------------------------------------------------
-DataTree::DataTree()
+
+DataTree::DataTree(SymbolTable &symbol_table_arg, VariableTable &variable_table_arg) :
+  symbol_table(symbol_table_arg),
+  variable_table(variable_table_arg),
+  NoOpCode(-1), NullID(NULL)
 {
-
+  offset = 1;
   current_order = 0;
-  //Here "0" and "1" have been added to NumericalConstants class
-  SymbolTable::AddSymbolDeclar("0.0",eNumericalConstant, "");
-  SymbolTable::AddSymbolDeclar("1.0",eNumericalConstant, "");
 
+  Zero = new MetaToken(reinterpret_cast <NodeID> (0), eNumericalConstant, NULL, -1);
   Zero->op_name = "";
   Zero->reference_count.resize(current_order+1,2);
   Zero->idx = 0;
   mModelTree.push_back(Zero);
   mIndexOfTokens[*Zero]=Zero;
 
+  One = new MetaToken(reinterpret_cast <NodeID> (1), eNumericalConstant, NULL, -1);  One->op_name = "";
   One->op_name = "";
   One->reference_count.resize(current_order+1,1);
   One->idx = 1;
   mModelTree.push_back(One);
   mIndexOfTokens[*One]=One;
 
+  MinusOne = new MetaToken(One, eTempResult, NULL, token::UMINUS);
   MinusOne->op_name = operator_table.str(token::UMINUS);
   MinusOne->reference_count.resize(current_order+1,1);
   MinusOne->idx = 2;
@@ -52,6 +47,7 @@ DataTree::DataTree()
   mIndexOfTokens[*MinusOne]=MinusOne;
 
   // Pushing "0=0" into mModelTree
+  ZeroEqZero = new MetaToken(Zero, eTempResult, Zero, token::EQUAL);
   ZeroEqZero->op_name = operator_table.str(token::EQUAL);
   ZeroEqZero->reference_count.resize(current_order+1,1);
   ZeroEqZero->idx = 3;

@@ -2,25 +2,36 @@
 
 ParsingDriver::ParsingDriver() : trace_scanning(false), trace_parsing(false)
 {
-  order = -1;
-  linear = -1;
-  model_tree.error = error;
-  symbol_table.error = error;
-  variable_table.error = error;
-  shocks.error = error;
-  numerical_initialization.error = error;
-  computing_tasks.error = error;
+  mod_file = new ModFile();
+  mod_file->order = -1;
+  mod_file->linear = -1;
+
+  mod_file->model_tree.error = error;
+  mod_file->symbol_table.error = error;
+  mod_file->variable_table.error = error;
+  mod_file->shocks.error = error;
+  mod_file->numerical_initialization.error = error;
+  mod_file->computing_tasks.error = error;
   tmp_symbol_table.error = error;
+
+  tmp_symbol_table.setGlobalSymbolTable(&mod_file->symbol_table);
+  expression.setNumericalConstants(&mod_file->num_constants);
 }
 
 ParsingDriver::~ParsingDriver()
 {
 }
 
+bool
+ParsingDriver::exists_symbol(const char *s)
+{
+  return mod_file->symbol_table.Exist(s);
+}
+
 void
 ParsingDriver::check_symbol_existence(const string &name)
 {
-  if (!symbol_table.Exist(name))
+  if (!mod_file->symbol_table.Exist(name))
     error("Unknown symbol: " + name);
 }
 
@@ -36,10 +47,10 @@ ParsingDriver::get_expression(ExpObj *exp)
       return sexp;
     }
   else
-    return Expression::getArgument(exp->second, exp->first);
+    return expression.getArgument(exp->second, exp->first);
 }
 
-void
+ModFile *
 ParsingDriver::parse(const string &f)
 {
   file = f;
@@ -48,6 +59,7 @@ ParsingDriver::parse(const string &f)
   parser.set_debug_level(trace_parsing);
   parser.parse();
   scan_end();
+  return mod_file;
 }
 
 void
@@ -60,8 +72,7 @@ ParsingDriver::error(const yy::parser::location_type &l, const string &m)
 void
 ParsingDriver::error(const string &m)
 {
-  extern int yylineno;
-  cerr << file << ":" << yylineno << ": " << m << endl;
+  cerr << file << ": " << m << endl;
   exit(-1);
 }
 
@@ -69,16 +80,16 @@ void
 ParsingDriver::setoutput(ostringstream *ostr)
 {
   output = ostr;
-  numerical_initialization.setOutput(ostr);
-  shocks.setOutput(ostr);
-  sigmae.setOutput(ostr);
-  computing_tasks.setOutput(ostr);
+  mod_file->numerical_initialization.setOutput(ostr);
+  mod_file->shocks.setOutput(ostr);
+  mod_file->sigmae.setOutput(ostr);
+  mod_file->computing_tasks.setOutput(ostr);
 }
 
 void
 ParsingDriver::declare_endogenous(string *name, string *tex_name)
 {
-  symbol_table.AddSymbolDeclar(*name, eEndogenous, *tex_name);
+  mod_file->symbol_table.AddSymbolDeclar(*name, eEndogenous, *tex_name);
   delete name;
   delete tex_name;
 }
@@ -86,7 +97,7 @@ ParsingDriver::declare_endogenous(string *name, string *tex_name)
 void
 ParsingDriver::declare_exogenous(string *name, string *tex_name)
 {
-  symbol_table.AddSymbolDeclar(*name, eExogenous, *tex_name);
+  mod_file->symbol_table.AddSymbolDeclar(*name, eExogenous, *tex_name);
   delete name;
   delete tex_name;
 }
@@ -94,7 +105,7 @@ ParsingDriver::declare_exogenous(string *name, string *tex_name)
 void
 ParsingDriver::declare_exogenous_det(string *name, string *tex_name)
 {
-  symbol_table.AddSymbolDeclar(*name, eExogenousDet, *tex_name);
+  mod_file->symbol_table.AddSymbolDeclar(*name, eExogenousDet, *tex_name);
   delete name;
   delete tex_name;
 }
@@ -102,7 +113,7 @@ ParsingDriver::declare_exogenous_det(string *name, string *tex_name)
 void
 ParsingDriver::declare_parameter(string *name, string *tex_name)
 {
-  symbol_table.AddSymbolDeclar(*name, eParameter, *tex_name);
+  mod_file->symbol_table.AddSymbolDeclar(*name, eParameter, *tex_name);
   delete name;
   delete tex_name;
 }
@@ -110,7 +121,7 @@ ParsingDriver::declare_parameter(string *name, string *tex_name)
 ExpObj *
 ParsingDriver::add_expression_constant(string *constant)
 {
-  int id = num_constants.AddConstant(*constant);
+  int id = mod_file->num_constants.AddConstant(*constant);
   delete constant;
   return new ExpObj(id, eNumericalConstant);
 }
@@ -118,23 +129,23 @@ ParsingDriver::add_expression_constant(string *constant)
 NodeID
 ParsingDriver::add_model_constant(string *constant)
 {
-  int id = num_constants.AddConstant(*constant);
+  int id = mod_file->num_constants.AddConstant(*constant);
   delete constant;
-  return model_tree.AddTerminal((NodeID) id, eNumericalConstant);
+  return mod_file->model_tree.AddTerminal((NodeID) id, eNumericalConstant);
 }
 
 NodeID
 ParsingDriver::add_model_variable(string *name)
 {
   check_symbol_existence(*name);
-  Type type = symbol_table.getType(*name);
+  Type type = mod_file->symbol_table.getType(*name);
 
   if ((type == eEndogenous)
       || (type == eExogenous)
       || (type == eExogenousDet))
-    variable_table.AddVariable(*name, 0);
+    mod_file->variable_table.AddVariable(*name, 0);
 
-  NodeID id = model_tree.AddTerminal(*name);
+  NodeID id = mod_file->model_tree.AddTerminal(*name);
   delete name;
   return id;
 }
@@ -143,7 +154,7 @@ NodeID
 ParsingDriver::add_model_variable(string *name, string *olag)
 {
   check_symbol_existence(*name);
-  Type type = symbol_table.getType(*name);
+  Type type = mod_file->symbol_table.getType(*name);
   int lag = atoi(olag->c_str());
 
   if ((type == eExogenous) && lag != 0)
@@ -154,9 +165,9 @@ ParsingDriver::add_model_variable(string *name, string *olag)
     }
 
   if ((type == eEndogenous) || (type == eExogenous))
-    variable_table.AddVariable(*name, lag);
+    mod_file->variable_table.AddVariable(*name, lag);
 
-  NodeID id = model_tree.AddTerminal(*name, lag);
+  NodeID id = mod_file->model_tree.AddTerminal(*name, lag);
   delete name;
   delete olag;
   return id;
@@ -166,8 +177,8 @@ ExpObj *
 ParsingDriver::add_expression_variable(string *name)
 {
   check_symbol_existence(*name);
-  int id = symbol_table.getID(*name);
-  Type type = symbol_table.getType(*name);
+  int id = mod_file->symbol_table.getID(*name);
+  Type type = mod_file->symbol_table.getType(*name);
   delete name;
   return new ExpObj(id, type);
 }
@@ -203,7 +214,7 @@ ParsingDriver::add_expression_token(ExpObj *arg1, string *op_name)
 void
 ParsingDriver::init_param(string *name, ExpObj *rhs)
 {
-  numerical_initialization.SetConstant(*name, get_expression(rhs));
+  mod_file->numerical_initialization.SetConstant(*name, get_expression(rhs));
   delete name;
   delete rhs;
 }
@@ -211,7 +222,7 @@ ParsingDriver::init_param(string *name, ExpObj *rhs)
 void
 ParsingDriver::init_val(string *name, ExpObj *rhs)
 {
-  numerical_initialization.SetInit(*name, get_expression(rhs));
+  mod_file->numerical_initialization.SetInit(*name, get_expression(rhs));
   delete name;
   delete rhs;
 }
@@ -220,7 +231,7 @@ void
 ParsingDriver::hist_val(string *name, string *lag, ExpObj *rhs)
 {
   int ilag = atoi(lag->c_str());
-  numerical_initialization.SetHist(*name, ilag, get_expression(rhs));
+  mod_file->numerical_initialization.SetHist(*name, ilag, get_expression(rhs));
   delete name;
   delete lag;
   delete rhs;
@@ -230,14 +241,7 @@ void
 ParsingDriver::use_dll()
 {
   // Seetting variable momber offset to use C outputs
-  model_tree.offset = 0;
-}
-
-void
-ParsingDriver::check_model()
-{
-  // creates too many problems MJ 11/12/06
-  //  symbol_table.clean();
+  mod_file->model_tree.offset = 0;
 }
 
 void
@@ -246,42 +250,38 @@ ParsingDriver::finish()
   string model_file_name(file);
 
   // Setting flags to compute what is necessary
-  if (order == 1 || linear == 1)
+  if (mod_file->order == 1 || mod_file->linear == 1)
     {
-      model_tree.computeJacobianExo = true;
-      model_tree.computeJacobian = false;
+      mod_file->model_tree.computeJacobianExo = true;
+      mod_file->model_tree.computeJacobian = false;
     }
-  else if (order != -1 && linear != -1)
+  else if (mod_file->order != -1 && mod_file->linear != -1)
     {
-      model_tree.computeHessian = true;
-      model_tree.computeJacobianExo = true;
+      mod_file->model_tree.computeHessian = true;
+      mod_file->model_tree.computeJacobianExo = true;
     }
   // Removing extension chars
   model_file_name.erase(model_file_name.size()-4,4);
-  model_tree.ModelInitialization();
+  mod_file->model_tree.ModelInitialization();
 
-  if ( model_tree.computeHessian )
-    {
-      model_tree.derive(2);
-    }
+  if (mod_file->model_tree.computeHessian )
+    mod_file->model_tree.derive(2);
   else
-    {
-      model_tree.derive(1);
-    }
+    mod_file->model_tree.derive(1);
 
   cout << "Processing outputs ..." << endl;
-  model_tree.setStaticModel();
-  model_tree.setDynamicModel();
+  mod_file->model_tree.setStaticModel();
+  mod_file->model_tree.setDynamicModel();
 
-  if (model_tree.offset == 0)
+  if (mod_file->model_tree.offset == 0)
     {
-      model_tree.OpenCFiles(model_file_name+"_static", model_file_name+"_dynamic");
-      model_tree.SaveCFiles();
+      mod_file->model_tree.OpenCFiles(model_file_name+"_static", model_file_name+"_dynamic");
+      mod_file->model_tree.SaveCFiles();
     }
   else
     {
-      model_tree.OpenMFiles(model_file_name+"_static", model_file_name+"_dynamic");
-      model_tree.SaveMFiles();
+      mod_file->model_tree.OpenMFiles(model_file_name+"_static", model_file_name+"_dynamic");
+      mod_file->model_tree.SaveMFiles();
     }
 
   *output << "save('" << model_file_name << "_results', 'oo_');\n";
@@ -293,63 +293,63 @@ ParsingDriver::finish()
 void
 ParsingDriver::begin_initval()
 {
-  numerical_initialization.BeginInitval();
+  mod_file->numerical_initialization.BeginInitval();
 }
 
 void
 ParsingDriver::end_initval()
 {
-  numerical_initialization.EndInitval();
+  mod_file->numerical_initialization.EndInitval();
 }
 
 void
 ParsingDriver::begin_endval()
 {
-  numerical_initialization.BeginEndval();
+  mod_file->numerical_initialization.BeginEndval();
 }
 
 void
 ParsingDriver::end_endval()
 {
-  numerical_initialization.EndEndval();
+  mod_file->numerical_initialization.EndEndval();
 }
 
 void
 ParsingDriver::begin_histval()
 {
-  numerical_initialization.BeginHistval();
+  mod_file->numerical_initialization.BeginHistval();
 }
 
 void
 ParsingDriver::begin_shocks()
 {
-  shocks.BeginShocks();
+  mod_file->shocks.BeginShocks();
 }
 
 void
 ParsingDriver::begin_mshocks()
 {
-  shocks.BeginMShocks();
+  mod_file->shocks.BeginMShocks();
 }
 
 void
 ParsingDriver::end_shocks()
 {
-  shocks.EndShocks();
+  mod_file->shocks.EndShocks();
 }
 
 void
 ParsingDriver::add_det_shock(string *var)
 {
   check_symbol_existence(*var);
-  int id = symbol_table.getID(*var);
-  switch (symbol_table.getType(*var))
+  int id = mod_file->symbol_table.getID(*var);
+  switch (mod_file->symbol_table.getType(*var))
     {
     case eExogenous:
-      shocks.AddDetShockExo(id);
+      mod_file->shocks.AddDetShockExo(id);
       break;
     case eExogenousDet:
-      shocks.AddDetShockExoDet(id);
+      mod_file->shocks.AddDetShockExoDet(id);
       break;
     default:
       error("Shocks can only be applied to exogenous variables");
@@ -361,8 +361,8 @@ void
 ParsingDriver::add_stderr_shock(string *var, ExpObj *value)
 {
   check_symbol_existence(*var);
-  int id = symbol_table.getID(*var);
-  shocks.AddSTDShock(id, get_expression(value));
+  int id = mod_file->symbol_table.getID(*var);
+  mod_file->shocks.AddSTDShock(id, get_expression(value));
   delete var;
   delete value;
 }
@@ -371,8 +371,8 @@ void
 ParsingDriver::add_var_shock(string *var, ExpObj *value)
 {
   check_symbol_existence(*var);
-  int id = symbol_table.getID(*var);
-  shocks.AddVARShock(id, get_expression(value));
+  int id = mod_file->symbol_table.getID(*var);
+  mod_file->shocks.AddVARShock(id, get_expression(value));
   delete var;
   delete value;
 }
@@ -382,9 +382,9 @@ ParsingDriver::add_covar_shock(string *var1, string *var2, ExpObj *value)
 {
   check_symbol_existence(*var1);
   check_symbol_existence(*var2);
-  int id1 = symbol_table.getID(*var1);
-  int id2 = symbol_table.getID(*var2);
-  shocks.AddCOVAShock(id1, id2, get_expression(value));
+  int id1 = mod_file->symbol_table.getID(*var1);
+  int id2 = mod_file->symbol_table.getID(*var2);
+  mod_file->shocks.AddCOVAShock(id1, id2, get_expression(value));
   delete var1;
   delete var2;
   delete value;
@@ -395,9 +395,9 @@ ParsingDriver::add_correl_shock(string *var1, string *var2, ExpObj *value)
 {
   check_symbol_existence(*var1);
   check_symbol_existence(*var2);
-  int id1 = symbol_table.getID(*var1);
-  int id2 = symbol_table.getID(*var2);
-  shocks.AddCORRShock(id1, id2, get_expression(value));
+  int id1 = mod_file->symbol_table.getID(*var1);
+  int id2 = mod_file->symbol_table.getID(*var2);
+  mod_file->shocks.AddCORRShock(id1, id2, get_expression(value));
   delete var1;
   delete var2;
   delete value;
@@ -406,7 +406,7 @@ ParsingDriver::add_correl_shock(string *var1, string *var2, ExpObj *value)
 void
 ParsingDriver::add_period(string *p1, string *p2)
 {
-  shocks.AddPeriod(*p1, *p2);
+  mod_file->shocks.AddPeriod(*p1, *p2);
   delete p1;
   delete p2;
 }
@@ -414,61 +414,61 @@ ParsingDriver::add_period(string *p1, string *p2)
 void
 ParsingDriver::add_period(string *p1)
 {
-  shocks.AddPeriod(*p1, *p1);
+  mod_file->shocks.AddPeriod(*p1, *p1);
   delete p1;
 }
 
 void
 ParsingDriver::add_value(string *value)
 {
-  shocks.AddValue(*value);
+  mod_file->shocks.AddValue(*value);
   delete value;
 }
 
 void
 ParsingDriver::add_value(ExpObj *value)
 {
-  shocks.AddValue(get_expression(value));
+  mod_file->shocks.AddValue(get_expression(value));
   delete value;
 }
 
 void
 ParsingDriver::do_sigma_e()
 {
-  sigmae.set();
+  mod_file->sigmae.set();
 }
 
 void
 ParsingDriver::end_of_row()
 {
-  sigmae.EndOfRow();
+  mod_file->sigmae.EndOfRow();
 }
 
 void
 ParsingDriver::add_to_row(string *s)
 {
-  sigmae.AddExpression(*s);
+  mod_file->sigmae.AddExpression(*s);
   delete s;
 }
 
 void
 ParsingDriver::add_to_row(ExpObj *v)
 {
-  sigmae.AddExpression(get_expression(v));
+  mod_file->sigmae.AddExpression(get_expression(v));
   delete v;
 }
 
 void
 ParsingDriver::steady()
 {
-  computing_tasks.setSteady();
-  model_tree.computeJacobian = true;
+  mod_file->computing_tasks.setSteady();
+  mod_file->model_tree.computeJacobian = true;
 }
 
 void
 ParsingDriver::option_num(const string &name_option, string *opt1, string *opt2)
 {
-  computing_tasks.setOption(name_option, *opt1, *opt2);
+  mod_file->computing_tasks.setOption(name_option, *opt1, *opt2);
   delete opt1;
   delete opt2;
 }
@@ -483,11 +483,11 @@ ParsingDriver::option_num(const string &name_option, string *opt)
 void
 ParsingDriver::option_num(const string &name_option, const string &opt)
 {
-  computing_tasks.setOption(name_option, opt);
+  mod_file->computing_tasks.setOption(name_option, opt);
   if (name_option == "order")
-    order = atoi(opt.c_str());
+    mod_file->order = atoi(opt.c_str());
   else if (name_option == "linear")
-    linear = atoi(opt.c_str());
+    mod_file->linear = atoi(opt.c_str());
 }
 
 void
@@ -500,7 +500,7 @@ ParsingDriver::option_str(const string &name_option, string *opt)
 void
 ParsingDriver::option_str(const string &name_option, const string &opt)
 {
-  computing_tasks.setOption(name_option, "'" + opt + "'");
+  mod_file->computing_tasks.setOption(name_option, "'" + opt + "'");
 }
 
 void
@@ -522,64 +522,61 @@ void ParsingDriver::rplot()
 {
   tmp_symbol_table.set("var_list_");
   string tmp = tmp_symbol_table.get();
-  computing_tasks.runRplot(tmp);
+  mod_file->computing_tasks.runRplot(tmp);
 }
 
 void ParsingDriver::stoch_simul()
 {
   // If order and linear not set, then set them to default values
-  if (order == -1)
-    {
-      order = 2;
-    }
-  if (linear == -1)
-    {
-      linear = 0;
-    }
+  if (mod_file->order == -1)
+    mod_file->order = 2;
+
+  if (mod_file->linear == -1)
+    mod_file->linear = 0;
 
   tmp_symbol_table.set("var_list_");
   string tmp = tmp_symbol_table.get();
-  computing_tasks.setStochSimul(tmp);
+  mod_file->computing_tasks.setStochSimul(tmp);
 }
 
 void
 ParsingDriver::simul()
 {
-  computing_tasks.setSimul();
-  model_tree.computeJacobian = true;
+  mod_file->computing_tasks.setSimul();
+  mod_file->model_tree.computeJacobian = true;
 }
 
 void
 ParsingDriver::check()
 {
-  computing_tasks.setCheck();
-  model_tree.computeJacobian = true;
+  mod_file->computing_tasks.setCheck();
+  mod_file->model_tree.computeJacobian = true;
 }
 
 void
 ParsingDriver::estimation_init()
 {
-  computing_tasks.EstimParams = &estim_params;
-  computing_tasks.setEstimationInit();
-  model_tree.computeJacobianExo = true;
+  mod_file->computing_tasks.EstimParams = &estim_params;
+  mod_file->computing_tasks.setEstimationInit();
+  mod_file->model_tree.computeJacobianExo = true;
 }
 
 void
 ParsingDriver::set_estimated_elements()
 {
-  computing_tasks.setEstimatedElements();
+  mod_file->computing_tasks.setEstimatedElements();
 }
 
 void
 ParsingDriver::set_estimated_init_elements()
 {
-  computing_tasks.setEstimatedInitElements();
+  mod_file->computing_tasks.setEstimatedInitElements();
 }
 
 void
 ParsingDriver::set_estimated_bounds_elements()
 {
-  computing_tasks.setEstimatedBoundsElements();
+  mod_file->computing_tasks.setEstimatedBoundsElements();
 }
 
 void
@@ -594,7 +591,7 @@ ParsingDriver::run_estimation()
 {
   tmp_symbol_table.set("var_list_");
   string tmp = tmp_symbol_table.get();
-  computing_tasks.runEstimation(tmp);
+  mod_file->computing_tasks.runEstimation(tmp);
 }
 
 void
@@ -602,7 +599,7 @@ ParsingDriver::run_prior_analysis()
 {
   tmp_symbol_table.set("var_list_");
   string tmp = tmp_symbol_table.get();
-  computing_tasks.runPriorAnalysis(tmp);
+  mod_file->computing_tasks.runPriorAnalysis(tmp);
 }
 
 void
@@ -610,13 +607,13 @@ ParsingDriver::run_posterior_analysis()
 {
   tmp_symbol_table.set("var_list_");
   string tmp = tmp_symbol_table.get();
-  computing_tasks.runPosteriorAnalysis(tmp);
+  mod_file->computing_tasks.runPosteriorAnalysis(tmp);
 }
 
 void
 ParsingDriver::optim_options(string *str1, string *str2, int task)
 {
-  computing_tasks.setOptimOptions(*str1, *str2, task);
+  mod_file->computing_tasks.setOptimOptions(*str1, *str2, task);
   delete str1;
   delete str2;
 }
@@ -637,7 +634,7 @@ ParsingDriver::set_trend_init()
 void
 ParsingDriver::set_trend_element(string *arg1, ExpObj *arg2)
 {
-  computing_tasks.set_trend_element(*arg1, get_expression(arg2));
+  mod_file->computing_tasks.set_trend_element(*arg1, get_expression(arg2));
   delete arg1;
   delete arg2;
 }
@@ -645,13 +642,13 @@ ParsingDriver::set_trend_element(string *arg1, ExpObj *arg2)
 void
 ParsingDriver::begin_optim_weights()
 {
-  computing_tasks.BeginOptimWeights();
+  mod_file->computing_tasks.BeginOptimWeights();
 }
 
 void
 ParsingDriver::set_optim_weights(string *arg1, ExpObj *arg2)
 {
-  computing_tasks.setOptimWeights(*arg1, get_expression(arg2));
+  mod_file->computing_tasks.setOptimWeights(*arg1, get_expression(arg2));
   delete arg1;
   delete arg2;
 }
@@ -659,7 +656,7 @@ ParsingDriver::set_optim_weights(string *arg1, ExpObj *arg2)
 void
 ParsingDriver::set_optim_weights(string *arg1, string *arg2, ExpObj *arg3)
 {
-  computing_tasks.setOptimWeights(*arg1, *arg2, get_expression(arg3));
+  mod_file->computing_tasks.setOptimWeights(*arg1, *arg2, get_expression(arg3));
   delete arg1;
   delete arg2;
   delete arg3;
@@ -670,7 +667,7 @@ ParsingDriver::set_osr_params()
 {
   tmp_symbol_table.set("osr_params_");
   string tmp = tmp_symbol_table.get();
-  computing_tasks.setOsrParams(tmp);
+  mod_file->computing_tasks.setOsrParams(tmp);
 }
 
 void
@@ -678,8 +675,8 @@ ParsingDriver::run_osr()
 {
   tmp_symbol_table.set("var_list_");
   string tmp = tmp_symbol_table.get();
-  computing_tasks.runOsr(tmp);
-  model_tree.computeJacobianExo = true;
+  mod_file->computing_tasks.runOsr(tmp);
+  mod_file->model_tree.computeJacobianExo = true;
 }
 
 void
@@ -687,7 +684,7 @@ ParsingDriver::set_olr_inst()
 {
   tmp_symbol_table.set("options_.olr_inst");
   string tmp = tmp_symbol_table.get();
-  computing_tasks.setOlrInst(tmp);
+  mod_file->computing_tasks.setOlrInst(tmp);
 }
 
 void
@@ -695,19 +692,19 @@ ParsingDriver::run_olr()
 {
   tmp_symbol_table.set("var_list_");
   string tmp = tmp_symbol_table.get();
-  computing_tasks.runOlr(tmp);
+  mod_file->computing_tasks.runOlr(tmp);
 }
 
 void
 ParsingDriver::begin_calib_var()
 {
-  computing_tasks.BeginCalibVar();
+  mod_file->computing_tasks.BeginCalibVar();
 }
 
 void
 ParsingDriver::set_calib_var(string *name, string *weight, ExpObj *expression)
 {
-  computing_tasks.setCalibVar(*name, *weight, get_expression(expression));
+  mod_file->computing_tasks.setCalibVar(*name, *weight, get_expression(expression));
   delete name;
   delete weight;
   delete expression;
@@ -717,7 +714,7 @@ void
 ParsingDriver::set_calib_var(string *name1, string *name2,
                              string *weight, ExpObj *expression)
 {
-  computing_tasks.setCalibVar(*name1, *name2, *weight, get_expression(expression));
+  mod_file->computing_tasks.setCalibVar(*name1, *name2, *weight, get_expression(expression));
   delete name1;
   delete name2;
   delete weight;
@@ -728,7 +725,7 @@ void
 ParsingDriver::set_calib_ac(string *name, string *ar,
                             string *weight, ExpObj *expression)
 {
-  computing_tasks.setCalibAc(*name, *ar, *weight, get_expression(expression));
+  mod_file->computing_tasks.setCalibAc(*name, *ar, *weight, get_expression(expression));
   delete name;
   delete ar;
   delete weight;
@@ -738,7 +735,7 @@ ParsingDriver::set_calib_ac(string *name, string *ar,
 void
 ParsingDriver::run_calib(int flag)
 {
-  computing_tasks.runCalib(flag);
+  mod_file->computing_tasks.runCalib(flag);
 }
 
 void
@@ -746,7 +743,7 @@ ParsingDriver::run_dynatype(string *filename, string *ext)
 {
   tmp_symbol_table.set("var_list_");
   string tmp = tmp_symbol_table.get();
-  computing_tasks.runDynatype(*filename, *ext, tmp);
+  mod_file->computing_tasks.runDynatype(*filename, *ext, tmp);
   delete filename;
   delete ext;
 }
@@ -756,7 +753,7 @@ ParsingDriver::run_dynasave(string *filename, string *ext)
 {
   tmp_symbol_table.set("var_list_");
   string tmp = tmp_symbol_table.get();
-  computing_tasks.runDynasave(*filename, *ext, tmp);
+  mod_file->computing_tasks.runDynasave(*filename, *ext, tmp);
   delete filename;
   delete ext;
 }
@@ -764,13 +761,13 @@ ParsingDriver::run_dynasave(string *filename, string *ext)
 void
 ParsingDriver::begin_model_comparison()
 {
-  computing_tasks.beginModelComparison();
+  mod_file->computing_tasks.beginModelComparison();
 }
 
 void
 ParsingDriver::add_mc_filename(string *filename, string *prior)
 {
-  computing_tasks.addMcFilename(*filename, *prior);
+  mod_file->computing_tasks.addMcFilename(*filename, *prior);
   delete filename;
   delete prior;
 }
@@ -778,154 +775,166 @@ ParsingDriver::add_mc_filename(string *filename, string *prior)
 void
 ParsingDriver::run_model_comparison()
 {
-  computing_tasks.runModelComparison();
+  mod_file->computing_tasks.runModelComparison();
 }
 
 NodeID
 ParsingDriver::add_model_equal(NodeID arg1, NodeID arg2)
 {
-  NodeID id = model_tree.AddEqual(arg1, arg2);
-  model_parameters.eq_nbr++;
+  NodeID id = mod_file->model_tree.AddEqual(arg1, arg2);
+  mod_file->model_parameters.eq_nbr++;
   return id;
+}
+
+NodeID
+ParsingDriver::add_model_equal_with_zero_rhs(NodeID arg)
+{
+  return add_model_equal(arg, mod_file->model_tree.Zero);
 }
 
 void
 ParsingDriver::declare_and_init_local_parameter(string *name, NodeID rhs)
 {
-  symbol_table.AddSymbolDeclar(*name, eLocalParameter, *name);
-  NodeID id = model_tree.AddTerminal(*name);
-  model_tree.AddAssign(id, rhs);
+  mod_file->symbol_table.AddSymbolDeclar(*name, eLocalParameter, *name);
+  NodeID id = mod_file->model_tree.AddTerminal(*name);
+  mod_file->model_tree.AddAssign(id, rhs);
   delete name;
 }
 
 NodeID
 ParsingDriver::add_model_plus(NodeID arg1, NodeID arg2)
 {
-  return model_tree.AddPlus(arg1, arg2);
+  return mod_file->model_tree.AddPlus(arg1, arg2);
 }
 
 NodeID
 ParsingDriver::add_model_minus(NodeID arg1, NodeID arg2)
 {
-  return model_tree.AddMinus(arg1, arg2);
+  return mod_file->model_tree.AddMinus(arg1, arg2);
 }
 
 NodeID
 ParsingDriver::add_model_uminus(NodeID arg1)
 {
-  return model_tree.AddUMinus(arg1);
+  return mod_file->model_tree.AddUMinus(arg1);
 }
 
 NodeID
 ParsingDriver::add_model_times(NodeID arg1, NodeID arg2)
 {
-  return model_tree.AddTimes(arg1, arg2);
+  return mod_file->model_tree.AddTimes(arg1, arg2);
 }
 
 NodeID
 ParsingDriver::add_model_divide(NodeID arg1, NodeID arg2)
 {
-  return model_tree.AddDivide(arg1, arg2);
+  return mod_file->model_tree.AddDivide(arg1, arg2);
 }
 
 NodeID
 ParsingDriver::add_model_power(NodeID arg1, NodeID arg2)
 {
-  return model_tree.AddPower(arg1, arg2);
+  return mod_file->model_tree.AddPower(arg1, arg2);
 }
 
 NodeID
 ParsingDriver::add_model_exp(NodeID arg1)
 {
-  return model_tree.AddExp(arg1);
+  return mod_file->model_tree.AddExp(arg1);
 }
 
 NodeID
 ParsingDriver::add_model_log(NodeID arg1)
 {
-  return model_tree.AddLog(arg1);
+  return mod_file->model_tree.AddLog(arg1);
 }
 
 NodeID
 ParsingDriver::add_model_log10(NodeID arg1)
 {
-  return model_tree.AddLog10(arg1);
+  return mod_file->model_tree.AddLog10(arg1);
 }
 
 NodeID
 ParsingDriver::add_model_cos(NodeID arg1)
 {
-  return model_tree.AddCos(arg1);
+  return mod_file->model_tree.AddCos(arg1);
 }
 
 NodeID
 ParsingDriver::add_model_sin(NodeID arg1)
 {
-  return model_tree.AddSin(arg1);
+  return mod_file->model_tree.AddSin(arg1);
 }
 
 NodeID
 ParsingDriver::add_model_tan(NodeID arg1)
 {
-  return model_tree.AddTan(arg1);
+  return mod_file->model_tree.AddTan(arg1);
 }
 
 NodeID
 ParsingDriver::add_model_acos(NodeID arg1)
 {
-  return model_tree.AddACos(arg1);
+  return mod_file->model_tree.AddACos(arg1);
 }
 
 NodeID
 ParsingDriver::add_model_asin(NodeID arg1)
 {
-  return model_tree.AddASin(arg1);
+  return mod_file->model_tree.AddASin(arg1);
 }
 
 NodeID
 ParsingDriver::add_model_atan(NodeID arg1)
 {
-  return model_tree.AddATan(arg1);
+  return mod_file->model_tree.AddATan(arg1);
 }
 
 NodeID
 ParsingDriver::add_model_cosh(NodeID arg1)
 {
-  return model_tree.AddCosH(arg1);
+  return mod_file->model_tree.AddCosH(arg1);
 }
 
 NodeID
 ParsingDriver::add_model_sinh(NodeID arg1)
 {
-  return model_tree.AddSinH(arg1);
+  return mod_file->model_tree.AddSinH(arg1);
 }
 
 NodeID
 ParsingDriver::add_model_tanh(NodeID arg1)
 {
-  return model_tree.AddTanH(arg1);
+  return mod_file->model_tree.AddTanH(arg1);
 }
 
 NodeID
 ParsingDriver::add_model_acosh(NodeID arg1)
 {
-  return model_tree.AddACosH(arg1);
+  return mod_file->model_tree.AddACosH(arg1);
 }
 
 NodeID
 ParsingDriver::add_model_asinh(NodeID arg1)
 {
-  return model_tree.AddASinH(arg1);
+  return mod_file->model_tree.AddASinH(arg1);
 }
 
 NodeID
 ParsingDriver::add_model_atanh(NodeID arg1)
 {
-  return model_tree.AddATanH(arg1);
+  return mod_file->model_tree.AddATanH(arg1);
 }
 
 NodeID
 ParsingDriver::add_model_sqrt(NodeID arg1)
 {
-  return model_tree.AddSqRt(arg1);
+  return mod_file->model_tree.AddSqRt(arg1);
+}
+
+void
+ParsingDriver::add_native(const char *s)
+{
+  *output << s;
 }

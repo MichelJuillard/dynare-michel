@@ -8,11 +8,7 @@
 using namespace std;
 //------------------------------------------------------------------------------
 #include "NumericalConstants.hh"
-//------------------------------------------------------------------------------
-vector<string> NumericalConstants::mNumericalConstants;
-map<string, int, less<string> > NumericalConstants::numConstantsIndex;
 
-//------------------------------------------------------------------------------
 NumericalConstants::NumericalConstants()
 {
   AddConstant("0.0");
@@ -40,7 +36,7 @@ int NumericalConstants::AddConstant(string iConst)
 }
 
 //------------------------------------------------------------------------------
-string NumericalConstants::get(int ID)
+string NumericalConstants::get(int ID) const
 {
   if (ID < (int)mNumericalConstants.size())
     {

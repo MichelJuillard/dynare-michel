@@ -10,14 +10,11 @@
 using namespace std;
 //------------------------------------------------------------------------------
 #include "VariableTable.hh"
-//------------------------------------------------------------------------------
-map<varKey,int> VariableTable::mVariableTable;
-vector<varKey> VariableTable::mVariableIndex;
-vector<int> VariableTable::mSortedVariableID;
-vector<int> VariableTable::mPrintFormatIndex;
-void (* VariableTable::error) (const char* ) = NULL;
-//------------------------------------------------------------------------------
-VariableTable::VariableTable()
+
+VariableTable::VariableTable(const SymbolTable &symbol_table_arg,
+                             ModelParameters &mod_param_arg) :
+  symbol_table(symbol_table_arg),
+  mod_param(mod_param_arg)
 {
   // Empty
 }
@@ -35,7 +32,7 @@ int VariableTable::AddVariable(string iName, int iLag)
   //Variable  lVariable;
   varKey      key;
   // Testing if symbol exists
-  if (!SymbolTable::Exist(iName))
+  if (!symbol_table.Exist(iName))
     {
       string msg = "unknown symbol: " + iName;
       (* error) (msg.c_str());
@@ -57,66 +54,45 @@ int VariableTable::AddVariable(string iName, int iLag)
   //mVariableTable[key] = lVariable;
   mVariableTable[key] = lVariableID;
   mVariableIndex.push_back(key);
-  // Setting lags field in symbol table
-  SymbolTable::AddLag(iName, iLag);
   // Setting variable numbers
   Type type = getType(lVariableID);
   if (type == eEndogenous)
-    ModelParameters::var_endo_nbr++;
+    mod_param.var_endo_nbr++;
   if (type == eExogenous)
-    ModelParameters::var_exo_nbr++;
+    mod_param.var_exo_nbr++;
   if (type == eExogenousDet)
-    ModelParameters::var_exo_det_nbr++;
+    mod_param.var_exo_det_nbr++;
   // Setting Maximum and minimum lags
-  if (ModelParameters::max_lead < iLag)
-    {
-      ModelParameters::max_lead = iLag;
-    }
-  else if (-ModelParameters::max_lag > iLag)
-    {
-      ModelParameters::max_lag = -iLag;
-    }
+  if (mod_param.max_lead < iLag)
+    mod_param.max_lead = iLag;
+  else if (-mod_param.max_lag > iLag)
+    mod_param.max_lag = -iLag;
+
   switch(type)
     {
     case eEndogenous:
-      if (ModelParameters::max_endo_lead < iLag)
-        {
-          ModelParameters::max_endo_lead = iLag;
-        }
-      else if (-ModelParameters::max_endo_lag > iLag)
-        {
-          ModelParameters::max_endo_lag = -iLag;
-        }
+      if (mod_param.max_endo_lead < iLag)
+        mod_param.max_endo_lead = iLag;
+      else if (-mod_param.max_endo_lag > iLag)
+        mod_param.max_endo_lag = -iLag;
       break;
     case eExogenous:
-      if (ModelParameters::max_exo_lead < iLag)
-        {
-          ModelParameters::max_exo_lead = iLag;
-        }
-      else if (-ModelParameters::max_exo_lag > iLag)
-        {
-          ModelParameters::max_exo_lag = -iLag;
-        }
+      if (mod_param.max_exo_lead < iLag)
+        mod_param.max_exo_lead = iLag;
+      else if (-mod_param.max_exo_lag > iLag)
+        mod_param.max_exo_lag = -iLag;
       break;
     case eExogenousDet:
-      if (ModelParameters::max_exo_det_lead < iLag)
-        {
-          ModelParameters::max_exo_det_lead = iLag;
-        }
-      else if (-ModelParameters::max_exo_det_lag > iLag)
-        {
-          ModelParameters::max_exo_det_lag = -iLag;
-        }
+      if (mod_param.max_exo_det_lead < iLag)
+        mod_param.max_exo_det_lead = iLag;
+      else if (-mod_param.max_exo_det_lag > iLag)
+        mod_param.max_exo_det_lag = -iLag;
       break;
     case eRecursiveVariable:
-      if (ModelParameters::max_recur_lead < iLag)
-        {
-          ModelParameters::max_recur_lead = iLag;
-        }
-      else if (-ModelParameters::max_recur_lag > iLag)
-        {
-          ModelParameters::max_recur_lag = -iLag;
-        }
+      if (mod_param.max_recur_lead < iLag)
+        mod_param.max_recur_lead = iLag;
+      else if (-mod_param.max_recur_lag > iLag)
+        mod_param.max_recur_lag = -iLag;
       break;
     default:
       ;
@@ -149,7 +125,7 @@ void VariableTable::decSymbolID(string iName, int id, int iLag, Type iType)
 }
 
 //------------------------------------------------------------------------------
-void VariableTable::Sort(void)
+void VariableTable::Sort()
 {
   varKey          key;
   int           variable;
@@ -175,7 +151,7 @@ void VariableTable::Sort(void)
       IDs.push_back(getSymbolID(variable));
       Types.push_back(getType(variable));
       Lags.push_back(key.second);
-      unsigned long long int lag = Lags[id]+ModelParameters::max_lag;
+      unsigned long long int lag = Lags[id]+mod_param.max_lag;
       lag = lag << (4*sizeof(int));
       unsigned long long int  type = Types[id];
       type = type <<  8*sizeof(int);

@@ -25,7 +25,7 @@ OutputFile::~OutputFile()
 }
 
 //------------------------------------------------------------------------------
-void OutputFile::Open(string iFileName)
+void OutputFile::Open(string iFileName, ModFile *mod_file)
 {
   if (iFileName.size())
     {
@@ -67,7 +67,7 @@ void OutputFile::Open(string iFileName)
   mOutputFile << "warning on;\nwarning backtrace;\n";
   mOutputFile << "logname_ = '" << iFileName << ".log';\n";
   mOutputFile << "diary '" << iFileName << ".log';\n";
-  if (ModelTree::offset == 0)
+  if (mod_file->model_tree.offset == 0)
     {
       mOutputFile << "if ";
       mOutputFile << interfaces::file_exist(iFileName + "_static.c)")+"\n";
@@ -89,10 +89,10 @@ void OutputFile::Open(string iFileName)
 }
 
 //------------------------------------------------------------------------------
-void OutputFile::Save(ostringstream& iOutput)
+void OutputFile::Save(ostringstream& iOutput, ModFile *mod_file)
 {
-  mOutputFile << SymbolTable::get();
-  mOutputFile << ModelTree::get();
+  mOutputFile << mod_file->symbol_table.get();
+  mOutputFile << mod_file->model_tree.get();
   mOutputFile << iOutput.str();
   mOutputFile << "\ndisp(['Total computing time : ' sec2hms(round(toc)) ]);\n";
   mOutputFile.close();

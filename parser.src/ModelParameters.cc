@@ -3,41 +3,20 @@
   \date 04/09/2004
   \par This file implements the ModelParemeters class methodes.
 */
-//------------------------------------------------------------------------------
-#include <iostream>
+
 #include "ModelParameters.hh"
-//------------------------------------------------------------------------------
-int ModelParameters::eq_nbr = 0;
-int ModelParameters::exo_nbr = 0;
-int ModelParameters::var_exo_nbr = 0;
-int ModelParameters::exo_det_nbr = 0;
-int ModelParameters::var_exo_det_nbr = 0;
-int ModelParameters::endo_nbr = 0;
-int ModelParameters::var_endo_nbr = 0;
-int ModelParameters::parameter_nbr = 0;
-int ModelParameters::local_parameter_nbr = 0;
-int ModelParameters::recur_nbr = 0;
-int ModelParameters::max_lag = 0;
-int ModelParameters::max_lead = 0;
-int ModelParameters::max_endo_lag = 0;
-int ModelParameters::max_endo_lead = 0;
-int ModelParameters::max_exo_lag = 0;
-int ModelParameters::max_exo_lead = 0;
-int ModelParameters::max_exo_det_lag = 0;
-int ModelParameters::max_exo_det_lead = 0;
-int ModelParameters::max_recur_lag = 0;
-int ModelParameters::max_recur_lead = 0;
-using namespace std;
-//------------------------------------------------------------------------------
-ModelParameters::ModelParameters()
+
+ModelParameters::ModelParameters() : eq_nbr(0),
+                                     exo_nbr(0), var_exo_nbr(0),
+                                     exo_det_nbr(0), var_exo_det_nbr(0),
+                                     endo_nbr(0), var_endo_nbr(0),
+                                     parameter_nbr(0), local_parameter_nbr(0),
+                                     recur_nbr(0),
+                                     max_lag(0), max_lead(0),
+                                     max_endo_lag(0), max_endo_lead(0),
+                                     max_exo_lag(0), max_exo_lead(0),
+                                     max_exo_det_lag(0), max_exo_det_lead(0),
+                                     max_recur_lag(0), max_recur_lead(0)
 {
   // Empty
 }
-
-//------------------------------------------------------------------------------
-ModelParameters::~ModelParameters()
-{
-  // Empty
-}
-
-//------------------------------------------------------------------------------

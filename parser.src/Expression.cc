@@ -8,9 +8,7 @@
 using namespace std;
 //------------------------------------------------------------------------------
 #include "Expression.hh"
-//------------------------------------------------------------------------------
-ostringstream Expression::output;
-//------------------------------------------------------------------------------
+
 Expression::Expression()
 {
   // Empty
@@ -22,7 +20,12 @@ Expression::~Expression()
   // Empty
 }
 
-//------------------------------------------------------------------------------
+void
+Expression::setNumericalConstants(NumericalConstants *num_constants_arg)
+{
+  num_constants = num_constants_arg;
+}
+
 int Expression::AddToken(int id1,Type type1,int id2,Type type2,int op_code)
 {
   Token token;
@@ -261,13 +264,13 @@ string Expression::getArgument(Type type,int id)
     }
   else if (type == eNumericalConstant)
     {
-      argument << NumericalConstants::get(id);
+      argument << num_constants->get(id);
     }
   return argument.str();
 }
 
 //------------------------------------------------------------------------------
-string Expression::get(void)
+string Expression::get()
 {
   return output.str();
 }

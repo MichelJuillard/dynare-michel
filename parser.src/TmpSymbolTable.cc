@@ -15,23 +15,19 @@ TmpSymbolTable::TmpSymbolTable()
   // Empty
 }
 
-//------------------------------------------------------------------------------
-TmpSymbolTable::TmpSymbolTable(const TmpSymbolTable &tst)
-{
-  tmpsymboltable = tst.tmpsymboltable;
-  output.str(tst.output.str());
-}
-
-//------------------------------------------------------------------------------
 TmpSymbolTable::~TmpSymbolTable()
 {
   // Empty
 }
 
-//------------------------------------------------------------------------------
+void TmpSymbolTable::setGlobalSymbolTable(SymbolTable *symbol_table_arg)
+{
+  symbol_table = symbol_table_arg;
+}
+
 void TmpSymbolTable::AddTempSymbol(string symbol)
 {
-  if (SymbolTable::Exist(symbol))
+  if (symbol_table->Exist(symbol))
     tmpsymboltable.push_back(symbol);
   else
     {
@@ -43,7 +39,7 @@ void TmpSymbolTable::AddTempSymbol(string symbol)
 //------------------------------------------------------------------------------
 void  TmpSymbolTable::AddTempSymbol(string symbol1, string symbol2)
 {
-  if (SymbolTable::Exist(symbol1))
+  if (symbol_table->Exist(symbol1))
     tmpsymboltable.push_back(symbol1);
   else
     {
@@ -51,7 +47,7 @@ void  TmpSymbolTable::AddTempSymbol(string symbol1, string symbol2)
       error(msg.c_str());
     }
 
-  if (SymbolTable::Exist(symbol2))
+  if (symbol_table->Exist(symbol2))
     NameTable.push_back(symbol2);
   else
     {
@@ -68,7 +64,7 @@ void TmpSymbolTable::set(string varname)
   output << "\n" << varname << "=[];\n";
   for (it = tmpsymboltable.begin(); it!= tmpsymboltable.end(); it++)
     {
-      if (SymbolTable::isReferenced(*it) == eReferenced)
+      if (symbol_table->isReferenced(*it) == eReferenced)
         {
           output << varname << " = ";
           output << interfaces::strvcat(varname,"'"+*it+"'")+";\n";

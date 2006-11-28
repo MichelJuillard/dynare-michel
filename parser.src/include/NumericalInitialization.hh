@@ -21,9 +21,13 @@ class NumericalInitialization
 private :
   /*! Output of this class */
   std::ostringstream  *output;
+  //! Reference to symbol table
+  const SymbolTable &symbol_table;
+  //! Reference to model parameters
+  const ModelParameters &mod_param;
 public :
   /*! Constructor */
-  NumericalInitialization();
+  NumericalInitialization(const SymbolTable &symbol_table_arg, const ModelParameters &mod_param_arg);
   /*! Destrcutor */
   ~NumericalInitialization();
   /*! Pointer to error function of parser class */

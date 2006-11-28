@@ -1,20 +1,13 @@
 #ifndef _PARSING_DRIVER_HH
 #define _PARSING_DRIVER_HH
 
-#include <sstream>
 #include <iostream>
 
-#include "ModelParameters.hh"
-#include "SymbolTable.hh"
+#include "ModFile.hh"
 #include "Expression.hh"
-#include "NumericalInitialization.hh"
-#include "ModelTree.hh"
-#include "VariableTable.hh"
-#include "Shocks.hh"
-#include "SigmaeInitialization.hh"
-#include "ComputingTasks.hh"
 #include "TmpSymbolTable.hh"
 #include "DynareBison.hh"
+#include "ComputingTasks.hh"
 
 using namespace std;
 
@@ -46,49 +39,31 @@ private:
   //! Checks that a given symbol exists, and stops with an error message if it doesn't
   void check_symbol_existence(const string &name);
 
-  //! Stores model parameters
-  ModelParameters model_parameters;
-  //! Stores symbol table
-  SymbolTable symbol_table;
   //! Stores expressions
   Expression expression;
-  //! Stores numerical constants
-  NumericalConstants num_constants;
-  //! Handles numerical initalisations
-  NumericalInitialization numerical_initialization;
-  //! Handles shock command
-  Shocks shocks;
-  //! Handles sigma_e command
-  SigmaeInitialization sigmae;
-  //! Handles computing tasks commands
-  ComputingTasks computing_tasks;
   //! Stores temporary symbol table
   TmpSymbolTable tmp_symbol_table;
-  //! Stores model tree
-  ModelTree model_tree;
-  //! Stores variable table
-  VariableTable variable_table;
   //! Stores operator table
   OperatorTable op_table;
-  //! Value of option order
-  int order;
-  //! Value of option linear
-  int linear;
 
-public:
+  //! The mod file representation constructed by this ParsingDriver
+  ModFile *mod_file;
+
   //! Reference to output string
   ostringstream *output;
-  //! Estimation parameters
-  EstimationParams estim_params;
 
+public:
   //! Constructor
   ParsingDriver();
   //! Destructor
   virtual ~ParsingDriver();
 
-  //! Starts parsing
-  /*! \param f Name of file to parse */
-  void parse(const string &f);
+  //! Starts parsing, and constructs the MOD file representation
+  /*! \param f Name of file to parse
+
+      The returned pointer should be deleted after use.
+   */
+  ModFile *parse(const string &f);
 
   //! Name of file being parsed
   string file;
@@ -101,6 +76,9 @@ public:
   //! Trace parsing ?
   /*! If set to true before calling parse(), the bison parser will dump debugging information. Defaults to false. */
   bool trace_parsing;
+
+  //! Estimation parameters
+  EstimationParams estim_params;
 
   //! Error handler with location
   void error(const yy::parser::location_type &l, const string &m);
@@ -118,10 +96,10 @@ public:
 
   //! Sets reference to output string
   void setoutput(ostringstream *ostr);
-  //! Remove unused symbol from symbol table
-  void check_model();
   //! Executes final instructions
   void finish();
+  //! Check if a given symbol exists in the parsing context
+  bool exists_symbol(const char *s);
   //! Sets variable offset of ModelTree class to use C output
   void use_dll();
   //! Declares an endogenous variable by adding it to SymbolTable
@@ -257,7 +235,9 @@ public:
   void add_mc_filename(string *filename, string *prior = new string("1"));
   void run_model_comparison();
   //! Writes token "arg1=arg2" to model tree
-  NodeID add_model_equal(NodeID arg1, NodeID arg2 = ModelTree::Zero);
+  NodeID add_model_equal(NodeID arg1, NodeID arg2);
+  //! Writes token "arg=0" to model tree
+  NodeID add_model_equal_with_zero_rhs(NodeID arg);
   //! Writes token "arg1+arg2" to model tree
   NodeID add_model_plus(NodeID arg1, NodeID arg2);
   //! Writes token "arg1-arg2" to model tree
@@ -302,6 +282,8 @@ public:
   NodeID add_model_atanh(NodeID arg1);
   //! Writes token "sqrt(arg1)" to model tree
   NodeID add_model_sqrt(NodeID arg1);
+  //! Adds a native statement
+  void add_native(const char *s);
 };
 
 #endif // ! PARSING_DRIVER_HH

@@ -331,11 +331,10 @@ typedef pair<int, Type> ExpObj;
 	
  model
  	: MODEL ';' equation_list END 
- 		{driver.check_model();}
  	| MODEL '(' LINEAR ')' ';' {driver.option_num("linear","1");} 
-		equation_list END {driver.check_model();}
+		equation_list END
  	| MODEL '(' USE_DLL ')' ';' {driver.use_dll();} 
-		equation_list END {driver.check_model();}
+		equation_list END
  	;
 
  equation_list
@@ -349,7 +348,7 @@ typedef pair<int, Type> ExpObj;
  	: hand_side EQUAL hand_side ';'
  		{$$ = driver.add_model_equal($1, $3);}
  	| hand_side ';'
- 		{$$ = driver.add_model_equal($1);}
+ 		{$$ = driver.add_model_equal_with_zero_rhs($1);}
 	;
  
  hand_side

@@ -7,6 +7,7 @@ using namespace std;
 
 #include "ParsingDriver.hh"
 #include "OutputFile.hh"
+#include "ModFile.hh"
 
 /*!
   \brief Main function of Dynare.
@@ -48,7 +49,7 @@ main(int argc, char** argv)
   cout << "Parsing your model file ..." << endl;
 
   // Launch parsing
-  p.parse(argv[1]);
+  ModFile *mod_file = p.parse(argv[1]);
 
   // Execute final instructions
   p.finish();
@@ -56,9 +57,11 @@ main(int argc, char** argv)
   string name = argv[1];
   name.erase(name.size() - 4,4);
   // Opening and init main Output file (.m or .sci file)
-  output_file.Open(name);
+  output_file.Open(name, mod_file);
   // Writing remaining string output to output file
-  output_file.Save(output);
+  output_file.Save(output, mod_file);
+
+  delete mod_file;
 
   cout << "Parsing done" << endl;
   cout << "Starting Matlab computing ..." << endl;

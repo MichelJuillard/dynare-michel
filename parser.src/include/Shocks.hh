@@ -21,6 +21,7 @@ class Shocks
 {
 private :
   int mshock_flag;
+  int exo_det_length;
   /*!
     \class ShockElement
     \brief Shock element strcuture

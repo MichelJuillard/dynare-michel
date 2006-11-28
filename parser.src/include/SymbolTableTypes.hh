@@ -40,8 +40,7 @@ struct Symbol
   int id;
   /*! Symbol reference flag */
   Reference referenced;
-  /*! Lags of symbol if it is a variable */
-  std::vector<int> lags;
+
   Symbol()
   {
     type = eUNDEF;

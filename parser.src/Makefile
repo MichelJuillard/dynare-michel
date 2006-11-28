@@ -15,6 +15,8 @@ endif
 
 ifeq ($(CROSS_WIN32), yes)
 	CPP = i586-mingw32msvc-g++
+	# Detection of uninitialized variables is buggy in MinGW and generates spurious warnings
+	CPPFLAGS += -Wno-uninitialized
 	DYNARE_M = dynare_m.exe
 	DYNARE_S = dynare_s.exe
 endif
@@ -48,7 +50,8 @@ COMMON_OBJ=\
 	TmpSymbolTable.o\
 	VariableTable.o\
 	ParsingDriver.o\
-	DataTree.o
+	DataTree.o \
+	ModFile.o
 
 MATLAB_OBJ = InterfaceMatlab.o
 

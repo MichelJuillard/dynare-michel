@@ -8,10 +8,11 @@ using namespace std;
 //------------------------------------------------------------------------------
 #include "NumericalInitialization.hh"
 #include "Interface.hh"
-//------------------------------------------------------------------------------
-//ostringstream	NumericalInitialization::output;
-//------------------------------------------------------------------------------
-NumericalInitialization::NumericalInitialization()
+
+NumericalInitialization::NumericalInitialization(const SymbolTable &symbol_table_arg,
+                                                 const ModelParameters &mod_param_arg) :
+  symbol_table(symbol_table_arg),
+  mod_param(mod_param_arg)
 {
   //Empty
 }
@@ -33,20 +34,20 @@ void  NumericalInitialization::SetConstant (string name, string expression)
 {
 
   //Testing if symbol exists
-  if (!SymbolTable::Exist(name))
+  if (!symbol_table.Exist(name))
     {
       string msg = "Unknown parameter: " + name;
       (* error) (msg.c_str());
     }
   // Testing symbol type
-  if (SymbolTable::getType(name) != eParameter)
+  if (symbol_table.getType(name) != eParameter)
     {
       string msg = "Non-parameter used as a parameter: " + name;
       (* error) (msg.c_str());
     }
   // Writing expression
-  *output << "M_.params( " << SymbolTable::getID(name)+1 << " ) = " << expression << ";\n";
-  *output << name << " = M_.params( " << SymbolTable::getID(name)+1 << " );\n";
+  *output << "M_.params( " << symbol_table.getID(name)+1 << " ) = " << expression << ";\n";
+  *output << name << " = M_.params( " << symbol_table.getID(name)+1 << " );\n";
   // Deleting expression
   //TODO
 
@@ -61,10 +62,9 @@ void  NumericalInitialization::BeginInitval (void)
           << interfaces::comment() << "\n";
   // Writing initval block to set initial values for variables
   *output << "options_.initval_file = 0;\nendval_=0;\n";
-  if(ModelParameters::recur_nbr > 0)
-    {
-      *output << "recurs_ = zeros(" << ModelParameters::recur_nbr << ", 1);\n";
-    }
+
+  if (mod_param.recur_nbr > 0)
+    *output << "recurs_ = zeros(" << mod_param.recur_nbr << ", 1);\n";
 }
 
 //------------------------------------------------------------------------------
@@ -72,13 +72,13 @@ void  NumericalInitialization::SetInit (string name, string expression)
 {
 
   //Testing if symbol exists
-  if (!SymbolTable::Exist(name))
+  if (!symbol_table.Exist(name))
     {
       string msg = "Unknown variable: " + name;
       (* error) (msg.c_str());
     }
-  Type  type = SymbolTable::getType(name);
-  int   id = SymbolTable::getID(name);
+  Type type = symbol_table.getType(name);
+  int id = symbol_table.getID(name);
   // Writing instrcuction that set initial or terminal value
   // for a variable
   if (type == eEndogenous)
@@ -141,13 +141,13 @@ void  NumericalInitialization::BeginHistval (void)
 void  NumericalInitialization::SetHist (string name, int lag, string expression)
 {
   //Testing if symbol exists
-  if (!SymbolTable::Exist(name))
+  if (!symbol_table.Exist(name))
     {
       string msg = "Unknown parameter: " + name;
       (* error) (msg.c_str());
     }
-  Type  type = SymbolTable::getType(name);
-  int   id = SymbolTable::getID(name);
+  Type  type = symbol_table.getType(name);
+  int   id = symbol_table.getID(name);
   // Testing symbol type
   if (type == eEndogenous)
     {

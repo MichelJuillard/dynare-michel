@@ -20,24 +20,25 @@ using namespace std;
 #include "ModelTree.hh"
 #include "ModelParameters.hh"
 #include "Interface.hh"
-//------------------------------------------------------------------------------
-ostringstream ModelTree::output;
-//------------------------------------------------------------------------------
 
-inline NodeID MetaToken::getDerivativeAddress(int iVarID)
+inline NodeID MetaToken::getDerivativeAddress(int iVarID, const ModelTree &model_tree) const
 {
-  std::map<int, NodeID, std::less<int> >::iterator iter = d1.find(iVarID);
+  std::map<int, NodeID, std::less<int> >::const_iterator iter = d1.find(iVarID);
   if (iter == d1.end())
     // No entry in map, derivative is therefore null
     if (op_code == token::EQUAL)
-      return DataTree::ZeroEqZero;
+      return model_tree.ZeroEqZero;
     else
-      return DataTree::Zero;
+      return model_tree.Zero;
   else
     return iter->second;
 }
 
-ModelTree::ModelTree()
+ModelTree::ModelTree(SymbolTable &symbol_table_arg, VariableTable &variable_table_arg,
+                     ModelParameters &mod_param_arg, const NumericalConstants &num_constants_arg) :
+  DataTree(symbol_table_arg, variable_table_arg),
+  mod_param(mod_param_arg),
+  num_constants(num_constants_arg)
 {
   computeJacobian = false;
   computeJacobianExo = false;
@@ -199,7 +200,7 @@ void ModelTree::SaveCFiles()
       mStaticModelFile << "  if (nlhs >= 1)\n";
       mStaticModelFile << "  {\n";
       mStaticModelFile << "      /* Set the output pointer to the output matrix residual. */\n";
-      mStaticModelFile << "      plhs[0] = mxCreateDoubleMatrix(" << ModelParameters::eq_nbr << ",1, mxREAL);\n";
+      mStaticModelFile << "      plhs[0] = mxCreateDoubleMatrix(" << mod_param.eq_nbr << ",1, mxREAL);\n";
       mStaticModelFile << "     /* Create a C pointer to a copy of the output matrix residual. */\n";
       mStaticModelFile << "     residual = mxGetPr(plhs[0]);\n";
       mStaticModelFile << "  }\n\n";
@@ -207,7 +208,7 @@ void ModelTree::SaveCFiles()
       mStaticModelFile << "  if (nlhs >= 2)\n";
       mStaticModelFile << "  {\n";
       mStaticModelFile << "      /* Set the output pointer to the output matrix g1. */\n";
-      mStaticModelFile << "      plhs[1] = mxCreateDoubleMatrix(" << ModelParameters::eq_nbr << ", " << ModelParameters::endo_nbr << ", mxREAL);\n";
+      mStaticModelFile << "      plhs[1] = mxCreateDoubleMatrix(" << mod_param.eq_nbr << ", " << mod_param.endo_nbr << ", mxREAL);\n";
       mStaticModelFile << "      /* Create a C pointer to a copy of the output matrix g1. */\n";
       mStaticModelFile << "      g1 = mxGetPr(plhs[1]);\n";
       mStaticModelFile << "  }\n\n";
@@ -247,7 +248,7 @@ void ModelTree::SaveCFiles()
       mDynamicModelFile << "  if (nlhs >= 1)\n";
       mDynamicModelFile << "  {\n";
       mDynamicModelFile << "     /* Set the output pointer to the output matrix residual. */\n";
-      mDynamicModelFile << "     plhs[0] = mxCreateDoubleMatrix(" << ModelParameters::eq_nbr << ",1, mxREAL);\n";
+      mDynamicModelFile << "     plhs[0] = mxCreateDoubleMatrix(" << mod_param.eq_nbr << ",1, mxREAL);\n";
       mDynamicModelFile << "     /* Create a C pointer to a copy of the output matrix residual. */\n";
       mDynamicModelFile << "     residual = mxGetPr(plhs[0]);\n";
       mDynamicModelFile << "  }\n\n";
@@ -256,9 +257,9 @@ void ModelTree::SaveCFiles()
       mDynamicModelFile << "  {\n";
       mDynamicModelFile << "     /* Set the output pointer to the output matrix g1. */\n";
       if (computeJacobianExo)
-        mDynamicModelFile << "     plhs[1] = mxCreateDoubleMatrix(" << ModelParameters::eq_nbr << ", " << VariableTable::size() << ", mxREAL);\n";
+        mDynamicModelFile << "     plhs[1] = mxCreateDoubleMatrix(" << mod_param.eq_nbr << ", " << variable_table.size() << ", mxREAL);\n";
       else if (computeJacobian)
-        mDynamicModelFile << "     plhs[1] = mxCreateDoubleMatrix(" << ModelParameters::eq_nbr << ", " << ModelParameters::var_endo_nbr << ", mxREAL);\n";
+        mDynamicModelFile << "     plhs[1] = mxCreateDoubleMatrix(" << mod_param.eq_nbr << ", " << mod_param.var_endo_nbr << ", mxREAL);\n";
       mDynamicModelFile << "     /* Create a C pointer to a copy of the output matrix g1. */\n";
       mDynamicModelFile << "     g1 = mxGetPr(plhs[1]);\n";
       mDynamicModelFile << "  }\n\n";
@@ -266,7 +267,7 @@ void ModelTree::SaveCFiles()
       mDynamicModelFile << " if (nlhs >= 3)\n";
       mDynamicModelFile << "  {\n";
       mDynamicModelFile << "     /* Set the output pointer to the output matrix g2. */\n";
-      mDynamicModelFile << "     plhs[2] = mxCreateDoubleMatrix(" << ModelParameters::eq_nbr << ", " << VariableTable::size()*VariableTable::size() << ", mxREAL);\n";
+      mDynamicModelFile << "     plhs[2] = mxCreateDoubleMatrix(" << mod_param.eq_nbr << ", " << variable_table.size()*variable_table.size() << ", mxREAL);\n";
       mDynamicModelFile << "     /* Create a C pointer to a copy of the output matrix g1. */\n";
       mDynamicModelFile << "     g2 = mxGetPr(plhs[2]);\n";
       mDynamicModelFile << "  }\n\n";
@@ -552,21 +553,21 @@ void ModelTree::derive(int iOrder)
 
       // Filling mDerivativeIndex
       // Loop on variables of derivation, skipping symmetric elements
-      for (int var = 0; var < VariableTable::size(); var++)
+      for (int var = 0; var < variable_table.size(); var++)
         {
-          int starti = var*Order*(Order-1)*ModelParameters::eq_nbr/2;
+          int starti = var*Order*(Order-1)*mod_param.eq_nbr/2;
           for (unsigned int i = starti; i < EqualTokenIDs.size() ; i++ )
             {
-              t1 = EqualTokenIDs[i]->getDerivativeAddress(var);
+              t1 = EqualTokenIDs[i]->getDerivativeAddress(var, *this);
               if (Order == 1)
                 mDerivativeIndex[0].push_back(DerivativeIndex(t1, i-starti, var));
               else if (Order == 2)
                 {
-                  int var1 = VariableTable::getSortID(i/ModelParameters::eq_nbr);
-                  int var2 = VariableTable::getSortID(var);
+                  int var1 = variable_table.getSortID(i/mod_param.eq_nbr);
+                  int var2 = variable_table.getSortID(var);
                   mDerivativeIndex[1].push_back(DerivativeIndex(t1,
-                                                                i-ModelParameters::eq_nbr*(i/ModelParameters::eq_nbr),
-                                                                var1*VariableTable::size()+var2));
+                                                                i-mod_param.eq_nbr*(i/mod_param.eq_nbr),
+                                                                var1*variable_table.size()+var2));
                 }
             }
         }
@@ -634,23 +635,13 @@ inline NodeID ModelTree::DeriveArgument(NodeID iArg, Type iType, int iVarID)
   switch(iType)
     {
     case eTempResult      :
-      return iArg->getDerivativeAddress(iVarID);
+      return iArg->getDerivativeAddress(iVarID, *this);
     case eExogenous       :
     case eExogenousDet      :
     case eEndogenous      :
     case eRecursiveVariable   :
       if ((long int) iArg == iVarID)
-        //if ((VariableTable::getSymbolID(iArg) == VariableTable::getSymbolID(iVarID)) &&
-        //   (VariableTable::getType(iArg) == VariableTable::getType(iVarID)))
-        {
-          /*
-            cout << SymbolTable::getNameByID(iType,
-            VariableTable::getSymbolID(iArg)) << endl;
-            cout << SymbolTable::getNameByID(iType,
-            VariableTable::getSymbolID(iVarID)) << endl;
-          */
-          return One;
-        }
+        return One;
       else
         {
           return Zero;
@@ -684,7 +675,7 @@ string  ModelTree::setStaticModel(void)
   int d = current_order;         // Minimum number of times a temparary expression apears in equations
   int EquationNBR;               // Number of model equations
 
-  EquationNBR = ModelParameters::eq_nbr;
+  EquationNBR = mod_param.eq_nbr;
   // Reference count of token "0=0" is set to 0
   // Not to be printed as a temp expression
   fill(ZeroEqZero->reference_count.begin(),
@@ -702,7 +693,7 @@ string  ModelTree::setStaticModel(void)
               model_output << " = ";
               model_output << getExpression((*tree_it)->id2, eStaticEquations, lEquationNBR) << ";" << endl;
             }
-          else if  (lEquationNBR < ModelParameters::eq_nbr)
+          else if (lEquationNBR < mod_param.eq_nbr)
             {
               model_output << "lhs =";
               model_output << getExpression((*tree_it)->id1, eStaticEquations, lEquationNBR) << ";" << endl;
@@ -750,7 +741,7 @@ string  ModelTree::setStaticModel(void)
   lEquationNBR = 0;
   for (unsigned int i = 0; i < mDerivativeIndex[0].size(); i++)
     {
-      if (VariableTable::getType(mDerivativeIndex[0][i].derivators) == eEndogenous)
+      if (variable_table.getType(mDerivativeIndex[0][i].derivators) == eEndogenous)
         {
           NodeID startJacobian = mDerivativeIndex[0][i].token_id;
           if (startJacobian != ZeroEqZero)
@@ -758,7 +749,7 @@ string  ModelTree::setStaticModel(void)
               string exp = getExpression(startJacobian->id1, eStaticDerivatives);
               ostringstream g1;
               g1 << "  g1" << lpar << mDerivativeIndex[0][i].equation_id+1 << ", " <<
-                VariableTable::getSymbolID(mDerivativeIndex[0][i].derivators)+1 << rpar;
+                variable_table.getSymbolID(mDerivativeIndex[0][i].derivators)+1 << rpar;
               jacobian_output << g1.str() << "=" <<  g1.str() << "+" << exp << ";\n";
             }
         }
@@ -770,7 +761,7 @@ string  ModelTree::setStaticModel(void)
       StaticOutput << "global M_ \n";
       StaticOutput << "if M_.param_nbr > 0\n  params = M_.params;\nend\n";
 
-      StaticOutput << "  residual = zeros( " << ModelParameters::eq_nbr << ", 1);\n";
+      StaticOutput << "  residual = zeros( " << mod_param.eq_nbr << ", 1);\n";
       StaticOutput << "\n\t"+interfaces::comment()+"\n\t"+interfaces::comment();
       StaticOutput << "Model equations\n\t";
       StaticOutput << interfaces::comment() + "\n\n";
@@ -780,8 +771,8 @@ string  ModelTree::setStaticModel(void)
       StaticOutput << "end\n";
       StaticOutput << "if nargout >= 2,\n";
       StaticOutput << "  g1 = " <<
-        "zeros(" << ModelParameters::eq_nbr << ", " <<
-        ModelParameters::endo_nbr << ");\n" ;
+        "zeros(" << mod_param.eq_nbr << ", " <<
+        mod_param.endo_nbr << ");\n" ;
       StaticOutput << "\n\t"+interfaces::comment()+"\n\t"+interfaces::comment();
       StaticOutput << "Jacobian matrix\n\t";
       StaticOutput << interfaces::comment() + "\n\n";
@@ -856,7 +847,7 @@ string  ModelTree::setDynamicModel(void)
               model_output << " = ";
               model_output << getExpression((*tree_it)->id2, eStaticEquations, lEquationNBR) << ";" << endl;
             }
-          else if  (lEquationNBR < ModelParameters::eq_nbr)
+          else if (lEquationNBR < mod_param.eq_nbr)
             {
               model_output << "lhs =";
               model_output << getExpression(((*tree_it)->id1), eDynamicEquations, lEquationNBR) << ";" << endl;
@@ -925,7 +916,7 @@ string  ModelTree::setDynamicModel(void)
       lEquationNBR = 0;
       for (unsigned int i = 0; i < mDerivativeIndex[0].size(); i++)
         {
-          if (computeJacobianExo || VariableTable::getType(mDerivativeIndex[0][i].derivators) == eEndogenous)
+          if (computeJacobianExo || variable_table.getType(mDerivativeIndex[0][i].derivators) == eEndogenous)
             {
               NodeID startJacobian = mDerivativeIndex[0][i].token_id;
               if (startJacobian != ZeroEqZero)
@@ -933,7 +924,7 @@ string  ModelTree::setDynamicModel(void)
                   string exp = getExpression(startJacobian->id1, eDynamicDerivatives);
                   ostringstream g1;
                   g1 << "  g1" << lpar << mDerivativeIndex[0][i].equation_id+1 << ", " <<
-                    VariableTable::getSortID(mDerivativeIndex[0][i].derivators)+1 << rpar;
+                    variable_table.getSortID(mDerivativeIndex[0][i].derivators)+1 << rpar;
                   jacobian_output << g1.str() << "=" <<  g1.str() << "+" << exp << ";\n";
                 }
             }
@@ -956,14 +947,14 @@ string  ModelTree::setDynamicModel(void)
             {
               string exp = getExpression(startHessian->id1, eDynamicDerivatives);
 
-              int varID1 = mDerivativeIndex[1][i].derivators/VariableTable::size();
-              int varID2 = mDerivativeIndex[1][i].derivators-varID1*VariableTable::size();
+              int varID1 = mDerivativeIndex[1][i].derivators / variable_table.size();
+              int varID2 = mDerivativeIndex[1][i].derivators - varID1 * variable_table.size();
               hessian_output << "  g2" << lpar << mDerivativeIndex[1][i].equation_id+1 << ", " <<
                 mDerivativeIndex[1][i].derivators+1 << rpar << " = " << exp << ";\n";
               // Treating symetric elements
               if (varID1 != varID2)
                 lsymetric <<  "  g2" << lpar << mDerivativeIndex[1][i].equation_id+1 << ", " <<
-                  varID2*VariableTable::size()+varID1+1 << rpar << " = " <<
+                  varID2*variable_table.size()+varID1+1 << rpar << " = " <<
                   "g2" << lpar << mDerivativeIndex[1][i].equation_id+1 << ", " <<
                   mDerivativeIndex[1][i].derivators+1 << rpar << ";\n";
             }
@@ -971,8 +962,8 @@ string  ModelTree::setDynamicModel(void)
         }
       cout << "done \n";
     }
-  int nrows = ModelParameters::eq_nbr;
-  int nvars = ModelParameters::var_endo_nbr+ModelParameters::exo_nbr+ModelParameters::exo_det_nbr;
+  int nrows = mod_param.eq_nbr;
+  int nvars = mod_param.var_endo_nbr + mod_param.exo_nbr + mod_param.exo_det_nbr;
   if (offset == 1)
     {
       DynamicOutput << "global M_ it_\n";
@@ -1163,16 +1154,16 @@ inline string ModelTree::getArgument(NodeID id, Type type, EquationType iEquatio
     }
   else if (type == eLocalParameter)
     {
-      argument << SymbolTable::getNameByID(eLocalParameter,(long int)id);
+      argument << symbol_table.getNameByID(eLocalParameter, (long int) id);
     }
   else if (type == eNumericalConstant)
     {
-      argument << NumericalConstants::get((long int) id);
+      argument << num_constants.get((long int) id);
     }
   else if (type == eEndogenous || type == eExogenous || type == eExogenousDet)
     if (iEquationType == eStaticEquations || iEquationType == eStaticDerivatives)
       {
-        int idx = VariableTable::getSymbolID((long int) id)+offset;
+        int idx = variable_table.getSymbolID((long int) id)+offset;
         if (type == eEndogenous)
           {
             argument <<  "y" << lpar << idx << rpar;
@@ -1183,7 +1174,7 @@ inline string ModelTree::getArgument(NodeID id, Type type, EquationType iEquatio
           }
         else if (type == eExogenousDet)
           {
-            idx += ModelParameters::exo_nbr;
+            idx += mod_param.exo_nbr;
             argument <<  "x" << lpar << idx << rpar;
           }
       }
@@ -1191,13 +1182,13 @@ inline string ModelTree::getArgument(NodeID id, Type type, EquationType iEquatio
       {
         if (type == eEndogenous)
           {
-            int idx = VariableTable::getPrintIndex((long int) id)+offset;
+            int idx = variable_table.getPrintIndex((long int) id) + offset;
             argument <<  "y" << lpar << idx << rpar;
           }
         else if (type == eExogenous)
           {
-            int idx = VariableTable::getSymbolID((long int) id)+offset;
-            int lag = VariableTable::getLag((long int) id);
+            int idx = variable_table.getSymbolID((long int) id) + offset;
+            int lag = variable_table.getLag((long int) id);
             if (offset == 1)
               {
                 if ( lag != 0)
@@ -1225,8 +1216,8 @@ inline string ModelTree::getArgument(NodeID id, Type type, EquationType iEquatio
           }
         else if (type == eExogenousDet)
           {
-            int idx = VariableTable::getSymbolID((long int) id)+ModelParameters::exo_nbr+offset;
-            int lag = VariableTable::getLag((long int) id);
+            int idx = variable_table.getSymbolID((long int) id) + mod_param.exo_nbr + offset;
+            int lag = variable_table.getLag((long int) id);
             if (offset == 1)
               {
                 if (lag != 0)
@@ -1261,13 +1252,13 @@ inline string ModelTree::getArgument(NodeID id, Type type, EquationType iEquatio
 void ModelTree::ModelInitialization(void)
 {
   // Exit if there is no equation in model file*/
-  if (ModelParameters::eq_nbr == 0)
+  if (mod_param.eq_nbr == 0)
     {
       (* error) ("no equations found in model file");
     }
-  cout << ModelParameters::eq_nbr << " equation(s) found \n";
+  cout << mod_param.eq_nbr << " equation(s) found \n";
   // Sorting variable table
-  VariableTable::Sort();
+  variable_table.Sort();
 
   // Setting number of equations in ModelParameters class
   // Here no derivative are computed
@@ -1298,25 +1289,25 @@ void ModelTree::ModelInitialization(void)
   output << "M_.lead_lag_incidence = [";
   /*
     zeros(" <<
-    ModelParameters::max_lag+ModelParameters::max_lead+1 << ", " <<
-    ModelParameters::endo_nbr << ");\n";
+    mod_param.max_lag+mod_param.max_lead+1 << ", " <<
+    mod_param.endo_nbr << ");\n";
   */
   // Loop on endogenous variables
-  for (int endoID = 0; endoID < ModelParameters::endo_nbr; endoID++)
+  for (int endoID = 0; endoID < mod_param.endo_nbr; endoID++)
     {
       output << "\n\t";
       // Loop on periods
-      for (int lag = -ModelParameters::max_endo_lag; lag <= ModelParameters::max_endo_lead; lag++)
+      for (int lag = -mod_param.max_endo_lag; lag <= mod_param.max_endo_lead; lag++)
         {
           // Getting name of symbol
-          string name = SymbolTable::getNameByID(eEndogenous, endoID);
+          string name = symbol_table.getNameByID(eEndogenous, endoID);
           // and its variableID if exists with current period
-          int varID = VariableTable::getID(name, lag);
-          //cout << name << " " << varID << " " << lag << " " << VariableTable::getPrintIndex(varID)+1 << " " << VariableTable::getSortID(varID)+1 << endl;
+          int varID = variable_table.getID(name, lag);
+          //cout << name << " " << varID << " " << lag << " " << variable_table.getPrintIndex(varID)+1 << " " << variable_table.getSortID(varID)+1 << endl;
 
           if (varID >=0)
             {
-              output << " " << VariableTable::getPrintIndex(varID)+1;
+              output << " " << variable_table.getPrintIndex(varID) + 1;
             }
           else
             {
@@ -1328,36 +1319,36 @@ void ModelTree::ModelInitialization(void)
   output << "]';\n";
 
   // Writing initialization for some other variables
-  output << "M_.exo_names_orig_ord = [1:" << ModelParameters::exo_nbr << "];\n";
-  output << "M_.maximum_lag = " << ModelParameters::max_lag << ";\n";
-  output << "M_.maximum_lead = " << ModelParameters::max_lead<< ";\n";
-  if (ModelParameters::endo_nbr)
+  output << "M_.exo_names_orig_ord = [1:" << mod_param.exo_nbr << "];\n";
+  output << "M_.maximum_lag = " << mod_param.max_lag << ";\n";
+  output << "M_.maximum_lead = " << mod_param.max_lead << ";\n";
+  if (mod_param.endo_nbr)
     {
-      output << "M_.maximum_endo_lag = " << ModelParameters::max_endo_lag << ";\n";
-      output << "M_.maximum_endo_lead = " << ModelParameters::max_endo_lead<< ";\n";
-      output << "oo_.steady_state = zeros(" << ModelParameters::endo_nbr << ", 1);\n";
+      output << "M_.maximum_endo_lag = " << mod_param.max_endo_lag << ";\n";
+      output << "M_.maximum_endo_lead = " << mod_param.max_endo_lead << ";\n";
+      output << "oo_.steady_state = zeros(" << mod_param.endo_nbr << ", 1);\n";
     }
-  if (ModelParameters::exo_nbr)
+  if (mod_param.exo_nbr)
     {
-      output << "M_.maximum_exo_lag = " << ModelParameters::max_exo_lag << ";\n";
-      output << "M_.maximum_exo_lead = " << ModelParameters::max_exo_lead<< ";\n";
-      output << "oo_.exo_steady_state = zeros(" << ModelParameters::exo_nbr << ", 1);\n";
+      output << "M_.maximum_exo_lag = " << mod_param.max_exo_lag << ";\n";
+      output << "M_.maximum_exo_lead = " << mod_param.max_exo_lead << ";\n";
+      output << "oo_.exo_steady_state = zeros(" << mod_param.exo_nbr << ", 1);\n";
     }
-  if (ModelParameters::exo_det_nbr)
+  if (mod_param.exo_det_nbr)
     {
-      output << "M_.maximum_exo_det_lag = " << ModelParameters::max_exo_det_lag << ";\n";
-      output << "M_.maximum_exo_det_lead = " << ModelParameters::max_exo_det_lead<< ";\n";
-      output << "oo_.exo_det_steady_state = zeros(" << ModelParameters::exo_det_nbr << ", 1);\n";
+      output << "M_.maximum_exo_det_lag = " << mod_param.max_exo_det_lag << ";\n";
+      output << "M_.maximum_exo_det_lead = " << mod_param.max_exo_det_lead << ";\n";
+      output << "oo_.exo_det_steady_state = zeros(" << mod_param.exo_det_nbr << ", 1);\n";
     }
-  if (ModelParameters::recur_nbr)
+  if (mod_param.recur_nbr)
     {
-      output << "M_.maximum_recur_lag = " << ModelParameters::max_recur_lag << ";\n";
-      output << "M_.maximum_recur_lead = " << ModelParameters::max_recur_lead<< ";\n";
-      output << "oo_.recur_steady_state = zeros(" << ModelParameters::recur_nbr << ", 1);\n";
+      output << "M_.maximum_recur_lag = " << mod_param.max_recur_lag << ";\n";
+      output << "M_.maximum_recur_lead = " << mod_param.max_recur_lead << ";\n";
+      output << "oo_.recur_steady_state = zeros(" << mod_param.recur_nbr << ", 1);\n";
     }
-  if (ModelParameters::parameter_nbr)
+  if (mod_param.parameter_nbr)
     {
-      output << "M_.params = zeros(" << ModelParameters::parameter_nbr << ", 1);\n";
+      output << "M_.params = zeros(" << mod_param.parameter_nbr << ", 1);\n";
     }
 }
 
@@ -1398,89 +1389,3 @@ inline int ModelTree::optimize(NodeID node)
   node->tmp_status = 0;
   return tmp_status;
 }
-
-//------------------------------------------------------------------------------
-#ifdef TEST_MODELTREE
-int main(void)
-{
-  SymbolTable     st;
-  VariableTable     vt;
-  NumericalConstants  nc;
-  ModelTree     model;
-  vector<int>     t(20);
-
-  //Adding 2 different symbols with AddSymbolDeclar
-  SymbolTable::AddSymbolDeclar("c",eExogenous);
-  //SymbolTable::PrintSymbolTable();
-  SymbolTable::AddSymbolDeclar("k",eEndogenous);
-  //SymbolTable::PrintSymbolTable();
-  SymbolTable::AddSymbolDeclar("aa",eParameter);
-  //SymbolTable::PrintSymbolTable();
-  SymbolTable::AddSymbolDeclar("x",eExogenous);
-  SymbolTable::AddSymbolDeclar("alph",eParameter);
-  SymbolTable::AddSymbolDeclar("delt",eParameter);
-
-  VariableTable::AddVariable("k",0);
-  VariableTable::AddVariable("x",-1);
-  VariableTable::AddVariable("c",-1);
-
-  SymbolTable::AddSymbolDeclar("x1",eEndogenous);
-  SymbolTable::AddSymbolDeclar("x2",eExogenousDet);
-  //SymbolTable::AddSymbolDeclar("x3",eExogenous);
-
-  VariableTable::AddVariable("x1",-1);
-  VariableTable::AddVariable("x2",1);
-  //VariableTable::AddVariable("x3",-1);
-  //VariableTable::AddVariable("k",1);
-  //VariableTable::AddVariable("y",0);
-
-  t[0] = model.AddToken("aa");
-  t[1] = model.AddToken("x",-1);
-  t[2] = model.AddToken("k",0);
-  t[3] = model.AddToken(Argument(t[0], eTempResult),
-                        Argument(t[1], eTempResult), TIMES);
-  t[4] = model.AddToken("alph");
-  t[5] = model.AddToken(Argument(t[2], eTempResult),
-                        Argument(t[4], eTempResult), POWER);
-  t[6] = model.AddToken(Argument(t[3], eTempResult),
-                        Argument(t[5], eTempResult), TIMES);
-
-  t[7] = model.AddToken("delt");
-  //t[8] = model.AddToken("1");
-  t[9] = model.AddToken(Argument(1, eTempResult),
-                        Argument(t[7], eTempResult), MINUS);
-  t[10] = model.AddToken(Argument(t[9], eTempResult),
-                         Argument(t[2], eTempResult), TIMES);
-
-  t[11] = model.AddToken(Argument(t[2], eTempResult),
-                         UMINUS);
-
-  t[12] = model.AddToken(Argument(t[11], eTempResult),
-                         Argument(t[6], eTempResult), PLUS);
-  t[13] = model.AddToken(Argument(t[12], eTempResult),
-                         Argument(t[10], eTempResult), PLUS);
-  t[14] = model.AddToken(Argument(t[13], eTempResult),
-                         Argument(t[10], eTempResult), PLUS);
-  t[15] = model.AddToken("c",-1);
-  t[16] = model.AddToken(Argument(t[15], eTempResult),
-                         Argument(t[14], eTempResult), EQUAL);
-  //try
-  //{
-  model.derive(2);
-  model.setStaticModel();
-  model.setDynamicStochasticModel();
-  model.Open("static_model.m", "dynamic_model.m");
-  model.Save();
-  //cout << model.getStaticModel();
-  //}
-  //catch(Error err)
-  //{
-  // cout << "error---------------------\n";
-  // exit(-1);
-  //}
-  //cout << model.getDynamicDeterministicModel() << endl;
-  //cout << model.getDynamicStochasticModel() << endl;
-  //VariableTable::Sort();
-}
-#endif
-//------------------------------------------------------------------------------

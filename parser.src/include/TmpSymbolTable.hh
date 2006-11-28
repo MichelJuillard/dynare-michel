@@ -9,7 +9,9 @@
 //------------------------------------------------------------------------------
 #include <list>
 #include <sstream>
-//------------------------------------------------------------------------------
+
+#include "SymbolTable.hh"
+
 /*!
   \class  TmpSymbolTable
   \brief  Defines temparary symbol table used with computing tasks
@@ -23,13 +25,15 @@ private :
   std::list<std::string>  NameTable;
   /*! Output of this class */
   std::ostringstream  output;
+  //! Pointer to global symbol table
+  SymbolTable *symbol_table;
 public :
   /*! Constrcutor */
   TmpSymbolTable();
-  /*! Copy constructor */
-  TmpSymbolTable(const TmpSymbolTable &tst);
   /*! Destructor*/
   ~TmpSymbolTable();
+  //! Sets global symbol table pointer
+  void setGlobalSymbolTable(SymbolTable *symbol_table_arg);
   /*! Pointer to error function of parser class */
   void (* error) (const char* m);
   /*! Adds a temp symbol */

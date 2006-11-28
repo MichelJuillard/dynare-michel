@@ -3,34 +3,26 @@
   \date 04/09/2004
   \par This file implements the SymbolTable class methodes.
 */
-//------------------------------------------------------------------------------
+
 #include <iostream>
 #include <algorithm>
-//------------------------------------------------------------------------------
+#include <sstream>
+
 #include "SymbolTable.hh"
 #include "Interface.hh"
 using namespace std;
-//------------------------------------------------------------------------------
-// = *(new symbolmap);
-map<string, Symbol, less<string> > SymbolTable::symboltable;
-vector< vector<string> > SymbolTable::name_table;
-vector< vector<string> > SymbolTable::tex_name_table;
-ostringstream SymbolTable::output;
-void (* SymbolTable::error) (const char* ) = NULL;
-//------------------------------------------------------------------------------
-SymbolTable::SymbolTable()
+
+SymbolTable::SymbolTable(ModelParameters &mod_param_arg) : mod_param(mod_param_arg)
 {
   name_table.resize(20);
   tex_name_table.resize(20);
 }
 
-//------------------------------------------------------------------------------
 SymbolTable::~SymbolTable()
 {
   // Empty
 }
 
-//------------------------------------------------------------------------------
 int SymbolTable::AddSymbol(string name,Type type, string tex_name)
 {
   symboltable[name].type = type;
@@ -41,29 +33,23 @@ int SymbolTable::AddSymbol(string name,Type type, string tex_name)
   switch (type)
     {
     case eExogenous:
-      symboltable[name].id = ModelParameters::exo_nbr;
-      ModelParameters::exo_nbr++;
-      return  ModelParameters::exo_nbr-1;
+      symboltable[name].id = mod_param.exo_nbr;
+      return mod_param.exo_nbr++;
     case eExogenousDet:
-      symboltable[name].id = ModelParameters::exo_det_nbr;
-      ModelParameters::exo_det_nbr++;
-      return  ModelParameters::exo_det_nbr-1;
+      symboltable[name].id = mod_param.exo_det_nbr;
+      return mod_param.exo_det_nbr++;
     case eEndogenous:
-      symboltable[name].id = ModelParameters::endo_nbr;
-      ModelParameters::endo_nbr++;
-      return  ModelParameters::endo_nbr-1;
+      symboltable[name].id = mod_param.endo_nbr;
+      return mod_param.endo_nbr++;
     case eParameter:
-      symboltable[name].id = ModelParameters::parameter_nbr;
-      ModelParameters::parameter_nbr++;
-      return  ModelParameters::parameter_nbr-1;
+      symboltable[name].id = mod_param.parameter_nbr;
+      return mod_param.parameter_nbr++;
     case eRecursiveVariable:
-      symboltable[name].id = ModelParameters::recur_nbr;
-      ModelParameters::recur_nbr++;
-      return  ModelParameters::recur_nbr-1;
+      symboltable[name].id = mod_param.recur_nbr;
+      return mod_param.recur_nbr++;
     case eLocalParameter:
-      symboltable[name].id = ModelParameters::local_parameter_nbr;
-      ModelParameters::local_parameter_nbr++;
-      return  ModelParameters::local_parameter_nbr-1;
+      symboltable[name].id = mod_param.local_parameter_nbr;
+      return mod_param.local_parameter_nbr++;
     default:
       // should never happen
       return -1;
@@ -71,7 +57,6 @@ int SymbolTable::AddSymbol(string name,Type type, string tex_name)
 
 }
 
-//------------------------------------------------------------------------------
 int SymbolTable::AddSymbolDeclar(string name,Type type, string tex_name)
 {
   //Testing if the symbol exist in the map
@@ -98,45 +83,28 @@ int SymbolTable::AddSymbolDeclar(string name,Type type, string tex_name)
 
 }
 
-//------------------------------------------------------------------------------
 void SymbolTable::AddSymbolRange(string name,int nbr,Type type, string tex_name)
 {
 }
 
-//------------------------------------------------------------------------------
-void SymbolTable::AddLag(string name,int lag)
-{
-  //Testing if the symbol exist in the map
-  if ( !Exist(name) )
-    {
-      return;
-    }
-  Type type = symboltable[name].type;
-  if ((type == eEndogenous) || (type == eExogenous))
-    {
-      symboltable[name].lags.push_back(lag);
-    }
-}
-
-//------------------------------------------------------------------------------
 void  SymbolTable::ResetType(string name,Type new_type)
 {
   symboltable[name].type = new_type;
 }
 
-//------------------------------------------------------------------------------
 void  SymbolTable::SetReferenced(string name)
 {
   symboltable[name].referenced = eReferenced;
 }
 
-//------------------------------------------------------------------------------
-Reference   SymbolTable::isReferenced(std::string name)
+Reference SymbolTable::isReferenced(const std::string &name) const
 {
-  return symboltable[name].referenced;
+  symboltable_const_iterator iter = symboltable.find(name);
+  return iter->second.referenced;
 }
 
-//------------------------------------------------------------------------------
+#if 0 // Commented out on 27/11/2006, SV
+
 void SymbolTable::clean()
 {
   string unused;
@@ -148,9 +116,9 @@ void SymbolTable::clean()
   types[1] = eExogenous;
   types[2] = eExogenousDet;
 
-  nb_type[0] = ModelParameters::endo_nbr;
-  nb_type[1] = ModelParameters::exo_nbr;
-  nb_type[2] = ModelParameters::exo_det_nbr;
+  nb_type[0] = mod_param.endo_nbr;
+  nb_type[1] = mod_param.exo_nbr;
+  nb_type[2] = mod_param.exo_det_nbr;
 
   // Removing unused variables
   for (int t = 0; t < 3; t++)
@@ -190,9 +158,9 @@ void SymbolTable::clean()
             }
         }
     }
-  ModelParameters::endo_nbr     = nb_type[0];
-  ModelParameters::exo_nbr    = nb_type[1];
-  ModelParameters::exo_det_nbr  = nb_type[2];
+  mod_param.endo_nbr     = nb_type[0];
+  mod_param.exo_nbr    = nb_type[1];
+  mod_param.exo_det_nbr  = nb_type[2];
   /*
   // Checking if unused parameters
   for (int s1 = 0; s1 < ModelParameters::parameter_nbr; s1++)
@@ -219,81 +187,69 @@ void SymbolTable::clean()
     }
   //PrintSymbolTable();
 }
+#endif // Comment
 
 string SymbolTable::get()
 {
-  if (ModelParameters::exo_nbr > 0)
+  ostringstream output;
+
+  if (mod_param.exo_nbr > 0)
     {
       output << "M_.exo_names = '" << getNameByID(eExogenous, 0) << "';\n";
       output << "M_.exo_names_tex = '" << getTexNameByID(eExogenous, 0) << "';\n";
-      for (int id = 1; id < ModelParameters::exo_nbr; id++)
+      for (int id = 1; id < mod_param.exo_nbr; id++)
         {
           output << "M_.exo_names = " + interfaces::strvcat("M_.exo_names","'"+getNameByID(eExogenous, id)+"'") + ";\n";
           output << "M_.exo_names_tex = " + interfaces::strvcat("M_.exo_names_tex","'"+getTexNameByID(eExogenous, id)+"'") + ";\n";
         }
     }
-  if (ModelParameters::exo_det_nbr > 0)
+  if (mod_param.exo_det_nbr > 0)
     {
       output << "lgxdet_ = '" << getNameByID(eExogenousDet, 0) << "';\n";
       output << "lgxdet_tex_ = '" << getTexNameByID(eExogenousDet, 0) << "';\n";
-      for (int id = 1; id < ModelParameters::exo_det_nbr; id++)
+      for (int id = 1; id < mod_param.exo_det_nbr; id++)
         {
           output << "lgxdet_ = " + interfaces::strvcat("lgxdet_","'"+getNameByID(eExogenousDet, id)+"'") + ";\n";
           output << "lgxdet_tex_ = " + interfaces::strvcat("lgxdet_tex_","'"+getTexNameByID(eExogenousDet, id)+"'") + ";\n";
         }
     }
-  if (ModelParameters::endo_nbr > 0)
+  if (mod_param.endo_nbr > 0)
     {
       output << "M_.endo_names = '" << getNameByID(eEndogenous, 0) << "';\n";
       output << "M_.endo_names_tex = '" << getTexNameByID(eEndogenous, 0) << "';\n";
-      for (int id = 1; id < ModelParameters::endo_nbr; id++)
+      for (int id = 1; id < mod_param.endo_nbr; id++)
         {
           output << "M_.endo_names = " + interfaces::strvcat("M_.endo_names","'"+getNameByID(eEndogenous, id)+"'") + ";\n";
           output << "M_.endo_names_tex = " + interfaces::strvcat("M_.endo_names_tex","'"+getTexNameByID(eEndogenous, id)+"'") + ";\n";
         }
     }
-  if (ModelParameters::recur_nbr > 0)
+  if (mod_param.recur_nbr > 0)
     {
       output << "M_.recur_names = '" << getNameByID(eRecursiveVariable, 0) << "';\n";
       output << "M_.recur_names_tex = '" << getTexNameByID(eRecursiveVariable, 0) << "';\n";
-      for (int id = 1; id < ModelParameters::recur_nbr; id++)
+      for (int id = 1; id < mod_param.recur_nbr; id++)
         {
           output << "M_.recur_names = " + interfaces::strvcat("M_.recur_names","'"+getNameByID(eRecursiveVariable, id)+"'") + ";\n";
           output << "M_.recur_names_tex = " + interfaces::strvcat("M_.recur_names_tex","'"+getTexNameByID(eRecursiveVariable, id)+"'") + ";\n";
         }
     }
-  if (ModelParameters::parameter_nbr > 0)
+  if (mod_param.parameter_nbr > 0)
     {
       output << "M_.param_names = '" << getNameByID(eParameter, 0) << "';\n";
       output << "M_.param_names_tex = '" << getTexNameByID(eParameter, 0) << "';\n";
-      for (int id = 1; id < ModelParameters::parameter_nbr; id++)
+      for (int id = 1; id < mod_param.parameter_nbr; id++)
         {
           output << "M_.param_names = " + interfaces::strvcat("M_.param_names","'"+getNameByID(eParameter, id)+"'") + ";\n";
           output << "M_.param_names_tex = " + interfaces::strvcat("M_.param_names_tex","'"+getTexNameByID(eParameter, id)+"'") + ";\n";
         }
     }
 
-  output << "M_.exo_det_nbr = " << ModelParameters::exo_det_nbr << ";\n";
-  output << "M_.exo_nbr = " << ModelParameters::exo_nbr << ";\n";
-  output << "M_.Sigma_e = zeros(" << ModelParameters::exo_nbr
-         << ", " << ModelParameters::exo_nbr << ");\n";
-  output << "M_.endo_nbr = " << ModelParameters::endo_nbr << ";\n";
-  output << "M_.recur_nbr = " << ModelParameters::recur_nbr << ";\n";
-  output << "M_.param_nbr = " << ModelParameters::parameter_nbr << ";\n";
+  output << "M_.exo_det_nbr = " << mod_param.exo_det_nbr << ";\n";
+  output << "M_.exo_nbr = " << mod_param.exo_nbr << ";\n";
+  output << "M_.Sigma_e = zeros(" << mod_param.exo_nbr
+         << ", " << mod_param.exo_nbr << ");\n";
+  output << "M_.endo_nbr = " << mod_param.endo_nbr << ";\n";
+  output << "M_.recur_nbr = " << mod_param.recur_nbr << ";\n";
+  output << "M_.param_nbr = " << mod_param.parameter_nbr << ";\n";
   return output.str();
 }
-
-//------------------------------------------------------------------------------
-void SymbolTable::erase_local_parameters(void)
-{
-  std::map<std::string, Symbol, std::less<std::string> >::iterator i = symboltable.begin();
-  for(; i != symboltable.end(); ++i)
-    {
-      if ((i->second).type == eLocalParameter)
-        {
-          symboltable.erase(i);
-        }
-    }
-}
-
-//------------------------------------------------------------------------------

@@ -32,6 +32,11 @@ typedef TreeList::iterator TreeIterator;
 class DataTree
 {
 protected :
+  //! A reference to the symbol table
+  SymbolTable &symbol_table;
+  //! A reference to the variable table
+  VariableTable &variable_table;
+
   /*! A list of structures "token" */
   TreeList    mModelTree;
   /*! matches key with entry id in list of token */
@@ -52,14 +57,14 @@ protected :
   inline NodeID   getIDOfToken(const MToken &iToken);
 public :
   /*! Flag for empty operator (final toekn) */
-  static const int        NoOpCode;
-  static const NodeID     NullID;
-  static const NodeID     Zero;
-  static const NodeID     One;
-  static const NodeID     MinusOne;
-  static const NodeID     ZeroEqZero;
+  const int NoOpCode;
+  const NodeID NullID;
+  NodeID Zero;
+  NodeID One;
+  NodeID MinusOne;
+  NodeID ZeroEqZero;
   /*! Type of output 0 for C and 1 for Matlab (default) , also used as matrix index offset*/
-  static int    offset;
+  int offset;
   /*! Pointer to error function of parser class */
   void (* error) (const char* m);
   /*! Increment reference count of given token */
@@ -118,7 +123,7 @@ public :
   inline NodeID     AddAssign(NodeID iArg1, NodeID iArg2);
 public :
   /*! Constructor */
-  DataTree();
+  DataTree(SymbolTable &symbol_table_arg, VariableTable &variable_table_arg);
   /*! Destructor */
   ~DataTree();
 };
@@ -213,22 +218,22 @@ inline NodeID DataTree::AddTerminal(std::string iArgName, int iLag)
   int   id;
   Type  type;
 
-  if (!SymbolTable::Exist(iArgName))
+  if (!symbol_table.Exist(iArgName))
     {
       std::string msg = "unknown symbol: " + iArgName;
       (* error) (msg.c_str());
       exit(-1);
     }
-  type = SymbolTable::getType(iArgName);
+  type = symbol_table.getType(iArgName);
   if (type != eUNDEF)
     {
-      SymbolTable::SetReferenced(iArgName);
+      symbol_table.SetReferenced(iArgName);
       if (type == eEndogenous ||
           type == eExogenousDet  ||
           type == eExogenous  ||
           type == eRecursiveVariable)
         {
-          id = VariableTable::getID(iArgName,iLag);
+          id = variable_table.getID(iArgName,iLag);
           if (id == -1)
             {
               std::string msg = "unknown variable " + iArgName;
@@ -237,7 +242,7 @@ inline NodeID DataTree::AddTerminal(std::string iArgName, int iLag)
             }
         }
       else
-        id = SymbolTable::getID(iArgName);
+        id = symbol_table.getID(iArgName);
 
     }
   else
@@ -751,7 +756,7 @@ inline NodeID DataTree::AddSqRt(NodeID iArg1)
     }
 }
 
-inline NodeID DataTree::AddEqual(NodeID iArg1, NodeID iArg2=Zero)
+inline NodeID DataTree::AddEqual(NodeID iArg1, NodeID iArg2)
 {
   if (iArg1 == Zero && iArg2 == Zero)
     return ZeroEqZero;
@@ -767,7 +772,7 @@ inline NodeID DataTree::AddEqual(NodeID iArg1, NodeID iArg2=Zero)
     }
 }
 
-inline NodeID DataTree::AddAssign(NodeID iArg1, NodeID iArg2=Zero)
+inline NodeID DataTree::AddAssign(NodeID iArg1, NodeID iArg2)
 {
   MToken  lToken(iArg1, eTempResult, iArg2, token::ASSIGN);
 

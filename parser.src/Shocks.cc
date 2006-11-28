@@ -11,13 +11,7 @@ using namespace std;
 #include "ModelParameters.hh"
 #include "Interface.hh"
 
-static int mshock_flag = 0;
-static int exo_det_length = 0;
-
-//------------------------------------------------------------------------------
-//ostringstream	Shocks::output;
-//------------------------------------------------------------------------------
-Shocks::Shocks()
+Shocks::Shocks() : mshock_flag(0), exo_det_length(0)
 {
   // Empty
 }

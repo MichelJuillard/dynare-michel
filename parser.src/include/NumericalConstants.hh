@@ -19,18 +19,18 @@ class NumericalConstants
 {
 private :
   /*! Vector of numerical constants */
-  static std::vector<std::string>  mNumericalConstants;
+  std::vector<std::string> mNumericalConstants;
   //! Map matching constants to their id
-  static std::map<std::string, int, std::less<std::string> > numConstantsIndex;
+  std::map<std::string, int, std::less<std::string> > numConstantsIndex;
 public :
   /*! Construcor */
   NumericalConstants();
   /*! Destructor */
   ~NumericalConstants();
   /*! Adds a constant to mNumericalConstants */
-  static int    AddConstant(std::string iConst);
+  int AddConstant(std::string iConst);
   /*! Gets a constant form mNumericalConstants */
-  static std::string  get(int iID);
+  std::string get(int iID) const;
 };
 //------------------------------------------------------------------------------
 #endif

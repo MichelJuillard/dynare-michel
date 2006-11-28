@@ -258,7 +258,7 @@ int sigma_e = 0;
     otherwise it is a native statement until the end of the line
  */
 <INITIAL>[A-Za-z_][A-Za-z0-9_]* {	      
-  if (SymbolTable::getID(yytext) != -1)
+  if (driver.exists_symbol(yytext))
     {
       BEGIN DYNARE_STATEMENT;
       yylval->string_val = new string(yytext);
@@ -267,14 +267,14 @@ int sigma_e = 0;
   else
     {
       BEGIN NATIVE;
-      *(driver.output) << yytext;
+      driver.add_native(yytext);
     }
 }
 
-<INITIAL>. {BEGIN NATIVE; *(driver.output) << yytext;}
+<INITIAL>. {BEGIN NATIVE; driver.add_native(yytext); }
 
  /* NATIVE Block */
-<NATIVE>.* {BEGIN INITIAL; *(driver.output) << yytext << endl;}
+<NATIVE>.* {BEGIN INITIAL; driver.add_native(yytext); driver.add_native("\n"); }
 
 <*>. {return yy::parser::token_type (yytext[0]);}
 

@@ -89,7 +89,9 @@ struct MTokenLess
   }
 };
 
-//------------------------------------------------------------------------------
+// For MetaToken::getDerivativeAddress()
+class ModelTree;
+
 /*!
   \struct  MetaToken
   \brief  Meta token structure
@@ -205,11 +207,15 @@ public :
     d1[iVarID] = iDerivative;
   }
 
-  /*! Get derivative with respect to iVarID.
-    Defined in ModelTree.cc because it needs DataTree::Zero and DataTree::ZeroEqZero
+  //! Get derivative with respect to iVarID.
+  /*
+    Defined in ModelTree.cc because it needs a reference to the enclosing ModelTree,
     and is only used in that source file.
+
+    \param iVarID variable with respect to get derivative
+    \param model_tree enclosing ModelTree
   */
-  inline NodeID getDerivativeAddress(int iVarID);
+  inline NodeID getDerivativeAddress(int iVarID, const ModelTree &model_tree) const;
 };
 //------------------------------------------------------------------------------
 /*! Equation type enum */
