@@ -1022,7 +1022,7 @@ typedef pair<int, Type> ExpObj;
                        filename_list ';' {driver.run_model_comparison();}
                   ;
 
- model_comparison_options: model_comparison_options ',' model_comparison_option
+ model_comparison_options: model_comparison_options COMMA model_comparison_option
               | model_comparison_option
               ;
 
@@ -1032,9 +1032,9 @@ typedef pair<int, Type> ExpObj;
               ;
 
  filename_list : filename {driver.add_mc_filename($1);}
-        | filename_list ',' filename {driver.add_mc_filename($3);}
+        | filename_list COMMA filename {driver.add_mc_filename($3);}
 	| filename '(' value ')' {driver.add_mc_filename($1, $3);}
-        | filename_list ',' filename '(' value ')' {driver.add_mc_filename($3, $5);}
+        | filename_list COMMA filename '(' value ')' {driver.add_mc_filename($3, $5);}
         ;
 
  filename : filename_elem {$$ = $1;}
@@ -1043,7 +1043,7 @@ typedef pair<int, Type> ExpObj;
 
  filename_elem : NAME
                | '\\' { $$ = new string("\\"); }
-               | '/' { $$ = new string("/"); }
+               | DIVIDE { $$ = new string("/"); }
                | ':' { $$ = new string(":"); }
                | '.' { $$ = new string("."); }
                ;

@@ -21,13 +21,9 @@ int comment_caller;
 int sigma_e = 0;
 %} 
 
-%option case-insensitive noyywrap nounput batch debug never-interactive
-
-/* To be removed in the future (see static ParsingDriver::error) */
-%option yylineno
+%option case-insensitive noyywrap nounput batch debug never-interactive yylineno
 
 %x COMMENT
-%x SET_STATEMENT
 %x DYNARE_STATEMENT
 %x DYNARE_BLOCK
 %x NATIVE
@@ -47,9 +43,9 @@ int sigma_e = 0;
 <*>[\n]+       { yylloc->lines(yyleng); yylloc->step(); }
 
  /* Comments */
-<INITIAL,SET_STATEMENT,DYNARE_STATEMENT,DYNARE_BLOCK>["%"].*
-<INITIAL,SET_STATEMENT,DYNARE_STATEMENT,DYNARE_BLOCK>["/"]["/"].* 
-<INITIAL,SET_STATEMENT,DYNARE_STATEMENT,DYNARE_BLOCK>"/*"   {comment_caller = YY_START; BEGIN COMMENT;}
+<INITIAL,DYNARE_STATEMENT,DYNARE_BLOCK>["%"].*
+<INITIAL,DYNARE_STATEMENT,DYNARE_BLOCK>["/"]["/"].* 
+<INITIAL,DYNARE_STATEMENT,DYNARE_BLOCK>"/*"   {comment_caller = YY_START; BEGIN COMMENT;}
 
 <COMMENT>[^*\n]* 		
 <COMMENT>"*"+[^/\n]
@@ -205,10 +201,14 @@ int sigma_e = 0;
 <DYNARE_STATEMENT>xticklabel   		{return token::XTICKLABEL;}  	  
 <DYNARE_STATEMENT>xls_sheet {return token::XLS_SHEET;}
 <DYNARE_STATEMENT>xls_range {return token::XLS_RANGE;}
+<DYNARE_STATEMENT>[\.] {return yy::parser::token_type (yytext[0]);}
+<DYNARE_STATEMENT>[\\] {return yy::parser::token_type (yytext[0]);}
+<DYNARE_STATEMENT>[\'] {return yy::parser::token_type (yytext[0]);}
 
 <DYNARE_STATEMENT,DYNARE_BLOCK>use_dll {return token::USE_DLL;}
 <DYNARE_STATEMENT,DYNARE_BLOCK>linear {return token::LINEAR;}
 <DYNARE_STATEMENT,DYNARE_BLOCK>[,] {return token::COMMA;}
+<DYNARE_STATEMENT,DYNARE_BLOCK>[:] {return yy::parser::token_type (yytext[0]);}
 <DYNARE_STATEMENT,DYNARE_BLOCK>[\(\)] {return yy::parser::token_type (yytext[0]);} 
 <DYNARE_STATEMENT,DYNARE_BLOCK>[\[] {return yy::parser::token_type (yytext[0]);}
 <DYNARE_STATEMENT,DYNARE_BLOCK>[\]] {
@@ -277,6 +277,7 @@ int sigma_e = 0;
  /* NATIVE Block */
 <NATIVE>.* {BEGIN INITIAL; driver.add_native(yytext); driver.add_native("\n"); }
 
+<*>.      { driver.error("Unrecognized character: '" + string(yytext) + "'"); }
 %%
 
 void

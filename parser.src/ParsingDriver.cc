@@ -72,7 +72,8 @@ ParsingDriver::error(const yy::parser::location_type &l, const string &m)
 void
 ParsingDriver::error(const string &m)
 {
-  cerr << file << ": " << m << endl;
+  extern int yylineno;
+  cerr << file << ":" << yylineno << ": " << m << endl;
   exit(-1);
 }
 
