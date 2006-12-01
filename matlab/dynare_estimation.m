@@ -200,7 +200,7 @@ if ~isempty(options_.unit_root_vars)
   [junk,bayestopt_.restrict_var_list_stationary] = ...
       setdiff(bayestopt_.restrict_var_list,i_ur);
   [junk,bayestopt_.restrict_var_list_nonstationary] = ...
-      setdiff(bayestopt_.restrict_var_list,i_ur);
+      intersect(bayestopt_.restrict_var_list,i_ur);
   if M_.maximum_lag > 1
     l1 = flipud([cumsum(M_.lead_lag_incidence(1:M_.maximum_lag-1,dr.order_var),1);ones(1,M_.endo_nbr)]);
     l2 = l1(:,restrict_var_list);
