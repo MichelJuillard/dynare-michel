@@ -7,569 +7,626 @@
 #include <sstream>
 
 using namespace std;
-//------------------------------------------------------------------------------
+
 #include "ComputingTasks.hh"
 #include "Interface.hh"
-//------------------------------------------------------------------------------
-//ostringstream	ComputingTasks::output;
-//------------------------------------------------------------------------------
-ComputingTasks::ComputingTasks(const SymbolTable &symbol_table_arg) : symbol_table(symbol_table_arg)
+#include "Statement.hh"
+
+SteadyStatement::SteadyStatement(const OptionsList &options_list_arg) :
+  options_list(options_list_arg)
 {
-  // Empty
 }
 
-//------------------------------------------------------------------------------
-ComputingTasks::~ComputingTasks()
+void
+SteadyStatement::writeOutput(ostream &output) const
 {
-  // Empty
+  options_list.writeOutput(output);
+  output << "steady;\n";
 }
 
-//------------------------------------------------------------------------------
-void ComputingTasks::setOutput(ostringstream* iOutput)
+CheckStatement::CheckStatement(const OptionsList &options_list_arg) :
+  options_list(options_list_arg)
 {
-  output = iOutput;
 }
 
-//------------------------------------------------------------------------------
-void ComputingTasks::set(void)
+void
+CheckStatement::writeOutput(ostream &output) const
 {
-  // Empty
+  options_list.writeOutput(output);
+  output << "check;\n";
 }
 
-//------------------------------------------------------------------------------
-void ComputingTasks::setSteady(void)
+SimulStatement::SimulStatement(const OptionsList &options_list_arg) :
+  options_list(options_list_arg)
 {
-  *output << "steady;\n";
 }
 
-//------------------------------------------------------------------------------
-void ComputingTasks::setCheck(void)
+void
+SimulStatement::writeOutput(ostream &output) const
 {
-  *output << "check;\n";
+  options_list.writeOutput(output);
+  output << "simul(oo_.dr);\n";
 }
 
-//------------------------------------------------------------------------------
-void ComputingTasks::setSimul(void)
+StochSimulStatement::StochSimulStatement(const TmpSymbolTable &tmp_symbol_table_arg,
+                                         const OptionsList &options_list_arg) :
+  tmp_symbol_table(tmp_symbol_table_arg),
+  options_list(options_list_arg)
 {
-  *output << "simul(oo_.dr);\n";
 }
 
-//------------------------------------------------------------------------------
-void ComputingTasks::setStochSimul(string tmp1)
-
+void
+StochSimulStatement::writeOutput(ostream &output) const
 {
-  *output << tmp1;
-  *output << "stoch_simul(var_list_);\n";
+  options_list.writeOutput(output);
+  tmp_symbol_table.writeOutput("var_list_", output);
+  output << "stoch_simul(var_list_);\n";
 }
 
-//------------------------------------------------------------------------------
-void ComputingTasks::setOption(string name, string value)
+EstimationStatement::EstimationStatement(const TmpSymbolTable &tmp_symbol_table_arg,
+                                         const OptionsList &options_list_arg) :
+  tmp_symbol_table(tmp_symbol_table_arg),
+  options_list(options_list_arg)
 {
-  *output << "options_." << name << " = " << value << ";\n";
 }
 
-//------------------------------------------------------------------------------
-void ComputingTasks::setOption(string name, string value1, string value2)
+void
+EstimationStatement::writeOutput(ostream &output) const
 {
-  *output << "options_." << name << " = [" << value1 << "; " << value2 << "];\n";
+  options_list.writeOutput(output);
+  tmp_symbol_table.writeOutput("var_list_", output);
+  output << "dynare_estimation(var_list_);\n";
 }
 
-//------------------------------------------------------------------------------
-void ComputingTasks::runEstimation(string tmp1)
+PriorAnalysisStatement::PriorAnalysisStatement(const TmpSymbolTable &tmp_symbol_table_arg,
+                                               const OptionsList &options_list_arg) :
+  tmp_symbol_table(tmp_symbol_table_arg),
+  options_list(options_list_arg)
 {
-  *output << tmp1;
-  *output << "dynare_estimation(var_list_);\n";
 }
 
-//------------------------------------------------------------------------------
-void ComputingTasks::runPriorAnalysis(string tmp1)
+void
+PriorAnalysisStatement::writeOutput(ostream &output) const
 {
-  *output << tmp1;
-  *output << "prior_analysis(var_list_);\n";
+  options_list.writeOutput(output);
+  tmp_symbol_table.writeOutput("var_list_", output);
+  output << "prior_analysis(var_list_);\n";
 }
 
-//------------------------------------------------------------------------------
-void ComputingTasks::runPosteriorAnalysis(string tmp1)
+PosteriorAnalysisStatement::PosteriorAnalysisStatement(const TmpSymbolTable &tmp_symbol_table_arg,
+                                                       const OptionsList &options_list_arg) :
+  tmp_symbol_table(tmp_symbol_table_arg),
+  options_list(options_list_arg)
 {
-  *output << tmp1;
-  *output << "posterior_analysis(var_list_);\n";
 }
 
-//------------------------------------------------------------------------------
-void ComputingTasks::runRplot(string tmp1)
+void
+PosteriorAnalysisStatement::writeOutput(ostream &output) const
 {
-  *output << tmp1;
-  *output << "rplot(var_list_);\n";
+  options_list.writeOutput(output);
+  tmp_symbol_table.writeOutput("var_list_", output);
+  output << "posterior_analysis(var_list_);\n";
 }
 
-//------------------------------------------------------------------------------
-void ComputingTasks::setEstimationInit(void)
+RplotStatement::RplotStatement(const TmpSymbolTable &tmp_symbol_table_arg,
+                               const OptionsList &options_list_arg) :
+  tmp_symbol_table(tmp_symbol_table_arg),
+  options_list(options_list_arg)
 {
-  *output << "global estim_params_\n";
-  *output << "var_list_ = [];\n";
-  *output << "estim_params_.var_exo = [];\n";
-  *output << "estim_params_.var_endo = [];\n";
-  *output << "estim_params_.corrx = [];\n";
-  *output << "estim_params_.corrn = [];\n";
-  *output << "estim_params_.param_names = [];\n";
-  *output << "estim_params_.user_param_names = [];\n";
-  *output << "estim_params_.param_vals = [];\n";
-  *output << "M_.H = 0;\n";
 }
 
-//------------------------------------------------------------------------------
-void ComputingTasks::setOptimOptions(string str1, string str2, int task)
+void
+RplotStatement::writeOutput(ostream &output) const
 {
-  string optim_string;
-  int start;
-  switch(task)
+  options_list.writeOutput(output);
+  tmp_symbol_table.writeOutput("var_list_", output);
+  output << "rplot(var_list_);\n";
+}
+
+UnitRootVarsStatement::UnitRootVarsStatement(const TmpSymbolTable &tmp_symbol_table_arg) :
+  tmp_symbol_table(tmp_symbol_table_arg)
+{
+}
+
+void
+UnitRootVarsStatement::writeOutput(ostream &output) const
+{
+  tmp_symbol_table.writeOutput("options_.unit_root_vars", output);
+}
+
+PeriodsStatement::PeriodsStatement(int periods_arg) : periods(periods_arg)
+{
+}
+
+void
+PeriodsStatement::writeOutput(ostream &output) const
+{
+  output << "options_.periods = " << periods << ";" << endl;
+  output << "options_.simul = 1;" << endl;
+}
+
+DsampleStatement::DsampleStatement(int val1_arg) : val1(val1_arg), val2(-1)
+{
+}
+
+DsampleStatement::DsampleStatement(int val1_arg, int val2_arg) : val1(val1_arg), val2(val2_arg)
+{
+}
+
+void
+DsampleStatement::writeOutput(ostream &output) const
+{
+  if (val2 < 0)
+    output << "options_.dsample = " << val1 << ";" << endl;
+  else
+    output << "options_.dsample = [" << val1 << "; " << val2 << "];" << endl;
+}
+
+VarobsStatement::VarobsStatement(const TmpSymbolTable &tmp_symbol_table_arg) :
+  tmp_symbol_table(tmp_symbol_table_arg)
+{
+}
+
+void
+VarobsStatement::writeOutput(ostream &output) const
+{
+  tmp_symbol_table.writeOutput("options_.varobs", output);
+}
+
+EstimatedParamsStatement::EstimatedParamsStatement(const vector<EstimationParams> &estim_params_list_arg,
+                                                   const SymbolTable &symbol_table_arg) :
+  estim_params_list(estim_params_list_arg),
+  symbol_table(symbol_table_arg)
+{
+}
+
+void
+EstimatedParamsStatement::writeOutput(ostream &output) const
+{
+  output << "global estim_params_\n";
+  output << "var_list_ = [];\n";
+  output << "estim_params_.var_exo = [];\n";
+  output << "estim_params_.var_endo = [];\n";
+  output << "estim_params_.corrx = [];\n";
+  output << "estim_params_.corrn = [];\n";
+  output << "estim_params_.param_names = [];\n";
+  output << "estim_params_.user_param_names = [];\n";
+  output << "estim_params_.param_vals = [];\n";
+  output << "M_.H = 0;\n";
+
+  vector<EstimationParams>::const_iterator it;
+
+  for(it = estim_params_list.begin(); it != estim_params_list.end(); it++)
     {
-    case 1:
-      optim_string = "options_.optim_opt = '";
-      start = 0;
-      return;
-    case 2:
-      if (start > 0)
+      if (symbol_table.isReferenced(it->name) == eNotReferenced
+          && it->name != "dsge_prior_weight")
+        return;
+      switch(it->type)
         {
-          optim_string += ",";
+        case 1:
+          if (symbol_table.getType(it->name) == eExogenous)
+            output << "estim_params_.var_exo = [estim_params_.var_exo; ";
+          else if (symbol_table.getType(it->name) == eEndogenous)
+            output << "estim_params_.var_endo = [estim_params_.var_endo; ";
+          output << symbol_table.getID(it->name)+1;
+          break;
+        case 2:
+          output << "estim_params_.param_vals = [estim_params_.param_vals; ";
+          output << symbol_table.getID(it->name)+1;
+          break;
+        case 3:
+          if (symbol_table.getType(it->name) == eExogenous)
+            output << "estim_params_.corrx = [estim_params_.corrx; ";
+          else if (symbol_table.getType(it->name) == eEndogenous)
+            output << "estim_params_.corrn = [estim_params_.corrn; ";
+          output << symbol_table.getID(it->name)+1;
+          output << " " << symbol_table.getID(it->name2)+1;
+          break;
+        }
+      output << " " << it->init_val << " " <<  it->low_bound
+             << " " << it->up_bound << " " <<  it->prior
+             << " " << it->mean << " " <<  it->std
+             << " " << it->p3 << " " <<  it->p4  << " " <<  it->jscale << "];\n";
+    }
+}
+
+EstimatedParamsInitStatement::EstimatedParamsInitStatement(const vector<EstimationParams> &estim_params_list_arg,
+                                                           const SymbolTable &symbol_table_arg) :
+  estim_params_list(estim_params_list_arg),
+  symbol_table(symbol_table_arg)
+{
+}
+
+void
+EstimatedParamsInitStatement::writeOutput(ostream &output) const
+{
+  vector<EstimationParams>::const_iterator it;
+
+  for(it = estim_params_list.begin(); it != estim_params_list.end(); it++)
+    {
+      if (symbol_table.isReferenced(it->name) == eNotReferenced)
+        return;
+      if (it->type < 3)
+        {
+          if (symbol_table.getType(it->name) == eExogenous)
+            {
+              output << "tmp1 = find(estim_params_.var_exo(:,1)==" << symbol_table.getID(it->name)+1 << ");\n";
+              output << "estim_params_.var_exo(tmp1,2) = " << it->init_val << ";\n";
+            }
+          else if (symbol_table.getType(it->name) == eEndogenous)
+            {
+              output << "tmp1 = find(estim_params_.var_endo(:,1)==" << symbol_table.getID(it->name)+1 << ");\n";
+              output << "estim_params_.var_endo(tmp1,2) = " << it->init_val << ";\n";
+            }
+          else if (symbol_table.getType(it->name) == eParameter)
+            {
+              output << "tmp1 = find(estim_params_.param_vals(:,1)==" << symbol_table.getID(it->name)+1 << ");\n";
+              output << "estim_params_.param_vals(tmp1,2) = " << it->init_val << ";\n";
+            }
         }
       else
         {
-          start = 1;
+          if (symbol_table.getType(it->name) == eExogenous)
+            {
+              output << "tmp1 = find((estim_params_.corrx(:,1)==" << symbol_table.getID(it->name)+1 << ")) & (estim_params_.corrx(:,2)==" << symbol_table.getID(it->name2)+1 << ");\n";
+              output << "estim_params_.corrx(tmp1,3) = " << it->init_val << ";\n";
+            }
+          else if (symbol_table.getType(it->name) == eEndogenous)
+            {
+              output << "tmp1 = find((estim_params_.corrn(:,1)==" << symbol_table.getID(it->name)+1 << ")) & (estim_params_.corrn(:,2)==" << symbol_table.getID(it->name2)+1 << ";\n";
+              output << "estim_params_.corrx(tmp1,3) = " << it->init_val << ";\n";
+            }
         }
-      optim_string += "''";
-      optim_string += str1;
-      optim_string += "'',";
-      if (str2[0] >= 'A' && str2[0] <= 'z')
+    }
+}
+
+EstimatedParamsBoundsStatement::EstimatedParamsBoundsStatement(const vector<EstimationParams> &estim_params_list_arg,
+                                                               const SymbolTable &symbol_table_arg) :
+  estim_params_list(estim_params_list_arg),
+  symbol_table(symbol_table_arg)
+{
+}
+
+void
+EstimatedParamsBoundsStatement::writeOutput(ostream &output) const
+{
+  vector<EstimationParams>::const_iterator it;
+
+  for(it = estim_params_list.begin(); it != estim_params_list.end(); it++)
+    {
+      if (symbol_table.isReferenced(it->name) == eNotReferenced)
+        return;
+      if (it->type < 3)
         {
-          optim_string += "''";
-          optim_string += str2;
-          optim_string += "''";
+          if (symbol_table.getType(it->name) == eExogenous)
+            {
+              output << "tmp1 = find(estim_params_.var_exo(:,1)==" << symbol_table.getID(it->name)+1 << ");\n";
+              output << "estim_params_.var_exo(tmp1,3) = " << it->low_bound << ";\n";
+              output << "estim_params_.var_exo(tmp1,4) = " << it->up_bound << ";\n";
+            }
+          else if (symbol_table.getType(it->name) == eEndogenous)
+            {
+              output << "tmp1 = find(estim_params_.var_endo(:,1)==" << symbol_table.getID(it->name)+1 << ");\n";
+              output << "estim_params_.var_endo(tmp1,3) = " << it->low_bound << ";\n";
+              output << "estim_params_.var_endo(tmp1,4) = " << it->up_bound << ";\n";
+            }
+          else if (symbol_table.getType(it->name) == eParameter)
+            {
+              output << "tmp1 = find(estim_params_.param_vals(:,1)==" << symbol_table.getID(it->name)+1 << ");\n";
+              output << "estim_params_.param_vals(tmp1,3) = " << it->low_bound << ";\n";
+              output << "estim_params_.param_vals(tmp1,4) = " << it->up_bound << ";\n";
+            }
         }
       else
         {
-          optim_string += str2;
+          if (symbol_table.getType(it->name) == eExogenous)
+            {
+              output << "tmp1 = find((estim_params_.corrx(:,1)==" << symbol_table.getID(it->name)+1 << ")) & (estim_params_.corrx(:,2)==" << symbol_table.getID(it->name2)+1 << ");\n";
+              output << "estim_params_.corrx(tmp1,4) = " << it->low_bound << ";\n";
+              output << "estim_params_.corrx(tmp1,5) = " << it->up_bound << ";\n";
+            }
+          else if (symbol_table.getType(it->name) == eEndogenous)
+            {
+              output << "tmp1 = find((estim_params_.corrn(:,1)==" << symbol_table.getID(it->name)+1 << ")) & (estim_params_.corrn(:,2)==" << symbol_table.getID(it->name2)+1 << ";\n";
+              output << "estim_params_.corrx(tmp1,4) = " << it->low_bound << ";\n";
+              output << "estim_params_.corrx(tmp1,5) = " << it->up_bound << ";\n";
+            }
         }
-      return;
-    case 3:
-      optim_string += "';\n";
-      *output << optim_string;
     }
 }
 
-//------------------------------------------------------------------------------
-void ComputingTasks::setEstimatedElements(void)
+ObservationTrendsStatement::ObservationTrendsStatement(const trend_elements_type &trend_elements_arg,
+                                                       const SymbolTable &symbol_table_arg) :
+  trend_elements(trend_elements_arg),
+  symbol_table(symbol_table_arg)
 {
-  if (!symbol_table.Exist(EstimParams->name))
-    {
-      string msg = "Unknown symbol: "+EstimParams->name;
-      error(msg.c_str());
-    }
-  if (symbol_table.isReferenced(EstimParams->name) == eNotReferenced & EstimParams->name != "dsge_prior_weight")
-    {
-      return;
-    }
-  if ((EstimParams->init_val).size() == 0)
-    {
-      EstimParams->init_val = EstimParams->mean;
-    }
-  switch(EstimParams->type)
-    {
-    case 1:
-      if (symbol_table.getType(EstimParams->name) == eExogenous)
-        {
-          *output << "estim_params_.var_exo = [estim_params_.var_exo; ";
-        }
-      else if (symbol_table.getType(EstimParams->name) == eEndogenous)
-        {
-          *output << "estim_params_.var_endo = [estim_params_.var_endo; ";
-        }
-      *output << symbol_table.getID(EstimParams->name)+1;
-      break;
-    case 2:
-      *output << "estim_params_.param_vals = [estim_params_.param_vals; ";
-      *output << symbol_table.getID(EstimParams->name)+1;
-      break;
-    case 3:
-      if (symbol_table.getType(EstimParams->name) == eExogenous)
-        {
-          *output << "estim_params_.corrx = [estim_params_.corrx; ";
-        }
-      else if (symbol_table.getType(EstimParams->name) == eEndogenous)
-        {
-          *output << "estim_params_.corrn = [estim_params_.corrn; ";
-        }
-      *output << symbol_table.getID(EstimParams->name)+1;
-      *output << " " << symbol_table.getID(EstimParams->name2)+1;
-      break;
-    }
-  *output << " " << EstimParams->init_val << " " <<  EstimParams->low_bound << " " <<
-    EstimParams->up_bound << " " <<  EstimParams->prior << " ";
-  *output <<  EstimParams->mean << " " <<  EstimParams->std << " " <<
-    EstimParams->p3 << " " <<  EstimParams->p4  << " " <<  EstimParams->jscale << "];\n";
-  EstimParams->clear();
 }
 
-//------------------------------------------------------------------------------
-void ComputingTasks::setEstimatedInitElements(void)
+void
+ObservationTrendsStatement::writeOutput(ostream &output) const
 {
-  if (!symbol_table.Exist(EstimParams->name))
-    {
-      string msg = "Unknown symbol: "+EstimParams->name;
-      error(msg.c_str());
-    }
-  if (symbol_table.isReferenced(EstimParams->name) == eNotReferenced)
-    {
-      return;
-    }
-  if ((EstimParams->init_val).size() == 0)
-    {
-      EstimParams->init_val = EstimParams->mean;
-    }
-  if (EstimParams->type < 3)
-    {
-      if (symbol_table.getType(EstimParams->name) == eExogenous)
-        {
-          *output << "tmp1 = find(estim_params_.var_exo(:,1)==" << symbol_table.getID(EstimParams->name)+1 << ");\n";
-          *output << "estim_params_.var_exo(tmp1,2) = " << EstimParams->init_val << ";\n";
-        }
-      else if (symbol_table.getType(EstimParams->name) == eEndogenous)
-        {
-          *output << "tmp1 = find(estim_params_.var_endo(:,1)==" << symbol_table.getID(EstimParams->name)+1 << ");\n";
-          *output << "estim_params_.var_endo(tmp1,2) = " << EstimParams->init_val << ";\n";
-        }
-      else if (symbol_table.getType(EstimParams->name) == eParameter)
-        {
-          *output << "tmp1 = find(estim_params_.param_vals(:,1)==" << symbol_table.getID(EstimParams->name)+1 << ");\n";
-          *output << "estim_params_.param_vals(tmp1,2) = " << EstimParams->init_val << ";\n";
-        }
-    }
-  else
-    {
-      if (symbol_table.getType(EstimParams->name) == eExogenous)
-        {
-          *output << "tmp1 = find((estim_params_.corrx(:,1)==" << symbol_table.getID(EstimParams->name)+1 << ")) & (estim_params_.corrx(:,2)==" << symbol_table.getID(EstimParams->name2)+1 << ");\n";
-          *output << "estim_params_.corrx(tmp1,3) = " << EstimParams->init_val << ";\n";
-        }
-      else if (symbol_table.getType(EstimParams->name) == eEndogenous)
-        {
-          *output << "tmp1 = find((estim_params_.corrn(:,1)==" << symbol_table.getID(EstimParams->name)+1 << ")) & (estim_params_.corrn(:,2)==" << symbol_table.getID(EstimParams->name2)+1 << ";\n";
-          *output << "estim_params_.corrx(tmp1,3) = " << EstimParams->init_val << ";\n";
-        }
-    }
-  EstimParams->clear();
-}
+  output << "options_.trend_coeff_ = {};" << endl;
 
-//------------------------------------------------------------------------------
-void ComputingTasks::setEstimatedBoundsElements(void)
-{
-  if (!symbol_table.Exist(EstimParams->name))
-    {
-      string msg = "Unknown symbol: "+EstimParams->name;
-      error(msg.c_str());
-    }
-  if (symbol_table.isReferenced(EstimParams->name) == eNotReferenced)
-    {
-      return;
-    }
-  if ((EstimParams->init_val).size() == 0)
-    {
-      EstimParams->init_val = EstimParams->mean;
-    }
-  if (EstimParams->type < 3)
-    {
-      if (symbol_table.getType(EstimParams->name) == eExogenous)
-        {
-          *output << "tmp1 = find(estim_params_.var_exo(:,1)==" << symbol_table.getID(EstimParams->name)+1 << ");\n";
-          *output << "estim_params_.var_exo(tmp1,3) = " << EstimParams->low_bound << ";\n";
-          *output << "estim_params_.var_exo(tmp1,4) = " << EstimParams->up_bound << ";\n";
-        }
-      else if (symbol_table.getType(EstimParams->name) == eEndogenous)
-        {
-          *output << "tmp1 = find(estim_params_.var_endo(:,1)==" << symbol_table.getID(EstimParams->name)+1 << ");\n";
-          *output << "estim_params_.var_endo(tmp1,3) = " << EstimParams->low_bound << ";\n";
-          *output << "estim_params_.var_endo(tmp1,4) = " << EstimParams->up_bound << ";\n";
-        }
-      else if (symbol_table.getType(EstimParams->name) == eParameter)
-        {
-          *output << "tmp1 = find(estim_params_.param_vals(:,1)==" << symbol_table.getID(EstimParams->name)+1 << ");\n";
-          *output << "estim_params_.param_vals(tmp1,3) = " << EstimParams->low_bound << ";\n";
-          *output << "estim_params_.param_vals(tmp1,4) = " << EstimParams->up_bound << ";\n";
-        }
-    }
-  else
-    {
-      if (symbol_table.getType(EstimParams->name) == eExogenous)
-        {
-          *output << "tmp1 = find((estim_params_.corrx(:,1)==" << symbol_table.getID(EstimParams->name)+1 << ")) & (estim_params_.corrx(:,2)==" << symbol_table.getID(EstimParams->name2)+1 << ");\n";
-          *output << "estim_params_.corrx(tmp1,4) = " << EstimParams->low_bound << ";\n";
-          *output << "estim_params_.corrx(tmp1,5) = " << EstimParams->up_bound << ";\n";
-        }
-      else if (symbol_table.getType(EstimParams->name) == eEndogenous)
-        {
-          *output << "tmp1 = find((estim_params_.corrn(:,1)==" << symbol_table.getID(EstimParams->name)+1 << ")) & (estim_params_.corrn(:,2)==" << symbol_table.getID(EstimParams->name2)+1 << ";\n";
-          *output << "estim_params_.corrx(tmp1,4) = " << EstimParams->low_bound << ";\n";
-          *output << "estim_params_.corrx(tmp1,5) = " << EstimParams->up_bound << ";\n";
-        }
-    }
-  EstimParams->clear();
-}
+  trend_elements_type::const_iterator it;
 
-//-----------------------------------------------------------------------
-void ComputingTasks::set_trend_element (string name, string expression)
-{
-  //Testing if symbol exists
-  if (!symbol_table.Exist(name))
+  for(it = trend_elements.begin(); it != trend_elements.end(); it++)
     {
-      string msg = "Unknown variable: " + name;
-      (* error) (msg.c_str());
-    }
-  Type type = symbol_table.getType(name);
-  // int id = symbol_table.getID(name);
-  if (type == eEndogenous)
-    {
-      *output << "tmp1 = strmatch('" << name << "',options_.varobs,'exact');\n";
-      *output << "options_.trend_coeffs{tmp1} = '" << expression << "';\n";
-    }
-  else
-    {
-      cout << "Error : Non-variable symbol used in TREND_COEFF: " << name << endl;
+      Type type = symbol_table.getType(it->first);
+      if (type == eEndogenous)
+        {
+          output << "tmp1 = strmatch('" << it->first << "',options_.varobs,'exact');\n";
+          output << "options_.trend_coeffs{tmp1} = '" << it->second << "';\n";
+        }
+      else
+        cout << "Error : Non-variable symbol used in TREND_COEFF: " << it->first << endl;
     }
 }
 
-//------------------------------------------------------------------------------
-void ComputingTasks::BeginCalibVar(void)
+CalibVarStatement::CalibVarStatement(const calib_var_type &calib_var_arg,
+                                     const calib_covar_type &calib_covar_arg,
+                                     const calib_ac_type &calib_ac_arg,
+                                     const SymbolTable &symbol_table_arg) :
+  calib_var(calib_var_arg),
+  calib_covar(calib_covar_arg),
+  calib_ac(calib_ac_arg),
+  symbol_table(symbol_table_arg)
 {
-
-  *output << interfaces::comment() << "\n" << interfaces::comment() << "CALIB_VAR \n"
-          << interfaces::comment() << "\n";
-  for(int i=1;i<4;++i)
-    {
-      *output << "calib_var_index{" << i << "} = [];\n";
-      *output << "calib_targets{" << i << "} = [];\n";
-      *output << "calib_weights{" << i << "}=[];\n";
-    }
 }
 
-//------------------------------------------------------------------------------
-void ComputingTasks::setCalibVar(string name, string weight, string expression)
+void
+CalibVarStatement::writeOutput(ostream &output) const
 {
-  if (!symbol_table.Exist(name))
-    {
-      string msg = "calib_var: " + name + " doesn't exist";
-      error(msg.c_str());
-    }
-  int id = symbol_table.getID(name) + 1;
-  if (symbol_table.getType(name) == eEndogenous)
-    {
-      *output << "calib_var_index{1} = [calib_var_index{1};" <<  id << "," << id << "];\n";
-      *output << "calib_weights{1} = [calib_weights{1}; " << weight << "];\n";
-      *output << "calib_targets{1} =[calib_targets{1}; " << expression << "];\n";
-    }
-  else if (symbol_table.getType(name) == eExogenous)
-    {
-      *output << "calib_var_index{3} = [calib_var_index{3};" <<  id << "," << id << "];\n";
-      *output << "calib_weights{3} = [calib_weights{3}; " << weight << "];\n";
-      *output << "calib_targets{3} =[calib_targets{3}; " << expression << "];\n";
-    }
-  else
-    {
-      string msg = "calib_var: " + name + "isn't a endogenous or an exogenous variable";
-      error(msg.c_str());
-    }
-}
 
-//------------------------------------------------------------------------------
-void ComputingTasks::setCalibVar(string name1, string name2, string weight, string expression)
-{
-  if (!symbol_table.Exist(name1))
-    {
-      string msg = "calib_var: " + name1 + " doesn't exist";
-      error(msg.c_str());
-    }
-  if (!symbol_table.Exist(name2))
-    {
-      string msg = "calib_var: " + name2 + " doesn't exist";
-      error(msg.c_str());
-    }
-  if (symbol_table.getType(name1) != symbol_table.getType(name2))
-    {
-      string msg = "calib_var: " + name1 + " and " + name2 + " don't have the same type";
-      error(msg.c_str());
-    }
-  int id1 = symbol_table.getID(name1) + 1;
-  int id2 = symbol_table.getID(name2) + 1;
-  if (symbol_table.getType(name1) == eEndogenous)
-    {
-      *output << "calib_var_index{1} = [calib_var_index{1};" <<  id1 << "," << id2 << "];\n";
-      *output << "calib_weights{1} = [calib_weights{1}; " << weight << "];\n";
-      *output << "calib_targets{1} =[calib_targets{1}; " << expression << "];\n";
-    }
-  else if (symbol_table.getType(name1) == eExogenous)
-    {
-      *output << "calib_var_index{3} = [calib_var_index{3};" <<  id1 << "," << id2 << "];\n";
-      *output << "calib_weights{3} = [calib_weights{3}; " << weight << "];\n";
-      *output << "calib_targets{3} =[calib_targets{3}; " << expression << "];\n";
-    }
-  else
-    {
-      string msg = "calib_var: " + name1 + " and " + name2 + "aren't endogenous or exogenous variables";
-      error(msg.c_str());
-    }
-}
+  output << interfaces::comment() << "\n" << interfaces::comment() << "CALIB_VAR \n"
+         << interfaces::comment() << "\n";
 
-void ComputingTasks::setCalibAc(string name, string ar, string weight, string expression)
-{
+  for(int i = 1; i < 4 ; i++)
+    {
+      output << "calib_var_index{" << i << "} = [];\n";
+      output << "calib_targets{" << i << "} = [];\n";
+      output << "calib_weights{" << i << "}=[];\n";
+    }
+
+  // Print calibration variances
+  for(calib_var_type::const_iterator it = calib_var.begin();
+      it != calib_var.end(); it++)
+    {
+      const string &name = it->first;
+      const string &weight = it->second.first;
+      const string &expression = it->second.second;
+
+      int id = symbol_table.getID(name) + 1;
+      if (symbol_table.getType(name) == eEndogenous)
+        {
+          output << "calib_var_index{1} = [calib_var_index{1};" <<  id << "," << id << "];\n";
+          output << "calib_weights{1} = [calib_weights{1}; " << weight << "];\n";
+          output << "calib_targets{1} =[calib_targets{1}; " << expression << "];\n";
+        }
+      else if (symbol_table.getType(name) == eExogenous)
+        {
+          output << "calib_var_index{3} = [calib_var_index{3};" <<  id << "," << id << "];\n";
+          output << "calib_weights{3} = [calib_weights{3}; " << weight << "];\n";
+          output << "calib_targets{3} =[calib_targets{3}; " << expression << "];\n";
+        }
+    }
+
+  // Print calibration covariances
+  for(calib_covar_type::const_iterator it = calib_covar.begin();
+      it != calib_covar.end(); it++)
+    {
+      const string &name1 = it->first.first;
+      const string &name2 = it->first.second;
+      const string &weight = it->second.first;
+      const string &expression = it->second.second;
+
+      int id1 = symbol_table.getID(name1) + 1;
+      int id2 = symbol_table.getID(name2) + 1;
+      if (symbol_table.getType(name1) == eEndogenous)
+        {
+          output << "calib_var_index{1} = [calib_var_index{1};" <<  id1 << "," << id2 << "];\n";
+          output << "calib_weights{1} = [calib_weights{1}; " << weight << "];\n";
+          output << "calib_targets{1} =[calib_targets{1}; " << expression << "];\n";
+        }
+      else if (symbol_table.getType(name1) == eExogenous)
+        {
+          output << "calib_var_index{3} = [calib_var_index{3};" <<  id1 << "," << id2 << "];\n";
+          output << "calib_weights{3} = [calib_weights{3}; " << weight << "];\n";
+          output << "calib_targets{3} =[calib_targets{3}; " << expression << "];\n";
+        }
+    }
+
+  // Print calibration autocorrelations
   int max_iar = 3;
-  if (!symbol_table.Exist(name))
+
+  for(calib_ac_type::const_iterator it = calib_ac.begin();
+      it != calib_ac.end(); it++)
     {
-      string msg = "calib_var: " + name + " doesn't exist";
-      error(msg.c_str());
-    }
-  int id = symbol_table.getID(name) + 1;
-  int iar = atoi(ar.c_str())+3;
-  if (iar > max_iar)
-    {
-      // creates new variables
-      for(int i=max_iar+1; i <= iar; ++i)
+      const string &name = it->first.first;
+      int iar = it->first.second + 3;
+      const string &weight = it->second.first;
+      const string &expression = it->second.second;
+
+      int id = symbol_table.getID(name) + 1;
+
+      if (iar > max_iar)
         {
-          *output << "calib_var_index{" << i << "} = [];\n";
-          *output << "calib_targets{" << i << "} = [];\n";
-          *output << "calib_weights{" << i << "}=[];\n";
+          // Create new variables
+          for(int i = max_iar + 1; i <= iar; i++)
+            {
+              output << "calib_var_index{" << i << "} = [];\n";
+              output << "calib_targets{" << i << "} = [];\n";
+              output << "calib_weights{" << i << "}=[];\n";
+            }
+          max_iar = iar;
         }
-      max_iar = iar;
+
+      output << "calib_var_index{" << iar << "} = [calib_var_index{" << iar << "};" <<  id << "];\n";
+      output << "calib_weights{" << iar << "} = [calib_weights{" << iar << "}; " << weight << "];\n";
+      output << "calib_targets{" << iar << "} =[calib_targets{" << iar << "}; " << expression << "];\n";
     }
-  if (symbol_table.getType(name) == eEndogenous)
+}
+
+CalibStatement::CalibStatement(int covar_arg) : covar(covar_arg)
+{
+}
+
+void
+CalibStatement::writeOutput(ostream &output) const
+{
+  output << "M_.Sigma_e=calib(calib_var_index,calib_targets,calib_weights," << covar << ",Sigma_e_);\n";
+}
+
+OsrParamsStatement::OsrParamsStatement(const TmpSymbolTable &tmp_symbol_table_arg) :
+  tmp_symbol_table(tmp_symbol_table_arg)
+{
+}
+
+void
+OsrParamsStatement::writeOutput(ostream &output) const
+{
+  tmp_symbol_table.writeOutput("osr_params_", output);
+}
+
+OsrStatement::OsrStatement(const TmpSymbolTable &tmp_symbol_table_arg,
+                           const OptionsList &options_list_arg) :
+  tmp_symbol_table(tmp_symbol_table_arg),
+  options_list(options_list_arg)
+{
+}
+
+void
+OsrStatement::writeOutput(ostream &output) const
+{
+  options_list.writeOutput(output);
+  tmp_symbol_table.writeOutput("var_list_", output);
+  output << "osr(var_list_,osr_params_,obj_var_,optim_weights_);\n";
+}
+
+OlrInstStatement::OlrInstStatement(const TmpSymbolTable &tmp_symbol_table_arg) :
+  tmp_symbol_table(tmp_symbol_table_arg)
+{
+}
+
+void
+OlrInstStatement::writeOutput(ostream &output) const
+{
+  tmp_symbol_table.writeOutput("options_.olr_inst", output);
+}
+
+
+OlrStatement::OlrStatement(const TmpSymbolTable &tmp_symbol_table_arg,
+                           const OptionsList &options_list_arg) :
+  tmp_symbol_table(tmp_symbol_table_arg),
+  options_list(options_list_arg)
+{
+}
+
+void
+OlrStatement::writeOutput(ostream &output) const
+{
+  options_list.writeOutput(output);
+  tmp_symbol_table.writeOutput("var_list_", output);
+  output << "options_.olr = 1;\n";
+  output << "options_.olr_w = optim_weights_;\n";
+  output << "options_.olr_inst = olr_inst_;\n";
+  output << "info = stoch_simul(var_list_);\n";
+}
+
+OptimWeightsStatement::OptimWeightsStatement(const var_weights_type &var_weights_arg,
+                                             const covar_weights_type &covar_weights_arg,
+                                             const SymbolTable &symbol_table_arg) :
+  var_weights(var_weights_arg),
+  covar_weights(covar_weights_arg),
+  symbol_table(symbol_table_arg)
+{
+}
+
+void
+OptimWeightsStatement::writeOutput(ostream &output) const
+{
+  output << interfaces::comment() << "OPTIM_WEIGHTS\n\n";
+  output << "optim_weights_ = sparse(M_.endo_nbr,M_.endo_nbr);\n";
+  output << "obj_var_ = [];\n\n";
+
+  for(var_weights_type::const_iterator it = var_weights.begin();
+      it != var_weights.end(); it++)
     {
-      *output << "calib_var_index{" << iar << "} = [calib_var_index{" << iar << "};" <<  id << "];\n";
-      *output << "calib_weights{" << iar << "} = [calib_weights{" << iar << "}; " << weight << "];\n";
-      *output << "calib_targets{" << iar << "} =[calib_targets{" << iar << "}; " << expression << "];\n";
+      const string &name = it->first;
+      const string &value = it->second;
+      int id = symbol_table.getID(name) + 1;
+      output <<  "optim_weights_(" << id << "," << id << ") = " << value << ";\n";
+      output << "obj_var_ = [obj_var_; " << id << "];\n";
     }
-  else
+
+  for(covar_weights_type::const_iterator it = covar_weights.begin();
+      it != covar_weights.end(); it++)
     {
-      string msg = "calib_var: " + name + "isn't a endogenous variable";
-      error(msg.c_str());
+      const string &name1 = it->first.first;
+      const string &name2 = it->first.second;
+      const string &value = it->second;
+      int id1 = symbol_table.getID(name1) + 1;
+      int id2 = symbol_table.getID(name2) + 1;
+      output <<  "optim_weights_(" << id1 << "," << id2 << ") = " << value << ";\n";
+      output << "obj_var_ = [obj_var_; " << id1 << " " << id2 << "];\n";
     }
 }
 
-//------------------------------------------------------------------------------
-void ComputingTasks::runCalib(int cova)
+DynaSaveStatement::DynaSaveStatement(const TmpSymbolTable &tmp_symbol_table_arg,
+                                     const string &filename_arg, const string &ext_arg) :
+  tmp_symbol_table(tmp_symbol_table_arg),
+  filename(filename_arg),
+  ext(ext_arg)
 {
-  *output << "M_.Sigma_e=calib(calib_var_index,calib_targets,calib_weights," << cova << ",Sigma_e_);\n";
 }
 
-//------------------------------------------------------------------------------
-void ComputingTasks::setOsrParams(string tmp)
+void
+DynaSaveStatement::writeOutput(ostream &output) const
 {
-  *output << tmp;
-}
-
-//------------------------------------------------------------------------------
-void ComputingTasks::runOsr(string tmp1)
-{
-  *output << tmp1;
-  *output << "osr(var_list_,osr_params_,obj_var_,optim_weights_);\n";
-}
-
-//------------------------------------------------------------------------------
-void ComputingTasks::setOlrInst(string tmp)
-{
-  *output << tmp;
-}
-
-//------------------------------------------------------------------------------
-void ComputingTasks::runOlr(string tmp1)
-{
-  *output << tmp1;
-  *output << "options_.olr = 1;\n";
-  *output << "options_.olr_w = optim_weights_;\n";
-  *output << "options_.olr_inst = olr_inst_;\n";
-  *output << "info = stoch_simul(var_list_);\n";
-}
-
-//------------------------------------------------------------------------------
-void ComputingTasks::BeginOptimWeights(void)
-{
-  *output << interfaces::comment() << "OPTIM_WEIGHTS\n\n";
-  *output << "optim_weights_ = sparse(M_.endo_nbr,M_.endo_nbr);\n";
-  *output << "obj_var_ = [];\n\n";
-}
-
-//------------------------------------------------------------------------------
-void ComputingTasks::setOptimWeights(string name, string exp)
-{
-  if (!symbol_table.Exist(name) || symbol_table.getType(name) != eEndogenous)
-    {
-      string msg = "optim_weights: " + name + " isn't an endogenous variable";
-      error(msg.c_str());
-    }
-  int id = symbol_table.getID(name) + 1;
-  *output <<  "optim_weights_(" << id << "," << id << ") = " << exp << ";\n";
-  *output << "obj_var_ = [obj_var_; " << id << "];\n";
-}
-
-//------------------------------------------------------------------------------
-void ComputingTasks::setOptimWeights(string name1, string name2, string exp)
-{
-  if (!symbol_table.Exist(name1) || symbol_table.getType(name1) != eEndogenous)
-    {
-      string msg = "optim_weights: " + name1 + " isn't an endogenous variable";
-      error(msg.c_str());
-    }
-  if (!symbol_table.Exist(name2) || symbol_table.getType(name2) != eEndogenous)
-    {
-      string msg = "optim_weights: " + name2 + " isn't an endogenous variable";
-      error(msg.c_str());
-    }
-  int id1 = symbol_table.getID(name1) + 1;
-  int id2 = symbol_table.getID(name2) + 1;
-  *output <<  "optim_weights_(" << id1 << "," << id2 << ") = " << exp << ";\n";
-  *output << "obj_var_ = [obj_var_; " << id1 << " " << id2 << "];\n";
-}
-
-//------------------------------------------------------------------------------
-void ComputingTasks::runDynasave(string filename, string ext, string varlist)
-{
-  *output << varlist;
-  *output << "dynasave(" << filename;
+  tmp_symbol_table.writeOutput("var_list_", output);
+  output << "dynasave(" << filename;
   if (ext.size() > 0)
-    {
-      *output << "," << ext;
-    }
-  *output << ",varlist_);\n";
+    output << "," << ext;
+  output << ",var_list_);\n";
 }
 
-void ComputingTasks::runDynatype(string filename, string ext, string varlist)
+DynaTypeStatement::DynaTypeStatement(const TmpSymbolTable &tmp_symbol_table_arg,
+                                     const string &filename_arg, const string &ext_arg) :
+  tmp_symbol_table(tmp_symbol_table_arg),
+  filename(filename_arg),
+  ext(ext_arg)
 {
-  *output << varlist;
-  *output << "dynatype(" << filename;
+}
+
+void
+DynaTypeStatement::writeOutput(ostream &output) const
+{
+  tmp_symbol_table.writeOutput("var_list_", output);
+  output << "dynatype(" << filename;
   if (ext.size() > 0)
+    output << "," << ext;
+  output << ",var_list_);\n";
+}
+
+ModelComparisonStatement::ModelComparisonStatement(const filename_list_type &filename_list_arg,
+                                                   const OptionsList &options_list_arg) :
+  filename_list(filename_list_arg),
+  options_list(options_list_arg)
+{
+}
+
+void
+ModelComparisonStatement::writeOutput(ostream &output) const
+{
+  options_list.writeOutput(output);
+
+  output << "ModelNames_ = {};\n";
+  output << "ModelPriors_ = {};\n";
+
+  for(filename_list_type::const_iterator it = filename_list.begin();
+      it != filename_list.end(); it++)
     {
-      *output << "," << ext;
+      output << "ModelNames_ = { ModelNames_{:} '" << it->first << "};\n";
+      output << "ModelPriors_ = { ModelPriors_{:} '" << it->second << "};\n";
     }
-  *output << ",varlist_);\n";
+  output << "model_comparison(ModelNames_,ModelPriors_);\n";
 }
-
-void ComputingTasks::beginModelComparison(void)
-{
-  *output << "ModelNames_ = {};\n";
-  *output << "ModelPriors_ = {};\n";
-}
-
-void ComputingTasks::addMcFilename(string filename, string prior)
-{
-  *output << "ModelNames_ = { ModelNames_{:} '" << filename << "};\n";
-  *output << "ModelPriors_ = { ModelPriors_{:} '" << prior << "};\n";
-}
-
-void ComputingTasks::runModelComparison(void)
-{
-  *output << "model_comparison(ModelNames_,ModelPriors_);\n";
-}
-
-/*
-  string ComputingTasks::get(void)
-  {
-  return output.str();
-  }
-*/

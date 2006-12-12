@@ -1,65 +1,45 @@
 #ifndef _SIGMAEINITIALIZATION_HH
 #define _SIGMAEINITIALIZATION_HH
-//------------------------------------------------------------------------------
-/*! \file
-  \version 1.0
-  \date 04/13/2004
-  \par This file defines the SigmaeInitialization class.
-*/
-//------------------------------------------------------------------------------
+
+using namespace std;
+
 #include <string>
-#include <sstream>
 #include <vector>
-//------------------------------------------------------------------------------
-/*!
-  \class  SigmaeInitialization
-  \brief  Handles Sigma_e command
-*/
-class SigmaeInitialization
+
+#include "Statement.hh"
+
+//! Stores a Sigma_e statement
+class SigmaeStatement : public Statement
 {
-
-  /*! Matrix type enum */
-  enum MatrixType
+public:
+  //! Matrix form (lower or upper triangular) enum
+  enum matrix_form_type
     {
-      eLower = 0,                  //!< Lower matrix
-      eUpper = 1                   //!< Upper matrix
+      eLower = 0,              //!< Lower triangular matrix
+      eUpper = 1               //!< Upper triangular matrix
     };
-private :
-  /*!  A row of Sigma_e */
-  std::vector<std::string>        row;
-  //!  The hole matrix Sigma_e */
-  std::vector<std::vector<std::string> >    matrix;
-  /*! Output of this class */
-  std::ostringstream        *output;
-  /*! Matrix type (eLower(lower) or eUpper) */
-  MatrixType          type;
+  //! Type of a matrix row
+  typedef vector<string> row_type;
+  //! Type of a complete matrix
+  typedef vector<row_type> matrix_type;
 
-  /*! Check that the matrix is triangular or square */
-  void  CheckMatrix(void);
-  /*! Print matrix to output */
-  void  SetMatrix(void);
+  //! An exception indicating that a matrix is neither upper triangular nor lower triangular
+  class MatrixFormException
+  {
+  };
+private:
+  //! The matrix
+  const matrix_type matrix;
+  //! Matrix form (lower or upper)
+  const matrix_form_type matrix_form;
+
+  //! Returns the type (upper or lower triangular) of a given matrix
+  /*! Throws an exception if it is neither upper triangular nor lower triangular */
+  static matrix_form_type determineMatrixForm(const matrix_type &matrix) throw (MatrixFormException);
 
 public :
-  /*! Constructor */
-  SigmaeInitialization();
-  /*! Destructor */
-  ~SigmaeInitialization();
-  /*! Pointer to error function of parser class */
-  void (* error) (const char* m);
-  /*!
-    Set output reference
-    \param iOutput : reference to an ostringstream
-  */
-  void  setOutput(std::ostringstream* iOutput);
-  /*!
-    Add an expression to current row
-    \param expression : a string expression
-  */
-  void  AddExpression(std::string expression);
-  /*! Add current row to matrix and clears the row */
-  void  EndOfRow();
-  /*! Check matrix and print it to output */
-  void  set(void);
+  SigmaeStatement(const matrix_type &matrix_arg) throw (MatrixFormException);
+  virtual void writeOutput(ostream &output) const;
 };
-//------------------------------------------------------------------------------
+
 #endif

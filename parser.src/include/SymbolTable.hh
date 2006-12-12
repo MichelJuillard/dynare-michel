@@ -10,6 +10,7 @@
 #include <map>
 #include <string>
 #include <vector>
+#include <ostream>
 //------------------------------------------------------------------------------
 #include "ModelParameters.hh"
 #include "SymbolTableTypes.hh"
@@ -75,8 +76,8 @@ public :
   inline Type getType(const std::string &name) const;
   /*! Gets ID by name */
   inline int getID(const std::string &name) const;
-  /*! Gets output string of this class */
-  std::string get();
+  //! Write output of this class
+  void writeOutput(std::ostream &output);
 #if 0 // Commented out on 27/11/2006, SV
   /*! Checks if symbols are used in model equations, removes unused symbol */
   void clean();

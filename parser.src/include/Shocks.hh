@@ -1,85 +1,69 @@
 #ifndef _SHOCKS_HH
 #define _SHOCKS_HH
-//------------------------------------------------------------------------------
-/** \file
- * \version 1.0
- * \date 04/26/2004
- * \par This file defines the Shocks class.
- */
-//------------------------------------------------------------------------------
-#include <string>
-#include <sstream>
-#include <list>
-#include <vector>
 
-//------------------------------------------------------------------------------
-/*!
-  \class  Shocks
-  \brief  Handles Shocks command
-*/
-class Shocks
+using namespace std;
+
+#include <string>
+#include <vector>
+#include <map>
+
+#include "Statement.hh"
+#include "SymbolTable.hh"
+
+class AbstractShocksStatement : public Statement
 {
-private :
-  int mshock_flag;
-  int exo_det_length;
-  /*!
-    \class ShockElement
-    \brief Shock element strcuture
-  */
-  struct ShockElement
+public:
+  struct DetShockElement
   {
-    std::string period1;
-    std::string period2;
-    std::string value;
+    int period1;
+    int period2;
+    string value;
   };
-  /*!
-    \class Shock
-    \brief Shock Structure
-  */
-  struct Shock
-  {
-    int     id1;
-    int     id2;
-    std::list<ShockElement> shock_elems;
-    std::string value;
-  };
-  /*! Output string of this class */
-  std::ostringstream    *output;
-  /*! Vector of begin period range */
-  std::vector<std::string>    mPeriod1;
-  /*! vector of end period range */
-  std::vector<std::string>    mPeriod2;
-  /*! vector of shock values */
-  std::vector<std::string>    mValues;
-public :
-  /*! Constructor */
-  Shocks();
-  /*! Destructor */
-  ~Shocks();
-  /*! Pointer to error function of parser class */
-  void (* error) (const char* m);
-  /*!
-    Set output reference
-    \param iOutput : reference to an ostringstream
-  */
-  void  setOutput(std::ostringstream* iOutput);
-  /*! Initialize shocks (or mshocks, for multiplicative shocks) block */
-  void  BeginShocks(void);
-  void  BeginMShocks(void);
-  void  EndShocks(void);
-  /*! Sets a shock */
-  void  AddDetShockExo(int id1);
-  void  AddDetShockExoDet(int id1);
-  void  AddSTDShock(int id1, std::string value);
-  void  AddVARShock(int id1, std::string value);
-  void  AddCOVAShock(int id1, int id2 , std::string value);
-  void  AddCORRShock(int id1, int id2 , std::string value);
-  /*! Adds a period rage */
-  void  AddPeriod(std::string p1, std::string p2);
-  /*! Adds a period */
-  void  AddPeriod(std::string p1);
-  /*! Adds a value */
-  void  AddValue(std::string value);
+  typedef map<string, vector<DetShockElement> > det_shocks_type;
+  typedef map<string, string> var_and_std_shocks_type;
+  typedef map<pair<string, string>, string> covar_and_corr_shocks_type;
+protected:
+  //! Is this statement a "mshocks" statement ? (instead of a "shocks" statement)
+  const bool mshocks;
+  const det_shocks_type det_shocks;
+  const var_and_std_shocks_type var_shocks, std_shocks;
+  const covar_and_corr_shocks_type covar_shocks, corr_shocks;
+  const SymbolTable &symbol_table;
+  void writeDetShocks(ostream &output) const;
+  void writeVarAndStdShocks(ostream &output) const;
+  void writeCovarAndCorrShocks(ostream &output) const;
+
+  AbstractShocksStatement(bool mshocks_arg,
+                          const det_shocks_type &det_shocks_arg,
+                          const var_and_std_shocks_type &var_shocks_arg,
+                          const var_and_std_shocks_type &std_shocks_arg,
+                          const covar_and_corr_shocks_type &covar_shocks_arg,
+                          const covar_and_corr_shocks_type &corr_shocks_arg,
+                          const SymbolTable &symbol_table_arg);
 };
-//------------------------------------------------------------------------------
+
+class ShocksStatement : public AbstractShocksStatement
+{
+public:
+  ShocksStatement(const det_shocks_type &det_shocks_arg,
+                  const var_and_std_shocks_type &var_shocks_arg,
+                  const var_and_std_shocks_type &std_shocks_arg,
+                  const covar_and_corr_shocks_type &covar_shocks_arg,
+                  const covar_and_corr_shocks_type &corr_shocks_arg,
+                  const SymbolTable &symbol_table_arg);
+  virtual void writeOutput(ostream &output) const;
+};
+
+class MShocksStatement : public AbstractShocksStatement
+{
+public:
+  MShocksStatement(const det_shocks_type &det_shocks_arg,
+                   const var_and_std_shocks_type &var_shocks_arg,
+                   const var_and_std_shocks_type &std_shocks_arg,
+                   const covar_and_corr_shocks_type &covar_shocks_arg,
+                   const covar_and_corr_shocks_type &corr_shocks_arg,
+                   const SymbolTable &symbol_table_arg);
+  virtual void writeOutput(ostream &output) const;
+};
+
 #endif

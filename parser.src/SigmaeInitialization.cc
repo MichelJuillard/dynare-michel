@@ -1,52 +1,17 @@
-/*! \file
-  \version 1.0
-  \date 04/13/2004
-  \par This file defines the SigmaeInitialization class.
-*/
-//------------------------------------------------------------------------------
-#include <iostream>
-
-using namespace std;
-
 #include "SigmaeInitialization.hh"
-//------------------------------------------------------------------------------
-SigmaeInitialization::SigmaeInitialization()
+
+SigmaeStatement::SigmaeStatement(const matrix_type &matrix_arg) throw (MatrixFormException) :
+  matrix(matrix_arg),
+  matrix_form(determineMatrixForm(matrix))
 {
-  // Empty
 }
 
-//------------------------------------------------------------------------------
-SigmaeInitialization::~SigmaeInitialization()
+SigmaeStatement::matrix_form_type
+SigmaeStatement::determineMatrixForm(const matrix_type &matrix) throw (MatrixFormException)
 {
-  // Empty
-}
-
-//------------------------------------------------------------------------------
-void SigmaeInitialization::setOutput(ostringstream* iOutput)
-{
-  output = iOutput;
-}
-
-//------------------------------------------------------------------------------
-void SigmaeInitialization::AddExpression(string expression)
-{
-  row.push_back(expression);
-}
-
-//------------------------------------------------------------------------------
-void SigmaeInitialization::EndOfRow()
-{
-
-  matrix.push_back(row);
-  row.clear();
-}
-
-//------------------------------------------------------------------------------
-void SigmaeInitialization::CheckMatrix(void)
-{
-  vector<vector<string> >::iterator ir;
   unsigned int nbe;
   int inc;
+  matrix_form_type type;
   // Checking if first or last row has one element.
   if (matrix.front().size() == 1)
     {
@@ -61,69 +26,55 @@ void SigmaeInitialization::CheckMatrix(void)
       type = eUpper;
     }
   else
-    {
-      string msg = "sigma_e isn't in triangular form";
-      (* error) (msg.c_str());
-    }
+    throw MatrixFormException();
+
   // Checking if matrix is triangular (upper or lower):
   // each row has one element more or less than the previous one
   // and first or last one has one element.
+  matrix_type::const_iterator ir;
   for (ir = matrix.begin(), ir++; ir != matrix.end(); ir++, nbe += inc )
     if (ir->size() != nbe)
-      {
-        string msg = "sigma_e isn't in triangular form!";
-        (* error) (msg.c_str());
-      }
+      throw MatrixFormException();
+
+  return type;
 }
 
-//------------------------------------------------------------------------------
-void SigmaeInitialization::SetMatrix(void)
+void
+SigmaeStatement::writeOutput(ostream &output) const
 {
   unsigned int ic, ic1;
   unsigned int ir, ir1;
 
-  *output << "M_.Sigma_e = [...\n";
+  output << "M_.Sigma_e = [...\n";
   for (ir = 0; ir < matrix.size(); ir++)
     {
-      *output << "\t";
+      output << "\t";
       for (ic = 0; ic < matrix.size(); ic++)
         {
-          if (ic >= ir && type == eUpper)
+          if (ic >= ir && matrix_form == eUpper)
             {
               ic1 = ic-ir;
               ir1 = ir;
             }
-          else if (ic < ir && type == eUpper)
+          else if (ic < ir && matrix_form == eUpper)
             {
               ic1 = ir-ic;
               ir1 = ic;
             }
-          else if (ic > ir && type == eLower)
+          else if (ic > ir && matrix_form == eLower)
             {
               ic1 = ir;
               ir1 = ic;
             }
-          else if (ic <= ir && type == eLower)
+          else if (ic <= ir && matrix_form == eLower)
             {
               ic1 = ic;
               ir1 = ir;
             }
 
-          *output << matrix[ir1][ic1] << " ";
+          output << matrix[ir1][ic1] << " ";
         }
-      *output << ";...\n";
+      output << ";...\n";
     }
-  *output << "\t];...\n";
+  output << "\t];...\n";
 }
-
-//------------------------------------------------------------------------------
-void SigmaeInitialization::set(void)
-{
-  CheckMatrix();
-
-  SetMatrix();
-  matrix.clear();
-  row.clear();
-}
-
-//------------------------------------------------------------------------------

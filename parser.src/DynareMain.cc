@@ -6,7 +6,6 @@
 using namespace std;
 
 #include "ParsingDriver.hh"
-#include "OutputFile.hh"
 #include "ModFile.hh"
 
 /*!
@@ -17,9 +16,6 @@ using namespace std;
 int
 main(int argc, char** argv)
 {
-  OutputFile output_file;
-  ostringstream output;
-
   if (argc < 2)
     {
       cerr << "Missing model file" << endl;
@@ -29,8 +25,7 @@ main(int argc, char** argv)
 
   ParsingDriver p;
 
-  // Sets string output of parser
-  p.setoutput(&output);
+  bool clear_all = true;
 
   // Parse options
   for (int arg = 2; arg < argc; arg++)
@@ -42,7 +37,7 @@ main(int argc, char** argv)
         }
       else
         if (string(argv[arg]) == string("noclearall"))
-          output_file.clear_all = false;
+          clear_all = false;
     }
 
   cout << "Starting Dynare ..." << endl;
@@ -51,15 +46,11 @@ main(int argc, char** argv)
   // Launch parsing
   ModFile *mod_file = p.parse(argv[1]);
 
-  // Execute final instructions
-  p.finish();
+  // FIXME
+  string basename = argv[1];
+  basename.erase(basename.size() - 4, 4);
 
-  string name = argv[1];
-  name.erase(name.size() - 4,4);
-  // Opening and init main Output file (.m or .sci file)
-  output_file.Open(name, mod_file);
-  // Writing remaining string output to output file
-  output_file.Save(output, mod_file);
+  mod_file->writeOutputFiles(basename, clear_all);
 
   delete mod_file;
 

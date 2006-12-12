@@ -100,7 +100,7 @@ typedef pair<int, Type> ExpObj;
  	| initval
  	| endval
  	| histval
- 	| equality_expression
+ 	| init_param
  	| shocks
  	| mshocks
  	| sigma_e
@@ -140,8 +140,8 @@ typedef pair<int, Type> ExpObj;
  	;
 
  	
- dsample : DSAMPLE INT_NUMBER ';' {driver.option_num("dsample", $2);}
-         | DSAMPLE INT_NUMBER INT_NUMBER ';' {driver.option_num("dsample", $2, $3);}
+ dsample : DSAMPLE INT_NUMBER ';' { driver.dsample($2);}
+         | DSAMPLE INT_NUMBER INT_NUMBER ';' {driver.dsample($2, $3);}
          ; 
 
  rplot : RPLOT tmp_var_list ';' {driver.rplot();}
@@ -225,18 +225,16 @@ typedef pair<int, Type> ExpObj;
  periods 
  	: PERIODS INT_NUMBER ';'
  		{
-		 driver.option_num("periods", $2);
-		 driver.option_num("simul", "1");
+      driver.periods($2);
 		}
     | PERIODS EQUAL INT_NUMBER ';'
  		{
-		 driver.option_num("periods", $3);
-		 driver.option_num("simul", "1");
+      driver.periods($3);
 		}
     ;
 
  		   
- equality_expression
+ init_param
  	: NAME EQUAL expression ';'
     {driver.init_param($1, $3);} 
 	;
@@ -297,12 +295,12 @@ typedef pair<int, Type> ExpObj;
           {$$ = driver.add_expression_token($1, $3, token::COMMA);}
 
  initval
- 	: INITVAL ';' {driver.begin_initval();} initval_list END
+ 	: INITVAL ';' initval_list END
  		{driver.end_initval();}
  	;
  	
  endval
- 	: ENDVAL ';' {driver.begin_endval();} initval_list END
+ 	: ENDVAL ';' initval_list END
  		{driver.end_endval();}
  	; 	
 
@@ -317,7 +315,9 @@ typedef pair<int, Type> ExpObj;
  	; 	
  	
  histval
- 	: HISTVAL ';' {driver.begin_histval();} histval_list END 
+  : HISTVAL ';' histval_list END
+    { driver.end_histval(); }
+  ;
 
  histval_list
  	: histval_list histval_elem
@@ -331,9 +331,9 @@ typedef pair<int, Type> ExpObj;
 	
  model
  	: MODEL ';' equation_list END 
- 	| MODEL '(' LINEAR ')' ';' {driver.option_num("linear","1");} 
+ 	| MODEL '(' o_linear ')' ';'
 		equation_list END
- 	| MODEL '(' USE_DLL ')' ';' {driver.use_dll();} 
+ 	| MODEL '(' USE_DLL ')' ';' {driver.use_dll();}
 		equation_list END
  	;
 
@@ -405,11 +405,11 @@ typedef pair<int, Type> ExpObj;
 	;
 	
  shocks
- 	: SHOCKS  ';' {driver.begin_shocks();} shock_list END {driver.end_shocks();} 
+ 	: SHOCKS  ';' shock_list END {driver.end_shocks();}
  	;
 
  mshocks
- 	: MSHOCKS  ';' {driver.begin_mshocks();} shock_list END {driver.end_shocks();} 
+  : MSHOCKS  ';' shock_list END {driver.end_mshocks();}
  	;
 
  shock_list 
@@ -612,14 +612,15 @@ typedef pair<int, Type> ExpObj;
  	;
 
  estimated_params 
-	: ESTIMATED_PARAMS ';' {driver.estimation_init();} estimated_list END
+	: ESTIMATED_PARAMS ';' estimated_list END
+    { driver.estimated_params(); }
 	;
 	
  estimated_list 
 	: estimated_list estimated_elem 
-		{driver.set_estimated_elements();}
+		{driver.add_estimated_params_element();}
 	| estimated_elem 
-		{driver.set_estimated_elements();}
+		{driver.add_estimated_params_element();}
 	;
 
  estimated_elem 
@@ -723,12 +724,13 @@ typedef pair<int, Type> ExpObj;
 	;
 
  estimated_params_init: ESTIMATED_PARAMS_INIT ';' estimated_init_list END
+                        { driver.estimated_params_init(); }
                       ;
 
  estimated_init_list : estimated_init_list estimated_init_elem
-                       {driver.set_estimated_init_elements();}
+                       {driver.add_estimated_params_element();}
                      | estimated_init_elem
-                       {driver.set_estimated_init_elements();}
+                       {driver.add_estimated_params_element();}
                      ;
 
  estimated_init_elem : STDERR NAME COMMA value ';'
@@ -757,12 +759,13 @@ typedef pair<int, Type> ExpObj;
                      ;
 
  estimated_params_bounds: ESTIMATED_PARAMS_BOUNDS ';' estimated_bounds_list END
+                          { driver.estimated_params_bounds(); }
                       ;
 
  estimated_bounds_list : estimated_bounds_list estimated_bounds_elem
-                       {driver.set_estimated_bounds_elements();}
+                       {driver.add_estimated_params_element();}
                      | estimated_bounds_elem
-                       {driver.set_estimated_bounds_elements();}
+                       {driver.add_estimated_params_element();}
                      ;
 
  estimated_bounds_elem : STDERR NAME COMMA value COMMA value ';'
@@ -914,8 +917,8 @@ typedef pair<int, Type> ExpObj;
 	;
 
  list_optim_option
- 	: '\'' NAME '\'' COMMA '\'' NAME '\'' {driver.optim_options($2, $6, 2);}
-	| '\'' NAME '\'' COMMA value {driver.optim_options($2, $5, 2);}
+ 	: '\'' NAME '\'' COMMA '\'' NAME '\'' {driver.optim_options_string($2, $6);}
+	| '\'' NAME '\'' COMMA value {driver.optim_options_num($2, $5);}
 	;
 
  optim_options
@@ -929,7 +932,8 @@ typedef pair<int, Type> ExpObj;
 	;
 
  observation_trends
-        : OBSERVATION_TRENDS ';' {driver.set_trend_init();} trend_list END
+        : OBSERVATION_TRENDS ';' trend_list END
+{ driver.set_trends(); }
 	;
 
  trend_list 
@@ -944,7 +948,8 @@ typedef pair<int, Type> ExpObj;
  unit_root_vars : UNIT_ROOT_VARS tmp_var_list ';' {driver.set_unit_root_vars();}
                 ;
 
- optim_weights : OPTIM_WEIGHTS ';' {driver.begin_optim_weights();} optim_weights_list END
+ optim_weights : OPTIM_WEIGHTS ';' optim_weights_list END
+                 { driver.optim_weights(); }
                ;
 
  optim_weights_list : optim_weights_list NAME expression ';' 
@@ -983,7 +988,8 @@ typedef pair<int, Type> ExpObj;
  olr_inst : OLR_INST tmp_var_list ';' {driver.set_olr_inst();}
           ;
 
- calib_var : CALIB_VAR ';' {driver.begin_calib_var();} calib_var_list END
+ calib_var : CALIB_VAR ';' calib_var_list END
+             { driver.run_calib_var(); }
            ;
 
  calib_var_list : calib_var_list calib_arg1
@@ -991,7 +997,7 @@ typedef pair<int, Type> ExpObj;
                 ;
 
  calib_arg1 : NAME calib_arg2 EQUAL expression ';' {driver.set_calib_var($1, $2, $4);}
-            | NAME COMMA NAME calib_arg2 EQUAL expression ';' {driver.set_calib_var($1, $3, $4, $6);}
+            | NAME COMMA NAME calib_arg2 EQUAL expression ';' {driver.set_calib_covar($1, $3, $4, $6);}
             | AUTOCORR NAME '(' INT_NUMBER ')' calib_arg2 EQUAL expression ';' {driver.set_calib_ac($2, $4, $6, $8);}
             ;
 
@@ -1018,8 +1024,8 @@ typedef pair<int, Type> ExpObj;
           | DYNASAVE '(' NAME '.' NAME ')' tmp_var_list ';' {driver.run_dynasave($3, $5);}
           | DYNASAVE NAME '.' NAME ';' {driver.run_dynasave($2, $4);};
 
- model_comparison : MODEL_COMPARISON '(' model_comparison_options ')' {driver.begin_model_comparison();} 
-                       filename_list ';' {driver.run_model_comparison();}
+ model_comparison : MODEL_COMPARISON '(' model_comparison_options ')' filename_list ';'
+                    {driver.run_model_comparison();}
                   ;
 
  model_comparison_options: model_comparison_options COMMA model_comparison_option
@@ -1051,7 +1057,7 @@ typedef pair<int, Type> ExpObj;
  o_dr_algo: DR_ALGO EQUAL INT_NUMBER {driver.option_num("dr_algo", $3);};
  o_solve_algo: SOLVE_ALGO EQUAL INT_NUMBER {driver.option_num("solve_algo", $3);};
  o_simul_algo: SIMUL_ALGO EQUAL INT_NUMBER {driver.option_num("simul_algo", $3);};
- o_linear: LINEAR {driver.option_num("linear", "1");};
+ o_linear: LINEAR {driver.linear();};
  o_order: ORDER EQUAL INT_NUMBER {driver.option_num("order", $3);};
  o_replic: REPLIC EQUAL INT_NUMBER {driver.option_num("replic", $3);};
  o_drop: DROP EQUAL INT_NUMBER {driver.option_num("drop", $3);};

@@ -189,10 +189,9 @@ void SymbolTable::clean()
 }
 #endif // Comment
 
-string SymbolTable::get()
+void
+SymbolTable::writeOutput(ostream &output)
 {
-  ostringstream output;
-
   if (mod_param.exo_nbr > 0)
     {
       output << "M_.exo_names = '" << getNameByID(eExogenous, 0) << "';\n";
@@ -251,5 +250,4 @@ string SymbolTable::get()
   output << "M_.endo_nbr = " << mod_param.endo_nbr << ";\n";
   output << "M_.recur_nbr = " << mod_param.recur_nbr << ";\n";
   output << "M_.param_nbr = " << mod_param.parameter_nbr << ";\n";
-  return output.str();
 }

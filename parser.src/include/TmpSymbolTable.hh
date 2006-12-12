@@ -7,8 +7,9 @@
  * \par This file defines the TmpSymbolTable class.
  */
 //------------------------------------------------------------------------------
-#include <list>
-#include <sstream>
+#include <string>
+#include <vector>
+#include <ostream>
 
 #include "SymbolTable.hh"
 
@@ -20,32 +21,24 @@ class TmpSymbolTable
 {
 private :
   /*! list of string TempSymbolTable */
-  std::list<std::string>  tmpsymboltable;
+  std::vector<std::string> tmpsymboltable;
   /*! List of symbol Values */
-  std::list<std::string>  NameTable;
-  /*! Output of this class */
-  std::ostringstream  output;
-  //! Pointer to global symbol table
-  SymbolTable *symbol_table;
+  std::vector<std::string> nameTable;
+  //! A reference to enclosing symbol table
+  const SymbolTable &symbol_table;
 public :
   /*! Constrcutor */
-  TmpSymbolTable();
+  TmpSymbolTable(const SymbolTable &symbol_table_arg);
   /*! Destructor*/
   ~TmpSymbolTable();
-  //! Sets global symbol table pointer
-  void setGlobalSymbolTable(SymbolTable *symbol_table_arg);
-  /*! Pointer to error function of parser class */
-  void (* error) (const char* m);
   /*! Adds a temp symbol */
-  void  AddTempSymbol(std::string symbol);
+  void AddTempSymbol(const std::string &symbol);
   /*! Adds a temp symbol and its value */
-  void  AddTempSymbol(std::string symbol1, std::string symbol2);
+  void AddTempSymbol(const std::string &symbol1, const std::string &symbol2);
   /*! Write TempSymbolTable to output string */
-  void  set(std::string varname);
-  /*! Gets size of TempSymbolTable */
-  int   size(void);
-  /*! Gets output of this class*/
-  std::string  get(void);
+  void writeOutput(const std::string &varname, std::ostream &output) const;
+  //! Clears all content
+  void clear();
 };
 //------------------------------------------------------------------------------
 #endif

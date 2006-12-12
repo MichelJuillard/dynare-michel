@@ -1,204 +1,128 @@
-/*! \file
-  \version 1.0
-  \date 04/09/2004
-  \par This file implements the NumericalInitialization class methodes.
-*/
-//------------------------------------------------------------------------------
-using namespace std;
-//------------------------------------------------------------------------------
 #include "NumericalInitialization.hh"
 #include "Interface.hh"
 
-NumericalInitialization::NumericalInitialization(const SymbolTable &symbol_table_arg,
-                                                 const ModelParameters &mod_param_arg) :
-  symbol_table(symbol_table_arg),
+InitParamStatement::InitParamStatement(const string &param_name_arg,
+                                       const string &param_value_arg,
+                                       const SymbolTable &symbol_table_arg) :
+  param_name(param_name_arg),
+  param_value(param_value_arg),
+  symbol_table(symbol_table_arg)
+{
+}
+
+void
+InitParamStatement::writeOutput(ostream &output) const
+{
+  int id = symbol_table.getID(param_name) + 1;
+  output << "M_.params( " << id << " ) = " << param_value << ";\n";
+  output << param_name << " = M_.params( " << id << " );\n";
+}
+
+InitOrEndValStatement::InitOrEndValStatement(const init_values_type &init_values_arg,
+                                             const SymbolTable &symbol_table_arg) :
+  init_values(init_values_arg),
+  symbol_table(symbol_table_arg)
+{
+}
+
+void
+InitOrEndValStatement::writeInitValues(ostream &output) const
+{
+  for(init_values_type::const_iterator it = init_values.begin();
+      it != init_values.end(); it++)
+    {
+      const string &name = it->first;
+      const string &expression = it->second;
+
+      Type type = symbol_table.getType(name);
+      int id = symbol_table.getID(name) + 1;
+
+      if (type == eEndogenous)
+        output << "oo_.steady_state( " << id << " ) = " << expression << ";\n";
+      else if (type == eExogenous)
+        output << "oo_.exo_steady_state( " << id << " ) = " << expression << ";\n";
+      else if (type == eExogenousDet)
+        output << "oo_.exo_det_steady_state( " << id << " ) = " << expression << ";\n";
+    }
+}
+
+InitValStatement::InitValStatement(const init_values_type &init_values_arg,
+                                   const SymbolTable &symbol_table_arg,
+                                   const ModelParameters &mod_param_arg) :
+  InitOrEndValStatement(init_values_arg, symbol_table_arg),
   mod_param(mod_param_arg)
 {
-  //Empty
 }
 
-//------------------------------------------------------------------------------
-NumericalInitialization::~NumericalInitialization()
+void
+InitValStatement::writeOutput(ostream &output) const
 {
-  //Empty
-}
-
-//------------------------------------------------------------------------------
-void NumericalInitialization::setOutput(ostringstream* iOutput)
-{
-  output = iOutput;
-}
-
-//------------------------------------------------------------------------------
-void  NumericalInitialization::SetConstant (string name, string expression)
-{
-
-  //Testing if symbol exists
-  if (!symbol_table.Exist(name))
-    {
-      string msg = "Unknown parameter: " + name;
-      (* error) (msg.c_str());
-    }
-  // Testing symbol type
-  if (symbol_table.getType(name) != eParameter)
-    {
-      string msg = "Non-parameter used as a parameter: " + name;
-      (* error) (msg.c_str());
-    }
-  // Writing expression
-  *output << "M_.params( " << symbol_table.getID(name)+1 << " ) = " << expression << ";\n";
-  *output << name << " = M_.params( " << symbol_table.getID(name)+1 << " );\n";
-  // Deleting expression
-  //TODO
-
-}
-
-//------------------------------------------------------------------------------
-void  NumericalInitialization::BeginInitval (void)
-{
-
-  // Writing a Matlab comment
-  *output << interfaces::comment() << "\n" << interfaces::comment() << "INITVAL instructions \n"
-          << interfaces::comment() << "\n";
+  output << interfaces::comment() << "\n" << interfaces::comment() << "INITVAL instructions \n"
+         << interfaces::comment() << "\n";
   // Writing initval block to set initial values for variables
-  *output << "options_.initval_file = 0;\nendval_=0;\n";
+  output << "options_.initval_file = 0;\nendval_=0;\n";
 
   if (mod_param.recur_nbr > 0)
-    *output << "recurs_ = zeros(" << mod_param.recur_nbr << ", 1);\n";
+    output << "recurs_ = zeros(" << mod_param.recur_nbr << ", 1);\n";
+
+  writeInitValues(output);
+
+  output << "oo_.y_simul=[oo_.steady_state*ones(1,M_.maximum_lag)];\n";
+  output << "if M_.exo_nbr > 0;\n";
+  output << "\too_.exo_simul = [ones(M_.maximum_lag,1)*oo_.exo_steady_state'];\n";
+  output <<"end;\n";
+  output << "if M_.exo_det_nbr > 0;\n";
+  output << "\too_.exo_det_simul = [ones(M_.maximum_lag,1)*oo_.exo_det_steady_state'];\n";
+  output <<"end;\n";
 }
 
-//------------------------------------------------------------------------------
-void  NumericalInitialization::SetInit (string name, string expression)
-{
 
-  //Testing if symbol exists
-  if (!symbol_table.Exist(name))
-    {
-      string msg = "Unknown variable: " + name;
-      (* error) (msg.c_str());
-    }
-  Type type = symbol_table.getType(name);
-  int id = symbol_table.getID(name);
-  // Writing instrcuction that set initial or terminal value
-  // for a variable
-  if (type == eEndogenous)
-    {
-      *output << "oo_.steady_state( " << id+1 << " ) = " << expression << ";\n";
-    }
-  else if (type == eExogenous)
-    {
-      *output << "oo_.exo_steady_state( " << id+1 << " ) = " << expression << ";\n";
-    }
-  else if (type == eExogenousDet)
-    {
-      *output << "oo_.exo_det_steady_state( " << id+1 << " ) = " << expression << ";\n";
-    }
-  // Testing if symbol is a variable (Exogenousous deterministic or recursive)
-  else if ( type != eRecursiveVariable )
-    {
-      cout << "Error : Non-variable symbol used in INITVAL: " << name << endl;
-    }
+EndValStatement::EndValStatement(const init_values_type &init_values_arg,
+                                 const SymbolTable &symbol_table_arg) :
+  InitOrEndValStatement(init_values_arg, symbol_table_arg)
+{
 }
 
-//------------------------------------------------------------------------------
-void  NumericalInitialization::EndInitval(void)
-{
-  *output << "oo_.y_simul=[oo_.steady_state*ones(1,M_.maximum_lag)];\n";
-  *output << "if M_.exo_nbr > 0;\n";
-  *output << "\too_.exo_simul = [ones(M_.maximum_lag,1)*oo_.exo_steady_state'];\n";
-  *output <<"end;\n";
-  *output << "if M_.exo_det_nbr > 0;\n";
-  *output << "\too_.exo_det_simul = [ones(M_.maximum_lag,1)*oo_.exo_det_steady_state'];\n";
-  *output <<"end;\n";
-}
 
-//------------------------------------------------------------------------------
-void  NumericalInitialization::BeginEndval (void)
+void
+EndValStatement::writeOutput(ostream &output) const
 {
-  // Writing a Matlab comment
-  *output << interfaces::comment() << "\n" << interfaces::comment() << "ENDVAL instructions\n"
-          << interfaces::comment() << "\n";
+  output << interfaces::comment() << "\n" << interfaces::comment() << "ENDVAL instructions\n"
+         << interfaces::comment() << "\n";
   // Writing endval block to set terminal values for variables
-  *output << "ys0_= oo_.steady_state;\nex0_ = oo_.exo_steady_state;\nrecurs0_ = recurs_;\nendval_ = 1;\n";
+  output << "ys0_= oo_.steady_state;\nex0_ = oo_.exo_steady_state;\nrecurs0_ = recurs_;\nendval_ = 1;\n";
 
+  writeInitValues(output);
 }
 
-//------------------------------------------------------------------------------
-void  NumericalInitialization::EndEndval (void)
+HistValStatement::HistValStatement(const hist_values_type &hist_values_arg,
+                                   const SymbolTable &symbol_table_arg) :
+  hist_values(hist_values_arg),
+  symbol_table(symbol_table_arg)
 {
 }
 
-//------------------------------------------------------------------------------
-void  NumericalInitialization::BeginHistval (void)
+void
+HistValStatement::writeOutput(ostream &output) const
 {
-  // Writing a Matlab comment
-  *output << interfaces::comment() << "\n" << interfaces::comment() << "HISTVAL instructions\n"
-          << interfaces::comment() << "\n";
+  output << interfaces::comment() << "\n" << interfaces::comment() << "HISTVAL instructions\n"
+         << interfaces::comment() << "\n";
 
+  for(hist_values_type::const_iterator it = hist_values.begin();
+      it != hist_values.end(); it++)
+    {
+      const string &name = it->first.first;
+      const int &lag = it->first.second;
+      const string &expression = it->second;
+
+      Type type = symbol_table.getType(name);
+      int id = symbol_table.getID(name) + 1;
+
+      if (type == eEndogenous)
+        output << "oo_.endo_simul( " << id << ", M_.maximum_lag + " << lag + 1 << ") = " << expression << ";\n";
+      else if (type == eExogenous)
+        output << "oo_.exo_simul( M_.maximum_lag + " << lag + 1 << ", " << id << " ) = " << expression << ";\n";
+      else if (type != eExogenousDet)
+        output << "oo_.exo_det_simul( M_.maximum_lag + " << lag + 1 << ", " << id << " ) = " << expression << ";\n";
+    }
 }
-
-//------------------------------------------------------------------------------
-void  NumericalInitialization::SetHist (string name, int lag, string expression)
-{
-  //Testing if symbol exists
-  if (!symbol_table.Exist(name))
-    {
-      string msg = "Unknown parameter: " + name;
-      (* error) (msg.c_str());
-    }
-  Type  type = symbol_table.getType(name);
-  int   id = symbol_table.getID(name);
-  // Testing symbol type
-  if (type == eEndogenous)
-    {
-      *output << "oo_.endo_simul( " << id+1 << ", M_.maximum_lag + " << lag + 1 << ") = " << expression << ";\n";
-    }
-  else if (type == eExogenous)
-    {
-      *output << "oo_.exo_simul( M_.maximum_lag + " << lag + 1 << ", " << id+1 << " ) = " << expression << ";\n";
-    }
-  // Tetsting if symbol is a variable (Exogenousous deterministic or recursive)
-  else if (type != eExogenousDet)
-    {
-      *output << "oo_.exo_det_simul( M_.maximum_lag + " << lag + 1 << ", " << id+1 << " ) = " << expression << ";\n";
-    }
-  else if (type != eRecursiveVariable)
-    {
-      string msg = "Non-variable symbol : " + name;
-      (* error) (msg.c_str());
-    }
-  // Deleting expression
-  // TODO
-
-  /////////////////////////////////
-  /*
-    char buffer[200];
-    int offset;
-
-    offset = v->var_ptr-var_list;
-    if (v->endo_exo == 1)
-    {
-
-    sprintf(buffer,"oo_.y_simul(%d,M_.maximum_lag+(%s))=",v->nbr+1,lag);
-    }
-    else if (v->endo_exo == 0)
-    {
-    initval_check1[offset] = 1;
-    sprintf(buffer,"oo_.exo_simul(M_.maximum_lag+(%s),%d)=",lag,v->nbr+1);
-    }
-
-    str_output(buffer);
-
-    p_expression(q);
-    str_output(";\n");
-  */
-}
-
-//------------------------------------------------------------------------------
-/*
-  string NumericalInitialization::get(void)
-  {
-  return output.str();
-  }
-*/
-//------------------------------------------------------------------------------

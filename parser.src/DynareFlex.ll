@@ -67,7 +67,6 @@ int sigma_e = 0;
 <INITIAL>rplot	 	{BEGIN DYNARE_STATEMENT; return token::RPLOT;}
 <INITIAL>osr_params 	{BEGIN DYNARE_STATEMENT; return token::OSR_PARAMS;}
 <INITIAL>osr	 	{BEGIN DYNARE_STATEMENT; return token::OSR;}
-<INITIAL>calib_var 	{BEGIN DYNARE_STATEMENT; return token::CALIB_VAR;}
 <INITIAL>dynatype	{BEGIN DYNARE_STATEMENT; return token::DYNATYPE;}
 <INITIAL>dynasave 	{BEGIN DYNARE_STATEMENT; return token::DYNASAVE;}
 <INITIAL>olr	 	{BEGIN DYNARE_STATEMENT; return token::OLR;}
@@ -80,6 +79,7 @@ int sigma_e = 0;
 <INITIAL>stoch_simul {BEGIN DYNARE_STATEMENT; return token::STOCH_SIMUL;}
 <INITIAL>dsample {BEGIN DYNARE_STATEMENT; return token::DSAMPLE;}
 <INITIAL>Sigma_e {BEGIN DYNARE_STATEMENT; sigma_e = 1; return token::SIGMA_E;}
+<INITIAL>calib {BEGIN DYNARE_STATEMENT; return token::CALIB;}
 
  /* End of a Dynare statement */
 <DYNARE_STATEMENT>; {
@@ -102,6 +102,7 @@ int sigma_e = 0;
 <INITIAL>estimated_params_bounds 	{BEGIN DYNARE_BLOCK; return token::ESTIMATED_PARAMS_BOUNDS;}
 <INITIAL>observation_trends {BEGIN DYNARE_BLOCK; return token::OBSERVATION_TRENDS;}
 <INITIAL>optim_weights {BEGIN DYNARE_BLOCK; return token::OPTIM_WEIGHTS;}
+<INITIAL>calib_var 	{BEGIN DYNARE_BLOCK; return token::CALIB_VAR;}
 
  /* End of a Dynare block */
 <DYNARE_BLOCK>end[ \t\n]*; 	{BEGIN INITIAL; return token::END;}   
@@ -154,6 +155,7 @@ int sigma_e = 0;
 <DYNARE_STATEMENT>modifiedharmonicmean {return token::MODIFIEDHARMONICMEAN;}
 <DYNARE_STATEMENT>constant	{return token::CONSTANT;}
 <DYNARE_STATEMENT>noconstant	{return token::NOCONSTANT;}
+<DYNARE_STATEMENT>covar {return token::COVAR;}
 
 <DYNARE_STATEMENT>[\$][^$]*[\$] {
   strtok(yytext+1, "$");
@@ -179,6 +181,7 @@ int sigma_e = 0;
 <DYNARE_BLOCK>; {return yy::parser::token_type (yytext[0]);}
 <DYNARE_BLOCK># {return yy::parser::token_type (yytext[0]);}
 
+<DYNARE_BLOCK>autocorr {return token::AUTOCORR;}
 
  /* Inside Dynare statement */
 <DYNARE_STATEMENT>solve_algo {return token::SOLVE_ALGO;}
@@ -195,7 +198,6 @@ int sigma_e = 0;
 <DYNARE_STATEMENT>simul_seed {return token::SIMUL_SEED;}
 <DYNARE_STATEMENT>qz_criterium {return token::QZ_CRITERIUM;}
 <DYNARE_STATEMENT>simul {return token::SIMUL;}
-<DYNARE_STATEMENT>autocorr {return token::AUTOCORR;}
 <DYNARE_STATEMENT>olr_beta {return token::OLR_BETA;}
 <DYNARE_STATEMENT>xtick   		{return token::XTICK;}  	  
 <DYNARE_STATEMENT>xticklabel   		{return token::XTICKLABEL;}  	  
@@ -267,15 +269,17 @@ int sigma_e = 0;
     }
   else
     {
+      /* Enter a native block */
       BEGIN NATIVE;
-      driver.add_native(yytext);
+      yyless(0);
     }
 }
 
-<INITIAL>. {BEGIN NATIVE; driver.add_native(yytext); }
+ /* Enter a native block */
+<INITIAL>. { BEGIN NATIVE; yyless(0); }
 
- /* NATIVE Block */
-<NATIVE>.* {BEGIN INITIAL; driver.add_native(yytext); driver.add_native("\n"); }
+ /* Add the native statement */
+<NATIVE>.* { driver.add_native(yytext); BEGIN INITIAL; }
 
 <*>.      { driver.error("Unrecognized character: '" + string(yytext) + "'"); }
 %%

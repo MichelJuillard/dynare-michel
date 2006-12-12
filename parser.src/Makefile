@@ -43,7 +43,6 @@ COMMON_OBJ=\
 	NumericalConstants.o\
 	NumericalInitialization.o\
 	OperatorTable.o\
-	OutputFile.o\
 	Shocks.o\
 	SigmaeInitialization.o\
 	SymbolTable.o\
@@ -51,7 +50,8 @@ COMMON_OBJ=\
 	VariableTable.o\
 	ParsingDriver.o\
 	DataTree.o \
-	ModFile.o
+	ModFile.o \
+	Statement.o
 
 MATLAB_OBJ = InterfaceMatlab.o
 

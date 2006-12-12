@@ -38,11 +38,11 @@ ModelTree::ModelTree(SymbolTable &symbol_table_arg, VariableTable &variable_tabl
                      ModelParameters &mod_param_arg, const NumericalConstants &num_constants_arg) :
   DataTree(symbol_table_arg, variable_table_arg),
   mod_param(mod_param_arg),
-  num_constants(num_constants_arg)
+  num_constants(num_constants_arg),
+  computeHessian(false),
+  computeJacobian(false),
+  computeJacobianExo(false)
 {
-  computeJacobian = false;
-  computeJacobianExo = false;
-  computeHessian = false;
 }
 
 //------------------------------------------------------------------------------
@@ -1249,8 +1249,8 @@ inline string ModelTree::getArgument(NodeID id, Type type, EquationType iEquatio
   return argument.str();
 }
 
-//------------------------------------------------------------------------------
-void ModelTree::ModelInitialization(void)
+void
+ModelTree::ModelInitialization(ostream &output)
 {
   // Exit if there is no equation in model file*/
   if (mod_param.eq_nbr == 0)
@@ -1353,13 +1353,6 @@ void ModelTree::ModelInitialization(void)
     }
 }
 
-//------------------------------------------------------------------------------
-string ModelTree::get()
-{
-  return output.str();
-}
-
-//------------------------------------------------------------------------------
 inline int ModelTree::optimize(NodeID node)
 {
   int cost;
@@ -1389,4 +1382,42 @@ inline int ModelTree::optimize(NodeID node)
     }
   node->tmp_status = 0;
   return tmp_status;
+}
+
+void
+ModelTree::writeOutput(ostream &output, const string &basename, int order, int linear)
+{
+  // Setting flags to compute what is necessary
+  if (order == 1 || linear == 1)
+    {
+      computeJacobianExo = true;
+      computeJacobian = false;
+    }
+  else if (order != -1 && linear != -1)
+    {
+      computeHessian = true;
+      computeJacobianExo = true;
+    }
+
+  ModelInitialization(output);
+
+  if (computeHessian)
+    derive(2);
+  else
+    derive(1);
+
+  cout << "Processing outputs ..." << endl;
+  setStaticModel();
+  setDynamicModel();
+
+  if (offset == 0)
+    {
+      OpenCFiles(basename + "_static", basename + "_dynamic");
+      SaveCFiles();
+    }
+  else
+    {
+      OpenMFiles(basename + "_static", basename + "_dynamic");
+      SaveMFiles();
+    }
 }

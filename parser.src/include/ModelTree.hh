@@ -13,6 +13,7 @@
 #include <stack>
 #include <sstream>
 #include <fstream>
+#include <ostream>
 //------------------------------------------------------------------------------
 #include "SymbolTable.hh"
 #include "OperatorTable.hh"
@@ -34,8 +35,6 @@ private :
   std::ostringstream      StaticOutput;
   /*! Output for dynamic model */
   std::ostringstream      DynamicOutput;
-  /*! Output for main file */
-  std::ostringstream output;
   /*! Output file stream for static model */
   std::ofstream       mStaticModelFile;
   /*! Output file stream for dynamic model */
@@ -54,7 +53,6 @@ private :
   //! Reference to numerical constants table
   const NumericalConstants &num_constants;
 
-private :
   /*! Computes argument derivative */
   inline NodeID     DeriveArgument(NodeID iArg, Type iType, int iVarID);
   /*! Gets output argument of terminal token */
@@ -62,17 +60,8 @@ private :
   /*! Gets expression of part of model tree */
   inline std::string    getExpression(NodeID StartID, EquationType  iEquationType, int iEquationID = -1);
   inline int optimize(NodeID id);
-public :
-  /*! When Jacobian (vs endogenous) is writen this flag is set to true */
-  bool    computeJacobian;
-  /*! When Jacobian (vs endogenous and exogenous) is writen this flag is set to true */
-  bool    computeJacobianExo;
   /*! When Hessian  is writen this flag is set to true */
   bool    computeHessian;
-  /*! Constructor */
-  ModelTree(SymbolTable &symbol_table_arg, VariableTable &variable_table_arg, ModelParameters &mod_param_arg, const NumericalConstants &num_constants);
-  /*! Destructor */
-  ~ModelTree();
   /*! Opens output M files (1st and 2nd derivatives) */
   void OpenMFiles(std::string iModelFileName1, std::string iModelFileName2 = "");
   /*! Opens output C files (1st and 2nd derivatives) */
@@ -96,9 +85,19 @@ public :
   */
   std::string     setDynamicModel(void);
   /*! Writes initialization of various Matlab variables */
-  void    ModelInitialization(void);
-  /*! Returns string output for main file */
-  std::string get();
+  void ModelInitialization(std::ostream &output);
+
+public:
+  //! Constructor
+  ModelTree(SymbolTable &symbol_table_arg, VariableTable &variable_table_arg, ModelParameters &mod_param_arg, const NumericalConstants &num_constants);
+  //! Destructor
+  ~ModelTree();
+  //! When Jacobian (vs endogenous) is written this flag is set to true
+  bool computeJacobian;
+  //! When Jacobian (vs endogenous and exogenous) is written this flag is set to true
+  bool computeJacobianExo;
+  //! Writes model initialization to output and uses basename for dumping model static/dynamic files
+  void writeOutput(std::ostream &output, const std::string &basename, int order, int linear);
 };
 //------------------------------------------------------------------------------
 #endif
