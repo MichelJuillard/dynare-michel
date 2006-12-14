@@ -89,7 +89,7 @@ private :
 
 public:
   //! Constructor
-  ModelTree(SymbolTable &symbol_table_arg, VariableTable &variable_table_arg, ModelParameters &mod_param_arg, const NumericalConstants &num_constants);
+  ModelTree(SymbolTable &symbol_table_arg, ModelParameters &mod_param_arg, const NumericalConstants &num_constants);
   //! Destructor
   ~ModelTree();
   //! When Jacobian (vs endogenous) is written this flag is set to true

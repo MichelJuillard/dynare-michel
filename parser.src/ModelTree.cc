@@ -34,9 +34,10 @@ inline NodeID MetaToken::getDerivativeAddress(int iVarID, const ModelTree &model
     return iter->second;
 }
 
-ModelTree::ModelTree(SymbolTable &symbol_table_arg, VariableTable &variable_table_arg,
-                     ModelParameters &mod_param_arg, const NumericalConstants &num_constants_arg) :
-  DataTree(symbol_table_arg, variable_table_arg),
+ModelTree::ModelTree(SymbolTable &symbol_table_arg,
+                     ModelParameters &mod_param_arg,
+                     const NumericalConstants &num_constants_arg) :
+  DataTree(symbol_table_arg, mod_param_arg),
   mod_param(mod_param_arg),
   num_constants(num_constants_arg),
   computeHessian(false),

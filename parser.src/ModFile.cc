@@ -2,8 +2,7 @@
 #include "Interface.hh"
 
 ModFile::ModFile() : symbol_table(model_parameters),
-                     variable_table(symbol_table, model_parameters),
-                     model_tree(symbol_table, variable_table, model_parameters, num_constants),
+                     model_tree(symbol_table, model_parameters, num_constants),
                      order(-1), linear(-1)
 {
 }

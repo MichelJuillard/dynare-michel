@@ -44,7 +44,6 @@ ParsingDriver::parse(const string &f)
 
   mod_file->model_tree.error = error;
   mod_file->symbol_table.error = error;
-  mod_file->variable_table.error = error;
 
   expression.setNumericalConstants(&mod_file->num_constants);
   tmp_symbol_table = new TmpSymbolTable(mod_file->symbol_table);
@@ -128,13 +127,6 @@ NodeID
 ParsingDriver::add_model_variable(string *name)
 {
   check_symbol_existence(*name);
-  Type type = mod_file->symbol_table.getType(*name);
-
-  if ((type == eEndogenous)
-      || (type == eExogenous)
-      || (type == eExogenousDet))
-    mod_file->variable_table.AddVariable(*name, 0);
-
   NodeID id = mod_file->model_tree.AddTerminal(*name);
   delete name;
   return id;
@@ -153,10 +145,6 @@ ParsingDriver::add_model_variable(string *name, string *olag)
            << *name
            << " has lag " << lag << endl;
     }
-
-  if ((type == eEndogenous) || (type == eExogenous))
-    mod_file->variable_table.AddVariable(*name, lag);
-
   NodeID id = mod_file->model_tree.AddTerminal(*name, lag);
   delete name;
   delete olag;

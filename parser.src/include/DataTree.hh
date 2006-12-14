@@ -34,8 +34,8 @@ class DataTree
 protected :
   //! A reference to the symbol table
   SymbolTable &symbol_table;
-  //! A reference to the variable table
-  VariableTable &variable_table;
+  //! The variable table
+  VariableTable variable_table;
 
   /*! A list of structures "token" */
   TreeList    mModelTree;
@@ -123,7 +123,7 @@ public :
   inline NodeID     AddAssign(NodeID iArg1, NodeID iArg2);
 public :
   /*! Constructor */
-  DataTree(SymbolTable &symbol_table_arg, VariableTable &variable_table_arg);
+  DataTree(SymbolTable &symbol_table_arg, ModelParameters &mod_param_arg);
   /*! Destructor */
   ~DataTree();
 };
@@ -232,15 +232,7 @@ inline NodeID DataTree::AddTerminal(std::string iArgName, int iLag)
           type == eExogenousDet  ||
           type == eExogenous  ||
           type == eRecursiveVariable)
-        {
-          id = variable_table.getID(iArgName,iLag);
-          if (id == -1)
-            {
-              std::string msg = "unknown variable " + iArgName;
-              (* error) (msg.c_str());
-              exit(-1);
-            }
-        }
+        id = variable_table.AddVariable(iArgName,iLag);
       else
         id = symbol_table.getID(iArgName);
 

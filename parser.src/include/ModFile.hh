@@ -22,8 +22,6 @@ public:
   ModelParameters model_parameters;
   //! Symbol table
   SymbolTable symbol_table;
-  //! Variable table
-  VariableTable variable_table;
   //! Numerical constants table
   NumericalConstants num_constants;
   //! Model equations and their derivatives
