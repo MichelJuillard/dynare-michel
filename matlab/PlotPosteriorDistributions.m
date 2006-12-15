@@ -88,8 +88,8 @@ for i=1:npar
   else
     j = i - (nvx+nvn+ncx+ncn);
     name = deblank(M_.param_names(estim_params_.param_vals(j,1),:));
-    eval(['x1 = oo_.posterior_density.' name '(:,1);'])
-    eval(['f1 = oo_.posterior_density.' name '(:,2);'])
+    eval(['x1 = oo_.posterior_density.parameters.' name '(:,1);'])
+    eval(['f1 = oo_.posterior_density.parameters.' name '(:,2);'])
     if options_.posterior_mode_estimation
       eval(['pmode = oo_.posterior_mode.parameters.' name ';'])
     end

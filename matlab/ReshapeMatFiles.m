@@ -26,10 +26,14 @@ else
 end  
 end
   switch type
-   case 'irf'
-    CAPtype  = 'IRF';
+   case 'irf_dsge'
+    CAPtype  = 'IRF_DSGE';
     TYPEsize = [ options_.irf , M_.endo_nbr , M_.exo_nbr ];
-    TYPEarray = 4; 
+    TYPEarray = 4;    
+   case 'irf_bvardsge'
+    CAPtype  = 'IRF_BVARDSGE';
+    TYPEsize = [ options_.irf , size(options_.varobs,1) , M_.exo_nbr ];
+    TYPEarray = 4;      
    case 'smooth'
     CAPtype  = 'SMOOTH';
     TYPEsize = [ M_.endo_nbr , options_.nobs ];
@@ -59,7 +63,7 @@ end
     return
   end
   
-  TYPEfiles = dir([MhDirectoryName M_.fname '_' type '*']);
+  TYPEfiles = dir([MhDirectoryName M_.fname '_' type '*.mat']);
   NumberOfTYPEfiles = length(TYPEfiles);
   B = options_.B;
   
@@ -98,9 +102,10 @@ end
       %eval(['STOCK_' CAPtype ' = sort(stock_' type ',4);'])
       save([MhDirectoryName M_.fname '_' CAPtype 's' int2str(1)],['STOCK_' CAPtype ]);
     end
-    for file = 1:NumberOfTYPEfiles
-      delete([MhDirectoryName M_.fname '_' type int2str(file) '.mat'])
-    end
+    % Original file format may be useful in some cases...
+    % for file = 1:NumberOfTYPEfiles
+    %  delete([MhDirectoryName M_.fname '_' type int2str(file) '.mat'])
+    % end
    case 3
     if NumberOfTYPEfiles>1
       NumberOfPeriodsPerTYPEfiles = ceil( TYPEsize(2)/NumberOfTYPEfiles );
@@ -132,7 +137,8 @@ end
       %eval(['STOCK_' CAPtype ' = sort(stock_' type ',3);'])
       save([MhDirectoryName M_.fname '_' CAPtype 's' int2str(1)],['STOCK_' CAPtype ]);      
     end
-    for file = 1:NumberOfTYPEfiles
-      delete([MhDirectoryName M_.fname '_' type  int2str(file) '.mat'])
-    end
+    % Original file format may be useful in some cases...
+    % for file = 1:NumberOfTYPEfiles
+    %   delete([MhDirectoryName M_.fname '_' type  int2str(file) '.mat'])
+    % end
   end
