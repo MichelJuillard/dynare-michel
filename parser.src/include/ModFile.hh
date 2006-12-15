@@ -26,17 +26,20 @@ public:
   NumericalConstants num_constants;
   //! Model equations and their derivatives
   ModelTree model_tree;
-  //! Option order
-  int order;
   //! Option linear
-  int linear;
+  bool linear;
+
 private:
   //! List of statements
   vector<Statement *> statements;
+  //! Structure of the mod file
+  ModFileStructure mod_file_struct;
 
 public:
   //! Add a statement
   void addStatement(Statement *st);
+  //! Do some checking and fills mod_file_struct
+  void checkPass();
   //! Writes Matlab/Scilab output files
   /*!
     \param basename The base name used for writing output files. Should be the name of the mod file without its extension

@@ -7,10 +7,22 @@ using namespace std;
 #include <string>
 #include <map>
 
+class ModFileStructure
+{
+public:
+  ModFileStructure();
+  //! Whether a simul statement is present
+  bool simul_present;
+  //! Whether a stoch_simul, estimation, olr, osr statement is present
+  bool stoch_simul_or_similar_present;
+};
+
 class Statement
 {
 public:
   virtual ~Statement();
+  //! Do some internal check, and fill the ModFileStructure class
+  virtual void checkPass(ModFileStructure &mod_file_struct);
   virtual void writeOutput(ostream &output) const = 0;
 };
 

@@ -1,6 +1,17 @@
 #include "Statement.hh"
 
+ModFileStructure::ModFileStructure() :
+  simul_present(false),
+  stoch_simul_or_similar_present(false)
+{
+}
+
 Statement::~Statement()
+{
+}
+
+void
+Statement::checkPass(ModFileStructure &mod_file_struct)
 {
 }
 

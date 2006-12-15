@@ -40,9 +40,9 @@ ModelTree::ModelTree(SymbolTable &symbol_table_arg,
   DataTree(symbol_table_arg, mod_param_arg),
   mod_param(mod_param_arg),
   num_constants(num_constants_arg),
-  computeHessian(false),
   computeJacobian(false),
-  computeJacobianExo(false)
+  computeJacobianExo(false),
+  computeHessian(false)
 {
 }
 
@@ -964,7 +964,10 @@ string  ModelTree::setDynamicModel(void)
       cout << "done \n";
     }
   int nrows = mod_param.eq_nbr;
-  int nvars = mod_param.var_endo_nbr + mod_param.exo_nbr + mod_param.exo_det_nbr;
+  int nvars = mod_param.var_endo_nbr;
+  if (computeJacobianExo)
+    nvars += mod_param.exo_nbr + mod_param.exo_det_nbr;
+
   if (offset == 1)
     {
       DynamicOutput << "global M_ it_\n";
@@ -1386,20 +1389,8 @@ inline int ModelTree::optimize(NodeID node)
 }
 
 void
-ModelTree::writeOutput(ostream &output, const string &basename, int order, int linear)
+ModelTree::writeOutput(ostream &output, const string &basename)
 {
-  // Setting flags to compute what is necessary
-  if (order == 1 || linear == 1)
-    {
-      computeJacobianExo = true;
-      computeJacobian = false;
-    }
-  else if (order != -1 && linear != -1)
-    {
-      computeHessian = true;
-      computeJacobianExo = true;
-    }
-
   ModelInitialization(output);
 
   if (computeHessian)

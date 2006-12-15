@@ -46,6 +46,9 @@ main(int argc, char** argv)
   // Launch parsing
   ModFile *mod_file = p.parse(argv[1]);
 
+  // Run checking pass
+  mod_file->checkPass();
+
   // FIXME
   string basename = argv[1];
   basename.erase(basename.size() - 4, 4);

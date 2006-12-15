@@ -60,8 +60,6 @@ private :
   /*! Gets expression of part of model tree */
   inline std::string    getExpression(NodeID StartID, EquationType  iEquationType, int iEquationID = -1);
   inline int optimize(NodeID id);
-  /*! When Hessian  is writen this flag is set to true */
-  bool    computeHessian;
   /*! Opens output M files (1st and 2nd derivatives) */
   void OpenMFiles(std::string iModelFileName1, std::string iModelFileName2 = "");
   /*! Opens output C files (1st and 2nd derivatives) */
@@ -92,12 +90,14 @@ public:
   ModelTree(SymbolTable &symbol_table_arg, ModelParameters &mod_param_arg, const NumericalConstants &num_constants);
   //! Destructor
   ~ModelTree();
-  //! When Jacobian (vs endogenous) is written this flag is set to true
+  //! Whether Jacobian (vs endogenous) should be written
   bool computeJacobian;
-  //! When Jacobian (vs endogenous and exogenous) is written this flag is set to true
+  //! Whether Jacobian (vs endogenous and exogenous) should be written
   bool computeJacobianExo;
+  //! Whether Hessian (vs endogenous and exogenous) should be written
+  bool computeHessian;
   //! Writes model initialization to output and uses basename for dumping model static/dynamic files
-  void writeOutput(std::ostream &output, const std::string &basename, int order, int linear);
+  void writeOutput(std::ostream &output, const std::string &basename);
 };
 //------------------------------------------------------------------------------
 #endif

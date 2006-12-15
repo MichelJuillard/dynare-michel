@@ -497,7 +497,6 @@ ParsingDriver::steady()
 {
   mod_file->addStatement(new SteadyStatement(options_list));
   options_list.clear();
-  mod_file->model_tree.computeJacobian = true;
 }
 
 void
@@ -527,9 +526,6 @@ ParsingDriver::option_num(const string &name_option, const string &opt)
     error("option " + name_option + " declared twice");
 
   options_list.num_options[name_option] = opt;
-
-  if (name_option == "order")
-    mod_file->order = atoi(opt.c_str());
 }
 
 void
@@ -552,7 +548,7 @@ ParsingDriver::option_str(const string &name_option, const string &opt)
 void
 ParsingDriver::linear()
 {
-  mod_file->linear = 1;
+  mod_file->linear = true;
 }
 
 void
@@ -582,13 +578,6 @@ void ParsingDriver::rplot()
 
 void ParsingDriver::stoch_simul()
 {
-  // If order and linear not set, then set them to default values
-  if (mod_file->order == -1)
-    mod_file->order = 2;
-
-  if (mod_file->linear == -1)
-    mod_file->linear = 0;
-
   mod_file->addStatement(new StochSimulStatement(*tmp_symbol_table, options_list));
   tmp_symbol_table->clear();
   options_list.clear();
@@ -599,7 +588,6 @@ ParsingDriver::simul()
 {
   mod_file->addStatement(new SimulStatement(options_list));
   options_list.clear();
-  mod_file->model_tree.computeJacobian = true;
 }
 
 void
@@ -607,7 +595,6 @@ ParsingDriver::check()
 {
   mod_file->addStatement(new CheckStatement(options_list));
   options_list.clear();
-  mod_file->model_tree.computeJacobian = true;
 }
 
 void
@@ -626,7 +613,6 @@ ParsingDriver::estimated_params()
 {
   mod_file->addStatement(new EstimatedParamsStatement(estim_params_list, mod_file->symbol_table));
   estim_params_list.clear();
-  mod_file->model_tree.computeJacobianExo = true;
 }
 
 void
@@ -784,7 +770,6 @@ ParsingDriver::run_osr()
   mod_file->addStatement(new OsrStatement(*tmp_symbol_table, options_list));
   tmp_symbol_table->clear();
   options_list.clear();
-  mod_file->model_tree.computeJacobianExo = true;
 }
 
 void

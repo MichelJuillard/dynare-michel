@@ -42,6 +42,12 @@ SimulStatement::SimulStatement(const OptionsList &options_list_arg) :
 }
 
 void
+SimulStatement::checkPass(ModFileStructure &mod_file_struct)
+{
+  mod_file_struct.simul_present = true;
+}
+
+void
 SimulStatement::writeOutput(ostream &output) const
 {
   options_list.writeOutput(output);
@@ -53,6 +59,12 @@ StochSimulStatement::StochSimulStatement(const TmpSymbolTable &tmp_symbol_table_
   tmp_symbol_table(tmp_symbol_table_arg),
   options_list(options_list_arg)
 {
+}
+
+void
+StochSimulStatement::checkPass(ModFileStructure &mod_file_struct)
+{
+  mod_file_struct.stoch_simul_or_similar_present = true;
 }
 
 void
@@ -68,6 +80,12 @@ EstimationStatement::EstimationStatement(const TmpSymbolTable &tmp_symbol_table_
   tmp_symbol_table(tmp_symbol_table_arg),
   options_list(options_list_arg)
 {
+}
+
+void
+EstimationStatement::checkPass(ModFileStructure &mod_file_struct)
+{
+  mod_file_struct.stoch_simul_or_similar_present = true;
 }
 
 void
@@ -495,6 +513,12 @@ OsrStatement::OsrStatement(const TmpSymbolTable &tmp_symbol_table_arg,
 }
 
 void
+OsrStatement::checkPass(ModFileStructure &mod_file_struct)
+{
+  mod_file_struct.stoch_simul_or_similar_present = true;
+}
+
+void
 OsrStatement::writeOutput(ostream &output) const
 {
   options_list.writeOutput(output);
@@ -519,6 +543,12 @@ OlrStatement::OlrStatement(const TmpSymbolTable &tmp_symbol_table_arg,
   tmp_symbol_table(tmp_symbol_table_arg),
   options_list(options_list_arg)
 {
+}
+
+void
+OlrStatement::checkPass(ModFileStructure &mod_file_struct)
+{
+  mod_file_struct.stoch_simul_or_similar_present = true;
 }
 
 void

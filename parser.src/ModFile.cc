@@ -3,7 +3,7 @@
 
 ModFile::ModFile() : symbol_table(model_parameters),
                      model_tree(symbol_table, model_parameters, num_constants),
-                     order(-1), linear(-1)
+                     linear(false)
 {
 }
 
@@ -18,6 +18,37 @@ void
 ModFile::addStatement(Statement *st)
 {
   statements.push_back(st);
+}
+
+void
+ModFile::checkPass()
+{
+  for(vector<Statement *>::iterator it = statements.begin();
+      it != statements.end(); it++)
+    (*it)->checkPass(mod_file_struct);
+
+  if (!mod_file_struct.simul_present
+      && !mod_file_struct.stoch_simul_or_similar_present)
+    {
+      cerr << "Error: nothing to compute! you must use one of {simul, stoch_simul, estimation, olr, osr}" << endl;
+      exit(-1);
+    }
+
+  if (mod_file_struct.simul_present
+      && mod_file_struct.stoch_simul_or_similar_present)
+    {
+      cerr << "Error: a mod file cannot contain both a simul command and one of {stoch_simul, estimation, olr, osr}" << endl;
+      exit(-1);
+    }
+
+  // Set things to compute
+  if (mod_file_struct.simul_present)
+    model_tree.computeJacobian = true;
+  else
+    {
+      model_tree.computeJacobianExo = true;
+      model_tree.computeHessian = true;
+    }
 }
 
 void
@@ -92,7 +123,7 @@ ModFile::writeOutputFiles(const string &basename, bool clear_all)
   if (linear == 1)
     mOutputFile << "options_.linear = 1;" << endl;
 
-  model_tree.writeOutput(mOutputFile, basename, order, linear);
+  model_tree.writeOutput(mOutputFile, basename);
 
   // Print statements
   for(vector<Statement *>::iterator it = statements.begin();

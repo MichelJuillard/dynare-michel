@@ -31,6 +31,7 @@ private:
   const OptionsList options_list;
 public:
   SimulStatement(const OptionsList &options_list_arg);
+  virtual void checkPass(ModFileStructure &mod_file_struct);
   virtual void writeOutput(ostream &output) const;
 };
 
@@ -42,6 +43,7 @@ private:
 public:
   StochSimulStatement(const TmpSymbolTable &tmp_symbol_table_arg,
                       const OptionsList &options_list_arg);
+  virtual void checkPass(ModFileStructure &mod_file_struct);
   virtual void writeOutput(ostream &output) const;
 };
 
@@ -92,6 +94,7 @@ private:
 public:
   EstimationStatement(const TmpSymbolTable &tmp_symbol_table_arg,
                       const OptionsList &options_list_arg);
+  virtual void checkPass(ModFileStructure &mod_file_struct);
   virtual void writeOutput(ostream &output) const;
 };
 
@@ -156,6 +159,7 @@ private:
 public:
   OsrStatement(const TmpSymbolTable &tmp_symbol_table_arg,
                const OptionsList &options_list_arg);
+  virtual void checkPass(ModFileStructure &mod_file_struct);
   virtual void writeOutput(ostream &output) const;
 };
 
@@ -167,6 +171,7 @@ private:
 public:
   OlrStatement(const TmpSymbolTable &tmp_symbol_table_arg,
                const OptionsList &options_list_arg);
+  virtual void checkPass(ModFileStructure &mod_file_struct);
   virtual void writeOutput(ostream &output) const;
 };
 
