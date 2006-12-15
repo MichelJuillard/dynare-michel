@@ -49,6 +49,9 @@ main(int argc, char** argv)
   // Run checking pass
   mod_file->checkPass();
 
+  // Do computations
+  mod_file->computingPass();
+
   // FIXME
   string basename = argv[1];
   basename.erase(basename.size() - 4, 4);

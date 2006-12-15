@@ -23,6 +23,8 @@ ModFile::addStatement(Statement *st)
 void
 ModFile::checkPass()
 {
+  model_tree.checkPass();
+
   for(vector<Statement *>::iterator it = statements.begin();
       it != statements.end(); it++)
     (*it)->checkPass(mod_file_struct);
@@ -40,7 +42,11 @@ ModFile::checkPass()
       cerr << "Error: a mod file cannot contain both a simul command and one of {stoch_simul, estimation, olr, osr}" << endl;
       exit(-1);
     }
+}
 
+void
+ModFile::computingPass()
+{
   // Set things to compute
   if (mod_file_struct.simul_present)
     model_tree.computeJacobian = true;
@@ -49,6 +55,8 @@ ModFile::checkPass()
       model_tree.computeJacobianExo = true;
       model_tree.computeHessian = true;
     }
+
+  model_tree.computingPass();
 }
 
 void
@@ -123,7 +131,12 @@ ModFile::writeOutputFiles(const string &basename, bool clear_all)
   if (linear == 1)
     mOutputFile << "options_.linear = 1;" << endl;
 
-  model_tree.writeOutput(mOutputFile, basename);
+  model_tree.writeOutput(mOutputFile);
+
+  cout << "Processing outputs ..." << endl;
+
+  model_tree.writeStaticFile(basename);
+  model_tree.writeDynamicFile(basename);
 
   // Print statements
   for(vector<Statement *>::iterator it = statements.begin();

@@ -30,15 +30,6 @@ class ModelTree : public DataTree
 private :
   /*! Stores ID of equations and their derivatives */
   std::vector<std::vector<DerivativeIndex> > mDerivativeIndex;
-
-  /*! Output for static model */
-  std::ostringstream      StaticOutput;
-  /*! Output for dynamic model */
-  std::ostringstream      DynamicOutput;
-  /*! Output file stream for static model */
-  std::ofstream       mStaticModelFile;
-  /*! Output file stream for dynamic model */
-  std::ofstream       mDynamicModelFile;
   /*!
     A token is writen as a temporary expression
     if its cost is greater than min_cost
@@ -46,8 +37,6 @@ private :
   int           min_cost;
   /*! left and right parentheses can be (,[ or ),] */
   char          lpar, rpar;
-  /*! Name of parameter variables ("params" for C output, and M_.params for Matlab) */
-  std::string       param_name;
   //! Reference to model parameters
   ModelParameters &mod_param;
   //! Reference to numerical constants table
@@ -60,44 +49,44 @@ private :
   /*! Gets expression of part of model tree */
   inline std::string    getExpression(NodeID StartID, EquationType  iEquationType, int iEquationID = -1);
   inline int optimize(NodeID id);
-  /*! Opens output M files (1st and 2nd derivatives) */
-  void OpenMFiles(std::string iModelFileName1, std::string iModelFileName2 = "");
-  /*! Opens output C files (1st and 2nd derivatives) */
-  void OpenCFiles(std::string iModelFileName1, std::string iModelFileName2 = "");
-  /*! Saves output string into output M files */
-  void SaveMFiles();
-  /*! Saves output string into output C files */
-  void SaveCFiles();
   /*! Computes derivatives of ModelTree */
   void    derive(int iOrder);
-  /*!
-    Writes output file for static model :
-    - equations
-    - 1st order derivatives with respect to endogenous variables (without lags)
-  */
-  std::string     setStaticModel(void);
-  /*!
-    Writes output file for dynamic stochastic model :
-    - equations
-    - 1st order and 2nd order derivatives with respect to endogenous, exogenous, exogenous_det (in specific order)
-  */
-  std::string     setDynamicModel(void);
-  /*! Writes initialization of various Matlab variables */
-  void ModelInitialization(std::ostream &output);
+  //! Writes the static model equations and its derivatives
+  void writeStaticModel(std::ostream &StaticOutput);
+  //! Writes the dynamic model equations and its derivatives
+  void writeDynamicModel(std::ostream &DynamicOutput);
+  //! Writes static model file (Matlab version)
+  void writeStaticMFile(const std::string &static_basename);
+  //! Writes static model file (C version)
+  void writeStaticCFile(const std::string &static_basename);
+  //! Writes dynamic model file (Matlab version)
+  void writeDynamicMFile(const std::string &dynamic_basename);
+  //! Writes dynamic model file (C version)
+  void writeDynamicCFile(const std::string &dynamic_basename);
 
 public:
   //! Constructor
   ModelTree(SymbolTable &symbol_table_arg, ModelParameters &mod_param_arg, const NumericalConstants &num_constants);
-  //! Destructor
-  ~ModelTree();
+  //! Do some checking
+  void checkPass() const;
   //! Whether Jacobian (vs endogenous) should be written
   bool computeJacobian;
   //! Whether Jacobian (vs endogenous and exogenous) should be written
   bool computeJacobianExo;
   //! Whether Hessian (vs endogenous and exogenous) should be written
   bool computeHessian;
-  //! Writes model initialization to output and uses basename for dumping model static/dynamic files
-  void writeOutput(std::ostream &output, const std::string &basename);
+  //! Execute computations (variable sorting + derivation)
+  /*! You must set computeJacobian, computeJacobianExo and computeHessian to correct values before
+    calling this function */
+  void computingPass();
+  //! Writes model initialization and lead/lag incidence matrix to output
+  void writeOutput(std::ostream &output) const;
+  //! Writes static model file
+  /*! \todo make this method const */
+  void writeStaticFile(const std::string &basename);
+  //! Writes dynamic model file
+  /*! \todo make this method const */
+  void writeDynamicFile(const std::string &basename);
 };
 //------------------------------------------------------------------------------
 #endif
