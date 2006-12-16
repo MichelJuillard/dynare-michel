@@ -199,10 +199,6 @@ if any(isinf(a(:)))
   info = 1;
   return
 end
-if M_.exo_nbr
-  fu = aa(:,nz+(1:M_.exo_nbr));
-end
-clear aa;
 
 % buildind D and E
 d = zeros(nd,nd) ;
@@ -297,6 +293,7 @@ j3 = nonzeros(kstate(:,3));
 j4  = find(kstate(:,3));
 % derivatives with respect to exogenous variables
 if M_.exo_nbr
+  fu = aa(:,nz+(1:M_.exo_nbr));
   a1 = b;
   aa1 = [];
   if nstatic > 0
@@ -304,6 +301,8 @@ if M_.exo_nbr
   end
   dr.ghu = -[aa1 a(:,j3)*gx(j4,1:npred)+a1(:,nstatic+1:nstatic+ ...
 						  npred) a1(:,nstatic+npred+1:end)]\fu;
+else
+  dr.ghu = [];
 end
 
 % static variables
