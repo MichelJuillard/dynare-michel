@@ -36,6 +36,12 @@ CheckStatement::writeOutput(ostream &output) const
   output << "check;\n";
 }
 
+void
+CheckStatement::checkPass(ModFileStructure &mod_file_struct)
+{
+  mod_file_struct.check_present = true;
+}
+
 SimulStatement::SimulStatement(const OptionsList &options_list_arg) :
   options_list(options_list_arg)
 {

@@ -11,6 +11,8 @@ class ModFileStructure
 {
 public:
   ModFileStructure();
+  //! Wheter check is present
+  bool check_present;
   //! Whether a simul statement is present
   bool simul_present;
   //! Whether a stoch_simul, estimation, olr, osr statement is present

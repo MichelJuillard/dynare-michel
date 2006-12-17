@@ -1,6 +1,7 @@
 #include "Statement.hh"
 
 ModFileStructure::ModFileStructure() :
+  check_present(false),
   simul_present(false),
   stoch_simul_or_similar_present(false)
 {
