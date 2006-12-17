@@ -50,97 +50,50 @@ if M_.exo_nbr == 0
   oo_.exo_steady_state = [] ;
 end
 
-tempex = oo_.exo_simul;
-it_ = M_.maximum_lag + 1;
-if options_.olr
-  z = repmat(zeros(M_.endo_nbr,1),1,klen);
-else
-  z = repmat(dr.ys,1,klen);
-end
-z = z(iyr0) ;
-if options_.order == 1
-  [junk,jacobia_] = feval([M_.fname '_dynamic'],z,tempex);
-elseif options_.order == 2
-    [junk,jacobia_,hessian] = feval([M_.fname '_dynamic'],z,...
-				    [oo_.exo_simul ...
-		                     oo_.exo_det_simul]);
-end
-
-oo_.exo_simul = tempex ;
-tempex = [];
-
 % expanding system for Optimal Linear Regulator
 if options_.olr
-  bet = options_.olr_beta;
-  jacobia1 = [];
-  n_inst = size(options_.olr_inst,1);
+  if isfield(M_,'orig_model')
+    orig_model = M_.orig_model;
+    M_.endo_nbr = orig_model.endo_nbr;
+    M_.endo_names = orig_model.endo_names;
+    M_.lead_lag_incidence = orig_model.lead_lag_incidence;
+    M_.maximum_lead = orig_model.maximum_lead;
+    M_.maximum_endo_lead = orig_model.maximum_endo_lead;
+    M_.maximum_lag = orig_model.maximum_lag;
+    M_.maximum_endo_lag = orig_model.maximum_endo_lag;
+  end
+  oo_.steady_state = dynare_solve('ramsey_static',oo_.steady_state,0);
+  [junk,junk,multbar] = ramsey_static(oo_.steady_state);
+  jacobia_=ramsey_dynamic(oo_.steady_state,multbar);
+  klen = M_.maximum_lag + M_.maximum_lead + 1;
+  dr.ys = [oo_.steady_state;zeros(M_.exo_nbr,1);multbar];
+else
+  klen = M_.maximum_lag + M_.maximum_lead + 1;
+  iyv = M_.lead_lag_incidence';
+  iyv = iyv(:);
+  iyr0 = find(iyv) ;
+  it_ = M_.maximum_lag + 1 ;
 
-  if ~isfield(olr_state_,'done')
-    olr_state_.done = 1;
-    olr_state_.old_M_.maximum_endo_lag = M_.maximum_endo_lag;
-    olr_state_.old_M_.maximum_endo_lead = M_.maximum_endo_lead;
-    olr_state_.old_M_.endo_nbr = M_.endo_nbr;
-    olr_state_.old_M_.lead_lag_incidence = M_.lead_lag_incidence;
-    
-    for i=1:M_.endo_nbr
-      temp = ['mult_' int2str(i)];
-      lgoo_.endo_simul = strvcat(lgoo_.endo_simul,temp);
-    end
-    M_.endo_nbr = 2*M_.endo_nbr-n_inst;
-    M_.maximum_endo_lag = max(M_.maximum_endo_lag,M_.maximum_endo_lead);
-    M_.maximum_endo_lead = M_.maximum_endo_lag;
-  end    
-  nj = olr_state_.old_M_.endo_nbr-n_inst;
-  offset_min = M_.maximum_endo_lag - olr_state_.old_M_.maximum_endo_lag;
-  offset_max = M_.maximum_endo_lead - olr_state_.old_M_.maximum_endo_lead;
-  newiy = zeros(2*M_.maximum_endo_lag+1,nj+olr_state_.old_M_.endo_nbr);
-  jacobia_ = jacobia_(1:nj,:);
-  for i=1:2*M_.maximum_endo_lag+1
-    if i > offset_min & i <= 2*M_.maximum_endo_lag+1-offset_max
-      [junk,k1,k2] = find(olr_state_.old_M_.lead_lag_incidence(i-offset_min,:));
-      if i == M_.maximum_endo_lag+1
-	jacobia1 = [jacobia1 [jacobia_(:,k2); 2*options_.olr_w]];
-      else
-	jacobia1 = [jacobia1 [jacobia_(:,k2); ...
-		    zeros(olr_state_.old_M_.endo_nbr,length(k1))]];
-      end
-      newiy(i,k1) = ones(1,length(k1));
-    end
-    i1  = 2*M_.maximum_endo_lag+2-i;
-    if i1 <= 2*M_.maximum_endo_lag+1-offset_max & i1 > offset_min 
-      [junk,k1,k2] = find(olr_state_.old_M_.lead_lag_incidence(i1-offset_min,:));
-      k3 = find(any(jacobia_(:,k2),2));
-      x = zeros(olr_state_.old_M_.endo_nbr,length(k3));
-      x(k1,:) = bet^(-i1+M_.maximum_endo_lag+1)*jacobia_(k3,k2)';
-      jacobia1  = [jacobia1 [zeros(nj,length(k3)); x]];
-      newiy(i,k3+olr_state_.old_M_.endo_nbr) = ones(1,length(k3));
-    end      
+  if M_.exo_nbr == 0
+    oo_.exo_steady_state = [] ;
   end
-  jacobia1 = [jacobia1 [jacobia_(:,end-M_.exo_nbr+1:end); ...
-		    zeros(olr_state_.old_M_.endo_nbr, M_.exo_nbr)]];
-  newiy = newiy';
-  newiy = find(newiy(:));
-  M_.lead_lag_incidence = zeros(M_.endo_nbr*(M_.maximum_endo_lag+M_.maximum_endo_lead+1),1);
-  M_.lead_lag_incidence(newiy) = [1:length(newiy)]';
-  M_.lead_lag_incidence =reshape(M_.lead_lag_incidence,M_.endo_nbr,M_.maximum_endo_lag+M_.maximum_endo_lead+1)';
-  jacobia_ = jacobia1;
-  clear jacobia1
-  % computes steady state
-  resid = feval([M_.fname '_steady'],zeros(olr_state_.old_M_.endo_nbr,1));
-  if resid'*resid < 1e-12
-    dr.ys =[dr.ys; zeros(nj,1)];
-  else
-    AA = zeros(M_.endo_nbr,M_.endo_nbr);
-    for i=1:M_.maximum_endo_lag+M_.maximum_endo_lead+1
-      [junk,k1,k2] = find(M_.lead_lag_incidence(i,:));
-      AA(:,k1) = AA(:,k1)+jacobia_(:,k2);
-    end
-    dr.ys = -AA\[resid; zeros(nj,1)];
+
+  tempex = oo_.exo_simul;
+  it_ = M_.maximum_lag + 1;
+  z = repmat(dr.ys,1,klen);
+  z = z(iyr0) ;
+  if options_.order == 1
+    [junk,jacobia_] = feval([M_.fname '_dynamic'],z,tempex);
+  elseif options_.order == 2
+    [junk,jacobia_,hessian] = feval([M_.fname '_dynamic'],z,...
+				    [oo_.exo_simul ...
+		    oo_.exo_det_simul]);
   end
+
+  oo_.exo_simul = tempex ;
+  tempex = [];
 end
-% end of code section for Optimal Linear Regulator
 
-klen = M_.maximum_endo_lag + M_.maximum_endo_lead + 1;
 dr=set_state_space(dr);
 kstate = dr.kstate;
 kad = dr.kad;
