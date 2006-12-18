@@ -120,7 +120,7 @@ ShocksStatement::ShocksStatement(const det_shocks_type &det_shocks_arg,
 }
 
 void
-ShocksStatement::writeOutput(ostream &output) const
+ShocksStatement::writeOutput(ostream &output, const string &basename) const
 {
   output << interfaces::comment() << endl << interfaces::comment();
   output << "SHOCKS instructions \n";
@@ -146,7 +146,7 @@ MShocksStatement::MShocksStatement(const det_shocks_type &det_shocks_arg,
 }
 
 void
-MShocksStatement::writeOutput(ostream &output) const
+MShocksStatement::writeOutput(ostream &output, const string &basename) const
 {
   output << interfaces::comment() << endl << interfaces::comment();
   output << "SHOCKS instructions \n";

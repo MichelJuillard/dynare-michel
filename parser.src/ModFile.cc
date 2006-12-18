@@ -56,6 +56,10 @@ ModFile::computingPass()
     }
 
   model_tree.computingPass();
+
+  for(vector<Statement *>::iterator it = statements.begin();
+      it != statements.end(); it++)
+    (*it)->computingPass();
 }
 
 void
@@ -140,7 +144,7 @@ ModFile::writeOutputFiles(const string &basename, bool clear_all)
   // Print statements
   for(vector<Statement *>::iterator it = statements.begin();
       it != statements.end(); it++)
-    (*it)->writeOutput(mOutputFile);
+    (*it)->writeOutput(mOutputFile, basename);
 
   mOutputFile << "save('" << basename << "_results', 'oo_');" << endl;
   mOutputFile << "diary off" << endl;

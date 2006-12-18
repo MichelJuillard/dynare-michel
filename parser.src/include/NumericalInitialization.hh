@@ -18,7 +18,7 @@ private:
 public:
   InitParamStatement(const string &param_name_arg, const string &param_value_arg,
                      const SymbolTable &symbol_table_arg);
-  virtual void writeOutput(ostream &output) const;
+  virtual void writeOutput(ostream &output, const string &basename) const;
 };
 
 class InitOrEndValStatement : public Statement
@@ -44,7 +44,7 @@ class InitValStatement : public InitOrEndValStatement
 public:
   InitValStatement(const init_values_type &init_values_arg,
                    const SymbolTable &symbol_table_arg);
-  virtual void writeOutput(ostream &output) const;
+  virtual void writeOutput(ostream &output, const string &basename) const;
 };
 
 class EndValStatement : public InitOrEndValStatement
@@ -52,7 +52,7 @@ class EndValStatement : public InitOrEndValStatement
 public:
   EndValStatement(const init_values_type &init_values_arg,
                   const SymbolTable &symbol_table_arg);
-  virtual void writeOutput(ostream &output) const;
+  virtual void writeOutput(ostream &output, const string &basename) const;
 };
 
 class HistValStatement : public Statement
@@ -69,7 +69,7 @@ private:
 public:
   HistValStatement(const hist_values_type &hist_values_arg,
                    const SymbolTable &symbol_table_arg);
-  virtual void writeOutput(ostream &output) const;
+  virtual void writeOutput(ostream &output, const string &basename) const;
 };
 
 #endif

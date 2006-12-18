@@ -51,7 +51,7 @@ public:
                   const covar_and_corr_shocks_type &covar_shocks_arg,
                   const covar_and_corr_shocks_type &corr_shocks_arg,
                   const SymbolTable &symbol_table_arg);
-  virtual void writeOutput(ostream &output) const;
+  virtual void writeOutput(ostream &output, const string &basename) const;
 };
 
 class MShocksStatement : public AbstractShocksStatement
@@ -63,7 +63,7 @@ public:
                    const covar_and_corr_shocks_type &covar_shocks_arg,
                    const covar_and_corr_shocks_type &corr_shocks_arg,
                    const SymbolTable &symbol_table_arg);
-  virtual void writeOutput(ostream &output) const;
+  virtual void writeOutput(ostream &output, const string &basename) const;
 };
 
 #endif

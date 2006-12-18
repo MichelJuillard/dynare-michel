@@ -45,11 +45,12 @@ private :
   /*! Gets output argument of terminal token */
   inline std::string    getArgument(NodeID id, Type type, EquationType  iEquationType);
   /*! Gets expression of part of model tree */
-  inline std::string    getExpression(NodeID StartID, EquationType  iEquationType, int iEquationID = -1);
+  std::string getExpression(NodeID StartID, EquationType iEquationType);
   inline int optimize(NodeID id);
   /*! Computes derivatives of ModelTree */
   void    derive(int iOrder);
   //! Writes the static model equations and its derivatives
+  /*! \todo handle hessian in C output */
   void writeStaticModel(std::ostream &StaticOutput);
   //! Writes the dynamic model equations and its derivatives
   void writeDynamicModel(std::ostream &DynamicOutput);
@@ -69,12 +70,14 @@ public:
   int eq_nbr;
   //! Do some checking
   void checkPass() const;
-  //! Whether Jacobian (vs endogenous) should be written
+  //! Whether dynamic Jacobian (w.r. to endogenous) should be written
   bool computeJacobian;
-  //! Whether Jacobian (vs endogenous and exogenous) should be written
+  //! Whether dynamic Jacobian (w.r. to endogenous and exogenous) should be written
   bool computeJacobianExo;
-  //! Whether Hessian (vs endogenous and exogenous) should be written
+  //! Whether dynamic Hessian (w.r. to endogenous and exogenous) should be written
   bool computeHessian;
+  //! Whether static Hessian (w.r. to endogenous only) should be written
+  bool computeStaticHessian;
   //! Execute computations (variable sorting + derivation)
   /*! You must set computeJacobian, computeJacobianExo and computeHessian to correct values before
     calling this function */

@@ -11,7 +11,7 @@ InitParamStatement::InitParamStatement(const string &param_name_arg,
 }
 
 void
-InitParamStatement::writeOutput(ostream &output) const
+InitParamStatement::writeOutput(ostream &output, const string &basename) const
 {
   int id = symbol_table.getID(param_name) + 1;
   output << "M_.params( " << id << " ) = " << param_value << ";\n";
@@ -53,7 +53,7 @@ InitValStatement::InitValStatement(const init_values_type &init_values_arg,
 }
 
 void
-InitValStatement::writeOutput(ostream &output) const
+InitValStatement::writeOutput(ostream &output, const string &basename) const
 {
   output << interfaces::comment() << "\n" << interfaces::comment() << "INITVAL instructions \n"
          << interfaces::comment() << "\n";
@@ -83,7 +83,7 @@ EndValStatement::EndValStatement(const init_values_type &init_values_arg,
 
 
 void
-EndValStatement::writeOutput(ostream &output) const
+EndValStatement::writeOutput(ostream &output, const string &basename) const
 {
   output << interfaces::comment() << "\n" << interfaces::comment() << "ENDVAL instructions\n"
          << interfaces::comment() << "\n";
@@ -101,7 +101,7 @@ HistValStatement::HistValStatement(const hist_values_type &hist_values_arg,
 }
 
 void
-HistValStatement::writeOutput(ostream &output) const
+HistValStatement::writeOutput(ostream &output, const string &basename) const
 {
   output << interfaces::comment() << "\n" << interfaces::comment() << "HISTVAL instructions\n"
          << interfaces::comment() << "\n";

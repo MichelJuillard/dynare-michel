@@ -16,13 +16,18 @@ Statement::checkPass(ModFileStructure &mod_file_struct)
 {
 }
 
+void
+Statement::computingPass()
+{
+}
+
 NativeStatement::NativeStatement(const string &native_statement_arg) :
   native_statement(native_statement_arg)
 {
 }
 
 void
-NativeStatement::writeOutput(ostream &output) const
+NativeStatement::writeOutput(ostream &output, const string &basename) const
 {
   output << native_statement << endl;
 }

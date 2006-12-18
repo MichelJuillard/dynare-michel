@@ -39,7 +39,8 @@ ModelTree::ModelTree(SymbolTable &symbol_table_arg,
   num_constants(num_constants_arg),
   computeJacobian(false),
   computeJacobianExo(false),
-  computeHessian(false)
+  computeHessian(false),
+  computeStaticHessian(false)
 {
 }
 
@@ -56,7 +57,7 @@ ModelTree::writeStaticMFile(const string &static_basename)
       exit(-1);
     }
   // Writing comments and function definition command
-  mStaticModelFile << "function [residual, g1] = " << static_basename << "( y, x )\n";
+  mStaticModelFile << "function [residual, g1, g2] = " << static_basename << "( y, x )\n";
   mStaticModelFile << interfaces::comment()+"\n"+interfaces::comment();
   mStaticModelFile << "Status : Computes static model for Dynare\n" << interfaces::comment() << "\n";
   mStaticModelFile << interfaces::comment();
@@ -630,13 +631,10 @@ inline NodeID ModelTree::DeriveArgument(NodeID iArg, Type iType, int iVarID)
 void
 ModelTree::writeStaticModel(ostream &StaticOutput)
 {
-  TreeIterator tree_it;
-  int lEquationNBR = 0;
   ostringstream model_output;    // Used for storing model equations
-  ostringstream model_tmp_output;// Used for storing tmp expressions for model equations
   ostringstream jacobian_output; // Used for storing jacobian equations
-                                 // Used for storing tmp expressions for jacobian equations
-  ostringstream jacobian_tmp_output;
+  ostringstream hessian_output;
+  ostringstream lsymetric;       // For symmetric elements in hessian
 
   int d = current_order;         // Minimum number of times a temparary expression apears in equations
   // Reference count of token "0=0" is set to 0
@@ -645,23 +643,24 @@ ModelTree::writeStaticModel(ostream &StaticOutput)
        ZeroEqZero->reference_count.end(),0);
   // Writing model Equations
   current_order = 1;
-  tree_it = BeginModel;
+  TreeIterator tree_it = BeginModel;
+  int lEquationNBR = 0;
   for (; tree_it != mModelTree.end(); tree_it++)
     {
       if ((*tree_it)->op_code == token::EQUAL || (*tree_it)->op_code == token::ASSIGN )
         {
           if ((*tree_it)->id1->type1 == eLocalParameter)
             {
-              model_output << getExpression((*tree_it)->id1, eStaticEquations, lEquationNBR);
+              model_output << getExpression((*tree_it)->id1, eStaticEquations);
               model_output << " = ";
-              model_output << getExpression((*tree_it)->id2, eStaticEquations, lEquationNBR) << ";" << endl;
+              model_output << getExpression((*tree_it)->id2, eStaticEquations) << ";" << endl;
             }
           else if (lEquationNBR < eq_nbr)
             {
               model_output << "lhs =";
-              model_output << getExpression((*tree_it)->id1, eStaticEquations, lEquationNBR) << ";" << endl;
+              model_output << getExpression((*tree_it)->id1, eStaticEquations) << ";" << endl;
               model_output << "rhs =";
-              model_output << getExpression((*tree_it)->id2, eStaticEquations, lEquationNBR) << ";" << endl;
+              model_output << getExpression((*tree_it)->id2, eStaticEquations) << ";" << endl;
               model_output << "residual" << lpar << lEquationNBR+1 << rpar << "= lhs-rhs;" << endl;
               lEquationNBR++;
             }
@@ -672,7 +671,7 @@ ModelTree::writeStaticModel(ostream &StaticOutput)
         {
           if (optimize(*tree_it))
             {
-              model_output << "T" << (*tree_it)->idx << "=" << getExpression(*tree_it, eStaticEquations, lEquationNBR) << ";" << endl;
+              model_output << "T" << (*tree_it)->idx << "=" << getExpression(*tree_it, eStaticEquations) << ";" << endl;
               (*tree_it)->tmp_status = 1;
             }
           else
@@ -682,7 +681,6 @@ ModelTree::writeStaticModel(ostream &StaticOutput)
         }
     }
 
-  // Writing Jacobian for endogenous variables without lag
   for(; tree_it != mModelTree.end(); tree_it++)
     {
       if ((*tree_it)->op_code != NoOpCode
@@ -691,7 +689,7 @@ ModelTree::writeStaticModel(ostream &StaticOutput)
         {
           if (optimize(*tree_it) == 1)
             {
-              jacobian_output << "T" << (*tree_it)->idx << "=" << getExpression(*tree_it, eStaticEquations, lEquationNBR) << ";" << endl;
+              jacobian_output << "T" << (*tree_it)->idx << "=" << getExpression(*tree_it, eStaticEquations) << ";" << endl;
               (*tree_it)->tmp_status = 1;
             }
           else
@@ -701,7 +699,7 @@ ModelTree::writeStaticModel(ostream &StaticOutput)
         }
     }
 
-  lEquationNBR = 0;
+  // Write Jacobian w.r. to endogenous only
   for (unsigned int i = 0; i < mDerivativeIndex[0].size(); i++)
     {
       if (variable_table.getType(mDerivativeIndex[0][i].derivators) == eEndogenous)
@@ -715,6 +713,43 @@ ModelTree::writeStaticModel(ostream &StaticOutput)
                 variable_table.getSymbolID(mDerivativeIndex[0][i].derivators)+1 << rpar;
               jacobian_output << g1.str() << "=" <<  g1.str() << "+" << exp << ";\n";
             }
+        }
+    }
+
+  // Write Hessian w.r. to endogenous only
+  if (computeStaticHessian)
+    {
+      for (unsigned int i = 0; i < mDerivativeIndex[1].size(); i++)
+        {
+          NodeID startHessian = mDerivativeIndex[1][i].token_id;
+          if (startHessian != ZeroEqZero)
+            {
+              string exp = getExpression(startHessian->id1, eStaticDerivatives);
+
+              int varID1 = mDerivativeIndex[1][i].derivators / variable_table.size();
+              int varID2 = mDerivativeIndex[1][i].derivators - varID1 * variable_table.size();
+
+              // Keep only derivatives w.r. to endogenous variables
+              if (variable_table.getType(varID1) != eEndogenous
+                  || variable_table.getType(varID2) != eEndogenous)
+                continue;
+
+              int id1 = variable_table.getSymbolID(varID1);
+              int id2 = variable_table.getSymbolID(varID2);
+
+              int col_nb = id1*symbol_table.endo_nbr+id2+1;
+              int col_nb_sym = id2*symbol_table.endo_nbr+id1+1;
+
+              hessian_output << "  g2" << lpar << mDerivativeIndex[1][i].equation_id+1 << ", " <<
+                col_nb << rpar << " = " << exp << ";\n";
+              // Treating symetric elements
+              if (varID1 != varID2)
+                lsymetric <<  "  g2" << lpar << mDerivativeIndex[1][i].equation_id+1 << ", " <<
+                  col_nb_sym << rpar << " = " <<
+                  "g2" << lpar << mDerivativeIndex[1][i].equation_id+1 << ", " <<
+                  col_nb << rpar << ";\n";
+            }
+
         }
     }
 
@@ -744,6 +779,20 @@ ModelTree::writeStaticModel(ostream &StaticOutput)
       StaticOutput << "    g1 = real(g1)+2*imag(g1);\n";
       StaticOutput << "  end\n";
       StaticOutput << "end\n";
+      if (computeStaticHessian)
+        {
+          StaticOutput << "if nargout >= 3,\n";
+          // Writing initialization instruction for matrix g2
+          int ncols = symbol_table.endo_nbr * symbol_table.endo_nbr;
+          StaticOutput << "  g2 = " <<
+            "sparse([],[],[]," << eq_nbr << ", " << ncols << ", " <<
+            5*ncols << ");\n";
+          StaticOutput << "\n\t"+interfaces::comment()+"\n\t"+interfaces::comment();
+          StaticOutput << "Hessian matrix\n\t";
+          StaticOutput << interfaces::comment() + "\n\n";
+          StaticOutput << hessian_output.str() << lsymetric.str();
+          StaticOutput << "end;\n";
+        }
     }
   else
     {
@@ -770,17 +819,10 @@ ModelTree::writeStaticModel(ostream &StaticOutput)
 void
 ModelTree::writeDynamicModel(ostream &DynamicOutput)
 {
-  TreeIterator tree_it;
-  int lEquationNBR = 0;
-  ostringstream lsymetric;       // Used when writing symetric elements
+  ostringstream lsymetric;       // Used when writing symetric elements in Hessian
   ostringstream model_output;    // Used for storing model equations
-  ostringstream model_tmp_output;// Used for storing tmp expressions for model equations
   ostringstream jacobian_output; // Used for storing jacobian equations
-                                 // Used for storing tmp expressions for jacobian equations
-  ostringstream jacobian_tmp_output;
   ostringstream hessian_output;  // Used for storing Hessian equations
-                                 // Used for storing tmp expressions for Hessian equations
-  ostringstream hessian_tmp_output;
 
   int d = current_order;
 
@@ -789,32 +831,29 @@ ModelTree::writeDynamicModel(ostream &DynamicOutput)
   fill(ZeroEqZero->reference_count.begin(),
        ZeroEqZero->reference_count.end(),0);
 
-  // Clearing output string
-  model_output.str("");
-  jacobian_output.str("");
   // Getting equations from model tree
   // Starting from the end of equation
   // Searching for the next '=' operator,
   current_order = 1;
-  lEquationNBR = 0;
+  int lEquationNBR = 0;
   cout << "\tequations .. ";
-  tree_it = BeginModel;
+  TreeIterator tree_it = BeginModel;
   for (; tree_it != mModelTree.end(); tree_it++)
     {
       if ((*tree_it)->op_code == token::EQUAL || (*tree_it)->op_code == token::ASSIGN)
         {
           if ((*tree_it)->id1->type1 == eLocalParameter)
             {
-              model_output << getExpression((*tree_it)->id1, eStaticEquations, lEquationNBR);
+              model_output << getExpression((*tree_it)->id1, eStaticEquations);
               model_output << " = ";
-              model_output << getExpression((*tree_it)->id2, eStaticEquations, lEquationNBR) << ";" << endl;
+              model_output << getExpression((*tree_it)->id2, eStaticEquations) << ";" << endl;
             }
           else if (lEquationNBR < eq_nbr)
             {
               model_output << "lhs =";
-              model_output << getExpression(((*tree_it)->id1), eDynamicEquations, lEquationNBR) << ";" << endl;
+              model_output << getExpression(((*tree_it)->id1), eDynamicEquations) << ";" << endl;
               model_output << "rhs =";
-              model_output << getExpression(((*tree_it)->id2), eDynamicEquations, lEquationNBR) << ";" << endl;
+              model_output << getExpression(((*tree_it)->id2), eDynamicEquations) << ";" << endl;
               model_output << "residual" << lpar << lEquationNBR+1 << rpar << "= lhs-rhs;" << endl;
               lEquationNBR++;
             }
@@ -825,7 +864,7 @@ ModelTree::writeDynamicModel(ostream &DynamicOutput)
         {
           if (optimize(*tree_it))
             {
-              model_output << "T" << (*tree_it)->idx << "=" << getExpression(*tree_it, eDynamicEquations, lEquationNBR) << ";" << endl;
+              model_output << "T" << (*tree_it)->idx << "=" << getExpression(*tree_it, eDynamicEquations) << ";" << endl;
               (*tree_it)->tmp_status = 1;
             }
           else
@@ -843,7 +882,7 @@ ModelTree::writeDynamicModel(ostream &DynamicOutput)
         {
           if (optimize(*tree_it) == 1)
             {
-              jacobian_output << "T" << (*tree_it)->idx << "=" << getExpression(*tree_it, eDynamicEquations, lEquationNBR) << ";" << endl;
+              jacobian_output << "T" << (*tree_it)->idx << "=" << getExpression(*tree_it, eDynamicEquations) << ";" << endl;
               (*tree_it)->tmp_status = 1;
             }
           else
@@ -865,7 +904,7 @@ ModelTree::writeDynamicModel(ostream &DynamicOutput)
             {
               if (optimize(*tree_it) == 1)
                 {
-                  jacobian_output << "T" << (*tree_it)->idx << "=" << getExpression(*tree_it, eDynamicEquations, lEquationNBR) << ";" << endl;
+                  jacobian_output << "T" << (*tree_it)->idx << "=" << getExpression(*tree_it, eDynamicEquations) << ";" << endl;
                   (*tree_it)->tmp_status = 1;
                 }
               else
@@ -875,7 +914,6 @@ ModelTree::writeDynamicModel(ostream &DynamicOutput)
             }
         }
 
-      lEquationNBR = 0;
       for (unsigned int i = 0; i < mDerivativeIndex[0].size(); i++)
         {
           if (computeJacobianExo || variable_table.getType(mDerivativeIndex[0][i].derivators) == eEndogenous)
@@ -899,7 +937,6 @@ ModelTree::writeDynamicModel(ostream &DynamicOutput)
       // Getting Hessian from model tree
       // Starting from the end of equation
       // Searching for the next '=' operator,
-      lEquationNBR = 0;
       cout << "\tHessian .. ";
       for (unsigned int i = 0; i < mDerivativeIndex[1].size(); i++)
         {
@@ -995,8 +1032,8 @@ ModelTree::writeDynamicModel(ostream &DynamicOutput)
   current_order = d;
 }
 
-//------------------------------------------------------------------------------
-inline string ModelTree::getExpression(NodeID StartID, EquationType  iEquationType, int iEquationID)
+string
+ModelTree::getExpression(NodeID StartID, EquationType iEquationType)
 {
 
   // Stack of tokens
@@ -1342,7 +1379,7 @@ ModelTree::computingPass()
       rpar = ']';
     }
 
-  if (computeHessian)
+  if (computeHessian || computeStaticHessian)
     derive(2);
   else
     derive(1);

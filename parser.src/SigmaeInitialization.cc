@@ -40,7 +40,7 @@ SigmaeStatement::determineMatrixForm(const matrix_type &matrix) throw (MatrixFor
 }
 
 void
-SigmaeStatement::writeOutput(ostream &output) const
+SigmaeStatement::writeOutput(ostream &output, const string &basename) const
 {
   unsigned int ic, ic1;
   unsigned int ir, ir1;

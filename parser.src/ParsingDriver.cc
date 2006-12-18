@@ -120,14 +120,14 @@ ParsingDriver::add_model_constant(string *constant)
 {
   int id = mod_file->num_constants.AddConstant(*constant);
   delete constant;
-  return mod_file->model_tree.AddTerminal((NodeID) id, eNumericalConstant);
+  return model_tree->AddTerminal((NodeID) id, eNumericalConstant);
 }
 
 NodeID
 ParsingDriver::add_model_variable(string *name)
 {
   check_symbol_existence(*name);
-  NodeID id = mod_file->model_tree.AddTerminal(*name);
+  NodeID id = model_tree->AddTerminal(*name);
   delete name;
   return id;
 }
@@ -145,7 +145,7 @@ ParsingDriver::add_model_variable(string *name, string *olag)
            << *name
            << " has lag " << lag << endl;
     }
-  NodeID id = mod_file->model_tree.AddTerminal(*name, lag);
+  NodeID id = model_tree->AddTerminal(*name, lag);
   delete name;
   delete olag;
   return id;
@@ -294,6 +294,12 @@ ParsingDriver::end_histval()
 {
   mod_file->addStatement(new HistValStatement(hist_values, mod_file->symbol_table));
   hist_values.clear();
+}
+
+void
+ParsingDriver::begin_model()
+{
+  model_tree = &mod_file->model_tree;
 }
 
 void
@@ -904,159 +910,175 @@ ParsingDriver::run_model_comparison()
   options_list.clear();
 }
 
+void
+ParsingDriver::begin_planner_objective()
+{
+  model_tree = new ModelTree(mod_file->symbol_table, mod_file->num_constants);
+}
+
+void
+ParsingDriver::end_planner_objective(NodeID expr)
+{
+  // Add equation corresponding to expression
+  model_tree->AddEqual(expr, model_tree->Zero);
+  model_tree->eq_nbr++;
+
+  mod_file->addStatement(new PlannerObjectiveStatement(model_tree));
+}
+
 NodeID
 ParsingDriver::add_model_equal(NodeID arg1, NodeID arg2)
 {
-  NodeID id = mod_file->model_tree.AddEqual(arg1, arg2);
-  mod_file->model_tree.eq_nbr++;
+  NodeID id = model_tree->AddEqual(arg1, arg2);
+  model_tree->eq_nbr++;
   return id;
 }
 
 NodeID
 ParsingDriver::add_model_equal_with_zero_rhs(NodeID arg)
 {
-  return add_model_equal(arg, mod_file->model_tree.Zero);
+  return add_model_equal(arg, model_tree->Zero);
 }
 
 void
 ParsingDriver::declare_and_init_local_parameter(string *name, NodeID rhs)
 {
   mod_file->symbol_table.AddSymbolDeclar(*name, eLocalParameter, *name);
-  NodeID id = mod_file->model_tree.AddTerminal(*name);
-  mod_file->model_tree.AddAssign(id, rhs);
+  NodeID id = model_tree->AddTerminal(*name);
+  model_tree->AddAssign(id, rhs);
   delete name;
 }
 
 NodeID
 ParsingDriver::add_model_plus(NodeID arg1, NodeID arg2)
 {
-  return mod_file->model_tree.AddPlus(arg1, arg2);
+  return model_tree->AddPlus(arg1, arg2);
 }
 
 NodeID
 ParsingDriver::add_model_minus(NodeID arg1, NodeID arg2)
 {
-  return mod_file->model_tree.AddMinus(arg1, arg2);
+  return model_tree->AddMinus(arg1, arg2);
 }
 
 NodeID
 ParsingDriver::add_model_uminus(NodeID arg1)
 {
-  return mod_file->model_tree.AddUMinus(arg1);
+  return model_tree->AddUMinus(arg1);
 }
 
 NodeID
 ParsingDriver::add_model_times(NodeID arg1, NodeID arg2)
 {
-  return mod_file->model_tree.AddTimes(arg1, arg2);
+  return model_tree->AddTimes(arg1, arg2);
 }
 
 NodeID
 ParsingDriver::add_model_divide(NodeID arg1, NodeID arg2)
 {
-  return mod_file->model_tree.AddDivide(arg1, arg2);
+  return model_tree->AddDivide(arg1, arg2);
 }
 
 NodeID
 ParsingDriver::add_model_power(NodeID arg1, NodeID arg2)
 {
-  return mod_file->model_tree.AddPower(arg1, arg2);
+  return model_tree->AddPower(arg1, arg2);
 }
 
 NodeID
 ParsingDriver::add_model_exp(NodeID arg1)
 {
-  return mod_file->model_tree.AddExp(arg1);
+  return model_tree->AddExp(arg1);
 }
 
 NodeID
 ParsingDriver::add_model_log(NodeID arg1)
 {
-  return mod_file->model_tree.AddLog(arg1);
+  return model_tree->AddLog(arg1);
 }
 
 NodeID
 ParsingDriver::add_model_log10(NodeID arg1)
 {
-  return mod_file->model_tree.AddLog10(arg1);
+  return model_tree->AddLog10(arg1);
 }
 
 NodeID
 ParsingDriver::add_model_cos(NodeID arg1)
 {
-  return mod_file->model_tree.AddCos(arg1);
+  return model_tree->AddCos(arg1);
 }
 
 NodeID
 ParsingDriver::add_model_sin(NodeID arg1)
 {
-  return mod_file->model_tree.AddSin(arg1);
+  return model_tree->AddSin(arg1);
 }
 
 NodeID
 ParsingDriver::add_model_tan(NodeID arg1)
 {
-  return mod_file->model_tree.AddTan(arg1);
+  return model_tree->AddTan(arg1);
 }
 
 NodeID
 ParsingDriver::add_model_acos(NodeID arg1)
 {
-  return mod_file->model_tree.AddACos(arg1);
+  return model_tree->AddACos(arg1);
 }
 
 NodeID
 ParsingDriver::add_model_asin(NodeID arg1)
 {
-  return mod_file->model_tree.AddASin(arg1);
+  return model_tree->AddASin(arg1);
 }
 
 NodeID
 ParsingDriver::add_model_atan(NodeID arg1)
 {
-  return mod_file->model_tree.AddATan(arg1);
+  return model_tree->AddATan(arg1);
 }
 
 NodeID
 ParsingDriver::add_model_cosh(NodeID arg1)
 {
-  return mod_file->model_tree.AddCosH(arg1);
+  return model_tree->AddCosH(arg1);
 }
 
 NodeID
 ParsingDriver::add_model_sinh(NodeID arg1)
 {
-  return mod_file->model_tree.AddSinH(arg1);
+  return model_tree->AddSinH(arg1);
 }
 
 NodeID
 ParsingDriver::add_model_tanh(NodeID arg1)
 {
-  return mod_file->model_tree.AddTanH(arg1);
+  return model_tree->AddTanH(arg1);
 }
 
 NodeID
 ParsingDriver::add_model_acosh(NodeID arg1)
 {
-  return mod_file->model_tree.AddACosH(arg1);
+  return model_tree->AddACosH(arg1);
 }
 
 NodeID
 ParsingDriver::add_model_asinh(NodeID arg1)
 {
-  return mod_file->model_tree.AddASinH(arg1);
+  return model_tree->AddASinH(arg1);
 }
 
 NodeID
 ParsingDriver::add_model_atanh(NodeID arg1)
 {
-  return mod_file->model_tree.AddATanH(arg1);
+  return model_tree->AddATanH(arg1);
 }
 
 NodeID
 ParsingDriver::add_model_sqrt(NodeID arg1)
 {
-  return mod_file->model_tree.AddSqRt(arg1);
+  return model_tree->AddSqRt(arg1);
 }
 
 void

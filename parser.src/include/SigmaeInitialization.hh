@@ -39,7 +39,7 @@ private:
 
 public :
   SigmaeStatement(const matrix_type &matrix_arg) throw (MatrixFormException);
-  virtual void writeOutput(ostream &output) const;
+  virtual void writeOutput(ostream &output, const string &basename) const;
 };
 
 #endif

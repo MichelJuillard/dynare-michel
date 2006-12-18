@@ -18,7 +18,7 @@ SteadyStatement::SteadyStatement(const OptionsList &options_list_arg) :
 }
 
 void
-SteadyStatement::writeOutput(ostream &output) const
+SteadyStatement::writeOutput(ostream &output, const string &basename) const
 {
   options_list.writeOutput(output);
   output << "steady;\n";
@@ -30,7 +30,7 @@ CheckStatement::CheckStatement(const OptionsList &options_list_arg) :
 }
 
 void
-CheckStatement::writeOutput(ostream &output) const
+CheckStatement::writeOutput(ostream &output, const string &basename) const
 {
   options_list.writeOutput(output);
   output << "check;\n";
@@ -54,7 +54,7 @@ SimulStatement::checkPass(ModFileStructure &mod_file_struct)
 }
 
 void
-SimulStatement::writeOutput(ostream &output) const
+SimulStatement::writeOutput(ostream &output, const string &basename) const
 {
   options_list.writeOutput(output);
   output << "simul(oo_.dr);\n";
@@ -74,7 +74,7 @@ StochSimulStatement::checkPass(ModFileStructure &mod_file_struct)
 }
 
 void
-StochSimulStatement::writeOutput(ostream &output) const
+StochSimulStatement::writeOutput(ostream &output, const string &basename) const
 {
   options_list.writeOutput(output);
   tmp_symbol_table.writeOutput("var_list_", output);
@@ -95,7 +95,7 @@ EstimationStatement::checkPass(ModFileStructure &mod_file_struct)
 }
 
 void
-EstimationStatement::writeOutput(ostream &output) const
+EstimationStatement::writeOutput(ostream &output, const string &basename) const
 {
   options_list.writeOutput(output);
   tmp_symbol_table.writeOutput("var_list_", output);
@@ -110,7 +110,7 @@ PriorAnalysisStatement::PriorAnalysisStatement(const TmpSymbolTable &tmp_symbol_
 }
 
 void
-PriorAnalysisStatement::writeOutput(ostream &output) const
+PriorAnalysisStatement::writeOutput(ostream &output, const string &basename) const
 {
   options_list.writeOutput(output);
   tmp_symbol_table.writeOutput("var_list_", output);
@@ -125,7 +125,7 @@ PosteriorAnalysisStatement::PosteriorAnalysisStatement(const TmpSymbolTable &tmp
 }
 
 void
-PosteriorAnalysisStatement::writeOutput(ostream &output) const
+PosteriorAnalysisStatement::writeOutput(ostream &output, const string &basename) const
 {
   options_list.writeOutput(output);
   tmp_symbol_table.writeOutput("var_list_", output);
@@ -140,7 +140,7 @@ RplotStatement::RplotStatement(const TmpSymbolTable &tmp_symbol_table_arg,
 }
 
 void
-RplotStatement::writeOutput(ostream &output) const
+RplotStatement::writeOutput(ostream &output, const string &basename) const
 {
   options_list.writeOutput(output);
   tmp_symbol_table.writeOutput("var_list_", output);
@@ -153,7 +153,7 @@ UnitRootVarsStatement::UnitRootVarsStatement(const TmpSymbolTable &tmp_symbol_ta
 }
 
 void
-UnitRootVarsStatement::writeOutput(ostream &output) const
+UnitRootVarsStatement::writeOutput(ostream &output, const string &basename) const
 {
   tmp_symbol_table.writeOutput("options_.unit_root_vars", output);
 }
@@ -163,7 +163,7 @@ PeriodsStatement::PeriodsStatement(int periods_arg) : periods(periods_arg)
 }
 
 void
-PeriodsStatement::writeOutput(ostream &output) const
+PeriodsStatement::writeOutput(ostream &output, const string &basename) const
 {
   output << "options_.periods = " << periods << ";" << endl;
   output << "options_.simul = 1;" << endl;
@@ -178,7 +178,7 @@ DsampleStatement::DsampleStatement(int val1_arg, int val2_arg) : val1(val1_arg),
 }
 
 void
-DsampleStatement::writeOutput(ostream &output) const
+DsampleStatement::writeOutput(ostream &output, const string &basename) const
 {
   if (val2 < 0)
     output << "options_.dsample = " << val1 << ";" << endl;
@@ -192,7 +192,7 @@ VarobsStatement::VarobsStatement(const TmpSymbolTable &tmp_symbol_table_arg) :
 }
 
 void
-VarobsStatement::writeOutput(ostream &output) const
+VarobsStatement::writeOutput(ostream &output, const string &basename) const
 {
   tmp_symbol_table.writeOutput("options_.varobs", output);
 }
@@ -205,7 +205,7 @@ EstimatedParamsStatement::EstimatedParamsStatement(const vector<EstimationParams
 }
 
 void
-EstimatedParamsStatement::writeOutput(ostream &output) const
+EstimatedParamsStatement::writeOutput(ostream &output, const string &basename) const
 {
   output << "global estim_params_\n";
   output << "var_list_ = [];\n";
@@ -262,7 +262,7 @@ EstimatedParamsInitStatement::EstimatedParamsInitStatement(const vector<Estimati
 }
 
 void
-EstimatedParamsInitStatement::writeOutput(ostream &output) const
+EstimatedParamsInitStatement::writeOutput(ostream &output, const string &basename) const
 {
   vector<EstimationParams>::const_iterator it;
 
@@ -312,7 +312,7 @@ EstimatedParamsBoundsStatement::EstimatedParamsBoundsStatement(const vector<Esti
 }
 
 void
-EstimatedParamsBoundsStatement::writeOutput(ostream &output) const
+EstimatedParamsBoundsStatement::writeOutput(ostream &output, const string &basename) const
 {
   vector<EstimationParams>::const_iterator it;
 
@@ -367,7 +367,7 @@ ObservationTrendsStatement::ObservationTrendsStatement(const trend_elements_type
 }
 
 void
-ObservationTrendsStatement::writeOutput(ostream &output) const
+ObservationTrendsStatement::writeOutput(ostream &output, const string &basename) const
 {
   output << "options_.trend_coeff_ = {};" << endl;
 
@@ -398,7 +398,7 @@ CalibVarStatement::CalibVarStatement(const calib_var_type &calib_var_arg,
 }
 
 void
-CalibVarStatement::writeOutput(ostream &output) const
+CalibVarStatement::writeOutput(ostream &output, const string &basename) const
 {
 
   output << interfaces::comment() << "\n" << interfaces::comment() << "CALIB_VAR \n"
@@ -495,7 +495,7 @@ CalibStatement::CalibStatement(int covar_arg) : covar(covar_arg)
 }
 
 void
-CalibStatement::writeOutput(ostream &output) const
+CalibStatement::writeOutput(ostream &output, const string &basename) const
 {
   output << "M_.Sigma_e=calib(calib_var_index,calib_targets,calib_weights," << covar << ",Sigma_e_);\n";
 }
@@ -506,7 +506,7 @@ OsrParamsStatement::OsrParamsStatement(const TmpSymbolTable &tmp_symbol_table_ar
 }
 
 void
-OsrParamsStatement::writeOutput(ostream &output) const
+OsrParamsStatement::writeOutput(ostream &output, const string &basename) const
 {
   tmp_symbol_table.writeOutput("osr_params_", output);
 }
@@ -525,7 +525,7 @@ OsrStatement::checkPass(ModFileStructure &mod_file_struct)
 }
 
 void
-OsrStatement::writeOutput(ostream &output) const
+OsrStatement::writeOutput(ostream &output, const string &basename) const
 {
   options_list.writeOutput(output);
   tmp_symbol_table.writeOutput("var_list_", output);
@@ -538,7 +538,7 @@ OlrInstStatement::OlrInstStatement(const TmpSymbolTable &tmp_symbol_table_arg) :
 }
 
 void
-OlrInstStatement::writeOutput(ostream &output) const
+OlrInstStatement::writeOutput(ostream &output, const string &basename) const
 {
   tmp_symbol_table.writeOutput("options_.olr_inst", output);
 }
@@ -558,7 +558,7 @@ OlrStatement::checkPass(ModFileStructure &mod_file_struct)
 }
 
 void
-OlrStatement::writeOutput(ostream &output) const
+OlrStatement::writeOutput(ostream &output, const string &basename) const
 {
   options_list.writeOutput(output);
   tmp_symbol_table.writeOutput("var_list_", output);
@@ -578,7 +578,7 @@ OptimWeightsStatement::OptimWeightsStatement(const var_weights_type &var_weights
 }
 
 void
-OptimWeightsStatement::writeOutput(ostream &output) const
+OptimWeightsStatement::writeOutput(ostream &output, const string &basename) const
 {
   output << interfaces::comment() << "OPTIM_WEIGHTS\n\n";
   output << "optim_weights_ = sparse(M_.endo_nbr,M_.endo_nbr);\n";
@@ -616,7 +616,7 @@ DynaSaveStatement::DynaSaveStatement(const TmpSymbolTable &tmp_symbol_table_arg,
 }
 
 void
-DynaSaveStatement::writeOutput(ostream &output) const
+DynaSaveStatement::writeOutput(ostream &output, const string &basename) const
 {
   tmp_symbol_table.writeOutput("var_list_", output);
   output << "dynasave(" << filename;
@@ -634,7 +634,7 @@ DynaTypeStatement::DynaTypeStatement(const TmpSymbolTable &tmp_symbol_table_arg,
 }
 
 void
-DynaTypeStatement::writeOutput(ostream &output) const
+DynaTypeStatement::writeOutput(ostream &output, const string &basename) const
 {
   tmp_symbol_table.writeOutput("var_list_", output);
   output << "dynatype(" << filename;
@@ -651,7 +651,7 @@ ModelComparisonStatement::ModelComparisonStatement(const filename_list_type &fil
 }
 
 void
-ModelComparisonStatement::writeOutput(ostream &output) const
+ModelComparisonStatement::writeOutput(ostream &output, const string &basename) const
 {
   options_list.writeOutput(output);
 
@@ -665,4 +665,33 @@ ModelComparisonStatement::writeOutput(ostream &output) const
       output << "ModelPriors_ = { ModelPriors_{:} '" << it->second << "};\n";
     }
   output << "model_comparison(ModelNames_,ModelPriors_);\n";
+}
+
+PlannerObjectiveStatement::PlannerObjectiveStatement(ModelTree *model_tree_arg) :
+  model_tree(model_tree_arg)
+{
+}
+
+PlannerObjectiveStatement::~PlannerObjectiveStatement()
+{
+  delete model_tree;
+}
+
+void
+PlannerObjectiveStatement::checkPass(ModFileStructure &mod_file_struct)
+{
+  model_tree->checkPass();
+}
+
+void
+PlannerObjectiveStatement::computingPass()
+{
+  model_tree->computeStaticHessian = true;
+  model_tree->computingPass();
+}
+
+void
+PlannerObjectiveStatement::writeOutput(ostream &output, const string &basename) const
+{
+  model_tree->writeStaticFile(basename + "_objective");
 }

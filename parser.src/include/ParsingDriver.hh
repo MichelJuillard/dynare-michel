@@ -11,6 +11,7 @@
 #include "Shocks.hh"
 #include "SigmaeInitialization.hh"
 #include "NumericalInitialization.hh"
+#include "ModelTree.hh"
 
 using namespace std;
 
@@ -49,6 +50,10 @@ private:
   Expression expression;
   //! Stores temporary symbol table
   TmpSymbolTable *tmp_symbol_table;
+
+  //! The model tree in which to add expressions currently parsed
+  ModelTree *model_tree;
+
   //! Stores options lists
   OptionsList options_list;
   //! Stores operator table
@@ -185,6 +190,8 @@ public:
   void end_endval();
   //! Writes end of an histval block
   void end_histval();
+  //! Begin a model block
+  void begin_model();
   //! Writes a shocks statement
   void end_shocks();
   //! Writes a mshocks statement
@@ -280,6 +287,10 @@ public:
   void run_dynatype(string *arg1, string *arg2 = new string);
   void add_mc_filename(string *filename, string *prior = new string("1"));
   void run_model_comparison();
+  //! Begin a planner_objective statement
+  void begin_planner_objective();
+  //! End a planner objective statement
+  void end_planner_objective(NodeID expr);
   //! Writes token "arg1=arg2" to model tree
   NodeID add_model_equal(NodeID arg1, NodeID arg2);
   //! Writes token "arg=0" to model tree

@@ -25,7 +25,13 @@ public:
   virtual ~Statement();
   //! Do some internal check, and fill the ModFileStructure class
   virtual void checkPass(ModFileStructure &mod_file_struct);
-  virtual void writeOutput(ostream &output) const = 0;
+  virtual void computingPass();
+  //! Write Matlab outout code
+  /*!
+    \param output is the output stream of the main matlab file
+    \param basename is the name of the modfile (without extension) which can be used to build auxiliary files
+  */
+  virtual void writeOutput(ostream &output, const string &basename) const = 0;
 };
 
 class NativeStatement : public Statement
@@ -34,7 +40,7 @@ private:
   const string native_statement;
 public:
   NativeStatement(const string &native_statement_arg);
-  virtual void writeOutput(ostream &output) const;
+  virtual void writeOutput(ostream &output, const string &basename) const;
 };
 
 class OptionsList

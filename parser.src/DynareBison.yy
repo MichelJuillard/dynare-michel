@@ -44,7 +44,7 @@ typedef pair<int, Type> ExpObj;
 %token DATAFILE DIAGNOSTIC DIFFUSE_D DOLLAR DR_ALGO DROP DSAMPLE DYN2VEC DYNASAVE DYNATYPE 
 %token END ENDVAL EQUAL ESTIMATION ESTIMATED_PARAMS ESTIMATED_PARAMS_BOUNDS ESTIMATED_PARAMS_INIT
 %token PRIOR_ANALYSIS POSTERIOR_ANALYSIS
-%token FILTERED_VARS FIRST_OBS
+%token FILTER_STEP_AHEAD FILTERED_VARS FIRST_OBS
 %token <string_val> FLOAT_NUMBER
 %token FORECAST FUNCTIONS
 %token GAMMA_PDF GRAPH
@@ -59,7 +59,7 @@ typedef pair<int, Type> ExpObj;
 %token NOBS NOCORR NODIAGNOSTIC NOFUNCTIONS NOGRAPH XLS_SHEET XLS_RANGE
 %token NOMOMENTS NOPRINT NORMAL_PDF
 %token OBSERVATION_TRENDS OLR OLR_INST OLR_BETA OPTIM OPTIM_WEIGHTS ORDER OSR OSR_PARAMS 
-%token PARAMETERS PERIODS PREFILTER PRESAMPLE PRINT PRIOR_TRUNC FILTER_STEP_AHEAD
+%token PARAMETERS PERIODS PLANNER_OBJECTIVE PREFILTER PRESAMPLE PRINT PRIOR_TRUNC 
 %token QZ_CRITERIUM
 %token RELATIVE_IRF REPLIC RESOL RPLOT
 %token SHOCKS SIGMA_E SIMUL SIMUL_ALGO SIMUL_SEED SMOOTHER SOLVE_ALGO STDERR STEADY STOCH_SIMUL  
@@ -129,6 +129,7 @@ typedef pair<int, Type> ExpObj;
 	| olr
 	| olr_inst
         | model_comparison
+  | planner_objective
 	;
 
     
@@ -330,10 +331,10 @@ typedef pair<int, Type> ExpObj;
  	;
 	
  model
- 	: MODEL ';' equation_list END 
- 	| MODEL '(' o_linear ')' ';'
+  : MODEL ';' { driver.begin_model(); } equation_list END 
+ 	| MODEL '(' o_linear ')' ';' { driver.begin_model(); } 
 		equation_list END
- 	| MODEL '(' USE_DLL ')' ';' {driver.use_dll();}
+  | MODEL '(' USE_DLL ')' ';' { driver.begin_model(); driver.use_dll(); }
 		equation_list END
  	;
 
@@ -1036,6 +1037,8 @@ typedef pair<int, Type> ExpObj;
               | o_print
               | o_noprint
               ;
+
+ planner_objective : PLANNER_OBJECTIVE { driver.begin_planner_objective(); } hand_side { driver.end_planner_objective($3); } ';'
 
  filename_list : filename {driver.add_mc_filename($1);}
         | filename_list COMMA filename {driver.add_mc_filename($3);}

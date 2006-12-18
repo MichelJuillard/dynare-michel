@@ -80,6 +80,7 @@ int sigma_e = 0;
 <INITIAL>dsample {BEGIN DYNARE_STATEMENT; return token::DSAMPLE;}
 <INITIAL>Sigma_e {BEGIN DYNARE_STATEMENT; sigma_e = 1; return token::SIGMA_E;}
 <INITIAL>calib {BEGIN DYNARE_STATEMENT; return token::CALIB;}
+<INITIAL>planner_objective {BEGIN DYNARE_STATEMENT; return token::PLANNER_OBJECTIVE;}
 
  /* End of a Dynare statement */
 <DYNARE_STATEMENT>; {
