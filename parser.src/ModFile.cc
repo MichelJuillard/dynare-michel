@@ -1,8 +1,7 @@
 #include "ModFile.hh"
 #include "Interface.hh"
 
-ModFile::ModFile() : symbol_table(model_parameters),
-                     model_tree(symbol_table, model_parameters, num_constants),
+ModFile::ModFile() : model_tree(symbol_table, num_constants),
                      linear(false)
 {
 }

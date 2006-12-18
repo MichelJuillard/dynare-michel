@@ -11,10 +11,9 @@
 #include <string>
 #include <vector>
 #include <ostream>
-//------------------------------------------------------------------------------
-#include "ModelParameters.hh"
+
 #include "SymbolTableTypes.hh"
-//------------------------------------------------------------------------------
+
 /*!
   \class SymbolTable
   \brief This class keeps track of symbols
@@ -22,8 +21,6 @@
 class SymbolTable
 {
 private:
-  //! A reference to the model parameters
-  ModelParameters &mod_param;
   /*! Adds symbol into symbol table
     \param name a string.
     \param type a Type struct.
@@ -46,9 +43,19 @@ private:
   void ResetType(std::string name, Type new_type);
 public :
   /*! Constructor */
-  SymbolTable(ModelParameters &mod_param_arg);
-  /*! Destructor*/
-  ~SymbolTable();
+  SymbolTable();
+  //! Number of declared endogenous variables
+  int endo_nbr;
+  //! Number of declared exogenous variables
+  int exo_nbr;
+  //! Number of declared deterministic exogenous variables
+  int exo_det_nbr;
+  //! Number of declared parameters
+  int parameter_nbr;
+  //! Number of declared local parameters
+  int local_parameter_nbr;
+  //! Number of declared recursive variables
+  int recur_nbr;
   /*! Pointer to error function of parser class */
   void (* error) (const char* m);
   /*! Adds a symbol apearing in declaration
@@ -78,10 +85,6 @@ public :
   inline int getID(const std::string &name) const;
   //! Write output of this class
   void writeOutput(std::ostream &output);
-#if 0 // Commented out on 27/11/2006, SV
-  /*! Checks if symbols are used in model equations, removes unused symbol */
-  void clean();
-#endif // Comment
 };
 
 inline bool SymbolTable::Exist(const std::string &name) const

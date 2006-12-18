@@ -3,10 +3,14 @@
 
 #include "VariableTable.hh"
 
-VariableTable::VariableTable(const SymbolTable &symbol_table_arg,
-                             ModelParameters &mod_param_arg) :
+VariableTable::VariableTable(const SymbolTable &symbol_table_arg) :
   symbol_table(symbol_table_arg),
-  mod_param(mod_param_arg)
+  var_endo_nbr(0), var_exo_nbr(0), var_exo_det_nbr(0),
+  max_lag(0), max_lead(0),
+  max_endo_lag(0), max_endo_lead(0),
+  max_exo_lag(0), max_exo_lead(0),
+  max_exo_det_lag(0), max_exo_det_lead(0),
+  max_recur_lag(0), max_recur_lead(0)
 {
 }
 
@@ -34,43 +38,43 @@ VariableTable::AddVariable(const string &iName, int iLag)
   // Setting dynamic variables numbers
   Type type = getType(lVariableID);
   if (type == eEndogenous)
-    mod_param.var_endo_nbr++;
+    var_endo_nbr++;
   if (type == eExogenous)
-    mod_param.var_exo_nbr++;
+    var_exo_nbr++;
   if (type == eExogenousDet)
-    mod_param.var_exo_det_nbr++;
+    var_exo_det_nbr++;
 
   // Setting maximum and minimum lags
-  if (mod_param.max_lead < iLag)
-    mod_param.max_lead = iLag;
-  else if (-mod_param.max_lag > iLag)
-    mod_param.max_lag = -iLag;
+  if (max_lead < iLag)
+    max_lead = iLag;
+  else if (-max_lag > iLag)
+    max_lag = -iLag;
 
   switch(type)
     {
     case eEndogenous:
-      if (mod_param.max_endo_lead < iLag)
-        mod_param.max_endo_lead = iLag;
-      else if (-mod_param.max_endo_lag > iLag)
-        mod_param.max_endo_lag = -iLag;
+      if (max_endo_lead < iLag)
+        max_endo_lead = iLag;
+      else if (-max_endo_lag > iLag)
+        max_endo_lag = -iLag;
       break;
     case eExogenous:
-      if (mod_param.max_exo_lead < iLag)
-        mod_param.max_exo_lead = iLag;
-      else if (-mod_param.max_exo_lag > iLag)
-        mod_param.max_exo_lag = -iLag;
+      if (max_exo_lead < iLag)
+        max_exo_lead = iLag;
+      else if (-max_exo_lag > iLag)
+        max_exo_lag = -iLag;
       break;
     case eExogenousDet:
-      if (mod_param.max_exo_det_lead < iLag)
-        mod_param.max_exo_det_lead = iLag;
-      else if (-mod_param.max_exo_det_lag > iLag)
-        mod_param.max_exo_det_lag = -iLag;
+      if (max_exo_det_lead < iLag)
+        max_exo_det_lead = iLag;
+      else if (-max_exo_det_lag > iLag)
+        max_exo_det_lag = -iLag;
       break;
     case eRecursiveVariable:
-      if (mod_param.max_recur_lead < iLag)
-        mod_param.max_recur_lead = iLag;
-      else if (-mod_param.max_recur_lag > iLag)
-        mod_param.max_recur_lag = -iLag;
+      if (max_recur_lead < iLag)
+        max_recur_lead = iLag;
+      else if (-max_recur_lag > iLag)
+        max_recur_lag = -iLag;
       break;
     default:
       ;

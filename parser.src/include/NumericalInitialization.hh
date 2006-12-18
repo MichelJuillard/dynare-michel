@@ -41,12 +41,9 @@ protected:
 
 class InitValStatement : public InitOrEndValStatement
 {
-private:
-  const ModelParameters &mod_param;
 public:
   InitValStatement(const init_values_type &init_values_arg,
-                   const SymbolTable &symbol_table_arg,
-                   const ModelParameters &mod_param_arg);
+                   const SymbolTable &symbol_table_arg);
   virtual void writeOutput(ostream &output) const;
 };
 

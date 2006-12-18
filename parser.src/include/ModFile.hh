@@ -5,7 +5,6 @@ using namespace std;
 
 #include <ostream>
 
-#include "ModelParameters.hh"
 #include "SymbolTable.hh"
 #include "NumericalConstants.hh"
 #include "ModelTree.hh"
@@ -18,8 +17,6 @@ class ModFile
 public:
   ModFile();
   ~ModFile();
-  //! Model parameters
-  ModelParameters model_parameters;
   //! Symbol table
   SymbolTable symbol_table;
   //! Numerical constants table

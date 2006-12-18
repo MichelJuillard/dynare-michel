@@ -17,9 +17,9 @@ using namespace std;
 #include "NumericalConstants.hh"
 #include "DataTree.hh"
 
-DataTree::DataTree(SymbolTable &symbol_table_arg, ModelParameters &mod_param_arg) :
+DataTree::DataTree(SymbolTable &symbol_table_arg) :
   symbol_table(symbol_table_arg),
-  variable_table(symbol_table_arg, mod_param_arg),
+  variable_table(symbol_table_arg),
   NoOpCode(-1), NullID(NULL)
 {
   offset = 1;

@@ -123,7 +123,7 @@ public :
   inline NodeID     AddAssign(NodeID iArg1, NodeID iArg2);
 public :
   /*! Constructor */
-  DataTree(SymbolTable &symbol_table_arg, ModelParameters &mod_param_arg);
+  DataTree(SymbolTable &symbol_table_arg);
   /*! Destructor */
   ~DataTree();
 };

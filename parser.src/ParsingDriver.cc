@@ -278,8 +278,7 @@ ParsingDriver::use_dll()
 void
 ParsingDriver::end_initval()
 {
-  mod_file->addStatement(new InitValStatement(init_values, mod_file->symbol_table,
-                                              mod_file->model_parameters));
+  mod_file->addStatement(new InitValStatement(init_values, mod_file->symbol_table));
   init_values.clear();
 }
 
@@ -909,7 +908,7 @@ NodeID
 ParsingDriver::add_model_equal(NodeID arg1, NodeID arg2)
 {
   NodeID id = mod_file->model_tree.AddEqual(arg1, arg2);
-  mod_file->model_parameters.eq_nbr++;
+  mod_file->model_tree.eq_nbr++;
   return id;
 }
 

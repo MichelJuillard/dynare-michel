@@ -38,7 +38,6 @@ COMMON_OBJ=\
 	ComputingTasks.o\
 	DynareMain.o\
 	Expression.o\
-	ModelParameters.o\
 	ModelTree.o\
 	NumericalConstants.o\
 	NumericalInitialization.o\

@@ -8,7 +8,6 @@
 using namespace std;
 //------------------------------------------------------------------------------
 #include "Shocks.hh"
-#include "ModelParameters.hh"
 #include "Interface.hh"
 
 AbstractShocksStatement::AbstractShocksStatement(bool mshocks_arg,

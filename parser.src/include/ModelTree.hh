@@ -37,8 +37,6 @@ private :
   int           min_cost;
   /*! left and right parentheses can be (,[ or ),] */
   char          lpar, rpar;
-  //! Reference to model parameters
-  ModelParameters &mod_param;
   //! Reference to numerical constants table
   const NumericalConstants &num_constants;
 
@@ -66,7 +64,9 @@ private :
 
 public:
   //! Constructor
-  ModelTree(SymbolTable &symbol_table_arg, ModelParameters &mod_param_arg, const NumericalConstants &num_constants);
+  ModelTree(SymbolTable &symbol_table_arg, const NumericalConstants &num_constants);
+  //! Number of equations contained in this model tree
+  int eq_nbr;
   //! Do some checking
   void checkPass() const;
   //! Whether Jacobian (vs endogenous) should be written

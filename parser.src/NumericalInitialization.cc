@@ -47,10 +47,8 @@ InitOrEndValStatement::writeInitValues(ostream &output) const
 }
 
 InitValStatement::InitValStatement(const init_values_type &init_values_arg,
-                                   const SymbolTable &symbol_table_arg,
-                                   const ModelParameters &mod_param_arg) :
-  InitOrEndValStatement(init_values_arg, symbol_table_arg),
-  mod_param(mod_param_arg)
+                                   const SymbolTable &symbol_table_arg) :
+  InitOrEndValStatement(init_values_arg, symbol_table_arg)
 {
 }
 
@@ -62,8 +60,8 @@ InitValStatement::writeOutput(ostream &output) const
   // Writing initval block to set initial values for variables
   output << "options_.initval_file = 0;\nendval_=0;\n";
 
-  if (mod_param.recur_nbr > 0)
-    output << "recurs_ = zeros(" << mod_param.recur_nbr << ", 1);\n";
+  if (symbol_table.recur_nbr > 0)
+    output << "recurs_ = zeros(" << symbol_table.recur_nbr << ", 1);\n";
 
   writeInitValues(output);
 

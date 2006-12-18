@@ -16,8 +16,6 @@ class VariableTable
 private:
   //! A reference to the symbol table
   const SymbolTable &symbol_table;
-  //! A reference to model parameters
-  ModelParameters &mod_param;
   //! Variable key type to acced variable table elements
   typedef pair<string, int> varKey;
   //! Maps a pair (symbol, lag) to an ID
@@ -34,7 +32,33 @@ private:
   */
   vector<int> mPrintFormatIndex;
 public:
-  VariableTable(const SymbolTable &symbol_table_arg, ModelParameters &mod_param_arg);
+  VariableTable(const SymbolTable &symbol_table_arg);
+  //! Number of dynamic endogenous variables inside the model block
+  int var_endo_nbr;
+  //! Number of dynamic exogenous variables inside the model block
+  int var_exo_nbr;
+  //! Number of dynamic deterministic exogenous variables inside the model block
+  int var_exo_det_nbr;
+  //! Maximum lag over all types of variables (positive value)
+  int max_lag;
+  //! Maximum lead over all types of variables
+  int max_lead;
+  //! Maximum lag over endogenous variables (positive value)
+  int max_endo_lag;
+  //! Maximum lead over endogenous variables
+  int max_endo_lead;
+  //! Maximum lag over exogenous variables (positive value)
+  int max_exo_lag;
+  //! Maximum lead over exogenous variables
+  int max_exo_lead;
+  //! Maximum lag over deterministic exogenous variables (positive value)
+  int max_exo_det_lag;
+  //! Maximum lead over deterministic exogenous variables
+  int max_exo_det_lead;
+  //! Maximum lag over recursive variables (positive value)
+  int max_recur_lag;
+  //! Maximum lead over recursive variables
+  int max_recur_lead;
   //! Adds a variable in the table, and returns its (newly allocated) varID
   /*! Also works if the variable already exists */
   int AddVariable(const string &iName, int iLag);
