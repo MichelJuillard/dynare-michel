@@ -28,13 +28,6 @@ ModFile::checkPass()
       it != statements.end(); it++)
     (*it)->checkPass(mod_file_struct);
 
-//   if (!mod_file_struct.simul_present
-//       && !mod_file_struct.stoch_simul_or_similar_present)
-//     {
-//       cerr << "Error: nothing to compute! you must use one of {simul, stoch_simul, estimation, olr, osr}" << endl;
-//       exit(-1);
-//     }
-
   if (mod_file_struct.simul_present
       && mod_file_struct.stoch_simul_or_similar_present)
     {

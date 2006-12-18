@@ -154,7 +154,7 @@ ParsingDriver::add_model_variable(string *name, string *olag)
 ExpObj *
 ParsingDriver::add_expression_variable(string *name)
 {
-  //  check_symbol_existence(*name);
+  check_symbol_existence(*name);
   int id = mod_file->symbol_table.getID(*name);
   Type type = mod_file->symbol_table.getType(*name);
   delete name;
