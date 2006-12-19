@@ -32,7 +32,7 @@ MhDirectoryName = CheckPath('metropolis');
 nblck = options_.mh_nblck;
 nruns = ones(nblck,1)*options_.mh_replic;
 npar  = length(xparam1);
-MAX_nruns = ceil(options_.MaxNumberOfBytes/(npar+2)/8);
+MAX_nruns = ceil(options_.MaxNumberOfBytes/(npar+2)/8/50  );
 d = chol(vv);
 options_.lik_algo = 1;
 OpenOldFile = ones(nblck,1);
@@ -51,8 +51,24 @@ if options_.load_mh_file == 0
         delete([ MhDirectoryName '/' M_.fname '_mh*_blck*.mat']);
         disp('MH: Old _mh files succesfully erased!')
     end
+    file = dir([ MhDirectoryName '/metropolis.log']);
+    if length(file)
+        delete([ MhDirectoryName '/metropolis.log']);
+        disp('MH: Old metropolis.log file succesfully erased!')
+        disp('MH: Creation of a new metropolis.log file.')
+    end
+    fidlog = fopen([MhDirectoryName '/metropolis.log'],'w');
+    fprintf(fidlog,'%% MH log file (Dynare).\n');
+    fprintf(fidlog,['%% ' datestr(now,0) '.\n']);
+    fprintf(fidlog,' \n\n');
+    fprintf(fidlog,'%% Session 1.\n');
+    fprintf(fidlog,' \n');
+    fprintf(fidlog,['  Number of blocks...............: ' int2str(nblck) '\n']);
+    fprintf(fidlog,['  Number of simulations per block: ' int2str(nruns(1)) '\n']);
+    fprintf(fidlog,' \n');
     %% Initial values...
     if nblck > 1% Case 1: multiple chains
+        fprintf(fidlog,['  Initial values of the parameters:\n']);
         disp('MH: Searching for initial values...')
         ix2 = zeros(nblck,npar);
         ilogpo2 = zeros(nblck,1);
@@ -65,6 +81,11 @@ if options_.load_mh_file == 0
                 if all(candidate' > mh_bounds(:,1)) & all(candidate' < mh_bounds(:,2)) 
                     ix2(j,:) = candidate;
                     ilogpo2(j) = - feval(TargetFun,ix2(j,:)',varargin{:});
+                    fprintf(fidlog,['    Blck ' int2str(j) ':\n']);
+                    for i=1:length(ix2(1,:))
+                        fprintf(fidlog,['      params:' int2str(i) ': ' num2str(ix2(j,i)) '\n']);
+                    end
+                    fprintf(fidlog,['      logpo2: ' num2str(ilogpo2(j)) '\n']);
                     j = j+1;
                     validate = 1;
                 end
@@ -82,21 +103,30 @@ if options_.load_mh_file == 0
                 return
             end
         end
+        fprintf(fidlog,' \n');
         disp('MH: Initial values found!')
         disp(' ')
     else% Case 2: one chain (we start from the posterior mode)
+        fprintf(fidlog,['  Initial values of the parameters:\n']);
         candidate = transpose(xparam1);
         if all(candidate' > mh_bounds(:,1)) & all(candidate' < mh_bounds(:,2)) 
             ix2 = candidate;
             ilogpo2 = - feval(TargetFun,ix2',varargin{:});
             disp('MH: Initialization at the posterior mode.')
             disp(' ')
+            fprintf(fidlog,['    Blck ' int2str(1) 'params:\n']);
+            for i=1:length(ix2(1,:))
+                fprintf(fidlog,['      ' int2str(i)  ':' num2str(ix2(1,i)) '\n']);
+            end
+            fprintf(fidlog,['    Blck ' int2str(1) 'logpo2:' num2str(logpo2(1)) '\n']);
         else
             disp('MH: Initialization failed...')
             disp('MH: The posterior mode lies outside the prior bounds.')
             return
         end
+        fprintf(fidlog,' \n');
     end
+    fprintf(fidlog,' \n');
     fblck = 1;
     fline = ones(nblck,1);
     NewFile = ones(nblck,1);
@@ -125,6 +155,20 @@ if options_.load_mh_file == 0
     record.LastFileNumber = AnticipatedNumberOfFiles ;
     record.LastLineNumber = AnticipatedNumberOfLinesInTheLastFile;
     save([MhDirectoryName '/' M_.fname '_mh_history'],'record');  
+    fprintf(fidlog,['  CREATION OF THE MH HISTORY FILE!\n\n']);
+    fprintf(fidlog,['    Expected number of files per block.......: ' int2str(AnticipatedNumberOfFiles) '.\n']);
+    fprintf(fidlog,['    Expected number of lines in the last file: ' ...
+                    int2str(AnticipatedNumberOfLinesInTheLastFile) '.\n']);
+    fprintf(fidlog,['\n']);
+    fprintf(fidlog,['    Initial seed (randn):\n']);
+    for i=1:length(record.Seeds.Normal)
+        fprintf(fidlog,['      ' num2str(record.Seeds.Normal(i)') '\n']);
+    end
+    fprintf(fidlog,['    Initial seed (rand).:\n']);
+    for i=1:length(record.Seeds.Unifor)
+        fprintf(fidlog,['      ' num2str(record.Seeds.Unifor(i)') '\n']);
+    end
+    fprintf(fidlog,' \n');
 elseif options_.load_mh_file == 1
     %% Here we consider previous mh files (previous mh did not crash).
     disp('MH: I''m loading past metropolis-hastings simulations...')
@@ -140,6 +184,13 @@ elseif options_.load_mh_file == 1
     else
         load([ MhDirectoryName '/'  M_.fname '_mh_history'])
     end
+    fidlog = fopen([MhDirectoryName '/metropolis.log'],'a');
+    fprintf(fidlog,'\n');
+    fprintf(fidlog,['%% Session ' int2str(length(record.MhDraws(:,1))+1) '.\n']);
+    fprintf(fidlog,' \n');
+    fprintf(fidlog,['  Number of blocks...............: ' int2str(nblck) '\n']);
+    fprintf(fidlog,['  Number of simulations per block: ' int2str(nruns(1)) '\n']);
+    fprintf(fidlog,' \n');
     past_number_of_blocks = record.Nblck;
     if past_number_of_blocks ~= nblck
         disp('MH:: The specified number of blocks doesn''t match with the previous number of blocks!')
@@ -319,9 +370,10 @@ elseif options_.load_mh_file == -1
         ix2(CrashedBlck,:) = x2(end,:);       
     end
 end% of (if options_.load_mh_file == {0,1 or -1})
-   %%%%
-   %%%% NOW i run the (nblck-fblck+1) metropolis-hastings chains
-   %%%%
+fclose(fidlog);
+%%%%
+%%%% NOW i run the (nblck-fblck+1) metropolis-hastings chains
+%%%%
 InitSizeArray = min([MAX_nruns*ones(nblck) nruns],[],2);
 for b = fblck:nblck
     if (options_.load_mh_file~=0)  & (fline(b)>1) & OpenOldFile(b)
@@ -335,8 +387,9 @@ for b = fblck:nblck
         logpo2 = zeros(InitSizeArray(b),1);
     end
     hh = waitbar(0,['Please wait... Metropolis-Hastings (' int2str(b) '/' int2str(nblck) ')...']);
-    set(hh,'Name','Metropolis-Hastings')
+    set(hh,'Name','Metropolis-Hastings');
     isux = 0;
+    jsux = 0;
     irun = fline(b);
     j = 1;
     while j <= nruns(b)
@@ -353,26 +406,51 @@ for b = fblck:nblck
             logpo2(irun) = logpost; 
             ilogpo2(b) = logpost;
             isux = isux + 1;
+            jsux = jsux + 1;
         else    
             x2(irun,:) = ix2(b,:);
             logpo2(irun) = ilogpo2(b);
-        end	
+        end
         prtfrc = j/nruns(b);
         waitbar(prtfrc,hh,[ '(' int2str(b) '/' int2str(nblck) ') ' sprintf('%f done, acceptation rate %f',prtfrc,isux/j)]);
         if (irun == InitSizeArray(b)) | (j == nruns(b)) % Now I save the simulations
             save([MhDirectoryName '/' M_.fname '_mh' int2str(NewFile(b)) '_blck' int2str(b)],'x2','logpo2');
             InitSizeArray(b) = min(nruns(b)-j,MAX_nruns);
+            fidlog = fopen([MhDirectoryName '/metropolis.log'],'a');
+            fprintf(fidlog,['\n']);
+            fprintf(fidlog,['%% Mh' int2str(NewFile(b)) 'Blck' int2str(b) ' (' datestr(now,0) ')\n']);
+            fprintf(fidlog,' \n');
+            fprintf(fidlog,['  Number of simulations.: ' int2str(length(logpo2)) '\n']);
+            fprintf(fidlog,['  Acceptation rate......: ' num2str(jsux/length(logpo2)) '\n']);
+            fprintf(fidlog,['  Posterior mean........:\n']);
+            for i=1:length(x2(1,:))
+                fprintf(fidlog,['    params:' int2str(i) ': ' num2str(mean(x2(:,i))) '\n']);
+            end
+            fprintf(fidlog,['    log2po:' num2str(mean(logpo2)) '\n']);
+            fprintf(fidlog,['  Minimum value.........:\n']);;
+            for i=1:length(x2(1,:))
+                fprintf(fidlog,['    params:' int2str(i) ': ' num2str(min(x2(:,i))) '\n']);
+            end
+            fprintf(fidlog,['    log2po:' num2str(min(logpo2)) '\n']);
+            fprintf(fidlog,['  Maximum value.........:\n']);
+            for i=1:length(x2(1,:))
+                fprintf(fidlog,['    params:' int2str(i) ': ' num2str(max(x2(:,i))) '\n']);
+            end
+            fprintf(fidlog,['    log2po:' num2str(max(logpo2)) '\n']);
+            fprintf(fidlog,' \n');
+            fclose(fidlog);
+            jsux = 0;
             if j == nruns(b) % I record the last draw...
                 record.LastParameters(b,:) = x2(end,:);
                 record.LastLogLiK(b) = logpo2(end);
-            end      
+            end
             if InitSizeArray(b)
                 x2 = zeros(InitSizeArray(b),npar);
                 logpo2 = zeros(InitSizeArray(b),1);
                 NewFile(b) = NewFile(b) + 1;
                 irun = 0;
-            else % InitSizeArray is equal to zero because we are at the end of an mc chain.
-            InitSizeArray(b) = min(nruns(b),MAX_nruns);
+            else% InitSizeArray is equal to zero because we are at the end of an mc chain.
+                InitSizeArray(b) = min(nruns(b),MAX_nruns);
             end
         end
         j=j+1;
@@ -384,7 +462,7 @@ end% End of the loop over the mh-blocks.
 record.Seeds.Normal = randn('state');
 record.Seeds.Unifor = rand('state');
 save([MhDirectoryName '/' M_.fname '_mh_history'],'record');
-disp(['MH: Number of mh files				: ' int2str(NewFile(1)) ' per block.'])
+disp(['MH: Number of mh files			: ' int2str(NewFile(1)) ' per block.'])
 disp(['MH: Total number of generated files	: ' int2str(NewFile(1)*nblck) '.'])
 disp(['MH: Total number of iterations 		: ' int2str((NewFile(1)-1)*MAX_nruns+irun-1) '.'])
 disp(' ')
