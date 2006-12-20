@@ -91,7 +91,7 @@ opt_gsa.namendo='pie'; % evaluate relationships for pie (it can be M_.endo_names
 opt_gsa.namexo=M_.exo_names; % evaluate relationships with all exogenous
 opt_gsa.namlagendo=M_.endo_names; % evaluate relationships with all endogenous
 opt_gsa.load_stab=1; % load stability analsis sample
-opt_gsa.load_redform=1; %load reduced form analysis (default=0: preform a new one)
+opt_gsa.load_redform=0; %load reduced form analysis (default=0: preform a new one)
 opt_gsa.stab=0; % don't do again stability analysis
 options_.opt_gsa=opt_gsa;
 dynare_sensitivity;
