@@ -40,34 +40,32 @@ typedef pair<int, Type> ExpObj;
 
 %token AR AUTOCORR
 %token BAYESIAN_IRF BETA_PDF
-%token CALIB CALIB_VAR CHECK CONF_SIG CORR COVAR
-%token DATAFILE DIAGNOSTIC DIFFUSE_D DOLLAR DR_ALGO DROP DSAMPLE DYN2VEC DYNASAVE DYNATYPE 
+%token CALIB CALIB_VAR CHECK CONF_SIG CONSTANT CORR COVAR
+%token DATAFILE DR_ALGO DROP DSAMPLE DYNASAVE DYNATYPE 
 %token END ENDVAL EQUAL ESTIMATION ESTIMATED_PARAMS ESTIMATED_PARAMS_BOUNDS ESTIMATED_PARAMS_INIT
-%token PRIOR_ANALYSIS POSTERIOR_ANALYSIS
 %token FILTER_STEP_AHEAD FILTERED_VARS FIRST_OBS
 %token <string_val> FLOAT_NUMBER
-%token FORECAST FUNCTIONS
+%token FORECAST
 %token GAMMA_PDF GRAPH
-%token HISTVAL HP_FILTER HP_NGRID    
-%token INITVAL INITVALF
+%token HISTVAL HP_FILTER HP_NGRID
+%token INITVAL
 %token <string_val> INT_NUMBER
-%token INV_GAMMA_PDF INV_GAMMA1_PDF INV_GAMMA2_PDF IRF
-%token KALMAN_ALGO KALMAN_TOL CONSTANT NOCONSTANT
+%token INV_GAMMA_PDF IRF
+%token KALMAN_ALGO KALMAN_TOL
 %token LAPLACE LIK_ALGO LIK_INIT LINEAR LOAD_MH_FILE LOGLINEAR
-%token MH_DROP MH_INIT_SCALE MH_JSCALE MH_MODE MH_NBLOCKS MH_REPLIC MODE_CHECK MODE_COMPUTE MODE_FILE MODEL MODEL_COMPARISON MODEL_COMPARISON_APPROXIMATION MODIFIEDHARMONICMEAN MOMENTS MOMENTS_VARENDO MSHOCKS
+%token MH_DROP MH_INIT_SCALE MH_JSCALE MH_MODE MH_NBLOCKS MH_REPLIC MODE_CHECK MODE_COMPUTE MODE_FILE MODEL MODEL_COMPARISON MODEL_COMPARISON_APPROXIMATION MODIFIEDHARMONICMEAN MOMENTS_VARENDO MSHOCKS
 %token <string_val> NAME
-%token NOBS NOCORR NODIAGNOSTIC NOFUNCTIONS NOGRAPH XLS_SHEET XLS_RANGE
-%token NOMOMENTS NOPRINT NORMAL_PDF
+%token NOBS NOCONSTANT NOCORR NODIAGNOSTIC NOFUNCTIONS NOGRAPH NOMOMENTS NOPRINT NORMAL_PDF
 %token OBSERVATION_TRENDS OLR OLR_INST OLR_BETA OPTIM OPTIM_WEIGHTS ORDER OSR OSR_PARAMS 
-%token PARAMETERS PERIODS PLANNER_OBJECTIVE PREFILTER PRESAMPLE PRINT PRIOR_TRUNC 
+%token PARAMETERS PERIODS PLANNER_OBJECTIVE PREFILTER PRESAMPLE PRINT PRIOR_TRUNC PRIOR_ANALYSIS POSTERIOR_ANALYSIS
 %token QZ_CRITERIUM
-%token RELATIVE_IRF REPLIC RESOL RPLOT
+%token RELATIVE_IRF REPLIC RPLOT
 %token SHOCKS SIGMA_E SIMUL SIMUL_ALGO SIMUL_SEED SMOOTHER SOLVE_ALGO STDERR STEADY STOCH_SIMUL  
 %token TEX
 %token <string_val> TEX_NAME
 %token UNIFORM_PDF UNIT_ROOT_VARS USE_DLL
 %token VALUES VAR VAREXO VAREXO_DET VAROBS
-%token XTICK XTICKLABEL
+%token XLS_SHEET XLS_RANGE
 %left COMMA
 %left PLUS MINUS
 %left TIMES DIVIDE
@@ -567,7 +565,7 @@ typedef pair<int, Type> ExpObj;
                      | o_drop
                      | o_ar
                      | o_nocorr
-                     | o_nofunction
+                     | o_nofunctions
                      | o_nomoments
                      | o_irf
                      | o_relative_irf
@@ -1066,7 +1064,7 @@ typedef pair<int, Type> ExpObj;
  o_drop: DROP EQUAL INT_NUMBER {driver.option_num("drop", $3);};
  o_ar: AR EQUAL INT_NUMBER {driver.option_num("ar", $3);};
  o_nocorr: NOCORR {driver.option_num("nocorr", "1");};
- o_nofunction: NOFUNCTIONS {driver.option_num("nofunctions", "1");};
+ o_nofunctions: NOFUNCTIONS {driver.option_num("nofunctions", "1");};
  o_nomoments: NOMOMENTS {driver.option_num("nomoments", "1");};
  o_irf: IRF EQUAL INT_NUMBER {driver.option_num("irf", $3);};
  o_hp_filter: HP_FILTER EQUAL INT_NUMBER {driver.option_num("hp_filter", $3);};
@@ -1087,13 +1085,14 @@ typedef pair<int, Type> ExpObj;
  o_lik_algo: LIK_ALGO EQUAL INT_NUMBER {driver.option_num("lik_algo", $3);}; 
  o_lik_init: LIK_INIT EQUAL INT_NUMBER {driver.option_num("lik_init", $3);}; 
  o_nograph: NOGRAPH {driver.option_num("nograph","1");}; 
+          | GRAPH {driver.option_num("nograph", "0");};	
  o_conf_sig: CONF_SIG EQUAL FLOAT_NUMBER {driver.option_num("conf_sig", $3);}; 
  o_mh_replic: MH_REPLIC EQUAL INT_NUMBER {driver.option_num("mh_replic", $3);}; 
  o_mh_drop: MH_DROP EQUAL FLOAT_NUMBER {driver.option_num("mh_drop", $3);}; 
  o_mh_jscale: MH_JSCALE EQUAL FLOAT_NUMBER {driver.option_num("mh_jscale", $3);}; 
  o_optim: OPTIM  EQUAL '(' optim_options ')';
- o_mh_init_scale :MH_INIT_SCALE EQUAL FLOAT_NUMBER {driver.option_num("mh_init_scale", $3);};
- o_mh_init_scale :MH_INIT_SCALE EQUAL INT_NUMBER {driver.option_num("mh_init_scale", $3);};
+ o_mh_init_scale: MH_INIT_SCALE EQUAL FLOAT_NUMBER {driver.option_num("mh_init_scale", $3);};
+                | MH_INIT_SCALE EQUAL INT_NUMBER {driver.option_num("mh_init_scale", $3);};
  o_mode_file : MODE_FILE EQUAL NAME {driver.option_str("mode_file", $3);};
  o_mode_compute : MODE_COMPUTE EQUAL INT_NUMBER {driver.option_num("mode_compute", $3);};
  o_mode_check : MODE_CHECK {driver.option_num("mode_check", "1");};
@@ -1121,7 +1120,6 @@ typedef pair<int, Type> ExpObj;
    ;
  o_print : PRINT {driver.option_num("noprint", "0");};
  o_noprint : NOPRINT {driver.option_num("noprint", "1");};
- o_nograph : GRAPH {driver.option_num("nograph", "0");};	
  o_xls_sheet : XLS_SHEET EQUAL NAME {driver.option_str("xls_sheet", $3);} 
  o_xls_range : XLS_RANGE EQUAL range {driver.option_str("xls_range", $3);} 
  o_filter_step_ahead : FILTER_STEP_AHEAD EQUAL vec_int {driver.option_num("filter_step_ahead", $3);}

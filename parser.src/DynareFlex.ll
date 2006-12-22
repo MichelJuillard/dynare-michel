@@ -57,13 +57,11 @@ int sigma_e = 0;
 <INITIAL>varexo_det {BEGIN DYNARE_STATEMENT; return token::VAREXO_DET;}
 <INITIAL>parameters {BEGIN DYNARE_STATEMENT; return token::PARAMETERS;}
 <INITIAL>periods 	{BEGIN DYNARE_STATEMENT; return token::PERIODS;}
-<INITIAL>initvalf 	{BEGIN DYNARE_STATEMENT; return token::INITVALF;}
 <INITIAL>estimation {BEGIN DYNARE_STATEMENT; return token::ESTIMATION;}
 <INITIAL>prior_analysis {BEGIN DYNARE_STATEMENT; return token::PRIOR_ANALYSIS;}
 <INITIAL>posterior_analysis {BEGIN DYNARE_STATEMENT; return token::POSTERIOR_ANALYSIS;}
 <INITIAL>varobs 	{BEGIN DYNARE_STATEMENT; return token::VAROBS;}
 <INITIAL>unit_root_vars	{BEGIN DYNARE_STATEMENT; return token::UNIT_ROOT_VARS;}
-<INITIAL>dyn2vec 	{BEGIN DYNARE_STATEMENT; return token::DYN2VEC;}
 <INITIAL>rplot	 	{BEGIN DYNARE_STATEMENT; return token::RPLOT;}
 <INITIAL>osr_params 	{BEGIN DYNARE_STATEMENT; return token::OSR_PARAMS;}
 <INITIAL>osr	 	{BEGIN DYNARE_STATEMENT; return token::OSR;}
@@ -144,13 +142,11 @@ int sigma_e = 0;
 <DYNARE_STATEMENT>filter_step_ahead	{return token::FILTER_STEP_AHEAD;}
 <DYNARE_STATEMENT>relative_irf 	{return token::RELATIVE_IRF;}
 <DYNARE_STATEMENT>tex		{return token::TEX;}
-<DYNARE_STATEMENT>moments	{return token::MOMENTS;}
 <DYNARE_STATEMENT>nomoments	{return token::NOMOMENTS;}
 <DYNARE_STATEMENT>corr		{return token::CORR;}
 <DYNARE_STATEMENT>nocorr	{return token::NOCORR;}
 <DYNARE_STATEMENT>optim		{return token::OPTIM;}
 <DYNARE_STATEMENT>periods	{return token::PERIODS;}
-<DYNARE_STATEMENT>diffuse_d {return token::DIFFUSE_D;}
 <DYNARE_STATEMENT>model_comparison_approximation {return token::MODEL_COMPARISON;}
 <DYNARE_STATEMENT>laplace {return token::LAPLACE;}
 <DYNARE_STATEMENT>modifiedharmonicmean {return token::MODIFIEDHARMONICMEAN;}
@@ -200,8 +196,6 @@ int sigma_e = 0;
 <DYNARE_STATEMENT>qz_criterium {return token::QZ_CRITERIUM;}
 <DYNARE_STATEMENT>simul {return token::SIMUL;}
 <DYNARE_STATEMENT>olr_beta {return token::OLR_BETA;}
-<DYNARE_STATEMENT>xtick   		{return token::XTICK;}  	  
-<DYNARE_STATEMENT>xticklabel   		{return token::XTICKLABEL;}  	  
 <DYNARE_STATEMENT>xls_sheet {return token::XLS_SHEET;}
 <DYNARE_STATEMENT>xls_range {return token::XLS_RANGE;}
 <DYNARE_STATEMENT>[\.] {return yy::parser::token_type (yytext[0]);}
