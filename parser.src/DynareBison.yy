@@ -53,7 +53,9 @@ typedef pair<int, Type> ExpObj;
 %token INV_GAMMA_PDF IRF
 %token KALMAN_ALGO KALMAN_TOL
 %token LAPLACE LIK_ALGO LIK_INIT LINEAR LOAD_MH_FILE LOGLINEAR
-%token MH_DROP MH_INIT_SCALE MH_JSCALE MH_MODE MH_NBLOCKS MH_REPLIC MODE_CHECK MODE_COMPUTE MODE_FILE MODEL MODEL_COMPARISON MODEL_COMPARISON_APPROXIMATION MODIFIEDHARMONICMEAN MOMENTS_VARENDO MSHOCKS
+%token MH_DROP MH_INIT_SCALE MH_JSCALE MH_MODE MH_NBLOCKS MH_REPLIC MH_RECOVER
+%token MODE_CHECK MODE_COMPUTE MODE_FILE MODEL MODEL_COMPARISON MSHOCKS
+%token MODEL_COMPARISON_APPROXIMATION MODIFIEDHARMONICMEAN MOMENTS_VARENDO 
 %token <string_val> NAME
 %token NOBS NOCONSTANT NOCORR NODIAGNOSTIC NOFUNCTIONS NOGRAPH NOMOMENTS NOPRINT NORMAL_PDF
 %token OBSERVATION_TRENDS OLR OLR_INST OLR_BETA OPTIM OPTIM_WEIGHTS ORDER OSR OSR_PARAMS 
@@ -878,6 +880,7 @@ typedef pair<int, Type> ExpObj;
                    | o_solve_algo
                    | o_constant
                    | o_noconstant
+                   | o_mh_recover
                    ;
 	
  prior_analysis 
@@ -1125,6 +1128,7 @@ typedef pair<int, Type> ExpObj;
  o_filter_step_ahead : FILTER_STEP_AHEAD EQUAL vec_int {driver.option_num("filter_step_ahead", $3);}
  o_constant : CONSTANT {driver.option_num("noconstant", "0");}
  o_noconstant : NOCONSTANT {driver.option_num("noconstant", "1");}
+ o_mh_recover : MH_RECOVER {driver.option_num("load_mh_file", "-1");}
 
  range : NAME ':' NAME
   {

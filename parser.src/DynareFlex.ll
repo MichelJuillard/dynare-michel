@@ -198,6 +198,9 @@ int sigma_e = 0;
 <DYNARE_STATEMENT>olr_beta {return token::OLR_BETA;}
 <DYNARE_STATEMENT>xls_sheet {return token::XLS_SHEET;}
 <DYNARE_STATEMENT>xls_range {return token::XLS_RANGE;}
+<DYNARE_STATEMENT>mh_recover {return token::MH_RECOVER;}
+
+
 <DYNARE_STATEMENT>[\.] {return yy::parser::token_type (yytext[0]);}
 <DYNARE_STATEMENT>[\\] {return yy::parser::token_type (yytext[0]);}
 <DYNARE_STATEMENT>[\'] {return yy::parser::token_type (yytext[0]);}
