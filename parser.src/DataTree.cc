@@ -40,7 +40,7 @@ DataTree::DataTree(SymbolTable &symbol_table_arg) :
   mIndexOfTokens[*One]=One;
 
   MinusOne = new MetaToken(One, eTempResult, NULL, token::UMINUS);
-  MinusOne->op_name = operator_table.str(token::UMINUS);
+  MinusOne->op_name = OperatorTable::str(token::UMINUS);
   MinusOne->reference_count.resize(current_order+1,1);
   MinusOne->idx = 2;
   mModelTree.push_back(MinusOne);
@@ -48,7 +48,7 @@ DataTree::DataTree(SymbolTable &symbol_table_arg) :
 
   // Pushing "0=0" into mModelTree
   ZeroEqZero = new MetaToken(Zero, eTempResult, Zero, token::EQUAL);
-  ZeroEqZero->op_name = operator_table.str(token::EQUAL);
+  ZeroEqZero->op_name = OperatorTable::str(token::EQUAL);
   ZeroEqZero->reference_count.resize(current_order+1,1);
   ZeroEqZero->idx = 3;
   mModelTree.push_back(ZeroEqZero);

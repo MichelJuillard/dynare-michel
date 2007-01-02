@@ -16,7 +16,6 @@
 #include <ostream>
 //------------------------------------------------------------------------------
 #include "SymbolTable.hh"
-#include "OperatorTable.hh"
 #include "NumericalConstants.hh"
 #include "ModelTypes.hh"
 #include "DataTree.hh"

@@ -1069,7 +1069,7 @@ ModelTree::getExpression(NodeID StartID, EquationType iEquationType)
           continue;
         }
 
-      int precedence_current_op = operator_table.precedence(current_op_code);
+      int precedence_current_op = OperatorTable::precedence(current_op_code);
       // deal with left argument first
       if (current_token_ID->left_done == 0)
         {
@@ -1100,7 +1100,7 @@ ModelTree::getExpression(NodeID StartID, EquationType iEquationType)
               exp << "-";
               current_token_ID->close_parenthesis = 1;
             }
-          else if ( operator_table.isfunction(current_op_code) == true)
+          else if ( OperatorTable::isfunction(current_op_code) == true)
             {
               exp << current_token_ID->op_name << "(";
               precedence_last_op = 0;
@@ -1320,14 +1320,14 @@ inline int ModelTree::optimize(NodeID node)
   int tmp_status = 0;
   if (node->op_code != NoOpCode)
     {
-      cost = operator_table.cost(node->op_code,offset);
+      cost = OperatorTable::cost(node->op_code,offset);
       if (node->id1 != NullID && node->id1->op_code != NoOpCode)
         {
-          cost += operator_table.cost(node->id1->op_code,offset);
+          cost += OperatorTable::cost(node->id1->op_code,offset);
         }
       if (node->id2 != NullID && node->id2->op_code != NoOpCode)
         {
-          cost += operator_table.cost(node->id2->op_code,offset);
+          cost += OperatorTable::cost(node->id2->op_code,offset);
         }
     }
   cost *= node->reference_count[current_order];
@@ -1366,7 +1366,7 @@ ModelTree::computingPass()
   // Setting number of equations in ModelParameters class
   // Here no derivative are computed
   BeginModel++;
-  min_cost = 40 * operator_table.cost(token::PLUS, offset);
+  min_cost = 40 * OperatorTable::cost(token::PLUS, offset);
   // Setting format of parentheses
   if (offset == 1)
     {

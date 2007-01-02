@@ -56,8 +56,6 @@ private:
 
   //! Stores options lists
   OptionsList options_list;
-  //! Stores operator table
-  OperatorTable op_table;
   //! Temporary storage for trend elements
   ObservationTrendsStatement::trend_elements_type trend_elements;
   //! Temporary storage for filename list of ModelComparison

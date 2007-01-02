@@ -43,8 +43,6 @@ protected :
   TreeMap         mIndexOfTokens;
   /*! A counter for filling MetatToken's idx field */
   int nodeCounter;
-  /*! Operator table : names and precedence of oparator */
-  OperatorTable     operator_table;
   /*! ID of first token in model tree (first tokens are "0", "1" and "0=" */
   TreeIterator      BeginModel;
   /*!
@@ -134,7 +132,7 @@ inline NodeID DataTree::PushToken(NodeID iArg1,int iOpCode, NodeID iArg2, Type i
 
   if (iOpCode != NoOpCode)
     {
-      lToken->op_name = operator_table.str(iOpCode);
+      lToken->op_name = OperatorTable::str(iOpCode);
     }
   else
     {
@@ -146,7 +144,7 @@ inline NodeID DataTree::PushToken(NodeID iArg1,int iOpCode, NodeID iArg2, Type i
   //Updating reference counters and time costs
   if (iType1 == eTempResult )
     {
-      lToken->cost = operator_table.cost(iOpCode,offset)+iArg1->cost;
+      lToken->cost = OperatorTable::cost(iOpCode,offset)+iArg1->cost;
       IncrementReferenceCount(iArg1);
     }
   if(iArg2 != NullID)

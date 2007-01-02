@@ -11,7 +11,7 @@
 #include <vector>
 #include <sstream>
 
-#include "OperatorTable.hh"
+#include "SymbolTableTypes.hh"
 #include "NumericalConstants.hh"
 
 struct Token
@@ -46,8 +46,6 @@ class Expression
 private :
   /*! Vector tokens */
   std::vector<Token>   expression_list;
-  /*! Operator table : names and precedences */
-  OperatorTable operator_table;
   /*! Output string of the class */
   std::ostringstream output;
   //! Pointer to numerical constants table

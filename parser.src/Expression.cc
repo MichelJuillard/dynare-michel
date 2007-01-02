@@ -8,6 +8,7 @@
 using namespace std;
 //------------------------------------------------------------------------------
 #include "Expression.hh"
+#include "OperatorTable.hh"
 
 Expression::Expression()
 {
@@ -35,7 +36,7 @@ int Expression::AddToken(int id1,Type type1,int id2,Type type2,int op_code)
   token.id2 = id2;
   token.type2 = type2;
   token.op_code = op_code;
-  token.op_name = operator_table.str(op_code);
+  token.op_name = OperatorTable::str(op_code);
   //  Inserting token into expression_list
   expression_list.push_back(token);
   return expression_list.size() -1;
@@ -51,7 +52,7 @@ int Expression::AddToken(int id1,Type type1,int op_code)
   token.id2 = -1;
   token.type2 = eUNDEF;
   token.op_code = op_code;
-  token.op_name = operator_table.str(op_code);;
+  token.op_name = OperatorTable::str(op_code);;
   //  Inserting token into expression_list
   expression_list.push_back(token);
   return expression_list.size() -1;
@@ -228,7 +229,7 @@ void Expression::set(void)
           else
             {
               // Case of functions
-              if (operator_table.isfunction(current_op) == true)
+              if (OperatorTable::isfunction(current_op) == true)
                 exp <<  op_name << "(" << argument1 << ")";
               else
                 exp <<  "(" << op_name << argument1 << ")";
