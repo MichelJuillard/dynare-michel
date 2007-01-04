@@ -7,6 +7,7 @@ function J = ramsey_dynamic(ys,lbar)
 % OUPTUT: 
 %         J          jaocobian of expanded model
 %  
+
   global M_ options_ it_
   
   % retrieving model parameters
@@ -24,9 +25,8 @@ function J = ramsey_dynamic(ys,lbar)
   max_endo_lag = M_.maximum_endo_lag;
   leadlag_nbr = max_lead+max_lag+1;
   fname = M_.fname;
-  instr_names = options_.olr_inst;
-  instr_nbr =  size(options_.olr_inst,1);
-  mult_nbr = endo_nbr-instr_nbr;
+  % instr_names = options_.olr_inst;
+  % instr_nbr =  size(options_.olr_inst,1);
 
   % discount factor
   beta = options_.planner_discount;
@@ -44,9 +44,14 @@ function J = ramsey_dynamic(ys,lbar)
   k = find(i_leadlag');
   it_ = 1;
   % retrieving derivatives of the objective function
-  [U,Uy,Uyy] = feval([fname '_objective'],ys,zeros(1,exo_nbr));
+  [U,Uy,Uyy] = feval([fname '_objective_static'],ys,zeros(1,exo_nbr));
+  Uy = Uy';
+  Uyy = reshape(Uyy,endo_nbr,endo_nbr);
+  
   % retrieving derivatives of original model
   [f,fJ,fH] = feval([fname '_dynamic'],y(k),zeros(1,exo_nbr));
+  instr_nbr = endo_nbr - size(f,1);
+  mult_nbr = endo_nbr-instr_nbr;
 
   % parameters for expanded model
   endo_nbr1 = 2*endo_nbr-instr_nbr+exo_nbr;

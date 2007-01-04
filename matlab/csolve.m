@@ -54,7 +54,8 @@ while ~done
             grad = (feval(FUN,x*ones(1,nv)+tvec,varargin{:})-f0*ones(1,nv))/delta;
          end
       else % use analytic gradient
-         grad=feval(gradfun,x,varargin{:});
+	   %         grad=feval(gradfun,x,varargin{:});
+	   [f0,grad] = feval(FUN,x,varargin{:});
       end
       if isreal(grad)
          if rcond(grad)<1e-12

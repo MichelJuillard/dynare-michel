@@ -75,8 +75,10 @@ function [x,info] = dynare_solve(func,x,jacobian_flag,varargin)
 	error(sprintf('Solve block = %d check = %d\n',i,info));
       end
     end
-    [x,info]=solve1(func,x,1:nn,1:nn,jacobian_flag,varargin{:});
-      
+    fvec = feval(func,x,varargin{:});
+    if max(abs(fvec)) > tolf
+      [x,info]=solve1(func,x,1:nn,1:nn,jacobian_flag,varargin{:});
+    end
   elseif options_.solve_algo == 3
       [x,info] = csolve(func,x,'grad_ss',1e-6,500,varargin{:});
   end

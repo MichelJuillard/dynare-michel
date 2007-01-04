@@ -79,6 +79,7 @@ int sigma_e = 0;
 <INITIAL>Sigma_e {BEGIN DYNARE_STATEMENT; sigma_e = 1; return token::SIGMA_E;}
 <INITIAL>calib {BEGIN DYNARE_STATEMENT; return token::CALIB;}
 <INITIAL>planner_objective {BEGIN DYNARE_STATEMENT; return token::PLANNER_OBJECTIVE;}
+<INITIAL>ramsey_policy {BEGIN DYNARE_STATEMENT; return token::RAMSEY_POLICY;}
 
  /* End of a Dynare statement */
 <DYNARE_STATEMENT>; {
@@ -199,6 +200,7 @@ int sigma_e = 0;
 <DYNARE_STATEMENT>xls_sheet {return token::XLS_SHEET;}
 <DYNARE_STATEMENT>xls_range {return token::XLS_RANGE;}
 <DYNARE_STATEMENT>mh_recover {return token::MH_RECOVER;}
+<DYNARE_STATEMENT>planner_discount {return token::PLANNER_DISCOUNT;}
 
 
 <DYNARE_STATEMENT>[\.] {return yy::parser::token_type (yytext[0]);}

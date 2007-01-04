@@ -229,7 +229,7 @@ elseif options_.load_mh_file == 1
     save([MhDirectoryName '/' M_.fname '_mh_history'],'record');
     disp(['MH: ... It''s done. I''ve loaded ' int2str(NumberOfPreviousSimulations) ' simulations.'])
     disp(' ')
-elseif options_.load_mh_file == -1
+elseif options_.mh_recover == 1
     %% The previous metropolis-hastings crashed before the end! I try to
     %% recover the saved draws...
     disp('MH: Recover mode!')

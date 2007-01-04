@@ -51,7 +51,7 @@ if M_.exo_nbr == 0
 end
 
 % expanding system for Optimal Linear Regulator
-if options_.olr
+if options_.ramsey_policy
   if isfield(M_,'orig_model')
     orig_model = M_.orig_model;
     M_.endo_nbr = orig_model.endo_nbr;
@@ -62,7 +62,10 @@ if options_.olr
     M_.maximum_lag = orig_model.maximum_lag;
     M_.maximum_endo_lag = orig_model.maximum_endo_lag;
   end
+  old_solve_algo = options_.solve_algo;
+  options_.solve_algo = 1;
   oo_.steady_state = dynare_solve('ramsey_static',oo_.steady_state,0);
+  options_.solve_algo = old_solve_algo;
   [junk,junk,multbar] = ramsey_static(oo_.steady_state);
   jacobia_=ramsey_dynamic(oo_.steady_state,multbar);
   klen = M_.maximum_lag + M_.maximum_lead + 1;

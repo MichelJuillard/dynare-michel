@@ -54,6 +54,13 @@ function global_initialization()
   % Solution
   options_.order = 2;
   options_.dr_algo = 0;
+  options_.solve_algo = 2;
+  
+  % Ramsey policy
+  options_.planner_discount = 1.0;
+  
+  % estimation
+  options_.load_mh_file = 0;
   
   % Misc
   options_.conf_sig = 0.9;

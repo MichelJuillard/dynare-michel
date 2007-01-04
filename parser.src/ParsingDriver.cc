@@ -926,6 +926,14 @@ ParsingDriver::end_planner_objective(NodeID expr)
   mod_file->addStatement(new PlannerObjectiveStatement(model_tree));
 }
 
+void
+ParsingDriver::ramsey_policy()
+{
+  mod_file->addStatement(new RamseyPolicyStatement(*tmp_symbol_table, options_list));
+  tmp_symbol_table->clear();
+  options_list.clear();
+}
+
 NodeID
 ParsingDriver::add_model_equal(NodeID arg1, NodeID arg2)
 {

@@ -63,7 +63,7 @@ typedef pair<int, Type> ExpObj;
 %token QZ_CRITERIUM
 %token RELATIVE_IRF REPLIC RPLOT
 %token SHOCKS SIGMA_E SIMUL SIMUL_ALGO SIMUL_SEED SMOOTHER SOLVE_ALGO STDERR STEADY STOCH_SIMUL  
-%token TEX
+%token TEX RAMSEY_POLICY PLANNER_DISCOUNT
 %token <string_val> TEX_NAME
 %token UNIFORM_PDF UNIT_ROOT_VARS USE_DLL
 %token VALUES VAR VAREXO VAREXO_DET VAROBS
@@ -129,7 +129,8 @@ typedef pair<int, Type> ExpObj;
 	| olr
 	| olr_inst
         | model_comparison
-  | planner_objective
+        | planner_objective
+	| ramsey_policy
 	;
 
     
@@ -1039,8 +1040,6 @@ typedef pair<int, Type> ExpObj;
               | o_noprint
               ;
 
- planner_objective : PLANNER_OBJECTIVE { driver.begin_planner_objective(); } hand_side { driver.end_planner_objective($3); } ';'
-
  filename_list : filename {driver.add_mc_filename($1);}
         | filename_list COMMA filename {driver.add_mc_filename($3);}
 	| filename '(' value ')' {driver.add_mc_filename($1, $3);}
@@ -1057,6 +1056,28 @@ typedef pair<int, Type> ExpObj;
                | ':' { $$ = new string(":"); }
                | '.' { $$ = new string("."); }
                ;
+
+ planner_objective : PLANNER_OBJECTIVE { driver.begin_planner_objective(); } hand_side { driver.end_planner_objective($3); } ';'
+               ;
+ 
+ ramsey_policy : RAMSEY_POLICY ';'
+ 		{driver.ramsey_policy();}
+	| RAMSEY_POLICY '(' ramsey_policy_options_list ')' ';' 
+		{driver.ramsey_policy();}
+	| RAMSEY_POLICY tmp_var_list ';'
+		{driver.ramsey_policy();}
+	| RAMSEY_POLICY '(' ramsey_policy_options_list ')' tmp_var_list ';' 
+		{driver.ramsey_policy();}
+	;
+
+ ramsey_policy_options_list : 
+          ramsey_policy_options_list COMMA ramsey_policy_options
+        | ramsey_policy_options
+	;
+	
+ ramsey_policy_options : stoch_simul_options
+        | o_planner_discount
+        ;
 
  o_dr_algo: DR_ALGO EQUAL INT_NUMBER {driver.option_num("dr_algo", $3);};
  o_solve_algo: SOLVE_ALGO EQUAL INT_NUMBER {driver.option_num("solve_algo", $3);};
@@ -1129,6 +1150,7 @@ typedef pair<int, Type> ExpObj;
  o_constant : CONSTANT {driver.option_num("noconstant", "0");}
  o_noconstant : NOCONSTANT {driver.option_num("noconstant", "1");}
  o_mh_recover : MH_RECOVER {driver.option_num("load_mh_file", "-1");}
+ o_planner_discount : PLANNER_DISCOUNT EQUAL FLOAT_NUMBER {driver.option_num("planner_discount",$3);}
 
  range : NAME ':' NAME
   {
@@ -1137,6 +1159,7 @@ typedef pair<int, Type> ExpObj;
     delete $3;
     $$ = $1;
   }
+
  vec_int_elem : INT_NUMBER
               | INT_NUMBER ':' INT_NUMBER
                 { $1->append(":"); $1->append(*$3); delete $3; $$ = $1; }

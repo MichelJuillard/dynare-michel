@@ -81,6 +81,27 @@ StochSimulStatement::writeOutput(ostream &output, const string &basename) const
   output << "stoch_simul(var_list_);\n";
 }
 
+RamseyPolicyStatement::RamseyPolicyStatement(const TmpSymbolTable &tmp_symbol_table_arg,
+                                         const OptionsList &options_list_arg) :
+  tmp_symbol_table(tmp_symbol_table_arg),
+  options_list(options_list_arg)
+{
+}
+
+void
+RamseyPolicyStatement::checkPass(ModFileStructure &mod_file_struct)
+{
+  mod_file_struct.stoch_simul_or_similar_present = true;
+}
+
+void
+RamseyPolicyStatement::writeOutput(ostream &output, const string &basename) const
+{
+  options_list.writeOutput(output);
+  tmp_symbol_table.writeOutput("var_list_", output);
+  output << "options_.ramsey_policy=1;\nstoch_simul(var_list_);\n";
+}
+
 EstimationStatement::EstimationStatement(const TmpSymbolTable &tmp_symbol_table_arg,
                                          const OptionsList &options_list_arg) :
   tmp_symbol_table(tmp_symbol_table_arg),

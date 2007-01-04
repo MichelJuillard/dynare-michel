@@ -12,7 +12,6 @@ global it_
 %unfinished
 jacobian_flag = 0; 
 
-options_ = set_default_option(options_,'olr',0);
 options_ = set_default_option(options_,'jacobian_flag',1);
 info = 0;
 
@@ -32,7 +31,7 @@ end
 dr.ys = ys;
 fh = str2func([M_.fname '_static']);
 if options_.linear == 0
-  if max(abs(feval(fh,dr.ys,[oo_.exo_steady_state; oo_.exo_det_steady_state]))) > options_.dynatol & options_.olr == 0
+  if max(abs(feval(fh,dr.ys,[oo_.exo_steady_state; oo_.exo_det_steady_state]))) > options_.dynatol & options_.ramsey_policy == 0
     if options_.steadystate_flag
       [dr.ys,check1] = feval([M_.fname '_steadystate'],dr.ys,...
 			     [oo_.exo_steady_state; oo_.exo_det_steady_state]);

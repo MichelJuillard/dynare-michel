@@ -289,6 +289,8 @@ public:
   void begin_planner_objective();
   //! End a planner objective statement
   void end_planner_objective(NodeID expr);
+  //! ramsey policy statement
+  void ramsey_policy();
   //! Writes token "arg1=arg2" to model tree
   NodeID add_model_equal(NodeID arg1, NodeID arg2);
   //! Writes token "arg=0" to model tree
