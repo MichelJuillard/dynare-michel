@@ -42,6 +42,7 @@ ModelTree::ModelTree(SymbolTable &symbol_table_arg,
   computeHessian(false),
   computeStaticHessian(false)
 {
+  eq_nbr = 0;
 }
 
 void
