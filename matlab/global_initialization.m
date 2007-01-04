@@ -58,6 +58,7 @@ function global_initialization()
   
   % Ramsey policy
   options_.planner_discount = 1.0;
+  options_.ramsey_policy = 0;
   
   % estimation
   options_.load_mh_file = 0;
