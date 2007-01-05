@@ -37,12 +37,12 @@ ModelTree::ModelTree(SymbolTable &symbol_table_arg,
                      const NumericalConstants &num_constants_arg) :
   DataTree(symbol_table_arg),
   num_constants(num_constants_arg),
+  eq_nbr(0),
   computeJacobian(false),
   computeJacobianExo(false),
   computeHessian(false),
   computeStaticHessian(false)
 {
-  eq_nbr = 0;
 }
 
 void
