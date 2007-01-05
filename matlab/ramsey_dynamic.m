@@ -79,7 +79,7 @@ function J = ramsey_dynamic(ys,lbar)
   % original variables, exogenous variables made endogenous, multipliers
   %
   % number of original dynamic variables 
-  n = nnz(i_leadlag);
+  n_dyn = nnz(i_leadlag);
   % numbering columns of dynamic multipliers to be put in the last columns
   % of the new Jacobian
   i_leadlag1 = [cumsum(i_leadlag(1:max_lag,:),1); ...
@@ -143,7 +143,7 @@ function J = ramsey_dynamic(ys,lbar)
     ir = find(i_leadlag(leadlag_nbr+1-i,:) > 0);
     kr1 = i_leadlag(leadlag_nbr+1-i,ir);
     J(ir,kc) = beta^(i-max_lag-1)...
-	*reshape(lbarfH(iH(kr1,endo_nbr+(1:exo_nbr))),length(kr1), ...
+	*reshape(lbarfH(iH(kr1,n_dyn+(1:exo_nbr))),length(kr1), ...
 			exo_nbr);
   end
   % derivatives w.r. Lagrange multipliers
