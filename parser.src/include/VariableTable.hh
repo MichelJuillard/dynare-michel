@@ -79,6 +79,8 @@ public:
   //! Sorts variable table
   /*! The order used is a lexicographic order over the tuple (type, lag, symbolID) */
   void Sort();
+  //! Get the number of dynamic variables 
+  inline int get_dyn_var_nbr(void) const;
 };
 
 inline int
@@ -127,6 +129,12 @@ inline int
 VariableTable::size() const
 {
   return mVariableTable.size();
+}
+
+inline int 
+VariableTable::get_dyn_var_nbr(void) const
+{
+  return var_endo_nbr + symbol_table.exo_nbr + symbol_table.exo_det_nbr;
 }
 
 #endif

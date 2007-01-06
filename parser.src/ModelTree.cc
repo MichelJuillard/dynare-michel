@@ -227,7 +227,7 @@ ModelTree::writeDynamicCFile(const string &dynamic_basename)
   mDynamicModelFile << "  {\n";
   mDynamicModelFile << "     /* Set the output pointer to the output matrix g1. */\n";
   if (computeJacobianExo)
-    mDynamicModelFile << "     plhs[1] = mxCreateDoubleMatrix(" << eq_nbr << ", " << variable_table.size() << ", mxREAL);\n";
+    mDynamicModelFile << "     plhs[1] = mxCreateDoubleMatrix(" << eq_nbr << ", " << variable_table.get_dyn_var_nbr() << ", mxREAL);\n";
   else if (computeJacobian)
     mDynamicModelFile << "     plhs[1] = mxCreateDoubleMatrix(" << eq_nbr << ", " << variable_table.var_endo_nbr << ", mxREAL);\n";
   mDynamicModelFile << "     /* Create a C pointer to a copy of the output matrix g1. */\n";
@@ -237,7 +237,7 @@ ModelTree::writeDynamicCFile(const string &dynamic_basename)
   mDynamicModelFile << " if (nlhs >= 3)\n";
   mDynamicModelFile << "  {\n";
   mDynamicModelFile << "     /* Set the output pointer to the output matrix g2. */\n";
-  mDynamicModelFile << "     plhs[2] = mxCreateDoubleMatrix(" << eq_nbr << ", " << variable_table.size()*variable_table.size() << ", mxREAL);\n";
+  mDynamicModelFile << "     plhs[2] = mxCreateDoubleMatrix(" << eq_nbr << ", " << variable_table.get_dyn_var_nbr()*variable_table.get_dyn_var_nbr() << ", mxREAL);\n";
   mDynamicModelFile << "     /* Create a C pointer to a copy of the output matrix g1. */\n";
   mDynamicModelFile << "     g2 = mxGetPr(plhs[2]);\n";
   mDynamicModelFile << "  }\n\n";
@@ -535,7 +535,7 @@ void ModelTree::derive(int iOrder)
                   int var2 = variable_table.getSortID(var);
                   mDerivativeIndex[1].push_back(DerivativeIndex(t1,
                                                                 i-eq_nbr*(i/eq_nbr),
-                                                                var1*variable_table.size()+var2));
+                                                                var1*variable_table.get_dyn_var_nbr()+var2));
                 }
             }
         }
@@ -727,8 +727,8 @@ ModelTree::writeStaticModel(ostream &StaticOutput)
             {
               string exp = getExpression(startHessian->id1, eStaticDerivatives);
 
-              int varID1 = mDerivativeIndex[1][i].derivators / variable_table.size();
-              int varID2 = mDerivativeIndex[1][i].derivators - varID1 * variable_table.size();
+              int varID1 = mDerivativeIndex[1][i].derivators / variable_table.get_dyn_var_nbr();
+              int varID2 = mDerivativeIndex[1][i].derivators - varID1 * variable_table.get_dyn_var_nbr();
 
               // Keep only derivatives w.r. to endogenous variables
               if (variable_table.getType(varID1) != eEndogenous
@@ -947,14 +947,14 @@ ModelTree::writeDynamicModel(ostream &DynamicOutput)
             {
               string exp = getExpression(startHessian->id1, eDynamicDerivatives);
 
-              int varID1 = mDerivativeIndex[1][i].derivators / variable_table.size();
-              int varID2 = mDerivativeIndex[1][i].derivators - varID1 * variable_table.size();
+              int varID1 = mDerivativeIndex[1][i].derivators / variable_table.get_dyn_var_nbr();
+              int varID2 = mDerivativeIndex[1][i].derivators - varID1 * variable_table.get_dyn_var_nbr();
               hessian_output << "  g2" << lpar << mDerivativeIndex[1][i].equation_id+1 << ", " <<
                 mDerivativeIndex[1][i].derivators+1 << rpar << " = " << exp << ";\n";
               // Treating symetric elements
               if (varID1 != varID2)
                 lsymetric <<  "  g2" << lpar << mDerivativeIndex[1][i].equation_id+1 << ", " <<
-                  varID2*variable_table.size()+varID1+1 << rpar << " = " <<
+                  varID2*variable_table.get_dyn_var_nbr()+varID1+1 << rpar << " = " <<
                   "g2" << lpar << mDerivativeIndex[1][i].equation_id+1 << ", " <<
                   mDerivativeIndex[1][i].derivators+1 << rpar << ";\n";
             }
