@@ -29,28 +29,31 @@ if M_.exo_det_nbr > 0
   oo_.exo_det_simul = repmat(oo_.exo_det_steady_state',M_.maximum_lag+M_.maximum_lead+1,1);
 end
 dr.ys = ys;
-fh = str2func([M_.fname '_static']);
-if options_.linear == 0
-  if max(abs(feval(fh,dr.ys,[oo_.exo_steady_state; oo_.exo_det_steady_state]))) > options_.dynatol & options_.ramsey_policy == 0
-    if options_.steadystate_flag
-      [dr.ys,check1] = feval([M_.fname '_steadystate'],dr.ys,...
-			     [oo_.exo_steady_state; oo_.exo_det_steady_state]);
-    else
+% testing for steadystate file
+if options_.steadystate_flag
+  [dr.ys,check1] = feval([M_.fname '_steadystate'],dr.ys,...
+			 [oo_.exo_steady_state; oo_.exo_det_steady_state]);
+else
+  fh = str2func([M_.fname '_static']);
+  % testing if ys isn't a steady state or if we aren't computing Ramsey policy
+  if max(abs(feval(fh,dr.ys,[oo_.exo_steady_state; oo_.exo_det_steady_state]))) ...
+	> options_.dynatol & options_.ramsey_policy == 0
+    if options_.linear == 0
+      % nonlinear models
       [dr.ys,check1] = dynare_solve(fh,dr.ys,options_.jacobian_flag,...
 				    [oo_.exo_steady_state; oo_.exo_det_steady_state]);
-    end
-    if check1
-      info(1) = 20;
-      resid = feval(fh,ys,oo_.exo_steady_state);
-      info(2) = resid'*resid; % penalty...
-      return
+    else
+      % linear models
+      dr.ys = dr.ys-jacob\fvec;
     end
   end
-else
-  [fvec,jacob] = feval(fh,dr.ys,oo_.exo_steady_state);
-  if max(abs(fvec)) > options_.dynatol & options_.ramsey_policy == 0
-    dr.ys = dr.ys-jacob\fvec;
-  end
+end
+% testing for problem
+if check1
+  info(1) = 20;
+  resid = feval(fh,ys,oo_.exo_steady_state);
+  info(2) = resid'*resid; % penalty...
+  return
 end
 
 dr.fbias = zeros(M_.endo_nbr,1);
