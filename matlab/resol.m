@@ -48,7 +48,7 @@ if options_.linear == 0
   end
 else
   [fvec,jacob] = feval(fh,dr.ys,oo_.exo_steady_state);
-  if max(abs(fvec)) > options_.dynatol & options_.olr == 0
+  if max(abs(fvec)) > options_.dynatol & options_.ramsey_policy == 0
     dr.ys = dr.ys-jacob\fvec;
   end
 end
