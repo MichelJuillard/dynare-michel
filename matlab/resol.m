@@ -29,6 +29,7 @@ if M_.exo_det_nbr > 0
   oo_.exo_det_simul = repmat(oo_.exo_det_steady_state',M_.maximum_lag+M_.maximum_lead+1,1);
 end
 dr.ys = ys;
+check1 = 0;
 % testing for steadystate file
 if options_.steadystate_flag
   [dr.ys,check1] = feval([M_.fname '_steadystate'],dr.ys,...
