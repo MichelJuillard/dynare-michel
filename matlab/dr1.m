@@ -447,7 +447,21 @@ end
 nyf1 = sum(kstate(:,2) == M_.maximum_endo_lag+2);
 hu1 = [hu;zeros(np-npred,M_.exo_nbr)];
 %B1 = [B(1:M_.endo_nbr,:);zeros(size(A,1)-M_.endo_nbr,size(B,2))];
-rhs = -[rhs; zeros(n-M_.endo_nbr,size(rhs,2))]-B*dr.ghxx*kron(hx,hu1);
+[nrhx,nchx] = size(hx);
+[nrhu1,nchu1] = size(hu1);
+if nrhx*nrhu1*nchx*nchu1 > 1e7
+  B1 = zeros(M_.endo_nbr,nchx*nchu1);
+  k1 = 1;
+  for i1 = 1:nchx
+      for i2 = 1:nchu1
+	B1(:,k1) = dr.ghxx*kron(hx(:,i1),hu1(:,i2));
+	k1 = k1 + 1; 
+      end
+  end
+else
+  B1 = B*dr.ghxx*kron(hx,hu1);
+end
+rhs = -[rhs; zeros(n-M_.endo_nbr,size(rhs,2))]-B1;
 
 
 %lhs
@@ -469,7 +483,18 @@ if nrzx*nrzx*M_.exo_nbr*M_.exo_nbr > 1e7
 else
   rhs = hessian*kron(zu,zu);
 end
-
+if nrhu1*nrhu1*nchu1*nchu1 > 1e7
+  B1 = zeros(M_.endo_nbr,nchu1*nchu1);
+  k1 = 1;
+  for i1 = 1:nchu1
+      for i2 = 1:nchu1
+	B1(:,k1) = dr.ghxx*kron(hu1(:,i1),hu1(:,i2));
+	k1 = k1 + 1; 
+      end
+  end
+else
+  B1 = B*dr.ghxx*kron(hu1,hu1);
+end
 rhs = -[rhs; zeros(n-M_.endo_nbr,size(rhs,2))]-B*dr.ghxx*kron(hu1,hu1);
 
 %lhs
@@ -510,9 +535,24 @@ hxx = dr.ghxx(nstatic+[1:npred],:);
 for i=1:M_.maximum_endo_lead
   for j=i:M_.maximum_endo_lead
     [junk,k2a,k2] = find(M_.lead_lag_incidence(M_.maximum_endo_lag+j+1,order_var));
-    [junk,k3a,k3] = find(M_.lead_lag_incidenceordered(M_.maximum_endo_lag+j+1,:));
-    RHS = RHS + jacobia_(:,k2)*guu(k2a,:)+hessian(:,kh(k3,k3))* ...
-	  kron(gu(k3a,:),gu(k3a,:));
+    [junk,k3a,k3] = ...
+	find(M_.lead_lag_incidenceordered(M_.maximum_endo_lag+j+1,:));
+    nk3a = length(k3a);
+    if nk3a*nk3a*M_.exo_nbr*M_.exo_nbr > 1e7
+      B1 = zeros(M_.endo_nbr,M_.exo_nbr*M_.exo_nbr);
+      k1 = 1;
+      H = hessian(:,kh(k3,k3));
+      guk3a = gu(k3a,:);
+      for i1 = 1:M_.exo_nbr
+	for i2 = 1:M_.exo_nbr
+	  B1(:,k1) = H*kron(guk3a(:,i1),guk3a(:,i2));
+	  k1 = k1 + 1; 
+	end
+      end
+    else
+      B1 = hessian(:,kh(k3,k3))*kron(gu(k3a,:),gu(k3a,:));
+    end
+    RHS = RHS + jacobia_(:,k2)*guu(k2a,:)+B1;
   end
 
   % LHS
@@ -525,11 +565,29 @@ for i=1:M_.maximum_endo_lead
   
   kk = find(kstate(:,2) == M_.maximum_endo_lag+i+1);
   gu = dr.ghx*Gu;
-  GuGu = kron(Gu,Gu);
-  guu = dr.ghx*Guu+dr.ghxx*GuGu;
+  [nrGu,ncGu] = size(Gu);
+  if nrGu*nrGu*ncGu*ncGu > 1e7
+    G1 = zeros(M_.endo_nbr,ncGu*ncGu);
+    G2 = zeros(size(hxx,1),ncGu*ncGu);
+    k1 = 1;
+    for i1 = 1:nchx
+      for i2 = 1:nchu1
+	GuGu = kron(Gu(:,i1),Gu(:,i2));
+	G1(:,k1) = dr.ghxx*GuGu
+	G2(:,k1) = hxx*GuGu
+	k1 = k1 + 1; 
+      end
+    end
+  else
+    GuGu = kron(Gu,Gu);
+    G1 = dr.ghxx*GuGu;
+    G2 = hxx*GuGu;
+  end
+
+  guu = dr.ghx*Guu+G1;
   Gu = hx*Gu;
   Guu = hx*Guu;
-  Guu(end-npred+1:end,:) = Guu(end-npred+1:end,:) + hxx*GuGu;
+  Guu(end-npred+1:end,:) = Guu(end-npred+1:end,:) + G2;
 
   H = E1 + hx*H;
 end
