@@ -495,7 +495,7 @@ if nrhu1*nrhu1*nchu1*nchu1 > 1e7
 else
   B1 = B*dr.ghxx*kron(hu1,hu1);
 end
-rhs = -[rhs; zeros(n-M_.endo_nbr,size(rhs,2))]-B*dr.ghxx*kron(hu1,hu1);
+rhs = -[rhs; zeros(n-M_.endo_nbr,size(rhs,2))]-B1;
 
 %lhs
 dr.ghuu = A\rhs;
