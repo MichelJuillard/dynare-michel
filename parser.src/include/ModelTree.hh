@@ -1,72 +1,73 @@
 #ifndef _MODELTREE_HH
 #define _MODELTREE_HH
-//------------------------------------------------------------------------------
-/*! \file
-  \version 1.0
-  \date 04/13/2003
-  \par This file defines the ModelTree class.
-*/
-//------------------------------------------------------------------------------
+
+using namespace std;
+
 #include <string>
 #include <vector>
-#include <list>
-#include <stack>
-#include <sstream>
-#include <fstream>
+#include <map>
 #include <ostream>
-//------------------------------------------------------------------------------
+
 #include "SymbolTable.hh"
 #include "NumericalConstants.hh"
-#include "ModelTypes.hh"
 #include "DataTree.hh"
-//------------------------------------------------------------------------------
-/*!
-  \class  ModelTree
-  \brief  Stores a model equations and derivatives.
-*/
+
+//! Stores a model's equations and derivatives
 class ModelTree : public DataTree
 {
-private :
-  /*! Stores ID of equations and their derivatives */
-  std::vector<std::vector<DerivativeIndex> > mDerivativeIndex;
-  /*!
-    A token is writen as a temporary expression
-    if its cost is greater than min_cost
-  */
-  int           min_cost;
-  /*! left and right parentheses can be (,[ or ),] */
-  char          lpar, rpar;
-  //! Reference to numerical constants table
-  const NumericalConstants &num_constants;
+private:
+  //! Stores declared equations
+  vector<BinaryOpNode *> equations;
 
-  /*! Computes argument derivative */
-  inline NodeID     DeriveArgument(NodeID iArg, Type iType, int iVarID);
-  /*! Gets output argument of terminal token */
-  inline std::string    getArgument(NodeID id, Type type, EquationType  iEquationType);
-  /*! Gets expression of part of model tree */
-  std::string getExpression(NodeID StartID, EquationType iEquationType);
-  inline int optimize(NodeID id);
-  /*! Computes derivatives of ModelTree */
-  void    derive(int iOrder);
+  typedef map<pair<int, int>, NodeID> first_derivatives_type;
+  //! First order derivatives
+  /*! First index is equation number, second is variable w.r. to which is computed the derivative.
+    Only non-null derivatives are stored in the map.
+    Variable indexes used are those of the variable_table, before sorting.
+  */
+  first_derivatives_type first_derivatives;
+
+  typedef map<pair<int, pair<int, int> >, NodeID> second_derivatives_type;
+  //! Second order derivatives
+  /*! First index is equation number, second and third are variables w.r. to which is computed the derivative.
+    Only non-null derivatives are stored in the map.
+    Contains only second order derivatives where var1 >= var2 (for obvious symmetry reasons).
+    Variable indexes used are those of the variable_table, before sorting.
+  */
+  second_derivatives_type second_derivatives;
+
+  //! Temporary terms (those which will be noted Txxxx)
+  temporary_terms_type temporary_terms;
+
+  //! Computes derivatives of ModelTree
+  void derive(int order);
+  //! Computes temporary terms
+  void computeTemporaryTerms(int order);
+
+  //! Writes temporary terms
+  void writeTemporaryTerms(ostream &output, bool is_dynamic) const;
+  //! Writes local parameters
+  void writeLocalParameters(ostream &output, bool is_dynamic) const;
+  //! Writes model equations
+  void writeModelEquations(ostream &output, bool is_dynamic) const;
   //! Writes the static model equations and its derivatives
   /*! \todo handle hessian in C output */
-  void writeStaticModel(std::ostream &StaticOutput);
+  void writeStaticModel(ostream &StaticOutput) const;
   //! Writes the dynamic model equations and its derivatives
-  void writeDynamicModel(std::ostream &DynamicOutput);
+  void writeDynamicModel(ostream &DynamicOutput) const;
   //! Writes static model file (Matlab version)
-  void writeStaticMFile(const std::string &static_basename);
+  void writeStaticMFile(const string &static_basename) const;
   //! Writes static model file (C version)
-  void writeStaticCFile(const std::string &static_basename);
+  void writeStaticCFile(const string &static_basename) const;
   //! Writes dynamic model file (Matlab version)
-  void writeDynamicMFile(const std::string &dynamic_basename);
+  void writeDynamicMFile(const string &dynamic_basename) const;
   //! Writes dynamic model file (C version)
-  void writeDynamicCFile(const std::string &dynamic_basename);
+  void writeDynamicCFile(const string &dynamic_basename) const;
 
 public:
-  //! Constructor
-  ModelTree(SymbolTable &symbol_table_arg, const NumericalConstants &num_constants);
-  //! Number of equations contained in this model tree
-  int eq_nbr;
+  ModelTree(SymbolTable &symbol_table_arg, NumericalConstants &num_constants);
+  //! Declare a node as an equation of the model
+  void addEquation(NodeID eq);
   //! Do some checking
   void checkPass() const;
   //! Whether dynamic Jacobian (w.r. to endogenous) should be written
@@ -82,13 +83,11 @@ public:
     calling this function */
   void computingPass();
   //! Writes model initialization and lead/lag incidence matrix to output
-  void writeOutput(std::ostream &output) const;
+  void writeOutput(ostream &output) const;
   //! Writes static model file
-  /*! \todo make this method const */
-  void writeStaticFile(const std::string &basename);
+  void writeStaticFile(const string &basename) const;
   //! Writes dynamic model file
-  /*! \todo make this method const */
-  void writeDynamicFile(const std::string &basename);
+  void writeDynamicFile(const string &basename) const;
 };
-//------------------------------------------------------------------------------
+
 #endif

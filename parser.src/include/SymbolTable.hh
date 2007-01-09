@@ -76,15 +76,15 @@ public :
   */
   inline bool Exist(const std::string &name) const;
   /*! Gets name by type and ID */
-  inline std::string getNameByID(Type type, int id);
+  inline std::string getNameByID(Type type, int id) const;
   /*! Gets tex name by type and ID */
-  inline std::string getTexNameByID(Type type, int id);
+  inline std::string getTexNameByID(Type type, int id) const;
   /*! Gets type by name */
   inline Type getType(const std::string &name) const;
   /*! Gets ID by name */
   inline int getID(const std::string &name) const;
   //! Write output of this class
-  void writeOutput(std::ostream &output);
+  void writeOutput(std::ostream &output) const;
 };
 
 inline bool SymbolTable::Exist(const std::string &name) const
@@ -94,7 +94,7 @@ inline bool SymbolTable::Exist(const std::string &name) const
 }
 
 //------------------------------------------------------------------------------
-inline std::string  SymbolTable::getNameByID(Type type,int id)
+inline std::string  SymbolTable::getNameByID(Type type,int id) const
 {
   if (id >= 0 && (int)name_table[type].size() > id)
     return(name_table[type][id]);
@@ -102,7 +102,7 @@ inline std::string  SymbolTable::getNameByID(Type type,int id)
 }
 
 //------------------------------------------------------------------------------
-inline std::string  SymbolTable::getTexNameByID(Type type,int id)
+inline std::string  SymbolTable::getTexNameByID(Type type,int id) const
 {
   if (id >= 0 && (int)tex_name_table[type].size() > id)
     return(tex_name_table[type][id]);

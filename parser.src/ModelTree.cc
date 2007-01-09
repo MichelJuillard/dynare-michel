@@ -1,43 +1,13 @@
-/*! \file
-  \version 1.0
-  \date 04/09/2004
-  \par This file implements the ModelTree class methodes.
-*/
-//------------------------------------------------------------------------------
 #include <iostream>
-#include <string>
-#include <vector>
-#include <stack>
-#include <numeric>
-#include <stdio.h>
-#include <map>
-#include <time.h>
-using namespace std;
-//------------------------------------------------------------------------------
-#include "VariableTable.hh"
-#include "DynareBison.hh"
-#include "NumericalConstants.hh"
+#include <fstream>
+#include <sstream>
+
 #include "ModelTree.hh"
 #include "Interface.hh"
 
-inline NodeID MetaToken::getDerivativeAddress(int iVarID, const ModelTree &model_tree) const
-{
-  std::map<int, NodeID, std::less<int> >::const_iterator iter = d1.find(iVarID);
-  if (iter == d1.end())
-    // No entry in map, derivative is therefore null
-    if (op_code == token::EQUAL)
-      return model_tree.ZeroEqZero;
-    else
-      return model_tree.Zero;
-  else
-    return iter->second;
-}
-
 ModelTree::ModelTree(SymbolTable &symbol_table_arg,
-                     const NumericalConstants &num_constants_arg) :
-  DataTree(symbol_table_arg),
-  num_constants(num_constants_arg),
-  eq_nbr(0),
+                     NumericalConstants &num_constants_arg) :
+  DataTree(symbol_table_arg, num_constants_arg),
   computeJacobian(false),
   computeJacobianExo(false),
   computeHessian(false),
@@ -46,7 +16,122 @@ ModelTree::ModelTree(SymbolTable &symbol_table_arg,
 }
 
 void
-ModelTree::writeStaticMFile(const string &static_basename)
+ModelTree::derive(int order)
+{
+  cout << "Processing derivation ..." << endl;
+
+  cout << "  Processing Order 1... ";
+  for(int var = 0; var < variable_table.size(); var++)
+    for(int eq = 0; eq < (int) equations.size(); eq++)
+      {
+        NodeID d1 = equations[eq]->getDerivative(var);
+        if (d1 == Zero)
+          continue;
+        first_derivatives[make_pair(eq, var)] = d1;
+      }
+  cout << "done" << endl;
+
+  if (order == 2)
+    {
+      cout << "  Processing Order 2... ";
+      for(first_derivatives_type::const_iterator it = first_derivatives.begin();
+          it != first_derivatives.end(); it++)
+        {
+          int eq = it->first.first;
+          int var1 = it->first.second;
+          NodeID d1 = it->second;
+      
+          // Store only second derivatives with var2 <= var1
+          for(int var2 = 0; var2 <= var1; var2++)
+            {
+              NodeID d2 = d1->getDerivative(var2);
+              if (d2 == Zero)
+                continue;
+              second_derivatives[make_pair(eq, make_pair(var1, var2))] = d2;
+            }
+        }
+      cout << "done" << endl;
+    }
+}
+
+void
+ModelTree::computeTemporaryTerms(int order)
+{
+  map<NodeID, int> reference_count;
+  temporary_terms.clear();
+
+  for(vector<BinaryOpNode *>::iterator it = equations.begin();
+      it != equations.end(); it++)
+    (*it)->computeTemporaryTerms(reference_count, temporary_terms);
+
+  for(first_derivatives_type::iterator it = first_derivatives.begin();
+      it != first_derivatives.end(); it++)
+    it->second->computeTemporaryTerms(reference_count, temporary_terms);
+
+  if (order == 2)
+    for(second_derivatives_type::iterator it = second_derivatives.begin();
+        it != second_derivatives.end(); it++)
+      it->second->computeTemporaryTerms(reference_count, temporary_terms);
+}
+
+void
+ModelTree::writeTemporaryTerms(ostream &output, bool is_dynamic) const
+{
+  // A copy of temporary terms
+  temporary_terms_type tt2;
+
+  for(temporary_terms_type::const_iterator it = temporary_terms.begin();
+      it != temporary_terms.end(); it++)
+    {
+      (*it)->writeOutput(output, is_dynamic, temporary_terms);
+      output << " = ";
+
+      (*it)->writeOutput(output, is_dynamic, tt2);
+
+      // Insert current node into tt2
+      tt2.insert(*it);
+
+      output << ";" << endl;
+    }
+}
+
+void
+ModelTree::writeLocalParameters(ostream &output, bool is_dynamic) const
+{
+  for(map<int, NodeID>::const_iterator it = local_parameters_table.begin();
+      it != local_parameters_table.end(); it++)
+    {
+      int id = it->first;
+      NodeID value = it->second;
+      output << symbol_table.getNameByID(eLocalParameter, id) << " = ";
+      value->writeOutput(output, is_dynamic, temporary_terms);
+      output << ";" << endl;
+    }
+}
+
+void
+ModelTree::writeModelEquations(ostream &output, bool is_dynamic) const
+{
+  for(int eq = 0; eq < (int) equations.size(); eq++)
+    {
+      BinaryOpNode *eq_node = equations[eq];
+
+      NodeID lhs = eq_node->arg1;
+      output << "lhs =";
+      lhs->writeOutput(output, is_dynamic, temporary_terms);
+      output << ";" << endl;
+
+      NodeID rhs = eq_node->arg2;
+      output << "rhs =";
+      rhs->writeOutput(output, is_dynamic, temporary_terms);
+      output << ";" << endl;
+
+      output << "residual" << lpar << eq + 1 << rpar << "= lhs-rhs;" << endl;
+    }
+}
+
+void
+ModelTree::writeStaticMFile(const string &static_basename) const
 {
   string filename = static_basename + interfaces::function_file_extension();
 
@@ -74,7 +159,7 @@ ModelTree::writeStaticMFile(const string &static_basename)
 
 
 void
-ModelTree::writeDynamicMFile(const string &dynamic_basename)
+ModelTree::writeDynamicMFile(const string &dynamic_basename) const
 {
   string filename = dynamic_basename + interfaces::function_file_extension();
 
@@ -100,7 +185,7 @@ ModelTree::writeDynamicMFile(const string &dynamic_basename)
 }
 
 void
-ModelTree::writeStaticCFile(const string &static_basename)
+ModelTree::writeStaticCFile(const string &static_basename) const
 {
   string filename = static_basename + ".c";
 
@@ -143,7 +228,7 @@ ModelTree::writeStaticCFile(const string &static_basename)
   mStaticModelFile << "  if (nlhs >= 1)\n";
   mStaticModelFile << "  {\n";
   mStaticModelFile << "      /* Set the output pointer to the output matrix residual. */\n";
-  mStaticModelFile << "      plhs[0] = mxCreateDoubleMatrix(" << eq_nbr << ",1, mxREAL);\n";
+  mStaticModelFile << "      plhs[0] = mxCreateDoubleMatrix(" << equations.size() << ",1, mxREAL);\n";
   mStaticModelFile << "     /* Create a C pointer to a copy of the output matrix residual. */\n";
   mStaticModelFile << "     residual = mxGetPr(plhs[0]);\n";
   mStaticModelFile << "  }\n\n";
@@ -151,7 +236,7 @@ ModelTree::writeStaticCFile(const string &static_basename)
   mStaticModelFile << "  if (nlhs >= 2)\n";
   mStaticModelFile << "  {\n";
   mStaticModelFile << "      /* Set the output pointer to the output matrix g1. */\n";
-  mStaticModelFile << "      plhs[1] = mxCreateDoubleMatrix(" << eq_nbr << ", " << symbol_table.endo_nbr << ", mxREAL);\n";
+  mStaticModelFile << "      plhs[1] = mxCreateDoubleMatrix(" << equations.size() << ", " << symbol_table.endo_nbr << ", mxREAL);\n";
   mStaticModelFile << "      /* Create a C pointer to a copy of the output matrix g1. */\n";
   mStaticModelFile << "      g1 = mxGetPr(plhs[1]);\n";
   mStaticModelFile << "  }\n\n";
@@ -170,7 +255,7 @@ ModelTree::writeStaticCFile(const string &static_basename)
 
  
 void
-ModelTree::writeDynamicCFile(const string &dynamic_basename)
+ModelTree::writeDynamicCFile(const string &dynamic_basename) const
 {
   string filename = dynamic_basename + ".c";
 
@@ -218,7 +303,7 @@ ModelTree::writeDynamicCFile(const string &dynamic_basename)
   mDynamicModelFile << "  if (nlhs >= 1)\n";
   mDynamicModelFile << "  {\n";
   mDynamicModelFile << "     /* Set the output pointer to the output matrix residual. */\n";
-  mDynamicModelFile << "     plhs[0] = mxCreateDoubleMatrix(" << eq_nbr << ",1, mxREAL);\n";
+  mDynamicModelFile << "     plhs[0] = mxCreateDoubleMatrix(" << equations.size() << ",1, mxREAL);\n";
   mDynamicModelFile << "     /* Create a C pointer to a copy of the output matrix residual. */\n";
   mDynamicModelFile << "     residual = mxGetPr(plhs[0]);\n";
   mDynamicModelFile << "  }\n\n";
@@ -227,9 +312,9 @@ ModelTree::writeDynamicCFile(const string &dynamic_basename)
   mDynamicModelFile << "  {\n";
   mDynamicModelFile << "     /* Set the output pointer to the output matrix g1. */\n";
   if (computeJacobianExo)
-    mDynamicModelFile << "     plhs[1] = mxCreateDoubleMatrix(" << eq_nbr << ", " << variable_table.get_dyn_var_nbr() << ", mxREAL);\n";
+    mDynamicModelFile << "     plhs[1] = mxCreateDoubleMatrix(" << equations.size() << ", " << variable_table.get_dyn_var_nbr() << ", mxREAL);\n";
   else if (computeJacobian)
-    mDynamicModelFile << "     plhs[1] = mxCreateDoubleMatrix(" << eq_nbr << ", " << variable_table.var_endo_nbr << ", mxREAL);\n";
+    mDynamicModelFile << "     plhs[1] = mxCreateDoubleMatrix(" << equations.size() << ", " << variable_table.var_endo_nbr << ", mxREAL);\n";
   mDynamicModelFile << "     /* Create a C pointer to a copy of the output matrix g1. */\n";
   mDynamicModelFile << "     g1 = mxGetPr(plhs[1]);\n";
   mDynamicModelFile << "  }\n\n";
@@ -237,7 +322,7 @@ ModelTree::writeDynamicCFile(const string &dynamic_basename)
   mDynamicModelFile << " if (nlhs >= 3)\n";
   mDynamicModelFile << "  {\n";
   mDynamicModelFile << "     /* Set the output pointer to the output matrix g2. */\n";
-  mDynamicModelFile << "     plhs[2] = mxCreateDoubleMatrix(" << eq_nbr << ", " << variable_table.get_dyn_var_nbr()*variable_table.get_dyn_var_nbr() << ", mxREAL);\n";
+  mDynamicModelFile << "     plhs[2] = mxCreateDoubleMatrix(" << equations.size() << ", " << variable_table.get_dyn_var_nbr()*variable_table.get_dyn_var_nbr() << ", mxREAL);\n";
   mDynamicModelFile << "     /* Create a C pointer to a copy of the output matrix g1. */\n";
   mDynamicModelFile << "     g2 = mxGetPr(plhs[2]);\n";
   mDynamicModelFile << "  }\n\n";
@@ -257,502 +342,70 @@ ModelTree::writeDynamicCFile(const string &dynamic_basename)
   mDynamicModelFile.close();
 }
 
-
-void ModelTree::derive(int iOrder)
-{
-  NodeID  lToken;                // To store current working token
-  NodeID    lD1, lD2;            // To store derivative arguments of current argument
-  NodeID   lArg1, lArg2;         // To store current arguments
-  Type    lType1;                // Type of first argument
-  NodeID   t1,t11,t12,t13,
-    t14, t15;                    // To store temoporary result arguments
-  TreeIterator  BeginIT;         // Iterator of the 1st token to derive
-  TreeIterator  EndIT;           // Iterator of the last token to derive
-  TreeIterator  currentIT;       // Iterator (counter) for model tree loop
-
-  vector<NodeID> EqualTokenIDs;  // IDs of "equal token" in model Tree
-  // Capturing equation IDs
-  for (currentIT = BeginModel; currentIT != mModelTree.end(); currentIT++)
-    {
-      if ((*currentIT)->op_code == token::EQUAL)
-        {
-          EqualTokenIDs.push_back(*currentIT);
-          // Equation is forced to be in Model Tree as referenced
-          // This is useful to remove symmetric elements
-          (*currentIT)->reference_count[0]++;
-        }
-    }
-  //std::cout << "size " << EqualTokenIDs.size() << "\n";
-  mDerivativeIndex.resize(iOrder);
-  // Uncomment this to print model tree data
-  /*
-  //cout << "ModelTree==================================\n";
-  for (currentIT = mModelTree.begin(); currentIT != mModelTree.end(); currentIT++)
-  {
-  lToken = *currentIT;
-  int ID = lToken->idx;
-  cout << ID << ":" << lToken << "->" << lToken->id1 << " " << lToken->type1 << " " <<
-  lToken->id2 << " " << lToken->op_code << "\n";
-  }
-  */
-
-  EndIT = mModelTree.begin();
-  EndIT--;
-  cout << "Processing derivation ...\n";
-  // loop on order of derivation
-  for(int Order = 1; Order <= iOrder; Order++)
-    {
-
-      cout << "\tProcessing Order " << Order << "... ";
-      current_order = Order;
-      BeginIT = EndIT;
-      BeginIT++;
-      EndIT = mModelTree.end();
-      EndIT--;
-      // Adding a reference counter for current order to tokens in mModelTree
-      // and updating them
-
-      for (TreeIterator it = mModelTree.begin(); it != mModelTree.end(); it++)
-        {
-          int s = (*it)->reference_count.size();
-          for (int i = s; i <= current_order; i++)
-            {
-              int rc = (*it)->reference_count[i-1];
-              (*it)->reference_count.push_back(rc);
-            }
-        }
-
-      // Loop on tokens
-      for (currentIT = BeginIT;; currentIT++)
-        {
-          lToken = *currentIT;
-
-          // Loop on variables of derivation which may give non null result for this token
-          for (vector<int>::iterator varIt = lToken->non_null_derivatives.begin();
-               varIt != lToken->non_null_derivatives.end(); varIt++)
-            {
-              int var = *varIt;
-              //cout << "Token " << (*currentIT)->idx << endl;
-              if (accumulate((*currentIT)->reference_count.begin(), (*currentIT)->reference_count.end(),0) > 0)
-                {
-                  lArg1 = lToken->id1;
-                  lArg2 = lToken->id2;
-                  lType1 = lToken->type1;
-                  lD1 = DeriveArgument(lArg1, lType1, var);
-                  lD2 = Zero;
-                  if (lArg2 != NullID)
-                    lD2 = DeriveArgument(lArg2, eTempResult, var);
-                  // Case where token is a terminal
-                  if (lToken->op_code == NoOpCode)
-                    {
-                      (*currentIT)->setDerivativeAddress(lD1, var);
-                    }
-                  else if (lD1 == Zero && lD2 == Zero)
-                    {
-                      (*currentIT)->setDerivativeAddress(Zero, var);
-                    }
-                  else
-                    {
-                      switch (lToken->op_code)
-                        {
-                        case token::UMINUS:
-                          t1 = AddUMinus(lD1);
-                          (*currentIT)->setDerivativeAddress(t1, var);
-                          break;
-                        case token::PLUS:
-                          t1 = AddPlus(lD1, lD2);
-                          (*currentIT)->setDerivativeAddress(t1, var);
-                          break;
-                        case token::MINUS:
-                          t1 = AddMinus(lD1, lD2);
-                          (*currentIT)->setDerivativeAddress(t1, var);
-                          break;
-                        case token::TIMES:
-                          t11 = AddTimes(lD1, lArg2);
-                          t12 = AddTimes(lD2, lArg1);
-                          t1 = AddPlus(t11, t12);
-                          (*currentIT)->setDerivativeAddress(t1, var);
-                          break;
-                        case token::DIVIDE:
-                          t11 = AddTimes(lD1, lArg2);
-                          t12 = AddTimes(lD2, lArg1);
-                          t13 = AddMinus(t11, t12);
-                          t14 =  AddTimes(lArg2, lArg2);
-                          t1 = AddDivide(t13, t14);
-                          (*currentIT)->setDerivativeAddress(t1, var);
-                          break;
-                        case token::SQRT:
-                          t11 = AddPlus(*currentIT, *currentIT);
-                          t1 = AddDivide(lD1, t11);
-                          (*currentIT)->setDerivativeAddress(t1, var);
-                          break;
-                        case token::POWER:
-                          if (lD2 == Zero)
-                            {
-                              if (lD1 == Zero)
-                                t1 = Zero;
-                              else
-                                {
-                                  t11 = AddMinus(lArg2, One);
-                                  t12 = AddPower(lArg1, t11);
-                                  t13 = AddTimes(lArg2, t12);
-                                  t1 = AddTimes(lD1, t13);
-                                }
-                            }
-                          else
-                            {
-                              t11 = AddLog(lArg1);
-                              t12 = AddTimes(lD2, t11);
-                              t13 = AddTimes(lD1, lArg2);
-                              t14 =  AddDivide(t13, lArg1);
-                              t15 = AddPlus(t12, t14);
-                              t1 = AddTimes(t15, *currentIT);
-                            }
-                          (*currentIT)->setDerivativeAddress(t1, var);
-                          break;
-                        case token::EXP:
-                          t1 = AddTimes(lD1, *currentIT);
-                          (*currentIT)->setDerivativeAddress(t1, var);
-                          break;
-                        case token::LOG:
-                          t1 = AddDivide(lD1, lArg1);
-                          (*currentIT)->setDerivativeAddress(t1, var);
-                          break;
-                        case token::LOG10:
-                          t11 = AddExp(One);
-                          t12 = AddLog10(t11);
-                          t13 = AddDivide(lD1, lArg1);
-                          t1 = AddTimes(t12, t13);
-                          (*currentIT)->setDerivativeAddress(t1, var);
-                          break;
-                        case token::COS:
-                          t11 = AddSin(lArg1);
-                          t12 = AddUMinus(t11);
-                          t1 = AddTimes( lD1, t12);
-                          (*currentIT)->setDerivativeAddress(t1, var);
-                          break;
-                        case token::SIN:
-                          t11 = AddCos(lArg1);
-                          t1 = AddTimes(lD1,t11);
-                          (*currentIT)->setDerivativeAddress(t1, var);
-                          break;
-                        case token::TAN:
-                          t11 = AddTimes(*currentIT, *currentIT);
-                          t12 = AddPlus(t11, One);
-                          t1 = AddTimes(lD1, t12);
-                          (*currentIT)->setDerivativeAddress(t1, var);
-                          break;
-                        case token::ACOS:
-                          t11 = AddSin(*currentIT);
-                          t12 = AddDivide(lD1, t11);
-                          t1 = AddUMinus(t12);
-                          (*currentIT)->setDerivativeAddress(t1, var);
-                          break;
-                        case token::ASIN:
-                          t11 = AddCos(*currentIT);
-                          t1 = AddDivide(lD1, t11);
-                          (*currentIT)->setDerivativeAddress(t1, var);
-                          break;
-                        case token::ATAN:
-                          t11 = AddTimes(lArg1, lArg1);
-                          t12 = AddPlus(One, t11);
-                          t1 = AddDivide(lD1, t12);
-                          (*currentIT)->setDerivativeAddress(t1,var);
-                          break;
-                        case token::COSH:
-                          t11 = AddSinH(lArg1);
-                          t1 = AddTimes( lD1,t11);
-                          (*currentIT)->setDerivativeAddress(t1, var);
-                          break;
-                        case token::SINH:
-                          t11 = AddCosH(lArg1);
-                          t1 = AddTimes( lD1, t11);
-                          (*currentIT)->setDerivativeAddress(t1, var);
-                          break;
-                        case token::TANH:
-                          t11 = AddTimes(*currentIT, *currentIT);
-                          t12 = AddMinus(One, t11);
-                          t1 = AddTimes(lD1, t12);
-                          (*currentIT)->setDerivativeAddress(t1,var);
-                          break;
-                        case token::ACOSH:
-                          t11 = AddSinH(*currentIT);
-                          t1 = AddDivide(lD1, t11);
-                          (*currentIT)->setDerivativeAddress(t1,var);
-                          break;
-                        case token::ASINH:
-                          t11 = AddCosH(*currentIT);
-                          t1 = AddDivide(lD1, t11);
-                          (*currentIT)->setDerivativeAddress(t1,var);
-                          break;
-                        case token::ATANH:
-                          t11 = AddTimes(lArg1, lArg1);
-                          t12 = AddMinus(One, t11);
-                          t1 = AddTimes(lD1, t12);
-                          (*currentIT)->setDerivativeAddress(t1,var);
-                          break;
-                        case token::EQUAL:
-                          // Force the derivative to have zero on right hand side
-                          // (required for setStaticModel and setDynamicModel)
-                          if (lD1 == Zero && lD2 != Zero)
-                            {
-                              t11 = AddUMinus(lD2);
-                              t1 = AddEqual(t11, Zero);
-                            }
-                          else if (lD1 != Zero && lD2 == Zero)
-                            t1 = AddEqual(lD1, Zero);
-                          else
-                            {
-                              t11 = AddMinus(lD1, lD2);
-                              t1 = AddEqual(t11, Zero);
-                            }
-                          // The derivative is forced to be in Model Tree as referenced
-                          // This is useful to remove symmetric elements
-                          IncrementReferenceCount(t1);
-                          lToken->setDerivativeAddress(t1, var);
-                          break;
-                        }
-                    }
-                }
-            }
-          if (currentIT == EndIT)
-            break;
-        }
-
-      // Filling mDerivativeIndex
-      // Loop on variables of derivation, skipping symmetric elements
-      for (int var = 0; var < variable_table.size(); var++)
-        {
-          int starti = var*Order*(Order-1)*eq_nbr/2;
-          for (unsigned int i = starti; i < EqualTokenIDs.size() ; i++ )
-            {
-              t1 = EqualTokenIDs[i]->getDerivativeAddress(var, *this);
-              if (Order == 1)
-                mDerivativeIndex[0].push_back(DerivativeIndex(t1, i-starti, var));
-              else if (Order == 2)
-                {
-                  int var1 = variable_table.getSortID(i/eq_nbr);
-                  int var2 = variable_table.getSortID(var);
-                  mDerivativeIndex[1].push_back(DerivativeIndex(t1,
-                                                                i-eq_nbr*(i/eq_nbr),
-                                                                var1*variable_table.get_dyn_var_nbr()+var2));
-                }
-            }
-        }
-
-      // Uncomment to debug : prints unreferenced tokens
-      /*
-        cout << "Order : " << Order << "\n";
-        for (TokenCount = BeginModel; TokenCount < mModelTree.size() ; TokenCount++ )
-        {
-        if (accumulate(mModelTree[TokenCount].reference_count.begin(),mModelTree[TokenCount].reference_count.end(),0) == 0)
-        cout << "\tNot referenced : token ID :" << TokenCount << endl;
-        }
-      */
-      // Uncomment this to debug : mDerivative(1and2)Index data
-      // before removing unreferenced tokens
-      /*
-        cout << "Contenence of mDerivative1Index\n";
-        for (int i=0; i< mDerivativeIndex[0].size();i++)
-        //if (mDerivativeIndex[0][i].token_id != 3)
-        cout << "\t" << mDerivativeIndex[0][i].token_id << endl;
-        cout << "Contenence of mDerivative2Index\n";
-        for (int i=0; i< mDerivativeIndex[1].size();i++)
-        //if (mDerivativeIndex[1][i].token_id != 3)
-        cout << "\t" << mDerivativeIndex[1][i].token_id << endl;
-      */
-      //cout << "Removing unreferenced tokens range ids :" << CurrentID << " - " << mModelTree.size()-1 << endl;
-      // Removing unreferenced tokens in last derivative
-      // RemoveUnref(CurrentID, mModelTree.size()-1, Order);
-      // Decrementing reference couter of unreferenced tokens in last derivative
-      //DecrementUnref(CurrentID, mModelTree.size()-1, Order);
-      /*
-        cout << "Order : " << Order << "\n";
-        for (TokenCount = BeginModel; TokenCount < mModelTree.size() ; TokenCount++ )
-        {
-        if (accumulate(mModelTree[TokenCount].reference_count.begin(),mModelTree[TokenCount].reference_count.end(),0) == 0)
-        cout << "\tNot referenced : token ID :" << TokenCount << endl;
-        }
-      */
-      EqualTokenIDs.clear();
-      // Updating EqualTokenIDs
-      for (unsigned int i=0; i< mDerivativeIndex[Order-1].size();i++)
-        {
-          EqualTokenIDs.push_back(mDerivativeIndex[Order-1][i].token_id);
-        }
-
-      // Uncomment this to debug : mDerivative(1and2)Index data
-      // after removing unreferenced tokens
-      /*
-        cout << "Contenence of mDerivative1Index after removing\n";
-        for (int i=0; i< mDerivativeIndex[0].size();i++)
-        if (mDerivativeIndex[0][i].token_id != 3)
-        cout << "\t" << mDerivativeIndex[0][i].token_id << endl;
-        cout << "Contenence of mDerivative2Index after removing\n";
-        for (int i=0; i< mDerivativeIndex[1].size();i++)
-        //if (mDerivativeIndex[1][i].token_id != 3)
-        cout << "\t" << mDerivativeIndex[1][i].token_id << endl;
-      */
-      cout << "done" << endl;
-    }
-}
-
-//------------------------------------------------------------------------------
-inline NodeID ModelTree::DeriveArgument(NodeID iArg, Type iType, int iVarID)
-{
-  switch(iType)
-    {
-    case eTempResult      :
-      return iArg->getDerivativeAddress(iVarID, *this);
-    case eExogenous       :
-    case eExogenousDet      :
-    case eEndogenous      :
-    case eRecursiveVariable   :
-      if ((long int) iArg == iVarID)
-        return One;
-      else
-        {
-          return Zero;
-        }
-      break;
-    case eNumericalConstant   :
-    case eParameter       :
-      return Zero;
-    case eLocalParameter      :
-      return Zero;
-    case eUNDEF         :
-      return NullID;
-    default       :
-      cout << "ModelTree::DeriveArgument : Error: Unknown Type\n";
-      exit(-1);
-    };
-
-}
-
 void
-ModelTree::writeStaticModel(ostream &StaticOutput)
+ModelTree::writeStaticModel(ostream &StaticOutput) const
 {
   ostringstream model_output;    // Used for storing model equations
   ostringstream jacobian_output; // Used for storing jacobian equations
   ostringstream hessian_output;
   ostringstream lsymetric;       // For symmetric elements in hessian
 
-  int d = current_order;         // Minimum number of times a temparary expression apears in equations
-  // Reference count of token "0=0" is set to 0
-  // Not to be printed as a temp expression
-  fill(ZeroEqZero->reference_count.begin(),
-       ZeroEqZero->reference_count.end(),0);
-  // Writing model Equations
-  current_order = 1;
-  TreeIterator tree_it = BeginModel;
-  int lEquationNBR = 0;
-  for (; tree_it != mModelTree.end(); tree_it++)
-    {
-      if ((*tree_it)->op_code == token::EQUAL || (*tree_it)->op_code == token::ASSIGN )
-        {
-          if ((*tree_it)->id1->type1 == eLocalParameter)
-            {
-              model_output << getExpression((*tree_it)->id1, eStaticEquations);
-              model_output << " = ";
-              model_output << getExpression((*tree_it)->id2, eStaticEquations) << ";" << endl;
-            }
-          else if (lEquationNBR < eq_nbr)
-            {
-              model_output << "lhs =";
-              model_output << getExpression((*tree_it)->id1, eStaticEquations) << ";" << endl;
-              model_output << "rhs =";
-              model_output << getExpression((*tree_it)->id2, eStaticEquations) << ";" << endl;
-              model_output << "residual" << lpar << lEquationNBR+1 << rpar << "= lhs-rhs;" << endl;
-              lEquationNBR++;
-            }
-          else
-            break;
-        }
-      else if ((*tree_it)->op_code != NoOpCode)
-        {
-          if (optimize(*tree_it))
-            {
-              model_output << "T" << (*tree_it)->idx << "=" << getExpression(*tree_it, eStaticEquations) << ";" << endl;
-              (*tree_it)->tmp_status = 1;
-            }
-          else
-            {
-              (*tree_it)->tmp_status = 0;
-            }
-        }
-    }
+  writeTemporaryTerms(model_output, false);
 
-  for(; tree_it != mModelTree.end(); tree_it++)
-    {
-      if ((*tree_it)->op_code != NoOpCode
-          && (*tree_it)->op_code != token::EQUAL
-          && (*tree_it)->op_code != token::ASSIGN)
-        {
-          if (optimize(*tree_it) == 1)
-            {
-              jacobian_output << "T" << (*tree_it)->idx << "=" << getExpression(*tree_it, eStaticEquations) << ";" << endl;
-              (*tree_it)->tmp_status = 1;
-            }
-          else
-            {
-              (*tree_it)->tmp_status = 0;
-            }
-        }
-    }
+  writeLocalParameters(model_output, false);
+
+  writeModelEquations(model_output, false);
 
   // Write Jacobian w.r. to endogenous only
-  for (unsigned int i = 0; i < mDerivativeIndex[0].size(); i++)
+  for(first_derivatives_type::const_iterator it = first_derivatives.begin();
+      it != first_derivatives.end(); it++)
     {
-      if (variable_table.getType(mDerivativeIndex[0][i].derivators) == eEndogenous)
+      int eq = it->first.first;
+      int var = it->first.second;
+      NodeID d1 = it->second;
+
+      if (variable_table.getType(var) == eEndogenous)
         {
-          NodeID startJacobian = mDerivativeIndex[0][i].token_id;
-          if (startJacobian != ZeroEqZero)
-            {
-              string exp = getExpression(startJacobian->id1, eStaticDerivatives);
-              ostringstream g1;
-              g1 << "  g1" << lpar << mDerivativeIndex[0][i].equation_id+1 << ", " <<
-                variable_table.getSymbolID(mDerivativeIndex[0][i].derivators)+1 << rpar;
-              jacobian_output << g1.str() << "=" <<  g1.str() << "+" << exp << ";\n";
-            }
+          ostringstream g1;
+          g1 << "  g1" << lpar << eq + 1 << ", " << variable_table.getSymbolID(var) + 1 << rpar;
+          
+          jacobian_output << g1.str() << "=" << g1.str() << "+";
+          d1->writeOutput(jacobian_output, false, temporary_terms);
+          jacobian_output << ";" << endl;
         }
     }
 
   // Write Hessian w.r. to endogenous only
   if (computeStaticHessian)
-    {
-      for (unsigned int i = 0; i < mDerivativeIndex[1].size(); i++)
-        {
-          NodeID startHessian = mDerivativeIndex[1][i].token_id;
-          if (startHessian != ZeroEqZero)
-            {
-              string exp = getExpression(startHessian->id1, eStaticDerivatives);
+    for(second_derivatives_type::const_iterator it = second_derivatives.begin();
+        it != second_derivatives.end(); it++)
+      {
+        int eq = it->first.first;
+        int var1 = it->first.second.first;
+        int var2 = it->first.second.second;
+        NodeID d2 = it->second;
 
-              int varID1 = mDerivativeIndex[1][i].derivators / variable_table.get_dyn_var_nbr();
-              int varID2 = mDerivativeIndex[1][i].derivators - varID1 * variable_table.get_dyn_var_nbr();
+        // Keep only derivatives w.r. to endogenous variables
+        if (variable_table.getType(var1) == eEndogenous
+            && variable_table.getType(var2) == eEndogenous)
+          {
+            int id1 = variable_table.getSymbolID(var1);
+            int id2 = variable_table.getSymbolID(var2);
 
-              // Keep only derivatives w.r. to endogenous variables
-              if (variable_table.getType(varID1) != eEndogenous
-                  || variable_table.getType(varID2) != eEndogenous)
-                continue;
+            int col_nb = id1*symbol_table.endo_nbr+id2+1;
+            int col_nb_sym = id2*symbol_table.endo_nbr+id1+1;
 
-              int id1 = variable_table.getSymbolID(varID1);
-              int id2 = variable_table.getSymbolID(varID2);
+            hessian_output << "  g2" << lpar << eq+1 << ", " << col_nb << rpar << " = ";
+            d2->writeOutput(hessian_output, false, temporary_terms);
+            hessian_output << ";" << endl;
 
-              int col_nb = id1*symbol_table.endo_nbr+id2+1;
-              int col_nb_sym = id2*symbol_table.endo_nbr+id1+1;
+            // Treating symetric elements
+            if (var1 != var2)
+              lsymetric <<  "  g2" << lpar << eq+1 << ", " << col_nb_sym << rpar << " = "
+                        <<  "g2" << lpar << eq+1 << ", " << col_nb << rpar << ";" << endl;
+          }
 
-              hessian_output << "  g2" << lpar << mDerivativeIndex[1][i].equation_id+1 << ", " <<
-                col_nb << rpar << " = " << exp << ";\n";
-              // Treating symetric elements
-              if (varID1 != varID2)
-                lsymetric <<  "  g2" << lpar << mDerivativeIndex[1][i].equation_id+1 << ", " <<
-                  col_nb_sym << rpar << " = " <<
-                  "g2" << lpar << mDerivativeIndex[1][i].equation_id+1 << ", " <<
-                  col_nb << rpar << ";\n";
-            }
-
-        }
-    }
+      }
 
   // Writing ouputs
   if (offset == 1)
@@ -760,7 +413,7 @@ ModelTree::writeStaticModel(ostream &StaticOutput)
       StaticOutput << "global M_ \n";
       StaticOutput << "if M_.param_nbr > 0\n  params = M_.params;\nend\n";
 
-      StaticOutput << "  residual = zeros( " << eq_nbr << ", 1);\n";
+      StaticOutput << "  residual = zeros( " << equations.size() << ", 1);\n";
       StaticOutput << "\n\t"+interfaces::comment()+"\n\t"+interfaces::comment();
       StaticOutput << "Model equations\n\t";
       StaticOutput << interfaces::comment() + "\n\n";
@@ -770,7 +423,7 @@ ModelTree::writeStaticModel(ostream &StaticOutput)
       StaticOutput << "end\n";
       StaticOutput << "if nargout >= 2,\n";
       StaticOutput << "  g1 = " <<
-        "zeros(" << eq_nbr << ", " <<
+        "zeros(" << equations.size() << ", " <<
         symbol_table.endo_nbr << ");\n" ;
       StaticOutput << "\n\t"+interfaces::comment()+"\n\t"+interfaces::comment();
       StaticOutput << "Jacobian matrix\n\t";
@@ -786,7 +439,7 @@ ModelTree::writeStaticModel(ostream &StaticOutput)
           // Writing initialization instruction for matrix g2
           int ncols = symbol_table.endo_nbr * symbol_table.endo_nbr;
           StaticOutput << "  g2 = " <<
-            "sparse([],[],[]," << eq_nbr << ", " << ncols << ", " <<
+            "sparse([],[],[]," << equations.size() << ", " << ncols << ", " <<
             5*ncols << ");\n";
           StaticOutput << "\n\t"+interfaces::comment()+"\n\t"+interfaces::comment();
           StaticOutput << "Hessian matrix\n\t";
@@ -814,155 +467,69 @@ ModelTree::writeStaticModel(ostream &StaticOutput)
       StaticOutput << " }\n";
       StaticOutput << "}\n\n";
     }
-  current_order = d;
 }
 
 void
-ModelTree::writeDynamicModel(ostream &DynamicOutput)
+ModelTree::writeDynamicModel(ostream &DynamicOutput) const
 {
   ostringstream lsymetric;       // Used when writing symetric elements in Hessian
   ostringstream model_output;    // Used for storing model equations
   ostringstream jacobian_output; // Used for storing jacobian equations
   ostringstream hessian_output;  // Used for storing Hessian equations
 
-  int d = current_order;
+  writeTemporaryTerms(model_output, true);
 
-  // Reference count of token "0=0" is set to 0
-  // Not to be printed as a temp expression
-  fill(ZeroEqZero->reference_count.begin(),
-       ZeroEqZero->reference_count.end(),0);
+  writeLocalParameters(model_output, true);
 
-  // Getting equations from model tree
-  // Starting from the end of equation
-  // Searching for the next '=' operator,
-  current_order = 1;
-  int lEquationNBR = 0;
-  cout << "\tequations .. ";
-  TreeIterator tree_it = BeginModel;
-  for (; tree_it != mModelTree.end(); tree_it++)
-    {
-      if ((*tree_it)->op_code == token::EQUAL || (*tree_it)->op_code == token::ASSIGN)
-        {
-          if ((*tree_it)->id1->type1 == eLocalParameter)
-            {
-              model_output << getExpression((*tree_it)->id1, eStaticEquations);
-              model_output << " = ";
-              model_output << getExpression((*tree_it)->id2, eStaticEquations) << ";" << endl;
-            }
-          else if (lEquationNBR < eq_nbr)
-            {
-              model_output << "lhs =";
-              model_output << getExpression(((*tree_it)->id1), eDynamicEquations) << ";" << endl;
-              model_output << "rhs =";
-              model_output << getExpression(((*tree_it)->id2), eDynamicEquations) << ";" << endl;
-              model_output << "residual" << lpar << lEquationNBR+1 << rpar << "= lhs-rhs;" << endl;
-              lEquationNBR++;
-            }
-          else
-            break;
-        }
-      else if ((*tree_it)->op_code != NoOpCode)
-        {
-          if (optimize(*tree_it))
-            {
-              model_output << "T" << (*tree_it)->idx << "=" << getExpression(*tree_it, eDynamicEquations) << ";" << endl;
-              (*tree_it)->tmp_status = 1;
-            }
-          else
-            {
-              (*tree_it)->tmp_status = 0;
-            }
-        }
-    }
+  writeModelEquations(model_output, true);
 
-  for(; tree_it != mModelTree.end(); tree_it++)
-    {
-      if ((*tree_it)->op_code != NoOpCode
-          && (*tree_it)->op_code != token::EQUAL
-          && (*tree_it)->op_code != token::ASSIGN)
-        {
-          if (optimize(*tree_it) == 1)
-            {
-              jacobian_output << "T" << (*tree_it)->idx << "=" << getExpression(*tree_it, eDynamicEquations) << ";" << endl;
-              (*tree_it)->tmp_status = 1;
-            }
-          else
-            {
-              (*tree_it)->tmp_status = 0;
-            }
-        }
-    }
-  cout << "done \n";
-  // Getting Jacobian from model tree
+  // Writing Jacobian
   if (computeJacobian || computeJacobianExo)
-    {
-      cout << "\tJacobian .. ";
-      for(; tree_it != mModelTree.end(); tree_it++)
-        {
-          if ((*tree_it)->op_code != NoOpCode
-              && (*tree_it)->op_code != token::EQUAL
-              && (*tree_it)->op_code != token::ASSIGN)
-            {
-              if (optimize(*tree_it) == 1)
-                {
-                  jacobian_output << "T" << (*tree_it)->idx << "=" << getExpression(*tree_it, eDynamicEquations) << ";" << endl;
-                  (*tree_it)->tmp_status = 1;
-                }
-              else
-                {
-                  (*tree_it)->tmp_status = 0;
-                }
-            }
-        }
+    for(first_derivatives_type::const_iterator it = first_derivatives.begin();
+        it != first_derivatives.end(); it++)
+      {
+        int eq = it->first.first;
+        int var = it->first.second;
+        NodeID d1 = it->second;
 
-      for (unsigned int i = 0; i < mDerivativeIndex[0].size(); i++)
-        {
-          if (computeJacobianExo || variable_table.getType(mDerivativeIndex[0][i].derivators) == eEndogenous)
-            {
-              NodeID startJacobian = mDerivativeIndex[0][i].token_id;
-              if (startJacobian != ZeroEqZero)
-                {
-                  string exp = getExpression(startJacobian->id1, eDynamicDerivatives);
-                  ostringstream g1;
-                  g1 << "  g1" << lpar << mDerivativeIndex[0][i].equation_id+1 << ", " <<
-                    variable_table.getSortID(mDerivativeIndex[0][i].derivators)+1 << rpar;
-                  jacobian_output << g1.str() << "=" <<  g1.str() << "+" << exp << ";\n";
-                }
-            }
-        }
-      cout << "done \n";
-    }
+        if (computeJacobianExo || variable_table.getType(var) == eEndogenous)
+          {
+            ostringstream g1;
+            g1 << "  g1" << lpar << eq + 1 << ", " << variable_table.getSortID(var) + 1 << rpar;
 
+            jacobian_output << g1.str() << "=" << g1.str() << "+";
+            d1->writeOutput(jacobian_output, true, temporary_terms);
+            jacobian_output << ";" << endl;
+          }
+      }
+
+  // Writing Hessian
   if (computeHessian)
-    {
-      // Getting Hessian from model tree
-      // Starting from the end of equation
-      // Searching for the next '=' operator,
-      cout << "\tHessian .. ";
-      for (unsigned int i = 0; i < mDerivativeIndex[1].size(); i++)
-        {
-          NodeID startHessian = mDerivativeIndex[1][i].token_id;
-          //cout << "ID = " << startHessian << " exp = " << exp << "\n";
-          if (startHessian != ZeroEqZero)
-            {
-              string exp = getExpression(startHessian->id1, eDynamicDerivatives);
+    for(second_derivatives_type::const_iterator it = second_derivatives.begin();
+        it != second_derivatives.end(); it++)
+      {
+        int eq = it->first.first;
+        int var1 = it->first.second.first;
+        int var2 = it->first.second.second;
+        NodeID d2 = it->second;
 
-              int varID1 = mDerivativeIndex[1][i].derivators / variable_table.get_dyn_var_nbr();
-              int varID2 = mDerivativeIndex[1][i].derivators - varID1 * variable_table.get_dyn_var_nbr();
-              hessian_output << "  g2" << lpar << mDerivativeIndex[1][i].equation_id+1 << ", " <<
-                mDerivativeIndex[1][i].derivators+1 << rpar << " = " << exp << ";\n";
-              // Treating symetric elements
-              if (varID1 != varID2)
-                lsymetric <<  "  g2" << lpar << mDerivativeIndex[1][i].equation_id+1 << ", " <<
-                  varID2*variable_table.get_dyn_var_nbr()+varID1+1 << rpar << " = " <<
-                  "g2" << lpar << mDerivativeIndex[1][i].equation_id+1 << ", " <<
-                  mDerivativeIndex[1][i].derivators+1 << rpar << ";\n";
-            }
+        int id1 = variable_table.getSortID(var1);
+        int id2 = variable_table.getSortID(var2);
 
-        }
-      cout << "done \n";
-    }
-  int nrows = eq_nbr;
+        int col_nb = id1*variable_table.get_dyn_var_nbr()+id2+1;
+        int col_nb_sym = id2*variable_table.get_dyn_var_nbr()+id1+1;
+
+        hessian_output << "  g2" << lpar << eq+1 << ", " << col_nb << rpar << " = ";
+        d2->writeOutput(hessian_output, true, temporary_terms);
+        hessian_output << ";" << endl;
+
+        // Treating symetric elements
+        if (id1 != id2)
+          lsymetric <<  "  g2" << lpar << eq+1 << ", " << col_nb_sym << rpar << " = "
+                    <<  "g2" << lpar << eq+1 << ", " << col_nb << rpar << ";" << endl;
+      }
+
+  int nrows = equations.size();
   int nvars = variable_table.var_endo_nbr;
   if (computeJacobianExo)
     nvars += symbol_table.exo_nbr + symbol_table.exo_det_nbr;
@@ -1030,225 +597,6 @@ ModelTree::writeDynamicModel(ostream &DynamicOutput)
         }
       DynamicOutput << "}\n\n";
     }
-  current_order = d;
-}
-
-string
-ModelTree::getExpression(NodeID StartID, EquationType iEquationType)
-{
-
-  // Stack of tokens
-  stack <int, vector<NodeID> > stack_token;
-  ostringstream exp;
-  NodeID current_token_ID;
-
-  stack_token.push(StartID);
-  int precedence_last_op = 0;
-  int last_op_code = 0;
-  int on_the_right_of_upper_node = 0;
-
-  while (stack_token.size() > 0)
-    {
-      current_token_ID = stack_token.top();
-      // defining short hand for current op code
-      int current_op_code = current_token_ID->op_code;
-      if ( current_token_ID->tmp_status == 1)
-        {
-          exp << "T" << current_token_ID->idx;
-          // set precedence of terminal token to highest value
-          precedence_last_op = 100;
-          stack_token.pop();
-          continue;
-        }
-      // else if current token is final
-      else if ( current_op_code == NoOpCode)
-        {
-          exp << getArgument(current_token_ID->id1, current_token_ID->type1, iEquationType);
-          // set precedence of terminal token to highest value
-          precedence_last_op = 100;
-          stack_token.pop();
-          continue;
-        }
-
-      int precedence_current_op = OperatorTable::precedence(current_op_code);
-      // deal with left argument first
-      if (current_token_ID->left_done == 0)
-        {
-          // if current operator is not a temporary variable and
-          // of lesser precedence than previous one, insert '('
-          if (precedence_current_op < precedence_last_op
-              || (on_the_right_of_upper_node == 1
-                  && (last_op_code == token::MINUS || last_op_code == token::DIVIDE)
-                  && (precedence_current_op == precedence_last_op))
-              || (last_op_code == token::POWER && current_op_code == token::POWER)
-              || current_op_code == token::UMINUS)
-            {
-              exp << "(";
-              current_token_ID->close_parenthesis = 1;
-            }
-          // set flag: left argument has been explored
-          current_token_ID->left_done = 1;
-          precedence_last_op = precedence_current_op;
-          last_op_code = current_op_code;
-          if (offset == 0 && current_op_code == token::POWER)
-            {
-              exp << "pow(";
-              precedence_last_op = 0;
-              current_token_ID->close_parenthesis = 1;
-            }
-          else if (current_op_code == token::UMINUS)
-            {
-              exp << "-";
-              current_token_ID->close_parenthesis = 1;
-            }
-          else if ( OperatorTable::isfunction(current_op_code) == true)
-            {
-              exp << current_token_ID->op_name << "(";
-              precedence_last_op = 0;
-              current_token_ID->close_parenthesis = 1;
-            }
-          on_the_right_of_upper_node = 0;
-          stack_token.push(current_token_ID->id1);
-        }
-      // deal with right argument when left branch is entirely explored
-      else if ( current_token_ID->right_done == 0 )
-        {
-          current_token_ID->right_done = 1;
-          if (offset == 0 && current_op_code == token::POWER)
-            {
-              exp << ",";
-            }
-
-          if ( current_token_ID->id2 != NullID )
-            {
-              exp << current_token_ID->op_name;
-              precedence_last_op = precedence_current_op;
-              last_op_code = current_op_code;
-              on_the_right_of_upper_node = 1;
-              stack_token.push(current_token_ID->id2);
-            }
-        }
-      else
-        {
-          if ( current_token_ID->close_parenthesis == 1)
-            {
-              exp << ")";
-            }
-          precedence_last_op = precedence_current_op;
-          last_op_code = current_op_code;
-          current_token_ID->left_done=0;
-          current_token_ID->right_done=0;
-          current_token_ID->close_parenthesis=0;
-          stack_token.pop();
-        }
-    }
-  return exp.str();
-}
-
-//------------------------------------------------------------------------------
-inline string ModelTree::getArgument(NodeID id, Type type, EquationType iEquationType)
-{
-
-  stringstream  argument;
-
-  if (type == eParameter)
-    {
-      argument << "params" << lpar << (long int)id+offset << rpar;
-    }
-  else if (type == eLocalParameter)
-    {
-      argument << symbol_table.getNameByID(eLocalParameter, (long int) id);
-    }
-  else if (type == eNumericalConstant)
-    {
-      argument << num_constants.get((long int) id);
-    }
-  else if (type == eEndogenous || type == eExogenous || type == eExogenousDet)
-    if (iEquationType == eStaticEquations || iEquationType == eStaticDerivatives)
-      {
-        int idx = variable_table.getSymbolID((long int) id)+offset;
-        if (type == eEndogenous)
-          {
-            argument <<  "y" << lpar << idx << rpar;
-          }
-        else if (type == eExogenous)
-          {
-            argument << "x" << lpar << idx << rpar;
-          }
-        else if (type == eExogenousDet)
-          {
-            idx += symbol_table.exo_nbr;
-            argument <<  "x" << lpar << idx << rpar;
-          }
-      }
-    else
-      {
-        if (type == eEndogenous)
-          {
-            int idx = variable_table.getPrintIndex((long int) id) + offset;
-            argument <<  "y" << lpar << idx << rpar;
-          }
-        else if (type == eExogenous)
-          {
-            int idx = variable_table.getSymbolID((long int) id) + offset;
-            int lag = variable_table.getLag((long int) id);
-            if (offset == 1)
-              {
-                if ( lag != 0)
-                  {
-                    argument <<  "x" << lpar << "it_ + " << lag
-                             << ", " << idx << rpar;
-                  }
-                else
-                  {
-                    argument <<  "x" << lpar << "it_, " << idx << rpar;
-                  }
-              }
-            else
-              {
-                if ( lag != 0)
-                  {
-                    argument <<  "x" << lpar << "it_+" << lag
-                             << "+" << idx << "*nb_row_x" << rpar;
-                  }
-                else
-                  {
-                    argument <<  "x" << lpar << "it_+" << idx << "*nb_row_x" << rpar;
-                  }
-              }
-          }
-        else if (type == eExogenousDet)
-          {
-            int idx = variable_table.getSymbolID((long int) id) + symbol_table.exo_nbr + offset;
-            int lag = variable_table.getLag((long int) id);
-            if (offset == 1)
-              {
-                if (lag != 0)
-                  {
-                    argument <<  "x" << lpar << "it_ + " << lag
-                             << ", " << idx << rpar;
-                  }
-                else
-                  {
-                    argument <<  "x" << lpar << "it_, " << idx << rpar;
-                  }
-              }
-            else
-              {
-                if (lag != 0)
-                  {
-                    argument <<  "x" << lpar << "it_ + " << lag
-                             << "+" << idx <<  "*nb_row_xd" << rpar;
-                  }
-                else
-                  {
-                    argument <<  "x" << lpar << "it_+" << idx << "*nb_row_xd" <<  rpar;
-                  }
-              }
-
-          }
-      }
-  return argument.str();
 }
 
 void
@@ -1315,42 +663,25 @@ ModelTree::writeOutput(ostream &output) const
     output << "M_.params = zeros(" << symbol_table.parameter_nbr << ", 1);\n";
 }
 
-inline int ModelTree::optimize(NodeID node)
+void
+ModelTree::addEquation(NodeID eq)
 {
-  int cost;
-  int tmp_status = 0;
-  if (node->op_code != NoOpCode)
+  BinaryOpNode *beq = dynamic_cast<BinaryOpNode *>(eq);
+
+  if (beq == NULL || beq->op_code != oEqual)
     {
-      cost = OperatorTable::cost(node->op_code,offset);
-      if (node->id1 != NullID && node->id1->op_code != NoOpCode)
-        {
-          cost += OperatorTable::cost(node->id1->op_code,offset);
-        }
-      if (node->id2 != NullID && node->id2->op_code != NoOpCode)
-        {
-          cost += OperatorTable::cost(node->id2->op_code,offset);
-        }
+      cerr << "ModelTree::addEquation: you didn't provide an equal node!" << endl;
+      exit(-1);
     }
-  cost *= node->reference_count[current_order];
-  if (cost > min_cost)
-    {
-      tmp_status = 1;
-      node->cost = 0;
-    }
-  else
-    {
-      tmp_status = 0;
-      node->cost = cost;
-    }
-  node->tmp_status = 0;
-  return tmp_status;
+
+  equations.push_back(beq);
 }
 
 void
 ModelTree::checkPass() const
 {
   // Exit if there is no equation in model file
-  if (eq_nbr == 0)
+  if (equations.size() == 0)
     {
       cerr << "No equation found in model file" << endl;
       exit(-1);
@@ -1360,34 +691,38 @@ ModelTree::checkPass() const
 void
 ModelTree::computingPass()
 {
-  cout << eq_nbr << " equation(s) found \n";
+  cout << equations.size() << " equation(s) found" << endl;
+
   // Sorting variable table
   variable_table.Sort();
 
-  // Setting number of equations in ModelParameters class
-  // Here no derivative are computed
-  BeginModel++;
-  min_cost = 40 * OperatorTable::cost(token::PLUS, offset);
-  // Setting format of parentheses
   if (offset == 1)
     {
+      min_cost = 40 * 90;
       lpar = '(';
       rpar = ')';
     }
   else
     {
+      min_cost = 40 * 4;
       lpar = '[';
       rpar = ']';
     }
 
   if (computeHessian || computeStaticHessian)
-    derive(2);
+    {
+      derive(2);
+      computeTemporaryTerms(2);
+    }
   else
-    derive(1);
+    {
+      derive(1);
+      computeTemporaryTerms(1);
+    }
 }
 
 void
-ModelTree::writeStaticFile(const string &basename)
+ModelTree::writeStaticFile(const string &basename) const
 {
   if (offset)
     writeStaticMFile(basename + "_static");
@@ -1396,7 +731,7 @@ ModelTree::writeStaticFile(const string &basename)
 }
 
 void
-ModelTree::writeDynamicFile(const string &basename)
+ModelTree::writeDynamicFile(const string &basename) const
 {
   if (offset)
     writeDynamicMFile(basename + "_dynamic");

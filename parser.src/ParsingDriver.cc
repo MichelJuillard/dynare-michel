@@ -42,7 +42,6 @@ ParsingDriver::parse(const string &f)
 {
   mod_file = new ModFile();
 
-  mod_file->model_tree.error = error;
   mod_file->symbol_table.error = error;
 
   expression.setNumericalConstants(&mod_file->num_constants);
@@ -118,16 +117,16 @@ ParsingDriver::add_expression_constant(string *constant)
 NodeID
 ParsingDriver::add_model_constant(string *constant)
 {
-  int id = mod_file->num_constants.AddConstant(*constant);
+  NodeID id = model_tree->AddNumConstant(*constant);
   delete constant;
-  return model_tree->AddTerminal((NodeID) id, eNumericalConstant);
+  return id;
 }
 
 NodeID
 ParsingDriver::add_model_variable(string *name)
 {
   check_symbol_existence(*name);
-  NodeID id = model_tree->AddTerminal(*name);
+  NodeID id = model_tree->AddVariable(*name);
   delete name;
   return id;
 }
@@ -145,7 +144,7 @@ ParsingDriver::add_model_variable(string *name, string *olag)
            << *name
            << " has lag " << lag << endl;
     }
-  NodeID id = model_tree->AddTerminal(*name, lag);
+  NodeID id = model_tree->AddVariable(*name, lag);
   delete name;
   delete olag;
   return id;
@@ -920,8 +919,8 @@ void
 ParsingDriver::end_planner_objective(NodeID expr)
 {
   // Add equation corresponding to expression
-  model_tree->AddEqual(expr, model_tree->Zero);
-  model_tree->eq_nbr++;
+  NodeID eq = model_tree->AddEqual(expr, model_tree->Zero);
+  model_tree->addEquation(eq);
 
   mod_file->addStatement(new PlannerObjectiveStatement(model_tree));
 }
@@ -938,7 +937,7 @@ NodeID
 ParsingDriver::add_model_equal(NodeID arg1, NodeID arg2)
 {
   NodeID id = model_tree->AddEqual(arg1, arg2);
-  model_tree->eq_nbr++;
+  model_tree->addEquation(id);
   return id;
 }
 
@@ -952,8 +951,14 @@ void
 ParsingDriver::declare_and_init_local_parameter(string *name, NodeID rhs)
 {
   mod_file->symbol_table.AddSymbolDeclar(*name, eLocalParameter, *name);
-  NodeID id = model_tree->AddTerminal(*name);
-  model_tree->AddAssign(id, rhs);
+  try
+    {
+      model_tree->AddLocalParameter(*name, rhs);
+    }
+  catch(DataTree::LocalParameterException &e)
+    {
+      error("Local parameter " + e.name + " declared twice");
+    }
   delete name;
 }
 

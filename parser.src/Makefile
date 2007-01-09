@@ -50,7 +50,8 @@ COMMON_OBJ=\
 	ParsingDriver.o\
 	DataTree.o \
 	ModFile.o \
-	Statement.o
+	Statement.o \
+	ExprNode.o
 
 MATLAB_OBJ = InterfaceMatlab.o
 

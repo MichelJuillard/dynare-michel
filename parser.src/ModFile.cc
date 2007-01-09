@@ -1,3 +1,6 @@
+#include <iostream>
+#include <fstream>
+
 #include "ModFile.hh"
 #include "Interface.hh"
 
@@ -56,7 +59,7 @@ ModFile::computingPass()
 }
 
 void
-ModFile::writeOutputFiles(const string &basename, bool clear_all)
+ModFile::writeOutputFiles(const string &basename, bool clear_all) const
 {
   ofstream mOutputFile;
 
@@ -135,7 +138,7 @@ ModFile::writeOutputFiles(const string &basename, bool clear_all)
   model_tree.writeDynamicFile(basename);
 
   // Print statements
-  for(vector<Statement *>::iterator it = statements.begin();
+  for(vector<Statement *>::const_iterator it = statements.begin();
       it != statements.end(); it++)
     (*it)->writeOutput(mOutputFile, basename);
 

@@ -8,7 +8,7 @@ using namespace std;
 class ParsingDriver;
 
 #include "SymbolTableTypes.hh"
-#include "ModelTypes.hh"
+#include "ExprNode.hh"
 
 //! Type for semantic value of non-derivable expressions
 typedef pair<int, Type> ExpObj;
@@ -74,9 +74,6 @@ typedef pair<int, Type> ExpObj;
 %left UMINUS
 %nonassoc POWER 
 %token EXP LOG LOG10 SIN COS TAN ASIN ACOS ATAN SINH COSH TANH ASINH ACOSH ATANH SQRT
-/* isn't parsed from the *.mod file, but used to distinguish EQUAL in equation and EQUAL in assignment in    operation codes
-*/
-%token ASSIGN
 
 %type <exp_val> expression comma_expression
 %type <model_val> equation hand_side model_var

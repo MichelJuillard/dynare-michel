@@ -100,7 +100,7 @@ Reference SymbolTable::isReferenced(const std::string &name) const
 }
 
 void
-SymbolTable::writeOutput(ostream &output)
+SymbolTable::writeOutput(ostream &output) const
 {
   if (exo_nbr > 0)
     {
