@@ -450,7 +450,7 @@ hu1 = [hu;zeros(np-npred,M_.exo_nbr)];
 [nrhx,nchx] = size(hx);
 [nrhu1,nchu1] = size(hu1);
 if nrhx*nrhu1*nchx*nchu1 > 1e7
-  B1 = zeros(M_.endo_nbr,nchx*nchu1);
+  B1 = zeros(size(dr.ghxx,1),nchx*nchu1);
   k1 = 1;
   for i1 = 1:nchx
       for i2 = 1:nchu1
@@ -484,7 +484,7 @@ else
   rhs = hessian*kron(zu,zu);
 end
 if nrhu1*nrhu1*nchu1*nchu1 > 1e7
-  B1 = zeros(M_.endo_nbr,nchu1*nchu1);
+  B1 = zeros(size(dr.ghxx,1),nchu1*nchu1);
   k1 = 1;
   for i1 = 1:nchu1
       for i2 = 1:nchu1
@@ -492,6 +492,7 @@ if nrhu1*nrhu1*nchu1*nchu1 > 1e7
 	k1 = k1 + 1; 
       end
   end
+  B1 = B*B1;
 else
   B1 = B*dr.ghxx*kron(hu1,hu1);
 end
