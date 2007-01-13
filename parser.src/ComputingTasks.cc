@@ -245,7 +245,7 @@ EstimatedParamsStatement::writeOutput(ostream &output, const string &basename) c
     {
       if (symbol_table.isReferenced(it->name) == eNotReferenced
           && it->name != "dsge_prior_weight")
-        return;
+        continue;
       switch(it->type)
         {
         case 1:
