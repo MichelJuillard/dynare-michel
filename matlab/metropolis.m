@@ -118,7 +118,7 @@ if options_.load_mh_file == 0
             for i=1:length(ix2(1,:))
                 fprintf(fidlog,['      ' int2str(i)  ':' num2str(ix2(1,i)) '\n']);
             end
-            fprintf(fidlog,['    Blck ' int2str(1) 'logpo2:' num2str(logpo2(1)) '\n']);
+            fprintf(fidlog,['    Blck ' int2str(1) 'logpo2:' num2str(ilogpo2) '\n']);
         else
             disp('MH: Initialization failed...')
             disp('MH: The posterior mode lies outside the prior bounds.')
