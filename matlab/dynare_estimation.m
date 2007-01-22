@@ -812,8 +812,11 @@ if (any(bayestopt_.pshape  >0 ) & options_.mh_replic) | ...
   if options_.mh_replic
       marginal = marginal_density;
   end
-  %% 
+  %%
   GetPosteriorParametersStatistics;
+  %% Results are saved (in case of an anormal exit from dynare or matlab)...
+  save([fname_ 'results'],oo_);
+  %%
   PlotPosteriorDistributions;
   metropolis_draw(1);
   if options_.bayesian_irf
