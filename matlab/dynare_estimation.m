@@ -863,7 +863,9 @@ if (any(bayestopt_.pshape  >0 ) & options_.mh_replic) | ...
   %% Here i discard first half of the draws:
   CutSample;
   %% Estimation of the marginal density from the Mh draws:
-  marginal = marginal_density;
+  if options_.mh_replic
+      marginal = marginal_density;
+  end
   %% 
   GetPosteriorParametersStatistics;
   PlotPosteriorDistributions;
