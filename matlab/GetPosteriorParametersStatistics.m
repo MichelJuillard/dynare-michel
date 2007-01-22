@@ -47,20 +47,30 @@ pformat = '%12s %7.3f %8.4f %7.4f %7.4f %4s %6.4f';
 disp(' ');disp(' ');disp('ESTIMATION RESULTS');disp(' ');
 disp(sprintf('Log data density is %f.',oo_.MarginalDensity.ModifiedHarmonicMean))
 if np
+    type = 'parameters';
     if TeX
-        fid = TeXBegin(OutputDirectoryName,M_.fname,1,'parameters');
+        fid = TeXBegin(OutputDirectoryName,M_.fname,1,type);
     end
     disp(' ')
-    disp('parameters')
+    disp(type)
     disp(tit2)
     ip = nvx+nvn+ncx+ncn+1;
     for i=1:np
-        Draws = GetAllPosteriorDraws(ip,FirstMhFile,FirstLine,TotalNumberOfMhFiles,NumberOfDraws);
-        [post_mean, post_median, post_var, hpd_interval, post_deciles, density] = posterior_moments(Draws,1);
-        name = bayestopt_.name{ip};
-        disp(sprintf(pformat,name,bayestopt_.pmean(ip),post_mean,hpd_interval, ...
-		 pnames(bayestopt_.pshape(ip)+1,:),bayestopt_.pstdev(ip)));
-        oo_ = Filloo(oo_,name,'parameters',post_mean,hpd_interval,post_median,post_var,post_deciles,density);    
+        if options_.mh_replic
+            Draws = GetAllPosteriorDraws(ip,FirstMhFile,FirstLine,TotalNumberOfMhFiles,NumberOfDraws);
+            [post_mean, post_median, post_var, hpd_interval, post_deciles, ...
+             density] = posterior_moments(Draws,1);
+            name = bayestopt_.name{ip};
+            oo_ = Filloo(oo_,name,type,post_mean,hpd_interval,post_median,post_var,post_deciles,density);
+        else
+            name = bayestopt_.name{ip};
+            [post_mean,hpd_interval,post_var] = Extractoo(oo_,name,type);
+        end
+        disp(sprintf(pformat,name,bayestopt_.pmean(ip),...
+                     post_mean, ...
+                     hpd_interval, ...
+                     pnames(bayestopt_.pshape(ip)+1,:), ...
+                     bayestopt_.pstdev(ip)));    
         if TeX
             TeXCore(fid,name,deblank(pnames(bayestopt_.pshape(ip)+1,:)),bayestopt_.pmean(ip),...
                     bayestopt_.pstdev(ip),post_mean,sqrt(post_var),hpd_interval);
@@ -68,10 +78,11 @@ if np
         ip = ip+1;
     end
     if TeX
-        TeXEnd(fid,1,'parameters');
+        TeXEnd(fid,1,type);
     end
 end
 if nvx
+    type = 'shocks_std';
     if TeX
         fid = TeXBegin(OutputDirectoryName,M_.fname,2,'standard deviation of structural shocks');
     end
@@ -80,14 +91,19 @@ if nvx
     disp('standard deviation of shocks')
     disp(tit2)
     for i=1:nvx
-        Draws = GetAllPosteriorDraws(ip,FirstMhFile,FirstLine,TotalNumberOfMhFiles,NumberOfDraws);
-        [post_mean, post_median, post_var, hpd_interval, post_deciles, density] = posterior_moments(Draws,1);
-        k = estim_params_.var_exo(i,1);
-        name = deblank(M_.exo_names(k,:));
+        if options_.mh_replic
+            Draws = GetAllPosteriorDraws(ip,FirstMhFile,FirstLine,TotalNumberOfMhFiles,NumberOfDraws);
+            [post_mean, post_median, post_var, hpd_interval, post_deciles, density] = posterior_moments(Draws,1);
+            k = estim_params_.var_exo(i,1);
+            name = deblank(M_.exo_names(k,:));
+            oo_ = Filloo(oo_,name,type,post_mean,hpd_interval,post_median,post_var,post_deciles,density);
+            M_.Sigma_e(k,k) = post_mean*post_mean;
+        else
+            name = deblank(M_.exo_names(k,:));
+            [post_mean,hpd_interval,post_var] = Extractoo(oo_,name,type);
+        end
         disp(sprintf(pformat,name,bayestopt_.pmean(ip),post_mean,hpd_interval,...
-                     pnames(bayestopt_.pshape(ip)+1,:),bayestopt_.pstdev(ip))); 
-        M_.Sigma_e(k,k) = post_mean*post_mean;
-        oo_ = Filloo(oo_,name,'shocks_std',post_mean,hpd_interval,post_median,post_var,post_deciles,density);
+                     pnames(bayestopt_.pshape(ip)+1,:),bayestopt_.pstdev(ip)));
         if TeX
             TeXCore(fid,name,deblank(pnames(bayestopt_.pshape(ip)+1,:)),bayestopt_.pmean(ip),...
                     bayestopt_.pstdev(ip),post_mean,sqrt(post_var),hpd_interval);
@@ -99,6 +115,7 @@ if nvx
     end
 end
 if nvn
+    type = 'measurement_errors_std';
     if TeX
         fid = TeXBegin(OutputDirectoryName,M_.fname,3,'standard deviation of measurement errors')
     end
@@ -107,13 +124,17 @@ if nvn
     disp(tit2)
     ip = nvx+1;
     for i=1:nvn
-        Draws = GetAllPosteriorDraws(ip,FirstMhFile,FirstLine,TotalNumberOfMhFiles,NumberOfDraws);
-        [post_mean, post_median, post_var, hpd_interval, post_deciles, density] = posterior_moments(Draws,1);    
-        name = deblank(options_.varobs(estim_params_.var_endo(i,1),:));
+        if options_.mh_replic
+            Draws = GetAllPosteriorDraws(ip,FirstMhFile,FirstLine,TotalNumberOfMhFiles,NumberOfDraws);
+            [post_mean, post_median, post_var, hpd_interval, post_deciles, density] = posterior_moments(Draws,1);
+            name = deblank(options_.varobs(estim_params_.var_endo(i,1),:));
+            oo_ = Filloo(oo_,name,type,post_mean,hpd_interval,post_median,post_var,post_deciles,density);
+        else
+            name = deblank(options_.varobs(estim_params_.var_endo(i,1),:));
+            [post_mean,hpd_interval,post_var] = Extractoo(oo_,name,type);
+        end
         disp(sprintf(pformat,name,bayestopt_.pmean(ip),post_mean,hpd_interval, ...
                      pnames(bayestopt_.pshape(ip)+1,:),bayestopt_.pstdev(ip)));
-        oo_ = Filloo(oo_,name,'measurement_errors_std',post_mean,hpd_interval,post_median,...
-                     post_var,post_deciles,density);
         if TeX
             TeXCore(fid,name,deblank(pnames(bayestopt_.pshape(ip)+1,:)),bayestopt_.pmean(ip),...
                     bayestopt_.pstdev(ip),post_mean,sqrt(post_var),hpd_interval);
@@ -125,6 +146,7 @@ if nvn
     end
 end
 if ncx
+    type = 'shocks_corr';
     if TeX
         fid = TeXBegin(OutputDirectoryName,M_.fname,4,'correlation of structural shocks');
     end
@@ -133,17 +155,23 @@ if ncx
     disp(tit2)
     ip = nvx+nvn+1;
     for i=1:ncx
-        Draws = GetAllPosteriorDraws(ip,FirstMhFile,FirstLine,TotalNumberOfMhFiles,NumberOfDraws);
-        [post_mean, post_median, post_var, hpd_interval, post_deciles, density] = posterior_moments(Draws,1);
-        k1 = estim_params_.corrx(i,1);
-        k2 = estim_params_.corrx(i,2);
-        name = [deblank(M_.exo_names(k1,:)) ',' deblank(M_.exo_names(k2,:))];
-        NAME = [deblank(M_.exo_names(k1,:)) '_' deblank(M_.exo_names(k2,:))];
+        if options_.mh_replic
+            Draws = GetAllPosteriorDraws(ip,FirstMhFile,FirstLine,TotalNumberOfMhFiles,NumberOfDraws);
+            [post_mean, post_median, post_var, hpd_interval, post_deciles, density] = posterior_moments(Draws,1);
+            k1 = estim_params_.corrx(i,1);
+            k2 = estim_params_.corrx(i,2);
+            name = [deblank(M_.exo_names(k1,:)) ',' deblank(M_.exo_names(k2,:))];
+            NAME = [deblank(M_.exo_names(k1,:)) '_' deblank(M_.exo_names(k2,:))];
+            oo_ = Filloo(oo_,NAME,type,post_mean,hpd_interval,post_median,post_var,post_deciles,density);
+            M_.Sigma_e(k1,k2) = post_mean*sqrt(M_.Sigma_e(k1,k1)*M_.Sigma_e(k2,k2));
+            M_.Sigma_e(k2,k1) = M_.Sigma_e(k1,k2);
+        else
+            name = [deblank(M_.exo_names(k1,:)) ',' deblank(M_.exo_names(k2,:))];
+            NAME = [deblank(M_.exo_names(k1,:)) '_' deblank(M_.exo_names(k2,:))];
+            [post_mean,hpd_interval,post_var] = Extractoo(oo_,NAME,type);
+        end
         disp(sprintf(pformat, name,bayestopt_.pmean(ip),post_mean,hpd_interval, ...
                      pnames(bayestopt_.pshape(ip)+1,:),bayestopt_.pstdev(ip)));
-        oo_ = Filloo(oo_,NAME,'shocks_corr',post_mean,hpd_interval,post_median,post_var,post_deciles,density);	  
-        M_.Sigma_e(k1,k2) = post_mean*sqrt(M_.Sigma_e(k1,k1)*M_.Sigma_e(k2,k2));
-        M_.Sigma_e(k2,k1) = M_.Sigma_e(k1,k2);
         if TeX
             TeXCore(fid,name,deblank(pnames(bayestopt_.pshape(ip)+1,:)),bayestopt_.pmean(ip),...
                     bayestopt_.pstdev(ip),post_mean,sqrt(post_var),hpd_interval);
@@ -155,6 +183,7 @@ if ncx
     end
 end
 if ncn
+    type = 'measurement_errors_corr';
     if TeX
         fid = TeXBegin(OutputDirectoryName,M_.fname,5,'correlation of measurement errors');
     end
@@ -163,16 +192,22 @@ if ncn
     disp(tit2)
     ip = nvx+nvn+ncx+1;
     for i=1:ncn
-        Draws = GetAllPosteriorDraws(ip,FirstMhFile,FirstLine,TotalNumberOfMhFiles,NumberOfDraws);
-        [post_mean, post_median, post_var, hpd_interval, post_deciles, density] = posterior_moments(Draws,1);
-        k1 = estim_params_.corrn(i,1);
-        k2 = estim_params_.corrn(i,2);
-        name = [deblank(M_.endo_names(k1,:)) ',' deblank(M_.endo_names(k2,:))];
-        NAME = [deblank(M_.endo_names(k1,:)) '_' deblank(M_.endo_names(k2,:))];
+        if options_.mh_replic
+            Draws = GetAllPosteriorDraws(ip,FirstMhFile,FirstLine,TotalNumberOfMhFiles,NumberOfDraws);
+            [post_mean, post_median, post_var, hpd_interval, post_deciles, density] = posterior_moments(Draws,1);
+            k1 = estim_params_.corrn(i,1);
+            k2 = estim_params_.corrn(i,2);
+            name = [deblank(M_.endo_names(k1,:)) ',' deblank(M_.endo_names(k2,:))];
+            NAME = [deblank(M_.endo_names(k1,:)) '_' deblank(M_.endo_names(k2,:))];
+            oo_ = Filloo(oo_,NAME,type,post_mean,hpd_interval,...
+                         post_median,post_var,post_deciles,density);
+        else
+            name = [deblank(M_.endo_names(k1,:)) ',' deblank(M_.endo_names(k2,:))];
+            NAME = [deblank(M_.endo_names(k1,:)) '_' deblank(M_.endo_names(k2,:))];
+            [post_mean,hpd_interval,post_var] = Extractoo(oo_,NAME,type);
+        end
         disp(sprintf(pformat, name,bayestopt_.pmean(ip),post_mean,hpd_interval, ...
                      pnames(bayestopt_.pshape(ip)+1,:),bayestopt_.pstdev(ip)));
-        oo_ = Filloo(oo_,NAME,'measurement_errors_corr',post_mean,hpd_interval,...
-                     post_median,post_var,post_deciles,density);
         if TeX
             TeXCore(fid,name,deblank(pnames(bayestopt_.pshape(ip)+1,:)),bayestopt_.pmean(ip),...
                     bayestopt_.pstdev(ip),post_mean,sqrt(post_var),hpd_interval);            
@@ -236,3 +271,10 @@ function oo = Filloo(oo,name,type,postmean,hpdinterval,postmedian,postvar,postde
     eval(['oo.posterior_variance.' type '.' name ' = postvar;']);
     eval(['oo.posterior_deciles.' type '.' name ' = postdecile;']);
     eval(['oo.posterior_density.' type '.' name ' = density;']);
+    
+function [post_mean,hpd_interval,post_var] = Extractoo(oo,name,type)
+    hpd_interval = zeros(2,1);
+    eval(['post_mean = oo.posterior_mean.' type '.' name ';']);
+    eval(['hpd_interval(1) = oo.posterior_hpdinf.' type '.' name ';']); 
+    eval(['hpd_interval(2) = oo.posterior_hpdsup.' type '.' name ';']);
+    eval(['post_var = oo.posterior_variance.' type '.' name ';']);
