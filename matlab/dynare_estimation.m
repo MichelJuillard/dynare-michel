@@ -13,61 +13,7 @@ for i = 1:size(M_.endo_names,1)
   if ~isempty(tmp)
     options_.lgyidx2varobs(i,1) = tmp;
   end
-end  
-
-options_ = set_default_option(options_,'first_obs',1);
-options_ = set_default_option(options_,'prefilter',0);
-options_ = set_default_option(options_,'presample',0);
-options_ = set_default_option(options_,'lik_algo',1);
-options_ = set_default_option(options_,'lik_init',1);
-options_ = set_default_option(options_,'nograph',0);
-options_ = set_default_option(options_,'mh_conf_sig',0.90);
-options_ = set_default_option(options_,'mh_replic',20000);
-options_ = set_default_option(options_,'mh_drop',0.5);
-options_ = set_default_option(options_,'mh_jscale',0.2);
-options_ = set_default_option(options_,'mh_init_scale',2*options_.mh_jscale);
-options_ = set_default_option(options_,'mode_file','');
-options_ = set_default_option(options_,'mode_compute',4);
-options_ = set_default_option(options_,'mode_check',0);
-options_ = set_default_option(options_,'prior_trunc',1e-10);
-options_ = set_default_option(options_,'mh_mode',1); 	
-options_ = set_default_option(options_,'mh_nblck',2);	
-options_ = set_default_option(options_,'load_mh_file',0);
-options_ = set_default_option(options_,'nodiagnostic',0);
-options_ = set_default_option(options_,'loglinear',0);
-options_ = set_default_option(options_,'unit_root_vars',[]);
-options_ = set_default_option(options_,'XTick',[]);
-options_ = set_default_option(options_,'XTickLabel',[]);
-options_ = set_default_option(options_,'bayesian_irf',0);
-options_ = set_default_option(options_,'bayesian_th_moments',0);
-options_ = set_default_option(options_,'TeX',0);
-options_ = set_default_option(options_,'irf',40);
-options_ = set_default_option(options_,'relative_irf',0);
-options_ = set_default_option(options_,'order',1);
-options_ = set_default_option(options_,'ar',5);
-options_ = set_default_option(options_,'dr_algo',0);
-options_ = set_default_option(options_,'linear',0);
-options_ = set_default_option(options_,'drop',0);
-options_ = set_default_option(options_,'replic',1);
-options_ = set_default_option(options_,'hp_filter',0);
-options_ = set_default_option(options_,'smoother',0);
-options_ = set_default_option(options_,'moments_varendo',0);
-options_ = set_default_option(options_,'filtered_vars',0);
-options_ = set_default_option(options_,'kalman_algo',1);
-options_ = set_default_option(options_,'kalman_tol',10^(-12));
-options_ = set_default_option(options_,'posterior_mode_estimation',1);
-options_ = set_default_option(options_,'MaxNumberOfBytes',1e6);
-options_ = set_default_option(options_,'xls_sheet','');
-options_ = set_default_option(options_,'xls_range','');
-options_ = set_default_option(options_,'filter_step_ahead',0);
-options_ = set_default_option(options_,'diffuse_d',[]);
-options_ = set_default_option(options_,'Opt6Iter',3);
-options_ = set_default_option(options_,'Opt6Numb',100000);
-options_ = set_default_option(options_,'steadystate_flag',0);
-options_ = set_default_option(options_,'logdata',0);
-options_ = set_default_option(options_,'use_mh_covariance_matrix',0);
-options_ = set_default_option(options_,'noconstant',0);
-options_ = set_default_option(options_,'steadystate_partial',[]);
+end
 
 if options_.order > 1
   options_.order = 1;
