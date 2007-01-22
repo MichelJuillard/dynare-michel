@@ -3,32 +3,10 @@
 function info=stoch_simul(var_list)
    global M_ options_ oo_ it_
 
-   options_old = options_;
-  options_ = set_default_option(options_,'TeX',0);  
-  options_ = set_default_option(options_,'order',2);
-  options_ = set_default_option(options_,'linear',0);
+  options_old = options_;
   if options_.linear
     options_.order = 1;
   end
-  options_ = set_default_option(options_,'ar',5);
-  options_ = set_default_option(options_,'irf',40);
-  options_ = set_default_option(options_,'relative_irf',0);
-  options_ = set_default_option(options_,'dr_algo',0);
-  options_ = set_default_option(options_,'simul_algo',0);
-  options_ = set_default_option(options_,'drop',100);
-  if options_.order == 1
-    options_.replic = 1;
-  else
-    options_ = set_default_option(options_,'replic',50);
-  end
-  options_ = set_default_option(options_,'nomoments',0);
-  options_ = set_default_option(options_,'nocorr',0);
-  options_ = set_default_option(options_,'simul_seed',[]);
-  options_ = set_default_option(options_,'hp_filter',0);
-  options_ = set_default_option(options_,'hp_ngrid',512);
-  options_ = set_default_option(options_,'simul',0);
-  options_ = set_default_option(options_,'periods',0);
-  options_ = set_default_option(options_,'noprint',0);
 
   TeX = options_.TeX;
 
@@ -272,10 +250,10 @@ function info=stoch_simul(var_list)
     end
   end
 
-if isfield(options_,'SpectralDensity')
+
   if options_.SpectralDensity == 1
-    [omega,f] = UnivariateSpectralDensity(oo_.dr,var_list);
+      [omega,f] = UnivariateSpectralDensity(oo_.dr,var_list);
   end
-end
+
 
 options_ = options_old;
