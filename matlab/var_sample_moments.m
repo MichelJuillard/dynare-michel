@@ -29,7 +29,7 @@ if trend == -1% No constant
   X = zeros(NumberOfObservations,NumberOfVariables*qlag);
 elseif trend == 0% Constant
   X = zeros(NumberOfObservations,NumberOfVariables*qlag+1);
-  indx = NumberOfVariables*qlag+1;
+  indx = NumberOfVariables*qlag+1:NumberOfVariables*qlag+NumberOfVariables;
 elseif trend == 1;% Constant + Trend
   X = zeros(NumberOfObservations,NumberOfVariables*qlag+2);
   indx = NumberOfVariables*qlag+1:NumberOfVariables*qlag+2;
@@ -45,7 +45,7 @@ for t=1:NumberOfObservations
     X(t,(lag-1)*NumberOfVariables+1:lag*NumberOfVariables) = data(line-lag,:);
   end
   if trend == 0
-    X(t,indx) = 1;
+    X(t,indx) = ones(1,NumberOfVariables);
   elseif trend == 1
   X(t,indx) = [ 1 , t ];
   end

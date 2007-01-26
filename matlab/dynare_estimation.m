@@ -140,7 +140,6 @@ if ~isempty(options_.unit_root_vars)
     end
     i_ur(i) = i1;
   end
-  
   [junk,bayestopt_.var_list_stationary] = ...
       setdiff((1:M_.endo_nbr)',i_ur);
   [junk,bayestopt_.restrict_var_list_stationary] = ...
@@ -194,22 +193,31 @@ if length(options_.mode_file) > 0 & options_.posterior_mode_estimation
   eval(['load ' options_.mode_file ';']');
 end
 
-%% compute sample moments if needed (bvar-dsge)
-if ~isempty(strmatch('dsge_prior_weight',M_.param_names))
-  evalin('base',['[mYY,mXY,mYX,mXX,Ydata,Xdata] = ' ...
-                 'var_sample_moments(options_.first_obs,options_.first_obs+options_.nobs-1,options_.varlag,-1);'])
+
+%% Compute the steadyn state: 
+if options_.steadystate_flag% if the _steadystate.m file is provided.
+    [oo_.steady_state,tchek] = feval([M_.fname '_steadystate'],[],[]);
+else% if the steady state file is not provided.
+   [dd,info] = resol(oo_.steady_state,0)
+   oo_.steady_state = dd.ys; clear('dd');
 end
 
-%% Compute the steadyn state if the _steadystate.m file is provided
-if options_.steadystate_flag
-  [oo_.steady_state,tchek] = feval([M_.fname '_steadystate'],[],[]);
-end
 initial_estimation_checks(xparam1,gend,data);
 
 if options_.mode_compute == 0 & length(options_.mode_file) == 0
   return;
 end
 
+%% compute sample moments if needed (bvar-dsge)
+if ~isempty(strmatch('dsge_prior_weight',M_.param_names))
+    if all(abs(oo_.steady_state)<10e-9)
+        evalin('base',['[mYY,mXY,mYX,mXX,Ydata,Xdata] = ' ...
+                 'var_sample_moments(options_.first_obs,options_.first_obs+options_.nobs-1,options_.varlag,-1);'])
+    else% The steady state is non zero ==> a constant in the VAR is needed!
+        evalin('base',['[mYY,mXY,mYX,mXX,Ydata,Xdata] = ' ...
+                 'var_sample_moments(options_.first_obs,options_.first_obs+options_.nobs-1,options_.varlag,0);'])
+    end
+end
 
 %% Estimation of the posterior mode or likelihood mode
 if options_.mode_compute > 0 & options_.posterior_mode_estimation
@@ -827,7 +835,7 @@ end
 
 if ~((any(bayestopt_.pshape > 0) & options_.mh_replic) | (any(bayestopt_.pshape ...
 						  > 0) & options_.load_mh_file)) | ~options_.smoother  
-    %% ML estimation, or posterior mode without metropolis-hastings or metropolis without bayesian smooth variables
+    %% ML estimation, or posterior mode without metropolis-hastings or metropolis without bayesian smooth variable
   options_.lik_algo = 2;
   [atT,innov,measurement_error,filtered_state_vector,ys,trend_coeff] = DsgeSmoother(xparam1,gend,data);
   for i=1:M_.endo_nbr

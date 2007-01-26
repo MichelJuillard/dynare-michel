@@ -1,7 +1,6 @@
 function [fval,cost_flag,ys,trend_coeff,info,PHI,SIGMAu,iXX] = DsgeVarLikelihood(xparam1,gend)
 % stephane.adjemian@ens.fr
-global bayestopt_ estim_params_ M_ options_ xparam1_test 
-global xparam_
+global bayestopt_ estim_params_ M_ options_
 
 nvx = estim_params_.nvx;
 nvn = estim_params_.nvn;
@@ -29,71 +28,75 @@ cost_flag  = 1;
 nobs = size(options_.varobs,1);
 
 if options_.mode_compute ~= 1 & any(xparam1 < bayestopt_.lb)
-  k = find(xparam1 < bayestopt_.lb);
-  fval = bayestopt_.penalty*min(1e3,exp(sum(bayestopt_.lb(k)-xparam1(k))));
-  cost_flag = 0;
-  return;
+    k = find(xparam1 < bayestopt_.lb);
+    fval = bayestopt_.penalty*min(1e3,exp(sum(bayestopt_.lb(k)-xparam1(k))));
+    cost_flag = 0;
+    return;
 end
 
 if options_.mode_compute ~= 1 & any(xparam1 > bayestopt_.ub)
-  k = find(xparam1 > bayestopt_.ub);
-  fval = bayestopt_.penalty*min(1e3,exp(sum(xparam1(k)-bayestopt_.ub(k))));
-  cost_flag = 0;
-  return;
+    k = find(xparam1 > bayestopt_.ub);
+    fval = bayestopt_.penalty*min(1e3,exp(sum(xparam1(k)-bayestopt_.ub(k))));
+    cost_flag = 0;
+    return;
 end
 
 Q = M_.Sigma_e;
 for i=1:estim_params_.nvx
-  k = estim_params_.var_exo(i,1);
-  Q(k,k) = xparam1(i)*xparam1(i);
+    k = estim_params_.var_exo(i,1);
+    Q(k,k) = xparam1(i)*xparam1(i);
 end
 offset = estim_params_.nvx;
 if estim_params_.nvn
-  H = zeros(nobs,nobs);
-  for i=1:estim_params_.nvn
-    k = estim_params_.var_endo(i,1);
-    H(k,k) = xparam1(i+offset)*xparam1(i+offset);
-  end
-  offset = offset+estim_params_.nvn;
+    disp('DsgeVarLikelihood :: Measurement errors are not implemented!')
+    return
+% $$$     H = zeros(nobs,nobs);
+% $$$     for i=1:estim_params_.nvn
+% $$$         k = estim_params_.var_endo(i,1);
+% $$$         H(k,k) = xparam1(i+offset)*xparam1(i+offset);
+% $$$     end
+% $$$     offset = offset+estim_params_.nvn;
 end 
 if estim_params_.ncx
-  for i=1:estim_params_.ncx
-    k1 =estim_params_.corrx(i,1);
-    k2 =estim_params_.corrx(i,2);
-    Q(k1,k2) = xparam1(i+offset)*sqrt(Q(k1,k1)*Q(k2,k2));
-    Q(k2,k1) = Q(k1,k2);
-  end
-  [CholQ,testQ] = chol(Q);
-  if testQ%% The variance-covariance matrix of the structural innovations is not definite positive.
-	  %% We have to compute the eigenvalues of this matrix in order to build the penalty.
-    a = eig(Q);
-    k = a<0;
-    if k > 0
-      fval = bayestopt_.penalty*min(1e3,exp(sum(-a(k))));
-      cost_flag = 0;
-      return
+    for i=1:estim_params_.ncx
+        k1 =estim_params_.corrx(i,1);
+        k2 =estim_params_.corrx(i,2);
+        Q(k1,k2) = xparam1(i+offset)*sqrt(Q(k1,k1)*Q(k2,k2));
+        Q(k2,k1) = Q(k1,k2);
     end
-  end
-  offset = offset+estim_params_.ncx;
+    [CholQ,testQ] = chol(Q);
+    if testQ%% The variance-covariance matrix of the structural innovations is not definite positive.
+            %% We have to compute the eigenvalues of this matrix in order to build the penalty.
+        a = eig(Q);
+        k = a<0;
+        if k > 0
+            fval = bayestopt_.penalty*min(1e3,exp(sum(-a(k))));
+            cost_flag = 0;
+            return
+        end
+    end
+    offset = offset+estim_params_.ncx;
 end
 if estim_params_.nvn & estim_params_.ncn 
-  for i=1:estim_params_.ncn
-    k1 = options_.lgyidx2varobs(estim_params_.corrn(i,1));
-    k2 = options_.lgyidx2varobs(estim_params_.corrn(i,2));
-    H(k1,k2) = xparam1(i+offset)*sqrt(H(k1,k1)*H(k2,k2));
-    H(k2,k1) = H(k1,k2);
-  end
-  [CholH,testH] = chol(H);
-  if testH
-    a = eig(H);
-    k = a<0;
-    if k > 0
-      fval = bayestopt_.penalty*min(1e3,exp(sum(-a(k))));
-      cost_flag = 0;
-      return
-    end
-  end
-  offset = offset+estim_params_.ncn;
+    disp('DsgeVarLikelihood :: Measurement errors are not implemented!')
+    return
+% $$$     for i=1:estim_params_.ncn
+% $$$         k1 = options_.lgyidx2varobs(estim_params_.corrn(i,1));
+% $$$         k2 = options_.lgyidx2varobs(estim_params_.corrn(i,2));
+% $$$         H(k1,k2) = xparam1(i+offset)*sqrt(H(k1,k1)*H(k2,k2));
+% $$$         H(k2,k1) = H(k1,k2);
+% $$$     end
+% $$$     [CholH,testH] = chol(H);
+% $$$     if testH
+% $$$         a = eig(H);
+% $$$         k = a<0;
+% $$$         if k > 0
+% $$$             fval = bayestopt_.penalty*min(1e3,exp(sum(-a(k))));
+% $$$             cost_flag = 0;
+% $$$             return
+% $$$         end
+% $$$     end
+% $$$     offset = offset+estim_params_.ncn;
 end
 M_.params(estim_params_.param_vals(:,1)) = xparam1(offset+1:end);
 M_.Sigma_e = Q;
@@ -107,27 +110,24 @@ dsge_prior_weight = M_.params(strmatch('dsge_prior_weight',M_.param_names));
                                         bayestopt_.restrict_columns,...
                                         bayestopt_.restrict_aux);
 if info(1) == 1 | info(1) == 2 | info(1) == 5
-  fval = bayestopt_.penalty;
-  cost_flag = 0;
-  return
+    fval = bayestopt_.penalty;
+    cost_flag = 0;
+    return
 elseif info(1) == 3 | info(1) == 4 | info(1) == 20
-  fval = bayestopt_.penalty*min(1e3,exp(info(2)));
-  cost_flag = 0;
-  return
+    fval = bayestopt_.penalty*min(1e3,exp(info(2)));
+    cost_flag = 0;
+    return
 end
 if options_.loglinear == 1
-  constant = log(SteadyState(bayestopt_.mfys));
+    constant = log(SteadyState(bayestopt_.mfys));
 else
-  constant = SteadyState(bayestopt_.mfys);
+    constant = SteadyState(bayestopt_.mfys);
 end
 if bayestopt_.with_trend == 1
-  trend_coeff = zeros(nobs,1);
-  for i=1:nobs
-    trend_coeff(i) = evalin('base',bayestopt_.trend_coeff{i});
-  end
-  trend = constant*ones(1,gend)+trend_coeff*(1:gend);
-else
-  trend = constant*ones(1,gend);
+    disp('DsgeVarLikelihood :: Linear trend is not yet implemented!')
+    return
+% $$$ else
+% $$$     trend = constant*ones(1,gend);
 end
 
 %------------------------------------------------------------------------------
