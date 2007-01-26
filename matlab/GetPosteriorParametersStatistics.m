@@ -103,6 +103,7 @@ if nvx
             oo_ = Filloo(oo_,name,type,post_mean,hpd_interval,post_median,post_var,post_deciles,density);
             M_.Sigma_e(k,k) = post_mean*post_mean;
         else
+            k = estim_params_.var_exo(i,1);
             name = deblank(M_.exo_names(k,:));
             [post_mean,hpd_interval,post_var] = Extractoo(oo_,name,type);
         end
@@ -170,6 +171,8 @@ if ncx
             M_.Sigma_e(k1,k2) = post_mean*sqrt(M_.Sigma_e(k1,k1)*M_.Sigma_e(k2,k2));
             M_.Sigma_e(k2,k1) = M_.Sigma_e(k1,k2);
         else
+            k1 = estim_params_.corrx(i,1);
+            k2 = estim_params_.corrx(i,2);
             name = [deblank(M_.exo_names(k1,:)) ',' deblank(M_.exo_names(k2,:))];
             NAME = [deblank(M_.exo_names(k1,:)) '_' deblank(M_.exo_names(k2,:))];
             [post_mean,hpd_interval,post_var] = Extractoo(oo_,NAME,type);
@@ -206,6 +209,8 @@ if ncn
             oo_ = Filloo(oo_,NAME,type,post_mean,hpd_interval,...
                          post_median,post_var,post_deciles,density);
         else
+            k1 = estim_params_.corrn(i,1);
+            k2 = estim_params_.corrn(i,2);
             name = [deblank(M_.endo_names(k1,:)) ',' deblank(M_.endo_names(k2,:))];
             NAME = [deblank(M_.endo_names(k1,:)) '_' deblank(M_.endo_names(k2,:))];
             [post_mean,hpd_interval,post_var] = Extractoo(oo_,NAME,type);
