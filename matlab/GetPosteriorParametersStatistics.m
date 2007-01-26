@@ -19,6 +19,10 @@ function get_posterior_parameters_statistics()
 % Gnu Public License.
 global estim_params_ M_ options_ bayestopt_ oo_
 
+if ~options_.mh_replic & options_.load_mh_file
+   load([M_.fname '_results.mat'],'oo_'); 
+end
+
 TeX   	= options_.TeX;
 nblck 	= options_.mh_nblck;
 nvx   	= estim_params_.nvx;
