@@ -97,6 +97,10 @@ else
   tempex = [];
 end
 
+if options_.debug
+  save([M_.fname '_debug'],'jacobia_')
+end
+
 dr=set_state_space(dr);
 kstate = dr.kstate;
 kad = dr.kad;
