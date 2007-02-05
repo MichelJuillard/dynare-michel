@@ -49,7 +49,7 @@ protected:
 
   //! Cost of computing current node
   /*! Nodes included in temporary_terms are considered having a null cost */
-  virtual int cost(temporary_terms_type &temporary_terms) const;
+  virtual int cost(const temporary_terms_type &temporary_terms) const;
 
 public:
   ExprNode(DataTree &datatree_arg);
@@ -137,7 +137,7 @@ private:
   const UnaryOpcode op_code;
   virtual NodeID computeDerivative(int varID);
 
-  int cost(temporary_terms_type &temporary_terms) const;
+  int cost(const temporary_terms_type &temporary_terms) const;
 public:
   UnaryOpNode(DataTree &datatree_arg, UnaryOpcode op_code_arg, const NodeID arg_arg);
   virtual void computeTemporaryTerms(map<NodeID, int> &reference_count, temporary_terms_type &temporary_terms) const;
@@ -162,7 +162,7 @@ private:
   const NodeID arg1, arg2;
   const BinaryOpcode op_code;
   virtual NodeID computeDerivative(int varID);
-  int cost(temporary_terms_type &temporary_terms) const;
+  int cost(const temporary_terms_type &temporary_terms) const;
 public:
   BinaryOpNode(DataTree &datatree_arg, const NodeID arg1_arg,
                BinaryOpcode op_code_arg, const NodeID arg2_arg);

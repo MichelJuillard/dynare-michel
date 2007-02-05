@@ -46,7 +46,7 @@ ExprNode::precedence(const temporary_terms_type &temporary_terms) const
 }
 
 int
-ExprNode::cost(temporary_terms_type &temporary_terms) const
+ExprNode::cost(const temporary_terms_type &temporary_terms) const
 {
   // For a terminal node, the cost is null
   return 0;
@@ -318,7 +318,7 @@ UnaryOpNode::computeDerivative(int varID)
 }
 
 int
-UnaryOpNode::cost(temporary_terms_type &temporary_terms) const
+UnaryOpNode::cost(const temporary_terms_type &temporary_terms) const
 {
   // For a temporary term, the cost is null
   temporary_terms_type::const_iterator it = temporary_terms.find(const_cast<UnaryOpNode *>(this));
@@ -617,7 +617,7 @@ BinaryOpNode::precedence(const temporary_terms_type &temporary_terms) const
 }
 
 int
-BinaryOpNode::cost(temporary_terms_type &temporary_terms) const
+BinaryOpNode::cost(const temporary_terms_type &temporary_terms) const
 {
   temporary_terms_type::const_iterator it = temporary_terms.find(const_cast<BinaryOpNode *>(this));
   // For a temporary term, the cost is null

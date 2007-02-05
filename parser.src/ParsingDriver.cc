@@ -237,7 +237,7 @@ ParsingDriver::init_val(string *name, ExpObj *rhs)
       && type != eExogenousDet)
     error("initval/endval: " + *name + " should be an endogenous or exogenous variable");
 
-  init_values.push_back(pair<string, string>(*name, get_expression(rhs)));
+  init_values.push_back(make_pair(*name, get_expression(rhs)));
 
   delete name;
   delete rhs;
@@ -434,7 +434,7 @@ ParsingDriver::add_period(string *p1, string *p2)
 {
   int p1_val = atoi(p1->c_str());
   int p2_val = atoi(p2->c_str());
-  det_shocks_periods.push_back(pair<int, int>(p1_val, p2_val));
+  det_shocks_periods.push_back(make_pair(p1_val, p2_val));
   delete p1;
   delete p2;
 }
@@ -443,7 +443,7 @@ void
 ParsingDriver::add_period(string *p1)
 {
   int p1_val = atoi(p1->c_str());
-  det_shocks_periods.push_back(pair<int, int>(p1_val, p1_val));
+  det_shocks_periods.push_back(make_pair(p1_val, p1_val));
   delete p1;
 }
 
@@ -510,7 +510,7 @@ ParsingDriver::option_num(const string &name_option, string *opt1, string *opt2)
       != options_list.paired_num_options.end())
     error("option " + name_option + " declared twice");
 
-  options_list.paired_num_options[name_option] = pair<string, string>(*opt1, *opt2);
+  options_list.paired_num_options[name_option] = make_pair(*opt1, *opt2);
   delete opt1;
   delete opt2;
 }
@@ -802,7 +802,7 @@ ParsingDriver::set_calib_var(string *name, string *weight, ExpObj *expression)
   if (calib_var.find(*name) != calib_var.end())
     error("calib_var: " + *name + " declared twice");
 
-  calib_var[*name] = pair<string, string>(*weight, get_expression(expression));
+  calib_var[*name] = make_pair(*weight, get_expression(expression));
 
   delete name;
   delete weight;
@@ -827,7 +827,7 @@ ParsingDriver::set_calib_covar(string *name1, string *name2,
     error("calib_var: pair of variables (" + *name1 + ", " + *name2
           + ") declared twice");
 
-  calib_covar[covar_key] = pair<string, string>(*weight, get_expression(expression));
+  calib_covar[covar_key] = make_pair(*weight, get_expression(expression));
 
   delete name1;
   delete name2;
@@ -849,7 +849,7 @@ ParsingDriver::set_calib_ac(string *name, string *ar,
   if (calib_ac.find(ac_key) != calib_ac.end())
     error("calib_var: autocorr " + *name + "(" + *ar + ") declared twice");
 
-  calib_ac[ac_key] = pair<string, string>(*weight, get_expression(expression));
+  calib_ac[ac_key] = make_pair(*weight, get_expression(expression));
 
   delete name;
   delete ar;

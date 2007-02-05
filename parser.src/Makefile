@@ -101,10 +101,14 @@ DynareBison.cc include/DynareBison.hh: DynareBison.yy include/ParsingDriver.hh
 clean:
 	rm -f *.o *.P \
 		*~ include/*~ \
-		DynareBison.cc \
-		include/DynareBison.hh \
 		DynareBison.output \
 		DynareFlex.cc \
 		$(DYNARE_M) \
 		$(DYNARE_S)
 
+distclean: clean
+	rm -f DynareBison.cc \
+		include/position.hh \
+		include/stack.hh \
+		include/location.hh \
+		include/DynareBison.hh

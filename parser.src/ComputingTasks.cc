@@ -82,7 +82,7 @@ StochSimulStatement::writeOutput(ostream &output, const string &basename) const
 }
 
 RamseyPolicyStatement::RamseyPolicyStatement(const TmpSymbolTable &tmp_symbol_table_arg,
-                                         const OptionsList &options_list_arg) :
+                                             const OptionsList &options_list_arg) :
   tmp_symbol_table(tmp_symbol_table_arg),
   options_list(options_list_arg)
 {
