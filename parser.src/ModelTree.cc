@@ -11,7 +11,8 @@ ModelTree::ModelTree(SymbolTable &symbol_table_arg,
   computeJacobian(false),
   computeJacobianExo(false),
   computeHessian(false),
-  computeStaticHessian(false)
+  computeStaticHessian(false),
+  computeThirdDerivatives(false)
 {
 }
 
@@ -31,7 +32,7 @@ ModelTree::derive(int order)
       }
   cout << "done" << endl;
 
-  if (order == 2)
+  if (order >= 2)
     {
       cout << "  Processing Order 2... ";
       for(first_derivatives_type::const_iterator it = first_derivatives.begin();
@@ -52,6 +53,32 @@ ModelTree::derive(int order)
         }
       cout << "done" << endl;
     }
+
+  if (order >= 3)
+    {
+      cout << "  Processing Order 3... ";
+      for(second_derivatives_type::const_iterator it = second_derivatives.begin();
+          it != second_derivatives.end(); it++)
+        {
+          int eq = it->first.first;
+
+          int var1 = it->first.second.first;
+          int var2 = it->first.second.second;
+          // By construction, var2 <= var1
+
+          NodeID d2 = it->second;
+
+          // Store only third derivatives such that var3 <= var2 <= var1
+          for(int var3 = 0; var3 <= var2; var3++)
+            {
+              NodeID d3 = d2->getDerivative(var3);
+              if (d3 == Zero)
+                continue;
+              third_derivatives[make_pair(eq, make_pair(var1, make_pair(var2, var3)))] = d3;
+            }
+        }
+      cout << "done" << endl;
+    }
 }
 
 void
@@ -68,9 +95,14 @@ ModelTree::computeTemporaryTerms(int order)
       it != first_derivatives.end(); it++)
     it->second->computeTemporaryTerms(reference_count, temporary_terms);
 
-  if (order == 2)
+  if (order >= 2)
     for(second_derivatives_type::iterator it = second_derivatives.begin();
         it != second_derivatives.end(); it++)
+      it->second->computeTemporaryTerms(reference_count, temporary_terms);
+
+  if (order >= 3)
+    for(third_derivatives_type::iterator it = third_derivatives.begin();
+        it != third_derivatives.end(); it++)
       it->second->computeTemporaryTerms(reference_count, temporary_terms);
 }
 
@@ -170,7 +202,7 @@ ModelTree::writeDynamicMFile(const string &dynamic_basename) const
       cerr << "Error: Can't open file " << filename << " for writing" << endl;
       exit(-1);
     }
-  mDynamicModelFile << "function [residual, g1, g2] = " << dynamic_basename << "(y, x)\n";
+  mDynamicModelFile << "function [residual, g1, g2, g3] = " << dynamic_basename << "(y, x)\n";
   mDynamicModelFile << interfaces::comment()+"\n"+interfaces::comment();
   mDynamicModelFile << "Status : Computes dynamic model for Dynare\n" << interfaces::comment() << "\n";
   mDynamicModelFile << interfaces::comment();
@@ -476,12 +508,21 @@ ModelTree::writeDynamicModel(ostream &DynamicOutput) const
   ostringstream model_output;    // Used for storing model equations
   ostringstream jacobian_output; // Used for storing jacobian equations
   ostringstream hessian_output;  // Used for storing Hessian equations
+  ostringstream third_derivatives_output;
 
   writeTemporaryTerms(model_output, true);
 
   writeLocalParameters(model_output, true);
 
   writeModelEquations(model_output, true);
+
+  int nrows = equations.size();
+  int nvars;
+  if (computeJacobianExo)
+    nvars = variable_table.get_dyn_var_nbr();
+  else
+    nvars = variable_table.var_endo_nbr;
+  int nvars_sq = nvars * nvars;
 
   // Writing Jacobian
   if (computeJacobian || computeJacobianExo)
@@ -516,8 +557,8 @@ ModelTree::writeDynamicModel(ostream &DynamicOutput) const
         int id1 = variable_table.getSortID(var1);
         int id2 = variable_table.getSortID(var2);
 
-        int col_nb = id1*variable_table.get_dyn_var_nbr()+id2+1;
-        int col_nb_sym = id2*variable_table.get_dyn_var_nbr()+id1+1;
+        int col_nb = id1*nvars+id2+1;
+        int col_nb_sym = id2*nvars+id1+1;
 
         hessian_output << "  g2" << lpar << eq+1 << ", " << col_nb << rpar << " = ";
         d2->writeOutput(hessian_output, true, temporary_terms);
@@ -529,10 +570,42 @@ ModelTree::writeDynamicModel(ostream &DynamicOutput) const
                     <<  "g2" << lpar << eq+1 << ", " << col_nb << rpar << ";" << endl;
       }
 
-  int nrows = equations.size();
-  int nvars = variable_table.var_endo_nbr;
-  if (computeJacobianExo)
-    nvars += symbol_table.exo_nbr + symbol_table.exo_det_nbr;
+  // Writing third derivatives
+  if (computeThirdDerivatives)
+    for(third_derivatives_type::const_iterator it = third_derivatives.begin();
+        it != third_derivatives.end(); it++)
+      {
+        int eq = it->first.first;
+        int var1 = it->first.second.first;
+        int var2 = it->first.second.second.first;
+        int var3 = it->first.second.second.second;
+        NodeID d3 = it->second;
+
+        int id1 = variable_table.getSortID(var1);
+        int id2 = variable_table.getSortID(var2);
+        int id3 = variable_table.getSortID(var3);
+
+        // Reference column number for the g3 matrix
+        int ref_col = id1 * nvars_sq + id2 * nvars + id3 + 1;
+
+        third_derivatives_output << "  g3" << lpar << eq+1 << ", " << ref_col << rpar << " = ";
+        d3->writeOutput(third_derivatives_output, true, temporary_terms);
+        third_derivatives_output << ";" << endl;
+
+        // Compute the column numbers for the 5 other permutations of (id1,id2,id3) and store them in a set (to avoid duplicates if two indexes are equal)
+        set<int> cols;
+        cols.insert(id1 * nvars_sq + id3 * nvars + id2 + 1);
+        cols.insert(id2 * nvars_sq + id1 * nvars + id3 + 1);
+        cols.insert(id2 * nvars_sq + id3 * nvars + id1 + 1);
+        cols.insert(id3 * nvars_sq + id1 * nvars + id2 + 1);
+        cols.insert(id3 * nvars_sq + id2 * nvars + id1 + 1);
+
+        for(set<int>::iterator it2 = cols.begin(); it2 != cols.end(); it2++)
+          if (*it2 != ref_col)
+            third_derivatives_output << "  g3" << lpar << eq+1 << ", " << *it2 << rpar << " = "
+                                     << "g3" << lpar << eq+1 << ", " << ref_col << rpar
+                                     << ";" << endl;
+      }
 
   if (offset == 1)
     {
@@ -561,14 +634,23 @@ ModelTree::writeDynamicModel(ostream &DynamicOutput) const
         {
           DynamicOutput << "if nargout >= 3,\n";
           // Writing initialization instruction for matrix g2
-          int ncols = nvars*nvars;
-          DynamicOutput << "  g2 = " <<
-            "sparse([],[],[]," << nrows << ", " << ncols << ", " <<
-            5*ncols << ");\n";
-          DynamicOutput << "\n\t"+interfaces::comment()+"\n\t"+interfaces::comment();
-          DynamicOutput << "Hessian matrix\n\t";
-          DynamicOutput << interfaces::comment() + "\n\n";
+          int ncols = nvars_sq;
+          DynamicOutput << "  g2 = sparse([],[],[]," << nrows << ", " << ncols << ", "
+                        << 5*ncols << ");\n";
+          DynamicOutput << "\n\t"+interfaces::comment() << "\n\t" << interfaces::comment();
+          DynamicOutput << "Hessian matrix\n\t" << interfaces::comment() << "\n\n";
           DynamicOutput << hessian_output.str() << lsymetric.str();
+          DynamicOutput << "end;\n";
+        }
+      if (computeThirdDerivatives)
+        {
+          DynamicOutput << "if nargout >= 4,\n";
+          int ncols = nvars_sq * nvars;
+          DynamicOutput << "  g3 = sparse([],[],[]," << nrows << ", " << ncols << ", "
+                        << 5*ncols << ");\n";
+          DynamicOutput << "\n\t" + interfaces::comment() + "\n\t" + interfaces::comment();
+          DynamicOutput << "Third order derivatives\n\t" << interfaces::comment() << "\n\n";
+          DynamicOutput << third_derivatives_output.str();
           DynamicOutput << "end;\n";
         }
     }
@@ -709,16 +791,16 @@ ModelTree::computingPass()
       rpar = ']';
     }
 
-  if (computeHessian || computeStaticHessian)
-    {
-      derive(2);
-      computeTemporaryTerms(2);
-    }
-  else
-    {
-      derive(1);
-      computeTemporaryTerms(1);
-    }
+  // Determine derivation order
+  int order = 1;
+  if (computeThirdDerivatives)
+    order = 3;
+  else if (computeHessian || computeStaticHessian)
+    order = 2;
+
+  // Launch computations
+  derive(order);
+  computeTemporaryTerms(order);
 }
 
 void

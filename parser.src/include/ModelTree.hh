@@ -36,6 +36,15 @@ private:
   */
   second_derivatives_type second_derivatives;
 
+  typedef map<pair<int, pair<int, pair<int, int> > >, NodeID> third_derivatives_type;
+  //! Third order derivatives
+  /*! First index is equation number, second, third and fourth are variables w.r. to which is computed the derivative.
+    Only non-null derivatives are stored in the map.
+    Contains only third order derivatives where var1 >= var2 >= var3 (for obvious symmetry reasons).
+    Variable indexes used are those of the variable_table, before sorting.
+  */
+  third_derivatives_type third_derivatives;
+
   //! Temporary terms (those which will be noted Txxxx)
   temporary_terms_type temporary_terms;
 
@@ -54,6 +63,7 @@ private:
   /*! \todo handle hessian in C output */
   void writeStaticModel(ostream &StaticOutput) const;
   //! Writes the dynamic model equations and its derivatives
+  /*! \todo add third derivatives handling in C output */
   void writeDynamicModel(ostream &DynamicOutput) const;
   //! Writes static model file (Matlab version)
   void writeStaticMFile(const string &static_basename) const;
@@ -62,6 +72,7 @@ private:
   //! Writes dynamic model file (Matlab version)
   void writeDynamicMFile(const string &dynamic_basename) const;
   //! Writes dynamic model file (C version)
+  /*! \todo add third derivatives handling */
   void writeDynamicCFile(const string &dynamic_basename) const;
 
 public:
@@ -78,9 +89,10 @@ public:
   bool computeHessian;
   //! Whether static Hessian (w.r. to endogenous only) should be written
   bool computeStaticHessian;
+  //! Whether dynamic third order derivatives (w.r. to endogenous and exogenous) should be written
+  bool computeThirdDerivatives;
   //! Execute computations (variable sorting + derivation)
-  /*! You must set computeJacobian, computeJacobianExo and computeHessian to correct values before
-    calling this function */
+  /*! You must set computeJacobian, computeJacobianExo, computeHessian, computeStaticHessian and computeThirdDerivatives to correct values before calling this function */
   void computingPass();
   //! Writes model initialization and lead/lag incidence matrix to output
   void writeOutput(ostream &output) const;

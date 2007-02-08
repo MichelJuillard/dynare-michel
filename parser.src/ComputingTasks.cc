@@ -71,6 +71,11 @@ void
 StochSimulStatement::checkPass(ModFileStructure &mod_file_struct)
 {
   mod_file_struct.stoch_simul_or_similar_present = true;
+
+  // Fill in option_order of mod_file_struct
+  OptionsList::num_options_type::const_iterator it = options_list.num_options.find("order");
+  if (it != options_list.num_options.end())
+    mod_file_struct.order_option = atoi(it->second.c_str());
 }
 
 void
@@ -92,6 +97,11 @@ void
 RamseyPolicyStatement::checkPass(ModFileStructure &mod_file_struct)
 {
   mod_file_struct.stoch_simul_or_similar_present = true;
+
+  // Fill in option_order of mod_file_struct
+  OptionsList::num_options_type::const_iterator it = options_list.num_options.find("order");
+  if (it != options_list.num_options.end())
+    mod_file_struct.order_option = atoi(it->second.c_str());
 }
 
 void
@@ -113,6 +123,11 @@ void
 EstimationStatement::checkPass(ModFileStructure &mod_file_struct)
 {
   mod_file_struct.stoch_simul_or_similar_present = true;
+
+  // Fill in option_order of mod_file_struct
+  OptionsList::num_options_type::const_iterator it = options_list.num_options.find("order");
+  if (it != options_list.num_options.end())
+    mod_file_struct.order_option = atoi(it->second.c_str());
 }
 
 void
@@ -543,6 +558,11 @@ void
 OsrStatement::checkPass(ModFileStructure &mod_file_struct)
 {
   mod_file_struct.stoch_simul_or_similar_present = true;
+
+  // Fill in option_order of mod_file_struct
+  OptionsList::num_options_type::const_iterator it = options_list.num_options.find("order");
+  if (it != options_list.num_options.end())
+    mod_file_struct.order_option = atoi(it->second.c_str());
 }
 
 void
@@ -576,6 +596,11 @@ void
 OlrStatement::checkPass(ModFileStructure &mod_file_struct)
 {
   mod_file_struct.stoch_simul_or_similar_present = true;
+
+  // Fill in option_order of mod_file_struct
+  OptionsList::num_options_type::const_iterator it = options_list.num_options.find("order");
+  if (it != options_list.num_options.end())
+    mod_file_struct.order_option = atoi(it->second.c_str());
 }
 
 void

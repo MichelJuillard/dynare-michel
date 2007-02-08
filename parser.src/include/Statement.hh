@@ -15,8 +15,11 @@ public:
   bool check_present;
   //! Whether a simul statement is present
   bool simul_present;
-  //! Whether a stoch_simul, estimation, olr, osr statement is present
+  //! Whether a stoch_simul, estimation, olr, osr, ramsey_policy statement is present
   bool stoch_simul_or_similar_present;
+  //! The value of the "order" option of stoch_simul, estimation, olr, osr, ramsey_policy
+  /*! Defaults to 2 */
+  int order_option;
 };
 
 class Statement

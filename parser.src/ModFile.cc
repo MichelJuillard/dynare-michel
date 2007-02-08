@@ -47,8 +47,16 @@ ModFile::computingPass()
     model_tree.computeJacobian = true;
   else
     {
+      if (mod_file_struct.order_option < 1 || mod_file_struct.order_option > 3)
+        {
+          cerr << "Incorrect order option..." << endl;
+          exit(-1);
+        }
       model_tree.computeJacobianExo = true;
-      model_tree.computeHessian = true;
+      if (mod_file_struct.order_option >= 2)
+        model_tree.computeHessian = true;
+      if (mod_file_struct.order_option == 3)
+        model_tree.computeThirdDerivatives = true;
     }
 
   model_tree.computingPass();
