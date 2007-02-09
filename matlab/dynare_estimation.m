@@ -194,7 +194,7 @@ if length(options_.mode_file) > 0 & options_.posterior_mode_estimation
 end
 
 
-%% Compute the steadyn state: 
+%% Compute the steady state: 
 if options_.steadystate_flag% if the _steadystate.m file is provided.
     [oo_.steady_state,tchek] = feval([M_.fname '_steadystate'],[],[]);
 else% if the steady state file is not provided.
@@ -202,21 +202,22 @@ else% if the steady state file is not provided.
    oo_.steady_state = dd.ys; clear('dd');
 end
 
-initial_estimation_checks(xparam1,gend,data);
-
-if options_.mode_compute == 0 & length(options_.mode_file) == 0
-  return;
-end
 
 %% compute sample moments if needed (bvar-dsge)
 if ~isempty(strmatch('dsge_prior_weight',M_.param_names))
-    if all(abs(oo_.steady_state)<10e-9)
+    if options_.noconstant
         evalin('base',['[mYY,mXY,mYX,mXX,Ydata,Xdata] = ' ...
                  'var_sample_moments(options_.first_obs,options_.first_obs+options_.nobs-1,options_.varlag,-1);'])
     else% The steady state is non zero ==> a constant in the VAR is needed!
         evalin('base',['[mYY,mXY,mYX,mXX,Ydata,Xdata] = ' ...
                  'var_sample_moments(options_.first_obs,options_.first_obs+options_.nobs-1,options_.varlag,0);'])
     end
+end
+
+initial_estimation_checks(xparam1,gend,data);
+
+if options_.mode_compute == 0 & length(options_.mode_file) == 0
+  return;
 end
 
 %% Estimation of the posterior mode or likelihood mode

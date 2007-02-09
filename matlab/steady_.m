@@ -3,7 +3,9 @@
 function steady_()
 
   global M_ oo_ it_ options_
-
+  
+  options_.steadystate_flag
+  
   if options_.steadystate_flag
     [oo_.steady_state,check] = feval([M_.fname '_steadystate'],...
 				     oo_.steady_state,...
@@ -17,7 +19,7 @@ function steady_()
 	cheick = max(abs(feval([M_.fname '_steadystate'],...
 			       oo_.steady_state,...
 			       [oo_.exo_steady_state; ...
-		    oo_.exo_det_steady_state]))) > options_.dynatol
+		    oo_.exo_det_steady_state]))) > options_.dynatol ;
       end
     end
     if ~isempty(options_.steadystate_partial)
