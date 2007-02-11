@@ -23,7 +23,9 @@ return
 [alphahat1,etahat1,a11, aK1] = DiffuseKalmanSmoother1(T,R,Q, ...
 						  Pinf1,Pstar1,Y,trend,pp,mm,smpl,mf);
 [alphahat2,etahat2,a12, aK2] = DiffuseKalmanSmoother3(T,R,Q, ...
-						  Pinf1,Pstar1,Y,trend,pp,mm,smpl,mf);
+						  Pinf1,Pstar1,Y,trend, ...
+						  pp,mm,smpl,mf);
+
 
 max(max(abs(alphahat1-alphahat2)))
 max(max(abs(etahat1-etahat2)))
