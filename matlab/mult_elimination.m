@@ -30,7 +30,7 @@ function dr=mult_elimination(void)
   A11 = A1(nil,:);
   A21 = A1(il,:);
   A12 = A2(nil,:);
-  A22 = A2(il,:)
+  A22 = A2(il,:);
 
   [Q1,R1,E1] = qr(A2);
   n1 = sum(abs(diag(R1)) > 1e-8);
@@ -42,8 +42,8 @@ function dr=mult_elimination(void)
   
   R2_1 = inv(R2(1:n2,1:n2));
 
-  M1(order_var,:) = AA1 - AA2*E2*[R2_1*Q2(:,1:n2)'*Q1_12'; zeros(m_nbr-n2,m_nbr)];
-  M2(order_var,:) = AA2*E2*[R2_1*Q2(:,1:n2)'*[Q1_12' Q1_22']*A1; zeros(m_nbr-n2,nil)];
+  M1(order_var,:) = AA1 - AA2*E2*[R2_1*Q2(:,1:n2)'*Q1_12'; zeros(m_nbr-n2,nm_nbr)];
+  M2(order_var,:) = AA2*E2*[R2_1*Q2(:,1:n2)'*[Q1_12' Q1_22']*A1; zeros(m_nbr-n2,length(nil))];
   M3(order_var,:) = dr.ghu;
   M4(order_var,:) = AA2*E2*[R2_1*Q2(:,1:n2)'*[Q1_12' Q1_22']*B; zeros(m_nbr-n2,size(B,2))];
 
@@ -67,7 +67,7 @@ function dr=mult_elimination(void)
   kstate = zeros(0,2);
   for i=maximum_lag:-1:1
     k = find(lead_lag_incidence(i,:));
-    kstate = [kstate; [k repmat(i+1,length(k),1)]];
+    kstate = [kstate; [k' repmat(i+1,length(k),1)]];
   end
   
   dr.M1 = M1;
