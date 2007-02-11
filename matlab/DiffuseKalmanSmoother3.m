@@ -113,7 +113,7 @@ while newRank & t < smpl
       %                 options_.diffuse_d=i;   %this is buggy
       %             end                    
       % end new terminiation criteria by M. Ratto
-    else 
+    elseif Fstar(i,t) > crit 
       %% Note that : (1) rank(Pinf)=0 implies that Finf = 0, (2) outside this loop (when for some i and t the condition
       %% rank(Pinf)=0 is satisfied we have P = Pstar and F = Fstar and (3) Finf = 0 does not imply that
       %% rank(Pinf)=0. [stéphane,11-03-2004].	  

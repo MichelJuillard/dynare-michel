@@ -87,6 +87,7 @@ function [fval,llik,cost_flag,ys,trend_coeff,info] = DsgeLikelihood_hh(xparam1,g
   %  M_.params(estim_params_.param_vals(i,1)) = xparam1(i+offset);
   %end
   M_.Sigma_e = Q;
+  M_.H = H;
   %------------------------------------------------------------------------------
   % 2. call model setup & reduction program
   %------------------------------------------------------------------------------
@@ -152,7 +153,7 @@ function [fval,llik,cost_flag,ys,trend_coeff,info] = DsgeLikelihood_hh(xparam1,g
   %------------------------------------------------------------------------------
   % 4. Likelihood evaluation
   %------------------------------------------------------------------------------
-  if estim_params_.nvn
+  if any(any(H ~= 0))
     if options_.kalman_algo == 1
       [LIK, lik] = DiffuseLikelihoodH1(T,R,Q,H,Pinf,Pstar,data,trend,start);
       if isinf(LIK) & ~estim_params_.ncn %% The univariate approach considered here doesn't 

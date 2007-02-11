@@ -13,7 +13,7 @@ function global_initialization()
   options_.slowc = 1;
   options_.timing = 0;
   options_.gstep = 1e-2;
-  options_.debug = 0
+  options_.debug = 0;
   options_.initval_file = 0;
   options_.Schur_vec_tol = 1e-8; % used to find nonstationary variables
                                  % in Schur decomposition of the
@@ -135,3 +135,6 @@ function global_initialization()
   oo_.dr = [];
   oo_.exo_det_steady_state = [];
   oo_.exo_det_simul = [];
+  
+  % Variance matrix for measurement errors
+  M_.H = 0;

@@ -55,8 +55,7 @@ while rank(Pinf(:,:,t+1),crit1) & t<smpl
     iFinf(:,:,t) 	= inv(Pinf(mf,mf,t));
     Kinf(:,:,t)	 	= T*Pinf(:,mf,t)*iFinf(:,:,t);
     a(:,t+1) 	 	= T*a(:,t) + Kinf(:,:,t)*v(:,t);
-    aK(1,:,t+1) 	 	= a(:,t+1);
-    for jnk=2:nk,
+    for jnk=1:nk,
         aK(jnk,:,t+jnk) 	 	= T^(jnk-1)*a(:,t+1);
     end
     Linf(:,:,t)  	= T - Kinf(:,:,t)*Z;
@@ -85,8 +84,7 @@ while notsteady & t<smpl
     K(:,:,t)    = T*P(:,mf,t)*iF(:,:,t);
     L(:,:,t)    = T-K(:,:,t)*Z;
     a(:,t+1)    = T*a(:,t) + K(:,:,t)*v(:,t);    
-    aK(1,:,t+1) 	 	= a(:,t+1);
-    for jnk=2:nk,
+    for jnk=1:nk,
         aK(jnk,:,t+jnk) 	 	= T^(jnk-1)*a(:,t+1);
     end
     P(:,:,t+1)  = T*P(:,:,t)*transpose(T)-T*P(:,mf,t)*transpose(K(:,:,t)) + QQ;
@@ -106,8 +104,7 @@ while t<smpl
     t=t+1;
     v(:,t) = Y(:,t) - a(mf,t) - trend(:,t);
     a(:,t+1) = T*a(:,t) + K_s*v(:,t);
-    aK(1,:,t+1) 	 	= a(:,t+1);
-    for jnk=2:nk,
+    for jnk=1:nk,
         aK(jnk,:,t+jnk) 	 	= T^(jnk-1)*a(:,t+1);
     end
 end

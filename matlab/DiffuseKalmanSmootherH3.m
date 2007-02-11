@@ -26,17 +26,24 @@ v       	= zeros(pp,smpl);
 a       	= zeros(mm,smpl+1);
 a1			= a;
 aK          = zeros(nk,mm,smpl+nk);
-Fstar   	= zeros(pp,smpl);
-Finf		= zeros(pp,smpl);
+
+if isempty(options_.diffuse_d),
+  smpl_diff = 1;
+else
+  smpl_diff=rank(Pinf1);
+end
+
+Fstar   	= zeros(pp,smpl_diff);
+Finf		= zeros(pp,smpl_diff);
 Ki       	= zeros(mm,pp,smpl);
 Li      	= zeros(mm,mm,pp,smpl);
-Linf    	= zeros(mm,mm,pp,smpl);
-L0      	= zeros(mm,mm,pp,smpl);
-Kstar   	= zeros(mm,pp,smpl);
+Linf    	= zeros(mm,mm,pp,smpl_diff);
+L0      	= zeros(mm,mm,pp,smpl_diff);
+Kstar   	= zeros(mm,pp,smpl_diff);
 P       	= zeros(mm,mm,smpl+1);
 P1			= P;
-Pstar   	= zeros(spstar(1),spstar(2),smpl+1); Pstar(:,:,1) = Pstar1;
-Pinf    	= zeros(spinf(1),spinf(2),smpl+1); Pinf(:,:,1) = Pinf1;
+Pstar   	= zeros(spstar(1),spstar(2),smpl_diff+1); Pstar(:,:,1) = Pstar1;
+Pinf    	= zeros(spinf(1),spinf(2),smpl_diff+1); Pinf(:,:,1) = Pinf1;
 Pstar1 		= Pstar;
 Pinf1  		= Pinf;
 crit   	 	= options_.kalman_tol;
@@ -106,7 +113,7 @@ while newRank & t < smpl
 % 	options_.diffuse_d=i;   % this line is buggy!
 %       end                    
       % end new terminiation criteria by M. Ratto
-    else 
+    elseif Fstar(i,t) > crit 
       %% Note that : (1) rank(Pinf)=0 implies that Finf = 0, (2) outside this loop (when for some i and t the condition
       %% rank(Pinf)=0 is satisfied we have P = Pstar and F = Fstar and (3) Finf = 0 does not imply that
       %% rank(Pinf)=0. [stéphane,11-03-2004].	  
@@ -149,8 +156,8 @@ while notsteady & t<smpl
   P1(:,:,t) = P(:,:,t);
   for i=1:pp
     v(i,t)  = Y(i,t) - a(mf(i),t) - trend(i,t);
-    Fi(i,t) = P(mf(i),mf(i),t);
-    Ki(:,i,t) = P(:,mf(i),t) + H(i,i);
+    Fi(i,t) = P(mf(i),mf(i),t)+H(i,i);
+    Ki(:,i,t) = P(:,mf(i),t);
     if Fi(i,t) > crit
       Li(:,:,i,t)    = eye(mm)-Ki(:,i,t)*Z(i,:)/Fi(i,t);
       a(:,t) = a(:,t) + Ki(:,i,t)*v(i,t)/Fi(i,t);
@@ -253,3 +260,4 @@ else
 end
 epsilonhat = Y-alphahat(mf,:)-trend;
 
+a=a(:,1:end-1);

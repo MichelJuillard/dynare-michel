@@ -38,6 +38,10 @@ function [xparam1,estim_params_,bayestopt_,lb,ub]=set_prior(estim_params_)
     bayestopt_.name = cellstr(M_.exo_names(estim_params_.var_exo(:,1),:));
   end
   if nvn
+    if M_.H == 0
+      nvarobs = size(options_.varobs,1);
+      M_.H = zeros(nvarobs,nvarobs);
+    end
     for i=1:nvn
       estim_params_.var_endo(i,1) = strmatch(deblank(M_.endo_names(estim_params_.var_endo(i,1),:)),deblank(options_.varobs),'exact');
     end
@@ -69,6 +73,10 @@ function [xparam1,estim_params_,bayestopt_,lb,ub]=set_prior(estim_params_)
 						  cellstr(M_.exo_names(estim_params_.corrx(:,2),:))))));
   end
   if ncn
+    if M_.H == 0
+      nvarobs = size(options_.varobs,1);
+      M_.H = zeros(nvarobs,nvarobs);
+    end
     xparam1 = [xparam1; estim_params_.corrn(:,3)];
     ub = [ub; max(min(estim_params_.corrn(:,5),1),-1)];
     lb = [lb; max(min(estim_params_.corrn(:,4),1),-1)];

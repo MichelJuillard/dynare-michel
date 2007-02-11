@@ -70,7 +70,7 @@ function [alphahat,etahat,epsilonhat,ahat,SteadyState,trend_coeff,aK] = DsgeSmoo
   % -----------------------------------------------------------------------------
   %  4. Kalman smoother
   % -----------------------------------------------------------------------------
-  if estim_params_.nvn
+  if any(any(H ~= 0))   % should be replaced by a flag
     if options_.kalman_algo == 1
       [alphahat,epsilonhat,etahat,ahat,aK] = DiffuseKalmanSmootherH1(T,R,Q,H,Pinf,Pstar,Y,trend,nobs,np,smpl,mf);
       if all(alphahat(:)==0)

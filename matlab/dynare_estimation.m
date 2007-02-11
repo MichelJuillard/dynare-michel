@@ -3,8 +3,6 @@ function dynare_estimation(var_list_)
 global M_ options_ oo_ estim_params_ 
 global bayestopt_ dsge_prior_weight
 
-% temporary fix until M_.H is initialized by the parser
-M_.H = [];
 
 options_.varlist = var_list_;
 options_.lgyidx2varobs = zeros(size(M_.endo_names,1),1);
