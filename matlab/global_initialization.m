@@ -138,3 +138,6 @@ function global_initialization()
   
   % Variance matrix for measurement errors
   M_.H = 0;
+  
+  % BVAR
+  M_.bvar = [];
