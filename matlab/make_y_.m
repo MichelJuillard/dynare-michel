@@ -21,7 +21,7 @@ function make_y_
   options_ = set_default_option(options_,'periods',0);
   
   if isempty(oo_.steady_state)
-    oo_.steady_state = ones(M_.endo_nbr,1);
+    oo_.steady_state = zeros(M_.endo_nbr,1);
   end
   
   
@@ -29,7 +29,7 @@ function make_y_
     if isempty(ys0_)
       oo_.endo_simul = [oo_.steady_state*ones(1,M_.maximum_lag+options_.periods+M_.maximum_lead)];
     else
-      oo_.endo_simul = [ys0_*ones(1,M_.maximum_lag);oo_.steady_state*ones(1,options_.periods+M_.maximum_lead)];
+      oo_.endo_simul = [ys0_*ones(1,M_.maximum_lag) oo_.steady_state*ones(1,options_.periods+M_.maximum_lead)];
     end
   elseif size(oo_.endo_simul,2) < M_.maximum_lag+M_.maximum_lead+options_.periods
     oo_.endo_simul = [oo_.endo_simul oo_.steady_state*ones(1,M_.maximum_lag+options_.periods+M_.maximum_lead-size(oo_.endo_simul,2),1)];
