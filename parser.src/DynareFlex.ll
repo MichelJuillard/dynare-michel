@@ -57,6 +57,7 @@ int sigma_e = 0;
 <INITIAL>varexo_det {BEGIN DYNARE_STATEMENT; return token::VAREXO_DET;}
 <INITIAL>parameters {BEGIN DYNARE_STATEMENT; return token::PARAMETERS;}
 <INITIAL>periods 	{BEGIN DYNARE_STATEMENT; return token::PERIODS;}
+<INITIAL>cutoff 	{BEGIN DYNARE_STATEMENT; return token::CUTOFF;}
 <INITIAL>estimation {BEGIN DYNARE_STATEMENT; return token::ESTIMATION;}
 <INITIAL>prior_analysis {BEGIN DYNARE_STATEMENT; return token::PRIOR_ANALYSIS;}
 <INITIAL>posterior_analysis {BEGIN DYNARE_STATEMENT; return token::POSTERIOR_ANALYSIS;}
@@ -148,6 +149,7 @@ int sigma_e = 0;
 <DYNARE_STATEMENT>nocorr	{return token::NOCORR;}
 <DYNARE_STATEMENT>optim		{return token::OPTIM;}
 <DYNARE_STATEMENT>periods	{return token::PERIODS;}
+<DYNARE_STATEMENT>cutoff	{return token::CUTOFF;}
 <DYNARE_STATEMENT>model_comparison_approximation {return token::MODEL_COMPARISON;}
 <DYNARE_STATEMENT>laplace {return token::LAPLACE;}
 <DYNARE_STATEMENT>modifiedharmonicmean {return token::MODIFIEDHARMONICMEAN;}
@@ -167,7 +169,7 @@ int sigma_e = 0;
 <DYNARE_BLOCK>values {return token::VALUES;}
 <DYNARE_BLOCK>corr {return token::CORR;}
 <DYNARE_BLOCK>periods {return token::PERIODS;}
-
+<DYNARE_BLOCK>filename {return token::FILENAME;}
 <DYNARE_BLOCK>gamma_pdf {return token::GAMMA_PDF;}
 <DYNARE_BLOCK>beta_pdf {return token::BETA_PDF;}
 <DYNARE_BLOCK>normal_pdf {return token::NORMAL_PDF;}
@@ -208,6 +210,9 @@ int sigma_e = 0;
 <DYNARE_STATEMENT>[\'] {return yy::parser::token_type (yytext[0]);}
 
 <DYNARE_STATEMENT,DYNARE_BLOCK>use_dll {return token::USE_DLL;}
+<DYNARE_STATEMENT,DYNARE_BLOCK>sparse_dll {return token::SPARSE_DLL;}
+<DYNARE_STATEMENT,DYNARE_BLOCK>gcc_compiler {return token::GCC_COMPILER;}
+<DYNARE_STATEMENT,DYNARE_BLOCK>lcc_compiler {return token::LCC_COMPILER;}
 <DYNARE_STATEMENT,DYNARE_BLOCK>linear {return token::LINEAR;}
 <DYNARE_STATEMENT,DYNARE_BLOCK>[,] {return token::COMMA;}
 <DYNARE_STATEMENT,DYNARE_BLOCK>[:] {return yy::parser::token_type (yytext[0]);}

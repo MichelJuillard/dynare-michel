@@ -12,6 +12,8 @@ class DataTree;
 
 typedef class ExprNode *NodeID;
 
+typedef struct Model_Block;
+
 struct ExprNodeLess;
 
 //! Type for set of temporary terms
@@ -51,6 +53,9 @@ protected:
   /*! Nodes included in temporary_terms are considered having a null cost */
   virtual int cost(const temporary_terms_type &temporary_terms) const;
 
+  //! set of endogenous variables in the current expression
+  //! <symbolID, lag>
+  set< pair<int,int> > present_endogenous;
 public:
   ExprNode(DataTree &datatree_arg);
   virtual ~ExprNode();
@@ -69,7 +74,18 @@ public:
   virtual void computeTemporaryTerms(map<NodeID, int> &reference_count, temporary_terms_type &temporary_terms) const;
 
   //! Writes output of node, using a Txxx notation for nodes in temporary_terms
-  virtual void writeOutput(ostream &output, bool is_dynamic, const temporary_terms_type &temporary_terms) const = 0;
+  virtual void writeOutput(ostream &output, bool is_dynamic, const temporary_terms_type &temporary_terms, int offset) const = 0;
+
+  //! Collects the Endogenous in a expression
+  virtual void collectEndogenous(NodeID &Id) = 0;
+  virtual void computeTemporaryTerms(map<NodeID, int> &reference_count,
+                                     temporary_terms_type &temporary_terms,
+                                     map<NodeID, int> &first_occurence,
+                                     int Curr_block,
+                                     Model_Block *ModelBlock) const;
+  int present_endogenous_size() const;
+  int present_endogenous_find(int var, int lag) const;
+  virtual void Evaluate() const = 0;
 };
 
 //! Object used to compare two nodes (using their indexes)
@@ -90,7 +106,9 @@ private:
   virtual NodeID computeDerivative(int varID);
 public:
   NumConstNode(DataTree &datatree_arg, int id_arg);
-  virtual void writeOutput(ostream &output, bool is_dynamic, const temporary_terms_type &temporary_terms) const;
+  virtual void writeOutput(ostream &output, bool is_dynamic, const temporary_terms_type &temporary_terms, int offset) const;
+  virtual void collectEndogenous(NodeID &Id);
+  virtual void Evaluate() const;
 };
 
 //! Symbol or variable node
@@ -104,7 +122,9 @@ private:
   virtual NodeID computeDerivative(int varID);
 public:
   VariableNode(DataTree &datatree_arg, int id_arg, Type type_arg);
-  virtual void writeOutput(ostream &output, bool is_dynamic, const temporary_terms_type &temporary_terms) const;
+  virtual void writeOutput(ostream &output, bool is_dynamic, const temporary_terms_type &temporary_terms, int offset) const;
+  virtual void collectEndogenous(NodeID &Id);
+  virtual void Evaluate() const;
 };
 
 enum UnaryOpcode
@@ -141,7 +161,14 @@ private:
 public:
   UnaryOpNode(DataTree &datatree_arg, UnaryOpcode op_code_arg, const NodeID arg_arg);
   virtual void computeTemporaryTerms(map<NodeID, int> &reference_count, temporary_terms_type &temporary_terms) const;
-  virtual void writeOutput(ostream &output, bool is_dynamic, const temporary_terms_type &temporary_terms) const;
+  virtual void writeOutput(ostream &output, bool is_dynamic, const temporary_terms_type &temporary_terms, int offset) const;
+  virtual void computeTemporaryTerms(map<NodeID, int> &reference_count,
+                                     temporary_terms_type &temporary_terms,
+                                     map<NodeID, int> &first_occurence,
+                                     int Curr_block,
+                                     Model_Block *ModelBlock) const;
+  virtual void collectEndogenous(NodeID &Id);
+  virtual void Evaluate() const;
 };
 
 enum BinaryOpcode
@@ -168,7 +195,38 @@ public:
                BinaryOpcode op_code_arg, const NodeID arg2_arg);
   virtual int precedence(const temporary_terms_type &temporary_terms) const;
   virtual void computeTemporaryTerms(map<NodeID, int> &reference_count, temporary_terms_type &temporary_terms) const;
-  virtual void writeOutput(ostream &output, bool is_dynamic, const temporary_terms_type &temporary_terms) const;
+  virtual void writeOutput(ostream &output, bool is_dynamic, const temporary_terms_type &temporary_terms, int offset) const;
+  virtual void computeTemporaryTerms(map<NodeID, int> &reference_count,
+                                     temporary_terms_type &temporary_terms,
+                                     map<NodeID, int> &first_occurence,
+                                     int Curr_block,
+                                     Model_Block *ModelBlock) const;
+  virtual void collectEndogenous(NodeID &Id);
+  virtual void Evaluate() const;
+};
+
+typedef struct IM_compact
+{
+  int size, u_init, u_finish, nb_endo;
+  int *u, *us, *Var, *Equ, *Var_Index, *Equ_Index, *Var_dyn_Index;
+};
+
+typedef struct Block
+{
+  int Size, Sized, Type, Simulation_Type, Max_Lead, Max_Lag, Nb_Lead_Lag_Endo;
+  bool is_linear;
+  int* Equation;
+  int *Variable, *Variable_Sorted, *dVariable;
+  int *variable_dyn_index, *variable_dyn_leadlag;
+  temporary_terms_type *Temporary_terms;
+  IM_compact *IM_lead_lag;
+};
+
+typedef struct Model_Block
+{
+  int Size, Periods;
+  Block* Block_List;
+  int *in_Block_Equ, *in_Block_Var, *in_Equ_of_Block, *in_Var_of_Block;
 };
 
 #endif

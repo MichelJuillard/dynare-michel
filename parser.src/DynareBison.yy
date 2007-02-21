@@ -40,19 +40,19 @@ typedef pair<int, Type> ExpObj;
 
 %token AR AUTOCORR
 %token BAYESIAN_IRF BETA_PDF
-%token CALIB CALIB_VAR CHECK CONF_SIG CONSTANT CORR COVAR
+%token CALIB CALIB_VAR CHECK CONF_SIG CONSTANT CORR COVAR CUTOFF
 %token DATAFILE DR_ALGO DROP DSAMPLE DYNASAVE DYNATYPE 
 %token END ENDVAL EQUAL ESTIMATION ESTIMATED_PARAMS ESTIMATED_PARAMS_BOUNDS ESTIMATED_PARAMS_INIT
-%token FILTER_STEP_AHEAD FILTERED_VARS FIRST_OBS
+%token FILENAME FILTER_STEP_AHEAD FILTERED_VARS FIRST_OBS
 %token <string_val> FLOAT_NUMBER
 %token FORECAST
-%token GAMMA_PDF GRAPH
+%token GAMMA_PDF GCC_COMPILER GRAPH
 %token HISTVAL HP_FILTER HP_NGRID
 %token INITVAL
 %token <string_val> INT_NUMBER
 %token INV_GAMMA_PDF IRF
 %token KALMAN_ALGO KALMAN_TOL
-%token LAPLACE LIK_ALGO LIK_INIT LINEAR LOAD_MH_FILE LOGLINEAR
+%token LAPLACE LCC_COMPILER LIK_ALGO LIK_INIT LINEAR LOAD_MH_FILE LOGLINEAR
 %token MH_DROP MH_INIT_SCALE MH_JSCALE MH_MODE MH_NBLOCKS MH_REPLIC MH_RECOVER
 %token MODE_CHECK MODE_COMPUTE MODE_FILE MODEL MODEL_COMPARISON MSHOCKS
 %token MODEL_COMPARISON_APPROXIMATION MODIFIEDHARMONICMEAN MOMENTS_VARENDO 
@@ -62,7 +62,7 @@ typedef pair<int, Type> ExpObj;
 %token PARAMETERS PERIODS PLANNER_OBJECTIVE PREFILTER PRESAMPLE PRINT PRIOR_TRUNC PRIOR_ANALYSIS POSTERIOR_ANALYSIS
 %token QZ_CRITERIUM
 %token RELATIVE_IRF REPLIC RPLOT
-%token SHOCKS SIGMA_E SIMUL SIMUL_ALGO SIMUL_SEED SMOOTHER SOLVE_ALGO STDERR STEADY STOCH_SIMUL  
+%token SHOCKS SIGMA_E SIMUL SIMUL_ALGO SIMUL_SEED SMOOTHER SOLVE_ALGO SPARSE_DLL STDERR STEADY STOCH_SIMUL  
 %token TEX RAMSEY_POLICY PLANNER_DISCOUNT
 %token <string_val> TEX_NAME
 %token UNIFORM_PDF UNIT_ROOT_VARS USE_DLL
@@ -93,6 +93,7 @@ typedef pair<int, Type> ExpObj;
  statement
   	: declaration
  	| periods
+  | cutoff
  	| model
  	| initval
  	| endval
@@ -232,6 +233,16 @@ typedef pair<int, Type> ExpObj;
 		}
     ;
 
+cutoff
+ 	: CUTOFF FLOAT_NUMBER ';'
+ 		{
+      driver.cutoff($2);
+		}
+    | CUTOFF EQUAL FLOAT_NUMBER ';'
+ 		{
+      driver.cutoff($3);
+		}
+    ;
  		   
  init_param
  	: NAME EQUAL expression ';'
@@ -296,7 +307,13 @@ typedef pair<int, Type> ExpObj;
  initval
  	: INITVAL ';' initval_list END
  		{driver.end_initval();}
+ 	|	INITVAL '(' initval_option ')' ';' initval_list END
+ 		{driver.end_initval();}
  	;
+
+ initval_option
+  : FILENAME EQUAL NAME {driver.init_val_filename($3);}
+  ;
  	
  endval
  	: ENDVAL ';' initval_list END
@@ -327,12 +344,26 @@ typedef pair<int, Type> ExpObj;
  	: NAME '(' signed_integer ')' EQUAL expression ';'
     {driver.hist_val($1, $3, $6);}
  	;
+
+ model_sparse_options_list : model_sparse_options_list COMMA model_sparse_options
+                     | model_sparse_options
+                     ;
+
+ model_sparse_options :
+      LCC_COMPILER { driver.init_compiler(0); }
+    | GCC_COMPILER { driver.init_compiler(1); }
+    | o_cutoff
+  ;
 	
  model
   : MODEL ';' { driver.begin_model(); } equation_list END 
  	| MODEL '(' o_linear ')' ';' { driver.begin_model(); } 
 		equation_list END
   | MODEL '(' USE_DLL ')' ';' { driver.begin_model(); driver.use_dll(); }
+		equation_list END
+	| MODEL '(' SPARSE_DLL COMMA model_sparse_options_list ')' { driver.sparse_dll(); driver.begin_model(); } ';'
+		equation_list END
+	| MODEL '(' SPARSE_DLL ')' { driver.sparse_dll(); driver.begin_model(); } ';'
 		equation_list END
  	;
 
@@ -529,9 +560,9 @@ typedef pair<int, Type> ExpObj;
 
  simul 
 	: SIMUL ';' 
-		{driver.simul();}
+		{driver.simulate();}
 	| SIMUL '(' simul_options_list ')' ';'
-		{driver.simul();}
+		{driver.simulate();}
         ;
 
  simul_options_list: simul_options_list COMMA simul_options
@@ -572,6 +603,7 @@ typedef pair<int, Type> ExpObj;
                      | o_hp_filter
                      | o_hp_ngrid
                      | o_periods
+                     | o_cutoff
                      | o_simul
                      | o_simul_seed
                      | o_qz_criterium
@@ -1091,6 +1123,7 @@ typedef pair<int, Type> ExpObj;
  o_hp_filter: HP_FILTER EQUAL INT_NUMBER {driver.option_num("hp_filter", $3);};
  o_hp_ngrid: HP_NGRID EQUAL INT_NUMBER {driver.option_num("hp_ngrid", $3);};
  o_periods: PERIODS EQUAL INT_NUMBER {driver.option_num("periods", $3); driver.option_num("simul", "1");};
+ o_cutoff: CUTOFF EQUAL FLOAT_NUMBER {driver.option_num("cutoff", $3);}
  o_simul: SIMUL {driver.option_num("simul", "1");};
  o_simul_seed: SIMUL_SEED EQUAL INT_NUMBER { driver.option_num("simul_seed", $3)};
  o_qz_criterium: QZ_CRITERIUM EQUAL INT_NUMBER { driver.option_num("qz_criterium", $3)}

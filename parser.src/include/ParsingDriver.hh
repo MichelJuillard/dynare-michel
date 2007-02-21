@@ -3,6 +3,8 @@
 
 #include <iostream>
 
+#include <math.h>
+
 #include "ModFile.hh"
 #include "Expression.hh"
 #include "TmpSymbolTable.hh"
@@ -144,6 +146,14 @@ public:
   bool exists_symbol(const char *s);
   //! Sets variable offset of ModelTree class to use C output
   void use_dll();
+  //! Sets variable offset of ModelTree class to block decompose the model and to use C output
+  void sparse_dll();
+  //! Initialize the model => creation of the incidence matrix
+  void initialize_model();
+  //! Sets the compiler type used in conjunction with SPARCE_DLL
+  void init_compiler(int compiler_type);
+  //! Sets the FILENAME for the initial value in initval
+  void init_val_filename(string *filename);
   //! Declares an endogenous variable by adding it to SymbolTable
   void declare_endogenous(string *name, string *tex_name = new string);
   //! Declares an exogenous variable by adding it to SymbolTable
@@ -172,6 +182,8 @@ public:
   ExpObj *add_expression_token(ExpObj *arg1, string *op_name);
   //! Adds a "periods" statement
   void periods(string *periods);
+  //! Adds a "cutoff" statement
+  void cutoff(string *cutoff);
   //! Adds a "dsample" statement
   void dsample(string *arg1);
   //! Adds a "dsample" statement
@@ -242,6 +254,10 @@ public:
   void rplot();
   //! Writes a stock_simul command
   void stoch_simul();
+  //! Determine whether to write simul command or simul_sparse command
+  void simulate();
+  //! Writes a simul_sparse command
+  void simul_sparse();
   //! Writes a simul command
   void simul();
   //! Writes check command

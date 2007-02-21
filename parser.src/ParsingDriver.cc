@@ -110,6 +110,10 @@ ExpObj *
 ParsingDriver::add_expression_constant(string *constant)
 {
   int id = mod_file->num_constants.AddConstant(*constant);
+
+  if(mod_file->model_tree.interprete_.eval)
+    mod_file->model_tree.interprete_.Stack.push(mod_file->model_tree.interprete_.S_to_Val(constant));
+
   delete constant;
   return new ExpObj(id, eNumericalConstant);
 }
@@ -127,6 +131,14 @@ ParsingDriver::add_model_variable(string *name)
 {
   check_symbol_existence(*name);
   NodeID id = model_tree->AddVariable(*name);
+
+  Type type = mod_file->symbol_table.getType(*name);
+  if ((type == eEndogenous) && (mod_file->model_tree.offset == 2))
+    {
+      int ID = mod_file->symbol_table.getID(*name);
+      mod_file->model_tree.block_triangular.fill_IM(model_tree->equation_number(), ID, 0);
+    }
+
   delete name;
   return id;
 }
@@ -145,6 +157,10 @@ ParsingDriver::add_model_variable(string *name, string *olag)
            << " has lag " << lag << endl;
     }
   NodeID id = model_tree->AddVariable(*name, lag);
+
+  if ((type == eEndogenous) && (mod_file->model_tree.offset == 2))
+    mod_file->model_tree.block_triangular.fill_IM(model_tree->equation_number(), mod_file->symbol_table.getID(*name), lag);
+
   delete name;
   delete olag;
   return id;
@@ -156,6 +172,10 @@ ParsingDriver::add_expression_variable(string *name)
   check_symbol_existence(*name);
   int id = mod_file->symbol_table.getID(*name);
   Type type = mod_file->symbol_table.getType(*name);
+
+  if(mod_file->model_tree.interprete_.eval)
+    mod_file->model_tree.interprete_.Stack.push(mod_file->model_tree.interprete_.get_value(name,0));
+
   delete name;
   return new ExpObj(id, type);
 }
@@ -166,6 +186,26 @@ ParsingDriver::add_expression_token(ExpObj *arg1, ExpObj *arg2, int op)
   int id = expression.AddToken(arg1->first, arg1->second,
                                arg2->first, arg2->second,
                                op);
+
+  if (mod_file->model_tree.interprete_.eval)
+    {
+      mod_file->model_tree.interprete_.u2 = mod_file->model_tree.interprete_.Stack.top();
+      mod_file->model_tree.interprete_.Stack.pop();
+      mod_file->model_tree.interprete_.u1 = mod_file->model_tree.interprete_.Stack.top();
+      mod_file->model_tree.interprete_.Stack.pop();
+      if (op == token::PLUS)
+        mod_file->model_tree.interprete_.u1+=mod_file->model_tree.interprete_.u2;
+      else if (op == token::MINUS)
+        mod_file->model_tree.interprete_.u1-=mod_file->model_tree.interprete_.u2;
+      else if (op == token::DIVIDE)
+        mod_file->model_tree.interprete_.u1/=mod_file->model_tree.interprete_.u2;
+      else if (op == token::TIMES)
+        mod_file->model_tree.interprete_.u1*=mod_file->model_tree.interprete_.u2;
+      else if (op == token::POWER)
+        mod_file->model_tree.interprete_.u1=pow(mod_file->model_tree.interprete_.u1,mod_file->model_tree.interprete_.u2);
+      mod_file->model_tree.interprete_.Stack.push(mod_file->model_tree.interprete_.u1);
+    }
+
   delete arg1;
   delete arg2;
   return new ExpObj(id, eTempResult);
@@ -175,6 +215,36 @@ ExpObj *
 ParsingDriver::add_expression_token(ExpObj *arg1, int op)
 {
   int id = expression.AddToken(arg1->first, arg1->second, op);
+
+  if (mod_file->model_tree.interprete_.eval)
+    {
+      mod_file->model_tree.interprete_.u2 = mod_file->model_tree.interprete_.Stack.top();
+      mod_file->model_tree.interprete_.Stack.pop();
+      if (op == token::UMINUS)
+        mod_file->model_tree.interprete_.u1=-mod_file->model_tree.interprete_.u2;
+      else if (op == token::EXP)
+        mod_file->model_tree.interprete_.u1=exp(mod_file->model_tree.interprete_.u2);
+      else if (op == token::LOG)
+        mod_file->model_tree.interprete_.u1=log(mod_file->model_tree.interprete_.u2);
+      else if (op == token::LOG10)
+        mod_file->model_tree.interprete_.u1=log10(mod_file->model_tree.interprete_.u2);
+      else if (op == token::SIN)
+        mod_file->model_tree.interprete_.u1=sin(mod_file->model_tree.interprete_.u2);
+      else if (op == token::COS)
+        mod_file->model_tree.interprete_.u1=cos(mod_file->model_tree.interprete_.u2);
+      else if (op == token::TAN)
+        mod_file->model_tree.interprete_.u1=tan(mod_file->model_tree.interprete_.u2);
+      else if (op == token::ASIN)
+        mod_file->model_tree.interprete_.u1=asin(mod_file->model_tree.interprete_.u2);
+      else if (op == token::ACOS)
+        mod_file->model_tree.interprete_.u1=acos(mod_file->model_tree.interprete_.u2);
+      else if (op == token::ATAN)
+        mod_file->model_tree.interprete_.u1=atan(mod_file->model_tree.interprete_.u2);
+      else if (op == token::SQRT)
+        mod_file->model_tree.interprete_.u1=sqrt(mod_file->model_tree.interprete_.u2);
+      mod_file->model_tree.interprete_.Stack.push(mod_file->model_tree.interprete_.u1);
+    }
+
   delete arg1;
   return new ExpObj(id, eTempResult);
 }
@@ -183,6 +253,15 @@ ExpObj *
 ParsingDriver::add_expression_token(ExpObj *arg1, string *op_name)
 {
   int id = expression.AddToken(arg1->first, arg1->second, *op_name);
+
+  if (mod_file->model_tree.interprete_.eval)
+    {
+      mod_file->model_tree.interprete_.u2 = mod_file->model_tree.interprete_.Stack.top();
+      mod_file->model_tree.interprete_.Stack.pop();
+      mod_file->model_tree.interprete_.Stack.push(mod_file->model_tree.interprete_.get_value(op_name,mod_file->model_tree.interprete_.u2));
+      mod_file->model_tree.interprete_.Stack.push(mod_file->model_tree.interprete_.u1);
+    }
+
   delete arg1;
   delete op_name;
   return new ExpObj(id, eTempResult);
@@ -194,6 +273,14 @@ ParsingDriver::periods(string *periods)
   int periods_val = atoi(periods->c_str());
   mod_file->addStatement(new PeriodsStatement(periods_val));
   delete periods;
+}
+
+void
+ParsingDriver::cutoff(string *cutoff)
+{
+  int cutoff_val = atoi(cutoff->c_str());
+  mod_file->addStatement(new CutoffStatement(cutoff_val));
+  delete cutoff;
 }
 
 void
@@ -222,6 +309,11 @@ ParsingDriver::init_param(string *name, ExpObj *rhs)
     error(*name + " is not a parameter");
 
   mod_file->addStatement(new InitParamStatement(*name, get_expression(rhs), mod_file->symbol_table));
+
+  mod_file->model_tree.interprete_.u2 = mod_file->model_tree.interprete_.Stack.top();
+  mod_file->model_tree.interprete_.Stack.pop();
+  mod_file->model_tree.interprete_.put_value(name,mod_file->symbol_table.getID(*name), eParameter, mod_file->model_tree.interprete_.u2);
+
   delete name;
   delete rhs;
 }
@@ -239,8 +331,23 @@ ParsingDriver::init_val(string *name, ExpObj *rhs)
 
   init_values.push_back(make_pair(*name, get_expression(rhs)));
 
+  if(mod_file->model_tree.interprete_.eval)
+    {
+      mod_file->model_tree.interprete_.u2 = mod_file->model_tree.interprete_.Stack.top();
+      mod_file->model_tree.interprete_.Stack.pop();
+      mod_file->model_tree.interprete_.put_value(name, mod_file->symbol_table.getID(*name), type, mod_file->model_tree.interprete_.u2);
+    }
+
   delete name;
   delete rhs;
+}
+
+void
+ParsingDriver::init_val_filename(string *filename)
+{
+  options_list.num_options["INITVAL_FILE"] = 1;
+  options_list.string_options["INITVAL_FILENAME"] = *filename;
+  delete filename;
 }
 
 void
@@ -268,10 +375,25 @@ ParsingDriver::hist_val(string *name, string *lag, ExpObj *rhs)
 }
 
 void
+ParsingDriver::initialize_model(void)
+{
+  //Initialize the incidence matrix
+  //cout << "mod_file->symbol_table.endo_nbr=" << mod_file->symbol_table.endo_nbr << "\n";
+  mod_file->model_tree.block_triangular.init_incidence_matrix(mod_file->symbol_table.endo_nbr);
+}
+
+void
 ParsingDriver::use_dll()
 {
   // Seetting variable momber offset to use C outputs
   mod_file->model_tree.offset = 0;
+}
+
+void
+ParsingDriver::sparse_dll()
+{
+  // Seetting variable momber offset to use C outputs
+  mod_file->model_tree.offset = 2;
 }
 
 void
@@ -299,6 +421,8 @@ void
 ParsingDriver::begin_model()
 {
   model_tree = &mod_file->model_tree;
+  if (mod_file->model_tree.offset == 2)
+    initialize_model();
 }
 
 void
@@ -529,6 +653,11 @@ ParsingDriver::option_num(const string &name_option, const string &opt)
       != options_list.num_options.end())
     error("option " + name_option + " declared twice");
 
+  if ((name_option == "periods") && (mod_file->model_tree.offset == 2))
+    mod_file->model_tree.block_triangular.periods = atoi(opt.c_str());
+  else if (name_option == "cutoff")
+    mod_file->model_tree.interprete_.set_cutoff(atof(opt.c_str()));
+
   options_list.num_options[name_option] = opt;
 }
 
@@ -585,6 +714,33 @@ void ParsingDriver::stoch_simul()
   mod_file->addStatement(new StochSimulStatement(*tmp_symbol_table, options_list));
   tmp_symbol_table->clear();
   options_list.clear();
+}
+
+void ParsingDriver::simulate()
+{
+  if(mod_file->model_tree.offset==2)
+    simul_sparse();
+  else
+    simul();
+}
+
+void
+ParsingDriver::simul_sparse()
+{
+  SimulSparseStatement *st=new SimulSparseStatement(options_list);
+  st->filename=file;
+  string tmp=st->filename.substr(st->filename.length()-4);
+  if(tmp==".mod"||tmp==".dyn")
+    st->filename.erase(st->filename.length()-4);
+  st->compiler=mod_file->model_tree.compiler;
+  mod_file->addStatement(st);
+  options_list.clear();
+}
+
+void
+ParsingDriver::init_compiler(int compiler_type)
+{
+  mod_file->model_tree.compiler=compiler_type;
 }
 
 void

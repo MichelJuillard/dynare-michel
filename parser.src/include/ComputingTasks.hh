@@ -37,6 +37,18 @@ public:
   virtual void writeOutput(ostream &output, const string &basename) const;
 };
 
+class SimulSparseStatement : public Statement
+{
+private:
+  const OptionsList options_list;
+public:
+  string filename;
+  int compiler;
+  SimulSparseStatement(const OptionsList &options_list_arg);
+  virtual void checkPass(ModFileStructure &mod_file_struct);
+  virtual void writeOutput(ostream &output, const string &basename) const;
+};
+
 class StochSimulStatement : public Statement
 {
 private:
@@ -87,6 +99,15 @@ private:
   const int periods;
 public:
   PeriodsStatement(int periods_arg);
+  virtual void writeOutput(ostream &output, const string &basename) const;
+};
+
+class CutoffStatement : public Statement
+{
+private:
+  const int cutoff;
+public:
+  CutoffStatement(int cutoff_arg);
   virtual void writeOutput(ostream &output, const string &basename) const;
 };
 

@@ -11,6 +11,8 @@ using namespace std;
 #include "SymbolTable.hh"
 #include "NumericalConstants.hh"
 #include "DataTree.hh"
+#include "OperatorTable.hh"
+#include "BlockTriangular.hh"
 
 //! Stores a model's equations and derivatives
 class ModelTree : public DataTree
@@ -50,9 +52,10 @@ private:
 
   //! Computes derivatives of ModelTree
   void derive(int order);
+  void GetDerivatives(ostream &output, int eq, int var, int lag, bool is_dynamic, const temporary_terms_type &temporary_terms) const;
   //! Computes temporary terms
   void computeTemporaryTerms(int order);
-
+  void computeTemporaryTermsOrdered(int order, Model_Block *ModelBlock);
   //! Writes temporary terms
   void writeTemporaryTerms(ostream &output, bool is_dynamic) const;
   //! Writes local parameters
@@ -64,7 +67,8 @@ private:
   void writeStaticModel(ostream &StaticOutput) const;
   //! Writes the dynamic model equations and its derivatives
   /*! \todo add third derivatives handling in C output */
-  void writeDynamicModel(ostream &DynamicOutput) const;
+  void writeDynamicModel(ostream &DynamicOutput, Model_Block *ModelBlock) const;
+  void writeModelEquationsOrdered(ostream &output, bool is_dynamic, Model_Block *ModelBlock) const;
   //! Writes static model file (Matlab version)
   void writeStaticMFile(const string &static_basename) const;
   //! Writes static model file (C version)
@@ -74,6 +78,10 @@ private:
   //! Writes dynamic model file (C version)
   /*! \todo add third derivatives handling */
   void writeDynamicCFile(const string &dynamic_basename) const;
+  //! Evaluates part of a model tree
+  inline double Evaluate_Expression(NodeID StartID);
+  inline void Evaluate_Jacobian();
+  inline void BlockLinear(Model_Block *ModelBlock);
 
 public:
   ModelTree(SymbolTable &symbol_table_arg, NumericalConstants &num_constants);
@@ -100,6 +108,12 @@ public:
   void writeStaticFile(const string &basename) const;
   //! Writes dynamic model file
   void writeDynamicFile(const string &basename) const;
+  void SaveCFiles(Model_Block* ModelBlock, std::string Model_file_name, std::ofstream &mDynamicModelFile) const;
+  void writeDynamicInitCFile(ostream &mDynamicModelFile);
+  string reform(string name) const;
+  //! Complete set to block decompose the model
+  BlockTriangular block_triangular;
+  int equation_number() const;
 };
 
 #endif

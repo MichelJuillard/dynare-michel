@@ -51,7 +51,13 @@ COMMON_OBJ=\
 	DataTree.o \
 	ModFile.o \
 	Statement.o \
-	ExprNode.o
+	ExprNode.o \
+	ModelNormalization.o \
+	ModelBlocks.o \
+	BlockTriangular.o \
+	Model_Graph.o \
+	interprete.o \
+	SymbolGaussElim.o
 
 MATLAB_OBJ = InterfaceMatlab.o
 

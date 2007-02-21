@@ -60,6 +60,33 @@ SimulStatement::writeOutput(ostream &output, const string &basename) const
   output << "simul(oo_.dr);\n";
 }
 
+SimulSparseStatement::SimulSparseStatement(const OptionsList &options_list_arg) :
+  options_list(options_list_arg)
+{
+}
+
+void
+SimulSparseStatement::checkPass(ModFileStructure &mod_file_struct)
+{
+  mod_file_struct.simul_present = true;
+}
+
+void
+SimulSparseStatement::writeOutput(ostream &output, const string &basename) const
+{
+  options_list.writeOutput(output);
+  output << "if ~ options_.initval_file\n";
+  output << "  make_y_;\n";
+  output << "  make_ex_;\n";
+  output << "end\n";
+  output << "disp('compiling...');\n";
+  if (compiler == 0)
+    output << "mex " << filename << "_dynamic.c;\n";
+  else
+    output << "mex " << filename << "_dynamic.cc;\n";
+  output << "oo_.endo_simul=" << filename << "_dynamic;\n";
+}
+
 StochSimulStatement::StochSimulStatement(const TmpSymbolTable &tmp_symbol_table_arg,
                                          const OptionsList &options_list_arg) :
   tmp_symbol_table(tmp_symbol_table_arg),
@@ -203,6 +230,16 @@ PeriodsStatement::writeOutput(ostream &output, const string &basename) const
 {
   output << "options_.periods = " << periods << ";" << endl;
   output << "options_.simul = 1;" << endl;
+}
+
+CutoffStatement::CutoffStatement(int cutoff_arg) : cutoff(cutoff_arg)
+{
+}
+
+void
+CutoffStatement::writeOutput(ostream &output, const string &basename) const
+{
+  output << "options_.cutoff = " << cutoff << ";" << endl;
 }
 
 DsampleStatement::DsampleStatement(int val1_arg) : val1(val1_arg), val2(-1)

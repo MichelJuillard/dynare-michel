@@ -132,3 +132,45 @@ VariableTable::Sort()
         }
     }
 }
+
+int*
+VariableTable::GetVariableTable(int* Size, int* HSize)
+{
+  int* Table;
+  varKey key;
+  int variable,id, ind;
+  (*Size)=0;
+  for (id=0; id < (int) mVariableIndex.size(); id++)
+    {
+      key = mVariableIndex[id];
+      variable = mVariableTable[key];
+      if(getType(variable)==eEndogenous)
+        (*Size)++;
+    }
+  (*HSize)=4;
+  Table=(int*)malloc((*Size)*(*HSize)*sizeof(*Table));
+  ind=0;
+  for (id=0; id < (int) mVariableIndex.size(); id++)
+    {
+      key = mVariableIndex[id];
+      variable = mVariableTable[key];
+      if (getType(variable)==eEndogenous)
+        {
+          Table[ind*(*HSize)]= getSymbolID(id);
+          Table[ind*(*HSize)+1]= key.second;
+          Table[ind*(*HSize)+2]= mPrintFormatIndex[id];
+          Table[ind*(*HSize)+3]= mSortedVariableID[id];
+          ind++;
+        }
+    }
+  return(Table);
+}
+
+int
+VariableTable::getIDS(int id, int lead_lag) const
+{
+  varKey key;
+  key=mVariableIndex[id];
+  map<varKey, int>::const_iterator it = mVariableTable.find(key);
+  return(it->second);
+}

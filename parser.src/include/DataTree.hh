@@ -12,6 +12,11 @@ using namespace std;
 #include "VariableTable.hh"
 #include "ExprNode.hh"
 
+#include "interprete.hh"
+
+#define LCC_COMPILE 0
+#define GCC_COMPILE 1
+
 class DataTree
 {
   friend class ExprNode;
@@ -24,8 +29,6 @@ protected:
   SymbolTable &symbol_table;
   //! Reference to numerical constants table
   NumericalConstants &num_constants;
-  //! The variable table
-  VariableTable variable_table;
   
   typedef list<NodeID> node_list_type;
   //! The list of nodes
@@ -38,11 +41,6 @@ protected:
 
   //! Computing cost above which a node can be declared a temporary term
   int min_cost;
-
-  //! Left indexing parenthesis
-  char lpar;
-  //! Right indexing parenthesis
-  char rpar;
 
   typedef map<int, NodeID> num_const_node_map_type;
   num_const_node_map_type num_const_node_map;
@@ -58,9 +56,20 @@ protected:
 public:
   DataTree(SymbolTable &symbol_table_arg, NumericalConstants &num_constants_arg);
   virtual ~DataTree();
+  //! The variable table
+  VariableTable variable_table;
   NodeID Zero, One, MinusOne;
   //! Type of output 0 for C and 1 for Matlab (default), also used as matrix index offset
   int offset;
+  //! Complete set to interpret the model parameters and variables
+  interprete interprete_;
+
+  //! Left indexing parenthesis
+  char lpar;
+  //! Right indexing parenthesis
+  char rpar;
+  //! Type of compiler used in matlab : 0 = LCC or 1 = GCC
+  int compiler;
 
   //! Raised when a local parameter is declared twice
   class LocalParameterException

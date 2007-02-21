@@ -67,7 +67,7 @@ ModFile::computingPass()
 }
 
 void
-ModFile::writeOutputFiles(const string &basename, bool clear_all) const
+ModFile::writeOutputFiles(const string &basename, bool clear_all)
 {
   ofstream mOutputFile;
 
@@ -142,7 +142,24 @@ ModFile::writeOutputFiles(const string &basename, bool clear_all) const
 
   cout << "Processing outputs ..." << endl;
 
+  model_tree.block_triangular.file_name = basename;
+  int true_offset = model_tree.offset;
+  if (model_tree.offset == 2)
+    {
+      model_tree.offset = 1;
+      model_tree.lpar = '(';
+      model_tree.rpar = ')';
+    }
+
   model_tree.writeStaticFile(basename);
+
+  if (true_offset == 2)
+    {
+      model_tree.offset = 2;
+      model_tree.lpar = '[';
+      model_tree.rpar = ']';
+    }
+
   model_tree.writeDynamicFile(basename);
 
   // Print statements

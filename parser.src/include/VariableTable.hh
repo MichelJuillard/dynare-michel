@@ -27,10 +27,11 @@ private:
   vector<int> mSortedVariableID;
   //! For each variable, gives its index number among variables of the same type
   /*! It is the index used in the output file:
-      - in the lead/lag matrix
-      - in the right hand side of equations (such as y(index))
+    - in the lead/lag matrix
+    - in the right hand side of equations (such as y(index))
   */
   vector<int> mPrintFormatIndex;
+  map<pair<int, int>, int> mVariableSelector;
 public:
   VariableTable(const SymbolTable &symbol_table_arg);
   //! Number of dynamic endogenous variables inside the model block
@@ -81,7 +82,27 @@ public:
   void Sort();
   //! Get the number of dynamic variables 
   inline int get_dyn_var_nbr(void) const;
+  int* GetVariableTable(int* Size, int* HSize);
+  int getIDS(int id, int lead_lag) const;
+  void setmVariableSelector();
+  int getmVariableSelector(int var, int lag) const;
 };
+
+inline void
+VariableTable::setmVariableSelector()
+{
+  for(int var = 0; var < (int) mVariableTable.size(); var++)
+    {
+      if(getType(var)==eEndogenous)
+        mVariableSelector[make_pair(getSymbolID(var),mVariableIndex[var].second)]=var;
+    }
+}
+
+inline int
+VariableTable::getmVariableSelector(int var, int lag) const
+{
+  return(mVariableSelector.find(make_pair(var,lag))->second);
+}
 
 inline int
 VariableTable::getSortID(int iVarID) const
