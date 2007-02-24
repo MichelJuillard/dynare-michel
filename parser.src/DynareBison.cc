@@ -278,7 +278,7 @@ namespace yy
   // Initialize the location filenames
   yylloc.begin.filename = yylloc.end.filename = &driver.file;
 }
-  /* Line 547 of yacc.c.  */
+  /* Line 555 of yacc.c.  */
 #line 283 "DynareBison.cc"
     /* Initialize the stacks.  The initial state will be pushed in
        yynewstate, since the latter expects the semantical and the

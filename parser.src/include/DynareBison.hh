@@ -61,7 +61,7 @@ class ParsingDriver;
 typedef pair<int, Type> ExpObj;
 
 
-/* Line 35 of lalr1.cc.  */
+/* Line 303 of lalr1.cc.  */
 #line 66 "DynareBison.hh"
 
 #include "location.hh"
@@ -119,7 +119,7 @@ namespace yy
   ExpObj *exp_val;
   NodeID model_val;
 }
-/* Line 35 of lalr1.cc.  */
+/* Line 303 of lalr1.cc.  */
 #line 124 "DynareBison.hh"
 	;
 #else
