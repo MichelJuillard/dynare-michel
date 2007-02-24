@@ -1514,8 +1514,10 @@ ModelTree::writeDynamicModel(ostream &DynamicOutput, Model_Block *ModelBlock) co
   writeLocalParameters(model_output, true);
 
   if (offset != 2)
-    writeTemporaryTerms(model_output, true);
-    writeModelEquations(model_output, true);
+    {
+      writeTemporaryTerms(model_output, true);
+      writeModelEquations(model_output, true);
+    }
   else
     writeModelEquationsOrdered(model_output, true,ModelBlock);
 
