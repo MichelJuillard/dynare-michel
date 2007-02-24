@@ -824,9 +824,9 @@ ModelTree::writeStaticModel(ostream &StaticOutput) const
   ostringstream hessian_output;
   ostringstream lsymetric;       // For symmetric elements in hessian
 
-  writeTemporaryTerms(model_output, false);
-
   writeLocalParameters(model_output, false);
+
+  writeTemporaryTerms(model_output, false);
 
   writeModelEquations(model_output, false);
 
@@ -1511,12 +1511,10 @@ ModelTree::writeDynamicModel(ostream &DynamicOutput, Model_Block *ModelBlock) co
   ostringstream hessian_output;  // Used for storing Hessian equations
   ostringstream third_derivatives_output;
 
-  if (offset != 2)
-    writeTemporaryTerms(model_output, true);
-
   writeLocalParameters(model_output, true);
 
   if (offset != 2)
+    writeTemporaryTerms(model_output, true);
     writeModelEquations(model_output, true);
   else
     writeModelEquationsOrdered(model_output, true,ModelBlock);
