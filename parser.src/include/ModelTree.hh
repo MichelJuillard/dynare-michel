@@ -59,6 +59,7 @@ private:
   //! Writes temporary terms
   void writeTemporaryTerms(ostream &output, bool is_dynamic) const;
   //! Writes local parameters
+  /*! No temporary term is used in the output, so that local parameters declarations can be safely put before temporary terms declaration in the output files */
   void writeLocalParameters(ostream &output, bool is_dynamic) const;
   //! Writes model equations
   void writeModelEquations(ostream &output, bool is_dynamic) const;

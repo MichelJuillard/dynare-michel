@@ -172,7 +172,8 @@ ModelTree::writeLocalParameters(ostream &output, bool is_dynamic) const
       int id = it->first;
       NodeID value = it->second;
       output << symbol_table.getNameByID(eLocalParameter, id) << " = ";
-      value->writeOutput(output, is_dynamic, temporary_terms, offset);
+      // Use an empty set for the temporary terms
+      value->writeOutput(output, is_dynamic, temporary_terms_type(), offset);
       output << ";" << endl;
     }
 }
