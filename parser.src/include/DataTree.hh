@@ -14,9 +14,6 @@ using namespace std;
 
 #include "interprete.hh"
 
-#define LCC_COMPILE 0
-#define GCC_COMPILE 1
-
 class DataTree
 {
   friend class ExprNode;
@@ -39,9 +36,6 @@ protected:
   //! Stores local parameters value
   map<int, NodeID> local_parameters_table;
 
-  //! Computing cost above which a node can be declared a temporary term
-  int min_cost;
-
   typedef map<int, NodeID> num_const_node_map_type;
   num_const_node_map_type num_const_node_map;
   typedef map<pair<int, Type>, NodeID> variable_node_map_type;
@@ -59,17 +53,8 @@ public:
   //! The variable table
   VariableTable variable_table;
   NodeID Zero, One, MinusOne;
-  //! Type of output 0 for C and 1 for Matlab (default), also used as matrix index offset
-  int offset;
   //! Complete set to interpret the model parameters and variables
   interprete interprete_;
-
-  //! Left indexing parenthesis
-  char lpar;
-  //! Right indexing parenthesis
-  char rpar;
-  //! Type of compiler used in matlab : 0 = LCC or 1 = GCC
-  int compiler;
 
   //! Raised when a local parameter is declared twice
   class LocalParameterException

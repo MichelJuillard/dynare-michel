@@ -41,14 +41,14 @@ ExprNode::getDerivative(int varID)
 }
 
 int
-ExprNode::precedence(const temporary_terms_type &temporary_terms) const
+ExprNode::precedence(ExprNodeOutputType output_type, const temporary_terms_type &temporary_terms) const
 {
   // For a constant, a variable, or a unary op, the precedence is maximal
   return 100;
 }
 
 int
-ExprNode::cost(const temporary_terms_type &temporary_terms) const
+ExprNode::cost(const temporary_terms_type &temporary_terms, bool is_matlab) const
 {
   // For a terminal node, the cost is null
   return 0;
@@ -68,7 +68,8 @@ ExprNode::present_endogenous_find(int var, int lag) const
 
 void
 ExprNode::computeTemporaryTerms(map<NodeID, int> &reference_count,
-                                temporary_terms_type &temporary_terms) const
+                                temporary_terms_type &temporary_terms,
+                                bool is_matlab) const
 {
   // Nothing to do for a terminal node
 }
@@ -100,12 +101,12 @@ NumConstNode::computeDerivative(int varID)
 }
 
 void
-NumConstNode::writeOutput(ostream &output, bool is_dynamic,
-                          const temporary_terms_type &temporary_terms, int offset) const
+NumConstNode::writeOutput(ostream &output, ExprNodeOutputType output_type,
+                          const temporary_terms_type &temporary_terms) const
 {
   temporary_terms_type::const_iterator it = temporary_terms.find(const_cast<NumConstNode *>(this));
   if (it != temporary_terms.end())
-    if (offset != 2)
+    if (output_type != oCDynamicModelSparseDLL)
       output << "T" << idx;
     else
       output << "T" << idx << "[it_]";
@@ -187,118 +188,136 @@ VariableNode::computeDerivative(int varID)
 }
 
 void
-VariableNode::writeOutput(ostream &output, bool is_dynamic,
-                          const temporary_terms_type &temporary_terms, int offset) const
+VariableNode::writeOutput(ostream &output, ExprNodeOutputType output_type,
+                          const temporary_terms_type &temporary_terms) const
 {
   // If node is a temporary term
   temporary_terms_type::const_iterator it = temporary_terms.find(const_cast<VariableNode *>(this));
   if (it != temporary_terms.end())
     {
-      if (offset != 2)
+      if (output_type != oCDynamicModelSparseDLL)
         output << "T" << idx;
       else
         output << "T" << idx << "[it_]";
       return;
     }
-
-  char &lpar = datatree.lpar;
-  char &rpar = datatree.rpar;
-
-  int idx;
+  int idx, lag;
   switch(type)
     {
     case eParameter:
-      if (datatree.offset < 2)
-        output << "params" << lpar << id + datatree.offset << rpar;
+      if (output_type == oMatlabOutsideModel)
+        output << "M_.params" << "(" << id + 1 << ")";
       else
-        output << "params" << lpar << id << rpar;
+        output << "params" << LPAR(output_type) << id + OFFSET(output_type) << RPAR(output_type);
       break;
+
     case eLocalParameter:
       output << datatree.symbol_table.getNameByID(eLocalParameter, id);
       break;
+
     case eEndogenous:
-      if (is_dynamic)
+      switch(output_type)
         {
-          if (datatree.offset < 2)
-            idx = datatree.variable_table.getPrintIndex(id) + datatree.offset;
+        case oMatlabDynamicModel:
+        case oCDynamicModel:
+          idx = datatree.variable_table.getPrintIndex(id) + OFFSET(output_type);
+          output <<  "y" << LPAR(output_type) << idx << RPAR(output_type);
+          break;
+        case oMatlabStaticModel:
+        case oCStaticModel:
+          idx = datatree.variable_table.getSymbolID(id) + OFFSET(output_type);
+          output <<  "y" << LPAR(output_type) << idx << RPAR(output_type);
+          break;
+        case oCDynamicModelSparseDLL:
+          idx = datatree.variable_table.getSymbolID(id);
+          lag = datatree.variable_table.getLag((long int) id);
+          if (lag > 0)
+            output << "y" << LPAR(output_type) << "(it_+" << lag << ")*y_size+" << idx << RPAR(output_type);
+          else if (lag < 0)
+            output << "y" << LPAR(output_type) << "(it_" << lag << ")*y_size+" << idx << RPAR(output_type);
           else
-            idx = datatree.variable_table.getSymbolID(id);
-
-          if (datatree.offset == 2)
-            {
-              int l = datatree.variable_table.getLag((long int) id);
-              if (l > 0)
-                output << "y" << lpar << "(it_+" << l << ")*y_size+" << idx << rpar;
-              else if (l < 0)
-                output << "y" << lpar << "(it_" << l << ")*y_size+" << idx << rpar;
-              else
-                output << "y" << lpar << "Per_y_+" << idx << rpar;
-            }
-          else
-            output <<  "y" << lpar << idx << rpar;
-        }
-      else
-        {
-          if (datatree.offset < 2)
-            idx = datatree.variable_table.getSymbolID(id) + datatree.offset;
-          else
-            idx = datatree.variable_table.getSymbolID(id);
-          output <<  "y" << lpar << idx << rpar;
+            output << "y" << LPAR(output_type) << "Per_y_+" << idx << RPAR(output_type);
+          break;
+        case oMatlabOutsideModel:
+          output << "oo_.steady_state" << "(" << id + 1 << ")";
+          break;
         }
       break;
+
     case eExogenous:
-      if (datatree.offset < 2)
-        idx = datatree.variable_table.getSymbolID(id) + datatree.offset;
-      else
-        idx = datatree.variable_table.getSymbolID(id);
-
-      if (is_dynamic)
-          {
-            int lag = datatree.variable_table.getLag(id);
-            if (datatree.offset == 1)
-              if (lag != 0)
-                output <<  "x" << lpar << "it_ + " << lag << ", " << idx << rpar;
-              else
-                output <<  "x" << lpar << "it_, " << idx << rpar;
-            else
-              if (lag == 0)
-                output <<  "x" << lpar << "it_+" << idx << "*nb_row_x" << rpar;
-              else if (lag > 0)
-                output <<  "x" << lpar << "it_+" << lag << "+" << idx << "*nb_row_x" << rpar;
-              else
-                output <<  "x" << lpar << "it_" << lag << "+" << idx << "*nb_row_x" << rpar;
-          }
-      else
-        output << "x" << lpar << idx << rpar;
+      idx = datatree.variable_table.getSymbolID(id) + OFFSET(output_type);
+      lag = datatree.variable_table.getLag(id);
+      switch(output_type)
+        {
+        case oMatlabDynamicModel:
+          if (lag > 0)
+            output <<  "x(it_+" << lag << ", " << idx << ")";
+          else if (lag < 0)
+            output <<  "x(it_" << lag << ", " << idx << ")";
+          else
+            output <<  "x(it_, " << idx << ")";
+          break;
+        case oCDynamicModel:
+          if (lag == 0)
+            output <<  "x[it_+" << idx << "*nb_row_x]";
+          else if (lag > 0)
+            output <<  "x[it_+" << lag << "+" << idx << "*nb_row_x]";
+          else
+            output <<  "x[it_" << lag << "+" << idx << "*nb_row_x]";
+          break;
+        case oMatlabStaticModel:
+        case oCStaticModel:
+        case oCDynamicModelSparseDLL:
+          output << "x" << LPAR(output_type) << idx << RPAR(output_type);
+          break;
+        case oMatlabOutsideModel:
+          if (lag != 0)
+            {
+              cerr << "VariableNode::writeOutput: lag != 0 for exogenous variable outside model scope!" << endl;
+              exit(-1);
+            }
+          output <<  "oo_.exo_steady_state" << "(" << idx << ")";
+          break;
+        }
       break;
+
     case eExogenousDet:
-      if (datatree.offset < 2)
-        idx = datatree.variable_table.getSymbolID(id) + datatree.symbol_table.exo_nbr
-          + datatree.offset;
-      else
-        idx = datatree.variable_table.getSymbolID(id) + datatree.symbol_table.exo_nbr;
-
-      if (is_dynamic)
-          {
-            int lag = datatree.variable_table.getLag(id);
-            if (datatree.offset == 1)
-              if (lag > 0)
-                output <<  "x" << lpar << "it_ +" << lag << ", " << idx << rpar;
-              else if (lag < 0)
-                output <<  "x" << lpar << "it_ " << lag << ", " << idx << rpar;
-              else
-                output <<  "x" << lpar << "it_, " << idx << rpar;
-            else
-              if (lag == 0)
-                output <<  "x" << lpar << "it_+" << idx << "*nb_row_xd" <<  rpar;
-              else if (lag < 0)
-                output <<  "x" << lpar << "it_ " << lag << "+" << idx <<  "*nb_row_xd" << rpar;
-              else
-                output <<  "x" << lpar << "it_ +" << lag << "+" << idx <<  "*nb_row_xd" << rpar;
-          }
-      else
-        output <<  "x" << lpar << idx << rpar;
+      idx = datatree.variable_table.getSymbolID(id) + datatree.symbol_table.exo_nbr + OFFSET(output_type);
+      lag = datatree.variable_table.getLag(id);
+      switch(output_type)
+        {
+        case oMatlabDynamicModel:
+          if (lag > 0)
+            output <<  "x(it_+" << lag << ", " << idx << ")";
+          else if (lag < 0)
+            output <<  "x(it_" << lag << ", " << idx << ")";
+          else
+            output <<  "x(it_, " << idx << ")";
+          break;
+        case oCDynamicModel:
+          if (lag == 0)
+            output <<  "x[it_+" << idx << "*nb_row_xd]";
+          else if (lag > 0)
+            output <<  "x[it_+" << lag << "+" << idx << "*nb_row_xd]";
+          else
+            output <<  "x[it_" << lag << "+" << idx << "*nb_row_xd]";
+          break;
+        case oMatlabStaticModel:
+        case oCStaticModel:
+        case oCDynamicModelSparseDLL:
+          output << "x" << LPAR(output_type) << idx << RPAR(output_type);
+          break;
+        case oMatlabOutsideModel:
+          if (lag != 0)
+            {
+              cerr << "VariableNode::writeOutput: lag != 0 for exogenous determistic variable outside model scope!" << endl;
+              exit(-1);
+            }
+          output <<  "oo_.exo_det_steady_state" << "(" << datatree.variable_table.getSymbolID(id) + 1 << ")";
+          break;
+        }
       break;
+
     case eRecursiveVariable:
       cerr << "Recursive variable not implemented" << endl;
       exit(-1);
@@ -414,16 +433,16 @@ UnaryOpNode::computeDerivative(int varID)
 }
 
 int
-UnaryOpNode::cost(const temporary_terms_type &temporary_terms) const
+UnaryOpNode::cost(const temporary_terms_type &temporary_terms, bool is_matlab) const
 {
   // For a temporary term, the cost is null
   temporary_terms_type::const_iterator it = temporary_terms.find(const_cast<UnaryOpNode *>(this));
   if (it != temporary_terms.end())
     return 0;
 
-  int cost = arg->cost(temporary_terms);
+  int cost = arg->cost(temporary_terms, is_matlab);
 
-  if (datatree.offset == 1)
+  if (is_matlab)
     // Cost for Matlab files
     switch(op_code)
       {
@@ -500,7 +519,8 @@ UnaryOpNode::cost(const temporary_terms_type &temporary_terms) const
 
 void
 UnaryOpNode::computeTemporaryTerms(map<NodeID, int> &reference_count,
-                                   temporary_terms_type &temporary_terms) const
+                                   temporary_terms_type &temporary_terms,
+                                   bool is_matlab) const
 {
   NodeID this2 = const_cast<UnaryOpNode *>(this);
 
@@ -508,12 +528,12 @@ UnaryOpNode::computeTemporaryTerms(map<NodeID, int> &reference_count,
   if (it == reference_count.end())
     {
       reference_count[this2] = 1;
-      arg->computeTemporaryTerms(reference_count, temporary_terms);
+      arg->computeTemporaryTerms(reference_count, temporary_terms, is_matlab);
     }
   else
     {
       reference_count[this2]++;
-      if (reference_count[this2] * cost(temporary_terms) > datatree.min_cost)
+      if (reference_count[this2] * cost(temporary_terms, is_matlab) > MIN_COST(is_matlab))
         temporary_terms.insert(this2);
     }
 }
@@ -536,7 +556,7 @@ UnaryOpNode::computeTemporaryTerms(map<NodeID, int> &reference_count,
   else
     {
       reference_count[this2]++;
-      if (reference_count[this2] * cost(temporary_terms) > datatree.min_cost)
+      if (reference_count[this2] * cost(temporary_terms, false) > MIN_COST_C)
         {
           temporary_terms.insert(this2);
           ModelBlock->Block_List[first_occurence[this2]].Temporary_terms->insert(this2);
@@ -545,14 +565,14 @@ UnaryOpNode::computeTemporaryTerms(map<NodeID, int> &reference_count,
 }
 
 void
-UnaryOpNode::writeOutput(ostream &output, bool is_dynamic,
-                         const temporary_terms_type &temporary_terms, int offset) const
+UnaryOpNode::writeOutput(ostream &output, ExprNodeOutputType output_type,
+                         const temporary_terms_type &temporary_terms) const
 {
   // If node is a temporary term
   temporary_terms_type::const_iterator it = temporary_terms.find(const_cast<UnaryOpNode *>(this));
   if (it != temporary_terms.end())
     {
-      if (offset != 2)
+      if (output_type != oCDynamicModelSparseDLL)
         output << "T" << idx;
       else
         output << "T" << idx << "[it_]";
@@ -625,14 +645,15 @@ UnaryOpNode::writeOutput(ostream &output, bool is_dynamic,
      - current opcode is uminus and argument has lowest precedence
   */
   if (op_code != oUminus
-      || (op_code == oUminus && arg->precedence(temporary_terms) < precedence(temporary_terms)))
+      || (op_code == oUminus
+          && arg->precedence(output_type, temporary_terms) < precedence(output_type, temporary_terms)))
     {
       output << "(";
       close_parenthesis = true;
     }
 
   // Write argument
-  arg->writeOutput(output, is_dynamic, temporary_terms, offset);
+  arg->writeOutput(output, output_type, temporary_terms);
 
   if (close_parenthesis)
     output << ")";
@@ -783,7 +804,7 @@ BinaryOpNode::computeDerivative(int varID)
 }
 
 int
-BinaryOpNode::precedence(const temporary_terms_type &temporary_terms) const
+BinaryOpNode::precedence(ExprNodeOutputType output_type, const temporary_terms_type &temporary_terms) const
 {
   temporary_terms_type::const_iterator it = temporary_terms.find(const_cast<BinaryOpNode *>(this));
   // A temporary term behaves as a variable
@@ -800,7 +821,7 @@ BinaryOpNode::precedence(const temporary_terms_type &temporary_terms) const
     case oDivide:
       return 1;
     case oPower:
-      if (datatree.offset == 1)
+      if (!OFFSET(output_type))
         // In C, power operator is of the form pow(a, b)
         return 100;
       else
@@ -811,17 +832,17 @@ BinaryOpNode::precedence(const temporary_terms_type &temporary_terms) const
 }
 
 int
-BinaryOpNode::cost(const temporary_terms_type &temporary_terms) const
+BinaryOpNode::cost(const temporary_terms_type &temporary_terms, bool is_matlab) const
 {
   temporary_terms_type::const_iterator it = temporary_terms.find(const_cast<BinaryOpNode *>(this));
   // For a temporary term, the cost is null
   if (it != temporary_terms.end())
     return 0;
 
-  int cost = arg1->cost(temporary_terms);
-  cost += arg2->cost(temporary_terms);
+  int cost = arg1->cost(temporary_terms, is_matlab);
+  cost += arg2->cost(temporary_terms, is_matlab);
 
-  if (datatree.offset == 1)
+  if (is_matlab)
     // Cost for Matlab files
     switch(op_code)
       {
@@ -857,7 +878,8 @@ BinaryOpNode::cost(const temporary_terms_type &temporary_terms) const
 
 void
 BinaryOpNode::computeTemporaryTerms(map<NodeID, int> &reference_count,
-                                    temporary_terms_type &temporary_terms) const
+                                    temporary_terms_type &temporary_terms,
+                                    bool is_matlab) const
 {
   NodeID this2 = const_cast<BinaryOpNode *>(this);
   map<NodeID, int>::iterator it = reference_count.find(this2);
@@ -866,15 +888,15 @@ BinaryOpNode::computeTemporaryTerms(map<NodeID, int> &reference_count,
       // If this node has never been encountered, set its ref count to one,
       //  and travel through its children
       reference_count[this2] = 1;
-      arg1->computeTemporaryTerms(reference_count, temporary_terms);
-      arg2->computeTemporaryTerms(reference_count, temporary_terms);
+      arg1->computeTemporaryTerms(reference_count, temporary_terms, is_matlab);
+      arg2->computeTemporaryTerms(reference_count, temporary_terms, is_matlab);
     }
   else
     {
       // If the node has already been encountered, increment its ref count
       //  and declare it as a temporary term if it is too costly
       reference_count[this2]++;
-      if (reference_count[this2] * cost(temporary_terms) > datatree.min_cost)
+      if (reference_count[this2] * cost(temporary_terms, is_matlab) > MIN_COST(is_matlab))
         temporary_terms.insert(this2);
     }
 }
@@ -898,7 +920,7 @@ BinaryOpNode::computeTemporaryTerms(map<NodeID, int> &reference_count,
   else
     {
       reference_count[this2]++;
-      if (reference_count[this2] * cost(temporary_terms) > datatree.min_cost)
+      if (reference_count[this2] * cost(temporary_terms, false) > MIN_COST_C)
         {
           temporary_terms.insert(this2);
           ModelBlock->Block_List[first_occurence[this2]].Temporary_terms->insert(this2);
@@ -940,14 +962,14 @@ BinaryOpNode::Evaluate() const
 }
 
 void
-BinaryOpNode::writeOutput(ostream &output, bool is_dynamic,
-                          const temporary_terms_type &temporary_terms, int offset) const
+BinaryOpNode::writeOutput(ostream &output, ExprNodeOutputType output_type,
+                          const temporary_terms_type &temporary_terms) const
 {
   // If current node is a temporary term
   temporary_terms_type::const_iterator it = temporary_terms.find(const_cast<BinaryOpNode *>(this));
   if (it != temporary_terms.end())
     {
-      if (offset != 2)
+      if (output_type != oCDynamicModelSparseDLL)
         output << "T" << idx;
       else
         output << "T" << idx << "[it_]";
@@ -955,23 +977,23 @@ BinaryOpNode::writeOutput(ostream &output, bool is_dynamic,
     }
 
   // Treat special case of power operator in C
-  if (op_code == oPower && (datatree.offset == 0 || datatree.offset == 2))
+  if (op_code == oPower && (!OFFSET(output_type)))
     {
       output << "pow(";
-      arg1->writeOutput(output, is_dynamic, temporary_terms, offset);
+      arg1->writeOutput(output, output_type, temporary_terms);
       output << ",";
-      arg2->writeOutput(output, is_dynamic, temporary_terms, offset);
+      arg2->writeOutput(output, output_type, temporary_terms);
       output << ")";
       return;
     }
 
-  int prec = precedence(temporary_terms);
+  int prec = precedence(output_type, temporary_terms);
 
   bool close_parenthesis = false;
 
   // If left argument has a lower precedence, or if current and left argument are both power operators, add parenthesis around left argument
   BinaryOpNode *barg1 = dynamic_cast<BinaryOpNode *>(arg1);
-  if (arg1->precedence(temporary_terms) < prec
+  if (arg1->precedence(output_type, temporary_terms) < prec
       || (op_code == oPower && barg1 != NULL && barg1->op_code == oPower))
     {
       output << "(";
@@ -979,7 +1001,7 @@ BinaryOpNode::writeOutput(ostream &output, bool is_dynamic,
     }
 
   // Write left argument
-  arg1->writeOutput(output, is_dynamic, temporary_terms, offset);
+  arg1->writeOutput(output, output_type, temporary_terms);
 
   if (close_parenthesis)
     output << ")";
@@ -1015,7 +1037,7 @@ BinaryOpNode::writeOutput(ostream &output, bool is_dynamic,
      - it is a minus operator with same precedence than current operator
      - it is a divide operator with same precedence than current operator */
   BinaryOpNode *barg2 = dynamic_cast<BinaryOpNode *>(arg2);
-  int arg2_prec = arg2->precedence(temporary_terms);
+  int arg2_prec = arg2->precedence(output_type, temporary_terms);
   if (arg2_prec < prec
       || (op_code == oPower && barg2 != NULL && barg2->op_code == oPower)
       || (op_code == oMinus && arg2_prec == prec)
@@ -1026,7 +1048,7 @@ BinaryOpNode::writeOutput(ostream &output, bool is_dynamic,
     }
 
   // Write right argument
-  arg2->writeOutput(output, is_dynamic, temporary_terms, offset);
+  arg2->writeOutput(output, output_type, temporary_terms);
 
   if (close_parenthesis)
     output << ")";

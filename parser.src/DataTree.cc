@@ -6,9 +6,7 @@ DataTree::DataTree(SymbolTable &symbol_table_arg, NumericalConstants &num_consta
   symbol_table(symbol_table_arg),
   num_constants(num_constants_arg),
   node_counter(0),
-  variable_table(symbol_table_arg),
-  offset(1),
-  compiler(LCC_COMPILE)
+  variable_table(symbol_table_arg)
 {
   Zero = AddNumConstant("0.0");
   One = AddNumConstant("1.0");

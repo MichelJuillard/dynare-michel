@@ -133,7 +133,7 @@ ParsingDriver::add_model_variable(string *name)
   NodeID id = model_tree->AddVariable(*name);
 
   Type type = mod_file->symbol_table.getType(*name);
-  if ((type == eEndogenous) && (mod_file->model_tree.offset == 2))
+  if ((type == eEndogenous) && (mod_file->model_tree.mode == eSparseDLLMode))
     {
       int ID = mod_file->symbol_table.getID(*name);
       mod_file->model_tree.block_triangular.fill_IM(model_tree->equation_number(), ID, 0);
@@ -158,7 +158,7 @@ ParsingDriver::add_model_variable(string *name, string *olag)
     }
   NodeID id = model_tree->AddVariable(*name, lag);
 
-  if ((type == eEndogenous) && (mod_file->model_tree.offset == 2))
+  if ((type == eEndogenous) && (mod_file->model_tree.mode == eSparseDLLMode))
     mod_file->model_tree.block_triangular.fill_IM(model_tree->equation_number(), mod_file->symbol_table.getID(*name), lag);
 
   delete name;
@@ -386,14 +386,14 @@ void
 ParsingDriver::use_dll()
 {
   // Seetting variable momber offset to use C outputs
-  mod_file->model_tree.offset = 0;
+  mod_file->model_tree.mode = eDLLMode;
 }
 
 void
 ParsingDriver::sparse_dll()
 {
   // Seetting variable momber offset to use C outputs
-  mod_file->model_tree.offset = 2;
+  mod_file->model_tree.mode = eSparseDLLMode;
 }
 
 void
@@ -421,7 +421,7 @@ void
 ParsingDriver::begin_model()
 {
   model_tree = &mod_file->model_tree;
-  if (mod_file->model_tree.offset == 2)
+  if (mod_file->model_tree.mode == eSparseDLLMode)
     initialize_model();
 }
 
@@ -653,7 +653,7 @@ ParsingDriver::option_num(const string &name_option, const string &opt)
       != options_list.num_options.end())
     error("option " + name_option + " declared twice");
 
-  if ((name_option == "periods") && (mod_file->model_tree.offset == 2))
+  if ((name_option == "periods") && (mod_file->model_tree.mode == eSparseDLLMode))
     mod_file->model_tree.block_triangular.periods = atoi(opt.c_str());
   else if (name_option == "cutoff")
     mod_file->model_tree.interprete_.set_cutoff(atof(opt.c_str()));
@@ -718,7 +718,7 @@ void ParsingDriver::stoch_simul()
 
 void ParsingDriver::simulate()
 {
-  if(mod_file->model_tree.offset==2)
+  if(mod_file->model_tree.mode == eSparseDLLMode)
     simul_sparse();
   else
     simul();

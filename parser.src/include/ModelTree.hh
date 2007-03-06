@@ -14,6 +14,17 @@ using namespace std;
 #include "OperatorTable.hh"
 #include "BlockTriangular.hh"
 
+#define LCC_COMPILE 0
+#define GCC_COMPILE 1
+
+//! The three in which ModelTree can work
+enum ModelTreeMode
+  {
+    eStandardMode, //!< Standard mode (static and dynamic files in Matlab)
+    eDLLMode,      //!< DLL mode (static and dynamic files in C)
+    eSparseDLLMode //!< Sparse DLL mode (static file in Matlab, dynamic file in C with block decomposition plus a binary file)
+  };
+
 //! Stores a model's equations and derivatives
 class ModelTree : public DataTree
 {
@@ -52,24 +63,25 @@ private:
 
   //! Computes derivatives of ModelTree
   void derive(int order);
-  void GetDerivatives(ostream &output, int eq, int var, int lag, bool is_dynamic, const temporary_terms_type &temporary_terms) const;
+  //! Write derivative of an equation w.r. to a variable
+  void writeDerivative(ostream &output, int eq, int var, int lag, ExprNodeOutputType output_type, const temporary_terms_type &temporary_terms) const;
   //! Computes temporary terms
   void computeTemporaryTerms(int order);
   void computeTemporaryTermsOrdered(int order, Model_Block *ModelBlock);
   //! Writes temporary terms
-  void writeTemporaryTerms(ostream &output, bool is_dynamic) const;
+  void writeTemporaryTerms(ostream &output, ExprNodeOutputType output_type) const;
   //! Writes local parameters
   /*! No temporary term is used in the output, so that local parameters declarations can be safely put before temporary terms declaration in the output files */
-  void writeLocalParameters(ostream &output, bool is_dynamic) const;
+  void writeLocalParameters(ostream &output, ExprNodeOutputType output_type) const;
   //! Writes model equations
-  void writeModelEquations(ostream &output, bool is_dynamic) const;
+  void writeModelEquations(ostream &output, ExprNodeOutputType output_type) const;
   //! Writes the static model equations and its derivatives
   /*! \todo handle hessian in C output */
   void writeStaticModel(ostream &StaticOutput) const;
   //! Writes the dynamic model equations and its derivatives
   /*! \todo add third derivatives handling in C output */
-  void writeDynamicModel(ostream &DynamicOutput, Model_Block *ModelBlock) const;
-  void writeModelEquationsOrdered(ostream &output, bool is_dynamic, Model_Block *ModelBlock) const;
+  void writeDynamicModel(ostream &DynamicOutput) const;
+  void writeModelEquationsOrdered(ostream &output, Model_Block *ModelBlock) const;
   //! Writes static model file (Matlab version)
   void writeStaticMFile(const string &static_basename) const;
   //! Writes static model file (C version)
@@ -79,13 +91,23 @@ private:
   //! Writes dynamic model file (C version)
   /*! \todo add third derivatives handling */
   void writeDynamicCFile(const string &dynamic_basename) const;
+  //! Writes dynamic model header file when SparseDLL option is on
+  void writeSparseDLLDynamicHFile(const string &dynamic_basename) const;
+  //! Writes dynamic model file when SparseDLL option is on
+  void writeSparseDLLDynamicCFileAndBinFile(const string &dynamic_basename, const string &bin_basename) const;
   //! Evaluates part of a model tree
   inline double Evaluate_Expression(NodeID StartID);
   inline void Evaluate_Jacobian();
   inline void BlockLinear(Model_Block *ModelBlock);
+  string reform(string name) const;
 
 public:
   ModelTree(SymbolTable &symbol_table_arg, NumericalConstants &num_constants);
+  //! Mode in which the ModelTree is supposed to work (Matlab, DLL or SparseDLL)
+  ModelTreeMode mode;
+  //! Type of compiler used in matlab for SPARSE_DLL option: 0 = LCC or 1 = GCC
+  int compiler;
+
   //! Declare a node as an equation of the model
   void addEquation(NodeID eq);
   //! Do some checking
@@ -109,9 +131,6 @@ public:
   void writeStaticFile(const string &basename) const;
   //! Writes dynamic model file
   void writeDynamicFile(const string &basename) const;
-  void SaveCFiles(Model_Block* ModelBlock, std::string Model_file_name, std::ofstream &mDynamicModelFile) const;
-  void writeDynamicInitCFile(ostream &mDynamicModelFile);
-  string reform(string name) const;
   //! Complete set to block decompose the model
   BlockTriangular block_triangular;
   int equation_number() const;

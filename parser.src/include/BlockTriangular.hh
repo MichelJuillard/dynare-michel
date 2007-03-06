@@ -79,7 +79,6 @@ public:
   int endo_nbr, TableSize;
   int* Table;
   Model_Block* ModelBlock;
-  string file_name;
   inline static std::string BlockType0(int type)
   {
     switch (type)

@@ -67,7 +67,7 @@ ModFile::computingPass()
 }
 
 void
-ModFile::writeOutputFiles(const string &basename, bool clear_all)
+ModFile::writeOutputFiles(const string &basename, bool clear_all) const
 {
   ofstream mOutputFile;
 
@@ -113,7 +113,7 @@ ModFile::writeOutputFiles(const string &basename, bool clear_all)
   mOutputFile << "logname_ = '" << basename << ".log';" << endl;
   mOutputFile << "diary '" << basename << ".log';" << endl;
 
-  if (model_tree.offset == 0)
+  if (model_tree.mode == eDLLMode)
     {
       mOutputFile << "if ";
       mOutputFile << interfaces::file_exist(basename + "_static.c)") << endl;
@@ -142,23 +142,7 @@ ModFile::writeOutputFiles(const string &basename, bool clear_all)
 
   cout << "Processing outputs ..." << endl;
 
-  model_tree.block_triangular.file_name = basename;
-  int true_offset = model_tree.offset;
-  if (model_tree.offset == 2)
-    {
-      model_tree.offset = 1;
-      model_tree.lpar = '(';
-      model_tree.rpar = ')';
-    }
-
   model_tree.writeStaticFile(basename);
-
-  if (true_offset == 2)
-    {
-      model_tree.offset = 2;
-      model_tree.lpar = '[';
-      model_tree.rpar = ']';
-    }
 
   model_tree.writeDynamicFile(basename);
 

@@ -20,6 +20,34 @@ struct ExprNodeLess;
 /*! They are ordered by index number thanks to ExprNodeLess */
 typedef set<NodeID, ExprNodeLess> temporary_terms_type;
 
+//! Possible types of output when writing ExprNode(s)
+enum ExprNodeOutputType
+  {
+    oMatlabStaticModel,       //!< Matlab code, static model declarations
+    oMatlabDynamicModel,      //!< Matlab code, dynamic model declarations
+    oCStaticModel,            //!< C code, static model declarations
+    oCDynamicModel,           //!< C code, dynamic model declarations
+    oCDynamicModelSparseDLL,  //!< C code, dynamic model declarations in SparseDLL module
+    oMatlabOutsideModel       //!< Matlab code, outside model block (for example in initval)
+  };
+
+/* Equal to 1 for Matlab langage, or to 0 for C language
+   In Matlab, array indexes begin at 1, while they begin at 0 in C */ 
+#define OFFSET(output_type) ((output_type == oMatlabStaticModel)      \
+                             || (output_type == oMatlabDynamicModel)  \
+                             || (output_type == oMatlabOutsideModel))
+
+// Left parenthesis: '(' for Matlab, '[' for C
+#define LPAR(output_type) (OFFSET(output_type) ? '(' : '[')
+
+// Right parenthesis: ')' for Matlab, ']' for C
+#define RPAR(output_type) (OFFSET(output_type) ? ')' : ']')
+
+// Computing cost above which a node can be declared a temporary term
+#define MIN_COST_MATLAB (40*90)
+#define MIN_COST_C (40*4)
+#define MIN_COST(is_matlab) (is_matlab ? MIN_COST_MATLAB : MIN_COST_C)
+
 //! Base class for expression nodes
 class ExprNode
 {
@@ -51,11 +79,12 @@ protected:
 
   //! Cost of computing current node
   /*! Nodes included in temporary_terms are considered having a null cost */
-  virtual int cost(const temporary_terms_type &temporary_terms) const;
+  virtual int cost(const temporary_terms_type &temporary_terms, bool is_matlab) const;
 
   //! set of endogenous variables in the current expression
   //! <symbolID, lag>
   set< pair<int,int> > present_endogenous;
+
 public:
   ExprNode(DataTree &datatree_arg);
   virtual ~ExprNode();
@@ -67,14 +96,14 @@ public:
 
   //! Returns precedence of node
   /*! Equals 100 for constants, variables, unary ops, and temporary terms */
-  virtual int precedence(const temporary_terms_type &temporary_terms) const;
+  virtual int precedence(ExprNodeOutputType output_type, const temporary_terms_type &temporary_terms) const;
 
   //! Fills temporary_terms set, using reference counts
   /*! A node will be marked as a temporary term if it is referenced at least two times (i.e. has at least two parents), and has a computing cost (multiplied by reference count) greater to datatree.min_cost */
-  virtual void computeTemporaryTerms(map<NodeID, int> &reference_count, temporary_terms_type &temporary_terms) const;
+  virtual void computeTemporaryTerms(map<NodeID, int> &reference_count, temporary_terms_type &temporary_terms, bool is_matlab) const;
 
   //! Writes output of node, using a Txxx notation for nodes in temporary_terms
-  virtual void writeOutput(ostream &output, bool is_dynamic, const temporary_terms_type &temporary_terms, int offset) const = 0;
+  virtual void writeOutput(ostream &output, ExprNodeOutputType output_type, const temporary_terms_type &temporary_terms) const = 0;
 
   //! Collects the Endogenous in a expression
   virtual void collectEndogenous(NodeID &Id) = 0;
@@ -106,7 +135,7 @@ private:
   virtual NodeID computeDerivative(int varID);
 public:
   NumConstNode(DataTree &datatree_arg, int id_arg);
-  virtual void writeOutput(ostream &output, bool is_dynamic, const temporary_terms_type &temporary_terms, int offset) const;
+  virtual void writeOutput(ostream &output, ExprNodeOutputType output_type, const temporary_terms_type &temporary_terms) const;
   virtual void collectEndogenous(NodeID &Id);
   virtual void Evaluate() const;
 };
@@ -122,7 +151,7 @@ private:
   virtual NodeID computeDerivative(int varID);
 public:
   VariableNode(DataTree &datatree_arg, int id_arg, Type type_arg);
-  virtual void writeOutput(ostream &output, bool is_dynamic, const temporary_terms_type &temporary_terms, int offset) const;
+  virtual void writeOutput(ostream &output, ExprNodeOutputType output_type, const temporary_terms_type &temporary_terms = temporary_terms_type()) const;
   virtual void collectEndogenous(NodeID &Id);
   virtual void Evaluate() const;
 };
@@ -157,11 +186,11 @@ private:
   const UnaryOpcode op_code;
   virtual NodeID computeDerivative(int varID);
 
-  int cost(const temporary_terms_type &temporary_terms) const;
+  int cost(const temporary_terms_type &temporary_terms, bool is_matlab) const;
 public:
   UnaryOpNode(DataTree &datatree_arg, UnaryOpcode op_code_arg, const NodeID arg_arg);
-  virtual void computeTemporaryTerms(map<NodeID, int> &reference_count, temporary_terms_type &temporary_terms) const;
-  virtual void writeOutput(ostream &output, bool is_dynamic, const temporary_terms_type &temporary_terms, int offset) const;
+  virtual void computeTemporaryTerms(map<NodeID, int> &reference_count, temporary_terms_type &temporary_terms, bool is_matlab) const;
+  virtual void writeOutput(ostream &output, ExprNodeOutputType output_type, const temporary_terms_type &temporary_terms) const;
   virtual void computeTemporaryTerms(map<NodeID, int> &reference_count,
                                      temporary_terms_type &temporary_terms,
                                      map<NodeID, int> &first_occurence,
@@ -189,13 +218,13 @@ private:
   const NodeID arg1, arg2;
   const BinaryOpcode op_code;
   virtual NodeID computeDerivative(int varID);
-  int cost(const temporary_terms_type &temporary_terms) const;
+  int cost(const temporary_terms_type &temporary_terms, bool is_matlab) const;
 public:
   BinaryOpNode(DataTree &datatree_arg, const NodeID arg1_arg,
                BinaryOpcode op_code_arg, const NodeID arg2_arg);
-  virtual int precedence(const temporary_terms_type &temporary_terms) const;
-  virtual void computeTemporaryTerms(map<NodeID, int> &reference_count, temporary_terms_type &temporary_terms) const;
-  virtual void writeOutput(ostream &output, bool is_dynamic, const temporary_terms_type &temporary_terms, int offset) const;
+  virtual int precedence(ExprNodeOutputType output_type, const temporary_terms_type &temporary_terms) const;
+  virtual void computeTemporaryTerms(map<NodeID, int> &reference_count, temporary_terms_type &temporary_terms, bool is_matlab) const;
+  virtual void writeOutput(ostream &output, ExprNodeOutputType output_type, const temporary_terms_type &temporary_terms) const;
   virtual void computeTemporaryTerms(map<NodeID, int> &reference_count,
                                      temporary_terms_type &temporary_terms,
                                      map<NodeID, int> &first_occurence,

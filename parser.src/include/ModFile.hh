@@ -43,9 +43,8 @@ public:
   /*!
     \param basename The base name used for writing output files. Should be the name of the mod file without its extension
     \param clear_all Should a "clear all" instruction be written to output ?
-    \todo make this method "const" again!
   */
-  void writeOutputFiles(const string &basename, bool clear_all);
+  void writeOutputFiles(const string &basename, bool clear_all) const;
 };
 
 #endif // ! MOD_FILE_HH
