@@ -2,7 +2,7 @@
 #include "Interface.hh"
 
 InitParamStatement::InitParamStatement(const string &param_name_arg,
-                                       const string &param_value_arg,
+                                       const NodeID param_value_arg,
                                        const SymbolTable &symbol_table_arg) :
   param_name(param_name_arg),
   param_value(param_value_arg),
@@ -14,7 +14,9 @@ void
 InitParamStatement::writeOutput(ostream &output, const string &basename) const
 {
   int id = symbol_table.getID(param_name) + 1;
-  output << "M_.params( " << id << " ) = " << param_value << ";\n";
+  output << "M_.params( " << id << " ) = ";
+  param_value->writeOutput(output);
+  output << ";" << endl;
   output << param_name << " = M_.params( " << id << " );\n";
 }
 
@@ -32,17 +34,21 @@ InitOrEndValStatement::writeInitValues(ostream &output) const
       it != init_values.end(); it++)
     {
       const string &name = it->first;
-      const string &expression = it->second;
+      const NodeID expression = it->second;
 
       Type type = symbol_table.getType(name);
       int id = symbol_table.getID(name) + 1;
 
       if (type == eEndogenous)
-        output << "oo_.steady_state( " << id << " ) = " << expression << ";\n";
+        output << "oo_.steady_state";
       else if (type == eExogenous)
-        output << "oo_.exo_steady_state( " << id << " ) = " << expression << ";\n";
+        output << "oo_.exo_steady_state";
       else if (type == eExogenousDet)
-        output << "oo_.exo_det_steady_state( " << id << " ) = " << expression << ";\n";
+        output << "oo_.exo_det_steady_state";
+
+      output << "( " << id << " ) = ";
+      expression->writeOutput(output);
+      output << ";" << endl;
     }
 }
 
@@ -111,16 +117,19 @@ HistValStatement::writeOutput(ostream &output, const string &basename) const
     {
       const string &name = it->first.first;
       const int &lag = it->first.second;
-      const string &expression = it->second;
+      const NodeID expression = it->second;
 
       Type type = symbol_table.getType(name);
       int id = symbol_table.getID(name) + 1;
 
       if (type == eEndogenous)
-        output << "oo_.endo_simul( " << id << ", M_.maximum_lag + " << lag + 1 << ") = " << expression << ";\n";
+        output << "oo_.endo_simul( " << id << ", M_.maximum_lag + " << lag + 1 << ") = ";
       else if (type == eExogenous)
-        output << "oo_.exo_simul( M_.maximum_lag + " << lag + 1 << ", " << id << " ) = " << expression << ";\n";
+        output << "oo_.exo_simul( M_.maximum_lag + " << lag + 1 << ", " << id << " ) = ";
       else if (type != eExogenousDet)
-        output << "oo_.exo_det_simul( M_.maximum_lag + " << lag + 1 << ", " << id << " ) = " << expression << ";\n";
+        output << "oo_.exo_det_simul( M_.maximum_lag + " << lag + 1 << ", " << id << " ) = ";
+
+      expression->writeOutput(output);
+      output << ";" << endl;
     }
 }

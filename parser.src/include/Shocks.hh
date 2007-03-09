@@ -9,6 +9,7 @@ using namespace std;
 
 #include "Statement.hh"
 #include "SymbolTable.hh"
+#include "ExprNode.hh"
 
 class AbstractShocksStatement : public Statement
 {
@@ -17,11 +18,11 @@ public:
   {
     int period1;
     int period2;
-    string value;
+    NodeID value;
   };
   typedef map<string, vector<DetShockElement> > det_shocks_type;
-  typedef map<string, string> var_and_std_shocks_type;
-  typedef map<pair<string, string>, string> covar_and_corr_shocks_type;
+  typedef map<string, NodeID> var_and_std_shocks_type;
+  typedef map<pair<string, string>, NodeID> covar_and_corr_shocks_type;
 protected:
   //! Is this statement a "mshocks" statement ? (instead of a "shocks" statement)
   const bool mshocks;

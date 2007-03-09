@@ -60,8 +60,10 @@ SimulStatement::writeOutput(ostream &output, const string &basename) const
   output << "simul(oo_.dr);\n";
 }
 
-SimulSparseStatement::SimulSparseStatement(const OptionsList &options_list_arg) :
-  options_list(options_list_arg)
+SimulSparseStatement::SimulSparseStatement(const OptionsList &options_list_arg,
+                                           int compiler_arg) :
+  options_list(options_list_arg),
+  compiler(compiler_arg)
 {
 }
 
@@ -81,10 +83,10 @@ SimulSparseStatement::writeOutput(ostream &output, const string &basename) const
   output << "end\n";
   output << "disp('compiling...');\n";
   if (compiler == 0)
-    output << "mex " << filename << "_dynamic.c;\n";
+    output << "mex " << basename << "_dynamic.c;\n";
   else
-    output << "mex " << filename << "_dynamic.cc;\n";
-  output << "oo_.endo_simul=" << filename << "_dynamic;\n";
+    output << "mex " << basename << "_dynamic.cc;\n";
+  output << "oo_.endo_simul=" << basename << "_dynamic;\n";
 }
 
 StochSimulStatement::StochSimulStatement(const TmpSymbolTable &tmp_symbol_table_arg,
@@ -452,7 +454,9 @@ ObservationTrendsStatement::writeOutput(ostream &output, const string &basename)
       if (type == eEndogenous)
         {
           output << "tmp1 = strmatch('" << it->first << "',options_.varobs,'exact');\n";
-          output << "options_.trend_coeffs{tmp1} = '" << it->second << "';\n";
+          output << "options_.trend_coeffs{tmp1} = '";
+          it->second->writeOutput(output);
+          output << "';" << endl;
         }
       else
         cout << "Error : Non-variable symbol used in TREND_COEFF: " << it->first << endl;
@@ -490,20 +494,24 @@ CalibVarStatement::writeOutput(ostream &output, const string &basename) const
     {
       const string &name = it->first;
       const string &weight = it->second.first;
-      const string &expression = it->second.second;
+      const NodeID expression = it->second.second;
 
       int id = symbol_table.getID(name) + 1;
       if (symbol_table.getType(name) == eEndogenous)
         {
           output << "calib_var_index{1} = [calib_var_index{1};" <<  id << "," << id << "];\n";
           output << "calib_weights{1} = [calib_weights{1}; " << weight << "];\n";
-          output << "calib_targets{1} =[calib_targets{1}; " << expression << "];\n";
+          output << "calib_targets{1} =[calib_targets{1}; ";
+          expression->writeOutput(output);
+          output << "];\n";
         }
       else if (symbol_table.getType(name) == eExogenous)
         {
           output << "calib_var_index{3} = [calib_var_index{3};" <<  id << "," << id << "];\n";
           output << "calib_weights{3} = [calib_weights{3}; " << weight << "];\n";
-          output << "calib_targets{3} =[calib_targets{3}; " << expression << "];\n";
+          output << "calib_targets{3} =[calib_targets{3}; ";
+          expression->writeOutput(output);
+          output << "];\n";
         }
     }
 
@@ -514,7 +522,7 @@ CalibVarStatement::writeOutput(ostream &output, const string &basename) const
       const string &name1 = it->first.first;
       const string &name2 = it->first.second;
       const string &weight = it->second.first;
-      const string &expression = it->second.second;
+      const NodeID expression = it->second.second;
 
       int id1 = symbol_table.getID(name1) + 1;
       int id2 = symbol_table.getID(name2) + 1;
@@ -522,13 +530,17 @@ CalibVarStatement::writeOutput(ostream &output, const string &basename) const
         {
           output << "calib_var_index{1} = [calib_var_index{1};" <<  id1 << "," << id2 << "];\n";
           output << "calib_weights{1} = [calib_weights{1}; " << weight << "];\n";
-          output << "calib_targets{1} =[calib_targets{1}; " << expression << "];\n";
+          output << "calib_targets{1} =[calib_targets{1}; ";
+          expression->writeOutput(output);
+          output << "];\n";
         }
       else if (symbol_table.getType(name1) == eExogenous)
         {
           output << "calib_var_index{3} = [calib_var_index{3};" <<  id1 << "," << id2 << "];\n";
           output << "calib_weights{3} = [calib_weights{3}; " << weight << "];\n";
-          output << "calib_targets{3} =[calib_targets{3}; " << expression << "];\n";
+          output << "calib_targets{3} =[calib_targets{3}; ";
+          expression->writeOutput(output);
+          output << "];\n";
         }
     }
 
@@ -541,7 +553,7 @@ CalibVarStatement::writeOutput(ostream &output, const string &basename) const
       const string &name = it->first.first;
       int iar = it->first.second + 3;
       const string &weight = it->second.first;
-      const string &expression = it->second.second;
+      const NodeID expression = it->second.second;
 
       int id = symbol_table.getID(name) + 1;
 
@@ -559,7 +571,9 @@ CalibVarStatement::writeOutput(ostream &output, const string &basename) const
 
       output << "calib_var_index{" << iar << "} = [calib_var_index{" << iar << "};" <<  id << "];\n";
       output << "calib_weights{" << iar << "} = [calib_weights{" << iar << "}; " << weight << "];\n";
-      output << "calib_targets{" << iar << "} =[calib_targets{" << iar << "}; " << expression << "];\n";
+      output << "calib_targets{" << iar << "} =[calib_targets{" << iar << "}; ";
+      expression->writeOutput(output);
+      output << "];\n";
     }
 }
 
@@ -671,9 +685,11 @@ OptimWeightsStatement::writeOutput(ostream &output, const string &basename) cons
       it != var_weights.end(); it++)
     {
       const string &name = it->first;
-      const string &value = it->second;
+      const NodeID value = it->second;
       int id = symbol_table.getID(name) + 1;
-      output <<  "optim_weights_(" << id << "," << id << ") = " << value << ";\n";
+      output <<  "optim_weights_(" << id << "," << id << ") = ";
+      value->writeOutput(output);
+      output << ";" << endl;
       output << "obj_var_ = [obj_var_; " << id << "];\n";
     }
 
@@ -682,10 +698,12 @@ OptimWeightsStatement::writeOutput(ostream &output, const string &basename) cons
     {
       const string &name1 = it->first.first;
       const string &name2 = it->first.second;
-      const string &value = it->second;
+      const NodeID value = it->second;
       int id1 = symbol_table.getID(name1) + 1;
       int id2 = symbol_table.getID(name2) + 1;
-      output <<  "optim_weights_(" << id1 << "," << id2 << ") = " << value << ";\n";
+      output <<  "optim_weights_(" << id1 << "," << id2 << ") = ";
+      value->writeOutput(output);
+      output << ";" << endl;
       output << "obj_var_ = [obj_var_; " << id1 << " " << id2 << "];\n";
     }
 }
@@ -770,7 +788,7 @@ void
 PlannerObjectiveStatement::computingPass()
 {
   model_tree->computeStaticHessian = true;
-  model_tree->computingPass();
+  model_tree->computingPass(eval_context_type());
 }
 
 void

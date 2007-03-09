@@ -95,10 +95,8 @@ private:
   void writeSparseDLLDynamicHFile(const string &dynamic_basename) const;
   //! Writes dynamic model file when SparseDLL option is on
   void writeSparseDLLDynamicCFileAndBinFile(const string &dynamic_basename, const string &bin_basename) const;
-  //! Evaluates part of a model tree
-  inline double Evaluate_Expression(NodeID StartID);
-  inline void Evaluate_Jacobian();
-  inline void BlockLinear(Model_Block *ModelBlock);
+  void evaluateJacobian(const eval_context_type &eval_context);
+  void BlockLinear(Model_Block *ModelBlock);
   string reform(string name) const;
 
 public:
@@ -107,6 +105,8 @@ public:
   ModelTreeMode mode;
   //! Type of compiler used in matlab for SPARSE_DLL option: 0 = LCC or 1 = GCC
   int compiler;
+  //! Absolute value under which a number is considered to be zero
+  double cutoff;
 
   //! Declare a node as an equation of the model
   void addEquation(NodeID eq);
@@ -124,7 +124,7 @@ public:
   bool computeThirdDerivatives;
   //! Execute computations (variable sorting + derivation)
   /*! You must set computeJacobian, computeJacobianExo, computeHessian, computeStaticHessian and computeThirdDerivatives to correct values before calling this function */
-  void computingPass();
+  void computingPass(const eval_context_type &eval_context);
   //! Writes model initialization and lead/lag incidence matrix to output
   void writeOutput(ostream &output) const;
   //! Writes static model file

@@ -4,7 +4,8 @@
 #include "ModFile.hh"
 #include "Interface.hh"
 
-ModFile::ModFile() : model_tree(symbol_table, num_constants),
+ModFile::ModFile() : expressions_tree(symbol_table, num_constants),
+                     model_tree(symbol_table, num_constants),
                      linear(false)
 {
 }
@@ -59,7 +60,7 @@ ModFile::computingPass()
         model_tree.computeThirdDerivatives = true;
     }
 
-  model_tree.computingPass();
+  model_tree.computingPass(global_eval_context);
 
   for(vector<Statement *>::iterator it = statements.begin();
       it != statements.end(); it++)

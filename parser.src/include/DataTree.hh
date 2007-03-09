@@ -12,8 +12,6 @@ using namespace std;
 #include "VariableTable.hh"
 #include "ExprNode.hh"
 
-#include "interprete.hh"
-
 class DataTree
 {
   friend class ExprNode;
@@ -38,7 +36,8 @@ protected:
 
   typedef map<int, NodeID> num_const_node_map_type;
   num_const_node_map_type num_const_node_map;
-  typedef map<pair<int, Type>, NodeID> variable_node_map_type;
+  //! Type (symbol_id, type, lag) used as key
+  typedef map<pair<pair<int, Type>, int>, NodeID> variable_node_map_type;
   variable_node_map_type variable_node_map;
   typedef map<pair<NodeID, int>, NodeID> unary_op_node_map_type;
   unary_op_node_map_type unary_op_node_map;
@@ -53,8 +52,6 @@ public:
   //! The variable table
   VariableTable variable_table;
   NodeID Zero, One, MinusOne;
-  //! Complete set to interpret the model parameters and variables
-  interprete interprete_;
 
   //! Raised when a local parameter is declared twice
   class LocalParameterException
@@ -113,6 +110,9 @@ public:
   //! Adds "arg1=arg2" to model tree
   NodeID AddEqual(NodeID iArg1, NodeID iArg2);
   void AddLocalParameter(const string &name, NodeID value) throw (LocalParameterException);
+  //! Adds an unknown function node
+  /*! \todo Use a map to share identical nodes */
+  NodeID AddUnknownFunction(const string &function_name, const vector<NodeID> &arguments);
 };
 
 inline NodeID

@@ -7,11 +7,7 @@ using namespace std;
 
 class ParsingDriver;
 
-#include "SymbolTableTypes.hh"
 #include "ExprNode.hh"
-
-//! Type for semantic value of non-derivable expressions
-typedef pair<int, Type> ExpObj;
 %}
 
 %parse-param { ParsingDriver &driver }
@@ -30,8 +26,7 @@ typedef pair<int, Type> ExpObj;
 %union
 {
   string *string_val;
-  ExpObj *exp_val;
-  NodeID model_val;
+  NodeID node_val;
 };
 
 %{
@@ -75,8 +70,8 @@ typedef pair<int, Type> ExpObj;
 %nonassoc POWER 
 %token EXP LOG LOG10 SIN COS TAN ASIN ACOS ATAN SINH COSH TANH ASINH ACOSH ATANH SQRT
 
-%type <exp_val> expression comma_expression
-%type <model_val> equation hand_side model_var
+%type <node_val> expression
+%type <node_val> equation hand_side model_var
 %type <string_val> signed_float signed_integer prior
 %type <string_val> value filename filename_elem vec_int_elem vec_int_1 vec_int
 %type <string_val> calib_arg2 range
@@ -255,54 +250,52 @@ cutoff
 	| NAME
 		{$$ = driver.add_expression_variable($1);}
 	| FLOAT_NUMBER
-		{$$ = driver.add_expression_constant($1);}
+		{$$ = driver.add_constant($1);}
 	| INT_NUMBER
-		{$$ = driver.add_expression_constant($1);}
+		{$$ = driver.add_constant($1);}
 	| expression PLUS expression 
-    {$$ = driver.add_expression_token($1, $3, token::PLUS);}
+    {$$ = driver.add_plus($1, $3);}
 	| expression MINUS expression
-    {$$ = driver.add_expression_token($1, $3, token::MINUS);}
+    {$$ = driver.add_minus($1, $3);}
 	| expression DIVIDE expression	 
-    {$$ = driver.add_expression_token($1, $3, token::DIVIDE);}
+    {$$ = driver.add_divide($1, $3);}
 	| expression TIMES expression 
-    {$$ = driver.add_expression_token($1, $3, token::TIMES);}
+    {$$ = driver.add_times($1, $3);}
 	| expression POWER expression 
-    {$$ = driver.add_expression_token($1, $3, token::POWER);}	
+    {$$ = driver.add_power($1, $3);}
 	| MINUS expression %prec UMINUS
-    {$$ = driver.add_expression_token($2, token::UMINUS);}
+    {$$ = driver.add_uminus($2);}
 	| PLUS expression
 	  {$$ = $2;}
 	| EXP '(' expression ')'
-    {$$ = driver.add_expression_token($3, token::EXP);}
+    {$$ = driver.add_exp($3);}
 	| LOG '(' expression ')'
-    {$$ = driver.add_expression_token($3, token::LOG);}
+    {$$ = driver.add_log($3);}
 	| LOG10 '(' expression ')'
-    {$$ = driver.add_expression_token($3, token::LOG10);}
+    {$$ = driver.add_log10($3);}
 	| SIN '(' expression ')'
-    {$$ = driver.add_expression_token($3, token::SIN);}
+    {$$ = driver.add_sin($3);}
 	| COS '(' expression ')'
-    {$$ = driver.add_expression_token($3, token::COS);}
+    {$$ = driver.add_cos($3);}
 	| TAN '(' expression ')'
-    {$$ = driver.add_expression_token($3, token::TAN);}
+    {$$ = driver.add_tan($3);}
 	| ASIN '(' expression ')'
-    {$$ = driver.add_expression_token($3, token::ASIN);}
+    {$$ = driver.add_asin($3);}
 	| ACOS '(' expression ')'
-    {$$ = driver.add_expression_token($3, token::ACOS);}
+    {$$ = driver.add_acos($3);}
 	| ATAN '(' expression ')'
-    {$$ = driver.add_expression_token($3, token::ATAN);}
+    {$$ = driver.add_atan($3);}
 	| SQRT '(' expression ')'
-    {$$ = driver.add_expression_token($3, token::SQRT);}
-  | NAME '(' expression ')' 
-    {$$ = driver.add_expression_token($3, $1);}
+    {$$ = driver.add_sqrt($3);}
   | NAME '(' comma_expression ')' 
-   	{$$ = driver.add_expression_token($3, $1);}
+    {$$ = driver.add_unknown_function($1);}
 	; 
 
  comma_expression :
-          expression COMMA expression
-          {$$ = driver.add_expression_token($1, $3, token::COMMA);}
+          expression
+          { driver.add_unknown_function_arg($1); }
         | comma_expression COMMA expression
-          {$$ = driver.add_expression_token($1, $3, token::COMMA);}
+          { driver.add_unknown_function_arg($3); }
 
  initval
  	: INITVAL ';' initval_list END
@@ -356,15 +349,15 @@ cutoff
   ;
 	
  model
-  : MODEL ';' { driver.begin_model(); } equation_list END 
+  : MODEL ';' { driver.begin_model(); } equation_list END { driver.reset_data_tree(); }
  	| MODEL '(' o_linear ')' ';' { driver.begin_model(); } 
-		equation_list END
+    equation_list END { driver.reset_data_tree(); }
   | MODEL '(' USE_DLL ')' ';' { driver.begin_model(); driver.use_dll(); }
-		equation_list END
-	| MODEL '(' SPARSE_DLL COMMA model_sparse_options_list ')' { driver.sparse_dll(); driver.begin_model(); } ';'
-		equation_list END
-	| MODEL '(' SPARSE_DLL ')' { driver.sparse_dll(); driver.begin_model(); } ';'
-		equation_list END
+    equation_list END { driver.reset_data_tree(); }
+	| MODEL '(' SPARSE_DLL COMMA model_sparse_options_list ')' { driver.begin_model(); driver.sparse_dll(); } ';'
+    equation_list END { driver.reset_data_tree(); }
+	| MODEL '(' SPARSE_DLL ')' { driver.begin_model(); driver.sparse_dll(); } ';'
+    equation_list END { driver.reset_data_tree(); }
  	;
 
  equation_list
@@ -385,43 +378,43 @@ cutoff
 	: '(' hand_side ')' {$$ = $2;}
 	| model_var
 	| FLOAT_NUMBER
-		{$$ = driver.add_model_constant($1);}
+		{$$ = driver.add_constant($1);}
 	| INT_NUMBER
-    {$1->append(".0"); $$ = driver.add_model_constant($1);}
+    {$1->append(".0"); $$ = driver.add_constant($1);}
 	| hand_side PLUS hand_side 
-    	{$$ = driver.add_model_plus($1, $3);}
+    	{$$ = driver.add_plus($1, $3);}
 	| hand_side MINUS hand_side
-    	{$$ = driver.add_model_minus($1, $3);}
+    	{$$ = driver.add_minus($1, $3);}
 	| hand_side DIVIDE hand_side	 
-    	{$$ = driver.add_model_divide($1, $3);}
+    	{$$ = driver.add_divide($1, $3);}
 	| hand_side TIMES hand_side 
-    	{$$ = driver.add_model_times($1, $3);}
+    	{$$ = driver.add_times($1, $3);}
 	| hand_side POWER hand_side 
-    	{$$ = driver.add_model_power($1, $3);}	
+    	{$$ = driver.add_power($1, $3);}	
         | MINUS hand_side %prec UMINUS
-      { $$ = driver.add_model_uminus($2);}
+      { $$ = driver.add_uminus($2);}
 	| PLUS hand_side
 	{$$ = $2;}
 	| EXP '(' hand_side ')'
-    	{$$ = driver.add_model_exp($3);}
+    	{$$ = driver.add_exp($3);}
 	| LOG '(' hand_side ')'
-    	{$$ = driver.add_model_log($3);}
+    	{$$ = driver.add_log($3);}
 	| LOG10 '(' hand_side ')'
-    	{$$ = driver.add_model_log10($3);}
+    	{$$ = driver.add_log10($3);}
 	| SIN '(' hand_side ')'
-    	{$$ = driver.add_model_sin($3);}
+    	{$$ = driver.add_sin($3);}
 	| COS '(' hand_side ')'
-    	{$$ = driver.add_model_cos($3);}
+    	{$$ = driver.add_cos($3);}
 	| TAN '(' hand_side ')'
-    	{$$ = driver.add_model_tan($3);}
+    	{$$ = driver.add_tan($3);}
 	| ASIN '(' hand_side ')'
-    	{$$ = driver.add_model_asin($3);}
+    	{$$ = driver.add_asin($3);}
 	| ACOS '(' hand_side ')'
-    	{$$ = driver.add_model_acos($3);}
+    	{$$ = driver.add_acos($3);}
 	| ATAN '(' hand_side ')'
-    	{$$ = driver.add_model_atan($3);}
+    	{$$ = driver.add_atan($3);}
 	| SQRT '(' hand_side ')'
-    	{$$ = driver.add_model_sqrt($3);}
+    	{$$ = driver.add_sqrt($3);}
 	;
 	
  pound_expression: '#' NAME EQUAL hand_side ';'
@@ -478,17 +471,17 @@ cutoff
 
  value_list
  	: value_list signed_float  
-		{driver.add_value($2);}
+		{driver.add_value_const($2);}
 	| value_list signed_integer
-		{driver.add_value($2);}
+		{driver.add_value_const($2);}
 	| value_list NAME
-		{driver.add_value($2);}
+		{driver.add_value_var($2);}
 	| signed_float
-		{driver.add_value($1);}
+		{driver.add_value_const($1);}
 	| signed_integer
-		{driver.add_value($1);}
+		{driver.add_value_const($1);}
 	| NAME
-		{driver.add_value($1);}
+		{driver.add_value_var($1);}
 	| value_list '(' expression ')'
     {driver.add_value($3);}
 	| '(' expression ')'
@@ -511,21 +504,21 @@ cutoff
  	: triangular_row COMMA '(' expression ')' 
     {driver.add_to_row($4);}
 	| triangular_row COMMA FLOAT_NUMBER 
-		{driver.add_to_row($3);}
+		{driver.add_to_row_const($3);}
 	| triangular_row COMMA INT_NUMBER 
-		{driver.add_to_row($3);}
+		{driver.add_to_row_const($3);}
 	| triangular_row '(' expression ')'
     {driver.add_to_row($3);}
 	| triangular_row FLOAT_NUMBER 
-		{driver.add_to_row($2);}
+		{driver.add_to_row_const($2);}
 	| triangular_row INT_NUMBER 
-		{driver.add_to_row($2);}
+		{driver.add_to_row_const($2);}
 	| '(' expression ')'
     {driver.add_to_row($2);}
 	| FLOAT_NUMBER 
-		{driver.add_to_row($1);}
+		{driver.add_to_row_const($1);}
 	| INT_NUMBER 
-		{driver.add_to_row($1);}
+		{driver.add_to_row_const($1);}
 	;
 	
  steady 

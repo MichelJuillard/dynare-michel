@@ -1,15 +1,7 @@
 #ifndef _SYMBOLTABLETYPES_HH
 #define _SYMBOLTABLETYPES_HH
-//------------------------------------------------------------------------------
-/*! \file
-  \version 1.0
-  \date 04/26/2004
-  \par This file defines types related to SymbolTable.
-*/
 
-#include <vector>
-
-/*! Symbol type enum */
+//! Symbol type enum
 enum Type
   {
     eEndogenous = 0,               //!< Endogenous
@@ -18,35 +10,27 @@ enum Type
     eRecursiveVariable = 3,        //!< Recursive variable (reserved for future use)
     eParameter = 4,                //!< Parameter
     eLocalParameter = 10,          //!< Parameter  local to a model
-    eTempResult = 6,               //!< Temporary result, used only in Expression class
-    eNumericalConstant = 7,        //!< Numerical constant,  used only in Expression class
-    eUNDEF = 9                     //!< Undefined
   };
-/*! Symbol reference flag enum */
+
+//! Symbol reference flag enum
 enum Reference
   {
     eNotReferenced,                //!< Not yet referenced in model
     eReferenced,                   //!< Already referenced in model
   };
-/*!
-  \class Symbol
-  \brief Symbol structure
-*/
+
 struct Symbol
 {
-  /*! Symbol type */
+  //! Symbol type
   Type type;
-  /*! Symbol ID : for each type */
+  //! Symbol ID : for each type
   int id;
-  /*! Symbol reference flag */
+  //! Symbol reference flag
   Reference referenced;
 
-  Symbol()
+  Symbol() : id(-1), referenced(eNotReferenced)
   {
-    type = eUNDEF;
-    id = -1;
-    referenced = eNotReferenced;
   }
-} ;
-//------------------------------------------------------------------------------
+};
+
 #endif

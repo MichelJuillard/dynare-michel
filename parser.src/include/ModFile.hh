@@ -21,10 +21,15 @@ public:
   SymbolTable symbol_table;
   //! Numerical constants table
   NumericalConstants num_constants;
+  //! Expressions outside model block
+  DataTree expressions_tree;
   //! Model equations and their derivatives
   ModelTree model_tree;
   //! Option linear
   bool linear;
+  //! Global evaluation context
+  /*! Filled using initval blocks and parameters initializations */
+  eval_context_type global_eval_context;
 
 private:
   //! List of statements

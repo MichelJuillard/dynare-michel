@@ -41,10 +41,9 @@ class SimulSparseStatement : public Statement
 {
 private:
   const OptionsList options_list;
+  const int compiler;
 public:
-  string filename;
-  int compiler;
-  SimulSparseStatement(const OptionsList &options_list_arg);
+  SimulSparseStatement(const OptionsList &options_list_arg, int compiler_arg);
   virtual void checkPass(ModFileStructure &mod_file_struct);
   virtual void writeOutput(ostream &output, const string &basename) const;
 };
@@ -167,7 +166,7 @@ public:
 class ObservationTrendsStatement : public Statement
 {
 public:
-  typedef map<string, string, less<string> > trend_elements_type;
+  typedef map<string, NodeID> trend_elements_type;
 private:
   const trend_elements_type trend_elements;
   const SymbolTable &symbol_table;
@@ -332,8 +331,8 @@ public:
 class OptimWeightsStatement : public Statement
 {
 public:
-  typedef map<string, string, less<string> > var_weights_type;
-  typedef map<pair<string, string>, string, less<pair<string, string> > > covar_weights_type;
+  typedef map<string, NodeID> var_weights_type;
+  typedef map<pair<string, string>, NodeID> covar_weights_type;
 private:
   const var_weights_type var_weights;
   const covar_weights_type covar_weights;
@@ -358,11 +357,11 @@ class CalibVarStatement : public Statement
 {
 public:
   //! Maps a variable to a pair (weight, expression)
-  typedef map<string, pair<string, string>, less<string> > calib_var_type;
+  typedef map<string, pair<string, NodeID> > calib_var_type;
   //! Maps a pair of variables to a pair (weight, expression)
-  typedef map<pair<string, string>, pair<string, string>, less<pair<string, string> > > calib_covar_type;
+  typedef map<pair<string, string>, pair<string, NodeID> > calib_covar_type;
   //! Maps a pair (variable, autocorr) to a pair (weight, expression)
-  typedef map<pair<string, int>, pair<string, string>, less<pair<string, int> > > calib_ac_type;
+  typedef map<pair<string, int>, pair<string, NodeID> > calib_ac_type;
 private:
   const calib_var_type calib_var;
   const calib_covar_type calib_covar;

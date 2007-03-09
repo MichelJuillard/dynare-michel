@@ -54,15 +54,11 @@ using namespace std;
 
 class ParsingDriver;
 
-#include "SymbolTableTypes.hh"
 #include "ExprNode.hh"
-
-//! Type for semantic value of non-derivable expressions
-typedef pair<int, Type> ExpObj;
 
 
 /* Line 35 of lalr1.cc.  */
-#line 66 "DynareBison.hh"
+#line 62 "DynareBison.hh"
 
 #include "location.hh"
 
@@ -113,14 +109,13 @@ namespace yy
     /// Symbol semantic values.
 #ifndef YYSTYPE
     union semantic_type
-#line 31 "DynareBison.yy"
+#line 27 "DynareBison.yy"
 {
   string *string_val;
-  ExpObj *exp_val;
-  NodeID model_val;
+  NodeID node_val;
 }
 /* Line 35 of lalr1.cc.  */
-#line 124 "DynareBison.hh"
+#line 119 "DynareBison.hh"
 	;
 #else
     typedef YYSTYPE semantic_type;

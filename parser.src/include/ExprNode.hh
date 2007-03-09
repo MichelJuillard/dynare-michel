@@ -5,6 +5,7 @@ using namespace std;
 
 #include <set>
 #include <map>
+#include <vector>
 
 #include "SymbolTableTypes.hh"
 
@@ -30,6 +31,11 @@ enum ExprNodeOutputType
     oCDynamicModelSparseDLL,  //!< C code, dynamic model declarations in SparseDLL module
     oMatlabOutsideModel       //!< Matlab code, outside model block (for example in initval)
   };
+
+//! Type for evaluation contexts
+/*! The key is a pair (symbol id, symbol type)
+  Lags are assumed to be null */
+typedef map<pair<int, Type>, double> eval_context_type;
 
 /* Equal to 1 for Matlab langage, or to 0 for C language
    In Matlab, array indexes begin at 1, while they begin at 0 in C */ 
@@ -105,6 +111,9 @@ public:
   //! Writes output of node, using a Txxx notation for nodes in temporary_terms
   virtual void writeOutput(ostream &output, ExprNodeOutputType output_type, const temporary_terms_type &temporary_terms) const = 0;
 
+  //! Writes output of node (with no temporary terms and with "outside model" output type)
+  void writeOutput(ostream &output);
+
   //! Collects the Endogenous in a expression
   virtual void collectEndogenous(NodeID &Id) = 0;
   virtual void computeTemporaryTerms(map<NodeID, int> &reference_count,
@@ -114,7 +123,12 @@ public:
                                      Model_Block *ModelBlock) const;
   int present_endogenous_size() const;
   int present_endogenous_find(int var, int lag) const;
-  virtual void Evaluate() const = 0;
+
+  class EvalException
+  {
+  };
+
+  virtual double eval(const eval_context_type &eval_context) const throw (EvalException) = 0;
 };
 
 //! Object used to compare two nodes (using their indexes)
@@ -137,23 +151,25 @@ public:
   NumConstNode(DataTree &datatree_arg, int id_arg);
   virtual void writeOutput(ostream &output, ExprNodeOutputType output_type, const temporary_terms_type &temporary_terms) const;
   virtual void collectEndogenous(NodeID &Id);
-  virtual void Evaluate() const;
+  virtual double eval(const eval_context_type &eval_context) const throw (EvalException);
 };
 
 //! Symbol or variable node
 class VariableNode : public ExprNode
 {
 private:
-  //! Id of the symbol/variable
-  /*! For an endogenous, exogenous or recursive variable, the id is taken from the variable table (before sorting). For other types of symbols, it's the id from the symbol table. */
-  const int id;
+  //! Id from the symbol table
+  const int symb_id;
   const Type type;
+  const int lag;
+  //! Id from the variable table (-1 if not a endogenous/exogenous/recursive)
+  int var_id;
   virtual NodeID computeDerivative(int varID);
 public:
-  VariableNode(DataTree &datatree_arg, int id_arg, Type type_arg);
+  VariableNode(DataTree &datatree_arg, int symb_id_arg, Type type_arg, int lag_arg);
   virtual void writeOutput(ostream &output, ExprNodeOutputType output_type, const temporary_terms_type &temporary_terms = temporary_terms_type()) const;
   virtual void collectEndogenous(NodeID &Id);
-  virtual void Evaluate() const;
+  virtual double eval(const eval_context_type &eval_context) const throw (EvalException);
 };
 
 enum UnaryOpcode
@@ -186,7 +202,7 @@ private:
   const UnaryOpcode op_code;
   virtual NodeID computeDerivative(int varID);
 
-  int cost(const temporary_terms_type &temporary_terms, bool is_matlab) const;
+  virtual int cost(const temporary_terms_type &temporary_terms, bool is_matlab) const;
 public:
   UnaryOpNode(DataTree &datatree_arg, UnaryOpcode op_code_arg, const NodeID arg_arg);
   virtual void computeTemporaryTerms(map<NodeID, int> &reference_count, temporary_terms_type &temporary_terms, bool is_matlab) const;
@@ -197,7 +213,7 @@ public:
                                      int Curr_block,
                                      Model_Block *ModelBlock) const;
   virtual void collectEndogenous(NodeID &Id);
-  virtual void Evaluate() const;
+  virtual double eval(const eval_context_type &eval_context) const throw (EvalException);
 };
 
 enum BinaryOpcode
@@ -218,7 +234,7 @@ private:
   const NodeID arg1, arg2;
   const BinaryOpcode op_code;
   virtual NodeID computeDerivative(int varID);
-  int cost(const temporary_terms_type &temporary_terms, bool is_matlab) const;
+  virtual int cost(const temporary_terms_type &temporary_terms, bool is_matlab) const;
 public:
   BinaryOpNode(DataTree &datatree_arg, const NodeID arg1_arg,
                BinaryOpcode op_code_arg, const NodeID arg2_arg);
@@ -231,7 +247,27 @@ public:
                                      int Curr_block,
                                      Model_Block *ModelBlock) const;
   virtual void collectEndogenous(NodeID &Id);
-  virtual void Evaluate() const;
+  virtual double eval(const eval_context_type &eval_context) const throw (EvalException);
+};
+
+class UnknownFunctionNode : public ExprNode
+{
+private:
+  const string function_name;
+  const vector<NodeID> arguments;
+  virtual NodeID computeDerivative(int varID);
+public:
+  UnknownFunctionNode(DataTree &datatree_arg, const string &function_name_arg,
+                      const vector<NodeID> &arguments_arg);
+  virtual void computeTemporaryTerms(map<NodeID, int> &reference_count, temporary_terms_type &temporary_terms, bool is_matlab) const;
+  virtual void writeOutput(ostream &output, ExprNodeOutputType output_type, const temporary_terms_type &temporary_terms) const;
+  virtual void computeTemporaryTerms(map<NodeID, int> &reference_count,
+                                     temporary_terms_type &temporary_terms,
+                                     map<NodeID, int> &first_occurence,
+                                     int Curr_block,
+                                     Model_Block *ModelBlock) const;
+  virtual void collectEndogenous(NodeID &Id);
+  virtual double eval(const eval_context_type &eval_context) const throw (EvalException);
 };
 
 typedef struct IM_compact

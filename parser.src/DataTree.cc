@@ -43,21 +43,14 @@ DataTree::AddVariable(const string &name, int lag)
 
   symbol_table.SetReferenced(name);
 
+  int symb_id = symbol_table.getID(name);
   Type type = symbol_table.getType(name);
-  int id;
-  if (type == eEndogenous
-      || type == eExogenousDet
-      || type == eExogenous
-      || type == eRecursiveVariable)
-    id = variable_table.AddVariable(name, lag);
-  else
-    id = symbol_table.getID(name);
 
-  variable_node_map_type::iterator it = variable_node_map.find(make_pair(id, type));
+  variable_node_map_type::iterator it = variable_node_map.find(make_pair(make_pair(symb_id, type), lag));
   if (it != variable_node_map.end())
     return it->second;
   else
-    return new VariableNode(*this, id, type);
+    return new VariableNode(*this, symb_id, type, lag);
 }
 
 NodeID
@@ -345,4 +338,10 @@ DataTree::AddLocalParameter(const string &name, NodeID value) throw (LocalParame
     throw LocalParameterException(name);
 
   local_parameters_table[id] = value;
+}
+
+NodeID
+DataTree::AddUnknownFunction(const string &function_name, const vector<NodeID> &arguments)
+{
+  return new UnknownFunctionNode(*this, function_name, arguments);
 }

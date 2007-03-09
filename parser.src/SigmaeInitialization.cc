@@ -72,7 +72,8 @@ SigmaeStatement::writeOutput(ostream &output, const string &basename) const
               ir1 = ir;
             }
 
-          output << matrix[ir1][ic1] << " ";
+          matrix[ir1][ic1]->writeOutput(output);
+          output << " ";
         }
       output << ";...\n";
     }

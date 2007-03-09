@@ -43,15 +43,22 @@ AbstractShocksStatement::writeDetShocks(ostream &output) const
         {
           const int &period1 = it->second[i].period1;
           const int &period2 = it->second[i].period2;
-          const string &value = it->second[i].value;
+          const NodeID value = it->second[i].value;
 
           if (period1 == period2)
-            output << "set_shocks(" << set_shocks_index << "," << period1
-                   << ", " << id << ", " << value << ");\n";
+            {
+              output << "set_shocks(" << set_shocks_index << "," << period1
+                     << ", " << id << ", ";
+              value->writeOutput(output);
+              output << ");" << endl;
+            }
           else
-            output << "set_shocks(" << set_shocks_index << "," << period1
-                   << ":" << period2 << ", " << id
-                   << ", " << value << ");\n";
+            {
+              output << "set_shocks(" << set_shocks_index << "," << period1
+                     << ":" << period2 << ", " << id << ", ";
+              value->writeOutput(output);
+              output << ");" << endl;
+            }
 
           if (exo_det && (period2 > exo_det_length))
             exo_det_length = period2;
@@ -68,15 +75,19 @@ AbstractShocksStatement::writeVarAndStdShocks(ostream &output) const
   for(it = var_shocks.begin(); it != var_shocks.end(); it++)
     {
       int id = symbol_table.getID(it->first) + 1;
-      const string &value = it->second;
-      output << "M_.Sigma_e(" << id << ", " << id << ") = " << value << ";\n";
+      const NodeID value = it->second;
+      output << "M_.Sigma_e(" << id << ", " << id << ") = ";
+      value->writeOutput(output);
+      output << ";" << endl;
     }
 
   for(it = std_shocks.begin(); it != std_shocks.end(); it++)
     {
       int id = symbol_table.getID(it->first) + 1;
-      const string &value = it->second;
-      output << "M_.Sigma_e(" << id << ", " << id << ") = " << value << "^2;\n";
+      const NodeID value = it->second;
+      output << "M_.Sigma_e(" << id << ", " << id << ") = (";
+      value->writeOutput(output);
+      output << ")^2;" << endl;
     }
 }
 
@@ -89,9 +100,10 @@ AbstractShocksStatement::writeCovarAndCorrShocks(ostream &output) const
     {
       int id1 = symbol_table.getID(it->first.first) + 1;
       int id2 = symbol_table.getID(it->first.second) + 1;
-      const string &value = it->second;
-      output << "M_.Sigma_e(" << id1 << ", " << id2 << ") = " << value
-             << "; M_.Sigma_e(" << id2 << ", " << id1 << ") = M_.Sigma_e("
+      const NodeID value = it->second;
+      output << "M_.Sigma_e(" << id1 << ", " << id2 << ") = ";
+      value->writeOutput(output);
+      output << "; M_.Sigma_e(" << id2 << ", " << id1 << ") = M_.Sigma_e("
              << id1 << ", " << id2 << ");\n";
     }
 
@@ -99,9 +111,10 @@ AbstractShocksStatement::writeCovarAndCorrShocks(ostream &output) const
     {
       int id1 = symbol_table.getID(it->first.first) + 1;
       int id2 = symbol_table.getID(it->first.second) + 1;
-      const string &value = it->second;
-      output << "M_.Sigma_e(" << id1 << ", " << id2 << ") = " << value
-             << "*sqrt(M_.Sigma_e(" << id1 << ", " << id1 << ")*M_.Sigma_e("
+      const NodeID value = it->second;
+      output << "M_.Sigma_e(" << id1 << ", " << id2 << ") = ";
+      value->writeOutput(output);
+      output << "*sqrt(M_.Sigma_e(" << id1 << ", " << id1 << ")*M_.Sigma_e("
              << id2 << ", " << id2 << "); M_.Sigma_e(" << id2 << ", "
              << id1 << ") = M_.Sigma_e(" << id1 << ", " << id2 << ");\n";
     }

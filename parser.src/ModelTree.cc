@@ -15,6 +15,7 @@ ModelTree::ModelTree(SymbolTable &symbol_table_arg,
   DataTree(symbol_table_arg, num_constants_arg),
   mode(eStandardMode),
   compiler(LCC_COMPILE),
+  cutoff(1e-6),
   computeJacobian(false),
   computeJacobianExo(false),
   computeHessian(false),
@@ -752,7 +753,7 @@ ModelTree::writeStaticModel(ostream &StaticOutput) const
       }
 
   // Writing ouputs
-  if (mode == eStandardMode)
+  if (mode != eDLLMode)
     {
       StaticOutput << "global M_ \n";
       StaticOutput << "if M_.param_nbr > 0\n  params = M_.params;\nend\n";
@@ -1785,8 +1786,8 @@ ModelTree::checkPass() const
     }
 }
 
-inline void
-ModelTree::Evaluate_Jacobian()
+void
+ModelTree::evaluateJacobian(const eval_context_type &eval_context)
 {
   int i=0;
   bool *IM;
@@ -1797,9 +1798,7 @@ ModelTree::Evaluate_Jacobian()
       if (variable_table.getType(it->first.second) == eEndogenous)
         {
           NodeID Id = it->second;
-          Id->Evaluate();
-          interprete_.u1 = interprete_.Stack.top();
-          interprete_.Stack.pop();
+          double val = Id->eval(eval_context);
           int eq=it->first.first;
           int var=variable_table.getSymbolID(it->first.second);
           int k1=variable_table.getLag(it->first.second);
@@ -1808,7 +1807,7 @@ ModelTree::Evaluate_Jacobian()
               IM=block_triangular.bGet_IM(k1);
               a_variable_lag=k1;
             }
-          if (IM[eq*symbol_table.endo_nbr+var] && (fabs(interprete_.u1)<interprete_.cutoff))
+          if (IM[eq*symbol_table.endo_nbr+var] && (fabs(val) < cutoff))
             {
               //cout << "the coefficient related to variable " << var << " with lag " << k1 << " in equation " << eq << " is equal to " << interprete_.u1 << " and is set to 0 in the incidence matrix\n";
               block_triangular.unfill_IM(eq, var, k1);
@@ -1817,10 +1816,10 @@ ModelTree::Evaluate_Jacobian()
         }
     }
   if (i>0)
-    cout << i << " elements in the incidence matrices are below the cutoff (" << interprete_.cutoff << ") and are discarded\n";
+    cout << i << " elements in the incidence matrices are below the cutoff (" << cutoff << ") and are discarded\n";
 }
 
-inline void
+void
 ModelTree::BlockLinear(Model_Block *ModelBlock)
 {
   int i,j,l,m;
@@ -1881,7 +1880,7 @@ ModelTree::BlockLinear(Model_Block *ModelBlock)
 }
 
 void
-ModelTree::computingPass()
+ModelTree::computingPass(const eval_context_type &eval_context)
 {
   cout << equations.size() << " equation(s) found" << endl;
 
@@ -1906,8 +1905,7 @@ ModelTree::computingPass()
       int HSize;
       int *Table=variable_table.GetVariableTable(&Size,&HSize);
 
-      interprete_.create_id_map(Table,Size,HSize);
-      Evaluate_Jacobian();
+      evaluateJacobian(eval_context);
 
       if (block_triangular.bt_verbose)
         {

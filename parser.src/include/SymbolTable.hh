@@ -7,10 +7,13 @@
   \par This file defines the SymbolTable class .
 */
 //------------------------------------------------------------------------------
+using namespace std;
+
 #include <map>
 #include <string>
 #include <vector>
 #include <ostream>
+#include <iostream>
 
 #include "SymbolTableTypes.hh"
 
@@ -114,7 +117,10 @@ inline Type SymbolTable::getType(const std::string &name) const
 {
   symboltable_const_iterator iter = symboltable.find(name);
   if (iter == symboltable.end())
-    return eUNDEF;
+    {
+      cerr << "SymbolTable::getType: unknwon symbol: " << name << endl;
+      exit(-1);
+    }
   else
     return iter->second.type;
 }

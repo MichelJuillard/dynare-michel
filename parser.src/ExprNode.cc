@@ -84,6 +84,12 @@ ExprNode::computeTemporaryTerms(map<NodeID, int> &reference_count,
   // Nothing to do for a terminal node
 }
 
+void
+ExprNode::writeOutput(ostream &output)
+{
+  writeOutput(output, oMatlabOutsideModel, temporary_terms_type());
+}
+
 NumConstNode::NumConstNode(DataTree &datatree_arg, int id_arg) :
   ExprNode(datatree_arg),
   id(id_arg)
@@ -114,10 +120,10 @@ NumConstNode::writeOutput(ostream &output, ExprNodeOutputType output_type,
     output << datatree.num_constants.get(id);
 }
 
-void
-NumConstNode::Evaluate() const
+double
+NumConstNode::eval(const eval_context_type &eval_context) const throw (EvalException)
 {
-  datatree.interprete_.Stack.push(atof(datatree.num_constants.get(id).c_str()));
+  return(atof(datatree.num_constants.get(id).c_str()));
 }
 
 void
@@ -125,13 +131,23 @@ NumConstNode::collectEndogenous(NodeID &Id)
 {
 }
 
-VariableNode::VariableNode(DataTree &datatree_arg, int id_arg, Type type_arg) :
+VariableNode::VariableNode(DataTree &datatree_arg, int symb_id_arg, Type type_arg, int lag_arg) :
   ExprNode(datatree_arg),
-  id(id_arg),
-  type(type_arg)
+  symb_id(symb_id_arg),
+  type(type_arg),
+  lag(lag_arg)
 {
   // Add myself to the variable map
-  datatree.variable_node_map[make_pair(id, type)] = this;
+  datatree.variable_node_map[make_pair(make_pair(symb_id, type), lag)] = this;
+
+  // Add myself to the variable table if necessary and initialize var_id
+  if (type == eEndogenous
+      || type == eExogenousDet
+      || type == eExogenous
+      || type == eRecursiveVariable)
+    var_id = datatree.variable_table.AddVariable(datatree.symbol_table.getNameByID(type, symb_id), lag);
+  else
+    var_id = -1;
 
   // Fill in non_null_derivatives
   switch(type)
@@ -141,21 +157,15 @@ VariableNode::VariableNode(DataTree &datatree_arg, int id_arg, Type type_arg) :
     case eExogenousDet:
     case eRecursiveVariable:
       // For a variable, the only non-null derivative is with respect to itself
-      non_null_derivatives.insert(id);
+      non_null_derivatives.insert(var_id);
       break;
     case eParameter:
       // All derivatives are null, do nothing
       break;
     case eLocalParameter:
       // Non null derivatives are those of the value of the local parameter
-      non_null_derivatives = datatree.local_parameters_table[id]->non_null_derivatives;
+      non_null_derivatives = datatree.local_parameters_table[symb_id]->non_null_derivatives;
       break;
-    case eNumericalConstant:
-    case eUNDEF:
-    case eTempResult:
-      // Impossible cases
-      cerr << "Incorrect symbol type used in VariableNode" << endl;
-      exit(-1);
     }
 }
 
@@ -168,20 +178,14 @@ VariableNode::computeDerivative(int varID)
     case eExogenous:
     case eExogenousDet:
     case eRecursiveVariable:
-      if (varID == id)
+      if (varID == var_id)
         return datatree.One;
       else
         return datatree.Zero;
     case eParameter:
       return datatree.Zero;
     case eLocalParameter:
-      return datatree.local_parameters_table[id]->getDerivative(varID);
-    case eNumericalConstant:
-    case eUNDEF:
-    case eTempResult:
-      // Impossible cases
-      cerr << "Incorrect symbol type used in VariableNode" << endl;
-      exit(-1);
+      return datatree.local_parameters_table[symb_id]->getDerivative(varID);
     }
   cerr << "Impossible case!" << endl;
   exit(-1);
@@ -201,18 +205,19 @@ VariableNode::writeOutput(ostream &output, ExprNodeOutputType output_type,
         output << "T" << idx << "[it_]";
       return;
     }
-  int idx, lag;
+
+  int i;
   switch(type)
     {
     case eParameter:
       if (output_type == oMatlabOutsideModel)
-        output << "M_.params" << "(" << id + 1 << ")";
+        output << "M_.params" << "(" << symb_id + 1 << ")";
       else
-        output << "params" << LPAR(output_type) << id + OFFSET(output_type) << RPAR(output_type);
+        output << "params" << LPAR(output_type) << symb_id + OFFSET(output_type) << RPAR(output_type);
       break;
 
     case eLocalParameter:
-      output << datatree.symbol_table.getNameByID(eLocalParameter, id);
+      output << datatree.symbol_table.getNameByID(eLocalParameter, symb_id);
       break;
 
     case eEndogenous:
@@ -220,55 +225,52 @@ VariableNode::writeOutput(ostream &output, ExprNodeOutputType output_type,
         {
         case oMatlabDynamicModel:
         case oCDynamicModel:
-          idx = datatree.variable_table.getPrintIndex(id) + OFFSET(output_type);
-          output <<  "y" << LPAR(output_type) << idx << RPAR(output_type);
+          i = datatree.variable_table.getPrintIndex(var_id) + OFFSET(output_type);
+          output <<  "y" << LPAR(output_type) << i << RPAR(output_type);
           break;
         case oMatlabStaticModel:
         case oCStaticModel:
-          idx = datatree.variable_table.getSymbolID(id) + OFFSET(output_type);
-          output <<  "y" << LPAR(output_type) << idx << RPAR(output_type);
+          i = symb_id + OFFSET(output_type);
+          output <<  "y" << LPAR(output_type) << i << RPAR(output_type);
           break;
         case oCDynamicModelSparseDLL:
-          idx = datatree.variable_table.getSymbolID(id);
-          lag = datatree.variable_table.getLag((long int) id);
           if (lag > 0)
-            output << "y" << LPAR(output_type) << "(it_+" << lag << ")*y_size+" << idx << RPAR(output_type);
+            output << "y" << LPAR(output_type) << "(it_+" << lag << ")*y_size+" << symb_id << RPAR(output_type);
           else if (lag < 0)
-            output << "y" << LPAR(output_type) << "(it_" << lag << ")*y_size+" << idx << RPAR(output_type);
+            output << "y" << LPAR(output_type) << "(it_" << lag << ")*y_size+" << symb_id << RPAR(output_type);
           else
-            output << "y" << LPAR(output_type) << "Per_y_+" << idx << RPAR(output_type);
+            output << "y" << LPAR(output_type) << "Per_y_+" << symb_id << RPAR(output_type);
           break;
         case oMatlabOutsideModel:
-          output << "oo_.steady_state" << "(" << id + 1 << ")";
+          output << "oo_.steady_state" << "(" << symb_id + 1 << ")";
           break;
         }
       break;
 
     case eExogenous:
-      idx = datatree.variable_table.getSymbolID(id) + OFFSET(output_type);
-      lag = datatree.variable_table.getLag(id);
+      i = symb_id + OFFSET(output_type);
       switch(output_type)
         {
         case oMatlabDynamicModel:
           if (lag > 0)
-            output <<  "x(it_+" << lag << ", " << idx << ")";
+            output <<  "x(it_+" << lag << ", " << i << ")";
           else if (lag < 0)
-            output <<  "x(it_" << lag << ", " << idx << ")";
+            output <<  "x(it_" << lag << ", " << i << ")";
           else
-            output <<  "x(it_, " << idx << ")";
+            output <<  "x(it_, " << i << ")";
           break;
         case oCDynamicModel:
+        case oCDynamicModelSparseDLL:
           if (lag == 0)
-            output <<  "x[it_+" << idx << "*nb_row_x]";
+            output <<  "x[it_+" << i << "*nb_row_x]";
           else if (lag > 0)
-            output <<  "x[it_+" << lag << "+" << idx << "*nb_row_x]";
+            output <<  "x[it_+" << lag << "+" << i << "*nb_row_x]";
           else
-            output <<  "x[it_" << lag << "+" << idx << "*nb_row_x]";
+            output <<  "x[it_" << lag << "+" << i << "*nb_row_x]";
           break;
         case oMatlabStaticModel:
         case oCStaticModel:
-        case oCDynamicModelSparseDLL:
-          output << "x" << LPAR(output_type) << idx << RPAR(output_type);
+          output << "x" << LPAR(output_type) << i << RPAR(output_type);
           break;
         case oMatlabOutsideModel:
           if (lag != 0)
@@ -276,36 +278,35 @@ VariableNode::writeOutput(ostream &output, ExprNodeOutputType output_type,
               cerr << "VariableNode::writeOutput: lag != 0 for exogenous variable outside model scope!" << endl;
               exit(-1);
             }
-          output <<  "oo_.exo_steady_state" << "(" << idx << ")";
+          output <<  "oo_.exo_steady_state" << "(" << i << ")";
           break;
         }
       break;
 
     case eExogenousDet:
-      idx = datatree.variable_table.getSymbolID(id) + datatree.symbol_table.exo_nbr + OFFSET(output_type);
-      lag = datatree.variable_table.getLag(id);
+      i = symb_id + datatree.symbol_table.exo_nbr + OFFSET(output_type);
       switch(output_type)
         {
         case oMatlabDynamicModel:
           if (lag > 0)
-            output <<  "x(it_+" << lag << ", " << idx << ")";
+            output <<  "x(it_+" << lag << ", " << i << ")";
           else if (lag < 0)
-            output <<  "x(it_" << lag << ", " << idx << ")";
+            output <<  "x(it_" << lag << ", " << i << ")";
           else
-            output <<  "x(it_, " << idx << ")";
+            output <<  "x(it_, " << i << ")";
           break;
         case oCDynamicModel:
+        case oCDynamicModelSparseDLL:
           if (lag == 0)
-            output <<  "x[it_+" << idx << "*nb_row_xd]";
+            output <<  "x[it_+" << i << "*nb_row_xd]";
           else if (lag > 0)
-            output <<  "x[it_+" << lag << "+" << idx << "*nb_row_xd]";
+            output <<  "x[it_+" << lag << "+" << i << "*nb_row_xd]";
           else
-            output <<  "x[it_" << lag << "+" << idx << "*nb_row_xd]";
+            output <<  "x[it_" << lag << "+" << i << "*nb_row_xd]";
           break;
         case oMatlabStaticModel:
         case oCStaticModel:
-        case oCDynamicModelSparseDLL:
-          output << "x" << LPAR(output_type) << idx << RPAR(output_type);
+          output << "x" << LPAR(output_type) << i << RPAR(output_type);
           break;
         case oMatlabOutsideModel:
           if (lag != 0)
@@ -313,7 +314,7 @@ VariableNode::writeOutput(ostream &output, ExprNodeOutputType output_type,
               cerr << "VariableNode::writeOutput: lag != 0 for exogenous determistic variable outside model scope!" << endl;
               exit(-1);
             }
-          output <<  "oo_.exo_det_steady_state" << "(" << datatree.variable_table.getSymbolID(id) + 1 << ")";
+          output <<  "oo_.exo_det_steady_state" << "(" << symb_id + 1 << ")";
           break;
         }
       break;
@@ -321,33 +322,27 @@ VariableNode::writeOutput(ostream &output, ExprNodeOutputType output_type,
     case eRecursiveVariable:
       cerr << "Recursive variable not implemented" << endl;
       exit(-1);
-    case eTempResult:
-    case eNumericalConstant:
-    case eUNDEF:
-      // Impossible cases
-      cerr << "Incorrect symbol type used in VariableNode" << endl;
-      exit(-1);
     }
 }
 
-void
-VariableNode::Evaluate() const
+double
+VariableNode::eval(const eval_context_type &eval_context) const throw (EvalException)
 {
-  if (type == eParameter)
-    datatree.interprete_.Stack.push(datatree.interprete_.GetDataValue(id, type));
-  else
-    datatree.interprete_.Stack.push(datatree.interprete_.GetDataValue(datatree.variable_table.getSymbolID(id), type));
+  if (lag != 0)
+    throw EvalException();
+
+  eval_context_type::const_iterator it = eval_context.find(make_pair(symb_id, type));
+  if (it == eval_context.end())
+    throw EvalException();
+
+  return it->second;
 }
 
 void
 VariableNode::collectEndogenous(NodeID &Id)
 {
-  int idx;
   if (type == eEndogenous)
-    {
-      idx = datatree.variable_table.getSymbolID(id);
-      Id->present_endogenous.insert(make_pair(idx, datatree.variable_table.getLag((long int) id)));
-    }
+    Id->present_endogenous.insert(make_pair(symb_id, lag));
 }
 
 UnaryOpNode::UnaryOpNode(DataTree &datatree_arg, UnaryOpcode op_code_arg, const NodeID arg_arg) :
@@ -663,67 +658,50 @@ UnaryOpNode::writeOutput(ostream &output, ExprNodeOutputType output_type,
     output << ")";
 }
 
-void
-UnaryOpNode::Evaluate() const
+double
+UnaryOpNode::eval(const eval_context_type &eval_context) const throw (EvalException)
 {
-  this->arg->Evaluate();
-  datatree.interprete_.u2 = datatree.interprete_.Stack.top();
-  datatree.interprete_.Stack.pop();
+  double v = arg->eval(eval_context);
+
   switch(op_code)
     {
     case oUminus:
-      datatree.interprete_.u1=-datatree.interprete_.u2;
-      break;
+      return(-v);
     case oExp:
-      datatree.interprete_.u1=exp(datatree.interprete_.u2);
-      break;
+      return(exp(v));
     case oLog:
-      datatree.interprete_.u1=log(datatree.interprete_.u2);
-      break;
+      return(log(v));
     case oLog10:
-      datatree.interprete_.u1=log10(datatree.interprete_.u2);
-      break;
+      return(log10(v));
     case oCos:
-      datatree.interprete_.u1=cos(datatree.interprete_.u2);
-      break;
+      return(cos(v));
     case oSin:
-      datatree.interprete_.u1=sin(datatree.interprete_.u2);
-      break;
+      return(sin(v));
     case oTan:
-      datatree.interprete_.u1=tan(datatree.interprete_.u2);
-      break;
+      return(tan(v));
     case oAcos:
-      datatree.interprete_.u1=acos(datatree.interprete_.u2);
-      break;
+      return(acos(v));
     case oAsin:
-      datatree.interprete_.u1=asin(datatree.interprete_.u2);
-      break;
+      return(asin(v));
     case oAtan:
-      datatree.interprete_.u1=atan(datatree.interprete_.u2);
-      break;
+      return(atan(v));
     case oCosh:
-      datatree.interprete_.u1=cosh(datatree.interprete_.u2);
-      break;
+      return(cosh(v));
     case oSinh:
-      datatree.interprete_.u1=sinh(datatree.interprete_.u2);
-      break;
+      return(sinh(v));
     case oTanh:
-      datatree.interprete_.u1=tanh(datatree.interprete_.u2);
-      break;
+      return(tanh(v));
     case oAcosh:
-      datatree.interprete_.u1=acosh(datatree.interprete_.u2);
-      break;
+      return(acosh(v));
     case oAsinh:
-      datatree.interprete_.u1=asinh(datatree.interprete_.u2);
-      break;
+      return(asinh(v));
     case oAtanh:
-      datatree.interprete_.u1=atanh(datatree.interprete_.u2);
-      break;
+      return(atanh(v));
     case oSqrt:
-      datatree.interprete_.u1=sqrt(datatree.interprete_.u2);
-      break;
+      return(sqrt(v));
     }
-  datatree.interprete_.Stack.push(datatree.interprete_.u1);
+  // Impossible
+  throw EvalException();
 }
 
 void
@@ -928,37 +906,28 @@ BinaryOpNode::computeTemporaryTerms(map<NodeID, int> &reference_count,
     }
 }
 
-void
-BinaryOpNode::Evaluate() const
+double
+BinaryOpNode::eval(const eval_context_type &eval_context) const throw (EvalException)
 {
-  // Write current operator symbol
-  this->arg1->Evaluate();
-  this->arg2->Evaluate();
-  datatree.interprete_.u2 = datatree.interprete_.Stack.top();
-  datatree.interprete_.Stack.pop();
-  datatree.interprete_.u1 = datatree.interprete_.Stack.top();
-  datatree.interprete_.Stack.pop();
+  double v1 = arg1->eval(eval_context);
+  double v2 = arg2->eval(eval_context);
+
   switch(op_code)
     {
     case oPlus:
-      datatree.interprete_.u1+=datatree.interprete_.u2;
-      break;
+      return(v1 + v2);
     case oMinus:
-      datatree.interprete_.u1-=datatree.interprete_.u2;
-      break;
+      return(v1 - v2);
     case oTimes:
-      datatree.interprete_.u1*=datatree.interprete_.u2;
-      break;
+      return(v1 * v2);
     case oDivide:
-      datatree.interprete_.u1/=datatree.interprete_.u2;
-      break;
+      return(v1 / v2);
     case oPower:
-      datatree.interprete_.u1=pow(datatree.interprete_.u1,datatree.interprete_.u2);
-      break;
+      return(pow(v1, v2));
     case oEqual:
-      break;
+    default:
+      throw EvalException();
     }
-  datatree.interprete_.Stack.push(datatree.interprete_.u1);
 }
 
 void
@@ -1059,4 +1028,68 @@ BinaryOpNode::collectEndogenous(NodeID &Id)
 {
   arg1->collectEndogenous(Id);
   arg2->collectEndogenous(Id);
+}
+
+UnknownFunctionNode::UnknownFunctionNode(DataTree &datatree_arg,
+                                         const string &function_name_arg,
+                                         const vector<NodeID> &arguments_arg) :
+  ExprNode(datatree_arg),
+  function_name(function_name_arg),
+  arguments(arguments_arg)
+{
+}
+
+NodeID
+UnknownFunctionNode::computeDerivative(int varID)
+{
+  cerr << "UnknownFunctionNode::computeDerivative: operation impossible!" << endl;
+  exit(-1);
+}
+
+void
+UnknownFunctionNode::computeTemporaryTerms(map<NodeID, int> &reference_count,
+                                           temporary_terms_type &temporary_terms,
+                                           bool is_matlab) const
+{
+  cerr << "UnknownFunctionNode::computeTemporaryTerms: operation impossible!" << endl;
+  exit(-1);
+}
+
+void UnknownFunctionNode::writeOutput(ostream &output, ExprNodeOutputType output_type,
+                                      const temporary_terms_type &temporary_terms) const
+{
+  output << function_name << "(";
+  for(vector<NodeID>::const_iterator it = arguments.begin();
+      it != arguments.end(); it++)
+    {
+      if (it != arguments.begin())
+        output << ",";
+
+      (*it)->writeOutput(output, output_type, temporary_terms);
+    }
+  output << ")";
+}
+
+void
+UnknownFunctionNode::computeTemporaryTerms(map<NodeID, int> &reference_count,
+                                           temporary_terms_type &temporary_terms,
+                                           map<NodeID, int> &first_occurence,
+                                           int Curr_block,
+                                           Model_Block *ModelBlock) const
+{
+  cerr << "UnknownFunctionNode::computeTemporaryTerms: not implemented" << endl;
+  exit(-1);
+}
+
+void
+UnknownFunctionNode::collectEndogenous(NodeID &Id)
+{
+  cerr << "UnknownFunctionNode::collectEndogenous: not implemented" << endl;
+  exit(-1);
+}
+
+double
+UnknownFunctionNode::eval(const eval_context_type &eval_context) const throw (EvalException)
+{
+  throw EvalException();
 }

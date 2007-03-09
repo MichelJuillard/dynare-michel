@@ -6,6 +6,7 @@ using namespace std;
 #include <string>
 #include <vector>
 
+#include "ExprNode.hh"
 #include "Statement.hh"
 
 //! Stores a Sigma_e statement
@@ -19,7 +20,7 @@ public:
       eUpper = 1               //!< Upper triangular matrix
     };
   //! Type of a matrix row
-  typedef vector<string> row_type;
+  typedef vector<NodeID> row_type;
   //! Type of a complete matrix
   typedef vector<row_type> matrix_type;
 
