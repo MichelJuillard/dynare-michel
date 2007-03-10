@@ -40,7 +40,6 @@ COMMON_OBJ=\
 	ModelTree.o\
 	NumericalConstants.o\
 	NumericalInitialization.o\
-	OperatorTable.o\
 	Shocks.o\
 	SigmaeInitialization.o\
 	SymbolTable.o\

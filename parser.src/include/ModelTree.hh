@@ -11,7 +11,6 @@ using namespace std;
 #include "SymbolTable.hh"
 #include "NumericalConstants.hh"
 #include "DataTree.hh"
-#include "OperatorTable.hh"
 #include "BlockTriangular.hh"
 
 #define LCC_COMPILE 0
