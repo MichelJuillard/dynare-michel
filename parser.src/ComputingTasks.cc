@@ -130,7 +130,7 @@ RamseyPolicyStatement::checkPass(ModFileStructure &mod_file_struct)
   // Fill in option_order of mod_file_struct
   OptionsList::num_options_type::const_iterator it = options_list.num_options.find("order");
   if (it != options_list.num_options.end())
-    mod_file_struct.order_option = atoi(it->second.c_str());
+    mod_file_struct.order_option = atoi(it->second.c_str()) + 1;
 }
 
 void
