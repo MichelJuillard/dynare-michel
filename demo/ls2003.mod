@@ -69,14 +69,23 @@ disp('NOW I DO STABILITY MAPPING, WHICH REQUIRES dynare_estimation to initialise
 disp(' ');
 pause;
 
+stoch_simul(irf=0, periods=100, order=1) y_obs R_obs pie_obs dq de;
+save data_ca1 y_obs R_obs pie_obs dq de
+
+
+
+
+
 estimation(datafile=data_ca1,mode_compute=0);
+
 		   
 opt_gsa.stab=1;	% performs stability analysis Idefault)
 opt_gsa.Nsam=2048; % sample size (default = 2048)
 opt_gsa.redform=1; % prepares mapping of reduced form coefficients (default = 0): this saves the full MC sample of the reduced form LRE solution
 opt_gsa.ilptau=1; % lptau sample (default)
-opt_gsa.load_stab=0; %don't load already generated sample (default=0)
+opt_gsa.load_stab=1; %don't load already generated sample (default=0)
 opt_gsa.alpha2_stab=0.4; % critical value to plot correlations in stable samples (default = 0.3)
+opt_gsa.ksstat=0; % critical value to plot Smirnov test in filtered samples (default = 0.1)
 
 options_.opt_gsa=opt_gsa;
 dynare_sensitivity;
@@ -87,7 +96,7 @@ disp(' ');
 pause;
 
 opt_gsa.logtrans_redform=1; % also estimate log-transformed reduced form coefficients (default=0)
-opt_gsa.namendo='pie'; % evaluate relationships for pie (it can be M_.endo_names as well for complete analysis)
+opt_gsa.namendo=M_.endo_names; % 'pie'; % evaluate relationships for pie (it can be M_.endo_names as well for complete analysis)
 opt_gsa.namexo=M_.exo_names; % evaluate relationships with all exogenous
 opt_gsa.namlagendo=M_.endo_names; % evaluate relationships with all endogenous
 opt_gsa.load_stab=1; % load stability analsis sample
