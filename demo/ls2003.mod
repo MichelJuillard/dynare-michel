@@ -69,21 +69,14 @@ disp('NOW I DO STABILITY MAPPING, WHICH REQUIRES dynare_estimation to initialise
 disp(' ');
 pause;
 
-stoch_simul(irf=0, periods=100, order=1) y_obs R_obs pie_obs dq de;
-save data_ca1 y_obs R_obs pie_obs dq de
-
-
-
-
-
 estimation(datafile=data_ca1,mode_compute=0);
 
 		   
-opt_gsa.stab=1;	% performs stability analysis Idefault)
+opt_gsa.stab=1;	% performs stability analysis (1 = default)
 opt_gsa.Nsam=2048; % sample size (default = 2048)
 opt_gsa.redform=1; % prepares mapping of reduced form coefficients (default = 0): this saves the full MC sample of the reduced form LRE solution
-opt_gsa.ilptau=1; % lptau sample (default)
-opt_gsa.load_stab=1; %don't load already generated sample (default=0)
+opt_gsa.ilptau=1; % lptau sample (1=default)
+opt_gsa.load_stab=0; % generate a new sample: overwrites any generated sample (default=0)
 opt_gsa.alpha2_stab=0.4; % critical value to plot correlations in stable samples (default = 0.3)
 opt_gsa.ksstat=0; % critical value to plot Smirnov test in filtered samples (default = 0.1)
 
@@ -96,11 +89,14 @@ disp(' ');
 pause;
 
 opt_gsa.logtrans_redform=1; % also estimate log-transformed reduced form coefficients (default=0)
-opt_gsa.namendo=M_.endo_names; % 'pie'; % evaluate relationships for pie (it can be M_.endo_names as well for complete analysis)
-opt_gsa.namexo=M_.exo_names; % evaluate relationships with all exogenous
-opt_gsa.namlagendo=M_.endo_names; % evaluate relationships with all endogenous
+//opt_gsa.namendo='pie'; % evaluate relationships for pie (it can be M_.endo_names as well for complete analysis)
+opt_gsa.namendo=['pie'; 'R  ']; % evaluate relationships for pie and R (it can be M_.endo_names as well for complete analysis)
+opt_gsa.namexo='e_R'; % evaluate relationships with exogenous e_R
+//opt_gsa.namexo=M_.exo_names; % evaluate relationships with all exogenous
+opt_gsa.namlagendo='R'; % evaluate relationships with lagged endogenous
+//opt_gsa.namlagendo=M_.endo_names; % evaluate relationships with all lagged endogenous
 opt_gsa.load_stab=1; % load stability analsis sample
-opt_gsa.load_redform=0; %load reduced form analysis (default=0: preform a new one)
+opt_gsa.load_redform=0; %load reduced form analysis if available (default=0: perform a new one)
 opt_gsa.stab=0; % don't do again stability analysis
 options_.opt_gsa=opt_gsa;
 dynare_sensitivity;
@@ -110,11 +106,11 @@ disp('I ESTIMATE THE MODEL');
 disp(' ');
 pause;
 // if already estimated, use this to build filtered variables at the mode in oo_ for RMSE analysis
-estimation(datafile=data_ca1,first_obs=8,nobs=79,mh_nblocks=2, mode_file=ls2003_mode, //load_mh_file,
+estimation(datafile=data_ca1,first_obs=8,nobs=79,mh_nblocks=2, mode_file=ls2003_mode, load_mh_file,
   prefilter=1,mh_jscale=0.55,mh_replic=0, mode_compute=0, nograph, mh_drop=0.6);
 
 // run this to generate posterior mode and Metropolis files if not yet done
-//estimation(datafile=data_ca1,first_obs=8,nobs=79,mh_nblocks=2,prefilter=1,mh_jscale=0.5,mh_replic=100000, mode_compute=4, nograph, mh_drop=0.9);
+//estimation(datafile=data_ca1,first_obs=8,nobs=79,mh_nblocks=2,prefilter=1,mh_jscale=0.5,mh_replic=100000, mode_compute=4, nograph, mh_drop=0.6);
 //options_.hess=1;
 //options_.ftol=1.e-7;
 
@@ -133,10 +129,10 @@ opt_gsa.redform=0;
 opt_gsa.load_stab=1; % load prior sample
 opt_gsa.load_rmse=0; % make a new rmse analysis
 opt_gsa.istart_rmse=2; %start computing rmse from second observation (i.e. rmse does not inlude initial big error)
-opt_gsa.stab=0;
+opt_gsa.stab=0; % don't  plot again stability analysis results
 opt_gsa.rmse=1; % do rmse analysis
 opt_gsa.glue=1; % prepare for glue GUI
-opt_gsa.pfilt_rmse=0.1;  % critical value of the Smirnov statistics for Filtering
+opt_gsa.pfilt_rmse=0.1;  % filtering criterion, i.e. I filter the best 10% rmse's
 opt_gsa.alpha2_rmse=0.3; % critical value for correlations in the rmse filterting analysis: if ==1, means no corrleation analysis done
 opt_gsa.alpha_rmse=1; % critical value for smirnov statistics
 options_.opt_gsa=opt_gsa;
@@ -182,4 +178,5 @@ opt_gsa.alpha_rmse=1;
 opt_gsa.glue=1;
 options_.opt_gsa=opt_gsa;
 dynare_sensitivity;
+
 
