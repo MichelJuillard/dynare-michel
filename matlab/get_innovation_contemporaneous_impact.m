@@ -23,7 +23,7 @@ function F = get_innovation_contemporaneous_impact('type')
 %   None.       
 %
 % SPECIAL REQUIREMENTS
-%   This function need to be run after the estimation of a model.
+%   This function needs to be run after the estimation of a model.
 %  
 %  
 % part of DYNARE, copyright S. Adjemian, M. Juillard (2006)
@@ -36,7 +36,9 @@ end
 
 get_posterior_parameters(type);
 
-Atheta(oo_.dr.order_var,M_.exo_names_orig_ord) = oo_.dr.ghu*sqrt(M_.Sigma_e);
-F = Atheta(bayestopt_.mfys,:);
+[dr,info]=dr1(oo_.dr,0);
+
+B(dr.order_var,M_.exo_names_orig_ord) = dr.ghu*sqrt(M_.Sigma_e);
+F = B(bayestopt_.mfys,:);
 
 save([M_.fname '_InnovImpact',F]);
