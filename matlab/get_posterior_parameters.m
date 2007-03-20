@@ -5,7 +5,7 @@ function xparam = get_posterior_parameters(type)
 %   o type       [char]     = 'mode' or 'mean'.
 %  
 % OUTPUTS 
-%   None.  
+%   o xparam  
 %
 %
 % ALGORITHM 
@@ -63,9 +63,15 @@ for i=1:ncn
     m = m+1;
 end
 
+FirstDeep = m;
+
 for i=1:np
     name1 = deblank(M_.param_names(estim_params_.param_vals(i,1),:));
     xparam(m) = eval(['oo_.posterior_' type '.parameters.' name1]);
-    assignin('base',name1,xparam(m));
+    assignin('base',name1,xparam(m));% Useless with version 4 (except maybe for users)
     m = m+1;
+end
+
+if np
+    M_.params(estim_params_.param_vals(:,1)) = xparam1(FirstDeep:end);
 end
