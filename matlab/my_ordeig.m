@@ -12,7 +12,7 @@ function eval = my_ordeig(t)
     end
   end
   if i < n
-    t(n) = t(n,n);
+    eval(n) = t(n,n);
   end
   
       
