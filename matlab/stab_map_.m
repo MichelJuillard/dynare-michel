@@ -1,14 +1,11 @@
-function x0 = stab_map_(Nsam, fload, ksstat, alpha2, prepSA, pprior, ilptau, OutputDirectoryName)
+function x0 = stab_map_(OutputDirectoryName)
 %
-% function x0 = stab_map_(Nsam, fload, alpha2, prepSA, pprior)
+% function x0 = stab_map_(OutputDirectoryName)
 %
 % Mapping of stability regions in the prior ranges applying
 % Monte Carlo filtering techniques.
 %
-% M. Ratto, Global Sensitivity Analysis for Macroeconomic models
-% I. Mapping stability, MIMEO, 2005.
-%
-% INPUTS
+% INPUTS (from opt_gsa structure)
 % Nsam = MC sample size
 % fload = 0 to run new MC; 1 to load prevoiusly generated analysis
 % alpha2 =  significance level for bivariate sensitivity analysis
@@ -34,100 +31,120 @@ function x0 = stab_map_(Nsam, fload, ksstat, alpha2, prepSA, pprior, ilptau, Out
 % USES lptauSEQ, 
 %      stab_map_1, stab_map_2
 %
-% Copyright (C) 2005 Marco Ratto
-% THIS PROGRAM WAS WRITTEN FOR MATLAB BY
-% Marco Ratto,
-% Unit of Econometrics and Statistics AF
-% (http://www.jrc.cec.eu.int/uasa/),
-% IPSC, Joint Research Centre
-% The European Commission,
-% TP 361, 21020 ISPRA(VA), ITALY
+% Part of the Sensitivity Analysis Toolbox for DYNARE
+%
+% Written by Marco Ratto, 2006
+% Joint Research Centre, The European Commission,
+% (http://eemc.jrc.ec.europa.eu/),
 % marco.ratto@jrc.it 
 %
-% ALL COPIES MUST BE PROVIDED FREE OF CHARGE AND MUST INCLUDE THIS COPYRIGHT
-% NOTICE.
+% Disclaimer: This software is not subject to copyright protection and is in the public domain. 
+% It is an experimental system. The Joint Research Centre of European Commission 
+% assumes no responsibility whatsoever for its use by other parties
+% and makes no guarantees, expressed or implied, about its quality, reliability, or any other
+% characteristic. We would appreciate acknowledgement if the software is used.
+% Reference:
+% M. Ratto, Global Sensitivity Analysis for Macroeconomic models, MIMEO, 2006.
 %
 
 %global bayestopt_ estim_params_ dr_ options_ ys_ fname_
 global bayestopt_ estim_params_ options_ oo_ M_
 
+opt_gsa=options_.opt_gsa;
+
+Nsam   = opt_gsa.Nsam;
+fload  = opt_gsa.load_stab;
+ksstat = opt_gsa.ksstat; 
+alpha2 = opt_gsa.alpha2_stab; 
+prepSA = (opt_gsa.redform | opt_gsa.identification); 
+pprior = opt_gsa.pprior; 
+ilptau = opt_gsa.ilptau;
+nliv   = opt_gsa.morris_nliv;    
+ntra   = opt_gsa.morris_ntra;
+
 dr_ = oo_.dr;
-if isfield(dr_,'ghx'),
+%if isfield(dr_,'ghx'),
   ys_ = oo_.dr.ys;
-  nspred = size(dr_.ghx,2);
+  nspred = dr_.nspred; %size(dr_.ghx,2);
   nboth = dr_.nboth;
   nfwrd = dr_.nfwrd;
-end
+%end
 fname_ = M_.fname;
 
 nshock = estim_params_.nvx;
 nshock = nshock + estim_params_.nvn;
 nshock = nshock + estim_params_.ncx;
 nshock = nshock + estim_params_.ncn;
+lpmat0=[];
 
+pshape = bayestopt_.pshape(nshock+1:end); 
+p1 = bayestopt_.p1(nshock+1:end); 
+p2 = bayestopt_.p2(nshock+1:end); 
+p3 = bayestopt_.p3(nshock+1:end); 
+p4 = bayestopt_.p4(nshock+1:end); 
 
 if nargin==0,
-  Nsam=2000; %2^13; %256;
-end
-if nargin<2,
-  fload=0;
-end
-if nargin<3,
-  ksstat=0.1;
-end
-if nargin<4,
-  alpha2=0.3;
-end
-if nargin<5,
-  prepSA=0;
-end
-if nargin<6,
-  pprior=1;
-end
-if nargin<7,
-  ilptau=1;
-end
-if nargin<8,
   OutputDirectoryName='';
 end
 
-options_.periods=0;
-options_.nomoments=1;
-options_.irf=0;
-options_.noprint=1;
-
-if fload==0 | nargin<2 | isempty(fload),
-  if prepSA
-    T=zeros(size(dr_.ghx,1),size(dr_.ghx,2)+size(dr_.ghu,2),Nsam/2);
-  end
+opt=options_;
+  options_.periods=0;
+  options_.nomoments=1;
+  options_.irf=0;
+  options_.noprint=1;
+  options_.simul=0;
+if fload==0,
+%   if prepSA
+%     T=zeros(size(dr_.ghx,1),size(dr_.ghx,2)+size(dr_.ghu,2),Nsam/2);
+%   end
   
   if isfield(dr_,'ghx'),
     egg=zeros(length(dr_.eigval),Nsam);
   end
   yys=zeros(length(dr_.ys),Nsam);
   
-  
-  if estim_params_.np<52 & ilptau,
-    [lpmat] = lptauSEQ(Nsam,estim_params_.np);
-    if estim_params_.np>30
+  if opt_gsa.morris
+    if opt_gsa.morris == 1
+      [lpmat, OutFact] = Sampling_Function_2(nliv, estim_params_.np, ntra, ones(estim_params_.np, 1), zeros(estim_params_.np,1), []);
+      lpmat = lpmat.*(nliv-1)/nliv+1/nliv/2;
+      Nsam=size(lpmat,1);
+    elseif opt_gsa.morris==2
+      lpmat = prep_ide(Nsam,estim_params_.np,5);
+      Nsam=size(lpmat,1);
+    end
+  else
+  if estim_params_.np<52 & ilptau>0,
+    [lpmat] = lptauSEQ(Nsam,estim_params_.np); % lptau
+    if estim_params_.np>30 | ilptau==2, % scrambled lptau
       for j=1:estim_params_.np,
         lpmat(:,j)=lpmat(randperm(Nsam),j);
       end
     end
-  else
+  else ilptau==0
     %[lpmat] = rand(Nsam,estim_params_.np);
     for j=1:estim_params_.np,
       lpmat(:,j) = randperm(Nsam)'./(Nsam+1); %latin hypercube
     end
+
   end
-  
+  end
+  prior_draw_gsa(1);
   if pprior,
     for j=1:nshock,
       lpmat0(:,j) = randperm(Nsam)'./(Nsam+1); %latin hypercube
-      lpmat0(:,j)=lpmat0(:,j).*(bayestopt_.ub(j)-bayestopt_.lb(j))+bayestopt_.lb(j);
+      if opt_gsa.prior_range
+        lpmat0(:,j)=lpmat0(:,j).*(bayestopt_.ub(j)-bayestopt_.lb(j))+bayestopt_.lb(j);
+      end
     end
-    for j=1:estim_params_.np,
-      lpmat(:,j)=lpmat(:,j).*(bayestopt_.ub(j+nshock)-bayestopt_.lb(j+nshock))+bayestopt_.lb(j+nshock);
+    if opt_gsa.prior_range
+      for j=1:estim_params_.np,
+        lpmat(:,j)=lpmat(:,j).*(bayestopt_.ub(j+nshock)-bayestopt_.lb(j+nshock))+bayestopt_.lb(j+nshock);
+      end
+    else
+      xx=prior_draw_gsa(0,[lpmat0 lpmat]);
+      lpmat0=xx(:,1:nshock);
+      lpmat=xx(:,nshock+1:end);
+      clear xx;
     end
   else
     %         for j=1:nshock,
@@ -183,7 +200,24 @@ if fload==0 | nargin<2 | isempty(fload),
   iwrong=zeros(1,Nsam);
   for j=1:Nsam,
     M_.params(estim_params_.param_vals(:,1)) = lpmat(j,:)';
-    stoch_simul([]);
+    %try stoch_simul([]);
+    try 
+      [Tt,Rr,SteadyState,info] = dynare_resolve(bayestopt_.restrict_var_list,...
+					  bayestopt_.restrict_columns,...
+					  bayestopt_.restrict_aux);
+          
+      if ~exist('T')
+        T=zeros(size(dr_.ghx,1),size(dr_.ghx,2)+size(dr_.ghu,2),Nsam);
+      end
+    catch 
+      if isfield(oo_.dr,'eigval'),
+        oo_.dr=rmfield(oo_.dr,'eigval');
+      end
+      if isfield(oo_.dr,'ghx'),
+        oo_.dr=rmfield(oo_.dr,'ghx');
+      end
+      disp('No solution could be found'),
+    end
     dr_ = oo_.dr;
     if isfield(dr_,'ghx'),
       egg(:,j) = sort(dr_.eigval);
@@ -191,9 +225,13 @@ if fload==0 | nargin<2 | isempty(fload),
       if prepSA
         jstab=jstab+1;
         T(:,:,jstab) = [dr_.ghx dr_.ghu];
+        [A,B] = ghx2transition(squeeze(T(:,:,jstab)), ...
+          bayestopt_.restrict_var_list, ...
+          bayestopt_.restrict_columns, ...
+          bayestopt_.restrict_aux);
       end            
       if ~exist('nspred'),
-        nspred = size(dr_.ghx,2);
+        nspred = dr_.nspred; %size(dr_.ghx,2);
         nboth = dr_.nboth;
         nfwrd = dr_.nfwrd;
       end
@@ -212,7 +250,7 @@ if fload==0 | nargin<2 | isempty(fload),
         end
       else
         if exist('egg'),
-        egg(:,j)=ones(size(egg,1),1).*1.1;
+        egg(:,j)=ones(size(egg,1),1).*NaN;
         end
         iwrong(j)=j;
       end
@@ -265,20 +303,31 @@ if fload==0 | nargin<2 | isempty(fload),
   %         end
   %     end
   %     iunstable=iunstable(find(iunstable));   % unstable params
+  bkpprior.pshape=bayestopt_.pshape;
+  bkpprior.p1=bayestopt_.p1;
+  bkpprior.p2=bayestopt_.p2;
+  bkpprior.p3=bayestopt_.p3;
+  bkpprior.p4=bayestopt_.p4;
   if pprior,
     if ~prepSA
-      save([OutputDirectoryName '\' fname_ '_prior'],'lpmat','lpmat0','iunstable','istable','iindeterm','iwrong','egg','yys','nspred','nboth','nfwrd')
+      save([OutputDirectoryName '\' fname_ '_prior'], ...
+        'bkpprior','lpmat','lpmat0','iunstable','istable','iindeterm','iwrong', ...
+        'egg','yys','nspred','nboth','nfwrd')
     else
-      save([OutputDirectoryName '\' fname_ '_prior'],'lpmat','lpmat0','iunstable','istable','iindeterm','iwrong','egg','yys','T','nspred','nboth','nfwrd')
+      save([OutputDirectoryName '\' fname_ '_prior'], ...
+        'bkpprior','lpmat','lpmat0','iunstable','istable','iindeterm','iwrong', ...
+        'egg','yys','T','nspred','nboth','nfwrd')
     end
     
   else
     if ~prepSA
       save([OutputDirectoryName '\' fname_ '_mc'], ...
-        'lpmat','lpmat0','iunstable','istable','iindeterm','iwrong','egg','yys','nspred','nboth','nfwrd')
+        'lpmat','lpmat0','iunstable','istable','iindeterm','iwrong', ...
+        'egg','yys','nspred','nboth','nfwrd')
     else
       save([OutputDirectoryName '\' fname_ '_mc'], ...
-        'lpmat','lpmat0','iunstable','istable','iindeterm','iwrong','egg','yys','T','nspred','nboth','nfwrd')
+        'lpmat','lpmat0','iunstable','istable','iindeterm','iwrong', ...
+        'egg','yys','T','nspred','nboth','nfwrd')
     end
   end
 else
@@ -289,6 +338,7 @@ else
   end
   load(filetoload,'lpmat','lpmat0','iunstable','istable','iindeterm','iwrong','egg','yys','nspred','nboth','nfwrd')
   Nsam = size(lpmat,1);    
+    
   
   if prepSA & isempty(strmatch('T',who('-file', filetoload),'exact')),
     h = waitbar(0,'Please wait...');
@@ -297,15 +347,21 @@ else
     options_.irf=0;
     options_.noprint=1;
     stoch_simul([]);
-    T=zeros(size(dr_.ghx,1),size(dr_.ghx,2)+size(dr_.ghu,2),length(istable));
+    %T=zeros(size(dr_.ghx,1),size(dr_.ghx,2)+size(dr_.ghu,2),length(istable));
     ntrans=length(istable);
     for j=1:ntrans,
       M_.params(estim_params_.param_vals(:,1)) = lpmat(istable(j),:)';
-      stoch_simul([]);
+      %stoch_simul([]);
+      [Tt,Rr,SteadyState,info] = dynare_resolve(bayestopt_.restrict_var_list,...
+					  bayestopt_.restrict_columns,...
+					  bayestopt_.restrict_aux);
+      if ~exist('T')
+        T=zeros(size(dr_.ghx,1),size(dr_.ghx,2)+size(dr_.ghu,2),ntrans);
+      end
       dr_ = oo_.dr;
-      T(:,:,j) = [dr_.ghx dr_.ghu];
+      T(:,:,j) = [dr_.ghx dr_.ghu];        
       if ~exist('nspred')
-        nspred = size(dr_.ghx,2);
+        nspred = dr_.nspred; %size(dr_.ghx,2);
         nboth = dr_.nboth;
         nfwrd = dr_.nfwrd;
       end
@@ -316,6 +372,8 @@ else
     end
     close(h)
     save(filetoload,'T','-append')    
+  elseif prepSA
+    load(filetoload,'T')        
   end
 end
 
@@ -340,37 +398,54 @@ delete([OutputDirectoryName,'\',fname_,'_',aunstname,'_corr_*.*']);
 delete([OutputDirectoryName,'\',fname_,'_',aindname,'_corr_*.*']);
 
 if length(iunstable)>0 & length(iunstable)<Nsam,
-  disp([num2str(length(istable)/Nsam*100),'\% of the prior support is stable.'])
+  disp([num2str(length(istable)/Nsam*100,3),'\% of the prior support is stable.'])
   disp([num2str( (length(iunstable)-length(iwrong)-length(iindeterm) )/Nsam*100),'\% of the prior support is unstable.'])
   if ~isempty(iindeterm),
-    disp([num2str(length(iindeterm)/Nsam*100),'\% of the prior support gives indeterminacy.'])
+    disp([num2str(length(iindeterm)/Nsam*100,3),'\% of the prior support gives indeterminacy.'])
   end
   if ~isempty(iwrong),
     disp(' ');
-    disp(['For ',num2str(length(iwrong)/Nsam*100),'\% of the prior support dynare could not find a solution.'])      
+    disp(['For ',num2str(length(iwrong)/Nsam*100,3),'\% of the prior support dynare could not find a solution.'])      
   end
+  disp(' ');
   % Blanchard Kahn
   [proba, dproba] = stab_map_1(lpmat, istable, iunstable, aname,0);
   indstab=find(dproba>ksstat);
-  disp('The following parameters mostly drive acceptable behaviour')
-  disp(M_.param_names(estim_params_.param_vals(indstab,1),:))  
+  disp('Smirnov statistics in driving acceptable behaviour')
+  for j=1:estim_params_.np,
+    disp([M_.param_names(estim_params_.param_vals(j,1),:),'   d-stat = ', num2str(dproba(j),3)])  
+  end
+  disp(' ');
+  if ~isempty(indstab)
   stab_map_1(lpmat, istable, iunstable, aname, 1, indstab, OutputDirectoryName);
+  end
+  ixun=iunstable(find(~ismember(iunstable,[iindeterm,iwrong])));
   if ~isempty(iindeterm),
-    ixun=iunstable(find(~ismember(iunstable,[iindeterm,iwrong])));
     [proba, dproba] = stab_map_1(lpmat, [1:Nsam], iindeterm, [aname, '_indet'],0);
     indindet=find(dproba>ksstat);
-    disp('The following parameters mostly drive indeterminacy')
-    disp(M_.param_names(estim_params_.param_vals(indindet,1),:))  
-    stab_map_1(lpmat, [1:Nsam], iindeterm, [aname, '_indet'], 1, indindet, OutputDirectoryName);
-    if ~isempty(ixun),
-      [proba, dproba] = stab_map_1(lpmat, [1:Nsam], ixun, [aname, '_unst'],0);
-      indunst=find(dproba>ksstat);
-      disp('The following parameters mostly drive instability')
-      disp(M_.param_names(estim_params_.param_vals(indunst,1),:))  
-      stab_map_1(lpmat, [1:Nsam], ixun, [aname, '_unst'], 1, indunst, OutputDirectoryName);
+    disp('Smirnov statistics in driving indeterminacy')
+    for j=1:estim_params_.np,
+      disp([M_.param_names(estim_params_.param_vals(j,1),:),' d-stat = ', num2str(dproba(j),3)])  
+    end
+    disp(' ');
+    if ~isempty(indindet)
+    stab_map_1(lpmat, istable, iindeterm, [aname, '_indet'], 1, indindet, OutputDirectoryName);
     end
   end
   
+  if ~isempty(ixun),
+    [proba, dproba] = stab_map_1(lpmat, [1:Nsam], ixun, [aname, '_unst'],0);
+    indunst=find(dproba>ksstat);
+    disp('Smirnov statistics in driving instability')
+    for j=1:estim_params_.np,
+      disp([M_.param_names(estim_params_.param_vals(j,1),:),'   d-stat = ', num2str(dproba(j),3)])
+    end
+    disp(' ');
+    if ~isempty(indunst)
+      stab_map_1(lpmat, istable, ixun, [aname, '_unst'], 1, indunst, OutputDirectoryName);
+    end
+  end
+
   disp(' ')
   disp('Starting bivariate analysis:')
   
@@ -378,14 +453,16 @@ if length(iunstable)>0 & length(iunstable)<Nsam,
   c00=tril(c0,-1);
   
   stab_map_2(lpmat(istable,:),alpha2, asname, OutputDirectoryName);
-  stab_map_2(lpmat(iunstable,:),alpha2, auname, OutputDirectoryName);
-  if ~isempty(iindeterm),
-    stab_map_2(lpmat(iindeterm,:),alpha2, aindname, OutputDirectoryName);
-    if ~isempty(ixun),
-      stab_map_2(lpmat(ixun,:),alpha2, aunstname, OutputDirectoryName);
-    end
+  if length(iunstable)>3,
+    stab_map_2(lpmat(iunstable,:),alpha2, auname, OutputDirectoryName);
   end
-  
+  if length(iindeterm)>3,
+    stab_map_2(lpmat(iindeterm,:),alpha2, aindname, OutputDirectoryName);
+  end
+  if length(ixun)>3,
+    stab_map_2(lpmat(ixun,:),alpha2, aunstname, OutputDirectoryName);
+  end
+
   x0=0.5.*(bayestopt_.ub(1:nshock)-bayestopt_.lb(1:nshock))+bayestopt_.lb(1:nshock);
   x0 = [x0; lpmat(istable(1),:)'];
   if istable(end)~=Nsam
@@ -403,3 +480,17 @@ else
   end
   
 end
+
+
+options_.periods=opt.periods;
+if isfield(opt,'nomoments'),
+  options_.nomoments=opt.nomoments;
+end
+options_.irf=opt.irf;
+options_.noprint=opt.noprint;
+if isfield(opt,'simul'),
+  options_.simul=opt.simul;
+end
+
+
+

@@ -1,29 +1,42 @@
-function [rmse_MC, ixx] = filt_mc_(vvarvecm, loadSA, pfilt, alpha, alpha2, OutDir, istart, alphaPC)
+function [rmse_MC, ixx] = filt_mc_(OutDir)
+% function [rmse_MC, ixx] = filt_mc_(OutDir)
 % copyright Marco Ratto 2006
+% inputs (from opt_gsa structure)
+% vvarvecm = options_gsa_.var_rmse;
+% loadSA   = options_gsa_.load_rmse;
+% pfilt    = options_gsa_.pfilt_rmse;
+% alpha    = options_gsa_.alpha_rmse; 
+% alpha2   = options_gsa_.alpha2_rmse; 
+% istart   = options_gsa_.istart_rmse;
+% alphaPC  = 0.5;
+%
+% Part of the Sensitivity Analysis Toolbox for DYNARE
+%
+% Written by Marco Ratto, 2006
+% Joint Research Centre, The European Commission,
+% (http://eemc.jrc.ec.europa.eu/),
+% marco.ratto@jrc.it 
+%
+% Disclaimer: This software is not subject to copyright protection and is in the public domain. 
+% It is an experimental system. The Joint Research Centre of European Commission 
+% assumes no responsibility whatsoever for its use by other parties
+% and makes no guarantees, expressed or implied, about its quality, reliability, or any other
+% characteristic. We would appreciate acknowledgement if the software is used.
+% Reference:
+% M. Ratto, Global Sensitivity Analysis for Macroeconomic models, MIMEO, 2006.
+%
+
 global bayestopt_ estim_params_ M_ options_ oo_
 
-if nargin<1 | isempty(vvarvecm),
-  vvarvecm = options_.varobs;
-end
-if nargin<2,
-  loadSA=0;
-end
-if nargin<3 | isempty(pfilt),
-  pfilt=0.1;  % cut the best 10% of runs
-end
-if nargin<4 | isempty(alpha),
-  alpha=0.002;
-end
-if nargin<5 | isempty(alpha2),
-  alpha2=0.5;
-end
-if nargin<7 | isempty(istart),
-  istart=1;
-end
-if nargin<8,
-  alphaPC=0.5;
-end
-
+options_gsa_=options_.opt_gsa;
+vvarvecm = options_gsa_.var_rmse;
+loadSA   = options_gsa_.load_rmse;
+pfilt    = options_gsa_.pfilt_rmse;
+alpha    = options_gsa_.alpha_rmse; 
+alpha2   = options_gsa_.alpha2_rmse; 
+istart   = options_gsa_.istart_rmse;
+alphaPC  = 0.5;
+  
 fname_ = M_.fname;
 lgy_ = M_.endo_names;
 dr_ = oo_.dr;
@@ -35,17 +48,26 @@ disp('for the fit of EACH observed series ...')
 disp(' ')
 disp('Deleting old SA figures...')
 a=dir([OutDir,'\*.*']);
+tmp1='0';
 if options_.opt_gsa.ppost,
-  tmp=['_SA_fit_post'];
+  tmp=['_rmse_post'];
 else
   if options_.opt_gsa.pprior
-    tmp=['_SA_fit_prior'];
+    tmp=['_rmse_prior'];
   else
-    tmp=['_SA_fit_mc'];
+    tmp=['_rmse_mc'];
+  end
+  if options_gsa_.lik_only,
+    tmp1 = [tmp,'_post_SA'];
+    tmp = [tmp,'_lik_SA'];
   end
 end
 for j=1:length(a), 
   if strmatch([fname_,tmp],a(j).name), 
+    disp(a(j).name)
+    delete([OutDir,'\',a(j).name])
+  end, 
+  if strmatch([fname_,tmp1],a(j).name), 
     disp(a(j).name)
     delete([OutDir,'\',a(j).name])
   end, 
@@ -55,22 +77,15 @@ disp('done !')
 
 nshock=estim_params_.nvx + estim_params_.nvn + estim_params_.ncx + estim_params_.ncn;
 npar=estim_params_.np;
-for j=1:npar+nshock,
-  if j>nshock
-    if isfield(oo_,'posterior_mode'),
-      xparam1(j)=oo_.posterior_mode.parameters.(bayestopt_.name{j});
-    end
-    if isfield(oo_,'posterior_mean'),
-      xparam1_mean(j)=oo_.posterior_mean.parameters.(bayestopt_.name{j});
-    end
-  else
-    if isfield(oo_,'posterior_mode'),
-      xparam1(j)=oo_.posterior_mode.shocks_std.(bayestopt_.name{j});
-    end
-    if isfield(oo_,'posterior_mean'),
-      xparam1_mean(j)=oo_.posterior_mean.shocks_std.(bayestopt_.name{j});
-    end
-  end
+load(options_.mode_file,'xparam1')
+if options_.opt_gsa.ppost,
+  c=load([fname_,'_mean'],'xparam1');
+  xparam1_mean=c.xparam1;
+  clear c
+elseif ~isempty(ls([fname_,'_mean.mat']))
+  c=load([fname_,'_mean'],'xparam1');
+  xparam1_mean=c.xparam1;
+  clear c
 end
 
 if options_.opt_gsa.ppost,
@@ -94,11 +109,14 @@ if ~loadSA,
     steady_;
     ys_mean=oo_.steady_state;
   end
-  eval(options_.datafile)
+%   eval(options_.datafile)
+  obs = dat_fil_(options_.datafile);
   if ~options_.opt_gsa.ppost
-    load([OutDir,'\',fnamtmp]);
+    load([OutDir,'\',fnamtmp],'x','logpo2','stock_gend','stock_data');
+    logpo2=-logpo2;
   else
-    load([DirectoryName '/' M_.fname '_data.mat']);
+    %load([DirectoryName '/' M_.fname '_data.mat']);
+    [stock_gend, stock_data] = read_data;
     filfilt = dir([DirectoryName '/' M_.fname '_filter*.mat']);
     filparam = dir([DirectoryName '/' M_.fname '_param*.mat']);
     x=[];
@@ -114,7 +132,6 @@ if ~loadSA,
         clear stock stock_logpo stock_ys;
       end
     end
-    logpo2=-logpo2;
   end
   nruns=size(x,1);
   nfilt=floor(pfilt*nruns);
@@ -125,15 +142,17 @@ if ~loadSA,
   nobs=options_.nobs;
   for i=1:size(vvarvecm,1),
     vj=deblank(vvarvecm(i,:));
+    eval(['vobs =obs.',vj,'(fobs:fobs-1+nobs);'])
     if options_.prefilter == 1
       %eval([vj,'=',vj,'-bayestopt_.mean_varobs(i);'])
-      eval([vj,'=',vj,'-mean(',vj,',1);'])
+      %eval([vj,'=',vj,'-mean(',vj,',1);'])
+      vobs = vobs-mean(vobs,1);
     end
     
     jxj = strmatch(vj,lgy_(dr_.order_var,:),'exact');
     js = strmatch(vj,lgy_,'exact');
     if exist('xparam1','var')
-      eval(['rmse_mode(i) = sqrt(mean((',vj,'(fobs-1+istart:fobs-1+nobs)-oo_.steady_state(js)-oo_.FilteredVariables.',vj,'(istart:end-1)).^2));'])
+      eval(['rmse_mode(i) = sqrt(mean((vobs(istart:end)-oo_.steady_state(js)-oo_.FilteredVariables.',vj,'(istart:end-1)).^2));'])
     end
     y0=zeros(nobs+1,nruns);
     if options_.opt_gsa.ppost
@@ -151,19 +170,31 @@ if ~loadSA,
         clear stock;
       end
     else
-      y0 = squeeze(stock_filter(:,jxj,:)) + ...
-        kron(stock_ys(js,:),ones(size(stock_filter,1),1));
+      filfilt=ls([OutDir,'\',fnamtmp,'_*.mat']);
+      nbb=0;
+      for j=1:size(filfilt,1),
+        load([OutDir,'\',fnamtmp,'_',num2str(j),'.mat'],'stock_filter','stock_ys');
+        nb = size(stock_filter,3);
+        y0(:,nbb+1:nbb+nb) = squeeze(stock_filter(jxj,:,:)) + ...
+          kron(stock_ys(:,js)',ones(nobs+1,1));
+        %y0(:,:,size(y0,3):size(y0,3)+size(stock,3))=stock;
+        nbb=nbb+nb;
+        clear stock_filter;
+      end
+
+%       y0 = squeeze(stock_filter(:,jxj,:)) + ...
+%         kron(stock_ys(js,:),ones(size(stock_filter,1),1));
     end
     y0M=mean(y0,2);
     for j=1:nruns,
-      eval(['rmse_MC(j,i) = sqrt(mean((',vj,'(fobs-1+istart:fobs-1+nobs)-y0(istart:end-1,j)).^2));'])
+      rmse_MC(j,i) = sqrt(mean((vobs(istart:end)-y0(istart:end-1,j)).^2));
     end
     if exist('xparam1_mean','var')
       %eval(['rmse_pmean(i) = sqrt(mean((',vj,'(fobs-1+istart:fobs-1+nobs)-y0M(istart:end-1)).^2));'])
       [alphahat,etahat,epsilonhat,ahat,SteadyState,trend_coeff,aK] = DsgeSmoother(xparam1_mean,stock_gend,stock_data);
       y0 = ahat(jxj,:)' + ...
         kron(ys_mean(js,:),ones(size(ahat,2),1));
-      eval(['rmse_pmean(i) = sqrt(mean((',vj,'(fobs-1+istart:fobs-1+nobs)-y0(istart:end-1)).^2));'])
+      rmse_pmean(i) = sqrt(mean((vobs(istart:end)-y0(istart:end-1)).^2));
     end
   end
   clear stock_filter;
@@ -171,7 +202,7 @@ if ~loadSA,
   for j=1:nruns,
     lnprior(j,1) = priordens(x(j,:),bayestopt_.pshape,bayestopt_.p1,bayestopt_.p2,bayestopt_.p3,bayestopt_.p4);
   end
-  likelihood=logpo2(:)+lnprior(:);
+  likelihood=logpo2(:)-lnprior(:);
   disp('... done!')
   
   if options_.opt_gsa.ppost
@@ -180,7 +211,11 @@ if ~loadSA,
     if options_.opt_gsa.lik_only
       save([OutDir,'\',fnamtmp], 'likelihood', '-append')    
     else
-      save([OutDir,'\',fnamtmp], 'likelihood', 'rmse_MC', 'rmse_mode','rmse_pmean','-append')    
+      if exist('xparam1_mean','var')
+        save([OutDir,'\',fnamtmp], 'likelihood', 'rmse_MC', 'rmse_mode','rmse_pmean','-append')    
+      else
+        save([OutDir,'\',fnamtmp], 'likelihood', 'rmse_MC', 'rmse_mode','-append')    
+      end
     end
   end
 else
@@ -189,7 +224,7 @@ else
   else
     load([OutDir,'\',fnamtmp],'x','logpo2','likelihood','rmse_MC','rmse_mode','rmse_pmean');
   end
-  lnprior=likelihood(:)-logpo2(:);
+  lnprior=logpo2(:)-likelihood(:);
   nruns=size(x,1);
   nfilt=floor(pfilt*nruns);
 end
@@ -197,21 +232,21 @@ end
 nfilt0=nfilt*ones(size(vvarvecm,1),1);
 logpo2=logpo2(:);
 if ~options_.opt_gsa.ppost
-  [dum, ipost]=sort(logpo2);
-  [dum, ilik]=sort(likelihood);
+  [dum, ipost]=sort(-logpo2);
+  [dum, ilik]=sort(-likelihood);
 end
 if ~options_.opt_gsa.ppost & options_.opt_gsa.lik_only
   if options_.opt_gsa.pprior
-    anam='SA_fit_prior_post';
+    anam='rmse_prior_post';
   else
-    anam='SA_fit_mc_post';
+    anam='rmse_mc_post';
   end
   stab_map_1(x, ipost(1:nfilt), ipost(nfilt+1:end), anam, 1,[],OutDir);
   stab_map_2(x(ipost(1:nfilt),:),alpha2,anam, OutDir);
   if options_.opt_gsa.pprior
-    anam='SA_fit_prior_lik';
+    anam='rmse_prior_lik';
   else
-    anam='SA_fit_mc_lik';
+    anam='rmse_mc_lik';
   end
   stab_map_1(x, ilik(1:nfilt), ilik(nfilt+1:end), anam, 1,[],OutDir);
   stab_map_2(x(ilik(1:nfilt),:),alpha2,anam, OutDir);
@@ -258,18 +293,18 @@ for i=1:size(vvarvecm,1),
   title(vvarvecm(i,:))
   if mod(i,9)==0 | i==size(vvarvecm,1)
     if options_.opt_gsa.ppost
-      saveas(gcf,[OutDir,'\',fname_,'_SA_fit_post_lnprior',int2str(ifig)])
-      eval(['print -depsc2 ' OutDir '\' fname_ '_SA_fit_post_lnprior',int2str(ifig)]);
-      eval(['print -dpdf ' OutDir '\' fname_ '_SA_fit_post_lnprior',int2str(ifig)]);
+      saveas(gcf,[OutDir,'\',fname_,'_rmse_post_lnprior',int2str(ifig)])
+      eval(['print -depsc2 ' OutDir '\' fname_ '_rmse_post_lnprior',int2str(ifig)]);
+      eval(['print -dpdf ' OutDir '\' fname_ '_rmse_post_lnprior',int2str(ifig)]);
     else
       if options_.opt_gsa.pprior
-        saveas(gcf,[OutDir,'\',fname_,'_SA_fit_prior_lnprior',int2str(ifig)])
-        eval(['print -depsc2 ' OutDir '\' fname_ '_SA_fit_prior_lnprior',int2str(ifig)]);
-        eval(['print -dpdf ' OutDir '\' fname_ '_SA_fit_prior_lnprior',int2str(ifig)]);
+        saveas(gcf,[OutDir,'\',fname_,'_rmse_prior_lnprior',int2str(ifig)])
+        eval(['print -depsc2 ' OutDir '\' fname_ '_rmse_prior_lnprior',int2str(ifig)]);
+        eval(['print -dpdf ' OutDir '\' fname_ '_rmse_prior_lnprior',int2str(ifig)]);
       else
-        saveas(gcf,[OutDir,'\',fname_,'_SA_fit_mc_lnprior',int2str(ifig)])
-        eval(['print -depsc2 ' OutDir '\' fname_ '_SA_fit_mc_lnprior',int2str(ifig)]);
-        eval(['print -dpdf ' OutDir '\' fname_ '_SA_fit_mc_lnprior',int2str(ifig)]);
+        saveas(gcf,[OutDir,'\',fname_,'_rmse_mc_lnprior',int2str(ifig)])
+        eval(['print -depsc2 ' OutDir '\' fname_ '_rmse_mc_lnprior',int2str(ifig)]);
+        eval(['print -dpdf ' OutDir '\' fname_ '_rmse_mc_lnprior',int2str(ifig)]);
       end
     end
     close(gcf)
@@ -288,20 +323,23 @@ for i=1:size(vvarvecm,1),
   h=cumplot(likelihood(ixx(nfilt0(i)+1:end,i)));
   set(h,'color','green')
   title(vvarvecm(i,:))
+  if options_.opt_gsa.ppost==0,
+    set(gca,'xlim',[min( likelihood(ixx(1:nfilt0(i),i)) ) max( likelihood(ixx(1:nfilt0(i),i)) )])
+  end
   if mod(i,9)==0 | i==size(vvarvecm,1)
     if options_.opt_gsa.ppost
-      saveas(gcf,[OutDir,'\',fname_,'_SA_fit_post_lnlik',int2str(ifig)])
-      eval(['print -depsc2 ' OutDir '\' fname_ '_SA_fit_post_lnlik',int2str(ifig)]);
-      eval(['print -dpdf ' OutDir '\' fname_ '_SA_fit_post_lnlik',int2str(ifig)]);
+      saveas(gcf,[OutDir,'\',fname_,'_rmse_post_lnlik',int2str(ifig)])
+      eval(['print -depsc2 ' OutDir '\' fname_ '_rmse_post_lnlik',int2str(ifig)]);
+      eval(['print -dpdf ' OutDir '\' fname_ '_rmse_post_lnlik',int2str(ifig)]);
     else
       if options_.opt_gsa.pprior
-        saveas(gcf,[OutDir,'\',fname_,'_SA_fit_prior_lnlik',int2str(ifig)])
-        eval(['print -depsc2 ' OutDir '\' fname_ '_SA_fit_prior_lnlik',int2str(ifig)]);
-        eval(['print -dpdf ' OutDir '\' fname_ '_SA_fit_prior_lnlik',int2str(ifig)]);
+        saveas(gcf,[OutDir,'\',fname_,'_rmse_prior_lnlik',int2str(ifig)])
+        eval(['print -depsc2 ' OutDir '\' fname_ '_rmse_prior_lnlik',int2str(ifig)]);
+        eval(['print -dpdf ' OutDir '\' fname_ '_rmse_prior_lnlik',int2str(ifig)]);
       else
-        saveas(gcf,[OutDir,'\',fname_,'_SA_fit_mc_lnlik',int2str(ifig)])
-        eval(['print -depsc2 ' OutDir '\' fname_ '_SA_fit_mc_lnlik',int2str(ifig)]);
-        eval(['print -dpdf ' OutDir '\' fname_ '_SA_fit_mc_lnlik',int2str(ifig)]);
+        saveas(gcf,[OutDir,'\',fname_,'_rmse_mc_lnlik',int2str(ifig)])
+        eval(['print -depsc2 ' OutDir '\' fname_ '_rmse_mc_lnlik',int2str(ifig)]);
+        eval(['print -dpdf ' OutDir '\' fname_ '_rmse_mc_lnlik',int2str(ifig)]);
       end
     end
     close(gcf)
@@ -320,20 +358,23 @@ for i=1:size(vvarvecm,1),
   h=cumplot(logpo2(ixx(nfilt0(i)+1:end,i)));
   set(h,'color','green')
   title(vvarvecm(i,:))
+  if options_.opt_gsa.ppost==0,
+    set(gca,'xlim',[min( logpo2(ixx(1:nfilt0(i),i)) ) max( logpo2(ixx(1:nfilt0(i),i)) )])
+  end
   if mod(i,9)==0 | i==size(vvarvecm,1)
     if options_.opt_gsa.ppost
-      saveas(gcf,[OutDir,'\',fname_,'_SA_fit_post_lnpost',int2str(ifig)])
-      eval(['print -depsc2 ' OutDir '\' fname_ '_SA_fit_post_lnpost',int2str(ifig)]);
-      eval(['print -dpdf ' OutDir '\' fname_ '_SA_fit_post_lnpost',int2str(ifig)]);
+      saveas(gcf,[OutDir,'\',fname_,'_rmse_post_lnpost',int2str(ifig)])
+      eval(['print -depsc2 ' OutDir '\' fname_ '_rmse_post_lnpost',int2str(ifig)]);
+      eval(['print -dpdf ' OutDir '\' fname_ '_rmse_post_lnpost',int2str(ifig)]);
     else
       if options_.opt_gsa.pprior
-        saveas(gcf,[OutDir,'\',fname_,'_SA_fit_prior_lnpost',int2str(ifig)])
-        eval(['print -depsc2 ' OutDir '\' fname_ '_SA_fit_prior_lnpost',int2str(ifig)]);
-        eval(['print -dpdf ' OutDir '\' fname_ '_SA_fit_prior_lnpost',int2str(ifig)]);
+        saveas(gcf,[OutDir,'\',fname_,'_rmse_prior_lnpost',int2str(ifig)])
+        eval(['print -depsc2 ' OutDir '\' fname_ '_rmse_prior_lnpost',int2str(ifig)]);
+        eval(['print -dpdf ' OutDir '\' fname_ '_rmse_prior_lnpost',int2str(ifig)]);
       else
-        saveas(gcf,[OutDir,'\',fname_,'_SA_fit_mc_lnpost',int2str(ifig)])
-        eval(['print -depsc2 ' OutDir '\' fname_ '_SA_fit_mc_lnpost',int2str(ifig)]);
-        eval(['print -dpdf ' OutDir '\' fname_ '_SA_fit_mc_lnpost',int2str(ifig)]);
+        saveas(gcf,[OutDir,'\',fname_,'_rmse_mc_lnpost',int2str(ifig)])
+        eval(['print -depsc2 ' OutDir '\' fname_ '_rmse_mc_lnpost',int2str(ifig)]);
+        eval(['print -dpdf ' OutDir '\' fname_ '_rmse_mc_lnpost',int2str(ifig)]);
       end
     end
     close(gcf)
@@ -366,11 +407,11 @@ vvarvecm=vvarvecm(ivar,:);
 rmse_MC=rmse_MC(:,ivar);
 
 disp(' ')
-if options_.opt_gsa.ppost==0 & options_.opt_gsa.pprior,
+% if options_.opt_gsa.ppost==0 & options_.opt_gsa.pprior,
   disp(['Sample filtered the ',num2str(pfilt*100),'% best RMSE''s for each observed series ...' ])
-else
-  disp(['Sample filtered the best RMSE''s smaller than RMSE at the posterior mean ...' ])
-end
+% else
+%   disp(['Sample filtered the best RMSE''s smaller than RMSE at the posterior mean ...' ])
+% end
 % figure, boxplot(rmse_MC)
 % set(gca,'xticklabel',vvarvecm)
 % saveas(gcf,[fname_,'_SA_RMSE'])
@@ -462,18 +503,18 @@ for ix=1:ceil(length(nsnam)/6),
     set(findobj(get(h0,'children'),'type','text'),'interpreter','none')
     title([pnam{nsnam(j)}],'interpreter','none')
     if options_.opt_gsa.ppost
-      saveas(gcf,[OutDir,'\',fname_,'_SA_fit_post_',num2str(ix)])
-      eval(['print -depsc2 ' OutDir '\' fname_ '_SA_fit_post_' int2str(ix)]);
-      eval(['print -dpdf ' OutDir '\' fname_ '_SA_fit_post_' int2str(ix)]);
+      saveas(gcf,[OutDir,'\',fname_,'_rmse_post_',num2str(ix)])
+      eval(['print -depsc2 ' OutDir '\' fname_ '_rmse_post_' int2str(ix)]);
+      eval(['print -dpdf ' OutDir '\' fname_ '_rmse_post_' int2str(ix)]);
     else
       if options_.opt_gsa.pprior
-        saveas(gcf,[OutDir,'\',fname_,'_SA_fit_prior_',num2str(ix)])
-        eval(['print -depsc2 ' OutDir '\' fname_ '_SA_fit_prior_' int2str(ix)]);
-        eval(['print -dpdf ' OutDir '\' fname_ '_SA_fit_prior_' int2str(ix)]);
+        saveas(gcf,[OutDir,'\',fname_,'_rmse_prior_',num2str(ix)])
+        eval(['print -depsc2 ' OutDir '\' fname_ '_rmse_prior_' int2str(ix)]);
+        eval(['print -dpdf ' OutDir '\' fname_ '_rmse_prior_' int2str(ix)]);
       else
-        saveas(gcf,[OutDir,'\',fname_,'_SA_fit_mc_',num2str(ix)])
-        eval(['print -depsc2 ' OutDir '\' fname_ '_SA_fit_mc_' int2str(ix)]);
-        eval(['print -dpdf ' OutDir '\' fname_ '_SA_fit_mc_' int2str(ix)]);
+        saveas(gcf,[OutDir,'\',fname_,'_rmse_mc_',num2str(ix)])
+        eval(['print -depsc2 ' OutDir '\' fname_ '_rmse_mc_' int2str(ix)]);
+        eval(['print -dpdf ' OutDir '\' fname_ '_rmse_mc_' int2str(ix)]);
       end
     end
   end
@@ -521,18 +562,18 @@ for ix=1:ceil(length(nsnam)/6),
     set(findobj(get(h0,'children'),'type','text'),'interpreter','none')
     title([pnam{nsnam(j)}],'interpreter','none')
     if options_.opt_gsa.ppost
-      saveas(gcf,[OutDir,'\',fname_,'_SA_fit_post_dens_',num2str(ix)])
-      eval(['print -depsc2 ' OutDir '\' fname_ '_SA_fit_post_dens_' int2str(ix)]);
-      eval(['print -dpdf ' OutDir '\' fname_ '_SA_fit_post_dens_' int2str(ix)]);
+      saveas(gcf,[OutDir,'\',fname_,'_rmse_post_dens_',num2str(ix)])
+      eval(['print -depsc2 ' OutDir '\' fname_ '_rmse_post_dens_' int2str(ix)]);
+      eval(['print -dpdf ' OutDir '\' fname_ '_rmse_post_dens_' int2str(ix)]);
     else
       if options_.opt_gsa.pprior
-        saveas(gcf,[OutDir,'\',fname_,'_SA_fit_prior_dens_',num2str(ix)])
-        eval(['print -depsc2 ' OutDir '\' fname_ '_SA_fit_prior_dens_' int2str(ix)]);
-        eval(['print -dpdf ' OutDir '\' fname_ '_SA_fit_prior_dens_' int2str(ix)]);
+        saveas(gcf,[OutDir,'\',fname_,'_rmse_prior_dens_',num2str(ix)])
+        eval(['print -depsc2 ' OutDir '\' fname_ '_rmse_prior_dens_' int2str(ix)]);
+        eval(['print -dpdf ' OutDir '\' fname_ '_rmse_prior_dens_' int2str(ix)]);
       else
-        saveas(gcf,[OutDir,'\',fname_,'_SA_fit_mc_dens_',num2str(ix)])
-        eval(['print -depsc2 ' OutDir '\' fname_ '_SA_fit_mc_dens_' int2str(ix)]);
-        eval(['print -dpdf ' OutDir '\' fname_ '_SA_fit_mc_dens_' int2str(ix)]);
+        saveas(gcf,[OutDir,'\',fname_,'_rmse_mc_dens_',num2str(ix)])
+        eval(['print -depsc2 ' OutDir '\' fname_ '_rmse_mc_dens_' int2str(ix)]);
+        eval(['print -dpdf ' OutDir '\' fname_ '_rmse_mc_dens_' int2str(ix)]);
       end
     end
   end
@@ -576,7 +617,7 @@ close all
 %         title([pnam{np(i)},'. K-S prob ', num2str(PP(np(i),j))],'interpreter','none')
 %         xlabel('')
 %         if mod(i,12)==0 | i==nsx(j),
-%             saveas(gcf,[fname_,'_SA_fit_',deblank(vvarvecm(j,:)),'_',int2str(nfig)])
+%             saveas(gcf,[fname_,'_rmse_',deblank(vvarvecm(j,:)),'_',int2str(nfig)])
 %             close(gcf)
 %         end
 %     end
@@ -605,12 +646,12 @@ disp('Starting bivariate analysis:')
 
 for i=1:size(vvarvecm,1)
   if options_.opt_gsa.ppost
-    fnam = ['SA_fit_post_',deblank(vvarvecm(i,:))];
+    fnam = ['rmse_post_',deblank(vvarvecm(i,:))];
   else
     if options_.opt_gsa.pprior
-      fnam = ['SA_fit_prior_',deblank(vvarvecm(i,:))];
+      fnam = ['rmse_prior_',deblank(vvarvecm(i,:))];
     else
-      fnam = ['SA_fit_mc_',deblank(vvarvecm(i,:))];
+      fnam = ['rmse_mc_',deblank(vvarvecm(i,:))];
     end
   end
   stab_map_2(x(ixx(1:nfilt0(i),i),:),alpha2,fnam, OutDir);

@@ -1,16 +1,21 @@
 %function stab_map_2(x,alpha2,istab,fnam)
 function stab_map_2(x,alpha2,fnam, dirname)
-% function stab_map_2(x,alpha2,fnam)
+% function stab_map_2(x,alpha2,fnam, dirname)
 %
-% Copyright (C) 2005 Marco Ratto
-% THIS PROGRAM WAS WRITTEN FOR MATLAB BY
-% Marco Ratto,
-% Unit of Econometrics and Statistics AF
-% (http://www.jrc.cec.eu.int/uasa/),
-% IPSC, Joint Research Centre
-% The European Commission,
-% TP 361, 21020 ISPRA(VA), ITALY
+% Part of the Sensitivity Analysis Toolbox for DYNARE
+%
+% Written by Marco Ratto, 2006
+% Joint Research Centre, The European Commission,
+% (http://eemc.jrc.ec.europa.eu/),
 % marco.ratto@jrc.it 
+%
+% Disclaimer: This software is not subject to copyright protection and is in the public domain. 
+% It is an experimental system. The Joint Research Centre of European Commission 
+% assumes no responsibility whatsoever for its use by other parties
+% and makes no guarantees, expressed or implied, about its quality, reliability, or any other
+% characteristic. We would appreciate acknowledgement if the software is used.
+% Reference:
+% M. Ratto, Global Sensitivity Analysis for Macroeconomic models, MIMEO, 2006.
 %
 
 %global bayestopt_ estim_params_ dr_ options_ ys_ fname_
