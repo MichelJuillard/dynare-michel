@@ -54,8 +54,8 @@ if strcmpi(type,'posterior')
   TotalNumberOfMhDraws = sum(record.MhDraws(:,1));
   NumberOfDraws = TotalNumberOfMhDraws-floor(options_.mh_drop*TotalNumberOfMhDraws);
 elseif strcmpi(type,'gsa')
-  load([ MhDirectoryName '/'  M_.fname '_prior'],'lpmat','istable')
-  x=lpmat(istable,:);
+  load([ MhDirectoryName '/'  M_.fname '_prior'],'lpmat0','lpmat','istable')
+  x=[lpmat0(istable,:) lpmat(istable,:)];
   clear lpmat istable
   NumberOfDraws=size(x,1);
   B=NumberOfDraws; options_.B = B;
