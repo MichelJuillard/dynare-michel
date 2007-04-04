@@ -31,11 +31,11 @@ end
 dr.ys = ys;
 check1 = 0;
 % testing for steadystate file
+fh = str2func([M_.fname '_static']);
 if options_.steadystate_flag
   [dr.ys,check1] = feval([M_.fname '_steadystate'],dr.ys,...
 			 [oo_.exo_steady_state; oo_.exo_det_steady_state]);
 else
-  fh = str2func([M_.fname '_static']);
   % testing if ys isn't a steady state or if we aren't computing Ramsey policy
   if max(abs(feval(fh,dr.ys,[oo_.exo_steady_state; oo_.exo_det_steady_state]))) ...
 	> options_.dynatol & options_.ramsey_policy == 0
