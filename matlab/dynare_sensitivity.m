@@ -70,7 +70,7 @@ if options_gsa_.morris,
   options_gsa_.rmse=0;
   options_gsa_.load_rmse=0;
   options_gsa_.alpha2_stab=1;
-  options_.ksstat=1;
+  options_gsa_.ksstat=1;
   if options_gsa_.morris==2,
     options_gsa_ = set_default_option(options_gsa_,'Nsam',256);
     OutputDirectoryName = CheckPath('GSA/IDENTIF');
