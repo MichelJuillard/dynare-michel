@@ -475,10 +475,10 @@ pnam=bayestopt_.name;
 
 % plot trade-offs
 a00=jet(size(vvarvecm,1));
-for ix=1:ceil(length(nsnam)/6),
+for ix=1:ceil(length(nsnam)/5),
   figure,
-  for j=1+6*(ix-1):min(size(snam2,1),6*ix),
-    subplot(2,3,j-6*(ix-1))
+  for j=1+5*(ix-1):min(size(snam2,1),5*ix),
+    subplot(2,3,j-5*(ix-1))
     %h0=cumplot(x(:,nsnam(j)+nshock));
     h0=cumplot(x(:,nsnam(j)));
     set(h0,'color',[0 0 0])
@@ -496,12 +496,14 @@ for ix=1:ceil(length(nsnam)/6),
     xdum=xparam1(nsnam(j));
     h1=plot([xdum xdum],ydum);
     set(h1,'color',[0.85 0.85 0.85],'linewidth',2)
-    h0=legend(str2mat('base',vvarvecm(np,:)),0); 
-    set(h0,'fontsize',6)
-    %h0=legend({'base',vnam{np}}',0); 
     xlabel('')
-    set(findobj(get(h0,'children'),'type','text'),'interpreter','none')
     title([pnam{nsnam(j)}],'interpreter','none')
+  end
+  %subplot(3,2,6)
+    h0=legend(str2mat('base',vvarvecm(np,:)),0); 
+    set(h0,'fontsize',6,'position',[0.7 0.1 0.2 0.3])
+    %h0=legend({'base',vnam{np}}',0); 
+    set(findobj(get(h0,'children'),'type','text'),'interpreter','none')
     if options_.opt_gsa.ppost
       saveas(gcf,[OutDir,'\',fname_,'_rmse_post_',num2str(ix)])
       eval(['print -depsc2 ' OutDir '\' fname_ '_rmse_post_' int2str(ix)]);
@@ -517,7 +519,6 @@ for ix=1:ceil(length(nsnam)/6),
         eval(['print -dpdf ' OutDir '\' fname_ '_rmse_mc_' int2str(ix)]);
       end
     end
-  end
 end
 close all
 
@@ -530,10 +531,10 @@ bandwidth = 0;                    % Rule of thumb optimal bandwidth parameter.
 kernel_function = 'gaussian';     % Gaussian kernel for Fast Fourrier Transform approximaton.  
 %kernel_function = 'uniform';     % Gaussian kernel for Fast Fourrier Transform approximaton.  
 
-for ix=1:ceil(length(nsnam)/6),
+for ix=1:ceil(length(nsnam)/5),
   figure,
-  for j=1+6*(ix-1):min(size(snam2,1),6*ix),
-    subplot(2,3,j-6*(ix-1))
+  for j=1+5*(ix-1):min(size(snam2,1),5*ix),
+    subplot(2,3,j-5*(ix-1))
     optimal_bandwidth = mh_optimal_bandwidth(x(:,nsnam(j)),size(x,1),bandwidth,kernel_function); 
     [x1,f1] = kernel_density_estimate(x(:,nsnam(j)),number_of_grid_points,...
         optimal_bandwidth,kernel_function);
@@ -555,12 +556,13 @@ for ix=1:ceil(length(nsnam)/6),
     xdum=xparam1(nsnam(j));
     h1=plot([xdum xdum],[0 ydum(2)]);
     set(h1,'color',[0.85 0.85 0.85],'linewidth',2)
-    h0=legend(str2mat('base',vvarvecm(np,:)),0); 
-    set(h0,'fontsize',6)
-    %h0=legend({'base',vnam{np}}',0); 
     xlabel('')
-    set(findobj(get(h0,'children'),'type','text'),'interpreter','none')
     title([pnam{nsnam(j)}],'interpreter','none')
+  end
+    h0=legend(str2mat('base',vvarvecm(np,:)),0); 
+    set(h0,'fontsize',6,'position',[0.7 0.1 0.2 0.3])
+    %h0=legend({'base',vnam{np}}',0); 
+    set(findobj(get(h0,'children'),'type','text'),'interpreter','none')
     if options_.opt_gsa.ppost
       saveas(gcf,[OutDir,'\',fname_,'_rmse_post_dens_',num2str(ix)])
       eval(['print -depsc2 ' OutDir '\' fname_ '_rmse_post_dens_' int2str(ix)]);
@@ -576,7 +578,6 @@ for ix=1:ceil(length(nsnam)/6),
         eval(['print -dpdf ' OutDir '\' fname_ '_rmse_mc_dens_' int2str(ix)]);
       end
     end
-  end
 end
 close all
 
