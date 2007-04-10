@@ -257,7 +257,7 @@ else
     %nfilt0(i)=length(find(rmse_MC(:,i)<rmse_pmean(i)));
     rmse_txt=rmse_pmean;
   else
-    if options_.opt_gsa.pprior,
+    if options_.opt_gsa.pprior | ~exist('rmse_pmean'),
       rmse_txt=rmse_mode;
     else
       %nfilt0(i)=length(find(rmse_MC(:,i)<rmse_pmean(i)));
@@ -501,9 +501,9 @@ for ix=1:ceil(length(nsnam)/5),
   end
   %subplot(3,2,6)
     h0=legend(str2mat('base',vvarvecm(np,:)),0); 
-    set(h0,'fontsize',6,'position',[0.7 0.1 0.2 0.3])
+    set(h0,'fontsize',6,'position',[0.7 0.1 0.2 0.3],'interpreter','none')
     %h0=legend({'base',vnam{np}}',0); 
-    set(findobj(get(h0,'children'),'type','text'),'interpreter','none')
+    %set(findobj(get(h0,'children'),'type','text'),'interpreter','none')
     if options_.opt_gsa.ppost
       saveas(gcf,[OutDir,'\',fname_,'_rmse_post_',num2str(ix)])
       eval(['print -depsc2 ' OutDir '\' fname_ '_rmse_post_' int2str(ix)]);
@@ -560,9 +560,9 @@ for ix=1:ceil(length(nsnam)/5),
     title([pnam{nsnam(j)}],'interpreter','none')
   end
     h0=legend(str2mat('base',vvarvecm(np,:)),0); 
-    set(h0,'fontsize',6,'position',[0.7 0.1 0.2 0.3])
+    set(h0,'fontsize',6,'position',[0.7 0.1 0.2 0.3],'interpreter','none')
     %h0=legend({'base',vnam{np}}',0); 
-    set(findobj(get(h0,'children'),'type','text'),'interpreter','none')
+    %set(findobj(get(h0,'children'),'type','text'),'interpreter','none')
     if options_.opt_gsa.ppost
       saveas(gcf,[OutDir,'\',fname_,'_rmse_post_dens_',num2str(ix)])
       eval(['print -depsc2 ' OutDir '\' fname_ '_rmse_post_dens_' int2str(ix)]);
