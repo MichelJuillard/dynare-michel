@@ -42,9 +42,12 @@ else
     if options_.linear == 0
       % nonlinear models
       [dr.ys,check1] = dynare_solve(fh,dr.ys,options_.jacobian_flag,...
-				    [oo_.exo_steady_state; oo_.exo_det_steady_state]);
+				    [oo_.exo_steady_state; ...
+		    oo_.exo_det_steady_state]);
     else
       % linear models
+      [fvec,jacob] = feval(fh,dr.ys,[oo_.exo_steady_state;...
+		    oo_.exo_det_steady_state]);
       dr.ys = dr.ys-jacob\fvec;
     end
   end
