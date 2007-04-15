@@ -73,5 +73,5 @@ for i=1:np
 end
 
 if np
-    M_.params(estim_params_.param_vals(:,1)) = xparam1(FirstDeep:end);
+    M_.params(estim_params_.param_vals(:,1)) = xparam(FirstDeep:end);
 end
