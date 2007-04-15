@@ -55,15 +55,19 @@ for i=1:npar
     name = deblank(M_.exo_names(estim_params_.var_exo(i,1),:));  
     eval(['x1 = oo_.posterior_density.shocks_std.' name '(:,1);'])
     eval(['f1 = oo_.posterior_density.shocks_std.' name '(:,2);'])
+    eval(['oo_.prior_density.shocks_std.' name '(:,1) = x2;'])
+    eval(['oo_.prior_density.shocks_std.' name '(:,2) = f2;'])
     if options_.posterior_mode_estimation
-      eval(['pmode = oo_.posterior_mode.shocks_std.' name ';'])
+      eval(['pmod = oo_.posterior_mode.shocks_std.' name ';'])
     end
   elseif i <= nvx+nvn
     name = deblank(options_.varobs(estim_params_.var_endo(i-nvx,1),:));
     eval(['x1 = oo_.posterior_density.measurement_errors_std.' name '(:,1);'])
     eval(['f1 = oo_.posterior_density.measurement_errors_std.' name '(:,2);'])    
+    eval(['oo_.prior_density.mearsurement_errors_std.' name '(:,1) = x2;'])
+    eval(['oo_.prior_density.measurement_errors_std.' name '(:,2) = f2;'])
     if options_.posterior_mode_estimation
-      eval(['pmode = oo_.posterior_mode.measurement_errors_std.' name ';'])
+      eval(['pmod = oo_.posterior_mode.measurement_errors_std.' name ';'])
     end     
   elseif i <= nvx+nvn+ncx
     j = i - (nvx+nvn)
@@ -72,8 +76,10 @@ for i=1:npar
     name = [deblank(M_.exo_names(k1,:)) '_' deblank(M_.exo_names(k2,:))];  
     eval(['x1 = oo_.posterior_density.shocks_corr.' name '(:,1);'])
     eval(['f1 = oo_.posterior_density.shocks_corr.' name '(:,2);'])    
+    eval(['oo_.prior_density.shocks_corr.' name '(:,1) = x2;'])
+    eval(['oo_.prior_density.shocks_corr.' name '(:,2) = f2;'])
     if options_.posterior_mode_estimation
-      eval(['pmode = oo_.posterior_mode.shocks_corr.' name ';'])  
+      eval(['pmod = oo_.posterior_mode.shocks_corr.' name ';'])  
     end
   elseif i <= nvx+nvn+ncx+ncn
     j = i - (nvx+nvn+ncx);
@@ -82,16 +88,20 @@ for i=1:npar
     name = [deblank(M_.endo_names(k1,:)) '_' deblank(M_.endo_names(k2,:))];
     eval(['x1 = oo_.posterior_density.measurement_errors_corr.' name '(:,1);'])
     eval(['f1 = oo_.posterior_density.measurement_errors_corr.' name '(:,2);'])
+    eval(['oo_.prior_density.mearsurement_errors_corr.' name '(:,1) = x2;'])
+    eval(['oo_.prior_density.measurement_errors_corr.' name '(:,2) = f2;'])
     if options_.posterior_mode_estimation
-      eval(['pmode = oo_.posterior_mode.measurement_errors_corr.' name ';'])
+      eval(['pmod = oo_.posterior_mode.measurement_errors_corr.' name ';'])
     end
   else
     j = i - (nvx+nvn+ncx+ncn);
     name = deblank(M_.param_names(estim_params_.param_vals(j,1),:));
     eval(['x1 = oo_.posterior_density.parameters.' name '(:,1);'])
     eval(['f1 = oo_.posterior_density.parameters.' name '(:,2);'])
+    eval(['oo_.prior_density.parameters.' name '(:,1) = x2;'])
+    eval(['oo_.prior_density.parameters.' name '(:,2) = f2;'])
     if options_.posterior_mode_estimation
-      eval(['pmode = oo_.posterior_mode.parameters.' name ';'])
+      eval(['pmod = oo_.posterior_mode.parameters.' name ';'])
     end
   end
   top1 = max(f1);
@@ -106,7 +116,7 @@ for i=1:npar
   hold on;
   plot(x1,f1,'-k','linewidth',2);
   if options_.posterior_mode_estimation
-    plot( [pmode pmode], [0.0 1.1*top0], '--g', 'linewidth', 2);
+    plot( [pmod pmod], [0.0 1.1*top0], '--g', 'linewidth', 2);
   end
   box on;
   axis([borneinf bornesup 0 1.1*top0]);
