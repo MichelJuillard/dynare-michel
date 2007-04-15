@@ -1,14 +1,36 @@
-function [alphahat,etahat,epsilonhat,ahat,SteadyState,trend_coeff,aK] = DsgeSmoother(xparam1,gend,Y)
-% stephane.adjemian@cepremap.cnrs.fr [09-07-2004]
+function [alphahat,etahat,epsilonhat,ahat,SteadyState,trend_coeff,aK,T,R] = DsgeSmoother(xparam1,gend,Y)
+% Estimation of the smoothed variables and innovations. 
+% 
+% INPUTS 
+%   o xparam1      [double]   (p*1) vector of (estimated) parameters. 
+%   o gend         [integer]  scalar specifying the number of observations ==> varargin{1}.
+%   o data         [double]   (T*n) matrix of data.
+%  
+% OUTPUTS 
+%   o alphahat      [double]  (m*T) matrix, smoothed endogenous variables.
+%   o etahat        [double]  (r*T) matrix, smoothed structural shocks (r>n is the umber of shocks).
+%   o epsilonhat    [double]  (n*T) matrix, smoothed measurement errors.
+%   o ahat          [double]  (m*T) matrix, one step ahead filtered (endogenous) variables.
+%   o SteadyState   [double]  (m*1) vector specifying the steady state level of each endogenous variable.
+%   o trend_coeff   [double]  (n*1) vector, parameters specifying the slope of the trend associated to each observed variable.
+%   o aK            [double]  (K,n,T+K) array, k (k=1,...,K) steps ahead filtered (endogenous) variables.
+%   o T and R       [double]  Matrices defining the state equation (T is the (m*m) transition matrix).
+% ALGORITHM 
+%   Metropolis-Hastings.       
 %
-% Adapted from mj_optmumlik.m
+% SPECIAL REQUIREMENTS
+%   None.
+%  
+%  
+% part of DYNARE, copyright S. Adjemian, M. Juillard (2006)
+% Gnu Public License.
   global bayestopt_ M_ oo_ estim_params_ options_
 
   alphahat 	= [];
   epsilonhat	= [];
-  etahat		= [];
+  etahat	= [];
   nobs 		= size(options_.varobs,1);
-  smpl        = size(Y,2);
+  smpl          = size(Y,2);
 
   set_all_parameters(xparam1);
 
