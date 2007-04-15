@@ -4,7 +4,6 @@ function steady_()
 
   global M_ oo_ it_ options_
   
-  options_.steadystate_flag
   
   if options_.steadystate_flag
     [oo_.steady_state,check] = feval([M_.fname '_steadystate'],...
