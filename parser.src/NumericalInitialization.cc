@@ -123,11 +123,11 @@ HistValStatement::writeOutput(ostream &output, const string &basename) const
       int id = symbol_table.getID(name) + 1;
 
       if (type == eEndogenous)
-        output << "oo_.endo_simul( " << id << ", M_.maximum_lag + " << lag + 1 << ") = ";
+        output << "oo_.endo_simul( " << id << ", M_.maximum_lag + " << lag << ") = ";
       else if (type == eExogenous)
-        output << "oo_.exo_simul( M_.maximum_lag + " << lag + 1 << ", " << id << " ) = ";
+        output << "oo_.exo_simul( M_.maximum_lag + " << lag << ", " << id << " ) = ";
       else if (type != eExogenousDet)
-        output << "oo_.exo_det_simul( M_.maximum_lag + " << lag + 1 << ", " << id << " ) = ";
+        output << "oo_.exo_det_simul( M_.maximum_lag + " << lag  << ", " << id << " ) = ";
 
       expression->writeOutput(output);
       output << ";" << endl;
