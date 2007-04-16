@@ -829,6 +829,9 @@ if (any(bayestopt_.pshape  >0 ) & options_.mh_replic) | ...
   if options_.bayesian_irf
     PosteriorIRF('posterior');
   end
+  if options_.smoother | options_.filter_step_ahead
+    PosteriorSmoother(data,gend,'posterior');
+  end
   return
 end
 
