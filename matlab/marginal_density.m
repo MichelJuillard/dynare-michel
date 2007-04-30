@@ -29,7 +29,7 @@ for n = FirstMhFile:TotalNumberOfMhFiles
   ifil = 1;
 end
 MU = MU/((TotalNumberOfMhDraws-TODROP)*nblck);
-xparam1 = MU;
+xparam1 = MU';
 MU1 = repmat(MU,MAX_nruns,1);
 %% lpost_mode is the value of the log posterior kernel at the mode.	
 fprintf(' Done!\n');
