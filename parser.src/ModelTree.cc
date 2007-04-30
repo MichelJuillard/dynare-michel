@@ -146,6 +146,9 @@ ModelTree::writeTemporaryTerms(ostream &output, ExprNodeOutputType output_type) 
   for(temporary_terms_type::const_iterator it = temporary_terms.begin();
       it != temporary_terms.end(); it++)
     {
+      if (!OFFSET(output_type) && it != temporary_terms.begin())
+        output << "," << endl;
+
       (*it)->writeOutput(output, output_type, temporary_terms);
       output << " = ";
 
@@ -156,11 +159,9 @@ ModelTree::writeTemporaryTerms(ostream &output, ExprNodeOutputType output_type) 
 
       if (OFFSET(output_type))
         output << ";" << endl;
-      else
-        output << ",\n";
     }
   if (!OFFSET(output_type))
-    output << ";\n";
+    output << ";" << endl;
 }
 
 void
@@ -538,60 +539,63 @@ ModelTree::writeStaticCFile(const string &static_basename) const
       cerr << "Error: Can't open file " << filename << " for writing" << endl;
       exit(-1);
     }
-  mStaticModelFile << "/*\n";
-  mStaticModelFile << " * " << filename << " : Computes static model for Dynare\n";
-  mStaticModelFile << " * Warning : this file is generated automatically by Dynare\n";
-  mStaticModelFile << " *           from model file (.mod)\n\n";
-  mStaticModelFile << " */\n";
-  mStaticModelFile << "#include <math.h>\n";
-  mStaticModelFile << "#include \"mex.h\"\n";
-  // A global variable for model parameters
-  mStaticModelFile << "double *params;\n";
+  mStaticModelFile << "/*" << endl
+                   << " * " << filename << " : Computes static model for Dynare" << endl
+                   << " * Warning : this file is generated automatically by Dynare" << endl
+                   << " *           from model file (.mod)" << endl
+                   << endl
+                   << " */" << endl
+                   << "#include <math.h>" << endl
+                   << "#include \"mex.h\"" << endl
+    // A global variable for model parameters
+                   << "double *params;" << endl;
 
   // Writing the function Static
   writeStaticModel(mStaticModelFile);
 
   // Writing the gateway routine
-  mStaticModelFile << "/* The gateway routine */\n";
-  mStaticModelFile << "void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])\n";
-  mStaticModelFile << "{\n";
-  mStaticModelFile << "  double *y, *x;\n";
-  mStaticModelFile << "  double *residual, *g1;\n";
-  mStaticModelFile << "  mxArray *M_;\n";
-  mStaticModelFile << "\n";
-  mStaticModelFile << "  /* Create a pointer to the input matrix y. */\n";
-  mStaticModelFile << "  y = mxGetPr(prhs[0]);\n";
-  mStaticModelFile << "\n";
-  mStaticModelFile << "  /* Create a pointer to the input matrix x. */\n";
-  mStaticModelFile << "  x = mxGetPr(prhs[1]);\n";
-  mStaticModelFile << "\n";
+  mStaticModelFile << "/* The gateway routine */" << endl
+                   << "void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])" << endl
+                   << "{" << endl
+                   << "  double *y, *x;" << endl
+                   << "  double *residual, *g1;" << endl
+                   << "  mxArray *M_;" << endl
+                   << endl
+                   << "  /* Create a pointer to the input matrix y. */" << endl
+                   << "  y = mxGetPr(prhs[0]);" << endl
+                   << endl
+                   << "  /* Create a pointer to the input matrix x. */" << endl
+                   << "  x = mxGetPr(prhs[1]);" << endl
+                   << endl
+                   << "  residual = NULL;" << endl
+                   << "  if (nlhs >= 1)" << endl
+                   << "  {" << endl
+                   << "      /* Set the output pointer to the output matrix residual. */" << endl
+                   << "      plhs[0] = mxCreateDoubleMatrix(" << equations.size() << ",1, mxREAL);" << endl
+                   << "     /* Create a C pointer to a copy of the output matrix residual. */" << endl
+                   << "     residual = mxGetPr(plhs[0]);" << endl
+                   << "  }" << endl
+                   << endl
+                   << "  g1 = NULL;" << endl
+                   << "  if (nlhs >= 2)" << endl
+                   << "  {" << endl
+                   << "      /* Set the output pointer to the output matrix g1. */" << endl
+                   << "      plhs[1] = mxCreateDoubleMatrix(" << equations.size() << ", " << symbol_table.endo_nbr << ", mxREAL);" << endl
+                   << "      /* Create a C pointer to a copy of the output matrix g1. */" << endl
+                   << "      g1 = mxGetPr(plhs[1]);" << endl
+                   << "  }" << endl
+                   << endl
+                   << "  /* Gets model parameters from global workspace of Matlab */" << endl
+                   << "  M_ = mexGetVariable(\"global\",\"M_\");" << endl
+                   << "  if (M_ == NULL ){" << endl
+                   << "     mexPrintf(\"Global variable not found : \");" << endl
+                   << "     mexErrMsgTxt(\"M_ \\n\");" << endl
+                   << "  }" << endl
+                   << "  params = mxGetPr(mxGetFieldByNumber(M_, 0, mxGetFieldNumber(M_,\"params\")));" << endl
+                   << "  /* Call the C Static. */" << endl
+                   << "  Static(y, x, residual, g1);" << endl
+                   << "}" << endl;
 
-  mStaticModelFile << "  residual = NULL;\n";
-  mStaticModelFile << "  if (nlhs >= 1)\n";
-  mStaticModelFile << "  {\n";
-  mStaticModelFile << "      /* Set the output pointer to the output matrix residual. */\n";
-  mStaticModelFile << "      plhs[0] = mxCreateDoubleMatrix(" << equations.size() << ",1, mxREAL);\n";
-  mStaticModelFile << "     /* Create a C pointer to a copy of the output matrix residual. */\n";
-  mStaticModelFile << "     residual = mxGetPr(plhs[0]);\n";
-  mStaticModelFile << "  }\n\n";
-  mStaticModelFile << "  g1 = NULL;\n";
-  mStaticModelFile << "  if (nlhs >= 2)\n";
-  mStaticModelFile << "  {\n";
-  mStaticModelFile << "      /* Set the output pointer to the output matrix g1. */\n";
-  mStaticModelFile << "      plhs[1] = mxCreateDoubleMatrix(" << equations.size() << ", " << symbol_table.endo_nbr << ", mxREAL);\n";
-  mStaticModelFile << "      /* Create a C pointer to a copy of the output matrix g1. */\n";
-  mStaticModelFile << "      g1 = mxGetPr(plhs[1]);\n";
-  mStaticModelFile << "  }\n\n";
-  mStaticModelFile << "  /* Gets model parameters from global workspace of Matlab */\n";
-  mStaticModelFile << "  M_ = mexGetVariable(\"global\",\"M_\");\n";
-  mStaticModelFile << "  if (M_ == NULL ){\n";
-  mStaticModelFile << "     mexPrintf(\"Global variable not found : \");\n";
-  mStaticModelFile << "     mexErrMsgTxt(\"M_ \\n\");\n";
-  mStaticModelFile << "  }\n";
-  mStaticModelFile << "  params = mxGetPr(mxGetFieldByNumber(M_, 0, mxGetFieldNumber(M_,\"params\")));\n";
-  mStaticModelFile << "  /* Call the C Static. */\n";
-  mStaticModelFile << "  Static(y, x, residual, g1);\n";
-  mStaticModelFile << "}\n";
   mStaticModelFile.close();
 }
 
@@ -607,78 +611,86 @@ ModelTree::writeDynamicCFile(const string &dynamic_basename) const
       cerr << "Error: Can't open file " << filename << " for writing" << endl;
       exit(-1);
     }
-  mDynamicModelFile << "/*\n";
-  mDynamicModelFile << " * " << filename << " : Computes dynamic model for Dynare\n";
-  mDynamicModelFile << " *\n";
-  mDynamicModelFile << " * Warning : this file is generated automatically by Dynare\n";
-  mDynamicModelFile << " *           from model file (.mod)\n\n";
-  mDynamicModelFile << " */\n";
-  
-  // A global variable for model parameters
-  mDynamicModelFile << "double *params;\n";
+  mDynamicModelFile << "/*" << endl
+                    << " * " << filename << " : Computes dynamic model for Dynare" << endl
+                    << " *" << endl
+                    << " * Warning : this file is generated automatically by Dynare" << endl
+                    << " *           from model file (.mod)" << endl
+                    << endl
+                    << " */" << endl
+                    << "#include <math.h>" << endl
+                    << "#include \"mex.h\"" << endl
+    // A global variable for model parameters
+                    << "double *params;" << endl
   // A global variable for it_
-  mDynamicModelFile << "int it_;\n";
-  mDynamicModelFile << "int nb_row_x;\n";
+                    << "int it_;" << endl
+                    << "int nb_row_x;" << endl;
 
   // Writing the function body
   writeDynamicModel(mDynamicModelFile);
 
   // Writing the gateway routine
-  mDynamicModelFile << "/* The gateway routine */\n";
-  mDynamicModelFile << "void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])\n";
-  mDynamicModelFile << "{\n";
-  mDynamicModelFile << "  double *y, *x;\n";
-  mDynamicModelFile << "  double *residual, *g1, *g2;\n";
-  mDynamicModelFile << "  mxArray *M_;\n";
-  mDynamicModelFile << "\n";
-  mDynamicModelFile << "  /* Create a pointer to the input matrix y. */\n";
-  mDynamicModelFile << "  y = mxGetPr(prhs[0]);\n";
-  mDynamicModelFile << "\n";
-  mDynamicModelFile << "  /* Create a pointer to the input matrix x. */\n";
-  mDynamicModelFile << "  x = mxGetPr(prhs[1]);\n";
-  mDynamicModelFile << "  /* Gets number of rows of matrix x. */\n";
-  mDynamicModelFile << "  nb_row_x = mxGetM(prhs[1]);\n";
-  mDynamicModelFile << "\n";
-  mDynamicModelFile << "  residual = NULL;\n";
-  mDynamicModelFile << "  if (nlhs >= 1)\n";
-  mDynamicModelFile << "  {\n";
-  mDynamicModelFile << "     /* Set the output pointer to the output matrix residual. */\n";
-  mDynamicModelFile << "     plhs[0] = mxCreateDoubleMatrix(" << equations.size() << ",1, mxREAL);\n";
-  mDynamicModelFile << "     /* Create a C pointer to a copy of the output matrix residual. */\n";
-  mDynamicModelFile << "     residual = mxGetPr(plhs[0]);\n";
-  mDynamicModelFile << "  }\n\n";
-  mDynamicModelFile << "  g1 = NULL;\n";
-  mDynamicModelFile << "  if (nlhs >= 2)\n";
-  mDynamicModelFile << "  {\n";
-  mDynamicModelFile << "     /* Set the output pointer to the output matrix g1. */\n";
+  mDynamicModelFile << "/* The gateway routine */" << endl
+                    << "void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])" << endl
+                    << "{" << endl
+                    << "  double *y, *x;" << endl
+                    << "  double *residual, *g1, *g2;" << endl
+                    << "  mxArray *M_;" << endl
+                    << endl
+                    << "  /* Create a pointer to the input matrix y. */" << endl
+                    << "  y = mxGetPr(prhs[0]);" << endl
+                    << endl
+                    << "  /* Create a pointer to the input matrix x. */" << endl
+                    << "  x = mxGetPr(prhs[1]);" << endl
+                    << "  /* Gets number of rows of matrix x. */" << endl
+                    << "  nb_row_x = mxGetM(prhs[1]);" << endl
+                    << endl
+                    << "  residual = NULL;" << endl
+                    << "  if (nlhs >= 1)" << endl
+                    << "  {" << endl
+                    << "     /* Set the output pointer to the output matrix residual. */" << endl
+                    << "     plhs[0] = mxCreateDoubleMatrix(" << equations.size() << ",1, mxREAL);" << endl
+                    << "     /* Create a C pointer to a copy of the output matrix residual. */" << endl
+                    << "     residual = mxGetPr(plhs[0]);" << endl
+                    << "  }" << endl
+                    << endl
+                    << "  g1 = NULL;" << endl
+                    << "  if (nlhs >= 2)" << endl
+                    << "  {" << endl
+                    << "     /* Set the output pointer to the output matrix g1. */" << endl;
+
   if (computeJacobianExo)
-    mDynamicModelFile << "     plhs[1] = mxCreateDoubleMatrix(" << equations.size() << ", " << variable_table.get_dyn_var_nbr() << ", mxREAL);\n";
+    mDynamicModelFile << "     plhs[1] = mxCreateDoubleMatrix(" << equations.size() << ", " << variable_table.get_dyn_var_nbr() << ", mxREAL);" << endl;
   else if (computeJacobian)
-    mDynamicModelFile << "     plhs[1] = mxCreateDoubleMatrix(" << equations.size() << ", " << variable_table.var_endo_nbr << ", mxREAL);\n";
-  mDynamicModelFile << "     /* Create a C pointer to a copy of the output matrix g1. */\n";
-  mDynamicModelFile << "     g1 = mxGetPr(plhs[1]);\n";
-  mDynamicModelFile << "  }\n\n";
-  mDynamicModelFile << "  g2 = NULL;\n";
-  mDynamicModelFile << " if (nlhs >= 3)\n";
-  mDynamicModelFile << "  {\n";
-  mDynamicModelFile << "     /* Set the output pointer to the output matrix g2. */\n";
-  mDynamicModelFile << "     plhs[2] = mxCreateDoubleMatrix(" << equations.size() << ", " << variable_table.get_dyn_var_nbr()*variable_table.get_dyn_var_nbr() << ", mxREAL);\n";
-  mDynamicModelFile << "     /* Create a C pointer to a copy of the output matrix g1. */\n";
-  mDynamicModelFile << "     g2 = mxGetPr(plhs[2]);\n";
-  mDynamicModelFile << "  }\n\n";
-  mDynamicModelFile << "  /* Gets model parameters from global workspace of Matlab */\n";
-  mDynamicModelFile << "  M_ = mexGetVariable(\"global\",\"M_\");\n";
-  mDynamicModelFile << "  if (M_ == NULL )\n";
-  mDynamicModelFile << "  {\n";
-  mDynamicModelFile << "      mexPrintf(\"Global variable not found : \");\n";
-  mDynamicModelFile << "      mexErrMsgTxt(\"M_ \\n\");\n";
-  mDynamicModelFile << "  }\n";
-  mDynamicModelFile << "  params = mxGetPr(mxGetFieldByNumber(M_, 0, mxGetFieldNumber(M_,\"params\")));\n";
-  mDynamicModelFile << "  /* Gets it_ from global workspace of Matlab */\n";
-  mDynamicModelFile << "  it_ = (int) floor(mxGetScalar(mexGetVariable(\"global\", \"it_\")))-1;\n";
-  mDynamicModelFile << "  /* Call the C subroutines. */\n";
-  mDynamicModelFile << "  Dynamic(y, x, residual, g1, g2);\n";
-  mDynamicModelFile << "}\n";
+    mDynamicModelFile << "     plhs[1] = mxCreateDoubleMatrix(" << equations.size() << ", " << variable_table.var_endo_nbr << ", mxREAL);" << endl;
+
+  mDynamicModelFile << "     /* Create a C pointer to a copy of the output matrix g1. */" << endl
+                    << "     g1 = mxGetPr(plhs[1]);" << endl
+                    << "  }" << endl
+                    << endl
+                    << "  g2 = NULL;" << endl
+                    << " if (nlhs >= 3)" << endl
+                    << "  {" << endl
+                    << "     /* Set the output pointer to the output matrix g2. */" << endl
+                    << "     plhs[2] = mxCreateDoubleMatrix(" << equations.size() << ", " << variable_table.get_dyn_var_nbr()*variable_table.get_dyn_var_nbr() << ", mxREAL);" << endl
+                    << "     /* Create a C pointer to a copy of the output matrix g1. */" << endl
+                    << "     g2 = mxGetPr(plhs[2]);" << endl
+                    << "  }" << endl
+                    << endl
+                    << "  /* Gets model parameters from global workspace of Matlab */" << endl
+                    << "  M_ = mexGetVariable(\"global\",\"M_\");" << endl
+                    << "  if (M_ == NULL)" << endl
+                    << "  {" << endl
+                    << "      mexPrintf(\"Global variable not found : \");" << endl
+                    << "      mexErrMsgTxt(\"M_ \\n\");" << endl
+                    << "  }" << endl
+                    << "  params = mxGetPr(mxGetFieldByNumber(M_, 0, mxGetFieldNumber(M_,\"params\")));" << endl
+                    << "  /* Gets it_ from global workspace of Matlab */" << endl
+                    << "  it_ = (int) floor(mxGetScalar(mexGetVariable(\"global\", \"it_\")))-1;" << endl
+                    << "  /* Call the C subroutines. */" << endl
+                    << "  Dynamic(y, x, residual, g1, g2);" << endl
+                    << "}" << endl;
+
   mDynamicModelFile.close();
 }
 
@@ -795,22 +807,26 @@ ModelTree::writeStaticModel(ostream &StaticOutput) const
     }
   else
     {
-      StaticOutput << "void Static(double *y, double *x, double *residual, double *g1)\n";
-      StaticOutput << "{\n";
-      StaticOutput << "  double lhs, rhs;\n\n";
-      // Writing residual equations
-      StaticOutput << "  /* Residual equations */\n";
-      StaticOutput << "  if (residual == NULL) return;\n";
-      StaticOutput << " {\n";
-      StaticOutput << model_output.str();
-      // Writing Jacobian
-      StaticOutput << "   /* Jacobian for endogenous variables without lag */\n";
-      StaticOutput << "   if (g1 == NULL) return;\n";
-      StaticOutput << " {\n";
-      StaticOutput << jacobian_output.str();
-      StaticOutput << "  }\n";
-      StaticOutput << " }\n";
-      StaticOutput << "}\n\n";
+      StaticOutput << "void Static(double *y, double *x, double *residual, double *g1)" << endl
+                   << "{" << endl
+                   << "  double lhs, rhs;" << endl
+        // Writing residual equations
+                   << "  /* Residual equations */" << endl
+                   << "  if (residual == NULL)" << endl
+                   << "    return;" << endl
+                   << "  else" << endl
+                   << "    {" << endl
+                   << model_output.str()
+        // Writing Jacobian
+                   << "     /* Jacobian for endogenous variables without lag */" << endl
+                   << "     if (g1 == NULL)" << endl
+                   << "       return;" << endl
+                   << "     else" << endl
+                   << "       {" << endl
+                   << jacobian_output.str()
+                   << "       }" << endl
+                   << "    }" << endl
+                   << "}" << endl << endl;
     }
 }
 
@@ -1672,28 +1688,35 @@ ModelTree::writeDynamicModel(ostream &DynamicOutput) const
     }
   else
     {
-      DynamicOutput << "void Dynamic(double *y, double *x, double *residual, double *g1, double *g2)\n";
-      DynamicOutput << "{\n";
-      DynamicOutput << "  double lhs, rhs;\n\n";
-      DynamicOutput << "  /* Residual equations */\n";
-      DynamicOutput << model_output.str();
+      DynamicOutput << "void Dynamic(double *y, double *x, double *residual, double *g1, double *g2)" << endl
+                    << "{" << endl
+                    << "  double lhs, rhs;" << endl
+                    << endl
+                    << "  /* Residual equations */" << endl
+                    << model_output.str();
+
       if (computeJacobian || computeJacobianExo)
         {
-          DynamicOutput << "  /* Jacobian  */\n";
-          DynamicOutput << "  if (g1 == NULL) return;\n";
-          DynamicOutput << "  {\n";
-          DynamicOutput << jacobian_output.str();
-          DynamicOutput << "  }\n";
+          DynamicOutput << "  /* Jacobian  */" << endl
+                        << "  if (g1 == NULL)" << endl
+                        << "    return;" << endl
+                        << "  else" << endl
+                        << "    {" << endl
+                        << jacobian_output.str()
+                        << "    }" << endl;
         }
       if (computeHessian)
         {
-          DynamicOutput << "  /* Hessian for endogenous and exogenous variables */\n";
-          DynamicOutput << "  if (g2 == NULL) return;\n";
-          DynamicOutput << "   {\n";
-          DynamicOutput << hessian_output.str() << lsymetric.str();
-          DynamicOutput << "   }\n";
+          DynamicOutput << "  /* Hessian for endogenous and exogenous variables */" << endl
+                        << "  if (g2 == NULL)" << endl
+                        << "    return;" << endl
+                        << "  else" << endl
+                        << "    {" << endl
+                        << hessian_output.str()
+                        << lsymetric.str()
+                        << "    }" << endl;
         }
-      DynamicOutput << "}\n\n";
+      DynamicOutput << "}" << endl << endl;
     }
 }
 
