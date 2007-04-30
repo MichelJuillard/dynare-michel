@@ -10,9 +10,12 @@ ParsingDriver::~ParsingDriver()
 }
 
 bool
-ParsingDriver::exists_symbol(const char *s)
+ParsingDriver::symbol_exists_and_is_not_modfile_local_variable(const char *s)
 {
-  return mod_file->symbol_table.Exist(s);
+  if (!mod_file->symbol_table.Exist(s))
+    return false;
+
+  return(mod_file->symbol_table.getType(s) != eModFileLocalVariable);
 }
 
 void
@@ -120,6 +123,10 @@ ParsingDriver::add_model_variable(string *name)
   NodeID id = model_tree->AddVariable(*name);
 
   Type type = mod_file->symbol_table.getType(*name);
+
+  if (type == eModFileLocalVariable)
+    error("Variable " + *name + " not allowed inside model declaration. Its scope is only outside model.");
+
   if ((type == eEndogenous) && (model_tree->mode == eSparseDLLMode))
     {
       int ID = mod_file->symbol_table.getID(*name);
@@ -136,6 +143,9 @@ ParsingDriver::add_model_variable(string *name, string *olag)
   check_symbol_existence(*name);
   Type type = mod_file->symbol_table.getType(*name);
   int lag = atoi(olag->c_str());
+
+  if (type == eModFileLocalVariable)
+    error("Variable " + *name + " not allowed inside model declaration. Its scope is only outside model.");
 
   if ((type == eExogenous) && lag != 0)
     {
@@ -156,7 +166,10 @@ ParsingDriver::add_model_variable(string *name, string *olag)
 NodeID
 ParsingDriver::add_expression_variable(string *name)
 {
-  check_symbol_existence(*name);
+  // If symbol doesn't exist, then declare it as a mod file local variable
+  if (!mod_file->symbol_table.Exist(*name))
+    mod_file->symbol_table.AddSymbolDeclar(*name, eModFileLocalVariable, *name);
+
   NodeID id = data_tree->AddVariable(*name);
 
   delete name;
@@ -985,9 +998,9 @@ ParsingDriver::add_model_equal_with_zero_rhs(NodeID arg)
 }
 
 void
-ParsingDriver::declare_and_init_local_parameter(string *name, NodeID rhs)
+ParsingDriver::declare_and_init_model_local_variable(string *name, NodeID rhs)
 {
-  mod_file->symbol_table.AddSymbolDeclar(*name, eLocalParameter, *name);
+  mod_file->symbol_table.AddSymbolDeclar(*name, eModelLocalVariable, *name);
   try
     {
       model_tree->AddLocalParameter(*name, rhs);

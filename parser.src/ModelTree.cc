@@ -164,14 +164,14 @@ ModelTree::writeTemporaryTerms(ostream &output, ExprNodeOutputType output_type) 
 }
 
 void
-ModelTree::writeLocalParameters(ostream &output, ExprNodeOutputType output_type) const
+ModelTree::writeModelLocalVariables(ostream &output, ExprNodeOutputType output_type) const
 {
-  for(map<int, NodeID>::const_iterator it = local_parameters_table.begin();
-      it != local_parameters_table.end(); it++)
+  for(map<int, NodeID>::const_iterator it = local_variables_table.begin();
+      it != local_variables_table.end(); it++)
     {
       int id = it->first;
       NodeID value = it->second;
-      output << symbol_table.getNameByID(eLocalParameter, id) << " = ";
+      output << symbol_table.getNameByID(eModelLocalVariable, id) << " = ";
       // Use an empty set for the temporary terms
       value->writeOutput(output, output_type, temporary_terms_type());
       output << ";" << endl;
@@ -692,7 +692,7 @@ ModelTree::writeStaticModel(ostream &StaticOutput) const
 
   ExprNodeOutputType output_type = (mode == eDLLMode ? oCStaticModel : oMatlabStaticModel);
 
-  writeLocalParameters(model_output, output_type);
+  writeModelLocalVariables(model_output, output_type);
 
   writeTemporaryTerms(model_output, output_type);
 
@@ -973,7 +973,7 @@ ModelTree::writeSparseDLLDynamicCFileAndBinFile(const string &dynamic_basename, 
     }
   mDynamicModelFile << "//#define DEBUG\n";
 
-  writeLocalParameters(mDynamicModelFile, oCDynamicModelSparseDLL);
+  writeModelLocalVariables(mDynamicModelFile, oCDynamicModelSparseDLL);
 
   writeModelEquationsOrdered(mDynamicModelFile, block_triangular.ModelBlock);
 
@@ -1521,7 +1521,7 @@ ModelTree::writeDynamicModel(ostream &DynamicOutput) const
 
   ExprNodeOutputType output_type = (mode == eStandardMode ? oMatlabDynamicModel : oCDynamicModel);
 
-  writeLocalParameters(model_output, output_type);
+  writeModelLocalVariables(model_output, output_type);
 
   writeTemporaryTerms(model_output, output_type);
 

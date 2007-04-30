@@ -333,11 +333,11 @@ DataTree::AddLocalParameter(const string &name, NodeID value) throw (LocalParame
   int id = symbol_table.getID(name);
 
   // Throw an exception if symbol already declared
-  map<int, NodeID>::iterator it = local_parameters_table.find(id);
-  if (it != local_parameters_table.end())
+  map<int, NodeID>::iterator it = local_variables_table.find(id);
+  if (it != local_variables_table.end())
     throw LocalParameterException(name);
 
-  local_parameters_table[id] = value;
+  local_variables_table[id] = value;
 }
 
 NodeID

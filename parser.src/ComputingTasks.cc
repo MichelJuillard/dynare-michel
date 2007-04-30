@@ -127,7 +127,9 @@ RamseyPolicyStatement::checkPass(ModFileStructure &mod_file_struct)
 {
   mod_file_struct.stoch_simul_or_similar_present = true;
 
-  // Fill in option_order of mod_file_struct
+  /* Fill in option_order of mod_file_struct
+     Since ramsey policy needs one further order of derivation (for example, for 1st order
+     approximation, it needs 2nd derivatives), we add 1 to the order declared by user */
   OptionsList::num_options_type::const_iterator it = options_list.num_options.find("order");
   if (it != options_list.num_options.end())
     mod_file_struct.order_option = atoi(it->second.c_str()) + 1;

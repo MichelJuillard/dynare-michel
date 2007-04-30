@@ -147,8 +147,8 @@ public:
     exit(-1);
   }
 
-  //! Check if a given symbol exists in the parsing context
-  bool exists_symbol(const char *s);
+  //! Check if a given symbol exists in the parsing context, and is not a mod file local variable
+  bool symbol_exists_and_is_not_modfile_local_variable(const char *s);
   //! Sets mode of ModelTree class to use C output
   void use_dll();
   //! Sets mode of ModelTree class to block decompose the model and triggers the creation of the incidence matrix
@@ -166,7 +166,7 @@ public:
   //! Declares a parameter by adding it to SymbolTable
   void declare_parameter(string *name, string *tex_name = new string);
   //! Declares and initializes a local parameter
-  void declare_and_init_local_parameter(string *name, NodeID rhs);
+  void declare_and_init_model_local_variable(string *name, NodeID rhs);
   //! Adds a constant to DataTree
   NodeID add_constant(string *constant);
   //! Adds a model variable to ModelTree and VariableTable

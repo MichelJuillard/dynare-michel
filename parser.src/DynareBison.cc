@@ -889,7 +889,7 @@ namespace yy
 
   case 159:
 #line 421 "DynareBison.yy"
-    {driver.declare_and_init_local_parameter((yysemantic_stack_[(5) - (2)].string_val), (yysemantic_stack_[(5) - (4)].node_val));;}
+    {driver.declare_and_init_model_local_variable((yysemantic_stack_[(5) - (2)].string_val), (yysemantic_stack_[(5) - (4)].node_val));;}
     break;
 
   case 160:

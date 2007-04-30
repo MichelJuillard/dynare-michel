@@ -13,7 +13,8 @@
 using namespace std;
 
 SymbolTable::SymbolTable() : endo_nbr(0), exo_nbr(0), exo_det_nbr(0), parameter_nbr(0),
-                             local_parameter_nbr(0), recur_nbr(0)
+                             model_local_variable_nbr(0), modfile_local_variable_nbr(0),
+                             recur_nbr(0)
 {
   name_table.resize(20);
   tex_name_table.resize(20);
@@ -43,14 +44,15 @@ int SymbolTable::AddSymbol(string name,Type type, string tex_name)
     case eRecursiveVariable:
       symboltable[name].id = recur_nbr;
       return recur_nbr++;
-    case eLocalParameter:
-      symboltable[name].id = local_parameter_nbr;
-      return local_parameter_nbr++;
-    default:
-      // should never happen
-      return -1;
+    case eModelLocalVariable:
+      symboltable[name].id = model_local_variable_nbr;
+      return model_local_variable_nbr++;
+    case eModFileLocalVariable:
+      symboltable[name].id = modfile_local_variable_nbr;
+      return modfile_local_variable_nbr++;
     }
-
+  // should never happen
+  return -1;
 }
 
 int SymbolTable::AddSymbolDeclar(string name,Type type, string tex_name)

@@ -9,7 +9,8 @@ enum Type
     eExogenousDet = 2,             //!< Exogenous deterministic (new)
     eRecursiveVariable = 3,        //!< Recursive variable (reserved for future use)
     eParameter = 4,                //!< Parameter
-    eLocalParameter = 10,          //!< Parameter  local to a model
+    eModelLocalVariable = 10,      //!< Local variable whose scope is model (pound expression)
+    eModFileLocalVariable = 11     //!< Local variable whose scope is mod file (model excluded)
   };
 
 //! Symbol reference flag enum

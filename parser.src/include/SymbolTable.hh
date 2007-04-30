@@ -55,8 +55,10 @@ public :
   int exo_det_nbr;
   //! Number of declared parameters
   int parameter_nbr;
-  //! Number of declared local parameters
-  int local_parameter_nbr;
+  //! Number of declared model local variables
+  int model_local_variable_nbr;
+  //! Number of declared modfile local variables
+  int modfile_local_variable_nbr;
   //! Number of declared recursive variables
   int recur_nbr;
   /*! Pointer to error function of parser class */

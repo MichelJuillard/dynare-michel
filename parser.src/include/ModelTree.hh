@@ -69,9 +69,9 @@ private:
   void computeTemporaryTermsOrdered(int order, Model_Block *ModelBlock);
   //! Writes temporary terms
   void writeTemporaryTerms(ostream &output, ExprNodeOutputType output_type) const;
-  //! Writes local parameters
+  //! Writes model local variables
   /*! No temporary term is used in the output, so that local parameters declarations can be safely put before temporary terms declaration in the output files */
-  void writeLocalParameters(ostream &output, ExprNodeOutputType output_type) const;
+  void writeModelLocalVariables(ostream &output, ExprNodeOutputType output_type) const;
   //! Writes model equations
   void writeModelEquations(ostream &output, ExprNodeOutputType output_type) const;
   //! Writes the static model equations and its derivatives

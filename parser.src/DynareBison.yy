@@ -418,7 +418,7 @@ cutoff
 	;
 	
  pound_expression: '#' NAME EQUAL hand_side ';'
-                   {driver.declare_and_init_local_parameter($2, $4);}
+                   {driver.declare_and_init_model_local_variable($2, $4);}
 
  model_var
  	: NAME 

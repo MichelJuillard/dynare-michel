@@ -162,9 +162,12 @@ VariableNode::VariableNode(DataTree &datatree_arg, int symb_id_arg, Type type_ar
     case eParameter:
       // All derivatives are null, do nothing
       break;
-    case eLocalParameter:
+    case eModelLocalVariable:
       // Non null derivatives are those of the value of the local parameter
-      non_null_derivatives = datatree.local_parameters_table[symb_id]->non_null_derivatives;
+      non_null_derivatives = datatree.local_variables_table[symb_id]->non_null_derivatives;
+      break;
+    case eModFileLocalVariable:
+      // Such a variable is never derived
       break;
     }
 }
@@ -184,8 +187,11 @@ VariableNode::computeDerivative(int varID)
         return datatree.Zero;
     case eParameter:
       return datatree.Zero;
-    case eLocalParameter:
-      return datatree.local_parameters_table[symb_id]->getDerivative(varID);
+    case eModelLocalVariable:
+      return datatree.local_variables_table[symb_id]->getDerivative(varID);
+    case eModFileLocalVariable:
+      cerr << "ModFileLocalVariable is not derivable" << endl;
+      exit(-1);
     }
   cerr << "Impossible case!" << endl;
   exit(-1);
@@ -216,8 +222,9 @@ VariableNode::writeOutput(ostream &output, ExprNodeOutputType output_type,
         output << "params" << LPAR(output_type) << symb_id + OFFSET(output_type) << RPAR(output_type);
       break;
 
-    case eLocalParameter:
-      output << datatree.symbol_table.getNameByID(eLocalParameter, symb_id);
+    case eModelLocalVariable:
+    case eModFileLocalVariable:
+      output << datatree.symbol_table.getNameByID(type, symb_id);
       break;
 
     case eEndogenous:

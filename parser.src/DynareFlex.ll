@@ -262,11 +262,12 @@ int sigma_e = 0;
   return token::INT_NUMBER;
 }
    	
- /* an instruction starting with a recognized symbol is passed as NAME,
+ /* an instruction starting with a recognized symbol (which is not a modfile local variable)
+    is passed as NAME,
     otherwise it is a native statement until the end of the line
  */
 <INITIAL>[A-Za-z_][A-Za-z0-9_]* {	      
-  if (driver.exists_symbol(yytext))
+  if (driver.symbol_exists_and_is_not_modfile_local_variable(yytext))
     {
       BEGIN DYNARE_STATEMENT;
       yylval->string_val = new string(yytext);
