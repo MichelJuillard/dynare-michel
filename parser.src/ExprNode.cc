@@ -123,7 +123,7 @@ NumConstNode::writeOutput(ostream &output, ExprNodeOutputType output_type,
 double
 NumConstNode::eval(const eval_context_type &eval_context) const throw (EvalException)
 {
-  return(atof(datatree.num_constants.get(id).c_str()));
+  return(datatree.num_constants.getDouble(id));
 }
 
 void
@@ -666,10 +666,8 @@ UnaryOpNode::writeOutput(ostream &output, ExprNodeOutputType output_type,
 }
 
 double
-UnaryOpNode::eval(const eval_context_type &eval_context) const throw (EvalException)
+UnaryOpNode::eval_opcode(UnaryOpcode op_code, double v) throw (EvalException)
 {
-  double v = arg->eval(eval_context);
-
   switch(op_code)
     {
     case oUminus:
@@ -709,6 +707,14 @@ UnaryOpNode::eval(const eval_context_type &eval_context) const throw (EvalExcept
     }
   // Impossible
   throw EvalException();
+}
+
+double
+UnaryOpNode::eval(const eval_context_type &eval_context) const throw (EvalException)
+{
+  double v = arg->eval(eval_context);
+
+  return eval_opcode(op_code, v);
 }
 
 void
@@ -914,11 +920,8 @@ BinaryOpNode::computeTemporaryTerms(map<NodeID, int> &reference_count,
 }
 
 double
-BinaryOpNode::eval(const eval_context_type &eval_context) const throw (EvalException)
+BinaryOpNode::eval_opcode(double v1, BinaryOpcode op_code, double v2) throw (EvalException)
 {
-  double v1 = arg1->eval(eval_context);
-  double v2 = arg2->eval(eval_context);
-
   switch(op_code)
     {
     case oPlus:
@@ -935,6 +938,15 @@ BinaryOpNode::eval(const eval_context_type &eval_context) const throw (EvalExcep
     default:
       throw EvalException();
     }
+}
+
+double
+BinaryOpNode::eval(const eval_context_type &eval_context) const throw (EvalException)
+{
+  double v1 = arg1->eval(eval_context);
+  double v2 = arg2->eval(eval_context);
+
+  return eval_opcode(v1, op_code, v2);
 }
 
 void

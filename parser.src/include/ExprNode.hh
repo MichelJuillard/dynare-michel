@@ -141,6 +141,7 @@ struct ExprNodeLess
 };
 
 //! Numerical constant node
+/*! The constant is necessarily non-negative (this is enforced at the NumericalConstants class level) */
 class NumConstNode : public ExprNode
 {
 private:
@@ -213,6 +214,7 @@ public:
                                      int Curr_block,
                                      Model_Block *ModelBlock) const;
   virtual void collectEndogenous(NodeID &Id);
+  static double eval_opcode(UnaryOpcode op_code, double v) throw (EvalException);
   virtual double eval(const eval_context_type &eval_context) const throw (EvalException);
 };
 
@@ -247,6 +249,7 @@ public:
                                      int Curr_block,
                                      Model_Block *ModelBlock) const;
   virtual void collectEndogenous(NodeID &Id);
+  static double eval_opcode(double v1, BinaryOpcode op_code, double v2) throw (EvalException);
   virtual double eval(const eval_context_type &eval_context) const throw (EvalException);
 };
 

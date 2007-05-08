@@ -8,8 +8,8 @@ DataTree::DataTree(SymbolTable &symbol_table_arg, NumericalConstants &num_consta
   node_counter(0),
   variable_table(symbol_table_arg)
 {
-  Zero = AddNumConstant("0.0");
-  One = AddNumConstant("1.0");
+  Zero = AddNumConstant("0");
+  One = AddNumConstant("1");
 
   MinusOne = AddUMinus(One);
 }

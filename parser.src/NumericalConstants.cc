@@ -1,33 +1,26 @@
-/*! \file
-  \version 1.0
-  \date 04/09/2004
-  \par This file implements the NumericalConstants class methodes.
-*/
-//------------------------------------------------------------------------------
 #include <iostream>
-using namespace std;
-//------------------------------------------------------------------------------
+
 #include "NumericalConstants.hh"
 
 NumericalConstants::NumericalConstants()
 {
-  AddConstant("0.0");
-  AddConstant("1.0");
+  AddConstant("0");
+  AddConstant("1");
 }
 
-//------------------------------------------------------------------------------
-NumericalConstants::~NumericalConstants()
+int
+NumericalConstants::AddConstant(const string &iConst)
 {
-  // Empty
-}
-
-//------------------------------------------------------------------------------
-int NumericalConstants::AddConstant(string iConst)
-{
-  map<string, int, less<string> >::iterator iter = numConstantsIndex.find(iConst);
+  map<string, int>::iterator iter = numConstantsIndex.find(iConst);
 
   if (iter != numConstantsIndex.end())
     return iter->second;
+
+  if (atof(iConst.c_str()) < 0)
+    {
+      cerr << "Can't handle a negative constant..!" << endl;
+      exit(-1);
+    }
 
   int id = (int) mNumericalConstants.size();
   mNumericalConstants.push_back(iConst);
@@ -35,17 +28,20 @@ int NumericalConstants::AddConstant(string iConst)
   return id;
 }
 
-//------------------------------------------------------------------------------
-string NumericalConstants::get(int ID) const
+string
+NumericalConstants::get(int ID) const
 {
-  if (ID < (int)mNumericalConstants.size())
-    {
-      return mNumericalConstants[ID];
-    }
+  if (ID < (int) mNumericalConstants.size())
+    return mNumericalConstants[ID];
   else
     {
-      return "";
+      cerr << "Unknown constant" << endl;
+      exit(-1);
     }
 }
 
-//------------------------------------------------------------------------------
+double
+NumericalConstants::getDouble(int iID) const
+{
+  return(atof(get(iID).c_str()));
+}

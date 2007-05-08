@@ -799,7 +799,7 @@ namespace yy
 
   case 141:
 #line 383 "DynareBison.yy"
-    {(yysemantic_stack_[(1) - (1)].string_val)->append(".0"); (yyval.node_val) = driver.add_constant((yysemantic_stack_[(1) - (1)].string_val));;}
+    {(yyval.node_val) = driver.add_constant((yysemantic_stack_[(1) - (1)].string_val));;}
     break;
 
   case 142:

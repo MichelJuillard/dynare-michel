@@ -1,36 +1,28 @@
 #ifndef _NUMERICALCONSTANTS_HH
 #define _NUMERICALCONSTANTS_HH
-//------------------------------------------------------------------------------
-/** \file
- * \version 1.0
- * \date 12/01/2003
- * \par This file defines NumericalConstants class.
- */
-//------------------------------------------------------------------------------
+
+using namespace std;
+
 #include <string>
 #include <vector>
 #include <map>
-//------------------------------------------------------------------------------
-/*!
-  \class  NumericalConstants
-  \brief  Handles numerical constants
-*/
+
+//! Handles numerical constants
 class NumericalConstants
 {
-private :
-  /*! Vector of numerical constants */
-  std::vector<std::string> mNumericalConstants;
+private:
+  //! Vector of numerical constants
+  vector<string> mNumericalConstants;
   //! Map matching constants to their id
-  std::map<std::string, int, std::less<std::string> > numConstantsIndex;
-public :
-  /*! Construcor */
+  map<string, int> numConstantsIndex;
+public:
   NumericalConstants();
-  /*! Destructor */
-  ~NumericalConstants();
-  /*! Adds a constant to mNumericalConstants */
-  int AddConstant(std::string iConst);
-  /*! Gets a constant form mNumericalConstants */
-  std::string get(int iID) const;
+  //! Adds a constant and returns its ID
+  int AddConstant(const string &iConst);
+  //! Get a constant in string form
+  string get(int iID) const;
+  //! Get a constant in double form
+  double getDouble(int iID) const;
 };
-//------------------------------------------------------------------------------
+
 #endif

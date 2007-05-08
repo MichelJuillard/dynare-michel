@@ -380,7 +380,7 @@ cutoff
 	| FLOAT_NUMBER
 		{$$ = driver.add_constant($1);}
 	| INT_NUMBER
-    {$1->append(".0"); $$ = driver.add_constant($1);}
+    {$$ = driver.add_constant($1);}
 	| hand_side PLUS hand_side 
     	{$$ = driver.add_plus($1, $3);}
 	| hand_side MINUS hand_side

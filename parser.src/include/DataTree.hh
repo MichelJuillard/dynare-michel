@@ -6,6 +6,7 @@ using namespace std;
 #include <string>
 #include <map>
 #include <list>
+#include <sstream>
 
 #include "SymbolTable.hh"
 #include "NumericalConstants.hh"
@@ -44,6 +45,7 @@ protected:
   typedef map<pair<pair<NodeID, NodeID>, int>, NodeID> binary_op_node_map_type;
   binary_op_node_map_type binary_op_node_map;
 
+  inline NodeID AddPossiblyNegativeConstant(double val);
   inline NodeID AddUnaryOp(UnaryOpcode op_code, NodeID arg);
   inline NodeID AddBinaryOp(NodeID arg1, BinaryOpcode op_code, NodeID arg2);
 public:
@@ -116,13 +118,50 @@ public:
 };
 
 inline NodeID
+DataTree::AddPossiblyNegativeConstant(double v)
+{
+  bool neg = false;
+  if (v < 0)
+    {
+      v = -v;
+      neg = true;
+    }
+  ostringstream ost;
+  ost << v;
+  
+  NodeID cnode = AddNumConstant(ost.str());
+
+  if (neg)
+    return AddUMinus(cnode);
+  else
+    return cnode;
+}
+
+inline NodeID
 DataTree::AddUnaryOp(UnaryOpcode op_code, NodeID arg)
 {
+  // If the node already exists in tree, share it
   unary_op_node_map_type::iterator it = unary_op_node_map.find(make_pair(arg, op_code));
   if (it != unary_op_node_map.end())
     return it->second;
-  else
-    return new UnaryOpNode(*this, op_code, arg);
+
+  // Try to reduce to a constant
+  // Case where arg is a constant and op_code == oUminus (i.e. we're adding a negative constant) is skipped
+  NumConstNode *carg = dynamic_cast<NumConstNode *>(arg);
+  if (op_code != oUminus || carg == NULL)
+    {
+      try
+        {
+          double argval = arg->eval(eval_context_type());
+          double val = UnaryOpNode::eval_opcode(op_code, argval);
+          return AddPossiblyNegativeConstant(val);
+        }
+      catch(ExprNode::EvalException &e)
+        {
+        }
+    }
+
+  return new UnaryOpNode(*this, op_code, arg);
 }
 
 inline NodeID
@@ -131,8 +170,20 @@ DataTree::AddBinaryOp(NodeID arg1, BinaryOpcode op_code, NodeID arg2)
   binary_op_node_map_type::iterator it = binary_op_node_map.find(make_pair(make_pair(arg1, arg2), op_code));
   if (it != binary_op_node_map.end())
     return it->second;
-  else
-    return new BinaryOpNode(*this, arg1, op_code, arg2);
+
+  // Try to reduce to a constant
+  try
+    {
+      double argval1 = arg1->eval(eval_context_type());
+      double argval2 = arg2->eval(eval_context_type());
+      double val = BinaryOpNode::eval_opcode(argval1, op_code, argval2);
+      return AddPossiblyNegativeConstant(val);
+    }
+  catch(ExprNode::EvalException &e)
+    {
+    }
+
+  return new BinaryOpNode(*this, arg1, op_code, arg2);
 }
 
 #endif
