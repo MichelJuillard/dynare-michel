@@ -100,6 +100,7 @@ end
     else
       load([MhDirectoryName M_.fname '_' type '1']);
       %eval(['STOCK_' CAPtype ' = sort(stock_' type ',4);'])
+      eval(['STOCK_' CAPtype ' = stock_' type ';'])
       save([MhDirectoryName M_.fname '_' CAPtype 's' int2str(1)],['STOCK_' CAPtype ]);
     end
     % Original file format may be useful in some cases...
@@ -135,6 +136,7 @@ end
     else
       load([MhDirectoryName M_.fname '_' type '1']);
       %eval(['STOCK_' CAPtype ' = sort(stock_' type ',3);'])
+      eval(['STOCK_' CAPtype ' = stock_' type ';'])
       save([MhDirectoryName M_.fname '_' CAPtype 's' int2str(1)],['STOCK_' CAPtype ]);      
     end
     % Original file format may be useful in some cases...
