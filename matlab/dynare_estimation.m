@@ -822,7 +822,7 @@ if (any(bayestopt_.pshape  >0 ) & options_.mh_replic) | ...
   %%
   GetPosteriorParametersStatistics;
   %% Results are saved (in case of an anormal exit from dynare or matlab)...
-  save([M_.fname '_results'],'oo_');
+  save([M_.fname '_results'],'oo_','M_');
   %%
   PlotPosteriorDistributions;
   metropolis_draw(1);
