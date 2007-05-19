@@ -1,28 +1,39 @@
-function [mu,sigma] = recursive_moments(m0,s0,data,offset)
-% stephane.adjemian@cepremap.cnrs.fr [02-03-2005]
+function [mu,sigma,offset] = recursive_moments(m0,s0,data,offset)
+% Recursive estimation of order one and two moments (expectation and
+% covariance matrix). 
+% 
+% INPUTS 
+%   o m0         [double]    (n*1) vector, the prior expectation.
+%   o s0         [double]    (n*n) matrix, the prior covariance matrix.
+%   o data       [double]    (T*n) matrix.  
+%   o offset     [integer]   scalar, number of observation previously
+%                            used to compute m0 and s0.
+%  
+% OUTPUTS 
+%   o mu         [double]    (n*1) vector, the posterior expectation. 
+%   o sigma      [double]    (n*n) matrix, the posterior covariance matrix.
+%   o offset     [integer]   = offset + T.
 %
-% m0    :: the initial mean, assumed to be a n*1 vector.
-% s0    :: the initial variance, assumed to be a n*n matrix.
-% data  :: T*n matrix.  
+% ALGORITHM 
+%   None.       
 %
-% mu    :: the sample mean, a n*1 vector.
-% sigma :: the sample covariance matrix, a n*n matrix.
-%
-% --> TODO: dll  
-T = size(data,1);
-n = size(data,2);
+% SPECIAL REQUIREMENTS
+%   None.
+%  
+%  
+% part of DYNARE, copyright S. Adjemian, M. Juillard (2006)
+% Gnu Public License. 
+
+[T,n] = size(data);
 
 for t = 1:T
   tt = t+offset;
   m1 = m0 + (1/tt)*(data(t,:)'-m0);
-  s1 = s0 + (1/tt)*(data(t,:)'*data(t,:)-m1*m1'-s0) + ((tt-1)/tt)*(m0*m0'-m1*m1');
+  qq = m1*m1';
+  s1 = s0 + (1/tt)*(data(t,:)'*data(t,:)-qq-s0) + ((tt-1)/tt)*(m0*m0'-qq');
   m0 = m1;
   s0 = s1;
 end
 
-mu = m1;
-sigma = s1;
-
-
-  
-
+mu = m1; sigma = s1;
+offset = offset+T;
