@@ -35,18 +35,12 @@ FirstMhFile = record.KeepedDraws.FirstMhFile;
 FirstLine = record.KeepedDraws.FirstLine;
 TotalNumberOfMhFiles = sum(record.MhDraws(:,2));
 
-load([ MhDirectoryName '/' M_.fname '_mh' int2str(1) '_blck' int2str(1)],'x2','logpo2');
-params = x2(1,:); oldlogpo2 = logpo2(1);
-for blck = 2:nblck
-    load([ MhDirectoryName '/' M_.fname '_mh' int2str(1) '_blck' int2str(blck)],'x2','logpo2');
-    if logpo2(1)>oldlogpo2
-        oldlogpo2 = logpo2(1);
-        params = x2(1,:);
-    end
-end
-
+params = zeros(1,n); 
+oldlogpo2 = -Inf;
 offset = 0;
-m0 = zeros(n,1); s0 = zeros(n,n);
+m0 = zeros(n,1); 
+s0 = zeros(n,n);
+
 for n = FirstMhFile:TotalNumberOfMhFiles
   for b = 1:nblck
     load([ MhDirectoryName '/' M_.fname '_mh' int2str(n) '_blck' int2str(b)],'x2','logpo2'); 
@@ -64,4 +58,4 @@ xparam1 = params';
 hh = inv(s0);
 fval = oldlogpo2;
 
-save([M_.fname 'mh_mode'],'xparam1','hh','fval');
+save([M_.fname '_mh_mode'],'xparam1','hh','fval');
