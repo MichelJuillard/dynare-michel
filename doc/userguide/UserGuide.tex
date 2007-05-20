@@ -1,0 +1,90 @@
+\documentclass[a4paper,11pt,titlepage]{memoir}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{rotating}
+\usepackage{graphicx}
+\usepackage[applemac]{inputenc}
+\usepackage{amsbsy,enumerate}
+\usepackage{natbib}
+%\usepackage{makeidx}
+%\usepackage[pdftex]{hyperref}
+%\usepackage{hyperref}
+%\hypersetup{colorlinks=false}
+\usepackage{hyperref} 
+\hypersetup{colorlinks,% 
+citecolor=green,% 
+filecolor=magenta,% 
+linkcolor=red,% 
+urlcolor=cyan,% 
+pdftex} 
+
+
+\newtheorem{definition}{Definition} [chapter]
+\newtheorem{lemma}{Lemma} [chapter]
+\newtheorem{property}{Property} [chapter]
+\newtheorem{theorem}{Theorem} [chapter]
+\newtheorem{remark}{Remark} [chapter]
+
+%\makeindex
+
+\begin{document}
+\frontmatter 
+
+\title{Dynare User Guide}
+\author{\\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\  Tommaso Mancini Griffoli\\ tommaso.mancini@stanfordalumni.org}
+\date{This draft: March 2007}
+
+\maketitle
+
+%\newpage
+
+\tableofcontents
+\listoffigures
+
+\chapter*{Work in Progress!}
+This is the second version of the Dynare User Guide which is still work in progress! This means two things. First, please read this with a critical eye and send me comments! Are some areas unclear? Is anything plain wrong? Are some sections too wordy, are there enough examples, are these clear? On the contrary, are there certain parts that just click particularly well? How can others be improved? I'm very interested to get your feedback. \\
+
+The second thing that a work in progress manuscript comes with is messy and disturbing notes to myself or others of the Dynare development team. These are marked with two stars (**). Just ignore whatever follows them... although there should not be too many. \\
+
+Thanks very much for your patience and good ideas. Please write either direclty to myself: tommaso.mancini@stanfordalumni.org, or \textbf{preferably on the Dynare Documentation Forum} available in the Forum section of the \href{http://www.cepremap.cnrs.fr/juillard/mambo/index.php?option=com_forum&Itemid=95}{Dynare website}. 
+
+\chapter*{Contacts and Credits} \label{ch:contacts}
+Dynare was originally developed by Michel Juillard in Paris, France. Currently, the development team of Dynare is composed of
+
+\begin{itemize}
+\item Stéphane Adjemian (stephane.adjemian``AT''ens.fr)
+\item Michel Juillard (michel.juillard``AT''ens.fr)
+\item Ferhat Mihoubi (ferhat.mihoubi``AT''univ-evry.fr)
+\item Ondra Kamenik (** email?)
+\item Marco Ratto (** email?)
+\item Sébastien Villemont (sebastien.villemont``AT''ens.fr)
+\end{itemize}
+
+Several parts of Dynare use or have strongly benefitted from publicly available programs by F. Collard, L. Ingber, P. Klein, S. Sakata, F. Schorfheide, C. Sims, P. Soederlind and R. Wouters. \\
+
+Finally, the development of Dynare could not have come such a long ways withough an active community of users who continually pose questions, report bugs and suggest new features. The help of this community is gratefully acknowledged.\\
+
+The email addresses above are provided in case yo wish to contact any one of the authors of Dynare directly. We nonetheless encourage you to first use the \href{http://www.cepremap.cnrs.fr/juillard/mambo/index.php?option=com_forum&Itemid=95}{Dynare forums} to ask your questions so that other users can benefit from them as well; remember, almost no question is specific enough to interest just one person, and yours is not the exception! 
+
+\mainmatter
+
+\include{ch-intro}
+\include{ch-inst}
+\include{ch-solbase}
+\include{ch-soladv}
+\include{ch-estbase}
+\include{ch-estadv}
+\include{ch-solbeh}
+\include{ch-estbeh}
+\include{ch-ramsey}
+\include{ch-trouble}
+
+\backmatter
+
+\bibliography{DynareBib}
+\bibliographystyle{econometrica}
+%\printindex
+
+\end{document}
+

@@ -1,4 +1,4 @@
-This is pdfeTeX, Version 3.141592-1.30.4-2.2 (Web2C 7.5.5) (format=pdflatex 2006.12.1)  10 FEB 2007 19:44
+This is pdfeTeX, Version 3.141592-1.30.4-2.2 (Web2C 7.5.5) (format=pdflatex 2006.12.1)  4 APR 2007 11:27
 entering extended mode
 \write18 enabled.
 **ch-inst.tex
@@ -11,11 +11,11 @@ h, portuges, romanian, russian, serbian, slovak, slovene, spanish, swedish, tur
 kish, ukrainian, nohyphenation, loaded.
 ! Undefined control sequence.
 l.1 \chapter
-            {Installing Dynare} \label{ch:install}
+            {Installing Dynare} \label{ch:inst}
 ? 
 ! Emergency stop.
 l.1 \chapter
-            {Installing Dynare} \label{ch:install}
+            {Installing Dynare} \label{ch:inst}
 End of file on the terminal!
 
  
@@ -26,7 +26,7 @@ Here is how much of TeX's memory you used:
  3314 multiletter control sequences out of 10000+50000
  3640 words of font info for 14 fonts, out of 2000000 for 2000
  582 hyphenation exceptions out of 5000
- 5i,0n,1p,60b,8s stack positions out of 5000i,500n,6000p,200000b,40000s
+ 5i,0n,1p,57b,8s stack positions out of 5000i,500n,6000p,200000b,40000s
 PDF statistics:
  0 PDF objects out of 300000
  0 named destinations out of 131072

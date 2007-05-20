@@ -1,111 +1,157 @@
 \chapter{Solving DSGE models - advanced topics} \label{ch:soladv}
 
-This chapter is a collection of topics - not all related to each other - that you will probably find interesting or at least understandable, if you have read the earlier Chapter \ref{ch:solbase} on the basics of solving DSGE models. This chapter begins with a section covering the methodologies used by Dynare to solve DSGE models. It then includes a section on undertaking more advanced or custom features in Dynare, like running loops to compare impulse response functions on the same graph, or retrieving particular series of data from your output files. Finally, the chapter ends with a section on modeling tips optimized for Dynare, but possibly also helpful for other work.\\
+This chapter is a collection of topics - not all related to each other - that you will probably find interesting or at least understandable, if you have read, and/ or feel comfortable with, the earlier chapter \ref{ch:solbase} on the basics of solving DSGE models. To provide at least some consistency, this chapter is divided into three sections. \textbf{The first section} deals directly with features of Dynare, such as dealing with correlated shocks, finding and saving your output, using loops, referring to external files and dealing with infinite eigenvalues. \textbf{The second section} overviews some of the inner workings of Dynare. The goal is to provide a brief explanation of the files that are created by Dynare to help you in troubleshooting or provide a starting point in case you actually want to customize the way Dynare works.  \textbf{The third section} of the chapter focusses on modeling tips optimized for Dynare, but possibly also helpful for other work.\\
 
-\section{Behind the scenes: an intro to solving stochastic DSGE models}
-The aim of this section is to peer behind the scenes of Dynare, or under its hood, to get an idea of the methodologies and algorithms used in its computations. Going into details would be beyond the scope of this User Guide which will instead remain at a high level. What you will find below will either comfort you in realizing that Dynare does what you expected of it - and what you would have also done if you had had to code it all yourself (with ten extra years of life expectancy and a direct phone line to the Dynare development team!), or will spur your curiosity to have a look at more detailed material. If so, you may want to go through Michel Juillard's presentation on solving DSGE models to a first and second order (** add link), or read \citet{CollardJuillard2001b} or \citet{SchmittGrohe2004} which gives a good overview of the most recent techniques based on perturbation methods. \\
+\section{Dynare features and functionality}
 
-\subsection{What is the advantage of a second order approximation?}
-As noted in chapter \ref{ch:solbase} and as will become clear in the section below, linearizing a system of equations to the first order raises the issue of certainty equivalence. This is because only the first moments of the shocks enter the linearized equations, and when expectations are taken, they disappear. Thus, unconditional expectations of the endogenous variables are equal to their non-stochastic steady state values. \\
+\subsection{Other examples}
+Other examples of .mod files used to generate impulse response functions are available on the Dynare website. In particular, Jesus Fernandez-Villaverde has provided a series of RBC model variants (from the most basic to some including variable capacity utilization, indivisible labor and investment specific technological change). You can find these, along with helpful notes and explanations, in the \href{http://www.cepremap.cnrs.fr/juillard/mambo/index.php?option=com_content&task=category&sectionid=11&id=96&Itemid=89}{Official Examples} section of the Dynare website.\\
 
-This may be an acceptable simplification to make. But depending on the context, it may instead be quite misleading. For instance, when using second order welfare functions to compare policies, you also need second order approximations of the policy function. Yet more clearly, in the case of asset pricing models, linearizing to the second order enables you to take risk (or the variance of shocks) into consideration - a highly desirable modeling feature. It is therefore very convenient that Dynare allows you to choose between a first or second order linearization of your model in the option of the \texttt{stoch\_simul} command. \\
+Also, don't forget to check occasionally the \href{http://www.cepremap.cnrs.fr/juillard/mambo/index.php?option=com_forum&Itemid=95}{Open Online Examples} page to see if any other user has posted an example that could help you in your work; or maybe you would like to post an example there yourself?
 
-\subsection{How does dynare solve stochastic DSGE models?}
-In this section, we shall briefly overview the perturbation methods employed by Dynare to solve DSGE models to a first order approximation. The second order follows very much the same approach, although at a higher level of complexity. The summary below is taken in most part from Michel Juillard's presentation ``Computing first order approximations of DSGE models with Dynare'' (** add link), which you should read if interested in particular details. \\
+\subsection{Working with several correlated shocks}
+Your model may have two or more shocks, and these may be correlated to each other. The example below illustrates how you would introduce this into Dynare.  Actually, the example provided is somewhat more complete than strictly necessary. This is to give you an alternative, full-blown example to the one described in chapter \ref{ch:solbase}.
 
-To summarize, a DSGE model is a collection of first order and equilibrium conditions that take the general form: 
+\subsubsection{The model}
+The model is a simplified standard RBC model taken from \citet{CollardJuillard2003} which served as the original User Guide for Dynare. \\
+
+The economy consists of an infinitely living representative agent who values consumption $c_t$ and labor services $h_t$ according to the following utility function
 \[
-\mathbb{E}_t\left\{f(y_{t+1},y_t,y_{t-1},u_t)\right\}=0
-\]
-\begin{eqnarray*}
-\mathbb{E}(u_t) &=& 0\\
-\mathbb{E}(u_t u_t') &=& \Sigma_u
-\end{eqnarray*}
-and where:
-\begin{description}
-  \item[$y$]: vector of endogenous variables
-  \item[$u$]: vector of exogenous stochastic shocks
-\end{description}
+\mathbb{E}_t \sum_{\tau=t}^\infty \beta^{\tau-t} \left( \log (c_t) - \theta \frac{h_t^{1+\psi}}{1+\psi} \right)
+\] 
+where, as usual, the discount factor $0<\beta<1$, the disutility of labor $\theta > 0$ and the labor supply elasticity $\psi \geq 0$. \\
 
-The solution to this system is a set of equations relating variables in the current period to the past state of the system and current shocks, that satisfy the original system. This is what we call the policy function. Sticking to the above notation, we can this function as:
+A social planner maximizes this utility function subject to the budget constraint
 \[
-y_t = g(y_{t-1},u_t)
+c_t + i_t = y_t
 \]
-
-Then, it is straightforward to re-write $y_{t+1}$ as
-\begin{eqnarray*}
-  y_{t+1} &=& g(y_t,u_{t+1})\\
-  &=& g(g(y_{t-1},u_t),u_{t+1})\\
-\end{eqnarray*}
-
-We can then define a new function $F$, such that:
+where $i_t$ is investment and $y_t$ output. Consumers are therefore also owners of the firms. The economy is a real economy, where part of output can be consumed and part invested to form physical capital. As is standard, the law of motion of capital is given by
 \[
-F(y_{t-1},u_t,u_{t+1}) =
-f(g(g(y_{t-1},u_t),u_{t+1}),g(y_{t-1},u_t),y_{t-1},u_t)\\
+k_{t+1} = \exp (b_t)i_t + (1-\delta)k_t
 \]
-which enables us to rewrite our system in terms of past variables, and current and future shocks:
+with $0<\delta<1$, where $\delta$ is physical depreciation and $b_t$ a shock affecting incorporated technological progress. \\
+
+We assume output is produced according to a standard constant returns to scale technology of the form
 \[
-\mathbb{E}_t\left[F(y_{t-1},u_t,u_{t+1})\right] = 0
+y_t = \exp (a_t)k_t^\alpha h_t^{1-\alpha}
 \]
+with $\alpha$ being the capital elasticity in the production function, with $0<\alpha<1$, and where $a_t$ represents a stochastic technological shock (or Solow residual). \\
 
-We then venture to linearize this model around a steady state defined as:
+Finally, we specify a \textbf{shock structure} that allows for shocks to display persistence across time and correlation in the current period. That is
 \[
-f(\bar y, \bar y, \bar y) = 0
+\left( \begin{array}{c}a_t \\
+b_t \end{array} \right) = \left( \begin{array}{c c} \rho & \tau \\
+\tau & \rho \end{array} \right) \left( \begin{array}{c}a_{t-1} \\
+b_{t-1} \end{array} \right) + \left( \begin{array}{c}\epsilon_t \\
+\nu_t \end{array} \right)
 \]
-having the property that:
+where $|\rho + \tau|<1$ and $|\rho - \tau|<1$ to ensure stationarity (we call $\rho$ the coefficient of persistence and $\tau$ that of cross-persistence). Furthermore, we assume $\mathbb{E}_t (\epsilon_t)=0$, $\mathbb{E}_t (\nu_t)=0$ and that the contemporaneous variance-covariance matrix of the innovations $\epsilon_t$ and $\nu_t$ is given by
 \[
-\bar y = g(\bar y, 0)
+\left( \begin{array}{c c} \sigma_\epsilon^2 & \psi \sigma_\epsilon \sigma_\nu \\
+\psi \sigma_\epsilon \sigma_\nu & \sigma_\nu^2 \end{array} \right)
 \]
+and where $corr(\epsilon_t \nu_s)=0$, $corr(\epsilon_t \epsilon_s)=0$ and $corr(\nu_t \nu_s)=0$ for all $t \neq s$. \\
 
-The first order Taylor expansion around $\bar y$ yields:
-\begin{eqnarray*}
-\lefteqn{\mathbb{E}_t\left\{F^{(1)}(y_{t-1},u_t,u_{t+1})\right\} =}\\
-&& \mathbb{E}_t\Big[f(\bar y, \bar y, \bar y)+f_{y_+}\left(g_y\left(g_y\hat y+g_uu \right)+g_u u' \right)\\
-&& + f_{y_0}\left(g_y\hat y+g_uu \right)+f_{y_-}\hat y+f_u u\Big]\\
-&& = 0
-\end{eqnarray*}
-with $\hat y = y_{t-1} - \bar y$, $u=u_t$, $u'=u_{t+1}$, $f_{y_+}=\frac{\partial f}{\partial y_{t+1}}$, $f_{y_0}=\frac{\partial f}{\partial y_t}$, $f_{y_-}=\frac{\partial f}{\partial y_{t-1}}$, $f_{u}=\frac{\partial f}{\partial u_t}$, $g_y=\frac{\partial g}{\partial y_{t-1}}$, $g_u=\frac{\partial g}{\partial u_t}$.\\
-
-Taking expectations (we're almost there!):
-\begin{eqnarray*}
-   \lefteqn{\mathbb{E}_t\left\{F^{(1)}(y_{t-1},u_t, u_{t+1})\right\} =}\\
-&& f(\bar y, \bar y, \bar y)+f_{y_+}\left(g_y\left(g_y\hat y+g_uu \right) \right)\\
-&& + f_{y_0}\left(g_y\hat y+g_uu \right)+f_{y_-}\hat y+f_u u\Big\}\\
-&=& \left(f_{y_+}g_yg_y+f_{y_0}g_y+f_{y_-}\right)\hat y+\left(f_{y_+}g_yg_u+f_{y_0}g_u+f_{u}\right)u\\
-&=& 0\\
-\end{eqnarray*}
-
-As you can see, since future shocks only enter with their first moments (which are zero in expectations), they drop out when taking expectations of the linearized equations. This is technically why certainty equivalence holds in a system linearized to its first order. The second thing to note is that we have two unknown variables in the above equation: $g_y$ and $g_u$ each of which will help us recover the policy function $g$. \\
-
-Since the above equation is true if the first and second parentheses are each zero, we can take each at a time (** hmm?). The first, yields a quadratic equation  in $g_y$, which we can solve with a series of algebraic trics that are not all immediately apparent (but detailed in Michel Juillard's presentation). Incidentally, one of the conditions that comes out of the solution of this equation is the Blanchard-Kahn condition: there must be as many roots larger than one in modulus as there are forward-looking variables in the model. Having recovered $g_y$, recovering $g_u$ is then straightforward from the second parenthesis. \\
-
-Finally, notice that a first order linearization of the function $g$ yields:
+This system - probably quite similar to standard RBC models you have run into - yields the following first order conditions (which are straightforward to reproduce in case you have doubts\ldots) and equilibrium conditions drawn from the description above. Note that the first equation captures the labor supply function and the second the intertemporal consumption Euler equation.
 \[
-y_t = \bar y+g_y\hat y+g_u u
-\]
-And now that we have $g_y$ and $g_u$, we have solved for the (approximate) policy (or decision) function and have succeeded in solving our DSGE model. If we were interested in impulse response functions, for instance, we would simply iterate the policy function starting from an initial value given by the steady state. \\
+\begin{aligned}
+c_t \theta h_t^{1+\psi} = (1-\alpha)y_t \\
+1= \beta \mathbb{E}_t \left[ \left( \frac{\exp(b_t)c_t}{\exp(b_{t+1})c_{t+1}} \right) \left( \exp(b_{t+1}) \alpha \frac{y_{t+1}}{k_{t+1}}+1-\delta \right) \right] \\
+y_t = \exp (a_t)k_t^\alpha h_t^{1-\alpha} \\
+k_{t+1} = \exp (b_t)i_t + (1-\delta)k_t \\
+a_t = \rho a_{t-1} + \tau b_{t-1} + \epsilon_t \\
+b_t = \tau a_{t-1} + \rho b_{t-1} + \nu_t
+\end{aligned}
+\] 
 
-The second order solution uses the same ``perturbation methods'' as above (the notion of starting from a function you can solve - like a steady state - and iterating forward), yet applies more complex algebraic techniques to recover the various partial derivatives of the policy function. But the general approach is perfectly isomorphic. Note that in the case of a second order approximation of a DSGE model, the variance of future shocks remains after taking expectations of the linearized equations and therefore affects the level of the resulting policy function.\\
+\subsubsection{The .mod file}
+To ``translate'' the model into a language understandable by Dynare, we would follow the steps outlined in chapter \ref{ch:solbase}. We will assume that you're comfortable with these and simply present the final .mod file below. Fist, though, note that to introduce shocks into Dynare, we have two options (this was not discussed in the earlier chapter). Either write:\\
+\\
+\texttt{shocks;\\
+var e; stderr 0.009;\\
+var u; stderr 0.009;\\
+var e, u = phi*0.009*0.009;\\
+end;}\\
+\\
+where the last line specifies the contemporaneous correlation between our two exogenous variables. (** does this mean every time you run your .mod file you will get a slightly different shock?) \\
 
-\section{Advanced topics and functions in Dynare}
-This section lists some of the more popular customizations of Dynare or advanced features that users may be interested in. 
+Alternatively, you can also write: \\
+\\
+\texttt{shocks;\\
+var e = 0.009 $\hat{}$ 2;\\
+var u = 0.009 $\hat{}$ 2;\\
+var e, u = phi*0.009*0.009;\\
+end;}\\
 
-\subsection{Finding and saving your output}
+So that you can gain experience by manipulating the entire model, here is the complete .mod file corresponding to the above example:\\
+\\
+\\
+\texttt{var y, c, k, a, h, b;\\
+varexo e,u;\\
+parameters beta, rho, beta, alpha, delta, theta, psi, tau;\\
+alpha = 0.36;\\
+rho   = 0.95;\\
+tau   = 0.025;\\
+beta  = 0.99;\\
+delta = 0.025;\\
+psi   = 0;\\
+theta = 2.95;\\
+phi   = 0.1;\\
+\\
+model;\\
+c*theta*h$\hat{ }$(1+psi)=(1-alpha)*y;\\
+k = beta*(((exp(b)*c)/(exp(b(+1))*c(+1)))\\
+    *(exp(b(+1))*alpha*y(+1)+(1-delta)*k));\\
+y = exp(a)*(k(-1)$\hat{ }$alpha)*(h$\hat{ }$(1-alpha));\\
+k = exp(b)*(y-c)+(1-delta)*k(-1);\\
+a = rho*a(-1)+tau*b(-1) + e;\\
+b = tau*a(-1)+rho*b(-1) + u;\\
+end;\\
+\\
+initval;\\
+y = 1.08068253095672;\\
+c = 0.80359242014163;\\
+h = 0.29175631001732;\\
+k = 5;\\
+a = 0;\\
+b = 0;\\
+e = 0;\\
+u = 0;\\
+end;\\
+\\
+shocks;\\
+var e; stderr 0.009;\\
+var u; stderr 0.009;\\
+var e, u = phi*0.009*0.009;\\
+end;\\
+\\
+stoch\_simul(periods=2100);}\\
+
+\subsection{Finding, saving and viewing your output} \label{sec:FindOut}
 Where is output stored? ** TBD, add a table summarizing what results exist and where they are stored in version 4. \\
 
-To save the data after simulations, you can just type: \texttt{save $<$datafilename$>$ $<$list of observed variables$>$} at the end of your .mod file. (** should the variables have the same name as in the .mod file?)
+To save your simulated variables, you can add the following command at the end of your .mod file: \texttt{dynasave (FILENAME) [variable names separated by commas]} If no variable names are specified in the optional field, Dynare will save all endogenous variables. In Matlab, variables saved with the \texttt{dynasave} command can be retrieved by using the Matlab command \texttt{load -mat FILENAME}.
+
 
 \subsection{Using loops to compare IRFs on the same graph}
-** See irf\_loop.mod e.g.
+** Comment the irf\_loop.mod e.g.
 
 \subsection{Referring to external files}
-You may find it convenient to refer to an external file, either when computing the steady state of a model in Matlab and reading the values into a .mod file, or when specifying shocks in an external file. The former used to be convenient in Dynare version 3, but is no longer necessary in version 4; we therefore do not provide details. (** give some details anyhow? describe how version 4 deals with steady states of non-stationary variables?) But you may find the latter helpful, for instance, to simulate a model based on shocks from a prior estimation. You could then retrieve the exogenous shocks from the oo\_ file by saving them in a file called datafile.mat. Finally, you could simulate a deterministic model with the shocks saved from the estimation by specifying the source file for the shocks, using the \texttt{shocks(shocks\_file = datafile.mat)} command. (** how should the variables be ordered in this datafile?)
-On the other hand, you could use the built-in commands in Dynare to generate impulse response functions from estimated shocks, as described in Chapter \ref{ch:estbase}. \\
+You may find it convenient to refer to an external file, either to compute the steady state of your model, or when specifying shocks in an external file. The former is described in section \ref{sec:ssshock} of chapter \ref{ch:solbase} when discussing steady states. The advantage of using Matlab, say, to find your model's steady state was clear with respect to Dynare version 3, as the latter resorted to numerical approximations to find steady state values. But Dynare version 4 now uses the same analytical methods available in Matlab. For most usage scenarios, you should therefore do just as  well to ask Dynare to compute your model's steady state (except, maybe, if you want to run loops, to vary your parameter values, for instance, in which case writing a Matlab program may be more handy). (** give more details? an example?)\\
+
+But you may also be interested in the second possibility described above, namely of specifying shocks in an external file, to simulate a model based on shocks from a prior estimation, for instance. You could then retrieve the exogenous shocks from the oo\_ file by saving them in a file called datafile.mat. Finally, you could simulate a deterministic model with the shocks saved from the estimation by specifying the source file for the shocks, using the \\ \mbox{\texttt{shocks(shocks\_file = datafile.mat)}} command. (** how should the variables be ordered in this datafile?)
+But of course, this is a bit of a workaround, since you could also use the built-in commands in Dynare to generate impulse response functions from estimated shocks, as described in chapter \ref{ch:estbase}. \\
+
+\subsection{Infinite eigenvalues}
+If you use the command \texttt{check} in your .mod file, Dynare will report your system's eigenvalues and tell you if these meet the Blanchard-Kahn conditions. At that point, don't worry if you get infinite eigenvalues - these are are firmly grounded in the theory of generalized eigenvalues. They have no detrimental influence on the solution algorithm. As far as Blanchard-Kahn conditions are concerned infinite eigenvalues are counted as explosive roots of modulus larger than one. \\
+
+\section{Files created by Dynare}
+At times, you may get a message that there is an error in a file with a new name, or you may want to have a closer look at how Dynare actually solves your model - out of curiosity or maybe to do some customization of your own. To help address these issues, below is a brief description of which files are created by Dynare after you launch \texttt{simul} or \texttt{stoch\_simul}, what their purpose is and what they contain. \\
+
+** Get this from Sebastien
+
 
 \section{Modeling tips}
-
-\subsection{Expectations taken in the past}
-For instance, to enter the term $\mathbb{E}_{t-1}y_t$, define $s_t=\mathbb{E}_t[y_{t+1}]$ and then use $s(-1)$ in your .mod file.
 
 \subsection{Stationarizing your model}
 Models in Dynare must be stationary, such that you can linearize them around a steady state and return to steady state after a shock. Thus, you must first stationarize your model, then linearize it, either by hand, or by letting Dynare do the work.  You can then reconstruct ex-post the non-stationary simulated variables after running impulse response functions.\\
@@ -114,8 +160,59 @@ For deterministic models, the trick is to use only stationary variables in $t+1$
 
 Note that in a stationary model, it is expected that variables will eventually go back to steady state after the initial shock. If you expect to see a growing curve for a variable, you are thinking about a growth model. Because growth models are nonstationary, it is easier to work with the stationarized version of such models. Again, if you know the trend, you can always add it back after the simulation of the stationary components of the variables. 
 
+\subsection{Expectations taken in the past}
+For instance, to enter the term $\mathbb{E}_{t-1}y_t$, define $s_t=\mathbb{E}_t[y_{t+1}]$ and then use $s(-1)$ in your .mod file.
+
 \subsection{Infinite sums}
-Dynare cannot deal with infinite sums very well. For instance, a user was once interested in entering 
+
+Dealing with infinite sums is tricky in general, and needs particular care when working with Dynare. The trick is to use a \textbf{recursive
+representation} of the sum. For example, suppose your model included:
+\[\sum^{\infty}_{j=0}\beta^j x_{t+j}=0, \]
+
+Note that the above can also be written by using an auxiliary variable $S_t$, defined as:
+\[S_t\equiv \sum^{\infty}_{j=0}\beta^j x_{t+j},\]
+which can also be written in the following recursive manner:
+\[S_t\equiv \sum^{\infty}_{j=0}\beta^j x_{t+j}=x_t +\sum^{\infty}_{j=1}\beta^j
+x_{t+j}=x_t+\beta\sum^{\infty}_{j=0}\beta^j x_{t+1+j} \equiv x_t + S_{t+1}\]
+
+This formulation turns out to be useful in problems of the following
+form:
+
+\[\sum^{\infty}_{j=0}\beta^j x_{t+j}=p_t\sum^{\infty}_{j=0}\gamma^j y_{t+j}, \]
+which can be written as a recursive system of the form:
+\[S1_t=x_t+\beta S1_{t+1},\]
+\[S2_t=y_t+\gamma S2_{t+1},\]
+\[S1=p_t S2.\]
+
+This is particularly helpful, for instance, in a \textbf{Calvo type setting}, as illustrated in the following brief example. The RBC model with monopolistic competition introduced in chapter \ref{ch:solbase} involved flexible prices. The extension with sticky prices, à la Calvo for instance, is instead typical of the new Keynesian monetary literature, exemplified by papers such as \citet{ClaridaGaliGertler1999}. \\
+
+The optimal price for a firm resetting its price in period $t$, given that it will be able to reset its price only with probability $1-\theta$ each  period, is
+\[
+p_t^*(i) = \mu + (1-\beta \theta) \sum_{k=0}^\infty (\beta \theta)^k \mathbb{E}_t [mc_{t+k}^n (i)]
+\]
+where $\mu$ is the markup, $\beta$ is a discount factor, $i$ represents a firm of the continuum between 0 and 1, and $mc_t$ is marginal cost as described in the example in chapter \ref{ch:solbase}. The trouble, of course, is \textbf{how to input this infinite sum into Dynare}? \\
+
+It turns out that the Calvo price setting implies that the aggregate price follows the equation of motion $p_t = \theta p_{t-1} + (1-\theta) p_t^*$, thus implying the following inflation relationship $\pi_t = (1-\theta) (p_t^* - p_{t-1})$. Finally, we can also rewrite the optimal price setting equation, after some algebraic manipulations, as
+\[
+p_t^* - p_{t-1} = (1-\beta \theta) \sum_{k=0}^\infty (\beta \theta)^k \mathbb{E}_t [\widehat{mc}_{t+k}] + \sum_{k=0}^\infty (\beta \theta)^k \mathbb{E}_t [\pi_{t+k}]
+\]
+where $\widehat{mc}_{t+k} = mc_{t+k} + \mu$ is the deviation of the marginal cost from its natural rate, defined as the marginal cost when prices are perfectly flexible. \\
+
+The trick now is to note that the above can be written recursively, by writing the right hand side as the first term of the sum (with $k=0$) plus the remainder of the sum, which can be written as the left hand side term scrolled forward one period and appropriately discounted. Mathematically, this yields:
+\[
+p_t^* - p_{t-1} = (1-\beta \theta) \widehat{mc}_{t+k} + \pi_t + \beta \theta \mathbb{E}_t [p_{t+1}^* - p_t]
+\]
+which has gotten rid of our infinite sum! That would be enough for Dynare, but for convenience, we can go one step further and write the above as
+\[
+\pi_t = \beta \mathbb{E}_t [\pi_{t+1}] + \lambda \widehat{mc}_{t}
+\]
+where $\lambda \equiv \frac{(1-\theta)(1-\beta\theta)}{\theta}$, which is the recognizable inflation equation in the new Keynesian (or new Neoclassical) monetary literature. 
+
+\subsection{Infinite sums with changing timing of expectations}
+
+When you are not able to write an infinite sum recursively, as the index of the expectations changes with each element of the sum, as in the following example, a different approach than the one mentioned above is necessary. \\
+
+Suppose your model included the following sum: 
 \[
 y_t=\sum_{j=0}^{\infty} \mathbb{E}_{t-j}x_t
 \]

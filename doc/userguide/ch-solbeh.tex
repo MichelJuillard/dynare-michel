@@ -1,0 +1,86 @@
+\chapter{Solving DSGE models - Behind the scenes of Dynare} \label{ch:solbeh}
+
+\section{Introduction}
+The aim of this chapter is to peer behind the scenes of Dynare, or under its hood, to get an idea of the methodologies and algorithms used in its computations. Going into details would be beyond the scope of this User Guide which will instead remain at a high level. What you will find below will either comfort you in realizing that Dynare does what you expected of it - and what you would have also done if you had had to code it all yourself (with a little extra time on your hands!), or will spur your curiosity to have a look at more detailed material. If so, you may want to go through Michel Juillard's presentation on solving DSGE models to a first and second order (available on Michel Juillard's \href{http://jourdan.ens.fr/~michel/}{website}), or read \citet{CollardJuillard2001b} or \citet{SchmittGrohe2004} which gives a good overview of the most recent solution techniques based on perturbation methods. Finally, note that in this chapter we will focus on stochastic models - which is where the major complication lies, as explained in section \ref{sec:detstoch} of chapter \ref{ch:solbase}. For more details on the Newton-Raphson algorithm used in Dynare to solve deterministic models, see \citet{Juillard1996}. \\
+
+\section{What is the advantage of a second order approximation?}
+As noted in chapter \ref{ch:solbase} and as will become clear in the section below, linearizing a system of equations to the first order raises the issue of certainty equivalence. This is because only the first moments of the shocks enter the linearized equations, and when expectations are taken, they disappear. Thus, unconditional expectations of the endogenous variables are equal to their non-stochastic steady state values. \\
+
+This may be an acceptable simplification to make. But depending on the context, it may instead be quite misleading. For instance, when using second order welfare functions to compare policies, you also need second order approximations of the policy function. Yet more clearly, in the case of asset pricing models, linearizing to the second order enables you to take risk (or the variance of shocks) into consideration - a highly desirable modeling feature. It is therefore very convenient that Dynare allows you to choose between a first or second order linearization of your model in the option of the \texttt{stoch\_simul} command. \\
+
+\section{How does dynare solve stochastic DSGE models?}
+In this section, we shall briefly overview the perturbation methods employed by Dynare to solve DSGE models to a first order approximation. The second order follows very much the same approach, although at a higher level of complexity. The summary below is taken mainly from Michel Juillard's presentation ``Computing first order approximations of DSGE models with Dynare'', which you should read if interested in particular details, especially regarding second order approximations (available on Michel Juillard's \href{http://jourdan.ens.fr/~michel/}{website}). \\
+
+To summarize, a DSGE model is a collection of first order and equilibrium conditions that take the general form: 
+\[
+\mathbb{E}_t\left\{f(y_{t+1},y_t,y_{t-1},u_t)\right\}=0
+\]
+\begin{eqnarray*}
+\mathbb{E}(u_t) &=& 0\\
+\mathbb{E}(u_t u_t') &=& \Sigma_u
+\end{eqnarray*}
+and where:
+\begin{description}
+  \item[$y$]: vector of endogenous variables of any dimension
+  \item[$u$]: vector of exogenous stochastic shocks of any dimension
+\end{description}
+
+The solution to this system is a set of equations relating variables in the current period to the past state of the system and current shocks, that satisfy the original system. This is what we call the policy function. Sticking to the above notation, we can write this function as:
+\[
+y_t = g(y_{t-1},u_t)
+\]
+
+Then, it is straightforward to re-write $y_{t+1}$ as
+\begin{eqnarray*}
+  y_{t+1} &=& g(y_t,u_{t+1})\\
+  &=& g(g(y_{t-1},u_t),u_{t+1})\\
+\end{eqnarray*}
+
+We can then define a new function $F$, such that:
+\[
+F(y_{t-1},u_t,u_{t+1}) =
+f(g(g(y_{t-1},u_t),u_{t+1}),g(y_{t-1},u_t),y_{t-1},u_t)\\
+\]
+which enables us to rewrite our system in terms of past variables, and current and future shocks:
+\[
+\mathbb{E}_t\left[F(y_{t-1},u_t,u_{t+1})\right] = 0
+\]
+
+We then venture to linearize this model around a steady state defined as:
+\[
+f(\bar y, \bar y, \bar y, 0) = 0
+\]
+having the property that:
+\[
+\bar y = g(\bar y, 0)
+\]
+
+The first order Taylor expansion around $\bar y$ yields:
+\begin{eqnarray*}
+\lefteqn{\mathbb{E}_t\left\{F^{(1)}(y_{t-1},u_t,u_{t+1})\right\} =}\\
+&& \mathbb{E}_t\Big[f(\bar y, \bar y, \bar y)+f_{y_+}\left(g_y\left(g_y\hat y+g_uu \right)+g_u u' \right)\\
+&& + f_{y_0}\left(g_y\hat y+g_uu \right)+f_{y_-}\hat y+f_u u\Big]\\
+&& = 0
+\end{eqnarray*}
+with $\hat y = y_{t-1} - \bar y$, $u=u_t$, $u'=u_{t+1}$, $f_{y_+}=\frac{\partial f}{\partial y_{t+1}}$, $f_{y_0}=\frac{\partial f}{\partial y_t}$, $f_{y_-}=\frac{\partial f}{\partial y_{t-1}}$, $f_{u}=\frac{\partial f}{\partial u_t}$, $g_y=\frac{\partial g}{\partial y_{t-1}}$, $g_u=\frac{\partial g}{\partial u_t}$.\\
+
+Taking expectations (we're almost there!):
+\begin{eqnarray*}
+   \lefteqn{\mathbb{E}_t\left\{F^{(1)}(y_{t-1},u_t, u_{t+1})\right\} =}\\
+&& f(\bar y, \bar y, \bar y)+f_{y_+}\left(g_y\left(g_y\hat y+g_uu \right) \right)\\
+&& + f_{y_0}\left(g_y\hat y+g_uu \right)+f_{y_-}\hat y+f_u u\Big\}\\
+&=& \left(f_{y_+}g_yg_y+f_{y_0}g_y+f_{y_-}\right)\hat y+\left(f_{y_+}g_yg_u+f_{y_0}g_u+f_{u}\right)u\\
+&=& 0\\
+\end{eqnarray*}
+
+As you can see, since future shocks only enter with their first moments (which are zero in expectations), they drop out when taking expectations of the linearized equations. This is technically why certainty equivalence holds in a system linearized to its first order. The second thing to note is that we have two unknown variables in the above equation: $g_y$ and $g_u$ each of which will help us recover the policy function $g$. \\
+
+Since the above equation holds for any $\hat y$ and any $u$, each parenthesis must be null and we can solve each at a time. The first, yields a quadratic equation  in $g_y$, which we can solve with a series of algebraic trics that are not all immediately apparent (but detailed in Michel Juillard's presentation). Incidentally, one of the conditions that comes out of the solution of this equation is the Blanchard-Kahn condition: there must be as many roots larger than one in modulus as there are forward-looking variables in the model. Having recovered $g_y$, recovering $g_u$ is then straightforward from the second parenthesis. \\
+
+Finally, notice that a first order linearization of the function $g$ yields:
+\[
+y_t = \bar y+g_y\hat y+g_u u
+\]
+And now that we have $g_y$ and $g_u$, we have solved for the (approximate) policy (or decision) function and have succeeded in solving our DSGE model. If we were interested in impulse response functions, for instance, we would simply iterate the policy function starting from an initial value given by the steady state. \\
+
+The second order solution uses the same ``perturbation methods'' as above (the notion of starting from a function you can solve - like a steady state - and iterating forward), yet applies more complex algebraic techniques to recover the various partial derivatives of the policy function. But the general approach is perfectly isomorphic. Note that in the case of a second order approximation of a DSGE model, the variance of future shocks remains after taking expectations of the linearized equations and therefore affects the level of the resulting policy function.\\
