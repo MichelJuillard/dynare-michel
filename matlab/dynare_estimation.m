@@ -193,6 +193,7 @@ end
 
 
 %% Compute the steady state: 
+set_parameters(xparam1);
 if options_.steadystate_flag% if the _steadystate.m file is provided.
     [oo_.steady_state,tchek] = feval([M_.fname '_steadystate'],[],[]);
 else% if the steady state file is not provided.
