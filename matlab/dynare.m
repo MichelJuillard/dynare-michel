@@ -34,7 +34,7 @@ if length(d) == 0
   return
 end
 dynareroot = strrep(which('dynare.m'),'dynare.m','');
-command = [dynareroot 'dynare_m ' fname] ;
+command = ['"' dynareroot 'dynare_m" ' fname] ;
 for i=2:nargin
   command = [command ' ' varargin{i-1}];
 end
@@ -49,7 +49,3 @@ end
 evalin('base',fname) ;
 
 
-% MJ 2/9/99: replace clear function by clear ff_
-% MJ 4/7/00: change the path of dynare_m
-% MJ 02/26/01: replaced local variable x by fname
-% MJ 09/19/01: evaluates mod script in 'base' workspace
