@@ -187,7 +187,7 @@ ParsingDriver::periods(string *periods)
 void
 ParsingDriver::cutoff(string *cutoff)
 {
-  int cutoff_val = atoi(cutoff->c_str());
+  double cutoff_val = atof(cutoff->c_str());
   mod_file->addStatement(new CutoffStatement(cutoff_val));
   delete cutoff;
 }
@@ -225,7 +225,7 @@ ParsingDriver::init_param(string *name, NodeID rhs)
       double val = rhs->eval(mod_file->global_eval_context);
       int symb_id = mod_file->symbol_table.getID(*name);
       mod_file->global_eval_context[make_pair(symb_id, eParameter)] = val;
-    }
+     }
   catch(ExprNode::EvalException &e)
     {
     }
@@ -427,7 +427,7 @@ ParsingDriver::add_covar_shock(string *var1, string *var2, NodeID value)
       || corr_shocks.find(key_inv) != corr_shocks.end())
     error("shocks: covariance or correlation shock on variable pair (" + *var1 + ", "
           + *var2 + ") declared twice");
-  
+
   covar_shocks[key] = value;
 
   delete var1;
@@ -448,7 +448,7 @@ ParsingDriver::add_correl_shock(string *var1, string *var2, NodeID value)
       || corr_shocks.find(key_inv) != corr_shocks.end())
     error("shocks: covariance or correlation shock on variable pair (" + *var1 + ", "
           + *var2 + ") declared twice");
-  
+
   corr_shocks[key] = value;
 
   delete var1;

@@ -25,7 +25,7 @@ protected:
   SymbolTable &symbol_table;
   //! Reference to numerical constants table
   NumericalConstants &num_constants;
-  
+
   typedef list<NodeID> node_list_type;
   //! The list of nodes
   node_list_type node_list;
@@ -128,7 +128,7 @@ DataTree::AddPossiblyNegativeConstant(double v)
     }
   ostringstream ost;
   ost << v;
-  
+
   NodeID cnode = AddNumConstant(ost.str());
 
   if (neg)
@@ -152,7 +152,8 @@ DataTree::AddUnaryOp(UnaryOpcode op_code, NodeID arg)
     {
       try
         {
-          double argval = arg->eval(eval_context_type());
+          eval_context_type *evc=NULL;
+          double argval = arg->eval(/*eval_context_type()*/*evc);
           double val = UnaryOpNode::eval_opcode(op_code, argval);
           return AddPossiblyNegativeConstant(val);
         }
@@ -160,7 +161,6 @@ DataTree::AddUnaryOp(UnaryOpcode op_code, NodeID arg)
         {
         }
     }
-
   return new UnaryOpNode(*this, op_code, arg);
 }
 
@@ -174,15 +174,15 @@ DataTree::AddBinaryOp(NodeID arg1, BinaryOpcode op_code, NodeID arg2)
   // Try to reduce to a constant
   try
     {
-      double argval1 = arg1->eval(eval_context_type());
-      double argval2 = arg2->eval(eval_context_type());
+      eval_context_type *evc=NULL;
+      double argval1 = arg1->eval(/*eval_context_type()*/*evc);
+      double argval2 = arg2->eval(/*eval_context_type()*/*evc);
       double val = BinaryOpNode::eval_opcode(argval1, op_code, argval2);
       return AddPossiblyNegativeConstant(val);
     }
   catch(ExprNode::EvalException &e)
     {
     }
-
   return new BinaryOpNode(*this, arg1, op_code, arg2);
 }
 

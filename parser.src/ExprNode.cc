@@ -335,13 +335,17 @@ VariableNode::writeOutput(ostream &output, ExprNodeOutputType output_type,
 double
 VariableNode::eval(const eval_context_type &eval_context) const throw (EvalException)
 {
-  if (lag != 0)
+  /*if (lag != 0)
+    throw EvalException();*/
+  if(&eval_context==NULL)
     throw EvalException();
-
   eval_context_type::const_iterator it = eval_context.find(make_pair(symb_id, type));
   if (it == eval_context.end())
-    throw EvalException();
-
+    {
+      cout << "Error: the variable or parameter (" << datatree.symbol_table.getNameByID( type, symb_id) << ") has not been initialized (in derivatives evaluation)\n";
+      cout.flush();
+      throw EvalException();
+    }
   return it->second;
 }
 
@@ -517,7 +521,7 @@ UnaryOpNode::cost(const temporary_terms_type &temporary_terms, bool is_matlab) c
       }
   cerr << "Impossible case!" << endl;
   exit(-1);
-}       
+}
 
 void
 UnaryOpNode::computeTemporaryTerms(map<NodeID, int> &reference_count,
@@ -967,7 +971,7 @@ BinaryOpNode::writeOutput(ostream &output, ExprNodeOutputType output_type,
   // Treat special case of power operator in C
   if (op_code == oPower && (!OFFSET(output_type)))
     {
-      output << "pow(";
+      output << "pow1(";
       arg1->writeOutput(output, output_type, temporary_terms);
       output << ",";
       arg2->writeOutput(output, output_type, temporary_terms);
@@ -1110,5 +1114,7 @@ UnknownFunctionNode::collectEndogenous(NodeID &Id)
 double
 UnknownFunctionNode::eval(const eval_context_type &eval_context) const throw (EvalException)
 {
+  cout << "Unknown function\n";
+  cout.flush();
   throw EvalException();
 }

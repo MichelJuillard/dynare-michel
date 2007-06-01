@@ -203,10 +203,15 @@ ModelBlock_Graph(Model_Block *ModelBlock, int Blck_num, bool dynamic, t_model_gr
     }
   else
     {
+      int sup;
       Lead = ModelBlock->Block_List[Blck_num].Max_Lead;
       Lag = ModelBlock->Block_List[Blck_num].Max_Lag;
-      int sup = Lead + Lag +3;
-      *periods = Lead + Lag  + sup;
+      cout << "---> *periods=" << *periods << "\n";
+      if(*periods>3)
+        {
+          sup = Lead + Lag +3;
+          *periods = Lead + Lag  + sup;
+        }
 #ifdef PRINT_OUT
       cout << "Lag=" << Lag << " Lead=" << Lead << "\n";
       cout << "periods=Lead+2*Lag+2= " << *periods << "\n";

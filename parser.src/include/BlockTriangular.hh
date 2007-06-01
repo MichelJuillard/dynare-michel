@@ -37,15 +37,17 @@ typedef struct vari
 };
 
 
+typedef map<pair<int ,int >,double> jacob_map;
+
 class BlockTriangular
 {
 public:
-  Normalization normalization;
-  BlockTriangular(const  SymbolTable &symbol_table_arg);
+  BlockTriangular(const SymbolTable &symbol_table_arg);
   ~BlockTriangular();
   /*! The incidence matrix for each lead and lags */
   Blocks blocks;
-  SymbolTable symbol_table;
+  Normalization normalization;
+  const SymbolTable &symbol_table;
   List_IM* Build_IM(int lead_lag);
   List_IM* Get_IM(int lead_lag);
   bool* bGet_IM(int lead_lag);
@@ -57,8 +59,9 @@ public:
   void Free_IM(List_IM* First_IM);
   void Print_SIM(bool* IM, int n);
   void Normalize_and_BlockDecompose_Static_Model();
-  void Normalize_and_BlockDecompose_Static_0_Model();
+  void Normalize_and_BlockDecompose_Static_0_Model(const jacob_map &j_m);
   bool Normalize_and_BlockDecompose(bool* IM, Model_Block* ModelBlock, int n, int* prologue, int* epilogue, simple* Index_Var_IM, simple* Index_Equ_IM, bool Do_Normalization, bool mixing, bool* IM_0 );
+  bool Normalize_and_BlockDecompose(bool* IM, Model_Block* ModelBlock, int n, int* prologue, int* epilogue, simple* Index_Var_IM, simple* Index_Equ_IM, bool Do_Normalization, bool mixing, bool* IM_0 , jacob_map j_m);
   void Normalize_and_BlockDecompose_0();
   void Normalize_and_BlockDecompose_Inside_Earth();
   void Prologue_Epilogue(bool* IM, int* prologue, int* epilogue, int n, simple* Index_Var_IM, simple* Index_Equ_IM);
@@ -69,6 +72,7 @@ public:
   void Allocate_Block(int size, int *count_Equ, int *count_Block, int type, Model_Block * ModelBlock, int* Table, int TableSize);
   void Free_Block(Model_Block* ModelBlock);
   void SetVariableTable(int *Table,int Size,int HSize);
+  string getnamebyID(Type type, int id);
   List_IM *First_IM ;
   List_IM *Last_IM ;
   simple *Index_Equ_IM;
@@ -104,28 +108,30 @@ public:
   {
     switch (type)
       {
-      case 0:
+      case EVALUATE_FOREWARD:
+      case EVALUATE_FOREWARD_R:
         return ("EVALUATE FOREWARD            ");
         break;
-      case 1:
+      case EVALUATE_BACKWARD:
+      case EVALUATE_BACKWARD_R:
         return ("EVALUATE BACKWARD            ");
         break;
-      case 2:
+      case SOLVE_FOREWARD_SIMPLE:
         return ("SOLVE FOREWARD SIMPLE        ");
         break;
-      case 3:
+      case SOLVE_BACKWARD_SIMPLE:
         return ("SOLVE BACKWARD SIMPLE        ");
         break;
-      case 4:
+      case SOLVE_TWO_BOUNDARIES_SIMPLE:
         return ("SOLVE TWO BOUNDARIES SIMPLE  ");
         break;
-      case 5:
+      case SOLVE_FOREWARD_COMPLETE:
         return ("SOLVE FOREWARD COMPLETE      ");
         break;
-      case 6:
+      case SOLVE_BACKWARD_COMPLETE:
         return ("SOLVE BACKWARD COMPLETE      ");
         break;
-      case 7:
+      case SOLVE_TWO_BOUNDARIES_COMPLETE:
         return ("SOLVE TWO BOUNDARIES COMPLETE");
         break;
       default:
@@ -137,28 +143,30 @@ public:
   {
     switch (type)
       {
-      case 0:
+      case EVALUATE_FOREWARD:
+      case EVALUATE_FOREWARD_R:
         return ("EVALUATE_FOREWARD            ");
         break;
-      case 1:
+      case EVALUATE_BACKWARD:
+      case EVALUATE_BACKWARD_R:
         return ("EVALUATE_BACKWARD            ");
         break;
-      case 2:
+      case SOLVE_FOREWARD_SIMPLE:
         return ("SOLVE_FOREWARD_SIMPLE        ");
         break;
-      case 3:
+      case SOLVE_BACKWARD_SIMPLE:
         return ("SOLVE_BACKWARD_SIMPLE        ");
         break;
-      case 4:
+      case SOLVE_TWO_BOUNDARIES_SIMPLE:
         return ("SOLVE_TWO_BOUNDARIES_SIMPLE  ");
         break;
-      case 5:
+      case SOLVE_FOREWARD_COMPLETE:
         return ("SOLVE_FOREWARD_COMPLETE      ");
         break;
-      case 6:
+      case SOLVE_BACKWARD_COMPLETE:
         return ("SOLVE_BACKWARD_COMPLETE      ");
         break;
-      case 7:
+      case SOLVE_TWO_BOUNDARIES_COMPLETE:
         return ("SOLVE_TWO_BOUNDARIES_COMPLETE");
         break;
       default:

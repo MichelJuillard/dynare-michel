@@ -15,11 +15,11 @@ typedef yy::parser::token token;
 #define yyterminate() return yy::parser::token_type (0);
 
 int comment_caller;
-/* Particular value : when sigma_e command is found 
+/* Particular value : when sigma_e command is found
  this flag is set to 1, when command finished it is set to 0
  */
 int sigma_e = 0;
-%} 
+%}
 
 %option case-insensitive noyywrap nounput batch debug never-interactive yylineno
 
@@ -44,10 +44,10 @@ int sigma_e = 0;
 
  /* Comments */
 <INITIAL,DYNARE_STATEMENT,DYNARE_BLOCK>["%"].*
-<INITIAL,DYNARE_STATEMENT,DYNARE_BLOCK>["/"]["/"].* 
+<INITIAL,DYNARE_STATEMENT,DYNARE_BLOCK>["/"]["/"].*
 <INITIAL,DYNARE_STATEMENT,DYNARE_BLOCK>"/*"   {comment_caller = YY_START; BEGIN COMMENT;}
 
-<COMMENT>[^*\n]* 		
+<COMMENT>[^*\n]*
 <COMMENT>"*"+[^/\n]
 <COMMENT>"*"+"/"        {BEGIN comment_caller;}
 
@@ -106,24 +106,24 @@ int sigma_e = 0;
 <INITIAL>calib_var 	{BEGIN DYNARE_BLOCK; return token::CALIB_VAR;}
 
  /* End of a Dynare block */
-<DYNARE_BLOCK>end[ \t\n]*; 	{BEGIN INITIAL; return token::END;}   
+<DYNARE_BLOCK>end[ \t\n]*; 	{BEGIN INITIAL; return token::END;}
 
  /* Inside  of a Dynare statement */
 <DYNARE_STATEMENT>datafile 		{return token::DATAFILE;}
 <DYNARE_STATEMENT>nobs 			{return token::NOBS;}
 <DYNARE_STATEMENT>first_obs 		{return token::FIRST_OBS;}
-<DYNARE_STATEMENT>prefilter 		{return token::PREFILTER;} 
-<DYNARE_STATEMENT>presample 		{return token::PRESAMPLE;} 
-<DYNARE_STATEMENT>lik_algo  		{return token::LIK_ALGO;}  
-<DYNARE_STATEMENT>lik_init  		{return token::LIK_INIT;}  
-<DYNARE_STATEMENT>graph   		{return token::GRAPH;}  	  
-<DYNARE_STATEMENT>nograph   		{return token::NOGRAPH;}  	  
-<DYNARE_STATEMENT>print   		{return token::PRINT;}  	  
-<DYNARE_STATEMENT>noprint   		{return token::NOPRINT;}  	  
-<DYNARE_STATEMENT>conf_sig  		{return token::CONF_SIG;}  
-<DYNARE_STATEMENT>mh_replic 		{return token::MH_REPLIC;} 
-<DYNARE_STATEMENT>mh_drop   		{return token::MH_DROP;}   
-<DYNARE_STATEMENT>mh_jscale   		{return token::MH_JSCALE;}   
+<DYNARE_STATEMENT>prefilter 		{return token::PREFILTER;}
+<DYNARE_STATEMENT>presample 		{return token::PRESAMPLE;}
+<DYNARE_STATEMENT>lik_algo  		{return token::LIK_ALGO;}
+<DYNARE_STATEMENT>lik_init  		{return token::LIK_INIT;}
+<DYNARE_STATEMENT>graph   		{return token::GRAPH;}
+<DYNARE_STATEMENT>nograph   		{return token::NOGRAPH;}
+<DYNARE_STATEMENT>print   		{return token::PRINT;}
+<DYNARE_STATEMENT>noprint   		{return token::NOPRINT;}
+<DYNARE_STATEMENT>conf_sig  		{return token::CONF_SIG;}
+<DYNARE_STATEMENT>mh_replic 		{return token::MH_REPLIC;}
+<DYNARE_STATEMENT>mh_drop   		{return token::MH_DROP;}
+<DYNARE_STATEMENT>mh_jscale   		{return token::MH_JSCALE;}
 <DYNARE_STATEMENT>mh_init_scale 	{return token::MH_INIT_SCALE;}
 <DYNARE_STATEMENT>mode_file 		{return token::MODE_FILE;}
 <DYNARE_STATEMENT>mode_compute 	{return token::MODE_COMPUTE;}
@@ -159,7 +159,7 @@ int sigma_e = 0;
 
 <DYNARE_STATEMENT>[\$][^$]*[\$] {
   strtok(yytext+1, "$");
-  yylval->string_val = new string(yytext + 1); 
+  yylval->string_val = new string(yytext + 1);
   return token::TEX_NAME;
 }
 
@@ -169,6 +169,7 @@ int sigma_e = 0;
 <DYNARE_BLOCK>values {return token::VALUES;}
 <DYNARE_BLOCK>corr {return token::CORR;}
 <DYNARE_BLOCK>periods {return token::PERIODS;}
+<DYNARE_BLOCK>cutoff {return token::CUTOFF;}
 <DYNARE_BLOCK>filename {return token::FILENAME;}
 <DYNARE_BLOCK>gamma_pdf {return token::GAMMA_PDF;}
 <DYNARE_BLOCK>beta_pdf {return token::BETA_PDF;}
@@ -216,7 +217,7 @@ int sigma_e = 0;
 <DYNARE_STATEMENT,DYNARE_BLOCK>linear {return token::LINEAR;}
 <DYNARE_STATEMENT,DYNARE_BLOCK>[,] {return token::COMMA;}
 <DYNARE_STATEMENT,DYNARE_BLOCK>[:] {return yy::parser::token_type (yytext[0]);}
-<DYNARE_STATEMENT,DYNARE_BLOCK>[\(\)] {return yy::parser::token_type (yytext[0]);} 
+<DYNARE_STATEMENT,DYNARE_BLOCK>[\(\)] {return yy::parser::token_type (yytext[0]);}
 <DYNARE_STATEMENT,DYNARE_BLOCK>[\[] {return yy::parser::token_type (yytext[0]);}
 <DYNARE_STATEMENT,DYNARE_BLOCK>[\]] {
   if (sigma_e)
@@ -261,12 +262,12 @@ int sigma_e = 0;
   yylval->string_val = new string(yytext);
   return token::INT_NUMBER;
 }
-   	
+
  /* an instruction starting with a recognized symbol (which is not a modfile local variable)
     is passed as NAME,
     otherwise it is a native statement until the end of the line
  */
-<INITIAL>[A-Za-z_][A-Za-z0-9_]* {	      
+<INITIAL>[A-Za-z_][A-Za-z0-9_]* {
   if (driver.symbol_exists_and_is_not_modfile_local_variable(yytext))
     {
       BEGIN DYNARE_STATEMENT;

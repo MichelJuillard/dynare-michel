@@ -104,9 +104,9 @@ public:
 class CutoffStatement : public Statement
 {
 private:
-  const int cutoff;
+  const double cutoff;
 public:
-  CutoffStatement(int cutoff_arg);
+  CutoffStatement(double cutoff_arg);
   virtual void writeOutput(ostream &output, const string &basename) const;
 };
 

@@ -12,9 +12,11 @@ using namespace std;
 #include "NumericalConstants.hh"
 #include "DataTree.hh"
 #include "BlockTriangular.hh"
+#include "SymbolGaussElim.hh"
 
 #define LCC_COMPILE 0
 #define GCC_COMPILE 1
+//#define CONDITION
 
 //! The three in which ModelTree can work
 enum ModelTreeMode
@@ -94,7 +96,7 @@ private:
   void writeSparseDLLDynamicHFile(const string &dynamic_basename) const;
   //! Writes dynamic model file when SparseDLL option is on
   void writeSparseDLLDynamicCFileAndBinFile(const string &dynamic_basename, const string &bin_basename) const;
-  void evaluateJacobian(const eval_context_type &eval_context);
+  void evaluateJacobian(const eval_context_type &eval_context, jacob_map *j_m);
   void BlockLinear(Model_Block *ModelBlock);
   string reform(string name) const;
 
@@ -106,7 +108,9 @@ public:
   int compiler;
   //! Absolute value under which a number is considered to be zero
   double cutoff;
-
+  //! Use a graphical and symbolic version of the symbolic gaussian elimination new_SGE = false
+  //! or use direct gaussian elimination new_SGE = true
+  bool new_SGE;
   //! Declare a node as an equation of the model
   void addEquation(NodeID eq);
   //! Do some checking
@@ -132,6 +136,10 @@ public:
   void writeDynamicFile(const string &basename) const;
   //! Complete set to block decompose the model
   BlockTriangular block_triangular;
+  //! Adds informations for simulation in a binary file
+  void Write_Inf_To_Bin_File(const string &dynamic_basename, const string &bin_basename, const int &num,
+                                 int &u_count_int, bool &file_open) const;
+
   int equation_number() const;
 };
 

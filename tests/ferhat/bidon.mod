@@ -13,14 +13,14 @@ m=1;
 n=1;
 o=1;
 
-model(SPARSE_DLL,gcc_compiler);
+model(SPARSE_DLL,gcc_compiler,cutoff=1e-12);
 /*0*/ k=(1-h)*k(-1)+i;  /*k:0*/
 /*1*/ y=l^j*k^m;          /*l:1*/
 /*2*/ c=y*a+b+0.3*c(-1)+0.1*c(+1)+0.*g_bar(-10);          /*c:2*/
 /*3*/ infl=0.02*y+0.5*r;         /*infl:3*/
 /*4*/ i=d*(y-y(-1))+e/**r*/;  /*i4*/
 /*5*/ g=f*g_bar;              /*g:5*/
-/*6*/ y=0.6*(c+i+g)+0.1*y(-2)+0.1*y(+2)+0.1*y(-1)+0.1*y(+1);          /*y:6*/
+/*6*/ y=0.6*(c+i+g)+/*0.1*y(-2)+0.1*y(+2)+*/0.1*y(-1)+0.1*y(+1);          /*y:6*/
 /*7*/ r=y-1+infl-0.02;         /*r7*/
 /*8*/ p1=i+0.5*q1;
 /*9*/ q1=0.5*p1+c;
@@ -50,16 +50,16 @@ end;
 steady(solve_algo=2);
 //check;
 
-/*shocks;
+shocks;
 var g_bar;
 periods 1;
 values 0.16;
-end;*/
+end;
+
+options_.slowc = 1;
 
 
-
-
-simul(periods=100);
+simul(periods=80);
 
 
 rplot c;

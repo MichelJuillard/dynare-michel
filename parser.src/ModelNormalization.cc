@@ -10,9 +10,11 @@
 using namespace std;
 
 
-Normalization::Normalization()
+Normalization::Normalization(const SymbolTable &symbol_table_arg) :
+  symbol_table(symbol_table_arg)
 {
   //Empty
+  fp_verbose=false;
 };
 
 Normalization::~Normalization()
@@ -488,10 +490,18 @@ Normalization::ErrorHandling(int n, bool* IM, simple* Index_Equ_IM)
     }
 }
 
+
 void
+Normalization::Set_fp_verbose(bool ok)
+{
+  fp_verbose=ok;
+}
+
+bool
 Normalization::Normalize(int n, int prologue, int epilogue, bool* IM, simple* Index_Equ_IM, Equation_set* Equation, bool mixing, bool* IM_s)
 {
   int matchingSize, effective_n;
+  int save_fp_verbose=fp_verbose;
   fp_verbose = 0;
   Variable_set* Variable = (Variable_set*) malloc(sizeof(Variable_set));
 #ifdef DEBUG
@@ -502,23 +512,40 @@ Normalization::Normalize(int n, int prologue, int epilogue, bool* IM, simple* In
   MaximumMatching(Equation, Variable);
   matchingSize = MeasureMatching(Equation);
   effective_n = n - prologue - epilogue;
-  if(matchingSize < effective_n)
+  fp_verbose=save_fp_verbose;
+  if(matchingSize < effective_n && fp_verbose)
     {
-      cout << "Error: dynare could not normalize the model\n";
-      ErrorHandling(n, IM, Index_Equ_IM);
-      system("PAUSE");
+      cout << "Error: dynare could not normalize the model.\n The following equations:\n - ";
+      int i;
+      for(i = 0; i < Equation->size; i++)
+        if(Equation->Number[i].matched == -1)
+          cout << i << " ";
+      cout << "\n and the following variables:\n - ";
+      for(i = 0; i < Variable->size; i++)
+        if(Variable->Number[i].matched == -1)
+          cout << symbol_table.getNameByID(eEndogenous, Index_Equ_IM[i].index) << " ";
+      cout << "\n could not be normalized\n";
+      //ErrorHandling(n, IM, Index_Equ_IM);
+      //system("PAUSE");
       exit( -1);
     }
-  Gr_to_IM(n, prologue, epilogue, IM, Index_Equ_IM, Equation, mixing, IM_s);
-  if(fp_verbose)
+  if(matchingSize >= effective_n )
     {
-      OutputMatching(Equation);
-      for(int i = 0;i < n;i++)
-        cout << "Index_Equ_IM[" << i << "]=" << Index_Equ_IM[i].index /*<< " == " "Index_Var_IM[" << i << "]=" << Index_Var_IM[i].index*/ << "\n";
+      Gr_to_IM(n, prologue, epilogue, IM, Index_Equ_IM, Equation, mixing, IM_s);
+      if(fp_verbose)
+        {
+          OutputMatching(Equation);
+          for(int i = 0;i < n;i++)
+            cout << "Index_Equ_IM[" << i << "]=" << Index_Equ_IM[i].index /*<< " == " "Index_Var_IM[" << i << "]=" << Index_Var_IM[i].index*/ << "\n";
+        }
     }
   Free_Other(Variable);
 #ifdef DEBUG
   cout << "end of Normalize\n";
 #endif
+    if(matchingSize < effective_n )
+      return(0);
+    else
+      return(1);
 }
 

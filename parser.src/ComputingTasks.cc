@@ -78,14 +78,20 @@ SimulSparseStatement::writeOutput(ostream &output, const string &basename) const
 {
   options_list.writeOutput(output);
   output << "if ~ options_.initval_file\n";
-  output << "  make_y_;\n";
-  output << "  make_ex_;\n";
+  output << "  if ~isfield(options_,'datafile')\n";
+  output << "    make_y_;\n";
+  output << "    make_ex_;\n";
+  output << "  else\n";
+  output << "    read_data_;\n";
+  output << "  end\n";
   output << "end\n";
   output << "disp('compiling...');\n";
+  output << "t0=clock;\n";
   if (compiler == 0)
     output << "mex " << basename << "_dynamic.c;\n";
   else
     output << "mex " << basename << "_dynamic.cc;\n";
+  output << "disp(['compiling time: ' num2str(etime(clock,t0))]);\n";
   output << "oo_.endo_simul=" << basename << "_dynamic;\n";
 }
 
@@ -236,7 +242,7 @@ PeriodsStatement::writeOutput(ostream &output, const string &basename) const
   output << "options_.simul = 1;" << endl;
 }
 
-CutoffStatement::CutoffStatement(int cutoff_arg) : cutoff(cutoff_arg)
+CutoffStatement::CutoffStatement(double cutoff_arg) : cutoff(cutoff_arg)
 {
 }
 

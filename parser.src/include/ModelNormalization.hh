@@ -1,6 +1,7 @@
 #ifndef MODELNORMALIZATION
 #define MODELNORMALIZATION
 #include "SymbolTableTypes.hh"
+#include "SymbolTable.hh"
 const int SIMULTANS=0;
 const int PROLOGUE=1;
 const int EPILOGUE=2;
@@ -14,6 +15,8 @@ const int SOLVE_TWO_BOUNDARIES_SIMPLE=4;
 const int SOLVE_FOREWARD_COMPLETE=5;
 const int SOLVE_BACKWARD_COMPLETE=6;
 const int SOLVE_TWO_BOUNDARIES_COMPLETE=7;
+const int EVALUATE_FOREWARD_R=8;
+const int EVALUATE_BACKWARD_R=9;
 
 typedef struct Edge
 {
@@ -62,11 +65,13 @@ private:
     int v;        /* current matched of u */
   };
 public:
-  Normalization(/*t_getNameByID gdi*/);
+  Normalization(const SymbolTable &symbol_table_arg);
   ~Normalization();
-  void Normalize(int n, int prologue, int epilogue, bool* IM, simple* Index_Var_IM, Equation_set* Equation,bool mixing, bool* IM_s);
+  bool Normalize(int n, int prologue, int epilogue, bool* IM, simple* Index_Var_IM, Equation_set* Equation,bool mixing, bool* IM_s);
   void Gr_to_IM_basic(int n0, int prologue, int epilogue, bool* IM, Equation_set *Equation,bool transpose);
   t_getNameByID getnamebyID;
+  const SymbolTable &symbol_table;
+  void Set_fp_verbose(bool ok);
 private:
   void IM_to_Gr(int n0, int prologue, int epilogue, bool* IM, Equation_set *Equation, Variable_set *Variable );
   void Inits(Equation_set *Equation);

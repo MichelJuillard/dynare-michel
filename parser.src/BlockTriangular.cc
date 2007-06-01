@@ -13,13 +13,15 @@
 #include <time.h>
 #include <malloc.h>
 #include <string.h>
+#include <math.h>
 using namespace std;
 //------------------------------------------------------------------------------
 #include "BlockTriangular.hh"
 //------------------------------------------------------------------------------
 
 BlockTriangular::BlockTriangular(const SymbolTable &symbol_table_arg) :
-  symbol_table(symbol_table_arg)
+  symbol_table(symbol_table_arg),
+  normalization(symbol_table_arg)
 {
   bt_verbose = 0;
   ModelBlock = NULL;
@@ -699,11 +701,162 @@ BlockTriangular::Free_Block(Model_Block* ModelBlock)
   free(ModelBlock);
 }
 
+string
+BlockTriangular::getnamebyID(Type type, int id)
+{
+  return symbol_table.getNameByID(type,id);
+}
+
 //------------------------------------------------------------------------------
 // Normalize each equation of the model (endgenous_i = f_i(endogenous_1, ..., endogenous_n) - in order to apply strong connex components search algorithm -
 // and find the optimal blocks triangular decomposition
 bool
-BlockTriangular::Normalize_and_BlockDecompose(bool* IM, Model_Block* ModelBlock, int n, int* prologue, int* epilogue, simple* Index_Var_IM, simple* Index_Equ_IM, bool Do_Normalization, bool mixing, bool* IM_0 )
+BlockTriangular::Normalize_and_BlockDecompose(bool* IM, Model_Block* ModelBlock, int n, int* prologue, int* epilogue, simple* Index_Var_IM, simple* Index_Equ_IM, bool Do_Normalization, bool mixing, bool* IM_0, jacob_map j_m )
+{
+  int i, j, Nb_TotalBlocks, Nb_RecursBlocks;
+  int count_Block, count_Equ;
+  block_result_t* res;
+  List_IM * p_First_IM, *p_Cur_IM, *Cur_IM;
+  Equation_set* Equation_gr = (Equation_set*) malloc(sizeof(Equation_set));
+  bool* SIM0, *SIM00;
+  p_First_IM = (List_IM*)malloc(sizeof(*p_First_IM));
+  p_Cur_IM = p_First_IM;
+  Cur_IM = First_IM;
+  i = endo_nbr * endo_nbr;
+  while(Cur_IM)
+    {
+      p_Cur_IM->lead_lag = Cur_IM->lead_lag;
+      p_Cur_IM->IM = (bool*)malloc(i * sizeof(bool));
+      memcpy ( p_Cur_IM->IM, Cur_IM->IM, i);
+      Cur_IM = Cur_IM->pNext;
+      if(Cur_IM)
+        {
+          p_Cur_IM->pNext = (List_IM*)malloc(sizeof(*p_Cur_IM));
+          p_Cur_IM = p_Cur_IM->pNext;
+        }
+      else
+        p_Cur_IM->pNext = NULL;
+    }
+  Prologue_Epilogue(IM, prologue, epilogue, n, Index_Var_IM, Index_Equ_IM);
+  if(bt_verbose)
+    {
+      cout << "prologue : " << *prologue << " epilogue : " << *epilogue << "\n";
+      Print_SIM(IM, n);
+      for(i = 0;i < n;i++)
+        cout << "Index_Var_IM[" << i << "]=" << Index_Var_IM[i].index << " Index_Equ_IM[" << i << "]=" << Index_Equ_IM[i].index << "\n";
+    }
+  if(Do_Normalization)
+    {
+      cout << "Normalizing the model ...\n";
+      if(mixing)
+        {
+          double* max_val=(double*)malloc(n*sizeof(double));
+          memset(max_val,0,n*sizeof(double));
+          for( map< pair< int, int >, double >::iterator iter = j_m.begin(); iter != j_m.end(); iter++ )
+            {
+              if(fabs(iter->second)>max_val[iter->first.first])
+                max_val[iter->first.first]=fabs(iter->second);
+            }
+          for( map< pair< int, int >, double >::iterator iter = j_m.begin(); iter != j_m.end(); iter++ )
+              iter->second/=max_val[iter->first.first];
+          free(max_val);
+          bool OK=false;
+          double bi=0.99999999;
+          int suppressed=0;
+          while(!OK && bi>1e-14)
+            {
+              int suppress=0;
+              SIM0 = (bool*)malloc(n * n * sizeof(bool));
+              memset(SIM0,0,n*n*sizeof(bool));
+              SIM00 = (bool*)malloc(n * n * sizeof(bool));
+              memset(SIM00,0,n*n*sizeof(bool));
+              for( map< pair< int, int >, double >::iterator iter = j_m.begin(); iter != j_m.end(); iter++ )
+               {
+                if(fabs(iter->second)>bi)
+                  {
+                    SIM0[iter->first.first*n+iter->first.second]=1;
+                    if(!IM_0[iter->first.first*n+iter->first.second])
+                      {
+                        cout << "error nothing at IM_0[" << iter->first.first << ", " << iter->first.second << "]=" << IM_0[iter->first.first*n+iter->first.second] << "\n";
+                      }
+                  }
+                else
+                  suppress++;
+               }
+              for(i = 0;i < n;i++)
+                for(j = 0;j < n;j++)
+                  SIM00[i*n + j] = SIM0[Index_Equ_IM[i].index * n + Index_Var_IM[j].index];
+              free(SIM0);
+              if(suppress!=suppressed)
+                OK=normalization.Normalize(n, *prologue, *epilogue, SIM00, Index_Equ_IM, Equation_gr, 1, IM);
+              suppressed=suppress;
+              if(!OK)
+                bi/=1.05;
+              if(bi>1e-14)
+                free(SIM00);
+            }
+          if(!OK)
+            {
+              normalization.Set_fp_verbose(true);
+              OK=normalization.Normalize(n, *prologue, *epilogue, SIM00, Index_Equ_IM, Equation_gr, 1, IM);
+              cout << "Error\n";
+              exit(-1);
+            }
+        }
+      else
+        normalization.Normalize(n, *prologue, *epilogue, IM, Index_Equ_IM, Equation_gr, 0, 0);
+    }
+  else
+    normalization.Gr_to_IM_basic(n, *prologue, *epilogue, IM, Equation_gr, false);
+  cout << "Finding the optimal block decomposition of the model ...\n";
+  if(bt_verbose)
+    blocks.Print_Equation_gr(Equation_gr);
+  res = blocks.sc(Equation_gr);
+  if(bt_verbose)
+    blocks.block_result_print(res);
+  if ((*prologue) || (*epilogue))
+    j = 1;
+  else
+    j = 0;
+  for(i = 0;i < res->n_sets;i++)
+    if ((res->sets_f[i] - res->sets_s[i] + 1) > j)
+      j = res->sets_f[i] - res->sets_s[i] + 1;
+  Nb_RecursBlocks = *prologue + *epilogue;
+  Nb_TotalBlocks = res->n_sets + Nb_RecursBlocks;
+  cout << Nb_TotalBlocks << " block(s) found:\n";
+  cout << "  " << Nb_RecursBlocks << " recursive block(s) and " << res->n_sets << " simultaneous block(s). \n";
+  cout << "  the largest simultaneous block has " << j << " equation(s). \n";
+  ModelBlock->Size = Nb_TotalBlocks;
+  ModelBlock->Periods = periods;
+  ModelBlock->in_Block_Equ = (int*)malloc(n * sizeof(int));
+  ModelBlock->in_Block_Var = (int*)malloc(n * sizeof(int));
+  ModelBlock->in_Equ_of_Block = (int*)malloc(n * sizeof(int));
+  ModelBlock->in_Var_of_Block = (int*)malloc(n * sizeof(int));
+  ModelBlock->Block_List = (Block*)malloc(sizeof(ModelBlock->Block_List[0]) * Nb_TotalBlocks);
+  blocks.block_result_to_IM(res, IM, *prologue, endo_nbr, Index_Equ_IM, Index_Var_IM);
+  Free_IM(p_First_IM);
+  count_Equ = count_Block = 0;
+  if (*prologue)
+    Allocate_Block(*prologue, &count_Equ, &count_Block, PROLOGUE, ModelBlock, Table, TableSize);
+  for(j = 0;j < res->n_sets;j++)
+    {
+      if(res->sets_f[res->ordered[j]] == res->sets_s[res->ordered[j]])
+        Allocate_Block(res->sets_f[res->ordered[j]] - res->sets_s[res->ordered[j]] + 1, &count_Equ, &count_Block, PROLOGUE, ModelBlock, Table, TableSize);
+      else
+        Allocate_Block(res->sets_f[res->ordered[j]] - res->sets_s[res->ordered[j]] + 1, &count_Equ, &count_Block, SIMULTANS, ModelBlock, Table, TableSize);
+    }
+  if (*epilogue)
+    Allocate_Block(*epilogue, &count_Equ, &count_Block, EPILOGUE, ModelBlock, Table, TableSize);
+  return 0;
+}
+
+
+
+//------------------------------------------------------------------------------
+// Normalize each equation of the model (endgenous_i = f_i(endogenous_1, ..., endogenous_n) - in order to apply strong connex components search algorithm -
+// and find the optimal blocks triangular decomposition
+bool
+BlockTriangular::Normalize_and_BlockDecompose(bool* IM, Model_Block* ModelBlock, int n, int* prologue, int* epilogue, simple* Index_Var_IM, simple* Index_Equ_IM, bool Do_Normalization, bool mixing, bool* IM_0)
 {
   int i, j, Nb_TotalBlocks, Nb_RecursBlocks;
   int count_Block, count_Equ;
@@ -743,6 +896,7 @@ BlockTriangular::Normalize_and_BlockDecompose(bool* IM, Model_Block* ModelBlock,
         {
           bool* SIM0;
           SIM0 = (bool*)malloc(n * n * sizeof(bool));
+
           for(i = 0;i < n*n;i++)
             SIM0[i] = IM_0[i];
           for(i = 0;i < n;i++)
@@ -797,7 +951,6 @@ BlockTriangular::Normalize_and_BlockDecompose(bool* IM, Model_Block* ModelBlock,
     Allocate_Block(*epilogue, &count_Equ, &count_Block, EPILOGUE, ModelBlock, Table, TableSize);
   return 0;
 }
-
 
 
 
@@ -944,7 +1097,7 @@ BlockTriangular::Normalize_and_BlockDecompose_Static_Model()
 // normalize each equation of the dynamic model
 // and find the optimal block triangular decomposition of the static model
 void
-BlockTriangular::Normalize_and_BlockDecompose_Static_0_Model()
+BlockTriangular::Normalize_and_BlockDecompose_Static_0_Model(const jacob_map &j_m)
 {
   bool* SIM, *SIM_0;
   List_IM* Cur_IM;
@@ -985,7 +1138,7 @@ BlockTriangular::Normalize_and_BlockDecompose_Static_0_Model()
   SIM_0 = (bool*)malloc(endo_nbr * endo_nbr * sizeof(*SIM_0));
   for(i = 0;i < endo_nbr*endo_nbr;i++)
     SIM_0[i] = Cur_IM->IM[i];
-  Normalize_and_BlockDecompose(SIM, ModelBlock, endo_nbr, &prologue, &epilogue, Index_Var_IM, Index_Equ_IM, 1, 1, SIM_0);
+  Normalize_and_BlockDecompose(SIM, ModelBlock, endo_nbr, &prologue, &epilogue, Index_Var_IM, Index_Equ_IM, 1, 1, SIM_0, j_m);
   if(bt_verbose)
     for(i = 0;i < endo_nbr;i++)
       cout << "Block=" << Index_Equ_IM[i].block << " Equ=" << Index_Equ_IM[i].index << " Var= " << Index_Var_IM[i].index << "  " << symbol_table.getNameByID(eEndogenous, Index_Var_IM[i].index) << "\n";

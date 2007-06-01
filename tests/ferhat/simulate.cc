@@ -1,60 +1,161 @@
   ////////////////////////////////////////////////////////////////////////
-  //                           simulate.c                               //
-  //              simulate file designed for GNU GCC C++ compiler       //
-  //                 use GCC_COMPILER option in MODEL command           //
-  ////////////////////////////////////////////////////////////////////////
+//                           simulate.c                               //
+//              simulate file designed for GNU GCC C++ compiler       //
+//                 use GCC_COMPILER option in MODEL command           //
+////////////////////////////////////////////////////////////////////////
 
 //#define PRINT_OUT
-//#define PRINT_OUT_p
+#define INDIRECT_SIMULATE
+#define PRINT_OUT_p
+//#define PRINT_OUT_y1
+//#define PRINT_u
+//#define PRINT_OUT_b
+//#define DEBUG
+//#define EXTENDED
+//#define FLOAT
+//#define WRITE_u
+//#define N_MX_ALLOC
+//#define MEM_ALLOC_CHK
+#define NEW_ALLOC
+//#define PROFILER
+#ifdef EXTENDED
+typedef long double longd;
+#else
+typedef double longd;
+#endif
+//#define PRINT_OUT_y
 #include <stack>
+#include <set>
+#include <vector>
 #include <math.h>
 #include <iostream>
 #include <fstream>
 #include "pctimer_h.hh"
 #include "mex.h"
+#include <string>
+#include <map>
+#include <algorithm>
+
+
+using namespace std;
+
+const int FLD  =0;
+const int FDIV =1;
+const int FLESS=2;
+const int FSUB =3;
+const int FLDZ =4;
+const int FMUL =5;
+const int FSTP =6;
+const int FADD =7;
+const longd eps=1e-7;
+
+typedef struct NonZeroElem
+  {
+    int u_index;
+    int r_index, c_index, lag_index;
+    NonZeroElem *NZE_R_N, *NZE_C_N;
+  };
+
 
 
 /*#include "simulate.hh"*/
-
+//typedef std::pair<int, int> eq_var;
+//typedef std::vector<std::pair<eq_var,int> > t_IM;
+std::map<std::pair<std::pair<int, int> ,int>, int> IM_i;
+//std::map<int, int> Lead_Lag;
+std::multimap<std::pair<int,int>, int> var_in_equ_and_lag_i, equ_in_var_and_lag_i;
+//t_IM IM;
+int  *index_vara, *pivota=NULL, *save_op_all=NULL, *b, *g_save_op=NULL;
+int *pivot, *pivotk;
+longd *pivotv, *pivotva=NULL;
+bool *line_done;
+bool symbolic=true, alt_symbolic=false, record_all=false;
+long int nop_all, nopa_all;
+const longd very_big=1e24;
 int Per_y_, Per_u_, it_, nb_row_x, u_size, y_size, x_size, y_kmin, y_kmax, y_decal;
-int periods, maxit_;
-double *params, *u, *y, *x, *r, *g1, *g2;
-double slowc, solve_tolf, max_res, res1, res2;
-bool cvg;
+int periods, maxit_, max_u=0, min_u=0x7FFFFFFF, g_nop_all=0;
+double *params;
+longd  *u, *y, *x, *r, *g1, *g2, *ya, *direction;
+longd slowc, slowc_save, solve_tolf, max_res, res1, res2, res1a=9.0e60;
+bool cvg, print_err, swp_f;
+int swp_f_b=0;
 pctimer_t t0, t1;
+int u_count_alloc, u_count_alloc_save, size_of_direction;
+int i, j, k, nb_endo, u_count, u_count_init, iter;
+longd err;
+std::string filename;
+NonZeroElem **FNZE_R, **FNZE_C;
+int *NbNZRow, *NbNZCol;
 
 typedef struct t_table_y
-{
-  int index, nb;
-  int *u_index, *y_index;
-};
+  {
+    int index, nb;
+    int *u_index, *y_index;
+  };
 
 typedef struct t_table_u
+  {
+    t_table_u* pNext;
+    unsigned char type;
+    int index;
+    int op1, op2;
+  };
+
+
+
+std::fstream SaveCode, SaveCode_swp;
+
+/*longd pow1(longd a, longd b)
+ {
+   if(a<0)
+     {
+       mexPrintf("Attempt to compute (-X)^Y at time %d\n",it_);
+       return(-pow(-a,b));
+     }
+   else
+     return(pow(a,b));
+ }
+*/
+
+longd pow1(longd a, longd b)
 {
-  t_table_u* pNext;
-  unsigned char type;
-  int index;
-  int op1, op2;
-};
+  double r=pow(a,b);
+  if (isnan(r) || isinf(r))
+    {
+      max_res=res1=res2=r;
+      return(r);
+    }
+  else
+    return r;
+}
 
 
-std::ifstream SaveCode;
+int
+max(int a, int b)
+{
+  if (a>b)
+    return(a);
+  else
+    return(b);
+}
 
-
-
-
+#ifdef INDIRECT_SIMULATE
 void
 read_file_table_u(t_table_u **table_u, t_table_u **F_table_u, t_table_u **i_table_u, t_table_u **F_i_table_u, int *nb_table_u, bool i_to_do, bool shifting, int *nb_add_u_count)
 {
   char type;
   int i;
+  i=SaveCode.tellp();
+#ifdef PRINT_OUT
+  mexPrintf("SaveCode.tellp()=%d\n",i);
+#endif
   SaveCode.read(reinterpret_cast<char *>(nb_table_u), sizeof(*nb_table_u));
 #ifdef PRINT_OUT
   mexPrintf("->*nb_table_u=%d\n", *nb_table_u);
 #endif
   *table_u = (t_table_u*)mxMalloc(sizeof(t_table_u) - 2 * sizeof(int));
   *F_table_u = *table_u;
-   if(i_to_do)
+  if (i_to_do)
     {
 #ifdef PRINT_OUT
       mexPrintf("=>i_table\n");
@@ -62,125 +163,151 @@ read_file_table_u(t_table_u **table_u, t_table_u **F_table_u, t_table_u **i_tabl
       (*i_table_u) = (t_table_u*)mxMalloc(sizeof(t_table_u) - 2 * sizeof(int));
       (*F_i_table_u) = (*i_table_u);
     }
-  for(i = 0;i < *nb_table_u;i++)
+  for (i = 0;i < *nb_table_u;i++)
     {
       SaveCode.read(reinterpret_cast<char *>(&type), sizeof(type));
       switch (type)
         {
-        case 3:
-        case 7:
-          (*table_u)->pNext = (t_table_u*)mxMalloc(sizeof(t_table_u) - sizeof(int));
-          (*table_u) = (*table_u)->pNext;
-          (*table_u)->type = type;
-          SaveCode.read(reinterpret_cast<char *>(&(*table_u)->index), sizeof((*table_u)->index));
-          SaveCode.read(reinterpret_cast<char *>(&(*table_u)->op1), sizeof((*table_u)->op1));
-          if(shifting)
-            {
-              (*table_u)->index -= y_kmin * u_size;
-              (*table_u)->op1 -= y_kmin * u_size;
-            }
+          case 3:
+          case 7:
+            (*table_u)->pNext = (t_table_u*)mxMalloc(sizeof(t_table_u) - sizeof(int));
+            (*table_u) = (*table_u)->pNext;
+            (*table_u)->type = type;
+            SaveCode.read(reinterpret_cast<char *>(&(*table_u)->index), sizeof((*table_u)->index));
+            if ((*table_u)->index>max_u)
+              max_u=(*table_u)->index;
+            if ((*table_u)->index<min_u)
+              min_u=(*table_u)->index;
+            SaveCode.read(reinterpret_cast<char *>(&(*table_u)->op1), sizeof((*table_u)->op1));
+            if (shifting)
+              {
+                (*table_u)->index -= y_kmin * u_size;
+                if ((*table_u)->index>max_u)
+                  max_u=(*table_u)->index;
+                if ((*table_u)->index<min_u)
+                  min_u=(*table_u)->index;
+                (*table_u)->op1 -= y_kmin * u_size;
+              }
 #ifdef PRINT_OUT
 
-          if((*table_u)->type == 3)
-            mexPrintf("u[%d]=-1/u[%d]\n", (*table_u)->index, (*table_u)->op1);
-          else
-            mexPrintf("u[%d]*=u[%d]\n", (*table_u)->index, (*table_u)->op1);
+            if ((*table_u)->type == 3)
+              mexPrintf("u[%d]=-1/u[%d]\n", (*table_u)->index, (*table_u)->op1);
+            else
+              mexPrintf("u[%d]*=u[%d]\n", (*table_u)->index, (*table_u)->op1);
 #endif
-          if(i_to_do)
-            {
-              (*i_table_u)->pNext = (t_table_u*)mxMalloc(sizeof(t_table_u) - sizeof(int));
-              (*i_table_u) = (*i_table_u)->pNext;
-              (*i_table_u)->type = type;
-              SaveCode.read(reinterpret_cast<char *>(&(*i_table_u)->index), sizeof((*i_table_u)->index));
-              SaveCode.read(reinterpret_cast<char *>(&(*i_table_u)->op1), sizeof((*i_table_u)->op1));
+            if (i_to_do)
+              {
+                (*i_table_u)->pNext = (t_table_u*)mxMalloc(sizeof(t_table_u) - sizeof(int));
+                (*i_table_u) = (*i_table_u)->pNext;
+                (*i_table_u)->type = type;
+                SaveCode.read(reinterpret_cast<char *>(&(*i_table_u)->index), sizeof((*i_table_u)->index));
+                SaveCode.read(reinterpret_cast<char *>(&(*i_table_u)->op1), sizeof((*i_table_u)->op1));
 #ifdef FIXE
-              (*i_table_u)->index = u_size;
-              (*i_table_u)->op1 = u_size;
+                (*i_table_u)->index = u_size;
+                (*i_table_u)->op1 = u_size;
 #endif
 #ifdef PRINT_OUT
-              if((*i_table_u)->type == 3)
-                mexPrintf("i u[%d]=1/(1-u[%d])\n", (*i_table_u)->index, (*i_table_u)->op1);
-              else
-                mexPrintf("i u[%d]*=u[%d]\n", (*i_table_u)->index, (*i_table_u)->op1);
+                if ((*i_table_u)->type == 3)
+                  mexPrintf("i u[%d]=1/(1-u[%d])\n", (*i_table_u)->index, (*i_table_u)->op1);
+                else
+                  mexPrintf("i u[%d]*=u[%d]\n", (*i_table_u)->index, (*i_table_u)->op1);
 #endif
-            }
-          break;
-        case 1:
-        case 2:
-        case 6:
-          (*table_u)->pNext = (t_table_u*)mxMalloc(sizeof(t_table_u));
-          (*table_u) = (*table_u)->pNext;
-          (*table_u)->type = type;
-          SaveCode.read(reinterpret_cast<char *>(&(*table_u)->index), sizeof((*table_u)->index));
-          SaveCode.read(reinterpret_cast<char *>(&(*table_u)->op1), sizeof((*table_u)->op1));
-          SaveCode.read(reinterpret_cast<char *>(&(*table_u)->op2), sizeof((*table_u)->op2));
-          if(shifting)
-            {
-              (*table_u)->index -= y_kmin * u_size;
-              (*table_u)->op1 -= y_kmin * u_size;
-              (*table_u)->op2 -= y_kmin * u_size;
-            }
-          if((*table_u)->type == 1)
-            {
+              }
+            break;
+          case 1:
+          case 2:
+          case 6:
+            (*table_u)->pNext = (t_table_u*)mxMalloc(sizeof(t_table_u));
+            (*table_u) = (*table_u)->pNext;
+            (*table_u)->type = type;
+            SaveCode.read(reinterpret_cast<char *>(&(*table_u)->index), sizeof((*table_u)->index));
+            if ((*table_u)->index>max_u)
+              max_u=(*table_u)->index;
+            if ((*table_u)->index<min_u)
+              min_u=(*table_u)->index;
+            SaveCode.read(reinterpret_cast<char *>(&(*table_u)->op1), sizeof((*table_u)->op1));
+            SaveCode.read(reinterpret_cast<char *>(&(*table_u)->op2), sizeof((*table_u)->op2));
+            if (shifting)
+              {
+                (*table_u)->index -= y_kmin * u_size;
+                if ((*table_u)->index>max_u)
+                  max_u=(*table_u)->index;
+                if ((*table_u)->index<min_u)
+                  min_u=(*table_u)->index;
+                (*table_u)->op1 -= y_kmin * u_size;
+                (*table_u)->op2 -= y_kmin * u_size;
+              }
+            if ((*table_u)->type == 1)
+              {
 #ifdef PRINT_OUT
-              mexPrintf("u[%d]=u[%d]*u[%d]\n", (*table_u)->index, (*table_u)->op1, (*table_u)->op2);
+                mexPrintf("u[%d]=u[%d]*u[%d]\n", (*table_u)->index, (*table_u)->op1, (*table_u)->op2);
 #endif
-              if(i_to_do)
-                (*nb_add_u_count)++;
-            }
+                if (i_to_do)
+                  (*nb_add_u_count)++;
+              }
 #ifdef PRINT_OUT
-          else if((*table_u)->type == 2)
-            mexPrintf("u[%d]+=u[%d]*u[%d]\n", (*table_u)->index, (*table_u)->op1, (*table_u)->op2);
-          else
-            mexPrintf("u[%d]=1/(1-u[%d]*u[%d])\n", (*table_u)->index, (*table_u)->op1, (*table_u)->op2);
+            else if ((*table_u)->type == 2)
+              mexPrintf("u[%d]+=u[%d]*u[%d]\n", (*table_u)->index, (*table_u)->op1, (*table_u)->op2);
+            else
+              mexPrintf("u[%d]=1/(1-u[%d]*u[%d])\n", (*table_u)->index, (*table_u)->op1, (*table_u)->op2);
 #endif
-          if(i_to_do)
-            {
-              (*i_table_u)->pNext = (t_table_u*)mxMalloc(sizeof(t_table_u));
-              (*i_table_u) = (*i_table_u)->pNext;
-              (*i_table_u)->type = type;
-              SaveCode.read(reinterpret_cast<char *>(&(*i_table_u)->index), sizeof((*i_table_u)->index));
-              SaveCode.read(reinterpret_cast<char *>(&(*i_table_u)->op1), sizeof((*i_table_u)->op1));
-              SaveCode.read(reinterpret_cast<char *>(&(*i_table_u)->op2), sizeof((*i_table_u)->op2));
+            if (i_to_do)
+              {
+                (*i_table_u)->pNext = (t_table_u*)mxMalloc(sizeof(t_table_u));
+                (*i_table_u) = (*i_table_u)->pNext;
+                (*i_table_u)->type = type;
+                SaveCode.read(reinterpret_cast<char *>(&(*i_table_u)->index), sizeof((*i_table_u)->index));
+                SaveCode.read(reinterpret_cast<char *>(&(*i_table_u)->op1), sizeof((*i_table_u)->op1));
+                SaveCode.read(reinterpret_cast<char *>(&(*i_table_u)->op2), sizeof((*i_table_u)->op2));
 #ifdef FIXE
-              (*i_table_u)->index = u_size;
-              (*i_table_u)->op1 = u_size;
-              (*i_table_u)->op2 = u_size;
+                (*i_table_u)->index = u_size;
+                (*i_table_u)->op1 = u_size;
+                (*i_table_u)->op2 = u_size;
 #endif
 #ifdef PRINT_OUT
-              if((*i_table_u)->type == 1)
-                mexPrintf("i u[%d]=u[%d]*u[%d]\n", (*i_table_u)->index, (*i_table_u)->op1, (*i_table_u)->op2);
-              else if((*i_table_u)->type == 2)
-                mexPrintf("i u[%d]+=u[%d]*u[%d]\n", (*i_table_u)->index, (*i_table_u)->op1, (*i_table_u)->op2);
-              else
-                mexPrintf("i u[%d]=1/(1-u[%d]*u[%d])\n", (*i_table_u)->index, (*i_table_u)->op1, (*i_table_u)->op2);
+                if ((*i_table_u)->type == 1)
+                  mexPrintf("i u[%d]=u[%d]*u[%d]\n", (*i_table_u)->index, (*i_table_u)->op1, (*i_table_u)->op2);
+                else if ((*i_table_u)->type == 2)
+                  mexPrintf("i u[%d]+=u[%d]*u[%d]\n", (*i_table_u)->index, (*i_table_u)->op1, (*i_table_u)->op2);
+                else
+                  mexPrintf("i u[%d]=1/(1-u[%d]*u[%d])\n", (*i_table_u)->index, (*i_table_u)->op1, (*i_table_u)->op2);
 #endif
-            }
-          break;
-        case 5:
-          (*table_u)->pNext = (t_table_u*)mxMalloc(sizeof(t_table_u) - 2 * sizeof(int));
-          (*table_u) = (*table_u)->pNext;
-          (*table_u)->type = type;
-          SaveCode.read(reinterpret_cast<char *>(&(*table_u)->index), sizeof((*table_u)->index));
-          if(shifting)
-            (*table_u)->index -= y_kmin * u_size;
+              }
+            break;
+          case 5:
+            (*table_u)->pNext = (t_table_u*)mxMalloc(sizeof(t_table_u) - 2 * sizeof(int));
+            (*table_u) = (*table_u)->pNext;
+            (*table_u)->type = type;
+            SaveCode.read(reinterpret_cast<char *>(&(*table_u)->index), sizeof((*table_u)->index));
+            if ((*table_u)->index>max_u)
+              max_u=(*table_u)->index;
+            if ((*table_u)->index<min_u)
+              min_u=(*table_u)->index;
+            if (shifting)
+              {
+                (*table_u)->index -= y_kmin * u_size;
+                if ((*table_u)->index>max_u)
+                  max_u=(*table_u)->index;
+                if ((*table_u)->index<min_u)
+                  min_u=(*table_u)->index;
+              }
 #ifdef PRINT_OUT
-          mexPrintf("push(u[%d])\n", (*table_u)->index);
+            mexPrintf("push(u[%d])\n", (*table_u)->index);
 #endif
-          if(i_to_do)
-            {
-              (*i_table_u)->pNext = (t_table_u*)mxMalloc(sizeof(t_table_u) - 2 * sizeof(int));
-              (*i_table_u) = (*i_table_u)->pNext;
-              (*i_table_u)->type = type;
-              SaveCode.read(reinterpret_cast<char *>(&(*i_table_u)->index), sizeof((*i_table_u)->index));
+            if (i_to_do)
+              {
+                (*i_table_u)->pNext = (t_table_u*)mxMalloc(sizeof(t_table_u) - 2 * sizeof(int));
+                (*i_table_u) = (*i_table_u)->pNext;
+                (*i_table_u)->type = type;
+                SaveCode.read(reinterpret_cast<char *>(&(*i_table_u)->index), sizeof((*i_table_u)->index));
 #ifdef FIXE
-              (*i_table_u)->index = u_size;
+                (*i_table_u)->index = u_size;
 #endif
 #ifdef PRINT_OUT
-              mexPrintf("i push(u[%d])\n", (*i_table_u)->index);
+                mexPrintf("i push(u[%d])\n", (*i_table_u)->index);
 #endif
-            }
-          break;
+              }
+            break;
         }
     }
 }
@@ -192,14 +319,14 @@ read_file_table_y(t_table_y **table_y, t_table_y **i_table_y, int *nb_table_y, b
   SaveCode.read(reinterpret_cast<char *>(nb_table_y), sizeof(*nb_table_y));
 #ifdef PRINT_OUT
   mexPrintf("nb_table_y=%d\n", *nb_table_y);
-  mexPrintf("y_size=%d, u_size=%d, y_kmin=%d, y_kmax=%d\n", y_size, u_size, y_kmin, y_kmax);
+  //mexPrintf("y_size=%d, u_size=%d, y_kmin=%d, y_kmax=%d\n", y_size, u_size, y_kmin, y_kmax);
 #endif
   (*table_y) = (t_table_y*)mxMalloc((*nb_table_y) * sizeof(t_table_y));
-  for(i = 0;i < *nb_table_y;i++)
+  for (i = 0;i < *nb_table_y;i++)
     {
       SaveCode.read(reinterpret_cast<char *>(&((*table_y)[i].index)), sizeof((*table_y)[i].index));
       SaveCode.read(reinterpret_cast<char *>(&((*table_y)[i].nb)), sizeof((*table_y)[i].nb));
-      if(shifting)
+      if (shifting)
         (*table_y)[i].index -= y_kmin * y_size;
 #ifdef PRINT_OUT
       mexPrintf("table_y[i].nb=%d\n", (*table_y)[i].nb);
@@ -207,20 +334,20 @@ read_file_table_y(t_table_y **table_y, t_table_y **i_table_y, int *nb_table_y, b
 #endif
       (*table_y)[i].u_index = (int*)mxMalloc((*table_y)[i].nb * sizeof(int));
       (*table_y)[i].y_index = (int*)mxMalloc((*table_y)[i].nb * sizeof(int));
-      for(k = 0;k < (*table_y)[i].nb;k++)
+      for (k = 0;k < (*table_y)[i].nb;k++)
         {
           SaveCode.read(reinterpret_cast<char *>(&((*table_y)[i].u_index[k])), sizeof((*table_y)[i].u_index[k]));
           SaveCode.read(reinterpret_cast<char *>(&((*table_y)[i].y_index[k])), sizeof((*table_y)[i].y_index[k]));
-          if(shifting)
+          if (shifting)
             {
               (*table_y)[i].u_index[k] -= y_kmin * u_size;
-              if(((*table_y)[i].y_index[k] > y_size*y_kmin) && ((*table_y)[i].y_index[k] < y_size*(2*y_kmin + y_kmax + 2)))
+              if (((*table_y)[i].y_index[k] > y_size*y_kmin) && ((*table_y)[i].y_index[k] < y_size*(2*y_kmin + y_kmax + 2)))
                 {
                   (*table_y)[i].y_index[k] -= y_kmin * y_size;
                 }
             }
 #ifdef PRINT_OUT
-          if(k < (*table_y)[i].nb - 1)
+          if (k < (*table_y)[i].nb - 1)
             mexPrintf("u[%d]*y[%d]+", (*table_y)[i].u_index[k], (*table_y)[i].y_index[k]);
           else
             mexPrintf("u[%d]*y[%d]\n", (*table_y)[i].u_index[k], (*table_y)[i].y_index[k]);
@@ -230,10 +357,10 @@ read_file_table_y(t_table_y **table_y, t_table_y **i_table_y, int *nb_table_y, b
 #ifdef PRINT_OUT
   mexPrintf("*nb_table_y=%d\n", *nb_table_y);
 #endif
-  if(i_to_do)
+  if (i_to_do)
     {
       *i_table_y = (t_table_y*)mxMalloc((*nb_table_y) * sizeof(t_table_y));
-      for(i = 0;i < *nb_table_y;i++)
+      for (i = 0;i < *nb_table_y;i++)
         {
           SaveCode.read(reinterpret_cast<char *>(&((*i_table_y)[i].index)), sizeof((*i_table_y)[i].index));
           SaveCode.read(reinterpret_cast<char *>(&((*i_table_y)[i].nb)), sizeof((*i_table_y)[i].nb));
@@ -243,12 +370,12 @@ read_file_table_y(t_table_y **table_y, t_table_y **i_table_y, int *nb_table_y, b
 #endif
           (*i_table_y)[i].u_index = (int*)mxMalloc((*i_table_y)[i].nb * sizeof(int));
           (*i_table_y)[i].y_index = (int*)mxMalloc((*i_table_y)[i].nb * sizeof(int));
-          for(k = 0;k < (*i_table_y)[i].nb;k++)
+          for (k = 0;k < (*i_table_y)[i].nb;k++)
             {
               SaveCode.read(reinterpret_cast<char *>(&((*i_table_y)[i].u_index[k])), sizeof((*i_table_y)[i].u_index[k]));
               SaveCode.read(reinterpret_cast<char *>(&((*i_table_y)[i].y_index[k])), sizeof((*i_table_y)[i].y_index[k]));
 #ifdef PRINT_OUT
-              if(k < (*i_table_y)[i].nb - 1)
+              if (k < (*i_table_y)[i].nb - 1)
                 mexPrintf("u[%d]*y[%d]+", (*i_table_y)[i].u_index[k], (*i_table_y)[i].y_index[k]);
               else
                 mexPrintf("u[%d]*y[%d]\n", (*i_table_y)[i].u_index[k], (*i_table_y)[i].y_index[k]);
@@ -259,7 +386,7 @@ read_file_table_y(t_table_y **table_y, t_table_y **i_table_y, int *nb_table_y, b
 }
 
 
-int i, j, k, nb_endo, u_count, u_count_init, iter;
+
 int nb_prologue_table_u, nb_first_table_u, nb_middle_table_u, nb_last_table_u;
 int nb_prologue_table_y, nb_first_table_y, nb_middle_table_y, nb_last_table_y;
 int first_count_loop, middle_count_loop;
@@ -267,7 +394,7 @@ char type;
 t_table_u *prologue_table_u, *first_table_u, *first_i_table_u, *middle_table_u, *middle_i_table_u, *last_table_u;
 t_table_y *prologue_table_y, *first_table_y, *middle_table_y, *middle_i_table_y, *last_table_y;
 t_table_u *F_prologue_table_u, *F_first_table_u, *F_first_i_table_u, *F_middle_table_u, *F_middle_i_table_u, *F_last_table_u;
-std::string filename;
+
 
 
 void
@@ -276,16 +403,18 @@ Read_file(std::string file_name, int periods, int u_size1, int y_size, int y_kmi
   int nb_add_u_count = 0;
   u_size = u_size1;
   filename=file_name;
+  //mexPrintf("-------------------------------------------------\n");
 #ifdef PRINT_OUT
+  mexPrintf("min_u(initial)=%d\n",min_u);
   mexPrintf("%s\n", file_name.c_str());
 #endif
-  if(!SaveCode.is_open())
+  if (!SaveCode.is_open())
     {
 #ifdef PRINT_OUT
       mexPrintf("file opened\n");
 #endif
       SaveCode.open((file_name + ".bin").c_str(), std::ios::in | std::ios::binary);
-      if(!SaveCode.is_open())
+      if (!SaveCode.is_open())
         {
           mexPrintf("Error : Can't open file \"%s\" for reading\n", (file_name + ".bin").c_str());
           mexErrMsgTxt("Exit from Dynare");
@@ -326,7 +455,7 @@ Read_file(std::string file_name, int periods, int u_size1, int y_size, int y_kmi
 #endif
   read_file_table_u(&middle_table_u, &F_middle_table_u, &middle_i_table_u, &F_middle_i_table_u, &nb_middle_table_u, true,  /*true*/false, &nb_add_u_count);
 #ifdef PRINT_OUT
- mexPrintf("nb_middle_table_u=%d\n",nb_middle_table_u);
+  mexPrintf("nb_middle_table_u=%d\n",nb_middle_table_u);
   //mexPrintf("last table_u\n");
 #endif
   read_file_table_u(&last_table_u, &F_last_table_u, NULL, NULL, &nb_last_table_u, false, false, &nb_add_u_count);
@@ -354,25 +483,27 @@ Read_file(std::string file_name, int periods, int u_size1, int y_size, int y_kmi
 #ifdef PRINT_OUT
   mexPrintf("nb_last_table_y=%d\n", nb_last_table_y);
   mexPrintf("->nb_last_table_y=%d\n", nb_last_table_y);
+  mexPrintf("max_u=%d\n",max_u);
+  mexPrintf("min_u=%d\n",min_u);
 #endif
-  if(nb_last_table_u > 0)
+  if (nb_last_table_u > 0)
     {
 #ifdef PRINT_OUT
       mexPrintf("y_size=%d, periods=%d, y_kmin=%d, y_kmax=%d\n", y_size, periods, y_kmin, y_kmax);
-      mexPrintf("u=mxMalloc(%d)\n", u_count + 1);
+      mexPrintf("u=mxMalloc(%d)\n", max(u_count + 1,max_u+1));
 #endif
-      u = (double*)mxMalloc((u_count + 1) * sizeof(double));
+      u = (longd*)mxMalloc(max(u_count + 1,max_u+1) * sizeof(longd));
     }
   else
     {
-#ifdef PRINT_OUT
+//#ifdef PRINT_OUT
       mexPrintf("u_size=%d, y_size=%d, periods=%d, y_kmin=%d, y_kmax=%d, u_count=%d, nb_add_u_count=%d\n", u_size, y_size, periods, y_kmin, y_kmax, u_count, nb_add_u_count);
       mexPrintf("u=mxMalloc(%d)\n", u_count + (periods + y_kmin + y_kmax)* /*(u_count-u_size*(periods+y_kmin+y_kmax))*/nb_add_u_count);
-#endif
-      u = (double*)mxMalloc((u_count + (periods + y_kmin + y_kmax)* /*(u_count-u_size*(periods+y_kmin+y_kmax)*/nb_add_u_count) * sizeof(double));
-      memset(u, 0, (u_count + (periods + y_kmin + y_kmax)* /*(u_count-u_size*(periods+y_kmin+y_kmax)*/nb_add_u_count)*sizeof(double));
+//#endif
+      u = (longd*)mxMalloc((u_count + (periods + y_kmin + y_kmax)* /*(u_count-u_size*(periods+y_kmin+y_kmax)*/nb_add_u_count) * sizeof(longd));
+      memset(u, 0, (u_count + (periods + y_kmin + y_kmax)* /*(u_count-u_size*(periods+y_kmin+y_kmax)*/nb_add_u_count)*sizeof(longd));
     }
-  if(u == NULL)
+  if (u == NULL)
     {
       mexPrintf("memory exhausted\n");
       mexErrMsgTxt("Exit from Dynare");
@@ -381,212 +512,254 @@ Read_file(std::string file_name, int periods, int u_size1, int y_size, int y_kmi
 }
 
 
-std::stack <double> Stack;
+std::stack <longd> Stack;
 
 void
-simulate(int blck, int y_size, int it_, int y_kmin, int y_kmax)
+simulate(int blck, int y_size, int it_, int y_kmin, int y_kmax, int Size, int periods, bool print_it)
 {
-  int i, j, k, l, m, m1, nop;
+  int i, j, k, l, m=0, nop;
+#ifdef PRINT_OUT_y
+  int m1;
+#endif
   int period = it_ * y_size, s_middle_count_loop = 0 ;
+  if (periods>0)
+    period = y_decal * y_size;
   pctimer_t t1 = pctimer();
-  double uu, yy;
-  char tmp_s[150];
+  longd uu, yy;
+  //char tmp_s[150];
+  //mexPrintf("period=%d\n",period);
 #ifdef PRINT_OUT
-  for(j = 0;j < it_ -y_kmin;j++)
+  for (j = 0;j < it_ -y_kmin;j++)
     {
-      for(i = 0;i < u_size;i++)
+      for (i = 0;i < u_size;i++)
         {
-          mexPrintf("u[%d]=%f ", j*u_size + i, u[j*u_size + i]);
+          mexPrintf("u[%d]=%f ", j*u_size + i, double(u[j*u_size + i]));
         }
       mexPrintf("\n");
     }
 #endif
-  if(nb_first_table_u > 0)
+  if (/*nb_first_table_u*/print_it > 0)
     {
       first_count_loop = it_;
-      s_middle_count_loop = it_ -y_kmin - middle_count_loop + 1;
+      //mexPrintf("nb_prologue_table_y=%d Size%d\n",nb_prologue_table_y,Size);
+      /*s_middle_count_loop = it_ -y_kmin - middle_count_loop + 1;*/
+      s_middle_count_loop = it_ - y_kmin - (nb_prologue_table_y  / Size);
+#ifdef PRINT_OUT
+      mexPrintf("nb_first_table_u=%d first_count_loop=%d s_middle_count_loop=%d\n",nb_first_table_u,first_count_loop, s_middle_count_loop);
+      mexPrintf("y_kmin=%d y_kmax=%d \n",y_kmin,y_kmax);
+      mexPrintf("middle_count_loop=%d\n",middle_count_loop);
+      mexPrintf("it_=%d\n",it_);
+#endif
 //#ifdef PRINT_OUT
       mexPrintf("----------------------------------------------------------------------\n");
-      mexPrintf("      Simulate     itération° %d     \n",iter+1);
-      mexPrintf("      max. error=%.10e       \n",max_res);
-      mexPrintf("      sqr. error=%.10e       \n",res2);
-      mexPrintf("      abs. error=%.10e       \n",res1);
+      mexPrintf("      Simulate     iteration° %d     \n",iter+1);
+      mexPrintf("      max. error=%.10e       \n",double(max_res));
+      mexPrintf("      sqr. error=%.10e       \n",double(res2));
+      mexPrintf("      abs. error=%.10e       \n",double(res1));
       mexPrintf("----------------------------------------------------------------------\n");
-//#endif
+//endif
+#ifdef PRINT_OUT
+      mexPrintf("first_count\n");
+      mexPrintf("(first_count_loop=%d - y_kmin=%d)=%d\n",first_count_loop,y_kmin, first_count_loop-y_kmin);
+#endif
     }
   nop = 0;
-  for(j = 0 ;j < first_count_loop - y_kmin;j++)
+
+  for (j = 0 ;j < first_count_loop - y_kmin;j++)
     {
+#ifdef PRINT_OUT_b
+      mexPrintf("------------------------------------------------------\n");
+      mexPrintf("j=%d\n",j);
+#endif
       first_table_u = F_first_table_u->pNext;
       first_i_table_u = F_first_i_table_u->pNext;
-      for(i = 0;i < nb_first_table_u;i++)
+      for (i = 0;i < nb_first_table_u;i++)
         {
           switch (first_table_u->type)
             {
-            case 1:
-              u[first_table_u->index + j*first_i_table_u->index] = u[first_table_u->op1 + j * first_i_table_u->op1] * u[first_table_u->op2 + j * first_i_table_u->op2];
-#ifdef PRINT_OUT
-              mexPrintf("u[%d]=u[%d]*u[%d]=%f\n", first_table_u->index + j*first_i_table_u->index , first_table_u->op1 + j*first_i_table_u->op1, first_table_u->op2 + j*first_i_table_u->op2, u[first_table_u->index + j*first_i_table_u->index]);
+              case 1:
+                u[first_table_u->index + j*first_i_table_u->index] = u[first_table_u->op1 + j * first_i_table_u->op1] * u[first_table_u->op2 + j * first_i_table_u->op2];
+#ifdef PRINT_OUT_b
+                mexPrintf("u[%d]=u[%d]*u[%d]=%f\n", first_table_u->index + j*first_i_table_u->index , first_table_u->op1 + j*first_i_table_u->op1, first_table_u->op2 + j*first_i_table_u->op2, double(u[first_table_u->index + j*first_i_table_u->index]));
 #endif
-              break;
-            case 2:
-              u[first_table_u->index + j*first_i_table_u->index] += u[first_table_u->op1 + j * first_i_table_u->op1] * u[first_table_u->op2 + j * first_i_table_u->op2];
-#ifdef PRINT_OUT
-              mexPrintf("u[%d]+=u[%d]*u[%d]=%f\n" , first_table_u->index + j*first_i_table_u->index, first_table_u->op1 + j*first_i_table_u->op1, first_table_u->op2 + j*first_i_table_u->op2, u[first_table_u->index + j*first_i_table_u->index]);
+                break;
+              case 2:
+                u[first_table_u->index + j*first_i_table_u->index] += u[first_table_u->op1 + j * first_i_table_u->op1] * u[first_table_u->op2 + j * first_i_table_u->op2];
+#ifdef PRINT_OUT_b
+                mexPrintf("u[%d]+=u[%d]*u[%d]=%f\n" , first_table_u->index + j*first_i_table_u->index, first_table_u->op1 + j*first_i_table_u->op1, first_table_u->op2 + j*first_i_table_u->op2, double(u[first_table_u->index + j*first_i_table_u->index]));
 #endif
-              break;
-            case 3:
-              u[first_table_u->index + j*first_i_table_u->index] = 1 / ( -u[first_table_u->op1 + j * first_i_table_u->op1]);
-#ifdef PRINT_OUT
-              mexPrintf("u[%d]=1/(-u[%d])=%f\n", first_table_u->index + j*first_i_table_u->index, first_table_u->op1 + j*first_i_table_u->op1, u[first_table_u->index + j*first_i_table_u->index]);
+                break;
+              case 3:
+                u[first_table_u->index + j*first_i_table_u->index] = 1 / ( -u[first_table_u->op1 + j * first_i_table_u->op1]);
+#ifdef PRINT_OUT_b
+                mexPrintf("u[%d]=1/(-u[%d])=%f\n", first_table_u->index + j*first_i_table_u->index, first_table_u->op1 + j*first_i_table_u->op1, double(u[first_table_u->index + j*first_i_table_u->index]));
 #endif
-              break;
-            case 5:
-              Stack.push(u[first_table_u->index + j*first_i_table_u->index]);
-#ifdef PRINT_OUT
-              mexPrintf("push(u[%d])\n", first_table_u->index + j*first_i_table_u->index);
+                break;
+              case 5:
+                Stack.push(u[first_table_u->index + j*first_i_table_u->index]);
+#ifdef PRINT_OUT_b
+                mexPrintf("push(u[%d])\n", first_table_u->index + j*first_i_table_u->index);
 #endif
-              break;
-            case 6:
-              u[first_table_u->index + j*first_i_table_u->index] = 1 / (1 - u[first_table_u->op1 + j * first_i_table_u->op1] * u[first_table_u->op2 + j * first_i_table_u->op2]);
-#ifdef PRINT_OUT
-              mexPrintf("u[%d]=1/(1-u[%d]*u[%d])=%f\n", first_table_u->index + j*first_i_table_u->index, first_table_u->op1 + j*first_i_table_u->op1, first_table_u->op2 + j*first_i_table_u->op2, u[first_table_u->index + j*first_i_table_u->index]);
+                break;
+              case 6:
+                u[first_table_u->index + j*first_i_table_u->index] = 1 / (1 - u[first_table_u->op1 + j * first_i_table_u->op1] * u[first_table_u->op2 + j * first_i_table_u->op2]);
+#ifdef PRINT_OUT_b
+                mexPrintf("u[%d]=1/(1-u[%d]*u[%d])=%f\n", first_table_u->index + j*first_i_table_u->index, first_table_u->op1 + j*first_i_table_u->op1, first_table_u->op2 + j*first_i_table_u->op2, double(u[first_table_u->index + j*first_i_table_u->index]));
 #endif
-              break;
-            case 7:
-              u[first_table_u->index + j*first_i_table_u->index] *= u[first_table_u->op1 + j * first_i_table_u->op1];
-#ifdef PRINT_OUT
-              mexPrintf("u[%d]*=u[%d]=%f\n", first_table_u->index + j*first_i_table_u->index, first_table_u->op1 + j*first_i_table_u->op1, u[first_table_u->index + j*first_i_table_u->index]);
+                break;
+              case 7:
+                u[first_table_u->index + j*first_i_table_u->index] *= u[first_table_u->op1 + j * first_i_table_u->op1];
+#ifdef PRINT_OUT_b
+                mexPrintf("u[%d]*=u[%d]=%f\n", first_table_u->index + j*first_i_table_u->index, first_table_u->op1 + j*first_i_table_u->op1, double(u[first_table_u->index + j*first_i_table_u->index]));
 #endif
-              break;
+                break;
             }
-          if(isnan(u[first_table_u->index+ j*first_i_table_u->index]) || isinf(u[first_table_u->index+ j*first_i_table_u->index]))
-           {
-             mexPrintf("Error during the computation of u[%d] at time %d (in first_table_u) (operation type %d)",first_table_u->index,j,int(first_table_u->type));
-             filename+=" stopped";
-             mexErrMsgTxt(filename.c_str());
-           }
+          if (isnan(u[first_table_u->index+ j*first_i_table_u->index]) || isinf(u[first_table_u->index+ j*first_i_table_u->index]))
+            {
+              mexPrintf("Error during the computation of u[%d] at time %d (in first_table_u) (operation type %d)",first_table_u->index,j,int(first_table_u->type));
+              filename+=" stopped";
+              mexErrMsgTxt(filename.c_str());
+            }
+          else if (fabs(u[first_table_u->index+ j*first_i_table_u->index])>very_big)
+            {
+              mexPrintf("(first) big u[%d]=%f>%f in type=%d",first_table_u->index+ j*first_i_table_u->index, double(u[first_table_u->index+ j*first_i_table_u->index]),very_big,first_table_u->type);
+              filename+=" stopped";
+              mexErrMsgTxt(filename.c_str());
+            }
           first_table_u = first_table_u->pNext;
           first_i_table_u = first_i_table_u->pNext;
           nop++;
         }
     }
-#ifdef PRINT_OUT_p
+#ifdef PRINT_OUT_b
+  mexPrintf("//////////////////////////////////////////////////////////////\n");
   mexPrintf("prologue\n");
 #endif
   //int nb_prologue_push=0;
   prologue_table_u = F_prologue_table_u->pNext;
-  for(i = 0;i < nb_prologue_table_u;i++)
+  for (i = 0;i < nb_prologue_table_u ;i++)
     {
       switch (prologue_table_u->type)
         {
-        case 1:
-          u[prologue_table_u->index ] = u[prologue_table_u->op1 ] * u[prologue_table_u->op2 ];
-#ifdef PRINT_OUT_p
-          mexPrintf("u[%d]=u[%d]*u[%d]=%f\n", prologue_table_u->index , prologue_table_u->op1 , prologue_table_u->op2 , u[prologue_table_u->index ]);
+          case 1:
+            u[prologue_table_u->index ] = u[prologue_table_u->op1 ] * u[prologue_table_u->op2 ];
+#ifdef PRINT_OUT_b
+            mexPrintf("u[%d]=u[%d]*u[%d]=%f\n", prologue_table_u->index , prologue_table_u->op1 , prologue_table_u->op2 , double(u[prologue_table_u->index ]));
 #endif
-          break;
-        case 2:
-          u[prologue_table_u->index ] += u[prologue_table_u->op1 ] * u[prologue_table_u->op2 ];
-#ifdef PRINT_OUT_p
-          mexPrintf("u[%d]+=u[%d]*u[%d]=%f\n" , prologue_table_u->index , prologue_table_u->op1 , prologue_table_u->op2 , u[prologue_table_u->index ]);
+            break;
+          case 2:
+            u[prologue_table_u->index ] += u[prologue_table_u->op1 ] * u[prologue_table_u->op2 ];
+#ifdef PRINT_OUT_b
+            mexPrintf("u[%d]+=u[%d]*u[%d]=%f\n" , prologue_table_u->index , prologue_table_u->op1 , prologue_table_u->op2 , double(u[prologue_table_u->index ]));
 #endif
-          break;
-        case 3:
-          u[prologue_table_u->index ] = 1 / ( -u[prologue_table_u->op1 ]);
-#ifdef PRINT_OUT_p
-          mexPrintf("u[%d]=1/(-u[%d])=%f\n", prologue_table_u->index, prologue_table_u->op1, u[prologue_table_u->index]);
+            break;
+          case 3:
+            u[prologue_table_u->index ] = 1 / ( -u[prologue_table_u->op1 ]);
+#ifdef PRINT_OUT_b
+            mexPrintf("u[%d]=1/(-u[%d])=%f\n", prologue_table_u->index, prologue_table_u->op1, double(u[prologue_table_u->index]));
 #endif
-          break;
-        case 5:
-          //nb_prologue_push++;
-          Stack.push(u[prologue_table_u->index]);
-#ifdef PRINT_OUT_p
-          mexPrintf("push(u[%d])\n", prologue_table_u->index );
+            break;
+          case 5:
+            //nb_prologue_push++;
+            Stack.push(u[prologue_table_u->index]);
+#ifdef PRINT_OUT_b
+            mexPrintf("push(u[%d])\n", prologue_table_u->index );
 #endif
-          break;
-        case 6:
-          u[prologue_table_u->index ] = 1 / (1 - u[prologue_table_u->op1] * u[prologue_table_u->op2]);
-#ifdef PRINT_OUT_p
-          mexPrintf("u[%d]=1/(1-u[%d]*u[%d])=%f\n", prologue_table_u->index, prologue_table_u->op1, prologue_table_u->op2, u[prologue_table_u->index]);
+            break;
+          case 6:
+            u[prologue_table_u->index ] = 1 / (1 - u[prologue_table_u->op1] * u[prologue_table_u->op2]);
+#ifdef PRINT_OUT_b
+            mexPrintf("u[%d]=1/(1-u[%d]*u[%d])=%f\n", prologue_table_u->index, prologue_table_u->op1, prologue_table_u->op2, double(u[prologue_table_u->index]));
 #endif
-          break;
-        case 7:
-          u[prologue_table_u->index] *= u[prologue_table_u->op1];
-#ifdef PRINT_OUT_p
-          mexPrintf("u[%d]*=u[%d]=%f\n", prologue_table_u->index, prologue_table_u->op1, u[prologue_table_u->index]);
+            break;
+          case 7:
+            u[prologue_table_u->index] *= u[prologue_table_u->op1];
+#ifdef PRINT_OUT_b
+            mexPrintf("u[%d]*=u[%d]=%f\n", prologue_table_u->index, prologue_table_u->op1, double(u[prologue_table_u->index]));
 #endif
-          break;
+            break;
         }
-      if(isnan(u[prologue_table_u->index]) || isinf(u[prologue_table_u->index]))
+      if (isnan(u[prologue_table_u->index]) || isinf(u[prologue_table_u->index]))
         {
-          mexPrintf("Error during the computation of u[%d] (in prologue_table_u)",prologue_table_u->index);
+          mexPrintf("Error during the computation of u[%d] type=%d (in prologue_table_u)",prologue_table_u->index, prologue_table_u->type);
+          filename+=" stopped";
+          mexErrMsgTxt(filename.c_str());
+        }
+      else if (fabs(u[prologue_table_u->index])>very_big)
+        {
+          mexPrintf("(prologue) big u[%d]=%f>%f type=%d",prologue_table_u->index, double(u[prologue_table_u->index]), very_big, prologue_table_u->type);
           filename+=" stopped";
           mexErrMsgTxt(filename.c_str());
         }
       prologue_table_u = prologue_table_u->pNext;
       nop++;
     }
-#ifdef PRINT_OUT
+#ifdef PRINT_OUT_b
   mexPrintf("middle_u (s_middle_count_loop=%d\n", s_middle_count_loop);
 #endif
   //int nb_middle_push=0;
-  for(j = 0;j < s_middle_count_loop - y_kmin;j++)
+  for (j = 0;j < s_middle_count_loop /*- y_kmin*/;j++)
     {
       //cout << "j=" << j << "\n";
-#ifdef PRINT_OUT
+#ifdef PRINT_OUT_b
       mexPrintf("-----------------------------------------------------------------\n");
 #endif
       middle_table_u = F_middle_table_u->pNext;
       middle_i_table_u = F_middle_i_table_u->pNext;
-      for(i = 0;i < nb_middle_table_u;i++)
+      for (i = 0;i < nb_middle_table_u;i++)
         {
           switch (middle_table_u->type)
             {
-            case 1:
-              u[middle_table_u->index + j*middle_i_table_u->index] = u[middle_table_u->op1 + j * middle_i_table_u->op1] * u[middle_table_u->op2 + j * middle_i_table_u->op2];
-#ifdef PRINT_OUT
-              mexPrintf("u[%d+%d*%d=%d]=u[%d]*u[%d]=%f\n", middle_table_u->index, j, middle_i_table_u->index, middle_table_u->index + j*middle_i_table_u->index, middle_table_u->op1 + j*middle_i_table_u->op1, middle_table_u->op2 + j*middle_i_table_u->op2, u[middle_table_u->index + j*middle_i_table_u->index]);
+              case 1:
+                u[middle_table_u->index + j*middle_i_table_u->index] = u[middle_table_u->op1 + j * middle_i_table_u->op1] * u[middle_table_u->op2 + j * middle_i_table_u->op2];
+#ifdef PRINT_OUT_b
+                mexPrintf("u[%d+%d*%d=%d]=u[%d]*u[%d]=%f\n", middle_table_u->index, j, middle_i_table_u->index, middle_table_u->index + j*middle_i_table_u->index, middle_table_u->op1 + j*middle_i_table_u->op1, middle_table_u->op2 + j*middle_i_table_u->op2, double(u[middle_table_u->index + j*middle_i_table_u->index]));
 #endif
-              break;
-            case 2:
-              u[middle_table_u->index + j*middle_i_table_u->index] += u[middle_table_u->op1 + j * middle_i_table_u->op1] * u[middle_table_u->op2 + j * middle_i_table_u->op2];
-#ifdef PRINT_OUT
-              mexPrintf("u[%d+%d*%d=%d]+=u[%d]*u[%d]=%f\n" , middle_table_u->index, j, middle_i_table_u->index , middle_table_u->index + j*middle_i_table_u->index , middle_table_u->op1 + j*middle_i_table_u->op1, middle_table_u->op2 + j*middle_i_table_u->op2, u[middle_table_u->index + j*middle_i_table_u->index]);
+                break;
+              case 2:
+                u[middle_table_u->index + j*middle_i_table_u->index] += u[middle_table_u->op1 + j * middle_i_table_u->op1] * u[middle_table_u->op2 + j * middle_i_table_u->op2];
+#ifdef PRINT_OUT_b
+                mexPrintf("u[%d+%d*%d=%d]+=u[%d]*u[%d]=%f\n" , middle_table_u->index, j, middle_i_table_u->index , middle_table_u->index + j*middle_i_table_u->index , middle_table_u->op1 + j*middle_i_table_u->op1, middle_table_u->op2 + j*middle_i_table_u->op2, double(u[middle_table_u->index + j*middle_i_table_u->index]));
 #endif
-              break;
-            case 3:
-              u[middle_table_u->index + middle_i_table_u->index] = 1 / ( -u[middle_table_u->op1 + j * middle_i_table_u->op1]);
-#ifdef PRINT_OUT
-              mexPrintf("u[%d+%d*%d=%d]=1/(-u[%d])=%f\n", middle_table_u->index, j, middle_i_table_u->index, middle_table_u->index + j*middle_i_table_u->index, middle_table_u->op1 + j*middle_i_table_u->op1, u[middle_table_u->index + j*middle_i_table_u->index]);
+                break;
+              case 3:
+                u[middle_table_u->index + middle_i_table_u->index] = 1 / ( -u[middle_table_u->op1 + j * middle_i_table_u->op1]);
+#ifdef PRINT_OUT_b
+                mexPrintf("u[%d+%d*%d=%d]=1/(-u[%d])=%f\n", middle_table_u->index, j, middle_i_table_u->index, middle_table_u->index + j*middle_i_table_u->index, middle_table_u->op1 + j*middle_i_table_u->op1, double(u[middle_table_u->index + j*middle_i_table_u->index]));
 #endif
-              break;
-            case 5:
-#ifdef PRINT_OUT
-              mexPrintf("push(u[%d+%d*%d=%d])\n", middle_table_u->index, j, middle_i_table_u->index, middle_table_u->index + j*middle_i_table_u->index);
+                break;
+              case 5:
+#ifdef PRINT_OUT_b
+                mexPrintf("push(u[%d+%d*%d=%d])\n", middle_table_u->index, j, middle_i_table_u->index, middle_table_u->index + j*middle_i_table_u->index);
 #endif
-              //nb_middle_push++;
-              Stack.push(u[middle_table_u->index + j*middle_i_table_u->index]);
-              break;
-            case 6:
-              u[middle_table_u->index + j*middle_i_table_u->index] = 1 / (1 - u[middle_table_u->op1 + j * middle_i_table_u->op1] * u[middle_table_u->op2 + j * middle_i_table_u->op2]);
-#ifdef PRINT_OUT
-              mexPrintf("u[%d+%d*%d=%d]=1/(1-u[%d]*u[%d])=%f\n", middle_table_u->index, j, middle_i_table_u->index, middle_table_u->index + j*middle_i_table_u->index, middle_table_u->op1 + j*middle_i_table_u->op1, middle_table_u->op2 + j*middle_i_table_u->op2, u[middle_table_u->index + j*middle_i_table_u->index]);
+                //nb_middle_push++;
+                Stack.push(u[middle_table_u->index + j*middle_i_table_u->index]);
+                break;
+              case 6:
+                u[middle_table_u->index + j*middle_i_table_u->index] = 1 / (1 - u[middle_table_u->op1 + j * middle_i_table_u->op1] * u[middle_table_u->op2 + j * middle_i_table_u->op2]);
+#ifdef PRINT_OUT_b
+                mexPrintf("u[%d+%d*%d=%d]=1/(1-u[%d]*u[%d])=%f\n", middle_table_u->index, j, middle_i_table_u->index, middle_table_u->index + j*middle_i_table_u->index, middle_table_u->op1 + j*middle_i_table_u->op1, middle_table_u->op2 + j*middle_i_table_u->op2, double(u[middle_table_u->index + j*middle_i_table_u->index]));
 #endif
-              break;
-            case 7:
-              u[middle_table_u->index + j*middle_i_table_u->index] *= u[middle_table_u->op1 + j * middle_i_table_u->op1];
-#ifdef PRINT_OUT
-              mexPrintf("u[%d+%d*%d=%d]*=u[%d]=%f\n", middle_table_u->index, j, middle_i_table_u->index, middle_table_u->index + j*middle_i_table_u->index, middle_table_u->op1 + j*middle_i_table_u->op1, u[middle_table_u->index + j*middle_i_table_u->index]);
+                break;
+              case 7:
+                u[middle_table_u->index + j*middle_i_table_u->index] *= u[middle_table_u->op1 + j * middle_i_table_u->op1];
+#ifdef PRINT_OUT_b
+                mexPrintf("u[%d+%d*%d=%d]*=u[%d]=%f\n", middle_table_u->index, j, middle_i_table_u->index, middle_table_u->index + j*middle_i_table_u->index, middle_table_u->op1 + j*middle_i_table_u->op1, double(u[middle_table_u->index + j*middle_i_table_u->index]));
 #endif
-              break;
+                break;
             }
-          if(isnan(u[middle_table_u->index+ j*middle_i_table_u->index]) || isinf(u[middle_table_u->index+ j*middle_i_table_u->index]))
-           {
-             mexPrintf("Error during the computation of u[%d] at time %d (in middle_table_u)",middle_table_u->index,j);
-             filename+=" stopped";
-             mexErrMsgTxt(filename.c_str());
-           }
+          if (isnan(u[middle_table_u->index+ j*middle_i_table_u->index]) || isinf(u[middle_table_u->index+ j*middle_i_table_u->index]))
+            {
+              mexPrintf("Error during the computation of u[%d] at time %d type=%d (in middle_table_u)",middle_table_u->index,j,middle_table_u->type);
+              filename+=" stopped";
+              mexErrMsgTxt(filename.c_str());
+            }
+          else if (fabs(u[middle_table_u->index+ j*middle_i_table_u->index])>very_big)
+            {
+              mexPrintf("(middle) big u[%d]=%f>%f type=%d",middle_table_u->index+ j*middle_i_table_u->index, double(u[middle_table_u->index+ j*middle_i_table_u->index]), very_big,middle_table_u->type);
+              filename+=" stopped";
+              mexErrMsgTxt(filename.c_str());
+            }
           middle_table_u = middle_table_u->pNext;
           middle_i_table_u = middle_i_table_u->pNext;
           nop++;
@@ -596,255 +769,3115 @@ simulate(int blck, int y_size, int it_, int y_kmin, int y_kmax)
   mexPrintf("last_u\n");
 #endif
   last_table_u = F_last_table_u->pNext;
-  for(i = 0;i < nb_last_table_u ;i++)
+  for (i = 0;i < nb_last_table_u ;i++)
     {
       switch (last_table_u->type)
         {
-        case 1:
-          u[last_table_u->index] = u[last_table_u->op1] * u[last_table_u->op2];
-#ifdef PRINT_OUT
-          mexPrintf("u[%d]=u[%d]*u[%d]=%f\n", last_table_u->index, last_table_u->op1, last_table_u->op2, u[last_table_u->index]);
+          case 1:
+            u[last_table_u->index] = u[last_table_u->op1] * u[last_table_u->op2];
+#ifdef PRINT_OUT_b
+            mexPrintf("u[%d]=u[%d]*u[%d]=%f\n", last_table_u->index, last_table_u->op1, last_table_u->op2, double(u[last_table_u->index]));
 #endif
-          break;
-        case 2:
-          u[last_table_u->index] += u[last_table_u->op1] * u[last_table_u->op2];
-#ifdef PRINT_OUT
-          mexPrintf("u[%d]+=u[%d]*u[%d]=%f\n", last_table_u->index, last_table_u->op1, last_table_u->op2, u[last_table_u->index]);
+            break;
+          case 2:
+            u[last_table_u->index] += u[last_table_u->op1] * u[last_table_u->op2];
+#ifdef PRINT_OUT_b
+            mexPrintf("u[%d]+=u[%d]*u[%d]=%f\n", last_table_u->index, last_table_u->op1, last_table_u->op2, double(u[last_table_u->index]));
 #endif
-          break;
-        case 3:
-          u[last_table_u->index] = 1 / ( -u[last_table_u->op1]);
-#ifdef PRINT_OUT
-          mexPrintf("u[%d]=1/(-u[%d])=%f\n", last_table_u->index, last_table_u->op1, u[last_table_u->index]);
+            break;
+          case 3:
+            u[last_table_u->index] = 1 / ( -u[last_table_u->op1]);
+#ifdef PRINT_OUT_b
+            mexPrintf("u[%d]=1/(-u[%d])=%f\n", last_table_u->index, last_table_u->op1, double(u[last_table_u->index]));
 #endif
-          break;
-        case 5:
-          Stack.push(u[last_table_u->index]);
-#ifdef PRINT_OUT
-          mexPrintf("push(u[%d])\n", last_table_u->index);
+            break;
+          case 5:
+            Stack.push(u[last_table_u->index]);
+#ifdef PRINT_OUT_b
+            mexPrintf("push(u[%d])\n", last_table_u->index);
 #endif
-          break;
-        case 6:
-          u[last_table_u->index] = 1 / (1 - u[last_table_u->op1] * u[last_table_u->op2]);
-#ifdef PRINT_OUT
-          mexPrintf("u[%d]=1/(1-u[%d]*u[%d])=%f\n", last_table_u->index, last_table_u->op1, last_table_u->op2, u[last_table_u->index]);
+            break;
+          case 6:
+            u[last_table_u->index] = 1 / (1 - u[last_table_u->op1] * u[last_table_u->op2]);
+#ifdef PRINT_OUT_b
+            mexPrintf("u[%d]=1/(1-u[%d]*u[%d])=%f\n", last_table_u->index, last_table_u->op1, last_table_u->op2, double(u[last_table_u->index]));
 #endif
-          break;
-        case 7:
-          u[last_table_u->index] *= u[last_table_u->op1];
-#ifdef PRINT_OUT
-          mexPrintf("u[%d]*=u[%d]=%f\n", last_table_u->index, last_table_u->op1, u[last_table_u->index]);
+            break;
+          case 7:
+            u[last_table_u->index] *= u[last_table_u->op1];
+#ifdef PRINT_OUT_b
+            mexPrintf("u[%d]*=u[%d]=%f\n", last_table_u->index, last_table_u->op1, double(u[last_table_u->index]));
 #endif
-          break;
+            break;
         }
-      if(isnan(u[last_table_u->index]) || isinf(u[last_table_u->index]))
+      if (isnan(u[last_table_u->index]) || isinf(u[last_table_u->index]))
         {
-          mexPrintf("Error during the computation of u[%d] (in last_table_u)",last_table_u->index);
+          mexPrintf("Error during the computation of u[%d] type=%d (in last_table_u)",last_table_u->index,last_table_u->type);
+          filename+=" stopped";
+          mexErrMsgTxt(filename.c_str());
+        }
+      else if (fabs(u[last_table_u->index])>very_big)
+        {
+          mexPrintf("(last) big u[%d]=%f>%f type=%d",last_table_u->index, double(u[last_table_u->index]),very_big,last_table_u->type);
           filename+=" stopped";
           mexErrMsgTxt(filename.c_str());
         }
       last_table_u = last_table_u->pNext;
       nop++;
     }
-  for(i = nb_last_table_y - 1;i >= 0;i--)
+  res1 = res2 =max_res = 0;
+  for (i = nb_last_table_y - 1;i >= 0;i--)
     {
       k = last_table_y[i].index;
       yy = 0;
       /*y[period + k] = 0;*/
-//#ifdef PRINT_OUT
-      mexPrintf("it_=%d\n", it_);
-      mexPrintf("->y[it_*y_size+%d]=y[%d]=", k, it_*y_size + k);
-//#endif
-      for(j = last_table_y[i].nb - 1;j >= 0;j--)
+#ifdef PRINT_OUT_y
+      //mexPrintf("it_=%d\n", it_);
+      mexPrintf("->y[it_*y_size+%d]=y[%d]=", k, period + k);
+#endif
+      for (j = last_table_y[i].nb - 1;j >= 0;j--)
         {
           uu = Stack.top();
           Stack.pop();
           m = last_table_y[i].y_index[j];
-#ifdef PRINT_OUT
-          if(j > 0)
+#ifdef PRINT_OUT_y
+          if (j > 0)
             {
-              if(m >= 0)
-                mexPrintf("u[%d](%f)*y[%d]+", last_table_y[i].u_index[j], uu, last_table_y[i].y_index[j]);
+              if (m >= 0)
+                mexPrintf("u[%d](%f)*y[%d](%f)+", last_table_y[i].u_index[j], double(uu), m + period, double(y[period + m]));
               else
-                mexPrintf("u[%d](%f)+", last_table_y[i].u_index[j], uu);
+                mexPrintf("u[%d](%f)+", last_table_y[i].u_index[j], double(uu));
             }
           else
             {
-              if(m >= 0)
-                mexPrintf("u[%d](%f)*y[%d]", last_table_y[i].u_index[j], uu, last_table_y[i].y_index[j]);
+              if (m >= 0)
+                mexPrintf("u[%d](%f)*y[%d](%f)", last_table_y[i].u_index[j], double(uu), m + period, double(y[period + m]));
               else
-                mexPrintf("u[%d](%f)", last_table_y[i].u_index[j], uu);
+                mexPrintf("u[%d](%f)", last_table_y[i].u_index[j], double(uu));
             }
 #endif
-          if(m >= 0)
+          if (m >= 0)
             yy/*y[period + k]*/ += uu * y[period + m];
           else
             yy/*y[period + k]*/ += uu;
         }
-       if(isnan(yy) || isinf(yy))
-         {
-           mexPrintf("Error during the computation of y[%d] at time %d (in last_table_u)",k,period);
-           filename+=" stopped";
-           mexErrMsgTxt(filename.c_str());
-         }
-       /*if(((k-73) % y_size)==0)
-         mexPrintf("y[it_*y_size +73]=%f \n",yy);*/
-       y[period + k] += slowc*(yy - y[period + k]);
-//#ifdef PRINT_OUT
-      mexPrintf("=%f\n", y[period + k]);
-//#endif
+      if (isnan(yy) || isinf(yy))
+        {
+          mexPrintf("Error during the computation of y[%d] at time %d (in last_table_u)",k,period);
+          filename+=" stopped";
+          mexErrMsgTxt(filename.c_str());
+        }
+      /*if(((k-73) % y_size)==0)
+        mexPrintf("y[it_*y_size +73]=%f \n",yy);*/
+      err = fabs(yy - y[period + k]);
+      res1 += err;
+      if (max_res<err)
+        max_res=err;
+      res2 += err*err;
+      y[period + k] += slowc*(yy - y[period + k]);
+#ifdef PRINT_OUT_y
+      mexPrintf("=%f\n", double(y[period + k]));
+#endif
       nop++;
     }
-  int nb_middle_pop=0;
-  for(j = s_middle_count_loop - y_kmin - 1+y_decal;j >= y_decal;j--)
+#ifdef PRINT_OUT_y
+  int deca=y_kmin - (nb_prologue_table_y  / Size);
+#endif
+  for (j = s_middle_count_loop+y_decal ;j >y_decal;j--)
     {
-      for(i = nb_middle_table_y - 1;i >= 0;i--)
+#ifdef PRINT_OUT_y
+      mexPrintf("(per)j=%d y_decal=%d deca=%d in y compute\n",j,y_decal,deca);
+#endif
+      for (i = nb_middle_table_y - 1;i >= 0;i--)
         {
-          k = middle_table_y[i].index + j * middle_i_table_y[i].index;
+          k = middle_table_y[i].index + (j-1) * middle_i_table_y[i].index;
           yy = 0;
-//#ifdef PRINT_OUT
+#ifdef PRINT_OUT_y
           mexPrintf("(0)y[%d]=", k );
-//#endif
-          for(l = middle_table_y[i].nb - 1;l >= 0;l--)
+#endif
+          for (l = middle_table_y[i].nb - 1;l >= 0;l--)
             {
               uu = Stack.top();
-              //mexPrintf("{");
               Stack.pop();
-              //mexPrintf("}");
-              //nb_middle_pop++;
-              m = middle_table_y[i].y_index[l] + j * middle_i_table_y[i].y_index[l];
-//#ifdef PRINT_OUT
-              if(m >= 0)
+              m = middle_table_y[i].y_index[l] + (j/*-deca*/-1) * middle_i_table_y[i].y_index[l];
+#ifdef PRINT_OUT_y
+              if (/*m*/middle_table_y[i].y_index[l] >= 0)
                 {
-                  m1 = middle_table_y[i].u_index[l] + j * middle_i_table_y[i].u_index[l];
-                  if(l > 0)
-                    mexPrintf("u[%d](%f)*y[%d](%f)+", m1, uu, m, y[m]);
+                  m1 = middle_table_y[i].u_index[l] + (j-deca-1) * middle_i_table_y[i].u_index[l];
+                  if (l > 0)
+                    mexPrintf("u[%d](%f)*y[%d](%f)+", m1, double(uu), m, double(y[m]));
                   else
-                    mexPrintf("u[%d](%f)*y[%d](%f)", m1, uu, m, y[m]);
+                    mexPrintf("u[%d](%f)*y[%d](%f)", m1, double(uu), m, double(y[m]));
                 }
               else
                 {
-                  m1 = middle_table_y[i].u_index[l] + j * middle_i_table_y[i].u_index[l];
-                  if(l > 0)
-                    mexPrintf("u[%d](%f)*y[%d](%f)+", m1, uu, m, 1.0);
+                  m1 = middle_table_y[i].u_index[l] + (j-deca-1) * middle_i_table_y[i].u_index[l];
+                  if (l > 0)
+                    mexPrintf("u[%d](%f)*y[%d](%f)+", m1, double(uu), m, 1.0);
                   else
-                    mexPrintf("u[%d](%f)*y[%d](%f)", m1, uu, m, 1.0);
+                    mexPrintf("u[%d](%f)*y[%d](%f)", m1, double(uu), m, 1.0);
                 }
-//#endif
-              if(m >= 0)
+#endif
+              if (/*m*/middle_table_y[i].y_index[l] >= 0)
                 yy += uu * y[m];
               else
                 yy += uu;
             }
-           //mexPrintf("y[%d]=%f\n",k,yy);
-           if(isnan(yy) || isinf(yy))
-             {
-               mexPrintf("Error during the computation of y[%d] at time %d (in middle_table_u)",middle_table_y[i].index % y_size,j+middle_table_y[i].index / y_size);
-               filename+=" stopped";
-               mexErrMsgTxt(filename.c_str());
-             }
-           /*if(((k-73) % y_size)==0)
-             mexPrintf("y[it_*y_size +73]=%f \n",yy);*/
-           y[k] += slowc*(yy - y[k]);
-//#ifdef PRINT_OUT
-          mexPrintf("=%f\n", y[k]);
-//#endif
+          //mexPrintf("y[%d]=%f\n",k,yy);
+          if (isnan(yy) || isinf(yy))
+            {
+              mexPrintf("Error during the computation of y[%d] at time %d (in middle_table_u)",middle_table_y[i].index % y_size,j+middle_table_y[i].index / y_size);
+              filename+=" stopped";
+              mexErrMsgTxt(filename.c_str());
+            }
+          /*if(((k-73) % y_size)==0)
+            mexPrintf("y[it_*y_size +73]=%f \n",yy);*/
+          err = fabs(yy - y[k]);
+          res1 += err;
+          if (max_res<err)
+            max_res=err;
+          res2 += err*err;
+          y[k] += slowc*(yy - y[k]);
+#ifdef PRINT_OUT_y
+          mexPrintf("=%f\n", double(y[k]));
+#endif
           nop++;
         }
     }
-  //mexPrintf("nb_middle_push=%d et nb_middle_pop=%d\n",nb_middle_push,nb_middle_pop);
-  //int nb_prologue_pop=0;
-  for(i = nb_prologue_table_y - 1;i >= 0;i--)
+  for (i = nb_prologue_table_y - 1;i >= 0;i--)
     {
       k = prologue_table_y[i].index;
       yy = 0;
-//#ifdef PRINT_OUT_p
+#ifdef PRINT_OUT_y
       mexPrintf("(1)y[%d]=", k+y_decal*y_size);
-//#endif
-      for(j = prologue_table_y[i].nb - 1;j >= 0;j--)
+#endif
+      for (j = prologue_table_y[i].nb - 1;j >= 0;j--)
         {
           //nb_prologue_pop++;
           uu = Stack.top();
           Stack.pop();
-//#ifdef PRINT_OUT_p
-          if(prologue_table_y[i].y_index[j] >= 0)
+#ifdef PRINT_OUT_y
+          if (prologue_table_y[i].y_index[j] >= 0)
             {
-              if(j > 0)
-                mexPrintf("u[%d](%f)*y[%d](%f)+", prologue_table_y[i].u_index[j], uu, prologue_table_y[i].y_index[j], y[prologue_table_y[i].y_index[j]]);
+              if (j > 0)
+                mexPrintf("u[%d](%f)*y[%d](%f)+", prologue_table_y[i].u_index[j], double(uu), prologue_table_y[i].y_index[j], double(y[prologue_table_y[i].y_index[j]]));
               else
-                mexPrintf("u[%d](%f)*y[%d](%f)", prologue_table_y[i].u_index[j], uu, prologue_table_y[i].y_index[j], y[prologue_table_y[i].y_index[j]]);
+                mexPrintf("u[%d](%f)*y[%d](%f)", prologue_table_y[i].u_index[j], double(uu), prologue_table_y[i].y_index[j], double(y[prologue_table_y[i].y_index[j]]));
             }
           else
             {
-              if(j > 0)
-                mexPrintf("u[%d](%f)*y[%d](%f)+", prologue_table_y[i].u_index[j], uu, prologue_table_y[i].y_index[j], 1.0);
+              if (j > 0)
+                mexPrintf("u[%d](%f)*y[%d](%f)+", prologue_table_y[i].u_index[j], double(uu), prologue_table_y[i].y_index[j], 1.0);
               else
-                mexPrintf("u[%d](%f)*y[%d](%f)", prologue_table_y[i].u_index[j], uu, prologue_table_y[i].y_index[j], 1.0);
+                mexPrintf("u[%d](%f)*y[%d](%f)", prologue_table_y[i].u_index[j], double(uu), prologue_table_y[i].y_index[j], 1.0);
             }
-//#endif
-          if(prologue_table_y[i].y_index[j] >= 0)
+          /*if(uu!=u[prologue_table_y[i].u_index[j]])
+            {
+              mexPrintf("uu=%f != u[%d]=%f\n",uu,prologue_table_y[i].u_index[j],u[prologue_table_y[i].u_index[j]]);
+              filename+=" stopped";
+              mexErrMsgTxt(filename.c_str());
+            }*/
+#endif
+          if (prologue_table_y[i].y_index[j] >= 0)
             yy += uu * y[prologue_table_y[i].y_index[j]+y_decal*y_size];
           else
             yy += uu;
         }
-       if(isnan(yy) || isinf(yy))
-         {
-           mexPrintf("Error during the computation of y[%d] at time %d (in prologue_table_u)",k % y_size, k / y_size);
-           filename+=" stopped";
-           mexErrMsgTxt(filename.c_str());
-         }
-       /*if(((k-73) % y_size)==0)
-         mexPrintf("y[it_*y_size +73]=%f \n",yy);*/
-       y[k+y_decal*y_size] += slowc*(yy - y[k+y_decal*y_size]);
-//#ifdef PRINT_OUT_p
-      mexPrintf("=%f\n", y[k+y_decal*y_size]);
-//#endif
+      if (isnan(yy) || isinf(yy))
+        {
+          mexPrintf("Error during the computation of y[%d] at time %d (in prologue_table_u)",k % y_size, k / y_size);
+          filename+=" stopped";
+          mexErrMsgTxt(filename.c_str());
+        }
+      /*if(((k-73) % y_size)==0)
+        mexPrintf("y[it_*y_size +73]=%f \n",yy);*/
+      //mexPrintf("%f",yy);
+      err = fabs(yy - y[k+y_decal*y_size]);
+      res1 += err;
+      if (max_res<err)
+        max_res=err;
+      res2 += err*err;
+      y[k+y_decal*y_size] += slowc*(yy - y[k+y_decal*y_size]);
+#ifdef PRINT_OUT_y
+      mexPrintf("=%f\n", double(y[k+y_decal*y_size]));
+#endif
       nop++;
     }
   //mexPrintf("nb_prologue_push=%d et nb_prologue_pop=%d\n",nb_prologue_push,nb_prologue_pop);
-  for(i = nb_first_table_y - 1;i >= 0;i--)
+  for (i = nb_first_table_y - 1;i >= 0;i--)
     {
       k = first_table_y[i].index;
       yy = 0;
-//#ifdef PRINT_OUT_p
+#ifdef PRINT_OUT_y
       mexPrintf("(2)y[%d]=", k);
-//#endif
-      for(j = first_table_y[i].nb - 1;j >= 0;j--)
+#endif
+      for (j = first_table_y[i].nb - 1;j >= 0;j--)
         {
           uu = Stack.top();
           Stack.pop();
-#ifdef PRINT_OUT_p
-          if(j > 0)
-            mexPrintf("u[%d](%f)*y[%d](%f)+", first_table_y[i].u_index[j], uu, first_table_y[i].y_index[j], y[first_table_y[i].y_index[j]]);
+#ifdef PRINT_OUT_y
+          if (j > 0)
+            mexPrintf("u[%d](%f)*y[%d](%f)+", first_table_y[i].u_index[j], double(uu), first_table_y[i].y_index[j], double(y[first_table_y[i].y_index[j]]));
           else
-            mexPrintf("u[%d](%f)*y[%d](%f)", first_table_y[i].u_index[j], uu, first_table_y[i].y_index[j], y[first_table_y[i].y_index[j]]);
+            mexPrintf("u[%d](%f)*y[%d](%f)", first_table_y[i].u_index[j], double(uu), first_table_y[i].y_index[j], double(y[first_table_y[i].y_index[j]]));
 #endif
-          if(m >= 0)
+          if (m >= 0)
             yy += uu * y[first_table_y[i].y_index[j]];
           else
             yy += uu;
         }
-      if(isnan(yy) || isinf(yy))
-         {
-           mexPrintf("Error during the computation of y[%d] (in first_table_u)",k);
-           filename+=" stopped";
-           mexErrMsgTxt(filename.c_str());
-         }
+      if (isnan(yy) || isinf(yy))
+        {
+          mexPrintf("Error during the computation of y[%d] (in first_table_u)",k);
+          filename+=" stopped";
+          mexErrMsgTxt(filename.c_str());
+        }
       /*if(((k-73) % y_size)==0)
          mexPrintf("y[it_*y_size +73]=%f \n",yy);*/
+      err = fabs(yy - y[k]);
+      res1 += err;
+      if (max_res<err)
+        max_res=err;
+      res2 += err*err;
       y[k] += slowc*(yy - y[k]);
-//#ifdef PRINT_OUT_p
-      mexPrintf("=%f\n", y[k]);
-//#endif
+#ifdef PRINT_OUT_y
+      mexPrintf("=%f\n", double(y[k]));
+#endif
       nop++;
     }
   pctimer_t t2 = pctimer();
-  if(nb_first_table_u > 0)
+  if (!Stack.empty())
     {
+      mexPrintf("Error Stack not empty (%d)",Stack.empty());
+      filename+=" stopped";
+      mexErrMsgTxt(filename.c_str());
+    }
+  if (/*nb_first_table_u > 0*/print_it)
+    {
+      mexPrintf("res1    = %.10e\n", double(res1));
+      mexPrintf("res2    = %.10e\n", double(res2));
+      mexPrintf("max_res = %.10e\n", double(max_res));
       mexPrintf("(**%f milliseconds u_count : %d  nop : %d **)\n", 1000*(t2 - t1), u_count, nop);
       mexEvalString("drawnow;");
     }
   /*if((nb_last_table_u>0)&&(it_>y_kmin))
     mexErrMsgTxt("Exit from Dynare");*/
 }
+
+#endif
+
+
+
+
+
+class SparseMatrix
+  {
+  public:
+    SparseMatrix();
+    void Init(int periods, int y_kmin, int y_kmax, int Size, std::map<std::pair<std::pair<int, int> ,int>, int> IM);
+    void ShortInit(int periods, int y_kmin, int y_kmax, int Size, std::map<std::pair<std::pair<int, int> ,int>, int> IM);
+    void End(int Size);
+    void Insert(int r, int c, int u_index, int lag_index);
+    void Delete(int r,int c, int Size, int *b);
+    int At_Row(int r, NonZeroElem **first);
+    int At_Pos(int r, int c, NonZeroElem **first);
+    int At_Col(int c, NonZeroElem **first);
+    int At_Col(int c, int lag, NonZeroElem **first);
+    int NRow(int r);
+    int NCol(int c);
+    void Print(int Size,int *b);
+    int Get_u();
+    void Delete_u(int pos);
+    void Clear_u();
+    void Print_u();
+    void mxFree_NZE(void* pos);
+    NonZeroElem* mxMalloc_NZE();
+    int complete(int beg_t, int Size, int periods, int *b);
+    longd bksub( int tbreak, int last_period, int Size, long int *nmul, longd slowc_l);
+    void Print_heap();
+    void init_Mem();
+    void run_triangular(int nop_all,int *op_all);
+    void run_it(int nop_all,int *op_all);
+    void run_u_period1(int periods);
+
+
+    vector<int> u_liste;
+    //set<NonZeroElem*> mem_NZE;
+    //vector<void*> used_in_chunk;
+    vector<NonZeroElem*> Chunk_Stack;
+    //map<vector,pair<void*,size>> chunk_vector_list;
+    int CHUNK_SIZE, CHUNK_BLCK_SIZE, Nb_CHUNK;
+    int CHUNK_heap_pos/*, CHUNK_heap_max_size*/;
+    //int *NZE_pos, *NZE_rpos;
+    NonZeroElem** NZE_Mem_add;
+    //bool *NZE_Mem_available;
+    NonZeroElem* NZE_Mem;
+  };
+
+SparseMatrix::SparseMatrix()
+{
+  init_Mem();
+}
+
+
+void
+SparseMatrix::Print_heap()
+{
+  mexPrintf("i   :");
+  for (i=0;i<CHUNK_SIZE;i++)
+    mexPrintf("%3d ",i);
+  mexPrintf("\n");
+}
+
+void
+SparseMatrix::init_Mem()
+{
+  Chunk_Stack.clear();
+  CHUNK_SIZE=0;
+  Nb_CHUNK=0;
+  NZE_Mem=NULL;
+  NZE_Mem_add=NULL;
+  CHUNK_heap_pos=0;
+}
+
+NonZeroElem*
+SparseMatrix::mxMalloc_NZE()
+{
+  if (!Chunk_Stack.empty())
+    {
+      NonZeroElem* p1 = Chunk_Stack.back();
+      Chunk_Stack.pop_back();
+      return(p1);
+    }
+  else if (CHUNK_heap_pos<CHUNK_SIZE) /*there is enough allocated memory space available*/
+    {
+      int i=CHUNK_heap_pos++;
+      return(NZE_Mem_add[i]);
+    }
+  else                           /*We have to allocate extra memory space*/
+    {
+      CHUNK_SIZE+=CHUNK_BLCK_SIZE;
+      Nb_CHUNK++;
+#ifdef MEM_ALLOC_CHK
+      mexPrintf("CHUNK_BLCK_SIZE=%d\n",CHUNK_BLCK_SIZE);
+#endif
+      NZE_Mem=(NonZeroElem*)mxMalloc(CHUNK_BLCK_SIZE*sizeof(NonZeroElem));
+#ifdef MEM_ALLOC_CHK
+      mexPrintf("CHUNK_SIZE=%d\n",CHUNK_SIZE);
+#endif
+      NZE_Mem_add=(NonZeroElem**)mxRealloc(NZE_Mem_add, CHUNK_SIZE*sizeof(NonZeroElem*));
+#ifdef MEM_ALLOC_CHK
+      mexPrintf("ok\n");
+#endif
+      for (i=CHUNK_heap_pos;i<CHUNK_SIZE;i++)
+        {
+          NZE_Mem_add[i]=(NonZeroElem*)(NZE_Mem+(i-CHUNK_heap_pos));
+        }
+      i=CHUNK_heap_pos++;
+      return(NZE_Mem_add[i]);
+    }
+}
+
+
+void
+SparseMatrix::mxFree_NZE(void* pos)
+{
+  int i, gap;
+  for (i=0;i<Nb_CHUNK;i++)
+    {
+      gap=(int(pos)-int(NZE_Mem_add[i*CHUNK_BLCK_SIZE]))/sizeof(NonZeroElem);
+      if ((gap<CHUNK_BLCK_SIZE) && (gap>=0))
+        break;
+    }
+  Chunk_Stack.push_back((NonZeroElem*)pos);
+}
+
+
+
+
+int SparseMatrix::NRow(int r)
+{
+  return NbNZRow[r];
+}
+
+int SparseMatrix::NCol(int c)
+{
+  return NbNZCol[c];
+}
+
+
+int SparseMatrix::At_Row(int r, NonZeroElem **first)
+{
+  (*first)=FNZE_R[r];
+  return NbNZRow[r];
+}
+
+int
+SparseMatrix::At_Pos(int r, int c, NonZeroElem **first)
+{
+  (*first)=FNZE_R[r];
+  int i=0;
+  while ((*first)->c_index!=c && (*first)->NZE_R_N)
+    {
+#ifdef PRINT_OUT
+      mexPrintf("looking not CRS [%d, %d]\n",first->r_index,first->c_index);
+#endif
+      //firsta=(*first);
+      (*first)=(*first)->NZE_R_N;
+    }
+  if ((*first)->c_index!=c)
+    mexPrintf("-----------------------  cannot find M[%d, %d]\n",r,c);
+  return NbNZRow[r];
+}
+
+
+int SparseMatrix::At_Col(int c, NonZeroElem **first)
+{
+  (*first)=FNZE_C[c];
+  return NbNZCol[c];
+}
+
+int SparseMatrix::At_Col(int c, int lag, NonZeroElem **first)
+{
+  (*first)=FNZE_C[c];
+  int i=0;
+  while ((*first)->lag_index!=lag && (*first))
+    {
+#ifdef PRINT_OUT
+      mexPrintf("first->lag_index(%d) != %d\n",(*first)->lag_index,lag);
+#endif
+      (*first)=(*first)->NZE_C_N;
+    }
+  if ((*first))
+    {
+#ifdef PRINT_OUT
+      mexPrintf("first=%x\n",(*first));
+#endif
+      NonZeroElem* firsta=(*first);
+      if (!firsta->NZE_C_N)
+        i++;
+      else
+        {
+          while (firsta->lag_index==lag && firsta->NZE_C_N)
+            {
+#ifdef PRINT_OUT
+              mexPrintf("firsta->lag_index(%d) == %d, eq=%d, var=%d\n",firsta->lag_index,lag, firsta->r_index, firsta->c_index);
+#endif
+              firsta=firsta->NZE_C_N;
+              i++;
+            }
+          if (firsta->lag_index==lag) i++;
+        }
+    }
+#ifdef PRINT_OUT
+  mexPrintf("i=%d\n",i);
+#endif
+  return i;
+}
+
+
+longd tdelete1=0, tdelete2=0, tdelete21=0, tdelete22=0, tdelete221=0, tdelete222=0;
+
+void SparseMatrix::Delete(int r,int c, int Size, int *b)
+{
+  NonZeroElem *first=FNZE_R[r], *firsta=NULL;
+#ifdef PROFILER
+  pctimer_t td0, td1, td2;
+#endif
+  /*mexPrintf("r=%d & c=%d\n",r,c);
+  if((r==11 || r==14) && c==6)
+    Print(Size,b);*/
+#ifdef PROFILER
+  td0=pctimer();
+#endif
+  while (first->c_index!=c && first->NZE_R_N)
+    {
+#ifdef PRINT_OUT
+      mexPrintf("looking not CRS [%d, %d]\n",first->r_index,first->c_index);
+#endif
+      firsta=first;
+      first=first->NZE_R_N;
+    }
+#ifdef PRINT_OUT
+  mexPrintf("CRS [%d, %d]=c(%d)\n",first->r_index,first->c_index,c);
+#endif
+  if (first->c_index==c)
+    {
+      if (firsta!=NULL)
+        firsta->NZE_R_N=first->NZE_R_N;
+      if (first==FNZE_R[r])
+        FNZE_R[r]=first->NZE_R_N;
+      NbNZRow[r]--;
+    }
+  else
+    mexPrintf("Error (in Delete): in CRS element r=%d, c=%d does not exist (first->c_index=%d)\n",r,c,first->c_index);
+#ifdef PROFILER
+  tdelete1+=pctimer()-td0;
+  td0=pctimer();
+  td1=pctimer();
+#endif
+  first=FNZE_C[c];
+  firsta=NULL;
+  while (first->r_index!=r && first->NZE_C_N)
+    {
+#ifdef PRINT_OUT
+      mexPrintf("looking not CSS [%d, %d]\n",first->r_index,first->c_index);
+#endif
+      firsta=first;
+      first=first->NZE_C_N;
+    }
+#ifdef PRINT_OUT
+  mexPrintf("CSS [%d, %d]=r(%d)\n",first->r_index,first->c_index,r);
+#endif
+#ifdef PROFILER
+  tdelete21+=pctimer()-td1;
+  td1=pctimer();
+#endif
+  if (first->r_index==r)
+    {
+      if (firsta!=NULL)
+        firsta->NZE_C_N=first->NZE_C_N;
+      if (first==FNZE_C[c])
+        FNZE_C[c]=first->NZE_C_N;
+#ifdef PROFILER
+      td2=pctimer();
+#endif
+      Delete_u(first->u_index);
+#ifdef PROFILER
+      tdelete221+=pctimer()-td2;
+      td2=pctimer();
+#endif
+#ifdef NEW_ALLOC
+      mxFree_NZE(first);
+#else
+      mxFree(first);
+#endif
+      NbNZCol[c]--;
+#ifdef PROFILER
+      tdelete222+=pctimer()-td2;
+#endif
+    }
+  else
+    {
+      Print(Size,b);
+      mexPrintf("Error (in Delete): in CCS element r=%d, c=%d does not exist (first->r_index=%d) \n",r,c,first->r_index);
+    }
+#ifdef PROFILER
+  tdelete22+=pctimer()-td1;
+  tdelete2+=pctimer()-td0;
+#endif
+}
+
+
+void SparseMatrix::Print(int Size, int *b)
+{
+  int a,i,j,k,l;
+  mexPrintf("   ");
+  for (k=0;k<Size*periods;k++)
+    mexPrintf("%-2d ",k);
+  mexPrintf("    |    ");
+  for (k=0;k<Size*periods;k++)
+    mexPrintf("%8d",k);
+  mexPrintf("\n");
+  for (i=0;i<Size*periods;i++)
+    {
+      NonZeroElem *first=FNZE_R[i];
+      j=NbNZRow[i];
+      mexPrintf("%-2d ",i);
+      a=0;
+      for (k=0;k<j;k++)
+        {
+          for (l=0;l<(first->c_index-a);l++)
+            mexPrintf("   ");
+          mexPrintf("%-2d ",first->u_index);
+          a=first->c_index+1;
+          first=first->NZE_R_N;
+        }
+      for (k=a;k<Size*periods;k++)
+        mexPrintf("   ");
+      mexPrintf("%-2d ",b[i]);
+
+      first=FNZE_R[i];
+      j=NbNZRow[i];
+      mexPrintf(" | %-2d ",i);
+      a=0;
+      for (k=0;k<j;k++)
+        {
+          for (l=0;l<(first->c_index-a);l++)
+            mexPrintf("        ");
+          mexPrintf("%8.4f",double(u[first->u_index]));
+          a=first->c_index+1;
+          first=first->NZE_R_N;
+        }
+      for (k=a;k<Size*periods;k++)
+        mexPrintf("        ");
+      mexPrintf("%8.4f",double(u[b[i]]));
+      mexPrintf("\n");
+    }
+}
+
+
+
+void SparseMatrix::Insert(int r, int c, int u_index, int lag_index)
+{
+#ifdef PRINT_OUT
+  mexPrintf("In Insert r=%d, c=%d, u=%d, lag=%d \n",r,c,u_index,lag_index);
+#endif
+  NonZeroElem *first=FNZE_R[r], *firsta=NULL, *firstn=NULL;
+  if (!first)
+    {
+      /*mexPrintf("Error (in Insert): singular system\n");
+      mexPrintf("In Insert r=%d, c=%d, u=%d, lag=%d \n",r,c,u_index,lag_index);
+      filename+=" stopped";
+      mexErrMsgTxt(filename.c_str());*/
+#ifdef NEW_ALLOC
+      firstn=mxMalloc_NZE();
+#else
+      firstn=(NonZeroElem*)mxMalloc(sizeof(NonZeroElem));
+#endif
+      //mexPrintf("k");
+      /*if(firstn==NULL)
+        mexPrintf("Error in allocator\n");*/
+      firstn->u_index=u_index;
+      firstn->r_index=r;
+      firstn->c_index=c;
+      firstn->lag_index=lag_index;
+      FNZE_R[r]=firstn;
+      firstn->NZE_R_N=first;
+      NbNZRow[r]++;
+    }
+  else
+    {
+#ifdef PRINT_OUT
+      mexPrintf("first->c_index=%d, first->NZE_R_N=%x\n",first->c_index, first->NZE_R_N);
+#endif
+      while (first->c_index<c && first->NZE_R_N)
+        {
+          firsta=first;
+#ifdef PRINT_OUT
+          mexPrintf("drop first->c_index=%d c=%d\n",first->c_index,c);
+#endif
+          first=first->NZE_R_N;
+        }
+      if (first->c_index!=c)
+        {
+#ifdef PRINT_OUT
+          mexPrintf("retain first->c_index=%d c=%d\n",first->c_index,c);
+#endif
+          //mexPrintf("o");
+#ifdef NEW_ALLOC
+          firstn=mxMalloc_NZE();
+#else
+          firstn=(NonZeroElem*)mxMalloc(sizeof(NonZeroElem));
+#endif
+          //mexPrintf("k");
+          /*if(firstn==NULL)
+            mexPrintf("Error in allocator\n");*/
+          firstn->u_index=u_index;
+          firstn->r_index=r;
+          firstn->c_index=c;
+          firstn->lag_index=lag_index;
+          if (first->c_index>c)
+            {
+              //mexPrintf("- %x",firstn);
+              if (first==FNZE_R[r])
+                FNZE_R[r]=firstn;
+              //mexPrintf("^");
+              if (firsta!=NULL)
+                firsta->NZE_R_N=firstn;
+              //mexPrintf("¨");
+              firstn->NZE_R_N=first;
+              //mexPrintf("+");
+            }
+          else /*first.c_index<c*/
+            {
+              //mexPrintf("/");
+              first->NZE_R_N=firstn;
+              firstn->NZE_R_N=NULL;
+              //mexPrintf("*");
+            }
+          NbNZRow[r]++;
+
+        }
+      else
+        mexPrintf("Error (in Insert): in CRS element r=%, c=%d already exists\n",r,c);
+    }
+  //mexPrintf("a");
+  first=FNZE_C[c];
+  firsta=NULL;
+  while (first->r_index<r && first->NZE_C_N)
+    {
+      firsta=first;
+      first=first->NZE_C_N;
+    }
+  //mexPrintf("y");
+  if (first->r_index!=r)
+    {
+      if (first->r_index>r)
+        {
+          if (first==FNZE_C[c])
+            FNZE_C[c]=firstn;
+          if (firsta!=NULL)
+            firsta->NZE_C_N=firstn;
+          firstn->NZE_C_N=first;
+        }
+      else /*first.r_index<r*/
+        {
+          first->NZE_C_N=firstn;
+          firstn->NZE_C_N=NULL;
+        }
+      NbNZCol[c]++;
+    }
+  else
+    mexPrintf("Error (in Insert): in CCS element r=%, c=%d already exists\n",r,c);
+  //mexPrintf("!\n");
+}
+
+void Read_SparseMatrix(std::string file_name, int Size, int periods, int y_kmin, int y_kmax)
+{
+  int i,j,eq,var,lag;
+  //mexPrintf("read_sparseMatrix\n");
+  filename=file_name;
+  if (!SaveCode.is_open())
+    {
+#ifdef PRINT_OUT
+      mexPrintf("file opened\n");
+#endif
+      SaveCode.open((file_name + ".bin").c_str(), std::ios::in | std::ios::binary);
+      if (!SaveCode.is_open())
+        {
+          mexPrintf("Error : Can't open file \"%s\" for reading\n", (file_name + ".bin").c_str());
+          mexErrMsgTxt("Exit from Dynare");
+        }
+#ifdef PRINT_OUT
+      mexPrintf("done\n");
+#endif
+    }
+  IM_i.clear();
+  for (i=0;i<u_count_init;i++)
+    {
+      SaveCode.read(reinterpret_cast<char *>(&eq), sizeof(eq));
+      SaveCode.read(reinterpret_cast<char *>(&var), sizeof(var));
+      SaveCode.read(reinterpret_cast<char *>(&lag), sizeof(lag));
+      SaveCode.read(reinterpret_cast<char *>(&j), sizeof(j));
+      //mexPrintf("eq=%d var=%d lag=%d j=%d\n",eq,var,lag,j);
+      IM_i[std::make_pair(std::make_pair(eq, var), lag)] = j;
+    }
+#ifdef MEM_ALLOC_CHK
+  mexPrintf("index_vara=(int*)mxMalloc(%d*sizeof(int))\n",Size*(periods+y_kmin+y_kmax));
+#endif
+  index_vara=(int*)mxMalloc(Size*(periods+y_kmin+y_kmax)*sizeof(int));
+#ifdef MEM_ALLOC_CHK
+  mexPrintf("ok\n");
+#endif
+  for (j=0;j<Size;j++)
+    {
+      //mexPrintf("eq=%d var=%d lag=%d j=%d\n",eq,var,lag,j);
+      SaveCode.read(reinterpret_cast<char *>(&index_vara[j]), sizeof(*index_vara));
+      //mexPrintf("index_var[%d]=%d\n",j,index_var[j]);
+    }
+  for (i=1;i<periods+y_kmin+y_kmax;i++)
+    {
+      for (j=0;j<Size;j++)
+        {
+#ifdef PRINT_OUT
+          mexPrintf("index_vara[%d]=index_vara[%d]+y_size=",j+Size*i,j+Size*(i-1));
+#endif
+          index_vara[j+Size*i]=index_vara[j+Size*(i-1)]+y_size;
+#ifdef PRINT_OUT
+          mexPrintf("%d\n",index_vara[j+Size*i]);
+#endif
+        }
+    }
+  //mexPrintf("end of read_sparseMatrix\n");
+}
+
+
+void SparseMatrix::Init(int periods, int y_kmin, int y_kmax, int Size, std::map<std::pair<std::pair<int, int> ,int>, int> IM)
+{
+  int t,i,j, eq, var, lag;
+  longd tmp_b=0.0;
+  std::map<std::pair<std::pair<int, int> ,int>, int>::iterator it4;
+  NonZeroElem* first;
+#ifdef MEM_ALLOC_CHK
+  mexPrintf("pivot=(int*)mxMalloc(%d*sizeof(int))\n",Size*periods);
+#endif
+  pivot=(int*)mxMalloc(Size*periods*sizeof(int));
+#ifdef MEM_ALLOC_CHK
+  mexPrintf("pivota=(int*)mxMalloc(%d*sizeof(int))\n",Size*periods);
+#endif
+  pivotk=(int*)mxMalloc(Size*periods*sizeof(int));
+#ifdef MEM_ALLOC_CHK
+  mexPrintf("pivotv=(longd*)mxMalloc(%d*sizeof(longd))\n",Size*periods);
+#endif
+  pivotv=(longd*)mxMalloc(Size*periods*sizeof(longd));
+#ifdef MEM_ALLOC_CHK
+  mexPrintf("pivotva=(longd*)mxMalloc(%d*sizeof(longd))\n",Size*periods);
+#endif
+  pivotva=(longd*)mxMalloc(Size*periods*sizeof(longd));
+#ifdef MEM_ALLOC_CHK
+  mexPrintf("b=(int*)mxMalloc(%d*sizeof(int))\n",Size*periods);
+#endif
+  b=(int*)mxMalloc(Size*periods*sizeof(int));
+#ifdef MEM_ALLOC_CHK
+  mexPrintf("line_done=(bool*)mxMalloc(%d*sizeof(bool))\n",Size*periods);
+#endif
+  line_done=(bool*)mxMalloc(Size*periods*sizeof(bool));
+  memset(line_done, 0, periods*Size*sizeof(*line_done));
+  CHUNK_BLCK_SIZE=u_count;
+  print_err=true;
+  swp_f=false;
+  g_save_op=NULL;
+  g_nop_all=0;
+  /*#ifdef PRINT_OUT
+    mexPrintf("alloc index_vara=%x\n",index_vara);
+  #endif
+     //mexPrintf("ok0\n");
+    for(j=0;j<Size;j++)
+      {
+  #ifdef PRINT_OUT
+        mexPrintf("index_var[%d]=index_var[%d]+y_size=",j+Size*i,j+Size*(i-1));
+  #endif
+        index_vara[j]=index_var[j];
+      }
+    //mexPrintf("ok1\n");
+    for(i=1;i<periods+y_kmin+y_kmax;i++)
+      {
+        for(j=0;j<Size;j++)
+          {
+  #ifdef PRINT_OUT
+            mexPrintf("index_vara[%d]=index_vara[%d]+y_size=",j+Size*i,j+Size*(i-1));
+  #endif
+            index_vara[j+Size*i]=index_vara[j+Size*(i-1)]+y_size;
+  #ifdef PRINT_OUT
+            mexPrintf("%d\n",index_vara[j+Size*i]);
+  #endif
+          }
+      }*/
+  //mexPrintf("ok2\n");
+#ifdef PRINT_OUT
+  mexPrintf("sizeof(NonZeroElem)=%d sizeof(NonZeroElem*)=%d\n",sizeof(NonZeroElem),sizeof(NonZeroElem*));
+#endif
+  i=(periods+y_kmax+1)*Size*sizeof(NonZeroElem*);
+#ifdef MEM_ALLOC_CHK
+  mexPrintf("FNZE_R=(NonZeroElem**)mxMalloc(%d)\n",i);
+#endif
+  FNZE_R=(NonZeroElem**)mxMalloc(i);
+#ifdef MEM_ALLOC_CHK
+  mexPrintf("FNZE_C=(NonZeroElem**)mxMalloc(%d)\n",i);
+#endif
+  FNZE_C=(NonZeroElem**)mxMalloc(i);
+  memset(FNZE_R, 0, i);
+  memset(FNZE_C, 0, i);
+#ifdef MEM_ALLOC_CHK
+  mexPrintf("temp_NZE_R=(NonZeroElem**)(%d)\n",i);
+#endif
+  NonZeroElem** temp_NZE_R=(NonZeroElem**)mxMalloc(i);
+#ifdef MEM_ALLOC_CHK
+  mexPrintf("temp_NZE_R=(NonZeroElem**)(%d)\n",i);
+#endif
+  NonZeroElem** temp_NZE_C=(NonZeroElem**)mxMalloc(i);
+  memset(temp_NZE_R, 0, i);
+  memset(temp_NZE_C, 0, i);
+  i=(periods+y_kmax+1)*Size*sizeof(int);
+  /*mexPrintf("Size=%d, periods=%d, y_kmin=%d, y_kmax=%d\n",Size,periods,y_kmin,y_kmax);
+  mexPrintf("periods*Size=%d periods*y_size=%d\n",periods*Size,periods*y_size);
+  mexPrintf("(periods+y_kmin+y_kmax)*Size=%d (periods+y_kmin+y_kmax)*y_size=%d\n",(periods+y_kmin+y_kmax)*Size,(periods+y_kmin+y_kmax)*y_size);
+  mexPrintf("(periods+y_kmax)*Size=%d (periods+y_kmax)*y_size=%d\n",(periods+y_kmax)*Size,(periods+y_kmax)*y_size);*/
+#ifdef MEM_ALLOC_CHK
+  mexPrintf("NbNZRow=(int*)mxMalloc(%d)\n",i);
+#endif
+  NbNZRow=(int*)mxMalloc(i);
+#ifdef MEM_ALLOC_CHK
+  mexPrintf("NbNZCol=(int*)mxMalloc(%d)\n",i);
+#endif
+  NbNZCol=(int*)mxMalloc(i);
+#ifdef MEM_ALLOC_CHK
+  mexPrintf("ok\n");
+#endif
+  memset(NbNZRow, 0, i);
+  memset(NbNZCol, 0, i);
+  i=periods*Size*sizeof(*b);
+  memset(b,0,i);
+#ifdef PRINT_OUT
+  mexPrintf("Now looping\n");
+#endif
+  for (t=0;t<periods;t++)
+    {
+#ifdef PRINT_OUT
+      mexPrintf("t=%d\n",t);
+#endif
+      int ti_y_kmin=-min( t        , y_kmin);
+      int ti_y_kmax= min( periods-(t+1), y_kmax);
+      it4=IM.begin();
+      eq=-1;
+      while (it4!=IM.end())
+        {
+          var=it4->first.first.second;
+          if (eq!=it4->first.first.first+Size*t)
+            tmp_b=0;
+          eq=it4->first.first.first+Size*t;
+#ifdef PRINT_OUT
+          mexPrintf("eq=%d, var=%d",eq,var);
+#endif
+          if (var<(periods+y_kmax)*Size)
+            {
+              lag=it4->first.second;
+#ifdef PRINT_OUT
+              mexPrintf(", lag =%d, ti_y_kmin=%d, ti_y_kmax=%d ", lag, ti_y_kmin, ti_y_kmax);
+#endif
+              if (lag<=ti_y_kmax && lag>=ti_y_kmin)
+                {
+                  //mexPrintf("u_index=%d, eq=%d, var=%d, lag=%d ",it4->second+u_count_init*t, eq, var, lag);
+                  var+=Size*t;
+                  //mexPrintf("u_index=%d, eq=%d, var=%d, lag=%d ",it4->second+u_count_init*t, eq, var, lag);
+                  NbNZRow[eq]++;
+                  NbNZCol[var]++;
+#ifdef NEW_ALLOC
+                  first=mxMalloc_NZE();
+#else
+                  first=(NonZeroElem*)mxMalloc(sizeof(NonZeroElem));
+#endif
+                  first->NZE_C_N=NULL;
+                  first->NZE_R_N=NULL;
+                  first->u_index=it4->second+u_count_init*t;
+                  first->r_index=eq;
+                  first->c_index=var;
+                  first->lag_index=lag;
+
+                  if (FNZE_R[eq]==NULL)
+                    {
+                      FNZE_R[eq]=first;
+                      //mexPrintf("FNZE_R[%d]=%x\n",eq,FNZE_R[eq]);
+                    }
+                  if (FNZE_C[var]==NULL)
+                    FNZE_C[var]=first;
+                  if (temp_NZE_R[eq]!=NULL)
+                    temp_NZE_R[eq]->NZE_R_N=first;
+                  if (temp_NZE_C[var]!=NULL)
+                    temp_NZE_C[var]->NZE_C_N=first;
+                  temp_NZE_R[eq]=first;
+                  temp_NZE_C[var]=first;
+#ifdef PRINT_OUT
+                  mexPrintf("=> ");
+#endif
+                }
+              else
+                {
+#ifdef PRINT_OUT
+                  mexPrintf("nn ");
+                  mexPrintf("tmp_b+=u[%d]*y[index_var[%d]]\n",it4->second+u_count_init*t,var+Size*(y_kmin+t));
+                  mexPrintf("tmp_b+=u[%d](%f)*y[%d(%d)](%f)",it4->second+u_count_init*t,u[it4->second+u_count_init*t], index_vara[var+Size*(y_kmin+t)],var+Size*(y_kmin+t),y[index_vara[var+Size*(y_kmin+t)]]);
+#endif
+                  tmp_b+=u[it4->second+u_count_init*t]*y[index_vara[var+Size*(y_kmin+t)]];
+                }
+            }
+          else
+            {
+#ifdef PRINT_OUT
+              mexPrintf("");
+#endif
+              b[eq]=it4->second+u_count_init*t;
+              u[b[eq]]+=tmp_b;
+#ifdef PRINT_OUT
+              mexPrintf("=> b");
+#endif
+            }
+#ifdef PRINT_OUT
+          mexPrintf(" u[%d] = %e\n",it4->second+u_count_init*t,double(u[it4->second+u_count_init*t]));
+#endif
+          it4++;
+        }
+    }
+  //mexPrintf("ok3\n");
+  mxFree(temp_NZE_R);
+  mxFree(temp_NZE_C);
+  //mexPrintf("end Init\n");
+}
+
+void SparseMatrix::ShortInit(int periods, int y_kmin, int y_kmax, int Size, std::map<std::pair<std::pair<int, int> ,int>, int> IM)
+{
+//#ifdef PRINT_OUT
+  //mexPrintf("SparseMatrix::ShortInit periods=%d Size=%d\n",periods, Size);
+//#endif
+  int t,i,j, eq, var, lag;
+  longd tmp_b=0.0;
+  std::map<std::pair<std::pair<int, int> ,int>, int>::iterator it4;
+  NonZeroElem* first;
+
+  for (t=0;t<periods;t++)
+    {
+#ifdef PRINT_OUT
+      mexPrintf("t=%d\n",t);
+#endif
+      int ti_y_kmin=-min( t        , y_kmin);
+      int ti_y_kmax= min( periods-(t+1), y_kmax);
+      it4=IM.begin();
+      eq=-1;
+      while (it4!=IM.end())
+        {
+          var=it4->first.first.second;
+          if (eq!=it4->first.first.first+Size*t)
+            tmp_b=0;
+          eq=it4->first.first.first+Size*t;
+#ifdef PRINT_OUT
+          mexPrintf("eq=%d, var=%d",eq,var);
+#endif
+          if (var<(periods+y_kmax)*Size)
+            {
+              lag=it4->first.second;
+#ifdef PRINT_OUT
+              mexPrintf(", lag =%d, ti_y_kmin=%d, ti_y_kmax=%d ", lag, ti_y_kmin, ti_y_kmax);
+#endif
+              if (lag<=ti_y_kmax && lag>=ti_y_kmin)
+                {
+                  //mexPrintf("u_index=%d, eq=%d, var=%d, lag=%d ",it4->second+u_count_init*t, eq, var, lag);
+                  var+=Size*t;
+                }
+              else
+                {
+#ifdef PRINT_OUT
+                  mexPrintf("nn ");
+                  mexPrintf("tmp_b+=u[%d]*y[index_var[%d]]\n",it4->second+u_count_init*t,var+Size*(y_kmin+t));
+                  mexPrintf("tmp_b+=u[%d](%f)*y[%d(%d)](%f)",it4->second+u_count_init*t,u[it4->second+u_count_init*t], index_vara[var+Size*(y_kmin+t)],var+Size*(y_kmin+t),y[index_vara[var+Size*(y_kmin+t)]]);
+#endif
+                  tmp_b+=u[it4->second+u_count_init*t]*y[index_vara[var+Size*(y_kmin+t)]];
+                }
+            }
+          else
+            {
+#ifdef PRINT_OUT
+              mexPrintf("");
+#endif
+              b[eq]=it4->second+u_count_init*t;
+              u[b[eq]]+=tmp_b;
+#ifdef PRINT_OUT
+              mexPrintf("=> b");
+#endif
+            }
+#ifdef PRINT_OUT
+          mexPrintf(" u[%d] = %e\n",it4->second+u_count_init*t,double(u[it4->second+u_count_init*t]));
+#endif
+          it4++;
+        }
+    }
+  //mexPrintf("end Init\n");
+}
+
+
+
+int SparseMatrix::Get_u()
+{
+  if (!u_liste.empty())
+    {
+      int i=u_liste.back();
+      u_liste.pop_back();
+#ifdef PRINT_OUT
+      mexPrintf("Get_u=%d\n",i);
+#endif
+      return i;
+    }
+  else
+    {
+      if (u_count<u_count_alloc)
+        {
+          int i=u_count;
+          u_count++;
+#ifdef PRINT_OUT
+          mexPrintf("Get_u=%d\n",i);
+#endif
+          return i;
+        }
+      else
+        {
+          u_count_alloc+=5*u_count_alloc_save;
+#ifdef MEM_ALLOC_CHK
+          mexPrintf("u=(longd*)mxRealloc(u,%d*sizeof(longd))\n",u_count_alloc);
+#endif
+          u=(longd*)mxRealloc(u,u_count_alloc*sizeof(longd));
+#ifdef MEM_ALLOC_CHK
+          mexPrintf("ok\n");
+#endif
+          if (!u)
+            {
+              mexPrintf("Error in Get_u: memory exhausted (realloc(%d))\n",u_count_alloc*sizeof(longd));
+              mexErrMsgTxt("Exit from Dynare");
+            }
+          int i=u_count;
+          u_count++;
+          return i;
+        }
+    }
+}
+
+void SparseMatrix::Delete_u(int pos)
+{
+#ifdef PRINT_OUT
+  mexPrintf("Delete_u=%d\n",pos);
+#endif
+  u_liste.push_back(pos);
+
+}
+
+void SparseMatrix::Clear_u()
+{
+  u_liste.clear();
+}
+
+void SparseMatrix::Print_u()
+{
+  for (int i=0;i<u_liste.size();i++)
+    mexPrintf("%d ",u_liste[i]);
+}
+
+void SparseMatrix::End(int Size)
+{
+  //mexPrintf("free index_vara=%x\n",index_vara);
+  //mxFree(index_vara);
+  //mexPrintf("End.....\n");
+#ifdef NEW_ALLOC
+  for (int i=0;i<Nb_CHUNK;i++)
+    {
+      mxFree(NZE_Mem_add[i*CHUNK_BLCK_SIZE]);
+    }
+  init_Mem();
+#else
+  for (int i=0;i<Size*periods;i++)
+    {
+      NonZeroElem *first=FNZE_R[i];
+      while (!first)
+        {
+          NonZeroElem *firsta=first->NZE_R_N;
+          mxFree(first);
+          first=firsta;
+        }
+    }
+#endif
+  mxFree(FNZE_R);
+  mxFree(FNZE_C);
+  mxFree(NbNZRow);
+  mxFree(NbNZCol);
+  mxFree(b);
+  mxFree(line_done);
+}
+
+bool
+compare( int *save_op, int *save_opa, int *save_opaa, int beg_t, int periods, long int nop4,  int Size, long int *ndiv, long int *nsub)
+{
+  //mexPrintf("=>in compare beg_t=%d\n",beg_t);
+  long int i,j,nop=nop4/4, t, index_d, k;
+  longd r=0.0;
+  bool OK=true;
+
+  int *diff1, *diff2;
+  //mexPrintf("nop=%d\n",nop);
+  //g_save_op=(int*)mxMalloc(nop*5*sizeof(int));
+#ifdef MEM_ALLOC_CHK
+  mexPrintf("diff1=(int*)mxMalloc(%d*sizeof(int))\n",nop);
+#endif
+  diff1=(int*)mxMalloc(nop*sizeof(int));
+#ifdef MEM_ALLOC_CHK
+  mexPrintf("diff1=(int*)mxMalloc(%d*sizeof(int))\n",nop);
+#endif
+  diff2=(int*)mxMalloc(nop*sizeof(int));
+#ifdef MEM_ALLOC_CHK
+  mexPrintf("ok\n");
+#endif
+  j=k=0;
+  for (i=0;i<nop4 && OK;i+=4)
+    {
+      diff1[j]=save_op[i+1]-save_opa[i+1];
+      diff2[j]=save_op[i+2]-save_opa[i+2];
+      /*g_save_op[k]=save_op[i];
+      g_save_op[k+1]=save_op[i+1]-beg_t*diff1[j];
+      g_save_op[k+2]=diff1[j];
+      if(save_op[i]==FSUB || save_op[i]==FLESS)
+        {
+          g_save_op[k+3]=save_op[i+2]-beg_t*diff2[j];
+          g_save_op[k+4]=diff2[j];
+        }
+      k+=5;*/
+      /*if(save_op[i+2]==48616  )
+        mexPrintf("save_op[%d]=%d save_opa[%d]=%d save_opa[%d]=%d diff2[%d]=%d\n",i+2,save_op[i+2],i+2,save_opa[i+2],i+2,save_opaa[i+2],j,diff2[j]);*/
+      OK=(save_op[i]==save_opa[i] && save_opa[i]==save_opaa[i]
+          && diff1[j]==(save_opa[i+1]-save_opaa[i+1])
+          && diff2[j]==(save_opa[i+2]-save_opaa[i+2]));
+      //mexPrintf("diff1[%d]=%d, diff2[%d]=%d\n",j,diff1[j],j,diff2[j]);
+      /*mexPrintf("save_op[%d]=%d, save_opa[%d]=%d, save_opaa[%d]=%d\n",i,save_op[i],i,save_opa[i],i,save_opaa[i]);
+      mexPrintf("save_op[%d+1]=%d, save_opa[%d+1]=%d, save_opaa[%d+1]=%d\n",i,save_op[i+1],i,save_opa[i+1],i,save_opaa[i+1]);
+      mexPrintf("save_op[%d+2]=%d, save_opa[%d+2]=%d, save_opaa[%d+2]=%d\n",i,save_op[i+2],i,save_opa[i+2],i,save_opaa[i+2]);*/
+      j++;
+    }
+  //mexPrintf("j=%d nop=%d\n",j,nop);
+  //OK=false;
+  /*if(!OK)
+    {
+      mexPrintf("save_op[%d](%d)==save_opa[%d](%d)==save_opaa[%d](%d)\n diff1[%d](%d)==(save_opa[%d]-save_opaa[%d])(%d)\n diff2[%d](%d)==(save_opa[%d]-save_opaa[%d])(%d)\n",
+      i,save_op[i],i,save_opa[i],i,save_opaa[i],j,diff1[j],i+1,i+1,(save_opa[i+1]-save_opaa[i+1]),j,diff2[j],i+2,i+2,(save_opa[i+2]-save_opaa[i+2]));
+    }*/
+  //g_nop_all=k;
+  //mexPrintf("1 - OK=%d t=%d\n",OK,beg_t);
+  if (OK)
+    {
+      /*for(i=beg_t-2;i<beg_t;i++)
+        {
+          for(j=0;j<Size;j++)
+            {
+              mexPrintf("%d==%d ",pivot[i*Size+j]+Size,pivot[(i+1)*Size+j]);
+              OK = OK && ((pivot[i*Size+j]+Size)==pivot[(i+1)*Size+j]);
+            }
+          mexPrintf("\n");
+       }
+      if(OK)
+        {*/
+      for (i=beg_t;i<periods;i++)
+        {
+          /*if(i+1==periods)
+            mexPrintf("t=%d ",i);*/
+          for (j=0;j<Size;j++)
+            {
+              pivot[i*Size+j]=pivot[(i-1)*Size+j]+Size;
+              /*if(i+1==periods)
+                mexPrintf("%d==%d ",pivot[(i-1)*Size+j]+Size,pivot[i*Size+j]);*/
+            }
+          /*if(i+1==periods)
+            mexPrintf("\n");*/
+        }
+      /*}*/
+    }
+  //mexPrintf("2 - OK=%d t=%d\n",OK,beg_t);
+  //mexPrintf("from beg_t=%d to periods=%d\n",beg_t, periods);
+  if (OK)
+    {
+
+#ifdef WRITE_u
+      long int i_toto=0;
+      fstream toto;
+      toto.open("compare_s.txt", std::ios::out);
+#endif
+
+      t=1;
+      //mexPrintf("nop4=%d\n",nop4);
+      for (;t<periods-beg_t-max(y_kmax,y_kmin);t++)
+        {
+          //mexPrintf("t=%d\n",t);
+#ifdef WRITE_u
+          toto << "t=" << t << endl;
+#endif
+          j=0;
+          for (i=0;i<nop4;i+=4)
+            {
+              index_d=save_op[i+1]+t*diff1[j];
+              if (index_d>=u_count_alloc)
+                {
+                  u_count_alloc+=5*u_count_alloc_save;
+#ifdef MEM_ALLOC_CHK
+                  mexPrintf("u=(longd*)mxRealloc(u,u_count_alloc*sizeof(longd))\n",u_count_alloc);
+#endif
+                  u=(longd*)mxRealloc(u,u_count_alloc*sizeof(longd));
+#ifdef MEM_ALLOC_CHK
+                  mexPrintf("ok\n");
+#endif
+                  if (!u)
+                    {
+                      mexPrintf("Error in Get_u: memory exhausted (realloc(%d))\n",u_count_alloc*sizeof(longd));
+                      mexErrMsgTxt("Exit from Dynare");
+                    }
+                }
+              switch (save_op[i])
+                {
+                  case FLD  :
+                    r=u[index_d];
+#ifdef PRINT_u
+                    mexPrintf("FLD u[%d] (%f)\n",index_d,u[index_d]);
+#endif
+
+                    break;
+                  case FDIV :
+                    u[index_d]/=r;
+#ifdef PRINT_u
+                    mexPrintf("FDIV u[%d](%f)/=r(%f)=(%f)\n",index_d,u[index_d],r,u[index_d]);
+#endif
+
+                    /*if((t>=periods-beg_t-y_kmax))
+                      mexPrintf("u[%d]/=%f=%f\n",index_d,double(r),double(u[index_d]));*/
+                    /*toto << i_toto << " u[" << index_d << "]/=" << r << "=" << u[index_d] << endl;
+                    i_toto++;*/
+                    //(*ndiv)++;
+                    break;
+                  case FSUB :
+                    u[index_d]-=u[save_op[i+2]+t*diff2[j]]*r;
+#ifdef PRINT_u
+                    mexPrintf("FSUB u[%d]-=u[%d](%f)*r(%f)=(%f)\n",index_d,save_op[i+2]+t*diff2[j],u[save_op[i+2]+t*diff2[j]],r,u[index_d] );
+#endif
+
+                    /*if((t==periods-beg_t-y_kmax))
+                      mexPrintf("u[%d]-=u[%d]*%f=%f\n",index_d,save_op[i+2]+t*diff2[j],double(r),double(u[index_d]));*/
+                    /*toto << i_toto << " u[" << index_d << "]-=u[" << save_op[i+2]+t*diff2[j] << "]*" << r << "=" << u[index_d] << endl;
+                    i_toto++;*/
+                    //(*nsub)++;
+                    break;
+                  case FLESS:
+                    u[index_d]=-u[save_op[i+2]+t*diff2[j]]*r;
+#ifdef PRINT_u
+                    mexPrintf("FLESS u[%d]=-u[%d](%f)*r(%f)=(%f)\n",index_d,save_op[i+2]+t*diff2[j],u[save_op[i+2]+t*diff2[j]],r,u[index_d] );
+#endif
+
+                    /*if((t==periods-beg_t-y_kmax))
+                      mexPrintf("u[%d]=-u[%d]*%f=%f\n",index_d,save_op[i+2]+t*diff2[j],double(r),double(u[index_d]));*/
+                    /*toto << i_toto << "u[" << index_d << "]=-u[" << save_op[i+2]+t*diff2[j] << "]*" << r << "=" << u[index_d] << endl;
+                    i_toto++;*/
+                    //(*nsub)++;
+                    break;
+                }
+              j++;
+            }
+        }
+      int t1=t;
+      for (t=t1;t<periods-beg_t;t++)
+        {
+          j=0;
+#ifdef WRITE_u
+          toto << "t=" << t << " t+beg_t=" << t+beg_t/*<< "----------------------------------------------------------------------------------------------------------------"*/ <<endl;
+#endif
+          //mexPrintf("t=%d----------------------------------------------------------------------------------------------------------------\n",t);
+          for (i=0;i<nop4;i+=4)
+            {
+              if(save_op[i+3]<((periods-beg_t)-t))
+              {
+              index_d=save_op[i+1]+t*diff1[j];
+              if (index_d>=u_count_alloc)
+                {
+                  u_count_alloc+=5*u_count_alloc_save;
+#ifdef MEM_ALLOC_CHK
+                  mexPrintf("u=(longd*)mxRealloc(u,u_count_alloc*sizeof(longd))\n",u_count_alloc);
+#endif
+                  u=(longd*)mxRealloc(u,u_count_alloc*sizeof(longd));
+#ifdef MEM_ALLOC_CHK
+                  mexPrintf("ok\n");
+#endif
+                  if (!u)
+                    {
+                      mexPrintf("Error in Get_u: memory exhausted (realloc(%d))\n",u_count_alloc*sizeof(longd));
+                      mexErrMsgTxt("Exit from Dynare");
+                    }
+                }
+              switch (save_op[i])
+                {
+                  case FLD  :
+                    r=u[index_d];
+#ifdef PRINT_u
+                    mexPrintf("FLD u[%d] (%f)\n",index_d,u[index_d]);
+#endif
+
+                    break;
+                  case FDIV :
+                    u[index_d]/=r;
+#ifdef PRINT_u
+                    mexPrintf("FDIV u[%d](%f)/=r(%f)=(%f)\n",index_d,u[index_d],r,u[index_d]);
+#endif
+
+                    /*if(index_d==81726)
+                      mexPrintf("(0) u[%d]/=%f=%f save_op[%d]=%d diff1[%d]=%d\n",index_d,double(r),double(u[index_d]),i+1,save_op[i+1],j,diff1[j]);*/
+#ifdef WRITE_u
+                    toto << i_toto << " u[" /*<< index_d*/ << "]/=" << r << "=" << u[index_d] << /*"  lag_index=" << save_op[i+3] << " periods-beg_t-t=" << periods-beg_t-t <<*/ endl;
+                    i_toto++;
+#endif
+                    //(*ndiv)++;
+                    break;
+                  case FSUB :
+                    u[index_d]-=u[save_op[i+2]+t*diff2[j]]*r;
+                    //if((t>=periods-beg_t-y_kmax))
+#ifdef PRINT_u
+                    mexPrintf("FSUB u[%d]-=u[%d](%f)*r(%f)=(%f)\n",index_d,save_op[i+2]+t*diff2[j],u[save_op[i+2]+t*diff2[j]],r,u[index_d] );
+#endif
+                    /*if(index_d==81726)
+                      mexPrintf("(1) u[%d]-=u[%d](%f)*%f=%f save_op[%d]=%d diff1[%d]=%d\n",index_d,save_op[i+2]+t*diff2[j],u[save_op[i+2]+t*diff2[j]],double(r),double(u[index_d]),i+1,save_op[i+1],j,diff1[j]);*/
+#ifdef WRITE_u
+                    toto << i_toto << " u[" /*<< index_d*/ << "]-=u[" /*<< save_op[i+2]+t*diff2[j]*/ << "]*" << r << "=" << u[index_d] << /*"  lag_index=" << save_op[i+3] << " periods-beg_t-t=" << periods-beg_t-t <<*/  endl;
+                    i_toto++;
+#endif
+                    //(*nsub)++;
+                    break;
+                  case FLESS:
+                    u[index_d]=-u[save_op[i+2]+t*diff2[j]]*r;
+                    //if((t>=periods-beg_t-y_kmax))
+#ifdef PRINT_u
+                    mexPrintf("FLESS u[%d]=-u[%d](%f)*r(%f)=(%f)\n",index_d,save_op[i+2]+t*diff2[j],u[save_op[i+2]+t*diff2[j]],r,u[index_d] );
+#endif
+                    /*if(index_d==81726)
+                      mexPrintf("(3) u[%d]=-u[%d](%f)*r(%f)=%f save_op[%d]=%d diff1[%d]=%d\n",index_d,save_op[i+2]+t*diff2[j],u[save_op[i+2]+t*diff2[j]],double(r),double(u[index_d]),i+1,save_op[i+1],j,diff1[j]);*/
+#ifdef WRITE_u
+                    toto << i_toto << " u[" /*<< index_d*/ << "]=-u[" /*<< save_op[i+2]+t*diff2[j]*/ << "]*" << r << "=" << u[index_d] << /*"  lag_index=" << save_op[i+3] << " periods-beg_t-t=" << periods-beg_t-t <<*/ endl;
+                    i_toto++;
+#endif
+                    //(*nsub)++;
+                    break;
+                }
+              }
+              j++;
+            }
+        }
+#ifdef WRITE_u
+      toto.close();
+      filename+=" stopped";
+      mexErrMsgTxt(filename.c_str());
+#endif
+    }
+  //mexPrintf("out of compare\n");
+  mxFree(diff1);
+  mxFree(diff2);
+  //mexPrintf("Compare=%d\n",OK);
+  return OK;
+}
+
+void
+SparseMatrix::run_u_period1(int periods)
+{
+  longd r;
+  int index_d, t;
+  for (t=0;t<periods;t++)
+    {
+      for (long int i=0;i<g_nop_all;)
+        {
+          index_d=g_save_op[i+1]+t*g_save_op[i+2];
+          if (index_d>=u_count_alloc)
+            {
+              u_count_alloc+=5*u_count_alloc_save;
+#ifdef MEM_ALLOC_CHK
+              mexPrintf("u=(longd*)mxRealloc(u,u_count_alloc*sizeof(longd))\n",u_count_alloc);
+#endif
+              u=(longd*)mxRealloc(u,u_count_alloc*sizeof(longd));
+#ifdef MEM_ALLOC_CHK
+              mexPrintf("ok\n");
+#endif
+              if (!u)
+                {
+                  mexPrintf("Error in Get_u: memory exhausted (realloc(%d))\n",u_count_alloc*sizeof(longd));
+                  mexErrMsgTxt("Exit from Dynare");
+                }
+            }
+          switch (g_save_op[i])
+            {
+              case FLD  :
+                r=u[index_d];
+#ifdef PRINT_u
+                mexPrintf("FLD u[%d] (%f)\n",index_d,u[index_d]);
+#endif
+                break;
+              case FDIV :
+                u[index_d]/=r;
+#ifdef PRINT_u
+                mexPrintf("FDIV u[%d](%f)/=r(%f)=(%f)\n",index_d,u[index_d],r,u[index_d]);
+#endif
+                break;
+              case FSUB :
+                u[index_d]-=u[g_save_op[i+3]+t*g_save_op[i+4]]*r;
+#ifdef PRINT_u
+                mexPrintf("FSUB u[%d]-=u[%d](%f)*r(%f)=(%f) index1=%d index2=%d\n",index_d,g_save_op[i+3]+t*g_save_op[i+4],u[g_save_op[i+3]+t*g_save_op[i+4]],r,u[index_d],g_save_op[i+1],g_save_op[i+2] );
+#endif
+                break;
+              case FLESS:
+                u[index_d]=-u[g_save_op[i+3]+t*g_save_op[i+4]]*r;
+#ifdef PRINT_u
+                mexPrintf("FLESS u[%d]=-u[%d](%f)*r(%f)=(%f) index1=%d index2=%d\n",index_d,g_save_op[i+3]+t*g_save_op[i+4],u[g_save_op[i+3]+t*g_save_op[i+4]],r,u[index_d],g_save_op[i+1],g_save_op[i+2] );
+#endif
+                break;
+            }
+          i+=5;
+        }
+    }
+  //mexPrintf("end of run_triangular\n");
+}
+
+
+
+void
+write_swp_f(int *save_op_all,long int *nop_all)
+{
+  swp_f=true;
+  swp_f_b++;
+  mexPrintf("writing the block %d with size=%d\n",swp_f_b,*nop_all);
+  if (!SaveCode_swp.is_open())
+    {
+      mexPrintf("open the swp file for writing\n");
+#ifdef PRINT_OUT
+      mexPrintf("file opened\n");
+#endif
+      SaveCode_swp.open((filename + ".swp").c_str(), std::ios::out | std::ios::binary);
+      if (!SaveCode_swp.is_open())
+        {
+          mexPrintf("Error : Can't open file \"%s\" for writing\n", (filename + ".swp").c_str());
+          mexErrMsgTxt("Exit from Dynare");
+        }
+#ifdef PRINT_OUT
+      mexPrintf("done\n");
+#endif
+    }
+  SaveCode_swp.write(reinterpret_cast<char *>(nop_all), sizeof(*nop_all));
+  SaveCode_swp.write(reinterpret_cast<char *>(save_op_all), (*nop_all)*sizeof(int));
+  (*nop_all)=0;
+}
+
+bool
+read_swp_f(int **save_op_all,long int *nop_all)
+{
+  int j;
+  swp_f=true;
+  if (!SaveCode_swp.is_open())
+    {
+#ifdef PRINT_OUT
+      mexPrintf("file opened\n");
+#endif
+      mexPrintf("open the file %s\n",(filename + ".swp").c_str());
+      SaveCode_swp.open((filename + ".swp").c_str(), std::ios::in | std::ios::binary);
+      j=SaveCode_swp.is_open();
+      mexPrintf("is_open()=%d\n",j);
+
+      if (!SaveCode_swp.is_open())
+        {
+          mexPrintf("Error : Can't open file \"%s\" for reading\n", (filename + ".swp").c_str());
+          mexErrMsgTxt("Exit from Dynare");
+        }
+#ifdef PRINT_OUT
+      mexPrintf("done\n");
+#endif
+      SaveCode_swp.seekg(0);
+    }
+
+  j=SaveCode_swp.tellg();
+  //mexPrintf("SaveCode_swp.tellg()=%d\n",int(j));
+  SaveCode_swp.read(reinterpret_cast<char *>(nop_all), sizeof(*nop_all));
+  (*save_op_all)=(int*)mxMalloc((*nop_all)*sizeof(int));
+  SaveCode_swp.read(reinterpret_cast<char *>(*save_op_all), (*nop_all)*sizeof(int));
+  return(SaveCode_swp.good());
+}
+
+
+void
+close_swp_f()
+{
+  if (SaveCode_swp.is_open())
+    {
+      SaveCode_swp.close();
+      mexPrintf("close the swp file\n");
+    }
+}
+
+
+void
+SparseMatrix::run_it(int nop_all,int *op_all)
+{
+  longd r;
+  int index_d;
+  for (long int i=0;i<nop_all;)
+    {
+      index_d=op_all[i+1];
+      if (index_d>=u_count_alloc)
+        {
+          u_count_alloc+=5*u_count_alloc_save;
+#ifdef MEM_ALLOC_CHK
+          mexPrintf("u=(longd*)mxRealloc(u,u_count_alloc*sizeof(longd))\n",u_count_alloc);
+#endif
+          u=(longd*)mxRealloc(u,u_count_alloc*sizeof(longd));
+#ifdef MEM_ALLOC_CHK
+          mexPrintf("ok\n");
+#endif
+          if (!u)
+            {
+              mexPrintf("Error in Get_u: memory exhausted (realloc(%d))\n",u_count_alloc*sizeof(longd));
+              mexErrMsgTxt("Exit from Dynare");
+            }
+        }
+      switch (op_all[i])
+        {
+          case FLD  :
+            r=u[index_d];
+#ifdef PRINT_u
+            mexPrintf("FLD u[%d] (%f)\n",index_d,u[index_d]);
+#endif
+            i+=2;
+            break;
+          case FDIV :
+            u[index_d]/=r;
+#ifdef PRINT_u
+            mexPrintf("FDIV u[%d](%f)/=r(%f)=(%f)\n",index_d,u[index_d],r,u[index_d]);
+#endif
+            i+=2;
+            break;
+          case FSUB :
+            u[index_d]-=u[op_all[i+2]]*r;
+#ifdef PRINT_u
+            mexPrintf("FSUB u[%d]-=u[%d](%f)*r(%f)=(%f)\n",index_d,op_all[i+2],u[op_all[i+2]],r,u[index_d]);
+#endif
+            i+=3;
+            break;
+          case FLESS:
+            u[index_d]=-u[op_all[i+2]]*r;
+#ifdef PRINT_u
+            mexPrintf("FLESS u[%d]=-u[%d](%f)*r(%f)=(%f)\n",index_d,op_all[i+2],u[op_all[i+2]],r,u[index_d]);
+#endif
+            i+=3;
+            break;
+        }
+    }
+  //mexPrintf("end of run_triangular\n");
+}
+
+
+void
+SparseMatrix::run_triangular(int nop_all,int *op_all)
+{
+  int j=0;
+  mexPrintf("begining of run_triangular nop_all=%d\n",nop_all);
+  if (swp_f)
+    {
+      bool OK=true;
+      int* save_op;
+      long int nop;
+      while (OK)
+        {
+          mexPrintf("reading blck%d\n",j++);
+          OK=read_swp_f(&save_op,&nop);
+          //mexPrintf("OK=%d\n",OK);
+          if (OK)
+            {
+              run_it(nop,save_op);
+              mxFree(save_op);
+            }
+        }
+    }
+  run_it(nop_all,op_all);
+}
+
+int
+SparseMatrix::complete(int beg_t, int Size, int periods, int *b)
+{
+  long int i, j, k, nop, nopa, nop1, cal_y, nb_var, pos, t, ti, max_var, min_var;
+  NonZeroElem *first;
+  int *save_code;
+  int *diff;
+  longd yy=0.0, err, ferr;
+
+  /*mexPrintf("in complete t=%d\n",beg_t);
+  mexPrintf("u_count=%d\n",u_count);*/
+
+  int size_of_save_code=(1+y_kmax)*Size*(Size+1+4)/2*4;
+#ifdef MEM_ALLOC_CHK
+  mexPrintf("save_code=(int*)mxMalloc(%d*sizeof(int))\n",size_of_save_code);
+#endif
+  save_code=(int*)mxMalloc(size_of_save_code*sizeof(int));
+  int size_of_diff=(1+y_kmax)*Size*(Size+1+4);
+#ifdef MEM_ALLOC_CHK
+  mexPrintf("diff=(int*)mxMalloc(%d*sizeof(int))\n",size_of_diff);
+#endif
+  diff=(int*)mxMalloc(size_of_diff*sizeof(int));
+#ifdef MEM_ALLOC_CHK
+  mexPrintf("ok\n");
+#endif
+  //mexPrintf("Size=%d\n",Size);
+  cal_y=y_size*y_kmin;
+
+  i=(beg_t+1)*Size-1;
+  nop=0;
+  for (j=i;j>i-Size;j--)
+    {
+      pos=pivot[j];
+      nb_var=At_Row(pos,&first);
+      first=first->NZE_R_N;
+      nb_var--;
+      //mexPrintf("y[%d]=",index_vara[j]+y_size);
+      //yy=0;
+      save_code[nop]=FLDZ;
+      save_code[nop+1]=0;
+      save_code[nop+2]=0;
+      save_code[nop+3]=0;
+      if ((nop+3)>=size_of_save_code)
+        mexPrintf("out of save_code[%d] (bound=%d)\n",nop+2,size_of_save_code);
+      nop+=4;
+      for (k=0;k<nb_var;k++)
+        {
+          //yy+=y[index_vara[first->c_index]+cal_y]*u[first->u_index];
+          //mexPrintf("+y[%d]*u[%d]",index_vara[first->c_index]+cal_y,first->u_index);
+          save_code[nop]=FMUL;
+          save_code[nop+1]=index_vara[first->c_index]+cal_y;
+          save_code[nop+2]=first->u_index;
+          save_code[nop+3]=first->lag_index;
+          if ((nop+3)>=size_of_save_code)
+            mexPrintf("out of save_code[%d] (bound=%d)\n",nop+2,size_of_save_code);
+          nop+=4;
+          first=first->NZE_R_N;
+        }
+      //yy=-(yy+u[b[pos]]);
+      //mexPrintf("|u[%d]|\n",b[pos]);
+      save_code[nop]=FADD;
+      save_code[nop+1]=b[pos];
+      save_code[nop+2]=0;
+      save_code[nop+3]=0;
+      if ((nop+3)>=size_of_save_code)
+        mexPrintf("out of save_code[%d] (bound=%d)\n",nop+2,size_of_save_code);
+      nop+=4;
+      save_code[nop]=FSTP;
+      save_code[nop+1]=index_vara[j]+y_size*y_kmin;
+      save_code[nop+2]=0;
+      save_code[nop+3]=0;
+      if ((nop+2)>=size_of_save_code)
+        mexPrintf("out of save_code[%d] (bound=%d)\n",nop+2,size_of_save_code);
+      nop+=4;
+    }
+  //mexPrintf("nop=%d\n",nop);
+  i=beg_t*Size-1;
+  nop1=nopa=0;
+  for (j=i;j>i-Size;j--)
+    {
+      pos=pivot[j];
+      nb_var=At_Row(pos,&first);
+      first=first->NZE_R_N;
+      nb_var--;
+      //mexPrintf("y[%d]=",index_vara[j]+y_size);
+      //yy=0;
+      //mexPrintf("ok00 nopa=%d",nopa);
+      diff[nopa]=0;
+      //mexPrintf("ok01");
+      diff[nopa+1]=0;
+      //mexPrintf("ok02");
+      nopa+=2;
+      nop1+=4;
+      //mexPrintf("ok03");
+      for (k=0;k<nb_var;k++)
+        {
+          //yy+=y[index_vara[first->c_index]+cal_y]*u[first->u_index];
+          //mexPrintf("+y[%d]*u[%d]",index_vara[first->c_index]+cal_y,first->u_index);
+          diff[nopa]=save_code[nop1+1]-(index_vara[first->c_index]+cal_y);
+          /*if(save_code[nop1+2]==1064856)
+            mexPrintf("save_code[%d]=%d first->u_index=%d\n",nop1+2,save_code[nop1+2],first->u_index);*/
+          diff[nopa+1]=save_code[nop1+2]-(first->u_index);
+          if ((nop1+2)>=size_of_save_code)
+            mexPrintf("out of save_code[%d] (bound=%d)\n",nop1+2,size_of_save_code);
+          if ((nopa+1)>=size_of_diff)
+            mexPrintf("out of diff[%d] (bound=%d)\n",nopa+2,size_of_diff);
+          nopa+=2;
+          nop1+=4;
+          first=first->NZE_R_N;
+        }
+      //yy=-(yy+u[b[pos]]);
+      //mexPrintf("|u[%d]|\n",b[pos]);
+      diff[nopa]=save_code[nop1+1]-(b[pos]);
+      diff[nopa+1]=0;
+      if ((nop1+3)>=size_of_save_code)
+        mexPrintf("out of save_code[%d] (bound=%d)\n",nop1+2,size_of_save_code);
+      if ((nopa+1)>=size_of_diff)
+        mexPrintf("out of diff[%d] (bound=%d)\n",nopa+2,size_of_diff);
+      nopa+=2;
+      nop1+=4;
+      diff[nopa]=save_code[nop1+1]-(index_vara[j]+y_size*y_kmin);
+      diff[nopa+1]=0;
+      if ((nop1+4)>=size_of_save_code)
+        mexPrintf("out of save_code[%d] (bound=%d)\n",nop1+2,size_of_save_code);
+      if ((nopa+1)>=size_of_diff)
+        mexPrintf("out of diff[%d] (bound=%d)\n",nopa+2,size_of_diff);
+      nopa+=2;
+      nop1+=4;
+    }
+  //mexPrintf("ok1\n");
+  //goto end;
+  //mexPrintf("nopa=%d",nopa);
+  //mexPrintf("==>beg_t=%d\n",beg_t);
+  max_var=(periods+y_kmin)*y_size;
+  min_var=y_kmin*y_size;
+  int k1=0;
+  for (t=periods+y_kmin-1;t>=beg_t+y_kmin;t--)
+    {
+      j=0;
+      ti=t-y_kmin-beg_t;
+      //int var=0;
+      //mexPrintf("t=%d ti=%d\n",t,ti);
+      for (i=0;i<nop;i+=4)
+        {
+          switch (save_code[i])
+            {
+              case FLDZ :
+                yy=0;
+                break;
+              case FMUL :
+                k=save_code[i+1]+ti*diff[j];
+                if (k<max_var && k>min_var)
+                  {
+                    /*mexPrintf("FMUL save_code[%d]",i+1);
+                    mexPrintf("(%d)+ti*",save_code[i+1]);
+                    mexPrintf("diff[%d]",j);
+                    mexPrintf("(%d)",diff[j]);
+                    mexPrintf("=k(%d)\n",k);
+                    mexPrintf("save_code[%d]",i+2);
+                    mexPrintf("(%d)+ti*",save_code[i+2]);
+                    mexPrintf("diff[%d]",j+1);
+                    mexPrintf("(%d)=%d\n",diff[j+1],save_code[i+2]+ti*diff[j+1]);*/
+                    yy+=y[k]*u[save_code[i+2]+ti*diff[j+1]];
+#ifdef PRINT_OUT_y1
+                    //if(k1==3196)
+                      mexPrintf("y[%d](%f)*u[%d](%f)+",k, double(y[k]), save_code[i+2]+ti*diff[j+1], double(u[save_code[i+2]+ti*diff[j+1]]));
+#endif
+                    //mexPrintf("u[%d]*y[%d]+",save_code[i+2]+ti*diff[j+1],k);
+                  }
+                /*else
+                  {
+                    if (k>=max_var)
+                      mexPrintf("è");
+                    else
+                      mexPrintf("ç");
+                  }*/
+                break;
+              case FADD :
+                /*mexPrintf("FADD save_code[%]=",i+1);
+                mexPrintf("(%d)+ti*",save_code[i+1]);
+                mexPrintf("diff[%d]",j);
+                mexPrintf("(%d)=%d\n",diff[j],save_code[i+1]+ti*diff[j]);*/
+                yy=-(yy+u[save_code[i+1]+ti*diff[j]]);
+#ifdef PRINT_OUT_y1
+                mexPrintf("|u[%d](%f)|",save_code[i+1]+ti*diff[j],double(u[save_code[i+1]+ti*diff[j]]));
+#endif
+                //mexPrintf("u[%d]",save_code[i+1]+ti*diff[j]);
+                break;
+              case FSTP :
+                /*mexPrintf("FSTP save_code[%]=",i+1);
+                mexPrintf("(%d)+ti*",save_code[i+1]);
+                mexPrintf("diff[%d]",j);
+                mexPrintf("(%d)=%d\n",diff[j],save_code[i+1]+ti*diff[j]);*/
+                k=save_code[i+1]+ti*diff[j];
+                k1=k;
+                err = yy - y[k];
+                /*ferr = fabs(err);
+                (*res1) += ferr;
+                if ((*max_res)<ferr)
+                  (*max_res)=err;
+                (*res2) += err*err;*/
+                y[k] += slowc*(err);
+#ifdef PRINT_OUT_y1
+                mexPrintf("=y[%d]=%f  diff[%d]=%d save_code[%d]=%d ti=%d\n",save_code[i+1]+ti*diff[j],y[k],j,diff[j],i+1,save_code[i+1],ti);
+#endif
+                //mexPrintf("=y[%d]",k);
+                //mexPrintf("=%f\n",y[k]);
+                /*if(ferr>eps)
+                  mexPrintf("Error on y[%d] |err|=%f\n",k,double(ferr));*/
+
+                break;
+            }
+          j+=2;
+        }
+    }
+  mxFree(save_code);
+  mxFree(diff);
+  //mexPrintf("out of complete\n");
+  return(beg_t);
+}
+
+longd
+SparseMatrix::bksub( int tbreak, int last_period, int Size, /*NonZeroElem *first,*/ long int *nmul, longd slowc_l)
+{
+  NonZeroElem *first;
+  //mexPrintf("bksub\n");
+  int i;
+  longd yy;
+  res1 = res2 = max_res = 0;
+  /*for(i=0;i<Size*periods;i++)
+    mexPrintf("pivot[%d]=%d\n",i,pivot[i]);*/
+  for (i=0;i<y_size*(periods+y_kmin);i++)
+    y[i]=ya[i];
+  //mexPrintf("oka\n");
+  if (symbolic && tbreak)
+    last_period=complete(tbreak, Size, periods, b);
+  else
+    last_period=periods;
+  //mexPrintf("okb\n");
+  for (int t=last_period+y_kmin-1;t>=y_kmin;t--)
+    {
+      int ti=(t-y_kmin)*Size;
+      //mexPrintf("l t=%d\n",t);
+#ifdef PRINT_OUT
+      mexPrintf("t=%d ti=%d\n",t,ti);
+#endif
+      int cal=y_kmin*Size;
+      int cal_y=y_size*y_kmin;
+      //int ti_y_kmax=min( periods+y_kmin-t, y_kmax);
+      for (i=ti-1;i>=ti-Size;i--)
+        {
+          j=i+cal;
+#ifdef PRINT_OUT_y
+          mexPrintf("t=%d, ti=%d j=%d i+Size=%d\n",t,ti,j,i+Size);
+#endif
+          int pos=pivot[/*j*/i+Size];
+#ifdef PRINT_OUT_y
+          mexPrintf("i-ti+Size=%d pos=%d j=%d\n",i-ti+Size,pos,j);
+#endif
+          //mexPrintf("FNZE_R[%d]=",pos);
+          //mexPrintf("%x\n",FNZE_R[pos]);
+          int nb_var=At_Row(pos,&first);
+          //mexPrintf("nb_var=%d\n",nb_var);
+          first=first->NZE_R_N;
+          nb_var--;
+          int eq=index_vara[j]+y_size;
+          /*if(eq==3212)
+            mexPrintf("=>");*/
+#ifdef PRINT_OUT_y1
+          mexPrintf("y[index_vara[%d]=%d]=",j,index_vara[j]+y_size);
+#endif
+          yy=0/*y[eq]*/;
+          for (k=0;k<nb_var;k++)
+            {
+//#ifdef PRINT_OUT_y1
+             /*if(eq==3212)
+               mexPrintf("u[%d](=%f)*y[index_vara[%d]=%d](=%f) => %f\n",first->u_index,double(u[first->u_index]),first->c_index,index_vara[first->c_index]+cal_y,double(y[index_vara[first->c_index]+cal_y]),y[index_vara[first->c_index]+cal_y]*u[first->u_index]);*/
+//#endif
+              //mexPrintf("u[%d]*y[%d]+",first->u_index,index_vara[first->c_index]+cal_y);
+              yy+=y[index_vara[first->c_index]+cal_y]*u[first->u_index];
+              (*nmul)++;
+              first=first->NZE_R_N;
+            }
+#ifdef PRINT_OUT_y1
+          mexPrintf("|u[%d](%f)|",b[pos],double(u[b[pos]]));
+#endif
+          //mexPrintf("u[%d]",b[pos]);
+          yy=-(yy+y[eq]+u[b[pos]]);
+          direction[eq]=yy;
+          /*longd ferr = fabs(err);
+          res1 += ferr;
+          if(max_res<ferr)
+            max_res=ferr;
+          res2 += ferr*ferr;*/
+          y[eq] += slowc_l*yy;
+#ifdef PRINT_OUT_y1
+          mexPrintf("=%f (%f)\n",double(yy),double(y[eq]));
+#endif
+          //mexPrintf("=y[%d]=%f\n",eq,y[eq]);
+        }
+    }
+  //mexPrintf("end bksub\n");
+  //mexPrintf("y_kmin=%d\n",y_kmin);
+  return res1;
+}
+
+int*
+malloc_std(long int nop)
+{
+  return((int*)malloc(nop*sizeof(int)));
+}
+
+int*
+realloc_std(int* save_op_o, long int &nopa)
+{
+  int *save_op=(int*)realloc(save_op_o,nopa*sizeof(int));
+  if(!save_op)
+    {
+      int nopag=int(nopa/3);
+      nopa=nopa-nopag;
+      while(!save_op && nopag>0)
+        {
+          nopag=int(nopag*0.66);
+          save_op=(int*)realloc(save_op_o,nopa*sizeof(int));
+        }
+      if(!save_op)
+        {
+          mexPrintf("Memory exhausted\n");
+          mexEvalString("drawnow;");
+          filename+=" stopped";
+          mexErrMsgTxt(filename.c_str());
+        }
+    }
+  return(save_op);
+}
+
+void chk_avail_mem(int **save_op_all,long int *nop_all,long int *nopa_all,int add, int t)
+  {
+    mexPrintf("Error: out of save_op_all[%d] nopa_all=%d t=%d\n",(*nop_all)+add,(*nopa_all),t);
+    int tmp_nopa_all=int(1.5*(*nopa_all));
+    int *tmp_i;
+    //mexSetTrapFlag(1);
+    if (tmp_nopa_all*sizeof(int)<1024*1024)
+      {
+        mexPrintf("allocate %d bites save_op_all=%x\n",tmp_nopa_all*sizeof(int),*save_op_all);
+        tmp_i=(int*)mxRealloc(*save_op_all,tmp_nopa_all*sizeof(int));
+        mexPrintf("tmp_i=");
+        mexPrintf("%x\n",tmp_i);
+      }
+    else
+      tmp_i=NULL;
+    if (!tmp_i)
+      {
+        write_swp_f((*save_op_all),nop_all);
+      }
+    else
+      {
+        mexPrintf("allocated\n");
+        (*save_op_all)=tmp_i;
+        //mexPrintf("okoa\n");
+        (*nopa_all)=tmp_nopa_all;
+        //mexPrintf("okoo\n");
+      }
+    //mexSetTrapFlag(0);
+    mexPrintf("end of chk\n");
+  }
+
+int
+simulate_NG1(int blck, int y_size, int it_, int y_kmin, int y_kmax, int Size, int periods, bool print_it)
+{
+  /*Triangularisation at each period of a block using a simple gaussian Elimination*/
+  bool record=false;
+  int *save_op=NULL, *save_opa=NULL, *save_opaa=NULL;
+  long int nop=0, nopa=0, nopaa=0;
+  int tbreak=0, last_period=periods;
+  int i,j,k;
+  int pivj=0, pivk=0;
+  long int ndiv=0, nsub=0, ncomp=0, nmul=0;
+  NonZeroElem *first, *firsta, *first_sub, *first_piv, *first_suba;
+  longd piv_abs, first_elem;
+  SparseMatrix sparse_matrix;
+  int save_u_count=u_count;
+  u_count_alloc_save=u_count_alloc;
+#ifdef PROFILER
+  double tinsert=0, tdelete=0, tpivot=0, tbigloop=0;
+  pctimer_t td1;
+#endif
+  pctimer_t t01;
+  pctimer_t t1 = pctimer();
+  tdelete1=0; tdelete2=0; tdelete21=0; tdelete22=0; tdelete221=0; tdelete222=0;
+  if (isnan(res1) || isinf(res1))
+    {
+      /*if(record_all and nop_all)
+        {
+          mexPrintf("NAN or INF value in simulation. Trying to restarte..\n");
+          mxFree(save_op_all);
+          save_op_all=NULL;
+          for(i=0;i<y_size*(periods+y_kmin);i++)
+            y[i]=ya[i];
+          u_count=save_u_count;
+          sparse_matrix.End(Size);
+        }
+      else
+        {*/
+      if (slowc_save<1e-8)
+        {
+          mexPrintf("Dynare cannot improve the simulation\n");
+          mexEvalString("drawnow;");
+          filename+=" stopped";
+          mexErrMsgTxt(filename.c_str());
+        }
+      slowc_save/=2;
+      mexPrintf("Error: Simulation diverging, trying to correct it using slowc=%f\n",slowc_save);
+      for (i=0;i<y_size*(periods+y_kmin);i++)
+        y[i]=ya[i]+slowc_save*direction[i];
+      iter--;
+      return(0);
+      /*}*/
+    }
+  u_count+=u_count_init;
+  if (alt_symbolic)
+    {
+      mexPrintf("Pivoting method will be only applied to the first periods.\n");
+      alt_symbolic=false;
+      symbolic=true;
+    }
+  if (((res1/res1a-1)>-0.1) && symbolic)
+    {
+      mexPrintf("Divergence or slowdown occured during simulation.\nIn the next iteration, pivoting method will be applied to all periods.\n");
+      symbolic=false;
+      alt_symbolic=true;
+    }
+  res1a=res1;
+  mexPrintf("-----------------------------------\n");
+  mexPrintf("      Simulate     iteration° %d     \n",iter+1);
+  mexPrintf("      max. error=%.10e       \n",double(max_res));
+  mexPrintf("      sqr. error=%.10e       \n",double(res2));
+  mexPrintf("      abs. error=%.10e       \n",double(res1));
+  mexPrintf("-----------------------------------\n");
+  //mexPrintf("record_all=%d save_op_all=%x\n",record_all,save_op_all);
+  mexEvalString("drawnow;");
+#ifdef PRINT_OUT
+  mexPrintf("Size=%d y_size=%d y_kmin=%d y_kmax=%d u_count=%d u_count_alloc=%d periods=%d\n",Size,y_size,y_kmin,y_kmax,u_count,u_count_alloc,periods);
+#endif
+#ifdef PROFILER
+  pctimer_t t00 = pctimer();
+#endif
+#ifdef WRITE_u
+ fstream toto;
+ int i_toto=0;
+ if(!symbolic)
+   {
+     toto.open("compare_good.txt", std::ios::out);
+   }
+#endif
+#ifdef PROFILER
+  t01=pctimer();
+#endif
+#ifdef PROFILER
+  mexPrintf("initialization time=%f ms\n",1000*(t01-t00));
+#endif
+
+#ifdef PRINT_OUT
+  //sparse_matrix.Print(Size,b);
+  mexPrintf("sizeof(NonZeroElem)=%d\n",sizeof(NonZeroElem));
+  for (i=0;i<Size*periods;i++)
+    mexPrintf("b[%d]=%f\n",i,double(b[i]));
+#endif
+  if (record_all && !save_op_all)
+    {
+      nopa_all=(Size*periods)*Size*periods*4;  /*Initial guess on the total number of operations*/
+      //mexPrintf("nopa_all=%d\n",nopa_all);
+#ifdef MEM_ALLOC_CHK
+      mexPrintf("save_op_all=(int*)mxMalloc(%d*sizeof(int))\n",nopa_all);
+#endif
+      save_op_all=(int*)mxMalloc(nopa_all*sizeof(int));
+#ifdef MEM_ALLOC_CHK
+      mexPrintf("ok\n");
+#endif
+      nop_all=0;
+    }
+#ifdef PRINT_OUT
+  system("pause");
+  mexPrintf("That's the beginning Size=%d\n",Size);
+#endif
+  /*Add the first and the last values of endogenous to the exogenous */
+#ifdef PROFILER
+  t00 = pctimer();
+#endif
+  if (record_all && nop_all)
+    {
+      sparse_matrix.ShortInit(periods, y_kmin, y_kmax, Size, IM_i);
+      sparse_matrix.run_triangular(nop_all,save_op_all);
+    }
+  else if (g_nop_all>0)
+    sparse_matrix.run_u_period1(periods);
+  else
+    {
+      //mexPrintf("ok\n");
+      sparse_matrix.Init(periods, y_kmin, y_kmax, Size, IM_i);
+      for (int t=0;t<periods;t++)
+        {
+          //mexPrintf("t=%d u_count=%d\n",t,u_count);
+#ifdef WRITE_u
+          if(!symbolic && ((periods-t)<=y_kmax))
+            {
+              toto << "t=" << t << endl;
+            }
+#endif
+          //sparse_matrix.Print(Size,b);
+#ifdef PROFILER
+          pctimer_t by_time_t0=pctimer();
+#endif
+          //mexPrintf("t=%d \n",t);
+          if (record && symbolic)
+            {
+              if (save_op);
+              {
+                mxFree(save_op);
+                save_op=NULL;
+              }
+#ifdef MEM_ALLOC_CHK
+              mexPrintf("save_op=(int*)mxMalloc(%d*sizeof(int))\n",nop);
+#endif
+#ifdef N_MX_ALLOC
+              save_op=malloc_std(nop);
+#else
+              save_op=(int*)mxMalloc(nop*sizeof(int));
+#endif
+#ifdef MEM_ALLOC_CHK
+              mexPrintf("ok\n");
+#endif
+            }
+          nop=0;
+#ifdef PRINT_OUT
+          mexPrintf("---------------------------------------------------------\n");
+          mexPrintf("t=%d\n",t);
+          mexPrintf("---------------------------------------------------------\n");
+#endif
+          sparse_matrix.Clear_u();
+          int ti=t*Size;
+          for (i=ti;i<Size+ti;i++)
+            {
+              /*finding the max-pivot*/
+              //sparse_matrix.Print(Size,b);
+#ifdef PRINT_OUT
+              sparse_matrix.Print(Size,b);
+              mexPrintf("*************************************\n");
+              mexPrintf("Finding the Pivot at column i=%d\n",i);
+#endif
+#ifdef PROFILER
+              pctimer_t td0=pctimer();
+#endif
+              longd piv=piv_abs=0;
+              /*mexPrintf("beg i=%d \n",i);
+              mexEvalString("drawnow;");*/
+              int nb_eq=sparse_matrix.At_Col(i, 0, &first);
+#ifdef PRINT_OUT
+              mexPrintf("nb_eq=%d\n",nb_eq);
+#endif
+              if /*(t<=y_kmin)*/((symbolic && t<=y_kmin) || !symbolic)
+                {
+                  for (j=0;j<nb_eq;j++)
+                    {
+#ifdef PRINT_OUT
+                      mexPrintf("first=%x\n",first);
+                      mexPrintf("examine col %d row %d with lag 0 line_done=%d \n",i,first->r_index,line_done[first->r_index]);
+#endif
+                      if (!line_done[first->r_index])
+                        {
+                          k=first->u_index;
+#ifdef PRINT_OUT
+                          mexPrintf("u[%d]=%f fabs(u[%d])=%f\n",k,double(u[k]),k,double(fabs(u[k])));
+#endif
+                          int jj=first->r_index;
+                          int NRow_jj=sparse_matrix.NRow(jj);
+                          if (piv_abs<fabs(u[k])||NRow_jj==1)
+                            {
+                              piv=u[k];
+                              piv_abs=fabs(piv);
+                              pivj=jj;   //Line number
+                              pivk=k;   //position in u
+                              if (NRow_jj==1)
+                                break;
+                            }
+                          //ncomp++;
+                        }
+                      first=first->NZE_C_N;
+                    }
+#ifdef PROFILER
+                  tpivot+=pctimer()-td0;
+#endif
+
+#ifdef PRINT_OUT
+                  mexPrintf("Thats the pivot: %d with value %f in u[%d] \n",pivj,double(piv),pivk);
+                  mexPrintf("______________________________________________\n");
+                  mexPrintf("pivot[%d]=%d\n",i,pivj);
+#endif
+
+                  pivot[i]=pivj;
+                  pivotk[i]=pivk;
+                  pivotv[i]=piv;
+                }
+              else
+                {
+                  pivj=pivot[i-Size]+Size;
+                  pivot[i]=pivj;
+                  sparse_matrix.At_Pos(pivj, i, &first);
+                  pivk=first->u_index;
+                  piv=u[pivk];
+                  piv_abs=fabs(piv);
+                }
+              line_done[pivj]=true;
+#ifdef PRINT_u
+              mexPrintf("FLD u[%d] (%f=%f)   |",pivk,u[pivk],piv);
+              sparse_matrix.Print_u();mexPrintf("\n");
+#endif
+              if (symbolic)
+                {
+                  if (record)
+                    {
+                      if (nop+2>=nopa)
+                        {
+                          //mexPrintf("Error: out of save_op[%d] nopa=%d\n",nop+2,nopa);
+                          nopa=int(1.5*nopa);
+#ifdef MEM_ALLOC_CHK
+                          mexPrintf("save_op=(int*)mxRealloc(save_op,%d*sizeof(int))\n",nopa);
+#endif
+#ifdef N_MX_ALLOC
+                          save_op=realloc_std(save_op, nopa);
+#else
+                          save_op=(int*)mxRealloc(save_op,nopa*sizeof(int));
+#endif
+#ifdef MEM_ALLOC_CHK
+                          mexPrintf("ok\n");
+#endif
+                        }
+                      save_op[nop]=FLD;
+                      save_op[nop+1]=pivk;
+                      save_op[nop+2]=0;
+                      save_op[nop+3]=0;
+                    }
+                  nop+=4;
+                }
+              else if (record_all)
+                {
+                  if (nop_all+1>=nopa_all)
+                    chk_avail_mem(&save_op_all,&nop_all,&nopa_all,1,t);
+                  /*if(nop_all+1>=nopa_all)
+                    {
+                      mexPrintf("Error: out of save_op_all[%d] nopa_all=%d t=%d\n",nop_all+2,nopa_all,t);
+                      int tmp_nopa_all=int(1.5*nopa_all);
+                      mexSetTrapFlag(1);
+                      int *tmp_i=(int*)mxRealloc(save_op_all,tmp_nopa_all*sizeof(int));
+                      if(!tmp_i)
+                        write_swp_f(save_op_all,&nop_all);
+                      else
+                        {
+                          save_op_all=tmp_i;
+                          nopa_all=tmp_nopa_all;
+                        }
+                      mexSetTrapFlag(0);
+                    }*/
+                  save_op_all[nop_all]=FLD;
+                  save_op_all[nop_all+1]=pivk;
+                  nop_all+=2;
+                }
+              if (piv_abs<eps)
+                {
+                  //sparse_matrix.Print(Size,b);
+                  mexPrintf("Error: singular system\n");
+                  mexEvalString("drawnow;");
+                  filename+=" stopped";
+                  mexErrMsgTxt(filename.c_str());
+                }
+              /*divide all the non zeros elements of the line pivj by the max_pivot*/
+              int nb_var=sparse_matrix.At_Row(pivj,&first);
+#ifdef PRINT_OUT
+              mexPrintf("nb_var=%d\n",nb_var);
+#endif
+              for (j=0;j<nb_var;j++)
+                {
+#ifdef PRINT_OUT
+                  mexPrintf("j=%d ",j);
+                  mexPrintf("first=%x ",first);
+                  mexPrintf("dividing at lag %d [%d, %d] u[%d]\n",first->lag_index, first->r_index, first->c_index, first->u_index);
+#endif
+                  u[first->u_index]/=piv;
+                  /*if(first->u_index==81726)
+                    mexPrintf("(4) u[%d]/=%f=>%f\n",first->u_index,piv,u[first->u_index]);*/
+#ifdef WRITE_u
+                  if((periods-t)<=y_kmax)
+                    {
+                      toto << i_toto << " u[" /*<< first->u_index*/ << "]/=" << piv << "=" << u[first->u_index] << endl;
+                      i_toto++;
+                    }
+#endif
+#ifdef PRINT_u
+                  mexPrintf("FDIV u[%d](%f)/=piv(%f)=(%f)   |",first->u_index,u[first->u_index],piv,u[first->u_index]);
+                  sparse_matrix.Print_u();mexPrintf("\n");
+#endif
+                  if (symbolic)
+                    {
+                      if (record)
+                        {
+                          if (nop+2>=nopa)
+                            {
+                              //mexPrintf("Error: out of save_op[%d] nopa=%d\n",nop+2,nopa);
+                              nopa=int(1.5*nopa);
+#ifdef MEM_ALLOC_CHK
+                              mexPrintf("save_op=(int*)mxRealloc(save_op,%d*sizeof(int))\n",nopa);
+#endif
+#ifdef N_MX_ALLOC
+                              save_op=realloc_std(save_op, nopa);
+#else
+                              save_op=(int*)mxRealloc(save_op,nopa*sizeof(int));
+#endif
+#ifdef MEM_ALLOC_CHK
+                              mexPrintf("ok\n");
+#endif
+                            }
+
+                          save_op[nop]=FDIV;
+                          save_op[nop+1]=first->u_index;
+                          save_op[nop+2]=0;
+                          save_op[nop+3]=first->lag_index;
+                        }
+                      nop+=4;
+                    }
+                  else if (record_all)
+                    {
+                      if (nop_all+1>=nopa_all)
+                        chk_avail_mem(&save_op_all,&nop_all,&nopa_all,1,t);
+                      /*{
+                        mexPrintf("Error: out of save_op_all[%d] nopa_all=%d t=%d\n",nop_all+2,nopa_all,t);
+                        int tmp_nopa_all=int(1.5*nopa_all);
+                        mexSetTrapFlag(1);
+                        int *tmp_i=(int*)mxRealloc(save_op_all,tmp_nopa_all*sizeof(int));
+                        if(!tmp_i)
+                          write_swp_f(save_op_all,&nop_all);
+                        else
+                          {
+                            save_op_all=tmp_i;
+                            nopa_all=tmp_nopa_all;
+                          }
+                        mexSetTrapFlag(0);
+                      }*/
+                      save_op_all[nop_all]=FDIV;
+                      save_op_all[nop_all+1]=first->u_index;
+                      nop_all+=2;
+                    }
+                  //ndiv++;
+                  first=first->NZE_R_N;
+                }
+#ifdef PRINT_OUT
+              mexPrintf("dividing at u[%d]\n",b[pivj]);
+#endif
+              u[b[pivj]]/=piv;
+              /*if(b[pivj]==81726)
+                mexPrintf("(5) u[%d]/=%f=>%f\n",b[pivj],piv,u[b[pivj]]);*/
+#ifdef WRITE_u
+              if((periods-t)<=y_kmax)
+                {
+                  toto << i_toto << " u[" /*<< b[pivj]*/ << "]/=" << piv << "=" << u[b[pivj]] << endl;
+                  i_toto++;
+                }
+#endif
+#ifdef PRINT_u
+              mexPrintf("FDIV u[%d](%f)/=piv(%f)=(%f)   |",b[pivj],u[b[pivj]],piv,u[b[pivj]]);
+              sparse_matrix.Print_u();mexPrintf("\n");
+#endif
+              if (symbolic)
+                {
+                  if (record)
+                    {
+                      if (nop+2>=nopa)
+                        {
+                          //mexPrintf("Error: out of save_op[%d] nopa=%d\n",nop+2,nopa);
+                          nopa=int(1.5*nopa);
+#ifdef MEM_ALLOC_CHK
+                          mexPrintf("save_op=(int*)mxRealloc(save_op,%d*sizeof(int))\n",nopa);
+#endif
+#ifdef N_MX_ALLOC
+                          save_op=realloc_std(save_op, nopa);
+#else
+                          save_op=(int*)mxRealloc(save_op,nopa*sizeof(int));
+#endif
+#ifdef MEM_ALLOC_CHK
+                          mexPrintf("ok\n");
+#endif
+                        }
+                      save_op[nop]=FDIV;
+                      save_op[nop+1]=b[pivj];
+                      save_op[nop+2]=0;
+                      save_op[nop+3]=0;
+                    }
+                  nop+=4;
+                }
+              else if (record_all)
+                {
+                  if (nop_all+1>=nopa_all)
+                    chk_avail_mem(&save_op_all,&nop_all,&nopa_all,1,t);
+                  /*{
+                    mexPrintf("Error: out of save_op_all[%d] nopa_all=%d t=%d\n",nop_all+2,nopa_all,t);
+                    int tmp_nopa_all=int(1.5*nopa_all);
+                    mexSetTrapFlag(1);
+                    int *tmp_i=(int*)mxRealloc(save_op_all,tmp_nopa_all*sizeof(int));
+                    if(!tmp_i)
+                      write_swp_f(save_op_all,&nop_all);
+                    else
+                      {
+                        save_op_all=tmp_i;
+                        nopa_all=tmp_nopa_all;
+                      }
+                    mexSetTrapFlag(0);
+                  }*/
+                  save_op_all[nop_all]=FDIV;
+                  save_op_all[nop_all+1]=b[pivj];
+                  nop_all+=2;
+                }
+              //ndiv++;
+              /*substract the elements on the non treated lines*/
+              nb_eq=sparse_matrix.At_Col(i,&first);
+              NonZeroElem *first_piva;
+              int nb_var_piva=sparse_matrix.At_Row(pivj,&first_piva);
+              for (j=0;j<nb_eq;j++)
+                {
+                  int row=first->r_index;
+#ifdef PRINT_OUT
+                  mexPrintf("line_done[%d]=%d\n", row, int(line_done[row]));
+#endif
+                  if (!line_done[row])
+                    {
+#ifdef PRINT_OUT
+                      mexPrintf("Substracting from line %d lag %d\n",row,first->lag_index);
+#endif
+                      first_elem=u[first->u_index];
+#ifdef PRINT_u
+                      mexPrintf("FLD u[%d] (%f)  |",first->u_index,u[first->u_index]);
+                      sparse_matrix.Print_u();mexPrintf("\n");
+#endif
+                      if (symbolic)
+                        {
+                          if (record)
+                            {
+                              if (nop+2>=nopa)
+                                {
+                                  //mexPrintf("Error: out of save_op[%d] nopa=%d\n",nop+2,nopa);
+                                  nopa=int(1.5*nopa);
+#ifdef MEM_ALLOC_CHK
+                                  mexPrintf("save_op=(int*)mxRealloc(save_op,%d*sizeof(int))\n",nopa);
+#endif
+#ifdef N_MX_ALLOC
+                                  save_op=realloc_std(save_op, nopa);
+#else
+                                  save_op=(int*)mxRealloc(save_op,nopa*sizeof(int));
+#endif
+#ifdef MEM_ALLOC_CHK
+                                  mexPrintf("ok\n");
+#endif
+                                }
+                              save_op[nop]=FLD;
+                              save_op[nop+1]=first->u_index;
+                              save_op[nop+2]=0;
+                              save_op[nop+3]=abs(first->lag_index);
+                            }
+                          nop+=4;
+                        }
+                      else if (record_all)
+                        {
+                          if (nop_all+1>=nopa_all)
+                            chk_avail_mem(&save_op_all,&nop_all,&nopa_all,1,t);
+                          /*{
+                            mexPrintf("Error: out of save_op_all[%d] nopa_all=%d t=%d\n",nop_all+2,nopa_all,t);
+                            int tmp_nopa_all=int(1.5*nopa_all);
+                            mexSetTrapFlag(1);
+                            int *tmp_i=(int*)mxRealloc(save_op_all,tmp_nopa_all*sizeof(int));
+                            if(!tmp_i)
+                              write_swp_f(save_op_all,&nop_all);
+                            else
+                              {
+                                save_op_all=tmp_i;
+                                nopa_all=tmp_nopa_all;
+                              }
+                            mexSetTrapFlag(0);
+                          }*/
+                          save_op_all[nop_all]=FLD;
+                          save_op_all[nop_all+1]=first->u_index;
+                          nop_all+=2;
+                        }
+                      int nb_var_piv=nb_var_piva;
+                      first_piv=first_piva;
+                      int nb_var_sub=sparse_matrix.At_Row(row,&first_sub);
+                      int l_sub=0, l_piv=0;
+                      int sub_c_index=first_sub->c_index, piv_c_index=first_piv->c_index;
+                      int tmp_lag=first_sub->lag_index;
+#ifdef PROFILER
+                      td1 = pctimer();
+#endif
+                      while (l_sub<nb_var_sub || l_piv<nb_var_piv)
+                        {
+#ifdef PRINT_OUT
+                          if (l_piv<nb_var_piv)
+                            mexPrintf(" piv eq=%d lag=%d var=%d l1=%d",first_piv->r_index, first_piv->lag_index, first_piv->c_index,l_piv);
+                          mexPrintf("l_sub(%d)<nb_var_sub(%d)\n",l_sub,nb_var_sub);
+                          if (l_sub<nb_var_sub)
+                            mexPrintf(" sub eq=%d lag=%d var=%d l0=%d",first_sub->r_index, first_sub->lag_index, first_sub->c_index,l_sub);
+#endif
+                          if (l_sub<nb_var_sub && (sub_c_index<piv_c_index || l_piv>=nb_var_piv))
+                            {
+#ifdef PRINT_OUT
+                              mexPrintf("  u[%d]=u[%d]\n",first_sub->u_index,first_sub->u_index);
+#endif
+                              first_sub=first_sub->NZE_R_N;
+                              if (first_sub)
+                                sub_c_index=first_sub->c_index;
+                              else
+                                sub_c_index=Size*periods;
+                              l_sub++;
+                            }
+                          else if (sub_c_index>piv_c_index || l_sub>=nb_var_sub)
+                            {
+                              int tmp_u_count=sparse_matrix.Get_u();
+#ifdef PROFILER
+                              pctimer_t td0=pctimer();
+#endif
+                              //mexPrintf("insert\n");
+                              int lag=first_piv->c_index/Size-row/Size;
+                              sparse_matrix.Insert(row,first_piv->c_index,tmp_u_count,lag);
+                              //mexPrintf("end insert\n");
+#ifdef PROFILER
+                              tinsert+=pctimer()-td0;
+#endif
+                              u[tmp_u_count]=-u[first_piv->u_index]*first_elem;
+                              /*if(tmp_u_count==81726)
+                                mexPrintf("(6) u[%d]=-u[%d](%f)*first_elem(%f)=>%f\n",tmp_u_count,first_piv->u_index,u[first_piv->u_index],first_elem,u[tmp_u_count]);*/
+                              /*if(t==7)
+                                mexPrintf("u[%d]=-u[%d]*%f=%f\n",tmp_u_count,first_piv->u_index,first_elem,double(u[tmp_u_count]));*/
+#ifdef WRITE_u
+                              if((periods-t)<=y_kmax)
+                                {
+                                  toto << i_toto << " u[" /*<< tmp_u_count*/ << "]=-u[" /*<< first_piv->u_index*/ << "]*" << first_elem << "=" << u[tmp_u_count] << endl;
+                                  i_toto++;
+                                }
+#endif
+#ifdef PRINT_u
+                              mexPrintf("FLESS u[%d]=-u[%d](%f)*r(%f)=(%f)   |",tmp_u_count,first_piv->u_index,u[first_piv->u_index],first_elem,u[tmp_u_count]);
+                              sparse_matrix.Print_u();mexPrintf("\n");
+#endif
+                              if (symbolic)
+                                {
+                                  if (record)
+                                    {
+                                      if (nop+2>=nopa)
+                                        {
+                                          //mexPrintf("Error: out of save_op[%d] nopa=%d\n",nop+2,nopa);
+                                          nopa=int(1.5*nopa);
+#ifdef MEM_ALLOC_CHK
+                                          mexPrintf("save_op=(int*)mxRealloc(save_op,%d*sizeof(int))\n",nopa);
+#endif
+#ifdef N_MX_ALLOC
+                                          save_op=realloc_std(save_op, nopa);
+#else
+                                          save_op=(int*)mxRealloc(save_op,nopa*sizeof(int));
+#endif
+#ifdef MEM_ALLOC_CHK
+                                          mexPrintf("ok\n");
+#endif
+                                        }
+                                      save_op[nop]=FLESS;
+                                      save_op[nop+1]=tmp_u_count;
+                                      save_op[nop+2]=first_piv->u_index;
+                                      save_op[nop+3]=max(first_piv->lag_index,abs(tmp_lag)/*abs(lag)*/);
+                                    }
+                                  nop+=4;
+                                }
+                              else if (record_all)
+                                {
+                                  if (nop_all+2>=nopa_all)
+                                    chk_avail_mem(&save_op_all,&nop_all,&nopa_all,2,t);
+                                  /*{
+                                    mexPrintf("Error: out of save_op_all[%d] nopa_all=%d t=%d\n",nop_all+2,nopa_all,t);
+                                    int tmp_nopa_all=int(1.5*nopa_all);
+                                    mexSetTrapFlag(1);
+                                    int *tmp_i=(int*)mxRealloc(save_op_all,tmp_nopa_all*sizeof(int));
+                                    if(!tmp_i)
+                                      write_swp_f(save_op_all,&nop_all);
+                                    else
+                                      {
+                                        save_op_all=tmp_i;
+                                        nopa_all=tmp_nopa_all;
+                                      }
+                                    mexSetTrapFlag(0);
+                                  }*/
+
+                                  save_op_all[nop_all]=FLESS;
+                                  save_op_all[nop_all+1]=tmp_u_count;
+                                  save_op_all[nop_all+2]=first_piv->u_index;
+                                  nop_all+=3;
+                                }
+                              //nsub++;
+#ifdef PRINT_OUT
+                              mexPrintf("  u[%d at (%d, %d) lag %d]=-u[%d]*%f\n",tmp_u_count,row , first_piv->c_index, first_piv->c_index/Size-row/Size, first_piv->u_index ,double(first_elem));
+#endif
+                              first_piv=first_piv->NZE_R_N;
+                              if (first_piv)
+                                piv_c_index=first_piv->c_index;
+                              else
+                                piv_c_index=Size*periods;
+                              l_piv++;
+                            }
+                          else /*first_sub->c_index==first_piv->c_index*/
+                            {
+                              if (i==sub_c_index)
+                                {
+#ifdef PRINT_OUT
+                                  mexPrintf("   delete element [%d, %d] lag %d u[%d]\n",first_sub->r_index,first_sub->c_index,first_sub->lag_index,first_sub->u_index);
+#endif
+                                  firsta=first;
+                                  first_suba=first_sub->NZE_R_N;
+#ifdef PROFILER
+                                  pctimer_t td0=pctimer();
+#endif
+                                  //mexPrintf("delete\n");
+                                  sparse_matrix.Delete(first_sub->r_index,first_sub->c_index, Size, b);
+                                  //mexPrintf("end delete\n");
+#ifdef PROFILER
+                                  tdelete+=pctimer()-td0;
+#endif
+                                  first=firsta->NZE_C_N;
+                                  first_sub=first_suba;
+                                  if (first_sub)
+                                    sub_c_index=first_sub->c_index;
+                                  else
+                                    sub_c_index=Size*periods;
+                                  l_sub++;
+                                  first_piv=first_piv->NZE_R_N;
+                                  if (first_piv)
+                                    piv_c_index=first_piv->c_index;
+                                  else
+                                    piv_c_index=Size*periods;
+                                  l_piv++;
+#ifdef PRINT_OUT
+                                  sparse_matrix.Print(Size,b);
+#endif
+                                }
+                              else
+                                {
+#ifdef PRINT_OUT
+                                  mexPrintf("  u[%d]-=u[%d]*%f\n",first_sub->u_index,first_piv->u_index,double(first_elem));
+#endif
+
+
+                                  u[first_sub->u_index]-=u[first_piv->u_index]*first_elem;
+                                  /*if(first_sub->u_index==81726)
+                                    mexPrintf("(7) u[%d]-=u[%d](%f)*first_elem(%f)=>%f\n",first_sub->u_index,first_piv->u_index,u[first_piv->u_index],first_elem,u[first_sub->u_index]);*/
+#ifdef WRITE_u
+                                  if((periods-t)<=y_kmax)
+                                    {
+                                      toto << i_toto << " u[" /*<< first_sub->u_index*/ << "]-=u[" /*<< first_piv->u_index*/ << "]*" << first_elem << "=" << u[first_sub->u_index] << endl;
+                                      i_toto++;
+                                    }
+#endif
+#ifdef PRINT_u
+                                  mexPrintf("FSUB u[%d]-=u[%d](%f)*r(%f)=(%f)  |",first_sub->u_index,first_piv->u_index,u[first_piv->u_index],first_elem,u[first_sub->u_index]);
+                                  sparse_matrix.Print_u();mexPrintf("\n");
+#endif
+                                  /*if(t==7)
+                                    mexPrintf("u[%d]-=u[%d]*%f=%f\n",first_sub->u_index,first_piv->u_index,first_elem,double(u[first_sub->u_index]));*/
+                                  if (symbolic)
+                                    {
+                                      if (record)
+                                        {
+                                          if (nop+2>=nopa)
+                                            {
+                                              //mexPrintf("Error: out of save_op[%d] nopa=%d\n",nop+2,nopa);
+                                              nopa=int(1.5*nopa);
+#ifdef MEM_ALLOC_CHK
+                                              mexPrintf("save_op=(int*)mxRealloc(save_op,%d*sizeof(int))\n",nopa);
+#endif
+#ifdef N_MX_ALLOC
+                                              save_op=realloc_std(save_op, nopa);
+#else
+                                              save_op=(int*)mxRealloc(save_op,nopa*sizeof(int));
+#endif
+#ifdef MEM_ALLOC_CHK
+                                              mexPrintf("ok\n");
+#endif
+                                            }
+                                          save_op[nop]=FSUB;
+                                          save_op[nop+1]=first_sub->u_index;
+                                          save_op[nop+2]=first_piv->u_index;
+                                          save_op[nop+3]=max(abs(/*first_sub->lag_index*/tmp_lag),first_piv->lag_index);
+                                        }
+                                      nop+=4;
+                                    }
+                                  else if (record_all)
+                                    {
+                                      if (nop_all+2>=nopa_all)
+                                        chk_avail_mem(&save_op_all,&nop_all,&nopa_all,2,t);
+                                      /*{
+                                        mexPrintf("Error: out of save_op_all[%d] nopa_all=%d t=%d\n",nop_all+2,nopa_all,t);
+                                        int tmp_nopa_all=int(1.5*nopa_all);
+                                        mexSetTrapFlag(1);
+                                        int *tmp_i=(int*)mxRealloc(save_op_all,tmp_nopa_all*sizeof(int));
+                                        if(!tmp_i)
+                                          write_swp_f(save_op_all,&nop_all);
+                                        else
+                                          {
+                                            save_op_all=tmp_i;
+                                            nopa_all=tmp_nopa_all;
+                                          }
+                                        mexSetTrapFlag(0);
+                                      }*/
+                                      save_op_all[nop_all]=FSUB;
+                                      save_op_all[nop_all+1]=first_sub->u_index;
+                                      save_op_all[nop_all+2]=first_piv->u_index;
+                                      nop_all+=3;
+                                    }
+
+                                  //nsub++;
+                                  first_sub=first_sub->NZE_R_N;
+                                  if (first_sub)
+                                    sub_c_index=first_sub->c_index;
+                                  else
+                                    sub_c_index=Size*periods;
+                                  l_sub++;
+                                  first_piv=first_piv->NZE_R_N;
+                                  if (first_piv)
+                                    piv_c_index=first_piv->c_index;
+                                  else
+                                    piv_c_index=Size*periods;
+                                  l_piv++;
+                                }
+                            }
+                        }
+#ifdef PRINT_OUT
+                      mexPrintf("row=%d pivj=%d\n",row,pivj);
+                      mexPrintf("  u[%d](%f)-=u[%d](%f)*%f\n",b[row],double(u[b[row]]), b[pivj],double(u[b[pivj]]),double(first_elem));
+#endif
+
+                      u[b[row]]-=u[b[pivj]]*first_elem;
+                      /*if(b[row]==81726)
+                        mexPrintf("(8) u[%d]-=u[%d](%f)*first_elem(%f)=>%f\n",b[row],b[pivj],u[b[pivj]],first_elem,u[b[row]]);*/
+#ifdef PROFILER
+                      tbigloop += pctimer() - td1;
+#endif
+#ifdef WRITE_u
+                      if((periods-t)<=y_kmax)
+                        {
+                          toto << i_toto << " u[" /*<< b[row]*/ << "]-=u[" /*<< b[pivj]*/ << "]*" << first_elem << "=" << u[b[row]] << endl;
+                          i_toto++;
+                        }
+#endif
+                      /*if(t==7)
+                        mexPrintf("u[%d]-=u[%d]*%f=%f\n",b[row],b[pivj],first_elem,double(u[b[row]]));*/
+#ifdef PRINT_u
+                      mexPrintf("FSUB u[%d]-=u[%d](%f)*r(%f)=(%f)   |",b[row],b[pivj],u[b[pivj]],first_elem,u[b[row]]);
+                      sparse_matrix.Print_u();mexPrintf("\n");
+#endif
+                      if (symbolic)
+                        {
+                          if (record)
+                            {
+                              if (nop+2>=nopa)
+                                {
+                                  //mexPrintf("Error: out of save_op[%d] nopa=%d\n",nop+2,nopa);
+                                  nopa=int(1.5*nopa);
+#ifdef MEM_ALLOC_CHK
+                                  mexPrintf("save_op=(int*)mxRealloc(save_op,%d*sizeof(int))\n",nopa);
+#endif
+#ifdef N_MX_ALLOC
+                                  save_op=realloc_std(save_op, nopa);
+#else
+                                  save_op=(int*)mxRealloc(save_op,nopa*sizeof(int));
+#endif
+#ifdef MEM_ALLOC_CHK
+                                  mexPrintf("ok\n");
+#endif
+                                }
+                              save_op[nop]=FSUB;
+                              save_op[nop+1]=b[row];
+                              save_op[nop+2]=b[pivj];
+                              save_op[nop+3]=abs(tmp_lag);
+                            }
+                          nop+=4;
+                        }
+                      else if (record_all)
+                        {
+                          if (nop_all+2>=nopa_all)
+                            chk_avail_mem(&save_op_all,&nop_all,&nopa_all,2,t);
+                          /*{
+                            mexPrintf("Error: out of save_op_all[%d] nopa_all=%d t=%d\n",nop_all+2,nopa_all,t);
+                            int tmp_nopa_all=int(1.5*nopa_all);
+                            mexSetTrapFlag(1);
+                            int *tmp_i=(int*)mxRealloc(save_op_all,tmp_nopa_all*sizeof(int));
+                            if(!tmp_i)
+                              write_swp_f(save_op_all,&nop_all);
+                            else
+                              {
+                                save_op_all=tmp_i;
+                                nopa_all=tmp_nopa_all;
+                              }
+                            mexSetTrapFlag(0);
+                          }*/
+                          save_op_all[nop_all]=FSUB;
+                          save_op_all[nop_all+1]=b[row];
+                          save_op_all[nop_all+2]=b[pivj];
+                          nop_all+=3;
+                        }
+                      //nsub++;
+                    }
+                  else
+                    first=first->NZE_C_N;
+
+                  /*NonZeroElem *firstaa;
+                  int nb_eqa=sparse_matrix.At_Col(i,&firstaa);
+                  for(int ja=0;ja<nb_eqa;ja++)
+                    {
+                      mexPrintf(" with j=%d line %d %x\n",ja,firstaa->r_index,firstaa);
+                      firstaa=firstaa->NZE_C_N;
+                    }*/
+#ifdef PRINT_OUT
+                  mexPrintf(" bef first=%x\n",first);
+#endif
+                }
+            }
+          if (symbolic)
+            {
+              //mexPrintf("record=%d, nop=%d, nopa=%d\n",record,nop,nopa);
+              if (record && (nop==nopa))
+                {
+#ifdef PRINT_OUT
+                  mexPrintf("nop=%d, nopa=%d, record=%d save_opa=%x save_opaa=%x \n",nop, nopa, record, save_opa, save_opaa);
+#endif
+                  //mexPrintf("save_opa=%x, save_opaa=%x\n",save_opa, save_opaa);
+                  if (save_opa && save_opaa)
+                    {
+#ifdef PROFILER
+                      pctimer_t ta=pctimer();
+#endif
+                      if (compare( save_op, save_opa, save_opaa, t, periods, nop, Size, &ndiv, &nsub))
+                        {
+#ifdef PROFILER
+                          mexPrintf("compare time %f ms\n",1000*(pctimer()-ta));
+#endif
+                          tbreak=t;
+                          break;
+                        }
+                    }
+                  //mexPrintf("oka\n");
+                  if (save_opa)
+                    {
+                      if (save_opaa)
+                        {
+                          //mexPrintf("mxFree save_opaa=%x \n",save_opaa);
+#ifdef N_MX_ALLOC
+                          free(save_opaa);
+#else
+                          mxFree(save_opaa);
+#endif
+                          save_opaa=NULL;
+                        }
+#ifdef MEM_ALLOC_CHK
+                      mexPrintf("save_opaa=(int*)mxMalloc(%d*sizeof(int))\n",nopa);
+#endif
+#ifdef N_MX_ALLOC
+                      save_opaa=malloc_std(nopa);
+#else
+                      save_opaa=(int*)mxMalloc(nopa*sizeof(int));
+#endif
+#ifdef MEM_ALLOC_CHK
+                      mexPrintf("ok\n");
+#endif
+                      memcpy(save_opaa, save_opa, nopa*sizeof(int));
+                      //mexPrintf("1 - end memcpy\n");
+                    }
+                  //mexPrintf("okb\n");
+                  if (save_opa)
+                    {
+                      mxFree(save_opa);
+                      save_opa=NULL;
+                    }
+#ifdef MEM_ALLOC_CHK
+                  mexPrintf("save_opa=(int*)mxMalloc(%d*sizeof(int))\n",nop);
+#endif
+#ifdef N_MX_ALLOC
+                  save_opa=malloc_std(nop);
+#else
+                  save_opa=(int*)mxMalloc(nop*sizeof(int));
+#endif
+#ifdef MEM_ALLOC_CHK
+                  mexPrintf("ok\n");
+#endif
+                  memcpy(save_opa, save_op, nop*sizeof(int));
+                  //mexPrintf("end memcpy\n");
+                }
+              else
+                {
+                  if (nop==nopa)
+                    record=true;
+                  else
+                    {
+                      record=false;
+                      if (save_opa)
+                        {
+#ifdef N_MX_ALLOC
+                          free(save_opa);
+#else
+                          mxFree(save_opa);
+#endif
+                          save_opa=NULL;
+                        }
+                      if (save_opaa)
+                        {
+#ifdef N_MX_ALLOC
+                          free(save_opaa);
+#else
+                          mxFree(save_opaa);
+#endif
+                          save_opaa=NULL;
+                        }
+                    }
+                  //mexPrintf("nop=%d, nopa=%d, record=%d time=%f\n",nop, nopa, record,1000*(pctimer()-by_time_t0));
+                }
+              nopaa=nopa;
+              nopa=nop;
+            }
+          record=true;
+        }
+    }
+  nop_all+=nop;
+#ifdef PROFILER
+  t01=pctimer();
+  mexPrintf("resolution time=%f ms ndiv=%d nsub=%d ncomp=%d \n",1000*(t01-t00),ndiv,nsub,ncomp);
+  mexPrintf(" tinsert=%f tdelete=%f tpivot=%f tbigloop=%f tdelete1=%f tdelete2=%f \n",double(1000*tinsert), double(1000*tdelete), double(1000*tpivot), double(1000*tbigloop), double(1000*tdelete1), double(1000*tdelete2));
+  mexPrintf(" tdelete21=%f tdelete22=%f \n",double(1000*tdelete21),double(1000*tdelete22));
+  mexPrintf(" tdelete221=%f tdelete222=%f \n",double(1000*tdelete221),double(1000*tdelete222));
+#endif
+  //mexPrintf(" tdelete2221=%f tdelete2222=%f \n",double(1000*tdelete2221),double(1000*tdelete2222));
+  if (symbolic)
+    {
+#ifdef N_MX_ALLOC
+      if (save_op)
+        free(save_op);
+      if (save_opa)
+        free(save_opa);
+      if (save_opaa)
+        free(save_opaa);
+#else
+      if (save_op)
+        mxFree(save_op);
+      if (save_opa)
+        mxFree(save_opa);
+      if (save_opaa)
+        mxFree(save_opaa);
+#endif
+    }
+  /*if(pivota )
+    {
+      if(memcmp(pivot,pivota,Size*periods*sizeof(int))==0)
+        {
+          //record_all=true;
+          //symbolic=false;
+          mexPrintf("same pivoting\n");
+        }
+      else
+        {
+          mexPrintf("different pivoting\n");
+          mexPrintf("pivot (value) -pivota (value)\n");
+          for(i=0;i<Size;i++)
+            {
+              if(pivot[i]!=pivota[i])
+                mexPrintf("==>");
+              else
+                mexPrintf("   ");
+              mexPrintf("% 3d (%f) - %3d (%f)\n",pivot[i],pivotv[i], pivota[i], pivotva[i]);
+            }
+        }
+    }
+  else
+    pivota=(int*)mxMalloc(Size*periods*sizeof(int));
+  */
+  close_swp_f();
+  /*The backward substitution*/
+#ifdef PRINT_OUT
+  sparse_matrix.Print(Size,b);
+#endif
+  //mexPrintf("ok2\n");
+  longd slowc_lbx=slowc, res1bx;
+#ifdef PROFILER
+  t00 = pctimer();
+#endif
+  for (i=0;i<y_size*(periods+y_kmin);i++)
+    ya[i]=y[i];
+  slowc_save=slowc;
+  res1bx=sparse_matrix.bksub( tbreak, last_period, Size, &nmul, slowc_lbx);
+  t01=pctimer();
+#ifdef PROFILER
+  mexPrintf("backward substitution time=%f ms nmul=%d\n",1000*(t01-t00),nmul);
+#endif
+
+  /*memcpy(pivota, pivot, Size*periods*sizeof(int));
+  memcpy(pivotva, pivotv, Size*periods*sizeof(longd));*/
+
+  if (!((record_all && nop_all)||g_nop_all>0))
+    {
+      //mexPrintf("sparse_matrix.end()\n");
+      u_count=save_u_count;
+      sparse_matrix.End(Size);
+    }
+  if (print_it)
+    {
+      pctimer_t t2 = pctimer();
+      mexPrintf("(** %f milliseconds **)\n", 1000*(t2 - t1));
+      mexEvalString("drawnow;");
+    }
+
+#ifdef WRITE_u
+      if(!symbolic)
+        {
+          toto.close();
+          filename+=" stopped";
+          mexErrMsgTxt(filename.c_str());
+        }
+#endif
+  close_swp_f();
+  return(0);
+}
+
 

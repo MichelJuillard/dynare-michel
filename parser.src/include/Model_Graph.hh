@@ -6,7 +6,8 @@
 #define SIMPLIFYS
 #define SAVE
 #define COMPUTE
-#define PRINT_OUT_OUT
+//#define PRINT_OUT_OUT
+//#define PRINT_OUT_1
 #define DIRECT_SAVE
 #include "ModelTree.hh"
 #include "BlockTriangular.hh"

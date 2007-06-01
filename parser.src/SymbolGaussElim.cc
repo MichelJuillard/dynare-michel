@@ -11,6 +11,7 @@
 //#include "pctimer_h.hh"
 #include "Model_Graph.hh"
 #include "SymbolGaussElim.hh"
+//#define SIMPLIFY
 
 using namespace std;
 int max_nb_table_y, max_nb_in_degree_edges=0, max_nb_out_degree_edges=0;
@@ -297,10 +298,11 @@ SymbolicGaussElimination::write_to_file_table_u(t_table_u *save_table_u, t_table
 }
 
 void
-SymbolicGaussElimination::write_to_file_table_u_b(t_table_u *save_table_u, t_table_u *last_table_u, int *nb_save_table_u)
+SymbolicGaussElimination::write_to_file_table_u_b(t_table_u *save_table_u, t_table_u *last_table_u, int *nb_save_table_u, bool chk)
 {
   t_table_u *table_u;
-  while(save_table_u!=last_table_u)
+  bool OK=true;
+  while(/*save_table_u!=last_table_u*/OK)
     {
 #ifdef PRINT_OUT
       cout << "**save_table_u->type=" << int(save_table_u->type) << "\n";
@@ -349,9 +351,23 @@ SymbolicGaussElimination::write_to_file_table_u_b(t_table_u *save_table_u, t_tab
 #endif /**PRINT_OUT**/
           break;
         }
-      table_u = save_table_u->pNext;
-      free(save_table_u);
-      save_table_u = table_u;
+      if(chk)
+        {
+          OK=(save_table_u!=last_table_u);
+          if(OK)
+            {
+              table_u = save_table_u->pNext;
+              free(save_table_u);
+              save_table_u = table_u;
+            }
+        }
+      else
+        {
+          table_u = save_table_u->pNext;
+          free(save_table_u);
+          save_table_u = table_u;
+          OK=(save_table_u!=last_table_u);
+        }
     }
 }
 
@@ -525,7 +541,7 @@ SymbolicGaussElimination::interpolation(t_model_graph* model_graph, t_table_y* t
   t_table_u *tmp_table_u, *old_table_u;
   t_table_u *c_first_table_u, *c_second_table_u, *c_third_table_u;
   int c_first_y_blck, c_second_y_blck;
-  int i, j, k, up_to, op_count, k1, k2;
+  int i, j, k, up_to=0, op_count, k1, k2;
   bool OK, modify_u_count;
   int cur_pos, nb_table_u=0;
 #ifdef PRINT_OUT
@@ -701,6 +717,7 @@ SymbolicGaussElimination::interpolation(t_model_graph* model_graph, t_table_y* t
             }
           op_count++;
         }
+      SaveCode.flush();
       k=SaveCode.tellp();
       SaveCode.seekp(cur_pos);
       SaveCode.write(reinterpret_cast<char *>(&nb_table_u), sizeof(nb_table_u));
@@ -974,6 +991,7 @@ SymbolicGaussElimination::Vertex_Elimination(t_model_graph* model_graph, int pos
       cout << "--------------------------------------------------------------- \n";
       cout << "Elimination of vertex " << lvertex[vertex_to_eliminate].index << " interpolate=" << *interpolate << "\n";
       cout << "min_edge=" << min_edge << " length_markowitz=" << length_markowitz << "\n";
+      print_Graph(model_graph);
 #endif /**PRINT_OUT**/
 #ifdef DIRECT_COMPUTE
       table_y[vertex_count].index = lvertex[vertex_to_eliminate].index;
@@ -1087,7 +1105,7 @@ SymbolicGaussElimination::Vertex_Elimination(t_model_graph* model_graph, int pos
 #ifdef DEBUGR
                       cout << " creation of edge between vertices " << lvertex[i1].index << " and " << lvertex[j1].index << "\n";
 #endif /**DEBUGR**/
-#ifdef SYMPLIFY
+#ifdef SYMPLIFY  /*no reuse of free numbers, to be sure that there is no cyclcial behaviour in numbering*/
                       curr_u_count = get_free_u_list(dynamic);
 #else
                       curr_u_count = u_count;
@@ -1441,13 +1459,13 @@ SymbolicGaussElimination::Gaussian_Elimination(t_model_graph* model_graph
   cout << "going to open file file_open=" << file_open << " file_name={" << file_name << "}\n";
 #endif
   if(file_open)
-    SaveCode.open((file_name + ".bin").c_str(), ios::app | ios::binary);
+    SaveCode.open((file_name + ".bin").c_str(), ios::out | ios::in | ios::binary | ios ::ate );
   else
     SaveCode.open((file_name + ".bin").c_str(), ios::out | ios::binary);
   file_open = true;
   if(!SaveCode.is_open())
     {
-      cout << "Error : Can't open file \"CurrentModel.bin\" for writing\n";
+      cout << "Error : Can't open file \"" << file_name << ".bin\" for writing\n";
       exit( -1);
     }
 #ifdef PRINT_OUT
@@ -1728,14 +1746,14 @@ SymbolicGaussElimination::Gaussian_Elimination(t_model_graph* model_graph
                             prologue_save_table_y[i-first_nb_prologue_save_table_y]=table_y[i];
                           k=SaveCode.tellp();
                           SaveCode.seekp(cur_pos);
-                          i=nb_second_u_blck-prologue_nb_table_u;
+                          i=nb_second_u_blck-prologue_nb_table_u+1;
                           //cout << "nb_prologue_save_table_u=" << i << "\n";
                           SaveCode.write(reinterpret_cast<char *>(&i), sizeof(i));
                           SaveCode.seekp(k);
-                          write_to_file_table_u_b(first_u_blck,second_u_blck, &nb_prologue_save_table_u);
+                          write_to_file_table_u_b(first_u_blck,second_u_blck, &nb_prologue_save_table_u,true);
                           //cout << "nb_prologue_save_table_u(1)=" << nb_prologue_save_table_u << "\n";
                           nb_first_u_blck=nb_second_u_blck;
-                          nb_second_u_blck=nb_third_u_blck;
+                          nb_second_u_blck=nb_third_u_blck+1;
                           nb_first_y_blck=nb_second_y_blck;
                           nb_second_y_blck=nb_third_y_blck;
                           first_u_blck = second_u_blck;
@@ -1780,7 +1798,7 @@ SymbolicGaussElimination::Gaussian_Elimination(t_model_graph* model_graph
   else
     {
       SaveCode.write(reinterpret_cast<char *>(&nb_table_u), sizeof(nb_table_u));
-      write_to_file_table_u_b(First_table_u->pNext, table_u->pNext, &nb_last_save_table_u );
+      write_to_file_table_u_b(First_table_u->pNext, table_u->pNext, &nb_last_save_table_u, false );
       nb_last_save_table_y = vertex_count;
       last_save_table_y=(t_table_y*)malloc(nb_last_save_table_y*sizeof(*last_save_table_y));
       for(i=0;i<nb_last_save_table_y;i++)
@@ -1834,6 +1852,18 @@ SymbolicGaussElimination::Gaussian_Elimination(t_model_graph* model_graph
   free(s_j2);
 }
 
+void
+SymbolicGaussElimination::file_is_open1()
+{
+  file_open=true;
+}
+
+void
+SymbolicGaussElimination::file_is_open()
+{
+  file_open=true;
+  //file_is_open1();
+}
 
 void
 SymbolicGaussElimination::SGE_compute(Model_Block *ModelBlock, int blck, bool dynamic, string file_name, int endo_nbr)
@@ -1843,14 +1873,12 @@ SymbolicGaussElimination::SGE_compute(Model_Block *ModelBlock, int blck, bool dy
   // pctimer_t t1, t2;
   int i;
   int mean_var_in_equation;
-#ifdef PRINT_OUT
-  cout << "sizeof(i)=" << sizeof(i) << " sizeof(ttt)=" << sizeof(ttt) << " sizeof(short int)=" << sizeof(tti) << "\n" ;
-  system("pause");
-#endif
+
   init_glb();
   model_graph = (t_model_graph*)malloc(sizeof(*model_graph));
   nstacked = dynamic;
 #ifdef PRINT_OUT
+  periods = ModelBlock->Periods;
   cout << "nstacked=" << nstacked << "\n";
   // t1 = pctimer();
   cout << "periods=" << periods << "\n";
@@ -1872,6 +1900,9 @@ SymbolicGaussElimination::SGE_compute(Model_Block *ModelBlock, int blck, bool dy
   y_kmin = ModelBlock->Block_List[blck].Max_Lag;
   y_kmax = ModelBlock->Block_List[blck].Max_Lead;
   periods = ModelBlock->Periods;
+  if(periods<=3)
+    nstacked=false;
+  //cout << "periods=" << periods << " y_kmin=" << y_kmin << " y_kmax=" << y_kmax << "\n";
   u_count_init = u_count;
 #ifdef PRINT_OUT
   cout << "size : " << size << "\n";

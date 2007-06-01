@@ -75,7 +75,7 @@ public:
   void init_glb();
   void write_to_file_table_y( t_table_y *save_table_y, t_table_y *save_i_table_y, int nb_save_table_y, int nb_save_i_table_y);
   void write_to_file_table_u(t_table_u *save_table_u,t_table_u *save_i_table_u, int nb_save_table_u);
-  void write_to_file_table_u_b(t_table_u *save_table_u, t_table_u *last_table_u, int *nb_save_table_u);
+  void write_to_file_table_u_b(t_table_u *save_table_u, t_table_u *last_table_u, int *nb_save_table_u, bool chk);
   bool Check_Regularity(t_table_u *first_u_blck, t_table_u *second_u_blck, t_table_u *third_u_blck);
   t_table_u* interpolation(t_model_graph* model_graph,t_table_y* table_y, int to_add, bool middle,int per);
   bool Loop_Elimination(t_model_graph* model_graph);
@@ -87,6 +87,9 @@ public:
                             , bool dynamic);
   int SGE_all(int endo,int Time, List_IM *First_IM);
   void SGE_compute(Model_Block *ModelBlock, int blck, bool dynamic, string file_name, int endo_nbr);
+  void file_is_open();
+  void file_is_open1();
+
 };
 //------------------------------------------------------------------------------
 #endif

@@ -36,7 +36,7 @@ class ParsingDriver;
 %token AR AUTOCORR
 %token BAYESIAN_IRF BETA_PDF
 %token CALIB CALIB_VAR CHECK CONF_SIG CONSTANT CORR COVAR CUTOFF
-%token DATAFILE DR_ALGO DROP DSAMPLE DYNASAVE DYNATYPE 
+%token DATAFILE DR_ALGO DROP DSAMPLE DYNASAVE DYNATYPE
 %token END ENDVAL EQUAL ESTIMATION ESTIMATED_PARAMS ESTIMATED_PARAMS_BOUNDS ESTIMATED_PARAMS_INIT
 %token FILENAME FILTER_STEP_AHEAD FILTERED_VARS FIRST_OBS
 %token <string_val> FLOAT_NUMBER
@@ -50,14 +50,14 @@ class ParsingDriver;
 %token LAPLACE LCC_COMPILER LIK_ALGO LIK_INIT LINEAR LOAD_MH_FILE LOGLINEAR
 %token MH_DROP MH_INIT_SCALE MH_JSCALE MH_MODE MH_NBLOCKS MH_REPLIC MH_RECOVER
 %token MODE_CHECK MODE_COMPUTE MODE_FILE MODEL MODEL_COMPARISON MSHOCKS
-%token MODEL_COMPARISON_APPROXIMATION MODIFIEDHARMONICMEAN MOMENTS_VARENDO 
+%token MODEL_COMPARISON_APPROXIMATION MODIFIEDHARMONICMEAN MOMENTS_VARENDO
 %token <string_val> NAME
 %token NOBS NOCONSTANT NOCORR NODIAGNOSTIC NOFUNCTIONS NOGRAPH NOMOMENTS NOPRINT NORMAL_PDF
-%token OBSERVATION_TRENDS OLR OLR_INST OLR_BETA OPTIM OPTIM_WEIGHTS ORDER OSR OSR_PARAMS 
+%token OBSERVATION_TRENDS OLR OLR_INST OLR_BETA OPTIM OPTIM_WEIGHTS ORDER OSR OSR_PARAMS
 %token PARAMETERS PERIODS PLANNER_OBJECTIVE PREFILTER PRESAMPLE PRINT PRIOR_TRUNC PRIOR_ANALYSIS POSTERIOR_ANALYSIS
 %token QZ_CRITERIUM
 %token RELATIVE_IRF REPLIC RPLOT
-%token SHOCKS SIGMA_E SIMUL SIMUL_ALGO SIMUL_SEED SMOOTHER SOLVE_ALGO SPARSE_DLL STDERR STEADY STOCH_SIMUL  
+%token SHOCKS SIGMA_E SIMUL SIMUL_ALGO SIMUL_SEED SMOOTHER SOLVE_ALGO SPARSE_DLL STDERR STEADY STOCH_SIMUL
 %token TEX RAMSEY_POLICY PLANNER_DISCOUNT
 %token <string_val> TEX_NAME
 %token UNIFORM_PDF UNIT_ROOT_VARS USE_DLL
@@ -67,7 +67,7 @@ class ParsingDriver;
 %left PLUS MINUS
 %left TIMES DIVIDE
 %left UMINUS
-%nonassoc POWER 
+%nonassoc POWER
 %token EXP LOG LOG10 SIN COS TAN ASIN ACOS ATAN SINH COSH TANH ASINH ACOSH ATANH SQRT
 
 %type <node_val> expression
@@ -126,7 +126,7 @@ class ParsingDriver;
 	| ramsey_policy
 	;
 
-    
+
  declaration
  	: parameters
  	| var
@@ -134,44 +134,44 @@ class ParsingDriver;
  	| varexo_det
  	;
 
- 	
+
  dsample : DSAMPLE INT_NUMBER ';' { driver.dsample($2);}
          | DSAMPLE INT_NUMBER INT_NUMBER ';' {driver.dsample($2, $3);}
-         ; 
+         ;
 
  rplot : RPLOT tmp_var_list ';' {driver.rplot();}
-      ; 
- var 
- 	: VAR var_list ';' 
+      ;
+ var
+ 	: VAR var_list ';'
  	;
 
- varexo 
+ varexo
  	: VAREXO varexo_list ';'
 	;
 
  varexo_det
  	: VAREXO_DET varexo_det_list ';'
 	;
-      	
+
  parameters
  	: PARAMETERS parameter_list ';'
  	;
- 
+
  var_list
- 	: var_list NAME  
+ 	: var_list NAME
  		{ driver.declare_endogenous($2); }
- 	| var_list COMMA NAME  
+ 	| var_list COMMA NAME
  		{ driver.declare_endogenous($3); }
  	| NAME
  		{ driver.declare_endogenous($1); }
- 	| var_list NAME TEX_NAME 
+ 	| var_list NAME TEX_NAME
  		{ driver.declare_endogenous($2, $3); }
  	| var_list COMMA NAME TEX_NAME
  		{ driver.declare_endogenous($3, $4); }
  	| NAME TEX_NAME
  		{ driver.declare_endogenous($1, $2); }
-	; 
-	
+	;
+
  varexo_list
  	: varexo_list NAME
  		{ driver.declare_exogenous($2); }
@@ -185,7 +185,7 @@ class ParsingDriver;
  		{ driver.declare_exogenous($3, $4); }
  	| NAME TEX_NAME
  		{ driver.declare_exogenous($1, $2); }
-	; 
+	;
 
  varexo_det_list
  	: varexo_det_list NAME
@@ -200,7 +200,7 @@ class ParsingDriver;
  		{ driver.declare_exogenous_det($3, $4); }
  	| NAME TEX_NAME
  		{ driver.declare_exogenous_det($1, $2); }
-	; 
+	;
 
  parameter_list
  	: parameter_list NAME
@@ -215,9 +215,9 @@ class ParsingDriver;
  		{ driver.declare_parameter($3, $4); }
  	| NAME TEX_NAME
  		{ driver.declare_parameter($1, $2); }
-	; 	
+	;
 
- periods 
+ periods
  	: PERIODS INT_NUMBER ';'
  		{
       driver.periods($2);
@@ -238,12 +238,12 @@ cutoff
       driver.cutoff($3);
 		}
     ;
- 		   
+
  init_param
  	: NAME EQUAL expression ';'
-    {driver.init_param($1, $3);} 
+    {driver.init_param($1, $3);}
 	;
- 	
+
  expression
 	: '(' expression ')'
 		{ $$ = $2;}
@@ -253,15 +253,15 @@ cutoff
 		{$$ = driver.add_constant($1);}
 	| INT_NUMBER
 		{$$ = driver.add_constant($1);}
-	| expression PLUS expression 
+	| expression PLUS expression
     {$$ = driver.add_plus($1, $3);}
 	| expression MINUS expression
     {$$ = driver.add_minus($1, $3);}
-	| expression DIVIDE expression	 
+	| expression DIVIDE expression
     {$$ = driver.add_divide($1, $3);}
-	| expression TIMES expression 
+	| expression TIMES expression
     {$$ = driver.add_times($1, $3);}
-	| expression POWER expression 
+	| expression POWER expression
     {$$ = driver.add_power($1, $3);}
 	| MINUS expression %prec UMINUS
     {$$ = driver.add_uminus($2);}
@@ -287,9 +287,9 @@ cutoff
     {$$ = driver.add_atan($3);}
 	| SQRT '(' expression ')'
     {$$ = driver.add_sqrt($3);}
-  | NAME '(' comma_expression ')' 
+  | NAME '(' comma_expression ')'
     {$$ = driver.add_unknown_function($1);}
-	; 
+	;
 
  comma_expression :
           expression
@@ -307,22 +307,22 @@ cutoff
  initval_option
   : FILENAME EQUAL NAME {driver.init_val_filename($3);}
   ;
- 	
+
  endval
  	: ENDVAL ';' initval_list END
  		{driver.end_endval();}
- 	; 	
+ 	;
 
  initval_list
  	: initval_list initval_elem
 	| initval_elem
 	;
 
- initval_elem 
+ initval_elem
  	: NAME EQUAL expression ';'
     {driver.init_val($1, $3);}
- 	; 	
- 	
+ 	;
+
  histval
   : HISTVAL ';' histval_list END
     { driver.end_histval(); }
@@ -332,7 +332,7 @@ cutoff
  	: histval_list histval_elem
 	| histval_elem
 	;
-	
+
  histval_elem
  	: NAME '(' signed_integer ')' EQUAL expression ';'
     {driver.hist_val($1, $3, $6);}
@@ -347,10 +347,10 @@ cutoff
     | GCC_COMPILER { driver.init_compiler(1); }
     | o_cutoff
   ;
-	
+
  model
   : MODEL ';' { driver.begin_model(); } equation_list END { driver.reset_data_tree(); }
- 	| MODEL '(' o_linear ')' ';' { driver.begin_model(); } 
+ 	| MODEL '(' o_linear ')' ';' { driver.begin_model(); }
     equation_list END { driver.reset_data_tree(); }
   | MODEL '(' USE_DLL ')' ';' { driver.begin_model(); driver.use_dll(); }
     equation_list END { driver.reset_data_tree(); }
@@ -361,19 +361,19 @@ cutoff
  	;
 
  equation_list
-    : equation_list equation     	
+    : equation_list equation
     | equation_list pound_expression
     | equation
     | pound_expression
     ;
-    
+
  equation
  	: hand_side EQUAL hand_side ';'
  		{$$ = driver.add_model_equal($1, $3);}
  	| hand_side ';'
  		{$$ = driver.add_model_equal_with_zero_rhs($1);}
 	;
- 
+
  hand_side
 	: '(' hand_side ')' {$$ = $2;}
 	| model_var
@@ -381,16 +381,16 @@ cutoff
 		{$$ = driver.add_constant($1);}
 	| INT_NUMBER
     {$$ = driver.add_constant($1);}
-	| hand_side PLUS hand_side 
+	| hand_side PLUS hand_side
     	{$$ = driver.add_plus($1, $3);}
 	| hand_side MINUS hand_side
     	{$$ = driver.add_minus($1, $3);}
-	| hand_side DIVIDE hand_side	 
+	| hand_side DIVIDE hand_side
     	{$$ = driver.add_divide($1, $3);}
-	| hand_side TIMES hand_side 
+	| hand_side TIMES hand_side
     	{$$ = driver.add_times($1, $3);}
-	| hand_side POWER hand_side 
-    	{$$ = driver.add_power($1, $3);}	
+	| hand_side POWER hand_side
+    	{$$ = driver.add_power($1, $3);}
         | MINUS hand_side %prec UMINUS
       { $$ = driver.add_uminus($2);}
 	| PLUS hand_side
@@ -416,17 +416,17 @@ cutoff
 	| SQRT '(' hand_side ')'
     	{$$ = driver.add_sqrt($3);}
 	;
-	
+
  pound_expression: '#' NAME EQUAL hand_side ';'
                    {driver.declare_and_init_model_local_variable($2, $4);}
 
  model_var
- 	: NAME 
+ 	: NAME
  		{$$ = driver.add_model_variable($1);}
 	| NAME '(' signed_integer ')'
 		{$$ = driver.add_model_variable($1, $3);}
 	;
-	
+
  shocks
  	: SHOCKS  ';' shock_list END {driver.end_shocks();}
  	;
@@ -435,18 +435,18 @@ cutoff
   : MSHOCKS  ';' shock_list END {driver.end_mshocks();}
  	;
 
- shock_list 
+ shock_list
  	: shock_list shock_elem
 	| shock_elem
     ;
 
- shock_elem 
+ shock_elem
 	: VAR NAME ';' PERIODS period_list ';' VALUES value_list ';'
 		{driver.add_det_shock($2);}
 	| VAR NAME ';' STDERR expression ';'
     {driver.add_stderr_shock($2, $5);}
 	| VAR NAME EQUAL expression ';'
-    {driver.add_var_shock($2, $4);}	
+    {driver.add_var_shock($2, $4);}
 	| VAR NAME COMMA NAME EQUAL expression ';'
     {driver.add_covar_shock($2, $4, $6);}
 	| CORR NAME COMMA NAME EQUAL expression ';'
@@ -456,11 +456,11 @@ cutoff
  period_list
  	: period_list INT_NUMBER
  		{driver.add_period($2);}
-	| period_list INT_NUMBER ':' INT_NUMBER 
+	| period_list INT_NUMBER ':' INT_NUMBER
  		{driver.add_period($2,$4);}
         | period_list COMMA INT_NUMBER
  		{driver.add_period($3);}
-	| period_list COMMA INT_NUMBER ':' INT_NUMBER 
+	| period_list COMMA INT_NUMBER ':' INT_NUMBER
  		{driver.add_period($3, $5);}
 	| INT_NUMBER ':' INT_NUMBER
  		{driver.add_period($1, $3);}
@@ -470,7 +470,7 @@ cutoff
 
 
  value_list
- 	: value_list signed_float  
+ 	: value_list signed_float
 		{driver.add_value_const($2);}
 	| value_list signed_integer
 		{driver.add_value_const($2);}
@@ -487,49 +487,49 @@ cutoff
 	| '(' expression ')'
     {driver.add_value($2);}
 	;
-	
- sigma_e 
- 	: SIGMA_E EQUAL '[' triangular_matrix ']' ';' 
+
+ sigma_e
+ 	: SIGMA_E EQUAL '[' triangular_matrix ']' ';'
  		{driver.do_sigma_e();}
     ;
 
- triangular_matrix 
- 	: triangular_matrix ';' triangular_row 
+ triangular_matrix
+ 	: triangular_matrix ';' triangular_row
  		{driver.end_of_row();}
-    | triangular_row 
+    | triangular_row
     	{driver.end_of_row();}
 	;
-	
- triangular_row 
- 	: triangular_row COMMA '(' expression ')' 
+
+ triangular_row
+ 	: triangular_row COMMA '(' expression ')'
     {driver.add_to_row($4);}
-	| triangular_row COMMA FLOAT_NUMBER 
+	| triangular_row COMMA FLOAT_NUMBER
 		{driver.add_to_row_const($3);}
-	| triangular_row COMMA INT_NUMBER 
+	| triangular_row COMMA INT_NUMBER
 		{driver.add_to_row_const($3);}
 	| triangular_row '(' expression ')'
     {driver.add_to_row($3);}
-	| triangular_row FLOAT_NUMBER 
+	| triangular_row FLOAT_NUMBER
 		{driver.add_to_row_const($2);}
-	| triangular_row INT_NUMBER 
+	| triangular_row INT_NUMBER
 		{driver.add_to_row_const($2);}
 	| '(' expression ')'
     {driver.add_to_row($2);}
-	| FLOAT_NUMBER 
+	| FLOAT_NUMBER
 		{driver.add_to_row_const($1);}
-	| INT_NUMBER 
+	| INT_NUMBER
 		{driver.add_to_row_const($1);}
 	;
-	
- steady 
- 	: STEADY ';' 
+
+ steady
+ 	: STEADY ';'
  		{
  			driver.steady();
  		}
     | STEADY '(' steady_options_list ')' ';'
     	 {driver.steady();}
     ;
-    
+
  steady_options_list : steady_options_list COMMA steady_options
                      | steady_options
                      ;
@@ -537,11 +537,11 @@ cutoff
  steady_options: o_solve_algo
                ;
 
- check 
- 	: CHECK ';' 
+ check
+ 	: CHECK ';'
  		{driver.check();}
-	| CHECK '(' check_options_list ')' ';' 
-		{driver.check();} 
+	| CHECK '(' check_options_list ')' ';'
+		{driver.check();}
 	;
 
  check_options_list : check_options_list COMMA check_options
@@ -551,8 +551,8 @@ cutoff
  check_options : o_solve_algo
                ;
 
- simul 
-	: SIMUL ';' 
+ simul
+	: SIMUL ';'
 		{driver.simulate();}
 	| SIMUL '(' simul_options_list ')' ';'
 		{driver.simulate();}
@@ -563,19 +563,20 @@ cutoff
                    ;
 
  simul_options: o_periods
+              | o_datafile
               ;
 
  stoch_simul
  	: STOCH_SIMUL ';'
  		{driver.stoch_simul();}
-	| STOCH_SIMUL '(' stoch_simul_options_list ')' ';' 
+	| STOCH_SIMUL '(' stoch_simul_options_list ')' ';'
 		{driver.stoch_simul();}
 	| STOCH_SIMUL tmp_var_list ';'
 		{driver.stoch_simul();}
-	| STOCH_SIMUL '(' stoch_simul_options_list ')' tmp_var_list ';' 
+	| STOCH_SIMUL '(' stoch_simul_options_list ')' tmp_var_list ';'
 		{driver.stoch_simul();}
 	;
-	
+
  stoch_simul_options_list: stoch_simul_options_list COMMA stoch_simul_options
                          | stoch_simul_options
                          ;
@@ -584,7 +585,7 @@ cutoff
                      | o_solve_algo
          	     | o_simul_algo
 		     | o_linear
-		     | o_order			   
+		     | o_order
                      | o_replic
                      | o_drop
                      | o_ar
@@ -625,7 +626,7 @@ cutoff
  	| INT_NUMBER
  		{$$ = $1;}
  	;
- 	
+
  signed_float
  	: PLUS FLOAT_NUMBER
  		{$$ = $2;}
@@ -635,24 +636,24 @@ cutoff
  		{$$ = $1;}
  	;
 
- estimated_params 
+ estimated_params
 	: ESTIMATED_PARAMS ';' estimated_list END
     { driver.estimated_params(); }
 	;
-	
- estimated_list 
-	: estimated_list estimated_elem 
+
+ estimated_list
+	: estimated_list estimated_elem
 		{driver.add_estimated_params_element();}
-	| estimated_elem 
+	| estimated_elem
 		{driver.add_estimated_params_element();}
 	;
 
- estimated_elem 
+ estimated_elem
 	: estimated_elem1 COMMA estimated_elem2 ';'
 	;
 
- estimated_elem1 
-	: STDERR NAME 
+ estimated_elem1
+	: STDERR NAME
 		{driver.estim_params.type = 1;
 		 driver.estim_params.name = *$2;
      delete $2;
@@ -671,19 +672,19 @@ cutoff
 		}
 	;
 
- estimated_elem2 
-	: prior COMMA estimated_elem3 
+ estimated_elem2
+	: prior COMMA estimated_elem3
 		{
       driver.estim_params.prior=*$1;
       delete $1;
     }
-	| value COMMA prior COMMA estimated_elem3 
+	| value COMMA prior COMMA estimated_elem3
 		{driver.estim_params.init_val=*$1;
 		 driver.estim_params.prior=*$3;
      delete $1;
      delete $3;
 		}
-	| value COMMA value COMMA value COMMA prior COMMA estimated_elem3 
+	| value COMMA value COMMA value COMMA prior COMMA estimated_elem3
 		{driver.estim_params.init_val=*$1;
 		 driver.estim_params.low_bound=*$3;
 		 driver.estim_params.up_bound=*$5;
@@ -693,12 +694,12 @@ cutoff
      delete $5;
      delete $7;
 		}
-	| value 
+	| value
 		{
       driver.estim_params.init_val=*$1;
       delete $1;
     }
-	| value COMMA value COMMA value 
+	| value COMMA value COMMA value
 		{driver.estim_params.init_val=*$1;
 		 driver.estim_params.low_bound=*$3;
 		 driver.estim_params.up_bound=*$5;
@@ -708,8 +709,8 @@ cutoff
 		}
 	;
 
- estimated_elem3 
- 	: value COMMA value 
+ estimated_elem3
+ 	: value COMMA value
  		{driver.estim_params.mean=*$1;
  		 driver.estim_params.std=*$3;
      delete $1;
@@ -722,8 +723,8 @@ cutoff
      delete $1;
      delete $3;
      delete $5;
-		}	
-	| value COMMA value COMMA value COMMA value 
+		}
+	| value COMMA value COMMA value COMMA value
 		{driver.estim_params.mean=*$1;
 		 driver.estim_params.std=*$3;
 		 driver.estim_params.p3=*$5;
@@ -733,7 +734,7 @@ cutoff
      delete $5;
      delete $7;
 		}
-	| value COMMA value COMMA value COMMA value COMMA value 
+	| value COMMA value COMMA value COMMA value COMMA value
 		{driver.estim_params.mean=*$1;
 		 driver.estim_params.std=*$3;
 		 driver.estim_params.p3=*$5;
@@ -824,20 +825,20 @@ cutoff
                      ;
 
  prior
-	: BETA_PDF 
+	: BETA_PDF
     {$$ = new string("1");}
-	| GAMMA_PDF 
+	| GAMMA_PDF
     {$$ = new string("2");}
-	| NORMAL_PDF 
+	| NORMAL_PDF
     {$$ = new string("3");}
-	| INV_GAMMA_PDF 
+	| INV_GAMMA_PDF
     {$$ = new string("4");}
-	| UNIFORM_PDF 
+	| UNIFORM_PDF
     {$$ = new string("5");}
 	;
 
- value 
-  : {$$ = new string("NaN");} 
+ value
+  : {$$ = new string("NaN");}
   | INT_NUMBER
 	| FLOAT_NUMBER
 	| NAME
@@ -847,20 +848,20 @@ cutoff
     {$2->insert(0, "-"); $$ = $2;}
 	;
 
- 
-       
- estimation 
+
+
+ estimation
 	: ESTIMATION ';'
 		{driver.run_estimation();}
-	| ESTIMATION '(' estimation_options_list ')' ';' 
+	| ESTIMATION '(' estimation_options_list ')' ';'
 		{driver.run_estimation();}
 	| ESTIMATION tmp_var_list ';'
 		{driver.run_estimation();}
-	| ESTIMATION '(' estimation_options_list ')' tmp_var_list ';' 
+	| ESTIMATION '(' estimation_options_list ')' tmp_var_list ';'
 		{driver.run_estimation();}
 	;
 
- estimation_options_list 
+ estimation_options_list
 	: estimation_options_list COMMA estimation_options
 	| estimation_options
 	;
@@ -870,22 +871,22 @@ cutoff
                    | o_first_obs
                    | o_prefilter
                    | o_presample
-                   | o_lik_algo 
-                   | o_lik_init 
+                   | o_lik_algo
+                   | o_lik_init
                    | o_nograph
-                   | o_conf_sig 
+                   | o_conf_sig
                    | o_mh_replic
                    | o_mh_drop
                    | o_mh_jscale
                    | o_optim
-                   | o_mh_init_scale 
-                   | o_mode_file 
-                   | o_mode_compute 
+                   | o_mh_init_scale
+                   | o_mode_file
+                   | o_mode_compute
                    | o_mode_check
-                   | o_prior_trunc 
-                   | o_mh_mode 
-                   | o_mh_nblcks 
-                   | o_load_mh_file 
+                   | o_prior_trunc
+                   | o_mh_mode
+                   | o_mh_nblcks
+                   | o_load_mh_file
                    | o_loglinear
                    | o_nodiagnostic
                    | o_bayesian_irf
@@ -905,23 +906,23 @@ cutoff
                    | o_noconstant
                    | o_mh_recover
                    ;
-	
- prior_analysis 
-	: PRIOR_ANALYSIS '(' prior_posterior_options_list ')' ';' 
+
+ prior_analysis
+	: PRIOR_ANALYSIS '(' prior_posterior_options_list ')' ';'
                 {driver.run_prior_analysis();}
-	| PRIOR_ANALYSIS '(' prior_posterior_options_list ')' tmp_var_list ';' 
+	| PRIOR_ANALYSIS '(' prior_posterior_options_list ')' tmp_var_list ';'
                 {driver.run_prior_analysis();}
 	;
 
- prior_posterior_options_list 
+ prior_posterior_options_list
 	: prior_posterior_options_list COMMA prior_posterior_options
 	| prior_posterior_options
 	;
 
- prior_posterior_options 
+ prior_posterior_options
                    : o_nograph
-                   | o_conf_sig 
-                   | o_prior_trunc 
+                   | o_conf_sig
+                   | o_prior_trunc
                    | o_bayesian_irf
                    | o_irf
                    | o_tex
@@ -933,11 +934,11 @@ cutoff
                    | o_xls_range
                    | o_filter_step_ahead
                    ;
-	
- posterior_analysis 
-	: POSTERIOR_ANALYSIS '(' prior_posterior_options_list ')' ';' 
+
+ posterior_analysis
+	: POSTERIOR_ANALYSIS '(' prior_posterior_options_list ')' ';'
 		{driver.run_posterior_analysis();}
-	| POSTERIOR_ANALYSIS '(' prior_posterior_options_list ')' tmp_var_list ';' 
+	| POSTERIOR_ANALYSIS '(' prior_posterior_options_list ')' tmp_var_list ';'
 		{driver.run_posterior_analysis();}
 	;
 
@@ -950,9 +951,9 @@ cutoff
 	: list_optim_option
 	| optim_options COMMA list_optim_option;
 	;
-	
- varobs 
- 	: VAROBS tmp_var_list ';' 
+
+ varobs
+ 	: VAROBS tmp_var_list ';'
  		{driver.set_varobs();}
 	;
 
@@ -961,12 +962,12 @@ cutoff
 { driver.set_trends(); }
 	;
 
- trend_list 
+ trend_list
         : trend_list trend_element
 	| trend_element
 	;
 
- trend_element :  NAME '(' expression ')' ';' 
+ trend_element :  NAME '(' expression ')' ';'
 {driver.set_trend_element($1, $3);}
                ;
 
@@ -977,7 +978,7 @@ cutoff
                  { driver.optim_weights(); }
                ;
 
- optim_weights_list : optim_weights_list NAME expression ';' 
+ optim_weights_list : optim_weights_list NAME expression ';'
                       {driver.set_optim_weights($2, $3);}
                     | optim_weights_list NAME COMMA NAME expression ';'
                       {driver.set_optim_weights($2, $4, $5);}
@@ -995,17 +996,17 @@ cutoff
      | OSR tmp_var_list ';' {driver.run_osr();}
      | OSR '(' olr_options ')' tmp_var_list ';' {driver.run_osr();}
      ;
- 
+
  olr : OLR ';' {driver.run_olr();}
      | OLR '(' olr_options ')' ';' {driver.run_olr();}
      | OLR tmp_var_list ';' {driver.run_olr();}
      | OLR '(' olr_options ')' tmp_var_list ';' {driver.run_olr();}
      ;
- 
+
  olr_option : o_olr_beta
      | stoch_simul_options
      ;
- 
+
  olr_options : olr_option
      | olr_options COMMA olr_option
      ;
@@ -1081,22 +1082,22 @@ cutoff
 
  planner_objective : PLANNER_OBJECTIVE { driver.begin_planner_objective(); } hand_side { driver.end_planner_objective($3); } ';'
                ;
- 
+
  ramsey_policy : RAMSEY_POLICY ';'
  		{driver.ramsey_policy();}
-	| RAMSEY_POLICY '(' ramsey_policy_options_list ')' ';' 
+	| RAMSEY_POLICY '(' ramsey_policy_options_list ')' ';'
 		{driver.ramsey_policy();}
 	| RAMSEY_POLICY tmp_var_list ';'
 		{driver.ramsey_policy();}
-	| RAMSEY_POLICY '(' ramsey_policy_options_list ')' tmp_var_list ';' 
+	| RAMSEY_POLICY '(' ramsey_policy_options_list ')' tmp_var_list ';'
 		{driver.ramsey_policy();}
 	;
 
- ramsey_policy_options_list : 
+ ramsey_policy_options_list :
           ramsey_policy_options_list COMMA ramsey_policy_options
         | ramsey_policy_options
 	;
-	
+
  ramsey_policy_options : stoch_simul_options
         | o_planner_discount
         ;
@@ -1125,18 +1126,18 @@ cutoff
  o_datafile: DATAFILE EQUAL NAME {driver.option_str("datafile", $3);};
  o_nobs: NOBS EQUAL vec_int {driver.option_num("nobs", $3);}
        | NOBS EQUAL INT_NUMBER {driver.option_num("nobs", $3);}
-       ;	      
+       ;
  o_first_obs: FIRST_OBS EQUAL INT_NUMBER {driver.option_num("first_obs", $3);};
  o_prefilter: PREFILTER EQUAL INT_NUMBER {driver.option_num("prefilter", $3);};
  o_presample: PRESAMPLE EQUAL INT_NUMBER {driver.option_num("presample", $3);};
- o_lik_algo: LIK_ALGO EQUAL INT_NUMBER {driver.option_num("lik_algo", $3);}; 
- o_lik_init: LIK_INIT EQUAL INT_NUMBER {driver.option_num("lik_init", $3);}; 
- o_nograph: NOGRAPH {driver.option_num("nograph","1");}; 
-          | GRAPH {driver.option_num("nograph", "0");};	
- o_conf_sig: CONF_SIG EQUAL FLOAT_NUMBER {driver.option_num("conf_sig", $3);}; 
- o_mh_replic: MH_REPLIC EQUAL INT_NUMBER {driver.option_num("mh_replic", $3);}; 
- o_mh_drop: MH_DROP EQUAL FLOAT_NUMBER {driver.option_num("mh_drop", $3);}; 
- o_mh_jscale: MH_JSCALE EQUAL FLOAT_NUMBER {driver.option_num("mh_jscale", $3);}; 
+ o_lik_algo: LIK_ALGO EQUAL INT_NUMBER {driver.option_num("lik_algo", $3);};
+ o_lik_init: LIK_INIT EQUAL INT_NUMBER {driver.option_num("lik_init", $3);};
+ o_nograph: NOGRAPH {driver.option_num("nograph","1");};
+          | GRAPH {driver.option_num("nograph", "0");};
+ o_conf_sig: CONF_SIG EQUAL FLOAT_NUMBER {driver.option_num("conf_sig", $3);};
+ o_mh_replic: MH_REPLIC EQUAL INT_NUMBER {driver.option_num("mh_replic", $3);};
+ o_mh_drop: MH_DROP EQUAL FLOAT_NUMBER {driver.option_num("mh_drop", $3);};
+ o_mh_jscale: MH_JSCALE EQUAL FLOAT_NUMBER {driver.option_num("mh_jscale", $3);};
  o_optim: OPTIM  EQUAL '(' optim_options ')';
  o_mh_init_scale: MH_INIT_SCALE EQUAL FLOAT_NUMBER {driver.option_num("mh_init_scale", $3);};
                 | MH_INIT_SCALE EQUAL INT_NUMBER {driver.option_num("mh_init_scale", $3);};
@@ -1167,8 +1168,8 @@ cutoff
    ;
  o_print : PRINT {driver.option_num("noprint", "0");};
  o_noprint : NOPRINT {driver.option_num("noprint", "1");};
- o_xls_sheet : XLS_SHEET EQUAL NAME {driver.option_str("xls_sheet", $3);} 
- o_xls_range : XLS_RANGE EQUAL range {driver.option_str("xls_range", $3);} 
+ o_xls_sheet : XLS_SHEET EQUAL NAME {driver.option_str("xls_sheet", $3);}
+ o_xls_range : XLS_RANGE EQUAL range {driver.option_str("xls_range", $3);}
  o_filter_step_ahead : FILTER_STEP_AHEAD EQUAL vec_int {driver.option_num("filter_step_ahead", $3);}
  o_constant : CONSTANT {driver.option_num("noconstant", "0");}
  o_noconstant : NOCONSTANT {driver.option_num("noconstant", "1");}
