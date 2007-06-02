@@ -9,7 +9,7 @@ This Guide will focus on the most common or useful features of the program, thus
 
 This Guide is written mainly for an \textbf{advanced economist} - like a professor, graduate student or central banker - needing a powerful and flexible program to support and facilitate his or her research activities in a variety of fields. The sophisticated computer programmer, on the one hand, or the specialist of computational economics, on the other, may not find this Guide sufficiently detailed. \\
 
-We recognize that the ``advanced economist'' may be either a beginning or intermediate user of Dynare. This Guide is written to accommodate both. If you're \textbf{new to Dynare}, we recommend starting with chapters \ref{ch:solbase} and \ref{ch:estbase}, which introduce the program's basic features to solve (including running impulse response functions) and estimate DSGE models. To do so, these chapters lead you through a complete hands-on example, which we recommend following from A to Z, in order to ``learn by doing''. Once you have read these two chapters, you will know the crux of Dynare's functionality and (hopefully!) feel comfortable using Dynare for your own work. At that point, though, you will probably find yourself coming back to the User Guide to skim over some of the content in the advanced chapters to iron out details and potential complications you may run into.\\
+We recognize that the ``advanced economist'' may be either a beginning or intermediate user of Dynare. This Guide is written to accommodate both. If you're \textbf{new to Dynare}, we recommend starting with chapters \ref{ch:solbase} and \ref{ch:estbase}, which introduce the program's basic features to solve (including running impulse response functions) and estimate DSGE models, respectively. To do so, these chapters lead you through a complete hands-on example, which we recommend following from A to Z, in order to ``\textbf{learn by doing}''. Once you have read these two chapters, you will know the crux of Dynare's functionality and (hopefully!) feel comfortable using Dynare for your own work. At that point, though, you will probably find yourself coming back to the User Guide to skim over some of the content in the advanced chapters to iron out details and potential complications you may run into.\\
 
 If you're instead an \textbf{intermediate user} of Dynare, you will most likely find the advanced chapters, \ref{ch:soladv} and \ref{ch:estadv}, more appropriate. These chapters cover more advanced features of Dynare and more complicated usage scenarios. The presumption is that you would skip around these chapters to focus on the topics most applicable to your needs and curiosity. Examples are therefore more concise and specific to each feature; these chapters read a bit more like a reference manual.\\
 
@@ -19,8 +19,7 @@ Finally, besides breaking up content into short chapters, we've introduced two d
 \begin{itemize}
 \item \textbf{\textsf{TIP!}} introduces advice to help you work more efficiently with Dynare or solve common problems.  
 \item \textbf{\textsf{NOTE!}} is used to draw your attention to particularly important information you should keep in mind when using Dynare. 
-\end{itemize}
-Long enough material following any of these markers will be presented in a box for additional emphasis and clarity. 
+\end{itemize} 
 
 
 \section{What is Dynare?}
@@ -42,7 +41,7 @@ Each of these steps will become clear as you read through the User Guide, but fo
 \begin{itemize}
 \item compute the steady state of a model
 \item compute the solution of deterministic models
-\item compute the first and second order approximation to solutions of stochastic models (** third order coming up - when will this feature be coded?)
+\item compute the first and second order approximation to solutions of stochastic models
 \item estimate parameters of DSGE models using either a maximum likelihood or a Bayesian approach
 \item compute optimal policies in linear-quadratic models
 \end{itemize}
@@ -63,15 +62,24 @@ While this User Guide tries to be as complete and thorough as possible, you will
 To end this introduction and avoid confusion in what follows, it is worthwhile to agree on a few \textbf{definitions of terms}. Many of these are shared with the Reference Manual. 
 \begin{itemize}
 \item \textbf{Integer} indicates an integer number.
-\item \textbf{Double} indicates a double precision number. The following syntaxes are valid: 1.1e3, 1.1E3, 1.1d3, 1.1D3 (** check this)
+\item \textbf{Double} indicates a double precision number. The following syntaxes are valid: 1.1e3, 1.1E3, 1.1E-3, 1.1d3, 1.1D3
 \item \textbf{Expression} indicates a mathematical expression valid in the underlying language (e.g. Matlab).
-\item \textbf{Variable name} indicates a variable name. \textbf{\textsf{NOTE!}} These must start with an alphabetical character and can only contain other alphabetical characters and digits, as well as underscores (\_). All other characters, including accents, are forbidden. 
+\item \textbf{Variable name} indicates a variable name. \textbf{\textsf{NOTE!}} These must start with an alphabetical character and can only contain other alphabetical characters and digits, as well as underscores (\_). All other characters, including accents, and \textbf{spaces}, are forbidden. 
 \item \textbf{Parameter name} indicates a parameter name which must follow the same naming conventions as above. 
 \item \textbf{Filename} indicates a file name valid in your operating system.
 \item \textbf{Command} is an instruction to Dynare or other program when specified. 
 \item \textbf{Options} or optional arguments for a command are listed in square brackets \mbox{[ ]} unless otherwise noted. If, for instance, the option must be specified in parenthesis in Dynare, it will show up in the Guide as [(option)].
 \item \textbf{\texttt{Typewritten text}} indicates text as it should appear in Dynare code.
+\end{itemize}
 
+\section{v4, what's new and backward compatibility}
+The current version of Dynare - for which this guide is written - is version 4. With respect to version 3, this new version introduces several important features, as well as improvements, optimizations of routines and bug fixes. The major new features are the following: 
+\begin{itemize}
+\item Analytical derivatives are now used everywhere (for instance, in the Newton algorithm for deterministic models and in the linearizations necessary to solve stochastic models). This increases computational speed significantly. The drawback is that Dynare can now handle only a limited set of functions, although in nearly all economic applications this should not be a constraint. 
+\item Variables and parameters are now kept in the order in which they are declared whenever displayed and when used internally by Dynare. Recall that in version 3, variables and parameters where at times in their order of declaration and at times in alphabetical order. \textbf{\textsf{NOTE!}} This may cause some problems of backward compatibility if you wrote programs to run off Dynare v3 output.
+\item The names of many internal variables and the organization of output variables has changed. These are enumerated in details in the relevant chapters. The names of the files internally generated by Dynare have also changed. (** more on this when explaining internal file structure - TBD)
+\item The syntax for the external steady state file has changed. This is covered in more details in chapter \ref{ch:solbase}, in section \ref{sec:findsteady}. \textbf{\textsf{NOTE!}} You will unfortunately have to slightly amend any old steady state files you may have written. 
+\item Speed. Several large-scale improvements have been implemented to speed up Dynare. This should be most noticeable when solving deterministic models, but also apparent in other functionality.
 \end{itemize}
 
 

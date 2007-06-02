@@ -25,7 +25,7 @@ Suppose that the equation of motion of technology is a \textbf{stationary} AR(1)
   c+i = y;\\
   y = (k(-1)$\hat{}$alpha)*(exp(z)*l)$\hat{}$(1-alpha);\\
   w = y*((epsilon-1)/epsilon)*(1-alpha)/l;\\
-  r = y*((epsilon-1)/epsilon)*alpha/k;\\
+  r = y*((epsilon-1)/epsilon)*alpha/k(-1);\\
   i = k-(1-delta)*k(-1);\\
   y\_l = y/l;\\
   z = rho*z(-1)+e;\\
@@ -38,7 +38,9 @@ This should not come as a surprise. Dynare must know which variables are observa
 \texttt{varobs Y;}\\
 
 \section{Specifying the steady state}
-Before Dynare estimates a model, it first linearizes it around a steady state. Thus, a steady state must exist for the model and although Dynare can calculate it, we must give it a hand by declaring approximate values for the steady state. This is just as explained in details and according to the same syntax explained in chapter \ref{ch:solbase}, covering the \texttt{initval}, \texttt{steady} and \texttt{check} commands. (** how can Dynare find a steady state if it doesn't yet know the parameter values?) We therefore write **?? \\
+Before Dynare estimates a model, it first linearizes it around a steady state. Thus, a steady state must exist for the model and although Dynare can calculate it, we must give it a hand by declaring approximate values for the steady state. This is just as explained in details and according to the same syntax outlined in chapter \ref{ch:solbase}, covering the \texttt{initval}, \texttt{steady} and \texttt{check} commands. 
+
+\textsf{\textbf{TIP!}} During estimation, in finding the posterior mode, Dynare recalculates the steady state of the model at each iteration of the optimization routine (more on this later), based on the newest round of parameters available. Thus, by providing approximate initial values and relying solely on the built-in Dynare algorithm to find the steady state (a numerical procedure), you will significantly slow down the computation of the posterior mode. Dynare will end up spending 60 to 70\% of the time recalculating steady states. It is much more efficient to write an external \textbf{Matlab steady state file} and let Dynare use that file to find the steady state of your model by algebraic procedure. For more details on writing an external Matlab file to find your model's steady state, please refer to section \ref{sec:findsteady} of chapter \ref{ch:solbase}. \\
 
 
 \section{Declaring priors}
@@ -60,13 +62,13 @@ UNIFORM\_PDF& $U(p_3,p_4)$ &  $[p_3,p_4]$
     \end{tabular}\\
     \\
     \\
-    where $\mu$ is the \texttt{PRIOR\_MEAN}, $\sigma$ is the \texttt{PRIOR\_STANDARD\_ERROR}, $p_3$ is the \texttt{PRIOR 3$^{\textrm{rd}}$ PARAMETER} (whose default is 0) and $p_4$ is the \texttt{PRIOR 4$^{\textrm{th}}$ PARAMETER} (whose default is 1). \\
+    where $\mu$ is the \texttt{PRIOR\_MEAN}, $\sigma$ is the \texttt{PRIOR\_STANDARD\_ERROR}, $p_3$ is the \texttt{PRIOR 3$^{\textrm{rd}}$ PARAMETER} (whose default is 0) and $p_4$ is the \texttt{PRIOR 4$^{\textrm{th}}$ PARAMETER} (whose default is 1).  \textsf{\textbf{TIP!}} When specifying a uniform distribution between 0 and 1 as a prior for a parameter, say $\alpha$, you therefore have to put two empty spaces for parameters $\mu$ and $\sigma$, and then specify parameters $p3$ and $p4$, since the uniform distribution only takes $p3$ and $p4$ as arguments. For instance, you would write \texttt{alpha, uniform\_pdf, , , 0,1;} \\
     
 For a more complete review of all possible options for declaring priors, as well as the syntax to declare priors for maximum likelihood estimation (not Bayesian), see the \href{http://www.cepremap.cnrs.fr/juillard/mambo/index.php?option=com_content&task=view&id=51&Itemid=84}{Reference Manual}. Note also that if some parameters in a model are calibrated and are not to be estimated, you should declare them as such, by using the \texttt{parameters} command and its related syntax, as explained in chapter \ref{ch:solbase}. \\
 
-\textsf{\textbf{TIP!}} ** How to choose appropriate prior distribution, mean and standard error... add after discussion with experts (Michel, Stephane, etc..)\\
+\textsf{\textbf{TIP!}} Choosing the appropriate prior for your parameters is a tricky, yet very important endeavor. It is worth spending time on your choice of priors and to test the robustness of your results to your priors. Some considerations may prove helpful. First, think about the domain of your prior over each parameter. Should it be bounded? Should it be opened on either or both sides? Remember also that if you specify a probability of zero over a certain domain in your prior, you will necessarily also find a probability of zero in your posterior distribution. Then, think about the shape of your prior distribution. Should it be symmetric? Skewed? If so, on which side? You may also go one step further and build a distribution for each of your parameters in your mind. Ask yourself, for instance, what is the probability that your parameter is bigger than a certain value, and repeat the exercise by incrementally decreasing that value. You can then pick the standard distribution that best fits your perceived distribution. Finally, instead of describing here the shapes and properties of each distribution, you are instead encouraged to visualize these distributions yourself, either in a statistics book or on the Web. \\
     
-\textsf{\textbf{TIP!}} It may at times be desirable to estimate a transformation of a parameter appearing in the model, rather than the parameter itself. In such a case, it is possible to declare the parameter to be estimated in the parameters statement and to define the transformation at the top of the model section, as a Matlab expression, by adding a pound sign (\#) at the beginning of the corresponding line. For example:\\
+\textsf{\textbf{TIP!}} It may at times be desirable to estimate a transformation of a parameter appearing in the model, rather than the parameter itself. In such a case, it is possible to declare the parameter to be estimated in the parameters statement and to define the transformation at the top of the model section, as a Matlab expression, by adding a pound sign (\#) at the beginning of the corresponding line. For example, you may find it easier to define a prior over the discount factor, $\beta$, than its inverse which often shows up in Euler equations. Thus you would write:\\
 \\
 \texttt{model;\\
       \# sig = 1/bet;\\
@@ -100,11 +102,6 @@ To ask Dynare to estimate a model, all that is necessary is to add the command \
 \item first\_obs = INTEGER: the number of the first observation to be used (default = 1). This is useful when running loops, or instance, to divide the observations into sub-periods. 
 \item prefilter = 1: the estimation procedure demeans the data (default=0, no prefiltering). This is useful if model variables are in deviations from steady state, for instance, and therefore have zero mean. Demeaning the observations would also impose a zero mean on the observed variables.  
 \item nograph: no graphs should be plotted.
-\item lik\_init: INTEGER: type of initialization of Kalman filter. 
-\subitem 1 (default): for stationary models, the initial matrix of variance of the error of forecast is set equal to the 
-unconditional variance of the state variables. 
-\subitem 2: for nonstationary models: a wide prior is used with an initial matrix of variance of the error of forecast 
-diagonal with 10 on the diagonal. When using \texttt{unit\_root\_vars}, the \texttt{like\_init} option as no effect. (** but if have both stationary and nonstationary variables, what option should you use?)
 \item conf\_sig = \{INTEGER | DOUBLE \}: the level for the confidence intervals reported in the results (default = 0.90) 
 \item mh\_replic = INTEGER: number of replication for Metropolis Hasting algorithm. For the time being, mh\_replic 
 should be larger than 1200 (default = 20000) 
@@ -118,17 +115,17 @@ rarely satisfactory. This option must be tuned to obtain, ideally, an acceptance
 Dynare stores the mode (xparam1) and the hessian (hh) in a file called MODEL NAME\_mode. This is a particularly helpful option to speed up the estimation process if you have already undertaken initial estimations and have values of the posterior mode. 
 \item mode\_compute=INTEGER: specifies the optimizer for the mode computation. 
 \subitem 0: the mode isn’t computed. mode\_file must be specified 
-\subitem 1: uses Matlab fmincon (see the Reference Manual (** add link) to set options for this command).
+\subitem 1: uses Matlab fmincon (see the \href{http://www.cepremap.cnrs.fr/juillard/mambo/index.php?option=com_content&task=view&id=51&Itemid=84}{Reference Manual} to set options for this command).
 \subitem 2: uses Lester Ingber’s Adaptive Simulated Annealing. 
 \subitem 3: uses Matlab fminunc. 
 \subitem 4 (default): uses Chris Sim’s csminwel. 
 \item mode\_check: when mode\_check is set, Dynare plots the minus of the posterior density for values around the computed mode 
 for each estimated parameter in turn. This is helpful to diagnose problems with the optimizer. A clear indication of a problem would be that the mode is not at the trough (bottom of the minus) of the posterior distribution. 
 \item load\_mh\_file: when load\_mh\_file is declared, Dynare adds to previous Metropolis-Hastings simulations instead 
-of starting from scratch. Again, this is a useful option to speed up the process of estimation. (** a new recover mode in version 4?)
+of starting from scratch. Again, this is a useful option to speed up the process of estimation.
 \item nodiagnostic: doesn’t compute the convergence diagnostics for Metropolis-Hastings (default: diagnostics are computed and 
 displayed). Actually seeing if the various blocks of Metropolis-Hastings runs converge is a powerful and useful option to build confidence in your model estimation. More details on these diagnostics are given in Chapter \ref{ch:estadv}.
-\item bayesian\_irf: triggers the computation of the posterior distribution of impulse response functions (IRFs). The length of the IRFs are controlled by the irf option (** where, how?). The shocks at the origin of these IRFs are those estimated by Dynare. 
+\item bayesian\_irf: triggers the computation of the posterior distribution of impulse response functions (IRFs). The length of the IRFs are controlled by the irf option, as specified in chapter \ref{ch:solbase} when discussing the options for \texttt{stoch\_simul}. The shocks at the origin of these IRFs are those estimated by Dynare. 
 \item moments\_varendo: triggers the computation of the posterior distribution of the theoretical moments of the endogenous variables as in \texttt{stoch\_simul} (the posterior distribution of the variance decomposition is also included). 
 \item filtered\_vars: triggers the computation of the posterior distribution of filtered endogenous variables and shocks. See the note below on the difference between filtered and smoothed shocks. 
 \item smoother: triggers the computation of the posterior distribution of smoothed endogenous variables and shocks. Smoothed shocks are a reconstruction of the values of unobserved shocks over the sample, using all the information contained in the sample of observations. Filtered shocks, instead, are built only based on knowing past information. To calculate one period ahead prediction errors, for instance, you should use filtered, not smoothed variables.

@@ -1,4 +1,8 @@
 \documentclass[a4paper,11pt,titlepage]{memoir}
+\maxsecnumdepth{subsection} 
+\setsecnumdepth{subsection} 
+\maxtocdepth{subsection} 
+\settocdepth{subsection}
 \usepackage{amsmath}
 \usepackage{amsfonts}
 \usepackage{amssymb}
@@ -31,7 +35,7 @@ pdftex}
 \begin{document}
 \frontmatter 
 
-\title{Dynare User Guide}
+\title{Dynare v4 - User Guide \\ Public beta version}
 \author{\\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\  Tommaso Mancini Griffoli\\ tommaso.mancini@stanfordalumni.org}
 \date{This draft: March 2007}
 
@@ -45,7 +49,7 @@ pdftex}
 \chapter*{Work in Progress!}
 This is the second version of the Dynare User Guide which is still work in progress! This means two things. First, please read this with a critical eye and send me comments! Are some areas unclear? Is anything plain wrong? Are some sections too wordy, are there enough examples, are these clear? On the contrary, are there certain parts that just click particularly well? How can others be improved? I'm very interested to get your feedback. \\
 
-The second thing that a work in progress manuscript comes with is messy and disturbing notes to myself or others of the Dynare development team. These are marked with two stars (**). Just ignore whatever follows them... although there should not be too many. \\
+The second thing that a work in progress manuscript comes with is messy and disturbing notes to myself or others of the Dynare development team. These are marked with two stars (**). Just ignore whatever follows them... although there should not be too many left. \\
 
 Thanks very much for your patience and good ideas. Please write either direclty to myself: tommaso.mancini@stanfordalumni.org, or \textbf{preferably on the Dynare Documentation Forum} available in the Forum section of the \href{http://www.cepremap.cnrs.fr/juillard/mambo/index.php?option=com_forum&Itemid=95}{Dynare website}. 
 
@@ -56,16 +60,16 @@ Dynare was originally developed by Michel Juillard in Paris, France. Currently, 
 \item Stéphane Adjemian (stephane.adjemian``AT''ens.fr)
 \item Michel Juillard (michel.juillard``AT''ens.fr)
 \item Ferhat Mihoubi (ferhat.mihoubi``AT''univ-evry.fr)
-\item Ondra Kamenik (** email?)
-\item Marco Ratto (** email?)
-\item Sébastien Villemont (sebastien.villemont``AT''ens.fr)
+\item Ondra Kamenik (ondra.kamenik"AT"volny.cz)
+\item Marco Ratto (marco.ratto"AT"jrc.it)
+\item Sébastien Villemot (sebastien.villemot``AT''ens.fr)
 \end{itemize}
 
 Several parts of Dynare use or have strongly benefitted from publicly available programs by F. Collard, L. Ingber, P. Klein, S. Sakata, F. Schorfheide, C. Sims, P. Soederlind and R. Wouters. \\
 
 Finally, the development of Dynare could not have come such a long ways withough an active community of users who continually pose questions, report bugs and suggest new features. The help of this community is gratefully acknowledged.\\
 
-The email addresses above are provided in case yo wish to contact any one of the authors of Dynare directly. We nonetheless encourage you to first use the \href{http://www.cepremap.cnrs.fr/juillard/mambo/index.php?option=com_forum&Itemid=95}{Dynare forums} to ask your questions so that other users can benefit from them as well; remember, almost no question is specific enough to interest just one person, and yours is not the exception! 
+The email addresses above are provided in case you wish to contact any one of the authors of Dynare directly. We nonetheless encourage you to first use the \href{http://www.cepremap.cnrs.fr/juillard/mambo/index.php?option=com_forum&Itemid=95}{Dynare forums} to ask your questions so that other users can benefit from them as well; remember, almost no question is specific enough to interest just one person, and yours is not the exception! 
 
 \mainmatter
 

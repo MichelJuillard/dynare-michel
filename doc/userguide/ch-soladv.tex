@@ -9,8 +9,8 @@ Other examples of .mod files used to generate impulse response functions are ava
 
 Also, don't forget to check occasionally the \href{http://www.cepremap.cnrs.fr/juillard/mambo/index.php?option=com_forum&Itemid=95}{Open Online Examples} page to see if any other user has posted an example that could help you in your work; or maybe you would like to post an example there yourself?
 
-\subsection{Working with several correlated shocks}
-Your model may have two or more shocks, and these may be correlated to each other. The example below illustrates how you would introduce this into Dynare.  Actually, the example provided is somewhat more complete than strictly necessary. This is to give you an alternative, full-blown example to the one described in chapter \ref{ch:solbase}.
+\subsection{Alternative, complete example}
+The following example aims to give you an alternative example to the one in chapter \ref{ch:solbase}, to learn the workings of Dynare. It also aims to give you exposure to dealing with \textbf{several correlated shocks}. Your model may have two or more shocks, and these may be correlated to each other. The example below illustrates how you would introduce this into Dynare.  Actually, the example provided is somewhat more complete than strictly necessary. This is to give you an alternative, full-blown example to the one described in chapter \ref{ch:solbase}.
 
 \subsubsection{The model}
 The model is a simplified standard RBC model taken from \citet{CollardJuillard2003} which served as the original User Guide for Dynare. \\
@@ -21,7 +21,7 @@ The economy consists of an infinitely living representative agent who values con
 \] 
 where, as usual, the discount factor $0<\beta<1$, the disutility of labor $\theta > 0$ and the labor supply elasticity $\psi \geq 0$. \\
 
-A social planner maximizes this utility function subject to the budget constraint
+A social planner maximizes this utility function subject to the resource constraint
 \[
 c_t + i_t = y_t
 \]
@@ -73,7 +73,7 @@ var u; stderr 0.009;\\
 var e, u = phi*0.009*0.009;\\
 end;}\\
 \\
-where the last line specifies the contemporaneous correlation between our two exogenous variables. (** does this mean every time you run your .mod file you will get a slightly different shock?) \\
+where the last line specifies the contemporaneous correlation between our two exogenous variables. \\
 
 Alternatively, you can also write: \\
 \\
@@ -88,7 +88,7 @@ So that you can gain experience by manipulating the entire model, here is the co
 \\
 \texttt{var y, c, k, a, h, b;\\
 varexo e,u;\\
-parameters beta, rho, beta, alpha, delta, theta, psi, tau;\\
+parameters beta, rho, alpha, delta, theta, psi, tau;\\
 alpha = 0.36;\\
 rho   = 0.95;\\
 tau   = 0.025;\\
@@ -128,27 +128,30 @@ end;\\
 stoch\_simul(periods=2100);}\\
 
 \subsection{Finding, saving and viewing your output} \label{sec:FindOut}
-Where is output stored? ** TBD, add a table summarizing what results exist and where they are stored in version 4. \\
+Where is output stored? Most of the moments of interest are stored in global variable \texttt{oo\_} You can easily browse this global variable in Matlab by either calling it in the command line, or using the workspace interface. In global variable \texttt{oo\_} you will find the following (\textsf{\textbf{NOTE!}} variables will always appear in the order in which you declared them in the preamble block of your .mod file):
+\begin{itemize}
+\item \texttt{steady\_state}: the steady state of your variables
+\item \texttt{mean}: the mean of your variables
+\item \texttt{var}: the variance of your variables
+\item \texttt{autocorr}: the various autocorrelation matrices of your variables. Each row of these matrices will correspond to a variables in time $t$, and columns correspond to the variables lagged 1, for the first matrix, then lagged 2 for the second matrix, and so on. Thus, the matrix of autocorrelations that is automatically displayed in the results after running \texttt{stoch\_simul} has the diagonal elements of each autocorrelation matrix running down each column. 
+\item \texttt{gamma\_y}: the matrices of autocovariances. \texttt{gamma\_y\{1\}} represents variances, while \texttt{gamma\_y\{2\}} represents autocovariances with a lag of 1 and so on. By default, Dynare will return autocovariances with a lag of 5. The last matrix (\texttt{gamma\_y\{7\}} in the default case) returns the \textbf{variance decomposition}, where each column captures the independent contribution of each shock to the variance of each variable. 
+\end{itemize}
+
+Furthermore, if you decide to run impulse response functions, you will find a global variable \texttt{oo\_.irfs} comprising of vectors named \texttt{endogenous variable\_exogenous variable}, like \texttt{y\_e}, reporting the values of the endogenous variables corresponding to the impulse response functions, as a result of the independent impulse of each exogenous shock. \\
 
 To save your simulated variables, you can add the following command at the end of your .mod file: \texttt{dynasave (FILENAME) [variable names separated by commas]} If no variable names are specified in the optional field, Dynare will save all endogenous variables. In Matlab, variables saved with the \texttt{dynasave} command can be retrieved by using the Matlab command \texttt{load -mat FILENAME}.
 
-
-\subsection{Using loops to compare IRFs on the same graph}
-** Comment the irf\_loop.mod e.g.
-
 \subsection{Referring to external files}
-You may find it convenient to refer to an external file, either to compute the steady state of your model, or when specifying shocks in an external file. The former is described in section \ref{sec:ssshock} of chapter \ref{ch:solbase} when discussing steady states. The advantage of using Matlab, say, to find your model's steady state was clear with respect to Dynare version 3, as the latter resorted to numerical approximations to find steady state values. But Dynare version 4 now uses the same analytical methods available in Matlab. For most usage scenarios, you should therefore do just as  well to ask Dynare to compute your model's steady state (except, maybe, if you want to run loops, to vary your parameter values, for instance, in which case writing a Matlab program may be more handy). (** give more details? an example?)\\
+You may find it convenient to refer to an external file, either to compute the steady state of your model, or when specifying shocks in an external file. The former is described in section \ref{sec:ssshock} of chapter \ref{ch:solbase} when discussing steady states. The advantage of using Matlab, say, to find your model's steady state was clear with respect to Dynare version 3, as the latter resorted to numerical approximations to find steady state values. But Dynare version 4 now uses the same analytical methods available in Matlab. For most usage scenarios, you should therefore do just as  well to ask Dynare to compute your model's steady state (except, maybe, if you want to run loops, to vary your parameter values, for instance, in which case writing a Matlab program may be more handy).\\
 
-But you may also be interested in the second possibility described above, namely of specifying shocks in an external file, to simulate a model based on shocks from a prior estimation, for instance. You could then retrieve the exogenous shocks from the oo\_ file by saving them in a file called datafile.mat. Finally, you could simulate a deterministic model with the shocks saved from the estimation by specifying the source file for the shocks, using the \\ \mbox{\texttt{shocks(shocks\_file = datafile.mat)}} command. (** how should the variables be ordered in this datafile?)
+But you may also be interested in the second possibility described above, namely of specifying shocks in an external file, to simulate a model based on shocks from a prior estimation, for instance. You could then retrieve the exogenous shocks from the oo\_ file by saving them in a file called datafile.mat. Finally, you could simulate a deterministic model with the shocks saved from the estimation by specifying the source file for the shocks, using the \\ \mbox{\texttt{shocks(shocks\_file = datafile.mat)}} command.
 But of course, this is a bit of a workaround, since you could also use the built-in commands in Dynare to generate impulse response functions from estimated shocks, as described in chapter \ref{ch:estbase}. \\
 
 \subsection{Infinite eigenvalues}
 If you use the command \texttt{check} in your .mod file, Dynare will report your system's eigenvalues and tell you if these meet the Blanchard-Kahn conditions. At that point, don't worry if you get infinite eigenvalues - these are are firmly grounded in the theory of generalized eigenvalues. They have no detrimental influence on the solution algorithm. As far as Blanchard-Kahn conditions are concerned infinite eigenvalues are counted as explosive roots of modulus larger than one. \\
 
 \section{Files created by Dynare}
-At times, you may get a message that there is an error in a file with a new name, or you may want to have a closer look at how Dynare actually solves your model - out of curiosity or maybe to do some customization of your own. To help address these issues, below is a brief description of which files are created by Dynare after you launch \texttt{simul} or \texttt{stoch\_simul}, what their purpose is and what they contain. \\
-
-** Get this from Sebastien
+At times, you may get a message that there is an error in a file with a new name, or you may want to have a closer look at how Dynare actually solves your model - out of curiosity or maybe to do some customization of your own. You may therefore find it helpful to get a brief overview of the internal files that Dynare generates and the function of each one. ** TBD
 
 
 \section{Modeling tips}
@@ -161,7 +164,7 @@ For deterministic models, the trick is to use only stationary variables in $t+1$
 Note that in a stationary model, it is expected that variables will eventually go back to steady state after the initial shock. If you expect to see a growing curve for a variable, you are thinking about a growth model. Because growth models are nonstationary, it is easier to work with the stationarized version of such models. Again, if you know the trend, you can always add it back after the simulation of the stationary components of the variables. 
 
 \subsection{Expectations taken in the past}
-For instance, to enter the term $\mathbb{E}_{t-1}y_t$, define $s_t=\mathbb{E}_t[y_{t+1}]$ and then use $s(-1)$ in your .mod file.
+For instance, to enter the term $\mathbb{E}_{t-1}y_t$, define $s_t=\mathbb{E}_t[y_{t+1}]$ and then use $s(-1)$ in your .mod file. Note that $y_t$ in this case is not a variable in an equation, but an entire equation.
 
 \subsection{Infinite sums}
 
