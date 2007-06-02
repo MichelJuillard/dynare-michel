@@ -5,7 +5,7 @@ As in the chapter \ref{ch:solbase}, this chapter is structured around an example
 \section{Introducing an example} \label{sec:modsetup}
 The example introduced in this chapter is particularly basic. This is for two reasons. First, we did not want to introduce yet another example in this section; there's enough new material to keep you busy. Instead, we thought it would be easiest to simply continue working with the example introduced in chapter \ref{ch:solbase} with which you are probably already quite familiar. Second, the goal of the example in this chapter is really to explain features in context, but not necessarily to duplicate a ``real life scenario'' you would face when writing a paper. Once you feel comfortable with the content of this chapter, though, you can always move on to chapter \ref{ch:estadv} where you will find a full-fledged replication of a recent academic paper, featuring a non-stationary model. \\
 
-Recall from chapter \ref{ch:solbase} that we are dealing with an RBC model with monopolistic competition. Suppose we had data on business cycle variations of output (** is this enough to estimate the model?). Suppose also that we thought our little RBC model did a good job of reproducing reality. We could then use Bayesian methods to estimate the parameters of the model: $\alpha$, the capital share of output, $\beta$, the discount factor, $\delta$, the depreciation rate, $\psi$, the weight on leisure in the utility function, $\rho$, the degree of persistence in productivity, and $\epsilon$, the markup parameter. Let's see how to go about doing this. 
+Recall from chapter \ref{ch:solbase} that we are dealing with an RBC model with monopolistic competition. Suppose we had data on business cycle variations of output. Suppose also that we thought our little RBC model did a good job of reproducing reality. We could then use Bayesian methods to estimate the parameters of the model: $\alpha$, the capital share of output, $\beta$, the discount factor, $\delta$, the depreciation rate, $\psi$, the weight on leisure in the utility function, $\rho$, the degree of persistence in productivity, and $\epsilon$, the markup parameter. Note that in Bayesian estimation, the condition for undertaking estimation is that there be at least as many shocks as there are observables (a less stringent condition than for maximum likelihood estimation). It may be that this does not allow you to identify all your parameters - yielding posterior distributions identical to prior distributions - but the Bayesian estimation procedure would still run successfully. Let's see how to go about doing this. 
 
 \section{Declaring variables and parameters}
 To input the above model into Dynare for estimation purposes, we must first declare the model's variables in the preamble of the .mod file. This is done exactly as described in chapter \ref{ch:solbase} on solving DSGE models. We thus begin the .mod file with:\\
@@ -38,7 +38,7 @@ This should not come as a surprise. Dynare must know which variables are observa
 \texttt{varobs Y;}\\
 
 \section{Specifying the steady state}
-Before Dynare estimates a model, it first linearizes it around a steady state. Thus, a steady state must exist for the model and although Dynare can calculate it, we must give it a hand by declaring approximate values for the steady state. This is just as explained in details and according to the same syntax outlined in chapter \ref{ch:solbase}, covering the \texttt{initval}, \texttt{steady} and \texttt{check} commands. 
+Before Dynare estimates a model, it first linearizes it around a steady state. Thus, a steady state must exist for the model and although Dynare can calculate it, we must give it a hand by declaring approximate values for the steady state. This is just as explained in details and according to the same syntax outlined in chapter \ref{ch:solbase}, covering the \texttt{initval}, \texttt{steady} and \texttt{check} commands. In fact, as this chapter uses the same model as that outlined in chapter \ref{ch:solbase}, the steady state block will look exactly the same.\\
 
 \textsf{\textbf{TIP!}} During estimation, in finding the posterior mode, Dynare recalculates the steady state of the model at each iteration of the optimization routine (more on this later), based on the newest round of parameters available. Thus, by providing approximate initial values and relying solely on the built-in Dynare algorithm to find the steady state (a numerical procedure), you will significantly slow down the computation of the posterior mode. Dynare will end up spending 60 to 70\% of the time recalculating steady states. It is much more efficient to write an external \textbf{Matlab steady state file} and let Dynare use that file to find the steady state of your model by algebraic procedure. For more details on writing an external Matlab file to find your model's steady state, please refer to section \ref{sec:findsteady} of chapter \ref{ch:solbase}. \\
 
@@ -66,7 +66,7 @@ UNIFORM\_PDF& $U(p_3,p_4)$ &  $[p_3,p_4]$
     
 For a more complete review of all possible options for declaring priors, as well as the syntax to declare priors for maximum likelihood estimation (not Bayesian), see the \href{http://www.cepremap.cnrs.fr/juillard/mambo/index.php?option=com_content&task=view&id=51&Itemid=84}{Reference Manual}. Note also that if some parameters in a model are calibrated and are not to be estimated, you should declare them as such, by using the \texttt{parameters} command and its related syntax, as explained in chapter \ref{ch:solbase}. \\
 
-\textsf{\textbf{TIP!}} Choosing the appropriate prior for your parameters is a tricky, yet very important endeavor. It is worth spending time on your choice of priors and to test the robustness of your results to your priors. Some considerations may prove helpful. First, think about the domain of your prior over each parameter. Should it be bounded? Should it be opened on either or both sides? Remember also that if you specify a probability of zero over a certain domain in your prior, you will necessarily also find a probability of zero in your posterior distribution. Then, think about the shape of your prior distribution. Should it be symmetric? Skewed? If so, on which side? You may also go one step further and build a distribution for each of your parameters in your mind. Ask yourself, for instance, what is the probability that your parameter is bigger than a certain value, and repeat the exercise by incrementally decreasing that value. You can then pick the standard distribution that best fits your perceived distribution. Finally, instead of describing here the shapes and properties of each distribution, you are instead encouraged to visualize these distributions yourself, either in a statistics book or on the Web. \\
+\textsf{\textbf{TIP!}} Choosing the appropriate prior for your parameters is a tricky, yet very important endeavor. It is worth spending time on your choice of priors and to test the robustness of your results to your priors. Some considerations may prove helpful. First, think about the domain of your prior over each parameter. Should it be bounded? Should it be opened on either or both sides? Remember also that if you specify a probability of zero over a certain domain in your prior, you will necessarily also find a probability of zero in your posterior distribution. Then, think about the shape of your prior distribution. Should it be symmetric? Skewed? If so, on which side? You may also go one step further and build a distribution for each of your parameters in your mind. Ask yourself, for instance, what is the probability that your parameter is bigger than a certain value, and repeat the exercise by incrementally decreasing that value. You can then pick the standard distribution that best fits your perceived distribution. Finally, instead of describing here the shapes and properties of each standard distribution available in Dynare, you are instead encouraged to visualize these distributions yourself, either in a statistics book or on the Web. \\
     
 \textsf{\textbf{TIP!}} It may at times be desirable to estimate a transformation of a parameter appearing in the model, rather than the parameter itself. In such a case, it is possible to declare the parameter to be estimated in the parameters statement and to define the transformation at the top of the model section, as a Matlab expression, by adding a pound sign (\#) at the beginning of the corresponding line. For example, you may find it easier to define a prior over the discount factor, $\beta$, than its inverse which often shows up in Euler equations. Thus you would write:\\
 \\
@@ -125,23 +125,22 @@ for each estimated parameter in turn. This is helpful to diagnose problems with 
 of starting from scratch. Again, this is a useful option to speed up the process of estimation.
 \item nodiagnostic: doesn’t compute the convergence diagnostics for Metropolis-Hastings (default: diagnostics are computed and 
 displayed). Actually seeing if the various blocks of Metropolis-Hastings runs converge is a powerful and useful option to build confidence in your model estimation. More details on these diagnostics are given in Chapter \ref{ch:estadv}.
-\item bayesian\_irf: triggers the computation of the posterior distribution of impulse response functions (IRFs). The length of the IRFs are controlled by the irf option, as specified in chapter \ref{ch:solbase} when discussing the options for \texttt{stoch\_simul}. The shocks at the origin of these IRFs are those estimated by Dynare. 
-\item moments\_varendo: triggers the computation of the posterior distribution of the theoretical moments of the endogenous variables as in \texttt{stoch\_simul} (the posterior distribution of the variance decomposition is also included). 
-\item filtered\_vars: triggers the computation of the posterior distribution of filtered endogenous variables and shocks. See the note below on the difference between filtered and smoothed shocks. 
+\item bayesian\_irf: triggers the computation of the posterior distribution of impulse response functions (IRFs). The length of the IRFs are controlled by the irf option, as specified in chapter \ref{ch:solbase} when discussing the options for \texttt{stoch\_simul}. To build the posterior distribution of the IRFs, Dynare pulls parameter and shock values from the corresponding estimated distributions and, for each set of draws, generates an IRF. Repeating this process often enough generates a distribution of IRFs. \textsf{\textbf{TIP!}} If you stop the estimation procedure after calculating the posterior mode, or carry out maximum likelihood estimation, only the corresponding parameter estimates will be used to generate the IRFs. If you instead carry out a full Metropolis-Hastings estimation, on the other hand, the IRFs will use the parameters at the posterior mean, including the variance of the shocks. 
+\item All options available for stoch\_simul can simply be added to the above options, separated by commas. To view a list of these options, either see the \href{http://www.cepremap.cnrs.fr/juillard/mambo/index.php?option=com_content&task=view&id=51&Itemid=84}{Reference Manual} or section \ref{sec:compute} of chapter \ref{ch:solbase}.
+\item moments\_varendo: triggers the computation of the posterior distribution of the theoretical moments of the endogenous variables as in \texttt{stoch\_simul} (the posterior distribution of the variance decomposition is also included). ** will be implemented shortly - if not already - in Dynare version 4. 
+\item filtered\_vars: triggers the computation of the posterior distribution of filtered endogenous variables and shocks. See the note below on the difference between filtered and smoothed shocks. ** will be implemented shortly - if not already - in Dynare version 4. 
 \item smoother: triggers the computation of the posterior distribution of smoothed endogenous variables and shocks. Smoothed shocks are a reconstruction of the values of unobserved shocks over the sample, using all the information contained in the sample of observations. Filtered shocks, instead, are built only based on knowing past information. To calculate one period ahead prediction errors, for instance, you should use filtered, not smoothed variables.
-\item forecast = INTEGER: computes the posterior distribution of a forecast on INTEGER periods after the end of the sample used in estimation. The corresponding graph includes one confidence interval describing uncertainty due to parameters and one confidence interval describing uncertainty due to parameters and future shocks. Note that Dynare cannot forecast out of the posterior mode. You need to run Metropolis-Hastings iterations before being able to run forecasts on an estimated model.
-\item tex requests the printing of results and graphs in TeX tables and graphics that can be later directly included in Latex files (** any doc on this?)
-\item All options available for stoch\_simul can simply be added to the above options, separated by commas. To view a list of these options, either see the \href{http://www.cepremap.cnrs.fr/juillard/mambo/index.php?option=com_content&task=view&id=51&Itemid=84}{Reference Manual} or section \ref{sec:compute} of chapter \ref{ch:solbase}. (** how do you run stoch\_simul after estimation so that the shocks to be used in the simulation are those estimated and parameters are from the posterior mode? Or is this default?)
+\item forecast = INTEGER: computes the posterior distribution of a forecast on INTEGER periods after the end of the sample used in estimation. The corresponding graph includes one confidence interval describing uncertainty due to parameters and one confidence interval describing uncertainty due to parameters and future shocks. Note that Dynare cannot forecast out of the posterior mode. You need to run Metropolis-Hastings iterations before being able to run forecasts on an estimated model. Finally, running a forecast is very similar to an IRF, as in \texttt{bayesian\_irf}, except that the forecast does not begin at a steady state, but simply at the point corresponding to the last set of observations. The point of the forecast is to see how the system returns to steady state from this starting point. Of course, as observation do not exist for all variables, those for the remaining variables are reconstructed by sampling out of the posterior distribution of parameters. Again, repeating this step often enough yields a posterior distribution of the forecast. ** will be implemented shortly - if not already - in Dynare version 4. 
 \end{enumerate}
 
-\textsf{\textbf{TIP!}} Before launching estimation it is a good idea to make sure that your model is correctly declared, that a steady state exists and that it can be simulated for at least one set of parameter values. You may therefore want to create a test version of your .mod file. In this test file, you would comment out or erase the commands related to estimation, remove the prior estimates for parameter values and replace them with actual parameter values in the preamble, remove any non-stationary variables from your model, add a \texttt{shocks} block, make sure you have \texttt{steady} and \texttt{check} following the \texttt{initval} block if you do not have exact steady state values (** or add an initval block, depending on how this ends up looking in the original mod) and run a simulation using \texttt{stoch\_simul} at the end of your .mod file. Details on model solution and simulation can be found in Chapter \ref{ch:solbase}. \\
+\textsf{\textbf{TIP!}} Before launching estimation it is a good idea to make sure that your model is correctly declared, that a steady state exists and that it can be simulated for at least one set of parameter values. You may therefore want to create a test version of your .mod file. In this test file, you would comment out or erase the commands related to estimation, remove the prior estimates for parameter values and replace them with actual parameter values in the preamble, remove any non-stationary variables from your model, add a \texttt{shocks} block, make sure you have \texttt{steady} and possibly \texttt{check} following the \texttt{initval} block if you do not have exact steady state values and run a simulation using \texttt{stoch\_simul} at the end of your .mod file. Details on model solution and simulation can be found in Chapter \ref{ch:solbase}. \\
 
 Finally, coming back to our example, we could choose a standard option:\\
 \\
 \texttt{estimation(datafile=simuldataRBC,nobs=200,first\_obs=500,\\
 mh\_replic=2000,mh\_nblocks=2,mh\_drop=0.45,mh\_jscale=0.8); }\\
 
-This ends our description of the .mod file. (** create the datafile)
+This ends our description of the .mod file.
 
 \section{The complete .mod file}
 To summarize and to get a complete perspective on our work so far, here is the complete .mod file for the estimation of our very basic model:\\
@@ -157,7 +156,7 @@ model;\\
   c+i = y;\\
   y = (k(-1)$\hat{}$alpha)*(exp(z)*l)$\hat{}$(1-alpha);\\
   w = y*((epsilon-1)/epsilon)*(1-alpha)/l;\\
-  r = y*((epsilon-1)/epsilon)*alpha/k;\\
+  r = y*((epsilon-1)/epsilon)*alpha/k(-1);\\
   i = k-(1-delta)*k(-1);\\
   y\_l = y/l;\\
   z = rho*z(-1)+e;\\
@@ -165,7 +164,19 @@ end;\\
 \\
 varobs Y;\\
 \\
-** Steady State (see result of question asked above in SS section)\\
+initval;\\
+  k = 9;\\
+  c = 0.7;\\
+  l = 0.3;\\
+  w = 2.0;\\
+  r = 0;\\
+  z = 0; \\
+  e = 0;\\
+end;\\
+\\
+steady;\\
+\\
+check;\\
 \\
 estimated\_params;\\
 alpha, beta\_pdf, 0.35, 0.02; \\ 
@@ -187,14 +198,14 @@ mh\_replic=2000,mh\_nblocks=2,mh\_drop=0.45,mh\_jscale=0.8); }
 As in the case of model solution and simulation, Dynare returns both tabular and graphical output. On the basis of the options entered in the example .mod file above, Dynare will display the following results.\\
 
 \subsection{Tabular results}
-The first results to be displayed (and calculated from a chronological standpoint) are the steady state results. Note the dummy values of 1 for the non-stationary variables Y\_obs and P\_obs. These results are followed by the eigenvalues of the system, presented in the order in which the endogenous variables are declared at the beginning of the .mod file (** is this true?). The table of eigenvalues is completed with a statement about the Blanchard-Kahn condition being met - hopefully!\\
+The first results to be displayed (and calculated from a chronological standpoint) are the steady state results. Note the dummy values of 1 for the non-stationary variables Y\_obs and P\_obs. These results are followed by the eigenvalues of the system, presented in the order in which the endogenous variables are declared at the beginning of the .mod file. The table of eigenvalues is completed with a statement about the Blanchard-Kahn condition being met - hopefully!\\
 
 The next set of results are for the numerical iterations necessary to find the posterior mode, as explained in more details in Chapter \ref{ch:estadv}. The improvement from one iteration to the next reaches zero, Dynare give the value of the objective function (the posterior Kernel) at the mode and displays two important table summarizing results from posterior maximization.\\
 
-The first table summarizes results for parameter values. It includes: prior means, posterior mode, standard deviation and t-stat of the mode (based on the assumption of a Normal, probably erroneous when undertaking Bayesian estimation, as opposed to standard maximum likelihood), as well as the prior distribution and standard deviation (pstdev). It is followed by a second table summarizing the same results for the shocks. (** what does it mean when shocks have pstdev Inf?)\\
+The first table summarizes results for parameter values. It includes: prior means, posterior mode, standard deviation and t-stat of the mode (based on the assumption of a Normal, probably erroneous when undertaking Bayesian estimation, as opposed to standard maximum likelihood), as well as the prior distribution and standard deviation (pstdev). It is followed by a second table summarizing the same results for the shocks. It may be entirely possible that you get an infinite value for a standard deviation, this is simply the limit case of the inverse gamma distribution.\\
 
 \subsection{Graphical results}
-(** add screen shots? useful?)\\
+** corresponding graphs will be reproduced below.\\
 
 The first figure comes up soon after launching Dynare as little computation is necessary to generate it. The figure returns a graphical representation of the priors for each parameter of interest. \\
 
@@ -212,8 +223,6 @@ The first to last figure - figure 6 in our example - displays the most interesti
 
 The last figure returns the smoothed estimated shocks in a useful illustration to eye-ball the plausibility of the size and frequency of the shocks. The horizontal axis, in this case, represents the number of periods in the sample. One thing to check is the fact that shocks should be centered around zero. That is indeed the case for our example. \\
 
-\section{Dealing with non-stationary models}
-** Possibly extend above example with unit root in technology. But this may be repetitive with example provided in advanced chapter where non stationary models are dealt with in details. But if only that example is available to deal with nonstationarity, this means the user needs to invest another chunk of time to learn the new example in the next chapter. What is best?
 
 \begin{comment}
 \section{Dealing with non-stationary models}

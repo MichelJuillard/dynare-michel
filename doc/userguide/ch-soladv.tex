@@ -164,7 +164,7 @@ For deterministic models, the trick is to use only stationary variables in $t+1$
 Note that in a stationary model, it is expected that variables will eventually go back to steady state after the initial shock. If you expect to see a growing curve for a variable, you are thinking about a growth model. Because growth models are nonstationary, it is easier to work with the stationarized version of such models. Again, if you know the trend, you can always add it back after the simulation of the stationary components of the variables. 
 
 \subsection{Expectations taken in the past}
-For instance, to enter the term $\mathbb{E}_{t-1}y_t$, define $s_t=\mathbb{E}_t[y_{t+1}]$ and then use $s(-1)$ in your .mod file. Note that $y_t$ in this case is not a variable in an equation, but an entire equation.
+For instance, to enter the term $\mathbb{E}_{t-1}y_t$, define $s_t=\mathbb{E}_t[y_{t+1}]$ and then use $s(-1)$ in your .mod file. Note that, because of Jensen's inequality, you cannot do this for terms that enter your equation in a non-linear fashion. If you do have non-linear terms on which you want to take expectations in the past, you would need to apply the above manipulation to the entire equation, as if $y_t$ were an equation, not just a variable.
 
 \subsection{Infinite sums}
 
