@@ -1,4 +1,4 @@
-function posterior_irf(type)
+function PosteriorIRF(type)
 % Builds posterior IRFs after the MH algorithm. 
 % 
 % INPUTS 
