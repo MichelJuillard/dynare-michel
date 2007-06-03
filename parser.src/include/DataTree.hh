@@ -152,8 +152,7 @@ DataTree::AddUnaryOp(UnaryOpcode op_code, NodeID arg)
     {
       try
         {
-          eval_context_type *evc=NULL;
-          double argval = arg->eval(/*eval_context_type()*/*evc);
+          double argval = arg->eval(eval_context_type());
           double val = UnaryOpNode::eval_opcode(op_code, argval);
           return AddPossiblyNegativeConstant(val);
         }
@@ -174,9 +173,8 @@ DataTree::AddBinaryOp(NodeID arg1, BinaryOpcode op_code, NodeID arg2)
   // Try to reduce to a constant
   try
     {
-      eval_context_type *evc=NULL;
-      double argval1 = arg1->eval(/*eval_context_type()*/*evc);
-      double argval2 = arg2->eval(/*eval_context_type()*/*evc);
+      double argval1 = arg1->eval(eval_context_type());
+      double argval2 = arg2->eval(eval_context_type());
       double val = BinaryOpNode::eval_opcode(argval1, op_code, argval2);
       return AddPossiblyNegativeConstant(val);
     }

@@ -47,7 +47,7 @@ class ParsingDriver;
 %token <string_val> INT_NUMBER
 %token INV_GAMMA_PDF IRF
 %token KALMAN_ALGO KALMAN_TOL
-%token LAPLACE LCC_COMPILER LIK_ALGO LIK_INIT LINEAR LOAD_MH_FILE LOGLINEAR
+%token LAPLACE LCC_COMPILER LIK_ALGO LIK_INIT LINEAR LOAD_MH_FILE LOGLINEAR MARKOWITZ
 %token MH_DROP MH_INIT_SCALE MH_JSCALE MH_MODE MH_NBLOCKS MH_REPLIC MH_RECOVER
 %token MODE_CHECK MODE_COMPUTE MODE_FILE MODEL MODEL_COMPARISON MSHOCKS
 %token MODEL_COMPARISON_APPROXIMATION MODIFIEDHARMONICMEAN MOMENTS_VARENDO
@@ -89,6 +89,7 @@ class ParsingDriver;
   	: declaration
  	| periods
   | cutoff
+  | markowitz
  	| model
  	| initval
  	| endval
@@ -239,6 +240,18 @@ cutoff
 		}
     ;
 
+markowitz
+ 	: MARKOWITZ FLOAT_NUMBER ';'
+ 		{
+      driver.markowitz($2);
+		}
+    | MARKOWITZ EQUAL FLOAT_NUMBER ';'
+ 		{
+      driver.markowitz($3);
+		}
+    ;
+
+
  init_param
  	: NAME EQUAL expression ';'
     {driver.init_param($1, $3);}
@@ -346,6 +359,7 @@ cutoff
       LCC_COMPILER { driver.init_compiler(0); }
     | GCC_COMPILER { driver.init_compiler(1); }
     | o_cutoff
+    | o_markowitz
   ;
 
  model
@@ -1118,6 +1132,7 @@ cutoff
  o_hp_ngrid: HP_NGRID EQUAL INT_NUMBER {driver.option_num("hp_ngrid", $3);};
  o_periods: PERIODS EQUAL INT_NUMBER {driver.option_num("periods", $3); driver.option_num("simul", "1");};
  o_cutoff: CUTOFF EQUAL FLOAT_NUMBER {driver.option_num("cutoff", $3);}
+ o_markowitz: MARKOWITZ EQUAL FLOAT_NUMBER {driver.option_num("markowitz", $3);}
  o_simul: SIMUL {driver.option_num("simul", "1");};
  o_simul_seed: SIMUL_SEED EQUAL INT_NUMBER { driver.option_num("simul_seed", $3)};
  o_qz_criterium: QZ_CRITERIUM EQUAL INT_NUMBER { driver.option_num("qz_criterium", $3)}

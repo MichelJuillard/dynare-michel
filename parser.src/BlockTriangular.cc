@@ -777,7 +777,7 @@ BlockTriangular::Normalize_and_BlockDecompose(bool* IM, Model_Block* ModelBlock,
                     SIM0[iter->first.first*n+iter->first.second]=1;
                     if(!IM_0[iter->first.first*n+iter->first.second])
                       {
-                        cout << "error nothing at IM_0[" << iter->first.first << ", " << iter->first.second << "]=" << IM_0[iter->first.first*n+iter->first.second] << "\n";
+                        cout << "Error nothing at IM_0[" << iter->first.first << ", " << iter->first.second << "]=" << IM_0[iter->first.first*n+iter->first.second] << "\n";
                       }
                   }
                 else
@@ -791,7 +791,7 @@ BlockTriangular::Normalize_and_BlockDecompose(bool* IM, Model_Block* ModelBlock,
                 OK=normalization.Normalize(n, *prologue, *epilogue, SIM00, Index_Equ_IM, Equation_gr, 1, IM);
               suppressed=suppress;
               if(!OK)
-                bi/=1.05;
+                bi/=1.07;
               if(bi>1e-14)
                 free(SIM00);
             }

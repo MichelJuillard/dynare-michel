@@ -108,6 +108,8 @@ public:
   int compiler;
   //! Absolute value under which a number is considered to be zero
   double cutoff;
+  //! The weight of the Markowitz criteria to determine the pivot in the linear solver (simul_NG1 from simulate.cc)
+  double markowitz;
   //! Use a graphical and symbolic version of the symbolic gaussian elimination new_SGE = false
   //! or use direct gaussian elimination new_SGE = true
   bool new_SGE;

@@ -58,6 +58,7 @@ int sigma_e = 0;
 <INITIAL>parameters {BEGIN DYNARE_STATEMENT; return token::PARAMETERS;}
 <INITIAL>periods 	{BEGIN DYNARE_STATEMENT; return token::PERIODS;}
 <INITIAL>cutoff 	{BEGIN DYNARE_STATEMENT; return token::CUTOFF;}
+<INITIAL>markowitz 	{BEGIN DYNARE_STATEMENT; return token::MARKOWITZ;}
 <INITIAL>estimation {BEGIN DYNARE_STATEMENT; return token::ESTIMATION;}
 <INITIAL>prior_analysis {BEGIN DYNARE_STATEMENT; return token::PRIOR_ANALYSIS;}
 <INITIAL>posterior_analysis {BEGIN DYNARE_STATEMENT; return token::POSTERIOR_ANALYSIS;}
@@ -150,6 +151,7 @@ int sigma_e = 0;
 <DYNARE_STATEMENT>optim		{return token::OPTIM;}
 <DYNARE_STATEMENT>periods	{return token::PERIODS;}
 <DYNARE_STATEMENT>cutoff	{return token::CUTOFF;}
+<DYNARE_STATEMENT>markowitz	{return token::MARKOWITZ;}
 <DYNARE_STATEMENT>model_comparison_approximation {return token::MODEL_COMPARISON;}
 <DYNARE_STATEMENT>laplace {return token::LAPLACE;}
 <DYNARE_STATEMENT>modifiedharmonicmean {return token::MODIFIEDHARMONICMEAN;}
@@ -170,6 +172,7 @@ int sigma_e = 0;
 <DYNARE_BLOCK>corr {return token::CORR;}
 <DYNARE_BLOCK>periods {return token::PERIODS;}
 <DYNARE_BLOCK>cutoff {return token::CUTOFF;}
+<DYNARE_BLOCK>markowitz {return token::MARKOWITZ;}
 <DYNARE_BLOCK>filename {return token::FILENAME;}
 <DYNARE_BLOCK>gamma_pdf {return token::GAMMA_PDF;}
 <DYNARE_BLOCK>beta_pdf {return token::BETA_PDF;}

@@ -15,6 +15,7 @@ ModelTree::ModelTree(SymbolTable &symbol_table_arg,
   mode(eStandardMode),
   compiler(LCC_COMPILE),
   cutoff(1e-12),
+  markowitz(0.7),
   new_SGE(true),
   computeJacobian(false),
   computeJacobianExo(false),
@@ -1473,7 +1474,7 @@ ModelTree::writeSparseDLLDynamicCFileAndBinFile(const string &dynamic_basename, 
                   mDynamicModelFile << "    Read_SparseMatrix(\"" << reform(bin_basename) <<  "\","
                     << block_triangular.ModelBlock->Block_List[i].Size << ", periods, y_kmin, y_kmax"
                     << ");\n";
-                  mDynamicModelFile << "    u_count=" << u_count_int << "*(periods+y_kmax);\n";
+                  mDynamicModelFile << "    u_count=" << u_count_int << "*(periods+y_kmax+y_kmin);\n";
                 }
               else
                 {
@@ -1509,11 +1510,10 @@ ModelTree::writeSparseDLLDynamicCFileAndBinFile(const string &dynamic_basename, 
                   mDynamicModelFile << "              }\n";
                   mDynamicModelFile << "          }\n";
                   mDynamicModelFile << "        cvg=(max_res<solve_tolf);\n";
-                  mDynamicModelFile << "        if(!cvg)\n";
                   if(new_SGE)
-                    mDynamicModelFile << "          simulate_NG1(" << i << ", " << /*mod_param.endo_nbr*/symbol_table.endo_nbr << ", it_, y_kmin, y_kmax," << block_triangular.ModelBlock->Block_List[i].Size  << ", periods, true);\n";
+                    mDynamicModelFile << "      simulate_NG1(" << i << ", " << /*mod_param.endo_nbr*/symbol_table.endo_nbr << ", it_, y_kmin, y_kmax," << block_triangular.ModelBlock->Block_List[i].Size  << ", periods, true, cvg);\n";
                   else
-                    mDynamicModelFile << "          simulate(" << i << ", " << /*mod_param.endo_nbr*/symbol_table.endo_nbr << ", it_, y_kmin, y_kmax," << block_triangular.ModelBlock->Block_List[i].Size  << ", periods, true);\n";
+                    mDynamicModelFile << "      simulate(" << i << ", " << /*mod_param.endo_nbr*/symbol_table.endo_nbr << ", it_, y_kmin, y_kmax," << block_triangular.ModelBlock->Block_List[i].Size  << ", periods, true);\n";
                   mDynamicModelFile << "        iter++;\n";
                   mDynamicModelFile << "      }\n";
                   mDynamicModelFile << "    if (!cvg)\n";
@@ -1538,7 +1538,7 @@ ModelTree::writeSparseDLLDynamicCFileAndBinFile(const string &dynamic_basename, 
                   mDynamicModelFile << "#endif\n";
                   mDynamicModelFile << "      }\n";
                   if(new_SGE)
-                    mDynamicModelFile << "        simulate_NG1(" << i << ", " << /*mod_param.endo_nbr*/symbol_table.endo_nbr << ", it_, y_kmin, y_kmax," << block_triangular.ModelBlock->Block_List[i].Size  << ", periods, true);\n";
+                    mDynamicModelFile << "        simulate_NG1(" << i << ", " << /*mod_param.endo_nbr*/symbol_table.endo_nbr << ", it_, y_kmin, y_kmax," << block_triangular.ModelBlock->Block_List[i].Size  << ", periods, true, cvg);\n";
                   else
                     mDynamicModelFile << "        simulate(" << i << ", " << /*mod_param.endo_nbr*/symbol_table.endo_nbr << ", it_, y_kmin, y_kmax," << block_triangular.ModelBlock->Block_List[i].Size  << ", periods, true);\n";
                 }
@@ -1617,6 +1617,7 @@ ModelTree::writeSparseDLLDynamicCFileAndBinFile(const string &dynamic_basename, 
           mDynamicModelFile << "  periods=int(floor(*(mxGetPr(mxGetFieldByNumber(options_, 0, mxGetFieldNumber(options_,\"periods\"))))));\n";
           mDynamicModelFile << "  maxit_=int(floor(*(mxGetPr(mxGetFieldByNumber(options_, 0, mxGetFieldNumber(options_,\"maxit_\"))))));\n";
           mDynamicModelFile << "  slowc=double(*(mxGetPr(mxGetFieldByNumber(options_, 0, mxGetFieldNumber(options_,\"slowc\")))));\n";
+          mDynamicModelFile << "  markowitz_c=double(*(mxGetPr(mxGetFieldByNumber(options_, 0, mxGetFieldNumber(options_,\"markowitz\")))));\n";
         }
       else
         {
@@ -1624,7 +1625,8 @@ ModelTree::writeSparseDLLDynamicCFileAndBinFile(const string &dynamic_basename, 
           mDynamicModelFile << "  y_kmax=(int)floor(*(mxGetPr(mxGetFieldByNumber(M_, 0, mxGetFieldNumber(M_,\"maximum_lead\")))));\n";
           mDynamicModelFile << "  periods=(int)floor(*(mxGetPr(mxGetFieldByNumber(options_, 0, mxGetFieldNumber(options_,\"periods\")))));\n";
           mDynamicModelFile << "  maxit_=(int)floor(*(mxGetPr(mxGetFieldByNumber(options_, 0, mxGetFieldNumber(options_,\"maxit_\")))));\n";
-          mDynamicModelFile << "  slowc=(int)floor(*(mxGetPr(mxGetFieldByNumber(options_, 0, mxGetFieldNumber(options_,\"slowc\")))));\n";
+          mDynamicModelFile << "  slowc=double(*(mxGetPr(mxGetFieldByNumber(options_, 0, mxGetFieldNumber(options_,\"slowc\")))));\n";
+          mDynamicModelFile << "  markowitz_c=double(*(mxGetPr(mxGetFieldByNumber(options_, 0, mxGetFieldNumber(options_,\"markowitz\")))));\n";
         }
       mDynamicModelFile << "  col_y=mxGetN(mxGetFieldByNumber(oo_, 0, mxGetFieldNumber(oo_,\"endo_simul\")));;\n";
       mDynamicModelFile << "  if (col_y<row_x)\n";

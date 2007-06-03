@@ -337,13 +337,14 @@ VariableNode::eval(const eval_context_type &eval_context) const throw (EvalExcep
 {
   /*if (lag != 0)
     throw EvalException();*/
-  if(&eval_context==NULL)
-    throw EvalException();
   eval_context_type::const_iterator it = eval_context.find(make_pair(symb_id, type));
   if (it == eval_context.end())
     {
-      cout << "Error: the variable or parameter (" << datatree.symbol_table.getNameByID( type, symb_id) << ") has not been initialized (in derivatives evaluation)\n";
-      cout.flush();
+      if (eval_context.size()>0)
+        {
+          cout << "Error: the variable or parameter (" << datatree.symbol_table.getNameByID( type, symb_id) << ") has not been initialized (in derivatives evaluation)\n";
+          cout.flush();
+        }
       throw EvalException();
     }
   return it->second;

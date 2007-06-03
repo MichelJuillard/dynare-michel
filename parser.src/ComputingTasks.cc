@@ -252,6 +252,17 @@ CutoffStatement::writeOutput(ostream &output, const string &basename) const
   output << "options_.cutoff = " << cutoff << ";" << endl;
 }
 
+MarkowitzStatement::MarkowitzStatement(double markowitz_arg) : markowitz(markowitz_arg)
+{
+}
+
+void
+MarkowitzStatement::writeOutput(ostream &output, const string &basename) const
+{
+  output << "options_.markowitz = " << markowitz << ";" << endl;
+}
+
+
 DsampleStatement::DsampleStatement(int val1_arg) : val1(val1_arg), val2(-1)
 {
 }

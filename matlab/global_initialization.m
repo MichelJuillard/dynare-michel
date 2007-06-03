@@ -1,8 +1,8 @@
 function global_initialization()
   % initializes global variables and options for DYNARE
-    
+
   global oo_ M_ options_ ct_ endval_ rplottype_
-  
+
   ct_=0;
   endval_=0;
 
@@ -21,8 +21,8 @@ function global_initialization()
   options_.solve_tolf = eps^(2/3);
   options_.solve_tolx = 3.7e-11;
   options_.solve_maxit = 500;
-				 
-  
+
+
   % steady state file
   if exist([M_.fname '_steadystate'])
     options_.steadystate_flag = 1;
@@ -30,17 +30,17 @@ function global_initialization()
     options_.steadystate_flag = 0;
   end
   options_.steadystate_partial = [];
-  
+
   % subset of the estimated deep parameters
   options_.ParamSubSet = 'None';
-  
+
   % bvar-dsge
   options_.varlag = 4;
-  
+
   % Optimization algorithm [6] gmhmaxlik
   options_.Opt6Iter = 3;
   options_.Opt6Numb = 100000;
-  
+
   % Graphics
   options_.graphics.nrows = 3;
   options_.graphics.ncols = 3;
@@ -48,8 +48,8 @@ function global_initialization()
   options_.graphics.line_width = 1;
   options_.nograph = 0;
   options_.XTick = [];
-  options_.XTickLabel = [];  
-  
+  options_.XTickLabel = [];
+
   % IRFs & other stoch_simul output
   options_.irf = 40;
   options_.relative_irf = 0;
@@ -63,21 +63,21 @@ function global_initialization()
   options_.noprint = 0;
   options_.simul = 0;
   options_.SpectralDensity = 0;
-  
+
   % TeX output
   options_.TeX = 0;
 
   % Exel
   options_.xls_sheet = '';
   options_.xls_range = '';
-  
+
   % Prior draws
   options_.forecast = 0;
   options_.replic = 1;
-  
+
   % Model
   options_.linear = 0;
-  
+
   % Solution
   options_.order = 2;
   options_.dr_algo = 0;
@@ -86,11 +86,11 @@ function global_initialization()
   options_.replic = 50;
   options_.drop = 100;
   options_.simul_algo = 0;
-  
+
   % Ramsey policy
   options_.planner_discount = 1.0;
   options_.ramsey_policy = 0;
-  
+
   % estimation
   options_.load_mh_file = 0;
   options_.first_obs = 1;
@@ -107,14 +107,14 @@ function global_initialization()
   options_.mode_check = 0;
   options_.prior_trunc = 1e-10;
   options_.mh_conf_sig = 0.90;
-  options_.mh_mode = 1; 	
-  options_.mh_nblck = 2;	
+  options_.mh_mode = 1;
+  options_.mh_nblck = 2;
   options_.load_mh_file = 0;
   options_.nodiagnostic = 0;
   options_.loglinear = 0;
   options_.unit_root_vars = [];
   options_.bayesian_irf = 0;
-  options_.bayesian_th_moments = 0;  
+  options_.bayesian_th_moments = 0;
   options_.smoother = 0;
   options_.moments_varendo = 0;
   options_.filtered_vars = 0;
@@ -127,7 +127,8 @@ function global_initialization()
   options_.logdata = 0;
   options_.use_mh_covariance_matrix = 0;
   options_.noconstant = 0;
-  
+  options_.markowitz = 0.5;
+
   % Misc
   options_.conf_sig = 0.9;
   oo_.exo_simul = [];
@@ -136,9 +137,9 @@ function global_initialization()
   oo_.exo_steady_state = [];
   oo_.exo_det_steady_state = [];
   oo_.exo_det_simul = [];
-  
+
   % Variance matrix for measurement errors
   M_.H = 0;
-  
+
   % BVAR
   M_.bvar = [];

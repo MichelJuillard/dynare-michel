@@ -12,7 +12,7 @@ int
 NumericalConstants::AddConstant(const string &iConst)
 {
   map<string, int>::iterator iter = numConstantsIndex.find(iConst);
-
+  //cout << "iConst=" << iConst << "\n" ;
   if (iter != numConstantsIndex.end())
     return iter->second;
 

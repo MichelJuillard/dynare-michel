@@ -1,4 +1,4 @@
-  ////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////
 //                           simulate.c                               //
 //              simulate file designed for GNU GCC C++ compiler       //
 //                 use GCC_COMPILER option in MODEL command           //
@@ -7,6 +7,7 @@
 //#define PRINT_OUT
 #define INDIRECT_SIMULATE
 #define PRINT_OUT_p
+#define MARKOVITZ
 //#define PRINT_OUT_y1
 //#define PRINT_u
 //#define PRINT_OUT_b
@@ -14,6 +15,7 @@
 //#define EXTENDED
 //#define FLOAT
 //#define WRITE_u
+//#define MEMORY_LEAKS
 //#define N_MX_ALLOC
 //#define MEM_ALLOC_CHK
 #define NEW_ALLOC
@@ -56,6 +58,13 @@ typedef struct NonZeroElem
     NonZeroElem *NZE_R_N, *NZE_C_N;
   };
 
+  typedef struct t_save_op_s
+  {
+    short int lag, operat;
+    int first, second;
+  };
+
+
 
 
 /*#include "simulate.hh"*/
@@ -70,11 +79,11 @@ int *pivot, *pivotk;
 longd *pivotv, *pivotva=NULL;
 bool *line_done;
 bool symbolic=true, alt_symbolic=false, record_all=false;
-long int nop_all, nopa_all;
+long int nop_all, nopa_all, nop1, nop2;
 const longd very_big=1e24;
 int Per_y_, Per_u_, it_, nb_row_x, u_size, y_size, x_size, y_kmin, y_kmax, y_decal;
 int periods, maxit_, max_u=0, min_u=0x7FFFFFFF, g_nop_all=0;
-double *params;
+longd *params, markowitz_c;
 longd  *u, *y, *x, *r, *g1, *g2, *ya, *direction;
 longd slowc, slowc_save, solve_tolf, max_res, res1, res2, res1a=9.0e60;
 bool cvg, print_err, swp_f;
@@ -82,6 +91,8 @@ int swp_f_b=0;
 pctimer_t t0, t1;
 int u_count_alloc, u_count_alloc_save, size_of_direction;
 int i, j, k, nb_endo, u_count, u_count_init, iter;
+const int alt_symbolic_count_max=1;
+int alt_symbolic_count=0;
 longd err;
 std::string filename;
 NonZeroElem **FNZE_R, **FNZE_C;
@@ -105,17 +116,6 @@ typedef struct t_table_u
 
 std::fstream SaveCode, SaveCode_swp;
 
-/*longd pow1(longd a, longd b)
- {
-   if(a<0)
-     {
-       mexPrintf("Attempt to compute (-X)^Y at time %d\n",it_);
-       return(-pow(-a,b));
-     }
-   else
-     return(pow(a,b));
- }
-*/
 
 longd pow1(longd a, longd b)
 {
@@ -1085,6 +1085,7 @@ class SparseMatrix
     int At_Col(int c, int lag, NonZeroElem **first);
     int NRow(int r);
     int NCol(int c);
+    int Union_Row(int row1, int row2);
     void Print(int Size,int *b);
     int Get_u();
     void Delete_u(int pos);
@@ -1210,6 +1211,39 @@ int SparseMatrix::At_Row(int r, NonZeroElem **first)
 {
   (*first)=FNZE_R[r];
   return NbNZRow[r];
+}
+
+int
+SparseMatrix::Union_Row(int row1, int row2)
+{
+  NonZeroElem *first1, *first2;
+  int n1=At_Row(row1, &first1);
+  int n2=At_Row(row2, &first2);
+  int i1=0, i2=0, nb_elem=0;
+  while(i1<n1 && i2<n2)
+    {
+      if(first1->c_index==first2->c_index)
+        {
+          nb_elem++;
+          i1++;
+          i2++;
+          first1=first1->NZE_R_N;
+          first2=first2->NZE_R_N;
+        }
+      else if(first1->c_index<first2->c_index)
+        {
+          nb_elem++;
+          i1++;
+          first1=first1->NZE_R_N;
+        }
+      else
+        {
+          nb_elem++;
+          i2++;
+          first2=first2->NZE_R_N;
+        }
+    }
+  return nb_elem;
 }
 
 int
@@ -1940,6 +1974,7 @@ void SparseMatrix::End(int Size)
     {
       mxFree(NZE_Mem_add[i*CHUNK_BLCK_SIZE]);
     }
+  mxFree(NZE_Mem_add);
   init_Mem();
 #else
   for (int i=0;i<Size*periods;i++)
@@ -1959,16 +1994,20 @@ void SparseMatrix::End(int Size)
   mxFree(NbNZCol);
   mxFree(b);
   mxFree(line_done);
+  mxFree(pivot);
+  mxFree(pivotk);
+  mxFree(pivotv);
+  mxFree(pivotva);
 }
 
 bool
 compare( int *save_op, int *save_opa, int *save_opaa, int beg_t, int periods, long int nop4,  int Size, long int *ndiv, long int *nsub)
 {
   //mexPrintf("=>in compare beg_t=%d\n",beg_t);
-  long int i,j,nop=nop4/4, t, index_d, k;
+  long int i,j,/*nop=nop4/4*/nop=nop4/2, t, index_d, k;
   longd r=0.0;
   bool OK=true;
-
+  t_save_op_s *save_op_s, *save_opa_s, *save_opaa_s;
   int *diff1, *diff2;
   //mexPrintf("nop=%d\n",nop);
   //g_save_op=(int*)mxMalloc(nop*5*sizeof(int));
@@ -1983,70 +2022,99 @@ compare( int *save_op, int *save_opa, int *save_opaa, int beg_t, int periods, lo
 #ifdef MEM_ALLOC_CHK
   mexPrintf("ok\n");
 #endif
-  j=k=0;
-  for (i=0;i<nop4 && OK;i+=4)
+  j=k=i=0;
+  while(i<nop4 && OK)
+    {
+       save_op_s=(t_save_op_s*)&(save_op[i]);
+       save_opa_s=(t_save_op_s*)&(save_opa[i]);
+       save_opaa_s=(t_save_op_s*)&(save_opaa[i]);
+       //mexPrintf("i=%d nop4=%d save_op_s->operat=%d\n",i,nop4,save_op_s->operat);
+       diff1[j]=save_op_s->first-save_opa_s->first;
+       switch(save_op_s->operat)
+         {
+           case FLD:
+           case FDIV:
+             OK=(save_op_s->operat==save_opa_s->operat && save_opa_s->operat==save_opaa_s->operat
+                && diff1[j]==(save_opa_s->first-save_opaa_s->first));
+             i+=2;
+             break;
+           case FLESS:
+           case FSUB:
+             diff2[j]=save_op_s->second-save_opa_s->second;
+             OK=(save_op_s->operat==save_opa_s->operat && save_opa_s->operat==save_opaa_s->operat
+                && diff1[j]==(save_opa_s->first-save_opaa_s->first)
+                && diff2[j]==(save_opa_s->second-save_opaa_s->second));
+             i+=3;
+             break;
+           default:
+             mexPrintf("unknown operator = %d ",save_op_s->operat);
+             filename+=" stopped";
+             mexErrMsgTxt(filename.c_str());
+             break;
+         }
+       j++;
+    }
+
+  /*j=k=i=0;
+  save_op_s=(t_save_op_s*)&(*save_op);
+  save_opa_s=(t_save_op_s*)&(*save_opa);
+  save_opaa_s=(t_save_op_s*)&(*save_opaa);
+  while(i<nop4 && OK)
+    {
+       mexPrintf("i=%d nop4=%d save_op_s->operat=%d\n",i,nop4,save_op_s->operat);
+       diff1[j]=save_op_s->first-save_opa_s->first;
+       switch(save_op_s->operat)
+         {
+           case FLD:
+           case FDIV:
+             OK=(save_op_s->operat==save_opa_s->operat && save_opa_s->operat==save_opaa_s->operat
+                && diff1[j]==(save_opa_s->first-save_opaa_s->first));
+             i+=2;
+             if(i<nop4)
+               {
+                 save_op_s+=2;
+                 save_opa_s+=2;
+                 save_opaa_s+=2;
+               }
+             break;
+           case FLESS:
+           case FSUB:
+             diff2[j]=save_op_s->second-save_opa_s->second;
+             OK=(save_op_s->operat==save_opa_s->operat && save_opa_s->operat==save_opaa_s->operat
+                && diff1[j]==(save_opa_s->first-save_opaa_s->first)
+                && diff2[j]==(save_opa_s->second-save_opaa_s->second));
+             i+=3;
+             if(i<nop4)
+               {
+                 save_op_s+=3;
+                 save_opa_s+=3;
+                 save_opaa_s+=3;
+               }
+             break;
+           default:
+             mexPrintf("unknown operator = %d ",save_op_s->operat);
+             filename+=" stopped";
+             mexErrMsgTxt(filename.c_str());
+             break;
+         }
+       j++;
+    }
+*/
+  /*for (i=0;i<nop4 && OK;i+=4)
     {
       diff1[j]=save_op[i+1]-save_opa[i+1];
       diff2[j]=save_op[i+2]-save_opa[i+2];
-      /*g_save_op[k]=save_op[i];
-      g_save_op[k+1]=save_op[i+1]-beg_t*diff1[j];
-      g_save_op[k+2]=diff1[j];
-      if(save_op[i]==FSUB || save_op[i]==FLESS)
-        {
-          g_save_op[k+3]=save_op[i+2]-beg_t*diff2[j];
-          g_save_op[k+4]=diff2[j];
-        }
-      k+=5;*/
-      /*if(save_op[i+2]==48616  )
-        mexPrintf("save_op[%d]=%d save_opa[%d]=%d save_opa[%d]=%d diff2[%d]=%d\n",i+2,save_op[i+2],i+2,save_opa[i+2],i+2,save_opaa[i+2],j,diff2[j]);*/
       OK=(save_op[i]==save_opa[i] && save_opa[i]==save_opaa[i]
           && diff1[j]==(save_opa[i+1]-save_opaa[i+1])
           && diff2[j]==(save_opa[i+2]-save_opaa[i+2]));
-      //mexPrintf("diff1[%d]=%d, diff2[%d]=%d\n",j,diff1[j],j,diff2[j]);
-      /*mexPrintf("save_op[%d]=%d, save_opa[%d]=%d, save_opaa[%d]=%d\n",i,save_op[i],i,save_opa[i],i,save_opaa[i]);
-      mexPrintf("save_op[%d+1]=%d, save_opa[%d+1]=%d, save_opaa[%d+1]=%d\n",i,save_op[i+1],i,save_opa[i+1],i,save_opaa[i+1]);
-      mexPrintf("save_op[%d+2]=%d, save_opa[%d+2]=%d, save_opaa[%d+2]=%d\n",i,save_op[i+2],i,save_opa[i+2],i,save_opaa[i+2]);*/
       j++;
-    }
-  //mexPrintf("j=%d nop=%d\n",j,nop);
-  //OK=false;
-  /*if(!OK)
-    {
-      mexPrintf("save_op[%d](%d)==save_opa[%d](%d)==save_opaa[%d](%d)\n diff1[%d](%d)==(save_opa[%d]-save_opaa[%d])(%d)\n diff2[%d](%d)==(save_opa[%d]-save_opaa[%d])(%d)\n",
-      i,save_op[i],i,save_opa[i],i,save_opaa[i],j,diff1[j],i+1,i+1,(save_opa[i+1]-save_opaa[i+1]),j,diff2[j],i+2,i+2,(save_opa[i+2]-save_opaa[i+2]));
     }*/
-  //g_nop_all=k;
-  //mexPrintf("1 - OK=%d t=%d\n",OK,beg_t);
   if (OK)
-    {
-      /*for(i=beg_t-2;i<beg_t;i++)
-        {
-          for(j=0;j<Size;j++)
-            {
-              mexPrintf("%d==%d ",pivot[i*Size+j]+Size,pivot[(i+1)*Size+j]);
-              OK = OK && ((pivot[i*Size+j]+Size)==pivot[(i+1)*Size+j]);
-            }
-          mexPrintf("\n");
-       }
-      if(OK)
-        {*/
-      for (i=beg_t;i<periods;i++)
-        {
-          /*if(i+1==periods)
-            mexPrintf("t=%d ",i);*/
-          for (j=0;j<Size;j++)
-            {
-              pivot[i*Size+j]=pivot[(i-1)*Size+j]+Size;
-              /*if(i+1==periods)
-                mexPrintf("%d==%d ",pivot[(i-1)*Size+j]+Size,pivot[i*Size+j]);*/
-            }
-          /*if(i+1==periods)
-            mexPrintf("\n");*/
-        }
-      /*}*/
-    }
-  //mexPrintf("2 - OK=%d t=%d\n",OK,beg_t);
-  //mexPrintf("from beg_t=%d to periods=%d\n",beg_t, periods);
+    for (i=beg_t;i<periods;i++)
+      for (j=0;j<Size;j++)
+            pivot[i*Size+j]=pivot[(i-1)*Size+j]+Size;
+  /*mexPrintf("2 - OK=%d t=%d\n",OK,beg_t);
+  mexPrintf("from beg_t=%d to periods=%d\n",beg_t, periods);*/
   if (OK)
     {
 
@@ -2057,10 +2125,140 @@ compare( int *save_op, int *save_opa, int *save_opaa, int beg_t, int periods, lo
 #endif
 
       t=1;
-      //mexPrintf("nop4=%d\n",nop4);
       for (;t<periods-beg_t-max(y_kmax,y_kmin);t++)
         {
-          //mexPrintf("t=%d\n",t);
+          i=j=0;
+          while(i<nop4)
+            {
+              save_op_s=(t_save_op_s*)(&(save_op[i]));
+              index_d=save_op_s->first+t*diff1[j];
+              if (index_d>=u_count_alloc)
+                {
+                  u_count_alloc+=5*u_count_alloc_save;
+#ifdef MEM_ALLOC_CHK
+                  mexPrintf("u=(longd*)mxRealloc(u,u_count_alloc*sizeof(longd))\n",u_count_alloc);
+#endif
+                  u=(longd*)mxRealloc(u,u_count_alloc*sizeof(longd));
+#ifdef MEM_ALLOC_CHK
+                  mexPrintf("ok\n");
+#endif
+                  if (!u)
+                    {
+                      mexPrintf("Error in Get_u: memory exhausted (realloc(%d))\n",u_count_alloc*sizeof(longd));
+                      mexErrMsgTxt("Exit from Dynare");
+                    }
+                }
+              switch (save_op_s->operat)
+                {
+                  case FLD  :
+                    r=u[index_d];
+#ifdef PRINT_u
+                    mexPrintf("FLD u[%d] (%f)\n",index_d,u[index_d]);
+#endif
+                    i+=2;
+                    break;
+                  case FDIV :
+                    u[index_d]/=r;
+#ifdef PRINT_u
+                    mexPrintf("FDIV u[%d](%f)/=r(%f)=(%f)\n",index_d,u[index_d],r,u[index_d]);
+#endif
+                    i+=2;
+                    break;
+                  case FSUB :
+                    u[index_d]-=u[save_op_s->second+t*diff2[j]]*r;
+#ifdef PRINT_u
+                    mexPrintf("FSUB u[%d]-=u[%d](%f)*r(%f)=(%f)\n",index_d,save_op_s->second+t*diff2[j],u[save_op_s->second+t*diff2[j]],r,u[index_d] );
+#endif
+                    i+=3;
+                    break;
+                  case FLESS:
+                    u[index_d]=-u[save_op_s->second+t*diff2[j]]*r;
+#ifdef PRINT_u
+                    mexPrintf("FLESS u[%d]=-u[%d](%f)*r(%f)=(%f)\n",index_d,save_op_s->second+t*diff2[j],u[save_op_s->second+t*diff2[j]],r,u[index_d] );
+#endif
+                    i+=3;
+                    break;
+                }
+              j++;
+            }
+        }
+      int t1=t;
+      for (t=t1;t<periods-beg_t;t++)
+        {
+          i=j=0;
+          while(i<nop4)
+            {
+              save_op_s=(t_save_op_s*)(&(save_op[i]));
+              if(save_op_s->lag<((periods-beg_t)-t))
+                {
+                  index_d=save_op_s->first+t*diff1[j];
+                  if (index_d>=u_count_alloc)
+                    {
+                      u_count_alloc+=5*u_count_alloc_save;
+#ifdef MEM_ALLOC_CHK
+                      mexPrintf("u=(longd*)mxRealloc(u,u_count_alloc*sizeof(longd))\n",u_count_alloc);
+#endif
+                      u=(longd*)mxRealloc(u,u_count_alloc*sizeof(longd));
+#ifdef MEM_ALLOC_CHK
+                      mexPrintf("ok\n");
+#endif
+                      if (!u)
+                        {
+                          mexPrintf("Error in Get_u: memory exhausted (realloc(%d))\n",u_count_alloc*sizeof(longd));
+                          mexErrMsgTxt("Exit from Dynare");
+                        }
+                    }
+                  switch (save_op_s->operat)
+                    {
+                      case FLD  :
+                        r=u[index_d];
+#ifdef PRINT_u
+                        mexPrintf("FLD u[%d] (%f)\n",index_d,u[index_d]);
+#endif
+                        i+=2;
+                        break;
+                      case FDIV :
+                        u[index_d]/=r;
+#ifdef PRINT_u
+                        mexPrintf("FDIV u[%d](%f)/=r(%f)=(%f)\n",index_d,u[index_d],r,u[index_d]);
+#endif
+                        i+=2;
+                        break;
+                      case FSUB :
+                        u[index_d]-=u[save_op_s->second+t*diff2[j]]*r;
+#ifdef PRINT_u
+                        mexPrintf("FSUB u[%d]-=u[%d](%f)*r(%f)=(%f)\n",index_d,save_op_s->second+t*diff2[j],u[save_op_s->second+t*diff2[j]],r,u[index_d] );
+#endif
+                        i+=3;
+                        break;
+                      case FLESS:
+                        u[index_d]=-u[save_op_s->second+t*diff2[j]]*r;
+#ifdef PRINT_u
+                        mexPrintf("FLESS u[%d]=-u[%d](%f)*r(%f)=(%f)\n",index_d,save_op_s->second+t*diff2[j],u[save_op_s->second+t*diff2[j]],r,u[index_d] );
+#endif
+                        i+=3;
+                        break;
+                    }
+                }
+              else
+                {
+                  switch (save_op_s->operat)
+                    {
+                      case FLD  :
+                      case FDIV :
+                        i+=2;
+                        break;
+                      case FSUB :
+                      case FLESS :
+                        i+=3;
+                        break;
+                    }
+                }
+              j++;
+            }
+        }
+/*      for (;t<periods-beg_t-max(y_kmax,y_kmin);t++)
+        {
 #ifdef WRITE_u
           toto << "t=" << t << endl;
 #endif
@@ -2098,36 +2296,18 @@ compare( int *save_op, int *save_opa, int *save_opaa, int beg_t, int periods, lo
 #ifdef PRINT_u
                     mexPrintf("FDIV u[%d](%f)/=r(%f)=(%f)\n",index_d,u[index_d],r,u[index_d]);
 #endif
-
-                    /*if((t>=periods-beg_t-y_kmax))
-                      mexPrintf("u[%d]/=%f=%f\n",index_d,double(r),double(u[index_d]));*/
-                    /*toto << i_toto << " u[" << index_d << "]/=" << r << "=" << u[index_d] << endl;
-                    i_toto++;*/
-                    //(*ndiv)++;
                     break;
                   case FSUB :
                     u[index_d]-=u[save_op[i+2]+t*diff2[j]]*r;
 #ifdef PRINT_u
                     mexPrintf("FSUB u[%d]-=u[%d](%f)*r(%f)=(%f)\n",index_d,save_op[i+2]+t*diff2[j],u[save_op[i+2]+t*diff2[j]],r,u[index_d] );
 #endif
-
-                    /*if((t==periods-beg_t-y_kmax))
-                      mexPrintf("u[%d]-=u[%d]*%f=%f\n",index_d,save_op[i+2]+t*diff2[j],double(r),double(u[index_d]));*/
-                    /*toto << i_toto << " u[" << index_d << "]-=u[" << save_op[i+2]+t*diff2[j] << "]*" << r << "=" << u[index_d] << endl;
-                    i_toto++;*/
-                    //(*nsub)++;
                     break;
                   case FLESS:
                     u[index_d]=-u[save_op[i+2]+t*diff2[j]]*r;
 #ifdef PRINT_u
                     mexPrintf("FLESS u[%d]=-u[%d](%f)*r(%f)=(%f)\n",index_d,save_op[i+2]+t*diff2[j],u[save_op[i+2]+t*diff2[j]],r,u[index_d] );
 #endif
-
-                    /*if((t==periods-beg_t-y_kmax))
-                      mexPrintf("u[%d]=-u[%d]*%f=%f\n",index_d,save_op[i+2]+t*diff2[j],double(r),double(u[index_d]));*/
-                    /*toto << i_toto << "u[" << index_d << "]=-u[" << save_op[i+2]+t*diff2[j] << "]*" << r << "=" << u[index_d] << endl;
-                    i_toto++;*/
-                    //(*nsub)++;
                     break;
                 }
               j++;
@@ -2138,7 +2318,7 @@ compare( int *save_op, int *save_opa, int *save_opaa, int beg_t, int periods, lo
         {
           j=0;
 #ifdef WRITE_u
-          toto << "t=" << t << " t+beg_t=" << t+beg_t/*<< "----------------------------------------------------------------------------------------------------------------"*/ <<endl;
+          toto << "t=" << t << " t+beg_t=" << t+beg_t <<endl;
 #endif
           //mexPrintf("t=%d----------------------------------------------------------------------------------------------------------------\n",t);
           for (i=0;i<nop4;i+=4)
@@ -2177,10 +2357,9 @@ compare( int *save_op, int *save_opa, int *save_opaa, int beg_t, int periods, lo
                     mexPrintf("FDIV u[%d](%f)/=r(%f)=(%f)\n",index_d,u[index_d],r,u[index_d]);
 #endif
 
-                    /*if(index_d==81726)
-                      mexPrintf("(0) u[%d]/=%f=%f save_op[%d]=%d diff1[%d]=%d\n",index_d,double(r),double(u[index_d]),i+1,save_op[i+1],j,diff1[j]);*/
+
 #ifdef WRITE_u
-                    toto << i_toto << " u[" /*<< index_d*/ << "]/=" << r << "=" << u[index_d] << /*"  lag_index=" << save_op[i+3] << " periods-beg_t-t=" << periods-beg_t-t <<*/ endl;
+                    toto << i_toto << " u[" << "]/=" << r << "=" << u[index_d] <<  endl;
                     i_toto++;
 #endif
                     //(*ndiv)++;
@@ -2191,10 +2370,8 @@ compare( int *save_op, int *save_opa, int *save_opaa, int beg_t, int periods, lo
 #ifdef PRINT_u
                     mexPrintf("FSUB u[%d]-=u[%d](%f)*r(%f)=(%f)\n",index_d,save_op[i+2]+t*diff2[j],u[save_op[i+2]+t*diff2[j]],r,u[index_d] );
 #endif
-                    /*if(index_d==81726)
-                      mexPrintf("(1) u[%d]-=u[%d](%f)*%f=%f save_op[%d]=%d diff1[%d]=%d\n",index_d,save_op[i+2]+t*diff2[j],u[save_op[i+2]+t*diff2[j]],double(r),double(u[index_d]),i+1,save_op[i+1],j,diff1[j]);*/
 #ifdef WRITE_u
-                    toto << i_toto << " u[" /*<< index_d*/ << "]-=u[" /*<< save_op[i+2]+t*diff2[j]*/ << "]*" << r << "=" << u[index_d] << /*"  lag_index=" << save_op[i+3] << " periods-beg_t-t=" << periods-beg_t-t <<*/  endl;
+                    toto << i_toto << " u[" << "]-=u[" << "]*" << r << "=" << u[index_d] <<  endl;
                     i_toto++;
 #endif
                     //(*nsub)++;
@@ -2205,10 +2382,8 @@ compare( int *save_op, int *save_opa, int *save_opaa, int beg_t, int periods, lo
 #ifdef PRINT_u
                     mexPrintf("FLESS u[%d]=-u[%d](%f)*r(%f)=(%f)\n",index_d,save_op[i+2]+t*diff2[j],u[save_op[i+2]+t*diff2[j]],r,u[index_d] );
 #endif
-                    /*if(index_d==81726)
-                      mexPrintf("(3) u[%d]=-u[%d](%f)*r(%f)=%f save_op[%d]=%d diff1[%d]=%d\n",index_d,save_op[i+2]+t*diff2[j],u[save_op[i+2]+t*diff2[j]],double(r),double(u[index_d]),i+1,save_op[i+1],j,diff1[j]);*/
 #ifdef WRITE_u
-                    toto << i_toto << " u[" /*<< index_d*/ << "]=-u[" /*<< save_op[i+2]+t*diff2[j]*/ << "]*" << r << "=" << u[index_d] << /*"  lag_index=" << save_op[i+3] << " periods-beg_t-t=" << periods-beg_t-t <<*/ endl;
+                    toto << i_toto << " u[" << "]=-u["  << "]*" << r << "=" << u[index_d] <<  endl;
                     i_toto++;
 #endif
                     //(*nsub)++;
@@ -2217,7 +2392,7 @@ compare( int *save_op, int *save_opa, int *save_opaa, int beg_t, int periods, lo
               }
               j++;
             }
-        }
+        }*/
 #ifdef WRITE_u
       toto.close();
       filename+=" stopped";
@@ -2459,9 +2634,6 @@ SparseMatrix::complete(int beg_t, int Size, int periods, int *b)
   int *diff;
   longd yy=0.0, err, ferr;
 
-  /*mexPrintf("in complete t=%d\n",beg_t);
-  mexPrintf("u_count=%d\n",u_count);*/
-
   int size_of_save_code=(1+y_kmax)*Size*(Size+1+4)/2*4;
 #ifdef MEM_ALLOC_CHK
   mexPrintf("save_code=(int*)mxMalloc(%d*sizeof(int))\n",size_of_save_code);
@@ -2475,7 +2647,6 @@ SparseMatrix::complete(int beg_t, int Size, int periods, int *b)
 #ifdef MEM_ALLOC_CHK
   mexPrintf("ok\n");
 #endif
-  //mexPrintf("Size=%d\n",Size);
   cal_y=y_size*y_kmin;
 
   i=(beg_t+1)*Size-1;
@@ -2818,9 +2989,12 @@ void chk_avail_mem(int **save_op_all,long int *nop_all,long int *nopa_all,int ad
   }
 
 int
-simulate_NG1(int blck, int y_size, int it_, int y_kmin, int y_kmax, int Size, int periods, bool print_it)
+simulate_NG1(int blck, int y_size, int it_, int y_kmin, int y_kmax, int Size, int periods, bool print_it, bool cvg)
 {
   /*Triangularisation at each period of a block using a simple gaussian Elimination*/
+  const int maskhi=0xFFFF0000;
+  const int masklo=0x0000FFFF;
+  t_save_op_s *save_op_s;
   bool record=false;
   int *save_op=NULL, *save_opa=NULL, *save_opaa=NULL;
   long int nop=0, nopa=0, nopaa=0;
@@ -2840,6 +3014,39 @@ simulate_NG1(int blck, int y_size, int it_, int y_kmin, int y_kmax, int Size, in
   pctimer_t t01;
   pctimer_t t1 = pctimer();
   tdelete1=0; tdelete2=0; tdelete21=0; tdelete22=0; tdelete221=0; tdelete222=0;
+
+
+  /*int Z[3];
+  int *p;
+  p=Z;
+  mexPrintf("p=%x\n",p);
+  p=p+1;
+  mexPrintf("p=%x\n",p);*/
+/*
+  int Z[3];
+  Z[0]=0x56CE000A;
+  Z[1]=2;
+  Z[2]=3;
+
+
+  save_op_s=(t_save_op_s*)Z;
+*/
+  /*for(i=0;i<1;i++)
+    mexPrintf("Z[i]=%d lo(Z)=%d hi(Z)=%d\n",Z[i],Z[i] & masklo, Z[i] & maskhi);*/
+ /* mexPrintf("save_op_s->lag=%d sizeof(save_op_s->lag)=%d\n",int(save_op_s->lag),sizeof(save_op_s->lag));
+  mexPrintf("save_op_s->operat=%d sizeof(save_op_s->operat)=%d\n",int(save_op_s->operat),sizeof(save_op_s->operat));
+  mexPrintf("save_op_s->first=%d sizeof(save_op_s->first)=%d\n",save_op_s->first,sizeof(save_op_s->first));
+  mexPrintf("save_op_s->second=%d sizeof(save_op_s->second)=%d\n",save_op_s->second,sizeof(save_op_s->second));
+  mexPrintf("save_op_s->lag=%d sizeof(save_op_s->lag)=%d\n",int(save_op_s->lag),sizeof(save_op_s->lag));
+*/
+  /*int z=0x56CECDEF;*/
+
+  /*mexPrintf("lo(z)=%d hi(z)=%d\n",z & masklo, z & maskhi);*/
+  /*filename+=" stopped";
+  mexErrMsgTxt(filename.c_str());*/
+#ifdef MEMORY_LEAKS
+  mexEvalString("feature('memstats');");
+#endif
   if (isnan(res1) || isinf(res1))
     {
       /*if(record_all and nop_all)
@@ -2870,11 +3077,12 @@ simulate_NG1(int blck, int y_size, int it_, int y_kmin, int y_kmax, int Size, in
       /*}*/
     }
   u_count+=u_count_init;
-  if (alt_symbolic)
+  if (alt_symbolic && alt_symbolic_count<alt_symbolic_count_max)
     {
-      mexPrintf("Pivoting method will be only applied to the first periods.\n");
+      mexPrintf("Pivoting method will be applied only to the first periods.\n");
       alt_symbolic=false;
       symbolic=true;
+      alt_symbolic_count++;
     }
   if (((res1/res1a-1)>-0.1) && symbolic)
     {
@@ -2891,6 +3099,8 @@ simulate_NG1(int blck, int y_size, int it_, int y_kmin, int y_kmax, int Size, in
   mexPrintf("-----------------------------------\n");
   //mexPrintf("record_all=%d save_op_all=%x\n",record_all,save_op_all);
   mexEvalString("drawnow;");
+  if(cvg)
+    return(0);
 #ifdef PRINT_OUT
   mexPrintf("Size=%d y_size=%d y_kmin=%d y_kmax=%d u_count=%d u_count_alloc=%d periods=%d\n",Size,y_size,y_kmin,y_kmax,u_count,u_count_alloc,periods);
 #endif
@@ -2979,6 +3189,7 @@ simulate_NG1(int blck, int y_size, int it_, int y_kmin, int y_kmax, int Size, in
 #else
               save_op=(int*)mxMalloc(nop*sizeof(int));
 #endif
+              nopa=nop;
 #ifdef MEM_ALLOC_CHK
               mexPrintf("ok\n");
 #endif
@@ -3010,8 +3221,14 @@ simulate_NG1(int blck, int y_size, int it_, int y_kmin, int y_kmax, int Size, in
 #ifdef PRINT_OUT
               mexPrintf("nb_eq=%d\n",nb_eq);
 #endif
-              if /*(t<=y_kmin)*/((symbolic && t<=y_kmin) || !symbolic)
+              if /*(t<=y_kmin) */((symbolic && t<=y_kmin) || !symbolic)
                 {
+#ifdef MARKOVITZ
+                  double piv_v[Size];
+                  int pivj_v[Size], pivk_v[Size], NR[Size], l=0, N_max=0;
+                  bool one=false;
+                  piv_abs=0;
+#endif
                   for (j=0;j<nb_eq;j++)
                     {
 #ifdef PRINT_OUT
@@ -3026,6 +3243,39 @@ simulate_NG1(int blck, int y_size, int it_, int y_kmin, int y_kmax, int Size, in
 #endif
                           int jj=first->r_index;
                           int NRow_jj=sparse_matrix.NRow(jj);
+                          //Union_Row(jj, int row2)
+#ifdef MARKOVITZ
+                          piv_v[l]=u[k];
+                          longd piv_fabs=fabs(u[k]);
+                          //mexPrintf("piv_v[%d]=%f\n",l,piv_v[l]);
+                          pivj_v[l]=jj;
+                          pivk_v[l]=k;
+                          NR[l]=NRow_jj;
+                          if(NRow_jj==1 && !one)
+                            {
+                              one=true;
+                              piv_abs=piv_fabs;
+                              N_max=NRow_jj;
+                            }
+                          if(!one)
+                            {
+                              if(piv_fabs>piv_abs)
+                                piv_abs=piv_fabs;
+                              if(NRow_jj>N_max)
+                               N_max=NRow_jj;
+                            }
+                          else
+                            {
+                              if(NRow_jj==1)
+                                {
+                                  if(piv_fabs>piv_abs)
+                                   piv_abs=piv_fabs;
+                                 if(NRow_jj>N_max)
+                                  N_max=NRow_jj;
+                                }
+                            }
+                          l++;
+#else
                           if (piv_abs<fabs(u[k])||NRow_jj==1)
                             {
                               piv=u[k];
@@ -3035,10 +3285,48 @@ simulate_NG1(int blck, int y_size, int it_, int y_kmin, int y_kmax, int Size, in
                               if (NRow_jj==1)
                                 break;
                             }
+#endif
                           //ncomp++;
                         }
                       first=first->NZE_C_N;
                     }
+#ifdef MARKOVITZ
+                  double markovitz=0, markovitz_max=-9e70;
+                  //mexPrintf("N_max=%d piv_abs=%f l=%d nb_eq=%d\n",N_max,piv_abs,l,nb_eq);
+                  if(!one)
+                    {
+                       for(j=0;j<l;j++)
+                         {
+                            markovitz=exp(log(fabs(piv_v[j])/piv_abs)-markowitz_c*log(double(NR[j])/double(N_max)));
+                            //mexPrintf("none j=%d markovitz=%f piv_v=%f NR=%d term1=%f term2=%f\n",j,markovitz,piv_v[j],NR[j],log(fabs(piv_v[j])/piv_abs),log(double(NR[j])/double(N_max)));
+                            if(markovitz>markovitz_max)
+                              {
+                                piv=piv_v[j];
+                                //piv_abs=fabs(piv);
+                                pivj=pivj_v[j];   //Line number
+                                pivk=pivk_v[j];   //positi
+                                markovitz_max=markovitz;
+                              }
+                         }
+                    }
+                  else
+                    {
+                      for(j=0;j<l;j++)
+                         {
+                            markovitz=exp(log(fabs(piv_v[j])/piv_abs)-markowitz_c*log(NR[j]/N_max));
+                            //mexPrintf("one j=%d markovitz=%f piv_v=%f NR=%d\n",j,markovitz,piv_v[j],NR[j]);
+                            if(markovitz>markovitz_max && NR[j]==1)
+                              {
+                                piv=piv_v[j];
+                                //piv_abs=fabs(piv);
+                                pivj=pivj_v[j];   //Line number
+                                pivk=pivk_v[j];   //positi
+                                markovitz_max=markovitz;
+                              }
+                         }
+                    }
+                  //smexPrintf("selected pivj=%d piv=%f piv_abs=%f markovitz_max=%f one=%d \n",pivj,piv,piv_abs,markovitz_max,one);
+#endif
 #ifdef PROFILER
                   tpivot+=pctimer()-td0;
 #endif
@@ -3071,7 +3359,7 @@ simulate_NG1(int blck, int y_size, int it_, int y_kmin, int y_kmax, int Size, in
                 {
                   if (record)
                     {
-                      if (nop+2>=nopa)
+                      if (nop+1>=nopa)
                         {
                           //mexPrintf("Error: out of save_op[%d] nopa=%d\n",nop+2,nopa);
                           nopa=int(1.5*nopa);
@@ -3087,12 +3375,17 @@ simulate_NG1(int blck, int y_size, int it_, int y_kmin, int y_kmax, int Size, in
                           mexPrintf("ok\n");
 #endif
                         }
-                      save_op[nop]=FLD;
+                      save_op_s=(t_save_op_s*)(&(save_op[nop]));
+                      save_op_s->operat=FLD;
+                      save_op_s->first=pivk;
+                      save_op_s->lag=0;
+                      /*save_op[nop]=FLD;
                       save_op[nop+1]=pivk;
                       save_op[nop+2]=0;
-                      save_op[nop+3]=0;
+                      save_op[nop+3]=0;*/
                     }
-                  nop+=4;
+                  /*nop+=4;*/
+                  nop+=2;
                 }
               else if (record_all)
                 {
@@ -3155,7 +3448,7 @@ simulate_NG1(int blck, int y_size, int it_, int y_kmin, int y_kmax, int Size, in
                     {
                       if (record)
                         {
-                          if (nop+2>=nopa)
+                          if (nop+1>=nopa)
                             {
                               //mexPrintf("Error: out of save_op[%d] nopa=%d\n",nop+2,nopa);
                               nopa=int(1.5*nopa);
@@ -3171,13 +3464,17 @@ simulate_NG1(int blck, int y_size, int it_, int y_kmin, int y_kmax, int Size, in
                               mexPrintf("ok\n");
 #endif
                             }
-
-                          save_op[nop]=FDIV;
+                          save_op_s=(t_save_op_s*)(&(save_op[nop]));
+                          save_op_s->operat=FDIV;
+                          save_op_s->first=first->u_index;
+                          save_op_s->lag=first->lag_index;
+                          /*save_op[nop]=FDIV;
                           save_op[nop+1]=first->u_index;
                           save_op[nop+2]=0;
-                          save_op[nop+3]=first->lag_index;
+                          save_op[nop+3]=first->lag_index;*/
                         }
-                      nop+=4;
+                      /*nop+=4;*/
+                      nop+=2;
                     }
                   else if (record_all)
                     {
@@ -3225,7 +3522,7 @@ simulate_NG1(int blck, int y_size, int it_, int y_kmin, int y_kmax, int Size, in
                 {
                   if (record)
                     {
-                      if (nop+2>=nopa)
+                      if (nop+1>=nopa)
                         {
                           //mexPrintf("Error: out of save_op[%d] nopa=%d\n",nop+2,nopa);
                           nopa=int(1.5*nopa);
@@ -3241,12 +3538,17 @@ simulate_NG1(int blck, int y_size, int it_, int y_kmin, int y_kmax, int Size, in
                           mexPrintf("ok\n");
 #endif
                         }
-                      save_op[nop]=FDIV;
+                      save_op_s=(t_save_op_s*)(&(save_op[nop]));
+                      save_op_s->operat=FDIV;
+                      save_op_s->first=b[pivj];
+                      save_op_s->lag=0;
+                      /*save_op[nop]=FDIV;
                       save_op[nop+1]=b[pivj];
                       save_op[nop+2]=0;
-                      save_op[nop+3]=0;
+                      save_op[nop+3]=0;*/
                     }
-                  nop+=4;
+                  /*nop+=4;*/
+                  nop+=2;
                 }
               else if (record_all)
                 {
@@ -3295,7 +3597,7 @@ simulate_NG1(int blck, int y_size, int it_, int y_kmin, int y_kmax, int Size, in
                         {
                           if (record)
                             {
-                              if (nop+2>=nopa)
+                              if (nop+1>=nopa)
                                 {
                                   //mexPrintf("Error: out of save_op[%d] nopa=%d\n",nop+2,nopa);
                                   nopa=int(1.5*nopa);
@@ -3311,12 +3613,17 @@ simulate_NG1(int blck, int y_size, int it_, int y_kmin, int y_kmax, int Size, in
                                   mexPrintf("ok\n");
 #endif
                                 }
-                              save_op[nop]=FLD;
+                              save_op_s=(t_save_op_s*)(&(save_op[nop]));
+                              save_op_s->operat=FLD;
+                              save_op_s->first=first->u_index;
+                              save_op_s->lag=abs(first->lag_index);
+                              /*save_op[nop]=FLD;
                               save_op[nop+1]=first->u_index;
                               save_op[nop+2]=0;
-                              save_op[nop+3]=abs(first->lag_index);
+                              save_op[nop+3]=abs(first->lag_index);*/
                             }
-                          nop+=4;
+                          /*nop+=4;*/
+                          nop+=2;
                         }
                       else if (record_all)
                         {
@@ -3419,12 +3726,18 @@ simulate_NG1(int blck, int y_size, int it_, int y_kmin, int y_kmax, int Size, in
                                           mexPrintf("ok\n");
 #endif
                                         }
-                                      save_op[nop]=FLESS;
+                                      save_op_s=(t_save_op_s*)(&(save_op[nop]));
+                                      save_op_s->operat=FLESS;
+                                      save_op_s->first=tmp_u_count;
+                                      save_op_s->second=first_piv->u_index;
+                                      save_op_s->lag=max(first_piv->lag_index,abs(tmp_lag));
+                                      /*save_op[nop]=FLESS;
                                       save_op[nop+1]=tmp_u_count;
                                       save_op[nop+2]=first_piv->u_index;
-                                      save_op[nop+3]=max(first_piv->lag_index,abs(tmp_lag)/*abs(lag)*/);
+                                      save_op[nop+3]=max(first_piv->lag_index,abs(tmp_lag));*/
                                     }
-                                  nop+=4;
+                                  /*nop+=4;*/
+                                  nop+=3;
                                 }
                               else if (record_all)
                                 {
@@ -3539,12 +3852,18 @@ simulate_NG1(int blck, int y_size, int it_, int y_kmin, int y_kmax, int Size, in
                                               mexPrintf("ok\n");
 #endif
                                             }
-                                          save_op[nop]=FSUB;
+                                          save_op_s=(t_save_op_s*)(&(save_op[nop]));
+                                          save_op_s->operat=FSUB;
+                                          save_op_s->first=first_sub->u_index;
+                                          save_op_s->second=first_piv->u_index;
+                                          save_op_s->lag=max(abs(tmp_lag),first_piv->lag_index);
+                                          /*save_op[nop]=FSUB;
                                           save_op[nop+1]=first_sub->u_index;
                                           save_op[nop+2]=first_piv->u_index;
-                                          save_op[nop+3]=max(abs(/*first_sub->lag_index*/tmp_lag),first_piv->lag_index);
+                                          save_op[nop+3]=max(abs(tmp_lag),first_piv->lag_index);*/
                                         }
-                                      nop+=4;
+                                      /*nop+=4;*/
+                                      nop+=3;
                                     }
                                   else if (record_all)
                                     {
@@ -3630,12 +3949,18 @@ simulate_NG1(int blck, int y_size, int it_, int y_kmin, int y_kmax, int Size, in
                                   mexPrintf("ok\n");
 #endif
                                 }
-                              save_op[nop]=FSUB;
+                              save_op_s=(t_save_op_s*)(&(save_op[nop]));
+                              save_op_s->operat=FSUB;
+                              save_op_s->first=b[row];
+                              save_op_s->second=b[pivj];
+                              save_op_s->lag=abs(tmp_lag);
+                              /*save_op[nop]=FSUB;
                               save_op[nop+1]=b[row];
                               save_op[nop+2]=b[pivj];
-                              save_op[nop+3]=abs(tmp_lag);
+                              save_op[nop+3]=abs(tmp_lag);*/
                             }
-                          nop+=4;
+                          /*nop+=4;*/
+                          nop+=3;
                         }
                       else if (record_all)
                         {
@@ -3680,10 +4005,10 @@ simulate_NG1(int blck, int y_size, int it_, int y_kmin, int y_kmax, int Size, in
           if (symbolic)
             {
               //mexPrintf("record=%d, nop=%d, nopa=%d\n",record,nop,nopa);
-              if (record && (nop==nopa))
+              if (record && (nop==nop1))
                 {
 #ifdef PRINT_OUT
-                  mexPrintf("nop=%d, nopa=%d, record=%d save_opa=%x save_opaa=%x \n",nop, nopa, record, save_opa, save_opaa);
+                  mexPrintf("nop=%d, nop1=%d, record=%d save_opa=%x save_opaa=%x \n",nop, nop1, record, save_opa, save_opaa);
 #endif
                   //mexPrintf("save_opa=%x, save_opaa=%x\n",save_opa, save_opaa);
                   if (save_opa && save_opaa)
@@ -3714,23 +4039,27 @@ simulate_NG1(int blck, int y_size, int it_, int y_kmin, int y_kmax, int Size, in
                           save_opaa=NULL;
                         }
 #ifdef MEM_ALLOC_CHK
-                      mexPrintf("save_opaa=(int*)mxMalloc(%d*sizeof(int))\n",nopa);
+                      mexPrintf("save_opaa=(int*)mxMalloc(%d*sizeof(int))\n",nop1);
 #endif
 #ifdef N_MX_ALLOC
-                      save_opaa=malloc_std(nopa);
+                      save_opaa=malloc_std(nop1);
 #else
-                      save_opaa=(int*)mxMalloc(nopa*sizeof(int));
+                      save_opaa=(int*)mxMalloc(nop1*sizeof(int));
 #endif
 #ifdef MEM_ALLOC_CHK
                       mexPrintf("ok\n");
 #endif
-                      memcpy(save_opaa, save_opa, nopa*sizeof(int));
+                      memcpy(save_opaa, save_opa, nop1*sizeof(int));
                       //mexPrintf("1 - end memcpy\n");
                     }
                   //mexPrintf("okb\n");
                   if (save_opa)
                     {
+#ifdef N_MX_ALLOC
+                      free(save_opa);
+#else
                       mxFree(save_opa);
+#endif
                       save_opa=NULL;
                     }
 #ifdef MEM_ALLOC_CHK
@@ -3749,7 +4078,7 @@ simulate_NG1(int blck, int y_size, int it_, int y_kmin, int y_kmax, int Size, in
                 }
               else
                 {
-                  if (nop==nopa)
+                  if (nop==nop1)
                     record=true;
                   else
                     {
@@ -3775,8 +4104,8 @@ simulate_NG1(int blck, int y_size, int it_, int y_kmin, int y_kmax, int Size, in
                     }
                   //mexPrintf("nop=%d, nopa=%d, record=%d time=%f\n",nop, nopa, record,1000*(pctimer()-by_time_t0));
                 }
-              nopaa=nopa;
-              nopa=nop;
+              nop2=nop1;
+              nop1=nop;
             }
           record=true;
         }

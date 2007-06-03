@@ -82,7 +82,7 @@ options_.dynatol=4e-8;
 shocks;
 var e;
 periods 1;
-values -0.0002;
+values 0.0002;
 end;
 simul(periods=60);
 rplot y;

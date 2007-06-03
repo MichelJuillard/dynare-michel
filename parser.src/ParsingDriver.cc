@@ -193,6 +193,15 @@ ParsingDriver::cutoff(string *cutoff)
 }
 
 void
+ParsingDriver::markowitz(string *markowitz)
+{
+  double markowitz_val = atof(markowitz->c_str());
+  mod_file->addStatement(new MarkowitzStatement(markowitz_val));
+  delete markowitz;
+}
+
+
+void
 ParsingDriver::dsample(string *arg1)
 {
   int arg1_val = atoi(arg1->c_str());
