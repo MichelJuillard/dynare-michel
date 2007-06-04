@@ -28,7 +28,7 @@ end
   switch type
    case 'irf_dsge'
     CAPtype  = 'IRF_DSGE';
-    TYPEsize = [ options_.irf , M_.endo_nbr , M_.exo_nbr ];
+    TYPEsize = [ options_.irf , size(options_.varlist,1) , M_.exo_nbr ];
     TYPEarray = 4;    
    case 'irf_bvardsge'
     CAPtype  = 'IRF_BVARDSGE';

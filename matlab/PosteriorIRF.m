@@ -19,9 +19,27 @@ function PosteriorIRF(type)
 % part of DYNARE, copyright S. Adjemian, M. Juillard (2006)
 % Gnu Public License.
 global options_ estim_params_ oo_ M_ bayestopt_
+% Set the number of periods
 if isempty(options_.irf) | ~options_.irf 
     options_.irf = 40;
 end
+% Set varlist if necessary
+varlist = options_.varlist;
+if isempty(varlist)
+    varlist = options_.varobs;
+end
+options_.varlist = varlist;
+nvar = size(varlist,1);
+IndxVariables = [];
+for i=1:nvar
+    idx = strmatch(deblank(varlist(i,:)),M_.endo_names,'exact');
+    if isempty(idx)
+        disp(['PosteriorIRF :: ' deblank(varlist(i,:)) 'is not a declared endogenous variable!'])
+    else
+        IndxVariables = [IndxVariables,idx];
+    end
+end
+% Set various parameters & Check or create directories
 nvx  = estim_params_.nvx;
 nvn  = estim_params_.nvn;
 ncx  = estim_params_.ncx;
@@ -31,9 +49,15 @@ npar = nvx+nvn+ncx+ncn+np;
 offset = npar-np;
 nvobs = size(options_.varobs,1);
 gend = options_.nobs;
-%
-MaxNumberOfPlotPerFigure = 9;% The square root must be an integer!
+MaxNumberOfPlotPerFigure = 9;
 nn = sqrt(MaxNumberOfPlotPerFigure);
+MAX_nirfs_dsge = ceil(options_.MaxNumberOfBytes/(options_.irf*nvar*M_.exo_nbr)/8);
+MAX_nruns = ceil(options_.MaxNumberOfBytes/(npar+2)/8);
+if ~isempty(strmatch('dsge_prior_weight',M_.param_names))
+    MAX_nirfs_dsgevar = ceil(options_.MaxNumberOfBytes/(options_.irf*nvobs*M_.exo_nbr)/8);
+else
+    MAX_nirfs_dsgevar = 0;
+end
 DirectoryName = CheckPath('Output');
 if strcmpi(type,'posterior')
   MhDirectoryName = CheckPath('metropolis');
@@ -41,13 +65,6 @@ elseif strcmpi(type,'gsa')
   MhDirectoryName = CheckPath('GSA');
 else
   MhDirectoryName = CheckPath('prior');
-end
-MAX_nirfs_dsge = ceil(options_.MaxNumberOfBytes/(options_.irf*length(oo_.steady_state)*M_.exo_nbr)/8)+50;
-MAX_nruns = ceil(options_.MaxNumberOfBytes/(npar+2)/8);
-if ~isempty(strmatch('dsge_prior_weight',M_.param_names))
-    MAX_nirfs_dsgevar = ceil(options_.MaxNumberOfBytes/(options_.irf*nvobs*M_.exo_nbr)/8)+50;
-else
-    MAX_nirfs_dsgevar = 0;
 end
 if strcmpi(type,'posterior')
   load([ MhDirectoryName '/'  M_.fname '_mh_history'])
@@ -84,15 +101,16 @@ elseif strcmpi(type,'gsa')
 else
   h = waitbar(0,'Bayesian (prior) IRFs...');
 end
+% Create arrays
 if B <= MAX_nruns
   stock_param = zeros(B, npar);
 else
   stock_param = zeros(MAX_nruns, npar);
 end
 if B >= MAX_nirfs_dsge
-  stock_irf_dsge = zeros(options_.irf,M_.endo_nbr,M_.exo_nbr,MAX_nirfs_dsge);
+  stock_irf_dsge = zeros(options_.irf,nvar,M_.exo_nbr,MAX_nirfs_dsge);
 else
-  stock_irf_dsge = zeros(options_.irf,M_.endo_nbr,M_.exo_nbr,B);
+  stock_irf_dsge = zeros(options_.irf,nvar,M_.exo_nbr,B);
 end
 if MAX_nirfs_dsgevar
     if B >= MAX_nirfs_dsgevar
@@ -106,113 +124,131 @@ if MAX_nirfs_dsgevar
     NumberOfLagsTimesNvobs = NumberOfLags*nvobs;
     COMP_draw = diag(ones(nvobs*(NumberOfLags-1),1),-nvobs);
 end
-for b=1:B
-  irun = irun+1;
-  irun2 = irun2+1;
-  if ~strcmpi(type,'gsa')
-    deep = GetOneDraw(type);
-  else
-    deep = x(b,:);
-  end
-  stock_param(irun2,:) = deep;  
-  set_parameters(deep);
-  dr = resol(oo_.steady_state,0);
-  SS(M_.exo_names_orig_ord,M_.exo_names_orig_ord) = M_.Sigma_e+1e-14*eye(M_.exo_nbr);
-  SS = transpose(chol(SS));
-  for i = 1:M_.exo_nbr
-    if SS(i,i) > 1e-13
-      y=irf(dr,SS(M_.exo_names_orig_ord,i), options_.irf, options_.drop,options_.replic,options_.order);
-      if options_.relative_irf
-        y = 100*y/cs(i,i);
-      end
-      for j = 1:M_.endo_nbr
-        if max(y(j,:)) - min(y(j,:)) > 1e-10 
-          stock_irf_dsge(:,j,i,irun) = transpose(y(j,:));
+b = 0;
+while b<=B
+    b = b + 1;
+    irun = irun+1;
+    irun2 = irun2+1;
+    if ~strcmpi(type,'gsa')
+        deep = GetOneDraw(type);
+    else
+        deep = x(b,:);
+    end
+    stock_param(irun2,:) = deep;  
+    set_parameters(deep);
+    [dr,info] = resol(oo_.steady_state,0);
+    if info(1)
+        b = b - 1;
+        if info(1) == 1
+            errordef = 'Static variables are not uniquely defined';
+        elseif info(1) == 2
+            errordef = 'Dll problem';
+        elseif info(1) == 3
+            errordef = 'No stable trajectory';
+        elseif info(1) == 4
+            errordef = 'Indeterminacy';
+        elseif info(1) == 5
+            errordef = 'Rank condition is not satisfied';
         end
-      end
+        disp(['PosteriorIRF :: Dynare is unable to solve the model (' errordef ')'])
+        continue
     end
-  end
-  if MAX_nirfs_dsgevar
-      IRUN = IRUN+1;
-      tmp_dsgevar = zeros(options_.irf,nvobs*M_.exo_nbr);
-      [fval,cost_flag,ys,trend_coeff,info,PHI,SIGMAu,iXX] =  DsgeVarLikelihood(deep',gend);
-      dsge_prior_weight = M_.params(strmatch('dsge_prior_weight',M_.param_names));
-      DSGE_PRIOR_WEIGHT = floor(gend*(1+dsge_prior_weight));
-      tmp1 = SIGMAu*gend*(dsge_prior_weight+1);
-      val  = 1;
-      tmp1 = chol(inv(tmp1))'; 
-      while val;
-          % draw from the marginal posterior of sig
-          tmp2 = tmp1*randn(nvobs,DSGE_PRIOR_WEIGHT-NumberOfLagsTimesNvobs);
-          SIGMAu_draw = inv(tmp2*tmp2');
-          % draw from the conditional posterior of PHI
-          VARvecPHI = kron(SIGMAu_draw,iXX);
-          PHI_draw  = PHI(:) + chol(VARvecPHI)'*randn(nvobs*NumberOfLagsTimesNvobs,1);
-          COMP_draw(1:nvobs,:) = reshape(PHI_draw,NumberOfLagsTimesNvobs,nvobs)';
-          % Check for stationarity
-          tests = find(abs(eig(COMP_draw))>0.9999999999);
-          if isempty(tests)
-	      val=0;
-          end
-      end
-      % Get rotation
-      if dsge_prior_weight > 0
-          Atheta(oo_.dr.order_var,M_.exo_names_orig_ord) = oo_.dr.ghu*sqrt(M_.Sigma_e);
-          A0 = Atheta(bayestopt_.mfys,:);
-          [OMEGAstar,SIGMAtr] = qr2(A0');
-      end
-      SIGMAu_chol = chol(SIGMAu_draw)';
-      SIGMAtrOMEGA = SIGMAu_chol*OMEGAstar';
-      PHIpower = eye(NumberOfLagsTimesNvobs);
-      irfs = zeros (options_.irf,nvobs*M_.exo_nbr);
-      tmp3 = PHIpower(1:nvobs,1:nvobs)*SIGMAtrOMEGA;
-      irfs(1,:) = tmp3(:)';
-      for t = 2:options_.irf
-          PHIpower = COMP_draw*PHIpower;
-          tmp3 = PHIpower(1:nvobs,1:nvobs)*SIGMAtrOMEGA;
-          irfs(t,:)  = tmp3(:)';
-      end            
-      for j = 1:(nvobs*M_.exo_nbr)
-          if max(irfs(:,j)) - min(irfs(:,j)) > 1e-10 
-	      tmp_dsgevar(:,j) = (irfs(:,j));
-          end
-      end
-      if IRUN < MAX_nirfs_dsgevar
-          stock_irf_bvardsge(:,:,:,IRUN) = reshape(tmp_dsgevar,options_.irf,nvobs,M_.exo_nbr);
-      else
-          stock_irf_bvardsge(:,:,:,IRUN) = reshape(tmp_dsgevar,options_.irf,nvobs,M_.exo_nbr);
-          instr = [MhDirectoryName '/' M_.fname '_irf_bvardsge' int2str(NumberOfIRFfiles_dsgevar) ' stock_irf_bvardsge;'];,
-          eval(['save ' instr]);
-          NumberOfIRFfiles_dsgevar = NumberOfIRFfiles_dsgevar+1; 
-          IRUN =0;
-          stock_irf_dsgevar = zeros(options_.irf,nvobs,M_.exo_nbr,MAX_nirfs_dsgevar);
-      end
-  end
-  if irun == MAX_nirfs_dsge | irun == B | b == B
-    if b == B
-      stock_irf_dsge = stock_irf_dsge(:,:,:,1:irun);
-      if MAX_nirfs_dsgevar & (b == B | IRUN == B)
-          stock_irf_bvardsge = stock_irf_bvardsge(:,:,:,1:IRUN);
-          instr = [MhDirectoryName '/' M_.fname '_irf_bvardsge' int2str(NumberOfIRFfiles_dsgevar) ' stock_irf_bvardsge;'];,
-          eval(['save ' instr]);
-          NumberOfIRFfiles_dsgevar = NumberOfIRFfiles_dsgevar+1;
-          irun = 0;
-      end
+    SS(M_.exo_names_orig_ord,M_.exo_names_orig_ord) = M_.Sigma_e+1e-14*eye(M_.exo_nbr);
+    SS = transpose(chol(SS));
+    for i = 1:M_.exo_nbr
+        if SS(i,i) > 1e-13
+            y=irf(dr,SS(M_.exo_names_orig_ord,i), options_.irf, options_.drop,options_.replic,options_.order);
+            if options_.relative_irf
+                y = 100*y/cs(i,i);
+            end
+            for j = 1:nvar
+                if max(y(j,:)) - min(y(j,:)) > 1e-10 
+                    stock_irf_dsge(:,j,i,irun) = transpose(y(IndxVariables(j),:));
+                end
+            end
+        end
     end
-    save([MhDirectoryName '/' M_.fname '_irf_dsge' int2str(NumberOfIRFfiles_dsge)],'stock_irf_dsge');
-    NumberOfIRFfiles_dsge = NumberOfIRFfiles_dsge+1;
-    irun = 0;
-  end
-  if irun2 == MAX_nruns | b == B
-    if b == B
-      stock_param = stock_param(1:irun2,:);
+    if MAX_nirfs_dsgevar
+        IRUN = IRUN+1;
+        tmp_dsgevar = zeros(options_.irf,nvobs*M_.exo_nbr);
+        [fval,cost_flag,ys,trend_coeff,info,PHI,SIGMAu,iXX] =  DsgeVarLikelihood(deep',gend);
+        dsge_prior_weight = M_.params(strmatch('dsge_prior_weight',M_.param_names));
+        DSGE_PRIOR_WEIGHT = floor(gend*(1+dsge_prior_weight));
+        tmp1 = SIGMAu*gend*(dsge_prior_weight+1);
+        val  = 1;
+        tmp1 = chol(inv(tmp1))'; 
+        while val;
+            % draw from the marginal posterior of sig
+            tmp2 = tmp1*randn(nvobs,DSGE_PRIOR_WEIGHT-NumberOfLagsTimesNvobs);
+            SIGMAu_draw = inv(tmp2*tmp2');
+            % draw from the conditional posterior of PHI
+            VARvecPHI = kron(SIGMAu_draw,iXX);
+            PHI_draw  = PHI(:) + chol(VARvecPHI)'*randn(nvobs*NumberOfLagsTimesNvobs,1);
+            COMP_draw(1:nvobs,:) = reshape(PHI_draw,NumberOfLagsTimesNvobs,nvobs)';
+            % Check for stationarity
+            tests = find(abs(eig(COMP_draw))>0.9999999999);
+            if isempty(tests)
+                val=0;
+            end
+        end
+        % Get rotation
+        if dsge_prior_weight > 0
+            Atheta(oo_.dr.order_var,M_.exo_names_orig_ord) = oo_.dr.ghu*sqrt(M_.Sigma_e);
+            A0 = Atheta(bayestopt_.mfys,:);
+            [OMEGAstar,SIGMAtr] = qr2(A0');
+        end
+        SIGMAu_chol = chol(SIGMAu_draw)';
+        SIGMAtrOMEGA = SIGMAu_chol*OMEGAstar';
+        PHIpower = eye(NumberOfLagsTimesNvobs);
+        irfs = zeros (options_.irf,nvobs*M_.exo_nbr);
+        tmp3 = PHIpower(1:nvobs,1:nvobs)*SIGMAtrOMEGA;
+        irfs(1,:) = tmp3(:)';
+        for t = 2:options_.irf
+            PHIpower = COMP_draw*PHIpower;
+            tmp3 = PHIpower(1:nvobs,1:nvobs)*SIGMAtrOMEGA;
+            irfs(t,:)  = tmp3(:)';
+        end            
+        for j = 1:(nvobs*M_.exo_nbr)
+            if max(irfs(:,j)) - min(irfs(:,j)) > 1e-10 
+                tmp_dsgevar(:,j) = (irfs(:,j));
+            end
+        end
+        if IRUN < MAX_nirfs_dsgevar
+            stock_irf_bvardsge(:,:,:,IRUN) = reshape(tmp_dsgevar,options_.irf,nvobs,M_.exo_nbr);
+        else
+            stock_irf_bvardsge(:,:,:,IRUN) = reshape(tmp_dsgevar,options_.irf,nvobs,M_.exo_nbr);
+            instr = [MhDirectoryName '/' M_.fname '_irf_bvardsge' int2str(NumberOfIRFfiles_dsgevar) ' stock_irf_bvardsge;'];,
+            eval(['save ' instr]);
+            NumberOfIRFfiles_dsgevar = NumberOfIRFfiles_dsgevar+1; 
+            IRUN =0;
+            stock_irf_dsgevar = zeros(options_.irf,nvobs,M_.exo_nbr,MAX_nirfs_dsgevar);
+        end
     end
-    stock = stock_param;
-    save([MhDirectoryName '/' M_.fname '_param_irf' int2str(ifil2)],'stock');
-    ifil2 = ifil2 + 1;
-    irun2 = 0;
-  end
-  waitbar(b/B,h);
+    if irun == MAX_nirfs_dsge | irun == B | b == B
+        if b == B
+            stock_irf_dsge = stock_irf_dsge(:,:,:,1:irun);
+            if MAX_nirfs_dsgevar & (b == B | IRUN == B)
+                stock_irf_bvardsge = stock_irf_bvardsge(:,:,:,1:IRUN);
+                instr = [MhDirectoryName '/' M_.fname '_irf_bvardsge' int2str(NumberOfIRFfiles_dsgevar) ' stock_irf_bvardsge;'];,
+                eval(['save ' instr]);
+                NumberOfIRFfiles_dsgevar = NumberOfIRFfiles_dsgevar+1;
+                irun = 0;
+            end
+        end
+        save([MhDirectoryName '/' M_.fname '_irf_dsge' int2str(NumberOfIRFfiles_dsge)],'stock_irf_dsge');
+        NumberOfIRFfiles_dsge = NumberOfIRFfiles_dsge+1;
+        irun = 0;
+    end
+    if irun2 == MAX_nruns | b == B
+        if b == B
+            stock_param = stock_param(1:irun2,:);
+        end
+        stock = stock_param;
+        save([MhDirectoryName '/' M_.fname '_param_irf' int2str(ifil2)],'stock');
+        ifil2 = ifil2 + 1;
+        irun2 = 0;
+    end
+    waitbar(b/B,h);
 end
 NumberOfIRFfiles_dsge = NumberOfIRFfiles_dsge-1;
 NumberOfIRFfiles_dsgevar = NumberOfIRFfiles_dsgevar-1;
@@ -227,52 +263,7 @@ end
 
 if strcmpi(type,'gsa')
   return
-end  
-
-
-varlist = options_.varlist;
-
-if isempty(varlist)
-  if MAX_nirfs_dsgevar
-      varlist = options_.varobs;
-      nvar = size(varlist,1);
-      SelecVariables = [];
-      for i=1:nvar
-          if ~isempty(strmatch(varlist(i,:),M_.endo_names,'exact'))
-              SelecVariables = [SelecVariables;strmatch(varlist(i,:),M_.endo_names,'exact')];
-          end
-      end
-  else
-      varlist = M_.endo_names;
-      SelecVariables = transpose(1:M_.endo_nbr);
-      nvar = M_.endo_nbr;
-  end
-else
-  nvar = size(varlist,1);
-  SelecVariables = [];
-  for i=1:nvar
-    if ~isempty(strmatch(varlist(i,:),M_.endo_names,'exact'))
-      SelecVariables = [SelecVariables;strmatch(varlist(i,:),M_.endo_names,'exact')];
-    end
-  end
-  if MAX_nirfs_dsgevar% Here I test if declared variables are observed variables.
-      SelecVariables = [];
-      varlistbis = [];
-      for i=1:nvar
-          if ~isempty(strmatch(varlist(i,:),options_.varobs,'exact'))
-              SelecVariables = [SelecVariables;strmatch(varlist(i,:),M_.endo_names,'exact')];
-              varlistbis = strvcat(varlistbis,varlist(i,:));
-          else
-              disp(' ')
-              disp(['Warning :: ' varlist(i,:) 'is not an observed variable!'])
-              disp(['This variable will not be considered for the IRFs.'])
-              disp(' ')
-          end
-      end
-      varlist = varlistbis;
-  end 
 end
-
 
 MeanIRF = zeros(options_.irf,nvar,M_.exo_nbr);
 MedianIRF = zeros(options_.irf,nvar,M_.exo_nbr);
@@ -297,17 +288,18 @@ for file = 1:NumberOfIRFfiles_dsge
       for k = 1:size(STOCK_IRF_DSGE,1)
         kk = k+kdx;
         [MeanIRF(kk,j,i),MedianIRF(kk,j,i),VarIRF(kk,j,i),HPDIRF(kk,:,j,i),DistribIRF(kk,:,j,i)] = ...
-          posterior_moments(squeeze(STOCK_IRF_DSGE(k,SelecVariables(j),i,:)),0);
+          posterior_moments(squeeze(STOCK_IRF_DSGE(k,j,:)),0);
       end
     end
   end
   kdx = kdx + size(STOCK_IRF_DSGE,1);
 end
+
 clear STOCK_IRF_DSGE;
 
 for i = 1:M_.exo_nbr
   for j = 1:nvar
-    name = [deblank(M_.endo_names(SelecVariables(j),:)) '_' deblank(tit(i,:))];
+    name = [deblank(M_.endo_names(IndxVariables(j),:)) '_' deblank(tit(i,:))];
     eval(['oo_.PosteriorIRF.dsge.Mean.' name ' = MeanIRF(:,j,i);']);
     eval(['oo_.PosteriorIRF.dsge.Median.' name ' = MedianIRF(:,j,i);']);
     eval(['oo_.PosteriorIRF.dsge.Var.' name ' = VarIRF(:,j,i);']);
