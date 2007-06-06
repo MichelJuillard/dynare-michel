@@ -117,12 +117,12 @@ ModFile::writeOutputFiles(const string &basename, bool clear_all) const
   if (model_tree.mode == eDLLMode)
     {
       mOutputFile << "if ";
-      mOutputFile << interfaces::file_exist(basename + "_static.c)") << endl;
+      mOutputFile << interfaces::file_exist(basename + "_static.c") << endl;
       mOutputFile << "   clear " << basename << "_static" << endl;
       mOutputFile << "   " << interfaces::compile(basename +"_static.c") << endl;
       mOutputFile << "end" << endl;
       mOutputFile << "if ";
-      mOutputFile << interfaces::file_exist(basename + "_dynamic.c)") << endl;
+      mOutputFile << interfaces::file_exist(basename + "_dynamic.c") << endl;
       mOutputFile << "   clear " << basename << "_dynamic" << endl;
       mOutputFile << "   " + interfaces::compile(basename+"_dynamic.c") << endl;
       mOutputFile << "end" << endl;

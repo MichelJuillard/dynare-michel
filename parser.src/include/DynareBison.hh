@@ -58,7 +58,7 @@ class ParsingDriver;
 
 
 /* Line 35 of lalr1.cc.  */
-#line 62 "dynareBison.hh"
+#line 62 "DynareBison.hh"
 
 #include "location.hh"
 
@@ -115,7 +115,7 @@ namespace yy
   NodeID node_val;
 }
 /* Line 35 of lalr1.cc.  */
-#line 119 "dynareBison.hh"
+#line 119 "DynareBison.hh"
 	;
 #else
     typedef YYSTYPE semantic_type;

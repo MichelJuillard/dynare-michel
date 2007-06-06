@@ -16,12 +16,12 @@ namespace interfaces
 
   std::string file_exist(std::string s)
   {
-    return "exist(" + s + ")";
+    return "exist('" + s + "')";
   }
 
   std::string compile(std::string s)
   {
-    return "mex -O" + s + "\n";
+    return "mex -O " + s + "\n";
   }
 
   std::string function_close()

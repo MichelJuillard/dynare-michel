@@ -33,7 +33,7 @@
    version 2.2 of Bison.  */
 
 
-#include "dynareBison.hh"
+#include "DynareBison.hh"
 
 /* User implementation prologue.  */
 #line 32 "DynareBison.yy"
@@ -42,7 +42,7 @@
 
 
 /* Line 317 of lalr1.cc.  */
-#line 46 "dynareBison.cc"
+#line 46 "DynareBison.cc"
 
 #ifndef YY_
 # if YYENABLE_NLS
@@ -279,7 +279,7 @@ namespace yy
   yylloc.begin.filename = yylloc.end.filename = &driver.file;
 }
   /* Line 547 of yacc.c.  */
-#line 283 "dynareBison.cc"
+#line 283 "DynareBison.cc"
     /* Initialize the stacks.  The initial state will be pushed in
        yynewstate, since the latter expects the semantical and the
        location values to have been already stored, initialize these
@@ -2178,7 +2178,7 @@ namespace yy
 
 
     /* Line 675 of lalr1.cc.  */
-#line 2182 "dynareBison.cc"
+#line 2182 "DynareBison.cc"
 	default: break;
       }
     YY_SYMBOL_PRINT ("-> $$ =", yyr1_[yyn], &yyval, &yyloc);

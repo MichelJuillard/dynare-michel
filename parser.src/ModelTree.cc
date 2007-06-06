@@ -173,6 +173,10 @@ ModelTree::writeModelLocalVariables(ostream &output, ExprNodeOutputType output_t
     {
       int id = it->first;
       NodeID value = it->second;
+
+      if (!OFFSET(output_type))
+        output << "double ";
+
       output << symbol_table.getNameByID(eModelLocalVariable, id) << " = ";
       // Use an empty set for the temporary terms
       value->writeOutput(output, output_type, temporary_terms_type());
@@ -746,7 +750,7 @@ ModelTree::writeDynamicCFile(const string &dynamic_basename) const
                     << "  }" << endl
                     << "  params = mxGetPr(mxGetFieldByNumber(M_, 0, mxGetFieldNumber(M_,\"params\")));" << endl
                     << "  /* Gets it_ from global workspace of Matlab */" << endl
-                    << "  //it_ = (int) floor(mxGetScalar(mexGetVariable(\"global\", \"it_\")))-1;" << endl
+                    << "  /* it_ = (int) floor(mxGetScalar(mexGetVariable(\"global\", \"it_\")))-1; */" << endl
                     << "  /* Call the C subroutines. */" << endl
                     << "  Dynamic(y, x, residual, g1, g2);" << endl
                     << "}" << endl;

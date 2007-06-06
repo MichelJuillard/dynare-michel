@@ -972,7 +972,7 @@ BinaryOpNode::writeOutput(ostream &output, ExprNodeOutputType output_type,
   // Treat special case of power operator in C
   if (op_code == oPower && (!OFFSET(output_type)))
     {
-      output << "pow1(";
+      output << "pow(";
       arg1->writeOutput(output, output_type, temporary_terms);
       output << ",";
       arg2->writeOutput(output, output_type, temporary_terms);
