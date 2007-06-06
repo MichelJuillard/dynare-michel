@@ -45,9 +45,9 @@ public:
   BlockTriangular(const SymbolTable &symbol_table_arg);
   ~BlockTriangular();
   /*! The incidence matrix for each lead and lags */
+  const SymbolTable &symbol_table;
   Blocks blocks;
   Normalization normalization;
-  const SymbolTable &symbol_table;
   List_IM* Build_IM(int lead_lag);
   List_IM* Get_IM(int lead_lag);
   bool* bGet_IM(int lead_lag);

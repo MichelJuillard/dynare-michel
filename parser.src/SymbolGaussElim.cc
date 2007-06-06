@@ -538,7 +538,7 @@ SymbolicGaussElimination::Check_Regularity(t_table_u *first_u_blck, t_table_u *s
 t_table_u*
 SymbolicGaussElimination::interpolation(t_model_graph* model_graph, t_table_y* table_y, int to_add, bool middle, int per)
 {
-  t_table_u *tmp_table_u, *old_table_u;
+  t_table_u *tmp_table_u=NULL, *old_table_u=NULL;
   t_table_u *c_first_table_u, *c_second_table_u, *c_third_table_u;
   int c_first_y_blck, c_second_y_blck;
   int i, j, k, up_to=0, op_count, k1, k2;
@@ -1447,12 +1447,12 @@ SymbolicGaussElimination::Gaussian_Elimination(t_model_graph* model_graph
   int i, size, j, k, per;
   bool OK, interpolate = false;
   t_table_u *First_prologue_table_u;
-  int length_markowitz, per_next = 3;
-  bool try_to_interpolate;
-  int cur_pos;
-  int prologue_nb_table_u, first_nb_prologue_save_table_y;
-  int nb_first_u_blck, nb_second_u_blck, nb_third_u_blck;
-  int nb_first_y_blck, nb_second_y_blck, nb_third_y_blck;
+  int length_markowitz=0, per_next = 3;
+  bool try_to_interpolate=false;
+  int cur_pos=0;
+  int prologue_nb_table_u=0, first_nb_prologue_save_table_y=0;
+  int nb_first_u_blck, nb_second_u_blck=0, nb_third_u_blck=0;
+  int nb_first_y_blck, nb_second_y_blck=0, nb_third_y_blck=0;
 
   size = model_graph->nb_vertices;
 #ifdef PRINT_OUT
@@ -1580,7 +1580,7 @@ SymbolicGaussElimination::Gaussian_Elimination(t_model_graph* model_graph
   int pos = 0;
   j = 0;
   if(nstacked)
-    try_to_interpolate = 1;
+    try_to_interpolate = true;
 #ifdef PRINT_OUT
   cout << "try_to_interpolate=" << try_to_interpolate << "\n";
   cout << "y_kmin=" << y_kmin << " y_kmax=" << y_kmax << "\n";

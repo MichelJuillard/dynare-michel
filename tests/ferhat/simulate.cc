@@ -4,13 +4,14 @@
 //                 use GCC_COMPILER option in MODEL command           //
 ////////////////////////////////////////////////////////////////////////
 
-//#define PRINT_OUT
 #define INDIRECT_SIMULATE
-#define PRINT_OUT_p
 #define MARKOVITZ
+#define PRINT_OUT_p
+//#define PRINT_OUT
 //#define PRINT_OUT_y1
 //#define PRINT_u
 //#define PRINT_OUT_b
+//#define PRINT_OUT_y
 //#define DEBUG
 //#define EXTENDED
 //#define FLOAT
@@ -25,7 +26,6 @@ typedef long double longd;
 #else
 typedef double longd;
 #endif
-//#define PRINT_OUT_y
 #include <stack>
 #include <set>
 #include <vector>
@@ -67,13 +67,8 @@ typedef struct NonZeroElem
 
 
 
-/*#include "simulate.hh"*/
-//typedef std::pair<int, int> eq_var;
-//typedef std::vector<std::pair<eq_var,int> > t_IM;
 std::map<std::pair<std::pair<int, int> ,int>, int> IM_i;
-//std::map<int, int> Lead_Lag;
 std::multimap<std::pair<int,int>, int> var_in_equ_and_lag_i, equ_in_var_and_lag_i;
-//t_IM IM;
 int  *index_vara, *pivota=NULL, *save_op_all=NULL, *b, *g_save_op=NULL;
 int *pivot, *pivotk;
 longd *pivotv, *pivotva=NULL;
@@ -971,12 +966,6 @@ simulate(int blck, int y_size, int it_, int y_kmin, int y_kmax, int Size, int pe
               else
                 mexPrintf("u[%d](%f)*y[%d](%f)", prologue_table_y[i].u_index[j], double(uu), prologue_table_y[i].y_index[j], 1.0);
             }
-          /*if(uu!=u[prologue_table_y[i].u_index[j]])
-            {
-              mexPrintf("uu=%f != u[%d]=%f\n",uu,prologue_table_y[i].u_index[j],u[prologue_table_y[i].u_index[j]]);
-              filename+=" stopped";
-              mexErrMsgTxt(filename.c_str());
-            }*/
 #endif
           if (prologue_table_y[i].y_index[j] >= 0)
             yy += uu * y[prologue_table_y[i].y_index[j]+y_decal*y_size];
@@ -989,9 +978,6 @@ simulate(int blck, int y_size, int it_, int y_kmin, int y_kmax, int Size, int pe
           filename+=" stopped";
           mexErrMsgTxt(filename.c_str());
         }
-      /*if(((k-73) % y_size)==0)
-        mexPrintf("y[it_*y_size +73]=%f \n",yy);*/
-      //mexPrintf("%f",yy);
       err = fabs(yy - y[k+y_decal*y_size]);
       res1 += err;
       if (max_res<err)
@@ -1032,8 +1018,6 @@ simulate(int blck, int y_size, int it_, int y_kmin, int y_kmax, int Size, int pe
           filename+=" stopped";
           mexErrMsgTxt(filename.c_str());
         }
-      /*if(((k-73) % y_size)==0)
-         mexPrintf("y[it_*y_size +73]=%f \n",yy);*/
       err = fabs(yy - y[k]);
       res1 += err;
       if (max_res<err)
@@ -1060,8 +1044,6 @@ simulate(int blck, int y_size, int it_, int y_kmin, int y_kmax, int Size, int pe
       mexPrintf("(**%f milliseconds u_count : %d  nop : %d **)\n", 1000*(t2 - t1), u_count, nop);
       mexEvalString("drawnow;");
     }
-  /*if((nb_last_table_u>0)&&(it_>y_kmin))
-    mexErrMsgTxt("Exit from Dynare");*/
 }
 
 #endif
@@ -1256,7 +1238,6 @@ SparseMatrix::At_Pos(int r, int c, NonZeroElem **first)
 #ifdef PRINT_OUT
       mexPrintf("looking not CRS [%d, %d]\n",first->r_index,first->c_index);
 #endif
-      //firsta=(*first);
       (*first)=(*first)->NZE_R_N;
     }
   if ((*first)->c_index!=c)
@@ -1460,18 +1441,11 @@ void SparseMatrix::Insert(int r, int c, int u_index, int lag_index)
   NonZeroElem *first=FNZE_R[r], *firsta=NULL, *firstn=NULL;
   if (!first)
     {
-      /*mexPrintf("Error (in Insert): singular system\n");
-      mexPrintf("In Insert r=%d, c=%d, u=%d, lag=%d \n",r,c,u_index,lag_index);
-      filename+=" stopped";
-      mexErrMsgTxt(filename.c_str());*/
 #ifdef NEW_ALLOC
       firstn=mxMalloc_NZE();
 #else
       firstn=(NonZeroElem*)mxMalloc(sizeof(NonZeroElem));
 #endif
-      //mexPrintf("k");
-      /*if(firstn==NULL)
-        mexPrintf("Error in allocator\n");*/
       firstn->u_index=u_index;
       firstn->r_index=r;
       firstn->c_index=c;
@@ -1498,37 +1472,27 @@ void SparseMatrix::Insert(int r, int c, int u_index, int lag_index)
 #ifdef PRINT_OUT
           mexPrintf("retain first->c_index=%d c=%d\n",first->c_index,c);
 #endif
-          //mexPrintf("o");
 #ifdef NEW_ALLOC
           firstn=mxMalloc_NZE();
 #else
           firstn=(NonZeroElem*)mxMalloc(sizeof(NonZeroElem));
 #endif
-          //mexPrintf("k");
-          /*if(firstn==NULL)
-            mexPrintf("Error in allocator\n");*/
           firstn->u_index=u_index;
           firstn->r_index=r;
           firstn->c_index=c;
           firstn->lag_index=lag_index;
           if (first->c_index>c)
             {
-              //mexPrintf("- %x",firstn);
               if (first==FNZE_R[r])
                 FNZE_R[r]=firstn;
-              //mexPrintf("^");
               if (firsta!=NULL)
                 firsta->NZE_R_N=firstn;
-              //mexPrintf("¨");
               firstn->NZE_R_N=first;
-              //mexPrintf("+");
             }
           else /*first.c_index<c*/
             {
-              //mexPrintf("/");
               first->NZE_R_N=firstn;
               firstn->NZE_R_N=NULL;
-              //mexPrintf("*");
             }
           NbNZRow[r]++;
 
@@ -1536,7 +1500,6 @@ void SparseMatrix::Insert(int r, int c, int u_index, int lag_index)
       else
         mexPrintf("Error (in Insert): in CRS element r=%, c=%d already exists\n",r,c);
     }
-  //mexPrintf("a");
   first=FNZE_C[c];
   firsta=NULL;
   while (first->r_index<r && first->NZE_C_N)
@@ -1544,7 +1507,6 @@ void SparseMatrix::Insert(int r, int c, int u_index, int lag_index)
       firsta=first;
       first=first->NZE_C_N;
     }
-  //mexPrintf("y");
   if (first->r_index!=r)
     {
       if (first->r_index>r)
@@ -1564,13 +1526,11 @@ void SparseMatrix::Insert(int r, int c, int u_index, int lag_index)
     }
   else
     mexPrintf("Error (in Insert): in CCS element r=%, c=%d already exists\n",r,c);
-  //mexPrintf("!\n");
 }
 
 void Read_SparseMatrix(std::string file_name, int Size, int periods, int y_kmin, int y_kmax)
 {
   int i,j,eq,var,lag;
-  //mexPrintf("read_sparseMatrix\n");
   filename=file_name;
   if (!SaveCode.is_open())
     {
@@ -1594,7 +1554,6 @@ void Read_SparseMatrix(std::string file_name, int Size, int periods, int y_kmin,
       SaveCode.read(reinterpret_cast<char *>(&var), sizeof(var));
       SaveCode.read(reinterpret_cast<char *>(&lag), sizeof(lag));
       SaveCode.read(reinterpret_cast<char *>(&j), sizeof(j));
-      //mexPrintf("eq=%d var=%d lag=%d j=%d\n",eq,var,lag,j);
       IM_i[std::make_pair(std::make_pair(eq, var), lag)] = j;
     }
 #ifdef MEM_ALLOC_CHK
@@ -1606,9 +1565,7 @@ void Read_SparseMatrix(std::string file_name, int Size, int periods, int y_kmin,
 #endif
   for (j=0;j<Size;j++)
     {
-      //mexPrintf("eq=%d var=%d lag=%d j=%d\n",eq,var,lag,j);
       SaveCode.read(reinterpret_cast<char *>(&index_vara[j]), sizeof(*index_vara));
-      //mexPrintf("index_var[%d]=%d\n",j,index_var[j]);
     }
   for (i=1;i<periods+y_kmin+y_kmax;i++)
     {
@@ -1623,7 +1580,6 @@ void Read_SparseMatrix(std::string file_name, int Size, int periods, int y_kmin,
 #endif
         }
     }
-  //mexPrintf("end of read_sparseMatrix\n");
 }
 
 
@@ -1663,32 +1619,6 @@ void SparseMatrix::Init(int periods, int y_kmin, int y_kmax, int Size, std::map<
   swp_f=false;
   g_save_op=NULL;
   g_nop_all=0;
-  /*#ifdef PRINT_OUT
-    mexPrintf("alloc index_vara=%x\n",index_vara);
-  #endif
-     //mexPrintf("ok0\n");
-    for(j=0;j<Size;j++)
-      {
-  #ifdef PRINT_OUT
-        mexPrintf("index_var[%d]=index_var[%d]+y_size=",j+Size*i,j+Size*(i-1));
-  #endif
-        index_vara[j]=index_var[j];
-      }
-    //mexPrintf("ok1\n");
-    for(i=1;i<periods+y_kmin+y_kmax;i++)
-      {
-        for(j=0;j<Size;j++)
-          {
-  #ifdef PRINT_OUT
-            mexPrintf("index_vara[%d]=index_vara[%d]+y_size=",j+Size*i,j+Size*(i-1));
-  #endif
-            index_vara[j+Size*i]=index_vara[j+Size*(i-1)]+y_size;
-  #ifdef PRINT_OUT
-            mexPrintf("%d\n",index_vara[j+Size*i]);
-  #endif
-          }
-      }*/
-  //mexPrintf("ok2\n");
 #ifdef PRINT_OUT
   mexPrintf("sizeof(NonZeroElem)=%d sizeof(NonZeroElem*)=%d\n",sizeof(NonZeroElem),sizeof(NonZeroElem*));
 #endif
@@ -1714,10 +1644,6 @@ void SparseMatrix::Init(int periods, int y_kmin, int y_kmax, int Size, std::map<
   memset(temp_NZE_R, 0, i);
   memset(temp_NZE_C, 0, i);
   i=(periods+y_kmax+1)*Size*sizeof(int);
-  /*mexPrintf("Size=%d, periods=%d, y_kmin=%d, y_kmax=%d\n",Size,periods,y_kmin,y_kmax);
-  mexPrintf("periods*Size=%d periods*y_size=%d\n",periods*Size,periods*y_size);
-  mexPrintf("(periods+y_kmin+y_kmax)*Size=%d (periods+y_kmin+y_kmax)*y_size=%d\n",(periods+y_kmin+y_kmax)*Size,(periods+y_kmin+y_kmax)*y_size);
-  mexPrintf("(periods+y_kmax)*Size=%d (periods+y_kmax)*y_size=%d\n",(periods+y_kmax)*Size,(periods+y_kmax)*y_size);*/
 #ifdef MEM_ALLOC_CHK
   mexPrintf("NbNZRow=(int*)mxMalloc(%d)\n",i);
 #endif
@@ -1782,7 +1708,6 @@ void SparseMatrix::Init(int periods, int y_kmin, int y_kmax, int Size, std::map<
                   if (FNZE_R[eq]==NULL)
                     {
                       FNZE_R[eq]=first;
-                      //mexPrintf("FNZE_R[%d]=%x\n",eq,FNZE_R[eq]);
                     }
                   if (FNZE_C[var]==NULL)
                     FNZE_C[var]=first;
@@ -1823,17 +1748,12 @@ void SparseMatrix::Init(int periods, int y_kmin, int y_kmax, int Size, std::map<
           it4++;
         }
     }
-  //mexPrintf("ok3\n");
   mxFree(temp_NZE_R);
   mxFree(temp_NZE_C);
-  //mexPrintf("end Init\n");
 }
 
 void SparseMatrix::ShortInit(int periods, int y_kmin, int y_kmax, int Size, std::map<std::pair<std::pair<int, int> ,int>, int> IM)
 {
-//#ifdef PRINT_OUT
-  //mexPrintf("SparseMatrix::ShortInit periods=%d Size=%d\n",periods, Size);
-//#endif
   int t,i,j, eq, var, lag;
   longd tmp_b=0.0;
   std::map<std::pair<std::pair<int, int> ,int>, int>::iterator it4;
@@ -1865,7 +1785,6 @@ void SparseMatrix::ShortInit(int periods, int y_kmin, int y_kmax, int Size, std:
 #endif
               if (lag<=ti_y_kmax && lag>=ti_y_kmin)
                 {
-                  //mexPrintf("u_index=%d, eq=%d, var=%d, lag=%d ",it4->second+u_count_init*t, eq, var, lag);
                   var+=Size*t;
                 }
               else
@@ -1895,7 +1814,6 @@ void SparseMatrix::ShortInit(int periods, int y_kmin, int y_kmax, int Size, std:
           it4++;
         }
     }
-  //mexPrintf("end Init\n");
 }
 
 
@@ -1966,9 +1884,6 @@ void SparseMatrix::Print_u()
 
 void SparseMatrix::End(int Size)
 {
-  //mexPrintf("free index_vara=%x\n",index_vara);
-  //mxFree(index_vara);
-  //mexPrintf("End.....\n");
 #ifdef NEW_ALLOC
   for (int i=0;i<Nb_CHUNK;i++)
     {
@@ -2003,14 +1918,11 @@ void SparseMatrix::End(int Size)
 bool
 compare( int *save_op, int *save_opa, int *save_opaa, int beg_t, int periods, long int nop4,  int Size, long int *ndiv, long int *nsub)
 {
-  //mexPrintf("=>in compare beg_t=%d\n",beg_t);
   long int i,j,/*nop=nop4/4*/nop=nop4/2, t, index_d, k;
   longd r=0.0;
   bool OK=true;
   t_save_op_s *save_op_s, *save_opa_s, *save_opaa_s;
   int *diff1, *diff2;
-  //mexPrintf("nop=%d\n",nop);
-  //g_save_op=(int*)mxMalloc(nop*5*sizeof(int));
 #ifdef MEM_ALLOC_CHK
   mexPrintf("diff1=(int*)mxMalloc(%d*sizeof(int))\n",nop);
 #endif
@@ -2028,7 +1940,6 @@ compare( int *save_op, int *save_opa, int *save_opaa, int beg_t, int periods, lo
        save_op_s=(t_save_op_s*)&(save_op[i]);
        save_opa_s=(t_save_op_s*)&(save_opa[i]);
        save_opaa_s=(t_save_op_s*)&(save_opaa[i]);
-       //mexPrintf("i=%d nop4=%d save_op_s->operat=%d\n",i,nop4,save_op_s->operat);
        diff1[j]=save_op_s->first-save_opa_s->first;
        switch(save_op_s->operat)
          {
@@ -2055,66 +1966,10 @@ compare( int *save_op, int *save_opa, int *save_opaa, int beg_t, int periods, lo
        j++;
     }
 
-  /*j=k=i=0;
-  save_op_s=(t_save_op_s*)&(*save_op);
-  save_opa_s=(t_save_op_s*)&(*save_opa);
-  save_opaa_s=(t_save_op_s*)&(*save_opaa);
-  while(i<nop4 && OK)
-    {
-       mexPrintf("i=%d nop4=%d save_op_s->operat=%d\n",i,nop4,save_op_s->operat);
-       diff1[j]=save_op_s->first-save_opa_s->first;
-       switch(save_op_s->operat)
-         {
-           case FLD:
-           case FDIV:
-             OK=(save_op_s->operat==save_opa_s->operat && save_opa_s->operat==save_opaa_s->operat
-                && diff1[j]==(save_opa_s->first-save_opaa_s->first));
-             i+=2;
-             if(i<nop4)
-               {
-                 save_op_s+=2;
-                 save_opa_s+=2;
-                 save_opaa_s+=2;
-               }
-             break;
-           case FLESS:
-           case FSUB:
-             diff2[j]=save_op_s->second-save_opa_s->second;
-             OK=(save_op_s->operat==save_opa_s->operat && save_opa_s->operat==save_opaa_s->operat
-                && diff1[j]==(save_opa_s->first-save_opaa_s->first)
-                && diff2[j]==(save_opa_s->second-save_opaa_s->second));
-             i+=3;
-             if(i<nop4)
-               {
-                 save_op_s+=3;
-                 save_opa_s+=3;
-                 save_opaa_s+=3;
-               }
-             break;
-           default:
-             mexPrintf("unknown operator = %d ",save_op_s->operat);
-             filename+=" stopped";
-             mexErrMsgTxt(filename.c_str());
-             break;
-         }
-       j++;
-    }
-*/
-  /*for (i=0;i<nop4 && OK;i+=4)
-    {
-      diff1[j]=save_op[i+1]-save_opa[i+1];
-      diff2[j]=save_op[i+2]-save_opa[i+2];
-      OK=(save_op[i]==save_opa[i] && save_opa[i]==save_opaa[i]
-          && diff1[j]==(save_opa[i+1]-save_opaa[i+1])
-          && diff2[j]==(save_opa[i+2]-save_opaa[i+2]));
-      j++;
-    }*/
   if (OK)
     for (i=beg_t;i<periods;i++)
       for (j=0;j<Size;j++)
             pivot[i*Size+j]=pivot[(i-1)*Size+j]+Size;
-  /*mexPrintf("2 - OK=%d t=%d\n",OK,beg_t);
-  mexPrintf("from beg_t=%d to periods=%d\n",beg_t, periods);*/
   if (OK)
     {
 
@@ -2257,152 +2112,14 @@ compare( int *save_op, int *save_opa, int *save_opaa, int beg_t, int periods, lo
               j++;
             }
         }
-/*      for (;t<periods-beg_t-max(y_kmax,y_kmin);t++)
-        {
-#ifdef WRITE_u
-          toto << "t=" << t << endl;
-#endif
-          j=0;
-          for (i=0;i<nop4;i+=4)
-            {
-              index_d=save_op[i+1]+t*diff1[j];
-              if (index_d>=u_count_alloc)
-                {
-                  u_count_alloc+=5*u_count_alloc_save;
-#ifdef MEM_ALLOC_CHK
-                  mexPrintf("u=(longd*)mxRealloc(u,u_count_alloc*sizeof(longd))\n",u_count_alloc);
-#endif
-                  u=(longd*)mxRealloc(u,u_count_alloc*sizeof(longd));
-#ifdef MEM_ALLOC_CHK
-                  mexPrintf("ok\n");
-#endif
-                  if (!u)
-                    {
-                      mexPrintf("Error in Get_u: memory exhausted (realloc(%d))\n",u_count_alloc*sizeof(longd));
-                      mexErrMsgTxt("Exit from Dynare");
-                    }
-                }
-              switch (save_op[i])
-                {
-                  case FLD  :
-                    r=u[index_d];
-#ifdef PRINT_u
-                    mexPrintf("FLD u[%d] (%f)\n",index_d,u[index_d]);
-#endif
-
-                    break;
-                  case FDIV :
-                    u[index_d]/=r;
-#ifdef PRINT_u
-                    mexPrintf("FDIV u[%d](%f)/=r(%f)=(%f)\n",index_d,u[index_d],r,u[index_d]);
-#endif
-                    break;
-                  case FSUB :
-                    u[index_d]-=u[save_op[i+2]+t*diff2[j]]*r;
-#ifdef PRINT_u
-                    mexPrintf("FSUB u[%d]-=u[%d](%f)*r(%f)=(%f)\n",index_d,save_op[i+2]+t*diff2[j],u[save_op[i+2]+t*diff2[j]],r,u[index_d] );
-#endif
-                    break;
-                  case FLESS:
-                    u[index_d]=-u[save_op[i+2]+t*diff2[j]]*r;
-#ifdef PRINT_u
-                    mexPrintf("FLESS u[%d]=-u[%d](%f)*r(%f)=(%f)\n",index_d,save_op[i+2]+t*diff2[j],u[save_op[i+2]+t*diff2[j]],r,u[index_d] );
-#endif
-                    break;
-                }
-              j++;
-            }
-        }
-      int t1=t;
-      for (t=t1;t<periods-beg_t;t++)
-        {
-          j=0;
-#ifdef WRITE_u
-          toto << "t=" << t << " t+beg_t=" << t+beg_t <<endl;
-#endif
-          //mexPrintf("t=%d----------------------------------------------------------------------------------------------------------------\n",t);
-          for (i=0;i<nop4;i+=4)
-            {
-              if(save_op[i+3]<((periods-beg_t)-t))
-              {
-              index_d=save_op[i+1]+t*diff1[j];
-              if (index_d>=u_count_alloc)
-                {
-                  u_count_alloc+=5*u_count_alloc_save;
-#ifdef MEM_ALLOC_CHK
-                  mexPrintf("u=(longd*)mxRealloc(u,u_count_alloc*sizeof(longd))\n",u_count_alloc);
-#endif
-                  u=(longd*)mxRealloc(u,u_count_alloc*sizeof(longd));
-#ifdef MEM_ALLOC_CHK
-                  mexPrintf("ok\n");
-#endif
-                  if (!u)
-                    {
-                      mexPrintf("Error in Get_u: memory exhausted (realloc(%d))\n",u_count_alloc*sizeof(longd));
-                      mexErrMsgTxt("Exit from Dynare");
-                    }
-                }
-              switch (save_op[i])
-                {
-                  case FLD  :
-                    r=u[index_d];
-#ifdef PRINT_u
-                    mexPrintf("FLD u[%d] (%f)\n",index_d,u[index_d]);
-#endif
-
-                    break;
-                  case FDIV :
-                    u[index_d]/=r;
-#ifdef PRINT_u
-                    mexPrintf("FDIV u[%d](%f)/=r(%f)=(%f)\n",index_d,u[index_d],r,u[index_d]);
-#endif
-
-
-#ifdef WRITE_u
-                    toto << i_toto << " u[" << "]/=" << r << "=" << u[index_d] <<  endl;
-                    i_toto++;
-#endif
-                    //(*ndiv)++;
-                    break;
-                  case FSUB :
-                    u[index_d]-=u[save_op[i+2]+t*diff2[j]]*r;
-                    //if((t>=periods-beg_t-y_kmax))
-#ifdef PRINT_u
-                    mexPrintf("FSUB u[%d]-=u[%d](%f)*r(%f)=(%f)\n",index_d,save_op[i+2]+t*diff2[j],u[save_op[i+2]+t*diff2[j]],r,u[index_d] );
-#endif
-#ifdef WRITE_u
-                    toto << i_toto << " u[" << "]-=u[" << "]*" << r << "=" << u[index_d] <<  endl;
-                    i_toto++;
-#endif
-                    //(*nsub)++;
-                    break;
-                  case FLESS:
-                    u[index_d]=-u[save_op[i+2]+t*diff2[j]]*r;
-                    //if((t>=periods-beg_t-y_kmax))
-#ifdef PRINT_u
-                    mexPrintf("FLESS u[%d]=-u[%d](%f)*r(%f)=(%f)\n",index_d,save_op[i+2]+t*diff2[j],u[save_op[i+2]+t*diff2[j]],r,u[index_d] );
-#endif
-#ifdef WRITE_u
-                    toto << i_toto << " u[" << "]=-u["  << "]*" << r << "=" << u[index_d] <<  endl;
-                    i_toto++;
-#endif
-                    //(*nsub)++;
-                    break;
-                }
-              }
-              j++;
-            }
-        }*/
 #ifdef WRITE_u
       toto.close();
       filename+=" stopped";
       mexErrMsgTxt(filename.c_str());
 #endif
     }
-  //mexPrintf("out of compare\n");
   mxFree(diff1);
   mxFree(diff2);
-  //mexPrintf("Compare=%d\n",OK);
   return OK;
 }
 
@@ -2462,7 +2179,6 @@ SparseMatrix::run_u_period1(int periods)
           i+=5;
         }
     }
-  //mexPrintf("end of run_triangular\n");
 }
 
 
@@ -2521,7 +2237,6 @@ read_swp_f(int **save_op_all,long int *nop_all)
     }
 
   j=SaveCode_swp.tellg();
-  //mexPrintf("SaveCode_swp.tellg()=%d\n",int(j));
   SaveCode_swp.read(reinterpret_cast<char *>(nop_all), sizeof(*nop_all));
   (*save_op_all)=(int*)mxMalloc((*nop_all)*sizeof(int));
   SaveCode_swp.read(reinterpret_cast<char *>(*save_op_all), (*nop_all)*sizeof(int));
@@ -2596,7 +2311,6 @@ SparseMatrix::run_it(int nop_all,int *op_all)
             break;
         }
     }
-  //mexPrintf("end of run_triangular\n");
 }
 
 
@@ -2614,7 +2328,6 @@ SparseMatrix::run_triangular(int nop_all,int *op_all)
         {
           mexPrintf("reading blck%d\n",j++);
           OK=read_swp_f(&save_op,&nop);
-          //mexPrintf("OK=%d\n",OK);
           if (OK)
             {
               run_it(nop,save_op);
@@ -2657,8 +2370,6 @@ SparseMatrix::complete(int beg_t, int Size, int periods, int *b)
       nb_var=At_Row(pos,&first);
       first=first->NZE_R_N;
       nb_var--;
-      //mexPrintf("y[%d]=",index_vara[j]+y_size);
-      //yy=0;
       save_code[nop]=FLDZ;
       save_code[nop+1]=0;
       save_code[nop+2]=0;
@@ -2668,8 +2379,6 @@ SparseMatrix::complete(int beg_t, int Size, int periods, int *b)
       nop+=4;
       for (k=0;k<nb_var;k++)
         {
-          //yy+=y[index_vara[first->c_index]+cal_y]*u[first->u_index];
-          //mexPrintf("+y[%d]*u[%d]",index_vara[first->c_index]+cal_y,first->u_index);
           save_code[nop]=FMUL;
           save_code[nop+1]=index_vara[first->c_index]+cal_y;
           save_code[nop+2]=first->u_index;
@@ -2696,7 +2405,6 @@ SparseMatrix::complete(int beg_t, int Size, int periods, int *b)
         mexPrintf("out of save_code[%d] (bound=%d)\n",nop+2,size_of_save_code);
       nop+=4;
     }
-  //mexPrintf("nop=%d\n",nop);
   i=beg_t*Size-1;
   nop1=nopa=0;
   for (j=i;j>i-Size;j--)
@@ -2705,23 +2413,13 @@ SparseMatrix::complete(int beg_t, int Size, int periods, int *b)
       nb_var=At_Row(pos,&first);
       first=first->NZE_R_N;
       nb_var--;
-      //mexPrintf("y[%d]=",index_vara[j]+y_size);
-      //yy=0;
-      //mexPrintf("ok00 nopa=%d",nopa);
       diff[nopa]=0;
-      //mexPrintf("ok01");
       diff[nopa+1]=0;
-      //mexPrintf("ok02");
       nopa+=2;
       nop1+=4;
-      //mexPrintf("ok03");
       for (k=0;k<nb_var;k++)
         {
-          //yy+=y[index_vara[first->c_index]+cal_y]*u[first->u_index];
-          //mexPrintf("+y[%d]*u[%d]",index_vara[first->c_index]+cal_y,first->u_index);
           diff[nopa]=save_code[nop1+1]-(index_vara[first->c_index]+cal_y);
-          /*if(save_code[nop1+2]==1064856)
-            mexPrintf("save_code[%d]=%d first->u_index=%d\n",nop1+2,save_code[nop1+2],first->u_index);*/
           diff[nopa+1]=save_code[nop1+2]-(first->u_index);
           if ((nop1+2)>=size_of_save_code)
             mexPrintf("out of save_code[%d] (bound=%d)\n",nop1+2,size_of_save_code);
@@ -2731,8 +2429,6 @@ SparseMatrix::complete(int beg_t, int Size, int periods, int *b)
           nop1+=4;
           first=first->NZE_R_N;
         }
-      //yy=-(yy+u[b[pos]]);
-      //mexPrintf("|u[%d]|\n",b[pos]);
       diff[nopa]=save_code[nop1+1]-(b[pos]);
       diff[nopa+1]=0;
       if ((nop1+3)>=size_of_save_code)
@@ -2750,10 +2446,6 @@ SparseMatrix::complete(int beg_t, int Size, int periods, int *b)
       nopa+=2;
       nop1+=4;
     }
-  //mexPrintf("ok1\n");
-  //goto end;
-  //mexPrintf("nopa=%d",nopa);
-  //mexPrintf("==>beg_t=%d\n",beg_t);
   max_var=(periods+y_kmin)*y_size;
   min_var=y_kmin*y_size;
   int k1=0;
@@ -2761,8 +2453,6 @@ SparseMatrix::complete(int beg_t, int Size, int periods, int *b)
     {
       j=0;
       ti=t-y_kmin-beg_t;
-      //int var=0;
-      //mexPrintf("t=%d ti=%d\n",t,ti);
       for (i=0;i<nop;i+=4)
         {
           switch (save_code[i])
@@ -2774,63 +2464,26 @@ SparseMatrix::complete(int beg_t, int Size, int periods, int *b)
                 k=save_code[i+1]+ti*diff[j];
                 if (k<max_var && k>min_var)
                   {
-                    /*mexPrintf("FMUL save_code[%d]",i+1);
-                    mexPrintf("(%d)+ti*",save_code[i+1]);
-                    mexPrintf("diff[%d]",j);
-                    mexPrintf("(%d)",diff[j]);
-                    mexPrintf("=k(%d)\n",k);
-                    mexPrintf("save_code[%d]",i+2);
-                    mexPrintf("(%d)+ti*",save_code[i+2]);
-                    mexPrintf("diff[%d]",j+1);
-                    mexPrintf("(%d)=%d\n",diff[j+1],save_code[i+2]+ti*diff[j+1]);*/
                     yy+=y[k]*u[save_code[i+2]+ti*diff[j+1]];
 #ifdef PRINT_OUT_y1
-                    //if(k1==3196)
                       mexPrintf("y[%d](%f)*u[%d](%f)+",k, double(y[k]), save_code[i+2]+ti*diff[j+1], double(u[save_code[i+2]+ti*diff[j+1]]));
 #endif
-                    //mexPrintf("u[%d]*y[%d]+",save_code[i+2]+ti*diff[j+1],k);
                   }
-                /*else
-                  {
-                    if (k>=max_var)
-                      mexPrintf("è");
-                    else
-                      mexPrintf("ç");
-                  }*/
                 break;
               case FADD :
-                /*mexPrintf("FADD save_code[%]=",i+1);
-                mexPrintf("(%d)+ti*",save_code[i+1]);
-                mexPrintf("diff[%d]",j);
-                mexPrintf("(%d)=%d\n",diff[j],save_code[i+1]+ti*diff[j]);*/
                 yy=-(yy+u[save_code[i+1]+ti*diff[j]]);
 #ifdef PRINT_OUT_y1
                 mexPrintf("|u[%d](%f)|",save_code[i+1]+ti*diff[j],double(u[save_code[i+1]+ti*diff[j]]));
 #endif
-                //mexPrintf("u[%d]",save_code[i+1]+ti*diff[j]);
                 break;
               case FSTP :
-                /*mexPrintf("FSTP save_code[%]=",i+1);
-                mexPrintf("(%d)+ti*",save_code[i+1]);
-                mexPrintf("diff[%d]",j);
-                mexPrintf("(%d)=%d\n",diff[j],save_code[i+1]+ti*diff[j]);*/
                 k=save_code[i+1]+ti*diff[j];
                 k1=k;
                 err = yy - y[k];
-                /*ferr = fabs(err);
-                (*res1) += ferr;
-                if ((*max_res)<ferr)
-                  (*max_res)=err;
-                (*res2) += err*err;*/
                 y[k] += slowc*(err);
 #ifdef PRINT_OUT_y1
                 mexPrintf("=y[%d]=%f  diff[%d]=%d save_code[%d]=%d ti=%d\n",save_code[i+1]+ti*diff[j],y[k],j,diff[j],i+1,save_code[i+1],ti);
 #endif
-                //mexPrintf("=y[%d]",k);
-                //mexPrintf("=%f\n",y[k]);
-                /*if(ferr>eps)
-                  mexPrintf("Error on y[%d] |err|=%f\n",k,double(ferr));*/
-
                 break;
             }
           j+=2;
@@ -2838,7 +2491,6 @@ SparseMatrix::complete(int beg_t, int Size, int periods, int *b)
     }
   mxFree(save_code);
   mxFree(diff);
-  //mexPrintf("out of complete\n");
   return(beg_t);
 }
 
@@ -2846,30 +2498,23 @@ longd
 SparseMatrix::bksub( int tbreak, int last_period, int Size, /*NonZeroElem *first,*/ long int *nmul, longd slowc_l)
 {
   NonZeroElem *first;
-  //mexPrintf("bksub\n");
   int i;
   longd yy;
   res1 = res2 = max_res = 0;
-  /*for(i=0;i<Size*periods;i++)
-    mexPrintf("pivot[%d]=%d\n",i,pivot[i]);*/
   for (i=0;i<y_size*(periods+y_kmin);i++)
     y[i]=ya[i];
-  //mexPrintf("oka\n");
   if (symbolic && tbreak)
     last_period=complete(tbreak, Size, periods, b);
   else
     last_period=periods;
-  //mexPrintf("okb\n");
   for (int t=last_period+y_kmin-1;t>=y_kmin;t--)
     {
       int ti=(t-y_kmin)*Size;
-      //mexPrintf("l t=%d\n",t);
 #ifdef PRINT_OUT
       mexPrintf("t=%d ti=%d\n",t,ti);
 #endif
       int cal=y_kmin*Size;
       int cal_y=y_size*y_kmin;
-      //int ti_y_kmax=min( periods+y_kmin-t, y_kmax);
       for (i=ti-1;i>=ti-Size;i--)
         {
           j=i+cal;
@@ -2880,26 +2525,16 @@ SparseMatrix::bksub( int tbreak, int last_period, int Size, /*NonZeroElem *first
 #ifdef PRINT_OUT_y
           mexPrintf("i-ti+Size=%d pos=%d j=%d\n",i-ti+Size,pos,j);
 #endif
-          //mexPrintf("FNZE_R[%d]=",pos);
-          //mexPrintf("%x\n",FNZE_R[pos]);
           int nb_var=At_Row(pos,&first);
-          //mexPrintf("nb_var=%d\n",nb_var);
           first=first->NZE_R_N;
           nb_var--;
           int eq=index_vara[j]+y_size;
-          /*if(eq==3212)
-            mexPrintf("=>");*/
 #ifdef PRINT_OUT_y1
           mexPrintf("y[index_vara[%d]=%d]=",j,index_vara[j]+y_size);
 #endif
-          yy=0/*y[eq]*/;
+          yy=0;
           for (k=0;k<nb_var;k++)
             {
-//#ifdef PRINT_OUT_y1
-             /*if(eq==3212)
-               mexPrintf("u[%d](=%f)*y[index_vara[%d]=%d](=%f) => %f\n",first->u_index,double(u[first->u_index]),first->c_index,index_vara[first->c_index]+cal_y,double(y[index_vara[first->c_index]+cal_y]),y[index_vara[first->c_index]+cal_y]*u[first->u_index]);*/
-//#endif
-              //mexPrintf("u[%d]*y[%d]+",first->u_index,index_vara[first->c_index]+cal_y);
               yy+=y[index_vara[first->c_index]+cal_y]*u[first->u_index];
               (*nmul)++;
               first=first->NZE_R_N;
@@ -2907,23 +2542,14 @@ SparseMatrix::bksub( int tbreak, int last_period, int Size, /*NonZeroElem *first
 #ifdef PRINT_OUT_y1
           mexPrintf("|u[%d](%f)|",b[pos],double(u[b[pos]]));
 #endif
-          //mexPrintf("u[%d]",b[pos]);
           yy=-(yy+y[eq]+u[b[pos]]);
           direction[eq]=yy;
-          /*longd ferr = fabs(err);
-          res1 += ferr;
-          if(max_res<ferr)
-            max_res=ferr;
-          res2 += ferr*ferr;*/
           y[eq] += slowc_l*yy;
 #ifdef PRINT_OUT_y1
           mexPrintf("=%f (%f)\n",double(yy),double(y[eq]));
 #endif
-          //mexPrintf("=y[%d]=%f\n",eq,y[eq]);
         }
     }
-  //mexPrintf("end bksub\n");
-  //mexPrintf("y_kmin=%d\n",y_kmin);
   return res1;
 }
 
@@ -2962,7 +2588,6 @@ void chk_avail_mem(int **save_op_all,long int *nop_all,long int *nopa_all,int ad
     mexPrintf("Error: out of save_op_all[%d] nopa_all=%d t=%d\n",(*nop_all)+add,(*nopa_all),t);
     int tmp_nopa_all=int(1.5*(*nopa_all));
     int *tmp_i;
-    //mexSetTrapFlag(1);
     if (tmp_nopa_all*sizeof(int)<1024*1024)
       {
         mexPrintf("allocate %d bites save_op_all=%x\n",tmp_nopa_all*sizeof(int),*save_op_all);
@@ -2980,11 +2605,8 @@ void chk_avail_mem(int **save_op_all,long int *nop_all,long int *nopa_all,int ad
       {
         mexPrintf("allocated\n");
         (*save_op_all)=tmp_i;
-        //mexPrintf("okoa\n");
         (*nopa_all)=tmp_nopa_all;
-        //mexPrintf("okoo\n");
       }
-    //mexSetTrapFlag(0);
     mexPrintf("end of chk\n");
   }
 
@@ -3016,51 +2638,11 @@ simulate_NG1(int blck, int y_size, int it_, int y_kmin, int y_kmax, int Size, in
   tdelete1=0; tdelete2=0; tdelete21=0; tdelete22=0; tdelete221=0; tdelete222=0;
 
 
-  /*int Z[3];
-  int *p;
-  p=Z;
-  mexPrintf("p=%x\n",p);
-  p=p+1;
-  mexPrintf("p=%x\n",p);*/
-/*
-  int Z[3];
-  Z[0]=0x56CE000A;
-  Z[1]=2;
-  Z[2]=3;
-
-
-  save_op_s=(t_save_op_s*)Z;
-*/
-  /*for(i=0;i<1;i++)
-    mexPrintf("Z[i]=%d lo(Z)=%d hi(Z)=%d\n",Z[i],Z[i] & masklo, Z[i] & maskhi);*/
- /* mexPrintf("save_op_s->lag=%d sizeof(save_op_s->lag)=%d\n",int(save_op_s->lag),sizeof(save_op_s->lag));
-  mexPrintf("save_op_s->operat=%d sizeof(save_op_s->operat)=%d\n",int(save_op_s->operat),sizeof(save_op_s->operat));
-  mexPrintf("save_op_s->first=%d sizeof(save_op_s->first)=%d\n",save_op_s->first,sizeof(save_op_s->first));
-  mexPrintf("save_op_s->second=%d sizeof(save_op_s->second)=%d\n",save_op_s->second,sizeof(save_op_s->second));
-  mexPrintf("save_op_s->lag=%d sizeof(save_op_s->lag)=%d\n",int(save_op_s->lag),sizeof(save_op_s->lag));
-*/
-  /*int z=0x56CECDEF;*/
-
-  /*mexPrintf("lo(z)=%d hi(z)=%d\n",z & masklo, z & maskhi);*/
-  /*filename+=" stopped";
-  mexErrMsgTxt(filename.c_str());*/
 #ifdef MEMORY_LEAKS
   mexEvalString("feature('memstats');");
 #endif
   if (isnan(res1) || isinf(res1))
     {
-      /*if(record_all and nop_all)
-        {
-          mexPrintf("NAN or INF value in simulation. Trying to restarte..\n");
-          mxFree(save_op_all);
-          save_op_all=NULL;
-          for(i=0;i<y_size*(periods+y_kmin);i++)
-            y[i]=ya[i];
-          u_count=save_u_count;
-          sparse_matrix.End(Size);
-        }
-      else
-        {*/
       if (slowc_save<1e-8)
         {
           mexPrintf("Dynare cannot improve the simulation\n");
@@ -3074,7 +2656,6 @@ simulate_NG1(int blck, int y_size, int it_, int y_kmin, int y_kmax, int Size, in
         y[i]=ya[i]+slowc_save*direction[i];
       iter--;
       return(0);
-      /*}*/
     }
   u_count+=u_count_init;
   if (alt_symbolic && alt_symbolic_count<alt_symbolic_count_max)
@@ -3097,7 +2678,6 @@ simulate_NG1(int blck, int y_size, int it_, int y_kmin, int y_kmax, int Size, in
   mexPrintf("      sqr. error=%.10e       \n",double(res2));
   mexPrintf("      abs. error=%.10e       \n",double(res1));
   mexPrintf("-----------------------------------\n");
-  //mexPrintf("record_all=%d save_op_all=%x\n",record_all,save_op_all);
   mexEvalString("drawnow;");
   if(cvg)
     return(0);
@@ -3123,7 +2703,6 @@ simulate_NG1(int blck, int y_size, int it_, int y_kmin, int y_kmax, int Size, in
 #endif
 
 #ifdef PRINT_OUT
-  //sparse_matrix.Print(Size,b);
   mexPrintf("sizeof(NonZeroElem)=%d\n",sizeof(NonZeroElem));
   for (i=0;i<Size*periods;i++)
     mexPrintf("b[%d]=%f\n",i,double(b[i]));
@@ -3131,7 +2710,6 @@ simulate_NG1(int blck, int y_size, int it_, int y_kmin, int y_kmax, int Size, in
   if (record_all && !save_op_all)
     {
       nopa_all=(Size*periods)*Size*periods*4;  /*Initial guess on the total number of operations*/
-      //mexPrintf("nopa_all=%d\n",nopa_all);
 #ifdef MEM_ALLOC_CHK
       mexPrintf("save_op_all=(int*)mxMalloc(%d*sizeof(int))\n",nopa_all);
 #endif
@@ -3158,22 +2736,18 @@ simulate_NG1(int blck, int y_size, int it_, int y_kmin, int y_kmax, int Size, in
     sparse_matrix.run_u_period1(periods);
   else
     {
-      //mexPrintf("ok\n");
       sparse_matrix.Init(periods, y_kmin, y_kmax, Size, IM_i);
       for (int t=0;t<periods;t++)
         {
-          //mexPrintf("t=%d u_count=%d\n",t,u_count);
 #ifdef WRITE_u
           if(!symbolic && ((periods-t)<=y_kmax))
             {
               toto << "t=" << t << endl;
             }
 #endif
-          //sparse_matrix.Print(Size,b);
 #ifdef PROFILER
           pctimer_t by_time_t0=pctimer();
 #endif
-          //mexPrintf("t=%d \n",t);
           if (record && symbolic)
             {
               if (save_op);
@@ -3205,7 +2779,6 @@ simulate_NG1(int blck, int y_size, int it_, int y_kmin, int y_kmax, int Size, in
           for (i=ti;i<Size+ti;i++)
             {
               /*finding the max-pivot*/
-              //sparse_matrix.Print(Size,b);
 #ifdef PRINT_OUT
               sparse_matrix.Print(Size,b);
               mexPrintf("*************************************\n");
@@ -3215,8 +2788,6 @@ simulate_NG1(int blck, int y_size, int it_, int y_kmin, int y_kmax, int Size, in
               pctimer_t td0=pctimer();
 #endif
               longd piv=piv_abs=0;
-              /*mexPrintf("beg i=%d \n",i);
-              mexEvalString("drawnow;");*/
               int nb_eq=sparse_matrix.At_Col(i, 0, &first);
 #ifdef PRINT_OUT
               mexPrintf("nb_eq=%d\n",nb_eq);
@@ -3243,11 +2814,9 @@ simulate_NG1(int blck, int y_size, int it_, int y_kmin, int y_kmax, int Size, in
 #endif
                           int jj=first->r_index;
                           int NRow_jj=sparse_matrix.NRow(jj);
-                          //Union_Row(jj, int row2)
 #ifdef MARKOVITZ
                           piv_v[l]=u[k];
                           longd piv_fabs=fabs(u[k]);
-                          //mexPrintf("piv_v[%d]=%f\n",l,piv_v[l]);
                           pivj_v[l]=jj;
                           pivk_v[l]=k;
                           NR[l]=NRow_jj;
@@ -3286,23 +2855,19 @@ simulate_NG1(int blck, int y_size, int it_, int y_kmin, int y_kmax, int Size, in
                                 break;
                             }
 #endif
-                          //ncomp++;
                         }
                       first=first->NZE_C_N;
                     }
 #ifdef MARKOVITZ
                   double markovitz=0, markovitz_max=-9e70;
-                  //mexPrintf("N_max=%d piv_abs=%f l=%d nb_eq=%d\n",N_max,piv_abs,l,nb_eq);
                   if(!one)
                     {
                        for(j=0;j<l;j++)
                          {
                             markovitz=exp(log(fabs(piv_v[j])/piv_abs)-markowitz_c*log(double(NR[j])/double(N_max)));
-                            //mexPrintf("none j=%d markovitz=%f piv_v=%f NR=%d term1=%f term2=%f\n",j,markovitz,piv_v[j],NR[j],log(fabs(piv_v[j])/piv_abs),log(double(NR[j])/double(N_max)));
                             if(markovitz>markovitz_max)
                               {
                                 piv=piv_v[j];
-                                //piv_abs=fabs(piv);
                                 pivj=pivj_v[j];   //Line number
                                 pivk=pivk_v[j];   //positi
                                 markovitz_max=markovitz;
@@ -3314,18 +2879,15 @@ simulate_NG1(int blck, int y_size, int it_, int y_kmin, int y_kmax, int Size, in
                       for(j=0;j<l;j++)
                          {
                             markovitz=exp(log(fabs(piv_v[j])/piv_abs)-markowitz_c*log(NR[j]/N_max));
-                            //mexPrintf("one j=%d markovitz=%f piv_v=%f NR=%d\n",j,markovitz,piv_v[j],NR[j]);
                             if(markovitz>markovitz_max && NR[j]==1)
                               {
                                 piv=piv_v[j];
-                                //piv_abs=fabs(piv);
                                 pivj=pivj_v[j];   //Line number
                                 pivk=pivk_v[j];   //positi
                                 markovitz_max=markovitz;
                               }
                          }
                     }
-                  //smexPrintf("selected pivj=%d piv=%f piv_abs=%f markovitz_max=%f one=%d \n",pivj,piv,piv_abs,markovitz_max,one);
 #endif
 #ifdef PROFILER
                   tpivot+=pctimer()-td0;
@@ -3361,7 +2923,6 @@ simulate_NG1(int blck, int y_size, int it_, int y_kmin, int y_kmax, int Size, in
                     {
                       if (nop+1>=nopa)
                         {
-                          //mexPrintf("Error: out of save_op[%d] nopa=%d\n",nop+2,nopa);
                           nopa=int(1.5*nopa);
 #ifdef MEM_ALLOC_CHK
                           mexPrintf("save_op=(int*)mxRealloc(save_op,%d*sizeof(int))\n",nopa);
@@ -3379,40 +2940,19 @@ simulate_NG1(int blck, int y_size, int it_, int y_kmin, int y_kmax, int Size, in
                       save_op_s->operat=FLD;
                       save_op_s->first=pivk;
                       save_op_s->lag=0;
-                      /*save_op[nop]=FLD;
-                      save_op[nop+1]=pivk;
-                      save_op[nop+2]=0;
-                      save_op[nop+3]=0;*/
                     }
-                  /*nop+=4;*/
                   nop+=2;
                 }
               else if (record_all)
                 {
                   if (nop_all+1>=nopa_all)
                     chk_avail_mem(&save_op_all,&nop_all,&nopa_all,1,t);
-                  /*if(nop_all+1>=nopa_all)
-                    {
-                      mexPrintf("Error: out of save_op_all[%d] nopa_all=%d t=%d\n",nop_all+2,nopa_all,t);
-                      int tmp_nopa_all=int(1.5*nopa_all);
-                      mexSetTrapFlag(1);
-                      int *tmp_i=(int*)mxRealloc(save_op_all,tmp_nopa_all*sizeof(int));
-                      if(!tmp_i)
-                        write_swp_f(save_op_all,&nop_all);
-                      else
-                        {
-                          save_op_all=tmp_i;
-                          nopa_all=tmp_nopa_all;
-                        }
-                      mexSetTrapFlag(0);
-                    }*/
                   save_op_all[nop_all]=FLD;
                   save_op_all[nop_all+1]=pivk;
                   nop_all+=2;
                 }
               if (piv_abs<eps)
                 {
-                  //sparse_matrix.Print(Size,b);
                   mexPrintf("Error: singular system\n");
                   mexEvalString("drawnow;");
                   filename+=" stopped";
@@ -3431,8 +2971,6 @@ simulate_NG1(int blck, int y_size, int it_, int y_kmin, int y_kmax, int Size, in
                   mexPrintf("dividing at lag %d [%d, %d] u[%d]\n",first->lag_index, first->r_index, first->c_index, first->u_index);
 #endif
                   u[first->u_index]/=piv;
-                  /*if(first->u_index==81726)
-                    mexPrintf("(4) u[%d]/=%f=>%f\n",first->u_index,piv,u[first->u_index]);*/
 #ifdef WRITE_u
                   if((periods-t)<=y_kmax)
                     {
@@ -3450,7 +2988,6 @@ simulate_NG1(int blck, int y_size, int it_, int y_kmin, int y_kmax, int Size, in
                         {
                           if (nop+1>=nopa)
                             {
-                              //mexPrintf("Error: out of save_op[%d] nopa=%d\n",nop+2,nopa);
                               nopa=int(1.5*nopa);
 #ifdef MEM_ALLOC_CHK
                               mexPrintf("save_op=(int*)mxRealloc(save_op,%d*sizeof(int))\n",nopa);
@@ -3468,45 +3005,23 @@ simulate_NG1(int blck, int y_size, int it_, int y_kmin, int y_kmax, int Size, in
                           save_op_s->operat=FDIV;
                           save_op_s->first=first->u_index;
                           save_op_s->lag=first->lag_index;
-                          /*save_op[nop]=FDIV;
-                          save_op[nop+1]=first->u_index;
-                          save_op[nop+2]=0;
-                          save_op[nop+3]=first->lag_index;*/
                         }
-                      /*nop+=4;*/
                       nop+=2;
                     }
                   else if (record_all)
                     {
                       if (nop_all+1>=nopa_all)
                         chk_avail_mem(&save_op_all,&nop_all,&nopa_all,1,t);
-                      /*{
-                        mexPrintf("Error: out of save_op_all[%d] nopa_all=%d t=%d\n",nop_all+2,nopa_all,t);
-                        int tmp_nopa_all=int(1.5*nopa_all);
-                        mexSetTrapFlag(1);
-                        int *tmp_i=(int*)mxRealloc(save_op_all,tmp_nopa_all*sizeof(int));
-                        if(!tmp_i)
-                          write_swp_f(save_op_all,&nop_all);
-                        else
-                          {
-                            save_op_all=tmp_i;
-                            nopa_all=tmp_nopa_all;
-                          }
-                        mexSetTrapFlag(0);
-                      }*/
                       save_op_all[nop_all]=FDIV;
                       save_op_all[nop_all+1]=first->u_index;
                       nop_all+=2;
                     }
-                  //ndiv++;
                   first=first->NZE_R_N;
                 }
 #ifdef PRINT_OUT
               mexPrintf("dividing at u[%d]\n",b[pivj]);
 #endif
               u[b[pivj]]/=piv;
-              /*if(b[pivj]==81726)
-                mexPrintf("(5) u[%d]/=%f=>%f\n",b[pivj],piv,u[b[pivj]]);*/
 #ifdef WRITE_u
               if((periods-t)<=y_kmax)
                 {
@@ -3524,7 +3039,6 @@ simulate_NG1(int blck, int y_size, int it_, int y_kmin, int y_kmax, int Size, in
                     {
                       if (nop+1>=nopa)
                         {
-                          //mexPrintf("Error: out of save_op[%d] nopa=%d\n",nop+2,nopa);
                           nopa=int(1.5*nopa);
 #ifdef MEM_ALLOC_CHK
                           mexPrintf("save_op=(int*)mxRealloc(save_op,%d*sizeof(int))\n",nopa);
@@ -3542,37 +3056,17 @@ simulate_NG1(int blck, int y_size, int it_, int y_kmin, int y_kmax, int Size, in
                       save_op_s->operat=FDIV;
                       save_op_s->first=b[pivj];
                       save_op_s->lag=0;
-                      /*save_op[nop]=FDIV;
-                      save_op[nop+1]=b[pivj];
-                      save_op[nop+2]=0;
-                      save_op[nop+3]=0;*/
                     }
-                  /*nop+=4;*/
                   nop+=2;
                 }
               else if (record_all)
                 {
                   if (nop_all+1>=nopa_all)
                     chk_avail_mem(&save_op_all,&nop_all,&nopa_all,1,t);
-                  /*{
-                    mexPrintf("Error: out of save_op_all[%d] nopa_all=%d t=%d\n",nop_all+2,nopa_all,t);
-                    int tmp_nopa_all=int(1.5*nopa_all);
-                    mexSetTrapFlag(1);
-                    int *tmp_i=(int*)mxRealloc(save_op_all,tmp_nopa_all*sizeof(int));
-                    if(!tmp_i)
-                      write_swp_f(save_op_all,&nop_all);
-                    else
-                      {
-                        save_op_all=tmp_i;
-                        nopa_all=tmp_nopa_all;
-                      }
-                    mexSetTrapFlag(0);
-                  }*/
                   save_op_all[nop_all]=FDIV;
                   save_op_all[nop_all+1]=b[pivj];
                   nop_all+=2;
                 }
-              //ndiv++;
               /*substract the elements on the non treated lines*/
               nb_eq=sparse_matrix.At_Col(i,&first);
               NonZeroElem *first_piva;
@@ -3599,7 +3093,6 @@ simulate_NG1(int blck, int y_size, int it_, int y_kmin, int y_kmax, int Size, in
                             {
                               if (nop+1>=nopa)
                                 {
-                                  //mexPrintf("Error: out of save_op[%d] nopa=%d\n",nop+2,nopa);
                                   nopa=int(1.5*nopa);
 #ifdef MEM_ALLOC_CHK
                                   mexPrintf("save_op=(int*)mxRealloc(save_op,%d*sizeof(int))\n",nopa);
@@ -3617,32 +3110,13 @@ simulate_NG1(int blck, int y_size, int it_, int y_kmin, int y_kmax, int Size, in
                               save_op_s->operat=FLD;
                               save_op_s->first=first->u_index;
                               save_op_s->lag=abs(first->lag_index);
-                              /*save_op[nop]=FLD;
-                              save_op[nop+1]=first->u_index;
-                              save_op[nop+2]=0;
-                              save_op[nop+3]=abs(first->lag_index);*/
                             }
-                          /*nop+=4;*/
                           nop+=2;
                         }
                       else if (record_all)
                         {
                           if (nop_all+1>=nopa_all)
                             chk_avail_mem(&save_op_all,&nop_all,&nopa_all,1,t);
-                          /*{
-                            mexPrintf("Error: out of save_op_all[%d] nopa_all=%d t=%d\n",nop_all+2,nopa_all,t);
-                            int tmp_nopa_all=int(1.5*nopa_all);
-                            mexSetTrapFlag(1);
-                            int *tmp_i=(int*)mxRealloc(save_op_all,tmp_nopa_all*sizeof(int));
-                            if(!tmp_i)
-                              write_swp_f(save_op_all,&nop_all);
-                            else
-                              {
-                                save_op_all=tmp_i;
-                                nopa_all=tmp_nopa_all;
-                              }
-                            mexSetTrapFlag(0);
-                          }*/
                           save_op_all[nop_all]=FLD;
                           save_op_all[nop_all+1]=first->u_index;
                           nop_all+=2;
@@ -3683,18 +3157,12 @@ simulate_NG1(int blck, int y_size, int it_, int y_kmin, int y_kmax, int Size, in
 #ifdef PROFILER
                               pctimer_t td0=pctimer();
 #endif
-                              //mexPrintf("insert\n");
                               int lag=first_piv->c_index/Size-row/Size;
                               sparse_matrix.Insert(row,first_piv->c_index,tmp_u_count,lag);
-                              //mexPrintf("end insert\n");
 #ifdef PROFILER
                               tinsert+=pctimer()-td0;
 #endif
                               u[tmp_u_count]=-u[first_piv->u_index]*first_elem;
-                              /*if(tmp_u_count==81726)
-                                mexPrintf("(6) u[%d]=-u[%d](%f)*first_elem(%f)=>%f\n",tmp_u_count,first_piv->u_index,u[first_piv->u_index],first_elem,u[tmp_u_count]);*/
-                              /*if(t==7)
-                                mexPrintf("u[%d]=-u[%d]*%f=%f\n",tmp_u_count,first_piv->u_index,first_elem,double(u[tmp_u_count]));*/
 #ifdef WRITE_u
                               if((periods-t)<=y_kmax)
                                 {
@@ -3712,7 +3180,6 @@ simulate_NG1(int blck, int y_size, int it_, int y_kmin, int y_kmax, int Size, in
                                     {
                                       if (nop+2>=nopa)
                                         {
-                                          //mexPrintf("Error: out of save_op[%d] nopa=%d\n",nop+2,nopa);
                                           nopa=int(1.5*nopa);
 #ifdef MEM_ALLOC_CHK
                                           mexPrintf("save_op=(int*)mxRealloc(save_op,%d*sizeof(int))\n",nopa);
@@ -3731,39 +3198,18 @@ simulate_NG1(int blck, int y_size, int it_, int y_kmin, int y_kmax, int Size, in
                                       save_op_s->first=tmp_u_count;
                                       save_op_s->second=first_piv->u_index;
                                       save_op_s->lag=max(first_piv->lag_index,abs(tmp_lag));
-                                      /*save_op[nop]=FLESS;
-                                      save_op[nop+1]=tmp_u_count;
-                                      save_op[nop+2]=first_piv->u_index;
-                                      save_op[nop+3]=max(first_piv->lag_index,abs(tmp_lag));*/
                                     }
-                                  /*nop+=4;*/
                                   nop+=3;
                                 }
                               else if (record_all)
                                 {
                                   if (nop_all+2>=nopa_all)
                                     chk_avail_mem(&save_op_all,&nop_all,&nopa_all,2,t);
-                                  /*{
-                                    mexPrintf("Error: out of save_op_all[%d] nopa_all=%d t=%d\n",nop_all+2,nopa_all,t);
-                                    int tmp_nopa_all=int(1.5*nopa_all);
-                                    mexSetTrapFlag(1);
-                                    int *tmp_i=(int*)mxRealloc(save_op_all,tmp_nopa_all*sizeof(int));
-                                    if(!tmp_i)
-                                      write_swp_f(save_op_all,&nop_all);
-                                    else
-                                      {
-                                        save_op_all=tmp_i;
-                                        nopa_all=tmp_nopa_all;
-                                      }
-                                    mexSetTrapFlag(0);
-                                  }*/
-
                                   save_op_all[nop_all]=FLESS;
                                   save_op_all[nop_all+1]=tmp_u_count;
                                   save_op_all[nop_all+2]=first_piv->u_index;
                                   nop_all+=3;
                                 }
-                              //nsub++;
 #ifdef PRINT_OUT
                               mexPrintf("  u[%d at (%d, %d) lag %d]=-u[%d]*%f\n",tmp_u_count,row , first_piv->c_index, first_piv->c_index/Size-row/Size, first_piv->u_index ,double(first_elem));
 #endif
@@ -3786,9 +3232,7 @@ simulate_NG1(int blck, int y_size, int it_, int y_kmin, int y_kmax, int Size, in
 #ifdef PROFILER
                                   pctimer_t td0=pctimer();
 #endif
-                                  //mexPrintf("delete\n");
                                   sparse_matrix.Delete(first_sub->r_index,first_sub->c_index, Size, b);
-                                  //mexPrintf("end delete\n");
 #ifdef PROFILER
                                   tdelete+=pctimer()-td0;
 #endif
@@ -3817,8 +3261,6 @@ simulate_NG1(int blck, int y_size, int it_, int y_kmin, int y_kmax, int Size, in
 
 
                                   u[first_sub->u_index]-=u[first_piv->u_index]*first_elem;
-                                  /*if(first_sub->u_index==81726)
-                                    mexPrintf("(7) u[%d]-=u[%d](%f)*first_elem(%f)=>%f\n",first_sub->u_index,first_piv->u_index,u[first_piv->u_index],first_elem,u[first_sub->u_index]);*/
 #ifdef WRITE_u
                                   if((periods-t)<=y_kmax)
                                     {
@@ -3830,15 +3272,12 @@ simulate_NG1(int blck, int y_size, int it_, int y_kmin, int y_kmax, int Size, in
                                   mexPrintf("FSUB u[%d]-=u[%d](%f)*r(%f)=(%f)  |",first_sub->u_index,first_piv->u_index,u[first_piv->u_index],first_elem,u[first_sub->u_index]);
                                   sparse_matrix.Print_u();mexPrintf("\n");
 #endif
-                                  /*if(t==7)
-                                    mexPrintf("u[%d]-=u[%d]*%f=%f\n",first_sub->u_index,first_piv->u_index,first_elem,double(u[first_sub->u_index]));*/
                                   if (symbolic)
                                     {
                                       if (record)
                                         {
                                           if (nop+2>=nopa)
                                             {
-                                              //mexPrintf("Error: out of save_op[%d] nopa=%d\n",nop+2,nopa);
                                               nopa=int(1.5*nopa);
 #ifdef MEM_ALLOC_CHK
                                               mexPrintf("save_op=(int*)mxRealloc(save_op,%d*sizeof(int))\n",nopa);
@@ -3857,39 +3296,19 @@ simulate_NG1(int blck, int y_size, int it_, int y_kmin, int y_kmax, int Size, in
                                           save_op_s->first=first_sub->u_index;
                                           save_op_s->second=first_piv->u_index;
                                           save_op_s->lag=max(abs(tmp_lag),first_piv->lag_index);
-                                          /*save_op[nop]=FSUB;
-                                          save_op[nop+1]=first_sub->u_index;
-                                          save_op[nop+2]=first_piv->u_index;
-                                          save_op[nop+3]=max(abs(tmp_lag),first_piv->lag_index);*/
                                         }
-                                      /*nop+=4;*/
                                       nop+=3;
                                     }
                                   else if (record_all)
                                     {
                                       if (nop_all+2>=nopa_all)
                                         chk_avail_mem(&save_op_all,&nop_all,&nopa_all,2,t);
-                                      /*{
-                                        mexPrintf("Error: out of save_op_all[%d] nopa_all=%d t=%d\n",nop_all+2,nopa_all,t);
-                                        int tmp_nopa_all=int(1.5*nopa_all);
-                                        mexSetTrapFlag(1);
-                                        int *tmp_i=(int*)mxRealloc(save_op_all,tmp_nopa_all*sizeof(int));
-                                        if(!tmp_i)
-                                          write_swp_f(save_op_all,&nop_all);
-                                        else
-                                          {
-                                            save_op_all=tmp_i;
-                                            nopa_all=tmp_nopa_all;
-                                          }
-                                        mexSetTrapFlag(0);
-                                      }*/
                                       save_op_all[nop_all]=FSUB;
                                       save_op_all[nop_all+1]=first_sub->u_index;
                                       save_op_all[nop_all+2]=first_piv->u_index;
                                       nop_all+=3;
                                     }
 
-                                  //nsub++;
                                   first_sub=first_sub->NZE_R_N;
                                   if (first_sub)
                                     sub_c_index=first_sub->c_index;
@@ -3911,8 +3330,6 @@ simulate_NG1(int blck, int y_size, int it_, int y_kmin, int y_kmax, int Size, in
 #endif
 
                       u[b[row]]-=u[b[pivj]]*first_elem;
-                      /*if(b[row]==81726)
-                        mexPrintf("(8) u[%d]-=u[%d](%f)*first_elem(%f)=>%f\n",b[row],b[pivj],u[b[pivj]],first_elem,u[b[row]]);*/
 #ifdef PROFILER
                       tbigloop += pctimer() - td1;
 #endif
@@ -3923,8 +3340,6 @@ simulate_NG1(int blck, int y_size, int it_, int y_kmin, int y_kmax, int Size, in
                           i_toto++;
                         }
 #endif
-                      /*if(t==7)
-                        mexPrintf("u[%d]-=u[%d]*%f=%f\n",b[row],b[pivj],first_elem,double(u[b[row]]));*/
 #ifdef PRINT_u
                       mexPrintf("FSUB u[%d]-=u[%d](%f)*r(%f)=(%f)   |",b[row],b[pivj],u[b[pivj]],first_elem,u[b[row]]);
                       sparse_matrix.Print_u();mexPrintf("\n");
@@ -3935,7 +3350,6 @@ simulate_NG1(int blck, int y_size, int it_, int y_kmin, int y_kmax, int Size, in
                             {
                               if (nop+2>=nopa)
                                 {
-                                  //mexPrintf("Error: out of save_op[%d] nopa=%d\n",nop+2,nopa);
                                   nopa=int(1.5*nopa);
 #ifdef MEM_ALLOC_CHK
                                   mexPrintf("save_op=(int*)mxRealloc(save_op,%d*sizeof(int))\n",nopa);
@@ -3954,49 +3368,21 @@ simulate_NG1(int blck, int y_size, int it_, int y_kmin, int y_kmax, int Size, in
                               save_op_s->first=b[row];
                               save_op_s->second=b[pivj];
                               save_op_s->lag=abs(tmp_lag);
-                              /*save_op[nop]=FSUB;
-                              save_op[nop+1]=b[row];
-                              save_op[nop+2]=b[pivj];
-                              save_op[nop+3]=abs(tmp_lag);*/
                             }
-                          /*nop+=4;*/
                           nop+=3;
                         }
                       else if (record_all)
                         {
                           if (nop_all+2>=nopa_all)
                             chk_avail_mem(&save_op_all,&nop_all,&nopa_all,2,t);
-                          /*{
-                            mexPrintf("Error: out of save_op_all[%d] nopa_all=%d t=%d\n",nop_all+2,nopa_all,t);
-                            int tmp_nopa_all=int(1.5*nopa_all);
-                            mexSetTrapFlag(1);
-                            int *tmp_i=(int*)mxRealloc(save_op_all,tmp_nopa_all*sizeof(int));
-                            if(!tmp_i)
-                              write_swp_f(save_op_all,&nop_all);
-                            else
-                              {
-                                save_op_all=tmp_i;
-                                nopa_all=tmp_nopa_all;
-                              }
-                            mexSetTrapFlag(0);
-                          }*/
                           save_op_all[nop_all]=FSUB;
                           save_op_all[nop_all+1]=b[row];
                           save_op_all[nop_all+2]=b[pivj];
                           nop_all+=3;
                         }
-                      //nsub++;
                     }
                   else
                     first=first->NZE_C_N;
-
-                  /*NonZeroElem *firstaa;
-                  int nb_eqa=sparse_matrix.At_Col(i,&firstaa);
-                  for(int ja=0;ja<nb_eqa;ja++)
-                    {
-                      mexPrintf(" with j=%d line %d %x\n",ja,firstaa->r_index,firstaa);
-                      firstaa=firstaa->NZE_C_N;
-                    }*/
 #ifdef PRINT_OUT
                   mexPrintf(" bef first=%x\n",first);
 #endif
@@ -4004,13 +3390,11 @@ simulate_NG1(int blck, int y_size, int it_, int y_kmin, int y_kmax, int Size, in
             }
           if (symbolic)
             {
-              //mexPrintf("record=%d, nop=%d, nopa=%d\n",record,nop,nopa);
               if (record && (nop==nop1))
                 {
 #ifdef PRINT_OUT
                   mexPrintf("nop=%d, nop1=%d, record=%d save_opa=%x save_opaa=%x \n",nop, nop1, record, save_opa, save_opaa);
 #endif
-                  //mexPrintf("save_opa=%x, save_opaa=%x\n",save_opa, save_opaa);
                   if (save_opa && save_opaa)
                     {
 #ifdef PROFILER
@@ -4025,12 +3409,10 @@ simulate_NG1(int blck, int y_size, int it_, int y_kmin, int y_kmax, int Size, in
                           break;
                         }
                     }
-                  //mexPrintf("oka\n");
                   if (save_opa)
                     {
                       if (save_opaa)
                         {
-                          //mexPrintf("mxFree save_opaa=%x \n",save_opaa);
 #ifdef N_MX_ALLOC
                           free(save_opaa);
 #else
@@ -4050,9 +3432,7 @@ simulate_NG1(int blck, int y_size, int it_, int y_kmin, int y_kmax, int Size, in
                       mexPrintf("ok\n");
 #endif
                       memcpy(save_opaa, save_opa, nop1*sizeof(int));
-                      //mexPrintf("1 - end memcpy\n");
                     }
-                  //mexPrintf("okb\n");
                   if (save_opa)
                     {
 #ifdef N_MX_ALLOC
@@ -4074,7 +3454,6 @@ simulate_NG1(int blck, int y_size, int it_, int y_kmin, int y_kmax, int Size, in
                   mexPrintf("ok\n");
 #endif
                   memcpy(save_opa, save_op, nop*sizeof(int));
-                  //mexPrintf("end memcpy\n");
                 }
               else
                 {
@@ -4102,7 +3481,6 @@ simulate_NG1(int blck, int y_size, int it_, int y_kmin, int y_kmax, int Size, in
                           save_opaa=NULL;
                         }
                     }
-                  //mexPrintf("nop=%d, nopa=%d, record=%d time=%f\n",nop, nopa, record,1000*(pctimer()-by_time_t0));
                 }
               nop2=nop1;
               nop1=nop;
@@ -4118,7 +3496,6 @@ simulate_NG1(int blck, int y_size, int it_, int y_kmin, int y_kmax, int Size, in
   mexPrintf(" tdelete21=%f tdelete22=%f \n",double(1000*tdelete21),double(1000*tdelete22));
   mexPrintf(" tdelete221=%f tdelete222=%f \n",double(1000*tdelete221),double(1000*tdelete222));
 #endif
-  //mexPrintf(" tdelete2221=%f tdelete2222=%f \n",double(1000*tdelete2221),double(1000*tdelete2222));
   if (symbolic)
     {
 #ifdef N_MX_ALLOC
@@ -4137,37 +3514,11 @@ simulate_NG1(int blck, int y_size, int it_, int y_kmin, int y_kmax, int Size, in
         mxFree(save_opaa);
 #endif
     }
-  /*if(pivota )
-    {
-      if(memcmp(pivot,pivota,Size*periods*sizeof(int))==0)
-        {
-          //record_all=true;
-          //symbolic=false;
-          mexPrintf("same pivoting\n");
-        }
-      else
-        {
-          mexPrintf("different pivoting\n");
-          mexPrintf("pivot (value) -pivota (value)\n");
-          for(i=0;i<Size;i++)
-            {
-              if(pivot[i]!=pivota[i])
-                mexPrintf("==>");
-              else
-                mexPrintf("   ");
-              mexPrintf("% 3d (%f) - %3d (%f)\n",pivot[i],pivotv[i], pivota[i], pivotva[i]);
-            }
-        }
-    }
-  else
-    pivota=(int*)mxMalloc(Size*periods*sizeof(int));
-  */
   close_swp_f();
   /*The backward substitution*/
 #ifdef PRINT_OUT
   sparse_matrix.Print(Size,b);
 #endif
-  //mexPrintf("ok2\n");
   longd slowc_lbx=slowc, res1bx;
 #ifdef PROFILER
   t00 = pctimer();
@@ -4180,13 +3531,8 @@ simulate_NG1(int blck, int y_size, int it_, int y_kmin, int y_kmax, int Size, in
 #ifdef PROFILER
   mexPrintf("backward substitution time=%f ms nmul=%d\n",1000*(t01-t00),nmul);
 #endif
-
-  /*memcpy(pivota, pivot, Size*periods*sizeof(int));
-  memcpy(pivotva, pivotv, Size*periods*sizeof(longd));*/
-
   if (!((record_all && nop_all)||g_nop_all>0))
     {
-      //mexPrintf("sparse_matrix.end()\n");
       u_count=save_u_count;
       sparse_matrix.End(Size);
     }

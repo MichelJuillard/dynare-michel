@@ -303,7 +303,7 @@ ModelTree::writeModelEquationsOrdered(ostream &output, Model_Block *ModelBlock) 
   int i,j,k,m;
   string sModel, tmp_s;
   ostringstream tmp_output;
-  NodeID lhs, rhs;
+  NodeID lhs=NULL, rhs=NULL;
   BinaryOpNode *eq_node;
   bool OK, lhs_rhs_done, skip_the_head;
   ostringstream Uf[symbol_table.endo_nbr];
@@ -464,7 +464,6 @@ ModelTree::writeModelEquationsOrdered(ostream &output, Model_Block *ModelBlock) 
                   int var=ModelBlock->Block_List[j].IM_lead_lag[m].Var_Index[i];
                   int u=ModelBlock->Block_List[j].IM_lead_lag[m].us[i];
                   int eqr=ModelBlock->Block_List[j].IM_lead_lag[m].Equ[i];
-                  int varr=ModelBlock->Block_List[j].IM_lead_lag[m].Var[i];
                   Uf[ModelBlock->Block_List[j].Equation[eqr]] << "-u[" << u << "]*y[Per_y_+" << var << "]";
                   output << "  u[" << u << "] = "/*g1[" << eqr << "*" << ModelBlock->Block_List[j].Size << "+" << varr << "] = "*/;
                   writeDerivative(output, eq, var, 0, oCDynamicModelSparseDLL, temporary_terms);
@@ -1992,7 +1991,7 @@ ModelTree::evaluateJacobian(const eval_context_type &eval_context, jacob_map *j_
 {
   int i=0;
   int j=0;
-  bool *IM;
+  bool *IM=NULL;
   int a_variable_lag=-9999;
   for(first_derivatives_type::iterator it = first_derivatives.begin();
       it != first_derivatives.end(); it++)
