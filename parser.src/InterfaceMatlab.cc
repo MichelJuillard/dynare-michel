@@ -4,42 +4,42 @@
 
 namespace interfaces
 {
-  std::string comment()
+  string comment()
   {
     return "% ";
   }
 
-  std::string delete_file(std::string s)
+  string delete_file(string s)
   {
     return "delete " + s;
   }
 
-  std::string file_exist(std::string s)
+  string file_exist(string s)
   {
     return "exist('" + s + "')";
   }
 
-  std::string compile(std::string s)
+  string compile(string s)
   {
     return "mex -O " + s + "\n";
   }
 
-  std::string function_close()
+  string function_close()
   {
     return "";
   }
 
-  std::string function_file_extension()
+  string function_file_extension()
   {
     return ".m";
   }
 
-  std::string strvcat(std::string s1, std::string s2)
+  string strvcat(string s1, string s2)
   {
     return "strvcat(" + s1 + "," + s2 + ")";
   }
 
-  std::string load_model_function_files(std::string filename)
+  string load_model_function_files(string filename)
   {
     return "";
   }

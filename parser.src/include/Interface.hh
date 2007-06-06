@@ -1,15 +1,17 @@
 #ifndef _INTERFACE_HH
 #define _INTERFACE_HH
 
+using namespace std;
+
 namespace interfaces
 {
-  std::string comment();
-  std::string delete_file(std::string s);
-  std::string file_exist(std::string s);
-  std::string compile(std::string s);
-  std::string function_close();
-  std::string function_file_extension();
-  std::string strvcat(std::string s1, std::string s2);
-  std::string load_model_function_files(std::string filename);
+  string comment();
+  string delete_file(string s);
+  string file_exist(string s);
+  string compile(string s);
+  string function_close();
+  string function_file_extension();
+  string strvcat(string s1, string s2);
+  string load_model_function_files(string filename);
 }
 #endif
