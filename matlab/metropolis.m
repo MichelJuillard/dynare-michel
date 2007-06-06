@@ -42,7 +42,7 @@ d = chol(vv);
 options_.lik_algo = 1;
 OpenOldFile = ones(nblck,1);
 
-if options_.load_mh_file == 0
+if ~options_.load_mh_file & ~options_.mh_recover
     %% Here we start a new metropolis-hastings, previous draws are not
     %% considered.
     if nblck > 1
@@ -174,7 +174,7 @@ if options_.load_mh_file == 0
         fprintf(fidlog,['      ' num2str(record.Seeds.Unifor(i)') '\n']);
     end
     fprintf(fidlog,' \n');
-elseif options_.load_mh_file == 1
+elseif options_.load_mh_file & ~options_.mh_recover
     %% Here we consider previous mh files (previous mh did not crash).
     disp('MH: I''m loading past metropolis-hastings simulations...')
     file = dir([ MhDirectoryName '/'  ModelName '_mh_history.mat' ]);
@@ -234,7 +234,7 @@ elseif options_.load_mh_file == 1
     save([MhDirectoryName '/' ModelName '_mh_history'],'record');
     disp(['MH: ... It''s done. I''ve loaded ' int2str(NumberOfPreviousSimulations) ' simulations.'])
     disp(' ')
-elseif options_.mh_recover == 1
+elseif options_.mh_recover
     %% The previous metropolis-hastings crashed before the end! I try to
     %% recover the saved draws...
     disp('MH: Recover mode!')
