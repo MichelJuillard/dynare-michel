@@ -115,3 +115,4 @@ distclean: clean
 		include/stack.hh \
 		include/location.hh \
 		include/DynareBison.hh
+
