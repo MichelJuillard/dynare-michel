@@ -17,8 +17,8 @@ function global_initialization()
   options_.Schur_vec_tol = 1e-8; % used to find nonstationary variables
                                  % in Schur decomposition of the
                                  % transition matrix
-  options_.solve_tolf = eps^(2/3);
-  options_.solve_tolx = 3.7e-11;
+  options_.solve_tolf = eps^(1/3);
+  options_.solve_tolx = eps^(2/3);
   options_.solve_maxit = 500;
 
 
