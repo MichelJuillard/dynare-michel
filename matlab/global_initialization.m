@@ -122,7 +122,7 @@ function global_initialization()
   options_.kalman_tol = 1e-12;
   options_.posterior_mode_estimation = 1;
   options_.MaxNumberOfBytes = 1e6;
-  options_.filter_step_ahead = 0;
+  options_.filter_step_ahead = [];
   options_.diffuse_d = [];
   options_.logdata = 0;
   options_.use_mh_covariance_matrix = 0;
