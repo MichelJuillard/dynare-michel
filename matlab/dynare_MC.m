@@ -23,7 +23,7 @@ function dynare_MC(var_list_,OutDir)
 global M_ options_ oo_ estim_params_ 
 global bayestopt_
 
-if options_.filtered_vars ~= 0 & options_.filter_step_ahead == 0
+if options_.filtered_vars ~= 0 & isempty(options_.filter_step_ahead)
   options_.filter_step_ahead = 1;
 end
 if options_.filter_step_ahead ~= 0
