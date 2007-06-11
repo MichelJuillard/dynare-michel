@@ -47,6 +47,7 @@ ncn  = estim_params_.ncn;
 np   = estim_params_.np ;
 npar = nvx+nvn+ncx+ncn+np;
 offset = npar-np;
+clear('nvx','nvn','ncx','ncn','np');
 nvobs = size(options_.varobs,1);
 gend = options_.nobs;
 MaxNumberOfPlotPerFigure = 9;
@@ -125,6 +126,7 @@ if MAX_nirfs_dsgevar
     COMP_draw = diag(ones(nvobs*(NumberOfLags-1),1),-nvobs);
 end
 b = 0;
+nosaddle = 0;
 while b<=B
     b = b + 1;
     irun = irun+1;
@@ -138,7 +140,10 @@ while b<=B
     set_parameters(deep);
     [dr,info] = resol(oo_.steady_state,0);
     if info(1)
+        nosaddle = nosaddle + 1;
         b = b - 1;
+        irun = irun-1;
+        irun2 = irun2-1;
         if info(1) == 1
             errordef = 'Static variables are not uniquely defined';
         elseif info(1) == 2
@@ -148,7 +153,7 @@ while b<=B
         elseif info(1) == 4
             errordef = 'Indeterminacy';
         elseif info(1) == 5
-            errordef = 'Rank condition is not satisfied';
+            errordef = 'Rank condition  is not satisfied';
         end
         disp(['PosteriorIRF :: Dynare is unable to solve the model (' errordef ')'])
         continue
@@ -162,7 +167,7 @@ while b<=B
                 y = 100*y/cs(i,i);
             end
             for j = 1:nvar
-                if max(y(j,:)) - min(y(j,:)) > 1e-10 
+                if max(y(IndxVariables(j),:)) - min(y(IndxVariables(j),:)) > 1e-12 
                     stock_irf_dsge(:,j,i,irun) = transpose(y(IndxVariables(j),:));
                 end
             end
@@ -250,10 +255,9 @@ while b<=B
     end
     waitbar(b/B,h);
 end
-NumberOfIRFfiles_dsge = NumberOfIRFfiles_dsge-1;
-NumberOfIRFfiles_dsgevar = NumberOfIRFfiles_dsgevar-1;
-
-ifil2 = ifil2-1;
+if nosaddle
+   disp(['PosteriorIRF :: Percentage of discarded posterior draws = ' num2str(nosaddle/(B+nosaddle))]) 
+end    
 close(h);
 
 ReshapeMatFiles('irf_dsge')
@@ -264,6 +268,12 @@ end
 if strcmpi(type,'gsa')
   return
 end
+
+IRF_DSGEs = dir([MhDirectoryName '/' M_.fname '_IRF_DSGEs*.mat']);
+NumberOfIRFfiles_dsge = length(IRF_DSGEs);
+
+IRF_BVARDSGEs = dir([MhDirectoryName '/' M_.fname '_IRF_BVARDSGEs*.mat']);
+NumberOfIRFfiles_bavrdsge = length(IRF_BVARDSGEs);
 
 MeanIRF = zeros(options_.irf,nvar,M_.exo_nbr);
 MedianIRF = zeros(options_.irf,nvar,M_.exo_nbr);
@@ -281,15 +291,16 @@ end
 fprintf('MH: Posterior (dsge) IRFs...\n');
 tit(M_.exo_names_orig_ord,:) = M_.exo_names;
 kdx = 0;
+
 for file = 1:NumberOfIRFfiles_dsge
   load([MhDirectoryName '/' M_.fname '_IRF_DSGEs' int2str(file)]);
   for i = 1:M_.exo_nbr
     for j = 1:nvar
-      for k = 1:size(STOCK_IRF_DSGE,1)
-        kk = k+kdx;
-        [MeanIRF(kk,j,i),MedianIRF(kk,j,i),VarIRF(kk,j,i),HPDIRF(kk,:,j,i),DistribIRF(kk,:,j,i)] = ...
-          posterior_moments(squeeze(STOCK_IRF_DSGE(k,j,:)),0);
-      end
+        for k = 1:size(STOCK_IRF_DSGE,1)
+            kk = k+kdx;
+            [MeanIRF(kk,j,i),MedianIRF(kk,j,i),VarIRF(kk,j,i),HPDIRF(kk,:,j,i),...
+             DistribIRF(kk,:,j,i)] = posterior_moments(squeeze(STOCK_IRF_DSGE(k,j,i,:)),0);
+        end
     end
   end
   kdx = kdx + size(STOCK_IRF_DSGE,1);
@@ -327,7 +338,7 @@ if MAX_nirfs_dsgevar
                     kk = k+kdx;
                     [MeanIRFdsgevar(kk,j,i),MedianIRFdsgevar(kk,j,i),VarIRFdsgevar(kk,j,i),...
                      HPDIRFdsgevar(kk,:,j,i),DistribIRFdsgevar(kk,:,j,i)] = ...
-                        posterior_moments(squeeze(STOCK_IRF_BVARDSGE(k,j,i,:)),0);%SelecVariables(j)
+                        posterior_moments(squeeze(STOCK_IRF_BVARDSGE(k,j,i,:)),0);
                 end
             end
         end
