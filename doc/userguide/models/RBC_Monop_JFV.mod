@@ -1,43 +1,6 @@
-% Basic RBC Model with Monopolistic Competion. 
 
+// Adapted from Jesus Fernandez-Villaverde, Basic RBC Model with Monopolistic Competion Philadelphia, March 3, 2005
 
-%
-
-
-% Jesus Fernandez-Villaverde
-
-
-% Philadelphia, March 3, 2005
-
-
-
-
-
-%----------------------------------------------------------------
-
-
-% 0. Housekeeping
-
-
-%----------------------------------------------------------------
-
-
-
-
-
-close all
-
-
-
-
-
-%----------------------------------------------------------------
-
-
-% 1. Defining variables
-
-
-%----------------------------------------------------------------
 
 
 
@@ -53,20 +16,6 @@ varexo e;
 
 
 parameters beta psi delta alpha rho gamma sigma epsilon;
-
-
-
-
-
-%----------------------------------------------------------------
-
-
-% 2. Calibration
-
-
-%----------------------------------------------------------------
-
-
 
 
 
@@ -94,18 +43,6 @@ epsilon = 10;
 
 
 
-%----------------------------------------------------------------
-
-
-% 3. Model
-
-
-%----------------------------------------------------------------
-
-
-
-
-
 model;
 
 
@@ -124,7 +61,7 @@ model;
   w = y*((epsilon-1)/epsilon)*(1-alpha)/l;
 
 
-  r = y*((epsilon-1)/epsilon)*alpha/k;
+  r = y*((epsilon-1)/epsilon)*alpha/k(-1);
 
 
   i = k-(1-delta)*k(-1);
@@ -137,20 +74,6 @@ model;
 
 
 end;
-
-
-
-
-
-%----------------------------------------------------------------
-
-
-% 4. Computation
-
-
-%----------------------------------------------------------------
-
-
 
 
 
@@ -180,6 +103,9 @@ initval;
 
 end;
 
+steady;
+
+check;
 
 
 
@@ -202,30 +128,6 @@ steady;
 
 
 
-stoch_simul(dr_algo=0, hp_filter = 1600, order = 1);
-
-
-
-
-
-%----------------------------------------------------------------
-
-
-% 5. Some Results
-
-
-%----------------------------------------------------------------
-
-
-
-
-
-statistic1 = 100*sqrt(diag(oo_.var(1:8,1:8)))./oo_.mean(1:8);
-
-
-
-
-
-table('Relative standard deviations in %',strvcat('VARIABLE','REL. S.D.'),lgy_(1:8,:),statistic1,10,8,4)
+stoch_simul(periods=2100);
 
 

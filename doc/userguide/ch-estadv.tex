@@ -102,7 +102,7 @@ parameters alp, bet, gam, mst, rho, psi, del;}\\
 where the choice of upper and lower case letters is not significant, the first set of endogenous variables, up to $l$, are as specified in the model setup above, and where the last five variables are defined and explained in more details in the section below on declaring the model in Dynare. The exogenous variables are as expected and concern the shocks to the evolution of technology and money balances. \\
 
 \subsection{The origin of non-stationarity} \label{sec:nonstat}
-The problem of non-stationarity comes out clearly when attempting to solve the model for a steady state and realizing it does not have one. It can be shown that when shocks are null, real variables grow with $A_t$ (except for labor, $N_t$, which is stationary as there is no population growth), nominal variables grow with $M_t$ and prices with $M_t/A_t$. \textbf{Detrending} therefore involves the following operations (where hats over variables represent stationary variables): for real variables, $\hat q_t=q_t/A_t$, where $q_t = [y_t, c_t, i_t, k_{t+1} ]$. For nominal variables, $\hat{Q}_t = Q_t/M_t$, where $Q_t = [ d_t, l_t, W_t ]$. And for prices, $\hat P_t = P_t \cdot A_t / M_t$. \\
+The problem of non-stationarity comes from having stochastic trends in technology and money. The non-stationarity comes out clearly when attempting to solve the model for a steady state and realizing it does not have one. It can be shown that when shocks are null, real variables grow with $A_t$ (except for labor, $N_t$, which is stationary as there is no population growth), nominal variables grow with $M_t$ and prices with $M_t/A_t$. \textbf{Detrending} therefore involves the following operations (where hats over variables represent stationary variables): for real variables, $\hat q_t=q_t/A_t$, where $q_t = [y_t, c_t, i_t, k_{t+1} ]$. For nominal variables, $\hat{Q}_t = Q_t/M_t$, where $Q_t = [ d_t, l_t, W_t ]$. And for prices, $\hat P_t = P_t \cdot A_t / M_t$. \\
 
 \subsection{Stationarizing variables}
 Let's illustrate this transformation on output, and leave the transformations of the remaining equations as an exercise, if you wish (\citet{CogleyNason1994} includes more details on the transformations of each equation). We stationarize output by dividing its real variables (except for labor) by $A_t$. We define $\widehat{Y}_t$ to equal $Y_t / A_t$ and $\widehat{K}_t$ as $K_t / A_t$. \textsf{\textbf{NOTE!}} Recall from section \ref{sec:modspe} in chapter \ref{ch:solbase}), that in Dynare variables take the time subscript of the period in which they are decided (in the case of the capital stock, today's capital stock is a result of yesterday's decision). Thus, in the output equation, we should actually work with $\widehat{K}_{t-1}=K_{t-1} / A_{t-1}$. The resulting equation made up of stationary variables is
@@ -125,17 +125,17 @@ The other equations are entered into the .mod file after transforming them in ex
 by simply taking the exponential of both sides of the stochastic process of technology defined in the model setup above. \\
 
 \subsection{Linking stationary variables to the data}
-And finally, we must make a decision as to our \textbf{non-stationary observations}. We could simply stationarize them by \textbf{working with rates of growth} (which we know are constant). In the case of output, the observable variable would become $Y_t /Y_{t-1}$. We would then have to relate this observable, call it $gy\_obs$ to our (stationary) model's variables $\widehat Y_t$ by using the definition that $ \widehat{Y}_t \equiv Y_t/ A_t$. Thus, we add to the model block of the .mod file: \\
+And finally, we must make a decision as to our \textbf{non-stationary observations}. We could simply stationarize them by \textbf{working with rates of growth} (which we know are constant). In the case of output, the observable variable would become $Y_t /Y_{t-1}$. We would then have to relate this observable, call it $gy\_{obs}$, to our (stationary) model's variables $\widehat Y_t$ by using the definition that $ \widehat{Y}_t \equiv Y_t/ A_t$. Thus, we add to the model block of the .mod file: \\
 \\
 \texttt{gy\_obs = dA*y/y(-1);}\\
 \\
 where, the $y$ of the .mod file are the stationary $\widehat Y_t$.\\
 
-But, we could also \textbf{work with non-stationary data in levels}. This complicates things somewhat, but illustrates several features of Dynare worth highlighting; we therefore follow this path in the remainder of the example. The result is not very different, though, from what we just saw above. The goal is to add a line to the model block of our .mod file that relates the non stationary observables, call them $Y_obs$, to our stationary output, $\widehat Y_t$. We could simply write $Y_obs = \widehat Y_t A_t$. But since we don't have an $A_t$ variable, but just a $dA_t$, we we-write the above relationship in ratios. To the .mod file, we therefore add:\\
+But, we could also \textbf{work with non-stationary data in levels}. This complicates things somewhat, but illustrates several features of Dynare worth highlighting; we therefore follow this path in the remainder of the example. The result is not very different, though, from what we just saw above. The goal is to add a line to the model block of our .mod file that relates the non stationary observables, call them $Y_{obs}$, to our stationary output, $\widehat Y_t$. We could simply write $Y_{obs} = \widehat Y_t A_t$. But since we don't have an $A_t$ variable, but just a $dA_t$, we we-write the above relationship in ratios. To the .mod file, we therefore add:\\
 \\
 \texttt{Y\_obs/Y\_obs(-1) = dA*y/y(-1);}\\
 \\
-We of course do the same for prices, our other observable variable, except that we use the relationship $P_obs = \widehat P_t M_t/A_t$ as noted earlier. The details of the correct transformations for prices are left as an exercise and can be checked against the results below.\\
+We of course do the same for prices, our other observable variable, except that we use the relationship $P_{obs} = \widehat P_t M_t/A_t$ as noted earlier. The details of the correct transformations for prices are left as an exercise and can be checked against the results below.\\
 
 \subsection{The resulting model block of the .mod file}
 
@@ -168,7 +168,7 @@ We begin by declaring which of our model's variables are observables. In our .mo
 \\
 \texttt{varobs P\_obs Y\_obs;}\\
 \\
-to specify that our observable variables are indeed P\_obs and Y\_obs as noted in the section above. \textsf{\textbf{NOTE!}} The number of unobserved variables (number of \texttt{var} minus number of \texttt{varobs}) must be smaller or equal to the number of shocks such that the model be estimated (** is this true?). If this is not the case, you should add measurement shocks to your model where you deem most appropriate. \\
+to specify that our observable variables are indeed $P\_obs$ and $Y\_obs$ as noted in the section above. \textsf{\textbf{NOTE!}} Recall from earlier that the number of observed variables must be smaller or equal to the number of shocks such that the model be estimated. If this is not the case, you should add measurement shocks to your model where you deem most appropriate. \\
 
 \subsection{Declaring trends in observable variables}
 
@@ -188,7 +188,7 @@ Note from the original equation of motion of $\ln m_t$ that in steady state, $\l
 In Dynare, any trends, whether deterministic or stochastic (the drift term) must be declared up front. In the case of our example, we therefore write (in a somewhat cumbersome manner)\\
 \\
 \texttt{observation\_trends;\\
-P\_obs (log(exp(gam)/mst));\\
+P\_obs (log(mst)-gam);\\
 Y\_obs (gam);\\
 end;}\\
 
@@ -198,12 +198,12 @@ In general, the command \texttt{observation\_trends} specifies linear trends as 
 
 And finally, since P\_obs and Y\_obs inherit the unit root characteristics of their driving variables, technology and money, we must tell Dynare to use a diffuse prior (infinite variance) for their initialization in the Kalman filter. Note that for stationary variables, the unconditional covariance matrix of these variables is used for initialization. The algorithm to compute a true diffuse prior is taken from \citet{DurbinKoopman2001}. To give these instructions to Dynare, we write in the .mod\\
 \\
-\texttt{unit\_root\_vars = \{'P\_obs'; 'Y\_obs' \};}\\
+\texttt{unit\_root\_vars P\_obs Y\_obs;}\\
 \\
 \textsf{\textbf{NOTE!}} You don't need to declare unit roots for any non-stationary model. Unit roots are only related to stochastic trends. You don't need to use a diffuse initial condition in the case of a deterministic trend, since the variance is finite.\\
 
 \subsection{Specifying the steady state}
-Declaring the steady state is just as explained in details and according to the same syntax explained in chapter \ref{ch:solbase}, covering the \texttt{initval}, \texttt{steady} and \texttt{check} commands. The only difference with regards to model estimation is the non-stationary nature of our observable variables. In this case, the declaration of the steady state must be slightly amended in Dynare. (** fill in with the new functionality from Dynare version 4, currently the answer is to write a separate Matlab file which solves the steady state for the stationary variables and returns dummies for the non stationary variables). 
+Declaring the steady state is just as explained in details and according to the same syntax explained in chapter \ref{ch:solbase}, covering the \texttt{initval}, \texttt{steady} and \texttt{check} commands. In chapter \ref{ch:estbase}, section \ref{sec:ssest}, we also discussed the usefulness of providing an external Matlab file to solve for the steady state. In this case, you can find the corresponding steady state file in the \textsl{models} folder under \textsl{UserGuide}. The file is called \textsl{fs2000ns\_steadystate.m}. There are some things to notice. First, the output of the function is the endogenous variables at steady state, the \texttt{ys} vector. The \texttt{check=0} limits steady state values to real numbers. Second, notice the declaration of parameters at the beginning; intuitive, but tedious... This functionality may be updated in later versions of Dynare. Third, note that the file is really only a sequential set of equalities, defining each variable in terms of parameters or variables solved in the lines above. So far, nothing has changed with respect to the equivalent file of chapter \ref{ch:estbase}. The only novelty is the declaration of the non-stationary variables, $P\_obs$ and $Y\_obs$ which take the value of 1. This is Dynare convention and must be the case for all your non-stationary variables. 
 
 \subsection{Declaring priors}
 We expand our .mod file with the following information: \\
@@ -224,13 +224,13 @@ end;}\\
 \subsection{Launching the estimation}
 We add the following commands to ask Dynare to run a basic estimation of our model:\\
 \\
-\texttt{estimation(datafile=fsdat,nobs=192,loglinear,mh\_replic=5000,\\
-mh\_nblocks=5,mh\_drop=0.45,mh\_jscale=0.8);}\\
+\texttt{estimation(datafile=fsdat,nobs=192,loglinear,mh\_replic=2000,\\
+mode\_compute=4,mh\_nblocks=2,mh\_drop=0.45,mh\_jscale=0.65);}\\
 
 \textsf{\textbf{NOTE!}} As mentioned earlier, we need to instruct Dynare to log-linearize our model, since it contains non-linear equations in non-stationary variables. A simple linearization would fail as these variables do not have a steady state. Fortunately, taking the log of the equations involving non-stationary variables does the job of linearizing them.\\
 
 \subsection{The complete .mod file}
-We have seen each part of the .mod separately; it's now time to get a picture of what the complete file looks like. For convenience, the file also appears in the ``examples'' folder of your Dynare installation, under \texttt{fs2000l.mod}. (** rewrite and replace example file. Also, make sure the .mod below works given the slightly rearranged order of each block. Finally, change the initval block below with the appropriate commands for Dynare version 4, with respect to the non stationary variables). \\
+We have seen each part of the .mod separately; it's now time to get a picture of what the complete file looks like. For convenience, the file also appears in the \textsl{models} folder under \textsl{UserGuide} in your Dynare installation. The file is called \texttt{fs2000ns.mod}. \\
 \\
 \texttt{var m P c e W R k d n l Y\_obs P\_obs y dA; \\
 varexo e\_a e\_m;\\
@@ -258,11 +258,11 @@ end;\\
 varobs P\_obs Y\_obs;\\
 \\
 observation\_trends;\\
-P\_obs (log(exp(gam)/mst));\\
+P\_obs (log(mst)-gam);\\
 Y\_obs (gam);\\
 end;\\
 \\
-unit\_root\_vars = \{'P\_obs'; 'Y\_obs' \};\\
+unit\_root\_vars = P\_obs Y\_obs;\\
 \\
 initval;\\
 k = 6;\\
@@ -279,9 +279,11 @@ y = 0.6;\\
 dA = exp(gam);\\
 end;\\
 \\
-steady;\\
+// the above is really only useful if you want to do a stoch\_simul\\
+// of your model, since the estimation will use the Matlab\\
+// steady state file also provided and discussed above.\\
 \\
-check;\\
+steady;\\
 \\
 estimated\_params;\\
 alp, beta\_pdf, 0.356, 0.02; \\ 
@@ -295,8 +297,8 @@ stderr e\_a, inv\_gamma\_pdf, 0.035449, inf;\\
 stderr e\_m, inv\_gamma\_pdf, 0.008862, inf;\\
 end;\\
 \\
-estimation(datafile=fsdat,nobs=192,loglinear,mh\_replic=5000,\\
-mh\_nblocks=5,mh\_drop=0.45,mh\_jscale=0.8);}\\
+estimation(datafile=fsdat,nobs=192,loglinear,mh\_replic=2000,\\
+mode\_compute=4,mh\_nblocks=2,mh\_drop=0.45,mh\_jscale=0.65);}\\
 \\
 
 \subsection{Summing it up}
@@ -309,13 +311,8 @@ The explanations given above of each step necessary to translate the \citet{Scho
 \end{figure}\\
 
 
-
-
 \section{Comparing models based on their posterior distributions}
-** TBD using Stéphane's examples and model\_compare command which still needs to be documented.
-
-\section{Comparing output to BVARs}
-** TBD based on completed documentation from Michel and Stéphane. 
+** TBD
 
 \section{Where is your output stored?}
-** TBD with a table and info from Dynare v.4
+The output from estimation can be extremely varied, depending on the instructions you give Dynare. The \href{http://www.cepremap.cnrs.fr/juillard/mambo/download/manual/index.html}{Reference Manual} overviews the complete set of potential output files and describes where you can find each one. 

@@ -37,7 +37,7 @@ This should not come as a surprise. Dynare must know which variables are observa
 \\
 \texttt{varobs Y;}\\
 
-\section{Specifying the steady state}
+\section{Specifying the steady state} \label{sec:ssest}
 Before Dynare estimates a model, it first linearizes it around a steady state. Thus, a steady state must exist for the model and although Dynare can calculate it, we must give it a hand by declaring approximate values for the steady state. This is just as explained in details and according to the same syntax outlined in chapter \ref{ch:solbase}, covering the \texttt{initval}, \texttt{steady} and \texttt{check} commands. In fact, as this chapter uses the same model as that outlined in chapter \ref{ch:solbase}, the steady state block will look exactly the same.\\
 
 \textsf{\textbf{TIP!}} During estimation, in finding the posterior mode, Dynare recalculates the steady state of the model at each iteration of the optimization routine (more on this later), based on the newest round of parameters available. Thus, by providing approximate initial values and relying solely on the built-in Dynare algorithm to find the steady state (a numerical procedure), you will significantly slow down the computation of the posterior mode. Dynare will end up spending 60 to 70\% of the time recalculating steady states. It is much more efficient to write an external \textbf{Matlab steady state file} and let Dynare use that file to find the steady state of your model by algebraic procedure. For more details on writing an external Matlab file to find your model's steady state, please refer to section \ref{sec:findsteady} of chapter \ref{ch:solbase}. \\
@@ -87,9 +87,9 @@ Coming back to our basic example, we would write:\\
 alpha, beta\_pdf, 0.35, 0.02; \\ 
 beta, beta\_pdf, 0.99, 0.002; \\
 delta, beta\_pdf, 0.025, 0.003;\\
-psi, beta\_pdf, 1.75, 0.02;\\
+psi, gamma\_pdf, 1.75, 0.02;\\
 rho, beta\_pdf, 0.95, 0.05;\\
-epsilon, beta\_pdf, 10, 0.003;\\
+epsilon, gamma\_pdf, 10, 0.003;\\
 stderr e, inv\_gamma\_pdf, 0.01, inf;\\
 end;}\\
 
@@ -125,12 +125,12 @@ for each estimated parameter in turn. This is helpful to diagnose problems with 
 of starting from scratch. Again, this is a useful option to speed up the process of estimation.
 \item nodiagnostic: doesn’t compute the convergence diagnostics for Metropolis-Hastings (default: diagnostics are computed and 
 displayed). Actually seeing if the various blocks of Metropolis-Hastings runs converge is a powerful and useful option to build confidence in your model estimation. More details on these diagnostics are given in Chapter \ref{ch:estadv}.
-\item bayesian\_irf: triggers the computation of the posterior distribution of impulse response functions (IRFs). The length of the IRFs are controlled by the irf option, as specified in chapter \ref{ch:solbase} when discussing the options for \texttt{stoch\_simul}. To build the posterior distribution of the IRFs, Dynare pulls parameter and shock values from the corresponding estimated distributions and, for each set of draws, generates an IRF. Repeating this process often enough generates a distribution of IRFs. \textsf{\textbf{TIP!}} If you stop the estimation procedure after calculating the posterior mode, or carry out maximum likelihood estimation, only the corresponding parameter estimates will be used to generate the IRFs. If you instead carry out a full Metropolis-Hastings estimation, on the other hand, the IRFs will use the parameters at the posterior mean, including the variance of the shocks. 
+\item bayesian\_irf: triggers the computation of the posterior distribution of impulse response functions (IRFs). The length of the IRFs are controlled by the irf option, as specified in chapter \ref{ch:solbase} when discussing the options for \texttt{stoch\_simul}. To build the posterior distribution of the IRFs, Dynare pulls parameter and shock values from the corresponding estimated distributions and, for each set of draws, generates an IRF. Repeating this process often enough generates a distribution of IRFs. \textsf{\textbf{TIP!}} If you stop the estimation procedure after calculating the posterior mode, or carry out maximum likelihood estimation, only the corresponding parameter estimates will be used to generate the IRFs. If you instead carry out a full Metropolis-Hastings estimation, on the other hand, the IRFs will use the parameters the posterior distributions, including the variance of the shocks. 
 \item All options available for stoch\_simul can simply be added to the above options, separated by commas. To view a list of these options, either see the \href{http://www.cepremap.cnrs.fr/juillard/mambo/index.php?option=com_content&task=view&id=51&Itemid=84}{Reference Manual} or section \ref{sec:compute} of chapter \ref{ch:solbase}.
 \item moments\_varendo: triggers the computation of the posterior distribution of the theoretical moments of the endogenous variables as in \texttt{stoch\_simul} (the posterior distribution of the variance decomposition is also included). ** will be implemented shortly - if not already - in Dynare version 4. 
 \item filtered\_vars: triggers the computation of the posterior distribution of filtered endogenous variables and shocks. See the note below on the difference between filtered and smoothed shocks. ** will be implemented shortly - if not already - in Dynare version 4. 
 \item smoother: triggers the computation of the posterior distribution of smoothed endogenous variables and shocks. Smoothed shocks are a reconstruction of the values of unobserved shocks over the sample, using all the information contained in the sample of observations. Filtered shocks, instead, are built only based on knowing past information. To calculate one period ahead prediction errors, for instance, you should use filtered, not smoothed variables.
-\item forecast = INTEGER: computes the posterior distribution of a forecast on INTEGER periods after the end of the sample used in estimation. The corresponding graph includes one confidence interval describing uncertainty due to parameters and one confidence interval describing uncertainty due to parameters and future shocks. Note that Dynare cannot forecast out of the posterior mode. You need to run Metropolis-Hastings iterations before being able to run forecasts on an estimated model. Finally, running a forecast is very similar to an IRF, as in \texttt{bayesian\_irf}, except that the forecast does not begin at a steady state, but simply at the point corresponding to the last set of observations. The point of the forecast is to see how the system returns to steady state from this starting point. Of course, as observation do not exist for all variables, those for the remaining variables are reconstructed by sampling out of the posterior distribution of parameters. Again, repeating this step often enough yields a posterior distribution of the forecast. ** will be implemented shortly - if not already - in Dynare version 4. 
+\item forecast = INTEGER: computes the posterior distribution of a forecast on INTEGER periods after the end of the sample used in estimation. The corresponding graph includes one confidence interval describing uncertainty due to parameters and one confidence interval describing uncertainty due to parameters and future shocks. Note that Dynare cannot forecast out of the posterior mode. You need to run Metropolis-Hastings iterations before being able to run forecasts on an estimated model. Finally, running a forecast is very similar to an IRF, as in \texttt{bayesian\_irf}, except that the forecast does not begin at a steady state, but simply at the point corresponding to the last set of observations. The goal of undertaking a forecast is to see how the system returns to steady state from this starting point. Of course, as observation do not exist for all variables, those necessary are reconstructed by sampling out of the posterior distribution of parameters. Again, repeating this step often enough yields a posterior distribution of the forecast. ** will be implemented shortly - if not already - in Dynare version 4. 
 \end{enumerate}
 
 \textsf{\textbf{TIP!}} Before launching estimation it is a good idea to make sure that your model is correctly declared, that a steady state exists and that it can be simulated for at least one set of parameter values. You may therefore want to create a test version of your .mod file. In this test file, you would comment out or erase the commands related to estimation, remove the prior estimates for parameter values and replace them with actual parameter values in the preamble, remove any non-stationary variables from your model, add a \texttt{shocks} block, make sure you have \texttt{steady} and possibly \texttt{check} following the \texttt{initval} block if you do not have exact steady state values and run a simulation using \texttt{stoch\_simul} at the end of your .mod file. Details on model solution and simulation can be found in Chapter \ref{ch:solbase}. \\
@@ -143,7 +143,7 @@ mh\_replic=2000,mh\_nblocks=2,mh\_drop=0.45,mh\_jscale=0.8); }\\
 This ends our description of the .mod file.
 
 \section{The complete .mod file}
-To summarize and to get a complete perspective on our work so far, here is the complete .mod file for the estimation of our very basic model:\\
+To summarize and to get a complete perspective on our work so far, here is the complete .mod file for the estimation of our very basic model. You can find the corresponding file in the \textsl{models} folder under \textsl{UserGuide} in your installation of Dynare. The file is called \textsl{RBC\_Est.mod}.\\
 \\
 \texttt{var y c k i l y\_l w r  z;\\
 varexo e;\\
@@ -182,16 +182,16 @@ estimated\_params;\\
 alpha, beta\_pdf, 0.35, 0.02; \\ 
 beta, beta\_pdf, 0.99, 0.002; \\
 delta, beta\_pdf, 0.025, 0.003;\\
-psi, beta\_pdf, 1.75, 0.02;\\
+psi, gamma\_pdf, 1.75, 0.02;\\
 rho, beta\_pdf, 0.95, 0.05;\\
-epsilon, beta\_pdf, 10, 0.003;\\
+epsilon, gamma\_pdf, 10, 0.003;\\
 stderr e, inv\_gamma\_pdf, 0.01, inf;\\
 end;\\
 \\
 estimation(datafile=simuldataRBC,nobs=200,first\_obs=500,\\
 mh\_replic=2000,mh\_nblocks=2,mh\_drop=0.45,mh\_jscale=0.8); }
 \\
-(** problem: file doesn't work! See RBC\_DataGen.mod and RBC\_Est.mod)
+
 
 \section{Interpreting output}
 
@@ -217,7 +217,7 @@ In our example above, you can tell that indeed, we obtain convergence and relati
 
 \textsf{\textbf{TIP!}} If the plotted moments are highly unstable or do not converge, you may have a problem of poor priors. It is advisable to redo the estimation with different priors. If you have trouble coming up with a new prior, try starting with a uniform and relatively wide prior and see where the data leads the posterior distribution. Another approach is to undertake a greater number of Metropolis-Hastings simulations.\\
 
-The first to last figure - figure 6 in our example - displays the most interesting set of results, towards which most of the computations undertaken by Dynare are directed: the posterior distribution. In fact, the figure compares the posterior to the prior distribution (black vs. grey lines). In addition, on the posterior distribution, Dynare plots a green line which represents the posterior mode.\\
+The first to last figure - figure 6 in our example - displays the most interesting set of results, towards which most of the computations undertaken by Dynare are directed: the posterior distribution. In fact, the figure compares the posterior to the prior distribution (black vs. grey lines). In addition, on the posterior distribution, Dynare plots a green line which represents the posterior mode. These allow you to make statements about your data other than simply concerning the mean and variance of the parameters; you can also discuss the probability that your parameter is larger or smaller than a certain value.\\
 
 \textsf{\textbf{TIP!}} These graphs are of course especially relevant and present key results, but they can also serve as tools to detect problems or build additional confidence in your results. First, the prior and the posterior distributions should not be excessively different. Second, the posterior distributions should be close to normal, or at least not display a shape that is clearly non-normal. Third, the green mode (calculated from the numerical optimization of the posterior kernel) should not be too far away from the mode of the posterior distribution. If not, it is advisable to undertake a greater number of Metropolis-Hastings simulations. \\
 

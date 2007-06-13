@@ -83,7 +83,7 @@ var u = 0.009 $\hat{}$ 2;\\
 var e, u = phi*0.009*0.009;\\
 end;}\\
 
-So that you can gain experience by manipulating the entire model, here is the complete .mod file corresponding to the above example:\\
+So that you can gain experience by manipulating the entire model, here is the complete .mod file corresponding to the above example. You can find the corresponding file in the \textsl{models} folder under \textsl{UserGuide} in your installation of Dynare. The file is called \textsl{Alt\_Ex1.mod}. \\
 \\
 \\
 \texttt{var y, c, k, a, h, b;\\
@@ -133,8 +133,8 @@ Where is output stored? Most of the moments of interest are stored in global var
 \item \texttt{steady\_state}: the steady state of your variables
 \item \texttt{mean}: the mean of your variables
 \item \texttt{var}: the variance of your variables
-\item \texttt{autocorr}: the various autocorrelation matrices of your variables. Each row of these matrices will correspond to a variables in time $t$, and columns correspond to the variables lagged 1, for the first matrix, then lagged 2 for the second matrix, and so on. Thus, the matrix of autocorrelations that is automatically displayed in the results after running \texttt{stoch\_simul} has the diagonal elements of each autocorrelation matrix running down each column. 
-\item \texttt{gamma\_y}: the matrices of autocovariances. \texttt{gamma\_y\{1\}} represents variances, while \texttt{gamma\_y\{2\}} represents autocovariances with a lag of 1 and so on. By default, Dynare will return autocovariances with a lag of 5. The last matrix (\texttt{gamma\_y\{7\}} in the default case) returns the \textbf{variance decomposition}, where each column captures the independent contribution of each shock to the variance of each variable. 
+\item \texttt{autocorr}: the various autocorrelation matrices of your variables. Each row of these matrices will correspond to a variables in time $t$, and columns correspond to the variables lagged 1, for the first matrix, then lagged 2 for the second matrix, and so on. Thus, the matrix of autocorrelations that is automatically displayed in the results after running \texttt{stoch\_simul} has, running down each column, the diagonal elements of each of the various autocorrelation matrices described here. 
+\item \texttt{gamma\_y}: the matrices of autocovariances. \texttt{gamma\_y\{1\}} represents variances, while \texttt{gamma\_y\{2\}} represents autocovariances where variables on each column are lagged by one period and so on. By default, Dynare will return autocovariances with a lag of 5. The last matrix (\texttt{gamma\_y\{7\}} in the default case) returns the \textbf{variance decomposition}, where each column captures the independent contribution of each shock to the variance of each variable. 
 \end{itemize}
 
 Furthermore, if you decide to run impulse response functions, you will find a global variable \texttt{oo\_.irfs} comprising of vectors named \texttt{endogenous variable\_exogenous variable}, like \texttt{y\_e}, reporting the values of the endogenous variables corresponding to the impulse response functions, as a result of the independent impulse of each exogenous shock. \\
@@ -150,9 +150,43 @@ But of course, this is a bit of a workaround, since you could also use the built
 \subsection{Infinite eigenvalues}
 If you use the command \texttt{check} in your .mod file, Dynare will report your system's eigenvalues and tell you if these meet the Blanchard-Kahn conditions. At that point, don't worry if you get infinite eigenvalues - these are are firmly grounded in the theory of generalized eigenvalues. They have no detrimental influence on the solution algorithm. As far as Blanchard-Kahn conditions are concerned infinite eigenvalues are counted as explosive roots of modulus larger than one. \\
 
-\section{Files created by Dynare}
-At times, you may get a message that there is an error in a file with a new name, or you may want to have a closer look at how Dynare actually solves your model - out of curiosity or maybe to do some customization of your own. You may therefore find it helpful to get a brief overview of the internal files that Dynare generates and the function of each one. ** TBD
+\section{Files created by Dynare} \label{sec:dynfiles}
+At times, you may get a message that there is an error in a file with a new name, or you may want to have a closer look at how Dynare actually solves your model - out of curiosity or maybe to do some customization of your own. You may therefore find it helpful to get a brief overview of the internal files that Dynare generates and the function of each one. \\
 
+The dynare pre-processors essentially does three successive tasks:
+(i) parsing of the mod file (it checks that the mod file is syntactically
+correct), and its translation into internal machine representation (in
+particular, model equations are translated into expression trees), (ii) symbolic derivation of the model equations, up to the needed order
+(depending on the computing needs), (iii) outputting of several files, which are used from matlab. If the mod
+file is ``filename.mod", then the pre-processor creates the following
+files:
+
+\begin{itemize}
+\item \textbf{filename.m}: a matlab file containing several instructions, notably
+the parameter initializations and the matlab calls corresponding to
+computing tasks
+\item \textbf{filename\_dynamic.m}: a matlab file containing the model equations and
+their derivatives (first, second and maybe third).
+    Endogenous variables (resp. exogenous variables, parameters) are
+contained in a ``y" (resp. ``x", ``params") vector, with an index number
+depending on the declaration order.
+    The ``y" vector has as many entries as their are (variable, lag)
+pairs in the declared model.
+    The model equations residuals are stored in a vector named
+``residuals".
+    The model jacobian is put in ``g1" matrix. Second (resp. third)
+derivatives are in ``g2" matrix (resp. ``g3").
+    If the ``use\_dll" option has been specified in the model declaration,
+the pre-processor will output a C file (with .c extension) rather than a
+matlab file. It is then compiled to create a library (DLL) file. Using a
+compiled C file is supposed to give better computing performance in
+model simulation/estimation.
+\item \textbf{filename\_static.m}: a matlab file containing the stationarized
+version of the model (i.e. where lagged variables are replaced by
+current variables), with its jacobian. Used to compute the steady state.
+Same notations than the dynamic file. Replaced by a C file when
+``use\_dll" option is specified.
+\end{itemize}
 
 \section{Modeling tips}
 

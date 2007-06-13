@@ -1,11 +1,10 @@
 var y c k i l y_l w r ; 
 varexo z; 
-parameters beta psi delta alpha rho sigma epsilon; 
+parameters beta psi delta alpha sigma epsilon; 
 alpha   = 0.33; 
 beta    = 0.99; 
 delta   = 0.023; 
-psi     = 1.75; 
-rho     = 0.95;   
+psi     = 1.75;   
 sigma   = (0.007/(1-alpha)); 
 epsilon = 10; 
  
@@ -15,7 +14,7 @@ model;
   c+i = y; 
   y = (k(-1)^alpha)*(exp(z)*l)^(1-alpha); 
   w = y*((epsilon-1)/epsilon)*(1-alpha)/l; 
-  r = y*((epsilon-1)/epsilon)*alpha/k; 
+  r = y*((epsilon-1)/epsilon)*alpha/k(-1); 
   i = k-(1-delta)*k(-1); 
   y_l = y/l; 
 end; 
