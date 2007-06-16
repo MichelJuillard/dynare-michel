@@ -1,17 +1,19 @@
-function SampleAddress = selec_posterior_draws(SampleSize,info,filepath,filename)
-% Selects a sample of draws from the posterior distribution.
-% 
+function SampleAddress = selec_posterior_draws(SampleSize,info)
+% Selects a sample of draws from the posterior distribution and if info=1
+% saves the draws in _pdraws mat files (metropolis folder). This routine is more            
+% efficient than metropolis_draw.m because here an _mh file cannot be opened twice. 
+%   
 % INPUTS
 %   o SampleSize     [integer]  Size of the sample to build
-%   o info           [integer]  Ff 1 then posterior draws are saved on disk. 
-% OUTPUTS 
+%   o info           [integer]  If 1 then posterior draws are saved on disk. 
+% OUTPUTS
 %   o SampleAddress  [integer]  A (SampleSize*4) array, each line specifies the 
 %                               location of a posterior draw: 
 %                                  Column 2 --> Chain number
 %                                  Column 3 --> (mh) File number    
 %                                  Column 4 --> (mh) line number
 %
-% ALGORITHM 
+% ALGORITHM
 %   None.       
 %
 % SPECIAL REQUIREMENTS
