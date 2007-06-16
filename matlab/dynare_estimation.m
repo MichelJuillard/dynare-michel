@@ -833,6 +833,8 @@ if (any(bayestopt_.pshape  >0 ) & options_.mh_replic) | ...
   if options_.smoother | options_.filter_step_ahead
     PosteriorSmoother(data,gend,'posterior');
   end
+  xparam = get_posterior_parameters('mean');
+  set_parameters(xparam);
   return
 end
 
