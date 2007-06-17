@@ -606,6 +606,7 @@ markowitz
                      | o_nocorr
                      | o_nofunctions
                      | o_nomoments
+                     | o_nograph
                      | o_irf
                      | o_relative_irf
                      | o_hp_filter
