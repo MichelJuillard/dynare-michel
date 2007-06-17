@@ -146,7 +146,7 @@ RamseyPolicyStatement::writeOutput(ostream &output, const string &basename) cons
 {
   options_list.writeOutput(output);
   tmp_symbol_table.writeOutput("var_list_", output);
-  output << "options_.ramsey_policy=1;\nstoch_simul(var_list_);\n";
+  output << "ramsey_policy(var_list_);\n";
 }
 
 EstimationStatement::EstimationStatement(const TmpSymbolTable &tmp_symbol_table_arg,
