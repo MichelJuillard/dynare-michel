@@ -48,6 +48,7 @@ else
   options_.mh_replic = 0;
 end
 
+% set prior bounds and check initial value of the parameters
 bounds = prior_bounds(bayestopt_);
 bounds(:,1)=max(bounds(:,1),lb);
 bounds(:,2)=min(bounds(:,2),ub);
@@ -187,6 +188,18 @@ if ~isreal(rawdata)
   error(['There are complex values in the data. Probably  a wrong' ...
 	 ' transformation'])
 end
+
+% set options for recursive forecast if necessary
+options_ = set_default_option(options_,'nobs',size(rawdata,1)-options_.first_obs+1);
+if options_.nobs(1) == options_.nobs(end) % no recursive estimation
+  options_ = set_default_option(options_,'mh_nblck',2); 
+  options_ = set_default_option(options_,'nodiagnostic',0);
+else
+  options_ = set_default_option(options_,'mh_nblck',1); 
+  options_ = set_default_option(options_,'nodiagnostic',1);
+end
+
+% load mode file is necessary
 if length(options_.mode_file) > 0 & options_.posterior_mode_estimation
   eval(['load ' options_.mode_file ';']');
 end
@@ -830,11 +843,17 @@ if (any(bayestopt_.pshape  >0 ) & options_.mh_replic) | ...
   if options_.bayesian_irf
     PosteriorIRF('posterior');
   end
-  if options_.smoother | options_.filter_step_ahead
-    PosteriorSmoother(data,gend,'posterior');
+  if options_.smoother | ~isempty(options_.filter_step_ahead) | options_.forecast
+    PosteriorFilterSmootherAndForecast(data,gend,'posterior');
   end
+
+  if options_.moments_varendo
+    PosteriorMomentsVarendo('posterior');
+  end
+
   xparam = get_posterior_parameters('mean');
   set_parameters(xparam);
+
   return
 end
 
