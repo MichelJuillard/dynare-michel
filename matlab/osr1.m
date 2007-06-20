@@ -27,7 +27,7 @@ function osr1(i_params,i_var,weights)
   % check if ys is steady state
   fh = str2func([M_.fname '_static']);
   if max(abs(feval(fh,oo_.steady_state,exe))) > options_.dynatol
-    [oo_.dr.ys, check] = dynare_solve([M_.fname '_static'],oo_.steady_state,exe);
+    [oo_.dr.ys, check] = dynare_solve([M_.fname '_static'],1,oo_.steady_state,exe);
     if check
       error('OLR: convergence problem in DYNARE_SOLVE')
     end
