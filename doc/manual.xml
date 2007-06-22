@@ -1929,7 +1929,7 @@ Each line corresponds to an estimated parameter and follows this syntax:
 </listitem>
 <listitem><para> <command>first_obs</command> = <replaceable>INTEGER</replaceable>: the number of the first observation to be used (default = 1)</para></listitem>
 <listitem><para> <command>prefilter</command> = 1: the estimation procedure demeans the data (default=0, no prefiltering)</para></listitem>
-<listitem><para> <command>presample</command> = <replaceable>INTEGER</replaceable>: the number of observations to be skipped before evaluating the likelihood (default = 1)</para></listitem>
+<listitem><para> <command>presample</command> = <replaceable>INTEGER</replaceable>: the number of observations to be skipped before evaluating the likelihood (default = 0)</para></listitem>
 <listitem><para> <command>loglinear</command>: computes a log--linear approximation of the model instead of a linear (default) approximation. The data must correspond to the definition of the variables used in the modelx.</para></listitem>
 <listitem><para> <command>nograph</command>: no graphs should be plotted</para></listitem>
 <listitem><para> <command>lik_init</command>: <replaceable>INTEGER</replaceable>: type of initialization of Kalman filter.
