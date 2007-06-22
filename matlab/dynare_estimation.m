@@ -316,81 +316,85 @@ if options_.mode_compute > 0 & options_.posterior_mode_estimation
     save([M_.fname '_mode'],'xparam1','hh','gg','fval','invhess');
     %eval(['save ' M_.fname '_mode xparam1 hh gg fval invhess;']);
   elseif options_.mode_compute == 6
-    fval = DsgeLikelihood(xparam1,gend,data);
-    OldMode = fval;
-    if ~exist('MeanPar')
-      MeanPar = xparam1;
-    end
-    if exist('hh')
-      CovJump = inv(hh);
-    else% The covariance matrix is initialized with the prior
-        % covariance (a diagonal matrix) %%Except for infinite variances ;-)
-      varinit = 'prior';
-      if strcmpi(varinit,'prior')  
-          stdev = bayestopt_.pstdev;
-          indx = find(isinf(stdev));
-          stdev(indx) = ones(length(indx),1)*sqrt(10);
-          vars = stdev.^2;
-          CovJump = diag(vars);
-      elseif strcmpi(varinit,'eye')
-          vars = ones(length(bayestopt_.pstdev),1)*0.1;  
-          CovJump = diag(vars);          
-      else
-          disp('gmhmaxlik :: Error!')
-          return
-      end
-    end
-    OldPostVar = CovJump;
-    Scale = options_.mh_jscale;
-    for i=1:options_.Opt6Iter  
-      if i == 1
-        if options_.Opt6Iter > 1
-          flag = '';
-        else
-          flag = 'LastCall';
-        end
-        if isempty(strmatch('dsge_prior_weight',M_.param_names))
-          [xparam1,PostVar,Scale,PostMean] = ...
-              gmhmaxlik('DsgeLikelihood',xparam1,bounds,options_.Opt6Numb,Scale,flag,MeanPar,CovJump,gend,data);
+      if isempty(strmatch('dsge_prior_weight',M_.param_names))
           fval = DsgeLikelihood(xparam1,gend,data);
-        else
-          [xparam1,PostVar,Scale,PostMean] = ...
-              gmhmaxlik('DsgeVarLikelihood',xparam1,bounds,options_.Opt6Numb,Scale,flag,MeanPar,CovJump,gend);
+      else
           fval = DsgeVarLikelihood(xparam1,gend);
-        end
-        options_.mh_jscale = Scale;
-        mouvement = max(max(abs(PostVar-OldPostVar)));
-        disp(['Change in the covariance matrix = ' num2str(mouvement) '.'])
-        disp(['Mode improvement = ' num2str(abs(OldMode-fval))])
-        OldMode = fval;
-      else
-        OldPostVar = PostVar;
-        if i<options_.Opt6Iter
-          flag = '';
-        else
-          flag = 'LastCall';
-        end
-        if isempty(strmatch('dsge_prior_weight',M_.param_names))
-          [xparam1,PostVar,Scale,PostMean] = ...
-              gmhmaxlik('DsgeLikelihood',xparam1,bounds,...
-                        options_.Opt6Numb,Scale,flag,PostMean,PostVar,gend,data);
-          fval = DsgeLikelihood(xparam1,gend,data);
-        else
-          [xparam1,PostVar,Scale,PostMean] = ...
-              gmhmaxlik('DsgeVarLikelihood',xparam1,bounds,...
-                        options_.Opt6Numb,Scale,flag,PostMean,PostVar,gend);
-          fval = DsgeVarLikelihood(xparam1,gend);          
-        end
-        options_.mh_jscale = Scale;
-        mouvement = max(max(abs(PostVar-OldPostVar)));
-        fval = DsgeLikelihood(xparam1,gend,data);
-        disp(['Change in the covariance matrix = ' num2str(mouvement) '.'])
-        disp(['Mode improvement = ' num2str(abs(OldMode-fval))])
-        OldMode = fval;
       end
-      bayestopt_.jscale = ones(length(xparam1),1)*Scale;%??!
-    end
-    hh = inv(PostVar);
+      OldMode = fval;
+      if ~exist('MeanPar')
+          MeanPar = xparam1;
+      end
+      if exist('hh')
+          CovJump = inv(hh);
+      else% The covariance matrix is initialized with the prior
+          % covariance (a diagonal matrix) %%Except for infinite variances ;-)
+          varinit = 'prior';
+          if strcmpi(varinit,'prior')  
+              stdev = bayestopt_.pstdev;
+              indx = find(isinf(stdev));
+              stdev(indx) = ones(length(indx),1)*sqrt(10);
+              vars = stdev.^2;
+              CovJump = diag(vars);
+          elseif strcmpi(varinit,'eye')
+              vars = ones(length(bayestopt_.pstdev),1)*0.1;  
+              CovJump = diag(vars);          
+          else
+              disp('gmhmaxlik :: Error!')
+              return
+          end
+      end
+      OldPostVar = CovJump;
+      Scale = options_.mh_jscale;
+      for i=1:options_.Opt6Iter  
+          if i == 1
+              if options_.Opt6Iter > 1
+                  flag = '';
+              else
+                  flag = 'LastCall';
+              end
+              if isempty(strmatch('dsge_prior_weight',M_.param_names))
+                  [xparam1,PostVar,Scale,PostMean] = ...
+                      gmhmaxlik('DsgeLikelihood',xparam1,bounds,options_.Opt6Numb,Scale,flag,MeanPar,CovJump,gend,data);
+                  fval = DsgeLikelihood(xparam1,gend,data);
+              else
+                  [xparam1,PostVar,Scale,PostMean] = ...
+                      gmhmaxlik('DsgeVarLikelihood',xparam1,bounds,options_.Opt6Numb,Scale,flag,MeanPar,CovJump,gend);
+                  fval = DsgeVarLikelihood(xparam1,gend);
+              end
+              options_.mh_jscale = Scale;
+              mouvement = max(max(abs(PostVar-OldPostVar)));
+              disp(['Change in the covariance matrix = ' num2str(mouvement) '.'])
+              disp(['Mode improvement = ' num2str(abs(OldMode-fval))])
+              OldMode = fval;
+          else
+              OldPostVar = PostVar;
+              if i<options_.Opt6Iter
+                  flag = '';
+              else
+                  flag = 'LastCall';
+              end
+              if isempty(strmatch('dsge_prior_weight',M_.param_names))
+                  [xparam1,PostVar,Scale,PostMean] = ...
+                      gmhmaxlik('DsgeLikelihood',xparam1,bounds,...
+                                options_.Opt6Numb,Scale,flag,PostMean,PostVar,gend,data);
+                  fval = DsgeLikelihood(xparam1,gend,data);
+              else
+                  [xparam1,PostVar,Scale,PostMean] = ...
+                      gmhmaxlik('DsgeVarLikelihood',xparam1,bounds,...
+                                options_.Opt6Numb,Scale,flag,PostMean,PostVar,gend);
+                  fval = DsgeVarLikelihood(xparam1,gend);          
+              end
+              options_.mh_jscale = Scale;
+              mouvement = max(max(abs(PostVar-OldPostVar)));
+              fval = DsgeLikelihood(xparam1,gend,data);
+              disp(['Change in the covariance matrix = ' num2str(mouvement) '.'])
+              disp(['Mode improvement = ' num2str(abs(OldMode-fval))])
+              OldMode = fval;
+          end
+          bayestopt_.jscale = ones(length(xparam1),1)*Scale;%??!
+      end
+      hh = inv(PostVar);
   end
   if options_.mode_compute ~= 5
     if options_.mode_compute ~= 6
