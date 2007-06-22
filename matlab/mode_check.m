@@ -40,7 +40,11 @@ if nbplt == 1
         y = zeros(length(z),1);
         for i=1:length(z)
             xx(k) = z(i); % kk -> k
-            y(i) = DsgeLikelihood(xx,gend,data);
+            if isempty(strmatch('dsge_prior_weight',M_.param_names))
+                y(i) = DsgeLikelihood(xx,gend,data);
+            else
+                y(i) = DsgeVarLikelihood(xx,gend);
+            end
         end
         plot(z,y)
         hold on
@@ -91,7 +95,11 @@ else
             y = zeros(length(z),1);
             for i=1:length(z)
                 xx(kk) = z(i);
-                y(i) = DsgeLikelihood(xx,gend,data);
+                if isempty(strmatch('dsge_prior_weight',M_.param_names))
+                    y(i) = DsgeLikelihood(xx,gend,data);
+                else
+                    y(i) = DsgeVarLikelihood(xx,gend);
+                end                
             end
             plot(z,y);
             hold on
@@ -144,7 +152,11 @@ else
         y = zeros(length(z),1);
         for i=1:length(z)
             xx(kk) = z(i);
-            y(i) = DsgeLikelihood(xx,gend,data);
+            if isempty(strmatch('dsge_prior_weight',M_.param_names))
+                y(i) = DsgeLikelihood(xx,gend,data);
+            else
+                y(i) = DsgeVarLikelihood(xx,gend);
+            end                
         end
         plot(z,y)
         hold on
