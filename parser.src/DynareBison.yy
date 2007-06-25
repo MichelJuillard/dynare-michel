@@ -35,6 +35,10 @@ class ParsingDriver;
 
 %token AR AUTOCORR
 %token BAYESIAN_IRF BETA_PDF
+%token BVAR_DENSITY BVAR_FORECAST
+%token BVAR_PRIOR_DECAY BVAR_PRIOR_FLAT BVAR_PRIOR_LAMBDA
+%token BVAR_PRIOR_MU BVAR_PRIOR_OMEGA BVAR_PRIOR_TAU BVAR_PRIOR_TRAIN
+%token BVAR_REPLIC
 %token CALIB CALIB_VAR CHECK CONF_SIG CONSTANT CORR COVAR CUTOFF
 %token DATAFILE DR_ALGO DROP DSAMPLE DYNASAVE DYNATYPE
 %token END ENDVAL EQUAL ESTIMATION ESTIMATED_PARAMS ESTIMATED_PARAMS_BOUNDS ESTIMATED_PARAMS_INIT
@@ -125,6 +129,8 @@ class ParsingDriver;
         | model_comparison
         | planner_objective
 	| ramsey_policy
+  | bvar_density
+  | bvar_forecast
 	;
 
 
@@ -1117,6 +1123,51 @@ markowitz
         | o_planner_discount
         ;
 
+ bvar_prior_option : o_bvar_prior_tau
+                   | o_bvar_prior_decay
+                   | o_bvar_prior_lambda
+                   | o_bvar_prior_mu
+                   | o_bvar_prior_omega
+                   | o_bvar_prior_flat
+                   | o_bvar_prior_train
+                   ;
+
+ bvar_common_option : bvar_prior_option
+                    | o_datafile
+                    | o_xls_sheet
+                    | o_xls_range
+                    | o_first_obs
+                    | o_presample
+                    | o_nobs
+                    | o_prefilter
+                    ;
+
+ bvar_density_options_list : bvar_common_option COMMA bvar_density_options_list
+                           | bvar_common_option
+                           ;
+
+ bvar_density : BVAR_DENSITY INT_NUMBER ';'
+                { driver.bvar_density($2); }
+              | BVAR_DENSITY '(' bvar_density_options_list ')' INT_NUMBER ';'
+                { driver.bvar_density($5); }
+              ;
+ 
+ bvar_forecast_option : bvar_common_option
+                      | o_forecast
+                      | o_conf_sig
+                      | o_bvar_replic
+                      ;
+
+ bvar_forecast_options_list : bvar_forecast_option COMMA bvar_forecast_options_list
+                            | bvar_forecast_option
+                            ;
+
+ bvar_forecast : BVAR_FORECAST INT_NUMBER ';'
+                 { driver.bvar_forecast($2); }
+               | BVAR_FORECAST '(' bvar_forecast_options_list ')' INT_NUMBER ';'
+                 { driver.bvar_forecast($5); }
+               ;
+
  o_dr_algo: DR_ALGO EQUAL INT_NUMBER {driver.option_num("dr_algo", $3);};
  o_solve_algo: SOLVE_ALGO EQUAL INT_NUMBER {driver.option_num("solve_algo", $3);};
  o_simul_algo: SIMUL_ALGO EQUAL INT_NUMBER {driver.option_num("simul_algo", $3);};
@@ -1191,6 +1242,15 @@ markowitz
  o_noconstant : NOCONSTANT {driver.option_num("noconstant", "1");}
  o_mh_recover : MH_RECOVER {driver.option_num("load_mh_file", "-1");}
  o_planner_discount : PLANNER_DISCOUNT EQUAL FLOAT_NUMBER {driver.option_num("planner_discount",$3);}
+
+ o_bvar_prior_tau : BVAR_PRIOR_TAU EQUAL signed_float { driver.option_num("bvar_prior_tau", $3); }
+ o_bvar_prior_decay : BVAR_PRIOR_DECAY EQUAL FLOAT_NUMBER { driver.option_num("bvar_prior_decay", $3); }
+ o_bvar_prior_lambda : BVAR_PRIOR_LAMBDA EQUAL signed_float { driver.option_num("bvar_prior_lambda", $3); }
+ o_bvar_prior_mu : BVAR_PRIOR_MU EQUAL FLOAT_NUMBER { driver.option_num("bvar_prior_mu", $3); }
+ o_bvar_prior_omega : BVAR_PRIOR_OMEGA EQUAL INT_NUMBER { driver.option_num("bvar_prior_omega", $3); }
+ o_bvar_prior_flat : BVAR_PRIOR_FLAT { driver.option_num("bvar_prior_flat", "1"); }
+ o_bvar_prior_train : BVAR_PRIOR_TRAIN EQUAL INT_NUMBER { driver.option_num("bvar_prior_train", $3); }
+ o_bvar_replic : BVAR_REPLIC EQUAL INT_NUMBER { driver.option_num("bvar_replic", $3); }
 
  range : NAME ':' NAME
   {

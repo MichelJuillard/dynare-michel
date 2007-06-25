@@ -992,6 +992,22 @@ ParsingDriver::ramsey_policy()
   options_list.clear();
 }
 
+void
+ParsingDriver::bvar_density(string *maxnlags)
+{
+  mod_file->addStatement(new BVARDensityStatement(atoi(maxnlags->c_str()), options_list));
+  options_list.clear();
+  delete maxnlags;
+}
+
+void
+ParsingDriver::bvar_forecast(string *nlags)
+{
+  mod_file->addStatement(new BVARForecastStatement(atoi(nlags->c_str()), options_list));
+  options_list.clear();
+  delete nlags;
+}
+
 NodeID
 ParsingDriver::add_model_equal(NodeID arg1, NodeID arg2)
 {

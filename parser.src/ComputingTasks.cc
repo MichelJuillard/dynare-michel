@@ -815,3 +815,29 @@ PlannerObjectiveStatement::writeOutput(ostream &output, const string &basename) 
 {
   model_tree->writeStaticFile(basename + "_objective");
 }
+
+BVARDensityStatement::BVARDensityStatement(int maxnlags_arg, const OptionsList &options_list_arg) :
+  maxnlags(maxnlags_arg),
+  options_list(options_list_arg)
+{
+}
+
+void
+BVARDensityStatement::writeOutput(ostream &output, const string &basename) const
+{
+  options_list.writeOutput(output);
+  output << "bvar_density(" << maxnlags << ");" << endl;
+}
+
+BVARForecastStatement::BVARForecastStatement(int nlags_arg, const OptionsList &options_list_arg) :
+  nlags(nlags_arg),
+  options_list(options_list_arg)
+{
+}
+
+void
+BVARForecastStatement::writeOutput(ostream &output, const string &basename) const
+{
+  options_list.writeOutput(output);
+  output << "bvar_forecast(" << nlags << ");" << endl;
+}

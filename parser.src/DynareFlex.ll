@@ -83,6 +83,9 @@ int sigma_e = 0;
 <INITIAL>planner_objective {BEGIN DYNARE_STATEMENT; return token::PLANNER_OBJECTIVE;}
 <INITIAL>ramsey_policy {BEGIN DYNARE_STATEMENT; return token::RAMSEY_POLICY;}
 
+<INITIAL>bvar_density {BEGIN DYNARE_STATEMENT; return token::BVAR_DENSITY; }
+<INITIAL>bvar_forecast {BEGIN DYNARE_STATEMENT; return token::BVAR_FORECAST; }
+
  /* End of a Dynare statement */
 <DYNARE_STATEMENT>; {
   if (!sigma_e)
@@ -158,6 +161,15 @@ int sigma_e = 0;
 <DYNARE_STATEMENT>constant	{return token::CONSTANT;}
 <DYNARE_STATEMENT>noconstant	{return token::NOCONSTANT;}
 <DYNARE_STATEMENT>covar {return token::COVAR;}
+
+<DYNARE_STATEMENT>bvar_prior_tau { return token::BVAR_PRIOR_TAU; }
+<DYNARE_STATEMENT>bvar_prior_decay { return token::BVAR_PRIOR_DECAY; }
+<DYNARE_STATEMENT>bvar_prior_lambda { return token::BVAR_PRIOR_LAMBDA; }
+<DYNARE_STATEMENT>bvar_prior_mu { return token::BVAR_PRIOR_MU; }
+<DYNARE_STATEMENT>bvar_prior_omega { return token::BVAR_PRIOR_OMEGA; }
+<DYNARE_STATEMENT>bvar_prior_flat { return token::BVAR_PRIOR_FLAT; }
+<DYNARE_STATEMENT>bvar_prior_train { return token::BVAR_PRIOR_TRAIN; }
+<DYNARE_STATEMENT>bvar_replic { return token::BVAR_REPLIC; }
 
 <DYNARE_STATEMENT>[\$][^$]*[\$] {
   strtok(yytext+1, "$");
