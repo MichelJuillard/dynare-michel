@@ -29,7 +29,7 @@ function dyn_data_01=read_variables(file_name_01,var_names_01,dyn_data_01,xls_sh
       dyn_data_01(:,dyn_i_01) = dyn_tmp_01;
     end
   elseif exist([file_name_01 '.xls'])
-    file_name_02 = [file_name_01 '.xls']
+    file_name_02 = [file_name_01 '.xls'];
     [num,txt,raw] = xlsread(file_name_01,xls_sheet,xls_range);
     for dyn_i_01=1:var_size_01
       iv = strmatch(var_names_01(dyn_i_01,:),raw(1,:),'exact');
