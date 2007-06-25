@@ -116,7 +116,7 @@ function [x,check] = solve1(func,x,j1,j2,jacobian_flag,varargin)
 	disp (x)
 	return
       end
-    elseif f < tolf
+    elseif max(abs(fvec)) < tolf
       return
     end
   end
