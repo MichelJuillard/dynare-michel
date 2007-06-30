@@ -133,7 +133,7 @@ function J = ramsey_dynamic(ys,lbar)
       kc2 = i_leadlag1(i,kc(ic2));
       ir = find(i_leadlag(max_leadlag1+2-j,:) > 0 );
       kr1 = i_leadlag(max_leadlag1+2-j,ir);
-      J(ir,kc2) = J(ir,kc2) + beta^(j-max_lag-1)...
+      J(ir,kc2) = J(ir,kc2) + beta^(j-max_lead-1)...
 	  *reshape(lbarfH(iH(kr1,kc1)),length(kr1),length(kc1));
     end
   end
@@ -142,7 +142,7 @@ function J = ramsey_dynamic(ys,lbar)
     kc = i_leadlag1(max_lag+i,endo_nbr+(1:exo_nbr));
     ir = find(i_leadlag(leadlag_nbr+1-i,:) > 0);
     kr1 = i_leadlag(leadlag_nbr+1-i,ir);
-    J(ir,kc) = beta^(i-max_lag-1)...
+    J(ir,kc) = beta^(i-max_lead-1)...
 	*reshape(lbarfH(iH(kr1,n_dyn+(1:exo_nbr))),length(kr1), ...
 			exo_nbr);
   end
@@ -152,7 +152,7 @@ function J = ramsey_dynamic(ys,lbar)
     kc1 = i_leadlag(leadlag_nbr+1-i,ic1);
     ic2 = find(i_leadlag1(max_lag+i,endo_nbr+exo_nbr+(1:mult_nbr)) > 0);
     kc2 = i_leadlag1(max_lag+i,endo_nbr+exo_nbr+ic2);
-    J(ic1,kc2) = beta^(i-max_lag-1)*fJ(ic2,kc1)';
+    J(ic1,kc2) = beta^(i-max_lead-1)*fJ(ic2,kc1)';
   end
 
   % Jacobian of original equations
