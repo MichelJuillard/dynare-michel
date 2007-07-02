@@ -622,6 +622,8 @@ markowitz
                      | o_simul
                      | o_simul_seed
                      | o_qz_criterium
+                     | o_print
+                     | o_noprint
                      ;
 
  tmp_var_list
