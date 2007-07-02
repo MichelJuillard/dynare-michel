@@ -1962,7 +1962,7 @@ ModelTree::writeOutput(ostream &output) const
       output << "oo_.recur_steady_state = zeros(" << symbol_table.recur_nbr << ", 1);\n";
     }
   if (symbol_table.parameter_nbr)
-    output << "M_.params = NaN(" << symbol_table.parameter_nbr << ", 1);\n";
+    output << "M_.params = repmat(NaN," << symbol_table.parameter_nbr << ", 1);\n";
 }
 
 void
