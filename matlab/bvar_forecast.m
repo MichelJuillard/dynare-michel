@@ -78,7 +78,7 @@ function bvar_forecast(nlags)
         lags_data = forecast_data.initval;
         for t = 1:size(forecast_data.realized_val, 1)
             X = [ reshape(flipdim(lags_data, 1)', 1, ny*nlags) forecast_data.realized_xdata(t, :) ];
-            y = X * Phi;
+            y = X * posterior.PhiHat;
             lags_data = [ lags_data(2:end, :); y ];
             sq_err_cumul = sq_err_cumul + (y - forecast_data.realized_val(t, :)) .^ 2;
         end
