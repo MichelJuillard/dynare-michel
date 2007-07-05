@@ -12,15 +12,20 @@ function bvar_forecast(nlags)
     sims_no_shock = NaN(options_.forecast, ny, options_.bvar_replic);
     sims_with_shocks = NaN(options_.forecast, ny, options_.bvar_replic);
     
-    S_inv_chol = chol(inv(posterior.S));
-    XXi_lower_chol = chol(posterior.XXi, 'lower');
+    S_inv_upper_chol = chol(inv(posterior.S));
+
+    % Option 'lower' of chol() not available in old versions of
+    % Matlab, so using transpose
+    XXi_lower_chol = chol(posterior.XXi)';
     
     k = ny*nlags+nx;
     
     for d = 1:options_.bvar_replic
-        Sigma = rand_inverse_wishart(ny, posterior.df, S_inv_chol);
+        Sigma = rand_inverse_wishart(ny, posterior.df, S_inv_upper_chol);
 
-        Sigma_lower_chol = chol(Sigma, 'lower');
+        % Option 'lower' of chol() not available in old versions of
+        % Matlab, so using transpose
+        Sigma_lower_chol = chol(Sigma)';
 
         Phi = rand_matrix_normal(k, ny, posterior.PhiHat, XXi_lower_chol, Sigma_lower_chol);
         
@@ -93,31 +98,31 @@ function bvar_forecast(nlags)
     end
     
     
-function G = rand_inverse_wishart(m, v, H_inv_chol)
+function G = rand_inverse_wishart(m, v, H_inv_upper_chol)
 % rand_inverse_wishart  Pseudo random matrices drawn from an
 %                       inverse Wishart distribution
 %
-% G = rand_inverse_wishart(m, v, H_inv_chol)
+% G = rand_inverse_wishart(m, v, H_inv_upper_chol)
 %
 % Returns an m-by-m matrix drawn from an inverse-Wishart distribution.
 %
-% m:          dimension of G and H_inv_chol.
+% m:          dimension of G and H_inv_upper_chol.
 % v:          degrees of freedom, greater or equal than m.
-% H_inv_chol: (upper) cholesky decomposition of the inverse of the
-%              matrix parameter.
-%             The (upper) cholesky of the inverse is requested here
+% H_inv_chol: upper cholesky decomposition of the inverse of the
+%             matrix parameter.
+%             The upper cholesky of the inverse is requested here
 %             in order to avoid to recompute it at every random draw.
-%             H_inv_chol = chol(inv(H))
+%             H_inv_upper_chol = chol(inv(H))
 %
 % In other words:
-%  G ~ IW(m, v, H) where H = inv(H_inv_chol'*H_inv_chol)
+%  G ~ IW(m, v, H) where H = inv(H_inv_upper_chol'*H_inv_upper_chol)
 % or, equivalently, using the correspondence between Wishart and
 % inverse-Wishart:
-%  inv(G) ~ W(m, v, S) where S = H_inv_chol'*H_inv_chol = inv(H)
+%  inv(G) ~ W(m, v, S) where S = H_inv_upper_chol'*H_inv_upper_chol = inv(H)
 
     X = NaN(v, m);
     for i = 1:v
-        X(i, :) = randn(1, m) * H_inv_chol;
+        X(i, :) = randn(1, m) * H_inv_upper_chol;
     end
     
     % At this point, X'*X is Wishart distributed
