@@ -34,6 +34,7 @@ function global_initialization()
   options_.ParamSubSet = 'None';
 
   % bvar-dsge
+  options_.bvar_dsge = 0;
   options_.varlag = 4;
 
   % Optimization algorithm [6] gmhmaxlik

@@ -13,11 +13,19 @@ for i = 1:size(M_.endo_names,1)
   end
 end
 
+if ~isempty(strmatch('dsge_prior_weight',M_.param_names))
+    options_.bvar_dsge = 1;
+end
+
+
 if options_.order > 1
   options_.order = 1;
 end
 
 if options_.prefilter == 1
+  options_.noconstant = 1;
+end
+if options_.bvar_dsge 
   options_.noconstant = 1;
 end
 
@@ -204,7 +212,6 @@ if length(options_.mode_file) > 0 & options_.posterior_mode_estimation
   eval(['load ' options_.mode_file ';']');
 end
 
-
 %% Compute the steady state: 
 set_parameters(xparam1);
 if options_.steadystate_flag% if the _steadystate.m file is provided.
@@ -214,9 +221,9 @@ else% if the steady state file is not provided.
    oo_.steady_state = dd.ys; clear('dd');
 end
 
-
 %% compute sample moments if needed (bvar-dsge)
-if ~isempty(strmatch('dsge_prior_weight',M_.param_names))
+if options_.bvar_dsge~isempty(strmatch('dsge_prior_weight',M_.param_names))
+    options_.noconstant = 1;
     if options_.noconstant
         evalin('base',['[mYY,mXY,mYX,mXX,Ydata,Xdata] = ' ...
                  'var_sample_moments(options_.first_obs,options_.first_obs+options_.nobs-1,options_.varlag,-1);'])
@@ -234,7 +241,7 @@ end
 
 %% Estimation of the posterior mode or likelihood mode
 if options_.mode_compute > 0 & options_.posterior_mode_estimation
-  if isempty(strmatch('dsge_prior_weight',M_.param_names))
+  if ~options_.bvar_dsge
     fh=str2func('DsgeLikelihood');
   else
     fh=str2func('DsgeVarLikelihood');
@@ -245,7 +252,7 @@ if options_.mode_compute > 0 & options_.posterior_mode_estimation
     if isfield(options_,'optim_opt')
       eval(['optim_options = optimset(optim_options,' options_.optim_opt ');']);
     end
-    if isempty(strmatch('dsge_prior_weight',M_.param_names))
+    if ~options_.bvar_dsge
       [xparam1,fval,exitflag,output,lamdba,grad,hessian_fmincon] = ...
           fmincon(fh,xparam1,[],[],[],[],lb,ub,[],optim_options,gend,data);
     else
@@ -254,7 +261,7 @@ if options_.mode_compute > 0 & options_.posterior_mode_estimation
     end
   elseif options_.mode_compute == 2
     % asamin('set','maximum_cost_repeat',0);
-    if isempty(strmatch('dsge_prior_weight',M_.param_names))
+    if ~options_.bvar_dsge
       [fval,xparam1,grad,hessian_asamin,exitflag] = ...
           asamin('minimize','DsgeLikelihood',xparam1,lb,ub,-ones(size(xparam1)),gend,data);   
     else
@@ -276,7 +283,7 @@ if options_.mode_compute > 0 & options_.posterior_mode_estimation
     crit = 1e-7;
     nit = 1000;
     verbose = 2;
-    if isempty(strmatch('dsge_prior_weight',M_.param_names))
+    if ~options_.bvar_dsge
       [fval,xparam1,grad,hessian_csminwel,itct,fcount,retcodehat] = ...
           csminwel('DsgeLikelihood',xparam1,H0,[],crit,nit,gend,data);
       disp(sprintf('Objective function at mode: %f',fval))
@@ -308,7 +315,7 @@ if options_.mode_compute > 0 & options_.posterior_mode_estimation
     else
       nit=1000;
     end
-    if isempty(strmatch('dsge_prior_weight',M_.param_names))
+    if ~options_.bvar_dsge
       [xparam1,hh,gg,fval,invhess] = newrat('DsgeLikelihood',xparam1,hh,gg,igg,crit,nit,flag,gend,data);
     else
       [xparam1,hh,gg,fval,invhess] = newrat('DsgeVarLikelihood',xparam1,hh,gg,igg,crit,nit,flag,gend);
@@ -316,7 +323,7 @@ if options_.mode_compute > 0 & options_.posterior_mode_estimation
     save([M_.fname '_mode'],'xparam1','hh','gg','fval','invhess');
     %eval(['save ' M_.fname '_mode xparam1 hh gg fval invhess;']);
   elseif options_.mode_compute == 6
-      if isempty(strmatch('dsge_prior_weight',M_.param_names))
+      if ~options_.bvar_dsge
           fval = DsgeLikelihood(xparam1,gend,data);
       else
           fval = DsgeVarLikelihood(xparam1,gend);
@@ -353,7 +360,7 @@ if options_.mode_compute > 0 & options_.posterior_mode_estimation
               else
                   flag = 'LastCall';
               end
-              if isempty(strmatch('dsge_prior_weight',M_.param_names))
+              if ~options_.bvar_dsge
                   [xparam1,PostVar,Scale,PostMean] = ...
                       gmhmaxlik('DsgeLikelihood',xparam1,bounds,options_.Opt6Numb,Scale,flag,MeanPar,CovJump,gend,data);
                   fval = DsgeLikelihood(xparam1,gend,data);
@@ -374,7 +381,7 @@ if options_.mode_compute > 0 & options_.posterior_mode_estimation
               else
                   flag = 'LastCall';
               end
-              if isempty(strmatch('dsge_prior_weight',M_.param_names))
+              if options_.bvar_dsge
                   [xparam1,PostVar,Scale,PostMean] = ...
                       gmhmaxlik('DsgeLikelihood',xparam1,bounds,...
                                 options_.Opt6Numb,Scale,flag,PostMean,PostVar,gend,data);
@@ -398,7 +405,7 @@ if options_.mode_compute > 0 & options_.posterior_mode_estimation
   end
   if options_.mode_compute ~= 5
     if options_.mode_compute ~= 6
-      if isempty(strmatch('dsge_prior_weight',M_.param_names))
+      if options_.bvar_dsge
 	hh = reshape(hessian('DsgeLikelihood',xparam1,gend,data),nx,nx);
       else
 	hh = reshape(hessian('DsgeVarLikelihood',xparam1,gend),nx,nx);
@@ -425,7 +432,7 @@ if options_.posterior_mode_estimation
 else
   variances = bayestopt_.pstdev.^2;
   invhess = 0.001*diag(variances);
-  invhess = 0.001*eye(length(variances));
+  invhess = 0.01*eye(length(variances));
 end
 
 
@@ -524,7 +531,7 @@ if any(bayestopt_.pshape > 0) & options_.posterior_mode_estimation
     end
   end  
   %% Laplace approximation to the marginal log density:
-  if isempty(strmatch('dsge_prior_weight',M_.param_names))
+  if ~options_.bvar_dsge
     md_Laplace = .5*size(xparam1,1)*log(2*pi) + .5*log(det(invhess)) ...
         - DsgeLikelihood(xparam1,gend,data);
   else
@@ -812,7 +819,7 @@ if (any(bayestopt_.pshape  >0 ) & options_.mh_replic) | ...
   end
   if options_.mh_replic
     if ~options_.load_mh_file
-      if isempty(strmatch('dsge_prior_weight',M_.param_names))
+      if ~options_.bvar_dsge
         metropolis('DsgeLikelihood',xparam1,invhess,bounds,gend,data);
       else
         metropolis('DsgeVarLikelihood',xparam1,invhess,bounds,gend);
@@ -821,7 +828,7 @@ if (any(bayestopt_.pshape  >0 ) & options_.mh_replic) | ...
       if options_.use_mh_covariance_matrix
         invhess = compute_mh_covariance_matrix();
       end
-      if isempty(strmatch('dsge_prior_weight',M_.param_names))
+      if ~options_.bvar-dsge
         metropolis('DsgeLikelihood',xparam1,invhess,bounds,gend,data);
       else
         metropolis('DsgeVarLikelihood',xparam1,invhess,bounds,gend);
