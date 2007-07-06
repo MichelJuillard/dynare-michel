@@ -103,6 +103,7 @@ M_.Sigma_e = Q;
 %% Weight of the dsge prior:
 dsge_prior_weight = M_.params(strmatch('dsge_prior_weight',M_.param_names));
 
+
 %------------------------------------------------------------------------------
 % 2. call model setup & reduction program
 %------------------------------------------------------------------------------
@@ -141,6 +142,12 @@ mf  = bayestopt_.mf1;
 NumberOfObservedVariables = size(options_.varobs,1);
 NumberOfLags = options_.varlag;
 k = NumberOfObservedVariables*NumberOfLags ;
+
+if dsge_prior_weight<(k+NumberOfObservedVariables)/nobs;
+    fval = bayestopt_.penalty*min(1e3,(k+NumberOfObservedVariables)/nobs-dsge_prior_weight);
+    cost_flag = 0;
+    return;
+end
 
 TheoreticalAutoCovarianceOfTheObservedVariables = ...
     zeros(NumberOfObservedVariables,NumberOfObservedVariables,NumberOfLags+1);
