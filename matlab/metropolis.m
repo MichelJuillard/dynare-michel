@@ -174,6 +174,7 @@ if ~options_.load_mh_file & ~options_.mh_recover
         fprintf(fidlog,['      ' num2str(record.Seeds.Unifor(i)') '\n']);
     end
     fprintf(fidlog,' \n');
+    fclose(fidlog);
 elseif options_.load_mh_file & ~options_.mh_recover
     %% Here we consider previous mh files (previous mh did not crash).
     disp('MH: I''m loading past metropolis-hastings simulations...')
@@ -234,6 +235,7 @@ elseif options_.load_mh_file & ~options_.mh_recover
     save([MhDirectoryName '/' ModelName '_mh_history'],'record');
     disp(['MH: ... It''s done. I''ve loaded ' int2str(NumberOfPreviousSimulations) ' simulations.'])
     disp(' ')
+    fclose(fidlog);
 elseif options_.mh_recover
     %% The previous metropolis-hastings crashed before the end! I try to
     %% recover the saved draws...
@@ -345,7 +347,7 @@ elseif options_.mh_recover
     elseif ~OldMh && NumberOfSavedMhFilesInTheCrashedBlck    
         IsTheLastFileOfThePreviousMhFull = 0;
         NumberOfCompletedMhFiles = 0;
-        reste = 0;        
+        reste = 0;
     end
     %% How many runs were saved ?
     NumberOfSavedDraws = MAX_nruns*NumberOfCompletedMhFiles + reste;
@@ -375,7 +377,6 @@ elseif options_.mh_recover
         ix2(CrashedBlck,:) = x2(end,:);       
     end
 end% of (if options_.load_mh_file == {0,1 or -1})
-fclose(fidlog);
 %%%%
 %%%% NOW i run the (nblck-fblck+1) metropolis-hastings chains
 %%%%
