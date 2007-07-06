@@ -273,7 +273,9 @@ IRF_DSGEs = dir([MhDirectoryName '/' M_.fname '_IRF_DSGEs*.mat']);
 NumberOfIRFfiles_dsge = length(IRF_DSGEs);
 
 IRF_BVARDSGEs = dir([MhDirectoryName '/' M_.fname '_IRF_BVARDSGEs*.mat']);
-NumberOfIRFfiles_bavrdsge = length(IRF_BVARDSGEs);
+NumberOfIRFfiles_dsgevar = length(IRF_BVARDSGEs);
+
+
 
 MeanIRF = zeros(options_.irf,nvar,M_.exo_nbr);
 MedianIRF = zeros(options_.irf,nvar,M_.exo_nbr);
@@ -284,7 +286,7 @@ HPDIRF = zeros(options_.irf,2,nvar,M_.exo_nbr);
 if options_.TeX
   varlist_TeX = [];
   for i=1:nvar
-    varlist_TeX = strvcat(varlist_TeX,M_.endo_names_tex(SelecVariables(i),:));
+    varlist_TeX = strvcat(varlist_TeX,M_.endo_names_tex(IndxVariables(i),:));
   end
 end
 
@@ -347,7 +349,7 @@ if MAX_nirfs_dsgevar
     clear STOCK_IRF_BVARDSGE; 
     for i = 1:M_.exo_nbr
         for j = 1:nvar
-            name = [deblank(M_.endo_names(SelecVariables(j),:)) '_' deblank(tit(i,:))];
+            name = [deblank(M_.endo_names(IndxVariables(j),:)) '_' deblank(tit(i,:))];
             eval(['oo_.PosteriorIRF.bvardsge.Mean.' name ' = MeanIRFdsgevar(:,j,i);']);
             eval(['oo_.PosteriorIRF.bvardsge.Median.' name ' = MedianIRFdsgevar(:,j,i);']);
             eval(['oo_.PosteriorIRF.bvardsge.Var.' name ' = VarIRFdsgevar(:,j,i);']);
