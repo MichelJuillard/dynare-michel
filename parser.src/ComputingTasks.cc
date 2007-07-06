@@ -643,47 +643,6 @@ OsrStatement::writeOutput(ostream &output, const string &basename) const
   output << "osr(var_list_,osr_params_,obj_var_,optim_weights_);\n";
 }
 
-OlrInstStatement::OlrInstStatement(const TmpSymbolTable &tmp_symbol_table_arg) :
-  tmp_symbol_table(tmp_symbol_table_arg)
-{
-}
-
-void
-OlrInstStatement::writeOutput(ostream &output, const string &basename) const
-{
-  tmp_symbol_table.writeOutput("options_.olr_inst", output);
-}
-
-
-OlrStatement::OlrStatement(const TmpSymbolTable &tmp_symbol_table_arg,
-                           const OptionsList &options_list_arg) :
-  tmp_symbol_table(tmp_symbol_table_arg),
-  options_list(options_list_arg)
-{
-}
-
-void
-OlrStatement::checkPass(ModFileStructure &mod_file_struct)
-{
-  mod_file_struct.stoch_simul_or_similar_present = true;
-
-  // Fill in option_order of mod_file_struct
-  OptionsList::num_options_type::const_iterator it = options_list.num_options.find("order");
-  if (it != options_list.num_options.end())
-    mod_file_struct.order_option = atoi(it->second.c_str());
-}
-
-void
-OlrStatement::writeOutput(ostream &output, const string &basename) const
-{
-  options_list.writeOutput(output);
-  tmp_symbol_table.writeOutput("var_list_", output);
-  output << "options_.olr = 1;\n";
-  output << "options_.olr_w = optim_weights_;\n";
-  output << "options_.olr_inst = olr_inst_;\n";
-  output << "info = stoch_simul(var_list_);\n";
-}
-
 OptimWeightsStatement::OptimWeightsStatement(const var_weights_type &var_weights_arg,
                                              const covar_weights_type &covar_weights_arg,
                                              const SymbolTable &symbol_table_arg) :

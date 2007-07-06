@@ -837,21 +837,6 @@ ParsingDriver::run_osr()
 }
 
 void
-ParsingDriver::set_olr_inst()
-{
-  mod_file->addStatement(new OlrInstStatement(*tmp_symbol_table));
-  tmp_symbol_table->clear();
-}
-
-void
-ParsingDriver::run_olr()
-{
-  mod_file->addStatement(new OlrStatement(*tmp_symbol_table, options_list));
-  tmp_symbol_table->clear();
-  options_list.clear();
-}
-
-void
 ParsingDriver::set_calib_var(string *name, string *weight, NodeID expression)
 {
   check_symbol_existence(*name);

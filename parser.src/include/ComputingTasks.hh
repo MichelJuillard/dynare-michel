@@ -207,27 +207,6 @@ public:
   virtual void writeOutput(ostream &output, const string &basename) const;
 };
 
-class OlrStatement : public Statement
-{
-private:
-  const TmpSymbolTable tmp_symbol_table;
-  const OptionsList options_list;
-public:
-  OlrStatement(const TmpSymbolTable &tmp_symbol_table_arg,
-               const OptionsList &options_list_arg);
-  virtual void checkPass(ModFileStructure &mod_file_struct);
-  virtual void writeOutput(ostream &output, const string &basename) const;
-};
-
-class OlrInstStatement : public Statement
-{
-private:
-  const TmpSymbolTable tmp_symbol_table;
-public:
-  OlrInstStatement(const TmpSymbolTable &tmp_symbol_table_arg);
-  virtual void writeOutput(ostream &output, const string &basename) const;
-};
-
 class DynaTypeStatement : public Statement
 {
 private:

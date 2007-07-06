@@ -289,8 +289,6 @@ public:
   void set_optim_weights(string *name1, string *name2, NodeID value);
   void set_osr_params();
   void run_osr();
-  void set_olr_inst();
-  void run_olr();
   void run_calib_var();
   void set_calib_var(string *name, string *weight, NodeID expression);
   void set_calib_covar(string *name1, string *name2, string *weight, NodeID expression);

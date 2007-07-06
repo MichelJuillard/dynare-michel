@@ -57,7 +57,7 @@ class ParsingDriver;
 %token MODEL_COMPARISON_APPROXIMATION MODIFIEDHARMONICMEAN MOMENTS_VARENDO
 %token <string_val> NAME
 %token NOBS NOCONSTANT NOCORR NODIAGNOSTIC NOFUNCTIONS NOGRAPH NOMOMENTS NOPRINT NORMAL_PDF
-%token OBSERVATION_TRENDS OLR OLR_INST OLR_BETA OPTIM OPTIM_WEIGHTS ORDER OSR OSR_PARAMS
+%token OBSERVATION_TRENDS OPTIM OPTIM_WEIGHTS ORDER OSR OSR_PARAMS
 %token PARAMETERS PERIODS PLANNER_OBJECTIVE PREFILTER PRESAMPLE PRINT PRIOR_TRUNC PRIOR_ANALYSIS POSTERIOR_ANALYSIS
 %token QZ_CRITERIUM
 %token RELATIVE_IRF REPLIC RPLOT
@@ -124,8 +124,6 @@ class ParsingDriver;
 	| calib
 	| dynatype
 	| dynasave
-	| olr
-	| olr_inst
         | model_comparison
         | planner_objective
 	| ramsey_policy
@@ -1015,27 +1013,10 @@ markowitz
             ;
 
  osr : OSR ';' {driver.run_osr();}
-     | OSR '(' olr_options ')' ';' {driver.run_osr();}
+     | OSR '(' stoch_simul_options ')' ';' {driver.run_osr();}
      | OSR tmp_var_list ';' {driver.run_osr();}
-     | OSR '(' olr_options ')' tmp_var_list ';' {driver.run_osr();}
+     | OSR '(' stoch_simul_options ')' tmp_var_list ';' {driver.run_osr();}
      ;
-
- olr : OLR ';' {driver.run_olr();}
-     | OLR '(' olr_options ')' ';' {driver.run_olr();}
-     | OLR tmp_var_list ';' {driver.run_olr();}
-     | OLR '(' olr_options ')' tmp_var_list ';' {driver.run_olr();}
-     ;
-
- olr_option : o_olr_beta
-     | stoch_simul_options
-     ;
-
- olr_options : olr_option
-     | olr_options COMMA olr_option
-     ;
-
- olr_inst : OLR_INST tmp_var_list ';' {driver.set_olr_inst();}
-          ;
 
  calib_var : CALIB_VAR ';' calib_var_list END
              { driver.run_calib_var(); }
@@ -1228,7 +1209,6 @@ markowitz
  o_relative_irf : RELATIVE_IRF {driver.option_num("relative_irf", "1");};
  o_kalman_algo : KALMAN_ALGO EQUAL INT_NUMBER {driver.option_num("kalman_algo", $3);};
  o_kalman_tol : KALMAN_TOL EQUAL INT_NUMBER {driver.option_num("kalman_tol", $3);};
- o_olr_beta: OLR_BETA EQUAL value {driver.option_num("olr_beta", $3);};
  o_model_comparison_approximation:
      MODEL_COMPARISON_APPROXIMATION EQUAL LAPLACE
      { driver.option_str("model_comparison_approximation", "Laplace"); }

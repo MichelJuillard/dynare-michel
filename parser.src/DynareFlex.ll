@@ -69,8 +69,6 @@ int sigma_e = 0;
 <INITIAL>osr	 	{BEGIN DYNARE_STATEMENT; return token::OSR;}
 <INITIAL>dynatype	{BEGIN DYNARE_STATEMENT; return token::DYNATYPE;}
 <INITIAL>dynasave 	{BEGIN DYNARE_STATEMENT; return token::DYNASAVE;}
-<INITIAL>olr	 	{BEGIN DYNARE_STATEMENT; return token::OLR;}
-<INITIAL>olr_inst	 	{BEGIN DYNARE_STATEMENT; return token::OLR_INST;}
 <INITIAL>model_comparison 	{BEGIN DYNARE_STATEMENT; return token::MODEL_COMPARISON;}
 
 <INITIAL>steady {BEGIN DYNARE_STATEMENT; return token::STEADY;}
@@ -214,7 +212,6 @@ int sigma_e = 0;
 <DYNARE_STATEMENT>simul_seed {return token::SIMUL_SEED;}
 <DYNARE_STATEMENT>qz_criterium {return token::QZ_CRITERIUM;}
 <DYNARE_STATEMENT>simul {return token::SIMUL;}
-<DYNARE_STATEMENT>olr_beta {return token::OLR_BETA;}
 <DYNARE_STATEMENT>xls_sheet {return token::XLS_SHEET;}
 <DYNARE_STATEMENT>xls_range {return token::XLS_RANGE;}
 <DYNARE_STATEMENT>mh_recover {return token::MH_RECOVER;}
