@@ -405,7 +405,7 @@ if options_.mode_compute > 0 & options_.posterior_mode_estimation
   end
   if options_.mode_compute ~= 5
     if options_.mode_compute ~= 6
-      if options_.bvar_dsge
+      if ~options_.bvar_dsge
 	hh = reshape(hessian('DsgeLikelihood',xparam1,gend,data),nx,nx);
       else
 	hh = reshape(hessian('DsgeVarLikelihood',xparam1,gend),nx,nx);
