@@ -72,10 +72,6 @@ public :
   int AddSymbolDeclar(std::string name, Type type, std::string tex_name);
   /*! Adds symbol range */
   void AddSymbolRange(std::string name, int nbr, Type type, std::string tex_name);
-  /*! Sets a symbol as referenced */
-  void SetReferenced(std::string name);
-  /*! Return eReferenced if symbol is referenced eNotReferenced otherwise*/
-  Reference isReferenced(const std::string &name) const;
   /*! Tests if symbol exists in symbol table
     \return true if exists, false outherwise
   */

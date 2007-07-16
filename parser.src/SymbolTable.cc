@@ -23,7 +23,6 @@ SymbolTable::SymbolTable() : endo_nbr(0), exo_nbr(0), exo_det_nbr(0), parameter_
 int SymbolTable::AddSymbol(string name,Type type, string tex_name)
 {
   symboltable[name].type = type;
-  symboltable[name].referenced = eNotReferenced;
   name_table[(int) type].push_back(name);
   tex_name_table[(int) type].push_back(tex_name);
 
@@ -88,17 +87,6 @@ void SymbolTable::AddSymbolRange(string name,int nbr,Type type, string tex_name)
 void  SymbolTable::ResetType(string name,Type new_type)
 {
   symboltable[name].type = new_type;
-}
-
-void  SymbolTable::SetReferenced(string name)
-{
-  symboltable[name].referenced = eReferenced;
-}
-
-Reference SymbolTable::isReferenced(const std::string &name) const
-{
-  symboltable_const_iterator iter = symboltable.find(name);
-  return iter->second.referenced;
 }
 
 void

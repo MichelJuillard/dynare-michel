@@ -44,11 +44,10 @@ TmpSymbolTable::writeOutput(const string &varname, ostream &output) const
   output << varname << "=[];" << endl;
   for (vector<string>::const_iterator it = tmpsymboltable.begin();
        it != tmpsymboltable.end(); it++)
-    if (symbol_table.isReferenced(*it) == eReferenced)
-      {
-        output << varname << " = ";
-        output << interfaces::strvcat(varname, "'" + *it + "'") << ";" << endl;
-      }
+    {
+      output << varname << " = ";
+      output << interfaces::strvcat(varname, "'" + *it + "'") << ";" << endl;
+    }
 }
 
 void

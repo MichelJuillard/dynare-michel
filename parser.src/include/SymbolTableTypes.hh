@@ -13,23 +13,14 @@ enum Type
     eModFileLocalVariable = 11     //!< Local variable whose scope is mod file (model excluded)
   };
 
-//! Symbol reference flag enum
-enum Reference
-  {
-    eNotReferenced,                //!< Not yet referenced in model
-    eReferenced,                   //!< Already referenced in model
-  };
-
 struct Symbol
 {
   //! Symbol type
   Type type;
   //! Symbol ID : for each type
   int id;
-  //! Symbol reference flag
-  Reference referenced;
 
-  Symbol() : id(-1), referenced(eNotReferenced)
+  Symbol() : id(-1)
   {
   }
 };

@@ -41,8 +41,6 @@ DataTree::AddVariable(const string &name, int lag)
       exit(-1);
     }
 
-  symbol_table.SetReferenced(name);
-
   int symb_id = symbol_table.getID(name);
   Type type = symbol_table.getType(name);
 

@@ -316,9 +316,6 @@ EstimatedParamsStatement::writeOutput(ostream &output, const string &basename) c
 
   for(it = estim_params_list.begin(); it != estim_params_list.end(); it++)
     {
-      if (symbol_table.isReferenced(it->name) == eNotReferenced
-          && it->name != "dsge_prior_weight")
-        continue;
       switch(it->type)
         {
         case 1:
@@ -362,8 +359,6 @@ EstimatedParamsInitStatement::writeOutput(ostream &output, const string &basenam
 
   for(it = estim_params_list.begin(); it != estim_params_list.end(); it++)
     {
-      if (symbol_table.isReferenced(it->name) == eNotReferenced)
-        return;
       if (it->type < 3)
         {
           if (symbol_table.getType(it->name) == eExogenous)
@@ -412,8 +407,6 @@ EstimatedParamsBoundsStatement::writeOutput(ostream &output, const string &basen
 
   for(it = estim_params_list.begin(); it != estim_params_list.end(); it++)
     {
-      if (symbol_table.isReferenced(it->name) == eNotReferenced)
-        return;
       if (it->type < 3)
         {
           if (symbol_table.getType(it->name) == eExogenous)
