@@ -759,7 +759,11 @@ PlannerObjectiveStatement::~PlannerObjectiveStatement()
 void
 PlannerObjectiveStatement::checkPass(ModFileStructure &mod_file_struct)
 {
-  model_tree->checkPass();
+  if (model_tree->equation_number() != 1)
+    {
+      cerr << "Error: planer_objective: should have only one equation!" << endl;
+      exit(-1);
+    }
 }
 
 void

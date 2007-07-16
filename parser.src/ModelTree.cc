@@ -1980,17 +1980,6 @@ ModelTree::addEquation(NodeID eq)
 }
 
 void
-ModelTree::checkPass() const
-{
-  // Exit if there is no equation in model file
-  if (equations.size() == 0)
-    {
-      cerr << "No equation found in model file" << endl;
-      exit(-1);
-    }
-}
-
-void
 ModelTree::evaluateJacobian(const eval_context_type &eval_context, jacob_map *j_m)
 {
   int i=0;

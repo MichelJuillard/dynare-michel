@@ -115,8 +115,6 @@ public:
   bool new_SGE;
   //! Declare a node as an equation of the model
   void addEquation(NodeID eq);
-  //! Do some checking
-  void checkPass() const;
   //! Whether dynamic Jacobian (w.r. to endogenous) should be written
   bool computeJacobian;
   //! Whether dynamic Jacobian (w.r. to endogenous and exogenous) should be written
