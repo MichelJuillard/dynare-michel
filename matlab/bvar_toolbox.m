@@ -166,14 +166,18 @@ function [ydum,xdum,breaks]=varprior(nv,nx,lags,mnprior,vprior)
         ydum2 = zeros(lags+1,nv,nv);
         xdum2 = zeros(lags+1,nx,nv);
         ydum2(end,:,:) = diag(vprior.sig);
-        ydum = cat(3,ydum,ydum2);
-        xdum = cat(3,xdum,xdum2);
-        dimy = size(ydum);
-        ydum = reshape(permute(ydum,[1 3 2]),dimy(1)*dimy(3),nv);
-        xdum = reshape(permute(xdum,[1 3 2]),dimy(1)*dimy(3),nx);
-        breaks = [breaks;(lags+1)*[1:nv-1]'+lbreak];
+        for i = 1:vprior.w
+            ydum = cat(3,ydum,ydum2);
+            xdum = cat(3,xdum,xdum2);
+            breaks = [breaks;(lags+1)*[1:nv]'+lbreak];
+            lbreak = breaks(end);
+        end
     end
-
+    dimy = size(ydum);
+    ydum = reshape(permute(ydum,[1 3 2]),dimy(1)*dimy(3),nv);
+    xdum = reshape(permute(xdum,[1 3 2]),dimy(1)*dimy(3),nx);
+    breaks = breaks(1:(end-1));
+    
 
 function var=rfvar3(ydata,lags,xdata,breaks,lambda,mu)
 %function var=rfvar3(ydata,lags,xdata,breaks,lambda,mu)
