@@ -20,9 +20,9 @@ function [ny, nx, posterior, prior, forecast_data] = bvar_toolbox(nlags)
 %             Its fields are the same than for the posterior
 % forecast:   a structure containing data useful for forecasting
 %             Its fields are:
-%             - initval: a nlags*ny vector containing the "nlags" last
+%             - initval: a nlags*ny matrix containing the "nlags" last
 %               observations of the sample (i.e. before options_.nobs)
-%             - xdata: a vector containing the future exogenous for
+%             - xdata: a matrix containing the future exogenous for
 %               forecasting, of size options_.forecast*nx (actually only
 %               contains "1" values for the constant term)
 %             - realized_val: only non-empty if options_.nobs doesn't point

@@ -18,7 +18,7 @@ function bvar_density(maxnlags)
 
 
 function w = matrictint(S, df, XXi)
-% Computes the integral of the kernel of the PDF of a
+% Computes the log of the integral of the kernel of the PDF of a
 % normal-inverse-Wishart distribution.
 %
 % S:   parameter of inverse-Wishart distribution
