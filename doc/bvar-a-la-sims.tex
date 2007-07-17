@@ -1,0 +1,585 @@
+\documentclass[10pt,a4paper]{article}
+
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{url}
+
+\newcommand{\df}{\text{df}}
+
+\begin{document}
+
+\title{BVAR models ``\`a la Sims'' in Dynare}
+\author{S\'ebastien Villemot\thanks{Paris School of Economics and CEPREMAP. E-mail: \texttt{sebastien.villemot@ens.fr}}}
+\date{July 2007}
+
+\maketitle
+
+Dynare incorporates routines for BVAR models estimation, that can be used alone or in parallel with a DSGE estimation.
+This document describes their implementation and usage.
+
+If you are impatient to try the software and wish to skip mathematical details, jump to section \ref{dynare-commands}.
+
+\section{Model setting}
+
+Consider the following VAR(p) model:
+
+$$y'_t = y'_{t-1}\beta_1 + y'_{t-2}\beta_2 + \ldots + y'_{t-p}\beta_p + x'_t\alpha + u_t$$
+
+where:
+\begin{itemize}
+\item $t = 1\ldots T$ is the time index
+\item $y_t$ is a column vector of $ny$ endogenous variables
+\item $x_t$ a column vector of $nx$ exogenous variables
+\item the residuals $u_t \sim \mathcal{N}(0, \Sigma_u)$ are i.i.d. (with $\Sigma$ a $ny\times ny$ matrix)
+\item $\beta_1,\beta_2,\ldots,\beta_p$ are $ny\times ny$ matrices
+\item $\alpha$ is a $nx\times ny$ matrix
+\end{itemize}
+
+Note: in the actual implementation, exogenous variables $x_t$ only include a constant, so that $nx = 1$ and $x'_t = (1, \ldots, 1)$.
+
+The matrix form of the model is:
+$$Y = X\Phi + U$$
+
+where:
+\begin{itemize}
+\item $Y$ and $U$ are $T\times ny$
+\item $X$ is $T\times k$ where $k = ny\cdot p + nx$
+\item $\Phi$ is $k \times ny$
+\end{itemize}
+
+In other words:
+$$Y = \left[
+\begin{array}{c}
+y_1 \\
+\vdots \\
+y_T \\
+\end{array}
+\right]
+\; X = \left[
+\begin{array}{cccc}
+y_0 & \ldots & y_{1-p} & x_1 \\
+\vdots & \ddots & \vdots & \vdots \\
+y_{T-1} & \ldots & y_{T-p} & x_T
+\end{array}
+\right]
+\; \Phi = \left[
+\begin{array}{c}
+\beta_1 \\
+\vdots \\
+\beta_p \\
+\alpha \\
+\end{array}
+\right]$$
+
+\section{Constructing the prior}
+\label{sec-prior}
+
+We need a prior distribution over the parameters $(\Phi, \Sigma)$ before moving to Bayesian estimation. This section describes the construction of the prior used in Dynare implementation.
+
+The prior is made of three components, which are described in the following subsections.
+
+\subsection{Diffuse prior}
+
+The first component of the prior is, by default, Jeffreys' improper prior:
+
+$$p_1(\Phi,\Sigma) \propto |\Sigma|^{-(ny+1)/2}$$
+
+However, it is possible to choose a flat prior by specifying option \texttt{bvar\_prior\_flat}. In, that case:
+$$p_1(\Phi, \Sigma) = \text{const}$$
+
+\subsection{Dummy observations prior}
+
+The second component of the prior is constructed from the likelihood of $T^*$ dummy observations $(Y^*,X^*)$:
+
+$$p_2(\Phi, \Sigma) \propto |\Sigma|^{-T^*/2} \exp\left\{-\frac{1}{2}Tr(\Sigma^{-1}(Y^*-X^*\Phi)'(Y^*-X^*\Phi))\right\}$$
+
+The dummy observations are constructed according to Sims' version of the Minnesota prior\footnote{See Doan, Litterman and Sims (1984).}.
+
+Before constructing the dummy observations, one needs to choose values for the following parameters:
+\begin{itemize}
+\item $\tau$: the overall tightness of the prior. Large values imply a small prior covariance matrix. Controlled by option \texttt{bvar\_prior\_tau}, with a default of 3
+\item $d$: the decay factor for scaling down the coefficients of lagged values. Controlled by option \texttt{bvar\_prior\_decay}, with a default of 0.5
+\item $\omega$ controls the tightness for the prior on $\Sigma$. Must be an integer. Controlled by option \texttt{bvar\_prior\_omega}, with a default of 1
+\item $\lambda$ and $\mu$: additional tuning parameters, respectively controlled by option \texttt{bvar\_prior\_lambda} (with a default of 5) and option \texttt{bvar\_prior\_mu} (with a default of 2)
+\item based on a short presample $Y^0$ (in Dynare implementation, this presample consists of the $p$ observations used to initialize the VAR), one also calculates $\sigma = std(Y^0)$ and $\bar{y} = mean(Y^0)$
+\end{itemize}
+
+Below is a description of the different dummy observations. For the sake of simplicity, we should assume that $ny = 2$, $nx = 1$ and $p = 3$. The generalization is straigthforward.
+
+\begin{itemize}
+\item Dummies for the coefficients on the first lag:
+$$\left[
+\begin{array}{cc}
+\tau\sigma_1 & 0 \\
+0 & \tau\sigma_2
+\end{array}
+\right]
+=
+\left[
+\begin{array}{ccccccc}
+\tau\sigma_1 & 0 & 0&0& 0&0& 0 \\
+0 & \tau\sigma_2 & 0&0& 0&0& 0
+\end{array}
+\right]\Phi + U$$
+
+\item Dummies for the coefficients on the second lag:
+$$\left[
+\begin{array}{cc}
+0 & 0 \\
+0 & 0
+\end{array}
+\right]
+=
+\left[
+\begin{array}{ccccccc}
+0&0& \tau\sigma_1 2^d & 0 & 0&0& 0 \\
+0&0& 0 & \tau\sigma_2 2^d & 0&0& 0
+\end{array}
+\right]\Phi + U$$
+
+\item Dummies for the coefficients on the third lag:
+$$\left[
+\begin{array}{cc}
+0 & 0 \\
+0 & 0 
+\end{array}
+\right]
+=
+\left[
+\begin{array}{ccccccc}
+0&0& 0&0& \tau\sigma_1 3^d & 0 & 0 \\
+0&0& 0&0& 0 & \tau\sigma_2 3^d & 0 \\
+\end{array}
+\right]\Phi + U$$
+
+\item The prior for the covariance matrix is implemented by:
+$$\left[
+\begin{array}{cc}
+\sigma_1 & 0 \\
+0 & \sigma_2
+\end{array}
+\right]
+=
+\left[
+\begin{array}{ccccccc}
+0&0& 0&0& 0&0& 0 \\
+0&0& 0&0& 0&0& 0
+\end{array}
+\right]\Phi + U$$
+
+These observations are replicated $\omega$ times.
+
+\item Co-persistence prior dummy observation, reflecting the belief that when data on all $y$'s are stable at their initial levels, they will tend to persist at that level:
+
+$$\left[
+\begin{array}{cc}
+\lambda\bar{y}_1 & \lambda\bar{y}_2
+\end{array}
+\right]
+=
+\left[
+\begin{array}{ccccccc}
+\lambda\bar{y}_1 & \lambda\bar{y}_2 & \lambda\bar{y}_1 & \lambda\bar{y}_2 & \lambda\bar{y}_1 & \lambda\bar{y}_2 & \lambda
+\end{array}
+\right]\Phi + U$$
+
+\textit{Note:} in the implementation, if $\lambda < 0$, the exogenous variables will not be included in the dummy. In that case, the dummy observation becomes:
+$$\left[
+\begin{array}{cc}
+-\lambda\bar{y}_1 & -\lambda\bar{y}_2
+\end{array}
+\right]
+=
+\left[
+\begin{array}{ccccccc}
+-\lambda\bar{y}_1 & -\lambda\bar{y}_2 & -\lambda\bar{y}_1 & -\lambda\bar{y}_2 & -\lambda\bar{y}_1 & -\lambda\bar{y}_2 & 0
+\end{array}
+\right]\Phi + U$$
+
+\item Own-persistence prior dummy observations, reflecting the belief that when $y_i$ has been
+stable at its initial level, it will tend to persist at that level, regardless of the value of
+other variables:
+
+$$\left[
+\begin{array}{cc}
+\mu\bar{y}_1 & 0 \\
+0 & \mu\bar{y}_2
+\end{array}
+\right]
+=
+\left[
+\begin{array}{ccccccc}
+\mu\bar{y}_1 & 0 & \mu\bar{y}_1 &0 & \mu\bar{y}_1 & 0 & 0 \\
+0 & \mu\bar{y}_2 & 0 & \mu\bar{y}_2 & 0 &\mu\bar{y}_2 & 0
+\end{array}
+\right]\Phi + U$$
+
+
+\end{itemize}
+
+This makes a total of $T^* = ny\cdot p + ny\cdot\omega + 1 + ny = ny\cdot(p+\omega+1)+1$ dummy observations.
+
+\subsection{Training sample prior}
+
+The third component of the prior is constructed from the likelihood of $T^-$ observations $(Y^-,X^-)$ extracted from the beginning of the sample:
+
+$$p_3(\Phi, \Sigma) \propto |\Sigma|^{-T^-/2} \exp\left\{-\frac{1}{2}Tr(\Sigma^{-1}(Y^--X^-\Phi)'(Y^--X^-\Phi))\right\}$$
+
+In other words, the complete sample is divided in two parts such that $T = T^- + T^+$,
+$Y = \left[
+\begin{array}{c}
+Y^- \\
+Y^+
+\end{array}
+\right]$ and
+$X = \left[
+\begin{array}{c}
+X^- \\
+X^+
+\end{array}
+\right]$.
+
+The size of the training sample $T^-$ is controlled by option \texttt{bvar\_prior\_train}. It is null by default.
+
+\section{Characterization of the prior and posterior distributions}
+
+\textit{Notation:} in the following, we will use a small ``$p$'' as superscript for notations related to the prior, and a capital ``$P$'' for notations related to the posterior.
+
+\subsection{Prior distribution}
+\label{prior-distrib}
+
+We define the following notations:
+\begin{itemize}
+\item $T^p = T^* + T^-$
+\item
+$Y^p = \left[
+\begin{array}{c}
+Y^* \\
+Y^-
+\end{array}
+\right]$
+\item
+$X^p = \left[
+\begin{array}{c}
+X^* \\
+X^-
+\end{array}
+\right]$
+\item $\df^p = T^p - k$ if $p_1$ is Jeffrey's prior, or $\df^p = T^p - k - ny - 1$ if $p_1$ is a constant
+\end{itemize}
+
+With these notations, one can see that the prior is:
+\begin{eqnarray*}
+p(\Phi, \Sigma) & = & p_1(\Phi, \Sigma)\cdot p_2(\Phi, \Sigma)\cdot p_3(\Phi, \Sigma) \\
+& \propto & |\Sigma|^{-(\df^p + ny + 1 + k)/2} \exp\left\{-\frac{1}{2}Tr(\Sigma^{-1}(Y^p-X^p\Phi)'(Y^p-X^p\Phi))\right\}
+\end{eqnarray*}
+
+We define the following notations:
+\begin{itemize}
+\item $\hat{\Phi^p} = ({X^p}'X^p)^{-1} {X^p}' Y^p$ the linear regression of $X^p$ on $Y^p$
+\item $S^p = (Y^p - X^p\hat{\Phi^p})'(Y^p - X^p\hat{\Phi^p})$
+\end{itemize}
+
+After some manipulations, one obtains:
+
+\begin{eqnarray*}
+p(\Phi, \Sigma) & \propto & |\Sigma|^{-(\df^p + ny + 1 + k)/2} \exp\left\{-\frac{1}{2}Tr(\Sigma^{-1}(S^p + (\Phi-\hat{\Phi^p})'{X^p}'X^p(\Phi-\hat{\Phi^p})))\right\} \\
+& \propto & |\Sigma|^{-(\df^p + ny + 1)/2} \exp\left\{-\frac{1}{2}Tr(\Sigma^{-1}S^p)\right\} \times \\
+& & |\Sigma|^{-k/2}\exp\left\{-\frac{1}{2}Tr(\Sigma^{-1}(\Phi-\hat{\Phi^p})'{X^p}'X^p(\Phi-\hat{\Phi^p})))\right\}
+\end{eqnarray*}
+
+From the above decomposition, one can see that the prior distribution is such that:
+\begin{itemize}
+\item $\Sigma$ is distributed according to an inverse-Wishart distribution, with $\df^p$ degrees of freedom and parameter $S^p$
+\item conditionally to $\Sigma$, matrix $\Phi$ is distributed according to a matrix-normal distribution, with mean $\hat{\Phi^p}$ and variance-covariance parameters $\Sigma$ and $({X^p}'X^p)^{-1}$
+\end{itemize}
+
+\emph{Remark concerning the degrees of freedom of the inverse-Wishart:} the inverse-Wishart distribution requires the number of degrees of freedom to be greater or equal than the number of variables, i.e. $\df^p \geq ny$. When the \texttt{bvar\_prior\_flat} option is not specified, we have:
+$$\df^p = T^p - k = ny\cdot(p+\omega+1)+1+T^--ny\cdot p-nx = ny\cdot(\omega+1)+T^-$$
+so that the condition is always fulfilled. When \texttt{bvar\_prior\_flat} option is specified, we have:
+$$\df^p = ny\cdot w + T^- - 1$$
+so that with the defaults ($\omega = 1$ and $T^- = 0$) the condition is not met. The user needs to increase either \texttt{bvar\_prior\_omega} or \texttt{bvar\_prior\_train}.
+
+\subsection{Posterior distribution}
+
+Using Bayes formula, the posterior density is given by:
+
+\begin{equation}
+\label{bayes-formula}
+p(\Phi, \Sigma | Y^+, X^+) = \frac{p(Y^+ | \Phi, \Sigma, X^+) \cdot p(\Phi, \Sigma)}{p(Y^+ | X^+)}
+\end{equation}
+
+The posterior kernel is:
+
+$$p(\Phi, \Sigma | Y^+, X^+) \propto p(Y^+ | \Phi, \Sigma, X^+) \cdot p(\Phi, \Sigma)$$
+
+Since the likelihood is given by:
+
+$$p(Y^+ | \Phi, \Sigma, X^+) = (2\pi)^{-\frac{T^+ \cdot ny}{2}} |\Sigma|^{\frac{T^+}{2}} \exp\left\{-\frac{1}{2}Tr(\Sigma^{-1}(Y^+-X^+\Phi)'(Y^+-X^+\Phi))\right\}$$
+
+We obtain the following posterior kernel, when combining with the prior:
+
+$$p(\Phi, \Sigma | Y^+, X^+) \propto  |\Sigma|^{-(\df^P + ny + 1 + k)/2} \exp\left\{-\frac{1}{2}Tr(\Sigma^{-1}(Y^P-X^P\Phi)'(Y^P-X^P\Phi))\right\}$$
+
+where:
+\begin{itemize}
+\item $T^P = T^+ + T^p = T^+ + T^- + T^*$
+\item $Y^P = \left[
+\begin{array}{c}
+Y^p \\
+Y^+
+\end{array}
+\right]
+= \left[
+\begin{array}{c}
+Y^* \\
+Y^- \\
+Y^+
+\end{array}
+\right]$
+\item $X^P = \left[
+\begin{array}{c}
+X^p \\
+X^+
+\end{array}
+\right]
+= \left[
+\begin{array}{c}
+X^* \\
+X^- \\
+X^+
+\end{array}
+\right]$
+\item $\df^P = \df^p + T^+$. If $p_1$ is Jeffrey's prior, then $\df^P = T^P - k$. If $p_1$ is a constant, $\df^P = T^P - k - ny - 1$.
+\end{itemize}
+
+Using the same manipulations than for the prior, the posterior density can be rewritten as:
+\begin{eqnarray*}
+p(\Phi, \Sigma | Y^+, X^+) & \propto & |\Sigma|^{-(\df^P + ny + 1)/2} \exp\left\{-\frac{1}{2}Tr(\Sigma^{-1}S^P)\right\} \times \\
+& & |\Sigma|^{-k/2}\exp\left\{-\frac{1}{2}Tr(\Sigma^{-1}(\Phi-\hat{\Phi^P})'{X^P}'X^P(\Phi-\hat{\Phi^P})))\right\}
+\end{eqnarray*}
+where:
+\begin{itemize}
+\item $\hat{\Phi^P} = ({X^P}'X^P)^{-1} {X^P}' Y^P$ the linear regression of $X^P$ on $Y^P$
+\item $S^P = (Y^P - X^P\hat{\Phi^P})'(Y^P - X^P\hat{\Phi^P})$
+\end{itemize}
+
+From the above decomposition, one can see that the posterior distribution is such that:
+\begin{itemize}
+\item $\Sigma$ is distributed according to an inverse-Wishart distribution, with $\df^P$ degrees of freedom and parameter $S^P$
+\item conditionally to $\Sigma$, matrix $\Phi$ is distributed according to a matrix-normal distribution, with mean $\hat{\Phi^P}$ and variance-covariance parameters $\Sigma$ and $({X^P}'X^P)^{-1}$
+\end{itemize}
+
+\emph{Remark concerning the degrees of freedom of the inverse-Wishart:} in theory, the condition over the degrees of freedom of the inverse-Wishart may not be satisfied. In practice, it is not a problem, since $T^+$ is great.
+
+\section{Marginal density}
+
+By integrating equation (\ref{bayes-formula}) over $(\Phi, \Sigma)$, one gets:
+
+$$p(Y^+ | X^+) = \int p(Y^+ | \Phi, \Sigma, X^+) \cdot p(\Phi, \Sigma) d\Phi d\Sigma$$
+
+We define the following notation for the unnormalized density of a matrix-normal-inverse-Wishart:
+\begin{eqnarray*}
+f(\Phi,\Sigma | \df,S,\hat{\Phi},\Omega) & = & |\Sigma|^{-(\df + ny + 1)/2} \exp\left\{-\frac{1}{2}Tr(\Sigma^{-1}S)\right\} \times \\
+& & |\Sigma|^{-k/2}\exp\left\{-\frac{1}{2}Tr(\Sigma^{-1}(\Phi-\hat{\Phi})'\Omega^{-1}(\Phi-\hat{\Phi})))\right\}
+\end{eqnarray*}
+
+We also note:
+$$F(\df,S,\hat{\Phi},\Omega) = \int f(\Phi,\Sigma | \df,S,\hat{\Phi},\Omega)d\Phi d\Sigma$$
+
+The function $F$ has an analytical form, which is given by the normalization constants of matrix-normal and inverse-Wishart densities\footnote{Function \texttt{matricint} of file \texttt{bvar\_density.m} implements the calculation of the log of $F$.}:
+
+$$F(\df,S,\hat{\Phi},\Omega) = (2\pi)^{\frac{ny\cdot k}{2}} |\Omega|^{\frac{ny}{2}} \cdot 2^{\frac{ny\cdot \df}{2}} \pi^{\frac{ny(ny-1)}{4}} |S|^{-\frac{\df}{2}} \prod_{i=1}^{ny} \Gamma\left(\frac{\df + 1 - i}{2}\right) $$
+
+The prior density is:
+$$p(\Phi, \Sigma) = c^p \cdot f(\Phi,\Sigma | \df^p,S^p,\hat{\Phi^p},({X^p}'X^p)^{-1})$$
+where the normalization constant is $c^p = F(\df^p,S^p,\hat{\Phi^p},({X^p}'X^p)^{-1})$.
+
+
+
+Combining with the likelihood, one can see that the density is:
+
+\begin{eqnarray*}
+p(Y^+ | X^+) & = & \frac{\int (2\pi)^{-\frac{T^+\cdot ny}{2}} f(\Phi,\Sigma | \df^P,S^P,\hat{\Phi^P},({X^P}'X^P)^{-1})d\Phi d\Sigma}{F(\df^p,S^p,\hat{\Phi^p},({X^p}'X^p)^{-1})} \\
+& = & \frac{(2\pi)^{-\frac{T^+\cdot ny}{2}} F(\df^P,S^P,\hat{\Phi^P},({X^P}'X^P)^{-1})}{F(\df^p,S^p,\hat{\Phi^p},({X^p}'X^p)^{-1})}
+\end{eqnarray*}
+
+\section{Dynare commands}
+\label{dynare-commands}
+
+Dynare incorporates two commands related to BVAR models \`a la Sims:
+\begin{itemize}
+\item \texttt{bvar\_density} for computing marginal density,
+\item \texttt{bvar\_forecast} for forecasting (and RMSE computation).
+\end{itemize}
+
+\subsection{Common options}
+
+The two commands share a set of common options, which can be divided in two groups. They are described in the following subsections.
+
+\emph{An important remark concerning options:} in Dynare, all options are global. This means that, if you have set an option in a given command, Dynare will remember this setting for subsequent commands (unless you change it again). For example, if you call \texttt{bvar\_density} with option \texttt{bvar\_prior\_tau = 2}, then all subsequent \texttt{bvar\_density} and \texttt{bvar\_forecast} commands will assume a value of 2 for \texttt{bvar\_prior\_tau}, unless you redeclare it. This remark also applies to \texttt{datafile} and similar options, which means that you can run a BVAR estimation after a Dynare estimation without having to respecify the datafile.
+
+\subsubsection{Options related to the prior specification}
+
+They are:
+\begin{itemize}
+\item \texttt{bvar\_prior\_tau} (default: 3)
+\item \texttt{bvar\_prior\_decay} (default: 0.5)
+\item \texttt{bvar\_prior\_lambda} (default: 5)
+\item \texttt{bvar\_prior\_mu} (default: 2)
+\item \texttt{bvar\_prior\_omega} (default: 1)
+\item \texttt{bvar\_prior\_flat} (not enabled by default)
+\item \texttt{bvar\_prior\_train} (default: 0)
+\end{itemize}
+Please refer to section \ref{sec-prior} for the discussion of their meaning.
+
+
+\emph{Remark:} when option \texttt{bvar\_prior\_flat} is specified, the condition over the degrees of freedom of the inverse-Wishart distribution is not necessarily verified (see section \ref{prior-distrib}). One needs to increase either \texttt{bvar\_prior\_omega} or \texttt{bvar\_prior\_train} in that case.
+
+\subsubsection{Options related to the estimated dataset}
+
+The options related to the estimated dataset are the same than for the \texttt{estimation} command (please refer to the Dynare reference manual for more details):
+\begin{itemize}
+\item \texttt{datafile}
+\item \texttt{first\_obs}
+\item \texttt{presample}
+\item \texttt{nobs}
+\item \texttt{prefilter} (not yet implemented)
+\item \texttt{xls\_sheet}
+\item \texttt{xls\_range}
+\end{itemize}
+
+The (endogenous) variables of the BVAR model must be declared through a \texttt{varobs} statement (see Dynare reference manual).
+
+\emph{Restrictions related to the initialization of lags:} in DSGE estimation routines, the likelihood (and therefore the marginal density) are evaluated starting from the observation numbered \texttt{first\_obs + presample} in the datafile\footnote{\texttt{first\_obs} points to the first observation to be used in the datafile (defaults to 1), and \texttt{presample} indicates how many observations after \texttt{first\_obs} will be used to initialize the Kalman filter (defaults to 0).}. The BVAR estimation routines use the same convention (i.e. the first observation of $Y^+$ will be \texttt{first\_obs + presample}). Since we need $p$ observations to initialize the lags, and since we may also use a training sample, the user must ensure that the following condition holds (estimation will fail otherwise):
+$$\texttt{first\_obs} + \texttt{presample} > \texttt{bvar\_prior\_train} + \text{number\_of\_lags}$$
+
+
+
+\subsection{Marginal density}
+
+The syntax for computing the marginal density is:
+
+\medskip
+\texttt{bvar\_density(}\textit{options\_list}\texttt{) }\textit{max\_number\_of\_lags}\texttt{;}
+\medskip
+
+The options are those described above.
+
+The command will actually compute the marginal density for several models: first for the model with one lag, then with two lags, and so on up to \textit{max\_number\_of\_lags} lags.
+
+\subsection{Forecasting}
+
+The syntax for computing forecasts is:
+
+\medskip
+\texttt{bvar\_density(}\textit{options\_list}\texttt{) }\textit{max\_number\_of\_lags}\texttt{;}
+\medskip
+
+The options are those describe above, plus a few ones:
+\begin{itemize}
+\item \texttt{forecast}: the number of periods over which to compute forecasts after the end of the sample (no default)
+\item \texttt{bvar\_replic}: the number of replications for Monte-Carlo simulations (default: 2000)
+\item \texttt{conf\_sig}: confidence interval for graphs (default: 0.9)
+\end{itemize}
+
+The \texttt{forecast} option is mandatory.
+
+The command will draw \texttt{bvar\_replic} random samples from the posterior distribution. For each draw, it will simulate one path without shocks, and one path with shocks.
+
+It will produce one graph per observed variable. Each graph displays:
+\begin{itemize}
+\item a blue line for the mean forecast (equal to the mean of the simulated paths by linearity),
+\item two green lines giving the confidence interval for the forecasts without shocks,
+\item two red lines giving the confidence interval for the forecasts with shocks.
+\end{itemize}
+
+Morever, if option \texttt{nobs} is specified, the command will also compute root mean squared error (RMSE) for all variables between end of sample and end of datafile.
+
+\section{Examples}
+
+This section presents two short examples of BVAR estimations. These examples and the associated datafile (\texttt{test.xls}) can be found in the \texttt{tests/bvar\_a\_la\_sims} directory of the Dynare v4 subversion tree.
+
+\subsection{Standalone BVAR estimation}
+
+Here is a simple \texttt{mod} file example for a standalone BVAR estimation:
+
+\begin{verbatim}
+var dx dy;
+varobs dx dy;
+
+bvar_density(datafile = test, first_obs = 20, bvar_prior_flat,
+             bvar_prior_train = 10) 8;
+
+bvar_forecast(forecast = 10, bvar_replic = 10000, nobs = 200) 8;
+\end{verbatim}
+
+Note that you must declare twice the variables used in the estimation: first with a \texttt{var} statement, then with a \texttt{varobs} statement. This is necessary to have a syntactically correct \texttt{mod} file.
+
+The first component of the prior is flat. The prior also incorporates a training sample. Note that the \texttt{bvar\_prior\_*} options also apply to the second command since all options are global.
+
+The \texttt{bvar\_density} command will compute marginal density for all models from 1 up to 8 lags.
+
+The \texttt{bvar\_forecast} command will compute forecasts for a BVAR model with 8 lags, for 10 periods in the future, and with 10000 replications. Since \texttt{nobs} is specified and is such that \texttt{first\_obs + nobs - 1} is strictly less than the number of observations in the datafile, the command will also compute RMSE.
+
+\subsection{In parallel with a DSGE estimation}
+
+Here follows an example \texttt{mod} file, which performs both a DSGE and a BVAR estimation:
+
+\begin{verbatim}
+var dx dy;
+varexo e_x e_y;
+parameters rho_x rho_y;
+
+rho_x = 0.5;
+rho_y = -0.3;
+
+model;
+dx = rho_x*dx(-1)+e_x;
+dy = rho_y*dy(-1)+e_y;
+end;
+
+estimated_params;
+rho_x,NORMAL_PDF,0.5,0.1;
+rho_y,NORMAL_PDF,-0.3,0.1;
+stderr e_x,INV_GAMMA_PDF,0.01,inf;
+stderr e_y,INV_GAMMA_PDF,0.01,inf;
+end;
+
+varobs dx dy;
+
+check;
+
+estimation(datafile = test, mh_replic = 1200, mh_jscale = 1.3,
+           first_obs = 9);
+
+bvar_density 8;
+
+bvar_forecast(forecast = 10, bvar_replic = 2000, nobs = 200) 8;
+\end{verbatim}
+
+Note that the BVAR commands use the defaults for the prior, and take their \texttt{datafile} and \texttt{first\_obs} options from the \texttt{estimation} command.
+
+
+
+\section*{References}
+
+\noindent Doan, Thomas, Robert Litterman, and Christopher Sims (1984), ``\textit{Forecasting and Conditional Projections Using Realistic Prior Distributions}'', Econometric Reviews, \textbf{3}, 1-100
+
+Schorfheide, Frank (2004), ``\textit{Notes on Model Evaluation}'', Department of Economics, University of Pennsylvania
+
+Sims, Christopher (2003), ``\textit{Matlab Procedures to Compute Marginal Data Densities for VARs with Minnesota and Training Sample Priors}'', Department of Economics, Princeton University
+
+\section*{Acknowledgements}
+
+Many thanks to Christopher Sims for his BVAR Matlab routines, and to St\'ephane Adjemian and Michel Juillard for their helpful support.
+
+\section*{License}
+
+Permission is granted to copy, distribute and/or modify this document under the terms of the GNU Free Documentation License, Version 1.2 or any later version published by the Free Software Foundation; with no Invariant Sections, no Front-Cover Texts, and no Back-Cover Texts.
+
+A copy of the license can be found at:
+\url{http://www.gnu.org/licenses/fdl.txt}
+
+\end{document}
+
