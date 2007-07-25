@@ -10,6 +10,10 @@ np  = estim_params_.np;
 nx = nvx+nvn+ncx+ncn+np;
 ns = nvx+nvn+ncx+ncn;
 
+NumberOfObservedVariables = size(options_.varobs,1);
+NumberOfLags = options_.varlag;
+k = NumberOfObservedVariables*NumberOfLags ;
+
 info = [ ];
 
 mYY = evalin('base', 'mYY');
@@ -30,13 +34,15 @@ nobs = size(options_.varobs,1);
 if options_.mode_compute ~= 1 & any(xparam1 < bayestopt_.lb)
     k = find(xparam1 < bayestopt_.lb);
     fval = bayestopt_.penalty*min(1e3,exp(sum(bayestopt_.lb(k)-xparam1(k))));
+    info = 41;
     cost_flag = 0;
     return;
 end
 
 if options_.mode_compute ~= 1 & any(xparam1 > bayestopt_.ub)
     k = find(xparam1 > bayestopt_.ub);
-    fval = bayestopt_.penalty*min(1e3,exp(sum(xparam1(k)-bayestopt_.ub(k))));
+    fval = bayestopt_.penalty*min(1e3,exp(sum(xparam1(k)- bayestopt_.ub(k))));
+    info = 42;
     cost_flag = 0;
     return;
 end
@@ -50,59 +56,22 @@ offset = estim_params_.nvx;
 if estim_params_.nvn
     disp('DsgeVarLikelihood :: Measurement errors are not implemented!')
     return
-% $$$     H = zeros(nobs,nobs);
-% $$$     for i=1:estim_params_.nvn
-% $$$         k = estim_params_.var_endo(i,1);
-% $$$         H(k,k) = xparam1(i+offset)*xparam1(i+offset);
-% $$$     end
-% $$$     offset = offset+estim_params_.nvn;
 end 
 if estim_params_.ncx
-    for i=1:estim_params_.ncx
-        k1 =estim_params_.corrx(i,1);
-        k2 =estim_params_.corrx(i,2);
-        Q(k1,k2) = xparam1(i+offset)*sqrt(Q(k1,k1)*Q(k2,k2));
-        Q(k2,k1) = Q(k1,k2);
-    end
-    [CholQ,testQ] = chol(Q);
-    if testQ%% The variance-covariance matrix of the structural innovations is not definite positive.
-            %% We have to compute the eigenvalues of this matrix in order to build the penalty.
-        a = eig(Q);
-        k = a<0;
-        if k > 0
-            fval = bayestopt_.penalty*min(1e3,exp(sum(-a(k))));
-            cost_flag = 0;
-            return
-        end
-    end
-    offset = offset+estim_params_.ncx;
-end
-if estim_params_.nvn & estim_params_.ncn 
-    disp('DsgeVarLikelihood :: Measurement errors are not implemented!')
+    disp('DsgeVarLikelihood :: Correlated structural innovations are not yet implemented!')
     return
-% $$$     for i=1:estim_params_.ncn
-% $$$         k1 = options_.lgyidx2varobs(estim_params_.corrn(i,1));
-% $$$         k2 = options_.lgyidx2varobs(estim_params_.corrn(i,2));
-% $$$         H(k1,k2) = xparam1(i+offset)*sqrt(H(k1,k1)*H(k2,k2));
-% $$$         H(k2,k1) = H(k1,k2);
-% $$$     end
-% $$$     [CholH,testH] = chol(H);
-% $$$     if testH
-% $$$         a = eig(H);
-% $$$         k = a<0;
-% $$$         if k > 0
-% $$$             fval = bayestopt_.penalty*min(1e3,exp(sum(-a(k))));
-% $$$             cost_flag = 0;
-% $$$             return
-% $$$         end
-% $$$     end
-% $$$     offset = offset+estim_params_.ncn;
 end
+
 M_.params(estim_params_.param_vals(:,1)) = xparam1(offset+1:end);
 M_.Sigma_e = Q;
+
 %% Weight of the dsge prior:
 dsge_prior_weight = M_.params(strmatch('dsge_prior_weight',M_.param_names));
-
+if dsge_prior_weight<(k+NumberOfObservedVariables)/nobs;
+    fval = bayestopt_.penalty*min(1e3,(k+NumberOfObservedVariables)/nobs-dsge_prior_weight);
+    cost_flag = 0;
+    return;
+end
 
 %------------------------------------------------------------------------------
 % 2. call model setup & reduction program
@@ -127,8 +96,6 @@ end
 if bayestopt_.with_trend == 1
     disp('DsgeVarLikelihood :: Linear trend is not yet implemented!')
     return
-% $$$ else
-% $$$     trend = constant*ones(1,gend);
 end
 
 %------------------------------------------------------------------------------
@@ -139,15 +106,6 @@ tmp = lyapunov_symm(T,R*Q*R');% I compute the variance-covariance matrix
 bayestopt_.mf = bayestopt_.mf1;
 mf  = bayestopt_.mf1;
 
-NumberOfObservedVariables = size(options_.varobs,1);
-NumberOfLags = options_.varlag;
-k = NumberOfObservedVariables*NumberOfLags ;
-
-if dsge_prior_weight<(k+NumberOfObservedVariables)/nobs;
-    fval = bayestopt_.penalty*min(1e3,(k+NumberOfObservedVariables)/nobs-dsge_prior_weight);
-    cost_flag = 0;
-    return;
-end
 
 TheoreticalAutoCovarianceOfTheObservedVariables = ...
     zeros(NumberOfObservedVariables,NumberOfObservedVariables,NumberOfLags+1);
@@ -181,6 +139,14 @@ if ~isinf(dsge_prior_weight)
   tmp1 = dsge_prior_weight*gend*GYX + mYX;
   tmp2 = inv(dsge_prior_weight*gend*GXX+mXX);
   SIGMAu = SIGMAu - tmp1*tmp2*tmp1';
+  if ~ispd(SIGMAu)
+      v = diag(SIGMAu);
+      k = find(v<0);
+      fval = bayestopt_.penalty*min(1e3,exp(abs(v(k))));
+      info = 51;
+      cost_flag = 0;
+    return;      
+  end
   SIGMAu = SIGMAu / (gend*(dsge_prior_weight+1));
   PHI = tmp2*tmp1';
   prodlng1 = sum(gammaln(.5*((1+dsge_prior_weight)*gend- ...
