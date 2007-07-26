@@ -14,8 +14,6 @@ NumberOfObservedVariables = size(options_.varobs,1);
 NumberOfLags = options_.varlag;
 k = NumberOfObservedVariables*NumberOfLags ;
 
-info = [ ];
-
 mYY = evalin('base', 'mYY');
 mYX = evalin('base', 'mYX');
 mXY = evalin('base', 'mXY');
@@ -69,6 +67,7 @@ M_.Sigma_e = Q;
 dsge_prior_weight = M_.params(strmatch('dsge_prior_weight',M_.param_names));
 if dsge_prior_weight<(k+NumberOfObservedVariables)/nobs;
     fval = bayestopt_.penalty*min(1e3,(k+NumberOfObservedVariables)/nobs-dsge_prior_weight);
+    info = 51
     cost_flag = 0;
     return;
 end
@@ -143,7 +142,7 @@ if ~isinf(dsge_prior_weight)
       v = diag(SIGMAu);
       k = find(v<0);
       fval = bayestopt_.penalty*min(1e3,exp(abs(v(k))));
-      info = 51;
+      info = 52;
       cost_flag = 0;
     return;      
   end
