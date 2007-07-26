@@ -12,7 +12,7 @@ ns = nvx+nvn+ncx+ncn;
 
 NumberOfObservedVariables = size(options_.varobs,1);
 NumberOfLags = options_.varlag;
-k = NumberOfObservedVariables*NumberOfLags ;
+NumberOfParameters = NumberOfObservedVariables*NumberOfLags ;
 
 mYY = evalin('base', 'mYY');
 mYX = evalin('base', 'mYX');
@@ -23,11 +23,8 @@ fval = [];
 cost_flag = [];
 ys = [];
 trend_coeff = [];
-
 xparam1_test = xparam1;
-
 cost_flag  = 1;
-nobs = size(options_.varobs,1);
 
 if options_.mode_compute ~= 1 & any(xparam1 < bayestopt_.lb)
     k = find(xparam1 < bayestopt_.lb);
@@ -65,8 +62,8 @@ M_.Sigma_e = Q;
 
 %% Weight of the dsge prior:
 dsge_prior_weight = M_.params(strmatch('dsge_prior_weight',M_.param_names));
-if dsge_prior_weight<(k+NumberOfObservedVariables)/nobs;
-    fval = bayestopt_.penalty*min(1e3,(k+NumberOfObservedVariables)/nobs-dsge_prior_weight);
+if dsge_prior_weight<(NumberOfParameters+NumberOfObservedVariables)/gend;
+    fval = bayestopt_.penalty*min(1e3,(NumberOfParameters+NumberOfObservedVariables)/gend-dsge_prior_weight);
     info = 51
     cost_flag = 0;
     return;
@@ -113,7 +110,7 @@ for lag = 1:NumberOfLags
   tmp = T*tmp;
   TheoreticalAutoCovarianceOfTheObservedVariables(:,:,lag+1) = tmp(mf,mf);
 end
-GYX = zeros(NumberOfObservedVariables,k);
+GYX = zeros(NumberOfObservedVariables,NumberOfParameters);
 for i=1:NumberOfLags
   GYX(:,(i-1)*NumberOfObservedVariables+1:i*NumberOfObservedVariables) = ...
       TheoreticalAutoCovarianceOfTheObservedVariables(:,:,i+1);
@@ -155,12 +152,12 @@ if ~isinf(dsge_prior_weight)
 			     NumberOfObservedVariables*NumberOfLags ...
 			     +1-(1:NumberOfObservedVariables)')));  
   lik = .5*NumberOfObservedVariables*log(det(dsge_prior_weight*gend*GXX+mXX)) ...
-	+ .5*((dsge_prior_weight+1)*gend-k)*log(det((dsge_prior_weight+1)*gend*SIGMAu)) ...
+	+ .5*((dsge_prior_weight+1)*gend-NumberOfParameters)*log(det((dsge_prior_weight+1)*gend*SIGMAu)) ...
 	- .5*NumberOfObservedVariables*log(det(dsge_prior_weight*gend*GXX)) ...
-	- .5*(dsge_prior_weight*gend-k)*log(det(dsge_prior_weight*gend*(GYY-GYX*inv(GXX)*GYX'))) ...
+	- .5*(dsge_prior_weight*gend-NumberOfParameters)*log(det(dsge_prior_weight*gend*(GYY-GYX*inv(GXX)*GYX'))) ...
 	+ .5*NumberOfObservedVariables*gend*log(2*pi)  ...
-	- .5*log(2)*NumberOfObservedVariables*((dsge_prior_weight+1)*gend-k) ...
-	+ .5*log(2)*NumberOfObservedVariables*(dsge_prior_weight*gend-k) ...
+	- .5*log(2)*NumberOfObservedVariables*((dsge_prior_weight+1)*gend-NumberOfParameters) ...
+	+ .5*log(2)*NumberOfObservedVariables*(dsge_prior_weight*gend-NumberOfParameters) ...
 	- prodlng1 + prodlng2;
 else % codé par SM (sûrement pas exact... Que font ici les moments empiriques ?).    
   tmp1 = GYX;
