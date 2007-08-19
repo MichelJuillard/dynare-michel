@@ -1222,7 +1222,7 @@ markowitz
  o_filter_step_ahead : FILTER_STEP_AHEAD EQUAL vec_int {driver.option_num("filter_step_ahead", $3);}
  o_constant : CONSTANT {driver.option_num("noconstant", "0");}
  o_noconstant : NOCONSTANT {driver.option_num("noconstant", "1");}
- o_mh_recover : MH_RECOVER {driver.option_num("load_mh_file", "-1");}
+ o_mh_recover : MH_RECOVER {driver.option_num("mh_recover", "1");}
  o_planner_discount : PLANNER_DISCOUNT EQUAL FLOAT_NUMBER {driver.option_num("planner_discount",$3);}
 
  o_bvar_prior_tau : BVAR_PRIOR_TAU EQUAL signed_float { driver.option_num("bvar_prior_tau", $3); }
