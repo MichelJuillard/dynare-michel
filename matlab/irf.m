@@ -1,6 +1,7 @@
 function y = irf(dr, e1, long, drop, replic, iorder)
   global M_ oo_ options_
 
+
   temps = repmat(dr.ys,1,M_.maximum_lag);
   y	= 0;
   
