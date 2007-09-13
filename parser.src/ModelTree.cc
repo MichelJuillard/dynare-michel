@@ -201,7 +201,7 @@ ModelTree::writeModelEquations(ostream &output, ExprNodeOutputType output_type) 
       rhs->writeOutput(output, output_type, temporary_terms);
       output << ";" << endl;
 
-      output << "residual" << LPAR(output_type) << eq + 1 << RPAR(output_type) << "= lhs-rhs;" << endl;
+      output << "residual" << LPAR(output_type) << eq + OFFSET(output_type) << RPAR(output_type) << "= lhs-rhs;" << endl;
     }
 }
 
@@ -750,7 +750,7 @@ ModelTree::writeDynamicCFile(const string &dynamic_basename) const
                     << "  }" << endl
                     << "  params = mxGetPr(mxGetFieldByNumber(M_, 0, mxGetFieldNumber(M_,\"params\")));" << endl
                     << "  /* Gets it_ from global workspace of Matlab */" << endl
-                    << "  /* it_ = (int) floor(mxGetScalar(mexGetVariable(\"global\", \"it_\")))-1; */" << endl
+                    << "  it_ = (int) mxGetScalar(mexGetVariable(\"global\", \"it_\"))-1;" << endl
                     << "  /* Call the C subroutines. */" << endl
                     << "  Dynamic(y, x, residual, g1, g2);" << endl
                     << "}" << endl;
@@ -784,8 +784,8 @@ ModelTree::writeStaticModel(ostream &StaticOutput) const
       if (variable_table.getType(var) == eEndogenous)
         {
           ostringstream g1;
-          g1 << "  g1" << LPAR(output_type) << eq + 1 << ", "
-             << variable_table.getSymbolID(var) + 1 << RPAR(output_type);
+          g1 << "  g1";
+          matrixHelper(g1, eq, variable_table.getSymbolID(var), output_type);
 
           jacobian_output << g1.str() << "=" << g1.str() << "+";
           d1->writeOutput(jacobian_output, output_type, temporary_terms);
@@ -810,21 +810,25 @@ ModelTree::writeStaticModel(ostream &StaticOutput) const
             int id1 = variable_table.getSymbolID(var1);
             int id2 = variable_table.getSymbolID(var2);
 
-            int col_nb = id1*symbol_table.endo_nbr+id2+1;
-            int col_nb_sym = id2*symbol_table.endo_nbr+id1+1;
+            int col_nb = id1*symbol_table.endo_nbr+id2;
+            int col_nb_sym = id2*symbol_table.endo_nbr+id1;
 
-            hessian_output << "  g2" << LPAR(output_type) << eq+1 << ", " << col_nb
-                           << RPAR(output_type) << " = ";
+            hessian_output << "  g2";
+            matrixHelper(hessian_output, eq, col_nb, output_type);
+            hessian_output << " = ";
             d2->writeOutput(hessian_output, output_type, temporary_terms);
             hessian_output << ";" << endl;
 
             // Treating symetric elements
             if (var1 != var2)
-              lsymetric <<  "  g2" << LPAR(output_type) << eq+1 << ", " << col_nb_sym
-                        << RPAR(output_type) << " = " <<  "g2" << LPAR(output_type)
-                        << eq+1 << ", " << col_nb << RPAR(output_type) << ";" << endl;
+              {
+                lsymetric <<  "  g2";
+                matrixHelper(lsymetric, eq, col_nb_sym, output_type);
+                lsymetric << " = " <<  "g2";
+                matrixHelper(lsymetric, eq, col_nb, output_type);
+                lsymetric << ";" << endl;
+              }
           }
-
       }
 
   // Writing ouputs
@@ -1744,8 +1748,8 @@ ModelTree::writeDynamicModel(ostream &DynamicOutput) const
         if (computeJacobianExo || variable_table.getType(var) == eEndogenous)
           {
             ostringstream g1;
-            g1 << "  g1" << LPAR(output_type) << eq + 1 << ", "
-               << variable_table.getSortID(var) + 1 << RPAR(output_type);
+            g1 << "  g1";
+            matrixHelper(g1, eq, variable_table.getSortID(var), output_type);
 
             jacobian_output << g1.str() << "=" << g1.str() << "+";
             d1->writeOutput(jacobian_output, output_type, temporary_terms);
@@ -1766,19 +1770,24 @@ ModelTree::writeDynamicModel(ostream &DynamicOutput) const
         int id1 = variable_table.getSortID(var1);
         int id2 = variable_table.getSortID(var2);
 
-        int col_nb = id1*nvars+id2+1;
-        int col_nb_sym = id2*nvars+id1+1;
+        int col_nb = id1*nvars+id2;
+        int col_nb_sym = id2*nvars+id1;
 
-        hessian_output << "  g2" << LPAR(output_type) << eq+1 << ", " << col_nb
-                       << RPAR(output_type) << " = ";
+        hessian_output << "  g2";
+        matrixHelper(hessian_output, eq, col_nb, output_type);
+        hessian_output << " = ";
         d2->writeOutput(hessian_output, output_type, temporary_terms);
         hessian_output << ";" << endl;
 
         // Treating symetric elements
         if (id1 != id2)
-          lsymetric <<  "  g2" << LPAR(output_type) << eq+1 << ", " << col_nb_sym
-                    << RPAR(output_type) << " = " <<  "g2" << LPAR(output_type) << eq+1
-                    << ", " << col_nb << RPAR(output_type) << ";" << endl;
+          {
+            lsymetric <<  "  g2";
+            matrixHelper(lsymetric, eq, col_nb_sym, output_type);
+            lsymetric << " = " <<  "g2";
+            matrixHelper(lsymetric, eq, col_nb, output_type);
+            lsymetric << ";" << endl;
+          }
       }
 
   // Writing third derivatives
@@ -1797,27 +1806,31 @@ ModelTree::writeDynamicModel(ostream &DynamicOutput) const
         int id3 = variable_table.getSortID(var3);
 
         // Reference column number for the g3 matrix
-        int ref_col = id1 * nvars_sq + id2 * nvars + id3 + 1;
+        int ref_col = id1 * nvars_sq + id2 * nvars + id3;
 
-        third_derivatives_output << "  g3" << LPAR(output_type) << eq+1 << ", " << ref_col
-                                 << RPAR(output_type) << " = ";
+        third_derivatives_output << "  g3";
+        matrixHelper(third_derivatives_output, eq, ref_col, output_type);
+        third_derivatives_output << " = ";
         d3->writeOutput(third_derivatives_output, output_type, temporary_terms);
         third_derivatives_output << ";" << endl;
 
         // Compute the column numbers for the 5 other permutations of (id1,id2,id3) and store them in a set (to avoid duplicates if two indexes are equal)
         set<int> cols;
-        cols.insert(id1 * nvars_sq + id3 * nvars + id2 + 1);
-        cols.insert(id2 * nvars_sq + id1 * nvars + id3 + 1);
-        cols.insert(id2 * nvars_sq + id3 * nvars + id1 + 1);
-        cols.insert(id3 * nvars_sq + id1 * nvars + id2 + 1);
-        cols.insert(id3 * nvars_sq + id2 * nvars + id1 + 1);
+        cols.insert(id1 * nvars_sq + id3 * nvars + id2);
+        cols.insert(id2 * nvars_sq + id1 * nvars + id3);
+        cols.insert(id2 * nvars_sq + id3 * nvars + id1);
+        cols.insert(id3 * nvars_sq + id1 * nvars + id2);
+        cols.insert(id3 * nvars_sq + id2 * nvars + id1);
 
         for(set<int>::iterator it2 = cols.begin(); it2 != cols.end(); it2++)
           if (*it2 != ref_col)
-            third_derivatives_output << "  g3" << LPAR(output_type) << eq+1 << ", " << *it2
-                                     << RPAR(output_type) << " = " << "g3" << LPAR(output_type)
-                                     << eq+1 << ", " << ref_col << RPAR(output_type)
-                                     << ";" << endl;
+            {
+              third_derivatives_output << "  g3";
+              matrixHelper(third_derivatives_output, eq, *it2, output_type);
+              third_derivatives_output << " = " << "g3";
+              matrixHelper(third_derivatives_output, eq, ref_col, output_type);
+              third_derivatives_output << ";" << endl;
+            }
       }
 
   if (mode == eStandardMode)
@@ -2167,4 +2180,15 @@ ModelTree::writeDynamicFile(const string &basename) const
       writeSparseDLLDynamicHFile(basename + "_dynamic");
       break;
     }
+}
+
+void
+ModelTree::matrixHelper(ostream &output, int eq_nb, int col_nb, ExprNodeOutputType output_type) const
+{
+  output << LPAR(output_type);
+  if (OFFSET(output_type))
+    output << eq_nb + 1 << ", " << col_nb + 1;
+  else
+    output << eq_nb + col_nb * equations.size();
+  output << RPAR(output_type);
 }
