@@ -2123,7 +2123,7 @@ namespace yy
 
   case 524:
 #line 1225 "DynareBison.yy"
-    {driver.option_num("load_mh_file", "-1");;}
+    {driver.option_num("mh_recover", "1");;}
     break;
 
   case 525:
