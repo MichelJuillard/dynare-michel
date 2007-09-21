@@ -48,7 +48,7 @@ function bvar_forecast(nlags)
         lags_data = forecast_data.initval;
         for t = 1:options_.forecast
             X = [ reshape(flipdim(lags_data, 1)', 1, ny*nlags) forecast_data.xdata(t, :) ];
-            y = X * Phi;
+            y = X(:,1:k) * Phi;
             lags_data = [ lags_data(2:end, :); y ];
             sims_no_shock(t, :, d) = y;
         end
@@ -58,7 +58,7 @@ function bvar_forecast(nlags)
         for t = 1:options_.forecast
             X = [ reshape(flipdim(lags_data, 1)', 1, ny*nlags) forecast_data.xdata(t, :) ];
             shock = (Sigma_lower_chol * randn(ny, 1))';
-            y = X * Phi + shock;
+            y = X(:,1:k) * Phi + shock;
             lags_data = [ lags_data(2:end, :); y ];
             sims_with_shocks(t, :, d) = y;
         end

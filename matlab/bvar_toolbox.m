@@ -39,10 +39,10 @@ function [ny, nx, posterior, prior, forecast_data] = bvar_toolbox(nlags)
     
     global options_
     
-    % Prepare dataset
+    % Load dataset
     dataset = read_variables(options_.datafile, options_.varobs, [], options_.xls_sheet, options_.xls_range);
     options_ = set_default_option(options_, 'nobs', size(dataset,1)-options_.first_obs+1);
-
+    
     % Parameters for prior
     options_ = set_default_option(options_, 'bvar_prior_tau', 3);
     options_ = set_default_option(options_, 'bvar_prior_decay', 0.5);
@@ -61,6 +61,16 @@ function [ny, nx, posterior, prior, forecast_data] = bvar_toolbox(nlags)
     if options_.first_obs + options_.presample - train <= nlags
         error('first_obs+presample-train should be > nlags (for initializating the VAR)')
     end
+
+    idx = options_.first_obs+options_.presample-train-nlags:options_.first_obs+options_.nobs-1;
+    
+    % Prepare dataset
+    if options_.loglinear & ~options_.logdata
+        dataset = log(dataset);
+    end
+    if options_.prefilter
+        dataset = dataset(idx,:) - ones(length(idx),1)*mean(dataset(idx,:));
+    end
     
     mnprior.tight = options_.bvar_prior_tau;
     mnprior.decay = options_.bvar_prior_decay;
@@ -74,13 +84,21 @@ function [ny, nx, posterior, prior, forecast_data] = bvar_toolbox(nlags)
     flat = options_.bvar_prior_flat;
     
     ny = size(dataset, 2);
-    nx = 1;
+    if options_.prefilter | options_.noconstant
+        nx = 0;
+    else
+        nx = 1;
+    end
     
     [ydum, xdum, pbreaks] = varprior(ny, nx, nlags, mnprior, vprior);
     
-    ydata = dataset(options_.first_obs+options_.presample-train-nlags:options_.first_obs+options_.nobs-1, :);
+    ydata = dataset(idx, :);
     T = size(ydata, 1);
-    xdata = ones(T, 1);
+    if nx
+        xdata = ones(T,1);
+    else
+        xdata = [];
+    end
 
     % Posterior density
     var = rfvar3([ydata; ydum], nlags, [xdata; xdum], [T; T+pbreaks], lambda, mu);
@@ -93,8 +111,12 @@ function [ny, nx, posterior, prior, forecast_data] = bvar_toolbox(nlags)
     
     % Prior density
     Tp = train + nlags;
-    varp = rfvar3([ydata(1:Tp, :); ydum], nlags, [xdata(1:Tp, :); xdum], ...
-                  [Tp; Tp + pbreaks], lambda, mu);
+    if nx
+        xdata = xdata(1:Tp, :);
+    else
+        xdata = [];
+    end
+    varp = rfvar3([ydata(1:Tp, :); ydum], nlags, [xdata; xdum], [Tp; Tp + pbreaks], lambda, mu);
     Tup = size(varp.u, 1);
     
     prior.df = Tup - ny*nlags - nx - flat*(ny+1);
@@ -109,6 +131,8 @@ function [ny, nx, posterior, prior, forecast_data] = bvar_toolbox(nlags)
     % Add forecast informations
     if nargout >= 5
         forecast_data.xdata = ones(options_.forecast, nx);
+        % Useless if nx=0, but with the declaration of an empty matrix here we would have to add an if statement  
+        % inside a loop (see bvar_forecast.m).
         forecast_data.initval = ydata(end-nlags+1:end, :);
         if options_.first_obs + options_.nobs <= size(dataset, 1)
             forecast_data.realized_val = dataset(options_.first_obs+options_.nobs:end, :);
