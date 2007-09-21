@@ -94,11 +94,7 @@ function [ny, nx, posterior, prior, forecast_data] = bvar_toolbox(nlags)
     
     ydata = dataset(idx, :);
     T = size(ydata, 1);
-    if nx
-        xdata = ones(T,1);
-    else
-        xdata = [];
-    end
+    xdata = ones(T,nx);
 
     % Posterior density
     var = rfvar3([ydata; ydum], nlags, [xdata; xdum], [T; T+pbreaks], lambda, mu);
@@ -131,8 +127,6 @@ function [ny, nx, posterior, prior, forecast_data] = bvar_toolbox(nlags)
     % Add forecast informations
     if nargout >= 5
         forecast_data.xdata = ones(options_.forecast, nx);
-        % Useless if nx=0, but with the declaration of an empty matrix here we would have to add an if statement  
-        % inside a loop (see bvar_forecast.m).
         forecast_data.initval = ydata(end-nlags+1:end, :);
         if options_.first_obs + options_.nobs <= size(dataset, 1)
             forecast_data.realized_val = dataset(options_.first_obs+options_.nobs:end, :);
