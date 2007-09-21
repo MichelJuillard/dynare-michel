@@ -39,10 +39,14 @@ function [alphahat,etahat,epsilonhat,ahat,SteadyState,trend_coeff,aK,T,R] = Dsge
   %------------------------------------------------------------------------------
   [T,R,SteadyState] = dynare_resolve;
   bayestopt_.mf = bayestopt_.mf2;
-  if options_.loglinear == 1
-    constant = log(SteadyState(bayestopt_.mfys));
+  if options_.noconstant
+      constant = zeros(nobs,1);
   else
-    constant = SteadyState(bayestopt_.mfys);
+      if options_.loglinear == 1
+          constant = log(SteadyState(bayestopt_.mfys));
+      else
+          constant = SteadyState(bayestopt_.mfys);
+      end
   end
   trend_coeff = zeros(nobs,1);
   if bayestopt_.with_trend == 1

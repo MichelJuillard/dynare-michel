@@ -1021,15 +1021,18 @@ if ~((any(bayestopt_.pshape > 0) & options_.mh_replic) | (any(bayestopt_.pshape 
   %%
   %%	Smooth observational errors...
   %%
-  yf = zeros(gend,n_varobs);
-  if options_.prefilter == 1
-    yf = atT(bayestopt_.mf,:)+repmat(transpose(bayestopt_.mean_varobs),1,gend);
-  elseif options_.loglinear == 1
-    yf = atT(bayestopt_.mf,:)+repmat(log(ys(bayestopt_.mfys)),1,gend)+...
-         trend_coeff*[1:gend];
+  if options_.noconstant
+      yf = zeros(n_varobs,gend);
   else
-    yf = atT(bayestopt_.mf,:)+repmat(ys(bayestopt_.mfys),1,gend)+...
-         trend_coeff*[1:gend];
+      if options_.prefilter == 1
+          yf = atT(bayestopt_.mf,:)+repmat(transpose(bayestopt_.mean_varobs),1,gend);
+      elseif options_.loglinear == 1
+          yf = atT(bayestopt_.mf,:)+repmat(log(ys(bayestopt_.mfys)),1,gend)+...
+               trend_coeff*[1:gend];
+      else
+          yf = atT(bayestopt_.mf,:)+repmat(ys(bayestopt_.mfys),1,gend)+...
+               trend_coeff*[1:gend];
+      end
   end
   if nvn
     number_of_plots_to_draw = 0;
