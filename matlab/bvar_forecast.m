@@ -2,12 +2,14 @@ function bvar_forecast(nlags)
 
     global options_
     
+    nvar = size(options_.varobs,1);
+    
     options_ = set_default_option(options_, 'bvar_replic', 2000);
     if options_.forecast == 0
         error('bvar_forecast: you must specify "forecast" option')
     end
-
     [ny, nx, posterior, prior, forecast_data] = bvar_toolbox(nlags);
+
         
     sims_no_shock = NaN(options_.forecast, ny, options_.bvar_replic);
     sims_with_shocks = NaN(options_.forecast, ny, options_.bvar_replic);
@@ -20,7 +22,14 @@ function bvar_forecast(nlags)
     
     k = ny*nlags+nx;
     
-    for d = 1:options_.bvar_replic
+    % Declaration of the companion matrix:
+    Companion_matrix = diag(ones(nvar*(nlags-1),1),-nvar);
+    
+    p = 0;
+    d = 0;
+    while d<=options_.bvar_replic  
+        d = d+1;
+        
         Sigma = rand_inverse_wishart(ny, posterior.df, S_inv_upper_chol);
 
         % Option 'lower' of chol() not available in old versions of
@@ -28,6 +37,15 @@ function bvar_forecast(nlags)
         Sigma_lower_chol = chol(Sigma)';
 
         Phi = rand_matrix_normal(k, ny, posterior.PhiHat, XXi_lower_chol, Sigma_lower_chol);
+        
+        % All the eigenvalues of the companion matrix have to be on or inside the unit circle
+        Companion_matrix(1:nvar,:) = Phi(1:nvar*nlags,:)'; 
+        test = (abs(eig(Companion_matrix)));
+        if any(test>1.0000000000001)
+            p = p+1;
+            d = d-1;
+            continue
+        end
         
         % Without shocks
         lags_data = forecast_data.initval;
@@ -48,7 +66,12 @@ function bvar_forecast(nlags)
             sims_with_shocks(t, :, d) = y;
         end
     end
-
+    
+    disp('')
+    disp(['Some of the VAR models sampled from the posterior distribution'])
+    disp(['were found to be explosive (' int2str(p) ').'])
+    disp('')
+    
     % Plot graphs
     sims_no_shock_mean = mean(sims_no_shock, 3);
 
