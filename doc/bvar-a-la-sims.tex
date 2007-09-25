@@ -9,8 +9,8 @@
 \begin{document}
 
 \title{BVAR models ``\`a la Sims'' in Dynare}
-\author{S\'ebastien Villemot\thanks{Paris School of Economics and CEPREMAP. E-mail: \texttt{sebastien.villemot@ens.fr}}}
-\date{July 2007}
+\author{S\'ebastien Villemot\thanks{CEPREMAP. E-mail: \texttt{sebastien.villemot@ens.fr}}}
+\date{September 2007}
 
 \maketitle
 
@@ -35,7 +35,7 @@ where:
 \item $\alpha$ is a $nx\times ny$ matrix
 \end{itemize}
 
-Note: in the actual implementation, exogenous variables $x_t$ only include a constant, so that $nx = 1$ and $x'_t = (1, \ldots, 1)$.
+In the actual implementation, exogenous variables $x_t$ are either empty ($nx = 0$), or only include a constant (so that $nx = 1$ and $x'_t = (1, \ldots, 1)$). This alternative is controlled by options \texttt{constant} (the default) and \texttt{noconstant} (see section \ref{sec-model-prior-options}).
 
 The matrix form of the model is:
 $$Y = X\Phi + U$$
@@ -70,6 +70,7 @@ y_{T-1} & \ldots & y_{T-p} & x_T
 \alpha \\
 \end{array}
 \right]$$
+
 
 \section{Constructing the prior}
 \label{sec-prior}
@@ -419,9 +420,10 @@ The two commands share a set of common options, which can be divided in two grou
 
 \emph{An important remark concerning options:} in Dynare, all options are global. This means that, if you have set an option in a given command, Dynare will remember this setting for subsequent commands (unless you change it again). For example, if you call \texttt{bvar\_density} with option \texttt{bvar\_prior\_tau = 2}, then all subsequent \texttt{bvar\_density} and \texttt{bvar\_forecast} commands will assume a value of 2 for \texttt{bvar\_prior\_tau}, unless you redeclare it. This remark also applies to \texttt{datafile} and similar options, which means that you can run a BVAR estimation after a Dynare estimation without having to respecify the datafile.
 
-\subsubsection{Options related to the prior specification}
+\subsubsection{Options related to model and prior specifications}
+\label{sec-model-prior-options}
 
-They are:
+The options related to the prior are:
 \begin{itemize}
 \item \texttt{bvar\_prior\_tau} (default: 3)
 \item \texttt{bvar\_prior\_decay} (default: 0.5)
@@ -433,10 +435,13 @@ They are:
 \end{itemize}
 Please refer to section \ref{sec-prior} for the discussion of their meaning.
 
-
 \emph{Remark:} when option \texttt{bvar\_prior\_flat} is specified, the condition over the degrees of freedom of the inverse-Wishart distribution is not necessarily verified (see section \ref{prior-distrib}). One needs to increase either \texttt{bvar\_prior\_omega} or \texttt{bvar\_prior\_train} in that case.
 
+It is also possible to use either option \texttt{constant} or \texttt{noconstant}, to specify whether a constant term should be included in the BVAR model. The default is to include one.
+
 \subsubsection{Options related to the estimated dataset}
+
+The list of (endogenous) variables of the BVAR model has to be declared through a \texttt{varobs} statement (see Dynare reference manual).
 
 The options related to the estimated dataset are the same than for the \texttt{estimation} command (please refer to the Dynare reference manual for more details):
 \begin{itemize}
@@ -444,16 +449,17 @@ The options related to the estimated dataset are the same than for the \texttt{e
 \item \texttt{first\_obs}
 \item \texttt{presample}
 \item \texttt{nobs}
-\item \texttt{prefilter} (not yet implemented)
+\item \texttt{prefilter}
 \item \texttt{xls\_sheet}
 \item \texttt{xls\_range}
 \end{itemize}
 
-The (endogenous) variables of the BVAR model must be declared through a \texttt{varobs} statement (see Dynare reference manual).
+Note that option \texttt{prefilter} implies option \texttt{noconstant}.
+
+Please also note that if option \texttt{loglinear} had been specified in a previous \texttt{estimation} statement, without option \texttt{logdata}, then the BVAR model will be estimated on the log of the provided dataset, for maintaining coherence with the DSGE estimation procedure.
 
 \emph{Restrictions related to the initialization of lags:} in DSGE estimation routines, the likelihood (and therefore the marginal density) are evaluated starting from the observation numbered \texttt{first\_obs + presample} in the datafile\footnote{\texttt{first\_obs} points to the first observation to be used in the datafile (defaults to 1), and \texttt{presample} indicates how many observations after \texttt{first\_obs} will be used to initialize the Kalman filter (defaults to 0).}. The BVAR estimation routines use the same convention (i.e. the first observation of $Y^+$ will be \texttt{first\_obs + presample}). Since we need $p$ observations to initialize the lags, and since we may also use a training sample, the user must ensure that the following condition holds (estimation will fail otherwise):
 $$\texttt{first\_obs} + \texttt{presample} > \texttt{bvar\_prior\_train} + \text{number\_of\_lags}$$
-
 
 
 \subsection{Marginal density}
@@ -487,7 +493,9 @@ The \texttt{forecast} option is mandatory.
 
 The command will draw \texttt{bvar\_replic} random samples from the posterior distribution. For each draw, it will simulate one path without shocks, and one path with shocks.
 
-It will produce one graph per observed variable. Each graph displays:
+\emph{Note:} during the random sampling process, every draw such that the associated companion matrix has eigenvalues outside the unit circle will be discarded. This is meant to avoid explosive time series, especially when using a distant prediction horizon. Since this behaviour induces a distortion of the prior distribution, a message will be displayed if draws are thus discarded, indicating how many have been (knowing that the number of accepted draws is equal to \texttt{bvar\_replic}).
+
+The command will produce one graph per observed variable. Each graph displays:
 \begin{itemize}
 \item a blue line for the mean forecast (equal to the mean of the simulated paths by linearity),
 \item two green lines giving the confidence interval for the forecasts without shocks,
