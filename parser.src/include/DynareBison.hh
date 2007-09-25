@@ -375,7 +375,7 @@ namespace yy
     static const short int yytable_[];
     static const signed char yytable_ninf_;
 
-    static const unsigned short int yycheck_[];
+    static const short int yycheck_[];
 
     /// For a state, its accessing symbol.
     static const unsigned short int yystos_[];

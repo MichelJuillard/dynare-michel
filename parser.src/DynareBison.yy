@@ -1123,6 +1123,8 @@ markowitz
                     | o_presample
                     | o_nobs
                     | o_prefilter
+                    | o_constant
+                    | o_noconstant
                     ;
 
  bvar_density_options_list : bvar_common_option COMMA bvar_density_options_list
