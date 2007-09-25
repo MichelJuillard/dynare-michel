@@ -5,8 +5,8 @@ function [ny, nx, posterior, prior, forecast_data] = bvar_toolbox(nlags)
 %
 % Computes several things for the estimations of a BVAR(nlags):
 % ny:         number of endogenous variables
-% nx:         number of exogenous variables (actually equal to one, that is
-%             the constant term)
+% nx:         number of exogenous variables (equal to zero, or one if a
+%             constant term is included)
 % posterior:  a structure describing the posterior distribution (which is
 %             normal-Inverse-Wishart)
 %             Its fields are:
@@ -24,14 +24,14 @@ function [ny, nx, posterior, prior, forecast_data] = bvar_toolbox(nlags)
 %               observations of the sample (i.e. before options_.nobs)
 %             - xdata: a matrix containing the future exogenous for
 %               forecasting, of size options_.forecast*nx (actually only
-%               contains "1" values for the constant term)
+%               contains "1" values for the constant term if nx ~= 0)
 %             - realized_val: only non-empty if options_.nobs doesn't point
 %               to the end of sample    
 %               In that case, contains values of endogenous variables after
 %               options_.nobs and up to the end of the sample
 %             - realized_xdata: contains values of exogenous variables after
 %               options_.nobs and up to the end of the sample (actually only
-%               contains "1" values)
+%               contains "1" values for the constant term if nx ~= 0)
 %
 % This function uses the following Dynare options:
 % - datafile, first_obs, varobs, xls_sheet, xls_range, nobs, presample
@@ -130,7 +130,7 @@ function [ny, nx, posterior, prior, forecast_data] = bvar_toolbox(nlags)
         forecast_data.initval = ydata(end-nlags+1:end, :);
         if options_.first_obs + options_.nobs <= size(dataset, 1)
             forecast_data.realized_val = dataset(options_.first_obs+options_.nobs:end, :);
-            forecast_data.realized_xdata = ones(size(forecast_data.realized_val, 1), 1);
+            forecast_data.realized_xdata = ones(size(forecast_data.realized_val, 1), nx);
         else
             forecast_data.realized_val = [];
         end
