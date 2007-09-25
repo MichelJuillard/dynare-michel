@@ -69,7 +69,7 @@ function [ny, nx, posterior, prior, forecast_data] = bvar_toolbox(nlags)
         dataset = log(dataset);
     end
     if options_.prefilter
-        dataset = dataset(idx,:) - ones(length(idx),1)*mean(dataset(idx,:));
+        dataset(idx,:) = dataset(idx,:) - ones(length(idx),1)*mean(dataset(idx,:));
     end
     
     mnprior.tight = options_.bvar_prior_tau;
