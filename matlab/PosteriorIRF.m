@@ -123,7 +123,7 @@ if MAX_nirfs_dsgevar
         var_sample_moments(options_.first_obs,options_.first_obs+options_.nobs-1,options_.varlag,-1);
     NumberOfLags = options_.varlag;
     NumberOfLagsTimesNvobs = NumberOfLags*nvobs;
-    COMP_draw = diag(ones(nvobs*(NumberOfLags-1),1),-nvobs);
+    Companion_matrix = diag(ones(nvobs*(NumberOfLags-1),1),-nvobs);
 end
 b = 0;
 nosaddle = 0;
@@ -179,22 +179,18 @@ while b<=B
         [fval,cost_flag,ys,trend_coeff,info,PHI,SIGMAu,iXX] =  DsgeVarLikelihood(deep',gend);
         dsge_prior_weight = M_.params(strmatch('dsge_prior_weight',M_.param_names));
         DSGE_PRIOR_WEIGHT = floor(gend*(1+dsge_prior_weight));
-        tmp1 = SIGMAu*gend*(dsge_prior_weight+1);
-        val  = 1;
-        tmp1 = chol(inv(tmp1))'; 
-        while val;
-            % draw from the marginal posterior of sig
-            tmp2 = tmp1*randn(nvobs,DSGE_PRIOR_WEIGHT-NumberOfLagsTimesNvobs);
-            SIGMAu_draw = inv(tmp2*tmp2');
+        SIGMA_inv_upper_chol = chol(inv(SIGMAu*gend*(dsge_prior_weight+1))); 
+        explosive_var  = 1;
+        while explosive_var
+            % draw from the marginal posterior of SIGMA
+            SIGMAu_draw = rand_inverse_wishart(nvobs, DSGE_PRIOR_WEIGHT-NumberOfLagsTimesNvobs, ...
+                                               SIGMA_inv_upper_chol);
             % draw from the conditional posterior of PHI
-            VARvecPHI = kron(SIGMAu_draw,iXX);
-            PHI_draw  = PHI(:) + chol(VARvecPHI)'*randn(nvobs*NumberOfLagsTimesNvobs,1);
-            COMP_draw(1:nvobs,:) = reshape(PHI_draw,NumberOfLagsTimesNvobs,nvobs)';
+            PHI_draw = rand_matrix_normal(NumberOfLagsTimesNvobs,nvobs, PHI, ...
+                                           chol(iXX)', chol(SIGMAu_draw)');
+            Companion_matrix(1:nvobs,:) = transpose(PHI_draw);
             % Check for stationarity
-            tests = find(abs(eig(COMP_draw))>0.9999999999);
-            if isempty(tests)
-                val=0;
-            end
+            explosive_var = any(abs(eig(Companion_matrix))>1.000000001);
         end
         % Get rotation
         if dsge_prior_weight > 0
@@ -209,7 +205,7 @@ while b<=B
         tmp3 = PHIpower(1:nvobs,1:nvobs)*SIGMAtrOMEGA;
         irfs(1,:) = tmp3(:)';
         for t = 2:options_.irf
-            PHIpower = COMP_draw*PHIpower;
+            PHIpower = Companion_matrix*PHIpower;
             tmp3 = PHIpower(1:nvobs,1:nvobs)*SIGMAtrOMEGA;
             irfs(t,:)  = tmp3(:)';
         end            
@@ -222,7 +218,8 @@ while b<=B
             stock_irf_bvardsge(:,:,:,IRUN) = reshape(tmp_dsgevar,options_.irf,nvobs,M_.exo_nbr);
         else
             stock_irf_bvardsge(:,:,:,IRUN) = reshape(tmp_dsgevar,options_.irf,nvobs,M_.exo_nbr);
-            instr = [MhDirectoryName '/' M_.fname '_irf_bvardsge' int2str(NumberOfIRFfiles_dsgevar) ' stock_irf_bvardsge;'];,
+            instr = [MhDirectoryName '/' M_.fname '_irf_bvardsge' ...
+                     int2str(NumberOfIRFfiles_dsgevar) ' stock_irf_bvardsge;'];,
             eval(['save ' instr]);
             NumberOfIRFfiles_dsgevar = NumberOfIRFfiles_dsgevar+1; 
             IRUN =0;
@@ -234,7 +231,8 @@ while b<=B
             stock_irf_dsge = stock_irf_dsge(:,:,:,1:irun);
             if MAX_nirfs_dsgevar & (b == B | IRUN == B)
                 stock_irf_bvardsge = stock_irf_bvardsge(:,:,:,1:IRUN);
-                instr = [MhDirectoryName '/' M_.fname '_irf_bvardsge' int2str(NumberOfIRFfiles_dsgevar) ' stock_irf_bvardsge;'];,
+                instr = [MhDirectoryName '/' M_.fname '_irf_bvardsge' ...
+                         int2str(NumberOfIRFfiles_dsgevar) ' stock_irf_bvardsge;'];,
                 eval(['save ' instr]);
                 NumberOfIRFfiles_dsgevar = NumberOfIRFfiles_dsgevar+1;
                 irun = 0;
