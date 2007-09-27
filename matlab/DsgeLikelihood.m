@@ -115,8 +115,11 @@ function [fval,cost_flag,ys,trend_coeff,info] = DsgeLikelihood(xparam1,gend,data
   end
   if bayestopt_.with_trend == 1
     trend_coeff = zeros(nobs,1);
+    t = options_.trend_coeffs;
     for i=1:nobs
-      trend_coeff(i) = evalin('base',bayestopt_.trend_coeff{i});
+      if ~isempty(t{i})
+	trend_coeff(i) = evalin('base',t{i});
+      end
     end
     trend = repmat(constant,1,gend)+trend_coeff*[1:gend];
   else
