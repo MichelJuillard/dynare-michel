@@ -187,7 +187,7 @@ while b<=B
                                                SIGMA_inv_upper_chol);
             % draw from the conditional posterior of PHI
             PHI_draw = rand_matrix_normal(NumberOfLagsTimesNvobs,nvobs, PHI, ...
-                                           chol(iXX)', chol(SIGMAu_draw)');
+                                           chol(SIGMAu_draw)', chol(iXX)');
             Companion_matrix(1:nvobs,:) = transpose(PHI_draw);
             % Check for stationarity
             explosive_var = any(abs(eig(Companion_matrix))>1.000000001);

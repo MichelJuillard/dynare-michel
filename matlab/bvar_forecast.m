@@ -33,7 +33,7 @@ function bvar_forecast(nlags)
         % Matlab, so using transpose
         Sigma_lower_chol = chol(Sigma)';
 
-        Phi = rand_matrix_normal(k, ny, posterior.PhiHat, XXi_lower_chol, Sigma_lower_chol);
+        Phi = rand_matrix_normal(k, ny, posterior.PhiHat, Sigma_lower_chol, XXi_lower_chol);
         
         % All the eigenvalues of the companion matrix have to be on or inside the unit circle
         Companion_matrix(1:ny,:) = Phi(1:ny*nlags,:)'; 
