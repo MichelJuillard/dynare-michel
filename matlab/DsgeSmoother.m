@@ -52,7 +52,7 @@ function [alphahat,etahat,epsilonhat,ahat,SteadyState,trend_coeff,aK,T,R] = Dsge
   if bayestopt_.with_trend == 1
     trend_coeff = zeros(nobs,1);
     t = options_.trend_coeffs;
-    for i=1:nobs
+    for i=1:length(t)
       if ~isempty(t{i})
 	trend_coeff(i) = evalin('base',t{i});
       end
