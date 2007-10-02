@@ -205,6 +205,18 @@ PosteriorAnalysisStatement::writeOutput(ostream &output, const string &basename)
   output << "posterior_analysis(var_list_);\n";
 }
 
+DynareSensitivityStatement::DynareSensitivityStatement(const OptionsList &options_list_arg) :
+  options_list(options_list_arg)
+{
+}
+
+void
+DynareSensitivityStatement::writeOutput(ostream &output, const string &basename) const
+{
+  options_list.writeOutput(output);
+  output << "dynare_sensitivity;" << endl;
+}
+
 RplotStatement::RplotStatement(const TmpSymbolTable &tmp_symbol_table_arg,
                                const OptionsList &options_list_arg) :
   tmp_symbol_table(tmp_symbol_table_arg),

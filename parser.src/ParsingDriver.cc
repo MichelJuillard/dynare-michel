@@ -728,6 +728,13 @@ ParsingDriver::run_posterior_analysis()
 }
 
 void
+ParsingDriver::dynare_sensitivity()
+{
+  mod_file->addStatement(new DynareSensitivityStatement(options_list));
+  options_list.clear();
+}
+
+void
 ParsingDriver::optim_options_helper(const string &name)
 {
   if (options_list.string_options.find("optim_opt") == options_list.string_options.end())

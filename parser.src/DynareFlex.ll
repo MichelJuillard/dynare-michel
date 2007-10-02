@@ -83,8 +83,9 @@ int sigma_e = 0;
 
 <INITIAL>bvar_density {BEGIN DYNARE_STATEMENT; return token::BVAR_DENSITY; }
 <INITIAL>bvar_forecast {BEGIN DYNARE_STATEMENT; return token::BVAR_FORECAST; }
-
+<INITIAL>dynare_sensitivity {BEGIN DYNARE_STATEMENT; return token::DYNARE_SENSITIVITY;}
  /* End of a Dynare statement */
+
 <DYNARE_STATEMENT>; {
   if (!sigma_e)
     BEGIN INITIAL;
@@ -259,6 +260,41 @@ int sigma_e = 0;
 <DYNARE_STATEMENT,DYNARE_BLOCK>acosh {return token::ACOSH;}
 <DYNARE_STATEMENT,DYNARE_BLOCK>atanh {return token::ATANH;}
 <DYNARE_STATEMENT,DYNARE_BLOCK>sqrt  {return token::SQRT;}
+
+ /* options for GSA module by Marco Ratto */
+<DYNARE_STATEMENT>identification {return token::IDENTIFICATION;}
+<DYNARE_STATEMENT>morris {return token::MORRIS;}
+<DYNARE_STATEMENT>stab {return token::STAB;}
+<DYNARE_STATEMENT>redform {return token::REDFORM;}
+<DYNARE_STATEMENT>pprior {return token::PPRIOR;}
+<DYNARE_STATEMENT>prior_range {return token::PRIOR_RANGE;}
+<DYNARE_STATEMENT>ppost {return token::PPOST;}
+<DYNARE_STATEMENT>ilptau {return token::ILPTAU;}
+<DYNARE_STATEMENT>morris {return token::MORRIS;}
+<DYNARE_STATEMENT>glue {return token::GLUE;}
+<DYNARE_STATEMENT>morris_nliv {return token::MORRIS_NLIV;}
+<DYNARE_STATEMENT>morris_ntra {return token::MORRIS_NTRA;}
+<DYNARE_STATEMENT>Nsam {return token::NSAM;}
+<DYNARE_STATEMENT>load_redform {return token::LOAD_REDFORM;}
+<DYNARE_STATEMENT>load_rmse {return token::LOAD_RMSE;}
+<DYNARE_STATEMENT>load_stab {return token::LOAD_STAB;}
+<DYNARE_STATEMENT>alpha2_stab {return token::ALPHA2_STAB;}
+<DYNARE_STATEMENT>ksstat {return token::KSSTAT;}
+<DYNARE_STATEMENT>logtrans_redform {return token::LOGTRANS_REDFORM;}
+<DYNARE_STATEMENT>threshold_redform {return token::THRESHOLD_REDFORM;}
+<DYNARE_STATEMENT>ksstat_redform {return token::KSSTAT_REDFORM;}
+<DYNARE_STATEMENT>alpha2_redform {return token::ALPHA2_REDFORM;}
+<DYNARE_STATEMENT>namendo {return token::NAMENDO;}
+<DYNARE_STATEMENT>namlagendo {return token::NAMLAGENDO;}
+<DYNARE_STATEMENT>namexo {return token::NAMEXO;}
+<DYNARE_STATEMENT>rmse {return token::RMSE;}
+<DYNARE_STATEMENT>lik_only {return token::LIK_ONLY;}
+<DYNARE_STATEMENT>var_rmse {return token::VAR_RMSE;}
+<DYNARE_STATEMENT>pfilt_rmse {return token::PFILT_RMSE;}
+<DYNARE_STATEMENT>istart_rmse {return token::ISTART_RMSE;}
+<DYNARE_STATEMENT>alpha_rmse {return token::ALPHA_RMSE;}
+<DYNARE_STATEMENT>alpha2_rmse {return token::ALPHA2_RMSE;}
+ /* end of GSA options */
 
 <DYNARE_STATEMENT,DYNARE_BLOCK>[A-Za-z_][A-Za-z0-9_]* {
   yylval->string_val = new string(yytext);

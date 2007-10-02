@@ -164,6 +164,15 @@ public:
   virtual void writeOutput(ostream &output, const string &basename) const;
 };
 
+class DynareSensitivityStatement : public Statement
+{
+private:
+  const OptionsList options_list;
+public:
+  DynareSensitivityStatement(const OptionsList &options_list_arg);
+  virtual void writeOutput(ostream &output, const string &basename) const;
+};
+
 class VarobsStatement : public Statement
 {
 private:

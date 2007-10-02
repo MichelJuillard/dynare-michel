@@ -275,6 +275,8 @@ public:
   void run_prior_analysis();
   //! Runs posterior_analysis();
   void run_posterior_analysis();
+  //! Runs dynare_sensitivy()
+  void dynare_sensitivity();
   //! Adds an optimization option (string value)
   void optim_options_string(string *name, string *value);
   //! Adds an optimization option (numeric value)
