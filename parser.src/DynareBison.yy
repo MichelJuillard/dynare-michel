@@ -73,12 +73,18 @@ class ParsingDriver;
 %left UMINUS
 %nonassoc POWER
 %token EXP LOG LOG10 SIN COS TAN ASIN ACOS ATAN SINH COSH TANH ASINH ACOSH ATANH SQRT
+ /* GSA analysis */
+%token DYNARE_SENSITIVITY IDENTIFICATION MORRIS STAB REDFORM PPRIOR PRIOR_RANGE PPOST ILPTAU GLUE MORRIS_NLIV 
+%token MORRIS_NTRA NSAM LOAD_REDFORM LOAD_RMSE LOAD_STAB ALPHA2_STAB KSSTAT LOGTRANS_REDFORM THRESHOLD_REDFORM 
+%token KSSTAT_REDFORM ALPHA2_REDFORM NAMENDO NAMLAGENDO NAMEXO RMSE LIK_ONLY VAR_RMSE PFILT_RMSE ISTART_RMSE 
+%token ALPHA_RMSE ALPHA2_RMSE 
+ /* end of GSA analysis*/
 
 %type <node_val> expression
 %type <node_val> equation hand_side model_var
 %type <string_val> signed_float signed_integer prior
 %type <string_val> value filename filename_elem vec_int_elem vec_int_1 vec_int
-%type <string_val> calib_arg2 range
+%type <string_val> calib_arg2 range number
 
 %%
 
@@ -92,8 +98,8 @@ class ParsingDriver;
  statement
   	: declaration
  	| periods
-  | cutoff
-  | markowitz
+	| cutoff
+	| markowitz
  	| model
  	| initval
  	| endval
@@ -127,8 +133,9 @@ class ParsingDriver;
         | model_comparison
         | planner_objective
 	| ramsey_policy
-  | bvar_density
-  | bvar_forecast
+	| bvar_density
+	| bvar_forecast
+        | dynare_sensitivity
 	;
 
 
@@ -488,22 +495,10 @@ markowitz
 
 
  value_list
- 	: value_list signed_float
-		{driver.add_value_const($2);}
-	| value_list signed_integer
-		{driver.add_value_const($2);}
-	| value_list NAME
-		{driver.add_value_var($2);}
-	| signed_float
-		{driver.add_value_const($1);}
-	| signed_integer
-		{driver.add_value_const($1);}
-	| NAME
-		{driver.add_value_var($1);}
-	| value_list '(' expression ')'
-    {driver.add_value($3);}
-	| '(' expression ')'
+ 	:  value_list expression
     {driver.add_value($2);}
+	| expression
+    {driver.add_value($1);}
 	;
 
  sigma_e
@@ -1153,6 +1148,47 @@ markowitz
                  { driver.bvar_forecast($5); }
                ;
 
+ dynare_sensitivity : DYNARE_SENSITIVITY ';'
+                   { driver.dynare_sensitivity(); }
+                 | DYNARE_SENSITIVITY '(' dynare_sensitivity_options_list ')' ';'
+                   { driver.dynare_sensitivity(); } 
+                 ; 
+
+ dynare_sensitivity_options_list : dynare_sensitivity_option COMMA dynare_sensitivity_options_list
+                                | dynare_sensitivity_option
+                                ;
+
+ dynare_sensitivity_option : o_gsa_identification 
+                           | o_gsa_morris 
+                           | o_gsa_stab 
+                           | o_gsa_redform 
+                           | o_gsa_pprior 
+                           | o_gsa_prior_range 
+                           | o_gsa_ppost 
+                           | o_gsa_ilptau 
+                           | o_gsa_glue 
+                           | o_gsa_morris_nliv 
+                           | o_gsa_morris_ntra 
+                           | o_gsa_nsam 
+                           | o_gsa_load_redform 
+                           | o_gsa_load_rmse 
+                           | o_gsa_load_stab 
+                           | o_gsa_alpha2_stab 
+                           | o_gsa_ksstat 
+                           | o_gsa_logtrans_redform 
+                           | o_gsa_ksstat_redform 
+                           | o_gsa_alpha2_redform 
+                           | o_gsa_rmse 
+                           | o_gsa_lik_only 
+                           | o_gsa_pfilt_rmse 
+                           | o_gsa_istart_rmse 
+                           | o_gsa_alpha_rmse 
+                           | o_gsa_alpha2_rmse
+                           | o_gsa_threshold_redform 
+                           ;
+
+ number: INT_NUMBER | FLOAT_NUMBER;
+
  o_dr_algo: DR_ALGO EQUAL INT_NUMBER {driver.option_num("dr_algo", $3);};
  o_solve_algo: SOLVE_ALGO EQUAL INT_NUMBER {driver.option_num("solve_algo", $3);};
  o_simul_algo: SIMUL_ALGO EQUAL INT_NUMBER {driver.option_num("simul_algo", $3);};
@@ -1168,13 +1204,11 @@ markowitz
  o_hp_filter: HP_FILTER EQUAL INT_NUMBER {driver.option_num("hp_filter", $3);};
  o_hp_ngrid: HP_NGRID EQUAL INT_NUMBER {driver.option_num("hp_ngrid", $3);};
  o_periods: PERIODS EQUAL INT_NUMBER {driver.option_num("periods", $3); driver.option_num("simul", "1");};
- o_cutoff: CUTOFF EQUAL FLOAT_NUMBER {driver.option_num("cutoff", $3);}
- o_markowitz: MARKOWITZ EQUAL FLOAT_NUMBER {driver.option_num("markowitz", $3);}
+ o_cutoff: CUTOFF EQUAL number {driver.option_num("cutoff", $3);}
+ o_markowitz: MARKOWITZ EQUAL number {driver.option_num("markowitz", $3);}
  o_simul: SIMUL {driver.option_num("simul", "1");};
  o_simul_seed: SIMUL_SEED EQUAL INT_NUMBER { driver.option_num("simul_seed", $3)};
- o_qz_criterium: QZ_CRITERIUM EQUAL INT_NUMBER { driver.option_num("qz_criterium", $3)}
-               | QZ_CRITERIUM EQUAL FLOAT_NUMBER { driver.option_num("qz_criterium", $3)}
-               ;
+ o_qz_criterium: QZ_CRITERIUM EQUAL number { driver.option_num("qz_criterium", $3)};
  o_datafile: DATAFILE EQUAL NAME {driver.option_str("datafile", $3);};
  o_nobs: NOBS EQUAL vec_int {driver.option_num("nobs", $3);}
        | NOBS EQUAL INT_NUMBER {driver.option_num("nobs", $3);}
@@ -1186,17 +1220,16 @@ markowitz
  o_lik_init: LIK_INIT EQUAL INT_NUMBER {driver.option_num("lik_init", $3);};
  o_nograph: NOGRAPH {driver.option_num("nograph","1");};
           | GRAPH {driver.option_num("nograph", "0");};
- o_conf_sig: CONF_SIG EQUAL FLOAT_NUMBER {driver.option_num("conf_sig", $3);};
+ o_conf_sig: CONF_SIG EQUAL number {driver.option_num("conf_sig", $3);};
  o_mh_replic: MH_REPLIC EQUAL INT_NUMBER {driver.option_num("mh_replic", $3);};
- o_mh_drop: MH_DROP EQUAL FLOAT_NUMBER {driver.option_num("mh_drop", $3);};
- o_mh_jscale: MH_JSCALE EQUAL FLOAT_NUMBER {driver.option_num("mh_jscale", $3);};
+ o_mh_drop: MH_DROP EQUAL number {driver.option_num("mh_drop", $3);};
+ o_mh_jscale: MH_JSCALE EQUAL number {driver.option_num("mh_jscale", $3);};
  o_optim: OPTIM  EQUAL '(' optim_options ')';
- o_mh_init_scale: MH_INIT_SCALE EQUAL FLOAT_NUMBER {driver.option_num("mh_init_scale", $3);};
-                | MH_INIT_SCALE EQUAL INT_NUMBER {driver.option_num("mh_init_scale", $3);};
+ o_mh_init_scale: MH_INIT_SCALE EQUAL number {driver.option_num("mh_init_scale", $3);};
  o_mode_file : MODE_FILE EQUAL NAME {driver.option_str("mode_file", $3);};
  o_mode_compute : MODE_COMPUTE EQUAL INT_NUMBER {driver.option_num("mode_compute", $3);};
  o_mode_check : MODE_CHECK {driver.option_num("mode_check", "1");};
- o_prior_trunc : PRIOR_TRUNC EQUAL FLOAT_NUMBER {driver.option_num("prior_trunc", $3);};
+ o_prior_trunc : PRIOR_TRUNC EQUAL number {driver.option_num("prior_trunc", $3);};
  o_mh_mode : MH_MODE EQUAL INT_NUMBER {driver.option_num("mh_mode", $3);};
  o_mh_nblcks : MH_NBLOCKS EQUAL INT_NUMBER {driver.option_num("mh_nblck", $3);};
  o_load_mh_file : LOAD_MH_FILE {driver.option_num("load_mh_file", "1");};
@@ -1225,16 +1258,54 @@ markowitz
  o_constant : CONSTANT {driver.option_num("noconstant", "0");}
  o_noconstant : NOCONSTANT {driver.option_num("noconstant", "1");}
  o_mh_recover : MH_RECOVER {driver.option_num("mh_recover", "1");}
- o_planner_discount : PLANNER_DISCOUNT EQUAL FLOAT_NUMBER {driver.option_num("planner_discount",$3);}
+ o_planner_discount : PLANNER_DISCOUNT EQUAL number {driver.option_num("planner_discount",$3);}
 
  o_bvar_prior_tau : BVAR_PRIOR_TAU EQUAL signed_float { driver.option_num("bvar_prior_tau", $3); }
- o_bvar_prior_decay : BVAR_PRIOR_DECAY EQUAL FLOAT_NUMBER { driver.option_num("bvar_prior_decay", $3); }
+ o_bvar_prior_decay : BVAR_PRIOR_DECAY EQUAL number { driver.option_num("bvar_prior_decay", $3); }
  o_bvar_prior_lambda : BVAR_PRIOR_LAMBDA EQUAL signed_float { driver.option_num("bvar_prior_lambda", $3); }
- o_bvar_prior_mu : BVAR_PRIOR_MU EQUAL FLOAT_NUMBER { driver.option_num("bvar_prior_mu", $3); }
+ o_bvar_prior_mu : BVAR_PRIOR_MU EQUAL number { driver.option_num("bvar_prior_mu", $3); }
  o_bvar_prior_omega : BVAR_PRIOR_OMEGA EQUAL INT_NUMBER { driver.option_num("bvar_prior_omega", $3); }
  o_bvar_prior_flat : BVAR_PRIOR_FLAT { driver.option_num("bvar_prior_flat", "1"); }
  o_bvar_prior_train : BVAR_PRIOR_TRAIN EQUAL INT_NUMBER { driver.option_num("bvar_prior_train", $3); }
  o_bvar_replic : BVAR_REPLIC EQUAL INT_NUMBER { driver.option_num("bvar_replic", $3); }
+
+ o_gsa_identification : IDENTIFICATION EQUAL INT_NUMBER { driver.option_num("identification", $3); } /*not in doc */
+ o_gsa_morris : MORRIS EQUAL INT_NUMBER { driver.option_num("morris", $3); }
+ o_gsa_stab : STAB  EQUAL INT_NUMBER { driver.option_num("stab", $3); }
+ o_gsa_redform : REDFORM  EQUAL INT_NUMBER { driver.option_num("redform", $3); }
+ o_gsa_pprior : PPRIOR  EQUAL INT_NUMBER { driver.option_num("pprior", $3); }
+ o_gsa_prior_range : PRIOR_RANGE  EQUAL INT_NUMBER { driver.option_num("prior_range", $3); }
+ o_gsa_ppost : PPOST  EQUAL INT_NUMBER { driver.option_num("ppost", $3); }
+ o_gsa_ilptau : ILPTAU EQUAL INT_NUMBER { driver.option_num("ilptau", $3); }
+ o_gsa_glue : GLUE EQUAL INT_NUMBER { driver.option_num("glue", $3); }
+ o_gsa_morris_nliv : MORRIS_NLIV EQUAL INT_NUMBER { driver.option_num("morris_nliv", $3); }
+ o_gsa_morris_ntra : MORRIS_NTRA EQUAL INT_NUMBER { driver.option_num("morris_ntra", $3); }
+ o_gsa_nsam : NSAM EQUAL INT_NUMBER { driver.option_num("identification", $3); } /* not in doc ??*/
+ o_gsa_load_redform : LOAD_REDFORM EQUAL INT_NUMBER { driver.option_num("identification", $3); }
+ o_gsa_load_rmse : LOAD_RMSE EQUAL INT_NUMBER { driver.option_num("load_rmse", $3); }
+ o_gsa_load_stab : LOAD_STAB EQUAL INT_NUMBER { driver.option_num("load_stab", $3); }
+ o_gsa_alpha2_stab : ALPHA2_STAB EQUAL number { driver.option_num("identification", $3); }
+ o_gsa_ksstat : KSSTAT EQUAL number { driver.option_num("ksstat", $3); }
+ o_gsa_logtrans_redform : LOGTRANS_REDFORM EQUAL INT_NUMBER { driver.option_num("logtrans_redform", $3); }
+ o_gsa_threshold_redform : THRESHOLD_REDFORM EQUAL vec_int {driver.option_num("threshold_redfor",$3);}
+
+ o_gsa_ksstat_redform : KSSTAT_REDFORM EQUAL number { driver.option_num("ksstat_redfrom", $3); }
+ o_gsa_alpha2_redform : ALPHA2_REDFORM EQUAL number { driver.option_num("alpha2_redform", $3); }
+/*
+ o_gsa_namendo : NAMENDO EQUAL tmp_var_list { driver.option_list("namendo", $3); }
+ o_gsa_namlagendo : NAMLAGENDO tmp_var_list { driver.option_list("namlagendo", $3); }
+ o_gsa_namexo : NAMEXO tmp_var_list { driver.option_list("namexo", $3); }
+*/
+ o_gsa_rmse : RMSE EQUAL INT_NUMBER { driver.option_num("rmse", $3); }
+ o_gsa_lik_only : LIK_ONLY EQUAL INT_NUMBER { driver.option_num("lik_only", $3); }
+/*
+ o_gsa_var_rmse : VAR_RMSE tmp_var_list { driver.option_list("var_rmse", $3); }
+*/
+ o_gsa_pfilt_rmse : PFILT_RMSE EQUAL number { driver.option_num("pfilt_rmse", $3); }
+ o_gsa_istart_rmse : ISTART_RMSE EQUAL INT_NUMBER { driver.option_num("istart_rmse", $3); }
+ o_gsa_alpha_rmse : ALPHA_RMSE EQUAL number { driver.option_num("alpha_rmse", $3); }
+ o_gsa_alpha2_rmse : ALPHA2_RMSE EQUAL number { driver.option_num("alpha2_rmse", $3); }
+
 
  range : NAME ':' NAME
   {
