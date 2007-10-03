@@ -119,13 +119,13 @@ end
 %------------------------------------------------------------------------------
 tmp0 = lyapunov_symm(T,R*Q*R');% I compute the variance-covariance matrix
                                % of the restricted state vector.
-bayestopt_.mf = bayestopt_.mf1;
+%bayestopt_.mf = bayestopt_.mf1;????????
 mf  = bayestopt_.mf1;
 
 
 TheoreticalAutoCovarianceOfTheObservedVariables = ...
     zeros(NumberOfObservedVariables,NumberOfObservedVariables,NumberOfLags+1);
-TheoreticalAutoCovarianceOfTheObservedVariables(:,:,1) = tmp(mf,mf);
+TheoreticalAutoCovarianceOfTheObservedVariables(:,:,1) = tmp0(mf,mf);
 for lag = 1:NumberOfLags
   tmp0 = T*tmp0;
   TheoreticalAutoCovarianceOfTheObservedVariables(:,:,lag+1) = tmp0(mf,mf);
