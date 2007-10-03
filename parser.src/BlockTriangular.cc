@@ -419,6 +419,7 @@ BlockTriangular::Allocate_Block(int size, int *count_Equ, int *count_Block, int 
           ModelBlock->Block_List[*count_Block].Equation = (int*)malloc(sizeof(int));
           ModelBlock->Block_List[*count_Block].Variable = (int*)malloc(sizeof(int));
           ModelBlock->Block_List[*count_Block].Variable_Sorted = (int*)malloc(sizeof(int));
+          ModelBlock->Block_List[*count_Block].Own_Derivative = (int*)malloc(sizeof(int));
           ModelBlock->Block_List[*count_Block].Equation[0] = Index_Equ_IM[*count_Equ].index;
           ModelBlock->Block_List[*count_Block].Variable[0] = Index_Var_IM[*count_Equ].index;
           ModelBlock->Block_List[*count_Block].Variable_Sorted[0] = -1;
@@ -502,6 +503,7 @@ BlockTriangular::Allocate_Block(int size, int *count_Equ, int *count_Block, int 
       ModelBlock->Block_List[*count_Block].Equation = (int*)malloc(ModelBlock->Block_List[*count_Block].Size * sizeof(int));
       ModelBlock->Block_List[*count_Block].Variable = (int*)malloc(ModelBlock->Block_List[*count_Block].Size * sizeof(int));
       ModelBlock->Block_List[*count_Block].Variable_Sorted = (int*)malloc(ModelBlock->Block_List[*count_Block].Size * sizeof(int));
+      ModelBlock->Block_List[*count_Block].Own_Derivative = (int*)malloc(ModelBlock->Block_List[*count_Block].Size * sizeof(int));
       Lead = Lag = 0;
       first_count_equ = *count_Equ;
       tmp_var = (int*)malloc(size * sizeof(int));
@@ -637,6 +639,16 @@ BlockTriangular::Allocate_Block(int size, int *count_Equ, int *count_Block, int 
                       {
                         ModelBlock->Block_List[*count_Block].IM_lead_lag[i].us[m] = ls;
                         ls++;
+#ifdef DEBUG
+                        printf("j=%d ModelBlock->Block_List[%d].Variable[%d]=%d Index_Var_IM[%d].index=%d", j, *count_Block, j - first_count_equ, ModelBlock->Block_List[*count_Block].Variable[j - first_count_equ], k, Index_Var_IM[k].index);
+                        if(ModelBlock->Block_List[*count_Block].Variable[j - first_count_equ] == Index_Var_IM[k].index)
+                          {
+                            ModelBlock->Block_List[*count_Block].Own_Derivative[j - first_count_equ]=l;
+                            printf(" l=%d OK\n",l);
+                          }
+                        else
+                          printf("\n");
+#endif
                       }
                     ModelBlock->Block_List[*count_Block].IM_lead_lag[i].u[m] = l;
                     ModelBlock->Block_List[*count_Block].IM_lead_lag[i].Equ[m] = j - first_count_equ;

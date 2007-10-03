@@ -6,8 +6,12 @@ using namespace std;
 #include <set>
 #include <map>
 #include <vector>
+#include <iostream>
+#include <fstream>
+
 
 #include "SymbolTableTypes.hh"
+#include "CodeInterpreter.hh"
 
 class DataTree;
 
@@ -20,6 +24,7 @@ struct ExprNodeLess;
 //! Type for set of temporary terms
 /*! They are ordered by index number thanks to ExprNodeLess */
 typedef set<NodeID, ExprNodeLess> temporary_terms_type;
+typedef map<int,int> map_idx_type;
 
 //! Possible types of output when writing ExprNode(s)
 enum ExprNodeOutputType
@@ -38,7 +43,7 @@ enum ExprNodeOutputType
 typedef map<pair<int, Type>, double> eval_context_type;
 
 /* Equal to 1 for Matlab langage, or to 0 for C language
-   In Matlab, array indexes begin at 1, while they begin at 0 in C */ 
+   In Matlab, array indexes begin at 1, while they begin at 0 in C */
 #define OFFSET(output_type) ((output_type == oMatlabStaticModel)      \
                              || (output_type == oMatlabDynamicModel)  \
                              || (output_type == oMatlabOutsideModel))
@@ -120,7 +125,8 @@ public:
                                      temporary_terms_type &temporary_terms,
                                      map<NodeID, int> &first_occurence,
                                      int Curr_block,
-                                     Model_Block *ModelBlock) const;
+                                     Model_Block *ModelBlock,
+                                     map_idx_type &map_idx) const;
   int present_endogenous_size() const;
   int present_endogenous_find(int var, int lag) const;
 
@@ -129,6 +135,10 @@ public:
   };
 
   virtual double eval(const eval_context_type &eval_context) const throw (EvalException) = 0;
+  /*New*/
+  virtual void compile(ofstream &CompileCode, bool lhs_rhs, ExprNodeOutputType output_type, const temporary_terms_type &temporary_terms, map_idx_type map_idx) const = 0;
+  /*EndNew*/
+
 };
 
 //! Object used to compare two nodes (using their indexes)
@@ -153,6 +163,9 @@ public:
   virtual void writeOutput(ostream &output, ExprNodeOutputType output_type, const temporary_terms_type &temporary_terms) const;
   virtual void collectEndogenous(NodeID &Id);
   virtual double eval(const eval_context_type &eval_context) const throw (EvalException);
+  /*New*/
+  virtual void compile(ofstream &CompileCode, bool lhs_rhs, ExprNodeOutputType output_type, const temporary_terms_type &temporary_terms, map_idx_type map_idx) const;
+  /*EndNew*/
 };
 
 //! Symbol or variable node
@@ -171,9 +184,12 @@ public:
   virtual void writeOutput(ostream &output, ExprNodeOutputType output_type, const temporary_terms_type &temporary_terms = temporary_terms_type()) const;
   virtual void collectEndogenous(NodeID &Id);
   virtual double eval(const eval_context_type &eval_context) const throw (EvalException);
+  /*New*/
+  virtual void compile(ofstream &CompileCode, bool lhs_rhs, ExprNodeOutputType output_type, const temporary_terms_type &temporary_terms, map_idx_type map_idx) const;
+  /*EndNew*/
 };
 
-enum UnaryOpcode
+/*enum UnaryOpcode
   {
     oUminus,
     oExp,
@@ -193,7 +209,7 @@ enum UnaryOpcode
     oAtanh,
     oSqrt
   };
-
+*/
 //! Unary operator node
 class UnaryOpNode : public ExprNode
 {
@@ -212,12 +228,17 @@ public:
                                      temporary_terms_type &temporary_terms,
                                      map<NodeID, int> &first_occurence,
                                      int Curr_block,
-                                     Model_Block *ModelBlock) const;
+                                     Model_Block *ModelBlock,
+                                     map_idx_type &map_idx) const;
   virtual void collectEndogenous(NodeID &Id);
   static double eval_opcode(UnaryOpcode op_code, double v) throw (EvalException);
   virtual double eval(const eval_context_type &eval_context) const throw (EvalException);
+  /*New*/
+  virtual void compile(ofstream &CompileCode, bool lhs_rhs, ExprNodeOutputType output_type, const temporary_terms_type &temporary_terms, map_idx_type map_idx) const;
+  /*EndNew*/
 };
 
+/*
 enum BinaryOpcode
   {
     oPlus,
@@ -227,7 +248,7 @@ enum BinaryOpcode
     oPower,
     oEqual
   };
-
+*/
 //! Binary operator node
 class BinaryOpNode : public ExprNode
 {
@@ -247,10 +268,14 @@ public:
                                      temporary_terms_type &temporary_terms,
                                      map<NodeID, int> &first_occurence,
                                      int Curr_block,
-                                     Model_Block *ModelBlock) const;
+                                     Model_Block *ModelBlock,
+                                     map_idx_type &map_idx) const;
   virtual void collectEndogenous(NodeID &Id);
   static double eval_opcode(double v1, BinaryOpcode op_code, double v2) throw (EvalException);
   virtual double eval(const eval_context_type &eval_context) const throw (EvalException);
+  /*New*/
+  virtual void compile(ofstream &CompileCode, bool lhs_rhs, ExprNodeOutputType output_type, const temporary_terms_type &temporary_terms, map_idx_type map_idx) const;
+  /*EndNew*/
 };
 
 class UnknownFunctionNode : public ExprNode
@@ -268,9 +293,13 @@ public:
                                      temporary_terms_type &temporary_terms,
                                      map<NodeID, int> &first_occurence,
                                      int Curr_block,
-                                     Model_Block *ModelBlock) const;
+                                     Model_Block *ModelBlock,
+                                     map_idx_type &map_idx) const;
   virtual void collectEndogenous(NodeID &Id);
   virtual double eval(const eval_context_type &eval_context) const throw (EvalException);
+  /*New*/
+  virtual void compile(ofstream &CompileCode, bool lhs_rhs, ExprNodeOutputType output_type, const temporary_terms_type &temporary_terms, map_idx_type map_idx) const;
+  /*EndNew*/
 };
 
 typedef struct IM_compact
@@ -283,11 +312,12 @@ typedef struct Block
 {
   int Size, Sized, Type, Simulation_Type, Max_Lead, Max_Lag, Nb_Lead_Lag_Endo;
   bool is_linear;
-  int* Equation;
+  int *Equation, *Own_Derivative;
   int *Variable, *Variable_Sorted, *dVariable;
   int *variable_dyn_index, *variable_dyn_leadlag;
   temporary_terms_type *Temporary_terms;
   IM_compact *IM_lead_lag;
+  int Code_Start, Code_Length;
 };
 
 typedef struct Model_Block

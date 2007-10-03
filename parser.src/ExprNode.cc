@@ -79,7 +79,8 @@ ExprNode::computeTemporaryTerms(map<NodeID, int> &reference_count,
                                 temporary_terms_type &temporary_terms,
                                 map<NodeID, int> &first_occurence,
                                 int Curr_block,
-                                Model_Block *ModelBlock) const
+                                Model_Block *ModelBlock,
+                                map_idx_type &map_idx) const
 {
   // Nothing to do for a terminal node
 }
@@ -125,6 +126,31 @@ NumConstNode::eval(const eval_context_type &eval_context) const throw (EvalExcep
 {
   return(datatree.num_constants.getDouble(id));
 }
+
+/*New*/
+void
+NumConstNode::compile(ofstream &CompileCode, bool lhs_rhs, ExprNodeOutputType output_type, const temporary_terms_type &temporary_terms, map_idx_type map_idx) const
+{
+  //CompileCode.write(reinterpret_cast<char *>(&FLDT), sizeof(FLDT));
+  /*temporary_terms_type::const_iterator it = temporary_terms.find(const_cast<NumConstNode *>(this));
+  if (it != temporary_terms.end())
+    {
+      CompileCode.write(&FLDT, sizeof(FLDT));
+      idl=
+      CompileCode.write(reinterpret_cast<char *>(&idl),sizeof(idl));
+    }
+  else
+    {*/
+      CompileCode.write(&FLDC, sizeof(FLDC));
+      double vard=atof(datatree.num_constants.get(id).c_str());
+#ifdef DEBUGC
+      cout << "FLDC " << vard << "\n";
+#endif
+      CompileCode.write(reinterpret_cast<char *>(&vard),sizeof(vard));
+    /*}*/
+}
+/*EndNew*/
+
 
 void
 NumConstNode::collectEndogenous(NodeID &Id)
@@ -202,6 +228,9 @@ VariableNode::writeOutput(ostream &output, ExprNodeOutputType output_type,
                           const temporary_terms_type &temporary_terms) const
 {
   // If node is a temporary term
+#ifdef DEBUGC
+  cout << "write_ouput output_type=" << output_type << "\n";
+#endif
   temporary_terms_type::const_iterator it = temporary_terms.find(const_cast<VariableNode *>(this));
   if (it != temporary_terms.end())
     {
@@ -347,6 +376,60 @@ VariableNode::eval(const eval_context_type &eval_context) const throw (EvalExcep
     }
   return it->second;
 }
+
+/*New*/
+void
+VariableNode::compile(ofstream &CompileCode, bool lhs_rhs, ExprNodeOutputType output_type, const temporary_terms_type &temporary_terms, map_idx_type map_idx) const
+{
+  // If node is a temporary term
+  /*temporary_terms_type::const_iterator it = temporary_terms.find(const_cast<VariableNode *>(this));
+  if (it != temporary_terms.end())
+    {
+      CompileCode.write(&FLDT, sizeof(FLDT));
+      int var=temporary_terms.count(const_cast<VariableNode *>(this))-1;
+      CompileCode.write(reinterpret_cast<char *>(&var), sizeof(var));
+      return;
+    }*/
+  int i, lagl;
+#ifdef DEBUGC
+  cout << "output_type=" << output_type << "\n";
+#endif
+  if(!lhs_rhs)
+    CompileCode.write(&FLDV, sizeof(FLDV));
+  else
+    CompileCode.write(&FSTPV, sizeof(FSTPV));
+  char typel=(char)type;
+  CompileCode.write(&typel, sizeof(typel));
+  switch(type)
+    {
+      case eParameter:
+        i = symb_id + OFFSET(output_type);
+        CompileCode.write(reinterpret_cast<char *>(&i), sizeof(i));
+#ifdef DEBUGC
+        cout << "FLD Param[ " << i << ", symb_id=" << symb_id << "]\n";
+#endif
+        break;
+      case eEndogenous :
+        i = symb_id + OFFSET(output_type);
+        CompileCode.write(reinterpret_cast<char *>(&i), sizeof(i));
+        lagl=lag;
+        CompileCode.write(reinterpret_cast<char *>(&lagl), sizeof(lagl));
+        break;
+      case eExogenous :
+        i = symb_id + OFFSET(output_type);
+        CompileCode.write(reinterpret_cast<char *>(&i), sizeof(i));
+        lagl=lag;
+        CompileCode.write(reinterpret_cast<char *>(&lagl), sizeof(lagl));
+        break;
+      case eExogenousDet:
+        i = symb_id + datatree.symbol_table.exo_nbr + OFFSET(output_type);
+        CompileCode.write(reinterpret_cast<char *>(&i), sizeof(i));
+        lagl=lag;
+        CompileCode.write(reinterpret_cast<char *>(&lagl), sizeof(lagl));
+        break;
+    }
+}
+/*EndNew*/
 
 void
 VariableNode::collectEndogenous(NodeID &Id)
@@ -548,7 +631,8 @@ UnaryOpNode::computeTemporaryTerms(map<NodeID, int> &reference_count,
                                    temporary_terms_type &temporary_terms,
                                    map<NodeID, int> &first_occurence,
                                    int Curr_block,
-                                   Model_Block *ModelBlock) const
+                                   Model_Block *ModelBlock,
+                                   map_idx_type &map_idx) const
 {
   NodeID this2 = const_cast<UnaryOpNode *>(this);
   map<NodeID, int>::iterator it = reference_count.find(this2);
@@ -556,7 +640,7 @@ UnaryOpNode::computeTemporaryTerms(map<NodeID, int> &reference_count,
     {
       reference_count[this2] = 1;
       first_occurence[this2] = Curr_block;
-      arg->computeTemporaryTerms(reference_count, temporary_terms, first_occurence, Curr_block, ModelBlock);
+      arg->computeTemporaryTerms(reference_count, temporary_terms, first_occurence, Curr_block, ModelBlock, map_idx);
     }
   else
     {
@@ -719,6 +803,25 @@ UnaryOpNode::eval(const eval_context_type &eval_context) const throw (EvalExcept
 
   return eval_opcode(op_code, v);
 }
+
+/*New*/
+void
+UnaryOpNode::compile(ofstream &CompileCode, bool lhs_rhs, ExprNodeOutputType output_type, const temporary_terms_type &temporary_terms, map_idx_type map_idx) const
+{
+  temporary_terms_type::const_iterator it = temporary_terms.find(const_cast<UnaryOpNode *>(this));
+  if (it != temporary_terms.end())
+    {
+      CompileCode.write(&FLDT, sizeof(FLDT));
+      int var=map_idx[idx];
+      CompileCode.write(reinterpret_cast<char *>(&var), sizeof(var));
+      return;
+    }
+  arg->compile(CompileCode, lhs_rhs, output_type, temporary_terms, map_idx);
+  CompileCode.write(&FUNARY, sizeof(FUNARY));
+  UnaryOpcode op_codel=op_code;
+  CompileCode.write(reinterpret_cast<char *>(&op_codel), sizeof(op_codel));
+}
+/*EndNEw*/
 
 void
 UnaryOpNode::collectEndogenous(NodeID &Id)
@@ -900,7 +1003,8 @@ BinaryOpNode::computeTemporaryTerms(map<NodeID, int> &reference_count,
                                     temporary_terms_type &temporary_terms,
                                     map<NodeID, int> &first_occurence,
                                     int Curr_block,
-                                    Model_Block *ModelBlock) const
+                                    Model_Block *ModelBlock,
+                                    map_idx_type &map_idx) const
 {
   NodeID this2 = const_cast<BinaryOpNode *>(this);
   map<NodeID, int>::iterator it = reference_count.find(this2);
@@ -908,8 +1012,8 @@ BinaryOpNode::computeTemporaryTerms(map<NodeID, int> &reference_count,
     {
       reference_count[this2] = 1;
       first_occurence[this2] = Curr_block;
-      arg1->computeTemporaryTerms(reference_count, temporary_terms, first_occurence, Curr_block, ModelBlock);
-      arg2->computeTemporaryTerms(reference_count, temporary_terms, first_occurence, Curr_block, ModelBlock);
+      arg1->computeTemporaryTerms(reference_count, temporary_terms, first_occurence, Curr_block, ModelBlock, map_idx);
+      arg2->computeTemporaryTerms(reference_count, temporary_terms, first_occurence, Curr_block, ModelBlock, map_idx);
     }
   else
     {
@@ -951,6 +1055,27 @@ BinaryOpNode::eval(const eval_context_type &eval_context) const throw (EvalExcep
 
   return eval_opcode(v1, op_code, v2);
 }
+
+/*New*/
+void
+BinaryOpNode::compile(ofstream &CompileCode, bool lhs_rhs, ExprNodeOutputType output_type, const temporary_terms_type &temporary_terms, map_idx_type map_idx) const
+{
+  // If current node is a temporary term
+  temporary_terms_type::const_iterator it = temporary_terms.find(const_cast<BinaryOpNode *>(this));
+  if (it != temporary_terms.end())
+    {
+      CompileCode.write(&FLDT, sizeof(FLDT));
+      int var=map_idx[idx];
+      CompileCode.write(reinterpret_cast<char *>(&var), sizeof(var));
+      return;
+    }
+  arg1->compile(CompileCode, lhs_rhs, output_type, temporary_terms, map_idx);
+  arg2->compile(CompileCode, lhs_rhs, output_type, temporary_terms, map_idx);
+  CompileCode.write(&FBINARY, sizeof(FBINARY));
+  BinaryOpcode op_codel=op_code;
+  CompileCode.write(reinterpret_cast<char *>(&op_codel),sizeof(op_codel));
+}
+/*EndNew*/
 
 void
 BinaryOpNode::writeOutput(ostream &output, ExprNodeOutputType output_type,
@@ -1097,7 +1222,8 @@ UnknownFunctionNode::computeTemporaryTerms(map<NodeID, int> &reference_count,
                                            temporary_terms_type &temporary_terms,
                                            map<NodeID, int> &first_occurence,
                                            int Curr_block,
-                                           Model_Block *ModelBlock) const
+                                           Model_Block *ModelBlock,
+                                           map_idx_type &map_idx) const
 {
   cerr << "UnknownFunctionNode::computeTemporaryTerms: not implemented" << endl;
   exit(-1);
@@ -1116,4 +1242,12 @@ UnknownFunctionNode::eval(const eval_context_type &eval_context) const throw (Ev
   cout << "Unknown function\n";
   cout.flush();
   throw EvalException();
+}
+
+void
+UnknownFunctionNode::compile(ofstream &CompileCode, bool lhs_rhs, ExprNodeOutputType output_type, const temporary_terms_type &temporary_terms, map_idx_type map_idx) const
+{
+  cout << "Unknown function\n";
+  cout.flush();
+  exit(-1);
 }

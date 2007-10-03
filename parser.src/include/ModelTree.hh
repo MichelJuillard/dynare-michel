@@ -16,6 +16,7 @@ using namespace std;
 
 #define LCC_COMPILE 0
 #define GCC_COMPILE 1
+#define NO_COMPILE 2
 //#define CONDITION
 
 //! The three in which ModelTree can work
@@ -61,11 +62,14 @@ private:
 
   //! Temporary terms (those which will be noted Txxxx)
   temporary_terms_type temporary_terms;
+  map_idx_type map_idx;
 
   //! Computes derivatives of ModelTree
   void derive(int order);
   //! Write derivative of an equation w.r. to a variable
   void writeDerivative(ostream &output, int eq, int var, int lag, ExprNodeOutputType output_type, const temporary_terms_type &temporary_terms) const;
+  //! Write derivative code of an equation w.r. to a variable
+  void compileDerivative(ofstream &code_file, int eq, int var, int lag, ExprNodeOutputType output_type, map_idx_type map_idx) const;
   //! Computes temporary terms
   void computeTemporaryTerms(int order);
   void computeTemporaryTermsOrdered(int order, Model_Block *ModelBlock);
@@ -82,7 +86,10 @@ private:
   //! Writes the dynamic model equations and its derivatives
   /*! \todo add third derivatives handling in C output */
   void writeDynamicModel(ostream &DynamicOutput) const;
+  //! Writes the Block reordred structure of the model in C output
   void writeModelEquationsOrdered(ostream &output, Model_Block *ModelBlock) const;
+  //! Writes the code of the Block reordred structure of the model in C output
+  void writeModelEquationsCodeOrdered(const string file_name, const Model_Block *ModelBlock, const string bin_basename, ExprNodeOutputType output_type) const;
   //! Writes static model file (Matlab version)
   void writeStaticMFile(const string &static_basename) const;
   //! Writes static model file (C version)
@@ -95,7 +102,7 @@ private:
   //! Writes dynamic model header file when SparseDLL option is on
   void writeSparseDLLDynamicHFile(const string &dynamic_basename) const;
   //! Writes dynamic model file when SparseDLL option is on
-  void writeSparseDLLDynamicCFileAndBinFile(const string &dynamic_basename, const string &bin_basename) const;
+  void writeSparseDLLDynamicCFileAndBinFile(const string &dynamic_basename, const string &bin_basename, ExprNodeOutputType output_type) const;
   void evaluateJacobian(const eval_context_type &eval_context, jacob_map *j_m);
   void BlockLinear(Model_Block *ModelBlock);
   string reform(string name) const;
@@ -107,7 +114,7 @@ public:
   ModelTree(SymbolTable &symbol_table_arg, NumericalConstants &num_constants);
   //! Mode in which the ModelTree is supposed to work (Matlab, DLL or SparseDLL)
   ModelTreeMode mode;
-  //! Type of compiler used in matlab for SPARSE_DLL option: 0 = LCC or 1 = GCC
+  //! Type of compiler used in matlab for SPARSE_DLL option: 0 = LCC or 1 = GCC or 2 = NO
   int compiler;
   //! Absolute value under which a number is considered to be zero
   double cutoff;
@@ -116,6 +123,8 @@ public:
   //! Use a graphical and symbolic version of the symbolic gaussian elimination new_SGE = false
   //! or use direct gaussian elimination new_SGE = true
   bool new_SGE;
+  //! the file containing the model and the derivatives code
+  ofstream code_file;
   //! Declare a node as an equation of the model
   void addEquation(NodeID eq);
   //! Whether dynamic Jacobian (w.r. to endogenous) should be written

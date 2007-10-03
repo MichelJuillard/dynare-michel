@@ -56,7 +56,7 @@ class ParsingDriver;
 %token MODE_CHECK MODE_COMPUTE MODE_FILE MODEL MODEL_COMPARISON MSHOCKS
 %token MODEL_COMPARISON_APPROXIMATION MODIFIEDHARMONICMEAN MOMENTS_VARENDO
 %token <string_val> NAME
-%token NOBS NOCONSTANT NOCORR NODIAGNOSTIC NOFUNCTIONS NOGRAPH NOMOMENTS NOPRINT NORMAL_PDF
+%token NO_COMPILER NOBS NOCONSTANT NOCORR NODIAGNOSTIC NOFUNCTIONS NOGRAPH NOMOMENTS NOPRINT NORMAL_PDF
 %token OBSERVATION_TRENDS OPTIM OPTIM_WEIGHTS ORDER OSR OSR_PARAMS
 %token PARAMETERS PERIODS PLANNER_OBJECTIVE PREFILTER PRESAMPLE PRINT PRIOR_TRUNC PRIOR_ANALYSIS POSTERIOR_ANALYSIS
 %token QZ_CRITERIUM
@@ -74,10 +74,10 @@ class ParsingDriver;
 %nonassoc POWER
 %token EXP LOG LOG10 SIN COS TAN ASIN ACOS ATAN SINH COSH TANH ASINH ACOSH ATANH SQRT
  /* GSA analysis */
-%token DYNARE_SENSITIVITY IDENTIFICATION MORRIS STAB REDFORM PPRIOR PRIOR_RANGE PPOST ILPTAU GLUE MORRIS_NLIV 
-%token MORRIS_NTRA NSAM LOAD_REDFORM LOAD_RMSE LOAD_STAB ALPHA2_STAB KSSTAT LOGTRANS_REDFORM THRESHOLD_REDFORM 
-%token KSSTAT_REDFORM ALPHA2_REDFORM NAMENDO NAMLAGENDO NAMEXO RMSE LIK_ONLY VAR_RMSE PFILT_RMSE ISTART_RMSE 
-%token ALPHA_RMSE ALPHA2_RMSE 
+%token DYNARE_SENSITIVITY IDENTIFICATION MORRIS STAB REDFORM PPRIOR PRIOR_RANGE PPOST ILPTAU GLUE MORRIS_NLIV
+%token MORRIS_NTRA NSAM LOAD_REDFORM LOAD_RMSE LOAD_STAB ALPHA2_STAB KSSTAT LOGTRANS_REDFORM THRESHOLD_REDFORM
+%token KSSTAT_REDFORM ALPHA2_REDFORM NAMENDO NAMLAGENDO NAMEXO RMSE LIK_ONLY VAR_RMSE PFILT_RMSE ISTART_RMSE
+%token ALPHA_RMSE ALPHA2_RMSE
  /* end of GSA analysis*/
 
 %type <node_val> expression
@@ -98,8 +98,8 @@ class ParsingDriver;
  statement
   	: declaration
  	| periods
-	| cutoff
-	| markowitz
+  | cutoff
+  | markowitz
  	| model
  	| initval
  	| endval
@@ -133,8 +133,8 @@ class ParsingDriver;
         | model_comparison
         | planner_objective
 	| ramsey_policy
-	| bvar_density
-	| bvar_forecast
+  | bvar_density
+  | bvar_forecast
         | dynare_sensitivity
 	;
 
@@ -369,6 +369,7 @@ markowitz
  model_sparse_options :
       LCC_COMPILER { driver.init_compiler(0); }
     | GCC_COMPILER { driver.init_compiler(1); }
+    | NO_COMPILER { driver.init_compiler(2); }
     | o_cutoff
     | o_markowitz
   ;
@@ -1131,7 +1132,7 @@ markowitz
               | BVAR_DENSITY '(' bvar_density_options_list ')' INT_NUMBER ';'
                 { driver.bvar_density($5); }
               ;
- 
+
  bvar_forecast_option : bvar_common_option
                       | o_forecast
                       | o_conf_sig
@@ -1148,43 +1149,43 @@ markowitz
                  { driver.bvar_forecast($5); }
                ;
 
- dynare_sensitivity : DYNARE_SENSITIVITY ';'
+dynare_sensitivity : DYNARE_SENSITIVITY ';'
                    { driver.dynare_sensitivity(); }
                  | DYNARE_SENSITIVITY '(' dynare_sensitivity_options_list ')' ';'
-                   { driver.dynare_sensitivity(); } 
-                 ; 
+                   { driver.dynare_sensitivity(); }
+                 ;
 
  dynare_sensitivity_options_list : dynare_sensitivity_option COMMA dynare_sensitivity_options_list
                                 | dynare_sensitivity_option
                                 ;
 
- dynare_sensitivity_option : o_gsa_identification 
-                           | o_gsa_morris 
-                           | o_gsa_stab 
-                           | o_gsa_redform 
-                           | o_gsa_pprior 
-                           | o_gsa_prior_range 
-                           | o_gsa_ppost 
-                           | o_gsa_ilptau 
-                           | o_gsa_glue 
-                           | o_gsa_morris_nliv 
-                           | o_gsa_morris_ntra 
-                           | o_gsa_nsam 
-                           | o_gsa_load_redform 
-                           | o_gsa_load_rmse 
-                           | o_gsa_load_stab 
-                           | o_gsa_alpha2_stab 
-                           | o_gsa_ksstat 
-                           | o_gsa_logtrans_redform 
-                           | o_gsa_ksstat_redform 
-                           | o_gsa_alpha2_redform 
-                           | o_gsa_rmse 
-                           | o_gsa_lik_only 
-                           | o_gsa_pfilt_rmse 
-                           | o_gsa_istart_rmse 
-                           | o_gsa_alpha_rmse 
+ dynare_sensitivity_option : o_gsa_identification
+                           | o_gsa_morris
+                           | o_gsa_stab
+                           | o_gsa_redform
+                           | o_gsa_pprior
+                           | o_gsa_prior_range
+                           | o_gsa_ppost
+                           | o_gsa_ilptau
+                           | o_gsa_glue
+                           | o_gsa_morris_nliv
+                           | o_gsa_morris_ntra
+                           | o_gsa_nsam
+                           | o_gsa_load_redform
+                           | o_gsa_load_rmse
+                           | o_gsa_load_stab
+                           | o_gsa_alpha2_stab
+                           | o_gsa_ksstat
+                           | o_gsa_logtrans_redform
+                           | o_gsa_ksstat_redform
+                           | o_gsa_alpha2_redform
+                           | o_gsa_rmse
+                           | o_gsa_lik_only
+                           | o_gsa_pfilt_rmse
+                           | o_gsa_istart_rmse
+                           | o_gsa_alpha_rmse
                            | o_gsa_alpha2_rmse
-                           | o_gsa_threshold_redform 
+                           | o_gsa_threshold_redform
                            ;
 
  number: INT_NUMBER | FLOAT_NUMBER;

@@ -85,14 +85,22 @@ SimulSparseStatement::writeOutput(ostream &output, const string &basename) const
   output << "    read_data_;\n";
   output << "  end\n";
   output << "end\n";
-  output << "disp('compiling...');\n";
-  output << "t0=clock;\n";
-  if (compiler == 0)
-    output << "mex " << basename << "_dynamic.c;\n";
+  if(compiler!=NO_COMPILE)
+    {
+      output << "disp('compiling...');\n";
+      output << "t0=clock;\n";
+      if (compiler == 0)
+        output << "mex " << basename << "_dynamic.c;\n";
+      else
+        output << "mex " << basename << "_dynamic.cc;\n";
+      output << "disp(['compiling time: ' num2str(etime(clock,t0))]);\n";
+      output << "oo_.endo_simul=" << basename << "_dynamic;\n";
+    }
   else
-    output << "mex " << basename << "_dynamic.cc;\n";
-  output << "disp(['compiling time: ' num2str(etime(clock,t0))]);\n";
-  output << "oo_.endo_simul=" << basename << "_dynamic;\n";
+    {
+      output << "oo_.endo_simul=simulate;\n";
+      output << "clear simulate.dll;\n";
+    }
 }
 
 StochSimulStatement::StochSimulStatement(const TmpSymbolTable &tmp_symbol_table_arg,

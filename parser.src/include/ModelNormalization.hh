@@ -2,21 +2,8 @@
 #define MODELNORMALIZATION
 #include "SymbolTableTypes.hh"
 #include "SymbolTable.hh"
-const int SIMULTANS=0;
-const int PROLOGUE=1;
-const int EPILOGUE=2;
-const int SIMULTAN=3;
-const int UNKNOWN=-1;
-const int EVALUATE_FOREWARD=0;
-const int EVALUATE_BACKWARD=1;
-const int SOLVE_FOREWARD_SIMPLE=2;
-const int SOLVE_BACKWARD_SIMPLE=3;
-const int SOLVE_TWO_BOUNDARIES_SIMPLE=4;
-const int SOLVE_FOREWARD_COMPLETE=5;
-const int SOLVE_BACKWARD_COMPLETE=6;
-const int SOLVE_TWO_BOUNDARIES_COMPLETE=7;
-const int EVALUATE_FOREWARD_R=8;
-const int EVALUATE_BACKWARD_R=9;
+#include "CodeInterpreter.hh"
+
 
 typedef struct Edge
 {
