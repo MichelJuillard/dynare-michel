@@ -21,7 +21,7 @@ function initial_estimation_checks(xparam1,gend,data)
   end
 
   if ~isempty(strmatch('dsge_prior_weight',M_.param_names))
-    [fval,cost_flag,ys,trend_coeff,info] = DsgeVarLikelihood(xparam1,gend);
+    [fval,cost_flag,info] = DsgeVarLikelihood(xparam1,gend);
   else
     [fval,cost_flag,ys,trend_coeff,info] = DsgeLikelihood(xparam1,gend,data);
   end

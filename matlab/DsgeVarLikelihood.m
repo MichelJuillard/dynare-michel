@@ -1,5 +1,27 @@
-function [fval,cost_flag,ys,trend_coeff,info,PHI,SIGMAu,iXX] = DsgeVarLikelihood(xparam1,gend)
-% stephane.adjemian@ens.fr
+function [fval,cost_flag,info,PHI,SIGMAu,iXX] = DsgeVarLikelihood(xparam1,gend)
+% Evaluates the posterior kernel of the bvar-dsge model. 
+% 
+% INPUTS 
+%   o xparam1       [double]     Vector of model's parameters.
+%   o gend          [integer]    Number of observations (without conditionning observations for the lags).
+%  
+% OUTPUTS 
+%   o fval          [double]     Value of the posterior kernel at xparam1.
+%   o cost_flag     [integer]    Zero if the function returns a penalty, one otherwise.
+%   o info          [integer]    Vector of informations about the penalty.
+%   o PHI           [double]     Stacked BVAR-DSGE autoregressive matrices (at the mode associated to xparam1).
+%   o SIGMAu        [double]     Covariance matrix of the BVAR-DSGE (at the mode associated to xparam1).
+%   o iXX           [double]     inv(X'X).
+%
+% ALGORITHM
+%   None.       
+%
+% SPECIAL REQUIREMENTS
+%   None.
+%  
+%  
+% part of DYNARE, copyright S. Adjemian, M. Juillard (2006)
+% Gnu Public License.
 global bayestopt_ estim_params_ M_ options_
 
 nvx = estim_params_.nvx;
@@ -20,11 +42,7 @@ mXY = evalin('base', 'mXY');
 mXX = evalin('base', 'mXX');
 
 fval = [];
-cost_flag = [];
-ys = [];
-trend_coeff = [];
-xparam1_test = xparam1;
-cost_flag  = 1;
+cost_flag = 1;
 
 if options_.mode_compute ~= 1 & any(xparam1 < bayestopt_.lb)
     k = find(xparam1 < bayestopt_.lb);
@@ -49,11 +67,11 @@ for i=1:estim_params_.nvx
 end
 offset = estim_params_.nvx;
 if estim_params_.nvn
-    disp('DsgeVarLikelihood :: Measurement errors are not implemented!')
+    disp('DsgeVarLikelihood :: Measurement errors are implemented!')
     return
 end 
 if estim_params_.ncx
-    disp('DsgeVarLikelihood :: Correlated structural innovations are not yet implemented!')
+    disp('DsgeVarLikelihood :: Correlated structural innovations are not implemented!')
     return
 end
 
@@ -62,12 +80,14 @@ M_.Sigma_e = Q;
 
 %% Weight of the dsge prior:
 dsge_prior_weight = M_.params(strmatch('dsge_prior_weight',M_.param_names));
+% Is the DSGE prior proper?
 if dsge_prior_weight<(NumberOfParameters+NumberOfObservedVariables)/gend;
     fval = bayestopt_.penalty*min(1e3,(NumberOfParameters+NumberOfObservedVariables)/gend-dsge_prior_weight);
     info = 51
     cost_flag = 0;
     return;
 end
+
 
 %------------------------------------------------------------------------------
 % 2. call model setup & reduction program
@@ -97,8 +117,8 @@ end
 %------------------------------------------------------------------------------
 % 3. theorretical moments (second order)
 %------------------------------------------------------------------------------
-tmp = lyapunov_symm(T,R*Q*R');% I compute the variance-covariance matrix
-                              % of the restricted state vector.
+tmp0 = lyapunov_symm(T,R*Q*R');% I compute the variance-covariance matrix
+                               % of the restricted state vector.
 bayestopt_.mf = bayestopt_.mf1;
 mf  = bayestopt_.mf1;
 
@@ -107,8 +127,8 @@ TheoreticalAutoCovarianceOfTheObservedVariables = ...
     zeros(NumberOfObservedVariables,NumberOfObservedVariables,NumberOfLags+1);
 TheoreticalAutoCovarianceOfTheObservedVariables(:,:,1) = tmp(mf,mf);
 for lag = 1:NumberOfLags
-  tmp = T*tmp;
-  TheoreticalAutoCovarianceOfTheObservedVariables(:,:,lag+1) = tmp(mf,mf);
+  tmp0 = T*tmp0;
+  TheoreticalAutoCovarianceOfTheObservedVariables(:,:,lag+1) = tmp0(mf,mf);
 end
 GYX = zeros(NumberOfObservedVariables,NumberOfParameters);
 for i=1:NumberOfLags
@@ -131,20 +151,20 @@ assignin('base','GXX',GXX);
 assignin('base','GYX',GYX);
 
 if ~isinf(dsge_prior_weight) 
-  SIGMAu = dsge_prior_weight*gend*TheoreticalAutoCovarianceOfTheObservedVariables(:,:,1) + mYY ;
+  tmp0 = dsge_prior_weight*gend*TheoreticalAutoCovarianceOfTheObservedVariables(:,:,1) + mYY ;
   tmp1 = dsge_prior_weight*gend*GYX + mYX;
   tmp2 = inv(dsge_prior_weight*gend*GXX+mXX);
-  SIGMAu = SIGMAu - tmp1*tmp2*tmp1';
+  SIGMAu = tmp0 - tmp1*tmp2*tmp1'; clear('tmp0');
   if ~ispd(SIGMAu)
       v = diag(SIGMAu);
       k = find(v<0);
       fval = bayestopt_.penalty*min(1e3,exp(abs(v(k))));
       info = 52;
       cost_flag = 0;
-    return;      
+    return;
   end
-  SIGMAu = SIGMAu / (gend*(dsge_prior_weight+1));
-  PHI = tmp2*tmp1';
+  SIGMAu = SIGMAu / (gend*(1+dsge_prior_weight));
+  PHI = tmp2*tmp1'; clear('tmp1');
   prodlng1 = sum(gammaln(.5*((1+dsge_prior_weight)*gend- ...
 			     NumberOfObservedVariables*NumberOfLags ...
 			     +1-(1:NumberOfObservedVariables)')));
@@ -159,16 +179,21 @@ if ~isinf(dsge_prior_weight)
 	- .5*log(2)*NumberOfObservedVariables*((dsge_prior_weight+1)*gend-NumberOfParameters) ...
 	+ .5*log(2)*NumberOfObservedVariables*(dsge_prior_weight*gend-NumberOfParameters) ...
 	- prodlng1 + prodlng2;
-else % codé par SM (sûrement pas exact... Que font ici les moments empiriques ?).    
-  tmp1 = GYX;
-  tmp2 = inv(GXX);
-  PHI  = tmp2*tmp1';
-  SIGMAu = GYY - tmp1*tmp2*tmp1;
-  % à finir de corriger...
-  lik  = -.5*sum(diag(inv(tmp2)*(mYY-2*tmp1'*mYX'+tmp1'*mXX*tmp1))) ...
-	-(gend/2)*log(det(tmp2));
+else
+  iGXX = inv(GXX);
+  SIGMAu = GYY - GYX*iGXX*transpose(GYX);
+  PHI = iGXX*transpose(GYX);
+  lik = gend * ( log(det(SIGMAu)) + NumberOfObservedVariables*log(2*pi) +  ...
+        trace(inv(SIGMAu)*(mYY - transpose(mYX*PHI) - mYX*PHI + transpose(PHI)*mXX*PHI)/gend));
+  lik = .5*lik;% Minus likelihood
 end      
 
 lnprior = priordens(xparam1,bayestopt_.pshape,bayestopt_.p1,bayestopt_.p2,bayestopt_.p3,bayestopt_.p4);
 fval = (lik-lnprior);
-iXX = tmp2;
+if (nargout == 6)
+    if isinf(dsge_prior_weight)
+        iXX = iGXX;
+    else
+        iXX = tmp2;
+    end
+end

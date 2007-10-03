@@ -176,7 +176,7 @@ while b<=B
     if MAX_nirfs_dsgevar
         IRUN = IRUN+1;
         tmp_dsgevar = zeros(options_.irf,nvobs*M_.exo_nbr);
-        [fval,cost_flag,ys,trend_coeff,info,PHI,SIGMAu,iXX] =  DsgeVarLikelihood(deep',gend);
+        [fval,cost_flag,info,PHI,SIGMAu,iXX] =  DsgeVarLikelihood(deep',gend);
         dsge_prior_weight = M_.params(strmatch('dsge_prior_weight',M_.param_names));
         DSGE_PRIOR_WEIGHT = floor(gend*(1+dsge_prior_weight));
         SIGMA_inv_upper_chol = chol(inv(SIGMAu*gend*(dsge_prior_weight+1))); 
