@@ -1152,7 +1152,7 @@ ModelTree::writeDynamicCFile(const string &dynamic_basename) const
                     << "  }" << endl
                     << "  params = mxGetPr(mxGetFieldByNumber(M_, 0, mxGetFieldNumber(M_,\"params\")));" << endl
                     << "  /* Gets it_ from global workspace of Matlab */" << endl
-                    << "  //it_ = (int) mxGetScalar(mexGetVariable(\"global\", \"it_\"))-1;" << endl
+                    << "  it_ = (int) mxGetScalar(mexGetVariable(\"global\", \"it_\"))-1;" << endl
                     << "  /* Call the C subroutines. */" << endl
                     << "  Dynamic(y, x, residual, g1, g2);" << endl
                     << "}" << endl;
