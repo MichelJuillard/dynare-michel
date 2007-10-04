@@ -103,6 +103,11 @@ private:
   void writeSparseDLLDynamicHFile(const string &dynamic_basename) const;
   //! Writes dynamic model file when SparseDLL option is on
   void writeSparseDLLDynamicCFileAndBinFile(const string &dynamic_basename, const string &bin_basename, ExprNodeOutputType output_type) const;
+  //! Computes jacobian and prepares for equation normalization
+  /*! Using values from initval/endval blocks and parameter initializations:
+    - computes the jacobian for the model w.r. to contemporaneous variables
+    - removes edges of the incidence matrix when derivative w.r. to the corresponding variable is too close to zero (below the cutoff)
+  */
   void evaluateJacobian(const eval_context_type &eval_context, jacob_map *j_m);
   void BlockLinear(Model_Block *ModelBlock);
   string reform(string name) const;
@@ -120,8 +125,7 @@ public:
   double cutoff;
   //! The weight of the Markowitz criteria to determine the pivot in the linear solver (simul_NG1 from simulate.cc)
   double markowitz;
-  //! Use a graphical and symbolic version of the symbolic gaussian elimination new_SGE = false
-  //! or use direct gaussian elimination new_SGE = true
+  //! Use a graphical and symbolic version of the symbolic gaussian elimination (new_SGE = false) or use direct gaussian elimination (new_SGE = true)
   bool new_SGE;
   //! the file containing the model and the derivatives code
   ofstream code_file;
@@ -149,8 +153,8 @@ public:
   //! Complete set to block decompose the model
   BlockTriangular block_triangular;
   //! Adds informations for simulation in a binary file
-  void Write_Inf_To_Bin_File(const string &dynamic_basename, const string &bin_basename, const int &num,
-                                 int &u_count_int, bool &file_open) const;
+  void Write_Inf_To_Bin_File(const string &dynamic_basename, const string &bin_basename,
+                             const int &num, int &u_count_int, bool &file_open) const;
 
   int equation_number() const;
 };

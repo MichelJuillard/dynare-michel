@@ -217,11 +217,7 @@ public:
   void add_period(string *p1, string *p2);
   //! Adds a shock period
   void add_period(string *p1);
-  //! Adds a shock value (when only a numerical constant)
-  void add_value_const(string *value);
-  //! Adds a shock value (when only a variable name)
-  void add_value_var(string *name);
-  //! Adds a shock value (when it is a complete expression)
+  //! Adds a deterministic shock value
   void add_value(NodeID value);
   //! Writes a Sigma_e block
   void do_sigma_e();

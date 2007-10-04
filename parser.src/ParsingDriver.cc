@@ -483,18 +483,6 @@ ParsingDriver::add_period(string *p1)
 }
 
 void
-ParsingDriver::add_value_const(string *value)
-{
-  add_value(add_constant(value));
-}
-
-void
-ParsingDriver::add_value_var(string *name)
-{
-  add_value(add_expression_variable(name));
-}
-
-void
 ParsingDriver::add_value(NodeID value)
 {
   det_shocks_values.push_back(value);

@@ -364,6 +364,7 @@ VariableNode::writeOutput(ostream &output, ExprNodeOutputType output_type,
 double
 VariableNode::eval(const eval_context_type &eval_context) const throw (EvalException)
 {
+  // ModelTree::evaluateJacobian need to have the initval values applied to lead/lagged variables also
   /*if (lag != 0)
     throw EvalException();*/
   eval_context_type::const_iterator it = eval_context.find(make_pair(symb_id, type));
@@ -1239,15 +1240,13 @@ UnknownFunctionNode::collectEndogenous(NodeID &Id)
 double
 UnknownFunctionNode::eval(const eval_context_type &eval_context) const throw (EvalException)
 {
-  cout << "Unknown function\n";
-  cout.flush();
+  cerr << "UnknownFunctionNode::eval: operation impossible!" << endl;
   throw EvalException();
 }
 
 void
 UnknownFunctionNode::compile(ofstream &CompileCode, bool lhs_rhs, ExprNodeOutputType output_type, const temporary_terms_type &temporary_terms, map_idx_type map_idx) const
 {
-  cout << "Unknown function\n";
-  cout.flush();
+  cerr << "UnknownFunctionNode::compile: operation impossible!" << endl;
   exit(-1);
 }

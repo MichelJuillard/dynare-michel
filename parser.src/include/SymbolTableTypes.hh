@@ -1,38 +1,6 @@
 #ifndef _SYMBOLTABLETYPES_HH
 #define _SYMBOLTABLETYPES_HH
 
-enum UnaryOpcode
-  {
-    oUminus,
-    oExp,
-    oLog,
-    oLog10,
-    oCos,
-    oSin,
-    oTan,
-    oAcos,
-    oAsin,
-    oAtan,
-    oCosh,
-    oSinh,
-    oTanh,
-    oAcosh,
-    oAsinh,
-    oAtanh,
-    oSqrt
-  };
-
-enum BinaryOpcode
-  {
-    oPlus,
-    oMinus,
-    oTimes,
-    oDivide,
-    oPower,
-    oEqual
-  };
-
-
 //! Symbol type enum
 enum Type
   {

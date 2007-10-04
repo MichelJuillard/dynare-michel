@@ -189,7 +189,7 @@ public:
   /*EndNew*/
 };
 
-/*enum UnaryOpcode
+enum UnaryOpcode
   {
     oUminus,
     oExp,
@@ -209,7 +209,7 @@ public:
     oAtanh,
     oSqrt
   };
-*/
+
 //! Unary operator node
 class UnaryOpNode : public ExprNode
 {
@@ -238,7 +238,6 @@ public:
   /*EndNew*/
 };
 
-/*
 enum BinaryOpcode
   {
     oPlus,
@@ -248,7 +247,7 @@ enum BinaryOpcode
     oPower,
     oEqual
   };
-*/
+
 //! Binary operator node
 class BinaryOpNode : public ExprNode
 {
