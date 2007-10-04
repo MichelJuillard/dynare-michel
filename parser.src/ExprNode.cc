@@ -403,31 +403,36 @@ VariableNode::compile(ofstream &CompileCode, bool lhs_rhs, ExprNodeOutputType ou
   CompileCode.write(&typel, sizeof(typel));
   switch(type)
     {
-      case eParameter:
-        i = symb_id + OFFSET(output_type);
-        CompileCode.write(reinterpret_cast<char *>(&i), sizeof(i));
+    case eParameter:
+      i = symb_id + OFFSET(output_type);
+      CompileCode.write(reinterpret_cast<char *>(&i), sizeof(i));
 #ifdef DEBUGC
-        cout << "FLD Param[ " << i << ", symb_id=" << symb_id << "]\n";
+      cout << "FLD Param[ " << i << ", symb_id=" << symb_id << "]\n";
 #endif
-        break;
-      case eEndogenous :
-        i = symb_id + OFFSET(output_type);
-        CompileCode.write(reinterpret_cast<char *>(&i), sizeof(i));
-        lagl=lag;
-        CompileCode.write(reinterpret_cast<char *>(&lagl), sizeof(lagl));
-        break;
-      case eExogenous :
-        i = symb_id + OFFSET(output_type);
-        CompileCode.write(reinterpret_cast<char *>(&i), sizeof(i));
-        lagl=lag;
-        CompileCode.write(reinterpret_cast<char *>(&lagl), sizeof(lagl));
-        break;
-      case eExogenousDet:
-        i = symb_id + datatree.symbol_table.exo_nbr + OFFSET(output_type);
-        CompileCode.write(reinterpret_cast<char *>(&i), sizeof(i));
-        lagl=lag;
-        CompileCode.write(reinterpret_cast<char *>(&lagl), sizeof(lagl));
-        break;
+      break;
+    case eEndogenous :
+      i = symb_id + OFFSET(output_type);
+      CompileCode.write(reinterpret_cast<char *>(&i), sizeof(i));
+      lagl=lag;
+      CompileCode.write(reinterpret_cast<char *>(&lagl), sizeof(lagl));
+      break;
+    case eExogenous :
+      i = symb_id + OFFSET(output_type);
+      CompileCode.write(reinterpret_cast<char *>(&i), sizeof(i));
+      lagl=lag;
+      CompileCode.write(reinterpret_cast<char *>(&lagl), sizeof(lagl));
+      break;
+    case eExogenousDet:
+      i = symb_id + datatree.symbol_table.exo_nbr + OFFSET(output_type);
+      CompileCode.write(reinterpret_cast<char *>(&i), sizeof(i));
+      lagl=lag;
+      CompileCode.write(reinterpret_cast<char *>(&lagl), sizeof(lagl));
+      break;
+    case eRecursiveVariable:
+    case eModelLocalVariable:
+    case eModFileLocalVariable:
+      cerr << "VariableNode::compile: unhandled variable type" << endl;
+      exit(-1);
     }
 }
 /*EndNew*/
