@@ -5,8 +5,12 @@ function info=stoch_simul(var_list)
 
   options_old = options_;
   if options_.linear
-    options_.order = 1;
+      options_.order = 1;
   end
+  if (options_.order == 1)
+      options_.replic = 1;
+  end
+  
 
   TeX = options_.TeX;
 
@@ -253,7 +257,6 @@ function info=stoch_simul(var_list)
       end
     end
   end
-
 
   if options_.SpectralDensity == 1
       [omega,f] = UnivariateSpectralDensity(oo_.dr,var_list);
