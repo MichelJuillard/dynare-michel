@@ -4,6 +4,7 @@
 //                 use NO_COMPILER option in MODEL command            //
 ////////////////////////////////////////////////////////////////////////
 #include "simulate.hh"
+#include "linbcg.hh"
 
 
 longd
@@ -28,6 +29,34 @@ max(int a, int b)
   else
     return(b);
 }
+
+int
+min(int a, int b)
+{
+  if (a<b)
+    return(a);
+  else
+    return(b);
+}
+
+double
+max(double a, double b)
+{
+  if (a>b)
+    return(a);
+  else
+    return(b);
+}
+
+double
+min(double a, double b)
+{
+  if (a<b)
+    return(a);
+  else
+    return(b);
+}
+
 
 #ifdef INDIRECT_SIMULATE
 void
@@ -1415,6 +1444,7 @@ void Read_SparseMatrix(std::string file_name, int Size, int periods, int y_kmin,
   for (j=0;j<Size;j++)
     {
       SaveCode.read(reinterpret_cast<char *>(&index_vara[j]), sizeof(*index_vara));
+      //mexPrintf("index_vara[%d]=%d\n",j,index_vara[j]);
     }
   for (i=1;i<periods+y_kmin+y_kmax;i++)
     {
@@ -1428,6 +1458,12 @@ void Read_SparseMatrix(std::string file_name, int Size, int periods, int y_kmin,
           mexPrintf("%d\n",index_vara[j+Size*i]);
 #endif
         }
+    }
+  index_equa=(int*)mxMalloc(Size*sizeof(int));
+  for(j=0;j<Size;j++)
+    {
+      SaveCode.read(reinterpret_cast<char *>(&index_equa[j]), sizeof(*index_equa));
+      //mexPrintf("index_equa[%d]=%d\n",j,index_equa[j]);
     }
 }
 
@@ -3510,283 +3546,17 @@ simulate_NG1(int blck, int y_size, int it_, int y_kmin, int y_kmax, int Size, in
   return(0);
 }
 
-/*
-
-void SparseMatrixRow::Init(int periods, int y_kmin, int y_kmax, int Size, std::map<std::pair<std::pair<int, int> ,int>, int> IM,  double* sa, int* ija)
-{
-  std::map<std::pair<std::pair<int, int> ,int>, int>::iterator it4;
-  int Non_Zero_Elem=IM.size();
-  it4=IM.begin();
-  // count the non zero diagonal elements
-  while (it4!=IM.end())
-    {
-      eq= it4->first.first.first;
-      var=it4->first.first.second;
-      lag=it4->first.second;
 
 
-  for (t=0;t<periods;t++)
-    {
-#ifdef PRINT_OUT
-      mexPrintf("t=%d\n",t);
-#endif
-      int ti_y_kmin=-min( t            , y_kmin);
-      int ti_y_kmax= min( periods-(t+1), y_kmax);
-      it4=IM.begin();
-      eq=-1;
-      while (it4!=IM.end())
-        {
-          var=it4->first.first.second;
-          if (eq!=it4->first.first.first+Size*t)
-            tmp_b=0;
-          eq=it4->first.first.first+Size*t;
-#ifdef PRINT_OUT
-          mexPrintf("eq=%d, var=%d",eq,var);
-#endif
-          if (var<(periods+y_kmax)*Size)
-            {
-              lag=it4->first.second;
-#ifdef PRINT_OUT
-              mexPrintf(", lag =%d, ti_y_kmin=%d, ti_y_kmax=%d ", lag, ti_y_kmin, ti_y_kmax);
-#endif
-              if (lag<=ti_y_kmax && lag>=ti_y_kmin)
-                {
-                  //mexPrintf("u_index=%d, eq=%d, var=%d, lag=%d ",it4->second+u_count_init*t, eq, var, lag);
-                  var+=Size*t;
-                  //mexPrintf("u_index=%d, eq=%d, var=%d, lag=%d ",it4->second+u_count_init*t, eq, var, lag);
-                  NbNZRow[eq]++;
-                  NbNZCol[var]++;
-#ifdef NEW_ALLOC
-                  first=mxMalloc_NZE();
-#else
-                  first=(NonZeroElem*)mxMalloc(sizeof(NonZeroElem));
-#endif
-                  first->NZE_C_N=NULL;
-                  first->NZE_R_N=NULL;
-                  first->u_index=it4->second+u_count_init*t;
-                  first->r_index=eq;
-                  first->c_index=var;
-                  first->lag_index=lag;
 
-                  if (FNZE_R[eq]==NULL)
-                    {
-                      FNZE_R[eq]=first;
-                    }
-                  if (FNZE_C[var]==NULL)
-                    FNZE_C[var]=first;
-                  if (temp_NZE_R[eq]!=NULL)
-                    temp_NZE_R[eq]->NZE_R_N=first;
-                  if (temp_NZE_C[var]!=NULL)
-                    temp_NZE_C[var]->NZE_C_N=first;
-                  temp_NZE_R[eq]=first;
-                  temp_NZE_C[var]=first;
-#ifdef PRINT_OUT
-                  mexPrintf("=> ");
-#endif
-                }
-              else
-                {
-#ifdef PRINT_OUT
-                  mexPrintf("nn ");
-                  mexPrintf("tmp_b+=u[%d]*y[index_var[%d]]\n",it4->second+u_count_init*t,var+Size*(y_kmin+t));
-                  mexPrintf("tmp_b+=u[%d](%f)*y[%d(%d)](%f)",it4->second+u_count_init*t,u[it4->second+u_count_init*t], index_vara[var+Size*(y_kmin+t)],var+Size*(y_kmin+t),y[index_vara[var+Size*(y_kmin+t)]]);
-#endif
-                  tmp_b+=u[it4->second+u_count_init*t]*y[index_vara[var+Size*(y_kmin+t)]];
-                }
-            }
-          else
-            {
-#ifdef PRINT_OUT
-              mexPrintf("");
-#endif
-              b[eq]=it4->second+u_count_init*t;
-              u[b[eq]]+=tmp_b;
-#ifdef PRINT_OUT
-              mexPrintf("=> b");
-#endif
-            }
-#ifdef PRINT_OUT
-          mexPrintf(" u[%d] = %e\n",it4->second+u_count_init*t,double(u[it4->second+u_count_init*t]));
-#endif
-          it4++;
-        }
-    }
 
-  int t,i, eq, var, lag;
-  longd tmp_b=0.0;
-
-  NonZeroElem* first;
-#ifdef MEM_ALLOC_CHK
-  mexPrintf("pivot=(int*)mxMalloc(%d*sizeof(int))\n",Size*periods);
-#endif
-  pivot=(int*)mxMalloc(Size*periods*sizeof(int));
-#ifdef MEM_ALLOC_CHK
-  mexPrintf("pivota=(int*)mxMalloc(%d*sizeof(int))\n",Size*periods);
-#endif
-  pivotk=(int*)mxMalloc(Size*periods*sizeof(int));
-#ifdef MEM_ALLOC_CHK
-  mexPrintf("pivotv=(longd*)mxMalloc(%d*sizeof(longd))\n",Size*periods);
-#endif
-  pivotv=(longd*)mxMalloc(Size*periods*sizeof(longd));
-#ifdef MEM_ALLOC_CHK
-  mexPrintf("pivotva=(longd*)mxMalloc(%d*sizeof(longd))\n",Size*periods);
-#endif
-  pivotva=(longd*)mxMalloc(Size*periods*sizeof(longd));
-#ifdef MEM_ALLOC_CHK
-  mexPrintf("b=(int*)mxMalloc(%d*sizeof(int))\n",Size*periods);
-#endif
-  b=(int*)mxMalloc(Size*periods*sizeof(int));
-#ifdef MEM_ALLOC_CHK
-  mexPrintf("line_done=(bool*)mxMalloc(%d*sizeof(bool))\n",Size*periods);
-#endif
-  line_done=(bool*)mxMalloc(Size*periods*sizeof(bool));
-  memset(line_done, 0, periods*Size*sizeof(*line_done));
-  CHUNK_BLCK_SIZE=u_count;
-  print_err=true;
-  swp_f=false;
-  g_save_op=NULL;
-  g_nop_all=0;
-#ifdef PRINT_OUT
-  mexPrintf("sizeof(NonZeroElem)=%d sizeof(NonZeroElem*)=%d\n",sizeof(NonZeroElem),sizeof(NonZeroElem*));
-#endif
-  i=(periods+y_kmax+1)*Size*sizeof(NonZeroElem*);
-#ifdef MEM_ALLOC_CHK
-  mexPrintf("FNZE_R=(NonZeroElem**)mxMalloc(%d)\n",i);
-#endif
-  FNZE_R=(NonZeroElem**)mxMalloc(i);
-#ifdef MEM_ALLOC_CHK
-  mexPrintf("FNZE_C=(NonZeroElem**)mxMalloc(%d)\n",i);
-#endif
-  FNZE_C=(NonZeroElem**)mxMalloc(i);
-  memset(FNZE_R, 0, i);
-  memset(FNZE_C, 0, i);
-#ifdef MEM_ALLOC_CHK
-  mexPrintf("temp_NZE_R=(NonZeroElem**)(%d)\n",i);
-#endif
-  NonZeroElem** temp_NZE_R=(NonZeroElem**)mxMalloc(i);
-#ifdef MEM_ALLOC_CHK
-  mexPrintf("temp_NZE_R=(NonZeroElem**)(%d)\n",i);
-#endif
-  NonZeroElem** temp_NZE_C=(NonZeroElem**)mxMalloc(i);
-  memset(temp_NZE_R, 0, i);
-  memset(temp_NZE_C, 0, i);
-  i=(periods+y_kmax+1)*Size*sizeof(int);
-#ifdef MEM_ALLOC_CHK
-  mexPrintf("NbNZRow=(int*)mxMalloc(%d)\n",i);
-#endif
-  NbNZRow=(int*)mxMalloc(i);
-#ifdef MEM_ALLOC_CHK
-  mexPrintf("NbNZCol=(int*)mxMalloc(%d)\n",i);
-#endif
-  NbNZCol=(int*)mxMalloc(i);
-#ifdef MEM_ALLOC_CHK
-  mexPrintf("ok\n");
-#endif
-  memset(NbNZRow, 0, i);
-  memset(NbNZCol, 0, i);
-  i=periods*Size*sizeof(*b);
-  memset(b,0,i);
-#ifdef PRINT_OUT
-  mexPrintf("Now looping\n");
-#endif
-  for (t=0;t<periods;t++)
-    {
-#ifdef PRINT_OUT
-      mexPrintf("t=%d\n",t);
-#endif
-      int ti_y_kmin=-min( t            , y_kmin);
-      int ti_y_kmax= min( periods-(t+1), y_kmax);
-      it4=IM.begin();
-      eq=-1;
-      while (it4!=IM.end())
-        {
-          var=it4->first.first.second;
-          if (eq!=it4->first.first.first+Size*t)
-            tmp_b=0;
-          eq=it4->first.first.first+Size*t;
-#ifdef PRINT_OUT
-          mexPrintf("eq=%d, var=%d",eq,var);
-#endif
-          if (var<(periods+y_kmax)*Size)
-            {
-              lag=it4->first.second;
-#ifdef PRINT_OUT
-              mexPrintf(", lag =%d, ti_y_kmin=%d, ti_y_kmax=%d ", lag, ti_y_kmin, ti_y_kmax);
-#endif
-              if (lag<=ti_y_kmax && lag>=ti_y_kmin)
-                {
-                  //mexPrintf("u_index=%d, eq=%d, var=%d, lag=%d ",it4->second+u_count_init*t, eq, var, lag);
-                  var+=Size*t;
-                  //mexPrintf("u_index=%d, eq=%d, var=%d, lag=%d ",it4->second+u_count_init*t, eq, var, lag);
-                  NbNZRow[eq]++;
-                  NbNZCol[var]++;
-#ifdef NEW_ALLOC
-                  first=mxMalloc_NZE();
-#else
-                  first=(NonZeroElem*)mxMalloc(sizeof(NonZeroElem));
-#endif
-                  first->NZE_C_N=NULL;
-                  first->NZE_R_N=NULL;
-                  first->u_index=it4->second+u_count_init*t;
-                  first->r_index=eq;
-                  first->c_index=var;
-                  first->lag_index=lag;
-
-                  if (FNZE_R[eq]==NULL)
-                    {
-                      FNZE_R[eq]=first;
-                    }
-                  if (FNZE_C[var]==NULL)
-                    FNZE_C[var]=first;
-                  if (temp_NZE_R[eq]!=NULL)
-                    temp_NZE_R[eq]->NZE_R_N=first;
-                  if (temp_NZE_C[var]!=NULL)
-                    temp_NZE_C[var]->NZE_C_N=first;
-                  temp_NZE_R[eq]=first;
-                  temp_NZE_C[var]=first;
-#ifdef PRINT_OUT
-                  mexPrintf("=> ");
-#endif
-                }
-              else
-                {
-#ifdef PRINT_OUT
-                  mexPrintf("nn ");
-                  mexPrintf("tmp_b+=u[%d]*y[index_var[%d]]\n",it4->second+u_count_init*t,var+Size*(y_kmin+t));
-                  mexPrintf("tmp_b+=u[%d](%f)*y[%d(%d)](%f)",it4->second+u_count_init*t,u[it4->second+u_count_init*t], index_vara[var+Size*(y_kmin+t)],var+Size*(y_kmin+t),y[index_vara[var+Size*(y_kmin+t)]]);
-#endif
-                  tmp_b+=u[it4->second+u_count_init*t]*y[index_vara[var+Size*(y_kmin+t)]];
-                }
-            }
-          else
-            {
-#ifdef PRINT_OUT
-              mexPrintf("");
-#endif
-              b[eq]=it4->second+u_count_init*t;
-              u[b[eq]]+=tmp_b;
-#ifdef PRINT_OUT
-              mexPrintf("=> b");
-#endif
-            }
-#ifdef PRINT_OUT
-          mexPrintf(" u[%d] = %e\n",it4->second+u_count_init*t,double(u[it4->second+u_count_init*t]));
-#endif
-          it4++;
-        }
-    }
-  mxFree(temp_NZE_R);
-  mxFree(temp_NZE_C);
-}
-
-*/
 /*class EvalException
 {
 };*/
 
 Interpreter::Interpreter()
 {
-  GaussSeidel=true;
+  //GaussSeidel=true;
 }
 
 void
@@ -4187,7 +3957,7 @@ Interpreter::compute_block_time() /*throw(EvalException)*/
 }
 
 void
-Interpreter::simulate_a_block(int size,int type, string file_name, string bin_basename)
+Interpreter::simulate_a_block(int size,int type, string file_name, string bin_basename, bool Gaussian_Elimination)
 {
   char *begining;
   int i;
@@ -4199,8 +3969,10 @@ Interpreter::simulate_a_block(int size,int type, string file_name, string bin_ba
   int giter;
   int u_count_int;
   double *y_save;
+  LinBCG linbcg; 
+  //mexPrintf("%d\n",debile);
 
-  GaussSeidel=false;
+  //GaussSeidel=false;
   //slowc_save=slowc/2;
   switch (type)
     {
@@ -4546,7 +4318,7 @@ Interpreter::simulate_a_block(int size,int type, string file_name, string bin_ba
         mexPrintf("u_count=%d\n",u_count);
 #endif
         begining=get_code_pointer;
-        GaussSeidel=false;
+        //GaussSeidel=false;
         giter=0;
         //mexPrintf("GaussSeidel=%d\n",GaussSeidel);
         if (!is_linear)
@@ -4571,7 +4343,7 @@ Interpreter::simulate_a_block(int size,int type, string file_name, string bin_ba
                     if (isnan(res1)||isinf(res1))
                       {
                         memcpy(y, y_save, y_size*sizeof(longd)*(periods+y_kmax+y_kmin));
-                        GaussSeidel=false;
+                        //GaussSeidel=false;
                         break;
                       }
                     for (i=0; i< size; i++)
@@ -4585,32 +4357,27 @@ Interpreter::simulate_a_block(int size,int type, string file_name, string bin_ba
                           max_res=fabs(rr);
                         res2+=rr*rr;
                         res1+=fabs(rr);
-                        if (GaussSeidel && giter)
+                        /*if (GaussSeidel && giter)
                           {
                             //mexPrintf("y[%d]-=r[%d]/u[%d]\n",Block_Contain[i].Variable,i,Block_Contain[i].Own_Derivative,);
                             y[Per_y_+Block_Contain[i].Variable]-=r[i]/u[Per_u_+Block_Contain[i].Own_Derivative];
                             //mexPrintf("y[%d]-=r[%d](%f)/u[%d](%f)=%f\n",Block_Contain[i].Variable,i,r[i],Block_Contain[i].Own_Derivative,u[Per_u_+Block_Contain[i].Own_Derivative], y[Per_y_+Block_Contain[i].Variable]);
-                          }
+                          }*/
                       }
                   }
                 cvg=(max_res<solve_tolf);
-                if (GaussSeidel)
+                if(Gaussian_Elimination)
+                  simulate_NG1(Block_Count, symbol_table_endo_nbr, it_, y_kmin, y_kmax, size, periods, true, cvg);
+                else
                   {
-                    mexPrintf("GaussSeidel res1=%f res2=%f max_res=%f\n",res1,res2,max_res);
-                    if (giter && res1>res1a)
-                      {
-                        memcpy(y, y_save, nb_endo*sizeof(longd)*(periods+y_kmax+y_kmin));
-                        GaussSeidel=false;
-                      }
-                    giter++;
-                    res1a=res1;
+                    int ITMAX=75;
+                    double TOL=1e-9;
+                    int ITOL=1;
+                    linbcg.Init(periods, y_kmin, y_kmax, size, IM_i, index_vara, index_equa);
+                    /*Vec_DP b(NP),x(NP);
+                    linbcg.linbcg(b,x,ITOL,TOL,ITMAX,iter,err);*/
                   }
-                if (!GaussSeidel)
-                  {
-                    simulate_NG1(Block_Count, symbol_table_endo_nbr, it_, y_kmin, y_kmax, size, periods, true, cvg);
-                    //GaussSeidel=true;
-                    iter++;
-                  }
+                iter++;
               }
             if (!cvg)
               {
@@ -4641,7 +4408,7 @@ Interpreter::simulate_a_block(int size,int type, string file_name, string bin_ba
         mxFree(u);
         mxFree(index_vara);
         memset(direction,0,size_of_direction);
-        GaussSeidel=false;
+        //GaussSeidel=false;
         break;
       default:
         mexPrintf("Unknow type =%d\n",type);
@@ -4732,7 +4499,7 @@ Interpreter::compute_blocks(string file_name, string bin_basename)
                 //mexPrintf("Block_Contain[%d].Own_Derivative=%d\n",i,lBlock_Contain.Own_Derivative);
                 Block_Contain.push_back(lBlock_Contain);
               }
-            simulate_a_block(lBlock.size,lBlock.type, file_name, bin_basename);
+            simulate_a_block(lBlock.size,lBlock.type, file_name, bin_basename,/*false*/true);
             break;
           case FEND :
             //mexPrintf("FEND\n");

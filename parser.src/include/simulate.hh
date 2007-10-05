@@ -1,14 +1,12 @@
 #ifndef SIMULATE_HH_INCLUDED
 #define SIMULATE_HH_INCLUDED
 
-#include <math>
 #include <stack>
 #include <set>
 #include <vector>
 #include <math.h>
 #include <iostream>
 #include <fstream>
-//#include "pctimer_h.hh"
 #include <time.h>
 #include <string>
 #include <map>
@@ -20,11 +18,6 @@
 #define pow_ pow
 //#define pow pow1
 
-// typedef struct IM_compact
-// {
-//   int size, u_init, u_finish, nb_endo;
-//   int *u, *Var, *Equ, *Var_Index, *Equ_Index, *Var_dyn_Index;
-// };
 typedef struct Variable_l
 {
   int* Index;
@@ -98,7 +91,7 @@ typedef struct NonZeroElem
 
 std::map<std::pair<std::pair<int, int> ,int>, int> IM_i;
 std::multimap<std::pair<int,int>, int> var_in_equ_and_lag_i, equ_in_var_and_lag_i;
-int  *index_vara, *pivota=NULL, *save_op_all=NULL, *b, *g_save_op=NULL;
+int  *index_vara, *index_equa, *pivota=NULL, *save_op_all=NULL, *b, *g_save_op=NULL;
 int *pivot, *pivotk;
 longd *pivotv, *pivotva=NULL;
 bool *line_done;
@@ -189,6 +182,7 @@ class SparseMatrix
     NonZeroElem* NZE_Mem;
   };
 
+
 #define get_code_int          *((int*)Code); Code+=sizeof(int);
 #define get_code_double       *((double*)Code); Code+=sizeof(double);
 #define get_code_pdouble      (double*)Code; Code+=sizeof(double);
@@ -210,7 +204,7 @@ class Interpreter
 {
   protected :
     void compute_block_time();
-    void simulate_a_block(int size,int type, string file_name, string bin_basename);
+    void simulate_a_block(int size,int type, string file_name, string bin_basename, bool Gaussian_Elimination);
     longd *T;
     vector<Block_contain_type> Block_Contain;
     vector<Block_type> Block;

@@ -625,7 +625,7 @@ ModelTree::writeModelEquationsCodeOrdered(const string file_name, const Model_Bl
         prev_Simulation_Type=ModelBlock->Block_List[j].Simulation_Type;
       }
     ModelBlock_Aggregated_Count++;
-    cout << "ModelBlock_Aggregated_Count=" << ModelBlock_Aggregated_Count << "\n";
+    //cout << "ModelBlock_Aggregated_Count=" << ModelBlock_Aggregated_Count << "\n";
     //For each block
     j=0;
     for(k0 = 0;k0 < ModelBlock_Aggregated_Count;k0++)
@@ -638,7 +638,7 @@ ModelTree::writeModelEquationsCodeOrdered(const string file_name, const Model_Bl
         code_file.write(reinterpret_cast<char *>(&v),sizeof(v));
         v=ModelBlock->Block_List[j].Simulation_Type;
         code_file.write(reinterpret_cast<char *>(&v),sizeof(v));
-        cout << "FBEGINBLOCK j=" << j << " size=" << ModelBlock_Aggregated_Number[k0] << " type=" << v << "\n";
+        //cout << "FBEGINBLOCK j=" << j << " size=" << ModelBlock_Aggregated_Number[k0] << " type=" << v << "\n";
         for(k=0; k<ModelBlock_Aggregated_Size[k0]; k++)
           {
             for(i=0; i < ModelBlock->Block_List[j].Size;i++)
@@ -1458,27 +1458,28 @@ ModelTree::Write_Inf_To_Bin_File(const string &dynamic_basename, const string &b
     }
   for(j=0;j<block_triangular.ModelBlock->Block_List[num].Size;j++)
     {
-       //int eq=block_triangular.ModelBlock->Block_List[i].Equation[j];
        int eqr1=j;
        int varr=block_triangular.ModelBlock->Block_List[num].Size*(block_triangular.periods
-                                                                   +/*block_triangular.ModelBlock->Block_List[num].Max_Lead*/block_triangular.Model_Max_Lead);
+                                                                   +block_triangular.Model_Max_Lead);
        int k1=0;
-       //mDynamicModelFile << "    var_in_equ_and_lag[std::make_pair(std::make_pair(" << j << ", 0)] = -1;\n";
-       //mDynamicModelFile << "    /*periods=" << block_triangular.periods << " Size=" << block_triangular.ModelBlock->Block_List[i].Size << "*/\n";
-       //mDynamicModelFile << "    var_in_equ_and_lag.insert(std::make_pair(std::make_pair(" << eqr1 << ", 0), " << block_triangular.ModelBlock->Block_List[i].Size*block_triangular.periods << "));\n";
-       //mDynamicModelFile << "    equ_in_var_and_lag[std::make_pair(std::make_pair(-1, " << k1 << ")] = " << equ << ";\n";
        SaveCode.write(reinterpret_cast<char *>(&eqr1), sizeof(eqr1));
        SaveCode.write(reinterpret_cast<char *>(&varr), sizeof(varr));
        SaveCode.write(reinterpret_cast<char *>(&k1), sizeof(k1));
        SaveCode.write(reinterpret_cast<char *>(&eqr1), sizeof(eqr1));
-       //cout << "    IM_i[std::make_pair(std::make_pair(" << eqr1 << ", " << varr << "), " << k1 << ")] = " << eqr1 << ";\n";
        u_count_int++;
     }
+  //cout << "u_count_int = " << u_count_int << endl;
   for(j=0;j<block_triangular.ModelBlock->Block_List[num].Size;j++)
     {
       //mDynamicModelFile << "    index_var[" << j << "]=" << block_triangular.ModelBlock->Block_List[i].Variable[j] << ";\n";
       int varr=block_triangular.ModelBlock->Block_List[num].Variable[j];
       SaveCode.write(reinterpret_cast<char *>(&varr), sizeof(varr));
+    }
+  for(j=0;j<block_triangular.ModelBlock->Block_List[num].Size;j++)
+    {
+      //mDynamicModelFile << "    index_var[" << j << "]=" << block_triangular.ModelBlock->Block_List[i].Variable[j] << ";\n";
+      int eqr1=block_triangular.ModelBlock->Block_List[num].Equation[j];
+      SaveCode.write(reinterpret_cast<char *>(&eqr1), sizeof(eqr1));
     }
   SaveCode.close();
 }
@@ -2413,6 +2414,7 @@ ModelTree::evaluateJacobian(const eval_context_type &eval_context, jacob_map *j_
   int j=0;
   bool *IM=NULL;
   int a_variable_lag=-9999;
+  //block_triangular.Print_IM(2);
   for(first_derivatives_type::iterator it = first_derivatives.begin();
       it != first_derivatives.end(); it++)
     {
@@ -2435,7 +2437,7 @@ ModelTree::evaluateJacobian(const eval_context_type &eval_context, jacob_map *j_
             }
           if (IM[eq*symbol_table.endo_nbr+var] && (fabs(val) < cutoff))
             {
-              //cout << "the coefficient related to variable " << var << " with lag " << k1 << " in equation " << eq << " is equal to " << interprete_.u1 << " and is set to 0 in the incidence matrix\n";
+              //cout << "the coefficient related to variable " << var << " with lag " << k1 << " in equation " << eq << " is equal to " << val << " and is set to 0 in the incidence matrix\n";
               block_triangular.unfill_IM(eq, var, k1);
               i++;
             }

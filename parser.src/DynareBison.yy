@@ -293,8 +293,8 @@ expression : '(' expression ')'
 
 comma_expression : expression
                    { driver.add_unknown_function_arg($1); }
-/* | comma_expression COMMA expression
-   { driver.add_unknown_function_arg($3); }*/
+                   | comma_expression COMMA expression
+                   { driver.add_unknown_function_arg($3); }
                  ;
 
 initval : INITVAL ';' initval_list END
@@ -401,11 +401,11 @@ hand_side : '(' hand_side ')'
             { $$ = driver.add_atan($3); }
           | SQRT '(' hand_side ')'
             { $$ = driver.add_sqrt($3); }
-          | DUMMY '(' expression ')'
+          | DUMMY '(' hand_side ')'
              { $$ = driver.add_dummy($3); }
-          | MAX '(' expression COMMA expression ')'
+          | MAX '(' hand_side COMMA hand_side ')'
              { $$ = driver.add_max($3 , $5); }
-          | MIN '(' expression COMMA expression ')'
+          | MIN '(' hand_side COMMA hand_side ')'
              { $$ = driver.add_min($3 , $5); }
           ;
 
