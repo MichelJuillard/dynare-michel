@@ -1149,6 +1149,24 @@ ParsingDriver::add_sqrt(NodeID arg1)
   return data_tree->AddSqRt(arg1);
 }
 
+NodeID
+ParsingDriver::add_max(NodeID arg1, NodeID arg2)
+{
+  return data_tree->AddMaX(arg1,arg2);
+}
+
+NodeID
+ParsingDriver::add_min(NodeID arg1, NodeID arg2)
+{
+  return data_tree->AddMin(arg1,arg2);
+}
+
+NodeID
+ParsingDriver::add_dummy(NodeID arg1)
+{
+  return data_tree->AddDuMmY(arg1);
+}
+
 void
 ParsingDriver::add_unknown_function_arg(NodeID arg)
 {

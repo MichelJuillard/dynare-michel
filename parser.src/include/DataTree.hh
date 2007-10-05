@@ -109,6 +109,12 @@ public:
   NodeID AddATanH(NodeID iArg1);
   //! Adds "sqrt(arg)" to model tree
   NodeID AddSqRt(NodeID iArg1);
+  //! Adds "max(arg1,arg2)" to model tree
+  NodeID AddMaX(NodeID iArg1, NodeID iArg2);
+  //! Adds "min(arg1,arg2)" to model tree
+  NodeID AddMin(NodeID iArg1, NodeID iArg2);
+  //! Adds "dummy(arg1)" to model tree
+  NodeID AddDuMmY(NodeID iArg1);
   //! Adds "arg1=arg2" to model tree
   NodeID AddEqual(NodeID iArg1, NodeID iArg2);
   void AddLocalParameter(const string &name, NodeID value) throw (LocalParameterException);

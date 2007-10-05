@@ -40,7 +40,7 @@ class ParsingDriver;
 %token BVAR_PRIOR_MU BVAR_PRIOR_OMEGA BVAR_PRIOR_TAU BVAR_PRIOR_TRAIN
 %token BVAR_REPLIC
 %token CALIB CALIB_VAR CHECK CONF_SIG CONSTANT CORR COVAR CUTOFF
-%token DATAFILE DR_ALGO DROP DSAMPLE DYNASAVE DYNATYPE
+%token DATAFILE DR_ALGO DROP DSAMPLE DUMMY DYNASAVE DYNATYPE
 %token END ENDVAL EQUAL ESTIMATION ESTIMATED_PARAMS ESTIMATED_PARAMS_BOUNDS ESTIMATED_PARAMS_INIT
 %token FILENAME FILTER_STEP_AHEAD FILTERED_VARS FIRST_OBS
 %token <string_val> FLOAT_NUMBER
@@ -51,8 +51,8 @@ class ParsingDriver;
 %token <string_val> INT_NUMBER
 %token INV_GAMMA_PDF IRF
 %token KALMAN_ALGO KALMAN_TOL
-%token LAPLACE LCC_COMPILER LIK_ALGO LIK_INIT LINEAR LOAD_MH_FILE LOGLINEAR MARKOWITZ
-%token MH_DROP MH_INIT_SCALE MH_JSCALE MH_MODE MH_NBLOCKS MH_REPLIC MH_RECOVER
+%token LAPLACE LCC_COMPILER LIK_ALGO LIK_INIT LINEAR LOAD_MH_FILE LOGLINEAR MARKOWITZ MAX
+%token MH_DROP MH_INIT_SCALE MH_JSCALE MH_MODE MH_NBLOCKS MH_REPLIC MH_RECOVER MIN
 %token MODE_CHECK MODE_COMPUTE MODE_FILE MODEL MODEL_COMPARISON MSHOCKS
 %token MODEL_COMPARISON_APPROXIMATION MODIFIEDHARMONICMEAN MOMENTS_VARENDO
 %token <string_val> NAME
@@ -281,14 +281,20 @@ expression : '(' expression ')'
              { $$ = driver.add_atan($3); }
            | SQRT '(' expression ')'
              { $$ = driver.add_sqrt($3); }
+           | DUMMY '(' expression ')'
+             { $$ = driver.add_dummy($3); }
+           | MAX '(' expression COMMA expression ')'
+             { $$ = driver.add_max($3 , $5); }
+           | MIN '(' expression COMMA expression ')'
+             { $$ = driver.add_min($3 , $5); }
            | NAME '(' comma_expression ')'
              { $$ = driver.add_unknown_function($1); }
            ;
 
 comma_expression : expression
                    { driver.add_unknown_function_arg($1); }
-                 | comma_expression COMMA expression
-                   { driver.add_unknown_function_arg($3); }
+/* | comma_expression COMMA expression
+   { driver.add_unknown_function_arg($3); }*/
                  ;
 
 initval : INITVAL ';' initval_list END
@@ -395,6 +401,12 @@ hand_side : '(' hand_side ')'
             { $$ = driver.add_atan($3); }
           | SQRT '(' hand_side ')'
             { $$ = driver.add_sqrt($3); }
+          | DUMMY '(' expression ')'
+             { $$ = driver.add_dummy($3); }
+          | MAX '(' expression COMMA expression ')'
+             { $$ = driver.add_max($3 , $5); }
+          | MIN '(' expression COMMA expression ')'
+             { $$ = driver.add_min($3 , $5); }
           ;
 
 pound_expression: '#' NAME EQUAL hand_side ';'

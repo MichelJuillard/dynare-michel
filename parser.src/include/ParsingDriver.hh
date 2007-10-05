@@ -354,6 +354,12 @@ public:
   NodeID add_atanh(NodeID arg1);
   //! Writes token "sqrt(arg1)" to model tree
   NodeID add_sqrt(NodeID arg1);
+   //! Writes token "max(arg1,arg2)" to model tree
+  NodeID add_max(NodeID arg1, NodeID arg2);
+   //! Writes token "min(arg1,arg2)" to model tree
+  NodeID add_min(NodeID arg1, NodeID arg2);
+  //! Writes token "dummy(arg1)" to model tree
+  NodeID add_dummy(NodeID arg1);
   //! Adds an unknwon function argument
   void add_unknown_function_arg(NodeID arg);
   //! Adds an unknown function call node

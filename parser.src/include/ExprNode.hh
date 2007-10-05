@@ -207,7 +207,8 @@ enum UnaryOpcode
     oAcosh,
     oAsinh,
     oAtanh,
-    oSqrt
+    oSqrt,
+    oDummy
   };
 
 //! Unary operator node
@@ -245,7 +246,9 @@ enum BinaryOpcode
     oTimes,
     oDivide,
     oPower,
-    oEqual
+    oEqual,
+    oMax,
+    oMin
   };
 
 //! Binary operator node

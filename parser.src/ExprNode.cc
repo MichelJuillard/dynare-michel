@@ -521,6 +521,8 @@ UnaryOpNode::computeDerivative(int varID)
     case oSqrt:
       t11 = datatree.AddPlus(this, this);
       return datatree.AddDivide(darg, t11);
+    case oDummy:
+      return datatree.Zero;
     }
   cerr << "Impossible case!" << endl;
   exit(-1);
@@ -572,6 +574,8 @@ UnaryOpNode::cost(const temporary_terms_type &temporary_terms, bool is_matlab) c
         return cost + 350;
       case oSqrt:
         return cost + 570;
+      case oDummy:
+        return cost + 200;
       }
   else
     // Cost for C files
@@ -606,6 +610,8 @@ UnaryOpNode::cost(const temporary_terms_type &temporary_terms, bool is_matlab) c
         return cost + 150;
       case oSqrt:
         return cost + 90;
+      case oDummy:
+        return cost + 50;
       }
   cerr << "Impossible case!" << endl;
   exit(-1);
@@ -674,9 +680,22 @@ UnaryOpNode::writeOutput(ostream &output, ExprNodeOutputType output_type,
       return;
     }
 
+  if (op_code == oDummy)
+    {
+      if (OFFSET(output_type))
+	output << "double";
+      output << "(";
+      arg->writeOutput(output, output_type, temporary_terms);
+      output << ">0)";
+      return;
+    }
+
   // Always put parenthesis around uminus nodes
   if (op_code == oUminus)
     output << "(";
+
+
+
 
   switch(op_code)
     {
@@ -797,6 +816,8 @@ UnaryOpNode::eval_opcode(UnaryOpcode op_code, double v) throw (EvalException)
       return(atanh(v));
     case oSqrt:
       return(sqrt(v));
+    case oDummy:
+      return(double (v>0));
     }
   // Impossible
   throw EvalException();
@@ -899,8 +920,22 @@ BinaryOpNode::computeDerivative(int varID)
           t15 = datatree.AddPlus(t12, t14);
           return datatree.AddTimes(t15, this);
         }
+    case oMax:
+      t11 = datatree.AddMinus(arg1,arg2);
+      t12 = datatree.AddDuMmY(t11);
+      t13 = datatree.AddTimes(t12,darg1);
+      t14 = datatree.AddMinus(datatree.One,t12);
+      t15 = datatree.AddTimes(t14,darg2);
+      return datatree.AddPlus(t15,t13);
+    case oMin:
+      t11 = datatree.AddMinus(arg2,arg1);
+      t12 = datatree.AddDuMmY(t11);
+      t13 = datatree.AddTimes(t12,darg1);
+      t14 = datatree.AddMinus(datatree.One,t12);
+      t15 = datatree.AddTimes(t14,darg2);
+      return datatree.AddPlus(t15,t13);
     case oEqual:
-      return datatree.AddMinus(darg1, darg2);
+      return datatree.AddMinus(darg1, darg2);  
     }
   cerr << "Impossible case!" << endl;
   exit(-1);
@@ -919,6 +954,8 @@ BinaryOpNode::precedence(ExprNodeOutputType output_type, const temporary_terms_t
     case oEqual:
     case oPlus:
     case oMinus:
+    case oMax:
+    case oMin:  
       return 0;
     case oTimes:
     case oDivide:
@@ -928,7 +965,7 @@ BinaryOpNode::precedence(ExprNodeOutputType output_type, const temporary_terms_t
         // In C, power operator is of the form pow(a, b)
         return 100;
       else
-        return 3;
+        return 3;  
     }
   cerr << "Impossible case!" << endl;
   exit(-1);
@@ -953,6 +990,9 @@ BinaryOpNode::cost(const temporary_terms_type &temporary_terms, bool is_matlab) 
       case oMinus:
       case oTimes:
         return cost + 90;
+      case oMax:
+      case oMin:
+	return cost + 110;
       case oDivide:
         return cost + 990;
       case oPower:
@@ -968,6 +1008,9 @@ BinaryOpNode::cost(const temporary_terms_type &temporary_terms, bool is_matlab) 
       case oMinus:
       case oTimes:
         return cost + 4;
+      case oMax:
+      case oMin:
+	return cost + 5;
       case oDivide:
         return cost + 15;
       case oPower:
@@ -1047,6 +1090,16 @@ BinaryOpNode::eval_opcode(double v1, BinaryOpcode op_code, double v2) throw (Eva
       return(v1 / v2);
     case oPower:
       return(pow(v1, v2));
+    case oMax:
+      if(v1<v2)
+        return( v2);
+      else
+        return( v1);
+    case oMin:
+      if(v1>v2)
+        return( v2);
+      else
+        return( v1);
     case oEqual:
     default:
       throw EvalException();
@@ -1099,9 +1152,20 @@ BinaryOpNode::writeOutput(ostream &output, ExprNodeOutputType output_type,
     }
 
   // Treat special case of power operator in C
-  if (op_code == oPower && (!OFFSET(output_type)))
+  if ((op_code == oPower && !OFFSET(output_type)) || op_code == oMax || op_code == oMin )
     {
-      output << "pow(";
+      switch (op_code)
+	{
+	case oPower:
+	  output << "pow(";
+	  break;
+	case oMax:
+	  output << "max(";
+	  break;
+	case oMin:
+	  output << "min(";
+	  break;
+	}
       arg1->writeOutput(output, output_type, temporary_terms);
       output << ",";
       arg2->writeOutput(output, output_type, temporary_terms);

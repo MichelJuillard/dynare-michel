@@ -1,11 +1,30 @@
 #ifndef SIMULATE_HH_INCLUDED
 #define SIMULATE_HH_INCLUDED
 
-typedef struct IM_compact
-{
-  int size, u_init, u_finish, nb_endo;
-  int *u, *Var, *Equ, *Var_Index, *Equ_Index, *Var_dyn_Index;
-};
+#include <math>
+#include <stack>
+#include <set>
+#include <vector>
+#include <math.h>
+#include <iostream>
+#include <fstream>
+//#include "pctimer_h.hh"
+#include <time.h>
+#include <string>
+#include <map>
+#include <algorithm>
+#include "CodeInterpreter.hh"
+#include "SymbolTableTypes.hh"
+#include "mex.h"
+#include "ExprNode.hh"
+#define pow_ pow
+//#define pow pow1
+
+// typedef struct IM_compact
+// {
+//   int size, u_init, u_finish, nb_endo;
+//   int *u, *Var, *Equ, *Var_Index, *Equ_Index, *Var_dyn_Index;
+// };
 typedef struct Variable_l
 {
   int* Index;
@@ -47,22 +66,7 @@ typedef long double longd;
 #else
 typedef double longd;
 #endif
-#include <stack>
-#include <set>
-#include <vector>
-#include <math.h>
-#include <iostream>
-#include <fstream>
-//#include "pctimer_h.hh"
-#include <time.h>
-#include <string>
-#include <map>
-#include <algorithm>
-#include "CodeInterpreter.hh"
-#include "SymbolTableTypes.hh"
-#include "mex.h"
-#define pow_ pow
-//#define pow pow1
+
 
 using namespace std;
 
@@ -217,7 +221,7 @@ class Interpreter
     longd *g1, *r;
     bool GaussSeidel;
   public :
-    Interpreter::Interpreter();
+    Interpreter();
     void compute_blocks(string file_name, string bin_basename);
 };
 

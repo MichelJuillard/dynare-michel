@@ -3999,6 +3999,18 @@ Interpreter::compute_block_time() /*throw(EvalException)*/
                   mexPrintf("pow(%f, %f)\n",v1,v2);
 #endif
                   break;
+                case oMax:
+                  Stack.push(max(v1, v2));
+#ifdef DEBUGC
+                  mexPrintf("max(%f, %f)\n",v1,v2);
+#endif
+                  break;
+                case oMin:
+                  Stack.push(min(v1, v2));
+#ifdef DEBUGC
+                  mexPrintf("min(%f, %f)\n",v1,v2);
+#endif
+                  break;
                 case oEqual:
                 default:
                   /*throw EvalException();*/
@@ -4116,6 +4128,12 @@ Interpreter::compute_block_time() /*throw(EvalException)*/
                   mexPrintf("sqrt\n");
 #endif
                   break;
+                case oDummy:
+                  Stack.push(double (v1>0));
+#ifdef DEBUGC
+                  mexPrintf("dummy\n");
+#endif
+                  break;
                 default:
                   /*throw EvalException();*/
                   ;
@@ -4179,6 +4197,7 @@ Interpreter::simulate_a_block(int size,int type, string file_name, string bin_ba
   int Block_List_Max_Lag;
   int Block_List_Max_Lead;
   int giter;
+  int u_count_int;
   double *y_save;
 
   GaussSeidel=false;
@@ -4483,7 +4502,7 @@ Interpreter::simulate_a_block(int size,int type, string file_name, string bin_ba
         mxFree(r);
         mxFree(u);
         break;
-      case SOLVE_TWO_BOUNDARIES_COMPLETE :
+      case SOLVE_TWO_BOUNDARIES_COMPLETE:
 #ifdef DEBUGC
         mexPrintf("SOLVE_TWO_BOUNDARIES_COMPLETE\n");
 #endif
@@ -4507,7 +4526,7 @@ Interpreter::simulate_a_block(int size,int type, string file_name, string bin_ba
 #ifdef DEBUGC
         mexPrintf("Block_List_Max_Lead=%d\n",Block_List_Max_Lead);
 #endif
-        int u_count_int=get_code_int
+        u_count_int=get_code_int
 #ifdef DEBUGC
         mexPrintf("u_count_int=%d\n",u_count_int);
         mexPrintf("periods=%d\n",periods);
