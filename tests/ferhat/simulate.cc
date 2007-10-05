@@ -26,6 +26,7 @@ typedef long double longd;
 #else
 typedef double longd;
 #endif
+#include <cmath>
 #include <stack>
 #include <set>
 #include <vector>
@@ -110,6 +111,23 @@ typedef struct t_table_u
 
 
 std::fstream SaveCode, SaveCode_swp;
+
+
+double max(double a, double b)
+{
+  if(a<b)
+    return(b);
+  else
+    return(a);
+}
+
+double min(double a, double b)
+{
+  if(a>b)
+    return(b);
+  else
+    return(a);
+}
 
 
 longd pow1(longd a, longd b)
