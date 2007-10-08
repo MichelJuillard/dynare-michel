@@ -154,6 +154,42 @@ DataTree::AddDivide(NodeID iArg1, NodeID iArg2)
 }
 
 NodeID
+DataTree::AddLess(NodeID iArg1, NodeID iArg2)
+{
+  return AddBinaryOp(iArg1, oLess, iArg2);
+}
+
+NodeID
+DataTree::AddGreater(NodeID iArg1, NodeID iArg2)
+{
+  return AddBinaryOp(iArg1, oGreater, iArg2);
+}
+
+NodeID
+DataTree::AddLessEqual(NodeID iArg1, NodeID iArg2)
+{
+  return AddBinaryOp(iArg1, oLessEqual, iArg2);
+}
+
+NodeID
+DataTree::AddGreaterEqual(NodeID iArg1, NodeID iArg2)
+{
+  return AddBinaryOp(iArg1, oGreaterEqual, iArg2);
+}
+
+NodeID
+DataTree::AddEqualEqual(NodeID iArg1, NodeID iArg2)
+{
+  return AddBinaryOp(iArg1, oEqualEqual, iArg2);
+}
+
+NodeID
+DataTree::AddDifferent(NodeID iArg1, NodeID iArg2)
+{
+  return AddBinaryOp(iArg1, oDifferent, iArg2);
+}
+
+NodeID
 DataTree::AddPower(NodeID iArg1, NodeID iArg2)
 {
   if (iArg1 != Zero && iArg2 != Zero && iArg2 != One)

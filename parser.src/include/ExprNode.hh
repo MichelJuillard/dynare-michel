@@ -248,7 +248,13 @@ enum BinaryOpcode
     oPower,
     oEqual,
     oMax,
-    oMin
+    oMin,
+    oLess,
+    oGreater,
+    oLessEqual,
+    oGreaterEqual,
+    oEqualEqual,
+    oDifferent
   };
 
 //! Binary operator node

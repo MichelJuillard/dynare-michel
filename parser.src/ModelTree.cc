@@ -1453,6 +1453,7 @@ ModelTree::Write_Inf_To_Bin_File(const string &dynamic_basename, const string &b
           SaveCode.write(reinterpret_cast<char *>(&varr), sizeof(varr));
           SaveCode.write(reinterpret_cast<char *>(&k1), sizeof(k1));
           SaveCode.write(reinterpret_cast<char *>(&u), sizeof(u));
+          cout << "eqr1=" << eqr1 << " varr=" << varr << " k1=" << k1 << " u=" << u << "\n";
           u_count_int++;
         }
     }
@@ -1466,6 +1467,7 @@ ModelTree::Write_Inf_To_Bin_File(const string &dynamic_basename, const string &b
        SaveCode.write(reinterpret_cast<char *>(&varr), sizeof(varr));
        SaveCode.write(reinterpret_cast<char *>(&k1), sizeof(k1));
        SaveCode.write(reinterpret_cast<char *>(&eqr1), sizeof(eqr1));
+       cout << "eqr1=" << eqr1 << " varr=" << varr << " k1=" << k1 << " eqr1=" << eqr1 << "\n";
        u_count_int++;
     }
   //cout << "u_count_int = " << u_count_int << endl;

@@ -1048,6 +1048,45 @@ ParsingDriver::add_divide(NodeID arg1, NodeID arg2)
 }
 
 NodeID
+ParsingDriver::add_less(NodeID arg1, NodeID arg2)
+{
+  return data_tree->AddLess(arg1, arg2);
+}
+
+NodeID
+ParsingDriver::add_greater(NodeID arg1, NodeID arg2)
+{
+  return data_tree->AddGreater(arg1, arg2);
+}
+
+NodeID
+ParsingDriver::add_less_equal(NodeID arg1, NodeID arg2)
+{
+  return data_tree->AddLessEqual(arg1, arg2);
+}
+
+NodeID
+ParsingDriver::add_greater_equal(NodeID arg1, NodeID arg2)
+{
+  return data_tree->AddGreaterEqual(arg1, arg2);
+}
+
+NodeID
+ParsingDriver::add_equal_equal(NodeID arg1, NodeID arg2)
+{
+  return data_tree->AddEqualEqual(arg1, arg2);
+}
+
+NodeID
+ParsingDriver::add_different(NodeID arg1, NodeID arg2)
+{
+  return data_tree->AddDifferent(arg1, arg2);
+}
+
+
+
+
+NodeID
 ParsingDriver::add_power(NodeID arg1, NodeID arg2)
 {
   return data_tree->AddPower(arg1, arg2);

@@ -320,6 +320,18 @@ public:
   NodeID add_times(NodeID arg1,  NodeID arg2);
   //! Writes token "arg1/arg2" to model tree
   NodeID add_divide(NodeID arg1,  NodeID arg2);
+  //! Writes token "arg1<arg2" to model tree
+  NodeID add_less(NodeID arg1, NodeID arg2);
+  //! Writes token "arg1>arg2" to model treeNodeID
+  NodeID add_greater(NodeID arg1, NodeID arg2);
+  //! Writes token "arg1<=arg2" to model treeNodeID
+  NodeID add_less_equal(NodeID arg1, NodeID arg2);
+  //! Writes token "arg1>=arg2" to model treeNodeID
+  NodeID add_greater_equal(NodeID arg1, NodeID arg2);
+  //! Writes token "arg1==arg2" to model treeNodeIDNodeID
+  NodeID add_equal_equal(NodeID arg1, NodeID arg2);
+  //! Writes token "arg1!=arg2" to model treeNodeIDNodeID
+  NodeID add_different(NodeID arg1, NodeID arg2);
   //! Writes token "arg1^arg2" to model tree
   NodeID add_power(NodeID arg1,  NodeID arg2);
   //! Writes token "exp(arg1)" to model tree

@@ -70,6 +70,7 @@ class ParsingDriver;
 %token UNIFORM_PDF UNIT_ROOT_VARS USE_DLL
 %token VALUES VAR VAREXO VAREXO_DET VAROBS
 %token XLS_SHEET XLS_RANGE
+%left LESS GREATER LESS_EQUAL GREATER_EQUAL EQUAL_EQUAL EXCLAMATION EXCLAMATION_EQUAL
 %left COMMA
 %left PLUS MINUS
 %left TIMES DIVIDE
@@ -257,6 +258,18 @@ expression : '(' expression ')'
              { $$ = driver.add_times($1, $3); }
            | expression POWER expression
              { $$ = driver.add_power($1, $3); }
+           | expression LESS expression
+             { $$ = driver.add_less($1, $3); }
+           | expression GREATER expression
+             { $$ = driver.add_greater($1, $3); }
+           | expression LESS_EQUAL expression
+             { $$ = driver.add_less_equal($1, $3); }
+           | expression GREATER_EQUAL expression
+             { $$ = driver.add_greater_equal($1, $3); }
+           | expression EQUAL_EQUAL expression
+             { $$ = driver.add_equal_equal($1, $3); }
+           | expression EXCLAMATION_EQUAL expression
+             { $$ = driver.add_different($1, $3); }
            | MINUS expression %prec UMINUS
              { $$ = driver.add_uminus($2); }
            | PLUS expression
@@ -375,6 +388,18 @@ hand_side : '(' hand_side ')'
             { $$ = driver.add_divide($1, $3); }
           | hand_side TIMES hand_side
             { $$ = driver.add_times($1, $3); }
+          | hand_side LESS hand_side
+            { $$ = driver.add_less($1, $3); }
+          | hand_side GREATER hand_side
+            { $$ = driver.add_greater($1, $3); }
+          | hand_side LESS_EQUAL hand_side
+            { $$ = driver.add_less_equal($1, $3); }
+          | hand_side GREATER_EQUAL hand_side
+            { $$ = driver.add_greater_equal($1, $3); }
+          | hand_side EQUAL_EQUAL hand_side
+            { $$ = driver.add_equal_equal($1, $3); }
+          | hand_side EXCLAMATION_EQUAL hand_side
+            { $$ = driver.add_different($1, $3); }
           | hand_side POWER hand_side
             { $$ = driver.add_power($1, $3); }
           | MINUS hand_side %prec UMINUS

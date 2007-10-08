@@ -75,6 +75,18 @@ public:
   NodeID AddTimes(NodeID iArg1, NodeID iArg2);
   //! Adds "arg1/arg2" to model tree
   NodeID AddDivide(NodeID iArg1, NodeID iArg2);
+  //! Adds "arg1<arg2" to model tree
+  NodeID AddLess(NodeID iArg1, NodeID iArg2);
+  //! Adds "arg1>arg2" to model tree
+  NodeID AddGreater(NodeID iArg1, NodeID iArg2);
+  //! Adds "arg1<=arg2" to model tree
+  NodeID AddLessEqual(NodeID iArg1, NodeID iArg2);
+  //! Adds "arg1>=arg2" to model tree
+  NodeID AddGreaterEqual(NodeID iArg1, NodeID iArg2);
+  //! Adds "arg1==arg2" to model tree
+  NodeID AddEqualEqual(NodeID iArg1, NodeID iArg2);
+  //! Adds "arg1!=arg2" to model tree
+  NodeID AddDifferent(NodeID iArg1, NodeID iArg2);
   //! Adds "arg1^arg2" to model tree
   NodeID AddPower(NodeID iArg1, NodeID iArg2);
   //! Adds "exp(arg)" to model tree

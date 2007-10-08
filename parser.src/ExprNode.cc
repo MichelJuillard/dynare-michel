@@ -898,6 +898,13 @@ BinaryOpNode::computeDerivative(int varID)
       t13 = datatree.AddMinus(t11, t12);
       t14 = datatree.AddTimes(arg2, arg2);
       return datatree.AddDivide(t13, t14);
+    case oLess:
+    case oGreater:
+    case oLessEqual:
+    case oGreaterEqual:
+    case oEqualEqual:
+    case oDifferent:
+      return datatree.Zero;
     case oPower:
       if (darg2 == datatree.Zero)
         {
@@ -951,21 +958,26 @@ BinaryOpNode::precedence(ExprNodeOutputType output_type, const temporary_terms_t
 
   switch(op_code)
     {
+    case oEqualEqual:
+    case oDifferent:
+    case oLessEqual:
+    case oGreaterEqual:
+    case oLess:
+    case oGreater:
+      return 0;
     case oEqual:
     case oPlus:
     case oMinus:
-    case oMax:
-    case oMin:  
-      return 0;
+      return 1;
     case oTimes:
     case oDivide:
-      return 1;
+      return 2;
     case oPower:
       if (!OFFSET(output_type))
         // In C, power operator is of the form pow(a, b)
         return 100;
       else
-        return 3;  
+        return 4;  
     }
   cerr << "Impossible case!" << endl;
   exit(-1);
@@ -986,13 +998,20 @@ BinaryOpNode::cost(const temporary_terms_type &temporary_terms, bool is_matlab) 
     // Cost for Matlab files
     switch(op_code)
       {
+      case oLess:
+      case oGreater:
+      case oLessEqual:
+      case oGreaterEqual:
+      case oEqualEqual:
+      case oDifferent:
+        return cost + 60;
       case oPlus:
       case oMinus:
       case oTimes:
         return cost + 90;
       case oMax:
       case oMin:
-	return cost + 110;
+	      return cost + 110;
       case oDivide:
         return cost + 990;
       case oPower:
@@ -1004,6 +1023,13 @@ BinaryOpNode::cost(const temporary_terms_type &temporary_terms, bool is_matlab) 
     // Cost for C files
     switch(op_code)
       {
+      case oLess:
+      case oGreater:
+      case oLessEqual:
+      case oGreaterEqual:
+      case oEqualEqual:
+      case oDifferent:
+        return cost + 2;
       case oPlus:
       case oMinus:
       case oTimes:
@@ -1100,6 +1126,18 @@ BinaryOpNode::eval_opcode(double v1, BinaryOpcode op_code, double v2) throw (Eva
         return( v2);
       else
         return( v1);
+    case oLess:
+        return( v1< v2 ? 1.0 : 0.0);
+    case oGreater:
+        return( v1> v2 ? 1.0 : 0.0);
+    case oLessEqual:
+        return( v1<= v2 ? 1.0 : 0.0);
+    case oGreaterEqual:
+        return( v1>= v2 ? 1.0 : 0.0);
+    case oEqualEqual:
+        return( v1== v2 ? 1.0 : 0.0);
+    case oDifferent:
+        return( v1!= v2 ? 1.0 : 0.0);
     case oEqual:
     default:
       throw EvalException();
@@ -1155,17 +1193,17 @@ BinaryOpNode::writeOutput(ostream &output, ExprNodeOutputType output_type,
   if ((op_code == oPower && !OFFSET(output_type)) || op_code == oMax || op_code == oMin )
     {
       switch (op_code)
-	{
-	case oPower:
-	  output << "pow(";
-	  break;
-	case oMax:
-	  output << "max(";
-	  break;
-	case oMin:
-	  output << "min(";
-	  break;
-	}
+	      {
+	        case oPower:
+	          output << "pow(";
+	          break;
+	        case oMax:
+	          output << "max(";
+	          break;
+	        case oMin:
+	          output << "min(";
+	          break;
+	        }
       arg1->writeOutput(output, output_type, temporary_terms);
       output << ",";
       arg2->writeOutput(output, output_type, temporary_terms);
@@ -1209,6 +1247,24 @@ BinaryOpNode::writeOutput(ostream &output, ExprNodeOutputType output_type,
       break;
     case oPower:
       output << "^";
+      break;
+    case oLess:
+      output << "<";
+      break;
+    case oGreater:
+      output << ">";
+      break;
+    case oLessEqual:
+      output << "<=";
+      break;
+    case oGreaterEqual:
+      output << ">=";
+      break;
+    case oEqualEqual:
+      output << "==";
+      break;
+    case oDifferent:
+      output << "!=";
       break;
     case oEqual:
       output << "=";
