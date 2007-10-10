@@ -23,28 +23,7 @@ type = 'posterior';% To be defined as a input argument later...
 NumberOfSimulations = 800;% To be defined in a global structure...
 
 % Set varlist (vartan) if necessary
-varlist = options_.varlist;
-if isempty(varlist)
-    varlist = options_.varobs;
-    options_.varlist = varlist;
-end
-nvar = rows(varlist);
-if ~isempty(options_.unit_root_vars)
-    vartan = []; 
-    for i=1:nvar
-        if isempty(strmatch(deblank(varlist(i,:)),options_.unit_root_vars,'exact'))       
-            vartan = strvcat(vartan,varlist(i,:));
-        end
-    end
-else
-    vartan = varlist;
-end
-nvar = rows(vartan);
-ivar = zeros(nvar,1);
-for i = 1:nvar
-    ivar(i) = strmatch(deblank(vartan(i,:)),M_.endo_names,'exact');
-end
-
+[ivar,vartan] = set_stationary_variables_list();
 
 % Set various parameters & Check or create files and directories
 if strcmpi(type,'posterior')
