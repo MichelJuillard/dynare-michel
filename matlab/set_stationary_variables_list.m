@@ -1,5 +1,5 @@
 function [ivar,vartan] = set_stationary_variables_list()
-% This function builds of vector of indices targeting to the stationary
+% This function builds a vector of indices targeting to the stationary
 % variables in varlist.
 % 
 % INPUTS 
@@ -19,7 +19,7 @@ function [ivar,vartan] = set_stationary_variables_list()
 %  
 % part of DYNARE, copyright Dynare Team (2007)
 % Gnu Public License.    
-global options_    
+global options_ M_    
 varlist = options_.varlist;
 if isempty(varlist)
     varlist = options_.varobs;
