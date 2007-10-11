@@ -477,13 +477,15 @@ period_list : period_list INT_NUMBER
               { driver.add_period($1); }
             ;
 
-value_list : value_list expression
-             { driver.add_value($2); }
-           | expression
-             { driver.add_value($1); }
-           ;
 
 sigma_e : SIGMA_E EQUAL '[' triangular_matrix ']' ';' { driver.do_sigma_e(); };
+
+value_list
+ 	:  value_list COMMA expression
+    {driver.add_value($3);}
+	| expression
+    {driver.add_value($1);}
+	;
 
 triangular_matrix : triangular_matrix ';' triangular_row
                     { driver.end_of_row(); }
