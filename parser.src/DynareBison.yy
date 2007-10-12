@@ -463,11 +463,7 @@ shock_elem : VAR NAME ';' PERIODS period_list ';' VALUES value_list ';'
              { driver.add_correl_shock($2, $4, $6); }
            ;
 
-period_list : period_list INT_NUMBER
-              { driver.add_period($2); }
-            | period_list INT_NUMBER ':' INT_NUMBER
-              { driver.add_period($2, $4); }
-            | period_list COMMA INT_NUMBER
+period_list : period_list COMMA INT_NUMBER
               { driver.add_period($3); }
             | period_list COMMA INT_NUMBER ':' INT_NUMBER
               { driver.add_period($3, $5); }
