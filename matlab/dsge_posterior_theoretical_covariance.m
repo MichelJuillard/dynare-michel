@@ -22,7 +22,7 @@ global M_ options_ oo_
 type = 'posterior';% To be defined as a input argument later...
 NumberOfSimulations = 800;% To be defined in a global structure...
 
-% Set varlist (vartan) if necessary
+% Set varlist (vartan)
 [ivar,vartan] = set_stationary_variables_list();
 
 % Set various parameters & Check or create files and directories
