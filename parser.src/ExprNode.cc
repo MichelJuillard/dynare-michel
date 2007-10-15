@@ -944,6 +944,8 @@ BinaryOpNode::precedence(ExprNodeOutputType output_type, const temporary_terms_t
     case oGreaterEqual:
     case oLess:
     case oGreater:
+    case oMin:
+    case oMax:
       return 0;
     case oEqual:
     case oPlus:
