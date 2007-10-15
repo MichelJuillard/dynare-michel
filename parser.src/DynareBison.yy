@@ -40,7 +40,7 @@ class ParsingDriver;
 %token BVAR_PRIOR_MU BVAR_PRIOR_OMEGA BVAR_PRIOR_TAU BVAR_PRIOR_TRAIN
 %token BVAR_REPLIC
 %token CALIB CALIB_VAR CHECK CONF_SIG CONSTANT CORR COVAR CUTOFF
-%token DATAFILE DR_ALGO DROP DSAMPLE DUMMY DYNASAVE DYNATYPE
+%token DATAFILE DR_ALGO DROP DSAMPLE DYNASAVE DYNATYPE
 %token END ENDVAL EQUAL ESTIMATION ESTIMATED_PARAMS ESTIMATED_PARAMS_BOUNDS ESTIMATED_PARAMS_INIT
 %token FILENAME FILTER_STEP_AHEAD FILTERED_VARS FIRST_OBS
 %token <string_val> FLOAT_NUMBER
@@ -294,8 +294,6 @@ expression : '(' expression ')'
              { $$ = driver.add_atan($3); }
            | SQRT '(' expression ')'
              { $$ = driver.add_sqrt($3); }
-           | DUMMY '(' expression ')'
-             { $$ = driver.add_dummy($3); }
            | MAX '(' expression COMMA expression ')'
              { $$ = driver.add_max($3 , $5); }
            | MIN '(' expression COMMA expression ')'
@@ -426,8 +424,6 @@ hand_side : '(' hand_side ')'
             { $$ = driver.add_atan($3); }
           | SQRT '(' hand_side ')'
             { $$ = driver.add_sqrt($3); }
-          | DUMMY '(' hand_side ')'
-             { $$ = driver.add_dummy($3); }
           | MAX '(' hand_side COMMA hand_side ')'
              { $$ = driver.add_max($3 , $5); }
           | MIN '(' hand_side COMMA hand_side ')'

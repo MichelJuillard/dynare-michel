@@ -3763,6 +3763,42 @@ Interpreter::compute_block_time() /*throw(EvalException)*/
                   mexPrintf("/\n");
 #endif
                   break;
+                case oLess:
+                  Stack.push(double(v1<v2));
+#ifdef DEBUGC
+                  mexPrintf("%f < %f\n",v1,v2);
+#endif
+                  break;
+                case oGreater:
+                  Stack.push(double(v1>v2));
+#ifdef DEBUGC
+                  mexPrintf("%f > %f\n",v1,v2);
+#endif
+                  break;
+                case oLessEqual:
+                  Stack.push(double(v1<=v2));
+#ifdef DEBUGC
+                  mexPrintf("%f <= %f\n",v1,v2);
+#endif
+                  break;
+                case oGreaterEqual:
+                  Stack.push(double(v1>=v2));
+#ifdef DEBUGC
+                  mexPrintf("%f >= %f\n",v1,v2);
+#endif
+                  break;
+                case oEqualEqual:
+                  Stack.push(double(v1==v2));
+#ifdef DEBUGC
+                  mexPrintf("%f == %f\n",v1,v2);
+#endif
+                  break;
+                case oDifferent:
+                  Stack.push(double(v1!=v2));
+#ifdef DEBUGC
+                  mexPrintf("%f > %f\n",v1,v2);
+#endif
+                  break;
                 case oPower:
                   Stack.push(pow1(v1, v2));
 #ifdef DEBUGC
@@ -3896,12 +3932,6 @@ Interpreter::compute_block_time() /*throw(EvalException)*/
                   Stack.push(sqrt(v1));
 #ifdef DEBUGC
                   mexPrintf("sqrt\n");
-#endif
-                  break;
-                case oDummy:
-                  Stack.push(double (v1>0));
-#ifdef DEBUGC
-                  mexPrintf("dummy\n");
 #endif
                   break;
                 default:
@@ -4499,7 +4529,7 @@ Interpreter::compute_blocks(string file_name, string bin_basename)
                 //mexPrintf("Block_Contain[%d].Own_Derivative=%d\n",i,lBlock_Contain.Own_Derivative);
                 Block_Contain.push_back(lBlock_Contain);
               }
-            simulate_a_block(lBlock.size,lBlock.type, file_name, bin_basename,/*false*/true);
+            simulate_a_block(lBlock.size,lBlock.type, file_name, bin_basename,false/*true*/);
             break;
           case FEND :
             //mexPrintf("FEND\n");

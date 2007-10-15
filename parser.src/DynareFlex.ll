@@ -270,7 +270,6 @@ int sigma_e = 0;
 <DYNARE_STATEMENT,DYNARE_BLOCK>sqrt {return token::SQRT;}
 <DYNARE_STATEMENT,DYNARE_BLOCK>max {return token::MAX;}
 <DYNARE_STATEMENT,DYNARE_BLOCK>min {return token::MIN;}
-<DYNARE_STATEMENT,DYNARE_BLOCK>dummy {return token::DUMMY;}
 
  /* options for GSA module by Marco Ratto */
 <DYNARE_STATEMENT>identification {return token::IDENTIFICATION;}

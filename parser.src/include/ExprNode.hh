@@ -207,8 +207,7 @@ enum UnaryOpcode
     oAcosh,
     oAsinh,
     oAtanh,
-    oSqrt,
-    oDummy
+    oSqrt
   };
 
 //! Unary operator node

@@ -368,12 +368,6 @@ DataTree::AddMin(NodeID iArg1, NodeID iArg2)
 }
 
 NodeID
-DataTree::AddDuMmY(NodeID iArg1)
-{
-    return AddUnaryOp(oDummy,iArg1);
-}
-
-NodeID
 DataTree::AddEqual(NodeID iArg1, NodeID iArg2)
 {
   return AddBinaryOp(iArg1, oEqual, iArg2);

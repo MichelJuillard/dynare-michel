@@ -521,8 +521,6 @@ UnaryOpNode::computeDerivative(int varID)
     case oSqrt:
       t11 = datatree.AddPlus(this, this);
       return datatree.AddDivide(darg, t11);
-    case oDummy:
-      return datatree.Zero;
     }
   cerr << "Impossible case!" << endl;
   exit(-1);
@@ -574,8 +572,6 @@ UnaryOpNode::cost(const temporary_terms_type &temporary_terms, bool is_matlab) c
         return cost + 350;
       case oSqrt:
         return cost + 570;
-      case oDummy:
-        return cost + 200;
       }
   else
     // Cost for C files
@@ -610,8 +606,6 @@ UnaryOpNode::cost(const temporary_terms_type &temporary_terms, bool is_matlab) c
         return cost + 150;
       case oSqrt:
         return cost + 90;
-      case oDummy:
-        return cost + 50;
       }
   cerr << "Impossible case!" << endl;
   exit(-1);
@@ -677,16 +671,6 @@ UnaryOpNode::writeOutput(ostream &output, ExprNodeOutputType output_type,
         output << "T" << idx;
       else
         output << "T" << idx << "[it_]";
-      return;
-    }
-
-  if (op_code == oDummy)
-    {
-      if (OFFSET(output_type))
-	output << "double";
-      output << "(";
-      arg->writeOutput(output, output_type, temporary_terms);
-      output << ">0)";
       return;
     }
 
@@ -816,8 +800,6 @@ UnaryOpNode::eval_opcode(UnaryOpcode op_code, double v) throw (EvalException)
       return(atanh(v));
     case oSqrt:
       return(sqrt(v));
-    case oDummy:
-      return(double (v>0));
     }
   // Impossible
   throw EvalException();
@@ -928,21 +910,19 @@ BinaryOpNode::computeDerivative(int varID)
           return datatree.AddTimes(t15, this);
         }
     case oMax:
-      t11 = datatree.AddMinus(arg1,arg2);
-      t12 = datatree.AddDuMmY(t11);
-      t13 = datatree.AddTimes(t12,darg1);
-      t14 = datatree.AddMinus(datatree.One,t12);
-      t15 = datatree.AddTimes(t14,darg2);
-      return datatree.AddPlus(t15,t13);
+      t11 = datatree.AddGreater(arg1,arg2);
+      t12 = datatree.AddTimes(t11,darg1);
+      t13 = datatree.AddMinus(datatree.One,t11);
+      t14 = datatree.AddTimes(t13,darg2);
+      return datatree.AddPlus(t14,t12);
     case oMin:
-      t11 = datatree.AddMinus(arg2,arg1);
-      t12 = datatree.AddDuMmY(t11);
-      t13 = datatree.AddTimes(t12,darg1);
-      t14 = datatree.AddMinus(datatree.One,t12);
-      t15 = datatree.AddTimes(t14,darg2);
-      return datatree.AddPlus(t15,t13);
+      t11 = datatree.AddGreater(arg2,arg1);
+      t12 = datatree.AddTimes(t11,darg1);
+      t13 = datatree.AddMinus(datatree.One,t11);
+      t14 = datatree.AddTimes(t13,darg2);
+      return datatree.AddPlus(t14,t12);
     case oEqual:
-      return datatree.AddMinus(darg1, darg2);  
+      return datatree.AddMinus(darg1, darg2);
     }
   cerr << "Impossible case!" << endl;
   exit(-1);
@@ -977,7 +957,7 @@ BinaryOpNode::precedence(ExprNodeOutputType output_type, const temporary_terms_t
         // In C, power operator is of the form pow(a, b)
         return 100;
       else
-        return 4;  
+        return 4;
     }
   cerr << "Impossible case!" << endl;
   exit(-1);
@@ -1264,7 +1244,10 @@ BinaryOpNode::writeOutput(ostream &output, ExprNodeOutputType output_type,
       output << "==";
       break;
     case oDifferent:
-      output << "!=";
+      if(OFFSET(output_type))
+        output << "~=";
+      else
+        output << "!=";
       break;
     case oEqual:
       output << "=";

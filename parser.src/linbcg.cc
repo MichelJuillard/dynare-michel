@@ -6,7 +6,7 @@ LinBCG::LinBCG()
 
 void LinBCG::Init(int periods, int y_kmin, int y_kmax, int Size, std::map<std::pair<std::pair<int, int> ,int>, int> IM_i, int* index_vara, int* index_equa)
 {
-  std::map<std::pair<std::pair<int, int> ,int>, int>::iterator it4;
+  std::map<std::pair<std::pair<int, int> ,int>, int>::iterator it3, it4;
   int Non_Zero_By_Lag[y_kmax+y_kmin+1];
   memset(Non_Zero_By_Lag, 0, sizeof(int)*(y_kmax+y_kmin+1));
   int i, j, k, nz_diag_count, eq, eqp, eq_count, var, lag, pos_u;
@@ -22,7 +22,9 @@ void LinBCG::Init(int periods, int y_kmin, int y_kmax, int Size, std::map<std::p
       lag=it4->first.second;
       pos_u=it4->second;
       if(var<Size*periods+y_kmax+y_kmin)
-        IM[make_pair(make_pair(eq, var), lag)]= pos_u;
+        {
+          IM[make_pair(make_pair(eq, var), lag)]= pos_u;
+        }
       it4++;
     }
   
@@ -47,7 +49,7 @@ void LinBCG::Init(int periods, int y_kmin, int y_kmax, int Size, std::map<std::p
       j=inv_index_equa[index_equa[eq]];
       var=it4->first.first.second;
       lag=it4->first.second;
-      mexPrintf("eq=%d var=%d lag=%d \n",eq, var, lag);
+      mexPrintf("eq=%d var=%d lag=%d\n",eq, var, lag);
       if(!lag)
         {
           if(var==index_vara[j] && eq==index_equa[j])
@@ -81,18 +83,34 @@ void LinBCG::Init(int periods, int y_kmin, int y_kmax, int Size, std::map<std::p
   cumulate_past_block=(int*)mxMalloc((periods+1)*sizeof(int));
   memset(cumulate_past_block, 0, sizeof(int)*(periods+1)*Size);  
   mexPrintf("OK-1\n");
-  cumulate_past_block[0]=0;
-  for(j=1;j<=periods;j++)
+  //cumulate_past_block[0]=0;
+  it4=IM.begin();
+  i=0;
+  /*while(it4!=IM.end())
     {
-      for(i=-y_kmin;i<=y_kmax;i++)
+      int length=0;
+      eq= it4->first.first.first;
+      // Assumption no Row is completly null
+      //if(eq!=eqp)
+      j=inv_index_equa[index_equa[eq]];
+      var=it4->first.first.second;
+      lag=it4->first.second;
+      for(j=-y_kmin;j<=y_kmax;j++)
         {
-          if(j+i>0 && j+i<periods)
+          it3=IM.begin();
+          if(lag>j)
+            while(it3!=IM.end())
+              if(lag>j)            
+                length+=
+          if(j+lag>0 && j+lag<=periods)
+            cumulate_past_block[i+j*Size]+=length;
+          else
             {
-              mexPrintf("cumulate_past_block[%d]+=Non_Zero_By_Lag[%d]\n",j,i+y_kmin);
-              cumulate_past_block[j]+=Non_Zero_By_Lag[i+y_kmin];
-            }
+              
+          
         }
-    }
+      i++;
+    }*/
   for(j=0;j<=periods;j++)
     mexPrintf("cumulate_past_block[%d]=%d\n",j,cumulate_past_block[j]);
   int IM_Size=IM.size();
