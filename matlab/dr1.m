@@ -547,11 +547,11 @@ for i=1:M_.maximum_endo_lead
     if nk3a*nk3a*M_.exo_nbr*M_.exo_nbr > 1e7
       B1 = zeros(M_.endo_nbr,M_.exo_nbr*M_.exo_nbr);
       k1 = 1;
-      H = hessian(:,kh(k3,k3));
+      Hesse = hessian(:,kh(k3,k3));
       guk3a = gu(k3a,:);
       for i1 = 1:M_.exo_nbr
 	for i2 = 1:M_.exo_nbr
-	  B1(:,k1) = H*kron(guk3a(:,i1),guk3a(:,i2));
+	  B1(:,k1) = Hesse*kron(guk3a(:,i1),guk3a(:,i2));
 	  k1 = k1 + 1; 
 	end
       end
