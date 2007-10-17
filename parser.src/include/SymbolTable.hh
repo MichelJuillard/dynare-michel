@@ -61,6 +61,8 @@ public :
   int modfile_local_variable_nbr;
   //! Number of declared recursive variables
   int recur_nbr;
+  //! Number of unknown functions
+  int unknown_function_nbr;
   /*! Pointer to error function of parser class */
   void (* error) (const char* m);
   /*! Adds a symbol apearing in declaration

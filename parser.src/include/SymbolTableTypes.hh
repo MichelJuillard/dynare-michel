@@ -10,7 +10,8 @@ enum Type
     eRecursiveVariable = 3,        //!< Recursive variable (reserved for future use)
     eParameter = 4,                //!< Parameter
     eModelLocalVariable = 10,      //!< Local variable whose scope is model (pound expression)
-    eModFileLocalVariable = 11     //!< Local variable whose scope is mod file (model excluded)
+    eModFileLocalVariable = 11,    //!< Local variable whose scope is mod file (model excluded)
+    eUnknownFunction = 12          //!< Function unknown to the preprocessor
   };
 
 struct Symbol

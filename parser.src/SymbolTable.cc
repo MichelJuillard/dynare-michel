@@ -14,7 +14,7 @@ using namespace std;
 
 SymbolTable::SymbolTable() : endo_nbr(0), exo_nbr(0), exo_det_nbr(0), parameter_nbr(0),
                              model_local_variable_nbr(0), modfile_local_variable_nbr(0),
-                             recur_nbr(0)
+                             recur_nbr(0), unknown_function_nbr(0)
 {
   name_table.resize(20);
   tex_name_table.resize(20);
@@ -49,6 +49,9 @@ int SymbolTable::AddSymbol(string name,Type type, string tex_name)
     case eModFileLocalVariable:
       symboltable[name].id = modfile_local_variable_nbr;
       return modfile_local_variable_nbr++;
+    case eUnknownFunction:
+      symboltable[name].id = unknown_function_nbr;
+      return unknown_function_nbr++;
     }
   // should never happen
   return -1;

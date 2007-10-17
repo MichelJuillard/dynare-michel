@@ -195,6 +195,9 @@ VariableNode::VariableNode(DataTree &datatree_arg, int symb_id_arg, Type type_ar
     case eModFileLocalVariable:
       // Such a variable is never derived
       break;
+    case eUnknownFunction:
+      cerr << "Attempt to construct a VariableNode with an unknown function name" << endl;
+      exit(-1);
     }
 }
 
@@ -217,6 +220,9 @@ VariableNode::computeDerivative(int varID)
       return datatree.local_variables_table[symb_id]->getDerivative(varID);
     case eModFileLocalVariable:
       cerr << "ModFileLocalVariable is not derivable" << endl;
+      exit(-1);
+    case eUnknownFunction:
+      cerr << "Impossible case!" << endl;
       exit(-1);
     }
   cerr << "Impossible case!" << endl;
@@ -358,6 +364,9 @@ VariableNode::writeOutput(ostream &output, ExprNodeOutputType output_type,
     case eRecursiveVariable:
       cerr << "Recursive variable not implemented" << endl;
       exit(-1);
+    case eUnknownFunction:
+      cerr << "Impossible case" << endl;
+      exit(-1);
     }
 }
 
@@ -432,6 +441,9 @@ VariableNode::compile(ofstream &CompileCode, bool lhs_rhs, ExprNodeOutputType ou
     case eModelLocalVariable:
     case eModFileLocalVariable:
       cerr << "VariableNode::compile: unhandled variable type" << endl;
+      exit(-1);
+    case eUnknownFunction:
+      cerr << "Impossible case" << endl;
       exit(-1);
     }
 }
@@ -1121,9 +1133,10 @@ BinaryOpNode::eval_opcode(double v1, BinaryOpcode op_code, double v2) throw (Eva
     case oDifferent:
         return( v1!= v2 ? 1.0 : 0.0);
     case oEqual:
-    default:
       throw EvalException();
     }
+  cerr << "Impossible case!" << endl;
+  exit(-1);
 }
 
 double
@@ -1289,10 +1302,10 @@ BinaryOpNode::collectEndogenous(NodeID &Id)
 }
 
 UnknownFunctionNode::UnknownFunctionNode(DataTree &datatree_arg,
-                                         const string &function_name_arg,
+                                         int symb_id_arg,
                                          const vector<NodeID> &arguments_arg) :
   ExprNode(datatree_arg),
-  function_name(function_name_arg),
+  symb_id(symb_id_arg),
   arguments(arguments_arg)
 {
 }
@@ -1316,7 +1329,7 @@ UnknownFunctionNode::computeTemporaryTerms(map<NodeID, int> &reference_count,
 void UnknownFunctionNode::writeOutput(ostream &output, ExprNodeOutputType output_type,
                                       const temporary_terms_type &temporary_terms) const
 {
-  output << function_name << "(";
+  output << datatree.symbol_table.getNameByID(eUnknownFunction, symb_id) << "(";
   for(vector<NodeID>::const_iterator it = arguments.begin();
       it != arguments.end(); it++)
     {

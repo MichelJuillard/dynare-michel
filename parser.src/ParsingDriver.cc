@@ -1209,6 +1209,14 @@ ParsingDriver::add_unknown_function_arg(NodeID arg)
 NodeID
 ParsingDriver::add_unknown_function(string *function_name)
 {
+  if (mod_file->symbol_table.Exist(*function_name))
+    {
+      if (mod_file->symbol_table.getType(*function_name) != eUnknownFunction)
+        error("Symbol " + *function_name + " is not a function name.");
+    }
+  else
+    mod_file->symbol_table.AddSymbolDeclar(*function_name, eUnknownFunction, *function_name);
+
   NodeID id = data_tree->AddUnknownFunction(*function_name, unknown_function_args);
   unknown_function_args.clear();
   return id;

@@ -285,14 +285,16 @@ public:
   /*EndNew*/
 };
 
+//! Unknown function node
 class UnknownFunctionNode : public ExprNode
 {
 private:
-  const string function_name;
+  //! Symbol ID (no need to store type: it is necessary eUnknownFunction)
+  const int symb_id;
   const vector<NodeID> arguments;
   virtual NodeID computeDerivative(int varID);
 public:
-  UnknownFunctionNode(DataTree &datatree_arg, const string &function_name_arg,
+  UnknownFunctionNode(DataTree &datatree_arg, int symb_id_arg,
                       const vector<NodeID> &arguments_arg);
   virtual void computeTemporaryTerms(map<NodeID, int> &reference_count, temporary_terms_type &temporary_terms, bool is_matlab) const;
   virtual void writeOutput(ostream &output, ExprNodeOutputType output_type, const temporary_terms_type &temporary_terms) const;

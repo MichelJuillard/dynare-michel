@@ -20,6 +20,7 @@ class DataTree
   friend class VariableNode;
   friend class UnaryOpNode;
   friend class BinaryOpNode;
+  friend class UnknownFunctionNode;
 protected:
   //! A reference to the symbol table
   SymbolTable &symbol_table;

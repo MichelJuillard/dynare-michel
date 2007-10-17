@@ -376,6 +376,12 @@ DataTree::AddEqual(NodeID iArg1, NodeID iArg2)
 void
 DataTree::AddLocalParameter(const string &name, NodeID value) throw (LocalParameterException)
 {
+  if (!symbol_table.Exist(name))
+    {
+      cerr << "Unknown symbol: " << name << endl;
+      exit(-1);
+    }
+
   int id = symbol_table.getID(name);
 
   // Throw an exception if symbol already declared
@@ -389,5 +395,19 @@ DataTree::AddLocalParameter(const string &name, NodeID value) throw (LocalParame
 NodeID
 DataTree::AddUnknownFunction(const string &function_name, const vector<NodeID> &arguments)
 {
-  return new UnknownFunctionNode(*this, function_name, arguments);
+  if (!symbol_table.Exist(function_name))
+    {
+      cerr << "Unknown symbol: " << function_name << endl;
+      exit(-1);
+    }
+
+  if (symbol_table.getType(function_name) != eUnknownFunction)
+    {
+      cerr << "Symbol " << function_name << " is not a function name!";
+      exit(-1);
+    }
+
+  int id = symbol_table.getID(function_name);
+
+  return new UnknownFunctionNode(*this, id, arguments);
 }
