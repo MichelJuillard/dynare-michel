@@ -462,6 +462,7 @@ if nrhx*nrhu1*nchx*nchu1 > 1e7
 	k1 = k1 + 1; 
       end
   end
+  B1 = B*B1;
 else
   B1 = B*dr.ghxx*kron(hx,hu1);
 end
