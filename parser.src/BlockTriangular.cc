@@ -11,7 +11,7 @@
 #include <sstream>
 #include <fstream>
 #include <time.h>
-#include <malloc.h>
+#include <stdlib.h>
 #include <string.h>
 #include <math.h>
 using namespace std;
