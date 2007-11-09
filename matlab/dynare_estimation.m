@@ -826,7 +826,7 @@ if (any(bayestopt_.pshape  >0 ) & options_.mh_replic) | ...
       end
     else
       if options_.use_mh_covariance_matrix
-        invhess = compute_mh_covariance_matrix();
+        invhess = compute_mh_covariance_matrix;
       end
       if ~options_.bvar_dsge
         metropolis('DsgeLikelihood',xparam1,invhess,bounds,gend,data);

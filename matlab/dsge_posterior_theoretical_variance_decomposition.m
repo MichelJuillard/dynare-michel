@@ -24,7 +24,7 @@ type = 'posterior';% To be defined as a input argument later...
 NumberOfSimulations = 800;% To be defined in a global structure...
 
 % Set varlist (vartan)
-[ivar,vartan] = set_stationary_variables_list();
+[ivar,vartan] = set_stationary_variables_list;
 ivar
 vartan
 
