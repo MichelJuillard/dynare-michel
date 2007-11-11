@@ -1200,6 +1200,12 @@ ParsingDriver::add_min(NodeID arg1, NodeID arg2)
   return data_tree->AddMin(arg1,arg2);
 }
 
+NodeID
+ParsingDriver::add_normcdf(NodeID arg1, NodeID arg2, NodeID arg3)
+{
+  return data_tree->AddNormcdf(arg1,arg2,arg3);
+}
+
 void
 ParsingDriver::add_unknown_function_arg(NodeID arg)
 {

@@ -1301,6 +1301,275 @@ BinaryOpNode::collectEndogenous(NodeID &Id)
   arg2->collectEndogenous(Id);
 }
 
+TrinaryOpNode::TrinaryOpNode(DataTree &datatree_arg, const NodeID arg1_arg,
+                           TrinaryOpcode op_code_arg, const NodeID arg2_arg, const NodeID arg3_arg) :
+  ExprNode(datatree_arg),
+  arg1(arg1_arg),
+  arg2(arg2_arg),
+  arg3(arg3_arg),
+  op_code(op_code_arg)
+{
+  datatree.trinary_op_node_map[make_pair(make_pair(make_pair(arg1, arg2), arg3), op_code)] = this;
+
+  // Non-null derivatives are the union of those of the arguments
+  // Compute set union of arg1->non_null_derivatives and arg2->non_null_derivatives
+  set_union(arg1->non_null_derivatives.begin(),
+            arg1->non_null_derivatives.end(),
+            arg2->non_null_derivatives.begin(),
+            arg2->non_null_derivatives.end(),
+            inserter(non_null_derivatives_tmp, non_null_derivatives_tmp.begin()));
+  set_union(non_null_derivatives_tmp.begin(),
+            non_null_derivatives_tmp.end(),
+            arg3->non_null_derivatives.begin(),
+            arg3->non_null_derivatives.end(),
+            inserter(non_null_derivatives, non_null_derivatives.begin()));
+}
+
+NodeID
+TrinaryOpNode::computeDerivative(int varID)
+{
+  NodeID darg1 = arg1->getDerivative(varID);
+  NodeID darg2 = arg2->getDerivative(varID);
+  NodeID darg3 = arg3->getDerivative(varID);
+
+  NodeID t11, t12, t13, t14, t15;
+
+  switch(op_code)
+    {
+    case oNormcdf:
+      // normal pdf is inlined in the tree
+      NodeID y;
+      t11 = datatree.AddNumConstant("2");
+      t12 = datatree.AddNumConstant("3.141592653589793");
+      // 2 * pi
+      t13 = datatree.AddTimes(t11,t12);
+      // sqrt(2*pi)
+      t14 = datatree.AddSqRt(t13);
+      // x - mu
+      t12 = datatree.AddMinus(arg1,arg2);
+      // y = (x-mu)/sigma
+      y = datatree.AddDivide(t12,arg3);
+      // (x-mu)^2/sigma^2
+      t12 = datatree.AddTimes(y,y);
+      // -(x-mu)^2/sigma^2
+      t13 = datatree.AddUMinus(t12);
+      // -((x-mu)^2/sigma^2)/2
+      t12 = datatree.AddDivide(t13,t11);
+      // exp(-((x-mu)^2/sigma^2)/2)
+      t13 = datatree.AddExp(t12);
+      // derivative of a standardized normal
+      // t15 = (1/sqrt(2*pi))*exp(-y^2/2)
+      t15 = datatree.AddDivide(t13,t14);
+      // derivatives thru x
+      t11 = datatree.AddDivide(darg1,arg3);
+      // derivatives thru mu
+      t12 = datatree.AddDivide(darg2,arg3);
+      // intermediary sum
+      t14 = datatree.AddMinus(t11,t12);
+      // derivatives thru sigma
+      t11 = datatree.AddDivide(y,arg3);
+      t12 = datatree.AddTimes(t11,darg3);
+      //intermediary sum
+      t11 = datatree.AddMinus(t14,t12);
+      // total derivative:
+      // (darg1/sigma - darg2/sigma - darg3*(x-mu)/sigma)* t13
+      // where t13 is the derivative of a standardized normal
+      return datatree.AddTimes(t11, t15);
+    }
+  cerr << "Impossible case!" << endl;
+  exit(-1);
+}
+
+int
+TrinaryOpNode::precedence(ExprNodeOutputType output_type, const temporary_terms_type &temporary_terms) const
+{
+  temporary_terms_type::const_iterator it = temporary_terms.find(const_cast<TrinaryOpNode *>(this));
+  // A temporary term behaves as a variable
+  if (it != temporary_terms.end())
+    return 100;
+
+  switch(op_code)
+    {
+    case oNormcdf:
+        return 100;
+    }
+  cerr << "Impossible case!" << endl;
+  exit(-1);
+}
+
+int
+TrinaryOpNode::cost(const temporary_terms_type &temporary_terms, bool is_matlab) const
+{
+  temporary_terms_type::const_iterator it = temporary_terms.find(const_cast<TrinaryOpNode *>(this));
+  // For a temporary term, the cost is null
+  if (it != temporary_terms.end())
+    return 0;
+
+  int cost = arg1->cost(temporary_terms, is_matlab);
+  cost += arg2->cost(temporary_terms, is_matlab);
+
+  if (is_matlab)
+    // Cost for Matlab files
+    switch(op_code)
+      {
+      case oNormcdf:
+        return cost+1000;
+      }
+  else
+    // Cost for C files
+    switch(op_code)
+      {
+      case oNormcdf:
+        return cost+1000;
+      }
+  cerr << "Impossible case!" << endl;
+  exit(-1);
+}
+
+void
+TrinaryOpNode::computeTemporaryTerms(map<NodeID, int> &reference_count,
+                                    temporary_terms_type &temporary_terms,
+                                    bool is_matlab) const
+{
+  NodeID this2 = const_cast<TrinaryOpNode *>(this);
+  map<NodeID, int>::iterator it = reference_count.find(this2);
+  if (it == reference_count.end())
+    {
+      // If this node has never been encountered, set its ref count to one,
+      //  and travel through its children
+      reference_count[this2] = 1;
+      arg1->computeTemporaryTerms(reference_count, temporary_terms, is_matlab);
+      arg2->computeTemporaryTerms(reference_count, temporary_terms, is_matlab);
+      arg3->computeTemporaryTerms(reference_count, temporary_terms, is_matlab);
+    }
+  else
+    {
+      // If the node has already been encountered, increment its ref count
+      //  and declare it as a temporary term if it is too costly
+      reference_count[this2]++;
+      if (reference_count[this2] * cost(temporary_terms, is_matlab) > MIN_COST(is_matlab))
+        temporary_terms.insert(this2);
+    }
+}
+
+void
+TrinaryOpNode::computeTemporaryTerms(map<NodeID, int> &reference_count,
+                                    temporary_terms_type &temporary_terms,
+                                    map<NodeID, int> &first_occurence,
+                                    int Curr_block,
+                                    Model_Block *ModelBlock,
+                                    map_idx_type &map_idx) const
+{
+  NodeID this2 = const_cast<TrinaryOpNode *>(this);
+  map<NodeID, int>::iterator it = reference_count.find(this2);
+  if (it == reference_count.end())
+    {
+      reference_count[this2] = 1;
+      first_occurence[this2] = Curr_block;
+      arg1->computeTemporaryTerms(reference_count, temporary_terms, first_occurence, Curr_block, ModelBlock, map_idx);
+      arg2->computeTemporaryTerms(reference_count, temporary_terms, first_occurence, Curr_block, ModelBlock, map_idx);
+      arg3->computeTemporaryTerms(reference_count, temporary_terms, first_occurence, Curr_block, ModelBlock, map_idx);
+    }
+  else
+    {
+      reference_count[this2]++;
+      if (reference_count[this2] * cost(temporary_terms, false) > MIN_COST_C)
+        {
+          temporary_terms.insert(this2);
+          ModelBlock->Block_List[first_occurence[this2]].Temporary_terms->insert(this2);
+        }
+    }
+}
+
+double
+TrinaryOpNode::eval_opcode(double v1, TrinaryOpcode op_code, double v2, double v3) throw (EvalException)
+{
+  switch(op_code)
+    {
+    case oNormcdf:
+      cerr << "NORMCDF: eval not implemented" << endl;
+      exit(-1);
+    }
+  cerr << "Impossible case!" << endl;
+  exit(-1);
+}
+
+double
+TrinaryOpNode::eval(const eval_context_type &eval_context) const throw (EvalException)
+{
+  double v1 = arg1->eval(eval_context);
+  double v2 = arg2->eval(eval_context);
+  double v3 = arg3->eval(eval_context);
+
+  return eval_opcode(v1, op_code, v2, v3);
+}
+
+/*New*/
+void
+TrinaryOpNode::compile(ofstream &CompileCode, bool lhs_rhs, ExprNodeOutputType output_type, const temporary_terms_type &temporary_terms, map_idx_type map_idx) const
+{
+  // If current node is a temporary term
+  temporary_terms_type::const_iterator it = temporary_terms.find(const_cast<TrinaryOpNode *>(this));
+  if (it != temporary_terms.end())
+    {
+      CompileCode.write(&FLDT, sizeof(FLDT));
+      int var=map_idx[idx];
+      CompileCode.write(reinterpret_cast<char *>(&var), sizeof(var));
+      return;
+    }
+  arg1->compile(CompileCode, lhs_rhs, output_type, temporary_terms, map_idx);
+  arg2->compile(CompileCode, lhs_rhs, output_type, temporary_terms, map_idx);
+  arg3->compile(CompileCode, lhs_rhs, output_type, temporary_terms, map_idx);
+  CompileCode.write(&FBINARY, sizeof(FBINARY));
+  TrinaryOpcode op_codel=op_code;
+  CompileCode.write(reinterpret_cast<char *>(&op_codel),sizeof(op_codel));
+}
+/*EndNew*/
+
+void
+TrinaryOpNode::writeOutput(ostream &output, ExprNodeOutputType output_type,
+                          const temporary_terms_type &temporary_terms) const
+{
+
+  if (!OFFSET(output_type))
+    {
+      cerr << "TrinaryOpNode not implemented for C output" << endl;
+      exit(-1);
+    }
+
+  // If current node is a temporary term
+  temporary_terms_type::const_iterator it = temporary_terms.find(const_cast<TrinaryOpNode *>(this));
+  if (it != temporary_terms.end())
+    {
+      if (output_type != oCDynamicModelSparseDLL)
+        output << "T" << idx;
+      else
+        output << "T" << idx << "[it_]";
+      return;
+    }
+
+  switch (op_code)
+    {
+    case oNormcdf:
+      output << "pnorm(";
+      break;
+    }
+  arg1->writeOutput(output, output_type, temporary_terms);
+  output << ",";
+  arg2->writeOutput(output, output_type, temporary_terms);
+  output << ",";
+  arg3->writeOutput(output, output_type, temporary_terms);
+  output << ")";
+}
+
+void
+TrinaryOpNode::collectEndogenous(NodeID &Id)
+{
+  arg1->collectEndogenous(Id);
+  arg2->collectEndogenous(Id);
+  arg3->collectEndogenous(Id);
+}
+
 UnknownFunctionNode::UnknownFunctionNode(DataTree &datatree_arg,
                                          int symb_id_arg,
                                          const vector<NodeID> &arguments_arg) :

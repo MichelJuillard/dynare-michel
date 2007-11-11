@@ -370,6 +370,8 @@ public:
   NodeID add_max(NodeID arg1, NodeID arg2);
    //! Writes token "min(arg1,arg2)" to model tree
   NodeID add_min(NodeID arg1, NodeID arg2);
+   //! Writes token "normcdf(arg1,arg2,arg3)" to model tree
+  NodeID add_normcdf(NodeID arg1, NodeID arg2, NodeID arg3);
   //! Adds an unknwon function argument
   void add_unknown_function_arg(NodeID arg);
   //! Adds an unknown function call node

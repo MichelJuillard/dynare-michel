@@ -70,6 +70,7 @@ class ParsingDriver;
 %token UNIFORM_PDF UNIT_ROOT_VARS USE_DLL
 %token VALUES VAR VAREXO VAREXO_DET VAROBS
 %token XLS_SHEET XLS_RANGE
+%token NORMCDF
 %left LESS GREATER LESS_EQUAL GREATER_EQUAL EQUAL_EQUAL EXCLAMATION EXCLAMATION_EQUAL
 %left COMMA
 %left PLUS MINUS
@@ -300,6 +301,8 @@ expression : '(' expression ')'
              { $$ = driver.add_min($3 , $5); }
            | NAME '(' comma_expression ')'
              { $$ = driver.add_unknown_function($1); }
+           | NORMCDF '(' expression COMMA expression COMMA expression ')'
+             { $$ = driver.add_normcdf($3,$5,$7);}
            ;
 
 comma_expression : expression
@@ -428,6 +431,8 @@ hand_side : '(' hand_side ')'
              { $$ = driver.add_max($3 , $5); }
           | MIN '(' hand_side COMMA hand_side ')'
              { $$ = driver.add_min($3 , $5); }
+          | NORMCDF '(' expression COMMA expression COMMA expression ')'
+             { $$ = driver.add_normcdf($3,$5,$7);}
           ;
 
 pound_expression: '#' NAME EQUAL hand_side ';'

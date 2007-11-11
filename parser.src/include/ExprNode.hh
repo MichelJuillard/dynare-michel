@@ -69,6 +69,7 @@ class ExprNode
   friend class VariableNode;
   friend class UnaryOpNode;
   friend class BinaryOpNode;
+  friend class TrinaryOpNode;
 
 private:
   //! Computes derivative w.r. to variable varID (but doesn't store it in derivatives map)
@@ -279,6 +280,41 @@ public:
                                      map_idx_type &map_idx) const;
   virtual void collectEndogenous(NodeID &Id);
   static double eval_opcode(double v1, BinaryOpcode op_code, double v2) throw (EvalException);
+  virtual double eval(const eval_context_type &eval_context) const throw (EvalException);
+  /*New*/
+  virtual void compile(ofstream &CompileCode, bool lhs_rhs, ExprNodeOutputType output_type, const temporary_terms_type &temporary_terms, map_idx_type map_idx) const;
+  /*EndNew*/
+};
+
+enum TrinaryOpcode
+  {
+    oNormcdf
+  };
+
+//! Trinary operator node
+class TrinaryOpNode : public ExprNode
+{
+  friend class ModelTree;
+private:
+  const NodeID arg1, arg2, arg3;
+  const TrinaryOpcode op_code;
+  virtual NodeID computeDerivative(int varID);
+  virtual int cost(const temporary_terms_type &temporary_terms, bool is_matlab) const;
+  set<int> non_null_derivatives_tmp;
+public:
+  TrinaryOpNode(DataTree &datatree_arg, const NodeID arg1_arg,
+		TrinaryOpcode op_code_arg, const NodeID arg2_arg, const NodeID arg3_arg);
+  virtual int precedence(ExprNodeOutputType output_type, const temporary_terms_type &temporary_terms) const;
+  virtual void computeTemporaryTerms(map<NodeID, int> &reference_count, temporary_terms_type &temporary_terms, bool is_matlab) const;
+  virtual void writeOutput(ostream &output, ExprNodeOutputType output_type, const temporary_terms_type &temporary_terms) const;
+  virtual void computeTemporaryTerms(map<NodeID, int> &reference_count,
+                                     temporary_terms_type &temporary_terms,
+                                     map<NodeID, int> &first_occurence,
+                                     int Curr_block,
+                                     Model_Block *ModelBlock,
+                                     map_idx_type &map_idx) const;
+  virtual void collectEndogenous(NodeID &Id);
+  static double eval_opcode(double v1, TrinaryOpcode op_code, double v2, double v3) throw (EvalException);
   virtual double eval(const eval_context_type &eval_context) const throw (EvalException);
   /*New*/
   virtual void compile(ofstream &CompileCode, bool lhs_rhs, ExprNodeOutputType output_type, const temporary_terms_type &temporary_terms, map_idx_type map_idx) const;

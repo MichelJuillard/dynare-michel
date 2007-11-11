@@ -7,6 +7,7 @@ using namespace std;
 #include <map>
 #include <list>
 #include <sstream>
+#include <iomanip>
 
 #include "SymbolTable.hh"
 #include "NumericalConstants.hh"
@@ -20,6 +21,7 @@ class DataTree
   friend class VariableNode;
   friend class UnaryOpNode;
   friend class BinaryOpNode;
+  friend class TrinaryOpNode;
   friend class UnknownFunctionNode;
 protected:
   //! A reference to the symbol table
@@ -45,10 +47,13 @@ protected:
   unary_op_node_map_type unary_op_node_map;
   typedef map<pair<pair<NodeID, NodeID>, int>, NodeID> binary_op_node_map_type;
   binary_op_node_map_type binary_op_node_map;
+  typedef map<pair<pair<pair<NodeID, NodeID>,NodeID>, int>, NodeID> trinary_op_node_map_type;
+  trinary_op_node_map_type trinary_op_node_map;
 
   inline NodeID AddPossiblyNegativeConstant(double val);
   inline NodeID AddUnaryOp(UnaryOpcode op_code, NodeID arg);
   inline NodeID AddBinaryOp(NodeID arg1, BinaryOpcode op_code, NodeID arg2);
+  inline NodeID AddTrinaryOp(NodeID arg1, TrinaryOpcode op_code, NodeID arg2, NodeID arg3);
 public:
   DataTree(SymbolTable &symbol_table_arg, NumericalConstants &num_constants_arg);
   virtual ~DataTree();
@@ -126,6 +131,8 @@ public:
   NodeID AddMaX(NodeID iArg1, NodeID iArg2);
   //! Adds "min(arg1,arg2)" to model tree
   NodeID AddMin(NodeID iArg1, NodeID iArg2);
+  //! Adds "normcdf(arg1,arg2,arg3)" to model tree
+  NodeID AddNormcdf(NodeID iArg1, NodeID iArg2, NodeID iArg3);
   //! Adds "arg1=arg2" to model tree
   NodeID AddEqual(NodeID iArg1, NodeID iArg2);
   void AddLocalParameter(const string &name, NodeID value) throw (LocalParameterException);
@@ -144,7 +151,7 @@ DataTree::AddPossiblyNegativeConstant(double v)
       neg = true;
     }
   ostringstream ost;
-  ost << v;
+  ost << setprecision(16) << v;
 
   NodeID cnode = AddNumConstant(ost.str());
 
@@ -199,6 +206,28 @@ DataTree::AddBinaryOp(NodeID arg1, BinaryOpcode op_code, NodeID arg2)
     {
     }
   return new BinaryOpNode(*this, arg1, op_code, arg2);
+}
+
+inline NodeID
+DataTree::AddTrinaryOp(NodeID arg1, TrinaryOpcode op_code, NodeID arg2, NodeID arg3)
+{
+  trinary_op_node_map_type::iterator it = trinary_op_node_map.find(make_pair(make_pair(make_pair(arg1, arg2), arg3), op_code));
+  if (it != trinary_op_node_map.end())
+    return it->second;
+
+  // Try to reduce to a constant
+  try
+    {
+      double argval1 = arg1->eval(eval_context_type());
+      double argval2 = arg2->eval(eval_context_type());
+      double argval3 = arg3->eval(eval_context_type());
+      double val = TrinaryOpNode::eval_opcode(argval1, op_code, argval2, argval3);
+      return AddPossiblyNegativeConstant(val);
+    }
+  catch(ExprNode::EvalException &e)
+    {
+    }
+  return new TrinaryOpNode(*this, arg1, op_code, arg2, arg3);
 }
 
 #endif

@@ -368,6 +368,12 @@ DataTree::AddMin(NodeID iArg1, NodeID iArg2)
 }
 
 NodeID
+DataTree::AddNormcdf(NodeID iArg1, NodeID iArg2, NodeID iArg3)
+{
+  return AddTrinaryOp(iArg1, oNormcdf, iArg2, iArg3);
+}
+
+NodeID
 DataTree::AddEqual(NodeID iArg1, NodeID iArg2)
 {
   return AddBinaryOp(iArg1, oEqual, iArg2);
