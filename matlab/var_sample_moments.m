@@ -82,7 +82,7 @@ if qlag > FirstObservation
 end
 
 NumberOfObservations = LastObservation-FirstObservation+1;% This is T.
-NumberOfVariables = options_.varobs;% This is m.
+NumberOfVariables = size(options_.varobs,1);% This is m.
 if var_trend_order == -1% No constant no linear trend case.
     X = zeros(NumberOfObservations,NumberOfVariables*qlag);
 elseif var_trend_order == 0% Constant and no linear trend case.
@@ -101,12 +101,12 @@ Y = data(FirstObservation:LastObservation,:);
 for t=1:NumberOfObservations
   line = t + FirstObservation-1;
   for lag = 1:qlag
-    X(t,(lag-1)*NumberOfVariables+1:lag*NumberOfVariables) = data(line-lag,:);
+      X(t,(lag-1)*NumberOfVariables+1:lag*NumberOfVariables) = data(line-lag,:);
   end
   if var_trend_order == 0
-    X(t,indx) = ones(1,NumberOfVariables);
+      X(t,indx) = 1;
   elseif var_trend_order == 1
-  X(t,indx) = [ 1 , t ];
+      X(t,indx) = [ 1 , t ];
   end
 end
 

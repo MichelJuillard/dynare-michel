@@ -14,8 +14,7 @@ function [fval,cost_flag,info,PHI,SIGMAu,iXX] = DsgeVarLikelihood(xparam1,gend)
 %   o iXX           [double]     inv(X'X).
 %
 % ALGORITHM
-%   None.       
-%
+%   None.
 % SPECIAL REQUIREMENTS
 %   None.
 %  
@@ -83,7 +82,7 @@ dsge_prior_weight = M_.params(strmatch('dsge_prior_weight',M_.param_names));
 % Is the DSGE prior proper?
 if dsge_prior_weight<(NumberOfParameters+NumberOfObservedVariables)/gend;
     fval = bayestopt_.penalty*min(1e3,(NumberOfParameters+NumberOfObservedVariables)/gend-dsge_prior_weight);
-    info = 51
+    info = 51;
     cost_flag = 0;
     return;
 end
@@ -104,10 +103,15 @@ elseif info(1) == 3 | info(1) == 4 | info(1) == 20
     cost_flag = 0;
     return
 end
-if options_.loglinear == 1
-    constant = log(SteadyState(bayestopt_.mfys));
+if ~options_.noconstant
+    if options_.loglinear 
+        constant = transpose(log(SteadyState(bayestopt_.mfys)));
+    else
+        constant = transpose(SteadyState(bayestopt_.mfys));
+    end
+    NumberOfParameters = NumberOfParameters + 1;	
 else
-    constant = SteadyState(bayestopt_.mfys);
+    constant = zeros(1,NumberOfObservedVariables);
 end
 if bayestopt_.with_trend == 1
     disp('DsgeVarLikelihood :: Linear trend is not yet implemented!')
@@ -115,33 +119,41 @@ if bayestopt_.with_trend == 1
 end
 
 %------------------------------------------------------------------------------
-% 3. theorretical moments (second order)
+% 3. theoretical moments (second order)
 %------------------------------------------------------------------------------
 tmp0 = lyapunov_symm(T,R*Q*R');% I compute the variance-covariance matrix
-                               % of the restricted state vector.
-%bayestopt_.mf = bayestopt_.mf1;????????
-mf  = bayestopt_.mf1;
+mf  = bayestopt_.mf1;          % of the restricted state vector.
 
-
+% Get the non centered second order moments
 TheoreticalAutoCovarianceOfTheObservedVariables = ...
     zeros(NumberOfObservedVariables,NumberOfObservedVariables,NumberOfLags+1);
-TheoreticalAutoCovarianceOfTheObservedVariables(:,:,1) = tmp0(mf,mf);
+TheoreticalAutoCovarianceOfTheObservedVariables(:,:,1) = tmp0(mf,mf)+constant'*constant;
 for lag = 1:NumberOfLags
   tmp0 = T*tmp0;
-  TheoreticalAutoCovarianceOfTheObservedVariables(:,:,lag+1) = tmp0(mf,mf);
+  TheoreticalAutoCovarianceOfTheObservedVariables(:,:,lag+1) = tmp0(mf,mf) ...
+      + constant'*constant;
 end
+% Build the theoretical "covariance" between Y and X
 GYX = zeros(NumberOfObservedVariables,NumberOfParameters);
 for i=1:NumberOfLags
   GYX(:,(i-1)*NumberOfObservedVariables+1:i*NumberOfObservedVariables) = ...
       TheoreticalAutoCovarianceOfTheObservedVariables(:,:,i+1);
 end
+if ~options_.noconstant
+    GYX(:,end) = constant';
+end
+% Build the theoretical "covariance" between X and X
 GXX = kron(eye(NumberOfLags), ...
            TheoreticalAutoCovarianceOfTheObservedVariables(:,:,1));
 for i = 1:NumberOfLags-1
-  tmp1 = diag(ones(NumberOfLags-i,1),i); 
-  tmp2 = diag(ones(NumberOfLags-i,1),-i);
-  GXX = GXX + kron(tmp1,TheoreticalAutoCovarianceOfTheObservedVariables(:,:,i+1));
-  GXX = GXX + kron(tmp2,TheoreticalAutoCovarianceOfTheObservedVariables(:,:,i+1)');
+    tmp1 = diag(ones(NumberOfLags-i,1),i); 
+    tmp2 = diag(ones(NumberOfLags-i,1),-i);
+    GXX = GXX + kron(tmp1,TheoreticalAutoCovarianceOfTheObservedVariables(:,:,i+1));
+    GXX = GXX + kron(tmp2,TheoreticalAutoCovarianceOfTheObservedVariables(:,:,i+1)');
+end
+if ~options_.noconstant
+    % Add one row and one column to GXX
+    GXX = [GXX , ones(NumberOfLags*NumberOfObservedVariables,1) ; ones(1,NumberOfParameters)];
 end
 
 GYY = TheoreticalAutoCovarianceOfTheObservedVariables(:,:,1);
@@ -150,7 +162,7 @@ assignin('base','GYY',GYY);
 assignin('base','GXX',GXX);
 assignin('base','GYX',GYX);
 
-if ~isinf(dsge_prior_weight) 
+if ~isinf(dsge_prior_weight)
   tmp0 = dsge_prior_weight*gend*TheoreticalAutoCovarianceOfTheObservedVariables(:,:,1) + mYY ;
   tmp1 = dsge_prior_weight*gend*GYX + mYX;
   tmp2 = inv(dsge_prior_weight*gend*GXX+mXX);

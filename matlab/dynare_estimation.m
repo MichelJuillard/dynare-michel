@@ -25,9 +25,6 @@ end
 if options_.prefilter == 1
   options_.noconstant = 1;
 end
-if options_.bvar_dsge 
-  options_.noconstant = 1;
-end
 
 if options_.filtered_vars ~= 0 & options_.filter_step_ahead == 0
   options_.filter_step_ahead = 1;
@@ -223,7 +220,6 @@ end
 
 %% compute sample moments if needed (bvar-dsge)
 if options_.bvar_dsge~isempty(strmatch('dsge_prior_weight',M_.param_names))
-    options_.noconstant = 1;
     if options_.noconstant
         evalin('base',['[mYY,mXY,mYX,mXX,Ydata,Xdata] = ' ...
                  'var_sample_moments(options_.first_obs,options_.first_obs+options_.nobs-1,options_.varlag,-1);'])
