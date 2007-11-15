@@ -144,3 +144,7 @@ function global_initialization()
 
   % BVAR
   M_.bvar = [];
+
+  % rplot
+  options_.dsample = 0;
+  
