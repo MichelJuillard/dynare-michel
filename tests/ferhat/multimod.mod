@@ -2655,7 +2655,9 @@ W0906=0.0800069594276;
 W0907=0.147854375051;
 W0908=0.206834342322;
 W0909=-1;
-model(SPARSE_DLL,gcc_compiler,markowitz=2.0);
+model(SPARSE_DLL,markowitz=2.0,no_compiler);
+//model(SPARSE);
+//model;
  ( log(US_CPI)-(log(US_CPI(-1)))) = US_CPI1*( log(US_PIM)-(log(US_PIM(-1))))+US_CPI2*( log(US_PGNP)-(log(US_PGNP(-1))))+(1-US_CPI1-US_CPI2)*log(US_CPI(-1)/US_CPI(-2))+RES_US_CPI ;
  US_UNR_A = US_UNR_FE+US_UNR_1*100*log(US_GDP/US_GDP_FE)+US_UNR_2*(US_UNR(-1)-US_UNR_FE(-1))+RES_US_UNR_A ;
  US_UNR = /*MAX(US_UNR_A;0.1)*/US_UNR_A ;
@@ -4541,25 +4543,29 @@ end;
 
 
 
-/*shocks;
-var g_bar;
-periods 1;
-values 0.16;
-end;
-*/
 options_.slowc = 1.0;
 options_.dynatol = 1e-4;
+options_.maxit_ = 100;
 
 
-simul(periods=50,datafile=mark3);
+simul(periods=80,datafile=mark3);
 
+
+//simul(periods=10,datafile=mark3, method=lu);
+//simul(periods=10,datafile=mark3 /*, method=BICGSTAB*/);
+
+oo_.endo_simul_ss=oo_.endo_simul;
 
 shocks;
 var US_G;
 periods 1;
 values 4330.714737;
 end;
-simul(periods=50);
+simul(periods=80);
+
+oo_.endo_simul_sim=oo_.endo_simul;
+
+oo_.endo_simul=(oo_.endo_simul_sim./oo_.endo_simul_ss-1)*100;
 
 rplot WTRADER;
 rplot US_GDP;

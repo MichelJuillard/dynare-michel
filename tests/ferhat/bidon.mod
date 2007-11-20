@@ -13,7 +13,7 @@ m=1;
 n=1;
 o=1;
 
-model(SPARSE_DLL,gcc_compiler,cutoff=1e-12);
+model(SPARSE_DLL,cutoff=1e-12);
 /*0*/ k=(1-h)*k(-1)+i;  /*k:0*/
 /*1*/ y=l^j*k^m;          /*l:1*/
 /*2*/ c=y*a+b+0.3*c(-1)+0.1*c(+1)+0.*g_bar(-10);          /*c:2*/
@@ -30,12 +30,13 @@ model(SPARSE_DLL,gcc_compiler,cutoff=1e-12);
 end;
 
 initval;
-g_bar=0.15;
+//g_bar=0.15*(3.0+1==2.0);
+g_bar=max(2*(h==0.15),3*(d>0.2));
 c=0.7;
 i=0.15;
 g=0.15;
 y=1;
-k=1;
+k=0.2;
 l=1;
 infl=0.02;
 r=0;
@@ -60,7 +61,6 @@ options_.slowc = 1;
 
 
 simul(periods=80);
-
 
 rplot c;
 rplot y;

@@ -126,6 +126,24 @@ BlockTriangular::bGet_IM(int lead_lag)
   return (Cur_IM->IM);
 }
 
+bool*
+BlockTriangular::bGet_IM(int lead_lag) const
+{
+  List_IM* Cur_IM;
+  Cur_IM = First_IM;
+  while ((Cur_IM != NULL) && (Cur_IM->lead_lag != lead_lag))
+    {
+      Cur_IM = Cur_IM->pNext;
+    }
+  if((Cur_IM->lead_lag != lead_lag) || (Cur_IM==NULL))
+    {
+      cout << "the incidence matrix with lag " << lead_lag << " does not exist !!";
+      exit(-1);
+    }
+  return (Cur_IM->IM);
+}
+
+
 //------------------------------------------------------------------------------
 // Fill the incidence matrix related to a lead or a lag
 void
@@ -169,7 +187,7 @@ BlockTriangular::unfill_IM(int equation, int variable_endo, int lead_lag)
 //------------------------------------------------------------------------------
 //Print azn incidence matrix
 void
-BlockTriangular::Print_SIM(bool* IM, int n)
+BlockTriangular::Print_SIM(bool* IM, int n) const
 {
   int i, j;
   for(i = 0;i < n;i++)
@@ -184,7 +202,7 @@ BlockTriangular::Print_SIM(bool* IM, int n)
 //------------------------------------------------------------------------------
 //Print all incidence matrix
 void
-BlockTriangular::Print_IM(int n)
+BlockTriangular::Print_IM(int n) const
 {
   List_IM* Cur_IM;
   Cur_IM = First_IM;
@@ -427,9 +445,11 @@ BlockTriangular::Allocate_Block(int size, int *count_Equ, int *count_Block, int 
           ModelBlock->in_Block_Var[Index_Var_IM[*count_Equ].index] = *count_Block;
           ModelBlock->in_Equ_of_Block[Index_Equ_IM[*count_Equ].index] = ModelBlock->in_Var_of_Block[Index_Var_IM[*count_Equ].index] = 0;
           Index_Equ_IM[*count_Equ].block = *count_Block;
+          cout << "Lead=" << Lead << " Lag=" << Lag << "\n";
           if ((Lead > 0) && (Lag > 0))
             {
               ModelBlock->Block_List[*count_Block].Simulation_Type = SOLVE_TWO_BOUNDARIES_SIMPLE;
+              cout << "alloc ModelBlock->Block_List[" << *count_Block << "].IM_lead_lag = (" << (Lead + Lag + 1) * sizeof(IM_compact) << ")\n";
               ModelBlock->Block_List[*count_Block].IM_lead_lag = (IM_compact*)malloc((Lead + Lag + 1) * sizeof(IM_compact));
               ModelBlock->Block_List[*count_Block].Nb_Lead_Lag_Endo = nb_lead_lag_endo;
               ModelBlock->Block_List[*count_Block].variable_dyn_index = (int*)malloc(nb_lead_lag_endo * sizeof(int));
@@ -586,6 +606,7 @@ BlockTriangular::Allocate_Block(int size, int *count_Equ, int *count_Block, int 
         }
       ModelBlock->Block_List[*count_Block].Max_Lag = Lag;
       ModelBlock->Block_List[*count_Block].Max_Lead = Lead;
+      cout << "alloc ModelBlock->Block_List[" << *count_Block << "].IM_lead_lag = (" << (Lead + Lag + 1) * sizeof(IM_compact) << ")\n";
       ModelBlock->Block_List[*count_Block].IM_lead_lag = (IM_compact*)malloc((Lead + Lag + 1) * sizeof(IM_compact));
       ls = l = size;
       i1 = 0;

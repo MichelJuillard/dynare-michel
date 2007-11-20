@@ -1,10 +1,10 @@
 function global_initialization()
 % initializes global variables and options for DYNARE
   global oo_ M_ options_ ct_ endval_ rplottype_
-  
+
   ct_=0;
   endval_=0;
-  
+
   options_.rplottype = 0;
   options_.smpl = 0;
   options_.dynatol = 0.00001;
@@ -41,7 +41,7 @@ function global_initialization()
   options_.Opt6Iter = 3;
   options_.Opt6Numb = 100000;
 
-  % Graphics  
+  % Graphics
   options_.graphics.nrows = 3;
   options_.graphics.ncols = 3;
   options_.graphics.line_types = {'b-'};
@@ -129,6 +129,8 @@ function global_initialization()
   options_.use_mh_covariance_matrix = 0;
   options_.noconstant = 0;
   options_.markowitz = 0.5;
+  options_.simulation_method = 0;
+  options_.cutoff = 1e-12;
 
   % Misc
   options_.conf_sig = 0.9;

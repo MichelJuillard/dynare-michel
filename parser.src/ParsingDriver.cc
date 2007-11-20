@@ -127,7 +127,7 @@ ParsingDriver::add_model_variable(string *name)
   if (type == eModFileLocalVariable)
     error("Variable " + *name + " not allowed inside model declaration. Its scope is only outside model.");
 
-  if ((type == eEndogenous) && (model_tree->mode == eSparseDLLMode))
+  if ((type == eEndogenous) && (model_tree->mode == eSparseDLLMode || model_tree->mode == eSparseMode))
     {
       int ID = mod_file->symbol_table.getID(*name);
       model_tree->block_triangular.fill_IM(model_tree->equation_number(), ID, 0);
@@ -155,7 +155,7 @@ ParsingDriver::add_model_variable(string *name, string *olag)
     }
   NodeID id = model_tree->AddVariable(*name, lag);
 
-  if ((type == eEndogenous) && (model_tree->mode == eSparseDLLMode))
+  if ((type == eEndogenous) && (model_tree->mode == eSparseDLLMode || model_tree->mode == eSparseMode))
     model_tree->block_triangular.fill_IM(model_tree->equation_number(), mod_file->symbol_table.getID(*name), lag);
 
   delete name;
@@ -198,6 +198,14 @@ ParsingDriver::markowitz(string *markowitz)
   double markowitz_val = atof(markowitz->c_str());
   mod_file->addStatement(new MarkowitzStatement(markowitz_val));
   delete markowitz;
+}
+
+void
+ParsingDriver::simulation_method(string *simulation_method)
+{
+  double simulation_method_val = atof(simulation_method->c_str());
+  mod_file->addStatement(new Simulation_MethodStatement(simulation_method_val ));
+  delete simulation_method;
 }
 
 
@@ -310,6 +318,13 @@ void
 ParsingDriver::sparse_dll()
 {
   model_tree->mode = eSparseDLLMode;
+  model_tree->block_triangular.init_incidence_matrix(mod_file->symbol_table.endo_nbr);
+}
+
+void
+ParsingDriver::sparse()
+{
+  model_tree->mode = eSparseMode;
   model_tree->block_triangular.init_incidence_matrix(mod_file->symbol_table.endo_nbr);
 }
 
@@ -489,6 +504,15 @@ ParsingDriver::add_value(NodeID value)
 }
 
 void
+ParsingDriver::add_value(string *p1)
+{
+  //int p1_val = atoi(p1->c_str());
+  det_shocks_values.push_back(add_constant(p1));
+  //delete p1;
+}
+
+
+void
 ParsingDriver::do_sigma_e()
 {
   try
@@ -521,11 +545,22 @@ ParsingDriver::add_to_row(NodeID v)
   sigmae_row.push_back(v);
 }
 
+
 void
 ParsingDriver::steady()
 {
-  mod_file->addStatement(new SteadyStatement(options_list));
-  options_list.clear();
+  if (/*mod_file->model_tree.mode == eSparseDLLMode || */mod_file->model_tree.mode == eSparseMode)
+    {
+      mod_file->addStatement(new SteadySparseStatement(options_list));
+      options_list.clear();
+    }
+  else
+    {
+      mod_file->addStatement(new SteadyStatement(options_list));
+      options_list.clear();
+    }
+  /*mod_file->addStatement(new SteadyStatement(options_list));
+  options_list.clear();*/
 }
 
 void
@@ -554,7 +589,7 @@ ParsingDriver::option_num(const string &name_option, const string &opt)
       != options_list.num_options.end())
     error("option " + name_option + " declared twice");
 
-  if ((name_option == "periods") && (mod_file->model_tree.mode == eSparseDLLMode))
+  if ((name_option == "periods") && (mod_file->model_tree.mode == eSparseDLLMode || mod_file->model_tree.mode == eSparseMode))
     mod_file->model_tree.block_triangular.periods = atoi(opt.c_str());
   else if (name_option == "cutoff")
     mod_file->model_tree.cutoff = atof(opt.c_str());
@@ -619,7 +654,7 @@ void ParsingDriver::stoch_simul()
 
 void ParsingDriver::simulate()
 {
-  if (mod_file->model_tree.mode == eSparseDLLMode)
+  if (mod_file->model_tree.mode == eSparseDLLMode || mod_file->model_tree.mode == eSparseMode)
     simul_sparse();
   else
     simul();
@@ -628,7 +663,7 @@ void ParsingDriver::simulate()
 void
 ParsingDriver::simul_sparse()
 {
-  mod_file->addStatement(new SimulSparseStatement(options_list, mod_file->model_tree.compiler));
+  mod_file->addStatement(new SimulSparseStatement(options_list, mod_file->model_tree.compiler, mod_file->model_tree.mode));
   options_list.clear();
 }
 

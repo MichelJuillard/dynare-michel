@@ -151,8 +151,10 @@ public:
   bool symbol_exists_and_is_not_modfile_local_variable(const char *s);
   //! Sets mode of ModelTree class to use C output
   void use_dll();
-  //! Sets mode of ModelTree class to block decompose the model and triggers the creation of the incidence matrix
+  //! Sets mode of ModelTree class to block decompose the model and triggers the creation of the incidence matrix in a C context
   void sparse_dll();
+  //! Sets mode of ModelTree class to block decompose the model and triggers the creation of the incidence matrix in Matlab context
+  void sparse();
   //! Sets the compiler type used in conjunction with SPARCE_DLL
   void init_compiler(int compiler_type);
   //! Sets the FILENAME for the initial value in initval
@@ -180,6 +182,8 @@ public:
   //! Adds a "cutoff" statement
   void cutoff(string *cutoff);
   //! Adds a weight of the "markowitz" criteria statement
+  void simulation_method(string *simulation_method);
+  //! Adds a deterministic simulation method statement
   void markowitz(string *markowitz);
   //! Adds a "dsample" statement
   void dsample(string *arg1);
@@ -219,6 +223,8 @@ public:
   void add_period(string *p1);
   //! Adds a deterministic shock value
   void add_value(NodeID value);
+  //! Adds a deterministic shock value
+  void add_value(string *p1);
   //! Writes a Sigma_e block
   void do_sigma_e();
   //! Ends row of Sigma_e block

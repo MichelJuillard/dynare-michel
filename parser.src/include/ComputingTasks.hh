@@ -17,6 +17,15 @@ public:
   virtual void writeOutput(ostream &output, const string &basename) const;
 };
 
+class SteadySparseStatement : public Statement
+{
+private:
+  const OptionsList options_list;
+public:
+  SteadySparseStatement(const OptionsList &options_list_arg);
+  virtual void writeOutput(ostream &output, const string &basename) const;
+};
+
 class CheckStatement : public Statement
 {
 private:
@@ -41,9 +50,9 @@ class SimulSparseStatement : public Statement
 {
 private:
   const OptionsList options_list;
-  const int compiler;
+  const int compiler, mode;
 public:
-  SimulSparseStatement(const OptionsList &options_list_arg, int compiler_arg);
+  SimulSparseStatement(const OptionsList &options_list_arg, int compiler_arg, int mode_arg);
   virtual void checkPass(ModFileStructure &mod_file_struct);
   virtual void writeOutput(ostream &output, const string &basename) const;
 };
@@ -110,6 +119,14 @@ public:
   virtual void writeOutput(ostream &output, const string &basename) const;
 };
 
+class Simulation_MethodStatement : public Statement
+{
+private:
+  const int simulation_method;
+public:
+  Simulation_MethodStatement(double simulation_method_arg) ;
+  void writeOutput(ostream &output, const string &basename) const;
+};
 
 class MarkowitzStatement : public Statement
 {
@@ -400,7 +417,7 @@ public:
   BVARDensityStatement(int maxnlags_arg, const OptionsList &options_list_arg);
   virtual void writeOutput(ostream &output, const string &basename) const;
 };
-  
+
 class BVARForecastStatement : public Statement
 {
 private:
@@ -410,6 +427,6 @@ public:
   BVARForecastStatement(int nlags_arg, const OptionsList &options_list_arg);
   virtual void writeOutput(ostream &output, const string &basename) const;
 };
-  
+
 
 #endif

@@ -12,7 +12,7 @@ function f=calib_obj(M_.Sigma_e,A,ghu1,ghx,ghu,targets,var_weights,iy,nar)
   if isempty(vx)
     vx = lyapunov_symm(A,b);
   else
-    [vx,status] = bicgstab(@f_var,b(:),vx(:),1e-8,50,A,nx);
+    [vx,status] = bicgstab_(@f_var,b(:),vx(:),1e-8,50,A,nx);
     if status
       vx = lyapunov_symm(A,b);
     else

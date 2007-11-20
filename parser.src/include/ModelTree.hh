@@ -23,6 +23,7 @@ using namespace std;
 enum ModelTreeMode
   {
     eStandardMode, //!< Standard mode (static and dynamic files in Matlab)
+    eSparseMode,  //!< Sparse mode (static file in Matlab, dynamic file in Matlab with block decomposition)
     eDLLMode,      //!< DLL mode (static and dynamic files in C)
     eSparseDLLMode //!< Sparse DLL mode (static file in Matlab, dynamic file in C with block decomposition plus a binary file)
   };
@@ -87,13 +88,19 @@ private:
   /*! \todo add third derivatives handling in C output */
   void writeDynamicModel(ostream &DynamicOutput) const;
   //! Writes the Block reordred structure of the model in C output
-  void writeModelEquationsOrdered(ostream &output, Model_Block *ModelBlock) const;
+  void writeModelEquationsOrdered_C(ostream &output, Model_Block *ModelBlock) const;
+  //! Writes the Block reordred structure of the model in M output
+  void writeModelEquationsOrdered_M(ostream &output, Model_Block *ModelBlock, const string &dynamic_basename) const;
+  //! Writes the Block reordred structure of the static model in M output
+  void writeModelStaticEquationsOrdered_M(ostream &output, Model_Block *ModelBlock, const string &static_basename) const;
   //! Writes the code of the Block reordred structure of the model in C output
   void writeModelEquationsCodeOrdered(const string file_name, const Model_Block *ModelBlock, const string bin_basename, ExprNodeOutputType output_type) const;
   //! Writes static model file (Matlab version)
   void writeStaticMFile(const string &static_basename) const;
   //! Writes static model file (C version)
   void writeStaticCFile(const string &static_basename) const;
+  //! Writes static model file when Sparse option is on (Matlab version)
+  void writeSparseStaticMFile(const string &static_basename, const string &bin_basename, const int mode) const;
   //! Writes dynamic model file (Matlab version)
   void writeDynamicMFile(const string &dynamic_basename) const;
   //! Writes dynamic model file (C version)
@@ -102,7 +109,7 @@ private:
   //! Writes dynamic model header file when SparseDLL option is on
   void writeSparseDLLDynamicHFile(const string &dynamic_basename) const;
   //! Writes dynamic model file when SparseDLL option is on
-  void writeSparseDLLDynamicCFileAndBinFile(const string &dynamic_basename, const string &bin_basename, ExprNodeOutputType output_type) const;
+  void writeSparseDynamicFileAndBinFile(const string &dynamic_basename, const string &bin_basename, ExprNodeOutputType output_type, const int mode) const;
   //! Computes jacobian and prepares for equation normalization
   /*! Using values from initval/endval blocks and parameter initializations:
     - computes the jacobian for the model w.r. to contemporaneous variables

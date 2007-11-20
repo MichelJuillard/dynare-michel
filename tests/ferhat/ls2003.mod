@@ -18,6 +18,8 @@ rho_pies = 0.7;
 
 
 model(sparse_dll,gcc_compiler,cutoff=1e-17);
+//model(sparse);
+//model;
 y = y(+1) - (tau +alpha*(2-alpha)*(1-tau))*(R-pie(+1))-alpha*(tau +alpha*(2-alpha)*(1-tau))*dq(+1) + alpha*(2-alpha)*((1-tau)/tau)*(y_s-y_s(+1))-A(+1);
 pie = exp(-rr/400)*pie(+1)+alpha*exp(-rr/400)*dq(+1)-alpha*dq+(k/(tau+alpha*(2-alpha)*(1-tau)))*y+alpha*(2-alpha)*(1-tau)/(tau*(tau+alpha*(2-alpha)*(1-tau)))*y_s;
 pie = de+(1-alpha)*dq+pie_s;
@@ -74,6 +76,6 @@ periods 1;
 values 0.5;
 end;
 
-simul(periods=80);
+simul(periods=200,method=bicgstab);
 rplot A;
 rplot pie;

@@ -23,7 +23,9 @@ scy = 0.0040;
 shy = 0.0015;
 shc = 0.0010;
 
-model(sparse_dll,gcc_compiler);
+//model(sparse);
+//model(sparse_dll);
+model;
 exp(y) = exp(a)*exp(k(-1))^theta*exp(h)^(1-theta);
 a = (1-rho)*aa+rho*a(-1)+e;
 exp(y) = exp(c) + exp(i);
@@ -82,9 +84,10 @@ options_.dynatol=4e-8;
 shocks;
 var e;
 periods 1;
-values 0.0002;
+values 0.02;
 end;
-simul(periods=60);
+options_.maxit_=20;
+simul(periods=200, method=bicgstab);
 rplot y;
 rplot k;
 

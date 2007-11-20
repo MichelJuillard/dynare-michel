@@ -31,6 +31,8 @@ enum ExprNodeOutputType
   {
     oMatlabStaticModel,       //!< Matlab code, static model declarations
     oMatlabDynamicModel,      //!< Matlab code, dynamic model declarations
+    oMatlabStaticModelSparse, //!< Matlab code, static block decomposed mode declaration
+    oMatlabDynamicModelSparse, //!< Matlab code, dynamic block decomposed mode declaration
     oCStaticModel,            //!< C code, static model declarations
     oCDynamicModel,           //!< C code, dynamic model declarations
     oCDynamicModelSparseDLL,  //!< C code, dynamic model declarations in SparseDLL module
@@ -46,7 +48,9 @@ typedef map<pair<int, Type>, double> eval_context_type;
    In Matlab, array indexes begin at 1, while they begin at 0 in C */
 #define OFFSET(output_type) ((output_type == oMatlabStaticModel)      \
                              || (output_type == oMatlabDynamicModel)  \
-                             || (output_type == oMatlabOutsideModel))
+                             || (output_type == oMatlabOutsideModel)  \
+                             || (output_type == oMatlabStaticModelSparse)  \
+                             || (output_type == oMatlabDynamicModelSparse))
 
 // Left parenthesis: '(' for Matlab, '[' for C
 #define LPAR(output_type) (OFFSET(output_type) ? '(' : '[')

@@ -9,10 +9,10 @@ bet=0.05;
 aa=0.5;
 
 
-//model(SPARSE_DLL,GCC_COMPILER);
-//model(SPARSE_DLL);
-model;
-max(c,0.0)+ k - aa*x*k(-1)^alph - (1-delt)*k(-1);
+model(sparse);
+//model(sparse_dll);
+//model;
+c + k - aa*x*k(-1)^alph - (1-delt)*k(-1);
 c^(-gam) - (1+bet)^(-1)*(aa*alph*x(+1)*k^(alph-1) + 1 - delt)*c(+1)^(-gam);
 end;
 
@@ -22,20 +22,17 @@ k = ((delt+bet)/(1.0*aa*alph))^(1/(alph-1));
 c = aa*k^alph-delt*k;
 end;
 
-steady(solve_algo=2);
+steady;
 
 //check;
 
 shocks;
 var x;
 periods 1;
-values 1.2;
+values 1.002;
 end;
 
-oo_.dynatol=1e-19;
-options_.maxit_ = 10;
-
-simul(periods=6);
+simul(periods=200, METHOD=GmRes);
 
 rplot c;
 rplot k;

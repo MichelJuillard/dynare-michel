@@ -24,6 +24,18 @@ SteadyStatement::writeOutput(ostream &output, const string &basename) const
   output << "steady;\n";
 }
 
+SteadySparseStatement::SteadySparseStatement(const OptionsList &options_list_arg) :
+  options_list(options_list_arg)
+{
+}
+
+void
+SteadySparseStatement::writeOutput(ostream &output, const string &basename) const
+{
+  options_list.writeOutput(output);
+  output << basename << "_static;\n";
+}
+
 CheckStatement::CheckStatement(const OptionsList &options_list_arg) :
   options_list(options_list_arg)
 {
@@ -61,9 +73,10 @@ SimulStatement::writeOutput(ostream &output, const string &basename) const
 }
 
 SimulSparseStatement::SimulSparseStatement(const OptionsList &options_list_arg,
-                                           int compiler_arg) :
+                                           int compiler_arg, int mode_arg) :
   options_list(options_list_arg),
-  compiler(compiler_arg)
+  compiler(compiler_arg),
+  mode(mode_arg)
 {
 }
 
@@ -77,7 +90,7 @@ void
 SimulSparseStatement::writeOutput(ostream &output, const string &basename) const
 {
   options_list.writeOutput(output);
-  output << "if ~ options_.initval_file\n";
+  output << "if (~ options_.initval_file) & (size(oo_.endo_simul,2)<options_.periods)\n";
   output << "  if ~isfield(options_,'datafile')\n";
   output << "    make_y_;\n";
   output << "    make_ex_;\n";
@@ -85,21 +98,29 @@ SimulSparseStatement::writeOutput(ostream &output, const string &basename) const
   output << "    read_data_;\n";
   output << "  end\n";
   output << "end\n";
-  if(compiler!=NO_COMPILE)
+  if(mode==eSparseDLLMode)
     {
-      output << "disp('compiling...');\n";
-      output << "t0=clock;\n";
-      if (compiler == 0)
-        output << "mex " << basename << "_dynamic.c;\n";
+      if(compiler!=NO_COMPILE)
+        {
+          output << "disp('compiling...');\n";
+          output << "t0=clock;\n";
+          if (compiler == 0)
+            output << "mex " << basename << "_dynamic.c;\n";
+          else
+            output << "mex " << basename << "_dynamic.cc;\n";
+          output << "disp(['compiling time: ' num2str(etime(clock,t0))]);\n";
+          output << "oo_.endo_simul=" << basename << "_dynamic;\n";
+        }
       else
-        output << "mex " << basename << "_dynamic.cc;\n";
-      output << "disp(['compiling time: ' num2str(etime(clock,t0))]);\n";
-      output << "oo_.endo_simul=" << basename << "_dynamic;\n";
+        {
+          output << "oo_.endo_simul=simulate;\n";
+          output << "clear simulate.dll;\n";
+        }
     }
   else
     {
-      output << "oo_.endo_simul=simulate;\n";
-      output << "clear simulate.dll;\n";
+      //output << "oo_.endo_simul=" << basename << "_dynamic();\n";
+      output << basename << "_dynamic;\n";
     }
 }
 
@@ -280,6 +301,17 @@ void
 MarkowitzStatement::writeOutput(ostream &output, const string &basename) const
 {
   output << "options_.markowitz = " << markowitz << ";" << endl;
+}
+
+
+Simulation_MethodStatement::Simulation_MethodStatement(double simulation_method_arg) : simulation_method(simulation_method_arg)
+{
+}
+
+void
+Simulation_MethodStatement::writeOutput(ostream &output, const string &basename) const
+{
+  output << "options_.simulation_method = " << simulation_method << ";" << endl;
 }
 
 

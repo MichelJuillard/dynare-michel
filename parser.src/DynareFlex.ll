@@ -113,6 +113,7 @@ int sigma_e = 0;
 
  /* Inside  of a Dynare statement */
 <DYNARE_STATEMENT>datafile 		{return token::DATAFILE;}
+<DYNARE_STATEMENT>method    {return token::METHOD;}
 <DYNARE_STATEMENT>nobs 			{return token::NOBS;}
 <DYNARE_STATEMENT>first_obs 		{return token::FIRST_OBS;}
 <DYNARE_STATEMENT>prefilter 		{return token::PREFILTER;}
@@ -224,6 +225,11 @@ int sigma_e = 0;
 <DYNARE_STATEMENT>[\'] {return yy::parser::token_type (yytext[0]);}
 
 <DYNARE_STATEMENT,DYNARE_BLOCK>use_dll {return token::USE_DLL;}
+<DYNARE_STATEMENT,DYNARE_BLOCK>lu {return token::LU;}
+<DYNARE_STATEMENT,DYNARE_BLOCK>gaussian_elimination {return token::GAUSSIAN_ELIMINATION;}
+<DYNARE_STATEMENT,DYNARE_BLOCK>gmres {return token::GMRES;}
+<DYNARE_STATEMENT,DYNARE_BLOCK>bicgstab {return token::BICGSTAB;}
+<DYNARE_STATEMENT,DYNARE_BLOCK>sparse {return token::SPARSE;}
 <DYNARE_STATEMENT,DYNARE_BLOCK>sparse_dll {return token::SPARSE_DLL;}
 <DYNARE_STATEMENT,DYNARE_BLOCK>gcc_compiler {return token::GCC_COMPILER;}
 <DYNARE_STATEMENT,DYNARE_BLOCK>lcc_compiler {return token::LCC_COMPILER;}

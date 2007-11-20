@@ -325,7 +325,7 @@ ModelTree::computeTemporaryTermsOrdered(int order, Model_Block *ModelBlock)
 }
 
 void
-ModelTree::writeModelEquationsOrdered(ostream &output, Model_Block *ModelBlock) const
+ModelTree::writeModelEquationsOrdered_C(ostream &output, Model_Block *ModelBlock) const
 {
   int i,j,k,m;
   string sModel, tmp_s;
@@ -561,6 +561,567 @@ ModelTree::writeModelEquationsOrdered(ostream &output, Model_Block *ModelBlock) 
 }
 
 
+
+void
+ModelTree::writeModelEquationsOrdered_M(ostream &output, Model_Block *ModelBlock, const string &dynamic_basename) const
+{
+  int i,j,k,m;
+  string sModel, tmp_s, sps;
+  ostringstream tmp_output, global_output;
+  NodeID lhs=NULL, rhs=NULL;
+  BinaryOpNode *eq_node;
+  bool OK, lhs_rhs_done, skip_the_head;
+  ostringstream Uf[symbol_table.endo_nbr];
+  map<NodeID, int> reference_count;
+  int prev_Simulation_Type=-1;
+  temporary_terms_type::const_iterator it_temp=temporary_terms.begin();
+  //----------------------------------------------------------------------
+  //Temporary variables declaration
+  OK=true;
+  for(temporary_terms_type::const_iterator it = temporary_terms.begin();
+      it != temporary_terms.end(); it++)
+    {
+      if (OK)
+        OK=false;
+      else
+        tmp_output << " ";
+
+      (*it)->writeOutput(tmp_output, oMatlabDynamicModel, temporary_terms);
+
+      /*tmp_output << "[" << block_triangular.periods + variable_table.max_lag+variable_table.max_lead << "]";*/
+    }
+
+  if (tmp_output.str().length()>0)
+    {
+      global_output << "  global " << tmp_output.str() << " M_ ;\n";
+    }
+  //For each block
+  for(j = 0;j < ModelBlock->Size;j++)
+    {
+      //For a block composed of a single equation determines wether we have to evaluate or to solve the equation
+      if (ModelBlock->Block_List[j].Size==1)
+        {
+          lhs_rhs_done=true;
+          eq_node = equations[ModelBlock->Block_List[j].Equation[0]];
+          lhs = eq_node->arg1;
+          rhs = eq_node->arg2;
+          tmp_output.str("");
+          lhs->writeOutput(tmp_output, oMatlabDynamicModelSparse, temporary_terms);
+        }
+      else
+        lhs_rhs_done=false;
+      if (prev_Simulation_Type==ModelBlock->Block_List[j].Simulation_Type
+          && (ModelBlock->Block_List[j].Simulation_Type==EVALUATE_BACKWARD
+              ||ModelBlock->Block_List[j].Simulation_Type==EVALUATE_FOREWARD
+              ||ModelBlock->Block_List[j].Simulation_Type==EVALUATE_BACKWARD_R
+              ||ModelBlock->Block_List[j].Simulation_Type==EVALUATE_FOREWARD_R ))
+        skip_the_head=true;
+      else
+        skip_the_head=false;
+      if (!skip_the_head)
+        {
+          if (j>0)
+            {
+              output << "return;\n\n\n";
+            }
+          else
+            output << "\n\n";
+          if (ModelBlock->Block_List[j].Simulation_Type==EVALUATE_BACKWARD
+              ||ModelBlock->Block_List[j].Simulation_Type==EVALUATE_FOREWARD
+              ||ModelBlock->Block_List[j].Simulation_Type==EVALUATE_BACKWARD_R
+              ||ModelBlock->Block_List[j].Simulation_Type==EVALUATE_FOREWARD_R)
+            output << "function [y] = " << dynamic_basename << "_" << j+1 << "(y, x, it_)\n";
+          else if (ModelBlock->Block_List[j].Simulation_Type==SOLVE_BACKWARD_SIMPLE
+              ||ModelBlock->Block_List[j].Simulation_Type==SOLVE_FOREWARD_SIMPLE)
+            output << "function [residual, g1, g2, g3, b] = " << dynamic_basename << "_" << j+1 << "(y, x, it_)\n";
+          else
+            output << "function [residual, g1, g2, g3, b] = " << dynamic_basename << "_" << j+1 << "(y, x, y_kmin, y_size, periods)\n";
+          output << "  " <<  interfaces::comment()  << "////////////////////////////////////////////////////////////////////////\n" <<
+            "  " << interfaces::comment()  << "//" << string("                     Block ").substr(int(log10(j + 1))) << j + 1 << " " << BlockTriangular::BlockType0(ModelBlock->Block_List[j].Type) <<
+            "          //\n" <<
+            "  " << interfaces::comment()   << "//                     Simulation type ";
+          output << BlockTriangular::BlockSim(ModelBlock->Block_List[j].Simulation_Type) << "  //\n" <<
+            "  " << interfaces::comment()   << "////////////////////////////////////////////////////////////////////////\n";
+          //The Temporary terms
+          output << global_output.str();
+          output << "  if M_.param_nbr > 0\n";
+          output << "    params =  M_.params;\n";
+          output << "  end\n";
+        }
+
+
+      temporary_terms_type tt2;
+      if(ModelBlock->Block_List[j].Simulation_Type==SOLVE_TWO_BOUNDARIES_COMPLETE)
+        {
+          int nze;
+          for(nze=0,m=0;m<=ModelBlock->Block_List[j].Max_Lead+ModelBlock->Block_List[j].Max_Lag;m++)
+            nze+=ModelBlock->Block_List[j].IM_lead_lag[m].size;
+          output << "  Jacobian_Size=" << ModelBlock->Block_List[j].Size << "*(y_kmin+" << ModelBlock->Block_List[j].Max_Lead << " +periods);\n";
+          output << "  g1=spalloc( y_size*periods, Jacobian_Size, " << nze << "*periods" << ");\n";
+          output << "  for it_ = y_kmin+1:(periods+y_kmin)\n";
+          output << "    Per_y_=it_*y_size;\n";
+          output << "    Per_J_=(it_-y_kmin-1)*y_size;\n";
+          output << "    Per_K_=(it_-1)*y_size;\n";
+          sps="  ";
+        }
+      else
+        sps="";
+      if (ModelBlock->Block_List[j].Temporary_terms->size())
+        output << "  " << sps << interfaces::comment() << "//Temporary variables\n";
+      i=0;
+      for(temporary_terms_type::const_iterator it = ModelBlock->Block_List[j].Temporary_terms->begin();
+          it != ModelBlock->Block_List[j].Temporary_terms->end(); it++)
+        {
+          output << "  " <<  sps;
+          (*it)->writeOutput(output, oMatlabDynamicModelSparse, temporary_terms);
+          output << " = ";
+          (*it)->writeOutput(output, oMatlabDynamicModelSparse, tt2);
+          // Insert current node into tt2
+          tt2.insert(*it);
+          output << ";" << endl;
+          i++;
+        }
+      // The equations
+      for(i = 0;i < ModelBlock->Block_List[j].Size;i++)
+        {
+          sModel = symbol_table.getNameByID(eEndogenous, ModelBlock->Block_List[j].Variable[i]) ;
+          ModelBlock->Block_List[j].Variable_Sorted[i] = variable_table.getID(sModel, 0);
+          output <<  sps << "  " << interfaces::comment() << "equation " << ModelBlock->Block_List[j].Equation[i] << " variable : " <<
+            sModel << " (" << ModelBlock->Block_List[j].Variable[i] << ")\n";
+          if (!lhs_rhs_done)
+            {
+              eq_node = equations[ModelBlock->Block_List[j].Equation[i]];
+              lhs = eq_node->arg1;
+              rhs = eq_node->arg2;
+              tmp_output.str("");
+              lhs->writeOutput(tmp_output, oMatlabDynamicModelSparse, temporary_terms);
+            }
+          output << "  ";
+          switch(ModelBlock->Block_List[j].Simulation_Type)
+            {
+            case EVALUATE_BACKWARD:
+            case EVALUATE_FOREWARD:
+              output << tmp_output.str();
+              output << " = ";
+              rhs->writeOutput(output, oMatlabDynamicModelSparse, temporary_terms);
+              output << ";\n";
+              break;
+            case EVALUATE_BACKWARD_R:
+            case EVALUATE_FOREWARD_R:
+              rhs->writeOutput(output, oMatlabDynamicModelSparse, temporary_terms);
+              output << " = ";
+              lhs->writeOutput(output, oMatlabDynamicModelSparse, temporary_terms);
+              output << ";\n";
+              break;
+            case SOLVE_BACKWARD_SIMPLE:
+            case SOLVE_FOREWARD_SIMPLE:
+              output << sps << "residual(" << i+1 << ") = (";
+              goto end;
+            case SOLVE_BACKWARD_COMPLETE:
+            case SOLVE_FOREWARD_COMPLETE:
+              Uf[ModelBlock->Block_List[j].Equation[i]] << "  b(" << i+1 << ") = residual(" << i+1 << ", it_)";
+              output << sps << "residual(" << i+1 << ") = (";
+              goto end;
+            case SOLVE_TWO_BOUNDARIES_COMPLETE:
+              Uf[ModelBlock->Block_List[j].Equation[i]] << "    b(" << i+1 << "+Per_J_) = -residual(" << i+1 << ", it_)";
+              output << sps << "residual(" << i+1 << ", it_) = (";
+              goto end;
+            default:
+            end:
+              output << tmp_output.str();
+              output << ") - (";
+              rhs->writeOutput(output, oMatlabDynamicModelSparse, temporary_terms);
+              output << ");\n";
+#ifdef CONDITION
+              if (ModelBlock->Block_List[j].Simulation_Type==SOLVE_TWO_BOUNDARIES_COMPLETE)
+                output << "  condition(" << i+1 << ")=0;\n";
+#endif
+            }
+        }
+      // The Jacobian if we have to solve the block
+      if (ModelBlock->Block_List[j].Simulation_Type!=EVALUATE_BACKWARD
+          && ModelBlock->Block_List[j].Simulation_Type!=EVALUATE_FOREWARD
+          && ModelBlock->Block_List[j].Simulation_Type!=EVALUATE_BACKWARD_R
+          && ModelBlock->Block_List[j].Simulation_Type!=EVALUATE_FOREWARD_R)
+        {
+          output << "  " <<  sps << interfaces::comment()  << "Jacobian  \n";
+          switch(ModelBlock->Block_List[j].Simulation_Type)
+            {
+            case SOLVE_BACKWARD_SIMPLE:
+            case SOLVE_FOREWARD_SIMPLE:
+              output << "  g1(1)=";
+              writeDerivative(output, ModelBlock->Block_List[j].Equation[0], ModelBlock->Block_List[j].Variable[0], 0, oMatlabDynamicModelSparse, temporary_terms);
+              output << "; " << interfaces::comment() << "variable=" <<  symbol_table.getNameByID(eEndogenous, ModelBlock->Block_List[j].Variable[0])
+                     <<"(" << variable_table.getLag(variable_table.getSymbolID(ModelBlock->Block_List[j].Variable[0])) << ") " << ModelBlock->Block_List[j].Variable[0]
+                     << ", equation=" <<  ModelBlock->Block_List[j].Equation[0] << "\n";
+              break;
+            case SOLVE_BACKWARD_COMPLETE:
+            case SOLVE_FOREWARD_COMPLETE:
+              m=ModelBlock->Block_List[j].Max_Lag;
+              for(i=0;i<ModelBlock->Block_List[j].IM_lead_lag[m].size;i++)
+                {
+                  int eq=ModelBlock->Block_List[j].IM_lead_lag[m].Equ_Index[i];
+                  int var=ModelBlock->Block_List[j].IM_lead_lag[m].Var_Index[i];
+                  int u=ModelBlock->Block_List[j].IM_lead_lag[m].us[i];
+                  int eqr=ModelBlock->Block_List[j].IM_lead_lag[m].Equ[i];
+                  Uf[ModelBlock->Block_List[j].Equation[eqr]] << "-u(" << u << ")*y(Per_y_+" << var << ")";
+                  output << "  u(" << u+1 << ") = ";
+                  writeDerivative(output, eq, var, 0, oMatlabDynamicModelSparse, temporary_terms);
+                  output << "; " << interfaces::comment() <<  "variable=" <<  symbol_table.getNameByID(eEndogenous, var)
+                         <<"(" << variable_table.getLag(variable_table.getSymbolID(var))<< ") " << var
+                         << ", equation=" <<  eq << "\n";
+                }
+              for(i = 0;i < ModelBlock->Block_List[j].Size;i++)
+                output << Uf[ModelBlock->Block_List[j].Equation[i]].str() << ";\n";
+              break;
+            case SOLVE_TWO_BOUNDARIES_COMPLETE:
+              output << "    g2=0;g3=0;\n";
+              for(m=0;m<=ModelBlock->Block_List[j].Max_Lead+ModelBlock->Block_List[j].Max_Lag;m++)
+                {
+                  k=m-ModelBlock->Block_List[j].Max_Lag;
+                  for(i=0;i<ModelBlock->Block_List[j].IM_lead_lag[m].size;i++)
+                    {
+                      int eq=ModelBlock->Block_List[j].IM_lead_lag[m].Equ_Index[i];
+                      int var=ModelBlock->Block_List[j].IM_lead_lag[m].Var_Index[i];
+                      //int u=ModelBlock->Block_List[j].IM_lead_lag[m].u[i];
+                      int eqr=ModelBlock->Block_List[j].IM_lead_lag[m].Equ[i];
+                      int varr=ModelBlock->Block_List[j].IM_lead_lag[m].Var[i];
+                      if (k==0)
+                        Uf[ModelBlock->Block_List[j].Equation[eqr]] << "+g1(" << eqr+1 << "+Per_J_, " << varr+1 << "+Per_K_)*y(it_, " << var+1 << ")";
+                      else if (k>0)
+                        Uf[ModelBlock->Block_List[j].Equation[eqr]] << "+g1(" << eqr+1 << "+Per_J_, " << varr+1 << "+y_size*(it_+" << k << "-1))*y(it_+" << k << ", " << var+1 << ")";
+                      else if (k<0)
+                        Uf[ModelBlock->Block_List[j].Equation[eqr]] << "+g1(" << eqr+1 << "+Per_J_, " << varr+1 << "+y_size*(it_" << k << "-1))*y(it_" << k << ", " << var+1 << ")";
+                      //output << "  u(" << u+1 << "+Per_u_) = ";
+                      if(k==0)
+                        output << "    g1(" << eqr+1 << "+Per_J_, " << varr+1 << "+Per_K_) = ";
+                      else if(k>0)
+                        output << "    g1(" << eqr+1 << "+Per_J_, " << varr+1 << "+y_size*(it_+" << k << "-1)) = ";
+                      else if(k<0)
+                        output << "    g1(" << eqr+1 << "+Per_J_, " << varr+1 << "+y_size*(it_" << k << "-1)) = ";
+                      writeDerivative(output, eq, var, k, oMatlabDynamicModelSparse, temporary_terms);
+                      output << "; " << interfaces::comment()  << "variable=" <<  symbol_table.getNameByID(eEndogenous, var)
+                             <<"(" << k << ") " << var
+                             << ", equation=" <<  eq << "\n";
+#ifdef CONDITION
+                      output << "  if (fabs(condition[" << eqr << "])<fabs(u[" << u << "+Per_u_]))\n";
+                      output << "    condition(" << eqr << ")=u(" << u << "+Per_u_);\n";
+#endif
+                    }
+                }
+              for(i = 0;i < ModelBlock->Block_List[j].Size;i++)
+                {
+                  output << Uf[ModelBlock->Block_List[j].Equation[i]].str() << ";\n";
+#ifdef CONDITION
+                  output << "  if (fabs(condition(" << i+1 << "))<fabs(u(" << i << "+Per_u_)))\n";
+                  output << "    condition(" << i+1 << ")=u(" << i+1 << "+Per_u_);\n";
+#endif
+                }
+#ifdef CONDITION
+              for(m=0;m<=ModelBlock->Block_List[j].Max_Lead+ModelBlock->Block_List[j].Max_Lag;m++)
+                {
+                  k=m-ModelBlock->Block_List[j].Max_Lag;
+                  for(i=0;i<ModelBlock->Block_List[j].IM_lead_lag[m].size;i++)
+                    {
+                      int eq=ModelBlock->Block_List[j].IM_lead_lag[m].Equ_Index[i];
+                      int var=ModelBlock->Block_List[j].IM_lead_lag[m].Var_Index[i];
+                      int u=ModelBlock->Block_List[j].IM_lead_lag[m].u[i];
+                      int eqr=ModelBlock->Block_List[j].IM_lead_lag[m].Equ[i];
+                      output << "  u(" << u+1 << "+Per_u_) = u(" << u+1 << "+Per_u_) / condition(" << eqr+1 << ");\n";
+                    }
+                }
+              for(i = 0;i < ModelBlock->Block_List[j].Size;i++)
+                output << "  u(" << i+1 << "+Per_u_) = u(" << i+1 << "+Per_u_) / condition(" << i+1 << ");\n";
+#endif
+              output << "  end;\n";
+              break;
+            }
+        }
+      prev_Simulation_Type=ModelBlock->Block_List[j].Simulation_Type;
+    }
+  output << "return;\n\n\n";
+}
+
+void
+ModelTree::writeModelStaticEquationsOrdered_M(ostream &output, Model_Block *ModelBlock, const string &static_basename) const
+{
+  int i,j,k,m, var, eq;
+  string sModel, tmp_s, sps;
+  ostringstream tmp_output, global_output;
+  NodeID lhs=NULL, rhs=NULL;
+  BinaryOpNode *eq_node;
+  bool OK, lhs_rhs_done, skip_the_head;
+  ostringstream Uf[symbol_table.endo_nbr];
+  map<NodeID, int> reference_count;
+  int prev_Simulation_Type=-1;
+  int nze=0;
+  bool *IM, *IMl;
+  temporary_terms_type::const_iterator it_temp=temporary_terms.begin();
+  //----------------------------------------------------------------------
+  //Temporary variables declaration
+  OK=true;
+  for(temporary_terms_type::const_iterator it = temporary_terms.begin();
+      it != temporary_terms.end(); it++)
+    {
+      if (OK)
+        OK=false;
+      else
+        tmp_output << " ";
+      (*it)->writeOutput(tmp_output, oMatlabStaticModelSparse, temporary_terms);
+    }
+  if (tmp_output.str().length()>0)
+    {
+      global_output << "  global " << tmp_output.str() << " M_ ;\n";
+    }
+  //For each block
+  for(j = 0;j < ModelBlock->Size;j++)
+    {
+      //For a block composed of a single equation determines wether we have to evaluate or to solve the equation
+      if (ModelBlock->Block_List[j].Size==1)
+        {
+          lhs_rhs_done=true;
+          eq_node = equations[ModelBlock->Block_List[j].Equation[0]];
+          lhs = eq_node->arg1;
+          rhs = eq_node->arg2;
+          tmp_output.str("");
+          lhs->writeOutput(tmp_output, oMatlabStaticModelSparse, temporary_terms);
+        }
+      else
+        lhs_rhs_done=false;
+      if (prev_Simulation_Type==ModelBlock->Block_List[j].Simulation_Type
+          && (ModelBlock->Block_List[j].Simulation_Type==EVALUATE_BACKWARD
+              ||ModelBlock->Block_List[j].Simulation_Type==EVALUATE_FOREWARD
+              ||ModelBlock->Block_List[j].Simulation_Type==EVALUATE_BACKWARD_R
+              ||ModelBlock->Block_List[j].Simulation_Type==EVALUATE_FOREWARD_R ))
+        skip_the_head=true;
+      else
+        skip_the_head=false;
+      if (!skip_the_head)
+        {
+          if (j>0)
+            {
+              output << "return;\n\n\n";
+            }
+          else
+            output << "\n\n";
+          output << "function [residual, g1, g2, g3, b] = " << static_basename << "_" << j+1 << "(y, x)\n";
+          output << "  " <<  interfaces::comment()  << "////////////////////////////////////////////////////////////////////////\n" <<
+            "  " << interfaces::comment()  << "//" << string("                     Block ").substr(int(log10(j + 1))) << j + 1 << " " << BlockTriangular::BlockType0(ModelBlock->Block_List[j].Type) <<
+            "          //\n" <<
+            "  " << interfaces::comment()   << "//                     Simulation type ";
+          output << BlockTriangular::BlockSim(ModelBlock->Block_List[j].Simulation_Type) << "  //\n" <<
+            "  " << interfaces::comment()   << "////////////////////////////////////////////////////////////////////////\n";
+          //The Temporary terms
+          output << global_output.str();
+          output << "  if M_.param_nbr > 0\n";
+          output << "    params =  M_.params;\n";
+          output << "  end\n";
+        }
+
+
+      temporary_terms_type tt2;
+
+      int n=ModelBlock->Block_List[j].Size;
+      int n1=symbol_table.endo_nbr;
+      //cout << "n1=" << n1 << "\n";
+      IM=(bool*)malloc(n*n*sizeof(bool));
+      memset(IM, 0, n*n*sizeof(bool));
+      //cout << "ModelBlock->Block_List[j].Max_Lead" << ModelBlock->Block_List[j].Max_Lag << "  ModelBlock->Block_List[j].Max_Lag=" << ModelBlock->Block_List[j].Max_Lead << "\n";
+      for(m=-ModelBlock->Block_List[j].Max_Lag;m<=ModelBlock->Block_List[j].Max_Lead;m++)
+        {
+          //cout << "bGet_IM(" << m << ")\n";
+          IMl=block_triangular.bGet_IM(m);
+          //cout <<"OK\n";
+          for(i=0;i<n;i++)
+            {
+              eq=ModelBlock->Block_List[j].Equation[i];
+              for(k=0;k<n;k++)
+                {
+                  var=ModelBlock->Block_List[j].Variable[k];
+                  //cout << "eq=" << eq << " var=" << var << "\n";
+                  IM[i*n+k]=IM[i*n+k] || IMl[eq*n1+var];
+                  /*if(IM[i*n+k])
+                    cout << " ->i=" << i << " j=" << j << "\n";*/
+                }
+            }
+          //cout << "done\n";
+        }
+      for(nze=0, i=0;i<n*n;i++)
+        {
+          nze+=IM[i];
+        }
+      cout << "nze=" << nze << "\n";
+      memset(IM, 0, n*n*sizeof(bool));
+      if( ModelBlock->Block_List[j].Simulation_Type!=EVALUATE_BACKWARD && ModelBlock->Block_List[j].Simulation_Type!=EVALUATE_FOREWARD
+       && ModelBlock->Block_List[j].Simulation_Type!=EVALUATE_BACKWARD_R && ModelBlock->Block_List[j].Simulation_Type!=EVALUATE_FOREWARD_R)
+        output << "  g1=spalloc(" << ModelBlock->Block_List[j].Size << ", " << ModelBlock->Block_List[j].Size << ", " << nze << ");\n";
+      sps="";
+      if (ModelBlock->Block_List[j].Temporary_terms->size())
+        output << "  " << sps << interfaces::comment() << "//Temporary variables\n";
+      i=0;
+      for(temporary_terms_type::const_iterator it = ModelBlock->Block_List[j].Temporary_terms->begin();
+          it != ModelBlock->Block_List[j].Temporary_terms->end(); it++)
+        {
+          output << "  " <<  sps;
+          (*it)->writeOutput(output, oMatlabStaticModelSparse, temporary_terms);
+          output << " = ";
+          (*it)->writeOutput(output, oMatlabStaticModelSparse, tt2);
+          // Insert current node into tt2
+          tt2.insert(*it);
+          output << ";" << endl;
+          i++;
+        }
+      // The equations
+      for(i = 0;i < ModelBlock->Block_List[j].Size;i++)
+        {
+          sModel = symbol_table.getNameByID(eEndogenous, ModelBlock->Block_List[j].Variable[i]) ;
+          ModelBlock->Block_List[j].Variable_Sorted[i] = variable_table.getID(sModel, 0);
+          output <<  sps << "  " << interfaces::comment() << "equation " << ModelBlock->Block_List[j].Equation[i] << " variable : " <<
+            sModel << " (" << ModelBlock->Block_List[j].Variable[i] << ")\n";
+          if (!lhs_rhs_done)
+            {
+              eq_node = equations[ModelBlock->Block_List[j].Equation[i]];
+              lhs = eq_node->arg1;
+              rhs = eq_node->arg2;
+              tmp_output.str("");
+              lhs->writeOutput(tmp_output, oMatlabStaticModelSparse, temporary_terms);
+            }
+          output << "  ";
+          switch(ModelBlock->Block_List[j].Simulation_Type)
+            {
+            case EVALUATE_BACKWARD:
+            case EVALUATE_FOREWARD:
+              output << tmp_output.str();
+              output << " = ";
+              rhs->writeOutput(output, oMatlabStaticModelSparse, temporary_terms);
+              output << ";\n";
+              break;
+            case EVALUATE_BACKWARD_R:
+            case EVALUATE_FOREWARD_R:
+              rhs->writeOutput(output, oMatlabStaticModelSparse, temporary_terms);
+              output << " = ";
+              lhs->writeOutput(output, oMatlabStaticModelSparse, temporary_terms);
+              output << ";\n";
+              break;
+            case SOLVE_BACKWARD_COMPLETE:
+            case SOLVE_FOREWARD_COMPLETE:
+            case SOLVE_TWO_BOUNDARIES_COMPLETE:
+              Uf[ModelBlock->Block_List[j].Equation[i]] << "  b(" << i+1 << ") = - residual(" << i+1 << ")";
+              goto end;
+            default:
+            end:
+              output << sps << "residual(" << i+1 << ") = (";
+              output << tmp_output.str();
+              output << ") - (";
+              rhs->writeOutput(output, oMatlabStaticModelSparse, temporary_terms);
+              output << ");\n";
+#ifdef CONDITION
+              if (ModelBlock->Block_List[j].Simulation_Type==SOLVE_TWO_BOUNDARIES_COMPLETE)
+                output << "  condition(" << i+1 << ")=0;\n";
+#endif
+            }
+        }
+      // The Jacobian if we have to solve the block
+      if (ModelBlock->Block_List[j].Simulation_Type!=EVALUATE_BACKWARD
+          && ModelBlock->Block_List[j].Simulation_Type!=EVALUATE_FOREWARD
+          && ModelBlock->Block_List[j].Simulation_Type!=EVALUATE_BACKWARD_R
+          && ModelBlock->Block_List[j].Simulation_Type!=EVALUATE_FOREWARD_R)
+        {
+          output << "  " <<  sps << interfaces::comment()  << "Jacobian  \n";
+          switch(ModelBlock->Block_List[j].Simulation_Type)
+            {
+            case SOLVE_BACKWARD_SIMPLE:
+            case SOLVE_FOREWARD_SIMPLE:
+              output << "  g1(1)=";
+              writeDerivative(output, ModelBlock->Block_List[j].Equation[0], ModelBlock->Block_List[j].Variable[0], 0, oMatlabStaticModelSparse, temporary_terms);
+              output << "; " << interfaces::comment() << "variable=" <<  symbol_table.getNameByID(eEndogenous, ModelBlock->Block_List[j].Variable[0])
+                     <<"(" << variable_table.getLag(variable_table.getSymbolID(ModelBlock->Block_List[j].Variable[0])) << ") " << ModelBlock->Block_List[j].Variable[0]
+                     << ", equation=" <<  ModelBlock->Block_List[j].Equation[0] << "\n";
+              break;
+            case SOLVE_BACKWARD_COMPLETE:
+            case SOLVE_FOREWARD_COMPLETE:
+              m=ModelBlock->Block_List[j].Max_Lag;
+              for(i=0;i<ModelBlock->Block_List[j].IM_lead_lag[m].size;i++)
+                {
+                  int eq=ModelBlock->Block_List[j].IM_lead_lag[m].Equ_Index[i];
+                  int var=ModelBlock->Block_List[j].IM_lead_lag[m].Var_Index[i];
+                  int u=ModelBlock->Block_List[j].IM_lead_lag[m].us[i];
+                  int eqr=ModelBlock->Block_List[j].IM_lead_lag[m].Equ[i];
+                  Uf[ModelBlock->Block_List[j].Equation[eqr]] << "-u(" << u << ")*y(Per_y_+" << var << ")";
+                  output << "  u(" << u+1 << ") = ";
+                  writeDerivative(output, eq, var, 0, oMatlabStaticModelSparse, temporary_terms);
+                  output << "; " << interfaces::comment() <<  "variable=" <<  symbol_table.getNameByID(eEndogenous, var)
+                         <<"(" << variable_table.getLag(variable_table.getSymbolID(var))<< ") " << var
+                         << ", equation=" <<  eq << "\n";
+                }
+              for(i = 0;i < ModelBlock->Block_List[j].Size;i++)
+                output << Uf[ModelBlock->Block_List[j].Equation[i]].str() << ";\n";
+              break;
+            case SOLVE_TWO_BOUNDARIES_COMPLETE:
+              output << "  g2=0;g3=0;\n";
+              for(m=0;m<=ModelBlock->Block_List[j].Max_Lead+ModelBlock->Block_List[j].Max_Lag;m++)
+                {
+                  k=m-ModelBlock->Block_List[j].Max_Lag;
+                  for(i=0;i<ModelBlock->Block_List[j].IM_lead_lag[m].size;i++)
+                    {
+                      int eq=ModelBlock->Block_List[j].IM_lead_lag[m].Equ_Index[i];
+                      int var=ModelBlock->Block_List[j].IM_lead_lag[m].Var_Index[i];
+                      //int u=ModelBlock->Block_List[j].IM_lead_lag[m].u[i];
+                      int eqr=ModelBlock->Block_List[j].IM_lead_lag[m].Equ[i];
+                      int varr=ModelBlock->Block_List[j].IM_lead_lag[m].Var[i];
+                      output << "% i=" << i << " eq=" << eq << " var=" << var << " eqr=" << eqr << " varr=" << varr << "\n";
+                      cout << "% i=" << i << " eq=" << eq << " var=" << var << " eqr=" << eqr << " varr=" << varr << "\n";
+                      if(!IM[eqr*ModelBlock->Block_List[j].Size+varr])
+                        {
+                          Uf[ModelBlock->Block_List[j].Equation[eqr]] << "+g1(" << eqr+1
+                                                                        << ", " << varr+1 << ")*y( " << var+1 << ")";
+                          IM[eqr*ModelBlock->Block_List[j].Size+varr]=1;
+                        }
+                      output << "  g1(" << eqr+1 << ", " << varr+1 << ") = g1(" << eqr+1 << ", " << varr+1 << ") + ";
+                      writeDerivative(output, eq, var, k, oMatlabStaticModelSparse, temporary_terms);
+                      output << "; " << interfaces::comment()  << "variable=" <<  symbol_table.getNameByID(eEndogenous, var)
+                             <<"(" << k << ") " << var
+                             << ", equation=" <<  eq << "\n";
+#ifdef CONDITION
+                      output << "  if (fabs(condition[" << eqr << "])<fabs(u[" << u << "+Per_u_]))\n";
+                      output << "    condition(" << eqr << ")=u(" << u << "+Per_u_);\n";
+#endif
+                    }
+                }
+              for(i = 0;i < ModelBlock->Block_List[j].Size;i++)
+                {
+                  output << Uf[ModelBlock->Block_List[j].Equation[i]].str() << ";\n";
+#ifdef CONDITION
+                  output << "  if (fabs(condition(" << i+1 << "))<fabs(u(" << i << "+Per_u_)))\n";
+                  output << "    condition(" << i+1 << ")=u(" << i+1 << "+Per_u_);\n";
+#endif
+                }
+#ifdef CONDITION
+              for(m=0;m<=ModelBlock->Block_List[j].Max_Lead+ModelBlock->Block_List[j].Max_Lag;m++)
+                {
+                  k=m-ModelBlock->Block_List[j].Max_Lag;
+                  for(i=0;i<ModelBlock->Block_List[j].IM_lead_lag[m].size;i++)
+                    {
+                      int eq=ModelBlock->Block_List[j].IM_lead_lag[m].Equ_Index[i];
+                      int var=ModelBlock->Block_List[j].IM_lead_lag[m].Var_Index[i];
+                      int u=ModelBlock->Block_List[j].IM_lead_lag[m].u[i];
+                      int eqr=ModelBlock->Block_List[j].IM_lead_lag[m].Equ[i];
+                      output << "  u(" << u+1 << "+Per_u_) = u(" << u+1 << "+Per_u_) / condition(" << eqr+1 << ");\n";
+                    }
+                }
+              for(i = 0;i < ModelBlock->Block_List[j].Size;i++)
+                output << "  u(" << i+1 << "+Per_u_) = u(" << i+1 << "+Per_u_) / condition(" << i+1 << ");\n";
+#endif
+              break;
+            }
+        }
+      prev_Simulation_Type=ModelBlock->Block_List[j].Simulation_Type;
+    }
+  output << "return;\n\n\n";
+  free(IM);
+}
+
+
 void
 ModelTree::writeModelEquationsCodeOrdered(const string file_name, const Model_Block *ModelBlock, const string bin_basename, ExprNodeOutputType output_type) const
   {
@@ -680,8 +1241,6 @@ ModelTree::writeModelEquationsCodeOrdered(const string file_name, const Model_Bl
                 eq_node = equations[ModelBlock->Block_List[j].Equation[0]];
                 lhs = eq_node->arg1;
                 rhs = eq_node->arg2;
-                //tmp_output.str("");
-                //lhs->writeOutput(tmp_output, oCDynamicModelSparseDLL, temporary_terms);
               }
             else
               lhs_rhs_done=false;
@@ -1404,15 +1963,6 @@ ModelTree::writeSparseDLLDynamicHFile(const string &dynamic_basename) const
       mDynamicModelFile << "};\n";
       mDynamicModelFile << "\n";
     }
-  /*mDynamicModelFile << "const int UNKNOWN=" << UNKNOWN << ";\n";
-  mDynamicModelFile << "const int EVALUATE_FOREWARD=" << EVALUATE_FOREWARD << ";\n";
-  mDynamicModelFile << "const int EVALUATE_BACKWARD=" << EVALUATE_BACKWARD << ";\n";
-  mDynamicModelFile << "const int SOLVE_FOREWARD_SIMPLE=" << SOLVE_FOREWARD_SIMPLE << ";\n";
-  mDynamicModelFile << "const int SOLVE_BACKWARD_SIMPLE=" << SOLVE_BACKWARD_SIMPLE << ";\n";
-  mDynamicModelFile << "const int SOLVE_TWO_BOUNDARIES_SIMPLE=" << SOLVE_TWO_BOUNDARIES_SIMPLE << ";\n";
-  mDynamicModelFile << "const int SOLVE_FOREWARD_COMPLETE=" << SOLVE_FOREWARD_COMPLETE << ";\n";
-  mDynamicModelFile << "const int SOLVE_BACKWARD_COMPLETE=" << SOLVE_BACKWARD_COMPLETE << ";\n";
-  mDynamicModelFile << "const int SOLVE_TWO_BOUNDARIES_COMPLETE=" << SOLVE_TWO_BOUNDARIES_COMPLETE << ";\n";*/
   mDynamicModelFile << "#endif\n";
   mDynamicModelFile.close();
 }
@@ -1423,8 +1973,6 @@ ModelTree::Write_Inf_To_Bin_File(const string &dynamic_basename, const string &b
 {
   int j;
   std::ofstream SaveCode;
-  /*cout << "bin_basename=" << bin_basename << "\n";
-  system("pause");*/
   if (file_open)
     SaveCode.open((bin_basename + ".bin").c_str(), ios::out | ios::in | ios::binary | ios ::ate );
   else
@@ -1438,12 +1986,8 @@ ModelTree::Write_Inf_To_Bin_File(const string &dynamic_basename, const string &b
   for(int m=0;m<=block_triangular.ModelBlock->Block_List[num].Max_Lead+block_triangular.ModelBlock->Block_List[num].Max_Lag;m++)
     {
       int k1=m-block_triangular.ModelBlock->Block_List[num].Max_Lag;
-      //mDynamicModelFile << "    Lead_Lag.push_back(k1);\n";
       for(j=0;j<block_triangular.ModelBlock->Block_List[num].IM_lead_lag[m].size;j++)
         {
-          //int eq=block_triangular.ModelBlock->Block_List[num].IM_lead_lag[m].Equ_Index[j];
-          //int var=block_triangular.ModelBlock->Block_List[num].IM_lead_lag[m].Var_Index[j];
-          //int eqr=block_triangular.ModelBlock->Block_List[num].IM_lead_lag[m].Equ[j];
           int varr=block_triangular.ModelBlock->Block_List[num].IM_lead_lag[m].Var[j]+k1*block_triangular.ModelBlock->Block_List[num].Size;
           int u=block_triangular.ModelBlock->Block_List[num].IM_lead_lag[m].u[j];
           int eqr1=block_triangular.ModelBlock->Block_List[num].IM_lead_lag[m].Equ[j];
@@ -1470,16 +2014,13 @@ ModelTree::Write_Inf_To_Bin_File(const string &dynamic_basename, const string &b
        cout << "eqr1=" << eqr1 << " varr=" << varr << " k1=" << k1 << " eqr1=" << eqr1 << "\n";
        u_count_int++;
     }
-  //cout << "u_count_int = " << u_count_int << endl;
   for(j=0;j<block_triangular.ModelBlock->Block_List[num].Size;j++)
     {
-      //mDynamicModelFile << "    index_var[" << j << "]=" << block_triangular.ModelBlock->Block_List[i].Variable[j] << ";\n";
       int varr=block_triangular.ModelBlock->Block_List[num].Variable[j];
       SaveCode.write(reinterpret_cast<char *>(&varr), sizeof(varr));
     }
   for(j=0;j<block_triangular.ModelBlock->Block_List[num].Size;j++)
     {
-      //mDynamicModelFile << "    index_var[" << j << "]=" << block_triangular.ModelBlock->Block_List[i].Variable[j] << ";\n";
       int eqr1=block_triangular.ModelBlock->Block_List[num].Equation[j];
       SaveCode.write(reinterpret_cast<char *>(&eqr1), sizeof(eqr1));
     }
@@ -1487,66 +2028,437 @@ ModelTree::Write_Inf_To_Bin_File(const string &dynamic_basename, const string &b
 }
 
 void
-ModelTree::writeSparseDLLDynamicCFileAndBinFile(const string &dynamic_basename, const string &bin_basename, ExprNodeOutputType output_type) const
+ModelTree::writeSparseStaticMFile(const string &static_basename, const string &bin_basename, const int mode) const
 {
   string filename;
-  ofstream mDynamicModelFile;
-
-  SymbolicGaussElimination SGE;
-
-  if (compiler == LCC_COMPILE || compiler == GCC_COMPILE)
+  ofstream mStaticModelFile;
+  int i, k, prev_Simulation_Type;
+  bool /*printed = false,*/ skip_head, open_par=false;
+  filename = static_basename + ".m";
+  mStaticModelFile.open(filename.c_str(), ios::out | ios::binary);
+  if (!mStaticModelFile.is_open())
     {
-      if (compiler == LCC_COMPILE)
-        filename = dynamic_basename + ".c";
+      cerr << "Error: Can't open file " << filename << " for writing" << endl;
+      exit(-1);
+    }
+  mStaticModelFile << "%\n";
+  mStaticModelFile << "% " << filename << " : Computes static model for Dynare\n";
+  mStaticModelFile << "%\n";
+  mStaticModelFile << "% Warning : this file is generated automatically by Dynare\n";
+  mStaticModelFile << "%           from model file (.mod)\n\n";
+  mStaticModelFile << "%/\n";
+  mStaticModelFile << "function [varargout] = " << static_basename << "(varargin)\n";
+  mStaticModelFile << "  global oo_ options_ M_ ys0_ ;\n";
+  mStaticModelFile << "  y_kmin=M_.maximum_lag;\n";
+  mStaticModelFile << "  y_kmax=M_.maximum_lead;\n";
+  mStaticModelFile << "  y_size=M_.endo_nbr;\n";
+  mStaticModelFile << "  if(length(varargin)>0)\n";
+  mStaticModelFile << "    %it is a simple evaluation of the dynamic model for time _it\n";
+  mStaticModelFile << "    global it_;\n";
+  mStaticModelFile << "    y=varargin{1}(y_kmin,:);\n";
+  mStaticModelFile << "    ys=y;\n";
+  mStaticModelFile << "    x=varargin{2}(y_kmin,:);\n";
+  mStaticModelFile << "    residual=zeros(1, " << symbol_table.endo_nbr << ");\n";
+  prev_Simulation_Type=-1;
+  for(i=0;i<block_triangular.ModelBlock->Size;i++)
+    {
+      mStaticModelFile << "    y_index=[";
+      for(int ik=0;ik<block_triangular.ModelBlock->Block_List[i].Size;ik++)
+        {
+          mStaticModelFile << " " << block_triangular.ModelBlock->Block_List[i].Variable[ik]+1;
+        }
+      mStaticModelFile << " ];\n";
+      k=block_triangular.ModelBlock->Block_List[i].Simulation_Type;
+      if (prev_Simulation_Type==k &&
+         (k==EVALUATE_FOREWARD || k==EVALUATE_BACKWARD || k==EVALUATE_FOREWARD_R || k==EVALUATE_BACKWARD_R))
+        skip_head=true;
       else
-        filename = dynamic_basename + ".cc";
+        skip_head=false;
+      switch(k)
+        {
+           case EVALUATE_FOREWARD:
+           case EVALUATE_BACKWARD:
+           case EVALUATE_FOREWARD_R:
+           case EVALUATE_BACKWARD_R:
+             if(!skip_head)
+               mStaticModelFile << "    " << static_basename << "_" << i + 1 << "(y, x);\n";
+             mStaticModelFile << "    residual(y_index)=ys(y_index)-y(y_index);\n";
+             break;
+           case SOLVE_FOREWARD_COMPLETE:
+           case SOLVE_BACKWARD_COMPLETE:
+           case SOLVE_FOREWARD_SIMPLE:
+           case SOLVE_BACKWARD_SIMPLE:
+           case SOLVE_TWO_BOUNDARIES_COMPLETE:
+             mStaticModelFile << "    [r, g1]=" << static_basename << "_" <<  i + 1 << "(y, x);\n";
+             mStaticModelFile << "    residual(y_index)=r;\n";
+             break;
+        }
+      prev_Simulation_Type=k;
+    }
+   mStaticModelFile << "    varargout{1}=residual;\n";
+   mStaticModelFile << "    varargout{2}=g1;\n";
+   mStaticModelFile << "    return;\n";
+   mStaticModelFile << "  end;\n";
+   mStaticModelFile << "  %it is the deterministic simulation of the block decomposed static model\n";
+   mStaticModelFile << "  periods=options_.periods;\n";
+   mStaticModelFile << "  maxit_=options_.maxit_;\n";
+   mStaticModelFile << "  solve_tolf=options_.solve_tolf;\n";
+   mStaticModelFile << "  y=oo_.steady_state;\n";
+   mStaticModelFile << "  x=oo_.exo_steady_state;\n";
+   prev_Simulation_Type=-1;
+   for(i = 0;i < block_triangular.ModelBlock->Size;i++)
+     {
+       k = block_triangular.ModelBlock->Block_List[i].Simulation_Type;
+       if (prev_Simulation_Type==k &&
+          (k==EVALUATE_FOREWARD || k==EVALUATE_BACKWARD || k==EVALUATE_FOREWARD_R || k==EVALUATE_BACKWARD_R))
+         skip_head=true;
+       else
+         skip_head=false;
+       if ((k == EVALUATE_FOREWARD || k == EVALUATE_FOREWARD_R || k == EVALUATE_BACKWARD || k == EVALUATE_BACKWARD_R) && (block_triangular.ModelBlock->Block_List[i].Size))
+         {
+           if (!skip_head)
+             {
+               if (open_par)
+                 {
+                   mStaticModelFile << "  end\n";
+                 }
+               mStaticModelFile << "  " << static_basename << "_" << i + 1 << "(y, x);\n";
+             }
+           open_par=false;
+         }
+       else if ((k == SOLVE_FOREWARD_SIMPLE || k == SOLVE_BACKWARD_SIMPLE) && (block_triangular.ModelBlock->Block_List[i].Size))
+         {
+           if (open_par)
+             {
+               mStaticModelFile << "  end\n";
+             }
+           open_par=false;
+           mStaticModelFile << "    g1=0;\n";
+           mStaticModelFile << "    r=0;\n";
+           /*mStaticModelFile << "    for it_=y_kmin+1:periods+y_kmin\n";
+           mStaticModelFile << "        cvg=0;\n";
+           mStaticModelFile << "        iter=0;\n";
+           mStaticModelFile << "        Per_y_=it_*y_size;\n";
+           mStaticModelFile << "        while ~(cvg==1 | iter>maxit_),\n";
+           mStaticModelFile << "            [r, g1] = " << static_basename << "_" << i + 1 << "(y, x, it_, Per_y_, y_size);\n";
+           mStaticModelFile << "            y[it_, " << block_triangular.ModelBlock->Block_List[i].Variable[0] << "] = y[it_, " << block_triangular.ModelBlock->Block_List[i].Variable[0] << "]-r/g1;\n";
+           mStaticModelFile << "            cvg=((r[0]*r[0])<solve_tolf);\n";
+           mStaticModelFile << "            iter=iter+1;\n";
+           mStaticModelFile << "        end\n";
+           mStaticModelFile << "        if cvg==0\n";
+           mStaticModelFile << "            fprintf('Convergence not achieved in block " << i << ", at time %d after %d iterations\\n',it_,iter);\n";
+           mStaticModelFile << "            return;\n";
+           mStaticModelFile << "        end\n";
+           mStaticModelFile << "    end\n";*/
+           mStaticModelFile << "    cvg=0;\n";
+           mStaticModelFile << "    iter=0;\n";
+           /*mStaticModelFile << "    Per_y_=it_*y_size;\n";*/
+           mStaticModelFile << "    while ~(cvg==1 | iter>maxit_),\n";
+           mStaticModelFile << "      [r, g1] = " << static_basename << "_" << i + 1 << "(y, x);\n";
+           mStaticModelFile << "      y(" << block_triangular.ModelBlock->Block_List[i].Variable[0]+1 << ") = y(" << block_triangular.ModelBlock->Block_List[i].Variable[0]+1 << ")-r/g1;\n";
+           mStaticModelFile << "      cvg=((r*r)<solve_tolf);\n";
+           mStaticModelFile << "      iter=iter+1;\n";
+           mStaticModelFile << "    end\n";
+           mStaticModelFile << "    if cvg==0\n";
+           mStaticModelFile << "       fprintf('Convergence not achieved in block " << i << ", after %d iterations\\n',iter);\n";
+           mStaticModelFile << "       return;\n";
+           mStaticModelFile << "    end\n";
+         }
+       else if ((k == SOLVE_FOREWARD_COMPLETE || k == SOLVE_BACKWARD_COMPLETE || k == SOLVE_TWO_BOUNDARIES_COMPLETE) && (block_triangular.ModelBlock->Block_List[i].Size))
+         {
+           if (open_par)
+             {
+               mStaticModelFile << "end\n";
+             }
+           open_par=false;
+           mStaticModelFile << "  y_index=[";
+           for(int ik=0;ik<block_triangular.ModelBlock->Block_List[i].Size;ik++)
+             {
+               mStaticModelFile << " " << block_triangular.ModelBlock->Block_List[i].Variable[ik]+1;
+             }
+           mStaticModelFile << " ];\n";
+           mStaticModelFile << "  g1=0;g2=0;g3=0;\n";
+           mStaticModelFile << "  r=0;\n";
+           /*mStaticModelFile << "  for it_=y_kmin+1:periods+y_kmin\n";
+           mStaticModelFile << "      cvg=0;\n";
+           mStaticModelFile << "      iter=0;\n";
+           mStaticModelFile << "      Per_y_=it_*y_size;\n";
+           mStaticModelFile << "      while ~(cvg==1 | iter>maxit_),\n";
+           mStaticModelFile << "          [r, g1, g2, g3, b] = " << static_basename << "_" << i + 1 << "(y, x, it_, Per_y_, y_size);\n";
+           mStaticModelFile << "          [L, U] = LU(g1);\n";
+           mStaticModelFile << "          y(it_, y_index) = U\\(L\\b);\n";
+           mStaticModelFile << "          cvg=((r'*r)<solve_tolf);\n";
+           mStaticModelFile << "          iter=iter+1;\n";
+           mStaticModelFile << "      end\n";
+           mStaticModelFile << "      if cvg==0\n";
+           mStaticModelFile << "          fprintf('Convergence not achieved in block " << i << ", at time %d after %d iterations\\n',it_,iter);\n";
+           mStaticModelFile << "          return;\n";
+           mStaticModelFile << "      end\n";
+           mStaticModelFile << "  end\n";*/
+           mStaticModelFile << "  cvg=0;\n";
+           mStaticModelFile << "  iter=0;\n";
+           /*mStaticModelFile << "  Per_y_=it_*y_size;\n";*/
+           mStaticModelFile << "  lambda=1;\n";
+           mStaticModelFile << "  while ~(cvg==1 | iter>maxit_),\n";
+           mStaticModelFile << "    [r, g1, g2, g3, b] = " << static_basename << "_" << i + 1 << "(y, x);\n";
+           mStaticModelFile << "    max_res=max(abs(r));\n";
+           mStaticModelFile << "    if(iter>0)\n";
+           mStaticModelFile << "      if(~isreal(max_res) | max_resa<max_res)\n";
+           mStaticModelFile << "        if(lambda>1e-6)\n";
+           mStaticModelFile << "          lambda=lambda/2;\n";
+           mStaticModelFile << "          y(y_index)=y_save+lambda*dx;\n";
+           mStaticModelFile << "          continue;\n";
+           mStaticModelFile << "        else\n";
+           mStaticModelFile << "          disp(['No convergence after ' num2str(iter,'%d') ' iterations']);\n";
+           mStaticModelFile << "          return;\n";
+           mStaticModelFile << "        end;\n";
+           mStaticModelFile << "      else\n";
+           mStaticModelFile << "        if(lambda<1)\n";
+           mStaticModelFile << "          lambda=max(lambda*2, 1);\n";
+           mStaticModelFile << "        end;\n";
+           mStaticModelFile << "      end;\n";
+           mStaticModelFile << "    end;\n";
+           mStaticModelFile << "    max_resa=max_res;\n";
+           mStaticModelFile << "    cvg=(max_res<solve_tolf);\n";
+           mStaticModelFile << "    if (cvg==0),\n";
+           mStaticModelFile << "      spparms('autommd',0);\n";
+           mStaticModelFile << "      q = colamd(g1);\n";
+           mStaticModelFile << "      z = g1(:,q)\\b';\n";
+           mStaticModelFile << "      z(q) = z;\n";
+           mStaticModelFile << "      spparms('autommd',1);\n";
+           mStaticModelFile << "      y_save=y(y_index);\n";
+           mStaticModelFile << "      dx=  (z-y_save);\n";
+           mStaticModelFile << "      y(y_index)=y_save+lambda*dx;\n";
+           mStaticModelFile << "    end;\n";
+           mStaticModelFile << "    iter=iter+1;\n";
+           mStaticModelFile << "    disp(['iter=' num2str(iter,'%d') ' err=' num2str(max_res,'%f')]);\n";
+           mStaticModelFile << "  end\n";
+           mStaticModelFile << "  if cvg==0\n";
+           mStaticModelFile << "    fprintf('Error in steady: Convergence not achieved in block " << i << ", after %d iterations\\n',iter);\n";
+           mStaticModelFile << "    return;\n";
+           mStaticModelFile << "  else\n";
+           mStaticModelFile << "    fprintf('convergence achieved after %d iterations\\n',iter);\n";
+           mStaticModelFile << "  end\n";
+         }
+       prev_Simulation_Type=k;
+     }
+   if(open_par)
+     mStaticModelFile << "  end;\n";
+   mStaticModelFile << "  oo_.steady_state = y;\n";
+   mStaticModelFile << "  if isempty(ys0_)\n";
+   mStaticModelFile << "    oo_.endo_simul(:,1:M_.maximum_lag) = oo_.steady_state * ones(1,M_.maximum_lag);\n";
+   mStaticModelFile << "  else\n";
+   mStaticModelFile << "    options_ =set_default_option(options_,'periods',1);\n";
+   mStaticModelFile << "    oo_.endo_simul(:,M_.maximum_lag+1:M_.maximum_lag+options_.periods+M_.maximum_lead) = oo_.steady_state * ones(1,options_.periods+M_.maximum_lead);\n";
+   mStaticModelFile << "  end;\n";
+   mStaticModelFile << "  disp('Steady State value');\n";
+   mStaticModelFile << "  disp([strcat(M_.endo_names,' : ') num2str(oo_.steady_state,'%f')]);\n";
+   mStaticModelFile << "return;\n";
+
+   writeModelStaticEquationsOrdered_M(mStaticModelFile, block_triangular.ModelBlock, static_basename);
+   mStaticModelFile.close();
+}
+
+
+/*void
+ModelTree::writeSparseDLLDynamicCFileAndBinFile(const string &dynamic_basename, const string &bin_basename, ExprNodeOutputType output_type) const*/
+void
+ModelTree::writeSparseDynamicFileAndBinFile(const string &dynamic_basename, const string &bin_basename, ExprNodeOutputType output_type, const int mode) const
+{
+  string filename, sp;
+  ofstream mDynamicModelFile;
+  int prev_Simulation_Type;
+  SymbolicGaussElimination SGE;
+  bool OK;
+  if(mode==eSparseDLLMode)
+    {
+      if (compiler == LCC_COMPILE || compiler == GCC_COMPILE)
+        {
+          if (compiler == LCC_COMPILE)
+            filename = dynamic_basename + ".c";
+          else
+            filename = dynamic_basename + ".cc";
+          mDynamicModelFile.open(filename.c_str(), ios::out | ios::binary);
+          if (!mDynamicModelFile.is_open())
+            {
+              cerr << "Error: Can't open file " << filename << " for writing" << endl;
+              exit(-1);
+            }
+          mDynamicModelFile << "/*\n";
+          mDynamicModelFile << " * " << filename << " : Computes dynamic model for Dynare\n";
+          mDynamicModelFile << " *\n";
+          mDynamicModelFile << " * Warning : this file is generated automatically by Dynare\n";
+          mDynamicModelFile << " *           from model file (.mod)\n\n";
+          mDynamicModelFile << " */\n";
+          if (compiler==LCC_COMPILE)
+            {
+              mDynamicModelFile << "#include <math.h>\n";
+              mDynamicModelFile << "#include <stdio.h>\n";
+              mDynamicModelFile << "#include <string.h>\n";
+              mDynamicModelFile << "#include \"pctimer_h.h\"\n";
+              mDynamicModelFile << "#include \"mex.h\" /* The Last include file*/\n";
+              mDynamicModelFile << "#include \"" << dynamic_basename.c_str() << ".h\"\n";
+              mDynamicModelFile << "#include \"simulate.h\"\n";
+            }
+          else
+            {
+              mDynamicModelFile << "#include \"" << dynamic_basename.c_str() << ".hh\"\n";
+              mDynamicModelFile << "#include \"simulate.cc\"\n";
+            }
+          mDynamicModelFile << "//#define DEBUG\n";
+        }
+      writeModelLocalVariables(mDynamicModelFile, oCDynamicModelSparseDLL);
+      if (compiler==NO_COMPILE)
+        writeModelEquationsCodeOrdered(dynamic_basename, block_triangular.ModelBlock, bin_basename, oCDynamicModelSparseDLL);
+      else
+        writeModelEquationsOrdered_C(mDynamicModelFile, block_triangular.ModelBlock);
+    }
+  else
+    {
+      filename = dynamic_basename + ".m";
       mDynamicModelFile.open(filename.c_str(), ios::out | ios::binary);
       if (!mDynamicModelFile.is_open())
         {
           cerr << "Error: Can't open file " << filename << " for writing" << endl;
           exit(-1);
         }
-      mDynamicModelFile << "/*\n";
-      mDynamicModelFile << " * " << filename << " : Computes dynamic model for Dynare\n";
-      mDynamicModelFile << " *\n";
-      mDynamicModelFile << " * Warning : this file is generated automatically by Dynare\n";
-      mDynamicModelFile << " *           from model file (.mod)\n\n";
-      mDynamicModelFile << " */\n";
-      if (compiler==LCC_COMPILE)
-        {
-          mDynamicModelFile << "#include <math.h>\n";
-          mDynamicModelFile << "#include <stdio.h>\n";
-          mDynamicModelFile << "#include <string.h>\n";
-          mDynamicModelFile << "#include \"pctimer_h.h\"\n";
-          mDynamicModelFile << "#include \"mex.h\" /* The Last include file*/\n";
-          mDynamicModelFile << "#include \"" << dynamic_basename.c_str() << ".h\"\n";
-          mDynamicModelFile << "#include \"simulate.h\"\n";
-        }
-      else
-        {
-          mDynamicModelFile << "#include \"" << dynamic_basename.c_str() << ".hh\"\n";
-          mDynamicModelFile << "#include \"simulate.cc\"\n";
-        }
-      mDynamicModelFile << "//#define DEBUG\n";
+      mDynamicModelFile << "%\n";
+      mDynamicModelFile << "% " << filename << " : Computes dynamic model for Dynare\n";
+      mDynamicModelFile << "%\n";
+      mDynamicModelFile << "% Warning : this file is generated automatically by Dynare\n";
+      mDynamicModelFile << "%           from model file (.mod)\n\n";
+      mDynamicModelFile << "%/\n";
     }
-
-  writeModelLocalVariables(mDynamicModelFile, oCDynamicModelSparseDLL);
-  if (compiler==NO_COMPILE)
-    writeModelEquationsCodeOrdered(dynamic_basename, block_triangular.ModelBlock, bin_basename, oCDynamicModelSparseDLL);
-  else
-    writeModelEquationsOrdered(mDynamicModelFile, block_triangular.ModelBlock);
-
   int i, j, k, Nb_SGE=0;
   bool printed = false, skip_head, open_par=false;
-
   if (computeJacobian || computeJacobianExo || computeHessian)
     {
-      if (compiler!=NO_COMPILE)
+      if (compiler!=NO_COMPILE || mode==eSparseMode)
         {
           //mDynamicModelFile << "void Dynamic_Init(tModel_Block *Model_Block)\n";
-          mDynamicModelFile << "void Dynamic_Init()\n";
-          mDynamicModelFile << "  {\n";
-          int prev_Simulation_Type=-1;
+          if(mode==eSparseDLLMode)
+            {
+              mDynamicModelFile << "void Dynamic_Init()\n";
+              mDynamicModelFile << "  {\n";
+            }
+          else
+            {
+              mDynamicModelFile << "function [varargout] = " << dynamic_basename << "(varargin)\n";
+              mDynamicModelFile << "  global oo_ options_ M_ ;\n";
+              //Temporary variables declaration
+              {
+                OK=true;
+                ostringstream tmp_output;
+                for(temporary_terms_type::const_iterator it = temporary_terms.begin();
+                    it != temporary_terms.end(); it++)
+                  {
+                    if (OK)
+                      OK=false;
+                    else
+                      tmp_output << " ";
+                    (*it)->writeOutput(tmp_output, oMatlabDynamicModel, temporary_terms);
+                  }
+                if (tmp_output.str().length()>0)
+                  {
+                    mDynamicModelFile << "  global " << tmp_output.str() << " M_ ;\n";
+                  }
+              }
+              mDynamicModelFile << "  T_init=zeros(1,options_.periods+M_.maximum_lag+M_.maximum_lead);\n";
+              {
+                ostringstream tmp_output;
+                OK=true;
+                for(temporary_terms_type::const_iterator it = temporary_terms.begin();
+                    it != temporary_terms.end(); it++)
+                  {
+                    if (OK)
+                      OK=false;
+                    else
+                      tmp_output << "=T_init;\n  ";
+                    (*it)->writeOutput(tmp_output, oMatlabDynamicModel, temporary_terms);
+                  }
+                if (tmp_output.str().length()>0)
+                  {
+                    mDynamicModelFile << tmp_output.str() << "=T_init;\n";
+                  }
+              }
+              mDynamicModelFile << "  y_kmin=M_.maximum_lag;\n";
+              mDynamicModelFile << "  y_kmax=M_.maximum_lead;\n";
+              mDynamicModelFile << "  y_size=M_.endo_nbr;\n";
+              mDynamicModelFile << "  if(length(varargin)>0)\n";
+              mDynamicModelFile << "    %it is a simple evaluation of the dynamic model for time _it\n";
+              mDynamicModelFile << "    global it_;\n";
+              mDynamicModelFile << "    Per_u_=0;\n";
+              mDynamicModelFile << "    Per_y_=it_*y_size;\n";
+              mDynamicModelFile << "    y1=varargin{1};\n";
+              mDynamicModelFile << "    cnb_nz_elem=1;\n";
+              mDynamicModelFile << "    for i = -y_kmin:y_kmax\n";
+              mDynamicModelFile << "      nz_elem=find(M_.lead_lag_incidence(:,1+i+y_kmin));\n";
+              mDynamicModelFile << "      nb_nz_elem=length(nz_elem);\n";
+              mDynamicModelFile << "      y(it_+i, nz_elem)=y1(cnb_nz_elem:(cnb_nz_elem+nb_nz_elem));\n";
+              mDynamicModelFile << "      if(i==0)\n";
+              mDynamicModelFile << "        ys(nz_elem)=y(it_, nz_elem);\n";
+              mDynamicModelFile << "        nz_elem_s=nz_elem;\n";
+              mDynamicModelFile << "      end;\n";
+              mDynamicModelFile << "      cnb_nz_elem=cnb_nz_elem+nb_nz_elem;\n";
+              mDynamicModelFile << "    end;\n";
+              mDynamicModelFile << "    x=varargin{2};\n";
+              prev_Simulation_Type=-1;
+              for(i = 0;i < block_triangular.ModelBlock->Size;i++)
+                {
+                  mDynamicModelFile << "    y_index=[";
+                  for(int ik=0;ik<block_triangular.ModelBlock->Block_List[i].Size;ik++)
+                    {
+                       mDynamicModelFile << " " << block_triangular.ModelBlock->Block_List[i].Variable[ik]+1;
+                    }
+                  mDynamicModelFile << " ];\n";
+                  k=block_triangular.ModelBlock->Block_List[i].Simulation_Type;
+                  if (prev_Simulation_Type==k &&
+                     (k==EVALUATE_FOREWARD || k==EVALUATE_BACKWARD || k==EVALUATE_FOREWARD_R || k==EVALUATE_BACKWARD_R))
+                    skip_head=true;
+                  else
+                    skip_head=false;
+                  switch(k)
+                    {
+                       case EVALUATE_FOREWARD:
+                       case EVALUATE_BACKWARD:
+                       case EVALUATE_FOREWARD_R:
+                       case EVALUATE_BACKWARD_R:
+                          if(!skip_head)
+                            mDynamicModelFile << "    " << dynamic_basename << "_" << i + 1 << "(y, x, it_, y_kmin, Per_u_, Per_y_, y_size);\n";
+                          mDynamicModelFile << "    residual(y_index)=ys(y_index)-y(it_, y_index);\n";
+                          break;
+                       case SOLVE_FOREWARD_COMPLETE:
+                       case SOLVE_BACKWARD_COMPLETE:
+                       case SOLVE_TWO_BOUNDARIES_COMPLETE:
+                          mDynamicModelFile << "    [r, g1, g2, g3, b]=" << dynamic_basename << "_" <<  i + 1 << "(y, x, it_, y_size, it_);\n";
+                          mDynamicModelFile << "    residual(y_index)=r;\n";
+                          break;
+                    }
+                  prev_Simulation_Type=k;
+                }
+              mDynamicModelFile << "    varagout{1}=residual;\n";
+              mDynamicModelFile << "    return;\n";
+              mDynamicModelFile << "  end;\n";
+              mDynamicModelFile << "  %it is the deterministic simulation of the block decomposed dynamic model\n";
+              mDynamicModelFile << "  if(options_.simulation_method==0)\n";
+              mDynamicModelFile << "    mthd='Sparse LU';\n";
+              mDynamicModelFile << "  elseif(options_.simulation_method==2)\n";
+              mDynamicModelFile << "    mthd='GMRES';\n";
+              mDynamicModelFile << "  elseif(options_.simulation_method==3)\n";
+              mDynamicModelFile << "    mthd='BICGSTAB';\n";
+              mDynamicModelFile << "  else\n";
+              mDynamicModelFile << "    mthd='UNKNOWN';\n";
+              mDynamicModelFile << "  end;\n";
+              mDynamicModelFile << "  disp (['-----------------------------------------------------']) ;\n";
+              mDynamicModelFile << "  disp (['MODEL SIMULATION: (method=' mthd ')']) ;\n";
+              mDynamicModelFile << "  fprintf('\\n') ;\n";
+              mDynamicModelFile << "  periods=options_.periods;\n";
+              mDynamicModelFile << "  maxit_=options_.maxit_;\n";
+              mDynamicModelFile << "  solve_tolf=options_.solve_tolf;\n";
+              mDynamicModelFile << "  y=oo_.endo_simul';\n";
+              mDynamicModelFile << "  x=oo_.exo_simul;\n";
+            }
+          prev_Simulation_Type=-1;
           for(i = 0;i < block_triangular.ModelBlock->Size;i++)
             {
               k = block_triangular.ModelBlock->Block_List[i].Simulation_Type;
@@ -1555,118 +2467,216 @@ ModelTree::writeSparseDLLDynamicCFileAndBinFile(const string &dynamic_basename, 
                 skip_head=true;
               else
                 skip_head=false;
-                if ((k == EVALUATE_FOREWARD || k == EVALUATE_FOREWARD_R) && (block_triangular.ModelBlock->Block_List[i].Size))
+              if ((k == EVALUATE_FOREWARD || k == EVALUATE_FOREWARD_R) && (block_triangular.ModelBlock->Block_List[i].Size))
                 {
                   if (!skip_head)
                     {
-                      if (open_par)
+                      if(mode==eSparseDLLMode)
                         {
-                          mDynamicModelFile << "#endif\n";
-                          mDynamicModelFile << "      }\n";
+                          if (open_par)
+                            {
+                              mDynamicModelFile << "#endif\n";
+                              mDynamicModelFile << "      }\n";
+                            }
+                          mDynamicModelFile << "    for(it_=y_kmin;it_<periods+y_kmin;it_++)\n";
+                          mDynamicModelFile << "      {\n";
+                          mDynamicModelFile << "        Per_y_=it_*y_size;\n";
+                          mDynamicModelFile << "        Dynamic" << i + 1 << "(y, x, r, g1, g2);\n";
+                          mDynamicModelFile << "#ifdef DEBUG\n";
                         }
-                      mDynamicModelFile << "    for(it_=y_kmin;it_<periods+y_kmin;it_++)\n";
-                      mDynamicModelFile << "      {\n";
-                      mDynamicModelFile << "        Per_y_=it_*y_size;\n";
-                      mDynamicModelFile << "        Dynamic" << i + 1 << "(y, x, r, g1, g2);\n";
-                      mDynamicModelFile << "#ifdef DEBUG\n";
+                      else
+                        {
+                          if (open_par)
+                            {
+                              mDynamicModelFile << "  end\n";
+                            }
+                          mDynamicModelFile << "  Per_u_=0;\n";
+                          mDynamicModelFile << "  for it_ = y_kmin+1:(periods+y_kmin)\n";
+                          mDynamicModelFile << "    Per_y_=it_*y_size;\n";
+                          mDynamicModelFile << "    y=" << dynamic_basename << "_" << i + 1 << "(y, x, it_);\n";
+                        }
                     }
-                  for(j = 0;j < block_triangular.ModelBlock->Block_List[i].Size;j++)
-                    mDynamicModelFile << "        mexPrintf(\"y[%d, %d]=%f \\n\",it_," << block_triangular.ModelBlock->Block_List[i].Variable[j] << ",double(y[it_," << block_triangular.ModelBlock->Block_List[i].Variable[j] << "]));\n";
+                  if(mode==eSparseDLLMode)
+                    for(j = 0;j < block_triangular.ModelBlock->Block_List[i].Size;j++)
+                      mDynamicModelFile << "        mexPrintf(\"y[%d, %d]=%f \\n\",it_," << block_triangular.ModelBlock->Block_List[i].Variable[j] << ",double(y[it_," << block_triangular.ModelBlock->Block_List[i].Variable[j] << "]));\n";
                   open_par=true;
                 }
               else if ((k == EVALUATE_BACKWARD || k == EVALUATE_BACKWARD_R) && (block_triangular.ModelBlock->Block_List[i].Size))
                 {
                   if (!skip_head)
                     {
-                      if (open_par)
+                      if(mode==eSparseDLLMode)
                         {
-                          mDynamicModelFile << "#endif\n";
-                          mDynamicModelFile << "      }\n";
+                          if (open_par)
+                            {
+                              mDynamicModelFile << "#endif\n";
+                              mDynamicModelFile << "      }\n";
+                            }
+                          mDynamicModelFile << "    for(it_=periods+y_kmin;it_>y_kmin;it_--)\n";
+                          mDynamicModelFile << "      {\n";
+                          mDynamicModelFile << "        Per_y_=it_*y_size;\n";
+                          mDynamicModelFile << "        y=" << dynamic_basename << "_" << i + 1 << "(y, x, r, g1, g2);\n";
+                          mDynamicModelFile << "#ifdef DEBUG\n";
                         }
-                      mDynamicModelFile << "    for(it_=periods+y_kmin;it_>y_kmin;it_--)\n";
-                      mDynamicModelFile << "      {\n";
-                      mDynamicModelFile << "        Per_y_=it_*y_size;\n";
-                      mDynamicModelFile << "        Dynamic" << i + 1 << "(y, x, r, g1, g2);\n";
-                      mDynamicModelFile << "#ifdef DEBUG\n";
+                      else
+                        {
+                          if (open_par)
+                            {
+                              mDynamicModelFile << "  end\n";
+                            }
+                          mDynamicModelFile << "  Per_u_=0;\n";
+                          mDynamicModelFile << "  for it_ = y_kmin+1:(periods+y_kmin)\n";
+                          mDynamicModelFile << "    Per_y_=it_*y_size;\n";
+                          mDynamicModelFile << "    " << dynamic_basename << "_" << i + 1 << "(y, x, it_);\n";
+                        }
                     }
-                  for(j = 0;j < block_triangular.ModelBlock->Block_List[i].Size;j++)
-                    mDynamicModelFile << "        mexPrintf(\"y[%d, %d]=%f \\n\",it_," << block_triangular.ModelBlock->Block_List[i].Variable[j] << ",double(y[it_," << block_triangular.ModelBlock->Block_List[i].Variable[j] << "]));\n";
+                  if(mode==eSparseDLLMode)
+                    for(j = 0;j < block_triangular.ModelBlock->Block_List[i].Size;j++)
+                      mDynamicModelFile << "        mexPrintf(\"y[%d, %d]=%f \\n\",it_," << block_triangular.ModelBlock->Block_List[i].Variable[j] << ",double(y[it_," << block_triangular.ModelBlock->Block_List[i].Variable[j] << "]));\n";
                   open_par=true;
                 }
               else if ((k == SOLVE_FOREWARD_SIMPLE) && (block_triangular.ModelBlock->Block_List[i].Size))
                 {
                   if (open_par)
                     {
-                      mDynamicModelFile << "#endif\n";
-                      mDynamicModelFile << "      }\n";
+                      if(mode==eSparseDLLMode)
+                        {
+                          mDynamicModelFile << "#endif\n";
+                          mDynamicModelFile << "      }\n";
+                        }
+                      else
+                        {
+                          //if (!skip_head)
+                            mDynamicModelFile << "  end\n";
+                        }
                     }
                   open_par=false;
-                  mDynamicModelFile << "    g1=(double*)mxMalloc(" << block_triangular.ModelBlock->Block_List[i].Size*block_triangular.ModelBlock->Block_List[i].Size << "*sizeof(double));\n";
-                  mDynamicModelFile << "    r=(double*)mxMalloc(" << block_triangular.ModelBlock->Block_List[i].Size << "*sizeof(double));\n";
-                  mDynamicModelFile << "    for(it_=y_kmin;it_<periods+y_kmin;it_++)\n";
-                  mDynamicModelFile << "      {\n";
-                  mDynamicModelFile << "        cvg=false;\n";
-                  mDynamicModelFile << "        iter=0;\n";
-                  mDynamicModelFile << "        Per_y_=it_*y_size;\n";
-                  mDynamicModelFile << "        while(!((cvg)||(iter>maxit_)))\n";
-                  mDynamicModelFile << "          {\n";
-                  mDynamicModelFile << "            Dynamic" << i + 1 << "(y, x, r, g1, g2);\n";
-                  mDynamicModelFile << "            y[Per_y_+" << block_triangular.ModelBlock->Block_List[i].Variable[0] << "] += -r[0]/g1[0];\n";
-                  mDynamicModelFile << "            cvg=((r[0]*r[0])<solve_tolf);\n";
-                  mDynamicModelFile << "            iter++;\n";
-                  mDynamicModelFile << "          }\n";
-                  mDynamicModelFile << "        if (!cvg)\n";
-                  mDynamicModelFile << "          {\n";
-                  mDynamicModelFile << "            mexPrintf(\"Convergence not achieved in block " << i << ", at time %d after %d iterations\\n\",it_,iter);\n";
-                  mDynamicModelFile << "            mexErrMsgTxt(\"End of simulate\");\n";
-                  mDynamicModelFile << "          }\n";
-                  mDynamicModelFile << "#ifdef DEBUG\n";
-                  mDynamicModelFile << "        mexPrintf(\"y[%d, %d]=%f \\n\",it_," << block_triangular.ModelBlock->Block_List[i].Variable[0] << ",y[it_," << block_triangular.ModelBlock->Block_List[i].Variable[0] << "]);\n";
-                  mDynamicModelFile << "#endif\n";
-                  mDynamicModelFile << "      }\n";
-                  mDynamicModelFile << "    mxFree(g1);\n";
-                  mDynamicModelFile << "    mxFree(r);\n";
+                  if(mode==eSparseDLLMode)
+                    {
+                      mDynamicModelFile << "    g1=(double*)mxMalloc(" << block_triangular.ModelBlock->Block_List[i].Size*block_triangular.ModelBlock->Block_List[i].Size << "*sizeof(double));\n";
+                      mDynamicModelFile << "    r=(double*)mxMalloc(" << block_triangular.ModelBlock->Block_List[i].Size << "*sizeof(double));\n";
+                      mDynamicModelFile << "    for(it_=y_kmin;it_<periods+y_kmin;it_++)\n";
+                      mDynamicModelFile << "      {\n";
+                      mDynamicModelFile << "        cvg=false;\n";
+                      mDynamicModelFile << "        iter=0;\n";
+                      mDynamicModelFile << "        Per_y_=it_*y_size;\n";
+                      mDynamicModelFile << "        while(!((cvg)||(iter>maxit_)))\n";
+                      mDynamicModelFile << "          {\n";
+                      mDynamicModelFile << "            Dynamic" << i + 1 << "(y, x, r, g1, g2);\n";
+                      mDynamicModelFile << "            y[Per_y_+" << block_triangular.ModelBlock->Block_List[i].Variable[0] << "] += -r[0]/g1[0];\n";
+                      mDynamicModelFile << "            cvg=((r[0]*r[0])<solve_tolf);\n";
+                      mDynamicModelFile << "            iter++;\n";
+                      mDynamicModelFile << "          }\n";
+                      mDynamicModelFile << "        if (!cvg)\n";
+                      mDynamicModelFile << "          {\n";
+                      mDynamicModelFile << "            mexPrintf(\"Convergence not achieved in block " << i << ", at time %d after %d iterations\\n\",it_,iter);\n";
+                      mDynamicModelFile << "            mexErrMsgTxt(\"End of simulate\");\n";
+                      mDynamicModelFile << "          }\n";
+                      mDynamicModelFile << "#ifdef DEBUG\n";
+                      mDynamicModelFile << "        mexPrintf(\"y[%d, %d]=%f \\n\",it_," << block_triangular.ModelBlock->Block_List[i].Variable[0] << ",y[it_," << block_triangular.ModelBlock->Block_List[i].Variable[0] << "]);\n";
+                      mDynamicModelFile << "#endif\n";
+                      mDynamicModelFile << "      }\n";
+                      mDynamicModelFile << "    mxFree(g1);\n";
+                      mDynamicModelFile << "    mxFree(r);\n";
+                    }
+                  else
+                    {
+                      mDynamicModelFile << "  g1=0;\n";
+                      mDynamicModelFile << "  r=0;\n";
+                      mDynamicModelFile << "  for it_=y_kmin+1:periods+y_kmin\n";
+                      mDynamicModelFile << "    cvg=0;\n";
+                      mDynamicModelFile << "    iter=0;\n";
+                      mDynamicModelFile << "    Per_y_=it_*y_size;\n";
+                      mDynamicModelFile << "    while ~(cvg==1 | iter>maxit_),\n";
+                      mDynamicModelFile << "      [r, g1] = " << dynamic_basename << "_" << i + 1 << "(y, x, it_);\n";
+                      mDynamicModelFile << "      y(it_, " << block_triangular.ModelBlock->Block_List[i].Variable[0]+1 << ") = y(it_, " << block_triangular.ModelBlock->Block_List[i].Variable[0]+1 << ")-r/g1;\n";
+                      mDynamicModelFile << "      cvg=((r*r)<solve_tolf);\n";
+                      mDynamicModelFile << "      iter=iter+1;\n";
+                      mDynamicModelFile << "    end\n";
+                      mDynamicModelFile << "    if cvg==0\n";
+                      mDynamicModelFile << "      fprintf('Convergence not achieved in block " << i << ", at time %d after %d iterations\\n',it_,iter);\n";
+                      mDynamicModelFile << "      return;\n";
+                      mDynamicModelFile << "    end\n";
+                      mDynamicModelFile << "  end\n";
+                    }
                 }
               else if ((k == SOLVE_BACKWARD_SIMPLE) && (block_triangular.ModelBlock->Block_List[i].Size))
                 {
                   if (open_par)
                     {
-                      mDynamicModelFile << "#endif\n";
-                      mDynamicModelFile << "      }\n";
+                      if(mode==eSparseDLLMode)
+                        {
+                          mDynamicModelFile << "#endif\n";
+                          mDynamicModelFile << "      }\n";
+                        }
+                      else
+                        {
+                          mDynamicModelFile << "  end\n";
+                        }
                     }
                   open_par=false;
-                  mDynamicModelFile << "    g1=(double*)mxMalloc(" << block_triangular.ModelBlock->Block_List[i].Size*block_triangular.ModelBlock->Block_List[i].Size << "*sizeof(double));\n";
-                  mDynamicModelFile << "    r=(double*)mxMalloc(" << block_triangular.ModelBlock->Block_List[i].Size << "*sizeof(double));\n";
-                  mDynamicModelFile << "    for(it_=periods+y_kmin;it_>y_kmin;it_--)\n";
-                  mDynamicModelFile << "      {\n";
-                  mDynamicModelFile << "        cvg=false;\n";
-                  mDynamicModelFile << "        iter=0;\n";
-                  mDynamicModelFile << "        Per_y_=it_*y_size;\n";
-                  mDynamicModelFile << "        while(!((cvg)||(iter>maxit_)))\n";
-                  mDynamicModelFile << "          {\n";
-                  mDynamicModelFile << "            Dynamic" << i + 1 << "(y, x, r, g1, g2);\n";
-                  mDynamicModelFile << "            y[Per_y_+" << block_triangular.ModelBlock->Block_List[i].Variable[0] << "] += -r[0]/g1[0];\n";
-                  mDynamicModelFile << "            cvg=((r[0]*r[0])<solve_tolf);\n";
-                  mDynamicModelFile << "            iter++;\n";
-                  mDynamicModelFile << "          }\n";
-                  mDynamicModelFile << "        if (!cvg)\n";
-                  mDynamicModelFile << "          {\n";
-                  mDynamicModelFile << "            mexPrintf(\"Convergence not achieved in block " << i << ", at time %d after %d iterations\\n\",it_,iter);\n";
-                  mDynamicModelFile << "            mexErrMsgTxt(\"End of simulate\");\n";
-                  mDynamicModelFile << "          }\n";
-                  mDynamicModelFile << "#ifdef DEBUG\n";
-                  mDynamicModelFile << "        mexPrintf(\"y[%d, %d]=%f \\n\",it_," << block_triangular.ModelBlock->Block_List[i].Variable[0] << ",y[it_," << block_triangular.ModelBlock->Block_List[i].Variable[0] << "]);\n";
-                  mDynamicModelFile << "#endif\n";
-                  mDynamicModelFile << "      }\n";
-                  mDynamicModelFile << "    mxFree(g1);\n";
-                  mDynamicModelFile << "    mxFree(r);\n";
+                  if(mode==eSparseDLLMode)
+                    {
+                      mDynamicModelFile << "    g1=(double*)mxMalloc(" << block_triangular.ModelBlock->Block_List[i].Size*block_triangular.ModelBlock->Block_List[i].Size << "*sizeof(double));\n";
+                      mDynamicModelFile << "    r=(double*)mxMalloc(" << block_triangular.ModelBlock->Block_List[i].Size << "*sizeof(double));\n";
+                      mDynamicModelFile << "    for(it_=periods+y_kmin;it_>y_kmin;it_--)\n";
+                      mDynamicModelFile << "      {\n";
+                      mDynamicModelFile << "        cvg=false;\n";
+                      mDynamicModelFile << "        iter=0;\n";
+                      mDynamicModelFile << "        Per_y_=it_*y_size;\n";
+                      mDynamicModelFile << "        while(!((cvg)||(iter>maxit_)))\n";
+                      mDynamicModelFile << "          {\n";
+                      mDynamicModelFile << "            Dynamic" << i + 1 << "(y, x, r, g1, g2);\n";
+                      mDynamicModelFile << "            y[Per_y_+" << block_triangular.ModelBlock->Block_List[i].Variable[0] << "] += -r[0]/g1[0];\n";
+                      mDynamicModelFile << "            cvg=((r[0]*r[0])<solve_tolf);\n";
+                      mDynamicModelFile << "            iter++;\n";
+                      mDynamicModelFile << "          }\n";
+                      mDynamicModelFile << "        if (!cvg)\n";
+                      mDynamicModelFile << "          {\n";
+                      mDynamicModelFile << "            mexPrintf(\"Convergence not achieved in block " << i << ", at time %d after %d iterations\\n\",it_,iter);\n";
+                      mDynamicModelFile << "            mexErrMsgTxt(\"End of simulate\");\n";
+                      mDynamicModelFile << "          }\n";
+                      mDynamicModelFile << "#ifdef DEBUG\n";
+                      mDynamicModelFile << "        mexPrintf(\"y[%d, %d]=%f \\n\",it_," << block_triangular.ModelBlock->Block_List[i].Variable[0] << ",y[it_," << block_triangular.ModelBlock->Block_List[i].Variable[0] << "]);\n";
+                      mDynamicModelFile << "#endif\n";
+                      mDynamicModelFile << "      }\n";
+                      mDynamicModelFile << "    mxFree(g1);\n";
+                      mDynamicModelFile << "    mxFree(r);\n";
+                    }
+                  else
+                    {
+                      mDynamicModelFile << "  g1=0;\n";
+                      mDynamicModelFile << "  r=0;\n";
+                      mDynamicModelFile << "  for it_=periods+y_kmin:-1:y_kmin+1\n";
+                      mDynamicModelFile << "    cvg=0;\n";
+                      mDynamicModelFile << "    iter=0;\n";
+                      mDynamicModelFile << "    Per_y_=it_*y_size;\n";
+                      mDynamicModelFile << "    while ~(cvg==1 | iter>maxit_),\n";
+                      mDynamicModelFile << "      [r, g1] = " << dynamic_basename << "_" << i + 1 << "(y, x, it_);\n";
+                      mDynamicModelFile << "      y[it_, " << block_triangular.ModelBlock->Block_List[i].Variable[0] << "] = y[it_, " << block_triangular.ModelBlock->Block_List[i].Variable[0] << "]-r[it_]/g1;\n";
+                      mDynamicModelFile << "      cvg=((r[it_]*r[it_])<solve_tolf);\n";
+                      mDynamicModelFile << "      iter=iter+1;\n";
+                      mDynamicModelFile << "    end\n";
+                      mDynamicModelFile << "    if cvg==0\n";
+                      mDynamicModelFile << "      fprintf('Convergence not achieved in block " << i << ", at time %d after %d iterations\\n',it_,iter);\n";
+                      mDynamicModelFile << "      return;\n";
+                      mDynamicModelFile << "    end\n";
+                      mDynamicModelFile << "  end\n";
+                    }
                 }
               else if ((k == SOLVE_TWO_BOUNDARIES_SIMPLE) && (block_triangular.ModelBlock->Block_List[i].Size))
                 {
                   if (open_par)
                     {
-                      mDynamicModelFile << "#endif\n";
-                      mDynamicModelFile << "      }\n";
+                      if(mode==eSparseDLLMode)
+                        {
+                          mDynamicModelFile << "#endif\n";
+                          mDynamicModelFile << "      }\n";
+                        }
+                      else
+                        {
+                          mDynamicModelFile << "  end\n";
+                        }
                     }
                   open_par=false;
                   if (!printed)
@@ -1721,7 +2731,7 @@ ModelTree::writeSparseDLLDynamicCFileAndBinFile(const string &dynamic_basename, 
                       mDynamicModelFile << "      {\n";
                       mDynamicModelFile << "        Per_u_=(it_-y_kmin)*" << block_triangular.ModelBlock->Block_List[i].IM_lead_lag[block_triangular.ModelBlock->Block_List[i].Max_Lag + block_triangular.ModelBlock->Block_List[i].Max_Lead].u_finish + 1 << ";\n";
                       mDynamicModelFile << "        Per_y_=it_*y_size;\n";
-                      mDynamicModelFile << "        Dynamic" << i + 1 << "(y, x, r, g1, g2);\n";
+                      mDynamicModelFile << "        " << dynamic_basename << "_" << i + 1 << "(y, x, r, g1, g2);\n";
                       mDynamicModelFile << "#ifdef PRINT_OUT\n";
                       mDynamicModelFile << "        for(j=0;j<" << block_triangular.ModelBlock->Block_List[i].IM_lead_lag[block_triangular.ModelBlock->Block_List[i].Max_Lag + block_triangular.ModelBlock->Block_List[i].Max_Lead].u_finish + 1 << ";j++)\n";
                       mDynamicModelFile << "          {\n";
@@ -1732,17 +2742,6 @@ ModelTree::writeSparseDLLDynamicCFileAndBinFile(const string &dynamic_basename, 
                       mDynamicModelFile << "      }\n";
                       mDynamicModelFile << "    simulate(" << i << ", " << /*mod_param.endo_nbr*/symbol_table.endo_nbr << ", it_, y_kmin, y_kmax," << block_triangular.ModelBlock->Block_List[i].Size  << ", periods, true);\n";
                     }
-                  /*mDynamicModelFile << "#ifdef DEBUG\n";
-                  mDynamicModelFile << "    for(it_=y_kmin;it_<periods+y_kmin;it_++)\n";
-                  mDynamicModelFile << "      {\n";
-                  mDynamicModelFile << "        for(i=0;i<Model_Block->List[" << i << "].Size;i++)\n";
-                  mDynamicModelFile << "          {";
-                  mDynamicModelFile << "            Per_y_=it_*y_size;\n";
-                  mDynamicModelFile << "            mexPrintf(\" y[%d, %d]=%f \",it_,Model_Block->List[" << i << "].Variable[i],y[Per_y_+Model_Block->List[" << i << "].Variable[i]]);\n";
-                  mDynamicModelFile << "          }";
-                  mDynamicModelFile << "        mexPrintf(\" \\n \");\n";
-                  mDynamicModelFile << "      }\n";
-                  mDynamicModelFile << "#endif\n";*/
                   mDynamicModelFile << "    mxFree(g1);\n";
                   mDynamicModelFile << "    mxFree(r);\n";
                   mDynamicModelFile << "    mxFree(u);\n";
@@ -1752,8 +2751,15 @@ ModelTree::writeSparseDLLDynamicCFileAndBinFile(const string &dynamic_basename, 
                 {
                   if (open_par)
                     {
-                      mDynamicModelFile << "#endif\n";
-                      mDynamicModelFile << "      }\n";
+                      if(mode==eSparseDLLMode)
+                        {
+                          mDynamicModelFile << "#endif\n";
+                          mDynamicModelFile << "      }\n";
+                        }
+                      else
+                        {
+                          mDynamicModelFile << "  end\n";
+                        }
                     }
                   open_par=false;
                   if (!printed)
@@ -1800,11 +2806,6 @@ ModelTree::writeSparseDLLDynamicCFileAndBinFile(const string &dynamic_basename, 
                       mDynamicModelFile << "        Dynamic" << i + 1 << "(y, x, r, g1, g2);\n";
                       mDynamicModelFile << "        simulate(" << i << ", " << /*mod_param.endo_nbr*/symbol_table.endo_nbr << ", it_, y_kmin, y_kmax," << block_triangular.ModelBlock->Block_List[i].Size  << ", 0, false);\n";
                     }
-                  /*mDynamicModelFile << "#ifdef DEBUG\n";
-                  mDynamicModelFile << "        for(i=0;i<Model_Block->List[" << i << "].Size;i++)\n";
-                  mDynamicModelFile << "          mexPrintf(\" y[%d, %d]=%f \",it_,Model_Block->List[" << i << "].Variable[i],y[it_*" << symbol_table.endo_nbr << "+Model_Block->List[" << i << "].Variable[i]]);\n";
-                  mDynamicModelFile << "        mexPrintf(\" \\n \");\n";
-                  mDynamicModelFile << "#endif\n";*/
                   mDynamicModelFile << "      }\n";
                   mDynamicModelFile << "    mxFree(g1);\n";
                   mDynamicModelFile << "    mxFree(r);\n";
@@ -1814,8 +2815,15 @@ ModelTree::writeSparseDLLDynamicCFileAndBinFile(const string &dynamic_basename, 
                 {
                   if (open_par)
                     {
-                      mDynamicModelFile << "#endif\n";
-                      mDynamicModelFile << "      }\n";
+                      if(mode==eSparseDLLMode)
+                        {
+                          mDynamicModelFile << "#endif\n";
+                          mDynamicModelFile << "      }\n";
+                        }
+                      else
+                        {
+                          mDynamicModelFile << "  end\n";
+                        }
                     }
                   open_par=false;
                   SGE.SGE_compute(block_triangular.ModelBlock, i, false, bin_basename, /*mod_param.endo_nbr*/symbol_table.endo_nbr);
@@ -1851,11 +2859,6 @@ ModelTree::writeSparseDLLDynamicCFileAndBinFile(const string &dynamic_basename, 
                       mDynamicModelFile << "        Dynamic" << i + 1 << "(y, x, r, g1, g2);\n";
                       mDynamicModelFile << "        simulate(" << i << ", " << /*mod_param.endo_nbr*/symbol_table.endo_nbr << ", it_, y_kmin, y_kmax," << block_triangular.ModelBlock->Block_List[i].Size  << ", 0, false);\n";
                     }
-                  /*mDynamicModelFile << "#ifdef DEBUG\n";
-                  mDynamicModelFile << "        for(i=0;i<Model_Block->List[" << i << "].Size;i++)\n";
-                  mDynamicModelFile << "          mexPrintf(\" y[%d, %d]=%f \",it_,Model_Block->List[" << i << "].Variable[i],y[it_*" << symbol_table.endo_nbr << "+Model_Block->List[" << i << "].Variable[i]]);\n";
-                  mDynamicModelFile << "        mexPrintf(\" \\n \");\n";
-                  mDynamicModelFile << "#endif\n";*/
                   mDynamicModelFile << "      }\n";
                   mDynamicModelFile << "    mxFree(g1);\n";
                   mDynamicModelFile << "    mxFree(r);\n";
@@ -1865,8 +2868,15 @@ ModelTree::writeSparseDLLDynamicCFileAndBinFile(const string &dynamic_basename, 
                 {
                   if (open_par)
                     {
-                      mDynamicModelFile << "#endif\n";
-                      mDynamicModelFile << "      }\n";
+                      if(mode==eSparseDLLMode)
+                        {
+                          mDynamicModelFile << "#endif\n";
+                          mDynamicModelFile << "      }\n";
+                        }
+                      else
+                        {
+                          mDynamicModelFile << "  end\n";
+                        }
                     }
                   open_par=false;
                   if (!printed)
@@ -1875,253 +2885,391 @@ ModelTree::writeSparseDLLDynamicCFileAndBinFile(const string &dynamic_basename, 
                     }
                   Nb_SGE++;
                   //cout << "new_SGE=" << new_SGE << "\n";
-                  if (new_SGE)
+                  if(mode==eSparseDLLMode)
                     {
-                      int u_count_int=0;
-                      Write_Inf_To_Bin_File(dynamic_basename, bin_basename, i, u_count_int,SGE.file_open);
-                      SGE.file_is_open();
-                      mDynamicModelFile << "    u_count=" << u_count_int << "*periods;\n";
-                      mDynamicModelFile << "    u_count_alloc = 2*u_count;\n";
-                      mDynamicModelFile << "    u=(longd*)mxMalloc(u_count_alloc*sizeof(longd));\n";
-                      mDynamicModelFile << "    memset(u, 0, u_count_alloc*sizeof(longd));\n";
-                      mDynamicModelFile << "    u_count_init=" <<
-                                                  block_triangular.ModelBlock->Block_List[i].IM_lead_lag[block_triangular.ModelBlock->Block_List[i].Max_Lag +
-                                                  block_triangular.ModelBlock->Block_List[i].Max_Lead].u_finish + 1  << ";\n";
-                      //mDynamicModelFile << "    index_var=(int*)mxMalloc(" << block_triangular.ModelBlock->Block_List[i].Size<< "*sizeof(*index_var));\n";
-                      mDynamicModelFile << "    Read_SparseMatrix(\"" << reform(bin_basename) <<  "\","
-                        << block_triangular.ModelBlock->Block_List[i].Size << ", periods, y_kmin, y_kmax"
-                        << ");\n";
-                      mDynamicModelFile << "    u_count=" << u_count_int << "*(periods+y_kmax+y_kmin);\n";
+                      if (new_SGE)
+                        {
+                          int u_count_int=0;
+                          Write_Inf_To_Bin_File(dynamic_basename, bin_basename, i, u_count_int,SGE.file_open);
+                          SGE.file_is_open();
+                          mDynamicModelFile << "    u_count=" << u_count_int << "*periods;\n";
+                          mDynamicModelFile << "    u_count_alloc = 2*u_count;\n";
+                          mDynamicModelFile << "    u=(longd*)mxMalloc(u_count_alloc*sizeof(longd));\n";
+                          mDynamicModelFile << "    memset(u, 0, u_count_alloc*sizeof(longd));\n";
+                          mDynamicModelFile << "    u_count_init=" <<
+                                                      block_triangular.ModelBlock->Block_List[i].IM_lead_lag[block_triangular.ModelBlock->Block_List[i].Max_Lag +
+                                                      block_triangular.ModelBlock->Block_List[i].Max_Lead].u_finish + 1  << ";\n";
+                          mDynamicModelFile << "    Read_SparseMatrix(\"" << reform(bin_basename) <<  "\","
+                            << block_triangular.ModelBlock->Block_List[i].Size << ", periods, y_kmin, y_kmax"
+                            << ");\n";
+                          mDynamicModelFile << "    u_count=" << u_count_int << "*(periods+y_kmax+y_kmin);\n";
+                        }
+                      else
+                        {
+                          SGE.SGE_compute(block_triangular.ModelBlock, i, true, bin_basename, /*mod_param.endo_nbr*/symbol_table.endo_nbr);
+                          mDynamicModelFile << "    Read_file(\"" << reform(bin_basename) << "\",periods," <<
+                            block_triangular.ModelBlock->Block_List[i].IM_lead_lag[block_triangular.ModelBlock->Block_List[i].Max_Lag + block_triangular.ModelBlock->Block_List[i].Max_Lead].u_finish + 1 << ", " << /*mod_param.endo_nbr*/symbol_table.endo_nbr <<
+                            ", " << block_triangular.ModelBlock->Block_List[i].Max_Lag << ", " << block_triangular.ModelBlock->Block_List[i].Max_Lead << ");\n";
+                        }
+                      mDynamicModelFile << "    g1=(double*)mxMalloc(" << block_triangular.ModelBlock->Block_List[i].Size*block_triangular.ModelBlock->Block_List[i].Size << "*sizeof(double));\n";
+                      mDynamicModelFile << "    r=(double*)mxMalloc(" << block_triangular.ModelBlock->Block_List[i].Size << "*sizeof(double));\n";
+                      if (!block_triangular.ModelBlock->Block_List[i].is_linear)
+                        {
+                          mDynamicModelFile << "    cvg=false;\n";
+                          mDynamicModelFile << "    iter=0;\n";
+                          mDynamicModelFile << "    while(!((cvg)||(iter>maxit_)))\n";
+                          mDynamicModelFile << "      {\n";
+                          mDynamicModelFile << "        res2=0;\n";
+                          mDynamicModelFile << "        res1=0;\n";
+                          mDynamicModelFile << "        max_res=0;\n";
+                          mDynamicModelFile << "        for(it_=y_kmin;it_<periods+y_kmin;it_++)\n";
+                          mDynamicModelFile << "          {\n";
+                          mDynamicModelFile << "            Per_u_=(it_-y_kmin)*" << block_triangular.ModelBlock->Block_List[i].IM_lead_lag[block_triangular.ModelBlock->Block_List[i].Max_Lag + block_triangular.ModelBlock->Block_List[i].Max_Lead].u_finish + 1 << ";\n";
+                          mDynamicModelFile << "            Per_y_=it_*y_size;\n";
+                          mDynamicModelFile << "            Dynamic" << i + 1 << "(y, x, r, g1, g2);\n";
+                          mDynamicModelFile << "            if (isnan(res1)||isinf(res1))\n";
+                          mDynamicModelFile << "              break;\n";
+                          mDynamicModelFile << "            for(i=0;i<" << block_triangular.ModelBlock->Block_List[i].Size << ";i++)\n";
+                          mDynamicModelFile << "              {\n";
+                          mDynamicModelFile << "                if (max_res<fabs(r[i]))\n";
+                          mDynamicModelFile << "                  max_res=fabs(r[i]);\n";
+                          mDynamicModelFile << "                res2+=r[i]*r[i];\n";
+                          mDynamicModelFile << "                res1+=fabs(r[i]);\n";
+                          mDynamicModelFile << "              }\n";
+                          mDynamicModelFile << "          }\n";
+                          mDynamicModelFile << "        cvg=(max_res<solve_tolf);\n";
+                          if (new_SGE)
+                            mDynamicModelFile << "      simulate_NG1(" << i << ", " << /*mod_param.endo_nbr*/symbol_table.endo_nbr << ", it_, y_kmin, y_kmax," << block_triangular.ModelBlock->Block_List[i].Size  << ", periods, true, cvg);\n";
+                          else
+                            mDynamicModelFile << "      simulate(" << i << ", " << /*mod_param.endo_nbr*/symbol_table.endo_nbr << ", it_, y_kmin, y_kmax," << block_triangular.ModelBlock->Block_List[i].Size  << ", periods, true);\n";
+                          mDynamicModelFile << "        iter++;\n";
+                          mDynamicModelFile << "      }\n";
+                          mDynamicModelFile << "    if (!cvg)\n";
+                          mDynamicModelFile << "      {\n";
+                          mDynamicModelFile << "        mexPrintf(\"Convergence not achieved in block " << i << ", after %d iterations\\n\",iter);\n";
+                          mDynamicModelFile << "        mexErrMsgTxt(\"End of simulate\");\n";
+                          mDynamicModelFile << "      }\n";
+                        }
+                      else
+                        {
+                          mDynamicModelFile << "    for(it_=y_kmin;it_<periods+y_kmin;it_++)\n";
+                          mDynamicModelFile << "      {\n";
+                          mDynamicModelFile << "        Per_u_=(it_-y_kmin)*" << block_triangular.ModelBlock->Block_List[i].IM_lead_lag[block_triangular.ModelBlock->Block_List[i].Max_Lag + block_triangular.ModelBlock->Block_List[i].Max_Lead].u_finish + 1 << ";\n";
+                          mDynamicModelFile << "        Per_y_=it_*y_size;\n";
+                          mDynamicModelFile << "        Dynamic" << i + 1 << "(y, x, r, g1, g2);\n";
+                          mDynamicModelFile << "#ifdef PRINT_OUT\n";
+                          mDynamicModelFile << "        for(j=0;j<" << block_triangular.ModelBlock->Block_List[i].IM_lead_lag[block_triangular.ModelBlock->Block_List[i].Max_Lag + block_triangular.ModelBlock->Block_List[i].Max_Lead].u_finish + 1 << ";j++)\n";
+                          mDynamicModelFile << "          {\n";
+                          mDynamicModelFile << "            mexPrintf(\" %f\",u[Per_u_+j]);\n";
+                          mDynamicModelFile << "          }\n";
+                          mDynamicModelFile << "        mexPrintf(\"\\n\");\n";
+                          mDynamicModelFile << "#endif\n";
+                          mDynamicModelFile << "      }\n";
+                          if (new_SGE)
+                            mDynamicModelFile << "        simulate_NG1(" << i << ", " << /*mod_param.endo_nbr*/symbol_table.endo_nbr << ", it_, y_kmin, y_kmax," << block_triangular.ModelBlock->Block_List[i].Size  << ", periods, true, cvg);\n";
+                          else
+                            mDynamicModelFile << "        simulate(" << i << ", " << /*mod_param.endo_nbr*/symbol_table.endo_nbr << ", it_, y_kmin, y_kmax," << block_triangular.ModelBlock->Block_List[i].Size  << ", periods, true);\n";
+                        }
+                      mDynamicModelFile << "    mxFree(g1);\n";
+                      mDynamicModelFile << "    mxFree(r);\n";
+                      mDynamicModelFile << "    mxFree(u);\n";
+                      mDynamicModelFile << "    mxFree(index_vara);\n";
+                      mDynamicModelFile << "    memset(direction,0,size_of_direction);\n";
+                      mDynamicModelFile << "    //mexErrMsgTxt(\"Exit from Dynare\");\n";
                     }
                   else
                     {
-                      SGE.SGE_compute(block_triangular.ModelBlock, i, true, bin_basename, /*mod_param.endo_nbr*/symbol_table.endo_nbr);
-                      mDynamicModelFile << "    Read_file(\"" << reform(bin_basename) << "\",periods," <<
-                        block_triangular.ModelBlock->Block_List[i].IM_lead_lag[block_triangular.ModelBlock->Block_List[i].Max_Lag + block_triangular.ModelBlock->Block_List[i].Max_Lead].u_finish + 1 << ", " << /*mod_param.endo_nbr*/symbol_table.endo_nbr <<
-                        ", " << block_triangular.ModelBlock->Block_List[i].Max_Lag << ", " << block_triangular.ModelBlock->Block_List[i].Max_Lead << ");\n";
-                    }
-                  mDynamicModelFile << "    g1=(double*)mxMalloc(" << block_triangular.ModelBlock->Block_List[i].Size*block_triangular.ModelBlock->Block_List[i].Size << "*sizeof(double));\n";
-                  mDynamicModelFile << "    r=(double*)mxMalloc(" << block_triangular.ModelBlock->Block_List[i].Size << "*sizeof(double));\n";
-                  if (!block_triangular.ModelBlock->Block_List[i].is_linear)
-                    {
-                      mDynamicModelFile << "    cvg=false;\n";
-                      mDynamicModelFile << "    iter=0;\n";
-                      mDynamicModelFile << "    while(!((cvg)||(iter>maxit_)))\n";
-                      mDynamicModelFile << "      {\n";
-                      mDynamicModelFile << "        res2=0;\n";
-                      mDynamicModelFile << "        res1=0;\n";
-                      mDynamicModelFile << "        max_res=0;\n";
-                      mDynamicModelFile << "        for(it_=y_kmin;it_<periods+y_kmin;it_++)\n";
-                      mDynamicModelFile << "          {\n";
-                      mDynamicModelFile << "            Per_u_=(it_-y_kmin)*" << block_triangular.ModelBlock->Block_List[i].IM_lead_lag[block_triangular.ModelBlock->Block_List[i].Max_Lag + block_triangular.ModelBlock->Block_List[i].Max_Lead].u_finish + 1 << ";\n";
-                      mDynamicModelFile << "            Per_y_=it_*y_size;\n";
-                      mDynamicModelFile << "            Dynamic" << i + 1 << "(y, x, r, g1, g2);\n";
-                      mDynamicModelFile << "            if (isnan(res1)||isinf(res1))\n";
-                      mDynamicModelFile << "              break;\n";
-                      mDynamicModelFile << "            for(i=0;i<" << block_triangular.ModelBlock->Block_List[i].Size << ";i++)\n";
-                      mDynamicModelFile << "              {\n";
-                      mDynamicModelFile << "                if (max_res<fabs(r[i]))\n";
-                      mDynamicModelFile << "                  max_res=fabs(r[i]);\n";
-                      mDynamicModelFile << "                res2+=r[i]*r[i];\n";
-                      mDynamicModelFile << "                res1+=fabs(r[i]);\n";
-                      mDynamicModelFile << "              }\n";
-                      mDynamicModelFile << "          }\n";
-                      mDynamicModelFile << "        cvg=(max_res<solve_tolf);\n";
-                      if (new_SGE)
-                        mDynamicModelFile << "      simulate_NG1(" << i << ", " << /*mod_param.endo_nbr*/symbol_table.endo_nbr << ", it_, y_kmin, y_kmax," << block_triangular.ModelBlock->Block_List[i].Size  << ", periods, true, cvg);\n";
+                      mDynamicModelFile << "  cvg=0;\n";
+                      mDynamicModelFile << "  iter=0;\n";
+                      mDynamicModelFile << "  Per_u_=0;\n";
+                      mDynamicModelFile << "  y_index=[";
+                      for(int ik=0;ik<block_triangular.ModelBlock->Block_List[i].Size;ik++)
+                        {
+                          mDynamicModelFile << " " << block_triangular.ModelBlock->Block_List[i].Variable[ik]+1;
+                        }
+                      mDynamicModelFile << "  ];\n";
+                      mDynamicModelFile << "  Blck_size=" << block_triangular.ModelBlock->Block_List[i].Size << ";\n";
+                      /*mDynamicModelFile << "  if(options_.simulation_method==2 | options_.simulation_method==3),\n";
+                      mDynamicModelFile << "    [r, g1]= " << bin_basename << "_static(y, x);\n";
+                      mDynamicModelFile << "    [L1,U1] = lu(g1,1e-5);\n";
+                      mDynamicModelFile << "    I = speye(periods);\n";
+                      mDynamicModelFile << "    L1=kron(I,L1);\n";
+                      mDynamicModelFile << "    U1=kron(I,U1);\n";
+                      mDynamicModelFile << "  end;\n";*/
+                      mDynamicModelFile << "  y_kmin_l=" << block_triangular.ModelBlock->Block_List[i].Max_Lag << ";\n";
+                      mDynamicModelFile << "  y_kmax_l=" << block_triangular.ModelBlock->Block_List[i].Max_Lead << ";\n";
+                      mDynamicModelFile << "  lambda=options_.slowc;\n";
+                      mDynamicModelFile << "  correcting_factor=0.01;\n";
+                      if (!block_triangular.ModelBlock->Block_List[i].is_linear)
+                        {
+                          sp="  ";
+                          mDynamicModelFile << "  while ~(cvg==1 | iter>maxit_),\n";
+                        }
                       else
-                        mDynamicModelFile << "      simulate(" << i << ", " << /*mod_param.endo_nbr*/symbol_table.endo_nbr << ", it_, y_kmin, y_kmax," << block_triangular.ModelBlock->Block_List[i].Size  << ", periods, true);\n";
-                      mDynamicModelFile << "        iter++;\n";
-                      mDynamicModelFile << "      }\n";
-                      mDynamicModelFile << "    if (!cvg)\n";
-                      mDynamicModelFile << "      {\n";
-                      mDynamicModelFile << "        mexPrintf(\"Convergence not achieved in block " << i << ", after %d iterations\\n\",iter);\n";
-                      mDynamicModelFile << "        mexErrMsgTxt(\"End of simulate\");\n";
-                      mDynamicModelFile << "      }\n";
+                        {
+                          sp="";
+                        }
+                      mDynamicModelFile << sp << "  [r, g1, g2, g3, b]=" << dynamic_basename << "_" <<  i + 1 << "(y, x, y_kmin, Blck_size, periods);\n";
+                      mDynamicModelFile << sp << "  g1a=g1(:, y_kmin*Blck_size+1:(periods+y_kmin)*Blck_size);\n";
+                      mDynamicModelFile << sp << "  b = b' -g1(:, 1+(y_kmin-y_kmin_l)*Blck_size:y_kmin*Blck_size)*reshape(y(1+y_kmin-y_kmin_l:y_kmin,y_index)',1,y_kmin_l*Blck_size)'-g1(:, (periods+y_kmin)*Blck_size+1:(periods+y_kmin+y_kmax_l)*Blck_size)*reshape(y(periods+y_kmin+1:periods+y_kmin+y_kmax_l,y_index)',1,y_kmax_l*Blck_size)';\n";
+                      mDynamicModelFile << sp << "  if(~isreal(r))\n";
+                      mDynamicModelFile << sp << "    max_res=(-(max(max(abs(r))))^2)^0.5;\n";
+                      mDynamicModelFile << sp << "  else\n";
+                      mDynamicModelFile << sp << "    max_res=max(max(abs(r)));\n";
+                      mDynamicModelFile << sp << "  end;\n";
+
+                      mDynamicModelFile << sp << "  if(iter>0)\n";
+                      mDynamicModelFile << sp << "    if(~isreal(max_res) | isnan(max_res) | max_resa<max_res)\n";
+                      mDynamicModelFile << sp << "      if(isnan(max_res))\n";
+                      mDynamicModelFile << sp << "        detJ=det(g1aa);\n";
+                      mDynamicModelFile << sp << "        if(abs(detJ)<1e-7)\n";
+                      mDynamicModelFile << sp << "          max_factor=max(max(abs(g1aa)));\n";
+                      mDynamicModelFile << sp << "          ze_elem=sum(diag(g1aa)<options_.cutoff);\n";
+                      mDynamicModelFile << sp << "          disp([num2str(full(ze_elem),'%d') ' elements on the Jacobian diagonal are below the cutoff (' num2str(options_.cutoff,'%f') ')']);\n";
+                      mDynamicModelFile << sp << "          if(correcting_factor<max_factor)\n";
+                      mDynamicModelFile << sp << "            correcting_factor=correcting_factor*4;\n";
+                      mDynamicModelFile << sp << "            disp(['The Jacobain matrix is singular, det(Jacobian)=' num2str(detJ,'%f') '.']);\n";
+                      mDynamicModelFile << sp << "            disp(['    trying to correct the Jacobian matrix:']);\n";
+                      mDynamicModelFile << sp << "            disp(['    correcting_factor=' num2str(correcting_factor,'%f') ' max(Jacobian)=' num2str(full(max_factor),'%f')]);\n";
+                      mDynamicModelFile << sp << "            dx = (g1aa+correcting_factor*speye(periods*Blck_size))\\ba- ya;\n";
+                      mDynamicModelFile << sp << "            y(1+y_kmin:periods+y_kmin,y_index)=reshape((ya_save+lambda*dx)',length(y_index),periods)';\n";
+                      if (!block_triangular.ModelBlock->Block_List[i].is_linear)
+                        mDynamicModelFile << sp << "            continue;\n";
+                      mDynamicModelFile << sp << "          else\n";
+                      mDynamicModelFile << sp << "            disp('The singularity of the jacobian matrix could not be corrected');\n";
+                      mDynamicModelFile << sp << "            return;\n";
+                      mDynamicModelFile << sp << "          end;\n";
+                      mDynamicModelFile << sp << "        end;\n";
+                      mDynamicModelFile << sp << "      elseif(lambda>1e-6)\n";
+                      mDynamicModelFile << sp << "        lambda=lambda/2;\n";
+                      mDynamicModelFile << sp << "        disp(['reducing the path length: lambda=' num2str(lambda,'%f')]);\n";
+                      mDynamicModelFile << sp << "        y(1+y_kmin:periods+y_kmin,y_index)=reshape((ya_save+lambda*dx)',length(y_index),periods)';\n";
+                      if (!block_triangular.ModelBlock->Block_List[i].is_linear)
+                        mDynamicModelFile << sp << "        continue;\n";
+                      mDynamicModelFile << sp << "      else\n";
+                      mDynamicModelFile << sp << "        disp(['No convergence after ' num2str(iter,'%d') ' iterations']);\n";
+                      mDynamicModelFile << sp << "        return;\n";
+                      mDynamicModelFile << sp << "      end;\n";
+                      mDynamicModelFile << sp << "    else\n";
+                      mDynamicModelFile << sp << "      if(lambda<1)\n";
+                      mDynamicModelFile << sp << "        lambda=max(lambda*2, 1);\n";
+                      mDynamicModelFile << sp << "      end;\n";
+                      mDynamicModelFile << sp << "    end;\n";
+                      mDynamicModelFile << sp << "  end;\n";
+
+                      mDynamicModelFile << sp << "  ya = reshape(y(y_kmin+1:y_kmin+periods,y_index)',1,periods*Blck_size)';\n";
+                      mDynamicModelFile << sp << "  ya_save=ya;\n";
+                      mDynamicModelFile << sp << "  g1aa=g1a;\n";
+                      mDynamicModelFile << sp << "  ba=b;\n";
+                      mDynamicModelFile << sp << "  max_resa=max_res;\n";
+
+
+                      mDynamicModelFile << sp << "  if(options_.simulation_method==0),\n";
+                      mDynamicModelFile << sp << "    dx = g1a\\b- ya;\n";
+                      mDynamicModelFile << sp << "    ya = ya + lambda*dx;\n";
+                      mDynamicModelFile << sp << "    y(1+y_kmin:periods+y_kmin,y_index)=reshape(ya',length(y_index),periods)';\n";
+                      mDynamicModelFile << sp << "  elseif(options_.simulation_method==2),\n";
+                      mDynamicModelFile << sp << "    [L1, U1]=luinc(g1a,1e-6);\n";
+                      mDynamicModelFile << sp << "    [za,flag1] = gmres(g1a,b," << block_triangular.ModelBlock->Block_List[i].Size << ",1e-6," << block_triangular.ModelBlock->Block_List[i].Size << "*periods,L1,U1);\n";
+                      mDynamicModelFile << sp << "    dx = za - ya;\n";
+                      mDynamicModelFile << sp << "    ya = ya + lambda*dx;\n";
+                      mDynamicModelFile << sp << "    y(1+y_kmin:periods+y_kmin,y_index)=reshape(ya',length(y_index),periods)';\n";
+                      mDynamicModelFile << sp << "    if (flag1>0)\n";
+                      mDynamicModelFile << sp << "      if(flag1==1)\n";
+                      mDynamicModelFile << sp << "        disp(['No convergence inside GMRES after ' num2str(periods*" <<  block_triangular.ModelBlock->Block_List[i].Size << ",'%6d') ' iterations']);\n";
+                      mDynamicModelFile << sp << "      elseif(flag1==2)\n";
+                      mDynamicModelFile << sp << "        disp(['Preconditioner is ill-conditioned ']);\n";
+                      mDynamicModelFile << sp << "      elseif(flag1==3)\n";
+                      mDynamicModelFile << sp << "        disp(['GMRES stagnated. (Two consecutive iterates were the same.)']);\n";
+                      mDynamicModelFile << sp << "      end;\n";
+                      mDynamicModelFile << sp << "    end;\n";
+                      mDynamicModelFile << sp << "  elseif(options_.simulation_method==3),\n";
+                      mDynamicModelFile << sp << "    [L1, U1]=luinc(g1a,1e-7);\n";
+                      mDynamicModelFile << sp << "    [za,flag1] = bicgstab(g1a,b,1e-7," << block_triangular.ModelBlock->Block_List[i].Size << "*periods,L1,U1);\n";
+                      mDynamicModelFile << sp << "    dx = za - ya;\n";
+                      mDynamicModelFile << sp << "    ya = ya + lambda*dx;\n";
+                      //mDynamicModelFile << sp << "    [ya,flag1] = eval(strcat(fullfile(matlabroot,'toolbox','matlab','sparfun','bicgstab'),'(g1a,b,1e-6," << block_triangular.ModelBlock->Block_List[i].Size << "*periods,L1,U1)'));\n";
+                      mDynamicModelFile << sp << "    y(1+y_kmin:periods+y_kmin,y_index)=reshape(ya',length(y_index),periods)';\n";
+                      mDynamicModelFile << sp << "    if (flag1>0)\n";
+                      mDynamicModelFile << sp << "      if(flag1==1)\n";
+                      mDynamicModelFile << sp << "        disp(['No convergence inside BICGSTAB after ' num2str(periods*" <<  block_triangular.ModelBlock->Block_List[i].Size << ",'%6d') ' iterations']);\n";
+                      mDynamicModelFile << sp << "      elseif(flag1==2)\n";
+                      mDynamicModelFile << sp << "        disp(['Preconditioner is ill-conditioned ']);\n";
+                      mDynamicModelFile << sp << "      elseif(flag1==3)\n";
+                      mDynamicModelFile << sp << "        disp(['BICGSTAB stagnated. (Two consecutive iterates were the same.)']);\n";
+                      mDynamicModelFile << sp << "      end;\n";
+                      mDynamicModelFile << sp << "    end;\n";
+                      mDynamicModelFile << sp << "  end;\n";
+                      if(!block_triangular.ModelBlock->Block_List[i].is_linear)
+                        {
+                          mDynamicModelFile << "    cvg=(max_res<solve_tolf);\n";
+                          mDynamicModelFile << "    iter=iter+1;\n";
+                        }
+                      mDynamicModelFile << "    disp(['iteration: ' num2str(iter,'%d') ' error: ' num2str(max_res,'%e')]);\n";
+                      if(!block_triangular.ModelBlock->Block_List[i].is_linear)
+                        {
+                          mDynamicModelFile << "  end\n";
+                          mDynamicModelFile << "  if (iter>maxit_)\n";
+                          mDynamicModelFile << "    disp(['No convergence after ' num2str(iter,'%4d') ' iterations']);\n";
+                          mDynamicModelFile << "    return;\n";
+                          mDynamicModelFile << "  end;\n";
+                        }
                     }
-                  else
-                    {
-                      mDynamicModelFile << "    for(it_=y_kmin;it_<periods+y_kmin;it_++)\n";
-                      mDynamicModelFile << "      {\n";
-                      mDynamicModelFile << "        Per_u_=(it_-y_kmin)*" << block_triangular.ModelBlock->Block_List[i].IM_lead_lag[block_triangular.ModelBlock->Block_List[i].Max_Lag + block_triangular.ModelBlock->Block_List[i].Max_Lead].u_finish + 1 << ";\n";
-                      mDynamicModelFile << "        Per_y_=it_*y_size;\n";
-                      mDynamicModelFile << "        Dynamic" << i + 1 << "(y, x, r, g1, g2);\n";
-                      mDynamicModelFile << "#ifdef PRINT_OUT\n";
-                      mDynamicModelFile << "        for(j=0;j<" << block_triangular.ModelBlock->Block_List[i].IM_lead_lag[block_triangular.ModelBlock->Block_List[i].Max_Lag + block_triangular.ModelBlock->Block_List[i].Max_Lead].u_finish + 1 << ";j++)\n";
-                      mDynamicModelFile << "          {\n";
-                      mDynamicModelFile << "            mexPrintf(\" %f\",u[Per_u_+j]);\n";
-                      mDynamicModelFile << "          }\n";
-                      mDynamicModelFile << "        mexPrintf(\"\\n\");\n";
-                      mDynamicModelFile << "#endif\n";
-                      mDynamicModelFile << "      }\n";
-                      if (new_SGE)
-                        mDynamicModelFile << "        simulate_NG1(" << i << ", " << /*mod_param.endo_nbr*/symbol_table.endo_nbr << ", it_, y_kmin, y_kmax," << block_triangular.ModelBlock->Block_List[i].Size  << ", periods, true, cvg);\n";
-                      else
-                        mDynamicModelFile << "        simulate(" << i << ", " << /*mod_param.endo_nbr*/symbol_table.endo_nbr << ", it_, y_kmin, y_kmax," << block_triangular.ModelBlock->Block_List[i].Size  << ", periods, true);\n";
-                    }
-                  /*mDynamicModelFile << "#ifdef DEBUG\n";
-                  mDynamicModelFile << "    for(it_=y_kmin;it_<periods+y_kmin;it_++)\n";
-                  mDynamicModelFile << "      {\n";
-                  mDynamicModelFile << "        for(i=0;i<Model_Block->List[" << i << "].Size;i++)\n";
-                  mDynamicModelFile << "          {\n";
-                  mDynamicModelFile << "            Per_y_=it_*y_size;\n";
-                  mDynamicModelFile << "            mexPrintf(\" y[%d, %d]=%f \",it_,Model_Block->List[" << i << "].Variable[i],y[it_*" << symbol_table.endo_nbr << "+Model_Block->List[" << i << "].Variable[i]]);\n";
-                  mDynamicModelFile << "          }\n";
-                  mDynamicModelFile << "        mexPrintf(\" \\n \");\n";
-                  mDynamicModelFile << "      }\n";
-                  mDynamicModelFile << "#endif\n";*/
-                  mDynamicModelFile << "    mxFree(g1);\n";
-                  mDynamicModelFile << "    mxFree(r);\n";
-                  mDynamicModelFile << "    mxFree(u);\n";
-                  mDynamicModelFile << "    mxFree(index_vara);\n";
-                  mDynamicModelFile << "    memset(direction,0,size_of_direction);\n";
-                  mDynamicModelFile << "    //mexErrMsgTxt(\"Exit from Dynare\");\n";
+
                 }
               prev_Simulation_Type=k;
             }
-          if (open_par)
-            {
-              mDynamicModelFile << "#endif\n";
-              mDynamicModelFile << "      }\n";
-            }
-          mDynamicModelFile << " }\n";
-
           // Writing the gateway routine
-          mDynamicModelFile << "/* The gateway routine */\n";
-          mDynamicModelFile << "void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])\n";
-          mDynamicModelFile << "{\n";
-          mDynamicModelFile << "  mxArray *M_, *oo_, *options_;\n";
-          mDynamicModelFile << "  int i, row_y, col_y, row_x, col_x, nb_row_xd;\n";
-          mDynamicModelFile << "  double * pind ;\n";
-          mDynamicModelFile << "\n";
-          mDynamicModelFile << "  /* Gets model parameters from global workspace of Matlab */\n";
-          mDynamicModelFile << "  M_ = mexGetVariable(\"global\",\"M_\");\n";
-          mDynamicModelFile << "  if (M_ == NULL )\n";
-          mDynamicModelFile << "    {\n";
-          mDynamicModelFile << "      mexPrintf(\"Global variable not found : \");\n";
-          mDynamicModelFile << "      mexErrMsgTxt(\"M_ \\n\");\n";
-          mDynamicModelFile << "    }\n";
-          mDynamicModelFile << "  /* Gets variables and parameters from global workspace of Matlab */\n";
-          mDynamicModelFile << "  oo_ = mexGetVariable(\"global\",\"oo_\");\n";
-          mDynamicModelFile << "  if (oo_ == NULL )\n";
-          mDynamicModelFile << "    {\n";
-          mDynamicModelFile << "      mexPrintf(\"Global variable not found : \");\n";
-          mDynamicModelFile << "      mexErrMsgTxt(\"oo_ \\n\");\n";
-          mDynamicModelFile << "    }\n";
-          mDynamicModelFile << "  options_ = mexGetVariable(\"global\",\"options_\");\n";
-          mDynamicModelFile << "  if (options_ == NULL )\n";
-          mDynamicModelFile << "    {\n";
-          mDynamicModelFile << "      mexPrintf(\"Global variable not found : \");\n";
-          mDynamicModelFile << "      mexErrMsgTxt(\"options_ \\n\");\n";
-          mDynamicModelFile << "    }\n";
-          mDynamicModelFile << "  params = mxGetPr(mxGetFieldByNumber(M_, 0, mxGetFieldNumber(M_,\"params\")));\n";
-          mDynamicModelFile << "  double *yd, *xd;\n";
-          mDynamicModelFile << "  yd= mxGetPr(mxGetFieldByNumber(oo_, 0, mxGetFieldNumber(oo_,\"endo_simul\")));\n";
-          mDynamicModelFile << "  row_y=mxGetM(mxGetFieldByNumber(oo_, 0, mxGetFieldNumber(oo_,\"endo_simul\")));\n";
-          mDynamicModelFile << "  xd= mxGetPr(mxGetFieldByNumber(oo_, 0, mxGetFieldNumber(oo_,\"exo_simul\")));\n";
-          mDynamicModelFile << "  row_x=mxGetM(mxGetFieldByNumber(oo_, 0, mxGetFieldNumber(oo_,\"exo_simul\")));\n";
-          mDynamicModelFile << "  col_x=mxGetN(mxGetFieldByNumber(oo_, 0, mxGetFieldNumber(oo_,\"exo_simul\")));\n";
-          if (compiler==GCC_COMPILE)
+          if(mode==eSparseDLLMode)
+              {
+                mDynamicModelFile << "#endif\n";
+                mDynamicModelFile << "      }\n";
+                mDynamicModelFile << " }\n";
+              }
+          if(mode==eSparseMode)
             {
-              mDynamicModelFile << "  y_kmin=int(floor(*(mxGetPr(mxGetFieldByNumber(M_, 0, mxGetFieldNumber(M_,\"maximum_lag\"))))));\n";
-              mDynamicModelFile << "  y_kmax=int(floor(*(mxGetPr(mxGetFieldByNumber(M_, 0, mxGetFieldNumber(M_,\"maximum_lead\"))))));\n";
-              mDynamicModelFile << "  y_decal=max(0,y_kmin-int(floor(*(mxGetPr(mxGetFieldByNumber(M_, 0, mxGetFieldNumber(M_,\"maximum_endo_lag\")))))));\n";
-              mDynamicModelFile << "  periods=int(floor(*(mxGetPr(mxGetFieldByNumber(options_, 0, mxGetFieldNumber(options_,\"periods\"))))));\n";
-              mDynamicModelFile << "  maxit_=int(floor(*(mxGetPr(mxGetFieldByNumber(options_, 0, mxGetFieldNumber(options_,\"maxit_\"))))));\n";
-              mDynamicModelFile << "  slowc=double(*(mxGetPr(mxGetFieldByNumber(options_, 0, mxGetFieldNumber(options_,\"slowc\")))));\n";
-              mDynamicModelFile << "  markowitz_c=double(*(mxGetPr(mxGetFieldByNumber(options_, 0, mxGetFieldNumber(options_,\"markowitz\")))));\n";
-              mDynamicModelFile << "  nb_row_xd=int(floor(*(mxGetPr(mxGetFieldByNumber(M_, 0, mxGetFieldNumber(M_,\"exo_det_nbr\"))))));\n";
+              if(open_par)
+                mDynamicModelFile << "  end;\n";
+              mDynamicModelFile << "  oo_.endo_simul = y';\n";
+              mDynamicModelFile << "return;\n";
             }
-          else
+          if(mode==eSparseDLLMode)
             {
-              mDynamicModelFile << "  y_kmin=(int)floor(*(mxGetPr(mxGetFieldByNumber(M_, 0, mxGetFieldNumber(M_,\"maximum_lag\")))));\n";
-              mDynamicModelFile << "  y_kmax=(int)floor(*(mxGetPr(mxGetFieldByNumber(M_, 0, mxGetFieldNumber(M_,\"maximum_lead\")))));\n";
-              mDynamicModelFile << "  y_decal=max(0,y_kmin-int(floor(*(mxGetPr(mxGetFieldByNumber(M_, 0, mxGetFieldNumber(M_,\"maximum_endo_lag\")))))));\n";
-              mDynamicModelFile << "  periods=(int)floor(*(mxGetPr(mxGetFieldByNumber(options_, 0, mxGetFieldNumber(options_,\"periods\")))));\n";
-              mDynamicModelFile << "  maxit_=(int)floor(*(mxGetPr(mxGetFieldByNumber(options_, 0, mxGetFieldNumber(options_,\"maxit_\")))));\n";
-              mDynamicModelFile << "  slowc=double(*(mxGetPr(mxGetFieldByNumber(options_, 0, mxGetFieldNumber(options_,\"slowc\")))));\n";
-              mDynamicModelFile << "  markowitz_c=double(*(mxGetPr(mxGetFieldByNumber(options_, 0, mxGetFieldNumber(options_,\"markowitz\")))));\n";
-              mDynamicModelFile << "  nb_row_xd=int(floor(*(mxGetPr(mxGetFieldByNumber(M_, 0, mxGetFieldNumber(M_,\"exo_det_nbr\"))))));\n";
+              mDynamicModelFile << "/* The gateway routine */\n";
+              mDynamicModelFile << "void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])\n";
+              mDynamicModelFile << "{\n";
+              mDynamicModelFile << "  mxArray *M_, *oo_, *options_;\n";
+              mDynamicModelFile << "  int i, row_y, col_y, row_x, col_x, nb_row_xd;\n";
+              mDynamicModelFile << "  double * pind ;\n";
+              mDynamicModelFile << "\n";
+              mDynamicModelFile << "  /* Gets model parameters from global workspace of Matlab */\n";
+              mDynamicModelFile << "  M_ = mexGetVariable(\"global\",\"M_\");\n";
+              mDynamicModelFile << "  if (M_ == NULL )\n";
+              mDynamicModelFile << "    {\n";
+              mDynamicModelFile << "      mexPrintf(\"Global variable not found : \");\n";
+              mDynamicModelFile << "      mexErrMsgTxt(\"M_ \\n\");\n";
+              mDynamicModelFile << "    }\n";
+              mDynamicModelFile << "  /* Gets variables and parameters from global workspace of Matlab */\n";
+              mDynamicModelFile << "  oo_ = mexGetVariable(\"global\",\"oo_\");\n";
+              mDynamicModelFile << "  if (oo_ == NULL )\n";
+              mDynamicModelFile << "    {\n";
+              mDynamicModelFile << "      mexPrintf(\"Global variable not found : \");\n";
+              mDynamicModelFile << "      mexErrMsgTxt(\"oo_ \\n\");\n";
+              mDynamicModelFile << "    }\n";
+              mDynamicModelFile << "  options_ = mexGetVariable(\"global\",\"options_\");\n";
+              mDynamicModelFile << "  if (options_ == NULL )\n";
+              mDynamicModelFile << "    {\n";
+              mDynamicModelFile << "      mexPrintf(\"Global variable not found : \");\n";
+              mDynamicModelFile << "      mexErrMsgTxt(\"options_ \\n\");\n";
+              mDynamicModelFile << "    }\n";
+              mDynamicModelFile << "  params = mxGetPr(mxGetFieldByNumber(M_, 0, mxGetFieldNumber(M_,\"params\")));\n";
+              mDynamicModelFile << "  double *yd, *xd;\n";
+              mDynamicModelFile << "  yd= mxGetPr(mxGetFieldByNumber(oo_, 0, mxGetFieldNumber(oo_,\"endo_simul\")));\n";
+              mDynamicModelFile << "  row_y=mxGetM(mxGetFieldByNumber(oo_, 0, mxGetFieldNumber(oo_,\"endo_simul\")));\n";
+              mDynamicModelFile << "  xd= mxGetPr(mxGetFieldByNumber(oo_, 0, mxGetFieldNumber(oo_,\"exo_simul\")));\n";
+              mDynamicModelFile << "  row_x=mxGetM(mxGetFieldByNumber(oo_, 0, mxGetFieldNumber(oo_,\"exo_simul\")));\n";
+              mDynamicModelFile << "  col_x=mxGetN(mxGetFieldByNumber(oo_, 0, mxGetFieldNumber(oo_,\"exo_simul\")));\n";
+              if (compiler==GCC_COMPILE)
+                {
+                  mDynamicModelFile << "  y_kmin=int(floor(*(mxGetPr(mxGetFieldByNumber(M_, 0, mxGetFieldNumber(M_,\"maximum_lag\"))))));\n";
+                  mDynamicModelFile << "  y_kmax=int(floor(*(mxGetPr(mxGetFieldByNumber(M_, 0, mxGetFieldNumber(M_,\"maximum_lead\"))))));\n";
+                  mDynamicModelFile << "  y_decal=max(0,y_kmin-int(floor(*(mxGetPr(mxGetFieldByNumber(M_, 0, mxGetFieldNumber(M_,\"maximum_endo_lag\")))))));\n";
+                  mDynamicModelFile << "  periods=int(floor(*(mxGetPr(mxGetFieldByNumber(options_, 0, mxGetFieldNumber(options_,\"periods\"))))));\n";
+                  mDynamicModelFile << "  maxit_=int(floor(*(mxGetPr(mxGetFieldByNumber(options_, 0, mxGetFieldNumber(options_,\"maxit_\"))))));\n";
+                  mDynamicModelFile << "  slowc=double(*(mxGetPr(mxGetFieldByNumber(options_, 0, mxGetFieldNumber(options_,\"slowc\")))));\n";
+                  mDynamicModelFile << "  markowitz_c=double(*(mxGetPr(mxGetFieldByNumber(options_, 0, mxGetFieldNumber(options_,\"markowitz\")))));\n";
+                  mDynamicModelFile << "  nb_row_xd=int(floor(*(mxGetPr(mxGetFieldByNumber(M_, 0, mxGetFieldNumber(M_,\"exo_det_nbr\"))))));\n";
+                }
+              else
+                {
+                  mDynamicModelFile << "  y_kmin=(int)floor(*(mxGetPr(mxGetFieldByNumber(M_, 0, mxGetFieldNumber(M_,\"maximum_lag\")))));\n";
+                  mDynamicModelFile << "  y_kmax=(int)floor(*(mxGetPr(mxGetFieldByNumber(M_, 0, mxGetFieldNumber(M_,\"maximum_lead\")))));\n";
+                  mDynamicModelFile << "  y_decal=max(0,y_kmin-int(floor(*(mxGetPr(mxGetFieldByNumber(M_, 0, mxGetFieldNumber(M_,\"maximum_endo_lag\")))))));\n";
+                  mDynamicModelFile << "  periods=(int)floor(*(mxGetPr(mxGetFieldByNumber(options_, 0, mxGetFieldNumber(options_,\"periods\")))));\n";
+                  mDynamicModelFile << "  maxit_=(int)floor(*(mxGetPr(mxGetFieldByNumber(options_, 0, mxGetFieldNumber(options_,\"maxit_\")))));\n";
+                  mDynamicModelFile << "  slowc=double(*(mxGetPr(mxGetFieldByNumber(options_, 0, mxGetFieldNumber(options_,\"slowc\")))));\n";
+                  mDynamicModelFile << "  markowitz_c=double(*(mxGetPr(mxGetFieldByNumber(options_, 0, mxGetFieldNumber(options_,\"markowitz\")))));\n";
+                  mDynamicModelFile << "  nb_row_xd=int(floor(*(mxGetPr(mxGetFieldByNumber(M_, 0, mxGetFieldNumber(M_,\"exo_det_nbr\"))))));\n";
+                }
+              mDynamicModelFile << "  mxArray *mxa=mxGetFieldByNumber(M_, 0, mxGetFieldNumber(M_,\"fname\"));\n";
+              mDynamicModelFile << "  int buflen=mxGetM(mxa) * mxGetN(mxa) + 1;\n";
+              mDynamicModelFile << "  char *fname;\n";
+              mDynamicModelFile << "  fname=(char*)mxCalloc(buflen, sizeof(char));\n";
+              mDynamicModelFile << "  int status = mxGetString(mxa, fname, buflen);\n";
+              mDynamicModelFile << "  if (status != 0)\n";
+              mDynamicModelFile << "    mexWarnMsgTxt(\"Not enough space. Filename is truncated.\");\n";
+              mDynamicModelFile << "  mexPrintf(\"fname=%s\\n\",fname);\n";
+              mDynamicModelFile << "  col_y=mxGetN(mxGetFieldByNumber(oo_, 0, mxGetFieldNumber(oo_,\"endo_simul\")));;\n";
+              mDynamicModelFile << "  if (col_y<row_x)\n";
+              mDynamicModelFile << "    {\n";
+              mDynamicModelFile << "      row_y=row_y/row_x;\n";
+              mDynamicModelFile << "      col_y=row_x;\n";
+              mDynamicModelFile << "    }\n";
+              mDynamicModelFile << "  solve_tolf=*(mxGetPr(mxGetFieldByNumber(options_, 0, mxGetFieldNumber(options_,\"dynatol\"))));\n";
+              mDynamicModelFile << "  size_of_direction=col_y*row_y*sizeof(longd);\n";
+              mDynamicModelFile << "  y=(longd*)mxMalloc(size_of_direction);\n";
+              mDynamicModelFile << "  ya=(longd*)mxMalloc(size_of_direction);\n";
+              mDynamicModelFile << "  direction=(longd*)mxMalloc(size_of_direction);\n";
+              mDynamicModelFile << "  memset(direction,0,size_of_direction);\n";
+              mDynamicModelFile << "  x=(longd*)mxMalloc(col_x*row_x*sizeof(longd));\n";
+              mDynamicModelFile << "  for(i=0;i<row_x*col_x;i++)\n";
+              mDynamicModelFile << "    x[i]=longd(xd[i]);\n";
+              mDynamicModelFile << "  for(i=0;i<row_y*col_y;i++)\n";
+              mDynamicModelFile << "    y[i]=longd(yd[i]);\n";
+              mDynamicModelFile << "  \n";
+              mDynamicModelFile << "  y_size=row_y;\n";
+              mDynamicModelFile << "  x_size=row_x;\n";
+              mDynamicModelFile << "  nb_row_x=row_x;\n";
+              mDynamicModelFile << "#ifdef DEBUG\n";
+              mDynamicModelFile << "  for(j=0;j<periods+y_kmin+y_kmax;j++)\n";
+              mDynamicModelFile << "    {\n";
+              mDynamicModelFile << "      for(i=0;i<row_y;i++)\n";
+              mDynamicModelFile << "        mexPrintf(\"y[%d,%d]=%f \",j,i,y[j*y_size+i]);\n";
+              mDynamicModelFile << "      mexPrintf(\"\\n\");\n";
+              mDynamicModelFile << "    }\n";
+              mDynamicModelFile << "    mexPrintf(\"\\n\");\n";
+              mDynamicModelFile << "    mexPrintf(\"x=%x\\n\",x);\n";
+              mDynamicModelFile << "  for(j=0;j<periods+y_kmin+y_kmax;j++)\n";
+              mDynamicModelFile << "    {\n";
+              mDynamicModelFile << "      for(i=0;i<col_x;i++)\n";
+              mDynamicModelFile << "        mexPrintf(\"x[%d,%d]=%f \",j,i,x[i*x_size+j]);\n";
+              mDynamicModelFile << "      mexPrintf(\"\\n\");\n";
+              mDynamicModelFile << "    }\n";
+              mDynamicModelFile << "    mexPrintf(\"x[1]=%f\\n\",x[1]);\n";
+              mDynamicModelFile << "#endif\n";
+              mDynamicModelFile << "  /* Gets it_ from global workspace of Matlab */\n";
+              mDynamicModelFile << "  //it_ = (int) floor(mxGetScalar(mexGetVariable(\"global\", \"it_\")))-1;\n";
+              mDynamicModelFile << "  /* Call the C subroutines. */\n";
+              mDynamicModelFile << "  t0= pctimer();\n";
+              mDynamicModelFile << "  Dynamic_Init();\n";
+              mDynamicModelFile << "  t1= pctimer();\n";
+              mDynamicModelFile << "  mexPrintf(\"Simulation Time=%f milliseconds\\n\",1000*(t1-t0));\n";
+              if (compiler==LCC_COMPILE  )
+                {
+                  mDynamicModelFile << "  if (SaveCode)\n";
+                  mDynamicModelFile << "    fclose(SaveCode);\n";
+                }
+              else
+                {
+                  mDynamicModelFile << "  if (SaveCode.is_open())\n";
+                  mDynamicModelFile << "    SaveCode.close();\n";
+                }
+              mDynamicModelFile << "  if (nlhs>0)\n";
+              mDynamicModelFile << "    {\n";
+              mDynamicModelFile << "      plhs[0] = mxCreateDoubleMatrix(row_y, col_y, mxREAL);\n";
+              mDynamicModelFile << "      pind = mxGetPr(plhs[0]);\n";
+              mDynamicModelFile << "      for(i=0;i<row_y*col_y;i++)\n";
+              mDynamicModelFile << "        pind[i]=y[i];\n";
+              mDynamicModelFile << "    }\n";
+              mDynamicModelFile << "  mxFree(x);\n";
+              mDynamicModelFile << "  mxFree(y);\n";
+              mDynamicModelFile << "  mxFree(ya);\n";
+              mDynamicModelFile << "  mxFree(direction);\n";
+              mDynamicModelFile << "}\n";
             }
-          mDynamicModelFile << "  mxArray *mxa=mxGetFieldByNumber(M_, 0, mxGetFieldNumber(M_,\"fname\"));\n";
-          mDynamicModelFile << "  int buflen=mxGetM(mxa) * mxGetN(mxa) + 1;\n";
-          mDynamicModelFile << "  char *fname;\n";
-          mDynamicModelFile << "  fname=(char*)mxCalloc(buflen, sizeof(char));\n";
-          mDynamicModelFile << "  int status = mxGetString(mxa, fname, buflen);\n";
-          mDynamicModelFile << "  if (status != 0)\n";
-          mDynamicModelFile << "    mexWarnMsgTxt(\"Not enough space. Filename is truncated.\");\n";
-          mDynamicModelFile << "  mexPrintf(\"fname=%s\\n\",fname);\n";
-          mDynamicModelFile << "  col_y=mxGetN(mxGetFieldByNumber(oo_, 0, mxGetFieldNumber(oo_,\"endo_simul\")));;\n";
-          mDynamicModelFile << "  if (col_y<row_x)\n";
-          mDynamicModelFile << "    {\n";
-          mDynamicModelFile << "      row_y=row_y/row_x;\n";
-          mDynamicModelFile << "      col_y=row_x;\n";
-          mDynamicModelFile << "    }\n";
-          mDynamicModelFile << "  solve_tolf=*(mxGetPr(mxGetFieldByNumber(options_, 0, mxGetFieldNumber(options_,\"dynatol\"))));\n";
-
-          mDynamicModelFile << "  size_of_direction=col_y*row_y*sizeof(longd);\n";
-          mDynamicModelFile << "  y=(longd*)mxMalloc(size_of_direction);\n";
-          mDynamicModelFile << "  ya=(longd*)mxMalloc(size_of_direction);\n";
-          mDynamicModelFile << "  direction=(longd*)mxMalloc(size_of_direction);\n";
-          mDynamicModelFile << "  memset(direction,0,size_of_direction);\n";
-          mDynamicModelFile << "  x=(longd*)mxMalloc(col_x*row_x*sizeof(longd));\n";
-          mDynamicModelFile << "  for(i=0;i<row_x*col_x;i++)\n";
-          mDynamicModelFile << "    x[i]=longd(xd[i]);\n";
-          mDynamicModelFile << "  for(i=0;i<row_y*col_y;i++)\n";
-          mDynamicModelFile << "    y[i]=longd(yd[i]);\n";
-          mDynamicModelFile << "  \n";
-          mDynamicModelFile << "  y_size=row_y;\n";
-          mDynamicModelFile << "  x_size=row_x;\n";
-          mDynamicModelFile << "  nb_row_x=row_x;\n";
-          mDynamicModelFile << "#ifdef DEBUG\n";
-          mDynamicModelFile << "  for(j=0;j<periods+y_kmin+y_kmax;j++)\n";
-          mDynamicModelFile << "    {\n";
-          mDynamicModelFile << "      for(i=0;i<row_y;i++)\n";
-          mDynamicModelFile << "        mexPrintf(\"y[%d,%d]=%f \",j,i,y[j*y_size+i]);\n";
-          mDynamicModelFile << "      mexPrintf(\"\\n\");\n";
-          mDynamicModelFile << "    }\n";
-          mDynamicModelFile << "    mexPrintf(\"\\n\");\n";
-          mDynamicModelFile << "    mexPrintf(\"x=%x\\n\",x);\n";
-
-          mDynamicModelFile << "  for(j=0;j<periods+y_kmin+y_kmax;j++)\n";
-          mDynamicModelFile << "    {\n";
-          mDynamicModelFile << "      for(i=0;i<col_x;i++)\n";
-          mDynamicModelFile << "        mexPrintf(\"x[%d,%d]=%f \",j,i,x[i*x_size+j]);\n";
-          mDynamicModelFile << "      mexPrintf(\"\\n\");\n";
-          mDynamicModelFile << "    }\n";
-          mDynamicModelFile << "    mexPrintf(\"x[1]=%f\\n\",x[1]);\n";
-          mDynamicModelFile << "#endif\n";
-
-          mDynamicModelFile << "  /* Gets it_ from global workspace of Matlab */\n";
-          mDynamicModelFile << "  //it_ = (int) floor(mxGetScalar(mexGetVariable(\"global\", \"it_\")))-1;\n";
-          mDynamicModelFile << "  /* Call the C subroutines. */\n";
-          mDynamicModelFile << "  t0= pctimer();\n";
-          mDynamicModelFile << "  Dynamic_Init();\n";
-          mDynamicModelFile << "  t1= pctimer();\n";
-          mDynamicModelFile << "  mexPrintf(\"Simulation Time=%f milliseconds\\n\",1000*(t1-t0));\n";
-          if (compiler==LCC_COMPILE  )
-            {
-              mDynamicModelFile << "  if (SaveCode)\n";
-              mDynamicModelFile << "    fclose(SaveCode);\n";
-            }
-          else
-            {
-              mDynamicModelFile << "  if (SaveCode.is_open())\n";
-              mDynamicModelFile << "    SaveCode.close();\n";
-            }
-          mDynamicModelFile << "  if (nlhs>0)\n";
-          mDynamicModelFile << "    {\n";
-          mDynamicModelFile << "      plhs[0] = mxCreateDoubleMatrix(row_y, col_y, mxREAL);\n";
-          mDynamicModelFile << "      pind = mxGetPr(plhs[0]);\n";
-          mDynamicModelFile << "      for(i=0;i<row_y*col_y;i++)\n";
-          mDynamicModelFile << "        pind[i]=y[i];\n";
-          mDynamicModelFile << "    }\n";
-          mDynamicModelFile << "  mxFree(x);\n";
-          mDynamicModelFile << "  mxFree(y);\n";
-          mDynamicModelFile << "  mxFree(ya);\n";
-          mDynamicModelFile << "  mxFree(direction);\n";
-        mDynamicModelFile << "}\n";
         }
+      if(mode==eSparseMode)
+        writeModelEquationsOrdered_M(mDynamicModelFile, block_triangular.ModelBlock, dynamic_basename);
       mDynamicModelFile.close();
     }
   if (printed)
@@ -2137,7 +3285,7 @@ ModelTree::writeDynamicModel(ostream &DynamicOutput) const
   ostringstream hessian_output;  // Used for storing Hessian equations
   ostringstream third_derivatives_output;
 
-  ExprNodeOutputType output_type = (mode == eStandardMode ? oMatlabDynamicModel : oCDynamicModel);
+  ExprNodeOutputType output_type = (mode == eStandardMode || mode==eSparseMode ? oMatlabDynamicModel : oCDynamicModel);
 
   writeModelLocalVariables(model_output, output_type);
 
@@ -2439,7 +3587,7 @@ ModelTree::evaluateJacobian(const eval_context_type &eval_context, jacob_map *j_
             }
           if (IM[eq*symbol_table.endo_nbr+var] && (fabs(val) < cutoff))
             {
-              //cout << "the coefficient related to variable " << var << " with lag " << k1 << " in equation " << eq << " is equal to " << val << " and is set to 0 in the incidence matrix\n";
+              cout << "the coefficient related to variable " << var << " with lag " << k1 << " in equation " << eq << " is equal to " << val << " and is set to 0 in the incidence matrix (size=" << symbol_table.endo_nbr << ")\n";
               block_triangular.unfill_IM(eq, var, k1);
               i++;
             }
@@ -2539,7 +3687,7 @@ ModelTree::computingPass(const eval_context_type &eval_context)
   // Launch computations
   derive(order);
 
-  if (mode == eSparseDLLMode)
+  if (mode == eSparseDLLMode || mode == eSparseMode)
     {
       jacob_map j_m;
       int Size;
@@ -2573,6 +3721,8 @@ ModelTree::writeStaticFile(const string &basename) const
     case eSparseDLLMode:
       writeStaticMFile(basename + "_static");
       break;
+    case eSparseMode:
+      writeSparseStaticMFile(basename + "_static", basename, mode);
     case eDLLMode:
       writeStaticCFile(basename + "_static");
       break;
@@ -2588,11 +3738,14 @@ ModelTree::writeDynamicFile(const string &basename) const
     case eStandardMode:
       writeDynamicMFile(basename + "_dynamic");
       break;
+    case eSparseMode:
+      writeSparseDynamicFileAndBinFile(basename + "_dynamic", basename, output_type, mode);
+      break;
     case eDLLMode:
       writeDynamicCFile(basename + "_dynamic");
       break;
     case eSparseDLLMode:
-      writeSparseDLLDynamicCFileAndBinFile(basename + "_dynamic", basename, output_type);
+      writeSparseDynamicFileAndBinFile(basename + "_dynamic", basename, output_type, mode);
       if (compiler==GCC_COMPILE || compiler==LCC_COMPILE )
         writeSparseDLLDynamicHFile(basename + "_dynamic");
       break;

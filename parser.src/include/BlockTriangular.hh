@@ -51,13 +51,14 @@ public:
   List_IM* Build_IM(int lead_lag);
   List_IM* Get_IM(int lead_lag);
   bool* bGet_IM(int lead_lag);
+  bool* bGet_IM(int lead_lag) const;
   void fill_IM(int equation, int variable_endo, int lead_lag);
   void unfill_IM(int equation, int variable_endo, int lead_lag);
   void incidence_matrix() const;
   void init_incidence_matrix(int nb_endo);
-  void Print_IM(int n);
+  void Print_IM(int n) const;
   void Free_IM(List_IM* First_IM);
-  void Print_SIM(bool* IM, int n);
+  void Print_SIM(bool* IM, int n) const;
   void Normalize_and_BlockDecompose_Static_Model();
   void Normalize_and_BlockDecompose_Static_0_Model(const jacob_map &j_m);
   bool Normalize_and_BlockDecompose(bool* IM, Model_Block* ModelBlock, int n, int* prologue, int* epilogue, simple* Index_Var_IM, simple* Index_Equ_IM, bool Do_Normalization, bool mixing, bool* IM_0 );

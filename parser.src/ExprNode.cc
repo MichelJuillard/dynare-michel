@@ -113,10 +113,12 @@ NumConstNode::writeOutput(ostream &output, ExprNodeOutputType output_type,
 {
   temporary_terms_type::const_iterator it = temporary_terms.find(const_cast<NumConstNode *>(this));
   if (it != temporary_terms.end())
-    if (output_type != oCDynamicModelSparseDLL)
-      output << "T" << idx;
-    else
+    if (output_type == oCDynamicModelSparseDLL)
       output << "T" << idx << "[it_]";
+    else if (output_type == oMatlabDynamicModelSparse)
+      output << "T" << idx << "(it_)";
+    else
+      output << "T" << idx;
   else
     output << datatree.num_constants.get(id);
 }
@@ -240,10 +242,18 @@ VariableNode::writeOutput(ostream &output, ExprNodeOutputType output_type,
   temporary_terms_type::const_iterator it = temporary_terms.find(const_cast<VariableNode *>(this));
   if (it != temporary_terms.end())
     {
-      if (output_type != oCDynamicModelSparseDLL)
-        output << "T" << idx;
-      else
+      if (output_type == oCDynamicModelSparseDLL)
         output << "T" << idx << "[it_]";
+      else if (output_type == oMatlabDynamicModelSparse)
+        output << "T" << idx << "(it_)";
+      else
+        output << "T" << idx;
+      /*if (output_type != oCDynamicModelSparseDLL)
+        output << "T" << idx;
+      else if (output_type == oMatlabDynamicModelSparse)
+        output << "T" << idx << "(it_)";
+      else
+        output << "T" << idx << "[it_]";*/
       return;
     }
 
@@ -271,6 +281,7 @@ VariableNode::writeOutput(ostream &output, ExprNodeOutputType output_type,
           output <<  "y" << LPAR(output_type) << i << RPAR(output_type);
           break;
         case oMatlabStaticModel:
+        case oMatlabStaticModelSparse:
         case oCStaticModel:
           i = symb_id + OFFSET(output_type);
           output <<  "y" << LPAR(output_type) << i << RPAR(output_type);
@@ -283,6 +294,15 @@ VariableNode::writeOutput(ostream &output, ExprNodeOutputType output_type,
           else
             output << "y" << LPAR(output_type) << "Per_y_+" << symb_id << RPAR(output_type);
           break;
+        case oMatlabDynamicModelSparse:
+          i = symb_id + OFFSET(output_type);
+          if (lag > 0)
+            output << "y" << LPAR(output_type) << "it_+" << lag << ", " << i << RPAR(output_type);
+          else if (lag < 0)
+            output << "y" << LPAR(output_type) << "it_" << lag << ", " << i << RPAR(output_type);
+          else
+            output << "y" << LPAR(output_type) << "it_, " << i << RPAR(output_type);
+          break;
         case oMatlabOutsideModel:
           output << "oo_.steady_state" << "(" << symb_id + 1 << ")";
           break;
@@ -294,6 +314,7 @@ VariableNode::writeOutput(ostream &output, ExprNodeOutputType output_type,
       switch(output_type)
         {
         case oMatlabDynamicModel:
+        case oMatlabDynamicModelSparse:
           if (lag > 0)
             output <<  "x(it_+" << lag << ", " << i << ")";
           else if (lag < 0)
@@ -311,6 +332,7 @@ VariableNode::writeOutput(ostream &output, ExprNodeOutputType output_type,
             output <<  "x[it_" << lag << "+" << i << "*nb_row_x]";
           break;
         case oMatlabStaticModel:
+        case oMatlabStaticModelSparse:
         case oCStaticModel:
           output << "x" << LPAR(output_type) << i << RPAR(output_type);
           break;
@@ -330,6 +352,7 @@ VariableNode::writeOutput(ostream &output, ExprNodeOutputType output_type,
       switch(output_type)
         {
         case oMatlabDynamicModel:
+        case oMatlabDynamicModelSparse:
           if (lag > 0)
             output <<  "x(it_+" << lag << ", " << i << ")";
           else if (lag < 0)
@@ -347,6 +370,7 @@ VariableNode::writeOutput(ostream &output, ExprNodeOutputType output_type,
             output <<  "x[it_" << lag << "+" << i << "*nb_row_xd]";
           break;
         case oMatlabStaticModel:
+        case oMatlabStaticModelSparse:
         case oCStaticModel:
           output << "x" << LPAR(output_type) << i << RPAR(output_type);
           break;
@@ -679,10 +703,18 @@ UnaryOpNode::writeOutput(ostream &output, ExprNodeOutputType output_type,
   temporary_terms_type::const_iterator it = temporary_terms.find(const_cast<UnaryOpNode *>(this));
   if (it != temporary_terms.end())
     {
-      if (output_type != oCDynamicModelSparseDLL)
-        output << "T" << idx;
-      else
+      if (output_type == oCDynamicModelSparseDLL)
         output << "T" << idx << "[it_]";
+      else if (output_type == oMatlabDynamicModelSparse)
+        output << "T" << idx << "(it_)";
+      else
+        output << "T" << idx;
+      /*if (output_type != oCDynamicModelSparseDLL)
+        output << "T" << idx;
+      else if (output_type == oMatlabDynamicModelSparse)
+        output << "T" << idx << "(it_)";
+      else
+        output << "T" << idx << "[it_]";*/
       return;
     }
 
@@ -1177,10 +1209,18 @@ BinaryOpNode::writeOutput(ostream &output, ExprNodeOutputType output_type,
   temporary_terms_type::const_iterator it = temporary_terms.find(const_cast<BinaryOpNode *>(this));
   if (it != temporary_terms.end())
     {
-      if (output_type != oCDynamicModelSparseDLL)
-        output << "T" << idx;
-      else
+      if (output_type == oCDynamicModelSparseDLL)
         output << "T" << idx << "[it_]";
+      else if (output_type == oMatlabDynamicModelSparse)
+        output << "T" << idx << "(it_)";
+      else
+        output << "T" << idx;
+      /*if (output_type != oCDynamicModelSparseDLL)
+        output << "T" << idx;
+      else if (output_type == oMatlabDynamicModelSparse)
+        output << "T" << idx << "(it_)";
+      else
+        output << "T" << idx << "[it_]";*/
       return;
     }
 
@@ -1198,6 +1238,7 @@ BinaryOpNode::writeOutput(ostream &output, ExprNodeOutputType output_type,
 	        case oMin:
 	          output << "min(";
 	          break;
+          default:;
 	        }
       arg1->writeOutput(output, output_type, temporary_terms);
       output << ",";
@@ -1267,6 +1308,7 @@ BinaryOpNode::writeOutput(ostream &output, ExprNodeOutputType output_type,
     case oEqual:
       output << "=";
       break;
+    default:;
     }
 
   close_parenthesis = false;

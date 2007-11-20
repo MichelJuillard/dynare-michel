@@ -34,7 +34,7 @@ class ParsingDriver;
 %}
 
 %token AR AUTOCORR
-%token BAYESIAN_IRF BETA_PDF
+%token BAYESIAN_IRF BETA_PDF BICGSTAB
 %token BVAR_DENSITY BVAR_FORECAST
 %token BVAR_PRIOR_DECAY BVAR_PRIOR_FLAT BVAR_PRIOR_LAMBDA
 %token BVAR_PRIOR_MU BVAR_PRIOR_OMEGA BVAR_PRIOR_TAU BVAR_PRIOR_TRAIN
@@ -45,14 +45,14 @@ class ParsingDriver;
 %token FILENAME FILTER_STEP_AHEAD FILTERED_VARS FIRST_OBS
 %token <string_val> FLOAT_NUMBER
 %token FORECAST
-%token GAMMA_PDF GCC_COMPILER GRAPH
+%token GAMMA_PDF GAUSSIAN_ELIMINATION GCC_COMPILER GMRES GRAPH
 %token HISTVAL HP_FILTER HP_NGRID
 %token INITVAL
 %token <string_val> INT_NUMBER
 %token INV_GAMMA_PDF IRF
 %token KALMAN_ALGO KALMAN_TOL
-%token LAPLACE LCC_COMPILER LIK_ALGO LIK_INIT LINEAR LOAD_MH_FILE LOGLINEAR MARKOWITZ MAX
-%token MH_DROP MH_INIT_SCALE MH_JSCALE MH_MODE MH_NBLOCKS MH_REPLIC MH_RECOVER MIN
+%token LAPLACE LCC_COMPILER LIK_ALGO LIK_INIT LINEAR LOAD_MH_FILE LOGLINEAR LU MARKOWITZ MAX
+%token METHOD MH_DROP MH_INIT_SCALE MH_JSCALE MH_MODE MH_NBLOCKS MH_REPLIC MH_RECOVER MIN
 %token MODE_CHECK MODE_COMPUTE MODE_FILE MODEL MODEL_COMPARISON MSHOCKS
 %token MODEL_COMPARISON_APPROXIMATION MODIFIEDHARMONICMEAN MOMENTS_VARENDO
 %token <string_val> NAME
@@ -64,7 +64,7 @@ class ParsingDriver;
 %token QZ_CRITERIUM
 %token RELATIVE_IRF REPLIC RPLOT
 %token SHOCKS SIGMA_E SIMUL SIMUL_ALGO SIMUL_SEED SMOOTHER SOLVE_ALGO
-%token SPARSE_DLL STDERR STEADY STOCH_SIMUL
+%token SPARSE SPARSE_DLL STDERR STEADY STOCH_SIMUL
 %token TEX RAMSEY_POLICY PLANNER_DISCOUNT
 %token <string_val> TEX_NAME
 %token UNIFORM_PDF UNIT_ROOT_VARS USE_DLL
@@ -335,17 +335,27 @@ histval_list : histval_list histval_elem
 
 histval_elem : NAME '(' signed_integer ')' EQUAL expression ';' { driver.hist_val($1, $3, $6); };
 
-model_sparse_options_list : model_sparse_options_list COMMA model_sparse_options
-                          | model_sparse_options
+model_sparse_dll_options_list : model_sparse_dll_options_list COMMA model_sparse_dll_options
+                          | model_sparse_dll_options
                           ;
 
-model_sparse_options : LCC_COMPILER 
+model_sparse_options_list : model_sparse_options_list COMMA model_sparse_common_options
+                          | model_sparse_common_options
+                          ;
+
+model_sparse_dll_options : model_compiler_options
+                         | model_sparse_common_options
+                         ;
+
+model_compiler_options : LCC_COMPILER
                        { driver.init_compiler(0); }
                      | GCC_COMPILER
                        { driver.init_compiler(1); }
                      | NO_COMPILER
                        { driver.init_compiler(2); }
-                     | o_cutoff
+                      ;
+
+model_sparse_common_options : o_cutoff
                      | o_markowitz
                      ;
 
@@ -355,10 +365,15 @@ model : MODEL ';' { driver.begin_model(); }
         equation_list END { driver.reset_data_tree(); }
       | MODEL '(' USE_DLL ')' ';' { driver.begin_model(); driver.use_dll(); }
         equation_list END { driver.reset_data_tree(); }
-      | MODEL '(' SPARSE_DLL COMMA model_sparse_options_list ')'
+      | MODEL '(' SPARSE_DLL COMMA model_sparse_dll_options_list ')'
         { driver.begin_model(); driver.sparse_dll(); } ';'
         equation_list END { driver.reset_data_tree(); }
       | MODEL '(' SPARSE_DLL ')' { driver.begin_model(); driver.sparse_dll(); } ';'
+        equation_list END { driver.reset_data_tree(); }
+      | MODEL '(' SPARSE COMMA model_sparse_options_list ')'
+        { driver.begin_model(); driver.sparse(); } ';'
+        equation_list END { driver.reset_data_tree(); }
+      | MODEL '(' SPARSE ')' { driver.begin_model(); driver.sparse(); } ';'
         equation_list END { driver.reset_data_tree(); }
       ;
 
@@ -466,8 +481,12 @@ shock_elem : VAR NAME ';' PERIODS period_list ';' VALUES value_list ';'
 
 period_list : period_list COMMA INT_NUMBER
               { driver.add_period($3); }
+            | period_list INT_NUMBER
+              { driver.add_period($2); }
             | period_list COMMA INT_NUMBER ':' INT_NUMBER
               { driver.add_period($3, $5); }
+            | period_list INT_NUMBER ':' INT_NUMBER
+              { driver.add_period($2, $4); }
             | INT_NUMBER ':' INT_NUMBER
               { driver.add_period($1, $3); }
             | INT_NUMBER
@@ -480,6 +499,8 @@ sigma_e : SIGMA_E EQUAL '[' triangular_matrix ']' ';' { driver.do_sigma_e(); };
 value_list
  	:  value_list COMMA expression
     {driver.add_value($3);}
+  |  value_list number
+    {driver.add_value($2);}
 	| expression
     {driver.add_value($1);}
 	;
@@ -546,6 +567,7 @@ simul_options_list : simul_options_list COMMA simul_options
 
 simul_options : o_periods
               | o_datafile
+              | o_method
               ;
 
 stoch_simul : STOCH_SIMUL ';'
@@ -1186,7 +1208,12 @@ o_hp_ngrid : HP_NGRID EQUAL INT_NUMBER { driver.option_num("hp_ngrid", $3); };
 o_periods : PERIODS EQUAL INT_NUMBER
             { driver.option_num("periods", $3); driver.option_num("simul", "1"); };
 o_cutoff : CUTOFF EQUAL number { driver.option_num("cutoff", $3); }
-o_markowitz : MARKOWITZ EQUAL number { driver.option_num("markowitz", $3); }
+o_method : METHOD EQUAL INT_NUMBER { driver.option_num("simulation_method",$3);}
+           | METHOD EQUAL LU { driver.option_num("simulation_method", "0"); }
+           | METHOD EQUAL GAUSSIAN_ELIMINATION { driver.option_num("simulation_method", "1"); }
+           | METHOD EQUAL GMRES { driver.option_num("simulation_method", "2"); }
+           | METHOD EQUAL BICGSTAB { driver.option_num("simulation_method", "3"); };
+o_markowitz : MARKOWITZ EQUAL number { driver.option_num("markowitz", $3); };
 o_simul : SIMUL { driver.option_num("simul", "1"); };
 o_simul_seed : SIMUL_SEED EQUAL INT_NUMBER { driver.option_num("simul_seed", $3)} ;
 o_qz_criterium : QZ_CRITERIUM EQUAL number { driver.option_num("qz_criterium", $3) };
@@ -1306,7 +1333,7 @@ vec_int_elem : INT_NUMBER
                  $1->append(":");
                  $1->append(*$3);
                  delete $3;
-                 $$ = $1; 
+                 $$ = $1;
                }
              ;
 
