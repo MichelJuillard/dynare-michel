@@ -73,4 +73,20 @@ public:
   virtual void writeOutput(ostream &output, const string &basename) const;
 };
 
+class HomotopyStatement : public Statement
+{
+public:
+  /*!
+    Contrary to Initval and Endval, we use a map, since it is impossible to reuse
+    a given initialization value in a second initialization inside the block.
+  */
+  typedef map<string,pair<NodeID,NodeID> > homotopy_values_type;
+private:
+  const homotopy_values_type homotopy_values;
+  const SymbolTable &symbol_table;
+public:
+  HomotopyStatement(const homotopy_values_type &homotopy_values_arg,
+		    const SymbolTable &symbol_table_arg);
+  virtual void writeOutput(ostream &output, const string &basename) const;
+};
 #endif

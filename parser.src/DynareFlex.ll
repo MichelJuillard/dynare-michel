@@ -107,6 +107,7 @@ int sigma_e = 0;
 <INITIAL>observation_trends {BEGIN DYNARE_BLOCK; return token::OBSERVATION_TRENDS;}
 <INITIAL>optim_weights {BEGIN DYNARE_BLOCK; return token::OPTIM_WEIGHTS;}
 <INITIAL>calib_var 	{BEGIN DYNARE_BLOCK; return token::CALIB_VAR;}
+<INITIAL>homotopy_setup {BEGIN DYNARE_BLOCK; return token::HOMOTOPY_SETUP;}
 
  /* End of a Dynare block */
 <DYNARE_BLOCK>end[ \t\n]*; 	{BEGIN INITIAL; return token::END;}
@@ -170,6 +171,9 @@ int sigma_e = 0;
 <DYNARE_STATEMENT>bvar_prior_flat { return token::BVAR_PRIOR_FLAT; }
 <DYNARE_STATEMENT>bvar_prior_train { return token::BVAR_PRIOR_TRAIN; }
 <DYNARE_STATEMENT>bvar_replic { return token::BVAR_REPLIC; }
+
+<DYNARE_STATEMENT>homotopy_mode {return token::HOMOTOPY_MODE; }
+<DYNARE_STATEMENT>homotopy_steps {return token::HOMOTOPY_STEPS; }
 
 <DYNARE_STATEMENT>[\$][^$]*[\$] {
   strtok(yytext+1, "$");

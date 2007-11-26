@@ -98,6 +98,8 @@ private:
   InitOrEndValStatement::init_values_type init_values;
   //! Temporary storage for histval blocks
   HistValStatement::hist_values_type hist_values;
+  //! Temporary storage for homotopy_setup blocks
+  HomotopyStatement::homotopy_values_type homotopy_values;
 
   //! Temporary storage for argument list of unknown function
   vector<NodeID> unknown_function_args;
@@ -195,12 +197,16 @@ public:
   void init_val(string *name, NodeID rhs);
   //! Writes an histval block
   void hist_val(string *name, string *lag, NodeID rhs);
+  //! Writes an homotopy_setup block
+  void homotopy_val(string *name, NodeID val1, NodeID val2);
   //! Writes end of an initval block
   void end_initval();
   //! Writes end of an endval block
   void end_endval();
   //! Writes end of an histval block
   void end_histval();
+  //! Writes end of an homotopy_setup block
+  void end_homotopy();
   //! Begin a model block
   void begin_model();
   //! Writes a shocks statement

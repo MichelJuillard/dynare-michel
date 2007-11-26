@@ -309,6 +309,26 @@ ParsingDriver::hist_val(string *name, string *lag, NodeID rhs)
 }
 
 void
+ParsingDriver::homotopy_val(string *name, NodeID val1, NodeID val2)
+{
+  check_symbol_existence(*name);
+  Type type = mod_file->symbol_table.getType(*name);
+
+  if (type != eParameter
+      && type != eExogenous
+      && type != eExogenousDet)
+    error("homotopy_val: " + *name + " should be a parameter or exogenous variable");
+
+  if (homotopy_values.find(*name) != homotopy_values.end())
+    error("homotopy_val: " + *name +" declared twice");
+
+  pair<NodeID, NodeID> expressions(val1, val2);
+  homotopy_values[*name] = expressions;
+
+  delete name;
+}
+
+void
 ParsingDriver::use_dll()
 {
   model_tree->mode = eDLLMode;
@@ -347,6 +367,13 @@ ParsingDriver::end_histval()
 {
   mod_file->addStatement(new HistValStatement(hist_values, mod_file->symbol_table));
   hist_values.clear();
+}
+
+void
+ParsingDriver::end_homotopy()
+{
+  mod_file->addStatement(new HomotopyStatement(homotopy_values, mod_file->symbol_table));
+  homotopy_values.clear();
 }
 
 void

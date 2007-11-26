@@ -71,6 +71,7 @@ class ParsingDriver;
 %token VALUES VAR VAREXO VAREXO_DET VAROBS
 %token XLS_SHEET XLS_RANGE
 %token NORMCDF
+%token HOMOTOPY_SETUP HOMOTOPY_MODE HOMOTOPY_STEPS
 %left LESS GREATER LESS_EQUAL GREATER_EQUAL EQUAL_EQUAL EXCLAMATION EXCLAMATION_EQUAL
 %left COMMA
 %left PLUS MINUS
@@ -139,6 +140,7 @@ statement : declaration
           | bvar_density
           | bvar_forecast
           | dynare_sensitivity
+          | homotopy_setup
           ;
 
 declaration : parameters
@@ -446,7 +448,7 @@ hand_side : '(' hand_side ')'
              { $$ = driver.add_max($3 , $5); }
           | MIN '(' hand_side COMMA hand_side ')'
              { $$ = driver.add_min($3 , $5); }
-          | NORMCDF '(' expression COMMA expression COMMA expression ')'
+          | NORMCDF '(' hand_side COMMA hand_side COMMA hand_side ')'
              { $$ = driver.add_normcdf($3,$5,$7);}
           ;
 
@@ -541,7 +543,10 @@ steady_options_list : steady_options_list COMMA steady_options
                     | steady_options
                     ;
 
-steady_options : o_solve_algo;
+steady_options : o_solve_algo
+               | o_homotopy_mode
+               | o_homotopy_steps
+               ;
 
 check : CHECK ';'
         { driver.check(); }
@@ -1187,6 +1192,16 @@ dynare_sensitivity_option : o_gsa_identification
                           | o_gsa_threshold_redform
                           ;
 
+homotopy_setup: HOMOTOPY_SETUP ';' homotopy_list END 
+               { driver.end_homotopy();};
+
+homotopy_list : homotopy_item
+              | homotopy_list homotopy_item
+              ;
+
+homotopy_item : NAME COMMA expression COMMA expression ';'
+              { driver.homotopy_val($1,$3,$5);};
+
 number : INT_NUMBER
        | FLOAT_NUMBER
        ;
@@ -1318,6 +1333,8 @@ o_gsa_istart_rmse : ISTART_RMSE EQUAL INT_NUMBER { driver.option_num("istart_rms
 o_gsa_alpha_rmse : ALPHA_RMSE EQUAL number { driver.option_num("alpha_rmse", $3); };
 o_gsa_alpha2_rmse : ALPHA2_RMSE EQUAL number { driver.option_num("alpha2_rmse", $3); };
 
+o_homotopy_mode : HOMOTOPY_MODE EQUAL INT_NUMBER {driver.option_num("homotopy_mode",$3); };
+o_homotopy_steps : HOMOTOPY_STEPS EQUAL INT_NUMBER {driver.option_num("homotopy_steps",$3); };
 
 range : NAME ':' NAME
         {
