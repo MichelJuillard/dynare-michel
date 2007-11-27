@@ -180,14 +180,19 @@ function J = ramsey_dynamic(ys,lbar)
   
   % getting indices of nonzero entries
   m = find(i_leadlag1');
+  n1 = max_lag1*endo_nbr1+1
+  n2 = n1+endo_nbr-1
+  
   
   n = length(m);
   k = 1:size(J,2);
   
   for i=1:n
     if sum(abs(J(:,i))) < 1e-8
-      k(i) = 0;
-      m(i) = 0;
+      if m(i) < n1 | m(i) > n2
+	k(i) = 0;
+	m(i) = 0;
+      end
     end
   end
   
