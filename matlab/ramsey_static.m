@@ -52,7 +52,9 @@ function [resids, rJ,mult] = ramsey_static(x)
   mult = -A\Uy;
 %  resids = [f; Uy(i_inst)+A(i_inst,:)*mult];
   resids1 = Uy+A*mult;
-  resids = [f; sqrt(resids1'*resids1/endo_nbr)]; 
+%  resids = [f; sqrt(resids1'*resids1/endo_nbr)]; 
+  [q,r,e] = qr([A Uy]');
+  resids = [f; r(end,(endo_nbr-inst_nbr+1:end))'];
   rJ = [];
   return;
   
