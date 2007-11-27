@@ -8,9 +8,10 @@ function [x,info] = dynare_solve(func,x,jacobian_flag,varargin)
   if options_.solve_algo == 0
     if ~isempty(which('fsolve')) & sscanf(version('-release'),'%d') >= 13;
       options=optimset('fsolve');
-      options.MaxFunEvals = 20000;
+      options.MaxFunEvals = 50000;
+      options.MaxIter = 2000;
       options.TolFun=1e-8;
-      options.Display = 'off';
+      options.Display = 'iter';
       if jacobian_flag
 	options.Jacobian = 'on';
       else
@@ -51,7 +52,7 @@ function [x,info] = dynare_solve(func,x,jacobian_flag,varargin)
       error('exiting ...')
     end
     
-    f = 0.5*fvec'*fvec ;
+%    f = 0.5*fvec'*fvec ;
 
     if max(abs(fvec)) < tolf
       return ;
@@ -80,7 +81,11 @@ function [x,info] = dynare_solve(func,x,jacobian_flag,varargin)
       [x,info]=solve1(func,x,1:nn,1:nn,jacobian_flag,varargin{:});
     end
   elseif options_.solve_algo == 3
-      [x,info] = csolve(func,x,'grad_ss',1e-6,500,varargin{:});
+    if jacobian_flag
+      [x,info] = csolve(func,x,func,1e-6,500,varargin{:});
+    else
+      [x,info] = csolve(func,x,[],1e-6,500,varargin{:});
+    end 
   end
 %    fvec1 = feval(func,x,varargin{:})
 

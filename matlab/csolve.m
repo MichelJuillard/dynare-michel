@@ -43,19 +43,23 @@ af0=sum(abs(f0));
 af00=af0;
 itct=0;
 while ~done
-   disp([af00-af0 crit*max(1,af0)])
+%   disp([af00-af0 crit*max(1,af0)])
    if itct>3 & af00-af0<crit*max(1,af0) & rem(itct,2)==1
       randomize=1;
    else
       if ~analyticg
-         if isempty(varargin)
-            grad = (feval(FUN,x*ones(1,nv)+tvec)-f0*ones(1,nv))/delta;
-         else
-            grad = (feval(FUN,x*ones(1,nv)+tvec,varargin{:})-f0*ones(1,nv))/delta;
-         end
+% $$$          if isempty(varargin)
+% $$$             grad = (feval(FUN,x*ones(1,nv)+tvec)-f0*ones(1,nv))/delta;
+% $$$          else
+% $$$             grad = (feval(FUN,x*ones(1,nv)+tvec,varargin{:})-f0*ones(1,nv))/delta;
+% $$$          end
+	grad = zeros(nv,nv);
+	for i=1:nv
+	  grad(:,i) = (feval(FUN,x+tvec(:,i),varargin{:})-f0)/delta;
+	end
       else % use analytic gradient
 	   %         grad=feval(gradfun,x,varargin{:});
-	   [f0,grad] = feval(FUN,x,varargin{:});
+	   [f0,grad] = feval(gradfun,x,varargin{:});
       end
       if isreal(grad)
          if rcond(grad)<1e-12
