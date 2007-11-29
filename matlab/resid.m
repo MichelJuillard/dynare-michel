@@ -3,7 +3,10 @@
 function resid(period)
   global M_ options_ oo_ it_ endval_ z
   
-  oo_.exo_simul = ones(M_.maximum_lag+M_.maximum_lead+period,1)*oo_.exo_steady_state';
+  if M_.exo_nbr > 0
+    oo_.exo_simul = ones(M_.maximum_lag+M_.maximum_lead+period,1)* ...
+	oo_.exo_steady_state';
+  end
   n = size(M_.lead_lag_incidence,2);
 %  if ~ options_.initval_file | size(oo_.endo_simul,2) ~= period+M_.maximum_lag+M_.maximum_lead
   if ~ options_.initval_file 
