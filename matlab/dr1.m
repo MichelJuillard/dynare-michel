@@ -29,8 +29,6 @@ function [dr,info]=dr1(dr,task)
 
   global M_ options_ oo_ olr_state
 
-
-
   info = 0;
   
   options_ = set_default_option(options_,'loglinear',0);
@@ -454,17 +452,22 @@ end
 zx=[zx; zeros(M_.exo_nbr,np);zeros(M_.exo_det_nbr,np)];
 zu=[zu; eye(M_.exo_nbr);zeros(M_.exo_det_nbr,M_.exo_nbr)];
 [nrzx,nczx] = size(zx);
-if nrzx*nrzx*nczx*nczx > 1e7
-  rhs = zeros(M_.endo_nbr,nczx*nczx);
-  k1 = 1;
-  for i1 = 1:nczx
-      for i2 = 1:nczx
-	rhs(:,k1) = hessian*kron(zx(:,i1),zx(:,i2));
-	k1 = k1 + 1; 
-      end
-  end
+
+if ~exist('sparse_hessian_times_B_kronecker_C')
+    if nrzx*nrzx*nczx*nczx > 1e7
+        rhs = zeros(M_.endo_nbr,nczx*nczx);
+        k1 = 1;
+        for i1 = 1:nczx
+            for i2 = 1:nczx
+                rhs(:,k1) = hessian*kron(zx(:,i1),zx(:,i2));
+                k1 = k1 + 1;
+            end
+        end
+    else
+        rhs = hessian*kron(zx,zx);
+    end
 else
-  rhs = hessian*kron(zx,zx);
+    rhs = sparse_hessian_times_B_kronecker_C(hessian,zx);
 end
 rhs = -rhs;
 
@@ -512,6 +515,7 @@ A(1:M_.endo_nbr,nstatic+1:nstatic+npred)=...
     A(1:M_.endo_nbr,nstatic+[1:npred])+jacobia_(:,k2)*gx1(k1,1:npred);
 C = hx;
 D = [rhs; zeros(n-M_.endo_nbr,size(rhs,2))];
+
 if exist('gensylv') & (strcmp(version('-release'),'2007b') == 0)
   dr.ghxx = gensylv(2,A,B,C,D);
 elseif exist('gensylv75') & (strcmp(version('-release'),'2007b') == 1)
@@ -528,35 +532,43 @@ hu = dr.ghu(nstatic+1:nstatic+npred,:);
 %kk = reshape([1:np*np],np,np);
 %kk = kk(1:npred,1:npred);
 %rhs = -hessian*kron(zx,zu)-f1*dr.ghxx(end-nyf+1:end,kk(:))*kron(hx(1:npred,:),hu(1:npred,:));
-if nrzx*nrzx*nczx*M_.exo_nbr > 1e7
-  rhs = zeros(M_.endo_nbr,nczx*M_.exo_nbr);
-  k1 = 1;
-  for i1 = 1:nczx
-      for i2 = 1:M_.exo_nbr
-	rhs(:,k1) = hessian*kron(zx(:,i1),zu(:,i2));
-	k1 = k1 + 1; 
-      end
-  end
+if ~exist('sparse_hessian_times_B_kronecker_C')
+    if nrzx*nrzx*nczx*M_.exo_nbr > 1e7
+        rhs = zeros(M_.endo_nbr,nczx*M_.exo_nbr);
+        k1 = 1;
+        for i1 = 1:nczx
+            for i2 = 1:M_.exo_nbr
+                rhs(:,k1) = hessian*kron(zx(:,i1),zu(:,i2));
+                k1 = k1 + 1; 
+            end
+        end
+    else
+        rhs = hessian*kron(zx,zu);
+    end
 else
-  rhs = hessian*kron(zx,zu);
+    rhs = sparse_hessian_times_B_kronecker_C(hessian,zx,zu);
 end
 nyf1 = sum(kstate(:,2) == M_.maximum_endo_lag+2);
 hu1 = [hu;zeros(np-npred,M_.exo_nbr)];
 %B1 = [B(1:M_.endo_nbr,:);zeros(size(A,1)-M_.endo_nbr,size(B,2))];
 [nrhx,nchx] = size(hx);
 [nrhu1,nchu1] = size(hu1);
-if nrhx*nrhu1*nchx*nchu1 > 1e7
-  B1 = zeros(size(dr.ghxx,1),nchx*nchu1);
-  k1 = 1;
-  for i1 = 1:nchx
-      for i2 = 1:nchu1
-	B1(:,k1) = dr.ghxx*kron(hx(:,i1),hu1(:,i2));
-	k1 = k1 + 1; 
-      end
-  end
-  B1 = B*B1;
+if ~exist('A_times_B_kronecker_C')
+    if nrhx*nrhu1*nchx*nchu1 > 1e7
+        B1 = zeros(size(dr.ghxx,1),nchx*nchu1);
+        k1 = 1;
+        for i1 = 1:nchx
+            for i2 = 1:nchu1
+                B1(:,k1) = dr.ghxx*kron(hx(:,i1),hu1(:,i2));
+                k1 = k1 + 1;
+            end
+        end
+        B1 = B*B1;
+    else
+        B1 = B*dr.ghxx*kron(hx,hu1);
+    end
 else
-  B1 = B*dr.ghxx*kron(hx,hu1);
+    B1 = B*A_times_B_kronecker_C(dr.ghxx,hx,hu1);
 end
 rhs = -[rhs; zeros(n-M_.endo_nbr,size(rhs,2))]-B1;
 
@@ -568,30 +580,38 @@ dr.ghxu = A\rhs;
 %rhs
 kk = reshape([1:np*np],np,np);
 kk = kk(1:npred,1:npred);
-if nrzx*nrzx*M_.exo_nbr*M_.exo_nbr > 1e7
-  rhs = zeros(M_.endo_nbr,M_.exo_nbr*M_.exo_nbr);
-  k1 = 1;
-  for i1 = 1:M_.exo_nbr
-      for i2 = 1:M_.exo_nbr
-	rhs(:,k1) = hessian*kron(zu(:,i1),zu(:,i2));
-	k1 = k1 + 1; 
-      end
-  end
+if ~exist('sparse_hessian_times_B_kronecker_C')
+    if nrzx*nrzx*M_.exo_nbr*M_.exo_nbr > 1e7
+        rhs = zeros(M_.endo_nbr,M_.exo_nbr*M_.exo_nbr);
+        k1 = 1;
+        for i1 = 1:M_.exo_nbr
+            for i2 = 1:M_.exo_nbr
+                rhs(:,k1) = hessian*kron(zu(:,i1),zu(:,i2));
+                k1 = k1 + 1; 
+            end
+        end
+    else
+        rhs = hessian*kron(zu,zu);
+    end
 else
-  rhs = hessian*kron(zu,zu);
+    rhs = sparse_hessian_times_B_kronecker_C(hessian,zu);
 end
-if nrhu1*nrhu1*nchu1*nchu1 > 1e7
-  B1 = zeros(size(dr.ghxx,1),nchu1*nchu1);
-  k1 = 1;
-  for i1 = 1:nchu1
-      for i2 = 1:nchu1
-	B1(:,k1) = dr.ghxx*kron(hu1(:,i1),hu1(:,i2));
-	k1 = k1 + 1; 
-      end
-  end
-  B1 = B*B1;
+if ~exist('A_times_B_kronecker_C')
+    if nrhu1*nrhu1*nchu1*nchu1 > 1e7
+        B1 = zeros(size(dr.ghxx,1),nchu1*nchu1);
+        k1 = 1;
+        for i1 = 1:nchu1
+            for i2 = 1:nchu1
+                B1(:,k1) = dr.ghxx*kron(hu1(:,i1),hu1(:,i2));
+                k1 = k1 + 1; 
+            end
+        end
+        B1 = B*B1;
+    else
+        B1 = B*dr.ghxx*kron(hu1,hu1);
+    end
 else
-  B1 = B*dr.ghxx*kron(hu1,hu1);
+    B1 = A_times_B_kronecker_C(B*dr.ghxx,hu1);
 end
 rhs = -[rhs; zeros(n-M_.endo_nbr,size(rhs,2))]-B1;
 
@@ -636,19 +656,23 @@ for i=1:M_.maximum_endo_lead
     [junk,k3a,k3] = ...
 	find(M_.lead_lag_incidenceordered(M_.maximum_endo_lag+j+1,:));
     nk3a = length(k3a);
-    if nk3a*nk3a*M_.exo_nbr*M_.exo_nbr > 1e7
-      B1 = zeros(M_.endo_nbr,M_.exo_nbr*M_.exo_nbr);
-      k1 = 1;
-      Hesse = hessian(:,kh(k3,k3));
-      guk3a = gu(k3a,:);
-      for i1 = 1:M_.exo_nbr
-	for i2 = 1:M_.exo_nbr
-	  B1(:,k1) = Hesse*kron(guk3a(:,i1),guk3a(:,i2));
-	  k1 = k1 + 1; 
-	end
-      end
+    if ~exist('sparse_hessian_times_B_kronecker_C')
+        if nk3a*nk3a*M_.exo_nbr*M_.exo_nbr > 1e7
+            B1 = zeros(M_.endo_nbr,M_.exo_nbr*M_.exo_nbr);
+            k1 = 1;
+            Hesse = hessian(:,kh(k3,k3));
+            guk3a = gu(k3a,:);
+            for i1 = 1:M_.exo_nbr
+                for i2 = 1:M_.exo_nbr
+                    B1(:,k1) = Hesse*kron(guk3a(:,i1),guk3a(:,i2));
+                    k1 = k1 + 1; 
+                end
+            end
+        else
+            B1 = hessian(:,kh(k3,k3))*kron(gu(k3a,:),gu(k3a,:));
+        end
     else
-      B1 = hessian(:,kh(k3,k3))*kron(gu(k3a,:),gu(k3a,:));
+        B1 = sparse_hessian_times_B_kronecker_C(hessian(:,kh(k3,k3)),gu(k3a,:));
     end
     RHS = RHS + jacobia_(:,k2)*guu(k2a,:)+B1;
   end
@@ -664,29 +688,32 @@ for i=1:M_.maximum_endo_lead
   kk = find(kstate(:,2) == M_.maximum_endo_lag+i+1);
   gu = dr.ghx*Gu;
   [nrGu,ncGu] = size(Gu);
-  if nrGu*nrGu*ncGu*ncGu > 1e7
-    G1 = zeros(M_.endo_nbr,ncGu*ncGu);
-    G2 = zeros(size(hxx,1),ncGu*ncGu);
-    k1 = 1;
-    for i1 = 1:nchx
-      for i2 = 1:nchu1
-	GuGu = kron(Gu(:,i1),Gu(:,i2));
-	G1(:,k1) = dr.ghxx*GuGu
-	G2(:,k1) = hxx*GuGu
-	k1 = k1 + 1; 
+  if ~exist('A_times_B_kronecker_C')
+      if nrGu*nrGu*ncGu*ncGu > 1e7
+          G1 = zeros(M_.endo_nbr,ncGu*ncGu);
+          G2 = zeros(size(hxx,1),ncGu*ncGu);
+          k1 = 1;
+          for i1 = 1:nchx
+              for i2 = 1:nchu1
+                  GuGu = kron(Gu(:,i1),Gu(:,i2));
+                  G1(:,k1) = dr.ghxx*GuGu;
+                  G2(:,k1) = hxx*GuGu;
+                  k1 = k1 + 1;
+              end
+          end
+      else
+          GuGu = kron(Gu,Gu);
+          G1 = dr.ghxx*GuGu;
+          G2 = hxx*GuGu;
       end
-    end
   else
-    GuGu = kron(Gu,Gu);
-    G1 = dr.ghxx*GuGu;
-    G2 = hxx*GuGu;
+      G1 = A_times_B_kronecker_C(dr.ghxx,Gu);
+      G2 = A_times_B_kronecker_C(hxx,Gu);
   end
-
   guu = dr.ghx*Guu+G1;
   Gu = hx*Gu;
   Guu = hx*Guu;
   Guu(end-npred+1:end,:) = Guu(end-npred+1:end,:) + G2;
-
   H = E1 + hx*H;
 end
 RHS = RHS*M_.Sigma_e(:);
@@ -748,8 +775,3 @@ if M_.exo_det_nbr > 0
     
   end
 end
-
-
-
-
-
