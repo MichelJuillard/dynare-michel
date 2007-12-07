@@ -454,7 +454,7 @@ zu=[zu; eye(M_.exo_nbr);zeros(M_.exo_det_nbr,M_.exo_nbr)];
 [nrzx,nczx] = size(zx);
 
 if ~exist('sparse_hessian_times_B_kronecker_C') |  ((strcmp(version('-release'),'2007b') ...
-					 ~= 1) & computer == 'PCWIN')
+					 ~= 1) & strcmpi(computer,'PCWIN'))
     if nrzx*nrzx*nczx*nczx > 1e7
         rhs = zeros(M_.endo_nbr,nczx*nczx);
         k1 = 1;
@@ -534,7 +534,7 @@ hu = dr.ghu(nstatic+1:nstatic+npred,:);
 %kk = kk(1:npred,1:npred);
 %rhs = -hessian*kron(zx,zu)-f1*dr.ghxx(end-nyf+1:end,kk(:))*kron(hx(1:npred,:),hu(1:npred,:));
 if ~exist('sparse_hessian_times_B_kronecker_C') |  ((strcmp(version('-release'),'2007b') ...
-					 ~= 1) & computer == 'PCWIN')
+					 ~= 1) & strcmpi(computer,'PCWIN'))
     if nrzx*nrzx*nczx*M_.exo_nbr > 1e7
         rhs = zeros(M_.endo_nbr,nczx*M_.exo_nbr);
         k1 = 1;
@@ -556,7 +556,7 @@ hu1 = [hu;zeros(np-npred,M_.exo_nbr)];
 [nrhx,nchx] = size(hx);
 [nrhu1,nchu1] = size(hu1);
 if ~exist('A_times_B_kronecker_C') |  ((strcmp(version('-release'),'2007b') ...
-					 ~= 1) & computer == 'PCWIN')
+					 ~= 1) & strcmpi(computer,'PCWIN'))
     if nrhx*nrhu1*nchx*nchu1 > 1e7
         B1 = zeros(size(dr.ghxx,1),nchx*nchu1);
         k1 = 1;
@@ -584,7 +584,7 @@ dr.ghxu = A\rhs;
 kk = reshape([1:np*np],np,np);
 kk = kk(1:npred,1:npred);
 if ~exist('sparse_hessian_times_B_kronecker_C') |  ((strcmp(version('-release'),'2007b') ...
-					 ~= 1) & computer == 'PCWIN')
+					 ~= 1) & strcmpi(computer,'PCWIN'))
     if nrzx*nrzx*M_.exo_nbr*M_.exo_nbr > 1e7
         rhs = zeros(M_.endo_nbr,M_.exo_nbr*M_.exo_nbr);
         k1 = 1;
@@ -601,7 +601,7 @@ else
     rhs = sparse_hessian_times_B_kronecker_C(hessian,zu);
 end
 if ~exist('A_times_B_kronecker_C') |  ((strcmp(version('-release'),'2007b') ...
-					 ~= 1) & computer == 'PCWIN')
+					 ~= 1) & strcmpi(computer,'PCWIN'))
     if nrhu1*nrhu1*nchu1*nchu1 > 1e7
         B1 = zeros(size(dr.ghxx,1),nchu1*nchu1);
         k1 = 1;
@@ -662,7 +662,7 @@ for i=1:M_.maximum_endo_lead
 	find(M_.lead_lag_incidenceordered(M_.maximum_endo_lag+j+1,:));
     nk3a = length(k3a);
     if ~exist('sparse_hessian_times_B_kronecker_C') |  ((strcmp(version('-release'),'2007b') ...
-					 ~= 1) & computer == 'PCWIN')
+					 ~= 1) & strcmpi(computer,'PCWIN'))
         if nk3a*nk3a*M_.exo_nbr*M_.exo_nbr > 1e7
             B1 = zeros(M_.endo_nbr,M_.exo_nbr*M_.exo_nbr);
             k1 = 1;
@@ -695,7 +695,7 @@ for i=1:M_.maximum_endo_lead
   gu = dr.ghx*Gu;
   [nrGu,ncGu] = size(Gu);
   if ~exist('A_times_B_kronecker_C') | ((strcmp(version('-release'),'2007b') ...
-					 ~= 1) & computer == 'PCWIN')
+					 ~= 1) & strcmpi(computer,'PCWIN'))
       if nrGu*nrGu*ncGu*ncGu > 1e7
           G1 = zeros(M_.endo_nbr,ncGu*ncGu);
           G2 = zeros(size(hxx,1),ncGu*ncGu);
