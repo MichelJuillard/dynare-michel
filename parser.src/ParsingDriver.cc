@@ -201,15 +201,6 @@ ParsingDriver::markowitz(string *markowitz)
 }
 
 void
-ParsingDriver::simulation_method(string *simulation_method)
-{
-  double simulation_method_val = atof(simulation_method->c_str());
-  mod_file->addStatement(new Simulation_MethodStatement(simulation_method_val ));
-  delete simulation_method;
-}
-
-
-void
 ParsingDriver::dsample(string *arg1)
 {
   int arg1_val = atoi(arg1->c_str());
@@ -533,11 +524,8 @@ ParsingDriver::add_value(NodeID value)
 void
 ParsingDriver::add_value(string *p1)
 {
-  //int p1_val = atoi(p1->c_str());
   det_shocks_values.push_back(add_constant(p1));
-  //delete p1;
 }
-
 
 void
 ParsingDriver::do_sigma_e()
@@ -572,22 +560,14 @@ ParsingDriver::add_to_row(NodeID v)
   sigmae_row.push_back(v);
 }
 
-
 void
 ParsingDriver::steady()
 {
-  if (/*mod_file->model_tree.mode == eSparseDLLMode || */mod_file->model_tree.mode == eSparseMode)
-    {
-      mod_file->addStatement(new SteadySparseStatement(options_list));
-      options_list.clear();
-    }
+  if (mod_file->model_tree.mode == eSparseMode)
+    mod_file->addStatement(new SteadySparseStatement(options_list));
   else
-    {
-      mod_file->addStatement(new SteadyStatement(options_list));
-      options_list.clear();
-    }
-  /*mod_file->addStatement(new SteadyStatement(options_list));
-  options_list.clear();*/
+    mod_file->addStatement(new SteadyStatement(options_list));
+  options_list.clear();
 }
 
 void
@@ -1144,9 +1124,6 @@ ParsingDriver::add_different(NodeID arg1, NodeID arg2)
 {
   return data_tree->AddDifferent(arg1, arg2);
 }
-
-
-
 
 NodeID
 ParsingDriver::add_power(NodeID arg1, NodeID arg2)

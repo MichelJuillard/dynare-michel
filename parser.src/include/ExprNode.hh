@@ -140,10 +140,7 @@ public:
   };
 
   virtual double eval(const eval_context_type &eval_context) const throw (EvalException) = 0;
-  /*New*/
   virtual void compile(ofstream &CompileCode, bool lhs_rhs, ExprNodeOutputType output_type, const temporary_terms_type &temporary_terms, map_idx_type map_idx) const = 0;
-  /*EndNew*/
-
 };
 
 //! Object used to compare two nodes (using their indexes)
@@ -168,9 +165,7 @@ public:
   virtual void writeOutput(ostream &output, ExprNodeOutputType output_type, const temporary_terms_type &temporary_terms) const;
   virtual void collectEndogenous(NodeID &Id);
   virtual double eval(const eval_context_type &eval_context) const throw (EvalException);
-  /*New*/
   virtual void compile(ofstream &CompileCode, bool lhs_rhs, ExprNodeOutputType output_type, const temporary_terms_type &temporary_terms, map_idx_type map_idx) const;
-  /*EndNew*/
 };
 
 //! Symbol or variable node
@@ -189,9 +184,7 @@ public:
   virtual void writeOutput(ostream &output, ExprNodeOutputType output_type, const temporary_terms_type &temporary_terms = temporary_terms_type()) const;
   virtual void collectEndogenous(NodeID &Id);
   virtual double eval(const eval_context_type &eval_context) const throw (EvalException);
-  /*New*/
   virtual void compile(ofstream &CompileCode, bool lhs_rhs, ExprNodeOutputType output_type, const temporary_terms_type &temporary_terms, map_idx_type map_idx) const;
-  /*EndNew*/
 };
 
 enum UnaryOpcode
@@ -238,9 +231,7 @@ public:
   virtual void collectEndogenous(NodeID &Id);
   static double eval_opcode(UnaryOpcode op_code, double v) throw (EvalException);
   virtual double eval(const eval_context_type &eval_context) const throw (EvalException);
-  /*New*/
   virtual void compile(ofstream &CompileCode, bool lhs_rhs, ExprNodeOutputType output_type, const temporary_terms_type &temporary_terms, map_idx_type map_idx) const;
-  /*EndNew*/
 };
 
 enum BinaryOpcode
@@ -285,9 +276,7 @@ public:
   virtual void collectEndogenous(NodeID &Id);
   static double eval_opcode(double v1, BinaryOpcode op_code, double v2) throw (EvalException);
   virtual double eval(const eval_context_type &eval_context) const throw (EvalException);
-  /*New*/
   virtual void compile(ofstream &CompileCode, bool lhs_rhs, ExprNodeOutputType output_type, const temporary_terms_type &temporary_terms, map_idx_type map_idx) const;
-  /*EndNew*/
 };
 
 enum TrinaryOpcode
@@ -304,7 +293,6 @@ private:
   const TrinaryOpcode op_code;
   virtual NodeID computeDerivative(int varID);
   virtual int cost(const temporary_terms_type &temporary_terms, bool is_matlab) const;
-  set<int> non_null_derivatives_tmp;
 public:
   TrinaryOpNode(DataTree &datatree_arg, const NodeID arg1_arg,
 		TrinaryOpcode op_code_arg, const NodeID arg2_arg, const NodeID arg3_arg);
@@ -320,9 +308,7 @@ public:
   virtual void collectEndogenous(NodeID &Id);
   static double eval_opcode(double v1, TrinaryOpcode op_code, double v2, double v3) throw (EvalException);
   virtual double eval(const eval_context_type &eval_context) const throw (EvalException);
-  /*New*/
   virtual void compile(ofstream &CompileCode, bool lhs_rhs, ExprNodeOutputType output_type, const temporary_terms_type &temporary_terms, map_idx_type map_idx) const;
-  /*EndNew*/
 };
 
 //! Unknown function node
@@ -346,9 +332,7 @@ public:
                                      map_idx_type &map_idx) const;
   virtual void collectEndogenous(NodeID &Id);
   virtual double eval(const eval_context_type &eval_context) const throw (EvalException);
-  /*New*/
   virtual void compile(ofstream &CompileCode, bool lhs_rhs, ExprNodeOutputType output_type, const temporary_terms_type &temporary_terms, map_idx_type map_idx) const;
-  /*EndNew*/
 };
 
 typedef struct IM_compact

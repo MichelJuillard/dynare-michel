@@ -119,15 +119,6 @@ public:
   virtual void writeOutput(ostream &output, const string &basename) const;
 };
 
-class Simulation_MethodStatement : public Statement
-{
-private:
-  const int simulation_method;
-public:
-  Simulation_MethodStatement(double simulation_method_arg) ;
-  void writeOutput(ostream &output, const string &basename) const;
-};
-
 class MarkowitzStatement : public Statement
 {
 private:

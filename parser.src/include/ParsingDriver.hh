@@ -184,8 +184,6 @@ public:
   //! Adds a "cutoff" statement
   void cutoff(string *cutoff);
   //! Adds a weight of the "markowitz" criteria statement
-  void simulation_method(string *simulation_method);
-  //! Adds a deterministic simulation method statement
   void markowitz(string *markowitz);
   //! Adds a "dsample" statement
   void dsample(string *arg1);
@@ -378,11 +376,11 @@ public:
   NodeID add_atanh(NodeID arg1);
   //! Writes token "sqrt(arg1)" to model tree
   NodeID add_sqrt(NodeID arg1);
-   //! Writes token "max(arg1,arg2)" to model tree
+  //! Writes token "max(arg1,arg2)" to model tree
   NodeID add_max(NodeID arg1, NodeID arg2);
-   //! Writes token "min(arg1,arg2)" to model tree
+  //! Writes token "min(arg1,arg2)" to model tree
   NodeID add_min(NodeID arg1, NodeID arg2);
-   //! Writes token "normcdf(arg1,arg2,arg3)" to model tree
+  //! Writes token "normcdf(arg1,arg2,arg3)" to model tree
   NodeID add_normcdf(NodeID arg1, NodeID arg2, NodeID arg3);
   //! Adds an unknwon function argument
   void add_unknown_function_arg(NodeID arg);

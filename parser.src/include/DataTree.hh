@@ -14,6 +14,8 @@ using namespace std;
 #include "VariableTable.hh"
 #include "ExprNode.hh"
 
+#define CONSTANTS_PRECISION 16
+
 class DataTree
 {
   friend class ExprNode;
@@ -151,7 +153,7 @@ DataTree::AddPossiblyNegativeConstant(double v)
       neg = true;
     }
   ostringstream ost;
-  ost << setprecision(16) << v;
+  ost << setprecision(CONSTANTS_PRECISION) << v;
 
   NodeID cnode = AddNumConstant(ost.str());
 

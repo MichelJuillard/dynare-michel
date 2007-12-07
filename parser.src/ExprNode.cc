@@ -129,7 +129,6 @@ NumConstNode::eval(const eval_context_type &eval_context) const throw (EvalExcep
   return(datatree.num_constants.getDouble(id));
 }
 
-/*New*/
 void
 NumConstNode::compile(ofstream &CompileCode, bool lhs_rhs, ExprNodeOutputType output_type, const temporary_terms_type &temporary_terms, map_idx_type map_idx) const
 {
@@ -151,7 +150,6 @@ NumConstNode::compile(ofstream &CompileCode, bool lhs_rhs, ExprNodeOutputType ou
       CompileCode.write(reinterpret_cast<char *>(&vard),sizeof(vard));
     /*}*/
 }
-/*EndNew*/
 
 
 void
@@ -248,12 +246,6 @@ VariableNode::writeOutput(ostream &output, ExprNodeOutputType output_type,
         output << "T" << idx << "(it_)";
       else
         output << "T" << idx;
-      /*if (output_type != oCDynamicModelSparseDLL)
-        output << "T" << idx;
-      else if (output_type == oMatlabDynamicModelSparse)
-        output << "T" << idx << "(it_)";
-      else
-        output << "T" << idx << "[it_]";*/
       return;
     }
 
@@ -411,7 +403,6 @@ VariableNode::eval(const eval_context_type &eval_context) const throw (EvalExcep
   return it->second;
 }
 
-/*New*/
 void
 VariableNode::compile(ofstream &CompileCode, bool lhs_rhs, ExprNodeOutputType output_type, const temporary_terms_type &temporary_terms, map_idx_type map_idx) const
 {
@@ -471,7 +462,6 @@ VariableNode::compile(ofstream &CompileCode, bool lhs_rhs, ExprNodeOutputType ou
       exit(-1);
     }
 }
-/*EndNew*/
 
 void
 VariableNode::collectEndogenous(NodeID &Id)
@@ -709,21 +699,12 @@ UnaryOpNode::writeOutput(ostream &output, ExprNodeOutputType output_type,
         output << "T" << idx << "(it_)";
       else
         output << "T" << idx;
-      /*if (output_type != oCDynamicModelSparseDLL)
-        output << "T" << idx;
-      else if (output_type == oMatlabDynamicModelSparse)
-        output << "T" << idx << "(it_)";
-      else
-        output << "T" << idx << "[it_]";*/
       return;
     }
 
   // Always put parenthesis around uminus nodes
   if (op_code == oUminus)
     output << "(";
-
-
-
 
   switch(op_code)
     {
@@ -857,7 +838,6 @@ UnaryOpNode::eval(const eval_context_type &eval_context) const throw (EvalExcept
   return eval_opcode(op_code, v);
 }
 
-/*New*/
 void
 UnaryOpNode::compile(ofstream &CompileCode, bool lhs_rhs, ExprNodeOutputType output_type, const temporary_terms_type &temporary_terms, map_idx_type map_idx) const
 {
@@ -874,7 +854,6 @@ UnaryOpNode::compile(ofstream &CompileCode, bool lhs_rhs, ExprNodeOutputType out
   UnaryOpcode op_codel=op_code;
   CompileCode.write(reinterpret_cast<char *>(&op_codel), sizeof(op_codel));
 }
-/*EndNEw*/
 
 void
 UnaryOpNode::collectEndogenous(NodeID &Id)
@@ -982,28 +961,31 @@ BinaryOpNode::precedence(ExprNodeOutputType output_type, const temporary_terms_t
 
   switch(op_code)
     {
+    case oEqual:
+      return 0;
     case oEqualEqual:
     case oDifferent:
+      return 1;
     case oLessEqual:
     case oGreaterEqual:
     case oLess:
     case oGreater:
-    case oMin:
-    case oMax:
-      return 0;
-    case oEqual:
+      return 2;
     case oPlus:
     case oMinus:
-      return 1;
+      return 3;
     case oTimes:
     case oDivide:
-      return 2;
+      return 4;
     case oPower:
       if (!OFFSET(output_type))
         // In C, power operator is of the form pow(a, b)
         return 100;
       else
-        return 4;
+        return 5;
+    case oMin:
+    case oMax:
+      return 100;
     }
   cerr << "Impossible case!" << endl;
   exit(-1);
@@ -1143,27 +1125,27 @@ BinaryOpNode::eval_opcode(double v1, BinaryOpcode op_code, double v2) throw (Eva
     case oPower:
       return(pow(v1, v2));
     case oMax:
-      if(v1<v2)
-        return( v2);
+      if (v1 < v2)
+        return v2;
       else
-        return( v1);
+        return v1;
     case oMin:
-      if(v1>v2)
-        return( v2);
+      if (v1 > v2)
+        return v2;
       else
-        return( v1);
+        return v1;
     case oLess:
-        return( v1< v2 ? 1.0 : 0.0);
+      return (v1 < v2);
     case oGreater:
-        return( v1> v2 ? 1.0 : 0.0);
+      return (v1 > v2);
     case oLessEqual:
-        return( v1<= v2 ? 1.0 : 0.0);
+      return (v1 <= v2);
     case oGreaterEqual:
-        return( v1>= v2 ? 1.0 : 0.0);
+      return (v1 >= v2);
     case oEqualEqual:
-        return( v1== v2 ? 1.0 : 0.0);
+      return (v1 == v2);
     case oDifferent:
-        return( v1!= v2 ? 1.0 : 0.0);
+      return (v1 != v2);
     case oEqual:
       throw EvalException();
     }
@@ -1180,7 +1162,6 @@ BinaryOpNode::eval(const eval_context_type &eval_context) const throw (EvalExcep
   return eval_opcode(v1, op_code, v2);
 }
 
-/*New*/
 void
 BinaryOpNode::compile(ofstream &CompileCode, bool lhs_rhs, ExprNodeOutputType output_type, const temporary_terms_type &temporary_terms, map_idx_type map_idx) const
 {
@@ -1199,7 +1180,6 @@ BinaryOpNode::compile(ofstream &CompileCode, bool lhs_rhs, ExprNodeOutputType ou
   BinaryOpcode op_codel=op_code;
   CompileCode.write(reinterpret_cast<char *>(&op_codel),sizeof(op_codel));
 }
-/*EndNew*/
 
 void
 BinaryOpNode::writeOutput(ostream &output, ExprNodeOutputType output_type,
@@ -1215,30 +1195,25 @@ BinaryOpNode::writeOutput(ostream &output, ExprNodeOutputType output_type,
         output << "T" << idx << "(it_)";
       else
         output << "T" << idx;
-      /*if (output_type != oCDynamicModelSparseDLL)
-        output << "T" << idx;
-      else if (output_type == oMatlabDynamicModelSparse)
-        output << "T" << idx << "(it_)";
-      else
-        output << "T" << idx << "[it_]";*/
       return;
     }
 
-  // Treat special case of power operator in C
+  // Treat special case of power operator in C, and case of max and min operators
   if ((op_code == oPower && !OFFSET(output_type)) || op_code == oMax || op_code == oMin )
     {
       switch (op_code)
 	      {
-	        case oPower:
-	          output << "pow(";
-	          break;
-	        case oMax:
-	          output << "max(";
-	          break;
-	        case oMin:
-	          output << "min(";
-	          break;
-          default:;
+        case oPower:
+          output << "pow(";
+          break;
+        case oMax:
+          output << "max(";
+          break;
+        case oMin:
+          output << "min(";
+          break;
+        default:
+          ;
 	        }
       arg1->writeOutput(output, output_type, temporary_terms);
       output << ",";
@@ -1300,7 +1275,7 @@ BinaryOpNode::writeOutput(ostream &output, ExprNodeOutputType output_type,
       output << "==";
       break;
     case oDifferent:
-      if(OFFSET(output_type))
+      if (OFFSET(output_type))
         output << "~=";
       else
         output << "!=";
@@ -1308,7 +1283,8 @@ BinaryOpNode::writeOutput(ostream &output, ExprNodeOutputType output_type,
     case oEqual:
       output << "=";
       break;
-    default:;
+    default:
+      ;
     }
 
   close_parenthesis = false;
@@ -1354,7 +1330,8 @@ TrinaryOpNode::TrinaryOpNode(DataTree &datatree_arg, const NodeID arg1_arg,
   datatree.trinary_op_node_map[make_pair(make_pair(make_pair(arg1, arg2), arg3), op_code)] = this;
 
   // Non-null derivatives are the union of those of the arguments
-  // Compute set union of arg1->non_null_derivatives and arg2->non_null_derivatives
+  // Compute set union of arg{1,2,3}->non_null_derivatives
+  set<int> non_null_derivatives_tmp;  
   set_union(arg1->non_null_derivatives.begin(),
             arg1->non_null_derivatives.end(),
             arg2->non_null_derivatives.begin(),
@@ -1433,7 +1410,7 @@ TrinaryOpNode::precedence(ExprNodeOutputType output_type, const temporary_terms_
   switch(op_code)
     {
     case oNormcdf:
-        return 100;
+      return 100;
     }
   cerr << "Impossible case!" << endl;
   exit(-1);
@@ -1546,9 +1523,9 @@ TrinaryOpNode::eval(const eval_context_type &eval_context) const throw (EvalExce
   return eval_opcode(v1, op_code, v2, v3);
 }
 
-/*New*/
 void
-TrinaryOpNode::compile(ofstream &CompileCode, bool lhs_rhs, ExprNodeOutputType output_type, const temporary_terms_type &temporary_terms, map_idx_type map_idx) const
+TrinaryOpNode::compile(ofstream &CompileCode, bool lhs_rhs, ExprNodeOutputType output_type,
+                       const temporary_terms_type &temporary_terms, map_idx_type map_idx) const
 {
   // If current node is a temporary term
   temporary_terms_type::const_iterator it = temporary_terms.find(const_cast<TrinaryOpNode *>(this));
@@ -1566,13 +1543,11 @@ TrinaryOpNode::compile(ofstream &CompileCode, bool lhs_rhs, ExprNodeOutputType o
   TrinaryOpcode op_codel=op_code;
   CompileCode.write(reinterpret_cast<char *>(&op_codel),sizeof(op_codel));
 }
-/*EndNew*/
 
 void
 TrinaryOpNode::writeOutput(ostream &output, ExprNodeOutputType output_type,
                           const temporary_terms_type &temporary_terms) const
 {
-
   if (!OFFSET(output_type))
     {
       cerr << "TrinaryOpNode not implemented for C output" << endl;

@@ -303,18 +303,6 @@ MarkowitzStatement::writeOutput(ostream &output, const string &basename) const
   output << "options_.markowitz = " << markowitz << ";" << endl;
 }
 
-
-Simulation_MethodStatement::Simulation_MethodStatement(double simulation_method_arg) : simulation_method(simulation_method_arg)
-{
-}
-
-void
-Simulation_MethodStatement::writeOutput(ostream &output, const string &basename) const
-{
-  output << "options_.simulation_method = " << simulation_method << ";" << endl;
-}
-
-
 DsampleStatement::DsampleStatement(int val1_arg) : val1(val1_arg), val2(-1)
 {
 }
