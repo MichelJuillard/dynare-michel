@@ -1,6 +1,6 @@
 function bvar_forecast(nlags)
 
-    global options_
+    global options_ oo_ M_
     
     options_ = set_default_option(options_, 'bvar_replic', 2000);
     if options_.forecast == 0
@@ -20,12 +20,14 @@ function bvar_forecast(nlags)
     
     k = ny*nlags+nx;
     
-    % Declaration of the companion matrix:
+    % Declaration of the companion matrix
     Companion_matrix = diag(ones(ny*(nlags-1),1),-ny);
     
+    % Number of explosive VAR models sampled
     p = 0;
+    % Number of non-explosive VAR models sampled
     d = 0;
-    while d<=options_.bvar_replic
+    while d <= options_.bvar_replic
         
         Sigma = rand_inverse_wishart(ny, posterior.df, S_inv_upper_chol);
 
@@ -46,7 +48,6 @@ function bvar_forecast(nlags)
         
         % Without shocks
         lags_data = forecast_data.initval;
-        
         for t = 1:options_.forecast
             X = [ reshape(flipdim(lags_data, 1)', 1, ny*nlags) forecast_data.xdata(t, :) ];
             y = X * Phi;
@@ -67,10 +68,12 @@ function bvar_forecast(nlags)
         end
     end
     
-    disp('')
-    disp(['Some of the VAR models sampled from the posterior distribution'])
-    disp(['were found to be explosive (' int2str(p) ').'])
-    disp('')
+    if p > 0
+        disp('')
+        disp(['Some of the VAR models sampled from the posterior distribution'])
+        disp(['were found to be explosive (' int2str(p) ' samples).'])
+        disp('')
+    end
     
     % Plot graphs
     sims_no_shock_mean = mean(sims_no_shock, 3);
@@ -118,5 +121,35 @@ function bvar_forecast(nlags)
         
         for i = 1:size(options_.varobs, 1)
             fprintf('%s: %10.4f\n', options_.varobs(i, :), rmse(i));
+        end 
+    end
+
+    % Store results
+
+    DirectoryName = [ M_.fname '/bvar_forecast' ];
+    if ~isdir(DirectoryName)
+        mkdir('.',DirectoryName);
+    end
+    save([ DirectoryName '/simulations'], 'sims_no_shock', 'sims_with_shocks');
+
+    for i = 1:size(options_.varobs, 1)
+        name = options_.varobs(i, :);
+
+        sims = squeeze(sims_with_shocks(:,i,:));
+        eval(['oo_.bvar.forecast.with_shocks.Mean.' name ' = mean(sims, 2);']);
+        eval(['oo_.bvar.forecast.with_shocks.Median.' name ' = median(sims, 2);']);
+        eval(['oo_.bvar.forecast.with_shocks.Var.' name ' = var(sims, 0, 2);']);
+        eval(['oo_.bvar.forecast.with_shocks.HPDsup.' name ' = sims_with_shocks_up_conf(:,i);']);
+        eval(['oo_.bvar.forecast.with_shocks.HPDinf.' name ' = sims_with_shocks_down_conf(:,i);']);
+
+        sims = squeeze(sims_no_shock(:,i,:));
+        eval(['oo_.bvar.forecast.no_shock.Mean.' name ' = sims_no_shock_mean(:,i);']);
+        eval(['oo_.bvar.forecast.no_shock.Median.' name ' = median(sims, 2);']);
+        eval(['oo_.bvar.forecast.no_shock.Var.' name ' = var(sims, 0, 2);']);
+        eval(['oo_.bvar.forecast.no_shock.HPDsup.' name ' = sims_no_shock_up_conf(:,i);']);
+        eval(['oo_.bvar.forecast.no_shock.HPDinf.' name ' = sims_no_shock_down_conf(:,i);']);
+
+        if exist('rmse')
+            eval(['oo_.bvar.forecast.rmse.' name ' = rmse(i);']);
         end
     end

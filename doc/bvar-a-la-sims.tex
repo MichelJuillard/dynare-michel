@@ -504,6 +504,14 @@ The command will produce one graph per observed variable. Each graph displays:
 
 Morever, if option \texttt{nobs} is specified, the command will also compute root mean squared error (RMSE) for all variables between end of sample and end of datafile.
 
+Most results are stored for future use:
+\begin{itemize}
+\item mean, median, variance and confidence intervals for forecasts (with shocks) are stored in \texttt{oo\_.bvar.forecast.with\_shocks} (in time series form),
+\item \textit{idem} for forecasts without shocks in \texttt{oo\_.bvar.forecast.no\_shock},
+\item all simulated samples are stored in variables \texttt{sims\_no\_shock} and \texttt{sims\_with\_shocks} in file \textit{mod\_file}\texttt{/bvar\_forecast/simulations.mat}. Those variables are 3-dimensional arrays: first dimension is time, second dimension is variable (in the order of the \texttt{varobs} declaration), third dimension indexes the sample number,
+\item if RMSE has been computed, results are in \texttt{oo\_.bvar.forecast.rmse}.
+\end{itemize}
+
 \section{Examples}
 
 This section presents two short examples of BVAR estimations. These examples and the associated datafile (\texttt{test.xls}) can be found in the \texttt{tests/bvar\_a\_la\_sims} directory of the Dynare v4 subversion tree.
