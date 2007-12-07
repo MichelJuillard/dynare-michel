@@ -34,6 +34,9 @@ ns = nvx+nvn+ncx+ncn;
 NumberOfObservedVariables = size(options_.varobs,1);
 NumberOfLags = options_.varlag;
 NumberOfParameters = NumberOfObservedVariables*NumberOfLags ;
+if ~options_.noconstant
+    NumberOfParameters = NumberOfParameters + 1;
+end
 
 mYY = evalin('base', 'mYY');
 mYX = evalin('base', 'mYX');
@@ -108,8 +111,7 @@ if ~options_.noconstant
         constant = transpose(log(SteadyState(bayestopt_.mfys)));
     else
         constant = transpose(SteadyState(bayestopt_.mfys));
-    end
-    NumberOfParameters = NumberOfParameters + 1;	
+    end	
 else
     constant = zeros(1,NumberOfObservedVariables);
 end
@@ -153,7 +155,7 @@ for i = 1:NumberOfLags-1
 end
 if ~options_.noconstant
     % Add one row and one column to GXX
-    GXX = [GXX , ones(NumberOfLags*NumberOfObservedVariables,1) ; ones(1,NumberOfParameters)];
+    GXX = [GXX , kron(ones(NumberOfLags,1),constant') ; [  kron(ones(1,NumberOfLags),constant) , 1] ];
 end
 
 GYY = TheoreticalAutoCovarianceOfTheObservedVariables(:,:,1);

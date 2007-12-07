@@ -123,6 +123,11 @@ if MAX_nirfs_dsgevar
         var_sample_moments(options_.first_obs,options_.first_obs+options_.nobs-1,options_.varlag,-1);
     NumberOfLags = options_.varlag;
     NumberOfLagsTimesNvobs = NumberOfLags*nvobs;
+    if options_.noconstant
+        NumberOfParametersPerEquation = NumberOfLagsTimesNvobs;
+    else
+        NumberOfParametersPerEquation = NumberOfLagsTimesNvobs+1;
+    end
     Companion_matrix = diag(ones(nvobs*(NumberOfLags-1),1),-nvobs);
 end
 b = 0;
@@ -175,7 +180,7 @@ while b<=B
     end
     if MAX_nirfs_dsgevar
         IRUN = IRUN+1;
-        tmp_dsgevar = zeros(options_.irf,nvobs*M_.exo_nbr);
+        %tmp_dsgevar = zeros(options_.irf,nvobs*M_.exo_nbr);
         [fval,cost_flag,info,PHI,SIGMAu,iXX] =  DsgeVarLikelihood(deep',gend);
         dsge_prior_weight = M_.params(strmatch('dsge_prior_weight',M_.param_names));
         DSGE_PRIOR_WEIGHT = floor(gend*(1+dsge_prior_weight));
@@ -183,15 +188,25 @@ while b<=B
         explosive_var  = 1;
         while explosive_var
             % draw from the marginal posterior of SIGMA
-            SIGMAu_draw = rand_inverse_wishart(nvobs, DSGE_PRIOR_WEIGHT-NumberOfLagsTimesNvobs, ...
+            SIGMAu_draw = rand_inverse_wishart(nvobs, DSGE_PRIOR_WEIGHT-NumberOfParametersPerEquation, ...
                                                SIGMA_inv_upper_chol);
             % draw from the conditional posterior of PHI
-            PHI_draw = rand_matrix_normal(NumberOfLagsTimesNvobs,nvobs, PHI, ...
+            PHI_draw = rand_matrix_normal(NumberOfParametersPerEquation,nvobs, PHI, ...
                                            chol(SIGMAu_draw)', chol(iXX)');
-            Companion_matrix(1:nvobs,:) = transpose(PHI_draw);
+            Companion_matrix(1:nvobs,:) = transpose(PHI_draw(1:NumberOfLagsTimesNvobs,:));
             % Check for stationarity
             explosive_var = any(abs(eig(Companion_matrix))>1.000000001);
         end
+        % Get the mean 
+% $$$         if options_.noconstant
+            mu = zeros(1,nvobs); 
+% $$$         else
+% $$$             AA = eye(nvobs);
+% $$$             for lag=1:NumberOfLags
+% $$$                 AA = AA-PHI_draw((lag-1)*nvobs+1:lag*nvobs,:);
+% $$$             end
+% $$$             mu = transpose(AA\transpose(PHI_draw(end,:)));
+% $$$         end
         % Get rotation
         if dsge_prior_weight > 0
             Atheta(oo_.dr.order_var,M_.exo_names_orig_ord) = oo_.dr.ghu*sqrt(M_.Sigma_e);
@@ -207,8 +222,9 @@ while b<=B
         for t = 2:options_.irf
             PHIpower = Companion_matrix*PHIpower;
             tmp3 = PHIpower(1:nvobs,1:nvobs)*SIGMAtrOMEGA;
-            irfs(t,:)  = tmp3(:)';
-        end            
+            irfs(t,:)  = tmp3(:)'+kron(ones(1,M_.exo_nbr),mu);
+        end
+        tmp_dsgevar = kron(ones(options_.irf,1),mu);
         for j = 1:(nvobs*M_.exo_nbr)
             if max(irfs(:,j)) - min(irfs(:,j)) > 1e-10 
                 tmp_dsgevar(:,j) = (irfs(:,j));
