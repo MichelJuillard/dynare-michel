@@ -169,20 +169,17 @@ else
     oo_.exo_steady_state = [] ;
   end
 
-  tempex = oo_.exo_simul;
   it_ = M_.maximum_lag + 1;
   z = repmat(dr.ys,1,klen);
   z = z(iyr0) ;
   if options_.order == 1
-    [junk,jacobia_] = feval([M_.fname '_dynamic'],z,tempex);
+    [junk,jacobia_] = feval([M_.fname '_dynamic'],z,[oo_.exo_simul ...
+		    oo_.exo_det_simul]);
   elseif options_.order == 2
     [junk,jacobia_,hessian] = feval([M_.fname '_dynamic'],z,...
 				    [oo_.exo_simul ...
 		    oo_.exo_det_simul]);
   end
-
-  oo_.exo_simul = tempex ;
-  tempex = [];
 end
 
 if options_.debug
