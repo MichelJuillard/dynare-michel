@@ -72,7 +72,7 @@ irun4 = 1;
 irun5 = 1;
 irun6 = 1;
 irun7 = 1;
-ifil1 = 1;
+ifil1 = 0;
 ifil2 = 1;
 ifil3 = 1;
 ifil4 = 1;
@@ -165,49 +165,49 @@ for b=1:B
   irun6 = irun6 + 1;
   irun7 = irun7 + 1;
 
-  if irun1 > MAX_nsmoo
+  if irun1 > MAX_nsmoo | b == B
     stock = stock_smooth;
-    save([DirectoryName '/' M_.fname '_smooth' int2str(ifil1)],'stock');
     ifil1 = ifil1 + 1;
+    save([DirectoryName '/' M_.fname '_smooth' int2str(ifil1)],'stock');
     irun1 = 1;
   end
   
-  if nvx & irun2 > MAX_ninno
+  if nvx & (irun2 > MAX_ninno | b == B)
     stock = stock_innov;
     save([DirectoryName '/' M_.fname '_inno' int2str(ifil2)],'stock');
     ifil2 = ifil2 + 1;
     irun2 = 1;
   end
     
-  if nvn & irun3 > MAX_error
+  if nvn & (irun3 > MAX_error | b == B)
     stock = stock_error;
     save([DirectoryName '/' M_.fname '_error' int2str(ifil3)],'stock');
     ifil3 = ifil3 + 1;
     irun3 = 1;
   end
     
-  if naK & irun4 > MAX_naK
+  if naK & (irun4 > MAX_naK | b == B)
     stock = stock_filter;
     save([DirectoryName '/' M_.fname '_filter' int2str(ifil4)],'stock');
     ifil4 = ifil4 + 1;
     irun4 = 1;
   end
     
-  if irun5 > MAX_nruns
+  if irun5 > MAX_nruns | b == B
     stock = stock_param;
     save([DirectoryName '/' M_.fname '_param' int2str(ifil5)],'stock','stock_logpo','stock_ys');
     ifil5 = ifil5 + 1;
     irun5 = 1;
   end
 
-  if irun6 > MAX_nforc1
+  if horizon & (irun6 > MAX_nforc1 | b == B)
     stock = stock_forcst_mean;
     save([DirectoryName '/' M_.fname '_forc_mean' int2str(ifil6)],'stock');
     ifil6 = ifil6 + 1;
     irun6 = 1;
   end
 
-  if irun7 > MAX_nforc2
+  if horizon & (irun7 > MAX_nforc2 |  b == B)
     stock = stock_forcst_total;
     save([DirectoryName '/' M_.fname '_forc_total' int2str(ifil7)],'stock');
     ifil6 = ifil6 + 1;
@@ -222,7 +222,6 @@ stock_gend=gend;
 stock_data=Y;
 save([DirectoryName '/' M_.fname '_data'],'stock_gend','stock_data');
 
-ifil1=25;
 pm3(endo_nbr,gend,ifil1,B,'Smoothed variables',...
     M_.endo_names(SelecVariables),M_.endo_names,'tit_tex',M_.endo_names,...
     'names2','smooth',[M_.fname '/metropolis'],'_smooth')
