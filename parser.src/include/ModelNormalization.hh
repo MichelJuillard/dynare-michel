@@ -1,6 +1,5 @@
 #ifndef MODELNORMALIZATION
 #define MODELNORMALIZATION
-#include "SymbolTableTypes.hh"
 #include "SymbolTable.hh"
 #include "CodeInterpreter.hh"
 

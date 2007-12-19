@@ -42,6 +42,9 @@ private:
   //! Checks that a given symbol exists, and stops with an error message if it doesn't
   void check_symbol_existence(const string &name);
 
+  //! Helper to add a symbol declaration
+  void declare_symbol(string *name, Type type, string *tex_name);
+
   //! Creates option "optim_opt" in OptionsList if it doesn't exist, else add a comma, and adds the option name
   void optim_options_helper(const string &name);
 
@@ -139,15 +142,8 @@ public:
   void error(const yy::parser::location_type &l, const string &m);
   //! Error handler without location
   void error(const string &m);
-
-  //! Static error handler
-  /*! To be removed in the future. */
-  static void error(const char *m)
-  {
-    extern int yylineno;
-    cerr << "Error at line " << yylineno << ": " << m << endl;
-    exit(-1);
-  }
+  //! Warning handler
+  void warning(const string &m);
 
   //! Check if a given symbol exists in the parsing context, and is not a mod file local variable
   bool symbol_exists_and_is_not_modfile_local_variable(const char *s);
@@ -161,13 +157,13 @@ public:
   void init_compiler(int compiler_type);
   //! Sets the FILENAME for the initial value in initval
   void init_val_filename(string *filename);
-  //! Declares an endogenous variable by adding it to SymbolTable
+  //! Declares an endogenous variable
   void declare_endogenous(string *name, string *tex_name = new string);
-  //! Declares an exogenous variable by adding it to SymbolTable
+  //! Declares an exogenous variable
   void declare_exogenous(string *name, string *tex_name = new string);
-  //! Declares an exogenous deterministic variable by adding it to SymbolTable
+  //! Declares an exogenous deterministic variable
   void declare_exogenous_det(string *name, string *tex_name = new string);
-  //! Declares a parameter by adding it to SymbolTable
+  //! Declares a parameter
   void declare_parameter(string *name, string *tex_name = new string);
   //! Declares and initializes a local parameter
   void declare_and_init_model_local_variable(string *name, NodeID rhs);

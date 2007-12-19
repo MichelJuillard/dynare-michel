@@ -17,12 +17,6 @@ VariableTable::VariableTable(const SymbolTable &symbol_table_arg) :
 int
 VariableTable::AddVariable(const string &iName, int iLag)
 {
-  // Testing if symbol exists
-  if (!symbol_table.Exist(iName))
-    {
-      cerr << "Unknown symbol: " << iName << endl;
-      exit(-1);
-    }
   // Testing if variable exists in VariableTable
   int lVariableID = getID(iName,iLag);
   if (lVariableID != -1)

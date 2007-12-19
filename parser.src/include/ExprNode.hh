@@ -10,7 +10,7 @@ using namespace std;
 #include <fstream>
 
 
-#include "SymbolTableTypes.hh"
+#include "SymbolTable.hh"
 #include "CodeInterpreter.hh"
 
 class DataTree;

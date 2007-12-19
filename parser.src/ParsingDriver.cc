@@ -12,7 +12,7 @@ ParsingDriver::~ParsingDriver()
 bool
 ParsingDriver::symbol_exists_and_is_not_modfile_local_variable(const char *s)
 {
-  if (!mod_file->symbol_table.Exist(s))
+  if (!mod_file->symbol_table.exists(s))
     return false;
 
   return(mod_file->symbol_table.getType(s) != eModFileLocalVariable);
@@ -21,7 +21,7 @@ ParsingDriver::symbol_exists_and_is_not_modfile_local_variable(const char *s)
 void
 ParsingDriver::check_symbol_existence(const string &name)
 {
-  if (!mod_file->symbol_table.Exist(name))
+  if (!mod_file->symbol_table.exists(name))
     error("Unknown symbol: " + name);
 }
 
@@ -43,8 +43,6 @@ ParsingDriver::parse(const string &f)
 {
   mod_file = new ModFile();
 
-  mod_file->symbol_table.error = error;
-
   tmp_symbol_table = new TmpSymbolTable(mod_file->symbol_table);
 
   reset_data_tree();
@@ -64,7 +62,7 @@ ParsingDriver::parse(const string &f)
 void
 ParsingDriver::error(const yy::parser::location_type &l, const string &m)
 {
-  cerr << l << ": " << m << endl;
+  cerr << "ERROR: " << l << ": " << m << endl;
   exit(-1);
 }
 
@@ -72,40 +70,58 @@ void
 ParsingDriver::error(const string &m)
 {
   extern int yylineno;
-  cerr << file << ":" << yylineno << ": " << m << endl;
+  cerr << "ERROR: " << file << ":" << yylineno << ": " << m << endl;
   exit(-1);
+}
+
+void
+ParsingDriver::warning(const string &m)
+{
+  extern int yylineno;
+  cerr << "WARNING: " << file << ":" << yylineno << ": " << m << endl;
+}
+
+void
+ParsingDriver::declare_symbol(string *name, Type type, string *tex_name)
+{
+  try
+    {
+      mod_file->symbol_table.addSymbol(*name, type, *tex_name);
+    }
+  catch(SymbolTable::AlreadyDeclaredException &e)
+    {
+      if (e.same_type)
+        warning("Symbol " + *name + " declared twice.");
+      else
+        error("Symbol " + *name + " declared twice with different types!");
+    }
+
+  delete name;
+  delete tex_name;
 }
 
 void
 ParsingDriver::declare_endogenous(string *name, string *tex_name)
 {
-  mod_file->symbol_table.AddSymbolDeclar(*name, eEndogenous, *tex_name);
-  delete name;
-  delete tex_name;
+  declare_symbol(name, eEndogenous, tex_name);
 }
 
 void
 ParsingDriver::declare_exogenous(string *name, string *tex_name)
 {
-  mod_file->symbol_table.AddSymbolDeclar(*name, eExogenous, *tex_name);
-  delete name;
-  delete tex_name;
+  declare_symbol(name, eExogenous, tex_name);
 }
 
 void
 ParsingDriver::declare_exogenous_det(string *name, string *tex_name)
 {
-  mod_file->symbol_table.AddSymbolDeclar(*name, eExogenousDet, *tex_name);
-  delete name;
-  delete tex_name;
+  declare_symbol(name, eExogenousDet, tex_name);
 }
 
 void
 ParsingDriver::declare_parameter(string *name, string *tex_name)
 {
-  mod_file->symbol_table.AddSymbolDeclar(*name, eParameter, *tex_name);
-  delete name;
-  delete tex_name;
+  declare_symbol(name, eParameter, tex_name);
 }
 
 NodeID
@@ -149,10 +165,11 @@ ParsingDriver::add_model_variable(string *name, string *olag)
 
   if ((type == eExogenous) && lag != 0)
     {
-      cout << "Warning: exogenous variable "
-           << *name
-           << " has lag " << lag << endl;
+      ostringstream ost;
+      ost << "Exogenous variable " << *name << " has lag " << lag;
+      warning(ost.str());
     }
+
   NodeID id = model_tree->AddVariable(*name, lag);
 
   if ((type == eEndogenous) && (model_tree->mode == eSparseDLLMode || model_tree->mode == eSparseMode))
@@ -167,8 +184,8 @@ NodeID
 ParsingDriver::add_expression_variable(string *name)
 {
   // If symbol doesn't exist, then declare it as a mod file local variable
-  if (!mod_file->symbol_table.Exist(*name))
-    mod_file->symbol_table.AddSymbolDeclar(*name, eModFileLocalVariable, *name);
+  if (!mod_file->symbol_table.exists(*name))
+    mod_file->symbol_table.addSymbol(*name, eModFileLocalVariable);
 
   NodeID id = data_tree->AddVariable(*name);
 
@@ -1047,15 +1064,16 @@ ParsingDriver::add_model_equal_with_zero_rhs(NodeID arg)
 void
 ParsingDriver::declare_and_init_model_local_variable(string *name, NodeID rhs)
 {
-  mod_file->symbol_table.AddSymbolDeclar(*name, eModelLocalVariable, *name);
   try
     {
-      model_tree->AddLocalParameter(*name, rhs);
+      mod_file->symbol_table.addSymbol(*name, eModelLocalVariable);
     }
-  catch(DataTree::LocalParameterException &e)
+  catch(SymbolTable::AlreadyDeclaredException &e)
     {
-      error("Local parameter " + e.name + " declared twice");
+      error("Local model variable " + *name + " declared twice.");
     }
+
+  model_tree->AddLocalParameter(*name, rhs);
   delete name;
 }
 
@@ -1254,13 +1272,13 @@ ParsingDriver::add_unknown_function_arg(NodeID arg)
 NodeID
 ParsingDriver::add_unknown_function(string *function_name)
 {
-  if (mod_file->symbol_table.Exist(*function_name))
+  if (mod_file->symbol_table.exists(*function_name))
     {
       if (mod_file->symbol_table.getType(*function_name) != eUnknownFunction)
         error("Symbol " + *function_name + " is not a function name.");
     }
   else
-    mod_file->symbol_table.AddSymbolDeclar(*function_name, eUnknownFunction, *function_name);
+    mod_file->symbol_table.addSymbol(*function_name, eUnknownFunction);
 
   NodeID id = data_tree->AddUnknownFunction(*function_name, unknown_function_args);
   unknown_function_args.clear();

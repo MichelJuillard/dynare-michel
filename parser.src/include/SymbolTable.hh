@@ -1,12 +1,6 @@
 #ifndef _SYMBOLTABLE_HH
 #define _SYMBOLTABLE_HH
-//------------------------------------------------------------------------------
-/*! \file
-  \version 1.0
-  \date 12/01/2003
-  \par This file defines the SymbolTable class .
-*/
-//------------------------------------------------------------------------------
+
 using namespace std;
 
 #include <map>
@@ -15,125 +9,154 @@ using namespace std;
 #include <ostream>
 #include <iostream>
 
-#include "SymbolTableTypes.hh"
+//! Enumeration of possible symbol types
+/*! Be careful not to change the order of the enumeration, it matters for VariableTable (at least up to eParameter) */
+enum Type
+  {
+    eEndogenous = 0,               //!< Endogenous
+    eExogenous = 1,                //!< Exogenous
+    eExogenousDet = 2,             //!< Exogenous deterministic
+    eRecursiveVariable = 3,        //!< Recursive variable (reserved for future use)
+    eParameter = 4,                //!< Parameter
+    eModelLocalVariable = 10,      //!< Local variable whose scope is model (pound expression)
+    eModFileLocalVariable = 11,    //!< Local variable whose scope is mod file (model excluded)
+    eUnknownFunction = 12          //!< Function unknown to the preprocessor
+  };
 
+//! Stores the symbol table
 /*!
-  \class SymbolTable
-  \brief This class keeps track of symbols
+    A symbol is given by its name, and is internally represented by a pair (type, id).
+
+    There is a distinct sequence of ids for each type, so two symbol of different types can have the same id.
+
+    Also manages a TeX name for each symbol, which by default is an empty string.
 */
 class SymbolTable
 {
 private:
-  /*! Adds symbol into symbol table
-    \param name a string.
-    \param type a Type struct.
-    \param tex_name a string for the TeX name.
-    \par Description
-    - warning if symbol is already set with same type
-    - error if symbol is already set with different type
-    - set Name and Type
-    - increase corresponding counter in ModelParameters class
-  */
-  int AddSymbol(std::string name, Type type, std::string tex_name);
-  /*! Symbol table map */
-  std::map<std::string, Symbol, std::less<std::string> > symboltable;
-  //! Typedef for const iterator on symboltable map
-  typedef std::map<std::string, Symbol, std::less<std::string> >::const_iterator symboltable_const_iterator;
-  /*! Symbol name table indexed by type and ID */
-  std::vector< std::vector<std::string> > name_table;
-  std::vector< std::vector<std::string> > tex_name_table;
-  /*! Changes type of a symbol */
-  void ResetType(std::string name, Type new_type);
-public :
-  /*! Constructor */
+  //! A symbol is represented by a pair (type, id)
+  typedef pair<Type, int> symbol_type;
+
+  //! Type for map: symbol_name -> (type, id)
+  typedef map<string, symbol_type> symbol_table_type;
+  //! Maps strings to pairs (type,id)
+  symbol_table_type symbol_table;
+
+  //! Type for map: (type, id) -> symbol_name
+  typedef map<symbol_type, string> inv_symbol_table_type;
+
+  //! Maps pairs (type, id) to names
+  inv_symbol_table_type name_table;
+  //! Maps pairs (type, id) to TeX names
+  inv_symbol_table_type tex_name_table;
+public:
   SymbolTable();
+  //! Thrown when trying to access an unknown symbol (by name)
+  class UnknownSymbolNameException
+  {
+  public:
+    //! Symbol name
+    string name;
+    UnknownSymbolNameException(const string &name_arg) : name(name_arg) {}
+  };
+  //! Thrown when trying to access an unknown symbol (by type+id pair)
+  class UnknownSymbolIDException
+  {
+  public:
+    //! Symbol type
+    Type type;
+    //! Symbol ID
+    int id;
+    UnknownSymbolIDException(Type type_arg, int id_arg) : type(type_arg), id(id_arg) {}
+  };
+  //! Thrown when trying to declare a symbol twice
+  class AlreadyDeclaredException
+  {
+  public:
+    //! Symbol name
+    string name;
+    //! Was the previous declaration done with the same symbol type ?
+    bool same_type;
+    AlreadyDeclaredException(const string &name_arg, bool same_type_arg) : name(name_arg), same_type(same_type_arg) {}
+  };
   //! Number of declared endogenous variables
   int endo_nbr;
   //! Number of declared exogenous variables
   int exo_nbr;
   //! Number of declared deterministic exogenous variables
   int exo_det_nbr;
-  //! Number of declared parameters
-  int parameter_nbr;
-  //! Number of declared model local variables
-  int model_local_variable_nbr;
-  //! Number of declared modfile local variables
-  int modfile_local_variable_nbr;
   //! Number of declared recursive variables
   int recur_nbr;
+  //! Number of declared parameters
+  int parameter_nbr;
+  //! Number of model local variables
+  int model_local_variable_nbr;
+  //! Number of modfile local variables
+  int modfile_local_variable_nbr;
   //! Number of unknown functions
   int unknown_function_nbr;
-  /*! Pointer to error function of parser class */
-  void (* error) (const char* m);
-  /*! Adds a symbol apearing in declaration
-    - warning if symbol is already set with same type
-    - error if symbol is already set with different type
-    - set name, type
-    - increase corresponding counter in ModelParameters
-  */
-  int AddSymbolDeclar(std::string name, Type type, std::string tex_name);
-  /*! Adds symbol range */
-  void AddSymbolRange(std::string name, int nbr, Type type, std::string tex_name);
-  /*! Tests if symbol exists in symbol table
-    \return true if exists, false outherwise
-  */
-  inline bool Exist(const std::string &name) const;
-  /*! Gets name by type and ID */
-  inline std::string getNameByID(Type type, int id) const;
-  /*! Gets tex name by type and ID */
-  inline std::string getTexNameByID(Type type, int id) const;
-  /*! Gets type by name */
-  inline Type getType(const std::string &name) const;
-  /*! Gets ID by name */
-  inline int getID(const std::string &name) const;
+  //! Add a symbol
+  void addSymbol(const string &name, Type type, const string &tex_name = "") throw (AlreadyDeclaredException);
+  //! Tests if symbol already exists
+  inline bool exists(const string &name) const;
+  //! Get symbol name by type and ID
+  inline string getNameByID(Type type, int id) const throw (UnknownSymbolIDException);
+  //! Get TeX name by type and ID
+  inline string getTeXNameByID(Type type, int id) const throw (UnknownSymbolIDException);
+  //! Get type by name
+  inline Type getType(const string &name) const throw (UnknownSymbolNameException);
+  //! Get ID by name
+  inline int getID(const string &name) const throw (UnknownSymbolNameException);
   //! Write output of this class
-  void writeOutput(std::ostream &output) const;
+  void writeOutput(ostream &output) const;
+
 };
 
-inline bool SymbolTable::Exist(const std::string &name) const
+inline bool
+SymbolTable::exists(const string &name) const
 {
-  symboltable_const_iterator iter = symboltable.find(name);
-  return (iter != symboltable.end());
+  symbol_table_type::const_iterator iter = symbol_table.find(name);
+  return (iter != symbol_table.end());
 }
 
-//------------------------------------------------------------------------------
-inline std::string  SymbolTable::getNameByID(Type type,int id) const
+inline string
+SymbolTable::getNameByID(Type type, int id) const throw (UnknownSymbolIDException)
 {
-  if (id >= 0 && (int)name_table[type].size() > id)
-    return(name_table[type][id]);
-  else return "";
-}
-
-//------------------------------------------------------------------------------
-inline std::string  SymbolTable::getTexNameByID(Type type,int id) const
-{
-  if (id >= 0 && (int)tex_name_table[type].size() > id)
-    return(tex_name_table[type][id]);
-  else return "";
-}
-
-//------------------------------------------------------------------------------
-inline Type SymbolTable::getType(const std::string &name) const
-{
-  symboltable_const_iterator iter = symboltable.find(name);
-  if (iter == symboltable.end())
-    {
-      cerr << "SymbolTable::getType: unknwon symbol: " << name << endl;
-      exit(-1);
-    }
+  inv_symbol_table_type::const_iterator iter = name_table.find(make_pair(type, id));
+  if (iter != name_table.end())
+    return iter->second;
   else
-    return iter->second.type;
+    throw UnknownSymbolIDException(type, id);
 }
 
-//------------------------------------------------------------------------------
-inline int SymbolTable::getID(const std::string &name) const
+inline string
+SymbolTable::getTeXNameByID(Type type, int id) const throw (UnknownSymbolIDException)
 {
-  symboltable_const_iterator iter = symboltable.find(name);
-  if (iter == symboltable.end())
-    return -1;
+  inv_symbol_table_type::const_iterator iter = tex_name_table.find(make_pair(type, id));
+  if (iter != tex_name_table.end())
+    return iter->second;
   else
-    return(iter->second.id);
+    throw UnknownSymbolIDException(type, id);
 }
 
-//------------------------------------------------------------------------------
+inline Type
+SymbolTable::getType(const string &name) const throw (UnknownSymbolNameException)
+{
+  symbol_table_type::const_iterator iter = symbol_table.find(name);
+  if (iter != symbol_table.end())
+    return iter->second.first;
+  else
+    throw UnknownSymbolNameException(name);
+}
+
+inline int
+SymbolTable::getID(const string &name) const throw (UnknownSymbolNameException)
+{
+  symbol_table_type::const_iterator iter = symbol_table.find(name);
+  if (iter != symbol_table.end())
+    return iter->second.second;
+  else
+    throw UnknownSymbolNameException(name);
+}
+
 #endif
