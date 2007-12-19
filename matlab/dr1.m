@@ -514,10 +514,8 @@ A(1:M_.endo_nbr,nstatic+1:nstatic+npred)=...
 C = hx;
 D = [rhs; zeros(n-M_.endo_nbr,size(rhs,2))];
 
-if exist('gensylv') & (strcmp(version('-release'),'2007b') == 0)
-  dr.ghxx = gensylv(2,A,B,C,D);
-elseif exist('gensylv75') & (strcmp(version('-release'),'2007b') == 1)
-  dr.ghxx = gensylv75(2,A,B,C,D);
+if exist('gensylv')
+    dr.ghxx = gensylv(2,A,B,C,D);
 else
   C = kron(hx,hx); 
   x0 = sylvester3(A,B,C,D);
@@ -530,8 +528,7 @@ hu = dr.ghu(nstatic+1:nstatic+npred,:);
 %kk = reshape([1:np*np],np,np);
 %kk = kk(1:npred,1:npred);
 %rhs = -hessian*kron(zx,zu)-f1*dr.ghxx(end-nyf+1:end,kk(:))*kron(hx(1:npred,:),hu(1:npred,:));
-if ~exist('sparse_hessian_times_B_kronecker_C') |  ((strcmp(version('-release'),'2007b') ...
-					 ~= 1) & strcmpi(computer,'PCWIN'))
+if ~exist('sparse_hessian_times_B_kronecker_C') %| ((strcmp(version('-release'),'2007b')~= 1) & strcmpi(computer,'PCWIN'))
     if nrzx*nrzx*nczx*M_.exo_nbr > 1e7
         rhs = zeros(M_.endo_nbr,nczx*M_.exo_nbr);
         k1 = 1;
@@ -552,8 +549,7 @@ hu1 = [hu;zeros(np-npred,M_.exo_nbr)];
 %B1 = [B(1:M_.endo_nbr,:);zeros(size(A,1)-M_.endo_nbr,size(B,2))];
 [nrhx,nchx] = size(hx);
 [nrhu1,nchu1] = size(hu1);
-if ~exist('A_times_B_kronecker_C') |  ((strcmp(version('-release'),'2007b') ...
-					 ~= 1) & strcmpi(computer,'PCWIN'))
+if ~exist('A_times_B_kronecker_C') | ((strcmp(version('-release'),'2007b')~= 1) & strcmpi(computer,'PCWIN'))
     if nrhx*nrhu1*nchx*nchu1 > 1e7
         B1 = zeros(size(dr.ghxx,1),nchx*nchu1);
         k1 = 1;
@@ -580,8 +576,7 @@ dr.ghxu = A\rhs;
 %rhs
 kk = reshape([1:np*np],np,np);
 kk = kk(1:npred,1:npred);
-if ~exist('sparse_hessian_times_B_kronecker_C') |  ((strcmp(version('-release'),'2007b') ...
-					 ~= 1) & strcmpi(computer,'PCWIN'))
+if ~exist('sparse_hessian_times_B_kronecker_C') %| ((strcmp(version('-release'),'2007b')~= 1) & strcmpi(computer,'PCWIN'))
     if nrzx*nrzx*M_.exo_nbr*M_.exo_nbr > 1e7
         rhs = zeros(M_.endo_nbr,M_.exo_nbr*M_.exo_nbr);
         k1 = 1;
@@ -597,8 +592,7 @@ if ~exist('sparse_hessian_times_B_kronecker_C') |  ((strcmp(version('-release'),
 else
     rhs = sparse_hessian_times_B_kronecker_C(hessian,zu);
 end
-if ~exist('A_times_B_kronecker_C') |  ((strcmp(version('-release'),'2007b') ...
-					 ~= 1) & strcmpi(computer,'PCWIN'))
+if ~exist('A_times_B_kronecker_C') |  ((strcmp(version('-release'),'2007b') ~= 1) & strcmpi(computer,'PCWIN'))
     if nrhu1*nrhu1*nchu1*nchu1 > 1e7
         B1 = zeros(size(dr.ghxx,1),nchu1*nchu1);
         k1 = 1;
@@ -658,8 +652,7 @@ for i=1:M_.maximum_endo_lead
     [junk,k3a,k3] = ...
 	find(M_.lead_lag_incidenceordered(M_.maximum_endo_lag+j+1,:));
     nk3a = length(k3a);
-    if ~exist('sparse_hessian_times_B_kronecker_C') |  ((strcmp(version('-release'),'2007b') ...
-					 ~= 1) & strcmpi(computer,'PCWIN'))
+    if ~exist('sparse_hessian_times_B_kronecker_C') | %((strcmp(version('-release'),'2007b')~= 1) & strcmpi(computer,'PCWIN'))
         if nk3a*nk3a*M_.exo_nbr*M_.exo_nbr > 1e7
             B1 = zeros(M_.endo_nbr,M_.exo_nbr*M_.exo_nbr);
             k1 = 1;
@@ -691,8 +684,7 @@ for i=1:M_.maximum_endo_lead
   kk = find(kstate(:,2) == M_.maximum_endo_lag+i+1);
   gu = dr.ghx*Gu;
   [nrGu,ncGu] = size(Gu);
-  if ~exist('A_times_B_kronecker_C') | ((strcmp(version('-release'),'2007b') ...
-					 ~= 1) & strcmpi(computer,'PCWIN'))
+  if ~exist('A_times_B_kronecker_C') | ((strcmp(version('-release'),'2007b')~= 1) & strcmpi(computer,'PCWIN'))
       if nrGu*nrGu*ncGu*ncGu > 1e7
           G1 = zeros(M_.endo_nbr,ncGu*ncGu);
           G2 = zeros(size(hxx,1),ncGu*ncGu);
