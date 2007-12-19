@@ -9,6 +9,18 @@ function dynare(fname, varargin)
 %	When extension is omitted, a model file with .mod extension
 %	is processed.
 
+MATLAB  = ver('matlab');
+VERSION = str2num(MATLAB.Version);
+
+dynareroot = strrep(which('dynare.m'),'dynare.m','');
+
+addpath([dynareroot 'mex/common/']);
+if (VERSION <= 7.4)
+    addpath([dynareroot 'mex/2007a/'])
+elseif (VERSION == 7.5)
+    addpath([dynareroot 'mex/2007b/'])
+end
+
 if ~isstr(fname)
   error ('The argument in DYNARE must be a text string.') ;
 end
@@ -33,7 +45,7 @@ if length(d) == 0
   disp(['DYNARE: can''t open ' fname])
   return
 end
-dynareroot = strrep(which('dynare.m'),'dynare.m','');
+
 command = ['"' dynareroot 'dynare_m" ' fname] ;
 for i=2:nargin
   command = [command ' ' varargin{i-1}];
@@ -47,5 +59,3 @@ if ~ isempty(find(abs(fname) == 46))
 	fname = fname(:,1:find(abs(fname) == 46)-1) ;
 end
 evalin('base',fname) ;
-
-
