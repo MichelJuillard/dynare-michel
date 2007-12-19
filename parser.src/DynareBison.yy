@@ -78,7 +78,7 @@ class ParsingDriver;
 %left TIMES DIVIDE
 %left UMINUS
 %nonassoc POWER
-%token EXP LOG LOG10 SIN COS TAN ASIN ACOS ATAN SINH COSH TANH ASINH ACOSH ATANH SQRT
+%token EXP LOG LN LOG10 SIN COS TAN ASIN ACOS ATAN SINH COSH TANH ASINH ACOSH ATANH SQRT
 /* GSA analysis */
 %token DYNARE_SENSITIVITY IDENTIFICATION MORRIS STAB REDFORM PPRIOR PRIOR_RANGE PPOST ILPTAU GLUE MORRIS_NLIV
 %token MORRIS_NTRA NSAM LOAD_REDFORM LOAD_RMSE LOAD_STAB ALPHA2_STAB KSSTAT LOGTRANS_REDFORM THRESHOLD_REDFORM
@@ -281,6 +281,8 @@ expression : '(' expression ')'
              { $$ = driver.add_exp($3); }
            | LOG '(' expression ')'
              { $$ = driver.add_log($3); }
+           | LN '(' expression ')'
+             { $$ = driver.add_log($3); }
            | LOG10 '(' expression ')'
              { $$ = driver.add_log10($3); }
            | SIN '(' expression ')'
@@ -427,6 +429,8 @@ hand_side : '(' hand_side ')'
           | EXP '(' hand_side ')'
             { $$ = driver.add_exp($3); }
           | LOG '(' hand_side ')'
+            { $$ = driver.add_log($3); }
+          | LN '(' hand_side ')'
             { $$ = driver.add_log($3); }
           | LOG10 '(' hand_side ')'
             { $$ = driver.add_log10($3); }

@@ -264,7 +264,7 @@ int sigma_e = 0;
 <DYNARE_STATEMENT,DYNARE_BLOCK>exp {return token::EXP;}
 <DYNARE_STATEMENT,DYNARE_BLOCK>log {return token::LOG;}
 <DYNARE_STATEMENT,DYNARE_BLOCK>log10 {return token::LOG10;}
-<DYNARE_STATEMENT,DYNARE_BLOCK>ln {return token::LOG;}
+<DYNARE_STATEMENT,DYNARE_BLOCK>ln {return token::LN;}
 <DYNARE_STATEMENT,DYNARE_BLOCK>sin {return token::SIN;}
 <DYNARE_STATEMENT,DYNARE_BLOCK>cos {return token::COS;}
 <DYNARE_STATEMENT,DYNARE_BLOCK>tan {return token::TAN;}
