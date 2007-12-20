@@ -6,6 +6,9 @@ function build()
     SOURCE1 = 'sparse_hessian_times_B_kronecker_C.cc ' ;
     SOURCE2 = 'A_times_B_kronecker_C.cc ';
     
+    MATLAB  = ver('matlab');
+    VERSION = str2num(MATLAB.Version);
+    
     MATLAB_PATH = matlabroot;
     
     if strcmpi('GLNX86',computer)%linux (32 bits).
@@ -26,12 +29,20 @@ function build()
         CLEAN_COMMAND = 'rm *.mexa64';
     elseif strcmpi('PCWIN',computer)%windows (32 bits).
         MATLAB_PATH = ['"' matlabroot '\bin'];
-        LIB_PATH = ['"' matlabroot '\extern\lib\win32\microsoft"'];
-        LIB_NAME = '\libmwblas.lib';
-        COPY_COMMAND = 'cp  *.mexw32 ../../dynare_v4/matlab/';
-        COMPILE_COMMAND = '\mex" ';
+	if VERSION <= 7.4
+	  COMPILE_COMMAND = '\win32\mex" -DMWTYPES_NOT_DEFINED ';
+	  LIB_PATH = '';
+	  LIB_NAME = '';
+	  COPY_COMMAND = 'cp  *.dll ../../2007a/';
+	  CLEAN_COMMAND = 'del *.dll';
+	else
+	  COMPILE_COMMAND = '\mex" ';
+	  LIB_PATH = ['"' matlabroot '\extern\lib\win32\microsoft"'];
+	  LIB_NAME = '\libmwblas.lib';
+	  COPY_COMMAND = 'cp  *.mexw32 ../../2007b';
+	  CLEAN_COMMAND = 'del *.mexw32';
+	end
         COMPILE_OPTIONS = '-v ';
-        CLEAN_COMMAND = 'del *.mexw32';
     end
       
     system([MATLAB_PATH COMPILE_COMMAND COMPILE_OPTIONS SOURCE1]);

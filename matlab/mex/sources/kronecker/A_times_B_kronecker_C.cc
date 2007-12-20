@@ -9,9 +9,18 @@
 */
 #include <string.h>
 #include "mex.h"
-#include "blas.h"
 #include "matrix.h"
 
+#ifdef MWTYPES_NOT_DEFINED
+typedef unsigned int mwIndex;
+typedef unsigned int mwSize;
+//	  dgemm(transpose, transpose, &mA, &nC, &mC, &B[mB*col+row], &A[ka], &mA, &C[0], &mC, &one, &D[kd], &mA);
+extern "C"{
+int dgemm(char*, char*, mwSize*, mwSize*, mwSize*, double*, double*, mwSize*, double*, mwSize*, double*, double*, mwSize*);
+}
+#elif
+#include "blas.h"
+#endif
 
 void full_A_times_kronecker_B_C(double *A, double *B, double *C, double *D,
 			   mwSize mA, mwSize nA, mwSize mB, mwSize nB, mwSize mC, mwSize nC)

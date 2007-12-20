@@ -12,6 +12,11 @@
 #include "matrix.h"
 #include "mex.h"
 
+#ifdef MWTYPES_NOT_DEFINED
+typedef unsigned int mwIndex;
+typedef unsigned int mwSize;
+#endif
+
 void sparse_hessian_times_B_kronecker_B(mwIndex *isparseA, mwIndex *jsparseA, double *vsparseA, 
 					double *B, double *D, mwSize mA, mwSize nA, mwSize mB, mwSize nB)
 {
@@ -152,8 +157,8 @@ void mexFunction( int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[] )
       C = mxGetPr(prhs[2]);
     }
   // Sparse (dynare) hessian matrix.
-  mwIndex *isparseA = mxGetIr(prhs[0]);
-  mwIndex *jsparseA = mxGetJc(prhs[0]);
+  mwIndex *isparseA = (mwIndex*)mxGetIr(prhs[0]);
+  mwIndex *jsparseA = (mwIndex*)mxGetJc(prhs[0]);
   double  *vsparseA = mxGetPr(prhs[0]);
   // Initialization of the ouput:
   double *D;
