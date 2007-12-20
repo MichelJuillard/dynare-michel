@@ -7,7 +7,7 @@ global it_
   
   temp_options = options_;
   tempex = oo_.exo_simul;
-  if ~options_.initval_file
+  if ~options_.initval_file & M_.exo_nbr > 1
     oo_.exo_simul = ones(M_.maximum_lead+M_.maximum_lag+1,1)*oo_.exo_steady_state';
   end
   
@@ -21,6 +21,8 @@ global it_
   end
 
   [dr, info] = resol(oo_.steady_state,1);
+  
+  oo_.dr = dr;
   
   if info(1) ~= 0 & info(1) ~= 3 & info(1) ~= 4
     print_info(info);
