@@ -17,7 +17,7 @@ function simk
 %   None.
 %  
 %  
-% part of DYNARE, copyright S. Adjemian, M. Juillard (1996-2006)
+% part of DYNARE, copyright Dynare Team (1996-2007)
 % Gnu Public License.
 global M_ options_ oo_
 global it_ iyr0 ct_ broyden_
