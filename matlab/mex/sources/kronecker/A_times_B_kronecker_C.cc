@@ -18,7 +18,7 @@ typedef unsigned int mwSize;
 extern "C"{
 int dgemm(char*, char*, mwSize*, mwSize*, mwSize*, double*, double*, mwSize*, double*, mwSize*, double*, double*, mwSize*);
 }
-#elif
+#else
 #include "blas.h"
 #endif
 
@@ -35,7 +35,7 @@ void full_A_times_kronecker_B_C(double *A, double *B, double *C, double *D,
       ka = 0 ;
       for(unsigned long int row=0; row<mB; row++)
 	{
-	  dgemm(transpose, transpose, &mA, &nC, &mC, &B[mB*col+row], &A[ka], &mA, &C[0], &mC, &one, &D[kd], &mA);
+	  dgemm(transpose, transpose, (int*)&mA, (int*)&nC, (int*)&mC, &B[mB*col+row], &A[ka], (int*)&mA, &C[0], (int*)&mC, &one, &D[kd], (int*)&mA);
 	  ka += shiftA;
 	}
       kd += shiftD;
@@ -55,7 +55,7 @@ void full_A_times_kronecker_B_B(double *A, double *B, double *D, mwSize mA, mwSi
       ka = 0 ;
       for(unsigned long int row=0; row<mB; row++)
 	{
-	  dgemm(transpose, transpose, &mA, &nB, &mB, &B[mB*col+row], &A[ka], &mA, &B[0], &mB, &one, &D[kd], &mA);
+	  dgemm(transpose, transpose, (int*)&mA, (int*)&nB, (int*)&mB, &B[mB*col+row], &A[ka], (int*)&mA, &B[0], (int*)&mB, &one, &D[kd], (int*)&mA);
 	  ka += shiftA;
 	}
       kd += shiftD;

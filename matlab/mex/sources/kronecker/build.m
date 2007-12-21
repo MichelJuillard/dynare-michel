@@ -15,7 +15,7 @@ function build()
         MATLAB_PATH = [ matlabroot '/bin' ];
         LIB_PATH = [ MATLAB_PATH '/glnx86' ];
         LIB_NAME = '/libmwblas.so';
-        COPY_COMMAND = 'cp  *.mexglx ../../dynare_v4/matlab';
+        COPY_COMMAND = 'cp  *.mexglx ../../2007b';
         COMPILE_COMMAND = '/mex ';
         COMPILE_OPTIONS = '';
         CLEAN_COMMAND = 'rm *.mexglx';
@@ -23,7 +23,7 @@ function build()
         MATLAB_PATH = [matlabroot '/bin'];
         LIB_PATH = [MATLAB_PATH '/glnxa64'];
         LIB_NAME = '/libmwblas.so';
-        COPY_COMMAND = 'cp  *.mexa64 ../../dynare_v4/matlab/';
+        COPY_COMMAND = 'cp  *.mexa64 ../../2007b';
         COMPILE_COMMAND = '/mex ';
         COMPILE_OPTIONS = ' -largeArrayDims ';
         CLEAN_COMMAND = 'rm *.mexa64';
