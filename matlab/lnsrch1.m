@@ -1,5 +1,32 @@
-% Copyright (C) 2001 Michel Juillard
+% function [x,f,fvec,check]=lnsrch(xold,fold,g,p,stpmax,func,j1,j2,varargin)
+% Computes the optimal step by minimizing the residual sum of squares
 %
+% INPUTS
+%   xold:     actual point
+%   fold:     residual sum of squares at the point xold
+%   g:        gradient
+%   p:        Newton direction
+%   stpmax:   maximum step
+%   func:     name of the function
+%   j1:       equations index to be solved
+%   j2:       unknowns index
+%   varargin: list of arguments following j2
+%
+% OUTPUTS
+%   x:        chosen point
+%   f:        residual sum of squares value for a given x
+%   fvec:     residuals vector
+%   check=1:  problem of the looping which continues indefinitely
+%
+% 
+% SPECIAL REQUIREMENTS
+%   none
+%  
+%  
+% part of DYNARE, copyright Dynare Team (2001-2007)
+% Gnu Public License.
+
+
 function [x,f,fvec,check]=lnsrch(xold,fold,g,p,stpmax,func,j1,j2,varargin)
   global options_
   
