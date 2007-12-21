@@ -1,5 +1,23 @@
-% Copyright (C) 2001 Michel Juillard
+% function y_=simult_(y0,dr,ex_,iorder)
+% Monte Carlo simulations
+% Draws random shocks
 %
+% INPUTS
+%    y0:       starting values
+%    dr:       structure of decisions rules for stochastic simulations
+%    ex_:      matrix of shocks
+%    iorder=0: first-order approximation
+%    iorder=1: second-order approximation
+%
+% OUTPUTS
+%    y_:       stochastic simulations results
+%
+% SPECIAL REQUIREMENTS
+%    none
+%  
+%  
+% part of DYNARE, copyright Dynare Team (2001-2007)
+% Gnu Public License.
 
 function y_=simult_(y0,dr,ex_,iorder)
 global M_ options_ it_
