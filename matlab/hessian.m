@@ -1,6 +1,24 @@
-% Copyright (C) 2001 Michel Juillard
-%% computes second order partial derivatives
-% uses Abramowitz and Stegun (1965) formulas 25.3.24 and 25.3.27 p. 884
+% function hessian_mat = hessian(func,x,varargin)
+% Computes second order partial derivatives
+%
+% INPUTS
+%    func:           name of the function
+%    x:              vector of variables around which the Hessian is calculated
+%    varargin:       list of arguments following x
+%
+% OUTPUTS
+%    hessian_matrix: Hessian matrix
+%
+% ALGORITHM
+% Uses Abramowitz and Stegun (1965) formulas 25.3.24 and 25.3.27 p. 884
+%
+% SPECIAL REQUIREMENTS
+%    none
+%  
+%  
+% part of DYNARE, copyright Dynare Team (2001-2007)
+% Gnu Public License.
+
 
 function hessian_mat = hessian(func,x,varargin)
   global options_
