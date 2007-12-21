@@ -1,5 +1,20 @@
-% Copyright (C) 2001 Michel Juillard
+% function y_=simult(ys, dr)
+% Recursive Monte Carlo simulations
 %
+% INPUTS
+%    ys:    vector of variables in steady state
+%    dr:    structure of decisions rules for stochastic simulations
+%
+% OUTPUTS
+%    y_:    stochastic simulations results
+%
+% SPECIAL REQUIREMENTS
+%    none
+%  
+%  
+% part of DYNARE, copyright Dynare Team (2001-2007)
+% Gnu Public License.
+
 
 function y_=simult(ys, dr)
 global M_ options_ oo_
