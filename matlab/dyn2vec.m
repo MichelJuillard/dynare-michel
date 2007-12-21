@@ -1,5 +1,22 @@
-% Copyright (C) 2001 Michel Juillard
+% function [z,zss]=dyn2vec(s1,s2);
+% Takes Dynare variables from oo_.endo_simul and copies them into matlab global vectors
 %
+% INPUTS
+%    s1:    subset of variables to be saved
+%    s2:    optional parameter, copies Dynare variables (s1) in matlab ones (s2)
+%
+% OUTPUTS
+%    z:     subset of oo_.endo_simul
+%    zss:   matrix of variables in steady state
+%
+% SPECIAL REQUIREMENTS
+%   none
+%  
+%  
+% part of DYNARE, copyright Dynare Team (2001-2007)
+% Gnu Public License.
+
+
 function [z,zss]=dyn2vec(s1,s2);
 
   global M_ oo_ options_
