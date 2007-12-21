@@ -1,3 +1,5 @@
+function hessian_mat = hessian(func,x,varargin)
+
 % function hessian_mat = hessian(func,x,varargin)
 % Computes second order partial derivatives
 %
@@ -20,7 +22,6 @@
 % Gnu Public License.
 
 
-function hessian_mat = hessian(func,x,varargin)
   global options_
   func = str2func(func);
   n=size(x,1);
