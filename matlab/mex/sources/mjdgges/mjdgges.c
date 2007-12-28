@@ -1,4 +1,11 @@
+#include <string.h>
 #include "mex.h"
+
+#if defined(__linux__)
+#  define DGGES dgees_
+#else
+#  define DGGES dgees
+#endif
 
 /* GAUSS interface */
   void mjdgges(double *a, double *b, double *z, double *n, double *sdim, double *eval_r, double *eval_i, double *info);
@@ -28,7 +35,7 @@ void mjdgges(double *a, double *b, double *z, double *n, double *sdim, double *e
   /* made necessary by bug in Lapack */
   junk = mxCalloc(i_n*i_n,sizeof(double));
 
-  dgges_( "N", "V", "S", (int *)my_criteria, &i_n, a, &i_n, b, &i_n, &i_sdim, alphar, alphai, beta, junk, &i_n, z, &i_n, work, &lwork, bwork, &i_info );
+  DGGES( "N", "V", "S", (int *)my_criteria, &i_n, a, &i_n, b, &i_n, &i_sdim, alphar, alphai, beta, junk, &i_n, z, &i_n, work, &lwork, bwork, &i_info );
   
   *sdim = i_sdim;
   *info = i_info;
