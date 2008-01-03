@@ -26,13 +26,15 @@ if strcmpi('GLNX86', computer) || strcmpi('GLNXA64', computer) % GNU/Linux (i386
     else
         BLAS_PATH = '-lmwblas';
     end
-elseif strcmpi('PCWIN', computer) % Windows (32 bits)
-    LAPACK_PATH = 'libmwlapack.lib';
+elseif strcmpi('PCWIN', computer) % Windows (32 bits) with Microsoft or
+                                  % gcc compiler
+    LIBRARY_PATH = [MATLAB_PATH '/extern/lib/win32/microsoft/'];
+    LAPACK_PATH = ['"' LIBRARY_PATH 'libmwlapack.lib"'];
     if VERSION <= 7.4
         BLAS_PATH = LAPACK_PATH; % On <= 7.4, BLAS in included in LAPACK
         COMPILE_OPTIONS = [ COMPILE_OPTIONS ' -DMWTYPES_NOT_DEFINED -DNO_BLAS_H' ];
     else
-        BLAS_PATH = 'libmwblas.lib';
+        BLAS_PATH = ['"' LIBRARY_PATH 'libmwblas.lib"'];
     end
 else
     error('Unsupported platform')
@@ -54,9 +56,8 @@ system([ COMPILE_COMMAND ' mjdgges/mjdgges.c ' LAPACK_PATH ]);
 
 disp('Compiling sparse_hessian_times_B_kronecker_C...')
 system([ COMPILE_COMMAND ' kronecker/sparse_hessian_times_B_kronecker_C.cc ' BLAS_PATH ]);
-
 disp('Compiling A_times_B_kronecker_C...')
 system([ COMPILE_COMMAND ' kronecker/A_times_B_kronecker_C.cc ' BLAS_PATH ]);
-
 disp('Compiling gensylv...')
-system([ COMPILE_COMMAND ' -DMATLAB -Igensylv/cc gensylv/matlab/gensylv.cpp gensylv/cc/*.cpp ' BLAS_PATH ' ' LAPACK_PATH ]);
+system([ COMPILE_COMMAND ' -DMATLAB -Igensylv/cc gensylv/matlab/gensylv.cpp' ...
+		    ' gensylv/cc/*.cpp ' BLAS_PATH ' ' LAPACK_PATH ]);
