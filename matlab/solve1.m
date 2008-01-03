@@ -1,6 +1,27 @@
-% Copyright (C) 2001 Michel Juillard
-%
 function [x,check] = solve1(func,x,j1,j2,jacobian_flag,varargin)
+
+% function [x,check] = solve1(func,x,j1,j2,jacobian_flag,varargin)
+% Solves systems of non linear equations of several variables
+%
+% INPUTS
+%    func:            name of the function to be solved
+%    x:               guess values
+%    j1:              equations index for which the model is solved
+%    j2:              unknown variables index
+%    jacobian_flag=1: jacobian given by the 'func' function
+%    jacobian_flag=0: jacobian obtained numerically
+%    varargin:        list of arguments following jacobian_flag
+%    
+% OUTPUTS
+%    x:               results
+%    check=1:         the model can not be solved
+%
+% SPECIAL REQUIREMENTS
+%    none
+%  
+% part of DYNARE, copyright Dynare Team (2001-2008)
+% Gnu Public License.
+
 
   global M_ options_ fjac  
 
