@@ -1,7 +1,22 @@
-% Copyright (C) 2001 Michel Juillard
-%
-
 function result = check
+
+
+% function result = check
+% checks determinacy conditions by computing the eigenvalues
+%
+% INPUTS
+%    none
+%    
+% OUTPUTS
+%    result
+%
+% SPECIAL REQUIREMENTS
+%    none
+%  
+% part of DYNARE, copyright Dynare Team (2001-2007)
+% Gnu Public License.
+
+
 global M_ options_ oo_
 global it_
   
