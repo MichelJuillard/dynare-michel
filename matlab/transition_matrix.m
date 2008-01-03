@@ -1,6 +1,22 @@
-% makes transition matrices out of ghx and ghu
-
 function [A,B] = transition_matrix(dr)
+
+% function [A,B] = transition_matrix(dr)
+% Makes transition matrices out of ghx and ghu
+%
+% INPUTS
+%    dr:        structure of decision rules for stochastic simulations
+%
+% OUTPUTS
+%    A:         matrix of effects of predetermined variables in linear solution (ghx)
+%    B:         matrix of effects of shocks in linear solution (ghu)
+%
+% SPECIAL REQUIREMENTS
+%    none
+%  
+% part of DYNARE, copyright Dynare Team (2003-2007)
+% Gnu Public License.
+
+
   global M_
   exo_nbr = M_.exo_nbr;
   ykmin_ = M_.maximum_endo_lag;
