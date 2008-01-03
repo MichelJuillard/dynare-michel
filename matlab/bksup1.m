@@ -1,6 +1,21 @@
-% Copyright (C) 2001 Michel Juillard
-%
 function d = bksup1(ny,jcf)
+
+% function d = bksup1(ny,jcf)
+% Solves deterministic models recursively by backsubstitution for one lead/lag
+%
+% INPUTS
+%    ny:             number of endogenous variables
+%    jcf:            variables index forward
+%    
+% OUTPUTS
+%    d:              vector of backsubstitution results
+%
+% SPECIAL REQUIREMENTS
+%    none
+%  
+% part of DYNARE, copyright Dynare Team (2003-2007)
+% Gnu Public License.
+
 
 global options_ iyf c 
 
@@ -17,3 +32,4 @@ end
 d = c(:,jcf) ;
 
 return ;
+
