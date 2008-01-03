@@ -1,5 +1,23 @@
 function d1 = bksupk(ny,fid,jcf,icc1)
 
+% function d1 = bksupk(ny,fid,jcf,icc1)
+% Solves deterministic models recursively by backsubstitution for k leads/lags
+%
+% INPUTS
+%    ny:             number of endogenous variables
+%    fid:            saves the elements above the diagonal
+%    jcf:            variables index forward
+%    icc1:           jacobian column forward
+%
+% OUTPUTS
+%    d1:             vector of backsubstitution results
+%
+% SPECIAL REQUIREMENTS
+%    none
+%  
+% part of DYNARE, copyright Dynare Team (2003-2007)
+% Gnu Public License.
+
 global M_ options_
 
 icf = [1:jcf-1] ;
