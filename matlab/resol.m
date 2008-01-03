@@ -1,8 +1,31 @@
-% Copyright (C) 2001 Michel Juillard
-%
 function [dr,info]=resol(ys,check_flag)
+
+% function [dr,info]=resol(ys,check_flag)
+% Computes first and second order approximations
+%
+% INPUTS
+%    ys:             vector of variables in steady state
+%    check_flag=0:   all the approximation is computed
+%    check_flag=1:   computes only the eigenvalues
+%
+% OUTPUTS
+%    dr:             structure of decision rules for stochastic simulations
+%    info=1:         the model doesn't determine the current variables '...' uniquely
+%    info=2:         MJDGGES returns the following error code'
+%    info=3:         Blanchard Kahn conditions are not satisfied: no stable '...' equilibrium
+%    info=4:         Blanchard Kahn conditions are not satisfied:'...' indeterminacy
+%    info=5:         Blanchard Kahn conditions are not satisfied:'...' indeterminacy due to rank failure
+%    info=11:        same as dr1 for dr_algo = 2
+%    info=20:        can't find steady state info(2) contains sum of sqare residuals
+%    info=30:        Variance can't be computed
+%
+% SPECIAL REQUIREMENTS
+%    none
+%  
+% part of DYNARE, copyright Dynare Team (2001-2007)
+% Gnu Public License.
+
 global M_ options_ oo_ bayestopt_
-% info: same as dr1 
 global it_
 % plus: 
 % 11 .... same as dr1 for dr_algo = 2
