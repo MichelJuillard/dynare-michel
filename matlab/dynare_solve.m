@@ -1,6 +1,26 @@
-% Copyright (C) 2001 Michel Juillard
-%
 function [x,info] = dynare_solve(func,x,jacobian_flag,varargin)
+
+% function [x,info] = dynare_solve(func,x,jacobian_flag,varargin)
+% proposes different solvers
+%
+% INPUTS
+%    func:             name of the function to be solved
+%    x:                guess values
+%    jacobian_flag=1:  jacobian given by the 'func' function
+%    jacobian_flag=0:  jacobian obtained numerically
+%    varargin:         list of arguments following jacobian_flag
+%    
+% OUTPUTS
+%    x:                solution
+%    info=1:           the model can not be solved
+%
+% SPECIAL REQUIREMENTS
+%    none
+%  
+% part of DYNARE, copyright Dynare Team (2001-2008)
+% Gnu Public License.
+
+
   global options_
   
   options_ = set_default_option(options_,'solve_algo',2);
