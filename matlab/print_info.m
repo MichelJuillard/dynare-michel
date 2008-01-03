@@ -1,6 +1,28 @@
-% Copyright (C) 2005 Michel Juillard
-%
 function print_info(info)
+
+% function print_info(info)
+% Prints error messages
+%
+% INPUTS
+%    info=1:         the model doesn't determine the current variables '...' uniquely
+%    info=2:         MJDGGES returns the following error code'
+%    info=3:         Blanchard Kahn conditions are not satisfied: no stable '...' equilibrium
+%    info=4:         Blanchard Kahn conditions are not satisfied:'...' indeterminacy
+%    info=5:         Blanchard Kahn conditions are not satisfied:'...' indeterminacy due to rank failure
+%    info=20:        Impossible to find the steady state. Either the model' ...' doesn't have 
+%                    a unique steady state of the guess values' ...' are too far from the solution
+%    info=30:        Variance can't be computed
+%
+% OUTPUTS
+%    none
+%
+% SPECIAL REQUIREMENTS
+%    none
+%  
+% part of DYNARE, copyright Dynare Team (2005-2007)
+% Gnu Public License.
+
+
   global options_
 
   options_ = set_default_option(options_,'noprint',0);
