@@ -2,9 +2,9 @@
 #include "mex.h"
 
 #if defined(__linux__)
-#  define DGGES dgees_
+#  define DGGES dgges_
 #else
-#  define DGGES dgees
+#  define DGGES dgges
 #endif
 
 /* GAUSS interface */
