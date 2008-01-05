@@ -266,7 +266,29 @@ if ~isempty(kad)
   end
 end
 
-if ~exist('mjdgges')
+use_qzdiv = 0;
+
+if exist('ordqz')
+  info1 = 0;
+  try
+    [ss,tt,q,w]=qz(e,d,'real');
+    [ss,tt,q,w]=ordqz(ss,tt,q,w,'udi');
+    dr.eigval = ordeig(ss,tt);
+    sdim = find(abs(dr.eigval)<1);
+  catch
+    info(1) = 2;
+    info(2) = NaN;
+  end
+  nba = nd-sdim;
+elseif  exist('mjdgges')
+  [ss,tt,w,sdim,dr.eigval,info1] = mjdgges(e,d,options_.qz_criterium);
+  if info1
+    info(1) = 2;
+    info(2) = info1;
+    return
+  end
+  nba = nd-sdim;
+else
   % using Chris Sim's routines
   use_qzdiv = 1;
   [ss,tt,qq,w] = qz(e,d);
@@ -278,15 +300,6 @@ if ~exist('mjdgges')
   dr.eigval = ss1./tt1 ;
   warning warning_state;
   nba = nnz(abs(dr.eigval) > options_.qz_criterium);
-else
-  use_qzdiv = 0;
-  [ss,tt,w,sdim,dr.eigval,info1] = mjdgges(e,d,options_.qz_criterium);
-  if info1
-    info(1) = 2;
-    info(2) = info1;
-    return
-  end
-  nba = nd-sdim;
 end
 
 nyf = sum(kstate(:,2) > M_.maximum_endo_lag+1);
