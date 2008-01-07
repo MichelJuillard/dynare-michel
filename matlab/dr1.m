@@ -272,9 +272,11 @@ if exist('ordqz')
   info1 = 0;
   try
     [ss,tt,q,w]=qz(e,d,'real');
-    [ss,tt,q,w]=ordqz(ss,tt,q,w,'udi');
-    dr.eigval = ordeig(ss,tt);
-    sdim = find(abs(dr.eigval)<1);
+    eigval = ordeig(ss,tt);
+    dr.eigval = eigval;
+    select = abs(eigval) < options_.qz_criterium;
+    [ss,tt,q,w]=ordqz(ss,tt,q,w,select);
+    sdim = sum(select);
   catch
     info(1) = 2;
     info(2) = NaN;
