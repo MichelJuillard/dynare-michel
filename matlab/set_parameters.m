@@ -1,4 +1,20 @@
 function set_parameters(xparam1)
+
+% function set_parameters(xparam1)
+% Sets parameters value (except measurement errors)
+% 
+% INPUTS
+%    xparam1:   vector of parameters to be estimated (initial values)
+%    
+% OUTPUTS
+%    none
+%        
+% SPECIAL REQUIREMENTS
+%    none
+%  
+% part of DYNARE, copyright Dynare Team (2003-2008)
+% Gnu Public License.
+
   global estim_params_ M_
   
   nvx = estim_params_.nvx;
