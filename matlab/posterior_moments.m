@@ -1,6 +1,27 @@
 function [post_mean, post_median, post_var, hpd_interval, post_deciles, density] = posterior_moments(xx,info)
-% stephane.adjemian@ens.fr [09-09-2005]
+
+% function [post_mean, post_median, post_var, hpd_interval, post_deciles, density] = posterior_moments(xx,info)
 % Computes posterior mean, median, variance, HPD interval, deciles, and density from posterior draws.
+%
+% INPUTS
+%    xx:           vector of posterior draws
+%    info=1:       estimates posterior density
+%    info=0:       computes moments
+%    
+% OUTPUTS
+%    post_mean:    posterior mean
+%    post_median:  median
+%    post_var:     variance
+%    hpd_interval: HPD interval
+%    post_deciles: post deciles
+%    density:      density
+%    
+% SPECIAL REQUIREMENTS
+%    none
+%  
+% part of DYNARE, copyright Dynare Team (2005-2008)
+% Gnu Public License.
+
 global options_
 
 xx = xx(:);
