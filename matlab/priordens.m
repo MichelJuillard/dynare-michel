@@ -1,12 +1,29 @@
 function lnprior = priordens(para, pshape, p1, p2, p3, p4)
-% This procedure computes a prior density for
-% the structural parameters of the DSGE models
-% pshape: 0 is point mass, both para and p2 are ignored
-%         1 is BETA(mean,stdd)
-%         2 is GAMMA(mean,stdd)
-%         3 is NORMAL(mean,stdd)
-%         4 is INVGAMMA(s^2,nu)
-%         5 is UNIFORM [p3,p4]
+
+% function lnprior = priordens(para, pshape, p1, p2, p3, p4)
+% computes a prior density for the structural parameters of DSGE models
+%
+% INPUTS
+%    para:       parameter value
+%    pshape:     0 is point mass, both para and p2 are ignored
+%                1 is BETA(mean,stdd)
+%                2 is GAMMA(mean,stdd)
+%                3 is NORMAL(mean,stdd)
+%                4 is INVGAMMA(s^2,nu)
+%                5 is UNIFORM [p3,p4]
+%    p1:         mean
+%    p2:         standard deviation
+%    p3:         lower bound
+%    p4:         upper bound
+%    
+% OUTPUTS
+%    lnprior:    log of the prior density
+%
+% SPECIAL REQUIREMENTS
+%    none
+%  
+% part of DYNARE, copyright Dynare Team (2003-2008)
+% Gnu Public License.
 
 lnprior = 0;
 nprio 	= length(pshape);
