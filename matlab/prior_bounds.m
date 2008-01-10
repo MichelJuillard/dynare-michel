@@ -1,13 +1,13 @@
 function bounds = prior_bounds(bayestopt)
 
 % function bounds = prior_bounds(bayestopt)
-% bounds of the prior density
+% computes practical bounds for prior density
 %
 % INPUTS
 %    bayestopt:        structure characterizing priors (shape, mean, p1..p4)
 %    
 % OUTPUTS
-%    bounds:           matrix specifying bounds (raw= parameter, column=upper&lower bound)
+%    bounds:           matrix specifying bounds (row= parameter, column=upper&lower bound)
 %    
 % SPECIAL REQUIREMENTS
 %    none
