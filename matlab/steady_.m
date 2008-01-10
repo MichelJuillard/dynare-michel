@@ -1,6 +1,20 @@
-% Copyright (C) 2001 Michel Juillard
-%
+
 function steady_()
+
+% function steady_()
+% computes the steady state 
+%  
+% INPUTS
+%   none
+%  
+% OUTPUTS
+%   none
+%
+% SPECIAL REQUIREMENTS
+%   none
+%  
+% part of DYNARE, copyright Dynare Team (2001-2007)
+% Gnu Public License.
 
   global M_ oo_ it_ options_
   
