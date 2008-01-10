@@ -1,5 +1,25 @@
 function [x,f,abscissa,dens,binf,bsup] = draw_prior_density(indx);
-% stephane.adjemian@ens.fr [07-15-2004]
+
+% function [x,f,abscissa,dens,binf,bsup] = draw_prior_density(indx)
+% plots prior density
+%
+% INPUTS
+%    indx:      parameter number
+%    
+% OUTPUTS
+%    x:         subset of 'abscissa' such as the density is less than 10
+%    f:         subset of 'dens' such as the density is less than 10
+%    abscissa:  abscissa 
+%    dens:      density
+%    binf:      lower bound of the truncated prior
+%    bsup:      upper bound of the truncated prior
+%    
+% SPECIAL REQUIREMENTS
+%    none
+%  
+% part of DYNARE, copyright Dynare Team (2004-2008)
+% Gnu Public License.
+
 
 global bayestopt_
 
