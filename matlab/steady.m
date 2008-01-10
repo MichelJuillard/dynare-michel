@@ -1,7 +1,7 @@
 function steady()
 
 % function steady()
-% prints the steady state calculations
+% computes and prints the steady state calculations
 %  
 % INPUTS
 %   none
