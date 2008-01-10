@@ -1,5 +1,20 @@
 function plot_priors
-% stephane.adjemian@cepremap.cnrs.fr [07-31-2004]
+
+% function plot_priors
+% plots prior density
+%
+% INPUTS
+%    none
+%    
+% OUTPUTS
+%    none
+%    
+% SPECIAL REQUIREMENTS
+%    none
+%  
+% part of DYNARE, copyright Dynare Team (2004-2008)
+% Gnu Public License.
+
 global bayestopt_ M_ options_
 
 TeX = options_.TeX;
