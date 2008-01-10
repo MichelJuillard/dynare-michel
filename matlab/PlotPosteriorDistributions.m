@@ -1,5 +1,20 @@
 function PlotPosteriorDistributions()
-% stephane.adjemian@ens.fr [09-09-2005]
+
+% function PlotPosteriorDistributions()
+% plots posterior distributions
+%
+% INPUTS
+%    none
+%    
+% OUTPUTS
+%    none
+%    
+% SPECIAL REQUIREMENTS
+%    none
+%  
+% part of DYNARE, copyright Dynare Team (2005-2008)
+% Gnu Public License.
+
 global estim_params_ M_ options_ bayestopt_ oo_
 
 OutputDirectoryName = CheckPath('Output');
