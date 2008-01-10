@@ -1,4 +1,21 @@
 function bounds = prior_bounds(bayestopt)
+
+% function bounds = prior_bounds(bayestopt)
+% bounds of the prior density
+%
+% INPUTS
+%    bayestopt:        structure characterizing priors (shape, mean, p1..p4)
+%    
+% OUTPUTS
+%    bounds:           matrix specifying bounds (raw= parameter, column=upper&lower bound)
+%    
+% SPECIAL REQUIREMENTS
+%    none
+%  
+% part of DYNARE, copyright Dynare Team (2003-2008)
+% Gnu Public License.
+
+
 global options_
 
 pshape = bayestopt.pshape;
