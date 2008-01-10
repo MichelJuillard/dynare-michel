@@ -1,4 +1,25 @@
 function [xparam1,estim_params_,bayestopt_,lb,ub]=set_prior(estim_params_)
+
+% function [xparam1,estim_params_,bayestopt_,lb,ub]=set_prior(estim_params_)
+% sets prior distributions
+%
+% INPUTS
+%    estim_params_:    structure characterizing parameters to be estimated
+%    
+% OUTPUTS
+%    xparam1:          vector of parameters to be estimated (initial values)
+%    estim_params_:    structure characterizing parameters to be estimated
+%    bayestopt_:       structure characterizing priors
+%    lb:               lower bound 
+%    ub:               upper bound
+%    
+% SPECIAL REQUIREMENTS
+%    none
+%  
+% part of DYNARE, copyright Dynare Team (2003-2008)
+% Gnu Public License.
+
+
   global M_ options_
   
   nvx = size(estim_params_.var_exo,1);
