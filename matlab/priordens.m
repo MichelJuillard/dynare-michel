@@ -6,11 +6,12 @@ function lnprior = priordens(para, pshape, p1, p2, p3, p4)
 % INPUTS
 %    para:       parameter value
 %    pshape:     0 is point mass, both para and p2 are ignored
-%                1 is BETA(mean,stdd)
-%                2 is GAMMA(mean,stdd)
-%                3 is NORMAL(mean,stdd)
-%                4 is INVGAMMA(s^2,nu)
-%                5 is UNIFORM [p3,p4]
+%                1 is BETA
+%                2 is GAMMA
+%                3 is NORMAL
+%                4 is INVERTED GAMMA TYPE I
+%                5 is UNIFORM
+%                6 is INVERTED GAMMA TYPE II
 %    p1:         mean
 %    p2:         standard deviation
 %    p3:         lower bound
