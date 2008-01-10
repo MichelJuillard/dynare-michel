@@ -1,7 +1,8 @@
 function [nam,texnam] = get_the_name(k,TeX)
 
 % function [nam,texnam] = get_the_name(k,TeX)
-% 
+% get the name of parameters
+%
 % INPUTS
 %    k:      parameter number
 %    Tex=1:  tex variable name 
