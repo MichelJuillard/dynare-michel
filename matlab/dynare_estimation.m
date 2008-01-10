@@ -1,5 +1,21 @@
 function dynare_estimation(var_list_)
 
+% function dynare_estimation(var_list_)
+% runs the estimation of the model
+%  
+% INPUTS
+%   var_list_:  selected endogenous variables vector
+%  
+% OUTPUTS
+%   none
+%
+% SPECIAL REQUIREMENTS
+%   none
+%  
+% part of DYNARE, copyright Dynare Team (2003-2007)
+% Gnu Public License.
+
+
 global M_ options_ oo_ estim_params_ 
 global bayestopt_ dsge_prior_weight
 
