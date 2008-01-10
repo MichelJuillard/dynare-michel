@@ -1,5 +1,22 @@
 function [nam,texnam] = get_the_name(k,TeX)
-% stephane.adjemian@cepremap.cnrs.fr [07-13-2004]
+
+% function [nam,texnam] = get_the_name(k,TeX)
+% 
+% INPUTS
+%    k:      parameter number
+%    Tex=1:  tex variable name 
+%    Tex=0:  variable name (in the mod-file)
+%    
+% OUTPUTS
+%    nam:    variable name
+%    texnam: variable tex name
+%        
+% SPECIAL REQUIREMENTS
+%    none
+%  
+% part of DYNARE, copyright Dynare Team (2004-2008)
+% Gnu Public License.
+
 global M_ estim_params_ options_
 
 nam = [];
