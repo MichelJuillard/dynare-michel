@@ -190,7 +190,7 @@ VariableNode::VariableNode(DataTree &datatree_arg, int symb_id_arg, Type type_ar
       || type == eExogenousDet
       || type == eExogenous
       || type == eRecursiveVariable)
-    var_id = datatree.variable_table.AddVariable(datatree.symbol_table.getNameByID(type, symb_id), lag);
+    var_id = datatree.variable_table.addVariable(type, symb_id, lag);
   else
     var_id = -1;
 
@@ -288,7 +288,7 @@ VariableNode::writeOutput(ostream &output, ExprNodeOutputType output_type,
         {
         case oMatlabDynamicModel:
         case oCDynamicModel:
-          i = datatree.variable_table.getPrintIndex(var_id) + OFFSET(output_type);
+          i = datatree.variable_table.getSortID(var_id) + OFFSET(output_type);
           output <<  "y" << LPAR(output_type) << i << RPAR(output_type);
           break;
         case oMatlabStaticModel:

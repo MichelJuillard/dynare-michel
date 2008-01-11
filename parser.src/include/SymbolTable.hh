@@ -29,7 +29,7 @@ using namespace std;
 #include <iostream>
 
 //! Enumeration of possible symbol types
-/*! Be careful not to change the order of the enumeration, it matters for VariableTable (at least up to eParameter) */
+/*! Warning: do not to change the order of the enumeration, it matters for VariableTable (at least ensure that eEndogenous is the first one) */
 enum Type
   {
     eEndogenous = 0,               //!< Endogenous
@@ -56,14 +56,11 @@ private:
   //! A symbol is represented by a pair (type, id)
   typedef pair<Type, int> symbol_type;
 
-  //! Type for map: symbol_name -> (type, id)
   typedef map<string, symbol_type> symbol_table_type;
   //! Maps strings to pairs (type,id)
   symbol_table_type symbol_table;
 
-  //! Type for map: (type, id) -> symbol_name
   typedef map<symbol_type, string> inv_symbol_table_type;
-
   //! Maps pairs (type, id) to names
   inv_symbol_table_type name_table;
   //! Maps pairs (type, id) to TeX names
@@ -128,7 +125,6 @@ public:
   inline int getID(const string &name) const throw (UnknownSymbolNameException);
   //! Write output of this class
   void writeOutput(ostream &output) const;
-
 };
 
 inline bool

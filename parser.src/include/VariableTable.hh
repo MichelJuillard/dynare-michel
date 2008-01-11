@@ -23,34 +23,30 @@
 using namespace std;
 
 #include <map>
-#include <string>
 #include <vector>
 
 #include "SymbolTable.hh"
 
-//! This class is used to store variables as they appear in the model (with their lead or lag)
-/*! \todo Raise exceptions when requesting ordered IDs before calling to Sort() */
+//! Used to keep track of variables in the sense of the models, i.e. pairs (symbol, lead/lag)
+/*! Warning: some methods access variables through the tuple (type, symbol_id, lag), but internally the class uses a lexicographic order over (type, lag, symbol_id) */
 class VariableTable
 {
 private:
   //! A reference to the symbol table
   const SymbolTable &symbol_table;
-  //! Variable key type to acced variable table elements
-  typedef pair<string, int> varKey;
-  //! Maps a pair (symbol, lag) to an ID
-  map<varKey, int> mVariableTable;
-  //! Maps an ID to a pair (symbol, lag)
-  /*! It is the reverse map of mVariableTable */
-  vector<varKey> mVariableIndex;
-  //! Variable IDs of sorted variable table
-  vector<int> mSortedVariableID;
-  //! For each variable, gives its index number among variables of the same type
-  /*! It is the index used in the output file:
-    - in the lead/lag matrix
-    - in the right hand side of equations (such as y(index))
-  */
-  vector<int> mPrintFormatIndex;
-  map<pair<int, int>, int> mVariableSelector;
+  //! A variable is a tuple (type, lag, symbol_id)
+  /*! Warning: don't change the order of elements in the tuple, since this determines the lexicographic ordering in sort() */
+  typedef pair<pair<Type, int>, int> var_key_type;
+
+  typedef map<var_key_type, int> variable_table_type;
+  //! Maps a tuple (type, lag, symbol_id) to a variable ID
+  variable_table_type variable_table;
+
+  typedef map<int, var_key_type> inv_variable_table_type;
+  //! Maps a variable ID to a tuple (type, lag, symbol_id)
+  inv_variable_table_type inv_variable_table;
+  //! Contains the sorted IDs (indexed by variable IDs)
+  vector<int> sorted_ids_table;
 public:
   VariableTable(const SymbolTable &symbol_table_arg);
   //! Number of dynamic endogenous variables inside the model block
@@ -79,100 +75,111 @@ public:
   int max_recur_lag;
   //! Maximum lead over recursive variables
   int max_recur_lead;
-  //! Adds a variable in the table, and returns its (newly allocated) varID
+  //! Adds a variable in the table, and returns its (newly allocated) variable ID
   /*! Also works if the variable already exists */
-  int AddVariable(const string &iName, int iLag);
+  int addVariable(Type type, int symb_id, int lag);
   //! Return variable ID
-  inline int getID(const string &iName, int iLag) const;
+  inline int getID(Type type, int symb_id, int lag) const;
   //! Return lag of variable
   inline int getLag(int ivarID) const;
   //! Return symbol ID of variable
   inline int getSymbolID(int ivarID) const;
   //! Get variable type
   inline Type getType(int ivarID) const;
-  //! Get number of variables in mVariableTable
+  //! Get number of variables
   inline int size() const;
   //! Get variable ID of sorted variable table
+  /*! In practice, only used for endogenous variables */
   inline int getSortID(int iVarID) const;
-  //! Return variable index to print in format : y(index) or oo_.y_simul(index) ...
-  inline int getPrintIndex(int iVarID) const;
   //! Sorts variable table
-  /*! The order used is a lexicographic order over the tuple (type, lag, symbolID) */
-  void Sort();
+  /*! The order used is a lexicographic order over the tuple (type, lag, symbol_id) */
+  void sort();
   //! Get the number of dynamic variables 
-  inline int get_dyn_var_nbr(void) const;
-  int* GetVariableTable(int* Size, int* HSize);
-  int getIDS(int id, int lead_lag) const;
-  void setmVariableSelector();
-  int getmVariableSelector(int var, int lag) const;
+  inline int get_dyn_var_nbr() const;
+
+  //! Thrown when trying to access an unknown variable by (type, symb_id, lag)
+  class UnknownVariableKeyException
+  {
+  public:
+    Type type;
+    int symb_id, lag;
+    UnknownVariableKeyException(Type type_arg, int symb_id_arg, int lag_arg) : type(type_arg), symb_id(symb_id_arg), lag(lag_arg) {}
+  };
+  //! Thrown when trying to access an unknown variable by var_id
+  class UnknownVariableIDException
+  {
+  public:
+    //! Variable ID
+    int id;
+    UnknownVariableIDException(int id_arg) : id(id_arg) {}
+  };
+  //! Thrown when getSortID() called before sort()
+  class NotYetSortedException
+  {
+  };
+  //! Thrown when sort() or addVariable() called after sort()
+  class AlreadySortedException
+  {
+  };
 };
-
-inline void
-VariableTable::setmVariableSelector()
-{
-  for(int var = 0; var < (int) mVariableTable.size(); var++)
-    {
-      if(getType(var)==eEndogenous)
-        mVariableSelector[make_pair(getSymbolID(var),mVariableIndex[var].second)]=var;
-    }
-}
-
-inline int
-VariableTable::getmVariableSelector(int var, int lag) const
-{
-  return(mVariableSelector.find(make_pair(var,lag))->second);
-}
 
 inline int
 VariableTable::getSortID(int iVarID) const
 {
-  return mSortedVariableID[iVarID];
+  if (sorted_ids_table.size() == 0)
+    throw NotYetSortedException();
+
+  return sorted_ids_table[iVarID];
 }
 
 inline int
-VariableTable::getPrintIndex(int iVarID) const
+VariableTable::getID(Type type, int symb_id, int lag) const
 {
-  return mPrintFormatIndex[iVarID];
-}
-
-inline int
-VariableTable::getID(const string &iName, int iLag) const
-{
-  map<varKey, int>::const_iterator it = mVariableTable.find(make_pair(iName, iLag));
-  if (it == mVariableTable.end())
-    return -1;
+  variable_table_type::const_iterator it = variable_table.find(make_pair(make_pair(type, lag), symb_id));
+  if (it == variable_table.end())
+    throw UnknownVariableKeyException(type, symb_id, lag);
   else
     return it->second;
 }
 
 inline Type
-VariableTable::getType(int ivarID) const
+VariableTable::getType(int var_id) const
 {
-  varKey key = mVariableIndex[ivarID];
-  return symbol_table.getType(key.first);
+  inv_variable_table_type::const_iterator it = inv_variable_table.find(var_id);
+  if (it != inv_variable_table.end())
+    return it->second.first.first;
+  else
+    throw UnknownVariableIDException(var_id);
 }
 
 inline int
-VariableTable::getSymbolID(int ivarID) const
+VariableTable::getSymbolID(int var_id) const
 {
-  varKey key = mVariableIndex[ivarID];
-  return symbol_table.getID(key.first);
+  inv_variable_table_type::const_iterator it = inv_variable_table.find(var_id);
+  if (it != inv_variable_table.end())
+    return it->second.second;
+  else
+    throw UnknownVariableIDException(var_id);
 }
 
 inline int
-VariableTable::getLag(int ivarID) const
+VariableTable::getLag(int var_id) const
 {
-  return mVariableIndex[ivarID].second;
+  inv_variable_table_type::const_iterator it = inv_variable_table.find(var_id);
+  if (it != inv_variable_table.end())
+    return it->second.first.second;
+  else
+    throw UnknownVariableIDException(var_id);
 }
 
 inline int
 VariableTable::size() const
 {
-  return mVariableTable.size();
+  return variable_table.size();
 }
 
 inline int 
-VariableTable::get_dyn_var_nbr(void) const
+VariableTable::get_dyn_var_nbr() const
 {
   return var_endo_nbr + symbol_table.exo_nbr + symbol_table.exo_det_nbr;
 }

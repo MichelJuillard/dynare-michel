@@ -52,10 +52,11 @@ ModelTree::equation_number() const
 }
 
 void
-ModelTree::writeDerivative(ostream &output, int eq, int var, int lag, ExprNodeOutputType output_type,
-                          const temporary_terms_type &temporary_terms) const
+ModelTree::writeDerivative(ostream &output, int eq, int symb_id, int lag,
+                           ExprNodeOutputType output_type,
+                           const temporary_terms_type &temporary_terms) const
 {
-  first_derivatives_type::const_iterator it = first_derivatives.find(make_pair(eq, variable_table.getmVariableSelector(var, lag)));
+  first_derivatives_type::const_iterator it = first_derivatives.find(make_pair(eq, variable_table.getID(eEndogenous, symb_id, lag)));
   if (it != first_derivatives.end())
     (it->second)->writeOutput(output, output_type, temporary_terms);
   else
@@ -63,9 +64,9 @@ ModelTree::writeDerivative(ostream &output, int eq, int var, int lag, ExprNodeOu
 }
 
 void
-ModelTree::compileDerivative(ofstream &code_file, int eq, int var, int lag, ExprNodeOutputType output_type, map_idx_type map_idx) const
+ModelTree::compileDerivative(ofstream &code_file, int eq, int symb_id, int lag, ExprNodeOutputType output_type, map_idx_type map_idx) const
 {
-  first_derivatives_type::const_iterator it = first_derivatives.find(make_pair(eq, variable_table.getmVariableSelector(var, lag)));
+  first_derivatives_type::const_iterator it = first_derivatives.find(make_pair(eq, variable_table.getID(eEndogenous, symb_id, lag)));
   if (it != first_derivatives.end())
     {
       /*NodeID Id = it->second;*/
@@ -305,7 +306,7 @@ ModelTree::computeTemporaryTermsOrdered(int order, Model_Block *ModelBlock)
                     {
                       eq=ModelBlock->Block_List[j].IM_lead_lag[m].Equ_Index[i];
                       var=ModelBlock->Block_List[j].IM_lead_lag[m].Var_Index[i];
-                      it=first_derivatives.find(make_pair(eq,variable_table.getmVariableSelector(var,lag)));
+                      it=first_derivatives.find(make_pair(eq,variable_table.getID(eEndogenous, var,lag)));
                       it->second->computeTemporaryTerms(reference_count, temporary_terms, first_occurence, j, ModelBlock, map_idx);
                     }
                 }
@@ -318,7 +319,7 @@ ModelTree::computeTemporaryTermsOrdered(int order, Model_Block *ModelBlock)
                 {
                   eq=ModelBlock->Block_List[j].IM_lead_lag[m].Equ_Index[i];
                   var=ModelBlock->Block_List[j].IM_lead_lag[m].Var_Index[i];
-                  it=first_derivatives.find(make_pair(eq,variable_table.getmVariableSelector(var,0)));
+                  it=first_derivatives.find(make_pair(eq,variable_table.getID(eEndogenous,var,0)));
                   it->second->computeTemporaryTerms(reference_count, temporary_terms, first_occurence, j, ModelBlock, map_idx);
                 }
             }
@@ -326,7 +327,7 @@ ModelTree::computeTemporaryTermsOrdered(int order, Model_Block *ModelBlock)
             {
               eq=ModelBlock->Block_List[j].Equation[0];
               var=ModelBlock->Block_List[j].Variable[0];
-              it=first_derivatives.find(make_pair(eq,variable_table.getmVariableSelector(var,0)));
+              it=first_derivatives.find(make_pair(eq,variable_table.getID(eEndogenous,var,0)));
               it->second->computeTemporaryTerms(reference_count, temporary_terms, first_occurence, j, ModelBlock, map_idx);
             }
         }
@@ -347,7 +348,7 @@ void
 ModelTree::writeModelEquationsOrdered_C(ostream &output, Model_Block *ModelBlock) const
 {
   int i,j,k,m;
-  string sModel, tmp_s;
+  string tmp_s;
   ostringstream tmp_output;
   NodeID lhs=NULL, rhs=NULL;
   BinaryOpNode *eq_node;
@@ -435,8 +436,8 @@ ModelTree::writeModelEquationsOrdered_C(ostream &output, Model_Block *ModelBlock
       // The equations
       for(i = 0;i < ModelBlock->Block_List[j].Size;i++)
         {
-          sModel = symbol_table.getNameByID(eEndogenous, ModelBlock->Block_List[j].Variable[i]) ;
-          ModelBlock->Block_List[j].Variable_Sorted[i] = variable_table.getID(sModel, 0);
+          ModelBlock->Block_List[j].Variable_Sorted[i] = variable_table.getID(eEndogenous, ModelBlock->Block_List[j].Variable[i], 0);
+          string sModel = symbol_table.getNameByID(eEndogenous, ModelBlock->Block_List[j].Variable[i]) ;
           output << "  //equation " << ModelBlock->Block_List[j].Equation[i] << " variable : " <<
             sModel << " (" << ModelBlock->Block_List[j].Variable[i] << ")\n";
           if (!lhs_rhs_done)
@@ -585,7 +586,7 @@ void
 ModelTree::writeModelEquationsOrdered_M(ostream &output, Model_Block *ModelBlock, const string &dynamic_basename) const
 {
   int i,j,k,m;
-  string sModel, tmp_s, sps;
+  string tmp_s, sps;
   ostringstream tmp_output, global_output;
   NodeID lhs=NULL, rhs=NULL;
   BinaryOpNode *eq_node;
@@ -703,8 +704,8 @@ ModelTree::writeModelEquationsOrdered_M(ostream &output, Model_Block *ModelBlock
       // The equations
       for(i = 0;i < ModelBlock->Block_List[j].Size;i++)
         {
-          sModel = symbol_table.getNameByID(eEndogenous, ModelBlock->Block_List[j].Variable[i]) ;
-          ModelBlock->Block_List[j].Variable_Sorted[i] = variable_table.getID(sModel, 0);
+          ModelBlock->Block_List[j].Variable_Sorted[i] = variable_table.getID(eEndogenous, ModelBlock->Block_List[j].Variable[i], 0);
+          string sModel = symbol_table.getNameByID(eEndogenous, ModelBlock->Block_List[j].Variable[i]) ;
           output <<  sps << "  " << interfaces::comment() << "equation " << ModelBlock->Block_List[j].Equation[i] << " variable : " <<
             sModel << " (" << ModelBlock->Block_List[j].Variable[i] << ")\n";
           if (!lhs_rhs_done)
@@ -865,7 +866,7 @@ void
 ModelTree::writeModelStaticEquationsOrdered_M(ostream &output, Model_Block *ModelBlock, const string &static_basename) const
 {
   int i,j,k,m, var, eq;
-  string sModel, tmp_s, sps;
+  string tmp_s, sps;
   ostringstream tmp_output, global_output;
   NodeID lhs=NULL, rhs=NULL;
   BinaryOpNode *eq_node;
@@ -993,8 +994,8 @@ ModelTree::writeModelStaticEquationsOrdered_M(ostream &output, Model_Block *Mode
       // The equations
       for(i = 0;i < ModelBlock->Block_List[j].Size;i++)
         {
-          sModel = symbol_table.getNameByID(eEndogenous, ModelBlock->Block_List[j].Variable[i]) ;
-          ModelBlock->Block_List[j].Variable_Sorted[i] = variable_table.getID(sModel, 0);
+          ModelBlock->Block_List[j].Variable_Sorted[i] = variable_table.getID(eEndogenous, ModelBlock->Block_List[j].Variable[i], 0);
+          string sModel = symbol_table.getNameByID(eEndogenous, ModelBlock->Block_List[j].Variable[i]) ;
           output <<  sps << "  " << interfaces::comment() << "equation " << ModelBlock->Block_List[j].Equation[i] << " variable : " <<
             sModel << " (" << ModelBlock->Block_List[j].Variable[i] << ")\n";
           if (!lhs_rhs_done)
@@ -1157,7 +1158,7 @@ ModelTree::writeModelEquationsCodeOrdered(const string file_name, const Model_Bl
       };
 
     int i,j,k,m, v, ModelBlock_Aggregated_Count, k0, k1;
-    string sModel, tmp_s;
+    string tmp_s;
     ostringstream tmp_output;
     ofstream code_file;
     NodeID lhs=NULL, rhs=NULL;
@@ -1298,8 +1299,7 @@ ModelTree::writeModelEquationsCodeOrdered(const string file_name, const Model_Bl
             // The equations
             for(i = 0;i < ModelBlock->Block_List[j].Size;i++)
               {
-                sModel = symbol_table.getNameByID(eEndogenous, ModelBlock->Block_List[j].Variable[i]) ;
-                ModelBlock->Block_List[j].Variable_Sorted[i] = variable_table.getID(sModel, 0);
+                ModelBlock->Block_List[j].Variable_Sorted[i] = variable_table.getID(eEndogenous, ModelBlock->Block_List[j].Variable[i], 0);
                 if (!lhs_rhs_done)
                   {
                     eq_node = equations[ModelBlock->Block_List[j].Equation[i]];
@@ -3517,14 +3517,16 @@ ModelTree::writeOutput(ostream &output) const
       // Loop on periods
       for(int lag = -variable_table.max_endo_lag; lag <= variable_table.max_endo_lead; lag++)
         {
-          // Getting name of symbol
-          string name = symbol_table.getNameByID(eEndogenous, endoID);
-          // and its variableID if exists with current period
-          int varID = variable_table.getID(name, lag);
-          if (varID >= 0)
-            output << " " << variable_table.getPrintIndex(varID) + 1;
-          else
-            output << " 0";
+          // Print variableID if exists with current period, otherwise print 0
+          try
+            {
+              int varID = variable_table.getID(eEndogenous, endoID, lag);
+              output << " " << variable_table.getSortID(varID) + 1;
+            }
+          catch(VariableTable::UnknownVariableKeyException &e)
+            {
+              output << " 0";
+            }
         }
       output << ";";
     }
@@ -3633,7 +3635,7 @@ ModelTree::BlockLinear(Model_Block *ModelBlock)
             {
               int eq=ModelBlock->Block_List[j].IM_lead_lag[ll].Equ_Index[i];
               int var=ModelBlock->Block_List[j].IM_lead_lag[ll].Var_Index[i];
-              first_derivatives_type::const_iterator it=first_derivatives.find(make_pair(eq,variable_table.getmVariableSelector(var,0)));
+              first_derivatives_type::const_iterator it=first_derivatives.find(make_pair(eq,variable_table.getID(eEndogenous,var,0)));
               if (it!= first_derivatives.end())
                 {
                   NodeID Id = it->second;
@@ -3661,7 +3663,7 @@ ModelTree::BlockLinear(Model_Block *ModelBlock)
                 {
                   int eq=ModelBlock->Block_List[j].IM_lead_lag[m].Equ_Index[i];
                   int var=ModelBlock->Block_List[j].IM_lead_lag[m].Var_Index[i];
-                  first_derivatives_type::const_iterator it=first_derivatives.find(make_pair(eq,variable_table.getmVariableSelector(var,k1)));
+                  first_derivatives_type::const_iterator it=first_derivatives.find(make_pair(eq,variable_table.getID(eEndogenous,var,k1)));
                   NodeID Id = it->second;
                   if (it!= first_derivatives.end())
                     {
@@ -3692,9 +3694,7 @@ ModelTree::computingPass(const eval_context_type &eval_context)
   cout << equations.size() << " equation(s) found" << endl;
 
   // Sorting variable table
-  variable_table.Sort();
-
-  variable_table.setmVariableSelector();
+  variable_table.sort();
 
   // Determine derivation order
   int order = 1;
@@ -3709,10 +3709,6 @@ ModelTree::computingPass(const eval_context_type &eval_context)
   if (mode == eSparseDLLMode || mode == eSparseMode)
     {
       jacob_map j_m;
-      int Size;
-      int HSize;
-      int *Table=variable_table.GetVariableTable(&Size,&HSize);
-
 
       evaluateJacobian(eval_context, &j_m);
 
@@ -3721,7 +3717,6 @@ ModelTree::computingPass(const eval_context_type &eval_context)
           cout << "The gross incidence matrix \n";
           block_triangular.Print_IM( symbol_table.endo_nbr);
         }
-      block_triangular.SetVariableTable(Table, Size, HSize);
       block_triangular.Normalize_and_BlockDecompose_Static_0_Model(j_m);
       BlockLinear(block_triangular.ModelBlock);
 

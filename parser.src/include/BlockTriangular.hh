@@ -83,9 +83,8 @@ public:
   void getMax_Lead_Lag(int var, int equ, int *lead, int *lag);
   void getMax_Lead_Lag_B(int size, int* Equation, int *Variable, int *lead, int *lag);
   void swap_IM_c(bool *SIM, int pos1, int pos2, int pos3, simple* Index_Var_IM, simple* Index_Equ_IM, int n);
-  void Allocate_Block(int size, int *count_Equ, int *count_Block, int type, Model_Block * ModelBlock, int* Table, int TableSize);
+  void Allocate_Block(int size, int *count_Equ, int *count_Block, int type, Model_Block * ModelBlock);
   void Free_Block(Model_Block* ModelBlock);
-  void SetVariableTable(int *Table,int Size,int HSize);
   string getnamebyID(Type type, int id);
   List_IM *First_IM ;
   List_IM *Last_IM ;
@@ -94,8 +93,7 @@ public:
   int prologue, epilogue;
   int Model_Max_Lead, Model_Max_Lag, periods;
   bool bt_verbose;
-  int endo_nbr, TableSize;
-  int* Table;
+  int endo_nbr;
   Model_Block* ModelBlock;
   inline static std::string BlockType0(int type)
   {

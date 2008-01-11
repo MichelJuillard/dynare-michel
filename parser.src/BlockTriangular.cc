@@ -384,7 +384,7 @@ BlockTriangular::getMax_Lead_Lag_B(int size, int* Equation, int *Variable, int *
 
 
 void
-BlockTriangular::Allocate_Block(int size, int *count_Equ, int *count_Block, int type, Model_Block * ModelBlock, int* Table, int TableSize)
+BlockTriangular::Allocate_Block(int size, int *count_Equ, int *count_Block, int type, Model_Block * ModelBlock)
 {
   int i, j, k, l, ls, m, i_1, Lead, Lag, size_list_lead_var, first_count_equ, i1;
   int *list_lead_var, *tmp_size, *tmp_var, *tmp_endo, nb_lead_lag_endo;
@@ -882,16 +882,16 @@ BlockTriangular::Normalize_and_BlockDecompose(bool* IM, Model_Block* ModelBlock,
   Free_IM(p_First_IM);
   count_Equ = count_Block = 0;
   if (*prologue)
-    Allocate_Block(*prologue, &count_Equ, &count_Block, PROLOGUE, ModelBlock, Table, TableSize);
+    Allocate_Block(*prologue, &count_Equ, &count_Block, PROLOGUE, ModelBlock);
   for(j = 0;j < res->n_sets;j++)
     {
       if(res->sets_f[res->ordered[j]] == res->sets_s[res->ordered[j]])
-        Allocate_Block(res->sets_f[res->ordered[j]] - res->sets_s[res->ordered[j]] + 1, &count_Equ, &count_Block, PROLOGUE, ModelBlock, Table, TableSize);
+        Allocate_Block(res->sets_f[res->ordered[j]] - res->sets_s[res->ordered[j]] + 1, &count_Equ, &count_Block, PROLOGUE, ModelBlock);
       else
-        Allocate_Block(res->sets_f[res->ordered[j]] - res->sets_s[res->ordered[j]] + 1, &count_Equ, &count_Block, SIMULTANS, ModelBlock, Table, TableSize);
+        Allocate_Block(res->sets_f[res->ordered[j]] - res->sets_s[res->ordered[j]] + 1, &count_Equ, &count_Block, SIMULTANS, ModelBlock);
     }
   if (*epilogue)
-    Allocate_Block(*epilogue, &count_Equ, &count_Block, EPILOGUE, ModelBlock, Table, TableSize);
+    Allocate_Block(*epilogue, &count_Equ, &count_Block, EPILOGUE, ModelBlock);
   return 0;
 }
 
@@ -984,16 +984,16 @@ BlockTriangular::Normalize_and_BlockDecompose(bool* IM, Model_Block* ModelBlock,
   Free_IM(p_First_IM);
   count_Equ = count_Block = 0;
   if (*prologue)
-    Allocate_Block(*prologue, &count_Equ, &count_Block, PROLOGUE, ModelBlock, Table, TableSize);
+    Allocate_Block(*prologue, &count_Equ, &count_Block, PROLOGUE, ModelBlock);
   for(j = 0;j < res->n_sets;j++)
     {
       if(res->sets_f[res->ordered[j]] == res->sets_s[res->ordered[j]])
-        Allocate_Block(res->sets_f[res->ordered[j]] - res->sets_s[res->ordered[j]] + 1, &count_Equ, &count_Block, PROLOGUE, ModelBlock, Table, TableSize);
+        Allocate_Block(res->sets_f[res->ordered[j]] - res->sets_s[res->ordered[j]] + 1, &count_Equ, &count_Block, PROLOGUE, ModelBlock);
       else
-        Allocate_Block(res->sets_f[res->ordered[j]] - res->sets_s[res->ordered[j]] + 1, &count_Equ, &count_Block, SIMULTANS, ModelBlock, Table, TableSize);
+        Allocate_Block(res->sets_f[res->ordered[j]] - res->sets_s[res->ordered[j]] + 1, &count_Equ, &count_Block, SIMULTANS, ModelBlock);
     }
   if (*epilogue)
-    Allocate_Block(*epilogue, &count_Equ, &count_Block, EPILOGUE, ModelBlock, Table, TableSize);
+    Allocate_Block(*epilogue, &count_Equ, &count_Block, EPILOGUE, ModelBlock);
   return 0;
 }
 
@@ -1188,11 +1188,3 @@ BlockTriangular::Normalize_and_BlockDecompose_Static_0_Model(const jacob_map &j_
     for(i = 0;i < endo_nbr;i++)
       cout << "Block=" << Index_Equ_IM[i].block << " Equ=" << Index_Equ_IM[i].index << " Var= " << Index_Var_IM[i].index << "  " << symbol_table.getNameByID(eEndogenous, Index_Var_IM[i].index) << "\n";
 }
-
-void
-BlockTriangular::SetVariableTable(int *Table, int Size, int HSize)
-{
-  BlockTriangular::Table = Table;
-  TableSize = Size;
-}
-

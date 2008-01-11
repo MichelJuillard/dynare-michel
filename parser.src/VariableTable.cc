@@ -17,9 +17,6 @@
  * along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <iostream>
-#include <algorithm>
-
 #include "VariableTable.hh"
 
 VariableTable::VariableTable(const SymbolTable &symbol_table_arg) :
@@ -34,22 +31,23 @@ VariableTable::VariableTable(const SymbolTable &symbol_table_arg) :
 }
 
 int
-VariableTable::AddVariable(const string &iName, int iLag)
+VariableTable::addVariable(Type type, int symb_id, int lag)
 {
-  // Testing if variable exists in VariableTable
-  int lVariableID = getID(iName,iLag);
-  if (lVariableID != -1)
-    return lVariableID;
+  if (sorted_ids_table.size() != 0)
+    throw AlreadySortedException();
 
-  lVariableID = mVariableIndex.size();
-  // Making variable struct and key
-  varKey key = make_pair(iName, iLag);
-  // Pushing variable on VariableTable
-  mVariableTable[key] = lVariableID;
-  mVariableIndex.push_back(key);
+  var_key_type key = make_pair(make_pair(type, lag), symb_id);
 
-  // Setting dynamic variables numbers
-  Type type = getType(lVariableID);
+  // Testing if variable already exists
+  variable_table_type::const_iterator it = variable_table.find(key);
+  if (it != variable_table.end())
+    return it->second;
+
+  int var_id = size();
+
+  variable_table[key] = var_id;
+  inv_variable_table[var_id] = key;
+
   if (type == eEndogenous)
     var_endo_nbr++;
   if (type == eExogenous)
@@ -58,132 +56,53 @@ VariableTable::AddVariable(const string &iName, int iLag)
     var_exo_det_nbr++;
 
   // Setting maximum and minimum lags
-  if (max_lead < iLag)
-    max_lead = iLag;
-  else if (-max_lag > iLag)
-    max_lag = -iLag;
+  if (max_lead < lag)
+    max_lead = lag;
+  else if (-max_lag > lag)
+    max_lag = -lag;
 
   switch(type)
     {
     case eEndogenous:
-      if (max_endo_lead < iLag)
-        max_endo_lead = iLag;
-      else if (-max_endo_lag > iLag)
-        max_endo_lag = -iLag;
+      if (max_endo_lead < lag)
+        max_endo_lead = lag;
+      else if (-max_endo_lag > lag)
+        max_endo_lag = -lag;
       break;
     case eExogenous:
-      if (max_exo_lead < iLag)
-        max_exo_lead = iLag;
-      else if (-max_exo_lag > iLag)
-        max_exo_lag = -iLag;
+      if (max_exo_lead < lag)
+        max_exo_lead = lag;
+      else if (-max_exo_lag > lag)
+        max_exo_lag = -lag;
       break;
     case eExogenousDet:
-      if (max_exo_det_lead < iLag)
-        max_exo_det_lead = iLag;
-      else if (-max_exo_det_lag > iLag)
-        max_exo_det_lag = -iLag;
+      if (max_exo_det_lead < lag)
+        max_exo_det_lead = lag;
+      else if (-max_exo_det_lag > lag)
+        max_exo_det_lag = -lag;
       break;
     case eRecursiveVariable:
-      if (max_recur_lead < iLag)
-        max_recur_lead = iLag;
-      else if (-max_recur_lag > iLag)
-        max_recur_lag = -iLag;
+      if (max_recur_lead < lag)
+        max_recur_lead = lag;
+      else if (-max_recur_lag > lag)
+        max_recur_lag = -lag;
       break;
     default:
       ;
     }
-  return lVariableID;
+  return var_id;
 }
 
 void
-VariableTable::Sort()
+VariableTable::sort()
 {
-  // Trivial case where no ordering is necessary
-  if (mVariableIndex.size() == 1)
-    {
-      mSortedVariableID.push_back(0);
-      mPrintFormatIndex.push_back(0);
-      return;
-    }
+  if (sorted_ids_table.size() != 0)
+    throw AlreadySortedException();
 
-  /* The type of key for lexicographic ordering over variables:
-     the key is equal to (type, lag, symbol_id) */
-  typedef pair<Type, pair<int, int> > lexicographic_key_type;
+  int sorted_id = 0;
+  sorted_ids_table.resize(size());
 
-  // Construct the vector matching keys to their varIDs
-  vector<pair<lexicographic_key_type, int> > VarToSort;
-  for (unsigned int varID = 0; varID < mVariableIndex.size(); varID++)
-    {
-      Type type = getType(varID);
-      int symbolID = getSymbolID(varID);
-      int lag = mVariableIndex[varID].second;
-      VarToSort.push_back(make_pair(make_pair(type, make_pair(lag, symbolID)), varID));
-    }
-
-  // Sort variables using the lexicographic ordering
-  sort(VarToSort.begin(), VarToSort.end());
-
-  // Fill mSortedVariableID and mPrintFormatIndex
-  mSortedVariableID.resize(VarToSort.size());
-  mPrintFormatIndex.resize(VarToSort.size());
-  Type type = getType(VarToSort[0].second);
-  int index = 0;
-  for (unsigned int sortedID = 0; sortedID < VarToSort.size(); sortedID++)
-    {
-      int varID = VarToSort[sortedID].second;
-      mSortedVariableID[varID] = sortedID;
-      if (type == getType(varID))
-        {
-          mPrintFormatIndex[varID] = index;
-          index++;
-        }
-      else
-        {
-          mPrintFormatIndex[varID] = 0;
-          type = getType(varID);
-          index = 1;
-        }
-    }
-}
-
-int*
-VariableTable::GetVariableTable(int* Size, int* HSize)
-{
-  int* Table;
-  varKey key;
-  int variable,id, ind;
-  (*Size)=0;
-  for (id=0; id < (int) mVariableIndex.size(); id++)
-    {
-      key = mVariableIndex[id];
-      variable = mVariableTable[key];
-      if(getType(variable)==eEndogenous)
-        (*Size)++;
-    }
-  (*HSize)=4;
-  Table=(int*)malloc((*Size)*(*HSize)*sizeof(*Table));
-  ind=0;
-  for (id=0; id < (int) mVariableIndex.size(); id++)
-    {
-      key = mVariableIndex[id];
-      variable = mVariableTable[key];
-      if (getType(variable)==eEndogenous)
-        {
-          Table[ind*(*HSize)]= getSymbolID(id);
-          Table[ind*(*HSize)+1]= key.second;
-          Table[ind*(*HSize)+2]= mPrintFormatIndex[id];
-          Table[ind*(*HSize)+3]= mSortedVariableID[id];
-          ind++;
-        }
-    }
-  return(Table);
-}
-
-int
-VariableTable::getIDS(int id, int lead_lag) const
-{
-  varKey key;
-  key=mVariableIndex[id];
-  map<varKey, int>::const_iterator it = mVariableTable.find(key);
-  return(it->second);
+  for(variable_table_type::const_iterator it = variable_table.begin();
+      it != variable_table.end(); it++)
+    sorted_ids_table[it->second] = sorted_id++;
 }
