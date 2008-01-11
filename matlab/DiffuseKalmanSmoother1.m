@@ -15,7 +15,6 @@ function [alphahat,etahat,a, aK] = DiffuseKalmanSmoother1(T,R,Q,Pinf1,Pstar1,Y,t
 %    mm:       number of state variables
 %    smpl:     sample size
 %    mf:       observed variables index in the state vector
-%    start:    likelihood evaluation at 'start'
 %             
 % OUTPUTS
 %    alphahat: smoothed state variables
