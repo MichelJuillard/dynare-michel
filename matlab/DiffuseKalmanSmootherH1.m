@@ -1,15 +1,42 @@
 function [alphahat,epsilonhat,etahat,a, aK] = DiffuseKalmanSmootherH1(T,R,Q,H,Pinf1,Pstar1,Y,trend,pp,mm,smpl,mf)
+
+% function [alphahat,epsilonhat,etahat,a, aK] = DiffuseKalmanSmootherH1(T,R,Q,H,Pinf1,Pstar1,Y,trend,pp,mm,smpl,mf)
+% Computes the diffuse kalman smoother with measurement error, in the case of a non-singular var-cov matrix 
+%
+% INPUTS
+%    T:         mm*mm matrix
+%    R:         mm*rr matrix
+%    Q:         rr*rr matrix
+%    Pinf1:     mm*mm diagonal matrix with with q ones and m-q zeros
+%    Pstar1:    mm*mm variance-covariance matrix with stationary variables
+%    Y:         pp*1 vector
+%    trend
+%    pp:        number of observed variables
+%    mm:        number of state variables
+%    smpl:      sample size
+%    mf:        observed variables index in the state vector
+%             
+% OUTPUTS
+%    alphahat:  smoothed state variables
+%    epsilonhat:smoothed measurement errors
+%    etahat:    smoothed shocks
+%    a:         matrix of one step ahead filtered state variables
+%    aK:        3D array of k step ahead filtered state variables
+
+% SPECIAL REQUIREMENTS
+%   See "Filtering and Smoothing of State Vector for Diffuse State Space
+%   Models", S.J. Koopman and J. Durbin (2003, in Journal of Time Series 
+%   Analysis, vol. 24(1), pp. 85-98). 
+%  
+% part of DYNARE, copyright Dynare Team (2004-2008)
+% Gnu Public License.
+
+
 % modified by M. Ratto:
 % new output argument aK (1-step to k-step predictions)
 % new options_.nk: the max step ahed prediction in aK (default is 4)
 % new crit1 value for rank of Pinf
 % it is assured that P is symmetric 
-%
-% stephane.adjemian@cepremap.cnrs.fr [09-16-2004]
-% 
-%   See "Filtering and Smoothing of State Vector for Diffuse State Space
-%   Models", S.J. Koopman and J. Durbin (2003, in Journal of Time Series 
-%   Analysis, vol. 24(1), pp. 85-98).  
 
 global options_
 
