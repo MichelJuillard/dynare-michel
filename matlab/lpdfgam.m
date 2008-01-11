@@ -1,6 +1,6 @@
 function  ldens = lpdfgam(x,a,b);
 
-% function ldens = lpdfbeta(x,a,b)
+% function ldens = lpdfgam(x,a,b)
 % log GAMMA PDF
 %
 % INPUTS
