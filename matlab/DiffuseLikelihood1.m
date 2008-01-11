@@ -1,8 +1,34 @@
 function [LIK, lik] = DiffuseLikelihood1(T,R,Q,Pinf,Pstar,Y,trend,start)
-% M. Ratto added lik in output
-% stephane.adjemian@cepremap.cnrs.fr [07-19-2004]
+
+% function [LIK, lik] = DiffuseLikelihood1(T,R,Q,Pinf,Pstar,Y,trend,start)
+% Computes the diffuse likelihood without measurement error, in the case of a non-singular var-cov matrix 
 %
-% Same as DiffuseLikelihoodH1 without measurement error.
+% INPUTS
+%    T:      mm*mm matrix
+%    R:      mm*rr matrix
+%    Q:      rr*rr matrix
+%    Pinf:   mm*mm diagonal matrix with with q ones and m-q zeros
+%    Pstar:  mm*mm variance-covariance matrix with stationary variables
+%    Y:      pp*1 vector
+%    trend
+%    start:  likelihood evaluation at 'start'
+%             
+% OUTPUTS
+%    LIK:    likelihood
+%    lik:    density vector in each period
+%        
+% SPECIAL REQUIREMENTS
+%   See "Filtering and Smoothing of State Vector for Diffuse State Space
+%   Models", S.J. Koopman and J. Durbin (2003, in Journal of Time Series 
+%   Analysis, vol. 24(1), pp. 85-98). 
+%  
+% part of DYNARE, copyright Dynare Team (2004-2008)
+% Gnu Public License.
+
+
+
+% M. Ratto added lik in output
+
   global bayestopt_ options_
   
   mf = bayestopt_.mf;
