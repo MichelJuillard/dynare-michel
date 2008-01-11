@@ -48,7 +48,7 @@ namespace yy
 }
 
 /* First part of user declarations.  */
-#line 5 "DynareBison.yy"
+#line 24 "DynareBison.yy"
 
 using namespace std;
 
@@ -109,7 +109,7 @@ namespace yy
     /// Symbol semantic values.
 #ifndef YYSTYPE
     union semantic_type
-#line 27 "DynareBison.yy"
+#line 46 "DynareBison.yy"
 {
   string *string_val;
   NodeID node_val;

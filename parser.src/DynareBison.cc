@@ -36,7 +36,7 @@
 #include "DynareBison.hh"
 
 /* User implementation prologue.  */
-#line 32 "DynareBison.yy"
+#line 51 "DynareBison.yy"
 
 #include "ParsingDriver.hh"
 
@@ -273,7 +273,7 @@ namespace yy
 
 
     /* User initialization code.  */
-    #line 18 "DynareBison.yy"
+    #line 37 "DynareBison.yy"
 {
   // Initialize the location filenames
   yylloc.begin.filename = yylloc.end.filename = &driver.file;
@@ -395,907 +395,907 @@ namespace yy
     switch (yyn)
       {
 	  case 49:
-#line 154 "DynareBison.yy"
+#line 173 "DynareBison.yy"
     { driver.dsample((yysemantic_stack_[(3) - (2)].string_val)); ;}
     break;
 
   case 50:
-#line 156 "DynareBison.yy"
+#line 175 "DynareBison.yy"
     { driver.dsample((yysemantic_stack_[(4) - (2)].string_val), (yysemantic_stack_[(4) - (3)].string_val)); ;}
     break;
 
   case 51:
-#line 159 "DynareBison.yy"
+#line 178 "DynareBison.yy"
     { driver.rplot(); ;}
     break;
 
   case 56:
-#line 170 "DynareBison.yy"
+#line 189 "DynareBison.yy"
     { driver.declare_endogenous((yysemantic_stack_[(2) - (2)].string_val)); ;}
     break;
 
   case 57:
-#line 172 "DynareBison.yy"
+#line 191 "DynareBison.yy"
     { driver.declare_endogenous((yysemantic_stack_[(3) - (3)].string_val)); ;}
     break;
 
   case 58:
-#line 174 "DynareBison.yy"
+#line 193 "DynareBison.yy"
     { driver.declare_endogenous((yysemantic_stack_[(1) - (1)].string_val)); ;}
     break;
 
   case 59:
-#line 176 "DynareBison.yy"
+#line 195 "DynareBison.yy"
     { driver.declare_endogenous((yysemantic_stack_[(3) - (2)].string_val), (yysemantic_stack_[(3) - (3)].string_val)); ;}
     break;
 
   case 60:
-#line 178 "DynareBison.yy"
+#line 197 "DynareBison.yy"
     { driver.declare_endogenous((yysemantic_stack_[(4) - (3)].string_val), (yysemantic_stack_[(4) - (4)].string_val)); ;}
     break;
 
   case 61:
-#line 180 "DynareBison.yy"
+#line 199 "DynareBison.yy"
     { driver.declare_endogenous((yysemantic_stack_[(2) - (1)].string_val), (yysemantic_stack_[(2) - (2)].string_val)); ;}
     break;
 
   case 62:
-#line 184 "DynareBison.yy"
+#line 203 "DynareBison.yy"
     { driver.declare_exogenous((yysemantic_stack_[(2) - (2)].string_val)); ;}
     break;
 
   case 63:
-#line 186 "DynareBison.yy"
+#line 205 "DynareBison.yy"
     { driver.declare_exogenous((yysemantic_stack_[(3) - (3)].string_val)); ;}
     break;
 
   case 64:
-#line 188 "DynareBison.yy"
+#line 207 "DynareBison.yy"
     { driver.declare_exogenous((yysemantic_stack_[(1) - (1)].string_val)); ;}
     break;
 
   case 65:
-#line 190 "DynareBison.yy"
+#line 209 "DynareBison.yy"
     { driver.declare_exogenous((yysemantic_stack_[(3) - (2)].string_val), (yysemantic_stack_[(3) - (3)].string_val)); ;}
     break;
 
   case 66:
-#line 192 "DynareBison.yy"
+#line 211 "DynareBison.yy"
     { driver.declare_exogenous((yysemantic_stack_[(4) - (3)].string_val), (yysemantic_stack_[(4) - (4)].string_val)); ;}
     break;
 
   case 67:
-#line 194 "DynareBison.yy"
+#line 213 "DynareBison.yy"
     { driver.declare_exogenous((yysemantic_stack_[(2) - (1)].string_val), (yysemantic_stack_[(2) - (2)].string_val)); ;}
     break;
 
   case 68:
-#line 198 "DynareBison.yy"
+#line 217 "DynareBison.yy"
     { driver.declare_exogenous_det((yysemantic_stack_[(2) - (2)].string_val)); ;}
     break;
 
   case 69:
-#line 200 "DynareBison.yy"
+#line 219 "DynareBison.yy"
     { driver.declare_exogenous_det((yysemantic_stack_[(3) - (3)].string_val)); ;}
     break;
 
   case 70:
-#line 202 "DynareBison.yy"
+#line 221 "DynareBison.yy"
     { driver.declare_exogenous_det((yysemantic_stack_[(1) - (1)].string_val)); ;}
     break;
 
   case 71:
-#line 204 "DynareBison.yy"
+#line 223 "DynareBison.yy"
     { driver.declare_exogenous_det((yysemantic_stack_[(3) - (2)].string_val), (yysemantic_stack_[(3) - (3)].string_val)); ;}
     break;
 
   case 72:
-#line 206 "DynareBison.yy"
+#line 225 "DynareBison.yy"
     { driver.declare_exogenous_det((yysemantic_stack_[(4) - (3)].string_val), (yysemantic_stack_[(4) - (4)].string_val)); ;}
     break;
 
   case 73:
-#line 208 "DynareBison.yy"
+#line 227 "DynareBison.yy"
     { driver.declare_exogenous_det((yysemantic_stack_[(2) - (1)].string_val), (yysemantic_stack_[(2) - (2)].string_val)); ;}
     break;
 
   case 74:
-#line 212 "DynareBison.yy"
+#line 231 "DynareBison.yy"
     { driver.declare_parameter((yysemantic_stack_[(2) - (2)].string_val)); ;}
     break;
 
   case 75:
-#line 214 "DynareBison.yy"
+#line 233 "DynareBison.yy"
     { driver.declare_parameter((yysemantic_stack_[(3) - (3)].string_val)); ;}
     break;
 
   case 76:
-#line 216 "DynareBison.yy"
+#line 235 "DynareBison.yy"
     { driver.declare_parameter((yysemantic_stack_[(1) - (1)].string_val)); ;}
     break;
 
   case 77:
-#line 218 "DynareBison.yy"
+#line 237 "DynareBison.yy"
     { driver.declare_parameter((yysemantic_stack_[(3) - (2)].string_val), (yysemantic_stack_[(3) - (3)].string_val)); ;}
     break;
 
   case 78:
-#line 220 "DynareBison.yy"
+#line 239 "DynareBison.yy"
     { driver.declare_parameter((yysemantic_stack_[(4) - (3)].string_val), (yysemantic_stack_[(4) - (4)].string_val)); ;}
     break;
 
   case 79:
-#line 222 "DynareBison.yy"
+#line 241 "DynareBison.yy"
     { driver.declare_parameter((yysemantic_stack_[(2) - (1)].string_val), (yysemantic_stack_[(2) - (2)].string_val)); ;}
     break;
 
   case 80:
-#line 226 "DynareBison.yy"
+#line 245 "DynareBison.yy"
     { driver.periods((yysemantic_stack_[(3) - (2)].string_val)); ;}
     break;
 
   case 81:
-#line 228 "DynareBison.yy"
+#line 247 "DynareBison.yy"
     { driver.periods((yysemantic_stack_[(4) - (3)].string_val)); ;}
     break;
 
   case 82:
-#line 232 "DynareBison.yy"
+#line 251 "DynareBison.yy"
     { driver.cutoff((yysemantic_stack_[(3) - (2)].string_val)); ;}
     break;
 
   case 83:
-#line 234 "DynareBison.yy"
+#line 253 "DynareBison.yy"
     { driver.cutoff((yysemantic_stack_[(4) - (3)].string_val)); ;}
     break;
 
   case 84:
-#line 238 "DynareBison.yy"
+#line 257 "DynareBison.yy"
     { driver.markowitz((yysemantic_stack_[(3) - (2)].string_val)); ;}
     break;
 
   case 85:
-#line 240 "DynareBison.yy"
+#line 259 "DynareBison.yy"
     { driver.markowitz((yysemantic_stack_[(4) - (3)].string_val)); ;}
     break;
 
   case 86:
-#line 244 "DynareBison.yy"
+#line 263 "DynareBison.yy"
     { driver.init_param((yysemantic_stack_[(4) - (1)].string_val), (yysemantic_stack_[(4) - (3)].node_val)); ;}
     break;
 
   case 87:
-#line 247 "DynareBison.yy"
+#line 266 "DynareBison.yy"
     { (yyval.node_val) = (yysemantic_stack_[(3) - (2)].node_val);;}
     break;
 
   case 88:
-#line 249 "DynareBison.yy"
+#line 268 "DynareBison.yy"
     { (yyval.node_val) = driver.add_expression_variable((yysemantic_stack_[(1) - (1)].string_val)); ;}
     break;
 
   case 89:
-#line 251 "DynareBison.yy"
+#line 270 "DynareBison.yy"
     { (yyval.node_val) = driver.add_constant((yysemantic_stack_[(1) - (1)].string_val)); ;}
     break;
 
   case 90:
-#line 253 "DynareBison.yy"
+#line 272 "DynareBison.yy"
     { (yyval.node_val) = driver.add_constant((yysemantic_stack_[(1) - (1)].string_val)); ;}
     break;
 
   case 91:
-#line 255 "DynareBison.yy"
+#line 274 "DynareBison.yy"
     { (yyval.node_val) = driver.add_plus((yysemantic_stack_[(3) - (1)].node_val), (yysemantic_stack_[(3) - (3)].node_val)); ;}
     break;
 
   case 92:
-#line 257 "DynareBison.yy"
+#line 276 "DynareBison.yy"
     { (yyval.node_val) = driver.add_minus((yysemantic_stack_[(3) - (1)].node_val), (yysemantic_stack_[(3) - (3)].node_val)); ;}
     break;
 
   case 93:
-#line 259 "DynareBison.yy"
+#line 278 "DynareBison.yy"
     { (yyval.node_val) = driver.add_divide((yysemantic_stack_[(3) - (1)].node_val), (yysemantic_stack_[(3) - (3)].node_val)); ;}
     break;
 
   case 94:
-#line 261 "DynareBison.yy"
+#line 280 "DynareBison.yy"
     { (yyval.node_val) = driver.add_times((yysemantic_stack_[(3) - (1)].node_val), (yysemantic_stack_[(3) - (3)].node_val)); ;}
     break;
 
   case 95:
-#line 263 "DynareBison.yy"
+#line 282 "DynareBison.yy"
     { (yyval.node_val) = driver.add_power((yysemantic_stack_[(3) - (1)].node_val), (yysemantic_stack_[(3) - (3)].node_val)); ;}
     break;
 
   case 96:
-#line 265 "DynareBison.yy"
+#line 284 "DynareBison.yy"
     { (yyval.node_val) = driver.add_less((yysemantic_stack_[(3) - (1)].node_val), (yysemantic_stack_[(3) - (3)].node_val)); ;}
     break;
 
   case 97:
-#line 267 "DynareBison.yy"
+#line 286 "DynareBison.yy"
     { (yyval.node_val) = driver.add_greater((yysemantic_stack_[(3) - (1)].node_val), (yysemantic_stack_[(3) - (3)].node_val)); ;}
     break;
 
   case 98:
-#line 269 "DynareBison.yy"
+#line 288 "DynareBison.yy"
     { (yyval.node_val) = driver.add_less_equal((yysemantic_stack_[(3) - (1)].node_val), (yysemantic_stack_[(3) - (3)].node_val)); ;}
     break;
 
   case 99:
-#line 271 "DynareBison.yy"
+#line 290 "DynareBison.yy"
     { (yyval.node_val) = driver.add_greater_equal((yysemantic_stack_[(3) - (1)].node_val), (yysemantic_stack_[(3) - (3)].node_val)); ;}
     break;
 
   case 100:
-#line 273 "DynareBison.yy"
+#line 292 "DynareBison.yy"
     { (yyval.node_val) = driver.add_equal_equal((yysemantic_stack_[(3) - (1)].node_val), (yysemantic_stack_[(3) - (3)].node_val)); ;}
     break;
 
   case 101:
-#line 275 "DynareBison.yy"
+#line 294 "DynareBison.yy"
     { (yyval.node_val) = driver.add_different((yysemantic_stack_[(3) - (1)].node_val), (yysemantic_stack_[(3) - (3)].node_val)); ;}
     break;
 
   case 102:
-#line 277 "DynareBison.yy"
+#line 296 "DynareBison.yy"
     { (yyval.node_val) = driver.add_uminus((yysemantic_stack_[(2) - (2)].node_val)); ;}
     break;
 
   case 103:
-#line 279 "DynareBison.yy"
+#line 298 "DynareBison.yy"
     { (yyval.node_val) = (yysemantic_stack_[(2) - (2)].node_val); ;}
     break;
 
   case 104:
-#line 281 "DynareBison.yy"
+#line 300 "DynareBison.yy"
     { (yyval.node_val) = driver.add_exp((yysemantic_stack_[(4) - (3)].node_val)); ;}
     break;
 
   case 105:
-#line 283 "DynareBison.yy"
+#line 302 "DynareBison.yy"
     { (yyval.node_val) = driver.add_log((yysemantic_stack_[(4) - (3)].node_val)); ;}
     break;
 
   case 106:
-#line 285 "DynareBison.yy"
+#line 304 "DynareBison.yy"
     { (yyval.node_val) = driver.add_log((yysemantic_stack_[(4) - (3)].node_val)); ;}
     break;
 
   case 107:
-#line 287 "DynareBison.yy"
+#line 306 "DynareBison.yy"
     { (yyval.node_val) = driver.add_log10((yysemantic_stack_[(4) - (3)].node_val)); ;}
     break;
 
   case 108:
-#line 289 "DynareBison.yy"
+#line 308 "DynareBison.yy"
     { (yyval.node_val) = driver.add_sin((yysemantic_stack_[(4) - (3)].node_val)); ;}
     break;
 
   case 109:
-#line 291 "DynareBison.yy"
+#line 310 "DynareBison.yy"
     { (yyval.node_val) = driver.add_cos((yysemantic_stack_[(4) - (3)].node_val)); ;}
     break;
 
   case 110:
-#line 293 "DynareBison.yy"
+#line 312 "DynareBison.yy"
     { (yyval.node_val) = driver.add_tan((yysemantic_stack_[(4) - (3)].node_val)); ;}
     break;
 
   case 111:
-#line 295 "DynareBison.yy"
+#line 314 "DynareBison.yy"
     { (yyval.node_val) = driver.add_asin((yysemantic_stack_[(4) - (3)].node_val)); ;}
     break;
 
   case 112:
-#line 297 "DynareBison.yy"
+#line 316 "DynareBison.yy"
     { (yyval.node_val) = driver.add_acos((yysemantic_stack_[(4) - (3)].node_val)); ;}
     break;
 
   case 113:
-#line 299 "DynareBison.yy"
+#line 318 "DynareBison.yy"
     { (yyval.node_val) = driver.add_atan((yysemantic_stack_[(4) - (3)].node_val)); ;}
     break;
 
   case 114:
-#line 301 "DynareBison.yy"
+#line 320 "DynareBison.yy"
     { (yyval.node_val) = driver.add_sqrt((yysemantic_stack_[(4) - (3)].node_val)); ;}
     break;
 
   case 115:
-#line 303 "DynareBison.yy"
+#line 322 "DynareBison.yy"
     { (yyval.node_val) = driver.add_max((yysemantic_stack_[(6) - (3)].node_val) , (yysemantic_stack_[(6) - (5)].node_val)); ;}
     break;
 
   case 116:
-#line 305 "DynareBison.yy"
+#line 324 "DynareBison.yy"
     { (yyval.node_val) = driver.add_min((yysemantic_stack_[(6) - (3)].node_val) , (yysemantic_stack_[(6) - (5)].node_val)); ;}
     break;
 
   case 117:
-#line 307 "DynareBison.yy"
+#line 326 "DynareBison.yy"
     { (yyval.node_val) = driver.add_unknown_function((yysemantic_stack_[(4) - (1)].string_val)); ;}
     break;
 
   case 118:
-#line 309 "DynareBison.yy"
+#line 328 "DynareBison.yy"
     { (yyval.node_val) = driver.add_normcdf((yysemantic_stack_[(8) - (3)].node_val),(yysemantic_stack_[(8) - (5)].node_val),(yysemantic_stack_[(8) - (7)].node_val));;}
     break;
 
   case 119:
-#line 313 "DynareBison.yy"
+#line 332 "DynareBison.yy"
     { driver.add_unknown_function_arg((yysemantic_stack_[(1) - (1)].node_val)); ;}
     break;
 
   case 120:
-#line 315 "DynareBison.yy"
+#line 334 "DynareBison.yy"
     { driver.add_unknown_function_arg((yysemantic_stack_[(3) - (3)].node_val)); ;}
     break;
 
   case 121:
-#line 319 "DynareBison.yy"
+#line 338 "DynareBison.yy"
     { driver.end_initval(); ;}
     break;
 
   case 122:
-#line 321 "DynareBison.yy"
+#line 340 "DynareBison.yy"
     { driver.end_initval(); ;}
     break;
 
   case 123:
-#line 324 "DynareBison.yy"
+#line 343 "DynareBison.yy"
     { driver.init_val_filename((yysemantic_stack_[(3) - (3)].string_val)); ;}
     break;
 
   case 124:
-#line 326 "DynareBison.yy"
+#line 345 "DynareBison.yy"
     { driver.end_endval(); ;}
     break;
 
   case 127:
-#line 332 "DynareBison.yy"
+#line 351 "DynareBison.yy"
     { driver.init_val((yysemantic_stack_[(4) - (1)].string_val), (yysemantic_stack_[(4) - (3)].node_val)); ;}
     break;
 
   case 128:
-#line 334 "DynareBison.yy"
+#line 353 "DynareBison.yy"
     { driver.end_histval(); ;}
     break;
 
   case 131:
-#line 340 "DynareBison.yy"
+#line 359 "DynareBison.yy"
     { driver.hist_val((yysemantic_stack_[(7) - (1)].string_val), (yysemantic_stack_[(7) - (3)].string_val), (yysemantic_stack_[(7) - (6)].node_val)); ;}
     break;
 
   case 138:
-#line 355 "DynareBison.yy"
+#line 374 "DynareBison.yy"
     { driver.init_compiler(0); ;}
     break;
 
   case 139:
-#line 357 "DynareBison.yy"
+#line 376 "DynareBison.yy"
     { driver.init_compiler(1); ;}
     break;
 
   case 140:
-#line 359 "DynareBison.yy"
+#line 378 "DynareBison.yy"
     { driver.init_compiler(2); ;}
     break;
 
   case 143:
-#line 366 "DynareBison.yy"
+#line 385 "DynareBison.yy"
     { driver.begin_model(); ;}
     break;
 
   case 144:
-#line 367 "DynareBison.yy"
+#line 386 "DynareBison.yy"
     { driver.reset_data_tree(); ;}
     break;
 
   case 145:
-#line 368 "DynareBison.yy"
+#line 387 "DynareBison.yy"
     { driver.begin_model(); ;}
     break;
 
   case 146:
-#line 369 "DynareBison.yy"
+#line 388 "DynareBison.yy"
     { driver.reset_data_tree(); ;}
     break;
 
   case 147:
-#line 370 "DynareBison.yy"
+#line 389 "DynareBison.yy"
     { driver.begin_model(); driver.use_dll(); ;}
     break;
 
   case 148:
-#line 371 "DynareBison.yy"
+#line 390 "DynareBison.yy"
     { driver.reset_data_tree(); ;}
     break;
 
   case 149:
-#line 373 "DynareBison.yy"
+#line 392 "DynareBison.yy"
     { driver.begin_model(); driver.sparse_dll(); ;}
     break;
 
   case 150:
-#line 374 "DynareBison.yy"
+#line 393 "DynareBison.yy"
     { driver.reset_data_tree(); ;}
     break;
 
   case 151:
-#line 375 "DynareBison.yy"
+#line 394 "DynareBison.yy"
     { driver.begin_model(); driver.sparse_dll(); ;}
     break;
 
   case 152:
-#line 376 "DynareBison.yy"
+#line 395 "DynareBison.yy"
     { driver.reset_data_tree(); ;}
     break;
 
   case 153:
-#line 378 "DynareBison.yy"
+#line 397 "DynareBison.yy"
     { driver.begin_model(); driver.sparse(); ;}
     break;
 
   case 154:
-#line 379 "DynareBison.yy"
+#line 398 "DynareBison.yy"
     { driver.reset_data_tree(); ;}
     break;
 
   case 155:
-#line 380 "DynareBison.yy"
+#line 399 "DynareBison.yy"
     { driver.begin_model(); driver.sparse(); ;}
     break;
 
   case 156:
-#line 381 "DynareBison.yy"
+#line 400 "DynareBison.yy"
     { driver.reset_data_tree(); ;}
     break;
 
   case 161:
-#line 391 "DynareBison.yy"
+#line 410 "DynareBison.yy"
     { (yyval.node_val) = driver.add_model_equal((yysemantic_stack_[(4) - (1)].node_val), (yysemantic_stack_[(4) - (3)].node_val)); ;}
     break;
 
   case 162:
-#line 393 "DynareBison.yy"
+#line 412 "DynareBison.yy"
     { (yyval.node_val) = driver.add_model_equal_with_zero_rhs((yysemantic_stack_[(2) - (1)].node_val)); ;}
     break;
 
   case 163:
-#line 397 "DynareBison.yy"
+#line 416 "DynareBison.yy"
     { (yyval.node_val) = (yysemantic_stack_[(3) - (2)].node_val);;}
     break;
 
   case 165:
-#line 400 "DynareBison.yy"
+#line 419 "DynareBison.yy"
     { (yyval.node_val) = driver.add_constant((yysemantic_stack_[(1) - (1)].string_val)); ;}
     break;
 
   case 166:
-#line 402 "DynareBison.yy"
+#line 421 "DynareBison.yy"
     { (yyval.node_val) = driver.add_constant((yysemantic_stack_[(1) - (1)].string_val)); ;}
     break;
 
   case 167:
-#line 404 "DynareBison.yy"
+#line 423 "DynareBison.yy"
     { (yyval.node_val) = driver.add_plus((yysemantic_stack_[(3) - (1)].node_val), (yysemantic_stack_[(3) - (3)].node_val)); ;}
     break;
 
   case 168:
-#line 406 "DynareBison.yy"
+#line 425 "DynareBison.yy"
     { (yyval.node_val) = driver.add_minus((yysemantic_stack_[(3) - (1)].node_val), (yysemantic_stack_[(3) - (3)].node_val)); ;}
     break;
 
   case 169:
-#line 408 "DynareBison.yy"
+#line 427 "DynareBison.yy"
     { (yyval.node_val) = driver.add_divide((yysemantic_stack_[(3) - (1)].node_val), (yysemantic_stack_[(3) - (3)].node_val)); ;}
     break;
 
   case 170:
-#line 410 "DynareBison.yy"
+#line 429 "DynareBison.yy"
     { (yyval.node_val) = driver.add_times((yysemantic_stack_[(3) - (1)].node_val), (yysemantic_stack_[(3) - (3)].node_val)); ;}
     break;
 
   case 171:
-#line 412 "DynareBison.yy"
+#line 431 "DynareBison.yy"
     { (yyval.node_val) = driver.add_less((yysemantic_stack_[(3) - (1)].node_val), (yysemantic_stack_[(3) - (3)].node_val)); ;}
     break;
 
   case 172:
-#line 414 "DynareBison.yy"
+#line 433 "DynareBison.yy"
     { (yyval.node_val) = driver.add_greater((yysemantic_stack_[(3) - (1)].node_val), (yysemantic_stack_[(3) - (3)].node_val)); ;}
     break;
 
   case 173:
-#line 416 "DynareBison.yy"
+#line 435 "DynareBison.yy"
     { (yyval.node_val) = driver.add_less_equal((yysemantic_stack_[(3) - (1)].node_val), (yysemantic_stack_[(3) - (3)].node_val)); ;}
     break;
 
   case 174:
-#line 418 "DynareBison.yy"
+#line 437 "DynareBison.yy"
     { (yyval.node_val) = driver.add_greater_equal((yysemantic_stack_[(3) - (1)].node_val), (yysemantic_stack_[(3) - (3)].node_val)); ;}
     break;
 
   case 175:
-#line 420 "DynareBison.yy"
+#line 439 "DynareBison.yy"
     { (yyval.node_val) = driver.add_equal_equal((yysemantic_stack_[(3) - (1)].node_val), (yysemantic_stack_[(3) - (3)].node_val)); ;}
     break;
 
   case 176:
-#line 422 "DynareBison.yy"
+#line 441 "DynareBison.yy"
     { (yyval.node_val) = driver.add_different((yysemantic_stack_[(3) - (1)].node_val), (yysemantic_stack_[(3) - (3)].node_val)); ;}
     break;
 
   case 177:
-#line 424 "DynareBison.yy"
+#line 443 "DynareBison.yy"
     { (yyval.node_val) = driver.add_power((yysemantic_stack_[(3) - (1)].node_val), (yysemantic_stack_[(3) - (3)].node_val)); ;}
     break;
 
   case 178:
-#line 426 "DynareBison.yy"
+#line 445 "DynareBison.yy"
     { (yyval.node_val) = driver.add_uminus((yysemantic_stack_[(2) - (2)].node_val)); ;}
     break;
 
   case 179:
-#line 428 "DynareBison.yy"
+#line 447 "DynareBison.yy"
     { (yyval.node_val) = (yysemantic_stack_[(2) - (2)].node_val); ;}
     break;
 
   case 180:
-#line 430 "DynareBison.yy"
+#line 449 "DynareBison.yy"
     { (yyval.node_val) = driver.add_exp((yysemantic_stack_[(4) - (3)].node_val)); ;}
     break;
 
   case 181:
-#line 432 "DynareBison.yy"
+#line 451 "DynareBison.yy"
     { (yyval.node_val) = driver.add_log((yysemantic_stack_[(4) - (3)].node_val)); ;}
     break;
 
   case 182:
-#line 434 "DynareBison.yy"
+#line 453 "DynareBison.yy"
     { (yyval.node_val) = driver.add_log((yysemantic_stack_[(4) - (3)].node_val)); ;}
     break;
 
   case 183:
-#line 436 "DynareBison.yy"
+#line 455 "DynareBison.yy"
     { (yyval.node_val) = driver.add_log10((yysemantic_stack_[(4) - (3)].node_val)); ;}
     break;
 
   case 184:
-#line 438 "DynareBison.yy"
+#line 457 "DynareBison.yy"
     { (yyval.node_val) = driver.add_sin((yysemantic_stack_[(4) - (3)].node_val)); ;}
     break;
 
   case 185:
-#line 440 "DynareBison.yy"
+#line 459 "DynareBison.yy"
     { (yyval.node_val) = driver.add_cos((yysemantic_stack_[(4) - (3)].node_val)); ;}
     break;
 
   case 186:
-#line 442 "DynareBison.yy"
+#line 461 "DynareBison.yy"
     { (yyval.node_val) = driver.add_tan((yysemantic_stack_[(4) - (3)].node_val)); ;}
     break;
 
   case 187:
-#line 444 "DynareBison.yy"
+#line 463 "DynareBison.yy"
     { (yyval.node_val) = driver.add_asin((yysemantic_stack_[(4) - (3)].node_val)); ;}
     break;
 
   case 188:
-#line 446 "DynareBison.yy"
+#line 465 "DynareBison.yy"
     { (yyval.node_val) = driver.add_acos((yysemantic_stack_[(4) - (3)].node_val)); ;}
     break;
 
   case 189:
-#line 448 "DynareBison.yy"
+#line 467 "DynareBison.yy"
     { (yyval.node_val) = driver.add_atan((yysemantic_stack_[(4) - (3)].node_val)); ;}
     break;
 
   case 190:
-#line 450 "DynareBison.yy"
+#line 469 "DynareBison.yy"
     { (yyval.node_val) = driver.add_sqrt((yysemantic_stack_[(4) - (3)].node_val)); ;}
     break;
 
   case 191:
-#line 452 "DynareBison.yy"
+#line 471 "DynareBison.yy"
     { (yyval.node_val) = driver.add_max((yysemantic_stack_[(6) - (3)].node_val) , (yysemantic_stack_[(6) - (5)].node_val)); ;}
     break;
 
   case 192:
-#line 454 "DynareBison.yy"
+#line 473 "DynareBison.yy"
     { (yyval.node_val) = driver.add_min((yysemantic_stack_[(6) - (3)].node_val) , (yysemantic_stack_[(6) - (5)].node_val)); ;}
     break;
 
   case 193:
-#line 456 "DynareBison.yy"
+#line 475 "DynareBison.yy"
     { (yyval.node_val) = driver.add_normcdf((yysemantic_stack_[(8) - (3)].node_val),(yysemantic_stack_[(8) - (5)].node_val),(yysemantic_stack_[(8) - (7)].node_val));;}
     break;
 
   case 194:
-#line 460 "DynareBison.yy"
+#line 479 "DynareBison.yy"
     { driver.declare_and_init_model_local_variable((yysemantic_stack_[(5) - (2)].string_val), (yysemantic_stack_[(5) - (4)].node_val)); ;}
     break;
 
   case 195:
-#line 463 "DynareBison.yy"
+#line 482 "DynareBison.yy"
     { (yyval.node_val) = driver.add_model_variable((yysemantic_stack_[(1) - (1)].string_val)); ;}
     break;
 
   case 196:
-#line 465 "DynareBison.yy"
+#line 484 "DynareBison.yy"
     { (yyval.node_val) = driver.add_model_variable((yysemantic_stack_[(4) - (1)].string_val), (yysemantic_stack_[(4) - (3)].string_val)); ;}
     break;
 
   case 197:
-#line 468 "DynareBison.yy"
+#line 487 "DynareBison.yy"
     { driver.end_shocks(); ;}
     break;
 
   case 198:
-#line 470 "DynareBison.yy"
+#line 489 "DynareBison.yy"
     { driver.end_mshocks(); ;}
     break;
 
   case 201:
-#line 477 "DynareBison.yy"
+#line 496 "DynareBison.yy"
     { driver.add_det_shock((yysemantic_stack_[(9) - (2)].string_val)); ;}
     break;
 
   case 202:
-#line 479 "DynareBison.yy"
+#line 498 "DynareBison.yy"
     { driver.add_stderr_shock((yysemantic_stack_[(6) - (2)].string_val), (yysemantic_stack_[(6) - (5)].node_val)); ;}
     break;
 
   case 203:
-#line 481 "DynareBison.yy"
+#line 500 "DynareBison.yy"
     { driver.add_var_shock((yysemantic_stack_[(5) - (2)].string_val), (yysemantic_stack_[(5) - (4)].node_val)); ;}
     break;
 
   case 204:
-#line 483 "DynareBison.yy"
+#line 502 "DynareBison.yy"
     { driver.add_covar_shock((yysemantic_stack_[(7) - (2)].string_val), (yysemantic_stack_[(7) - (4)].string_val), (yysemantic_stack_[(7) - (6)].node_val)); ;}
     break;
 
   case 205:
-#line 485 "DynareBison.yy"
+#line 504 "DynareBison.yy"
     { driver.add_correl_shock((yysemantic_stack_[(7) - (2)].string_val), (yysemantic_stack_[(7) - (4)].string_val), (yysemantic_stack_[(7) - (6)].node_val)); ;}
     break;
 
   case 206:
-#line 489 "DynareBison.yy"
+#line 508 "DynareBison.yy"
     { driver.add_period((yysemantic_stack_[(3) - (3)].string_val)); ;}
     break;
 
   case 207:
-#line 491 "DynareBison.yy"
+#line 510 "DynareBison.yy"
     { driver.add_period((yysemantic_stack_[(2) - (2)].string_val)); ;}
     break;
 
   case 208:
-#line 493 "DynareBison.yy"
+#line 512 "DynareBison.yy"
     { driver.add_period((yysemantic_stack_[(5) - (3)].string_val), (yysemantic_stack_[(5) - (5)].string_val)); ;}
     break;
 
   case 209:
-#line 495 "DynareBison.yy"
+#line 514 "DynareBison.yy"
     { driver.add_period((yysemantic_stack_[(4) - (2)].string_val), (yysemantic_stack_[(4) - (4)].string_val)); ;}
     break;
 
   case 210:
-#line 497 "DynareBison.yy"
+#line 516 "DynareBison.yy"
     { driver.add_period((yysemantic_stack_[(3) - (1)].string_val), (yysemantic_stack_[(3) - (3)].string_val)); ;}
     break;
 
   case 211:
-#line 499 "DynareBison.yy"
+#line 518 "DynareBison.yy"
     { driver.add_period((yysemantic_stack_[(1) - (1)].string_val)); ;}
     break;
 
   case 212:
-#line 503 "DynareBison.yy"
+#line 522 "DynareBison.yy"
     { driver.do_sigma_e(); ;}
     break;
 
   case 213:
-#line 507 "DynareBison.yy"
+#line 526 "DynareBison.yy"
     {driver.add_value((yysemantic_stack_[(3) - (3)].node_val));;}
     break;
 
   case 214:
-#line 509 "DynareBison.yy"
+#line 528 "DynareBison.yy"
     {driver.add_value((yysemantic_stack_[(2) - (2)].string_val));;}
     break;
 
   case 215:
-#line 511 "DynareBison.yy"
+#line 530 "DynareBison.yy"
     {driver.add_value((yysemantic_stack_[(1) - (1)].node_val));;}
     break;
 
   case 216:
-#line 515 "DynareBison.yy"
+#line 534 "DynareBison.yy"
     { driver.end_of_row(); ;}
     break;
 
   case 217:
-#line 517 "DynareBison.yy"
+#line 536 "DynareBison.yy"
     { driver.end_of_row(); ;}
     break;
 
   case 218:
-#line 521 "DynareBison.yy"
+#line 540 "DynareBison.yy"
     { driver.add_to_row((yysemantic_stack_[(5) - (4)].node_val)); ;}
     break;
 
   case 219:
-#line 523 "DynareBison.yy"
+#line 542 "DynareBison.yy"
     { driver.add_to_row_const((yysemantic_stack_[(3) - (3)].string_val)); ;}
     break;
 
   case 220:
-#line 525 "DynareBison.yy"
+#line 544 "DynareBison.yy"
     { driver.add_to_row_const((yysemantic_stack_[(3) - (3)].string_val)); ;}
     break;
 
   case 221:
-#line 527 "DynareBison.yy"
+#line 546 "DynareBison.yy"
     { driver.add_to_row((yysemantic_stack_[(4) - (3)].node_val)); ;}
     break;
 
   case 222:
-#line 529 "DynareBison.yy"
+#line 548 "DynareBison.yy"
     { driver.add_to_row_const((yysemantic_stack_[(2) - (2)].string_val)); ;}
     break;
 
   case 223:
-#line 531 "DynareBison.yy"
+#line 550 "DynareBison.yy"
     { driver.add_to_row_const((yysemantic_stack_[(2) - (2)].string_val)); ;}
     break;
 
   case 224:
-#line 533 "DynareBison.yy"
+#line 552 "DynareBison.yy"
     { driver.add_to_row((yysemantic_stack_[(3) - (2)].node_val)); ;}
     break;
 
   case 225:
-#line 535 "DynareBison.yy"
+#line 554 "DynareBison.yy"
     { driver.add_to_row_const((yysemantic_stack_[(1) - (1)].string_val)); ;}
     break;
 
   case 226:
-#line 537 "DynareBison.yy"
+#line 556 "DynareBison.yy"
     { driver.add_to_row_const((yysemantic_stack_[(1) - (1)].string_val)); ;}
     break;
 
   case 227:
-#line 541 "DynareBison.yy"
+#line 560 "DynareBison.yy"
     { driver.steady(); ;}
     break;
 
   case 228:
-#line 543 "DynareBison.yy"
+#line 562 "DynareBison.yy"
     { driver.steady(); ;}
     break;
 
   case 234:
-#line 556 "DynareBison.yy"
+#line 575 "DynareBison.yy"
     { driver.check(); ;}
     break;
 
   case 235:
-#line 558 "DynareBison.yy"
+#line 577 "DynareBison.yy"
     { driver.check(); ;}
     break;
 
   case 239:
-#line 568 "DynareBison.yy"
+#line 587 "DynareBison.yy"
     { driver.simulate(); ;}
     break;
 
   case 240:
-#line 570 "DynareBison.yy"
+#line 589 "DynareBison.yy"
     { driver.simulate(); ;}
     break;
 
   case 246:
-#line 583 "DynareBison.yy"
+#line 602 "DynareBison.yy"
     { driver.stoch_simul(); ;}
     break;
 
   case 247:
-#line 585 "DynareBison.yy"
+#line 604 "DynareBison.yy"
     { driver.stoch_simul(); ;}
     break;
 
   case 248:
-#line 587 "DynareBison.yy"
+#line 606 "DynareBison.yy"
     { driver.stoch_simul(); ;}
     break;
 
   case 249:
-#line 589 "DynareBison.yy"
+#line 608 "DynareBison.yy"
     { driver.stoch_simul(); ;}
     break;
 
   case 275:
-#line 622 "DynareBison.yy"
+#line 641 "DynareBison.yy"
     { driver.add_tmp_var((yysemantic_stack_[(2) - (2)].string_val)); ;}
     break;
 
   case 276:
-#line 624 "DynareBison.yy"
+#line 643 "DynareBison.yy"
     { driver.add_tmp_var((yysemantic_stack_[(4) - (2)].string_val), (yysemantic_stack_[(4) - (4)].string_val)); ;}
     break;
 
   case 277:
-#line 626 "DynareBison.yy"
+#line 645 "DynareBison.yy"
     { driver.add_tmp_var((yysemantic_stack_[(3) - (3)].string_val)); ;}
     break;
 
   case 278:
-#line 628 "DynareBison.yy"
+#line 647 "DynareBison.yy"
     { driver.add_tmp_var((yysemantic_stack_[(5) - (3)].string_val), (yysemantic_stack_[(5) - (5)].string_val)); ;}
     break;
 
   case 279:
-#line 630 "DynareBison.yy"
+#line 649 "DynareBison.yy"
     { driver.add_tmp_var((yysemantic_stack_[(1) - (1)].string_val)); ;}
     break;
 
   case 280:
-#line 632 "DynareBison.yy"
+#line 651 "DynareBison.yy"
     { driver.add_tmp_var((yysemantic_stack_[(3) - (1)].string_val), (yysemantic_stack_[(3) - (3)].string_val)); ;}
     break;
 
   case 281:
-#line 636 "DynareBison.yy"
+#line 655 "DynareBison.yy"
     { (yyval.string_val) = (yysemantic_stack_[(2) - (2)].string_val); ;}
     break;
 
   case 282:
-#line 638 "DynareBison.yy"
+#line 657 "DynareBison.yy"
     { (yysemantic_stack_[(2) - (2)].string_val)->insert(0, "-"); (yyval.string_val) = (yysemantic_stack_[(2) - (2)].string_val); ;}
     break;
 
   case 283:
-#line 640 "DynareBison.yy"
+#line 659 "DynareBison.yy"
     { (yyval.string_val) = (yysemantic_stack_[(1) - (1)].string_val); ;}
     break;
 
   case 284:
-#line 644 "DynareBison.yy"
+#line 663 "DynareBison.yy"
     { (yyval.string_val) = (yysemantic_stack_[(2) - (2)].string_val); ;}
     break;
 
   case 285:
-#line 646 "DynareBison.yy"
+#line 665 "DynareBison.yy"
     { (yysemantic_stack_[(2) - (2)].string_val)->insert(0, "-"); (yyval.string_val) = (yysemantic_stack_[(2) - (2)].string_val); ;}
     break;
 
   case 286:
-#line 648 "DynareBison.yy"
+#line 667 "DynareBison.yy"
     { (yyval.string_val) = (yysemantic_stack_[(1) - (1)].string_val); ;}
     break;
 
   case 287:
-#line 651 "DynareBison.yy"
+#line 670 "DynareBison.yy"
     { driver.estimated_params(); ;}
     break;
 
   case 288:
-#line 654 "DynareBison.yy"
+#line 673 "DynareBison.yy"
     { driver.add_estimated_params_element(); ;}
     break;
 
   case 289:
-#line 656 "DynareBison.yy"
+#line 675 "DynareBison.yy"
     { driver.add_estimated_params_element(); ;}
     break;
 
   case 291:
-#line 662 "DynareBison.yy"
+#line 681 "DynareBison.yy"
     {
                     driver.estim_params.type = 1;
                     driver.estim_params.name = *(yysemantic_stack_[(2) - (2)].string_val);
@@ -1304,7 +1304,7 @@ namespace yy
     break;
 
   case 292:
-#line 668 "DynareBison.yy"
+#line 687 "DynareBison.yy"
     {
                     driver.estim_params.type = 2;
                     driver.estim_params.name = *(yysemantic_stack_[(1) - (1)].string_val);
@@ -1313,7 +1313,7 @@ namespace yy
     break;
 
   case 293:
-#line 674 "DynareBison.yy"
+#line 693 "DynareBison.yy"
     {
                     driver.estim_params.type = 3;
                     driver.estim_params.name = *(yysemantic_stack_[(4) - (2)].string_val);
@@ -1324,7 +1324,7 @@ namespace yy
     break;
 
   case 294:
-#line 684 "DynareBison.yy"
+#line 703 "DynareBison.yy"
     {
                     driver.estim_params.prior = *(yysemantic_stack_[(3) - (1)].string_val);
                     delete (yysemantic_stack_[(3) - (1)].string_val);
@@ -1332,7 +1332,7 @@ namespace yy
     break;
 
   case 295:
-#line 689 "DynareBison.yy"
+#line 708 "DynareBison.yy"
     {
                     driver.estim_params.init_val = *(yysemantic_stack_[(5) - (1)].string_val);
                     driver.estim_params.prior = *(yysemantic_stack_[(5) - (3)].string_val);
@@ -1342,7 +1342,7 @@ namespace yy
     break;
 
   case 296:
-#line 696 "DynareBison.yy"
+#line 715 "DynareBison.yy"
     {
                     driver.estim_params.init_val = *(yysemantic_stack_[(9) - (1)].string_val);
                     driver.estim_params.low_bound = *(yysemantic_stack_[(9) - (3)].string_val);
@@ -1356,7 +1356,7 @@ namespace yy
     break;
 
   case 297:
-#line 707 "DynareBison.yy"
+#line 726 "DynareBison.yy"
     {
                     driver.estim_params.init_val = *(yysemantic_stack_[(1) - (1)].string_val);
                     delete (yysemantic_stack_[(1) - (1)].string_val);
@@ -1364,7 +1364,7 @@ namespace yy
     break;
 
   case 298:
-#line 712 "DynareBison.yy"
+#line 731 "DynareBison.yy"
     {
                     driver.estim_params.init_val = *(yysemantic_stack_[(5) - (1)].string_val);
                     driver.estim_params.low_bound = *(yysemantic_stack_[(5) - (3)].string_val);
@@ -1376,7 +1376,7 @@ namespace yy
     break;
 
   case 299:
-#line 723 "DynareBison.yy"
+#line 742 "DynareBison.yy"
     {
                     driver.estim_params.mean = *(yysemantic_stack_[(3) - (1)].string_val);
                     driver.estim_params.std = *(yysemantic_stack_[(3) - (3)].string_val);
@@ -1386,7 +1386,7 @@ namespace yy
     break;
 
   case 300:
-#line 730 "DynareBison.yy"
+#line 749 "DynareBison.yy"
     {
                     driver.estim_params.mean = *(yysemantic_stack_[(5) - (1)].string_val);
                     driver.estim_params.std = *(yysemantic_stack_[(5) - (3)].string_val);
@@ -1398,7 +1398,7 @@ namespace yy
     break;
 
   case 301:
-#line 739 "DynareBison.yy"
+#line 758 "DynareBison.yy"
     {
                     driver.estim_params.mean = *(yysemantic_stack_[(7) - (1)].string_val);
                     driver.estim_params.std = *(yysemantic_stack_[(7) - (3)].string_val);
@@ -1412,7 +1412,7 @@ namespace yy
     break;
 
   case 302:
-#line 750 "DynareBison.yy"
+#line 769 "DynareBison.yy"
     {
                     driver.estim_params.mean = *(yysemantic_stack_[(9) - (1)].string_val);
                     driver.estim_params.std = *(yysemantic_stack_[(9) - (3)].string_val);
@@ -1428,22 +1428,22 @@ namespace yy
     break;
 
   case 303:
-#line 765 "DynareBison.yy"
+#line 784 "DynareBison.yy"
     { driver.estimated_params_init(); ;}
     break;
 
   case 304:
-#line 768 "DynareBison.yy"
+#line 787 "DynareBison.yy"
     { driver.add_estimated_params_element(); ;}
     break;
 
   case 305:
-#line 770 "DynareBison.yy"
+#line 789 "DynareBison.yy"
     { driver.add_estimated_params_element(); ;}
     break;
 
   case 306:
-#line 774 "DynareBison.yy"
+#line 793 "DynareBison.yy"
     {
                         driver.estim_params.type = 1;
                         driver.estim_params.name = *(yysemantic_stack_[(5) - (2)].string_val);
@@ -1454,7 +1454,7 @@ namespace yy
     break;
 
   case 307:
-#line 782 "DynareBison.yy"
+#line 801 "DynareBison.yy"
     {
                         driver.estim_params.type = 3;
                         driver.estim_params.name = *(yysemantic_stack_[(7) - (2)].string_val);
@@ -1467,7 +1467,7 @@ namespace yy
     break;
 
   case 308:
-#line 792 "DynareBison.yy"
+#line 811 "DynareBison.yy"
     {
                         driver.estim_params.type = 2;
                         driver.estim_params.name = *(yysemantic_stack_[(4) - (1)].string_val);
@@ -1478,22 +1478,22 @@ namespace yy
     break;
 
   case 309:
-#line 802 "DynareBison.yy"
+#line 821 "DynareBison.yy"
     { driver.estimated_params_bounds(); ;}
     break;
 
   case 310:
-#line 805 "DynareBison.yy"
+#line 824 "DynareBison.yy"
     { driver.add_estimated_params_element(); ;}
     break;
 
   case 311:
-#line 807 "DynareBison.yy"
+#line 826 "DynareBison.yy"
     { driver.add_estimated_params_element(); ;}
     break;
 
   case 312:
-#line 811 "DynareBison.yy"
+#line 830 "DynareBison.yy"
     {
                           driver.estim_params.type = 1;
                           driver.estim_params.name = *(yysemantic_stack_[(7) - (2)].string_val);
@@ -1506,7 +1506,7 @@ namespace yy
     break;
 
   case 313:
-#line 821 "DynareBison.yy"
+#line 840 "DynareBison.yy"
     {
                           driver.estim_params.type = 3;
                           driver.estim_params.name = *(yysemantic_stack_[(9) - (2)].string_val);
@@ -1521,7 +1521,7 @@ namespace yy
     break;
 
   case 314:
-#line 833 "DynareBison.yy"
+#line 852 "DynareBison.yy"
     {
                           driver.estim_params.type = 2;
                           driver.estim_params.name = *(yysemantic_stack_[(6) - (1)].string_val);
@@ -1534,927 +1534,927 @@ namespace yy
     break;
 
   case 315:
-#line 845 "DynareBison.yy"
+#line 864 "DynareBison.yy"
     { (yyval.string_val) = new string("1"); ;}
     break;
 
   case 316:
-#line 847 "DynareBison.yy"
+#line 866 "DynareBison.yy"
     { (yyval.string_val) = new string("2"); ;}
     break;
 
   case 317:
-#line 849 "DynareBison.yy"
+#line 868 "DynareBison.yy"
     { (yyval.string_val) = new string("3"); ;}
     break;
 
   case 318:
-#line 851 "DynareBison.yy"
+#line 870 "DynareBison.yy"
     { (yyval.string_val) = new string("4"); ;}
     break;
 
   case 319:
-#line 853 "DynareBison.yy"
+#line 872 "DynareBison.yy"
     { (yyval.string_val) = new string("5"); ;}
     break;
 
   case 320:
-#line 856 "DynareBison.yy"
+#line 875 "DynareBison.yy"
     { (yyval.string_val) = new string("NaN"); ;}
     break;
 
   case 324:
-#line 861 "DynareBison.yy"
+#line 880 "DynareBison.yy"
     { (yysemantic_stack_[(2) - (2)].string_val)->insert(0, "-"); (yyval.string_val) = (yysemantic_stack_[(2) - (2)].string_val); ;}
     break;
 
   case 325:
-#line 863 "DynareBison.yy"
+#line 882 "DynareBison.yy"
     { (yysemantic_stack_[(2) - (2)].string_val)->insert(0, "-"); (yyval.string_val) = (yysemantic_stack_[(2) - (2)].string_val); ;}
     break;
 
   case 326:
-#line 867 "DynareBison.yy"
+#line 886 "DynareBison.yy"
     { driver.run_estimation(); ;}
     break;
 
   case 327:
-#line 869 "DynareBison.yy"
+#line 888 "DynareBison.yy"
     { driver.run_estimation(); ;}
     break;
 
   case 328:
-#line 871 "DynareBison.yy"
+#line 890 "DynareBison.yy"
     { driver.run_estimation(); ;}
     break;
 
   case 329:
-#line 873 "DynareBison.yy"
+#line 892 "DynareBison.yy"
     { driver.run_estimation(); ;}
     break;
 
   case 371:
-#line 922 "DynareBison.yy"
+#line 941 "DynareBison.yy"
     { driver.run_prior_analysis(); ;}
     break;
 
   case 372:
-#line 924 "DynareBison.yy"
+#line 943 "DynareBison.yy"
     { driver.run_prior_analysis(); ;}
     break;
 
   case 388:
-#line 947 "DynareBison.yy"
+#line 966 "DynareBison.yy"
     { driver.run_posterior_analysis(); ;}
     break;
 
   case 389:
-#line 949 "DynareBison.yy"
+#line 968 "DynareBison.yy"
     { driver.run_posterior_analysis(); ;}
     break;
 
   case 390:
-#line 953 "DynareBison.yy"
+#line 972 "DynareBison.yy"
     { driver.optim_options_string((yysemantic_stack_[(7) - (2)].string_val), (yysemantic_stack_[(7) - (6)].string_val)); ;}
     break;
 
   case 391:
-#line 955 "DynareBison.yy"
+#line 974 "DynareBison.yy"
     { driver.optim_options_num((yysemantic_stack_[(5) - (2)].string_val), (yysemantic_stack_[(5) - (5)].string_val)); ;}
     break;
 
   case 394:
-#line 962 "DynareBison.yy"
+#line 981 "DynareBison.yy"
     { driver.set_varobs(); ;}
     break;
 
   case 395:
-#line 964 "DynareBison.yy"
+#line 983 "DynareBison.yy"
     { driver.set_trends(); ;}
     break;
 
   case 398:
-#line 970 "DynareBison.yy"
+#line 989 "DynareBison.yy"
     { driver.set_trend_element((yysemantic_stack_[(5) - (1)].string_val), (yysemantic_stack_[(5) - (3)].node_val)); ;}
     break;
 
   case 399:
-#line 972 "DynareBison.yy"
+#line 991 "DynareBison.yy"
     { driver.set_unit_root_vars(); ;}
     break;
 
   case 400:
-#line 974 "DynareBison.yy"
+#line 993 "DynareBison.yy"
     { driver.optim_weights(); ;}
     break;
 
   case 401:
-#line 977 "DynareBison.yy"
+#line 996 "DynareBison.yy"
     { driver.set_optim_weights((yysemantic_stack_[(4) - (2)].string_val), (yysemantic_stack_[(4) - (3)].node_val)); ;}
     break;
 
   case 402:
-#line 979 "DynareBison.yy"
+#line 998 "DynareBison.yy"
     { driver.set_optim_weights((yysemantic_stack_[(6) - (2)].string_val), (yysemantic_stack_[(6) - (4)].string_val), (yysemantic_stack_[(6) - (5)].node_val)); ;}
     break;
 
   case 403:
-#line 981 "DynareBison.yy"
+#line 1000 "DynareBison.yy"
     { driver.set_optim_weights((yysemantic_stack_[(3) - (1)].string_val), (yysemantic_stack_[(3) - (2)].node_val)); ;}
     break;
 
   case 404:
-#line 983 "DynareBison.yy"
+#line 1002 "DynareBison.yy"
     { driver.set_optim_weights((yysemantic_stack_[(5) - (1)].string_val), (yysemantic_stack_[(5) - (3)].string_val), (yysemantic_stack_[(5) - (4)].node_val)); ;}
     break;
 
   case 405:
-#line 986 "DynareBison.yy"
+#line 1005 "DynareBison.yy"
     { driver.set_osr_params(); ;}
     break;
 
   case 406:
-#line 989 "DynareBison.yy"
+#line 1008 "DynareBison.yy"
     { driver.run_osr(); ;}
     break;
 
   case 407:
-#line 991 "DynareBison.yy"
+#line 1010 "DynareBison.yy"
     { driver.run_osr(); ;}
     break;
 
   case 408:
-#line 993 "DynareBison.yy"
+#line 1012 "DynareBison.yy"
     { driver.run_osr(); ;}
     break;
 
   case 409:
-#line 995 "DynareBison.yy"
+#line 1014 "DynareBison.yy"
     {driver.run_osr(); ;}
     break;
 
   case 410:
-#line 998 "DynareBison.yy"
+#line 1017 "DynareBison.yy"
     { driver.run_calib_var(); ;}
     break;
 
   case 413:
-#line 1005 "DynareBison.yy"
+#line 1024 "DynareBison.yy"
     { driver.set_calib_var((yysemantic_stack_[(5) - (1)].string_val), (yysemantic_stack_[(5) - (2)].string_val), (yysemantic_stack_[(5) - (4)].node_val)); ;}
     break;
 
   case 414:
-#line 1007 "DynareBison.yy"
+#line 1026 "DynareBison.yy"
     { driver.set_calib_covar((yysemantic_stack_[(7) - (1)].string_val), (yysemantic_stack_[(7) - (3)].string_val), (yysemantic_stack_[(7) - (4)].string_val), (yysemantic_stack_[(7) - (6)].node_val)); ;}
     break;
 
   case 415:
-#line 1009 "DynareBison.yy"
+#line 1028 "DynareBison.yy"
     { driver.set_calib_ac((yysemantic_stack_[(9) - (2)].string_val), (yysemantic_stack_[(9) - (4)].string_val), (yysemantic_stack_[(9) - (6)].string_val), (yysemantic_stack_[(9) - (8)].node_val)); ;}
     break;
 
   case 416:
-#line 1012 "DynareBison.yy"
+#line 1031 "DynareBison.yy"
     { (yyval.string_val) = new string("1"); ;}
     break;
 
   case 417:
-#line 1014 "DynareBison.yy"
+#line 1033 "DynareBison.yy"
     { (yyval.string_val) = (yysemantic_stack_[(3) - (2)].string_val); ;}
     break;
 
   case 418:
-#line 1016 "DynareBison.yy"
+#line 1035 "DynareBison.yy"
     { (yyval.string_val) = (yysemantic_stack_[(3) - (2)].string_val); ;}
     break;
 
   case 419:
-#line 1020 "DynareBison.yy"
+#line 1039 "DynareBison.yy"
     { driver.run_calib(0); ;}
     break;
 
   case 420:
-#line 1022 "DynareBison.yy"
+#line 1041 "DynareBison.yy"
     { driver.run_calib(1); ;}
     break;
 
   case 421:
-#line 1026 "DynareBison.yy"
+#line 1045 "DynareBison.yy"
     { driver.run_dynatype((yysemantic_stack_[(5) - (3)].string_val)); ;}
     break;
 
   case 422:
-#line 1028 "DynareBison.yy"
+#line 1047 "DynareBison.yy"
     { driver.run_dynatype((yysemantic_stack_[(6) - (3)].string_val)); ;}
     break;
 
   case 423:
-#line 1030 "DynareBison.yy"
+#line 1049 "DynareBison.yy"
     { driver.run_dynatype((yysemantic_stack_[(3) - (2)].string_val)); ;}
     break;
 
   case 424:
-#line 1032 "DynareBison.yy"
+#line 1051 "DynareBison.yy"
     { driver.run_dynatype((yysemantic_stack_[(7) - (3)].string_val), (yysemantic_stack_[(7) - (5)].string_val)); ;}
     break;
 
   case 425:
-#line 1034 "DynareBison.yy"
+#line 1053 "DynareBison.yy"
     { driver.run_dynatype((yysemantic_stack_[(8) - (3)].string_val), (yysemantic_stack_[(8) - (5)].string_val)); ;}
     break;
 
   case 426:
-#line 1036 "DynareBison.yy"
+#line 1055 "DynareBison.yy"
     { driver.run_dynatype((yysemantic_stack_[(5) - (2)].string_val),(yysemantic_stack_[(5) - (4)].string_val)); ;}
     break;
 
   case 427:
-#line 1040 "DynareBison.yy"
+#line 1059 "DynareBison.yy"
     { driver.run_dynasave((yysemantic_stack_[(5) - (3)].string_val)); ;}
     break;
 
   case 428:
-#line 1042 "DynareBison.yy"
+#line 1061 "DynareBison.yy"
     { driver.run_dynasave((yysemantic_stack_[(6) - (3)].string_val)); ;}
     break;
 
   case 429:
-#line 1044 "DynareBison.yy"
+#line 1063 "DynareBison.yy"
     { driver.run_dynasave((yysemantic_stack_[(3) - (2)].string_val)); ;}
     break;
 
   case 430:
-#line 1046 "DynareBison.yy"
+#line 1065 "DynareBison.yy"
     { driver.run_dynasave((yysemantic_stack_[(7) - (3)].string_val), (yysemantic_stack_[(7) - (5)].string_val)); ;}
     break;
 
   case 431:
-#line 1048 "DynareBison.yy"
+#line 1067 "DynareBison.yy"
     { driver.run_dynasave((yysemantic_stack_[(8) - (3)].string_val), (yysemantic_stack_[(8) - (5)].string_val)); ;}
     break;
 
   case 432:
-#line 1050 "DynareBison.yy"
+#line 1069 "DynareBison.yy"
     { driver.run_dynasave((yysemantic_stack_[(5) - (2)].string_val), (yysemantic_stack_[(5) - (4)].string_val)); ;}
     break;
 
   case 433:
-#line 1054 "DynareBison.yy"
+#line 1073 "DynareBison.yy"
     { driver.run_model_comparison(); ;}
     break;
 
   case 439:
-#line 1066 "DynareBison.yy"
+#line 1085 "DynareBison.yy"
     { driver.add_mc_filename((yysemantic_stack_[(1) - (1)].string_val)); ;}
     break;
 
   case 440:
-#line 1068 "DynareBison.yy"
+#line 1087 "DynareBison.yy"
     { driver.add_mc_filename((yysemantic_stack_[(3) - (3)].string_val)); ;}
     break;
 
   case 441:
-#line 1070 "DynareBison.yy"
+#line 1089 "DynareBison.yy"
     { driver.add_mc_filename((yysemantic_stack_[(4) - (1)].string_val), (yysemantic_stack_[(4) - (3)].string_val)); ;}
     break;
 
   case 442:
-#line 1072 "DynareBison.yy"
+#line 1091 "DynareBison.yy"
     { driver.add_mc_filename((yysemantic_stack_[(6) - (3)].string_val), (yysemantic_stack_[(6) - (5)].string_val)); ;}
     break;
 
   case 443:
-#line 1076 "DynareBison.yy"
+#line 1095 "DynareBison.yy"
     { (yyval.string_val) = (yysemantic_stack_[(1) - (1)].string_val); ;}
     break;
 
   case 444:
-#line 1078 "DynareBison.yy"
+#line 1097 "DynareBison.yy"
     { (yysemantic_stack_[(2) - (1)].string_val)->append(*(yysemantic_stack_[(2) - (2)].string_val)); delete (yysemantic_stack_[(2) - (2)].string_val); (yyval.string_val) = (yysemantic_stack_[(2) - (1)].string_val); ;}
     break;
 
   case 446:
-#line 1083 "DynareBison.yy"
+#line 1102 "DynareBison.yy"
     { (yyval.string_val) = new string("\\"); ;}
     break;
 
   case 447:
-#line 1085 "DynareBison.yy"
+#line 1104 "DynareBison.yy"
     { (yyval.string_val) = new string("/"); ;}
     break;
 
   case 448:
-#line 1087 "DynareBison.yy"
+#line 1106 "DynareBison.yy"
     { (yyval.string_val) = new string(":"); ;}
     break;
 
   case 449:
-#line 1089 "DynareBison.yy"
+#line 1108 "DynareBison.yy"
     { (yyval.string_val) = new string("."); ;}
     break;
 
   case 450:
-#line 1092 "DynareBison.yy"
+#line 1111 "DynareBison.yy"
     { driver.begin_planner_objective(); ;}
     break;
 
   case 451:
-#line 1093 "DynareBison.yy"
+#line 1112 "DynareBison.yy"
     { driver.end_planner_objective((yysemantic_stack_[(3) - (3)].node_val)); ;}
     break;
 
   case 453:
-#line 1096 "DynareBison.yy"
+#line 1115 "DynareBison.yy"
     { driver.ramsey_policy(); ;}
     break;
 
   case 454:
-#line 1098 "DynareBison.yy"
+#line 1117 "DynareBison.yy"
     { driver.ramsey_policy(); ;}
     break;
 
   case 455:
-#line 1100 "DynareBison.yy"
+#line 1119 "DynareBison.yy"
     { driver.ramsey_policy(); ;}
     break;
 
   case 456:
-#line 1102 "DynareBison.yy"
+#line 1121 "DynareBison.yy"
     { driver.ramsey_policy(); ;}
     break;
 
   case 480:
-#line 1139 "DynareBison.yy"
+#line 1158 "DynareBison.yy"
     { driver.bvar_density((yysemantic_stack_[(3) - (2)].string_val)); ;}
     break;
 
   case 481:
-#line 1141 "DynareBison.yy"
+#line 1160 "DynareBison.yy"
     { driver.bvar_density((yysemantic_stack_[(6) - (5)].string_val)); ;}
     break;
 
   case 488:
-#line 1155 "DynareBison.yy"
+#line 1174 "DynareBison.yy"
     { driver.bvar_forecast((yysemantic_stack_[(3) - (2)].string_val)); ;}
     break;
 
   case 489:
-#line 1157 "DynareBison.yy"
+#line 1176 "DynareBison.yy"
     { driver.bvar_forecast((yysemantic_stack_[(6) - (5)].string_val)); ;}
     break;
 
   case 490:
-#line 1161 "DynareBison.yy"
+#line 1180 "DynareBison.yy"
     { driver.dynare_sensitivity(); ;}
     break;
 
   case 491:
-#line 1163 "DynareBison.yy"
+#line 1182 "DynareBison.yy"
     { driver.dynare_sensitivity(); ;}
     break;
 
   case 521:
-#line 1200 "DynareBison.yy"
+#line 1219 "DynareBison.yy"
     { driver.end_homotopy();;}
     break;
 
   case 524:
-#line 1207 "DynareBison.yy"
+#line 1226 "DynareBison.yy"
     { driver.homotopy_val((yysemantic_stack_[(6) - (1)].string_val),(yysemantic_stack_[(6) - (3)].node_val),(yysemantic_stack_[(6) - (5)].node_val));;}
     break;
 
   case 527:
-#line 1213 "DynareBison.yy"
+#line 1232 "DynareBison.yy"
     { driver.option_num("dr_algo", (yysemantic_stack_[(3) - (3)].string_val)); ;}
     break;
 
   case 528:
-#line 1214 "DynareBison.yy"
+#line 1233 "DynareBison.yy"
     { driver.option_num("solve_algo", (yysemantic_stack_[(3) - (3)].string_val)); ;}
     break;
 
   case 529:
-#line 1215 "DynareBison.yy"
+#line 1234 "DynareBison.yy"
     { driver.option_num("simul_algo", (yysemantic_stack_[(3) - (3)].string_val)); ;}
     break;
 
   case 530:
-#line 1216 "DynareBison.yy"
+#line 1235 "DynareBison.yy"
     { driver.linear(); ;}
     break;
 
   case 531:
-#line 1217 "DynareBison.yy"
+#line 1236 "DynareBison.yy"
     { driver.option_num("order", (yysemantic_stack_[(3) - (3)].string_val)); ;}
     break;
 
   case 532:
-#line 1218 "DynareBison.yy"
+#line 1237 "DynareBison.yy"
     { driver.option_num("replic", (yysemantic_stack_[(3) - (3)].string_val)); ;}
     break;
 
   case 533:
-#line 1219 "DynareBison.yy"
+#line 1238 "DynareBison.yy"
     { driver.option_num("drop", (yysemantic_stack_[(3) - (3)].string_val)); ;}
     break;
 
   case 534:
-#line 1220 "DynareBison.yy"
+#line 1239 "DynareBison.yy"
     { driver.option_num("ar", (yysemantic_stack_[(3) - (3)].string_val)); ;}
     break;
 
   case 535:
-#line 1221 "DynareBison.yy"
+#line 1240 "DynareBison.yy"
     { driver.option_num("nocorr", "1"); ;}
     break;
 
   case 536:
-#line 1222 "DynareBison.yy"
+#line 1241 "DynareBison.yy"
     { driver.option_num("nofunctions", "1"); ;}
     break;
 
   case 537:
-#line 1223 "DynareBison.yy"
+#line 1242 "DynareBison.yy"
     { driver.option_num("nomoments", "1"); ;}
     break;
 
   case 538:
-#line 1224 "DynareBison.yy"
+#line 1243 "DynareBison.yy"
     { driver.option_num("irf", (yysemantic_stack_[(3) - (3)].string_val)); ;}
     break;
 
   case 539:
-#line 1225 "DynareBison.yy"
+#line 1244 "DynareBison.yy"
     { driver.option_num("hp_filter", (yysemantic_stack_[(3) - (3)].string_val)); ;}
     break;
 
   case 540:
-#line 1226 "DynareBison.yy"
+#line 1245 "DynareBison.yy"
     { driver.option_num("hp_ngrid", (yysemantic_stack_[(3) - (3)].string_val)); ;}
     break;
 
   case 541:
-#line 1228 "DynareBison.yy"
+#line 1247 "DynareBison.yy"
     { driver.option_num("periods", (yysemantic_stack_[(3) - (3)].string_val)); driver.option_num("simul", "1"); ;}
     break;
 
   case 542:
-#line 1229 "DynareBison.yy"
+#line 1248 "DynareBison.yy"
     { driver.option_num("cutoff", (yysemantic_stack_[(3) - (3)].string_val)); ;}
     break;
 
   case 543:
-#line 1230 "DynareBison.yy"
+#line 1249 "DynareBison.yy"
     { driver.option_num("simulation_method",(yysemantic_stack_[(3) - (3)].string_val));;}
     break;
 
   case 544:
-#line 1231 "DynareBison.yy"
+#line 1250 "DynareBison.yy"
     { driver.option_num("simulation_method", "0"); ;}
     break;
 
   case 545:
-#line 1232 "DynareBison.yy"
+#line 1251 "DynareBison.yy"
     { driver.option_num("simulation_method", "1"); ;}
     break;
 
   case 546:
-#line 1233 "DynareBison.yy"
+#line 1252 "DynareBison.yy"
     { driver.option_num("simulation_method", "2"); ;}
     break;
 
   case 547:
-#line 1234 "DynareBison.yy"
+#line 1253 "DynareBison.yy"
     { driver.option_num("simulation_method", "3"); ;}
     break;
 
   case 548:
-#line 1235 "DynareBison.yy"
+#line 1254 "DynareBison.yy"
     { driver.option_num("markowitz", (yysemantic_stack_[(3) - (3)].string_val)); ;}
     break;
 
   case 549:
-#line 1236 "DynareBison.yy"
+#line 1255 "DynareBison.yy"
     { driver.option_num("simul", "1"); ;}
     break;
 
   case 550:
-#line 1237 "DynareBison.yy"
+#line 1256 "DynareBison.yy"
     { driver.option_num("simul_seed", (yysemantic_stack_[(3) - (3)].string_val));}
     break;
 
   case 551:
-#line 1238 "DynareBison.yy"
+#line 1257 "DynareBison.yy"
     { driver.option_num("qz_criterium", (yysemantic_stack_[(3) - (3)].string_val)) ;}
     break;
 
   case 552:
-#line 1239 "DynareBison.yy"
+#line 1258 "DynareBison.yy"
     { driver.option_str("datafile", (yysemantic_stack_[(3) - (3)].string_val)); ;}
     break;
 
   case 553:
-#line 1241 "DynareBison.yy"
+#line 1260 "DynareBison.yy"
     { driver.option_num("nobs", (yysemantic_stack_[(3) - (3)].string_val)); ;}
     break;
 
   case 554:
-#line 1243 "DynareBison.yy"
+#line 1262 "DynareBison.yy"
     { driver.option_num("nobs", (yysemantic_stack_[(3) - (3)].string_val)); ;}
     break;
 
   case 555:
-#line 1245 "DynareBison.yy"
+#line 1264 "DynareBison.yy"
     { driver.option_num("first_obs", (yysemantic_stack_[(3) - (3)].string_val)); ;}
     break;
 
   case 556:
-#line 1246 "DynareBison.yy"
+#line 1265 "DynareBison.yy"
     { driver.option_num("prefilter", (yysemantic_stack_[(3) - (3)].string_val)); ;}
     break;
 
   case 557:
-#line 1247 "DynareBison.yy"
+#line 1266 "DynareBison.yy"
     { driver.option_num("presample", (yysemantic_stack_[(3) - (3)].string_val)); ;}
     break;
 
   case 558:
-#line 1248 "DynareBison.yy"
+#line 1267 "DynareBison.yy"
     { driver.option_num("lik_algo", (yysemantic_stack_[(3) - (3)].string_val)); ;}
     break;
 
   case 559:
-#line 1249 "DynareBison.yy"
+#line 1268 "DynareBison.yy"
     { driver.option_num("lik_init", (yysemantic_stack_[(3) - (3)].string_val)); ;}
     break;
 
   case 560:
-#line 1251 "DynareBison.yy"
+#line 1270 "DynareBison.yy"
     { driver.option_num("nograph","1"); ;}
     break;
 
   case 561:
-#line 1253 "DynareBison.yy"
+#line 1272 "DynareBison.yy"
     { driver.option_num("nograph", "0"); ;}
     break;
 
   case 562:
-#line 1255 "DynareBison.yy"
+#line 1274 "DynareBison.yy"
     { driver.option_num("conf_sig", (yysemantic_stack_[(3) - (3)].string_val)); ;}
     break;
 
   case 563:
-#line 1256 "DynareBison.yy"
+#line 1275 "DynareBison.yy"
     { driver.option_num("mh_replic", (yysemantic_stack_[(3) - (3)].string_val)); ;}
     break;
 
   case 564:
-#line 1257 "DynareBison.yy"
+#line 1276 "DynareBison.yy"
     { driver.option_num("mh_drop", (yysemantic_stack_[(3) - (3)].string_val)); ;}
     break;
 
   case 565:
-#line 1258 "DynareBison.yy"
+#line 1277 "DynareBison.yy"
     { driver.option_num("mh_jscale", (yysemantic_stack_[(3) - (3)].string_val)); ;}
     break;
 
   case 567:
-#line 1260 "DynareBison.yy"
+#line 1279 "DynareBison.yy"
     { driver.option_num("mh_init_scale", (yysemantic_stack_[(3) - (3)].string_val)); ;}
     break;
 
   case 568:
-#line 1261 "DynareBison.yy"
+#line 1280 "DynareBison.yy"
     { driver.option_str("mode_file", (yysemantic_stack_[(3) - (3)].string_val)); ;}
     break;
 
   case 569:
-#line 1262 "DynareBison.yy"
+#line 1281 "DynareBison.yy"
     { driver.option_num("mode_compute", (yysemantic_stack_[(3) - (3)].string_val)); ;}
     break;
 
   case 570:
-#line 1263 "DynareBison.yy"
+#line 1282 "DynareBison.yy"
     { driver.option_num("mode_check", "1"); ;}
     break;
 
   case 571:
-#line 1264 "DynareBison.yy"
+#line 1283 "DynareBison.yy"
     { driver.option_num("prior_trunc", (yysemantic_stack_[(3) - (3)].string_val)); ;}
     break;
 
   case 572:
-#line 1265 "DynareBison.yy"
+#line 1284 "DynareBison.yy"
     { driver.option_num("mh_mode", (yysemantic_stack_[(3) - (3)].string_val)); ;}
     break;
 
   case 573:
-#line 1266 "DynareBison.yy"
+#line 1285 "DynareBison.yy"
     { driver.option_num("mh_nblck", (yysemantic_stack_[(3) - (3)].string_val)); ;}
     break;
 
   case 574:
-#line 1267 "DynareBison.yy"
+#line 1286 "DynareBison.yy"
     { driver.option_num("load_mh_file", "1"); ;}
     break;
 
   case 575:
-#line 1268 "DynareBison.yy"
+#line 1287 "DynareBison.yy"
     { driver.option_num("loglinear", "1"); ;}
     break;
 
   case 576:
-#line 1269 "DynareBison.yy"
+#line 1288 "DynareBison.yy"
     { driver.option_num("nodiagnostic", "1"); ;}
     break;
 
   case 577:
-#line 1270 "DynareBison.yy"
+#line 1289 "DynareBison.yy"
     { driver.option_num("bayesian_irf", "1"); ;}
     break;
 
   case 578:
-#line 1271 "DynareBison.yy"
+#line 1290 "DynareBison.yy"
     { driver.option_num("TeX", "1"); ;}
     break;
 
   case 579:
-#line 1272 "DynareBison.yy"
+#line 1291 "DynareBison.yy"
     { driver.option_num("forecast", (yysemantic_stack_[(3) - (3)].string_val)); ;}
     break;
 
   case 580:
-#line 1273 "DynareBison.yy"
+#line 1292 "DynareBison.yy"
     { driver.option_num("smoother", "1"); ;}
     break;
 
   case 581:
-#line 1274 "DynareBison.yy"
+#line 1293 "DynareBison.yy"
     { driver.option_num("moments_varendo", "1"); ;}
     break;
 
   case 582:
-#line 1275 "DynareBison.yy"
+#line 1294 "DynareBison.yy"
     { driver.option_num("filtered_vars", "1"); ;}
     break;
 
   case 583:
-#line 1276 "DynareBison.yy"
+#line 1295 "DynareBison.yy"
     { driver.option_num("relative_irf", "1"); ;}
     break;
 
   case 584:
-#line 1277 "DynareBison.yy"
+#line 1296 "DynareBison.yy"
     { driver.option_num("kalman_algo", (yysemantic_stack_[(3) - (3)].string_val)); ;}
     break;
 
   case 585:
-#line 1278 "DynareBison.yy"
+#line 1297 "DynareBison.yy"
     { driver.option_num("kalman_tol", (yysemantic_stack_[(3) - (3)].string_val)); ;}
     break;
 
   case 586:
-#line 1280 "DynareBison.yy"
+#line 1299 "DynareBison.yy"
     { driver.option_str("model_comparison_approximation", "Laplace"); ;}
     break;
 
   case 587:
-#line 1282 "DynareBison.yy"
+#line 1301 "DynareBison.yy"
     { driver.option_str("model_comparison_approximation", "MODIFIEDHARMONICMEAN"); ;}
     break;
 
   case 588:
-#line 1284 "DynareBison.yy"
+#line 1303 "DynareBison.yy"
     { driver.option_num("noprint", "0"); ;}
     break;
 
   case 589:
-#line 1285 "DynareBison.yy"
+#line 1304 "DynareBison.yy"
     { driver.option_num("noprint", "1"); ;}
     break;
 
   case 590:
-#line 1286 "DynareBison.yy"
+#line 1305 "DynareBison.yy"
     { driver.option_str("xls_sheet", (yysemantic_stack_[(3) - (3)].string_val)); ;}
     break;
 
   case 591:
-#line 1287 "DynareBison.yy"
+#line 1306 "DynareBison.yy"
     { driver.option_str("xls_range", (yysemantic_stack_[(3) - (3)].string_val)); ;}
     break;
 
   case 592:
-#line 1288 "DynareBison.yy"
+#line 1307 "DynareBison.yy"
     { driver.option_num("filter_step_ahead", (yysemantic_stack_[(3) - (3)].string_val)); ;}
     break;
 
   case 593:
-#line 1289 "DynareBison.yy"
+#line 1308 "DynareBison.yy"
     { driver.option_num("noconstant", "0"); ;}
     break;
 
   case 594:
-#line 1290 "DynareBison.yy"
+#line 1309 "DynareBison.yy"
     { driver.option_num("noconstant", "1"); ;}
     break;
 
   case 595:
-#line 1291 "DynareBison.yy"
+#line 1310 "DynareBison.yy"
     { driver.option_num("mh_recover", "1"); ;}
     break;
 
   case 596:
-#line 1292 "DynareBison.yy"
+#line 1311 "DynareBison.yy"
     { driver.option_num("planner_discount",(yysemantic_stack_[(3) - (3)].string_val)); ;}
     break;
 
   case 597:
-#line 1294 "DynareBison.yy"
+#line 1313 "DynareBison.yy"
     { driver.option_num("bvar_prior_tau", (yysemantic_stack_[(3) - (3)].string_val)); ;}
     break;
 
   case 598:
-#line 1295 "DynareBison.yy"
+#line 1314 "DynareBison.yy"
     { driver.option_num("bvar_prior_decay", (yysemantic_stack_[(3) - (3)].string_val)); ;}
     break;
 
   case 599:
-#line 1296 "DynareBison.yy"
+#line 1315 "DynareBison.yy"
     { driver.option_num("bvar_prior_lambda", (yysemantic_stack_[(3) - (3)].string_val)); ;}
     break;
 
   case 600:
-#line 1297 "DynareBison.yy"
+#line 1316 "DynareBison.yy"
     { driver.option_num("bvar_prior_mu", (yysemantic_stack_[(3) - (3)].string_val)); ;}
     break;
 
   case 601:
-#line 1298 "DynareBison.yy"
+#line 1317 "DynareBison.yy"
     { driver.option_num("bvar_prior_omega", (yysemantic_stack_[(3) - (3)].string_val)); ;}
     break;
 
   case 602:
-#line 1299 "DynareBison.yy"
+#line 1318 "DynareBison.yy"
     { driver.option_num("bvar_prior_flat", "1"); ;}
     break;
 
   case 603:
-#line 1300 "DynareBison.yy"
+#line 1319 "DynareBison.yy"
     { driver.option_num("bvar_prior_train", (yysemantic_stack_[(3) - (3)].string_val)); ;}
     break;
 
   case 604:
-#line 1301 "DynareBison.yy"
+#line 1320 "DynareBison.yy"
     { driver.option_num("bvar_replic", (yysemantic_stack_[(3) - (3)].string_val)); ;}
     break;
 
   case 605:
-#line 1303 "DynareBison.yy"
+#line 1322 "DynareBison.yy"
     { driver.option_num("identification", (yysemantic_stack_[(3) - (3)].string_val)); ;}
     break;
 
   case 606:
-#line 1304 "DynareBison.yy"
+#line 1323 "DynareBison.yy"
     { driver.option_num("morris", (yysemantic_stack_[(3) - (3)].string_val)); ;}
     break;
 
   case 607:
-#line 1305 "DynareBison.yy"
+#line 1324 "DynareBison.yy"
     { driver.option_num("stab", (yysemantic_stack_[(3) - (3)].string_val)); ;}
     break;
 
   case 608:
-#line 1306 "DynareBison.yy"
+#line 1325 "DynareBison.yy"
     { driver.option_num("redform", (yysemantic_stack_[(3) - (3)].string_val)); ;}
     break;
 
   case 609:
-#line 1307 "DynareBison.yy"
+#line 1326 "DynareBison.yy"
     { driver.option_num("pprior", (yysemantic_stack_[(3) - (3)].string_val)); ;}
     break;
 
   case 610:
-#line 1308 "DynareBison.yy"
+#line 1327 "DynareBison.yy"
     { driver.option_num("prior_range", (yysemantic_stack_[(3) - (3)].string_val)); ;}
     break;
 
   case 611:
-#line 1309 "DynareBison.yy"
+#line 1328 "DynareBison.yy"
     { driver.option_num("ppost", (yysemantic_stack_[(3) - (3)].string_val)); ;}
     break;
 
   case 612:
-#line 1310 "DynareBison.yy"
+#line 1329 "DynareBison.yy"
     { driver.option_num("ilptau", (yysemantic_stack_[(3) - (3)].string_val)); ;}
     break;
 
   case 613:
-#line 1311 "DynareBison.yy"
+#line 1330 "DynareBison.yy"
     { driver.option_num("glue", (yysemantic_stack_[(3) - (3)].string_val)); ;}
     break;
 
   case 614:
-#line 1312 "DynareBison.yy"
+#line 1331 "DynareBison.yy"
     { driver.option_num("morris_nliv", (yysemantic_stack_[(3) - (3)].string_val)); ;}
     break;
 
   case 615:
-#line 1313 "DynareBison.yy"
+#line 1332 "DynareBison.yy"
     { driver.option_num("morris_ntra", (yysemantic_stack_[(3) - (3)].string_val)); ;}
     break;
 
   case 616:
-#line 1314 "DynareBison.yy"
+#line 1333 "DynareBison.yy"
     { driver.option_num("identification", (yysemantic_stack_[(3) - (3)].string_val)); ;}
     break;
 
   case 617:
-#line 1315 "DynareBison.yy"
+#line 1334 "DynareBison.yy"
     { driver.option_num("identification", (yysemantic_stack_[(3) - (3)].string_val)); ;}
     break;
 
   case 618:
-#line 1316 "DynareBison.yy"
+#line 1335 "DynareBison.yy"
     { driver.option_num("load_rmse", (yysemantic_stack_[(3) - (3)].string_val)); ;}
     break;
 
   case 619:
-#line 1317 "DynareBison.yy"
+#line 1336 "DynareBison.yy"
     { driver.option_num("load_stab", (yysemantic_stack_[(3) - (3)].string_val)); ;}
     break;
 
   case 620:
-#line 1318 "DynareBison.yy"
+#line 1337 "DynareBison.yy"
     { driver.option_num("identification", (yysemantic_stack_[(3) - (3)].string_val)); ;}
     break;
 
   case 621:
-#line 1319 "DynareBison.yy"
+#line 1338 "DynareBison.yy"
     { driver.option_num("ksstat", (yysemantic_stack_[(3) - (3)].string_val)); ;}
     break;
 
   case 622:
-#line 1320 "DynareBison.yy"
+#line 1339 "DynareBison.yy"
     { driver.option_num("logtrans_redform", (yysemantic_stack_[(3) - (3)].string_val)); ;}
     break;
 
   case 623:
-#line 1321 "DynareBison.yy"
+#line 1340 "DynareBison.yy"
     { driver.option_num("threshold_redfor",(yysemantic_stack_[(3) - (3)].string_val)); ;}
     break;
 
   case 624:
-#line 1323 "DynareBison.yy"
+#line 1342 "DynareBison.yy"
     { driver.option_num("ksstat_redfrom", (yysemantic_stack_[(3) - (3)].string_val)); ;}
     break;
 
   case 625:
-#line 1324 "DynareBison.yy"
+#line 1343 "DynareBison.yy"
     { driver.option_num("alpha2_redform", (yysemantic_stack_[(3) - (3)].string_val)); ;}
     break;
 
   case 626:
-#line 1330 "DynareBison.yy"
+#line 1349 "DynareBison.yy"
     { driver.option_num("rmse", (yysemantic_stack_[(3) - (3)].string_val)); ;}
     break;
 
   case 627:
-#line 1331 "DynareBison.yy"
+#line 1350 "DynareBison.yy"
     { driver.option_num("lik_only", (yysemantic_stack_[(3) - (3)].string_val)); ;}
     break;
 
   case 628:
-#line 1335 "DynareBison.yy"
+#line 1354 "DynareBison.yy"
     { driver.option_num("pfilt_rmse", (yysemantic_stack_[(3) - (3)].string_val)); ;}
     break;
 
   case 629:
-#line 1336 "DynareBison.yy"
+#line 1355 "DynareBison.yy"
     { driver.option_num("istart_rmse", (yysemantic_stack_[(3) - (3)].string_val)); ;}
     break;
 
   case 630:
-#line 1337 "DynareBison.yy"
+#line 1356 "DynareBison.yy"
     { driver.option_num("alpha_rmse", (yysemantic_stack_[(3) - (3)].string_val)); ;}
     break;
 
   case 631:
-#line 1338 "DynareBison.yy"
+#line 1357 "DynareBison.yy"
     { driver.option_num("alpha2_rmse", (yysemantic_stack_[(3) - (3)].string_val)); ;}
     break;
 
   case 632:
-#line 1340 "DynareBison.yy"
+#line 1359 "DynareBison.yy"
     {driver.option_num("homotopy_mode",(yysemantic_stack_[(3) - (3)].string_val)); ;}
     break;
 
   case 633:
-#line 1341 "DynareBison.yy"
+#line 1360 "DynareBison.yy"
     {driver.option_num("homotopy_steps",(yysemantic_stack_[(3) - (3)].string_val)); ;}
     break;
 
   case 634:
-#line 1344 "DynareBison.yy"
+#line 1363 "DynareBison.yy"
     {
           (yysemantic_stack_[(3) - (1)].string_val)->append(":");
           (yysemantic_stack_[(3) - (1)].string_val)->append(*(yysemantic_stack_[(3) - (3)].string_val));
@@ -2464,7 +2464,7 @@ namespace yy
     break;
 
   case 636:
-#line 1353 "DynareBison.yy"
+#line 1372 "DynareBison.yy"
     {
                  (yysemantic_stack_[(3) - (1)].string_val)->append(":");
                  (yysemantic_stack_[(3) - (1)].string_val)->append(*(yysemantic_stack_[(3) - (3)].string_val));
@@ -2474,12 +2474,12 @@ namespace yy
     break;
 
   case 637:
-#line 1362 "DynareBison.yy"
+#line 1381 "DynareBison.yy"
     { (yysemantic_stack_[(2) - (2)].string_val)->insert(0, "["); (yyval.string_val) = (yysemantic_stack_[(2) - (2)].string_val);;}
     break;
 
   case 638:
-#line 1364 "DynareBison.yy"
+#line 1383 "DynareBison.yy"
     {
               (yysemantic_stack_[(2) - (1)].string_val)->append(" ");
               (yysemantic_stack_[(2) - (1)].string_val)->append(*(yysemantic_stack_[(2) - (2)].string_val));
@@ -2489,7 +2489,7 @@ namespace yy
     break;
 
   case 639:
-#line 1372 "DynareBison.yy"
+#line 1391 "DynareBison.yy"
     { (yysemantic_stack_[(2) - (1)].string_val)->append("]"); (yyval.string_val) = (yysemantic_stack_[(2) - (1)].string_val); ;}
     break;
 
@@ -4302,70 +4302,70 @@ namespace yy
   const unsigned short int
   parser::yyrline_[] =
   {
-         0,    99,    99,   100,   103,   104,   105,   106,   107,   108,
-     109,   110,   111,   112,   113,   114,   115,   116,   117,   118,
-     119,   120,   121,   122,   123,   124,   125,   126,   127,   128,
-     129,   130,   131,   132,   133,   134,   135,   136,   137,   138,
-     139,   140,   141,   142,   143,   146,   147,   148,   149,   153,
-     155,   159,   161,   163,   165,   167,   169,   171,   173,   175,
-     177,   179,   183,   185,   187,   189,   191,   193,   197,   199,
-     201,   203,   205,   207,   211,   213,   215,   217,   219,   221,
-     225,   227,   231,   233,   237,   239,   244,   246,   248,   250,
-     252,   254,   256,   258,   260,   262,   264,   266,   268,   270,
-     272,   274,   276,   278,   280,   282,   284,   286,   288,   290,
-     292,   294,   296,   298,   300,   302,   304,   306,   308,   312,
-     314,   318,   320,   324,   326,   328,   329,   332,   334,   336,
-     337,   340,   342,   343,   346,   347,   350,   351,   354,   356,
-     358,   362,   363,   366,   366,   368,   368,   370,   370,   373,
-     372,   375,   375,   378,   377,   380,   380,   384,   385,   386,
-     387,   390,   392,   396,   398,   399,   401,   403,   405,   407,
-     409,   411,   413,   415,   417,   419,   421,   423,   425,   427,
-     429,   431,   433,   435,   437,   439,   441,   443,   445,   447,
-     449,   451,   453,   455,   459,   462,   464,   468,   470,   472,
-     473,   476,   478,   480,   482,   484,   488,   490,   492,   494,
-     496,   498,   503,   506,   508,   510,   514,   516,   520,   522,
-     524,   526,   528,   530,   532,   534,   536,   540,   542,   546,
-     547,   550,   551,   552,   555,   557,   561,   562,   565,   567,
-     569,   573,   574,   577,   578,   579,   582,   584,   586,   588,
-     592,   593,   596,   597,   598,   599,   600,   601,   602,   603,
-     604,   605,   606,   607,   608,   609,   610,   611,   612,   613,
-     614,   615,   616,   617,   618,   621,   623,   625,   627,   629,
-     631,   635,   637,   639,   643,   645,   647,   651,   653,   655,
-     659,   661,   667,   673,   683,   688,   695,   706,   711,   722,
-     729,   738,   749,   764,   767,   769,   773,   781,   791,   801,
-     804,   806,   810,   820,   832,   844,   846,   848,   850,   852,
-     856,   857,   858,   859,   860,   862,   866,   868,   870,   872,
-     876,   877,   880,   881,   882,   883,   884,   885,   886,   887,
-     888,   889,   890,   891,   892,   893,   894,   895,   896,   897,
-     898,   899,   900,   901,   902,   903,   904,   905,   906,   907,
-     908,   909,   910,   911,   912,   913,   914,   915,   916,   917,
-     918,   921,   923,   927,   928,   931,   932,   933,   934,   935,
-     936,   937,   938,   939,   940,   941,   942,   943,   946,   948,
-     952,   954,   958,   959,   962,   964,   966,   967,   970,   972,
-     974,   976,   978,   980,   982,   986,   988,   990,   992,   994,
-     998,  1000,  1001,  1004,  1006,  1008,  1012,  1013,  1015,  1019,
-    1021,  1025,  1027,  1029,  1031,  1033,  1035,  1039,  1041,  1043,
-    1045,  1047,  1049,  1053,  1056,  1057,  1060,  1061,  1062,  1065,
-    1067,  1069,  1071,  1075,  1077,  1081,  1082,  1084,  1086,  1088,
-    1092,  1093,  1092,  1095,  1097,  1099,  1101,  1105,  1106,  1109,
-    1110,  1113,  1114,  1115,  1116,  1117,  1118,  1119,  1122,  1123,
-    1124,  1125,  1126,  1127,  1128,  1129,  1130,  1131,  1134,  1135,
-    1138,  1140,  1144,  1145,  1146,  1147,  1150,  1151,  1154,  1156,
-    1160,  1162,  1166,  1167,  1170,  1171,  1172,  1173,  1174,  1175,
-    1176,  1177,  1178,  1179,  1180,  1181,  1182,  1183,  1184,  1185,
-    1186,  1187,  1188,  1189,  1190,  1191,  1192,  1193,  1194,  1195,
-    1196,  1199,  1202,  1203,  1206,  1209,  1210,  1213,  1214,  1215,
-    1216,  1217,  1218,  1219,  1220,  1221,  1222,  1223,  1224,  1225,
-    1226,  1227,  1229,  1230,  1231,  1232,  1233,  1234,  1235,  1236,
-    1237,  1238,  1239,  1240,  1242,  1245,  1246,  1247,  1248,  1249,
-    1250,  1252,  1255,  1256,  1257,  1258,  1259,  1260,  1261,  1262,
-    1263,  1264,  1265,  1266,  1267,  1268,  1269,  1270,  1271,  1272,
-    1273,  1274,  1275,  1276,  1277,  1278,  1279,  1281,  1284,  1285,
-    1286,  1287,  1288,  1289,  1290,  1291,  1292,  1294,  1295,  1296,
-    1297,  1298,  1299,  1300,  1301,  1303,  1304,  1305,  1306,  1307,
-    1308,  1309,  1310,  1311,  1312,  1313,  1314,  1315,  1316,  1317,
-    1318,  1319,  1320,  1321,  1323,  1324,  1330,  1331,  1335,  1336,
-    1337,  1338,  1340,  1341,  1343,  1351,  1352,  1361,  1363,  1372
+         0,   118,   118,   119,   122,   123,   124,   125,   126,   127,
+     128,   129,   130,   131,   132,   133,   134,   135,   136,   137,
+     138,   139,   140,   141,   142,   143,   144,   145,   146,   147,
+     148,   149,   150,   151,   152,   153,   154,   155,   156,   157,
+     158,   159,   160,   161,   162,   165,   166,   167,   168,   172,
+     174,   178,   180,   182,   184,   186,   188,   190,   192,   194,
+     196,   198,   202,   204,   206,   208,   210,   212,   216,   218,
+     220,   222,   224,   226,   230,   232,   234,   236,   238,   240,
+     244,   246,   250,   252,   256,   258,   263,   265,   267,   269,
+     271,   273,   275,   277,   279,   281,   283,   285,   287,   289,
+     291,   293,   295,   297,   299,   301,   303,   305,   307,   309,
+     311,   313,   315,   317,   319,   321,   323,   325,   327,   331,
+     333,   337,   339,   343,   345,   347,   348,   351,   353,   355,
+     356,   359,   361,   362,   365,   366,   369,   370,   373,   375,
+     377,   381,   382,   385,   385,   387,   387,   389,   389,   392,
+     391,   394,   394,   397,   396,   399,   399,   403,   404,   405,
+     406,   409,   411,   415,   417,   418,   420,   422,   424,   426,
+     428,   430,   432,   434,   436,   438,   440,   442,   444,   446,
+     448,   450,   452,   454,   456,   458,   460,   462,   464,   466,
+     468,   470,   472,   474,   478,   481,   483,   487,   489,   491,
+     492,   495,   497,   499,   501,   503,   507,   509,   511,   513,
+     515,   517,   522,   525,   527,   529,   533,   535,   539,   541,
+     543,   545,   547,   549,   551,   553,   555,   559,   561,   565,
+     566,   569,   570,   571,   574,   576,   580,   581,   584,   586,
+     588,   592,   593,   596,   597,   598,   601,   603,   605,   607,
+     611,   612,   615,   616,   617,   618,   619,   620,   621,   622,
+     623,   624,   625,   626,   627,   628,   629,   630,   631,   632,
+     633,   634,   635,   636,   637,   640,   642,   644,   646,   648,
+     650,   654,   656,   658,   662,   664,   666,   670,   672,   674,
+     678,   680,   686,   692,   702,   707,   714,   725,   730,   741,
+     748,   757,   768,   783,   786,   788,   792,   800,   810,   820,
+     823,   825,   829,   839,   851,   863,   865,   867,   869,   871,
+     875,   876,   877,   878,   879,   881,   885,   887,   889,   891,
+     895,   896,   899,   900,   901,   902,   903,   904,   905,   906,
+     907,   908,   909,   910,   911,   912,   913,   914,   915,   916,
+     917,   918,   919,   920,   921,   922,   923,   924,   925,   926,
+     927,   928,   929,   930,   931,   932,   933,   934,   935,   936,
+     937,   940,   942,   946,   947,   950,   951,   952,   953,   954,
+     955,   956,   957,   958,   959,   960,   961,   962,   965,   967,
+     971,   973,   977,   978,   981,   983,   985,   986,   989,   991,
+     993,   995,   997,   999,  1001,  1005,  1007,  1009,  1011,  1013,
+    1017,  1019,  1020,  1023,  1025,  1027,  1031,  1032,  1034,  1038,
+    1040,  1044,  1046,  1048,  1050,  1052,  1054,  1058,  1060,  1062,
+    1064,  1066,  1068,  1072,  1075,  1076,  1079,  1080,  1081,  1084,
+    1086,  1088,  1090,  1094,  1096,  1100,  1101,  1103,  1105,  1107,
+    1111,  1112,  1111,  1114,  1116,  1118,  1120,  1124,  1125,  1128,
+    1129,  1132,  1133,  1134,  1135,  1136,  1137,  1138,  1141,  1142,
+    1143,  1144,  1145,  1146,  1147,  1148,  1149,  1150,  1153,  1154,
+    1157,  1159,  1163,  1164,  1165,  1166,  1169,  1170,  1173,  1175,
+    1179,  1181,  1185,  1186,  1189,  1190,  1191,  1192,  1193,  1194,
+    1195,  1196,  1197,  1198,  1199,  1200,  1201,  1202,  1203,  1204,
+    1205,  1206,  1207,  1208,  1209,  1210,  1211,  1212,  1213,  1214,
+    1215,  1218,  1221,  1222,  1225,  1228,  1229,  1232,  1233,  1234,
+    1235,  1236,  1237,  1238,  1239,  1240,  1241,  1242,  1243,  1244,
+    1245,  1246,  1248,  1249,  1250,  1251,  1252,  1253,  1254,  1255,
+    1256,  1257,  1258,  1259,  1261,  1264,  1265,  1266,  1267,  1268,
+    1269,  1271,  1274,  1275,  1276,  1277,  1278,  1279,  1280,  1281,
+    1282,  1283,  1284,  1285,  1286,  1287,  1288,  1289,  1290,  1291,
+    1292,  1293,  1294,  1295,  1296,  1297,  1298,  1300,  1303,  1304,
+    1305,  1306,  1307,  1308,  1309,  1310,  1311,  1313,  1314,  1315,
+    1316,  1317,  1318,  1319,  1320,  1322,  1323,  1324,  1325,  1326,
+    1327,  1328,  1329,  1330,  1331,  1332,  1333,  1334,  1335,  1336,
+    1337,  1338,  1339,  1340,  1342,  1343,  1349,  1350,  1354,  1355,
+    1356,  1357,  1359,  1360,  1362,  1370,  1371,  1380,  1382,  1391
   };
 
   // Print the state stack on the debug stream.
@@ -4473,7 +4473,7 @@ namespace yy
 
 } // namespace yy
 
-#line 1374 "DynareBison.yy"
+#line 1393 "DynareBison.yy"
 
 
 void
