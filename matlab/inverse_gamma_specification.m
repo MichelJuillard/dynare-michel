@@ -1,12 +1,24 @@
 function [s,nu] = inverse_gamma_specification(mu,sigma,type)
-%
-% mu    --> expectation
-% sigma --> standard deviation
-% type = 1 --> Inverse Gamma 1
-% type = 2 --> Inverse Gamma 2
-%
-% stephane.adjemian@cepremap.cnrs.fr [01/14/2004]
 
+% function [s,nu] = inverse_gamma_specification(mu,sigma,type)
+% Specification of the inverse Gamma function parameters
+% X ~ IG(s,nu)
+%
+% INPUTS
+%    mu:      expectation
+%    sigma:   standard deviation 
+%    type=1:  inverse Gamma 1 
+%    type=2:  inverse Gamma 2 
+
+% OUTPUTS
+%    s:       shape parameter
+%    nu:      scale parameter 
+%        
+% SPECIAL REQUIREMENTS
+%    none
+%  
+% part of DYNARE, copyright Dynare Team (2003-2008)
+% Gnu Public License.
 
 sigma2 = sigma^2;
 mu2 = mu^2;
