@@ -31,7 +31,7 @@ VariableTable::VariableTable(const SymbolTable &symbol_table_arg) :
 }
 
 int
-VariableTable::addVariable(Type type, int symb_id, int lag)
+VariableTable::addVariable(Type type, int symb_id, int lag) throw (AlreadySortedException)
 {
   if (sorted_ids_table.size() != 0)
     throw AlreadySortedException();
@@ -94,7 +94,7 @@ VariableTable::addVariable(Type type, int symb_id, int lag)
 }
 
 void
-VariableTable::sort()
+VariableTable::sort() throw (AlreadySortedException)
 {
   if (sorted_ids_table.size() != 0)
     throw AlreadySortedException();

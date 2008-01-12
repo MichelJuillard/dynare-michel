@@ -75,28 +75,6 @@ public:
   int max_recur_lag;
   //! Maximum lead over recursive variables
   int max_recur_lead;
-  //! Adds a variable in the table, and returns its (newly allocated) variable ID
-  /*! Also works if the variable already exists */
-  int addVariable(Type type, int symb_id, int lag);
-  //! Return variable ID
-  inline int getID(Type type, int symb_id, int lag) const;
-  //! Return lag of variable
-  inline int getLag(int ivarID) const;
-  //! Return symbol ID of variable
-  inline int getSymbolID(int ivarID) const;
-  //! Get variable type
-  inline Type getType(int ivarID) const;
-  //! Get number of variables
-  inline int size() const;
-  //! Get variable ID of sorted variable table
-  /*! In practice, only used for endogenous variables */
-  inline int getSortID(int iVarID) const;
-  //! Sorts variable table
-  /*! The order used is a lexicographic order over the tuple (type, lag, symbol_id) */
-  void sort();
-  //! Get the number of dynamic variables 
-  inline int get_dyn_var_nbr() const;
-
   //! Thrown when trying to access an unknown variable by (type, symb_id, lag)
   class UnknownVariableKeyException
   {
@@ -121,19 +99,43 @@ public:
   class AlreadySortedException
   {
   };
+  //! Adds a variable in the table, and returns its (newly allocated) variable ID
+  /*! Also works if the variable already exists */
+  int addVariable(Type type, int symb_id, int lag) throw (AlreadySortedException);
+  //! Return variable ID
+  inline int getID(Type type, int symb_id, int lag) const throw (UnknownVariableKeyException);
+  //! Return lag of variable
+  inline int getLag(int var_id) const throw (UnknownVariableIDException);
+  //! Return symbol ID of variable
+  inline int getSymbolID(int var_id) const throw (UnknownVariableIDException);
+  //! Get variable type
+  inline Type getType(int var_id) const throw (UnknownVariableIDException);
+  //! Get number of variables
+  inline int size() const;
+  //! Get variable ID of sorted variable table
+  /*! In practice, only used for endogenous variables */
+  inline int getSortID(int var_id) const throw (NotYetSortedException, UnknownVariableIDException);
+  //! Sorts variable table
+  /*! The order used is a lexicographic order over the tuple (type, lag, symbol_id) */
+  void sort() throw (AlreadySortedException);
+  //! Get the number of dynamic variables 
+  inline int get_dyn_var_nbr() const;
 };
 
 inline int
-VariableTable::getSortID(int iVarID) const
+VariableTable::getSortID(int var_id) const throw (NotYetSortedException, UnknownVariableIDException)
 {
   if (sorted_ids_table.size() == 0)
     throw NotYetSortedException();
 
-  return sorted_ids_table[iVarID];
+  if (var_id < 0 || var_id >= size())
+    throw UnknownVariableIDException(var_id);
+
+  return sorted_ids_table[var_id];
 }
 
 inline int
-VariableTable::getID(Type type, int symb_id, int lag) const
+VariableTable::getID(Type type, int symb_id, int lag) const throw (UnknownVariableKeyException)
 {
   variable_table_type::const_iterator it = variable_table.find(make_pair(make_pair(type, lag), symb_id));
   if (it == variable_table.end())
@@ -143,7 +145,7 @@ VariableTable::getID(Type type, int symb_id, int lag) const
 }
 
 inline Type
-VariableTable::getType(int var_id) const
+VariableTable::getType(int var_id) const throw (UnknownVariableIDException)
 {
   inv_variable_table_type::const_iterator it = inv_variable_table.find(var_id);
   if (it != inv_variable_table.end())
@@ -153,7 +155,7 @@ VariableTable::getType(int var_id) const
 }
 
 inline int
-VariableTable::getSymbolID(int var_id) const
+VariableTable::getSymbolID(int var_id) const throw (UnknownVariableIDException)
 {
   inv_variable_table_type::const_iterator it = inv_variable_table.find(var_id);
   if (it != inv_variable_table.end())
@@ -163,7 +165,7 @@ VariableTable::getSymbolID(int var_id) const
 }
 
 inline int
-VariableTable::getLag(int var_id) const
+VariableTable::getLag(int var_id) const throw (UnknownVariableIDException)
 {
   inv_variable_table_type::const_iterator it = inv_variable_table.find(var_id);
   if (it != inv_variable_table.end())
