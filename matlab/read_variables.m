@@ -1,10 +1,26 @@
-% Copyright (C) 2005 Michel Juillard
-%
-% all local variables have complicated names in order to avoid name
-% conflicts with possible user variable names
-
 function dyn_data_01=read_variables(file_name_01,var_names_01,dyn_data_01,xls_sheet,xls_range)
   
+% function dyn_data_01=read_variables(file_name_01,var_names_01,dyn_data_01,xls_sheet,xls_range)
+% Read data
+%
+% INPUTS
+%    file_name_01:    file name
+%    var_names_01:    variables name
+%    dyn_data_01:     
+%    xls_sheet:       Excel sheet name
+%    xls_range:       Excel range specification
+
+% OUTPUTS
+%    dyn_data_01:
+%
+% SPECIAL REQUIREMENTS
+% all local variables have complicated names in order to avoid name
+% conflicts with possible user variable names
+%  
+% part of DYNARE, copyright Dynare Team (2005-2007)
+% Gnu Public License.
+
+
   dyn_size_01 = size(dyn_data_01,1);
   var_size_01 = size(var_names_01,1);
   if exist(file_name_01)
