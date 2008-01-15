@@ -1,5 +1,20 @@
 function CutSample()
-% stephane.adjemian@ens.fr [09-09-2005]
+
+% function CutSample()
+% Takes a subset from metropolis
+%
+% INPUTS
+%    none
+%
+% OUTPUTS
+%    none
+%
+% SPECIAL REQUIREMENTS
+%    none
+%  
+% part of DYNARE, copyright Dynare Team (2005-2007)
+% Gnu Public License.
+
 global M_ options_ estim_params_
 
 npar = estim_params_.np+estim_params_.nvn+estim_params_.ncx+estim_params_.ncn+estim_params_.nvx;
