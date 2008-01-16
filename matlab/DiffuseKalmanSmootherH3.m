@@ -5,23 +5,24 @@ function [alphahat,epsilonhat,etahat,a1, aK] = DiffuseKalmanSmootherH3(T,R,Q,H,P
 % Univariate treatment of multivariate time series.
 %
 % INPUTS
-%    T:        mm*mm matrix
-%    R:        mm*rr matrix
-%    Q:        rr*rr matrix
-%    Pinf1:    mm*mm diagonal matrix with with q ones and m-q zeros
-%    Pstar1:   mm*mm variance-covariance matrix with stationary variables
-%    Y:        pp*1 vector
+%    T:         mm*mm matrix
+%    R:         mm*rr matrix
+%    Q:         rr*rr matrix
+%    Pinf1:     mm*mm diagonal matrix with with q ones and m-q zeros
+%    Pstar1:    mm*mm variance-covariance matrix with stationary variables
+%    Y:         pp*1 vector
 %    trend
-%    pp:       number of observed variables
-%    mm:       number of state variables
-%    smpl:     sample size
-%    mf:       observed variables index in the state vector
+%    pp:        number of observed variables
+%    mm:        number of state variables
+%    smpl:      sample size
+%    mf:        observed variables index in the state vector
 %             
 % OUTPUTS
-%    alphahat: smoothed state variables
-%    etahat:   smoothed shocks
+%    alphahat:  smoothed state variables
+%    epsilonhat:smoothed measurement error
+%    etahat:    smoothed shocks
 %    a1:        matrix of one step ahead filtered state variables
-%    aK:       3D array of k step ahead filtered state variables
+%    aK:        3D array of k step ahead filtered state variables
 
 % SPECIAL REQUIREMENTS
 %   See "Filtering and Smoothing of State Vector for Diffuse State Space
