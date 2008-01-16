@@ -1,9 +1,35 @@
 function [alphahat,epsilonhat,etahat,a1] = DiffuseKalmanSmootherH3corr(T,R,Q,H,Pinf1,Pstar1,Y,trend,pp,mm,smpl,mf)
-% stephane.adjemian@cepremap.cnrs.fr [09-16-2004]
-% 
+
+% function [alphahat,epsilonhat,etahat,a1] = DiffuseKalmanSmootherH3corr(T,R,Q,H,Pinf1,Pstar1,Y,trend,pp,mm,smpl,mf)
+% Computes the diffuse kalman smoother with measurement error, in the case of a singular var-cov matrix.
+% Univariate treatment of multivariate time series.
+%
+% INPUTS
+%    T:         mm*mm matrix
+%    R:         mm*rr matrix
+%    Q:         rr*rr matrix
+%    Pinf1:     mm*mm diagonal matrix with with q ones and m-q zeros
+%    Pstar1:    mm*mm variance-covariance matrix with stationary variables
+%    Y:         pp*1 vector
+%    trend
+%    pp:        number of observed variables
+%    mm:        number of state variables
+%    smpl:      sample size
+%    mf:        observed variables index in the state vector
+%             
+% OUTPUTS
+%    alphahat:  smoothed state variables
+%    epsilonhat:smoothed measurement error
+%    etahat:    smoothed shocks
+%    a1:        matrix of one step ahead filtered state variables
+
+% SPECIAL REQUIREMENTS
 %   See "Fast Filtering and Smoothing for Multivariate State Space
 %   Models", S.J. Koopman and J. Durbin (2000, in Journal of Time Series 
 %   Analysis, vol. 21(3), pp. 281-296).  
+%  
+% part of DYNARE, copyright Dynare Team (2004-2008)
+% Gnu Public License.
 
 global options_;
 
