@@ -1,13 +1,27 @@
-% Copyright (C) 2001 Michel Juillard
-%
+
 function dynare(fname, varargin)
-%	DYNARE ( 'Filename' )
+
+% function dynare(fname, varargin)
 %	This command runs dynare with specified model file in argument
 % 	Filename.
 %	The name of model file begins with an alphabetic character, 
 %	and has a filename extension of .mod or .dyn.
 %	When extension is omitted, a model file with .mod extension
 %	is processed.
+%
+% INPUTS
+%   fname:      file name
+%   varargin:   list of arguments following fname
+%             
+% OUTPUTS
+%   none
+%        
+% SPECIAL REQUIREMENTS
+%   none
+%  
+% part of DYNARE, copyright Dynare Team (2001-2008)
+% Gnu Public License.
+
 
 MATLAB  = ver('matlab');
 % FIXME:
