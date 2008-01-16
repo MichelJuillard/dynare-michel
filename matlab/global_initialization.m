@@ -1,5 +1,21 @@
 function global_initialization()
+
+% function global_initialization()
 % initializes global variables and options for DYNARE
+%
+% INPUTS
+%    none
+%
+% OUTPUTS
+%    none
+%
+% SPECIAL REQUIREMENTS
+%    none
+%  
+% part of DYNARE, copyright Dynare Team (2003-2008)
+% Gnu Public License.
+
+
   global oo_ M_ options_ ct_ endval_ rplottype_
 
   ct_=0;
