@@ -1,18 +1,21 @@
 function dynare_graph_init(figure_name,nplot,line_types,line_width)
-% function dynare_graph_init(figure_name,colors) initializes set of
-% graphs
-% INPUT
+
+% function dynare_graph_init(figure_name,colors) 
+% initializes set of graphs
+%
+% INPUTS:
 %   figure_name: name of the figures
 %   colors: line colors
-% OUTPUT
+%
+% OUTPUTS
 %   none
-% ALGORITHM
-%   none
+%
 % SPECIAL REQUIREMENT
 %   none
 %    
-% part of DYNARE, copyright S. Adjemian, M. Juillard (2006)
+% part of DYNARE, copyright Dynare Team (2006)
 % Gnu Public License.
+
   global dyn_graph options_
   
   dyn_graph.fh = figure('Name',figure_name);
