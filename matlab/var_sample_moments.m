@@ -1,4 +1,6 @@
 function [YtY,XtY,YtX,XtX,Y,X] = var_sample_moments(FirstObservation,LastObservation,qlag,var_trend_order)
+
+% function [YtY,XtY,YtX,XtX,Y,X] = var_sample_moments(FirstObservation,LastObservation,qlag,var_trend_order)
 % Computes the sample moments of a VAR model.  
 %
 % The VAR(p) model is defined by:
@@ -47,15 +49,13 @@ function [YtY,XtY,YtX,XtX,Y,X] = var_sample_moments(FirstObservation,LastObserva
 %   o Y                   [double]  Y a T*m matrix.
 %   o X                   [double]  X a T*(mp+q) matrix.
 %
-% ALGORITHM
-%   None.       
-%
+
 % SPECIAL REQUIREMENTS
 %   None.
 %  
-%  
 % part of DYNARE, copyright Dynare Team (2007)
 % Gnu Public License.
+
 global options_
 
 X = [];
