@@ -1,5 +1,24 @@
 function Draws = GetAllPosteriorDraws(column,FirstMhFile,FirstLine,TotalNumberOfMhFile,NumberOfDraws)
-% stephane.adjemian@ens.fr [09-09-2005]
+
+% function Draws = GetAllPosteriorDraws(column,FirstMhFile,FirstLine,TotalNumberOfMhFile,NumberOfDraws)
+% Gets all posterior draws
+%
+% INPUTS
+%    column:               column
+%    FirstMhFile:          first mh file 
+%    FirstLine:            first line
+%    TotalNumberOfMhFile:  total number of mh file 
+%    NumberOfDraws:        number of draws
+
+% OUTPUTS
+%    Draws:                draws from posterior distribution
+%        
+% SPECIAL REQUIREMENTS
+%    none
+%  
+% part of DYNARE, copyright Dynare Team (2005-2008)
+% Gnu Public License.
+
 global M_ options_
 
 nblck = options_.mh_nblck; 
