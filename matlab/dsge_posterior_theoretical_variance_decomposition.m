@@ -1,5 +1,6 @@
 function dsge_posterior_theoretical_variance_decomposition()
-% [stephane.adjemian@ens.fr][10-08-2007]
+
+% function dsge_posterior_theoretical_variance_decomposition()
 % This function estimates the posterior distribution of the variance
 % decomposition of the observed endogenous variables.
 % 
@@ -9,15 +10,12 @@ function dsge_posterior_theoretical_variance_decomposition()
 % OUTPUTS 
 %   None.
 %
-% ALGORITHM 
-%   None.       
-%
 % SPECIAL REQUIREMENTS
 %   None.
-%  
 %     
-% part of DYNARE, copyright Dynare Team (2007).
+% part of DYNARE, copyright Dynare Team (2007-2008).
 % Gnu Public License.
+
 global M_ options_ oo_
 
 type = 'posterior';% To be defined as a input argument later...
