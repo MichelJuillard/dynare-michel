@@ -1,5 +1,8 @@
 function [PostMod,PostVar,Scale,PostMean] = ...
   gmhmaxlik(ObjFun,xparam1,mh_bounds,num,iScale,info,MeanPar,VarCov,varargin)  
+
+%function [PostMod,PostVar,Scale,PostMean] = ...
+%gmhmaxlik(ObjFun,xparam1,mh_bounds,num,iScale,info,MeanPar,VarCov,varargin)  
 % (Dirty) Global minimization routine of (minus) a likelihood (or posterior density) function. 
 % 
 % INPUTS 
@@ -20,7 +23,6 @@ function [PostMod,PostVar,Scale,PostMean] = ...
 %   o Scale      [double]   scalar specifying the scale parameter that should be used in 
 %                           an eventual metropolis-hastings algorithm. 
 %   o PostMean   [double]   (p*1) vector, evaluation of the posterior mean.  
-%
 %
 % ALGORITHM 
 %   Metropolis-Hastings with an constantly updated covariance matrix for
@@ -57,9 +59,10 @@ function [PostMod,PostVar,Scale,PostMean] = ...
 % SPECIAL REQUIREMENTS
 %   None.
 %  
-%  
-% part of DYNARE, copyright S. Adjemian, M. Juillard (2006)
+% part of DYNARE, copyright Dynare Team (2006-2008)
 % Gnu Public License.
+
+
 global bayestopt_ estim_params_ options_
 global dsge_prior_weight % Needed if a BVAR-DSGE model is estimated.
 
