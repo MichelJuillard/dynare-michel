@@ -1,4 +1,6 @@
 function F = get_innovation_contemporaneous_impact('type')
+
+% function F = get_innovation_contemporaneous_impact('type')
 % The approximated reduced form model is 
 % 
 %   Y^*_t = Z Y_t                   [Measure]
@@ -18,16 +20,12 @@ function F = get_innovation_contemporaneous_impact('type')
 % OUTPUTS 
 %   o F (F is also saved in a file)
 %
-%
-% ALGORITHM
-%   None.       
-%
 % SPECIAL REQUIREMENTS
 %   This function needs to be run after the estimation of a model.
 %  
-%  
-% part of DYNARE, copyright S. Adjemian, M. Juillard (2006)
+% part of DYNARE, copyright Dynare Team (2006-2008)
 % Gnu Public License.
+
 global oo_ M_ bayestopt_
 
 if nargin == 0
