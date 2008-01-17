@@ -1,4 +1,6 @@
 function dsge_posterior_theoretical_covariance()
+
+% function dsge_posterior_theoretical_covariance()
 % This function estimates the posterior density of the endogenous
 % variables second order moments. 
 % 
@@ -8,15 +10,12 @@ function dsge_posterior_theoretical_covariance()
 % OUTPUTS 
 %   None.
 %
-% ALGORITHM 
-%   None.       
-%
 % SPECIAL REQUIREMENTS
 %   None.
 %  
-%  
-% part of DYNARE, copyright S. Adjemian, M. Juillard (2007)
+% part of DYNARE, copyright Dynare Team (2007-2008)
 % Gnu Public License.
+
 global M_ options_ oo_
 
 type = 'posterior';% To be defined as a input argument later...
