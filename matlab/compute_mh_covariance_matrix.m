@@ -1,4 +1,6 @@
 function [m0,s0] = compute_mh_covariance_matrix()
+
+% function [m0,s0] = compute_mh_covariance_matrix()
 % Estimation of the posterior covariance matrix and expectation. 
 % 
 % INPUTS 
@@ -9,16 +11,12 @@ function [m0,s0] = compute_mh_covariance_matrix()
 %   o  s0  [double]  (n*n) matrix, posterior covariance of the parameters 
 %                    (computed from previous metropolis hastings).
 %
-%
-% ALGORITHM 
-%   None.       
-%
 % SPECIAL REQUIREMENTS
 %   None.
 %  
-%  
-% part of DYNARE, copyright S. Adjemian, M. Juillard (2006)
+% part of DYNARE, copyright Dynare Team (2006-2008)
 % Gnu Public License.
+
 global M_ options_ estim_params_
 
 n = estim_params_.np + ...
