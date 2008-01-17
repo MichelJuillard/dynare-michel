@@ -21,7 +21,7 @@ function [mu,sigma,offset] = recursive_moments(m0,s0,data,offset)
 %   None.
 %  
 %  
-% part of DYNARE, copyright S. Adjemian, M. Juillard (2006)
+% part of DYNARE, copyright dynare Team (2006-2008)
 % Gnu Public License. 
 
 [T,n] = size(data);
