@@ -1,18 +1,21 @@
 function dynare_graph(y,tit,x)
-% function dynare_graph_init(y,tit) 
+
+% function dynare_graph(y,tit,x) 
 % graphs
+%
 % INPUT
 %   figure_name: name of the figures
 %   colors: line colors
+%
 % OUTPUT
 %   none
-% ALGORITHM
-%   none
+%
 % SPECIAL REQUIREMENT
 %   none
 %    
-% part of DYNARE, copyright S. Adjemian, M. Juillard (2006)
+% part of DYNARE, copyright Dynare Team (2006-2008)
 % Gnu Public License.
+
   global dyn_graph
 
   if nargin < 3
