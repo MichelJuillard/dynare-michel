@@ -1,4 +1,6 @@
 function [mu,sigma,offset] = recursive_moments(m0,s0,data,offset)
+
+% function [mu,sigma,offset] = recursive_moments(m0,s0,data,offset)
 % Recursive estimation of order one and two moments (expectation and
 % covariance matrix). 
 % 
@@ -8,7 +10,6 @@ function [mu,sigma,offset] = recursive_moments(m0,s0,data,offset)
 %   o data       [double]    (T*n) matrix.  
 %   o offset     [integer]   scalar, number of observation previously
 %                            used to compute m0 and s0.
-%  
 % OUTPUTS 
 %   o mu         [double]    (n*1) vector, the posterior expectation. 
 %   o sigma      [double]    (n*n) matrix, the posterior covariance matrix.
@@ -19,7 +20,6 @@ function [mu,sigma,offset] = recursive_moments(m0,s0,data,offset)
 %
 % SPECIAL REQUIREMENTS
 %   None.
-%  
 %  
 % part of DYNARE, copyright dynare Team (2006-2008)
 % Gnu Public License. 
