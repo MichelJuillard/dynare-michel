@@ -1,18 +1,19 @@
 function prior_analysis(var_list)
+
 % function prior_analysis(var_list)
 % performs stochastic simulations for value of parameters drawn from
 % the prior
+%
 % INPUTS:
 %   var_list: list of variable names for which results are requested
+%
 % OUTPUTS:
 %   none
-% ALGORITHM
-%   uses antithetic draws for the shocks
 %
 % SPECIAL REQUIREMENTS
-%   None.
+%   none.
 %    
-% part of DYNARE, copyright S. Adjemian, M. Juillard (2006)
+% part of DYNARE, copyright Dynare Team (2006-2008)
 % Gnu Public License.
 
   global M_ options_ oo_ estim_params_ bayestopt_
