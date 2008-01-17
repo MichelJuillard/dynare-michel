@@ -1,13 +1,14 @@
 function forcst_unc(y0,var_list)
+
 % function [mean,intval1,intval2]=forcst_unc(y0,var_list)
-%   computes forecasts with parameter uncertainty
+% computes forecasts with parameter uncertainty
 %
 % INPUTS
 %   y0: matrix of initial values
 %   var_list: list of variables to be forecasted
 %
 % OUTPUTS
-%   ...
+%   none
 %
 % ALGORITHM
 %   uses antithetic draws for the shocks
@@ -15,7 +16,7 @@ function forcst_unc(y0,var_list)
 % SPECIAL REQUIREMENTS
 %   None.
 %    
-% part of DYNARE, copyright S. Adjemian, M. Juillard (2006)
+% part of DYNARE, copyright Dynare Team (2006-2008)
 % Gnu Public License.
 
   global M_ options_ oo_ estim_params_ bayestopt_
