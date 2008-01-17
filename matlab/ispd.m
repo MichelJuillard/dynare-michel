@@ -1,4 +1,6 @@
 function test = ispd(A)
+
+% function test = ispd(A)
 % Tests if a square matrix is positive definite. 
 % 
 % INPUTS 
@@ -7,15 +9,10 @@ function test = ispd(A)
 % OUTPUTS 
 %   o test    [integer]  is equal to one if A is pd, 0 otherwise. 
 %
-%
-% ALGORITHM
-%   None.       
-%
 % SPECIAL REQUIREMENTS
 %   None.
 %  
-%  
-% part of DYNARE, copyright S. Adjemian, M. Juillard (2007)
+% part of DYNARE, copyright Dynare Team (2007-2008)
 % Gnu Public License.
 
 m = length(A);% I do not test for a square matrix...
