@@ -29,6 +29,8 @@ class ParsingDriver;
 #include "ExprNode.hh"
 %}
 
+%name-prefix="Dynare"
+
 %parse-param { ParsingDriver &driver }
 %lex-param { ParsingDriver &driver }
 
@@ -1399,8 +1401,8 @@ vec_int : vec_int_1 ']' { $1->append("]"); $$ = $1; };
 %%
 
 void
-yy::parser::error(const yy::parser::location_type &l,
-                  const string &m)
+Dynare::parser::error(const Dynare::parser::location_type &l,
+                      const string &m)
 {
   driver.error(l, m);
 }

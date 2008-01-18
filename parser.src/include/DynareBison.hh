@@ -41,7 +41,7 @@
 #include <iostream>
 #include "stack.hh"
 
-namespace yy
+namespace Dynare
 {
   class position;
   class location;
@@ -99,7 +99,7 @@ do {							\
 } while (false)
 #endif
 
-namespace yy
+namespace Dynare
 {
 
   /// A Bison parser.
@@ -109,7 +109,7 @@ namespace yy
     /// Symbol semantic values.
 #ifndef YYSTYPE
     union semantic_type
-#line 46 "DynareBison.yy"
+#line 48 "DynareBison.yy"
 {
   string *string_val;
   NodeID node_val;

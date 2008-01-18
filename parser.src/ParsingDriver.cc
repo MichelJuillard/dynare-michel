@@ -73,7 +73,7 @@ ParsingDriver::parse(const string &f)
   lexer = new DynareFlex(&in);
   lexer->set_debug(trace_scanning);
 
-  yy::parser parser(*this);
+  Dynare::parser parser(*this);
   parser.parse();
 
   delete lexer;
@@ -83,7 +83,7 @@ ParsingDriver::parse(const string &f)
 }
 
 void
-ParsingDriver::error(const yy::parser::location_type &l, const string &m)
+ParsingDriver::error(const Dynare::parser::location_type &l, const string &m)
 {
   cerr << "ERROR: " << l << ": " << m << endl;
   exit(-1);

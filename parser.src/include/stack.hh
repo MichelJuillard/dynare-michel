@@ -37,7 +37,7 @@
 
 #include <deque>
 
-namespace yy
+namespace Dynare
 {
   template <class T, class S = std::deque<T> >
   class stack

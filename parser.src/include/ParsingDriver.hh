@@ -51,9 +51,9 @@ public:
   DynareFlex(istream* in = 0, ostream* out = 0);
 
   //! The main lexing function
-  yy::parser::token_type lex(yy::parser::semantic_type *yylval,
-                             yy::parser::location_type *yylloc,
-                             ParsingDriver &driver);
+  Dynare::parser::token_type lex(Dynare::parser::semantic_type *yylval,
+                                 Dynare::parser::location_type *yylloc,
+                                 ParsingDriver &driver);
 };
 
 //! Drives the scanning and parsing of the .mod file, and constructs its abstract representation
@@ -164,7 +164,7 @@ public:
   EstimationParams estim_params;
 
   //! Error handler with location
-  void error(const yy::parser::location_type &l, const string &m);
+  void error(const Dynare::parser::location_type &l, const string &m);
   //! Error handler without location
   void error(const string &m);
   //! Warning handler

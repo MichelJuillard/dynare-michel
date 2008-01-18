@@ -25,18 +25,18 @@ using namespace std;
 
 // Announce to Flex the prototype we want for lexing function
 #define YY_DECL                                            \
-  yy::parser::token_type                                   \
-  DynareFlex::lex(yy::parser::semantic_type *yylval,       \
-                  yy::parser::location_type *yylloc,       \
+  Dynare::parser::token_type                                   \
+  DynareFlex::lex(Dynare::parser::semantic_type *yylval,       \
+                  Dynare::parser::location_type *yylloc,       \
                   ParsingDriver &driver)
 
 // Shortcut to access tokens defined by Bison
-typedef yy::parser::token token;
+typedef Dynare::parser::token token;
 
 /* By default yylex returns int, we use token_type.
    Unfortunately yyterminate by default returns 0, which is
    not of token_type.  */
-#define yyterminate() return yy::parser::token_type (0);
+#define yyterminate() return Dynare::parser::token_type (0);
 
 int comment_caller;
 /* Particular value : when sigma_e command is found
@@ -118,7 +118,7 @@ int sigma_e = 0;
 <DYNARE_STATEMENT>; {
   if (!sigma_e)
     BEGIN INITIAL;
-  return yy::parser::token_type (yytext[0]);
+  return Dynare::parser::token_type (yytext[0]);
 }
 
 
@@ -227,8 +227,8 @@ int sigma_e = 0;
 <DYNARE_BLOCK>inv_gamma2_pdf {return token::INV_GAMMA_PDF;}
 <DYNARE_BLOCK>uniform_pdf {return token::UNIFORM_PDF;}
 
-<DYNARE_BLOCK>; {return yy::parser::token_type (yytext[0]);}
-<DYNARE_BLOCK># {return yy::parser::token_type (yytext[0]);}
+<DYNARE_BLOCK>; {return Dynare::parser::token_type (yytext[0]);}
+<DYNARE_BLOCK># {return Dynare::parser::token_type (yytext[0]);}
 
 <DYNARE_BLOCK>autocorr {return token::AUTOCORR;}
 
@@ -253,9 +253,9 @@ int sigma_e = 0;
 <DYNARE_STATEMENT>planner_discount {return token::PLANNER_DISCOUNT;}
 
 
-<DYNARE_STATEMENT>[\.] {return yy::parser::token_type (yytext[0]);}
-<DYNARE_STATEMENT>[\\] {return yy::parser::token_type (yytext[0]);}
-<DYNARE_STATEMENT>[\'] {return yy::parser::token_type (yytext[0]);}
+<DYNARE_STATEMENT>[\.] {return Dynare::parser::token_type (yytext[0]);}
+<DYNARE_STATEMENT>[\\] {return Dynare::parser::token_type (yytext[0]);}
+<DYNARE_STATEMENT>[\'] {return Dynare::parser::token_type (yytext[0]);}
 
 <DYNARE_STATEMENT,DYNARE_BLOCK>use_dll {return token::USE_DLL;}
 <DYNARE_STATEMENT,DYNARE_BLOCK>lu {return token::LU;}
@@ -269,13 +269,13 @@ int sigma_e = 0;
 <DYNARE_STATEMENT,DYNARE_BLOCK>no_compiler {return token::NO_COMPILER;}
 <DYNARE_STATEMENT,DYNARE_BLOCK>linear {return token::LINEAR;}
 <DYNARE_STATEMENT,DYNARE_BLOCK>[,] {return token::COMMA;}
-<DYNARE_STATEMENT,DYNARE_BLOCK>[:] {return yy::parser::token_type (yytext[0]);}
-<DYNARE_STATEMENT,DYNARE_BLOCK>[\(\)] {return yy::parser::token_type (yytext[0]);}
-<DYNARE_STATEMENT,DYNARE_BLOCK>[\[] {return yy::parser::token_type (yytext[0]);}
+<DYNARE_STATEMENT,DYNARE_BLOCK>[:] {return Dynare::parser::token_type (yytext[0]);}
+<DYNARE_STATEMENT,DYNARE_BLOCK>[\(\)] {return Dynare::parser::token_type (yytext[0]);}
+<DYNARE_STATEMENT,DYNARE_BLOCK>[\[] {return Dynare::parser::token_type (yytext[0]);}
 <DYNARE_STATEMENT,DYNARE_BLOCK>[\]] {
   if (sigma_e)
     sigma_e = 0;
-  return yy::parser::token_type (yytext[0]);
+  return Dynare::parser::token_type (yytext[0]);
 }
 <DYNARE_STATEMENT,DYNARE_BLOCK>[+] {return token::PLUS;}
 <DYNARE_STATEMENT,DYNARE_BLOCK>[-] {return token::MINUS;}

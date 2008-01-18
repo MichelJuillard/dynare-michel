@@ -34,7 +34,7 @@
 
 /**
  ** \file location.hh
- ** Define the yy::location class.
+ ** Define the Dynare::location class.
  */
 
 #ifndef BISON_LOCATION_HH
@@ -44,7 +44,7 @@
 # include <string>
 # include "position.hh"
 
-namespace yy
+namespace Dynare
 {
 
   /// Abstract a location.
