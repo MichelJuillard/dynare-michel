@@ -268,21 +268,23 @@ end
 
 use_qzdiv = 0;
 
-if exist('ordqz')
-  info1 = 0;
-  try
-    [ss,tt,q,w]=qz(e,d,'real');
-    eigval = ordeig(ss,tt);
-    dr.eigval = eigval;
-    select = abs(eigval) < options_.qz_criterium;
-    [ss,tt,q,w]=ordqz(ss,tt,q,w,select);
-    sdim = sum(select);
-  catch
-    info(1) = 2;
-    info(2) = NaN;
-  end
-  nba = nd-sdim;
-elseif  exist('mjdgges')
+% $$$ if exist('ordqz')
+% $$$   info1 = 0;
+% $$$   try
+% $$$     [ss,tt,q,w]=qz(e,d,'real');
+% $$$     eigval = ordeig(ss,tt);
+% $$$     dr.eigval = eigval;
+% $$$     select = abs(eigval) < options_.qz_criterium;
+% $$$     [ss,tt,q,w]=ordqz(ss,tt,q,w,select);
+% $$$     sdim = sum(select);
+% $$$   catch
+% $$$     info(1) = 2;
+% $$$     info(2) = NaN;
+% $$$     return
+% $$$   end
+% $$$   nba = nd-sdim;
+% $$$ elseif  exist('mjdgges')
+if  exist('mjdgges')
   [ss,tt,w,sdim,dr.eigval,info1] = mjdgges(e,d,options_.qz_criterium);
   if info1
     info(1) = 2;
