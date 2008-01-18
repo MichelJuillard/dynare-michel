@@ -35,7 +35,7 @@ dynareroot = strrep(which('dynare.m'),'dynare.m','');
 
 if (VERSION <= 7.4)
     addpath([dynareroot 'mex/2007a/'])
-elseif (VERSION == 7.5)
+else
     addpath([dynareroot 'mex/2007b/'])
 end
 
