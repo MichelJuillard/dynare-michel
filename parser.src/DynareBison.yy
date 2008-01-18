@@ -50,6 +50,12 @@ class ParsingDriver;
 
 %{
 #include "ParsingDriver.hh"
+
+/* this "connects" the bison parser in the driver to the flex scanner class
+ * object. it defines the yylex() function call to pull the next token from the
+ * current lexer object of the driver context. */
+#undef yylex
+#define yylex driver.lexer->lex
 %}
 
 %token AR AUTOCORR

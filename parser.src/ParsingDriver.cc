@@ -67,12 +67,16 @@ ParsingDriver::parse(const string &f)
   reset_data_tree();
 
   file = f;
-  scan_begin();
-  yy::parser parser(*this);
-  parser.set_debug_level(trace_parsing);
-  parser.parse();
-  scan_end();
 
+  ifstream in(f.c_str());
+
+  lexer = new DynareFlex(&in);
+  lexer->set_debug(trace_scanning);
+
+  yy::parser parser(*this);
+  parser.parse();
+
+  delete lexer;
   delete tmp_symbol_table;
 
   return mod_file;
@@ -88,16 +92,14 @@ ParsingDriver::error(const yy::parser::location_type &l, const string &m)
 void
 ParsingDriver::error(const string &m)
 {
-  extern int yylineno;
-  cerr << "ERROR: " << file << ":" << yylineno << ": " << m << endl;
+  cerr << "ERROR: " << file << ":" << lexer->lineno() << ": " << m << endl;
   exit(-1);
 }
 
 void
 ParsingDriver::warning(const string &m)
 {
-  extern int yylineno;
-  cerr << "WARNING: " << file << ":" << yylineno << ": " << m << endl;
+  cerr << "WARNING: " << file << ":" << lexer->lineno() << ": " << m << endl;
 }
 
 void

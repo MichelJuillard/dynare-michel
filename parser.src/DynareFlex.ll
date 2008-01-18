@@ -20,12 +20,17 @@
 %{
 using namespace std;
 
-/* The prototype for yylex() is defined in ParsingDriver.hh */
-
 #include "ParsingDriver.hh"
 #include "DynareBison.hh"
 
-/* Shortcut to access tokens defined by Bison */
+// Announce to Flex the prototype we want for lexing function
+#define YY_DECL                                            \
+  yy::parser::token_type                                   \
+  DynareFlex::lex(yy::parser::semantic_type *yylval,       \
+                  yy::parser::location_type *yylloc,       \
+                  ParsingDriver &driver)
+
+// Shortcut to access tokens defined by Bison
 typedef yy::parser::token token;
 
 /* By default yylex returns int, we use token_type.
@@ -40,6 +45,10 @@ int comment_caller;
 int sigma_e = 0;
 %}
 
+%option c++
+
+%option prefix="Dynare"
+
 %option case-insensitive noyywrap nounput batch debug never-interactive yylineno
 
 %x COMMENT
@@ -52,6 +61,7 @@ int sigma_e = 0;
 #define YY_USER_ACTION yylloc->columns(yyleng);
 %}
 %%
+ /* Code put at the beginning of yylex() */
 %{
   // Reset location before reading token
   yylloc->step();
@@ -378,18 +388,24 @@ int sigma_e = 0;
 <*>.      { driver.error("Unrecognized character: '" + string(yytext) + "'"); }
 %%
 
-void
-ParsingDriver::scan_begin()
+DynareFlex::DynareFlex(istream* in, ostream* out)
+  : DynareFlexLexer(in, out)
 {
-  yy_flex_debug = trace_scanning;
-  if (!(yyin = fopen(file.c_str(), "r")))
-    error(string("cannot open file"));
 }
 
-void
-ParsingDriver::scan_end()
+/* This implementation of DynareFlexLexer::yylex() is required to fill the
+ * vtable of the class DynareFlexLexer. We define the scanner's main yylex
+ * function via YY_DECL to reside in the Scanner class instead. */
+
+#ifdef yylex
+#undef yylex
+#endif
+
+int
+DynareFlexLexer::yylex()
 {
-  fclose(yyin);
+  cerr << "DynareFlexLexer::yylex() has been called, that should never happen!" << endl;
+  exit(-1);
 }
 
 /*
