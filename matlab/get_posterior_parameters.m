@@ -1,4 +1,6 @@
 function xparam = get_posterior_parameters(type)
+
+% function xparam = get_posterior_parameters(type)
 % Selects (estimated) parameters (posterior mode or posterior mean).
 % 
 % INPUTS 
@@ -7,16 +9,12 @@ function xparam = get_posterior_parameters(type)
 % OUTPUTS 
 %   o xparam  
 %
-%
-% ALGORITHM 
-%   None.       
-%
 % SPECIAL REQUIREMENTS
 %   None.
 %  
-%  
-% part of DYNARE, copyright S. Adjemian, M. Juillard (2006)
+% part of DYNARE, copyright dynare Team (2006-2008)
 % Gnu Public License.
+
 global estim_params_ oo_ options_ M_ 
   
 nvx = estim_params_.nvx;
