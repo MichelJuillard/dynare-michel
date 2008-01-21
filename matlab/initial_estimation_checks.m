@@ -1,4 +1,23 @@
 function initial_estimation_checks(xparam1,gend,data)
+
+% function initial_estimation_checks(xparam1,gend,data)
+% Checks data (complex values, ML evaluation, initial values, BK conditions,..)
+% 
+% INPUTS
+%    xparam1: vector of parameters to be estimated
+%    gend:    scalar specifying the number of observations
+%    data:    matrix of data
+%    
+% OUTPUTS
+%    none
+%        
+% SPECIAL REQUIREMENTS
+%    none
+%  
+% part of DYNARE, copyright Dynare Team (2003-2008)
+% Gnu Public License.
+
+
   global dr1_test bayestopt_ estim_params_ options_ oo_ M_
 
   nv = size(data,1);
