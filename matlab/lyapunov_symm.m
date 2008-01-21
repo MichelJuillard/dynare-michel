@@ -1,28 +1,26 @@
 function [x,u]=lyapunov_symm(a,b)
-% solves the Lyapunov equation 
-% x-a*x*a' = b 
-% for b (and then x) symmetrical
-% if a has some unit roots, the function computes only
-% the solution of the stable subsystem
+
+% function [x,u]=lyapunov_symm(a,b)
+% solves the Lyapunov equation x-a*x*a' = b, for b (and then x) symmetrical
+% if a has some unit roots, the function computes only the solution of the stable subsystem
 %  
 % INPUTS:
-%   a: coefficient matrix (n x n)  
-%   b: coefficient square matrix (n x n)
+%   a:      coefficient matrix (n x n)  
+%   b:      coefficient square matrix (n x n)
 %
 % OUTPUTS
-%   x: solution matrix (m x m)
+%   x:      solution matrix (m x m)
 %   ns_var: vector of indices of non-stationary variables (p x 1)
 %           (m + p = n)
-%   u: Schur vectors associated with unit roots  
+%   u:      Schur vectors associated with unit roots  
 %
 % ALGORITHM
 %   uses reordered Schur decomposition
 %
 % SPECIAL REQUIREMENTS
 %   needs Matlab version with ordeig function
-  
-  
-% part of DYNARE, copyright S. Adjemian, M. Juillard (2006)
+%
+% part of DYNARE, copyright Dynare Team (2006-2008)
 % Gnu Public License  
 
   global options_ 
