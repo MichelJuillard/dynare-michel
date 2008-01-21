@@ -1,23 +1,21 @@
 function PosteriorIRF(type)
+
+% function PosteriorIRF(type)
 % Builds posterior IRFs after the MH algorithm. 
 % 
 % INPUTS 
 %   o type       [char]     string specifying the joint density of the
-%   deep parameters ('prior','posterior'). 
+%                           deep parameters ('prior','posterior'). 
 %  
 % OUTPUTS 
-%   None (oo_ and plots).
-%
-%
-% ALGORITHM
-%   None.       
+%   None                    (oo_ and plots).
 %
 % SPECIAL REQUIREMENTS
-%   None.
+%   None
 %  
-%  
-% part of DYNARE, copyright S. Adjemian, M. Juillard (2006)
+% part of DYNARE, copyright Dynare Team(2006-2008)
 % Gnu Public License.
+
 global options_ estim_params_ oo_ M_ bayestopt_
 % Set the number of periods
 if isempty(options_.irf) | ~options_.irf 
