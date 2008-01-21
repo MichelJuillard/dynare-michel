@@ -20,7 +20,7 @@ function metropolis(TargetFun,xparam1,vv,mh_bounds,varargin)
 % SPECIAL REQUIREMENTS
 %   None.
 %  
-% part of DYNARE, copyright Dyanre Team (2006-2008)
+% part of DYNARE, copyright Dynare Team (2006-2008)
 % Gnu Public License.
 
 global M_ options_ bayestopt_
