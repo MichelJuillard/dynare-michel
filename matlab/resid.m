@@ -1,6 +1,22 @@
-% Copyright (C) 2001 Michel Juillard
-%
 function resid(period)
+%
+% function resid(period)
+% Computes residuals associated with the guess values
+% 
+% INPUTS
+%    period
+%    
+% OUTPUTS
+%    none
+%        
+% SPECIAL REQUIREMENTS
+%    none
+%  
+% part of DYNARE, copyright Dynare Team (2001-2008)
+% Gnu Public License.
+
+
+
   global M_ options_ oo_ it_ endval_ z
   
   if M_.exo_nbr > 0
