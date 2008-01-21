@@ -1,5 +1,20 @@
 function McmcDiagnostic
-% stephane.adjemian@ens.fr [06-04-2005]
+
+% function McmcDiagnostic
+% Computes convergence tests 
+% 
+% INPUTS 
+%   none
+%  
+% OUTPUTS 
+%   none  
+%
+% SPECIAL REQUIREMENTS
+%   none
+%  
+% part of DYNARE, copyright Dynare Team (2005-2008)
+% Gnu Public License.
+
 
 global options_ estim_params_ M_ 
 
