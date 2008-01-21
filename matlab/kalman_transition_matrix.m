@@ -1,8 +1,24 @@
-% makes transition matrices out of ghx and ghu for Kalman filter
-% still needs to eliminate unobserved static variables
-% order of variables s p b f p_1
-
 function [A,B] = kalman_transition_matrix(dr,iv,ic,aux)
+
+% function [A,B] = kalman_transition_matrix(dr,iv,ic,aux)
+% makes transition matrices out of ghx and ghu for Kalman filter
+% 
+% INPUTS
+%    dr:      structure of decisions rules for stochastic simulations
+%    iv:      integrated variables
+%    ic:      state variables position in the transition matrix columns
+%    aux:     auxiliary variables
+%
+% OUTPUTS
+%    A:       matrix of predetermined variables effects in linear solution (ghx)
+%    B:       matrix of shocks effects in linear solution (ghu)
+%        
+% SPECIAL REQUIREMENTS
+%    none
+%  
+% part of DYNARE, copyright Dynare Team (2003-2008)
+% Gnu Public License.
+
   global M_
   
   n_iv = length(iv);
