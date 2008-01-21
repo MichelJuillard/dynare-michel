@@ -1,4 +1,6 @@
 function metropolis(TargetFun,xparam1,vv,mh_bounds,varargin)
+
+% function metropolis(TargetFun,xparam1,vv,mh_bounds,varargin)
 % Metropolis-Hastings algorithm. 
 % 
 % INPUTS 
@@ -7,12 +9,10 @@ function metropolis(TargetFun,xparam1,vv,mh_bounds,varargin)
 %   o xparam1    [double]   (p*1) vector of parameters to be estimated (initial values).
 %   o vv         [double]   (p*p) matrix, posterior covariance matrix (at the mode).
 %   o mh_bounds  [double]   (p*2) matrix defining lower and upper bounds for the parameters. 
-%   o gend       [integer]  scalar specifying the number of observations ==> varargin{1}.
-%   o data       [double]   (T*n) matrix of data ==> varargin{2}.
+%   o varargin              list of argument following mh_bounds
 %  
 % OUTPUTS 
-%   None.  
-%
+%   None  
 %
 % ALGORITHM 
 %   Metropolis-Hastings.       
@@ -20,9 +20,9 @@ function metropolis(TargetFun,xparam1,vv,mh_bounds,varargin)
 % SPECIAL REQUIREMENTS
 %   None.
 %  
-%  
-% part of DYNARE, copyright S. Adjemian, M. Juillard (2006)
+% part of DYNARE, copyright Dyanre Team (2006-2008)
 % Gnu Public License.
+
 global M_ options_ bayestopt_
 
 ModelName = M_.fname;
