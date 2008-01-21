@@ -1,11 +1,25 @@
-% Copyright (C) 2001 Michel Juillard
-%
+function [Gamma_y,ivar]=th_autocovariances(dr,ivar)
+
+% function [Gamma_y,ivar]=th_autocovariances(dr,ivar)
 % computes the theoretical auto-covariances, Gamma_y, for an AR(p) process 
 % with coefficients dr.ghx and dr.ghu and shock variances Sigma_e_
 % for a subset of variables ivar (indices in lgy_)
-% Theoretical HP filtering is available as an option
+%  
+% INPUTS
+%   dr:         structure of decisions rules for stochastic simulations
+%   ivar:       subset of variables
+%  
+% OUTPUTS
+%   Gamma_y:    theoritical auto-covariances
+%   ivar:       subset of variables
+%
+% SPECIAL REQUIREMENTS
+%   Theoretical HP filtering is available as an option
+%  
+% part of DYNARE, copyright Dynare Team (2001-2008)
+% Gnu Public License.
 
-function [Gamma_y,ivar]=th_autocovariances(dr,ivar)
+
   global M_ options_
 
   exo_names_orig_ord  = M_.exo_names_orig_ord;
