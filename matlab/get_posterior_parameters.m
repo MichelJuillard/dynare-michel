@@ -7,7 +7,7 @@ function xparam = get_posterior_parameters(type)
 %   o type       [char]     = 'mode' or 'mean'.
 %  
 % OUTPUTS 
-%   o xparam  
+%   o xparam     vector of estimated parameters  
 %
 % SPECIAL REQUIREMENTS
 %   None.
