@@ -1,12 +1,29 @@
 function [abscissa,f] = kernel_density_estimate(data,number_of_grid_points,bandwidth,kernel_function) 
-%%  This function aims at estimating a continuous density. A kernel density 
-%%  estimator is used (see Silverman [1986]). 
-%%
-%%  * Silverman [1986], "Density estimation for statistics and data analysis". 
-%%
-%%  The code is adapted from Anders Holtsberg's matlab toolbox (stixbox). 
-%%
-%%  stephane.adjemian@cepremap.cnrs.fr [07/16/2004]. 
+
+% function [abscissa,f] = kernel_density_estimate(data,number_of_grid_points,bandwidth,kernel_function) 
+% Estimates a continuous density. 
+% 
+% INPUTS
+%    data:                    data
+%    number_of_grid_points:   number of grid points
+%    bandwidth:               scalar equals to 0,-1 or -2. For a value different from 0,-1 or -2 the
+%                             function will return optimal_bandwidth = bandwidth.
+%    kernel_function:         'gaussian','uniform','triangle','epanechnikov',
+%                             'quartic','triweight','cosinus'.
+%
+% OUTPUTS
+%    abscissa:                value on the abscissa axis
+%    f:                       density
+%        
+% SPECIAL REQUIREMENTS
+%    A kernel density estimator is used (see Silverman [1986], "Density estimation for statistics and data analysis")
+%    The code is adapted from Anders Holtsberg's matlab toolbox (stixbox). 
+%
+% part of DYNARE, copyright Dynare Team (2004-2008)
+% Gnu Public License.
+
+
+
 if size(data,2) > 1 & size(data,1) == 1 
     data = transpose(data); 
 elseif size(data,2)>1 & size(data,1)>1 
