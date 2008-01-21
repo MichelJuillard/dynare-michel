@@ -1,4 +1,26 @@
 function mode_check(x,fval,hessian,gend,data,lb,ub)
+
+% function mode_check(x,fval,hessian,gend,data,lb,ub)
+% Checks the maximum likelihood mode 
+% 
+% INPUTS
+%    x:       mode
+%    fval:    value at the maximum likelihood mode
+%    hessian: matrix of second order partial derivatives
+%    gend:    scalar specifying the number of observations
+%    data:    matrix of data
+%    lb:      lower bound
+%    ub:      upper bound
+%
+% OUTPUTS
+%    none
+%        
+% SPECIAL REQUIREMENTS
+%    none
+%  
+% part of DYNARE, copyright Dynare Team (2003-2008)
+% Gnu Public License.
+
 global bayestopt_ M_ options_
 
 TeX = options_.TeX;
