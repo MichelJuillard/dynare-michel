@@ -1,4 +1,25 @@
 function y = irf(dr, e1, long, drop, replic, iorder)
+
+% function y = irf(dr, e1, long, drop, replic, iorder)
+% Computes impulse response functions
+% 
+% INPUTS
+%    dr:     structure of decisions rules for stochastic simulations
+%    e1:     exogenous variables value in time 1 after one shock
+%    long
+%    drop:   truncation (in order 2)
+%    replic: number of replications (in order 2)
+%    iorder: first or second order approximation
+%
+% OUTPUTS
+%    y:      impulse response matrix
+%        
+% SPECIAL REQUIREMENTS
+%    none
+%  
+% part of DYNARE, copyright Dynare Team (2003-2008)
+% Gnu Public License.
+
   global M_ oo_ options_
 
 
