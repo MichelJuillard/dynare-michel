@@ -1,5 +1,7 @@
 function pdraw = prior_draw(init,cc)
-% Build one draw from the prior distribution. 
+
+% function pdraw = prior_draw(init,cc)
+% Builds one draw from the prior distribution. 
 % 
 % INPUTS
 %   o init           [integer]  scalar equal to 1 (first call) or 0.
@@ -10,15 +12,14 @@ function pdraw = prior_draw(init,cc)
 % OUTPUTS 
 %   o pdraw          [double]   draw from the joint prior density. 
 %
-% ALGORITHM 
-%   ...       
 %
 % SPECIAL REQUIREMENTS
-%   None.
+%   none
 %  
-%  
-% part of DYNARE, copyright S. Adjemian, M. Juillard (2006)
+% part of DYNARE, copyright Dynare Team (2006-2008)
 % Gnu Public License.
+
+
 global estim_params_  bayestopt_
 persistent fname npar bounds pshape pmean pstd a b p1 p2 p3 p4 condition
   
