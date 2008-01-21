@@ -1,4 +1,6 @@
 function get_posterior_parameters_statistics()
+
+% function get_posterior_parameters_statistics()
 % This function prints and saves posterior estimates after the mcmc
 % (+updates of oo_ & TeX output). 
 % 
@@ -8,15 +10,12 @@ function get_posterior_parameters_statistics()
 % OUTPUTS 
 %   None.  
 %
-% ALGORITHM 
-%   None.       
-%
 % SPECIAL REQUIREMENTS
 %   None.
 %  
-%  
-% part of DYNARE, copyright S. Adjemian, M. Juillard (2006)
+% part of DYNARE, copyright Dynare Team (2006-2008)
 % Gnu Public License.
+
 global estim_params_ M_ options_ bayestopt_ oo_
 
 if ~options_.mh_replic & options_.load_mh_file
