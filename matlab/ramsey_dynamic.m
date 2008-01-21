@@ -1,12 +1,22 @@
 function J = ramsey_dynamic(ys,lbar)
+
+% function J = ramsey_dynamic(ys,lbar)
 % ramsey_dynamic sets up the Jacobian of the expanded model for optimal
 % policies. It modifies several fields of M_
-% INPUT:
-%         ys         steady state of original endogenous variables
-%         lbar       steady state of Lagrange multipliers
-% OUPTUT: 
-%         J          jaocobian of expanded model
+%
+% INPUTS:
+%     ys:         steady state of original endogenous variables
+%     lbar:       steady state of Lagrange multipliers
+%
+% OUPTUTS: 
+%     J:          jaocobian of expanded model
 %  
+% SPECIAL REQUIREMENTS
+%     none
+%  
+% part of DYNARE, copyright Dynare Team (2003-2008)
+% Gnu Public License.
+
 
   global M_ options_ it_
   
