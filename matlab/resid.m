@@ -17,7 +17,7 @@ function resid(period)
 
 
 
-  global M_ options_ oo_ it_ endval_ z ys0_
+  global M_ options_ oo_ it_ endval_ z
   
   if M_.exo_nbr > 0
     oo_.exo_simul = ones(M_.maximum_lag+M_.maximum_lead+period,1)* ...
