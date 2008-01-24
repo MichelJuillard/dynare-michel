@@ -5,9 +5,9 @@ function [A,B] = kalman_transition_matrix(dr,iv,ic,aux)
 % 
 % INPUTS
 %    dr:      structure of decisions rules for stochastic simulations
-%    iv:      integrated variables
+%    iv:      selected variables
 %    ic:      state variables position in the transition matrix columns
-%    aux:     auxiliary variables
+%    aux:     indices for auxiliary equations
 %
 % OUTPUTS
 %    A:       matrix of predetermined variables effects in linear solution (ghx)
