@@ -30,9 +30,6 @@ function resid(period)
       oo_.steady_state = zeros(size(oo_.steady_state,1),1) ;
     end
     oo_.endo_simul = oo_.steady_state*ones(1,period+M_.maximum_lag+M_.maximum_lead) ;
-    if endval_ == 1
-      oo_.endo_simul(:,1:M_.maximum_lag) = ys0_*ones(1,M_.maximum_lag) ;
-    end
   end
 
   i = M_.lead_lag_incidence';
