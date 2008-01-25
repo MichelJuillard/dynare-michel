@@ -206,27 +206,6 @@ public:
   virtual void compile(ofstream &CompileCode, bool lhs_rhs, ExprNodeOutputType output_type, const temporary_terms_type &temporary_terms, map_idx_type map_idx) const;
 };
 
-enum UnaryOpcode
-  {
-    oUminus,
-    oExp,
-    oLog,
-    oLog10,
-    oCos,
-    oSin,
-    oTan,
-    oAcos,
-    oAsin,
-    oAtan,
-    oCosh,
-    oSinh,
-    oTanh,
-    oAcosh,
-    oAsinh,
-    oAtanh,
-    oSqrt
-  };
-
 //! Unary operator node
 class UnaryOpNode : public ExprNode
 {
@@ -252,24 +231,6 @@ public:
   virtual double eval(const eval_context_type &eval_context) const throw (EvalException);
   virtual void compile(ofstream &CompileCode, bool lhs_rhs, ExprNodeOutputType output_type, const temporary_terms_type &temporary_terms, map_idx_type map_idx) const;
 };
-
-enum BinaryOpcode
-  {
-    oPlus,
-    oMinus,
-    oTimes,
-    oDivide,
-    oPower,
-    oEqual,
-    oMax,
-    oMin,
-    oLess,
-    oGreater,
-    oLessEqual,
-    oGreaterEqual,
-    oEqualEqual,
-    oDifferent
-  };
 
 //! Binary operator node
 class BinaryOpNode : public ExprNode

@@ -27,20 +27,7 @@ using namespace std;
 #include <vector>
 #include <ostream>
 #include <iostream>
-
-//! Enumeration of possible symbol types
-/*! Warning: do not to change the order of the enumeration, it matters for VariableTable (at least ensure that eEndogenous is the first one) */
-enum Type
-  {
-    eEndogenous = 0,               //!< Endogenous
-    eExogenous = 1,                //!< Exogenous
-    eExogenousDet = 2,             //!< Exogenous deterministic
-    eRecursiveVariable = 3,        //!< Recursive variable (reserved for future use)
-    eParameter = 4,                //!< Parameter
-    eModelLocalVariable = 10,      //!< Local variable whose scope is model (pound expression)
-    eModFileLocalVariable = 11,    //!< Local variable whose scope is mod file (model excluded)
-    eUnknownFunction = 12          //!< Function unknown to the preprocessor
-  };
+#include "CodeInterpreter.hh"
 
 //! Stores the symbol table
 /*!

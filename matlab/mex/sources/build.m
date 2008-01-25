@@ -53,7 +53,6 @@ COMPILE_COMMAND = [ 'mex ' COMPILE_OPTIONS ' -outdir ' OUTPUT_DIR ' ' ];
 
 disp('Compiling mjdgges...')
 system([ COMPILE_COMMAND ' mjdgges/mjdgges.c ' LAPACK_PATH ]);
-
 disp('Compiling sparse_hessian_times_B_kronecker_C...')
 system([ COMPILE_COMMAND ' kronecker/sparse_hessian_times_B_kronecker_C.cc ' BLAS_PATH ]);
 disp('Compiling A_times_B_kronecker_C...')
@@ -61,3 +60,5 @@ system([ COMPILE_COMMAND ' kronecker/A_times_B_kronecker_C.cc ' BLAS_PATH ]);
 disp('Compiling gensylv...')
 system([ COMPILE_COMMAND ' -DMATLAB -Igensylv/cc gensylv/matlab/gensylv.cpp' ...
 		    ' gensylv/cc/*.cpp ' BLAS_PATH ' ' LAPACK_PATH ]);
+disp('Compiling simulate...')
+system([ COMPILE_COMMAND ' -DMATLAB -Isimulate -I..\..\..\parser.src\include simulate/simulate.cc simulate/Interpreter.cc simulate/Mem_Mngr.cc simulate/SparseMatrix.cc simulate/LinBcg.cc']);

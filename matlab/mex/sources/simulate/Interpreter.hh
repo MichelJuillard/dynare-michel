@@ -25,8 +25,8 @@
 #include <string>
 #include <cmath>
 #include "CodeInterpreter.hh"
-#include "SymbolTableTypes.hh"
-#include "ExprNode.hh"
+//#include "SymbolTable.hh"
+//#include "ExprNode.hh"
 //#include "Mem_Mngr.hh"
 #include "SparseMatrix.hh"
 #include "LinBCG.hh"

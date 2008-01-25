@@ -57,5 +57,59 @@ const int SOLVE_TWO_BOUNDARIES_COMPLETE=7;
 const int EVALUATE_FOREWARD_R=8;
 const int EVALUATE_BACKWARD_R=9;
 
+//! Enumeration of possible symbol types
+/*! Warning: do not to change the order of the enumeration, it matters for VariableTable (at least ensure that eEndogenous is the first one) */
+enum Type
+  {
+    eEndogenous = 0,               //!< Endogenous
+    eExogenous = 1,                //!< Exogenous
+    eExogenousDet = 2,             //!< Exogenous deterministic
+    eRecursiveVariable = 3,        //!< Recursive variable (reserved for future use)
+    eParameter = 4,                //!< Parameter
+    eModelLocalVariable = 10,      //!< Local variable whose scope is model (pound expression)
+    eModFileLocalVariable = 11,    //!< Local variable whose scope is mod file (model excluded)
+    eUnknownFunction = 12          //!< Function unknown to the preprocessor
+  };
+
+
+enum UnaryOpcode
+  {
+    oUminus,
+    oExp,
+    oLog,
+    oLog10,
+    oCos,
+    oSin,
+    oTan,
+    oAcos,
+    oAsin,
+    oAtan,
+    oCosh,
+    oSinh,
+    oTanh,
+    oAcosh,
+    oAsinh,
+    oAtanh,
+    oSqrt
+  };
+enum BinaryOpcode
+  {
+    oPlus,
+    oMinus,
+    oTimes,
+    oDivide,
+    oPower,
+    oEqual,
+    oMax,
+    oMin,
+    oLess,
+    oGreater,
+    oLessEqual,
+    oGreaterEqual,
+    oEqualEqual,
+    oDifferent
+  };
+
+
 
 #endif
