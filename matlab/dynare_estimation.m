@@ -168,13 +168,13 @@ if ~isempty(options_.unit_root_vars)
       intersect(bayestopt_.restrict_var_list,i_ur);
   if M_.maximum_lag > 1
     l1 = flipud([cumsum(M_.lead_lag_incidence(1:M_.maximum_lag-1,dr.order_var),1);ones(1,M_.endo_nbr)]);
-    l2 = l1(:,restrict_var_list);
+    l2 = l1(:,bayestopt_.restrict_var_list);
     il2 = find(l2' > 0);
     l2(il2) = (1:length(il2))';
-    bayestopt_.restict_var_list_stationary = ...
-	nonzeros(l2(:,restrict_var_list_stationary)); 
-    bayestopt_.restict_var_list_nonstationary = ...
-	nonzeros(l2(:,restrict_var_list_nonstationary)); 
+    bayestopt_.restrict_var_list_stationary = ...
+	nonzeros(l2(:,bayestopt_.restrict_var_list_stationary)); 
+    bayestopt_.restrict_var_list_nonstationary = ...
+	nonzeros(l2(:,bayestopt_.restrict_var_list_nonstationary)); 
   end
   options_.lik_init = 3;
 end % if ~isempty(options_.unit_root_vars)
@@ -877,7 +877,7 @@ if (any(bayestopt_.pshape  >0 ) & options_.mh_replic) | ...
   xparam = get_posterior_parameters('mean');
   set_parameters(xparam);
 
-  return
+%  return
 end
 
 if ~((any(bayestopt_.pshape > 0) & options_.mh_replic) | (any(bayestopt_.pshape ...
