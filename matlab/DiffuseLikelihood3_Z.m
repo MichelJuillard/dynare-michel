@@ -1,6 +1,6 @@
-function [LIK, lik] = DiffuseLikelihood3_Z(T,Z,R,Q,Pinf,Pstar,Y,trend,start)%//Z,T,R,Q,Pinf,Pstar,Y)
+function [LIK, lik] = DiffuseLikelihood3_Z(T,Z,R,Q,Pinf,Pstar,Y,start)
 
-% function [LIK, lik] = DiffuseLikelihood3(T,R,Q,Pinf,Pstar,Y,trend,start)
+% function [LIK, lik] = DiffuseLikelihood3(T,R,Q,Pinf,Pstar,Y,start)
 % Computes the diffuse likelihood without measurement error, in the case of
 % a singular var-cov matrix.
 % Univariate treatment of multivariate time series.
@@ -13,7 +13,6 @@ function [LIK, lik] = DiffuseLikelihood3_Z(T,Z,R,Q,Pinf,Pstar,Y,trend,start)%//Z
 %    Pinf:   mm*mm diagonal matrix with with q ones and m-q zeros
 %    Pstar:  mm*mm variance-covariance matrix with stationary variables
 %    Y:      pp*1 vector
-%    trend
 %    start:  likelihood evaluation at 'start'
 %             
 % OUTPUTS
@@ -60,7 +59,7 @@ while newRank & t < smpl
   t = t+1;
   for i=1:pp
     Zi          = Z(i,:);
-    v(i) 	= Y(i,t)-Zi*a-trend(i,t);
+    v(i) 	= Y(i,t)-Zi*a;
     Fstar 	= Zi*Pstar*Zi';
     Finf	= Zi*Pinf*Zi';
     Kstar 	= Pstar*Zi';
@@ -131,7 +130,7 @@ while notsteady & t < smpl
   oldP = Pstar;
   for i=1:pp
     Zi = Z(i,:);
-    v(i) = Y(i,t) - Zi*a - trend(i,t);
+    v(i) = Y(i,t) - Zi*a;
     Fi   = Zi*Pstar*Zi';
     if Fi > crit
       Ki	= Pstar*Zi';
@@ -151,7 +150,7 @@ while t < smpl
   Pstar = oldP;
   for i=1:pp
     Zi = Z(i,i);
-    v(i) = Y(i,t) - Zi*a - trend(i,t);
+    v(i) = Y(i,t) - Zi*a;
     Fi   = Zi*Pstar*Zi';
     if Fi > crit
       Ki 		= Pstar*Zi';

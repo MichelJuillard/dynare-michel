@@ -1,6 +1,6 @@
-function [LIK, lik] = DiffuseLikelihood1_Z(T,Z,R,Q,Pinf,Pstar,Y,trend,start)
+function [LIK, lik] = DiffuseLikelihood1_Z(T,Z,R,Q,Pinf,Pstar,Y,start)
 
-% function [LIK, lik] = DiffuseLikelihood1_Z(T,Z,R,Q,Pinf,Pstar,Y,trend,start)
+% function [LIK, lik] = DiffuseLikelihood1_Z(T,Z,R,Q,Pinf,Pstar,Y,start)
 % Computes the diffuse likelihood without measurement error, in the case of a non-singular var-cov matrix 
 %
 % INPUTS
@@ -11,7 +11,6 @@ function [LIK, lik] = DiffuseLikelihood1_Z(T,Z,R,Q,Pinf,Pstar,Y,trend,start)
 %    Pinf:   mm*mm diagonal matrix with with q ones and m-q zeros
 %    Pstar:  mm*mm variance-covariance matrix with stationary variables
 %    Y:      pp*1 vector
-%    trend
 %    start:  likelihood evaluation at 'start'
 %             
 % OUTPUTS
@@ -47,7 +46,7 @@ function [LIK, lik] = DiffuseLikelihood1_Z(T,Z,R,Q,Pinf,Pstar,Y,trend,start)
   reste       = 0;
   while rank(Pinf,crit) & t < smpl
     t     = t+1;
-    v  	  = Y(:,t)-Z*a-trend(:,t);
+    v  	  = Y(:,t)-Z*a;
     Finf  = Z*Pinf*Z';
     if rcond(Finf) < crit 
       if ~all(abs(Finf(:)) < crit)
@@ -68,7 +67,7 @@ function [LIK, lik] = DiffuseLikelihood1_Z(T,Z,R,Q,Pinf,Pstar,Y,trend,start)
       Kinf	= Pinf*Z'*iFinf;		
       Fstar	= Z*Pstar*Z';
       Kstar	= (Pstar*Z'-Kinf*Fstar)*iFinf; 	
-      Pstar	= T*(Pstar-Pstar*Z'*Kinf'-Pinf*Z'*Kstar)*T'+QQ;
+      Pstar	= T*(Pstar-Pstar*Z'*Kinf'-Pinf*Z'*Kstar')*T'+QQ;
       Pinf	= T*(Pinf-Pinf*Z'*Kinf')*T';
       a		= T*(a+Kinf*v);					
     end  
@@ -80,7 +79,7 @@ function [LIK, lik] = DiffuseLikelihood1_Z(T,Z,R,Q,Pinf,Pstar,Y,trend,start)
   F_singular = 1;
   while notsteady & t < smpl
     t  = t+1;
-    v  	  = Y(:,t)-Z*a-trend(:,t);
+    v  	  = Y(:,t)-Z*a;
     F  = Z*Pstar*Z';
     oldPstar  = Pstar;
     dF = det(F);
@@ -97,7 +96,7 @@ function [LIK, lik] = DiffuseLikelihood1_Z(T,Z,R,Q,Pinf,Pstar,Y,trend,start)
       lik(t)    = log(dF)+v'*iF*v;
       K         = Pstar*Z'*iF;
       a         = T*(a+K*v);	
-      Pstar     = T*(Pstar-K*Pstar*Z')*T'+QQ;
+      Pstar     = T*(Pstar-K*Z*Pstar)*T'+QQ;
     end
     notsteady = ~(max(max(abs(Pstar-oldPstar)))<crit);
   end
@@ -108,7 +107,7 @@ function [LIK, lik] = DiffuseLikelihood1_Z(T,Z,R,Q,Pinf,Pstar,Y,trend,start)
   reste = smpl-t;
   while t < smpl
     t = t+1;
-    v = Y(:,t)-Z*a-trend(:,t);
+    v = Y(:,t)-Z*a;
     a = T*(a+K*v);
     lik(t) = v*iF*v;
   end
