@@ -9,7 +9,7 @@ function dyn_data_01=read_variables(file_name_01,var_names_01,dyn_data_01,xls_sh
 %    dyn_data_01:     
 %    xls_sheet:       Excel sheet name
 %    xls_range:       Excel range specification
-
+%
 % OUTPUTS
 %    dyn_data_01:
 %
