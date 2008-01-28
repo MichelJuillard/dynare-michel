@@ -1,4 +1,24 @@
 function [xparams, logpost]=metropolis_draw(init)
+
+% function [xparams, logpost]=metropolis_draw(init) 
+% Builds draws from metropolis
+%
+% INPUTS:
+%   init:              scalar equal to 1 (first call) or 0
+%
+% OUTPUTS:
+%   xparams:           vector of estimated parameters
+%   logpost:           log of posterior density
+%   
+% SPECIAL REQUIREMENTS
+%   none
+%  
+% part of DYNARE, copyright Dynare Team (2003-2007)
+% Gnu Public License.
+  
+
+
+
   global options_ estim_params_ M_
   persistent mh_nblck NumberOfDraws fname FirstLine FirstMhFile MAX_nruns
   
