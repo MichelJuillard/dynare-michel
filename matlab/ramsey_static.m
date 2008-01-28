@@ -1,6 +1,22 @@
 function [resids, rJ,mult] = ramsey_static(x)
-% computes the static first order conditions for optimal policy
-    
+
+% function [resids, rJ,mult] = ramsey_static(x)
+% Computes the static first order conditions for optimal policy
+%
+% INPUTS
+%    x:         vector of endogenous variables
+%
+% OUTPUTS
+%    resids:    residuals of non linear equations
+%    rJ:        Jacobian
+%    mult:      Lagrangian multipliers
+%
+% SPECIAL REQUIREMENTS
+%    none
+%  
+% part of DYNARE, copyright Dynare Team (2003-2007)
+% Gnu Public License.
+
   global M_ options_ it_
   
   % recovering usefull fields
