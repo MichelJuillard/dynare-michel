@@ -1,5 +1,20 @@
 function bvar_density(maxnlags)
 
+% function bvar_density(maxnlags)
+% computes the density of a bayesian var
+%
+% INPUTS
+%    maxnlags:      maximum number of lags in the bvar
+%
+% OUTPUTS
+%    none
+%
+% SPECIAL REQUIREMENTS
+%    none
+%  
+% part of DYNARE, copyright Dynare Team (2003-2007)
+% Gnu Public License.
+
     for nlags = 1:maxnlags
         [ny, nx, posterior, prior] = bvar_toolbox(nlags);
         
