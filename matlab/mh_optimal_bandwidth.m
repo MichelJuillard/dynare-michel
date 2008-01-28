@@ -1,18 +1,27 @@
 function optimal_bandwidth = mh_optimal_bandwidth(data,n,bandwidth,kernel_function) 
-%%  This function gives the optimal bandwidth parameter of a kernel estimator 
-%%  used to estimate a posterior univariate density from realisations of a 
-%%  Metropolis-Hastings algorithm.  
-%% 
-%%  * M. Skold and G.O. Roberts [2003], "Density estimation for the Metropolis-Hastings algorithm". 
-%%  * Silverman [1986], "Density estimation for statistics and data analysis". 
-%%
-%%  data            :: a vector with n elements.
-%%  bandwidth       :: a scalar equal to 0,-1 or -2. For a value different from 0,-1 or -2 the
-%%                     function will return optimal_bandwidth = bandwidth.
-%%  kernel_function :: 'gaussian','uniform','triangle','epanechnikov',
-%%                     'quartic','triweight','cosinus'.
-%%
-%%  stephane.adjemian@cepremap.cnrs.fr [07-15-2004] <-- [01/16/2004] 
+
+% function optimal_bandwidth = mh_optimal_bandwidth(data,n,bandwidth,kernel_function) 
+% This function gives the optimal bandwidth parameter of a kernel estimator
+% used to estimate a posterior univariate density from realisations of a 
+% Metropolis-Hastings algorithm. 
+%
+% INPUTS:
+%   data:              vector with n elements
+%   n:                 number of observations
+%   bandwidth:         scalar equal to 0,-1 or -2. For a value different from 0,-1 or -2 the
+%                      function will return optimal_bandwidth = bandwidth
+%   kernel_function:   'gaussian','uniform','triangle','epanechnikov', 'quartic','triweight','cosinus'
+%
+% OUTPUTS:
+%   optimal_bandwidth: optimal window width (kernel smoothing)
+%   
+% SPECIAL REQUIREMENTS
+%   M. Skold and G.O. Roberts [2003], "Density estimation for the Metropolis-Hastings algorithm". 
+%   Silverman [1986], "Density estimation for statistics and data analysis". 
+%  
+% part of DYNARE, copyright Dynare Team (2004-2007)
+% Gnu Public License.
+  
 
 
 %% KERNEL SPECIFICATION...
