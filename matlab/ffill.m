@@ -1,6 +1,24 @@
-% Copyright (C) 2001 Michel Juillard
-%
 function [a,b] = ffill(x,ixc,y)
+
+% function [a,b] = ffill(x,ixc,y)
+% Makes the horizontale concatenation if x exists
+% and fills the matrix with 0 if x and y are not the same size.
+%
+% INPUTS
+%    x:         matrix
+%    ixc:       vector of indices
+%    y:         matrix
+%        
+% OUTPUTS
+%    a:         concatenation results
+%    b:         vector
+%        
+% SPECIAL REQUIREMENTS
+%    none
+%  
+% part of DYNARE, copyright Dynare Team (2001-2008)
+% Gnu Public License.
+
 
 xc = size(x,1) ;
 
