@@ -1,18 +1,21 @@
 function read_data_
+
 % function read_data_
-% read endogenous and exogenous variables from a text file 
+% reads endogenous and exogenous variables from a text file 
 % Used by datafile option in simulate
+%
 % INPUT
 %   none
+%
 % OUTPUT
 %   none
-% ALGORITHM
-%   none
+%
 % SPECIAL REQUIREMENT
 %   none
 %    
-% part of DYNARE, copyright (2007)
+% part of DYNARE, copyright Dynare Team (2007-2008)
 % Gnu Public License.
+
   global options_ M_ oo_;
   dname= options_.datafile;
   fid = fopen([dname '_endo.dat'],'r');
