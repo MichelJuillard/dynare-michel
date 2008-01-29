@@ -1,9 +1,23 @@
-% Copyright (C) 2001 Michel Juillard
-%
+
 function dynasave(s,var_list)
+
+% function dynasave(s,var_list)
+% This optional command saves the simulation results in a .MAT file.
 % DYNASAVE :	DYNASAVE ( [ 'filename' ] )	
-%		This optional command saves the simulation results
-%		in a .MAT file.
+%
+% INPUTS
+%    s:              matrix of endogenous variables values
+%    var_list:       vector of selected endogenous variables
+%
+% OUTPUTS
+%    none
+%
+% SPECIAL REQUIREMENTS
+%    none
+%  
+% part of DYNARE, copyright Dynare Team (2001-2007)
+% Gnu Public License.
+
 
   global M_ oo_
 
