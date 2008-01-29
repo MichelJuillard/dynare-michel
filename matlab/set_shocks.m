@@ -1,6 +1,26 @@
-% Copyright (C) 2003 Michel Juillard
-%
 function set_shocks(flag,k,ivar,values)
+
+% function set_shocks(flag,k,ivar,values)
+% writes a deterministic shock into exo_simul or exo_det_simul
+%
+% INPUTS
+%    flag=0:    replaces exo_simul  
+%    flag=1:    multiplicative shock into exo_simul
+%    flag=2:    replaces exo_det_simul
+%    flag=3:    multipliczative shock into exo_det_simul
+%    k:         period
+%    ivar:      indice of exogenous variables
+%    values:    shock values
+%
+% OUTPUTS
+%    none
+%        
+% SPECIAL REQUIREMENTS
+%    none
+%  
+% part of DYNARE, copyright Dynare Team (2003-2008)
+% Gnu Public License.
+
   global oo_ M_
   
   k = k + M_.maximum_lag;
