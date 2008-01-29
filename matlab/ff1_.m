@@ -1,6 +1,20 @@
-% Copyright (C) 2001 Michel Juillard
-%
 function y=ff1_(x)
+
+% function y=ff1_(x)
+% splits the input argument x into endogenous and exogenous variables and calls the 'static' function
+%
+% INPUTS
+%    x:          argument splitted between endogenous and exogenous
+%        
+% OUTPUTS
+%    y:         'static' function residuals
+%        
+% SPECIAL REQUIREMENTS
+%    none
+%  
+% part of DYNARE, copyright Dynare Team (2001-2008)
+% Gnu Public License.
+
 global it_ M_ oo_
 
 n1 = size(x,1) - M_.exo_nbr;
