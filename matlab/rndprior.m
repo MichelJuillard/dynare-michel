@@ -1,5 +1,22 @@
 function y = rndprior(bayestopt_)
 
+
+% function y = rndprior(bayestopt_)
+% Draws random number from the prior density
+%
+% INPUTS
+%   bayestopt_:    structure characterizing priors
+%    
+% OUTPUTS
+%   y:             drawn numbers vector              
+%
+% SPECIAL REQUIREMENTS
+%    none
+%  
+% part of DYNARE, copyright Dynare Team (2003-2007)
+% Gnu Public License.
+
+
 pshape=bayestopt_.pshape;
 pmean=bayestopt_.pmean;
 p1=bayestopt_.p1;
