@@ -1,4 +1,22 @@
 function initvalf_(fname,period,varargin)
+
+% function initvalf_(fname,period,varargin)
+% reads an initial path from the 'fname' file for exogenous and endogenous variables	
+%
+% INPUTS
+%    fname:         name of the function
+%    period:        period
+%    varargin:      list of arguments following period
+%
+% OUTPUTS
+%    none
+%
+% SPECIAL REQUIREMENTS
+%    none
+%  
+% part of DYNARE, copyright Dynare Team (2003-2007)
+% Gnu Public License.
+
   global M_ oo_ options_
   global y_start_date ex_start_date 
 
