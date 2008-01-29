@@ -1,12 +1,24 @@
-% Copyright (C) 2001 Michel Juillard
-%
+
 function rplot(s1)
-% RPLOT :		RPLOT ( ['var1'; 'var2';  ...] )	
-%		This optionnal command creates the plot of the variable
-%		trajectory. By default, the entire simulation period is 
-%		ploted. The instruction DSAMPLE permits to reduce the 
-%		number of periods in the plot.
 		
+% function rplot(s1)
+% This optionnal command creates the plot of the variable trajectory. By default, the entire simulation period is
+% ploted. The instruction DSAMPLE permits to reduce the number of periods in the plot.
+% RPLOT :		RPLOT ( ['var1'; 'var2';  ...] )	
+%
+% INPUTS
+%    s1:           list of vector names
+%
+% OUTPUTS
+%    none
+%
+% SPECIAL REQUIREMENTS
+%    none
+%  
+% part of DYNARE, copyright Dynare Team (2001-2007)
+% Gnu Public License.
+
+
 global M_ oo_ options_
 
 rplottype = options_.rplottype;
