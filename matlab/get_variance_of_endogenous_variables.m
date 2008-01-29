@@ -1,5 +1,23 @@
 function [vx1,i_ns] = get_variance_of_endogenous_variables(dr,i_var)
 
+% function [vx1,i_ns] = get_variance_of_endogenous_variables(dr,i_var)
+% Gets the variance of a variables subset
+%
+% INPUTS
+%    dr:        structure of decisions rules for stochastic simulations
+%    i_var:     indices of a variables list
+%        
+% OUTPUTS
+%    vx1:       variance-covariance matrix
+%    i_ns:      non-stationary variables indices for which the variance has
+%               been calculated
+%        
+% SPECIAL REQUIREMENTS
+%    none
+%  
+% part of DYNARE, copyright Dynare Team (2003-2008)
+% Gnu Public License.
+
   global M_ options_
   
   Sigma_e = M_.Sigma_e;
