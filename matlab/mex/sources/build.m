@@ -15,7 +15,8 @@ MATLAB_PATH = matlabroot;
 
 COMPILE_OPTIONS = '';
 
-if strcmpi('GLNX86', computer) || strcmpi('GLNXA64', computer) % GNU/Linux (i386)
+if strcmpi('GLNX86', computer) || strcmpi('GLNXA64', computer) ...
+   || strcmpi('MACI', computer) % GNU/Linux (i386 or ET64) or MacIntel
     if strcmpi('GLNXA64', computer) % 64 bits ?
         COMPILE_OPTIONS = [ COMPILE_OPTIONS ' -largeArrayDims' ];
     end
@@ -50,6 +51,10 @@ end
 COMPILE_OPTIONS = [ COMPILE_OPTIONS ' -v' ]
 
 COMPILE_COMMAND = [ 'mex ' COMPILE_OPTIONS ' -outdir ' OUTPUT_DIR ' ' ];
+if (strcmpi('MACI', computer))
+    % Need to specify mex path under MacIntel
+    COMPILE_COMMAND = [ MATLAB_PATH '/bin/' COMPILE_COMMAND ];
+end
 
 disp('Compiling mjdgges...')
 system([ COMPILE_COMMAND ' mjdgges/mjdgges.c ' LAPACK_PATH ]);
