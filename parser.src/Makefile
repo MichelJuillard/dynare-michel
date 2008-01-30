@@ -76,22 +76,17 @@ DynareBison.cc include/DynareBison.hh: DynareBison.yy include/ParsingDriver.hh
 clean: clean-recursive
 	rm -f *.o *.P \
 		*~ include/*~ \
-		DynareBison.output \
 		DynareFlex.cc \
+		DynareBison.output \
+		DynareBison.cc \
+		include/position.hh \
+		include/stack.hh \
+		include/location.hh \
+		include/DynareBison.hh \
 		$(DYNARE_M) \
 		$(DYNARE_S)
 
 clean-recursive:
 	make -C macro clean
 
-distclean: clean distclean-recursive
-	rm -f DynareBison.cc \
-		include/position.hh \
-		include/stack.hh \
-		include/location.hh \
-		include/DynareBison.hh
-
-distclean-recursive:
-	make -C macro distclean
-
-.PHONY: all all-recursive clean clean-recursive distclean distclean-recursive
+.PHONY: all all-recursive clean clean-recursive

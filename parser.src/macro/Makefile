@@ -14,9 +14,14 @@ MacroBison.cc MacroBison.hh: MacroBison.yy MacroDriver.hh
 	bison --verbose -o MacroBison.cc MacroBison.yy
 
 clean: 
-	rm -f *.o *.P *~ MacroBison.output MacroFlex.cc libmacro.a
+	rm -f *.o *.P *~ \
+		MacroFlex.cc \
+		MacroBison.output \
+		MacroBison.cc \
+		MacroBison.hh \
+		location.hh \
+		stack.hh \
+		position.hh \
+		libmacro.a
 
-distclean: clean
-	rm -f MacroBison.cc MacroBison.hh location.hh stack.hh position.hh
-
-.PHONY: clean distclean
+.PHONY: clean
