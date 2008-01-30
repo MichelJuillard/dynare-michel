@@ -82,18 +82,71 @@ function [alphahat,etahat,epsilonhat,ahat,SteadyState,trend_coeff,aK,T,R] = Dsge
     Pstar = 10*eye(np);
     Pinf	= [];
   elseif options_.lik_init == 3 % Diffuse Kalman filter
-    Pstar = zeros(np,np);
-    ivs = bayestopt_.var_list_stationary;
-    Pstar(ivs,ivs) = lyapunov_symm(T(ivs,ivs),R(ivs,:)*Q* ...
-				   transpose(R(ivs,:)));
-%    Pinf  = bayestopt_.Pinf;
-    % by M. Ratto
-    RR=T(:,find(~ismember([1:np],ivs)));
-    i=find(abs(RR)>1.e-10);
-    R0=zeros(size(RR));
-    R0(i)=sign(RR(i));
-    Pinf=R0*R0';
-    % by M. Ratto
+    if options_.kalman_algo < 4
+      Pstar = zeros(np,np);
+      ivs = bayestopt_.restrict_var_list_stationary;
+      R1 = R(ivs,:);
+      Pstar(ivs,ivs) = lyapunov_symm(T(ivs,ivs),R1*Q*R1');
+      %    Pinf  = bayestopt_.Pinf;
+      % by M. Ratto
+      RR=T(:,bayestopt_.restrict_var_list_nonstationary);
+      i=find(abs(RR)>1.e-10);
+      R0=zeros(size(RR));
+      R0(i)=sign(RR(i));
+      Pinf=R0*R0';
+      % by M. Ratto
+    else
+      [QT,ST] = schur(T);
+      e1 = abs(ordeig(ST)) > 2-options_.qz_criterium;
+      [QT,ST] = ordschur(QT,ST,e1);
+      k = find(abs(ordeig(ST)) > 2-options_.qz_criterium);
+      nk = length(k);
+      nk1 = nk+1;
+      Pinf = zeros(np,np);
+      Pinf(1:nk,1:nk) = eye(nk);
+      Pstar = zeros(np,np);
+      B = QT'*R*Q*R'*QT;
+      for i=np:-1:nk+2
+	if ST(i,i-1) == 0
+	  if i == np
+	    c = zeros(np-nk,1);
+	  else
+	    c = ST(nk1:i,:)*(Pstar(:,i+1:end)*ST(i,i+1:end)')+...
+		ST(i,i)*ST(nk1:i,i+1:end)*Pstar(i+1:end,i);
+	  end
+	  q = eye(i-nk)-ST(nk1:i,nk1:i)*ST(i,i);
+	  Pstar(nk1:i,i) = q\(B(nk1:i,i)+c);
+	  Pstar(i,nk1:i-1) = Pstar(nk1:i-1,i)';
+	else
+	  if i == np
+	    c = zeros(np-nk,1);
+	    c1 = zeros(np-nk,1);
+	  else
+	    c = ST(nk1:i,:)*(Pstar(:,i+1:end)*ST(i,i+1:end)')+...
+		ST(i,i)*ST(nk1:i,i+1:end)*Pstar(i+1:end,i)+...
+		ST(i,i-1)*ST(nk1:i,i+1:end)*Pstar(i+1:end,i-1);
+	    c1 = ST(nk1:i,:)*(Pstar(:,i+1:end)*ST(i-1,i+1:end)')+...
+		 ST(i-1,i-1)*ST(nk1:i,i+1:end)*Pstar(i+1:end,i-1)+...
+		 ST(i-1,i)*ST(nk1:i,i+1:end)*Pstar(i+1:end,i);
+	  end
+	  q = [eye(i-nk)-ST(nk1:i,nk1:i)*ST(i,i) -ST(nk1:i,nk1:i)*ST(i,i-1);...
+	       -ST(nk1:i,nk1:i)*ST(i-1,i) eye(i-nk)-ST(nk1:i,nk1:i)*ST(i-1,i-1)];
+	  z =  q\[B(nk1:i,i)+c;B(nk1:i,i-1)+c1];
+	  Pstar(nk1:i,i) = z(1:(i-nk));
+	  Pstar(nk1:i,i-1) = z(i-nk+1:end);
+	  Pstar(i,nk1:i-1) = Pstar(nk1:i-1,i)';
+	  Pstar(i-1,nk1:i-2) = Pstar(nk1:i-2,i-1)';
+	  i = i - 1;
+	end
+      end
+      if i == nk+2
+	c = ST(nk+1,:)*(Pstar(:,nk+2:end)*ST(nk1,nk+2:end)')+ST(nk1,nk1)*ST(nk1,nk+2:end)*Pstar(nk+2:end,nk1);
+	Pstar(nk1,nk1)=(B(nk1,nk1)+c)/(1-ST(nk1,nk1)*ST(nk1,nk1));
+      end
+      
+      Z = QT(mf,:);
+      R1 = QT'*R;
+    end
   end
   % -----------------------------------------------------------------------------
   %  4. Kalman smoother
@@ -115,5 +168,15 @@ function [alphahat,etahat,epsilonhat,ahat,SteadyState,trend_coeff,aK,T,R] = Dsge
       end
     elseif options_.kalman_algo == 3
       [alphahat,etahat,ahat,aK] = DiffuseKalmanSmoother3(T,R,Q,Pinf,Pstar,Y,trend,nobs,np,smpl,mf);
+    elseif options_.kalman_algo == 4
+      data1 = Y - trend;
+      [alphahat,etahat,ahat,aK] = DiffuseKalmanSmoother1_Z(ST,Z,R1,Q,Pinf,Pstar,data1,nobs,np,smpl);
+      alphahat = QT*alphahat;
+      ahat = QT*ahat;
+    elseif options_.kalman_algo == 5
+      data1 = Y - trend;
+      [alphahat,etahat,ahat,aK] = DiffuseKalmanSmoother3_Z(ST,Z,R1,Q,Pinf,Pstar,data1,nobs,np,smpl);
+      alphahat = QT*alphahat;
+      ahat = QT*ahat;
     end
   end

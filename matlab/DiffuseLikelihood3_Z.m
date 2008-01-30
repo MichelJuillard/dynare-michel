@@ -149,7 +149,7 @@ while t < smpl
   t = t+1;
   Pstar = oldP;
   for i=1:pp
-    Zi = Z(i,i);
+    Zi = Z(i,:);
     v(i) = Y(i,t) - Zi*a;
     Fi   = Zi*Pstar*Zi';
     if Fi > crit

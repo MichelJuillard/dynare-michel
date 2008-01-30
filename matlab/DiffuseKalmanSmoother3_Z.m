@@ -97,7 +97,7 @@ while newRank & t < smpl
     v(i,t) 	= Y(i,t)-Zi*a(:,t);
     Fstar(i,t) 	= Zi*Pstar(:,:,t)*Zi';
     Finf(i,t)	= Zi*Pinf(:,:,t)*Zi';
-    Kstar(:,i,t) 	= Pstar(:,:,t)*Zi;
+    Kstar(:,i,t) 	= Pstar(:,:,t)*Zi';
     if Finf(i,t) > crit & newRank
       icc=icc+1;
       Kinf(:,i,t)	= Pinf(:,:,t)*Zi';
@@ -168,7 +168,7 @@ while notsteady & t<smpl
   P(:,:,t)=tril(P(:,:,t))+tril(P(:,:,t),-1)';
   P1(:,:,t) = P(:,:,t);
   for i=1:pp
-    Zi = Z(i,:)'
+    Zi = Z(i,:);
     v(i,t)  = Y(i,t) - Zi*a(:,t);
     Fi(i,t) = Zi*P(:,:,t)*Zi';
     Ki(:,i,t) = P(:,:,t)*Zi';
@@ -200,7 +200,7 @@ while t<smpl
   t=t+1;
   a1(:,t) = a(:,t);
   for i=1:pp
-    Zi = Z(i,:)';
+    Zi = Z(i,:);
     v(i,t)      = Y(i,t) - Zi*a(:,t);
     if Fi_s(i) > crit
       a(:,t) = a(:,t) + Ki_s(:,i)*v(i,t)/Fi_s(i);
