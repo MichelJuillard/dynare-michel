@@ -45,6 +45,12 @@ using namespace std;
 */
 class MacroFlex : public MacroFlexLexer
 {
+private:
+  //! The stack of scanner states
+  /*! We could have used instead yypush_buffer_state() and yypop_buffer_state(),
+      but those functions do not exist in Flex 2.5.4 */
+  stack<struct yy_buffer_state *> state_stack;
+
 public:
   MacroFlex(istream* in = 0, ostream* out = 0);
 
@@ -54,8 +60,7 @@ public:
                                 MacroDriver &driver);
 };
 
-//! Drives the scanning and parsing of the .mod file, and constructs its abstract representation
-/*! It is built along the guidelines given in Bison 2.3 manual. */
+//! Implements the macro expansion using a Flex scanner and a Bison parser
 class MacroDriver
 {
 public:

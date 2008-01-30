@@ -80,7 +80,11 @@ typedef Macro::parser::token token;
                                // Display @line
                                *yyout << "@line \"" << *yylloc->begin.filename << "\" 1" << endl;
                                // Switch to new buffer
-                               yypush_buffer_state(yy_create_buffer(driver.ifs, YY_BUF_SIZE));
+                               /* We don't use yypush_buffer_state(), since it doesn't exist in
+                                  Flex 2.5.4 (see Flex 2.5.33 info file - section 11 - for code
+                                  example with yypush_buffer_state()) */
+                               state_stack.push(YY_CURRENT_BUFFER);
+                               yy_switch_to_buffer(yy_create_buffer(driver.ifs, YY_BUF_SIZE));
                                BEGIN(INITIAL);
                             }
 
@@ -93,14 +97,19 @@ typedef Macro::parser::token token;
                             }
 
 <<EOF>>                     {
-                              // Try to restore old flex buffer
-                              yypop_buffer_state();
-                              if (!YY_CURRENT_BUFFER)
+                              /* We don't use yypop_buffer_state(), since it doesn't exist in
+                                 Flex 2.5.4 (see Flex 2.5.33 info file - section 11 - for code
+                                 example with yypop_buffer_state()) */
+                              // Quit lexer if end of main file
+                              if (state_stack.empty())
                                 {
-                                  // Quit lexer if end of main file
                                   yyterminate();
                                 }
-                              // Else restore old location
+                              // Else restore old flex buffer
+                              yy_delete_buffer(YY_CURRENT_BUFFER);
+                              yy_switch_to_buffer(state_stack.top());
+                              state_stack.pop();
+                              // And restore old location
                               delete yylloc->begin.filename;
                               *yylloc = driver.loc_stack.top();
                               driver.loc_stack.pop();
