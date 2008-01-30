@@ -17,7 +17,7 @@
  * along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "mem_mngr.hh"
+#include "Mem_Mngr.hh"
 
 Mem_Mngr::Mem_Mngr()
 {

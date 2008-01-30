@@ -564,7 +564,7 @@ void LinBCG::sprsprt()
   int size=int(log10(maxi))+1;
   if(size<7)
     {
-      itoa(size+8,fmt,10);
+      sprintf(fmt, "%d", size+8);
       pf= fmt;
       pf.insert(0,"% ");
       pf.append(".6f ");
@@ -618,7 +618,7 @@ void LinBCG::sprs_sprt()
   int size=int(log10(maxi))+1;
   if(size<7)
     {
-      itoa(size+8,fmt,10);
+      sprintf(fmt, "%d", size+8);
       pf= fmt;
       pf.insert(0,"% ");
       pf1=pf2=pf;

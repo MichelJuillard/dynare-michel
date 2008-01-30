@@ -61,4 +61,4 @@ disp('Compiling gensylv...')
 system([ COMPILE_COMMAND ' -DMATLAB -Igensylv/cc gensylv/matlab/gensylv.cpp' ...
 		    ' gensylv/cc/*.cpp ' BLAS_PATH ' ' LAPACK_PATH ]);
 disp('Compiling simulate...')
-system([ COMPILE_COMMAND ' -DMATLAB -Isimulate -I..\..\..\parser.src\include simulate/simulate.cc simulate/Interpreter.cc simulate/Mem_Mngr.cc simulate/SparseMatrix.cc simulate/LinBcg.cc']);
+system([ COMPILE_COMMAND ' -DMATLAB -Isimulate -I../../../parser.src/include simulate/simulate.cc simulate/Interpreter.cc simulate/Mem_Mngr.cc simulate/SparseMatrix.cc simulate/linbcg.cc']);

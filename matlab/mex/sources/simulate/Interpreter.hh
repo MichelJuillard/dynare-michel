@@ -29,7 +29,7 @@
 //#include "ExprNode.hh"
 //#include "Mem_Mngr.hh"
 #include "SparseMatrix.hh"
-#include "LinBCG.hh"
+#include "linbcg.hh"
 #include "mex.h"
 
 //#define DEBUGC

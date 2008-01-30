@@ -23,10 +23,10 @@
 //                 use NO_COMPILER option in MODEL command            //
 ////////////////////////////////////////////////////////////////////////
 
-#include "Simulate.hh"
+#include "simulate.hh"
 #include "Interpreter.hh"
 #include "Mem_Mngr.hh"
-#include "LinBCG.hh"
+#include "linbcg.hh"
 
 
 
