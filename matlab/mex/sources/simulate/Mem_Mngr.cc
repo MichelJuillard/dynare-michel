@@ -116,7 +116,7 @@ Mem_Mngr::mxFree_NZE(void* pos)
           mexPrintf("NZE_Mem_add[i*CHUNK_BLCK_SIZE]=%d\n",NZE_Mem_add[i*CHUNK_BLCK_SIZE]);
           mexEvalString("drawnow;");
         }*/
-      gap=(int(pos)-int(NZE_Mem_add[i*CHUNK_BLCK_SIZE]))/sizeof(NonZeroElem);
+      gap=((long int)(pos)-(long int)(NZE_Mem_add[i*CHUNK_BLCK_SIZE]))/sizeof(NonZeroElem);
       if ((gap<CHUNK_BLCK_SIZE) && (gap>=0))
         break;
     }

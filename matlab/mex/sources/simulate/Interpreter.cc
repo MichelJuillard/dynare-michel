@@ -1141,7 +1141,7 @@ Interpreter::compute_blocks(string file_name, string bin_basename)
             mexPrintf("FBEGINBLOCK\n");
             mexEvalString("drawnow;");
 #endif
-            lBlock.begin=get_code_pos-int(Init_Code);
+            lBlock.begin=get_code_pos-(long int)(Init_Code);
 #ifdef DEBUGC
             mexPrintf("Block[Block_Count].begin=%d\n",lBlock.begin);
             mexEvalString("drawnow;");
@@ -1194,7 +1194,7 @@ Interpreter::compute_blocks(string file_name, string bin_basename)
             T=(double*)mxMalloc(var*(periods+y_kmin+y_kmax)*sizeof(double));
             break;
           default :
-            mexPrintf("Unknow command : %d at pos %d !!\n",int(code),int(get_code_pos)-int(Init_Code));
+            mexPrintf("Unknow command : %d at pos %d !!\n",(long int)(code),(long int)(get_code_pos)-(long int)(Init_Code));
             mexEvalString("st=fclose('all');clear all;");
             mexEvalString("drawnow;");
             mexErrMsgTxt("End of simulate");
