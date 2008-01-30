@@ -27,6 +27,24 @@ using namespace std;
 class ParsingDriver;
 
 #include "ExprNode.hh"
+
+/* Little hack: we redefine the macro which computes the locations, because
+   we need to access the location from within the parsing driver for error
+   and warning messages. */
+#define YYLLOC_DEFAULT(Current, Rhs, N)                 \
+  do {                                                  \
+    if (N)                                              \
+      {                                                 \
+        (Current).begin = (Rhs)[1].begin;               \
+        (Current).end   = (Rhs)[N].end;                 \
+      }                                                 \
+    else                                                \
+      {                                                 \
+        (Current).begin = (Current).end = (Rhs)[0].end;	\
+      }                                                 \
+    driver.location = (Current);                        \
+  } while(false)
+
 %}
 
 %name-prefix="Dynare"
@@ -35,11 +53,6 @@ class ParsingDriver;
 %lex-param { ParsingDriver &driver }
 
 %locations
-%initial-action
-{
-  // Initialize the location filenames
-  @$.begin.filename = @$.end.filename = &driver.file;
-};
 
 %debug
 %error-verbose

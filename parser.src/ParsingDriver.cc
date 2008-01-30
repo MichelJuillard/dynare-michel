@@ -17,6 +17,9 @@
  * along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <fstream>
+#include <iostream>
+
 #include "ParsingDriver.hh"
 #include "Statement.hh"
 
@@ -58,17 +61,13 @@ ParsingDriver::reset_data_tree()
 }
 
 ModFile *
-ParsingDriver::parse(const string &f)
+ParsingDriver::parse(istream &in)
 {
   mod_file = new ModFile();
 
   tmp_symbol_table = new TmpSymbolTable(mod_file->symbol_table);
 
   reset_data_tree();
-
-  file = f;
-
-  ifstream in(f.c_str());
 
   lexer = new DynareFlex(&in);
   lexer->set_debug(trace_scanning);
@@ -92,14 +91,13 @@ ParsingDriver::error(const Dynare::parser::location_type &l, const string &m)
 void
 ParsingDriver::error(const string &m)
 {
-  cerr << "ERROR: " << file << ":" << lexer->lineno() << ": " << m << endl;
-  exit(-1);
+  error(location, m);
 }
 
 void
 ParsingDriver::warning(const string &m)
 {
-  cerr << "WARNING: " << file << ":" << lexer->lineno() << ": " << m << endl;
+  cerr << "WARNING: " << location << ": " << m << endl;
 }
 
 void

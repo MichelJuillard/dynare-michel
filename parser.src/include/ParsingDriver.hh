@@ -20,8 +20,13 @@
 #ifndef _PARSING_DRIVER_HH
 #define _PARSING_DRIVER_HH
 
-#include <iostream>
+#ifdef _MACRO_DRIVER_HH
+# error Impossible to include both ParsingDriver.hh and MacroDriver.hh
+#endif
+
+#include <string>
 #include <vector>
+#include <istream>
 
 #include "ModFile.hh"
 #include "TmpSymbolTable.hh"
@@ -36,9 +41,9 @@ using namespace std;
 
 // Declare DynareFlexLexer class
 #ifndef __FLEX_LEXER_H
-#define yyFlexLexer DynareFlexLexer
-#include <FlexLexer.h>
-#undef yyFlexLexer
+# define yyFlexLexer DynareFlexLexer
+# include <FlexLexer.h>
+# undef yyFlexLexer
 #endif
 
 //! The lexer class
@@ -139,17 +144,14 @@ public:
   virtual ~ParsingDriver();
 
   //! Starts parsing, and constructs the MOD file representation
-  /*! \param f Name of file to parse
-
-      The returned pointer should be deleted after use.
-   */
-  ModFile *parse(const string &f);
-
-  //! Name of file being parsed
-  string file;
+  /*! The returned pointer should be deleted after use */
+  ModFile *parse(istream &in);
 
   //! Reference to the lexer
   class DynareFlex *lexer;
+
+  //! Copy of parsing location, maintained by YYLLOC_DEFAULT macro in DynareBison.yy
+  Dynare::parser::location_type location;
 
   //! Trace scanning ?
   /*! If set to true before calling parse(), the flex scanner will dump a lot of debugging information. Defaults to false.
@@ -163,11 +165,11 @@ public:
   //! Estimation parameters
   EstimationParams estim_params;
 
-  //! Error handler with location
+  //! Error handler with explicit location
   void error(const Dynare::parser::location_type &l, const string &m);
-  //! Error handler without location
+  //! Error handler using saved location
   void error(const string &m);
-  //! Warning handler
+  //! Warning handler using saved location
   void warning(const string &m);
 
   //! Check if a given symbol exists in the parsing context, and is not a mod file local variable

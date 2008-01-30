@@ -24,12 +24,12 @@ using namespace std;
 #include "DynareBison.hh"
 
 // Announce to Flex the prototype we want for lexing function
-#define YY_DECL                                            \
+#define YY_DECL                                                \
   Dynare::parser::token_type                                   \
-  DynareFlex::lex(Dynare::parser::semantic_type *yylval,       \
-                  Dynare::parser::location_type *yylloc,       \
-                  ParsingDriver &driver)
-
+    DynareFlex::lex(Dynare::parser::semantic_type *yylval,     \
+                    Dynare::parser::location_type *yylloc,     \
+                    ParsingDriver &driver)
+ 
 // Shortcut to access tokens defined by Bison
 typedef Dynare::parser::token token;
 
@@ -38,7 +38,7 @@ typedef Dynare::parser::token token;
    not of token_type.  */
 #define yyterminate() return Dynare::parser::token_type (0);
 
-int comment_caller;
+int comment_caller, line_caller;
 /* Particular value : when sigma_e command is found
  this flag is set to 1, when command finished it is set to 0
  */
@@ -49,12 +49,15 @@ int sigma_e = 0;
 
 %option prefix="Dynare"
 
-%option case-insensitive noyywrap nounput batch debug never-interactive yylineno
+%option case-insensitive noyywrap nounput batch debug never-interactive
 
 %x COMMENT
 %x DYNARE_STATEMENT
 %x DYNARE_BLOCK
 %x NATIVE
+%x LINE1
+%x LINE2
+%x LINE3
 
 %{
 // Increments location counter for every token read
@@ -66,6 +69,20 @@ int sigma_e = 0;
   // Reset location before reading token
   yylloc->step();
 %}
+
+ /* Rules for matching @line directives */
+<*>^@line\ \"   { line_caller = YYSTATE; BEGIN(LINE1); }
+<LINE1>[^\"\n]* {
+                  if (yylloc->begin.filename)
+                    delete yylloc->begin.filename;
+                  yylloc->begin.filename = yylloc->end.filename = new string(yytext);
+                  BEGIN(LINE2);
+                }
+<LINE2>\"       BEGIN(LINE3);
+<LINE3>[0-9]+   {
+                  yylloc->begin.line = yylloc->end.line = atoi(yytext) - 1;
+                  BEGIN(line_caller);
+                }
 
  /* spaces, tabs and EOL are ignored */
 <*>[ \t\r\f]+  { yylloc->step(); }
@@ -385,7 +402,7 @@ int sigma_e = 0;
  /* Add the native statement */
 <NATIVE>.* { driver.add_native(yytext); BEGIN INITIAL; }
 
-<*>.      { driver.error("Unrecognized character: '" + string(yytext) + "'"); }
+<*>.      { driver.error(*yylloc, "character unrecognized by lexer"); }
 %%
 
 DynareFlex::DynareFlex(istream* in, ostream* out)
@@ -395,10 +412,10 @@ DynareFlex::DynareFlex(istream* in, ostream* out)
 
 /* This implementation of DynareFlexLexer::yylex() is required to fill the
  * vtable of the class DynareFlexLexer. We define the scanner's main yylex
- * function via YY_DECL to reside in the Scanner class instead. */
+ * function via YY_DECL to reside in the DynareFlex class instead. */
 
 #ifdef yylex
-#undef yylex
+# undef yylex
 #endif
 
 int

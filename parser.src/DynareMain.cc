@@ -19,62 +19,80 @@
 
 using namespace std;
 
-#include "ParsingDriver.hh"
-#include "ModFile.hh"
+#include <iostream>
+#include <sstream>
+#include <fstream>
 
-/*!
-  \brief Main function of Dynare.
-  \param argc Number of command line argumetns from runtime system
-  \param argv Command line arguments from runtime system
+#include <cctype>    // for tolower()
+#include <algorithm> // for transform()
+
+#include "macro/MacroDriver.hh"
+
+/* Prototype for second part of main function
+   Splitting main() in two parts was necessary because ParsingDriver.h and MacroDriver.h can't be
+   included simultaneously (because of Bison limitations).
 */
+void main2(stringstream &in, string &basename, bool trace_scanning, bool trace_parsing,
+           bool clear_all);
+
 int
 main(int argc, char** argv)
 {
   if (argc < 2)
     {
-      cerr << "Missing model file" << endl;
-      cerr << "Dynare usage: dynare model_file [debug]" << endl;
+      cerr << "Missing model file!" << endl;
+      cerr << "Dynare usage: dynare mod_file [debug] [noclearall] [savemacro]" << endl;
       exit(-1);
     }
 
-  ParsingDriver p;
-
   bool clear_all = true;
+  bool save_macro = false;
+  bool trace_scanning = false;
+  bool trace_parsing = false;
 
   // Parse options
   for (int arg = 2; arg < argc; arg++)
     {
       if (string(argv[arg]) == string("debug"))
         {
-          p.trace_scanning = true;
-          p.trace_parsing = true;
+          trace_scanning = true;
+          trace_parsing = true;
         }
-      else
-        if (string(argv[arg]) == string("noclearall"))
-          clear_all = false;
+      else if (string(argv[arg]) == string("noclearall"))
+        clear_all = false;
+      else if (string(argv[arg]) == string("savemacro"))
+        save_macro = true;
     }
 
   cout << "Starting Dynare ..." << endl;
   cout << "Parsing your model file ..." << endl;
 
-  // Launch parsing
-  ModFile *mod_file = p.parse(argv[1]);
-
-  // Run checking pass
-  mod_file->checkPass();
-
-  // Do computations
-  mod_file->computingPass();
-
-  // FIXME
+  // Construct basename (check file extension is correct then remove it)
   string basename = argv[1];
+  string ext = basename.substr(basename.size() - 4);
+  transform(ext.begin(), ext.end(), ext.begin(), (int(*)(int)) tolower); // Convert ext to lowercase
+  if (ext != string(".mod") && ext != string(".dyn"))
+    {
+      cerr << "mod_file extension must be .mod or .dyn!" << endl;
+      exit(-1);
+    }
   basename.erase(basename.size() - 4, 4);
 
-  mod_file->writeOutputFiles(basename, clear_all);
+  // Do macro processing
+  MacroDriver m;
+  m.trace_scanning = trace_scanning;
+  m.trace_parsing = trace_parsing;
+  stringstream macro_output;
+  m.parse(argv[1], macro_output);
+  if (save_macro)
+    {
+      ofstream macro_output_file((basename + "-macroexp.mod").c_str());
+      macro_output_file << macro_output.str();
+      macro_output_file.close();
+    }
 
-  delete mod_file;
+  // Do the rest
+  main2(macro_output, basename, trace_scanning, trace_parsing, clear_all);
 
-  cout << "Parsing done" << endl;
-  cout << "Starting Matlab computing ..." << endl;
   return 0;
 }
