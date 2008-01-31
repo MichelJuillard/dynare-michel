@@ -16,7 +16,8 @@ MATLAB_PATH = matlabroot;
 COMPILE_OPTIONS = '';
 
 if strcmpi('GLNX86', computer) || strcmpi('GLNXA64', computer) ...
-   || strcmpi('MACI', computer) % GNU/Linux (i386 or ET64) or MacIntel
+        || strcmpi('MACI', computer) || strcmpi('MAC', computer)
+    % GNU/Linux (x86-32 or x86-64) or MacOS (Intel or PPC)
     if strcmpi('GLNXA64', computer) % 64 bits ?
         COMPILE_OPTIONS = [ COMPILE_OPTIONS ' -largeArrayDims' ];
     end
@@ -27,8 +28,8 @@ if strcmpi('GLNX86', computer) || strcmpi('GLNXA64', computer) ...
     else
         BLAS_PATH = '-lmwblas';
     end
-elseif strcmpi('PCWIN', computer) % Windows (32 bits) with Microsoft or
-                                  % gcc compiler
+elseif strcmpi('PCWIN', computer)
+    % Windows (x86-32) with Microsoft or gcc compiler
     LIBRARY_PATH = [MATLAB_PATH '/extern/lib/win32/microsoft/'];
     LAPACK_PATH = ['"' LIBRARY_PATH 'libmwlapack.lib"'];
     if VERSION <= 7.4
@@ -51,8 +52,8 @@ end
 COMPILE_OPTIONS = [ COMPILE_OPTIONS ' -v' ]
 
 COMPILE_COMMAND = [ 'mex ' COMPILE_OPTIONS ' -outdir ' OUTPUT_DIR ' ' ];
-if (strcmpi('MACI', computer))
-    % Need to specify mex path under MacIntel
+if strcmpi('MACI', computer) || strcmpi('MAC', computer)
+    % Need to specify mex path under MacOS
     COMPILE_COMMAND = [ MATLAB_PATH '/bin/' COMPILE_COMMAND ];
 end
 
