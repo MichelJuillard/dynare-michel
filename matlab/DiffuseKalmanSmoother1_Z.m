@@ -83,7 +83,7 @@ while rank(Pinf(:,:,t+1),crit1) & t<smpl
     Linf(:,:,t)  	= T - Kinf(:,:,t)*Z;
     Fstar(:,:,t) 	= Z*Pstar(:,:,t)*Z';
     Kstar(:,:,t) 	= (T*Pstar(:,:,t)*Z'-Kinf(:,:,t)*Fstar(:,:,t))*iFinf(:,:,t);
-    Pstar(:,:,t+1)	= T*Pstar(:,:,t)*T'-T*Pstar(:,:,t)*Z'*Kinf(:,:,t)'-Kinf(:,:,t)*F*Kstar(:,:,t) + QQ;
+    Pstar(:,:,t+1)	= T*Pstar(:,:,t)*T'-T*Pstar(:,:,t)*Z'*Kinf(:,:,t)'-Kinf(:,:,t)*F*Kstar(:,:,t)' + QQ;
     Pinf(:,:,t+1)	= T*Pinf(:,:,t)*T'-T*Pinf(:,:,t)*Z'*Kinf(:,:,t)';
 end
 d = t;
@@ -99,7 +99,7 @@ while notsteady & t<smpl
     t = t+1;
     v(:,t)      = Y(:,t) - Z*a(:,t);
     P(:,:,t)=tril(P(:,:,t))+transpose(tril(P(:,:,t),-1));
-    F = Z*P(:,:,t)*Z'
+    F = Z*P(:,:,t)*Z';
     if rcond(F) < crit
     	return		
     end    
@@ -150,7 +150,7 @@ if d
     etahat(:,t)		= QRt*r0(:,t);
   end
   r0_0 = Linf(:,:,1)'*r0(:,1);
-  r1_0 = Z'*(iFinf(:,:,1)*v(:,1)-Kstar(:,:,1)*r0(:,1)) + Linf(:,:,1)'*r1(:,1);
+  r1_0 = Z'*(iFinf(:,:,1)*v(:,1)-Kstar(:,:,1)'*r0(:,1)) + Linf(:,:,1)'*r1(:,1);
   alphahat(:,1)  	= a(:,1) + Pstar(:,:,1)*r0_0 + Pinf(:,:,1)*r1_0;
   etahat(:,1)		= QRt*r0(:,1);
 else

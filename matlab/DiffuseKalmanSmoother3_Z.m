@@ -253,7 +253,7 @@ if d
         L0(:,:,i,1)'*r0_0 + Linf(:,:,i,1)'*r1_0;
       r0_0 = Linf(:,:,i,1)'*r0_0;
     elseif Fstar(i,1) > crit, % step needed when Finf=0
-      r0_0=transpose(Z(i,:))/Fstar(i,1)*v(i,1)+Li(:,:,i,1)'*r0_0;
+      r0_0=Z(i,:)'/Fstar(i,1)*v(i,1)+Li(:,:,i,1)'*r0_0;
     end
   end
   alphahat(:,1)  	= a1(:,1) + Pstar1(:,:,1)*r0_0 + Pinf1(:,:,1)*r1_0;
