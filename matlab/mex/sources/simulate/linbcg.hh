@@ -51,7 +51,7 @@ public:
 	NRVec(const NRVec &rhs);	// Copy constructor
 	NRVec & operator=(const NRVec &rhs);	//assignment
 	NRVec & operator=(const T &a);	//assign a to every element
-	NRVec & operator=(const T* rhs);
+  //	NRVec & operator=(const T* rhs);
 	inline T & operator[](const int i);	//i'th element
 	inline const T & operator[](const int i) const;
 	inline int size() const;

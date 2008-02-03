@@ -22,7 +22,6 @@
 
 LinBCG::LinBCG()
 {
- ijat_p=NULL;
 }
 
 
