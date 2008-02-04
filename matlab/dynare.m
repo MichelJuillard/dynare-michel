@@ -34,9 +34,9 @@ VERSION = str2num(MATLAB.Version);
 dynareroot = strrep(which('dynare.m'),'dynare.m','');
 
 if (VERSION <= 7.4)
-    addpath([dynareroot 'mex/2007a/'])
+    addpath([dynareroot '../mex/2007a/'])
 else
-    addpath([dynareroot 'mex/2007b/'])
+    addpath([dynareroot '../mex/2007b/'])
 end
 
 if ~isstr(fname)
