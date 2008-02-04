@@ -1,4 +1,4 @@
-function [alphahat,etahat,a, aK] = DiffuseKalmanSmoother1_Z(T,Z,R,Q,Pinf1,Pstar1,Y,pp,mm,smpl)
+function [alphahat,etahat,a,aK,P,PK,d] = DiffuseKalmanSmoother1_Z(T,Z,R,Q,Pinf1,Pstar1,Y,pp,mm,smpl)
 
 % function [alphahat,etahat,a, aK] = DiffuseKalmanSmoother1(T,Z,R,Q,Pinf1,Pstar1,Y,pp,mm,smpl)
 % Computes the diffuse kalman smoother without measurement error, in the case of a non-singular var-cov matrix 
@@ -20,7 +20,14 @@ function [alphahat,etahat,a, aK] = DiffuseKalmanSmoother1_Z(T,Z,R,Q,Pinf1,Pstar1
 %    etahat:   smoothed shocks
 %    a:        matrix of one step ahead filtered state variables
 %    aK:       3D array of k step ahead filtered state variables
-
+%              (meaningless for periods 1:d)
+%    P:        3D array of one-step ahead forecast error variance
+%              matrices
+%    PK:       4D array of k-step ahead forecast error variance
+%              matrices (meaningless for periods 1:d)
+%    d:        number of periods where filter remains in diffuse part
+%              (should be equal to the order of integration of the model)
+%  
 % SPECIAL REQUIREMENTS
 %   See "Filtering and Smoothing of State Vector for Diffuse State Space
 %   Models", S.J. Koopman and J. Durbin (2003, in Journal of Time Series 
@@ -44,7 +51,8 @@ spinf   	= size(Pinf1);
 spstar  	= size(Pstar1);
 v       	= zeros(pp,smpl);
 a       	= zeros(mm,smpl+1);
-aK              = zeros(nk,mm,smpl+1);
+aK              = zeros(nk,mm,smpl+nk);
+PK              = zeros(nk,mm,mm,smpl+nk);
 iF      	= zeros(pp,pp,smpl);
 Fstar   	= zeros(pp,pp,smpl);
 iFinf   	= zeros(pp,pp,smpl);
@@ -77,6 +85,7 @@ while rank(Pinf(:,:,t+1),crit1) & t<smpl
     Kinf(:,:,t)	 	= T*Pinf(:,:,t)*Z'*iFinf(:,:,t);
     a(:,t+1) 	 	= T*a(:,t) + Kinf(:,:,t)*v(:,t);
     aK(1,:,t+1) 	 	= a(:,t+1);
+    % isn't a meaningless as long as we are in the diffuse part? MJ
     for jnk=2:nk,
         aK(jnk,:,t+jnk) 	 	= T^(jnk-1)*a(:,t+1);
     end
@@ -106,12 +115,16 @@ while notsteady & t<smpl
     iF(:,:,t)   = inv(F);
     K(:,:,t)    = T*P(:,:,t)*Z'*iF(:,:,t);
     L(:,:,t)    = T-K(:,:,t)*Z;
-    a(:,t+1)    = T*a(:,t) + K(:,:,t)*v(:,t);    
-    aK(1,:,t+1) 	 	= a(:,t+1);
-    for jnk=2:nk,
-        aK(jnk,:,t+jnk) 	 	= T^(jnk-1)*a(:,t+1);
+    a(:,t+1)    = T*a(:,t) + K(:,:,t)*v(:,t);
+    af          = a(:,t);
+    Pf          = P(:,:,t);
+    for jnk=1:nk,
+	af = T*af;
+	Pf = T*Pf*T' + QQ;
+        aK(jnk,:,t+jnk) = af;
+	PK(jnk,:,:,t+jnk) = Pf;
     end
-    P(:,:,t+1)  = T*P(:,:,t)*transpose(T)-T*P(:,:,t)*Z'*K(:,:,t)' + QQ;
+    P(:,:,t+1)  = T*P(:,:,t)*T'-T*P(:,:,t)*Z'*K(:,:,t)' + QQ;
     notsteady   = ~(max(max(abs(P(:,:,t+1)-P(:,:,t))))<crit);
 end
 K_s = K(:,:,t);
@@ -127,9 +140,13 @@ while t<smpl
     t=t+1;
     v(:,t) = Y(:,t) - Z*a(:,t);
     a(:,t+1) = T*a(:,t) + K_s*v(:,t);
-    aK(1,:,t+1) 	 	= a(:,t+1);
-    for jnk=2:nk,
-        aK(jnk,:,t+jnk) 	 	= T^(jnk-1)*a(:,t+1);
+    af          = a(:,t);
+    Pf          = P(:,:,t);
+    for jnk=1:nk,
+	af = T*af;
+	Pf = T*Pf*T' + QQ;
+        aK(jnk,:,t+jnk) = af;
+	PK(jnk,:,:,t+jnk) = Pf;
     end
 end
 t = smpl+1;

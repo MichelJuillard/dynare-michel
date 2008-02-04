@@ -880,11 +880,20 @@ if (any(bayestopt_.pshape  >0 ) & options_.mh_replic) | ...
 %  return
 end
 
-if ~((any(bayestopt_.pshape > 0) & options_.mh_replic) | (any(bayestopt_.pshape ...
-						  > 0) & options_.load_mh_file)) | ~options_.smoother  
+if (~((any(bayestopt_.pshape > 0) & options_.mh_replic) | (any(bayestopt_.pshape ...
+						  > 0) & options_.load_mh_file)) ...
+    | ~options_.smoother ) & M_.endo_nbr^2*gend < 1e6 % to be fixed   
     %% ML estimation, or posterior mode without metropolis-hastings or metropolis without bayesian smooth variable
-  options_.lik_algo = 2;
-  [atT,innov,measurement_error,filtered_state_vector,ys,trend_coeff] = DsgeSmoother(xparam1,gend,data);
+  [atT,innov,measurement_error,filtered_state_vector,ys,trend_coeff,aK,T,R,P,PK,d,decomp] = DsgeSmoother(xparam1,gend,data);
+  oo_.Smoother.SteadyState = ys;
+  oo_.Smoother.TrendCoeffs = trend_coeff;
+  oo_.Smoother.integration_order = d;
+  oo_.Smoother.variance = P;
+  if options_.nk ~= 0
+    oo_.FilteredVariablesKStepAhead = aK(options_.filter_step_ahead,:,:);
+    oo_.FilteredVariablesKStepAheadVariances = PK(options_.filter_step_ahead,:,:,:);
+    oo_.FilteredVariablesShockDecomposition = decomp(options_.filter_step_ahead,:,:,:);
+  end
   for i=1:M_.endo_nbr
     eval(['oo_.SmoothedVariables.' deblank(M_.endo_names(dr.order_var(i),:)) ' = atT(i,:)'';']);
     eval(['oo_.FilteredVariables.' deblank(M_.endo_names(dr.order_var(i),:)) ' = filtered_state_vector(i,:)'';']);

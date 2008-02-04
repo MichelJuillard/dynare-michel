@@ -1,4 +1,4 @@
-function [alphahat,etahat,epsilonhat,ahat,SteadyState,trend_coeff,aK,T,R] = DsgeSmoother(xparam1,gend,Y)
+function [alphahat,etahat,epsilonhat,ahat,SteadyState,trend_coeff,aK,T,R,P,PK,d,decomp] = DsgeSmoother(xparam1,gend,Y)
 % Estimation of the smoothed variables and innovations. 
 % 
 % INPUTS 
@@ -14,9 +14,17 @@ function [alphahat,etahat,epsilonhat,ahat,SteadyState,trend_coeff,aK,T,R] = Dsge
 %   o SteadyState   [double]  (m*1) vector specifying the steady state level of each endogenous variable.
 %   o trend_coeff   [double]  (n*1) vector, parameters specifying the slope of the trend associated to each observed variable.
 %   o aK            [double]  (K,n,T+K) array, k (k=1,...,K) steps ahead filtered (endogenous) variables.
-%   o T and R       [double]  Matrices defining the state equation (T is the (m*m) transition matrix).
+%   o T and R       [double]  Matrices defining the state equation (T is
+%                             the (m*m) transition matrix).
+%    P:        3D array of one-step ahead forecast error variance
+%              matrices
+%    PK:       4D array of k-step ahead forecast error variance
+%              matrices (meaningless for periods 1:d)
+%    d:        number of periods where filter remains in diffuse part
+%              (should be equal to the order of integration of the model)
+%    
 % ALGORITHM 
-%   Metropolis-Hastings.       
+%   Diffuse Kalman filter (Durbin and Koopman)       
 %
 % SPECIAL REQUIREMENTS
 %   None.
@@ -27,8 +35,18 @@ function [alphahat,etahat,epsilonhat,ahat,SteadyState,trend_coeff,aK,T,R] = Dsge
   global bayestopt_ M_ oo_ estim_params_ options_
 
   alphahat 	= [];
-  epsilonhat	= [];
   etahat	= [];
+  epsilonhat	= [];
+  ahat          = [];
+  SteadyState   = [];
+  trend_coeff   = [];
+  aK            = [];
+  T             = [];
+  R             = [];
+  P             = [];
+  PK            = [];
+  d             = [];
+  decomp        = [];
   nobs 		= size(options_.varobs,1);
   smpl          = size(Y,2);
 
@@ -168,15 +186,31 @@ function [alphahat,etahat,epsilonhat,ahat,SteadyState,trend_coeff,aK,T,R] = Dsge
       end
     elseif options_.kalman_algo == 3
       [alphahat,etahat,ahat,aK] = DiffuseKalmanSmoother3(T,R,Q,Pinf,Pstar,Y,trend,nobs,np,smpl,mf);
-    elseif options_.kalman_algo == 4
+    elseif options_.kalman_algo == 4 | options_.kalman_algo == 5
       data1 = Y - trend;
-      [alphahat,etahat,ahat,aK] = DiffuseKalmanSmoother1_Z(ST,Z,R1,Q,Pinf,Pstar,data1,nobs,np,smpl);
+      if options_.kalman_algo == 4
+	  [alphahat,etahat,ahat,P,aK,PK,d] = DiffuseKalmanSmoother1_Z(ST, ...
+						  Z,R1,Q,Pinf,Pstar,data1,nobs,np,smpl);
+      else
+	  [alphahat,etahat,ahat,P,aK,PK,d,decomp] = DiffuseKalmanSmoother3_Z(ST, ...
+						  Z,R1,Q,Pinf,Pstar,data1,nobs,np,smpl);
+      end
       alphahat = QT*alphahat;
       ahat = QT*ahat;
-    elseif options_.kalman_algo == 5
-      data1 = Y - trend;
-      [alphahat,etahat,ahat,aK] = DiffuseKalmanSmoother3_Z(ST,Z,R1,Q,Pinf,Pstar,data1,nobs,np,smpl);
-      alphahat = QT*alphahat;
-      ahat = QT*ahat;
+      if options_.nk > 0
+	  nk = options_.nk;
+	  for jnk=1:nk
+	      aK(jnk,:,:) = QT*squeeze(aK(jnk,:,:));
+	      for i=1:size(PK,4)
+		  PK(jnk,:,:,i) = QT*squeeze(PK(jnk,:,:,i))*QT';
+	      end
+	      for i=1:size(decomp,4)
+		  decomp(jnk,:,:,i) = QT*squeeze(decomp(jnk,:,:,i));
+	      end
+	  end
+	  for i=1:size(P,4)
+	      P(:,:,i) = QT*squeeze(P(:,:,i))*QT';
+	  end
+      end
     end
   end

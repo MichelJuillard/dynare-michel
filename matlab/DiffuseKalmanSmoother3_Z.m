@@ -1,6 +1,6 @@
-function [alphahat,etahat,a1, aK] = DiffuseKalmanSmoother3_Z(T,Z,R,Q,Pinf1,Pstar1,Y,pp,mm,smpl)
+function [alphahat,etahat,a1,P,aK,PK,d,decomp] = DiffuseKalmanSmoother3_Z(T,Z,R,Q,Pinf1,Pstar1,Y,pp,mm,smpl)
 
-% function [alphahat,etahat,a1, aK] = DiffuseKalmanSmoother3(T,Z,R,Q,Pinf1,Pstar1,Y,pp,mm,smpl)
+% function [alphahat,etahat,a1,P,aK,PK,d,decomp_filt] = DiffuseKalmanSmoother3(T,Z,R,Q,Pinf1,Pstar1,Y,pp,mm,smpl)
 % Computes the diffuse kalman smoother without measurement error, in the case of a singular var-cov matrix.
 % Univariate treatment of multivariate time series.
 %
@@ -21,7 +21,15 @@ function [alphahat,etahat,a1, aK] = DiffuseKalmanSmoother3_Z(T,Z,R,Q,Pinf1,Pstar
 %    etahat:   smoothed shocks
 %    a1:        matrix of one step ahead filtered state variables
 %    aK:       3D array of k step ahead filtered state variables
-
+%              (meaningless for periods 1:d)
+%    P:        3D array of one-step ahead forecast error variance
+%              matrices
+%    PK:       4D array of k-step ahead forecast error variance
+%              matrices (meaningless for periods 1:d)
+%    d:        number of periods where filter remains in diffuse part
+%              (should be equal to the order of integration of the model)
+%    decomp:   decomposition of the effect of shocks on filtered values
+%
 % SPECIAL REQUIREMENTS
 %   See "Filtering and Smoothing of State Vector for Diffuse State Space
 %   Models", S.J. Koopman and J. Durbin (2003, in Journal of Time Series 
@@ -67,7 +75,9 @@ Linf    	= zeros(mm,mm,pp,smpl_diff);
 L0      	= zeros(mm,mm,pp,smpl_diff);
 Kstar   	= zeros(mm,pp,smpl_diff);
 P       	= zeros(mm,mm,smpl+1);
-P1			= P;
+P1		= P;
+aK              = zeros(nk,mm,smpl+nk);
+PK              = zeros(nk,mm,mm,smpl+nk);
 Pstar   	= zeros(spstar(1),spstar(2),smpl_diff+1); Pstar(:,:,1) = Pstar1;
 Pinf    	= zeros(spinf(1),spinf(2),smpl_diff+1); Pinf(:,:,1) = Pinf1;
 Pstar1 		= Pstar;
@@ -75,7 +85,7 @@ Pinf1  		= Pinf;
 crit   	 	= options_.kalman_tol;
 crit1       = 1.e-6;
 steady  	= smpl;
-rr      	= size(Q,1);
+rr      	= size(Q,1); % number of structural shocks
 QQ      	= R*Q*transpose(R);
 QRt			= Q*transpose(R);
 alphahat   	= zeros(mm,smpl);
@@ -180,18 +190,25 @@ while notsteady & t<smpl
     end
   end
   a(:,t+1) = T*a(:,t);
+  af          = a(:,t);
+  Pf          = P(:,:,t);
   for jnk=1:nk,
-    aK(jnk,:,t+jnk) = T^jnk*a(:,t);
+      af = T*af;
+      Pf = T*Pf*T' + QQ;
+      aK(jnk,:,t+jnk) = af;
+      PK(jnk,:,:,t+jnk) = Pf;
   end
   P(:,:,t+1) = T*P(:,:,t)*T' + QQ;
   notsteady   = ~(max(max(abs(P(:,:,t+1)-P(:,:,t))))<crit);
 end
 P_s=tril(P(:,:,t))+tril(P(:,:,t),-1)';
+P1_s=tril(P1(:,:,t))+tril(P1(:,:,t),-1)';
 Fi_s = Fi(:,t);
 Ki_s = Ki(:,:,t);
 L_s  =Li(:,:,:,t);
 if t<smpl
   P  = cat(3,P(:,:,1:t),repmat(P_s,[1 1 smpl-t]));
+  P1  = cat(3,P1(:,:,1:t),repmat(P1_s,[1 1 smpl-t]));
   Fi = cat(2,Fi(:,1:t),repmat(Fi_s,[1 1 smpl-t]));
   Li  = cat(4,Li(:,:,:,1:t),repmat(L_s,[1 1 smpl-t]));
   Ki  = cat(3,Ki(:,:,1:t),repmat(Ki_s,[1 1 smpl-t]));
@@ -207,8 +224,13 @@ while t<smpl
     end
   end
   a(:,t+1) = T*a(:,t);
+  af          = a(:,t);
+  Pf          = P(:,:,t);
   for jnk=1:nk,
-    aK(jnk,:,t+jnk) = T^jnk*a(:,t);
+      af = T*af;
+      Pf = T*Pf*T' + QQ;
+      aK(jnk,:,t+jnk) = af;
+      PK(jnk,:,:,t+jnk) = Pf;
   end
 end
 a1(:,t+1) = a(:,t+1);
@@ -270,3 +292,29 @@ else
 end
 
 a=a(:,1:end-1);
+
+if nargout > 7
+    decomp = zeros(nk,mm,rr,smpl+nk);
+    ZRQinv = inv(Z*QQ*Z');
+    for t = d:smpl
+	ri_d = zeros(mm,1);
+	for i=pp:-1:1
+	    if Fi(i,t) > crit
+		ri_d = Z(i,:)'/Fi(i,t)*v(i,t)+Li(:,:,i,t)'*ri_d;
+	    end
+	end
+	
+	% calculate eta_tm1t
+	eta_tm1t = QRt*ri_d;
+	% calculate decomposition
+	Ttok = eye(mm,mm); 
+	for h = 1:nk
+	    for j=1:rr
+		eta=zeros(rr,1);
+		eta(j) = eta_tm1t(j);
+		decomp(h,:,j,t+h) = Ttok*P1(:,:,t)*Z'*ZRQinv*Z*R*eta;
+	    end
+	    Ttok = T*Ttok;
+	end
+    end
+end
