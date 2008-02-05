@@ -52,13 +52,8 @@ end
 COMPILE_OPTIONS = [ COMPILE_OPTIONS ' -v' ]
 
 COMPILE_COMMAND = [ 'mex ' COMPILE_OPTIONS ' -outdir ' OUTPUT_DIR ' ' ];
-if strcmpi('MACI', computer) || strcmpi('MAC', computer)
-    % Need to specify mex path under MacOS
-    COMPILE_COMMAND = [ MATLAB_PATH '/bin/' COMPILE_COMMAND ];
-end
 
 disp('Compiling mjdgges...')
-tmp = [ COMPILE_COMMAND ' mjdgges/mjdgges.c ' LAPACK_PATH ]
 eval([ COMPILE_COMMAND ' mjdgges/mjdgges.c ' LAPACK_PATH ]);
 disp('Compiling sparse_hessian_times_B_kronecker_C...')
 eval([ COMPILE_COMMAND ' kronecker/sparse_hessian_times_B_kronecker_C.cc ' BLAS_PATH ]);
@@ -68,4 +63,4 @@ disp('Compiling gensylv...')
 eval([ COMPILE_COMMAND ' -DMATLAB -Igensylv/cc gensylv/matlab/gensylv.cpp' ...
 		    ' gensylv/cc/*.cpp ' BLAS_PATH ' ' LAPACK_PATH ]);
 disp('Compiling simulate...')
-eval([ COMPILE_COMMAND ' -DMATLAB -Isimulate -I../../../preprocessor/include simulate/simulate.cc simulate/Interpreter.cc simulate/Mem_Mngr.cc simulate/SparseMatrix.cc simulate/linbcg.cc']);
+eval([ COMPILE_COMMAND ' -DMATLAB -Isimulate -I../../preprocessor/include simulate/simulate.cc simulate/Interpreter.cc simulate/Mem_Mngr.cc simulate/SparseMatrix.cc simulate/linbcg.cc']);
