@@ -44,7 +44,7 @@ end
 for i = 1:n
 	fprintf(fid,M_.endo_names(ivar(i),:),'\n') ;
 	fprintf(fid,'\n') ;
-	fprintf(fid,'%15.8g\n',oo_.y_simul(ivar(i),:)') ;
+	fprintf(fid,'%15.8g\n',oo_.endo_simul(ivar(i),:)') ;
 end
 fclose(fid) ;
 
