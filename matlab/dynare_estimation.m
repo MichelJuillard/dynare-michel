@@ -35,54 +35,77 @@ end
 
 
 if options_.order > 1
-  options_.order = 1;
+    options_.order = 1;
 end
 
 if options_.prefilter == 1
-  options_.noconstant = 1;
+    options_.noconstant = 1;
 end
 
 if options_.filtered_vars ~= 0 & options_.filter_step_ahead == 0
-  options_.filter_step_ahead = 1;
+    options_.filter_step_ahead = 1;
 end
 if options_.filter_step_ahead ~= 0
-  options_.nk = max(options_.filter_step_ahead);
+    options_.nk = max(options_.filter_step_ahead);
 else
-  options_.nk = 0;
+    options_.nk = 0;
 end
 
 %% Add something to the parser ++>
-M_.dname = M_.fname; % The user should be able to choose another name
-                     % for the directory...
-
+% The user should be able to choose another name
+% for the directory...
+M_.dname = M_.fname; 
 
 pnames 		= ['     ';'beta ';'gamm ';'norm ';'invg ';'unif ';'invg2'];
 n_varobs 	= size(options_.varobs,1);
 
-[xparam1,estim_params_,bayestopt_,lb,ub] = set_prior(estim_params_);
+if ~isempty(estim_params_)
+    [xparam1,estim_params_,bayestopt_,lb,ub] = set_prior(estim_params_);
 
-if any(bayestopt_.pshape > 0)
-  if options_.mode_compute
-    plot_priors
-  end
+    if any(bayestopt_.pshape > 0)
+	if options_.mode_compute
+	    plot_priors
+	end
+    else
+	options_.mh_replic = 0;
+    end
+
+    % set prior bounds and check initial value of the parameters
+    bounds = prior_bounds(bayestopt_);
+    bounds(:,1)=max(bounds(:,1),lb);
+    bounds(:,2)=min(bounds(:,2),ub);
+
+    if any(xparam1 < bounds(:,1)) | any(xparam1 > bounds(:,2))
+	find(xparam1 < bounds(:,1))
+	find(xparam1 > bounds(:,2))
+	error('Initial parameter values are outside parameter bounds')
+    end
+    lb = bounds(:,1);
+    ub = bounds(:,2);
+    bayestopt_.lb = lb;
+    bayestopt_.ub = ub;
 else
-  options_.mh_replic = 0;
+    xparam1 = [];
+    bayestopt_.lb = [];
+    bayestopt_.ub = [];
+    bayestopt_.jscale = [];
+    bayestopt_.pshape = [];
+    bayestopt_.p1 = [];
+    bayestopt_.p2 = [];
+    bayestopt_.p3 = [];
+    bayestopt_.p4 = [];
+    estim_params_.nvx = 0;
+    estim_params_.nvn = 0;
+    estim_params_.ncx = 0;
+    estim_params_.ncn = 0;
+    estim_params_.np = 0;
 end
-
-% set prior bounds and check initial value of the parameters
-bounds = prior_bounds(bayestopt_);
-bounds(:,1)=max(bounds(:,1),lb);
-bounds(:,2)=min(bounds(:,2),ub);
-
-if any(xparam1 < bounds(:,1)) | any(xparam1 > bounds(:,2))
-  find(xparam1 < bounds(:,1))
-  find(xparam1 > bounds(:,2))
-  error('Initial parameter values are outside parameter bounds')
-end
-lb = bounds(:,1);
-ub = bounds(:,2);
-bayestopt_.lb = lb;
-bayestopt_.ub = ub;
+nvx = estim_params_.nvx;
+nvn = estim_params_.nvn;
+ncx = estim_params_.ncx;
+ncn = estim_params_.ncn;
+np  = estim_params_.np ;
+nx  = nvx+nvn+ncx+ncn+np;
 
 if ~isfield(options_,'trend_coeffs')
   bayestopt_.with_trend = 0;
@@ -101,13 +124,6 @@ else
 end
 
 bayestopt_.penalty = 1e8;	% penalty 
-
-nvx = estim_params_.nvx;
-nvn = estim_params_.nvn;
-ncx = estim_params_.ncx;
-ncn = estim_params_.ncn;
-np  = estim_params_.np ;
-nx  = nvx+nvn+ncx+ncn+np;
 
 dr = set_state_space([]);
 nstatic = dr.nstatic;
@@ -226,7 +242,9 @@ if length(options_.mode_file) > 0 & options_.posterior_mode_estimation
 end
 
 %% Compute the steady state: 
-set_parameters(xparam1);
+if ~isempty(estim_params_)
+    set_parameters(xparam1);
+end
 if options_.steadystate_flag% if the _steadystate.m file is provided.
     [oo_.steady_state,tchek] = feval([M_.fname '_steadystate'],[],[]);
 else% if the steady state file is not provided.
@@ -248,6 +266,23 @@ end
 initial_estimation_checks(xparam1,gend,data);
 
 if options_.mode_compute == 0 & length(options_.mode_file) == 0
+    if options_.smoother == 1
+	[atT,innov,measurement_error,filtered_state_vector,ys,trend_coeff,aK,T,R,P,PK,d,decomp] = DsgeSmoother(xparam1,gend,data);
+	oo_.Smoother.SteadyState = ys;
+	oo_.Smoother.TrendCoeffs = trend_coeff;
+	oo_.Smoother.integration_order = d;
+	oo_.Smoother.variance = P;
+	i_endo_nbr = 1:M_.endo_nbr;
+	if options_.nk ~= 0
+	    oo_.FilteredVariablesKStepAhead = aK(options_.filter_step_ahead,i_endo_nbr,:);
+	    oo_.FilteredVariablesKStepAheadVariances = PK(options_.filter_step_ahead,i_endo_nbr,i_endo_nbr,:);
+	    oo_.FilteredVariablesShockDecomposition = decomp(options_.filter_step_ahead,i_endo_nbr,:,:);
+	end
+	for i=1:M_.endo_nbr
+	    eval(['oo_.SmoothedVariables.' deblank(M_.endo_names(dr.order_var(i),:)) ' = atT(i,:)'';']);
+	    eval(['oo_.FilteredVariables.' deblank(M_.endo_names(dr.order_var(i),:)) ' = filtered_state_vector(i,:)'';']);
+	end
+    end
   return;
 end
 
