@@ -44,8 +44,8 @@ ct_=0;
 
 if options_.simul_algo == 0
   if ~ options_.initval_file
-    make_y_;
-    make_ex_;
+      make_ex_;
+      make_y_;
   end
 
   if isempty(options_.scalv) | options_.scalv == 0
