@@ -22,8 +22,11 @@
 function y_=simult_(y0,dr,ex_,iorder)
 global M_ options_ it_
   iter = size(ex_,1);
-  nx = size(dr.ghu,2);
+  if ~isempty(dr.ghu)
+      nx = size(dr.ghu,2);
+  end
   y_ = zeros(size(y0,1),iter+M_.maximum_lag);
+  
   y_(:,1:M_.maximum_lag) = y0;
   k1 = [M_.maximum_lag:-1:1];
   k2 = dr.kstate(find(dr.kstate(:,2) <= M_.maximum_lag+1),[1 2]);
@@ -43,21 +46,38 @@ global M_ options_ it_
   end
 
   if iorder == 1    
-    for i = M_.maximum_lag+1: iter+M_.maximum_lag
-      tempx1 = y_(dr.order_var,k1);
-      tempx2 = tempx1-repmat(dr.ys(dr.order_var),1,M_.maximum_lag);
-      tempx = tempx2(k2);
-      if options_.simul_algo == 0
-	y_(dr.order_var,i) = dr.ys(dr.order_var)+dr.ghx*tempx+dr.ghu* ...
-	    ex_(i-M_.maximum_lag,:)';
-      elseif options_.simul_algo == 1
-	it_ = i;
-	m = dr.ys(dr.order_var);
-	[y_(:,i), check] = dynare_solve('ff_simul1',y_(:,i-1),tempx1(k3), ...
-					m(o3:end),tempx(k4),o1,o2,o3,k6);
+      if ~isempty(dr.ghu)
+          for i = M_.maximum_lag+1: iter+M_.maximum_lag
+              tempx1 = y_(dr.order_var,k1);
+              tempx2 = tempx1-repmat(dr.ys(dr.order_var),1,M_.maximum_lag);
+              tempx = tempx2(k2);
+              if options_.simul_algo == 0
+                  y_(dr.order_var,i) = dr.ys(dr.order_var)+dr.ghx*tempx+dr.ghu* ...
+                      ex_(i-M_.maximum_lag,:)';
+              elseif options_.simul_algo == 1
+                  it_ = i;
+                  m = dr.ys(dr.order_var);
+                  [y_(:,i), check] = dynare_solve('ff_simul1',y_(:,i-1),tempx1(k3), ...
+                                                  m(o3:end),tempx(k4),o1,o2,o3,k6);
+              end
+              k1 = k1+1;
+          end
+      else
+          for i = M_.maximum_lag+1: iter+M_.maximum_lag
+              tempx1 = y_(dr.order_var,k1);
+              tempx2 = tempx1-repmat(dr.ys(dr.order_var),1,M_.maximum_lag);
+              tempx = tempx2(k2);
+              if options_.simul_algo == 0
+                  y_(dr.order_var,i) = dr.ys(dr.order_var)+dr.ghx*tempx;
+              elseif options_.simul_algo == 1
+                  it_ = i;
+                  m = dr.ys(dr.order_var);
+                  [y_(:,i), check] = dynare_solve('ff_simul1',y_(:,i-1),tempx1(k3), ...
+                                                  m(o3:end),tempx(k4),o1,o2,o3,k6);
+              end
+              k1 = k1+1;
+          end
       end
-      k1 = k1+1;
-    end
   elseif iorder == 2
     for i = M_.maximum_lag+1: iter+M_.maximum_lag
       tempx1 = y_(dr.order_var,k1);

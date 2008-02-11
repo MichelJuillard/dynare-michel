@@ -35,10 +35,11 @@ function steady()
     disp(sprintf('%s \t\t %g',endo_names(i,:),steady_state(i)));
   end
   
-  if isempty(ys0_)
-    oo_.endo_simul(:,1:M_.maximum_lag) = oo_.steady_state * ones(1,M_.maximum_lag);
-  else
-    options_ =set_default_option(options_,'periods',1);
-    oo_.endo_simul(:,M_.maximum_lag+1:M_.maximum_lag+options_.periods+M_.maximum_lead) = oo_.steady_state * ones(1,options_.periods+M_.maximum_lead);
-  end
-  
+  %%% Unless I'm wrong, this is (should be?) done in make_y_.m
+% $$$   if isempty(ys0_)
+% $$$     oo_.endo_simul(:,1:M_.maximum_lag) = oo_.steady_state * ones(1, M_.maximum_lag);
+% $$$   else
+% $$$     options_ =set_default_option(options_,'periods',1);
+% $$$     oo_.endo_simul(:,M_.maximum_lag+1:M_.maximum_lag+options_.periods+ ...
+% $$$                    M_.maximum_lead) = oo_.steady_state * ones(1,options_.periods+M_.maximum_lead);
+% $$$   end
