@@ -910,7 +910,7 @@ if (any(bayestopt_.pshape  >0 ) & options_.mh_replic) | ...
   end
 
   xparam = get_posterior_parameters('mean');
-  set_parameters(xparam);
+  set_all_parameters(xparam);
 
 %  return
 end
