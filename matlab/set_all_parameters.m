@@ -34,7 +34,7 @@ function set_all_parameters(xparam1)
     end
   end
   % update offset
-  offset = nvx
+  offset = nvx;
   
   % setting measument error variance
   if nvn
