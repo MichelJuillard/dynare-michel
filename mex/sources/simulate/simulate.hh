@@ -23,10 +23,10 @@
 /*#include <stack>
 #include <set>
 #include <vector>
-#include <math.h>
+#include <cmath>
 #include <iostream>
 #include <fstream>*/
-//#include <time.h>
+//#include <ctime>
 //#include <string>
 /*#include <map>
 #include <algorithm>

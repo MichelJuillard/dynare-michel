@@ -22,9 +22,9 @@
 
 #include <fstream>
 #include <stack>
-#include <math.h>
+#include <cmath>
 #include <map>
-#include <time.h>
+#include <ctime>
 #include "Mem_Mngr.hh"
 
 #define NEW_ALLOC

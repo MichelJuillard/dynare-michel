@@ -22,12 +22,11 @@
 
 #include <iostream>
 #include <iomanip>
-#include <math.h>
 #include <cmath>
 #include <complex>
 #include <map>
 #include <string>
-#include <time.h>
+#include <ctime>
 #include "mex.h"
 
 using namespace std;
