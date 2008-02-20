@@ -35,17 +35,17 @@ function forecast(var_list,task)
 
     endo_names = M_.endo_names;
     if isempty(var_list)
-	varlist = endo_names;
-	i_var = 1:M_.endo_nbr;
+        var_list = endo_names;
+        i_var = 1:M_.endo_nbr;
     else
-	i_var = [];
-	for i = 1:size(var_list)
-	    tmp = strmatch(var_list(i,:),endo_names,'exact');
-	    if isempty(tmp)
-		error([var_list(i,:) ' isn''t and endogenous variable'])
-	    end
-	    i_var = [i_var; tmp];
-	end
+        i_var = [];
+        for i = 1:size(var_list)
+            tmp = strmatch(var_list(i,:),endo_names,'exact');
+            if isempty(tmp)
+                error([var_list(i,:) ' isn''t and endogenous variable'])
+            end
+            i_var = [i_var; tmp];
+        end
     end
     n_var = length(i_var);
     
