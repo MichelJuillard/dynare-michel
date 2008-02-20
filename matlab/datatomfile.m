@@ -3,10 +3,9 @@ function datatomfile (s,var_list)
 % function datatomfile (s,var_list)
 % This optional command saves the simulation results in a text file. The name of each
 % variable preceeds the corresponding results. This command must follow SIMUL.
-% DYNATYPE :	DYNATYPE ( [ 'filename' ] )
-%
+% 
 % INPUTS
-%    s:              matrix of endogenous variables values
+%    s:              data file name
 %    var_list:       vector of selected endogenous variables
 %
 % OUTPUTS
