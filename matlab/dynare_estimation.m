@@ -478,7 +478,7 @@ if options_.posterior_mode_estimation
   stdh = sqrt(diag(invhess));
 else
   variances = bayestopt_.pstdev.^2;
-  invhess = 0.001*diag(variances);
+%  invhess = 0.001*diag(variances);
   invhess = 0.01*eye(length(variances));
 end
 
@@ -851,8 +851,10 @@ if any(bayestopt_.pshape > 0) & options_.TeX %% Bayesian estimation (posterior m
   end
 end
 
-pindx = estim_params_.param_vals(:,1);
-save([M_.fname '_params'],'pindx');
+if np > 0
+    pindx = estim_params_.param_vals(:,1);
+    save([M_.fname '_params'],'pindx');
+end
 
 if (any(bayestopt_.pshape  >0 ) & options_.mh_replic) | ...
       (any(bayestopt_.pshape >0 ) & options_.load_mh_file)  %% not ML estimation
@@ -950,7 +952,7 @@ if (~((any(bayestopt_.pshape > 0) & options_.mh_replic) | (any(bayestopt_.pshape
   if nbplt == 1
     hh = figure('Name','Smoothed shocks');
     NAMES = [];
-    if options_.TeX, TeXNAMES = [], end
+    if options_.TeX, TexNAMES = []; end
     for i=1:M_.exo_nbr
       subplot(nr,nc,i);
       plot(1:gend,innov(i,:),'-k','linewidth',1)
@@ -994,7 +996,7 @@ if (~((any(bayestopt_.pshape > 0) & options_.mh_replic) | (any(bayestopt_.pshape
       hh = figure('Name','Smoothed shocks');
       set(0,'CurrentFigure',hh)
       NAMES = [];
-      if options_.TeX, TeXNAMES = [], end
+      if options_.TeX, TexNAMES = []; end
       for i=1:nstar
 	k = (plt-1)*nstar+i;
 	subplot(nr,nc,i);
@@ -1036,7 +1038,7 @@ if (~((any(bayestopt_.pshape > 0) & options_.mh_replic) | (any(bayestopt_.pshape
     hh = figure('Name','Smoothed shocks');
     set(0,'CurrentFigure',hh)
     NAMES = [];
-    if options_.TeX, TeXNAMES = [], end
+    if options_.TeX, TexNAMES = []; end
     for i=1:M_.exo_nbr-(nbplt-1)*nstar
       k = (nbplt-1)*nstar+i;
       if lr ~= 0
@@ -1119,7 +1121,7 @@ if (~((any(bayestopt_.pshape > 0) & options_.mh_replic) | (any(bayestopt_.pshape
       hh = figure('Name','Smoothed observation errors');
       set(0,'CurrentFigure',hh)
       NAMES = [];
-      if options_.TeX, TeXNAMES = [], end
+      if options_.TeX, TexNAMES = []; end
       for i=1:number_of_plots_to_draw
         subplot(nr,nc,i);
         plot(1:gend,measurement_error(index(i),:),'-k','linewidth',1)
@@ -1162,7 +1164,7 @@ if (~((any(bayestopt_.pshape > 0) & options_.mh_replic) | (any(bayestopt_.pshape
         hh = figure('Name','Smoothed observation errors');
         set(0,'CurrentFigure',hh)
         NAMES = [];
-        if options_.TeX, TeXNAMES = [], end
+        if options_.TeX, TexNAMES = []; end
         for i=1:nstar
           k = (plt-1)*nstar+i;
           subplot(nr,nc,i);
@@ -1203,7 +1205,7 @@ if (~((any(bayestopt_.pshape > 0) & options_.mh_replic) | (any(bayestopt_.pshape
       hh = figure('Name','Smoothed observation errors');
       set(0,'CurrentFigure',hh)
       NAMES = [];
-      if options_.TeX, TeXNAMES = [], end
+      if options_.TeX, TexNAMES = []; end
       for i=1:number_of_plots_to_draw-(nbplt-1)*nstar
         k = (nbplt-1)*nstar+i;
         if lr ~= 0
@@ -1261,7 +1263,7 @@ if (~((any(bayestopt_.pshape > 0) & options_.mh_replic) | (any(bayestopt_.pshape
   if nbplt == 1
     hh = figure('Name','Historical and smoothed variables');
     NAMES = [];
-    if options_.TeX, TeXNAMES = [], end
+    if options_.TeX, TexNAMES = []; end
     for i=1:n_varobs
       subplot(nr,nc,i);
       plot(1:gend,yf(i,:),'-r','linewidth',1)
@@ -1305,7 +1307,7 @@ if (~((any(bayestopt_.pshape > 0) & options_.mh_replic) | (any(bayestopt_.pshape
       hh = figure('Name','Historical and smoothed variables');
       set(0,'CurrentFigure',hh)
       NAMES = [];
-      if options_.TeX, TeXNAMES = [], end
+      if options_.TeX, TexNAMES = []; end
       for i=1:nstar
         k = (plt-1)*nstar+i;
         subplot(nr,nc,i);
@@ -1347,7 +1349,7 @@ if (~((any(bayestopt_.pshape > 0) & options_.mh_replic) | (any(bayestopt_.pshape
     hh = figure('Name','Historical and smoothed variables');
     set(0,'CurrentFigure',hh)
     NAMES = [];
-    if options_.TeX, TeXNAMES = [], end
+    if options_.TeX, TexNAMES = []; end
     for i=1:n_varobs-(nbplt-1)*nstar
       k = (nbplt-1)*nstar+i;
       if lr ~= 0
@@ -1398,5 +1400,7 @@ if options_.forecast > 0 & options_.mh_replic == 0 & ~options_.load_mh_file
   forecast(var_list_,'smoother');
 end
 
-pindx = estim_params_.param_vals(:,1);
-save([M_.fname '_pindx','pindx']);
+if np > 0
+    pindx = estim_params_.param_vals(:,1);
+    save([M_.fname '_pindx','pindx']);
+end
