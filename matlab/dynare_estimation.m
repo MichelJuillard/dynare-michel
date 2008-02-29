@@ -33,7 +33,6 @@ if ~isempty(strmatch('dsge_prior_weight',M_.param_names))
     options_.bvar_dsge = 1;
 end
 
-
 if options_.order > 1
     options_.order = 1;
 end
@@ -428,7 +427,7 @@ if options_.mode_compute > 0 & options_.posterior_mode_estimation
               else
                   flag = 'LastCall';
               end
-              if options_.bvar_dsge
+              if ~options_.bvar_dsge
                   [xparam1,PostVar,Scale,PostMean] = ...
                       gmhmaxlik('DsgeLikelihood',xparam1,bounds,...
                                 options_.Opt6Numb,Scale,flag,PostMean,PostVar,gend,data);
