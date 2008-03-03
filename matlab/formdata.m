@@ -1,4 +1,5 @@
 function formdata(fname,date)
+
 % function formdata(fname,date)
 % store endogenous and exogenous variables in a "FRM" TROLL text format file
 % INPUT
@@ -11,8 +12,9 @@ function formdata(fname,date)
 % SPECIAL REQUIREMENT
 %   none
 %    
-% part of DYNARE, copyright (2007)
+% part of DYNARE, copyright (2007-2008)
 % Gnu Public License.
+
   global M_ oo_
   fid = fopen([fname '_endo.frm'],'w');
   n=size(oo_.endo_simul,1);
