@@ -1,7 +1,29 @@
 function [fval,llik,cost_flag,ys,trend_coeff,info] = DsgeLikelihood(xparam1,gend,data)
-% marco.ratto@jrc.it [13-03-2007]
-%
-% Adapted from dsgelikelihood.m
+
+% function [fval,llik,cost_flag,ys,trend_coeff,info] = DsgeLikelihood(xparam1,gend,data)
+% Evaluates the likelihood at each observation and the marginal density of a dsge model  
+% used in the optimization algorithm number 5
+% 
+% INPUTS 
+%   xparam1:          vector of model parameters
+%   gend   :          scalar specifying the number of observations
+%   data   :          matrix of data
+%  
+% OUTPUTS 
+%   fval        :     value of the posterior kernel at xparam1
+%   llik        :     gives the density at each observation
+%   cost_flag   :     zero if the function returns a penalty, one otherwise
+%   ys          :     steady state of original endogenous variables
+%   trend_coeff :
+%   info        :     vector of informations about the penalty                
+%               
+% SPECIAL REQUIREMENTS
+%   Adapted from dsgelikelihood.m
+%  
+% copyright marco.ratto@jrc.it [13-03-2007] 
+
+
+
   global bayestopt_ estim_params_ options_ trend_coeff_ M_ oo_ xparam1_test
 
   fval		= [];
