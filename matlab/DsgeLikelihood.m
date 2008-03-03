@@ -1,7 +1,28 @@
 function [fval,cost_flag,ys,trend_coeff,info] = DsgeLikelihood(xparam1,gend,data)
-% stephane.adjemian@cepremap.cnrs.fr [09-07-2004]
-%
-% Adapted from mj_optmumlik.m
+
+% function [fval,cost_flag,ys,trend_coeff,info] = DsgeLikelihood(xparam1,gend,data)
+% Evaluates the posterior kernel of a dsge model. 
+% 
+% INPUTS 
+%   xparam1:          vector of model parameters.
+%   gend   :          scalar specifying the number of observations.
+%   data   :          matrix of data
+%  
+% OUTPUTS 
+%   fval        :     value of the posterior kernel at xparam1.
+%   cost_flag   :     zero if the function returns a penalty, one otherwise.
+%   ys          :     steady state of original endogenous variables
+%   trend_coeff :
+%   info        :     vector of informations about the penalty:
+%                     41: one (many) parameter(s) do(es) not satisfied the lower bound
+%                     42: one (many) parameter(s) do(es) not satisfied the upper bound
+%               
+% SPECIAL REQUIREMENTS
+%   Adapted from mj_optmumlik.m
+%  
+% part of DYNARE, copyright Dynare Team (2004-2008)
+% Gnu Public License.
+
   global bayestopt_ estim_params_ options_ trend_coeff_ M_ oo_ xparam1_test
 
   fval		= [];
