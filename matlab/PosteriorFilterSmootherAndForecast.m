@@ -1,5 +1,26 @@
 function PosteriorFilterSmootherAndForecast(Y,gend, type)
-% stephane.adjemian@ens.fr [09-25-2005]
+
+% function PosteriorFilterSmootherAndForecast(Y,gend, type)
+% Computes posterior filter smoother and forecasts
+%
+% INPUTS
+%    Y:      data
+%    gend:   number of observations 
+%    type:   posterior
+%            prior
+%            gsa
+%    
+% OUTPUTS
+%    none
+%        
+% SPECIAL REQUIREMENTS
+%    none
+%  
+% part of DYNARE, copyright Dynare Team (2005-2008)
+% Gnu Public License.
+
+
+
 global options_ estim_params_ oo_ M_ bayestopt_
 
 nvx  = estim_params_.nvx;
