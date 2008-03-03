@@ -1,10 +1,12 @@
 function [alphahat,etahat,epsilonhat,ahat,SteadyState,trend_coeff,aK,T,R,P,PK,d,decomp] = DsgeSmoother(xparam1,gend,Y)
+
+% function [alphahat,etahat,epsilonhat,ahat,SteadyState,trend_coeff,aK,T,R,P,PK,d,decomp] = DsgeSmoother(xparam1,gend,Y)
 % Estimation of the smoothed variables and innovations. 
 % 
 % INPUTS 
-%   o xparam1      [double]   (p*1) vector of (estimated) parameters. 
-%   o gend         [integer]  scalar specifying the number of observations ==> varargin{1}.
-%   o data         [double]   (T*n) matrix of data.
+%   o xparam1       [double]   (p*1) vector of (estimated) parameters. 
+%   o gend          [integer]  scalar specifying the number of observations ==> varargin{1}.
+%   o data          [double]   (T*n) matrix of data.
 %  
 % OUTPUTS 
 %   o alphahat      [double]  (m*T) matrix, smoothed endogenous variables.
@@ -14,24 +16,23 @@ function [alphahat,etahat,epsilonhat,ahat,SteadyState,trend_coeff,aK,T,R,P,PK,d,
 %   o SteadyState   [double]  (m*1) vector specifying the steady state level of each endogenous variable.
 %   o trend_coeff   [double]  (n*1) vector, parameters specifying the slope of the trend associated to each observed variable.
 %   o aK            [double]  (K,n,T+K) array, k (k=1,...,K) steps ahead filtered (endogenous) variables.
-%   o T and R       [double]  Matrices defining the state equation (T is
-%                             the (m*m) transition matrix).
-%    P:        3D array of one-step ahead forecast error variance
-%              matrices
-%    PK:       4D array of k-step ahead forecast error variance
-%              matrices (meaningless for periods 1:d)
-%    d:        number of periods where filter remains in diffuse part
-%              (should be equal to the order of integration of the model)
+%   o T and R       [double]  Matrices defining the state equation (T is the (m*m) transition matrix).
+%    P:             3D array of one-step ahead forecast error variance
+%                   matrices
+%    PK:            4D array of k-step ahead forecast error variance
+%                   matrices (meaningless for periods 1:d)
+%    d:             number of periods where filter remains in diffuse part
+%                  (should be equal to the order of integration of the model)
 %    
 % ALGORITHM 
 %   Diffuse Kalman filter (Durbin and Koopman)       
 %
 % SPECIAL REQUIREMENTS
-%   None.
+%   None
 %  
-%  
-% part of DYNARE, copyright S. Adjemian, M. Juillard (2006)
+% part of DYNARE, copyright Dynare Team (2006-2008)
 % Gnu Public License.
+
   global bayestopt_ M_ oo_ estim_params_ options_
 
   alphahat 	= [];
