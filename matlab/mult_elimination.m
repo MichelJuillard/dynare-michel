@@ -1,12 +1,20 @@
 function dr=mult_elimination(void)
+
 % function mult_elimination()
 % replaces Lagrange multipliers in Ramsey policy by lagged value of state
 % and shock variables
+%
 % INPUT
 %   none  
+%
 % OUTPUT
 %   dr: a structure with the new decision rule
 %
+% SPECIAL REQUIREMENTS
+%   none
+%  
+% part of DYNARE, copyright Dynare Team (2003-2008)
+% Gnu Public License.
   
   global M_ options_ oo_
 
