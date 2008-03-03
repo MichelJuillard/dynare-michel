@@ -13,7 +13,7 @@ function dynare_graph_init(figure_name,nplot,line_types,line_width)
 % SPECIAL REQUIREMENT
 %   none
 %    
-% part of DYNARE, copyright Dynare Team (2006)
+% part of DYNARE, copyright Dynare Team (2006-2008)
 % Gnu Public License.
 
   global dyn_graph options_
