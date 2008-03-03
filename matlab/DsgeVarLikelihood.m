@@ -1,4 +1,6 @@
 function [fval,cost_flag,info,PHI,SIGMAu,iXX] = DsgeVarLikelihood(xparam1,gend)
+
+% function [fval,cost_flag,info,PHI,SIGMAu,iXX] = DsgeVarLikelihood(xparam1,gend)
 % Evaluates the posterior kernel of the bvar-dsge model. 
 % 
 % INPUTS 
@@ -13,14 +15,13 @@ function [fval,cost_flag,info,PHI,SIGMAu,iXX] = DsgeVarLikelihood(xparam1,gend)
 %   o SIGMAu        [double]     Covariance matrix of the BVAR-DSGE (at the mode associated to xparam1).
 %   o iXX           [double]     inv(X'X).
 %
-% ALGORITHM
-%   None.
 % SPECIAL REQUIREMENTS
 %   None.
 %  
-%  
-% part of DYNARE, copyright S. Adjemian, M. Juillard (2006)
+% part of DYNARE, copyright Dynare Team (2006-2008)
 % Gnu Public License.
+
+
 global bayestopt_ estim_params_ M_ options_
 
 nvx = estim_params_.nvx;
