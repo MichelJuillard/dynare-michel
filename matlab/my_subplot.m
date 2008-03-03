@@ -1,13 +1,25 @@
 function my_subplot(i,imax,irow,icol,fig_title)
+
+% function my_subplot(i,imax,irow,icol,fig_title)
 % spreads subplots on several figures according to a maximum number of
 % subplots per figure
 %
 % INPUTS
-% i: subplot number
-% imax: total number of subplots
-% irow: maximum number of rows in a figure
-% icol: maximum number of columns in a figure
-% fig_title: title to be repeated on each figure
+%   i:          subplot number
+%   imax:       total number of subplots
+%   irow:       maximum number of rows in a figure
+%   icol:       maximum number of columns in a figure
+%   fig_title:  title to be repeated on each figure
+%
+% OUTPUT
+%   none
+%
+% SPECIAL REQUIREMENTS
+%   none
+%  
+% part of DYNARE, copyright Dynare Team (2003-2008)
+% Gnu Public License.
+
   nfig_max = irow*icol;
   if imax < nfig_max
     icol = ceil(sqrt(imax));
