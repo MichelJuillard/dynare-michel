@@ -1,5 +1,20 @@
 function bvar_forecast(nlags)
 
+% function bvar_forecast(nlags)
+% builds forecats for a bvar model
+%
+% INPUTS
+%    nlags:     number of lags for the bvar
+%
+% OUTPUTS
+%    none
+%
+% SPECIAL REQUIREMENTS
+%    none
+%  
+% part of DYNARE, copyright Dynare Team (2003-2008)
+% Gnu Public License.
+
     global options_ oo_ M_
     
     options_ = set_default_option(options_, 'bvar_replic', 2000);
