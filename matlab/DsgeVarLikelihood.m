@@ -1,5 +1,4 @@
-function [fval,cost_flag,info,PHI,SIGMAu,iXX] = DsgeVarLikelihood(xparam1,gend)
-
+function [fval,cost_flag,info,PHI,SIGMAu,iXX,prior] = DsgeVarLikelihood(xparam1,gend)
 % function [fval,cost_flag,info,PHI,SIGMAu,iXX] = DsgeVarLikelihood(xparam1,gend)
 % Evaluates the posterior kernel of the bvar-dsge model. 
 % 
@@ -14,14 +13,13 @@ function [fval,cost_flag,info,PHI,SIGMAu,iXX] = DsgeVarLikelihood(xparam1,gend)
 %   o PHI           [double]     Stacked BVAR-DSGE autoregressive matrices (at the mode associated to xparam1).
 %   o SIGMAu        [double]     Covariance matrix of the BVAR-DSGE (at the mode associated to xparam1).
 %   o iXX           [double]     inv(X'X).
+%   o prior         [double]     a matlab structure describing the dsge-var prior.  
 %
 % SPECIAL REQUIREMENTS
 %   None.
 %  
 % part of DYNARE, copyright Dynare Team (2006-2008)
 % Gnu Public License.
-
-
 global bayestopt_ estim_params_ M_ options_
 
 nvx = estim_params_.nvx;
@@ -211,4 +209,13 @@ if (nargout == 6)
     else
         iXX = tmp2;
     end
+end
+
+if (nargout==7)
+    iGXX = inv(GXX);
+    prior.SIGMAstar = GYY - GYX*iGXX*GYX';
+    prior.PHIstar = iGXX*transpose(GYX);
+    prior.ArtificialSampleSize = fix(dsge_prior_weight*T);
+    prior.DF = prior.ArtificialSampleSize - NumberOfParameters - NumberOfObservedVariables;
+    prior.iGXX = iGXX;
 end
