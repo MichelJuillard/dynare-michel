@@ -190,8 +190,8 @@ function J = ramsey_dynamic(ys,lbar)
   
   % getting indices of nonzero entries
   m = find(i_leadlag1');
-  n1 = max_lag1*endo_nbr1+1
-  n2 = n1+endo_nbr-1
+  n1 = max_lag1*endo_nbr1+1;
+  n2 = n1+endo_nbr-1;
   
   
   n = length(m);
