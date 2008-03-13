@@ -75,9 +75,9 @@ if ~options_.load_mh_file & ~options_.mh_recover
             validate	= 0;
             init_iter	= 0;
             trial = 1;
-            while validate == 0 & trial <= 10 
-                candidate = options_.mh_init_scale*randn(1,npar)*d + transpose(xparam1);
-                if all(candidate' > mh_bounds(:,1)) & all(candidate' < mh_bounds(:,2)) 
+            while validate == 0 & trial <= 10
+                candidate = rand_multivariate_normal( transpose(xparam1), d * options_.mh_init_scale, npar);
+                if all(candidate(:) > mh_bounds(:,1)) & all(candidate(:) < mh_bounds(:,2)) 
                     ix2(j,:) = candidate;
                     ilogpo2(j) = - feval(TargetFun,ix2(j,:)',varargin{:});
                     fprintf(fidlog,['    Blck ' int2str(j) ':\n']);

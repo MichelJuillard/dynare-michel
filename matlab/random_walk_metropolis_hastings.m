@@ -1,4 +1,4 @@
-function random_walk_metropolis_hastings(TargetFun,xparam1,vv,mh_bounds,varargin)
+function random_walk_metropolis_hastings(TargetFun,ProposalFun,xparam1,vv,mh_bounds,varargin)
 % Random walk Metropolis-Hastings algorithm. 
 % 
 % INPUTS 
@@ -25,14 +25,20 @@ global M_ options_ bayestopt_
 %%%% Initialization of the random walk metropolis-hastings chains.
 %%%%
 [ ix2, ilogpo2, ModelName, MhDirectoryName, fblck, fline, npar, nblck, nruns, NewFile, MAX_nruns, d ] = ...
-    metropolis_hastings_initialization(TargetFun,xparam1,vv,mh_bounds,varargin{:});
+    metropolis_hastings_initialization(TargetFun, xparam1, vv, mh_bounds, varargin{:});
 options_.lik_algo = 1;
 OpenOldFile = ones(nblck,1);
+if strcmpi(ProposalFun,'rand_multivariate_normal')
+    n = npar;
+elseif strcmpi(ProposalFun,'rand_multivariate_student')
+    n = options_.student_degrees_of_freedom;
+end
 load([MhDirectoryName '/' ModelName '_mh_history'],'record');
 %%%%
 %%%% NOW i run the (nblck-fblck+1) metropolis-hastings chains
 %%%%
 InitSizeArray = min([MAX_nruns*ones(nblck) nruns],[],2);
+jscale = diag(bayestopt_.jscale);
 for b = fblck:nblck
     if (options_.load_mh_file~=0)  & (fline(b)>1) & OpenOldFile(b)
         load(['./' MhDirectoryName '/' ModelName '_mh' int2str(NewFile(b)) ...
@@ -51,15 +57,14 @@ for b = fblck:nblck
     irun = fline(b);
     j = 1;
     while j <= nruns(b)
-        par = randn(1,npar)*d;
-        par = par.*bayestopt_.jscale' + ix2(b,:);  
-        if all(par'>mh_bounds(:,1)) & all(par'<mh_bounds(:,2))
-            logpost = - feval(TargetFun,par',varargin{:});
+        par = feval(ProposalFun, ix2(b,:), d * jscale, n);
+        if all( par(:) > mh_bounds(:,1) ) & all( par(:) < mh_bounds(:,2) )
+            logpost = - feval(TargetFun, par(:), varargin{:});
         else
             logpost = -inf;
         end
         if (logpost > -inf) & (log(rand) < logpost-ilogpo2(b))
-            x2(irun,:) = par; 
+            x2(irun,:) = par;
             ix2(b,:) = par;
             logpo2(irun) = logpost; 
             ilogpo2(b) = logpost;

@@ -868,9 +868,9 @@ if (any(bayestopt_.pshape  >0 ) & options_.mh_replic) | ...
   if options_.mh_replic
     if ~options_.load_mh_file
       if ~options_.bvar_dsge
-        metropolis('DsgeLikelihood',xparam1,invhess,bounds,gend,data);
+        random_walk_metropolis_hastings('DsgeLikelihood','rand_multivariate_normal',xparam1,invhess,bounds,gend,data);
       else
-        metropolis('DsgeVarLikelihood',xparam1,invhess,bounds,gend);
+        random_walk_metropolis_hastings('DsgeVarLikelihood','rand_multivariate_normal',xparam1,invhess,bounds,gend);
       end
     else
       if options_.use_mh_covariance_matrix

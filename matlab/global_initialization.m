@@ -1,6 +1,4 @@
 function global_initialization()
-
-% function global_initialization()
 % initializes global variables and options for DYNARE
 %
 % INPUTS
@@ -14,8 +12,6 @@ function global_initialization()
 %  
 % part of DYNARE, copyright Dynare Team (2003-2008)
 % Gnu Public License.
-
-
   global oo_ M_ options_ ct_ endval_ rplottype_
 
   ct_=0;
@@ -147,9 +143,10 @@ function global_initialization()
   options_.markowitz = 0.5;
   options_.simulation_method = 0;
   options_.cutoff = 1e-12;
+  options_.student_degrees_of_freedom = 3;
 
   % Misc
-  options_.conf_sig = 0.9;
+  options_.conf_sig = 0.6;
   oo_.exo_simul = [];
   oo_.endo_simul = [];
   oo_.dr = [];
@@ -165,4 +162,3 @@ function global_initialization()
 
   % rplot
   options_.dsample = 0;
-  
