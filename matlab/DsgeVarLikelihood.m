@@ -203,6 +203,7 @@ end
 
 lnprior = priordens(xparam1,bayestopt_.pshape,bayestopt_.p1,bayestopt_.p2,bayestopt_.p3,bayestopt_.p4);
 fval = (lik-lnprior);
+
 if (nargout == 6)
     if isinf(dsge_prior_weight)
         iXX = iGXX;
@@ -213,9 +214,10 @@ end
 
 if (nargout==7)
     iGXX = inv(GXX);
+    iXX  = iGXX; 
     prior.SIGMAstar = GYY - GYX*iGXX*GYX';
     prior.PHIstar = iGXX*transpose(GYX);
-    prior.ArtificialSampleSize = fix(dsge_prior_weight*T);
+    prior.ArtificialSampleSize = fix(dsge_prior_weight*gend);
     prior.DF = prior.ArtificialSampleSize - NumberOfParameters - NumberOfObservedVariables;
     prior.iGXX = iGXX;
 end

@@ -28,7 +28,7 @@ bvar.NumberOfLags = options_.varlag;
 bvar.NumberOfVariables = size(options_.varobs,1);
 bvar.Constant = 'no';
 bvar.NumberOfEstimatedParameters = bvar.NumberOfLags*bvar.NumberOfVariables;   
-if 
+if ~options_.noconstant
     bvar.Constant = 'yes';
     bvar.NumberOfEstimatedParameters = bvar.NumberOfEstimatedParameters + ...
         bvar.NumberOfVariables;        
@@ -73,7 +73,7 @@ bvar.Sigma.prior.arg2 = prior.DF;
 % Marginal posterior density of the lagged matrices -> Generalized 
 % Student distribution (See appendix B.5 in Zellner (1971)).
 bvar.LaggedMatrices.prior.density = 'matric-variate student';
-bvar.LaggedMatrices.prior.arg1 = inv(iGXX);%P
+bvar.LaggedMatrices.prior.arg1 = inv(prior.iGXX);%P
 bvar.LaggedMatrices.prior.arg2 = prior.SIGMAstar*prior.ArtificialSampleSize;%Q
 bvar.LaggedMatrices.prior.arg3 = prior.PHIstar;%M (posterior mean)
 bvar.LaggedMatrices.prior.arg4 = prior.ArtificialSampleSize;%(sample size)
