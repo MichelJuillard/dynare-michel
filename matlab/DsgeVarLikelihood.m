@@ -213,8 +213,12 @@ if (nargout == 6)
 end
 
 if (nargout==7)
-    iGXX = inv(GXX);
-    iXX  = iGXX; 
+    if isinf(dsge_prior_weight)
+        iXX = iGXX;
+    else
+        iXX = tmp2;
+    end
+    iGXX = inv(GXX); 
     prior.SIGMAstar = GYY - GYX*iGXX*GYX';
     prior.PHIstar = iGXX*transpose(GYX);
     prior.ArtificialSampleSize = fix(dsge_prior_weight*gend);
