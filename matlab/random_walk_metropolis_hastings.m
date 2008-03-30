@@ -37,7 +37,7 @@ load([MhDirectoryName '/' ModelName '_mh_history'],'record');
 %%%%
 %%%% NOW i run the (nblck-fblck+1) metropolis-hastings chains
 %%%%
-InitSizeArray = min([MAX_nruns*ones(nblck) nruns],[],2);
+InitSizeArray = min([repmat(MAX_nruns,nblck,1) fline+nruns-1],[],2);
 jscale = diag(bayestopt_.jscale);
 for b = fblck:nblck
     if (options_.load_mh_file~=0)  & (fline(b)>1) & OpenOldFile(b)
@@ -78,7 +78,6 @@ for b = fblck:nblck
         waitbar(prtfrc,hh,[ '(' int2str(b) '/' int2str(nblck) ') ' sprintf('%f done, acceptation rate %f',prtfrc,isux/j)]);
         if (irun == InitSizeArray(b)) | (j == nruns(b)) % Now I save the simulations
             save([MhDirectoryName '/' ModelName '_mh' int2str(NewFile(b)) '_blck' int2str(b)],'x2','logpo2');
-            InitSizeArray(b) = min(nruns(b)-j,MAX_nruns);
             fidlog = fopen([MhDirectoryName '/metropolis.log'],'a');
             fprintf(fidlog,['\n']);
             fprintf(fidlog,['%% Mh' int2str(NewFile(b)) 'Blck' int2str(b) ' (' datestr(now,0) ')\n']);
@@ -107,13 +106,14 @@ for b = fblck:nblck
                 record.LastParameters(b,:) = x2(end,:);
                 record.LastLogLiK(b) = logpo2(end);
             end
+            % size of next file in chain b
+            InitSizeArray(b) = min(nruns(b)-j,MAX_nruns);
+            % initialization of next file if necessary
             if InitSizeArray(b)
                 x2 = zeros(InitSizeArray(b),npar);
                 logpo2 = zeros(InitSizeArray(b),1);
                 NewFile(b) = NewFile(b) + 1;
                 irun = 0;
-            else% InitSizeArray is equal to zero because we are at the end of an mc chain.
-                InitSizeArray(b) = min(nruns(b),MAX_nruns);
             end
         end
         j=j+1;
@@ -128,4 +128,6 @@ save([MhDirectoryName '/' ModelName '_mh_history'],'record');
 disp(['MH: Number of mh files			: ' int2str(NewFile(1)) ' per block.'])
 disp(['MH: Total number of generated files	: ' int2str(NewFile(1)*nblck) '.'])
 disp(['MH: Total number of iterations 		: ' int2str((NewFile(1)-1)*MAX_nruns+irun-1) '.'])
+disp(['MH: average acceptation rate per chain   : ')
+disp(record.AcceptationRates);
 disp(' ')
