@@ -865,22 +865,15 @@ if (any(bayestopt_.pshape  >0 ) & options_.mh_replic) | ...
     find(xparam1 > bounds(:,2))
     error('Mode values are outside prior bounds. Reduce prior_trunc.')
   end
+  % runs MCMC
   if options_.mh_replic
-    if ~options_.load_mh_file
-      if ~options_.bvar_dsge
-        random_walk_metropolis_hastings('DsgeLikelihood','rand_multivariate_normal',xparam1,invhess,bounds,gend,data);
-      else
-        random_walk_metropolis_hastings('DsgeVarLikelihood','rand_multivariate_normal',xparam1,invhess,bounds,gend);
-      end
-    else
-      if options_.use_mh_covariance_matrix
+    if options_.load_mh_file & options_.use_mh_covariance_matrix
         invhess = compute_mh_covariance_matrix;
-      end
-      if ~options_.bvar_dsge
-        metropolis('DsgeLikelihood',xparam1,invhess,bounds,gend,data);
-      else
-        metropolis('DsgeVarLikelihood',xparam1,invhess,bounds,gend);
-      end
+    end
+    if options_.bvar_dsge
+        random_walk_metropolis_hastings('DsgeVarLikelihood','rand_multivariate_normal',xparam1,invhess,bounds,gend);
+    else
+        random_walk_metropolis_hastings('DsgeLikelihood','rand_multivariate_normal',xparam1,invhess,bounds,gend,data);
     end
   end
   if ~options_.nodiagnostic & options_.mh_replic > 1000 & options_.mh_nblck > 1
