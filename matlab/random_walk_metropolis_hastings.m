@@ -128,6 +128,6 @@ save([MhDirectoryName '/' ModelName '_mh_history'],'record');
 disp(['MH: Number of mh files			: ' int2str(NewFile(1)) ' per block.'])
 disp(['MH: Total number of generated files	: ' int2str(NewFile(1)*nblck) '.'])
 disp(['MH: Total number of iterations 		: ' int2str((NewFile(1)-1)*MAX_nruns+irun-1) '.'])
-disp(['MH: average acceptation rate per chain   : ')
+disp('MH: average acceptation rate per chain   : ')
 disp(record.AcceptationRates);
 disp(' ')
