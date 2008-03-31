@@ -1,66 +1,62 @@
-% homotopy1 implements a homotopy method with a fixed number of intervals
+function homotopy1(values, step_nbr)
+% function homotopy1(values, step_nbr)
+%
+% Implements homotopy (mode 1) for steady-state computation.
+% The multi-dimensional vector going from the set of initial values
+% to the set of final values is divided in as many sub-vectors as
+% there are steps, and the problem is solved as many times.
+%
+% INPUTS
+%    values:        a matrix with 4 columns, representing the content of
+%                   homotopy_setup block, with one variable per line.
+%                   Column 1 is variable type (1 for exogenous, 2 for
+%                   exogenous deterministic, 4 for parameters)
+%                   Column 2 is symbol integer identifier.
+%                   Column 3 is initial value, and column 4 is final value.
+%    step_nbr:      number of steps for homotopy
+%
+% OUTPUTS
+%    none
+%
+% SPECIAL REQUIREMENTS
+%    none
+%  
+% part of DYNARE, copyright Dynare Team (2008)
+% Gnu Public License.
 
-function homotopy1(params,exo,exodet, step_nbr)
   global M_ oo_ options_
-  
-  options_.jacobian_flag = 1;
 
-  np = size(params,1);
-  ip = zeros(np,1);
-  vp = zeros(np,step_nbr+1);
+  nv = size(values, 1);
+  
+  ip = find(values(:,1) == 4); % Parameters
+  ix = find(values(:,1) == 1); % Exogenous
+  ixd = find(values(:,1) == 2); % Exogenous deterministic
 
-  nx = size(exo,1);
-  ix = zeros(nx,1);
-  vx = zeros(nx,step_nbr+1);
- 
-  nxd = size(exodet,1);
-  ixd = zeros(nxd,1);
-  vxd = zeros(nxd,step_nbr+1);
-  
-  for i = 1:np
-    temp1 = strmatch(params{i,1},M_.param_names,'exact');
-    if isempty(temp1)
-      error(['HOMOTOPY: unknown parameter name: ' params{i,1}])
-    end
-    ip(i) = temp1;
-    vp(i,:) = params{i,2}:(params{i,3}-params{i,2})/step_nbr:params{i,3};
+  if length([ip, ix, ixd]) ~= nv
+    error('HOMOTOPY: incorrect variable types specified')
+  end
+
+  if any(values(:,3) == values(:,4))
+    error('HOMOTOPY: initial and final values should be different')
   end
   
-  for i = 1:nx
-    temp1 = strmatch(exo{i,1},M_.exo_names,'exact');
-    if isempty(temp1)
-      error(['HOMOTOPY: unknown exogenous variable name: ' exo{i,1}])
-    end
-    ix(i) = temp1;
-    vp(i,:) = exo{i,2}:(exo{i,3}-exo{i,2})/step_nbr:exo{i,3};
+  points = zeros(nv, step_nbr+1);
+  for i = 1:nv
+    points(i,:) = values(i,3):(values(i,4)-values(i,3))/step_nbr:values(i,4);
   end
-  
-  for i = 1:nxd
-    temp1 = strmatch(exodet{i,1},M_.exodet_names,'exact');
-    if isempty(temp1)
-      error(['HOMOTOPY: unknown deterministic exogenous name: ' exodet{i,1}])
-    end
-    ixd(i) = temp1;
-    vxd(i,:) = exodet{i,2}:(exodet{i,3}-exodet{i,2})/step_nbr:exodet{i,3};
-  end
-  
-  for i=1:step_nbr+1
-    M_.params(ip) = vp(:,i);
-    for j=1:np
-      assignin('base',params{j,1},vp(j,i));
-    end
     
-    oo_.exo_steady_state(ix) = vx(:,i);
-    oo_.exo_det_steady_state(ixd) = vxd(:,i);
+  for i=1:step_nbr+1
+    M_.params(values(ip,2)) = points(ip,i);
+    oo_.exo_steady_state(values(ix,2)) = points(ix,i);
+    oo_.exo_det_steady_state(values(ixd,2)) = points(ixd,i);
 
     [oo_.steady_state,check] = dynare_solve([M_.fname '_static'],...
-					    oo_.steady_state,...
-					    options_.jacobian_flag, ...	    
-					    [oo_.exo_steady_state; ...
-		    oo_.exo_det_steady_state]);
+                                            oo_.steady_state,...
+                                            options_.jacobian_flag, ...	    
+                                            [oo_.exo_steady_state; ...
+                        oo_.exo_det_steady_state]);
   
     if check
       error('HOMOTOPY didn''t succeed')
     end
-    steady_;
   end

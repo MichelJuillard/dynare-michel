@@ -1,65 +1,91 @@
-% homotopy3 implements a homotopy method that reduces the step as much as necessary
-
-function homotopy3(params,exo,exodet, step_nbr)
+function homotopy3(values, step_nbr)
+% function homotopy3(values, step_nbr)
+%
+% Implements homotopy (mode 3) for steady-state computation.
+% Tries first the most extreme values. If it fails to compute the steady
+% state, the interval between initial and desired values is divided by two
+% for each parameter. Every time that it is impossible to find a steady
+% state, the previous interval is divided by two. When one succeed to find
+% a steady state, the previous interval is multiplied by two.
+%
+% INPUTS
+%    values:        a matrix with 4 columns, representing the content of
+%                   homotopy_setup block, with one variable per line.
+%                   Column 1 is variable type (1 for exogenous, 2 for
+%                   exogenous deterministic, 4 for parameters)
+%                   Column 2 is symbol integer identifier.
+%                   Column 3 is initial value, and column 4 is final value.
+%    step_nbr:      maximum number of steps to try before aborting
+%
+% OUTPUTS
+%    none
+%
+% SPECIAL REQUIREMENTS
+%    none
+%  
+% part of DYNARE, copyright Dynare Team (2008)
+% Gnu Public License.
   global M_ oo_ options_
   
-  options_.jacobian_flag = 1;
-  np = length(param_names);
-  ip = zeros(np,1);
-  oldvalues = zeros(np,1);
-  iplus = [];
-  iminus = [];
-  for i = 1:np
-    temp1 = strmatch(param_names{i},M_.param_names,'exact');
-    if isempty(temp1)
-      error(['HOMOTOPY: unknown parameter name: ' param_names{i}])
-    end
-    ip(i) = temp1;
-    oldvalues(i) = param_values{i}(1);
-    targetvalues(i) = param_values{i}(2);
-    if targetvalues(i) > oldvalues(i)
-      iplus = [iplus i];
-    else
-      iminus = [iminus i];
-    end
-  end
+  tol = 1e-8;
   
-  iter = 1
-  maxiter = 500;
-  values = oldvalues;
+  nv = size(values,1);
+
+  ip = find(values(:,1) == 4); % Parameters
+  ix = find(values(:,1) == 1); % Exogenous
+  ixd = find(values(:,1) == 2); % Exogenous deterministic
+
+  if length([ip, ix, ixd]) ~= nv
+    error('HOMOTOPY: incorrect variable types specified')
+  end
+
+  oldvalues = values(:,3);
+  targetvalues = values(:,4);
+
+  if min(abs(targetvalues - oldvalues)) < tol
+    error('HOMOTOPY: distance between initial and final values should be at least %e for all variables', tol)
+  end
+  iplus = find(targetvalues > oldvalues);
+  iminus = find(targetvalues < oldvalues);
+  
+  curvalues = oldvalues;
   inc = (targetvalues-oldvalues)/2;
-  k = [];
+  kplus = [];
+  kminus = [];
   old_ss = oo_.steady_state;
-  while iter < maxiter
-    for j=1:np
-      M_.params(ip(j)) = values(j,i);
-      assignin('base',param_names{1},values(j,1));
-    end
+
+  iter = 1;
+  while iter < step_nbr
+    M_.params(values(ip,2)) = curvalues(ip);
+    oo_.exo_steady_state(values(ix,2)) = curvalues(ix);
+    oo_.exo_det_steady_state(values(ixd,2)) = curvalues(ixd);
     
     [oo_.steady_state,check] = dynare_solve([M_.fname '_static'],...
-					    oo_.steady_state,...
-					    options_.jacobian_flag, ...	    
-					    [oo_.exo_steady_state; ...
-		    oo_.exo_det_steady_state]);
+                                            oo_.steady_state,...
+                                            options_.jacobian_flag, ...	    
+                                            [oo_.exo_steady_state; ...
+                        oo_.exo_det_steady_state]);
   
     if check
       inc = inc/2;
       oo_.steady_state = old_ss;
     else
-      if length(k) == np
-	return
+      if length([kplus, kminus]) == nv
+        return
       end
-      oldvalues = values;
+      oldvalues = curvalues;
       inc = 2*inc;
     end
-    values = oldvalues + inc
-    k = find(values(iplus) > targetvalues(iplus));
-    values(k) = targetvalues(k);
-    k = find(values(iminus) < targetvalues(iminus));
-    values(k) = targetvalues(k);
-    values
-    if max(abs(inc)) < 1e-8
+    curvalues = oldvalues + inc;
+    kplus = find(curvalues(iplus) >= targetvalues(iplus));
+    curvalues(kplus) = targetvalues(kplus);
+    kminus = find(curvalues(iminus) <= targetvalues(iminus));
+    curvalues(kminus) = targetvalues(kminus);
+
+    if max(abs(inc)) < tol
         error('HOMOTOPY didn''t succeed')
     end
+    
+    iter = iter + 1;
   end
   error('HOMOTOPY didn''t succeed')

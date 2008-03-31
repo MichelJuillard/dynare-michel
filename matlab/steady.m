@@ -23,7 +23,20 @@ function steady()
   if exist([M_.fname '_steadystate.m'])
     options_.steadystate_flag = 1;
   end 
-    
+
+  if options_.steadystate_flag && options_.homotopy_mode
+    error('STEADY: Can''t use homotopy when providing a steady state external file');
+  end
+  
+  switch options_.homotopy_mode
+    case 1
+     homotopy1(options_.homotopy_values, options_.homotopy_steps);
+    case 2
+     homotopy2(options_.homotopy_values, options_.homotopy_steps);
+    case 3
+     homotopy3(options_.homotopy_values, options_.homotopy_steps);
+  end
+  
   steady_;
   
   disp(' ')
