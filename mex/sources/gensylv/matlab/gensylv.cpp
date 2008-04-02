@@ -5,6 +5,11 @@
 
 #include "mex.h"
 
+#ifdef MWTYPES_NOT_DEFINED
+typedef unsigned int mwIndex;
+typedef unsigned int mwSize;
+#endif
+
 #include "GeneralSylvester.h"
 #include "SylvException.h"
 
