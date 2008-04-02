@@ -71,6 +71,8 @@ end
 [status, result] = system(command);
 if status
   error(result)
+else
+  disp(result)
 end
 
 if ~ isempty(find(abs(fname) == 46))
