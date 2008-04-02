@@ -69,10 +69,10 @@ for i=2:nargin
   command = [command ' ' varargin{i-1}];
 end
 [status, result] = system(command);
+disp(result)
 if status
-  error(result)
-else
-  disp(result)
+  % Should not use "error(result)" since message will be truncated if too long
+  error('Preprocessing failed')
 end
 
 if ~ isempty(find(abs(fname) == 46))
