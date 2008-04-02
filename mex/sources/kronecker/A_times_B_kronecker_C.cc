@@ -43,7 +43,7 @@ void full_A_times_kronecker_B_C(double *A, double *B, double *C, double *D,
       ka = 0 ;
       for(unsigned long int row=0; row<mB; row++)
 	{
-	  DGEMM(transpose, transpose, (int*)&mA, (int*)&nC, (int*)&mC, &B[mB*col+row], &A[ka], (int*)&mA, &C[0], (int*)&mC, &one, &D[kd], (int*)&mA);
+	  DGEMM(transpose, transpose, &mA, &nC, &mC, &B[mB*col+row], &A[ka], &mA, &C[0], &mC, &one, &D[kd], &mA);
 	  ka += shiftA;
 	}
       kd += shiftD;
