@@ -49,7 +49,7 @@ else
 end
 
 % Comment next line to suppress compilation debugging info
-COMPILE_OPTIONS = [ COMPILE_OPTIONS ' -v' ]
+COMPILE_OPTIONS = [ COMPILE_OPTIONS ' -v' ];
 
 COMPILE_COMMAND = [ 'mex ' COMPILE_OPTIONS ' -outdir ' OUTPUT_DIR ' ' ];
 
