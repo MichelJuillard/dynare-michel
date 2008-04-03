@@ -7,13 +7,14 @@
 initval;
 k = 12.75;
 c = 1.5;
+x = 1;
 end;
 
 homotopy_setup;
 bet, 0.05, 0.1;
-x, 1, 2;
+x, 2;
 end;
 
-steady(homotopy_mode = 1, homotopy_steps = 50);
+steady(homotopy_mode = 2, homotopy_steps = 50);
 //steady(homotopy_mode = 2, homotopy_steps = 50);
 //steady(homotopy_mode = 3, homotopy_steps = 50);

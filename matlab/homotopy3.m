@@ -15,6 +15,8 @@ function homotopy3(values, step_nbr)
 %                   exogenous deterministic, 4 for parameters)
 %                   Column 2 is symbol integer identifier.
 %                   Column 3 is initial value, and column 4 is final value.
+%                   Column 3 can contain NaNs, in which case previous
+%                   initialization of variable will be used as initial value.
 %    step_nbr:      maximum number of steps to try before aborting
 %
 % OUTPUTS
@@ -39,7 +41,16 @@ function homotopy3(values, step_nbr)
     error('HOMOTOPY: incorrect variable types specified')
   end
 
+  % Construct vector of starting values, using previously initialized values
+  % when initial value has not been given in homotopy_setup block
   oldvalues = values(:,3);
+  ipn = find(values(:,1) == 4 & isnan(oldvalues));
+  oldvalues(ipn) = M_.params(values(ipn, 2));
+  ixn = find(values(:,1) == 1 & isnan(oldvalues));
+  oldvalues(ixn) = oo_.exo_steady_state(values(ixn, 2));
+  ixdn = find(values(:,1) == 2 & isnan(oldvalues));
+  oldvalues(ixdn) = oo_.exo_det_steady_state(values(ixdn, 2));
+
   targetvalues = values(:,4);
 
   if min(abs(targetvalues - oldvalues)) < tol

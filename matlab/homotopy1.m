@@ -13,6 +13,8 @@ function homotopy1(values, step_nbr)
 %                   exogenous deterministic, 4 for parameters)
 %                   Column 2 is symbol integer identifier.
 %                   Column 3 is initial value, and column 4 is final value.
+%                   Column 3 can contain NaNs, in which case previous
+%                   initialization of variable will be used as initial value.
 %    step_nbr:      number of steps for homotopy
 %
 % OUTPUTS
@@ -36,15 +38,25 @@ function homotopy1(values, step_nbr)
     error('HOMOTOPY: incorrect variable types specified')
   end
 
-  if any(values(:,3) == values(:,4))
+  % Construct vector of starting values, using previously initialized values
+  % when initial value has not been given in homotopy_setup block
+  oldvalues = values(:,3);
+  ipn = find(values(:,1) == 4 & isnan(oldvalues));
+  oldvalues(ipn) = M_.params(values(ipn, 2));
+  ixn = find(values(:,1) == 1 & isnan(oldvalues));
+  oldvalues(ixn) = oo_.exo_steady_state(values(ixn, 2));
+  ixdn = find(values(:,1) == 2 & isnan(oldvalues));
+  oldvalues(ixdn) = oo_.exo_det_steady_state(values(ixdn, 2));
+  
+  if any(oldvalues == values(:,4))
     error('HOMOTOPY: initial and final values should be different')
   end
   
   points = zeros(nv, step_nbr+1);
   for i = 1:nv
-    points(i,:) = values(i,3):(values(i,4)-values(i,3))/step_nbr:values(i,4);
+    points(i,:) = oldvalues(i):(values(i,4)-oldvalues(i))/step_nbr:values(i,4);
   end
-    
+  
   for i=1:step_nbr+1
     M_.params(values(ip,2)) = points(ip,i);
     oo_.exo_steady_state(values(ix,2)) = points(ix,i);
