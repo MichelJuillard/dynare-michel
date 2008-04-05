@@ -1,4 +1,4 @@
-function x0=dynare_sensitivity()
+function x0=dynare_sensitivity(options_gsa)
 % Part of the Sensitivity Analysis Toolbox for DYNARE
 %
 % Written by Marco Ratto, 2006
@@ -21,58 +21,59 @@ fname_ = M_.fname;
 lgy_ = M_.endo_names;
 x0=[];
 
-options_ = set_default_option(options_,'opt_gsa',1);
-options_gsa_ = options_.opt_gsa;
-
-options_gsa_ = set_default_option(options_gsa_,'identification',0);
-if options_gsa_.identification,
-  options_gsa_.redform=0;
-  options_gsa_ = set_default_option(options_gsa_,'morris',1);
+options_gsa = set_default_option(options_gsa,'identification',0);
+if options_gsa.identification,
+  options_gsa.redform=0;
+  options_gsa = set_default_option(options_gsa,'morris',1);
 end
 
 % map stability
-options_gsa_ = set_default_option(options_gsa_,'stab',1);
-options_gsa_ = set_default_option(options_gsa_,'redform',0);
-options_gsa_ = set_default_option(options_gsa_,'pprior',1);
-options_gsa_ = set_default_option(options_gsa_,'prior_range',1);
-options_gsa_ = set_default_option(options_gsa_,'ppost',0);
-options_gsa_ = set_default_option(options_gsa_,'ilptau',1);
-options_gsa_ = set_default_option(options_gsa_,'morris',0);
-options_gsa_ = set_default_option(options_gsa_,'glue',0);
-options_gsa_ = set_default_option(options_gsa_,'morris_nliv',6);
-options_gsa_ = set_default_option(options_gsa_,'morris_ntra',20);
-options_gsa_ = set_default_option(options_gsa_,'Nsam',2048);
-options_gsa_ = set_default_option(options_gsa_,'load_redform',0);
-options_gsa_ = set_default_option(options_gsa_,'load_rmse',0);
-options_gsa_ = set_default_option(options_gsa_,'load_stab',0);
-options_gsa_ = set_default_option(options_gsa_,'alpha2_stab',0.3);
-options_gsa_ = set_default_option(options_gsa_,'ksstat',0.1);
-%options_gsa_ = set_default_option(options_gsa_,'load_mh',0);
+options_gsa = set_default_option(options_gsa,'stab',1);
+options_gsa = set_default_option(options_gsa,'redform',0);
+options_gsa = set_default_option(options_gsa,'pprior',1);
+options_gsa = set_default_option(options_gsa,'prior_range',1);
+options_gsa = set_default_option(options_gsa,'ppost',0);
+options_gsa = set_default_option(options_gsa,'ilptau',1);
+options_gsa = set_default_option(options_gsa,'morris',0);
+options_gsa = set_default_option(options_gsa,'glue',0);
+options_gsa = set_default_option(options_gsa,'morris_nliv',6);
+options_gsa = set_default_option(options_gsa,'morris_ntra',20);
+options_gsa = set_default_option(options_gsa,'Nsam',2048);
+options_gsa = set_default_option(options_gsa,'load_redform',0);
+options_gsa = set_default_option(options_gsa,'load_rmse',0);
+options_gsa = set_default_option(options_gsa,'load_stab',0);
+options_gsa = set_default_option(options_gsa,'alpha2_stab',0.3);
+options_gsa = set_default_option(options_gsa,'ksstat',0.1);
+%options_gsa = set_default_option(options_gsa,'load_mh',0);
 
-if options_gsa_.redform,
-  options_gsa_.pprior=1;
-  options_gsa_.ppost=0;
+if options_gsa.redform,
+  options_gsa.pprior=1;
+  options_gsa.ppost=0;
 end
 
-if options_gsa_.morris,
+if options_gsa.morris,
   if ~(exist('Sampling_Function_2','file')==6 | exist('Sampling_Function_2','file')==2),
-    disp('Download pre-parsed mapping routines at:')
-    disp('http://eemc.jrc.ec.europa.eu/softwareDYNARE-Dowload.htm')
-    disp(' ' )
-    error('Mapping routines missing!')
-
+      dynare_root = strrep(which('dynare.m'),'dynare.m','');
+      gsa_path = [dynare_root 'gsa'];
+      if exist(gsa_path)
+          addpath(gsa_path,path)
+      else
+          disp('Download pre-parsed mapping routines at:')
+          disp('http://eemc.jrc.ec.europa.eu/softwareDYNARE-Dowload.htm')
+          disp(' ' )
+          error('Mapping routines missing!')
+      end
   end
-
-  options_gsa_.pprior=1;
-  options_gsa_.ppost=0;
-  %options_gsa_.stab=1;
-  options_gsa_.glue=0;
-  options_gsa_.rmse=0;
-  options_gsa_.load_rmse=0;
-  options_gsa_.alpha2_stab=1;
-  options_gsa_.ksstat=1;
-  if options_gsa_.morris==2,
-    options_gsa_ = set_default_option(options_gsa_,'Nsam',256);
+  options_gsa.pprior=1;
+  options_gsa.ppost=0;
+  %options_gsa.stab=1;
+  options_gsa.glue=0;
+  options_gsa.rmse=0;
+  options_gsa.load_rmse=0;
+  options_gsa.alpha2_stab=1;
+  options_gsa.ksstat=1;
+  if options_gsa.morris==2,
+    options_gsa = set_default_option(options_gsa,'Nsam',256);
     OutputDirectoryName = CheckPath('GSA/IDENTIF');
   else
     OutputDirectoryName = CheckPath('GSA/SCREEN');
@@ -81,15 +82,15 @@ else
   OutputDirectoryName = CheckPath('GSA');
 end
 
-options_.opt_gsa = options_gsa_;
+options_.opt_gsa = options_gsa;
 
-if (options_gsa_.load_stab | options_gsa_.load_rmse | options_gsa_.load_redform) ...
-    & options_gsa_.pprior,
+if (options_gsa.load_stab | options_gsa.load_rmse | options_gsa.load_redform) ...
+    & options_gsa.pprior,
   filetoload=[OutputDirectoryName '\' fname_ '_prior.mat'];
   if isempty(ls(filetoload)),
     disp([filetoload,' not found!'])
     disp(['You asked to load a non existent analysis'])
-    %options_gsa_.load_stab=0;
+    %options_gsa.load_stab=0;
     return,
   else
   if isempty(strmatch('bkpprior',who('-file', filetoload),'exact')),
@@ -112,24 +113,24 @@ if (options_gsa_.load_stab | options_gsa_.load_rmse | options_gsa_.load_redform)
   end
 end
 
-if options_gsa_.stab & ~options_gsa_.ppost,
+if options_gsa.stab & ~options_gsa.ppost,
   x0 = stab_map_(OutputDirectoryName);
 end
 
 % reduced form
 % redform_map(namendo, namlagendo, namexo, icomp, pprior, ilog, threshold)
-options_gsa_ = set_default_option(options_gsa_,'logtrans_redform',0);
-options_gsa_ = set_default_option(options_gsa_,'threshold_redform',[]);
-options_gsa_ = set_default_option(options_gsa_,'ksstat_redform',0.1);
-options_gsa_ = set_default_option(options_gsa_,'alpha2_redform',0.3);
-options_gsa_ = set_default_option(options_gsa_,'namendo',[]);
-options_gsa_ = set_default_option(options_gsa_,'namlagendo',[]);
-options_gsa_ = set_default_option(options_gsa_,'namexo',[]);
+options_gsa = set_default_option(options_gsa,'logtrans_redform',0);
+options_gsa = set_default_option(options_gsa,'threshold_redform',[]);
+options_gsa = set_default_option(options_gsa,'ksstat_redform',0.1);
+options_gsa = set_default_option(options_gsa,'alpha2_redform',0.3);
+options_gsa = set_default_option(options_gsa,'namendo',[]);
+options_gsa = set_default_option(options_gsa,'namlagendo',[]);
+options_gsa = set_default_option(options_gsa,'namexo',[]);
 
-options_.opt_gsa = options_gsa_;
-if options_gsa_.redform & ~isempty(options_gsa_.namendo) ...
-    & ~options_gsa_.ppost,
-  if options_gsa_.morris,
+options_.opt_gsa = options_gsa;
+if options_gsa.redform & ~isempty(options_gsa.namendo) ...
+    & ~options_gsa.ppost,
+  if options_gsa.morris,
     redform_screen(OutputDirectoryName);    
   else
     redform_map(OutputDirectoryName);
@@ -137,36 +138,36 @@ if options_gsa_.redform & ~isempty(options_gsa_.namendo) ...
 end
 % RMSE mapping
 % function [rmse_MC, ixx] = filt_mc_(vvarvecm, loadSA, pfilt, alpha, alpha2)
-options_gsa_ = set_default_option(options_gsa_,'rmse',0);
-options_gsa_ = set_default_option(options_gsa_,'lik_only',0);
-options_gsa_ = set_default_option(options_gsa_,'var_rmse',options_.varobs);
-options_gsa_ = set_default_option(options_gsa_,'pfilt_rmse',0.1);
-options_gsa_ = set_default_option(options_gsa_,'istart_rmse',options_.presample+1);
-options_gsa_ = set_default_option(options_gsa_,'alpha_rmse',0.002);
-options_gsa_ = set_default_option(options_gsa_,'alpha2_rmse',1);
-options_.opt_gsa = options_gsa_;
-if options_gsa_.rmse,
-  if ~options_gsa_.ppost
-  if options_gsa_.pprior
+options_gsa = set_default_option(options_gsa,'rmse',0);
+options_gsa = set_default_option(options_gsa,'lik_only',0);
+options_gsa = set_default_option(options_gsa,'var_rmse',options_.varobs);
+options_gsa = set_default_option(options_gsa,'pfilt_rmse',0.1);
+options_gsa = set_default_option(options_gsa,'istart_rmse',options_.presample+1);
+options_gsa = set_default_option(options_gsa,'alpha_rmse',0.002);
+options_gsa = set_default_option(options_gsa,'alpha2_rmse',1);
+options_.opt_gsa = options_gsa;
+if options_gsa.rmse,
+  if ~options_gsa.ppost
+  if options_gsa.pprior
     a=whos('-file',[OutputDirectoryName,'\',fname_,'_prior'],'logpo2');
   else
     a=whos('-file',[OutputDirectoryName,'\',fname_,'_mc'],'logpo2');
   end
   if isempty(a),
     dynare_MC([],OutputDirectoryName);
-    options_gsa_.load_rmse=0;
+    options_gsa.load_rmse=0;
 %   else
-%     if options_gsa_.load_rmse==0,
+%     if options_gsa.load_rmse==0,
 %       disp('You already saved a MC filter/smoother analysis ')
 %       disp('Do you want to overwrite ?')
 %       pause;
-%       if options_gsa_.pprior
+%       if options_gsa.pprior
 %         delete([OutputDirectoryName,'\',fname_,'_prior_*.mat'])
 %       else
 %         delete([OutputDirectoryName,'\',fname_,'_mc_*.mat'])
 %       end
 %       dynare_MC([],OutputDirectoryName);
-%       options_gsa_.load_rmse=0;
+%       options_gsa.load_rmse=0;
 %     end    
     
   end
@@ -176,13 +177,13 @@ if options_gsa_.rmse,
 end
 
 
-if options_gsa_.glue,
+if options_gsa.glue,
   dr_ = oo_.dr;
-  if options_gsa_.ppost
+  if options_gsa.ppost
     load([OutputDirectoryName,'\',fname_,'_post']);
     DirectoryName = CheckPath('metropolis');
   else
-    if options_gsa_.pprior
+    if options_gsa.pprior
       load([OutputDirectoryName,'\',fname_,'_prior']);
     else
       load([OutputDirectoryName,'\',fname_,'_mc']);
@@ -216,7 +217,7 @@ if options_gsa_.glue,
     
     jxj = strmatch(vj,lgy_(dr_.order_var,:),'exact');
     js = strmatch(vj,lgy_,'exact');
-    if ~options_gsa_.ppost
+    if ~options_gsa.ppost
 %       y0=zeros(gend+1,nruns);
 %       nb = size(stock_filter,3);
 %       y0 = squeeze(stock_filter(:,jxj,:)) + ...
@@ -236,7 +237,7 @@ if options_gsa_.glue,
     Lik(j).isam = 1;
     Lik(j).data = rmse_MC(:,j)';
     
-    if ~options_gsa_.ppost
+    if ~options_gsa.ppost
 %       y0 = squeeze(stock_smooth(:,jxj,:)) + ...
 %         kron(stock_ys(js,:),ones(size(stock_smooth,1),1));
 %       Out1(j).name = vj;
@@ -255,7 +256,7 @@ if options_gsa_.glue,
     if ~ismember(j,ismoo),
       jsmoo=jsmoo+1;
       vj=deblank(M_.endo_names(dr_.order_var(j),:));
-      if ~options_gsa_.ppost        
+      if ~options_gsa.ppost        
 %         y0 = squeeze(stock_smooth(:,j,:)) + ...
 %           kron(stock_ys(j,:),ones(size(stock_smooth,1),1));
 %         Out1(jsmoo).time = [1:size(y0,1)];
@@ -274,7 +275,7 @@ if options_gsa_.glue,
   for j=1:M_.exo_nbr,
       Exo(j).name = deblank(tit(j,:));    
   end
-  if ~options_gsa_.ppost
+  if ~options_gsa.ppost
     Lik(size(options_.varobs,1)+1).name = 'logpo';
     Lik(size(options_.varobs,1)+1).ini  = 'yes';
     Lik(size(options_.varobs,1)+1).isam = 1;
@@ -290,7 +291,7 @@ if options_gsa_.glue,
   Info.dynare=M_.fname;
   Info.order_var=dr_.order_var;
   Out=Out1;
-  if options_gsa_.ppost
+  if options_gsa.ppost
 %     Info.dynare=M_.fname;
 %     Info.order_var=dr_.order_var;
 %     Out=Out1;
@@ -299,7 +300,7 @@ if options_gsa_.glue,
     %save([fname_,'_post_glue_smooth'], 'Out', 'Sam', 'Lik', 'Obs', 'Rem','Info')
     
   else
-    if options_gsa_.pprior
+    if options_gsa.pprior
       Info.TypeofSample='prior';
       save([OutputDirectoryName,'\',fname_,'_glue_prior'], 'Out', 'Sam', 'Lik', 'Obs', 'Rem','Info', 'Exo')
 %       save([OutputDirectoryName,'\',fname_,'_prior_glue'], 'Out', 'Sam', 'Lik', 'Obs', 'Rem')
