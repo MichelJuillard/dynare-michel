@@ -2,7 +2,7 @@
 // The values in initval block are obtained from ramst_initial.mod 
 // Result of the computation should be the same than in ramst_final.mod
 
-@include "common.mod"
+@#include "common.mod"
 
 initval;
 k = 12.75;

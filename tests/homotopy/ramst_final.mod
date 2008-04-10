@@ -1,6 +1,6 @@
 // Computes the steady state which should be arrived at in ramst_homotopy.mod
 
-@include "common.mod"
+@#include "common.mod"
 
 bet = 0.1;
 

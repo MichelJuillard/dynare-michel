@@ -1,6 +1,6 @@
 // Computes the steady state used in initval block of ramst_homotopy.mod
 
-@include "common.mod"
+@#include "common.mod"
 
 bet=0.05;
 
