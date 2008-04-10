@@ -187,49 +187,49 @@ for b=1:B
   irun7 = irun7 + 1;
 
   if irun1 > MAX_nsmoo | b == B
-    stock = stock_smooth;
+    stock = stock_smooth(:,:,1:irun1-1);
     ifil1 = ifil1 + 1;
     save([DirectoryName '/' M_.fname '_smooth' int2str(ifil1)],'stock');
     irun1 = 1;
   end
   
   if nvx & (irun2 > MAX_ninno | b == B)
-    stock = stock_innov;
+    stock = stock_innov(:,:,1:irun2-1);
     save([DirectoryName '/' M_.fname '_inno' int2str(ifil2)],'stock');
     ifil2 = ifil2 + 1;
     irun2 = 1;
   end
     
   if nvn & (irun3 > MAX_error | b == B)
-    stock = stock_error;
+    stock = stock_error(:,:,1:irun3-1);
     save([DirectoryName '/' M_.fname '_error' int2str(ifil3)],'stock');
     ifil3 = ifil3 + 1;
     irun3 = 1;
   end
     
   if naK & (irun4 > MAX_naK | b == B)
-    stock = stock_filter;
+    stock = stock_filter(:,:,:,1:irun4-1);
     save([DirectoryName '/' M_.fname '_filter' int2str(ifil4)],'stock');
     ifil4 = ifil4 + 1;
     irun4 = 1;
   end
     
   if irun5 > MAX_nruns | b == B
-    stock = stock_param;
+    stock = stock_param(1:irun5-1,:);
     save([DirectoryName '/' M_.fname '_param' int2str(ifil5)],'stock','stock_logpo','stock_ys');
     ifil5 = ifil5 + 1;
     irun5 = 1;
   end
 
   if horizon & (irun6 > MAX_nforc1 | b == B)
-    stock = stock_forcst_mean;
+    stock = stock_forcst_mean(:,:,1:irun6-1);
     save([DirectoryName '/' M_.fname '_forc_mean' int2str(ifil6)],'stock');
     ifil6 = ifil6 + 1;
     irun6 = 1;
   end
 
   if horizon & (irun7 > MAX_nforc2 |  b == B)
-    stock = stock_forcst_total;
+    stock = stock_forcst_total(:,:,1:irun7-1);
     save([DirectoryName '/' M_.fname '_forc_total' int2str(ifil7)],'stock');
     ifil6 = ifil6 + 1;
     irun6 = 1;
