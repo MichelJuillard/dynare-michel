@@ -26,6 +26,10 @@ options_gsa = set_default_option(options_gsa,'datafile',[]);
 if isfield(options_gsa,'nograph'),
   options_.nograph=options_gsa.nograph;
 end
+if isfield(options_gsa,'mode_file'),
+  options_.mode_file=options_gsa.mode_file;
+end
+
 
 if ~isempty(options_gsa.datafile) | isempty(bayestopt_),
 options_.datafile = options_gsa.datafile;
@@ -43,9 +47,6 @@ if isfield(options_gsa,'prefilter'),
 end
 if isfield(options_gsa,'loglinear'),
   options_.loglinear=options_gsa.loglinear;
-end
-if isfield(options_gsa,'mode_file'),
-  options_.mode_file=options_gsa.mode_file;
 end
 options_.mode_compute = 0;
 [data,rawdata]=dynare_estimation_init([],1);
