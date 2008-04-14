@@ -86,20 +86,22 @@ if options_gsa.redform,
   options_gsa.ppost=0;
 end
 
-if ~(exist('Sampling_Function_2','file')==6 | exist('Sampling_Function_2','file')==2),
+if ~(exist('stab_map_','file')==6 | exist('stab_map_','file')==2),
     dynare_root = strrep(which('dynare.m'),'dynare.m','');
     gsa_path = [dynare_root 'gsa'];
     if exist(gsa_path)
         addpath(gsa_path,path)
     else
-        disp('Download pre-parsed mapping routines at:')
+        disp('Download Dynare sensitivity routines at:')
         disp('http://eemc.jrc.ec.europa.eu/softwareDYNARE-Dowload.htm')
         disp(' ' )
         error('GSA routines missing!')
     end
 end
 
+
 if options_gsa.morris,
+  options_gsa.redform=1;
   options_gsa.pprior=1;
   options_gsa.ppost=0;
   %options_gsa.stab=1;
@@ -179,9 +181,18 @@ if options_gsa.redform & ~isempty(options_gsa.namendo) ...
   if strmatch(':',options_gsa.namlagendo,'exact'),
     options_gsa.namlagendo=M_.endo_names;
   end
+  options_.opt_gsa = options_gsa;
   if options_gsa.morris,
-    redform_screen(OutputDirectoryName);    
+    redform_screen(OutputDirectoryName);
   else
+    % check existence of the SS_ANOVA toolbox
+    if ~(exist('gsa_sdp','file')==6 | exist('gsa_sdp','file')==2),
+      disp('Download Mapping routines at:')
+      disp('http://eemc.jrc.ec.europa.eu/softwareDYNARE-Dowload.htm')
+      disp(' ' )
+      error('Mapping routines missing!')
+    end
+
     redform_map(OutputDirectoryName);
   end
 end
