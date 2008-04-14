@@ -22,11 +22,36 @@ M_.dname = fname_;
 lgy_ = M_.endo_names;
 x0=[];
 
+options_gsa = set_default_option(options_gsa,'datafile',[]);
+if isfield(options_gsa,'nograph'),
+  options_.nograph=options_gsa.nograph;
+end
+
+if ~isempty(options_gsa.datafile) | isempty(bayestopt_),
 options_.datafile = options_gsa.datafile;
+if isfield(options_gsa,'first_obs'),
+  options_.first_obs=options_gsa.first_obs;
+end
+if isfield(options_gsa,'nobs'),
+  options_.nobs=options_gsa.nobs;
+end
+if isfield(options_gsa,'presample'),
+  options_.presample=options_gsa.presample;
+end
+if isfield(options_gsa,'prefilter'),
+  options_.prefilter=options_gsa.prefilter;
+end
+if isfield(options_gsa,'loglinear'),
+  options_.loglinear=options_gsa.loglinear;
+end
+if isfield(options_gsa,'mode_file'),
+  options_.mode_file=options_gsa.mode_file;
+end
 options_.mode_compute = 0;
-[data,rawdata]=dynare_estimation_init([]);
+[data,rawdata]=dynare_estimation_init([],1);
 % computes a first linear solution to set up various variables
 dynare_resolve;
+end
 
 options_gsa = set_default_option(options_gsa,'identification',0);
 if options_gsa.identification,
@@ -133,9 +158,9 @@ options_gsa = set_default_option(options_gsa,'logtrans_redform',0);
 options_gsa = set_default_option(options_gsa,'threshold_redform',[]);
 options_gsa = set_default_option(options_gsa,'ksstat_redform',0.1);
 options_gsa = set_default_option(options_gsa,'alpha2_redform',0.3);
-options_gsa = set_default_option(options_gsa,'namendo',M_.endo_names);
-options_gsa = set_default_option(options_gsa,'namlagendo',M_.endo_names);
-options_gsa = set_default_option(options_gsa,'namexo',M_.exo_names);
+options_gsa = set_default_option(options_gsa,'namendo',[]);
+options_gsa = set_default_option(options_gsa,'namlagendo',[]);
+options_gsa = set_default_option(options_gsa,'namexo',[]);
 
 options_.opt_gsa = options_gsa;
 if options_gsa.identification,
@@ -144,6 +169,15 @@ end
 
 if options_gsa.redform & ~isempty(options_gsa.namendo) ...
     & ~options_gsa.ppost,
+  if strmatch(':',options_gsa.namendo,'exact'),
+    options_gsa.namendo=M_.endo_names;
+  end
+  if strmatch(':',options_gsa.namexo,'exact'),
+    options_gsa.namexo=M_.exo_names;
+  end
+  if strmatch(':',options_gsa.namlagendo,'exact'),
+    options_gsa.namlagendo=M_.endo_names;
+  end
   if options_gsa.morris,
     redform_screen(OutputDirectoryName);    
   else
