@@ -15,11 +15,18 @@ function x0=dynare_sensitivity(options_gsa)
 % M. Ratto, Global Sensitivity Analysis for Macroeconomic models, MIMEO, 2006.
 %
 
-global M_ options_ oo_ bayestopt_
+global M_ options_ oo_ bayestopt_ estim_params_
 
 fname_ = M_.fname;
+M_.dname = fname_;
 lgy_ = M_.endo_names;
 x0=[];
+
+options_.datafile = options_gsa.datafile;
+options_.mode_compute = 0;
+[data,rawdata]=dynare_estimation_init([]);
+% computes a first linear solution to set up various variables
+dynare_resolve;
 
 options_gsa = set_default_option(options_gsa,'identification',0);
 if options_gsa.identification,
@@ -53,19 +60,20 @@ if options_gsa.redform,
   options_gsa.ppost=0;
 end
 
+if ~(exist('Sampling_Function_2','file')==6 | exist('Sampling_Function_2','file')==2),
+    dynare_root = strrep(which('dynare.m'),'dynare.m','');
+    gsa_path = [dynare_root 'gsa'];
+    if exist(gsa_path)
+        addpath(gsa_path,path)
+    else
+        disp('Download pre-parsed mapping routines at:')
+        disp('http://eemc.jrc.ec.europa.eu/softwareDYNARE-Dowload.htm')
+        disp(' ' )
+        error('GSA routines missing!')
+    end
+end
+
 if options_gsa.morris,
-  if ~(exist('Sampling_Function_2','file')==6 | exist('Sampling_Function_2','file')==2),
-      dynare_root = strrep(which('dynare.m'),'dynare.m','');
-      gsa_path = [dynare_root 'gsa'];
-      if exist(gsa_path)
-          addpath(gsa_path,path)
-      else
-          disp('Download pre-parsed mapping routines at:')
-          disp('http://eemc.jrc.ec.europa.eu/softwareDYNARE-Dowload.htm')
-          disp(' ' )
-          error('Mapping routines missing!')
-      end
-  end
   options_gsa.pprior=1;
   options_gsa.ppost=0;
   %options_gsa.stab=1;
