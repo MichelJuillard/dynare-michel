@@ -1,4 +1,4 @@
-function [data,rawdata]=dynare_estimation_init(var_list_)
+function [data,rawdata]=dynare_estimation_init(var_list_, igsa)
 
 % function dynare_estimation_init(var_list_)
 % preforms initialization tasks before estimation or
@@ -21,6 +21,9 @@ function [data,rawdata]=dynare_estimation_init(var_list_)
 global M_ options_ oo_ estim_params_ 
 global bayestopt_ dsge_prior_weight
 
+if nargin<2 | isempty(igsa),
+  igsa=0;
+end
 
 options_.varlist = var_list_;
 options_.lgyidx2varobs = zeros(size(M_.endo_names,1),1);
@@ -196,8 +199,14 @@ if ~isempty(options_.unit_root_vars)
   options_.lik_init = 3;
 end % if ~isempty(options_.unit_root_vars)
 
-if isempty(options_.datafile)
-  error('ESTIMATION: datafile option is missing')
+if isempty(options_.datafile),
+  if igsa,
+    data=[];
+    rawdata=[];
+    return,
+  else
+    error('ESTIMATION: datafile option is missing'),
+  end
 end
 
 %% If jscale isn't specified for an estimated parameter, use
