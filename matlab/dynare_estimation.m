@@ -41,7 +41,10 @@ if options_.prefilter == 1
     options_.noconstant = 1;
 end
 
-if options_.filtered_vars ~= 0 & options_.filter_step_ahead == 0
+if options_.filtered_vars ~= 0 & isempty(options_.filter_step_ahead), 
+    options_.filter_step_ahead = 1;
+end
+if options_.filtered_vars ~= 0 & options_.filter_step_ahead == 0,
     options_.filter_step_ahead = 1;
 end
 if options_.filter_step_ahead ~= 0
@@ -858,6 +861,8 @@ end
 if (any(bayestopt_.pshape  >0 ) & options_.mh_replic) | ...
       (any(bayestopt_.pshape >0 ) & options_.load_mh_file)  %% not ML estimation
   bounds = prior_bounds(bayestopt_);
+  bounds(:,1)=max(bounds(:,1),lb);
+  bounds(:,2)=min(bounds(:,2),ub);
   bayestopt_.lb = bounds(:,1);
   bayestopt_.ub = bounds(:,2);
   if any(xparam1 < bounds(:,1)) | any(xparam1 > bounds(:,2))
