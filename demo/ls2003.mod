@@ -41,8 +41,6 @@ end;
 
 varobs y_obs R_obs pie_obs dq de;
 
-//addpath H:\Junior\2006\gsautilities\GSA;
-
 estimated_params;
 psi1 , gamma_pdf,1.5,0.5;
 psi2 , gamma_pdf,0.25,0.125;
@@ -65,118 +63,145 @@ end;
 
   
 disp(' ');
-disp('NOW I DO STABILITY MAPPING, WHICH REQUIRES dynare_estimation to initialise prior settings');
+disp('NOW I DO STABILITY MAPPING and prepare sample for Reduced form Mapping');
 disp(' ');
-pause;
+disp('Press ENTER to continue'); pause;
 
-estimation(datafile=data_ca1,mode_compute=0);
-
-		   
-opt_gsa.stab=1;	% performs stability analysis (1 = default)
-opt_gsa.Nsam=2048; % sample size (default = 2048)
-opt_gsa.redform=1; % prepares mapping of reduced form coefficients (default = 0): this saves the full MC sample of the reduced form LRE solution
-opt_gsa.ilptau=1; % lptau sample (1=default)
-opt_gsa.load_stab=0; % generate a new sample: overwrites any generated sample (default=0)
-opt_gsa.alpha2_stab=0.4; % critical value to plot correlations in stable samples (default = 0.3)
-opt_gsa.ksstat=0; % critical value to plot Smirnov test in filtered samples (default = 0.1)
-
-options_.opt_gsa=opt_gsa;
-dynare_sensitivity;
+dynare_sensitivity(redform=1, //create sample of reduced form coefficients
+alpha2_stab=0.4,
+ksstat=0);
+// NOTE: since namendo is emppty by default, 
+// this call does not perform the mapping of reduced form coefficient: just prepares the sample
 
 disp(' ');
 disp('ANALYSIS OF REDUCED FORM COEFFICIENTS');
 disp(' ');
-pause;
+disp('Press ENTER to continue'); pause;
 
-opt_gsa.logtrans_redform=1; % also estimate log-transformed reduced form coefficients (default=0)
-//opt_gsa.namendo='pie'; % evaluate relationships for pie (it can be M_.endo_names as well for complete analysis)
-opt_gsa.namendo=['pie'; 'R  ']; % evaluate relationships for pie and R (it can be M_.endo_names as well for complete analysis)
-opt_gsa.namexo='e_R'; % evaluate relationships with exogenous e_R
-//opt_gsa.namexo=M_.exo_names; % evaluate relationships with all exogenous
-opt_gsa.namlagendo='R'; % evaluate relationships with lagged endogenous
-//opt_gsa.namlagendo=M_.endo_names; % evaluate relationships with all lagged endogenous
-opt_gsa.load_stab=1; % load stability analsis sample
-opt_gsa.load_redform=0; %load reduced form analysis if available (default=0: perform a new one)
-opt_gsa.stab=0; % don't do again stability analysis
-options_.opt_gsa=opt_gsa;
-dynare_sensitivity;
+dynare_sensitivity(load_stab=1,  // loead previously generated sample analysed for stability
+redform=1,  // do the reduced form mapping
+logtrans_redform=1,  // estimate log-transformed reduced form coefficients (default=0)
+namendo=(pie,R),  // evaluate relationships for pie and R (namendo=(:) for all variables)
+namexo=(e_R),     // evaluate relationships with exogenous e_R (use namexo=(:) for all shocks)
+namlagendo=(R),   // evaluate relationships with lagged R (use namlagendo=(:) for all lagged endogenous)
+stab=0 // don't repeat again the stability mapping
+);
+
+disp(' ');
+disp('THE PREVIOUS TWO CALLS COULD BE DONE TOGETHER');
+disp(' ');
+disp('Press ENTER to continue'); pause;
+dynare_sensitivity(
+alpha2_stab=0.4,
+ksstat=0,
+redform=1, //create sample of reduced form coefficients
+logtrans_redform=1,  // estimate log-transformed reduced form coefficients (default=0)
+namendo=(pie,R),  // evaluate relationships for pie and R (namendo=(:) for all variables)
+namexo=(e_R),     // evaluate relationships with exogenous e_R (use namexo=(:) for all shocks)
+namlagendo=(R)   // evaluate relationships with lagged R (use namlagendo=(:) for all lagged endogenous)
+);
+
+
+
+disp(' ');
+disp('MC FILTERING(rmse=1), TO MAP THE FIT FROM PRIORS');
+disp('Press ENTER to continue'); pause;
+
+dynare_sensitivity(datafile=data_ca1,first_obs=8,nobs=79,prefilter=1, // also presample=2,loglinear, are admissible
+load_stab=1,     // load prior sample
+istart_rmse=2,   //start computing rmse from second observation (i.e. rmse does not inlude initial big error)
+stab=0,          // don't  plot again stability analysis results
+rmse=1,          // do rmse analysis
+pfilt_rmse=0.1,  // filtering criterion, i.e. filter the best 10 percent rmse's
+alpha2_rmse=0.3, // critical value for correlations in the rmse filterting analysis: 
+                 // if ==1, means no corrleation analysis done
+alpha_rmse=1     // critical value for smirnov statistics of filtered samples
+                 // if ==1, no smornov analysis is done
+);
+
+disp(' ');
+disp('THE PREVIOUS THREE CALLS COULD BE DONE TOGETHER');
+disp(' ');
+disp('Press ENTER to continue'); pause;
+dynare_sensitivity(
+alpha2_stab=0.4,
+ksstat=0,
+redform=1, //create sample of reduced form coefficients
+logtrans_redform=1,  // estimate log-transformed reduced form coefficients (default=0)
+namendo=(pie,R),  // evaluate relationships for pie and R (namendo=(:) for all variables)
+namexo=(e_R),     // evaluate relationships with exogenous e_R (use namexo=(:) for all shocks)
+namlagendo=(R),   // evaluate relationships with lagged R (use namlagendo=(:) for all lagged endogenous)
+datafile=data_ca1,first_obs=8,nobs=79,prefilter=1, 
+istart_rmse=2,   //start computing rmse from second observation (i.e. rmse does not inlude initial big error)
+rmse=1,          // do rmse analysis
+pfilt_rmse=0.1,  // filtering criterion, i.e. filter the best 10 percent rmse's
+alpha2_rmse=0.3, // critical value for correlations in the rmse filterting analysis: 
+                 // if ==1, means no corrleation analysis done
+alpha_rmse=1     // critical value for smirnov statistics of filtered samples
+                 // if ==1, no smirnov sensitivity analysis is done
+);
+
+
 
 disp(' ');
 disp('I ESTIMATE THE MODEL');
 disp(' ');
-pause;
-// if already estimated, use this to build filtered variables at the mode in oo_ for RMSE analysis
-estimation(datafile=data_ca1,first_obs=8,nobs=79,mh_nblocks=2, mode_file=ls2003_mode, load_mh_file,
-  prefilter=1,mh_jscale=0.55,mh_replic=0, mode_compute=0, nograph, mh_drop=0.6);
+disp('Press ENTER to continue'); pause;
 
 // run this to generate posterior mode and Metropolis files if not yet done
-//estimation(datafile=data_ca1,first_obs=8,nobs=79,mh_nblocks=2,prefilter=1,mh_jscale=0.5,mh_replic=100000, mode_compute=4, nograph, mh_drop=0.6);
-//options_.hess=1;
-//options_.ftol=1.e-7;
+//estimation(datafile=data_ca1,first_obs=8,nobs=79,mh_nblocks=2,
+//   prefilter=1,mh_jscale=0.5,mh_replic=100000, mode_compute=4, nograph, mh_drop=0.6);
 
 
-// run this to produce posterior samples of filtered, smoothed amd irf variables
-//estimation(datafile=data_ca1,first_obs=8,nobs=79,mh_nblocks=2,prefilter=1,mh_jscale=0.5,
+// run this to produce posterior samples of filtered, smoothed and irf variables, if not yet done
+//estimation(datafile=data_ca1,first_obs=8,nobs=79,mh_nblocks=2,prefilter=1,mh_jscale=0.3,
 //          mh_replic=0, mode_file=ls2003_mode, mode_compute=0, nograph, load_mh_file, bayesian_irf,
 //		  filtered_vars, smoother, mh_drop=0.6);
 
 
 disp(' ');
-disp('MC FILTERING(opt_gsa.rmse=1), TO MAP THE FIT FROM PRIORS');
-pause;
+disp('WE DO STABILITY MAPPING AGAIN, BUT FOR MULTIVARIATE SAMPLE AT THE POSTERIOR MODE (or ML) and Hessian (pprior=0 & ppost=0)');
+disp('Typical for ML estimation, also feasible for posterior mode');
+disp(' ');
+disp('Press ENTER to continue'); pause;
 
-opt_gsa.redform=0;
-opt_gsa.load_stab=1; % load prior sample
-opt_gsa.load_rmse=0; % make a new rmse analysis
-opt_gsa.istart_rmse=2; %start computing rmse from second observation (i.e. rmse does not inlude initial big error)
-opt_gsa.stab=0; % don't  plot again stability analysis results
-opt_gsa.rmse=1; % do rmse analysis
-opt_gsa.glue=1; % prepare for glue GUI
-opt_gsa.pfilt_rmse=0.1;  % filtering criterion, i.e. I filter the best 10% rmse's
-opt_gsa.alpha2_rmse=0.3; % critical value for correlations in the rmse filterting analysis: if ==1, means no corrleation analysis done
-opt_gsa.alpha_rmse=1; % critical value for smirnov statistics
-options_.opt_gsa=opt_gsa;
-dynare_sensitivity;
+dynare_sensitivity(pprior=0,Nsam=2048,alpha2_stab=0.4,
+mode_file=ls2003_mode  // specifies the mode file where the mode and Hessian are stored
+);
+
 
 disp(' ');
-disp('WE DO STABILITY MAPPING AGAIN, BUT FROM THE POSTERIOR RANGES (opt_gsa.pprior=0 & opt_gsa.ppost=0)');
-pause,
-
-opt_gsa.stab=1;
-opt_gsa.Nsam=2048;
-opt_gsa.redform=0;
-opt_gsa.pprior=0;
-opt_gsa.rmse=0;
-opt_gsa.load_stab=0;
-opt_gsa.alpha2_stab=0.4;
-options_.opt_gsa=opt_gsa;
-dynare_sensitivity;
-//stab_map_(2048,1,0.4,1,0);
+disp('RMSE ANALYSIS FOR MULTIVARIATE SAMPLE AT THE POSTERIOR MODE');
+disp(' ');
+disp('Press ENTER to continue'); pause;
+dynare_sensitivity(mode_file=ls2003_mode,
+datafile=data_ca1,first_obs=8,nobs=79,prefilter=1,
+pprior=0,
+stab=0,
+rmse=1,
+alpha2_rmse=1, // no correlation analysis
+alpha_rmse=1  // no Smirnov sensitivity analysis
+);
 
 disp(' ');
-disp('RMSE ANALYSIS FOR POSTERIOR RANGES');
-pause,
-opt_gsa.stab=0;
-opt_gsa.redform=0;
-opt_gsa.rmse=1;
-opt_gsa.load_rmse=0;
-opt_gsa.alpha2_rmse=1;
-opt_gsa.alpha_rmse=1;
-options_.opt_gsa=opt_gsa;
-dynare_sensitivity;
+disp('THE LAST TWO CALLS COULD BE DONE TOGETHER');
+disp(' ');
+disp('Press ENTER to continue'); pause;
+dynare_sensitivity(pprior=0,Nsam=2048,alpha2_stab=0.4,mode_file=ls2003_mode,
+datafile=data_ca1,first_obs=8,nobs=79,prefilter=1,
+rmse=1,
+alpha2_rmse=1, // no correlation analysis
+alpha_rmse=1  // no Smirnov sensitivity analysis
+);
 
 disp(' ');
-disp('RMSE ANALYSIS FOR POSTERIOR MCMC sample (opt_gsa.ppost=1)');
-pause,
-opt_gsa.stab=0;
-opt_gsa.redform=0;
-opt_gsa.rmse=1;
-opt_gsa.load_rmse=0;
-opt_gsa.ppost=1;
-opt_gsa.alpha2_rmse=1;
-opt_gsa.alpha_rmse=1;
-opt_gsa.glue=1;
-options_.opt_gsa=opt_gsa;
-dynare_sensitivity;
+disp('RMSE ANALYSIS FOR POSTERIOR MCMC sample (ppost=1)');
+disp('Needs a call to dynare_estimation to load all MH environment');
+disp('Press ENTER to continue'); pause;
+estimation(datafile=data_ca1,first_obs=8,nobs=79,mh_nblocks=2, mode_file=ls2003_mode, load_mh_file,
+  prefilter=1,mh_jscale=0.5,mh_replic=0, mode_compute=0, nograph, mh_drop=0.6);
+
+dynare_sensitivity(stab=0, // no need for stability analysis since the posterior sample is surely OK
+rmse=1,ppost=1,alpha2_rmse=1,alpha_rmse=1);
 
 
