@@ -41,8 +41,6 @@ end;
 
 varobs y_obs R_obs pie_obs dq de;
 
-//addpath H:\Junior\2006\gsautilities\GSA;
-
 estimated_params;
 psi1 , gamma_pdf,1.5,0.5;
 psi2 , gamma_pdf,0.25,0.125;
@@ -64,41 +62,11 @@ stderr e_pies,inv_gamma_pdf,1.88,0.9827;
 end;
 
   
-disp(' ');
-disp('NOW I DO STABILITY MAPPING, WHICH REQUIRES dynare_estimation to initialise prior settings');
-disp(' ');
+disp('CREATE SCREENING SAMPLE, CHECK FOR STABILITY AND PERFORM SENSITIVITY ANALYSIS');
+disp('PRESS ENTER TO CONTUNUE');
 pause;
 
-estimation(datafile=data_ca1,mode_compute=0);
+dynare_sensitivity(morris=1, morris_nliv=6, morris_ntra=20, redform=1, 
+  namendo=(:), namexo=(:), namlagendo=(:));
 
-		   
-opt_gsa.stab=1;	% performs stability analysis (1 = default)
-opt_gsa.morris = 1; % performs screening (default = 0)
-opt_gsa.morris_nliv = 6; % number of bins in each prior range (default = 6)
-opt_gsa.morris_ntra = 20; % number of replicas (default = 20)
-opt_gsa.redform=1; % prepares mapping of reduced form coefficients (default = 0): this saves the full MC sample of the reduced form LRE solution
-opt_gsa.load_stab=0; % generate a new sample: overwrites any generated sample (default=0)
-opt_gsa.alpha2_stab=0.4; % critical value to plot correlations in stable samples (default = 0.3)
-opt_gsa.ksstat=0; % critical value to plot Smirnov test in filtered samples (default = 0.1)
-
-options_.opt_gsa=opt_gsa;
-dynare_sensitivity;
-
-disp(' ');
-disp('ANALYSIS OF REDUCED FORM COEFFICIENTS');
-disp(' ');
-pause;
-
-opt_gsa.logtrans_redform=1; % also estimate log-transformed reduced form coefficients (default=0)
-//opt_gsa.namendo='pie'; % evaluate relationships for pie (it can be M_.endo_names as well for complete analysis)
-//opt_gsa.namendo=['pie'; 'R  ']; % evaluate relationships for pie and R (it can be M_.endo_names as well for complete analysis)
-opt_gsa.namendo=M_.endo_names; % evaluate relationships with all lagged endogenous
-//opt_gsa.namexo='e_R'; % evaluate relationships with exogenous e_R
-opt_gsa.namexo=M_.exo_names; % evaluate relationships with all exogenous
-//opt_gsa.namlagendo='R'; % evaluate relationships with lagged endogenous
-opt_gsa.namlagendo=M_.endo_names; % evaluate relationships with all lagged endogenous
-opt_gsa.load_stab=1; % load stability analsis sample
-opt_gsa.stab=0; % don't do again stability analysis
-options_.opt_gsa=opt_gsa;
-dynare_sensitivity;
 
