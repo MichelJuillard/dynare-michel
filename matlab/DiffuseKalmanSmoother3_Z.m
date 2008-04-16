@@ -53,12 +53,14 @@ function [alphahat,etahat,a1,P,aK,PK,d,decomp] = DiffuseKalmanSmoother3_Z(T,Z,R,
 
 global options_
 
+d = 0;
+
 nk = options_.nk;
-spinf   	= size(Pinf1);
-spstar  	= size(Pstar1);
-v       	= zeros(pp,smpl);
-a       	= zeros(mm,smpl+1);
-a1			= a;
+spinf           = size(Pinf1);
+spstar          = size(Pstar1);
+v               = zeros(pp,smpl);
+a               = zeros(mm,smpl+1);
+a1                      = a;
 aK          = zeros(nk,mm,smpl+nk);
 
 if isempty(options_.diffuse_d),
@@ -67,34 +69,34 @@ else
   smpl_diff=rank(Pinf1);
 end
 
-Fstar   	= zeros(pp,smpl_diff);
-Finf		= zeros(pp,smpl_diff);
-Ki       	= zeros(mm,pp,smpl);
-Li      	= zeros(mm,mm,pp,smpl);
-Linf    	= zeros(mm,mm,pp,smpl_diff);
-L0      	= zeros(mm,mm,pp,smpl_diff);
-Kstar   	= zeros(mm,pp,smpl_diff);
-P       	= zeros(mm,mm,smpl+1);
-P1		= P;
+Fstar           = zeros(pp,smpl_diff);
+Finf            = zeros(pp,smpl_diff);
+Ki              = zeros(mm,pp,smpl);
+Li              = zeros(mm,mm,pp,smpl);
+Linf            = zeros(mm,mm,pp,smpl_diff);
+L0              = zeros(mm,mm,pp,smpl_diff);
+Kstar           = zeros(mm,pp,smpl_diff);
+P               = zeros(mm,mm,smpl+1);
+P1              = P;
 aK              = zeros(nk,mm,smpl+nk);
 PK              = zeros(nk,mm,mm,smpl+nk);
-Pstar   	= zeros(spstar(1),spstar(2),smpl_diff+1); Pstar(:,:,1) = Pstar1;
-Pinf    	= zeros(spinf(1),spinf(2),smpl_diff+1); Pinf(:,:,1) = Pinf1;
-Pstar1 		= Pstar;
-Pinf1  		= Pinf;
-crit   	 	= options_.kalman_tol;
+Pstar           = zeros(spstar(1),spstar(2),smpl_diff+1); Pstar(:,:,1) = Pstar1;
+Pinf            = zeros(spinf(1),spinf(2),smpl_diff+1); Pinf(:,:,1) = Pinf1;
+Pstar1          = Pstar;
+Pinf1           = Pinf;
+crit            = options_.kalman_tol;
 crit1       = 1.e-6;
-steady  	= smpl;
-rr      	= size(Q,1); % number of structural shocks
-QQ      	= R*Q*transpose(R);
-QRt			= Q*transpose(R);
-alphahat   	= zeros(mm,smpl);
-etahat	   	= zeros(rr,smpl);
-r 		   	= zeros(mm,smpl);
+steady          = smpl;
+rr              = size(Q,1); % number of structural shocks
+QQ              = R*Q*transpose(R);
+QRt                     = Q*transpose(R);
+alphahat        = zeros(mm,smpl);
+etahat          = zeros(rr,smpl);
+r                       = zeros(mm,smpl);
 
 t = 0;
 icc=0;
-newRank	  = rank(Pinf(:,:,1),crit1);
+newRank   = rank(Pinf(:,:,1),crit1);
 while newRank & t < smpl
   t = t+1;
   a1(:,t) = a(:,t);
@@ -104,21 +106,21 @@ while newRank & t < smpl
   Pinf1(:,:,t) = Pinf(:,:,t);
   for i=1:pp
     Zi = Z(i,:);
-    v(i,t) 	= Y(i,t)-Zi*a(:,t);
-    Fstar(i,t) 	= Zi*Pstar(:,:,t)*Zi';
-    Finf(i,t)	= Zi*Pinf(:,:,t)*Zi';
-    Kstar(:,i,t) 	= Pstar(:,:,t)*Zi';
+    v(i,t)      = Y(i,t)-Zi*a(:,t);
+    Fstar(i,t)  = Zi*Pstar(:,:,t)*Zi';
+    Finf(i,t)   = Zi*Pinf(:,:,t)*Zi';
+    Kstar(:,i,t)        = Pstar(:,:,t)*Zi';
     if Finf(i,t) > crit & newRank
       icc=icc+1;
-      Kinf(:,i,t)	= Pinf(:,:,t)*Zi';
-      Linf(:,:,i,t)  	= eye(mm) - Kinf(:,i,t)*Z(i,:)/Finf(i,t);
-      L0(:,:,i,t)  	= (Kinf(:,i,t)*Fstar(i,t)/Finf(i,t) - Kstar(:,i,t))*Zi/Finf(i,t);
-      a(:,t)		= a(:,t) + Kinf(:,i,t)*v(i,t)/Finf(i,t);
-      Pstar(:,:,t)	= Pstar(:,:,t) + ...
+      Kinf(:,i,t)       = Pinf(:,:,t)*Zi';
+      Linf(:,:,i,t)     = eye(mm) - Kinf(:,i,t)*Z(i,:)/Finf(i,t);
+      L0(:,:,i,t)       = (Kinf(:,i,t)*Fstar(i,t)/Finf(i,t) - Kstar(:,i,t))*Zi/Finf(i,t);
+      a(:,t)            = a(:,t) + Kinf(:,i,t)*v(i,t)/Finf(i,t);
+      Pstar(:,:,t)      = Pstar(:,:,t) + ...
         Kinf(:,i,t)*Kinf(:,i,t)'*Fstar(i,t)/(Finf(i,t)*Finf(i,t)) - ...
         (Kstar(:,i,t)*Kinf(:,i,t)' +...
         Kinf(:,i,t)*Kstar(:,i,t)')/Finf(i,t);
-      Pinf(:,:,t)	= Pinf(:,:,t) - Kinf(:,i,t)*Kinf(:,i,t)'/Finf(i,t);
+      Pinf(:,:,t)       = Pinf(:,:,t) - Kinf(:,i,t)*Kinf(:,i,t)'/Finf(i,t);
       Pstar(:,:,t)=tril(Pstar(:,:,t))+tril(Pstar(:,:,t),-1)';
       Pinf(:,:,t)=tril(Pinf(:,:,t))+tril(Pinf(:,:,t),-1)';
       % new terminiation criteria by M. Ratto
@@ -140,22 +142,22 @@ while newRank & t < smpl
     elseif Fstar(i,t) > crit 
       %% Note that : (1) rank(Pinf)=0 implies that Finf = 0, (2) outside this loop (when for some i and t the condition
       %% rank(Pinf)=0 is satisfied we have P = Pstar and F = Fstar and (3) Finf = 0 does not imply that
-      %% rank(Pinf)=0. [stéphane,11-03-2004].	  
+      %% rank(Pinf)=0. [stéphane,11-03-2004].     
       Li(:,:,i,t)    = eye(mm)-Kstar(:,i,t)*Z(i,:)/Fstar(i,t);  % we need to store Li for DKF smoother
-      a(:,t) 		= a(:,t) + Kstar(:,i,t)*v(i,t)/Fstar(i,t);
-      Pstar(:,:,t)	= Pstar(:,:,t) - Kstar(:,i,t)*Kstar(:,i,t)'/Fstar(i,t);
+      a(:,t)            = a(:,t) + Kstar(:,i,t)*v(i,t)/Fstar(i,t);
+      Pstar(:,:,t)      = Pstar(:,:,t) - Kstar(:,i,t)*Kstar(:,i,t)'/Fstar(i,t);
       Pstar(:,:,t)=tril(Pstar(:,:,t))+tril(Pstar(:,:,t),-1)';
     end
   end
-  a(:,t+1) 	 	= T*a(:,t);
+  a(:,t+1)              = T*a(:,t);
   for jnk=1:nk,
-    aK(jnk,:,t+jnk) 	 	= T^jnk*a(:,t);
+    aK(jnk,:,t+jnk)             = T^jnk*a(:,t);
   end
-  Pstar(:,:,t+1)	= T*Pstar(:,:,t)*T'+ QQ;
-  Pinf(:,:,t+1)	= T*Pinf(:,:,t)*T';
+  Pstar(:,:,t+1)        = T*Pstar(:,:,t)*T'+ QQ;
+  Pinf(:,:,t+1) = T*Pinf(:,:,t)*T';
   P0=Pinf(:,:,t+1);
   if newRank,
-    newRank	  = rank(P0,crit1);
+    newRank       = rank(P0,crit1);
   end
 end
 
@@ -244,7 +246,7 @@ while t>d+1 & t>2,
     end
   end
   r(:,t-1) = ri(:,t);
-  alphahat(:,t)	= a1(:,t) + P1(:,:,t)*r(:,t-1);
+  alphahat(:,t) = a1(:,t) + P1(:,:,t)*r(:,t-1);
   etahat(:,t) = QRt*r(:,t);
   ri(:,t-1) = T'*ri(:,t);
 end
@@ -261,9 +263,9 @@ if d
         r0(:,t) = Z(i,:)'/Fstar(i,t)*v(i,t)+Li(:,:,i,t)'*r0(:,t);
       end
     end
-    alphahat(:,t)	= a1(:,t) + Pstar1(:,:,t)*r0(:,t) + Pinf1(:,:,t)*r1(:,t);
-    r(:,t-1)		= r0(:,t);
-    etahat(:,t)		= QRt*r(:,t);
+    alphahat(:,t)       = a1(:,t) + Pstar1(:,:,t)*r0(:,t) + Pinf1(:,:,t)*r1(:,t);
+    r(:,t-1)            = r0(:,t);
+    etahat(:,t)         = QRt*r(:,t);
     r0(:,t-1) = T'*r0(:,t);
     r1(:,t-1) = T'*r1(:,t);
   end
@@ -278,8 +280,8 @@ if d
       r0_0=Z(i,:)'/Fstar(i,1)*v(i,1)+Li(:,:,i,1)'*r0_0;
     end
   end
-  alphahat(:,1)  	= a1(:,1) + Pstar1(:,:,1)*r0_0 + Pinf1(:,:,1)*r1_0;
-  etahat(:,1)		= QRt*r(:,1);
+  alphahat(:,1)         = a1(:,1) + Pstar1(:,:,1)*r0_0 + Pinf1(:,:,1)*r1_0;
+  etahat(:,1)           = QRt*r(:,1);
 else
   r0 = ri(:,1);
   for i=pp:-1:1
@@ -287,8 +289,8 @@ else
       r0 = Z(i,:)'/Fi(i,1)*v(i,1)+Li(:,:,i,1)'*r0;
     end
   end 
-  alphahat(:,1)	= a1(:,1) + P1(:,:,1)*r0;
-  etahat(:,1)	= QRt*r(:,1);
+  alphahat(:,1) = a1(:,1) + P1(:,:,1)*r0;
+  etahat(:,1)   = QRt*r(:,1);
 end
 
 a=a(:,1:end-1);
@@ -297,24 +299,24 @@ if nargout > 7
     decomp = zeros(nk,mm,rr,smpl+nk);
     ZRQinv = inv(Z*QQ*Z');
     for t = d:smpl
-	ri_d = zeros(mm,1);
-	for i=pp:-1:1
-	    if Fi(i,t) > crit
-		ri_d = Z(i,:)'/Fi(i,t)*v(i,t)+Li(:,:,i,t)'*ri_d;
-	    end
-	end
-	
-	% calculate eta_tm1t
-	eta_tm1t = QRt*ri_d;
-	% calculate decomposition
-	Ttok = eye(mm,mm); 
-	for h = 1:nk
-	    for j=1:rr
-		eta=zeros(rr,1);
-		eta(j) = eta_tm1t(j);
-		decomp(h,:,j,t+h) = Ttok*P1(:,:,t)*Z'*ZRQinv*Z*R*eta;
-	    end
-	    Ttok = T*Ttok;
-	end
+        ri_d = zeros(mm,1);
+        for i=pp:-1:1
+            if Fi(i,t) > crit
+                ri_d = Z(i,:)'/Fi(i,t)*v(i,t)+Li(:,:,i,t)'*ri_d;
+            end
+        end
+        
+        % calculate eta_tm1t
+        eta_tm1t = QRt*ri_d;
+        % calculate decomposition
+        Ttok = eye(mm,mm); 
+        for h = 1:nk
+            for j=1:rr
+                eta=zeros(rr,1);
+                eta(j) = eta_tm1t(j);
+                decomp(h,:,j,t+h) = Ttok*P1(:,:,t)*Z'*ZRQinv*Z*R*eta;
+            end
+            Ttok = T*Ttok;
+        end
     end
 end

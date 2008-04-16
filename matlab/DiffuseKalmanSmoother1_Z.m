@@ -46,6 +46,7 @@ function [alphahat,etahat,a,aK,P,PK,d] = DiffuseKalmanSmoother1_Z(T,Z,R,Q,Pinf1,
 
 global options_
 
+d = 0;
 nk = options_.nk;
 spinf   	= size(Pinf1);
 spstar  	= size(Pstar1);
