@@ -1,0 +1,29 @@
+This is BibTeX, Version 0.99cThe top-level auxiliary file: dyn_tbx.aux
+The style file: plainnat.bst
+Database file #1: marco.bib
+I was expecting a `,' or a `}'---line 916 of file marco.bib
+ :   
+ :   pages =        {},
+(Error may have been on previous line)
+I'm skipping whatever remains of this entry
+I was expecting a `,' or a `}'---line 1172 of file marco.bib
+ :   
+ :   organisation = {Los Alamos National Laboratories}
+(Error may have been on previous line)
+I'm skipping whatever remains of this entry
+I was expecting a `,' or a `}'---line 1359 of file marco.bib
+ :   
+ :   organisation = {}
+(Error may have been on previous line)
+I'm skipping whatever remains of this entry
+You're missing a field name---line 2205 of file marco.bib
+ : 
+ : %@ARTICLE{kn:NIH,
+(Error may have been on previous line)
+I'm skipping whatever remains of this entry
+You're missing a field name---line 2206 of file marco.bib
+ : 
+ : %  author =  {NIH},
+(Error may have been on previous line)
+I'm skipping whatever remains of this entry
+(There were 5 error messages)
