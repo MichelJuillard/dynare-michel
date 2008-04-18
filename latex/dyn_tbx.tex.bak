@@ -174,9 +174,6 @@ out-of-sample validation. \vspace{0.5cm}
                             &   & analyse entries
                             [\verb"namendo"$\times$\verb"namexo"]\\
                             & : & jolly character to indicate ALL exogenous  \\\hline
-       \verb"identification"& 0 & 0 = no identification analysis  \\
-                            &   & 1 = performs identification analysis:\\
-                            &   & this forces \verb"morris"=1 and \verb"redform"=0 \\ \hline
 \end{tabular}
 \vspace{0.5cm} \\
 
@@ -252,6 +249,14 @@ analysis based on theoretical moments, steady state gains and time
 of adjustment is performed. Sensitivity plots are provided that
 allow to infer which parameters are most likely to be less
 identifiable.
+
+\begin{tabular}{r|l|l}
+                option name & default & description  \\ \hline
+       \verb"identification"& 0 & 0 = no identification analysis  \\
+                            &   & 1 = performs identification analysis:\\
+                            &   & this forces \verb"morris"=1 and \verb"redform"=0 \\ \hline
+\end{tabular}
+
 
 \newpage
 \section{Directory structure}

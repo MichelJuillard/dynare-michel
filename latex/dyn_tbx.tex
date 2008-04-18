@@ -248,13 +248,21 @@ Setting the option \verb"identification=1", an identification
 analysis based on theoretical moments, steady state gains and time
 of adjustment is performed. Sensitivity plots are provided that
 allow to infer which parameters are most likely to be less
-identifiable.
+identifiable. \vspace{1cm}
 
 \begin{tabular}{r|l|l}
                 option name & default & description  \\ \hline
        \verb"identification"& 0 & 0 = no identification analysis  \\
                             &   & 1 = performs identification analysis:\\
-                            &   & this forces \verb"morris"=1 and \verb"redform"=0 \\ \hline
+                            &   & this forces \verb"redform"=0 and default\verb"morris"=1\\
+               \verb"morris"& 1 & 1 = Screening analysis (Type II error)\\
+                            &   & 0 = ANOVA Mapping (Type I error)\\
+          \verb"morris_nliv"& 6 & number of levels in Morris design\\
+          \verb"morris_ntra"& 20& number of trajectories in Morris design\\
+          \verb"trans_ident"& 0 & data transformation for ANOVA Mapping\\
+                            &   & 0 = no transformation\\
+                            &   & 1 = log-transformation\\
+                            &   & 2 = rank-transformation\\\hline
 \end{tabular}
 
 
