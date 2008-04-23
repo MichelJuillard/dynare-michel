@@ -1,9 +1,10 @@
-function x = gamm_inv(p,a)
-% PURPOSE: returns the inverse of the cdf at p of the gamma(a) distribution
+function x = gamm_inv(p,a,b)
+% PURPOSE: returns the inverse of the cdf at p of the gamma(a,b) distribution
 %---------------------------------------------------
 % USAGE: x = gamm_inv(p,a)
 % where: p = a vector of probabilities 
 %        a = a scalar parameter gamma(a)
+%        b = scaling factor for gamma
 %---------------------------------------------------
 % RETURNS:
 %        a vector x of the quantile at each element of p of the gamma(a) distribution      
@@ -16,7 +17,11 @@ function x = gamm_inv(p,a)
 % documentation modified by LeSage to fit the format
 % of the econometrics toolbox
 
-  if (nargin ~= 2)
+  if (nargin < 2 | isempty(b))
+    b=1;
+  end
+
+  if (nargin > 3)
     error('Wrong # of arguments to gamm_inv');
   end
   
@@ -42,3 +47,4 @@ I1 = find(p==1);
 x(I1) = zeros(size(I0)) + Inf;
 
 
+x=x.*b;
