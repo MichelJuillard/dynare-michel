@@ -82,7 +82,7 @@ else
   namfile=[fname_,'_mc'];
 end
 load([OutDir,'\',namfile],'lpmat', 'lpmat0', 'istable')
-load(options_.mode_file)
+% load(options_.mode_file)
 %%
 %%
 %%
