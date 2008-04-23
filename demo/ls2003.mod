@@ -89,17 +89,21 @@ stab=0 // don't repeat again the stability mapping
 
 disp(' ');
 disp('THE PREVIOUS TWO CALLS COULD BE DONE TOGETHER');
+disp('BY USING THE COMBINED CALL');
+disp(' ');
+disp('dynare_sensitivity(alpha2_stab=0.4, ksstat=0, redform=1,')
+disp('logtrans_redform=1, namendo=(pie,R), namexo=(e_R), namlagendo=(R));')
 disp(' ');
 disp('Press ENTER to continue'); pause;
-dynare_sensitivity(
-alpha2_stab=0.4,
-ksstat=0,
-redform=1, //create sample of reduced form coefficients
-logtrans_redform=1,  // estimate log-transformed reduced form coefficients (default=0)
-namendo=(pie,R),  // evaluate relationships for pie and R (namendo=(:) for all variables)
-namexo=(e_R),     // evaluate relationships with exogenous e_R (use namexo=(:) for all shocks)
-namlagendo=(R)   // evaluate relationships with lagged R (use namlagendo=(:) for all lagged endogenous)
-);
+//dynare_sensitivity(
+//alpha2_stab=0.4,
+//ksstat=0,
+//redform=1, //create sample of reduced form coefficients
+//logtrans_redform=1,  // estimate log-transformed reduced form coefficients (default=0)
+//namendo=(pie,R),  // evaluate relationships for pie and R (namendo=(:) for all variables)
+//namexo=(e_R),     // evaluate relationships with exogenous e_R (use namexo=(:) for all shocks)
+//namlagendo=(R)   // evaluate relationships with lagged R (use namlagendo=(:) for all lagged endogenous)
+//);
 
 
 
@@ -121,25 +125,31 @@ alpha_rmse=1     // critical value for smirnov statistics of filtered samples
 
 disp(' ');
 disp('THE PREVIOUS THREE CALLS COULD BE DONE TOGETHER');
+disp('BY USING THE COMBINED CALL');
+disp(' ');
+disp('dynare_sensitivity(alpha2_stab=0.4, ksstat=0, redform=1,')
+disp('logtrans_redform=1, namendo=(pie,R), namexo=(e_R), namlagendo=(R),')   
+disp('datafile=data_ca1,first_obs=8,nobs=79,prefilter=1,')
+disp('istart_rmse=2, rmse=1, pfilt_rmse=0.1, alpha2_rmse=0.3, alpha_rmse=1);')
 disp(' ');
 disp('Press ENTER to continue'); pause;
-dynare_sensitivity(
-alpha2_stab=0.4,
-ksstat=0,
-redform=1, //create sample of reduced form coefficients
-logtrans_redform=1,  // estimate log-transformed reduced form coefficients (default=0)
-namendo=(pie,R),  // evaluate relationships for pie and R (namendo=(:) for all variables)
-namexo=(e_R),     // evaluate relationships with exogenous e_R (use namexo=(:) for all shocks)
-namlagendo=(R),   // evaluate relationships with lagged R (use namlagendo=(:) for all lagged endogenous)
-datafile=data_ca1,first_obs=8,nobs=79,prefilter=1, 
-istart_rmse=2,   //start computing rmse from second observation (i.e. rmse does not inlude initial big error)
-rmse=1,          // do rmse analysis
-pfilt_rmse=0.1,  // filtering criterion, i.e. filter the best 10 percent rmse's
-alpha2_rmse=0.3, // critical value for correlations in the rmse filterting analysis: 
-                 // if ==1, means no corrleation analysis done
-alpha_rmse=1     // critical value for smirnov statistics of filtered samples
-                 // if ==1, no smirnov sensitivity analysis is done
-);
+//dynare_sensitivity(
+//alpha2_stab=0.4,
+//ksstat=0,
+//redform=1, //create sample of reduced form coefficients
+//logtrans_redform=1,  // estimate log-transformed reduced form coefficients (default=0)
+//namendo=(pie,R),  // evaluate relationships for pie and R (namendo=(:) for all variables)
+//namexo=(e_R),     // evaluate relationships with exogenous e_R (use namexo=(:) for all shocks)
+//namlagendo=(R),   // evaluate relationships with lagged R (use namlagendo=(:) for all lagged endogenous)
+//datafile=data_ca1,first_obs=8,nobs=79,prefilter=1, 
+//istart_rmse=2,   //start computing rmse from second observation (i.e. rmse does not inlude initial big error)
+//rmse=1,          // do rmse analysis
+//pfilt_rmse=0.1,  // filtering criterion, i.e. filter the best 10 percent rmse's
+//alpha2_rmse=0.3, // critical value for correlations in the rmse filterting analysis: 
+//                 // if ==1, means no corrleation analysis done
+//alpha_rmse=1     // critical value for smirnov statistics of filtered samples
+//                 // if ==1, no smirnov sensitivity analysis is done
+//);
 
 
 
@@ -185,14 +195,19 @@ alpha_rmse=1  // no Smirnov sensitivity analysis
 
 disp(' ');
 disp('THE LAST TWO CALLS COULD BE DONE TOGETHER');
+disp('BY USING THE COMBINED CALL');
+disp(' ');
+disp('dynare_sensitivity(pprior=0,Nsam=2048,alpha2_stab=0.4,mode_file=ls2003_mode,')
+disp('datafile=data_ca1,first_obs=8,nobs=79,prefilter=1,')
+disp('rmse=1, alpha2_rmse=1, alpha_rmse=1);')
 disp(' ');
 disp('Press ENTER to continue'); pause;
-dynare_sensitivity(pprior=0,Nsam=2048,alpha2_stab=0.4,mode_file=ls2003_mode,
-datafile=data_ca1,first_obs=8,nobs=79,prefilter=1,
-rmse=1,
-alpha2_rmse=1, // no correlation analysis
-alpha_rmse=1  // no Smirnov sensitivity analysis
-);
+//dynare_sensitivity(pprior=0,Nsam=2048,alpha2_stab=0.4,mode_file=ls2003_mode,
+//datafile=data_ca1,first_obs=8,nobs=79,prefilter=1,
+//rmse=1,
+//alpha2_rmse=1, // no correlation analysis
+//alpha_rmse=1  // no Smirnov sensitivity analysis
+//);
 
 disp(' ');
 disp('RMSE ANALYSIS FOR POSTERIOR MCMC sample (ppost=1)');
