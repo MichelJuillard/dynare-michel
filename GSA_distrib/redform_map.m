@@ -258,7 +258,7 @@ eval(['print -dpdf ' dirname,'\',M_.fname,'_redform_gsa']);
 else
 figure, %bar(silog)
 % boxplot(silog','whis',10,'symbol','r.')
-boxplot(silog',[],'.',[],10)
+myboxplot(silog',[],'.',[],10)
 set(gca,'xticklabel',' ','fontsize',10,'xtick',[1:np])
 xlabel(' ')
 set(gca,'xlim',[0.5 np+0.5])
