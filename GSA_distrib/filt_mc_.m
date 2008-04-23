@@ -159,7 +159,7 @@ if ~loadSA,
       else
         [alphahat,etahat,epsilonhat,ahat,SteadyState,trend_coeff,aK] = DsgeSmoother(xparam1,stock_gend,stock_data);
       y0 = ahat(jxj,:)' + ...
-        kron(ys_mean(js,:),ones(size(ahat,2),1));
+        kron(ys_mode(js,:),ones(size(ahat,2),1));
       rmse_mode(i) = sqrt(mean((vobs(istart:end)-y0(istart:end-1)).^2));
       end
     end
