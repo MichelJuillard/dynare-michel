@@ -25,7 +25,7 @@ npT = np+nshock;
 fname_ = M_.fname;
 
 % th moments
-[vdec, cc, ac] = mc_moments(T, lpmat0, oo_.dr);
+[vdec, cc, ac] = mc_moments(T, lpmat0(istable,:), oo_.dr);
 if opt_gsa.morris==0,
   ifig=0;
   for j=1:M_.exo_nbr,
@@ -36,7 +36,8 @@ if opt_gsa.morris==0,
     end
     iplo=iplo+1;
     subplot(2,3,iplo)
-    boxplot(squeeze(vdec(:,j,:))','whis',10,'symbol','.r')
+    myboxplot(squeeze(vdec(:,j,:))',[],'.',[],10)
+%     boxplot(squeeze(vdec(:,j,:))','whis',10,'symbol','.r')
     set(gca,'xticklabel',' ','fontsize',10,'xtick',[1:size(options_.varobs,1)])
     set(gca,'xlim',[0.5 size(options_.varobs,1)+0.5])
     set(gca,'ylim',[-2 102])
@@ -110,8 +111,11 @@ if opt_gsa.morris==1,
     [SAmeas, SAMorris(:,:,i)] = Morris_Measure_Groups(npT, [lpmat0 lpmat], vdec(:,i),nliv);
   end
   SAvdec = squeeze(SAMorris(:,1,:))';
+  save([OutputDirectoryName,'\',fname_,'_morris_IDE'],'SAvdec','vdec','ir_vdec','ic_vdec')
+
   figure,
-  boxplot(SAvdec,'whis',10,'symbol','r.')
+%   boxplot(SAvdec,'whis',10,'symbol','r.')
+  myboxplot(SAvdec,[],'.',[],10)
   set(gca,'xticklabel',' ','fontsize',10,'xtick',[1:npT])
   set(gca,'xlim',[0.5 npT+0.5])
   ydum = get(gca,'ylim');
@@ -138,7 +142,8 @@ if opt_gsa.morris==1,
     iv = find(ir_vdec==j);
     if ~isempty(iv)
       if length(iv)>1
-        boxplot(SAvdec(iv,:),'whis',3,'symbol','r.');
+%         boxplot(SAvdec(iv,:),'whis',3,'symbol','r.');
+        myboxplot(SAvdec(iv,:),[],'.',[],3)
       else
         plot(SAvdec(iv,:),'r.');
       end
@@ -171,7 +176,8 @@ if opt_gsa.morris==1,
     iv = find(ic_vdec==j);
     if ~isempty(iv)
       if length(iv)>1
-        boxplot(SAvdec(iv,:),'whis',3,'symbol','r.');
+%         boxplot(SAvdec(iv,:),'whis',3,'symbol','r.');
+        myboxplot(SAvdec(iv,:),[],'.',[],3)
       else
         plot(SAvdec(iv,:),'r.');
       end
@@ -198,8 +204,11 @@ if opt_gsa.morris==1,
     [SAmeas, SAMorris(:,:,i)] = Morris_Measure_Groups(npT, [lpmat0 lpmat], cc(:,i),nliv);
   end
   SAcc = squeeze(SAMorris(:,1,:))';
+  save([OutputDirectoryName,'\',fname_,'_morris_IDE'],'SAcc','cc','ir_cc','ic_cc','-append')
+  
   figure,
-  boxplot(SAcc,'whis',10,'symbol','r.')
+%   boxplot(SAcc,'whis',10,'symbol','r.')
+  myboxplot(SAcc,[],'.',[],10)
   set(gca,'xticklabel',' ','fontsize',10,'xtick',[1:npT])
   set(gca,'xlim',[0.5 npT+0.5])
   ydum = get(gca,'ylim');
@@ -227,7 +236,8 @@ if opt_gsa.morris==1,
     iv = [iv; find(ic_cc==j)];
     if ~isempty(iv)
       if length(iv)>1
-        boxplot(SAcc(iv,:),'whis',3,'symbol','r.');
+%         boxplot(SAcc(iv,:),'whis',3,'symbol','r.');
+        myboxplot(SAcc(iv,:),[],'.',[],3)
       else
         plot(SAcc(iv,:),'r.');
       end
@@ -255,8 +265,11 @@ if opt_gsa.morris==1,
   end
   %end
   SAac = squeeze(SAMorris(:,1,:))';
+  save([OutputDirectoryName,'\',fname_,'_morris_IDE'],'SAac','ac','ir_ac','ic_ac','-append')
+
   figure,
-  boxplot(SAac,'whis',10,'symbol','r.')
+%   boxplot(SAac,'whis',10,'symbol','r.')
+  myboxplot(SAac,[],'.',[],10)
   set(gca,'xticklabel',' ','fontsize',10,'xtick',[1:npT])
   set(gca,'xlim',[0.5 npT+0.5])
   ydum = get(gca,'ylim');
@@ -283,7 +296,8 @@ if opt_gsa.morris==1,
     iv = find(ir_ac==j);
     if ~isempty(iv)
       if length(iv)>1
-        boxplot(SAac(iv,:),'whis',3,'symbol','r.');
+%         boxplot(SAac(iv,:),'whis',3,'symbol','r.');
+        myboxplot(SAac(iv,:),[],'.',[],3)
       else
         plot(SAac(iv,:),'r.');
       end
@@ -317,6 +331,8 @@ if opt_gsa.morris==1,
     SAtadj(:,j)=SAM(:,j)./(max(SAM(:,j))+eps);
   end
   SAtadj = SAtadj';
+  save([OutputDirectoryName,'\',fname_,'_morris_IDE'],'SAtadj','tadj','ir_tadj','ic_tadj','-append')
+  
   js=0;
   SAMorris = [];
   for i=1:size(iff,2),
@@ -328,10 +344,12 @@ if opt_gsa.morris==1,
     SAIF(:,j)=SAM(:,j)./(max(SAM(:,j))+eps);
   end
   SAIF = SAIF';
+  save([OutputDirectoryName,'\',fname_,'_morris_IDE'],'SAIF','iff','ir_if','ic_if','-append')
 
   figure,
   %bar(SAtadj),
-  boxplot(SAtadj,'whis',10,'symbol','r.')
+%   boxplot(SAtadj,'whis',10,'symbol','r.')
+  myboxplot(SAtadj,[],'.',[],10)
   set(gca,'xticklabel',' ','fontsize',10,'xtick',[1:np])
   set(gca,'xlim',[0.5 np+0.5])
   set(gca,'ylim',[0 1])
@@ -357,7 +375,8 @@ if opt_gsa.morris==1,
     iv = find(ir_tadj==j);
     if ~isempty(iv)
       if length(iv)>1
-        boxplot(SAtadj(iv,:),'whis',3,'symbol','r.');
+%         boxplot(SAtadj(iv,:),'whis',3,'symbol','r.');
+        myboxplot(SAtadj(iv,:),[],'.',[],3)
       else
         plot(SAtadj(iv,:),'r.');
       end
@@ -390,7 +409,8 @@ if opt_gsa.morris==1,
     iv = find(ic_tadj==j);
     if ~isempty(iv)
       if length(iv)>1
-        boxplot(SAtadj(iv,:),'whis',3,'symbol','r.');
+%         boxplot(SAtadj(iv,:),'whis',3,'symbol','r.');
+        myboxplot(SAtadj(iv,:),[],'.',[],3)
       else
         plot(SAtadj(iv,:),'r.');
       end
@@ -413,7 +433,8 @@ if opt_gsa.morris==1,
 
   figure,
   %bar(SAIF),
-  boxplot(SAIF,'whis',10,'symbol','r.')
+%   boxplot(SAIF,'whis',10,'symbol','r.')
+  myboxplot(SAIF,[],'.',[],10)
   set(gca,'xticklabel',' ','fontsize',10,'xtick',[1:np])
   set(gca,'xlim',[0.5 np+0.5])
   set(gca,'ylim',[0 1])
@@ -440,7 +461,8 @@ if opt_gsa.morris==1,
     iv = find(ir_if==j);
     if ~isempty(iv)
       if length(iv)>1
-        boxplot(SAIF(iv,:),'whis',10,'symbol','r.');
+%         boxplot(SAIF(iv,:),'whis',10,'symbol','r.');
+        myboxplot(SAIF(iv,:),[],'.',[],10)
       else
         plot(SAIF(iv,:),'r.');
       end
@@ -473,7 +495,8 @@ if opt_gsa.morris==1,
     iv = find(ic_if==j);
     if ~isempty(iv)
       if length(iv)>1
-        boxplot(SAIF(iv,:),'whis',3,'symbol','r.');
+%         boxplot(SAIF(iv,:),'whis',3,'symbol','r.');
+        myboxplot(SAIF(iv,:),[],'.',[],3)
       else
         plot(SAIF(iv,:),'r.');
       end
@@ -517,7 +540,8 @@ if opt_gsa.morris==1,
   end
 
   figure, %bar(SAnorm(:,irel))
-  boxplot(SAnorm','whis',10,'symbol','r.')
+%   boxplot(SAnorm','whis',10,'symbol','r.')
+  myboxplot(SAnorm',[],'.',[],10)
   set(gca,'xticklabel',' ','fontsize',10,'xtick',[1:np])
   set(gca,'xlim',[0.5 np+0.5])
   set(gca,'ylim',[0 1])
@@ -533,7 +557,8 @@ if opt_gsa.morris==1,
   eval(['print -dpdf ' OutputDirectoryName '\' fname_ '_morris_par']);
 
   figure, %bar(SAmunorm(:,irel))
-  boxplot(SAmunorm','whis',10,'symbol','r.')
+%   boxplot(SAmunorm','whis',10,'symbol','r.')
+  myboxplot(SAmunorm',[],'.',[],10)
   set(gca,'xticklabel',' ','fontsize',10,'xtick',[1:np])
   set(gca,'xlim',[0.5 np+0.5])
   set(gca,'ylim',[-1 1])
@@ -548,7 +573,8 @@ if opt_gsa.morris==1,
   eval(['print -depsc2 ' OutputDirectoryName '\' fname_ '_morrismu_par']);
   eval(['print -dpdf ' OutputDirectoryName '\' fname_ '_morrismu_par']);
   figure, %bar(SAsignorm(:,irel))
-  boxplot(SAsignorm','whis',10,'symbol','r.')
+%   boxplot(SAsignorm','whis',10,'symbol','r.')
+  myboxplot(SAsignorm',[],'.',[],10)
   set(gca,'xticklabel',' ','fontsize',10,'xtick',[1:np])
   set(gca,'xlim',[0.5 np+0.5])
   set(gca,'ylim',[0 1])
@@ -626,7 +652,7 @@ elseif opt_gsa.morris==2,
   figure, bar((idex_pcr.*ys_pcr)./opt_gsa.Nsam), title('Relationships rank PCA')
   figure, bar((idex_pcr.*ys_pcr)'./opt_gsa.Nsam), title('Parameters rank PCA')
 else,
-
+  
   if itrans==0,
     fsuffix = '';
   elseif itrans==1,
@@ -634,10 +660,20 @@ else,
   else
     fsuffix = '_rank';
   end
+  
+  imap=[1:npT];
 
+  x0=[lpmat0(istable,:), lpmat(istable,:)];
   nrun=length(istable);
   nest=min(250,nrun);
   nfit=min(1000,nrun);
+  try 
+    EET=load([OutputDirectoryName,'\SCREEN\',fname_,'_morris_IDE'],'SAvdec','vdec','ir_vdec','ic_vdec');
+  catch
+    EET=[];
+  end
+  
+  SAvdec=zeros(size(vdec,2),npT);
 
   for j=1:size(vdec,2),
     if itrans==0,
@@ -647,26 +683,34 @@ else,
     else
       y0 = trank(vdec(istable,j));
     end
-  gsa_(j) = gsa_sdp(y0(1:nest), lpmat(istable(1:nest),:), ...
+    if ~isempty(EET),
+%       imap=find(EET.SAvdec(j,:));
+%       [dum, isort]=sort(-EET.SAvdec(j,:));
+      imap=find(EET.SAvdec(j,:) >= (0.1.*max(EET.SAvdec(j,:))) );
+    end
+  gsa_(j) = gsa_sdp(y0(1:nest), x0(1:nest,imap), ...
       2, [],[],[],0,[OutputDirectoryName,'/map_vdec',fsuffix,int2str(j)], pnames);
   if nfit>nest,
-    gsa_(j) = gsa_sdp(y0(1:nest), lpmat(istable(1:nest),:), ...
+    gsa_(j) = gsa_sdp(y0(1:nfit), x0(1:nfit,imap), ...
         -2, gsa_(j).nvr*nest^3/nfit^3,[],[],0,[OutputDirectoryName,'/map_vdec',fsuffix,int2str(j)], pnames);
   end
     
-    SAvdec(j,:)=gsa_(j).si;
-
+    SAvdec(j,imap)=gsa_(j).si;
+    imap_vdec{j}=imap;
   end
+  save([OutputDirectoryName,'\',fname_,'_main_eff'],'imap_vdec','SAvdec','vdec','ir_vdec','ic_vdec')
 
   figure,
-  boxplot(SAvdec,'whis',10,'symbol','r.')
+%   boxplot(SAvdec,'whis',10,'symbol','r.')
+  myboxplot(SAvdec,[],'.',[],10)
   set(gca,'xticklabel',' ','fontsize',10,'xtick',[1:np])
-  set(gca,'xlim',[0.5 np+0.5])
+  set(gca,'xlim',[0.5 npT+0.5])
   ydum = get(gca,'ylim');
   set(gca,'ylim',[0 ydum(2)])
   set(gca,'position',[0.13 0.2 0.775 0.7])
-  for ip=1:np,
-    text(ip,-0.02,deblank(pnames(ip,:)),'rotation',90,'HorizontalAlignment','right','interpreter','none')
+  for ip=1:npT,
+    text(ip,-0.02,bayestopt_.name{ip},'rotation',90,'HorizontalAlignment','right','interpreter','none')
+%     text(ip,-0.02,deblank(pnames(ip,:)),'rotation',90,'HorizontalAlignment','right','interpreter','none')
   end
   xlabel(' ')
   title(['Main effects variance decomposition ',fsuffix],'interpreter','none')
@@ -686,16 +730,18 @@ else,
     iv = find(ir_vdec==j);
     if ~isempty(iv)
       if length(iv)>1
-        boxplot(SAvdec(iv,:),'whis',10,'symbol','r.');
+%         boxplot(SAvdec(iv,:),'whis',10,'symbol','r.');
+        myboxplot(SAvdec(iv,:),[],'.',[],10)
       else
         plot(SAvdec(iv,:),'r.');
       end
       set(gca,'xticklabel',' ','fontsize',10,'xtick',[1:np])
-      set(gca,'xlim',[0.5 np+0.5])
+      set(gca,'xlim',[0.5 npT+0.5])
       ydum = get(gca,'ylim');
       set(gca,'ylim',[0 ydum(2)])
-      for ip=1:np,
-        text(ip,-0.02,deblank(pnames(ip,:)),'rotation',90,'HorizontalAlignment','right','interpreter','none')
+      for ip=1:npT,
+        text(ip,-0.02,bayestopt_.name{ip},'rotation',90,'HorizontalAlignment','right','interpreter','none')
+%         text(ip,-0.02,deblank(pnames(ip,:)),'rotation',90,'HorizontalAlignment','right','interpreter','none')
       end
       xlabel(' ')
     end
@@ -719,20 +765,23 @@ else,
     iv = find(ic_vdec==j);
     if ~isempty(iv)
       if length(iv)>1
-        boxplot(SAvdec(iv,:),'whis',3,'symbol','r.');
+%         boxplot(SAvdec(iv,:),'whis',3,'symbol','r.');
+        myboxplot(SAvdec(iv,:),[],'.',[],10)
       else
         plot(SAvdec(iv,:),'r.');
       end
       set(gca,'xticklabel',' ','fontsize',3,'xtick',[1:np])
-      set(gca,'xlim',[0.5 np+0.5])
+      set(gca,'xlim',[0.5 npT+0.5])
       ydum = get(gca,'ylim');
       set(gca,'ylim',[0 ydum(2)])
-      for ip=1:np,
-        text(ip,-0.02,deblank(pnames(ip,:)),'rotation',90,'HorizontalAlignment','right','interpreter','none')
+      for ip=1:npT,
+        text(ip,-0.02,bayestopt_.name{ip},'rotation',90,'HorizontalAlignment','right','interpreter','none')
+%         text(ip,-0.02,deblank(pnames(ip,:)),'rotation',90,'HorizontalAlignment','right','interpreter','none')
       end
       xlabel(' ')
+      set(gca,'fontsize',10)
     end
-    title(M_.exo_names(j,:),'interpreter','none')
+    title(M_.exo_names(j,:),'interpreter','none','fontsize',10)
     if mod(j,6)==0 | j==M_.exo_nbr
       saveas(gcf,[OutputDirectoryName,'\',fname_,'_map_vdec',fsuffix,'_exo_',int2str(ifig)])
       eval(['print -depsc2 ' OutputDirectoryName '\' fname_ '_map_vdec',fsuffix,'_exo_',int2str(ifig)]);
@@ -740,6 +789,12 @@ else,
     end
   end
 
+  try 
+    EET=load([OutputDirectoryName,'\SCREEN\',fname_,'_morris_IDE'],'SAcc','ir_cc','ic_cc');
+  catch
+    EET=[];
+  end
+  SAcc=zeros(size(cc,2),npT);
   for j=1:size(cc,2),
     if itrans==0,
       y0 = cc(istable,j);
@@ -748,25 +803,34 @@ else,
     else
       y0 = trank(cc(istable,j));
     end
-  gsa_(j) = gsa_sdp(y0(1:nest), lpmat(istable(1:nest),:), ...
+    if ~isempty(EET),
+%       imap=find(EET.SAvdec(j,:));
+%       [dum, isort]=sort(-EET.SAvdec(j,:));
+      imap=find(EET.SAcc(j,:) >= (0.1.*max(EET.SAcc(j,:))) );
+    end
+  gsa_(j) = gsa_sdp(y0(1:nest), x0(1:nest,imap), ...
       2, [],[],[],0,[OutputDirectoryName,'/map_cc',fsuffix,int2str(j)], pnames);
   if nfit>nest,
-    gsa_(j) = gsa_sdp(y0(1:nest), lpmat(istable(1:nest),:), ...
+    gsa_(j) = gsa_sdp(y0(1:nfit), x0(1:nfit,imap), ...
         -2, gsa_(j).nvr*nest^3/nfit^3,[],[],0,[OutputDirectoryName,'/map_cc',fsuffix,int2str(j)], pnames);
   end
-    SAcc(j,:)=gsa_(j).si;
+    SAcc(j,imap)=gsa_(j).si;
+    imap_cc{j}=imap;
 
   end
+  save([OutputDirectoryName,'\',fname_,'_main_eff'],'imap_cc','SAcc','cc','ir_cc','ic_cc')
 
   figure,
-  boxplot(SAcc,'whis',10,'symbol','r.')
+%   boxplot(SAcc,'whis',10,'symbol','r.')
+  myboxplot(SAcc,[],'.',[],10)
   set(gca,'xticklabel',' ','fontsize',10,'xtick',[1:np])
-  set(gca,'xlim',[0.5 np+0.5])
+  set(gca,'xlim',[0.5 npT+0.5])
   ydum = get(gca,'ylim');
   set(gca,'ylim',[0 ydum(2)])
   set(gca,'position',[0.13 0.2 0.775 0.7])
-  for ip=1:np,
-    text(ip,-0.02,deblank(pnames(ip,:)),'rotation',90,'HorizontalAlignment','right','interpreter','none')
+  for ip=1:npT,
+    text(ip,-0.02,bayestopt_.name{ip},'rotation',90,'HorizontalAlignment','right','interpreter','none')
+%     text(ip,-0.02,deblank(pnames(ip,:)),'rotation',90,'HorizontalAlignment','right','interpreter','none')
   end
   xlabel(' ')
   ylabel(' ')
@@ -788,20 +852,23 @@ else,
     iv = [iv; find(ic_cc==j)];
     if ~isempty(iv)
       if length(iv)>1
-        boxplot(SAcc(iv,:),'whis',10,'symbol','r.');
+%         boxplot(SAcc(iv,:),'whis',10,'symbol','r.');
+        myboxplot(SAcc(iv,:),[],'.',[],10)
       else
         plot(SAcc(iv,:),'r.');
       end
       set(gca,'xticklabel',' ','fontsize',10,'xtick',[1:np])
-      set(gca,'xlim',[0.5 np+0.5])
+      set(gca,'xlim',[0.5 npT+0.5])
       ydum = get(gca,'ylim');
       set(gca,'ylim',[0 ydum(2)])
-      for ip=1:np,
-        text(ip,-0.02,deblank(pnames(ip,:)),'rotation',90,'HorizontalAlignment','right','interpreter','none')
+      for ip=1:npT,
+        text(ip,-0.02,bayestopt_.name{ip},'rotation',90,'HorizontalAlignment','right','interpreter','none')
+%         text(ip,-0.02,deblank(pnames(ip,:)),'rotation',90,'HorizontalAlignment','right','interpreter','none')
       end
       xlabel(' ')
+      set(gca,'fontsize',10)
     end
-    title(options_.varobs(j,:),'interpreter','none')
+    title(options_.varobs(j,:),'interpreter','none','fontsize',10)
     if mod(j,6)==0 | j==size(options_.varobs,1)
       saveas(gcf,[OutputDirectoryName,'\',fname_,'_map_cc',fsuffix,'_',int2str(ifig)])
       eval(['print -depsc2 ' OutputDirectoryName '\' fname_ '_map_cc',fsuffix,'_',int2str(ifig)]);
@@ -809,6 +876,12 @@ else,
     end
   end
 
+  try 
+    EET=load([OutputDirectoryName,'\SCREEN\',fname_,'_morris_IDE'],'SAac','ir_ac','ic_ac');
+  catch
+    EET=[];
+  end
+  SAac=zeros(size(ac,2),npT);
   for j=1:size(ac,2),
     if itrans==0,
       y0 = ac(istable,j);
@@ -817,22 +890,28 @@ else,
     else
       y0 = trank(ac(istable,j));
     end
+    if ~isempty(EET),
+      imap=find(EET.SAac(j,:) >= (0.1.*max(EET.SAac(j,:))) );
+    end
 %     gsa_(j) = gsa_sdp_dyn( y0, lpmat(istable,:), ...
 %       gsa_flag, [],[],[],0,[OutputDirectoryName,'/map_ac',fsuffix,int2str(j)], pnames);
-  gsa_(j) = gsa_sdp(y0(1:nest), lpmat(istable(1:nest),:), ...
+  gsa_(j) = gsa_sdp(y0(1:nest), x0(1:nest,imap), ...
       2, [],[],[],0,[OutputDirectoryName,'/map_ac',fsuffix,int2str(j)], pnames);
   if nfit>nest,
-    gsa_(j) = gsa_sdp(y0(1:nest), lpmat(istable(1:nest),:), ...
+    gsa_(j) = gsa_sdp(y0(1:nfit), x0(1:nfit,imap), ...
         -2, gsa_(j).nvr*nest^3/nfit^3,[],[],0,[OutputDirectoryName,'/map_ac',fsuffix,int2str(j)], pnames);
   end
-    SAac(j,:)=gsa_(j).si;
+    SAac(j,imap)=gsa_(j).si;
+    imap_ac{j}=imap;
 
   end
+  save([OutputDirectoryName,'\',fname_,'_main_eff'],'imap_ac','SAac','ac','ir_ac','ic_ac')
 
   figure,
-  boxplot(SAac,'whis',10,'symbol','r.')
+%   boxplot(SAac,'whis',10,'symbol','r.')
+  myboxplot(SAac,[],'.',[],10)
   set(gca,'xticklabel',' ','fontsize',10,'xtick',[1:np])
-  set(gca,'xlim',[0.5 np+0.5])
+  set(gca,'xlim',[0.5 npT+0.5])
   ydum = get(gca,'ylim');
   set(gca,'ylim',[0 ydum(2)])
   set(gca,'position',[0.13 0.2 0.775 0.7])
@@ -858,27 +937,40 @@ else,
     %iv = [iv; find(ic_ac==j)];
     if ~isempty(iv)
       if length(iv)>1
-        boxplot(SAac(iv,:),'whis',10,'symbol','r.');
+%         boxplot(SAac(iv,:),'whis',10,'symbol','r.');
+        myboxplot(SAac(iv,:),[],'.',[],10)
       else
         plot(SAac(iv,:),'r.');
       end
       set(gca,'xticklabel',' ','fontsize',10,'xtick',[1:np])
-      set(gca,'xlim',[0.5 np+0.5])
+      set(gca,'xlim',[0.5 npT+0.5])
       ydum = get(gca,'ylim');
       set(gca,'ylim',[0 ydum(2)])
-      for ip=1:np,
-        text(ip,-0.02,deblank(pnames(ip,:)),'rotation',90,'HorizontalAlignment','right','interpreter','none')
+      for ip=1:npT,
+        text(ip,-0.02,bayestopt_.name{ip},'rotation',90,'HorizontalAlignment','right','interpreter','none')
+%         text(ip,-0.02,deblank(pnames(ip,:)),'rotation',90,'HorizontalAlignment','right','interpreter','none')
       end
       xlabel(' ')
+      set(gca,'fontsize',10)
     end
-    title(options_.varobs(j,:),'interpreter','none')
+    title(options_.varobs(j,:),'interpreter','none','fontsize',10)
     if mod(j,6)==0 | j==size(options_.varobs,1)
       saveas(gcf,[OutputDirectoryName,'\',fname_,'_map_ac',fsuffix,'_',int2str(ifig)])
       eval(['print -depsc2 ' OutputDirectoryName '\' fname_ '_map_ac',fsuffix,'_',int2str(ifig)]);
       eval(['print -dpdf ' OutputDirectoryName '\' fname_ '_map_ac',fsuffix,'_',int2str(ifig)]);
     end
   end
+  
+  x0=x0(:,nshock+1:end);
+  imap=[1:np];
 
+  try 
+    EET=load([OutputDirectoryName,'\SCREEN\',fname_,'_morris_IDE'],'SAtadj','ir_tadj','ic_tadj');
+    ny=size(EET.SAtadj,1);
+  catch
+    EET=[];
+  end
+  SAtadj=zeros(size(tadj,2),np);
   for j=1:size(tadj,2),
     if itrans==0,
       y0 = tadj(istable,j);
@@ -887,20 +979,36 @@ else,
     else
       y0 = trank(tadj(istable,j));
     end
+    if ~isempty(EET),
+      if size(tadj,2)~=ny,
+        jj=find(EET.ir_tadj==ir_tadj(j));
+        jj=jj(find(EET.ic_tadj(jj)==ic_tadj(j)));
+        if ~isempty(jj),
+          imap=find(EET.SAtadj(jj,:) >= (0.1.*max(EET.SAtadj(jj,:))) );
+        else
+          imap=[1:np];
+        end
+      else
+        imap=find(EET.SAtadj(j,:) >= (0.1.*max(EET.SAtadj(j,:))) );
+      end
+    end
 %     gsa_(j) = gsa_sdp_dyn( y0, lpmat(istable,:), ...
 %       gsa_flag, [],[],[],0,[OutputDirectoryName,'/map_tadj',fsuffix,int2str(j)], pnames);
-  gsa_(j) = gsa_sdp(y0(1:nest), lpmat(istable(1:nest),:), ...
+  gsa_(j) = gsa_sdp(y0(1:nest), x0(1:nest,imap), ...
       2, [],[],[],0,[OutputDirectoryName,'/map_tadj',fsuffix,int2str(j)], pnames);
   if nfit>nest,
-    gsa_(j) = gsa_sdp(y0(1:nest), lpmat(istable(1:nest),:), ...
+    gsa_(j) = gsa_sdp(y0(1:nfit), x0(1:nfit,imap), ...
         -2, gsa_(j).nvr*nest^3/nfit^3,[],[],0,[OutputDirectoryName,'/map_tadj',fsuffix,int2str(j)], pnames);
   end
-    SAtadj(j,:)=gsa_(j).si;
+    SAtadj(j,imap)=gsa_(j).si;
+    imap_tadj{j}=imap;
 
   end
+  save([OutputDirectoryName,'\',fname_,'_main_eff'],'imap_tadj','SAtadj','tadj','ir_tadj','ic_tadj')
 
   figure,
-  boxplot(SAtadj,'whis',10,'symbol','r.')
+%   boxplot(SAtadj,'whis',10,'symbol','r.')
+  myboxplot(SAtadj,[],'.',[],10)
   set(gca,'xticklabel',' ','fontsize',10,'xtick',[1:np])
   set(gca,'xlim',[0.5 np+0.5])
   ydum = get(gca,'ylim');
@@ -927,7 +1035,8 @@ else,
     iv = find(ir_tadj==j);
     if ~isempty(iv)
       if length(iv)>1
-        boxplot(SAtadj(iv,:),'whis',3,'symbol','r.');
+%         boxplot(SAtadj(iv,:),'whis',3,'symbol','r.');
+        myboxplot(SAtadj(iv,:),[],'.',[],10)
       else
         plot(SAtadj(iv,:),'r.');
       end
@@ -960,7 +1069,8 @@ else,
     iv = find(ic_tadj==j);
     if ~isempty(iv)
       if length(iv)>1
-        boxplot(SAtadj(iv,:),'whis',3,'symbol','r.');
+%         boxplot(SAtadj(iv,:),'whis',3,'symbol','r.');
+        myboxplot(SAtadj(iv,:),[],'.',[],10)
       else
         plot(SAtadj(iv,:),'r.');
       end
@@ -982,6 +1092,12 @@ else,
   end
 
 
+  try 
+    EET=load([OutputDirectoryName,'\SCREEN\',fname_,'_morris_IDE'],'SAIF','ir_if','ic_if');
+  catch
+    EET=[];
+  end
+  SAif=zeros(size(iff,2),np);
   for j=1:size(iff,2),
     if itrans==0,
       y0 = iff(istable,j);
@@ -990,20 +1106,26 @@ else,
     else
       y0 = trank(iff(istable,j));
     end
+    if ~isempty(EET),
+      imap=find(EET.SAIF(j,:) >= (0.1.*max(EET.SAIF(j,:))) );
+    end
 %     gsa_(j) = gsa_sdp_dyn( y0, lpmat(istable,:), ...
 %       gsa_flag, [],[],[],0,[OutputDirectoryName,'/map_if',fsuffix,int2str(j)], pnames);
-  gsa_(j) = gsa_sdp(y0(1:nest), lpmat(istable(1:nest),:), ...
+  gsa_(j) = gsa_sdp(y0(1:nest), x0(1:nest,imap), ...
       2, [],[],[],0,[OutputDirectoryName,'/map_if',fsuffix,int2str(j)], pnames);
   if nfit>nest,
-    gsa_(j) = gsa_sdp(y0(1:nest), lpmat(istable(1:nest),:), ...
+    gsa_(j) = gsa_sdp(y0(1:nfit), x0(1:nfit,imap), ...
         -2, gsa_(j).nvr*nest^3/nfit^3,[],[],0,[OutputDirectoryName,'/map_if',fsuffix,int2str(j)], pnames);
   end
-    SAif(j,:)=gsa_(j).si;
-
+    SAif(j,imap)=gsa_(j).si;
+    imap_if{j}=imap;
+    
   end
+  save([OutputDirectoryName,'\',fname_,'_main_eff'],'imap_if','SAif','iff','ir_if','ic_if')
 
   figure,
-  boxplot(SAif,'whis',10,'symbol','r.')
+%   boxplot(SAif,'whis',10,'symbol','r.')
+  myboxplot(SAif,[],'.',[],10)
   set(gca,'xticklabel',' ','fontsize',10,'xtick',[1:np])
   set(gca,'xlim',[0.5 np+0.5])
   ydum = get(gca,'ylim');
@@ -1030,7 +1152,8 @@ else,
     iv = find(ir_if==j);
     if ~isempty(iv)
       if length(iv)>1
-        boxplot(SAif(iv,:),'whis',3,'symbol','r.');
+%         boxplot(SAif(iv,:),'whis',3,'symbol','r.');
+        myboxplot(SAif(iv,:),[],'.',[],10)
       else
         plot(SAif(iv,:),'r.');
       end
@@ -1063,7 +1186,8 @@ else,
     iv = find(ic_if==j);
     if ~isempty(iv)
       if length(iv)>1
-        boxplot(SAif(iv,:),'whis',3,'symbol','r.');
+%         boxplot(SAif(iv,:),'whis',3,'symbol','r.');
+        myboxplot(SAif(iv,:),[],'.',[],10)
       else
         plot(SAif(iv,:),'r.');
       end

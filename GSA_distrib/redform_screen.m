@@ -72,11 +72,11 @@ for j=1:size(anamendo,1),
         SAM = squeeze(SAMorris(nshock+1:end,1));
         SA(:,js)=SAM./(max(SAM)+eps);
         [saso, iso] = sort(-SA(:,js));
-        bar(SA(iso(1:10),js))
-        %set(gca,'xticklabel',pnames(iso(1:10),:),'fontsize',8)
+        bar(SA(iso(1:min(np,10)),js))
+        %set(gca,'xticklabel',pnames(iso(1:min(np,10)),:),'fontsize',8)
         set(gca,'xticklabel',' ','fontsize',10)
         set(gca,'xlim',[0.5 10.5])
-        for ip=1:10,
+        for ip=1:min(np,10),
           text(ip,-0.02,deblank(pnames(iso(ip),:)),'rotation',90,'HorizontalAlignment','right','interpreter','none')
         end
         title([namendo,' vs. ',namexo],'interpreter','none')
@@ -118,11 +118,11 @@ for j=1:size(anamendo,1),
         SAM = squeeze(SAMorris(nshock+1:end,1));
         SA(:,js)=SAM./(max(SAM)+eps);
         [saso, iso] = sort(-SA(:,js));
-        bar(SA(iso(1:10),js))
-        %set(gca,'xticklabel',pnames(iso(1:10),:),'fontsize',8)
+        bar(SA(iso(1:min(np,10)),js))
+        %set(gca,'xticklabel',pnames(iso(1:min(np,10)),:),'fontsize',8)
         set(gca,'xticklabel',' ','fontsize',10)
         set(gca,'xlim',[0.5 10.5])
-        for ip=1:10,
+        for ip=1:min(np,10),
           text(ip,-0.02,deblank(pnames(iso(ip),:)),'rotation',90,'HorizontalAlignment','right','interpreter','none')
         end
 
@@ -146,7 +146,8 @@ end
 
 figure, 
 %bar(SA)
-boxplot(SA','whis',10,'symbol','r.')
+% boxplot(SA','whis',10,'symbol','r.')
+myboxplot(SA',[],'.',[],10)
 set(gca,'xticklabel',' ','fontsize',10,'xtick',[1:np])
 set(gca,'xlim',[0.5 np+0.5])
 set(gca,'ylim',[0 1])

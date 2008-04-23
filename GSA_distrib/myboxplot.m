@@ -1,12 +1,13 @@
 
-function s = myboxplot (data,notched,symbol,vertical,maxwhisker)
+function sout = myboxplot (data,notched,symbol,vertical,maxwhisker)
 
+%  sout = myboxplot (data,notched,symbol,vertical,maxwhisker)
 
 % % % % endif
-if nargin < 5, maxwhisker = 1; end
-if nargin < 4, vertical = 1; end
-if nargin < 3, symbol = ['+','o']; end
-if nargin < 2, notched = 0; end
+if nargin < 5 | isempty(maxwhisker), maxwhisker = 1.5; end
+if nargin < 4 | isempty(vertical), vertical = 1; end
+if nargin < 3 | isempty(symbol), symbol = ['+','o']; end
+if nargin < 2 | isempty(notched), notched = 0; end
 
 if length(symbol)==1, symbol(2)=symbol(1); end
 
@@ -128,8 +129,8 @@ cap_y = whisker_y([1,1],:);
 % 
 % ## Do the plot
 
-mm=min(min(col));
-MM=max(max(col));
+mm=min(min(data));
+MM=max(max(data));
 
 if vertical
     plot (quartile_x, quartile_y, 'b',  ...
@@ -151,4 +152,7 @@ else
 % % % % %     outliers2_y, outliers2_x, [symbol(2),"r;;"]);
 end
 
+if nargout,
+  sout=s;
+end
 % % % endfunction

@@ -130,17 +130,17 @@ for j=1:size(anamendo,1)
         subplot(3,3,iplo),
         if ilog,
           [saso, iso] = sort(-silog(:,js));
-          bar([silog(iso(1:10),js)])
+          bar([silog(iso(1:min(np,10)),js)])
           logflag='log';
         else
           [saso, iso] = sort(-si(:,js));
-          bar(si(iso(1:10),js))
+          bar(si(iso(1:min(np,10)),js))
           logflag='';
         end
-        %set(gca,'xticklabel',pnames(iso(1:10),:),'fontsize',8)
+        %set(gca,'xticklabel',pnames(iso(1:min(np,10)),:),'fontsize',8)
         set(gca,'xticklabel',' ','fontsize',10)
         set(gca,'xlim',[0.5 10.5])
-        for ip=1:10,
+        for ip=1:min(np,10),
           text(ip,-0.02,deblank(pnames(iso(ip),:)),'rotation',90,'HorizontalAlignment','right','interpreter','none')
         end
         title([logflag,' ',namendo,' vs. ',namexo],'interpreter','none')
@@ -205,17 +205,17 @@ for j=1:size(anamendo,1)
         subplot(3,3,iplo),
         if ilog,
           [saso, iso] = sort(-silog(:,js));
-          bar([silog(iso(1:10),js)])
+          bar([silog(iso(1:min(np,10)),js)])
           logflag='log';
         else
           [saso, iso] = sort(-si(:,js));
-          bar(si(iso(1:10),js))
+          bar(si(iso(1:min(np,10)),js))
           logflag='';
         end
-        %set(gca,'xticklabel',pnames(iso(1:10),:),'fontsize',8)
+        %set(gca,'xticklabel',pnames(iso(1:min(np,10)),:),'fontsize',8)
         set(gca,'xticklabel',' ','fontsize',10)
         set(gca,'xlim',[0.5 10.5])
-        for ip=1:10,
+        for ip=1:min(np,10),
           text(ip,-0.02,deblank(pnames(iso(ip),:)),'rotation',90,'HorizontalAlignment','right','interpreter','none')
         end
         title([logflag,' ',namendo,' vs. ',namlagendo,'(-1)'],'interpreter','none')
@@ -239,7 +239,8 @@ end
 
 if ilog==0,
 figure, %bar(si)
-boxplot(si','whis',10,'symbol','r.')
+% boxplot(si','whis',10,'symbol','r.')
+myboxplot(si',[],'.',[],10)
 xlabel(' ')
 set(gca,'xticklabel',' ','fontsize',10,'xtick',[1:np])
 set(gca,'xlim',[0.5 np+0.5])
@@ -256,7 +257,8 @@ eval(['print -dpdf ' dirname,'\',M_.fname,'_redform_gsa']);
 
 else
 figure, %bar(silog)
-boxplot(silog','whis',10,'symbol','r.')
+% boxplot(silog','whis',10,'symbol','r.')
+boxplot(silog',[],'.',[],10)
 set(gca,'xticklabel',' ','fontsize',10,'xtick',[1:np])
 xlabel(' ')
 set(gca,'xlim',[0.5 np+0.5])

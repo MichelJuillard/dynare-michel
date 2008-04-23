@@ -106,17 +106,17 @@ for i = 1:npar
       case 5% Uniform prior.
         pdraw(:,i) = rdraw(:,i)*(p4(i)-p3(i)) + p3(i);
       case 3% Gaussian prior.
-        pdraw(:,i) = norminv(rdraw(:,i),pmean(i),pstd(i));
+        pdraw(:,i) = norm_inv(rdraw(:,i),pmean(i),pstd(i));
       case 2% Gamma prior.
-        pdraw(:,i) = gaminv(rdraw(:,i),a(i),b(i))+p3(i);
+        pdraw(:,i) = gamm_inv(rdraw(:,i),a(i),b(i))+p3(i);
       case 1% Beta distribution (TODO: generalized beta distribution)
-        pdraw(:,i) = betainv(rdraw(:,i),a(i),b(i))*(p4(i)-p3(i))+p3(i);
+        pdraw(:,i) = beta_inv(rdraw(:,i),a(i),b(i))*(p4(i)-p3(i))+p3(i);
       case 4% INV-GAMMA1 distribution 
         % TO BE CHECKED
-        pdraw(:,i) =  sqrt(1./gaminv(rdraw(:,i),p2(i)/2,2/p1(i)));
+        pdraw(:,i) =  sqrt(1./gamm_inv(rdraw(:,i),p2(i)/2,2/p1(i)));
       case 6% INV-GAMMA2 distribution  
         % TO BE CHECKED
-        pdraw(:,i) =  1./gaminv(rdraw(:,i),p2(i)/2,2/p1(i));
+        pdraw(:,i) =  1./gamm_inv(rdraw(:,i),p2(i)/2,2/p1(i));
       otherwise
         % Nothing to do here.
     end
