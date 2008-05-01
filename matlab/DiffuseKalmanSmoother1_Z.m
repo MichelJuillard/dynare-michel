@@ -1,4 +1,4 @@
-function [alphahat,etahat,a,aK,P,PK,d] = DiffuseKalmanSmoother1_Z(T,Z,R,Q,Pinf1,Pstar1,Y,pp,mm,smpl)
+function [alphahat,etahat,a,aK,P,PK,d,decomp] = DiffuseKalmanSmoother1_Z(T,Z,R,Q,Pinf1,Pstar1,Y,pp,mm,smpl)
 
 % function [alphahat,etahat,a, aK] = DiffuseKalmanSmoother1(T,Z,R,Q,Pinf1,Pstar1,Y,pp,mm,smpl)
 % Computes the diffuse kalman smoother without measurement error, in the case of a non-singular var-cov matrix 
@@ -27,6 +27,7 @@ function [alphahat,etahat,a,aK,P,PK,d] = DiffuseKalmanSmoother1_Z(T,Z,R,Q,Pinf1,
 %              matrices (meaningless for periods 1:d)
 %    d:        number of periods where filter remains in diffuse part
 %              (should be equal to the order of integration of the model)
+%    decomp:   decomposition of the effect of shocks on filtered values
 %  
 % SPECIAL REQUIREMENTS
 %   See "Filtering and Smoothing of State Vector for Diffuse State Space
@@ -47,6 +48,7 @@ function [alphahat,etahat,a,aK,P,PK,d] = DiffuseKalmanSmoother1_Z(T,Z,R,Q,Pinf1,
 global options_
 
 d = 0;
+decomp = [];
 nk = options_.nk;
 spinf   	= size(Pinf1);
 spstar  	= size(Pstar1);
@@ -175,4 +177,30 @@ else
   r0 = Z'*iF(:,:,1)*v(:,1) + L(:,:,1)'*r(:,1);
   alphahat(:,1)	= a(:,1) + P(:,:,1)*r0;
   etahat(:,1)	= QRt*r(:,1);
+end
+
+if nargout > 7
+    decomp = zeros(nk,mm,rr,smpl+nk);
+    ZRQinv = inv(Z*QQ*Z');
+    for t = d:smpl
+        ri_d = zeros(mm,1);
+        for i=pp:-1:1
+            if Fi(i,t) > crit
+                ri_d = Z(i,:)'/Fi(i,t)*v(i,t)+Li(:,:,i,t)'*ri_d;
+            end
+        end
+        
+        % calculate eta_tm1t
+        eta_tm1t = QRt*ri_d;
+        % calculate decomposition
+        Ttok = eye(mm,mm); 
+        for h = 1:nk
+            for j=1:rr
+                eta=zeros(rr,1);
+                eta(j) = eta_tm1t(j);
+                decomp(h,:,j,t+h) = Ttok*P1(:,:,t)*Z'*ZRQinv*Z*R*eta;
+            end
+            Ttok = T*Ttok;
+        end
+    end
 end

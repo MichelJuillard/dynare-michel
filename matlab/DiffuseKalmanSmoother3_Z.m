@@ -54,7 +54,7 @@ function [alphahat,etahat,a1,P,aK,PK,d,decomp] = DiffuseKalmanSmoother3_Z(T,Z,R,
 global options_
 
 d = 0;
-
+decomp = [];
 nk = options_.nk;
 spinf           = size(Pinf1);
 spstar          = size(Pstar1);

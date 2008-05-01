@@ -183,15 +183,22 @@ function [alphahat,etahat,epsilonhat,ahat,SteadyState,trend_coeff,aK,T,R,P,PK,d,
     if options_.kalman_algo == 1
       [alphahat,etahat,ahat,aK] = DiffuseKalmanSmoother1(T,R,Q,Pinf,Pstar,Y,trend,nobs,np,smpl,mf);
       if all(alphahat(:)==0)
-	[alphahat,etahat,ahat,aK] = DiffuseKalmanSmoother3(T,R,Q,Pinf,Pstar,Y,trend,nobs,np,smpl,mf);
+          options_.kalman_algo = 3;
+          [alphahat,etahat,ahat,aK] = DiffuseKalmanSmoother3(T,R,Q,Pinf,Pstar,Y,trend,nobs,np,smpl,mf);
       end
     elseif options_.kalman_algo == 3
       [alphahat,etahat,ahat,aK] = DiffuseKalmanSmoother3(T,R,Q,Pinf,Pstar,Y,trend,nobs,np,smpl,mf);
     elseif options_.kalman_algo == 4 | options_.kalman_algo == 5
       data1 = Y - trend;
       if options_.kalman_algo == 4
-	  [alphahat,etahat,ahat,P,aK,PK,d] = DiffuseKalmanSmoother1_Z(ST, ...
+	  [alphahat,etahat,ahat,P,aK,PK,d,decomp] = DiffuseKalmanSmoother1_Z(ST, ...
 						  Z,R1,Q,Pinf,Pstar,data1,nobs,np,smpl);
+          if all(alphahat(:)==0)
+              options_.kalman_algo = 5;
+              [alphahat,etahat,ahat,P,aK,PK,d,decomp] = DiffuseKalmanSmoother3_Z(ST, ...
+						  Z,R1,Q,Pinf,Pstar, ...
+                                                  data1,nobs,np,smpl);
+          end
       else
 	  [alphahat,etahat,ahat,P,aK,PK,d,decomp] = DiffuseKalmanSmoother3_Z(ST, ...
 						  Z,R1,Q,Pinf,Pstar,data1,nobs,np,smpl);
