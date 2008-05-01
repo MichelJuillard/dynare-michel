@@ -94,12 +94,12 @@ irun5 = 1;
 irun6 = 1;
 irun7 = 1;
 ifil1 = 0;
-ifil2 = 1;
-ifil3 = 1;
-ifil4 = 1;
-ifil5 = 1;
-ifil6 = 1;
-ifil7 = 1;
+ifil2 = 0;
+ifil3 = 0;
+ifil4 = 0;
+ifil5 = 0;
+ifil6 = 0;
+ifil7 = 0;
 
 h = waitbar(0,'Bayesian smoother...');
 
@@ -110,14 +110,15 @@ if options_.smoother
   stock_smooth = zeros(endo_nbr,gend,MAX_nsmoo);
   stock_innov  = zeros(exo_nbr,gend,B);
   stock_error = zeros(nvobs,gend,MAX_nerro);
-  if options_.filter_step_ahead
-    stock_filter = zeros(naK,endo_nbr,gend+options_.filter_step_ahead(end),MAX_naK);
-  end
-  if options_.forecast
-    stock_forcst_mean = zeros(endo_nbr,horizon+maxlag,MAX_forcst1);
-    stock_forcst_total = zeros(endo_nbr,horizon+maxlag,MAX_forcst2);
-  end
 end
+if options_.filter_step_ahead
+    stock_filter = zeros(naK,endo_nbr,gend+options_.filter_step_ahead(end),MAX_naK);
+end
+if options_.forecast
+    stock_forcst_mean = zeros(endo_nbr,horizon+maxlag,MAX_nforc1);
+    stock_forcst_total = zeros(endo_nbr,horizon+maxlag,MAX_nforc2);
+end
+
 for b=1:B
   %deep = GetOneDraw(NumberOfDraws,FirstMhFile,LastMhFile,FirstLine,MAX_nruns,DirectoryName);
   [deep, logpo] = GetOneDraw(type);
@@ -156,7 +157,7 @@ for b=1:B
     yf(:,IdObs) = yf(:,IdObs)+(gend+[1-maxlag:horizon]')*trend_coeff';
     if options_.loglinear == 1
       yf = yf+repmat(log(SteadyState'),horizon+maxlag,1);
-      yf = exp(yf);
+%      yf = exp(yf);
     else
       yf = yf+repmat(SteadyState',horizon+maxlag,1);
     end
@@ -169,13 +170,13 @@ for b=1:B
 					   trend_coeff',[1,1,1]);
     if options_.loglinear == 1
       yf1 = yf1 + repmat(log(SteadyState'),[horizon+maxlag,1,1]);
-      yf1 = exp(yf1);
+%      yf1 = exp(yf1);
     else
       yf1 = yf1 + repmat(SteadyState',[horizon+maxlag,1,1]);
     end
 
-    stock_forcst_mean(:,:,irun6) = yf;
-    stock_forcst_total(:,:,irun7) = yf1;
+    stock_forcst_mean(:,:,irun6) = yf';
+    stock_forcst_total(:,:,irun7) = yf1';
   end
   
   irun1 = irun1 + 1;
@@ -195,44 +196,44 @@ for b=1:B
   
   if nvx & (irun2 > MAX_ninno | b == B)
     stock = stock_innov(:,:,1:irun2-1);
-    save([DirectoryName '/' M_.fname '_inno' int2str(ifil2)],'stock');
     ifil2 = ifil2 + 1;
+    save([DirectoryName '/' M_.fname '_inno' int2str(ifil2)],'stock');
     irun2 = 1;
   end
     
   if nvn & (irun3 > MAX_error | b == B)
     stock = stock_error(:,:,1:irun3-1);
-    save([DirectoryName '/' M_.fname '_error' int2str(ifil3)],'stock');
     ifil3 = ifil3 + 1;
+    save([DirectoryName '/' M_.fname '_error' int2str(ifil3)],'stock');
     irun3 = 1;
   end
     
   if naK & (irun4 > MAX_naK | b == B)
     stock = stock_filter(:,:,:,1:irun4-1);
-    save([DirectoryName '/' M_.fname '_filter' int2str(ifil4)],'stock');
     ifil4 = ifil4 + 1;
+    save([DirectoryName '/' M_.fname '_filter' int2str(ifil4)],'stock');
     irun4 = 1;
   end
     
   if irun5 > MAX_nruns | b == B
     stock = stock_param(1:irun5-1,:);
-    save([DirectoryName '/' M_.fname '_param' int2str(ifil5)],'stock','stock_logpo','stock_ys');
     ifil5 = ifil5 + 1;
+    save([DirectoryName '/' M_.fname '_param' int2str(ifil5)],'stock','stock_logpo','stock_ys');
     irun5 = 1;
   end
 
   if horizon & (irun6 > MAX_nforc1 | b == B)
     stock = stock_forcst_mean(:,:,1:irun6-1);
-    save([DirectoryName '/' M_.fname '_forc_mean' int2str(ifil6)],'stock');
     ifil6 = ifil6 + 1;
+    save([DirectoryName '/' M_.fname '_forc_mean' int2str(ifil6)],'stock');
     irun6 = 1;
   end
 
   if horizon & (irun7 > MAX_nforc2 |  b == B)
     stock = stock_forcst_total(:,:,1:irun7-1);
+    ifil7 = ifil7 + 1;
     save([DirectoryName '/' M_.fname '_forc_total' int2str(ifil7)],'stock');
-    ifil6 = ifil6 + 1;
-    irun6 = 1;
+    irun7 = 1;
   end
 
   waitbar(b/B,h);
@@ -243,6 +244,17 @@ stock_gend=gend;
 stock_data=Y;
 save([DirectoryName '/' M_.fname '_data'],'stock_gend','stock_data');
 
-pm3(endo_nbr,gend,ifil1,B,'Smoothed variables',...
-    M_.endo_names(SelecVariables),M_.endo_names,'tit_tex',M_.endo_names,...
-    'names2','smooth',[M_.fname '/metropolis'],'_smooth')
+if options_.smoother
+    pm3(endo_nbr,gend,ifil1,B,'Smoothed variables',...
+	M_.endo_names(SelecVariables),M_.endo_names,'tit_tex',M_.endo_names,...
+	'names2','smooth',[M_.fname '/metropolis'],'_smooth')
+end
+
+if options_.forecast
+    pm3(endo_nbr,horizon+maxlag,ifil6,B,'Forecasted variables (mean)',...
+	M_.endo_names(SelecVariables),M_.endo_names,'tit_tex',M_.endo_names,...
+	'names2','smooth',[M_.fname '/metropolis'],'_forc_mean')
+    pm3(endo_nbr,horizon+maxlag,ifil6,B,'Forecasted variables (total)',...
+	M_.endo_names(SelecVariables),M_.endo_names,'tit_tex',M_.endo_names,...
+	'names2','smooth',[M_.fname '/metropolis'],'_forc_total')
+end

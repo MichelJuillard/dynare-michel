@@ -1,4 +1,4 @@
-function forecast(var_list,task)
+function info = forecast(var_list,task)
 
 % function forecast(var_list,task)
 %   computes mean forecast for a given value of the parameters
@@ -22,10 +22,11 @@ function forecast(var_list,task)
     
     global options_ dr_ oo_ M_
     
+    info = 0;
+    
     old_options = options_;
 
     maximum_lag = M_.maximum_lag;
-    y_smoothed = oo_.SmoothedVariables;
     options_ = set_default_option(options_,'periods',40);
     if options_.periods == 0
         options_.periods = 40;
@@ -58,6 +59,7 @@ function forecast(var_list,task)
           y0 = oo_.endo_simul(:,1:maximum_lag);
       end
      case 'smoother'
+      y_smoothed = oo_.SmoothedVariables;
       y0 = zeros(M_.endo_nbr,maximum_lag);
       for i = 1:M_.endo_nbr
           v_name = deblank(M_.endo_names(i,:));
