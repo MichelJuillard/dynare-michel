@@ -42,10 +42,9 @@ function dynasave(s,var_list)
 %  dyn2vec(var_list(1),var_list(1));
 eval([var_list(1) '=oo_.endo_simul(ivar(1),:)'';'])
 eval(['save ' s ' ' var_list(1) ' -mat'])
-  for i = 2:n
-%    dyn2vec(var_list(i),var_list(i));
-    eval([var_list(i) '=oo_.endo_simul(ivar(i),:)'';'])
-    eval(['save ' s ' ' var_list(i) ' -append -mat'])
-  end
+for dynare__i_ = 2:n
+    eval([var_list(dynare__i_) '=oo_.endo_simul(ivar(dynare__i_),:)'';'])
+    eval(['save ' s ' ' var_list(dynare__i_) ' -append -mat'])
+end
 
 
