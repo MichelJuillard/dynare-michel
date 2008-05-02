@@ -44,8 +44,8 @@ end
 for i=1:ncx
     k1 = estim_params_.corrx(i,1);
     k2 = estim_params_.corrx(i,2);
-    name1 = deblank(M_.var_exo(k1,:));
-    name2 = deblank(M_.var_exo(k2,:));
+    name1 = deblank(M_.exo_names(k1,:));
+    name2 = deblank(M_.exo_names(k2,:));
     xparam(m) = eval(['oo_.posterior_' type '.shocks_corr.' name1 '_' name2]);
     M_.Sigma_e(k1,k2) = xparam(m);
     M_.Sigma_e(k2,k1) = xparam(m);
