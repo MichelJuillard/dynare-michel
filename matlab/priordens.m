@@ -31,28 +31,28 @@ nprio 	= length(pshape);
 
 i = 1;
 while i <=  nprio;
-	a = 0;	
-	b = 0;
-	if pshape(i) == 1;     % (generalized) BETA Prior 
-		mu = (p1(i)-p3(i))/(p4(i)-p3(i));
-		stdd = p2(i)/(p4(i)-p3(i));
-		a = (1-mu)*mu^2/stdd^2 - mu;
-		b = a*(1/mu - 1);
-		lnprior = lnprior + lpdfgbeta(para(i),a,b,p3(i),p4(i))   ;
-	elseif pshape(i) == 2; % GAMMA PRIOR 
+    a = 0;	
+    b = 0;
+    if pshape(i) == 1;     % (generalized) BETA Prior 
+        mu = (p1(i)-p3(i))/(p4(i)-p3(i));
+        stdd = p2(i)/(p4(i)-p3(i));
+        a = (1-mu)*mu^2/stdd^2 - mu;
+        b = a*(1/mu - 1);
+        lnprior = lnprior + lpdfgbeta(para(i),a,b,p3(i),p4(i))   ;
+    elseif pshape(i) == 2; % GAMMA PRIOR 
      	b = p2(i)^2/(p1(i)-p3(i));
-		a = (p1(i)-p3(i))/b;
-		lnprior = lnprior + lpdfgam(para(i)-p3(i),a,b);
-	elseif pshape(i) == 3; % GAUSSIAN PRIOR 
-     lnprior = lnprior + lpdfnorm(para(i),p1(i),p2(i));
-	elseif pshape(i) == 4; % INVGAMMA1 PRIOR 
+        a = (p1(i)-p3(i))/b;
+        lnprior = lnprior + lpdfgam(para(i)-p3(i),a,b);
+    elseif pshape(i) == 3; % GAUSSIAN PRIOR 
+        lnprior = lnprior + lpdfnorm(para(i),p1(i),p2(i));
+    elseif pshape(i) == 4; % INVGAMMA1 PRIOR 
      	lnprior = lnprior + lpdfig1(para(i),p1(i),p2(i));
-	elseif pshape(i) == 5; % UNIFORM PRIOR 
+    elseif pshape(i) == 5; % UNIFORM PRIOR 
      	lnprior = lnprior + log(1/(p2(i)-p1(i)));
-	elseif pshape(i) == 6; % INVGAMMA2 PRIOR 
+    elseif pshape(i) == 6; % INVGAMMA2 PRIOR 
     	lnprior = lnprior + lpdfig2(para(i),p1(i),p2(i));
-	end;
-	i = i+1;
+    end;
+    i = i+1;
 end;
 
 % 10/11/03 MJ adapted from an earlier version in GAUSS by F. Schorfheide

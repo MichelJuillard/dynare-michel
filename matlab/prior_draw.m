@@ -115,7 +115,7 @@ for i = 1:npar
         end
       case 4% INV-GAMMA1 distribution
         while condition
-            tmp = sqrt(1/gamma_draw(p2(i)/2,1/p1(i),0));
+            tmp = sqrt(1/gamma_draw(p2(i)/2,2/p1(i),0));
             if tmp >= bounds(i,1) && tmp <= bounds(i,2)
                 pdraw(i) = tmp;
                 break
@@ -123,7 +123,7 @@ for i = 1:npar
         end        
       case 6% INV-GAMMA2 distribution  
         while condition
-            tmp = 1/gamma_draw(p2(i)/2,1/p1(i),0);
+            tmp = 1/gamma_draw(p2(i)/2,2/p1(i),0);
             if tmp >= bounds(i,1) && tmp <= bounds(i,2)
                 pdraw(i) = tmp;
                 break
