@@ -22,7 +22,7 @@ varobs dx dy;
 
 check;
 
-estimation(datafile = test, mh_replic = 1200, mh_jscale = 1.3,
+estimation(datafile = bvar_sample, mh_replic = 1200, mh_jscale = 1.3,
            first_obs = 9);
 
 bvar_density 8;

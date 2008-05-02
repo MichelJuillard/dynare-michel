@@ -514,7 +514,7 @@ Most results are stored for future use:
 
 \section{Examples}
 
-This section presents two short examples of BVAR estimations. These examples and the associated datafile (\texttt{test.xls}) can be found in the \texttt{tests/bvar\_a\_la\_sims} directory of the Dynare v4 subversion tree.
+This section presents two short examples of BVAR estimations. These examples and the associated datafile (\texttt{bvar\_sample.xls}) can be found in the \texttt{tests/bvar\_a\_la\_sims} directory of the Dynare v4 subversion tree.
 
 \subsection{Standalone BVAR estimation}
 
@@ -524,7 +524,7 @@ Here is a simple \texttt{mod} file example for a standalone BVAR estimation:
 var dx dy;
 varobs dx dy;
 
-bvar_density(datafile = test, first_obs = 20, bvar_prior_flat,
+bvar_density(datafile = bvar_sample, first_obs = 20, bvar_prior_flat,
              bvar_prior_train = 10) 8;
 
 bvar_forecast(forecast = 10, bvar_replic = 10000, nobs = 200) 8;
@@ -566,7 +566,7 @@ varobs dx dy;
 
 check;
 
-estimation(datafile = test, mh_replic = 1200, mh_jscale = 1.3,
+estimation(datafile = bvar_sample, mh_replic = 1200, mh_jscale = 1.3,
            first_obs = 9);
 
 bvar_density 8;
