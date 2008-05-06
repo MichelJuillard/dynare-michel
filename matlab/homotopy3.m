@@ -81,7 +81,7 @@ function homotopy3(values, step_nbr)
       inc = inc/2;
       oo_.steady_state = old_ss;
     else
-      if length([kplus, kminus]) == nv
+      if length([kplus; kminus]) == nv
         return
       end
       oldvalues = curvalues;
