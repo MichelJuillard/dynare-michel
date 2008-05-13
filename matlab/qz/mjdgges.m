@@ -34,7 +34,7 @@ end
 % Check the first two inputs.
 [me,ne] = size(e);
 [md,nd] = size(d);
-if ( ~isdouble(e) | ~isdouble(d) | iscomplex(e) | iscomplex(d) | me~=ne | md~=nd | me~nd)
+if ( ~isdouble(e) | ~isdouble(d) | iscomplex(e) | iscomplex(d) | me~=ne | md~=nd | me~=nd)
     % info should be negative in this case, see dgges.f.
     error('MYDGGES requires two square real matrices of the same dimension.')
 end
