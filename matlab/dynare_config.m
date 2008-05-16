@@ -36,7 +36,7 @@ end
 mex_status = cell(1,3);
 mex_status(1,1) = {'mjdgges'};
 mex_status(1,2) = {'qz'};
-mex_status(1,3) = {'Generalized QZ decomposition'};
+mex_status(1,3) = {'Generalized QZ'};
 mex_status(2,1) = {'gensylv'};
 mex_status(2,2) = {'gensylv'};
 mex_status(2,3) = {'Sylvester equation solution'};
@@ -52,13 +52,11 @@ number_of_mex_files = size(mex_status,1);
 %% subfolders if valid mex files exist.
 matlab_path = path;
 for i=1:number_of_mex_files
-    test = strfind(matlab_path,['/matlab/' mex_status{i,2}]);
+    test = strfind(matlab_path,[dynareroot mex_status{i,2}]);
     action = length(test);
-    if action==1
+    if action
         rmpath([dynareroot mex_status{i,2}]);
         matlab_path = path;
-    elseif action>1
-        disp('Dynare configuration problem!')
     end
 end
 %% Test if valid mex files are available, if a mex file is not available
