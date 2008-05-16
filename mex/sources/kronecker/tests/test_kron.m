@@ -2,7 +2,7 @@ function test_kron(test)
     
     
     if ~nargin
-        test = 1;
+        test = 3;
     end
     
     
@@ -64,20 +64,27 @@ function test_kron(test)
         disp(' ')
         disp('Direct computation of A*kron(B,B):')
         tic
-            D4 = A*kron(B,B);
+            try
+                D4 = A*kron(B,B);
+                notest = 0;
+            catch
+                notest = 1;
+                disp('Out of memory')
+            end
         toc
-        disp('');
-        disp(['Difference between D1 and D4 = ' num2str(max(max(abs(D1-D4))))]);        
-        
+        if ~notest
+            disp('');
+            disp(['Difference between D1 and D4 = ' num2str(max(max(abs(D1-D4))))]);        
+        end
 end
 
 
 
 
 
+if test > 1
 
-if test == 2
-
+    hessian = 0;
     load nash_matrices;
     
     r2 = size(zx,1);
@@ -99,10 +106,10 @@ if test == 2
         D2 = sparse_hessian_times_B_kronecker_C(hessian,zx,zx);
     toc
     
-% $$$     disp('');
-% $$$     disp(['Difference between D1 and D2 = ' num2str(max(max(abs(D1-D2))))]);
-% $$$     
-% $$$     disp(' ')
+    disp('');
+    disp(['Difference between D1 and D2 = ' num2str(max(max(abs(D1-D2))))]);
+    
+    disp(' ')
 % $$$     disp('Computation of A*kron(B,B) with two nested loops:')
 % $$$     tic
 % $$$         D3 = zeros(r1,c2*c2);
@@ -121,4 +128,18 @@ if test == 2
     disp(' ')
     disp(['Percentage of non zero elements in the result matrix = ' num2str(100*nnz(D1)/(r1*c2^2)) '%']);
     
+end
+
+if test>2
+    A = randn(100,100);
+    B = randn(10,10);
+    C = randn(10,10);
+    disp('Test with full format matrix -- 1')
+    D1 = A*kron(B,C);
+    D2 = A_times_B_kronecker_C(A,B,C);
+    disp(['Difference between D1 and D2 = ' num2str(max(max(abs(D1-D2))))]);
+    disp('Test with full format matrix -- 1')
+    D1 = A*kron(B,B);
+    D2 = A_times_B_kronecker_C(A,B);
+    disp(['Difference between D1 and D2 = ' num2str(max(max(abs(D1-D2))))]);
 end
