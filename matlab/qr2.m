@@ -1,6 +1,4 @@
 function [Q,R] = qr2(X)
-
-% function [Q,R] = qr2(X)
 % This routine performs a qr decomposition of matrix X such that the
 % diagonal scalars of the upper-triangular matrix R are positive. If X 
 % is a full (column) rank matrix, then R is also the cholesky
@@ -8,10 +6,10 @@ function [Q,R] = qr2(X)
 % & Schorfheides's identification scheme.
 % 
 % INPUTS 
-%   See matlab's documentation.
+%   See matlab's documentation for QR decomposition.
 %     
 % OUTPUTS 
-%   See matlab's documentation.
+%   See matlab's documentation for QR decomposition.
 %
 % ALGORITHM
 %   None.       
@@ -19,9 +17,8 @@ function [Q,R] = qr2(X)
 % SPECIAL REQUIREMENTS
 %   None.
 %  
-% part of DYNARE, copyright Dynare Team (2007)
+% part of DYNARE, copyright Dynare Team (2006-2008)
 % Gnu Public License.
-
 [Q,R] = qr(X);
 indx = find(diag(R)<0);
 if ~isempty(indx)
