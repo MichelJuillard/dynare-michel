@@ -34,7 +34,7 @@ end
 % Check the first two inputs.
 [me,ne] = size(e);
 [md,nd] = size(d);
-if ( ~isdouble(e) | ~isdouble(d) | iscomplex(e) | iscomplex(d) | me~=ne | md~=nd | me~=nd)
+if ( ~isreal(e) | ~isreal(d) | me~=ne | md~=nd | me~=nd)
     % info should be negative in this case, see dgges.f.
     error('MYDGGES requires two square real matrices of the same dimension.')
 end
@@ -52,7 +52,7 @@ info   = 0;
 % Computational part.
 try
     [ss,tt,qq,w] = qz(e,d);
-    [ss,tt,qq,w] = qzdiv(qz_criterium,tt,ss,qq,w);
+    [tt,ss,qq,w] = qzdiv(qz_criterium,tt,ss,qq,w);
     warning_old_state = warning;
     warning off;
     eigval = diag(ss)./diag(tt);

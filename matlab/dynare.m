@@ -1,7 +1,4 @@
-
 function dynare(fname, varargin)
-
-% function dynare(fname, varargin)
 %	This command runs dynare with specified model file in argument
 % 	Filename.
 %	The name of model file begins with an alphabetic character, 
@@ -21,24 +18,7 @@ function dynare(fname, varargin)
 %  
 % part of DYNARE, copyright Dynare Team (2001-2008)
 % Gnu Public License.
-
-
-MATLAB  = ver('matlab');
-% FIXME:
-% It's not satisfactory to convert string versions into numbers, and to
-% compare these numbers:
-% - conversion will fail if version = 1.2.3
-% - it will give 7.10 < 7.9
-VERSION = str2num(MATLAB.Version);
-
-dynareroot = strrep(which('dynare.m'),'dynare.m','');
-
-if (VERSION <= 7.4)
-    addpath([dynareroot '../mex/2007a/'])
-else
-    addpath([dynareroot '../mex/2007b/'])
-end
-
+dynareroot = dynare_config();
 if ~isstr(fname)
   error ('The argument in DYNARE must be a text string.') ;
 end

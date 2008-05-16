@@ -18,5 +18,11 @@ function D = sparse_hessian_times_B_kronecker_C(A,B,C)
 %  
 % part of DYNARE, copyright Dynare Team (1996-2008)
 % Gnu Public License.
-
-D = A_times_B_kronecker_C(A,B,C);
+switch nargin
+  case 3
+    D = A_times_B_kronecker_C(A,B,C);
+  case 2
+    D = A_times_B_kronecker_C(A,B,B);
+  otherwise
+    error('Two or Three input arguments required!')
+end

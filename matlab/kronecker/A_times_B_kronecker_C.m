@@ -31,7 +31,7 @@ end
 [mB,nB] = size(B);
 if nargin == 3
     [mC,nC] = size(C);
-    if mB*mc ~= nA
+    if mB*mC ~= nA
         error('Input dimension error!')
     end
     D = zeros(mA,nB*nC);
@@ -40,7 +40,7 @@ else
     if mB*mB ~= nA
         error('Input dimension error!')
     end
-    D = D = zeros(mA,nB*nB);
+    D = zeros(mA,nB*nB);
     loop = (mB*nB*mB*nB > 1e7);
 end
 % Computational part.
