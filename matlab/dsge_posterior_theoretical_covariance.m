@@ -1,6 +1,4 @@
 function dsge_posterior_theoretical_covariance()
-
-% function dsge_posterior_theoretical_covariance()
 % This function estimates the posterior density of the endogenous
 % variables second order moments. 
 % 
@@ -11,7 +9,14 @@ function dsge_posterior_theoretical_covariance()
 %   None.
 %
 % SPECIAL REQUIREMENTS
-%   None.
+%    Other matlab routines distributed with Dynare: set_stationary_variables_list.m
+%                                                   CheckPath.m
+%                                                   selec_posterior_draws.m                          
+%                                                   set_parameters.m
+%                                                   resol.m
+%                                                   th_autocovariances.m    
+%                                                   posterior_moments.m
+%    
 %  
 % part of DYNARE, copyright Dynare Team (2007-2008)
 % Gnu Public License.
@@ -40,6 +45,11 @@ if ~rows(DrawsFiles)
     end
     DrawsFiles = dir([fname '_' type '_draws*']);
 end
+
+% Get the number of stationary endogenous variables.
+nvar = length(ivar);
+
+
 
 nar = options_.ar;% Saves size of the auto-correlation function.
 options_.ar = 0;% Set the size of the auto-correlation function.
@@ -104,7 +114,8 @@ for i=1:nvar
             tmp(i1:i2) = Covariance_matrix(:,idx(i,j,nvar));
             i1 = i2+1;
         end
-        [post_mean, post_median, post_var, hpd_interval, post_deciles, density] = posterior_moments(tmp,1);
+        [post_mean, post_median, post_var, hpd_interval, post_deciles, density] = ...
+            posterior_moments(tmp,1,options_.mh_conf_sig);
         name = fieldname(i,j,vartan);
         eval(['oo_.PosteriorTheoreticalMoments.dsge.covariance.mean.' name ' = post_mean;']);
         eval(['oo_.PosteriorTheoreticalMoments.dsge.covariance.median.' name ' = post_median;']);

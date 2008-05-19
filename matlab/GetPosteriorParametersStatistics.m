@@ -1,6 +1,4 @@
 function get_posterior_parameters_statistics()
-
-% function get_posterior_parameters_statistics()
 % This function prints and saves posterior estimates after the mcmc
 % (+updates of oo_ & TeX output). 
 % 
@@ -62,7 +60,7 @@ if np
         if options_.mh_replic
             Draws = GetAllPosteriorDraws(ip,FirstMhFile,FirstLine,TotalNumberOfMhFiles,NumberOfDraws);
             [post_mean, post_median, post_var, hpd_interval, post_deciles, ...
-             density] = posterior_moments(Draws,1);
+             density] = posterior_moments(Draws,1,options_.mh_conf_sig);
             name = bayestopt_.name{ip};
             oo_ = Filloo(oo_,name,type,post_mean,hpd_interval,post_median,post_var,post_deciles,density);
         else
@@ -96,7 +94,8 @@ if nvx
     for i=1:nvx
         if options_.mh_replic
             Draws = GetAllPosteriorDraws(ip,FirstMhFile,FirstLine,TotalNumberOfMhFiles,NumberOfDraws);
-            [post_mean, post_median, post_var, hpd_interval, post_deciles, density] = posterior_moments(Draws,1);
+            [post_mean, post_median, post_var, hpd_interval, post_deciles, density] = ...
+                posterior_moments(Draws,1,options_.mh_conf_sig);
             k = estim_params_.var_exo(i,1);
             name = deblank(M_.exo_names(k,:));
             oo_ = Filloo(oo_,name,type,post_mean,hpd_interval,post_median,post_var,post_deciles,density);
@@ -130,7 +129,8 @@ if nvn
     for i=1:nvn
         if options_.mh_replic
             Draws = GetAllPosteriorDraws(ip,FirstMhFile,FirstLine,TotalNumberOfMhFiles,NumberOfDraws);
-            [post_mean, post_median, post_var, hpd_interval, post_deciles, density] = posterior_moments(Draws,1);
+            [post_mean, post_median, post_var, hpd_interval, post_deciles, density] = ...
+                posterior_moments(Draws,1,options_.mh_conf_sig);
             name = deblank(options_.varobs(estim_params_.var_endo(i,1),:));
             oo_ = Filloo(oo_,name,type,post_mean,hpd_interval,post_median,post_var,post_deciles,density);
         else
@@ -161,7 +161,8 @@ if ncx
     for i=1:ncx
         if options_.mh_replic
             Draws = GetAllPosteriorDraws(ip,FirstMhFile,FirstLine,TotalNumberOfMhFiles,NumberOfDraws);
-            [post_mean, post_median, post_var, hpd_interval, post_deciles, density] = posterior_moments(Draws,1);
+            [post_mean, post_median, post_var, hpd_interval, post_deciles, density] = ...
+                posterior_moments(Draws,1,options_.mh_conf_sig);
             k1 = estim_params_.corrx(i,1);
             k2 = estim_params_.corrx(i,2);
             name = [deblank(M_.exo_names(k1,:)) ',' deblank(M_.exo_names(k2,:))];
@@ -200,7 +201,8 @@ if ncn
     for i=1:ncn
         if options_.mh_replic
             Draws = GetAllPosteriorDraws(ip,FirstMhFile,FirstLine,TotalNumberOfMhFiles,NumberOfDraws);
-            [post_mean, post_median, post_var, hpd_interval, post_deciles, density] = posterior_moments(Draws,1);
+            [post_mean, post_median, post_var, hpd_interval, post_deciles, density] = ...
+                posterior_moments(Draws,1,options_.mh_conf_sig);
             k1 = estim_params_.corrn(i,1);
             k2 = estim_params_.corrn(i,2);
             name = [deblank(M_.endo_names(k1,:)) ',' deblank(M_.endo_names(k2,:))];

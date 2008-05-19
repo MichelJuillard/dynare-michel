@@ -1,6 +1,4 @@
 function dsge_posterior_theoretical_variance_decomposition()
-
-% function dsge_posterior_theoretical_variance_decomposition()
 % This function estimates the posterior distribution of the variance
 % decomposition of the observed endogenous variables.
 % 
@@ -11,7 +9,13 @@ function dsge_posterior_theoretical_variance_decomposition()
 %   None.
 %
 % SPECIAL REQUIREMENTS
-%   None.
+%    Other matlab routines distributed with Dynare: set_stationary_variables_list.m
+%                                                   CheckPath.m
+%                                                   selec_posterior_draws.m                          
+%                                                   set_parameters.m
+%                                                   resol.m
+%                                                   th_autocovariances.m    
+%                                                   posterior_moments.m
 %     
 % part of DYNARE, copyright Dynare Team (2007-2008).
 % Gnu Public License.
@@ -133,7 +137,8 @@ for i=1:nvar
             post_deciles = NaN(9,1);
             density = NaN;
         else
-            [post_mean, post_median, post_var, hpd_interval, post_deciles, density] = posterior_moments(tmp,1);
+            [post_mean, post_median, post_var, hpd_interval, post_deciles, density] = ...
+                posterior_moments(tmp,1,options_.mh_conf_sig);
         end
         
         eval(['oo_.PosteriorTheoreticalMoments.dsge.VarianceDecomposition.mean.' name ' = post_mean;']);

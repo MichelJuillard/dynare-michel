@@ -40,7 +40,8 @@ function pm3(n1,n2,ifil,B,tit1,tit2,tit3,tit_tex,names1,names2,name3,DirectoryNa
   tmp =zeros(B,1);
   for i = 1:nvar
     for j = 1:n2
-      [Mean(j,i),Median(j,i),Var(j,i),HPD(:,j,i),Distrib(:,j,i)] = posterior_moments(squeeze(stock1(SelecVariables(i),j,:)),0);
+      [Mean(j,i),Median(j,i),Var(j,i),HPD(:,j,i),Distrib(:,j,i)] = ...
+          posterior_moments(squeeze(stock1(SelecVariables(i),j,:)),0,options_.mh_conf_sig);
     end
   end
   clear stock1

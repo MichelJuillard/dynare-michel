@@ -1,28 +1,27 @@
-function [post_mean, post_median, post_var, hpd_interval, post_deciles, density] = posterior_moments(xx,info)
-
-% function [post_mean, post_median, post_var, hpd_interval, post_deciles, density] = posterior_moments(xx,info)
+function [post_mean, post_median, post_var, hpd_interval, post_deciles, density] = posterior_moments(xx,info,mh_conf_sig)
 % Computes posterior mean, median, variance, HPD interval, deciles, and density from posterior draws.
 %
 % INPUTS
-%    xx:           vector of posterior draws
-%    info=1:       estimates posterior density
-%    info=0:       computes moments
-%    
+%    xx            [double]    Vector of posterior draws (or prior draws ;-)
+%    info          [integer]   If equal to one the posterior density is estimated.
+%    mh_config_sig [double]    Scalar between 0 and 1 specifying the size of the HPD interval.
+%
+%
 % OUTPUTS
-%    post_mean:    posterior mean
-%    post_median:  median
-%    post_var:     variance
-%    hpd_interval: HPD interval
-%    post_deciles: post deciles
-%    density:      density
+%    post_mean     [double]    Scalar, posterior mean.
+%    post_median   [double]    Scalar, posterior median.
+%    post_var      [double]    Scalar, posterior variance.
+%    hpd_interval  [double]    Vector (1*2), Highest Probability Density interval 
+%    post_deciles  [double]    Vector (9*1), deciles of the posterior distribution.
+%    density       [double]    Matrix (n*2), non parametric estimate of the posterior density. First and second 
+%                              columns are respectively abscissa and ordinate coordinates.  
 %    
 % SPECIAL REQUIREMENTS
-%    none
-%  
+%    Other matlab routines distributed with Dynare: mh_optimal_bandwidth.m 
+%                                                   kernel_density_estimate.m.
+%
 % part of DYNARE, copyright Dynare Team (2005-2008)
 % Gnu Public License.
-
-global options_
 
 xx = xx(:);
 xx = sort(xx);
@@ -32,33 +31,33 @@ post_mean = mean(xx);
 post_median = median(xx);
 post_var = var(xx);
 
-n = length(xx);
-m = round((1-options_.mh_conf_sig)*n);
-k = zeros(m,1);
-jj = n-m;
-for ii = 1:m
-  k(ii) = xx(jj)-xx(ii);
+number_of_draws = length(xx);
+hpd_draws = round((1-mh_conf_sig)*number_of_draws);
+kk = zeros(hpd_draws,1);
+jj = number_of_draws-hpd_draws;
+for ii = 1:hpd_draws
+  kk(ii) = xx(jj)-xx(ii);
   jj = jj + 1;
 end
-[kmin,idx] = min(k);
+[kmin,idx] = min(kk);
 hpd_interval = [xx(idx) xx(idx)+kmin];
 
-post_deciles = xx([round(0.1*n) ...
-       round(0.2*n)...
-       round(0.3*n)...
-       round(0.4*n)...
-       round(0.5*n)...
-       round(0.6*n)...
-       round(0.7*n)...
-       round(0.8*n)...
-       round(0.9*n)]);
+post_deciles = xx([round(0.1*number_of_draws) ...
+       round(0.2*number_of_draws) ...
+       round(0.3*number_of_draws) ...
+       round(0.4*number_of_draws) ...
+       round(0.5*number_of_draws) ...
+       round(0.6*number_of_draws) ...
+       round(0.7*number_of_draws) ...
+       round(0.8*number_of_draws) ...
+       round(0.9*number_of_draws)]);
 
-if ~info
-  density = [];
-else
-  number_of_grid_points = 2^9;      % 2^9 = 512 !... Must be a power of two.
-  bandwidth = 0;                    % Rule of thumb optimal bandwidth parameter.
-  kernel_function = 'gaussian';     % Gaussian kernel for Fast Fourrier Transform approximaton.  
-  optimal_bandwidth = mh_optimal_bandwidth(xx,length(xx),bandwidth,kernel_function);
-  [density(:,1),density(:,2)] = kernel_density_estimate(xx,number_of_grid_points,optimal_bandwidth,kernel_function);
+density = [];
+if info
+    number_of_grid_points = 2^9;      % 2^9 = 512 !... Must be a power of two.
+    bandwidth = 0;                    % Rule of thumb optimal bandwidth parameter.
+    kernel_function = 'gaussian';     % Gaussian kernel for Fast Fourrier Transform approximaton.  
+    optimal_bandwidth = mh_optimal_bandwidth(xx,number_of_draws,bandwidth,kernel_function);
+    [density(:,1),density(:,2)] = kernel_density_estimate(xx,number_of_grid_points,...
+                                                             number_of_draws,optimal_bandwidth,kernel_function);
 end
