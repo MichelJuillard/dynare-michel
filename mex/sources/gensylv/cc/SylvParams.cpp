@@ -4,6 +4,9 @@
 
 #include "SylvParams.h"
 
+#ifdef MWTYPES_NOT_DEFINED
+typedef int mwSize;
+#endif
 
 void SylvParams::print(const char* prefix) const
 {
