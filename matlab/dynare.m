@@ -19,7 +19,7 @@ function dynare(fname, varargin)
 % part of DYNARE, copyright Dynare Team (2001-2008)
 % Gnu Public License.
 dynareroot = dynare_config();
-if ~isstr(fname)
+if ~ischar(fname)
   error ('The argument in DYNARE must be a text string.') ;
 end
 % Testing if file have extension

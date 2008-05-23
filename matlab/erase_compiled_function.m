@@ -1,4 +1,4 @@
-function erased_compiled_function(func)
+function erase_compiled_function(func)
   % erase compiled function with name 'func'
 
     if exist([func '.dll'])
