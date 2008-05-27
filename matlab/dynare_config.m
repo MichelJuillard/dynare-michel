@@ -72,6 +72,5 @@ for i=1:number_of_mex_files
         message = '[mex] '; 
     end
     disp([ message mex_status{i,3} '.' ])
-    disp([])
 end
 disp(' ')

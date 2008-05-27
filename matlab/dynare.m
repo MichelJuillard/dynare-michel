@@ -18,10 +18,17 @@ function dynare(fname, varargin)
 %  
 % part of DYNARE, copyright Dynare Team (2001-2008)
 % Gnu Public License.
-dynareroot = dynare_config();
+
+if nargin < 1
+  error('You must provide the name of the MOD file in argument');
+end
+
 if ~ischar(fname)
   error ('The argument in DYNARE must be a text string.') ;
 end
+
+dynareroot = dynare_config();
+
 % Testing if file have extension
 % If no extension defalut .mod is added
 if isempty(strfind(fname,'.'))
