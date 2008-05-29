@@ -84,7 +84,7 @@ while i<n,
         %if abs(dx(it)) ~= 0,
         if abs(dx(it))<0.5*htol
             if abs(dx(it)) ~= 0,
-                h1(i)=min(0.3*abs(x(i)), 0.9*htol/abs(dx(it))*h1(i));
+                h1(i)=min(max(1.e-10,0.3*abs(x(i))), 0.9*htol/abs(dx(it))*h1(i));
             else
                 h1(i)=2.1*h1(i);
             end
