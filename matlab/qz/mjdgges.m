@@ -36,7 +36,7 @@ end
 [md,nd] = size(d);
 if ( ~isreal(e) | ~isreal(d) | me~=ne | md~=nd | me~=nd)
     % info should be negative in this case, see dgges.f.
-    error('MYDGGES requires two square real matrices of the same dimension.')
+    error('MJDGGES requires two square real matrices of the same dimension.')
 end
 % Set default value of qz_criterium.
 if nargin <3
