@@ -54,12 +54,12 @@ function J = ramsey_dynamic(ys,lbar)
   k = find(i_leadlag');
   it_ = 1;
   % retrieving derivatives of the objective function
-  [U,Uy,Uyy] = feval([fname '_objective_static'],ys,zeros(1,exo_nbr));
+  [U,Uy,Uyy] = feval([fname '_objective_static'],ys,zeros(1,exo_nbr), M_.params);
   Uy = Uy';
   Uyy = reshape(Uyy,endo_nbr,endo_nbr);
   
   % retrieving derivatives of original model
-  [f,fJ,fH] = feval([fname '_dynamic'],y(k),zeros(1,exo_nbr));
+  [f,fJ,fH] = feval([fname '_dynamic'],y(k),zeros(1,exo_nbr), M_.params, it_);
   instr_nbr = endo_nbr - size(f,1);
   mult_nbr = endo_nbr-instr_nbr;
 

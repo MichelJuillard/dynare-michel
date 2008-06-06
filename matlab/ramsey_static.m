@@ -38,7 +38,7 @@ function [resids, rJ,mult] = ramsey_static(x)
   
   % value and Jacobian of objective function
   ex = zeros(1,M_.exo_nbr);
-  [U,Uy,Uyy] = feval([fname '_objective_static'],x(i_endo),ex);
+  [U,Uy,Uyy] = feval([fname '_objective_static'],x(i_endo),ex, M_.params);
   Uy = Uy';
   Uyy = reshape(Uyy,endo_nbr,endo_nbr);
   
@@ -47,7 +47,7 @@ function [resids, rJ,mult] = ramsey_static(x)
   k = find(i_lag');
   it_ = 1;
 %  [f,fJ,fH] = feval([fname '_dynamic'],y(k),ex);
-  [f,fJ] = feval([fname '_dynamic'],y(k),ex);
+  [f,fJ] = feval([fname '_dynamic'],y(k),ex, M_.params, it_);
   % indices of Lagrange multipliers
   inst_nbr = endo_nbr - size(f,1);
   i_mult = [endo_nbr+1:2*endo_nbr-inst_nbr]';

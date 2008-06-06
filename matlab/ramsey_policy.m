@@ -43,7 +43,7 @@ function info = ramsey_policy(var_list)
   ghs22 = [ghs2(nstatic+(1:npred),:); zeros(nspred-npred,size(ghs2,2))];
   
   fname = [M_.fname '_objective_static'];
-  [ubar,uj,uh] = feval(fname,dr.ys(1:endo_nbr1),zeros(exo_nbr1,1));
+  [ubar,uj,uh] = feval(fname,dr.ys(1:endo_nbr1),zeros(exo_nbr1,1), M_.params);
   
   bet = options_.planner_discount;
   wbar = ubar/(1-bet);

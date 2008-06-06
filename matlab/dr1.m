@@ -79,7 +79,7 @@ if options_.ramsey_policy
     
     k1 = find(M_.orig_model.lead_lag_incidence');
     y = repmat(oo_.dr.ys(1:M_.orig_model.endo_nbr),1,M_.orig_model.maximum_lag+M_.orig_model.maximum_lead+1);
-    [f,fJ,fh] = feval([M_.fname '_dynamic'],y(k1),zeros(1,M_.exo_nbr));
+    [f,fJ,fh] = feval([M_.fname '_dynamic'],y(k1),zeros(1,M_.exo_nbr), M_.params, it_);
 
     % looking for dynamic variables that are both in the original model
     % and in the optimal policy model
@@ -94,7 +94,7 @@ if options_.ramsey_policy
     lead_lag_incidence1 = M_.orig_model.lead_lag_incidence;
     y = repmat(oo_.dr.ys(1:M_.orig_model.endo_nbr),1,M_.orig_model.maximum_lag+M_.orig_model.maximum_lead+1);
     k1 = find(M_.orig_model.lead_lag_incidence');
-    [f,fj,fh] = feval([M_.fname '_dynamic'],y(k1),zeros(1,M_.exo_nbr));
+    [f,fj,fh] = feval([M_.fname '_dynamic'],y(k1),zeros(1,M_.exo_nbr), M_.params, it_);
     nrj = size(fj,1); 
     
     iy = M_.lead_lag_incidence;
@@ -174,11 +174,11 @@ else
   z = z(iyr0) ;
   if options_.order == 1
     [junk,jacobia_] = feval([M_.fname '_dynamic'],z,[oo_.exo_simul ...
-		    oo_.exo_det_simul]);
+		    oo_.exo_det_simul], M_.params, it_);
   elseif options_.order == 2
     [junk,jacobia_,hessian] = feval([M_.fname '_dynamic'],z,...
 				    [oo_.exo_simul ...
-		    oo_.exo_det_simul]);
+		    oo_.exo_det_simul], M_.params, it_);
   end
 end
 

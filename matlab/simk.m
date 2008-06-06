@@ -22,7 +22,7 @@ function simk
 global M_ options_ oo_
 global it_ iyr0 ct_ broyden_
 
-func_name = [M_.fname '_static'];
+%func_name = [M_.fname '_static'];
 nk = M_.maximum_endo_lag + M_.maximum_endo_lead + 1 ;
 ny = size(M_.lead_lag_incidence,2) ;
 icc1 = M_.lead_lag_incidence(nk,:) > 0;
@@ -126,10 +126,10 @@ for iter = 1:options_.maxit
     h3 = clock ;
     if broyden_ & iter > 1
       %d1_ = -feval(fh,oo_.endo_simul(iyr));
-      d1 = -feval([M_.fname '_dynamic'],oo_.endo_simul(iyr),z,oo_.exo_simul);
+      d1 = -feval([M_.fname '_dynamic'],oo_.endo_simul(iyr),z,oo_.exo_simul, M_.params, it_);
     else
       %jacob(func_name,oo_.endo_simul(iyr)) ;
-      [d1,M_.jacobia] = feval([M_.fname '_dynamic'],oo_.endo_simul(iyr),oo_.exo_simul);
+      [d1,M_.jacobia] = feval([M_.fname '_dynamic'],oo_.endo_simul(iyr),oo_.exo_simul, M_.params, it_);
       d1 = -d1 ;
     end
     err_f = max(err_f,max(abs(d1)));
@@ -219,10 +219,10 @@ for iter = 1:options_.maxit
   while it_ <= options_.periods+M_.maximum_lag
     if broyden_
       %d1_ = -feval(fh,oo_.endo_simul(iyr));
-       d1 = -feval([M_.fname '_dynamic'],oo_.endo_simul(iyr),z,oo_.exo_simul);
+       d1 = -feval([M_.fname '_dynamic'],oo_.endo_simul(iyr),z,oo_.exo_simul, M_.params, it_);
     else
       %jacob(func_name,oo_.endo_simul(iyr)) ;
-      [d1,M_.jacobia] = feval([M_.fname '_dynamic'],oo_.endo_simul(iyr),oo_.exo_simul);
+      [d1,M_.jacobia] = feval([M_.fname '_dynamic'],oo_.endo_simul(iyr),oo_.exo_simul, M_.params, it_);
       d1 = -d1 ;
     end
     err_f = max(err_f,max(abs(d1)));

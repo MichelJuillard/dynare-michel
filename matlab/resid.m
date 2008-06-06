@@ -39,7 +39,7 @@ function resid(period)
   z = zeros(n,period);
   fh = str2func([M_.fname '_dynamic']);
   for it_=M_.maximum_lag+1:period+M_.maximum_lag
-    z(:,it_-M_.maximum_lag) = feval(fh,y(iyr0),oo_.exo_simul);
+    z(:,it_-M_.maximum_lag) = feval(fh,y(iyr0),oo_.exo_simul, M_.params, it_);
     iyr0 = iyr0 + n;
   end
 

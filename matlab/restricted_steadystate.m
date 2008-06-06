@@ -8,7 +8,7 @@ function [sR,sG] = restricted_steadystate(y,x,indx)
   
   ss(indx) = y;
  
-  eval(['[R,G] = ' M_.fname '_static(ss,x);']);
+  eval(['[R,G] = ' M_.fname '_static(ss, x, M_.params);']);
 
   sR = R(inde);
   sG = G(inde,indx);
