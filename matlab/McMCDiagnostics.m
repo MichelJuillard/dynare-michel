@@ -1,6 +1,6 @@
-function McmcDiagnostic
+function McMCDiagnostics
 
-% function McmcDiagnostic
+% function McMCDiagnostics
 % Computes convergence tests 
 % 
 % INPUTS 
