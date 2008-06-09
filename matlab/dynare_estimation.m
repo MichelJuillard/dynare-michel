@@ -250,7 +250,7 @@ end
 if options_.steadystate_flag% if the _steadystate.m file is provided.
     [oo_.steady_state,tchek] = feval([M_.fname '_steadystate'],[],[]);
 else% if the steady state file is not provided.
-   [dd,info] = resol(oo_.steady_state,0)
+   [dd,info] = resol(oo_.steady_state,0);
    oo_.steady_state = dd.ys; clear('dd');
 end
 
