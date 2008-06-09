@@ -1399,5 +1399,5 @@ end
 
 if np > 0
     pindx = estim_params_.param_vals(:,1);
-    save([M_.fname '_pindx','pindx']);
+    save([M_.fname '_pindx'],'pindx');
 end
