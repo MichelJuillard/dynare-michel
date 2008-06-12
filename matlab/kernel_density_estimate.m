@@ -39,19 +39,19 @@ end
 
 %% Kernel specification.
 if strcmpi(kernel_function,'gaussian') 
-    kernel = inline('inv(sqrt(2*pi))*exp(-0.5*x.^2)'); 
+    kernel = @(x) inv(sqrt(2*pi))*exp(-0.5*x.^2);
 elseif strcmpi(kernel_function,'uniform') 
-    kernel = inline('0.5*(abs(x) <= 1)'); 
+    kernel = @(x) 0.5*(abs(x) <= 1); 
 elseif strcmpi(kernel_function,'triangle') 
-    kernel = inline('(1-abs(x)).*(abs(x) <= 1)'); 
+    kernel = @(x) (1-abs(x)).*(abs(x) <= 1);
 elseif strcmpi(kernel_function,'epanechnikov') 
-    kernel = inline('0.75*(1-x.^2).*(abs(x) <= 1)'); 
+    kernel = @(x) 0.75*(1-x.^2).*(abs(x) <= 1);
 elseif strcmpi(kernel_function,'quartic') 
-    kernel = inline('0.9375*((1-x.^2).^2).*(abs(x) <= 1)'); 
+    kernel = @(x) 0.9375*((1-x.^2).^2).*(abs(x) <= 1);
 elseif strcmpi(kernel_function,'triweight') 
-    kernel = inline('1.09375*((1-x.^2).^3).*(abs(x) <= 1)'); 
+    kernel = @(x) 1.09375*((1-x.^2).^3).*(abs(x) <= 1);
 elseif strcmpi(kernel_function,'cosinus') 
-    kernel = inline('(pi/4)*cos((pi/2)*x).*(abs(x) <= 1)'); 
+    kernel = @(x) (pi/4)*cos((pi/2)*x).*(abs(x) <= 1);
 end
 
 %% Non parametric estimation (Gaussian kernel should be used (FFT)).
