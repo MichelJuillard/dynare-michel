@@ -95,7 +95,7 @@ P_obs (log(mst)-gam);
 Y_obs (gam);
 end;
 
-options_.unit_root_vars = {'P_obs'; 'Y_obs'};
+unit_root_vars P_obs Y_obs;
 
 //stoch_simul(order=1,nomoments,irf=0);
 estimation(datafile=fsdat,nobs=192,loglinear,mh_replic=0,mh_nblocks=2,mh_drop=0.45,mode_compute=0,mode_file=fs2000b_mode,load_mh_file);
