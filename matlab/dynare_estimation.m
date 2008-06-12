@@ -284,6 +284,9 @@ if options_.mode_compute == 0 & length(options_.mode_file) == 0
 	    eval(['oo_.SmoothedVariables.' deblank(M_.endo_names(dr.order_var(i),:)) ' = atT(i,:)'';']);
 	    eval(['oo_.FilteredVariables.' deblank(M_.endo_names(dr.order_var(i),:)) ' = filtered_state_vector(i,:)'';']);
 	end
+	for i=1:M_.exo_nbr
+        eval(['oo_.SmoothedShocks.' deblank(M_.exo_names(i,:)) ' = innov(i,:)'';']);
+	end
     end
   return;
 end
