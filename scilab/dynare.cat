@@ -1,5 +1,0 @@
- Copyright (C) 2001 Michel Juillard
-
- DYNARE ( 'Filename' )
- This command runs the .MOD file specified in Filename.
- Filename could be enter with or without the .MOD extension.

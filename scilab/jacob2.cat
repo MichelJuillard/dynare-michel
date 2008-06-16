@@ -1,4 +1,0 @@
- Copyright (C) 2001 Michel Juillard
-
- computes second order partial derivatives
- uses Abramowitz and Stegun (1965) formulas 25.3.24 and 25.3.27 p. 884

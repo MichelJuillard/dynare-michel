@@ -1,7 +1,0 @@
- Copyright (C) 2001 Michel Juillard
-
- DYNATYPE : DYNATYPE ( [ 'filename' ] )
-  This optional command saves the simulation
-  results in a text file. The name of each 
-  variable preceeds the corresponding results.
-  This command must follow SIMUL.

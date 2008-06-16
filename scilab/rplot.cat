@@ -1,7 +1,0 @@
- Copyright (C) 2001 Michel Juillard
-
- RPLOT :  RPLOT ( ['var1'; 'var2';  ...] , rplottype ) 
-  This optionnal command creates the plot of the variable
-  trajectory. By default, the entire simulation period is 
-  ploted. The instruction DSAMPLE permits to reduce the 
-  number of periods in the plot.

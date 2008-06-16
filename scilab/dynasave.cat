@@ -1,6 +1,0 @@
- Copyright (C) 2001 Michel Juillard
-
- DYNASAVE : DYNASAVE ( [ 'filename' ] ) 
-  This optional command saves the simulation results
-  in a .BIN datafile. This command must follow SIMUL.
-  Filename must be specified without the .BIN extension.

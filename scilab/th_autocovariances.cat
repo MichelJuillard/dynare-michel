@@ -1,6 +1,0 @@
- Copyright (C) 2001 Michel Juillard
-
- computes the theoretical auto-covariances, Gamma_y, for an AR(p) process 
- with coefficients dr.ghx and dr.ghu and shock variances Sigma_e_
- for a subset of variables ivar (indices in lgy_)
- 
