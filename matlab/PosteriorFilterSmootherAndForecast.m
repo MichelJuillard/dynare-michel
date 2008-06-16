@@ -53,6 +53,7 @@ TotalNumberOfMhDraws = sum(record.MhDraws(:,1));
 NumberOfDraws = TotalNumberOfMhDraws-floor(options_.mh_drop*TotalNumberOfMhDraws);
 clear record;
 B = min(1200, round(0.25*NumberOfDraws));
+B = 200;
 %%
 MAX_nruns = min(B,ceil(options_.MaxNumberOfBytes/(npar+2)/8));
 MAX_nsmoo = min(B,ceil(MaxNumberOfBytes/((endo_nbr)*gend)/8));

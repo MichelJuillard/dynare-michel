@@ -903,12 +903,9 @@ if (any(bayestopt_.pshape  >0 ) & options_.mh_replic) | ...
   if options_.bayesian_irf
     PosteriorIRF('posterior');
   end
-  if options_.smoother | ~isempty(options_.filter_step_ahead) | options_.forecast
-    PosteriorFilterSmootherAndForecast(data,gend,'posterior');
-  end
-
-  if options_.moments_varendo
-    PosteriorMomentsVarendo('posterior');
+  if options_.smoother | ~isempty(options_.filter_step_ahead) | options_.forecast ...
+          | options_.moments_varendo
+    prior_posterior_statistics('posterior',data,gend);
   end
 
   xparam = get_posterior_parameters('mean');

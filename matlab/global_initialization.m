@@ -144,7 +144,8 @@ function global_initialization()
   options_.simulation_method = 0;
   options_.cutoff = 1e-12;
   options_.student_degrees_of_freedom = 3;
-
+  options_.subdraws = [];
+  
   % Misc
   options_.conf_sig = 0.6;
   oo_.exo_simul = [];
