@@ -24,7 +24,7 @@ function dsge_posterior_theoretical_covariance()
 global M_ options_ oo_
 
 type = 'posterior';% To be defined as a input argument later...
-NumberOfSimulations = 800;% To be defined in a global structure...
+NumberOfSimulations = 1000;% To be defined in a global structure...
 
 % Set varlist (vartan)
 [ivar,vartan] = set_stationary_variables_list;
@@ -40,8 +40,13 @@ fname = [ MhDirectoryName '/' M_.fname];
 DrawsFiles = dir([fname '_' type '_draws*' ]);
 if ~rows(DrawsFiles)
     if strcmpi(type,'posterior')
-        SampleAddress = selec_posterior_draws(NumberOfSimulations,1);
-    else% (samples from the prior) To be done later...
+        drsize = size_of_the_reduced_form_model(oo_.dr);
+        if drsize*NumberOfSimulations>101 %Too big model!
+            drsize=0;
+        end
+        SampleAddress = selec_posterior_draws(NumberOfSimulations,drsize);
+    else
+        % (samples from the prior) To be done later...
     end
     DrawsFiles = dir([fname '_' type '_draws*']);
 end
@@ -49,10 +54,8 @@ end
 % Get the number of stationary endogenous variables.
 nvar = length(ivar);
 
-
-
 nar = options_.ar;% Saves size of the auto-correlation function.
-options_.ar = 0;% Set the size of the auto-correlation function.
+options_.ar = 0;% Set the size of the auto-correlation function to zero.
 
 NumberOfDrawsFiles = rows(DrawsFiles);
 MaXNumberOfCovarLines = ceil(options_.MaxNumberOfBytes/(nvar*(nvar+1)/2)/8);
@@ -74,11 +77,15 @@ linea = 0;
 for file = 1:NumberOfDrawsFiles
     load([MhDirectoryName '/' DrawsFiles(file).name]);
     NumberOfDraws = rows(pdraws);
+    isdrsaved = cols(pdraws)-1;
     for linee = 1:NumberOfDraws
         linea = linea+1;
-        draw = pdraws(linee,:);
-        set_parameters(draw);
-        [dr,info] = resol(oo_.steady_state,0);
+        if isdrsaved
+            dr = pdraws{linee,2};
+        else
+            set_parameters(pdraws{linee,1});
+            [dr,info] = resol(oo_.steady_state,0);
+        end
         tmp = th_autocovariances(dr,ivar);
         for i=1:nvar
             for j=i:nvar
@@ -90,13 +97,14 @@ for file = 1:NumberOfDrawsFiles
             CovarFileNumber = CovarFileNumber + 1;
             linea = 0;
             test = CovarFileNumber-NumberOfCovarFiles;
-            if ~(CovarFileNumber-NumberOfCovarFiles)% Prepare the last round...
+            if ~test% Prepare the last round...
                 Covariance_matrix = zeros(NumberOfLinesInTheLastCovarFile,nvar*(nvar+1)/2);
                 NumberOfCovarLines = NumberOfLinesInTheLastCovarFile;
-            elseif CovarFileNumber-NumberOfCovarFiles<0;
+                CovarFileNumber = CovarFileNumber - 1;
+            elseif test<0;
                 Covariance_matrix = zeros(MaXNumberOfCovarLines,nvar*(nvar+1)/2);
             else
-                clear('Covariance_matrix');    
+                clear('Covariance_matrix');
             end
         end
     end
@@ -108,7 +116,7 @@ for i=1:nvar
     for j=i:nvar
         i1 = 1;
         tmp = zeros(NumberOfSimulations,1);
-        for file = 1:NumberOfDrawsFiles
+        for file = 1:CovarFileNumber
             load([fname '_Posterior2ndOrderMoments' int2str(file)]);
             i2 = i1 + rows(Covariance_matrix) - 1;
             tmp(i1:i2) = Covariance_matrix(:,idx(i,j,nvar));
@@ -124,7 +132,7 @@ for i=1:nvar
         eval(['oo_.PosteriorTheoreticalMoments.dsge.covariance.hpdsup.' name ' = hpd_interval(2);']);
         eval(['oo_.PosteriorTheoreticalMoments.dsge.covariance.deciles.' name ' = post_deciles;']);
         eval(['oo_.PosteriorTheoreticalMoments.dsge.covariance.density.' name ' = density;']);
-    end
+    end 
 end
 
 
@@ -133,10 +141,12 @@ end
 function k = idx(i,j,n)
     k = (i-1)*n+j-i*(i-1)/2;
 
-
 function r = rows(M)
     r = size(M,1);
 
+function c = cols(M)
+    c = size(M,2);
+    
 function name = fieldname(i,j,vlist)
     n1 = deblank(vlist(i,:));
     n2 = deblank(vlist(j,:));

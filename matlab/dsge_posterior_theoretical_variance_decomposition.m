@@ -41,7 +41,11 @@ fname = [ MhDirectoryName '/' M_.fname];
 DrawsFiles = dir([fname '_' type '_draws*' ]);
 if ~rows(DrawsFiles)
     if strcmpi(type,'posterior')
-        SampleAddress = selec_posterior_draws(NumberOfSimulations,1);
+        drsize = size_of_the_reduced_form_model(oo_.dr);
+        if drsize*NumberOfSimulations>101%Big model!
+            drsize=0;
+        end
+        SampleAddress = selec_posterior_draws(NumberOfSimulations,drsize);
     else% (samples from the prior) To be done later...
     end
     DrawsFiles = dir([fname '_' type '_draws*']);
@@ -75,12 +79,16 @@ DecompFileNumber = 1;
 linea = 0;
 for file = 1:NumberOfDrawsFiles
     load([MhDirectoryName '/' DrawsFiles(file).name]);
+    isdrsaved = cols(pdraws)-1;
     NumberOfDraws = rows(pdraws);
     for linee = 1:NumberOfDraws
         linea = linea+1;
-        draw = pdraws(linee,:);
-        set_parameters(draw);
-        [dr,info] = resol(oo_.steady_state,0);
+        if isdrsaved
+            dr = pdraws{linee,2};
+        else
+            set_parameters(pdraws{linee,1});
+            [dr,info] = resol(oo_.steady_state,0);
+        end
         tmp = th_autocovariances(dr,ivar);
         for i=1:nvar
             Decomposition_array(linea,i) = tmp{1}(i,i);
@@ -95,10 +103,11 @@ for file = 1:NumberOfDrawsFiles
             DecompFileNumber = DecompFileNumber + 1;
             linea = 0;
             test = DecompFileNumber-NumberOfDecompFiles;
-            if ~(DecompFileNumber-NumberOfDecompFiles)% Prepare the last round...
+            if ~test% Prepare the last round...
                 Decomposition_array = zeros(NumberOfLinesInTheLastDecompFile,nvar*(nexo+1));
                 NumberOfDecompLines = NumberOfLinesInTheLastDecompFile;
-            elseif DecompFileNumber-NumberOfDecompFiles<0;
+                DecompFileNumber = DecompFileNumber - 1;
+            elseif test<0;
                 Decomposition_array = zeros(MaXNumberOfDecompLines,nvar*(nexo+1));
             else
                 clear('Decomposition_array');
@@ -114,7 +123,7 @@ for i=1:nvar
     for j=1:nexo
         i1 = 1;
         tmp = zeros(NumberOfSimulations,1);
-        for file = 1:NumberOfDrawsFiles
+        for file = 1:DecompFileNumber
             load([fname '_PosteriorVarianceDecomposition' int2str(file)]);
             i2 = i1 + rows(Decomposition_array) - 1;
             tmp(i1:i2) = Decomposition_array(:,nvar+(i-1)*nexo+j);
@@ -150,3 +159,18 @@ for i=1:nvar
         eval(['oo_.PosteriorTheoreticalMoments.dsge.VarianceDecomposition.density.' name ' = density;']);
     end
 end
+
+
+function k = idx(i,j,n)
+    k = (i-1)*n+j-i*(i-1)/2;
+
+function r = rows(M)
+    r = size(M,1);
+
+function c = cols(M)
+    c = size(M,2);
+    
+function name = fieldname(i,j,vlist)
+    n1 = deblank(vlist(i,:));
+    n2 = deblank(vlist(j,:));
+    name = [n1 '.' n2];
