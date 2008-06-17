@@ -1,7 +1,6 @@
-function [YtY,XtY,YtX,XtX,Y,X] = var_sample_moments(FirstObservation,LastObservation,qlag,var_trend_order)
-
-% function [YtY,XtY,YtX,XtX,Y,X] = var_sample_moments(FirstObservation,LastObservation,qlag,var_trend_order)
-% Computes the sample moments of a VAR model.  
+function [YtY,XtY,YtX,XtX,Y,X] = ...
+    var_sample_moments(FirstObservation,LastObservation,qlag,var_trend_order,datafile,varobs)
+% Computes the sample moments of a VAR model.
 %
 % The VAR(p) model is defined by:
 %
@@ -49,14 +48,11 @@ function [YtY,XtY,YtX,XtX,Y,X] = var_sample_moments(FirstObservation,LastObserva
 %   o Y                   [double]  Y a T*m matrix.
 %   o X                   [double]  X a T*(mp+q) matrix.
 %
-
 % SPECIAL REQUIREMENTS
 %   None.
 %  
 % part of DYNARE, copyright Dynare Team (2007)
 % Gnu Public License.
-
-global options_
 
 X = [];
 Y = [];
@@ -65,15 +61,15 @@ YtX = [];
 XtY = [];
 XtX = [];
 
-if exist(options_.datafile)
-  eval(options_.datafile);
+if exist(datafile)
+  eval(datafile);
 else
-  eval(['load ' options_.datafile]);
+  eval(['load ' datafile]);
 end
 
 data = [ ];
-for i=1:size(options_.varobs,1)% m is equal to options_.varobs
-  data = [data eval(deblank(options_.varobs(i,:)))];
+for i=1:size(varobs,1)% m is equal to options_.varobs
+  data = [data eval(deblank(varobs(i,:)))];
 end
 
 if qlag > FirstObservation
@@ -82,14 +78,14 @@ if qlag > FirstObservation
 end
 
 NumberOfObservations = LastObservation-FirstObservation+1;% This is T.
-NumberOfVariables = size(options_.varobs,1);% This is m.
+NumberOfVariables = size(varobs,1);% This is m.
 if var_trend_order == -1% No constant no linear trend case.
     X = zeros(NumberOfObservations,NumberOfVariables*qlag);
 elseif var_trend_order == 0% Constant and no linear trend case.
-    X = zeros(NumberOfObservations,NumberOfVariables*qlag+1);
+    X = ones(NumberOfObservations,NumberOfVariables*qlag+1);
     indx = NumberOfVariables*qlag+1;
 elseif var_trend_order == 1;% Constant and linear trend case.
-    X = zeros(NumberOfObservations,NumberOfVariables*qlag+2);
+    X = ones(NumberOfObservations,NumberOfVariables*qlag+2);
     indx = NumberOfVariables*qlag+1:NumberOfVariables*qlag+2;
 else
     disp('var_sample_moments :: trend must be equal to -1,0 or 1!')
@@ -98,16 +94,16 @@ end
 
 % I build matrices Y and X  
 Y = data(FirstObservation:LastObservation,:);
+
 for t=1:NumberOfObservations
   line = t + FirstObservation-1;
   for lag = 1:qlag
       X(t,(lag-1)*NumberOfVariables+1:lag*NumberOfVariables) = data(line-lag,:);
   end
-  if var_trend_order == 0
-      X(t,indx) = 1;
-  elseif var_trend_order == 1
-      X(t,indx) = [ 1 , t ];
-  end
+end
+
+if (var_trend_order == 1)
+    X(:,end) = transpose(1:NumberOfObservations)
 end
 
 YtY = Y'*Y;

@@ -116,7 +116,8 @@ if MAX_nirfs_dsgevar
         stock_irf_bvardsge = zeros(options_.irf,nvobs,M_.exo_nbr,B);
     end
     [mYY,mXY,mYX,mXX,Ydata,Xdata] = ...
-        var_sample_moments(options_.first_obs,options_.first_obs+options_.nobs-1,options_.varlag,-1);
+        var_sample_moments(options_.first_obs,options_.first_obs+options_.nobs-1,...
+                           options_.varlag,-1,options_.datafile,options_.varobs);
     NumberOfLags = options_.varlag;
     NumberOfLagsTimesNvobs = NumberOfLags*nvobs;
     if options_.noconstant
