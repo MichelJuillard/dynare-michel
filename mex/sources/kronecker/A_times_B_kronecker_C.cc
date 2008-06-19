@@ -12,8 +12,8 @@
 #include "matrix.h"
 
 #ifdef MWTYPES_NOT_DEFINED
-typedef unsigned int mwIndex;
-typedef unsigned int mwSize;
+typedef int mwIndex;
+typedef int mwSize;
 #endif
 
 #ifdef NO_BLAS_H

@@ -13,8 +13,8 @@
 #include "mex.h"
 
 #ifdef MWTYPES_NOT_DEFINED
-typedef unsigned int mwIndex;
-typedef unsigned int mwSize;
+typedef int mwIndex;
+typedef int mwSize;
 #endif
 
 void sparse_hessian_times_B_kronecker_B(mwIndex *isparseA, mwIndex *jsparseA, double *vsparseA, 
