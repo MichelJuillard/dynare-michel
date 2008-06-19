@@ -84,7 +84,7 @@ if check1
 end
 
 dr.fbias = zeros(M_.endo_nbr,1);
-[dr,info] = dr1(dr,check_flag);
+[dr,info,M_,options_,oo_] = dr1(dr,check_flag,M_,options_,oo_);
 
 if info(1)
   return
@@ -93,7 +93,7 @@ end
 if options_.dr_algo == 1 & options_.order > 1
   dr.ys = dynare_solve('dr2',ys,0,dr);
   dr.fbias = 2*feval([M_.fname '_static'],dr.ys,oo_.exo_steady_state, M_.params);
-  [dr, info1] = dr1(dr,check_flag);
+  [dr,info1,M_,options_,oo_] = dr1(dr,check_flag,M_,options_,oo_);
   if info1(1)
     info(1) = info(1)+10;
     return

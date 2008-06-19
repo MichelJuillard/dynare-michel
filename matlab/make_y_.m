@@ -23,7 +23,6 @@ function make_y_
     oo_.steady_state = zeros(M_.endo_nbr,1);
   end
   
-  
   if isempty(oo_.endo_simul)
     if isempty(ys0_)
       oo_.endo_simul = [oo_.steady_state*ones(1,M_.maximum_lag+options_.periods+M_.maximum_lead)];
@@ -40,7 +39,7 @@ function make_y_
           options_.order = 1;
           dr = oo_.dr;
           dr.ys = oo_.steady_state;
-          [dr,info]=dr1(dr,0);
+          [dr,info,M_,options_,oo_]=dr1(dr,0,M_,options_,oo_);
           exogenous_variables = zeros(M_.maximum_lag+options_.periods+M_.maximum_lead-size(oo_.endo_simul,2)+1,0);
           y0 = oo_.endo_simul(:,1:M_.maximum_lag);
           oo_.endo_simul=simult_(y0,dr,exogenous_variables,1);
