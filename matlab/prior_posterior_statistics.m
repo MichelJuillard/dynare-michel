@@ -127,12 +127,11 @@ for b=1:B
   set_all_parameters(deep);
   dr = resol(oo_.steady_state,0);
   if moments_varendo
-      stock_moments{irun(8)} = compute_model_moments(dr,options_);
+      stock_moments{irun(8)} = compute_model_moments(dr,M_,options_);
   end
   if run_smoother
       [alphahat,etahat,epsilonhat,ahat,SteadyState,trend_coeff,aK] = ...
           DsgeSmoother(deep,gend,Y);
-      
       if options_.loglinear
           stock_smooth(dr.order_var,:,irun(1)) = alphahat(1:endo_nbr,:)+ ...
               repmat(log(dr.ys(dr.order_var)),1,gend);

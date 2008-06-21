@@ -1,7 +1,7 @@
 % targets and iy order: 1) variances 2) correlations 
 % 3) constraints on M_.Sigma_e itself 4) autocorrelations
 function f=calib_obj(M_.Sigma_e,A,ghu1,ghx,ghu,targets,var_weights,iy,nar)
-  global vx fold
+  global vx fold options_
   
   oo_.gamma_y = cell(nar+1,1);
 %  M_.Sigma_e = M_.Sigma_e'*M_.Sigma_e;
@@ -10,11 +10,11 @@ function f=calib_obj(M_.Sigma_e,A,ghu1,ghx,ghu,targets,var_weights,iy,nar)
   b=ghu1*M_.Sigma_e*ghu1';
   vx = [];
   if isempty(vx)
-    vx = lyapunov_symm(A,b);
+    vx = lyapunov_symm(A,b,options_.qz_criterium);
   else
     [vx,status] = bicgstab_(@f_var,b(:),vx(:),1e-8,50,A,nx);
     if status
-      vx = lyapunov_symm(A,b);
+      vx = lyapunov_symm(A,b,options_.qz_criterium);
     else
       vx=reshape(vx,nx,nx);
     end

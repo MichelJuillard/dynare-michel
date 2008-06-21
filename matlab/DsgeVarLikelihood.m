@@ -122,7 +122,7 @@ end
 %------------------------------------------------------------------------------
 % 3. theoretical moments (second order)
 %------------------------------------------------------------------------------
-tmp0 = lyapunov_symm(T,R*Q*R');% I compute the variance-covariance matrix
+tmp0 = lyapunov_symm(T,R*Q*R',options_.qz_criterium);% I compute the variance-covariance matrix
 mf  = bayestopt_.mf1;          % of the restricted state vector.
 
 % Get the non centered second order moments

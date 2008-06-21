@@ -1,6 +1,4 @@
 function [alphahat,etahat,epsilonhat,ahat,SteadyState,trend_coeff,aK,T,R,P,PK,d,decomp] = DsgeSmoother(xparam1,gend,Y)
-
-% function [alphahat,etahat,epsilonhat,ahat,SteadyState,trend_coeff,aK,T,R,P,PK,d,decomp] = DsgeSmoother(xparam1,gend,Y)
 % Estimation of the smoothed variables and innovations. 
 % 
 % INPUTS 
@@ -95,7 +93,7 @@ function [alphahat,etahat,epsilonhat,ahat,SteadyState,trend_coeff,aK,T,R,P,PK,d,
   H = M_.H;
   
   if options_.lik_init == 1		% Kalman filter
-    Pstar = lyapunov_symm(T,R*Q*transpose(R));
+    Pstar = lyapunov_symm(T,R*Q*transpose(R),options_.qz_criterium);
     Pinf	= [];
   elseif options_.lik_init == 2 % Old Diffuse Kalman filter
     Pstar = 10*eye(np);
@@ -105,7 +103,7 @@ function [alphahat,etahat,epsilonhat,ahat,SteadyState,trend_coeff,aK,T,R,P,PK,d,
       Pstar = zeros(np,np);
       ivs = bayestopt_.restrict_var_list_stationary;
       R1 = R(ivs,:);
-      Pstar(ivs,ivs) = lyapunov_symm(T(ivs,ivs),R1*Q*R1');
+      Pstar(ivs,ivs) = lyapunov_symm(T(ivs,ivs),R1*Q*R1',options_.qz_criterium);
       %    Pinf  = bayestopt_.Pinf;
       % by M. Ratto
       RR=T(:,bayestopt_.restrict_var_list_nonstationary);

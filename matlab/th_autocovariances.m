@@ -1,14 +1,14 @@
-function [Gamma_y,ivar]=th_autocovariances(dr,ivar)
-
-% function [Gamma_y,ivar]=th_autocovariances(dr,ivar)
-% computes the theoretical auto-covariances, Gamma_y, for an AR(p) process 
+function [Gamma_y,ivar]=th_autocovariances(dr,ivar,M_,options_)
+% Computes the theoretical auto-covariances, Gamma_y, for an AR(p) process 
 % with coefficients dr.ghx and dr.ghu and shock variances Sigma_e_
 % for a subset of variables ivar (indices in lgy_)
 %  
 % INPUTS
 %   dr:         structure of decisions rules for stochastic simulations
 %   ivar:       subset of variables
-%  
+%   M_
+%   options_
+%    
 % OUTPUTS
 %   Gamma_y:    theoritical auto-covariances
 %   ivar:       subset of variables
@@ -18,9 +18,6 @@ function [Gamma_y,ivar]=th_autocovariances(dr,ivar)
 %  
 % part of DYNARE, copyright Dynare Team (2001-2008)
 % Gnu Public License.
-
-
-  global M_ options_
 
   exo_names_orig_ord  = M_.exo_names_orig_ord;
   if sscanf(version('-release'),'%d') < 13
@@ -68,9 +65,9 @@ function [Gamma_y,ivar]=th_autocovariances(dr,ivar)
 
   ipred = nstatic+(1:npred)';
   % state space representation for state variables only
-  [A,B] = kalman_transition_matrix(dr,ipred,1:nx,dr.transition_auxiliary_variables);
+  [A,B] = kalman_transition_matrix(dr,ipred,1:nx,dr.transition_auxiliary_variables,M_.exo_nbr);
   if options_.order == 2 | options_.hp_filter == 0
-    [vx, u] =  lyapunov_symm(A,B*M_.Sigma_e*B');
+    [vx, u] =  lyapunov_symm(A,B*M_.Sigma_e*B',options_.qz_criterium);
     iky = iv(ivar);
     if ~isempty(u)
       iky = iky(find(all(abs(ghx(iky,:)*u) < options_.Schur_vec_tol,2)));
@@ -113,10 +110,10 @@ function [Gamma_y,ivar]=th_autocovariances(dr,ivar)
       b1 = b1*cs;
       b2(:,exo_names_orig_ord) = ghu(iky,:);
       b2 = b2*cs;
-      vx  = lyapunov_symm(A,b1*b1');
+      vx  = lyapunov_symm(A,b1*b1',options_.qz_criterium);
       vv = diag(aa*vx*aa'+b2*b2');
       for i=1:M_.exo_nbr
-	vx1 = lyapunov_symm(A,b1(:,i)*b1(:,i)');
+	vx1 = lyapunov_symm(A,b1(:,i)*b1(:,i)',options_.qz_criterium);
 	Gamma_y{nar+2}(:,i) = abs(diag(aa*vx1*aa'+b2(:,i)*b2(:,i)'))./vv;
       end
     end
@@ -161,9 +158,9 @@ function [Gamma_y,ivar]=th_autocovariances(dr,ivar)
     end
     
     %variance decomposition
-    if M_.exo_nbr > 1 
+    if M_.exo_nbr > 1
       Gamma_y{nar+2} = zeros(nvar,M_.exo_nbr);
-      SS(exo_names_orig_ord,exo_names_orig_ord)=M_.Sigma_e+1e-14*eye(M_.exo_nbr);
+      SS(exo_names_orig_ord,exo_names_orig_ord) = M_.Sigma_e+1e-14*eye(M_.exo_nbr);
       cs = chol(SS)';
       SS = cs*cs';
       b1(:,exo_names_orig_ord) = ghu1;

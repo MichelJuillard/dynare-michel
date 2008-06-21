@@ -1,14 +1,13 @@
-function [A,B] = kalman_transition_matrix(dr,iv,ic,aux)
-
-% function [A,B] = kalman_transition_matrix(dr,iv,ic,aux)
-% makes transition matrices out of ghx and ghu for Kalman filter
+function [A,B] = kalman_transition_matrix(dr,iv,ic,aux,exo_nbr)
+% Builds the transition equation of the state space representation out of ghx and ghu for Kalman filter
 % 
 % INPUTS
 %    dr:      structure of decisions rules for stochastic simulations
 %    iv:      selected variables
 %    ic:      state variables position in the transition matrix columns
 %    aux:     indices for auxiliary equations
-%
+%    exo_nbr: number of exogenous variables
+%    
 % OUTPUTS
 %    A:       matrix of predetermined variables effects in linear solution (ghx)
 %    B:       matrix of shocks effects in linear solution (ghu)
@@ -18,15 +17,13 @@ function [A,B] = kalman_transition_matrix(dr,iv,ic,aux)
 %  
 % part of DYNARE, copyright Dynare Team (2003-2008)
 % Gnu Public License.
-
-  global M_
   
   n_iv = length(iv);
   n_ir1 = size(aux,1);
   nr = n_iv + n_ir1;
   
   A = zeros(nr,nr);
-  B = zeros(nr,M_.exo_nbr);
+  B = zeros(nr,exo_nbr);
   
   i_n_iv = 1:n_iv;
   A(i_n_iv,ic) = dr.ghx(iv,:);

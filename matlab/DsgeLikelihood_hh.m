@@ -160,7 +160,7 @@ function [fval,llik,cost_flag,ys,trend_coeff,info] = DsgeLikelihood(xparam1,gend
   % 3. Initial condition of the Kalman filter
   %------------------------------------------------------------------------------
   if options_.lik_init == 1		% Kalman filter
-    Pstar = lyapunov_symm(T,R*Q*R');
+    Pstar = lyapunov_symm(T,R*Q*R',options_.qz_criterium);
     Pinf	= [];
   elseif options_.lik_init == 2	% Old Diffuse Kalman filter
     Pstar = 10*eye(np);
@@ -183,7 +183,7 @@ function [fval,llik,cost_flag,ys,trend_coeff,info] = DsgeLikelihood(xparam1,gend
         R1(j,:) = R1(j,:)-RR(j,i).*R(ivd(i),:);
       end
     end
-    Pstar = lyapunov_symm(T0,R1*Q*R1');
+    Pstar = lyapunov_symm(T0,R1*Q*R1',options_.qz_criterium);
   end
   %------------------------------------------------------------------------------
   % 4. Likelihood evaluation

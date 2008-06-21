@@ -145,6 +145,8 @@ function global_initialization()
   options_.cutoff = 1e-12;
   options_.student_degrees_of_freedom = 3;
   options_.subdraws = [];
+  options_.PosteriorSampleSize = 1000;
+  options_.MaximumNumberOfMegaBytes = 111;
   
   % Misc
   options_.conf_sig = 0.6;

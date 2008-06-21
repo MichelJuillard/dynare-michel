@@ -1,10 +1,12 @@
-function dsge_posterior_theoretical_covariance()
+function [nvar,vartan,CovarFileNumber] = dsge_posterior_theoretical_covariance(SampleSize,M_,options_,oo_)
 % This function estimates the posterior density of the endogenous
 % variables second order moments. 
 % 
 % INPUTS 
-%   None.
-%  
+%   SampleSize   [integer]
+%   
+%
+%
 % OUTPUTS 
 %   None.
 %
@@ -21,52 +23,30 @@ function dsge_posterior_theoretical_covariance()
 % part of DYNARE, copyright Dynare Team (2007-2008)
 % Gnu Public License.
 
-global M_ options_ oo_
-
-type = 'posterior';% To be defined as a input argument later...
-NumberOfSimulations = 1000;% To be defined in a global structure...
-
+type = 'posterior';
+    
 % Set varlist (vartan)
 [ivar,vartan] = set_stationary_variables_list;
-
-% Set various parameters & Check or create files and directories
-if strcmpi(type,'posterior')
-    MhDirectoryName = CheckPath('metropolis');
-else
-    MhDirectoryName = CheckPath('prior');
-end
-fname = [ MhDirectoryName '/' M_.fname];
-%save([fname '_Posterior2ndOrder'],'varlist');
-DrawsFiles = dir([fname '_' type '_draws*' ]);
-if ~rows(DrawsFiles)
-    if strcmpi(type,'posterior')
-        drsize = size_of_the_reduced_form_model(oo_.dr);
-        if drsize*NumberOfSimulations>101 %Too big model!
-            drsize=0;
-        end
-        SampleAddress = selec_posterior_draws(NumberOfSimulations,drsize);
-    else
-        % (samples from the prior) To be done later...
-    end
-    DrawsFiles = dir([fname '_' type '_draws*']);
-end
-
-% Get the number of stationary endogenous variables.
 nvar = length(ivar);
 
-nar = options_.ar;% Saves size of the auto-correlation function.
-options_.ar = 0;% Set the size of the auto-correlation function to zero.
+% Set the size of the auto-correlation function to zero.
+nar = options_.ar;
+options_.ar = 0;    
 
-NumberOfDrawsFiles = rows(DrawsFiles);
+% Get informations about the _posterior_draws files.
+DrawsFiles = dir([M_.dname '/metropolis/' M_.fname '_' type '_draws*' ]);
+NumberOfDrawsFiles = length(DrawsFiles);
+
+% Number of lines in posterior data files.
 MaXNumberOfCovarLines = ceil(options_.MaxNumberOfBytes/(nvar*(nvar+1)/2)/8);
 
-if NumberOfSimulations<=MaXNumberOfCovarLines
+if SampleSize<=MaXNumberOfCovarLines
     Covariance_matrix = zeros(NumberOfSimulations,nvar*(nvar+1)/2);
     NumberOfCovarFiles = 1;
 else
     Covariance_matrix = zeros(MaXNumberOfCovarLines,nvar*(nvar+1)/2);
-    NumberOfLinesInTheLastCovarFile = mod(NumberOfSimulations,MaXNumberOfCovarLines);
-    NumberOfCovarFiles = ceil(NumberOfSimulations/MaXNumberOfCovarLines);
+    NumberOfLinesInTheLastCovarFile = mod(SampleSize,MaXNumberOfCovarLines);
+    NumberOfCovarFiles = ceil(SampleSize/MaXNumberOfCovarLines);
 end
 
 NumberOfCovarLines = rows(Covariance_matrix);
@@ -86,10 +66,10 @@ for file = 1:NumberOfDrawsFiles
             set_parameters(pdraws{linee,1});
             [dr,info] = resol(oo_.steady_state,0);
         end
-        tmp = th_autocovariances(dr,ivar);
+        tmp = th_autocovariances(dr,ivar,M_,options_);
         for i=1:nvar
             for j=i:nvar
-                Covariance_matrix(linea,idx(i,j,nvar)) = tmp{1}(i,j);
+                Covariance_matrix(linea,symmetric_matrix_index(i,j,nvar)) = tmp{1}(i,j);
             end
         end
         if linea == NumberOfCovarLines
@@ -109,45 +89,12 @@ for file = 1:NumberOfDrawsFiles
         end
     end
 end
-options_.ar = nar; clear('pdraws','tmp');
 
-% Compute statistics and save in oo_
-for i=1:nvar
-    for j=i:nvar
-        i1 = 1;
-        tmp = zeros(NumberOfSimulations,1);
-        for file = 1:CovarFileNumber
-            load([fname '_Posterior2ndOrderMoments' int2str(file)]);
-            i2 = i1 + rows(Covariance_matrix) - 1;
-            tmp(i1:i2) = Covariance_matrix(:,idx(i,j,nvar));
-            i1 = i2+1;
-        end
-        [post_mean, post_median, post_var, hpd_interval, post_deciles, density] = ...
-            posterior_moments(tmp,1,options_.mh_conf_sig);
-        name = fieldname(i,j,vartan);
-        eval(['oo_.PosteriorTheoreticalMoments.dsge.covariance.mean.' name ' = post_mean;']);
-        eval(['oo_.PosteriorTheoreticalMoments.dsge.covariance.median.' name ' = post_median;']);
-        eval(['oo_.PosteriorTheoreticalMoments.dsge.covariance.variance.' name ' = post_var;']);
-        eval(['oo_.PosteriorTheoreticalMoments.dsge.covariance.hpdinf.' name ' = hpd_interval(1);']);
-        eval(['oo_.PosteriorTheoreticalMoments.dsge.covariance.hpdsup.' name ' = hpd_interval(2);']);
-        eval(['oo_.PosteriorTheoreticalMoments.dsge.covariance.deciles.' name ' = post_deciles;']);
-        eval(['oo_.PosteriorTheoreticalMoments.dsge.covariance.density.' name ' = density;']);
-    end 
-end
+options_.ar = nar;
 
-
-
-    
-function k = idx(i,j,n)
-    k = (i-1)*n+j-i*(i-1)/2;
 
 function r = rows(M)
     r = size(M,1);
 
 function c = cols(M)
     c = size(M,2);
-    
-function name = fieldname(i,j,vlist)
-    n1 = deblank(vlist(i,:));
-    n2 = deblank(vlist(j,:));
-    name = [n1 '.' n2];

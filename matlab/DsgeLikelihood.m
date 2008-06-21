@@ -1,5 +1,4 @@
 function [fval,cost_flag,ys,trend_coeff,info] = DsgeLikelihood(xparam1,gend,data)
-
 % function [fval,cost_flag,ys,trend_coeff,info] = DsgeLikelihood(xparam1,gend,data)
 % Evaluates the posterior kernel of a dsge model. 
 % 
@@ -22,9 +21,7 @@ function [fval,cost_flag,ys,trend_coeff,info] = DsgeLikelihood(xparam1,gend,data
 %  
 % part of DYNARE, copyright Dynare Team (2004-2008)
 % Gnu Public License.
-
   global bayestopt_ estim_params_ options_ trend_coeff_ M_ oo_ xparam1_test
-
   fval		= [];
   ys		= [];
   trend_coeff	= [];
@@ -155,7 +152,7 @@ function [fval,cost_flag,ys,trend_coeff,info] = DsgeLikelihood(xparam1,gend,data
   % 3. Initial condition of the Kalman filter
   %------------------------------------------------------------------------------
   if options_.lik_init == 1		% Kalman filter
-    Pstar = lyapunov_symm(T,R*Q*R');
+    Pstar = lyapunov_symm(T,R*Q*R',options_.qz_criterium);
     Pinf	= [];
   elseif options_.lik_init == 2	% Old Diffuse Kalman filter
     Pstar = 10*eye(np);
@@ -165,7 +162,7 @@ function [fval,cost_flag,ys,trend_coeff,info] = DsgeLikelihood(xparam1,gend,data
       Pstar = zeros(np,np);
       ivs = bayestopt_.restrict_var_list_stationary;
       R1 = R(ivs,:);
-      Pstar(ivs,ivs) = lyapunov_symm(T(ivs,ivs),R1*Q*R1');
+      Pstar(ivs,ivs) = lyapunov_symm(T(ivs,ivs),R1*Q*R1',options_.qz_criterium);
       %    Pinf  = bayestopt_.Pinf;
       % by M. Ratto
       RR=T(:,bayestopt_.restrict_var_list_nonstationary);
@@ -245,15 +242,20 @@ function [fval,cost_flag,ys,trend_coeff,info] = DsgeLikelihood(xparam1,gend,data
         LIK = DiffuseLikelihoodH3(T,R,Q,H,Pinf,Pstar,data,trend,start);
       else
 	LIK = DiffuseLikelihoodH3corr(T,R,Q,H,Pinf,Pstar,data,trend,start);
-      end	
-    end	  
+      end
+    end 
   else
     if options_.kalman_algo == 1
        %nv = size(bayestopt_.Z,1);
        %LIK = kalman_filter(bayestopt_.Z,zeros(nv,nv),T,R,Q,data,zeros(size(T,1),1),Pstar,'u');
-      LIK = DiffuseLikelihood1(T,R,Q,Pinf,Pstar,data,trend,start);
-      % LIK = diffuse_likelihood1(T,R,Q,Pinf,Pstar,data-trend,start);
-      %if abs(LIK1-LIK)>0.0000000001
+       %tic
+       LIK = DiffuseLikelihood1(T,R,Q,Pinf,Pstar,data,trend,start);
+       %toc
+       %tic
+       %LIK1 = Diffuse_Likelihood1(T,R,Q,Pinf,Pstar,data,trend,start);
+       %toc
+       %LIK1-LIK
+       %if abs(LIK1-LIK)>0.0000000001
       %  disp(['LIK1 and LIK are not equal! ' num2str(abs(LIK1-LIK))])
       %end
       if isinf(LIK)

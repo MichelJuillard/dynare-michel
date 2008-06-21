@@ -32,7 +32,7 @@ function [A,B,ys,info] = dynare_resolve(iv,ic,aux)
   global oo_ M_
   
   [oo_.dr,info] = resol(oo_.steady_state,0);
-  
+
   if info(1) > 0
     A = [];
     B = [];
@@ -52,5 +52,5 @@ function [A,B,ys,info] = dynare_resolve(iv,ic,aux)
     aux(k,2) = aux(k,2) + oo_.dr.nfwrd;
   end
   
-  [A,B] = kalman_transition_matrix(oo_.dr,iv,ic,aux);
+  [A,B] = kalman_transition_matrix(oo_.dr,iv,ic,aux,M_.exo_nbr);
   ys = oo_.dr.ys;

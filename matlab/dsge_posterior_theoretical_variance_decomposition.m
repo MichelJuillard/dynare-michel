@@ -1,4 +1,5 @@
-function dsge_posterior_theoretical_variance_decomposition()
+function [nvar,vartan,NumberOfDecompFiles] = ...
+        dsge_posterior_theoretical_variance_decomposition(SampleSize,M_,options_,oo_)
 % This function estimates the posterior distribution of the variance
 % decomposition of the observed endogenous variables.
 % 
@@ -20,42 +21,22 @@ function dsge_posterior_theoretical_variance_decomposition()
 % part of DYNARE, copyright Dynare Team (2007-2008).
 % Gnu Public License.
 
-global M_ options_ oo_
-
 type = 'posterior';% To be defined as a input argument later...
-NumberOfSimulations = 800;% To be defined in a global structure...
 
 % Set varlist (vartan)
 [ivar,vartan] = set_stationary_variables_list;
-ivar
-vartan
+nvar = length(ivar);
 
-% Set various parameters, Check or create files and directories &
-% initialize arrays.
-if strcmpi(type,'posterior')
-    MhDirectoryName = CheckPath('metropolis');
-else
-    MhDirectoryName = CheckPath('prior');
-end
-fname = [ MhDirectoryName '/' M_.fname];
-DrawsFiles = dir([fname '_' type '_draws*' ]);
-if ~rows(DrawsFiles)
-    if strcmpi(type,'posterior')
-        drsize = size_of_the_reduced_form_model(oo_.dr);
-        if drsize*NumberOfSimulations>101%Big model!
-            drsize=0;
-        end
-        SampleAddress = selec_posterior_draws(NumberOfSimulations,drsize);
-    else% (samples from the prior) To be done later...
-    end
-    DrawsFiles = dir([fname '_' type '_draws*']);
-end
+% Set the size of the auto-correlation function to zero.
+nar = options_.ar;
+options_.ar = 0;    
 
-nar = options_.ar;% Saves size of the auto-correlation function.
-options_.ar = 0;% Set the size of the auto-correlation function.
+% Get informations about the _posterior_draws files.
+DrawsFiles = dir([M_.dname '/metropolis/' M_.fname '_' type '_draws*' ]);
+NumberOfDrawsFiles = length(DrawsFiles);
 
 nexo = M_.exo_nbr;
-nvar = length(ivar);
+
 
 NumberOfDrawsFiles = rows(DrawsFiles);
 NumberOfSavedElementsPerSimulation = nvar*(nexo+1);
@@ -89,10 +70,11 @@ for file = 1:NumberOfDrawsFiles
             set_parameters(pdraws{linee,1});
             [dr,info] = resol(oo_.steady_state,0);
         end
-        tmp = th_autocovariances(dr,ivar);
-        for i=1:nvar
-            Decomposition_array(linea,i) = tmp{1}(i,i);
-        end
+        tmp = th_autocovariances(dr,ivar,M_,options_);
+        %for i=1:nvar
+        %    Decomposition_array(linea,i) = tmp{1}(i,i);
+        %end
+        Decomposition_array(linea,:) = transpose(tmp{1});
         for i=1:nvar
             for j=1:nexo
                 Decomposition_array(linea,nvar+(i-1)*nexo+j) = tmp{2}(i,j);
@@ -115,62 +97,11 @@ for file = 1:NumberOfDrawsFiles
         end
     end
 end
-options_.ar = nar; clear('pdraws','tmp');
 
-% Compute statistics and save in oo_
-
-for i=1:nvar
-    for j=1:nexo
-        i1 = 1;
-        tmp = zeros(NumberOfSimulations,1);
-        for file = 1:DecompFileNumber
-            load([fname '_PosteriorVarianceDecomposition' int2str(file)]);
-            i2 = i1 + rows(Decomposition_array) - 1;
-            tmp(i1:i2) = Decomposition_array(:,nvar+(i-1)*nexo+j);
-            i1 = i2+1;
-        end
-        name = [ deblank(vartan(i,:)) '.' deblank(M_.exo_names(j,:)) ];
-        t1 = min(tmp); t2 = max(tmp);
-        t3 = t2-t1;% How to normalize ? t1 and t2 may be zero...
-        if t3<1.0e-12
-            if t1<1.0e-12
-                t1 = 0;
-            end
-            if abs(t1-1)<1.0e-12
-                t1 = 1;
-            end 
-            post_mean = t1;
-            post_median = t1;
-            post_var = 0;
-            hpd_interval = NaN(2,1);
-            post_deciles = NaN(9,1);
-            density = NaN;
-        else
-            [post_mean, post_median, post_var, hpd_interval, post_deciles, density] = ...
-                posterior_moments(tmp,1,options_.mh_conf_sig);
-        end
-        
-        eval(['oo_.PosteriorTheoreticalMoments.dsge.VarianceDecomposition.mean.' name ' = post_mean;']);
-        eval(['oo_.PosteriorTheoreticalMoments.dsge.VarianceDecomposition.median.' name ' = post_median;']);
-        eval(['oo_.PosteriorTheoreticalMoments.dsge.VarianceDecomposition.variance.' name ' = post_var;']);
-        eval(['oo_.PosteriorTheoreticalMoments.dsge.VarianceDecomposition.hpdinf.' name ' = hpd_interval(1);']);
-        eval(['oo_.PosteriorTheoreticalMoments.dsge.VarianceDecomposition.hpdsup.' name ' = hpd_interval(2);']);
-        eval(['oo_.PosteriorTheoreticalMoments.dsge.VarianceDecomposition.deciles.' name ' = post_deciles;']);
-        eval(['oo_.PosteriorTheoreticalMoments.dsge.VarianceDecomposition.density.' name ' = density;']);
-    end
-end
-
-
-function k = idx(i,j,n)
-    k = (i-1)*n+j-i*(i-1)/2;
+options_.ar = nar;% Useless because options_ is not a global anymore...
 
 function r = rows(M)
     r = size(M,1);
 
 function c = cols(M)
     c = size(M,2);
-    
-function name = fieldname(i,j,vlist)
-    n1 = deblank(vlist(i,:));
-    n2 = deblank(vlist(j,:));
-    name = [n1 '.' n2];

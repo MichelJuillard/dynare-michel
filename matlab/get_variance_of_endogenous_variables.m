@@ -29,9 +29,9 @@ function [vx1,i_ns] = get_variance_of_endogenous_variables(dr,i_var)
   nc = size(ghx,2);
   n = length(i_var);
   
-  [A,B] = kalman_transition_matrix(dr,nstatic+(1:npred),1:nc,dr.transition_auxiliary_variables);
+  [A,B] = kalman_transition_matrix(dr,nstatic+(1:npred),1:nc,dr.transition_auxiliary_variables,M_.exo_nbr);
   
-  [vx,u] = lyapunov_symm(A,B*Sigma_e*B');
+  [vx,u] = lyapunov_symm(A,B*Sigma_e*B',options_.qz_criterium);
   
   if size(u,2) > 0
     i_stat = find(any(abs(ghx*u) < options_.Schur_vec_tol,2));

@@ -1,7 +1,5 @@
-function [x,u]=lyapunov_symm(a,b)
-
-% function [x,u]=lyapunov_symm(a,b)
-% solves the Lyapunov equation x-a*x*a' = b, for b (and then x) symmetrical
+function [x,u]=lyapunov_symm(a,b,qz_criterium)
+% Solves the Lyapunov equation x-a*x*a' = b, for b (and then x) symmetrical
 % if a has some unit roots, the function computes only the solution of the stable subsystem
 %  
 % INPUTS:
@@ -21,9 +19,7 @@ function [x,u]=lyapunov_symm(a,b)
 %   needs Matlab version with ordeig function
 %
 % part of DYNARE, copyright Dynare Team (2006-2008)
-% Gnu Public License  
-
-  global options_ 
+% Gnu Public License   
 
   ns_var = [];
   u = [];
@@ -35,9 +31,9 @@ function [x,u]=lyapunov_symm(a,b)
   end
   [u,t] = schur(a);
   if exist('ordeig','builtin')
-    e1 = abs(ordeig(t)) > 2-options_.qz_criterium;
+    e1 = abs(ordeig(t)) > 2-qz_criterium;
   else
-    e1 = abs(my_ordeig(t)) > 2-options_.qz_criterium;
+    e1 = abs(my_ordeig(t)) > 2-qz_criterium;
   end
   k = sum(e1);
   if exist('ordschur','builtin')

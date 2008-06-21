@@ -30,7 +30,7 @@ function [yf,int_width]=forcst(dr,y0,horizon,var_list)
     nc = size(dr.ghx,2);
     endo_nbr = M_.endo_nbr;
     inv_order_var = dr.inv_order_var;
-    [A,B] = kalman_transition_matrix(dr,nstatic+(1:npred),1:nc,dr.transition_auxiliary_variables);
+    [A,B] = kalman_transition_matrix(dr,nstatic+(1:npred),1:nc,dr.transition_auxiliary_variables,M_.exo_nbr);
     
     nvar = size(var_list,1);
     if nvar == 0
