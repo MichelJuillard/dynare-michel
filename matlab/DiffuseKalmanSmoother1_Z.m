@@ -183,12 +183,7 @@ if nargout > 7
     decomp = zeros(nk,mm,rr,smpl+nk);
     ZRQinv = inv(Z*QQ*Z');
     for t = d:smpl
-        ri_d = zeros(mm,1);
-        for i=pp:-1:1
-            if Fi(i,t) > crit
-                ri_d = Z(i,:)'/Fi(i,t)*v(i,t)+Li(:,:,i,t)'*ri_d;
-            end
-        end
+        ri_d = Z'*iF(:,:,t)*v(:,t);
         
         % calculate eta_tm1t
         eta_tm1t = QRt*ri_d;
@@ -198,9 +193,8 @@ if nargout > 7
             for j=1:rr
                 eta=zeros(rr,1);
                 eta(j) = eta_tm1t(j);
-                decomp(h,:,j,t+h) = Ttok*P1(:,:,t)*Z'*ZRQinv*Z*R*eta;
+                decomp(h,:,j,t+h) = T^(h-1)*P(:,:,t)*Z'*ZRQinv*Z*R*eta;
             end
-            Ttok = T*Ttok;
         end
     end
 end
