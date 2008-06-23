@@ -1,14 +1,15 @@
 #include <string.h>
 #include "mex.h"
 
-#if defined(__linux__)
-#  define DGGES dgges_
-#else
-#  define DGGES dgges
-#endif
-
-/* GAUSS interface */
-  void mjdgges(double *a, double *b, double *z, double *n, double *sdim, double *eval_r, double *eval_i, double *info);
+#ifdef NO_LAPACK_H
+# ifdef __linux__
+#  define dgges dgges_
+# endif
+void dgges(char *, char *, char *, int (*)(), int *, double *, int *, double *, int *, int *, double *, double *, double *,
+           double *, int *, double *, int *, double *, int *, int *, int *);
+#else /* NO_LAPACK_H */
+# include "lapack.h"
+#endif /* NO_LAPACK_H */
 
 double criterium;
 
@@ -25,17 +26,17 @@ void mjdgges(double *a, double *b, double *z, double *n, double *sdim, double *e
   int *bwork;
 
   one = 1;
-  i_n = (long int)*n;
+  i_n = (int)*n;
   alphar = mxCalloc(i_n,sizeof(double));
   alphai = mxCalloc(i_n,sizeof(double));
   beta = mxCalloc(i_n,sizeof(double));
   lwork = 16*i_n+16;
   work = mxCalloc(lwork,sizeof(double));
-  bwork = mxCalloc(i_n,sizeof(long int));
+  bwork = mxCalloc(i_n,sizeof(int));
   /* made necessary by bug in Lapack */
   junk = mxCalloc(i_n*i_n,sizeof(double));
 
-  DGGES( "N", "V", "S", (int *)my_criteria, &i_n, a, &i_n, b, &i_n, &i_sdim, alphar, alphai, beta, junk, &i_n, z, &i_n, work, &lwork, bwork, &i_info );
+  dgges("N", "V", "S", my_criteria, &i_n, a, &i_n, b, &i_n, &i_sdim, alphar, alphai, beta, junk, &i_n, z, &i_n, work, &lwork, bwork, &i_info);
   
   *sdim = i_sdim;
   *info = i_info;
@@ -81,7 +82,7 @@ void mexFunction( int nlhs, mxArray *plhs[],
   if (!mxIsDouble(prhs[0]) || mxIsComplex(prhs[0]) || 
       !mxIsDouble(prhs[1]) || mxIsComplex(prhs[1]) || 
       (m1 != n1) || (m2!= n1) || (m2 != n2)) { 
-    mexErrMsgTxt("MYDGGES requires two square real matrices of the same dimension."); 
+    mexErrMsgTxt("MJDGGES requires two square real matrices of the same dimension."); 
   } 
     
   /* Create a matrix for the return argument */ 

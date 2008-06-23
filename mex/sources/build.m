@@ -24,7 +24,7 @@ if strcmpi('GLNX86', computer) || strcmpi('GLNXA64', computer) ...
     LAPACK_PATH = '-lmwlapack';
     if VERSION <= 7.4
         BLAS_PATH = LAPACK_PATH; % On <= 7.4, BLAS in included in LAPACK
-        COMPILE_OPTIONS = [ COMPILE_OPTIONS ' -DMWTYPES_NOT_DEFINED -DNO_BLAS_H' ];
+        COMPILE_OPTIONS = [ COMPILE_OPTIONS ' -DMWTYPES_NOT_DEFINED -DNO_BLAS_H -DNO_LAPACK_H' ];
     else
         BLAS_PATH = '-lmwblas';
     end
@@ -34,7 +34,7 @@ elseif strcmpi('PCWIN', computer)
     LAPACK_PATH = ['"' LIBRARY_PATH 'libmwlapack.lib"'];
     if VERSION <= 7.4
         BLAS_PATH = LAPACK_PATH; % On <= 7.4, BLAS in included in LAPACK
-        COMPILE_OPTIONS = [ COMPILE_OPTIONS ' -DMWTYPES_NOT_DEFINED -DNO_BLAS_H' ];
+        COMPILE_OPTIONS = [ COMPILE_OPTIONS ' -DMWTYPES_NOT_DEFINED -DNO_BLAS_H -DNO_LAPACK_H' ];
     else
         BLAS_PATH = ['"' LIBRARY_PATH 'libmwblas.lib"'];
     end

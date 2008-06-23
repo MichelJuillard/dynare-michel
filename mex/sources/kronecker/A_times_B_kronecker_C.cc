@@ -9,7 +9,6 @@
 */
 #include <string.h>
 #include "mex.h"
-#include "matrix.h"
 
 #ifdef MWTYPES_NOT_DEFINED
 typedef int mwIndex;
@@ -17,18 +16,15 @@ typedef int mwSize;
 #endif
 
 #ifdef NO_BLAS_H
-#  if defined(__linux__)
-#    define DGEMM dgemm_
-#  else
-#    define DGEMM dgemm
-#  endif
-extern "C"{
-  int DGEMM(char*, char*, int*, int*, int*, double*, double*, int*, double*, int*, double*, double*, int*);
+# ifdef __linux__
+#  define dgemm dgemm_
+# endif
+extern "C" {
+  int dgemm(char*, char*, int*, int*, int*, double*, double*, int*, double*, int*, double*, double*, int*);
 }
-#else
-#  include "blas.h"
-#  define DGEMM dgemm
-#endif
+#else /* NO_BLAS_H */
+# include "blas.h"
+#endif /* NO_BLAS_H */
 
 void full_A_times_kronecker_B_C(double *A, double *B, double *C, double *D,
 				int mA, int nA, int mB, int nB, int mC, int nC)
@@ -43,7 +39,7 @@ void full_A_times_kronecker_B_C(double *A, double *B, double *C, double *D,
       ka = 0 ;
       for(unsigned long int row=0; row<mB; row++)
 	{
-	  DGEMM(transpose, transpose, &mA, &nC, &mC, &B[mB*col+row], &A[ka], &mA, &C[0], &mC, &one, &D[kd], &mA);
+	  dgemm(transpose, transpose, &mA, &nC, &mC, &B[mB*col+row], &A[ka], &mA, &C[0], &mC, &one, &D[kd], &mA);
 	  ka += shiftA;
 	}
       kd += shiftD;
@@ -63,7 +59,7 @@ void full_A_times_kronecker_B_B(double *A, double *B, double *D, int mA, int nA,
       ka = 0 ;
       for(unsigned long int row=0; row<mB; row++)
 	{
-	  DGEMM(transpose, transpose, &mA, &nB, &mB, &B[mB*col+row], &A[ka], &mA, &B[0], &mB, &one, &D[kd], &mA);
+	  dgemm(transpose, transpose, &mA, &nB, &mB, &B[mB*col+row], &A[ka], &mA, &B[0], &mB, &one, &D[kd], &mA);
 	  ka += shiftA;
 	}
       kd += shiftD;

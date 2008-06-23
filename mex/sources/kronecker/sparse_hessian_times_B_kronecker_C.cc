@@ -9,7 +9,6 @@
 ** Dynare Team, 2007.
 */
 #include <string.h>
-#include "matrix.h"
 #include "mex.h"
 
 #ifdef MWTYPES_NOT_DEFINED
