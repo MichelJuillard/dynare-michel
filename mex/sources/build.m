@@ -19,7 +19,7 @@ if strcmpi('GLNX86', computer) || strcmpi('GLNXA64', computer) ...
         || strcmpi('MACI', computer) || strcmpi('MAC', computer)
     % GNU/Linux (x86-32 or x86-64) or MacOS (Intel or PPC)
     if strcmpi('GLNXA64', computer) % 64 bits ?
-        COMPILE_OPTIONS = [ COMPILE_OPTIONS ' -largeArrayDims -DMX_COMPAT_32' ];
+        COMPILE_OPTIONS = [ COMPILE_OPTIONS ' -largeArrayDims'];
     end
     LAPACK_PATH = '-lmwlapack';
     if VERSION <= 7.4
