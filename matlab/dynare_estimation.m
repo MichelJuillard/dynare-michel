@@ -318,13 +318,14 @@ if options_.mode_compute > 0 & options_.posterior_mode_estimation
     end
   elseif options_.mode_compute == 2
     % asamin('set','maximum_cost_repeat',0);
-    if ~options_.bvar_dsge
-      [fval,xparam1,grad,hessian_asamin,exitflag] = ...
-          asamin('minimize','DsgeLikelihood',xparam1,lb,ub,-ones(size(xparam1)),gend,data);   
-    else
-      [fval,xparam1,grad,hessian_asamin,exitflag] = ...
-          asamin('minimize','DsgeVarLikelihood',xparam1,lb,ub,-ones(size(xparam1)),gend);   
-    end       
+% $$$     if ~options_.bvar_dsge
+% $$$       [fval,xparam1,grad,hessian_asamin,exitflag] = ...
+% $$$           asamin('minimize','DsgeLikelihood',xparam1,lb,ub,-ones(size(xparam1)),gend,data);   
+% $$$     else
+% $$$       [fval,xparam1,grad,hessian_asamin,exitflag] = ...
+% $$$           asamin('minimize','DsgeVarLikelihood',xparam1,lb,ub,-ones(size(xparam1)),gend);   
+% $$$     end       
+    error('ESTIMATION: mode_compute=2 option (Lester Ingber''s Adaptive Simulated Annealing) is no longer available')
   elseif options_.mode_compute == 3
     optim_options = optimset('display','iter','MaxFunEvals',100000,'TolFun',1e-8,'TolX',1e-6);
     if isfield(options_,'optim_opt')
