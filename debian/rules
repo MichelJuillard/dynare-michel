@@ -23,14 +23,14 @@ build-stamp:
 	# Building Matlab 7.4 MEX files
 ifeq ($(shell test -d $(MATLAB74_ROOT) && echo yes), yes)
 	$(MATLAB74_ROOT)/etc/lmboot
-	cd mex/sources && $(MATLAB74_ROOT)/bin/matlab -nodisplay < build.m
+	cd mex/sources && $(MATLAB74_ROOT)/bin/matlab -nodisplay -r build_matlab
 	$(MATLAB74_ROOT)/etc/lmdown
 endif
 
 	# Building Matlab 7.5 MEX files
 ifeq ($(shell test -d $(MATLAB75_ROOT) && echo yes), yes)
 	$(MATLAB75_ROOT)/etc/lmboot
-	cd mex/sources && $(MATLAB75_ROOT)/bin/matlab -nodisplay < build.m
+	cd mex/sources && $(MATLAB75_ROOT)/bin/matlab -nodisplay -r build_matlab
 	$(MATLAB75_ROOT)/etc/lmdown
 endif
 
