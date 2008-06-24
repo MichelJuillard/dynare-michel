@@ -155,9 +155,11 @@ function info=stoch_simul(var_list)
 	      xlim([1 options_.irf]);
 	      title(deblank(mylist(j,:)),'Interpreter','none');
 	    end
-	    eval(['print -depsc2 ' M_.fname '_IRF_' deblank(tit(i,:))]);
-	    eval(['print -dpdf ' M_.fname  '_IRF_' deblank(tit(i,:))]);
-	    saveas(hh,[M_.fname  '_IRF_' deblank(tit(i,:)) '.fig']);
+	    eval(['print -depsc2 ' M_.fname '_IRF_' deblank(tit(i,:)) '.eps']);
+      if ~exist('OCTAVE_VERSION')
+        eval(['print -dpdf ' M_.fname  '_IRF_' deblank(tit(i,:))]);
+        saveas(hh,[M_.fname  '_IRF_' deblank(tit(i,:)) '.fig']);
+      end
 	    if TeX
 	      fprintf(fidTeX,'\\begin{figure}[H]\n');
 	      for j = 1:number_of_plots_to_draw
@@ -189,9 +191,11 @@ function info=stoch_simul(var_list)
 		xlim([1 options_.irf]);
 		title(deblank(mylist((fig-1)*nstar+plt,:)),'Interpreter','none');
 	      end
-	      eval(['print -depsc2 ' M_.fname '_IRF_' deblank(tit(i,:)) int2str(fig)]);
-	      eval(['print -dpdf ' M_.fname  '_IRF_' deblank(tit(i,:)) int2str(fig)]);
-	      saveas(hh,[M_.fname  '_IRF_' deblank(tit(i,:)) int2str(fig) '.fig']);
+	      eval(['print -depsc2 ' M_.fname '_IRF_' deblank(tit(i,:)) int2str(fig) '.eps']);
+        if ~exist('OCTAVE_VERSION')
+          eval(['print -dpdf ' M_.fname  '_IRF_' deblank(tit(i,:)) int2str(fig)]);
+          saveas(hh,[M_.fname  '_IRF_' deblank(tit(i,:)) int2str(fig) '.fig']);
+        end
 	      if TeX
 		fprintf(fidTeX,'\\begin{figure}[H]\n');
 		for j = 1:nstar
@@ -224,9 +228,11 @@ function info=stoch_simul(var_list)
 	      xlim([1 options_.irf]);
 	      title(deblank(mylist((nbplt-1)*nstar+plt,:)),'Interpreter','none');
 	    end
-	    eval(['print -depsc2 ' M_.fname '_IRF_' deblank(tit(i,:)) int2str(nbplt)]);
-	    eval(['print -dpdf ' M_.fname  '_IRF_' deblank(tit(i,:)) int2str(nbplt)]);
-	    saveas(hh,[M_.fname  '_IRF_' deblank(tit(i,:)) int2str(nbplt) '.fig']);
+	    eval(['print -depsc2 ' M_.fname '_IRF_' deblank(tit(i,:)) int2str(nbplt) '.eps']);
+      if ~exist('OCTAVE_VERSION')
+        eval(['print -dpdf ' M_.fname  '_IRF_' deblank(tit(i,:)) int2str(nbplt)]);
+        saveas(hh,[M_.fname  '_IRF_' deblank(tit(i,:)) int2str(nbplt) '.fig']);
+      end
 	    if TeX
 	      fprintf(fidTeX,'\\begin{figure}[H]\n');
 	      for j = 1:m

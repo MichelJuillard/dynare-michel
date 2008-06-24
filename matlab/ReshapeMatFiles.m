@@ -102,31 +102,31 @@ end
       for f1=1:NumberOfTYPEfiles-foffset
         eval(['STOCK_' CAPtype ' = zeros(NumberOfPeriodsPerTYPEfiles,TYPEsize(2),TYPEsize(3),B);'])
         for f2 = 1:NumberOfTYPEfiles
-          load([MhDirectoryName M_.fname '_' type int2str(f2)]);
+          load([MhDirectoryName M_.fname '_' type int2str(f2) '.mat']);
           eval(['STOCK_' CAPtype '(:,:,:,idx+1:idx+size(stock_' type ',4))=stock_' ...
                 type '(jdx+1:jdx+NumberOfPeriodsPerTYPEfiles,:,:,:);'])
           eval(['idx = idx + size(stock_' type ',4);'])
         end
         %eval(['STOCK_' CAPtype ' = sort(STOCK_' CAPtype ',4);'])
-        save([MhDirectoryName M_.fname '_' CAPtype 's' int2str(f1)],['STOCK_' CAPtype]);
+        save([MhDirectoryName M_.fname '_' CAPtype 's' int2str(f1) '.mat'],['STOCK_' CAPtype]);
         jdx = jdx + NumberOfPeriodsPerTYPEfiles;
         idx = 0;
       end
       if reste
       eval(['STOCK_' CAPtype ' = zeros(reste,TYPEsize(2),TYPEsize(3),B);'])
       for f2 = 1:NumberOfTYPEfiles
-        load([MhDirectoryName M_.fname '_' type int2str(f2)]);
+        load([MhDirectoryName M_.fname '_' type int2str(f2) '.mat']);
         eval(['STOCK_' CAPtype '(:,:,:,idx+1:idx+size(stock_' type ',4))=stock_' type '(jdx+1:jdx+reste,:,:,:);'])
         eval(['idx = idx + size(stock_' type ',4);'])
       end
       %eval(['STOCK_' CAPtype ' = sort(STOCK_' CAPtype ',4);'])
-      save([MhDirectoryName M_.fname '_' CAPtype 's' int2str(NumberOfTYPEfiles-foffset+1)],['STOCK_' CAPtype]);  
+      save([MhDirectoryName M_.fname '_' CAPtype 's' int2str(NumberOfTYPEfiles-foffset+1) '.mat'],['STOCK_' CAPtype]);  
       end
     else
-      load([MhDirectoryName M_.fname '_' type '1']);
+      load([MhDirectoryName M_.fname '_' type '1.mat']);
       %eval(['STOCK_' CAPtype ' = sort(stock_' type ',4);'])
       eval(['STOCK_' CAPtype ' = stock_' type ';'])
-      save([MhDirectoryName M_.fname '_' CAPtype 's' int2str(1)],['STOCK_' CAPtype ]);
+      save([MhDirectoryName M_.fname '_' CAPtype 's' int2str(1) '.mat'],['STOCK_' CAPtype ]);
     end
     % Original file format may be useful in some cases...
     % for file = 1:NumberOfTYPEfiles
@@ -141,28 +141,28 @@ end
       for f1=1:NumberOfTYPEfiles-1
         eval(['STOCK_' CAPtype ' = zeros(TYPEsize(1),NumberOfPeriodsPerTYPEfiles,B);'])
         for f2 = 1:NumberOfTYPEfiles
-          load([MhDirectoryName M_.fname '_' type int2str(f2)]);
+          load([MhDirectoryName M_.fname '_' type int2str(f2) '.mat']);
           eval(['STOCK_' CAPtype '(:,:,idx+1:idx+size(stock_ ' type ',3))=stock_' type '(:,jdx+1:jdx+NumberOfPeriodsPerTYPEfiles,:);'])
           eval(['idx = idx + size(stock_' type ',3);'])
         end
         %eval(['STOCK_' CAPtype ' = sort(STOCK_' CAPtype ',3);'])
-        save([MhDirectoryName M_.fname '_' CAPtype 's' int2str(f1)],['STOCK_' CAPtype]);
+        save([MhDirectoryName M_.fname '_' CAPtype 's' int2str(f1) '.mat'],['STOCK_' CAPtype]);
         jdx = jdx + NumberOfPeriodsPerTYPEfiles;
         idx = 0;
       end
       eval(['STOCK_' CAPtype ' = zeros(TYPEsize(1),reste,B);'])
       for f2 = 1:NumberOfTYPEfiles
-        load([MhDirectoryName M_.fname '_' type int2str(f2)]);
+        load([MhDirectoryName M_.fname '_' type int2str(f2) '.mat']);
         eval(['STOCK_' CAPtype '(:,:,idx+1:idx+size(stock_' type ',3))=stock_' type '(:,jdx+1:jdx+reste,:);'])
         eval(['idx = idx + size(stock_' type ',3);'])
       end
       %eval(['STOCK_' CAPtype ' = sort(STOCK_' CAPtype ',3);'])
-      save([MhDirectoryName M_.fname '_' CAPtype 's' int2str(NumberOfTYPEfiles)],['STOCK_' CAPtype]);
+      save([MhDirectoryName M_.fname '_' CAPtype 's' int2str(NumberOfTYPEfiles) '.mat'],['STOCK_' CAPtype]);
     else
-      load([MhDirectoryName M_.fname '_' type '1']);
+      load([MhDirectoryName M_.fname '_' type '1.mat']);
       %eval(['STOCK_' CAPtype ' = sort(stock_' type ',3);'])
       eval(['STOCK_' CAPtype ' = stock_' type ';'])
-      save([MhDirectoryName M_.fname '_' CAPtype 's' int2str(1)],['STOCK_' CAPtype ]);      
+      save([MhDirectoryName M_.fname '_' CAPtype 's' int2str(1) '.mat'],['STOCK_' CAPtype ]);      
     end
     % Original file format may be useful in some cases...
     % for file = 1:NumberOfTYPEfiles

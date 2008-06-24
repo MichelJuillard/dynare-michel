@@ -3,6 +3,7 @@
 function disp_moments(y,var_list)
   global M_ options_ oo_
   
+  warning_old_state = warning;
   warning off
   nvar = size(var_list,1);
   if nvar == 0
@@ -72,7 +73,7 @@ function disp_moments(y,var_list)
     table(title,headers,labels,autocorr,size(labels,2)+2,8,4);
   end
   
-  warning on
+  warning(warning_old_state);
 % 10/03/02 MJ corrected order std. dev var in printed report.
 % 01/02/03 MJ added correlation and autocorrelation
 % 01/19/03 MJ corrected variable name truncation

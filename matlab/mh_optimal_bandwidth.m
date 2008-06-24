@@ -157,7 +157,7 @@ function correction = correction_for_repeated_draws(draws,n)
 correction = 0;
 for i=1:n
     j = i;
-    while j<=n & ( draws(j,1) - draws(i,1) )<2*eps; 
+    while j<=n && ( draws(j,1) - draws(i,1) )<2*eps; 
         j = j+1;
     end
     correction = correction + 2*(j-i) - 1;

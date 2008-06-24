@@ -139,12 +139,16 @@ for i=1:npar
   hold off;
   drawnow
   if subplotnum == MaxNumberOfPlotPerFigure | i == npar;
-    eval(['print -depsc2 ' OutputDirectoryName '/' M_.fname '_PriorsAndPosteriors' int2str(figunumber)]);
-    eval(['print -dpdf ' OutputDirectoryName '/' M_.fname '_PriorsAndPosteriors' int2str(figunumber)]);
+    eval(['print -depsc2 ' OutputDirectoryName '/' M_.fname '_PriorsAndPosteriors' int2str(figunumber) '.eps']);
+    if ~exist('OCTAVE_VERSION')
+      eval(['print -dpdf ' OutputDirectoryName '/' M_.fname '_PriorsAndPosteriors' int2str(figunumber)]);
+    end
     if options_.nograph, 
       set(hfig,'Visible','on');
     end
-    saveas(hfig,[OutputDirectoryName '/' M_.fname '_PriorsAndPosteriors' int2str(figunumber) '.fig']);
+    if ~exist('OCTAVE_VERSION')
+      saveas(hfig,[OutputDirectoryName '/' M_.fname '_PriorsAndPosteriors' int2str(figunumber) '.fig']);
+    end
     if TeX
       fprintf(fidTeX,'\\begin{figure}[H]\n');
       for j = 1:size(NAMES,1)

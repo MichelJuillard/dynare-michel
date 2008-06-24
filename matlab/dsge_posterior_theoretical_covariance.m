@@ -55,7 +55,7 @@ CovarFileNumber = 1;
 % Compute 2nd order moments and save them in *_Posterior2ndOrderMoments* files
 linea = 0;
 for file = 1:NumberOfDrawsFiles
-    load([M_.dname '/metropolis/' DrawsFiles(file).name]);
+    load([M_.dname '/metropolis/' DrawsFiles(file).name '.mat']);
     NumberOfDraws = rows(pdraws);
     isdrsaved = cols(pdraws)-1;
     for linee = 1:NumberOfDraws
@@ -73,7 +73,7 @@ for file = 1:NumberOfDrawsFiles
             end
         end
         if linea == NumberOfCovarLines
-            save([ M_.dname '/metropolis/' M_.fname '_Posterior2ndOrderMoments' int2str(CovarFileNumber)],'Covariance_matrix');
+            save([ M_.dname '/metropolis/' M_.fname '_Posterior2ndOrderMoments' int2str(CovarFileNumber) '.mat' ],'Covariance_matrix');
             CovarFileNumber = CovarFileNumber + 1;
             linea = 0;
             test = CovarFileNumber-NumberOfCovarFiles;

@@ -23,6 +23,17 @@ if nargin < 1
   error('You must provide the name of the MOD file in argument');
 end
 
+
+warning_config
+
+% disable output paging
+more off
+
+% sets default format for save() command
+if exist('OCTAVE_VERSION')
+  default_save_options('-mat')
+end
+
 if ~ischar(fname)
   error ('The argument in DYNARE must be a text string.') ;
 end

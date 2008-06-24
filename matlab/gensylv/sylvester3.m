@@ -12,8 +12,13 @@ function x=sylvester3(a,b,c,d)
   end
   x=zeros(n,m);
   [u,t]=schur(c);
-  [aa,bb,qq,zz]=qz(full(a),full(b),'real'); % available in Matlab version 6.0
-  d=qq*d*u;
+  if exist('OCTAVE_VERSION')
+    [aa,bb,qq,zz]=qz(full(a),full(b));
+    d=qq'*d*u;
+  else
+    [aa,bb,qq,zz]=qz(full(a),full(b),'real'); % available in Matlab version 6.0
+    d=qq*d*u;
+  end
   i = 1;
   while i < m
     if t(i+1,i) == 0

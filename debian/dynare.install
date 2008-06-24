@@ -1,0 +1,7 @@
+matlab/*.m              /usr/lib/dynare/matlab
+matlab/gensylv/*.m      /usr/lib/dynare/matlab/gensylv
+matlab/qz/*.m           /usr/lib/dynare/matlab/qz
+matlab/kronecker/*.m    /usr/lib/dynare/matlab/kronecker
+mex/octave/*.mex        /usr/lib/dynare/mex/octave
+mex/octave/rcond.m      /usr/lib/dynare/mex/octave
+preprocessor/dynare_m   /usr/lib/dynare/matlab

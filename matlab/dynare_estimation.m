@@ -178,12 +178,12 @@ if ~isempty(options_.unit_root_vars)
     end
     i_ur(i) = i1;
   end
-  [junk,bayestopt_.var_list_stationary] = ...
-      setdiff((1:M_.endo_nbr)',i_ur);
-  [junk,bayestopt_.restrict_var_list_stationary] = ...
-      setdiff(bayestopt_.restrict_var_list,i_ur);
+  bayestopt_.var_list_stationary = setdiff((1:M_.endo_nbr)',i_ur);
   [junk,bayestopt_.restrict_var_list_nonstationary] = ...
       intersect(bayestopt_.restrict_var_list,i_ur);
+  bayestopt_.restrict_var_list_stationary = ...
+      setdiff((1:length(bayestopt_.restrict_var_list))', ...
+              bayestopt_.restrict_var_list_nonstationary);
   if M_.maximum_lag > 1
     l1 = flipud([cumsum(M_.lead_lag_incidence(1:M_.maximum_lag-1,dr.order_var),1);ones(1,M_.endo_nbr)]);
     l2 = l1(:,bayestopt_.restrict_var_list);
@@ -378,7 +378,7 @@ if options_.mode_compute > 0 & options_.posterior_mode_estimation
     else
       [xparam1,hh,gg,fval,invhess] = newrat('DsgeVarLikelihood',xparam1,hh,gg,igg,crit,nit,flag,gend);
     end
-    save([M_.fname '_mode'],'xparam1','hh','gg','fval','invhess');
+    save([M_.fname '_mode.mat'],'xparam1','hh','gg','fval','invhess');
     %eval(['save ' M_.fname '_mode xparam1 hh gg fval invhess;']);
   elseif options_.mode_compute == 6
       if ~options_.bvar_dsge
@@ -468,14 +468,14 @@ if options_.mode_compute > 0 & options_.posterior_mode_estimation
       else
 	hh = reshape(hessian('DsgeVarLikelihood',xparam1,gend),nx,nx);
       end
-      save([M_.fname '_mode'],'xparam1','hh','fval');
+      save([M_.fname '_mode.mat'],'xparam1','hh','fval');
       %eval(['save ' M_.fname '_mode xparam1 hh fval;']);
     else
-      save([M_.fname '_mode'],'xparam1','hh','fval');
+      save([M_.fname '_mode.mat'],'xparam1','hh','fval');
       %eval(['save ' M_.fname '_mode xparam1 hh fval;']);
     end
   end
-  save([M_.fname '_mode'],'xparam1','hh');
+  save([M_.fname '_mode.mat'],'xparam1','hh');
   %eval(['save ' M_.fname '_mode xparam1 hh;']);
 end
 
@@ -864,7 +864,7 @@ end
 
 if np > 0
     pindx = estim_params_.param_vals(:,1);
-    save([M_.fname '_params'],'pindx');
+    save([M_.fname '_params.mat'],'pindx');
 end
 
 if (any(bayestopt_.pshape  >0 ) & options_.mh_replic) | ...
@@ -902,7 +902,7 @@ if (any(bayestopt_.pshape  >0 ) & options_.mh_replic) | ...
   %%
   GetPosteriorParametersStatistics;
   %% Results are saved (in case of an anormal exit from dynare or matlab)...
-  save([M_.fname '_results'],'oo_','M_');
+  save([M_.fname '_results.mat'],'oo_','M_');
   %%
   PlotPosteriorDistributions;
   metropolis_draw(1);
@@ -976,9 +976,11 @@ if (~((any(bayestopt_.pshape > 0) & options_.mh_replic) | (any(bayestopt_.pshape
       title(name,'Interpreter','none')
       eval(['oo_.SmoothedShocks.' deblank(M_.exo_names(i,:)) ' = innov(i,:)'';']);
     end
-    eval(['print -depsc2 ' M_.fname '_SmoothedShocks' int2str(1)]);
-    eval(['print -dpdf ' M_.fname '_SmoothedShocks' int2str(1)]);
-    saveas(hh,[M_.fname '_SmoothedShocks' int2str(1) '.fig']);
+    eval(['print -depsc2 ' M_.fname '_SmoothedShocks' int2str(1) '.eps']);
+    if ~exist('OCTAVE_VERSION')
+      eval(['print -dpdf ' M_.fname '_SmoothedShocks' int2str(1)]);
+      saveas(hh,[M_.fname '_SmoothedShocks' int2str(1) '.fig']);
+    end
     if options_.nograph, close(hh), end
     if options_.TeX
       fprintf(fidTeX,'\\begin{figure}[H]\n');
@@ -1021,9 +1023,11 @@ if (~((any(bayestopt_.pshape > 0) & options_.mh_replic) | (any(bayestopt_.pshape
 	title(name,'Interpreter','none')
 	eval(['oo_.SmoothedShocks.' deblank(name) ' = innov(k,:)'';']);
       end
-      eval(['print -depsc2 ' M_.fname '_SmoothedShocks' int2str(plt)]);
-      eval(['print -dpdf ' M_.fname '_SmoothedShocks' int2str(plt)]);
-      saveas(hh,[M_.fname '_SmoothedShocks' int2str(plt) '.fig']);
+      eval(['print -depsc2 ' M_.fname '_SmoothedShocks' int2str(plt) '.eps']);
+      if ~exist('OCTAVE_VERSION')
+        eval(['print -dpdf ' M_.fname '_SmoothedShocks' int2str(plt)]);
+        saveas(hh,[M_.fname '_SmoothedShocks' int2str(plt) '.fig']);
+      end
       if options_.nograph, close(hh), end
       if options_.TeX
 	fprintf(fidTeX,'\\begin{figure}[H]\n');
@@ -1067,9 +1071,11 @@ if (~((any(bayestopt_.pshape > 0) & options_.mh_replic) | (any(bayestopt_.pshape
       title(name,'Interpreter','none')
       eval(['oo_.SmoothedShocks.' deblank(name) ' = innov(k,:)'';']);
     end
-    eval(['print -depsc2 ' M_.fname '_SmoothedShocks' int2str(nbplt)]);
-    eval(['print -dpdf ' M_.fname '_SmoothedShocks' int2str(nbplt)]);
-    saveas(hh,[M_.fname '_SmoothedShocks' int2str(nbplt) '.fig']);
+    eval(['print -depsc2 ' M_.fname '_SmoothedShocks' int2str(nbplt) '.eps']);
+    if ~exist('OCTAVE_VERSION')
+      eval(['print -dpdf ' M_.fname '_SmoothedShocks' int2str(nbplt)]);
+      saveas(hh,[M_.fname '_SmoothedShocks' int2str(nbplt) '.fig']);
+    end
     if options_.nograph, close(hh), end
     if options_.TeX
       fprintf(fidTeX,'\\begin{figure}[H]\n');
@@ -1144,9 +1150,11 @@ if (~((any(bayestopt_.pshape > 0) & options_.mh_replic) | (any(bayestopt_.pshape
         end
         title(name,'Interpreter','none')
       end
-      eval(['print -depsc2 ' M_.fname '_SmoothedObservationErrors' int2str(1)]);
-      eval(['print -dpdf ' M_.fname '_SmoothedObservationErrors' int2str(1)]);
-      saveas(hh,[M_.fname '_SmoothedObservationErrors' int2str(1) '.fig']);
+      eval(['print -depsc2 ' M_.fname '_SmoothedObservationErrors' int2str(1) '.eps']);
+      if ~exist('OCTAVE_VERSION')
+        eval(['print -dpdf ' M_.fname '_SmoothedObservationErrors' int2str(1)]);
+        saveas(hh,[M_.fname '_SmoothedObservationErrors' int2str(1) '.fig']);
+      end
       if options_.nograph, close(hh), end
       if options_.TeX
         fprintf(fidTeX,'\\begin{figure}[H]\n');
@@ -1188,9 +1196,11 @@ if (~((any(bayestopt_.pshape > 0) & options_.mh_replic) | (any(bayestopt_.pshape
           end    
           title(name,'Interpreter','none')
         end
-        eval(['print -depsc2 ' M_.fname '_SmoothedObservationErrors' int2str(plt)]);
-        eval(['print -dpdf ' M_.fname '_SmoothedObservationErrors' int2str(plt)]);
-        saveas(hh,[M_.fname '_SmoothedObservationErrors' int2str(plt) '.fig']);
+        eval(['print -depsc2 ' M_.fname '_SmoothedObservationErrors' int2str(plt) '.eps']);
+        if ~exist('OCTAVE_VERSION')
+          eval(['print -dpdf ' M_.fname '_SmoothedObservationErrors' int2str(plt)]);
+          saveas(hh,[M_.fname '_SmoothedObservationErrors' int2str(plt) '.fig']);
+        end
         if options_.nograph, close(hh), end
         if options_.TeX
           fprintf(fidTeX,'\\begin{figure}[H]\n');
@@ -1233,9 +1243,11 @@ if (~((any(bayestopt_.pshape > 0) & options_.mh_replic) | (any(bayestopt_.pshape
         end
         title(name,'Interpreter','none');
       end
-      eval(['print -depsc2 ' M_.fname '_SmoothedObservationErrors' int2str(nbplt)]);
-      eval(['print -dpdf ' M_.fname '_SmoothedObservationErrors' int2str(nbplt)]);
-      saveas(hh,[M_.fname '_SmoothedObservationErrors' int2str(nbplt) '.fig']);
+      eval(['print -depsc2 ' M_.fname '_SmoothedObservationErrors' int2str(nbplt) '.eps']);
+      if ~exist('OCTAVE_VERSION')
+        eval(['print -dpdf ' M_.fname '_SmoothedObservationErrors' int2str(nbplt)]);
+        saveas(hh,[M_.fname '_SmoothedObservationErrors' int2str(nbplt) '.fig']);
+      end
       if options_.nograph, close(hh), end
       if options_.TeX
         fprintf(fidTeX,'\\begin{figure}[H]\n');
@@ -1287,9 +1299,11 @@ if (~((any(bayestopt_.pshape > 0) & options_.mh_replic) | (any(bayestopt_.pshape
       end
       title(name,'Interpreter','none')
     end
-    eval(['print -depsc2 ' M_.fname '_HistoricalAndSmoothedVariables' int2str(1)]);
-    eval(['print -dpdf ' M_.fname '_HistoricalAndSmoothedVariables' int2str(1)]);
-    saveas(hh,[M_.fname '_HistoricalAndSmoothedVariables' int2str(1) '.fig']);
+    eval(['print -depsc2 ' M_.fname '_HistoricalAndSmoothedVariables' int2str(1) '.eps']);
+    if ~exist('OCTAVE_VERSION')
+      eval(['print -dpdf ' M_.fname '_HistoricalAndSmoothedVariables' int2str(1)]);
+      saveas(hh,[M_.fname '_HistoricalAndSmoothedVariables' int2str(1) '.fig']);
+    end
     if options_.nograph, close(hh), end
     if options_.TeX
       fprintf(fidTeX,'\\begin{figure}[H]\n');
@@ -1332,9 +1346,11 @@ if (~((any(bayestopt_.pshape > 0) & options_.mh_replic) | (any(bayestopt_.pshape
         end    
         title(name,'Interpreter','none')
       end
-      eval(['print -depsc2 ' M_.fname '_HistoricalAndSmoothedVariables' int2str(plt)]);
-      eval(['print -dpdf ' M_.fname '_HistoricalAndSmoothedVariables' int2str(plt)]);
-      saveas(hh,[M_.fname '_HistoricalAndSmoothedVariables' int2str(plt) '.fig']);
+      eval(['print -depsc2 ' M_.fname '_HistoricalAndSmoothedVariables' int2str(plt) '.eps']);
+      if ~exist('OCTAVE_VERSION')
+        eval(['print -dpdf ' M_.fname '_HistoricalAndSmoothedVariables' int2str(plt)]);
+        saveas(hh,[M_.fname '_HistoricalAndSmoothedVariables' int2str(plt) '.fig']);
+      end
       if options_.nograph, close(hh), end
       if options_.TeX
         fprintf(fidTeX,'\\begin{figure}[H]\n');
@@ -1378,9 +1394,11 @@ if (~((any(bayestopt_.pshape > 0) & options_.mh_replic) | (any(bayestopt_.pshape
       end
       title(name,'Interpreter','none');
     end
-    eval(['print -depsc2 ' M_.fname '_HistoricalAndSmoothedVariables' int2str(nbplt)]);
-    eval(['print -dpdf ' M_.fname '_HistoricalAndSmoothedVariables' int2str(nbplt)]);
-    saveas(hh,[M_.fname '_HistoricalAndSmoothedVariables' int2str(nbplt) '.fig']);
+    eval(['print -depsc2 ' M_.fname '_HistoricalAndSmoothedVariables' int2str(nbplt) '.eps']);
+    if ~exist('OCTAVE_VERSION')
+      eval(['print -dpdf ' M_.fname '_HistoricalAndSmoothedVariables' int2str(nbplt)]);
+      saveas(hh,[M_.fname '_HistoricalAndSmoothedVariables' int2str(nbplt) '.fig']);
+    end
     if options_.nograph, close(hh), end
     if options_.TeX
       fprintf(fidTeX,'\\begin{figure}[H]\n');
@@ -1405,5 +1423,5 @@ end
 
 if np > 0
     pindx = estim_params_.param_vals(:,1);
-    save([M_.fname '_pindx'],'pindx');
+    save([M_.fname '_pindx.mat'] ,'pindx');
 end

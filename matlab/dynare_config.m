@@ -16,22 +16,28 @@ function dynareroot = dynare_config(path_to_dynare)
 %  
 % part of DYNARE, copyright Dynare Team (2001-2008)
 % Gnu Public License.
-MATLAB  = ver('matlab');
-%% FIXME:
-%% It's not satisfactory to convert string versions into numbers, and to
-%% compare these numbers:
-%% - conversion will fail if version = 1.2.3
-%% - it will give 7.10 < 7.9
-VERSION = str2num(MATLAB.Version);
 if nargin
     addpath(path_to_dynare);
 end
 dynareroot = strrep(which('dynare.m'),'dynare.m','');
-if (VERSION <= 7.4)
-    addpath([dynareroot '../mex/2007a/'])
+
+if exist('OCTAVE_VERSION')
+    addpath([dynareroot '../mex/octave/'])
 else
-    addpath([dynareroot '../mex/2007b/'])
+    MATLAB  = ver('matlab');
+    %% FIXME:
+    %% It's not satisfactory to convert string versions into numbers, and to
+    %% compare these numbers:
+    %% - conversion will fail if version = 1.2.3
+    %% - it will give 7.10 < 7.9
+    VERSION = str2num(MATLAB.Version);
+    if (VERSION <= 7.4)
+        addpath([dynareroot '../mex/2007a/'])
+    else
+        addpath([dynareroot '../mex/2007b/'])
+    end
 end
+
 %% Set mex routine names
 mex_status = cell(1,3);
 mex_status(1,1) = {'mjdgges'};

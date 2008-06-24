@@ -22,7 +22,7 @@ npar = estim_params_.np+estim_params_.nvn+estim_params_.ncx+estim_params_.ncn+es
 nblck = options_.mh_nblck;
 
 MhDirectoryName = CheckPath('metropolis');
-load([ MhDirectoryName '/'  M_.fname '_mh_history'])
+load([ MhDirectoryName '/'  M_.fname '_mh_history.mat'])
 
 FirstMhFile = record.KeepedDraws.FirstMhFile;
 FirstLine = record.KeepedDraws.FirstLine; ifil = FirstLine;
@@ -38,7 +38,7 @@ lpost_mode = -Inf;
 fprintf('MH: I''m computing the posterior mean... ');
 for n = FirstMhFile:TotalNumberOfMhFiles
   for b = 1:nblck
-    load([ MhDirectoryName '/' M_.fname '_mh' int2str(n) '_blck' int2str(b)],'x2','logpo2'); 
+    load([ MhDirectoryName '/' M_.fname '_mh' int2str(n) '_blck' int2str(b) '.mat'],'x2','logpo2'); 
     MU = MU + sum(x2(ifil:end,:));
     lpost_mode = max(lpost_mode,max(logpo2));
   end
@@ -53,7 +53,7 @@ fprintf('MH: I''m computing the posterior covariance matrix... ');
 ifil = FirstLine;
 for n = FirstMhFile:TotalNumberOfMhFiles
   for b = 1:nblck
-    load([MhDirectoryName '/' M_.fname '_mh' int2str(n) '_blck' int2str(b)],'x2');
+    load([MhDirectoryName '/' M_.fname '_mh' int2str(n) '_blck' int2str(b) '.mat'],'x2');
     x = x2(ifil:end,:)-MU1(1:size(x2(ifil:end,:),1),:);
     SIGMA = SIGMA + x'*x;
   end
@@ -65,7 +65,7 @@ fprintf(' Done!\n');
 %% save the posterior mean and the inverse of the covariance matrix
 %% (usefull if the user wants to perform some computations using
 %% the posterior mean instead of the posterior mode ==> ). 
-save([M_.fname '_mean'],'xparam1','hh','SIGMA');
+save([M_.fname '_mean.mat'],'xparam1','hh','SIGMA');
 %% end%Save.
 disp(' ');
 disp('MH: I''m computing the posterior log marginale density (modified harmonic mean)... ');
@@ -82,7 +82,7 @@ while check_coverage
     tmp = 0;
     for n = FirstMhFile:TotalNumberOfMhFiles
       for b=1:nblck
-	load([ MhDirectoryName '/' M_.fname '_mh' int2str(n) '_blck' int2str(b)],'x2','logpo2');
+	load([ MhDirectoryName '/' M_.fname '_mh' int2str(n) '_blck' int2str(b) '.mat'],'x2','logpo2');
 	EndOfFile = size(x2,1);
 	for i = ifil:EndOfFile
 	  deviation  = (x2(i,:)-MU)*invSIGMA*(x2(i,:)-MU)';
@@ -95,9 +95,10 @@ while check_coverage
       ifil = 1;
     end
     linee = linee + 1;
-    warning off all
+    warning_old_state = warning;
+    warning off;
     marginal(linee,:) = [p, lpost_mode-log(tmp/((TotalNumberOfMhDraws-TODROP)*nblck))];
-    warning on all
+    warning(warning_old_state);
   end
   if abs((marginal(9,2)-marginal(1,2))/marginal(9,2)) > 0.01 | isinf(marginal(1,2))
     if increase == 1

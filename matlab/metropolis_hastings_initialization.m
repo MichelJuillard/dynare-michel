@@ -153,7 +153,7 @@ if ~options_.load_mh_file & ~options_.mh_recover
     record.LastLogLiK = zeros(nblck,1);
     record.LastFileNumber = AnticipatedNumberOfFiles ;
     record.LastLineNumber = AnticipatedNumberOfLinesInTheLastFile;
-    save([MhDirectoryName '/' ModelName '_mh_history'],'record');  
+    save([MhDirectoryName '/' ModelName '_mh_history.mat'],'record');  
     fprintf(fidlog,['  CREATION OF THE MH HISTORY FILE!\n\n']);
     fprintf(fidlog,['    Expected number of files per block.......: ' int2str(AnticipatedNumberOfFiles) '.\n']);
     fprintf(fidlog,['    Expected number of lines in the last file: ' ...
@@ -182,7 +182,7 @@ elseif options_.load_mh_file & ~options_.mh_recover
         disp('MH:: FAILURE! there is no MH-history file!')
         return
     else
-        load([ MhDirectoryName '/'  ModelName '_mh_history'])
+        load([ MhDirectoryName '/'  ModelName '_mh_history.mat'])
     end
     fidlog = fopen([MhDirectoryName '/metropolis.log'],'a');
     fprintf(fidlog,'\n');
@@ -226,7 +226,7 @@ elseif options_.load_mh_file & ~options_.mh_recover
     record.MhDraws(end,3) = AnticipatedNumberOfLinesInTheLastFile;
     randn('state',record.Seeds.Normal);
     rand('state',record.Seeds.Unifor);
-    save([MhDirectoryName '/' ModelName '_mh_history'],'record');
+    save([MhDirectoryName '/' ModelName '_mh_history.mat'],'record');
     disp(['MH: ... It''s done. I''ve loaded ' int2str(NumberOfPreviousSimulations) ' simulations.'])
     disp(' ')
     fclose(fidlog);
@@ -240,7 +240,7 @@ elseif options_.mh_recover
         disp('MH:: FAILURE! there is no MH-history file!')
         return
     else
-        load([ MhDirectoryName '/'  ModelName '_mh_history'])
+        load([ MhDirectoryName '/'  ModelName '_mh_history.mat'])
     end
     nblck = record.Nblck;
     options_.mh_nblck = nblck;

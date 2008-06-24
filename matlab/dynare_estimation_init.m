@@ -180,12 +180,12 @@ if ~isempty(options_.unit_root_vars)
     end
     i_ur(i) = i1;
   end
-  [junk,bayestopt_.var_list_stationary] = ...
-      setdiff((1:M_.endo_nbr)',i_ur);
-  [junk,bayestopt_.restrict_var_list_stationary] = ...
-      setdiff(bayestopt_.restrict_var_list,i_ur);
+  bayestopt_.var_list_stationary = setdiff((1:M_.endo_nbr)',i_ur);
   [junk,bayestopt_.restrict_var_list_nonstationary] = ...
       intersect(bayestopt_.restrict_var_list,i_ur);
+  bayestopt_.restrict_var_list_stationary = ...
+      setdiff((1:length(bayestopt_.restrict_var_list))', ...
+              bayestopt_.restrict_var_list_nonstationary);
   if M_.maximum_lag > 1
     l1 = flipud([cumsum(M_.lead_lag_incidence(1:M_.maximum_lag-1,dr.order_var),1);ones(1,M_.endo_nbr)]);
     l2 = l1(:,bayestopt_.restrict_var_list);

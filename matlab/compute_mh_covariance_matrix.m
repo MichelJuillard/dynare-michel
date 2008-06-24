@@ -27,7 +27,7 @@ n = estim_params_.np + ...
 nblck = options_.mh_nblck;
 
 MhDirectoryName = CheckPath('metropolis');
-load([ MhDirectoryName '/'  M_.fname '_mh_history'])
+load([ MhDirectoryName '/'  M_.fname '_mh_history.mat'])
 
 FirstMhFile = record.KeepedDraws.FirstMhFile;
 FirstLine = record.KeepedDraws.FirstLine;
@@ -41,7 +41,7 @@ s0 = zeros(n,n);
 
 for n = FirstMhFile:TotalNumberOfMhFiles
   for b = 1:nblck
-    load([ MhDirectoryName '/' M_.fname '_mh' int2str(n) '_blck' int2str(b)],'x2','logpo2'); 
+    load([ MhDirectoryName '/' M_.fname '_mh' int2str(n) '_blck' int2str(b) '.mat'],'x2','logpo2'); 
     [tmp,idx] = max(logpo2);
     if tmp>oldlogpo2
         oldlogpo2 = tmp;
@@ -56,4 +56,4 @@ xparam1 = params';
 hh = inv(s0);
 fval = oldlogpo2;
 
-save([M_.fname '_mh_mode'],'xparam1','hh','fval');
+save([M_.fname '_mh_mode.mat'],'xparam1','hh','fval');

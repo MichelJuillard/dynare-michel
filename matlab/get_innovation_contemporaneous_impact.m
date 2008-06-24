@@ -44,4 +44,4 @@ get_posterior_parameters(type);
 B(dr.order_var,M_.exo_names_orig_ord) = dr.ghu*sqrt(M_.Sigma_e);
 B = B(bayestopt_.mfys,:);
 
-save([M_.fname '_InnovImpact'],'B');
+save([M_.fname '_InnovImpact.mat'],'B');

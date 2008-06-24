@@ -52,11 +52,14 @@ info   = 0;
 % Computational part.
 try
     [ss,tt,qq,w] = qz(e,d);
+    if exist('OCTAVE_VERSION')
+      qq = qq';
+    end
     [tt,ss,qq,w] = qzdiv(qz_criterium,tt,ss,qq,w);
     warning_old_state = warning;
     warning off;
     eigval = diag(ss)./diag(tt);
-    warning warning_old_state;
+    warning(warning_old_state);
     sdim = sum( abs(eigval) < qz_criterium );
 catch
     info = 1;% Not as precise as lapack's info!

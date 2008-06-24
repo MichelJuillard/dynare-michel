@@ -1,0 +1,19 @@
+dynare (4~svn.20080619) UNRELEASED; urgency=low
+
+  * New SVN snapshot.
+  * Changes to packaging:
+    - All files are now installed under /usr/lib/dynare.
+    - Added new packages for Matlab which contains compiled MEX files.
+    - No longer depend on octave-miscellaneous.
+    - Compile preprocessor with g++-4.1: Matlab 7.4 and 7.5 override libstdc++-6
+      with their own version, which is not compatible with newer versions of
+      g++-4.2.
+    - Use debhelper version 6 for compatibility with Ubuntu "Hardy Heron"
+
+ -- Sébastien Villemot <sebastien.villemot@ens.fr>  Thu, 19 Jun 2008 17:32:41 +0200
+
+dynare (4~svn.20080613) UNRELEASED; urgency=low
+
+  * Initial release.
+
+ -- Sébastien Villemot <sebastien.villemot@ens.fr>  Fri, 13 Jun 2008 17:01:56 +0200

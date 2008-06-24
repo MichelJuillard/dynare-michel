@@ -187,7 +187,7 @@ function [dr,info,M_,options_,oo_] = dr1(dr,task,M_,options_,oo_)
     end
     
     if options_.debug
-        save([M_.fname '_debug'],'jacobia_')
+        save([M_.fname '_debug.mat'],'jacobia_')
     end
     
     dr=set_state_space(dr);
@@ -291,7 +291,11 @@ function [dr,info,M_,options_,oo_] = dr1(dr,task,M_,options_,oo_)
     
     if task == 1
         dr.rank = rank(w(1:nyf,nd-nyf+1:end));
-        dr.eigval = eig(e,d);
+        if exist('OCTAVE_VERSION')
+            dr.eigval = qz(e,d);
+        else
+            dr.eigval = eig(e,d);
+        end
         return
     end
     

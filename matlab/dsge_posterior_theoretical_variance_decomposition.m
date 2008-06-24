@@ -59,7 +59,7 @@ DecompFileNumber = 1;
 % implied by each structural shock.
 linea = 0;
 for file = 1:NumberOfDrawsFiles
-    load([M_.dname '/metropolis/' DrawsFiles(file).name]);
+    load([M_.dname '/metropolis/' DrawsFiles(file).name '.mat' ]);
     isdrsaved = cols(pdraws)-1;
     NumberOfDraws = rows(pdraws);
     for linee = 1:NumberOfDraws
@@ -77,7 +77,7 @@ for file = 1:NumberOfDrawsFiles
             end
         end
         if linea == NumberOfDecompLines
-            save([M_.dname '/metropolis/' M_.fname '_PosteriorVarianceDecomposition' int2str(DecompFileNumber)],'Decomposition_array');
+            save([M_.dname '/metropolis/' M_.fname '_PosteriorVarianceDecomposition' int2str(DecompFileNumber) '.mat' ],'Decomposition_array');
             DecompFileNumber = DecompFileNumber + 1;
             linea = 0;
             test = DecompFileNumber-NumberOfDecompFiles;

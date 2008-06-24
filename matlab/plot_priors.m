@@ -49,9 +49,11 @@ if nbplt == 1
         title(nam,'Interpreter','none')
         drawnow
     end
-    eval(['print -depsc2 ' M_.fname '_Priors' int2str(1)]);
-    eval(['print -dpdf ' M_.fname '_Priors' int2str(1)]);
-	saveas(h1,[M_.fname '_Priors' int2str(1) '.fig']);
+    eval(['print -depsc2 ' M_.fname '_Priors' int2str(1) '.eps']);
+    if ~exist('OCTAVE_VERSION')
+      eval(['print -dpdf ' M_.fname '_Priors' int2str(1)]);
+      saveas(h1,[M_.fname '_Priors' int2str(1) '.fig']);
+    end
     if options_.nograph, close(h1), end
     if TeX
     	fprintf(fidTeX,'\\begin{figure}[H]\n');
@@ -90,9 +92,11 @@ else
             title(nam,'Interpreter','none')
             drawnow
         end  % index=1:nstar
-        eval(['print -depsc2 ' M_.fname '_Priors' int2str(plt)]);
-        eval(['print -dpdf ' M_.fname '_Priors' int2str(plt)]);
-		saveas(hplt,[M_.fname '_Priors' int2str(plt) '.fig']);
+        eval(['print -depsc2 ' M_.fname '_Priors' int2str(plt) '.eps']);
+        if ~exist('OCTAVE_VERSION')
+          eval(['print -dpdf ' M_.fname '_Priors' int2str(plt)]);
+          saveas(hplt,[M_.fname '_Priors' int2str(plt) '.fig']);
+        end
     	if options_.nograph, close(hplt), end
 		if TeX
             fprintf(fidTeX,'\\begin{figure}[H]\n');
@@ -131,9 +135,11 @@ else
         title(nam,'Interpreter','none')
         drawnow
     end  % index=1:npar-(nbplt-1)*nstar
-    eval(['print -depsc2 ' M_.fname '_Priors' int2str(nbplt)]);
-    eval(['print -dpdf ' M_.fname '_Priors' int2str(nbplt)]);
- 	saveas(hplt,[M_.fname '_Priors' int2str(nbplt) '.fig']);
+    eval(['print -depsc2 ' M_.fname '_Priors' int2str(nbplt) '.eps']);
+    if ~exist('OCTAVE_VERSION')
+      eval(['print -dpdf ' M_.fname '_Priors' int2str(nbplt)]);
+      saveas(hplt,[M_.fname '_Priors' int2str(nbplt) '.fig']);
+    end
     if options_.nograph, close(hplt), end
 	if TeX
         fprintf(fidTeX,'\\begin{figure}[H]\n');

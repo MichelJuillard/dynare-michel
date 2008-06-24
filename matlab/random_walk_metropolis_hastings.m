@@ -33,7 +33,7 @@ if strcmpi(ProposalFun,'rand_multivariate_normal')
 elseif strcmpi(ProposalFun,'rand_multivariate_student')
     n = options_.student_degrees_of_freedom;
 end
-load([MhDirectoryName '/' ModelName '_mh_history'],'record');
+load([MhDirectoryName '/' ModelName '_mh_history.mat'],'record');
 %%%%
 %%%% NOW i run the (nblck-fblck+1) metropolis-hastings chains
 %%%%
@@ -50,8 +50,12 @@ for b = fblck:nblck
         x2 = zeros(InitSizeArray(b),npar);
         logpo2 = zeros(InitSizeArray(b),1);
     end
-    hh = waitbar(0,['Please wait... Metropolis-Hastings (' int2str(b) '/' int2str(nblck) ')...']);
-    set(hh,'Name','Metropolis-Hastings');
+    if exist('OCTAVE_VERSION')
+      diary off;
+    else
+      hh = waitbar(0,['Please wait... Metropolis-Hastings (' int2str(b) '/' int2str(nblck) ')...']);
+      set(hh,'Name','Metropolis-Hastings');
+    end
     isux = 0;
     jsux = 0;
     irun = fline(b);
@@ -75,9 +79,16 @@ for b = fblck:nblck
             logpo2(irun) = ilogpo2(b);
         end
         prtfrc = j/nruns(b);
-        waitbar(prtfrc,hh,[ '(' int2str(b) '/' int2str(nblck) ') ' sprintf('%f done, acceptation rate %f',prtfrc,isux/j)]);
+        if exist('OCTAVE_VERSION')
+          if mod(j, 10) == 0
+            printf('MH: Computing Metropolis-Hastings (chain %d/%d): %3.f%% done, acception rate: %3.f%%\r', b, nblck, 100 * prtfrc, 100 * isux / j);
+          end
+        else
+          waitbar(prtfrc,hh,[ '(' int2str(b) '/' int2str(nblck) ') ' sprintf('%f done, acceptation rate %f',prtfrc,isux/j)]);
+        end
+          
         if (irun == InitSizeArray(b)) | (j == nruns(b)) % Now I save the simulations
-            save([MhDirectoryName '/' ModelName '_mh' int2str(NewFile(b)) '_blck' int2str(b)],'x2','logpo2');
+            save([MhDirectoryName '/' ModelName '_mh' int2str(NewFile(b)) '_blck' int2str(b) '.mat'],'x2','logpo2');
             fidlog = fopen([MhDirectoryName '/metropolis.log'],'a');
             fprintf(fidlog,['\n']);
             fprintf(fidlog,['%% Mh' int2str(NewFile(b)) 'Blck' int2str(b) ' (' datestr(now,0) ')\n']);
@@ -120,11 +131,16 @@ for b = fblck:nblck
         irun = irun + 1;
     end% End of the simulations for one mh-block.
     record.AcceptationRates(b) = isux/j;
-    close(hh);
+    if exist('OCTAVE_VERSION')
+      printf('\n');
+      diary on;
+    else
+      close(hh);
+    end
 end% End of the loop over the mh-blocks.
 record.Seeds.Normal = randn('state');
 record.Seeds.Unifor = rand('state');
-save([MhDirectoryName '/' ModelName '_mh_history'],'record');
+save([MhDirectoryName '/' ModelName '_mh_history.mat'],'record');
 disp(['MH: Number of mh files			: ' int2str(NewFile(1)) ' per block.'])
 disp(['MH: Total number of generated files	: ' int2str(NewFile(1)*nblck) '.'])
 disp(['MH: Total number of iterations 		: ' int2str((NewFile(1)-1)*MAX_nruns+irun-1) '.'])

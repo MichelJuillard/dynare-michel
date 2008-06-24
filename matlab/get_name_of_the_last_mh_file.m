@@ -3,7 +3,7 @@ function mhname = get_name_of_the_last_mh_file(M_)
 % Gnu Public License.
     model_name = M_.fname ;
     mcmc_directory = M_.dname ;
-    load([ mcmc_directory '/metropolis/' model_name '_mh_history']) ;
+    load([ mcmc_directory '/metropolis/' model_name '_mh_history.mat']) ;
     mh_number = record.LastFileNumber ;
     bk_number = record.Nblck ;
     clear('record') ;

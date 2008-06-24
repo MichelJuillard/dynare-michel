@@ -1,0 +1,70 @@
+#!/usr/bin/make -f
+
+MATLAB74_ROOT=/usr/local/matlab74
+MATLAB75_ROOT=/usr/local/matlab75
+
+# Build only Matlab packages for which Matlab is installed on this machine
+export DH_OPTIONS
+DH_OPTIONS += $(shell test -d $(MATLAB74_ROOT) || echo "-Ndynare-matlab7.4 ")
+DH_OPTIONS += $(shell test -d $(MATLAB75_ROOT) || echo "-Ndynare-matlab7.5 ")
+
+build: build-stamp
+build-stamp:
+	dh_testdir
+
+	# Building preprocessor
+	# It is necessary to build it with g++ 4.1 to avoid dynamic
+	# loading problems under Matlab 7.4 and 7.5
+	make -C preprocessor CXX=g++-4.1
+
+	# Building Octave MEX/OCT files
+	cd mex/sources && octave build_octave.m
+
+	# Building Matlab 7.4 MEX files
+ifeq ($(shell test -d $(MATLAB74_ROOT) && echo yes), yes)
+	$(MATLAB74_ROOT)/etc/lmboot
+	cd mex/sources && $(MATLAB74_ROOT)/bin/matlab -nodisplay < build.m
+	$(MATLAB74_ROOT)/etc/lmdown
+endif
+
+	# Building Matlab 7.5 MEX files
+ifeq ($(shell test -d $(MATLAB75_ROOT) && echo yes), yes)
+	$(MATLAB75_ROOT)/etc/lmboot
+	cd mex/sources && $(MATLAB75_ROOT)/bin/matlab -nodisplay < build.m
+	$(MATLAB75_ROOT)/etc/lmdown
+endif
+
+	touch build-stamp
+
+clean:
+	dh_testdir
+	dh_testroot
+	make clean -C preprocessor
+	find mex/sources -name *.o | xargs rm -f
+	rm -f mex/octave/*.mex mex/2007a/* mex/2007b/*
+	rm -f matlab/dynare_m matlab/dynare_m.exe
+	rm -rf preprocessor/doc/html
+	rm -f build-stamp
+	dh_clean
+
+binary-arch: build
+	dh_testdir
+	dh_testroot
+	dh_clean -k	# Do not use dh_prep for compatibility with debhelper 6 on Hardy Ubuntu
+	dh_installdirs
+	dh_install
+	dh_installchangelogs
+	dh_installdocs
+	dh_strip
+	dh_compress
+	dh_fixperms
+	dh_shlibdeps
+	dh_gencontrol
+	dh_md5sums
+	dh_builddeb
+
+binary-indep:
+
+binary: binary-arch binary-indep
+
+.PHONY: build clean binary-arch binary-indep binary

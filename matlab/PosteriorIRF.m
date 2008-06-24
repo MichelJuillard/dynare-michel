@@ -64,11 +64,11 @@ else
   MhDirectoryName = CheckPath('prior');
 end
 if strcmpi(type,'posterior')
-  load([ MhDirectoryName '/'  M_.fname '_mh_history'])
+  load([ MhDirectoryName '/'  M_.fname '_mh_history.mat'])
   TotalNumberOfMhDraws = sum(record.MhDraws(:,1));
   NumberOfDraws = TotalNumberOfMhDraws-floor(options_.mh_drop*TotalNumberOfMhDraws);
 elseif strcmpi(type,'gsa')
-  load([ MhDirectoryName '/'  M_.fname '_prior'],'lpmat0','lpmat','istable')
+  load([ MhDirectoryName '/'  M_.fname '_prior.mat'],'lpmat0','lpmat','istable')
   x=[lpmat0(istable,:) lpmat(istable,:)];
   clear lpmat istable
   NumberOfDraws=size(x,1);
@@ -232,7 +232,7 @@ while b<=B
         else
             stock_irf_bvardsge(:,:,:,IRUN) = reshape(tmp_dsgevar,options_.irf,nvobs,M_.exo_nbr);
             instr = [MhDirectoryName '/' M_.fname '_irf_bvardsge' ...
-                     int2str(NumberOfIRFfiles_dsgevar) ' stock_irf_bvardsge;'];,
+                     int2str(NumberOfIRFfiles_dsgevar) '.mat stock_irf_bvardsge;'];,
             eval(['save ' instr]);
             NumberOfIRFfiles_dsgevar = NumberOfIRFfiles_dsgevar+1; 
             IRUN =0;
@@ -251,7 +251,7 @@ while b<=B
                 irun = 0;
             end
         end
-        save([MhDirectoryName '/' M_.fname '_irf_dsge' int2str(NumberOfIRFfiles_dsge)],'stock_irf_dsge');
+        save([MhDirectoryName '/' M_.fname '_irf_dsge' int2str(NumberOfIRFfiles_dsge) '.mat'],'stock_irf_dsge');
         NumberOfIRFfiles_dsge = NumberOfIRFfiles_dsge+1;
         irun = 0;
     end
@@ -260,7 +260,7 @@ while b<=B
             stock_param = stock_param(1:irun2,:);
         end
         stock = stock_param;
-        save([MhDirectoryName '/' M_.fname '_param_irf' int2str(ifil2)],'stock');
+        save([MhDirectoryName '/' M_.fname '_param_irf' int2str(ifil2) '.mat'],'stock');
         ifil2 = ifil2 + 1;
         irun2 = 0;
     end
@@ -306,7 +306,7 @@ tit(M_.exo_names_orig_ord,:) = M_.exo_names;
 kdx = 0;
 
 for file = 1:NumberOfIRFfiles_dsge
-  load([MhDirectoryName '/' M_.fname '_IRF_DSGEs' int2str(file)]);
+  load([MhDirectoryName '/' M_.fname '_IRF_DSGEs' int2str(file) '.mat']);
   for i = 1:M_.exo_nbr
     for j = 1:nvar
         for k = 1:size(STOCK_IRF_DSGE,1)
@@ -344,7 +344,7 @@ if MAX_nirfs_dsgevar
     tit(M_.exo_names_orig_ord,:) = M_.exo_names;
     kdx = 0;
     for file = 1:NumberOfIRFfiles_dsgevar
-        load([MhDirectoryName '/' M_.fname '_IRF_BVARDSGEs' int2str(file)]);
+        load([MhDirectoryName '/' M_.fname '_IRF_BVARDSGEs' int2str(file) '.mat']);
         for i = 1:M_.exo_nbr
             for j = 1:nvar
                 for k = 1:size(STOCK_IRF_BVARDSGE,1)

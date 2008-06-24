@@ -145,7 +145,7 @@ function bvar_forecast(nlags)
     if ~isdir(DirectoryName)
         mkdir('.',DirectoryName);
     end
-    save([ DirectoryName '/simulations'], 'sims_no_shock', 'sims_with_shocks');
+    save([ DirectoryName '/simulations.mat'], 'sims_no_shock', 'sims_with_shocks');
 
     for i = 1:size(options_.varobs, 1)
         name = options_.varobs(i, :);

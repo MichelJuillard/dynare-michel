@@ -30,7 +30,7 @@ if ~length(file)
   disp('MH:: FAILURE! there is no MH-history file!')
   return
 else
-  load([ DirectoryName '/'  M_.fname '_mh_history'])
+  load([ DirectoryName '/'  M_.fname '_mh_history.mat'])
 end
 TotalNumberOfMhFiles = sum(record.MhDraws(:,2));
 TotalNumberOfMhDraws = sum(record.MhDraws(:,1));
@@ -49,7 +49,7 @@ elseif TotalNumberOfMhFiles == 1
 elseif TotalNumberOfMhFiles == 2 & FirstMhFile > 1
   record.KeepedDraws.Distribution = [MAX_nruns-FirstLine+1 ; record.MhDraws(end,3)];  
 end
-save([DirectoryName '/' M_.fname '_mh_history'],'record');
+save([DirectoryName '/' M_.fname '_mh_history.mat'],'record');
 fprintf('MH: Total number of Mh draws: %d.\n',TotalNumberOfMhDraws);
 fprintf('MH: Total number of generated Mh files: %d.\n',TotalNumberOfMhFiles);
 fprintf('MH: I''ll use mh-files %d to %d.\n',FirstMhFile,TotalNumberOfMhFiles);
