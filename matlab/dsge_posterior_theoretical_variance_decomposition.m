@@ -42,13 +42,13 @@ NumberOfDrawsFiles = rows(DrawsFiles);
 NumberOfSavedElementsPerSimulation = nvar*(nexo+1);
 MaXNumberOfDecompLines = ceil(options_.MaxNumberOfBytes/NumberOfSavedElementsPerSimulation/8);
 
-if NumberOfSimulations<=MaXNumberOfDecompLines
-    Decomposition_array = zeros(NumberOfSimulations,nvar*(nexo+1));
+if SampleSize<=MaXNumberOfDecompLines
+    Decomposition_array = zeros(SampleSize,nvar*nexo);
     NumberOfDecompFiles = 1;
 else
-    Decomposition_array = zeros(MaXNumberOfDecompLines,nvar*(nexo+1));
-    NumberOfLinesInTheLastDecompFile = mod(NumberOfSimulations,MaXNumberOfDecompLines);
-    NumberOfDecompFiles = ceil(NumberOfSimulations/MaXNumberOfDecompLines);
+    Decomposition_array = zeros(MaXNumberOfDecompLines,nvar*nexo);
+    NumberOfLinesInTheLastDecompFile = mod(SampleSize,MaXNumberOfDecompLines);
+    NumberOfDecompFiles = ceil(SampleSize/MaXNumberOfDecompLines);
 end
 
 NumberOfDecompLines = rows(Decomposition_array);
@@ -59,7 +59,7 @@ DecompFileNumber = 1;
 % implied by each structural shock.
 linea = 0;
 for file = 1:NumberOfDrawsFiles
-    load([MhDirectoryName '/' DrawsFiles(file).name]);
+    load([M_.dname '/metropolis/' DrawsFiles(file).name]);
     isdrsaved = cols(pdraws)-1;
     NumberOfDraws = rows(pdraws);
     for linee = 1:NumberOfDraws
@@ -71,26 +71,22 @@ for file = 1:NumberOfDrawsFiles
             [dr,info] = resol(oo_.steady_state,0);
         end
         tmp = th_autocovariances(dr,ivar,M_,options_);
-        %for i=1:nvar
-        %    Decomposition_array(linea,i) = tmp{1}(i,i);
-        %end
-        Decomposition_array(linea,:) = transpose(tmp{1});
         for i=1:nvar
             for j=1:nexo
-                Decomposition_array(linea,nvar+(i-1)*nexo+j) = tmp{2}(i,j);
+                Decomposition_array(linea,(i-1)*nexo+j) = tmp{2}(i,j);
             end
         end
         if linea == NumberOfDecompLines
-            save([fname '_PosteriorVarianceDecomposition' int2str(DecompFileNumber)],'Decomposition_array');
+            save([M_.dname '/metropolis/' M_.fname '_PosteriorVarianceDecomposition' int2str(DecompFileNumber)],'Decomposition_array');
             DecompFileNumber = DecompFileNumber + 1;
             linea = 0;
             test = DecompFileNumber-NumberOfDecompFiles;
             if ~test% Prepare the last round...
-                Decomposition_array = zeros(NumberOfLinesInTheLastDecompFile,nvar*(nexo+1));
+                Decomposition_array = zeros(NumberOfLinesInTheLastDecompFile,nvar*nexo);
                 NumberOfDecompLines = NumberOfLinesInTheLastDecompFile;
                 DecompFileNumber = DecompFileNumber - 1;
             elseif test<0;
-                Decomposition_array = zeros(MaXNumberOfDecompLines,nvar*(nexo+1));
+                Decomposition_array = zeros(MaXNumberOfDecompLines,nvar*nexo);
             else
                 clear('Decomposition_array');
             end
@@ -98,10 +94,4 @@ for file = 1:NumberOfDrawsFiles
     end
 end
 
-options_.ar = nar;% Useless because options_ is not a global anymore...
-
-function r = rows(M)
-    r = size(M,1);
-
-function c = cols(M)
-    c = size(M,2);
+options_.ar = nar;

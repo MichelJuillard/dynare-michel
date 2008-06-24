@@ -41,7 +41,7 @@ NumberOfDrawsFiles = length(DrawsFiles);
 MaXNumberOfCovarLines = ceil(options_.MaxNumberOfBytes/(nvar*(nvar+1)/2)/8);
 
 if SampleSize<=MaXNumberOfCovarLines
-    Covariance_matrix = zeros(NumberOfSimulations,nvar*(nvar+1)/2);
+    Covariance_matrix = zeros(SampleSize,nvar*(nvar+1)/2);
     NumberOfCovarFiles = 1;
 else
     Covariance_matrix = zeros(MaXNumberOfCovarLines,nvar*(nvar+1)/2);
@@ -55,7 +55,7 @@ CovarFileNumber = 1;
 % Compute 2nd order moments and save them in *_Posterior2ndOrderMoments* files
 linea = 0;
 for file = 1:NumberOfDrawsFiles
-    load([MhDirectoryName '/' DrawsFiles(file).name]);
+    load([M_.dname '/metropolis/' DrawsFiles(file).name]);
     NumberOfDraws = rows(pdraws);
     isdrsaved = cols(pdraws)-1;
     for linee = 1:NumberOfDraws
@@ -73,7 +73,7 @@ for file = 1:NumberOfDrawsFiles
             end
         end
         if linea == NumberOfCovarLines
-            save([fname '_Posterior2ndOrderMoments' int2str(CovarFileNumber)],'Covariance_matrix');
+            save([ M_.dname '/metropolis/' M_.fname '_Posterior2ndOrderMoments' int2str(CovarFileNumber)],'Covariance_matrix');
             CovarFileNumber = CovarFileNumber + 1;
             linea = 0;
             test = CovarFileNumber-NumberOfCovarFiles;
@@ -91,10 +91,3 @@ for file = 1:NumberOfDrawsFiles
 end
 
 options_.ar = nar;
-
-
-function r = rows(M)
-    r = size(M,1);
-
-function c = cols(M)
-    c = size(M,2);
