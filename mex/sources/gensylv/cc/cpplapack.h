@@ -5,7 +5,7 @@
 #ifndef CPPLAPACK_H
 #define CPPLAPACK_H
 
-#if defined(MATLAB) && !defined(__linux__)
+#if defined(MATLAB) && !defined(__linux__) && !defined(OCTAVE)
 #define LAPACK_dgetrs dgetrs
 #define LAPACK_dgetrf dgetrf
 #define LAPACK_dgees  dgees
@@ -15,7 +15,7 @@
 #define LAPACK_dpotrf dpotrf
 #define LAPACK_dgges  dgges
 #define LAPACK_dsyev  dsyev
-#else /* MATLAB */
+#else
 #define LAPACK_dgetrs dgetrs_
 #define LAPACK_dgetrf dgetrf_
 #define LAPACK_dgees  dgees_
@@ -25,7 +25,7 @@
 #define LAPACK_dpotrf dpotrf_
 #define LAPACK_dgges  dgges_
 #define LAPACK_dsyev  dsyev_
-#endif /* MATLAB */
+#endif
 
 #define LACHAR const char*
 #define CONST_LAINT const int*

@@ -5,7 +5,7 @@
 #ifndef CPPBLAS_H
 #define CPPBLAS_H
 
-#if defined(MATLAB) && !defined(__linux__)
+#if defined(MATLAB) && !defined(__linux__) && !defined(OCTAVE)
 #define BLAS_dgemm dgemm
 #define BLAS_dgemv dgemv
 #define BLAS_dtrsv dtrsv
@@ -16,7 +16,7 @@
 #define BLAS_dscal dscal
 #define BLAS_dtrsm dtrsm
 #define BLAS_ddot  ddot
-#else /* defined(MATLAB) && !defined(__linux__) */
+#else
 #define BLAS_dgemm dgemm_
 #define BLAS_dgemv dgemv_
 #define BLAS_dtrsv dtrsv_
@@ -27,7 +27,7 @@
 #define BLAS_dscal dscal_
 #define BLAS_dtrsm dtrsm_
 #define BLAS_ddot  ddot_
-#endif /* defined(MATLAB) && !defined(__linux__) */
+#endif
 
 #define BLCHAR const char*
 #define CONST_BLINT const int*

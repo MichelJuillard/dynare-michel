@@ -16,6 +16,10 @@
 
 using namespace std;
 
+#ifdef _MSC_VER
+# define isfinite _finite
+#endif
+
 ZeroPad zero_pad;
 
 void Vector::copy(const double* d, int inc)

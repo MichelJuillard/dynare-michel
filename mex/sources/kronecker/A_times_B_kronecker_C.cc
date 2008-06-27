@@ -16,7 +16,7 @@ typedef int mwSize;
 #endif
 
 #ifdef NO_BLAS_H
-# ifdef __linux__
+# if defined(__linux__) || defined(OCTAVE)
 #  define dgemm dgemm_
 # endif
 extern "C" {

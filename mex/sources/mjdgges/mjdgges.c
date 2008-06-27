@@ -2,7 +2,7 @@
 #include "mex.h"
 
 #ifdef NO_LAPACK_H
-# ifdef __linux__
+# if defined(__linux__) || defined(OCTAVE)
 #  define dgges dgges_
 # endif
 void dgges(char *, char *, char *, int (*)(), int *, double *, int *, double *, int *, int *, double *, double *, double *,
