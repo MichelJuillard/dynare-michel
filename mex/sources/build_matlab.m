@@ -70,7 +70,7 @@ eval([ COMPILE_COMMAND ' kronecker/sparse_hessian_times_B_kronecker_C.cc ' BLAS_
 disp('Compiling A_times_B_kronecker_C...')
 eval([ COMPILE_COMMAND ' kronecker/A_times_B_kronecker_C.cc ' BLAS_PATH ]);
 disp('Compiling gensylv...')
-eval([ COMPILE_COMMAND ' -Igensylv/cc gensylv/matlab/gensylv.cpp' ...
+eval([ COMPILE_COMMAND ' -DMATLAB -Igensylv/cc gensylv/matlab/gensylv.cpp' ...
        ' gensylv/cc/*.cpp ' BLAS_PATH ' ' LAPACK_PATH ]);
 disp('Compiling simulate...')
 eval([ COMPILE_COMMAND ' -Isimulate -I../../preprocessor/include simulate/simulate.cc simulate/Interpreter.cc simulate/Mem_Mngr.cc simulate/SparseMatrix.cc simulate/linbcg.cc' ]);
