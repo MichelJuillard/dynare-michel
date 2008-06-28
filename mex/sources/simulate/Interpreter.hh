@@ -36,12 +36,12 @@
 
 using namespace std;
 
-typedef struct Block_contain_type
+struct Block_contain_type
 {
   int Equation, Variable, Own_Derivative;
 };
 
-typedef struct Block_type
+struct Block_type
 {
   long int begin, end, size, type;
 };

@@ -23,6 +23,8 @@
 //                 use NO_COMPILER option in MODEL command            //
 ////////////////////////////////////////////////////////////////////////
 
+#include <cstring>
+
 #include "simulate.hh"
 #include "Interpreter.hh"
 #include "Mem_Mngr.hh"

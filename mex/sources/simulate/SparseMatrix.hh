@@ -33,7 +33,7 @@
 
 using namespace std;
 
-typedef struct t_save_op_s
+struct t_save_op_s
 {
   short int lag, operat;
   int first, second;
@@ -51,13 +51,13 @@ const double eps=1e-7;
 const double very_big=1e24;
 const int alt_symbolic_count_max=1;
 
-typedef struct t_table_y
+struct t_table_y
   {
     int index, nb;
     int *u_index, *y_index;
   };
 
-typedef struct t_table_u
+struct t_table_u
   {
     t_table_u* pNext;
     unsigned char type;

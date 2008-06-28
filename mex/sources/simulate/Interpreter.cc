@@ -17,6 +17,8 @@
  * along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <cstring>
+
 #include "Interpreter.hh"
 
 Interpreter::Interpreter(double *params_arg, double *y_arg, double *ya_arg, double *x_arg, double *direction_arg, int y_size_arg,

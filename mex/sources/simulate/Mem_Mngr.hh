@@ -25,7 +25,7 @@
 #include "mex.h"
 using namespace std;
 
-typedef struct NonZeroElem
+struct NonZeroElem
   {
     int u_index;
     int r_index, c_index, lag_index;
