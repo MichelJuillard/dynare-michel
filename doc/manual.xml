@@ -4,37 +4,30 @@
 <book>
   <bookinfo>
     <title>DYNARE MANUAL</title>
-    <subtitle>Version 3.0</subtitle>
+    <subtitle>Version 4</subtitle>
     <titleabbrev>DYNARE</titleabbrev>
     <author><firstname>Michel</firstname><surname>Juillard</surname>
 <affiliation><orgname>CEPREMAP and University Paris 8</orgname></affiliation>
-<email>michel.juillard@cepremap.cnrs.fr</email>
+<email>michel.juillard@ens.fr</email>
 <address>
-<street>142 rue du Chevaleret</street>
-<postcode>75013</postcode><city>Paris</city><country>France</country>
+<street>48 bd Jourdan</street>
+<postcode>75014</postcode><city>Paris</city><country>France</country>
 </address>
 </author>
 
-<copyright><year>1996, 2005</year><holder> Michel Juillard</holder>
+<copyright><year>1996, 2008</year><holder> Dynare Team</holder>
 
 </copyright>
 <legalnotice>
 <para>
-Permission is granted to make and distribute verbatim copies of
-this manual provided the copyright notice and this permission notice
-are preserved on all copies.
-</para>
-
-<para>
-Permission is granted to copy and distribute modified versions of
-this manual under the conditions for verbatim copying, provided that
-the entire resulting derived work is distributed under the terms of
-a permission notice identical to this one.
+Permission is granted to copy, distribute and/or modify this document
+under the terms of the GNU Free Documentation License, Version 1.2 or
+any later version published by the Free Software Foundation; with no
+Invariant Sections, no Front-Cover Texts, and no Back-Cover Texts.
 </para>
 <para>
-Permission is granted to copy and distribute translations of this
-manual into another language, under the above conditions for
-modified versions.
+A copy of the license can be found at:
+http://www.gnu.org/licenses/fdl.txt
 </para>
 </legalnotice>
 <indexterm zone="Dynare"><primary>Dynare</primary></indexterm>
@@ -105,10 +98,17 @@ Starting with version 3.0, it is possible to use Dynare to estimate model parame
 </para>
 
 <para>
-Currently the development team of Dynare is composed of S. Adjemian, M. Juillard and O. Kamenik. Several parts of Dynare use or have strongly benefited from publicly available programs by F. Collard, L. Ingber, P. Klein, S. Sakata, F. Schorfheide, C. Sims, P. Soederlind and R. Wouters.  
+Currently the development team of Dynare is composed of S. Adjemian, M. Juillard and O. Kamenik. Several parts of Dynare use or have strongly benefited from publicly available programs by F. Collard, L. Ingber, P. Klein, M. Ratto, S. Sakata, F. Schorfheide, C. Sims, P. Soederlind and R. Wouters.  
 </para>
 
 <section><title>Changes</title>
+<section><title>Version 4</title>
+<para>December 26, 2006</para>
+<itemizedlist>
+<listitem><para>added option <xref linkend="mh_recover"/></para></listitem>
+</itemizedlist>
+</section>
+<section><title>Version 3</title>
 <para>December 30, 2005</para>
 <itemizedlist>
 <listitem><para>added details about parameter transformation in <xref linkend="model"/> and in <xref linkend="estimated_params"/></para></listitem>
@@ -145,6 +145,7 @@ Currently the development team of Dynare is composed of S. Adjemian, M. Juillard
 <listitem><para>temporarily removed description of output variables in <xref linkend="estimation"/> as old content was outdated and the new one isn't ready yet.</para></listitem>
 <listitem><para>added cross-references</para></listitem>
 </itemizedlist>
+</section>
 </section>
 </preface>
 
@@ -1923,7 +1924,9 @@ Each line corresponds to an estimated parameter and follows this syntax:
 <refsect1><title>OPTIONS</title>
 <itemizedlist spacing='compact'>
 <listitem><para> <command>datafile</command> =
-	  <replaceable>FILENAME</replaceable>: the datafile (a .m file or a .mat file)</para></listitem>
+	  <replaceable>FILENAME</replaceable>: the datafile (a .m file, a .mat file or a .xls file)</para></listitem>
+<listitem><para><command>xls_sheet</command> = <replaceable>NAME</replaceable>: the name of the sheet with the data in an Excel file</para></listitem>
+<listitem><para><command>xls_range</command> = <replaceable>RANGE</replaceable>: the range with the data in an Excel file</para></listitem>
 <listitem><para><command>nobs</command> = <replaceable>INTEGER</replaceable>: the number of observations to be used (default: all observations in the file)</para>
 <para><command>nobs</command> = ([<replaceable>INTEGER_1</replaceable>:<replaceable>INTEGER_2</replaceable>]): runs a recursive estimation and forecast for samples of size ranging of <varname>INTEGER_1</varname> to <varname>INTEGER_2</varname>. Option <varname>FORECAST</varname> must also be specified.</para> 
 </listitem>
@@ -1945,6 +1948,7 @@ Each line corresponds to an estimated parameter and follows this syntax:
 <listitem><para> <command>mh_jscale</command> = <replaceable>DOUBLE</replaceable>: the scale to be used for the jumping distribution in MH algorithm. The default value is rarely satisfactory. This option must be tune to obtain, ideally, an accpetation rate of 25% in the Metropolis-Hastings algorithm (default = 0.2).</para></listitem>
 <listitem><para><command>mh_init_scale</command>=<replaceable>DOUBLE</replaceable>: the scale to be used for drawing the initial value of the Metropolis-Hastings chain (default=2*mh_scale).</para>
 </listitem>
+<listitem><anchor id="mh_recover" xreflabel="mh_recover"/><para><command>mh_recover</command> attempts to recover a Metropolis simulation that crashed prematurely. Shouldn't be used together with <xref linkend="load_mh_file"/></para></listitem>
 <listitem><para><command>mode_file</command>=<replaceable>FILENAME</replaceable>: name of the file containing previous value for the mode. When computing the mode, Dynare stores the mode (<varname>xparam1</varname>) and the hessian (<varname>hh</varname>) in a file called <filename><replaceable>MODEL NAME</replaceable>_mode</filename>.</para></listitem>
 <listitem><para><command>mode_compute</command>=<replaceable>INTEGER</replaceable>: specifies the optimizer for the mode computation.
 <itemizedlist spacing='compact'>
@@ -1956,7 +1960,7 @@ Each line corresponds to an estimated parameter and follows this syntax:
 </itemizedlist></para></listitem>
 <listitem><para><command>mode_check</command>: when <command>mode_check</command> is set, Dynare plots the posterior density for values around the computed mode for each estimated parameter in turn. This is helpful to diagnose problems with the optimizer.</para></listitem>
 <listitem><para><command>prior_trunc</command>=<replaceable>DOUBLE</replaceable>: probability of extreme values of the prior density that is ignored when computing bounds for the parameters (default=1e-32).</para></listitem>
-<listitem><anchor id="load_mh_file" xreflabel="load_mh_file"/><para><command>load_mh_file</command>: when <command>load_mh_file</command> is declared, Dynare adds to previous Metropolis-Hastings simulations instead of starting from scratch.</para></listitem>
+<listitem><anchor id="load_mh_file" xreflabel="load_mh_file"/><para><command>load_mh_file</command>: when <command>load_mh_file</command> is declared, Dynare adds to previous Metropolis-Hastings simulations instead of starting from scratch. Shouldn't be used together with <xref linkend="mh_recover"/>.</para></listitem>
 <listitem><para><command>optim</command>=(<replaceable>fmincon options</replaceable>): can be used to set options for fmincon, the optimizing function of Matlab Optimizaiton toolbox. Use Matlab syntax for these options</para>
 <para> (default: ('display','iter','LargeScale','off','MaxFunEvals',100000,'TolFun',1e-8,'TolX',1e-6))</para></listitem>
 <listitem>
