@@ -44,6 +44,8 @@ function [info,description] = check_posterior_analysis_data(type,M_)
         generic_post_data_file_name = 'Posterior2ndOrderMoments';
       case 'decomposition'
         generic_post_data_file_name = 'PosteriorVarianceDecomposition';
+      case 'correlation'
+        generic_post_data_file_name = 'PosteriorCorrelations';
       case 'dynamic_decomposition'
         generic_post_data_file_name = 'PosteriorDynamicVarianceDecomposition';
       otherwise

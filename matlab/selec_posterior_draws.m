@@ -50,7 +50,7 @@ function SampleAddress = selec_posterior_draws(SampleSize,drsize)
     % Get informations about the mcmc: 
     MhDirectoryName = CheckPath('metropolis');
     fname = [ MhDirectoryName '/' M_.fname];
-    load([ fname '_mh_history']);
+    load([ fname '_mh_history.mat']);
     FirstMhFile = record.KeepedDraws.FirstMhFile;
     FirstLine = record.KeepedDraws.FirstLine; 
     TotalNumberOfMhFiles = sum(record.MhDraws(:,2)); 
