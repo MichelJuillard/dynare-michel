@@ -93,9 +93,11 @@ function pm3(n1,n2,ifil,B,tit1,tit2,tit3,tit_tex,names1,names2,name3,DirectoryNa
       title(name,'Interpreter','none')
     end
     if subplotnum == MaxNumberOfPlotsPerFigure | j == nvar  
-      eval(['print -depsc2 ' M_.dname '/Output/'  M_.fname '_' name3 '_' deblank(tit3(i,:))]);
-      eval(['print -dpdf ' M_.dname '/Output/' M_.fname  '_' name3 '_' deblank(tit3(i,:))]);
-      saveas(hh,[M_.dname '/Output/' M_.fname '_' name3 '_' deblank(tit3(i,:)) '.fig']);
+      eval(['print -depsc2 ' M_.dname '/Output/'  M_.fname '_' name3 '_' deblank(tit3(i,:)) '.eps' ]);
+      if ~exist('OCTAVE_VERSION')
+          eval(['print -dpdf ' M_.dname '/Output/' M_.fname  '_' name3 '_' deblank(tit3(i,:))]);
+          saveas(hh,[M_.dname '/Output/' M_.fname '_' name3 '_' deblank(tit3(i,:)) '.fig']);
+      end
       if options_.nograph, close(hh), end
       if options_.TeX
 	fprintf(fidTeX,'\\begin{figure}[H]\n');
