@@ -59,7 +59,7 @@ DecompFileNumber = 1;
 % implied by each structural shock.
 linea = 0;
 for file = 1:NumberOfDrawsFiles
-    load([M_.dname '/metropolis/' DrawsFiles(file).name '.mat' ]);
+    load([M_.dname '/metropolis/' DrawsFiles(file).name ]);
     isdrsaved = cols(pdraws)-1;
     NumberOfDraws = rows(pdraws);
     for linee = 1:NumberOfDraws
