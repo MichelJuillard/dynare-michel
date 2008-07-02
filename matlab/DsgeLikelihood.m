@@ -161,9 +161,7 @@ function [fval,cost_flag,ys,trend_coeff,info] = DsgeLikelihood(xparam1,gend,data
       Pstar = 10*eye(np);
       Pinf = [];
   elseif options_.lik_init == 3	% Diffuse Kalman filter
-      if kalman_algo == 1
-          kalman_algo == 3
-      end
+      kalman_algo = 3;
       [QT,ST] = schur(T);
       e1 = abs(ordeig(ST)) > 2-options_.qz_criterium;
       [QT,ST] = ordschur(QT,ST,e1);
@@ -280,7 +278,7 @@ function [fval,cost_flag,ys,trend_coeff,info] = DsgeLikelihood(xparam1,gend,data
           end
       elseif kalman_algo == 2 
           LIK = DiffuseLikelihood3(T,R,Q,Pinf,Pstar,data,trend,start);
-      elseif options_.kalman_algo == 3
+      elseif kalman_algo == 3
           data1 = data - trend;
           LIK = DiffuseLikelihood1_Z(ST,Z,R1,Q,Pinf,Pstar,data1,start);
           if isinf(LIK)

@@ -55,7 +55,7 @@ function initial_estimation_checks(xparam1,gend,data)
     % Check if the steady state obtained from the _steadystate file is a 
     % steady state.
     check1 = 0;
-    if isfield(options_,'unit_root_vars')
+    if isfield(options_,'unit_root_vars') & options_.diffuse_filter == 0
       if isempty(options_.unit_root_vars)
 	check1 = max(abs(feval([M_.fname '_static'],...
 			       oo_.steady_state,...

@@ -196,7 +196,7 @@ function [alphahat,etahat,epsilonhat,ahat,SteadyState,trend_coeff,aK,T,R,P,PK,d,
                                                     nobs,np,smpl);
               end
           end
-      elseif options_.kalman_algo == 4
+      elseif kalman_algo == 4
           data1 = Y - trend;
           if ~estim_params.ncn
               [alphahat,epsilonhat,etahat,ahat,aK] = ...
