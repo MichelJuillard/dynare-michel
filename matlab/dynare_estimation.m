@@ -37,6 +37,12 @@ if options_.order > 1
     options_.order = 1;
 end
 
+if (~isempty(options_.unit_root_vars) || options_.diffuse_filter == 1)
+    if options_.lik_init == 1
+        options_.lik_init = 3
+    end
+end
+
 if options_.prefilter == 1
     options_.noconstant = 1;
 end
