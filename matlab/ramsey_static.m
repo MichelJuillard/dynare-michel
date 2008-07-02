@@ -1,4 +1,4 @@
-function [resids, rJ,mult] = ramsey_static(x)
+function [resids, rJ,mult] = ramsey_static(x,M_,options_,oo_,it_)
 
 % function [resids, rJ,mult] = ramsey_static(x)
 % Computes the static first order conditions for optimal policy
@@ -17,7 +17,6 @@ function [resids, rJ,mult] = ramsey_static(x)
 % part of DYNARE, copyright Dynare Team (2003-2007)
 % Gnu Public License.
 
-  global M_ options_ it_
   
   % recovering usefull fields
   endo_nbr = M_.endo_nbr;
@@ -47,7 +46,7 @@ function [resids, rJ,mult] = ramsey_static(x)
   k = find(i_lag');
   it_ = 1;
 %  [f,fJ,fH] = feval([fname '_dynamic'],y(k),ex);
-  [f,fJ] = feval([fname '_dynamic'],y(k),ex, M_.params, it_);
+  [f,fJ] = feval([fname '_dynamic'],y(k),[oo_.exo_simul oo_.exo_det_simul], M_.params, it_);
   % indices of Lagrange multipliers
   inst_nbr = endo_nbr - size(f,1);
   i_mult = [endo_nbr+1:2*endo_nbr-inst_nbr]';

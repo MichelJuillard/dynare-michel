@@ -1,4 +1,4 @@
-function J = ramsey_dynamic(ys,lbar)
+function [J,M_] = ramsey_dynamic(ys,lbar,M_,options_,oo_,it_)
 
 % function J = ramsey_dynamic(ys,lbar)
 % ramsey_dynamic sets up the Jacobian of the expanded model for optimal
@@ -18,8 +18,6 @@ function J = ramsey_dynamic(ys,lbar)
 % Gnu Public License.
 
 
-  global M_ options_ it_
-  
   % retrieving model parameters
   endo_nbr = M_.endo_nbr;
   i_endo_nbr = 1:endo_nbr;
@@ -52,14 +50,14 @@ function J = ramsey_dynamic(ys,lbar)
   
   y = repmat(ys,1,max_lag+max_lead+1);
   k = find(i_leadlag');
-  it_ = 1;
+
   % retrieving derivatives of the objective function
   [U,Uy,Uyy] = feval([fname '_objective_static'],ys,zeros(1,exo_nbr), M_.params);
   Uy = Uy';
   Uyy = reshape(Uyy,endo_nbr,endo_nbr);
   
   % retrieving derivatives of original model
-  [f,fJ,fH] = feval([fname '_dynamic'],y(k),zeros(1,exo_nbr), M_.params, it_);
+  [f,fJ,fH] = feval([fname '_dynamic'],y(k),[oo_.exo_simul oo_.exo_det_simul], M_.params, it_);
   instr_nbr = endo_nbr - size(f,1);
   mult_nbr = endo_nbr-instr_nbr;
 

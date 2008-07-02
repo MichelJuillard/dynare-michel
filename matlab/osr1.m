@@ -22,7 +22,7 @@ function osr1(i_params,i_var,weights)
 
   exe =zeros(M_.exo_nbr,1);
   
-  oo_.dr = set_state_space(oo_.dr);
+  oo_.dr = set_state_space(oo_.dr,M_);
   
   % check if ys is steady state
   fh = str2func([M_.fname '_static']);

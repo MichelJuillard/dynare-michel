@@ -1,5 +1,5 @@
-function dr=set_state_space(dr)
-% function dr = set_state_space(dr)
+function dr=set_state_space(dr,M_)
+% function dr = set_state_space(dr,M_)
 % finds the state vector for structural state space representation
 % sets many fields of dr 
 %
@@ -17,8 +17,6 @@ function dr=set_state_space(dr)
 %  
 % part of DYNARE, copyright Dynare Team (1996-2007)
 % Gnu Public License.
-
-global M_ oo_ options_ it_
 
 xlen = M_.maximum_endo_lead + M_.maximum_endo_lag + 1;
 klen = M_.maximum_endo_lag + M_.maximum_endo_lead + 1;

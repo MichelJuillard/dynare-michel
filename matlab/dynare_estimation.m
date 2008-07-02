@@ -127,7 +127,7 @@ end
 
 bayestopt_.penalty = 1e8;	% penalty 
 
-dr = set_state_space([]);
+dr = set_state_space([],M_);
 nstatic = dr.nstatic;
 npred = dr.npred;
 nspred = dr.nspred;

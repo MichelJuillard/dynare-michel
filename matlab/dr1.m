@@ -66,102 +66,102 @@ function [dr,info,M_,options_,oo_] = dr1(dr,task,M_,options_,oo_)
         end
         old_solve_algo = options_.solve_algo;
         %  options_.solve_algo = 1;
-        oo_.steady_state = dynare_solve('ramsey_static',oo_.steady_state,0);
+        oo_.steady_state = dynare_solve('ramsey_static',oo_.steady_state,0,M_,options_,oo_,it_);
         options_.solve_algo = old_solve_algo;
-        [junk,junk,multbar] = ramsey_static(oo_.steady_state);
-        jacobia_=ramsey_dynamic(oo_.steady_state,multbar);
+        [junk,junk,multbar] = ramsey_static(oo_.steady_state,M_,options_,oo_,it_);
+        [jacobia_,M_] = ramsey_dynamic(oo_.steady_state,multbar,M_,options_,oo_,it_);
         klen = M_.maximum_lag + M_.maximum_lead + 1;
         dr.ys = [oo_.steady_state;zeros(M_.exo_nbr,1);multbar];
-        if options_.ramsey_policy == 2
-            mask = M_.orig_model.lead_lag_incidence ~= 0;
-            incidence_submatrix = M_.lead_lag_incidence(M_.orig_model.maximum_lead+(1:size(mask,1)),1:M_.orig_model.endo_nbr); 
-            k = nonzeros((incidence_submatrix.*mask)');
-            nl = nnz(M_.lead_lag_incidence);
-            k = [k; nl+(1:M_.exo_nbr)'];
-            kk = reshape(1:(nl+M_.exo_nbr)^2,nl+M_.exo_nbr,nl+M_.exo_nbr);
-            kk2 = kk(k,k);
-            
-            k1 = find(M_.orig_model.lead_lag_incidence');
-            y = repmat(oo_.dr.ys(1:M_.orig_model.endo_nbr),1,M_.orig_model.maximum_lag+M_.orig_model.maximum_lead+1);
-            [f,fJ,fh] = feval([M_.fname '_dynamic'],y(k1),zeros(1,M_.exo_nbr), M_.params, it_);
-            
-            % looking for dynamic variables that are both in the original model
-            % and in the optimal policy model
-            k1 = k1+nnz(M_.lead_lag_incidence(1:M_.orig_model.maximum_lead,1:M_.orig_model.endo_nbr));
-            hessian = sparse([],[],[],size(jacobia_,1),(nl+M_.exo_nbr)^2,nnz(fh));
-            hessian(M_.orig_model.endo_nbr+(1:size(fh,1)),kk2) = fh;
-            options_.order = 2;
-        elseif options_.ramsey_policy == 3
-            maxlag1 = M_.orig_model.maximum_lag;
-            maxlead1 = M_.orig_model.maximum_lead;
-            endo_nbr1 = M_.orig_model.endo_nbr;
-            lead_lag_incidence1 = M_.orig_model.lead_lag_incidence;
-            y = repmat(oo_.dr.ys(1:M_.orig_model.endo_nbr),1,M_.orig_model.maximum_lag+M_.orig_model.maximum_lead+1);
-            k1 = find(M_.orig_model.lead_lag_incidence');
-            [f,fj,fh] = feval([M_.fname '_dynamic'],y(k1),zeros(1,M_.exo_nbr), M_.params, it_);
-            nrj = size(fj,1); 
-            
-            iy = M_.lead_lag_incidence;
-            kstate = oo_.dr.kstate;
-            inv_order_var = oo_.dr.inv_order_var;
-            offset = 0;
-            i3 = zeros(0,1);
-            i4 = find(kstate(:,2) <= M_.maximum_lag+1);
-            kstate1 = kstate(i4,:);
-            kk2 = zeros(0,1);
-            % lagged variables
-            for i=2:M_.maximum_lag + 1
-                i1 = find(kstate(:,2) == i);
-                k1 = kstate(i1,:);
-                i2 = find(oo_.dr.order_var(k1(:,1)) <= M_.orig_model.endo_nbr);
-                i3 = [i3; i2+offset]; 
-                offset = offset + size(k1,1);
-                i4 = find(kstate1(:,2) == i);
-                kk2 = [kk2; i4];
-            end
-            i2 = find(oo_.dr.order_var(k1(:,1)) > M_.orig_model.endo_nbr);
-            j2 = k1(i2,1);
-            nj2 = length(j2);
-            k2 = offset+(1:nj2)';
-            offset = offset + length(i2);
-            i3 = [i3; ...
-                  find(M_.orig_model.lead_lag_incidence(M_.orig_model.maximum_lag+1:end,:)')+offset];
-            i3 = [i3; (1:M_.exo_nbr)'+length(i3)];
-            ni3 = length(i3);
-            nrfj = size(fj,1);
-            jacobia_ = zeros(nrfj+length(j2),ni3);
-            jacobia_(1:nrfj,i3) = fj;
-            jacobia_(nrfj+(1:nj2),1:size(oo_.dr.ghx,2)) = oo_.dr.ghx(j2,:);
-            jacobia_(nrfj+(1:nj2),k2) = eye(nj2);
-            kk1 = reshape(1:ni3^2,ni3,ni3);
-            hessian =  zeros(nrfj+length(j2),ni3^2);
-            hessian(1:nrfj,kk1(i3,i3)) = fh;
-            
-            k = find(any(M_.lead_lag_incidence(1:M_.maximum_lag, ...
-                                               M_.orig_model.endo_nbr+1:end)));
-            if maxlead1 > maxlag1
-                M_.lead_lag_incidence = [ [zeros(maxlead1-maxlag1,endo_nbr1); ...
-                                    lead_lag_incidence1] ...
-                                    [M_.lead_lag_incidence(M_.maximum_lag+(1:maxlead1), ...
-                                                           k); zeros(maxlead1,length(k))]];
-            elseif maxlag1 > maxlead1
-                M_.lead_lag_incidence = [ [lead_lag_incidence1; zeros(maxlag1- ...
-                                                                  maxlead1,endo_nbr1);] ...
-                                    [M_.lead_lag_incidence(M_.maximum_lag+(1:maxlead1), ...
-                                                           k); zeros(maxlead1,length(k))]];
-            else % maxlag1 == maxlead1
-                M_.lead_lag_incidence = [ lead_lag_incidence1
-                                    [M_.lead_lag_incidence(M_.maximum_lag+(1:maxlead1), ...
-                                                           k); zeros(maxlead1,length(k))]];
-            end
-            M_.maximum_lag = max(maxlead1,maxlag1);
-            M_.maximum_endo_lag = M_.maximum_lag;
-            M_.maximum_lead = M_.maximum_lag;
-            M_.maximum_endo_lead = M_.maximum_lag;
-            
-            M_.endo_names = strvcat(M_.orig_model.endo_names, M_.endo_names(endo_nbr1+k,:));
-            M_.endo_nbr = endo_nbr1+length(k);  
-        end
+% $$$         if options_.ramsey_policy == 2
+% $$$             mask = M_.orig_model.lead_lag_incidence ~= 0;
+% $$$             incidence_submatrix = M_.lead_lag_incidence(M_.orig_model.maximum_lead+(1:size(mask,1)),1:M_.orig_model.endo_nbr); 
+% $$$             k = nonzeros((incidence_submatrix.*mask)');
+% $$$             nl = nnz(M_.lead_lag_incidence);
+% $$$             k = [k; nl+(1:M_.exo_nbr)'];
+% $$$             kk = reshape(1:(nl+M_.exo_nbr)^2,nl+M_.exo_nbr,nl+M_.exo_nbr);
+% $$$             kk2 = kk(k,k);
+% $$$             
+% $$$             k1 = find(M_.orig_model.lead_lag_incidence');
+% $$$             y = repmat(oo_.dr.ys(1:M_.orig_model.endo_nbr),1,M_.orig_model.maximum_lag+M_.orig_model.maximum_lead+1);
+% $$$             [f,fJ,fh] = feval([M_.fname '_dynamic'],y(k1),zeros(1,M_.exo_nbr), M_.params, it_);
+% $$$             
+% $$$             % looking for dynamic variables that are both in the original model
+% $$$             % and in the optimal policy model
+% $$$             k1 = k1+nnz(M_.lead_lag_incidence(1:M_.orig_model.maximum_lead,1:M_.orig_model.endo_nbr));
+% $$$             hessian = sparse([],[],[],size(jacobia_,1),(nl+M_.exo_nbr)^2,nnz(fh));
+% $$$             hessian(M_.orig_model.endo_nbr+(1:size(fh,1)),kk2) = fh;
+% $$$             options_.order = 2;
+% $$$         elseif options_.ramsey_policy == 3
+% $$$             maxlag1 = M_.orig_model.maximum_lag;
+% $$$             maxlead1 = M_.orig_model.maximum_lead;
+% $$$             endo_nbr1 = M_.orig_model.endo_nbr;
+% $$$             lead_lag_incidence1 = M_.orig_model.lead_lag_incidence;
+% $$$             y = repmat(oo_.dr.ys(1:M_.orig_model.endo_nbr),1,M_.orig_model.maximum_lag+M_.orig_model.maximum_lead+1);
+% $$$             k1 = find(M_.orig_model.lead_lag_incidence');
+% $$$             [f,fj,fh] = feval([M_.fname '_dynamic'],y(k1),zeros(1,M_.exo_nbr), M_.params, it_);
+% $$$             nrj = size(fj,1); 
+% $$$             
+% $$$             iy = M_.lead_lag_incidence;
+% $$$             kstate = oo_.dr.kstate;
+% $$$             inv_order_var = oo_.dr.inv_order_var;
+% $$$             offset = 0;
+% $$$             i3 = zeros(0,1);
+% $$$             i4 = find(kstate(:,2) <= M_.maximum_lag+1);
+% $$$             kstate1 = kstate(i4,:);
+% $$$             kk2 = zeros(0,1);
+% $$$             % lagged variables
+% $$$             for i=2:M_.maximum_lag + 1
+% $$$                 i1 = find(kstate(:,2) == i);
+% $$$                 k1 = kstate(i1,:);
+% $$$                 i2 = find(oo_.dr.order_var(k1(:,1)) <= M_.orig_model.endo_nbr);
+% $$$                 i3 = [i3; i2+offset]; 
+% $$$                 offset = offset + size(k1,1);
+% $$$                 i4 = find(kstate1(:,2) == i);
+% $$$                 kk2 = [kk2; i4];
+% $$$             end
+% $$$             i2 = find(oo_.dr.order_var(k1(:,1)) > M_.orig_model.endo_nbr);
+% $$$             j2 = k1(i2,1);
+% $$$             nj2 = length(j2);
+% $$$             k2 = offset+(1:nj2)';
+% $$$             offset = offset + length(i2);
+% $$$             i3 = [i3; ...
+% $$$                   find(M_.orig_model.lead_lag_incidence(M_.orig_model.maximum_lag+1:end,:)')+offset];
+% $$$             i3 = [i3; (1:M_.exo_nbr)'+length(i3)];
+% $$$             ni3 = length(i3);
+% $$$             nrfj = size(fj,1);
+% $$$             jacobia_ = zeros(nrfj+length(j2),ni3);
+% $$$             jacobia_(1:nrfj,i3) = fj;
+% $$$             jacobia_(nrfj+(1:nj2),1:size(oo_.dr.ghx,2)) = oo_.dr.ghx(j2,:);
+% $$$             jacobia_(nrfj+(1:nj2),k2) = eye(nj2);
+% $$$             kk1 = reshape(1:ni3^2,ni3,ni3);
+% $$$             hessian =  zeros(nrfj+length(j2),ni3^2);
+% $$$             hessian(1:nrfj,kk1(i3,i3)) = fh;
+% $$$             
+% $$$             k = find(any(M_.lead_lag_incidence(1:M_.maximum_lag, ...
+% $$$                                                M_.orig_model.endo_nbr+1:end)));
+% $$$             if maxlead1 > maxlag1
+% $$$                 M_.lead_lag_incidence = [ [zeros(maxlead1-maxlag1,endo_nbr1); ...
+% $$$                                     lead_lag_incidence1] ...
+% $$$                                     [M_.lead_lag_incidence(M_.maximum_lag+(1:maxlead1), ...
+% $$$                                                            k); zeros(maxlead1,length(k))]];
+% $$$             elseif maxlag1 > maxlead1
+% $$$                 M_.lead_lag_incidence = [ [lead_lag_incidence1; zeros(maxlag1- ...
+% $$$                                                                   maxlead1,endo_nbr1);] ...
+% $$$                                     [M_.lead_lag_incidence(M_.maximum_lag+(1:maxlead1), ...
+% $$$                                                            k); zeros(maxlead1,length(k))]];
+% $$$             else % maxlag1 == maxlead1
+% $$$                 M_.lead_lag_incidence = [ lead_lag_incidence1
+% $$$                                     [M_.lead_lag_incidence(M_.maximum_lag+(1:maxlead1), ...
+% $$$                                                            k); zeros(maxlead1,length(k))]];
+% $$$             end
+% $$$             M_.maximum_lag = max(maxlead1,maxlag1);
+% $$$             M_.maximum_endo_lag = M_.maximum_lag;
+% $$$             M_.maximum_lead = M_.maximum_lag;
+% $$$             M_.maximum_endo_lead = M_.maximum_lag;
+% $$$             
+% $$$             M_.endo_names = strvcat(M_.orig_model.endo_names, M_.endo_names(endo_nbr1+k,:));
+% $$$             M_.endo_nbr = endo_nbr1+length(k);  
+% $$$         end
     else
         klen = M_.maximum_lag + M_.maximum_lead + 1;
         iyv = M_.lead_lag_incidence';
@@ -190,7 +190,7 @@ function [dr,info,M_,options_,oo_] = dr1(dr,task,M_,options_,oo_)
         save([M_.fname '_debug.mat'],'jacobia_')
     end
     
-    dr=set_state_space(dr);
+    dr=set_state_space(dr,M_);
     kstate = dr.kstate;
     kad = dr.kad;
     kae = dr.kae;
