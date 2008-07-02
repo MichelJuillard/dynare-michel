@@ -53,8 +53,8 @@ function [LIK, lik] = DiffuseLikelihood1_Z(T,Z,R,Q,Pinf,Pstar,Y,start)
 	return
       else
 	Fstar   = Z*Pstar*Z';
-	iFstar	= inv(Fstar);
-	dFstar	= det(Fstar);
+	iFstar	= inv(F);
+	dFstar	= det(F);
 	Kstar	= Pstar*Z'*iFstar;
 	lik(t)	= log(dFstar) + v'*iFstar*v;
 	Pinf	= T*Pinf*transpose(T);
@@ -109,7 +109,7 @@ function [LIK, lik] = DiffuseLikelihood1_Z(T,Z,R,Q,Pinf,Pstar,Y,start)
     t = t+1;
     v = Y(:,t)-Z*a;
     a = T*(a+K*v);
-    lik(t) = v'*iF*v;
+    lik(t) = v*iF*v;
   end
   lik(t) = lik(t) + reste*log(dF);
 

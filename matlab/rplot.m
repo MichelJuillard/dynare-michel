@@ -35,10 +35,10 @@ for k=1:size(s1,1)
   y = [y; oo_.endo_simul(strmatch(s1(k,:),M_.endo_names,'exact'),:)] ;
 end
 
-if options_.dsample == 0
+if options_.smpl == 0
         i = [M_.maximum_lag:size(oo_.endo_simul,2)]' ;
 else
-	i = [options_.dsample(1)+M_.maximum_lag:options_.dsample(2)+M_.maximum_lag]' ;
+	i = [options_.smpl(1)+M_.maximum_lag:options_.smpl(2)+M_.maximum_lag]' ;
 end
 
 t = ['Plot of '] ;
@@ -75,6 +75,9 @@ elseif rplottype == 2
 	end
 end
 
+% 02/28/01 MJ replaced bseastr by MATLAB's strmatch
+% 06/19/01 MJ added 'exact' to strmatch calls
+% 06/25/03 MJ correction when options_.smpl ~= 0
 
 
 

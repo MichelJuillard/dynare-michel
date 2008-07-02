@@ -151,19 +151,27 @@ function [fval,cost_flag,ys,trend_coeff,info] = DsgeLikelihood(xparam1,gend,data
   %------------------------------------------------------------------------------
   % 3. Initial condition of the Kalman filter
   %------------------------------------------------------------------------------
-  kalman_algo = options_.kalman_algo;
   if options_.lik_init == 1		% Kalman filter
-      kalman_algo = 1;
-      Pstar = lyapunov_symm(T,R*Q*R',options_.qz_criterium);
-      Pinf	= [];
+    Pstar = lyapunov_symm(T,R*Q*R',options_.qz_criterium);
+    Pinf	= [];
   elseif options_.lik_init == 2	% Old Diffuse Kalman filter
-      kalman_algo = 1;
-      Pstar = 10*eye(np);
-      Pinf = [];
+    Pstar = 10*eye(np);
+    Pinf	= [];
   elseif options_.lik_init == 3	% Diffuse Kalman filter
-      if kalman_algo == 1
-          kalman_algo == 3
-      end
+    if options_.kalman_algo < 4
+      Pstar = zeros(np,np);
+      ivs = bayestopt_.restrict_var_list_stationary;
+      R1 = R(ivs,:);
+      Pstar(ivs,ivs) = lyapunov_symm(T(ivs,ivs),R1*Q*R1',options_.qz_criterium);
+      %    Pinf  = bayestopt_.Pinf;
+      % by M. Ratto
+      RR=T(:,bayestopt_.restrict_var_list_nonstationary);
+      i=find(abs(RR)>1.e-10);
+      R0=zeros(size(RR));
+      R0(i)=sign(RR(i));
+      Pinf=R0*R0';
+      % by M. Ratto
+    else
       [QT,ST] = schur(T);
       e1 = abs(ordeig(ST)) > 2-options_.qz_criterium;
       [QT,ST] = ordschur(QT,ST,e1);
@@ -175,131 +183,104 @@ function [fval,cost_flag,ys,trend_coeff,info] = DsgeLikelihood(xparam1,gend,data
       Pstar = zeros(np,np);
       B = QT'*R*Q*R'*QT;
       for i=np:-1:nk+2
-          if ST(i,i-1) == 0
-              if i == np
-                  c = zeros(np-nk,1);
-              else
-                  c = ST(nk1:i,:)*(Pstar(:,i+1:end)*ST(i,i+1:end)')+...
-                      ST(i,i)*ST(nk1:i,i+1:end)*Pstar(i+1:end,i);
-              end
-              q = eye(i-nk)-ST(nk1:i,nk1:i)*ST(i,i);
-              Pstar(nk1:i,i) = q\(B(nk1:i,i)+c);
-              Pstar(i,nk1:i-1) = Pstar(nk1:i-1,i)';
-          else
-              if i == np
-                  c = zeros(np-nk,1);
-                  c1 = zeros(np-nk,1);
-              else
-                  c = ST(nk1:i,:)*(Pstar(:,i+1:end)*ST(i,i+1:end)')+...
-                      ST(i,i)*ST(nk1:i,i+1:end)*Pstar(i+1:end,i)+...
-                      ST(i,i-1)*ST(nk1:i,i+1:end)*Pstar(i+1:end,i-1);
-                  c1 = ST(nk1:i,:)*(Pstar(:,i+1:end)*ST(i-1,i+1:end)')+...
-                       ST(i-1,i-1)*ST(nk1:i,i+1:end)*Pstar(i+1:end,i-1)+...
-                       ST(i-1,i)*ST(nk1:i,i+1:end)*Pstar(i+1:end,i);
-              end
-              q = [eye(i-nk)-ST(nk1:i,nk1:i)*ST(i,i) -ST(nk1:i,nk1:i)*ST(i,i-1);...
-                   -ST(nk1:i,nk1:i)*ST(i-1,i) eye(i-nk)-ST(nk1:i,nk1:i)*ST(i-1,i-1)];
-              z =  q\[B(nk1:i,i)+c;B(nk1:i,i-1)+c1];
-              Pstar(nk1:i,i) = z(1:(i-nk));
-              Pstar(nk1:i,i-1) = z(i-nk+1:end);
-              Pstar(i,nk1:i-1) = Pstar(nk1:i-1,i)';
-              Pstar(i-1,nk1:i-2) = Pstar(nk1:i-2,i-1)';
-              i = i - 1;
-          end
+	if ST(i,i-1) == 0
+	  if i == np
+	    c = zeros(np-nk,1);
+	  else
+	    c = ST(nk1:i,:)*(Pstar(:,i+1:end)*ST(i,i+1:end)')+...
+		ST(i,i)*ST(nk1:i,i+1:end)*Pstar(i+1:end,i);
+	  end
+	  q = eye(i-nk)-ST(nk1:i,nk1:i)*ST(i,i);
+	  Pstar(nk1:i,i) = q\(B(nk1:i,i)+c);
+	  Pstar(i,nk1:i-1) = Pstar(nk1:i-1,i)';
+	else
+	  if i == np
+	    c = zeros(np-nk,1);
+	    c1 = zeros(np-nk,1);
+	  else
+	    c = ST(nk1:i,:)*(Pstar(:,i+1:end)*ST(i,i+1:end)')+...
+		ST(i,i)*ST(nk1:i,i+1:end)*Pstar(i+1:end,i)+...
+		ST(i,i-1)*ST(nk1:i,i+1:end)*Pstar(i+1:end,i-1);
+	    c1 = ST(nk1:i,:)*(Pstar(:,i+1:end)*ST(i-1,i+1:end)')+...
+		 ST(i-1,i-1)*ST(nk1:i,i+1:end)*Pstar(i+1:end,i-1)+...
+		 ST(i-1,i)*ST(nk1:i,i+1:end)*Pstar(i+1:end,i);
+	  end
+	  q = [eye(i-nk)-ST(nk1:i,nk1:i)*ST(i,i) -ST(nk1:i,nk1:i)*ST(i,i-1);...
+	       -ST(nk1:i,nk1:i)*ST(i-1,i) eye(i-nk)-ST(nk1:i,nk1:i)*ST(i-1,i-1)];
+	  z =  q\[B(nk1:i,i)+c;B(nk1:i,i-1)+c1];
+	  Pstar(nk1:i,i) = z(1:(i-nk));
+	  Pstar(nk1:i,i-1) = z(i-nk+1:end);
+	  Pstar(i,nk1:i-1) = Pstar(nk1:i-1,i)';
+	  Pstar(i-1,nk1:i-2) = Pstar(nk1:i-2,i-1)';
+	  i = i - 1;
+	end
       end
       if i == nk+2
-          c = ST(nk+1,:)*(Pstar(:,nk+2:end)*ST(nk1,nk+2:end)')+ST(nk1,nk1)*ST(nk1,nk+2:end)*Pstar(nk+2:end,nk1);
-          Pstar(nk1,nk1)=(B(nk1,nk1)+c)/(1-ST(nk1,nk1)*ST(nk1,nk1));
+	c = ST(nk+1,:)*(Pstar(:,nk+2:end)*ST(nk1,nk+2:end)')+ST(nk1,nk1)*ST(nk1,nk+2:end)*Pstar(nk+2:end,nk1);
+	Pstar(nk1,nk1)=(B(nk1,nk1)+c)/(1-ST(nk1,nk1)*ST(nk1,nk1));
       end
       
       Z = QT(mf,:);
       R1 = QT'*R;
-      [u,s,v]=svd(Z*ST(:,1:nk),0);
-      k = find(abs(diag(s)) < 1e-8);
-      if length(k) > 0
-	  [junk,k1] = max(abs(v(:,k)));
-	  dd =ones(nk,1);
-	  dd(k1) = zeros(length(k1),1);
-	  Pinf(1:nk,1:nk) = diag(dd);
-      end
-	
+    end
   end
   %------------------------------------------------------------------------------
   % 4. Likelihood evaluation
   %------------------------------------------------------------------------------
   if any(any(H ~= 0)) % should be replaced by a flag
-      if kalman_algo == 1
-          LIK = DiffuseLikelihoodH1(T,R,Q,H,Pinf,Pstar,data,trend,start);
-          if isinf(LIK)
-              kalman_algo = 2;
-              if ~estim_params_.ncn 
-                  %% The univariate approach considered here doesn't 
-                  %%	apply when H has some off-diagonal elements.
-                  LIK = DiffuseLikelihoodH3(T,R,Q,H,Pinf,Pstar,data,trend,start);
-              else
-                  LIK = DiffuseLikelihoodH3corr(T,R,Q,H,Pinf,Pstar,data,trend,start);
-              end
-          end
-      elseif kalman_algo == 2
-          if ~estim_params_.ncn 
-              %% The univariate approach considered here doesn't 
-              %%	apply when H has some off-diagonal elements.
-              LIK = DiffuseLikelihoodH3(T,R,Q,H,Pinf,Pstar,data,trend,start);
-          else
-              LIK = DiffuseLikelihoodH3corr(T,R,Q,H,Pinf,Pstar,data,trend,start);
-          end
-      elseif kalman_algo == 3
-          data1 = data - trend;
-          LIK = DiffuseLikelihoodH1_Z(ST,Z,R1,Q,H,Pinf,Pstar,data1,trend,start);
-          if isinf(LIK)
-              kalman_algo = 4;
-              if ~estim_params_.ncn 
-                  %% The univariate approach considered here doesn't 
-                  %%	apply when H has some off-diagonal elements.
-                  LIK = DiffuseLikelihoodH3_Z(ST,Z,R1,Q,H,Pinf,Pstar,data1,trend,start);
-              else
-                  LIK = DiffuseLikelihoodH3corr_Z(ST,Z,R1,Q,H,Pinf,Pstar,data1,trend,start);
-              end
-          end
-      elseif kalman_algo == 4
-          data1 = data - trend;
-          if ~estim_params_.ncn 
-              %% The univariate approach considered here doesn't 
-              %%	apply when H has some off-diagonal elements.
-              LIK = DiffuseLikelihoodH3_Z(ST,Z,R1,Q,H,Pinf,Pstar,data1,trend,start);
-          else
-              LIK = DiffuseLikelihoodH3corr_Z(ST,Z,R1,Q,H,Pinf,Pstar,data1,trend,start);
-          end
-      end 
+    if options_.kalman_algo == 1
+      LIK = DiffuseLikelihoodH1(T,R,Q,H,Pinf,Pstar,data,trend,start);
+      if isinf(LIK) & ~estim_params_.ncn %% The univariate approach considered here doesn't 
+					 %%	apply when H has some off-diagonal elements.
+        LIK = DiffuseLikelihoodH3(T,R,Q,H,Pinf,Pstar,data,trend,start);
+      elseif isinf(LIK) & estim_params_.ncn
+	LIK = DiffuseLikelihoodH3corr(T,R,Q,H,Pinf,Pstar,data,trend,start);
+      end
+    elseif options_.kalman_algo == 3
+      if ~estim_params_.ncn %% The univariate approach considered here doesn't 
+			    %%	apply when H has some off-diagonal elements.
+        LIK = DiffuseLikelihoodH3(T,R,Q,H,Pinf,Pstar,data,trend,start);
+      else
+	LIK = DiffuseLikelihoodH3corr(T,R,Q,H,Pinf,Pstar,data,trend,start);
+      end
+    end 
   else
-      if kalman_algo == 1
-          LIK = DiffuseLikelihood1(T,R,Q,Pinf,Pstar,data,trend,start);
-          if isinf(LIK)
-              kalman_algo = 2
-              LIK = DiffuseLikelihood3(T,R,Q,Pinf,Pstar,data,trend,start);
-          end
-      elseif kalman_algo == 2 
-          LIK = DiffuseLikelihood3(T,R,Q,Pinf,Pstar,data,trend,start);
-      elseif options_.kalman_algo == 3
-          data1 = data - trend;
-          LIK = DiffuseLikelihood1_Z(ST,Z,R1,Q,Pinf,Pstar,data1,start);
-          if isinf(LIK)
-              kalman_algo = 4
-              LIK = DiffuseLikelihood3_Z(ST,Z,R1,Q,Pinf,Pstar,data1,start);
-          end
-      elseif kalman_algo == 4
-          data1 = data - trend;
-          LIK = DiffuseLikelihood3_Z(ST,Z,R1,Q,Pinf,Pstar,data1,start);
-      end 	
+    if options_.kalman_algo == 1
+       %nv = size(bayestopt_.Z,1);
+       %LIK = kalman_filter(bayestopt_.Z,zeros(nv,nv),T,R,Q,data,zeros(size(T,1),1),Pstar,'u');
+       %tic
+       LIK = DiffuseLikelihood1(T,R,Q,Pinf,Pstar,data,trend,start);
+       %toc
+       %tic
+       %LIK1 = Diffuse_Likelihood1(T,R,Q,Pinf,Pstar,data,trend,start);
+       %toc
+       %LIK1-LIK
+       %if abs(LIK1-LIK)>0.0000000001
+      %  disp(['LIK1 and LIK are not equal! ' num2str(abs(LIK1-LIK))])
+      %end
+      if isinf(LIK)
+	LIK = DiffuseLikelihood3(T,R,Q,Pinf,Pstar,data,trend,start);
+      end
+    elseif options_.kalman_algo == 3
+      LIK = DiffuseLikelihood3(T,R,Q,Pinf,Pstar,data,trend,start);
+    elseif options_.kalman_algo == 4
+      data1 = data - trend;
+      LIK = DiffuseLikelihood1_Z(ST,Z,R1,Q,Pinf,Pstar,data1,start);
+      if isinf(LIK)
+	LIK = DiffuseLikelihood3_Z(ST,Z,R1,Q,Pinf,Pstar,data1,start);
+      end
+    elseif options_.kalman_algo == 5
+      data1 = data - trend;
+      LIK = DiffuseLikelihood3_Z(ST,Z,R1,Q,Pinf,Pstar,data1,start);
+    end 	
   end
   if imag(LIK) ~= 0
-      likelihood = bayestopt_.penalty;
+    likelihood = bayestopt_.penalty;
   else
-      likelihood = LIK;
+    likelihood = LIK;
   end
   % ------------------------------------------------------------------------------
   % Adds prior if necessary
   % ------------------------------------------------------------------------------
   lnprior = priordens(xparam1,bayestopt_.pshape,bayestopt_.p1,bayestopt_.p2,bayestopt_.p3,bayestopt_.p4);
   fval    = (likelihood-lnprior);
-  options_.kalman_algo = kalman_algo;
