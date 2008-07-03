@@ -273,7 +273,7 @@ function [fval,cost_flag,ys,trend_coeff,info] = DsgeLikelihood(xparam1,gend,data
       if kalman_algo == 1
           LIK = DiffuseLikelihood1(T,R,Q,Pinf,Pstar,data,trend,start);
           if isinf(LIK)
-              kalman_algo = 2
+              kalman_algo = 2;
               LIK = DiffuseLikelihood3(T,R,Q,Pinf,Pstar,data,trend,start);
           end
       elseif kalman_algo == 2 
@@ -282,7 +282,7 @@ function [fval,cost_flag,ys,trend_coeff,info] = DsgeLikelihood(xparam1,gend,data
           data1 = data - trend;
           LIK = DiffuseLikelihood1_Z(ST,Z,R1,Q,Pinf,Pstar,data1,start);
           if isinf(LIK)
-              kalman_algo = 4
+              kalman_algo = 4;
               LIK = DiffuseLikelihood3_Z(ST,Z,R1,Q,Pinf,Pstar,data1,start);
           end
       elseif kalman_algo == 4
