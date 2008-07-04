@@ -55,7 +55,8 @@ function dyn_data_01=read_variables(file_name_01,var_names_01,dyn_data_01,xls_sh
       end
       dyn_data_01(:,dyn_i_01) = dyn_tmp_01;
     end
-    
+  else
+      error(['Can''t find datafile: ' file_name_01 ]);
   end
   disp(sprintf('Loading %d observations from %s\n',...
 	       size(dyn_data_01,1),file_name_02))
