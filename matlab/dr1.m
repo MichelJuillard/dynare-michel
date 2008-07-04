@@ -291,9 +291,9 @@ function [dr,info,M_,options_,oo_] = dr1(dr,task,M_,options_,oo_)
     
     if task == 1
         dr.rank = rank(w(1:nyf,nd-nyf+1:end));
-        if exist('OCTAVE_VERSION')
-            dr.eigval = qz(e,d);
-        else
+        % Under Octave, eig(A,B) doesn't exist, and
+        % lambda = qz(A,B) won't return infinite eigenvalues
+        if ~exist('OCTAVE_VERSION')
             dr.eigval = eig(e,d);
         end
         return
