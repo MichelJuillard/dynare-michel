@@ -12,6 +12,12 @@ end
 if any(any(abs(2*p-1)>1))
    error('A probability should be 0<=p<=1, please!')
 end
+
+if exist('OCTAVE_VERSION')
+    x = betainv(p, a, b);
+    return
+end
+
 b = min(b,100000);
 
 x = a ./ (a+b);
