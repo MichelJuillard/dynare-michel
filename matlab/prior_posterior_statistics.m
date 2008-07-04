@@ -186,56 +186,56 @@ for b=1:B
 
   irun = irun +  ones(8,1);
 
-  if irun(1) > MAX_nsmoo | b == B
+  if irun(1) > MAX_nsmoo || b == B
       stock = stock_smooth(:,:,1:irun(1)-1);
       ifil(1) = ifil(1) + 1;
       save([DirectoryName '/' M_.fname '_smooth' int2str(ifil(1))],'stock');
       irun(1) = 1;
   end
   
-  if nvx && (irun(2) > MAX_ninno | b == B)
+  if nvx && (irun(2) > MAX_ninno || b == B)
       stock = stock_innov(:,:,1:irun(2)-1);
       ifil(2) = ifil(2) + 1;
       save([DirectoryName '/' M_.fname '_inno' int2str(ifil(2))],'stock');
       irun(2) = 1;
   end
   
-  if nvn && (irun(3) > MAX_nerro | b == B)
+  if nvn && (irun(3) > MAX_nerro || b == B)
       stock = stock_error(:,:,1:irun(3)-1);
       ifil(3) = ifil(3) + 1;
       save([DirectoryName '/' M_.fname '_error' int2str(ifil(3))],'stock');
       irun(3) = 1;
   end
   
-  if naK && (irun(4) > MAX_naK | b == B)
+  if naK && (irun(4) > MAX_naK || b == B)
       stock = stock_filter(:,:,:,1:irun(4)-1);
       ifil(4) = ifil(4) + 1;
       save([DirectoryName '/' M_.fname '_filter' int2str(ifil(4))],'stock');
       irun(4) = 1;
   end
   
-  if irun(5) > MAX_nruns | b == B
+  if irun(5) > MAX_nruns || b == B
       stock = stock_param(1:irun(5)-1,:);
       ifil(5) = ifil(5) + 1;
       save([DirectoryName '/' M_.fname '_param' int2str(ifil(5))],'stock','stock_logpo','stock_ys');
       irun(5) = 1;
   end
 
-  if horizon && (irun(6) > MAX_nforc1 | b == B)
+  if horizon && (irun(6) > MAX_nforc1 || b == B)
       stock = stock_forcst_mean(:,:,1:irun(6)-1);
       ifil(6) = ifil(6) + 1;
       save([DirectoryName '/' M_.fname '_forc_mean' int2str(ifil(6))],'stock');
       irun(6) = 1;
   end
 
-  if horizon && (irun(7) > MAX_nforc2 |  b == B)
+  if horizon && (irun(7) > MAX_nforc2 ||  b == B)
       stock = stock_forcst_total(:,:,1:irun(7)-1);
       ifil(7) = ifil(7) + 1;
       save([DirectoryName '/' M_.fname '_forc_total' int2str(ifil(7))],'stock');
       irun(7) = 1;
   end
 
-  if moments_varendo && (irun(8) > MAX_momentsno | b == B)
+  if moments_varendo && (irun(8) > MAX_momentsno || b == B)
       stock = stock_moments(1:irun(8)-1);
       ifil(8) = ifil(8) + 1;
       save([DirectoryName '/' M_.fname '_moments' int2str(ifil(8))],'stock');
