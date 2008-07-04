@@ -202,7 +202,7 @@ for b=1:B
       irun(2) = 1;
   end
   
-  if nvn & (irun(3) > MAX_error | b == B)
+  if nvn & (irun(3) > MAX_nerro | b == B)
       stock = stock_error(:,:,1:irun(3)-1);
       ifil(3) = ifil(3) + 1;
       save([DirectoryName '/' M_.fname '_error' int2str(ifil(3))],'stock');
