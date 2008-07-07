@@ -23,10 +23,10 @@ function eigs = my_ordeig(t)
           break;
       elseif t(i+1,i) == 0
           eigs(i) = t(i,i);
+          i = i+1;
       else
           k = i:i+1;
           eigs(k) = eig(t(k,k));
-          i = i+1;
+          i = i+2;
       end
-      i = i+1;
   end

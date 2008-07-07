@@ -16,7 +16,7 @@ function [x,u]=lyapunov_symm(a,b,qz_criterium)
 %   uses reordered Schur decomposition
 %
 % SPECIAL REQUIREMENTS
-%   needs Matlab version with ordeig function
+%   needs Matlab >= 7.0.1 for ordeig function (otherwise uses my_ordeig)
 %
 % part of DYNARE, copyright Dynare Team (2006-2008)
 % Gnu Public License   
@@ -30,10 +30,10 @@ function [x,u]=lyapunov_symm(a,b,qz_criterium)
     return
   end
   [u,t] = schur(a);
-  if exist('ordeig','builtin')
-    e1 = abs(ordeig(t)) > 2-qz_criterium;
-  else
+  if exist('OCTAVE_VERSION') || matlab_ver_less_than('7.0.1')
     e1 = abs(my_ordeig(t)) > 2-qz_criterium;
+  else
+    e1 = abs(ordeig(t)) > 2-qz_criterium;
   end
   k = sum(e1);
   if exist('ordschur','builtin')
