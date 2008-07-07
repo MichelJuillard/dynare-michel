@@ -47,17 +47,17 @@ cost_flag = 1;
 
 if options_.mode_compute ~= 1 & any(xparam1 < bayestopt_.lb)
     k = find(xparam1 < bayestopt_.lb);
-    fval = bayestopt_.penalty*min(1e3,exp(sum(bayestopt_.lb(k)-xparam1(k))));
-    info = 41;
+    fval = bayestopt_.penalty+sum((bayestopt_.lb(k)-xparam1(k)).^2);
     cost_flag = 0;
+    info = 41;
     return;
 end
 
 if options_.mode_compute ~= 1 & any(xparam1 > bayestopt_.ub)
     k = find(xparam1 > bayestopt_.ub);
-    fval = bayestopt_.penalty*min(1e3,exp(sum(xparam1(k)- bayestopt_.ub(k))));
-    info = 42;
+    fval = bayestopt_.penalty+sum((xparam1(k)-bayestopt_.ub(k)).^2);
     cost_flag = 0;
+    info = 42;
     return;
 end
 
@@ -83,9 +83,9 @@ M_.Sigma_e = Q;
 dsge_prior_weight = M_.params(strmatch('dsge_prior_weight',M_.param_names));
 % Is the DSGE prior proper?
 if dsge_prior_weight<(NumberOfParameters+NumberOfObservedVariables)/gend;
-    fval = bayestopt_.penalty*min(1e3,(NumberOfParameters+NumberOfObservedVariables)/gend-dsge_prior_weight);
-    info = 51;
+    fval = bayestopt_.penalty+abs(gend*dsge_prior_weight-(NumberOfParameters+NumberOfObservedVariables));
     cost_flag = 0;
+    info = 51;
     return;
 end
 
@@ -97,11 +97,11 @@ end
                                         bayestopt_.restrict_columns,...
                                         bayestopt_.restrict_aux);
 if info(1) == 1 | info(1) == 2 | info(1) == 5
-    fval = bayestopt_.penalty;
+    fval = bayestopt_.penalty+1;
     cost_flag = 0;
     return
 elseif info(1) == 3 | info(1) == 4 | info(1) == 20
-    fval = bayestopt_.penalty*min(1e3,exp(info(2)));
+    fval = bayestopt_.penalty+info(2)^2;
     cost_flag = 0;
     return
 end
@@ -152,6 +152,7 @@ for i = 1:NumberOfLags-1
     GXX = GXX + kron(tmp1,TheoreticalAutoCovarianceOfTheObservedVariables(:,:,i+1));
     GXX = GXX + kron(tmp2,TheoreticalAutoCovarianceOfTheObservedVariables(:,:,i+1)');
 end
+
 if ~options_.noconstant
     % Add one row and one column to GXX
     GXX = [GXX , kron(ones(NumberOfLags,1),constant') ; [  kron(ones(1,NumberOfLags),constant) , 1] ];
@@ -171,7 +172,7 @@ if ~isinf(dsge_prior_weight)
   if ~ispd(SIGMAu)
       v = diag(SIGMAu);
       k = find(v<0);
-      fval = bayestopt_.penalty*min(1e3,exp(abs(v(k))));
+      fval = bayestopt_.penalty + sum(v(k).^2);
       info = 52;
       cost_flag = 0;
     return;
