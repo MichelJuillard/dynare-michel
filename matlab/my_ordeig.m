@@ -1,5 +1,4 @@
-function eval = my_ordeig(t)
-
+function eigs = my_ordeig(t)
 % function eval = my_ordeig(t)
 % Computes the eigenvalues of a quasi-triangular matrix
 %
@@ -7,7 +6,7 @@ function eval = my_ordeig(t)
 %    t:              quasi-triangular matrix
 %
 % OUTPUTS
-%    eval:           eigenvalues
+%    eigs:           eigenvalues
 %
 % SPECIAL REQUIREMENTS
 %    none
@@ -16,18 +15,18 @@ function eval = my_ordeig(t)
 % Gnu Public License.
 
   n = size(t,2);
-  eval = zeros(n,1);
-  for i=1:n-1
-    if t(i+1,i) == 0
-      eval(i) = t(i,i);
-    else
-      k = i:i+1;
-      eval(k) = eig(t(k,k));
+  eigs = zeros(n,1);
+  i = 1;
+  while i <= n
+      if i == n
+          eigs(n) = t(n,n);
+          break;
+      elseif t(i+1,i) == 0
+          eigs(i) = t(i,i);
+      else
+          k = i:i+1;
+          eigs(k) = eig(t(k,k));
+          i = i+1;
+      end
       i = i+1;
-    end
   end
-  if i < n
-    eval(n) = t(n,n);
-  end
-  
-      
