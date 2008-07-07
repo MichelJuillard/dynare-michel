@@ -25,10 +25,8 @@ GridSize = length(omega);
 exo_names_orig_ord  = M_.exo_names_orig_ord;
 if exist('OCTAVE_VERSION')
   warning('off', 'Octave:divide-by-zero')
-elseif sscanf(version('-release'),'%d') < 13
-  warning off
 else
-  eval('warning off MATLAB:dividebyzero')
+  warning off MATLAB:dividebyzero
 end
 if nargin<2
   var_list = [];
@@ -150,10 +148,8 @@ end
 
 if exist('OCTAVE_VERSION')
   warning('on', 'Octave:divide-by-zero')
-elseif sscanf(version('-release'),'%d') < 13
-  warning_config
 else
-  eval('warning on MATLAB:dividebyzero')
+  warning on MATLAB:dividebyzero
 end
 
 if pltinfo

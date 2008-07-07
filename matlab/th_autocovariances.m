@@ -22,10 +22,8 @@ function [Gamma_y,ivar]=th_autocovariances(dr,ivar,M_,options_)
   exo_names_orig_ord  = M_.exo_names_orig_ord;
   if exist('OCTAVE_VERSION')
     warning('off', 'Octave:divide-by-zero')
-  elseif sscanf(version('-release'),'%d') < 13
-    warning off
   else
-    eval('warning off MATLAB:dividebyzero')
+    warning off MATLAB:dividebyzero
   end
   nar = options_.ar;
   Gamma_y = cell(nar+1,1);
@@ -202,9 +200,7 @@ function [Gamma_y,ivar]=th_autocovariances(dr,ivar,M_,options_)
   end
   if exist('OCTAVE_VERSION')
     warning('on', 'Octave:divide-by-zero')
-  elseif sscanf(version('-release'),'%d') < 13
-    warning_config
   else
-    eval('warning on MATLAB:dividebyzero')
+    warning on MATLAB:dividebyzero
   end
   

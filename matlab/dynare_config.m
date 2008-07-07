@@ -24,14 +24,7 @@ dynareroot = strrep(which('dynare.m'),'dynare.m','');
 if exist('OCTAVE_VERSION')
     addpath([dynareroot '../mex/octave/'])
 else
-    MATLAB  = ver('matlab');
-    %% FIXME:
-    %% It's not satisfactory to convert string versions into numbers, and to
-    %% compare these numbers:
-    %% - conversion will fail if version = 1.2.3
-    %% - it will give 7.10 < 7.9
-    VERSION = str2num(MATLAB.Version);
-    if (VERSION <= 7.4)
+    if matlab_ver_less_than('7.5')
         addpath([dynareroot '../mex/2007a/'])
     else
         addpath([dynareroot '../mex/2007b/'])

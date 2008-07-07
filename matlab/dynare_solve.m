@@ -26,7 +26,7 @@ function [x,info] = dynare_solve(func,x,jacobian_flag,varargin)
   options_ = set_default_option(options_,'solve_algo',2);
   info = 0;
   if options_.solve_algo == 0
-    if ~isempty(which('fsolve')) & sscanf(version('-release'),'%d') >= 13;
+    if ~isempty(which('fsolve'))
       options=optimset('fsolve');
       options.MaxFunEvals = 50000;
       options.MaxIter = 2000;

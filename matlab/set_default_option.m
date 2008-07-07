@@ -18,11 +18,7 @@ function options=set_default_option(options,field,default)
 % Gnu Public License.
 
   if ~isfield(options,field)
-    if ~exist('OCTAVE_VERSION') && sscanf(version('-release'),'%d') < 13
-      options = setfield(options,field,default);
-    else
-      eval('options.(field) = default;');
-    end
+    options.(field) = default;
   end
   
   % 06/07/03 MJ added ; to eval expression
