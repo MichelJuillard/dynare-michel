@@ -50,8 +50,8 @@ function global_initialization()
   options_.varlag = 4;
 
   % Optimization algorithm [6] gmhmaxlik
-  options_.Opt6Iter = 3;
-  options_.Opt6Numb = 100000;
+  options_.Opt6Iter = 2;
+  options_.Opt6Numb = 5000;
 
   % Graphics
   options_.graphics.nrows = 3;
@@ -148,6 +148,7 @@ function global_initialization()
   options_.subdraws = [];
   options_.unit_root_vars = [];
   options_.use_mh_covariance_matrix = 0;
+  options_.gradient_method = 2;
   
   % Misc
   options_.conf_sig = 0.6;

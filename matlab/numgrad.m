@@ -15,29 +15,40 @@ g=zeros(n,1);
 %end
 %f0 = eval([fcn '(x' tailstr]); % Is there a way not to do this?
 %---------------------------------------------------------------^yes
-f0 = eval([fcn '(x,varargin{:})']);
+[f0,cost_flag] = feval(fcn, x, varargin{:});
+%f0 = eval([fcn '(x,varargin{:})']);
 % disp(' first fcn in numgrad.m ------------------')
 %home
 % disp('numgrad.m is working. ----') % Jiinil on 9/5/95
 % sizex=size(x),sizetvec=size(tvec),x,    % Jinill on 9/6/95
 badg=0;
+goog=1;% stepan 07/07/2008
+scale=1; % stepan 07/07/2008
 for i=1:n
-   scale=1; % originally 1
    % i,tveci=tvec(:,i)% ,plus=x+scale*tvec(:,i) % Jinill Kim on 9/6/95
    if size(x,1)>size(x,2)
       tvecv=tvec(i,:);
    else
       tvecv=tvec(:,i);
    end
-   g0 = (eval([fcn '(x+scale*tvecv'', varargin{:})']) - f0) ...
-         /(scale*delta);
+   [fh,cost_flag] = feval(fcn, x+scale*transpose(tvecv), varargin{:});% stepan 07/07/2008
+   if cost_flag% stepan 07/07/2008
+       g0 = (fh - f0) / (scale*delta);
+   else
+       [fh,cost_flag] = feval(fcn, x-scale*transpose(tvecv), varargin{:});
+       if cost_flag
+           g0 = (f0-fh) / (scale*delta);
+       else
+           goog=0;
+       end
+   end
    % disp(' fcn in the i=1:n loop of numgrad.m ------------------')% Jinill 9/6/95
    % disp('          and i is')               % Jinill
    % i                         % Jinill
    % fprintf('Gradient w.r.t. %3d: %10g\n',i,g0) %see below Jinill 9/6/95
 % -------------------------- special code to essentially quit here
    % absg0=abs(g0) % Jinill on 9/6/95
-   if abs(g0)< 1e15
+   if goog && abs(g0)< 1e15 % stepan 07/07/2008
       g(i)=g0;
       % disp('good gradient') % Jinill Kim
    else
@@ -95,4 +106,3 @@ end
 %end
 %save g.dat g x f0
 %eval(['save g g x f0 ' stailstr]);
-

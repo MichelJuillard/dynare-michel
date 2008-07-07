@@ -1,5 +1,4 @@
 function dynare_estimation(var_list_)
-
 % function dynare_estimation(var_list_)
 % runs the estimation of the model
 %  
@@ -17,8 +16,7 @@ function dynare_estimation(var_list_)
 
 
 global M_ options_ oo_ estim_params_ 
-global bayestopt_ dsge_prior_weight
-
+global bayestopt_
 
 options_.varlist = var_list_;
 options_.lgyidx2varobs = zeros(size(M_.endo_names,1),1);
@@ -259,9 +257,16 @@ else% if the steady state file is not provided.
    [dd,info] = resol(oo_.steady_state,0);
    oo_.steady_state = dd.ys; clear('dd');
 end
+if all(abs(oo_.steady_state(bayestopt_.mfys))<1e-9)
+    disp('no constant')
+    options_.noconstant = 1;
+else
+    options_.noconstant = 0;
+end
+
 
 %% compute sample moments if needed (bvar-dsge)
-if options_.bvar_dsge~isempty(strmatch('dsge_prior_weight',M_.param_names))
+if options_.bvar_dsge
     if options_.noconstant
         evalin('base',...
                ['[mYY,mXY,mYX,mXX,Ydata,Xdata] = ' ...
@@ -337,7 +342,7 @@ if options_.mode_compute > 0 & options_.posterior_mode_estimation
     if isfield(options_,'optim_opt')
       eval(['optim_options = optimset(optim_options,' options_.optim_opt ');']);
     end
-    if isempty(strmatch('dsge_prior_weight',M_.param_names))
+    if ~options_.bvar_dsge
       [xparam1,fval,exitflag] = fminunc(fh,xparam1,optim_options,gend,data);
     else
       [xparam1,fval,exitflag] = fminunc(fh,xparam1,optim_options,gend);
@@ -349,12 +354,12 @@ if options_.mode_compute > 0 & options_.posterior_mode_estimation
     verbose = 2;
     if ~options_.bvar_dsge
       [fval,xparam1,grad,hessian_csminwel,itct,fcount,retcodehat] = ...
-          csminwel('DsgeLikelihood',xparam1,H0,[],crit,nit,gend,data);
+          csminwel('DsgeLikelihood',xparam1,H0,[],crit,nit,options_.gradient_method,gend,data);
       disp(sprintf('Objective function at mode: %f',fval))
       disp(sprintf('Objective function at mode: %f',DsgeLikelihood(xparam1,gend,data)))
     else
       [fval,xparam1,grad,hessian_csminwel,itct,fcount,retcodehat] = ...
-          csminwel('DsgeVarLikelihood',xparam1,H0,[],crit,nit,gend);
+          csminwel('DsgeVarLikelihood',xparam1,H0,[],crit,nit,options_.gradient_method,gend);
       disp(sprintf('Objective function at mode: %f',fval))
       disp(sprintf('Objective function at mode: %f',DsgeVarLikelihood(xparam1,gend)))
     end

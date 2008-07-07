@@ -45,7 +45,7 @@ function osr1(i_params,i_var,weights)
   nit = 1000;
   verbose = 2;
 
-  [f,p]=csminwel('osr_obj',t0,H0,[],crit,nit,i_params,...
+  [f,p]=csminwel('osr_obj',t0,H0,[],crit,nit,options_.gradient_method,i_params,...
 		inv_order_var(i_var),weights(i_var,i_var));
 
   %  options = optimset('fminunc');

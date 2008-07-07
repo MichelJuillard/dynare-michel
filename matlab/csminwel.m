@@ -1,5 +1,5 @@
-function [fh,xh,gh,H,itct,fcount,retcodeh] = csminwel(fcn,x0,H0,grad,crit,nit,varargin)
-%[fhat,xhat,ghat,Hhat,itct,fcount,retcodehat] = csminwel(fcn,x0,H0,grad,crit,nit,varargin)
+function [fh,xh,gh,H,itct,fcount,retcodeh] = csminwel(fcn,x0,H0,grad,crit,nit,method,varargin)
+%[fhat,xhat,ghat,Hhat,itct,fcount,retcodehat] = csminwel(fcn,x0,H0,grad,crit,nit,method,varargin)
 % fcn:   string naming the objective function to be minimized
 % x0:    initial value of the parameter vector
 % H0:    initial value for the inverse Hessian.  Must be positive definite.
@@ -9,6 +9,7 @@ function [fh,xh,gh,H,itct,fcount,retcodeh] = csminwel(fcn,x0,H0,grad,crit,nit,va
 % crit:  Convergence criterion.  Iteration will cease when it proves impossible to improve the
 %        function value by more than crit.
 % nit:   Maximum number of iterations.
+% method: integer scalar, 2 or 3 points formula. 
 % varargin: A list of optional length of additional parameters that get handed off to fcn each
 %        time it is called.
 %        Note that if the program ends abnormally, it is possible to retrieve the current x,
@@ -37,25 +38,21 @@ snit=100;
 %   tailstr=[ ',P' num2str(i)  tailstr];
 %   stailstr=[' P' num2str(i) stailstr];
 %end
-f0 = feval(fcn,x0,varargin{:});
-%ARGLIST
-%f0 = feval(fcn,x0,P1,P2,P3,P4,P5,P6,P7,P8,P9,P10,P11,P12,P13);
-% disp('first fcn in csminwel.m ----------------') % Jinill on 9/5/95
-if f0 > 1e50, disp('Bad initial parameter.'), return, end
+
+[f0,cost_flag] = feval(fcn,x0,varargin{:});
+if ~cost_flag
+    disp('Bad initial parameter.') 
+    return 
+end
+
 if NumGrad
-   if length(grad)==0
-      [g badg] = numgrad(fcn,x0, varargin{:});
-      %ARGLIST
-      %[g badg] = numgrad(fcn,x0,P1,P2,P3,P4,P5,P6,P7,P8,P9,P10,P11,P12,P13);
-   else
-      badg=any(find(grad==0));
-      g=grad;
-   end
-   %numgrad(fcn,x0,P1,P2,P3,P4);
+    if method==2
+        [g,badg] = numgrad(fcn,x0, varargin{:});
+    elseif method==3
+        [g,badg] = numgrad3(fcn,x0, varargin{:});
+    end
 else
-   [g badg] = feval(grad,x0,varargin{:});
-   %ARGLIST
-   %[g badg] = feval(grad,x0,P1,P2,P3,P4,P5,P6,P7,P8,P9,P10,P11,P12,P13);
+    [g,badg] = feval(grad,x0,varargin{:});
 end
 retcode3=101;
 x=x0;
@@ -93,15 +90,13 @@ while ~done
          wall1=1; badg1=1;
       else
          if NumGrad
-            [g1 badg1] = numgrad(fcn, x1,varargin{:});
-            %ARGLIST
-            %[g1 badg1] = numgrad(fcn, x1,P1,P2,P3,P4,P5,P6,P7,P8,P9,...
-            %                P10,P11,P12,P13);
+             if method == 2
+                 [g1 badg1] = numgrad(fcn, x1,varargin{:});
+             elseif method == 3
+                 [g1 badg1] = numgrad3(fcn, x1,varargin{:});
+             end
          else
             [g1 badg1] = feval(grad,x1,varargin{:});
-            %ARGLIST
-            %[g1 badg1] = feval(grad, x1,P1,P2,P3,P4,P5,P6,P7,P8,P9,...
-            %                P10,P11,P12,P13);
          end
          wall1=badg1;
          % g1
@@ -126,15 +121,13 @@ while ~done
                   wall2=1; badg2=1;
             else
                if NumGrad
-                  [g2 badg2] = numgrad(fcn, x2,varargin{:});
-                  %ARGLIST
-                  %[g2 badg2] = numgrad(fcn, x2,P1,P2,P3,P4,P5,P6,P7,P8,...
-                  %      P9,P10,P11,P12,P13);
+                   if method==2
+                       [g2 badg2] = numgrad(fcn, x2,varargin{:});
+                   elseif method==3
+                       [g2 badg2] = numgrad3(fcn, x2,varargin{:});
+                   end
                else
                   [g2 badg2] = feval(grad,x2,varargin{:});
-                  %ARGLIST
-                  %[g2 badg2] = feval(grad,x2,P1,P2,P3,P4,P5,P6,P7,P8,...
-                  %      P9,P10,P11,P12,P13);
                end
                wall2=badg2;
                % g2
@@ -160,15 +153,13 @@ while ~done
                      wall3=1; badg3=1;
                   else
                      if NumGrad
-                        [g3 badg3] = numgrad(fcn, x3,varargin{:});
-                        %ARGLIST
-                        %[g3 badg3] = numgrad(fcn, x3,P1,P2,P3,P4,P5,P6,P7,P8,...
-                        %                        P9,P10,P11,P12,P13);
+                         if method==2
+                             [g3 badg3] = numgrad(fcn, x3,varargin{:});
+                         elseif method==3
+                             [g3 badg3] = numgrad3(fcn, x3,varargin{:});
+                         end
                      else
                         [g3 badg3] = feval(grad,x3,varargin{:});
-                        %ARGLIST
-                        %[g3 badg3] = feval(grad,x3,P1,P2,P3,P4,P5,P6,P7,P8,...
-                        %                         P9,P10,P11,P12,P13);
                      end
                      wall3=badg3;
                      % g3
@@ -224,7 +215,11 @@ while ~done
       end
       if nogh
          if NumGrad
-            [gh badgh] = numgrad(fcn,xh,varargin{:});
+             if method==2
+                 [gh,badgh] = numgrad(fcn,xh,varargin{:});
+             elseif method==3
+                 [gh,badgh] = numgrad3(fcn,xh,varargin{:});
+             end
          else
             [gh badgh] = feval(grad, xh,varargin{:});
          end
