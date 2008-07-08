@@ -98,7 +98,14 @@ function global_initialization()
   options_.replic = 50;
   options_.drop = 100;
   options_.simul_algo = 0;
-
+  if exist('mjdgges')==2
+      options_.use_qzdiv = 1;
+  else
+      options_.use_qzdiv = 0;
+  end
+  
+  
+  
   % Ramsey policy
   options_.planner_discount = 1.0;
   options_.ramsey_policy = 0;

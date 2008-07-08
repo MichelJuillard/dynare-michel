@@ -270,13 +270,6 @@ function [dr,info,M_,options_,oo_] = dr1(dr,task,M_,options_,oo_)
         end
     end
     
-
-    if exist('mjdgges')==2
-        use_qzdiv = 1;
-    else
-        use_qzdiv = 0;
-    end
-    
     [ss,tt,w,sdim,dr.eigval,info1] = mjdgges(e,d,options_.qz_criterium);
     
     if info1
@@ -373,7 +366,7 @@ function [dr,info,M_,options_,oo_] = dr1(dr,task,M_,options_,oo_)
     end
     
     %% Necessary when using Sims' routines for QZ
-    if use_qzdiv
+    if options_.use_qzdiv
         gx = real(gx);
         hx = real(hx);
         dr.ghx = real(dr.ghx);
