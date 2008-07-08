@@ -19,14 +19,23 @@ function dynare(fname, varargin)
 % part of DYNARE, copyright Dynare Team (2001-2008)
 % Gnu Public License.
 
+warning_config
+
+if exist('OCTAVE_VERSION')
+  if octave_ver_less_than('3.0.0')
+    warning('This version of Dynare has only been tested on Octave 3.0.0 and above. Since your Octave version is older than that, Dynare may fail to run, or give unexpected results. Consider upgrading your Octave installation.');
+  end
+else
+  if matlab_ver_less_than('6.5')
+    warning('This version of Dynare has only been tested on Matlab 6.5 and above. Since your Matlab version is older than that, Dynare may fail to run, or give unexpected results. Consider upgrading your Matlab installation (or switch to Octave).');
+  end
+end
+
 if nargin < 1
   error('You must provide the name of the MOD file in argument');
 end
 
-
-warning_config
-
-% disable output paging
+% disable output paging (it is on by default on Octave)
 more off
 
 % sets default format for save() command
