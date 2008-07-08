@@ -31,10 +31,6 @@ else
   end
 end
 
-if nargin < 1
-  error('You must provide the name of the MOD file in argument');
-end
-
 % disable output paging (it is on by default on Octave)
 more off
 
@@ -43,11 +39,16 @@ if exist('OCTAVE_VERSION')
   default_save_options('-mat')
 end
 
-if ~ischar(fname)
-  error ('The argument in DYNARE must be a text string.') ;
+% detect if MEX files are present; if not, use alternative M-files
+dynareroot = dynare_config();
+
+if nargin < 1
+  error('DYNARE: you must provide the name of the MOD file in argument')
 end
 
-dynareroot = dynare_config();
+if ~ischar(fname)
+  error('DYNARE: argument of dynare must be a text string')
+end
 
 % Testing if file have extension
 % If no extension defalut .mod is added
@@ -62,13 +63,12 @@ if isempty(strfind(fname,'.'))
 else
   if ~strcmp(upper(fname(size(fname,2)-3:size(fname,2))),'.MOD') ...
 	&& ~strcmp(upper(fname(size(fname,2)-3:size(fname,2))),'.DYN')
-    error ('Argument is a file name with .mod or .dyn extension');
+    error('DYNARE: argument must be a filename with .mod or .dyn extension')
   end;
 end;
 d = dir(fname);
 if length(d) == 0
-  disp(['DYNARE: can''t open ' fname])
-  return
+  error(['DYNARE: can''t open ' fname])
 end
 
 command = ['"' dynareroot 'dynare_m" ' fname] ;
@@ -79,7 +79,7 @@ end
 disp(result)
 if status
   % Should not use "error(result)" since message will be truncated if too long
-  error('Preprocessing failed')
+  error('DYNARE: preprocessing failed')
 end
 
 if ~ isempty(find(abs(fname) == 46))
