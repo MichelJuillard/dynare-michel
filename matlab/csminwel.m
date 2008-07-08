@@ -9,7 +9,8 @@ function [fh,xh,gh,H,itct,fcount,retcodeh] = csminwel(fcn,x0,H0,grad,crit,nit,me
 % crit:  Convergence criterion.  Iteration will cease when it proves impossible to improve the
 %        function value by more than crit.
 % nit:   Maximum number of iterations.
-% method: integer scalar, 2 or 3 points formula. 
+% method: integer scalar, 2, 3 or 5 points formula.
+% penalty: scalar double, size of the penality.
 % varargin: A list of optional length of additional parameters that get handed off to fcn each
 %        time it is called.
 %        Note that if the program ends abnormally, it is possible to retrieve the current x,
@@ -46,10 +47,13 @@ if ~cost_flag
 end
 
 if NumGrad
-    if method==2
+    switch method
+      case 2
         [g,badg] = numgrad(fcn,x0, varargin{:});
-    elseif method==3
+      case 3
         [g,badg] = numgrad3(fcn,x0, varargin{:});
+      case 5
+        [g,badg] = numgrad5(fcn,x0, varargin{:});    
     end
 else
     [g,badg] = feval(grad,x0,varargin{:});
@@ -90,10 +94,13 @@ while ~done
          wall1=1; badg1=1;
       else
          if NumGrad
-             if method == 2
+             switch method 
+               case 2
                  [g1 badg1] = numgrad(fcn, x1,varargin{:});
-             elseif method == 3
+               case 3
                  [g1 badg1] = numgrad3(fcn, x1,varargin{:});
+               case 5
+                 [g1,badg1] = numgrad5(fcn,x0, varargin{:});             
              end
          else
             [g1 badg1] = feval(grad,x1,varargin{:});
@@ -121,10 +128,13 @@ while ~done
                   wall2=1; badg2=1;
             else
                if NumGrad
-                   if method==2
+                   switch method
+                     case 2
                        [g2 badg2] = numgrad(fcn, x2,varargin{:});
-                   elseif method==3
+                     case 3
                        [g2 badg2] = numgrad3(fcn, x2,varargin{:});
+                     case 5
+                       [g2,badg2] = numgrad5(fcn,x0, varargin{:});                   
                    end
                else
                   [g2 badg2] = feval(grad,x2,varargin{:});
@@ -153,13 +163,16 @@ while ~done
                      wall3=1; badg3=1;
                   else
                      if NumGrad
-                         if method==2
+                         switch method
+                           case 2
                              [g3 badg3] = numgrad(fcn, x3,varargin{:});
-                         elseif method==3
+                           case 3
                              [g3 badg3] = numgrad3(fcn, x3,varargin{:});
+                           case 5
+                             [g3,badg3] = numgrad5(fcn,x0, varargin{:});                         
                          end
                      else
-                        [g3 badg3] = feval(grad,x3,varargin{:});
+                         [g3 badg3] = feval(grad,x3,varargin{:});
                      end
                      wall3=badg3;
                      % g3
@@ -215,10 +228,13 @@ while ~done
       end
       if nogh
          if NumGrad
-             if method==2
+             switch method
+               case 2
                  [gh,badgh] = numgrad(fcn,xh,varargin{:});
-             elseif method==3
+               case 3
                  [gh,badgh] = numgrad3(fcn,xh,varargin{:});
+               case 5
+                 [gh,badgh] = numgrad5(fcn,xh,varargin{:});
              end
          else
             [gh badgh] = feval(grad, xh,varargin{:});
