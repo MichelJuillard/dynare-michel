@@ -1,7 +1,8 @@
 # Configuration file for building Dynare Windows Installer
 # Uses "NullSoft Scriptable Installer System", aka NSIS (see http://nsis.sourceforge.net)
 # NSIS can be run from both Windows and Linux (see "nsis" package in Debian)
-# (However for Dynare it fails under Debian because we use a plugin which cannot be compiled under Debian at this time)
+
+# NOTE: if you want to build from Debian, you'll need to replace /usr/share/nsis/Plugins/System.dll by the System.dll included in the windows distribution of NSIS (see http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=319999)
 
 # How to build the installer:
 # - build the preprocessor, the MEX binaries (for Matlab 7.4, 7.5 and for Octave), and the documentation (PDF files + HTML manual)
@@ -68,10 +69,10 @@ Section
  File ..\mex\octave\rcond.m ..\mex\octave\*.mex
 
  SetOutPath $INSTDIR\doc
- File ..\doc\guide.pdf ..\doc\userguide\Dynare_UserGuide_WebBeta.pdf ..\doc\bvar-a-la-sims.pdf
+ File ..\doc\manual.pdf ..\doc\guide.pdf ..\doc\userguide\Dynare_UserGuide_WebBeta.pdf ..\doc\bvar-a-la-sims.pdf ..\doc\macroprocessor\macroprocessor.pdf
 
- SetOutPath $INSTDIR\doc\manual
- File ..\doc\manual\*.html
+ SetOutPath $INSTDIR\doc\manual-html
+ File ..\doc\manual-html\*.html
 
  WriteUninstaller $INSTDIR\uninstall.exe
 

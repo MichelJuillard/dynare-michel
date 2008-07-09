@@ -34,12 +34,16 @@ ifeq ($(shell test -d $(MATLAB75_ROOT) && echo yes), yes)
 	$(MATLAB75_ROOT)/etc/lmdown
 endif
 
+	# Building documentation
+	make -C doc
+
 	touch build-stamp
 
 clean:
 	dh_testdir
 	dh_testroot
 	make clean -C preprocessor
+	make clean -C doc
 	find mex/sources -name *.o | xargs rm -f
 	rm -f mex/octave/*.mex mex/2007a/* mex/2007b/*
 	rm -f matlab/dynare_m matlab/dynare_m.exe
@@ -57,7 +61,7 @@ binary-arch: build
 	dh_installdocs
 	-dh_lintian # Do not fail here, since dh_lintian is only present in debhelper >= 6.0.7, and Ubuntu Hardy has 6.0.4
 	dh_strip
-	dh_compress
+	dh_compress -X.pdf
 	dh_fixperms
 	dh_shlibdeps
 	dh_gencontrol
