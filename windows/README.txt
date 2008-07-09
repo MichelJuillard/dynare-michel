@@ -2,23 +2,23 @@ Dynare version 4
 ================
 
 For information about how to use Dynare, you should have a look at the
-documentation located in the doc/ subdirectory of your Dynare installation (you
+documentation located in the 'doc' subdirectory of your Dynare installation (you
 should have a shortcut in your Start Menu to access it directly).
 
-Beginners should start with the Dynare userguide. There is also a complete
-reference manual documenting all Dynare functions in manual/index.html (however
+Beginners should start with the Dynare user guide. There is also a complete
+reference manual documenting all Dynare functions in 'manual\index.html' (however
 note that it is a bit outdated).
 
-You can also get more information on the Dynare Wiki at:
-
-  http://www.cepremap.cnrs.fr/DynareWiki
-
-You can also ask questions on the Dynare forums at:
+You can also get more information on the web, on Dynare homepage:
 
   http://www.dynare.org
 
-Note that Dynare comes with an automated uninstaller, which you can run from
-the "Add/Remove Programs" menu of the Control Panel.
+Or on Dynare Wiki:
+
+  http://www.cepremap.cnrs.fr/DynareWiki
+
+NOTE: Dynare comes with an automated uninstaller, which you can run from the
+"Add/Remove Programs" menu of the Control Panel.
 
 
 Using Dynare with Matlab
@@ -27,23 +27,25 @@ Using Dynare with Matlab
 Dynare requires Matlab version 6.5 or above. With older versions of Matlab, it
 may fail or give unexpected results.
 
-To use Dynare, you just have to add the matlab/ subdirectory of your Dynare
+To use Dynare, you just have to add the 'matlab' subdirectory of your Dynare
 installation to Matlab's path. You have two options for doing that:
 
-* Use the addpath command, by typing something like:
+* Use the addpath command, by typing the following (assuming that you have
+  installed Dynare at the standard location, and replacing '4.x.y' by correct
+  version number):
 
-    addpath DYNARE_INSTALLATION_DIRECTORY/matlab
+    addpath c:\dynare\4.x.y\matlab
 
   Matlab will not remember this setting next time you run it, and you will have
   to do it again.
 
 * Select the "Set Path" entry in the "File" menu, then click on "Add
-  Folder...", and select the matlab/ subdirectory of your Dynare
+  Folder...", and select the 'matlab' subdirectory of your Dynare
   installation. Note that you SHOULD NOT use "Add with Subfolders...". Apply
   the settings by clicking on "Save". Note that Matlab will remember this
   setting next time you run it.
 
-You can test your installation by typing "dynare" at the Matlab prompt. This
+You can test your installation by typing 'dynare' at the Matlab prompt. This
 should give you an error message complaining that you did not specify a MOD
 file.
 
@@ -58,37 +60,83 @@ For installing Octave on your Windows system, go to:
 
   http://sourceforge.net/project/showfiles.php?group_id=2888&package_id=40078
 
-Then pick the "octave-3.0.1-vs2008-setup.exe" installer. Choose GNUplot
+Then pick the 'octave-3.0.1-vs2008-setup.exe' installer. Choose GNUplot
 graphical backend (instead of JHandles) during installation. Also note that
 this distribution contains a nice text editor, which you can invoke with "edit"
 as you would under Matlab.
 
 WARNING: the Octave binary distribution has a bug which makes Octave crash
-everytime one types clear all (and therefore everytime one runs Dynare!). A
+everytime one types 'clear all' (and therefore everytime one runs Dynare!). A
 simple workaround is to type the following command the first time you run
 Octave:
 
   pkg rebuild -noauto ftp ann database
 
-Every time you run Octave, you should type the two following commands:
+Every time you run Octave, you should type the two following commands (assuming
+that you have installed Dynare at the standard location, and replacing '4.x.y'
+by correct version number):
 
-  addpath DYNARE_INSTALLATION_DIRECTORY/matlab mark_as_command dynare
+  addpath c:\dynare\4.x.y\matlab
+  mark_as_command dynare
 
 NOTE: if you don't want to type these two commands every time you run Octave,
-you can put them in a file called ".octaverc" in your home directory (generally
-"c:\Documents and Settings\USERNAME\"). This file is run by Octave at every
+you can put them in a file called '.octaverc' in your home directory (generally
+'c:\Documents and Settings\USERNAME\'). This file is run by Octave at every
 startup.
 
-You can test your installation by typing "dynare" at the Octave prompt. This
+You can test your installation by typing 'dynare' at the Octave prompt. This
 should give you an error message complaining that you did not specify a MOD
 file.
+
+For more information about Dynare for Octave, go to:
+
+  http://www.cepremap.cnrs.fr/DynareWiki/DynareOctave
+
+
+Dynamic Loadable Libraries
+--------------------------
+
+For better performance, some parts of Dynare are written in the C++ language,
+which is faster than standard M-files. These parts are compiled and distributed
+as dynamic loadable libraries (DLL), located in the 'mex' subdirectory of your
+Dynare installation.
+
+If the DLL are correctly detected by Matlab or Octave, the following should be
+displayed when you launch Dynare:
+
+  Configuring Dynare ...
+  [mex] Generalized QZ.
+  [mex] Sylvester equation solution.
+  [mex] Kronecker products.
+  [mex] Sparse kronecker products.
+
+On the contrary, if DLL are not detected, Dynare will fallback on slower
+alternatives written in M-files, and display the following:
+
+  Configuring Dynare ...
+  [m] Generalized QZ.
+  [m] Sylvester equation solution.
+  [m] Kronecker products.
+  [m] Sparse kronecker products.
+
+In this last case, Dynare will run correctly, but with suboptimal speed. There
+could be several reasons for Matlab or Octave failing to detect the DLL:
+
+* Your path settings may be wrong. Make sure that the 'matlab' subdirectory of
+  your Dynare installation is the only Dynare directory present in the path
+  variable.
+
+* Your Matlab or Octave version may be incompatible with the provided binaries.
+
+* You may have a custom M-file in your search path with the same name than a
+  DLL, therefore overriding it.
 
 
 Copyright notice for software
 -----------------------------
 
-Most Dynare source file are copyright "Dynare Team". There are some exceptions
-to this, which are described in source file headers when relevant.
+Most Dynare source files are copyright 1996-2008 Dynare Team. There are some
+exceptions to this, which are described in source file headers when relevant.
 
 Dynare is free software: you can redistribute it and/or modify it under the
 terms of the GNU General Public License as published by the Free Software
@@ -100,7 +148,7 @@ WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
 PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License along with
-this program (see gpl.txt). If not, see <http://www.gnu.org/licenses/>.
+this program (see 'gpl.txt'). If not, see <http://www.gnu.org/licenses/>.
 
 
 Copyright notice for documentation
@@ -111,4 +159,10 @@ files under the terms of the GNU Free Documentation License, Version 1.2 or any
 later version published by the Free Software Foundation; with no Invariant
 Sections, no Front-Cover Texts, and no Back-Cover Texts.
 
-A copy of the license can be found in the fdl.txt file.
+A copy of the license can be found in the 'fdl.txt' file.
+
+
+Credits
+-------
+
+Matlab is a registered trademark of The Mathworks, Inc.

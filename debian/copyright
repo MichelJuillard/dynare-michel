@@ -1,0 +1,46 @@
+Upstream source for Dynare can be found on:
+
+  http://www.dynare.org
+
+It can also be downloaded via subversion at:
+
+  http://www.cepremap.cnrs.fr/svn/
+
+Debian packaging was done by Sébastien Villemot <sebastien.villemot@ens.fr>.
+
+
+Copyright notice for software
+-----------------------------
+
+Most Dynare source files are copyright 1996-2008 Dynare Team. There are some
+exceptions to this, which are described in source file headers when relevant.
+
+Dynare is free software: you can redistribute it and/or modify it under the
+terms of the GNU General Public License as published by the Free Software
+Foundation, either version 3 of the License, or (at your option) any later
+version.
+
+This program is distributed in the hope that it will be useful, but WITHOUT ANY
+WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+
+On Debian systems, the complete text of the GNU General Public License can be
+found in `/usr/share/common-licenses/GPL-3'.
+
+
+Copyright notice for documentation
+----------------------------------
+
+Permission is granted to copy, distribute and/or modify Dynare documentation
+files under the terms of the GNU Free Documentation License, Version 1.2 or any
+later version published by the Free Software Foundation; with no Invariant
+Sections, no Front-Cover Texts, and no Back-Cover Texts.
+
+On Debian systems, the complete text of the GNU Free Documentation License can
+be found in `/usr/share/common-licenses/GFDL-1.2'.
+
+
+Credits
+-------
+
+Matlab is a registered trademark of The Mathworks, Inc.

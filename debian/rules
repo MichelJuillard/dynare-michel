@@ -55,6 +55,7 @@ binary-arch: build
 	dh_install
 	dh_installchangelogs
 	dh_installdocs
+	-dh_lintian # Do not fail here, since dh_lintian is only present in debhelper >= 6.0.7, and Ubuntu Hardy has 6.0.4
 	dh_strip
 	dh_compress
 	dh_fixperms
