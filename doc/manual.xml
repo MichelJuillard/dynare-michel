@@ -1,6 +1,5 @@
 <?xml version="1.0"?>
-<!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.2//EN" "http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd">
-
+<!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN" "http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd">
 <book>
   <bookinfo>
     <title>DYNARE MANUAL</title>
@@ -105,7 +104,7 @@ Currently the development team of Dynare is composed of S. Adjemian, M. Juillard
 <section><title>Version 4</title>
 <para>December 26, 2006</para>
 <itemizedlist>
-<listitem><para>added option <xref linkend="mh_recover"/></para></listitem>
+<listitem><para>added option <link linkend="mh_recover">mh_recover</link></para></listitem>
 </itemizedlist>
 </section>
 <section><title>Version 3</title>
@@ -1948,7 +1947,7 @@ Each line corresponds to an estimated parameter and follows this syntax:
 <listitem><para> <command>mh_jscale</command> = <replaceable>DOUBLE</replaceable>: the scale to be used for the jumping distribution in MH algorithm. The default value is rarely satisfactory. This option must be tune to obtain, ideally, an accpetation rate of 25% in the Metropolis-Hastings algorithm (default = 0.2).</para></listitem>
 <listitem><para><command>mh_init_scale</command>=<replaceable>DOUBLE</replaceable>: the scale to be used for drawing the initial value of the Metropolis-Hastings chain (default=2*mh_scale).</para>
 </listitem>
-<listitem><anchor id="mh_recover" xreflabel="mh_recover"/><para><command>mh_recover</command> attempts to recover a Metropolis simulation that crashed prematurely. Shouldn't be used together with <xref linkend="load_mh_file"/></para></listitem>
+<listitem><anchor id="mh_recover" xreflabel="mh_recover"/><para><command>mh_recover</command> attempts to recover a Metropolis simulation that crashed prematurely. Shouldn't be used together with <link linkend="load_mh_file">load_mh_file</link></para></listitem>
 <listitem><para><command>mode_file</command>=<replaceable>FILENAME</replaceable>: name of the file containing previous value for the mode. When computing the mode, Dynare stores the mode (<varname>xparam1</varname>) and the hessian (<varname>hh</varname>) in a file called <filename><replaceable>MODEL NAME</replaceable>_mode</filename>.</para></listitem>
 <listitem><para><command>mode_compute</command>=<replaceable>INTEGER</replaceable>: specifies the optimizer for the mode computation.
 <itemizedlist spacing='compact'>
@@ -1960,7 +1959,7 @@ Each line corresponds to an estimated parameter and follows this syntax:
 </itemizedlist></para></listitem>
 <listitem><para><command>mode_check</command>: when <command>mode_check</command> is set, Dynare plots the posterior density for values around the computed mode for each estimated parameter in turn. This is helpful to diagnose problems with the optimizer.</para></listitem>
 <listitem><para><command>prior_trunc</command>=<replaceable>DOUBLE</replaceable>: probability of extreme values of the prior density that is ignored when computing bounds for the parameters (default=1e-32).</para></listitem>
-<listitem><anchor id="load_mh_file" xreflabel="load_mh_file"/><para><command>load_mh_file</command>: when <command>load_mh_file</command> is declared, Dynare adds to previous Metropolis-Hastings simulations instead of starting from scratch. Shouldn't be used together with <xref linkend="mh_recover"/>.</para></listitem>
+<listitem><anchor id="load_mh_file" xreflabel="load_mh_file"/><para><command>load_mh_file</command>: when <command>load_mh_file</command> is declared, Dynare adds to previous Metropolis-Hastings simulations instead of starting from scratch. Shouldn't be used together with <link linkend="mh_recover">mh_recover</link>.</para></listitem>
 <listitem><para><command>optim</command>=(<replaceable>fmincon options</replaceable>): can be used to set options for fmincon, the optimizing function of Matlab Optimizaiton toolbox. Use Matlab syntax for these options</para>
 <para> (default: ('display','iter','LargeScale','off','MaxFunEvals',100000,'TolFun',1e-8,'TolX',1e-6))</para></listitem>
 <listitem>
@@ -1998,26 +1997,26 @@ Each line corresponds to an estimated parameter and follows this syntax:
 <para>After <command>estimation</command> with Metropolis iterations (option <command>mh_replic</command> > 0 or option <command>load_mh_file</command> set) the parameters and the variance matrix of the shocks are set to the posterior mean.</para>
 
 <para>Depending on the options, <command>estimation</command> stores results in the following fields of structure <varname>oo_</varname>:
-<table orient="land"><title>Content of <varname>oo_</varname></title><tgroup cols='2'>
+<table orient="land"><title>Content of <varname>oo_</varname></title><tgroup cols='6'>
 <thead>
 <row><entry>Field 1</entry><entry>Field 2</entry><entry>Field 3</entry><entry>Field 4</entry><entry>Field 5</entry><entry>Required options</entry></row>
 </thead>
 <tbody>
 <row><entry><varname>Forecast</varname></entry><entry>See <xref linkend="ForecastsMoments"/></entry><entry><replaceable>Variable name</replaceable></entry><entry></entry><entry></entry><entry><xref linkend="forecast_opt"/></entry></row>
 <row><entry morerows='1'><varname>MarginalDensity</varname></entry><entry><varname>LaplaceApproximation</varname></entry><entry/><entry></entry><entry></entry><entry>Always provided</entry></row>
-<row><entry><varname>ModifiedHarmonicMean</varname></entry><entry></entry><entry></entry><entry></entry><entry><para><xref linkend="mh_replic"/>&gt; 0 or <xref linkend="load_mh_file"/></para></entry></row>
-<row><entry><varname>PosteriorFilteredVariables</varname></entry><entry>See <xref linkend="MomentsNames"/></entry><entry><replaceable>Variable name</replaceable></entry><entry></entry><entry></entry><entry><para><xref linkend="filtered_vars"/></para></entry></row>
-<row><entry><varname>PosteriorIRF</varname></entry><entry><varname>Dsge</varname></entry><entry>See <xref linkend="MomentsNames"/></entry><entry><para>IRF name: name of endogenous variable '_' name of shock</para></entry><entry></entry><entry><xref linkend="bayesian_irf"/></entry></row>
+<row><entry><varname>ModifiedHarmonicMean</varname></entry><entry></entry><entry></entry><entry></entry><entry><para><link linkend="mh_replic">mh_replic</link>&gt; 0 or <link linkend="load_mh_file">load_mh_file</link></para></entry></row>
+<row><entry><varname>PosteriorFilteredVariables</varname></entry><entry>See <xref linkend="MomentsNames"/></entry><entry><replaceable>Variable name</replaceable></entry><entry></entry><entry></entry><entry><para><link linkend="filtered_vars">filtered_vars</link></para></entry></row>
+<row><entry><varname>PosteriorIRF</varname></entry><entry><varname>Dsge</varname></entry><entry>See <xref linkend="MomentsNames"/></entry><entry><para>IRF name: name of endogenous variable '_' name of shock</para></entry><entry></entry><entry><link linkend="bayesian_irf">bayesian_irf</link></entry></row>
 <row><entry><varname>PosteriorSmoothedObservationErrors</varname></entry><entry>See <xref linkend="MomentsNames"/></entry><entry><replaceable>Variable name</replaceable></entry><entry></entry><entry></entry><entry><para><xref linkend="smoother"/></para></entry></row>
 <row><entry><varname>PosteriorSmoothedShocks</varname></entry><entry>See <xref linkend="MomentsNames"/></entry><entry><replaceable>Variable name</replaceable></entry><entry></entry><entry></entry><entry><para><xref linkend="smoother"/></para></entry></row>
 <row><entry><varname>PosteriorSmoothedVariables</varname></entry><entry>See <xref linkend="MomentsNames"/></entry><entry><replaceable>Variable name</replaceable></entry><entry></entry><entry></entry><entry><para><xref linkend="smoother"/></para></entry></row>
-<row><entry><varname>PosteriorTheoreticalMoments</varname></entry><entry>See <xref linkend="TheoreticalMoments"/></entry><entry>See <xref linkend="EstimatedObjects"/></entry><entry>See <xref linkend="MomentsNames"/></entry><entry><replaceable>Variable name</replaceable></entry><entry><xref linkend="moments_varendo"/></entry></row>
-<row><entry><varname>posterior_density</varname></entry><entry><replaceable>Parameter name</replaceable></entry><entry></entry><entry></entry><entry></entry><entry><para><xref linkend="mh_replic"/>&gt; 0 or <xref linkend="load_mh_file"/></para></entry></row>
-<row><entry><varname>posterior_hpdinf</varname></entry><entry>See <xref linkend="EstimatedObjects"/></entry><entry><replaceable>Variable name</replaceable></entry><entry></entry><entry></entry><entry><para><xref linkend="mh_replic"/>&gt; 0 or <xref linkend="load_mh_file"/></para></entry></row>
-<row><entry><varname>posterior_hpdsup</varname></entry><entry>See <xref linkend="EstimatedObjects"/></entry><entry><replaceable>Variable name</replaceable></entry><entry></entry><entry></entry><entry><para><xref linkend="mh_replic"/>&gt; 0 or <xref linkend="load_mh_file"/></para></entry></row>
-<row><entry><varname>posterior_mean</varname></entry><entry>See <xref linkend="EstimatedObjects"/></entry><entry><replaceable>Variable name</replaceable></entry><entry></entry><entry></entry><entry><para><xref linkend="mh_replic"/>&gt; 0 or <xref linkend="load_mh_file"/></para></entry></row>
-<row><entry><varname>posterior_mode</varname></entry><entry>See <xref linkend="EstimatedObjects"/></entry><entry><replaceable>Variable name</replaceable></entry><entry></entry><entry></entry><entry><para><xref linkend="mh_replic"/>&gt; 0 or <xref linkend="load_mh_file"/></para></entry></row>
-<row><entry><varname>posterior_std</varname></entry><entry>See <xref linkend="EstimatedObjects"/></entry><entry><replaceable>Variable name</replaceable></entry><entry></entry><entry></entry><entry><para><xref linkend="mh_replic"/>&gt; 0 or <xref linkend="load_mh_file"/></para></entry></row>
+<row><entry><varname>PosteriorTheoreticalMoments</varname></entry><entry>See <xref linkend="TheoreticalMoments"/></entry><entry>See <xref linkend="EstimatedObjects"/></entry><entry>See <xref linkend="MomentsNames"/></entry><entry><replaceable>Variable name</replaceable></entry><entry><link linkend="moments_varendo">moments_varendo</link></entry></row>
+<row><entry><varname>posterior_density</varname></entry><entry><replaceable>Parameter name</replaceable></entry><entry></entry><entry></entry><entry></entry><entry><para><link linkend="mh_replic">mh_replic</link>&gt; 0 or <link linkend="load_mh_file">load_mh_file</link></para></entry></row>
+<row><entry><varname>posterior_hpdinf</varname></entry><entry>See <xref linkend="EstimatedObjects"/></entry><entry><replaceable>Variable name</replaceable></entry><entry></entry><entry></entry><entry><para><link linkend="mh_replic">mh_replic</link>&gt; 0 or <link linkend="load_mh_file">load_mh_file</link></para></entry></row>
+<row><entry><varname>posterior_hpdsup</varname></entry><entry>See <xref linkend="EstimatedObjects"/></entry><entry><replaceable>Variable name</replaceable></entry><entry></entry><entry></entry><entry><para><link linkend="mh_replic">mh_replic</link>&gt; 0 or <link linkend="load_mh_file">load_mh_file</link></para></entry></row>
+<row><entry><varname>posterior_mean</varname></entry><entry>See <xref linkend="EstimatedObjects"/></entry><entry><replaceable>Variable name</replaceable></entry><entry></entry><entry></entry><entry><para><link linkend="mh_replic">mh_replic</link>&gt; 0 or <link linkend="load_mh_file">load_mh_file</link></para></entry></row>
+<row><entry><varname>posterior_mode</varname></entry><entry>See <xref linkend="EstimatedObjects"/></entry><entry><replaceable>Variable name</replaceable></entry><entry></entry><entry></entry><entry><para><link linkend="mh_replic">mh_replic</link>&gt; 0 or <link linkend="load_mh_file">load_mh_file</link></para></entry></row>
+<row><entry><varname>posterior_std</varname></entry><entry>See <xref linkend="EstimatedObjects"/></entry><entry><replaceable>Variable name</replaceable></entry><entry></entry><entry></entry><entry><para><link linkend="mh_replic">mh_replic</link>&gt; 0 or <link linkend="load_mh_file">load_mh_file</link></para></entry></row>
 </tbody>
 </tgroup>
 </table>
@@ -2030,7 +2029,7 @@ Each line corresponds to an estimated parameter and follows this syntax:
 <row><entry>Field name</entry><entry>Description</entry></row>
 </thead>
 <tbody>
-<row><entry><varname>HPDinf</varname></entry><entry>Lower bound of a 90% HPD interval<footnote id="see_conf_sig"><para>See option <xref linkend="conf_sig"/> to change the size of the HPD interval</para></footnote> of forecast  due to parameter uncertainty</entry></row> 
+<row><entry><varname>HPDinf</varname></entry><entry>Lower bound of a 90% HPD interval<footnote id="see_conf_sig"><para>See option <link linkend="conf_sig">conf_sig</link> to change the size of the HPD interval</para></footnote> of forecast  due to parameter uncertainty</entry></row> 
 <row><entry><varname>HPDsup</varname></entry><entry>Lower bound of a 90% HPD interval <footnoteref linkend="see_conf_sig"/> due to parameter uncertainty</entry></row> 
 <row><entry><varname>HPDTotalinf</varname></entry><entry>Lower bound of a 90% HPD interval of forecast <footnoteref linkend="see_conf_sig"/> due to parameter uncertainty and future shocks</entry></row> 
 <row><entry><varname>HPDTotalsup</varname></entry><entry>Lower bound of a 90% HPD interval <footnoteref linkend="see_conf_sig"/> due to parameter uncertainty and future shocks</entry></row>
@@ -2048,7 +2047,7 @@ Each line corresponds to an estimated parameter and follows this syntax:
 <row><entry>Field name</entry><entry>Description</entry></row>
 </thead>
 <tbody>
-<row><entry><varname>HPDinf</varname></entry><entry>Lower bound of a 90% HPD interval<footnote id="see_conf_sig1"><para>See option <xref linkend="conf_sig"/> to change the size of the HPD interval</para></footnote></entry></row> 
+<row><entry><varname>HPDinf</varname></entry><entry>Lower bound of a 90% HPD interval<footnote id="see_conf_sig1"><para>See option <link linkend="conf_sig">conf_sig</link> to change the size of the HPD interval</para></footnote></entry></row> 
 <row><entry><varname>HPDsup</varname></entry><entry>Upper bound of a 90% HPD interval <footnoteref linkend="see_conf_sig1"/> </entry></row> 
 <row><entry><varname>Mean</varname></entry><entry>Mean of the posterior distribution</entry></row> 
 <row><entry><varname>Median</varname></entry><entry>Median of the posterior distribution</entry></row>  
@@ -2194,7 +2193,7 @@ oo_.posterior_hpdsup.measurement_errors_corr.gdp_conso
 <command>olr</command> computes optimal policies under commitment (Ramsey plans) for linear--quadratic problems of the form
 </para>
 <blockquote><para>
-max<subscript>u</subscript> E<subscript>0</subscript>&Sigma;<subscript>t=0</subscript><superscript>&infin;</superscript>&beta;<superscript>t</superscript>(y<subscript>t</subscript>&prime;W<subscript>11</subscript>y<subscript>t</subscript>+2y<subscript>t</subscript>&prime;W<subscript>12</subscript>u<subscript>t</subscript>+u<subscript>t</subscript>&prime;W<subscript>22</subscript>u<subscript>t</subscript>)
+max<subscript>u</subscript> E<subscript>0</subscript>&Sigma;<subscript>t=0</subscript><superscript>&infin;</superscript>&beta;<superscript>t</superscript>(y'<subscript>t</subscript>W<subscript>11</subscript>y<subscript>t</subscript>+2y'<subscript>t</subscript>W<subscript>12</subscript>u<subscript>t</subscript>+u'<subscript>t</subscript>W<subscript>22</subscript>u<subscript>t</subscript>)
 </para>
 <para>s.t.</para>
 <para>
@@ -2330,7 +2329,7 @@ Dynare automatically builds the corresponding linear rational expectation model 
 <command>osr</command> computes optimal simple policy rules for linear--quadratic problems of the form
 </para>
 <blockquote><para>
-max<subscript>&gamma;</subscript> E(y<subscript>t</subscript>&prime;Wy<subscript>t</subscript>)
+max<subscript>&gamma;</subscript> E(y'<subscript>t</subscript>Wy<subscript>t</subscript>)
 </para>
 <para>s.t.</para>
 <para>
