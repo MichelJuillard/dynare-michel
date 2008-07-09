@@ -32,7 +32,7 @@ function global_initialization()
   options_.solve_tolf = eps^(1/3);
   options_.solve_tolx = eps^(2/3);
   options_.solve_maxit = 500;
-
+  options_.deterministic_simulation_initialization = 0;
 
   % steady state file
   if exist([M_.fname '_steadystate'])

@@ -1,4 +1,3 @@
-
 function make_y_
 % function make_y_
 % forms oo_.endo_simul as guess values for deterministic simulations
@@ -30,11 +29,11 @@ function make_y_
       oo_.endo_simul = [ys0_*ones(1,M_.maximum_lag) oo_.steady_state*ones(1,options_.periods+M_.maximum_lead)];
     end
   elseif size(oo_.endo_simul,2) < M_.maximum_lag+M_.maximum_lead+options_.periods
-      if size(oo_.exo_simul)
+      switch options_.deterministic_simulation_initialization 
+        case 0
           oo_.endo_simul = [oo_.endo_simul ...
-                        oo_.steady_state*ones(1,M_.maximum_lag+options_.periods+M_.maximum_lead-size(oo_.endo_simul,2),1)];
-      else
-          %% A linear approximation is used to initiate the solution.
+                            oo_.steady_state*ones(1,M_.maximum_lag+options_.periods+M_.maximum_lead-size(oo_.endo_simul,2),1)];
+        case 1% A linear approximation is used to initiate the solution.
           oldopt = options_;
           options_.order = 1;
           dr = oo_.dr;
@@ -44,5 +43,7 @@ function make_y_
           y0 = oo_.endo_simul(:,1:M_.maximum_lag);
           oo_.endo_simul=simult_(y0,dr,exogenous_variables,1);
           options_ = oldopt;
+        case 2% Homotopic mod
+              % Leave endo_simul as it is.
       end
   end
