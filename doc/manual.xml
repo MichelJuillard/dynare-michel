@@ -26,7 +26,7 @@ Invariant Sections, no Front-Cover Texts, and no Back-Cover Texts.
 </para>
 <para>
 A copy of the license can be found at:
-http://www.gnu.org/licenses/fdl.txt
+<ulink url="http://www.gnu.org/licenses/fdl.txt">http://www.gnu.org/licenses/fdl.txt</ulink>
 </para>
 </legalnotice>
 <indexterm zone="Dynare"><primary>Dynare</primary></indexterm>
@@ -64,9 +64,9 @@ http://www.gnu.org/licenses/fdl.txt
   </bookinfo>
 
 <preface><title>Preface</title><para>
-Dynare is a pre-processor and a collection of Matlab, Scilab or Gauss routines which solve, simulate and estimate non-linear
+Dynare is a pre-processor and a collection of <ulink url="http://www.mathworks.com/products/matlab/">Matlab&reg;</ulink> and <ulink url="http://www.octave.org">GNU Octave</ulink> routines which solve, simulate and estimate non-linear
 models with forward looking variables. It is the result of research carried at
-CEPREMAP by several people (see Laffargue, 1990, Boucekkine, 1995, and
+<ulink url="http://www.cepremap.ens.fr/">CEPREMAP</ulink> by several people (see Laffargue, 1990, Boucekkine, 1995, and
 Juillard, 1996, Collard and Juillard 2001a and 2001b).
 </para>
 <para>
@@ -90,14 +90,14 @@ this approach to be in general both faster and more robust. The
 details of the algorithm used in Dynare can be found in Juillard (1996).
 </para>
 <para>
-In a stochastic context, Dynare computes one or several simulations corresponding to a random draw of the shocks. Starting with version 2.3 (not available for Gauss), Dynare uses a second order Taylor approximation of the expectation functions (see Judd, 1996, Collard and Juillard, 2001a, 2001b, and Schmitt-Grohe and Uribe, 2002).
+In a stochastic context, Dynare computes one or several simulations corresponding to a random draw of the shocks. Starting with version 2.3, Dynare uses a second order Taylor approximation of the expectation functions (see Judd, 1996, Collard and Juillard, 2001a, 2001b, and Schmitt-Grohe and Uribe, 2002).
 </para>
 <para>
 Starting with version 3.0, it is possible to use Dynare to estimate model parameters either by maximum likelihood as in Ireland (2004) or using a Bayesian approach as in Rabanal and Rubio-Ramirez (2002), Schorfheide (2000) or Smets and Wouters (2002).
 </para>
 
 <para>
-Currently the development team of Dynare is composed of S. Adjemian, M. Juillard and O. Kamenik. Several parts of Dynare use or have strongly benefited from publicly available programs by F. Collard, L. Ingber, P. Klein, M. Ratto, S. Sakata, F. Schorfheide, C. Sims, P. Soederlind and R. Wouters.  
+Currently the development team of Dynare is composed of S. Adjemian, M. Juillard, O. Kamenik, F. Mihoubi and S. Villemot. Several parts of Dynare use or have strongly benefited from publicly available programs by F. Collard, L. Ingber, P. Klein, M. Ratto, S. Sakata, F. Schorfheide, C. Sims, P. Soederlind and R. Wouters.  
 </para>
 
 <section><title>Changes</title>
@@ -157,111 +157,132 @@ In order to give instructions to Dynare, the user has to write a <emphasis>model
 In practice, the handling of your model file is done in two
 steps: in the first one, the model and the processing instructions
 written by the user in a <emphasis>model file</emphasis> are
-interpreted and the proper Gauss, Matlab or Scilab instructions are generated; in the
+interpreted and the proper Matlab&reg; or GNU Octave instructions are generated; in the
 second step, the program actually runs the computations. Both steps
-are triggered by a single keyword: <command>Dynare</command>.
+are triggered by a single keyword: <command>dynare</command>.
 </para>
 
 <sect1><title>Software requirements</title>
 <para>
-This version of Dynare works only under Windows 98/NT/2000/XP. For a Unix version, please, write me.
+Packaged versions of Dynare are available for Windows&reg; 98/NT/2000/XP/Vista, <ulink url="http://www.debian.org">Debian GNU/Linux</ulink> and <ulink url="http://www.ubuntu.com/">Ubuntu</ulink>, on Intel/AMD x86 architectures.
+Dynare should work on other systems and architectures, but some compilation steps are necessary in that case.
 </para>
 <para>
-The Matlab version has been written with Matlab 6.5.1.
+The Matlab&reg; version is written for Matlab&reg; version 6.5 and above.
 </para>
 <para>
-The Scilab version has been tested with Scilab 3.0.
-</para>
-<para>
-The Gauss version of Dynare has been written with Gauss version 3.2. It most likely doesn't work with previous versions.
+The Octave version is written for GNU Octave version 3.0.0 and above.
 </para>
 </sect1>
 
-<sect1><title>Installation</title>
-<para>
-In case of update from a previous version, it is a good idea to copy
-the old version in a backup directory so as to be able to revert to it
-in case of problems. None of the previous files are usefull anymore, so you are strongly encouraged to remove them from directory <filename>c:\dynare</filename>. The Matlab version of Dynare lets you now easily have different versions of Dynare on your computer.
-</para>
+<sect1><title>Installation and configuration</title>
 
 <para>
 After installation, Dynare can be used in any directory on your computer. It is best practive to keep your model files in directories different from the one containing the Dynare toolbox. That way you can upgrade Dynare and discard the previous version without having to worry about your own files.
 </para>
- 
-<sect2><title>Installing the Matlab version</title>
-<para>
-Starting with version 3.0, by default, Dynare is installed in a directory whose name contains the version number. For example
-<informalexample><programlisting>
-Dynare_v3.0
-</programlisting>
-</informalexample>
-This directory contains several sub-directories, among which <filename>matlab</filename>, <filename>doc</filename> and <filename>examples</filename>.
-</para>
-<para>
-After unpacking the archive, start the Matlab program and use the menu <command>File/Set path</command> to add the path to Dynare <filename>matlab</filename> subdirectory. For example
-<informalexample>
-<programlisting>
-c:\dynare_v3.0\matlab
-</programlisting>
-</informalexample>
-</para>
+
+<sect2><title>Installation of GNU Octave</title>
+
+<para>You can skip this step if you are planning to use only Matlab&reg; with Dynare.</para>
+
+<para>Please refer to <ulink url="http://www.cepremap.cnrs.fr/DynareWiki/DynareOctave">DynareOctave</ulink> on Dynare Wiki for detailed instructions.</para>
+
 </sect2>
 
+<sect2><title>Installation of Dynare</title>
 
-<sect2><title>Installing the Scilab version</title>
-<para>
-Unpack the zip file in the directory <filename>c:\</filename> (If you want to use another
-directory, see below). The Scilab version in automatically installed in <filename>c:\dynare\scilab</filename>.
-</para>
-<para>
-Then, find the <filename>scilab.star</filename> file, in the top directory of your Scilab distribution. Edit this file and add the following line after similar statements:
-<informalexample>
-<programlisting>
-load('c:/dynare/scilab/lib');
-</programlisting>
-</informalexample>
-</para>
-<para>
-If you installed Dynare for Scilab in a directory different from <filename>c:\dynare\scilab</filename>, change the above instructions accordingly and edit the following line in <filename>Dynare.sci</filename>
-<informalexample>
-<programlisting>
-command = 'c:\dynare\scilab\dynare_s '+fname;
-</programlisting>
-</informalexample>
-Then, restart Scilab and run the command <command>uplib()</command>.
-</para>
+<sect3><title>On Windows&reg;</title>
+
+<para>Execute the automated installer called <filename>dynare-4.x.y-win32.exe</filename> (where 4.x.y is the version number), and follow the instructions. The default installation directory is <filename>c:\dynare\4.x.y</filename>.</para>
+
+<para>After installation, this directory will contain several sub-directories, among which <filename>matlab</filename>, <filename>mex</filename> and <filename>doc</filename>.</para>
+
+<para>The installer will also add an entry in your Start Menu with a shortcut to documentation files and to the uninstaller.</para>
+
+<para>You can have several versions of Dynare coexisting (for example in <filename>c:\dynare</filename>), as long as you correctly adjust your path settings (see <xref linkend="path_warning" />).</para>
+
+<para>Note that no installer is currently avaible for Windows&reg; on 64 bits platforms. For the time being, please follow the instructions given in <xref linkend="install_other_systems"/> if you have such a system.</para>
+</sect3>
+
+<sect3><title>On Debian GNU/Linux and Ubuntu</title>
+<para>Please refer to <ulink url="http://www.cepremap.cnrs.fr/DynareWiki/InstallOnDebianOrUbuntu">InstallOnDebianOrUbuntu</ulink> on Dynare Wiki for detailed instructions.</para>
+
+<para>Dynare will be installed under <filename>/usr/lib/dynare</filename>. Documentation will be under <filename>/usr/share/doc/dynare</filename>.</para>
+</sect3>
+
+<sect3 id="install_other_systems"><title>For other systems</title>
+<para>You need to download Dynare source code from the <ulink url="http://www.dynare.org">Dynare website</ulink> and unpack it somewhere.</para>
+
+<para>Then you will need to recompile the pre-processor and the dynamic loadable libraries. Please refer to <ulink url="http://www.cepremap.cnrs.fr/DynareWiki/BuildingPreprocessor">BuildingPreprocessor</ulink> and <ulink url="http://www.cepremap.cnrs.fr/DynareWiki/BuildingDlls">BuildingDlls</ulink> on Dynare Wiki.</para>
+</sect3>
 </sect2>
 
-<sect2><title>Installing the Gauss version</title>
-<para>
-Unpack the zip file in the directory <filename>c:\</filename> (If you want to use another
-directory, see below). The Gauss version in automatically installed in <filename>c:\dynare\gauss</filename>.
-</para>
-<para>
-If you had any previous version of Dynare, use the Gauss editor or any text editor to remove all references to it from the library file <filename>user.lcg</filename>.
-</para>
-<para>
-After unpacking the archive, start the Gauss program and type the following:
-<informalexample>
-<programlisting>
-   library pgraph
-   lib user c:\dynare\gauss\dynare.src
-   lib user c:\dynare\gauss\dynare1.src
-   lib user c:\dynare\gauss\dynare2.src
-   lib user c:\dynare\gauss\dynare3.src
-</programlisting>
-</informalexample>
-</para>
-<para>
-If you installed Dynare for Gauss in a directory different from <filename>c:\dynare\gauss</filename>, change the above instructions accordingly and edit the following line in <filename>Dynare.src</filename>
-<informalexample>
+<sect2><title>Configuration</title>
+
+<sect3><title>For Matlab&reg;</title>
+
+<para>You need to add the <filename>matlab</filename> subdirectory of your Dynare
+installation to Matlab&reg; path. You have two options for doing that:</para>
+<itemizedlist>
+
+  <listitem><para>Using the <command>addpath</command> command in the Matlab&reg; command window:</para>
+
+  <para>Under Windows&reg;, assuming that you have installed Dynare at the standard location, and replacing "4.x.y" by correct version number, type:</para>
   <programlisting>
-declare string PARSER = "c:\\dynare\\gauss\\dynare_g ";
+  addpath c:\dynare\4.x.y\matlab
   </programlisting>
-</informalexample>
-</para>
-</sect2>
 
+  <para>Under Debian GNU/Linux or Ubuntu, type:</para>
+  <programlisting>
+   addpath /usr/lib/dynare/matlab
+  </programlisting>
+
+ <para>Matlab&reg; will not remember this setting next time you run it, and you will have
+ to do it again.</para>
+ </listitem>
+  <listitem><para>Via the menu entries:</para>
+<para>Select the "Set Path" entry in the "File" menu, then click on "Add
+  Folder...", and select the <filename>matlab</filename> subdirectory of your Dynare
+  installation. Note that you SHOULD NOT use "Add with Subfolders...". Apply
+  the settings by clicking on "Save". Note that Matlab will remember this
+  setting next time you run it.</para></listitem>
+</itemizedlist>
+</sect3>
+
+<sect3><title>For GNU Octave</title>
+
+<para>You need to add the <filename>matlab</filename> subdirectory of your Dynare
+installation to Octave path, using the <command>addpath</command> at the Octave command prompt.</para>
+
+<para>Under Windows&reg;, assuming that you have installed Dynare at the standard location, and replacing "4.x.y" by correct version number, type:</para>
+<programlisting>
+  addpath c:\dynare\4.x.y\matlab
+</programlisting>
+
+<para>Under Debian GNU/Linux or Ubuntu, type:</para>
+<programlisting>
+  addpath /usr/lib/dynare/matlab
+</programlisting>
+
+<para>You will also want to tell to Octave to accept the short syntax (without parentheses and quotes) for the <command>dynare</command> command, by typing:</para>
+<programlisting>
+  mark_as_command dynare
+</programlisting>
+
+<para>If you don't want to type these two commands every time you run Octave,
+you can put them in a file called <filename>.octaverc</filename> in your home directory (under Windows&reg; this will generally by <filename>c:\Document and Settings\USERNAME\</filename>). This file is run by Octave at every startup.</para>
+</sect3>
+
+<sect3 id="path_warning"><title>Some words of warning</title>
+
+<para>You should carefully watch the content of you Matlab&reg; or Octave path. You can display its content by simply typing <command>path</command> in the command window.</para>
+
+<para>The path should normally contain system directories of Matlab&reg; or Octave, and the <command>matlab</command> subdirectory of your Dynare installation. It should not contain any other Dynare-related directory, from another Dynare version of from the version you are using. However, note that Dynare will automatically add one (and only one) of the <filename>mex/2007a</filename>, <filename>mex/2007b</filename>, and <filename>mex/octave</filename> subdirectories, depending on your installation.</para>
+
+<para>You have to be aware that adding other directories to your path can potentially create problems, if some of your M-files have the same names than Dynare files. Your files would then override Dynare files, and make Dynare unusable.</para>
+</sect3>
+
+</sect2>
 </sect1>
 </chapter>
 
@@ -280,10 +301,10 @@ In the description of Dynare commands, the following conventions are observed:
 <listitem><para>repreated arguments are indicated by ellipses <command>...</command></para></listitem>
 <listitem><para><command><replaceable>INTEGER</replaceable></command> indicates an integer number</para></listitem>
 <listitem><para><command><replaceable>DOUBLE</replaceable></command> indicates a double precision number. The following syntaxes are valid: 1.1e3, 1.1E3, 1.1d3, 1.1D3.</para></listitem>
-<listitem><para><command><replaceable>EXPRESSION</replaceable></command> indicates a mathematical expression valid in the underlying language (Matlab, Scilab or Gauss)</para></listitem>
+<listitem><para><command><replaceable>EXPRESSION</replaceable></command> indicates a mathematical expression valid in the underlying language (Matlab&reg; or GNU Octave)</para></listitem>
 <listitem><para><command><replaceable>VARIABLE_NAME</replaceable></command> indicates a variable name starting with an alphabetical character and can't contain ()+-*/^=!;:@#. or accentuated characters</para></listitem>
 <listitem><para><command><replaceable>PARAMETER_NAME</replaceable></command> indicates a parameter name starting with an alphabetical charcater and can't contain ()+-*/^=!;:@#. or accentuated characters</para></listitem>
-<listitem><para><command><replaceable>FILENAME</replaceable></command> indicates a file name valid under your operating system (Windows, Linux or Unix)</para></listitem>
+<listitem><para><command><replaceable>FILENAME</replaceable></command> indicates a file name valid under your operating system (Windows&reg;, GNU/Linux, ...)</para></listitem>
 </itemizedlist>
 </para>
 
@@ -318,23 +339,12 @@ model and the processing instructions.
 
 <refsect1><title>Details</title>
 <para>
-In Matlab, <command>dynare</command> creates three intermediary files:
+<command>dynare</command> creates three intermediary files:
 <itemizedlist spacing='compact'>
 <listitem><para> <filename>filename.m</filename> with the instructions for the simulations</para></listitem>
-<listitem><para> <filename>filename_ff.m</filename> with the dynamic model equations</para></listitem>
-<listitem><para> <filename>filename_fff.m</filename> with the long run static model equations</para></listitem>
+<listitem><para> <filename>filename_dynamic.m</filename> with the dynamic model equations</para></listitem>
+<listitem><para> <filename>filename_static.m</filename> with the long run static model equations</para></listitem>
 </itemizedlist>
-</para>
-<para>
-In Scilab, <command>dynare</command> creates three intermediary files:
-<itemizedlist spacing='compact'>
-<listitem><para> <filename>filename.sci</filename> with the instructions for the simulations</para></listitem>
-<listitem><para> <filename>filename_ff.sci</filename> with the dynamic model equations</para></listitem>
-<listitem><para> <filename>filename_fff.sci</filename> with the long run static model equations</para></listitem>
-</itemizedlist>
-</para>
-<para>
-In Gauss, <command>dynare</command> creates an intermediary file <filename>filename.gau</filename> with the instructions for the simulations. The Gauss version still accepts the former <filename>.mdl</filename> extension, but it is now deprecated.
 </para>
 <para>
 These files may be looked at to understand errors reported at the simulation stage.
@@ -562,7 +572,7 @@ varexo_det tau;
 
 <refsect1><title>Description</title>
 <para>
-This optional command declares parameters used in the model, in variable initialization or in shock declarations. The parameters must then be assigned values using standard syntax of underlying matrix programming language. Be carefull not to use names reserved by Dynare or the underlying language (Matlab, Scilab or Gauss).
+This optional command declares parameters used in the model, in variable initialization or in shock declarations. The parameters must then be assigned values using standard syntax of underlying matrix programming language. Be careful not to use names reserved by Dynare or the underlying language (Matlab&reg; or GNU Octave).
 </para>
 </refsect1>
 
