@@ -52,7 +52,8 @@ function [x,u]=lyapunov_symm(a,b,qz_criterium)
     b=u'*b*u;
   end
   x=zeros(n,n);
-  for i=n:-1:2
+  i = n;
+  while i >= 2
     if t(i,i-1) == 0
       if i == n
 	c = zeros(n,1);
@@ -63,6 +64,7 @@ function [x,u]=lyapunov_symm(a,b,qz_criterium)
       q = eye(i)-t(1:i,1:i)*t(i,i);
       x(1:i,i) = q\(b(1:i,i)+c);
       x(i,1:i-1) = x(1:i-1,i)';
+      i = i - 1;
     else
       if i == n
 	c = zeros(n,1);
@@ -82,10 +84,10 @@ function [x,u]=lyapunov_symm(a,b,qz_criterium)
       x(1:i,i-1) = z(i+1:end);
       x(i,1:i-1)=x(1:i-1,i)';
       x(i-1,1:i-2)=x(1:i-2,i-1)';
-      i = i - 1;
+      i = i - 2;
     end
   end
-  if i == 2
+  if i == 1
     c = t(1,:)*(x(:,2:end)*t(1,2:end)')+t(1,1)*t(1,2:end)*x(2:end,1);
     x(1,1)=(b(1,1)+c)/(1-t(1,1)*t(1,1));
   end
