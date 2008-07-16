@@ -11,6 +11,7 @@ bvar-a-la-sims.pdf: bvar-a-la-sims.tex
 	pdflatex bvar-a-la-sims
 
 manual-html/index.html: manual.xml dynare_html.xsl
+	# Make sure that you have installed the docbook-xsl package, otherwise xsltproc will take a very long time
 	xsltproc -stringparam base.dir ./manual-html/ dynare_html.xsl manual.xml 
 
 manual.pdf: manual.xml

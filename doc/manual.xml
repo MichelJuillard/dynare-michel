@@ -29,7 +29,7 @@ A copy of the license can be found at:
 <ulink url="http://www.gnu.org/licenses/fdl.txt">http://www.gnu.org/licenses/fdl.txt</ulink>
 </para>
 </legalnotice>
-<indexterm zone="Dynare"><primary>Dynare</primary></indexterm>
+<indexterm zone="dynare"><primary>dynare</primary></indexterm>
 <indexterm zone="var"><primary>var</primary></indexterm>
 <indexterm zone="varexo"><primary>varexo</primary></indexterm>
 <indexterm zone="varexo_det"><primary>varexo_det</primary></indexterm>
@@ -53,14 +53,10 @@ A copy of the license can be found at:
 <indexterm zone="dynasave"><primary>dynasave</primary></indexterm>
 <indexterm zone="dynatype"><primary>dynatype</primary></indexterm>
 <indexterm zone="unit_root_vars"><primary>unit_root_vars</primary></indexterm>
-<indexterm zone="olr"><primary>olr</primary></indexterm>
-<indexterm zone="olr_inst"><primary>olr_inst</primary></indexterm>
 <indexterm zone="optim_weights"><primary>optim_weights</primary></indexterm>
 <indexterm zone="osr"><primary>osr</primary></indexterm>
 <indexterm zone="osr_params"><primary>osr_params</primary></indexterm>
-<indexterm zone="define"><primary>@define</primary></indexterm>
 <indexterm zone="forecast"><primary>forecast</primary></indexterm>
-<indexterm zone="if_elseif_else_end"><primary>@if...@elseif...@else...@end</primary></indexterm>
   </bookinfo>
 
 <preface><title>Preface</title><para>
@@ -111,14 +107,14 @@ Currently the development team of Dynare is composed of S. Adjemian, M. Juillard
 <para>December 30, 2005</para>
 <itemizedlist>
 <listitem><para>added details about parameter transformation in <xref linkend="model"/> and in <xref linkend="estimated_params"/></para></listitem>
-<listitem><para>added conditional compilation commands <xref linkend="define"/> and <xref linkend="if_elseif_else_end"/></para></listitem>
+<listitem><para>added conditional compilation commands <xref linkend="define"/> and if_elseif_else_end</para></listitem>
 <listitem><para>enhanced output section of command <xref linkend="estimation"/></para></listitem>
 <listitem><para>added exogenous deterministic shocks in stochastic models. See <xref linkend="varexo_det"/>, <xref linkend="forecast"/>, <xref linkend="shocks"/>, <xref linkend="stoch_simul"/></para></listitem>
 <listitem><para>added a forecast command for calibrated models. See <xref linkend="forecast"/>.</para></listitem>
 </itemizedlist>
 <para>October 14, 2005</para>
 <itemizedlist>
-<listitem><para>added syntax for computing optimal policy. See <xref linkend='olr'/>, <xref linkend='olr_inst'/>, <xref linkend='optim_weights'/>, <xref linkend='osr'/>, <xref linkend='osr_params'/>.</para></listitem>
+<listitem><para>added syntax for computing optimal policy. See olr, olr_inst, <xref linkend='optim_weights'/>, <xref linkend='osr'/>, <xref linkend='osr_params'/>.</para></listitem>
 <listitem><para>added syntax for estimating correlation between two shocks or two measurment errors in <xref linkend="estimated_params"/>, <xref linkend="estimated_params_bounds"/> and <xref linkend="estimated_params_init"/>
 </para></listitem>
 </itemizedlist>
@@ -275,9 +271,9 @@ you can put them in a file called <filename>.octaverc</filename> in your home di
 
 <sect3 id="path_warning"><title>Some words of warning</title>
 
-<para>You should carefully watch the content of you Matlab&reg; or Octave path. You can display its content by simply typing <command>path</command> in the command window.</para>
+<para>You should be very careful about the content of you Matlab&reg; or Octave path. You can display its content by simply typing <command>path</command> in the command window.</para>
 
-<para>The path should normally contain system directories of Matlab&reg; or Octave, and the <command>matlab</command> subdirectory of your Dynare installation. It should not contain any other Dynare-related directory, from another Dynare version of from the version you are using. However, note that Dynare will automatically add one (and only one) of the <filename>mex/2007a</filename>, <filename>mex/2007b</filename>, and <filename>mex/octave</filename> subdirectories, depending on your installation.</para>
+<para>The path should normally contain system directories of Matlab&reg; or Octave, and the <filename>matlab</filename> subdirectory of your Dynare installation. It should not contain any other Dynare-related directory, from another Dynare version of from the version you are using. However, note that Dynare will automatically add one (and only one) of the <filename>mex/2007a</filename>, <filename>mex/2007b</filename>, and <filename>mex/octave</filename> subdirectories, depending on your installation.</para>
 
 <para>You have to be aware that adding other directories to your path can potentially create problems, if some of your M-files have the same names than Dynare files. Your files would then override Dynare files, and make Dynare unusable.</para>
 </sect3>
@@ -286,31 +282,11 @@ you can put them in a file called <filename>.octaverc</filename> in your home di
 </sect1>
 </chapter>
 
-<chapter><title>Commands</title>
-<para>
-Dynare commands are either single instructions or a block of instructions. Each single instructions or block elements are terminated by <command>;</command>. Block of instructions are terminated by <command>end;</command>.
-</para>
+<chapter><title>Dynare invocation</title>
 
-<para>
-Most Dynare commands have arguments and several accept options, indicated in parentheses after the command keyword.
-</para>
-<para>
-In the description of Dynare commands, the following conventions are observed:
-<itemizedlist>
-<listitem><para>optional arguments or options are indicated between square brackets <command>[]</command></para></listitem>
-<listitem><para>repreated arguments are indicated by ellipses <command>...</command></para></listitem>
-<listitem><para><command><replaceable>INTEGER</replaceable></command> indicates an integer number</para></listitem>
-<listitem><para><command><replaceable>DOUBLE</replaceable></command> indicates a double precision number. The following syntaxes are valid: 1.1e3, 1.1E3, 1.1d3, 1.1D3.</para></listitem>
-<listitem><para><command><replaceable>EXPRESSION</replaceable></command> indicates a mathematical expression valid in the underlying language (Matlab&reg; or GNU Octave)</para></listitem>
-<listitem><para><command><replaceable>VARIABLE_NAME</replaceable></command> indicates a variable name starting with an alphabetical character and can't contain ()+-*/^=!;:@#. or accentuated characters</para></listitem>
-<listitem><para><command><replaceable>PARAMETER_NAME</replaceable></command> indicates a parameter name starting with an alphabetical charcater and can't contain ()+-*/^=!;:@#. or accentuated characters</para></listitem>
-<listitem><para><command><replaceable>FILENAME</replaceable></command> indicates a file name valid under your operating system (Windows&reg;, GNU/Linux, ...)</para></listitem>
-</itemizedlist>
-</para>
+<para>You invoke Dynare by typing the <command>dynare</command> at the Matlab&reg; or Octave prompt.</para>
 
-<sect1><title>Executing Dynare</title>
-
-<refentry id="Dynare">
+<refentry id="dynare">
   <refmeta>
     <refentrytitle>dynare</refentrytitle>
   </refmeta>
@@ -323,9 +299,12 @@ In the description of Dynare commands, the following conventions are observed:
   <refsynopsisdiv>
     <cmdsynopsis>
       <command>dynare</command>
-      <arg choice="plain">
+      <arg choice="req">
       <replaceable>FILENAME</replaceable>[.mod]
       </arg>
+      <arg>noclearall</arg>
+      <arg>savemacro</arg>
+      <arg>debug</arg>
     </cmdsynopsis>
   </refsynopsisdiv>
 
@@ -367,56 +346,43 @@ dynare ramst
 </programlisting>
 <para>or</para>
 <programlisting>
-dynare ramst.mod
+dynare ramst.mod savemacro
 </programlisting>
 </refsect1>
 </refentry>
-</sect1>
+</chapter>
 
-<sect1><title>General declarations</title>
+<chapter><title>Model file commands</title>
+<para>
+Dynare commands are either single instructions or a block of instructions. Each single instructions or block elements are terminated by <command>;</command>. Block of instructions are terminated by <command>end;</command>.
+</para>
 
-<para>General declarations of variables and parameters are made with the following commands:</para>
+<para>
+Most Dynare commands have arguments and several accept options, indicated in parentheses after the command keyword.
+</para>
+<para>
+In the description of Dynare commands, the following conventions are observed:
 <itemizedlist>
-<listitem><para><xref linkend='periods'/> (deprecated)</para></listitem>
+<listitem><para>optional arguments or options are indicated between square brackets <command>[]</command></para></listitem>
+<listitem><para>repreated arguments are indicated by ellipses <command>...</command></para></listitem>
+<listitem><para><command><replaceable>INTEGER</replaceable></command> indicates an integer number</para></listitem>
+<listitem><para><command><replaceable>DOUBLE</replaceable></command> indicates a double precision number. The following syntaxes are valid: 1.1e3, 1.1E3, 1.1d3, 1.1D3.</para></listitem>
+<listitem><para><command><replaceable>EXPRESSION</replaceable></command> indicates a mathematical expression valid in the underlying language (Matlab&reg; or GNU Octave)</para></listitem>
+<listitem><para><command><replaceable>VARIABLE_NAME</replaceable></command> indicates a variable name starting with an alphabetical character and can't contain ()+-*/^=!;:@#. or accentuated characters</para></listitem>
+<listitem><para><command><replaceable>PARAMETER_NAME</replaceable></command> indicates a parameter name starting with an alphabetical charcater and can't contain ()+-*/^=!;:@#. or accentuated characters</para></listitem>
+<listitem><para><command><replaceable>FILENAME</replaceable></command> indicates a file name valid under your operating system (Windows&reg;, GNU/Linux, ...)</para></listitem>
+</itemizedlist>
+</para>
+
+<sect1><title>Variable declarations</title>
+
+<para>Declarations of variables and parameters are made with the following commands:</para>
+<itemizedlist>
 <listitem><para><xref linkend='var'/></para></listitem>
 <listitem><para><xref linkend='varexo'/></para></listitem>
 <listitem><para><xref linkend='varexo_det'/></para></listitem>
 <listitem><para><xref linkend='parameters'/></para></listitem>
 </itemizedlist>
-
-<refentry id="periods">
-  <refmeta>
-    <refentrytitle>periods</refentrytitle>
-  </refmeta>
-
-  <refnamediv>
-    <refname>periods</refname>
-    <refpurpose>specifies the number of simulation periods</refpurpose>
-  </refnamediv>
-
-  <refsynopsisdiv>
-    <cmdsynopsis>
-      <command>periods</command> <arg choice="plain">
-      <replaceable>INTEGER</replaceable>;
-      </arg>
-    </cmdsynopsis>
-  </refsynopsisdiv>
-
-<refsect1><title>Description</title>
-<para>
-This command is now deprecated (but will still work for older model files). It is not necessary when no simulation is performed and is replaced by an option PERIODS in SIMUL and STOCH_SIMUL.
-</para>
-<para>
-Set the number of periods in the simulation. The periods are numbered from 1 to <replaceable>INTEGER</replaceable>. In perfect foresight simulations, it is assumed that all future events are perfectly known at the beginning of period 1.
-</para>
-</refsect1>
-
-<refsect1><title>Example</title>
-<programlisting>
-periods 100;
-</programlisting>
-</refsect1>
-</refentry>
 
 <refentry id="var">
   <refmeta>
@@ -587,6 +553,84 @@ bet = sqrt(2);
 </refentry>
 </sect1>
 
+<sect1><title>Other general declarations</title>
+
+<itemizedlist>
+<listitem><para><xref linkend='dsample'/></para></listitem>
+<listitem><para><xref linkend='periods'/> (deprecated)</para></listitem>
+<listitem><para><xref linkend='cutoff'/></para></listitem>
+<listitem><para><xref linkend='markowitz'/></para></listitem>
+</itemizedlist>
+
+<refentry id="dsample">
+  <refmeta>
+    <refentrytitle>dsample</refentrytitle>
+  </refmeta>
+
+  <refnamediv>
+    <refname>dsample</refname>
+    <refpurpose>reduces the number of periods considered in following output commands</refpurpose>
+  </refnamediv>
+</refentry>
+
+<refentry id="periods">
+  <refmeta>
+    <refentrytitle>periods</refentrytitle>
+  </refmeta>
+
+  <refnamediv>
+    <refname>periods</refname>
+    <refpurpose>specifies the number of simulation periods</refpurpose>
+  </refnamediv>
+
+  <refsynopsisdiv>
+    <cmdsynopsis>
+      <command>periods</command> <arg choice="plain">
+      <replaceable>INTEGER</replaceable>;
+      </arg>
+    </cmdsynopsis>
+  </refsynopsisdiv>
+
+<refsect1><title>Description</title>
+<para>
+This command is now deprecated (but will still work for older model files). It is not necessary when no simulation is performed and is replaced by an option PERIODS in SIMUL and STOCH_SIMUL.
+</para>
+<para>
+Set the number of periods in the simulation. The periods are numbered from 1 to <replaceable>INTEGER</replaceable>. In perfect foresight simulations, it is assumed that all future events are perfectly known at the beginning of period 1.
+</para>
+</refsect1>
+
+<refsect1><title>Example</title>
+<programlisting>
+periods 100;
+</programlisting>
+</refsect1>
+</refentry>
+
+<refentry id="cutoff">
+  <refmeta>
+    <refentrytitle>cutoff</refentrytitle>
+  </refmeta>
+
+  <refnamediv>
+    <refname>cutoff</refname>
+    <refpurpose>declares the cutoff for fast deterministic simulations</refpurpose>
+  </refnamediv>
+</refentry>
+
+<refentry id="markowitz">
+  <refmeta>
+    <refentrytitle>markowitz</refentrytitle>
+  </refmeta>
+
+  <refnamediv>
+    <refname>markowitz</refname>
+    <refpurpose>declares the markowitz criterion for fast deterministic simulations</refpurpose>
+  </refnamediv>
+</refentry>
+
+</sect1>
+
 <sect1><title>Model declaration</title>
 
 <para>The model is declared inside a <xref linkend="model"/> block.</para>
@@ -649,7 +693,7 @@ bet = sqrt(2);
 The equations of the model are written in a block delimited by <command>model;</command> and <command>end;</command>.
 </para>
 <para>
-There must be as many equations as there are endogenous variables in the model, except when used to compute the unconstrained optimal policy with <command>olr</command>. The lead and lag of the variables are written in parenthesis immediately after the variable name. Leads or lags of more than one period are allowed. All the functions available in Matlab, Scilab or Gauss, respectively, are recognized. Each equation must be terminated by a semicolon (;).
+There must be as many equations as there are endogenous variables in the model, except when used to compute the unconstrained optimal policy with <command>planner_objective</command>. The lead and lag of the variables are written in parenthesis immediately after the variable name. Leads or lags of more than one period are allowed. All the functions available in Matlab, Scilab or Gauss, respectively, are recognized. Each equation must be terminated by a semicolon (;).
 </para>
 <para>
 When the equations are written in homogenous form, it is possible to omit the "= 0" part and write only the left hand side of the equation.
@@ -711,6 +755,7 @@ For models with lags on more than one period, the command <xref linkend='histval
 </para>
 <itemizedlist>
 <listitem><para><xref linkend='initval'/></para></listitem>
+<listitem><para><xref linkend='initval_file'/></para></listitem>
 <listitem><para><xref linkend='endval'/></para></listitem>
 <listitem><para><xref linkend='histval'/></para></listitem>
 </itemizedlist>
@@ -769,6 +814,17 @@ end;
 steady;
 </programlisting>
 </refsect1>
+</refentry>
+
+<refentry id="initval_file">
+  <refmeta>
+    <refentrytitle>initval_file</refentrytitle>
+  </refmeta>
+
+  <refnamediv>
+    <refname>initval_file</refname>
+    <refpurpose>use an external file for specifying initial values (for steady-state computation or for simulations)</refpurpose>
+  </refnamediv>
 </refentry>
 
 <refentry id="endval">
@@ -921,7 +977,8 @@ If the variance of an exogenous variable is set to zero, this variable will appe
 </para>
 <itemizedlist>
 <listitem><para><xref linkend='shocks'/></para></listitem>
-<listitem><para><xref linkend='Sigma_e'/></para></listitem>
+<listitem><para><xref linkend='mshocks'/></para></listitem>
+<listitem><para><xref linkend='Sigma_e'/> (deprecated)</para></listitem>
 </itemizedlist>
 
 <refentry id="shocks">
@@ -1087,6 +1144,17 @@ forecast;
 </refsect1>
 </refentry>
 
+<refentry id="mshocks">
+  <refmeta>
+    <refentrytitle>mshocks</refentrytitle>
+  </refmeta>
+
+  <refnamediv>
+    <refname>mshocks</refname>
+    <refpurpose>specifies multiplicative shocks on deterministic or stochastic exogenous variables</refpurpose>
+  </refnamediv>
+</refentry>
+
 <refentry id="Sigma_e">
   <refmeta>
     <refentrytitle>Sigma_e</refentrytitle>
@@ -1156,6 +1224,7 @@ Dynare has special commands for the computation of the static equilibrium of the
 </para>
 <itemizedlist>
 <listitem><para><xref linkend='steady'/></para></listitem>
+<listitem><para><xref linkend='homotopy_setup'/></para></listitem>
 <listitem><para><xref linkend='check'/></para></listitem>
 <listitem><para><xref linkend='forecast'/></para></listitem>
 <listitem><para><xref linkend='simul'/></para></listitem>
@@ -1225,6 +1294,17 @@ See <xref linkend='initval'/> and <xref linkend='endval'/>.
 </para>
 </refsect1>
 </refentry>     
+
+<refentry id="homotopy_setup">
+  <refmeta>
+    <refentrytitle>homotopy_setup</refentrytitle>
+  </refmeta>
+
+  <refnamediv>
+    <refname>homotopy_setup</refname>
+    <refpurpose>instructs <xref linkend="steady"/> to use homotopy methods</refpurpose>
+  </refnamediv>
+</refentry>
 
 <refentry id="check">
   <refmeta>
@@ -1573,6 +1653,8 @@ Note that in order to avoid stochastic singularity, you must have at least as ma
 <listitem><para><xref linkend='estimated_params_bounds'/></para></listitem>
 <listitem><para><xref linkend='estimated_params_init'/></para></listitem>
 <listitem><para><xref linkend='estimation'/></para></listitem>
+<listitem><para><xref linkend='prior_analysis'/></para></listitem>
+<listitem><para><xref linkend='posterior_analysis'/></para></listitem>
 <listitem><para><xref linkend='unit_root_vars'/></para></listitem>
 </itemizedlist>
 
@@ -2120,6 +2202,28 @@ oo_.posterior_hpdsup.measurement_errors_corr.gdp_conso
 </refsect1>
 </refentry>
 
+<refentry id="prior_analysis">
+  <refmeta>
+    <refentrytitle>prior_analysis</refentrytitle>
+  </refmeta>
+
+  <refnamediv>
+    <refname>prior_analysis</refname>
+    <refpurpose>Prior distribution analysis</refpurpose>
+  </refnamediv>
+</refentry>
+
+<refentry id="posterior_analysis">
+  <refmeta>
+    <refentrytitle>posterior_analysis</refentrytitle>
+  </refmeta>
+
+  <refnamediv>
+    <refname>posterior_analysis</refname>
+    <refpurpose>Posterior distribution analysis</refpurpose>
+  </refnamediv>
+</refentry>
+
 <refentry id="unit_root_vars">
   <refmeta>
     <refentrytitle>unit_root_vars</refentrytitle>
@@ -2160,104 +2264,16 @@ oo_.posterior_hpdsup.measurement_errors_corr.gdp_conso
 </sect1>
 
 <sect1><title>Optimal policy</title>
-<para>Dynare has tools to compute optimal policies for quadratic objectives. You can either solve for optimal policy under commitment with <xref linkend='olr'/> or for optimal simple rule with <xref linkend='osr'/>.
+<para>Dynare has tools to compute optimal policies for quadratic objectives. You can either solve for optimal policy under commitment with <command>planner_objective</command> or for optimal simple rule with <xref linkend='osr'/>.
 </para>
 
 <itemizedlist>
-<listitem><para><xref linkend='olr'/></para></listitem>
-<listitem><para><xref linkend='olr_inst'/></para></listitem>
 <listitem><para><xref linkend='optim_weights'/></para></listitem>
 <listitem><para><xref linkend='osr'/></para></listitem>
 <listitem><para><xref linkend='osr_params'/></para></listitem>
+<listitem><para><xref linkend='planner_objective'/></para></listitem>
+<listitem><para><xref linkend='ramsey_policy'/></para></listitem>
 </itemizedlist>
-
-<refentry id="olr">
-  <refmeta>
-    <refentrytitle>olr</refentrytitle>
-  </refmeta>
-
-  <refnamediv>
-    <refname>olr</refname>
-    <refpurpose>computes optimal policy under commitment</refpurpose>
-  </refnamediv>
-
-  <refsynopsisdiv>
-    <cmdsynopsis>
-      <command>olr</command>
-      <arg>(<arg rep="repeat" choice="plain"><replaceable>OPTION</replaceable>,</arg>)</arg>
-      <arg choice="plain"><replaceable>VARIABLE_NAME</replaceable></arg>
-      <arg rep="repeat"><replaceable>VARIABLE_NAME</replaceable></arg>
-      <arg choice='plain'>;</arg>
-    </cmdsynopsis>
-  </refsynopsisdiv>
-
-<refsect1><title>OPTIONS</title>
-<itemizedlist spacing='compact'>
-<listitem><para><command>olr_beta=VALUE</command> sets the value of the discount factor for the intertemporal optimization problem</para></listitem>
-<listitem><para>All options for <xref linkend="stoch_simul"/></para></listitem>
-</itemizedlist>
-</refsect1>
-
-<refsect1><title>Description</title>
-<para>
-<command>olr</command> computes optimal policies under commitment (Ramsey plans) for linear--quadratic problems of the form
-</para>
-<blockquote><para>
-max<subscript>u</subscript> E<subscript>0</subscript>&Sigma;<subscript>t=0</subscript><superscript>&infin;</superscript>&beta;<superscript>t</superscript>(y'<subscript>t</subscript>W<subscript>11</subscript>y<subscript>t</subscript>+2y'<subscript>t</subscript>W<subscript>12</subscript>u<subscript>t</subscript>+u'<subscript>t</subscript>W<subscript>22</subscript>u<subscript>t</subscript>)
-</para>
-<para>s.t.</para>
-<para>
-  A<subscript>1</subscript>E<subscript>t</subscript>(y<subscript>t+1</subscript>)+A<subscript>2</subscript>y<subscript>t</subscript>+A<subscript>3</subscript>y<subscript>t-1</subscript>+Bu<subscript>t</subscript>+Ce<subscript>t</subscript>=0
-</para>
-</blockquote>
-<para>with</para>
-<itemizedlist>
-<listitem><para>y: endogenous variables</para></listitem>
-<listitem><para>u: policiy instrument</para></listitem>
-<listitem><para>e: exogenous stochastic shocks</para></listitem>
-<listitem><para>&beta;: discount factor</para></listitem>
-</itemizedlist>
-<para>The policy instruments must be listed with <xref linkend='olr_inst'/>.
-</para>
-<para>The quadratic objectives must be listed with <xref linkend='optim_weights'/>.
-</para>
-<para>Multipliers are automatically added to the model. Note, however, that the representation isn't minimal and that, in the solution, some multipliers could be sustituted off.
-</para>
-<para>
-Forward-looking endogenous variables don't need to be present in the dynamics of the economy.
-</para>
-<para>
-Dynare automatically builds the corresponding linear rational expectation model and solves it as with <xref linkend='stoch_simul'/>.
-</para>
-</refsect1>
-</refentry>
-
-<refentry id="olr_inst">
-  <refmeta>
-    <refentrytitle>olr_inst</refentrytitle>
-  </refmeta>
-
-  <refnamediv>
-    <refname>olr_inst</refname>
-    <refpurpose>declares instruments for optimal policy under commitment</refpurpose>
-  </refnamediv>
-
-  <refsynopsisdiv>
-    <cmdsynopsis>
-      <command>olr_inst</command>
-      <arg choice="plain"><replaceable>VARIABLE_NAME</replaceable></arg>
-      <arg rep="repeat"><replaceable>VARIABLE_NAME</replaceable></arg>
-      <arg choice='plain'>;</arg>
-    </cmdsynopsis>
-  </refsynopsisdiv>
-
-
-<refsect1><title>Description</title>
-<para>
-<command>olr_inst</command> declares instruments for optimal policy computed by <xref linkend='olr'/>.
-</para>
-</refsect1>
-</refentry>
 
 <refentry id="optim_weights">
   <refmeta>
@@ -2303,7 +2319,7 @@ Dynare automatically builds the corresponding linear rational expectation model 
   </refsynopsisdiv>
 <refsect1><title>Description</title>
 <para>
-<command>optim_weights</command> secifies the nonzero elements of the quadratic weight matrices for the objectives in <xref linkend='olr'/> and <xref linkend='osr'/>
+<command>optim_weights</command> secifies the nonzero elements of the quadratic weight matrices for the objectives in <xref linkend='osr'/>
 </para>
 </refsect1>
 </refentry>
@@ -2389,8 +2405,45 @@ This problem is solved using a numerical optimizer.
 </refsect1>
 </refentry>
 
+<refentry id="planner_objective">
+  <refmeta>
+    <refentrytitle>planner_objective</refentrytitle>
+  </refmeta>
+
+  <refnamediv>
+    <refname>planner_objective</refname>
+    <refpurpose>declares the policy maker objective, for use with <xref linkend="ramsey_policy"/></refpurpose>
+  </refnamediv>
+</refentry>
+
+<refentry id="ramsey_policy">
+  <refmeta>
+    <refentrytitle>ramsey_policy</refentrytitle>
+  </refmeta>
+
+  <refnamediv>
+    <refname>ramsey_policy</refname>
+    <refpurpose>computes the first order approximation of the policy that maximizes the policy maker objective function (see <xref linkend="planner_objective"/>) submitted to the constraints provided by the equilibrium path of the economy</refpurpose>
+  </refnamediv>
+</refentry>
 
 </sect1>
+
+<sect1><title>Sensitivity analysis</title>
+
+<refentry id="dynare_sensitivity">
+  <refmeta>
+    <refentrytitle>dynare_sensitivity</refentrytitle>
+  </refmeta>
+
+  <refnamediv>
+    <refname>dynare_sensitivity</refname>
+    <refpurpose>interface to the global sensitivity analysis (GSA) toolbox developed by the Joint Research Center of the European Commission</refpurpose>
+  </refnamediv>
+</refentry>
+
+</sect1>
+
 <sect1><title>Displaying and saving results</title>
 <para>
 Dynare has comments to plot the results of a simulation and to save the results.
@@ -2501,121 +2554,119 @@ In Matlab, variables saved with the <command>dynasave</command> command can be r
 </refentry>
 </sect1>
 
-<sect1><title>Conditional compilation</title>
-<para>
-Dynare has the following commands to choose which part of the *.mod file is executed. This is useful to maintain several versions of a model in the same *.mod file.
+<sect1><title>Macro-processing language</title>
+<para>It is possible to use "macro" commands in the *.mod file for doing the following tasks: source file inclusion, replicating blocks of equations through loops, conditional inclusion of code...</para>
+
+<para>Technically, this macro language is totally independent of the basic Dynare language, and is processed by a separate component of the Dynare pre-processor. The macro processor transforms a *.mod file with macros into a *.mod file without macros (doing expansions/inclusions), and then feeds it to the Dynare parser.
 </para>
 <itemizedlist>
+<listitem><para><xref linkend='include'/></para></listitem>
 <listitem><para><xref linkend='define'/></para></listitem>
-<listitem><para><xref linkend='if_elseif_else_end'/></para></listitem>
+<listitem><para><xref linkend='if_else_endif'/></para></listitem>
+<listitem><para><xref linkend='for_endfor'/></para></listitem>
+<listitem><para><xref linkend='echo'/></para></listitem>
+<listitem><para><xref linkend='error'/></para></listitem>
 </itemizedlist>
+
+<refentry id="include">
+  <refmeta>
+    <refentrytitle>@#include</refentrytitle>
+  </refmeta>
+
+  <refnamediv>
+    <refname>@#include</refname>
+    <refpurpose>includes another file</refpurpose>
+  </refnamediv>
+</refentry>
 
 <refentry id="define">
   <refmeta>
-    <refentrytitle>@define</refentrytitle>
+    <refentrytitle>@#define</refentrytitle>
   </refmeta>
 
   <refnamediv>
-    <refname>@define</refname>
-    <refpurpose>defines a macro</refpurpose>
+    <refname>@#define</refname>
+    <refpurpose>defines a macro-variable</refpurpose>
   </refnamediv>
-
-  <refsynopsisdiv>
-    <cmdsynopsis>
-      <command>@define</command>
-      <arg choice="plain">
-      <replaceable>VARIABLE_NAME</replaceable>
-      </arg>
-      <arg choice="plain">
-      <replaceable>INTEGER</replaceable>
-      </arg>
-      <arg choice="plain">;</arg>
-    </cmdsynopsis>
-  </refsynopsisdiv>
-<refsect1><title>Description</title>
-<para>
-<command>@define</command> defines a macro with name <replaceable>VARIABLE_NAME</replaceable> and value <replaceable>INTEGER</replaceable>. This macro can be used later in the *.mod file only in <command>@if</command> or <command>@elseif</command> statements. The macros can't be used to replace arbitrary part of codes like in C, for example.
-</para>
-</refsect1>
-
-<refsect1><title>Example</title>
-<para>
-<informalexample>
-<programlisting>
-  @define version 1;
-</programlisting>
-</informalexample>
-</para>
-</refsect1>
-
 </refentry>
 
-<refentry id="if_elseif_else_end">
+<refentry id="if_else_endif">
   <refmeta>
-    <refentrytitle>@if ... @elseif ... @else ... @end</refentrytitle>
+    <refentrytitle>@#if ... @#else ... @#endif</refentrytitle>
   </refmeta>
 
   <refnamediv>
-    <refname>@if ... @elseif ... @else ... @end</refname>
-    <refpurpose>defines conditional compilation of the *.mod file</refpurpose>
+    <refname>@#if ... @#else ... @#endif</refname>
+    <refpurpose>conditional inclusion of some part of the *.mod file</refpurpose>
   </refnamediv>
+</refentry>
 
-  <refsynopsisdiv>
-    <cmdsynopsis>
-      <command>@if</command>
-      <arg choice="plain">
-      <replaceable>VARIABLE_NAME</replaceable>
-      </arg>
-      <arg choice="plain">
-      <replaceable>LOGICAL_OPERATOR</replaceable>
-      </arg>
-      <arg choice="plain">
-      <replaceable>INTEGER</replaceable>
-      </arg>
-      <arg choice="plain">;</arg><sbr/>
-      <arg choice="plain">...</arg><sbr/>
-        
-    </cmdsynopsis>
-  </refsynopsisdiv>
-<refsect1><title>Description</title>
-<para><replaceable>LOGICAL_OPERATOR</replaceable> are
-<itemizedlist>
-<listitem><para>== equal</para></listitem>
-<listitem><para>!= not equal</para></listitem>
-<listitem><para>&lt; lesser than</para></listitem>
-<listitem><para>&gt; greater than</para></listitem>
-<listitem><para>&lt;= lesser or equal than</para></listitem>
-<listitem><para>&gt;= greater or equal than</para></listitem>
-</itemizedlist>
-</para>
+<refentry id="for_endfor">
+  <refmeta>
+    <refentrytitle>@#for ... @#endfor</refentrytitle>
+  </refmeta>
 
-<para>
-These commands let the user define which part of the *.mod file should be handled by Dynare
-</para>
-</refsect1>
+  <refnamediv>
+    <refname>@#for ... @#endfor</refname>
+    <refpurpose>loop for replications of portions of the *.mod file</refpurpose>
+  </refnamediv>
+</refentry>
 
-<refsect1><title>Example</title>
-<para>
-<informalexample>
-<programlisting>
-  @define version 1;
-  parameters alph bet;
-  alph = 0.3;
-  @if version == 1;
-    bet = 0.9;
-  @elseif version == 2;
-    bet = 0.95;
-  @else;
-    bet = 0.98;
-  @end;
-</programlisting>
-</informalexample>
-</para>
-</refsect1>
+<refentry id="echo">
+  <refmeta>
+    <refentrytitle>@#echo</refentrytitle>
+  </refmeta>
 
+  <refnamediv>
+    <refname>@#echo</refname>
+    <refpurpose>asks the preprocessor to display some message on standard output</refpurpose>
+  </refnamediv>
+</refentry>
+
+<refentry id="error">
+  <refmeta>
+    <refentrytitle>@#error</refentrytitle>
+  </refmeta>
+
+  <refnamediv>
+    <refname>@#error</refname>
+    <refpurpose>asks the preprocessor to display some error message on standard output and to abort</refpurpose>
+  </refnamediv>
 </refentry>
 
 </sect1>
+
+<sect1><title>Misc commands</title>
+
+<itemizedlist>
+  <listitem><para><xref linkend="bvar_density"/></para></listitem>
+  <listitem><para><xref linkend="bvar_forecast"/></para></listitem>
+</itemizedlist>
+
+<refentry id="bvar_density">
+  <refmeta>
+    <refentrytitle>bvar_density</refentrytitle>
+  </refmeta>
+
+  <refnamediv>
+    <refname>bvar_density</refname>
+    <refpurpose>computes the marginal density of an estimated BVAR model, using Minnesota priors</refpurpose>
+  </refnamediv>
+</refentry>
+
+<refentry id="bvar_forecast">
+  <refmeta>
+    <refentrytitle>bvar_forecast</refentrytitle>
+  </refmeta>
+
+  <refnamediv>
+    <refname>bvar_forecast</refname>
+    <refpurpose>computes in-sample or out-sample forecasts for an estimated BVAR model, using Minnesota priors</refpurpose>
+  </refnamediv>
+</refentry>
+
+</sect1>
+
 </chapter>
 
 <chapter><title>Examples</title>
