@@ -153,15 +153,21 @@ function [fval,cost_flag,ys,trend_coeff,info] = DsgeLikelihood(xparam1,gend,data
   %------------------------------------------------------------------------------
   kalman_algo = options_.kalman_algo;
   if options_.lik_init == 1		% Kalman filter
-      kalman_algo = 1;
+      if kalman_algo ~= 2
+          kalman_algo = 1;
+      end
       Pstar = lyapunov_symm(T,R*Q*R',options_.qz_criterium);
       Pinf	= [];
   elseif options_.lik_init == 2	% Old Diffuse Kalman filter
-      kalman_algo = 1;
+      if kalman_algo ~= 2
+          kalman_algo = 1;
+      end
       Pstar = 10*eye(np);
       Pinf = [];
   elseif options_.lik_init == 3	% Diffuse Kalman filter
-      kalman_algo = 3;
+      if kalman_algo ~= 4
+          kalman_algo = 3;
+      end
       [QT,ST] = schur(T);
       if exist('OCTAVE_VERSION') || matlab_ver_less_than('7.0.1')
           e1 = abs(my_ordeig(ST)) > 2-options_.qz_criterium;
