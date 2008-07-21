@@ -37,7 +37,7 @@ end
 
 if (~isempty(options_.unit_root_vars) || options_.diffuse_filter == 1)
     if options_.lik_init == 1
-        options_.lik_init = 3
+        options_.lik_init = 3;
     end
 end
 
