@@ -85,7 +85,7 @@ elseif pshape(indx) == 5  %/* UNIFORM PRIOR */
     abscissa = infbound:stepsize:supbound;
     dens = density(abscissa,a,b);  
 elseif pshape(indx) == 6  %/*  INVGAMMA PRIOR type 2 */        
-    density = inline('inv(gamma(nu/2))*(x.^(-.5(nu+2)))*((s/2)^(nu/2)).*exp(-s./(2*x))','x','s','nu');
+    density = inline('inv(gamma(nu/2))*(x.^(-.5*(nu+2)))*((s/2)^(nu/2)).*exp(-s./(2*x))','x','s','nu');
     nu = p2(indx);
     s  = p1(indx);
     a  = nu/2;
