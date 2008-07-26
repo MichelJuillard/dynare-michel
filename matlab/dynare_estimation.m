@@ -53,8 +53,6 @@ if options_.filtered_vars ~= 0 & options_.filter_step_ahead == 0,
 end
 if options_.filter_step_ahead ~= 0
     options_.nk = max(options_.filter_step_ahead);
-else
-    options_.nk = 0;
 end
 
 %% Add something to the parser ++>

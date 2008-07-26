@@ -109,7 +109,8 @@ function global_initialization()
   % Ramsey policy
   options_.planner_discount = 1.0;
   options_.ramsey_policy = 0;
-
+  options_.timeless = 0;
+  
   % estimation
   options_.MaxNumberOfBytes = 1e6;
   options_.MaximumNumberOfMegaBytes = 111;
@@ -143,6 +144,7 @@ function global_initialization()
   options_.mode_compute = 4;
   options_.mode_file = '';
   options_.moments_varendo = 0;
+  options_.nk = 1;
   options_.noconstant = 0;
   options_.nodiagnostic = 0;
   options_.posterior_mode_estimation = 1;

@@ -236,26 +236,25 @@ function [alphahat,etahat,epsilonhat,ahat,SteadyState,trend_coeff,aK,T,R,P,PK,d,
 						  Z,R1,Q,Pinf,Pstar, ...
                                                   data1,nobs,np,smpl);
               end
+              oo_.NewFilteredVariables = QT*filtered_values(data1,ahat,P,T,Z);
           else
               [alphahat,etahat,ahat,P,aK,PK,d,decomp] = DiffuseKalmanSmoother3_Z(ST, ...
 						  Z,R1,Q,Pinf,Pstar,data1,nobs,np,smpl);
           end
           alphahat = QT*alphahat;
           ahat = QT*ahat;
-          if options_.nk > 0
-              nk = options_.nk;
-              for jnk=1:nk
-                  aK(jnk,:,:) = QT*squeeze(aK(jnk,:,:));
-                  for i=1:size(PK,4)
-                      PK(jnk,:,:,i) = QT*squeeze(PK(jnk,:,:,i))*QT';
-                  end
-                  for i=1:size(decomp,4)
-                      decomp(jnk,:,:,i) = QT*squeeze(decomp(jnk,:,:,i));
-                  end
+          nk = options_.nk;
+          for jnk=1:nk
+              aK(jnk,:,:) = QT*squeeze(aK(jnk,:,:));
+              for i=1:size(PK,4)
+                  PK(jnk,:,:,i) = QT*squeeze(PK(jnk,:,:,i))*QT';
               end
-              for i=1:size(P,4)
-                  P(:,:,i) = QT*squeeze(P(:,:,i))*QT';
+              for i=1:size(decomp,4)
+                  decomp(jnk,:,:,i) = QT*squeeze(decomp(jnk,:,:,i));
               end
+          end
+          for i=1:size(P,4)
+              P(:,:,i) = QT*squeeze(P(:,:,i))*QT';
           end
       end
   end
