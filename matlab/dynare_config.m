@@ -21,6 +21,10 @@ if nargin
 end
 dynareroot = strrep(which('dynare.m'),'dynare.m','');
 
+if exist('AIM')==7  % Add path to G.Anderson AIM solver (added by GP July'08)
+    addpath([dynareroot '/AIM/']);
+end
+
 if exist('OCTAVE_VERSION')
     addpath([dynareroot '../mex/octave/'])
 else

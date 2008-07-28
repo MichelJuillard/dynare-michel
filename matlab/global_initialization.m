@@ -98,12 +98,16 @@ function global_initialization()
   options_.replic = 50;
   options_.drop = 100;
   options_.simul_algo = 0;
+  % if mjdgges.dll (or .mexw32 or ....) doesn't exit, matlab/qz is added to the path. 
+  % There exists now qz/mjdgges.m that contains the calls to the old Sims code 
+  % Hence, if mjdgges.m is visible exist(...)==2, 
+  % this means that the DLL isn't avaiable and use_qzdiv is set to 1
   if exist('mjdgges')==2
       options_.use_qzdiv = 1;
   else
       options_.use_qzdiv = 0;
   end
-  
+  options_.useAIM = 0; % i.e. by default do not use G.Anderson's AIM solver, use mjdgges instead
   
   
   % Ramsey policy
