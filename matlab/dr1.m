@@ -209,17 +209,36 @@ function [dr,info,M_,options_,oo_] = dr1(dr,task,M_,options_,oo_)
     b = jacobia_(:,k0);
     
     if M_.maximum_endo_lead == 0;  % backward models
-        a = jacobia_(:,nonzeros(k1'));
-        dr.ghx = zeros(size(a));
-        m = 0;
-        for i=M_.maximum_endo_lag:-1:1
-            k = nonzeros(M_.lead_lag_incidence(i,order_var));
-            dr.ghx(:,m+[1:length(k)]) = -b\a(:,k);
-            m = m+length(k);
-        end
-        if M_.exo_nbr
-            dr.ghu = -b\jacobia_(:,nz+1:end);
-        end
+        % If required, try Gary Anderson and G Moore AIM solver if not
+        % check only and if 1st order (added by GP July'08)
+        if (options_.useAIM == 1) && (task == 0) && (options_.order == 1) 
+            try
+                [dr,aimcode]=dynAIMsolver1(jacobia_,M_,dr);
+                if aimcode ~=1
+                    info(1) = aimcode;
+                    info(2) = 1.0e+8;
+                    return
+                end
+            catch
+                %warning('Problem with using AIM solver - Using Dynare solver instead');
+                disp('Problem with using AIM solver - Using Dynare solver instead');
+                options_.useAIM = 0; % and try mjdgges instead
+            end
+        end % end if useAIM and...
+        %else use original Dynare solver
+        if ~((options_.useAIM == 1) && (task == 0) && (options_.order == 1)) 
+            a = jacobia_(:,nonzeros(k1'));
+            dr.ghx = zeros(size(a));
+            m = 0;
+            for i=M_.maximum_endo_lag:-1:1
+                k = nonzeros(M_.lead_lag_incidence(i,order_var));
+                dr.ghx(:,m+[1:length(k)]) = -b\a(:,k);
+                m = m+length(k);
+            end
+            if M_.exo_nbr
+                dr.ghu = -b\jacobia_(:,nz+1:end);
+            end
+        end % if not use AIM or not...
         dr.eigval = eig(transition_matrix(dr));
         dr.rank = 0;
         if any(abs(dr.eigval) > options_.qz_criterium)
@@ -239,121 +258,177 @@ function [dr,info,M_,options_,oo_] = dr1(dr,task,M_,options_,oo_)
     else
         aa = jacobia_;
     end
-    a = aa(:,nonzeros(k1'));
-    b = aa(:,k0);
-    b10 = b(1:nstatic,1:nstatic);
-    b11 = b(1:nstatic,nstatic+1:end);
-    b2 = b(nstatic+1:end,nstatic+1:end);
-    if any(isinf(a(:)))
-        info = 1;
-        return
-    end
-    
-    % buildind D and E
-    d = zeros(nd,nd) ;
-    e = d ;
-    
-    k = find(kstate(:,2) >= M_.maximum_endo_lag+2 & kstate(:,3));
-    d(1:sdyn,k) = a(nstatic+1:end,kstate(k,3)) ;
-    k1 = find(kstate(:,2) == M_.maximum_endo_lag+2);
-    e(1:sdyn,k1) =  -b2(:,kstate(k1,1)-nstatic);
-    k = find(kstate(:,2) <= M_.maximum_endo_lag+1 & kstate(:,4));
-    e(1:sdyn,k) = -a(nstatic+1:end,kstate(k,4)) ;
-    k2 = find(kstate(:,2) == M_.maximum_endo_lag+1);
-    k2 = k2(~ismember(kstate(k2,1),kstate(k1,1)));
-    d(1:sdyn,k2) = b2(:,kstate(k2,1)-nstatic);
-    
-    if ~isempty(kad)
-        for j = 1:size(kad,1)
-            d(sdyn+j,kad(j)) = 1 ;
-            e(sdyn+j,kae(j)) = 1 ;
+
+    % If required, try Gary Anderson and G Moore AIM solver, that is, if not check
+    % only and if 1st order (added by GP July'08)
+    if (options_.useAIM == 1) && (task == 0) && (options_.order == 1) 
+        try
+            [dr,aimcode]=dynAIMsolver1(aa,M_,dr);
+
+            % reuse some of the bypassed code and tests that may be needed 
+            
+            if aimcode ~=1
+                info(1) = aimcode;
+                info(2) = 1.0e+8;
+                return
+            end
+            [A,B] =transition_matrix(dr);
+            dr.eigval = eig(A);
+%            if any(abs(dr.eigval) > options_.qz_criterium)
+%                temp = sort(abs(dr.eigval));
+%                nba = nnz(abs(dr.eigval) > options_.qz_criterium);
+%                temp = temp(nd-nba+1:nd)-1-options_.qz_criterium;
+%                info(1) = 3;
+%                info(2) = temp'*temp;
+%                return
+%            end
+            sdim = sum( abs(dr.eigval) < options_.qz_criterium );
+            nba = nd-sdim;
+
+            nyf = sum(kstate(:,2) > M_.maximum_endo_lag+1);
+            if nba ~= nyf
+                temp = sort(abs(dr.eigval));
+                if nba > nyf
+                    temp = temp(nd-nba+1:nd-nyf)-1-options_.qz_criterium;
+                    info(1) = 3
+                elseif nba < nyf;
+                    temp = temp(nd-nyf+1:nd-nba)-1-options_.qz_criterium;
+                    info(1) = 4
+                end
+                info(2) = temp'*temp;
+                return
+            end
+        catch
+            %warning('Problem with using AIM solver - Using Dynare solver instead');
+            disp('Problem with using AIM solver - Using Dynare solver instead');
+            options_.useAIM = 0; % and then try mjdgges instead
         end
-    end
-    
-    [ss,tt,w,sdim,dr.eigval,info1] = mjdgges(e,d,options_.qz_criterium);
-    
-    if info1
-        info(1) = 2;
-        info(2) = info1;
-        return
-    end
-    
-    nba = nd-sdim;
-    
-    nyf = sum(kstate(:,2) > M_.maximum_endo_lag+1);
-    
-    if task == 1
-        dr.rank = rank(w(1:nyf,nd-nyf+1:end));
-        % Under Octave, eig(A,B) doesn't exist, and
-        % lambda = qz(A,B) won't return infinite eigenvalues
-        if ~exist('OCTAVE_VERSION')
-            dr.eigval = eig(e,d);
+    end % end if useAIM and...
+    %else  % use original Dynare solver
+    if  ~((options_.useAIM == 1)&& (task == 0) && (options_.order == 1)) % || isempty(options_.useAIM)  
+        a = aa(:,nonzeros(k1'));
+        b = aa(:,k0);
+        b10 = b(1:nstatic,1:nstatic);
+        b11 = b(1:nstatic,nstatic+1:end);
+        b2 = b(nstatic+1:end,nstatic+1:end);
+        if any(isinf(a(:)))
+            info = 1;
+            return
         end
-        return
-    end
-    
-    if nba ~= nyf
-        temp = sort(abs(dr.eigval));
-        if nba > nyf
-            temp = temp(nd-nba+1:nd-nyf)-1-options_.qz_criterium;
-            info(1) = 3;
-        elseif nba < nyf;
-            temp = temp(nd-nyf+1:nd-nba)-1-options_.qz_criterium;
-            info(1) = 4;
+
+        % buildind D and E
+        d = zeros(nd,nd) ;
+        e = d ;
+
+        k = find(kstate(:,2) >= M_.maximum_endo_lag+2 & kstate(:,3));
+        d(1:sdyn,k) = a(nstatic+1:end,kstate(k,3)) ;
+        k1 = find(kstate(:,2) == M_.maximum_endo_lag+2);
+        e(1:sdyn,k1) =  -b2(:,kstate(k1,1)-nstatic);
+        k = find(kstate(:,2) <= M_.maximum_endo_lag+1 & kstate(:,4));
+        e(1:sdyn,k) = -a(nstatic+1:end,kstate(k,4)) ;
+        k2 = find(kstate(:,2) == M_.maximum_endo_lag+1);
+        k2 = k2(~ismember(kstate(k2,1),kstate(k1,1)));
+        d(1:sdyn,k2) = b2(:,kstate(k2,1)-nstatic);
+
+        if ~isempty(kad)
+            for j = 1:size(kad,1)
+                d(sdyn+j,kad(j)) = 1 ;
+                e(sdyn+j,kae(j)) = 1 ;
+            end
         end
-        info(2) = temp'*temp;
-        return
-    end
-    
-    np = nd - nyf;
-    n2 = np + 1;
-    n3 = nyf;
-    n4 = n3 + 1;
-    % derivatives with respect to dynamic state variables
-    % forward variables
-    w1 =w(1:n3,n2:nd);
-    if condest(w1) > 1e9;
-        info(1) = 5;
-        info(2) = condest(w1);
-        return;
-    else
-        gx = -w1'\w(n4:nd,n2:nd)';
-    end  
-    
-    % predetermined variables
-    hx = w(1:n3,1:np)'*gx+w(n4:nd,1:np)';
-    hx = (tt(1:np,1:np)*hx)\(ss(1:np,1:np)*hx);
-    
-    k1 = find(kstate(n4:nd,2) == M_.maximum_endo_lag+1);
-    k2 = find(kstate(1:n3,2) == M_.maximum_endo_lag+2);
-    dr.ghx = [hx(k1,:); gx(k2(nboth+1:end),:)];
-    
-    %lead variables actually present in the model
-    j3 = nonzeros(kstate(:,3));
-    j4  = find(kstate(:,3));
-    % derivatives with respect to exogenous variables
-    if M_.exo_nbr
-        fu = aa(:,nz+(1:M_.exo_nbr));
-        a1 = b;
-        aa1 = [];
+
+        % 1) if mjdgges.dll (or .mexw32 or ....) doesn't exit, 
+        % matlab/qz is added to the path. There exists now qz/mjdgges.m that 
+        % contains the calls to the old Sims code 
+        % 2) In  global_initialization.m, if mjdgges.m is visible exist(...)==2, 
+        % this means that the DLL isn't avaiable and use_qzdiv is set to 1
+
+        [ss,tt,w,sdim,dr.eigval,info1] = mjdgges(e,d,options_.qz_criterium);
+
+        if info1
+            info(1) = 2;
+            info(2) = info1;
+            return
+        end
+
+        nba = nd-sdim;
+
+        nyf = sum(kstate(:,2) > M_.maximum_endo_lag+1);
+
+        if task == 1
+            dr.rank = rank(w(1:nyf,nd-nyf+1:end));
+            % Under Octave, eig(A,B) doesn't exist, and
+            % lambda = qz(A,B) won't return infinite eigenvalues
+            if ~exist('OCTAVE_VERSION')
+                dr.eigval = eig(e,d);
+            end
+            return
+        end
+
+        if nba ~= nyf
+            temp = sort(abs(dr.eigval));
+            if nba > nyf
+                temp = temp(nd-nba+1:nd-nyf)-1-options_.qz_criterium;
+                info(1) = 3
+            elseif nba < nyf;
+                temp = temp(nd-nyf+1:nd-nba)-1-options_.qz_criterium;
+                info(1) = 4;
+            end
+            info(2) = temp'*temp;
+            return
+        end
+
+        np = nd - nyf;
+        n2 = np + 1;
+        n3 = nyf;
+        n4 = n3 + 1;
+        % derivatives with respect to dynamic state variables
+        % forward variables
+        w1 =w(1:n3,n2:nd);
+        if condest(w1) > 1e9;
+            info(1) = 5;
+            info(2) = condest(w1);
+            return;
+        else
+            gx = -w1'\w(n4:nd,n2:nd)';
+        end  
+
+        % predetermined variables
+        hx = w(1:n3,1:np)'*gx+w(n4:nd,1:np)';
+        hx = (tt(1:np,1:np)*hx)\(ss(1:np,1:np)*hx);
+
+        k1 = find(kstate(n4:nd,2) == M_.maximum_endo_lag+1);
+        k2 = find(kstate(1:n3,2) == M_.maximum_endo_lag+2);
+        dr.ghx = [hx(k1,:); gx(k2(nboth+1:end),:)];
+
+        %lead variables actually present in the model
+        j3 = nonzeros(kstate(:,3));
+        j4  = find(kstate(:,3));
+        % derivatives with respect to exogenous variables
+        if M_.exo_nbr
+            fu = aa(:,nz+(1:M_.exo_nbr));
+            a1 = b;
+            aa1 = [];
+            if nstatic > 0
+                aa1 = a1(:,1:nstatic);
+            end
+            dr.ghu = -[aa1 a(:,j3)*gx(j4,1:npred)+a1(:,nstatic+1:nstatic+ ...
+                                                     npred) a1(:,nstatic+npred+1:end)]\fu;
+        else
+            dr.ghu = [];
+        end
+
+        % static variables
         if nstatic > 0
-            aa1 = a1(:,1:nstatic);
+            temp = -a(1:nstatic,j3)*gx(j4,:)*hx;
+            j5 = find(kstate(n4:nd,4));
+            temp(:,j5) = temp(:,j5)-a(1:nstatic,nonzeros(kstate(:,4)));
+            temp = b10\(temp-b11*dr.ghx);
+            dr.ghx = [temp; dr.ghx];
+            temp = [];
         end
-        dr.ghu = -[aa1 a(:,j3)*gx(j4,1:npred)+a1(:,nstatic+1:nstatic+ ...
-                                                 npred) a1(:,nstatic+npred+1:end)]\fu;
-    else
-        dr.ghu = [];
-    end
-    
-    % static variables
-    if nstatic > 0
-        temp = -a(1:nstatic,j3)*gx(j4,:)*hx;
-        j5 = find(kstate(n4:nd,4));
-        temp(:,j5) = temp(:,j5)-a(1:nstatic,nonzeros(kstate(:,4)));
-        temp = b10\(temp-b11*dr.ghx);
-        dr.ghx = [temp; dr.ghx];
-        temp = [];
-    end
+    end % if not use AIM and ....
+    % End of if... and if not... main AIM Blocks, continue as per usual...
     
     if options_.loglinear == 1
         k = find(dr.kstate(:,2) <= M_.maximum_endo_lag+1);
@@ -365,13 +440,15 @@ function [dr,info,M_,options_,oo_] = dr1(dr,task,M_,options_,oo_)
         dr.ghu = repmat(1./dr.ys(k1),1,size(dr.ghu,2)).*dr.ghu;
     end
     
-    %% Necessary when using Sims' routines for QZ
-    if options_.use_qzdiv
-        gx = real(gx);
-        hx = real(hx);
-        dr.ghx = real(dr.ghx);
-        dr.ghu = real(dr.ghu);
-    end
+    if  ~((options_.useAIM == 1) && (options_.order == 1)) % if not use AIM ...
+        %% Necessary when using Sims' routines for QZ
+        if options_.use_qzdiv
+            gx = real(gx);
+            hx = real(hx);
+            dr.ghx = real(dr.ghx);
+            dr.ghu = real(dr.ghu);
+        end
+    end % if not use AIM 
     
     %exogenous deterministic variables
     if M_.exo_det_nbr > 0
