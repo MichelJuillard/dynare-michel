@@ -1,0 +1,409 @@
+<html xmlns:mwsh="http://www.mathworks.com/namespace/mcode/v1/syntaxhighlight.dtd">
+   <head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+      <!--
+This HTML is auto-generated from an M-file.
+To make changes, update the M-file and republish this document.
+      -->
+      <title>Dunare AIM Solver Subsystem</title>
+      <meta name="generator" content="MATLAB 7.1">
+      <meta name="date" content="2008-07-29">
+      <meta name="m-file" content="Dynare AIM use Doc"><style>
+
+body {
+  background-color: white;
+  margin:10px;
+}
+
+h1 {
+  color: #990000; 
+  font-size: x-large;
+}
+
+h2 {
+  color: #990000;
+  font-size: medium;
+}
+
+/* Make the text shrink to fit narrow windows, but not stretch too far in 
+wide windows.  On Gecko-based browsers, the shrink-to-fit doesn't work. */ 
+p,h1,h2,div.content div {
+  /* for MATLAB's browser */
+  width: 600px;
+  /* for Mozilla, but the "width" tag overrides it anyway */
+  max-width: 600px;
+  /* for IE */
+  width:expression(document.body.clientWidth > 620 ? "600px": "auto" );
+}
+
+pre.codeinput {
+  background: #EEEEEE;
+  padding: 10px;
+}
+
+span.keyword {color: #0000FF}
+span.comment {color: #228B22}
+span.string {color: #A020F0}
+span.untermstring {color: #B20000}
+span.syscmd {color: #B28C00}
+
+pre.codeoutput {
+  color: #666666;
+  padding: 10px;
+}
+
+pre.error {
+  color: red;
+}
+
+p.footer {
+  text-align: right;
+  font-size: xx-small;
+  font-weight: lighter;
+  font-style: italic;
+  color: gray;
+}
+
+  </style></head>
+   <body>
+      <div class="content">
+         <h1>Dunare AIM Solver Subsystem</h1>
+         <introduction></introduction>
+         <h2>Contents</h2>
+         <div>
+            <ul>
+               <li><a href="#1">AIM Solver Subsystem</a></li>
+               <li><a href="#2">APPENDIX 1: AIM System SPecification and Dynare Mapping</a></li>
+               <li><a href="#11">APPENDIX 2: dynAIMsolver1 Function Specification</a></li>
+            </ul>
+         </div>
+         <h2>AIM Solver Subsystem<a name="1"></a></h2>
+         <p>The AIM subsystem in the AIM subdirectory of the main Dynare matlab directory contains Matlab functions necessary for using
+            Gary Anderson's AIM 1st order solver as an alternative to Dynare's default mjdgges solver (see  <a href="http://www.federalreserve.gov/Pubs/oss/oss4/aimindex.html">http://www.federalreserve.gov/Pubs/oss/oss4/aimindex.html</a> ).
+         </p>
+         <p>It cosists of:</p>
+         <div>
+            <ul>
+               <li>New Dynare function <b>dynAIMsolver1(jacobia_, M_, dr)</b> which is called from <b>dr1.m</b> and which maps Dynare system to the AIM package subsystem. It then derives the solution for gy=dr.hgx and gu=dr.hgu from
+                  the AIM outputs. ("1" in the title is for 1st order solver).
+               </li>
+            </ul>
+         </div>
+         <div>
+            <ul>
+               <li>A subset of Matlab routines from Gary Anderson's own AIM package needed to compute and solve system passed on and returned
+                  by dynAIMsolver1 whose names start with SP.. of which <b>SPAmalg.m</b> is the main driver:
+               </li>
+            </ul>
+         </div>
+         <div>
+            <ul>
+               <li>SPAmalg.m</li>
+               <li>SPBuild_a.m</li>
+               <li>SPSparse.m</li>
+               <li>SPShiftright.m</li>
+               <li>SPExact_shift.m</li>
+               <li>SPNumeric_shift.m</li>
+               <li>SPObstruct.m</li>
+               <li>SPSparseSPBuild_a.m</li>
+               <li>SPEigQZ.m</li>
+               <li>SPEigensystem.m</li>
+               <li>SPReduced_form</li>
+               <li>SPCopy_w.m</li>
+               <li>SPAimerr.m</li>
+            </ul>
+         </div>
+         <p>The path to the AIM directory, if exists, is added by <b>dynare_config.m</b> using addpath
+         </p>
+         <p><b>USE:</b></p>
+         <p>Dynare DR1.m tries to invoke AIM solver instead default mjdgges if options_.useAIM == 1 is set and, if not check only, and
+            if 1st order solution is needed, i.e.:
+         </p><pre>  if (options_.useAIM == 1) &amp;&amp; (task == 0) &amp;&amp; (options_.order == 1)</pre><p>For a start, options_.useAIM = 0 is set by default in <b>global_initialization.m</b> so that system uses mjdgges by default.
+         </p>
+         <p>If AIM is to be used, options_.useAIM = 1 needs to be set either in the model <a href="modelname">modelname</a>.mod file, before invoking, estimate and/or stoch_simul, or by issuing appropriate command for estimate and/or stoch_simul.
+         </p>
+         <p><b>RELEASE NOTES:</b></p>
+         <p>In the current implementation, as of July 2008, only first order solution is supported and handling of exceptions is rather
+            fundamental and, in particular, when Blanchard and Kahn conditions are not met, only a large penalty value 1.0e+8 is being
+            set.
+         </p>
+         <p>Hence, system may not coverge or the resluts may not be accurate if there were many messages like</p>
+         <div>
+            <ul>
+               <li>"Error in AIM: aimcode=4 : Aim: too few big roots", or</li>
+               <li>"Error in AIM: aimcode=3 : Aim: too many big roots"</li>
+            </ul>
+         </div>
+         <p>especially when issued close to the point of convergence.</p>
+         <p>However, if other exceptions occur and aimcode (see codes below) is higher than 5, the system resets options_.useAIM = 0 and
+            tries to use mjdgges instead.
+         </p>
+         <h2>APPENDIX 1: AIM System SPecification and Dynare Mapping<a name="2"></a></h2>
+         <p>AIM System for thau lags and theta leads, and:</p>
+         <p><img vspace="5" hspace="5" src="Dynare AIM use Doc_eq5664.png"> </p>
+         <p><img vspace="5" hspace="5" src="Dynare AIM use Doc_eq45937.png"> </p>
+         <p>where xt+i is system vectors at time t for all lag/lead t+i and zt is vector of exogenous shocks.</p>
+         <p>The AIM input is array of matrices <b>H</b>:
+         </p>
+         <p><img vspace="5" hspace="5" src="Dynare AIM use Doc_eq45249.png"> </p>
+         <p>and its solution given as:</p>
+         <p><img vspace="5" hspace="5" src="Dynare AIM use Doc_eq69844.png"> </p>
+         <p>where Xt is matrix of vectors of all current system variables and forward looking leads xi for i=t,...,t+theta:</p>
+         <p><img vspace="5" hspace="5" src="Dynare AIM use Doc_eq235275.png"> </p>
+         <p>and AIM output in the form of endogenous transition matrix <b>bb</b>:
+         </p>
+         <p><img vspace="5" hspace="5" src="Dynare AIM use Doc_eq25810.png"> </p>
+         <p>and, for simple case of one lag system, the  matrix Phi derived as:</p>
+         <p><img vspace="5" hspace="5" src="Dynare AIM use Doc_eq13129.png"> </p>
+         <p>For more lags, the phi equation becomes more complicated (see documentation on G.Anderson's site above).</p>
+         <p><b>Dynare AIM Mapping - input</b></p>
+         <p>For Dynare jacobian = [fy'-tau...  fy'i ... fy'+theta  fu'] - where -tau and +theta are subscripts, we have that its subset
+            without exogenous term fu' and expanded with zero columns represents <b>H</b>, i.e.:
+         </p>
+         <p><img vspace="5" hspace="5" src="Dynare AIM use Doc_eq372007.png"> </p>
+         <p>and for exogenous shocks terms:</p>
+         <p><img vspace="5" hspace="5" src="Dynare AIM use Doc_eq3403.png"> </p>
+         <p><b>Output</b> Dynare solution output:
+         </p>
+         <p><img vspace="5" hspace="5" src="Dynare AIM use Doc_eq76947.png"> </p>
+         <p>where Xt is again matrix of vectors all current system variables and forward looking leads xi for i=t,..., t+theta, is mapped
+            so that:
+         </p>
+         <div>
+            <ul>
+               <li>gy (or dr.ghx) is a reordered subset of AIM <b>SPAmalg.m</b> output <b>bb</b> without zero columns, and,
+               </li>
+               <li>gu (or dr.ghu) is derived from reordered AIM <b>SPObstruct.m</b> output as phi in:
+               </li>
+            </ul>
+         </div>
+         <p><img vspace="5" hspace="5" src="Dynare AIM use Doc_eq33587.png"> </p>
+         <h2>APPENDIX 2: dynAIMsolver1 Function Specification<a name="11"></a></h2>
+         <p><b>function [dr,aimcode]=dynAIMsolver1(jacobia_,M_,dr)</b></p>
+         <p><b>INPUTS</b></p>
+         <div>
+            <ul>
+               <li>jacobia_  - [matrix]           1st order derivative of the model</li>
+               <li>dr        - [matlab structure] Decision rules for stochastic simulations.</li>
+               <li>M_        - [matlab structure] Definition of the model.</li>
+            </ul>
+         </div>
+         <p><b>OUTPUTS</b></p>
+         <div>
+            <ul>
+               <li> dr         [matlab structure] Decision rules for stochastic simulations.</li>
+               <li> aimcode    [integer]          status</li>
+            </ul>
+         </div><pre>aimcode status is resolved by calling AIMerr as</pre><div>
+            <ul>
+               <li>    (c==1)  e='Aim: unique solution.';</li>
+               <li>    (c==2)  e='Aim: roots not correctly computed by real_schur.';</li>
+               <li>    (c==3)  e='Aim: too many big roots.';</li>
+               <li>    (c==35) e='Aim: too many big roots, and q(:,right) is singular.';</li>
+               <li>    (c==4)  e='Aim: too few big roots.';</li>
+               <li>    (c==45) e='Aim: too few big roots, and q(:,right) is singular.';</li>
+               <li>    (c==5)  e='Aim: q(:,right) is singular.';</li>
+               <li>    (c==61) e='Aim: too many exact shiftrights.';</li>
+               <li>    (c==62) e='Aim: too many numeric shiftrights.';</li>
+               <li>    else    e='Aimerr: return code not properly specified';</li>
+            </ul>
+         </div>
+         <p><b>SPECIAL REQUIREMENTS</b></p>
+         <p>Dynare use:</p><pre>     1) the lognormal block in DR1 is being invoked for some models and changing
+     values of ghx and ghy. We need to return the AIM output
+     values before that block and run the block with the current returned values
+     of gy (i.e. dr.ghx) and gu (dr.ghu) if it is needed even when the AIM is used
+     (it does not depend on mjdgges output).</pre><pre>     2) for forward looking models, passing into dynAIMsolver aa ={Q'|1}*jacobia_
+     can produce ~ one order closer results to the Dynare solutiion
+     then when if plain jacobia_ is passed,
+     i.e. diff &lt; e-14 for aa and diff &lt; *e-13 for jacobia_ if Q' is used.</pre><p>GP July 2008</p>
+         <p>part of DYNARE, copyright Dynare Team (1996-2008) Gnu Public License.</p>
+         <p class="footer"><br>
+            Published with MATLAB&reg; 7.1<br></p>
+      </div>
+      <!--
+##### SOURCE BEGIN #####
+%% Dunare AIM Solver Subsystem 
+
+%% AIM Solver Subsystem
+% The AIM subsystem in the AIM subdirectory of the main Dynare matlab
+% directory contains Matlab functions necessary for using
+% Gary Anderson's AIM 1st order solver as an alternative to Dynare's default mjdgges solver (see  http://www.federalreserve.gov/Pubs/oss/oss4/aimindex.html ). 
+%
+% It cosists of:
+%
+% * New Dynare function *dynAIMsolver1(jacobia_, M_, dr)* which is called
+% from *dr1.m* and which maps Dynare system to the AIM package subsystem. 
+% It then derives the solution for gy=dr.hgx and
+% gu=dr.hgu from the AIM outputs. ("1" in the title is for 1st order
+% solver).
+%
+% * A subset of Matlab routines from Gary Anderson's own AIM package needed to compute
+% and solve system passed on and returned by dynAIMsolver1 whose names start with SP.. 
+% of which *SPAmalg.m* is the main driver:
+%
+% * SPAmalg.m
+% * SPBuild_a.m
+% * SPSparse.m
+% * SPShiftright.m
+% * SPExact_shift.m
+% * SPNumeric_shift.m
+% * SPObstruct.m
+% * SPSparseSPBuild_a.m
+% * SPEigQZ.m
+% * SPEigensystem.m
+% * SPReduced_form
+% * SPCopy_w.m
+% * SPAimerr.m
+%
+% The path to the AIM directory, if exists, is added by *dynare_config.m* using addpath
+%
+% *USE:*
+%
+% Dynare DR1.m tries to invoke AIM solver instead default mjdgges if options_.useAIM == 1 is set and, if not check only, and if 1st order solution is needed, i.e.:
+%
+%    if (options_.useAIM == 1) && (task == 0) && (options_.order == 1) 
+%
+% For a start, options_.useAIM = 0 is set by default in *global_initialization.m* so that system uses mjdgges by default. 
+%
+% If AIM is to be used, options_.useAIM = 1 needs to be set either in the model <modelname>.mod file, before invoking, estimate and/or stoch_simul, or by issuing appropriate command for estimate and/or stoch_simul. 
+%
+% *RELEASE NOTES:* 
+%
+% In the current implementation, as of July 2008, only first order solution is supported and handling of exceptions is rather fundamental and, in particular, when Blanchard and Kahn conditions are not met, only a large penalty value 1.0e+8 is being set.
+%
+% Hence, system may not coverge or the resluts may not be accurate if there were many messages like
+%
+% * "Error in AIM: aimcode=4 : Aim: too few big roots", or
+% * "Error in AIM: aimcode=3 : Aim: too many big roots"
+%
+% especially when issued close to the point of convergence.
+%
+% However, if other exceptions occur and aimcode (see codes below) is higher than 5, the system resets options_.useAIM = 0 and tries to use mjdgges instead.
+
+
+%% APPENDIX 1: AIM System SPecification and Dynare Mapping
+%%
+% AIM System for thau lags and theta leads, and:
+% 
+% $$i=-\tau...+\theta $$ 
+% 
+%%
+% 
+% $$ \sum_{i=-\tau}^\theta(H_i*x_{t+i})= \Psi*z_t$$
+%
+%%
+% where xt+i is system vectors at time t for all lag/lead t+i and zt is vector
+% of exogenous shocks.
+%
+% The AIM input is array of matrices *H*:
+%
+% $$H=[H_{-\tau} \ ...\  H_i \ ...\ H_{+\theta}] $$
+%
+% and its solution given as:
+%%
+% 
+% $$ X_t=\sum_{i=-\tau}^{-1}(B_i*x_{t+i}) + \phi*\Psi*z_t$$
+%
+% where Xt is matrix of vectors of all current system variables and forward
+% looking leads xi for i=t,...,t+theta:
+%
+% $$X_t= \left[\begin{array}{c} {x_{t+\theta} } \\ {...} \\ {x_{t} }
+% \end{array}\right]$$
+%
+%%
+% and AIM output in the form of endogenous transition matrix *bb*:
+%%
+%
+% $$bb=[B_{-\tau}...  B_i \ ...\ B_{-1}]$$ 
+%
+% and, for simple case of one lag system, the  matrix Phi derived as:
+%
+% $$ \phi=(H_O+H_1*B_{-1})^{-1}$$
+% 
+%%
+% For more lags, the phi equation becomes more complicated (see documentation on G.Anderson's site above).
+%
+% *Dynare AIM Mapping - input*
+%
+% For Dynare jacobian = [fy'-tau...  fy'i ... fy'+theta  fu'] - where -tau and +theta are subscripts, 
+% we have that its subset without exogenous term fu' and expanded with zero columns represents *H*, i.e.:
+%
+%%
+% 
+% $$ [f_{y,-\tau}' \ ...\ f_{y,i}' \ ...\  f_{y,+\theta}']=[H_{-\tau} \
+% ...\  H_i \ ...\ H_{+\theta}] $$
+%
+% and for exogenous shocks terms: 
+%
+% $$ f_u' = - \Psi$$
+% 
+% *Output*
+% Dynare solution output:
+% 
+% $$ X_t = \sum_{i=-\tau}^{-1}(g_{y,t+i}*x_{t+i})+ g_u*z_t $$
+%
+% where Xt is again matrix of vectors all current system variables and forward looking leads
+% xi for i=t,..., t+theta, is mapped so that:
+%
+% * gy (or dr.ghx) is a reordered subset of AIM *SPAmalg.m* output *bb*
+% without zero columns, and,
+% * gu (or dr.ghu) is derived from reordered AIM *SPObstruct.m* output as phi in:
+%
+% $$dr.ghu=g_u= - \phi * \Psi= - \phi * f_u'$$
+%
+
+%% APPENDIX 2: dynAIMsolver1 Function Specification
+
+%%
+% *function [dr,aimcode]=dynAIMsolver1(jacobia_,M_,dr)* 
+%
+% *INPUTS*  
+% 
+% * jacobia_  - [matrix]           1st order derivative of the model
+% * dr        - [matlab structure] Decision rules for stochastic simulations.
+% * M_        - [matlab structure] Definition of the model.
+%     
+% *OUTPUTS*
+%%
+% *  dr         [matlab structure] Decision rules for stochastic simulations.
+% *  aimcode    [integer]          status
+%
+%  aimcode status is resolved by calling AIMerr as
+% 
+% *     (c==1)  e='Aim: unique solution.';
+% *     (c==2)  e='Aim: roots not correctly computed by real_schur.';
+% *     (c==3)  e='Aim: too many big roots.';
+% *     (c==35) e='Aim: too many big roots, and q(:,right) is singular.';
+% *     (c==4)  e='Aim: too few big roots.';
+% *     (c==45) e='Aim: too few big roots, and q(:,right) is singular.';
+% *     (c==5)  e='Aim: q(:,right) is singular.';
+% *     (c==61) e='Aim: too many exact shiftrights.';
+% *     (c==62) e='Aim: too many numeric shiftrights.';
+% *     else    e='Aimerr: return code not properly specified';
+%    
+% *SPECIAL REQUIREMENTS*
+%
+% Dynare use: 
+%%
+%       1) the lognormal block in DR1 is being invoked for some models and changing
+%       values of ghx and ghy. We need to return the AIM output
+%       values before that block and run the block with the current returned values
+%       of gy (i.e. dr.ghx) and gu (dr.ghu) if it is needed even when the AIM is used  
+%       (it does not depend on mjdgges output).
+%       
+%       2) for forward looking models, passing into dynAIMsolver aa ={Q'|1}*jacobia_ 
+%       can produce ~ one order closer results to the Dynare solutiion   
+%       then when if plain jacobia_ is passed, 
+%       i.e. diff < e-14 for aa and diff < *e-13 for jacobia_ if Q' is used.  
+%
+% GP July 2008  
+%
+% part of DYNARE, copyright Dynare Team (1996-2008)
+% Gnu Public License.
+
+##### SOURCE END #####
+-->
+   </body>
+</html>

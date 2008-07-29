@@ -1,0 +1,1154 @@
+From: <Saved by Microsoft Internet Explorer 5>
+Subject: Dunare AIM Solver Subsystem
+Date: Tue, 29 Jul 2008 14:27:04 +0100
+MIME-Version: 1.0
+Content-Type: multipart/related;
+	boundary="----=_NextPart_000_0022_01C8F187.2C5ADB50";
+	type="text/html"
+X-MimeOLE: Produced By Microsoft MimeOLE V6.00.2800.1165
+
+This is a multi-part message in MIME format.
+
+------=_NextPart_000_0022_01C8F187.2C5ADB50
+Content-Type: text/html;
+	charset="utf-8"
+Content-Transfer-Encoding: quoted-printable
+Content-Location: file://C:\Documents%20and%20Settings\Sculptor\My%20Documents\Academia\Economics\Dynare%20DSGE\V4\matlab\AIM\html\Dynare%20AIM%20use%20Doc.html
+
+=EF=BB=BF<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<HTML xmlns:mwsh =3D=20
+"http://www.mathworks.com/namespace/mcode/v1/syntaxhighlight.dtd"><HEAD><=
+TITLE>Dunare AIM Solver Subsystem</TITLE>
+<META http-equiv=3DContent-Type content=3D"text/html; =
+charset=3Dutf-8"><!--=0A=
+This HTML is auto-generated from an M-file.=0A=
+To make changes, update the M-file and republish this document.=0A=
+      -->
+<META content=3D"MSHTML 6.00.2800.1400" name=3DGENERATOR>
+<META content=3D2008-07-29 name=3Ddate>
+<META content=3D"Dynare AIM use Doc" name=3Dm-file>
+<STYLE>BODY {
+	MARGIN: 10px; BACKGROUND-COLOR: white
+}
+H1 {
+	FONT-SIZE: x-large; COLOR: #990000
+}
+H2 {
+	FONT-SIZE: medium; COLOR: #990000
+}
+P {
+	WIDTH: 600px; ; WIDTH: expression(document.body.clientWidth > 620 ? =
+"600px": "auto" ); max-width: 600px
+}
+H1 {
+	WIDTH: 600px; ; WIDTH: expression(document.body.clientWidth > 620 ? =
+"600px": "auto" ); max-width: 600px
+}
+H2 {
+	WIDTH: 600px; ; WIDTH: expression(document.body.clientWidth > 620 ? =
+"600px": "auto" ); max-width: 600px
+}
+DIV.content DIV {
+	WIDTH: 600px; ; WIDTH: expression(document.body.clientWidth > 620 ? =
+"600px": "auto" ); max-width: 600px
+}
+PRE.codeinput {
+	PADDING-RIGHT: 10px; PADDING-LEFT: 10px; BACKGROUND: #eeeeee; =
+PADDING-BOTTOM: 10px; PADDING-TOP: 10px
+}
+SPAN.keyword {
+	COLOR: #0000ff
+}
+SPAN.comment {
+	COLOR: #228b22
+}
+SPAN.string {
+	COLOR: #a020f0
+}
+SPAN.untermstring {
+	COLOR: #b20000
+}
+SPAN.syscmd {
+	COLOR: #b28c00
+}
+PRE.codeoutput {
+	PADDING-RIGHT: 10px; PADDING-LEFT: 10px; PADDING-BOTTOM: 10px; COLOR: =
+#666666; PADDING-TOP: 10px
+}
+PRE.error {
+	COLOR: red
+}
+P.footer {
+	FONT-WEIGHT: lighter; FONT-SIZE: xx-small; COLOR: gray; FONT-STYLE: =
+italic; TEXT-ALIGN: right
+}
+</STYLE>
+</HEAD>
+<BODY>
+<DIV class=3Dcontent>
+<H1>Dunare AIM Solver Subsystem</H1><INTRODUCTION></INTRODUCTION>
+<H2>Contents</H2>
+<DIV>
+<UL>
+  <LI><A=20
+  =
+href=3D"file:///C:/Documents%20and%20Settings/Sculptor/My%20Documents/Aca=
+demia/Economics/Dynare%20DSGE/V4/matlab/AIM/html/Dynare%20AIM%20use%20Doc=
+.html#1">AIM=20
+  Solver Subsystem</A>=20
+  <LI><A=20
+  =
+href=3D"file:///C:/Documents%20and%20Settings/Sculptor/My%20Documents/Aca=
+demia/Economics/Dynare%20DSGE/V4/matlab/AIM/html/Dynare%20AIM%20use%20Doc=
+.html#2">APPENDIX=20
+  1: AIM System SPecification and Dynare Mapping</A>=20
+  <LI><A=20
+  =
+href=3D"file:///C:/Documents%20and%20Settings/Sculptor/My%20Documents/Aca=
+demia/Economics/Dynare%20DSGE/V4/matlab/AIM/html/Dynare%20AIM%20use%20Doc=
+.html#11">APPENDIX=20
+  2: dynAIMsolver1 Function Specification</A> </LI></UL></DIV>
+<H2>AIM Solver Subsystem<A name=3D1></A></H2>
+<P>The AIM subsystem in the AIM subdirectory of the main Dynare matlab =
+directory=20
+contains Matlab functions necessary for using Gary Anderson's AIM 1st =
+order=20
+solver as an alternative to Dynare's default mjdgges solver (see <A=20
+href=3D"http://www.federalreserve.gov/Pubs/oss/oss4/aimindex.html">http:/=
+/www.federalreserve.gov/Pubs/oss/oss4/aimindex.html</A>=20
+). </P>
+<P>It cosists of:</P>
+<DIV>
+<UL>
+  <LI>New Dynare function <B>dynAIMsolver1(jacobia_, M_, dr)</B> which =
+is called=20
+  from <B>dr1.m</B> and which maps Dynare system to the AIM package =
+subsystem.=20
+  It then derives the solution for gy=3Ddr.hgx and gu=3Ddr.hgu from the =
+AIM outputs.=20
+  ("1" in the title is for 1st order solver). </LI></UL></DIV>
+<DIV>
+<UL>
+  <LI>A subset of Matlab routines from Gary Anderson's own AIM package =
+needed to=20
+  compute and solve system passed on and returned by dynAIMsolver1 whose =
+names=20
+  start with SP.. of which <B>SPAmalg.m</B> is the main driver: =
+</LI></UL></DIV>
+<DIV>
+<UL>
+  <LI>SPAmalg.m=20
+  <LI>SPBuild_a.m=20
+  <LI>SPSparse.m=20
+  <LI>SPShiftright.m=20
+  <LI>SPExact_shift.m=20
+  <LI>SPNumeric_shift.m=20
+  <LI>SPObstruct.m=20
+  <LI>SPSparseSPBuild_a.m=20
+  <LI>SPEigQZ.m=20
+  <LI>SPEigensystem.m=20
+  <LI>SPReduced_form=20
+  <LI>SPCopy_w.m=20
+  <LI>SPAimerr.m </LI></UL></DIV>
+<P>The path to the AIM directory, if exists, is added by =
+<B>dynare_config.m</B>=20
+using addpath </P>
+<P><B>USE:</B></P>
+<P>Dynare DR1.m tries to invoke AIM solver instead default mjdgges if=20
+options_.useAIM =3D=3D 1 is set and, if not check only, and if 1st order =
+solution is=20
+needed, i.e.: </P><PRE>  if (options_.useAIM =3D=3D 1) &amp;&amp; (task =
+=3D=3D 0) &amp;&amp; (options_.order =3D=3D 1)</PRE>
+<P>For a start, options_.useAIM =3D 0 is set by default in=20
+<B>global_initialization.m</B> so that system uses mjdgges by default. =
+</P>
+<P>If AIM is to be used, options_.useAIM =3D 1 needs to be set either in =
+the model=20
+<A=20
+href=3D"file:///C:/Documents%20and%20Settings/Sculptor/My%20Documents/Aca=
+demia/Economics/Dynare%20DSGE/V4/matlab/AIM/html/modelname">modelname</A>=
+.mod=20
+file, before invoking, estimate and/or stoch_simul, or by issuing =
+appropriate=20
+command for estimate and/or stoch_simul. </P>
+<P><B>RELEASE NOTES:</B></P>
+<P>In the current implementation, as of July 2008, only first order =
+solution is=20
+supported and handling of exceptions is rather fundamental and, in =
+particular,=20
+when Blanchard and Kahn conditions are not met, only a large penalty =
+value=20
+1.0e+8 is being set. </P>
+<P>Hence, system may not coverge or the resluts may not be accurate if =
+there=20
+were many messages like</P>
+<DIV>
+<UL>
+  <LI>"Error in AIM: aimcode=3D4 : Aim: too few big roots", or=20
+  <LI>"Error in AIM: aimcode=3D3 : Aim: too many big roots" =
+</LI></UL></DIV>
+<P>especially when issued close to the point of convergence.</P>
+<P>However, if other exceptions occur and aimcode (see codes below) is =
+higher=20
+than 5, the system resets options_.useAIM =3D 0 and tries to use mjdgges =
+instead.=20
+</P>
+<H2>APPENDIX 1: AIM System SPecification and Dynare Mapping<A =
+name=3D2></A></H2>
+<P>AIM System for thau lags and theta leads, and:</P>
+<P><IMG hspace=3D5=20
+src=3D"file:///C:/Documents%20and%20Settings/Sculptor/My%20Documents/Acad=
+emia/Economics/Dynare%20DSGE/V4/matlab/AIM/html/Dynare%20AIM%20use%20Doc_=
+eq5664.png"=20
+vspace=3D5> </P>
+<P><IMG hspace=3D5=20
+src=3D"file:///C:/Documents%20and%20Settings/Sculptor/My%20Documents/Acad=
+emia/Economics/Dynare%20DSGE/V4/matlab/AIM/html/Dynare%20AIM%20use%20Doc_=
+eq45937.png"=20
+vspace=3D5> </P>
+<P>where xt+i is system vectors at time t for all lag/lead t+i and zt is =
+vector=20
+of exogenous shocks.</P>
+<P>The AIM input is array of matrices <B>H</B>: </P>
+<P><IMG hspace=3D5=20
+src=3D"file:///C:/Documents%20and%20Settings/Sculptor/My%20Documents/Acad=
+emia/Economics/Dynare%20DSGE/V4/matlab/AIM/html/Dynare%20AIM%20use%20Doc_=
+eq45249.png"=20
+vspace=3D5> </P>
+<P>and its solution given as:</P>
+<P><IMG hspace=3D5=20
+src=3D"file:///C:/Documents%20and%20Settings/Sculptor/My%20Documents/Acad=
+emia/Economics/Dynare%20DSGE/V4/matlab/AIM/html/Dynare%20AIM%20use%20Doc_=
+eq69844.png"=20
+vspace=3D5> </P>
+<P>where Xt is matrix of vectors of all current system variables and =
+forward=20
+looking leads xi for i=3Dt,...,t+theta:</P>
+<P><IMG hspace=3D5=20
+src=3D"file:///C:/Documents%20and%20Settings/Sculptor/My%20Documents/Acad=
+emia/Economics/Dynare%20DSGE/V4/matlab/AIM/html/Dynare%20AIM%20use%20Doc_=
+eq235275.png"=20
+vspace=3D5> </P>
+<P>and AIM output in the form of endogenous transition matrix <B>bb</B>: =
+</P>
+<P><IMG hspace=3D5=20
+src=3D"file:///C:/Documents%20and%20Settings/Sculptor/My%20Documents/Acad=
+emia/Economics/Dynare%20DSGE/V4/matlab/AIM/html/Dynare%20AIM%20use%20Doc_=
+eq25810.png"=20
+vspace=3D5> </P>
+<P>and, for simple case of one lag system, the matrix Phi derived =
+as:</P>
+<P><IMG hspace=3D5=20
+src=3D"file:///C:/Documents%20and%20Settings/Sculptor/My%20Documents/Acad=
+emia/Economics/Dynare%20DSGE/V4/matlab/AIM/html/Dynare%20AIM%20use%20Doc_=
+eq13129.png"=20
+vspace=3D5> </P>
+<P>For more lags, the phi equation becomes more complicated (see =
+documentation=20
+on G.Anderson's site above).</P>
+<P><B>Dynare AIM Mapping - input</B></P>
+<P>For Dynare jacobian =3D [fy'-tau... fy'i ... fy'+theta fu'] - where =
+-tau and=20
++theta are subscripts, we have that its subset without exogenous term =
+fu' and=20
+expanded with zero columns represents <B>H</B>, i.e.: </P>
+<P><IMG hspace=3D5=20
+src=3D"file:///C:/Documents%20and%20Settings/Sculptor/My%20Documents/Acad=
+emia/Economics/Dynare%20DSGE/V4/matlab/AIM/html/Dynare%20AIM%20use%20Doc_=
+eq372007.png"=20
+vspace=3D5> </P>
+<P>and for exogenous shocks terms:</P>
+<P><IMG hspace=3D5=20
+src=3D"file:///C:/Documents%20and%20Settings/Sculptor/My%20Documents/Acad=
+emia/Economics/Dynare%20DSGE/V4/matlab/AIM/html/Dynare%20AIM%20use%20Doc_=
+eq3403.png"=20
+vspace=3D5> </P>
+<P><B>Output</B> Dynare solution output: </P>
+<P><IMG hspace=3D5=20
+src=3D"file:///C:/Documents%20and%20Settings/Sculptor/My%20Documents/Acad=
+emia/Economics/Dynare%20DSGE/V4/matlab/AIM/html/Dynare%20AIM%20use%20Doc_=
+eq76947.png"=20
+vspace=3D5> </P>
+<P>where Xt is again matrix of vectors all current system variables and =
+forward=20
+looking leads xi for i=3Dt,..., t+theta, is mapped so that: </P>
+<DIV>
+<UL>
+  <LI>gy (or dr.ghx) is a reordered subset of AIM <B>SPAmalg.m</B> =
+output=20
+  <B>bb</B> without zero columns, and,=20
+  <LI>gu (or dr.ghu) is derived from reordered AIM <B>SPObstruct.m</B> =
+output as=20
+  phi in: </LI></UL></DIV>
+<P><IMG hspace=3D5=20
+src=3D"file:///C:/Documents%20and%20Settings/Sculptor/My%20Documents/Acad=
+emia/Economics/Dynare%20DSGE/V4/matlab/AIM/html/Dynare%20AIM%20use%20Doc_=
+eq33587.png"=20
+vspace=3D5> </P>
+<H2>APPENDIX 2: dynAIMsolver1 Function Specification<A =
+name=3D11></A></H2>
+<P><B>function [dr,aimcode]=3DdynAIMsolver1(jacobia_,M_,dr)</B></P>
+<P><B>INPUTS</B></P>
+<DIV>
+<UL>
+  <LI>jacobia_ - [matrix] 1st order derivative of the model=20
+  <LI>dr - [matlab structure] Decision rules for stochastic simulations. =
+
+  <LI>M_ - [matlab structure] Definition of the model. </LI></UL></DIV>
+<P><B>OUTPUTS</B></P>
+<DIV>
+<UL>
+  <LI>dr [matlab structure] Decision rules for stochastic simulations.=20
+  <LI>aimcode [integer] status </LI></UL></DIV><PRE>aimcode status is =
+resolved by calling AIMerr as</PRE>
+<DIV>
+<UL>
+  <LI>(c=3D=3D1) e=3D'Aim: unique solution.';=20
+  <LI>(c=3D=3D2) e=3D'Aim: roots not correctly computed by real_schur.'; =
+
+  <LI>(c=3D=3D3) e=3D'Aim: too many big roots.';=20
+  <LI>(c=3D=3D35) e=3D'Aim: too many big roots, and q(:,right) is =
+singular.';=20
+  <LI>(c=3D=3D4) e=3D'Aim: too few big roots.';=20
+  <LI>(c=3D=3D45) e=3D'Aim: too few big roots, and q(:,right) is =
+singular.';=20
+  <LI>(c=3D=3D5) e=3D'Aim: q(:,right) is singular.';=20
+  <LI>(c=3D=3D61) e=3D'Aim: too many exact shiftrights.';=20
+  <LI>(c=3D=3D62) e=3D'Aim: too many numeric shiftrights.';=20
+  <LI>else e=3D'Aimerr: return code not properly specified'; =
+</LI></UL></DIV>
+<P><B>SPECIAL REQUIREMENTS</B></P>
+<P>Dynare use:</P><PRE>     1) the lognormal block in DR1 is being =
+invoked for some models and changing
+     values of ghx and ghy. We need to return the AIM output
+     values before that block and run the block with the current =
+returned values
+     of gy (i.e. dr.ghx) and gu (dr.ghu) if it is needed even when the =
+AIM is used
+     (it does not depend on mjdgges output).</PRE><PRE>     2) for =
+forward looking models, passing into dynAIMsolver aa =3D{Q'|1}*jacobia_
+     can produce ~ one order closer results to the Dynare solutiion
+     then when if plain jacobia_ is passed,
+     i.e. diff &lt; e-14 for aa and diff &lt; *e-13 for jacobia_ if Q' =
+is used.</PRE>
+<P>GP July 2008</P>
+<P>part of DYNARE, copyright Dynare Team (1996-2008) Gnu Public =
+License.</P>
+<P class=3Dfooter><BR>Published with MATLAB=C2=AE 7.1<BR></P></DIV><!--=0A=
+##### SOURCE BEGIN #####=0A=
+%% Dunare AIM Solver Subsystem=20
+
+%% AIM Solver Subsystem
+% The AIM subsystem in the AIM subdirectory of the main Dynare matlab
+% directory contains Matlab functions necessary for using
+% Gary Anderson's AIM 1st order solver as an alternative to Dynare's =
+default mjdgges solver (see  =
+http://www.federalreserve.gov/Pubs/oss/oss4/aimindex.html ).=20
+%
+% It cosists of:
+%
+% * New Dynare function *dynAIMsolver1(jacobia_, M_, dr)* which is =
+called
+% from *dr1.m* and which maps Dynare system to the AIM package =
+subsystem.=20
+% It then derives the solution for gy=3Ddr.hgx and
+% gu=3Ddr.hgu from the AIM outputs. ("1" in the title is for 1st order
+% solver).
+%
+% * A subset of Matlab routines from Gary Anderson's own AIM package =
+needed to compute
+% and solve system passed on and returned by dynAIMsolver1 whose names =
+start with SP..=20
+% of which *SPAmalg.m* is the main driver:
+%
+% * SPAmalg.m
+% * SPBuild_a.m
+% * SPSparse.m
+% * SPShiftright.m
+% * SPExact_shift.m
+% * SPNumeric_shift.m
+% * SPObstruct.m
+% * SPSparseSPBuild_a.m
+% * SPEigQZ.m
+% * SPEigensystem.m
+% * SPReduced_form
+% * SPCopy_w.m
+% * SPAimerr.m
+%
+% The path to the AIM directory, if exists, is added by =
+*dynare_config.m* using addpath
+%
+% *USE:*
+%
+% Dynare DR1.m tries to invoke AIM solver instead default mjdgges if =
+options_.useAIM =3D=3D 1 is set and, if not check only, and if 1st order =
+solution is needed, i.e.:
+%
+%    if (options_.useAIM =3D=3D 1) && (task =3D=3D 0) && (options_.order =
+=3D=3D 1)=20
+%
+% For a start, options_.useAIM =3D 0 is set by default in =
+*global_initialization.m* so that system uses mjdgges by default.=20
+%
+% If AIM is to be used, options_.useAIM =3D 1 needs to be set either in =
+the model <modelname>.mod file, before invoking, estimate and/or =
+stoch_simul, or by issuing appropriate command for estimate and/or =
+stoch_simul.=20
+%
+% *RELEASE NOTES:*=20
+%
+% In the current implementation, as of July 2008, only first order =
+solution is supported and handling of exceptions is rather fundamental =
+and, in particular, when Blanchard and Kahn conditions are not met, only =
+a large penalty value 1.0e+8 is being set.
+%
+% Hence, system may not coverge or the resluts may not be accurate if =
+there were many messages like
+%
+% * "Error in AIM: aimcode=3D4 : Aim: too few big roots", or
+% * "Error in AIM: aimcode=3D3 : Aim: too many big roots"
+%
+% especially when issued close to the point of convergence.
+%
+% However, if other exceptions occur and aimcode (see codes below) is =
+higher than 5, the system resets options_.useAIM =3D 0 and tries to use =
+mjdgges instead.
+
+
+%% APPENDIX 1: AIM System SPecification and Dynare Mapping
+%%
+% AIM System for thau lags and theta leads, and:
+%=20
+% $$i=3D-\tau...+\theta $$=20
+%=20
+%%
+%=20
+% $$ \sum_{i=3D-\tau}^\theta(H_i*x_{t+i})=3D \Psi*z_t$$
+%
+%%
+% where xt+i is system vectors at time t for all lag/lead t+i and zt is =
+vector
+% of exogenous shocks.
+%
+% The AIM input is array of matrices *H*:
+%
+% $$H=3D[H_{-\tau} \ ...\  H_i \ ...\ H_{+\theta}] $$
+%
+% and its solution given as:
+%%
+%=20
+% $$ X_t=3D\sum_{i=3D-\tau}^{-1}(B_i*x_{t+i}) + \phi*\Psi*z_t$$
+%
+% where Xt is matrix of vectors of all current system variables and =
+forward
+% looking leads xi for i=3Dt,...,t+theta:
+%
+% $$X_t=3D \left[\begin{array}{c} {x_{t+\theta} } \\ {...} \\ {x_{t} }
+% \end{array}\right]$$
+%
+%%
+% and AIM output in the form of endogenous transition matrix *bb*:
+%%
+%
+% $$bb=3D[B_{-\tau}...  B_i \ ...\ B_{-1}]$$=20
+%
+% and, for simple case of one lag system, the  matrix Phi derived as:
+%
+% $$ \phi=3D(H_O+H_1*B_{-1})^{-1}$$
+%=20
+%%
+% For more lags, the phi equation becomes more complicated (see =
+documentation on G.Anderson's site above).
+%
+% *Dynare AIM Mapping - input*
+%
+% For Dynare jacobian =3D [fy'-tau...  fy'i ... fy'+theta  fu'] - where =
+-tau and +theta are subscripts,=20
+% we have that its subset without exogenous term fu' and expanded with =
+zero columns represents *H*, i.e.:
+%
+%%
+%=20
+% $$ [f_{y,-\tau}' \ ...\ f_{y,i}' \ ...\  f_{y,+\theta}']=3D[H_{-\tau} =
+\
+% ...\  H_i \ ...\ H_{+\theta}] $$
+%
+% and for exogenous shocks terms:=20
+%
+% $$ f_u' =3D - \Psi$$
+%=20
+% *Output*
+% Dynare solution output:
+%=20
+% $$ X_t =3D \sum_{i=3D-\tau}^{-1}(g_{y,t+i}*x_{t+i})+ g_u*z_t $$
+%
+% where Xt is again matrix of vectors all current system variables and =
+forward looking leads
+% xi for i=3Dt,..., t+theta, is mapped so that:
+%
+% * gy (or dr.ghx) is a reordered subset of AIM *SPAmalg.m* output *bb*
+% without zero columns, and,
+% * gu (or dr.ghu) is derived from reordered AIM *SPObstruct.m* output =
+as phi in:
+%
+% $$dr.ghu=3Dg_u=3D - \phi * \Psi=3D - \phi * f_u'$$
+%
+
+%% APPENDIX 2: dynAIMsolver1 Function Specification
+
+%%
+% *function [dr,aimcode]=3DdynAIMsolver1(jacobia_,M_,dr)*=20
+%
+% *INPUTS* =20
+%=20
+% * jacobia_  - [matrix]           1st order derivative of the model
+% * dr        - [matlab structure] Decision rules for stochastic =
+simulations.
+% * M_        - [matlab structure] Definition of the model.
+%    =20
+% *OUTPUTS*
+%%
+% *  dr         [matlab structure] Decision rules for stochastic =
+simulations.
+% *  aimcode    [integer]          status
+%
+%  aimcode status is resolved by calling AIMerr as
+%=20
+% *     (c=3D=3D1)  e=3D'Aim: unique solution.';
+% *     (c=3D=3D2)  e=3D'Aim: roots not correctly computed by =
+real_schur.';
+% *     (c=3D=3D3)  e=3D'Aim: too many big roots.';
+% *     (c=3D=3D35) e=3D'Aim: too many big roots, and q(:,right) is =
+singular.';
+% *     (c=3D=3D4)  e=3D'Aim: too few big roots.';
+% *     (c=3D=3D45) e=3D'Aim: too few big roots, and q(:,right) is =
+singular.';
+% *     (c=3D=3D5)  e=3D'Aim: q(:,right) is singular.';
+% *     (c=3D=3D61) e=3D'Aim: too many exact shiftrights.';
+% *     (c=3D=3D62) e=3D'Aim: too many numeric shiftrights.';
+% *     else    e=3D'Aimerr: return code not properly specified';
+%   =20
+% *SPECIAL REQUIREMENTS*
+%
+% Dynare use:=20
+%%
+%       1) the lognormal block in DR1 is being invoked for some models =
+and changing
+%       values of ghx and ghy. We need to return the AIM output
+%       values before that block and run the block with the current =
+returned values
+%       of gy (i.e. dr.ghx) and gu (dr.ghu) if it is needed even when =
+the AIM is used =20
+%       (it does not depend on mjdgges output).
+%      =20
+%       2) for forward looking models, passing into dynAIMsolver aa =
+=3D{Q'|1}*jacobia_=20
+%       can produce ~ one order closer results to the Dynare solutiion   =
+
+%       then when if plain jacobia_ is passed,=20
+%       i.e. diff < e-14 for aa and diff < *e-13 for jacobia_ if Q' is =
+used. =20
+%
+% GP July 2008 =20
+%
+% part of DYNARE, copyright Dynare Team (1996-2008)
+% Gnu Public License.
+=0A=
+##### SOURCE END #####=0A=
+--></BODY></HTML>
+
+------=_NextPart_000_0022_01C8F187.2C5ADB50
+Content-Type: image/png
+Content-Transfer-Encoding: base64
+Content-Location: file:///C:/Documents%20and%20Settings/Sculptor/My%20Documents/Academia/Economics/Dynare%20DSGE/V4/matlab/AIM/html/Dynare%20AIM%20use%20Doc_eq5664.png
+
+iVBORw0KGgoAAAANSUhEUgAAAFAAAAAMCAIAAAB6P612AAAAB3RJTUUH2AcdDRY2+RDUrQAAA4lJ
+REFUeJzdVT1IM1sQnf1JUFDQSMBKQhDFJgqGCIqNCNpYGJRoY2VEbLSwMCCC2AVFC0tJJaSQSBAL
+iygYk5g/FDGCfzFaRTFRI0Zh7+7OKy5vWUyivE8fPN6p7s7OnXPuzNm7gIiI+Pz8HI/H8X8HWZYR
+MZFIDA4ODg0NEUKAhiYmJvr6+pSMf1uEGj8plcvlHh8fvyBCxNPT097eXkTc399fWFgASZIQ8f39
+PZ/PfyvuF7X+EJTd7/e73W4sPSdCiM1mi8ViiOjz+QCAZ1k2FApVVFSYTCZEZBgGVPj0+HMg4sHB
+gSAIACCKYkNDg9Fo/ONqHMdpNJpSRAzDuFyuZDJpNpsBoLKyEgB4r9f78fGxvb29urpaXV39aVso
+FHp6euI47lNckqS6ujqTyVRIU0ocwzCyLLtcrrW1tbu7O51OxzDM1NSU0WgsbPQXoBR0Cx2jmlep
+QxPcbndTU5PP5+N53ul0Op1Odn5+fnh4+Pz8/PLyslCx2kKFTi56qlIAgGAwaDabw+HwysrK7u5u
+IpEYHR39R6dVKFiWBQCO4+gwWJZVWChYlhUEIZvNGgwGnuczmUwgEGhtbeU9Hs/Ozk5jY2NbWxsU
+eLijo+PrZtN8uohGox6Pp9BjhJCurq6enp7Ozk4AEATh7OyspaWltrZWlmWWZWnvlFJF1wrL5uZm
+JBLRaDQ8z6dSqbe3t5OTE1EURVE0GAzj4+NKpt/vz+fzs7OzWq02EonU1NS0t7fzRqPR4XDY7XZC
+yMvLi16vV2sNBoPU0up5MgxDLd3c3KxEAMBisVgslm8blE6nOY6rr6+nc/jU5VJr5dFqtVqtVhoJ
+h8PpdLq/v78UnV6v12q1ALC4uDg9PV1WVsaGQqGLi4vu7u6lpaVCaymGZFVQu7SQoyjUOV6vFxHV
+Tby9vY1Go4QQALi5uYnFYqIoAsD19XU8HpckqZBClmUAkCSJvlU+NHWmTqerqqoCgOPjY0KI3W4H
+AMhms3Nzc+vr63t7e1/c778CWtzhcDidTvz7XkDEsbExhmHu7+8RcWRkRKPRZDIZRLTZbOXl5blc
+rlSpQCCwsbFRVDaNTE5OLi8vz8zMHB0d0SAg4uvr6+HhYaltv/4ffnh4IISoI6lUKhKJCIKAiMlk
+kk4bEa+urui0/+DAFPl8fmtri7aM5jCyLKsvnqIfw38QVG0wGEyn0wMDA9+KVxL+Ajch9lxo447f
+AAAAAElFTkSuQmCC
+
+------=_NextPart_000_0022_01C8F187.2C5ADB50
+Content-Type: image/png
+Content-Transfer-Encoding: base64
+Content-Location: file:///C:/Documents%20and%20Settings/Sculptor/My%20Documents/Academia/Economics/Dynare%20DSGE/V4/matlab/AIM/html/Dynare%20AIM%20use%20Doc_eq45937.png
+
+iVBORw0KGgoAAAANSUhEUgAAAJkAAAArCAIAAADkPL2TAAAAB3RJTUUH2AcdDRY4Hqj5qgAADRRJ
+REFUeJztWntQU0cX33tJSECGtLwMZJAWpbxECFDkIe0MjlY6mWHsgI+CLQoOdaq1nbFOpa3MVG1p
+tXWordIWxEIoIGNtCSiFofQBGgFbTAFFyVMeMaZEFAIJudnvj6231yQkwU+ROvn9leyeu3vO/nb3
+nLO7GIQQ2AKEEMOw8vLylpaW0tJSGo1m8xMH5h6YTS5JIj08PBgMhkKhyMnJQYVzo6IDdgK3KYFh
+mFKpbG5u5vF4k5OTZWVlc6CWA/cBG1yiVSsUCjs7Oy9cuNDZ2RkeHj4nijkwa9jl+WpqarKzs3U6
+3YkTJ6qqqh62Tg7cH2ysS+QURSLR6tWrk5OTc3Jyli1bRpY7MK9gI/ZBMU51dbVGo5HL5Zs2bQoP
+D3cEPvMTtuNYBKFQGBoaymKxHETOW9jFJcmfg8j5DFMuIYSIMBPOkBi1cCZJBx4V7N1jHZj/+Ccn
+QStMJpPl5eVNTk4uX77czc3NOs3nz59XKpVxcXHFxcVOTk5zoq0DVgHvwmg0QgjT09MBAFVVVWTJ
+TOjs7Dx8+DCbza6srIQQEgRhRfg/B+u2z08Ak/96vX7NmjUAgJ9++gnawdDo6Gh+fr5Wq7VYa3FE
+jEajSbl5yWOJh23mPVyinnp7ewEAERERBoPBumaI6ZGRkcOHD1sUgBAODw/X19c/SJUfPlQqlUAg
+eNRazBqmsY/RaMRxvLS0NDc3d9u2bUePHkUl1ndphUIREBBgXqVSqbZt27Z///7Q0FAAgMFgOH78
++MWLFzUaDZfLzcvLGxwcrKmp6e7uZjKZcXFxW7Zs8fb2foAe5D4AIcQwrLW1ta+v7/XXX38grQ0P
+D5eVlanVarFYzOVyDQbDhg0bIiIi4IPN8SwyPDU1tWrVKgBAc3MzvC9fiBblgQMH+Hw+tQWCIFas
+WJGWlkYWisViX1/fU6dOQTu8lBUBcgd7IFsZQRB5eXnd3d32aGUn2tvbo6Ki9Hq9TUnrPc5Ua2HB
+QQgZDEZDQ8OiRYtWrVollUpxHIe2jvrMJ6NYLL527dq6desAAOTKnp6enpiYePXVVwEARqMRANDU
+1AQASEpKsjnnwN0E16IyKNOFDyLlhRDiOP7SSy/V1NQAs8Nn6zSYNHXz5s233noLXRRiGMZkMpFM
+U1PT1q1br1y5YmKOTTPh3aWMRo8KC1xiGGY0Gul0+ueffw4A2LVrF0EQ1kfHYm17ezuLxaLT6ahX
+pFlzc7NEIomKigIAoPcJMpls5cqVCxcuNBqNVnrBMEylUp0+fdpid0aj8eeff25pacEwTKFQ/PLL
+L+amzhbh4eE9PT1qtdpcEyugSkIIvb29169fX1RUBADAcRwtKQDAp59+mpCQEBISAu/dZtHvyspK
+nU5nbiYSvnDhglqtxnF8dHRUpVKRtZbvvFCvaWlpmZmZlZWVp06dWrdunU3HSVXIaDTW19fv3r0b
+3Dv0KpXK29tbJBKhKTk9PV1eXp6TkwMok9HchqmpKY1GQ6fTkernzp2LjIxcsGABqjUYDAKBAMdx
+oVBYXV0dFham0+kGBgZyc3NRa+ZtWuyFLESfcDic0NBQgUCwefNmqnxvb69UKnVycqKuG2Syu7t7
+YmKiSbYNIaTT6aQY+uHi4mJx6CQSSWBg4PXr1xkMRldXF4fD8fX1par322+/FRQUxMfHr169ur+/
+PyMjg6ya8f4S0VZSUnLjxo2NGze6ubm9+OKLFofAIgwGg1gsnp6eplpLEMR3333HZrNZLNbExASd
+TpfJZDiOb9iwgSpm3trk5OSRI0eCg4MlEklJSYlUKo2JiSFtUCgUCoVi586dKSkp0dHROTk5Y2Nj
+bm5uVtq02It54ejo6NDQkEkh8lgmfod0Y+bNPvHEE2RAh3ZvAMDExARJElmFYRifz1+yZMng4GBt
+bW1TU9O+ffuotRKJ5Pbt262trQqFIj8//+jRo+7u7v+SYtPH9vT0AABeeeUVK17XHHq9Pj4+/vz5
+89SvdDodl8utq6sjxSoqKthstkKhIMUOHjz47bffUr8if+zevTsuLo76OcLk5OTg4CCE8NixY7Gx
+saOjo9QPlUrlmTNnqCUKhaKhocHEHJ1Ol5+fj7JqMnrKy8srLCy0qIydQPJ79+49duxYd3d3fHw8
+hLCsrIzH480kXFJSsmzZsk8++cS8R/T71q1bxcXFKKdH8SOfzzcajdbeFSC2ORxOQUHBO++8M9N0
+tggIIQrYqNOqubm5v78fZS8Gg4FGo4lEopSUFH9/f3IDX7ly5TPPPEPtC8MwjUZz8ODBsLAwAMCN
+GzfefffdvXv3MhgM1DKTyeRwOACA4eHhhISEJ598kqpJZWWlWq1OTU1FHhTDsDt37gwODgJKcIFc
+XXp6+tKlS8HdPRYAQBAEdWtBVT09PRKJhEajQbN0jsViJSUlUfdYZMWePXsKCgquXbs2Pj5+6NCh
+q1evlpaWmo8YhmEffPDBkiVLkpOTn3rqqa1bt+7bt4/NZlMF9Hp9dXV1enq6i4uLWCxevHhxR0dH
+SUlJZmam7TcixcXFu3btQgGY/VzSaLTFixeb+AmVSpWQkIBeJqDAp66uLjMzkxTg8/kymcz8SZGL
+i8uOHTvodPrU1FRubu65c+cMBgODwUAqDQwMMBgMLy+vtra2jz76CAAgEAiioqK8vLxKSkrOnj3r
+6ura1ta2YsUK1JqbmxvytdTouri4GMdxFJSR8PDwQLOECgzDcBw3GQrS0ZoPBZptH3/8cV1dnUAg
+2LJli4eHBzDz2eh3VlZWYGCgQqHIyMh4+umnTRaDVqt97bXX3n//fU9Pz/LychzHL126VFtbq9fr
+9+/fPyOX6OP6+vq4uDh0zm6FSJNaCCGO4zwej8/nx8bGomT54sWLRUVFCxYs+P3338PDw8VicX19
+vVQq9fLyunLlSkhIyB9//OHp6cnn89evXx8UFERtk8lk+vr6qlQqHx8fAEBiYiK198bGxqampk2b
+Nj3//PNyuXxkZGRqasrb25vJZGZlZbW0tBw5csTf3//q1av9/f1MJlMmk/X19fn4+Oj1eldX1+ee
+e66zs5PD4ZSWlm7cuNHDwwN1PTQ0dPny5bffftuEpPDw8Fk9YMMwbGxsrKurSyKREAQhFAoJgoiJ
+ifHz8zMXDgwMBAD4+/vrdLrY2FhqIxqN5uTJk9nZ2RUVFW1tbcHBwYWFhSwWq7a29r333ktNTbXM
+JTKmsbHR2dk5JSXF5oq0WJuUlNTa2qrX652dndH8OnToEABAq9XiOK7X6+Pi4hobG7VaLdrHoqOj
+Gxoa1qxZExQUZB4zQwh9fHzWrl0L7g04AQDbt2+PjIxcuHBhRkZGa2srQRA8Hg+t+97e3uDgYE9P
+T6VSaTEIxzBseno6MTHx66+/zs7ORkSiqt7e3qVLl3p5eZkPzmyHAvUSEhLyzTffoGRjpvFEpqG9
+ymTYCYJIT0/39PTkcrmpqakJCQkAgLGxMQBAcnLyn3/+aSH2Qe60vb3d/gsQmUxm0Y2T5z72YGJi
+gsfjnTx58tdff51Jxv4DEaT2G2+8sWfPHpFIRFVDLpebaCWXy1NTUwUCQUdHB/n5Az/3sR9WeiTp
+QKflP/74Y3R0NIRw7dq1plMVQojjuEajEYlEaWlpgOJUzIGiiaGhIZTCm0/P3Nzc77///vLly0iY
+VAiYxc8AAFdX1xdeeEEqlS5fvnxWs55sDcUskHJ0kpOTMzo6KhKJXn75ZVJhrVar0+lIlQAAbDY7
+Pj5eqVTGxMTAu1tIQEBAZGSklU5nBXN7rcBKj4gOCCGKsFJSUpKSkgoLC6uqqizck/z9999ffPHF
+rVu30CxA9yFUkDckCCdOnPjrr7/MZ9M8vCdBKvX19X311Vdw5un/mNyTjI+Pnz59OjMz0+YRz/j4
+eFdX15dffhkUFPThhx9CqycpdgKavSr6PwEpWQdZqNVqb9++Tcb6D6nrOQOp+b9conEvKir67LPP
+AgICpqamrBjm5OQ0PDwsl8sBAB0dHc8+++xsaZvn+C+aY/re58yZM76+vhYPdqkgCILD4SxatCgi
+IoLMr+dC37nCf9Ecxzu8xwem+SXyovZ/byVVcmCO8c+6/C+6BwdM4NhjHx/gAACNRrN582apVAru
+zehJ2GyFXNwPW10HrACDEI6NjUkkEi6Xa13UIlWOnXn+gHbnzp0DBw4kJSVxuVyhUKhWq8nXD+gl
+AJvNRgf2M9F28+bNs2fPDgwMXL9+3c/PLyoqKiMjw+GA5x60ioqKyMjI48ePo3eOJtXkHqtSqTo6
+Okxo9vX1jYmJuXTpkru7+/bt22tqanbs2IE+dBA598AghG+++WZubi5K+WeCRS79/Pyio6ORwA8/
+/ODj45OYmOhYkY8KtLa2NolEotFoJBJJe3t7X1+fs7MzWT09PR0WFpaVleXj48Pj8aw0VF5evnPn
+zoevsAMzghYZGTkyMjI0NJScnIwutWeCldhncnIyICAArVHHonxU+B/lD/2JxqI+3AAAAABJRU5E
+rkJggg==
+
+------=_NextPart_000_0022_01C8F187.2C5ADB50
+Content-Type: image/png
+Content-Transfer-Encoding: base64
+Content-Location: file:///C:/Documents%20and%20Settings/Sculptor/My%20Documents/Academia/Economics/Dynare%20DSGE/V4/matlab/AIM/html/Dynare%20AIM%20use%20Doc_eq45249.png
+
+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
+
+------=_NextPart_000_0022_01C8F187.2C5ADB50
+Content-Type: image/png
+Content-Transfer-Encoding: base64
+Content-Location: file:///C:/Documents%20and%20Settings/Sculptor/My%20Documents/Academia/Economics/Dynare%20DSGE/V4/matlab/AIM/html/Dynare%20AIM%20use%20Doc_eq69844.png
+
+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
+
+------=_NextPart_000_0022_01C8F187.2C5ADB50
+Content-Type: image/png
+Content-Transfer-Encoding: base64
+Content-Location: file:///C:/Documents%20and%20Settings/Sculptor/My%20Documents/Academia/Economics/Dynare%20DSGE/V4/matlab/AIM/html/Dynare%20AIM%20use%20Doc_eq235275.png
+
+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
+
+------=_NextPart_000_0022_01C8F187.2C5ADB50
+Content-Type: image/png
+Content-Transfer-Encoding: base64
+Content-Location: file:///C:/Documents%20and%20Settings/Sculptor/My%20Documents/Academia/Economics/Dynare%20DSGE/V4/matlab/AIM/html/Dynare%20AIM%20use%20Doc_eq25810.png
+
+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
+QmCC
+
+------=_NextPart_000_0022_01C8F187.2C5ADB50
+Content-Type: image/png
+Content-Transfer-Encoding: base64
+Content-Location: file:///C:/Documents%20and%20Settings/Sculptor/My%20Documents/Academia/Economics/Dynare%20DSGE/V4/matlab/AIM/html/Dynare%20AIM%20use%20Doc_eq13129.png
+
+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
+
+------=_NextPart_000_0022_01C8F187.2C5ADB50
+Content-Type: image/png
+Content-Transfer-Encoding: base64
+Content-Location: file:///C:/Documents%20and%20Settings/Sculptor/My%20Documents/Academia/Economics/Dynare%20DSGE/V4/matlab/AIM/html/Dynare%20AIM%20use%20Doc_eq372007.png
+
+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
+
+------=_NextPart_000_0022_01C8F187.2C5ADB50
+Content-Type: image/png
+Content-Transfer-Encoding: base64
+Content-Location: file:///C:/Documents%20and%20Settings/Sculptor/My%20Documents/Academia/Economics/Dynare%20DSGE/V4/matlab/AIM/html/Dynare%20AIM%20use%20Doc_eq3403.png
+
+iVBORw0KGgoAAAANSUhEUgAAADcAAAAPCAIAAADPkMDRAAAAB3RJTUUH2AcdDRcRRQFQhwAAA21J
+REFUeJzFlU8sK18Ux8/UNTptuqGtBNUgUZpGhERSFoSIRCX1p1bCRkTYsNDYdE2EsBDpjo2VSENi
+JQhiVm0kqjsSNqVSrdEaWtPe+xaXvkn9yfv9Eu99d/fcm3M+58+cYQgh8C5CCMMwAIAxVigUHo9H
+FMXBwcGM/V+JyVBSlGAweHd3V1dXBwCdnZ1lZWUrKyt/gZKG8Hq9wWCQZVmMcSqV0ul0TU1NGGMk
+f3R8fHx0dBSJRFiW1Wq1kUjE7Xb/KFxGtAocxxUWFo6MjDgcjo6ODqVSCQAKhQLJH83Pz09OTgqC
+UFVVtb6+3tzcbDQaafd/mpLneUEQbDYbABQXF9fX11utVgDY29u7v79/Cx+PxwOBwO3trVKp7Onp
+QQj5/f7x8fFMAj8to9E4Nze3s7MDAJIkJRIJij49PW02m1Gm1x6Ph7I+PDx0dXW5XK78/PyvKEVR
+FATh4xUhBCGk1WpzcnKy7F/xMQyDMS4pKdFoNNFoNGMEgHg8jhCqqalBDMMQQmw2G8/zlZWVo6Oj
+9B1F/Cia1dXV1eHhIUIo6xZjrNFoent71Wp1FspXlCAbSo7j5Fm9vLyoVCoA+B1md3fX5XLB+xr6
+3qPFYrFYLN8ElisWi21vbycSiSzWdDqt1+vtdju1j42NbW1t9ff3I4RYlgWA5eXliYmJN0pa82Qy
+qdFo6FG+ej5dQ9Fo9Obm5tMK5ebmlpeXy8usUqlaWlrS6TT1nMmWEMKyLMMw1E9bW9vp6enCwkIy
+mQwEAmdnZ62trd3d3QDwNpf7+/vPz8+1tbXwoTufooTDYZ/PhxCSDxzNVq1WGwwGOSVCyGAwfFft
+dzmdzlAotLa2hjGempqi7f5NKUlSUVFRQUEBAMRisY2NjcbGRrPZHAqFTk5OHA5HljuTyWQymf4k
+8H/SxcWFJEksyyqVyuvra4ZhqqurAUBBR3Bzc9NutwMAxpjneY7jZmdnAYDn+UgkAp99pORr/W/K
+cDjs9/udTmdpaanf7w+FQm8Xq6url5eX7e3tPp+PEJJKpQghS0tLbrebEDIwMOD1egkhGONvsH5a
+OU9PT3l5eX19fVarlRBCSzszMzM0NMSy7MHBQUVFxevrq06nI3/lb55loREZURQDgUBDQ4Mc4vHx
+cXh4WK/XWyyW8/PzxcXFzCb7J/oFYjg7tI9Xy/YAAAAASUVORK5CYII=
+
+------=_NextPart_000_0022_01C8F187.2C5ADB50
+Content-Type: image/png
+Content-Transfer-Encoding: base64
+Content-Location: file:///C:/Documents%20and%20Settings/Sculptor/My%20Documents/Academia/Economics/Dynare%20DSGE/V4/matlab/AIM/html/Dynare%20AIM%20use%20Doc_eq76947.png
+
+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
+
+------=_NextPart_000_0022_01C8F187.2C5ADB50
+Content-Type: image/png
+Content-Transfer-Encoding: base64
+Content-Location: file:///C:/Documents%20and%20Settings/Sculptor/My%20Documents/Academia/Economics/Dynare%20DSGE/V4/matlab/AIM/html/Dynare%20AIM%20use%20Doc_eq33587.png
+
+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
+wy7Y5VwAAAAASUVORK5CYII=
+
+------=_NextPart_000_0022_01C8F187.2C5ADB50--
