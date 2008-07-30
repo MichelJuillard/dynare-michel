@@ -124,15 +124,15 @@ Currently the development team of Dynare is composed of S. Adjemian, M. Juillard
 <listitem><para>changed the default for nonlinear solver in <xref linkend="steady"/></para></listitem>
 <listitem><para>added a mention of the possibility to write explicitly a steady state function in <xref linkend="steady"/>, <xref linkend="stoch_simul"/>, <xref linkend="estimation"/> and <xref linkend="unit_root_vars"/></para></listitem>
 <listitem><para>added a brief <emphasis>Ouput</emphasis> section in <xref linkend="estimation"/></para></listitem>
-<listitem><para>corrected misleading description of option <command>prefilter</command> in <xref linkend="estimation"/></para></listitem>
-<listitem><para>added variance decomposition among the statistics computed with option <command>moments_varendo</command> in <xref linkend="estimation"/></para></listitem>
+<listitem><para>corrected misleading description of option <option>prefilter</option> in <xref linkend="estimation"/></para></listitem>
+<listitem><para>added variance decomposition among the statistics computed with option <option>moments_varendo</option> in <xref linkend="estimation"/></para></listitem>
 <listitem><para>tex option in <xref linkend="estimation"/> isn't yet implemented</para></listitem>
 </itemizedlist>
 <para>May 3, 2005</para>
 <itemizedlist>
-<listitem><para>added option <command>noprint</command> in <xref linkend="stoch_simul"/></para></listitem>
-<listitem><para>modified option <command>irf</command> in <xref linkend="stoch_simul"/></para></listitem>
-<listitem><para>modified option <command>simul_seed</command> in <xref linkend="stoch_simul"/></para></listitem>
+<listitem><para>added option <option>noprint</option> in <xref linkend="stoch_simul"/></para></listitem>
+<listitem><para>modified option <option>irf</option> in <xref linkend="stoch_simul"/></para></listitem>
+<listitem><para>modified option <option>simul_seed</option> in <xref linkend="stoch_simul"/></para></listitem>
 </itemizedlist>
 <para>March 6, 2005</para>
 <itemizedlist>
@@ -284,7 +284,7 @@ you can put them in a file called <filename>.octaverc</filename> in your home di
 
 <chapter><title>Dynare invocation</title>
 
-<para>You invoke Dynare by typing the <command>dynare</command> at the Matlab&reg; or Octave prompt.</para>
+<para>You invoke Dynare by using the <command>dynare</command> at the Matlab&reg; or Octave prompt.</para>
 
 <refentry id="dynare">
   <refmeta>
@@ -299,35 +299,45 @@ you can put them in a file called <filename>.octaverc</filename> in your home di
   <refsynopsisdiv>
     <cmdsynopsis>
       <command>dynare</command>
-      <arg choice="req">
+      <arg choice="plain">
       <replaceable>FILENAME</replaceable>[.mod]
       </arg>
-      <arg>noclearall</arg>
-      <arg>savemacro</arg>
-      <arg>debug</arg>
+      <arg><option>noclearall</option></arg>
+      <arg><option>savemacro</option></arg>
+      <arg><option>debug</option></arg>
     </cmdsynopsis>
   </refsynopsisdiv>
 
 <refsect1><title>Description</title>
 <para>
-<command>dynare</command> executes instruction included in <filename>filename.mod</filename>.
-<filename>filename.mod</filename> is the name of the model file containing the
-model and the processing instructions.
+<command>dynare</command> executes instruction included in <replaceable>FILENAME</replaceable><filename>.mod</filename>.
+This user-supplied file contains the model and the processing instructions, as described in <xref linkend="modfile"/>.
 </para>
 </refsect1>
 
 <refsect1><title>Details</title>
 <para>
-<command>dynare</command> creates three intermediary files:
+<command>dynare</command> begins by launching the preprocessor on the *.mod file.
+
+By default (unless any of <option>use_dll</option>, <option>sparse</option> or <option>sparse_dll</option> options have been given to <xref linkend="model"/>), the preprocessor creates three intermediary files:
 <itemizedlist spacing='compact'>
-<listitem><para> <filename>filename.m</filename> with the instructions for the simulations</para></listitem>
-<listitem><para> <filename>filename_dynamic.m</filename> with the dynamic model equations</para></listitem>
-<listitem><para> <filename>filename_static.m</filename> with the long run static model equations</para></listitem>
+  <listitem><para><replaceable>FILENAME</replaceable><filename>.m</filename>: contains variable declarations, and computing tasks</para></listitem>
+  <listitem><para><replaceable>FILENAME</replaceable><filename>_dynamic.m</filename>: contains the dynamic model equations</para></listitem>
+  <listitem><para><replaceable>FILENAME</replaceable><filename>_static.m</filename>: contains the long run static model equations</para></listitem>
 </itemizedlist>
-</para>
-<para>
 These files may be looked at to understand errors reported at the simulation stage.
 </para>
+<para><command>dynare</command> will then run the computing tasks by executing <replaceable>FILENAME</replaceable><filename>.m</filename>.</para>
+</refsect1>
+
+<refsect1><title>Options</title>
+
+  <itemizedlist spacing='compact'>
+    <listitem><para><option>noclearall</option>: by default, <command>dynare</command> will issue a <command>clear all</command> command to Matlab&reg; or Octave, thereby deleting all workspace variables; this options instructs <command>dynare</command> not to clear the workspace</para></listitem>
+    <listitem><para><option>savemacro</option>: instructs <command>dynare</command> to save the intermediary file which is obtained after macro-processing (see <xref linkend="macrolanguage"/>); the saved output will go in <replaceable>FILENAME</replaceable><filename>-macroexp.mod</filename></para></listitem>
+    <listitem><para><option>debug</option>: instructs the preprocessor to write some debugging information about the scanning and parsing of the *.mod file</para></listitem>
+  </itemizedlist>
+
 </refsect1>
 
 <refsect1><title>Output</title>
@@ -336,41 +346,40 @@ Depending on the computing tasks requested in the *.mod file, executing command 
 </para>
 
 <para>
-Under Matlab, some results are also saved in a file called <replaceable>FILENAME</replaceable><filename>_results.mat</filename>. Currently, this file contains when available the structures <varname>dr_</varname> and <varname>oo_</varname>.
+The <varname>oo_</varname> structure is also saved in a file called <replaceable>FILENAME</replaceable><filename>_results.mat</filename>.
 </para>
 </refsect1>
 
 <refsect1><title>Examples</title>
 <programlisting>
 dynare ramst
-</programlisting>
-<para>or</para>
-<programlisting>
 dynare ramst.mod savemacro
 </programlisting>
 </refsect1>
 </refentry>
 </chapter>
 
-<chapter><title>Model file commands</title>
+<chapter id="modfile"><title>The Model file</title>
 <para>
-Dynare commands are either single instructions or a block of instructions. Each single instructions or block elements are terminated by <command>;</command>. Block of instructions are terminated by <command>end;</command>.
+Dynare commands are either single instructions or a block of instructions. Each single instruction and each element of a block is terminated by a semicolon (<command>;</command>). Blocks of instructions are terminated by <command>end;</command>.
 </para>
 
 <para>
 Most Dynare commands have arguments and several accept options, indicated in parentheses after the command keyword.
 </para>
-<para>
+
+<para id="conventions" xreflabel="Conventions">
 In the description of Dynare commands, the following conventions are observed:
 <itemizedlist>
 <listitem><para>optional arguments or options are indicated between square brackets <command>[]</command></para></listitem>
 <listitem><para>repreated arguments are indicated by ellipses <command>...</command></para></listitem>
-<listitem><para><command><replaceable>INTEGER</replaceable></command> indicates an integer number</para></listitem>
-<listitem><para><command><replaceable>DOUBLE</replaceable></command> indicates a double precision number. The following syntaxes are valid: 1.1e3, 1.1E3, 1.1d3, 1.1D3.</para></listitem>
-<listitem><para><command><replaceable>EXPRESSION</replaceable></command> indicates a mathematical expression valid in the underlying language (Matlab&reg; or GNU Octave)</para></listitem>
-<listitem><para><command><replaceable>VARIABLE_NAME</replaceable></command> indicates a variable name starting with an alphabetical character and can't contain ()+-*/^=!;:@#. or accentuated characters</para></listitem>
-<listitem><para><command><replaceable>PARAMETER_NAME</replaceable></command> indicates a parameter name starting with an alphabetical charcater and can't contain ()+-*/^=!;:@#. or accentuated characters</para></listitem>
-<listitem><para><command><replaceable>FILENAME</replaceable></command> indicates a file name valid under your operating system (Windows&reg;, GNU/Linux, ...)</para></listitem>
+<listitem><para><replaceable>INTEGER</replaceable> indicates an integer number</para></listitem>
+<listitem><para><replaceable>DOUBLE</replaceable> indicates a double precision number. The following syntaxes are valid: 1.1e3, 1.1E3, 1.1d3, 1.1D3</para></listitem>
+<listitem><para><replaceable>EXPRESSION</replaceable> indicates a mathematical expression valid outside the model description (see <xref linkend="expressions"/>)</para></listitem>
+<listitem><para><replaceable>MODEL_EXPRESSION</replaceable> indicates a mathematical expression valid in the model description (see <xref linkend="expressions"/> and <xref linkend="model"/>)</para></listitem>
+<listitem><para><replaceable>VARIABLE_NAME</replaceable> indicates a variable name starting with an alphabetical character and can't contain ()+-*/^=!;:@#. or accentuated characters</para></listitem>
+<listitem><para><replaceable>PARAMETER_NAME</replaceable> indicates a parameter name starting with an alphabetical character and can't contain ()+-*/^=!;:@#. or accentuated characters</para></listitem>
+<listitem><para><replaceable>FILENAME</replaceable> indicates a file name valid in the underlying operating system (Windows&reg;, GNU/Linux, ...)</para></listitem>
 </itemizedlist>
 </para>
 
@@ -398,24 +407,18 @@ In the description of Dynare commands, the following conventions are observed:
     <cmdsynopsis>
       <command>var</command>
       <arg choice="plain">
-	<replaceable>VARIABLE_NAME</replaceable>
+	      <replaceable>VARIABLE_NAME</replaceable>
       </arg>
-      <arg>
-	,
+      <arg rep="repeat"><arg>,</arg>
+	      <replaceable>VARIABLE_NAME</replaceable>
       </arg>
-      <arg rep="repeat">
-	<replaceable>VARIABLE_NAME</replaceable>
-      </arg>
-    <arg choice="plain">;</arg>
+      <arg choice="plain">;</arg>
     </cmdsynopsis>
   </refsynopsisdiv>
 
 <refsect1><title>Description</title>
 <para>
-This required command declares the endogenous variables in the model. The variable names must start with a letter and can't contain the following characters : ()+-*/^=!;:@#. or accentuated characters.
-</para>
-<para>
-In Gauss, setting <varname>_longname = 1</varname> allows the use of more than 8 characters in the variable names and makes a distinction between lower and upper case letters.
+This required command declares the endogenous variables in the model. See <xref linkend="conventions"/> for the syntax of <replaceable>VARIABLE_NAME</replaceable>.
 </para>
 </refsect1>
 
@@ -440,13 +443,10 @@ var c gnp q1 q2;
     <cmdsynopsis>
       <command>varexo</command>
       <arg choice="plain">
-	<replaceable>VARIABLE_NAME</replaceable>
+	      <replaceable>VARIABLE_NAME</replaceable>
       </arg>
-      <arg>
-	,
-      </arg>
-      <arg rep="repeat">
-	<replaceable>VARIABLE_NAME</replaceable>
+      <arg rep="repeat"><arg>,</arg>
+	      <replaceable>VARIABLE_NAME</replaceable>
       </arg>
     <arg choice="plain">;</arg>
     </cmdsynopsis>
@@ -454,7 +454,7 @@ var c gnp q1 q2;
 
 <refsect1><title>Description</title>
 <para>
-This optional command declares the exogenous variables in the model. See command <xref linkend="var"/> for the syntax of <replaceable>VARIABLE_NAME</replaceable>.
+This optional command declares the exogenous variables in the model. See <xref linkend="conventions"/> for the syntax of <replaceable>VARIABLE_NAME</replaceable>.
 </para>
 <para>
 Exogenous variables are required if the user wants to be able to apply shocks to her model. 
@@ -482,23 +482,20 @@ varexo m gov;
     <cmdsynopsis>
       <command>varexo_det</command>
       <arg choice="plain">
-	<replaceable>VARIABLE_NAME</replaceable>
+	      <replaceable>VARIABLE_NAME</replaceable>
       </arg>
-      <arg>
-	,
+      <arg rep="repeat"><arg>,</arg>
+	      <replaceable>VARIABLE_NAME</replaceable>
       </arg>
-      <arg rep="repeat">
-	<replaceable>VARIABLE_NAME</replaceable>
-      </arg>
-    <arg choice="plain">;</arg>
+      <arg choice="plain">;</arg>
     </cmdsynopsis>
   </refsynopsisdiv>
 
 <refsect1><title>Description</title>
 <para>
-This optional command declares exogenous deterministic variables in a stochastic model. See command <xref linkend="var"/> for the syntax of <replaceable>VARIABLE_NAME</replaceable>.
+This optional command declares exogenous deterministic variables in a stochastic model. See <xref linkend="conventions"/> for the syntax of <replaceable>VARIABLE_NAME</replaceable>.
 </para>
-<para>It is possible to mix deterministic and stochastic shocks to build models where agents know from the start of the simulation about future exogenous changes. In that case <xref linkend="stoch_simul"/> will compute the rational expectation solution adding future information to the state space (nothing is shown in the output of <xref linkend="stoch_simul"/>) and <xref linkend="forecast"/> will compute a simulation conditional on initial  conditions and future information.
+<para>It is possible to mix deterministic and stochastic shocks to build models where agents know from the start of the simulation about future exogenous changes. In that case <xref linkend="stoch_simul"/> will compute the rational expectation solution adding future information to the state space (nothing is shown in the output of <xref linkend="stoch_simul"/>) and <xref linkend="forecast"/> will compute a simulation conditional on initial conditions and future information.
 </para>
 </refsect1>
 
@@ -524,21 +521,20 @@ varexo_det tau;
     <cmdsynopsis>
       <command>parameters</command>
       <arg choice="plain">
-	<replaceable>PARAMETER_NAME</replaceable>
+	      <replaceable>PARAMETER_NAME</replaceable>
       </arg>
-      <arg>
-	,
+      <arg rep="repeat"><arg>,</arg>
+	      <replaceable>PARAMETER_NAME</replaceable>
       </arg>
-      <arg rep="repeat">
-	<replaceable>PARAMETER_NAME</replaceable>
-      </arg>
-    <arg choice="plain">;</arg>
+      <arg choice="plain">;</arg>
     </cmdsynopsis>
   </refsynopsisdiv>
 
 <refsect1><title>Description</title>
 <para>
-This optional command declares parameters used in the model, in variable initialization or in shock declarations. The parameters must then be assigned values using standard syntax of underlying matrix programming language. Be careful not to use names reserved by Dynare or the underlying language (Matlab&reg; or GNU Octave).
+This optional command declares parameters used in the model, in variable initialization or in shock declarations. See <xref linkend="conventions"/> for the syntax of <replaceable>PARAMETER_NAME</replaceable>.
+</para>
+<para>The parameters must then be assigned values, see <xref linkend="param_init"/>.
 </para>
 </refsect1>
 
@@ -569,7 +565,7 @@ bet = sqrt(2);
 
   <refnamediv>
     <refname>dsample</refname>
-    <refpurpose>reduces the number of periods considered in following output commands</refpurpose>
+    <refpurpose>reduces the number of periods considered in subsequent output commands</refpurpose>
   </refnamediv>
 </refentry>
 
@@ -593,10 +589,10 @@ bet = sqrt(2);
 
 <refsect1><title>Description</title>
 <para>
-This command is now deprecated (but will still work for older model files). It is not necessary when no simulation is performed and is replaced by an option PERIODS in SIMUL and STOCH_SIMUL.
+This command is now deprecated (but will still work for older model files). It is not necessary when no simulation is performed and is replaced by an option <option>periods</option> in <xref linkend="simul"/> and <xref linkend="stoch_simul"/>.
 </para>
 <para>
-Set the number of periods in the simulation. The periods are numbered from 1 to <replaceable>INTEGER</replaceable>. In perfect foresight simulations, it is assumed that all future events are perfectly known at the beginning of period 1.
+Sets the number of periods in the simulation. The periods are numbered from 1 to <replaceable>INTEGER</replaceable>. In perfect foresight simulations, it is assumed that all future events are perfectly known at the beginning of period 1.
 </para>
 </refsect1>
 
@@ -628,6 +624,48 @@ periods 100;
     <refpurpose>declares the markowitz criterion for fast deterministic simulations</refpurpose>
   </refnamediv>
 </refentry>
+
+</sect1>
+
+<sect1 id="expressions"><title>Expressions</title>
+
+<para>You can specify mathematical expression at two kinds of places in the *.mod file: inside some commands and inside the model description. These expressions are respectively represented by <replaceable>EXPRESSION</replaceable> and <replaceable>MODEL_EXPRESSION</replaceable> in this manual.</para>
+
+<para>Unlike Matlab&reg; or Octave expressions, these expressions are necessarily scalar ones, and cannot construct or contain matrices<footnote><para>Note that you can also put arbitrary Matlab&reg; or Octave expressions in your *.mod file, but those expressions have to be on separate lines, generally at the end of the file for post-processing purposes. These constructions are not addresses in these section.</para></footnote>.</para>
+
+<para>You can construct these expressions using integers (<replaceable>INTEGER</replaceable>), floating point numbers (<replaceable>DOUBLE</replaceable>), parameters, variables, operators and functions.</para>
+
+<sect2><title>Parameters and variables</title>
+Lead and lags allowed only in model expressions.
+
+Describe the semantic difference for endogenous/exogenous between the two kinds of expressions.
+</sect2>
+
+<sect2><title>Operators</title>
+</sect2>
+
+<sect2><title>Functions</title>
+Unknown functions allowed (under some conditions) in expressions outside model block.
+</sect2>
+
+</sect1>
+
+<sect1 id="param_init"><title>Initializing parameters</title>
+
+<para>The syntax is the following:</para>
+<cmdsynopsis>
+  <replaceable>PARAMETER_NAME</replaceable> = <replaceable>EXPRESSION</replaceable>;
+</cmdsynopsis>
+
+<para>Examples:</para>
+
+<programlisting>
+parameters alpha, bet;
+
+beta = 0.99;
+alpha = 0.36;
+A = 1-alpha*beta;
+</programlisting>
 
 </sect1>
 
@@ -693,7 +731,7 @@ periods 100;
 The equations of the model are written in a block delimited by <command>model;</command> and <command>end;</command>.
 </para>
 <para>
-There must be as many equations as there are endogenous variables in the model, except when used to compute the unconstrained optimal policy with <command>planner_objective</command>. The lead and lag of the variables are written in parenthesis immediately after the variable name. Leads or lags of more than one period are allowed. All the functions available in Matlab, Scilab or Gauss, respectively, are recognized. Each equation must be terminated by a semicolon (;).
+There must be as many equations as there are endogenous variables in the model, except when used to compute the unconstrained optimal policy with <xref linkend="ramsey_policy"/>. The lead and lag of the variables are written in parenthesis immediately after the variable name. Leads or lags of more than one period are allowed. Only some elementary functions are allowed. Each equation must be terminated by a semicolon (;).
 </para>
 <para>
 When the equations are written in homogenous form, it is possible to omit the "= 0" part and write only the left hand side of the equation.
@@ -2554,7 +2592,7 @@ In Matlab, variables saved with the <command>dynasave</command> command can be r
 </refentry>
 </sect1>
 
-<sect1><title>Macro-processing language</title>
+<sect1 id="macrolanguage"><title>Macro-processing language</title>
 <para>It is possible to use "macro" commands in the *.mod file for doing the following tasks: source file inclusion, replicating blocks of equations through loops, conditional inclusion of code...</para>
 
 <para>Technically, this macro language is totally independent of the basic Dynare language, and is processed by a separate component of the Dynare pre-processor. The macro processor transforms a *.mod file with macros into a *.mod file without macros (doing expansions/inclusions), and then feeds it to the Dynare parser.
