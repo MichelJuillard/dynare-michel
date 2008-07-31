@@ -1,12 +1,27 @@
-/* This mex file computes A*kron(B,C) or A*kron(B,B) without explicitely building kron(B,C) or kron(B,B), so that 
-** one can consider large matrices B and/or C. 
-**
-** (linux)SYNTAX:
-** mex AkronBC.cc /opt/matlab2007b/bin/glnx86/mkl.so
-**
-** stephane.adjemian@ens.fr [15-11-2007]
-** Dynare Team, 2007.
-*/
+/*
+ * Copyright (C) 2007-2008 Dynare Team
+ *
+ * This file is part of Dynare.
+ *
+ * Dynare is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Dynare is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+/*
+ * This mex file computes A*kron(B,C) or A*kron(B,B) without explicitely building kron(B,C) or kron(B,B), so that 
+ * one can consider large matrices B and/or C. 
+ */
+
 #include <string.h>
 #include "mex.h"
 
