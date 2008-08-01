@@ -1,5 +1,3 @@
-% Copyright (C) 2001 Michel Juillard
-%
 function gcompare(s1,s2)
 % GCOMPARE :	GCOMPARE ( [ 'file1' ; 'file2' ] , [ 'var1' ; 'var2' ...] )	
 %		This optional command plots the trajectories of a list of
@@ -8,6 +6,22 @@ function gcompare(s1,s2)
 %		saved by the instruction DYNASAVE. The simulation in file1
 %		is refered to as the base simulation.
 
+% Copyright (C) 2001 Dynare Team
+%
+% This file is part of Dynare.
+%
+% Dynare is free software: you can redistribute it and/or modify
+% it under the terms of the GNU General Public License as published by
+% the Free Software Foundation, either version 3 of the License, or
+% (at your option) any later version.
+%
+% Dynare is distributed in the hope that it will be useful,
+% but WITHOUT ANY WARRANTY; without even the implied warranty of
+% MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+% GNU General Public License for more details.
+%
+% You should have received a copy of the GNU General Public License
+% along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
 global options_ M_
 global nvx nvy x y lag1
