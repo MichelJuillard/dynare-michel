@@ -18,6 +18,24 @@ function [fh,xh,gh,H,itct,fcount,retcodeh] = csminwel(fcn,x0,H0,grad,crit,nit,me
 %        hessian update, respectively.  (When the routine hits certain kinds of difficulty, it
 %        write g2.mat and g3.mat as well.  If all were written at about the same time, any of them
 %        may be a decent starting point.  One can also start from the one with best function value.)
+
+% Copyright (C) 1993-2007 Christopher Sims
+%
+% This file is part of Dynare.
+%
+% Dynare is free software: you can redistribute it and/or modify
+% it under the terms of the GNU General Public License as published by
+% the Free Software Foundation, either version 3 of the License, or
+% (at your option) any later version.
+%
+% Dynare is distributed in the hope that it will be useful,
+% but WITHOUT ANY WARRANTY; without even the implied warranty of
+% MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+% GNU General Public License for more details.
+%
+% You should have received a copy of the GNU General Public License
+% along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
+
 global bayestopt_
 fh = [];
 xh = [];

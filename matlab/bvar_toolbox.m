@@ -41,7 +41,7 @@ function [ny, nx, posterior, prior, forecast_data] = bvar_toolbox(nlags)
 %    - datafile, first_obs, varobs, xls_sheet, xls_range, nobs, presample
 %    - bvar_prior_{tau,decay,lambda,mu,omega,flat,train}
     
-% Copyright (C) 2003-2007 Chris Sims
+% Copyright (C) 2003-2007 Christopher Sims
 % Copyright (C) 2007-2008 Dynare Team
 %
 % This file is part of Dynare.

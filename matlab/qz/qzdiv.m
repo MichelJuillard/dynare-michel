@@ -1,7 +1,3 @@
-% from Chris Sims web site
-% http://eco-072399b.princeton.edu/yftp/gensys/mfiles/QZDIV.M
-%
-
 function [A,B,Q,Z] = qzdiv(stake,A,B,Q,Z)
 %function [A,B,Q,Z] = qzdiv(stake,A,B,Q,Z)
 %
@@ -9,7 +5,24 @@ function [A,B,Q,Z] = qzdiv(stake,A,B,Q,Z)
 % so that all cases of abs(B(i,i)/A(i,i))>stake are in lower right 
 % corner, while preserving U.T. and orthonormal properties and Q'AZ' and
 % Q'BZ'.
+
+% Copyright (C) 1993-2007 Christopher Sims
 %
+% This file is part of Dynare.
+%
+% Dynare is free software: you can redistribute it and/or modify
+% it under the terms of the GNU General Public License as published by
+% the Free Software Foundation, either version 3 of the License, or
+% (at your option) any later version.
+%
+% Dynare is distributed in the hope that it will be useful,
+% but WITHOUT ANY WARRANTY; without even the implied warranty of
+% MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+% GNU General Public License for more details.
+%
+% You should have received a copy of the GNU General Public License
+% along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
+
 [n jnk] = size(A);
 root = abs([diag(A) diag(B)]);
 root(:,1) = root(:,1)-(root(:,1)<1.e-13).*(root(:,1)+root(:,2));

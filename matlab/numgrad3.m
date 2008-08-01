@@ -7,6 +7,7 @@ function [g, badg, f0, f1, f2] = numgrad3(fcn,x,varargin)
 % See section 25.3.4 in Abramovitz and Stegun (1972, Tenth Printing, December) Handbook of Mathematical Functions.
 % http://www.math.sfu.ca/~cbm/aands/ 
 
+% Copyright (C) 1993-2007 Christopher Sims
 % Copyright (C) 2008 Dynare Team
 %
 % This file is part of Dynare.

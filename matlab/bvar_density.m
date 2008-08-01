@@ -11,7 +11,7 @@ function bvar_density(maxnlags)
 % SPECIAL REQUIREMENTS
 %    none
 
-% Copyright (C) 2003-2007 Chris Sims
+% Copyright (C) 2003-2007 Christopher Sims
 % Copyright (C) 2007 Dynare Team
 %
 % This file is part of Dynare.

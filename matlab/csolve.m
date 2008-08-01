@@ -17,6 +17,24 @@ function [x,rc] = csolve(FUN,x,gradfun,crit,itmax,varargin)
 % rc:       0 means normal solution, 1 and 3 mean no solution despite extremely fine adjustments
 %           in step length (very likely a numerical problem, or a discontinuity). 4 means itmax
 %           termination.
+
+% Copyright (C) 1993-2007 Christopher Sims
+%
+% This file is part of Dynare.
+%
+% Dynare is free software: you can redistribute it and/or modify
+% it under the terms of the GNU General Public License as published by
+% the Free Software Foundation, either version 3 of the License, or
+% (at your option) any later version.
+%
+% Dynare is distributed in the hope that it will be useful,
+% but WITHOUT ANY WARRANTY; without even the implied warranty of
+% MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+% GNU General Public License for more details.
+%
+% You should have received a copy of the GNU General Public License
+% along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
+
 %---------- delta --------------------
 % differencing interval for numerical gradient
 delta = 1e-6;

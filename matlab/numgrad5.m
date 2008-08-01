@@ -8,8 +8,8 @@ function [g, badg, f0, f1, f2, f3, f4] = numgrad5(fcn,x,varargin)
 % http://www.math.sfu.ca/~cbm/aands/ 
 %
 % TODO Try Four points formula when cost_flag3=0 or cost_flag4=0.
-%
 
+% Copyright (C) 1993-2007 Christopher Sims
 % Copyright (C) 2008 Dynare Team
 %
 % This file is part of Dynare.

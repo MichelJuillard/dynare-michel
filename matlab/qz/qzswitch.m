@@ -1,7 +1,3 @@
-% from Chris Sims web site
-% http://eco-072399b.princeton.edu/yftp/gensys/mfiles/QZSWITCH.M
-%
-
 function [A,B,Q,Z] = qzswitch(i,A,B,Q,Z)
 %function [A,B,Q,Z] = qzswitch(i,A,B,Q,Z)
 %
@@ -13,7 +9,25 @@ function [A,B,Q,Z] = qzswitch(i,A,B,Q,Z)
 % to drive all zeros on the diagonal of A to the lower right, but in this case
 % the qz transformation is not unique and it is not possible simply to switch
 % the positions of the diagonal elements of both A and B.
- realsmall=sqrt(eps)*10;
+
+% Copyright (C) 1993-2007 Christopher Sims
+%
+% This file is part of Dynare.
+%
+% Dynare is free software: you can redistribute it and/or modify
+% it under the terms of the GNU General Public License as published by
+% the Free Software Foundation, either version 3 of the License, or
+% (at your option) any later version.
+%
+% Dynare is distributed in the hope that it will be useful,
+% but WITHOUT ANY WARRANTY; without even the implied warranty of
+% MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+% GNU General Public License for more details.
+%
+% You should have received a copy of the GNU General Public License
+% along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
+
+realsmall=sqrt(eps)*10;
 %realsmall=1e-3;
 a = A(i,i); d = B(i,i); b = A(i,i+1); e = B(i,i+1);
 c = A(i+1,i+1); f = B(i+1,i+1);
