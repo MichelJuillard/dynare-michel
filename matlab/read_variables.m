@@ -16,10 +16,23 @@ function dyn_data_01=read_variables(file_name_01,var_names_01,dyn_data_01,xls_sh
 % SPECIAL REQUIREMENTS
 % all local variables have complicated names in order to avoid name
 % conflicts with possible user variable names
-%  
-% part of DYNARE, copyright Dynare Team (2005-2007)
-% Gnu Public License.
 
+% Copyright (C) 2005-2007 Dynare Team
+%
+% This file is part of Dynare.
+%
+% Dynare is free software: you can redistribute it and/or modify
+% it under the terms of the GNU General Public License as published by
+% the Free Software Foundation, either version 3 of the License, or
+% (at your option) any later version.
+%
+% Dynare is distributed in the hope that it will be useful,
+% but WITHOUT ANY WARRANTY; without even the implied warranty of
+% MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+% GNU General Public License for more details.
+%
+% You should have received a copy of the GNU General Public License
+% along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
   dyn_size_01 = size(dyn_data_01,1);
   var_size_01 = size(var_names_01,1);
