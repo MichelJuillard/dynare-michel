@@ -14,9 +14,23 @@ function dr=set_state_space(dr,M_)
 % SPECIAL REQUIREMENTS
 %   none
 %  
-%  
-% part of DYNARE, copyright Dynare Team (1996-2007)
-% Gnu Public License.
+
+% Copyright (C) 1996-2007 Dynare Team
+%
+% This file is part of Dynare.
+%
+% Dynare is free software: you can redistribute it and/or modify
+% it under the terms of the GNU General Public License as published by
+% the Free Software Foundation, either version 3 of the License, or
+% (at your option) any later version.
+%
+% Dynare is distributed in the hope that it will be useful,
+% but WITHOUT ANY WARRANTY; without even the implied warranty of
+% MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+% GNU General Public License for more details.
+%
+% You should have received a copy of the GNU General Public License
+% along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
 xlen = M_.maximum_endo_lead + M_.maximum_endo_lag + 1;
 klen = M_.maximum_endo_lag + M_.maximum_endo_lead + 1;

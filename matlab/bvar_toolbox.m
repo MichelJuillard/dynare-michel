@@ -1,5 +1,4 @@
 function [ny, nx, posterior, prior, forecast_data] = bvar_toolbox(nlags)
-
 %function [ny, nx, posterior, prior, forecast_data] = bvar_toolbox(nlags)
 % bvar_toolbox  Routines shared between BVAR methods
 % Computes several things for the estimations of a BVAR(nlags)
@@ -41,10 +40,25 @@ function [ny, nx, posterior, prior, forecast_data] = bvar_toolbox(nlags)
 %    This function uses the following Dynare options:
 %    - datafile, first_obs, varobs, xls_sheet, xls_range, nobs, presample
 %    - bvar_prior_{tau,decay,lambda,mu,omega,flat,train}
-%    
-% part of DYNARE, copyright Dynare Team (2003-2008)
-% Gnu Public License.
     
+% Copyright (C) 2003-2007 Chris Sims
+% Copyright (C) 2007-2008 Dynare Team
+%
+% This file is part of Dynare.
+%
+% Dynare is free software: you can redistribute it and/or modify
+% it under the terms of the GNU General Public License as published by
+% the Free Software Foundation, either version 3 of the License, or
+% (at your option) any later version.
+%
+% Dynare is distributed in the hope that it will be useful,
+% but WITHOUT ANY WARRANTY; without even the implied warranty of
+% MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+% GNU General Public License for more details.
+%
+% You should have received a copy of the GNU General Public License
+% along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
+
     global options_
     
     % Load dataset

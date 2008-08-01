@@ -6,9 +6,23 @@ function [g, badg, f0, f1, f2] = numgrad3(fcn,x,varargin)
 %
 % See section 25.3.4 in Abramovitz and Stegun (1972, Tenth Printing, December) Handbook of Mathematical Functions.
 % http://www.math.sfu.ca/~cbm/aands/ 
+
+% Copyright (C) 2008 Dynare Team
 %
-% part of DYNARE, copyright Dynare Team (2008)
-% Gnu Public License.
+% This file is part of Dynare.
+%
+% Dynare is free software: you can redistribute it and/or modify
+% it under the terms of the GNU General Public License as published by
+% the Free Software Foundation, either version 3 of the License, or
+% (at your option) any later version.
+%
+% Dynare is distributed in the hope that it will be useful,
+% but WITHOUT ANY WARRANTY; without even the implied warranty of
+% MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+% GNU General Public License for more details.
+%
+% You should have received a copy of the GNU General Public License
+% along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
 f0 = NaN;
 f1 = NaN;

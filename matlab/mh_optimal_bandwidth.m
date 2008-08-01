@@ -23,11 +23,24 @@ function optimal_bandwidth = mh_optimal_bandwidth(data,number_of_draws,bandwidth
 % REFERENCES:
 %   [1] M. Skold and G.O. Roberts [2003], "Density estimation for the Metropolis-Hastings algorithm". 
 %   [2] Silverman [1986], "Density estimation for statistics and data analysis". 
-%  
-% part of DYNARE, copyright Dynare Team (2004-2008)
-% Gnu Public License.
-  
 
+% Copyright (C) 2004-2008 Dynare Team
+%
+% This file is part of Dynare.
+%
+% Dynare is free software: you can redistribute it and/or modify
+% it under the terms of the GNU General Public License as published by
+% the Free Software Foundation, either version 3 of the License, or
+% (at your option) any later version.
+%
+% Dynare is distributed in the hope that it will be useful,
+% but WITHOUT ANY WARRANTY; without even the implied warranty of
+% MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+% GNU General Public License for more details.
+%
+% You should have received a copy of the GNU General Public License
+% along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
+  
 %% Kernel specifications.
 if strcmpi(kernel_function,'gaussian')
     % Kernel definition

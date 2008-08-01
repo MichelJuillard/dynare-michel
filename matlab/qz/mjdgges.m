@@ -1,4 +1,5 @@
 function [ss,tt,w,sdim,eigval,info] = mjdgges(e,d,qz_criterium)
+%function [ss,tt,w,sdim,eigval,info] = mjdgges(e,d,qz_criterium)
 % QZ decomposition, Sims' codes are used.
 %
 % INPUTS
@@ -19,10 +20,23 @@ function [ss,tt,w,sdim,eigval,info] = mjdgges(e,d,qz_criterium)
 %
 % SPECIAL REQUIREMENTS
 %   none.
-%  
-%  
-% part of DYNARE, copyright Dynare Team (1996-2008)
-% Gnu Public License.
+
+% Copyright (C) 1996-2008 Dynare Team
+%
+% This file is part of Dynare.
+%
+% Dynare is free software: you can redistribute it and/or modify
+% it under the terms of the GNU General Public License as published by
+% the Free Software Foundation, either version 3 of the License, or
+% (at your option) any later version.
+%
+% Dynare is distributed in the hope that it will be useful,
+% but WITHOUT ANY WARRANTY; without even the implied warranty of
+% MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+% GNU General Public License for more details.
+%
+% You should have received a copy of the GNU General Public License
+% along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
     
 % Chek number of inputs and outputs.
 if nargin>3 | nargin<2
