@@ -1,18 +1,25 @@
-function hms = sec2hms(sec)
-%function [hour, minute, second] = sec2hms(sec)
-%SEC2HMS  Convert seconds to hours, minutes and seconds.
+function hms = sec2hms(secs)
+% SEC2HMS Converts a number of seconds into a hours-minutes-seconds string
+
+% Copyright (C) 2008 Dynare Team
 %
-%   [HOUR, MINUTE, SECOND] = SEC2HMS(SEC) converts the number of seconds in
-%   SEC into hours, minutes and seconds.
+% This file is part of Dynare.
+%
+% Dynare is free software: you can redistribute it and/or modify
+% it under the terms of the GNU General Public License as published by
+% the Free Software Foundation, either version 3 of the License, or
+% (at your option) any later version.
+%
+% Dynare is distributed in the hope that it will be useful,
+% but WITHOUT ANY WARRANTY; without even the implied warranty of
+% MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+% GNU General Public License for more details.
+%
+% You should have received a copy of the GNU General Public License
+% along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-%   Author:      Peter J. Acklam
-%   Time-stamp:  2002-03-03 12:50:09 +0100
-%   E-mail:      pjacklam@online.no
-%   URL:         http://home.online.no/~pjacklam
-
-   hour   = fix(sec/3600);      % get number of hours
-   sec    = sec - 3600*hour;    % remove the hours
-   minute = fix(sec/60);        % get number of minutes
-   sec    = sec - 60*minute;    % remove the minutes
-   second = sec;
-   hms = [num2str(hour,'%02g') ':' num2str(minute,'%02g') ':' num2str(second,'%02g')];
+    secs = round(secs);
+    s = rem(secs, 60);
+    m = rem(floor(secs / 60), 60);
+    h = floor(secs / 3600);
+    hms = sprintf('%dh%02dm%02ds', h, m, s);
