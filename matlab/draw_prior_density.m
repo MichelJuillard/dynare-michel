@@ -71,8 +71,8 @@ elseif pshape(indx) == 3  %/* GAUSSIAN PRIOR */
     density = inline('inv(sqrt(2*pi)*b)*exp(-0.5*((x-a)/b).^2)','x','a','b');
     a = p1(indx);
     b = p2(indx);
-    infbound = qnorm(truncprior,a,b); 
-    supbound = qnorm(1-truncprior,a,b);
+    infbound = norminv(truncprior,a,b); 
+    supbound = norminv(1-truncprior,a,b);
     stepsize = (supbound-infbound)/200;
     abscissa = infbound:stepsize:supbound;
     dens = density(abscissa,a,b);  

@@ -55,8 +55,8 @@ for i=1:n
       bounds(i,1) = mj_qgamma(options_.prior_trunc,a)*b+p3(i);
       bounds(i,2) = mj_qgamma(1-options_.prior_trunc,a)*b+p3(i);
     case 3
-      bounds(i,1) = qnorm(options_.prior_trunc,pmean(i),p2(i));
-      bounds(i,2) = qnorm(1-options_.prior_trunc,pmean(i),p2(i));
+      bounds(i,1) = norminv(options_.prior_trunc,pmean(i),p2(i));
+      bounds(i,2) = norminv(1-options_.prior_trunc,pmean(i),p2(i));
     case 4
       nu = p2(i);
       mu = pmean(i);

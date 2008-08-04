@@ -80,7 +80,7 @@ function [yf,int_width]=forcst(dr,y0,horizon,var_list)
 	sigma_y = sigma_y+sigma_u;
     end
 
-    fact = qnorm((1-options_.conf_sig)/2,0,1);
+    fact = norminv((1-options_.conf_sig)/2,0,1);
     
     int_width = zeros(horizon,M_.endo_nbr);
     for i=1:nvar

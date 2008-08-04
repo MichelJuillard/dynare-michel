@@ -4,6 +4,7 @@ function dynareroot = dynare_config(path_to_dynare)
 % decomposition, solution to sylvester equation and kronecker
 % products...) and, if needed, add paths to the matlab versions
 % of these routines.
+% Also adds other directories to the path.
 %
 % INPUTS
 %   none
@@ -35,6 +36,12 @@ if nargin
     addpath(path_to_dynare);
 end
 dynareroot = strrep(which('dynare.m'),'dynare.m','');
+
+% Add path to distribution-related function if under Matlab
+% without the statistics toolbox
+if ~exist('OCTAVE_VERSION') && isempty(ver('stats'))
+    addpath([dynareroot '/distributions/'])
+end
 
 if exist('AIM')==7  % Add path to G.Anderson AIM solver (added by GP July'08)
     addpath([dynareroot '/AIM/']);
