@@ -44,7 +44,8 @@ p4      = bayestopt_.p4;
 
 truncprior = 10^(-3);
 
-if pshape(indx) == 1     %/* BETA Prior */
+switch pshape(indx)
+ case 1  % Beta prior
     density = inline('((bb-x).^(b-1)).*(x-aa).^(a-1)./(beta(a,b)*(bb-aa)^(a+b-1))','x','a','b','aa','bb');
     mu = (p1(indx)-p3(indx))/(p4(indx)-p3(indx));
     stdd = p2(indx)/(p4(indx)-p3(indx));
@@ -57,7 +58,7 @@ if pshape(indx) == 1     %/* BETA Prior */
     stepsize = (supbound-infbound)/200;
     abscissa = infbound:stepsize:supbound;
     dens = density(abscissa,a,b,aa,bb);
-elseif pshape(indx) == 2  %/* GAMMA PRIOR */
+ case 2  % Generalized Gamma prior
     mu = p1(indx)-p3(indx);
     b  = p2(indx)^2/mu;
     a  = mu/b;
@@ -67,7 +68,7 @@ elseif pshape(indx) == 2  %/* GAMMA PRIOR */
     abscissa = infbound:stepsize:supbound;
     dens = exp(lpdfgam(abscissa,a,b));
     abscissa = abscissa + p3(indx);
-elseif pshape(indx) == 3  %/* GAUSSIAN PRIOR */
+ case 3  % Gaussian prior
     density = inline('inv(sqrt(2*pi)*b)*exp(-0.5*((x-a)/b).^2)','x','a','b');
     a = p1(indx);
     b = p2(indx);
@@ -76,7 +77,7 @@ elseif pshape(indx) == 3  %/* GAUSSIAN PRIOR */
     stepsize = (supbound-infbound)/200;
     abscissa = infbound:stepsize:supbound;
     dens = density(abscissa,a,b);  
-elseif pshape(indx) == 4  %/* INVGAMMA PRIOR type 1 */
+ case 4  % Inverse-gamma of type 1 prior
     density = inline('2*inv(gamma(nu/2))*(x.^(-nu-1))*((s/2)^(nu/2)).*exp(-s./(2*x.^2))','x','s','nu');
     nu = p2(indx);
     s  = p1(indx);
@@ -87,7 +88,7 @@ elseif pshape(indx) == 4  %/* INVGAMMA PRIOR type 1 */
     stepsize = (supbound-infbound)/200;
     abscissa = infbound:stepsize:supbound;
     dens = density(abscissa,s,nu);  
-elseif pshape(indx) == 5  %/* UNIFORM PRIOR */
+ case 5  % Uniform prior
     density = inline('(x.^0)/(b-a)','x','a','b');
     a  = p1(indx);
     b  = p2(indx);
@@ -96,7 +97,7 @@ elseif pshape(indx) == 5  %/* UNIFORM PRIOR */
     stepsize = (supbound-infbound)/200;
     abscissa = infbound:stepsize:supbound;
     dens = density(abscissa,a,b);  
-elseif pshape(indx) == 6  %/*  INVGAMMA PRIOR type 2 */        
+ case 6  % Inverse-gamma of type 2 prior
     density = inline('inv(gamma(nu/2))*(x.^(-.5*(nu+2)))*((s/2)^(nu/2)).*exp(-s./(2*x))','x','s','nu');
     nu = p2(indx);
     s  = p1(indx);
@@ -107,6 +108,8 @@ elseif pshape(indx) == 6  %/*  INVGAMMA PRIOR type 2 */
     stepsize = (supbound-infbound)/200;
     abscissa = infbound:stepsize:supbound;
     dens = density(abscissa,s,nu);  
+ otherwise
+  error(sprintf('draw_prior_density: unknown distribution shape (index %d, type %d)', indx, pshape(indx)));
 end 
 
 k = [1:length(dens)];

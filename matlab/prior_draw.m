@@ -82,9 +82,7 @@ if init
             % 5: Uniform prior
             %    p3(i) and p4(i) are used.
           otherwise
-            disp('prior_draw :: Error!')
-            disp('Unknown prior shape.')
-            return
+           error(sprintf('prior_draw: unknown distribution shape (index %d, type %d)', i, pshape(i)));
         end
         pdraw = zeros(npar,1);  
     end
@@ -139,6 +137,6 @@ for i = 1:npar
             end
         end
       otherwise
-        % Nothing to do here.
+       error(sprintf('prior_draw: unknown distribution shape (index %d, type %d)', i, pshape(i)));
     end
 end

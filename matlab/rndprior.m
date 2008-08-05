@@ -39,7 +39,7 @@ for i=1:length(pmean),
     
     switch pshape(i)
         
-     case 1 %'beta'
+     case 1 % Beta
       mu = (pmean(i)-p3(i))/(p4(i)-p3(i));
       stdd = p2(i)/(p4(i)-p3(i));
       A = (1-mu)*mu^2/stdd^2 - mu;
@@ -47,25 +47,32 @@ for i=1:length(pmean),
       y(1,i) = betarnd(A, B);
       y(1,i) = y(1,i) * (p4(i)-p3(i)) + p3(i);
       
-     case 2 %'gamma'
+     case 2 % Generalized gamma
       mu = pmean(i)-p3(i);
       B = p2(i)^2/mu;
       A = mu/B;
       y(1,i) = gamrnd(A, B) + p3(i);
       
-     case 3 %'normal'
+     case 3 % Gaussian
       MU = pmean(i);
       SIGMA = p2(i);
       y(1,i) = randn*SIGMA+ MU;
       
-     case 4 %'invgamma'
+     case 4 % Inverse-gamma type 1
       nu = p2(i);
       s = p1(i);
       y(1,i) = 1/sqrt(gamrnd(nu/2, 2/s));
       
-     case 5 %'uniform'
+     case 5 % Uniform
       y(1,i) = rand*(p2(i)-p1(i)) + p1(i);
+
+     case 6 % Inverse-gamma type 2
+      nu = p2(i);
+      s = p1(i);
+      y(1,i) = 1/gamrnd(nu/2, 2/s);
       
+     otherwise
+      error(sprintf('rndprior: unknown distribution shape (index %d, type %d)', i, pshape(i)));
     end
 end
 

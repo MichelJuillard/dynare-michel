@@ -67,8 +67,10 @@ for i=1:n
     case 5
       bounds(i,1) = p1(i);
       bounds(i,2) = p2(i);
+    case 6
+      bounds(i,1) = 1/gaminv(1-options_.prior_trunc, p2(i)/2, 2/p1(i));
+      bounds(i,2) = 1/gaminv(options_.prior_trunc, p2(i)/2, 2/p1(i));
     otherwise
-      bounds(i,1) = -Inf;
-      bounds(i,2) = Inf;
+      error(sprintf('prior_bounds: unknown distribution shape (index %d, type %d)', i, pshape(i)));
   end
 end
