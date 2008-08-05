@@ -52,8 +52,8 @@ if pshape(indx) == 1     %/* BETA Prior */
     b = a*(1/mu-1);
     aa = p3(indx);
     bb = p4(indx);
-    infbound = qbeta(truncprior,a,b)*(bb-aa)+aa;
-    supbound = qbeta(1-truncprior,a,b)*(bb-aa)+aa;
+    infbound = betainv(truncprior,a,b)*(bb-aa)+aa;
+    supbound = betainv(1-truncprior,a,b)*(bb-aa)+aa;
     stepsize = (supbound-infbound)/200;
     abscissa = infbound:stepsize:supbound;
     dens = density(abscissa,a,b,aa,bb);

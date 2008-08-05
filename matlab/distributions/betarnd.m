@@ -3,7 +3,7 @@ function rnd = betarnd(a, b)
 %  RND = betarnd(A,B) returns a random sample from the
 %  Beta distribution with parameters A and B (i.e. mean of
 %  the distribution is A/(A+B) and variance is
-%  A*B/(A+B)^2/(A+B+1).
+%  A*B/(A+B)^2/(A+B+1) ).
 
 % Copyright (C) 2008 Dynare Team
 %

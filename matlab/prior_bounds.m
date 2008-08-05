@@ -47,8 +47,8 @@ for i=1:n
       stdd = p2(i)/(p4(i)-p3(i));
       A = (1-mu)*mu^2/stdd^2 - mu;
       B = A*(1/mu - 1);
-      bounds(i,1) = qbeta(options_.prior_trunc,A,B)*(p4(i)-p3(i))+p3(i);
-      bounds(i,2) = qbeta(1-options_.prior_trunc,A,B)*(p4(i)-p3(i))+p3(i);
+      bounds(i,1) = betainv(options_.prior_trunc,A,B)*(p4(i)-p3(i))+p3(i);
+      bounds(i,2) = betainv(1-options_.prior_trunc,A,B)*(p4(i)-p3(i))+p3(i);
     case 2
       b = p2(i)^2/(pmean(i)-p3(i));
       a = (pmean(i)-p3(i))/b;
