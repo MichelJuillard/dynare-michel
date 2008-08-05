@@ -58,12 +58,8 @@ for i=1:n
       bounds(i,1) = norminv(options_.prior_trunc,pmean(i),p2(i));
       bounds(i,2) = norminv(1-options_.prior_trunc,pmean(i),p2(i));
     case 4
-      nu = p2(i);
-      mu = pmean(i);
-      beta = ( gamma( (nu-1)/2 ) / mu / gamma( nu/2 ) )^2;
-      a=2/beta;
-      bounds(i,1) = 1/sqrt(gaminv(1-options_.prior_trunc,p2(i)/2,beta));
-      bounds(i,2) = 1/sqrt(gaminv(options_.prior_trunc,p2(i)/2,beta));
+      bounds(i,1) = 1/sqrt(gaminv(1-options_.prior_trunc, p2(i)/2, 2/p1(i)));
+      bounds(i,2) = 1/sqrt(gaminv(options_.prior_trunc, p2(i)/2, 2/p1(i)));
     case 5
       bounds(i,1) = p1(i);
       bounds(i,2) = p2(i);
