@@ -108,26 +108,23 @@ for i = 1:npar
         end
       case 2% Gamma prior.
         while condition
-            g = gamma_draw(a(i),b(i),p3(i));
+            g = gamrnd(a(i),b(i)) + p3(i);
             if g >= bounds(i,1) && g <= bounds(i,2)
                 pdraw(i) = g;
                 break
             end
         end
-      case 1% Beta distribution (TODO: generalized beta distribution)
+      case 1% Beta distribution
         while condition
-            y1 = gamma_draw(a(i),1,0);
-            y2 = gamma_draw(b(i),1,0);
-            tmp = y1/(y1+y2);
+            tmp = betarnd(a(i), b(i));
             if tmp >= bounds(i,1) && tmp <= bounds(i,2)
-                %pdraw(i) = pmean(i)+tmp*pstd(i);
                 pdraw(i) = p3(i)+tmp*(p4(i)-p3(i));
                 break
             end
         end
       case 4% INV-GAMMA1 distribution
         while condition
-            tmp = sqrt(1/gamma_draw(p2(i)/2,2/p1(i),0));
+            tmp = sqrt(1/gamrnd(p2(i)/2,2/p1(i)));
             if tmp >= bounds(i,1) && tmp <= bounds(i,2)
                 pdraw(i) = tmp;
                 break
@@ -135,7 +132,7 @@ for i = 1:npar
         end        
       case 6% INV-GAMMA2 distribution  
         while condition
-            tmp = 1/gamma_draw(p2(i)/2,2/p1(i),0);
+            tmp = 1/gamrnd(p2(i)/2,2/p1(i));
             if tmp >= bounds(i,1) && tmp <= bounds(i,2)
                 pdraw(i) = tmp;
                 break
@@ -144,30 +141,4 @@ for i = 1:npar
       otherwise
         % Nothing to do here.
     end
-end
-
-  
-
-  
-  
-function g = gamma_draw(a,b,c)
-% Bauwens, Lubrano & Richard (page 316)
-if a >30
-    z = randn;
-    g = b*(z+sqrt(4*a-1))^2/4 + c; 
-else
-    condi = 1;
-    while condi
-        x = -1;
-        while x<0
-            u1 = rand;
-            y = tan(pi*u1);
-            x = y*sqrt(2*a-1)+a-1; 
-        end
-        u2 = rand;
-        if log(u2) <= log(1+y^2)+(a-1)*log(x/(a-1))-y*sqrt(2*a-1);
-            break
-        end
-    end
-    g = x*b+c;
 end

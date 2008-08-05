@@ -11,7 +11,7 @@ function y = rndprior(bayestopt_)
 % SPECIAL REQUIREMENTS
 %    none
 
-% Copyright (C) 2003-2007 Dynare Team
+% Copyright (C) 2003-2008 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -44,14 +44,14 @@ for i=1:length(pmean),
       stdd = p2(i)/(p4(i)-p3(i));
       A = (1-mu)*mu^2/stdd^2 - mu;
       B = A*(1/mu - 1);
-      y(1,i) = beta_rnd(1, A, B);
+      y(1,i) = betarnd(A, B);
       y(1,i) = y(1,i) * (p4(i)-p3(i)) + p3(i);
       
      case 2 %'gamma'
       mu = pmean(i)-p3(i);
-      B = mu/p2(i)^2;              %gamm_rnd uses 1/B instead of B as param.
-      A = mu*B;
-      y(1,i) = gamm_rnd(1, A, B) + p3(i);
+      B = p2(i)^2/mu;
+      A = mu/B;
+      y(1,i) = gamrnd(A, B) + p3(i);
       
      case 3 %'normal'
       MU = pmean(i);
@@ -61,8 +61,7 @@ for i=1:length(pmean),
      case 4 %'invgamma'
       nu = p2(i);
       s = p1(i);
-      y(1,i) = 1/sqrt(gamm_rnd(1, nu/2, s/2));    %gamm_rnd uses 1/B
-                                                  %instead of B as param.
+      y(1,i) = 1/sqrt(gamrnd(nu/2, 2/s));
       
      case 5 %'uniform'
       y(1,i) = rand*(p2(i)-p1(i)) + p1(i);
