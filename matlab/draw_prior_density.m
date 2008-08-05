@@ -61,8 +61,8 @@ elseif pshape(indx) == 2  %/* GAMMA PRIOR */
     mu = p1(indx)-p3(indx);
     b  = p2(indx)^2/mu;
     a  = mu/b;
-    infbound = mj_qgamma(truncprior,a)*b; 
-    supbound = mj_qgamma(1-truncprior,a)*b;
+    infbound = gaminv(truncprior,a,b);
+    supbound = gaminv(1-truncprior,a,b);
     stepsize = (supbound-infbound)/200;
     abscissa = infbound:stepsize:supbound;
     dens = exp(lpdfgam(abscissa,a,b));
@@ -82,8 +82,8 @@ elseif pshape(indx) == 4  %/* INVGAMMA PRIOR type 1 */
     s  = p1(indx);
     a  = nu/2;
     b  = 2/s;
-    infbound = 1/sqrt(mj_qgamma(1-10*truncprior,a)*b); 
-    supbound = 1/sqrt(mj_qgamma(10*truncprior,a)*b);
+    infbound = 1/sqrt(gaminv(1-10*truncprior,a,b));
+    supbound = 1/sqrt(gaminv(10*truncprior,a,b));
     stepsize = (supbound-infbound)/200;
     abscissa = infbound:stepsize:supbound;
     dens = density(abscissa,s,nu);  
@@ -102,8 +102,8 @@ elseif pshape(indx) == 6  %/*  INVGAMMA PRIOR type 2 */
     s  = p1(indx);
     a  = nu/2;
     b  = 2/s;
-    infbound = 1/(qgamma(1-truncprior,a)*b); 
-    supbound = 1/(qgamma(truncprior,a)*b);
+    infbound = 1/(gaminv(1-truncprior,a,b));
+    supbound = 1/(gaminv(truncprior,a,b));
     stepsize = (supbound-infbound)/200;
     abscissa = infbound:stepsize:supbound;
     dens = density(abscissa,s,nu);  

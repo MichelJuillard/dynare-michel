@@ -89,7 +89,7 @@ check_coverage = 1;
 increase = 1;
 while check_coverage
   for p = 0.1:0.1:0.9;
-    critval = qchisq(p,npar);
+    critval = chi2inv(p,npar);
     ifil = FirstLine;
     tmp = 0;
     for n = FirstMhFile:TotalNumberOfMhFiles

@@ -52,8 +52,8 @@ for i=1:n
     case 2
       b = p2(i)^2/(pmean(i)-p3(i));
       a = (pmean(i)-p3(i))/b;
-      bounds(i,1) = mj_qgamma(options_.prior_trunc,a)*b+p3(i);
-      bounds(i,2) = mj_qgamma(1-options_.prior_trunc,a)*b+p3(i);
+      bounds(i,1) = gaminv(options_.prior_trunc,a,b)+p3(i);
+      bounds(i,2) = gaminv(1-options_.prior_trunc,a,b)+p3(i);
     case 3
       bounds(i,1) = norminv(options_.prior_trunc,pmean(i),p2(i));
       bounds(i,2) = norminv(1-options_.prior_trunc,pmean(i),p2(i));
@@ -62,8 +62,8 @@ for i=1:n
       mu = pmean(i);
       beta = ( gamma( (nu-1)/2 ) / mu / gamma( nu/2 ) )^2;
       a=2/beta;
-      bounds(i,1) = 1/sqrt(mj_qgamma(1-options_.prior_trunc,p2(i)/2)*beta);
-      bounds(i,2) = 1/sqrt(mj_qgamma(options_.prior_trunc,p2(i)/2)*beta);
+      bounds(i,1) = 1/sqrt(gaminv(1-options_.prior_trunc,p2(i)/2,beta));
+      bounds(i,2) = 1/sqrt(gaminv(options_.prior_trunc,p2(i)/2,beta));
     case 5
       bounds(i,1) = p1(i);
       bounds(i,2) = p2(i);
