@@ -250,7 +250,7 @@ function [alphahat,etahat,epsilonhat,ahat,SteadyState,trend_coeff,aK,T,R,P,PK,d,
 						  Z,R1,Q,Pinf,Pstar, ...
                                                   data1,nobs,np,smpl);
               end
-              oo_.NewFilteredVariables = QT*filtered_values(data1,ahat,P,T,Z);
+%              oo_.NewFilteredVariables = QT*filtered_values(data1,ahat,P,T,Z);
           else
               [alphahat,etahat,ahat,P,aK,PK,d,decomp] = DiffuseKalmanSmoother3_Z(ST, ...
 						  Z,R1,Q,Pinf,Pstar,data1,nobs,np,smpl);
