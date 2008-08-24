@@ -51,6 +51,7 @@ nvobs     = size(options_.varobs,1);
 iendo = 1:endo_nbr;
 horizon = options_.forecast;
 moments_varendo = options_.moments_varendo;
+filtered_vars = options_.filtered_vars;
 if horizon
     i_last_obs = gend+(1-M_.maximum_endo_lag:0);
 end
@@ -123,16 +124,18 @@ if options_.smoother
   stock_smooth = zeros(endo_nbr,gend,MAX_nsmoo);
   stock_innov  = zeros(exo_nbr,gend,B);
   stock_error = zeros(nvobs,gend,MAX_nerro);
+  stock_filter = zeros(endo_nbr,gend,MAX_nsmoo);
   run_smoother = 1;
 end
+
 if options_.filter_step_ahead
-    stock_filter = zeros(naK,endo_nbr,gend+ ...
+    stock_filter_step_ahead = zeros(naK,endo_nbr,gend+ ...
                          options_.filter_step_ahead(end),MAX_naK);
     run_smoother = 1;
 end
 if options_.forecast
     stock_forcst_mean = zeros(endo_nbr,horizon+maxlag,MAX_nforc1);
-    stock_forcst_total = zeros(endo_nbr,horizon+maxlag,MAX_nforc2);
+    stock_forcst_point = zeros(endo_nbr,horizon+maxlag,MAX_nforc2);
     run_smoother = 1;
 end
 if moments_varendo
@@ -146,23 +149,25 @@ for b=1:B
       stock_moments{irun(8)} = compute_model_moments(dr,M_,options_);
   end
   if run_smoother
-      [alphahat,etahat,epsilonhat,ahat,SteadyState,trend_coeff,aK] = ...
+      [alphahat,etahat,epsilonhat,alphatilde,SteadyState,trend_coeff,aK] = ...
           DsgeSmoother(deep,gend,Y);
       if options_.loglinear
           stock_smooth(dr.order_var,:,irun(1)) = alphahat(1:endo_nbr,:)+ ...
               repmat(log(dr.ys(dr.order_var)),1,gend);
+          stock_filter(dr.order_var,:,irun(1)) = alphatilde(1:endo_nbr,:)+ ...
+              repmat(log(dr.ys(dr.order_var)),1,gend);
       else
           stock_smooth(dr.order_var,:,irun(1)) = alphahat(1:endo_nbr,:)+ ...
               repmat(dr.ys(dr.order_var),1,gend);
+          stock_filter(dr.order_var,:,irun(1)) = alphatilde(1:endo_nbr,:)+ ...
+              repmat(dr.ys(dr.order_var),1,gend);
       end    
-      if nvx
-          stock_innov(:,:,irun(2))  = etahat;
-      end
+      stock_innov(:,:,irun(2))  = etahat;
       if nvn
           stock_error(:,:,irun(3))  = epsilonhat;
       end
       if naK
-          stock_filter(:,dr.order_var,:,irun(4)) = aK(options_.filter_step_ahead,1:endo_nbr,:);
+          stock_filter_steap_ahead(:,dr.order_var,:,irun(4)) = aK(options_.filter_step_ahead,1:endo_nbr,:);
       end
 
       if horizon
@@ -192,7 +197,7 @@ for b=1:B
           end
 
           stock_forcst_mean(:,:,irun(6)) = yf';
-          stock_forcst_total(:,:,irun(7)) = yf1';
+          stock_forcst_point(:,:,irun(7)) = yf1';
       end
       
   end
@@ -206,10 +211,12 @@ for b=1:B
       stock = stock_smooth(:,:,1:irun(1)-1);
       ifil(1) = ifil(1) + 1;
       save([DirectoryName '/' M_.fname '_smooth' int2str(ifil(1)) '.mat'],'stock');
+      stock = stock_filter(:,:,1:irun(1)-1);
+      save([DirectoryName '/' M_.fname '_smooth' int2str(ifil(1)) '.mat'],'stock');
       irun(1) = 1;
   end
   
-  if nvx && (irun(2) > MAX_ninno || b == B)
+  if irun(2) > MAX_ninno || b == B
       stock = stock_innov(:,:,1:irun(2)-1);
       ifil(2) = ifil(2) + 1;
       save([DirectoryName '/' M_.fname '_inno' int2str(ifil(2)) '.mat'],'stock');
@@ -224,9 +231,9 @@ for b=1:B
   end
   
   if naK && (irun(4) > MAX_naK || b == B)
-      stock = stock_filter(:,:,:,1:irun(4)-1);
+      stock = stock_filter_step_ahead(:,:,:,1:irun(4)-1);
       ifil(4) = ifil(4) + 1;
-      save([DirectoryName '/' M_.fname '_filter' int2str(ifil(4)) '.mat'],'stock');
+      save([DirectoryName '/' M_.fname '_filter_step_ahead' int2str(ifil(4)) '.mat'],'stock');
       irun(4) = 1;
   end
   
@@ -245,9 +252,9 @@ for b=1:B
   end
 
   if horizon && (irun(7) > MAX_nforc2 ||  b == B)
-      stock = stock_forcst_total(:,:,1:irun(7)-1);
+      stock = stock_forcst_point(:,:,1:irun(7)-1);
       ifil(7) = ifil(7) + 1;
-      save([DirectoryName '/' M_.fname '_forc_total' int2str(ifil(7)) '.mat'],'stock');
+      save([DirectoryName '/' M_.fname '_forc_point' int2str(ifil(7)) '.mat'],'stock');
       irun(7) = 1;
   end
 
@@ -278,15 +285,37 @@ save([DirectoryName '/' M_.fname '_data.mat'],'stock_gend','stock_data');
 
 if options_.smoother
     pm3(endo_nbr,gend,ifil(1),B,'Smoothed variables',...
-	M_.endo_names(SelecVariables),M_.endo_names,'tit_tex',M_.endo_names,...
-	'names2','smooth',[M_.fname '/metropolis'],'_smooth')
+	'',M_.endo_names,'tit_tex',M_.endo_names,...
+	varlist,'smoothed_variables',[M_.fname '/metropolis'],'_smooth');
+    pm3(exo_nbr,gend,ifil(2),B,'Smoothed shocks',...
+	'',M_.exo_names,'tit_tex',M_.exo_names,...
+	M_.exo_names,'smoothed_shocks',[M_.fname '/metropolis'],'_inno');
+    if nvn
+        % needs to  be fixed
+%        pm3(endo_nbr,gend,ifil(3),B,'Smoothed measurement errors',...
+%            M_.endo_names(SelecVariables),M_.endo_names,'tit_tex',M_.endo_names,...
+%            'names2','smooth_errors',[M_.fname '/metropolis'],'_error')
+    end
+end
+
+if options_.filtered_vars
+    pm3(endo_nbr,gend+1,ifil(1),B,'Filtered variables',...
+	'',M_.endo_names,'tit_tex',M_.endo_names,...
+	varlist,'filtered_current_variables',[M_.fname '/metropolis'], ...
+        '_filter');
+end
+
+if options_.filter_step_ahead
+    pm3(endo_nbr,gend+1,ifil(1),B,'One step ahead forecast',...
+	'',M_.endo_names,'tit_tex',M_.endo_names,...
+	varlist,'one_step_ahead',[M_.fname '/metropolis'],'_filter_step_ahead');
 end
 
 if options_.forecast
     pm3(endo_nbr,horizon+maxlag,ifil(6),B,'Forecasted variables (mean)',...
-	M_.endo_names(SelecVariables),M_.endo_names,'tit_tex',M_.endo_names,...
-	'names2','smooth',[M_.fname '/metropolis'],'_forc_mean')
-    pm3(endo_nbr,horizon+maxlag,ifil(6),B,'Forecasted variables (total)',...
-	M_.endo_names(SelecVariables),M_.endo_names,'tit_tex',M_.endo_names,...
-	'names2','smooth',[M_.fname '/metropolis'],'_forc_total')
+	'',M_.endo_names,'tit_tex',M_.endo_names,...
+	varlist,'mean_forecast',[M_.fname '/metropolis'],'_forc_mean');
+    pm3(endo_nbr,horizon+maxlag,ifil(6),B,'Forecasted variables (point)',...
+	'',M_.endo_names,'tit_tex',M_.endo_names,...
+	varlist,'point_forecast',[M_.fname '/metropolis'],'_forc_point');
 end

@@ -21,21 +21,22 @@ function pm3(n1,n2,ifil,B,tit1,tit2,tit3,tit_tex,names1,names2,name3,DirectoryNa
 
   nn = 3;
   MaxNumberOfPlotsPerFigure = nn^2; % must be square
-  varlist = options_.varlist;
+  varlist = names2;
   if isempty(varlist)
-    varlist = M_.endo_names;
+    varlist = names1;
     SelecVariables = (1:M_.endo_nbr)';
     nvar = M_.endo_nbr;
   else
     nvar = size(varlist,1);
     SelecVariables = [];
     for i=1:nvar
-      if ~isempty(strmatch(varlist(i,:),M_.endo_names,'exact'))
-	SelecVariables = [SelecVariables;strmatch(varlist(i,:),M_.endo_names,'exact')];
+      if ~isempty(strmatch(varlist(i,:),names1,'exact'))
+	SelecVariables = [SelecVariables;strmatch(varlist(i,:),names1,'exact')];
       end
     end
   end
   if options_.TeX
+      % needs to be fixed
     varlist_TeX = [];
     for i=1:nvar
       varlist_TeX = strvcat(varlist_TeX,M_.endo_names_tex(SelecVariables(i),:));
@@ -51,6 +52,9 @@ function pm3(n1,n2,ifil,B,tit1,tit2,tit3,tit_tex,names1,names2,name3,DirectoryNa
   k = 0;
   for file = 1:ifil
     load([DirectoryName '/' M_.fname var_type int2str(file)]);
+    if size(size(stock),2) == 4
+        stock = squeeze(stock(1,:,:,:));
+    end
     k = k(end)+(1:size(stock,3));
     stock1(:,:,k) = stock;
   end
@@ -84,7 +88,7 @@ function pm3(n1,n2,ifil,B,tit1,tit2,tit3,tit_tex,names1,names2,name3,DirectoryNa
   %%
   figunumber = 0;
   subplotnum = 0;
-  hh = figure('Name',[name3 ' ' int2str(figunumber+1)]);
+  hh = figure('Name',[tit1 ' ' int2str(figunumber+1)]);
   for i=1:nvar
     NAMES = [];
     if options_.TeX 
