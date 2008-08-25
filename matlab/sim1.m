@@ -1,4 +1,3 @@
-
 function sim1
 % function sim1
 % performs deterministic simulations with lead or lag on one period
@@ -111,7 +110,10 @@ for iter = 1:options_.maxit
 		fprintf('\n') ;
 		disp(['	Convergency obtained.']) ;
 		fprintf('\n') ;
-		break
+                oo_.deterministic_simulation.status = 1;% Convergency obtained.
+		oo_.deterministic_simulation.error = err;
+                oo_.deterministic_simulation.iterations = iter;
+                break
 	end
 end
 
@@ -121,6 +123,9 @@ if ~ stop
 	fprintf('\n') ;
 	disp(['WARNING : maximum number of iterations is reached (modify options_.maxit).']) ;
 	fprintf('\n') ;
+        oo_.deterministic_simulation.status = 0;% more iterations are needed.
+        oo_.deterministic_simulation.error = err;
+        oo_.deterministic_simulation.iterations = options_.maxit;
 end
 disp (['-----------------------------------------------------']) ;
 return ;
