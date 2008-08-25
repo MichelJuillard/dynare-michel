@@ -167,7 +167,7 @@ for b=1:B
           stock_error(:,:,irun(3))  = epsilonhat;
       end
       if naK
-          stock_filter_steap_ahead(:,dr.order_var,:,irun(4)) = aK(options_.filter_step_ahead,1:endo_nbr,:);
+          stock_filter_step_ahead(:,dr.order_var,:,irun(4)) = aK(options_.filter_step_ahead,1:endo_nbr,:);
       end
 
       if horizon
@@ -212,7 +212,7 @@ for b=1:B
       ifil(1) = ifil(1) + 1;
       save([DirectoryName '/' M_.fname '_smooth' int2str(ifil(1)) '.mat'],'stock');
       stock = stock_filter(:,:,1:irun(1)-1);
-      save([DirectoryName '/' M_.fname '_smooth' int2str(ifil(1)) '.mat'],'stock');
+      save([DirectoryName '/' M_.fname '_filter' int2str(ifil(1)) '.mat'],'stock');
       irun(1) = 1;
   end
   
@@ -299,7 +299,7 @@ if options_.smoother
 end
 
 if options_.filtered_vars
-    pm3(endo_nbr,gend+1,ifil(1),B,'Filtered variables',...
+    pm3(endo_nbr,gend,ifil(1),B,'Filtered variables',...
 	'',M_.endo_names,'tit_tex',M_.endo_names,...
 	varlist,'filtered_current_variables',[M_.fname '/metropolis'], ...
         '_filter');
