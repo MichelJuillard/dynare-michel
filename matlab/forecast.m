@@ -113,8 +113,8 @@ function info = forecast(var_list,task)
         elseif options_.periods < exo_det_length 
             ex = zeros(exo_det_length,M_.exo_nbr); 
         end
-        [yf,int_width] = simultxdet(y0,dr_,ex,oo_.exo_det_simul,...
-                                    options_.order,var_list);
+        [yf,int_width] = simultxdet(y0,ex,oo_.exo_det_simul,...
+                                    options_.order,var_list,M_,oo_,options_);
     end
 
     if ~isscalar(trend)
