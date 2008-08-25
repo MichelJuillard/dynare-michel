@@ -77,7 +77,6 @@ function [PostMod,PostVar,Scale,PostMean] = ...
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
 global bayestopt_ estim_params_ options_
-global dsge_prior_weight % Needed if a BVAR-DSGE model is estimated.
 
 options_.lik_algo = 1;
 npar = length(xparam1);
@@ -139,6 +138,7 @@ while j<=MaxNumberOfTuningSimulations
   jj = jj + 1;
 end
 close(hh);
+iScale
 %% [2] One block metropolis, I update the covariance matrix of the jumping distribution
 hh = waitbar(0,'Metropolis-Hastings...');
 set(hh,'Name','Looking for the posterior covariance...')
@@ -154,7 +154,7 @@ while j<= NumberOfIterations
   end
   % I move if the proposal is enough likely...
   if logpo2 > -inf & log(rand) < logpo2 - ilogpo2
-    ix2 = proposal; 
+    ix2 = proposal;
     if logpo2 > mlogpo2
       ModePar = proposal;
       mlogpo2 = logpo2;
@@ -223,10 +223,11 @@ if strcmpi(info,'LastCall')
   end
   close(hh);
   Scale = iScale;
+  iScale
   %%
   %% Now I climb the hill
   %%
-  climb = 0;
+  climb = 1;
   if climb
   hh = waitbar(0,' ');
   set(hh,'Name','Now I am climbing the hill...')

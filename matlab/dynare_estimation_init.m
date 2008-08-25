@@ -32,7 +32,7 @@ function [data,rawdata]=dynare_estimation_init(var_list_, igsa)
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
 global M_ options_ oo_ estim_params_ 
-global bayestopt_ dsge_prior_weight
+global bayestopt_
 
 if nargin<2 | isempty(igsa),
   igsa=0;
