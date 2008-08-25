@@ -93,19 +93,25 @@ Interpreter::compute_block_time() /*throw(EvalException)*/
                 case eEndogenous :
                   var=get_code_int
                   lag=get_code_int
-#ifdef DEBUGC
-                  mexPrintf(" y[%d]=%f\n",(it_+lag)*y_size+var,y[(it_+lag)*y_size+var]);
-                  mexEvalString("drawnow;");
-#endif
+//#ifdef DEBUGC
+                  if(var==153)
+                    {
+                      mexPrintf(" FLD y[var=%d,time=%d,lag=%d,%d]=%f\n",var,it_,lag,(it_+lag)*y_size+var,y[(it_+lag)*y_size+var]);
+                      mexEvalString("drawnow;");
+                    }
+//#endif
                   Stack.push(y[(it_+lag)*y_size+var]);
                   break;
                 case eExogenous :
                   var=get_code_int
                   lag=get_code_int
-#ifdef DEBUGC
-                  mexPrintf(" x[%d]=%f\n",it_+lag+var*nb_row_x,x[it_+lag+var*nb_row_x]);
-                  mexEvalString("drawnow;");
-#endif
+//#ifdef DEBUGC
+                  if(var==6)
+                    {
+                      mexPrintf(" FLD x[%d, time=%d, var=%d, lag=%d]=%f\n",it_+lag+var*nb_row_x,it_,var,lag,x[it_+lag+var*nb_row_x]);
+                      mexEvalString("drawnow;");
+                    }
+//#endif
                   Stack.push(x[it_+lag+var*nb_row_x]);
                   break;
                 case eExogenousDet :
@@ -187,6 +193,11 @@ Interpreter::compute_block_time() /*throw(EvalException)*/
                   mexEvalString("drawnow;");
 #endif
                   y[(it_+lag)*y_size+var] = Stack.top();
+                   if(var==153)
+                    {
+                      mexPrintf(" FSTP y[var=%d,time=%d,lag=%d,%d]=%f\n",var,it_,lag,(it_+lag)*y_size+var,y[(it_+lag)*y_size+var]);
+                      mexEvalString("drawnow;");
+                    }
 #ifdef DEBUGC
                   mexPrintf("%f\n",y[(it_+lag)*y_size+var]);
                   mexEvalString("drawnow;");
@@ -980,8 +991,10 @@ Interpreter::simulate_a_block(int size,int type, string file_name, string bin_ba
                     //mexPrintf("Per_u_=%d\n",Per_u_);
                     Per_y_=it_*y_size;
                     //mexPrintf("ok\n");
+                    //mexPrintf("compute_block_time\n");
                     set_code_pointer(begining);
                     compute_block_time();
+                    //mexPrintf("end of compute_block_time\n");
                     /*if(Gaussian_Elimination)
                       initialize(periods, nb_endo, y_kmin, y_kmax, y_size, u_count, u_count_init, u, y, ya, slowc, y_decal, markowitz_c, res1, res2, max_res);*/
                     //mexPrintf("ok1\n");
@@ -996,7 +1009,11 @@ Interpreter::simulate_a_block(int size,int type, string file_name, string bin_ba
                       {
                         double rr;
                         /*if(fabs(y[Per_y_+Block_Contain[i].Variable])>solve_tolf)*/
-                        rr=r[i]/(1+y[Per_y_+Block_Contain[i].Variable]);
+                        //mexPrintf("res[%d]=%f\n",i,r[i]);
+                        if(fabs(1+y[Per_y_+Block_Contain[i].Variable])>eps)
+                          rr=r[i]/(1+y[Per_y_+Block_Contain[i].Variable]);
+                        else
+                          rr=r[i];
                         /*else
                           rr=r[i];*/
                         if (max_res<fabs(rr))

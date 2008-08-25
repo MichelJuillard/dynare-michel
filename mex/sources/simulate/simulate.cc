@@ -114,11 +114,11 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
     mexWarnMsgTxt("Not enough space. Filename is truncated.");
   //mexPrintf("fname=%s\n",fname);
   col_y=mxGetN(mxGetFieldByNumber(oo_, 0, mxGetFieldNumber(oo_,"endo_simul")));;
-  if (col_y<row_x)
+  /*if (col_y<row_x)
     {
       row_y=row_y/row_x;
       col_y=row_x;
-    }
+    }*/
   solve_tolf=*(mxGetPr(mxGetFieldByNumber(options_, 0, mxGetFieldNumber(options_,"dynatol"))));
   //mexPrintf("col_y=%d row_y=%d\n",col_y, row_y);
   size_of_direction=col_y*row_y*sizeof(double);
@@ -128,7 +128,26 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
   memset(direction,0,size_of_direction);
   x=(double*)mxMalloc(col_x*row_x*sizeof(double));
   for (i=0;i<row_x*col_x;i++)
-    x[i]=double(xd[i]);
+     x[i]=double(xd[i]);
+  /*mexPrintf("1 ");
+  for (i=0;i<row_x*col_x;i++)
+    {
+      x[i]=double(xd[i]);
+      if(!(i % row_x) && i>0)
+        mexPrintf("\n%d %f  ",i/row_x+1,x[i]);
+      else
+        mexPrintf("%f  ",x[i]);
+    }
+  for(i=0;i<row_x;i++)
+    {
+      for(j=0;j<col_x;j++)
+        {
+          x[j*row_x+i]=xd[i*col_x+j];
+          mexPrintf("%f ",xd[i*col_x+j]);
+        }
+      mexPrintf("\n");
+    }
+  */
   for (i=0;i<row_y*col_y;i++)
     y[i]=double(yd[i]);
   y_size=row_y;
