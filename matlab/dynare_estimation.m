@@ -83,14 +83,16 @@ if ~isempty(estim_params_)
 	if options_.mode_compute
 	    plot_priors
 	end
+        % set prior bounds and check initial value of the parameters
+        bounds = prior_bounds(bayestopt_);
+        bounds(:,1)=max(bounds(:,1),lb);
+        bounds(:,2)=min(bounds(:,2),ub);
     else
 	options_.mh_replic = 0;
+        bounds(:,1) = lb;
+        bounds(:,2) = ub;
     end
 
-    % set prior bounds and check initial value of the parameters
-    bounds = prior_bounds(bayestopt_);
-    bounds(:,1)=max(bounds(:,1),lb);
-    bounds(:,2)=min(bounds(:,2),ub);
 
     if any(xparam1 < bounds(:,1)) | any(xparam1 > bounds(:,2))
 	find(xparam1 < bounds(:,1))
