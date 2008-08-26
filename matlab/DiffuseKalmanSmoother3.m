@@ -1,4 +1,4 @@
-function [alphahat,etahat,a1, aK] = DiffuseKalmanSmoother3(T,R,Q,Pinf1,Pstar1,Y,trend,pp,mm,smpl,mf)
+function [alphahat,etahat,a, aK] = DiffuseKalmanSmoother3(T,R,Q,Pinf1,Pstar1,Y,trend,pp,mm,smpl,mf)
 % function [alphahat,etahat,a1, aK] = DiffuseKalmanSmoother3(T,R,Q,Pinf1,Pstar1,Y,trend,pp,mm,smpl,mf)
 % Computes the diffuse kalman smoother without measurement error, in the case of a singular var-cov matrix.
 % Univariate treatment of multivariate time series.
@@ -19,7 +19,7 @@ function [alphahat,etahat,a1, aK] = DiffuseKalmanSmoother3(T,R,Q,Pinf1,Pstar1,Y,
 % OUTPUTS
 %    alphahat: smoothed state variables
 %    etahat:   smoothed shocks
-%    a1:        matrix of one step ahead filtered state variables
+%    a:   matrix of filtered variables
 %    aK:       3D array of k step ahead filtered state variables
 %
 % SPECIAL REQUIREMENTS
@@ -62,8 +62,8 @@ nk = options_.nk;
 spinf   	= size(Pinf1);
 spstar  	= size(Pstar1);
 v       	= zeros(pp,smpl);
-a       	= zeros(mm,smpl+1);
-a1			= a;
+a       	= zeros(mm,smpl);
+a1       	= zeros(mm,smpl+1);
 aK          = zeros(nk,mm,smpl+nk);
 
 if isempty(options_.diffuse_d),
@@ -93,7 +93,7 @@ QQ      	= R*Q*transpose(R);
 QRt			= Q*transpose(R);
 alphahat   	= zeros(mm,smpl);
 etahat	   	= zeros(rr,smpl);
-r 		   	= zeros(mm,smpl);
+r 		= zeros(mm,smpl);
 
 Z = zeros(pp,mm);
 for i=1:pp;
@@ -105,7 +105,7 @@ icc=0;
 newRank	  = rank(Pinf(:,:,1),crit1);
 while newRank & t < smpl
   t = t+1;
-  a1(:,t) = a(:,t);
+  a(:,t) = a1(:,t);
   Pstar(:,:,t)=tril(Pstar(:,:,t))+transpose(tril(Pstar(:,:,t),-1));
   Pinf(:,:,t)=tril(Pinf(:,:,t))+transpose(tril(Pinf(:,:,t),-1));
   Pstar1(:,:,t) = Pstar(:,:,t);
@@ -161,7 +161,7 @@ while newRank & t < smpl
       Pstar(:,:,t)=tril(Pstar(:,:,t))+transpose(tril(Pstar(:,:,t),-1));
     end
   end
-  a(:,t+1) 	 	= T*a(:,t);
+  a1(:,t+1) 	 	= T*a(:,t);
   for jnk=1:nk,
     aK(jnk,:,t+jnk) 	 	= T^jnk*a(:,t);
   end
@@ -189,7 +189,7 @@ Pinf1  = Pinf1(:,:,1:d);
 notsteady = 1;
 while notsteady & t<smpl
   t = t+1;
-  a1(:,t) = a(:,t);
+  a(:,t) = a1(:,t);
   P(:,:,t)=tril(P(:,:,t))+transpose(tril(P(:,:,t),-1));
   P1(:,:,t) = P(:,:,t);
   for i=1:pp
@@ -223,19 +223,18 @@ if t<smpl
 end
 while t<smpl
   t=t+1;
-  a1(:,t) = a(:,t);
+  a(:,t) = a1(:,t);
   for i=1:pp
     v(i,t)      = Y(i,t) - a(mf(i),t) - trend(i,t);
     if Fi_s(i) > crit
       a(:,t) = a(:,t) + Ki_s(:,i)*v(i,t)/Fi_s(i);
     end
   end
-  a(:,t+1) = T*a(:,t);
+  a1(:,t+1) = T*a(:,t);
   for jnk=1:nk,
     aK(jnk,:,t+jnk)	= T^jnk*a(:,t);
   end
 end
-a1(:,t+1) = a(:,t+1);
 ri=r;
 t = smpl+1;
 while t>d+1 & t>2,

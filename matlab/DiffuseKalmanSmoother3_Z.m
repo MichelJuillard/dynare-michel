@@ -1,4 +1,4 @@
-function [alphahat,etahat,a1,P,aK,PK,d,decomp] = DiffuseKalmanSmoother3_Z(T,Z,R,Q,Pinf1,Pstar1,Y,pp,mm,smpl)
+function [alphahat,etahat,a,P,aK,PK,d,decomp] = DiffuseKalmanSmoother3_Z(T,Z,R,Q,Pinf1,Pstar1,Y,pp,mm,smpl)
 % function [alphahat,etahat,a1,P,aK,PK,d,decomp_filt] = DiffuseKalmanSmoother3(T,Z,R,Q,Pinf1,Pstar1,Y,pp,mm,smpl)
 % Computes the diffuse kalman smoother without measurement error, in the case of a singular var-cov matrix.
 % Univariate treatment of multivariate time series.
@@ -18,7 +18,7 @@ function [alphahat,etahat,a1,P,aK,PK,d,decomp] = DiffuseKalmanSmoother3_Z(T,Z,R,
 % OUTPUTS
 %    alphahat: smoothed state variables
 %    etahat:   smoothed shocks
-%    a1:        matrix of one step ahead filtered state variables
+%    a:        matrix of filtered variables
 %    aK:       3D array of k step ahead filtered state variables
 %              (meaningless for periods 1:d)
 %    P:        3D array of one-step ahead forecast error variance
@@ -71,8 +71,8 @@ nk = options_.nk;
 spinf           = size(Pinf1);
 spstar          = size(Pstar1);
 v               = zeros(pp,smpl);
-a               = zeros(mm,smpl+1);
-a1                      = a;
+a               = zeros(mm,smpl);
+a1              = zeros(mm,smpl+1);
 aK          = zeros(nk,mm,smpl+nk);
 
 if isempty(options_.diffuse_d),
@@ -111,7 +111,7 @@ icc=0;
 newRank   = rank(Pinf(:,:,1),crit1);
 while newRank & t < smpl
   t = t+1;
-  a1(:,t) = a(:,t);
+  a(:,t) = a1(:,t);
   Pstar(:,:,t)=tril(Pstar(:,:,t))+tril(Pstar(:,:,t),-1)';
   Pinf(:,:,t)=tril(Pinf(:,:,t))+tril(Pinf(:,:,t),-1)';
   Pstar1(:,:,t) = Pstar(:,:,t);
@@ -161,7 +161,7 @@ while newRank & t < smpl
       Pstar(:,:,t)=tril(Pstar(:,:,t))+tril(Pstar(:,:,t),-1)';
     end
   end
-  a(:,t+1)              = T*a(:,t);
+  a1(:,t+1)              = T*a(:,t);
   for jnk=1:nk,
     aK(jnk,:,t+jnk)             = T^jnk*a(:,t);
   end
@@ -188,7 +188,7 @@ Pinf1  = Pinf1(:,:,1:d);
 notsteady = 1;
 while notsteady & t<smpl
   t = t+1;
-  a1(:,t) = a(:,t);
+  a(:,t) = a1(:,t);
   P(:,:,t)=tril(P(:,:,t))+tril(P(:,:,t),-1)';
   P1(:,:,t) = P(:,:,t);
   for i=1:pp
@@ -203,13 +203,11 @@ while notsteady & t<smpl
       P(:,:,t)=tril(P(:,:,t))+tril(P(:,:,t),-1)';
     end
   end
-  a(:,t+1) = T*a(:,t);
-  af          = a(:,t);
+  a1(:,t+1) = T*a(:,t);
   Pf          = P(:,:,t);
   for jnk=1:nk,
-      af = T*af;
       Pf = T*Pf*T' + QQ;
-      aK(jnk,:,t+jnk) = af;
+      aK(jnk,:,t+jnk) = T^jnk*a(:,t);
       PK(jnk,:,:,t+jnk) = Pf;
   end
   P(:,:,t+1) = T*P(:,:,t)*T' + QQ;
@@ -229,7 +227,7 @@ if t<smpl
 end
 while t<smpl
   t=t+1;
-  a1(:,t) = a(:,t);
+  a(:,t) = a1(:,t);
   for i=1:pp
     Zi = Z(i,:);
     v(i,t)      = Y(i,t) - Zi*a(:,t);
@@ -237,17 +235,14 @@ while t<smpl
       a(:,t) = a(:,t) + Ki_s(:,i)*v(i,t)/Fi_s(i);
     end
   end
-  a(:,t+1) = T*a(:,t);
-  af          = a(:,t);
+  a1(:,t+1) = T*a(:,t);
   Pf          = P(:,:,t);
   for jnk=1:nk,
-      af = T*af;
       Pf = T*Pf*T' + QQ;
-      aK(jnk,:,t+jnk) = af;
+      aK(jnk,:,t+jnk) = T^jnk*a(:,t);
       PK(jnk,:,:,t+jnk) = Pf;
   end
 end
-a1(:,t+1) = a(:,t+1);
 ri=r;
 t = smpl+1;
 while t>d+1 & t>2,
