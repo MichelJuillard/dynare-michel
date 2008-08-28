@@ -32,8 +32,8 @@ psi = 0.787;
 del = 0.02;
 
 //model(sparse_dll,no_compiler,cutoff=1e-17);
-//model(sparse);
-model;
+model(sparse);
+//model;
 dA = exp(gam+e_a);
 log(m) = (1-rho)*log(mst) + rho*log(m(-1))+e_m;
 -P/(c(+1)*P(+1)*m)+bet*P(+1)*(alp*exp(-alp*(gam+log(e(+1))))*k^(alp-1)*n(+1)^(1-alp)+(1-del)*exp(-(gam+log(e(+1)))))/(c(+2)*P(+2)*m(+1))=0;
@@ -75,8 +75,10 @@ var e_m; stderr 0.005;
 end;
 */
 options_.solve_tolf=1e-10;
+options_.maxit_=100;
 steady;
-
+model_info;
+check;
 shocks;
 var e_a;
 periods 1;
@@ -84,7 +86,7 @@ values 0.16;
 end;
 
 
-simul(periods=200, method=bicgstab);
+simul(periods=200, method=lu);
 rplot y;
 rplot k;
 rplot c;

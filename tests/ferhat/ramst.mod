@@ -24,8 +24,8 @@ end;
 
 steady;
 
-//check;
-
+check;
+model_info;
 shocks;
 var x;
 periods 1;
