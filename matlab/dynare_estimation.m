@@ -909,9 +909,9 @@ if (any(bayestopt_.pshape  >0 ) & options_.mh_replic) | ...
         invhess = compute_mh_covariance_matrix;
     end
     if options_.bvar_dsge
-        random_walk_metropolis_hastings('DsgeVarLikelihood','rand_multivariate_normal',xparam1,invhess,bounds,gend);
+        feval(options_.posterior_sampling_method,'DsgeVarLikelihood',options_.proposal_distribution,xparam1,invhess,bounds,gend);
     else
-        random_walk_metropolis_hastings('DsgeLikelihood','rand_multivariate_normal',xparam1,invhess,bounds,gend,data);
+        feval(options_.posterior_sampling_method,'DsgeLikelihood',options_.proposal_distribution,xparam1,invhess,bounds,gend,data);
     end
   end
   if ~options_.nodiagnostic & options_.mh_replic > 1000 & options_.mh_nblck > 1
