@@ -1,10 +1,11 @@
-function [A,B] = transition_matrix(dr)
+function [A,B] = transition_matrix(dr, varargin)
 
-% function [A,B] = transition_matrix(dr)
+% function [A,B] = transition_matrix(dr, varargin)
 % Makes transition matrices out of ghx and ghu
 %
 % INPUTS
 %    dr:        structure of decision rules for stochastic simulations
+% varargin:     {1}: M_
 %
 % OUTPUTS
 %    A:         matrix of effects of predetermined variables in linear solution (ghx)
@@ -30,7 +31,12 @@ function [A,B] = transition_matrix(dr)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-  global M_
+  if(length(varargin)<=0)
+    global M_
+  else
+    M_=varargin{1};
+  end;
+  
   exo_nbr = M_.exo_nbr;
   ykmin_ = M_.maximum_endo_lag;
   
@@ -43,7 +49,9 @@ function [A,B] = transition_matrix(dr)
   i0 = find(k0(:,2) == ykmin_+1);
   A(i0,:) = dr.ghx(ikx,:);
   B = zeros(nx,exo_nbr);
-  B(i0,:) = dr.ghu(ikx,:);
+  if(isfield(dr,'ghu'))
+    B(i0,:) = dr.ghu(ikx,:);
+  end;
   for i=ykmin_:-1:2
     i1 = find(k0(:,2) == i);
     n1 = size(i1,1);
@@ -54,3 +62,4 @@ function [A,B] = transition_matrix(dr)
     A(i1,i0(j))=eye(n1);
     i0 = i1;
   end
+  

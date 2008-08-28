@@ -98,8 +98,11 @@ if check1
 end
 
 dr.fbias = zeros(M_.endo_nbr,1);
-[dr,info,M_,options_,oo_] = dr1(dr,check_flag,M_,options_,oo_);
-
+if(options_.model_mode==1)
+    [dr,info,M_,options_,oo_] = dr1_sparse(dr,check_flag,M_,options_,oo_);
+else
+    [dr,info,M_,options_,oo_] = dr1(dr,check_flag,M_,options_,oo_);
+end
 if info(1)
   return
 end
