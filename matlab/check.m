@@ -59,8 +59,11 @@ global it_
   oo_.exo_simul = tempex;
   
   eigenvalues_ = dr.eigval;
-  %nyf = nnz(dr.kstate(:,2)>M_.maximum_lag+1);
-  nyf = dr.nyf;
+  if(options_.model_mode == 1)
+    nyf = dr.nyf;      
+  else
+    nyf = nnz(dr.kstate(:,2)>M_.maximum_lag+1);
+  end;
   [m_lambda,i]=sort(abs(eigenvalues_));
   n_explod = nnz(abs(eigenvalues_) > options_.qz_criterium);
   

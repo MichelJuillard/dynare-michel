@@ -93,25 +93,25 @@ Interpreter::compute_block_time() /*throw(EvalException)*/
                 case eEndogenous :
                   var=get_code_int
                   lag=get_code_int
-//#ifdef DEBUGC
+#ifdef DEBUGC
                   if(var==153)
                     {
                       mexPrintf(" FLD y[var=%d,time=%d,lag=%d,%d]=%f\n",var,it_,lag,(it_+lag)*y_size+var,y[(it_+lag)*y_size+var]);
                       mexEvalString("drawnow;");
                     }
-//#endif
+#endif
                   Stack.push(y[(it_+lag)*y_size+var]);
                   break;
                 case eExogenous :
                   var=get_code_int
                   lag=get_code_int
-//#ifdef DEBUGC
+#ifdef DEBUGC
                   if(var==6)
                     {
                       mexPrintf(" FLD x[%d, time=%d, var=%d, lag=%d]=%f\n",it_+lag+var*nb_row_x,it_,var,lag,x[it_+lag+var*nb_row_x]);
                       mexEvalString("drawnow;");
                     }
-//#endif
+#endif
                   Stack.push(x[it_+lag+var*nb_row_x]);
                   break;
                 case eExogenousDet :
