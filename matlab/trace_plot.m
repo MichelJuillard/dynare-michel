@@ -4,10 +4,16 @@ function trace_plot(options_,M_,estim_params_,type,blck,name1,name2)
 %
 % INPUTS 
 %
-%    name
+%   options_        [structure]    Dynare structure.
+%   M_              [structure]    Dynare structure (related to model definition).
+%   estim_params_   [structure]    Dynare structure (related to estimation).
+%   type            [string]       'DeepParameter', 'MeasurementError' (for measurement equation error) or 'StructuralShock' (for structural shock).
+%   blck            [integer]      Number of the mh chain.
+%   name1           [string]       Object name.
+%   name2           [string]       Object name. 
 %    
 % OUTPUTS 
-%    density            [double]    density 
+%   None
 %        
 % SPECIAL REQUIREMENTS
 
