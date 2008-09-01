@@ -114,6 +114,7 @@ function global_initialization()
   options_.replic = 50;
   options_.drop = 100;
   options_.simul_algo = 0;
+  options_.model_mode = 0;
   % if mjdgges.dll (or .mexw32 or ....) doesn't exit, matlab/qz is added to the path. 
   % There exists now qz/mjdgges.m that contains the calls to the old Sims code 
   % Hence, if mjdgges.m is visible exist(...)==2, 
@@ -180,6 +181,8 @@ function global_initialization()
   options_.posterior_sampling_method = 'random_walk_metropolis_hastings';
   options_.proposal_distribution = 'rand_multivariate_normal';
   options_.student_degrees_of_freedom = 3;
+  options_.trace_plot_ma = 50;
+  
   
   % Misc
   options_.conf_sig = 0.6;

@@ -1,4 +1,4 @@
-function Draws = GetAllPosteriorDraws(column,FirstMhFile,FirstLine,TotalNumberOfMhFile,NumberOfDraws)
+function Draws = GetAllPosteriorDraws(column, FirstMhFile, FirstLine, TotalNumberOfMhFile, NumberOfDraws, blck)
 
 % function Draws = GetAllPosteriorDraws(column,FirstMhFile,FirstLine,TotalNumberOfMhFile,NumberOfDraws)
 % Gets all posterior draws
@@ -35,30 +35,57 @@ function Draws = GetAllPosteriorDraws(column,FirstMhFile,FirstLine,TotalNumberOf
 
 global M_ options_
 
-nblck = options_.mh_nblck; 
-iline = FirstLine; 
+nblck = options_.mh_nblck;
+
+iline = FirstLine;
 linee = 1;
 DirectoryName = CheckPath('metropolis');
-Draws = zeros(NumberOfDraws*nblck,1);
-logpo = zeros(NumberOfDraws*nblck,1);
-ipost=0;
-if column<=0, 
-  column=1;  
-  ipost=1;
-end
-iline0=iline;
-for blck = 1:nblck
-  iline=iline0;
-  for file = FirstMhFile:TotalNumberOfMhFile
-    load([DirectoryName '/'  M_.fname '_mh' int2str(file) '_blck' int2str(blck)],'x2','logpo2')
-    NumberOfLines = size(x2(iline:end,:),1);
-    Draws(linee:linee+NumberOfLines-1) = x2(iline:end,column);
-    logpo(linee:linee+NumberOfLines-1) = logpo2(iline:end);
-    linee = linee+NumberOfLines;
-    iline = 1;
-  end
-end
 
-if ipost,
-  Draws=logpo;
+if nblck>1 && nargin<6
+    Draws = zeros(NumberOfDraws*nblck,1);
+    iline0=iline;
+    if column>0
+        for blck = 1:nblck
+            iline=iline0;
+            for file = FirstMhFile:TotalNumberOfMhFile
+                load([DirectoryName '/'  M_.fname '_mh' int2str(file) '_blck' int2str(blck)],'x2')
+                NumberOfLines = size(x2(iline:end,:),1);
+                Draws(linee:linee+NumberOfLines-1) = x2(iline:end,column);
+                linee = linee+NumberOfLines;
+                iline = 1;
+            end
+        end
+    else 
+        for blck = 1:nblck
+            iline=iline0;
+            for file = FirstMhFile:TotalNumberOfMhFile
+                load([DirectoryName '/'  M_.fname '_mh' int2str(file) '_blck' int2str(blck)],'logpo2')
+                NumberOfLines = size(logpo2(iline:end),1);
+                Draws(linee:linee+NumberOfLines-1) = logpo2(iline:end);
+                linee = linee+NumberOfLines;
+                iline = 1;
+            end
+        end
+    end
+else
+    if nblck==1
+        blck=1;
+    end
+    if column>0
+        for file = FirstMhFile:TotalNumberOfMhFile
+            load([DirectoryName '/'  M_.fname '_mh' int2str(file) '_blck' int2str(blck)],'x2')
+            NumberOfLines = size(x2(iline:end,:),1);
+            Draws(linee:linee+NumberOfLines-1) = x2(iline:end,column);
+            linee = linee+NumberOfLines;
+            iline = 1;
+        end
+    else
+        for file = FirstMhFile:TotalNumberOfMhFile
+            load([DirectoryName '/'  M_.fname '_mh' int2str(file) '_blck' int2str(blck)],'logpo2')
+            NumberOfLines = size(logpo2(iline:end,:),1);
+            Draws(linee:linee+NumberOfLines-1) = logpo2(iline:end);
+            linee = linee+NumberOfLines;
+            iline = 1;
+        end
+    end
 end
