@@ -304,10 +304,10 @@ function [dr,info,M_,options_,oo_] = dr1(dr,task,M_,options_,oo_)
                 temp = sort(abs(dr.eigval));
                 if nba > nyf
                     temp = temp(nd-nba+1:nd-nyf)-1-options_.qz_criterium;
-                    info(1) = 3
+                    info(1) = 3;
                 elseif nba < nyf;
                     temp = temp(nd-nyf+1:nd-nba)-1-options_.qz_criterium;
-                    info(1) = 4
+                    info(1) = 4;
                 end
                 info(2) = temp'*temp;
                 return
@@ -383,7 +383,7 @@ function [dr,info,M_,options_,oo_] = dr1(dr,task,M_,options_,oo_)
             temp = sort(abs(dr.eigval));
             if nba > nyf
                 temp = temp(nd-nba+1:nd-nyf)-1-options_.qz_criterium;
-                info(1) = 3
+                info(1) = 3;
             elseif nba < nyf;
                 temp = temp(nd-nyf+1:nd-nba)-1-options_.qz_criterium;
                 info(1) = 4;
