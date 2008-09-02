@@ -9,6 +9,9 @@ function [g, badg, f0, f1, f2, f3, f4] = numgrad5(fcn,x,varargin)
 %
 % TODO Try Four points formula when cost_flag3=0 or cost_flag4=0.
 
+% Original file downloaded from:
+% http://sims.princeton.edu/yftp/optimize/mfiles/numgrad.m
+
 % Copyright (C) 1993-2007 Christopher Sims
 % Copyright (C) 2008 Dynare Team
 %

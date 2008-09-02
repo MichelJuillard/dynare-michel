@@ -19,7 +19,11 @@ function [fh,xh,gh,H,itct,fcount,retcodeh] = csminwel(fcn,x0,H0,grad,crit,nit,me
 %        write g2.mat and g3.mat as well.  If all were written at about the same time, any of them
 %        may be a decent starting point.  One can also start from the one with best function value.)
 
+% Original file downloaded from:
+% http://sims.princeton.edu/yftp/optimize/mfiles/csminwel.m
+
 % Copyright (C) 1993-2007 Christopher Sims
+% Copyright (C) 2006-2008 Dynare Team
 %
 % This file is part of Dynare.
 %

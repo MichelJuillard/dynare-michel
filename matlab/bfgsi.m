@@ -4,6 +4,9 @@ function H = bfgsi(H0,dg,dx)
 % 6/8/93 version that updates inverse hessian instead of hessian
 % itself.
 
+% Original file downloaded from:
+% http://sims.princeton.edu/yftp/optimize/mfiles/bfgsi.m
+
 % Copyright (C) 1993-2007 Christopher Sims
 %
 % This file is part of Dynare.

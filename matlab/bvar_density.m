@@ -61,6 +61,9 @@ function w = matrictint(S, df, XXi)
 %
 % (where k is the dimension of XXi and ny is the dimension of S and
 % Sigma)
+
+% Original file downloaded from:
+% http://sims.princeton.edu/yftp/VARtools/matlab/matrictint.m
     
     k=size(XXi,1);
     ny=size(S,1);

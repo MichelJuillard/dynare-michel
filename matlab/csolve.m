@@ -18,7 +18,11 @@ function [x,rc] = csolve(FUN,x,gradfun,crit,itmax,varargin)
 %           in step length (very likely a numerical problem, or a discontinuity). 4 means itmax
 %           termination.
 
+% Original file downloaded from:
+% http://sims.princeton.edu/yftp/optimize/mfiles/csolve.m
+
 % Copyright (C) 1993-2007 Christopher Sims
+% Copyright (C) 2007 Dynare Team
 %
 % This file is part of Dynare.
 %

@@ -6,6 +6,9 @@ function [A,B,Q,Z] = qzdiv(stake,A,B,Q,Z)
 % corner, while preserving U.T. and orthonormal properties and Q'AZ' and
 % Q'BZ'.
 
+% Original file downloaded from:
+% http://sims.princeton.edu/yftp/gensys/mfiles/qzdiv.m
+
 % Copyright (C) 1993-2007 Christopher Sims
 %
 % This file is part of Dynare.

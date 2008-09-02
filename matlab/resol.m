@@ -1,5 +1,4 @@
 function [dr,info]=resol(ys,check_flag)
-
 % function [dr,info]=resol(ys,check_flag)
 % Computes first and second order approximations
 %
@@ -22,7 +21,7 @@ function [dr,info]=resol(ys,check_flag)
 % SPECIAL REQUIREMENTS
 %    none
 
-% Copyright (C) 2001-2007 Dynare Team
+% Copyright (C) 2001-2008 Dynare Team
 %
 % This file is part of Dynare.
 %

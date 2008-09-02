@@ -1,5 +1,4 @@
 function [A,B] = transition_matrix(dr, varargin)
-
 % function [A,B] = transition_matrix(dr, varargin)
 % Makes transition matrices out of ghx and ghu
 %
@@ -14,7 +13,7 @@ function [A,B] = transition_matrix(dr, varargin)
 % SPECIAL REQUIREMENTS
 %    none
 
-% Copyright (C) 2003-2007 Dynare Team
+% Copyright (C) 2003-2008 Dynare Team
 %
 % This file is part of Dynare.
 %

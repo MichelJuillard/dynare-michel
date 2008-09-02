@@ -10,6 +10,9 @@ function [A,B,Q,Z] = qzswitch(i,A,B,Q,Z)
 % the qz transformation is not unique and it is not possible simply to switch
 % the positions of the diagonal elements of both A and B.
 
+% Original file downloaded from:
+% http://sims.princeton.edu/yftp/gensys/mfiles/qzswitch.m
+
 % Copyright (C) 1993-2007 Christopher Sims
 %
 % This file is part of Dynare.

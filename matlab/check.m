@@ -1,6 +1,4 @@
 function result = check
-
-
 % function result = check
 % checks determinacy conditions by computing the eigenvalues
 %
@@ -13,7 +11,7 @@ function result = check
 % SPECIAL REQUIREMENTS
 %    none
 
-% Copyright (C) 2001-2007 Dynare Team
+% Copyright (C) 2001-2008 Dynare Team
 %
 % This file is part of Dynare.
 %

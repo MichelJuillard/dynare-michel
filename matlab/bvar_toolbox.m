@@ -181,7 +181,9 @@ function [ydum,xdum,breaks]=varprior(nv,nx,lags,mnprior,vprior)
 %                   prior mean generates larger prior variances for own than for cross-effects even in 
 %                   this formulation, but here there is no way to shrink toward a set of unconstrained 
 %                   univariate AR's.
-% Author: C. Sims
+
+% Original file downloaded from:
+% http://sims.princeton.edu/yftp/VARtools/matlab/varprior.m
 
     if ~isempty(mnprior)
         xdum = zeros(lags+1,nx,lags,nv);
@@ -247,7 +249,10 @@ function var=rfvar3(ydata,lags,xdata,breaks,lambda,mu)
 %      repeating the initial xdata(lags+1,:) row or copying xdata(lags+1:2*lags,:) into 
 %      xdata(1:lags,:) are reasonable subsititutes.  These values are used in forming the
 %      persistence priors.
-% Code written by Christopher Sims.  This version 6/15/03.
+
+% Original file downloaded from:
+% http://sims.princeton.edu/yftp/VARtools/matlab/rfvar3.m
+
     [T,nvar] = size(ydata);
     nox = isempty(xdata);
     if ~nox
