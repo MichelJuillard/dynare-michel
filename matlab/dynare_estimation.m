@@ -11,7 +11,7 @@ function dynare_estimation(var_list_)
 % SPECIAL REQUIREMENTS
 %   none
 
-% Copyright (C) 2003-2007 Dynare Team
+% Copyright (C) 2003-2008 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -28,10 +28,15 @@ function dynare_estimation(var_list_)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-global M_ options_ oo_ estim_params_ 
-global bayestopt_
+global M_ options_ oo_ estim_params_ bayestopt_
 
-options_.varlist = var_list_;
+var_list_ = check_list_of_variables(options_, M_, var_list_)
+if isempty(var_list_)
+    return
+else
+    options_.varlist = var_list_;
+end
+
 options_.lgyidx2varobs = zeros(size(M_.endo_names,1),1);
 for i = 1:size(M_.endo_names,1)
   tmp = strmatch(deblank(M_.endo_names(i,:)),options_.varobs,'exact');
