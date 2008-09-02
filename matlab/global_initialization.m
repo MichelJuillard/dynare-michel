@@ -182,7 +182,7 @@ function global_initialization()
   options_.proposal_distribution = 'rand_multivariate_normal';
   options_.student_degrees_of_freedom = 3;
   options_.trace_plot_ma = 200;
-  
+  options_.mh_autocorrelation_function_size = 30;
   
   % Misc
   options_.conf_sig = 0.6;
