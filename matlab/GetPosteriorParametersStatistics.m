@@ -48,7 +48,7 @@ OutputDirectoryName = CheckPath('Output');
 
 load([ DirectoryName '/'  M_.fname '_mh_history'])
 FirstMhFile = record.KeepedDraws.FirstMhFile;
-FirstLine = record.KeepedDraws.FirstLine; ifil = FirstLine;
+FirstLine = record.KeepedDraws.FirstLine;
 TotalNumberOfMhFiles = sum(record.MhDraws(:,2))
 TotalNumberOfMhDraws = sum(record.MhDraws(:,1));
 FirstMhFile = record.KeepedDraws.FirstMhFile;
