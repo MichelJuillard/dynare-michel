@@ -181,7 +181,7 @@ function global_initialization()
   options_.posterior_sampling_method = 'random_walk_metropolis_hastings';
   options_.proposal_distribution = 'rand_multivariate_normal';
   options_.student_degrees_of_freedom = 3;
-  options_.trace_plot_ma = 50;
+  options_.trace_plot_ma = 200;
   
   
   % Misc
