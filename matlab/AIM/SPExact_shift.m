@@ -4,7 +4,8 @@
 
 function [h,q,iq,nexact] = SPExact_shift(h,q,iq,qrows,qcols,neq)
 
-hs=SPSparse(h);
+%hs=SPSparse(h);
+hs=sparse(h);
 nexact = 0;
 left   = 1:qcols;
 right  = qcols+1:qcols+neq;

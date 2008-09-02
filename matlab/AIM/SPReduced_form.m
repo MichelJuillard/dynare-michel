@@ -4,7 +4,8 @@
 
 function [nonsing,b] = SPReduced_form(q,qrows,qcols,bcols,neq,condn);
 b=[];
-qs=SPSparse(q);
+%qs=SPSparse(q);
+qs=sparse(q);
 left = 1:qcols-qrows;
 right = qcols-qrows+1:qcols;
 nonsing = rcond(full(qs(:,right))) > condn;

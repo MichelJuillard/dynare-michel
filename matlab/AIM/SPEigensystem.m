@@ -33,7 +33,8 @@ catch
 end
 flag_trouble=0; 
 
-ws=SPSparse(w);
+%ws=SPSparse(w);
+ws=sparse(w);
 ws       = ws(:,k);
 
 %  Given a complex conjugate pair of vectors W = [w1,w2], there is a

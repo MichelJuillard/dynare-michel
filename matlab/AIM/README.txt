@@ -2,10 +2,10 @@ AIM Subsystem cosists of
 
 A function dynAIMsolver1(jacobia_,M_,dr) which maps Dynare to Gary Anderson AIM package subsystem and derives the solution for gy=dr.hgx and gu=dr.hgu from the AIM outputs (where "1" in the title is for 1st order solver).
 
-A subset of routines from Gary Anderson AIM package needed to compute and solve system passed on and returned by dynAIMsolver1.
+A subset of routines from Gary Anderson AIM package starting with SP... needed to compute and solve system passed on and returned by dynAIMsolver1.
 ( see  http://www.federalreserve.gov/Pubs/oss/oss4/aimindex.html  )
 
-The path to the AIM directory is added by dynare_config.m
+The path to the AIM directory,if exists, is added by dynare_config.m using addpath.
 
 DR1 tries to invoke AIM if options_.useAIM == 1 is set and, if not check only, and if 1st order only: 
     if (options_.useAIM == 1) && (task == 0) && (options_.order == 1) 
@@ -22,7 +22,7 @@ or
 Error in AIM: aimcode=3 : Aim: too many big roots
 especially close to the point of convergence.
 
-However, if other exceptions occur and aimcode (see codes below) is higher than 5, the system resets options_.useAIM = 0 tries to use mjdgges instead.
+However, if other exceptions occur and aimcode (see codes below) is higher than 5, the system resets options_.useAIM = 0 and tries to use mjdgges instead.
 
 
 APPENDIX
