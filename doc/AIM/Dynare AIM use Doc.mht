@@ -1,19 +1,19 @@
 From: <Saved by Microsoft Internet Explorer 5>
 Subject: Dunare AIM Solver Subsystem
-Date: Tue, 29 Jul 2008 14:27:04 +0100
+Date: Tue, 2 Sep 2008 22:25:31 +0100
 MIME-Version: 1.0
 Content-Type: multipart/related;
-	boundary="----=_NextPart_000_0022_01C8F187.2C5ADB50";
+	boundary="----=_NextPart_000_0000_01C90D4A.CF77DD90";
 	type="text/html"
 X-MimeOLE: Produced By Microsoft MimeOLE V6.00.2800.1165
 
 This is a multi-part message in MIME format.
 
-------=_NextPart_000_0022_01C8F187.2C5ADB50
+------=_NextPart_000_0000_01C90D4A.CF77DD90
 Content-Type: text/html;
 	charset="utf-8"
 Content-Transfer-Encoding: quoted-printable
-Content-Location: file://C:\Documents%20and%20Settings\Sculptor\My%20Documents\Academia\Economics\Dynare%20DSGE\V4\matlab\AIM\html\Dynare%20AIM%20use%20Doc.html
+Content-Location: file://C:\Documents%20and%20Settings\Sculptor\My%20Documents\Academia\Economics\Dynare%20DSGE\V4\doc\AIM\Dynare%20AIM%20use%20Doc.html
 
 =EF=BB=BF<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
 <HTML xmlns:mwsh =3D=20
@@ -25,7 +25,7 @@ This HTML is auto-generated from an M-file.=0A=
 To make changes, update the M-file and republish this document.=0A=
       -->
 <META content=3D"MSHTML 6.00.2800.1400" name=3DGENERATOR>
-<META content=3D2008-07-29 name=3Ddate>
+<META content=3D2008-09-02 name=3Ddate>
 <META content=3D"Dynare AIM use Doc" name=3Dm-file>
 <STYLE>BODY {
 	MARGIN: 10px; BACKGROUND-COLOR: white
@@ -93,20 +93,20 @@ italic; TEXT-ALIGN: right
   <LI><A=20
   =
 href=3D"file:///C:/Documents%20and%20Settings/Sculptor/My%20Documents/Aca=
-demia/Economics/Dynare%20DSGE/V4/matlab/AIM/html/Dynare%20AIM%20use%20Doc=
-.html#1">AIM=20
+demia/Economics/Dynare%20DSGE/V4/doc/AIM/Dynare%20AIM%20use%20Doc.html#1"=
+>AIM=20
   Solver Subsystem</A>=20
   <LI><A=20
   =
 href=3D"file:///C:/Documents%20and%20Settings/Sculptor/My%20Documents/Aca=
-demia/Economics/Dynare%20DSGE/V4/matlab/AIM/html/Dynare%20AIM%20use%20Doc=
-.html#2">APPENDIX=20
+demia/Economics/Dynare%20DSGE/V4/doc/AIM/Dynare%20AIM%20use%20Doc.html#2"=
+>APPENDIX=20
   1: AIM System SPecification and Dynare Mapping</A>=20
   <LI><A=20
   =
 href=3D"file:///C:/Documents%20and%20Settings/Sculptor/My%20Documents/Aca=
-demia/Economics/Dynare%20DSGE/V4/matlab/AIM/html/Dynare%20AIM%20use%20Doc=
-.html#11">APPENDIX=20
+demia/Economics/Dynare%20DSGE/V4/doc/AIM/Dynare%20AIM%20use%20Doc.html#11=
+">APPENDIX=20
   2: dynAIMsolver1 Function Specification</A> </LI></UL></DIV>
 <H2>AIM Solver Subsystem<A name=3D1></A></H2>
 <P>The AIM subsystem in the AIM subdirectory of the main Dynare matlab =
@@ -139,13 +139,10 @@ names=20
 <UL>
   <LI>SPAmalg.m=20
   <LI>SPBuild_a.m=20
-  <LI>SPSparse.m=20
   <LI>SPShiftright.m=20
   <LI>SPExact_shift.m=20
   <LI>SPNumeric_shift.m=20
   <LI>SPObstruct.m=20
-  <LI>SPSparseSPBuild_a.m=20
-  <LI>SPEigQZ.m=20
   <LI>SPEigensystem.m=20
   <LI>SPReduced_form=20
   <LI>SPCopy_w.m=20
@@ -166,8 +163,7 @@ needed, i.e.: </P><PRE>  if (options_.useAIM =3D=3D 1) &amp;&amp; (task =
 the model=20
 <A=20
 href=3D"file:///C:/Documents%20and%20Settings/Sculptor/My%20Documents/Aca=
-demia/Economics/Dynare%20DSGE/V4/matlab/AIM/html/modelname">modelname</A>=
-.mod=20
+demia/Economics/Dynare%20DSGE/V4/doc/AIM/modelname">modelname</A>.mod=20
 file, before invoking, estimate and/or stoch_simul, or by issuing =
 appropriate=20
 command for estimate and/or stoch_simul. </P>
@@ -198,13 +194,13 @@ name=3D2></A></H2>
 <P>AIM System for thau lags and theta leads, and:</P>
 <P><IMG hspace=3D5=20
 src=3D"file:///C:/Documents%20and%20Settings/Sculptor/My%20Documents/Acad=
-emia/Economics/Dynare%20DSGE/V4/matlab/AIM/html/Dynare%20AIM%20use%20Doc_=
-eq5664.png"=20
+emia/Economics/Dynare%20DSGE/V4/doc/AIM/Dynare%20AIM%20use%20Doc_eq5664.p=
+ng"=20
 vspace=3D5> </P>
 <P><IMG hspace=3D5=20
 src=3D"file:///C:/Documents%20and%20Settings/Sculptor/My%20Documents/Acad=
-emia/Economics/Dynare%20DSGE/V4/matlab/AIM/html/Dynare%20AIM%20use%20Doc_=
-eq45937.png"=20
+emia/Economics/Dynare%20DSGE/V4/doc/AIM/Dynare%20AIM%20use%20Doc_eq45937.=
+png"=20
 vspace=3D5> </P>
 <P>where xt+i is system vectors at time t for all lag/lead t+i and zt is =
 vector=20
@@ -212,36 +208,36 @@ of exogenous shocks.</P>
 <P>The AIM input is array of matrices <B>H</B>: </P>
 <P><IMG hspace=3D5=20
 src=3D"file:///C:/Documents%20and%20Settings/Sculptor/My%20Documents/Acad=
-emia/Economics/Dynare%20DSGE/V4/matlab/AIM/html/Dynare%20AIM%20use%20Doc_=
-eq45249.png"=20
+emia/Economics/Dynare%20DSGE/V4/doc/AIM/Dynare%20AIM%20use%20Doc_eq45249.=
+png"=20
 vspace=3D5> </P>
 <P>and its solution given as:</P>
 <P><IMG hspace=3D5=20
 src=3D"file:///C:/Documents%20and%20Settings/Sculptor/My%20Documents/Acad=
-emia/Economics/Dynare%20DSGE/V4/matlab/AIM/html/Dynare%20AIM%20use%20Doc_=
-eq69844.png"=20
+emia/Economics/Dynare%20DSGE/V4/doc/AIM/Dynare%20AIM%20use%20Doc_eq69844.=
+png"=20
 vspace=3D5> </P>
 <P>where Xt is matrix of vectors of all current system variables and =
 forward=20
 looking leads xi for i=3Dt,...,t+theta:</P>
 <P><IMG hspace=3D5=20
 src=3D"file:///C:/Documents%20and%20Settings/Sculptor/My%20Documents/Acad=
-emia/Economics/Dynare%20DSGE/V4/matlab/AIM/html/Dynare%20AIM%20use%20Doc_=
-eq235275.png"=20
+emia/Economics/Dynare%20DSGE/V4/doc/AIM/Dynare%20AIM%20use%20Doc_eq235275=
+.png"=20
 vspace=3D5> </P>
 <P>and AIM output in the form of endogenous transition matrix <B>bb</B>: =
 </P>
 <P><IMG hspace=3D5=20
 src=3D"file:///C:/Documents%20and%20Settings/Sculptor/My%20Documents/Acad=
-emia/Economics/Dynare%20DSGE/V4/matlab/AIM/html/Dynare%20AIM%20use%20Doc_=
-eq25810.png"=20
+emia/Economics/Dynare%20DSGE/V4/doc/AIM/Dynare%20AIM%20use%20Doc_eq25810.=
+png"=20
 vspace=3D5> </P>
 <P>and, for simple case of one lag system, the matrix Phi derived =
 as:</P>
 <P><IMG hspace=3D5=20
 src=3D"file:///C:/Documents%20and%20Settings/Sculptor/My%20Documents/Acad=
-emia/Economics/Dynare%20DSGE/V4/matlab/AIM/html/Dynare%20AIM%20use%20Doc_=
-eq13129.png"=20
+emia/Economics/Dynare%20DSGE/V4/doc/AIM/Dynare%20AIM%20use%20Doc_eq13129.=
+png"=20
 vspace=3D5> </P>
 <P>For more lags, the phi equation becomes more complicated (see =
 documentation=20
@@ -254,20 +250,20 @@ fu' and=20
 expanded with zero columns represents <B>H</B>, i.e.: </P>
 <P><IMG hspace=3D5=20
 src=3D"file:///C:/Documents%20and%20Settings/Sculptor/My%20Documents/Acad=
-emia/Economics/Dynare%20DSGE/V4/matlab/AIM/html/Dynare%20AIM%20use%20Doc_=
-eq372007.png"=20
+emia/Economics/Dynare%20DSGE/V4/doc/AIM/Dynare%20AIM%20use%20Doc_eq372007=
+.png"=20
 vspace=3D5> </P>
 <P>and for exogenous shocks terms:</P>
 <P><IMG hspace=3D5=20
 src=3D"file:///C:/Documents%20and%20Settings/Sculptor/My%20Documents/Acad=
-emia/Economics/Dynare%20DSGE/V4/matlab/AIM/html/Dynare%20AIM%20use%20Doc_=
-eq3403.png"=20
+emia/Economics/Dynare%20DSGE/V4/doc/AIM/Dynare%20AIM%20use%20Doc_eq3403.p=
+ng"=20
 vspace=3D5> </P>
 <P><B>Output</B> Dynare solution output: </P>
 <P><IMG hspace=3D5=20
 src=3D"file:///C:/Documents%20and%20Settings/Sculptor/My%20Documents/Acad=
-emia/Economics/Dynare%20DSGE/V4/matlab/AIM/html/Dynare%20AIM%20use%20Doc_=
-eq76947.png"=20
+emia/Economics/Dynare%20DSGE/V4/doc/AIM/Dynare%20AIM%20use%20Doc_eq76947.=
+png"=20
 vspace=3D5> </P>
 <P>where Xt is again matrix of vectors all current system variables and =
 forward=20
@@ -282,8 +278,8 @@ output as=20
   phi in: </LI></UL></DIV>
 <P><IMG hspace=3D5=20
 src=3D"file:///C:/Documents%20and%20Settings/Sculptor/My%20Documents/Acad=
-emia/Economics/Dynare%20DSGE/V4/matlab/AIM/html/Dynare%20AIM%20use%20Doc_=
-eq33587.png"=20
+emia/Economics/Dynare%20DSGE/V4/doc/AIM/Dynare%20AIM%20use%20Doc_eq33587.=
+png"=20
 vspace=3D5> </P>
 <H2>APPENDIX 2: dynAIMsolver1 Function Specification<A =
 name=3D11></A></H2>
@@ -363,13 +359,10 @@ start with SP..=20
 %
 % * SPAmalg.m
 % * SPBuild_a.m
-% * SPSparse.m
 % * SPShiftright.m
 % * SPExact_shift.m
 % * SPNumeric_shift.m
 % * SPObstruct.m
-% * SPSparseSPBuild_a.m
-% * SPEigQZ.m
 % * SPEigensystem.m
 % * SPReduced_form
 % * SPCopy_w.m
@@ -557,10 +550,10 @@ used. =20
 ##### SOURCE END #####=0A=
 --></BODY></HTML>
 
-------=_NextPart_000_0022_01C8F187.2C5ADB50
+------=_NextPart_000_0000_01C90D4A.CF77DD90
 Content-Type: image/png
 Content-Transfer-Encoding: base64
-Content-Location: file:///C:/Documents%20and%20Settings/Sculptor/My%20Documents/Academia/Economics/Dynare%20DSGE/V4/matlab/AIM/html/Dynare%20AIM%20use%20Doc_eq5664.png
+Content-Location: file:///C:/Documents%20and%20Settings/Sculptor/My%20Documents/Academia/Economics/Dynare%20DSGE/V4/doc/AIM/Dynare%20AIM%20use%20Doc_eq5664.png
 
 iVBORw0KGgoAAAANSUhEUgAAAFAAAAAMCAIAAAB6P612AAAAB3RJTUUH2AcdDRY2+RDUrQAAA4lJ
 REFUeJzdVT1IM1sQnf1JUFDQSMBKQhDFJgqGCIqNCNpYGJRoY2VEbLSwMCCC2AVFC0tJJaSQSBAL
@@ -581,10 +574,10 @@ rlSpQCCwsbFRVDaNTE5OLi8vz8zMHB0d0SAg4uvr6+HhYaltv/4ffnh4IISoI6lUKhKJCIKAiMlk
 kk4bEa+urui0/+DAFPl8fmtri7aM5jCyLKsvnqIfw38QVG0wGEyn0wMDA9+KVxL+Ajch9lxo447f
 AAAAAElFTkSuQmCC
 
-------=_NextPart_000_0022_01C8F187.2C5ADB50
+------=_NextPart_000_0000_01C90D4A.CF77DD90
 Content-Type: image/png
 Content-Transfer-Encoding: base64
-Content-Location: file:///C:/Documents%20and%20Settings/Sculptor/My%20Documents/Academia/Economics/Dynare%20DSGE/V4/matlab/AIM/html/Dynare%20AIM%20use%20Doc_eq45937.png
+Content-Location: file:///C:/Documents%20and%20Settings/Sculptor/My%20Documents/Academia/Economics/Dynare%20DSGE/V4/doc/AIM/Dynare%20AIM%20use%20Doc_eq45937.png
 
 iVBORw0KGgoAAAANSUhEUgAAAJkAAAArCAIAAADkPL2TAAAAB3RJTUUH2AcdDRY4Hqj5qgAADRRJ
 REFUeJztWntQU0cX33tJSECGtLwMZJAWpbxECFDkIe0MjlY6mWHsgI+CLQoOdaq1nbFOpa3MVG1p
@@ -648,10 +641,10 @@ Okxo9vX1jYmJuXTpkru7+/bt22tqanbs2IE+dBA598AghG+++WZubi5K+WeCRS79/Pyio6ORwA8/
 zoevsAMzghYZGTkyMjI0NJScnIwutWeCldhncnIyICAArVHHonxU+B/lD/2JxqI+3AAAAABJRU5E
 rkJggg==
 
-------=_NextPart_000_0022_01C8F187.2C5ADB50
+------=_NextPart_000_0000_01C90D4A.CF77DD90
 Content-Type: image/png
 Content-Transfer-Encoding: base64
-Content-Location: file:///C:/Documents%20and%20Settings/Sculptor/My%20Documents/Academia/Economics/Dynare%20DSGE/V4/matlab/AIM/html/Dynare%20AIM%20use%20Doc_eq45249.png
+Content-Location: file:///C:/Documents%20and%20Settings/Sculptor/My%20Documents/Academia/Economics/Dynare%20DSGE/V4/doc/AIM/Dynare%20AIM%20use%20Doc_eq45249.png
 
 iVBORw0KGgoAAAANSUhEUgAAAJwAAAAPCAIAAACeKDH3AAAAB3RJTUUH2AcdDRY7h6GoEAAABrhJ
 REFUeJztWF9IU18c/967azW3YqutqESwmQbpUHBbU2JjrAZGPaS9CGLZMKg9FVRPBj6UrwU9bFSu
@@ -686,10 +679,10 @@ ut9CrGDt/Xvy5MnMzIxerxdEL7b73aDyOQvRQViWbW9vJ0myo6NDoVDwD0gQxO/uhhvN+SyJSaXS
 rq6ua9euoaqyGTilUimXy9edllNdBf2c+YVYcUtkMplerxepIvxICPqFEIuVAsMwhmEMBgOKKBoM
 hULNzc3BYPA/TuEZCn2Jrp0AAAAASUVORK5CYII=
 
-------=_NextPart_000_0022_01C8F187.2C5ADB50
+------=_NextPart_000_0000_01C90D4A.CF77DD90
 Content-Type: image/png
 Content-Transfer-Encoding: base64
-Content-Location: file:///C:/Documents%20and%20Settings/Sculptor/My%20Documents/Academia/Economics/Dynare%20DSGE/V4/matlab/AIM/html/Dynare%20AIM%20use%20Doc_eq69844.png
+Content-Location: file:///C:/Documents%20and%20Settings/Sculptor/My%20Documents/Academia/Economics/Dynare%20DSGE/V4/doc/AIM/Dynare%20AIM%20use%20Doc_eq69844.png
 
 iVBORw0KGgoAAAANSUhEUgAAANIAAAAqCAIAAABJOpJhAAAAB3RJTUUH2AcdDRcBWLZA4wAAETFJ
 REFUeJztXHlQk8f73zcnJBA55JBDDIIGwSMq5ajILa0i41SrlqqdcTr1qM6IDJ06Ha/pWGvb6SEz
@@ -771,10 +764,10 @@ DQYD/FYcL0FRVKvVMpnM9PT0kZERtVoNXwHZ0nj/Rrw7s4OBHZ/PHxwc7O/vp1Ao5eXl3d3dVCoV
 93YTExPLli1bt26dj4+Pj4+POSYlJSVCoRC83lMLG6YQ7/pyjMvlHj9+XKlUstnsOXPmWDAaC2cd
 tVqN/8cJG/6N+D/vdecohMuEjgAAAABJRU5ErkJggg==
 
-------=_NextPart_000_0022_01C8F187.2C5ADB50
+------=_NextPart_000_0000_01C90D4A.CF77DD90
 Content-Type: image/png
 Content-Transfer-Encoding: base64
-Content-Location: file:///C:/Documents%20and%20Settings/Sculptor/My%20Documents/Academia/Economics/Dynare%20DSGE/V4/matlab/AIM/html/Dynare%20AIM%20use%20Doc_eq235275.png
+Content-Location: file:///C:/Documents%20and%20Settings/Sculptor/My%20Documents/Academia/Economics/Dynare%20DSGE/V4/doc/AIM/Dynare%20AIM%20use%20Doc_eq235275.png
 
 iVBORw0KGgoAAAANSUhEUgAAAFAAAAA0CAIAAACSFii2AAAAB3RJTUUH2AcdDRcEKNy0bAAAB6pJ
 REFUeJztW11ME00XPrvdWqrFn0RoAYuEZDFIRBpawQJq+RGjkmhExKDxonpBTIya9MagRiWSGI0x
@@ -813,10 +806,10 @@ jdOEkZf29vYeOXKkpaUlLi5OJBK1t7d3dXXFxMQAgEKhsNvt+fn5CoXin+DSaGSmpKRUVFQsWbLk
 fohaP1Nbva/VsgK6BJCamlpdXU1RFLocMG0NrAoej8cwTJAJow2zX+6i+N+DgCn+mzZtgllty16F
 QL/BJBwSEjLHvwDMfqfa/y8A7969+w/7VNSGSH2X+QAAAABJRU5ErkJggg==
 
-------=_NextPart_000_0022_01C8F187.2C5ADB50
+------=_NextPart_000_0000_01C90D4A.CF77DD90
 Content-Type: image/png
 Content-Transfer-Encoding: base64
-Content-Location: file:///C:/Documents%20and%20Settings/Sculptor/My%20Documents/Academia/Economics/Dynare%20DSGE/V4/matlab/AIM/html/Dynare%20AIM%20use%20Doc_eq25810.png
+Content-Location: file:///C:/Documents%20and%20Settings/Sculptor/My%20Documents/Academia/Economics/Dynare%20DSGE/V4/doc/AIM/Dynare%20AIM%20use%20Doc_eq25810.png
 
 iVBORw0KGgoAAAANSUhEUgAAAI4AAAAPCAIAAAC9c2AiAAAAB3RJTUUH2AcdDRcHsdXl1gAABp5J
 REFUeJzFWG9IU98bf87ddY5lRVvliywbQ7IW2tgL819TmAk5on/0InyTL7JG0NvojzYLCSIQIYnV
@@ -851,10 +844,10 @@ bIpNdhz5XlJlHJY/e/Zs165d7N+Jya72AkzqF9+s+FN5ebnRaCwsLJRIJGzqt1mqx0VitBumCQDL
 y8uVlZUajSYUCmE1PJEkyXRdosyxrs762g1mF5zN/0trf1VwnfV/ALPgkLSXYJLzAAAAAElFTkSu
 QmCC
 
-------=_NextPart_000_0022_01C8F187.2C5ADB50
+------=_NextPart_000_0000_01C90D4A.CF77DD90
 Content-Type: image/png
 Content-Transfer-Encoding: base64
-Content-Location: file:///C:/Documents%20and%20Settings/Sculptor/My%20Documents/Academia/Economics/Dynare%20DSGE/V4/matlab/AIM/html/Dynare%20AIM%20use%20Doc_eq13129.png
+Content-Location: file:///C:/Documents%20and%20Settings/Sculptor/My%20Documents/Academia/Economics/Dynare%20DSGE/V4/doc/AIM/Dynare%20AIM%20use%20Doc_eq13129.png
 
 iVBORw0KGgoAAAANSUhEUgAAAJgAAAAQCAIAAABlQyHDAAAAB3RJTUUH2AcdDRcJVm3I0QAACoRJ
 REFUeJzNWVtME9kbP2dm2jKViy3lYiFtRdR6Q3GzyiYY12VxEVFY1nuMt2giXmLUxQejDxg3Jj5o
@@ -906,10 +899,10 @@ f+CTvaur6/79+xiGaTSamTNngtHdS4AQLhohhBaLpbW1VSwWDw4OzpgxY8KECaMXEYrOTqfz1q1b
 OI7TNC2TydLT05EyBw4c+O2332Qy2YjUeHdd+ezZsxFnXWg4e/as2WzmQsgvPwK0/32U/+jrx/8V
 fv75556eHm7kdv0P9/SDU2IgcJ8AAAAASUVORK5CYII=
 
-------=_NextPart_000_0022_01C8F187.2C5ADB50
+------=_NextPart_000_0000_01C90D4A.CF77DD90
 Content-Type: image/png
 Content-Transfer-Encoding: base64
-Content-Location: file:///C:/Documents%20and%20Settings/Sculptor/My%20Documents/Academia/Economics/Dynare%20DSGE/V4/matlab/AIM/html/Dynare%20AIM%20use%20Doc_eq372007.png
+Content-Location: file:///C:/Documents%20and%20Settings/Sculptor/My%20Documents/Academia/Economics/Dynare%20DSGE/V4/doc/AIM/Dynare%20AIM%20use%20Doc_eq372007.png
 
 iVBORw0KGgoAAAANSUhEUgAAARgAAAARCAIAAACJlCSnAAAAB3RJTUUH2AcdDRcMJgc8XgAAEaRJ
 REFUeJzdWnlUU0fUn5eVkA3CDoZVSBAoohhAEShQjwroUTxF6lo5FWh7WrVH7XE5XVyqtnZ114qo
@@ -993,10 +986,10 @@ l3f9+vW+vr41a9a0trbCBhcuXKirq3vRBCD6+/sPHz6sVCoPHz587NgxWPn48eMLFy7AlrDx2bNn
 cBAEWb58+cyZMzdv3gwAkMlkd+7ceeutt4DR7BgfH+/h4WFCHvlndgHvaE8XYQRBJtoT/7+CqS+b
 LwfmCxeZTMYw7H8AepLzydhZR1MAAAAASUVORK5CYII=
 
-------=_NextPart_000_0022_01C8F187.2C5ADB50
+------=_NextPart_000_0000_01C90D4A.CF77DD90
 Content-Type: image/png
 Content-Transfer-Encoding: base64
-Content-Location: file:///C:/Documents%20and%20Settings/Sculptor/My%20Documents/Academia/Economics/Dynare%20DSGE/V4/matlab/AIM/html/Dynare%20AIM%20use%20Doc_eq3403.png
+Content-Location: file:///C:/Documents%20and%20Settings/Sculptor/My%20Documents/Academia/Economics/Dynare%20DSGE/V4/doc/AIM/Dynare%20AIM%20use%20Doc_eq3403.png
 
 iVBORw0KGgoAAAANSUhEUgAAADcAAAAPCAIAAADPkMDRAAAAB3RJTUUH2AcdDRcRRQFQhwAAA21J
 REFUeJzFlU8sK18Ux8/UNTptuqGtBNUgUZpGhERSFoSIRCX1p1bCRkTYsNDYdE2EsBDpjo2VSENi
@@ -1016,10 +1009,10 @@ cDjs9/udTmdpaanf7w+FQm8Xq6url5eX7e3tPp+PEJJKpQghS0tLbrebEDIwMOD1egkhGONvsH5a
 OU9PT3l5eX19fVarlRBCSzszMzM0NMSy7MHBQUVFxevrq06nI3/lb55loREZURQDgUBDQ4Mc4vHx
 cXh4WK/XWyyW8/PzxcXFzCb7J/oFYjg7tI9Xy/YAAAAASUVORK5CYII=
 
-------=_NextPart_000_0022_01C8F187.2C5ADB50
+------=_NextPart_000_0000_01C90D4A.CF77DD90
 Content-Type: image/png
 Content-Transfer-Encoding: base64
-Content-Location: file:///C:/Documents%20and%20Settings/Sculptor/My%20Documents/Academia/Economics/Dynare%20DSGE/V4/matlab/AIM/html/Dynare%20AIM%20use%20Doc_eq76947.png
+Content-Location: file:///C:/Documents%20and%20Settings/Sculptor/My%20Documents/Academia/Economics/Dynare%20DSGE/V4/doc/AIM/Dynare%20AIM%20use%20Doc_eq76947.png
 
 iVBORw0KGgoAAAANSUhEUgAAANIAAAAqCAIAAABJOpJhAAAAB3RJTUUH2AcdDRcXrGL1sgAAEBlJ
 REFUeJztXHlQU1cXvy8JIoOMLAEXEGgFUcSlSEtRFAzUhSJoO61LW9TR2tJlWplx6lintbXbVKYi
@@ -1096,10 +1089,10 @@ IIQDAwN6bjc4OAgA+PzzzwEANTU1O3bsACbTtAWTFuPnduh1/s2bN2UymVqtrqurKy0tFYvF6Iwu
 AADDMBzHvby8du7c6eTkRD3OSmWCYditW7eKi4vBlO7jT22Mn9sh/1iyZMnDhw+bmpqCg4M9PT1N
 OI2JQrWtrc3oy3sL/i34H8GosRGcla9PAAAAAElFTkSuQmCC
 
-------=_NextPart_000_0022_01C8F187.2C5ADB50
+------=_NextPart_000_0000_01C90D4A.CF77DD90
 Content-Type: image/png
 Content-Transfer-Encoding: base64
-Content-Location: file:///C:/Documents%20and%20Settings/Sculptor/My%20Documents/Academia/Economics/Dynare%20DSGE/V4/matlab/AIM/html/Dynare%20AIM%20use%20Doc_eq33587.png
+Content-Location: file:///C:/Documents%20and%20Settings/Sculptor/My%20Documents/Academia/Economics/Dynare%20DSGE/V4/doc/AIM/Dynare%20AIM%20use%20Doc_eq33587.png
 
 iVBORw0KGgoAAAANSUhEUgAAANEAAAAPCAIAAAD1bL3nAAAAB3RJTUUH2AcdDRccO7AsOgAACnVJ
 REFUeJztWXlMVNcXPneYzBsQd2AmIDuubbQpCLiQEtEUXMBoRBMJNeICSQe12oZWaUlKTdpkjDr/
@@ -1151,4 +1144,4 @@ S25ieE0JCCGlUvn06dP09PRVq1ZxKW5ra9NoNHv27Ll06dLSpUsrKyvRaJETQWdn59OnTxmGSUhI
 mDVr1jtI6sQ5jFP3bxV9fX3v5g+Dt4fXlGC327u7u+Pi4txycf369YKCgtzc3Lt37y5duvR/lLIs
 wy7Y5VwAAAAASUVORK5CYII=
 
-------=_NextPart_000_0022_01C8F187.2C5ADB50--
+------=_NextPart_000_0000_01C90D4A.CF77DD90--
