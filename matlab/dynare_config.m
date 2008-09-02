@@ -43,7 +43,7 @@ if ~exist('OCTAVE_VERSION') && isempty(ver('stats'))
     addpath([dynareroot '/distributions/'])
 end
 
-if exist('AIM')==7  % Add path to G.Anderson AIM solver (added by GP July'08)
+if exist([dynareroot '/AIM'])==7  % Add path to G.Anderson AIM solver (added by GP July'08)
     addpath([dynareroot '/AIM/']);
 end
 
