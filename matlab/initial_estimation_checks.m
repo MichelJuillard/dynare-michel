@@ -88,11 +88,9 @@ function initial_estimation_checks(xparam1,gend,data)
   end
   
   if any(abs(oo_.steady_state(bayestopt_.mfys))>1e-9) & (options_.prefilter==1) 
-      disp(['You are trying to estimate a model with a non zero steady state for the observed endogenous']
+      disp(['You are trying to estimate a model with a non zero steady state for the observed endogenous'])
       disp(['variables using demeaned data!'])
       error('You should change something in your mod file...')
   end
   
-  
-
   disp(['Initial value of the log posterior (or likelihood): ' num2str(-fval)]);
