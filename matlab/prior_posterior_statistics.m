@@ -50,7 +50,7 @@ exo_nbr=M_.exo_nbr;
 nvobs     = size(options_.varobs,1);
 iendo = 1:endo_nbr;
 horizon = options_.forecast;
-moments_varendo = options_.moments_varendo;
+% moments_varendo = options_.moments_varendo;
 filtered_vars = options_.filtered_vars;
 if horizon
     i_last_obs = gend+(1-M_.maximum_endo_lag:0);
@@ -107,8 +107,8 @@ else
   end
 end
 
-irun = ones(8,1);
-ifil = zeros(8,1);
+irun = ones(7,1);
+ifil = zeros(7,1);
 
 if exist('OCTAVE_VERSION')
     diary off;
@@ -138,16 +138,16 @@ if options_.forecast
     stock_forcst_point = zeros(endo_nbr,horizon+maxlag,MAX_nforc2);
     run_smoother = 1;
 end
-if moments_varendo
-    stock_moments = cell(MAX_momentsno,1);
-end
+%if moments_varendo
+%    stock_moments = cell(MAX_momentsno,1);
+%end
 for b=1:B
   [deep, logpo] = GetOneDraw(type);
   set_all_parameters(deep);
   dr = resol(oo_.steady_state,0);
-  if moments_varendo
-      stock_moments{irun(8)} = compute_model_moments(dr,M_,options_);
-  end
+  %if moments_varendo
+  %    stock_moments{irun(8)} = compute_model_moments(dr,M_,options_);
+  %end
   if run_smoother
       [alphahat,etahat,epsilonhat,alphatilde,SteadyState,trend_coeff,aK] = ...
           DsgeSmoother(deep,gend,Y);
@@ -205,7 +205,7 @@ for b=1:B
   stock_logpo(irun(5),1) = logpo;
   stock_ys(irun(5),:) = SteadyState';
 
-  irun = irun +  ones(8,1);
+  irun = irun +  ones(7,1);
 
   if irun(1) > MAX_nsmoo || b == B
       stock = stock_smooth(:,:,1:irun(1)-1);
@@ -258,12 +258,12 @@ for b=1:B
       irun(7) = 1;
   end
 
-  if moments_varendo && (irun(8) > MAX_momentsno || b == B)
-      stock = stock_moments(1:irun(8)-1);
-      ifil(8) = ifil(8) + 1;
-      save([DirectoryName '/' M_.fname '_moments' int2str(ifil(8)) '.mat'],'stock');
-      irun(8) = 1;
-  end
+  % if moments_varendo && (irun(8) > MAX_momentsno || b == B)
+  %    stock = stock_moments(1:irun(8)-1);
+  %    ifil(8) = ifil(8) + 1;
+  %    save([DirectoryName '/' M_.fname '_moments' int2str(ifil(8)) '.mat'],'stock');
+  %    irun(8) = 1;
+  % end
   
   if exist('OCTAVE_VERSION')
       printf('Taking subdraws: %3.f%% done\r', b/B);

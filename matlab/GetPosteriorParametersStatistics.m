@@ -1,12 +1,16 @@
-function get_posterior_parameters_statistics()
+function oo_ = GetPosteriorParametersStatistics(estim_params_, M_, options_, bayestopt_, oo_)
 % This function prints and saves posterior estimates after the mcmc
 % (+updates of oo_ & TeX output). 
 % 
 % INPUTS 
-%   None.
+%   estim_params_    [structure] 
+%   M_               [structure]
+%   options_         [structure]
+%   bayestopt_       [structure]
+%   oo_              [structure]
 %  
 % OUTPUTS 
-%   None.  
+%   oo_              [structure]  
 %
 % SPECIAL REQUIREMENTS
 %   None.
@@ -30,9 +34,9 @@ function get_posterior_parameters_statistics()
 
 global estim_params_ M_ options_ bayestopt_ oo_
 
-if ~options_.mh_replic & options_.load_mh_file
-   load([M_.fname '_results.mat'],'oo_'); 
-end
+%if ~options_.mh_replic & options_.load_mh_file
+%   load([M_.fname '_results.mat'],'oo_'); 
+%end
 
 TeX   	= options_.TeX;
 nblck 	= options_.mh_nblck;
@@ -60,7 +64,12 @@ tit2 = sprintf('%10s %7s %10s %14s %4s %6s\n',' ','prior mean','post. mean','con
 pformat = '%12s %7.3f %8.4f %7.4f %7.4f %4s %6.4f';
 
 disp(' ');disp(' ');disp('ESTIMATION RESULTS');disp(' ');
-disp(sprintf('Log data density is %f.',oo_.MarginalDensity.ModifiedHarmonicMean))
+try
+    disp(sprintf('Log data density is %f.',oo_.MarginalDensity.ModifiedHarmonicMean))
+catch
+    [marginal,oo_] = marginal_density(M_, options_, estim_params_, oo_)
+    disp(sprintf('Log data density is %f.',oo_.MarginalDensity.ModifiedHarmonicMean))
+end
 if np
     type = 'parameters';
     if TeX
@@ -78,8 +87,16 @@ if np
             name = bayestopt_.name{ip};
             oo_ = Filloo(oo_,name,type,post_mean,hpd_interval,post_median,post_var,post_deciles,density);
         else
-            name = bayestopt_.name{ip};
-            [post_mean,hpd_interval,post_var] = Extractoo(oo_,name,type);
+            try
+                name = bayestopt_.name{ip};
+                [post_mean,hpd_interval,post_var] = Extractoo(oo_,name,type);
+            catch
+                Draws = GetAllPosteriorDraws(ip,FirstMhFile,FirstLine,TotalNumberOfMhFiles,NumberOfDraws);
+                [post_mean, post_median, post_var, hpd_interval, post_deciles, ...
+                 density] = posterior_moments(Draws,1,options_.mh_conf_sig);
+                name = bayestopt_.name{ip};
+                oo_ = Filloo(oo_,name,type,post_mean,hpd_interval,post_median,post_var,post_deciles,density);                
+            end
         end
         disp(sprintf(pformat,name,bayestopt_.pmean(ip),...
                      post_mean, ...
@@ -115,9 +132,19 @@ if nvx
             oo_ = Filloo(oo_,name,type,post_mean,hpd_interval,post_median,post_var,post_deciles,density);
             M_.Sigma_e(k,k) = post_mean*post_mean;
         else
-            k = estim_params_.var_exo(i,1);
-            name = deblank(M_.exo_names(k,:));
-            [post_mean,hpd_interval,post_var] = Extractoo(oo_,name,type);
+            try
+                k = estim_params_.var_exo(i,1);
+                name = deblank(M_.exo_names(k,:));
+                [post_mean,hpd_interval,post_var] = Extractoo(oo_,name,type);
+            catch
+                Draws = GetAllPosteriorDraws(ip,FirstMhFile,FirstLine,TotalNumberOfMhFiles,NumberOfDraws);
+                [post_mean, post_median, post_var, hpd_interval, post_deciles, density] = ...
+                    posterior_moments(Draws,1,options_.mh_conf_sig);
+                k = estim_params_.var_exo(i,1);
+                name = deblank(M_.exo_names(k,:));
+                oo_ = Filloo(oo_,name,type,post_mean,hpd_interval,post_median,post_var,post_deciles,density);
+                M_.Sigma_e(k,k) = post_mean*post_mean;
+            end
         end
         disp(sprintf(pformat,name,bayestopt_.pmean(ip),post_mean,hpd_interval,...
                      pnames(bayestopt_.pshape(ip)+1,:),bayestopt_.pstdev(ip)));
@@ -148,8 +175,16 @@ if nvn
             name = deblank(options_.varobs(estim_params_.var_endo(i,1),:));
             oo_ = Filloo(oo_,name,type,post_mean,hpd_interval,post_median,post_var,post_deciles,density);
         else
-            name = deblank(options_.varobs(estim_params_.var_endo(i,1),:));
-            [post_mean,hpd_interval,post_var] = Extractoo(oo_,name,type);
+            try
+                name = deblank(options_.varobs(estim_params_.var_endo(i,1),:));
+                [post_mean,hpd_interval,post_var] = Extractoo(oo_,name,type);
+            catch
+                Draws = GetAllPosteriorDraws(ip,FirstMhFile,FirstLine,TotalNumberOfMhFiles,NumberOfDraws);
+                [post_mean, post_median, post_var, hpd_interval, post_deciles, density] = ...
+                    posterior_moments(Draws,1,options_.mh_conf_sig);
+                name = deblank(options_.varobs(estim_params_.var_endo(i,1),:));
+                oo_ = Filloo(oo_,name,type,post_mean,hpd_interval,post_median,post_var,post_deciles,density);
+            end
         end
         disp(sprintf(pformat,name,bayestopt_.pmean(ip),post_mean,hpd_interval, ...
                      pnames(bayestopt_.pshape(ip)+1,:),bayestopt_.pstdev(ip)));
@@ -185,11 +220,24 @@ if ncx
             M_.Sigma_e(k1,k2) = post_mean*sqrt(M_.Sigma_e(k1,k1)*M_.Sigma_e(k2,k2));
             M_.Sigma_e(k2,k1) = M_.Sigma_e(k1,k2);
         else
-            k1 = estim_params_.corrx(i,1);
-            k2 = estim_params_.corrx(i,2);
-            name = [deblank(M_.exo_names(k1,:)) ',' deblank(M_.exo_names(k2,:))];
-            NAME = [deblank(M_.exo_names(k1,:)) '_' deblank(M_.exo_names(k2,:))];
-            [post_mean,hpd_interval,post_var] = Extractoo(oo_,NAME,type);
+            try
+                k1 = estim_params_.corrx(i,1);
+                k2 = estim_params_.corrx(i,2);
+                name = [deblank(M_.exo_names(k1,:)) ',' deblank(M_.exo_names(k2,:))];
+                NAME = [deblank(M_.exo_names(k1,:)) '_' deblank(M_.exo_names(k2,:))];
+                [post_mean,hpd_interval,post_var] = Extractoo(oo_,NAME,type);
+            catch
+                Draws = GetAllPosteriorDraws(ip,FirstMhFile,FirstLine,TotalNumberOfMhFiles,NumberOfDraws);
+                [post_mean, post_median, post_var, hpd_interval, post_deciles, density] = ...
+                    posterior_moments(Draws,1,options_.mh_conf_sig);
+                k1 = estim_params_.corrx(i,1);
+                k2 = estim_params_.corrx(i,2);
+                name = [deblank(M_.exo_names(k1,:)) ',' deblank(M_.exo_names(k2,:))];
+                NAME = [deblank(M_.exo_names(k1,:)) '_' deblank(M_.exo_names(k2,:))];
+                oo_ = Filloo(oo_,NAME,type,post_mean,hpd_interval,post_median,post_var,post_deciles,density);
+                M_.Sigma_e(k1,k2) = post_mean*sqrt(M_.Sigma_e(k1,k1)*M_.Sigma_e(k2,k2));
+                M_.Sigma_e(k2,k1) = M_.Sigma_e(k1,k2);
+            end
         end
         disp(sprintf(pformat, name,bayestopt_.pmean(ip),post_mean,hpd_interval, ...
                      pnames(bayestopt_.pshape(ip)+1,:),bayestopt_.pstdev(ip)));
@@ -224,11 +272,23 @@ if ncn
             oo_ = Filloo(oo_,NAME,type,post_mean,hpd_interval,...
                          post_median,post_var,post_deciles,density);
         else
-            k1 = estim_params_.corrn(i,1);
-            k2 = estim_params_.corrn(i,2);
-            name = [deblank(M_.endo_names(k1,:)) ',' deblank(M_.endo_names(k2,:))];
-            NAME = [deblank(M_.endo_names(k1,:)) '_' deblank(M_.endo_names(k2,:))];
-            [post_mean,hpd_interval,post_var] = Extractoo(oo_,NAME,type);
+            try
+                k1 = estim_params_.corrn(i,1);
+                k2 = estim_params_.corrn(i,2);
+                name = [deblank(M_.endo_names(k1,:)) ',' deblank(M_.endo_names(k2,:))];
+                NAME = [deblank(M_.endo_names(k1,:)) '_' deblank(M_.endo_names(k2,:))];
+                [post_mean,hpd_interval,post_var] = Extractoo(oo_,NAME,type);
+            catch
+                Draws = GetAllPosteriorDraws(ip,FirstMhFile,FirstLine,TotalNumberOfMhFiles,NumberOfDraws);
+                [post_mean, post_median, post_var, hpd_interval, post_deciles, density] = ...
+                    posterior_moments(Draws,1,options_.mh_conf_sig);
+                k1 = estim_params_.corrn(i,1);
+                k2 = estim_params_.corrn(i,2);
+                name = [deblank(M_.endo_names(k1,:)) ',' deblank(M_.endo_names(k2,:))];
+                NAME = [deblank(M_.endo_names(k1,:)) '_' deblank(M_.endo_names(k2,:))];
+                oo_ = Filloo(oo_,NAME,type,post_mean,hpd_interval,...
+                             post_median,post_var,post_deciles,density);
+            end
         end
         disp(sprintf(pformat, name,bayestopt_.pmean(ip),post_mean,hpd_interval, ...
                      pnames(bayestopt_.pshape(ip)+1,:),bayestopt_.pstdev(ip)));

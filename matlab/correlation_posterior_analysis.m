@@ -76,23 +76,38 @@ function oo_ = correlation_posterior_analysis(SampleSize,dname,fname,vartan,nvar
         tmp(i1:i2) = Correlation_array(:,indx1,indx2,nar);
         i1 = i2+1;
     end
-    [post_mean, post_median, post_var, hpd_interval, post_deciles, density] = ...
-        posterior_moments(tmp,1,mh_conf_sig);
     name = [ var1 '.' var2 ];
-    if isfield(oo_,'PosteriorTheoreticalMoments')
-        if isfield(oo_.PosteriorTheoreticalMoments,'dsge')
-            if isfield(oo_.PosteriorTheoreticalMoments.dsge,'correlation')
-                oo_ = fill_output_structure(var1,var2,oo_,'mean',nar,post_mean);
-                oo_ = fill_output_structure(var1,var2,oo_,'median',nar,post_median);
-                oo_ = fill_output_structure(var1,var2,oo_,'variance',nar,post_var);
-                oo_ = fill_output_structure(var1,var2,oo_,'hpdinf',nar,hpd_interval(1));
-                oo_ = fill_output_structure(var1,var2,oo_,'hpdsup',nar,hpd_interval(2));
-                oo_ = fill_output_structure(var1,var2,oo_,'deciles',nar,post_deciles);
-                oo_ = fill_output_structure(var1,var2,oo_,'density',nar,density);
+    if ~isconst(tmp)
+        [post_mean, post_median, post_var, hpd_interval, post_deciles, density] = ...
+            posterior_moments(tmp,1,mh_conf_sig);
+        if isfield(oo_,'PosteriorTheoreticalMoments')
+            if isfield(oo_.PosteriorTheoreticalMoments,'dsge')
+                if isfield(oo_.PosteriorTheoreticalMoments.dsge,'correlation')
+                    oo_ = fill_output_structure(var1,var2,oo_,'mean',nar,post_mean);
+                    oo_ = fill_output_structure(var1,var2,oo_,'median',nar,post_median);
+                    oo_ = fill_output_structure(var1,var2,oo_,'variance',nar,post_var);
+                    oo_ = fill_output_structure(var1,var2,oo_,'hpdinf',nar,hpd_interval(1));
+                    oo_ = fill_output_structure(var1,var2,oo_,'hpdsup',nar,hpd_interval(2));
+                    oo_ = fill_output_structure(var1,var2,oo_,'deciles',nar,post_deciles);
+                    oo_ = fill_output_structure(var1,var2,oo_,'density',nar,density);
+                end
+            end
+        end
+    else
+        if isfield(oo_,'PosteriorTheoreticalMoments')
+            if isfield(oo_.PosteriorTheoreticalMoments,'dsge')
+                if isfield(oo_.PosteriorTheoreticalMoments.dsge,'correlation')
+                    oo_ = fill_output_structure(var1,var2,oo_,'mean',nar,NaN);
+                    oo_ = fill_output_structure(var1,var2,oo_,'median',nar,NaN);
+                    oo_ = fill_output_structure(var1,var2,oo_,'variance',nar,NaN);
+                    oo_ = fill_output_structure(var1,var2,oo_,'hpdinf',nar,NaN);
+                    oo_ = fill_output_structure(var1,var2,oo_,'hpdsup',nar,NaN);
+                    oo_ = fill_output_structure(var1,var2,oo_,'deciles',nar,NaN);
+                    oo_ = fill_output_structure(var1,var2,oo_,'density',nar,NaN);
+                end
             end
         end
     end
-
     
 function oo_ = initialize_output_structure(var1,var2,nar,oo_)
     name = [ var1 '.' var2 ];

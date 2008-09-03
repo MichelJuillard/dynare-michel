@@ -49,12 +49,12 @@ function oo_ = covariance_posterior_analysis(NumberOfSimulations,dname,fname,var
                             return
                         end
                     end
-                end         
+                end
             end
         end
     end
     tmp = dir([ dname '/metropolis/'  fname '_Posterior2ndOrderMoments*.mat']);
-    NumberOfFiles= length(tmp);
+    NumberOfFiles = length(tmp);
     i1 = 1; tmp = zeros(NumberOfSimulations,1);
     for file = 1:NumberOfFiles
         load([ dname '/metropolis/'  fname '_Posterior2ndOrderMoments' int2str(file) '.mat']);
@@ -62,13 +62,23 @@ function oo_ = covariance_posterior_analysis(NumberOfSimulations,dname,fname,var
         tmp(i1:i2) = Covariance_matrix(:,symmetric_matrix_index(indx1,indx2,nvar));
         i1 = i2+1;
     end
-    [post_mean, post_median, post_var, hpd_interval, post_deciles, density] = ...
-        posterior_moments(tmp,1,mh_conf_sig);
     name = [var1 '.' var2];
-    eval(['oo_.PosteriorTheoreticalMoments.dsge.covariance.mean.' name ' = post_mean;']);
-    eval(['oo_.PosteriorTheoreticalMoments.dsge.covariance.median.' name ' = post_median;']);
-    eval(['oo_.PosteriorTheoreticalMoments.dsge.covariance.variance.' name ' = post_var;']);
-    eval(['oo_.PosteriorTheoreticalMoments.dsge.covariance.hpdinf.' name ' = hpd_interval(1);']);
-    eval(['oo_.PosteriorTheoreticalMoments.dsge.covariance.hpdsup.' name ' = hpd_interval(2);']);
-    eval(['oo_.PosteriorTheoreticalMoments.dsge.covariance.deciles.' name ' = post_deciles;']);
-    eval(['oo_.PosteriorTheoreticalMoments.dsge.covariance.density.' name ' = density;']);
+    if ~isconst(tmp)
+        [post_mean, post_median, post_var, hpd_interval, post_deciles, density] = ...
+            posterior_moments(tmp,1,mh_conf_sig);
+        eval(['oo_.PosteriorTheoreticalMoments.dsge.covariance.mean.' name ' = post_mean;']);
+        eval(['oo_.PosteriorTheoreticalMoments.dsge.covariance.median.' name ' = post_median;']);
+        eval(['oo_.PosteriorTheoreticalMoments.dsge.covariance.variance.' name ' = post_var;']);
+        eval(['oo_.PosteriorTheoreticalMoments.dsge.covariance.hpdinf.' name ' = hpd_interval(1);']);
+        eval(['oo_.PosteriorTheoreticalMoments.dsge.covariance.hpdsup.' name ' = hpd_interval(2);']);
+        eval(['oo_.PosteriorTheoreticalMoments.dsge.covariance.deciles.' name ' = post_deciles;']);
+        eval(['oo_.PosteriorTheoreticalMoments.dsge.covariance.density.' name ' = density;']);
+    else
+        eval(['oo_.PosteriorTheoreticalMoments.dsge.covariance.mean.' name ' = NaN;']);
+        eval(['oo_.PosteriorTheoreticalMoments.dsge.covariance.median.' name ' = NaN;']);
+        eval(['oo_.PosteriorTheoreticalMoments.dsge.covariance.variance.' name ' = NaN;']);
+        eval(['oo_.PosteriorTheoreticalMoments.dsge.covariance.hpdinf.' name ' = NaN;']);
+        eval(['oo_.PosteriorTheoreticalMoments.dsge.covariance.hpdsup.' name ' = NaN;']);
+        eval(['oo_.PosteriorTheoreticalMoments.dsge.covariance.deciles.' name ' = NaN;']);
+        eval(['oo_.PosteriorTheoreticalMoments.dsge.covariance.density.' name ' = NaN;']);
+    end

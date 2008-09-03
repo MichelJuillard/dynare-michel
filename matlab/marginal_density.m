@@ -1,12 +1,16 @@
-function marginal = marginal_density()
+function [marginal,oo_] = marginal_density(M_, options_, estim_params_, oo_)
 % function marginal = marginal_density()
 % Computes the marginal density
 %
 % INPUTS
-%    none
+%   options_         [structure]
+%   estim_params_    [structure]
+%   M_               [structure]
+%   oo_              [structure]
 %
 % OUTPUTS
-%    marginal:  marginal density
+%   marginal:        [double]     marginal density (modified harmonic mean)
+%   oo_              [structure]
 %
 % SPECIAL REQUIREMENTS
 %    none
@@ -28,7 +32,6 @@ function marginal = marginal_density()
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-global M_ options_ estim_params_ oo_
 
 npar = estim_params_.np+estim_params_.nvn+estim_params_.ncx+estim_params_.ncn+estim_params_.nvx;
 nblck = options_.mh_nblck;

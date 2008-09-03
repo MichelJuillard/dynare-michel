@@ -1,10 +1,12 @@
-function CutSample()
+function CutSample(M_, options_, estim_params_)
 
 % function CutSample()
 % Takes a subset from metropolis
 %
 % INPUTS
-%    none
+%   options_         [structure]
+%   estim_params_    [structure]
+%   M_               [structure]
 %
 % OUTPUTS
 %    none

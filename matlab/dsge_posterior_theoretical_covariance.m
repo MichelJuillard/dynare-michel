@@ -40,6 +40,8 @@ type = 'posterior';
     
 % Set varlist (vartan)
 [ivar,vartan] = set_stationary_variables_list;
+vartan
+pause
 nvar = length(ivar);
 
 % Set the size of the auto-correlation function to zero.
@@ -68,7 +70,7 @@ CovarFileNumber = 1;
 % Compute 2nd order moments and save them in *_Posterior2ndOrderMoments* files
 linea = 0;
 for file = 1:NumberOfDrawsFiles
-    load([M_.dname '/metropolis/' DrawsFiles(file).name '.mat']);
+    load([M_.dname '/metropolis/' DrawsFiles(file).name ],'pdraws');
     NumberOfDraws = rows(pdraws);
     isdrsaved = cols(pdraws)-1;
     for linee = 1:NumberOfDraws

@@ -616,7 +616,7 @@ if any(bayestopt_.pshape > 0) & options_.posterior_mode_estimation
       eval(['oo_.posterior_std.measurement_errors_corr.' NAME ' = stdh(ip);']); 
       ip = ip+1;
     end
-  end  
+  end
   %% Laplace approximation to the marginal log density:
   if ~options_.bvar_dsge
     md_Laplace = .5*size(xparam1,1)*log(2*pi) + .5*log(det(invhess)) ...
@@ -898,16 +898,16 @@ end
 
 if (any(bayestopt_.pshape  >0 ) & options_.mh_replic) | ...
       (any(bayestopt_.pshape >0 ) & options_.load_mh_file)  %% not ML estimation
-  bounds = prior_bounds(bayestopt_);
-  bounds(:,1)=max(bounds(:,1),lb);
-  bounds(:,2)=min(bounds(:,2),ub);
-  bayestopt_.lb = bounds(:,1);
-  bayestopt_.ub = bounds(:,2);
-  if any(xparam1 < bounds(:,1)) | any(xparam1 > bounds(:,2))
-    find(xparam1 < bounds(:,1))
-    find(xparam1 > bounds(:,2))
-    error('Mode values are outside prior bounds. Reduce prior_trunc.')
-  end
+    bounds = prior_bounds(bayestopt_);
+    bounds(:,1)=max(bounds(:,1),lb);
+    bounds(:,2)=min(bounds(:,2),ub);
+    bayestopt_.lb = bounds(:,1);
+    bayestopt_.ub = bounds(:,2);
+    if any(xparam1 < bounds(:,1)) | any(xparam1 > bounds(:,2))
+        find(xparam1 < bounds(:,1))
+        find(xparam1 > bounds(:,2))
+        error('Mode values are outside prior bounds. Reduce prior_trunc.')
+    end
   % runs MCMC
   if options_.mh_replic
     if options_.load_mh_file & options_.use_mh_covariance_matrix
@@ -920,26 +920,29 @@ if (any(bayestopt_.pshape  >0 ) & options_.mh_replic) | ...
     end
   end
   if ~options_.nodiagnostic & options_.mh_replic > 1000 & options_.mh_nblck > 1
-    McMCDiagnostics;
+      McMCDiagnostics(options_, estim_params_, M_);
   end
   %% Here i discard first half of the draws:
   CutSample;
   %% Estimation of the marginal density from the Mh draws:
   if options_.mh_replic
-      marginal = marginal_density;
+      [marginal,oo_] = marginal_density(M_, options_, estim_params_, oo_);
   end
   %%
-  GetPosteriorParametersStatistics;
+  oo_ = GetPosteriorParametersStatistics(estim_params_, M_, options_, bayestopt_, oo_);
   %% Results are saved (in case of an anormal exit from dynare or matlab)...
-  save([M_.fname '_results.mat'],'oo_','M_');
+  %%save([M_.fname '_results.mat'],'oo_','M_');
   %%
-  PlotPosteriorDistributions;
+  oo_
+  oo_ = PlotPosteriorDistributions(estim_params_, M_, options_, bayestopt_, oo_);
   metropolis_draw(1);
   if options_.bayesian_irf
     PosteriorIRF('posterior');
   end
-  if options_.smoother | ~isempty(options_.filter_step_ahead) | options_.forecast ...
-          | options_.moments_varendo
+  if options_.moments_varendo
+      oo_ = compute_moments_varendo(options_,M_,oo_,var_list_);
+  end
+  if options_.smoother | ~isempty(options_.filter_step_ahead) | options_.forecast
     prior_posterior_statistics('posterior',data,gend);
   end
 

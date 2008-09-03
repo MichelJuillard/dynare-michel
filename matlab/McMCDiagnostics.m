@@ -1,10 +1,12 @@
-function McMCDiagnostics
+function McMCDiagnostics(options_, estim_params_, M_)
 % function McMCDiagnostics
 % Computes convergence tests 
 % 
 % INPUTS 
-%   none
-%  
+%   options_         [structure]
+%   estim_params_    [structure]
+%   M_               [structure]
+%
 % OUTPUTS 
 %   none  
 %
@@ -27,8 +29,6 @@ function McMCDiagnostics
 %
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
-
-global options_ estim_params_ M_ 
 
 DirectoryName = CheckPath('Output');
 MhDirectoryName = CheckPath('metropolis');
