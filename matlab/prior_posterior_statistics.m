@@ -124,7 +124,7 @@ if options_.smoother
   stock_smooth = zeros(endo_nbr,gend,MAX_nsmoo);
   stock_innov  = zeros(exo_nbr,gend,B);
   stock_error = zeros(nvobs,gend,MAX_nerro);
-  stock_filter = zeros(endo_nbr,gend,MAX_nsmoo);
+  stock_update = zeros(endo_nbr,gend,MAX_nsmoo);
   run_smoother = 1;
 end
 
@@ -145,21 +145,23 @@ for b=1:B
   [deep, logpo] = GetOneDraw(type);
   set_all_parameters(deep);
   dr = resol(oo_.steady_state,0);
+
   %if moments_varendo
   %    stock_moments{irun(8)} = compute_model_moments(dr,M_,options_);
   %end
+
   if run_smoother
       [alphahat,etahat,epsilonhat,alphatilde,SteadyState,trend_coeff,aK] = ...
           DsgeSmoother(deep,gend,Y);
       if options_.loglinear
           stock_smooth(dr.order_var,:,irun(1)) = alphahat(1:endo_nbr,:)+ ...
               repmat(log(dr.ys(dr.order_var)),1,gend);
-          stock_filter(dr.order_var,:,irun(1)) = alphatilde(1:endo_nbr,:)+ ...
+          stock_update(dr.order_var,:,irun(1)) = alphatilde(1:endo_nbr,:)+ ...
               repmat(log(dr.ys(dr.order_var)),1,gend);
       else
           stock_smooth(dr.order_var,:,irun(1)) = alphahat(1:endo_nbr,:)+ ...
               repmat(dr.ys(dr.order_var),1,gend);
-          stock_filter(dr.order_var,:,irun(1)) = alphatilde(1:endo_nbr,:)+ ...
+          stock_update(dr.order_var,:,irun(1)) = alphatilde(1:endo_nbr,:)+ ...
               repmat(dr.ys(dr.order_var),1,gend);
       end    
       stock_innov(:,:,irun(2))  = etahat;
@@ -211,8 +213,8 @@ for b=1:B
       stock = stock_smooth(:,:,1:irun(1)-1);
       ifil(1) = ifil(1) + 1;
       save([DirectoryName '/' M_.fname '_smooth' int2str(ifil(1)) '.mat'],'stock');
-      stock = stock_filter(:,:,1:irun(1)-1);
-      save([DirectoryName '/' M_.fname '_filter' int2str(ifil(1)) '.mat'],'stock');
+      stock = stock_update(:,:,1:irun(1)-1);
+      save([DirectoryName '/' M_.fname '_update' int2str(ifil(1)) '.mat'],'stock');
       irun(1) = 1;
   end
   
@@ -286,10 +288,10 @@ save([DirectoryName '/' M_.fname '_data.mat'],'stock_gend','stock_data');
 if options_.smoother
     pm3(endo_nbr,gend,ifil(1),B,'Smoothed variables',...
 	'',M_.endo_names,'tit_tex',M_.endo_names,...
-	varlist,'smoothed_variables',[M_.fname '/metropolis'],'_smooth');
+	varlist,'SmoothedVariables',[M_.fname '/metropolis'],'_smooth');
     pm3(exo_nbr,gend,ifil(2),B,'Smoothed shocks',...
 	'',M_.exo_names,'tit_tex',M_.exo_names,...
-	M_.exo_names,'smoothed_shocks',[M_.fname '/metropolis'],'_inno');
+	M_.exo_names,'SmoothedShocks',[M_.fname '/metropolis'],'_inno');
     if nvn
         % needs to  be fixed
 %        pm3(endo_nbr,gend,ifil(3),B,'Smoothed measurement errors',...
@@ -299,23 +301,20 @@ if options_.smoother
 end
 
 if options_.filtered_vars
-    pm3(endo_nbr,gend,ifil(1),B,'Filtered variables',...
+    pm3(endo_nbr,gend,ifil(1),B,'Updated Variables',...
 	'',M_.endo_names,'tit_tex',M_.endo_names,...
-	varlist,'filtered_current_variables',[M_.fname '/metropolis'], ...
-        '_filter');
-end
-
-if options_.filter_step_ahead
-    pm3(endo_nbr,gend+1,ifil(1),B,'One step ahead forecast',...
+	varlist,'UpdatedVariables',[M_.fname '/metropolis'], ...
+        '_update');
+    pm3(endo_nbr,gend+1,ifil(4),B,'One step ahead forecast',...
 	'',M_.endo_names,'tit_tex',M_.endo_names,...
-	varlist,'one_step_ahead',[M_.fname '/metropolis'],'_filter_step_ahead');
+	varlist,'FilteredVariables',[M_.fname '/metropolis'],'_filter_step_ahead');
 end
 
 if options_.forecast
     pm3(endo_nbr,horizon+maxlag,ifil(6),B,'Forecasted variables (mean)',...
 	'',M_.endo_names,'tit_tex',M_.endo_names,...
-	varlist,'mean_forecast',[M_.fname '/metropolis'],'_forc_mean');
+	varlist,'MeanForecast',[M_.fname '/metropolis'],'_forc_mean');
     pm3(endo_nbr,horizon+maxlag,ifil(6),B,'Forecasted variables (point)',...
 	'',M_.endo_names,'tit_tex',M_.endo_names,...
-	varlist,'point_forecast',[M_.fname '/metropolis'],'_forc_point');
+	varlist,'PointForecast',[M_.fname '/metropolis'],'_forc_point');
 end
