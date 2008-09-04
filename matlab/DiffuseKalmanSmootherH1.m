@@ -1,11 +1,12 @@
-function [alphahat,epsilonhat,etahat,a, aK] = DiffuseKalmanSmootherH1(T,R,Q,H,Pinf1,Pstar1,Y,trend,pp,mm,smpl,mf)
-% function [alphahat,epsilonhat,etahat,a, aK] = DiffuseKalmanSmootherH1(T,R,Q,H,Pinf1,Pstar1,Y,trend,pp,mm,smpl,mf)
+gfunction [alphahat,epsilonhat,etahat,atilde, aK] = DiffuseKalmanSmootherH1(T,R,Q,H,Pinf1,Pstar1,Y,trend,pp,mm,smpl,mf)
+% function [alphahat,epsilonhat,etahat,atilde, aK] = DiffuseKalmanSmootherH1(T,R,Q,H,Pinf1,Pstar1,Y,trend,pp,mm,smpl,mf)
 % Computes the diffuse kalman smoother with measurement error, in the case of a non-singular var-cov matrix 
 %
 % INPUTS
 %    T:         mm*mm matrix
 %    R:         mm*rr matrix
 %    Q:         rr*rr matrix
+%    H:        pp*pp matrix variance of measurement errors    
 %    Pinf1:     mm*mm diagonal matrix with with q ones and m-q zeros
 %    Pstar1:    mm*mm variance-covariance matrix with stationary variables
 %    Y:         pp*1 vector
@@ -16,11 +17,11 @@ function [alphahat,epsilonhat,etahat,a, aK] = DiffuseKalmanSmootherH1(T,R,Q,H,Pi
 %    mf:        observed variables index in the state vector
 %             
 % OUTPUTS
-%    alphahat:  smoothed state variables
+%    alphahat:  smoothed state variables (a_{t|T})
 %    epsilonhat:smoothed measurement errors
-%    etahat:    smoothed shocks
-%    a:         matrix of one step ahead filtered state variables
-%    aK:        3D array of k step ahead filtered state variables
+%    etahat:    smoothed shocks 
+%    atilde:         matrix of updated variables (a_{t|t})
+%    aK:        3D array of k step ahead filtered state variables (a_{t+k|t)}
 %
 % SPECIAL REQUIREMENTS
 %   See "Filtering and Smoothing of State Vector for Diffuse State Space
@@ -57,6 +58,7 @@ spinf   	= size(Pinf1);
 spstar  	= size(Pstar1);
 v       	= zeros(pp,smpl);
 a       	= zeros(mm,smpl+1);
+atilde       	= zeros(mm,smpl);
 aK              = zeros(nk,mm,smpl+nk);  
 iF      	= zeros(pp,pp,smpl);
 Fstar   	= zeros(pp,pp,smpl);
@@ -92,8 +94,10 @@ while rank(Pinf(:,:,t+1),crit1) & t<smpl
     	return		
     end
     iFinf(:,:,t) 	= inv(Pinf(mf,mf,t));
-    Kinf(:,:,t)	 	= T*Pinf(:,mf,t)*iFinf(:,:,t);
-    a(:,t+1) 	 	= T*a(:,t) + Kinf(:,:,t)*v(:,t);
+    PZI                 = Pinf(:,mf,t)*iFinf(:,:,t);
+    atilde(:,t)         = a(:,t) + PZI*v(:,t);
+    Kinf(:,:,t)	 	= T*PZI;
+    a(:,t+1) 	 	= T*atilde(:,t);
     for jnk=1:nk,
         aK(jnk,:,t+jnk)	= T^(jnk-1)*a(:,t+1);
     end
@@ -120,29 +124,33 @@ while notsteady & t<smpl
     	return		
     end    
     iF(:,:,t)   = inv(P(mf,mf,t) + H);
-    K(:,:,t)    = T*P(:,mf,t)*iF(:,:,t);
+    PZI         = P(:,mf,t)*iF(:,:,t);
+    atilde(:,t) = a(:,t) + PZI*v(:,t);
+    K(:,:,t)    = T*PZI;
     L(:,:,t)    = T-K(:,:,t)*Z;
-    a(:,t+1)    = T*a(:,t) + K(:,:,t)*v(:,t);    
+    a(:,t+1)    = T*atilde(:,t);
     for jnk=1:nk,
         aK(jnk,:,t+jnk) = T^(jnk-1)*a(:,t+1);
     end
     P(:,:,t+1)  = T*P(:,:,t)*transpose(T)-T*P(:,mf,t)*transpose(K(:,:,t)) + QQ;
     notsteady   = ~(max(max(abs(P(:,:,t+1)-P(:,:,t))))<crit);
 end
-K_s = K(:,:,t);
-iF_s = iF(:,:,t);
-P_s = P(:,:,t+1);
 if t<smpl
-	t_steady = t+1;
-	P  = cat(3,P(:,:,1:t),repmat(P(:,:,t),[1 1 smpl-t_steady+1]));
-	iF = cat(3,iF(:,:,1:t),repmat(inv(P_s(mf,mf)+H),[1 1 smpl-t_steady+1]));
-	L  = cat(3,L(:,:,1:t),repmat(T-K_s*Z,[1 1 smpl-t_steady+1]));
-	K  = cat(3,K(:,:,1:t),repmat(T*P_s(:,mf)*iF_s,[1 1 smpl-t_steady+1]));
+    PZI_s = PZI; 
+    K_s = K(:,:,t);
+    iF_s = iF(:,:,t);
+    P_s = P(:,:,t+1);
+    t_steady = t+1;
+    P  = cat(3,P(:,:,1:t),repmat(P(:,:,t),[1 1 smpl-t_steady+1]));
+    iF = cat(3,iF(:,:,1:t),repmat(inv(P_s(mf,mf)+H),[1 1 smpl-t_steady+1]));
+    L  = cat(3,L(:,:,1:t),repmat(T-K_s*Z,[1 1 smpl-t_steady+1]));
+    K  = cat(3,K(:,:,1:t),repmat(T*P_s(:,mf)*iF_s,[1 1 smpl-t_steady+1]));
 end
 while t<smpl
     t=t+1;
     v(:,t) = Y(:,t) - a(mf,t) - trend(:,t);
-    a(:,t+1) = T*a(:,t) + K_s*v(:,t);
+    atilde(:,t) = a(:,t) + PZI_s*v(:,t);
+    a(:,t+1) = T*atilde(:,t);
     for jnk=1:nk,
         aK(jnk,:,t+jnk) = T^(jnk-1)*a(:,t+1);
     end

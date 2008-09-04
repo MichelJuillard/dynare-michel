@@ -1,5 +1,5 @@
-function [alphahat,etahat,a,P,aK,PK,d,decomp] = DiffuseKalmanSmoother3_Z(T,Z,R,Q,Pinf1,Pstar1,Y,pp,mm,smpl)
-% function [alphahat,etahat,a1,P,aK,PK,d,decomp_filt] = DiffuseKalmanSmoother3(T,Z,R,Q,Pinf1,Pstar1,Y,pp,mm,smpl)
+function [alphahat,epsilonhat,etahat,a,P,aK,PK,d,decomp] = DiffuseKalmanSmootherH3_Z(T,Z,R,Q,H,Pinf1,Pstar1,Y,pp,mm,smpl)
+% function [alphahat,epsilonhat,etahat,a1,P,aK,PK,d,decomp_filt] = DiffuseKalmanSmootherH3(T,Z,R,Q,H,Pinf1,Pstar1,Y,pp,mm,smpl)
 % Computes the diffuse kalman smoother without measurement error, in the case of a singular var-cov matrix.
 % Univariate treatment of multivariate time series.
 %
@@ -18,6 +18,7 @@ function [alphahat,etahat,a,P,aK,PK,d,decomp] = DiffuseKalmanSmoother3_Z(T,Z,R,Q
 % OUTPUTS
 %    alphahat: smoothed state variables (a_{t|T})
 %    etahat:   smoothed shocks
+%    epsilonhat:smoothed measurement error
 %    a:        matrix of updated variables (a_{t|t})
 %    aK:       3D array of k step ahead filtered state variables (a_{t+k|t})
 %              (meaningless for periods 1:d)
@@ -104,6 +105,7 @@ QQ              = R*Q*transpose(R);
 QRt                     = Q*transpose(R);
 alphahat        = zeros(mm,smpl);
 etahat          = zeros(rr,smpl);
+epsilonhat      = zeros(size(Y));
 r                       = zeros(mm,smpl);
 
 t = 0;
@@ -119,7 +121,7 @@ while newRank & t < smpl
   for i=1:pp
     Zi = Z(i,:);
     v(i,t)      = Y(i,t)-Zi*a(:,t);
-    Fstar(i,t)  = Zi*Pstar(:,:,t)*Zi';
+    Fstar(i,t)  = Zi*Pstar(:,:,t)*Zi' +H(i,i);
     Finf(i,t)   = Zi*Pinf(:,:,t)*Zi';
     Kstar(:,i,t)        = Pstar(:,:,t)*Zi';
     if Finf(i,t) > crit & newRank
@@ -194,7 +196,7 @@ while notsteady & t<smpl
   for i=1:pp
     Zi = Z(i,:);
     v(i,t)  = Y(i,t) - Zi*a(:,t);
-    Fi(i,t) = Zi*P(:,:,t)*Zi';
+    Fi(i,t) = Zi*P(:,:,t)*Zi' + H(i,i);
     Ki(:,i,t) = P(:,:,t)*Zi';
     if Fi(i,t) > crit
       Li(:,:,i,t)    = eye(mm)-Ki(:,i,t)*Z(i,:)/Fi(i,t);
@@ -325,3 +327,5 @@ if nargout > 7
         end
     end
 end
+
+epsilonhat = Y-alphahat(mf,:)-trend;

@@ -31,11 +31,11 @@ function dynare_estimation(var_list_)
 global M_ options_ oo_ estim_params_ bayestopt_
 
 var_list_ = check_list_of_variables(options_, M_, var_list_)
-if isempty(var_list_)
-    return
-else
+%if isempty(var_list_)
+%    return
+%else
     options_.varlist = var_list_;
-end
+%end
 
 options_.lgyidx2varobs = zeros(size(M_.endo_names,1),1);
 for i = 1:size(M_.endo_names,1)
@@ -303,7 +303,7 @@ initial_estimation_checks(xparam1,gend,data);
 
 if options_.mode_compute == 0 & length(options_.mode_file) == 0
     if options_.smoother == 1
-	[atT,innov,measurement_error,filtered_state_vector,ys,trend_coeff,aK,T,R,P,PK,d,decomp] = DsgeSmoother(xparam1,gend,data);
+	[atT,innov,measurement_error,updated_variables,ys,trend_coeff,aK,T,R,P,PK,d,decomp] = DsgeSmoother(xparam1,gend,data);
 	oo_.Smoother.SteadyState = ys;
 	oo_.Smoother.TrendCoeffs = trend_coeff;
 	oo_.Smoother.integration_order = d;
@@ -316,7 +316,8 @@ if options_.mode_compute == 0 & length(options_.mode_file) == 0
 	end
 	for i=1:M_.endo_nbr
 	    eval(['oo_.SmoothedVariables.' deblank(M_.endo_names(dr.order_var(i),:)) ' = atT(i,:)'';']);
-	    eval(['oo_.FilteredVariables.' deblank(M_.endo_names(dr.order_var(i),:)) ' = filtered_state_vector(i,:)'';']);
+	    eval(['oo_.FilteredVariables.' deblank(M_.endo_names(dr.order_var(i),:)) ' = squeeze(aK(1,i,:))'';']);
+	    eval(['oo_.UpdatedVariables.' deblank(M_.endo_names(dr.order_var(i),:)) ' = updated_variables(i,:)'';']);
 	end
 	for i=1:M_.exo_nbr
         eval(['oo_.SmoothedShocks.' deblank(M_.exo_names(i,:)) ' = innov(i,:)'';']);
@@ -956,7 +957,7 @@ if (~((any(bayestopt_.pshape > 0) & options_.mh_replic) | (any(bayestopt_.pshape
 						  > 0) & options_.load_mh_file)) ...
     | ~options_.smoother ) & M_.endo_nbr^2*gend < 1e7 % to be fixed   
     %% ML estimation, or posterior mode without metropolis-hastings or metropolis without bayesian smooth variable
-  [atT,innov,measurement_error,filtered_state_vector,ys,trend_coeff,aK,T,R,P,PK,d,decomp] = DsgeSmoother(xparam1,gend,data);
+  [atT,innov,measurement_error,updated_variables,ys,trend_coeff,aK,T,R,P,PK,d,decomp] = DsgeSmoother(xparam1,gend,data);
   oo_.Smoother.SteadyState = ys;
   oo_.Smoother.TrendCoeffs = trend_coeff;
   oo_.Smoother.integration_order = d;
@@ -975,7 +976,9 @@ if (~((any(bayestopt_.pshape > 0) & options_.mh_replic) | (any(bayestopt_.pshape
   end
   for i=1:M_.endo_nbr
     eval(['oo_.SmoothedVariables.' deblank(M_.endo_names(dr.order_var(i),:)) ' = atT(i,:)'';']);
-    eval(['oo_.FilteredVariables.' deblank(M_.endo_names(dr.order_var(i),:)) ' = filtered_state_vector(i,:)'';']);
+    eval(['oo_.FilteredVariables.' deblank(M_.endo_names(dr.order_var(i),:)) ' = squeeze(aK(1,i,:))'';']);
+    eval(['oo_.UpdatedVariables.' deblank(M_.endo_names(dr.order_var(i),:)) ...
+          ' = updated variables(i,:)'';']);
   end
   [nbplt,nr,nc,lr,lc,nstar] = pltorg(M_.exo_nbr);
   if options_.TeX

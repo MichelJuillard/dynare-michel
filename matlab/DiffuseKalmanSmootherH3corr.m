@@ -1,4 +1,4 @@
-function [alphahat,epsilonhat,etahat,a1] = DiffuseKalmanSmootherH3corr(T,R,Q,H,Pinf1,Pstar1,Y,trend,pp,mm,smpl,mf)
+function [alphahat,epsilonhat,etahat,a,aK] = DiffuseKalmanSmootherH3corr(T,R,Q,H,Pinf1,Pstar1,Y,trend,pp,mm,smpl,mf)
 
 % function [alphahat,epsilonhat,etahat,a1] = DiffuseKalmanSmootherH3corr(T,R,Q,H,Pinf1,Pstar1,Y,trend,pp,mm,smpl,mf)
 % Computes the diffuse kalman smoother with measurement error, in the case of a singular var-cov matrix.
@@ -18,10 +18,11 @@ function [alphahat,epsilonhat,etahat,a1] = DiffuseKalmanSmootherH3corr(T,R,Q,H,P
 %    mf:        observed variables index in the state vector
 %             
 % OUTPUTS
-%    alphahat:  smoothed state variables
+%    alphahat:  smoothed state variables (a_{t|T})
 %    epsilonhat:smoothed measurement error
 %    etahat:    smoothed shocks
-%    a1:        matrix of one step ahead filtered state variables
+%    a:         matrix of updated variables (a_{t|t})
+%    aK:        matrix of one step ahead filtered state variables (a_{t+k|t})
 
 % SPECIAL REQUIREMENTS
 %   See "Fast Filtering and Smoothing for Multivariate State Space
@@ -47,6 +48,7 @@ function [alphahat,epsilonhat,etahat,a1] = DiffuseKalmanSmootherH3corr(T,R,Q,H,P
 
 global options_;
 
+nk = options_.nk;
 rr = size(Q,1);
 T  = cat(1,cat(2,T,zeros(mm,pp)),zeros(pp,mm+pp));
 R  = cat(1,cat(2,R,zeros(mm,pp)),cat(2,zeros(pp,rr),eye(pp)));
@@ -62,11 +64,12 @@ Pinf     = zeros(spinf(1),spinf(2),smpl+1); Pinf(:,:,1) = Pinf1;
 Pstar1 	 = Pstar;
 Pinf1  	 = Pinf;
 v      	 = zeros(pp,smpl);
-a      	 = zeros(mm+pp,smpl+1);
-a1		 = a;
+a      	 = zeros(mm+pp,smpl);
+a1       = zeros(mm+pp,smpl+1);
+aK       = zeros(nk,mm,smpl+nk);
 Fstar 	 = zeros(pp,smpl);
 Finf	 = zeros(pp,smpl);
-Fi		 = zeros(pp,smpl);
+Fi	 = zeros(pp,smpl);
 Ki     	 = zeros(mm+pp,pp,smpl);
 Li     	 = zeros(mm+pp,mm+pp,pp,smpl);
 Linf   	 = zeros(mm+pp,mm+pp,pp,smpl);
@@ -93,7 +96,7 @@ t = 0;
 newRank	  = rank(Pinf(:,:,1),crit);
 while newRank & t < smpl
     t = t+1;
-    a1(:,t) = a(:,t);
+    a(:,t) = a1(:,t);
     Pstar1(:,:,t) = Pstar(:,:,t);
     Pinf1(:,:,t) = Pinf(:,:,t);
 	for i=1:pp
@@ -118,7 +121,10 @@ while newRank & t < smpl
 			Pstar(:,:,t)	= Pstar(:,:,t) - Kstar(:,i,t)*transpose(Kstar(:,i,t))/Fstar(i,t);
     	end
 	end
-    a(:,t+1) 	 	= T*a(:,t);
+    a1(:,t+1) 	 	= T*a(:,t);
+    for jnk=1:nk,
+        aK(jnk,:,t+jnk) 	 	= T^jnk*a(:,t);
+    end
     Pstar(:,:,t+1)	= T*Pstar(:,:,t)*transpose(T)+ QQ;
     Pinf(:,:,t+1)	= T*Pinf(:,:,t)*transpose(T);
     P0=Pinf(:,:,t+1);
@@ -138,7 +144,7 @@ Pinf1  = Pinf1(:,:,1:d);
 notsteady = 1;
 while notsteady & t<smpl
     t = t+1;
-    a1(:,t) = a(:,t);
+    a(:,t) = a1(:,t);
     P(:,:,t)=tril(P(:,:,t))+transpose(tril(P(:,:,t),-1));
     P1(:,:,t) = P(:,:,t);
 	for i=1:pp
@@ -152,7 +158,10 @@ while notsteady & t<smpl
             P(:,:,t)=tril(P(:,:,t))+transpose(tril(P(:,:,t),-1));
         end
     end
-    a(:,t+1) = T*a(:,t);
+    a1(:,t+1) = T*a(:,t);
+    for jnk=1:nk,
+        aK(jnk,:,t+jnk) 	 	= T^jnk*a(:,t);
+    end
     P(:,:,t+1) = T*P(:,:,t)*transpose(T) + QQ;
     notsteady   = ~(max(max(abs(P(:,:,t+1)-P(:,:,t))))<crit);
 end
@@ -169,16 +178,19 @@ if t<smpl
 end
 while t<smpl
     t=t+1;
-    a1(:,t) = a(:,t);
-	for i=1:pp
+    a(:,t) = a1(:,t);
+    for i=1:pp
         v(i,t)      = Y(i,t) - a(mf(i),t) - a(mm+i,t) - trend(i,t);
-		if Fi_s(i) > crit
+        if Fi_s(i) > crit
             a(:,t) = a(:,t) + Ki_s(:,i)*v(i,t)/Fi_s(i);
         end
     end
-    a(:,t+1) = T*a(:,t);
+    a1(:,t+1) = T*a(:,t);
+    for jnk=1:nk,
+        aK(jnk,:,t+jnk) 	 	= T^jnk*a(:,t);
+    end
 end
-a1(:,t+1) = a(:,t+1);
+
 %% [2] Kalman smoother...
 ri=r;
 t = smpl+1;

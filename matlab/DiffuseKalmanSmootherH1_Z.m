@@ -1,6 +1,6 @@
-function [alphahat,etahat,atilde,P,aK,PK,d,decomp] = DiffuseKalmanSmoother1_Z(T,Z,R,Q,Pinf1,Pstar1,Y,pp,mm,smpl)
+function [alphahat,epsilonhat,etahat,atilde,P,aK,PK,d,decomp] = DiffuseKalmanSmootherH1_Z(T,Z,R,Q,H,Pinf1,Pstar1,Y,pp,mm,smpl)
 
-% function [alphahat,etahat,a, aK] = DiffuseKalmanSmoother1(T,Z,R,Q,Pinf1,Pstar1,Y,pp,mm,smpl)
+% function [alphahat,etahat,atilde, aK] = DiffuseKalmanSmootherH1_Z(T,Z,R,Q,H,Pinf1,Pstar1,Y,pp,mm,smpl)
 % Computes the diffuse kalman smoother without measurement error, in the case of a non-singular var-cov matrix 
 %
 % INPUTS
@@ -8,6 +8,7 @@ function [alphahat,etahat,atilde,P,aK,PK,d,decomp] = DiffuseKalmanSmoother1_Z(T,
 %    Z:        pp*mm matrix  
 %    R:        mm*rr matrix
 %    Q:        rr*rr matrix
+%    H:        pp*pp matrix variance of measurement errors    
 %    Pinf1:    mm*mm diagonal matrix with with q ones and m-q zeros
 %    Pstar1:   mm*mm variance-covariance matrix with stationary variables
 %    Y:        pp*1 vector
@@ -17,6 +18,7 @@ function [alphahat,etahat,atilde,P,aK,PK,d,decomp] = DiffuseKalmanSmoother1_Z(T,
 %             
 % OUTPUTS
 %    alphahat: smoothed variables (a_{t|T})
+%    epsilonhat:smoothed measurement errors
 %    etahat:   smoothed shocks
 %    atilde:   matrix of updated variables (a_{t|t})
 %    aK:       3D array of k step ahead filtered state variables (a_{t+k|t)
@@ -88,6 +90,7 @@ QQ      	= R*Q*transpose(R);
 QRt			= Q*transpose(R);
 alphahat   	= zeros(mm,smpl);
 etahat	   	= zeros(rr,smpl);
+epsilonhat      = zeros(size(Y));
 r 		   	= zeros(mm,smpl);
 
 t = 0;
@@ -109,7 +112,7 @@ while rank(Pinf(:,:,t+1),crit1) & t<smpl
         aK(jnk,:,t+jnk) 	 	= T^(jnk-1)*a(:,t+1);
     end
     Linf(:,:,t)  	= T - Kinf(:,:,t)*Z;
-    Fstar(:,:,t) 	= Z*Pstar(:,:,t)*Z';
+    Fstar(:,:,t) 	= Z*Pstar(:,:,t)*Z' + H;
     Kstar(:,:,t) 	= (T*Pstar(:,:,t)*Z'-Kinf(:,:,t)*Fstar(:,:,t))*iFinf(:,:,t);
     Pstar(:,:,t+1)	= T*Pstar(:,:,t)*T'-T*Pstar(:,:,t)*Z'*Kinf(:,:,t)'-Kinf(:,:,t)*F*Kstar(:,:,t)' + QQ;
     Pinf(:,:,t+1)	= T*Pinf(:,:,t)*T'-T*Pinf(:,:,t)*Z'*Kinf(:,:,t)';
@@ -127,7 +130,7 @@ while notsteady & t<smpl
     t = t+1;
     v(:,t)      = Y(:,t) - Z*a(:,t);
     P(:,:,t)=tril(P(:,:,t))+transpose(tril(P(:,:,t),-1));
-    F = Z*P(:,:,t)*Z';
+    F = Z*P(:,:,t)*Z' + H;
     if rcond(F) < crit
     	return		
     end    
@@ -214,3 +217,4 @@ if nargout > 7
         end
     end
 end
+epsilonhat = Y-alphahat(mf,:)-trend;

@@ -17,10 +17,10 @@ function [alphahat,etahat,atilde, aK] = DiffuseKalmanSmoother1(T,R,Q,Pinf1,Pstar
 %    mf:       observed variables index in the state vector
 %             
 % OUTPUTS
-%    alphahat: smoothed state variables
+%    alphahat: smoothed state variables (a_{t|T})
 %    etahat:   smoothed shocks
-%    atilde:   matrix of filtered variables (E_t Y_t)
-%    aK:       3D array of k step ahead filtered state variables
+%    atilde:   matrix of updated variables (a_{t|t})
+%    aK:       3D array of k step ahead filtered state variables (a_{t+k|t})
 
 % SPECIAL REQUIREMENTS
 %   See "Filtering and Smoothing of State Vector for Diffuse State Space
