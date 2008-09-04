@@ -29,4 +29,4 @@ function dynare_version
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-    return '4-Prerelease'
+    return '4.1-Prerelease'
