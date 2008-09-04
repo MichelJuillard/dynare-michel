@@ -28,8 +28,31 @@
 %    nnumeric  Number of numeric shiftrights.
 %    lgroots   Number of roots greater in modulus than uprbnd.
 %    aimcode     Return code: see function aimerr.
-% Modified to deal with infinite or nan A  Dec 12 2007
-% =========================================================
+
+% Original author: Gary Anderson
+% Original file downloaded from:
+% http://www.federalreserve.gov/Pubs/oss/oss4/code.html
+% Adapted for Dynare by Dynare Team, in order to deal
+% with infinite or nan values.
+%
+% This code is in the public domain and may be used freely.
+% However the authors would appreciate acknowledgement of the source by
+% citation of any of the following papers:
+%
+% Anderson, G. and Moore, G.
+% "A Linear Algebraic Procedure for Solving Linear Perfect Foresight
+% Models."
+% Economics Letters, 17, 1985.
+%
+% Anderson, G.
+% "Solving Linear Rational Expectations Models: A Horse Race"
+% Computational Economics, 2008, vol. 31, issue 2, pages 95-113
+%
+% Anderson, G.
+% "A Reliable and Computationally Efficient Algorithm for Imposing the
+% Saddle Point Property in Dynamic Models"
+% Journal of Economic Dynamics and Control, Forthcoming
+
 function [b,rts,ia,nexact,nnumeric,lgroots,aimcode] = ...
                         SPAmalg(h,neq,nlag,nlead,condn,uprbnd)
 b=[];rts=[];ia=[];nexact=[];nnumeric=[];lgroots=[];aimcode=[];
