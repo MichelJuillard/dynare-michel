@@ -1,6 +1,5 @@
-function dynare_version
-
-% function dynare_version
+function v = dynare_version
+% function v = dynare_version
 %	This command returns Dynare version number
 %
 % INPUTS
@@ -12,7 +11,7 @@ function dynare_version
 % SPECIAL REQUIREMENTS
 %   none
 
-% Copyright (C) 2001-2008 Dynare Team
+% Copyright (C) 2008 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -29,4 +28,4 @@ function dynare_version
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-    return '4.1-Prerelease'
+    v = '4.1-Prerelease';
