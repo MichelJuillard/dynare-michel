@@ -198,7 +198,6 @@ while ~done
                      end
                      wall3=badg3;
                      % g3
-                     badg3
                      save g3.mat g3 x3 f3 varargin;
                      %ARGLIST
                      %save g3 g3 x3 f3 P1 P2 P3 P4 P5 P6 P7 P8 P9 P10 P11 P12 P13;
@@ -219,17 +218,17 @@ while ~done
    end
    %how to pick gh and xh
    if f3 < f - crit & badg3==0
-      ih=3
+      ih=3;
       fh=f3;xh=x3;gh=g3;badgh=badg3;retcodeh=retcode3;
    elseif f2 < f - crit & badg2==0
-      ih=2
+      ih=2;
       fh=f2;xh=x2;gh=g2;badgh=badg2;retcodeh=retcode2;
    elseif f1 < f - crit & badg1==0
-      ih=1
+      ih=1;
       fh=f1;xh=x1;gh=g1;badgh=badg1;retcodeh=retcode1;
    else
       [fh,ih] = min([f1,f2,f3]);
-      disp(sprintf('ih = %d',ih))
+      %disp(sprintf('ih = %d',ih))
       %eval(['xh=x' num2str(ih) ';'])
       switch ih
          case 1

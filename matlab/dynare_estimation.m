@@ -276,7 +276,7 @@ else% if the steady state file is not provided.
    oo_.steady_state = dd.ys; clear('dd');
 end
 if all(abs(oo_.steady_state(bayestopt_.mfys))<1e-9)
-    disp('no constant')
+    disp('No constant.')
     options_.noconstant = 1;
 else
     options_.noconstant = 0;
@@ -924,7 +924,7 @@ if (any(bayestopt_.pshape  >0 ) & options_.mh_replic) | ...
       McMCDiagnostics(options_, estim_params_, M_);
   end
   %% Here i discard first half of the draws:
-  CutSample;
+  CutSample(M_, options_, estim_params_);
   %% Estimation of the marginal density from the Mh draws:
   if options_.mh_replic
       [marginal,oo_] = marginal_density(M_, options_, estim_params_, oo_);
@@ -934,7 +934,6 @@ if (any(bayestopt_.pshape  >0 ) & options_.mh_replic) | ...
   %% Results are saved (in case of an anormal exit from dynare or matlab)...
   %%save([M_.fname '_results.mat'],'oo_','M_');
   %%
-  oo_
   oo_ = PlotPosteriorDistributions(estim_params_, M_, options_, bayestopt_, oo_);
   metropolis_draw(1);
   if options_.bayesian_irf
@@ -978,7 +977,7 @@ if (~((any(bayestopt_.pshape > 0) & options_.mh_replic) | (any(bayestopt_.pshape
     eval(['oo_.SmoothedVariables.' deblank(M_.endo_names(dr.order_var(i),:)) ' = atT(i,:)'';']);
     eval(['oo_.FilteredVariables.' deblank(M_.endo_names(dr.order_var(i),:)) ' = squeeze(aK(1,i,:))'';']);
     eval(['oo_.UpdatedVariables.' deblank(M_.endo_names(dr.order_var(i),:)) ...
-          ' = updated variables(i,:)'';']);
+          ' = updated_variables(i,:)'';']);
   end
   [nbplt,nr,nc,lr,lc,nstar] = pltorg(M_.exo_nbr);
   if options_.TeX

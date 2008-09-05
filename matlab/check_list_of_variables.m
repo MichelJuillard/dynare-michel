@@ -33,7 +33,7 @@ function varlist = check_list_of_variables(options_, M_, varlist)
 
     if isempty(varlist)
         disp(' ')
-        disp(['You did not declared endogenous variables after the estimation command.'])
+        disp(['You did not declare endogenous variables after the estimation command.'])
         cas = [];
         if options_.bayesian_irf
             cas = 'Posterior IRFs';

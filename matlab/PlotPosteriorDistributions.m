@@ -33,8 +33,6 @@ function oo_ = PlotPosteriorDistributions(estim_params_, M_, options_, bayestopt
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-global estim_params_ M_ options_ bayestopt_ oo_
-
 OutputDirectoryName = CheckPath('Output');
 
 TeX   	= options_.TeX;

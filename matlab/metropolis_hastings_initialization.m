@@ -63,12 +63,12 @@ if ~options_.load_mh_file & ~options_.mh_recover
     files = dir([ MhDirectoryName '/' ModelName '_mh*_blck*.mat']);
     if length(files)
         delete([ MhDirectoryName '/' ModelName '_mh*_blck*.mat']);
-        disp('MH: Old _mh files succesfully erased!')
+        disp('MH: Old _mh files successfully erased!')
     end
     file = dir([ MhDirectoryName '/metropolis.log']);
     if length(file)
         delete([ MhDirectoryName '/metropolis.log']);
-        disp('MH: Old metropolis.log file succesfully erased!')
+        disp('MH: Old metropolis.log file successfully erased!')
         disp('MH: Creation of a new metropolis.log file.')
     end
     fidlog = fopen([MhDirectoryName '/metropolis.log'],'w');
@@ -150,7 +150,7 @@ if ~options_.load_mh_file & ~options_.mh_recover
     file = dir([MhDirectoryName '/'  ModelName '_mh_history.mat']);
     if length(files)
         delete([ MhDirectoryName '/' ModelName '_mh_history.mat']);
-        disp('MH: Old mh_history file succesfully erased!')
+        disp('MH: Old mh_history file successfully erased!')
     end
     AnticipatedNumberOfFiles = ceil(nruns(1)/MAX_nruns);
     AnticipatedNumberOfLinesInTheLastFile = nruns(1) - (AnticipatedNumberOfFiles-1)*MAX_nruns;
