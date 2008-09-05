@@ -30,7 +30,7 @@ function dynare_estimation(var_list_)
 
 global M_ options_ oo_ estim_params_ bayestopt_
 
-var_list_ = check_list_of_variables(options_, M_, var_list_)
+var_list_ = check_list_of_variables(options_, M_, var_list_);
 %if isempty(var_list_)
 %    return
 %else

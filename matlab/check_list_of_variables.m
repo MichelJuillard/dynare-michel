@@ -34,11 +34,9 @@ function varlist = check_list_of_variables(options_, M_, varlist)
     if isempty(varlist)
         disp(' ')
         disp(['You did not declared endogenous variables after the estimation command.'])
-        info = 0;
         cas = [];
         if options_.bayesian_irf
             cas = 'Posterior IRFs';
-            info=1;
         end
         if options_.moments_varendo
             if isempty(cas)
@@ -46,7 +44,6 @@ function varlist = check_list_of_variables(options_, M_, varlist)
             else
                 cas = [ cas , ', posterior moments'];
             end
-            info=1;
         end
         if options_.smoother
             if isempty(cas)
@@ -54,7 +51,6 @@ function varlist = check_list_of_variables(options_, M_, varlist)
             else
                 cas = [ cas , ', posterior smoothed variables'];
             end
-            info=1;
         end
         if options_.smoother
             if isempty(cas)
@@ -62,7 +58,6 @@ function varlist = check_list_of_variables(options_, M_, varlist)
             else
                 cas = [ cas , ', posterior smoothed variables'];
             end
-            info=1;
         end
         if ~isempty(options_.filter_step_ahead)
             if isempty(cas)
@@ -70,7 +65,6 @@ function varlist = check_list_of_variables(options_, M_, varlist)
             else
                 cas = [ cas , ', posterior k-step ahead filtered variables'];
             end
-            info=1;
         end
         if options_.forecast
             if isempty(cas)
@@ -78,12 +72,11 @@ function varlist = check_list_of_variables(options_, M_, varlist)
             else
                 cas = [ cas , ' and posterior forecats'];
             end
-            info=1;
         end
-        string = [ cas , ' will be computed for the ' num2str(M_.endo_nbr)  ' endogenous variables'];
-        string = [ string ' of your model, this can be very long....']; 
-        format_text( string, 10)
-        if info
+        if ~isempty(cas)
+            string = [ cas , ' will be computed for the ' num2str(M_.endo_nbr)  ' endogenous variables'];
+            string = [ string ' of your model, this can be very long....']; 
+            format_text(string, 10)
             choice = [];
             while isempty(choice)
                 disp(' ')
