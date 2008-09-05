@@ -1,3 +1,42 @@
+dynare (4.0~rc1) UNRELEASED; urgency=low
+
+  * First release candidate for 4.0 series
+  * Updates to the manual:
+    - added empty entries for commands new in Dynare 4
+    - removed obsolete commands
+    - improved description of valid mathematical expressions
+  * Added interface to Gary Anderson's AIM package (not yet documented)
+  * Fix copyright/license headers for most source files
+  * Replaced functions related to probability distributions (CDF, PDF, quantile)
+    by GPL'd ones
+  * Added preprocessor support for inverse gamma of type 2
+  * New command "model_info" providing informations about the block structure
+    of the model
+  * Informations about determistic simulations (number of iterations, error...)
+    are now saved in oo_
+  * Added Independent Metropolis Hastings and multivariate student as an
+    alternative to multivariate normal for the proposal distribution. The
+    default posterior sampling algorithm is random walk metropolis with a
+    gaussian proposal distribution.
+  * Added trace plots
+  * Added autocorrelogram for the posterior draws
+  * If no variable given to "estimation" command, the user is asked to confirm
+    that she wants to obtain posterior statistics for all the endogenous
+    variables of the model. The user can then choose between:
+    - the set of all the endogenous variables
+    - the set of all observed variables
+    - stop Dynare and edit the mod file (to add a list of variables after the
+      estimation command)
+  * Option "order" is now allowed in "estimation" command
+  * Warn the user when she tries to estimate a model with non zero steady state
+    (for the observed endogenous variables) using demeaned data (i.e. prefilter=1)
+  * Added computation of posterior moments for endogenous variables (triggered by
+    "moments_varendo" option). First order moments are still missing.
+  * Allow for normcdf(x) in the .mod file (equivalent to normcdf(x,0,1))
+  * Many bug fixes and enhancements
+
+ -- Sébastien Villemot <sebastien.villemot@ens.fr>  Fri, 05 Sep 2008 12:13:38 +0200
+
 dynare (4~svn.20080711) UNRELEASED; urgency=low
 
   * New functions for posterior distribution processing
