@@ -113,7 +113,7 @@ while newRank & t < smpl
       % presample options can be used to ignore initial time points
       lik(t) = lik(t) + log(Fstar) + v(i)*v(i)/Fstar;
       a	= a + Kstar*v(i)/Fstar;
-      Pstar = Pstar - Kstar*Kstar'/Fstar;
+      Pstar = Pstar - Kstar*(Kstar'/Fstar);
     else
       %disp(['zero F term in DKF for observed ',int2str(i),' ',num2str(Fstar)])
     end
@@ -147,7 +147,7 @@ while notsteady & t < smpl
     if Fi > crit
       Ki	= Pstar*Zi';
       a		= a + Ki*v(i)/Fi;
-      Pstar 	= Pstar - Ki*Ki'/Fi;
+      Pstar 	= Pstar - Ki*(Ki'/Fi);
       lik(t) 	= lik(t) + log(Fi) + v(i)*v(i)/Fi;
     else
       %disp(['zero F term for observed ',int2str(i),' ',num2str(Fi)])
