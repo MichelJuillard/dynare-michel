@@ -40,8 +40,6 @@ type = 'posterior';
     
 % Set varlist (vartan)
 [ivar,vartan] = set_stationary_variables_list;
-vartan
-pause
 nvar = length(ivar);
 
 % Set the size of the auto-correlation function to zero.
