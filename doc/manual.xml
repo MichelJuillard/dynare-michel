@@ -14,7 +14,7 @@
 </address>
 </author>
 
-<copyright><year>1996, 2008</year><holder> Dynare Team</holder>
+<copyright><year>1996-2008</year><holder>Dynare Team</holder>
 
 </copyright>
 <legalnotice>
@@ -2677,9 +2677,91 @@ In Matlab, variables saved with the <command>dynasave</command> command can be r
 <sect1><title>Misc commands</title>
 
 <itemizedlist>
+  <listitem><para><xref linkend="save_params_and_steady_state"/></para></listitem>
+  <listitem><para><xref linkend="load_params_and_steady_state"/></para></listitem>
   <listitem><para><xref linkend="bvar_density"/></para></listitem>
   <listitem><para><xref linkend="bvar_forecast"/></para></listitem>
 </itemizedlist>
+
+<refentry id="save_params_and_steady_state">
+  <refmeta>
+    <refentrytitle>save_params_and_steady_state</refentrytitle>
+  </refmeta>
+
+  <refnamediv>
+    <refname>save_params_and_steady_state</refname>
+    <refpurpose>saves the values of the parameters and of the computed steady-state in a file</refpurpose>
+  </refnamediv>
+
+  <refsynopsisdiv>
+    <cmdsynopsis>
+      <command>save_params_and_steady_state</command>
+      <arg choice="plain"><replaceable>FILENAME</replaceable></arg>
+      <arg choice="plain">;</arg>
+    </cmdsynopsis>
+  </refsynopsisdiv>
+
+  <refsect1>
+    <title>Description</title>
+    <para>For all parameters, endogenous and exogenous variables, stores
+      their value in a file, using a simple name/value associative array.</para>
+    <itemizedlist>
+      <listitem><para>for parameters, the value is taken from the last parameter
+          initialization</para></listitem>
+      <listitem><para>for exogenous, the value is taken from the last initval block</para></listitem>
+      <listitem><para>for endogenous, the value is taken from the last steady state computation
+          (or, if no steady state has been computed, from the last initval block)</para></listitem>
+    </itemizedlist>
+    <para>Note that no variable type is stored in the file, so that the values
+      can be reloaded (with <xref linkend="load_params_and_steady_state"/>) in a setup where
+      the variable types are different.</para>
+    <para>The typical usage of this function is to compute the steady-state of a
+      model by calibrating the steady-state value of some endogenous variables (which implies that some parameters must be endogeneized
+      during the steady-state computation).</para>
+    <para>You would then write a first .mod file which computes the steady-state and saves the result of the
+      computation at the end of the file, using <command>save_params_and_steady_state</command>.</para>
+    <para>In a second file designed to perform the actual simulations, you would use <xref linkend="load_params_and_steady_state"/> just after
+      your variable declarations, in order to load the steady-state previously computed (including the parameters which had been
+      endogeneized during the steady-state computation).</para>
+    <para>The need for two separate .mod files arises from the fact that the variable declarations differ between the files for
+      steady-state calibration and for simulation (the set of endogenous and parameters differ between the two); this leads
+      to different <xref linkend="var"/> and <xref linkend="parameters"/> statements.</para>
+    <para>Also note that you can take advantage of the <xref linkend="include"/> directive to share the model equations between the two files.</para>
+  </refsect1>
+</refentry>
+
+<refentry id="load_params_and_steady_state">
+  <refmeta>
+    <refentrytitle>load_params_and_steady_state</refentrytitle>
+  </refmeta>
+
+  <refnamediv>
+    <refname>load_params_and_steady_state</refname>
+    <refpurpose>loads the values of the parameters and of the steady-state from a file</refpurpose>
+  </refnamediv>
+
+  <refsynopsisdiv>
+    <cmdsynopsis>
+      <command>load_params_and_steady_state</command>
+      <arg choice="plain"><replaceable>FILENAME</replaceable></arg>
+      <arg choice="plain">;</arg>
+    </cmdsynopsis>
+  </refsynopsisdiv>
+
+  <refsect1>
+    <title>Description</title>
+    <para>For all parameters, endogenous and exogenous variables, loads
+      their value from a file created with save_params_and_steady_state.</para>
+    <itemizedlist>
+      <listitem><para>for parameters, their value will be initialized as if they
+          had been calibrated in the .mod file</para></listitem>
+      <listitem><para>for endogenous and exogenous, their value will be initialized
+          as they would have been from an initval block</para></listitem>
+    </itemizedlist>
+    <para>This function is used in conjunction with <xref linkend="save_params_and_steady_state"/>;
+      see the documentation of that function for more information.</para>
+  </refsect1>
+</refentry>
 
 <refentry id="bvar_density">
   <refmeta>
