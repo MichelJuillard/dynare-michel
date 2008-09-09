@@ -37,10 +37,11 @@ if nargin
 end
 dynareroot = strrep(which('dynare.m'),'dynare.m','');
 
+addpath([dynareroot '/distributions/'])
 % Add path to distribution-related function if under Matlab
 % without the statistics toolbox
 if ~exist('OCTAVE_VERSION') && isempty(ver('stats'))
-    addpath([dynareroot '/distributions/'])
+    addpath([dynareroot '/distributions/toolbox/'])
 end
 
 if exist([dynareroot '/AIM'])==7  % Add path to G.Anderson AIM solver (added by GP July'08)
