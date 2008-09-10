@@ -493,11 +493,11 @@ The \texttt{forecast} option is mandatory.
 
 The command will draw \texttt{bvar\_replic} random samples from the posterior distribution. For each draw, it will simulate one path without shocks, and one path with shocks.
 
-\emph{Note:} during the random sampling process, every draw such that the associated companion matrix has eigenvalues outside the unit circle will be discarded. This is meant to avoid explosive time series, especially when using a distant prediction horizon. Since this behaviour induces a distortion of the prior distribution, a message will be displayed if draws are thus discarded, indicating how many have been (knowing that the number of accepted draws is equal to \texttt{bvar\_replic}).
+% \emph{Note:} during the random sampling process, every draw such that the associated companion matrix has eigenvalues outside the unit circle will be discarded. This is meant to avoid explosive time series, especially when using a distant prediction horizon. Since this behaviour induces a distortion of the prior distribution, a message will be displayed if draws are thus discarded, indicating how many have been (knowing that the number of accepted draws is equal to \texttt{bvar\_replic}).
 
 The command will produce one graph per observed variable. Each graph displays:
 \begin{itemize}
-\item a blue line for the mean forecast (equal to the mean of the simulated paths by linearity),
+\item a blue line for the posterior median forecast,% (equal to the mean of the simulated paths by linearity),
 \item two green lines giving the confidence interval for the forecasts without shocks,
 \item two red lines giving the confidence interval for the forecasts with shocks.
 \end{itemize}

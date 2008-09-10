@@ -36,7 +36,6 @@ function bvar_forecast(nlags)
     end
     [ny, nx, posterior, prior, forecast_data] = bvar_toolbox(nlags);
 
-        
     sims_no_shock = NaN(options_.forecast, ny, options_.bvar_replic);
     sims_with_shocks = NaN(options_.forecast, ny, options_.bvar_replic);
     
@@ -53,7 +52,7 @@ function bvar_forecast(nlags)
     
     % Number of explosive VAR models sampled
     p = 0;
-    % Number of non-explosive VAR models sampled
+    % Loop counter initialization
     d = 0;
     while d <= options_.bvar_replic
         
@@ -70,7 +69,6 @@ function bvar_forecast(nlags)
         test = (abs(eig(Companion_matrix)));
         if any(test>1.0000000000001)
             p = p+1;
-            continue
         end
         d = d+1;
         
@@ -97,21 +95,22 @@ function bvar_forecast(nlags)
     end
     
     if p > 0
-        disp('')
+        disp(' ')
         disp(['Some of the VAR models sampled from the posterior distribution'])
-        disp(['were found to be explosive (' int2str(p) ' samples).'])
-        disp('')
+        disp(['were found to be explosive (' num2str(p/options_.bvar_replic) ' percent).'])
+        disp(' ')
     end
     
     % Plot graphs
     sims_no_shock_mean = mean(sims_no_shock, 3);
-
-    sort_idx = round((0.5 + [-options_.conf_sig, options_.conf_sig]/2) * options_.bvar_replic);
+    
+    sort_idx = round((0.5 + [-options_.conf_sig, options_.conf_sig, 0]/2) * options_.bvar_replic);
     
     sims_no_shock_sort = sort(sims_no_shock, 3);
     sims_no_shock_down_conf = sims_no_shock_sort(:, :, sort_idx(1));
     sims_no_shock_up_conf = sims_no_shock_sort(:, :, sort_idx(2));
-
+    sims_no_shock_median = sims_no_shock_sort(:, :, sort_idx(3));
+    
     sims_with_shocks_sort = sort(sims_with_shocks, 3);
     sims_with_shocks_down_conf = sims_with_shocks_sort(:, :, sort_idx(1));
     sims_with_shocks_up_conf = sims_with_shocks_sort(:, :, sort_idx(2));
@@ -119,7 +118,7 @@ function bvar_forecast(nlags)
     dynare_graph_init(sprintf('BVAR forecasts (nlags = %d)', nlags), ny, {'b-' 'g-' 'g-' 'r-' 'r-'});
     
     for i = 1:ny
-        dynare_graph([ sims_no_shock_mean(:, i) ...
+        dynare_graph([ sims_no_shock_median(:, i) ...
                        sims_no_shock_up_conf(:, i) sims_no_shock_down_conf(:, i) ...
                        sims_with_shocks_up_conf(:, i) sims_with_shocks_down_conf(:, i) ], ...
                      options_.varobs(i, :));
@@ -172,7 +171,7 @@ function bvar_forecast(nlags)
 
         sims = squeeze(sims_no_shock(:,i,:));
         eval(['oo_.bvar.forecast.no_shock.Mean.' name ' = sims_no_shock_mean(:,i);']);
-        eval(['oo_.bvar.forecast.no_shock.Median.' name ' = median(sims, 2);']);
+        eval(['oo_.bvar.forecast.no_shock.Median.' name ' = sims_no_shock_median(:,i);']);
         eval(['oo_.bvar.forecast.no_shock.Var.' name ' = var(sims, 0, 2);']);
         eval(['oo_.bvar.forecast.no_shock.HPDsup.' name ' = sims_no_shock_up_conf(:,i);']);
         eval(['oo_.bvar.forecast.no_shock.HPDinf.' name ' = sims_no_shock_down_conf(:,i);']);
