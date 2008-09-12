@@ -1,6 +1,6 @@
-function [LIK, lik] = DiffuseLikelihood1_Z(T,Z,R,Q,Pinf,Pstar,Y,start)
+function [LIK, lik] = DiffuseLikelihoodH1_Z(T,Z,R,Q,H,Pinf,Pstar,Y,start)
 
-% function [LIK, lik] = DiffuseLikelihood1_Z(T,Z,R,Q,H,Pinf,Pstar,Y,start)
+% function [LIK, lik] = DiffuseLikelihoodH1_Z(T,Z,R,Q,H,Pinf,Pstar,Y,start)
 % Computes the diffuse likelihood (H=measurement error) in the case of a non-singular var-cov matrix 
 
 %

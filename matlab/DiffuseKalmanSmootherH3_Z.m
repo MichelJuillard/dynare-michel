@@ -328,4 +328,4 @@ if nargout > 7
     end
 end
 
-epsilonhat = Y-alphahat(mf,:)-trend;
+epsilonhat = Y-Z*alphahat;

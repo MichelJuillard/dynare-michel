@@ -277,7 +277,7 @@ function [fval,cost_flag,ys,trend_coeff,info] = DsgeLikelihood(xparam1,gend,data
           end
       elseif kalman_algo == 3
           data1 = data - trend;
-          LIK = DiffuseLikelihoodH1_Z(ST,Z,R1,Q,H,Pinf,Pstar,data1,trend,start);
+          LIK = DiffuseLikelihoodH1_Z(ST,Z,R1,Q,H,Pinf,Pstar,data1,start);
           if isinf(LIK)
               kalman_algo = 4;
               if ~estim_params_.ncn 
