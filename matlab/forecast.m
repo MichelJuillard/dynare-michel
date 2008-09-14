@@ -130,7 +130,7 @@ function info = forecast(var_list,task)
     end
 
     for i=1:M_.exo_det_nbr
-        eval(['oo_.forecast.Exogenous.' lgx_det_(i,:) '= M_.exo_det_simul(:,' int2str(i) ');']);
+        eval(['oo_.forecast.Exogenous.' M_.exo_det_names(i,:) '= oo_.exo_det_simul(:,' int2str(i) ');']);
     end
     
     if options_.nograph == 0

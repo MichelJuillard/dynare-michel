@@ -108,21 +108,27 @@ function [y_,int_width]=simultexdet(y0,ex,ex_det, iorder,var_list,M_,oo_,options
   end
 
   [A,B] = kalman_transition_matrix(dr,nstatic+(1:npred),1:nc,dr.transition_auxiliary_variables,M_.exo_nbr);
-  
+
+  inv_order_var = dr.inv_order_var;
+  ghx1 = dr.ghx(inv_order_var(ivar),:);
+  ghu1 = dr.ghu(inv_order_var(ivar),:);
+
   sigma_u = B*M_.Sigma_e*B';
+  sigma_u1 = ghu1*M_.Sigma_e*ghu1';
   sigma_y = 0;
   
   for i=1:iter
-    var_yf(i,dr.order_var) = diag(sigma_y(1:endo_nbr,1:endo_nbr))';
-    if i == iter
-      break
-    end
-    sigma_u = A*sigma_u*A';
-    sigma_y = sigma_y+sigma_u;
+      sigma_y1 = ghx1*sigma_y*ghx1'+sigma_u1;
+      var_yf(i,:) = diag(sigma_y1)';
+      if i == iter
+          break
+      end
+      sigma_u = A*sigma_u*A';
+      sigma_y = sigma_y+sigma_u;
   end
 
-  fact = qnorm((1-options_.conf_sig)/2,0,1);
-  
+  fact = norminv((1-options_.conf_sig)/2,0,1);
+
   int_width = zeros(iter,endo_nbr);
   for i=1:endo_nbr
     int_width(:,i) = fact*sqrt(var_yf(:,i));
