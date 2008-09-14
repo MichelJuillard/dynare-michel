@@ -303,7 +303,7 @@ end
 if nargout > 7
     decomp = zeros(nk,mm,rr,smpl+nk);
     ZRQinv = inv(Z*QQ*Z');
-    for t = d:smpl
+    for t = max(d,1):smpl
         ri_d = zeros(mm,1);
         for i=pp:-1:1
             if Fi(i,t) > crit

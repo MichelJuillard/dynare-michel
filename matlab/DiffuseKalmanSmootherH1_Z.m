@@ -201,7 +201,7 @@ end
 if nargout > 7
     decomp = zeros(nk,mm,rr,smpl+nk);
     ZRQinv = inv(Z*QQ*Z');
-    for t = d:smpl
+    for t = max(d,1):smpl
         ri_d = Z'*iF(:,:,t)*v(:,t);
         
         % calculate eta_tm1t
