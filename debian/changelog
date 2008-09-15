@@ -1,3 +1,16 @@
+dynare (4.0.0) UNRELEASED; urgency=low
+
+  * First official release in the 4.0 series
+  * New functions {load,save}_params_and_steady_state
+  * Fixed bug with forecasting with exogenous deterministic variables
+  * BVAR à la Sims:
+    - no longer remove explosive models when drawing from the posterior
+    - forecasting now reports median path instead of mean path
+  * Fixed bug and improve performance in diffuse filter/smoother
+  * Fixed crash of estimation in some cases
+	
+ -- Sébastien Villemot <sebastien.villemot@ens.fr>  Mon, 15 Sep 2008 11:15:20 +0200
+
 dynare (4.0~rc1) UNRELEASED; urgency=low
 
   * First release candidate for 4.0 series

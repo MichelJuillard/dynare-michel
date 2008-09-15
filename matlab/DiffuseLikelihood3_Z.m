@@ -1,6 +1,6 @@
 function [LIK, lik] = DiffuseLikelihood3_Z(T,Z,R,Q,Pinf,Pstar,Y,start)
 
-% function [LIK, lik] = DiffuseLikelihood3(T,R,Q,Pinf,Pstar,Y,start)
+% function [LIK, lik] = DiffuseLikelihood3_Z(T,Z,R,Q,Pinf,Pstar,Y,start)
 % Computes the diffuse likelihood without measurement error, in the case of
 % a singular var-cov matrix.
 % Univariate treatment of multivariate time series.
