@@ -70,16 +70,24 @@ function homotopy2(values, step_nbr)
         M_.params(values(i,2)) = oldvalues(i);
       end
      otherwise
-      error('HOMOTOPY: incorrect variable types specified')
+      error('HOMOTOPY mode 2: incorrect variable types specified')
     end
   end
 
   if any(oldvalues == values(:,4))
-    error('HOMOTOPY: initial and final values should be different')
+    error('HOMOTOPY mode 2: initial and final values should be different')
   end
   
   % Actually do the homotopy
   for i = 1:nv
+    switch values(i,1)
+     case 1
+      varname = M_.exo_names(values(i,2), :);
+     case 2
+      varname = M_.exo_det_names(values(i,2), :);
+     case 4
+      varname = M_.param_names(values(i,2), :);
+    end
     for v = oldvalues(i):(values(i,4)-oldvalues(i))/step_nbr:values(i,4)
       switch values(i,1)
        case 1
@@ -89,7 +97,8 @@ function homotopy2(values, step_nbr)
        case 4
         M_.params(values(i,2)) = v;
       end
-      
+
+      disp([ 'HOMOTOPY mode 2: lauching solver with ' strtrim(varname) ' = ' num2str(v) ' ...'])
       [oo_.steady_state,check] = dynare_solve([M_.fname '_static'],...
                                               oo_.steady_state,...
                                               options_.jacobian_flag, ...	    
@@ -97,7 +106,7 @@ function homotopy2(values, step_nbr)
                           oo_.exo_det_steady_state], M_.params);
       
       if check
-        error('HOMOTOPY didn''t succeed')
+        error('HOMOTOPY mode 2: failed')
       end
     end
   end

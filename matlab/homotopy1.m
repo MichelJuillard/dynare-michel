@@ -49,7 +49,7 @@ function homotopy1(values, step_nbr)
   ixd = find(values(:,1) == 2); % Exogenous deterministic
 
   if length([ip, ix, ixd]) ~= nv
-    error('HOMOTOPY: incorrect variable types specified')
+    error('HOMOTOPY mode 1: incorrect variable types specified')
   end
 
   % Construct vector of starting values, using previously initialized values
@@ -63,7 +63,7 @@ function homotopy1(values, step_nbr)
   oldvalues(ixdn) = oo_.exo_det_steady_state(values(ixdn, 2));
   
   if any(oldvalues == values(:,4))
-    error('HOMOTOPY: initial and final values should be different')
+    error('HOMOTOPY mode 1: initial and final values should be different')
   end
   
   points = zeros(nv, step_nbr+1);
@@ -72,6 +72,7 @@ function homotopy1(values, step_nbr)
   end
   
   for i=1:step_nbr+1
+    disp([ 'HOMOTOPY mode 1: computing step ' int2str(i-1) '/' int2str(step_nbr) '...' ])
     M_.params(values(ip,2)) = points(ip,i);
     oo_.exo_steady_state(values(ix,2)) = points(ix,i);
     oo_.exo_det_steady_state(values(ixd,2)) = points(ixd,i);
@@ -83,6 +84,6 @@ function homotopy1(values, step_nbr)
                         oo_.exo_det_steady_state], M_.params);
   
     if check
-      error('HOMOTOPY didn''t succeed')
+      error('HOMOTOPY mode 1: failed')
     end
   end
