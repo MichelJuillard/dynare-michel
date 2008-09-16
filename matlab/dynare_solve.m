@@ -102,10 +102,17 @@ function [x,info] = dynare_solve(func,x,jacobian_flag,varargin)
 
     [j1,j2,r,s] = dmperm(fjac);
     
+    if options_.debug
+      disp(['DYNARE_SOLVE (solve_algo=2): number of blocks = ' num2str(length(r))]);
+    end
+    
     for i=length(r)-1:-1:1
+      if options_.debug
+        disp(['DYNARE_SOLVE (solve_algo=2): solving block ' num2str(i) ', of size ' num2str(r(i+1)-r(i)) ]);
+      end
       [x,info]=solve1(func,x,j1(r(i):r(i+1)-1),j2(r(i):r(i+1)-1),jacobian_flag,varargin{:});
-      if info & options_.debug
-	error(sprintf('Solve block = %d check = %d\n',i,info));
+      if info
+        return
       end
     end
     fvec = feval(func,x,varargin{:});
