@@ -46,42 +46,21 @@ TotalNumberOfMhDraws = sum(record.MhDraws(:,1));
 MAX_nruns = ceil(options_.MaxNumberOfBytes/(npar+2)/8);
 TODROP = floor(options_.mh_drop*TotalNumberOfMhDraws);
 
-MU = zeros(1,npar);
-SIGMA = zeros(npar,npar);
-lpost_mode = -Inf;
+fprintf('MH: I''m computing the posterior mean and covariance... ');
+[posterior_mean,posterior_covariance,posterior_mode,posterior_kernel_at_the_mode] = compute_mh_covariance_matrix();
 
-fprintf('MH: I''m computing the posterior mean... ');
-for n = FirstMhFile:TotalNumberOfMhFiles
-  for b = 1:nblck
-    load([ MhDirectoryName '/' M_.fname '_mh' int2str(n) '_blck' int2str(b) '.mat'],'x2','logpo2'); 
-    MU = MU + sum(x2(ifil:end,:));
-    lpost_mode = max(lpost_mode,max(logpo2));
-  end
-  ifil = 1;
-end
-MU = MU/((TotalNumberOfMhDraws-TODROP)*nblck);
-xparam1 = MU';
-MU1 = repmat(MU,MAX_nruns,1);
-%% lpost_mode is the value of the log posterior kernel at the mode.	
-fprintf(' Done!\n');
-fprintf('MH: I''m computing the posterior covariance matrix... ');
-ifil = FirstLine;
-for n = FirstMhFile:TotalNumberOfMhFiles
-  for b = 1:nblck
-    load([MhDirectoryName '/' M_.fname '_mh' int2str(n) '_blck' int2str(b) '.mat'],'x2');
-    x = x2(ifil:end,:)-MU1(1:size(x2(ifil:end,:),1),:);
-    SIGMA = SIGMA + x'*x;
-  end
-  ifil = 1;
-end
-SIGMA =  SIGMA/((TotalNumberOfMhDraws-TODROP)*nblck);%<=== Variance of the parameters (ok!)
+MU = transpose(posterior_mean);
+SIGMA = posterior_covariance;
+lpost_mode = posterior_kernel_at_the_mode;
+xparam1 = posterior_mean;
 hh = inv(SIGMA);
 fprintf(' Done!\n');
+
 %% save the posterior mean and the inverse of the covariance matrix
 %% (usefull if the user wants to perform some computations using
 %% the posterior mean instead of the posterior mode ==> ). 
 save([M_.fname '_mean.mat'],'xparam1','hh','SIGMA');
-%% end%Save.
+
 disp(' ');
 disp('MH: I''m computing the posterior log marginale density (modified harmonic mean)... ');
 detSIGMA = det(SIGMA);

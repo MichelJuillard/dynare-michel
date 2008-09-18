@@ -1,4 +1,4 @@
-function [m0,s0] = compute_mh_covariance_matrix()
+function [posterior_mean,posterior_covariance,posterior_mode,posterior_kernel_at_the_mode] = compute_mh_covariance_matrix()
 
 % function [m0,s0] = compute_mh_covariance_matrix()
 % Estimation of the posterior covariance matrix and expectation. 
@@ -7,9 +7,10 @@ function [m0,s0] = compute_mh_covariance_matrix()
 %   None.
 %  
 % OUTPUTS
-%   o  m0  [double]  (n*1) vector, posterior expectation of the parameters.
-%   o  s0  [double]  (n*n) matrix, posterior covariance of the parameters 
-%                    (computed from previous metropolis hastings).
+%   o  posterior_mean                [double]  (n*1) vector, posterior expectation of the parameters.
+%   o  posterior_covariance          [double]  (n*n) matrix, posterior covariance of the parameters (computed from previous metropolis hastings).
+%   o  posterior_mode                [double]  (n*1) vector, posterior mode of the parameters. 
+%   o  posterior_kernel_at_the_mode  [double]  scalar. 
 %
 % SPECIAL REQUIREMENTS
 %   None.
@@ -33,6 +34,7 @@ function [m0,s0] = compute_mh_covariance_matrix()
 
 global M_ options_ estim_params_
 
+
 n = estim_params_.np + ...
        estim_params_.nvn+ ...
        estim_params_.ncx+ ...
@@ -44,30 +46,32 @@ MhDirectoryName = CheckPath('metropolis');
 load([ MhDirectoryName '/'  M_.fname '_mh_history.mat'])
 
 FirstMhFile = record.KeepedDraws.FirstMhFile;
-FirstLine = record.KeepedDraws.FirstLine;
+FirstLine   = record.KeepedDraws.FirstLine;
 TotalNumberOfMhFiles = sum(record.MhDraws(:,2));
 
-params = zeros(1,n); 
-oldlogpo2 = -Inf;
+posterior_kernel_at_the_mode = -Inf;
+posterior_mean = zeros(n,1);
+posterior_mode = NaN(n,1);
+posterior_covariance = zeros(n,n);
 offset = 0;
-m0 = zeros(n,1); 
-s0 = zeros(n,n);
 
-for n = FirstMhFile:TotalNumberOfMhFiles
-  for b = 1:nblck
-    load([ MhDirectoryName '/' M_.fname '_mh' int2str(n) '_blck' int2str(b) '.mat'],'x2','logpo2'); 
-    [tmp,idx] = max(logpo2);
-    if tmp>oldlogpo2
-        oldlogpo2 = tmp;
-        params = x2(idx,:);
+for b=1:nblck
+    first_line = FirstLine;
+    for n = FirstMhFile:TotalNumberOfMhFiles
+        %for b = 1:nblck
+        load([ MhDirectoryName '/' M_.fname '_mh' int2str(n) '_blck' int2str(b) '.mat'],'x2','logpo2'); 
+        [tmp,idx] = max(logpo2);
+        if tmp>posterior_kernel_at_the_mode
+            posterior_kernel_at_the_mode = tmp;
+            posterior_mode = x2(idx,:);
+        end
+        [posterior_mean,posterior_covariance,offset] = recursive_moments(posterior_mean,posterior_covariance,x2(first_line:end,:),offset);
+        first_line = 1;
     end
-    [m0,s0,offset] = recursive_moments(m0,s0,x2(FirstLine,:),offset);
-  end
-  FirstLine = 1;
 end
 
-xparam1 = params';
-hh = inv(s0);
-fval = oldlogpo2;
+xparam1 = posterior_mode';
+hh = inv(posterior_covariance);
+fval = posterior_kernel_at_the_mode;
 
 save([M_.fname '_mh_mode.mat'],'xparam1','hh','fval');
