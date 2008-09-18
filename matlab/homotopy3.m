@@ -78,7 +78,6 @@ function homotopy3(values, step_nbr)
   inc = (targetvalues-oldvalues)/2;
   kplus = [];
   kminus = [];
-  old_ss = oo_.steady_state;
 
   disp('HOMOTOPY mode 3: launching solver at initial point...')
 
@@ -89,6 +88,7 @@ function homotopy3(values, step_nbr)
     oo_.exo_steady_state(values(ix,2)) = curvalues(ix);
     oo_.exo_det_steady_state(values(ixd,2)) = curvalues(ixd);
     
+    old_ss = oo_.steady_state;
     [oo_.steady_state,check] = dynare_solve([M_.fname '_static'],...
                                             oo_.steady_state,...
                                             options_.jacobian_flag, ...	    
@@ -113,9 +113,9 @@ function homotopy3(values, step_nbr)
     end
     curvalues = oldvalues + inc;
     kplus = find(curvalues(iplus) >= targetvalues(iplus));
-    curvalues(kplus) = targetvalues(kplus);
+    curvalues(iplus(kplus)) = targetvalues(iplus(kplus));
     kminus = find(curvalues(iminus) <= targetvalues(iminus));
-    curvalues(kminus) = targetvalues(kminus);
+    curvalues(iminus(kminus)) = targetvalues(iminus(kminus));
 
     if max(abs(inc)) < tol
         error('HOMOTOPY mode 3: failed, increment has become too small')
