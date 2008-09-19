@@ -1,9 +1,9 @@
-function bvar_irf(nlags,varagin)
+function bvar_irf(nlags,identification)
 % builds IRFs for a bvar model
 %
 % INPUTS
 %    nlags            [integer]     number of lags for the bvar
-%    identification   [string]      identification scheme ('cholesky')
+%    identification   [string]      identification scheme ('Cholesky' or 'SquareRoot')
 %
 % OUTPUTS
 %    none
@@ -29,6 +29,10 @@ function bvar_irf(nlags,varagin)
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
     global options_ oo_ M_
+    
+    if nargin==1
+        identification = 'Cholesky';
+    end
     
     options_ = set_default_option(options_, 'bvar_replic', 2000);
 
@@ -71,6 +75,12 @@ function bvar_irf(nlags,varagin)
             p = p+1;
         end
 
+        if strcmpi(identification,'Cholesky')
+            StructuralMat = Sigma_lower_chol;
+        elseif strcmpi(identification,'SquareRoot')
+            StructuralMat = sqrtm(Sigma);
+        end
+        
         % Build the IRFs...
         lags_data = zeros(ny,ny*nlags) ;
         sampled_irfs(:,:,1,draw) = Sigma_lower_chol ;
@@ -103,6 +113,7 @@ function bvar_irf(nlags,varagin)
     number_of_columns = fix(sqrt(ny));
     number_of_rows = ceil(ny / number_of_columns) ;
 
+    % Plots of the IRFs
     for shock=1:ny
         figure('Name',['Posterior BVAR Impulse Responses (shock in equation ' int2str(shock) ').']);
         for variable=1:ny
@@ -117,5 +128,25 @@ function bvar_irf(nlags,varagin)
             plot(1:options_.irf,squeeze(posterior_median_irfs(shock,variable,:)),'-k','linewidth',2)
             axis tight
             hold off
+        end
+    end
+    
+    % Save intermediate results
+    DirectoryName = [ M_.fname '/bvar_irf' ];
+    if ~isdir(DirectoryName)
+        mkdir('.',DirectoryName);
+    end
+    save([ DirectoryName '/simulations.mat'], 'sampled_irfs');
+
+    % Save results in oo_
+    for i=1:ny
+        shock_name = options_.varobs(i, :);
+        for j=1:ny
+            variable_name = options_.varobs(j, :);
+            eval(['oo_.bvar.irf.Mean.' variable_name '.' shock_name ' = posterior_mean_irfs(' int2str(j) ',' int2str(i) ',:);'])
+            eval(['oo_.bvar.irf.Median.' variable_name '.' shock_name ' = posterior_median_irfs(' int2str(j) ',' int2str(i) ',:);'])
+            eval(['oo_.bvar.irf.Var.' variable_name '.' shock_name ' = posterior_variance_irfs(' int2str(j) ',' int2str(i) ',:);'])
+            eval(['oo_.bvar.irf.Upper_bound.' variable_name '.' shock_name ' = posterior_up_conf_irfs(' int2str(j) ',' int2str(i) ',:);'])
+            eval(['oo_.bvar.irf.Lower_bound.' variable_name '.' shock_name ' = posterior_down_conf_irfs(' int2str(j) ',' int2str(i) ',:);'])
         end
     end
