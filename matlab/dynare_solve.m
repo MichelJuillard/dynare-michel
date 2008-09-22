@@ -64,7 +64,7 @@ function [x,info] = dynare_solve(func,x,jacobian_flag,varargin)
   if options_.solve_algo == 1
     nn = size(x,1);
     [x,info]=solve1(func,x,1:nn,1:nn,jacobian_flag,varargin{:});
-  elseif options_.solve_algo == 2
+  elseif options_.solve_algo == 2 || options_.solve_algo == 4
     nn = size(x,1) ;
     tolf = options_.solve_tolf ;
 
@@ -103,21 +103,29 @@ function [x,info] = dynare_solve(func,x,jacobian_flag,varargin)
     [j1,j2,r,s] = dmperm(fjac);
     
     if options_.debug
-      disp(['DYNARE_SOLVE (solve_algo=2): number of blocks = ' num2str(length(r))]);
+      disp(['DYNARE_SOLVE (solve_algo=2|4): number of blocks = ' num2str(length(r))]);
     end
     
     for i=length(r)-1:-1:1
       if options_.debug
-        disp(['DYNARE_SOLVE (solve_algo=2): solving block ' num2str(i) ', of size ' num2str(r(i+1)-r(i)) ]);
+        disp(['DYNARE_SOLVE (solve_algo=2|4): solving block ' num2str(i) ', of size ' num2str(r(i+1)-r(i)) ]);
       end
-      [x,info]=solve1(func,x,j1(r(i):r(i+1)-1),j2(r(i):r(i+1)-1),jacobian_flag,varargin{:});
+      if options_.solve_algo == 2
+        [x,info]=solve1(func,x,j1(r(i):r(i+1)-1),j2(r(i):r(i+1)-1),jacobian_flag,varargin{:});
+      else % solve_algo=4
+        [x,info]=solve2(func,x,j1(r(i):r(i+1)-1),j2(r(i):r(i+1)-1),jacobian_flag,varargin{:});
+      end
       if info
         return
       end
     end
     fvec = feval(func,x,varargin{:});
     if max(abs(fvec)) > tolf
-      [x,info]=solve1(func,x,1:nn,1:nn,jacobian_flag,varargin{:});
+      if options_.solve_algo == 2
+        [x,info]=solve1(func,x,1:nn,1:nn,jacobian_flag,varargin{:});
+      else % solve_algo=4
+        [x,info]=solve2(func,x,1:nn,1:nn,jacobian_flag,varargin{:});
+      end
     end
   elseif options_.solve_algo == 3
     if jacobian_flag
