@@ -1,3 +1,24 @@
+dynare (4.0.1) UNRELEASED; urgency=low
+
+  * Include matlab/distributions/ directory in packaging
+  * BVAR à la Sims: the preprocessor now accepts integers for tau and
+    lambda parameters (thanks to Aqua for reporting)
+  * More information messages displayed during homotopy (modes 1,2,3)
+  * Fixed bugs in homotopy mode 3
+  * Fixed typo in DiffuseKalmanSmootherH1.m (thanks to Tsu-ting Tim Lin
+    for reporting)
+  * Fixed bug with cumulative normal distribution in model block (thanks
+    to Karl Walentin for reporting)
+  * Changes to Dynare solver:
+    - more debugging messages with solve_algo=2
+    - solve_algo=2 now exits immediately after failure to solve one block
+    - new solve_algo=4, similar to solve_algo=2 but with a different way
+      of dealing with badly scaled or nearly singular Jacobian
+    - solve_algo=0 fails if Matlab's Optimization Toolbox not present
+    - solver fails if solve_algo not in [0,1,2,3,4]
+	
+ -- Sébastien Villemot <sebastien.villemot@ens.fr>  Tue, 23 Sep 2008 11:41:41 +0200
+
 dynare (4.0.0) UNRELEASED; urgency=low
 
   * First official release in the 4.0 series
