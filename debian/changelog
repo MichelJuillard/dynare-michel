@@ -1,4 +1,4 @@
-dynare (4.0.1) UNRELEASED; urgency=low
+dynare (4.0.1) unstable; urgency=low
 
   * Include matlab/distributions/ directory in packaging
   * BVAR à la Sims: the preprocessor now accepts integers for tau and
