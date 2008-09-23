@@ -1,4 +1,4 @@
-gfunction [alphahat,epsilonhat,etahat,atilde, aK] = DiffuseKalmanSmootherH1(T,R,Q,H,Pinf1,Pstar1,Y,trend,pp,mm,smpl,mf)
+function [alphahat,epsilonhat,etahat,atilde, aK] = DiffuseKalmanSmootherH1(T,R,Q,H,Pinf1,Pstar1,Y,trend,pp,mm,smpl,mf)
 % function [alphahat,epsilonhat,etahat,atilde, aK] = DiffuseKalmanSmootherH1(T,R,Q,H,Pinf1,Pstar1,Y,trend,pp,mm,smpl,mf)
 % Computes the diffuse kalman smoother with measurement error, in the case of a non-singular var-cov matrix 
 %
