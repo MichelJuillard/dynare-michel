@@ -193,7 +193,7 @@ function [alphahat,etahat,epsilonhat,ahat,SteadyState,trend_coeff,aK,T,R,P,PK,d,
               DiffuseKalmanSmootherH1(T,R,Q,H,Pinf,Pstar,Y,trend,nobs,np,smpl,mf);
           if all(alphahat(:)==0)
               kalman_algo = 2;
-              if ~estim_params.ncn
+              if ~estim_params_.ncn
                   [alphahat,epsilonhat,etahat,ahat,aK] = ...
                       DiffuseKalmanSmootherH3(T,R,Q,H,Pinf,Pstar,Y,trend,nobs,np,smpl,mf);
               else
@@ -203,7 +203,7 @@ function [alphahat,etahat,epsilonhat,ahat,SteadyState,trend_coeff,aK,T,R,P,PK,d,
               end
           end
       elseif options_.kalman_algo == 2
-          if ~estim_params.ncn
+          if ~estim_params_.ncn
               [alphahat,epsilonhat,etahat,ahat,aK] = ...
                   DiffuseKalmanSmootherH3(T,R,Q,H,Pinf,Pstar,Y,trend,nobs,np,smpl,mf);
           else
@@ -217,7 +217,7 @@ function [alphahat,etahat,epsilonhat,ahat,SteadyState,trend_coeff,aK,T,R,P,PK,d,
               DiffuseKalmanSmootherH1_Z(ST,Z,R1,Q,H,Pinf,Pstar,data1,nobs,np,smpl);
           if all(alphahat(:)==0)
               kalman_algo = 4;
-              if ~estim_params.ncn
+              if ~estim_params_.ncn
                   [alphahat,epsilonhat,etahat,ahat,aK] = ...
                       DiffuseKalmanSmootherH3_Z(ST,Z,R1,Q,H,Pinf,Pstar,data1,nobs,np,smpl);
               else
@@ -228,7 +228,7 @@ function [alphahat,etahat,epsilonhat,ahat,SteadyState,trend_coeff,aK,T,R,P,PK,d,
           end
       elseif kalman_algo == 4
           data1 = Y - trend;
-          if ~estim_params.ncn
+          if ~estim_params_.ncn
               [alphahat,epsilonhat,etahat,ahat,aK] = ...
                   DiffuseKalmanSmootherH3_Z(ST,Z,R1,Q,H,Pinf,Pstar,data1, ...
                                             nobs,np,smpl);
