@@ -148,19 +148,19 @@ end
 
 if Info.SaveFormat.Eps
   if isempty(Info.SaveFormat.Name)
-    eval(['print -depsc2 ' M_.fname Info.SaveFormat.GenericName int2str(Info.SaveFormat.Number)]);
+    eval(['print -depsc2 ' M_.fname Info.SaveFormat.GenericName int2str(Info.SaveFormat.Number) '.eps']);
   else
-    eval(['print -depsc2 ' M_.fname Info.SaveFormat.GenericName Info.SaveFormat.Name]);  
+    eval(['print -depsc2 ' M_.fname Info.SaveFormat.GenericName Info.SaveFormat.Name '.eps']);  
   end
 end
-if Info.SaveFormat.Pdf
+if Info.SaveFormat.Pdf && ~exist('OCTAVE_VERSION')
  if isempty(Info.SaveFormat.Name)
     eval(['print -dpdf ' M_.fname Info.SaveFormat.GenericName int2str(Info.SaveFormat.Number)]);
   else
     eval(['print -dpdf ' M_.fname Info.SaveFormat.GenericName Info.SaveFormat.Name]);  
  end
 end
-if Info.SaveFormat.Fig
+if Info.SaveFormat.Fig && ~exist('OCTAVE_VERSION')
  if isempty(Info.SaveFormat.Name)
     saveas(FigHandle,[M_.fname Info.SaveFormat.GenericName int2str(Info.SaveFormat.Number) '.fig']);
   else

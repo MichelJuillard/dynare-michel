@@ -463,9 +463,11 @@ for i=1:M_.exo_nbr
     if subplotnum == MaxNumberOfPlotPerFigure | (j == nvar  & subplotnum> 0)
       figunumber = figunumber+1;
       set(hh,'visible','on')
-      eval(['print -depsc2 ' DirectoryName '/'  M_.fname '_Bayesian_IRF_' deblank(tit(i,:)) '_' int2str(figunumber)]);
-      eval(['print -dpdf ' DirectoryName '/' M_.fname  '_Bayesian_IRF_' deblank(tit(i,:)) '_' int2str(figunumber)]);
-      saveas(hh,[DirectoryName '/' M_.fname  '_Bayesian_IRF_' deblank(tit(i,:))  '_' int2str(figunumber) '.fig']);
+      eval(['print -depsc2 ' DirectoryName '/'  M_.fname '_Bayesian_IRF_' deblank(tit(i,:)) '_' int2str(figunumber) '.eps']);
+      if ~exist('OCTAVE_VERSION')
+          eval(['print -dpdf ' DirectoryName '/' M_.fname  '_Bayesian_IRF_' deblank(tit(i,:)) '_' int2str(figunumber)]);
+          saveas(hh,[DirectoryName '/' M_.fname  '_Bayesian_IRF_' deblank(tit(i,:))  '_' int2str(figunumber) '.fig']);
+      end
       set(hh,'visible','off')
       if options_.nograph, close(hh), end
       if options_.TeX

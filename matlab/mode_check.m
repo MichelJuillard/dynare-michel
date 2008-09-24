@@ -90,9 +90,11 @@ if nbplt == 1
         hold off
         drawnow
     end
-    eval(['print -depsc2 ' M_.fname '_CheckPlots' int2str(1)]);
-    eval(['print -dpdf ' M_.fname '_CheckPlots' int2str(1)]);
-    saveas(hh,[M_.fname '_CheckPlots' int2str(1) '.fig']);
+    eval(['print -depsc2 ' M_.fname '_CheckPlots' int2str(1) '.eps' ]);
+    if ~exist('OCTAVE_VERSION')
+        eval(['print -dpdf ' M_.fname '_CheckPlots' int2str(1)]);
+        saveas(hh,[M_.fname '_CheckPlots' int2str(1) '.fig']);
+    end
     if options_.nograph, close(hh), end  
     % TeX eps loader file
     if TeX
@@ -145,9 +147,11 @@ else
             hold off
             drawnow
         end    
-        eval(['print -depsc2 ' M_.fname '_CheckPlots' int2str(plt)]);
-        eval(['print -dpdf ' M_.fname '_CheckPlots' int2str(plt)]);
-        saveas(hh,[M_.fname '_CheckPlots' int2str(plt) '.fig']);
+        eval(['print -depsc2 ' M_.fname '_CheckPlots' int2str(plt) '.eps']);
+        if ~exist('OCTAVE_VERSION')
+            eval(['print -dpdf ' M_.fname '_CheckPlots' int2str(plt)]);
+            saveas(hh,[M_.fname '_CheckPlots' int2str(plt) '.fig']);
+        end
         if options_.nograph, close(hh), end
         if TeX
             % TeX eps loader file    
@@ -203,9 +207,11 @@ else
         k = k + 1;
         drawnow
     end
-    eval(['print -depsc2 ' M_.fname '_CheckPlots' int2str(nbplt)]);
-    eval(['print -dpdf ' M_.fname '_CheckPlots' int2str(nbplt)]);
-    saveas(hh,[M_.fname '_CheckPlots' int2str(nbplt) '.fig']);
+    eval(['print -depsc2 ' M_.fname '_CheckPlots' int2str(nbplt) '.eps']);
+    if ~exist('OCTAVE_VERSION')
+        eval(['print -dpdf ' M_.fname '_CheckPlots' int2str(nbplt)]);
+        saveas(hh,[M_.fname '_CheckPlots' int2str(nbplt) '.fig']);
+    end
     if options_.nograph, close(hh), end
     if TeX
         fprintf(fidTeX,'\\begin{figure}[H]\n');
