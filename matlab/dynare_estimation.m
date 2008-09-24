@@ -261,8 +261,8 @@ else
 end
 
 % load mode file is necessary
-if length(options_.mode_file) > 0 & options_.posterior_mode_estimation
-  eval(['load ' options_.mode_file ';']');
+if length(options_.mode_file) > 0 && options_.posterior_mode_estimation
+  eval(['load ' options_.mode_file ';']);
 end
 
 %% Compute the steady state: 
