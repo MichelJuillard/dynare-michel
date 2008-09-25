@@ -31,6 +31,8 @@ function CutSample(M_, options_, estim_params_)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
+global M_ options_ estim_params_
+
 npar = estim_params_.np+estim_params_.nvn+estim_params_.ncx+estim_params_.ncn+estim_params_.nvx;
 
 DirectoryName = CheckPath('metropolis');

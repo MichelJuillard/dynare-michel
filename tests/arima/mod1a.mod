@@ -3,11 +3,11 @@ varexo e_x e_y;
 
 parameters rho_x rho_y;
 
-rho_x = 0.5;
+rho_x = 0.5; // comment 1
 rho_y = -0.3;
 
 model;
-dx = rho_x*dx(-1)+e_x;
+dx = rho_x*dx(-1)+e_x; // comment 2
 dy = rho_y*dy(-1)+e_y;
 end;
 
@@ -20,4 +20,4 @@ end;
 
 varobs dx dy;
 check;
-estimation(datafile=data1,nobs=1000,mh_replic=2000);
+estimation(datafile=data1,nobs=1000,mh_replic=2000,mh_jscale=1.2);

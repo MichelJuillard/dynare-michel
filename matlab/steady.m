@@ -49,7 +49,19 @@ function steady()
      homotopy3(options_.homotopy_values, options_.homotopy_steps);
   end
   
-  steady_;
+  if options_.homotopy_mode == 1
+    homotopy1(options_.homotopy_param,options_.homotopy_exo, ...
+	      options_.homotopy_exodet,options_.homotopy_steps);
+  elseif options_.homotopy_mode == 2
+    homotopy2(options_.homotopy_param,options_.homotopy_exo, ...
+	      options_.homotopy_exodet,options_.homotopy_steps);
+  elseif options_.homotopy_mode == 3
+    homotopy3(options_.homotopy_param,options_.homotopy_exo, ...
+	      options_.homotopy_exodet,options_.homotopy_steps);
+  else
+    steady_;
+  end
+  
   
   disp(' ')
   disp('STEADY-STATE RESULTS:')

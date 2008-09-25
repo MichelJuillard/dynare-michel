@@ -87,4 +87,5 @@ oy (log(eta));
 oc (log(eta));
 end;
 
-estimation(datafile=idata,nograph);
+warning off;
+estimation(datafile=idata,mode_compute=4,nograph);

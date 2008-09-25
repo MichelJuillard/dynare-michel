@@ -1,6 +1,6 @@
 // example 1 from Collard's guide to Dynare
 var y, c, k, a, h, b;
-varexo e,u;
+varexo u, e;
 
 parameters beta, rho, alpha, delta, theta, psi, tau, phi;
 
@@ -36,9 +36,13 @@ u = 0;
 end;
 
 shocks;
-var e; stderr 0.009;
+var e; stderr 0.018;
 var u; stderr 0.009;
-var e, u = phi*0.009*0.009;
+var e, u = phi*0.018*0.009;
 end;
 
-stoch_simul;
+rhos = 0.8:0.05:0.8;
+for i=1:length(rhos);
+ rho = rhos(i);
+ stoch_simul(order=2);
+end;

@@ -72,6 +72,8 @@ var e_a; stderr 0.014;
 var e_m; stderr 0.005;
 end;
 
+unit_root_vars P_obs Y_obs;
+
 steady;
 
 check;
@@ -95,8 +97,7 @@ P_obs (log(mst)-gam);
 Y_obs (gam);
 end;
 
-unit_root_vars P_obs Y_obs;
 
 //stoch_simul(order=1,nomoments,irf=0);
-estimation(datafile=fsdat,nobs=192,loglinear,mh_replic=0,mh_nblocks=2,mh_drop=0.45,mode_compute=0,mode_file=fs2000b_mode,load_mh_file);
-stab_map_;
+estimation(datafile=fsdat,nobs=192,loglinear,mh_replic=2000,mh_nblocks=2,mh_jscale=0.8,mode_compute=0,mode_file=fs2000b_mode,kalman_algo=4);
+

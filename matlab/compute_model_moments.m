@@ -1,7 +1,9 @@
-function moments=compute_model_moments(dr,M_,options,_)
+function moments=compute_model_moments(dr,SelectVariables,M_,options_)
+%function moments=compute_model_moments(dr,M_,options_)
 %
 % INPUTS
 %    dr:        structure describing model solution
+%    SelectVariables: indices of selected variables
 %    M_:   structure of Dynare options
 %     options_
 %    
@@ -28,4 +30,4 @@ function moments=compute_model_moments(dr,M_,options,_)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-    moments = th_autocovariances(dr,options_.varlist,M_,options_);
+    moments = th_autocovariances(dr,SelectVariables,M_,options_);

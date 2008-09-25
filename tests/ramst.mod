@@ -26,7 +26,7 @@ check;
 
 shocks;
 var x;
-periods 1;
+periods 10;
 values 1.2;
 end;
 
