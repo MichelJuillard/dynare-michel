@@ -99,19 +99,6 @@ if ~(exist('stab_map_','file')==6 | exist('stab_map_','file')==2),
     end
 end
 
-if ~(exist('gsa_sdp','file')==6 | exist('gsa_sdp','file')==2),
-    dynare_root = strrep(which('dynare.m'),'dynare.m','');
-    ss_anova_path = [dynare_root 'gsa/ss_anova_recurs'];
-    if exist(ss_anova_path)
-        addpath(ss_anova_path,path)
-    else
-        disp('Download Dynare sensitivity routines at:')
-        disp('http://eemc.jrc.ec.europa.eu/softwareDYNARE-Dowload.htm')
-        disp(' ' )
-        error('Mapping routines missing!')
-    end
-end
-
 
 if options_gsa.morris,
   options_gsa.redform=1;

@@ -29,4 +29,5 @@ end;
 
 varobs x y;
 
-estimation(datafile=data2,nobs=100,mh_replic=0,mh_nblocks=1);
+unit_root_vars x y;
+estimation(datafile=data2,nobs=100,mh_replic=0,lik_init=2);

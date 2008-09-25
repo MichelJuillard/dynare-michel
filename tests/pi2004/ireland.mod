@@ -53,8 +53,8 @@ oc = c;
 oh = h;
 end;
 
-//steady;
-//check;
+steady;
+check;
 
 estimated_params;
 theta , 0.22, 0.1, 0.5;
@@ -87,5 +87,4 @@ oy (log(eta));
 oc (log(eta));
 end;
 
-//options_.debug=1;
-estimation(datafile=idata,mode_compute=4,nograph);
+estimation(datafile=idata,mode_compute=1,nograph);
