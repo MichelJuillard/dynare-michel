@@ -1,5 +1,5 @@
-function hms = sec2hms(secs)
-% SEC2HMS Converts a number of seconds into a hours-minutes-seconds string
+function hms = dynsec2hms(secs)
+% DYNSEC2HMS Converts a number of seconds into a hours-minutes-seconds string
 
 % Copyright (C) 2008 Dynare Team
 %
