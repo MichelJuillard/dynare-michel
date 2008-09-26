@@ -101,7 +101,7 @@ for i=1:npar
       eval(['pmod = oo_.posterior_mode.measurement_errors_std.' name ';'])
     end     
   elseif i <= nvx+nvn+ncx
-    j = i - (nvx+nvn)
+    j = i - (nvx+nvn);
     k1 = estim_params_.corrx(j,1);
     k2 = estim_params_.corrx(j,2);
     name = [deblank(M_.exo_names(k1,:)) '_' deblank(M_.exo_names(k2,:))];  
