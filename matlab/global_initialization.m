@@ -108,7 +108,6 @@ function global_initialization()
 
   % Solution
   options_.order = 2;
-  options_.dr_algo = 0;
   options_.solve_algo = 2;
   options_.linear = 0;
   options_.replic = 50;

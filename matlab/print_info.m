@@ -41,10 +41,6 @@ function print_info(info)
   options_ = set_default_option(options_,'noprint',0);
   
   if ~options_.noprint
-    if info(1) > 10 & info(1) < 20
-      disp('Failure in dr_algo=2')
-      info(1) = info(1) - 10;
-    end
     switch info(1)
      case 1
       error(['The model doesn''t determine the current variables' ...

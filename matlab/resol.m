@@ -14,7 +14,6 @@ function [dr,info]=resol(ys,check_flag)
 %    info=3:         Blanchard Kahn conditions are not satisfied: no stable '...' equilibrium
 %    info=4:         Blanchard Kahn conditions are not satisfied:'...' indeterminacy
 %    info=5:         Blanchard Kahn conditions are not satisfied:'...' indeterminacy due to rank failure
-%    info=11:        same as dr1 for dr_algo = 2
 %    info=20:        can't find steady state info(2) contains sum of sqare residuals
 %    info=30:        Variance can't be computed
 %
@@ -40,12 +39,7 @@ function [dr,info]=resol(ys,check_flag)
 
 global M_ options_ oo_ bayestopt_
 global it_
-% plus: 
-% 11 .... same as dr1 for dr_algo = 2
-% 20: can't find steady state info(2) contains sum of sqare residuals
 
- 
-%unfinished
 jacobian_flag = 0; 
 
 options_ = set_default_option(options_,'jacobian_flag',1);
@@ -106,15 +100,6 @@ if info(1)
   return
 end
 
-if options_.dr_algo == 1 & options_.order > 1
-  dr.ys = dynare_solve('dr2',ys,0,dr);
-  dr.fbias = 2*feval([M_.fname '_static'],dr.ys,oo_.exo_steady_state, M_.params);
-  [dr,info1,M_,options_,oo_] = dr1(dr,check_flag,M_,options_,oo_);
-  if info1(1)
-    info(1) = info(1)+10;
-    return
-  end
-end
 if M_.exo_det_nbr > 0
   oo_.exo_det_simul = tempexdet;
 end

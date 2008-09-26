@@ -39,7 +39,6 @@ global it_
   
   options_ = set_default_option(options_,'noprint',0);
   options_ = set_default_option(options_,'linear',0);  
-  options_ = set_default_option(options_,'dr_algo',0);  
   options_ = set_default_option(options_,'steadystate_flag',0);
   options_.order = 1;
   if exist([M_.fname '_steadystate.m'])

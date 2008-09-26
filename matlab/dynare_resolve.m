@@ -18,7 +18,6 @@ function [A,B,ys,info] = dynare_resolve(iv,ic,aux)
 %    info=3:         Blanchard Kahn conditions are not satisfied: no stable '...' equilibrium
 %    info=4:         Blanchard Kahn conditions are not satisfied:'...' indeterminacy
 %    info=5:         Blanchard Kahn conditions are not satisfied:'...' indeterminacy due to rank failure
-%    info=11:        same as dr1 for dr_algo = 2
 %    info=20:        can't find steady state info(2) contains sum of sqare residuals
 %    info=30:        variance can't be computed
 %

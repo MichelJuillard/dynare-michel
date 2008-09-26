@@ -23,7 +23,6 @@ function osr(var_list,params,i_var,W)
   options_ = set_default_option(options_,'linear',0);
   options_ = set_default_option(options_,'ar',5);
   options_ = set_default_option(options_,'irf',40);
-  options_ = set_default_option(options_,'dr_algo',0);
   options_ = set_default_option(options_,'simul_algo',0);
   options_ = set_default_option(options_,'drop',100);
   options_ = set_default_option(options_,'replic',1);
