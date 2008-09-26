@@ -1,26 +1,37 @@
-% /*
-% **  By Jeff Gill, April 2002.
-% **
-% **  This procedure produces:
-% **
-% **  y = chol(A+E), where E is a diagonal matrix with each element as small
-% **  as possible, and A and E are the same size.  E diagonal values are 
-% **  constrained by iteravely updated Gerschgorin bounds.  
-% **
-% **  REFERENCES:
-% **
-% **  Jeff Gill and Gary King. 1998. "`Hessian not Invertable.' Help!"
-% **  manuscript in progress, Harvard University.
-% **
-% **  Robert B. Schnabel and Elizabeth Eskow. 1990. "A New Modified Cholesky
-% **  Factorization," SIAM Journal of Scientific Statistical Computating,
-% **  11, 6: 1136-58.
-% **
-% **
-% **
-% **  Stéphane Adjemian (2003): translation from Gauss to Matlab.  
-% */
 function AA = generalized_cholesky2(A)
+%function AA = generalized_cholesky2(A)
+%
+% This procedure produces:
+%
+% y = chol(A+E), where E is a diagonal matrix with each element as small
+% as possible, and A and E are the same size.  E diagonal values are 
+% constrained by iteravely updated Gerschgorin bounds.  
+%
+% REFERENCES:
+%
+% Jeff Gill and Gary King. 1998. "`Hessian not Invertable.' Help!"
+% manuscript in progress, Harvard University.
+%
+% Robert B. Schnabel and Elizabeth Eskow. 1990. "A New Modified Cholesky
+% Factorization," SIAM Journal of Scientific Statistical Computating,
+% 11, 6: 1136-58.
+
+% Copyright (C) 2003 Dynare Team
+%
+% This file is part of Dynare.
+%
+% Dynare is free software: you can redistribute it and/or modify
+% it under the terms of the GNU General Public License as published by
+% the Free Software Foundation, either version 3 of the License, or
+% (at your option) any later version.
+%
+% Dynare is distributed in the hope that it will be useful,
+% but WITHOUT ANY WARRANTY; without even the implied warranty of
+% MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+% GNU General Public License for more details.
+%
+% You should have received a copy of the GNU General Public License
+% along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
 n = size(A,1);
 L = zeros(n,n);
