@@ -969,7 +969,7 @@ if (~((any(bayestopt_.pshape > 0) & options_.mh_replic) | (any(bayestopt_.pshape
     oo_.FilteredVariablesKStepAhead = aK(options_.filter_step_ahead, ...
                                          i_endo_nbr,:);
     if isfield(options_,'kalman_algo')
-        if options_.kalman_algo > 3
+        if options_.kalman_algo > 2
             oo_.FilteredVariablesKStepAheadVariances = PK(options_.filter_step_ahead,i_endo_nbr,i_endo_nbr,:);
             oo_.FilteredVariablesShockDecomposition = ...
                 decomp(options_.filter_step_ahead,i_endo_nbr,:,:);
