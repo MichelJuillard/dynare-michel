@@ -619,11 +619,14 @@ if any(bayestopt_.pshape > 0) & options_.posterior_mode_estimation
     end
   end
   %% Laplace approximation to the marginal log density:
+  estim_params_nbr = size(xparam1);
+  scale_factor = -sum(log10(diag(invhess)));
+  log_det_invhess = -estim_params_nbr*log(scale_factor)+log(det(scale_factor*invhess));
   if ~options_.bvar_dsge
-    md_Laplace = .5*size(xparam1,1)*log(2*pi) + .5*log(det(invhess)) ...
+    md_Laplace = .5*estim_params_nbr*log(2*pi) + .5*log_det_invhess ...
         - DsgeLikelihood(xparam1,gend,data);
   else
-    md_Laplace = .5*size(xparam1,1)*log(2*pi) + .5*log(det(invhess)) ...
+    md_Laplace = .5*estim_params_nbr*log(2*pi) + .5*log_det_invhess ...
         - DsgeVarLikelihood(xparam1,gend);
   end
   oo_.MarginalDensity.LaplaceApproximation = md_Laplace;    
