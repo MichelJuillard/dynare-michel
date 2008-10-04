@@ -1,4 +1,4 @@
-function dynare_estimation(var_list_)
+function dynare_estimation(var_list_,dname)
 % function dynare_estimation(var_list_)
 % runs the estimation of the model
 %  
@@ -30,12 +30,9 @@ function dynare_estimation(var_list_)
 
 global M_ options_ oo_ estim_params_ bayestopt_
 
+%% Build var_list_
 var_list_ = check_list_of_variables(options_, M_, var_list_);
-%if isempty(var_list_)
-%    return
-%else
-    options_.varlist = var_list_;
-%end
+options_.varlist = var_list_;
 
 options_.lgyidx2varobs = zeros(size(M_.endo_names,1),1);
 for i = 1:size(M_.endo_names,1)
@@ -45,24 +42,28 @@ for i = 1:size(M_.endo_names,1)
   end
 end
 
+%% Decide if a DSGE or DSGE-VAR has to be estimated.
 if ~isempty(strmatch('dsge_prior_weight',M_.param_names))
     options_.bvar_dsge = 1;
 end
 
+%% Set the order of approximation to one (if needed).
 if options_.order > 1
     options_.order = 1;
 end
 
-if (~isempty(options_.unit_root_vars) || options_.diffuse_filter == 1)
-    if options_.lik_init == 1
-        options_.lik_init = 3;
-    end
+%% Set options_.lik_init equal to 3 if diffuse filter is used.
+if (options_.diffuse_filter==1) && (options_.lik_init==1)
+    options_.lik_init = 3;
 end
 
+%% If the data are prefiltered then there must not be constants in the
+%% measurement equation of the DSGE model or in the DSGE-VAR model.
 if options_.prefilter == 1
     options_.noconstant = 1;
 end
 
+%% Set options related to filtered variables.
 if options_.filtered_vars ~= 0 & isempty(options_.filter_step_ahead), 
     options_.filter_step_ahead = 1;
 end
@@ -73,32 +74,39 @@ if options_.filter_step_ahead ~= 0
     options_.nk = max(options_.filter_step_ahead);
 end
 
-%% Add something to the parser ++>
-% The user should be able to choose another name
-% for the directory...
-M_.dname = M_.fname; 
+%% Set the name of the directory where (intermediary) results will be saved.
+if nargin>1
+    M_.dname = dname;
+else
+    M_.dname = M_.fname; 
+end
+%% Set the names of the priors.
+pnames = ['     ';'beta ';'gamm ';'norm ';'invg ';'unif ';'invg2'];
 
-pnames 		= ['     ';'beta ';'gamm ';'norm ';'invg ';'unif ';'invg2'];
-n_varobs 	= size(options_.varobs,1);
+%% Set the number of observed variables.
+n_varobs = size(options_.varobs,1);
 
+%% Set priors over the estimated parameters.
 if ~isempty(estim_params_)
-    [xparam1,estim_params_,bayestopt_,lb,ub] = set_prior(estim_params_);
-
+    [xparam1,estim_params_,bayestopt_,lb,ub,M_] = set_prior(estim_params_,M_,options_);
     if any(bayestopt_.pshape > 0)
+        % Plot prior densities.
 	if options_.mode_compute
-	    plot_priors
+	    plot_priors(bayestopt_,M_,options_)
 	end
-        % set prior bounds and check initial value of the parameters
+        % Set prior bounds
         bounds = prior_bounds(bayestopt_);
         bounds(:,1)=max(bounds(:,1),lb);
         bounds(:,2)=min(bounds(:,2),ub);
     else
-	options_.mh_replic = 0;
+        % No priors are declared so Dynare will estimate the model by
+        % maximum likelihood with inequality constraints for the parameters.
+	options_.mh_replic = 0;% No metropolis.
         bounds(:,1) = lb;
         bounds(:,2) = ub;
     end
-
-
+    % Test if initial values of the estimated parameters are all between
+    % the prior lower and upper bounds.
     if any(xparam1 < bounds(:,1)) | any(xparam1 > bounds(:,2))
 	find(xparam1 < bounds(:,1))
 	find(xparam1 > bounds(:,2))
@@ -108,7 +116,7 @@ if ~isempty(estim_params_)
     ub = bounds(:,2);
     bayestopt_.lb = lb;
     bayestopt_.ub = ub;
-else
+else% If estim_params_ is empty...
     xparam1 = [];
     bayestopt_.lb = [];
     bayestopt_.ub = [];
@@ -117,66 +125,65 @@ else
     bayestopt_.p1 = [];
     bayestopt_.p2 = [];
     bayestopt_.p3 = [];
-    bayestopt_.p4 = [];
-    estim_params_.nvx = 0;
     estim_params_.nvn = 0;
     estim_params_.ncx = 0;
     estim_params_.ncn = 0;
     estim_params_.np = 0;
 end
-nvx = estim_params_.nvx;
-nvn = estim_params_.nvn;
-ncx = estim_params_.ncx;
-ncn = estim_params_.ncn;
-np  = estim_params_.np ;
-nx  = nvx+nvn+ncx+ncn+np;
 
-if ~isfield(options_,'trend_coeffs')
-  bayestopt_.with_trend = 0;
-else
-  bayestopt_.with_trend = 1;
-  bayestopt_.trend_coeff = {};
-  trend_coeffs = options_.trend_coeffs;
-  nt = length(trend_coeffs);
-  for i=1:n_varobs
-    if i > length(trend_coeffs)
-      bayestopt_.trend_coeff{i} = '0';
-    else
-      bayestopt_.trend_coeff{i} = trend_coeffs{i};
+%% Get the number of parameters to be estimated. 
+nvx = estim_params_.nvx;  % Variance of the structural innovations (number of parameters).
+nvn = estim_params_.nvn;  % Variance of the measurement innovations (number of parameters).
+ncx = estim_params_.ncx;  % Covariance of the structural innovations (number of parameters).
+ncn = estim_params_.ncn;  % Covariance of the measurement innovations (number of parameters).
+np  = estim_params_.np ;  % Number of deep parameters.
+nx  = nvx+nvn+ncx+ncn+np; % Total number of parameters to be estimated.
+
+%% Is there a linear trend in the measurement equation?
+if ~isfield(options_,'trend_coeffs') % No!
+    bayestopt_.with_trend = 0;
+else% Yes!
+    bayestopt_.with_trend = 1;
+    bayestopt_.trend_coeff = {};
+    trend_coeffs = options_.trend_coeffs;
+    nt = length(trend_coeffs);
+    for i=1:n_varobs
+        if i > length(trend_coeffs)
+            bayestopt_.trend_coeff{i} = '0';
+        else
+            bayestopt_.trend_coeff{i} = trend_coeffs{i};
+        end
     end
-  end
 end
 
-bayestopt_.penalty = 1e8;	% penalty 
+%% Set the "size" of penalty.
+bayestopt_.penalty = 1e8; 
 
+%% Get informations about the variables of the model.
 dr = set_state_space([],M_);
-nstatic = dr.nstatic;
-npred = dr.npred;
-nspred = dr.nspred;
+nstatic = dr.nstatic;          % Number of static variables. 
+npred = dr.npred;              % Number of predetermined variables.
+nspred = dr.nspred;            % Number of predetermined variables in the state equation.
 
+%% Test if observed variables are declared.
 if isempty(options_.varobs)
   error('ESTIMATION: VAROBS is missing')
 end
 
 %% Setting resticted state space (observed + predetermined variables)
-
 k = [];
 k1 = [];
 for i=1:n_varobs
   k = [k strmatch(deblank(options_.varobs(i,:)),M_.endo_names(dr.order_var,:),'exact')];
   k1 = [k1 strmatch(deblank(options_.varobs(i,:)),M_.endo_names, 'exact')];
 end
-% union of observed and state variables
+% Define union of observed and state variables
 k2 = union(k',[dr.nstatic+1:dr.nstatic+dr.npred]');
-
-% set restrict_state to postion of observed + state variables
-% in expanded state vector
+% Set restrict_state to postion of observed + state variables in expanded state vector.
 bayestopt_.restrict_var_list = k2;
-% set mf1 to positions of observed variables in restricted state vector
-% for likelihood computation
+% Set mf1 to positions of observed variables in restricted state vector for likelihood computation.
 [junk,bayestopt_.mf1] = ismember(k,k2); 
-% set mf2 to positions of observed variables in expanded state vector
-% for filtering and smoothing
+% Set mf2 to positions of observed variables in expanded state vector for filtering and smoothing.
 bayestopt_.mf2 	= k;
 bayestopt_.mfys = k1;
 
@@ -188,8 +195,7 @@ k = find(aux(:,2) > npred);
 aux(k,2) = aux(k,2) + sum(k2 > nstatic+npred);
 bayestopt_.restrict_aux = aux;
 
-
-%% Initialization with unit-root variables
+%% Initialization with unit-root variables.
 if ~isempty(options_.unit_root_vars)
   n_ur = size(options_.unit_root_vars,1);
   i_ur = zeros(n_ur,1);
@@ -219,46 +225,53 @@ if ~isempty(options_.unit_root_vars)
   options_.lik_init = 3;
 end % if ~isempty(options_.unit_root_vars)
 
+%% Test if the data file is declared.
 if isempty(options_.datafile)
-  error('ESTIMATION: datafile option is missing')
+    error('ESTIMATION: datafile option is missing')
 end
 
-%% If jscale isn't specified for an estimated parameter, use
-%% global option options_.jscale, set to 0.2, by default
+%% If jscale isn't specified for an estimated parameter, use global option options_.jscale, set to 0.2, by default.
 k = find(isnan(bayestopt_.jscale));
 bayestopt_.jscale(k) = options_.mh_jscale;
 
-%% Read and demean data 
+%% Load and transform data.
 rawdata = read_variables(options_.datafile,options_.varobs,[],options_.xls_sheet,options_.xls_range);
-
+% Set the number of observations (nobs) and build a subsample between first_obs and nobs.
 options_ = set_default_option(options_,'nobs',size(rawdata,1)-options_.first_obs+1);
 gend = options_.nobs;
-
 rawdata = rawdata(options_.first_obs:options_.first_obs+gend-1,:);
-if options_.loglinear == 1 & ~options_.logdata
-  rawdata = log(rawdata);
+% Take the log of the variables if needed
+if options_.loglinear      % If the model is log-linearized...
+    if ~options_.logdata   % and if the data are not in logs, then...
+        rawdata = log(rawdata);  
+    end
 end
-if options_.prefilter == 1
-  bayestopt_.mean_varobs = mean(rawdata,1);
-  data = transpose(rawdata-ones(gend,1)*bayestopt_.mean_varobs);
-else
-  data = transpose(rawdata);
-end
-
+% Test if the observations are real numbers. 
 if ~isreal(rawdata)
-  error(['There are complex values in the data. Probably  a wrong' ...
-	 ' transformation'])
+    error('There are complex values in the data! Probably  a wrong transformation')
 end
+% Test for missing observations.
+options_.missing_data = any(any(isnan(rawdata)));
+% Prefilter the data if needed.
+if options_.prefilter == 1
+    if options_.missing_data
+        bayestopt_.mean_varobs = zeros(1,n_varobs);
+        [rdx,cdx] = find(~isnan(rawdata));
+        for variable=1:n_varobs
+            tdx = find(cdx==variable);
+            bayestopt_.mean_varobs(variable) = mean(rawdata(rdx(tdx)),variable);
+        end
+    else
+        bayestopt_.mean_varobs = mean(rawdata,1);
+        rawdata = transpose(rawdata-ones(gend,1)*bayestopt_.mean_varobs);
+    end
+end
+% Transpose the dataset array.
+data = transpose(rawdata);
 
-% set options for recursive forecast if necessary
-options_ = set_default_option(options_,'nobs',size(rawdata,1)-options_.first_obs+1);
-if options_.nobs(1) == options_.nobs(end) % no recursive estimation
-  options_ = set_default_option(options_,'mh_nblck',2); 
-  options_ = set_default_option(options_,'nodiagnostic',0);
-else
-  options_ = set_default_option(options_,'mh_nblck',1); 
-  options_ = set_default_option(options_,'nodiagnostic',1);
-end
+%% Set various options.
+options_ = set_default_option(options_,'mh_nblck',2); 
+options_ = set_default_option(options_,'nodiagnostic',0);
 
 % load mode file is necessary
 if length(options_.mode_file) > 0 && options_.posterior_mode_estimation
@@ -269,14 +282,13 @@ end
 if ~isempty(estim_params_)
     set_parameters(xparam1);
 end
-if options_.steadystate_flag% if the _steadystate.m file is provided.
+if options_.steadystate_flag% if the *_steadystate.m file is provided.
     [oo_.steady_state,tchek] = feval([M_.fname '_steadystate'],[],[]);
 else% if the steady state file is not provided.
    [dd,info] = resol(oo_.steady_state,0);
    oo_.steady_state = dd.ys; clear('dd');
 end
 if all(abs(oo_.steady_state(bayestopt_.mfys))<1e-9)
-    disp('No constant.')
     options_.noconstant = 1;
 else
     options_.noconstant = 0;
@@ -323,7 +335,7 @@ if options_.mode_compute == 0 & length(options_.mode_file) == 0
         eval(['oo_.SmoothedShocks.' deblank(M_.exo_names(i,:)) ' = innov(i,:)'';']);
 	end
     end
-  return;
+    return;
 end
 
 %% Estimation of the posterior mode or likelihood mode
@@ -346,16 +358,8 @@ if options_.mode_compute > 0 & options_.posterior_mode_estimation
       [xparam1,fval,exitflag,output,lamdba,grad,hessian_fmincon] = ...
           fmincon(fh,xparam1,[],[],[],[],lb,ub,[],optim_options,gend);
     end
-  elseif options_.mode_compute == 2
-    % asamin('set','maximum_cost_repeat',0);
-% $$$     if ~options_.bvar_dsge
-% $$$       [fval,xparam1,grad,hessian_asamin,exitflag] = ...
-% $$$           asamin('minimize','DsgeLikelihood',xparam1,lb,ub,-ones(size(xparam1)),gend,data);   
-% $$$     else
-% $$$       [fval,xparam1,grad,hessian_asamin,exitflag] = ...
-% $$$           asamin('minimize','DsgeVarLikelihood',xparam1,lb,ub,-ones(size(xparam1)),gend);   
-% $$$     end       
-    error('ESTIMATION: mode_compute=2 option (Lester Ingber''s Adaptive Simulated Annealing) is no longer available')
+  elseif options_.mode_compute == 2       
+      error('ESTIMATION: mode_compute=2 option (Lester Ingber''s Adaptive Simulated Annealing) is no longer available')
   elseif options_.mode_compute == 3
     optim_options = optimset('display','iter','MaxFunEvals',100000,'TolFun',1e-8,'TolX',1e-6);
     if isfield(options_,'optim_opt')
@@ -499,14 +503,11 @@ if options_.mode_compute > 0 & options_.posterior_mode_estimation
 	hh = reshape(hessian('DsgeVarLikelihood',xparam1,gend),nx,nx);
       end
       save([M_.fname '_mode.mat'],'xparam1','hh','fval');
-      %eval(['save ' M_.fname '_mode xparam1 hh fval;']);
     else
       save([M_.fname '_mode.mat'],'xparam1','hh','fval');
-      %eval(['save ' M_.fname '_mode xparam1 hh fval;']);
     end
   end
   save([M_.fname '_mode.mat'],'xparam1','hh');
-  %eval(['save ' M_.fname '_mode xparam1 hh;']);
 end
 
 if options_.mode_check == 1 & options_.posterior_mode_estimation
@@ -514,13 +515,13 @@ if options_.mode_check == 1 & options_.posterior_mode_estimation
 end
 
 if options_.posterior_mode_estimation
-  hh = generalized_cholesky(hh);
-  invhess = inv(hh);
-  stdh = sqrt(diag(invhess));
+    %hh = generalized_cholesky(hh);
+    invhess = inv(hh);
+    stdh = sqrt(diag(invhess));
 else
-  variances = bayestopt_.pstdev.^2;
-%  invhess = 0.001*diag(variances);
-  invhess = 0.01*eye(length(variances));
+    variances = bayestopt_.pstdev.^2;
+    invhess = 0.01*diag(variances);
+    %invhess = 0.01*eye(length(variances));
 end
 
 
@@ -932,11 +933,7 @@ if (any(bayestopt_.pshape  >0 ) & options_.mh_replic) | ...
   if options_.mh_replic
       [marginal,oo_] = marginal_density(M_, options_, estim_params_, oo_);
   end
-  %%
   oo_ = GetPosteriorParametersStatistics(estim_params_, M_, options_, bayestopt_, oo_);
-  %% Results are saved (in case of an anormal exit from dynare or matlab)...
-  %%save([M_.fname '_results.mat'],'oo_','M_');
-  %%
   oo_ = PlotPosteriorDistributions(estim_params_, M_, options_, bayestopt_, oo_);
   metropolis_draw(1);
   if options_.bayesian_irf
@@ -948,11 +945,8 @@ if (any(bayestopt_.pshape  >0 ) & options_.mh_replic) | ...
   if options_.smoother | ~isempty(options_.filter_step_ahead) | options_.forecast
     prior_posterior_statistics('posterior',data,gend);
   end
-
   xparam = get_posterior_parameters('mean');
   set_all_parameters(xparam);
-
-%  return
 end
 
 if (~((any(bayestopt_.pshape > 0) & options_.mh_replic) | (any(bayestopt_.pshape ...

@@ -1,19 +1,22 @@
-function [xparam1,estim_params_,bayestopt_,lb,ub]=set_prior(estim_params_)
+function [xparam1, estim_params_, bayestopt_, lb, ub, M_]=set_prior(estim_params_, M_, options_)
 % function [xparam1,estim_params_,bayestopt_,lb,ub]=set_prior(estim_params_)
 % sets prior distributions
 %
 % INPUTS
-%    estim_params_:    structure characterizing parameters to be estimated
+%    o estim_params_    [structure] characterizing parameters to be estimated.
+%    o M_               [structure] characterizing the model. 
+%    o options_         [structure] 
 %    
 % OUTPUTS
-%    xparam1:          vector of parameters to be estimated (initial values)
-%    estim_params_:    structure characterizing parameters to be estimated
-%    bayestopt_:       structure characterizing priors
-%    lb:               lower bound 
-%    ub:               upper bound
+%    o xparam1          [double]    vector of parameters to be estimated (initial values)
+%    o estim_params_    [structure] characterizing parameters to be estimated
+%    o bayestopt_       [structure] characterizing priors
+%    o lb               [double]    vector of lower bounds for the estimated parameters. 
+%    o ub               [double]    vector of upper bounds for the estimated parameters.
+%    o M_               [structure] characterizing the model.
 %    
 % SPECIAL REQUIREMENTS
-%    none
+%    None
 
 % Copyright (C) 2003-2008 Dynare Team
 %
@@ -31,8 +34,6 @@ function [xparam1,estim_params_,bayestopt_,lb,ub]=set_prior(estim_params_)
 %
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
-
-  global M_ options_
   
   nvx = size(estim_params_.var_exo,1);
   nvn = size(estim_params_.var_endo,1);

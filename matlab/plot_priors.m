@@ -1,16 +1,17 @@
-function plot_priors
-
+function plot_priors(bayestopt_,M_,options_)
 % function plot_priors
 % plots prior density
 %
 % INPUTS
-%    none
+%    o bayestopt_  [structure]
+%    o M_          [structure]
+%    o options_    [structure]
 %    
 % OUTPUTS
-%    none
+%    None
 %    
 % SPECIAL REQUIREMENTS
-%    none
+%    None
 
 % Copyright (C) 2004-2008 Dynare Team
 %
@@ -28,8 +29,6 @@ function plot_priors
 %
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
-
-global bayestopt_ M_ options_
 
 TeX = options_.TeX;
 
