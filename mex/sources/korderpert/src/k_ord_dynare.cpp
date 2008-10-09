@@ -15,13 +15,16 @@
 
 #include "k_ord_dynare.h"
 #include "dynare_exception.h"
-///#include "planner_builder.h"
+#include "decision_rule.h"
+#include "fs_tensor.h"
+#include "SylvException.h"
+
+#include "mex.h" 
+
 ///#include "forw_subst_builder.h"
 
 #include "Dynare_pp/utils/cc/memory_file.h"
 #include "Dynare_pp/utils/cc/exception.h"
-///#include "parser/cc/parser_exception.h"
-///#include "parser/cc/atom_substitutions.h"
 #include "Dynare_pp/tl/cc/tl_exception.h"
 #include "Dynare_pp/kord/kord_exception.h"
 
@@ -72,8 +75,6 @@ KordpDynare::KordpDynare(const char** endo, int nstat,int npred, int nforw, int 
 ///	dnl = new DynareNameList(*this);
 ///	denl = new DynareExogNameList(*this);
 //	dsnl = new DynareStateNameList(*this, *dnl, *denl);
-///	fe = new ogp::FormulaEvaluator(model->getParser());
-///	fde = new ogp::FormulaDerEvaluator(model->getParser());
 ///	writeModelInfo(journal);
 }
 
@@ -153,7 +154,9 @@ void KordpDynare::evaluateSystem(Vector& out, const Vector& yym, const Vector& y
 	DynareEvalLoader del(model->getAtoms(), out);
 	fe->eval(dav, del);
 ///////////////////////*/
-
+#ifdef DEBUG
+	mexPrintf("Call in EvaluateSystem\n");
+#endif
 }
 
 void KordpDynare::calcDerivatives(const Vector& yy, const Vector& xx)

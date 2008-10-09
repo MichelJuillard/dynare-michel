@@ -17,12 +17,12 @@
 
 #include "stdafx.h"
 
-#include "k_order_perturbation.h"
-#include "k_order_dynare.h"
+#include "k_ord_dynare.h"
 #include "math.h"
 #include "mex.h"
+#include "k_order_perturbation.h"
 
-//#include "kord/approximation.h"
+#include "approximation.h"
 
 /* 
 BOOL APIENTRY DllMain( HANDLE hModule, 
@@ -61,13 +61,13 @@ CK_order_perturbation::CK_order_perturbation()
 */
 
 extern "C" {
-	void mexFunction(int nlhs, mxArray* plhs[],
-					 int nrhs, const mxArray* prhs[])
-	{
-		if (nrhs < 3)
-			mexErrMsgTxt("Must have at least 3 input parameters.\n");
-		if (nlhs == 0)
-			mexErrMsgTxt("Must have at least 1 output parameter.\n");
+void mexFunction(int nlhs, mxArray* plhs[],
+				 int nrhs, const mxArray* prhs[])
+{
+	if (nrhs < 3)
+		mexErrMsgTxt("Must have at least 3 input parameters.\n");
+	if (nlhs == 0)
+		mexErrMsgTxt("Must have at least 1 output parameter.\n");
 
 /*		int order = (int)mxGetScalar(prhs[0]);
 		if (nrhs != 12 + order) {
@@ -86,6 +86,150 @@ extern "C" {
 	char*  mFname = mxArrayToString(prhs[nrhs-1]);
 
 
+	// SIM:
+	int nstat = (int)mxGetScalar(prhs[1]);
+	int npred = (int)mxGetScalar(prhs[2]);
+	int nboth = (int)mxGetScalar(prhs[3]);
+	int nforw = (int)mxGetScalar(prhs[4]);
+	int nexog = (int)mxGetScalar(prhs[5]);
+
+	const mxArray* const ystart = prhs[6];
+	const mxArray* const shocks = prhs[7];
+	const mxArray* const vcov = prhs[8];
+	int seed = (int)mxGetScalar(prhs[9]);
+	const mxArray* const ysteady = prhs[10];
+	const int* const ystart_dim = mxGetDimensions(ystart);
+	const int* const shocks_dim = mxGetDimensions(shocks);
+	const int* const vcov_dim = mxGetDimensions(vcov);
+	const int* const ysteady_dim = mxGetDimensions(ysteady);
+
+
+
+	int ny = nstat + npred + nboth + nforw;
+	if (ny != ystart_dim[0])
+		mexErrMsgTxt("ystart has wrong number of rows.\n");
+	if (1 != ystart_dim[1])
+		mexErrMsgTxt("ystart has wrong number of cols.\n");
+	int nper = shocks_dim[1];
+	if (nexog != shocks_dim[0])
+		mexErrMsgTxt("shocks has a wrong number of rows.\n");
+	if (nexog != vcov_dim[0])
+		mexErrMsgTxt("vcov has a wrong number of rows.\n");
+	if (nexog != vcov_dim[1])
+		mexErrMsgTxt("vcov has a wrong number of cols.\n");
+	if (ny != ysteady_dim[0])
+		mexErrMsgTxt("ysteady has wrong number of rows.\n");
+	if (1 != ysteady_dim[1])
+		mexErrMsgTxt("ysteady has wrong number of cols.\n");
+
+	mxArray* res = mxCreateDoubleMatrix(ny, nper, mxREAL);
+	THREAD_GROUP::max_parallel_threads = params.num_threads;
+
+	try {
+		// make journal name and journal
+		std::string jname(params.basename);
+		jname += ".jnl";
+		Journal journal(jname.c_str());
+
+		// make dynare object
+		Dynare dynare(params.modname, params.order, params.ss_tol, journal);
+		// make list of shocks for which we will do IRFs
+        vector<int> irf_list_ind;
+		if (params.do_irfs_all)
+			for (int i = 0; i < dynare.nexog(); i++)
+				irf_list_ind.push_back(i);
+		else
+			irf_list_ind = ((const DynareNameList&)dynare.getExogNames()).selectIndices(params.irf_list);
+
+
+		try {
+
+			system_random_generator.initSeed(params.seed);
+
+			tls.init(dynare.order(),
+					 dynare.nstat()+2*dynare.npred()+3*dynare.nboth()+
+					 2*dynare.nforw()+dynare.nexog());
+
+			Approximation app(dynare, journal, params.num_steps);
+
+		} catch (const KordException& e) {
+				// tell about the exception and continue
+				printf("Caught (not yet fatal) Kord exception: ");
+				e.print();
+				JournalRecord rec(journal);
+				rec << "Solution routine not finished (" << e.get_message()
+					<< "), see what happens" << endrec; 
+		} catch (const TLException& e) {
+			mexErrMsgTxt("Caugth TL exception.");
+		} catch (SylvException& e) {
+			mexErrMsgTxt("Caught Sylv exception.");
+		}
+
+			
+		try {
+
+			app.walkStochSteady();		
+		
+		} catch (const KordException& e) {
+				// tell about the exception and continue
+				printf("Caught (not yet fatal) Kord exception: ");
+				e.print();
+				JournalRecord rec(journal);
+				rec << "Solution routine not finished (" << e.get_message()
+					<< "), see what happens" << endrec; 
+		} catch (const TLException& e) {
+			mexErrMsgTxt("Caugth TL exception.");
+		} catch (SylvException& e) {
+			mexErrMsgTxt("Caught Sylv exception.");
+		}
+
+		std::string ss_matrix_name(params.prefix);
+		ss_matrix_name += "_steady_states";
+		ConstTwoDMatrix(app.getSS()).writeMat4(matfd, ss_matrix_name.c_str());
+
+		// check the approximation
+		if (params.check_along_path || params.check_along_shocks
+			|| params.check_on_ellipse) {
+			GlobalChecker gcheck(app, THREAD_GROUP::max_parallel_threads, journal);
+			if (params.check_along_shocks)
+				gcheck.checkAlongShocksAndSave(matfd, params.prefix,
+											   params.getCheckShockPoints(),
+											   params.getCheckShockScale(),
+											   params.check_evals);
+			if (params.check_on_ellipse)
+				gcheck.checkOnEllipseAndSave(matfd, params.prefix,
+											 params.getCheckEllipsePoints(),
+											 params.getCheckEllipseScale(),
+											 params.check_evals);
+			if (params.check_along_path)
+				gcheck.checkAlongSimulationAndSave(matfd, params.prefix,
+												   params.getCheckPathPoints(),
+												   params.check_evals);
+		}
+	} catch (const KordException& e) {
+		printf("Caugth Kord exception: ");
+		e.print();
+		return e.code();
+	} catch (const TLException& e) {
+		printf("Caugth TL exception: ");
+		e.print();
+		return 255;
+	} catch (SylvException& e) {
+		printf("Caught Sylv exception: ");
+		e.printMessage();
+		return 255;
+	} catch (const DynareException& e) {
+		printf("Caught Dynare exception: %s\n", e.message());
+		return 255;
+	} catch (const ogu::Exception& e) {
+		printf("Caught ogu::Exception: ");
+		e.print();
+		return 255;
+
+}
+
+void loadModelDynamicDLL ()
+{
   double *y, *x, *params;
   double *residual, *g1, *g2;
   int nb_row_x, it_;
@@ -136,41 +280,6 @@ extern "C" {
 
 
 
-/*
-		int nstat = (int)mxGetScalar(prhs[1]);
-		int npred = (int)mxGetScalar(prhs[2]);
-		int nboth = (int)mxGetScalar(prhs[3]);
-		int nforw = (int)mxGetScalar(prhs[4]);
-		int nexog = (int)mxGetScalar(prhs[5]);
-
-		const mxArray* const ystart = prhs[6];
-		const mxArray* const shocks = prhs[7];
-		const mxArray* const vcov = prhs[8];
-		int seed = (int)mxGetScalar(prhs[9]);
-		const mxArray* const ysteady = prhs[10];
-		const int* const ystart_dim = mxGetDimensions(ystart);
-		const int* const shocks_dim = mxGetDimensions(shocks);
-		const int* const vcov_dim = mxGetDimensions(vcov);
-		const int* const ysteady_dim = mxGetDimensions(ysteady);
-
-		int ny = nstat + npred + nboth + nforw;
-		if (ny != ystart_dim[0])
-			mexErrMsgTxt("ystart has wrong number of rows.\n");
-		if (1 != ystart_dim[1])
-			mexErrMsgTxt("ystart has wrong number of cols.\n");
-		int nper = shocks_dim[1];
-		if (nexog != shocks_dim[0])
-			mexErrMsgTxt("shocks has a wrong number of rows.\n");
-		if (nexog != vcov_dim[0])
-			mexErrMsgTxt("vcov has a wrong number of rows.\n");
-		if (nexog != vcov_dim[1])
-			mexErrMsgTxt("vcov has a wrong number of cols.\n");
-		if (ny != ysteady_dim[0])
-			mexErrMsgTxt("ysteady has wrong number of rows.\n");
-		if (1 != ysteady_dim[1])
-			mexErrMsgTxt("ysteady has wrong number of cols.\n");
-*/
-//		mxArray* res = mxCreateDoubleMatrix(ny, nper, mxREAL);
 /*
 		try {
 
