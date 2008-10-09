@@ -245,7 +245,7 @@ function [fval,cost_flag,ys,trend_coeff,info] = DsgeLikelihood(xparam1,gend,data
       [QQ,RR,EE] = qr(Z*ST(:,1:nk),0);
       k = find(abs(diag(RR)) < 1e-8);
       if length(k) > 0
-          [k1,junk] = find(EE(:,k));
+          k1 = find(ismember(EE,k)); %find(EE(:,k));
 %	  [junk,k1] = max(abs(v(:,k)));
 	  dd =ones(nk,1);
 	  dd(k1) = zeros(length(k1),1);
