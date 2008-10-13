@@ -99,4 +99,13 @@ for i=1:number_of_mex_files
     end
     disp([ message mex_status{i,3} '.' ])
 end
+
+% Test if simulate DLL is present
+if exist('simulate') == 3
+  message = '[mex] ';
+else
+  message = '[no]  ';
+end
+disp([ message 'Fast model evaluation.' ])
+
 disp(' ')
