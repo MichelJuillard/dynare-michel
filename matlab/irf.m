@@ -6,7 +6,7 @@ function y = irf(dr, e1, long, drop, replic, iorder)
 % INPUTS
 %    dr:     structure of decisions rules for stochastic simulations
 %    e1:     exogenous variables value in time 1 after one shock
-%    long
+%    long:   number of periods of simulation
 %    drop:   truncation (in order 2)
 %    replic: number of replications (in order 2)
 %    iorder: first or second order approximation
