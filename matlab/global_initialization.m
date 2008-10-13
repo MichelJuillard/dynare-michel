@@ -145,6 +145,7 @@ function global_initialization()
   options_.first_obs = 1;
   options_.kalman_algo = 0;
   options_.kalman_tol = 1e-12;
+  options_.riccati_tol = 1e-6;
   options_.lik_algo = 1;
   options_.lik_init = 1;
   options_.load_mh_file = 0;

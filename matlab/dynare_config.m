@@ -38,6 +38,8 @@ end
 dynareroot = strrep(which('dynare.m'),'dynare.m','');
 
 addpath([dynareroot '/distributions/'])
+addpath([dynareroot '/kalman/'])
+
 % Add path to distribution-related function if under Matlab
 % without the statistics toolbox
 if ~exist('OCTAVE_VERSION') && isempty(ver('stats'))
