@@ -175,16 +175,15 @@ function [alphahat,etahat,epsilonhat,ahat,SteadyState,trend_coeff,aK,T,R,P,PK,d,
       
       Z = QT(mf,:);
       R1 = QT'*R;
-      %      [u,s,v]=svd(Z*ST(:,1:nk),0);
-      [QQ,RR,EE] = qr(Z*ST(:,1:nk),0);
-      k = find(abs(diag(RR)) < 1e-8);
-      if length(k) > 0
-          k1 = find(ismember(EE,k)); %find(EE(:,k));
-%	  [junk,k1] = max(abs(v(:,k)));
-	  dd =ones(nk,1);
-	  dd(k1) = zeros(length(k1),1);
-	  Pinf(1:nk,1:nk) = diag(dd);
-      end
+% $$$       [u,s,v]=svd(Z*ST(:,1:nk),0);
+% $$$       k = find(abs(diag(s)) < 1e-8);
+% $$$       if length(k) > 0
+% $$$ 	  [junk,k1] = max(abs(v(:,k)));
+% $$$ 	  dd =ones(nk,1);
+% $$$ 	  dd(k1) = zeros(length(k1),1);
+% $$$ 	  Pinf(1:nk,1:nk) = diag(dd);
+% $$$       end
+      Pinf(1:nk,1:nk) = eye(nk);
   end
   % -----------------------------------------------------------------------------
   %  4. Kalman smoother
@@ -282,18 +281,3 @@ function [alphahat,etahat,epsilonhat,ahat,SteadyState,trend_coeff,aK,T,R,P,PK,d,
           end
       end
   end
-
-aE=T*alphahat;
-global ss_
-ss_.T=T;
-ss_.R=R;
-ss_.a=alphahat(:,end);
-ss_.a1=alphahat(:,1);
-ss_.ss=SteadyState(oo_.dr.order_var);
-for j= (length(ss_.ss)+1):length(T),
-    ss_.ss(j)=ss_.ss(find(T(j,:)));
-end
-ss_.etahat=etahat;
-% ss_.af=af;
-ss_.aE=aE;
-  

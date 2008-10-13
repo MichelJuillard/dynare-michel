@@ -241,17 +241,17 @@ function [fval,cost_flag,ys,trend_coeff,info] = DsgeLikelihood(xparam1,gend,data
       
       Z = QT(mf,:);
       R1 = QT'*R;
-      %      [u,s,v]=svd(Z*ST(:,1:nk),0);
+%      [u,s,v]=svd(Z*ST(:,1:nk),0);
       [QQ,RR,EE] = qr(Z*ST(:,1:nk),0);
       k = find(abs(diag(RR)) < 1e-8);
       if length(k) > 0
-          k1 = find(ismember(EE,k)); %find(EE(:,k));
+          k1 = EE(:,k);
 %	  [junk,k1] = max(abs(v(:,k)));
 	  dd =ones(nk,1);
 	  dd(k1) = zeros(length(k1),1);
 	  Pinf(1:nk,1:nk) = diag(dd);
       end
-	
+
   end
   %------------------------------------------------------------------------------
   % 4. Likelihood evaluation
