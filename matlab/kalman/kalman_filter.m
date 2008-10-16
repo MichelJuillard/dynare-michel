@@ -1,5 +1,5 @@
 function [LIK, lik] = kalman_filter(T,R,Q,H,P,Y,start,mf,kalman_tol,riccati_tol)
-% Computes the likelihood of a stationnary state space model without measurement error, in the case of a non-singular var-cov matrix
+% Computes the likelihood of a stationnary state space model.
 %
 % INPUTS
 %    T                      [double]    mm*mm transition matrix of the state equation.
