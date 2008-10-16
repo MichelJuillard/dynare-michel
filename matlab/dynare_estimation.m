@@ -380,7 +380,7 @@ if options_.mode_compute > 0 & options_.posterior_mode_estimation
     end
     if ~options_.bvar_dsge
       [xparam1,fval,exitflag,output,lamdba,grad,hessian_fmincon] = ...
-          fmincon(fh,xparam1,[],[],[],[],lb,ub,[],optim_options,gend,data);
+          fmincon(fh,xparam1,[],[],[],[],lb,ub,[],optim_options,gend,data,data_index,number_of_observations,no_more_missing_observations);
     else
       [xparam1,fval,exitflag,output,lamdba,grad,hessian_fmincon] = ...
           fmincon(fh,xparam1,[],[],[],[],lb,ub,[],optim_options,gend);
@@ -393,7 +393,7 @@ if options_.mode_compute > 0 & options_.posterior_mode_estimation
       eval(['optim_options = optimset(optim_options,' options_.optim_opt ');']);
     end
     if ~options_.bvar_dsge
-      [xparam1,fval,exitflag] = fminunc(fh,xparam1,optim_options,gend,data);
+      [xparam1,fval,exitflag] = fminunc(fh,xparam1,optim_options,gend,data,data_index,number_of_observations,no_more_missing_observations);
     else
       [xparam1,fval,exitflag] = fminunc(fh,xparam1,optim_options,gend);
     end
@@ -435,15 +435,14 @@ if options_.mode_compute > 0 & options_.posterior_mode_estimation
       nit=1000;
     end
     if ~options_.bvar_dsge
-      [xparam1,hh,gg,fval,invhess] = newrat('DsgeLikelihood',xparam1,hh,gg,igg,crit,nit,flag,gend,data);
+      [xparam1,hh,gg,fval,invhess] = newrat('DsgeLikelihood',xparam1,hh,gg,igg,crit,nit,flag,gend,data,data_index,number_of_observations,no_more_missing_observations);
     else
       [xparam1,hh,gg,fval,invhess] = newrat('DsgeVarLikelihood',xparam1,hh,gg,igg,crit,nit,flag,gend);
     end
     save([M_.fname '_mode.mat'],'xparam1','hh','gg','fval','invhess');
-    %eval(['save ' M_.fname '_mode xparam1 hh gg fval invhess;']);
   elseif options_.mode_compute == 6
       if ~options_.bvar_dsge
-          fval = DsgeLikelihood(xparam1,gend,data);
+          fval = DsgeLikelihood(xparam1,gend,data,data_index,number_of_observations,no_more_missing_observations);
       else
           fval = DsgeVarLikelihood(xparam1,gend);
       end
@@ -481,8 +480,9 @@ if options_.mode_compute > 0 & options_.posterior_mode_estimation
               end
               if ~options_.bvar_dsge
                   [xparam1,PostVar,Scale,PostMean] = ...
-                      gmhmaxlik('DsgeLikelihood',xparam1,bounds,options_.Opt6Numb,Scale,flag,MeanPar,CovJump,gend,data);
-                  fval = DsgeLikelihood(xparam1,gend,data);
+                      gmhmaxlik('DsgeLikelihood',xparam1,bounds,options_.Opt6Numb,Scale,flag,MeanPar,CovJump,gend,data,...
+                                data_index,number_of_observations,no_more_missing_observations);
+                  fval = DsgeLikelihood(xparam1,gend,data,data_index,number_of_observations,no_more_missing_observations);
               else
                   [xparam1,PostVar,Scale,PostMean] = ...
                       gmhmaxlik('DsgeVarLikelihood',xparam1,bounds,options_.Opt6Numb,Scale,flag,MeanPar,CovJump,gend);
