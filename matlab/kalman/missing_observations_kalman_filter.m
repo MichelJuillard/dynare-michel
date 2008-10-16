@@ -2,19 +2,20 @@ function  [LIK, lik] = missing_observations_kalman_filter(T,R,Q,H,P,Y,start,mf,k
 % Computes the likelihood of a state space model in the case with missing observations.
 %
 % INPUTS
-%    T                      [double]    mm*mm transition matrix of the state equation.
-%    R                      [double]    mm*rr matrix, mapping structural innovations to state variables.
-%    Q                      [double]    rr*rr covariance matrix of the structural innovations.
-%    H                      [double]    pp*pp (or 1*1 =0 if no measurement error) covariance matrix of the measurement errors.    
-%    P                      [double]    mm*mm variance-covariance matrix of the initial state vector.
-%    Y                      [double]    pp*smpl matrix of detrended data, where pp is the maximum number of observed variables
-%    trend                  [double]    pp*smpl matrix
-%    start                  [integer]   scalar, likelihood evaluation starts at 'start'.
-%    mf                     [integer]   pp*1 vector of indices.
-%    kalman_tol             [double]    scalar, tolerance parameter (rcond).
-%    riccati_tol            [double]    scalar, tolerance parameter (riccati iteration).
-%    data_index             [cell]      1*smpl cell of column vectors of indices.
-%    number_of_observations [integer]   saclar.
+%    T                            [double]    mm*mm transition matrix of the state equation.
+%    R                            [double]    mm*rr matrix, mapping structural innovations to state variables.
+%    Q                            [double]    rr*rr covariance matrix of the structural innovations.
+%    H                            [double]    pp*pp (or 1*1 =0 if no measurement error) covariance matrix of the measurement errors.    
+%    P                            [double]    mm*mm variance-covariance matrix of the initial state vector.
+%    Y                            [double]    pp*smpl matrix of detrended data, where pp is the maximum number of observed variables
+%    trend                        [double]    pp*smpl matrix
+%    start                        [integer]   scalar, likelihood evaluation starts at 'start'.
+%    mf                           [integer]   pp*1 vector of indices.
+%    kalman_tol                   [double]    scalar, tolerance parameter (rcond).
+%    riccati_tol                  [double]    scalar, tolerance parameter (riccati iteration).
+%    data_index                   [cell]      1*smpl cell of column vectors of indices.
+%    number_of_observations       [integer]   scalar.
+%    no_more_missing_observations [integer]   scalar.    
 %    
 % OUTPUTS
 %    LIK        [double]    scalar, likelihood
