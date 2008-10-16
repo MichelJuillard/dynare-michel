@@ -38,7 +38,7 @@ end
 dynareroot = strrep(which('dynare.m'),'dynare.m','');
 
 addpath([dynareroot '/distributions/'])
-addpath([dynareroot '/kalman/'])
+addpath([dynareroot '/kalman/likelihood'])
 
 % Add path to distribution-related function if under Matlab
 % without the statistics toolbox
