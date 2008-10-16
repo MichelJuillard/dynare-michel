@@ -1,4 +1,4 @@
-function mode_check(x,fval,hessian,gend,data,lb,ub)
+function mode_check(x,fval,hessian,gend,data,lb,ub,data_index,number_of_observations,no_more_missing_observations)
 
 % function mode_check(x,fval,hessian,gend,data,lb,ub)
 % Checks the maximum likelihood mode 
@@ -77,7 +77,7 @@ if nbplt == 1
         for i=1:length(z)
             xx(k) = z(i); % kk -> k
             if isempty(strmatch('dsge_prior_weight',M_.param_names))
-                y(i) = DsgeLikelihood(xx,gend,data);
+                y(i) = DsgeLikelihood(xx,gend,data,data_index,number_of_observations,no_more_missing_observations);
             else
                 y(i) = DsgeVarLikelihood(xx,gend);
             end
@@ -134,7 +134,7 @@ else
             for i=1:length(z)
                 xx(kk) = z(i);
                 if isempty(strmatch('dsge_prior_weight',M_.param_names))
-                    y(i) = DsgeLikelihood(xx,gend,data);
+                    y(i) = DsgeLikelihood(xx,gend,data,data_index,number_of_observations,no_more_missing_observations);
                 else
                     y(i) = DsgeVarLikelihood(xx,gend);
                 end                
@@ -193,7 +193,7 @@ else
         for i=1:length(z)
             xx(kk) = z(i);
             if isempty(strmatch('dsge_prior_weight',M_.param_names))
-                y(i) = DsgeLikelihood(xx,gend,data);
+                y(i) = DsgeLikelihood(xx,gend,data,data_index,number_of_observations,no_more_missing_observations);
             else
                 y(i) = DsgeVarLikelihood(xx,gend);
             end                

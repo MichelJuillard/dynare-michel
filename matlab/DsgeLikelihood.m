@@ -254,7 +254,7 @@ function [fval,cost_flag,ys,trend_coeff,info] = DsgeLikelihood(xparam1,gend,data
   switch kalman_algo
     case 1% Standard Kalman filter.
       Y   = data-trend;
-      if nargin==3
+      if number_of_observations==gend*nobs
           LIK = kalman_filter(T,R,Q,H,Pstar,Y,start,bayestopt_.mf1,options_.kalman_tol,options_.riccati_tol); 
       else
           LIK = ...

@@ -324,7 +324,6 @@ for obs=1:gend
     tmp = variable_index(idx);
     missing_observations_counter(obs,1) = n_varobs-length(tmp);
     data_index(obs) = { tmp(:) };
-    data_index(obs)
 end
 missing_observations_counter = cumsum(missing_observations_counter);
 
@@ -526,9 +525,9 @@ if options_.mode_compute > 0 & options_.posterior_mode_estimation
   if options_.mode_compute ~= 5
     if options_.mode_compute ~= 6
       if ~options_.bvar_dsge
-	hh = reshape(hessian('DsgeLikelihood',xparam1,gend,data,data_index,number_of_observations,no_more_missing_observations),nx,nx);
+	hh = reshape(hessian('DsgeLikelihood',xparam1,options_.gstep,gend,data,data_index,number_of_observations,no_more_missing_observations),nx,nx);
       else
-	hh = reshape(hessian('DsgeVarLikelihood',xparam1,gend),nx,nx);
+	hh = reshape(hessian('DsgeVarLikelihood',xparam1,options_.gstep,gend),nx,nx);
       end
       save([M_.fname '_mode.mat'],'xparam1','hh','fval');
     else
@@ -539,7 +538,7 @@ if options_.mode_compute > 0 & options_.posterior_mode_estimation
 end
 
 if options_.mode_check == 1 & options_.posterior_mode_estimation
-  mode_check(xparam1,0,hh,gend,data,lb,ub);
+  mode_check(xparam1,0,hh,gend,data,lb,ub,data_index,number_of_observations,no_more_missing_observations);
 end
 
 if options_.posterior_mode_estimation
@@ -949,7 +948,8 @@ if (any(bayestopt_.pshape  >0 ) & options_.mh_replic) | ...
     if options_.bvar_dsge
         feval(options_.posterior_sampling_method,'DsgeVarLikelihood',options_.proposal_distribution,xparam1,invhess,bounds,gend);
     else
-        feval(options_.posterior_sampling_method,'DsgeLikelihood',options_.proposal_distribution,xparam1,invhess,bounds,gend,data);
+        feval(options_.posterior_sampling_method,'DsgeLikelihood',options_.proposal_distribution,xparam1,invhess,bounds,gend,data,...
+              data_index,number_of_observations,no_more_missing_observations);
     end
   end
   if ~options_.nodiagnostic & options_.mh_replic > 1000 & options_.mh_nblck > 1

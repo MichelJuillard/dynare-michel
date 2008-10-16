@@ -1,18 +1,18 @@
-function hessian_mat = hessian(func,x,varargin)
-
+function hessian_mat = hessian(func,x,gstep,varargin)
 % function hessian_mat = hessian(func,x,varargin)
 % Computes second order partial derivatives
 %
 % INPUTS
-%    func:           name of the function
-%    x:              vector of variables around which the Hessian is calculated
-%    varargin:       list of arguments following x
+%    func        [string]   name of the function
+%    x           [double]   vector, the Hessian of "func" is evaluated at x.
+%    gstep       [double]   scalar, size of epsilon.
+%    varargin    [void]     list of additional arguments for "func".
 %
 % OUTPUTS
-%    hessian_matrix: Hessian matrix
+%    hessian_mat [double]   Hessian matrix
 %
 % ALGORITHM
-% Uses Abramowitz and Stegun (1965) formulas 25.3.24 and 25.3.27 p. 884
+%    Uses Abramowitz and Stegun (1965) formulas 25.3.24 and 25.3.27 p. 884
 %
 % SPECIAL REQUIREMENTS
 %    none
@@ -35,11 +35,9 @@ function hessian_mat = hessian(func,x,varargin)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-  global options_
   func = str2func(func);
   n=size(x,1);
-  %h1=max(abs(x),options_.gstep*ones(n,1))*eps^(1/3);
-  h1=max(abs(x),sqrt(options_.gstep)*ones(n,1))*eps^(1/6);
+  h1=max(abs(x),sqrt(gstep)*ones(n,1))*eps^(1/6);
   h_1=h1;
   xh1=x+h1;
   h1=xh1-x;
@@ -79,5 +77,4 @@ function hessian_mat = hessian(func,x,varargin)
       j=j+1;
     end    
     i=i+1;
-  end 
-  % 11/25/03 SA Created from Hessian_sparse (removed sparse)
+  end
