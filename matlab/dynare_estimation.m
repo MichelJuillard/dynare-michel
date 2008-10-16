@@ -297,6 +297,9 @@ end
 
 %% compute sample moments if needed (bvar-dsge)
 if options_.bvar_dsge
+    if options_.missing_data
+        error('I cannot estimate a DSGE-VAR model with missing observations!')
+    end
     if options_.noconstant
         evalin('base',...
                ['[mYY,mXY,mYX,mXX,Ydata,Xdata] = ' ...
@@ -311,7 +314,32 @@ if options_.bvar_dsge
     end
 end
 
-initial_estimation_checks(xparam1,gend,data);
+%% Build cell of indices for observed variables (used to control for missing observations).
+[variable_index,observation_index] = find(~isnan(data));
+
+data_index = cell(1,gend);
+missing_observations_counter = NaN(gend,1);
+for obs=1:gend
+    idx = find(observation_index==obs);
+    tmp = variable_index(idx);
+    missing_observations_counter(obs,1) = n_varobs-length(tmp);
+    data_index(obs) = { tmp(:) };
+    data_index(obs)
+end
+missing_observations_counter = cumsum(missing_observations_counter);
+
+% The number of observations is different from gend*n_varobs in case of missing observations.
+number_of_observations = length(variable_index);
+
+% 
+if ~missing_observations_counter
+    no_more_missing_observations = 0;
+else
+    tmp = find(missing_observations_counter>=(gend*n_varobs-number_of_observations))
+    no_more_missing_observations = tmp(1);
+end
+
+initial_estimation_checks(xparam1,gend,data,data_index,number_of_observations,no_more_missing_observations);
 
 if options_.mode_compute == 0 & length(options_.mode_file) == 0
     if options_.smoother == 1
@@ -325,10 +353,10 @@ if options_.mode_compute == 0 & length(options_.mode_file) == 0
 	    oo_.FilteredVariablesKStepAhead = aK(options_.filter_step_ahead,i_endo_nbr,:);
 	    oo_.FilteredVariablesKStepAheadVariances = PK(options_.filter_step_ahead,i_endo_nbr,i_endo_nbr,:);
 	    oo_.FilteredVariablesShockDecomposition = decomp(options_.filter_step_ahead,i_endo_nbr,:,:);
-	end
-	for i=1:M_.endo_nbr
-	    eval(['oo_.SmoothedVariables.' deblank(M_.endo_names(dr.order_var(i),:)) ' = atT(i,:)'';']);
-	    eval(['oo_.FilteredVariables.' deblank(M_.endo_names(dr.order_var(i),:)) ' = squeeze(aK(1,i,:))'';']);
+        end
+        for i=1:M_.endo_nbr
+            eval(['oo_.SmoothedVariables.' deblank(M_.endo_names(dr.order_var(i),:)) ' = atT(i,:)'';']);
+            eval(['oo_.FilteredVariables.' deblank(M_.endo_names(dr.order_var(i),:)) ' = squeeze(aK(1,i,:))'';']);
 	    eval(['oo_.UpdatedVariables.' deblank(M_.endo_names(dr.order_var(i),:)) ' = updated_variables(i,:)'';']);
 	end
 	for i=1:M_.exo_nbr
@@ -377,9 +405,9 @@ if options_.mode_compute > 0 & options_.posterior_mode_estimation
     verbose = 2;
     if ~options_.bvar_dsge
       [fval,xparam1,grad,hessian_csminwel,itct,fcount,retcodehat] = ...
-          csminwel('DsgeLikelihood',xparam1,H0,[],crit,nit,options_.gradient_method,gend,data);
+          csminwel('DsgeLikelihood',xparam1,H0,[],crit,nit,options_.gradient_method,gend,data,data_index,number_of_observations,no_more_missing_observations);
       disp(sprintf('Objective function at mode: %f',fval))
-      disp(sprintf('Objective function at mode: %f',DsgeLikelihood(xparam1,gend,data)))
+      disp(sprintf('Objective function at mode: %f',DsgeLikelihood(xparam1,gend,data,data_index,number_of_observations,no_more_missing_observations)))
     else
       [fval,xparam1,grad,hessian_csminwel,itct,fcount,retcodehat] = ...
           csminwel('DsgeVarLikelihood',xparam1,H0,[],crit,nit,options_.gradient_method,gend);
@@ -498,7 +526,7 @@ if options_.mode_compute > 0 & options_.posterior_mode_estimation
   if options_.mode_compute ~= 5
     if options_.mode_compute ~= 6
       if ~options_.bvar_dsge
-	hh = reshape(hessian('DsgeLikelihood',xparam1,gend,data),nx,nx);
+	hh = reshape(hessian('DsgeLikelihood',xparam1,gend,data,data_index,number_of_observations,no_more_missing_observations),nx,nx);
       else
 	hh = reshape(hessian('DsgeVarLikelihood',xparam1,gend),nx,nx);
       end
@@ -625,7 +653,7 @@ if any(bayestopt_.pshape > 0) & options_.posterior_mode_estimation
   log_det_invhess = -estim_params_nbr*log(scale_factor)+log(det(scale_factor*invhess));
   if ~options_.bvar_dsge
     md_Laplace = .5*estim_params_nbr*log(2*pi) + .5*log_det_invhess ...
-        - DsgeLikelihood(xparam1,gend,data);
+        - DsgeLikelihood(xparam1,gend,data,data_index,number_of_observations,no_more_missing_observations);
   else
     md_Laplace = .5*estim_params_nbr*log(2*pi) + .5*log_det_invhess ...
         - DsgeVarLikelihood(xparam1,gend);

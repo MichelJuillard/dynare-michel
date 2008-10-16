@@ -90,8 +90,10 @@ function  [LIK, lik] = missing_observations_kalman_filter(T,R,Q,H,P,Y,start,mf,k
                 a      = T*(a+K*v);
                 P      = T*(P-K*P(MF,:))*transpose(T)+QQ;
             end
-            notsteady = ~( (t>no_more_missing_observations) && (max(max(abs(K-oldK)))<riccati_tol) );
-            oldK = K;
+            if t>no_more_missing_observations
+                notsteady = max(max(abs(K-oldK)))>riccati_tol;
+                oldK = K;
+            end
         end
     end
     

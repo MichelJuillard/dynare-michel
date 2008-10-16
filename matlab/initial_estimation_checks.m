@@ -1,4 +1,4 @@
-function initial_estimation_checks(xparam1,gend,data)
+function initial_estimation_checks(xparam1,gend,data,data_index,number_of_observations,no_more_missing_observations)
 
 % function initial_estimation_checks(xparam1,gend,data)
 % Checks data (complex values, ML evaluation, initial values, BK conditions,..)
@@ -46,16 +46,18 @@ function initial_estimation_checks(xparam1,gend,data)
     error(['Estimation can''t take place because there are less shocks than' ...
 	   'observed variables'])
   end
-  r = rank(data);
-  if r < nv
-    error(['Estimation can''t take place because the data are perfectly' ...
- 	   ' correlated']);
+  if (number_of_observations==gend*nv)% No missing observations...
+      r = rank(data);
+      if r < nv
+          error(['Estimation can''t take place because the data are perfectly' ...
+                 ' correlated']);
+      end
   end
-
+  
   if ~isempty(strmatch('dsge_prior_weight',M_.param_names))
     [fval,cost_flag,info] = DsgeVarLikelihood(xparam1,gend);
   else
-    [fval,cost_flag,ys,trend_coeff,info] = DsgeLikelihood(xparam1,gend,data);
+    [fval,cost_flag,ys,trend_coeff,info] = DsgeLikelihood(xparam1,gend,data,data_index,number_of_observations,no_more_missing_observations);
   end
 
   % when their is an analytical steadystate, check that the values
