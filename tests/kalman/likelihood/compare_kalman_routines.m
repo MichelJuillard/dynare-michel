@@ -1,5 +1,5 @@
 function compare_kalman_routines(experience)
-%% This function compare the kalman filter routines.
+%% This function compares the kalman filter routines.
 %%
 %%     
 %% stephane [DOT] adjemian [AT] ens [DOT] fr
@@ -35,7 +35,7 @@ if PeriodsWithMissingObservations
     Y = [ transpose(data_1) ; data_2 ];
 end
 
-[data_index,number_of_observations,no_more_missing_observations] = describe_missing_data(data,gend,nvarobs);
+[data_index,number_of_observations,no_more_missing_observations] = describe_missing_data(Y,gend,pp);
 
 
 %% SET THE STATE SPACE MODEL:
@@ -43,9 +43,9 @@ end
 % I randomly choose the mm eigenvalues of the transition matrix.
 TransitionEigenvalues  = rand(mm,1)*2-1;
 % I randomly choose the mm eigenvectors of the transition matrix
-TransitionEigenvectors = rand(mm,A);
+TransitionEigenvectors = rand(mm,mm);
 % I build the transition matrix
-T = TransitionEigenvectors*diag(TransitionEigenvectors)*inv(TransitionEigenvectors);
+T = TransitionEigenvectors*diag(TransitionEigenvalues)*inv(TransitionEigenvectors);
 % I randomly choose matrix R
 R = randn(mm,rr);
 % I randomly choose the covariance matrix of the structurtal innovations
@@ -64,40 +64,87 @@ else
 end
 % Set the selec tion vector (mf) 
 MF = transpose(randperm(mm));
-mf = tmp(1:pp);
+mf = MF(1:pp);
 
-
+P = lyapunov_symm(T,R*Q*R',1.000001);
 
 if PeriodsWithMissingObservations==0
+    
+    % kalman_filter.m
+    if measurement_error_flag==0
+        HH = 0;
+    elseif measurement_error_flag==1
+        HH = diag(H);
+    elseif measurement_error_flag==2
+        HH = H;
+    end
     instant0 = clock;  
-    LIK1 = kalman_filter(T,R,Q,H,P,Y,start,mf,kalman_tol,riccati_tol);
+    LIK1 = kalman_filter(T,R,Q,HH,P,Y,start,mf,kalman_tol,riccati_tol);
     T1 = etime(clock, instant0);
     disp(['kalman_filter = ' num2str(T1)])
+    
+    % missing_observations_kalman_filter.m
+    if measurement_error_flag==0
+        HH = zeros(pp,pp);
+    elseif measurement_error_flag==1
+        HH = diag(H);
+    elseif measurement_error_flag==2
+        HH = H;
+    end
     instant0 = clock;  
-    LIK2 = missing_observations_kalman_filter(T,R,Q,H,P,Y,start,mf,kalman_tol,riccati_tol,data_index,number_of_observations,no_more_missing_observations);
+    LIK2 = missing_observations_kalman_filter(T,R,Q,HH,P,Y,start,mf,kalman_tol,riccati_tol,data_index,number_of_observations,no_more_missing_observations);
     T2 = etime(clock, instant0);
     disp(['missing_observations_kalman_filter = ' num2str(T2)])
+    
+    
+    % univariate_kalman_filter.m
+    if measurement_error_flag==0
+        HH = zeros(pp,pp);
+    elseif measurement_error_flag==1
+        HH = diag(H);
+    elseif measurement_error_flag==2
+        error('The univariate approach cannot handle correlated measurement errors')
+    end
     instant0 = clock;
-    LIK3 = univariate_kalman_filter(T,R,Q,H,P,Y,start,mf,kalman_tol,riccati_tol,data_index,number_of_observations,no_more_missing_observations);
+    LIK3 = univariate_kalman_filter(T,R,Q,HH,P,Y,start,mf,kalman_tol,riccati_tol,data_index,number_of_observations,no_more_missing_observations);
     T3 = etime(clock, instant0);
     disp(['univariate_kalman_filter = ' num2str(T2)])
-    if T1==T2
+    if abs(T1-T2)<1e-12
         disp('missing data version is Ok')
     else
+        disp('missing data version is wrong')
         LIK1-LIK2
     end
-    if T1==T3
+    if abs(T1-T3)<1e-15
         disp('univariate version is Ok')
     else
+        disp('univariate version is wrong')
         LIK1-LIK3
     end
 else
+    % missing_observations_kalman_filter.m
+    if measurement_error_flag==0
+        HH = zeros(pp,pp);
+    elseif measurement_error_flag==1
+        HH = diag(H);
+    elseif measurement_error_flag==2
+        HH = H;
+    end    
     instant0 = clock;  
-    LIK2 = missing_observations_kalman_filter(T,R,Q,H,P,Y,start,mf,kalman_tol,riccati_tol,data_index,number_of_observations,no_more_missing_observations);
+    LIK2 = missing_observations_kalman_filter(T,R,Q,HH,P,Y,start,mf,kalman_tol,riccati_tol,data_index,number_of_observations,no_more_missing_observations);
     T2 = etime(clock, instant0);
     disp(['missing_observations_kalman_filter = ' num2str(T2)])
+    
+    % univariate_kalman_filter.m
+    if measurement_error_flag==0
+        HH = zeros(pp,pp);
+    elseif measurement_error_flag==1
+        HH = diag(H);
+    elseif measurement_error_flag==2
+        error('The univariate approach cannot handle correlated measurement errors')
+    end
     instant0 = clock;
-    LIK3 = univariate_kalman_filter(T,R,Q,H,P,Y,start,mf,kalman_tol,riccati_tol,data_index,number_of_observations,no_more_missing_observations);
+    LIK3 = univariate_kalman_filter(T,R,Q,HH,P,Y,start,mf,kalman_tol,riccati_tol,data_index,number_of_observations,no_more_missing_observations);
     T3 = etime(clock, instant0);
     disp(['univariate_kalman_filter = ' num2str(T2)])
     if T1==T3
@@ -105,5 +152,5 @@ else
     else
         LIK1-LIK3
     end
-else
+end
     
