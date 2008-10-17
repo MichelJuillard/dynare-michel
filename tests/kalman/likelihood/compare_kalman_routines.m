@@ -109,13 +109,17 @@ if PeriodsWithMissingObservations==0
     LIK3 = univariate_kalman_filter(T,R,Q,HH,P,Y,start,mf,kalman_tol,riccati_tol,data_index,number_of_observations,no_more_missing_observations);
     T3 = etime(clock, instant0);
     disp(['univariate_kalman_filter = ' num2str(T2)])
-    if abs(T1-T2)<1e-12
+    
+    disp(' ')
+    disp(' ')
+    
+    if abs(LIK1-LIK2)<1e-12
         disp('missing data version is Ok')
     else
         disp('missing data version is wrong')
         LIK1-LIK2
     end
-    if abs(T1-T3)<1e-15
+    if abs(LIK1-LIK3)<1e-15
         disp('univariate version is Ok')
     else
         disp('univariate version is wrong')
@@ -147,7 +151,11 @@ else
     LIK3 = univariate_kalman_filter(T,R,Q,HH,P,Y,start,mf,kalman_tol,riccati_tol,data_index,number_of_observations,no_more_missing_observations);
     T3 = etime(clock, instant0);
     disp(['univariate_kalman_filter = ' num2str(T2)])
-    if T1==T3
+    
+    disp(' ')
+    disp(' ')
+    
+    if abs(LIK2-LIK3)<1e-12
         disp('univariate version is Ok')
     else
         LIK1-LIK3
