@@ -43,6 +43,8 @@ end
 % I randomly choose the mm eigenvalues of the transition matrix.
 TransitionEigenvalues  = rand(mm,1)*2-1;
 % I randomly choose the mm eigenvectors of the transition matrix
+tmp = rand(mm,mm*100);
+TransitionEigenvectors = tmp*tmp'/(mm*100);
 TransitionEigenvectors = rand(mm,mm);
 % I build the transition matrix
 T = TransitionEigenvectors*diag(TransitionEigenvalues)*inv(TransitionEigenvectors);
@@ -68,6 +70,7 @@ mf = MF(1:pp);
 
 P = lyapunov_symm(T,R*Q*R',1.000001);
 
+
 if PeriodsWithMissingObservations==0
     
     % kalman_filter.m
@@ -79,7 +82,7 @@ if PeriodsWithMissingObservations==0
         HH = H;
     end
     instant0 = clock;  
-    LIK1 = kalman_filter(T,R,Q,HH,P,Y,start,mf,kalman_tol,riccati_tol);
+    [LIK1,lik1] = kalman_filter(T,R,Q,HH,P,Y,start,mf,kalman_tol,riccati_tol);
     T1 = etime(clock, instant0);
     disp(['kalman_filter = ' num2str(T1)])
     
@@ -92,7 +95,7 @@ if PeriodsWithMissingObservations==0
         HH = H;
     end
     instant0 = clock;  
-    LIK2 = missing_observations_kalman_filter(T,R,Q,HH,P,Y,start,mf,kalman_tol,riccati_tol,data_index,number_of_observations,no_more_missing_observations);
+    [LIK2,lik2] = missing_observations_kalman_filter(T,R,Q,HH,P,Y,start,mf,kalman_tol,riccati_tol,data_index,number_of_observations,no_more_missing_observations);
     T2 = etime(clock, instant0);
     disp(['missing_observations_kalman_filter = ' num2str(T2)])
     
@@ -106,24 +109,25 @@ if PeriodsWithMissingObservations==0
         error('The univariate approach cannot handle correlated measurement errors')
     end
     instant0 = clock;
-    LIK3 = univariate_kalman_filter(T,R,Q,HH,P,Y,start,mf,kalman_tol,riccati_tol,data_index,number_of_observations,no_more_missing_observations);
+    [LIK3,lik3] = univariate_kalman_filter(T,R,Q,HH,P,Y,start,mf,kalman_tol,riccati_tol,data_index,number_of_observations,no_more_missing_observations);
     T3 = etime(clock, instant0);
-    disp(['univariate_kalman_filter = ' num2str(T2)])
+    disp(['univariate_kalman_filter = ' num2str(T3)])
     
     disp(' ')
     disp(' ')
     
-    if abs(LIK1-LIK2)<1e-12
+    if abs(LIK2/LIK1-1)<1e-9
         disp('missing data version is Ok')
     else
         disp('missing data version is wrong')
-        LIK1-LIK2
+        disp(['percentage dev. = ' num2str((LIK2/LIK1-1)*100)])
     end
-    if abs(LIK1-LIK3)<1e-15
+    if abs(LIK3/LIK1-1)<1e-9
         disp('univariate version is Ok')
     else
         disp('univariate version is wrong')
-        LIK1-LIK3
+        disp(['percentage dev. = ' num2str((LIK3/LIK1-1)*100)])
+        [lik1/lik1(end),lik3/lik3(end)]        
     end
 else
     % missing_observations_kalman_filter.m
