@@ -28,7 +28,6 @@
 #include "simulate.hh"
 #include "Interpreter.hh"
 #include "Mem_Mngr.hh"
-#include "linbcg.hh"
 
 
 

@@ -579,9 +579,11 @@ Interpreter::simulate_a_block(int size,int type, string file_name, string bin_ba
   int giter;
   int u_count_int;
   double *y_save;
+#ifdef LINBCG
   LinBCG linbcg;
   Mat_DP a;
   Vec_INT indx;
+#endif
   //SparseMatrix sparse_matrix;
 
   int nb_endo, u_count_init;
@@ -960,6 +962,7 @@ Interpreter::simulate_a_block(int size,int type, string file_name, string bin_ba
         begining=get_code_pointer;
         if(!Gaussian_Elimination)
           {
+#ifdef LINBCG
             it_=y_kmin;
             Per_u_=0;
             Per_y_=it_*y_size;
@@ -967,6 +970,7 @@ Interpreter::simulate_a_block(int size,int type, string file_name, string bin_ba
             compute_block_time();
             linbcg.Initialize(filename, res1, res2, max_res, slowc, ya, direction, iter);
             linbcg.Preconditioner(periods, y_kmin, y_kmax, size, IM_i, index_vara, index_equa, y_size, y, true, 0, a, indx);
+#endif
           }
         //GaussSeidel=false;
         giter=0;
@@ -1044,8 +1048,10 @@ Interpreter::simulate_a_block(int size,int type, string file_name, string bin_ba
                   }
                 else
                   {
+#ifdef LINBCG
                     linbcg.Initialize(filename, res1, res2, max_res, slowc, ya, direction, iter);
                     linbcg.SolveLinear(periods, y_kmin, y_kmax, size, IM_i, index_vara, index_equa,y_size,y, true, cvg, a, indx);
+#endif
                   }
                 iter++;
               }
@@ -1077,8 +1083,10 @@ Interpreter::simulate_a_block(int size,int type, string file_name, string bin_ba
               simulate_NG1(Block_Count, symbol_table_endo_nbr, it_, y_kmin, y_kmax, size, periods, true, cvg, iter);
             else
               {
+#ifdef LINBCG
                 linbcg.Initialize(filename, res1, res2, max_res, slowc, ya, direction, iter);
                 linbcg.SolveLinear(periods, y_kmin, y_kmax, size, IM_i, index_vara, index_equa, y_size, y, true, cvg, a, indx);
+#endif
               }
           }
 #ifdef  DEBUGC
