@@ -314,29 +314,7 @@ if options_.bvar_dsge
     end
 end
 
-%% Build cell of indices for observed variables (used to control for missing observations).
-[variable_index,observation_index] = find(~isnan(data));
-
-data_index = cell(1,gend);
-missing_observations_counter = NaN(gend,1);
-for obs=1:gend
-    idx = find(observation_index==obs);
-    tmp = variable_index(idx);
-    missing_observations_counter(obs,1) = n_varobs-length(tmp);
-    data_index(obs) = { tmp(:) };
-end
-missing_observations_counter = cumsum(missing_observations_counter);
-
-% The number of observations is different from gend*n_varobs in case of missing observations.
-number_of_observations = length(variable_index);
-
-% 
-if ~missing_observations_counter
-    no_more_missing_observations = 0;
-else
-    tmp = find(missing_observations_counter>=(gend*n_varobs-number_of_observations))
-    no_more_missing_observations = tmp(1);
-end
+[data_index,number_of_observations,no_more_missing_observations] = describe_missing_data(data,gend,n_varobs);
 
 initial_estimation_checks(xparam1,gend,data,data_index,number_of_observations,no_more_missing_observations);
 
@@ -503,8 +481,8 @@ if options_.mode_compute > 0 & options_.posterior_mode_estimation
               if ~options_.bvar_dsge
                   [xparam1,PostVar,Scale,PostMean] = ...
                       gmhmaxlik('DsgeLikelihood',xparam1,bounds,...
-                                options_.Opt6Numb,Scale,flag,PostMean,PostVar,gend,data);
-                  fval = DsgeLikelihood(xparam1,gend,data);
+                                options_.Opt6Numb,Scale,flag,PostMean,PostVar,gend,data,data_index,number_of_observations,no_more_missing_observations);
+                  fval = DsgeLikelihood(xparam1,gend,data,data_index,number_of_observations,no_more_missing_observations);
               else
                   [xparam1,PostVar,Scale,PostMean] = ...
                       gmhmaxlik('DsgeVarLikelihood',xparam1,bounds,...
@@ -520,7 +498,7 @@ if options_.mode_compute > 0 & options_.posterior_mode_estimation
           end
           bayestopt_.jscale = ones(length(xparam1),1)*Scale;%??!
       end
-      hh = inv(PostVar);
+      hh = inv(PostVar);    
   end
   if options_.mode_compute ~= 5
     if options_.mode_compute ~= 6
