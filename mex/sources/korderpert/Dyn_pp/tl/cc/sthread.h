@@ -1,5 +1,4 @@
 /*1:*/
-#line 77 "./sthread.hweb"
 
 #ifndef STHREAD_H
 #define STHREAD_H
@@ -17,7 +16,6 @@ using namespace std;
 
 class Empty{};
 /*2:*/
-#line 117 "./sthread.hweb"
 
 template<bool condition,class Then,class Else> 
 struct IF{
@@ -32,13 +30,11 @@ typedef Else RET;
 
 
 /*:2*/
-#line 93 "./sthread.hweb"
 ;
 enum{posix,empty};
 template<int> class thread_traits;
 template<int> class detach_thread;
 /*3:*/
-#line 134 "./sthread.hweb"
 
 template<int thread_impl> 
 class thread{
@@ -61,10 +57,8 @@ void exit()
 };
 
 /*:3*/
-#line 97 "./sthread.hweb"
 ;
 /*4:*/
-#line 160 "./sthread.hweb"
 
 template<int thread_impl> 
 class thread_group{
@@ -77,7 +71,6 @@ static int max_parallel_threads;
 void insert(_Ctype*c)
 {tlist.push_back(c);}
 /*5:*/
-#line 180 "./sthread.hweb"
 
 ~thread_group()
 {
@@ -88,10 +81,8 @@ tlist.pop_front();
 }
 
 /*:5*/
-#line 171 "./sthread.hweb"
 ;
 /*7:*/
-#line 216 "./sthread.hweb"
 
 void run()
 {
@@ -112,11 +103,9 @@ run_portion(pfirst,rem);
 
 
 /*:7*/
-#line 172 "./sthread.hweb"
 ;
 private:
 /*6:*/
-#line 192 "./sthread.hweb"
 
 iterator run_portion(iterator start,int n)
 {
@@ -134,15 +123,12 @@ return ret;
 
 
 /*:6*/
-#line 174 "./sthread.hweb"
 ;
 };
 
 /*:4*/
-#line 98 "./sthread.hweb"
 ;
 /*8:*/
-#line 238 "./sthread.hweb"
 
 template<int thread_impl> 
 struct thread_traits{
@@ -156,10 +142,8 @@ static void join(_Ctype*c);
 };
 
 /*:8*/
-#line 99 "./sthread.hweb"
 ;
 /*9:*/
-#line 251 "./sthread.hweb"
 
 struct ltmmkey;
 typedef pair<const void*,const char*> mmkey;
@@ -174,10 +158,8 @@ static void unlock(_Tmutex&m);
 };
 
 /*:9*/
-#line 100 "./sthread.hweb"
 ;
 /*10:*/
-#line 283 "./sthread.hweb"
 
 struct ltmmkey{
 bool operator()(const mmkey&k1,const mmkey&k2)const
@@ -204,7 +186,6 @@ void insert(const void*c,const char*id,const _Tmutex&m)
 bool check(const void*c,const char*id)const
 {return _Tparent::find(mmkey(c,id))!=_Tparent::end();}
 /*11:*/
-#line 318 "./sthread.hweb"
 
 mmval*get(const void*c,const char*id)
 {
@@ -215,10 +196,8 @@ return&((*it).second);
 }
 
 /*:11*/
-#line 308 "./sthread.hweb"
 ;
 /*12:*/
-#line 331 "./sthread.hweb"
 
 void remove(const void*c,const char*id)
 {
@@ -228,7 +207,6 @@ erase(it);
 }
 
 /*:12*/
-#line 309 "./sthread.hweb"
 ;
 void lock_map()
 {_Mtraits::lock(m);}
@@ -238,10 +216,8 @@ void unlock_map()
 };
 
 /*:10*/
-#line 101 "./sthread.hweb"
 ;
 /*13:*/
-#line 346 "./sthread.hweb"
 
 template<int thread_impl> 
 class synchro{
@@ -261,7 +237,6 @@ synchro(const void*c,const char*id,mutex_map_t&mmap)
 {unlock();}
 private:
 /*14:*/
-#line 373 "./sthread.hweb"
 
 void lock(){
 mutmap.lock_map();
@@ -276,10 +251,8 @@ _Mtraits::lock(mutmap.get(caller,iden)->first);
 }
 
 /*:14*/
-#line 364 "./sthread.hweb"
 ;
 /*15:*/
-#line 390 "./sthread.hweb"
 
 void unlock(){
 mutmap.lock_map();
@@ -293,15 +266,12 @@ mutmap.unlock_map();
 }
 
 /*:15*/
-#line 365 "./sthread.hweb"
 ;
 };
 
 /*:13*/
-#line 102 "./sthread.hweb"
 ;
 /*16:*/
-#line 405 "./sthread.hweb"
 
 template<int thread_impl> 
 struct cond_traits{
@@ -314,10 +284,8 @@ static void destroy(_Tcond&cond);
 };
 
 /*:16*/
-#line 103 "./sthread.hweb"
 ;
 /*17:*/
-#line 425 "./sthread.hweb"
 
 template<int thread_impl> 
 class condition_counter{
@@ -329,7 +297,6 @@ _Tcond cond;
 bool changed;
 public:
 /*18:*/
-#line 445 "./sthread.hweb"
 
 condition_counter()
 :counter(0),changed(true)
@@ -339,10 +306,8 @@ cond_traits<thread_impl> ::init(cond);
 }
 
 /*:18*/
-#line 435 "./sthread.hweb"
 ;
 /*19:*/
-#line 456 "./sthread.hweb"
 
 ~condition_counter()
 {
@@ -350,10 +315,8 @@ cond_traits<thread_impl> ::destroy(cond);
 }
 
 /*:19*/
-#line 436 "./sthread.hweb"
 ;
 /*20:*/
-#line 465 "./sthread.hweb"
 
 void increase()
 {
@@ -365,10 +328,8 @@ mutex_traits<thread_impl> ::unlock(mut);
 }
 
 /*:20*/
-#line 437 "./sthread.hweb"
 ;
 /*21:*/
-#line 476 "./sthread.hweb"
 
 void decrease()
 {
@@ -380,10 +341,8 @@ mutex_traits<thread_impl> ::unlock(mut);
 }
 
 /*:21*/
-#line 438 "./sthread.hweb"
 ;
 /*22:*/
-#line 490 "./sthread.hweb"
 
 int waitForChange()
 {
@@ -399,15 +358,12 @@ return res;
 
 
 /*:22*/
-#line 439 "./sthread.hweb"
 ;
 };
 
 /*:17*/
-#line 104 "./sthread.hweb"
 ;
 /*23:*/
-#line 509 "./sthread.hweb"
 
 template<int thread_impl> 
 class detach_thread:public thread<thread_impl> {
@@ -421,10 +377,8 @@ void run()
 };
 
 /*:23*/
-#line 105 "./sthread.hweb"
 ;
 /*24:*/
-#line 525 "./sthread.hweb"
 
 template<int thread_impl> 
 class detach_thread_group{
@@ -437,7 +391,6 @@ condition_counter<thread_impl> counter;
 public:
 static int max_parallel_threads;
 /*25:*/
-#line 542 "./sthread.hweb"
 
 void insert(_Ctype*c)
 {
@@ -446,10 +399,8 @@ c->installCounter(&counter);
 }
 
 /*:25*/
-#line 536 "./sthread.hweb"
 ;
 /*26:*/
-#line 550 "./sthread.hweb"
 
 ~detach_thread_group()
 {
@@ -460,10 +411,8 @@ tlist.pop_front();
 }
 
 /*:26*/
-#line 537 "./sthread.hweb"
 ;
 /*27:*/
-#line 566 "./sthread.hweb"
 
 void run()
 {
@@ -481,16 +430,13 @@ while(counter.waitForChange()> 0){}
 
 
 /*:27*/
-#line 538 "./sthread.hweb"
 ;
 };
 
 /*:24*/
-#line 106 "./sthread.hweb"
 ;
 #ifdef POSIX_THREADS
 /*28:*/
-#line 586 "./sthread.hweb"
 
 typedef detach_thread<posix> PosixThread;
 typedef detach_thread_group<posix> PosixThreadGroup;
@@ -505,11 +451,9 @@ PosixSynchro(const void*c,const char*id);
 #define SYNCHRO sthread::PosixSynchro
 
 /*:28*/
-#line 108 "./sthread.hweb"
 ;
 #else
 /*29:*/
-#line 604 "./sthread.hweb"
 
 typedef thread<empty> NoThread;
 typedef thread_group<empty> NoThreadGroup;
@@ -525,7 +469,6 @@ NoSynchro(const void*c,const char*id){}
 #define SYNCHRO sthread::NoSynchro
 
 /*:29*/
-#line 110 "./sthread.hweb"
 ;
 #endif
 };

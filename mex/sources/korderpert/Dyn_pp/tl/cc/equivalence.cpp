@@ -1,5 +1,4 @@
 /*1:*/
-#line 6 "./equivalence.cweb"
 
 #include "equivalence.h"
 #include "permutation.h"
@@ -8,159 +7,139 @@
 #include <string.h> 
 
 /*2:*/
-#line 19 "./equivalence.cweb"
 
 /*6:*/
-#line 57 "./equivalence.cweb"
 
 int OrdSequence::operator[](int i)const
 {
-TL_RAISE_IF((i<0||i>=length()),
-"Index out of range in OrdSequence::operator[]");
-return data[i];
+	TL_RAISE_IF((i<0||i>=length()),
+		"Index out of range in OrdSequence::operator[]");
+	return data[i];
 }
 
 /*:6*/
-#line 20 "./equivalence.cweb"
 ;
 /*7:*/
-#line 69 "./equivalence.cweb"
 
 bool OrdSequence::operator<(const OrdSequence&s)const
 {
-double ta= average();
-double sa= s.average();
-return(ta<sa||((ta==sa)&&(operator[](0)> s[0])));
+	double ta= average();
+	double sa= s.average();
+	return(ta<sa||((ta==sa)&&(operator[](0)> s[0])));
 }
 
 /*:7*/
-#line 21 "./equivalence.cweb"
 ;
 /*8:*/
-#line 78 "./equivalence.cweb"
 
 bool OrdSequence::operator==(const OrdSequence&s)const
 {
-if(length()!=s.length())
-return false;
-
-int i= 0;
-while(i<length()&&operator[](i)==s[i])
-i++;
-
-return(i==length());
+	if(length()!=s.length())
+		return false;
+	
+	int i= 0;
+	while(i<length()&&operator[](i)==s[i])
+		i++;
+	
+	return(i==length());
 }
 
 
 /*:8*/
-#line 22 "./equivalence.cweb"
 ;
 /*9:*/
-#line 96 "./equivalence.cweb"
 
 void OrdSequence::add(int i)
 {
-vector<int> ::iterator vit= data.begin();
-while(vit!=data.end()&&*vit<i)
-++vit;
-if(vit!=data.end()&&*vit==i)
-return;
-data.insert(vit,i);
+	vector<int> ::iterator vit= data.begin();
+	while(vit!=data.end()&&*vit<i)
+		++vit;
+	if(vit!=data.end()&&*vit==i)
+		return;
+	data.insert(vit,i);
 }
 
 void OrdSequence::add(const OrdSequence&s)
 {
-vector<int> ::const_iterator vit= s.data.begin();
-while(vit!=s.data.end()){
-add(*vit);
-++vit;
-}
+	vector<int> ::const_iterator vit= s.data.begin();
+	while(vit!=s.data.end()){
+		add(*vit);
+		++vit;
+	}
 }
 
 /*:9*/
-#line 23 "./equivalence.cweb"
 ;
 /*10:*/
-#line 117 "./equivalence.cweb"
 
 bool OrdSequence::has(int i)const
 {
-vector<int> ::const_iterator vit= data.begin();
-while(vit!=data.end()){
-if(*vit==i)
-return true;
-++vit;
-}
-return false;
+	vector<int> ::const_iterator vit= data.begin();
+	while(vit!=data.end()){
+		if(*vit==i)
+			return true;
+		++vit;
+	}
+	return false;
 }
 
 /*:10*/
-#line 24 "./equivalence.cweb"
 ;
 /*11:*/
-#line 130 "./equivalence.cweb"
 
 double OrdSequence::average()const
 {
-double res= 0;
-for(unsigned int i= 0;i<data.size();i++)
-res+= data[i];
-TL_RAISE_IF(data.size()==0,
-"Attempt to take average of empty class in OrdSequence::average");
-return res/data.size();
+	double res= 0;
+	for(unsigned int i= 0;i<data.size();i++)
+		res+= data[i];
+	TL_RAISE_IF(data.size()==0,
+		"Attempt to take average of empty class in OrdSequence::average");
+	return res/data.size();
 }
 
 /*:11*/
-#line 25 "./equivalence.cweb"
 ;
 /*12:*/
-#line 142 "./equivalence.cweb"
 
 void OrdSequence::print(const char*prefix)const
 {
-printf("%s",prefix);
-for(unsigned int i= 0;i<data.size();i++)
-printf("%d ",data[i]);
-printf("\n");
+	printf("%s",prefix);
+	for(unsigned int i= 0;i<data.size();i++)
+		printf("%d ",data[i]);
+	printf("\n");
 }
 
 /*:12*/
-#line 26 "./equivalence.cweb"
 ;
 
 /*:2*/
-#line 13 "./equivalence.cweb"
 ;
 /*3:*/
-#line 29 "./equivalence.cweb"
 
 /*13:*/
-#line 152 "./equivalence.cweb"
 
 Equivalence::Equivalence(int num)
 :n(num)
 {
-for(int i= 0;i<num;i++){
-OrdSequence s;
-s.add(i);
-classes.push_back(s);
-}
+	for(int i= 0;i<num;i++){
+		OrdSequence s;
+		s.add(i);
+		classes.push_back(s);
+	}
 }
 
 Equivalence::Equivalence(int num,const char*dummy)
 :n(num)
 {
-OrdSequence s;
-for(int i= 0;i<num;i++)
-s.add(i);
-classes.push_back(s);
+	OrdSequence s;
+	for(int i= 0;i<num;i++)
+		s.add(i);
+	classes.push_back(s);
 }
 
 /*:13*/
-#line 30 "./equivalence.cweb"
 ;
 /*14:*/
-#line 173 "./equivalence.cweb"
 
 Equivalence::Equivalence(const Equivalence&e)
 :n(e.n),
@@ -172,342 +151,304 @@ Equivalence::Equivalence(const Equivalence&e,int i1,int i2)
 :n(e.n),
 classes(e.classes)
 {
-seqit s1= find(i1);
-seqit s2= find(i2);
-if(s1!=s2){
-OrdSequence ns(*s1);
-ns.add(*s2);
-classes.erase(s1);
-classes.erase(s2);
-insert(ns);
-}
+	seqit s1= find(i1);
+	seqit s2= find(i2);
+	if(s1!=s2){
+		OrdSequence ns(*s1);
+		ns.add(*s2);
+		classes.erase(s1);
+		classes.erase(s2);
+		insert(ns);
+	}
 }
 
 /*:14*/
-#line 31 "./equivalence.cweb"
 ;
 /*17:*/
-#line 220 "./equivalence.cweb"
 
 Equivalence::const_seqit Equivalence::findHaving(int i)const
 {
-const_seqit si= classes.begin();
-while(si!=classes.end()){
-if((*si).has(i))
-return si;
-++si;
-}
-TL_RAISE_IF(si==classes.end(),
-"Couldn't find equivalence class in Equivalence::findHaving");
-return si;
+	const_seqit si= classes.begin();
+	while(si!=classes.end()){
+		if((*si).has(i))
+			return si;
+		++si;
+	}
+	TL_RAISE_IF(si==classes.end(),
+		"Couldn't find equivalence class in Equivalence::findHaving");
+	return si;
 }
 
 Equivalence::seqit Equivalence::findHaving(int i)
 {
-seqit si= classes.begin();
-while(si!=classes.end()){
-if((*si).has(i))
-return si;
-++si;
-}
-TL_RAISE_IF(si==classes.end(),
-"Couldn't find equivalence class in Equivalence::findHaving");
-return si;
+	seqit si= classes.begin();
+	while(si!=classes.end()){
+		if((*si).has(i))
+			return si;
+		++si;
+	}
+	TL_RAISE_IF(si==classes.end(),
+		"Couldn't find equivalence class in Equivalence::findHaving");
+	return si;
 }
 
 
 /*:17*/
-#line 32 "./equivalence.cweb"
 ;
 /*18:*/
-#line 249 "./equivalence.cweb"
 
 Equivalence::const_seqit Equivalence::find(int j)const
 {
-const_seqit si= classes.begin();
-int i= 0;
-while(si!=classes.end()&&i<j){
-++si;
-i++;
-}
-TL_RAISE_IF(si==classes.end(),
-"Couldn't find equivalence class in Equivalence::find");
-return si;
+	const_seqit si= classes.begin();
+	int i= 0;
+	while(si!=classes.end()&&i<j){
+		++si;
+		i++;
+	}
+	TL_RAISE_IF(si==classes.end(),
+		"Couldn't find equivalence class in Equivalence::find");
+	return si;
 }
 
 Equivalence::seqit Equivalence::find(int j)
 {
-seqit si= classes.begin();
-int i= 0;
-while(si!=classes.end()&&i<j){
-++si;
-i++;
-}
-TL_RAISE_IF(si==classes.end(),
-"Couldn't find equivalence class in Equivalence::find");
-return si;
+	seqit si= classes.begin();
+	int i= 0;
+	while(si!=classes.end()&&i<j){
+		++si;
+		i++;
+	}
+	TL_RAISE_IF(si==classes.end(),
+		"Couldn't find equivalence class in Equivalence::find");
+	return si;
 }
 
 
 /*:18*/
-#line 33 "./equivalence.cweb"
 ;
 /*19:*/
-#line 278 "./equivalence.cweb"
 
 void Equivalence::insert(const OrdSequence&s)
 {
-seqit si= classes.begin();
-while(si!=classes.end()&&*si<s)
-++si;
-classes.insert(si,s);
+	seqit si= classes.begin();
+	while(si!=classes.end()&&*si<s)
+		++si;
+	classes.insert(si,s);
 }
 
 /*:19*/
-#line 34 "./equivalence.cweb"
 ;
 /*15:*/
-#line 196 "./equivalence.cweb"
 
 const Equivalence&Equivalence::operator= (const Equivalence&e)
 {
-classes.clear();
-n= e.n;
-classes= e.classes;
-return*this;
+	classes.clear();
+	n= e.n;
+	classes= e.classes;
+	return*this;
 }
 
 /*:15*/
-#line 35 "./equivalence.cweb"
 ;
 /*16:*/
-#line 206 "./equivalence.cweb"
 
 bool Equivalence::operator==(const Equivalence&e)const
 {
-if(!std::operator==(classes,e.classes))
-return false;
-
-if(n!=e.n)
-return false;
-
-return true;
+	if(!std::operator==(classes,e.classes))
+		return false;
+	
+	if(n!=e.n)
+		return false;
+	
+	return true;
 }
 
 
 /*:16*/
-#line 36 "./equivalence.cweb"
 ;
 /*20:*/
-#line 293 "./equivalence.cweb"
 
 void Equivalence::trace(IntSequence&out,int num)const
 {
-int i= 0;
-int nc= 0;
-for(const_seqit it= begin();it!=end()&&nc<num;++it,++nc)
-for(int j= 0;j<(*it).length();j++,i++){
-TL_RAISE_IF(i>=out.size(),
-"Wrong size of output sequence in Equivalence::trace");
-out[i]= (*it)[j];
-}
+	int i= 0;
+	int nc= 0;
+	for(const_seqit it= begin();it!=end()&&nc<num;++it,++nc)
+		for(int j= 0;j<(*it).length();j++,i++){
+			TL_RAISE_IF(i>=out.size(),
+				"Wrong size of output sequence in Equivalence::trace");
+			out[i]= (*it)[j];
+		}
 }
 
 /*:20*/
-#line 37 "./equivalence.cweb"
 ;
 /*21:*/
-#line 307 "./equivalence.cweb"
 
 void Equivalence::trace(IntSequence&out,const Permutation&per)const
 {
-TL_RAISE_IF(out.size()!=n,
-"Wrong size of output sequence in Equivalence::trace");
-TL_RAISE_IF(per.size()!=numClasses(),
-"Wrong permutation for permuted Equivalence::trace");
-int i= 0;
-for(int iclass= 0;iclass<numClasses();iclass++){
-const_seqit itper= find(per.getMap()[iclass]);
-for(int j= 0;j<(*itper).length();j++,i++)
-out[i]= (*itper)[j];
-}
+	TL_RAISE_IF(out.size()!=n,
+		"Wrong size of output sequence in Equivalence::trace");
+	TL_RAISE_IF(per.size()!=numClasses(),
+		"Wrong permutation for permuted Equivalence::trace");
+	int i= 0;
+	for(int iclass= 0;iclass<numClasses();iclass++){
+		const_seqit itper= find(per.getMap()[iclass]);
+		for(int j= 0;j<(*itper).length();j++,i++)
+			out[i]= (*itper)[j];
+	}
 }
 
 
 /*:21*/
-#line 38 "./equivalence.cweb"
 ;
 /*22:*/
-#line 324 "./equivalence.cweb"
 
 void Equivalence::print(const char*prefix)const
 {
-int i= 0;
-for(const_seqit it= classes.begin();
-it!=classes.end();
-++it,i++){
-printf("%sclass %d: ",prefix,i);
-(*it).print("");
-}
+	int i= 0;
+	for(const_seqit it= classes.begin();
+	it!=classes.end();
+	++it,i++){
+		printf("%sclass %d: ",prefix,i);
+		(*it).print("");
+	}
 }
 
 /*:22*/
-#line 39 "./equivalence.cweb"
 ;
 
 /*:3*/
-#line 14 "./equivalence.cweb"
 ;
 /*4:*/
-#line 42 "./equivalence.cweb"
 
 /*23:*/
-#line 357 "./equivalence.cweb"
 
 EquivalenceSet::EquivalenceSet(int num)
 :n(num),
 equis()
 {
-list<Equivalence> added;
-Equivalence first(n);
-equis.push_back(first);
-addParents(first,added);
-while(!added.empty()){
-addParents(added.front(),added);
-added.pop_front();
-}
-if(n> 1){
-Equivalence last(n,"");
-equis.push_back(last);
-}
+	list<Equivalence> added;
+	Equivalence first(n);
+	equis.push_back(first);
+	addParents(first,added);
+	while(!added.empty()){
+		addParents(added.front(),added);
+		added.pop_front();
+	}
+	if(n> 1){
+		Equivalence last(n,"");
+		equis.push_back(last);
+	}
 }
 
 /*:23*/
-#line 43 "./equivalence.cweb"
 ;
 /*24:*/
-#line 386 "./equivalence.cweb"
 
 bool EquivalenceSet::has(const Equivalence&e)const
 {
-list<Equivalence> ::const_reverse_iterator rit= equis.rbegin();
-while(rit!=equis.rend()&&*rit!=e)
-++rit;
-if(rit!=equis.rend())
-return true;
-return false;
+	list<Equivalence> ::const_reverse_iterator rit= equis.rbegin();
+	while(rit!=equis.rend()&&*rit!=e)
+		++rit;
+	if(rit!=equis.rend())
+		return true;
+	return false;
 }
 
 /*:24*/
-#line 44 "./equivalence.cweb"
 ;
 /*25:*/
-#line 404 "./equivalence.cweb"
 
 void EquivalenceSet::addParents(const Equivalence&e,
-list<Equivalence> &added)
+								list<Equivalence> &added)
 {
-if(e.numClasses()==2||e.numClasses()==1)
-return;
-
-for(int i1= 0;i1<e.numClasses();i1++)
-for(int i2= i1+1;i2<e.numClasses();i2++){
-Equivalence ns(e,i1,i2);
-if(!has(ns)){
-added.push_back(ns);
-equis.push_back(ns);
-}
-}
+	if(e.numClasses()==2||e.numClasses()==1)
+		return;
+	
+	for(int i1= 0;i1<e.numClasses();i1++)
+		for(int i2= i1+1;i2<e.numClasses();i2++){
+			Equivalence ns(e,i1,i2);
+			if(!has(ns)){
+				added.push_back(ns);
+				equis.push_back(ns);
+			}
+		}
 }
 
 /*:25*/
-#line 45 "./equivalence.cweb"
 ;
 /*26:*/
-#line 422 "./equivalence.cweb"
 
 void EquivalenceSet::print(const char*prefix)const
 {
-char tmp[100];
-strcpy(tmp,prefix);
-strcat(tmp,"    ");
-int i= 0;
-for(list<Equivalence> ::const_iterator it= equis.begin();
-it!=equis.end();
-++it,i++){
-printf("%sequivalence %d:(classes %d)\n",prefix,i,(*it).numClasses());
-(*it).print(tmp);
-}
+	char tmp[100];
+	strcpy(tmp,prefix);
+	strcat(tmp,"    ");
+	int i= 0;
+	for(list<Equivalence> ::const_iterator it= equis.begin();
+	it!=equis.end();
+	++it,i++){
+		printf("%sequivalence %d:(classes %d)\n",prefix,i,(*it).numClasses());
+		(*it).print(tmp);
+	}
 }
 
 /*:26*/
-#line 46 "./equivalence.cweb"
 ;
 
 /*:4*/
-#line 15 "./equivalence.cweb"
 ;
 /*5:*/
-#line 49 "./equivalence.cweb"
 
 /*27:*/
-#line 438 "./equivalence.cweb"
 
 EquivalenceBundle::EquivalenceBundle(int nmax)
 {
-nmax= max(nmax,1);
-generateUpTo(nmax);
+	nmax= max(nmax,1);
+	generateUpTo(nmax);
 }
 
 /*:27*/
-#line 50 "./equivalence.cweb"
 ;
 /*28:*/
-#line 446 "./equivalence.cweb"
 
 EquivalenceBundle::~EquivalenceBundle()
 {
-for(unsigned int i= 0;i<bundle.size();i++)
-delete bundle[i];
+	for(unsigned int i= 0;i<bundle.size();i++)
+		delete bundle[i];
 }
 
 /*:28*/
-#line 51 "./equivalence.cweb"
 ;
 /*29:*/
-#line 454 "./equivalence.cweb"
 
 const EquivalenceSet&EquivalenceBundle::get(int n)const
 {
-if(n> (int)(bundle.size())||n<1){
-TL_RAISE("Equivalence set not found in EquivalenceBundle::get");
-return*(bundle[0]);
-}else{
-return*(bundle[n-1]);
-}
+	if(n> (int)(bundle.size())||n<1){
+		TL_RAISE("Equivalence set not found in EquivalenceBundle::get");
+		return*(bundle[0]);
+	}else{
+		return*(bundle[n-1]);
+	}
 }
 
 /*:29*/
-#line 52 "./equivalence.cweb"
 ;
 /*30:*/
-#line 468 "./equivalence.cweb"
 
 void EquivalenceBundle::generateUpTo(int nmax)
 {
-int curmax= bundle.size();
-for(int i= curmax+1;i<=nmax;i++)
-bundle.push_back(new EquivalenceSet(i));
+	int curmax= bundle.size();
+	for(int i= curmax+1;i<=nmax;i++)
+		bundle.push_back(new EquivalenceSet(i));
 }
 
 
 /*:30*/
-#line 53 "./equivalence.cweb"
 ;
 
 
 /*:5*/
-#line 16 "./equivalence.cweb"
 ;
 
 /*:1*/

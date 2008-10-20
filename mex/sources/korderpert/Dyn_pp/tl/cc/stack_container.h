@@ -1,5 +1,4 @@
 /*1:*/
-#line 80 "./stack_container.hweb"
 
 #ifndef STACK_CONTAINER_H
 #define STACK_CONTAINER_H
@@ -13,7 +12,6 @@
 #include "sthread.h"
 
 /*2:*/
-#line 135 "./stack_container.hweb"
 
 template<class _Ttype> 
 class StackContainerInterface{
@@ -47,10 +45,8 @@ int getAllSize()const
 };
 
 /*:2*/
-#line 92 "./stack_container.hweb"
 ;
 /*3:*/
-#line 171 "./stack_container.hweb"
 
 template<class _Ttype> 
 class StackContainer:virtual public StackContainerInterface<_Ttype> {
@@ -84,7 +80,6 @@ virtual itype getType(int i,const Symmetry&s)const= 0;
 int numStacks()const
 {return stack_sizes.size();}
 /*4:*/
-#line 213 "./stack_container.hweb"
 
 bool isZero(int i,const Symmetry&s)const
 {
@@ -95,10 +90,8 @@ return(getType(i,s)==_Stype::zero||
 }
 
 /*:4*/
-#line 203 "./stack_container.hweb"
 ;
 /*5:*/
-#line 223 "./stack_container.hweb"
 
 const _Ttype*getMatrix(int i,const Symmetry&s)const
 {
@@ -108,10 +101,8 @@ return conts[i]->get(s);
 }
 
 /*:5*/
-#line 204 "./stack_container.hweb"
 ;
 /*6:*/
-#line 232 "./stack_container.hweb"
 
 int getLengthOfMatrixStacks(const Symmetry&s)const
 {
@@ -124,10 +115,8 @@ return res;
 
 
 /*:6*/
-#line 205 "./stack_container.hweb"
 ;
 /*7:*/
-#line 244 "./stack_container.hweb"
 
 int getUnitPos(const Symmetry&s)const
 {
@@ -141,10 +130,8 @@ return i;
 
 
 /*:7*/
-#line 206 "./stack_container.hweb"
 ;
 /*8:*/
-#line 257 "./stack_container.hweb"
 
 Vector*createPackedColumn(const Symmetry&s,
 const IntSequence&coor,int&iu)const
@@ -176,11 +163,9 @@ return res;
 }
 
 /*:8*/
-#line 207 "./stack_container.hweb"
 ;
 protected:
 /*9:*/
-#line 288 "./stack_container.hweb"
 
 void calculateOffsets()
 {
@@ -190,15 +175,12 @@ stack_offsets[i]= stack_offsets[i-1]+stack_sizes[i-1];
 }
 
 /*:9*/
-#line 209 "./stack_container.hweb"
 ;
 };
 
 /*:3*/
-#line 93 "./stack_container.hweb"
 ;
 /*10:*/
-#line 297 "./stack_container.hweb"
 
 class WorkerFoldMAADense;
 class WorkerFoldMAASparse1;
@@ -229,10 +211,8 @@ FGSTensor&out,const void*ad)const;
 
 
 /*:10*/
-#line 94 "./stack_container.hweb"
 ;
 /*11:*/
-#line 327 "./stack_container.hweb"
 
 class WorkerUnfoldMAADense;
 class WorkerUnfoldMAASparse1;
@@ -256,10 +236,8 @@ UGSTensor&out,const void*ad)const;
 };
 
 /*:11*/
-#line 95 "./stack_container.hweb"
 ;
 /*12:*/
-#line 360 "./stack_container.hweb"
 
 template<class _Ttype> 
 class ZContainer:public StackContainer<_Ttype> {
@@ -280,7 +258,6 @@ _Tparent::calculateOffsets();
 }
 
 /*13:*/
-#line 385 "./stack_container.hweb"
 
 itype getType(int i,const Symmetry&s)const
 {
@@ -307,15 +284,12 @@ return _Stype::zero;
 }
 
 /*:13*/
-#line 379 "./stack_container.hweb"
 ;
 };
 
 /*:12*/
-#line 96 "./stack_container.hweb"
 ;
 /*14:*/
-#line 411 "./stack_container.hweb"
 
 class FoldedZContainer:public ZContainer<FGSTensor> ,
 public FoldedStackContainer{
@@ -327,10 +301,8 @@ int ny,int nu)
 };
 
 /*:14*/
-#line 97 "./stack_container.hweb"
 ;
 /*15:*/
-#line 422 "./stack_container.hweb"
 
 class UnfoldedZContainer:public ZContainer<UGSTensor> ,
 public UnfoldedStackContainer{
@@ -342,10 +314,8 @@ int ny,int nu)
 };
 
 /*:15*/
-#line 98 "./stack_container.hweb"
 ;
 /*16:*/
-#line 442 "./stack_container.hweb"
 
 template<class _Ttype> 
 class GContainer:public StackContainer<_Ttype> {
@@ -364,7 +334,6 @@ _Tparent::calculateOffsets();
 }
 
 /*17:*/
-#line 467 "./stack_container.hweb"
 
 itype getType(int i,const Symmetry&s)const
 {
@@ -392,15 +361,12 @@ return _Stype::zero;
 
 
 /*:17*/
-#line 459 "./stack_container.hweb"
 ;
 };
 
 /*:16*/
-#line 99 "./stack_container.hweb"
 ;
 /*18:*/
-#line 494 "./stack_container.hweb"
 
 class FoldedGContainer:public GContainer<FGSTensor> ,
 public FoldedStackContainer{
@@ -411,10 +377,8 @@ FoldedGContainer(const _Ctype*gs,int ngs,int nu)
 };
 
 /*:18*/
-#line 100 "./stack_container.hweb"
 ;
 /*19:*/
-#line 504 "./stack_container.hweb"
 
 class UnfoldedGContainer:public GContainer<UGSTensor> ,
 public UnfoldedStackContainer{
@@ -426,10 +390,8 @@ UnfoldedGContainer(const _Ctype*gs,int ngs,int nu)
 
 
 /*:19*/
-#line 101 "./stack_container.hweb"
 ;
 /*20:*/
-#line 520 "./stack_container.hweb"
 
 template<class _Ttype> 
 class StackProduct{
@@ -455,7 +417,6 @@ int getAllSize()const
 const Symmetry&getProdSym(int ip)const
 {return syms[ip];}
 /*21:*/
-#line 553 "./stack_container.hweb"
 
 bool isZero(const IntSequence&istacks)const
 {
@@ -470,10 +431,8 @@ return res;
 }
 
 /*:21*/
-#line 544 "./stack_container.hweb"
 ;
 /*22:*/
-#line 567 "./stack_container.hweb"
 
 itype getType(int is,int ip)const
 {
@@ -485,10 +444,8 @@ return stack_cont.getType(is,syms[ip]);
 }
 
 /*:22*/
-#line 545 "./stack_container.hweb"
 ;
 /*23:*/
-#line 578 "./stack_container.hweb"
 
 const _Ttype*getMatrix(int is,int ip)const
 {
@@ -496,10 +453,8 @@ return stack_cont.getMatrix(is,syms[ip]);
 }
 
 /*:23*/
-#line 546 "./stack_container.hweb"
 ;
 /*24:*/
-#line 585 "./stack_container.hweb"
 
 void createPackedColumns(const IntSequence&coor,
 Vector**vs,IntSequence&iu)const
@@ -519,10 +474,8 @@ off+= syms[i].dimen();
 }
 
 /*:24*/
-#line 547 "./stack_container.hweb"
 ;
 /*25:*/
-#line 604 "./stack_container.hweb"
 
 int getSize(int is)const
 {
@@ -531,10 +484,8 @@ return stack_cont.getStackSizes()[is];
 
 
 /*:25*/
-#line 548 "./stack_container.hweb"
 ;
 /*26:*/
-#line 612 "./stack_container.hweb"
 
 int numMatrices(const IntSequence&istacks)const
 {
@@ -550,15 +501,12 @@ return ret;
 }
 
 /*:26*/
-#line 549 "./stack_container.hweb"
 ;
 };
 
 /*:20*/
-#line 102 "./stack_container.hweb"
 ;
 /*27:*/
-#line 629 "./stack_container.hweb"
 
 template<class _Ttype> 
 class KronProdStack:public KronProdAllOptim{
@@ -566,7 +514,6 @@ public:
 typedef StackProduct<_Ttype> _Ptype;
 typedef StackContainerInterface<_Ttype> _Stype;
 /*28:*/
-#line 646 "./stack_container.hweb"
 
 KronProdStack(const _Ptype&sp,const IntSequence&istack)
 :KronProdAllOptim(sp.dimen())
@@ -590,15 +537,12 @@ setMat(i,*m);
 
 
 /*:28*/
-#line 635 "./stack_container.hweb"
 ;
 };
 
 /*:27*/
-#line 103 "./stack_container.hweb"
 ;
 /*29:*/
-#line 669 "./stack_container.hweb"
 
 class WorkerFoldMAADense:public THREAD{
 const FoldedStackContainer&cont;
@@ -614,10 +558,8 @@ void operator()();
 };
 
 /*:29*/
-#line 104 "./stack_container.hweb"
 ;
 /*30:*/
-#line 684 "./stack_container.hweb"
 
 class WorkerFoldMAASparse1:public THREAD{
 const FoldedStackContainer&cont;
@@ -633,10 +575,8 @@ void operator()();
 };
 
 /*:30*/
-#line 105 "./stack_container.hweb"
 ;
 /*31:*/
-#line 699 "./stack_container.hweb"
 
 class WorkerFoldMAASparse2:public THREAD{
 const FoldedStackContainer&cont;
@@ -651,10 +591,8 @@ void operator()();
 };
 
 /*:31*/
-#line 106 "./stack_container.hweb"
 ;
 /*32:*/
-#line 713 "./stack_container.hweb"
 
 class WorkerFoldMAASparse4:public THREAD{
 const FoldedStackContainer&cont;
@@ -669,10 +607,8 @@ void operator()();
 };
 
 /*:32*/
-#line 107 "./stack_container.hweb"
 ;
 /*33:*/
-#line 727 "./stack_container.hweb"
 
 class WorkerUnfoldMAADense:public THREAD{
 const UnfoldedStackContainer&cont;
@@ -688,10 +624,8 @@ void operator()();
 };
 
 /*:33*/
-#line 108 "./stack_container.hweb"
 ;
 /*34:*/
-#line 742 "./stack_container.hweb"
 
 class WorkerUnfoldMAASparse1:public THREAD{
 const UnfoldedStackContainer&cont;
@@ -707,10 +641,8 @@ void operator()();
 };
 
 /*:34*/
-#line 109 "./stack_container.hweb"
 ;
 /*35:*/
-#line 757 "./stack_container.hweb"
 
 class WorkerUnfoldMAASparse2:public THREAD{
 const UnfoldedStackContainer&cont;
@@ -726,7 +658,6 @@ void operator()();
 
 
 /*:35*/
-#line 110 "./stack_container.hweb"
 ;
 
 #endif

@@ -1,5 +1,4 @@
 /*1:*/
-#line 48 "./pyramid_prod.hweb"
 
 #ifndef PYRAMID_PROD_H
 #define PYRAMID_PROD_H
@@ -14,7 +13,6 @@
 using namespace std;
 
 /*2:*/
-#line 71 "./pyramid_prod.hweb"
 
 class USubTensor:public URTensor{
 public:
@@ -25,7 +23,6 @@ const IntSequence&pindex);
 };
 
 /*:2*/
-#line 61 "./pyramid_prod.hweb"
 ;
 
 #endif

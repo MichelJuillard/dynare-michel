@@ -1,5 +1,4 @@
 /*1:*/
-#line 29 "./sparse_tensor.hweb"
 
 #ifndef SPARSE_TENSOR_H
 #define SPARSE_TENSOR_H
@@ -14,7 +13,6 @@
 using namespace std;
 
 /*2:*/
-#line 50 "./sparse_tensor.hweb"
 
 struct ltseq{
 bool operator()(const IntSequence&s1,const IntSequence&s2)const
@@ -22,10 +20,8 @@ bool operator()(const IntSequence&s1,const IntSequence&s2)const
 };
 
 /*:2*/
-#line 42 "./sparse_tensor.hweb"
 ;
 /*3:*/
-#line 60 "./sparse_tensor.hweb"
 
 class SparseTensor{
 public:
@@ -72,10 +68,8 @@ bool isFinite()const;
 }
 
 /*:3*/
-#line 43 "./sparse_tensor.hweb"
 ;
 /*4:*/
-#line 109 "./sparse_tensor.hweb"
 
 class FSSparseTensor:public SparseTensor{
 public:
@@ -97,10 +91,8 @@ void print()const;
 
 
 /*:4*/
-#line 44 "./sparse_tensor.hweb"
 ;
 /*5:*/
-#line 134 "./sparse_tensor.hweb"
 
 class GSSparseTensor:public SparseTensor{
 public:
@@ -122,7 +114,6 @@ void print()const;
 };
 
 /*:5*/
-#line 45 "./sparse_tensor.hweb"
 ;
 
 #endif

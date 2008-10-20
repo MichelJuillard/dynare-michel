@@ -1,5 +1,4 @@
 /*1:*/
-#line 47 "./t_polynomial.hweb"
 
 #include "t_container.h"
 #include "fs_tensor.h"
@@ -7,7 +6,6 @@
 #include"tl_static.h"
 
 /*2:*/
-#line 76 "./t_polynomial.hweb"
 
 class PowerProvider{
 Vector origv;
@@ -23,10 +21,8 @@ const FRSingleTensor&getNext(const FRSingleTensor*dummy);
 };
 
 /*:2*/
-#line 53 "./t_polynomial.hweb"
 ;
 /*3:*/
-#line 111 "./t_polynomial.hweb"
 
 template<class _Ttype,class _TGStype,class _Stype> 
 class TensorPolynomial:public TensorContainer<_Ttype> {
@@ -46,7 +42,6 @@ TensorPolynomial(int first_row,int num,TensorPolynomial<_Ttype,_TGStype,_Stype> 
 :TensorContainer<_Ttype> (first_row,num,tp),
 nr(num),nv(tp.nv),maxdim(tp.maxdim){}
 /*4:*/
-#line 162 "./t_polynomial.hweb"
 
 TensorPolynomial(const TensorPolynomial<_Ttype,_TGStype,_Stype> &tp,const Vector&xval)
 :TensorContainer<_Ttype> (1),
@@ -58,7 +53,6 @@ IntSequence ss(2);ss[0]= xval.length();ss[1]= nvars();
 IntSequence pp(2);pp[0]= 0;pp[1]= 1;
 
 /*5:*/
-#line 193 "./t_polynomial.hweb"
 
 PowerProvider pwp(xval);
 for(int i= 1;i<=tp.maxdim;i++){
@@ -66,7 +60,6 @@ const _Stype&xpow= pwp.getNext((const _Stype*)NULL);
 for(int j= 0;j<=tp.maxdim-i;j++){
 if(tp.check(Symmetry(i+j))){
 /*7:*/
-#line 227 "./t_polynomial.hweb"
 
 _Ttype*ten;
 if(_Tparent::check(Symmetry(j))){
@@ -79,7 +72,6 @@ insert(ten);
 
 
 /*:7*/
-#line 199 "./t_polynomial.hweb"
 ;
 Symmetry sym(i,j);
 IntSequence coor(sym,pp);
@@ -92,15 +84,12 @@ slice.contractAndAdd(0,tmp,xpow);
 }
 
 /*:5*/
-#line 172 "./t_polynomial.hweb"
 ;
 /*6:*/
-#line 214 "./t_polynomial.hweb"
 
 for(int j= 0;j<=tp.maxdim;j++){
 if(tp.check(Symmetry(j))){
 /*7:*/
-#line 227 "./t_polynomial.hweb"
 
 _Ttype*ten;
 if(_Tparent::check(Symmetry(j))){
@@ -113,7 +102,6 @@ insert(ten);
 
 
 /*:7*/
-#line 217 "./t_polynomial.hweb"
 ;
 Symmetry sym(0,j);
 IntSequence coor(sym,pp);
@@ -124,12 +112,10 @@ ten->add(1.0,slice);
 
 
 /*:6*/
-#line 173 "./t_polynomial.hweb"
 ;
 }
 
 /*:4*/
-#line 129 "./t_polynomial.hweb"
 ;
 TensorPolynomial(const TensorPolynomial&tp)
 :TensorContainer<_Ttype> (tp),nr(tp.nr),nv(tp.nv),maxdim(tp.maxdim){}
@@ -138,7 +124,6 @@ int nrows()const
 int nvars()const
 {return nv;}
 /*8:*/
-#line 242 "./t_polynomial.hweb"
 
 void evalTrad(Vector&out,const ConstVector&v)const
 {
@@ -159,10 +144,8 @@ t->multaVec(out,p.getData());
 }
 
 /*:8*/
-#line 136 "./t_polynomial.hweb"
 ;
 /*9:*/
-#line 264 "./t_polynomial.hweb"
 
 void evalHorner(Vector&out,const ConstVector&v)const
 {
@@ -196,10 +179,8 @@ delete last;
 }
 
 /*:9*/
-#line 137 "./t_polynomial.hweb"
 ;
 /*10:*/
-#line 299 "./t_polynomial.hweb"
 
 void insert(_ptr t)
 {
@@ -213,10 +194,8 @@ maxdim= t->dimen();
 }
 
 /*:10*/
-#line 138 "./t_polynomial.hweb"
 ;
 /*11:*/
-#line 323 "./t_polynomial.hweb"
 
 void derivative(int k)
 {
@@ -229,10 +208,8 @@ ten->mult((double)max((d-k),0));
 }
 
 /*:11*/
-#line 139 "./t_polynomial.hweb"
 ;
 /*12:*/
-#line 345 "./t_polynomial.hweb"
 
 _Ttype*evalPartially(int s,const ConstVector&v)
 {
@@ -268,16 +245,13 @@ return res;
 }
 
 /*:12*/
-#line 140 "./t_polynomial.hweb"
 ;
 };
 
 
 /*:3*/
-#line 54 "./t_polynomial.hweb"
 ;
 /*13:*/
-#line 380 "./t_polynomial.hweb"
 
 class FTensorPolynomial;
 class UTensorPolynomial:public TensorPolynomial<UFSTensor,UGSTensor,URSingleTensor> {
@@ -294,10 +268,8 @@ UTensorPolynomial(int first_row,int num,UTensorPolynomial&tp)
 };
 
 /*:13*/
-#line 55 "./t_polynomial.hweb"
 ;
 /*14:*/
-#line 396 "./t_polynomial.hweb"
 
 class FTensorPolynomial:public TensorPolynomial<FFSTensor,FGSTensor,FRSingleTensor> {
 public:
@@ -313,16 +285,13 @@ FTensorPolynomial(int first_row,int num,FTensorPolynomial&tp)
 };
 
 /*:14*/
-#line 56 "./t_polynomial.hweb"
 ;
 /*15:*/
-#line 414 "./t_polynomial.hweb"
 
 template<class _Ttype,class _TGStype,class _Stype> 
 class CompactPolynomial:public _Ttype{
 public:
 /*16:*/
-#line 434 "./t_polynomial.hweb"
 
 CompactPolynomial(const TensorPolynomial<_Ttype,_TGStype,_Stype> &pol)
 :_Ttype(pol.nrows(),pol.nvars()+1,pol.getMaxDim())
@@ -349,10 +318,8 @@ offset+= dumgs.ncols();
 
 
 /*:16*/
-#line 418 "./t_polynomial.hweb"
 ;
 /*17:*/
-#line 463 "./t_polynomial.hweb"
 
 void eval(Vector&out,const ConstVector&v)const
 {
@@ -378,15 +345,12 @@ multVec(0.0,out,1.0,xpow);
 }
 
 /*:17*/
-#line 419 "./t_polynomial.hweb"
 ;
 };
 
 /*:15*/
-#line 57 "./t_polynomial.hweb"
 ;
 /*18:*/
-#line 488 "./t_polynomial.hweb"
 
 class UCompactPolynomial:public CompactPolynomial<UFSTensor,UGSTensor,URSingleTensor> {
 public:
@@ -395,10 +359,8 @@ UCompactPolynomial(const UTensorPolynomial&upol)
 };
 
 /*:18*/
-#line 58 "./t_polynomial.hweb"
 ;
 /*19:*/
-#line 496 "./t_polynomial.hweb"
 
 class FCompactPolynomial:public CompactPolynomial<FFSTensor,FGSTensor,FRSingleTensor> {
 public:
@@ -409,7 +371,6 @@ FCompactPolynomial(const FTensorPolynomial&fpol)
 
 
 /*:19*/
-#line 59 "./t_polynomial.hweb"
 ;
 
 /*:1*/

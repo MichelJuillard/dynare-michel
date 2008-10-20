@@ -1,5 +1,4 @@
 /*1:*/
-#line 48 "./t_container.hweb"
 
 #ifndef T_CONTAINER_H
 #define T_CONTAINER_H
@@ -16,7 +15,6 @@
 #include <map> 
 
 /*2:*/
-#line 71 "./t_container.hweb"
 
 struct ltsym{
 bool operator()(const Symmetry&s1,const Symmetry&s2)const
@@ -24,10 +22,8 @@ bool operator()(const Symmetry&s1,const Symmetry&s2)const
 };
 
 /*:2*/
-#line 63 "./t_container.hweb"
 ;
 /*3:*/
-#line 97 "./t_container.hweb"
 
 template<class _Ttype> class TensorContainer{
 protected:
@@ -47,7 +43,6 @@ public:
 TensorContainer(int nn)
 :n(nn),ebundle(*(tls.ebundle)){}
 /*5:*/
-#line 150 "./t_container.hweb"
 
 TensorContainer(const TensorContainer<_Ttype> &c)
 :n(c.n),m(),ebundle(c.ebundle)
@@ -59,10 +54,8 @@ insert(ten);
 }
 
 /*:5*/
-#line 115 "./t_container.hweb"
 ;
 /*6:*/
-#line 163 "./t_container.hweb"
 
 TensorContainer(int first_row,int num,TensorContainer<_Ttype> &c)
 :n(c.n),ebundle(*(tls.ebundle))
@@ -75,10 +68,8 @@ insert(t);
 
 
 /*:6*/
-#line 116 "./t_container.hweb"
 ;
 /*7:*/
-#line 175 "./t_container.hweb"
 
 _const_ptr get(const Symmetry&s)const
 {
@@ -108,10 +99,8 @@ return(*it).second;
 }
 
 /*:7*/
-#line 117 "./t_container.hweb"
 ;
 /*8:*/
-#line 204 "./t_container.hweb"
 
 bool check(const Symmetry&s)const
 {
@@ -122,10 +111,8 @@ return it!=m.end();
 }
 
 /*:8*/
-#line 118 "./t_container.hweb"
 ;
 /*9:*/
-#line 214 "./t_container.hweb"
 
 void insert(_ptr t)
 {
@@ -140,10 +127,8 @@ throw TLException(__FILE__,__LINE__,"NaN or Inf asserted in TensorContainer::ins
 }
 
 /*:9*/
-#line 119 "./t_container.hweb"
 ;
 /*10:*/
-#line 228 "./t_container.hweb"
 
 void remove(const Symmetry&s)
 {
@@ -157,10 +142,8 @@ delete t;
 
 
 /*:10*/
-#line 120 "./t_container.hweb"
 ;
 /*11:*/
-#line 241 "./t_container.hweb"
 
 void clear()
 {
@@ -171,10 +154,8 @@ m.erase(m.begin());
 }
 
 /*:11*/
-#line 121 "./t_container.hweb"
 ;
 /*15:*/
-#line 299 "./t_container.hweb"
 
 vector<_const_ptr> 
 fetchTensors(const Symmetry&rsym,const Equivalence&e)const
@@ -190,10 +171,8 @@ return res;
 }
 
 /*:15*/
-#line 122 "./t_container.hweb"
 ;
 /*12:*/
-#line 251 "./t_container.hweb"
 
 int getMaxDim()const
 {
@@ -208,10 +187,8 @@ return res;
 
 
 /*:12*/
-#line 123 "./t_container.hweb"
 ;
 /*13:*/
-#line 265 "./t_container.hweb"
 
 void print()const
 {
@@ -224,10 +201,8 @@ printf("Symmetry: ");
 }
 
 /*:13*/
-#line 124 "./t_container.hweb"
 ;
 /*14:*/
-#line 277 "./t_container.hweb"
 
 void writeMat4(FILE*fd,const char*prefix)const
 {
@@ -247,14 +222,12 @@ m.writeMat4(fd,lname);
 
 
 /*:14*/
-#line 125 "./t_container.hweb"
 ;
 
 virtual~TensorContainer()
 {clear();}
 
 /*4:*/
-#line 134 "./t_container.hweb"
 
 int num()const
 {return n;}
@@ -271,15 +244,12 @@ iterator end()
 {return m.end();}
 
 /*:4*/
-#line 130 "./t_container.hweb"
 ;
 };
 
 /*:3*/
-#line 64 "./t_container.hweb"
 ;
 /*16:*/
-#line 315 "./t_container.hweb"
 
 class FGSContainer;
 class UGSContainer:public TensorContainer<UGSTensor> {
@@ -294,10 +264,8 @@ void multAndAdd(const UGSTensor&t,UGSTensor&out)const;
 
 
 /*:16*/
-#line 65 "./t_container.hweb"
 ;
 /*17:*/
-#line 342 "./t_container.hweb"
 
 class FGSContainer:public TensorContainer<FGSTensor> {
 static const int num_one_time;
@@ -318,7 +286,6 @@ const Tensor::index&end);
 
 
 /*:17*/
-#line 66 "./t_container.hweb"
 ;
 
 #endif

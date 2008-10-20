@@ -1,5 +1,4 @@
 /*1:*/
-#line 51 "./ps_tensor.hweb"
 
 
 #ifndef PS_TENSOR_H
@@ -13,7 +12,6 @@
 #include "sparse_tensor.h"
 
 /*2:*/
-#line 73 "./ps_tensor.hweb"
 
 class SortIntSequence:public IntSequence{
 public:
@@ -23,10 +21,8 @@ SortIntSequence(const IntSequence&s)
 
 
 /*:2*/
-#line 63 "./ps_tensor.hweb"
 ;
 /*3:*/
-#line 101 "./ps_tensor.hweb"
 
 class PerTensorDimens:public TensorDimens{
 protected:
@@ -58,16 +54,13 @@ const Permutation&getPer()const
 };
 
 /*:3*/
-#line 64 "./ps_tensor.hweb"
 ;
 /*4:*/
-#line 154 "./ps_tensor.hweb"
 
 class UPSTensor:public UTensor{
 const PerTensorDimens tdims;
 public:
 /*5:*/
-#line 194 "./ps_tensor.hweb"
 
 UPSTensor(const TensorDimens&td,const Equivalence&e,
 const ConstTwoDMatrix&a,const KronProdAll&kp)
@@ -91,7 +84,6 @@ a.nrows(),kp.ncols(),td.dimen()),tdims(td,Permutation(e,Permutation(p,kp.getPer(
 {kp.mult(a,*this);}
 
 /*:5*/
-#line 158 "./ps_tensor.hweb"
 ;
 UPSTensor(const FSSparseTensor&t,const IntSequence&ss,
 const IntSequence&coor,const PerTensorDimens&ptd);
@@ -117,10 +109,8 @@ const IntSequence&coor);
 };
 
 /*:4*/
-#line 65 "./ps_tensor.hweb"
 ;
 /*6:*/
-#line 231 "./ps_tensor.hweb"
 
 class PerTensorDimens2:public PerTensorDimens{
 InducedSymmetries syms;
@@ -150,10 +140,8 @@ void setDimensionSizes();
 };
 
 /*:6*/
-#line 66 "./ps_tensor.hweb"
 ;
 /*7:*/
-#line 298 "./ps_tensor.hweb"
 
 template<typename _Ttype> class StackProduct;
 
@@ -161,7 +149,6 @@ class FPSTensor:public FTensor{
 const PerTensorDimens2 tdims;
 public:
 /*8:*/
-#line 323 "./ps_tensor.hweb"
 
 FPSTensor(const TensorDimens&td,const Equivalence&e,
 const ConstTwoDMatrix&a,const KronProdAll&kp)
@@ -191,7 +178,6 @@ FPSTensor(const FPSTensor&ft)
 :FTensor(ft),tdims(ft.tdims){}
 
 /*:8*/
-#line 304 "./ps_tensor.hweb"
 ;
 
 void increment(IntSequence&v)const;
@@ -203,7 +189,6 @@ void addTo(FGSTensor&out)const;
 };
 
 /*:7*/
-#line 67 "./ps_tensor.hweb"
 ;
 
 #endif

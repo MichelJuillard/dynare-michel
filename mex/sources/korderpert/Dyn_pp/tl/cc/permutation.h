@@ -1,5 +1,4 @@
 /*1:*/
-#line 38 "./permutation.hweb"
 
 #ifndef PERMUTATION_H
 #define PERMUTATION_H
@@ -10,7 +9,6 @@
 #include <vector> 
 
 /*2:*/
-#line 65 "./permutation.hweb"
 
 class Permutation{
 protected:
@@ -52,10 +50,8 @@ void computeSortingMap(const IntSequence&s);
 
 
 /*:2*/
-#line 47 "./permutation.hweb"
 ;
 /*3:*/
-#line 117 "./permutation.hweb"
 
 class PermutationSet{
 int order;
@@ -74,10 +70,8 @@ vector<const Permutation*> getPreserving(const IntSequence&s)const;
 
 
 /*:3*/
-#line 48 "./permutation.hweb"
 ;
 /*4:*/
-#line 137 "./permutation.hweb"
 
 class PermutationBundle{
 vector<PermutationSet*> bundle;
@@ -89,7 +83,6 @@ void generateUpTo(int nmax);
 };
 
 /*:4*/
-#line 49 "./permutation.hweb"
 ;
 
 #endif

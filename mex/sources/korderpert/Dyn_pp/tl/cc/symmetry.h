@@ -1,5 +1,4 @@
 /*1:*/
-#line 49 "./symmetry.hweb"
 
 #ifndef SYMMETRY_H
 #define SYMMETRY_H
@@ -11,12 +10,10 @@
 #include <vector> 
 
 /*2:*/
-#line 69 "./symmetry.hweb"
 
 class Symmetry:public IntSequence{
 public:
 /*3:*/
-#line 93 "./symmetry.hweb"
 
 Symmetry(int len,const char*dummy)
 :IntSequence(len,0){}
@@ -48,7 +45,6 @@ Symmetry(Symmetry&s,int len)
 Symmetry(const IntSequence&s);
 
 /*:3*/
-#line 72 "./symmetry.hweb"
 ;
 int num()const
 {return size();}
@@ -59,10 +55,8 @@ bool isFull()const;
 };
 
 /*:2*/
-#line 59 "./symmetry.hweb"
 ;
 /*4:*/
-#line 148 "./symmetry.hweb"
 
 class SymmetrySet{
 Symmetry run;
@@ -83,10 +77,8 @@ int size()const
 };
 
 /*:4*/
-#line 60 "./symmetry.hweb"
 ;
 /*5:*/
-#line 177 "./symmetry.hweb"
 
 class symiterator{
 SymmetrySet&s;
@@ -105,10 +97,8 @@ const Symmetry&operator*()const
 
 
 /*:5*/
-#line 61 "./symmetry.hweb"
 ;
 /*6:*/
-#line 198 "./symmetry.hweb"
 
 class InducedSymmetries:public vector<Symmetry> {
 public:
@@ -120,7 +110,6 @@ void print()const;
 
 
 /*:6*/
-#line 62 "./symmetry.hweb"
 ;
 
 #endif

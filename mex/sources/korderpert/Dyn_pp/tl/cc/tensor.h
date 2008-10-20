@@ -1,5 +1,4 @@
 /*1:*/
-#line 47 "./tensor.hweb"
 
 
 #ifndef TENSOR_H
@@ -9,7 +8,6 @@
 #include "twod_matrix.h"
 
 /*2:*/
-#line 89 "./tensor.hweb"
 
 template<class _Tptr> class _index{
 typedef _index<_Tptr> _Self;
@@ -45,10 +43,8 @@ void print()const
 };
 
 /*:2*/
-#line 55 "./tensor.hweb"
 ;
 /*3:*/
-#line 143 "./tensor.hweb"
 
 class Tensor:public TwoDMatrix{
 public:
@@ -104,10 +100,8 @@ static int noverseq_ip(IntSequence&s);
 };
 
 /*:3*/
-#line 56 "./tensor.hweb"
 ;
 /*4:*/
-#line 203 "./tensor.hweb"
 
 class FTensor;
 class UTensor:public Tensor{
@@ -130,10 +124,8 @@ static int getOffset(const IntSequence&v,const IntSequence&nvmx);
 };
 
 /*:4*/
-#line 57 "./tensor.hweb"
 ;
 /*5:*/
-#line 233 "./tensor.hweb"
 
 class FTensor:public Tensor{
 public:
@@ -154,7 +146,6 @@ static int getOffsetRecurse(IntSequence&v,int nv);
 };
 
 /*:5*/
-#line 58 "./tensor.hweb"
 ;
 
 #endif

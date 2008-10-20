@@ -1,5 +1,4 @@
 /*1:*/
-#line 14 "./tl_exception.hweb"
 
 #ifndef TL_EXCEPTION_H
 #define TL_EXCEPTION_H
@@ -8,7 +7,6 @@
 #include <stdio.h> 
 
 /*2:*/
-#line 43 "./tl_exception.hweb"
 
 #ifndef TL_DEBUG_EXCEPTION
 #define TL_DEBUG_EXCEPTION 1
@@ -25,7 +23,6 @@ if (TL_DEBUG >= TL_DEBUG_EXCEPTION) throw TLException(__FILE__, __LINE__, mes);
 if (TL_DEBUG >= TL_DEBUG_EXCEPTION && (expr)) throw TLException(__FILE__, __LINE__, mes);
 
 /*3:*/
-#line 61 "./tl_exception.hweb"
 
 class TLException{
 char fname[50];
@@ -45,11 +42,9 @@ virtual void print()const
 
 
 /*:3*/
-#line 58 "./tl_exception.hweb"
 ;
 
 /*:2*/
-#line 21 "./tl_exception.hweb"
 ;
 
 #endif

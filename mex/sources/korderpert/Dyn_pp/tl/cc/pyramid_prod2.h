@@ -1,5 +1,4 @@
 /*1:*/
-#line 69 "./pyramid_prod2.hweb"
 
 #ifndef PYRAMID_PROD2_H
 #define PYRAMID_PROD2_H
@@ -13,7 +12,6 @@
 #include "Vector.h"
 
 /*2:*/
-#line 101 "./pyramid_prod2.hweb"
 
 class IrregTensor;
 class IrregTensorHeader{
@@ -35,10 +33,8 @@ IrregTensorHeader(const IrregTensorHeader&);
 
 
 /*:2*/
-#line 81 "./pyramid_prod2.hweb"
 ;
 /*3:*/
-#line 137 "./pyramid_prod2.hweb"
 
 class IrregTensor:public Tensor{
 const IrregTensorHeader&header;
@@ -54,7 +50,6 @@ int getOffset(const IntSequence&v)const
 };
 
 /*:3*/
-#line 82 "./pyramid_prod2.hweb"
 ;
 
 #endif
