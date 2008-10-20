@@ -1,4 +1,4 @@
-function [LIK, lik] = univariate_kalman_filter(T,R,Q,H,P,Y,trend,start,mf,kalman_tol,riccati_tol,data_index,number_of_observations,no_more_missing_observations)
+function [LIK, lik] = univariate_kalman_filter(T,R,Q,H,P,Y,start,mf,kalman_tol,riccati_tol,data_index,number_of_observations,no_more_missing_observations)
 % Computes the likelihood of a stationnary state space model (univariate approach).
 %
 % INPUTS
@@ -63,29 +63,30 @@ while notsteady && t<smpl
         prediction_error = Y(data_index{t}(i),t) - a(MF(i));
         Fi = P(MF(i),MF(i)) + H(data_index{t}(i));
         if Fi > kalman_tol
-            Ki	   = P(:,MF(i));
-            a	   = a + Ki*prediction_error/Fi;
-            P 	   = P - Ki*transpose(Ki)/Fi;
+            Ki	   = P(:,MF(i))/Fi;
+            a	   = a + Ki*prediction_error;
+            P 	   = P - (Fi*Ki)*transpose(Ki);
             lik(t) = lik(t) + log(Fi) + prediction_error*prediction_error/Fi;
         end
     end
-    a 	      = T*a;
-    Pstar     = T*P*transpose(T) + QQ;
+    a = T*a;
+    P = T*P*transpose(T) + QQ;
     if t>no_more_missing_observations
         notsteady = max(max(abs(P-oldP)))>riccati_tol;
     end
 end
 
-%$$$ To be checked! Something is probably wrong here...
+% Steady state kalman filter.
 while t < smpl
+    PP = P;
     t = t+1;
     for i=1:pp
         prediction_error = Y(i,t) - a(mf(i));
-        Fi   = P(mf(i),mf(i)) + H(i);
+        Fi   = PP(mf(i),mf(i)) + H(i);
         if Fi > kalman_tol
-            Ki = P(:,mf(i));
-            a  = a + Ki*prediction_error/Fi;
-            P  = P - Ki*transpose(Ki)/Fi; %$$$ We are at the steady state of the KF. Why should we update P? 
+            Ki = PP(:,mf(i))/Fi;
+            a  = a + Ki*prediction_error;
+            PP  = PP - (Fi*Ki)*transpose(Ki);
             lik(t) = lik(t) + log(Fi) + prediction_error*prediction_error/Fi;
         end
     end
