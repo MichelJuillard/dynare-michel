@@ -16,10 +16,10 @@ using namespace std;
 
 class USubTensor:public URTensor{
 public:
-USubTensor(const TensorDimens&bdims,const TensorDimens&hdims,
-const FGSContainer&cont,const vector<IntSequence> &lst);
-void addKronColumn(int i,const vector<const FGSTensor*> &ts,
-const IntSequence&pindex);
+	USubTensor(const TensorDimens&bdims,const TensorDimens&hdims,
+		const FGSContainer&cont,const vector<IntSequence> &lst);
+	void addKronColumn(int i,const vector<const FGSTensor*> &ts,
+		const IntSequence&pindex);
 };
 
 /*:2*/

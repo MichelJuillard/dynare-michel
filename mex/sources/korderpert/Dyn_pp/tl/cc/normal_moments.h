@@ -9,10 +9,10 @@
 
 class UNormalMoments:public TensorContainer<URSingleTensor> {
 public:
-UNormalMoments(int maxdim,const TwoDMatrix&v);
+	UNormalMoments(int maxdim,const TwoDMatrix&v);
 private:
-void generateMoments(int maxdim,const TwoDMatrix&v);
-static bool selectEquiv(const Equivalence&e);
+	void generateMoments(int maxdim,const TwoDMatrix&v);
+	static bool selectEquiv(const Equivalence&e);
 };
 
 /*:2*/
@@ -21,7 +21,7 @@ static bool selectEquiv(const Equivalence&e);
 
 class FNormalMoments:public TensorContainer<FRSingleTensor> {
 public:
-FNormalMoments(const UNormalMoments&moms);
+	FNormalMoments(const UNormalMoments&moms);
 };
 
 

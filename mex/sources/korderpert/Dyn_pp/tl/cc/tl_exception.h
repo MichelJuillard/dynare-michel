@@ -25,19 +25,19 @@ if (TL_DEBUG >= TL_DEBUG_EXCEPTION && (expr)) throw TLException(__FILE__, __LINE
 /*3:*/
 
 class TLException{
-char fname[50];
-int lnum;
-char message[500];
+	char fname[50];
+	int lnum;
+	char message[500];
 public:
-TLException(const char*f,int l,const char*mes)
-{
-strncpy(fname,f,50);fname[49]= '\0';
-strncpy(message,mes,500);message[499]= '\0';
-lnum= l;
-}
-virtual~TLException(){}
-virtual void print()const
-{printf("At %s:%d:%s\n",fname,lnum,message);}
+	TLException(const char*f,int l,const char*mes)
+	{
+		strncpy(fname,f,50);fname[49]= '\0';
+		strncpy(message,mes,500);message[499]= '\0';
+		lnum= l;
+	}
+	virtual~TLException(){}
+	virtual void print()const
+	{printf("At %s:%d:%s\n",fname,lnum,message);}
 };
 
 
