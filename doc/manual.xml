@@ -181,7 +181,7 @@ After installation, Dynare can be used in any directory on your computer. It is 
 
 <para>You can skip this step if you are planning to use only Matlab&reg; with Dynare.</para>
 
-<para>Please refer to <ulink url="http://www.cepremap.cnrs.fr/DynareWiki/DynareOctave">DynareOctave</ulink> on Dynare Wiki for detailed instructions.</para>
+<para>Please refer to <ulink url="http://www.dynare.org/DynareWiki/DynareOctave">DynareOctave</ulink> on Dynare Wiki for detailed instructions.</para>
 
 </sect2>
 
@@ -201,7 +201,7 @@ After installation, Dynare can be used in any directory on your computer. It is 
 </sect3>
 
 <sect3><title>On Debian GNU/Linux and Ubuntu</title>
-<para>Please refer to <ulink url="http://www.cepremap.cnrs.fr/DynareWiki/InstallOnDebianOrUbuntu">InstallOnDebianOrUbuntu</ulink> on Dynare Wiki for detailed instructions.</para>
+<para>Please refer to <ulink url="http://www.dynare.org/DynareWiki/InstallOnDebianOrUbuntu">InstallOnDebianOrUbuntu</ulink> on Dynare Wiki for detailed instructions.</para>
 
 <para>Dynare will be installed under <filename>/usr/lib/dynare</filename>. Documentation will be under <filename>/usr/share/doc/dynare</filename>.</para>
 </sect3>
@@ -209,7 +209,7 @@ After installation, Dynare can be used in any directory on your computer. It is 
 <sect3 id="install_other_systems"><title>For other systems</title>
 <para>You need to download Dynare source code from the <ulink url="http://www.dynare.org">Dynare website</ulink> and unpack it somewhere.</para>
 
-<para>Then you will need to recompile the pre-processor and the dynamic loadable libraries. Please refer to <ulink url="http://www.cepremap.cnrs.fr/DynareWiki/BuildingPreprocessor">BuildingPreprocessor</ulink> and <ulink url="http://www.cepremap.cnrs.fr/DynareWiki/BuildingDlls">BuildingDlls</ulink> on Dynare Wiki.</para>
+<para>Then you will need to recompile the pre-processor and the dynamic loadable libraries. Please refer to <ulink url="http://www.dynare.org/DynareWiki/BuildingPreprocessor">BuildingPreprocessor</ulink> and <ulink url="http://www.dynare.org/DynareWiki/BuildingDlls">BuildingDlls</ulink> on Dynare Wiki.</para>
 </sect3>
 </sect2>
 

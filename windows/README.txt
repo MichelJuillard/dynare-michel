@@ -15,7 +15,7 @@ You can also get more information on the web, on Dynare homepage:
 
 Or on Dynare Wiki:
 
-  http://www.cepremap.cnrs.fr/DynareWiki
+  http://www.dynare.org/DynareWiki
 
 NOTE: Dynare comes with an automated uninstaller, which you can run from the
 "Add/Remove Programs" menu of the Control Panel.
@@ -90,7 +90,7 @@ file.
 
 For more information about Dynare for Octave, go to:
 
-  http://www.cepremap.cnrs.fr/DynareWiki/DynareOctave
+  http://www.dynare.org/DynareWiki/DynareOctave
 
 
 Dynamic Loadable Libraries
