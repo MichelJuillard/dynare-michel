@@ -59,72 +59,73 @@ it_init = M_.maximum_lag+1 ;
 
 h1 = clock ;
 for iter = 1:options_.maxit
-	h2 = clock ;
-
-	if ct_ == 0
-		c = zeros(ny*options_.periods,nrc) ;
-	else
-		c = zeros(ny*(options_.periods+1),nrc) ;
-	end
-
-	it_ = it_init ;
-	z = [oo_.endo_simul(iyp,it_-1) ; oo_.endo_simul(:,it_) ; oo_.endo_simul(iyf,it_+1)] ;
-	[d1,M_.jacobia] = feval([M_.fname '_dynamic'],z,oo_.exo_simul, M_.params, it_);
-	M_.jacobia = [M_.jacobia(:,iz) -d1] ;
-	ic = [1:ny] ;
-	icp = iyp ;
-	c (ic,:) = M_.jacobia(:,is)\M_.jacobia(:,isf1) ;
-	for it_ = it_init+(1:options_.periods-1)
-		z = [oo_.endo_simul(iyp,it_-1) ; oo_.endo_simul(:,it_) ; oo_.endo_simul(iyf,it_+1)] ;
-		[d1,M_.jacobia] = feval([M_.fname '_dynamic'],z,oo_.exo_simul, M_.params, it_);
-		M_.jacobia = [M_.jacobia(:,iz) -d1] ;
-		M_.jacobia(:,[isf nrs]) = M_.jacobia(:,[isf nrs])-M_.jacobia(:,isp)*c(icp,:) ;
-		ic = ic + ny ;
-		icp = icp + ny ;
-		c (ic,:) = M_.jacobia(:,is)\M_.jacobia(:,isf1) ;
-	end
-
-	if ct_ == 1
-		s = eye(ny) ;
-		s(:,isf) = s(:,isf)+c(ic,1:nyf) ;
-		ic = ic + ny ;
-		c(ic,nrc) = s\c(:,nrc) ;
-		c = bksup1(ny,nrc) ;
-		c = reshape(c,ny,options_.periods+1) ;
-		oo_.endo_simul(:,it_init+(0:options_.periods)) = oo_.endo_simul(:,it_init+(0:options_.periods))+options_.slowc*c ;
-	else
-		c = bksup1(ny,nrc) ;
-		c = reshape(c,ny,options_.periods) ;
-		oo_.endo_simul(:,it_init+(0:options_.periods-1)) = oo_.endo_simul(:,it_init+(0:options_.periods-1))+options_.slowc*c ;
-	end
-
-	err = max(max(abs(c./options_.scalv')));
-	disp([num2str(iter) ' -	err = ' num2str(err)]) ;
-	disp(['	Time of iteration 	:' num2str(etime(clock,h2))]) ;
-
-	if err < options_.dynatol
-		stop = 1 ;
-		fprintf('\n') ;
-		disp(['	Total time of simulation 	:' num2str(etime(clock,h1))]) ;
-		fprintf('\n') ;
-		disp(['	Convergency obtained.']) ;
-		fprintf('\n') ;
-                oo_.deterministic_simulation.status = 1;% Convergency obtained.
-		oo_.deterministic_simulation.error = err;
-                oo_.deterministic_simulation.iterations = iter;
-                break
-	end
+    h2 = clock ;
+    
+    if ct_ == 0
+        c = zeros(ny*options_.periods,nrc) ;
+    else
+        c = zeros(ny*(options_.periods+1),nrc) ;
+    end
+    
+    it_ = it_init ;
+    z = [oo_.endo_simul(iyp,it_-1) ; oo_.endo_simul(:,it_) ; oo_.endo_simul(iyf,it_+1)] ;
+    [d1,M_.jacobia] = feval([M_.fname '_dynamic'],z,oo_.exo_simul, M_.params, it_);
+    M_.jacobia = [M_.jacobia(:,iz) -d1] ;
+    ic = [1:ny] ;
+    icp = iyp ;
+    c (ic,:) = M_.jacobia(:,is)\M_.jacobia(:,isf1) ;
+    for it_ = it_init+(1:options_.periods-1)
+        z = [oo_.endo_simul(iyp,it_-1) ; oo_.endo_simul(:,it_) ; oo_.endo_simul(iyf,it_+1)] ;
+        [d1,M_.jacobia] = feval([M_.fname '_dynamic'],z,oo_.exo_simul, M_.params, it_);
+        M_.jacobia = [M_.jacobia(:,iz) -d1] ;
+        M_.jacobia(:,[isf nrs]) = M_.jacobia(:,[isf nrs])-M_.jacobia(:,isp)*c(icp,:) ;
+        ic = ic + ny ;
+        icp = icp + ny ;
+        c (ic,:) = M_.jacobia(:,is)\M_.jacobia(:,isf1) ;
+    end
+    
+    if ct_ == 1
+        s = eye(ny) ;
+        s(:,isf) = s(:,isf)+c(ic,1:nyf) ;
+        ic = ic + ny ;
+        c(ic,nrc) = s\c(:,nrc) ;
+        c = bksup1(ny,nrc) ;
+        c = reshape(c,ny,options_.periods+1) ;
+        oo_.endo_simul(:,it_init+(0:options_.periods)) = oo_.endo_simul(:,it_init+(0:options_.periods))+options_.slowc*c ;
+    else
+        c = bksup1(ny,nrc) ;
+        c = reshape(c,ny,options_.periods) ;
+        oo_.endo_simul(:,it_init+(0:options_.periods-1)) = oo_.endo_simul(:,it_init+(0:options_.periods-1))+options_.slowc*c ;
+    end
+    
+    err = max(max(abs(c./options_.scalv')));
+    disp([num2str(iter) ' -	err = ' num2str(err)]) ;
+    disp(['	Time of iteration 	:' num2str(etime(clock,h2))]) ;
+    
+    if err < options_.dynatol
+        stop = 1 ;
+        fprintf('\n') ;
+        disp(['	Total time of simulation 	:' num2str(etime(clock,h1))]) ;
+        fprintf('\n') ;
+        disp(['	Convergency obtained.']) ;
+        fprintf('\n') ;
+        oo_.deterministic_simulation.status = 1;% Convergency obtained.
+        oo_.deterministic_simulation.error = err;
+        oo_.deterministic_simulation.iterations = iter;
+        break
+    end
 end
 
-if ~ stop
-	fprintf('\n') ;
-	disp(['	Total time of simulation 	:' num2str(etime(clock,h1))]) ;
-	fprintf('\n') ;
-	disp(['WARNING : maximum number of iterations is reached (modify options_.maxit).']) ;
-	fprintf('\n') ;
-        oo_.deterministic_simulation.status = 0;% more iterations are needed.
-        oo_.deterministic_simulation.error = err;
-        oo_.deterministic_simulation.iterations = options_.maxit;
+if ~stop
+    fprintf('\n') ;
+    disp(['	Total time of simulation 	:' num2str(etime(clock,h1))]) ;
+    fprintf('\n') ;
+    disp(['WARNING : maximum number of iterations is reached (modify options_.maxit).']) ;
+    fprintf('\n') ;
+    oo_.deterministic_simulation.status = 0;% more iterations are needed.
+    oo_.deterministic_simulation.error = err;
+    oo_.deterministic_simulation.errors = c/abs(err);    
+    oo_.deterministic_simulation.iterations = options_.maxit;
 end
 disp (['-----------------------------------------------------']) ;
 return ;
