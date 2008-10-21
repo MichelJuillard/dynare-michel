@@ -1,12 +1,14 @@
 function [fval,cost_flag,ys,trend_coeff,info] = DsgeLikelihood(xparam1,gend,data,data_index,number_of_observations,no_more_missing_observations)
-% function [fval,cost_flag,ys,trend_coeff,info] = DsgeLikelihood(xparam1,gend,data)
+% function [fval,cost_flag,ys,trend_coeff,info] = DsgeLikelihood(xparam1,gend,data,data_index,number_of_observations,no_more_missing_observations)
 % Evaluates the posterior kernel of a dsge model. 
 % 
 % INPUTS 
-%   xparam1      [double]   vector of model parameters.
-%   gend         [integer]  scalar specifying the number of observations.
-%   data         [double]   matrix of data
-%   data_index   [cell]     cell of column vectors
+%   xparam1                        [double]   vector of model parameters.
+%   gend                           [integer]  scalar specifying the number of observations.
+%   data                           [double]   matrix of data
+%   data_index                     [cell]     cell of column vectors
+%   number_of_observations         [integer]
+%   no_more_missing_observations   [integer] 
 % OUTPUTS 
 %   fval        :     value of the posterior kernel at xparam1.
 %   cost_flag   :     zero if the function returns a penalty, one otherwise.
@@ -17,7 +19,7 @@ function [fval,cost_flag,ys,trend_coeff,info] = DsgeLikelihood(xparam1,gend,data
 %                     42: one (many) parameter(s) do(es) not satisfied the upper bound
 %               
 % SPECIAL REQUIREMENTS
-%   Adapted from mj_optmumlik.m
+%
 
 % Copyright (C) 2004-2008 Dynare Team
 %
@@ -159,6 +161,7 @@ function [fval,cost_flag,ys,trend_coeff,info] = DsgeLikelihood(xparam1,gend,data
   start = options_.presample+1;
   np    = size(T,1);
   mf    = bayestopt_.mf;
+  no_missing_data_flag = (number_of_observations==gend*nobs);
   %------------------------------------------------------------------------------
   % 3. Initial condition of the Kalman filter
   %------------------------------------------------------------------------------
@@ -248,48 +251,39 @@ function [fval,cost_flag,ys,trend_coeff,info] = DsgeLikelihood(xparam1,gend,data
 	  Pinf(1:nk,1:nk) = diag(dd);
       end
   end
+  if kalman_algo == 2
+      no_correlation_flag = 1;
+      if length(H)==1
+          H = zeros(nobs,1);
+      else
+          if all(all(abs(H-diag(diag(H)))<1e-14))% ie, the covariance matrix is diagonal...
+              H = diag(H);
+          else
+              no_correlation_flag = 1;
+          end
+      end
+  end
+  kalman_tol = options_.kalman_tol;
+  riccati_tol = options_.riccati_tol;
+  mf = bayestopt_.mf1;
+  Y   = data-trend;
   %------------------------------------------------------------------------------
   % 4. Likelihood evaluation
   %------------------------------------------------------------------------------
   switch kalman_algo
     case 1% Standard Kalman filter.
-      Y   = data-trend;
-      if number_of_observations==gend*nobs
-          LIK = kalman_filter(T,R,Q,H,Pstar,Y,start,bayestopt_.mf1,options_.kalman_tol,options_.riccati_tol); 
+      if no_missing_data_flag
+          LIK = kalman_filter(T,R,Q,H,Pstar,Y,start,mf,kalman_tol,riccati_tol); 
       else
           LIK = ...
-              missing_observations_kalman_filter(T,R,Q,H,Pstar,Y,start,bayestopt_.mf1, ...
-                                                 options_.kalman_tol,options_.riccati_tol, ...
+              missing_observations_kalman_filter(T,R,Q,H,Pstar,Y,start,mf,kalman_tol,riccati_tol, ...
                                                  data_index,number_of_observations,no_more_missing_observations);
       end
-      if isinf(LIK)% Let me try the univariate approach
-          if nargin==3
-              if any(any(H ~= 0))
-                  if ~estim_params_.ncn
-                      LIK = DiffuseLikelihoodH3(T,R,Q,H,Pinf,Pstar,data,trend,start);
-                  else
-                      LIK = DiffuseLikelihoodH3corr(T,R,Q,H,Pinf,Pstar,data,trend,start);
-                  end
-              else
-                 LIK = DiffuseLikelihood3(T,R,Q,Pinf,Pstar,data,trend,start);
-              end
-          else
-              disp(['The univariate approach is not yet implemented for models with missing observations'])
-          end
-      end
-    case 2% Univariate Standard Kalman filter.
-      if nargin==3
-          if any(any(H ~= 0))
-              if ~estim_params_.ncn
-                  LIK = DiffuseLikelihoodH3(T,R,Q,H,Pinf,Pstar,data,trend,start);
-              else
-                  LIK = DiffuseLikelihoodH3corr(T,R,Q,H,Pinf,Pstar,data,trend,start);
-              end
-          else
-              LIK = DiffuseLikelihood3(T,R,Q,Pinf,Pstar,data,trend,start);
-          end
+    case 2% Univariate Kalman filter.
+      if no_correlation_flag
+          LIK = univariate_kalman_filter(T,R,Q,H,Pstar,Y,start,mf,kalman_tol,riccati_tol,data_index,number_of_observations,no_more_missing_observations);
       else
-          disp(['The univariate approach is not yet implemented for models with missing observations'])
+          LIK = univariate_kalman_filter_corr(T,R,Q,H,Pstar,Y,start,mf,kalman_tol,riccati_tol,data_index,number_of_observations,no_more_missing_observations);
       end      
     case 3% Diffuse Kalman filter.
       if nargin==3
@@ -310,7 +304,7 @@ function [fval,cost_flag,ys,trend_coeff,info] = DsgeLikelihood(xparam1,gend,data
               end
           end
       else
-          disp(['The univariate approach is not yet implemented for models with missing observations'])
+          disp(['The diffuse filter is not yet implemented for models with missing observations'])
       end
     case 4% Univariate diffuse kalman filter.
       data1 = data - trend;
@@ -338,80 +332,3 @@ function [fval,cost_flag,ys,trend_coeff,info] = DsgeLikelihood(xparam1,gend,data
   lnprior = priordens(xparam1,bayestopt_.pshape,bayestopt_.p1,bayestopt_.p2,bayestopt_.p3,bayestopt_.p4);
   fval    = (likelihood-lnprior);
   options_.kalman_algo = kalman_algo;
-  
-  
-  
-% $$$   if any(any(H ~= 0)) % should be replaced by a flag
-% $$$       if kalman_algo == 1
-% $$$           LIK = DiffuseLikelihoodH1(T,R,Q,H,Pinf,Pstar,data,trend,start);
-% $$$           if isinf(LIK)
-% $$$               kalman_algo = 2;
-% $$$               if ~estim_params_.ncn 
-% $$$                   %% The univariate approach considered here doesn't 
-% $$$                   %%	apply when H has some off-diagonal elements.
-% $$$                   LIK = DiffuseLikelihoodH3(T,R,Q,H,Pinf,Pstar,data,trend,start);
-% $$$               else
-% $$$                   LIK = DiffuseLikelihoodH3corr(T,R,Q,H,Pinf,Pstar,data,trend,start);
-% $$$               end
-% $$$           end
-% $$$       elseif kalman_algo == 2
-% $$$           if ~estim_params_.ncn
-% $$$               %% The univariate approach considered here doesn't 
-% $$$               %%	apply when H has some off-diagonal elements.
-% $$$               LIK = DiffuseLikelihoodH3(T,R,Q,H,Pinf,Pstar,data,trend,start);
-% $$$           else
-% $$$               LIK = DiffuseLikelihoodH3corr(T,R,Q,H,Pinf,Pstar,data,trend,start);
-% $$$           end
-% $$$       elseif kalman_algo == 3
-% $$$           data1 = data - trend;
-% $$$           LIK = DiffuseLikelihoodH1_Z(ST,Z,R1,Q,H,Pinf,Pstar,data1,start);
-% $$$           if isinf(LIK)
-% $$$               kalman_algo = 4;
-% $$$               if ~estim_params_.ncn 
-% $$$                   %% The univariate approach considered here doesn't 
-% $$$                   %%	apply when H has some off-diagonal elements.
-% $$$                   LIK = DiffuseLikelihoodH3_Z(ST,Z,R1,Q,H,Pinf,Pstar,data1,trend,start);
-% $$$               else
-% $$$                   LIK = DiffuseLikelihoodH3corr_Z(ST,Z,R1,Q,H,Pinf,Pstar,data1,trend,start);
-% $$$               end
-% $$$           end
-% $$$       elseif kalman_algo == 4
-% $$$           data1 = data - trend;
-% $$$           if ~estim_params_.ncn 
-% $$$               %% The univariate approach considered here doesn't 
-% $$$               %%	apply when H has some off-diagonal elements.
-% $$$               LIK = DiffuseLikelihoodH3_Z(ST,Z,R1,Q,H,Pinf,Pstar,data1,trend,start);
-% $$$           else
-% $$$               LIK = DiffuseLikelihoodH3corr_Z(ST,Z,R1,Q,H,Pinf,Pstar,data1,trend,start);
-% $$$           end
-% $$$       end 
-% $$$   else
-% $$$       if kalman_algo == 1
-% $$$           test_kalman_filter = 1;
-% $$$           LIK = DiffuseLikelihood1(T,R,Q,Pinf,Pstar,data,trend,start);
-% $$$           if test_kalman_filter
-% $$$               data1 = data-trend;
-% $$$               LIKbis = kalman_filter(T,R,Q,Pinf,Pstar,data,start, ...
-% $$$                                     bayestopt_.mf1, ...
-% $$$                                     options_.kalman_tol,options_.riccati_tol);%data_index,number_of_observations)
-% $$$               LIK-LIKbis
-% $$$               pause
-% $$$           end
-% $$$           if isinf(LIK)
-% $$$               kalman_algo = 2;
-% $$$               LIK = DiffuseLikelihood3(T,R,Q,Pinf,Pstar,data,trend,start);
-% $$$           end
-% $$$       elseif kalman_algo == 2 
-% $$$           LIK = DiffuseLikelihood3(T,R,Q,Pinf,Pstar,data,trend,start);
-% $$$       elseif kalman_algo == 3
-% $$$           data1 = data - trend;
-% $$$           LIK = DiffuseLikelihood1_Z(ST,Z,R1,Q,Pinf,Pstar,data1,start);
-% $$$           if isinf(LIK)
-% $$$               kalman_algo = 4;
-% $$$               LIK = DiffuseLikelihood3_Z(ST,Z,R1,Q,Pinf,Pstar,data1,start);
-% $$$           end
-% $$$       elseif kalman_algo == 4
-% $$$           data1 = data - trend;
-% $$$           LIK = DiffuseLikelihood3_Z(ST,Z,R1,Q,Pinf,Pstar,data1,start);
-% $$$       end 	
-% $$$   end
