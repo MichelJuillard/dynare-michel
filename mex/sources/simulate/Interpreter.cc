@@ -598,10 +598,10 @@ Interpreter::simulate_a_block(int size,int type, string file_name, string bin_ba
   //mexPrintf("simulate_a_block size=%d type=%d\n",size,type);
   switch (type)
     {
-      case EVALUATE_FOREWARD :
-      case EVALUATE_FOREWARD_R :
+      case EVALUATE_FORWARD :
+      case EVALUATE_FORWARD_R :
 #ifdef DEBUGC
-        mexPrintf("EVALUATE_FOREWARD\n");
+        mexPrintf("EVALUATE_FORWARD\n");
 #endif
         begining=get_code_pointer;
         for (it_=y_kmin;it_<periods+y_kmin;it_++)
@@ -632,9 +632,9 @@ Interpreter::simulate_a_block(int size,int type, string file_name, string bin_ba
 #endif
           }
         break;
-      case SOLVE_FOREWARD_SIMPLE :
+      case SOLVE_FORWARD_SIMPLE :
 #ifdef DEBUGC
-        mexPrintf("SOLVE_FOREWARD_SIMPLE\n");
+        mexPrintf("SOLVE_FORWARD_SIMPLE\n");
 #endif
         g1=(double*)mxMalloc(size*size*sizeof(double));
         r=(double*)mxMalloc(size*sizeof(double));
@@ -778,9 +778,9 @@ Interpreter::simulate_a_block(int size,int type, string file_name, string bin_ba
             Direct_Simulate(Block_Count, symbol_table_endo_nbr, it_, y_kmin, y_kmax,size, periods, true, iter);
           }
         break;
-      case SOLVE_FOREWARD_COMPLETE :
+      case SOLVE_FORWARD_COMPLETE :
 #ifdef DEBUGC
-        mexPrintf("SOLVE_FOREWARD_COMPLETE\n");
+        mexPrintf("SOLVE_FORWARD_COMPLETE\n");
 #endif
         is_linear=get_code_bool;
         max_lag_plus_max_lead_plus_1=get_code_int;
