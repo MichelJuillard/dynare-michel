@@ -1,7 +1,7 @@
-Experience.Number0fObservedVariables = 10;
-Experience.SizeOfTheStateVector = 100;
-Experience.NumberOfStructuralShocks = 12;
-Experience.MeasurementErrors = 0;
+Experience.Number0fObservedVariables = 50;
+Experience.SizeOfTheStateVector = 70;
+Experience.NumberOfStructuralShocks = 50;
+Experience.MeasurementErrors = 2;
 Experience.NumberOfPeriods = 300;
 Experience.PercentageOfMissingObservations = 0;
 Experience.PeriodsWithMissingObservations = 0;

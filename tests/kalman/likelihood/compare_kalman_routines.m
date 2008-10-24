@@ -20,23 +20,6 @@ riccati_tol =1e-9;
 start = 1;
 
 
-%% BUILD DATA SET (zero mean):
-Y = randn(pp,gend);
-if PeriodsWithMissingObservations
-    data_1 = Y(:,1:PeriodsWithMissingObservations)';
-    if PeriodsWithMissingObservations<gend
-        data_2 = Y(:,PeriodsWithMissingObservations+1:end);
-    else
-        data_2 = [];
-    end
-    tmp = randperm(1:PeriodsWithMissingObservations*pp);
-    tmp = tmp(1:round(PercentageOfMissingObservations*length(tmp)));
-    data_1(tmp) = NaN;
-    Y = [ transpose(data_1) ; data_2 ];
-end
-
-[data_index,number_of_observations,no_more_missing_observations] = describe_missing_data(Y,gend,pp);
-
 
 %% SET THE STATE SPACE MODEL:
 
@@ -64,12 +47,42 @@ elseif measurement_error_flag == 2
 else
     disp('compare_kalman_routines:: Unknown option!')
 end
-% Set the selec tion vector (mf) 
+% Set the selection vector (mf) 
 MF = transpose(randperm(mm));
 mf = MF(1:pp);
 
 P = lyapunov_symm(T,R*Q*R',1.000001);
 
+
+%% BUILD DATA SET (zero mean):
+
+if measurement_error_flag == 0
+    Y = simul_state_space_model(T,R,Q,mf,gend);
+elseif measurement_error_flag == 1
+    H = rand(pp,1);
+    Y = simul_state_space_model(T,R,Q,mf,gend,diag(H));
+elseif measurement_error_flag == 2
+    E = randn(pp,20*pp);
+    H = E*transpose(E)/(20*pp);
+    Y = simul_state_space_model(T,R,Q,mf,gend,H);
+else
+    disp('compare_kalman_routines:: Unknown option!')
+end
+
+if PeriodsWithMissingObservations
+    data_1 = Y(:,1:PeriodsWithMissingObservations)';
+    if PeriodsWithMissingObservations<gend
+        data_2 = Y(:,PeriodsWithMissingObservations+1:end);
+    else
+        data_2 = [];
+    end
+    tmp = randperm(1:PeriodsWithMissingObservations*pp);
+    tmp = tmp(1:round(PercentageOfMissingObservations*length(tmp)));
+    data_1(tmp) = NaN;
+    Y = [ transpose(data_1) ; data_2 ];
+end
+
+[data_index,number_of_observations,no_more_missing_observations] = describe_missing_data(Y,gend,pp);
 
 if PeriodsWithMissingObservations==0
     
@@ -81,7 +94,7 @@ if PeriodsWithMissingObservations==0
     elseif measurement_error_flag==2
         HH = H;
     end
-    instant0 = clock;  
+    instant0 = clock;
     [LIK1,lik1] = kalman_filter(T,R,Q,HH,P,Y,start,mf,kalman_tol,riccati_tol);
     T1 = etime(clock, instant0);
     disp(['kalman_filter = ' num2str(T1)])
@@ -104,13 +117,20 @@ if PeriodsWithMissingObservations==0
     if measurement_error_flag==0
         HH = zeros(pp,pp);
     elseif measurement_error_flag==1
-        HH = diag(H);
+        HH = H;
     elseif measurement_error_flag==2
-        error('The univariate approach cannot handle correlated measurement errors')
+        HH = H;
     end
-    instant0 = clock;
-    [LIK3,lik3] = univariate_kalman_filter(T,R,Q,HH,P,Y,start,mf,kalman_tol,riccati_tol,data_index,number_of_observations,no_more_missing_observations);
-    T3 = etime(clock, instant0);
+    if measurement_error_flag<2
+        instant0 = clock;
+        [LIK3,lik3] = univariate_kalman_filter(T,R,Q,HH,P,Y,start,mf,kalman_tol,riccati_tol,data_index,number_of_observations,no_more_missing_observations);
+        T3 = etime(clock, instant0);
+    else
+        instant0 = clock;
+        [LIK3,lik3] = univariate_kalman_filter_corr(T,R,Q,HH,P,Y,start,mf,kalman_tol,riccati_tol,data_index,number_of_observations,no_more_missing_observations);
+        T3 = etime(clock, instant0);
+    end
+    
     disp(['univariate_kalman_filter = ' num2str(T3)])
     
     disp(' ')
@@ -127,7 +147,8 @@ if PeriodsWithMissingObservations==0
     else
         disp('univariate version is wrong')
         disp(['percentage dev. = ' num2str((LIK3/LIK1-1)*100)])
-        [lik1/lik1(end),lik3/lik3(end)]        
+        %[lik1,lik3,lik1-lik3]        
+        %[lik1-lik3]
     end
 else
     % missing_observations_kalman_filter.m
@@ -147,7 +168,7 @@ else
     if measurement_error_flag==0
         HH = zeros(pp,pp);
     elseif measurement_error_flag==1
-        HH = diag(H);
+        HH = H;
     elseif measurement_error_flag==2
         error('The univariate approach cannot handle correlated measurement errors')
     end
@@ -159,10 +180,11 @@ else
     disp(' ')
     disp(' ')
     
-    if abs(LIK2-LIK3)<1e-12
+    if abs(LIK3/LIK2-1)<1e-9
         disp('univariate version is Ok')
     else
-        LIK1-LIK3
+        disp('univariate version is wrong')
+        disp(['percentage dev. = ' num2str((LIK3/LIK2-1)*100)])        
     end
 end
     
