@@ -646,7 +646,7 @@ elseif ~any(bayestopt_.pshape > 0) & options_.posterior_mode_estimation
   for i = 1:nx
     tstath(i) = abs(xparam1(i))/stdh(i);
   end
-  tit1 = sprintf('%10s %10s %7s %6\n',' ','Estimate','s.d.','t-stat');
+  tit1 = sprintf('%10s %10s %7s %6s\n',' ','Estimate','s.d.','t-stat');
   if np
     ip = nvx+nvn+ncx+ncn+1;
     disp('parameters')
