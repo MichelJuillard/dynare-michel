@@ -625,7 +625,7 @@ if any(bayestopt_.pshape > 0) & options_.posterior_mode_estimation
     end
   end
   %% Laplace approximation to the marginal log density:
-  estim_params_nbr = size(xparam1);
+  estim_params_nbr = size(xparam1,1);
   scale_factor = -sum(log10(diag(invhess)));
   log_det_invhess = -estim_params_nbr*log(scale_factor)+log(det(scale_factor*invhess));
   if ~options_.bvar_dsge
@@ -646,7 +646,7 @@ elseif ~any(bayestopt_.pshape > 0) & options_.posterior_mode_estimation
   for i = 1:nx
     tstath(i) = abs(xparam1(i))/stdh(i);
   end
-  tit1 = sprintf('%10s %10s %7s %6s\n',' ','Estimate','s.d.','t-stat');
+  tit1 = sprintf('%10s %10s %7s %6\n',' ','Estimate','s.d.','t-stat');
   if np
     ip = nvx+nvn+ncx+ncn+1;
     disp('parameters')
@@ -659,7 +659,7 @@ elseif ~any(bayestopt_.pshape > 0) & options_.posterior_mode_estimation
       eval(['oo_.mle_std.parameters.' name ' = stdh(ip);']); 
       ip = ip+1;
     end
-  end
+  end 
   if nvx
     ip = 1;
     disp('standard deviation of shocks')
