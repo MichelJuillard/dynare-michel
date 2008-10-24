@@ -23,34 +23,18 @@ function [dr,info,M_,options_,oo_] = dr11_sparse(dr,task,M_,options_,oo_, jacobi
     kstate = dr.kstate;
     kad = dr.kad;
     kae = dr.kae;
-    %kstate
-    %kad
-    %kae
     nstatic = dr.nstatic;
     nfwrd = dr.nfwrd;
     npred = dr.npred;
     nboth = dr.nboth;
-    %nstatic
-    %nfwrd
-    %npred
-    %nboth
     order_var = dr.order_var;
-    %order_var
     nd = size(kstate,1);
-    %nd
     nz = nnz(M_.lead_lag_incidence);
-    %nz
     
     sdyn = M_.endo_nbr - nstatic;
-    %sdyn
-%    M_.lead_lag_incidence
     k0 = M_.lead_lag_incidence(M_.maximum_endo_lag+1,order_var);
     k1 = M_.lead_lag_incidence(find([1:klen] ~= M_.maximum_endo_lag+1),:);
-%    size(jacobia_)
-%    k0
-    %k1
     b = jacobia_(:,k0);
-    %full(b)
     
     if M_.maximum_endo_lead == 0;  % backward models
         a = jacobia_(:,nonzeros(k1'));
@@ -75,7 +59,6 @@ function [dr,info,M_,options_,oo_] = dr11_sparse(dr,task,M_,options_,oo_, jacobi
         end
         return;
     end
-    
     %forward--looking models
     if nstatic > 0
         [Q,R] = qr(b(:,1:nstatic));
@@ -83,14 +66,8 @@ function [dr,info,M_,options_,oo_] = dr11_sparse(dr,task,M_,options_,oo_, jacobi
     else
         aa = jacobia_;
     end
-%    full(aa)
     a = aa(:,nonzeros(k1'));
     b = aa(:,k0);
-    %M_.lead_lag_incidence
-    %k0
-    %k1
-    %a
-    %b
     b10 = b(1:nstatic,1:nstatic);
     b11 = b(1:nstatic,nstatic+1:end);
     b2 = b(nstatic+1:end,nstatic+1:end);
@@ -100,9 +77,9 @@ function [dr,info,M_,options_,oo_] = dr11_sparse(dr,task,M_,options_,oo_, jacobi
     end
     
     % buildind D and E
+    %nd
     d = zeros(nd,nd) ;
     e = d ;
-    
     k = find(kstate(:,2) >= M_.maximum_endo_lag+2 & kstate(:,3));
     d(1:sdyn,k) = a(nstatic+1:end,kstate(k,3)) ;
     k1 = find(kstate(:,2) == M_.maximum_endo_lag+2);
@@ -124,10 +101,6 @@ function [dr,info,M_,options_,oo_] = dr11_sparse(dr,task,M_,options_,oo_, jacobi
     
     [ss,tt,w,sdim,dr.eigval,info1] = mjdgges(e,d,options_.qz_criterium);
     
-    %ss
-    %tt
-    %sdim
-    %fprintf('%20.16f\n',dr.eigval)
     
     if info1
         info(1) = 2;
@@ -138,14 +111,13 @@ function [dr,info,M_,options_,oo_] = dr11_sparse(dr,task,M_,options_,oo_, jacobi
     nba = nd-sdim;
     
     nyf = sum(kstate(:,2) > M_.maximum_endo_lag+1);
-    %disp(['task' num2str(task)]);
+
     if task == 1
         dr.rank = rank(w(1:nyf,nd-nyf+1:end));
         % Under Octave, eig(A,B) doesn't exist, and
         % lambda = qz(A,B) won't return infinite eigenvalues
         if ~exist('OCTAVE_VERSION')
             dr.eigval = eig(e,d);
-%            dr.eigval
         end
         return
     end

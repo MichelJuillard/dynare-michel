@@ -17,7 +17,7 @@ rho_ys = 0.9;
 rho_pies = 0.7;
 
 
-//model(sparse_dll,gcc_compiler,cutoff=1e-17);
+//model(sparse_dll,cutoff=1e-17);
 model(sparse);
 //model;
 y = y(+1) - (tau +alpha*(2-alpha)*(1-tau))*(R-pie(+1))-alpha*(tau +alpha*(2-alpha)*(1-tau))*dq(+1) + alpha*(2-alpha)*((1-tau)/tau)*(y_s-y_s(+1))-A(+1);
@@ -68,7 +68,7 @@ estimation(datafile=data_ca1,first_obs=8,nobs=79,mh_nblocks=10,prefilter=1,mh_js
 */
 
 steady;
-model_info;
+//model_info;
 check;
 
 shocks;
@@ -77,6 +77,6 @@ periods 1;
 values 0.5;
 end;
 
-simul(periods=200,method=bicgstab);
-rplot A;
-rplot pie;
+//simul(periods=200,method=bicgstab);
+//rplot A;
+//rplot pie;

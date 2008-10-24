@@ -214,11 +214,12 @@ function [dr,info,M_,options_,oo_] = dr1_sparse(dr,task,M_,options_,oo_)
                  dr.nyf = 0;
                  dr.rank = 0;
                  for i=1:length(M_.block_structure.block)
-                     %disp(['block ' num2str(i)]);
                      M_.block_structure.block(i).dr.Null=0;
                      M_.block_structure.block(i).dr=set_state_space(M_.block_structure.block(i).dr,M_.block_structure.block(i));
-                     jcb_=jacobia_(M_.block_structure.block(i).equation,repmat(M_.block_structure.block(i).variable,1,M_.block_structure.block(i).maximum_endo_lag+M_.block_structure.block(i).maximum_endo_lead+1)+kron([M_.maximum_endo_lag-M_.block_structure.block(i).maximum_endo_lag:M_.maximum_endo_lag+M_.block_structure.block(i).maximum_endo_lead],M_.endo_nbr*ones(1,M_.block_structure.block(i).endo_nbr)));
-                     jcb_=jcb_(:,find(any(jcb_,1)));
+                     col_selector=repmat(M_.block_structure.block(i).variable,1,M_.block_structure.block(i).maximum_endo_lag+M_.block_structure.block(i).maximum_endo_lead+1)+kron([M_.maximum_endo_lag-M_.block_structure.block(i).maximum_endo_lag:M_.maximum_endo_lag+M_.block_structure.block(i).maximum_endo_lead],M_.endo_nbr*ones(1,M_.block_structure.block(i).endo_nbr));
+                     row_selector = M_.block_structure.block(i).equation;
+                     jcb_=jacobia_(row_selector,col_selector);
+                     jcb_ = jcb_(:,find(M_.block_structure.block(i).lead_lag_incidence'))   ;
                      hss_=0; %hessian(M_.block_structure.block(i).equation,M_.block_structure.block(i).variable);
                      dra = M_.block_structure.block(i).dr;
                      M_.block_structure.block(i).exo_nbr=M_.exo_nbr;

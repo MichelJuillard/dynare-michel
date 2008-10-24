@@ -18,7 +18,7 @@
 //
 // Michel Juillard, February 2004
 
-var m P c e W R k d n l gy_obs gp_obs y dA;
+var m P c e W R k d n l gy_obs gp_obs y dA vv ww;
 varexo e_a e_m;
 
 parameters alp bet gam mst rho psi del;
@@ -48,6 +48,19 @@ e = exp(e_a);
 y = k(-1)^alp*n^(1-alp)*exp(-alp*(gam+e_a));
 gy_obs = dA*y/y(-1);
 gp_obs = (P/P(-1))*m(-1)/dA;
+vv = 0.2*ww+0.5*vv(-1)+1;
+ww = 0.1*vv+0.5*ww(-1)+2;
+/* A lt=
+ 0.5*vv-0.2*ww = 1
+-0.1*vv+0.5*ww = 2
+[ 0.5 -0.2][vv]   [1]
+                =
+[-0.1  0.5][ww]   [2]
+det = 0.25-0.02 = 0.23
+[vv]           [0.5  0.2] [1]           [0.9]   [3.91304]
+     = 1/0.23*                = 1/0.23*       = 
+[ww]           [0.1  0.5] [2]           [1.1]   [4.7826]
+*/
 end;
 
 initval;
@@ -67,6 +80,8 @@ gp_obs = exp(-gam);
 dA = exp(gam);
 e_a=0;
 e_m=0;
+vv = 0;
+ww = 0;
 end;
 
 /*shocks;
