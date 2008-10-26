@@ -78,7 +78,7 @@ QQ      	= R*Q*transpose(R);
 QRt			= Q*transpose(R);
 alphahat   	= zeros(mm,smpl);
 etahat	   	= zeros(rr,smpl);
-r 		   	= zeros(mm,smpl);
+r	   	= zeros(mm,smpl+1);
 
 Z = zeros(pp,mm);
 for i=1:pp;
@@ -152,33 +152,26 @@ while t<smpl
     v(:,t) = Y(:,t) - a(mf,t) - trend(:,t);
     atilde(:,t) = a(:,t) + PZI*v(:,t);
     a(:,t+1) = T*a(:,t) + K_s*v(:,t);
-    aK(1,:,t+1) 	 	= a(:,t+1);
+    aK(1,:,t+1) = a(:,t+1);
     for jnk=2:nk,
-        aK(jnk,:,t+jnk) 	 	= T^(jnk-1)*a(:,t+1);
+        aK(jnk,:,t+jnk) = T^(jnk-1)*a(:,t+1);
     end
 end
 t = smpl+1;
-while t>d+1 & t>2
-	t = t-1;
-    r(:,t-1) = transpose(Z)*iF(:,:,t)*v(:,t) + transpose(L(:,:,t))*r(:,t);
-    alphahat(:,t)	= a(:,t) + P(:,:,t)*r(:,t-1);
-	etahat(:,t)		= QRt*r(:,t);
+while t>d+1
+    t = t-1;
+    r(:,t) = Z'*iF(:,:,t)*v(:,t) + L(:,:,t)'*r(:,t+1);
+    alphahat(:,t)	= a(:,t) + P(:,:,t)*r(:,t);
+    etahat(:,t)		= QRt*r(:,t);
 end
 if d
-	r0 = zeros(mm,d); r0(:,d) = r(:,d);
-	r1 = zeros(mm,d);
-	for t = d:-1:2
-    	r0(:,t-1) = transpose(Linf(:,:,t))*r0(:,t);
-		r1(:,t-1) = transpose(Z)*(iFinf(:,:,t)*v(:,t)-transpose(Kstar(:,:,t))*r0(:,t)) + transpose(Linf(:,:,t))*r1(:,t);
-		alphahat(:,t)	= a(:,t) + Pstar(:,:,t)*r0(:,t-1) + Pinf(:,:,t)*r1(:,t-1);
-		etahat(:,t)		= QRt*r0(:,t);
-	end
-	r0_0 = transpose(Linf(:,:,1))*r0(:,1);
-	r1_0 = transpose(Z)*(iFinf(:,:,1)*v(:,1)-transpose(Kstar(:,:,1))*r0(:,1)) + transpose(Linf(:,:,1))*r1(:,1);
-	alphahat(:,1)  	= a(:,1) + Pstar(:,:,1)*r0_0 + Pinf(:,:,1)*r1_0;
-	etahat(:,1)		= QRt*r0(:,1);
-else
-    r0 = transpose(Z)*iF(:,:,1)*v(:,1) + transpose(L(:,:,1))*r(:,1);
-    alphahat(:,1)	= a(:,1) + P(:,:,1)*r0;
-    etahat(:,1)	= QRt*r(:,1);
+    r0 = zeros(mm,d+1); 
+    r0(:,d+1) = r(:,d+1);
+    r1 = zeros(mm,d+1);
+    for t = d:-1:1
+    	r0(:,t) = Linf(:,:,t)'*r0(:,t+1);
+        r1(:,t) = Z'*(iFinf(:,:,t)*v(:,t)-Kstar(:,:,t)'*r0(:,t+1)) + Linf(:,:,t)'*r1(:,t+1);
+        alphahat(:,t)	= a(:,t) + Pstar(:,:,t)*r0(:,t) + Pinf(:,:,t)*r1(:,t);
+        etahat(:,t)	= QRt*r0(:,t);
+    end
 end

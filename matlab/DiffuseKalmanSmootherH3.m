@@ -87,15 +87,15 @@ Pinf    	= zeros(spinf(1),spinf(2),smpl_diff+1); Pinf(:,:,1) = Pinf1;
 Pstar1 		= Pstar;
 Pinf1  		= Pinf;
 crit   	 	= options_.kalman_tol;
-crit1       = 1.e-6;
+crit1           = 1.e-6;
 steady  	= smpl;
 rr      	= size(Q,1);
 QQ      	= R*Q*transpose(R);
-QRt			= Q*transpose(R);
+QRt		= Q*transpose(R);
 alphahat   	= zeros(mm,smpl);
 etahat	   	= zeros(rr,smpl);
 epsilonhat      = zeros(size(Y));
-r 		   	= zeros(mm,smpl);
+r 		= zeros(mm,smpl+1);
 
 Z = zeros(pp,mm);
 for i=1:pp;
@@ -237,65 +237,42 @@ while t<smpl
     aK(jnk,:,t+jnk)	= T^jnk*a(:,t);
   end
 end
-ri=r;
+ri=zeros(mm,1);
 t = smpl+1;
-while t>d+1 & t>2,
+while t>d+1
   t = t-1;
   for i=pp:-1:1
     if Fi(i,t) > crit
-      ri(:,t)=transpose(Z(i,:))/Fi(i,t)*v(i,t)+transpose(Li(:,:,i,t))*ri(:,t);
+      ri=Z(i,:)'/Fi(i,t)*v(i,t)+Li(:,:,i,t)'*ri;
     end
   end
-  r(:,t-1) = ri(:,t);
-  alphahat(:,t)	= a1(:,t) + P1(:,:,t)*r(:,t-1);
+  r(:,t) = ri;
+  alphahat(:,t)	= a1(:,t) + P1(:,:,t)*r(:,t);
   etahat(:,t)		= QRt*r(:,t);
-  ri(:,t-1) = transpose(T)*ri(:,t);
+  ri = T'*ri;
 end
 if d
-  r0 = zeros(mm,d); r0(:,d) = ri(:,d);
+  r0 = zeros(mm,d); 
+  r0(:,d) = ri;
   r1 = zeros(mm,d);
-  for t = d:-1:2
+  for t = d:-1:1
     for i=pp:-1:1
       if Finf(i,t) > crit & ~(t==d & i>options_.diffuse_d),  % use of options_.diffuse_d to be sure of DKF termination
-					     %r1(:,t) = transpose(Z)*v(:,t)/Finf(i,t) + ... BUG HERE in transpose(Z)
-					     r1(:,t) = transpose(Z(i,:))*v(i,t)/Finf(i,t) + ...
-						       transpose(L0(:,:,i,t))*r0(:,t) + transpose(Linf(:,:,i,t))*r1(:,t);
-					     r0(:,t) = transpose(Linf(:,:,i,t))*r0(:,t);
+          r1(:,t) = Z(i,:)'*v(i,t)/Finf(i,t) + ...
+                    L0(:,:,i,t)'*r0(:,t) + Linf(:,:,i,t)'*r1(:,t);
+          r0(:,t) = Linf(:,:,i,t)'*r0(:,t);
       elseif Fstar(i,t) > crit % step needed whe Finf == 0
-	r0(:,t)=transpose(Z(i,:))/Fstar(i,t)*v(i,t)+Li(:,:,i,t)'*r0(:,t);
+	r0(:,t)=Z(i,:)'/Fstar(i,t)*v(i,t)+Li(:,:,i,t)'*r0(:,t);
       end
     end
     alphahat(:,t)	= a1(:,t) + Pstar1(:,:,t)*r0(:,t) + Pinf1(:,:,t)*r1(:,t);
-    r(:,t-1)		= r0(:,t);
+    r(:,t)		= r0(:,t);
     etahat(:,t)		= QRt*r(:,t);
-    r0(:,t-1) = transpose(T)*r0(:,t);
-    r1(:,t-1) = transpose(T)*r1(:,t);
-  end
-  r0_0 = r0(:,1);
-  r1_0 = r1(:,1);
-  for i=pp:-1:1
-    if Finf(i,1) > crit,
-      %r1_0 = transpose(Z)*v(:,1)/Finf(i,1) + ... %bug with Z here
-      r1_0 = transpose(Z(i,:))*v(i,1)/Finf(i,1) + ...
-	     transpose(L0(:,:,i,1))*r0_0 + transpose(Linf(:,:,i,1))*r1_0;
-      r0_0 = transpose(Linf(:,:,i,1))*r0_0;
-    elseif Fstar(i,1) > crit, % step needed when Finf=0
-      r0_0=transpose(Z(i,:))/Fstar(i,1)*v(i,1)+Li(:,:,i,1)'*r0_0;
+    if t > 1
+        r0(:,t-1) = transpose(T)*r0(:,t);
+        r1(:,t-1) = transpose(T)*r1(:,t);
     end
   end
-  %alphahat(:,1)  	= a(:,1) + Pstar(:,:,1)*r0_0 + Pinf(:,:,1)*r1_0; %this line is buggy
-  alphahat(:,1)  	= a1(:,1) + Pstar1(:,:,1)*r0_0 + Pinf1(:,:,1)*r1_0;
-  etahat(:,1)		= QRt*r(:,1);
-else
-  r0 = ri(:,1);
-  for i=pp:-1:1
-    if Fi(i,1) > crit
-      r0=transpose(Z(i,:))/Fi(i,1)*v(i,1)+transpose(Li(:,:,i,1))*r0;
-    end
-  end 
-  %alphahat(:,1)	= a(:,1) + P(:,:,1)*r0;  % this line is buggy
-  alphahat(:,1)	= a1(:,1) + P1(:,:,1)*r0;
-  etahat(:,1)	= QRt*r(:,1);
 end
 epsilonhat = Y-alphahat(mf,:)-trend;
 

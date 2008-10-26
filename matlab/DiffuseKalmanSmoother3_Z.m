@@ -243,26 +243,28 @@ while t<smpl
       PK(jnk,:,:,t+jnk) = Pf;
   end
 end
-ri=r;
+ri=zeros(mm,1);
 t = smpl+1;
-while t>d+1 & t>2,
+while t > d+1
   t = t-1;
   for i=pp:-1:1
     if Fi(i,t) > crit
-      ri(:,t) = Z(i,:)'/Fi(i,t)*v(i,t)+Li(:,:,i,t)'*ri(:,t);
+      ri = Z(i,:)'/Fi(i,t)*v(i,t)+Li(:,:,i,t)'*ri;
     end
   end
-  r(:,t-1) = ri(:,t);
-  alphahat(:,t) = a1(:,t) + P1(:,:,t)*r(:,t-1);
+  r(:,t) = ri;
+  alphahat(:,t) = a1(:,t) + P1(:,:,t)*r(:,t);
   etahat(:,t) = QRt*r(:,t);
-  ri(:,t-1) = T'*ri(:,t);
+  ri = T'*ri;
 end
 if d
-  r0 = zeros(mm,d); r0(:,d) = ri(:,d);
+  r0 = zeros(mm,d); 
+  r0(:,d) = ri;
   r1 = zeros(mm,d);
-  for t = d:-1:2
+  for t = d:-1:1
     for i=pp:-1:1
-      if Finf(i,t) > crit & ~(t==d & i>options_.diffuse_d),  % use of options_.diffuse_d to be sure of DKF termination
+%      if Finf(i,t) > crit & ~(t==d & i>options_.diffuse_d),  % use of options_.diffuse_d to be sure of DKF termination
+      if Finf(i,t) > crit 
         r1(:,t) = Z(i,:)'*v(i,t)/Finf(i,t) + ...
           L0(:,:,i,t)'*r0(:,t) + Linf(:,:,i,t)'*r1(:,t);
         r0(:,t) = Linf(:,:,i,t)'*r0(:,t);
@@ -270,34 +272,14 @@ if d
         r0(:,t) = Z(i,:)'/Fstar(i,t)*v(i,t)+Li(:,:,i,t)'*r0(:,t);
       end
     end
-    alphahat(:,t)       = a1(:,t) + Pstar1(:,:,t)*r0(:,t) + Pinf1(:,:,t)*r1(:,t);
-    r(:,t-1)            = r0(:,t);
-    etahat(:,t)         = QRt*r(:,t);
-    r0(:,t-1) = T'*r0(:,t);
-    r1(:,t-1) = T'*r1(:,t);
-  end
-  r0_0 = r0(:,1);
-  r1_0 = r1(:,1);
-  for i=pp:-1:1
-    if Finf(i,1) > crit,
-      r1_0 = Z(i,:)'*v(i,1)/Finf(i,1) + ...
-        L0(:,:,i,1)'*r0_0 + Linf(:,:,i,1)'*r1_0;
-      r0_0 = Linf(:,:,i,1)'*r0_0;
-    elseif Fstar(i,1) > crit, % step needed when Finf=0
-      r0_0=Z(i,:)'/Fstar(i,1)*v(i,1)+Li(:,:,i,1)'*r0_0;
+    alphahat(:,t) = a1(:,t) + Pstar1(:,:,t)*r0(:,t) + Pinf1(:,:,t)*r1(:,t);
+    r(:,t)        = r0(:,t);
+    etahat(:,t)   = QRt*r(:,t);
+    if t > 1
+        r0(:,t-1) = T'*r0(:,t);
+        r1(:,t-1) = T'*r1(:,t);
     end
   end
-  alphahat(:,1)         = a1(:,1) + Pstar1(:,:,1)*r0_0 + Pinf1(:,:,1)*r1_0;
-  etahat(:,1)           = QRt*r(:,1);
-else
-  r0 = ri(:,1);
-  for i=pp:-1:1
-    if Fi(i,1) > crit
-      r0 = Z(i,:)'/Fi(i,1)*v(i,1)+Li(:,:,i,1)'*r0;
-    end
-  end 
-  alphahat(:,1) = a1(:,1) + P1(:,:,1)*r0;
-  etahat(:,1)   = QRt*r(:,1);
 end
 
 if nargout > 7

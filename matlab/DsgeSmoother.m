@@ -108,15 +108,21 @@ function [alphahat,etahat,epsilonhat,ahat,SteadyState,trend_coeff,aK,T,R,P,PK,d,
   
   kalman_algo = options_.kalman_algo;
   if options_.lik_init == 1		% Kalman filter
-      kalman_algo = 1;
+      if kalman_algo ~= 2
+          kalman_algo = 1;
+      end
       Pstar = lyapunov_symm(T,R*Q*transpose(R),options_.qz_criterium);
       Pinf	= [];
   elseif options_.lik_init == 2 % Old Diffuse Kalman filter
-      kalman_algo = 1;
+      if kalman_algo ~= 2
+          kalman_algo = 1;
+      end
       Pstar = 10*eye(np);
       Pinf	= [];
   elseif options_.lik_init == 3 % Diffuse Kalman filter
-      kalman_algo = 3;
+      if kalman_algo ~= 4
+          kalman_algo = 3;
+      end
       [QT,ST] = schur(T);
       if exist('OCTAVE_VERSION') || matlab_ver_less_than('7.0.1')
           e1 = abs(my_ordeig(ST)) > 2-options_.qz_criterium;
@@ -212,31 +218,47 @@ function [alphahat,etahat,epsilonhat,ahat,SteadyState,trend_coeff,aK,T,R,P,PK,d,
                   DiffuseKalmanSmootherH3corr(T,R,Q,H,Pinf,Pstar,Y,trend, ...
                                               nobs,np,smpl,mf);
           end
-      elseif kalman_algo == 3
+      elseif kalman_algo == 3 | kalman_algo == 4
           data1 = Y - trend;
-          [alphahat,epsilonhat,etahat,ahat,aK] = ...
-              DiffuseKalmanSmootherH1_Z(ST,Z,R1,Q,H,Pinf,Pstar,data1,nobs,np,smpl);
-          if all(alphahat(:)==0)
-              kalman_algo = 4;
+          if kalman_algo == 3
+              [alphahat,epsilonhat,etahat,ahat,P,aK,PK,d,decomp] = ...
+                  DiffuseKalmanSmootherH1_Z(ST,Z,R1,Q,H,Pinf,Pstar,data1,nobs,np,smpl);
+              if all(alphahat(:)==0)
+                  kalman_algo = 4;
+                  if ~estim_params_.ncn
+                      [alphahat,epsilonhat,etahat,ahat,P,aK,PK,d,decomp] = ...
+                          DiffuseKalmanSmootherH3_Z(ST,Z,R1,Q,H,Pinf,Pstar,data1,nobs,np,smpl);
+                  else
+                      [alphahat,epsilonhat,etahat,ahat,P,aK,PK,d,decomp] = ...
+                          DiffuseKalmanSmootherH3corr_Z(ST,Z,R1,Q,H,Pinf,Pstar,data1, ...
+                                                        nobs,np,smpl);
+                  end
+              end
+          else
               if ~estim_params_.ncn
-                  [alphahat,epsilonhat,etahat,ahat,aK] = ...
-                      DiffuseKalmanSmootherH3_Z(ST,Z,R1,Q,H,Pinf,Pstar,data1,nobs,np,smpl);
+                  [alphahat,epsilonhat,etahat,ahat,P,aK,PK,d,decomp] = ...
+                      DiffuseKalmanSmootherH3_Z(ST,Z,R1,Q,H,Pinf,Pstar,data1, ...
+                                                nobs,np,smpl);
               else
-                  [alphahat,epsilonhat,etahat,ahat,aK] = ...
+                  [alphahat,epsilonhat,etahat,ahat,P,aK,PK,d,decomp] = ...
                       DiffuseKalmanSmootherH3corr_Z(ST,Z,R1,Q,H,Pinf,Pstar,data1, ...
                                                     nobs,np,smpl);
               end
           end
-      elseif kalman_algo == 4
-          data1 = Y - trend;
-          if ~estim_params_.ncn
-              [alphahat,epsilonhat,etahat,ahat,aK] = ...
-                  DiffuseKalmanSmootherH3_Z(ST,Z,R1,Q,H,Pinf,Pstar,data1, ...
-                                            nobs,np,smpl);
-          else
-              [alphahat,epsilonhat,etahat,ahat,aK] = ...
-                  DiffuseKalmanSmootherH3corr_Z(ST,Z,R1,Q,H,Pinf,Pstar,data1, ...
-                                                nobs,np,smpl);
+          alphahat = QT*alphahat;
+          ahat = QT*ahat;
+          nk = options_.nk;
+          for jnk=1:nk
+              aK(jnk,:,:) = QT*squeeze(aK(jnk,:,:));
+              for i=1:size(PK,4)
+                  PK(jnk,:,:,i) = QT*squeeze(PK(jnk,:,:,i))*QT';
+              end
+              for i=1:size(decomp,4)
+                  decomp(jnk,:,:,i) = QT*squeeze(decomp(jnk,:,:,i));
+              end
+          end
+          for i=1:size(P,4)
+              P(:,:,i) = QT*squeeze(P(:,:,i))*QT';
           end
       end
   else

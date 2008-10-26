@@ -85,7 +85,7 @@ QRt		 = Q*transpose(R);
 alphahat 	= zeros(mm+pp,smpl);
 etahat	 	= zeros(rr,smpl);
 epsilonhat 	= zeros(pp,smpl);
-r 		 	= zeros(mm+pp,smpl);
+r 		 	= zeros(mm+pp,smpl+1);
 Z = zeros(pp,mm+pp);
 for i=1:pp;
 	Z(i,mf(i)) = 1;
@@ -192,64 +192,43 @@ while t<smpl
 end
 
 %% [2] Kalman smoother...
-ri=r;
+ri=zeros(mm,1);
 t = smpl+1;
-while t>d+1 & t>2,
-	t = t-1;
-	for i=pp:-1:1
-		if Fi(i,t) > crit
-            ri(:,t)=transpose(Z(i,:))/Fi(i,t)*v(i,t)+transpose(Li(:,:,i,t))*ri(:,t);
+while t>d+1 
+    t = t-1;
+    for i=pp:-1:1
+        if Fi(i,t) > crit
+            ri=Z(i,:)'/Fi(i,t)*v(i,t)+Li(:,:,i,t)'*ri;
         end
     end
-    r(:,t-1) = ri(:,t);
-    alphahat(:,t)	= a1(:,t) + P1(:,:,t)*r(:,t-1);
-	tmp				= QRt*r(:,t);
-	etahat(:,t)		= tmp(1:rr);
-	epsilonhat(:,t)	= tmp(rr+1:rr+pp);
-    ri(:,t-1) = transpose(T)*ri(:,t);
+    r(:,t) = ri(:,t);
+    alphahat(:,t) = a1(:,t) + P1(:,:,t)*r(:,t);
+    tmp	  = QRt*r(:,t);
+    etahat(:,t)		= tmp(1:rr);
+    epsilonhat(:,t)	= tmp(rr+(1:pp));
+    ri = T'*ri;
 end
 if d
-	r0 = zeros(mm+pp,d); r0(:,d) = ri(:,d);
-	r1 = zeros(mm+pp,d);
-	for t = d:-1:2
+    r0 = zeros(mm+pp,d); 
+    r0(:,d) = ri;
+    r1 = zeros(mm+pp,d);
+    for t = d:-1:1
     	for i=pp:-1:1
-		    if Finf(i,t) > crit
-         		r1(:,t) = transpose(Z)*v(:,t)/Finf(i,t) + ...
-                    transpose(L0(:,:,i,t))*r0(:,t) + transpose(Linf(:,:,i,t))*r1(:,t);
+            if Finf(i,t) > crit
+                r1(:,t) = transpose(Z)*v(:,t)/Finf(i,t) + ...
+                          L0(:,:,i,t)'*r0(:,t) + Linf(:,:,i,t)'*r1(:,t);
                 r0(:,t) = transpose(Linf(:,:,i,t))*r0(:,t);
             end
         end
-		alphahat(:,t)	= a1(:,t) + Pstar1(:,:,t)*r0(:,t) + Pinf1(:,:,t)*r1(:,t);
-		r(:,t-1)		= r0(:,t);
-		tmp				= QRt*r(:,t);
-		etahat(:,t)		= tmp(1:rr);
-		epsilonhat(:,t)	= tmp(rr+1:rr+pp);
-        r0(:,t-1) = transpose(T)*r0(:,t);
-        r1(:,t-1) = transpose(T)*r1(:,t);
-	end
-	r0_0 = r0(:,1);
-	r1_0 = r1(:,1);
-    for i=pp:-1:1
-        if Finf(i,1) > crit,
-            r1_0 = transpose(Z)*v(:,1)/Finf(i,1) + ...
-                transpose(L0(:,:,i,1))*r0_0 + transpose(Linf(:,:,i,1))*r1_0;
-            r0_0 = transpose(Linf(:,:,i,1))*r0_0;
+        alphahat(:,t) = a1(:,t) + Pstar1(:,:,t)*r0(:,t) + Pinf1(:,:,t)*r1(:,t);
+        r(:,t-1)      = r0(:,t);
+        tmp	      = QRt*r(:,t);
+        etahat(:,t)   = tmp(1:rr);
+        epsilonhat(:,t)	= tmp(rr+(1:pp));
+        if t > 1
+            r0(:,t-1) = T'*r0(:,t);
+            r1(:,t-1) = T'*r1(:,t);
         end
     end
-	alphahat(:,1)  	= a(:,1) + Pstar(:,:,1)*r0_0 + Pinf(:,:,1)*r1_0;
-	tmp				= QRt*r(:,1);
-	etahat(:,1)		= tmp(1:rr);
-	epsilonhat(:,1)	= tmp(rr+1:rr+pp);
-else
-    r0 = ri(:,1);
-    for i=pp:-1:1
-		if Fi(i,1) > crit
-            r0=transpose(Z(i,:))/Fi(i,1)*v(i,1)+transpose(Li(:,:,i,1))*r0;
-        end
-    end 
-    alphahat(:,1)	= a(:,1) + P(:,:,1)*r0;
-	tmp 			= QRt*r(:,1);	    
-    etahat(:,1)		= tmp(1:rr);
-    epsilonhat(:,1)	= tmp(rr+1:rr+pp);
 end
 alphahat = alphahat(1:mm,:);

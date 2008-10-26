@@ -286,7 +286,7 @@ function [fval,cost_flag,ys,trend_coeff,info] = DsgeLikelihood(xparam1,gend,data
           LIK = univariate_kalman_filter_corr(T,R,Q,H,Pstar,Y,start,mf,kalman_tol,riccati_tol,data_index,number_of_observations,no_more_missing_observations);
       end      
     case 3% Diffuse Kalman filter.
-      if nargin==3
+      if no_missing_data_flag
           data1 = data - trend;
           if any(any(H ~= 0))
               LIK = DiffuseLikelihoodH1_Z(ST,Z,R1,Q,H,Pinf,Pstar,data1,start);
