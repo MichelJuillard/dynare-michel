@@ -237,15 +237,12 @@ function [fval,cost_flag,ys,trend_coeff,info] = DsgeLikelihood(xparam1,gend,data
           c = ST(nk+1,:)*(Pstar(:,nk+2:end)*ST(nk1,nk+2:end)')+ST(nk1,nk1)*ST(nk1,nk+2:end)*Pstar(nk+2:end,nk1);
           Pstar(nk1,nk1)=(B(nk1,nk1)+c)/(1-ST(nk1,nk1)*ST(nk1,nk1));
       end
-      
       Z = QT(mf,:);
       R1 = QT'*R;
-%      [u,s,v]=svd(Z*ST(:,1:nk),0);
       [QQ,RR,EE] = qr(Z*ST(:,1:nk),0);
       k = find(abs(diag(RR)) < 1e-8);
       if length(k) > 0
           k1 = EE(:,k);
-%	  [junk,k1] = max(abs(v(:,k)));
 	  dd =ones(nk,1);
 	  dd(k1) = zeros(length(k1),1);
 	  Pinf(1:nk,1:nk) = diag(dd);
@@ -270,8 +267,7 @@ function [fval,cost_flag,ys,trend_coeff,info] = DsgeLikelihood(xparam1,gend,data
   %------------------------------------------------------------------------------
   % 4. Likelihood evaluation
   %------------------------------------------------------------------------------
-  switch kalman_algo
-    case 1% Standard Kalman filter.
+  if (kalman_algo==1)% Multivariate Kalman Filter
       if no_missing_data_flag
           LIK = kalman_filter(T,R,Q,H,Pstar,Y,start,mf,kalman_tol,riccati_tol); 
       else
@@ -279,34 +275,33 @@ function [fval,cost_flag,ys,trend_coeff,info] = DsgeLikelihood(xparam1,gend,data
               missing_observations_kalman_filter(T,R,Q,H,Pstar,Y,start,mf,kalman_tol,riccati_tol, ...
                                                  data_index,number_of_observations,no_more_missing_observations);
       end
-    case 2% Univariate Kalman filter.
+      if isinf(LIK)
+          kalman_algo = 2;
+      end
+  end
+  if (kalman_algo==2)% Univariate Kalman Filter
       if no_correlation_flag
           LIK = univariate_kalman_filter(T,R,Q,H,Pstar,Y,start,mf,kalman_tol,riccati_tol,data_index,number_of_observations,no_more_missing_observations);
       else
           LIK = univariate_kalman_filter_corr(T,R,Q,H,Pstar,Y,start,mf,kalman_tol,riccati_tol,data_index,number_of_observations,no_more_missing_observations);
-      end      
-    case 3% Diffuse Kalman filter.
+      end
+  end
+  if (kalman_algo==3)% Multivariate Diffuse Kalman Filter
       if no_missing_data_flag
           data1 = data - trend;
           if any(any(H ~= 0))
               LIK = DiffuseLikelihoodH1_Z(ST,Z,R1,Q,H,Pinf,Pstar,data1,start);
-              if isinf(LIK)
-                  if ~estim_params_.ncn
-                      LIK = DiffuseLikelihoodH3_Z(ST,Z,R1,Q,H,Pinf,Pstar,data1,trend,start);
-                  else
-                      LIK = DiffuseLikelihoodH3corr_Z(ST,Z,R1,Q,H,Pinf,Pstar,data1,trend,start);
-                  end
-              end
           else
               LIK = DiffuseLikelihood1_Z(ST,Z,R1,Q,Pinf,Pstar,data1,start);
-              if isinf(LIK)
-                  LIK = DiffuseLikelihood3_Z(ST,Z,R1,Q,Pinf,Pstar,data1,start);
-              end
+          end
+          if isinf(LIK)
+              kalman_algo =  4;
           end
       else
-          disp(['The diffuse filter is not yet implemented for models with missing observations'])
+          error(['The diffuse filter is not yet implemented for models with missing observations'])
       end
-    case 4% Univariate diffuse kalman filter.
+  end
+  if (kalman_algo==4)% Univariate Diffuse Kalman Filter
       data1 = data - trend;
       if any(any(H ~= 0))
           if ~estim_params_.ncn 
@@ -317,10 +312,7 @@ function [fval,cost_flag,ys,trend_coeff,info] = DsgeLikelihood(xparam1,gend,data
       else
           LIK = DiffuseLikelihood3_Z(ST,Z,R1,Q,Pinf,Pstar,data1,start);
       end
-    otherwise
-      disp('DsgeLikihood:: Unknown kalman filter routine!')
   end
-
   if imag(LIK) ~= 0
       likelihood = bayestopt_.penalty;
   else
