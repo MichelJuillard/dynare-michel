@@ -181,15 +181,14 @@ function [alphahat,etahat,epsilonhat,ahat,SteadyState,trend_coeff,aK,T,R,P,PK,d,
       
       Z = QT(mf,:);
       R1 = QT'*R;
-% $$$       [u,s,v]=svd(Z*ST(:,1:nk),0);
-% $$$       k = find(abs(diag(s)) < 1e-8);
-% $$$       if length(k) > 0
-% $$$ 	  [junk,k1] = max(abs(v(:,k)));
-% $$$ 	  dd =ones(nk,1);
-% $$$ 	  dd(k1) = zeros(length(k1),1);
-% $$$ 	  Pinf(1:nk,1:nk) = diag(dd);
-% $$$       end
-      Pinf(1:nk,1:nk) = eye(nk);
+      [QQ,RR,EE] = qr(Z*ST(:,1:nk),0);
+      k = find(abs(diag(RR)) < 1e-8);
+      if length(k) > 0
+          k1 = EE(:,k);
+	  dd =ones(nk,1);
+	  dd(k1) = zeros(length(k1),1);
+	  Pinf(1:nk,1:nk) = diag(dd);
+      end
   end
   % -----------------------------------------------------------------------------
   %  4. Kalman smoother
