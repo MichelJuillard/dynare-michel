@@ -1,3 +1,19 @@
+dynare (4.0.2) unstable; urgency=low
+
+  * Fixed bugs in Kalman filter and smoother
+  * Fixed bug with "corr" statement of "shocks" block
+  * Added error message if number of equations differs from number of endogenous variables (except when doing optimal policy computation, or standalone BVAR estimation)
+  * Fixed bugs with "dynatype" and "dynasave" commands
+  * Fixed name collisions with Matlab functions "sec2hms" and "bicgstab"
+  * Fixed some licensing issues
+  * Removed obsolete "dr_algo" option
+  * Fixed crashes under Octave due to graphics limitations
+  * Added error message when model local variables (pound sign expressions) are used outside model scope
+  * Included AIM subdirectory in packaging
+  * Estimation: modified computation of log(det(invhess)) to solve cases in large models where det(invhess) is smaller than machine precision
+
+ -- Sébastien Villemot <sebastien.villemot@ens.fr>  Tue, 28 Oct 2008 14:57:28 +0100
+
 dynare (4.0.1) unstable; urgency=low
 
   * Include matlab/distributions/ directory in packaging
