@@ -52,6 +52,7 @@ function [LIK, lik] = diffuse_kalman_filter(T,R,Q,H,Pinf,Pstar,Y,start,Z,kalman_
   lik(smpl+1) = smpl*pp*log(2*pi);
   notsteady   = 1;
   reste       = 0;
+  
   while rank(Pinf,kalman_tol) && (t<smpl)
       t = t+1;
       v = Y(:,t)-Z*a;
