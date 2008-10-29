@@ -256,7 +256,7 @@ function [fval,cost_flag,ys,trend_coeff,info] = DsgeLikelihood(xparam1,gend,data
           if all(all(abs(H-diag(diag(H)))<1e-14))% ie, the covariance matrix is diagonal...
               H = diag(H);
           else
-              no_correlation_flag = 1;
+              no_correlation_flag = 0;
           end
       end
   end
@@ -298,18 +298,12 @@ function [fval,cost_flag,ys,trend_coeff,info] = DsgeLikelihood(xparam1,gend,data
       end
   end
   if (kalman_algo==4)% Univariate Diffuse Kalman Filter
-      data1 = data - trend;
-      if missing_data_flag
-          error('I cannot yet handle missing observations!')
-      end
-      if any(any(H ~= 0))
-          if ~estim_params_.ncn 
-              LIK = DiffuseLikelihoodH3_Z(ST,Z,R1,Q,H,Pinf,Pstar,data1,trend,start);
-          else
-              LIK = DiffuseLikelihoodH3corr_Z(ST,Z,R1,Q,H,Pinf,Pstar,data1,trend,start);
-          end
+      if no_correlation_flag
+          LIK = univariate_diffuse_kalman_filter(ST,R1,Q,H,Pinf,Pstar,Y,start,Z,kalman_tol,riccati_tol,...
+                                                        data_index,number_of_observations,no_more_missing_observations);
       else
-          LIK = DiffuseLikelihood3_Z(ST,Z,R1,Q,Pinf,Pstar,data1,start);
+          LIK = univariate_diffuse_kalman_filter_corr(ST,R1,Q,H,Pinf,Pstar,Y,start,Z,kalman_tol,riccati_tol,...
+                                                        data_index,number_of_observations,no_more_missing_observations);
       end
   end
   if imag(LIK) ~= 0
