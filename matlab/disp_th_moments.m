@@ -53,7 +53,7 @@ function disp_th_moments(dr,var_list)
   lh = size(deblank(M_.endo_names(ivar,:)),2)+2;
   if options_.nomoments == 0
     title='THEORETICAL MOMENTS';
-    if options_.hp_filter == 1
+    if options_.hp_filter
       title = [title ' (HP filter, lambda = ' int2str(options_.hp_filter) ')'];
     end
     headers=strvcat('VARIABLE','MEAN','STD. DEV.','VARIANCE');
@@ -61,7 +61,7 @@ function disp_th_moments(dr,var_list)
     if M_.exo_nbr > 1
       disp(' ')
       title='VARIANCE DECOMPOSITION (in percent)';
-      if options_.hp_filter == 1
+      if options_.hp_filter
 	title = [title ' (HP filter, lambda = ' ...
 		 int2str(options_.hp_filter) ')'];
       end
@@ -76,7 +76,7 @@ function disp_th_moments(dr,var_list)
   if options_.nocorr == 0
     disp(' ')
     title='MATRIX OF CORRELATIONS';
-    if options_.hp_filter == 1
+    if options_.hp_filter
       title = [title ' (HP filter, lambda = ' int2str(options_.hp_filter) ')'];
     end
     labels = deblank(M_.endo_names(ivar,:));
@@ -88,7 +88,7 @@ function disp_th_moments(dr,var_list)
   if options_.ar > 0
     disp(' ')
     title='COEFFICIENTS OF AUTOCORRELATION';
-    if options_.hp_filter == 1
+    if options_.hp_filter
       title = [title ' (HP filter, lambda = ' int2str(options_.hp_filter) ')'];
     end
     labels = deblank(M_.endo_names(ivar(i1),:));

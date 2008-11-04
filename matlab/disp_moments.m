@@ -51,7 +51,7 @@ function disp_moments(y,var_list)
     z = [ m' s' s2' (mean(y.^3)./s2.^1.5)' (mean(y.^4)./(s2.*s2)-3)' ];
   
     title='MOMENTS OF SIMULATED VARIABLES';
-    if options_.hp_filter > 1
+    if options_.hp_filter
       title = [title ' (HP filter, lambda = ' ...
 	       int2str(options_.hp_filter) ')'];
     end
@@ -63,7 +63,7 @@ function disp_moments(y,var_list)
   if options_.nocorr == 0
     corr = (y'*y/size(y,1))./(s'*s);
     title = 'CORRELATION OF SIMULATED VARIABLES';
-    if options_.hp_filter > 1
+    if options_.hp_filter
       title = [title ' (HP filter, lambda = ' ...
 	       int2str(options_.hp_filter) ')'];
     end
@@ -81,7 +81,7 @@ function disp_moments(y,var_list)
       autocorr = [ autocorr diag(oo_.autocorr{i}) ];
     end
     title = 'AUTOCORRELATION OF SIMULATED VARIABLES';
-    if options_.hp_filter > 1
+    if options_.hp_filter
       title = [title ' (HP filter, lambda = ' ...
 	       int2str(options_.hp_filter) ')'];
     end
