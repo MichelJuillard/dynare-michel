@@ -26,8 +26,14 @@
 #define K_ORDER_PERTURBATION_API __declspec(dllimport)
 #endif
 
+#ifdef WINDOWS 
+#include "stdafx.h"
+#else
+#include <dlfcn.h> // unix/linux DLL (.so) handling routines
+#endif
 
 #include <string>
+#include "mex.h"
 
 // This class is exported from the k_order_perturbation.dll
 //class K_ORDER_PERTURBATION_API CK_order_perturbation {
@@ -45,3 +51,50 @@
 
 //K_ORDER_PERTURBATION_API int fnK_order_perturbation(void);
 
+// <model>_Dynamic DLL pointer
+typedef void * (DynamicFn)
+				(double *y, double *x, int nb_row_x, double *params, 
+				int it_, double *residual, double *g1, double *g2);
+
+typedef void *(mexFunctionPtr)(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]);
+
+//typedef void * (DynamicFn());
+
+class DynamicModelDLL
+{
+
+#ifdef WINDOWS
+		HINSTANCE dynamicHinstance;
+# else // linux
+		void * dynamicHinstance ;
+#endif
+private:
+	void Dynamic(double *y, double *x, int nb_row_x, double *params, 
+		int it_, double *residual, double *g1, double *g2);
+//	const DynamicFn  (*(DynamicDLLfunc()));
+
+public:
+	// construct and load Dynamic model DLL 
+	DynamicModelDLL(const char* fname);
+	~DynamicModelDLL(){close();};
+//	DynamicFn get(){return DynamicDLLfunc;};
+//    void 
+//    ((DynamicFn())*) get(){return Dynamic;};
+	// evaluate Dynamic model DLL
+	void eval(double *y, double *x, int nb_row_x, double *params, 
+		int it_, double *residual, double *g1, double *g2){
+		Dynamic(y, x, nb_row_x, params, it_, residual, g1, g2);
+	};
+	void eval(const Vector&y, const Vector&x,  const Vector* params, 
+		Vector&residual, TwoDMatrix*g1, TwoDMatrix*g2){};
+	void eval(const Vector&y, const Vector&x, Vector* params, 
+		Vector&residual, TwoDMatrix*g1, TwoDMatrix*g2){};
+	void eval(const Vector&y, const TwoDMatrix&x,  const Vector* params, 
+		int it_, Vector&residual, TwoDMatrix*g1, TwoDMatrix*g2){};
+	void eval(const Vector&y, const TwoDMatrix&x,  const Vector* params, 
+		Vector& residual, double *g1, double *g2){};
+	// close DLL: If the referenced object was successfully closed, 
+	// close() returns 0, non 0 otherwise
+	int close();
+
+};
