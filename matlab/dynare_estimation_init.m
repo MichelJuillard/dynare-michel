@@ -77,7 +77,7 @@ pnames 		= ['     ';'beta ';'gamm ';'norm ';'invg ';'unif ';'invg2'];
 n_varobs 	= size(options_.varobs,1);
 
 if ~isempty(estim_params_)
-    [xparam1,estim_params_,bayestopt_,lb,ub] = set_prior(estim_params_);
+    [xparam1,estim_params_,bayestopt_,lb,ub, M_] = set_prior(estim_params_, M_, options_);
 
     if any(bayestopt_.pshape > 0)
 	if options_.mode_compute
