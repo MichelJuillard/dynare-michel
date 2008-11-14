@@ -210,23 +210,47 @@ function [dr,info,M_,options_,oo_] = dr1_sparse(dr,task,M_,options_,oo_)
             if options_.order == 1
                 [junk,jacobia_] = feval([M_.fname '_dynamic'],ones(M_.maximum_lag+M_.maximum_lead+1,1)*dr.ys',[oo_.exo_simul ...
                     oo_.exo_det_simul], it_);
+                 %full(jacobia_)
                  dr.eigval = [];
                  dr.nyf = 0;
                  dr.rank = 0;
+                 first_col_exo = M_.endo_nbr * (M_.maximum_endo_lag + M_.maximum_endo_lead + 1);
                  for i=1:length(M_.block_structure.block)
+                     %disp(['block = ' int2str(i)]);
                      M_.block_structure.block(i).dr.Null=0;
                      M_.block_structure.block(i).dr=set_state_space(M_.block_structure.block(i).dr,M_.block_structure.block(i));
                      col_selector=repmat(M_.block_structure.block(i).variable,1,M_.block_structure.block(i).maximum_endo_lag+M_.block_structure.block(i).maximum_endo_lead+1)+kron([M_.maximum_endo_lag-M_.block_structure.block(i).maximum_endo_lag:M_.maximum_endo_lag+M_.block_structure.block(i).maximum_endo_lead],M_.endo_nbr*ones(1,M_.block_structure.block(i).endo_nbr));
                      row_selector = M_.block_structure.block(i).equation;
+                     %col_selector
                      jcb_=jacobia_(row_selector,col_selector);
-                     jcb_ = jcb_(:,find(M_.block_structure.block(i).lead_lag_incidence'))   ;
+                     jcb_ = jcb_(:,find(M_.block_structure.block(i).lead_lag_incidence')) ;
+                     if M_.block_structure.block(i).exo_nbr>0
+                       col_selector = [ first_col_exo + ...
+                             repmat(M_.block_structure.block(i).exogenous,1,M_.block_structure.block(i).maximum_exo_lag+M_.block_structure.block(i).maximum_exo_lead+1)+kron([M_.maximum_exo_lag-M_.block_structure.block(i).maximum_exo_lag:M_.maximum_exo_lag+M_.block_structure.block(i).maximum_exo_lead],M_.exo_nbr*ones(1,M_.block_structure.block(i).exo_nbr))];
+                     end
+                     %col_selector
+                     jcb_ = [ jcb_ jacobia_(row_selector,col_selector)];
+                     %full(jcb_)
+                     
                      hss_=0; %hessian(M_.block_structure.block(i).equation,M_.block_structure.block(i).variable);
                      dra = M_.block_structure.block(i).dr;
-                     M_.block_structure.block(i).exo_nbr=M_.exo_nbr;
+                     %M_.block_structure.block(i).exo_nbr=M_.exo_nbr;
                      [dra ,info,M_.block_structure.block(i),options_,oo_] = dr11_sparse(dra ,task,M_.block_structure.block(i),options_,oo_, jcb_, hss_);
                      M_.block_structure.block(i).dr = dra;
                      dr.eigval = [dr.eigval; dra.eigval];
-                     dr.nyf = dr.nyf + nnz(dra.kstate(:,2)>M_.block_structure.block(i).maximum_endo_lag+1);
+                     nyf = nnz(dra.kstate(:,2)>M_.block_structure.block(i).maximum_endo_lag+1);
+                     n_explod = nnz(abs(dra.eigval) > options_.qz_criterium);
+                     if nyf ~= n_explod
+                         disp(['EIGENVALUES in block ' int2str(i) ':']);
+                         [m_lambda,ii]=sort(abs(dra.eigval));
+                         disp(sprintf('%16s %16s %16s\n','Modulus','Real','Imaginary'))
+                         z=[m_lambda real(dra.eigval(ii)) imag(dra.eigval(ii))]';
+                         disp(sprintf('%16.4g %16.4g %16.4g\n',z))
+                         disp(['The rank condition is not satisfy in block ' int2str(i) ' :']);
+                         disp(['  ' int2str(nyf) ' forward-looking variable(s) for ' ...
+                             int2str(n_explod) ' eigenvalue(s) larger than 1 in modulus']);
+                     end
+                     dr.nyf = dr.nyf + nyf;
                      dr.rank = dr.rank + dra.rank;
                  end;
             end

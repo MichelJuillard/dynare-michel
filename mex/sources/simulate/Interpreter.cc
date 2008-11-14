@@ -193,12 +193,12 @@ Interpreter::compute_block_time() /*throw(EvalException)*/
                   mexEvalString("drawnow;");
 #endif
                   y[(it_+lag)*y_size+var] = Stack.top();
+#ifdef DEBUGC
                    if(var==153)
                     {
                       mexPrintf(" FSTP y[var=%d,time=%d,lag=%d,%d]=%f\n",var,it_,lag,(it_+lag)*y_size+var,y[(it_+lag)*y_size+var]);
                       mexEvalString("drawnow;");
                     }
-#ifdef DEBUGC
                   mexPrintf("%f\n",y[(it_+lag)*y_size+var]);
                   mexEvalString("drawnow;");
 #endif

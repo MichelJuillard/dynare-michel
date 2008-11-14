@@ -601,6 +601,7 @@ void SparseMatrix::Init(int periods, int y_kmin, int y_kmax, int Size, std::map<
                   mexEvalString("drawnow;");
 #endif
                   tmp_b+=u[it4->second+u_count_init*t]*y[index_vara[var+Size*(y_kmin+t)]];
+                  //mexPrintf("  u[%d](%f)*y[%d](%f)=%f",it4->second+u_count_init*t,u[it4->second+u_count_init*t],index_vara[var+Size*(y_kmin+t)],y[index_vara[var+Size*(y_kmin+t)]],u[it4->second+u_count_init*t]*y[index_vara[var+Size*(y_kmin+t)]]);
                 }
             }
           else
@@ -610,6 +611,7 @@ void SparseMatrix::Init(int periods, int y_kmin, int y_kmax, int Size, std::map<
 #endif
               b[eq]=it4->second+u_count_init*t;
               u[b[eq]]+=tmp_b;
+              //mexPrintf("u[%d]=%f corr=%f\n",b[eq],u[b[eq]],tmp_b);
 #ifdef PRINT_OUT
               mexPrintf("=> b[%d]=%f\n", eq, u[b[eq]]);
               mexEvalString("drawnow;");
@@ -626,6 +628,7 @@ void SparseMatrix::Init(int periods, int y_kmin, int y_kmax, int Size, std::map<
   mexPrintf("end of Init\n");
   mexEvalString("drawnow;");
 #endif
+  //mexEvalString("Init");
   mxFree(temp_NZE_R);
   mxFree(temp_NZE_C);
 }
@@ -641,7 +644,7 @@ void SparseMatrix::ShortInit(int periods, int y_kmin, int y_kmax, int Size, std:
 #ifdef PRINT_OUT
       mexPrintf("t=%d\n",t);
 #endif
-      int ti_y_kmin=-min( t        , y_kmin);
+      int ti_y_kmin=-min( t            , y_kmin);
       int ti_y_kmax= min( periods-(t+1), y_kmax);
       it4=IM.begin();
       eq=-1;
@@ -681,6 +684,7 @@ void SparseMatrix::ShortInit(int periods, int y_kmin, int y_kmax, int Size, std:
 #endif
               b[eq]=it4->second+u_count_init*t;
               u[b[eq]]+=tmp_b;
+              //mexPrintf("u[%d]=%f\n",b[eq],u[b[eq]]);
 #ifdef PRINT_OUT
               mexPrintf("=> b[%d]=%f\n", eq, u[b[eq]]);
 #endif
@@ -691,6 +695,7 @@ void SparseMatrix::ShortInit(int periods, int y_kmin, int y_kmax, int Size, std:
           it4++;
         }
     }
+  //mexPrintf("ShortInit\n");
 }
 
 

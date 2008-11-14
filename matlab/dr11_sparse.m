@@ -17,7 +17,7 @@ function [dr,info,M_,options_,oo_] = dr11_sparse(dr,task,M_,options_,oo_, jacobi
 %
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
-
+    %task
     info = 0;
     klen = M_.maximum_endo_lag + M_.maximum_endo_lead + 1;
     kstate = dr.kstate;
@@ -46,7 +46,12 @@ function [dr,info,M_,options_,oo_] = dr11_sparse(dr,task,M_,options_,oo_, jacobi
             m = m+length(k);
         end
         if M_.exo_nbr & task~=1
+            jacobia_
+            jacobia_(:,nz+1:end)
+            b
             dr.ghu = -b\jacobia_(:,nz+1:end);
+            disp(['nz=' int2str(nz) ]);
+            dr.ghu
         end
         dr.eigval = eig(transition_matrix(dr,M_));
         dr.rank = 0;
@@ -156,12 +161,15 @@ function [dr,info,M_,options_,oo_] = dr11_sparse(dr,task,M_,options_,oo_, jacobi
     
     k1 = find(kstate(n4:nd,2) == M_.maximum_endo_lag+1);
     k2 = find(kstate(1:n3,2) == M_.maximum_endo_lag+2);
+    hx(k1,:)
+    gx(k2(nboth+1:end),:)
     dr.ghx = [hx(k1,:); gx(k2(nboth+1:end),:)];
-    
+    dr.ghx
     %lead variables actually present in the model
     j3 = nonzeros(kstate(:,3));
     j4  = find(kstate(:,3));
     % derivatives with respect to exogenous variables
+    disp(['M_.exo_nbr=' int2str(M_.exo_nbr)]);
     if M_.exo_nbr
         fu = aa(:,nz+(1:M_.exo_nbr));
         a1 = b;
@@ -216,7 +224,6 @@ function [dr,info,M_,options_,oo_] = dr11_sparse(dr,task,M_,options_,oo_, jacobi
             dr.ghud{i} = -M2*dr.ghud{i-1}(end-nyf+1:end,:);
         end
     end
-    disp('end0');
     if options_.order == 1
         return
     end
@@ -479,5 +486,4 @@ function [dr,info,M_,options_,oo_] = dr11_sparse(dr,task,M_,options_,oo_, jacobi
             end
             
         end
-        disp('end');
     end

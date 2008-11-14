@@ -32,7 +32,7 @@ periods 1;
 values 1.002;
 end;
 
-simul(periods=200, METHOD=GmRes);
+simul(periods=200, METHOD=LU);
 
 rplot c;
 rplot k;

@@ -89,7 +89,7 @@ end;
 options_.maxit_=20;
 model_info;
 
-simul(periods=200, method=/*LU*/GMRES/*bicgstab*/);
+simul(periods=2000, method=/*LU*/GMRES/*bicgstab*/);
 rplot y;
 rplot k;
 

@@ -1,4 +1,4 @@
-var y y_s R pie dq pie_s de A y_obs pie_obs R_obs;
+var y y_s R pie dq pie_s de A y_obs pie_obs R_obs vv ww;
 varexo e_R e_q e_ys e_pies e_A;
 
 parameters psi1 psi2 psi3 rho_R tau alpha rr k rho_q rho_A rho_ys rho_pies;
@@ -31,9 +31,22 @@ A = rho_A*A(-1)+e_A;
 y_obs = y-y(-1)+A;
 pie_obs = 4*pie;
 R_obs = 4*R;
+vv = 0.2*ww+0.5*vv(-1)+1;
+ww = 0.1*vv+0.5*ww(-1)+2;
+/* A lt=
+ 0.5*vv-0.2*ww = 1
+-0.1*vv+0.5*ww = 2
+[ 0.5 -0.2][vv]   [1]
+                =
+[-0.1  0.5][ww]   [2]
+det = 0.25-0.02 = 0.23
+[vv]           [0.5  0.2] [1]           [0.9]   [3.91304]
+     = 1/0.23*                = 1/0.23*       = 
+[ww]           [0.1  0.5] [2]           [1.1]   [4.7826]
+*/
 end;
 
-/*shocks;
+shocks;
 var e_R = 1.25^2;
 var e_q = 2.5^2;
 var e_A = 1.89;
@@ -41,7 +54,7 @@ var e_ys = 1.89;
 var e_pies = 1.89;
 end;
 
-varobs y_obs R_obs pie_obs dq de;
+/*varobs y_obs R_obs pie_obs dq de;
 
 estimated_params;
 psi1 , gamma_pdf,1.5,0.5;
@@ -63,12 +76,13 @@ stderr e_ys,inv_gamma_pdf,1.2533,0.6551;
 stderr e_pies,inv_gamma_pdf,1.88,0.9827;
 end;
 
-estimation(datafile=data_ca1,first_obs=8,nobs=79,mh_nblocks=10,prefilter=1,mh_jscale=0.5,mh_replic=0);
-
+estimation(datafile=data_ca1,first_obs=8,nobs=79,mh_nblocks=10,prefilter=1,mh_jscale=0.5,mh_replic=0,nograph);
 */
 
+
+options_.maxit_=100;
 steady;
-//model_info;
+model_info;
 check;
 
 shocks;
@@ -77,6 +91,9 @@ periods 1;
 values 0.5;
 end;
 
-//simul(periods=200,method=bicgstab);
-//rplot A;
-//rplot pie;
+simul(periods=200,method=bicgstab);
+rplot A;
+rplot pie;
+
+stoch_simul(periods=200,order=1);
+
