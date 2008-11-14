@@ -2,21 +2,17 @@
 <!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN" "http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd">
 <book>
   <bookinfo>
-    <title>DYNARE MANUAL</title>
-    <subtitle>Version 4</subtitle>
-    <titleabbrev>DYNARE</titleabbrev>
-    <author><firstname>Michel</firstname><surname>Juillard</surname>
-<affiliation><orgname>CEPREMAP and University Paris 8</orgname></affiliation>
-<email>michel.juillard@ens.fr</email>
-<address>
-<street>48 bd Jourdan</street>
-<postcode>75014</postcode><city>Paris</city><country>France</country>
-</address>
-</author>
+    <title>Dynare Manual</title>
+    <subtitle>Version 4.0.2 (draft)</subtitle>
+    <author>
+      <firstname>Michel</firstname><surname>Juillard</surname>
+      <affiliation><orgname>CEPREMAP and University Paris 8</orgname></affiliation>
+      <email>michel.juillard@ens.fr</email>
+      <address><street>48 bd Jourdan</street><postcode>75014</postcode><city>Paris</city><country>France</country></address>
+    </author>
 
-<copyright><year>1996-2008</year><holder>Dynare Team</holder>
+    <copyright><year>1996-2008</year><holder>Dynare Team</holder></copyright>
 
-</copyright>
 <legalnotice>
 <para>
 Permission is granted to copy, distribute and/or modify this document
@@ -59,8 +55,11 @@ A copy of the license can be found at:
 <indexterm zone="forecast"><primary>forecast</primary></indexterm>
   </bookinfo>
 
-<preface><title>Preface</title><para>
-Dynare is a pre-processor and a collection of <ulink url="http://www.mathworks.com/products/matlab/">Matlab&reg;</ulink> and <ulink url="http://www.octave.org">GNU Octave</ulink> routines which solve, simulate and estimate non-linear
+<chapter><title>Introduction</title>
+
+<sect1><title>What is Dynare ?</title>
+<para>
+Dynare is a pre-processor and a collection of <ulink url="http://www.mathworks.com/products/matlab/"><trademark class="registered">Matlab</trademark></ulink> and <ulink url="http://www.octave.org">GNU Octave</ulink> routines which solve, simulate and estimate non-linear
 models with forward looking variables. It is the result of research carried at
 <ulink url="http://www.cepremap.ens.fr/">CEPREMAP</ulink> by several people (see Laffargue, 1990, Boucekkine, 1995, and
 Juillard, 1996, Collard and Juillard 2001a and 2001b).
@@ -68,7 +67,7 @@ Juillard, 1996, Collard and Juillard 2001a and 2001b).
 <para>
 When the framework is deterministic, Dynare can be used for models with the assumption of perfect
 foresight. Typically, the system is supposed to be in a state of
-equilibrium before a period ``1'' when the news of a contemporaneous
+equilibrium before a period <literal>1</literal> when the news of a contemporaneous
 or of a future shock is learned by the agents in the model. The
 purpose of the simulation is to describe the reaction in anticipation of,
 then in reaction to the shock, until the system returns to the old or
@@ -95,99 +94,44 @@ Starting with version 3.0, it is possible to use Dynare to estimate model parame
 <para>
 Currently the development team of Dynare is composed of S. Adjemian, M. Juillard, O. Kamenik, F. Mihoubi and S. Villemot. Several parts of Dynare use or have strongly benefited from publicly available programs by F. Collard, L. Ingber, P. Klein, M. Ratto, S. Sakata, F. Schorfheide, C. Sims, P. Soederlind and R. Wouters.  
 </para>
+</sect1>
 
-<section><title>Changes</title>
-<section><title>Version 4</title>
-<para>December 26, 2006</para>
-<itemizedlist>
-<listitem><para>added option <link linkend="mh_recover">mh_recover</link></para></listitem>
-</itemizedlist>
-</section>
-<section><title>Version 3</title>
-<para>December 30, 2005</para>
-<itemizedlist>
-<listitem><para>added details about parameter transformation in <xref linkend="model"/> and in <xref linkend="estimated_params"/></para></listitem>
-<listitem><para>added conditional compilation commands <xref linkend="define"/> and if_elseif_else_end</para></listitem>
-<listitem><para>enhanced output section of command <xref linkend="estimation"/></para></listitem>
-<listitem><para>added exogenous deterministic shocks in stochastic models. See <xref linkend="varexo_det"/>, <xref linkend="forecast"/>, <xref linkend="shocks"/>, <xref linkend="stoch_simul"/></para></listitem>
-<listitem><para>added a forecast command for calibrated models. See <xref linkend="forecast"/>.</para></listitem>
-</itemizedlist>
-<para>October 14, 2005</para>
-<itemizedlist>
-<listitem><para>added syntax for computing optimal policy. See olr, olr_inst, <xref linkend='optim_weights'/>, <xref linkend='osr'/>, <xref linkend='osr_params'/>.</para></listitem>
-<listitem><para>added syntax for estimating correlation between two shocks or two measurment errors in <xref linkend="estimated_params"/>, <xref linkend="estimated_params_bounds"/> and <xref linkend="estimated_params_init"/>
-</para></listitem>
-</itemizedlist>
-<para>July 20, 2005</para>
-<itemizedlist>
-<listitem><para>Expanded description of <xref linkend="unit_root_vars"/> statement</para></listitem>
-<listitem><para>changed the default for nonlinear solver in <xref linkend="steady"/></para></listitem>
-<listitem><para>added a mention of the possibility to write explicitly a steady state function in <xref linkend="steady"/>, <xref linkend="stoch_simul"/>, <xref linkend="estimation"/> and <xref linkend="unit_root_vars"/></para></listitem>
-<listitem><para>added a brief <emphasis>Ouput</emphasis> section in <xref linkend="estimation"/></para></listitem>
-<listitem><para>corrected misleading description of option <option>prefilter</option> in <xref linkend="estimation"/></para></listitem>
-<listitem><para>added variance decomposition among the statistics computed with option <option>moments_varendo</option> in <xref linkend="estimation"/></para></listitem>
-<listitem><para>tex option in <xref linkend="estimation"/> isn't yet implemented</para></listitem>
-</itemizedlist>
-<para>May 3, 2005</para>
-<itemizedlist>
-<listitem><para>added option <option>noprint</option> in <xref linkend="stoch_simul"/></para></listitem>
-<listitem><para>modified option <option>irf</option> in <xref linkend="stoch_simul"/></para></listitem>
-<listitem><para>modified option <option>simul_seed</option> in <xref linkend="stoch_simul"/></para></listitem>
-</itemizedlist>
-<para>March 6, 2005</para>
-<itemizedlist>
-<listitem><para>corrected typos in equations for 1st and 2nd order approximation formulas in <xref linkend="stoch_simul"/>.</para></listitem>
-<listitem><para>temporarily removed description of output variables in <xref linkend="estimation"/> as old content was outdated and the new one isn't ready yet.</para></listitem>
-<listitem><para>added cross-references</para></listitem>
-</itemizedlist>
-</section>
-</section>
-</preface>
+<sect1><title>Changes since version 3</title>
 
-<chapter><title>Introduction</title>
+</sect1>
+</chapter>
 
-<para>
-In order to give instructions to Dynare, the user has to write a <emphasis>model file</emphasis> whose file name must terminate by ".mod". This file contains the description of the model and the computing tasks required by the user.
-</para>
-<para>
-In practice, the handling of your model file is done in two
-steps: in the first one, the model and the processing instructions
-written by the user in a <emphasis>model file</emphasis> are
-interpreted and the proper Matlab&reg; or GNU Octave instructions are generated; in the
-second step, the program actually runs the computations. Both steps
-are triggered by a single keyword: <command>dynare</command>.
-</para>
+<chapter><title>Installation and configuration</title>
+
 
 <sect1><title>Software requirements</title>
 <para>
-Packaged versions of Dynare are available for Windows&reg; 98/NT/2000/XP/Vista, <ulink url="http://www.debian.org">Debian GNU/Linux</ulink> and <ulink url="http://www.ubuntu.com/">Ubuntu</ulink>, on Intel/AMD x86 architectures.
+Packaged versions of Dynare are available for <trademark class="registered">Windows</trademark> 98/NT/2000/XP/Vista, <ulink url="http://www.debian.org">Debian GNU/Linux</ulink> and <ulink url="http://www.ubuntu.com/">Ubuntu</ulink>, on Intel/AMD x86 architectures.
 Dynare should work on other systems and architectures, but some compilation steps are necessary in that case.
 </para>
-<para>
-The Matlab&reg; version is written for Matlab&reg; version 6.5 and above.
-</para>
-<para>
-The Octave version is written for GNU Octave version 3.0.0 and above.
+<para>In order to run Dynare, you need at least one of the following:
+<itemizedlist>
+<listitem><para><trademark class="registered">Matlab</trademark> version 6.5 or above; note that no toolbox is needed by Dynare,</para></listitem>
+<listitem><para>GNU Octave version 3.0.0 or above.</para></listitem>
+</itemizedlist>
 </para>
 </sect1>
 
-<sect1><title>Installation and configuration</title>
+<sect1><title>Installation of GNU Octave</title>
+
+<para>You can skip this step if you are planning to use only <trademark class="registered">Matlab</trademark> with Dynare.</para>
+
+<para>Please refer to <ulink url="http://www.dynare.org/DynareWiki/DynareOctave">DynareOctave</ulink> on Dynare Wiki for detailed instructions.</para>
+
+</sect1>
+
+<sect1><title>Installation of Dynare</title>
 
 <para>
 After installation, Dynare can be used in any directory on your computer. It is best practive to keep your model files in directories different from the one containing the Dynare toolbox. That way you can upgrade Dynare and discard the previous version without having to worry about your own files.
 </para>
 
-<sect2><title>Installation of GNU Octave</title>
-
-<para>You can skip this step if you are planning to use only Matlab&reg; with Dynare.</para>
-
-<para>Please refer to <ulink url="http://www.dynare.org/DynareWiki/DynareOctave">DynareOctave</ulink> on Dynare Wiki for detailed instructions.</para>
-
-</sect2>
-
-<sect2><title>Installation of Dynare</title>
-
-<sect3><title>On Windows&reg;</title>
+<sect2><title>On <trademark class="registered">Windows</trademark></title>
 
 <para>Execute the automated installer called <filename>dynare-4.x.y-win32.exe</filename> (where 4.x.y is the version number), and follow the instructions. The default installation directory is <filename>c:\dynare\4.x.y</filename>.</para>
 
@@ -197,33 +141,33 @@ After installation, Dynare can be used in any directory on your computer. It is 
 
 <para>You can have several versions of Dynare coexisting (for example in <filename>c:\dynare</filename>), as long as you correctly adjust your path settings (see <xref linkend="path_warning" />).</para>
 
-<para>Note that no installer is currently avaible for Windows&reg; on 64 bits platforms. For the time being, please follow the instructions given in <xref linkend="install_other_systems"/> if you have such a system.</para>
-</sect3>
+<para>Note that no installer is currently avaible for <trademark class="registered">Windows</trademark> on 64 bits platforms. For the time being, please follow the instructions given in <xref linkend="install_other_systems"/> if you have such a system.</para>
+</sect2>
 
-<sect3><title>On Debian GNU/Linux and Ubuntu</title>
+<sect2><title>On Debian GNU/Linux and Ubuntu</title>
 <para>Please refer to <ulink url="http://www.dynare.org/DynareWiki/InstallOnDebianOrUbuntu">InstallOnDebianOrUbuntu</ulink> on Dynare Wiki for detailed instructions.</para>
 
 <para>Dynare will be installed under <filename>/usr/lib/dynare</filename>. Documentation will be under <filename>/usr/share/doc/dynare</filename>.</para>
-</sect3>
+</sect2>
 
-<sect3 id="install_other_systems"><title>For other systems</title>
+<sect2 id="install_other_systems"><title>For other systems</title>
 <para>You need to download Dynare source code from the <ulink url="http://www.dynare.org">Dynare website</ulink> and unpack it somewhere.</para>
 
 <para>Then you will need to recompile the pre-processor and the dynamic loadable libraries. Please refer to <ulink url="http://www.dynare.org/DynareWiki/BuildingPreprocessor">BuildingPreprocessor</ulink> and <ulink url="http://www.dynare.org/DynareWiki/BuildingDlls">BuildingDlls</ulink> on Dynare Wiki.</para>
-</sect3>
 </sect2>
+</sect1>
 
-<sect2><title>Configuration</title>
+<sect1><title>Configuration</title>
 
-<sect3><title>For Matlab&reg;</title>
+<sect2><title>For <trademark class="registered">Matlab</trademark></title>
 
 <para>You need to add the <filename>matlab</filename> subdirectory of your Dynare
-installation to Matlab&reg; path. You have two options for doing that:</para>
+installation to <trademark class="registered">Matlab</trademark> path. You have two options for doing that:</para>
 <itemizedlist>
 
-  <listitem><para>Using the <command>addpath</command> command in the Matlab&reg; command window:</para>
+  <listitem><para>Using the <command>addpath</command> command in the <trademark class="registered">Matlab</trademark> command window:</para>
 
-  <para>Under Windows&reg;, assuming that you have installed Dynare at the standard location, and replacing "4.x.y" by correct version number, type:</para>
+  <para>Under <trademark class="registered">Windows</trademark>, assuming that you have installed Dynare at the standard location, and replacing "4.x.y" by correct version number, type:</para>
   <programlisting>
   addpath c:\dynare\4.x.y\matlab
   </programlisting>
@@ -233,24 +177,24 @@ installation to Matlab&reg; path. You have two options for doing that:</para>
    addpath /usr/lib/dynare/matlab
   </programlisting>
 
- <para>Matlab&reg; will not remember this setting next time you run it, and you will have
+ <para><trademark class="registered">Matlab</trademark> will not remember this setting next time you run it, and you will have
  to do it again.</para>
  </listitem>
   <listitem><para>Via the menu entries:</para>
 <para>Select the "Set Path" entry in the "File" menu, then click on "Add
   Folder...", and select the <filename>matlab</filename> subdirectory of your Dynare
-  installation. Note that you SHOULD NOT use "Add with Subfolders...". Apply
+  installation. Note that you <emphasis>should not</emphasis> use "Add with Subfolders...". Apply
   the settings by clicking on "Save". Note that Matlab will remember this
   setting next time you run it.</para></listitem>
 </itemizedlist>
-</sect3>
+</sect2>
 
-<sect3><title>For GNU Octave</title>
+<sect2><title>For GNU Octave</title>
 
 <para>You need to add the <filename>matlab</filename> subdirectory of your Dynare
 installation to Octave path, using the <command>addpath</command> at the Octave command prompt.</para>
 
-<para>Under Windows&reg;, assuming that you have installed Dynare at the standard location, and replacing "4.x.y" by correct version number, type:</para>
+<para>Under <trademark class="registered">Windows</trademark>, assuming that you have installed Dynare at the standard location, and replacing "4.x.y" by correct version number, type:</para>
 <programlisting>
   addpath c:\dynare\4.x.y\matlab
 </programlisting>
@@ -266,25 +210,36 @@ installation to Octave path, using the <command>addpath</command> at the Octave 
 </programlisting>
 
 <para>If you don't want to type these two commands every time you run Octave,
-you can put them in a file called <filename>.octaverc</filename> in your home directory (under Windows&reg; this will generally by <filename>c:\Document and Settings\USERNAME\</filename>). This file is run by Octave at every startup.</para>
-</sect3>
+you can put them in a file called <filename>.octaverc</filename> in your home directory (under <trademark class="registered">Windows</trademark> this will generally by <filename>c:\Documents and Settings\USERNAME\</filename>). This file is run by Octave at every startup.</para>
+</sect2>
 
-<sect3 id="path_warning"><title>Some words of warning</title>
+<sect2 id="path_warning"><title>Some words of warning</title>
 
-<para>You should be very careful about the content of you Matlab&reg; or Octave path. You can display its content by simply typing <command>path</command> in the command window.</para>
+<para>You should be very careful about the content of you <trademark class="registered">Matlab</trademark> or Octave path. You can display its content by simply typing <command>path</command> in the command window.</para>
 
-<para>The path should normally contain system directories of Matlab&reg; or Octave, and the <filename>matlab</filename> subdirectory of your Dynare installation. It should not contain any other Dynare-related directory, from another Dynare version of from the version you are using. However, note that Dynare will automatically add one (and only one) of the <filename>mex/2007a</filename>, <filename>mex/2007b</filename>, and <filename>mex/octave</filename> subdirectories, depending on your installation.</para>
+<para>The path should normally contain system directories of <trademark class="registered">Matlab</trademark> or Octave, and the <filename>matlab</filename> subdirectory of your Dynare installation. It should not contain any other Dynare-related directory, from another Dynare version of from the version you are using. However, note that Dynare will automatically add one (and only one) of the <filename>mex/2007a</filename>, <filename>mex/2007b</filename>, and <filename>mex/octave</filename> subdirectories, depending on your installation.</para>
 
 <para>You have to be aware that adding other directories to your path can potentially create problems, if some of your M-files have the same names than Dynare files. Your files would then override Dynare files, and make Dynare unusable.</para>
-</sect3>
-
 </sect2>
+
 </sect1>
 </chapter>
 
 <chapter><title>Dynare invocation</title>
 
-<para>You invoke Dynare by using the <command>dynare</command> at the Matlab&reg; or Octave prompt.</para>
+<para>
+In order to give instructions to Dynare, the user has to write a <emphasis>model file</emphasis> whose filename extension must be <filename class="extension">.mod</filename>. This file contains the description of the model and the computing tasks required by the user. Its contents is described in <xref linkend="modfile"/>.
+</para>
+
+<para>Once the model file is written, Dynare is invoked using the <command>dynare</command> command at the <trademark class="registered">Matlab</trademark> or Octave prompt (with the filename of the <filename class="extension">.mod</filename> given as argument).</para>
+
+<para>
+In practice, the handling of the model file is done in two
+steps: in the first one, the model and the processing instructions
+written by the user in a <emphasis>model file</emphasis> are
+interpreted and the proper <trademark class="registered">Matlab</trademark> or GNU Octave instructions are generated; in the
+second step, the program actually runs the computations. Boths steps are triggered automatically by the <command>dynare</command> command.
+</para>
 
 <refentry id="dynare">
   <refmeta>
@@ -310,14 +265,14 @@ you can put them in a file called <filename>.octaverc</filename> in your home di
 
 <refsect1><title>Description</title>
 <para>
-<command>dynare</command> executes instruction included in <replaceable>FILENAME</replaceable><filename>.mod</filename>.
+<command>dynare</command> executes instruction included in <replaceable>FILENAME</replaceable><filename class="extension">.mod</filename>.
 This user-supplied file contains the model and the processing instructions, as described in <xref linkend="modfile"/>.
 </para>
 </refsect1>
 
 <refsect1><title>Details</title>
 <para>
-<command>dynare</command> begins by launching the preprocessor on the *.mod file.
+<command>dynare</command> begins by launching the preprocessor on the <filename class="extension">.mod</filename> file.
 
 By default (unless any of <option>use_dll</option>, <option>sparse</option> or <option>sparse_dll</option> options have been given to <xref linkend="model"/>), the preprocessor creates three intermediary files:
 <itemizedlist spacing='compact'>
@@ -333,16 +288,16 @@ These files may be looked at to understand errors reported at the simulation sta
 <refsect1><title>Options</title>
 
   <itemizedlist spacing='compact'>
-    <listitem><para><option>noclearall</option>: by default, <command>dynare</command> will issue a <command>clear all</command> command to Matlab&reg; or Octave, thereby deleting all workspace variables; this options instructs <command>dynare</command> not to clear the workspace</para></listitem>
+    <listitem><para><option>noclearall</option>: by default, <command>dynare</command> will issue a <command>clear all</command> command to <trademark class="registered">Matlab</trademark> or Octave, thereby deleting all workspace variables; this options instructs <command>dynare</command> not to clear the workspace</para></listitem>
     <listitem><para><option>savemacro</option>: instructs <command>dynare</command> to save the intermediary file which is obtained after macro-processing (see <xref linkend="macrolanguage"/>); the saved output will go in <replaceable>FILENAME</replaceable><filename>-macroexp.mod</filename></para></listitem>
-    <listitem><para><option>debug</option>: instructs the preprocessor to write some debugging information about the scanning and parsing of the *.mod file</para></listitem>
+    <listitem><para><option>debug</option>: instructs the preprocessor to write some debugging information about the scanning and parsing of the <filename class="extension">.mod</filename> file</para></listitem>
   </itemizedlist>
 
 </refsect1>
 
 <refsect1><title>Output</title>
 <para>
-Depending on the computing tasks requested in the *.mod file, executing command <command>dynare</command> will leave in the workspace variables containing results available for further processing. More details are given under the relevant computing tasks.
+Depending on the computing tasks requested in the <filename class="extension">.mod</filename> file, executing command <command>dynare</command> will leave in the workspace variables containing results available for further processing. More details are given under the relevant computing tasks.
 </para>
 
 <para>
@@ -379,7 +334,7 @@ In the description of Dynare commands, the following conventions are observed:
 <listitem><para><replaceable>MODEL_EXPRESSION</replaceable> indicates a mathematical expression valid in the model description (see <xref linkend="expressions"/> and <xref linkend="model"/>)</para></listitem>
 <listitem><para><replaceable>VARIABLE_NAME</replaceable> indicates a variable name starting with an alphabetical character and can't contain ()+-*/^=!;:@#. or accentuated characters</para></listitem>
 <listitem><para><replaceable>PARAMETER_NAME</replaceable> indicates a parameter name starting with an alphabetical character and can't contain ()+-*/^=!;:@#. or accentuated characters</para></listitem>
-<listitem><para><replaceable>FILENAME</replaceable> indicates a file name valid in the underlying operating system (Windows&reg;, GNU/Linux, ...)</para></listitem>
+<listitem><para><replaceable>FILENAME</replaceable> indicates a file name valid in the underlying operating system (<trademark class="registered">Windows</trademark>, GNU/Linux, ...)</para></listitem>
 </itemizedlist>
 </para>
 
@@ -532,125 +487,78 @@ varexo_det tau;
 
 <refsect1><title>Description</title>
 <para>
-This optional command declares parameters used in the model, in variable initialization or in shock declarations. See <xref linkend="conventions"/> for the syntax of <replaceable>PARAMETER_NAME</replaceable>.
+This optional command declares parameters used in the model, in variable initialization or in shocks declarations. See <xref linkend="conventions"/> for the syntax of <replaceable>PARAMETER_NAME</replaceable>.
 </para>
-<para>The parameters must then be assigned values, see <xref linkend="param_init"/>.
+<para>The parameters must subsequently be assigned values, see <xref linkend="param_init"/>.
 </para>
 </refsect1>
 
 <refsect1><title>Example</title>
 <programlisting>
 parameters alpha, bet;
-
-alpha = 0.3;
-bet = sqrt(2);
 </programlisting>
 </refsect1>
 </refentry>
-</sect1>
-
-<sect1><title>Other general declarations</title>
-
-<itemizedlist>
-<listitem><para><xref linkend='dsample'/></para></listitem>
-<listitem><para><xref linkend='periods'/> (deprecated)</para></listitem>
-<listitem><para><xref linkend='cutoff'/></para></listitem>
-<listitem><para><xref linkend='markowitz'/></para></listitem>
-</itemizedlist>
-
-<refentry id="dsample">
-  <refmeta>
-    <refentrytitle>dsample</refentrytitle>
-  </refmeta>
-
-  <refnamediv>
-    <refname>dsample</refname>
-    <refpurpose>reduces the number of periods considered in subsequent output commands</refpurpose>
-  </refnamediv>
-</refentry>
-
-<refentry id="periods">
-  <refmeta>
-    <refentrytitle>periods</refentrytitle>
-  </refmeta>
-
-  <refnamediv>
-    <refname>periods</refname>
-    <refpurpose>specifies the number of simulation periods</refpurpose>
-  </refnamediv>
-
-  <refsynopsisdiv>
-    <cmdsynopsis>
-      <command>periods</command> <arg choice="plain">
-      <replaceable>INTEGER</replaceable>;
-      </arg>
-    </cmdsynopsis>
-  </refsynopsisdiv>
-
-<refsect1><title>Description</title>
-<para>
-This command is now deprecated (but will still work for older model files). It is not necessary when no simulation is performed and is replaced by an option <option>periods</option> in <xref linkend="simul"/> and <xref linkend="stoch_simul"/>.
-</para>
-<para>
-Sets the number of periods in the simulation. The periods are numbered from 1 to <replaceable>INTEGER</replaceable>. In perfect foresight simulations, it is assumed that all future events are perfectly known at the beginning of period 1.
-</para>
-</refsect1>
-
-<refsect1><title>Example</title>
-<programlisting>
-periods 100;
-</programlisting>
-</refsect1>
-</refentry>
-
-<refentry id="cutoff">
-  <refmeta>
-    <refentrytitle>cutoff</refentrytitle>
-  </refmeta>
-
-  <refnamediv>
-    <refname>cutoff</refname>
-    <refpurpose>declares the cutoff for fast deterministic simulations</refpurpose>
-  </refnamediv>
-</refentry>
-
-<refentry id="markowitz">
-  <refmeta>
-    <refentrytitle>markowitz</refentrytitle>
-  </refmeta>
-
-  <refnamediv>
-    <refname>markowitz</refname>
-    <refpurpose>declares the markowitz criterion for fast deterministic simulations</refpurpose>
-  </refnamediv>
-</refentry>
-
 </sect1>
 
 <sect1 id="expressions"><title>Expressions</title>
 
-<para>You can specify mathematical expression at two kinds of places in the *.mod file: inside some commands and inside the model description. These expressions are respectively represented by <replaceable>EXPRESSION</replaceable> and <replaceable>MODEL_EXPRESSION</replaceable> in this manual.</para>
+  <para>Dynare distinguishes between two types of mathematical expressions: those that are used to describe the model, and those that are used outside the model block (<foreignphrase>e.g.</foreignphrase> for initializing parameters or variables, or as command options). In this manual, those two types of expressions are respectively denoted by <replaceable>MODEL_EXPRESSION</replaceable> and <replaceable>EXPRESSION</replaceable>.</para>
 
-<para>Unlike Matlab&reg; or Octave expressions, these expressions are necessarily scalar ones, and cannot construct or contain matrices<footnote><para>Note that you can also put arbitrary Matlab&reg; or Octave expressions in your *.mod file, but those expressions have to be on separate lines, generally at the end of the file for post-processing purposes. These constructions are not addresses in these section.</para></footnote>.</para>
+  <para>Unlike <trademark class="registered">Matlab</trademark> or Octave expressions, Dynare expressions are necessarily scalar ones: they cannot contain matrices or evaluate to matrices<footnote><para>Note that arbitrary <trademark class="registered">Matlab</trademark> or Octave expressions can be put in a <filename class="extension">.mod</filename> file, but those expressions have to be on separate lines, generally at the end of the file for post-processing purposes. They are not interpreted by Dynare, and are simply passed on unmodified to <trademark class="registered">Matlab</trademark> or Octave. Those constructions are not addresses in this section.</para></footnote>.</para>
 
-<para>You can construct these expressions using integers (<replaceable>INTEGER</replaceable>), floating point numbers (<replaceable>DOUBLE</replaceable>), parameters, variables, operators and functions.</para>
+  <para>Expressions can be constructed using integers (<replaceable>INTEGER</replaceable>), floating point numbers (<replaceable>DOUBLE</replaceable>), parameter names, variable names, operators and functions.</para>
 
-<sect2><title>Parameters and variables</title>
-Lead and lags allowed only in model expressions.
+  <sect2>
+    <title>Parameters and variables</title>
 
-Describe the semantic difference for endogenous/exogenous between the two kinds of expressions.
-</sect2>
+    <para>Parameters and variables can be introduced in expressions by simply typing their names. The semantics of parameters and variables is quite different whether they are used inside or outside the model block.</para>
 
-<sect2><title>Operators</title>
-</sect2>
+    <sect3>
+      <title>Inside the model</title>
 
-<sect2><title>Functions</title>
-Unknown functions allowed (under some conditions) in expressions outside model block.
+      <para>Parameters used inside the model either refer to the value given through <link linkend="param_init">parameter initialization</link> (and possiblity <xref linkend="homotopy_setup"/>) when doing a simulation, or are the estimated variables when doing an estimation.</para>
+
+      <para>Variables used in a <replaceable>MODEL_EXPRESSION</replaceable> denote <emphasis>current period</emphasis> values when neither a lead or a lag is given. A lead or a lag can be given by enclosing an integer between parenthesis just after the variable name: a positive integer means a lead, a negative one means a lag. For example, if <literal>c</literal> is an endogenous variable, then <literal>c(+1)</literal> is the variable one period ahead, and <literal>c(-2)</literal> is the variable two periods before.</para>
+
+      <para>Leads and lags are primarily used for endogenous variables. They can be used for exogenous variables under some conditions (TO BE EXPLICITED). They are forbidden for parameters and for local model variables (see <xref linkend="model"/>).</para>
+
+    </sect3>
+
+    <sect3>
+      <title>Outside the model</title>
+      <para>When used in an expression outside the model block, a parameter or a variable simply refers to the last value given to that variable. More precisely, for a parameter it refers to the value given in the corresponding <link linkend="param_init">parameter initialization</link>; for an endogenous or exogenous variable, it refers to the value given in the most recent <xref linkend="initval"/> or <xref linkend="endval"/> block.</para>
+    </sect3>
+
+  </sect2>
+
+  <sect2><title>Operators</title>
+    <para>The following operators are allowed in both <replaceable>MODEL_EXPRESSION</replaceable> and <replaceable>EXPRESSION</replaceable>:
+      <itemizedlist>
+        <listitem><para>binary arithmetic operators: <literal>+</literal>, <literal>-</literal>, <literal>*</literal>, <literal>/</literal>, <literal>^</literal></para></listitem>
+        <listitem><para>unary arithmetic operators: <literal>+</literal>, <literal>-</literal></para></listitem>
+        <listitem><para>binary comparison operators (which evaluate to either <literal>0</literal> or <literal>1</literal>): <literal>&lt;</literal>, <literal>&gt;</literal>, <literal>&lt;=</literal>, <literal>&gt;=</literal>, <literal>==</literal>, <literal>!=</literal></para></listitem>
+      </itemizedlist>
+    </para>
+  </sect2>
+
+  <sect2><title>Functions</title>
+    <para>The following standard functions are allowed in both <replaceable>MODEL_EXPRESSION</replaceable> and <replaceable>EXPRESSION</replaceable>:
+      <itemizedlist>
+        <listitem><para>exponential: <literal>exp()</literal></para></listitem>
+        <listitem><para>natural logarithm: <literal>log()</literal> (aliased as <literal>ln()</literal>)</para></listitem>
+        <listitem><para>base 10 logarithm: <literal>log10()</literal></para></listitem>
+        <listitem><para>square root: <literal>sqrt()</literal></para></listitem>
+        <listitem><para>trigonometric functions: <literal>sin()</literal>, <literal>cos()</literal>, <literal>tan()</literal>, <literal>asin()</literal>, <literal>acos()</literal>, <literal>atan()</literal></para></listitem>
+        <listitem><para>TO BE COMPLETED</para></listitem>
+      </itemizedlist>
+    </para>
+    <para>Unknown functions allowed (under some conditions) in expressions outside model block.</para>
 </sect2>
 
 </sect1>
 
-<sect1 id="param_init"><title>Initializing parameters</title>
+<sect1 id="param_init"><title>Parameter initialization</title>
 
 <para>The syntax is the following:</para>
 <cmdsynopsis>
@@ -1238,7 +1146,7 @@ forecast;
 The matrix of variance-covariance of the shocks can be directly specified as a upper (or lower) triangular matrix. Dynare builds the corresponding symmetrix matrix. Each row of the triangular matrix, except the last one, must be terminated by a semi-colon ';'. For a given element, an <replaceable>EXPRESSION</replaceable> using predefined parameters is allowed but must be placed between parentheses. THE ORDER OF THE COVARIANCES IN THE MATRIX IS THE SAME AS THE ONE USED IN THE VAREXO DECLARATION.
 </para>
 <note>
-<para>In previous versions, it was possible to directly set Dynare's internal covariance matrix <varname>Sigma_e_</varname>. This is still possible for compatibility with older .mod files, but STRONGLY DISCOURAGED as too prone to error. When setting <varname>Sigma_e_</varname> directly, the order of the exogenous shocks is the ALPHABETICAL order of their names.
+<para>In previous versions, it was possible to directly set Dynare's internal covariance matrix <varname>Sigma_e_</varname>. This is still possible for compatibility with older <filename class="extension">.mod</filename> files, but STRONGLY DISCOURAGED as too prone to error. When setting <varname>Sigma_e_</varname> directly, the order of the exogenous shocks is the ALPHABETICAL order of their names.
 </para>
 </note>
 </refsect1>
@@ -1254,6 +1162,60 @@ where the variance of <varname>u</varname> is 0.81, the variance of <varname>e</
 </para>
 </refsect1>
 </refentry>
+</sect1>
+
+<sect1><title>Other general declarations</title>
+
+<itemizedlist>
+<listitem><para><xref linkend='dsample'/></para></listitem>
+<listitem><para><xref linkend='periods'/> (deprecated)</para></listitem>
+</itemizedlist>
+
+<refentry id="dsample">
+  <refmeta>
+    <refentrytitle>dsample</refentrytitle>
+  </refmeta>
+
+  <refnamediv>
+    <refname>dsample</refname>
+    <refpurpose>reduces the number of periods considered in subsequent output commands</refpurpose>
+  </refnamediv>
+</refentry>
+
+<refentry id="periods">
+  <refmeta>
+    <refentrytitle>periods</refentrytitle>
+  </refmeta>
+
+  <refnamediv>
+    <refname>periods</refname>
+    <refpurpose>specifies the number of simulation periods</refpurpose>
+  </refnamediv>
+
+  <refsynopsisdiv>
+    <cmdsynopsis>
+      <command>periods</command> <arg choice="plain">
+      <replaceable>INTEGER</replaceable>;
+      </arg>
+    </cmdsynopsis>
+  </refsynopsisdiv>
+
+<refsect1><title>Description</title>
+<para>
+This command is now deprecated (but will still work for older model files). It is not necessary when no simulation is performed and is replaced by an option <option>periods</option> in <xref linkend="simul"/> and <xref linkend="stoch_simul"/>.
+</para>
+<para>
+Sets the number of periods in the simulation. The periods are numbered from 1 to <replaceable>INTEGER</replaceable>. In perfect foresight simulations, it is assumed that all future events are perfectly known at the beginning of period 1.
+</para>
+</refsect1>
+
+<refsect1><title>Example</title>
+<programlisting>
+periods 100;
+</programlisting>
+</refsect1>
+</refentry>
+
 </sect1>
 
 <sect1><title>Solving and simulating</title>
@@ -1315,7 +1277,7 @@ Computes the equilibrium value of the endogenous variables for the value of the 
 For complicated models, finding good numerical initial values for the endogenous variables is the trickiest part of finding the equilibrium of that model. Often, it is better to start with a smaller model and add new variables one by one.
 </para>
 
-<para>If you know how to compute the steady state for your model, you can provide a Matlab function doing the computation instead of using <command>steady</command>. The function should be called with the name of the <filename>.mod</filename> file followed by <filename>_steadystate</filename>. See <filename>fs2000a_steadystate.m</filename> in <filename>examples/fs2000</filename> directory.
+<para>If you know how to compute the steady state for your model, you can provide a Matlab function doing the computation instead of using <command>steady</command>. The function should be called with the name of the <filename class="extension">.mod</filename> file followed by <filename>_steadystate</filename>. See <filename>fs2000a_steadystate.m</filename> in <filename>examples/fs2000</filename> directory.
 </para>
 
 </refsect1>
@@ -1567,7 +1529,7 @@ When a list of VARIABLE_NAMEs is specified, results are displayed only for these
 <command>stoch_simul</command> computes a Taylor approximation of the decision and transition functions for the model, impulse response functions and various descriptive statistics (moments, variance decomposition, correlation and autocorrelation coefficients). For correlated shocks, the variance decomposition is computed as in the VAR literature through a Cholesky decomposition of the covariance matrix of the exogenous variables. When the shocks are correlated, the variance decomposition depends upon the order of the variables in the <xref linkend='varexo'/> command.
 </para>
 
-<para>The Taylor approximation is computed around the steady state (except whith option <command>dr_algo=1</command>). If you know how to compute the steady state for your model, you can provide a Matlab function doing the computation instead of using the nonlinear solver. The function should be called with the name of the <filename>.mod</filename> file followed by <filename>_steadystate</filename>. See <filename>fs2000a_steadystate.m</filename> in <filename>examples/fs2000</filename> directory.
+<para>The Taylor approximation is computed around the steady state (except whith option <command>dr_algo=1</command>). If you know how to compute the steady state for your model, you can provide a Matlab function doing the computation instead of using the nonlinear solver. The function should be called with the name of the <filename class="extension">.mod</filename> file followed by <filename>_steadystate</filename>. See <filename>fs2000a_steadystate.m</filename> in <filename>examples/fs2000</filename> directory.
 </para>
 
 <para>
@@ -2235,7 +2197,7 @@ oo_.posterior_hpdsup.measurement_errors_corr.gdp_conso
 </refsect1>
 
 <refsect1><title>Note on steady state computation</title>
-<para>If you know how to compute the steady state for your model, you can provide a Matlab function doing the computation instead of using <command>steady</command>. The function should be called with the name of the <filename>.mod</filename> file followed by <filename>_steadystate</filename>. See <filename>fs2000a_steadystate.m</filename> in <filename>examples/fs2000</filename> directory.
+<para>If you know how to compute the steady state for your model, you can provide a Matlab function doing the computation instead of using <command>steady</command>. The function should be called with the name of the <filename class="extension">.mod</filename> file followed by <filename>_steadystate</filename>. See <filename>fs2000a_steadystate.m</filename> in <filename>examples/fs2000</filename> directory.
 </para>
 </refsect1>
 </refentry>
@@ -2593,9 +2555,9 @@ In Matlab, variables saved with the <command>dynasave</command> command can be r
 </sect1>
 
 <sect1 id="macrolanguage"><title>Macro-processing language</title>
-<para>It is possible to use "macro" commands in the *.mod file for doing the following tasks: source file inclusion, replicating blocks of equations through loops, conditional inclusion of code...</para>
+<para>It is possible to use "macro" commands in the <filename class="extension">.mod</filename> file for doing the following tasks: source file inclusion, replicating blocks of equations through loops, conditional inclusion of code...</para>
 
-<para>Technically, this macro language is totally independent of the basic Dynare language, and is processed by a separate component of the Dynare pre-processor. The macro processor transforms a *.mod file with macros into a *.mod file without macros (doing expansions/inclusions), and then feeds it to the Dynare parser.
+<para>Technically, this macro language is totally independent of the basic Dynare language, and is processed by a separate component of the Dynare pre-processor. The macro processor transforms a <filename class="extension">.mod</filename> file with macros into a <filename class="extension">.mod</filename> file without macros (doing expansions/inclusions), and then feeds it to the Dynare parser.
 </para>
 <itemizedlist>
 <listitem><para><xref linkend='include'/></para></listitem>
@@ -2635,7 +2597,7 @@ In Matlab, variables saved with the <command>dynasave</command> command can be r
 
   <refnamediv>
     <refname>@#if ... @#else ... @#endif</refname>
-    <refpurpose>conditional inclusion of some part of the *.mod file</refpurpose>
+    <refpurpose>conditional inclusion of some part of the <filename class="extension">.mod</filename> file</refpurpose>
   </refnamediv>
 </refentry>
 
@@ -2646,7 +2608,7 @@ In Matlab, variables saved with the <command>dynasave</command> command can be r
 
   <refnamediv>
     <refname>@#for ... @#endfor</refname>
-    <refpurpose>loop for replications of portions of the *.mod file</refpurpose>
+    <refpurpose>loop for replications of portions of the <filename class="extension">.mod</filename> file</refpurpose>
   </refnamediv>
 </refentry>
 
