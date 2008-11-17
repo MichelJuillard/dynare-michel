@@ -18,24 +18,40 @@
 #ifndef K_ORD_DYNARE3_H
 #define K_ORD_DYNARE3_H
 #include <vector>
-#include "Dynare_pp/tl/cc/t_container.h"
-#include "Dynare_pp/tl/cc/sparse_tensor.h"
-#include "Dynare_pp/kord/decision_rule.h"
-#include "Dynare_pp/kord/dynamic_model.h"
+#include "t_container.h"
+#include "sparse_tensor.h"
+#include "decision_rule.h"
+#include "dynamic_model.h"
 
+#include "dynare_exception.h"
+#include "fs_tensor.h"
+#include "SylvException.h"
+#include "tl_exception.h"
+#include "kord_exception.h"
+#include "exception.h"
 #include "nlsolve.h"
 
 #include "k_order_perturbation.h"
 
 class KordpDynare;
 
+// derive from Approximation to get protected derivatives
+class FistOrderApproximation: public Approximation{
+    public:
+	FGSContainer* GetRuleDers(){return rule_ders;};
+	void GetRuleDers(double*dgy,double*dgu);
+	FGSContainer* GetRuleDersSS(){return rule_ders_ss;};
+	void GetRuleDersSS(double*dgy, double*dgu);
+}
+
 
 // instantiations of pure abstract class NameList in dynamic_model.h:
 /*////////////////////////////////////////////*/
 class DynareNameList : public NameList {
-vector<const char*> names;
+    vector<const char*> names;
 public:
     DynareNameList(const KordpDynare& dynare);
+    DynareNameList(const KordpDynare& dynare, const char ** names);
     int getNum() const {return (int)names.size();}
     const char* getName(int i) const {return names[i];}
 /** This for each string of the input vector calculates its index
@@ -44,26 +60,27 @@ public:
 vector<int> selectIndices(const vector<const char*>& ns) const;
 };
 
-  class DynareExogNameList : public NameList {
-  vector<const char*> names;
-  public:
-  DynareExogNameList(const KordpDynare& dynare);
-  int getNum() const
-		{return (int)names.size();}
-		const char* getName(int i) const
-		{return names[i];}
-		};
+class DynareExogNameList : public NameList {
+    vector<const char*> names;
+public:
+    DynareExogNameList(const  KordpDynare& dynare);
+    DynareExogNameList(const KordpDynare& dynare, const char ** names);
+    int getNum() const
+    {return (int)names.size();}
+    const char* getName(int i) const
+    {return names[i];}
+};
 		
-		  class DynareStateNameList : public NameList {
-		  vector<const char*> names;
-		  public:
-		  DynareStateNameList(const KordpDynare& dynare, const DynareNameList& dnl,
-		  const DynareExogNameList& denl);
-		  int getNum() const
-		  {return (int)names.size();}
-		  const char* getName(int i) const
-		  {return names[i];}
-		  };
+class DynareStateNameList : public NameList {
+    vector<const char*> names;
+public:
+    DynareStateNameList(const KordpDynare& dynare, const DynareNameList& dnl,
+    const DynareExogNameList& denl);
+    int getNum() const
+    {return (int)names.size();}
+    const char* getName(int i) const
+    {return names[i];}
+};
 /*********************************************/
 // The following only implements DynamicModel with help of ogdyn::DynareModel
 // instantiation of pure abstract DynamicModel decl. in dynamic_model.h
@@ -74,6 +91,7 @@ friend class DynareNameList;
 friend class DynareExogNameList;
 friend class DynareStateNameList;
 friend class KordpDynareJacobian;
+friend class DynamicModelDLL;
 	//////////
 	const int nStat;
 	const int nBoth;
@@ -84,31 +102,25 @@ friend class KordpDynareJacobian;
 	const int nYs;
 	const int nYss;
 	const int nY;
+	const int nSteps;
 	const int nOrder;
 	Journal& journal;
-	///	ogdyn::DynareModel* model;
 	///	DynamicModel* model;
-	///DynamicModelDLL& dynamicDLL;
-	const char* modName;
-	Vector* ysteady;
+	///const char* modName;
+	Vector* ySteady;
 	Vector* params;
+	TwoDMatrix* vCov;
 	TensorContainer<FSSparseTensor> md; // ModelDerivatives
 	DynareNameList* dnl;  
 	DynareExogNameList* denl;
 	DynareStateNameList* dsnl;
-	
-	TwoDMatrix* Vcov;
-	
-	///	ogp::FormulaEvaluator* fe;
-	///	ogp::FormulaDerEvaluator* fde;
 	const double ss_tol;
 public:
 	KordpDynare(const char** endo, int num_endo,
-	const char** exo, int num_exo,
-		const char** par, int num_par,
-		Vector* ysteady, int nstat,int nPred, int nforw, int nboth,
-		const char* modName, int len, int ord,
-		double sstol, Journal& jr, DynamicModelDLL& dynamicDLL);
+		const char** exo, int num_exo, int num_par, //const char** par,
+		Vector* ySteady, TwoDMatrix* vCov, Vector* params, int nstat,int nPred, 
+		int nforw, int nboth, const int nSteps, const int ord, 	//const char* modName,
+		Journal& jr, DynamicModelDLL& dynamicDLL, double sstol);
 
 	/** Makes a deep copy of the object. */
 	KordpDynare(const KordpDynare& dyn);
@@ -129,6 +141,8 @@ public:
 	{return nYss;}
 	int ny() const
 	{return nY;}
+	int steps() const
+	{return nSteps;}
 	int order() const
 	{return nOrder;}
 	const NameList& getAllEndoNames() const
@@ -138,23 +152,23 @@ public:
 	const NameList& getExogNames() const
 	{return *denl;}
 	TwoDMatrix& getVcov() const
-	{return *Vcov;}
+	{return *vCov;}
 	Vector& getParams()
 	{return *params;}
 	
 	const TensorContainer<FSSparseTensor>& getModelDerivatives() const
 	{return md;}
 	const Vector& getSteady() const
-	{return *ysteady;}
+	{return *ySteady;}
 	Vector& getSteady()
-	{return *ysteady;}
+	{return *ySteady;}
 	///	const ogdyn::DynareModel& getModel() const
 	///		{return *model;}
 	
 	// here is true public interface
 	void solveDeterministicSteady(Vector& steady);
 	void solveDeterministicSteady()
-	{solveDeterministicSteady(*ysteady);}
+	{solveDeterministicSteady(*ySteady);}
 	void evaluateSystem(Vector& out, const Vector& yy, const Vector& xx);
 	void evaluateSystem(Vector& out, const Vector& yym, const Vector& yy,
 		const Vector& yyp, const Vector& xx);

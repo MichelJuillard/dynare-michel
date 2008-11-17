@@ -15,19 +15,11 @@
 
 
 #include "k_ord_dynare.h"
-#include "dynare_exception.h"
-#include "decision_rule.h"
-#include "fs_tensor.h"
-#include "SylvException.h"
 
 #include "mex.h" 
 
-///#include "forw_subst_builder.h"
-
 #include "Dynare_pp/utils/cc/memory_file.h"
 #include "Dynare_pp/utils/cc/exception.h"
-#include "Dynare_pp/tl/cc/tl_exception.h"
-#include "Dynare_pp/kord/kord_exception.h"
 
 
 //#include "k_order_perturbation.h"
@@ -36,51 +28,36 @@
 #endif
 
 
-/**************************************************************************************/
-/*       DynareNameList class                                                         */
-/**************************************************************************************/
-vector<int> DynareNameList::selectIndices(const vector<const char*>& ns) const
-{
-	vector<int> res;
-	for (unsigned int i = 0; i < ns.size(); i++) {
-		int j = 0;
-		while (j < getNum() && strcmp(getName(j), ns[i]) != 0)
-			j++;
-		if (j == getNum())
-			throw DynareException(__FILE__, __LINE__,
-								  string("Couldn't find name for ") + ns[i] +
-								  " in DynareNameList::selectIndices");
-		res.push_back(j);
-	}
-	return res;
-}
+FistOrderApproximation::GetRuleDers(double*dgy,double*dgu){
+    
+};
+
 /////////////////////////
 /**************************************************************************************/
 /*       Dynare DynamicModel class                                                                 */
 /**************************************************************************************/
-
+class KordpJacobian;
 
 KordpDynare::KordpDynare(const char** endo,  int num_endo,
-			   const char** exo, int nexog,
-			   const char** par, int nPar, 
-   			   Vector* ysteady, int nstat,int nPred, int nForw, int nboth,
-			   const char* modName, int len, int nOrder,
-			   double sstol, Journal& jr, DynamicModelDLL& dynamicDLL)
-	: journal(jr),  md(1), 	  ysteady(NULL),
-	  dnl(NULL), denl(NULL), dsnl(NULL), nPar(nPar), nOrder(nOrder),
-	ss_tol(sstol), nStat(nstat), nBoth(nboth),
-	 nForw(nForw), nExog(nexog), nPred(nPred),
-	nYs(nYs), nYss(nYss),nY(nY), dynamicDLL(dynamicDLL)
-
+			   const char** exo, int nexog, int nPar, //const char** par,
+   			   Vector* ySteady, TwoDMatrix* vCov, Vector* params, int nstat,int nPred, int nForw, int nboth,
+			   const int nSteps, int nOrder, //const char* modName,
+			   Journal& jr, DynamicModelDLL& dynamicDLL, double sstol)
+	: nStat(nstat), nBoth(nboth), nPred(nPred), nForw(nForw), nExog(nexog), nPar(nPar),
+	nYs(nYs), nYss(nYss),nY(nY), nSteps(nSteps), nOrder(nOrder), journal(jr),  dynamicDLL(dynamicDLL),
+	ySteady(ySteady), vCov(vCov), params (params),  md(1), dnl(NULL), denl(NULL), dsnl(NULL), ss_tol(sstol)
 {
-
 	try{
-
-		dnl = new DynareNameList(*this);
-		denl = new DynareExogNameList(*this);
+		dnl = new DynareNameList(*this, endo);
+		denl = new DynareExogNameList(*this, exo);
 		dsnl = new DynareStateNameList(*this, *dnl, *denl);
 
-		throw DynareException(__FILE__, __LINE__, string("Could not open model file ")+modName);
+/****
+		ySteady = new Vector(*(ySteady));
+		params = new Vector(*(params));
+		vCov = new TwoDMatrix(*(vCov));
+******/
+	//	throw DynareException(__FILE__, __LINE__, string("Could not open model file ")+modName);
 	}
 	catch (...)
 	{}
@@ -89,50 +66,41 @@ KordpDynare::KordpDynare(const char** endo,  int num_endo,
 ///	writeModelInfo(journal);
 }
 
-class KordpJacobian;
-
 KordpDynare::KordpDynare(const KordpDynare& dynare)
-	: journal(dynare.journal),///, model(NULL),
-	  ysteady(NULL), md(dynare.md),
-	  dnl(NULL), denl(NULL), dsnl(NULL),
-	ss_tol(dynare.ss_tol), nStat(dynare.nStat), nBoth(dynare.nBoth),
-	nPred(dynare.nPred), nForw(dynare.nForw), nExog(dynare.nExog), 
-	nYs(dynare.nYs), nYss(dynare.nYss),nY(dynare.nY),
-	dynamicDLL(dynare.dynamicDLL),nOrder(dynare.nOrder), nPar(dynare.nPar)
+	: nStat(dynare.nStat), nBoth(dynare.nBoth),	nPred(dynare.nPred), 
+	nForw(dynare.nForw), nExog(dynare.nExog),  nPar(dynare.nPar),
+	nYs(dynare.nYs), nYss(dynare.nYss),nY(dynare.nY), 
+	nSteps(dynare.nSteps), nOrder(dynare.nOrder), journal(dynare.journal),
+	dynamicDLL(dynare.dynamicDLL), //modName(dynare.modName),
+	ySteady(NULL), params(NULL), vCov(NULL), md(dynare.md), 
+	dnl(NULL), denl(NULL), dsnl(NULL), ss_tol(dynare.ss_tol)
 {
 ///	model = dynare.model->clone();
-	ysteady = new Vector(*(dynare.ysteady));
+	ySteady = new Vector(*(dynare.ySteady));
 	params = new Vector(*(dynare.params));
-	Vcov = new TwoDMatrix(*(dynare.Vcov));
+	vCov = new TwoDMatrix(*(dynare.vCov));
 //	if (dynare.md)// !=NULL)
 //	Inititalise ModelDerivatives md
-	md= *(new TensorContainer<FSSparseTensor>::TensorContainer(dynare.md));
-	dnl = new DynareNameList(*this);
-	denl = new DynareExogNameList(*this);
+//	md= *(new TensorContainer<FSSparseTensor>(dynare.md));
+	dnl = new DynareNameList(dynare);//(*this);
+	denl = new DynareExogNameList(dynare);//(*this);
 	dsnl = new DynareStateNameList(*this, *dnl, *denl);
 }
 
 KordpDynare::~KordpDynare()
 {
-	if (ysteady)
-		delete ysteady;
+	if (ySteady)
+		delete ySteady;
 	if (params)
 		delete params;
-	if (Vcov)
-		delete Vcov;
-/*************** May be needed
+	if (vCov)
+		delete vCov;
 	if (dnl)
 		delete dnl;
 	if (dsnl)
 		delete dsnl;
 	if (denl)
 		delete denl;
-	if (fe)
-		delete fe;
-	if (fde)
-		delete fde;
-***********///
-
 }
 
 void KordpDynare::solveDeterministicSteady(Vector& steady)
@@ -144,7 +112,7 @@ void KordpDynare::solveDeterministicSteady(Vector& steady)
 	KordpJacobian dj(*this);
 	ogu::NLSolver nls(dvf, dj, 500, ss_tol, journal);
 	int iter;
-	if (! nls.solve(*ysteady, iter))
+	if (! nls.solve(*ySteady, iter))
 		throw DynareException(__FILE__, __LINE__,
 							  "Could not obtain convergence in non-linear solver");
 }
@@ -193,9 +161,7 @@ void KordpDynare::calcDerivatives(const Vector& yy, const Vector& xx)
 				params, //int it_, 
 				out, g1, NULL);
 
-//    if (!md){
-//        md=new TensorContainer<FSSparseTensor> (1); 
-    //    model derivatives FSSparseTensor instance
+   //    model derivatives FSSparseTensor instance
         FSSparseTensor mdTi=*(new FSSparseTensor (1, g1->ncols(),g1->nrows())); 
         for (int i = 0; i<g1->ncols(); i++){
                 for (int j = 0; j<g1->nrows(); j++){
@@ -204,17 +170,15 @@ void KordpDynare::calcDerivatives(const Vector& yy, const Vector& xx)
                 }
         }
         // md container
-        md=*(new TensorContainer<FSSparseTensor>::TensorContainer(1)); 
-
+//        md=*(new TensorContainer<FSSparseTensor>(1)); 
+        md.clear();
         md.insert(&mdTi);
-//    }else{}
-		
 }
 void KordpDynare::calcDerivativesAtSteady()
 {
 	Vector xx(nexog());
 	xx.zeros();
-	calcDerivatives(*ysteady, xx);
+	calcDerivatives(*ySteady, xx);
 }
 
 void KordpDynare::writeModelInfo(Journal& jr) const
@@ -286,5 +250,60 @@ void KordpVectorFunction::eval(const ConstVector& in, Vector& out)
 	Vector xx(d.nexog());
 	xx.zeros();
 	d.evaluateSystem(out, in, xx);
+}
+
+/**************************************************************************************/
+/*       DynareNameList class                                                         */
+/**************************************************************************************/
+vector<int> DynareNameList::selectIndices(const vector<const char*>& ns) const
+{
+	vector<int> res;
+	for (unsigned int i = 0; i < ns.size(); i++) {
+		int j = 0;
+		while (j < getNum() && strcmp(getName(j), ns[i]) != 0)
+			j++;
+		if (j == getNum())
+			throw DynareException(__FILE__, __LINE__,
+								  string("Couldn't find name for ") + ns[i] +
+								  " in DynareNameList::selectIndices");
+		res.push_back(j);
+	}
+	return res;
+}
+
+DynareNameList::DynareNameList(const  KordpDynare& dynare)
+{
+	for (int i = 0; i < dynare.ny(); i++) {
+		names.push_back(dynare.dnl->getName(i));
+	}
+}
+DynareNameList::DynareNameList(const KordpDynare& dynare, const char ** namesp)
+{
+	for (int i = 0; i < dynare.ny(); i++) {
+		names.push_back(namesp[i]);
+	}
+}
+
+DynareExogNameList::DynareExogNameList(const KordpDynare& dynare)
+{
+	for (int i = 0; i < dynare.nexog(); i++) {
+		names.push_back(dynare.denl->getName(i));
+	}
+}
+
+DynareExogNameList::DynareExogNameList(const KordpDynare& dynare, const char ** namesp)
+{
+	for (int i = 0; i < dynare.nexog(); i++) {
+		names.push_back(namesp[i]);
+	}
+}
+
+DynareStateNameList::DynareStateNameList(const KordpDynare& dynare, const DynareNameList& dnl,
+										 const DynareExogNameList& denl)
+{
+	for (int i = 0; i < dynare.nys(); i++)
+		names.push_back(dnl.getName(i+dynare.nstat()));
+	for (int i = 0; i < dynare.nexog(); i++)
+		names.push_back(denl.getName(i));
 }
 
