@@ -310,7 +310,7 @@ elseif options_.mh_recover
     while b <= nblck
         if  NumberOfMhFilesPerBlock(b) < ExpectedNumberOfMhFilesPerBlock
             CrashedBlck = b;% YES, chain b!
-            disp(['MH: Chain ' int2str(b) ' is uncomplete!'])
+            disp(['MH: Chain ' int2str(b) ' is not complete!'])
             break
         else
             disp(['MH: Chain ' int2str(b) ' is complete!'])
@@ -324,7 +324,7 @@ elseif options_.mh_recover
     end
     %% The new metropolis-hastings should start from chain... (fblck=CrashedBlck)
     fblck = CrashedBlck;
-    %% How many mh-files are saved in this block ?
+    %% How many mh-files are saved in this block?
     NumberOfSavedMhFilesInTheCrashedBlck = NumberOfMhFilesPerBlock(CrashedBlck);
     %% How many mh-files were saved in this block during the last session
     %% (if there was a complete session before the crash)
@@ -353,10 +353,6 @@ elseif options_.mh_recover
         IsTheLastFileOfThePreviousMhFull = 0;
         NumberOfCompletedMhFiles = NumberOfMhFilesPerBlock(CrashedBlck);
         reste = 0;
-    elseif ~OldMh && NumberOfSavedMhFilesInTheCrashedBlck    
-        IsTheLastFileOfThePreviousMhFull = 0;
-        NumberOfCompletedMhFiles = 0;
-        reste = 0;
     end
     %% How many runs were saved ?
     NumberOfSavedDraws = MAX_nruns*NumberOfCompletedMhFiles + reste;
@@ -383,6 +379,18 @@ elseif options_.mh_recover
             end
         end
         ilogpo2(CrashedBlck) = logpo2(end);
-        ix2(CrashedBlck,:) = x2(end,:);       
+        ix2(CrashedBlck,:) = x2(end,:); 
+    else
+        if NumberOfSavedMhFilesInTheCrashedBlck
+            load([MhDirectoryName '/' ModelName '_mh' ...
+                  int2str(NumberOfCompletedMhFiles) '_blck' int2str(CrashedBlck) '.mat']);
+            fline(CrashedBlck,1) = 1;
+            NewFile(CrashedBlck) = NumberOfCompletedMhFiles+1;% NumberOfSavedMhFilesInTheCrashedBlck+1;
+            ilogpo2(CrashedBlck) = logpo2(end);
+            ix2(CrashedBlck,:) = x2(end,:);
+        else
+            fline(CrashedBlck,1) = 1;
+            NewFile(CrashedBlck) = 1;
+        end
     end
 end% of (if options_.load_mh_file == {0,1 or -1})
