@@ -316,7 +316,7 @@ dynare ramst.mod savemacro
 
 <chapter id="modfile"><title>The Model file</title>
 <para>
-Dynare commands are either single instructions or a block of instructions. Each single instruction and each element of a block is terminated by a semicolon (<command>;</command>). Blocks of instructions are terminated by <command>end;</command>.
+Dynare commands are either single instructions or a block of instructions. Each single instruction and each element of a block is terminated by a semicolon (<literal>;</literal>). Blocks of instructions are terminated by <command>end</command><literal>;</literal>.
 </para>
 
 <para>
@@ -326,14 +326,15 @@ Most Dynare commands have arguments and several accept options, indicated in par
 <para id="conventions" xreflabel="Conventions">
 In the description of Dynare commands, the following conventions are observed:
 <itemizedlist>
-<listitem><para>optional arguments or options are indicated between square brackets <command>[]</command></para></listitem>
-<listitem><para>repreated arguments are indicated by ellipses <command>...</command></para></listitem>
+<listitem><para>optional arguments or options are indicated between square brackets <literal>[]</literal></para></listitem>
+<listitem><para>repreated arguments are indicated by ellipses <literal>...</literal></para></listitem>
+<listitem><para>mutually exclusive arguments are separated by vertical bars <literal>|</literal></para></listitem>
 <listitem><para><replaceable>INTEGER</replaceable> indicates an integer number</para></listitem>
-<listitem><para><replaceable>DOUBLE</replaceable> indicates a double precision number. The following syntaxes are valid: 1.1e3, 1.1E3, 1.1d3, 1.1D3</para></listitem>
+<listitem><para><replaceable>DOUBLE</replaceable> indicates a double precision number. The following syntaxes are valid: <literal>1.1e3</literal>, <literal>1.1E3</literal>, <literal>1.1d3</literal>, <literal>1.1D3</literal></para></listitem>
 <listitem><para><replaceable>EXPRESSION</replaceable> indicates a mathematical expression valid outside the model description (see <xref linkend="expressions"/>)</para></listitem>
 <listitem><para><replaceable>MODEL_EXPRESSION</replaceable> indicates a mathematical expression valid in the model description (see <xref linkend="expressions"/> and <xref linkend="model"/>)</para></listitem>
-<listitem><para><replaceable>VARIABLE_NAME</replaceable> indicates a variable name starting with an alphabetical character and can't contain ()+-*/^=!;:@#. or accentuated characters</para></listitem>
-<listitem><para><replaceable>PARAMETER_NAME</replaceable> indicates a parameter name starting with an alphabetical character and can't contain ()+-*/^=!;:@#. or accentuated characters</para></listitem>
+<listitem><para><replaceable>VARIABLE_NAME</replaceable> indicates a variable name starting with an alphabetical character and can't contain <literal>()+-*/^=!;:@#.</literal> or accentuated characters</para></listitem>
+<listitem><para><replaceable>PARAMETER_NAME</replaceable> indicates a parameter name starting with an alphabetical character and can't contain <literal>()+-*/^=!;:@#.</literal> or accentuated characters</para></listitem>
 <listitem><para><replaceable>FILENAME</replaceable> indicates a file name valid in the underlying operating system (<trademark class="registered">Windows</trademark>, GNU/Linux, ...)</para></listitem>
 </itemizedlist>
 </para>
@@ -507,7 +508,7 @@ parameters alpha, bet;
 
   <para>Unlike <trademark class="registered">Matlab</trademark> or Octave expressions, Dynare expressions are necessarily scalar ones: they cannot contain matrices or evaluate to matrices<footnote><para>Note that arbitrary <trademark class="registered">Matlab</trademark> or Octave expressions can be put in a <filename class="extension">.mod</filename> file, but those expressions have to be on separate lines, generally at the end of the file for post-processing purposes. They are not interpreted by Dynare, and are simply passed on unmodified to <trademark class="registered">Matlab</trademark> or Octave. Those constructions are not addresses in this section.</para></footnote>.</para>
 
-  <para>Expressions can be constructed using integers (<replaceable>INTEGER</replaceable>), floating point numbers (<replaceable>DOUBLE</replaceable>), parameter names, variable names, operators and functions.</para>
+  <para>Expressions can be constructed using integers (<replaceable>INTEGER</replaceable>), floating point numbers (<replaceable>DOUBLE</replaceable>), parameter names (<replaceable>PARAMETER_NAME</replaceable>), variable names (<replaceable>VARIABLE_NAME</replaceable>), operators and functions.</para>
 
   <sect2>
     <title>Parameters and variables</title>
@@ -517,9 +518,11 @@ parameters alpha, bet;
     <sect3>
       <title>Inside the model</title>
 
-      <para>Parameters used inside the model either refer to the value given through <link linkend="param_init">parameter initialization</link> (and possiblity <xref linkend="homotopy_setup"/>) when doing a simulation, or are the estimated variables when doing an estimation.</para>
+      <para>Parameters used inside the model refer to the value given through <link linkend="param_init">parameter initialization</link> or <xref linkend="homotopy_setup"/> when doing a simulation, or are the estimated variables when doing an estimation.</para>
 
       <para>Variables used in a <replaceable>MODEL_EXPRESSION</replaceable> denote <emphasis>current period</emphasis> values when neither a lead or a lag is given. A lead or a lag can be given by enclosing an integer between parenthesis just after the variable name: a positive integer means a lead, a negative one means a lag. For example, if <literal>c</literal> is an endogenous variable, then <literal>c(+1)</literal> is the variable one period ahead, and <literal>c(-2)</literal> is the variable two periods before.</para>
+
+      <para>DESCRIBE DYNARE TIMING CONVENTION...</para>
 
       <para>Leads and lags are primarily used for endogenous variables. They can be used for exogenous variables under some conditions (TO BE EXPLICITED). They are forbidden for parameters and for local model variables (see <xref linkend="model"/>).</para>
 
@@ -545,27 +548,32 @@ parameters alpha, bet;
   <sect2><title>Functions</title>
     <para>The following standard functions are allowed in both <replaceable>MODEL_EXPRESSION</replaceable> and <replaceable>EXPRESSION</replaceable>:
       <itemizedlist>
-        <listitem><para>exponential: <literal>exp()</literal></para></listitem>
-        <listitem><para>natural logarithm: <literal>log()</literal> (aliased as <literal>ln()</literal>)</para></listitem>
-        <listitem><para>base 10 logarithm: <literal>log10()</literal></para></listitem>
-        <listitem><para>square root: <literal>sqrt()</literal></para></listitem>
-        <listitem><para>trigonometric functions: <literal>sin()</literal>, <literal>cos()</literal>, <literal>tan()</literal>, <literal>asin()</literal>, <literal>acos()</literal>, <literal>atan()</literal></para></listitem>
-        <listitem><para>TO BE COMPLETED</para></listitem>
+        <listitem><para>exponential: <literal>exp(<replaceable>x</replaceable>)</literal></para></listitem>
+        <listitem><para>natural logarithm: <literal>log(<replaceable>x</replaceable>)</literal> (or equivalently <literal>ln(<replaceable>x</replaceable>)</literal>)</para></listitem>
+        <listitem><para>base 10 logarithm: <literal>log10(<replaceable>x</replaceable>)</literal></para></listitem>
+        <listitem><para>square root: <literal>sqrt(<replaceable>x</replaceable>)</literal></para></listitem>
+        <listitem><para>trigonometric functions: <literal>sin(<replaceable>x</replaceable>)</literal>, <literal>cos(<replaceable>x</replaceable>)</literal>, <literal>tan(<replaceable>x</replaceable>)</literal>, <literal>asin(<replaceable>x</replaceable>)</literal>, <literal>acos(<replaceable>x</replaceable>)</literal>, <literal>atan(<replaceable>x</replaceable>)</literal></para></listitem>
+        <listitem><para>maximum and minimum: <literal>max(<replaceable>a</replaceable>, <replaceable>b</replaceable>)</literal>, <literal>min(<replaceable>a</replaceable>, <replaceable>b</replaceable>)</literal></para></listitem>
+        <listitem><para>gaussian cumulative distribution function: <literal>normcdf(<replaceable>x</replaceable>, <replaceable>&mu;</replaceable>, <replaceable>&sigma;</replaceable>)</literal> (note that <literal>normcdf(<replaceable>x</replaceable>)</literal> is equivalent to <literal>normcdf(<replaceable>x</replaceable>, 0, 1)</literal>)</para></listitem>
       </itemizedlist>
     </para>
-    <para>Unknown functions allowed (under some conditions) in expressions outside model block.</para>
+    <para>In a <replaceable>MODEL_EXPRESSION</replaceable>, no other function is allowed.<footnote><para>This is due to the fact that the Dynare preprocessor performs a symbolical derivation of all model equations, and therefore needs to know the analytical derivatives of all the equations in the model equations. In the future, we should add support for other usual functions, and implement an interface to let the user define custom functions, for which he would provide the analytical derivatives.</para></footnote></para>
+    <para>In an <replaceable>EXPRESSION</replaceable>, it is possible to use any arbitrary <trademark class="registered">Matlab</trademark> or Octave function, provided that this function has scalar arguments and return value.</para>
 </sect2>
 
 </sect1>
 
 <sect1 id="param_init"><title>Parameter initialization</title>
 
-<para>The syntax is the following:</para>
+<para>When using Dynare for computing simulations, it is necessary to calibrate the parameters of the model. This is done through parameter initialization.</para>
+
+<formalpara><title>Syntax</title>
 <cmdsynopsis>
   <replaceable>PARAMETER_NAME</replaceable> = <replaceable>EXPRESSION</replaceable>;
 </cmdsynopsis>
+</formalpara>
 
-<para>Examples:</para>
+<formalpara><title>Example</title>
 
 <programlisting>
 parameters alpha, bet;
@@ -574,6 +582,7 @@ beta = 0.99;
 alpha = 0.36;
 A = 1-alpha*beta;
 </programlisting>
+</formalpara>
 
 </sect1>
 
@@ -594,49 +603,23 @@ A = 1-alpha*beta;
   <refsynopsisdiv>
     <cmdsynopsis>
       <command>model</command>
-      <arg>
-	(linear)
-      </arg>
-      <arg choice="plain">
+      <arg>(<replaceable>OPTION</replaceable><arg rep="repeat">, <replaceable>OPTION</replaceable></arg>)</arg>
       ;
-      </arg><sbr/>
-      <arg choice="plain">
-	<synopfragmentref linkend="pound_exp">MATLAB EXPRESSION</synopfragmentref>;
-      </arg><sbr/>
+      <sbr/>
       <arg rep="repeat">
-	<synopfragmentref linkend="pound_exp">MATLAB EXPRESSION</synopfragmentref>;
-      </arg><sbr/>
-      <arg choice="plain">
-	end;
+        <group>
+          <arg choice="plain"><replaceable>MODEL_EXPRESSION</replaceable> = <replaceable>MODEL_EXPRESSION</replaceable>;</arg>
+          <arg choice="plain"><replaceable>MODEL_EXPRESSION</replaceable>;</arg>
+          <arg choice="plain"># <replaceable>VARIABLE_NAME</replaceable> = <replaceable>MODEL_EXPRESSION</replaceable>;</arg>
+        </group>
       </arg>
-
-      <arg choice="plain">
-	<synopfragmentref linkend="eq">EQUATION</synopfragmentref>;
-      </arg><sbr/>
-      <arg rep="repeat">
-	<synopfragmentref linkend="eq">EQUATION</synopfragmentref>;
-      </arg><sbr/>
-      <arg choice="plain">
-	end;
-      </arg>
-
-      <synopfragment id="pound_exp">
-	<arg choice="plain">#<replaceable>EXPRESSION</replaceable></arg>
-	<arg>= #<replaceable>EXPRESSION</replaceable></arg>
-	<arg choice="plain">;</arg>
-      </synopfragment>
-
-      <synopfragment id="eq">
-	<arg choice="plain"><replaceable>EXPRESSION</replaceable></arg>
-	<arg>= <replaceable>EXPRESSION</replaceable></arg>
-	<arg choice="plain">;</arg>
-      </synopfragment>
+      <command>end</command>;
     </cmdsynopsis>
   </refsynopsisdiv>
 
 <refsect1><title>Description</title>
 <para>
-The equations of the model are written in a block delimited by <command>model;</command> and <command>end;</command>.
+The equations of the model are written in a block delimited by <command>model</command><literal>;</literal> and <command>end</command><literal>;</literal>.
 </para>
 <para>
 There must be as many equations as there are endogenous variables in the model, except when used to compute the unconstrained optimal policy with <xref linkend="ramsey_policy"/>. The lead and lag of the variables are written in parenthesis immediately after the variable name. Leads or lags of more than one period are allowed. Only some elementary functions are allowed. Each equation must be terminated by a semicolon (;).
@@ -649,7 +632,7 @@ It is possible to include arbitrary Matlab expressions in a model. It must be pr
 </para>
 
 <para>
-The option <command>linear</command> declares the model as being linear. It avoids to have to declare initial values for computing the steady state and it sets automatically <command>order=1</command> in <command>stoch_simul</command>.
+The option <option>linear</option> declares the model as being linear. It avoids to have to declare initial values for computing the steady state and it sets automatically <option>order=1</option> in <xref linkend="stoch_simul" />.
 </para>
 </refsect1>
 
@@ -1456,8 +1439,8 @@ the simulated variables are available in global matrix <varname>y_</varname>. Th
   <refsynopsisdiv>
     <cmdsynopsis>
       <command>stoch_simul</command>
-      <arg>(<arg rep="repeat" choice="plain"><replaceable>OPTION</replaceable>,</arg>)</arg>
-      <arg choice="plain"><replaceable>VARIABLE_NAME</replaceable></arg>
+      <arg>(<arg choice="plain"><replaceable>OPTION</replaceable></arg>
+        <arg rep="repeat">, <replaceable>OPTION</replaceable></arg>)</arg>
       <arg rep="repeat"><replaceable>VARIABLE_NAME</replaceable></arg>
       <arg choice='plain'>;</arg>
     </cmdsynopsis>
