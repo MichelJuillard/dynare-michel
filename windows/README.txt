@@ -53,17 +53,21 @@ specify a MOD file.
 Using Dynare with Octave
 ------------------------
 
-Dynare is now available for Octave, a free clone of Matlab (R) (see
+Dynare is now available for GNU Octave, a free clone of Matlab (R) (see
 <http://www.octave.org>).
 
-For installing Octave on your Windows system, go to:
+The recommended Octave distribution is the Octave/Windows VC++ 3.0.3
+precompiled binaries from Octave Forge, available at:
 
-  http://sourceforge.net/project/showfiles.php?group_id=2888&package_id=40078
+ http://sourceforge.net/project/showfiles.php?group_id=2888&package_id=40078&release_id=642199
 
-Then pick the 'octave-3.0.1-vs2008-setup.exe' installer. Choose GNUplot
-graphical backend (instead of JHandles) during installation. Also note that
-this distribution contains a nice text editor, which you can invoke with "edit"
-as you would under Matlab (R).
+During installation, you will be asked which graphical backend to use. Neither
+of them works perfectly with Dynare at this time:
+
+ * GNUplot gives better-looking results when several graphics are plotted in the
+   same window, but window titles will not show up
+ * JHandles properly displays windows titles, but gives ugly results when several
+   plots are displayed in the same window 
 
 WARNING: the Octave binary distribution has a bug which makes Octave crash
 everytime one types 'clear all' (and therefore everytime one runs Dynare!). A
