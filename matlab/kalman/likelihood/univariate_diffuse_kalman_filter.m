@@ -44,8 +44,9 @@ function [LIK, lik] = univariate_diffuse_kalman_filter(T,R,Q,H,Pinf,Pstar,Y,star
 %
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
+global options_
 
-[pp ,smpl] = size(Y,1); 
+[pp ,smpl] = size(Y); 
 mm = size(T,1);
 a  = zeros(mm,1);
 QQ = R*Q*transpose(R);
@@ -135,7 +136,7 @@ while notsteady && (t<smpl)
     a 	  = T*a;
     Pstar = T*Pstar*T' + QQ;
     if t>no_more_missing_observations
-        notsteady = max(max(abs(P-oldP)))>riccati_tol;
+        notsteady = max(max(abs(Pstar-oldP)))>riccati_tol;
     end
 end
 

@@ -1,4 +1,4 @@
-function PosteriorFilterSmootherAndForecast(Y,gend, type)
+function PosteriorFilterSmootherAndForecast(Y,gend, type,data_index)
 
 % function PosteriorFilterSmootherAndForecast(Y,gend, type)
 % Computes posterior filter smoother and forecasts
@@ -138,7 +138,7 @@ for b=1:B
   set_all_parameters(deep);
   dr = resol(oo_.steady_state,0);
   [alphahat,etahat,epsilonhat,ahat,SteadyState,trend_coeff,aK] = ...
-      DsgeSmoother(deep,gend,Y);
+      DsgeSmoother(deep,gend,Y,data_index);
   
   if options_.loglinear
     stock_smooth(dr.order_var,:,irun1) = alphahat(1:endo_nbr,:)+ ...

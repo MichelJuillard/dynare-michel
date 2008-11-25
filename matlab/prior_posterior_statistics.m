@@ -1,14 +1,16 @@
-function prior_posterior_statistics(type,Y,gend)
+function prior_posterior_statistics(type,Y,gend,data_index,missing_value)
 
 % function PosteriorFilterSmootherAndForecast(Y,gend, type)
 % Computes posterior filter smoother and forecasts
 %
 % INPUTS
-%    type:   posterior
-%            prior
-%            gsa
-%    Y:      data
-%    gend:   number of observations 
+%    type:         posterior
+%                  prior
+%                  gsa
+%    Y:            data
+%    gend:         number of observations 
+%    data_index    [cell]      1*smpl cell of column vectors of indices.
+%    missing_value 1 if missing values, 0 otherwise
 %    
 % OUTPUTS
 %    none
@@ -152,7 +154,7 @@ for b=1:B
 
   if run_smoother
       [alphahat,etahat,epsilonhat,alphatilde,SteadyState,trend_coeff,aK] = ...
-          DsgeSmoother(deep,gend,Y);
+          DsgeSmoother(deep,gend,Y,data_index,missing_value);
       if options_.loglinear
           stock_smooth(dr.order_var,:,irun(1)) = alphahat(1:endo_nbr,:)+ ...
               repmat(log(dr.ys(dr.order_var)),1,gend);

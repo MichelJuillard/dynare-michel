@@ -1,10 +1,12 @@
-function [alphahat,etahat,epsilonhat,ahat,SteadyState,trend_coeff,aK,T,R,P,PK,d,decomp] = DsgeSmoother(xparam1,gend,Y)
+function [alphahat,etahat,epsilonhat,ahat,SteadyState,trend_coeff,aK,T,R,P,PK,d,decomp] = DsgeSmoother(xparam1,gend,Y,data_index,missing_value)
 % Estimation of the smoothed variables and innovations. 
 % 
 % INPUTS 
 %   o xparam1       [double]   (p*1) vector of (estimated) parameters. 
 %   o gend          [integer]  scalar specifying the number of observations ==> varargin{1}.
 %   o data          [double]   (T*n) matrix of data.
+%   o data_index    [cell]      1*smpl cell of column vectors of indices.
+%   o missing_value 1 if missing values, 0 otherwise
 %  
 % OUTPUTS 
 %   o alphahat      [double]  (m*T) matrix, smoothed endogenous variables.
@@ -265,26 +267,37 @@ function [alphahat,etahat,epsilonhat,ahat,SteadyState,trend_coeff,aK,T,R,P,PK,d,
           [alphahat,etahat,ahat,aK] = DiffuseKalmanSmoother1(T,R,Q,Pinf,Pstar,Y,trend,nobs,np,smpl,mf);
           if all(alphahat(:)==0)
               kalman_algo = 2;
-              [alphahat,etahat,ahat,aK] = DiffuseKalmanSmoother3(T,R,Q,Pinf,Pstar,Y,trend,nobs,np,smpl,mf);
           end
-      elseif kalman_algo == 2
+      end
+      if kalman_algo == 2
           [alphahat,etahat,ahat,aK] = DiffuseKalmanSmoother3(T,R,Q,Pinf,Pstar,Y,trend,nobs,np,smpl,mf);
-      elseif kalman_algo == 3 | kalman_algo == 4
+      end
+      if kalman_algo == 3
           data1 = Y - trend;
-          if options_.kalman_algo == 3
+          if missing_value
+              [alphahat,etahat,ahat,P,aK,PK,d,decomp] = missing_DiffuseKalmanSmoother1_Z(ST, ...
+						  Z,R1,Q,Pinf,Pstar,data1,nobs,np,smpl,data_index);
+          else
               [alphahat,etahat,ahat,P,aK,PK,d,decomp] = DiffuseKalmanSmoother1_Z(ST, ...
-						  Z,R1,Q,Pinf,Pstar,data1,nobs,np,smpl);
-              if all(alphahat(:)==0)
-                  options_.kalman_algo = 4;
-                  [alphahat,etahat,ahat,P,aK,PK,d,decomp] = DiffuseKalmanSmoother3_Z(ST, ...
 						  Z,R1,Q,Pinf,Pstar, ...
                                                   data1,nobs,np,smpl);
-              end
-%              oo_.NewFilteredVariables = QT*filtered_values(data1,ahat,P,T,Z);
+          end
+          if all(alphahat(:)==0)
+              options_.kalman_algo = 4;
+          end
+      end
+      if kalman_algo == 4
+          data1 = Y - trend;
+          if missing_value
+              [alphahat,etahat,ahat,P,aK,PK,d,decomp] = missing_DiffuseKalmanSmoother3_Z(ST, ...
+						  Z,R1,Q,Pinf,Pstar,data1,nobs,np,smpl,data_index);
           else
               [alphahat,etahat,ahat,P,aK,PK,d,decomp] = DiffuseKalmanSmoother3_Z(ST, ...
-						  Z,R1,Q,Pinf,Pstar,data1,nobs,np,smpl);
+						  Z,R1,Q,Pinf,Pstar, ...
+                                                  data1,nobs,np,smpl);
           end
+      end
+      if kalman_algo == 3 | kalman_algo == 4
           alphahat = QT*alphahat;
           ahat = QT*ahat;
           nk = options_.nk;

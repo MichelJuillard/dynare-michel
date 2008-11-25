@@ -47,7 +47,8 @@ function initial_estimation_checks(xparam1,gend,data,data_index,number_of_observ
 	   'observed variables'])
   end
   if (number_of_observations==gend*nv)% No missing observations...
-      r = rank(data);
+      k = find(all(~isnan(data),2));
+      r = rank(data(unique(k),:));
       if r < nv
           error(['Estimation can''t take place because the data are perfectly' ...
                  ' correlated']);

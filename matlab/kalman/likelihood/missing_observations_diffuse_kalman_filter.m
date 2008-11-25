@@ -43,7 +43,7 @@ function [LIK, lik] = missing_observations_diffuse_kalman_filter(T,R,Q,H,Pinf,Ps
 %
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
- 
+
   [pp,smpl] = size(Y);
   mm   = size(T,2);
   a    = zeros(mm,1);
@@ -59,7 +59,7 @@ function [LIK, lik] = missing_observations_diffuse_kalman_filter(T,R,Q,H,Pinf,Ps
   
   while rank(Pinf,kalman_tol) && (t<smpl)
       t  = t+1;
-      if isempty(data_index{t},:)
+      if isempty(data_index{t})
           a = T*a;
           Pstar = T*Pstar*transpose(T)+QQ;
           Pinf  = T*Pinf*transpose(T);     

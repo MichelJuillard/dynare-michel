@@ -249,16 +249,6 @@ function [fval,cost_flag,ys,trend_coeff,info] = DsgeLikelihood(xparam1,gend,data
       end
   end
   if kalman_algo == 2
-      no_correlation_flag = 1;
-      if length(H)==1
-          H = zeros(nobs,1);
-      else
-          if all(all(abs(H-diag(diag(H)))<1e-14))% ie, the covariance matrix is diagonal...
-              H = diag(H);
-          else
-              no_correlation_flag = 1;
-          end
-      end
   end
   kalman_tol = options_.kalman_tol;
   riccati_tol = options_.riccati_tol;
@@ -280,6 +270,16 @@ function [fval,cost_flag,ys,trend_coeff,info] = DsgeLikelihood(xparam1,gend,data
       end
   end
   if (kalman_algo==2)% Univariate Kalman Filter
+      no_correlation_flag = 1;
+      if length(H)==1 & H == 0
+          H = zeros(nobs,1);
+      else
+          if all(all(abs(H-diag(diag(H)))<1e-14))% ie, the covariance matrix is diagonal...
+              H = diag(H);
+          else
+              no_correlation_flag = 0;
+          end
+      end
       if no_correlation_flag
           LIK = univariate_kalman_filter(T,R,Q,H,Pstar,Y,start,mf,kalman_tol,riccati_tol,data_index,number_of_observations,no_more_missing_observations);
       else
@@ -288,29 +288,38 @@ function [fval,cost_flag,ys,trend_coeff,info] = DsgeLikelihood(xparam1,gend,data
   end
   if (kalman_algo==3)% Multivariate Diffuse Kalman Filter
       if no_missing_data_flag
-          data1 = data - trend;
-          if any(any(H ~= 0))
-              LIK = DiffuseLikelihoodH1_Z(ST,Z,R1,Q,H,Pinf,Pstar,data1,start);
-          else
-              LIK = DiffuseLikelihood1_Z(ST,Z,R1,Q,Pinf,Pstar,data1,start);
-          end
-          if isinf(LIK)
-              kalman_algo =  4;
-          end
+          LIK = diffuse_kalman_filter(ST,R1,Q,H,Pinf,Pstar,Y,start,Z,kalman_tol, ...
+                                      riccati_tol);
       else
-          error(['The diffuse filter is not yet implemented for models with missing observations'])
+          LIK = missing_observations_diffuse_kalman_filter(ST,R1,Q,H,Pinf, ...
+                                                           Pstar,Y,start,Z,kalman_tol,riccati_tol,...
+                                                           data_index,number_of_observations,...
+                                                           no_more_missing_observations);
+      end
+      if isinf(LIK)
+          kalman_algo = 4;
       end
   end
   if (kalman_algo==4)% Univariate Diffuse Kalman Filter
-      data1 = data - trend;
-      if any(any(H ~= 0))
-          if ~estim_params_.ncn 
-              LIK = DiffuseLikelihoodH3_Z(ST,Z,R1,Q,H,Pinf,Pstar,data1,trend,start);
-          else
-              LIK = DiffuseLikelihoodH3corr_Z(ST,Z,R1,Q,H,Pinf,Pstar,data1,trend,start);
-          end
+      no_correlation_flag = 1;
+      if length(H)==1 & H == 0
+          H = zeros(nobs,1);
       else
-          LIK = DiffuseLikelihood3_Z(ST,Z,R1,Q,Pinf,Pstar,data1,start);
+          if all(all(abs(H-diag(diag(H)))<1e-14))% ie, the covariance matrix is diagonal...
+              H = diag(H);
+          else
+              no_correlation_flag = 0;
+          end
+      end
+      if no_correlation_flag
+          LIK = univariate_diffuse_kalman_filter(ST,R1,Q,H,Pinf,Pstar,Y, ...
+                                                 start,Z,kalman_tol,riccati_tol,data_index,...
+                                                 number_of_observations,no_more_missing_observations);
+      else
+          LIK = univariate_diffuse_kalman_filter_corr(ST,R1,Q,H,Pinf,Pstar, ...
+                                                      Y,start,Z,kalman_tol,riccati_tol,...
+                                                      data_index,number_of_observations,...
+                                                      no_more_missing_observations);
       end
   end
   if imag(LIK) ~= 0
