@@ -35,11 +35,11 @@ function forcst_unc(y0,var_list)
   global M_ options_ oo_ estim_params_ bayestopt_
   
   % setting up estim_params_
-  [xparam1,estim_params_,bayestopt_,lb,ub] = set_prior(estim_params_);
+  [xparam1,estim_params_,bayestopt_,lb,ub] = set_prior(estim_params_,M_);
 
   options_.TeX = 0;
   options_.nograph = 0;
-  plot_priors;
+  plot_priors(bayestopt_,M_,options_);
   
   % workspace initialization
   if isempty(var_list)
