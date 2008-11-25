@@ -40,18 +40,39 @@ function osr1(i_params,i_var,weights)
 
   exe =zeros(M_.exo_nbr,1);
   
-  oo_.dr = set_state_space(oo_.dr,M_);
+  dr = set_state_space(oo_.dr,M_);
   
   % check if ys is steady state
-  fh = str2func([M_.fname '_static']);
-  if max(abs(feval(fh, oo_.steady_state, exe, M_.params))) > options_.dynatol
-    [oo_.dr.ys, check] = dynare_solve([M_.fname '_static'], oo_.steady_state, 1, exe, M_.params);
-    if check
-      error('OLR: convergence problem in DYNARE_SOLVE')
-    end
+  if exist([M_.fname '_steadystate'])
+      [dr.ys,check1] = feval([M_.fname '_steadystate'],oo_.steady_state,...
+                             [oo_.exo_steady_state; oo_.exo_det_steady_state]);
   else
-    oo_.dr.ys = oo_.steady_state;
+      % testing if ys isn't a steady state or if we aren't computing Ramsey policy
+      fh = str2func([M_.fname '_static']);
+      if max(abs(feval(fh,oo_.steady_state,[oo_.exo_steady_state; oo_.exo_det_steady_state], M_.params))) ...
+              > options_.dynatol & options_.ramsey_policy == 0
+          if options_.linear == 0
+              % nonlinear models
+              [dr.ys,check1] = dynare_solve(fh,dr.ys,options_.jacobian_flag,...
+                                            [oo_.exo_steady_state; ...
+		    oo_.exo_det_steady_state], M_.params);
+          else
+              % linear models
+              [fvec,jacob] = feval(fh,oo_.steady_state,[oo_.exo_steady_state;...
+		    oo_.exo_det_steady_state], M_.params);
+              dr.ys = oo_.steady_state-jacob\fvec;
+          end
+      end
   end
+  oo_.dr = dr;
+% $$$   if max(abs(feval(fh, oo_.steady_state, exe, M_.params))) > options_.dynatol
+% $$$     [oo_.dr.ys, check] = dynare_solve([M_.fname '_static'], oo_.steady_state, 1, exe, M_.params);
+% $$$     if check
+% $$$       error('OLR: convergence problem in DYNARE_SOLVE')
+% $$$     end
+% $$$   else
+% $$$     oo_.dr.ys = oo_.steady_state;
+% $$$   end
 
   
   np = size(i_params,1);
