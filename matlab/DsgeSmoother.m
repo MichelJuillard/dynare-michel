@@ -264,13 +264,25 @@ function [alphahat,etahat,epsilonhat,ahat,SteadyState,trend_coeff,aK,T,R,P,PK,d,
       end
   else
       if kalman_algo == 1
-          [alphahat,etahat,ahat,aK] = DiffuseKalmanSmoother1(T,R,Q,Pinf,Pstar,Y,trend,nobs,np,smpl,mf);
+          if missing_value
+              [alphahat,etahat,ahat,aK] = missing_DiffuseKalmanSmoother1(T,R,Q, ...
+                                                  Pinf,Pstar,Y,trend,nobs,np,smpl,mf,data_index);
+          else
+              [alphahat,etahat,ahat,aK] = DiffuseKalmanSmoother1(T,R,Q, ...
+                                                  Pinf,Pstar,Y,trend,nobs,np,smpl,mf);
+          end
           if all(alphahat(:)==0)
               kalman_algo = 2;
           end
       end
       if kalman_algo == 2
-          [alphahat,etahat,ahat,aK] = DiffuseKalmanSmoother3(T,R,Q,Pinf,Pstar,Y,trend,nobs,np,smpl,mf);
+          if missing_value
+              [alphahat,etahat,ahat,aK] = missing_DiffuseKalmanSmoother3(T,R,Q, ...
+                                                  Pinf,Pstar,Y,trend,nobs,np,smpl,mf,data_index);
+          else
+              [alphahat,etahat,ahat,aK] = DiffuseKalmanSmoother3(T,R,Q, ...
+                                                  Pinf,Pstar,Y,trend,nobs,np,smpl,mf);
+          end
       end
       if kalman_algo == 3
           data1 = Y - trend;

@@ -17,6 +17,6 @@ number_of_observations = length(variable_index);
 if ~missing_observations_counter
     no_more_missing_observations = 0;
 else
-    tmp = find(missing_observations_counter>=(gend*nvarobs-number_of_observations))
+    tmp = find(missing_observations_counter>=(gend*nvarobs-number_of_observations));
     no_more_missing_observations = tmp(1);
 end
