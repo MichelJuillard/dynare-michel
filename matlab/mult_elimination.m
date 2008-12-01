@@ -1,4 +1,4 @@
-function dr=mult_elimination(void)
+function dr=mult_elimination(varlist,M_, options_, oo_)
 % function mult_elimination()
 % replaces Lagrange multipliers in Ramsey policy by lagged value of state
 % and shock variables
@@ -28,8 +28,6 @@ function dr=mult_elimination(void)
 %
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
-
-  global M_ options_ oo_
 
   dr = oo_.dr;
   
@@ -95,3 +93,29 @@ function dr=mult_elimination(void)
   dr.M2 = M2;
   dr.M3 = M3;
   dr.M4 = M4;
+  
+  nvar = length(varlist);
+  nspred = dr.nspred;
+  nspred = 6;
+  if nvar > 0
+      res_table = zeros(2*(nspred+M_.exo_nbr),nvar);
+      headers = 'Variables';
+      for i=1:length(varlist)
+          k = strmatch(varlist{i},M_.endo_names(dr.order_var,:),'exact');
+          headers = strvcat(headers,varlist{i});
+          
+          res_table(1:nspred,i) = M1(k,:)';
+          res_table(nspred+(1:nspred),i) = M2(k,:)';
+          res_table(2*nspred+(1:M_.exo_nbr),i) = M3(k,:)';
+          res_table(2*nspred+M_.exo_nbr+(1:M_.exo_nbr),i) = M4(k,:)';
+      end
+            
+      my_title='ELIMINATION OF THE MULTIPLIERS';
+      lab1 = M_.endo_names(dr.order_var(dr.nstatic+[ 1 2 5:8]),:);
+      labels = strvcat(lab1,lab1,M_.exo_names,M_.exo_names);
+      lh = size(labels,2)+2;
+      table(my_title,headers,labels,res_table,lh,10,6);
+      disp(' ')
+  end
+      
+      
