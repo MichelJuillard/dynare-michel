@@ -1,4 +1,4 @@
-function y = solve_two_boundaries(fname, y, x, y_index, nze, periods, y_kmin_l, y_kmax_l, is_linear, Block_Num, y_kmin, maxit_, solve_tolf, lambda, cutoff, simulation_method)
+function y = solve_two_boundaries(fname, y, x, params, y_index, nze, periods, y_kmin_l, y_kmax_l, is_linear, Block_Num, y_kmin, maxit_, solve_tolf, lambda, cutoff, simulation_method)
 % Computes the deterministic simulation of a block of equation containing
 % both lead and lag variables using relaxation methods 
 %
@@ -7,6 +7,7 @@ function y = solve_two_boundaries(fname, y, x, y_index, nze, periods, y_kmin_l, 
 %                                       to simulate
 %   y                   [matrix]        All the endogenous variables of the model
 %   x                   [matrix]        All the exogenous variables of the model
+%   params              [vector]        All the parameters of the model
 %   y_index             [vector of int] The index of the endogenous variables of
 %                                       the block
 %   nze                 [integer]       number of non-zero elements in the
@@ -72,7 +73,7 @@ function y = solve_two_boundaries(fname, y, x, y_index, nze, periods, y_kmin_l, 
   reduced = 0;
   while ~(cvg==1 | iter>maxit_),
     %fname
-    [r, g1, g2, g3, b]=feval(fname, y, x, periods, 0, g1, g2, g3, y_kmin, Blck_size);
+    [r, g1, g2, g3, b]=feval(fname, y, x, params, periods, 0, g1, g2, g3, y_kmin, Blck_size);
     g1a=g1(:, y_kmin*Blck_size+1:(periods+y_kmin)*Blck_size);
     b = b' -g1(:, 1+(y_kmin-y_kmin_l)*Blck_size:y_kmin*Blck_size)*reshape(y(1+y_kmin-y_kmin_l:y_kmin,y_index)',1,y_kmin_l*Blck_size)'-g1(:, (periods+y_kmin)*Blck_size+1:(periods+y_kmin+y_kmax_l)*Blck_size)*reshape(y(periods+y_kmin+1:periods+y_kmin+y_kmax_l,y_index)',1,y_kmax_l*Blck_size)';
     if(~isreal(r))

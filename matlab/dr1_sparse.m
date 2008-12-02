@@ -208,8 +208,9 @@ function [dr,info,M_,options_,oo_] = dr1_sparse(dr,task,M_,options_,oo_)
           dr.nyf = nnz(dr.kstate(:,2)>M_.maximum_lag+1);
         elseif options_.model_mode==1
             if options_.order == 1
+                
                 [junk,jacobia_] = feval([M_.fname '_dynamic'],ones(M_.maximum_lag+M_.maximum_lead+1,1)*dr.ys',[oo_.exo_simul ...
-                    oo_.exo_det_simul], it_);
+                    oo_.exo_det_simul], M_.params, it_);
                  %full(jacobia_)
                  dr.eigval = [];
                  dr.nyf = 0;
@@ -221,7 +222,6 @@ function [dr,info,M_,options_,oo_] = dr1_sparse(dr,task,M_,options_,oo_)
                      M_.block_structure.block(i).dr=set_state_space(M_.block_structure.block(i).dr,M_.block_structure.block(i));
                      col_selector=repmat(M_.block_structure.block(i).variable,1,M_.block_structure.block(i).maximum_endo_lag+M_.block_structure.block(i).maximum_endo_lead+1)+kron([M_.maximum_endo_lag-M_.block_structure.block(i).maximum_endo_lag:M_.maximum_endo_lag+M_.block_structure.block(i).maximum_endo_lead],M_.endo_nbr*ones(1,M_.block_structure.block(i).endo_nbr));
                      row_selector = M_.block_structure.block(i).equation;
-                     %col_selector
                      jcb_=jacobia_(row_selector,col_selector);
                      jcb_ = jcb_(:,find(M_.block_structure.block(i).lead_lag_incidence')) ;
                      if M_.block_structure.block(i).exo_nbr>0

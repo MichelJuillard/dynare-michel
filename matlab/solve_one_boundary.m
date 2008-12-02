@@ -1,4 +1,4 @@
-function y = solve_one_boundary(fname, y, x, y_index_eq, nze, periods, is_linear, Block_Num, y_kmin, maxit_, solve_tolf, lambda, cutoff, simulation_method, forward_backward)
+function y = solve_one_boundary(fname, y, x, params, y_index_eq, nze, periods, is_linear, Block_Num, y_kmin, maxit_, solve_tolf, lambda, cutoff, simulation_method, forward_backward, is_dynamic, verbose)
 % Computes the deterministic simulation of a block of equation containing
 % lead or lag variables 
 %
@@ -7,6 +7,7 @@ function y = solve_one_boundary(fname, y, x, y_index_eq, nze, periods, is_linear
 %                                       to simulate
 %   y                   [matrix]        All the endogenous variables of the model
 %   x                   [matrix]        All the exogenous variables of the model
+%   params              [vector]        All the parameters of the model
 %   y_index_eq          [vector of int] The index of the endogenous variables of
 %                                       the block
 %   nze                 [integer]       number of non-zero elements in the
@@ -29,6 +30,13 @@ function y = solve_one_boundary(fname, y, x, y_index_eq, nze, periods, is_linear
 %                                            - 3 BicGStab
 %   forward_backward    [integer]       The block has to be solve forward
 %                                       (1) or backward (0)
+%   is_dynamic          [integer]       (1) The block belong to the dynamic
+%                                           file and the oo_.deterministic_simulation field has to be uptated
+%                                       (0) The block belong to the static
+%                                           file and th oo_.deteerminstic
+%                                           field remains unchanged
+%   verobse            [integer]        (0) iterations are not printed
+%                                       (1) iterations are printed
 %
 % OUTPUTS
 %   y                  [matrix]         All endogenous variables of the model      
@@ -58,7 +66,7 @@ function y = solve_one_boundary(fname, y, x, y_index_eq, nze, periods, is_linear
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
 
-    global oo_;
+    global oo_ M_;
     Blck_size=size(y_index_eq,2);
     g2 = [];
     g3 = [];
@@ -75,123 +83,155 @@ function y = solve_one_boundary(fname, y, x, y_index_eq, nze, periods, is_linear
         start = periods+y_kmin;
         finish = y_kmin+1;
     end
-    
+    lambda=1;
     for it_=start:incr:finish
        cvg=0;
        iter=0;
        g1=spalloc( Blck_size, Blck_size, nze);
-       %Per_y_=it_*Blck_size;
        while ~(cvg==1 | iter>maxit_),
-           [r, g1] = feval(fname, y, x, it_, 0, g1, g2, g3);
-           %r
+           if(is_dynamic)
+             [r, g1] = feval(fname, y, x, params, it_, 0, g1, g2, g3);
+           else
+             [r, g1] = feval(fname, y, x, params, 0);
+           end;
            if(~isreal(r))
               max_res=(-(max(max(abs(r))))^2)^0.5;
            else
               max_res=max(max(abs(r)));
            end;
-           if(iter>0)
-             if(~isreal(max_res) | isnan(max_res) | (max_resa<max_res && iter>1))
-               if(isnan(max_res))
-                 detJ=det(g1a);
-                 if(abs(detJ)<1e-7)
-                   max_factor=max(max(abs(g1a)));
-                   ze_elem=sum(diag(g1a)<cutoff);
-                   disp([num2str(full(ze_elem),'%d') ' elements on the Jacobian diagonal are below the cutoff (' num2str(cutoff,'%f') ')']);
-                   if(correcting_factor<max_factor)
-                     correcting_factor=correcting_factor*4;
-                     disp(['The Jacobain matrix is singular, det(Jacobian)=' num2str(detJ,'%f') '.']);
-                     disp(['    trying to correct the Jacobian matrix:']);
-                     disp(['    correcting_factor=' num2str(correcting_factor,'%f') ' max(Jacobian)=' num2str(full(max_factor),'%f')]);
-                     dx = -r/(g1+correcting_factor*speye(Blck_size));
-                     y(it_,y_index_eq)=ya_save+lambda*dx;
-                     continue;
-                   else
-                     disp('The singularity of the jacobian matrix could not be corrected');
-                     return;
-                   end;
-                 end;
-               elseif(lambda>1e-8)
-                 lambda=lambda/2;
-                 reduced = 1;
-                 disp(['reducing the path length: lambda=' num2str(lambda,'%f')]);
-                 y(it_,y_index_eq)=ya_save+lambda*dx;
-                 continue;
-               else
-                 if(cutoff == 0)
-                   fprintf('Error in simul: Convergence not achieved in block %d, at time %d, after %d iterations.\n Increase "options_.maxit_".\n',Block_Num, it_, iter);
-                 else
-                   fprintf('Error in simul: Convergence not achieved in block %d, at time %d, after %d iterations.\n Increase "options_.maxit_" or set "cutoff=0" in model options.\n',Block_Num, it_, iter);
-                 end;
-                 oo_.deterministic_simulation.status = 0;
-                 oo_.deterministic_simulation.error = max_res;
-                 oo_.deterministic_simulation.iterations = iter;
-                 oo_.deterministic_simulation.block(Block_Num).status = 0;% Convergency failed.
-                 oo_.deterministic_simulation.block(Block_Num).error = max_res;
-                 oo_.deterministic_simulation.block(Block_Num).iterations = iter;
-                 return;
-               end;
-             else
-               if(lambda<1)
-                 lambda=max(lambda*2, 1);
-               end;
-             end;
-           end;
-           ya = y(it_,y_index_eq)';
-           ya_save=ya;
-           g1a=g1;
-           if(simulation_method==0),
-              dx = (-r/g1)';
-              ya = ya + lambda*dx;
-              y(it_,y_index_eq)=ya';
-           elseif(simulation_method==2),
-              flag1=1;
-              while(flag1>0)
-                 [L1, U1]=luinc(g1,luinc_tol);
-                 [za,flag1] = gmres(g1,-r',Blck_size,1e-6,Blck_size,L1,U1);
-                 if (flag1>0 | reduced)
-                    if(flag1==1)
-                       disp(['Error in simul: No convergence inside GMRES after ' num2str(iter,'%6d') ' iterations, in block' num2str(Block_Num,'%3d')]);
-                    elseif(flag1==2)
-                       disp(['Error in simul: Preconditioner is ill-conditioned, in block' num2str(Block_Num,'%3d')]);
-                    elseif(flag1==3)
-                       disp(['Error in simul: GMRES stagnated (Two consecutive iterates were the same.), in block' num2str(Block_Num,'%3d')]);
-                    end;
-                    luinc_tol = luinc_tol/10;
-                    reduced = 0;
-                 else
-                    dx = za - ya;
-                    ya = ya + lambda*dx;
-                    y(it_,y_index_eq)=ya';
-                 end;
-              end;
-           elseif(simulation_method==3),
-              flag1=1;
-              while(flag1>0)
-                 [L1, U1]=luinc(g1,luinc_tol);
-                 [za,flag1] = bicgstab(g1,-r',1e-7,Blck_size,L1,U1);
-                 if (flag1>0 | reduced)
-                    if(flag1==1)
-                       disp(['Error in simul: No convergence inside BICGSTAB after ' num2str(iter,'%6d') ' iterations, in block' num2str(Block_Num,'%3d')]);
-                    elseif(flag1==2)
-                       disp(['Error in simul: Preconditioner is ill-conditioned, in block' num2str(Block_Num,'%3d')]);
-                    elseif(flag1==3)
-                       disp(['Error in simul: GMRES stagnated (Two consecutive iterates were the same.), in block' num2str(Block_Num,'%3d')]);
-                    end;
-                    luinc_tol = luinc_tol/10;
-                    reduced = 0;
-                 else
-                    dx = za - ya;
-                    ya = ya + lambda*dx;
-                    y(it_,y_index_eq)=ya';
-                 end;
-              end;
+           if(verbose==1)
+             disp(['iteration : ' int2str(iter) ' => ' num2str(max_res)]);
+             disp([M_.endo_names(y_index_eq,:) num2str([y(y_index_eq) r g1])]);
            end;
            if(is_linear)
               cvg = 1;
            else
               cvg=(max_res<solve_tolf);
            end;
-           iter=iter+1;
+           if(~cvg)
+             if(iter>0)
+               if(~isreal(max_res) | isnan(max_res) | (max_resa<max_res && iter>1))
+                 if(isnan(max_res))
+                   detJ=det(g1a);
+                   if(abs(detJ)<1e-7)
+                     max_factor=max(max(abs(g1a)));
+                     ze_elem=sum(diag(g1a)<cutoff);
+                     disp([num2str(full(ze_elem),'%d') ' elements on the Jacobian diagonal are below the cutoff (' num2str(cutoff,'%f') ')']);
+                     if(correcting_factor<max_factor)
+                       correcting_factor=correcting_factor*4;
+                       disp(['The Jacobain matrix is singular, det(Jacobian)=' num2str(detJ,'%f') '.']);
+                       disp(['    trying to correct the Jacobian matrix:']);
+                       disp(['    correcting_factor=' num2str(correcting_factor,'%f') ' max(Jacobian)=' num2str(full(max_factor),'%f')]);
+                       dx = -r/(g1+correcting_factor*speye(Blck_size));
+                       y(it_,y_index_eq)=ya_save+lambda*dx;
+                       continue;
+                     else
+                       disp('The singularity of the jacobian matrix could not be corrected');
+                       return;
+                     end;
+                   end;
+                 elseif(lambda>1e-8)
+                   lambda=lambda/2;
+                   reduced = 1;
+                   disp(['reducing the path length: lambda=' num2str(lambda,'%f')]);
+                   if(is_dynamic)
+                     y(it_,y_index_eq)=ya_save+lambda*dx;
+                   else
+                     y(y_index_eq)=ya_save+lambda*dx;
+                   end;
+                   continue;
+                 else
+                   if(cutoff == 0)
+                     fprintf('Error in simul: Convergence not achieved in block %d, at time %d, after %d iterations.\n Increase "options_.maxit_".\n',Block_Num, it_, iter);
+                   else
+                     fprintf('Error in simul: Convergence not achieved in block %d, at time %d, after %d iterations.\n Increase "options_.maxit_" or set "cutoff=0" in model options.\n',Block_Num, it_, iter);
+                   end;
+                   if(is_dynamic)
+                     oo_.deterministic_simulation.status = 0;
+                     oo_.deterministic_simulation.error = max_res;
+                     oo_.deterministic_simulation.iterations = iter;
+                     oo_.deterministic_simulation.block(Block_Num).status = 0;% Convergency failed.
+                     oo_.deterministic_simulation.block(Block_Num).error = max_res;
+                     oo_.deterministic_simulation.block(Block_Num).iterations = iter;
+                   end;
+                   return;
+                 end;
+               else
+                 if(lambda<1)
+                   lambda=max(lambda*2, 1);
+                 end;
+               end;
+             end;
+             if(is_dynamic)
+               ya = y(it_,y_index_eq)';
+             else
+               ya = y(y_index_eq);
+             end;
+             ya_save=ya;
+             g1a=g1;
+             if(simulation_method==0),
+                %dx = - inv(g1)*r;
+                num2str(eig(full(g1)),'%f')
+                dx = - g1\r;
+                ya = ya + lambda*dx;
+                if(is_dynamic)
+                  y(it_,y_index_eq) = ya';
+                else
+                  y(y_index_eq) = ya;
+                end;
+             elseif(simulation_method==2),
+                flag1=1;
+                while(flag1>0)
+                   [L1, U1]=luinc(g1,luinc_tol);
+                   [za,flag1] = gmres(g1,-r,Blck_size,1e-6,Blck_size,L1,U1);
+                   if (flag1>0 | reduced)
+                      if(flag1==1)
+                         disp(['Error in simul: No convergence inside GMRES after ' num2str(iter,'%6d') ' iterations, in block' num2str(Block_Num,'%3d')]);
+                      elseif(flag1==2)
+                         disp(['Error in simul: Preconditioner is ill-conditioned, in block' num2str(Block_Num,'%3d')]);
+                      elseif(flag1==3)
+                         disp(['Error in simul: GMRES stagnated (Two consecutive iterates were the same.), in block' num2str(Block_Num,'%3d')]);
+                      end;
+                      luinc_tol = luinc_tol/10;
+                      reduced = 0;
+                   else
+                      dx = za - ya;
+                      ya = ya + lambda*dx;
+                      if(is_dynamic)
+                        y(it_,y_index_eq) = ya';
+                      else
+                        y(y_index_eq) = ya';
+                      end;
+                   end;
+                end;
+             elseif(simulation_method==3),
+                flag1=1;
+                while(flag1>0)
+                   [L1, U1]=luinc(g1,luinc_tol);
+                   [za,flag1] = bicgstab(g1,-r,1e-7,Blck_size,L1,U1);
+                   if (flag1>0 | reduced)
+                      if(flag1==1)
+                         disp(['Error in simul: No convergence inside BICGSTAB after ' num2str(iter,'%6d') ' iterations, in block' num2str(Block_Num,'%3d')]);
+                      elseif(flag1==2)
+                         disp(['Error in simul: Preconditioner is ill-conditioned, in block' num2str(Block_Num,'%3d')]);
+                      elseif(flag1==3)
+                         disp(['Error in simul: GMRES stagnated (Two consecutive iterates were the same.), in block' num2str(Block_Num,'%3d')]);
+                      end;
+                      luinc_tol = luinc_tol/10;
+                      reduced = 0;
+                   else
+                      dx = za - ya;
+                      ya = ya + lambda*dx;
+                      if(is_dynamic)
+                        y(it_,y_index_eq) = ya';
+                      else
+                        y(y_index_eq) = ya';
+                      end;
+                   end;
+                end;
+             end;
+             iter=iter+1;
+           end
        end
        if cvg==0
            if(cutoff == 0)
@@ -199,19 +239,23 @@ function y = solve_one_boundary(fname, y, x, y_index_eq, nze, periods, is_linear
            else
                fprintf('Error in simul: Convergence not achieved in block %d, at time %d, after %d iterations.\n Increase "options_.maxit_" or set "cutoff=0" in model options.\n',Block_Num, it_,iter);
            end;
-           oo_.deterministic_simulation.status = 0;
-           oo_.deterministic_simulation.error = max_res;
-           oo_.deterministic_simulation.iterations = iter;
-           oo_.deterministic_simulation.block(Block_Num).status = 0;% Convergency failed.
-           oo_.deterministic_simulation.block(Block_Num).error = max_res;
-           oo_.deterministic_simulation.block(Block_Num).iterations = iter;
+           if(is_dynamic)
+             oo_.deterministic_simulation.status = 0;
+             oo_.deterministic_simulation.error = max_res;
+             oo_.deterministic_simulation.iterations = iter;
+             oo_.deterministic_simulation.block(Block_Num).status = 0;% Convergency failed.
+             oo_.deterministic_simulation.block(Block_Num).error = max_res;
+             oo_.deterministic_simulation.block(Block_Num).iterations = iter;
+           end;
            return;
        end
     end
-    oo_.deterministic_simulation.status = 1;
-    oo_.deterministic_simulation.error = max_res;
-    oo_.deterministic_simulation.iterations = iter;
-    oo_.deterministic_simulation.block(Block_Num).status = 1;% Convergency failed.
-    oo_.deterministic_simulation.block(Block_Num).error = max_res;
-    oo_.deterministic_simulation.block(Block_Num).iterations = iter;
+    if(is_dynamic)
+      oo_.deterministic_simulation.status = 1;
+      oo_.deterministic_simulation.error = max_res;
+      oo_.deterministic_simulation.iterations = iter;
+      oo_.deterministic_simulation.block(Block_Num).status = 1;% Convergency failed.
+      oo_.deterministic_simulation.block(Block_Num).error = max_res;
+      oo_.deterministic_simulation.block(Block_Num).iterations = iter;
+    end;
     return;
