@@ -26,7 +26,7 @@
 //#include "mex.h"
 //#include "k_order_perturbation.h"
 
-#include "approximation.h"
+
 
 #ifdef  _MSC_VER  //&&WINDOWS 
 
@@ -130,10 +130,14 @@ extern "C" {
 		const int nStat = (int)mxGetScalar(mxFldp);
 		mxFldp = mxGetField(dr, 0,"npred" );
 		const int nPred = (int)mxGetScalar(mxFldp);
+		mxFldp = mxGetField(dr, 0,"nspred" );
+		const int nsPred = (int)mxGetScalar(mxFldp);
 		mxFldp = mxGetField(dr, 0,"nboth" );
 		const int nBoth = (int)mxGetScalar(mxFldp);
 		mxFldp = mxGetField(dr, 0,"nfwrd" );
 		const int nForw = (int)mxGetScalar(mxFldp);
+		mxFldp = mxGetField(dr, 0,"nsfwrd" );
+		const int nsForw = (int)mxGetScalar(mxFldp);
 
 		mxFldp = mxGetField(M_, 0,"exo_nbr" );
 		const int nExog = (int)mxGetScalar(mxFldp);
@@ -141,8 +145,12 @@ extern "C" {
 		const int nEndo = (int)mxGetScalar(mxFldp);
 		mxFldp = mxGetField(M_, 0,"param_nbr" );
 		const int nPar = (int)mxGetScalar(mxFldp);
+        // it_ should be set to M_.maximum_lag
+		mxFldp = mxGetField(M_, 0,"maximum_lag" );
+		const int nMax_lag = (int)mxGetScalar(mxFldp);
 
-
+        const int jcols = nExog+nEndo+nsPred+nsForw; // Num of Jacobian columns
+        
 		mxFldp 	= mxGetField(M_, 0,"endo_names" );
 		const char ** endoNames = (const char **) mxGetData(mxFldp);
 		const int nendo = (int)mxGetN(mxFldp);
@@ -179,7 +187,7 @@ extern "C" {
 			Journal journal(jName.c_str());
 			
 			//			DynamicFn * pDynamicFn = loadModelDynamicDLL (fname);
-			DynamicModelDLL dynamicDLL(fName);
+			DynamicModelDLL dynamicDLL(fName, jcols, nMax_lag, nExog);
 			
 			// make KordpDynare object
 			KordpDynare dynare(endoNames,  nEndo, exoNames,  nExog, nPar, // paramNames,
@@ -202,7 +210,8 @@ extern "C" {
 					2*dynare.nforw()+dynare.nexog());
                 
 				// construct main K-order approximation class
-				FistOrderApproximation app(dynare, journal, nSteps);
+//				FistOrderApproximation app(dynare, journal, nSteps);
+				Approximation app(dynare, journal, nSteps);
                 // run stochastic steady 
                 app.walkStochSteady();		
 
@@ -249,15 +258,14 @@ extern "C" {
             
         // get protected derivatives from Approximation 
 
-            FGSContainer* rule_ders = app.GetRuleDers();
-        	FGSContainer* rule_ders_ss = app.GetRuleDersSS();
+//          FGSContainer* rule_ders = app.GetRuleDers();
+//        	FGSContainer* rule_ders_ss = app.GetRuleDersSS();
+//			TwoDMatrix* gy = new TwoDMatrix(app.GetGy());
+//			TwoDMatrix* gu = new TwoDMatrix(app.GetGu());
             
         // get latest ysteady 
-            ysteady = dynare.getSteady()->base();
-            
-            
-            
-  
+            double * dYsteady = (dynare.getSteady().base());
+            ySteady = (Vector*)(&dynare.getSteady());
             
 		} catch (const KordException& e) {
 			printf("Caugth Kord exception: ");
@@ -280,34 +288,36 @@ extern "C" {
 			return;// 255;
         }
 			
-			double  *gy, *gu;
+			double  *dgy, *dgu, *ysteady;
 			int nb_row_x;
 			
 			ysteady = NULL;
 			if (nlhs >= 1)
 			{
-				/* Set the output pointer to the output matrix residual. */
+				/* Set the output pointer to the output matrix ysteady. */
 				plhs[0] = mxCreateDoubleMatrix(nEndo,1, mxREAL);
-				/* Create a C pointer to a copy of the output matrix residual. */
+				/* Create a C pointer to a copy of the output ysteady. */
 				ysteady = mxGetPr(plhs[0]);
 			}
 			
-			gy = NULL;
+			dgy = NULL;
 			if (nlhs >= 2)
 			{
-				/* Set the output pointer to the output matrix g1. */
+				/* Set the output pointer to the output matrix gy. */
 				plhs[1] = mxCreateDoubleMatrix(nEndo, nEndo, mxREAL);
-				/* Create a C pointer to a copy of the output matrix g1. */
-				gy = mxGetPr(plhs[1]);
+//				plhs[1] = (double*)(gy->getData())->base();
+				/* Create a C pointer to a copy of the output matrix gy. */
+				dgy = mxGetPr(plhs[1]);
 			}
             
-			gu = NULL;
+			dgu = NULL;
 			if (nlhs >= 3)
 			{
-				/* Set the output pointer to the output matrix g2. */
+				/* Set the output pointer to the output matrix gu. */
 				plhs[2] = mxCreateDoubleMatrix(nExog, nExog, mxREAL);
-				/* Create a C pointer to a copy of the output matrix g1. */
-				gu = mxGetPr(plhs[2]);
+//				plhs[2] = (double*)((gu->getData())->base());
+				/* Create a C pointer to a copy of the output matrix gu. */
+				dgu = mxGetPr(plhs[2]);
 			}
             
             
@@ -319,7 +329,11 @@ extern "C" {
     };
 		
 // Load  <model>_Dyamic DLL );
-DynamicModelDLL::DynamicModelDLL(const char * modName)
+}; // end of extern C
+
+DynamicModelDLL::DynamicModelDLL(const char * modName, const int jcols, 
+								 const int nMax_lag, const int nExog)
+	:jcols( jcols), nMax_lag(nMax_lag), nExog(nExog)
 {
     char fName[MAX_MODEL_NAME];
     strcpy(fName,modName);
@@ -398,7 +412,7 @@ DynamicModelDLL::DynamicModelDLL(const char * modName)
 			*/
 			//		basic_string sFname(mFname);
 			
-	
+
 
 // close DLL: If the referenced object was successfully closed, 
 // close() returns 0, non 0 otherwise
@@ -414,35 +428,59 @@ int DynamicModelDLL::close(){
 	//If OK, dlclose() returns 0, non 0 otherwise
 	return dlclose(dynamicHinstance);
 # endif
-}
+};
 
 
-void DynamicModelDLL::eval(Vector&y, TwoDMatrix&x,  Vector&modParams, 
-		int it_, Vector&residual, TwoDMatrix&g1, TwoDMatrix&g2){
+void DynamicModelDLL::eval(const Vector&y, const TwoDMatrix&x, const  Vector* modParams, 
+		int it_, Vector&residual, TwoDMatrix*g1, TwoDMatrix*g2){
 
 //		DynamicDLLfunc(double *y, double *x, int nb_row_x, double *params, 
 //		int it_, double *residual, double *g1, double *g2)
-        double *dy, *dx, *dresidual, *dg1, *dg2, dbParams;
-        
-        dy=y.base();
-        dx=x[it_];
-        dbParams=modParams.base();
-        Dynamic(dy, dx, int nb_row_x, dbParams, 1, dresidual, dg1, dg2)
+//        const double *dy, *dx, dbParams;
+        double  *dresidual, *dg1=NULL, *dg2=NULL; 
+        int length=y.length();
 
-//		g1=	&(TwoDMatrix(double* d, int rows, int cols));
-        g1=	(TwoDMatrix(dg1,  rows,  cols));
-        residual=Vector(dresidual);
-	}
-void DynamicModelDLL::eval(Vector&y, Vector&x,  Vector&modParams, 
-		Vector&residual, TwoDMatrix&g1, TwoDMatrix&g2){
-        
-        dy=y.base();
-        dx=x.base();
-        dbParams=modParams.base();
-        Dynamic(dy, dx, int nb_row_x, dbParams, 1, dresidual, dg1, dg2)
+		const TwoDMatrix&mx = *(new const TwoDMatrix(it_+1, nExog));  
+        if (residual.length()<length){ // dummy or insufficient
+            Vector*tempv= new Vector(length );
+			residual=*tempv;
+            delete tempv;
+		}
+        if (g1!=NULL){
+            if (g1->nrows()!=length){ // dummy
+                delete g2;
+                g1=	new TwoDMatrix( length, jcols); // and get a new one
+            }
+            dg1= const_cast<double*>(g1->base());
+        }
+        if (g2!=NULL){
+            if (g2->nrows()!=length){ // dummy 
+                delete g2;
+                g2=	new TwoDMatrix( length, jcols*jcols);// and get a new one
+            }
+            dg2= const_cast<double*>(g2->base());
+        }
 
+        dresidual=const_cast<double*>(residual.base());
+        double *dy=const_cast<double*>(y.base());
+        double *dx=const_cast<double*>(mx.base());
+        double *dbParams=const_cast<double*>(modParams->base());
+        
+        try{
+            Dynamic(dy, dx, nExog, dbParams, it_, dresidual, dg1, dg2);
+        }catch (...){
+            mexPrintf("MexPrintf: error in run Dynamic DLL \n");
+        }
+        
 //		g1=	&(TwoDMatrix(double* d, int rows, int cols));
-        g1=	&(TwoDMatrix(dg1,  rows,  cols));
-    
-        residual=Vector(dresidual);
-	}
+//        g1=	new TwoDMatrix( length,  sizeof(dg1)/length, dg1);
+//        g2=	new TwoDMatrix( length,  sizeof(dg2)/length, dg2);
+//        residual=Vector(dresidual,length );
+};
+
+void DynamicModelDLL::eval(const Vector&y, const TwoDMatrix&x, const Vector * modParams, 
+		Vector&residual, TwoDMatrix*g1, TwoDMatrix*g2){
+
+		eval(y, x, modParams, nMax_lag, residual, g1, g2);	
+};
+

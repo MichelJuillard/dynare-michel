@@ -30,19 +30,36 @@
 #include "kord_exception.h"
 #include "exception.h"
 #include "nlsolve.h"
-
+#include "approximation.h"
 #include "k_order_perturbation.h"
 
 class KordpDynare;
 
 // derive from Approximation to get protected derivatives
-class FistOrderApproximation: public Approximation{
+/******
+ class FistOrderApproximation: public Approximation{
+    TwoDMatrix *gy;
+    TwoDMatrix *gu;
     public:
-	FGSContainer* GetRuleDers(){return rule_ders;};
-	void GetRuleDers(double*dgy,double*dgu);
-	FGSContainer* GetRuleDersSS(){return rule_ders_ss;};
-	void GetRuleDersSS(double*dgy, double*dgu);
-}
+	FistOrderApproximation();
+	FistOrderApproximation(FistOrderApproximation& fo): ::Approximation(fo){
+		if (&(fo.GetGy())!=0){
+			gy= new TwoDMatrix(fo.GetGy());
+			gu= new TwoDMatrix(fo.GetGu());
+		}
+	};
+	virtual ~FistOrderApproximation(){
+		delete gy;
+		delete gu;
+	};
+	virtual void approxAtSteady(); // NOTE: change the Approximation parent to use virual too so that it can be overriden !!
+	//FGSContainer* GetRuleDers(){return rule_ders;};
+	//FGSContainer* GetRuleDersSS(){return rule_ders_ss;};
+	const TwoDMatrix& GetGy(){return (const TwoDMatrix&)(*gy);};
+	const TwoDMatrix& GetGu(){return (const TwoDMatrix&)(*gu);};
+    virtual void saveRuleDerivs(FirstOrder& fo); 
+};
+***********/
 
 
 // instantiations of pure abstract class NameList in dynamic_model.h:

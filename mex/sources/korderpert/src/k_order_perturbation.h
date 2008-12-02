@@ -60,22 +60,29 @@ typedef void *(mexFunctionPtr)(int nlhs, mxArray *plhs[], int nrhs, const mxArra
 
 const int MAX_MODEL_NAME=100;
 
+/**
+* creates pointer to Dynamic function inside <model>_dynamic.dll
+* and handles calls to it.
+**/
 class DynamicModelDLL
 {
 private:
-	DynamicFn * Dynamic;
+	DynamicFn * Dynamic;// pointer to the Dynamic function in DLL
+	const int jcols;  // tot num vars = Num of Jacobian columns
+	const int nMax_lag; // no of lags
+	const int nExog; // no of exogenous
 #ifdef WINDOWS
-	HINSTANCE dynamicHinstance;
+	HINSTANCE dynamicHinstance;  // DLL instance pointer in Windows
 # else // linux
-	void * dynamicHinstance ;
+	void * dynamicHinstance ;	// and in Linux
 #endif
-//	void Dynamic(double *y, double *x, int nb_row_x, double *params, 
-//		int it_, double *residual, double *g1, double *g2);
+
 
 public:
 	// construct and load Dynamic model DLL 
-	DynamicModelDLL(const char* fname);
-	~DynamicModelDLL(){close();};
+	DynamicModelDLL(const char* fname, const int jcols, const int nMax_lag, 
+		const int nExog);
+	virtual ~DynamicModelDLL(){close();};
 	//	DynamicFn get(){return DynamicDLLfunc;};
 	//    void 
 	//    ((DynamicFn())*) get(){return Dynamic;};
@@ -85,13 +92,15 @@ public:
 		Dynamic(y, x, nb_row_x, params, it_, residual, g1, g2);
 	};
 	void eval(const Vector&y, const Vector&x,  const Vector* params, 
-		Vector&residual, TwoDMatrix*g1, TwoDMatrix*g2){};
+		Vector&residual, TwoDMatrix*g1, TwoDMatrix*g2);
 	void eval(const Vector&y, const Vector&x, Vector* params, 
-		Vector&residual, TwoDMatrix*g1, TwoDMatrix*g2){};
+		Vector&residual, TwoDMatrix*g1, TwoDMatrix*g2);
 	void eval(const Vector&y, const TwoDMatrix&x,  const Vector* params, 
-		int it_, Vector&residual, TwoDMatrix*g1, TwoDMatrix*g2){};
+		int it_, Vector&residual, TwoDMatrix*g1, TwoDMatrix*g2);
 	void eval(const Vector&y, const TwoDMatrix&x,  const Vector* params, 
-		Vector& residual, double *g1, double *g2){};
+		Vector& residual, TwoDMatrix *g1, TwoDMatrix *g2);
+	void eval(const Vector&y, const TwoDMatrix&x,  const Vector* params, 
+		Vector& residual, double *g1, double *g2);
 	// close DLL: If the referenced object was successfully closed, 
 	// close() returns 0, non 0 otherwise
 	int close();

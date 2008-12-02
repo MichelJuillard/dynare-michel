@@ -11,9 +11,9 @@
  * You should have received a copy of the GNU General Public License
  * along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
  */
-// based on: work by O.Kamenik
+// GP, based on work by O.Kamenik
 
-
+#include "first_order.h"
 #include "k_ord_dynare.h"
 
 #include "mex.h" 
@@ -27,10 +27,48 @@
 #define DYNVERSION "unknown"
 #endif
 
-
-FistOrderApproximation::GetRuleDers(double*dgy,double*dgu){
+    /******
+void FistOrderApproximation::approxAtSteady()
+{
+	model.calcDerivativesAtSteady();
+	FirstOrder fo(model.nstat(),model.npred(),model.nboth(),model.nforw(),
+		model.nexog(),*(model.getModelDerivatives().get(Symmetry(1))),
+		journal);
+	KORD_RAISE_IF_X(!fo.isStable(),
+		"The model is not Blanchard-Kahn stable",
+		KORD_MD_NOT_STABLE);
+	
+	if(model.order()>=2){
+		KOrder korder(model.nstat(),model.npred(),model.nboth(),model.nforw(),
+			model.getModelDerivatives(),fo.getGy(),fo.getGu(),
+			model.getVcov(),journal);
+		korder.switchToFolded();
+		for(int k= 2;k<=model.order();k++)
+			korder.performStep<KOrder::fold> (k);
+		
+		saveRuleDerivs(korder.getFoldDers());
+	}else{
+		FirstOrderDerivs<KOrder::fold> fo_ders(fo);
+		saveRuleDerivs(fo_ders);
+        
+	}
+	check(0.0);
+    Approximation::approxAtSteady();
     
-};
+	//saveRuleDerivs(fo);
+}
+
+
+void FistOrderApproximation::saveRuleDerivs(const FistOrder& fo)
+{
+	if(gy){
+		delete gy;
+		delete gu;
+	}
+	gy= new TwoDMatrix(fo.getGy);
+	gu= new TwoDMatrix(fo.getGu);
+}
+     ****************/
 
 /////////////////////////
 /**************************************************************************************/
@@ -156,7 +194,8 @@ void KordpDynare::calcDerivatives(const Vector& yy, const Vector& xx)
 
 	//double *g1, *g2;
     TwoDMatrix *g1, *g2;
-    Vector& out= *(new Vector(ny()));
+	g1=new TwoDMatrix(0,0);
+    Vector& out= *(new Vector(nY));
 	dynamicDLL.eval( yy,  xx, //int nb_row_x, 
 				params, //int it_, 
 				out, g1, NULL);
