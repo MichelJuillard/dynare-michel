@@ -190,7 +190,8 @@ public:
 	void evaluateSystem(Vector& out, const Vector& yym, const Vector& yy,
 		const Vector& yyp, const Vector& xx);
 	void calcDerivatives(const Vector& yy, const Vector& xx);
-	void calcDerivatives(const Vector& yy, const TwoDMatrix& xx);
+	//void calcDerivatives(const Vector& yy, TwoDMatrix& jj);
+    void calcDerivatives(const Vector& yy, ogu::Jacobian& jacob);
 	void calcDerivativesAtSteady();
 	DynamicModelDLL& dynamicDLL;
 	///	void writeMat4(FILE* fd, const char* prefix) const;

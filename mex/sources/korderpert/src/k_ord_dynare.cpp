@@ -213,6 +213,37 @@ void KordpDynare::calcDerivatives(const Vector& yy, const Vector& xx)
         md.clear();
         md.insert(&mdTi);
 }
+
+
+void KordpDynare::calcDerivatives(const Vector& yy, ogu::Jacobian& jacob)
+{
+//	ConstVector yym(yy, nstat(), nys());
+//	ConstVector yyp(yy, nstat()+npred(), nyss());
+
+//	Vector yyp(yy, nstat()+npred(), nyss());
+
+	//double *g1, *g2;
+	TwoDMatrix * jj= &jacob;
+    Vector& out= *(new Vector(nY));
+    Vector& xx= *(new Vector(nExog));
+	dynamicDLL.eval( yy,  xx, //int nb_row_x, 
+				params, //int it_, 
+				out, jj, NULL);
+   //    model derivatives FSSparseTensor instance
+        FSSparseTensor mdTi=*(new FSSparseTensor (1, jj->ncols(),jj->nrows())); 
+        for (int i = 0; i<jj->ncols(); i++){
+                for (int j = 0; j<jj->nrows(); j++){
+                    if (jj->get(i,j)!=0.0) // populate sparse if not zero
+                        mdTi.insert(i, j, jj->get(i,j));
+                }
+        }
+        // md container
+//        md=*(new TensorContainer<FSSparseTensor>(1)); 
+        md.clear();
+        md.insert(&mdTi);
+		delete &out;
+		delete &xx;
+}
 void KordpDynare::calcDerivativesAtSteady()
 {
 	Vector xx(nexog());

@@ -358,7 +358,7 @@ DynamicModelDLL::DynamicModelDLL(const char * modName, const int jcols,
 		mexPrintf("MexPrintf: Call GetProcAddress  %s .\n", fName);
 		Dynamic = (DynamicFn *) ::GetProcAddress(dynamicHinstance,"Dynamic");
         
-# else // linux
+# else // __linux__
 		
 		void *dynamicHinstance = dlopen(strcat(fNname,"_dynamic.so"), RTLD_NOW);
 		if((dynamicHinstance == NULL) || dlerr()){
@@ -440,7 +440,6 @@ void DynamicModelDLL::eval(const Vector&y, const TwoDMatrix&x, const  Vector* mo
         double  *dresidual, *dg1=NULL, *dg2=NULL; 
         int length=y.length();
 
-		const TwoDMatrix&mx = *(new const TwoDMatrix(it_+1, nExog));  
         if (residual.length()<length){ // dummy or insufficient
             Vector*tempv= new Vector(length );
 			residual=*tempv;
@@ -463,7 +462,7 @@ void DynamicModelDLL::eval(const Vector&y, const TwoDMatrix&x, const  Vector* mo
 
         dresidual=const_cast<double*>(residual.base());
         double *dy=const_cast<double*>(y.base());
-        double *dx=const_cast<double*>(mx.base());
+        double *dx=const_cast<double*>(x.base());
         double *dbParams=const_cast<double*>(modParams->base());
         
         try{
@@ -484,3 +483,14 @@ void DynamicModelDLL::eval(const Vector&y, const TwoDMatrix&x, const Vector * mo
 		eval(y, x, modParams, nMax_lag, residual, g1, g2);	
 };
 
+void DynamicModelDLL::eval(const Vector&y, const Vector&x, const Vector * modParams, 
+		Vector&residual, TwoDMatrix*g1, TwoDMatrix*g2){
+
+		/** ignore given exogens and create new 2D x matrix since 
+		* when calling <model>_dynamic(z,x,params,it_) x must be equal to
+		* zeros(M_.maximum_lag+1,M_.exo_nbr)
+		**/
+		const TwoDMatrix&mx = *(new const TwoDMatrix(nMax_lag+1, nExog));  
+
+		eval(y, mx, modParams, nMax_lag, residual, g1, g2);	
+};

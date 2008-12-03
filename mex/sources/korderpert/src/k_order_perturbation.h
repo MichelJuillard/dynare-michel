@@ -93,14 +93,12 @@ public:
 	};
 	void eval(const Vector&y, const Vector&x,  const Vector* params, 
 		Vector&residual, TwoDMatrix*g1, TwoDMatrix*g2);
-	void eval(const Vector&y, const Vector&x, Vector* params, 
-		Vector&residual, TwoDMatrix*g1, TwoDMatrix*g2);
 	void eval(const Vector&y, const TwoDMatrix&x,  const Vector* params, 
 		int it_, Vector&residual, TwoDMatrix*g1, TwoDMatrix*g2);
 	void eval(const Vector&y, const TwoDMatrix&x,  const Vector* params, 
 		Vector& residual, TwoDMatrix *g1, TwoDMatrix *g2);
-	void eval(const Vector&y, const TwoDMatrix&x,  const Vector* params, 
-		Vector& residual, double *g1, double *g2);
+//	void eval(const Vector&y, const TwoDMatrix&x,  const Vector* params, 
+//		Vector& residual, double *g1, double *g2);
 	// close DLL: If the referenced object was successfully closed, 
 	// close() returns 0, non 0 otherwise
 	int close();
