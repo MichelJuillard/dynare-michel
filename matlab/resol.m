@@ -67,18 +67,22 @@ if options_.steadystate_flag
 			 [oo_.exo_steady_state; oo_.exo_det_steady_state]);
 else
   % testing if ys isn't a steady state or if we aren't computing Ramsey policy
-  if max(abs(feval(fh,dr.ys,[oo_.exo_steady_state; oo_.exo_det_steady_state], M_.params))) ...
-	> options_.dynatol & options_.ramsey_policy == 0
-    if options_.linear == 0
-      % nonlinear models
-      [dr.ys,check1] = dynare_solve(fh,dr.ys,options_.jacobian_flag,...
-				    [oo_.exo_steady_state; ...
+  if  options_.ramsey_policy == 0
+      if options_.linear == 0
+          % nonlinear models
+          if max(abs(feval(fh,dr.ys,[oo_.exo_steady_state; ...
+                    oo_.exo_det_steady_state], M_.params))) > options_.dynatol
+              [dr.ys,check1] = dynare_solve(fh,dr.ys,options_.jacobian_flag,...
+                                            [oo_.exo_steady_state; ...
 		    oo_.exo_det_steady_state], M_.params);
-    else
-      % linear models
-      [fvec,jacob] = feval(fh,dr.ys,[oo_.exo_steady_state;...
+          end
+      else
+          % linear models
+          [fvec,jacob] = feval(fh,dr.ys,[oo_.exo_steady_state;...
 		    oo_.exo_det_steady_state], M_.params);
-      dr.ys = dr.ys-jacob\fvec;
+          if max(abs(fvec)) > 1e-12
+              dr.ys = dr.ys-jacob\fvec;
+          end
     end
   end
 end
