@@ -41,6 +41,15 @@ elseif strcmpi('PCWIN', computer)
     else
         BLAS_PATH = ['"' LIBRARY_PATH 'libmwblas.lib"'];
     end
+elseif strcmpi('PCWIN64', computer)
+    % Windows (x86-64) with Microsoft or gcc compiler
+    LIBRARY_PATH = [MATLAB_PATH '/extern/lib/win64/microsoft/'];
+    LAPACK_PATH = ['"' LIBRARY_PATH 'libmwlapack.lib"'];
+    if matlab_ver_less_than('7.5')
+        BLAS_PATH = LAPACK_PATH; % On <= 7.4, BLAS in included in LAPACK
+    else
+        BLAS_PATH = ['"' LIBRARY_PATH 'libmwblas.lib"'];
+    end
 else
     error('Unsupported platform')
 end
