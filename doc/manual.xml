@@ -274,7 +274,7 @@ This user-supplied file contains the model and the processing instructions, as d
 <para>
 <command>dynare</command> begins by launching the preprocessor on the <filename class="extension">.mod</filename> file.
 
-By default (unless any of <option>use_dll</option>, <option>sparse</option> or <option>sparse_dll</option> options have been given to <xref linkend="model"/>), the preprocessor creates three intermediary files:
+By default (unless <option>use_dll</option> option has been given to <xref linkend="model"/>), the preprocessor creates three intermediary files:
 <itemizedlist spacing='compact'>
   <listitem><para><replaceable>FILENAME</replaceable><filename>.m</filename>: contains variable declarations, and computing tasks</para></listitem>
   <listitem><para><replaceable>FILENAME</replaceable><filename>_dynamic.m</filename>: contains the dynamic model equations</para></listitem>
@@ -339,7 +339,7 @@ In the description of Dynare commands, the following conventions are observed:
 </itemizedlist>
 </para>
 
-<sect1><title>Variable declarations</title>
+<sect1 id="vardecls"><title>Variable declarations</title>
 
 <para>Declarations of variables and parameters are made with the following commands:</para>
 <itemizedlist>
@@ -520,7 +520,7 @@ parameters alpha, bet;
 
       <para>Parameters used inside the model refer to the value given through <link linkend="param_init">parameter initialization</link> or <xref linkend="homotopy_setup"/> when doing a simulation, or are the estimated variables when doing an estimation.</para>
 
-      <para>Variables used in a <replaceable>MODEL_EXPRESSION</replaceable> denote <emphasis>current period</emphasis> values when neither a lead or a lag is given. A lead or a lag can be given by enclosing an integer between parenthesis just after the variable name: a positive integer means a lead, a negative one means a lag. For example, if <literal>c</literal> is an endogenous variable, then <literal>c(+1)</literal> is the variable one period ahead, and <literal>c(-2)</literal> is the variable two periods before.</para>
+      <para>Variables used in a <replaceable>MODEL_EXPRESSION</replaceable> denote <emphasis>current period</emphasis> values when neither a lead or a lag is given. A lead or a lag can be given by enclosing an integer between parenthesis just after the variable name: a positive integer means a lead, a negative one means a lag. Leads or lags of more than one period are allowed. For example, if <literal>c</literal> is an endogenous variable, then <literal>c(+1)</literal> is the variable one period ahead, and <literal>c(-2)</literal> is the variable two periods before.</para>
 
       <para>DESCRIBE DYNARE TIMING CONVENTION...</para>
 
@@ -569,7 +569,7 @@ parameters alpha, bet;
 
 <formalpara><title>Syntax</title>
 <cmdsynopsis>
-  <replaceable>PARAMETER_NAME</replaceable> = <replaceable>EXPRESSION</replaceable>;
+  <replaceable>PARAMETER_NAME</replaceable> = <replaceable>EXPRESSION</replaceable> ;
 </cmdsynopsis>
 </formalpara>
 
@@ -608,9 +608,9 @@ A = 1-alpha*beta;
       <sbr/>
       <arg rep="repeat">
         <group>
-          <arg choice="plain"><replaceable>MODEL_EXPRESSION</replaceable> = <replaceable>MODEL_EXPRESSION</replaceable>;</arg>
-          <arg choice="plain"><replaceable>MODEL_EXPRESSION</replaceable>;</arg>
-          <arg choice="plain"># <replaceable>VARIABLE_NAME</replaceable> = <replaceable>MODEL_EXPRESSION</replaceable>;</arg>
+          <arg choice="plain"><replaceable>MODEL_EXPRESSION</replaceable> = <replaceable>MODEL_EXPRESSION</replaceable> ;</arg>
+          <arg choice="plain"><replaceable>MODEL_EXPRESSION</replaceable> ;</arg>
+          <arg choice="plain"># <replaceable>VARIABLE_NAME</replaceable> = <replaceable>MODEL_EXPRESSION</replaceable> ;</arg>
         </group>
       </arg>
       <command>end</command>;
@@ -619,49 +619,76 @@ A = 1-alpha*beta;
 
 <refsect1><title>Description</title>
 <para>
-The equations of the model are written in a block delimited by <command>model</command><literal>;</literal> and <command>end</command><literal>;</literal>.
+The equations of the model are written in a block delimited by <command>model</command> and <command>end</command> keywords.
 </para>
 <para>
-There must be as many equations as there are endogenous variables in the model, except when used to compute the unconstrained optimal policy with <xref linkend="ramsey_policy"/>. The lead and lag of the variables are written in parenthesis immediately after the variable name. Leads or lags of more than one period are allowed. Only some elementary functions are allowed. Each equation must be terminated by a semicolon (;).
-</para>
-<para>
-When the equations are written in homogenous form, it is possible to omit the "= 0" part and write only the left hand side of the equation.
-</para>
-<para>
-It is possible to include arbitrary Matlab expressions in a model. It must be preceeded by a pound sign (#) as the first character of the line. This is particularily usefull to declare tansformation of parameters for estimation purpose (see <xref linkend="estimated_params"/>).
-</para>
+There must be as many equations as there are endogenous variables in the model, except when computing the unconstrained optimal policy with <xref linkend="ramsey_policy"/>.</para>
 
+<para>The syntax of equations must follow the conventions for <replaceable>MODEL_EXPRESSION</replaceable> as described in <xref linkend="expressions"/>. Each equation must be terminated by a semicolon (<literal>;</literal>).
+</para>
 <para>
-The option <option>linear</option> declares the model as being linear. It avoids to have to declare initial values for computing the steady state and it sets automatically <option>order=1</option> in <xref linkend="stoch_simul" />.
+When the equations are written in homogenous form, it is possible to omit the <literal>=0</literal> part and write only the left hand side of the equation.
+</para>
+<para>
+Inside the model block, Dynare allows the creation of <emphasis>model-local variables</emphasis>, which constitute a simple way to share a common expression between several equations. The syntax consists of a pound sign (<literal>#</literal>) followed by the name of the new model local variable (which must <emphasis>not</emphasis> be declared as in <xref linkend="vardecls"/>), an equal sign, and the expression for which this new variable will stand. Later on, every time this variable appears in the model, Dynare will substitute it by the expression assigned to the variable. Note that the scope of this variable is restricted to the model block; it cannot be used outside.
 </para>
 </refsect1>
 
-<refsect1><title>Example 1</title>
+<refsect1><title>Options</title>
+  <variablelist spacing='compact'>
+    <varlistentry>
+      <term><option>linear</option></term>
+      <listitem><para>Declares the model as being linear. It spares oneself from having to declare initial values for computing the steady state, and it sets automatically <option>order</option><literal>=1</literal> in <xref linkend="stoch_simul" />.</para></listitem>
+    </varlistentry>
+    <varlistentry>
+      <term><option>use_dll</option></term>
+      <listitem><para>Instructs the preprocessor to create dynamic loadable libraries (DLL) containing the model equations and derivatives, instead of writing those in <filename class="extension">M</filename>-files. You need to having a working compilation environment (<foreignphrase>i.e.</foreignphrase> the <command>mex</command> command of <trademark class="registered">Matlab</trademark> or Octave must be operational). Using this option can result in faster simulations or estimations, at the expense of some initial compilation time.<footnote><para>In particular, for big models, the compilation step can be very time-consuming, and use of this option may be counter-productive in those cases.</para></footnote></para></listitem>
+    </varlistentry>
+  </variablelist>
+</refsect1>
+
+<refsect1><title>Examples</title>
+<refsect2><title>Example 1: elementary RBC model</title>
 <programlisting>
+var c k;
+varexo x;
+parameters aa alph bet delt gam;
+
 model;
 c =  - k + aa*x*k(-1)^alph + (1-delt)*k(-1);
 c^(-gam) = (aa*alph*x(+1)*k^(alph-1) + 1 - delt)*c(+1)^(-gam)/(1+bet);
 end;
 </programlisting>
-</refsect1>
+</refsect2>
 
-<refsect1><title>Example 2</title>
+<refsect2><title>Example 2: use of model local variables</title>
+
+The following program:
 <programlisting>
 model;
-c + k - aa*x*k(-1)^alph - (1-delt)*k(-1);
-c^(-gam) - (aa*alph*x(+1)*k^(alph-1) + 1 - delt)*c(+1)^(-gam)/(1+bet);
+# gamma = 1 - 1/sigma
+u1 = c1^gamma/gamma;
+u2 = c2^gamma/gamma;
 end;
 </programlisting>
-</refsect1>
 
-<refsect1><title>Example 3</title>
+...is formally equivalent to:
+<programlisting>
+model;
+u1 = c1^(1-1/sigma)/(1-1/sigma);
+u2 = c2^(1-1/sigma)/(1-1/sigma);
+end;
+</programlisting>
+</refsect2>
+
+<refsect2><title>Example 3: a linear model</title>
 <programlisting>
 model(linear);
-# b = 1/c;
 x = a*x(-1)+b*y(+1)+e_x;
 y = d*y(-1)+e_y;
 end;
 </programlisting>
+</refsect2>
 </refsect1>
 </refentry>
 </sect1>
