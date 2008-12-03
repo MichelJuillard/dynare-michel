@@ -74,6 +74,7 @@ end
 
 Fstar   	= zeros(pp,smpl_diff);
 Finf		= zeros(pp,smpl_diff);
+Fi		= zeros(pp,smpl_diff);
 Ki       	= zeros(mm,pp,smpl);
 Li      	= zeros(mm,mm,pp,smpl);
 Linf    	= zeros(mm,mm,pp,smpl_diff);

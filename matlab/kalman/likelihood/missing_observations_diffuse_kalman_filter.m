@@ -53,7 +53,7 @@ function [LIK, lik] = missing_observations_diffuse_kalman_filter(T,R,Q,H,Pinf,Ps
   oldK = 0;
   lik  = zeros(smpl+1,1);
   LIK  = Inf;
-  lik(smpl+1) = number_of_observations*pp*log(2*pi);
+  lik(smpl+1) = number_of_observations*log(2*pi);
   notsteady   = 1;
   reste       = 0;
   

@@ -84,6 +84,7 @@ end
 
 Fstar           = zeros(pp,smpl_diff);
 Finf            = zeros(pp,smpl_diff);
+Fi              = zeros(pp,smpl);
 Ki              = zeros(mm,pp,smpl);
 Li              = zeros(mm,mm,pp,smpl);
 Linf            = zeros(mm,mm,pp,smpl_diff);
@@ -214,39 +215,39 @@ while notsteady & t<smpl
       PK(jnk,:,:,t+jnk) = Pf;
   end
   P(:,:,t+1) = T*P(:,:,t)*T' + QQ;
-  notsteady   = ~(max(max(abs(P(:,:,t+1)-P(:,:,t))))<crit);
+%  notsteady   = ~(max(max(abs(P(:,:,t+1)-P(:,:,t))))<crit);
 end
-P_s=tril(P(:,:,t))+tril(P(:,:,t),-1)';
-P1_s=tril(P1(:,:,t))+tril(P1(:,:,t),-1)';
-Fi_s = Fi(:,t);
-Ki_s = Ki(:,:,t);
-L_s  =Li(:,:,:,t);
-if t<smpl
-  P  = cat(3,P(:,:,1:t),repmat(P_s,[1 1 smpl-t]));
-  P1  = cat(3,P1(:,:,1:t),repmat(P1_s,[1 1 smpl-t]));
-  Fi = cat(2,Fi(:,1:t),repmat(Fi_s,[1 1 smpl-t]));
-  Li  = cat(4,Li(:,:,:,1:t),repmat(L_s,[1 1 smpl-t]));
-  Ki  = cat(3,Ki(:,:,1:t),repmat(Ki_s,[1 1 smpl-t]));
-end
-while t<smpl
-  t=t+1;
-  a(:,t) = a1(:,t);
-  di = data_index{t}';
-  for i=di
-    Zi = Z(i,:);
-    v(i,t)      = Y(i,t) - Zi*a(:,t);
-    if Fi_s(i) > crit
-      a(:,t) = a(:,t) + Ki_s(:,i)*v(i,t)/Fi_s(i);
-    end
-  end
-  a1(:,t+1) = T*a(:,t);
-  Pf          = P(:,:,t);
-  for jnk=1:nk,
-      Pf = T*Pf*T' + QQ;
-      aK(jnk,:,t+jnk) = T^jnk*a(:,t);
-      PK(jnk,:,:,t+jnk) = Pf;
-  end
-end
+% $$$ P_s=tril(P(:,:,t))+tril(P(:,:,t),-1)';
+% $$$ P1_s=tril(P1(:,:,t))+tril(P1(:,:,t),-1)';
+% $$$ Fi_s = Fi(:,t);
+% $$$ Ki_s = Ki(:,:,t);
+% $$$ L_s  =Li(:,:,:,t);
+% $$$ if t<smpl
+% $$$   P  = cat(3,P(:,:,1:t),repmat(P_s,[1 1 smpl-t]));
+% $$$   P1  = cat(3,P1(:,:,1:t),repmat(P1_s,[1 1 smpl-t]));
+% $$$   Fi = cat(2,Fi(:,1:t),repmat(Fi_s,[1 1 smpl-t]));
+% $$$   Li  = cat(4,Li(:,:,:,1:t),repmat(L_s,[1 1 smpl-t]));
+% $$$   Ki  = cat(3,Ki(:,:,1:t),repmat(Ki_s,[1 1 smpl-t]));
+% $$$ end
+% $$$ while t<smpl
+% $$$   t=t+1;
+% $$$   a(:,t) = a1(:,t);
+% $$$   di = data_index{t}';
+% $$$   for i=di
+% $$$     Zi = Z(i,:);
+% $$$     v(i,t)      = Y(i,t) - Zi*a(:,t);
+% $$$     if Fi_s(i) > crit
+% $$$       a(:,t) = a(:,t) + Ki_s(:,i)*v(i,t)/Fi_s(i);
+% $$$     end
+% $$$   end
+% $$$   a1(:,t+1) = T*a(:,t);
+% $$$   Pf          = P(:,:,t);
+% $$$   for jnk=1:nk,
+% $$$       Pf = T*Pf*T' + QQ;
+% $$$       aK(jnk,:,t+jnk) = T^jnk*a(:,t);
+% $$$       PK(jnk,:,:,t+jnk) = Pf;
+% $$$   end
+% $$$ end
 ri=zeros(mm,1);
 t = smpl+1;
 while t > d+1

@@ -75,6 +75,7 @@ end
 
 Fstar   	= zeros(pp,smpl_diff);
 Finf		= zeros(pp,smpl_diff);
+Fi		= zeros(pp,smpl_diff);
 Ki       	= zeros(mm,pp,smpl);
 Li      	= zeros(mm,mm,pp,smpl);
 Linf    	= zeros(mm,mm,pp,smpl_diff);
@@ -211,34 +212,34 @@ while notsteady & t<smpl
     aK(jnk,:,t+jnk) 	 	= T^jnk*a(:,t);
   end
   P(:,:,t+1) = T*P(:,:,t)*transpose(T) + QQ;
-  notsteady   = ~(max(max(abs(P(:,:,t+1)-P(:,:,t))))<crit);
+%  notsteady   = ~(max(max(abs(P(:,:,t+1)-P(:,:,t))))<crit);
 end
-P_s=tril(P(:,:,t))+transpose(tril(P(:,:,t),-1));
-Fi_s = Fi(:,t);
-Ki_s = Ki(:,:,t);
-L_s  =Li(:,:,:,t);
-if t<smpl
-  t_steady = t+1;
-  P  = cat(3,P(:,:,1:t),repmat(P(:,:,t),[1 1 smpl-t_steady+1]));
-  Fi = cat(2,Fi(:,1:t),repmat(Fi_s,[1 1 smpl-t_steady+1]));
-  Li  = cat(4,Li(:,:,:,1:t),repmat(L_s,[1 1 smpl-t_steady+1]));
-  Ki  = cat(3,Ki(:,:,1:t),repmat(Ki_s,[1 1 smpl-t_steady+1]));
-end
-while t<smpl
-  t=t+1;
-  a(:,t) = a1(:,t);
-  di = data_index{t}';
-  for i=di
-    v(i,t)      = Y(i,t) - a(mf(i),t) - trend(i,t);
-    if Fi_s(i) > crit
-      a(:,t) = a(:,t) + Ki_s(:,i)*v(i,t)/Fi_s(i);
-    end
-  end
-  a1(:,t+1) = T*a(:,t);
-  for jnk=1:nk,
-    aK(jnk,:,t+jnk)	= T^jnk*a(:,t);
-  end
-end
+% $$$ P_s=tril(P(:,:,t))+transpose(tril(P(:,:,t),-1));
+% $$$ Fi_s = Fi(:,t);
+% $$$ Ki_s = Ki(:,:,t);
+% $$$ L_s  =Li(:,:,:,t);
+% $$$ if t<smpl
+% $$$   t_steady = t+1;
+% $$$   P  = cat(3,P(:,:,1:t),repmat(P(:,:,t),[1 1 smpl-t_steady+1]));
+% $$$   Fi = cat(2,Fi(:,1:t),repmat(Fi_s,[1 1 smpl-t_steady+1]));
+% $$$   Li  = cat(4,Li(:,:,:,1:t),repmat(L_s,[1 1 smpl-t_steady+1]));
+% $$$   Ki  = cat(3,Ki(:,:,1:t),repmat(Ki_s,[1 1 smpl-t_steady+1]));
+% $$$ end
+% $$$ while t<smpl
+% $$$   t=t+1;
+% $$$   a(:,t) = a1(:,t);
+% $$$   di = data_index{t}';
+% $$$   for i=di
+% $$$     v(i,t)      = Y(i,t) - a(mf(i),t) - trend(i,t);
+% $$$     if Fi_s(i) > crit
+% $$$       a(:,t) = a(:,t) + Ki_s(:,i)*v(i,t)/Fi_s(i);
+% $$$     end
+% $$$   end
+% $$$   a1(:,t+1) = T*a(:,t);
+% $$$   for jnk=1:nk,
+% $$$     aK(jnk,:,t+jnk)	= T^jnk*a(:,t);
+% $$$   end
+% $$$ end
 ri=zeros(mm,1);
 t = smpl+1;
 while t>d+1
