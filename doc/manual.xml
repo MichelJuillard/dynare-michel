@@ -1,4 +1,4 @@
-<?xml version="1.0"?>
+<?xml version="1.0" encoding="utf-8" ?>
 <!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN" "http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd">
 <book>
   <bookinfo>
@@ -61,8 +61,8 @@ A copy of the license can be found at:
 <para>
 Dynare is a pre-processor and a collection of <ulink url="http://www.mathworks.com/products/matlab/"><trademark class="registered">Matlab</trademark></ulink> and <ulink url="http://www.octave.org">GNU Octave</ulink> routines which solve, simulate and estimate non-linear
 models with forward looking variables. It is the result of research carried at
-<ulink url="http://www.cepremap.ens.fr/">CEPREMAP</ulink> by several people (see Laffargue, 1990, Boucekkine, 1995, and
-Juillard, 1996, Collard and Juillard 2001a and 2001b).
+<ulink url="http://www.cepremap.ens.fr/">CEPREMAP</ulink> by several people (see <xref linkend="laffargue:1990"/>,
+<xref linkend="boucekkine:1995"/>, <xref linkend="juillard:1996"/>, <xref linkend="collard-juillard:2001a" /> and <xref linkend="collard-juillard:2001b"/>).
 </para>
 <para>
 When the framework is deterministic, Dynare can be used for models with the assumption of perfect
@@ -79,16 +79,17 @@ transition path to a new equilibrium following a permanent shock.
 </para>
 <para>
 For deterministic simulations, Dynare uses a Newton-type algorithm, first
-proposed by Laffargue (1990), instead of a first order technique like
-the one proposed by Fair and Taylor (1983), and used in earlier generation simulation programs. We believe
+proposed by <xref linkend="laffargue:1990"/>, instead of a first order technique like
+the one proposed by <xref linkend="fair-taylor:1983"/>, and used in earlier generation simulation programs. We believe
 this approach to be in general both faster and more robust. The
-details of the algorithm used in Dynare can be found in Juillard (1996).
+details of the algorithm used in Dynare can be found in <xref linkend="juillard:1996"/>.
 </para>
 <para>
-In a stochastic context, Dynare computes one or several simulations corresponding to a random draw of the shocks. Starting with version 2.3, Dynare uses a second order Taylor approximation of the expectation functions (see Judd, 1996, Collard and Juillard, 2001a, 2001b, and Schmitt-Grohe and Uribe, 2002).
+In a stochastic context, Dynare computes one or several simulations corresponding to a random draw of the shocks. Starting with version 2.3, Dynare uses a second order Taylor approximation of the expectation functions (see <xref linkend="judd:1996"/>, 
+<xref linkend="collard-juillard:2001a" />, <xref linkend="collard-juillard:2001b"/>, and <xref linkend="schmitt-grohe-uribe:2002"/>).
 </para>
 <para>
-Starting with version 3.0, it is possible to use Dynare to estimate model parameters either by maximum likelihood as in Ireland (2004) or using a Bayesian approach as in Rabanal and Rubio-Ramirez (2002), Schorfheide (2000) or Smets and Wouters (2002).
+Starting with version 3.0, it is possible to use Dynare to estimate model parameters either by maximum likelihood as in <xref linkend="ireland:2004"/> or using a Bayesian approach as in <xref linkend="rabanal-rubio-ramirez:2003"/>, <xref linkend="schorfheide:2000"/> or <xref linkend="smets-wouters:2003"/>.
 </para>
 
 <para>
@@ -522,7 +523,7 @@ parameters alpha, bet;
 
       <para>Variables used in a <replaceable>MODEL_EXPRESSION</replaceable> denote <emphasis>current period</emphasis> values when neither a lead or a lag is given. A lead or a lag can be given by enclosing an integer between parenthesis just after the variable name: a positive integer means a lead, a negative one means a lag. Leads or lags of more than one period are allowed. For example, if <literal>c</literal> is an endogenous variable, then <literal>c(+1)</literal> is the variable one period ahead, and <literal>c(-2)</literal> is the variable two periods before.</para>
 
-      <para>DESCRIBE DYNARE TIMING CONVENTION...</para>
+      <para>When specifying the leads and lags of endogenous variables, it is important to respect the following convention: in Dynare, the timing of a variable reflects when that variable is decided. A control variable - which by definition is decided in the current period - must have no lead. A predetermined variable - which by definition has been decided in a previous period - must have a lag. A consequence of this is that all stock variables must use the "stock at the end of the period" convention. Please refer to <xref linkend="bib:userguide"/> for more details and concrete examples.</para>
 
       <para>Leads and lags are primarily used for endogenous variables. They can be used for exogenous variables under some conditions (TO BE EXPLICITED). They are forbidden for parameters and for local model variables (see <xref linkend="model"/>).</para>
 
@@ -1481,7 +1482,7 @@ n</para></listitem>
 <listitem><para> <command>dr_algo = 0 | 1</command>: 
 specifies the algorithm used for computing the quadratic approximation of the decision rules:
 <itemizedlist spacing='compact'>
-<listitem><para> 0: uses a <emphasis>pure</emphasis> perturbation approach as in Schmitt-Grohe and Uribe (2002) (default)
+<listitem><para> 0: uses a <emphasis>pure</emphasis> perturbation approach as in <xref linkend="schmitt-grohe-uribe:2002"/> (default)
 </para></listitem>
 <listitem><para> 1: moves the point around which the Taylor expansion is computed toward the means of the distribution as in Collard and Juillard (2001)
 </para></listitem>
@@ -2259,7 +2260,7 @@ oo_.posterior_hpdsup.measurement_errors_corr.gdp_conso
 
 <refsect1><title>Description</title>
 <para>
-<command>unit_root_vars</command> is used to declare unit-root variables of a model so that a diffuse prior can be used in the initialization of the Kalman filter for these variables only. For stationary variables, the unconditional covariance matrix of these variables is used for initialization. The algorithm to compute a true diffuse prior is taken from Durbin and Koopman (2001, 2003).
+<command>unit_root_vars</command> is used to declare unit-root variables of a model so that a diffuse prior can be used in the initialization of the Kalman filter for these variables only. For stationary variables, the unconditional covariance matrix of these variables is used for initialization. The algorithm to compute a true diffuse prior is taken from <xref linkend="durbin-koopman:2001"/> and <xref linkend="koopman-durbin:2003"/>.
 </para>
 
 <para>When <command>unit_root_vars</command> is used the <command>lik_init</command> option of <xref linkend="estimation"/> has no effect.
@@ -2768,11 +2769,12 @@ Fabrice Collard (GREMAQ, University of Toulouse) has written a guide to stochast
 </chapter>
 
 <bibliography>
-<biblioentry>
+
+<biblioentry id="boucekkine:1995" xreflabel="Boucekkine (1995)">
   <biblioset relation="article">
     <author>
-      <surname> Boucekkine</surname>
-      <firstname> Raouf</firstname>
+      <surname>Boucekkine</surname>
+      <firstname>Raouf</firstname>
     </author>
     <pubdate>1995</pubdate>
     <title>An alternative methodology for solving nonlinear forward-looking models</title>
@@ -2783,7 +2785,8 @@ Fabrice Collard (GREMAQ, University of Toulouse) has written a guide to stochast
     <pagenums>711-734</pagenums>
   </biblioset>
 </biblioentry>
-<biblioentry>
+
+<biblioentry id="collard-juillard:2001a" xreflabel="Collard and Juillard (2001a)">
   <biblioset relation="article">
     <authorgroup>
       <author>
@@ -2805,7 +2808,7 @@ Fabrice Collard (GREMAQ, University of Toulouse) has written a guide to stochast
   </biblioset>
 </biblioentry>
 
-<biblioentry> 
+<biblioentry id="collard-juillard:2001b" xreflabel="Collard and Juillard (2001b)">
   <biblioset relation="article">
     <authorgroup>
       <author>
@@ -2827,7 +2830,7 @@ Fabrice Collard (GREMAQ, University of Toulouse) has written a guide to stochast
   </biblioset>
 </biblioentry>
 
-<biblioentry>
+<biblioentry id="durbin-koopman:2001" xreflabel="Durbin and Koopman (2001)">
   <biblioset relation="book">
     <authorgroup>
       <author>
@@ -2845,7 +2848,7 @@ Fabrice Collard (GREMAQ, University of Toulouse) has written a guide to stochast
   </biblioset>
 </biblioentry>
 
-<biblioentry>
+<biblioentry id="fair-taylor:1983" xreflabel="Fair and Taylor (1983)">
   <biblioset relation="article">
     <authorgroup>
       <author>
@@ -2889,7 +2892,7 @@ Fabrice Collard (GREMAQ, University of Toulouse) has written a guide to stochast
   </biblioset>
 </biblioentry>
 
-<biblioentry>   
+<biblioentry id="ireland:2004" xreflabel="Ireland (2004)">   
   <biblioset relation="article">
     <author>
       <surname>Ireland</surname>
@@ -2905,7 +2908,7 @@ Fabrice Collard (GREMAQ, University of Toulouse) has written a guide to stochast
   </biblioset>
 </biblioentry>
 
-<biblioentry>  
+<biblioentry id="judd:1996" xreflabel="Judd (1996)">  
   <biblioset relation="article">
     <author>
       <surname>Judd</surname>
@@ -2914,6 +2917,7 @@ Fabrice Collard (GREMAQ, University of Toulouse) has written a guide to stochast
     <pubdate>1996</pubdate>    
     <title>Approximation, Perturbation, and Projection Methods in Economic Analysis</title>
   </biblioset>
+
   <biblioset relation="book">
     <authorgroup>
       <author>
@@ -2936,19 +2940,23 @@ Fabrice Collard (GREMAQ, University of Toulouse) has written a guide to stochast
   </biblioset>
 </biblioentry>
 
-<biblioentry> 
-      <author>
-	<surname>Juillard</surname>
-	<firstname>Michel</firstname>
-      </author>
-      <pubdate>1996</pubdate>
-      <title>Dynare: A program for the resolution and simulation of dynamic models with forward variables through the use of a relaxation algorithm</title>
-      <orgname>CEPREMAP</orgname>
-      <citetitle>Couverture Orange</citetitle>
-      <volumenum>9602</volumenum>
+<biblioentry id="juillard:1996" xreflabel="Juillard (1996)">
+  <biblioset relation="article">
+    <author>
+      <surname>Juillard</surname>
+      <firstname>Michel</firstname>
+    </author>
+    <pubdate>1996</pubdate>
+    <title>Dynare: A program for the resolution and simulation of dynamic models with forward variables through the use of a relaxation algorithm</title>
+  </biblioset>
+  <biblioset relation="wpseries">
+    <orgname>CEPREMAP</orgname>
+    <title>Couverture Orange</title>
+    <volumenum>9602</volumenum>
+  </biblioset>
 </biblioentry>
 
-<biblioentry>
+<biblioentry id="koopman-durbin:2003" xreflabel="Koopman and Durbin (2003)">
   <biblioset relation="article">
     <authorgroup>
       <author>
@@ -2966,11 +2974,12 @@ Fabrice Collard (GREMAQ, University of Toulouse) has written a guide to stochast
   <biblioset relation="journal">
     <title>Journal of Time Series Analysis</title>
     <volumenum>24</volumenum>
+    <issuenum>1</issuenum>
     <pagenums>85-98</pagenums>
   </biblioset>
 </biblioentry>
 
-<biblioentry>   
+<biblioentry id="laffargue:1990" xreflabel="Laffargue (1990)">
   <biblioset relation="article">
     <author>
       <surname>Laffargue</surname>
@@ -2980,45 +2989,68 @@ Fabrice Collard (GREMAQ, University of Toulouse) has written a guide to stochast
     <pubdate>1990</pubdate>
   </biblioset>
   <biblioset relation="journal">
-    <title>Annales d'Economie et Statistique</title>
+    <title>Annales d'Économie et Statistique</title>
     <volumenum>17</volumenum>
     <pagenums>97-119</pagenums>
   </biblioset>
 </biblioentry>
-<biblioentry> 
-  <authorgroup>
-  <author>
-    <surname>Lubik</surname>
-    <firstname>Thomas</firstname>
-  </author>
-  <author>
-    <surname>Schorfheide</surname>
-    <firstname>Frank</firstname>
-  </author>
-  </authorgroup>
-  <pubdate>2003</pubdate>
-  <title>Do Central Banks Target Exchange Rates? A Structural Investigation</title>
-  <orgname>University of Pennsylvania</orgname>
-</biblioentry>
-<biblioentry> 
-  <authorgroup>
-    <author>
-      <surname>Rabanal</surname>
-      <firstname>Pau</firstname>
-    </author>
-    <author>
-      <surname>Rubio-Ramirez</surname>
-      <firstname>Juan</firstname>
-    </author>
-  </authorgroup>
-  <pubdate>2003</pubdate>
-  <title>Comparing New Keynesian Models of the Business Cycle: A Bayesian Approach</title>
-  <orgname>Atlanta Fed</orgname>
-<citetitle>Working Paper</citetitle>
-<volumenum>2001-22a, rev 2003</volumenum>
-</biblioentry>
 
 <biblioentry> 
+  <biblioset relation="article">
+    <authorgroup>
+      <author>
+        <surname>Lubik</surname>
+        <firstname>Thomas</firstname>
+      </author>
+      <author>
+        <surname>Schorfheide</surname>
+        <firstname>Frank</firstname>
+      </author>
+    </authorgroup>
+    <pubdate>2007</pubdate>
+    <title>Do Central Banks Respond to Exchange Rate Movements? A Structural Investigation</title>
+  </biblioset>
+  <biblioset relation="journal">
+    <title>Journal of Monetary Economics</title>
+    <volumenum>54</volumenum>
+    <issuenum>4</issuenum>
+    <pagenums>1069-1087</pagenums>
+  </biblioset>
+</biblioentry>
+
+<biblioentry id="bib:userguide" xreflabel="Mancini-Griffoli (2007)">
+  <author>
+    <surname>Mancini-Griffoli</surname>
+    <firstname>Tommaso</firstname>
+  </author>
+  <pubdate>2007</pubdate>
+  <title>Dynare User Guide</title>
+  <subtitle>An introduction to the solution and estimation of DSGE models</subtitle>
+</biblioentry>
+
+<biblioentry id="rabanal-rubio-ramirez:2003" xreflabel="Rabanal and Rubio-Ramirez (2003)"> 
+  <biblioset relation="article">
+    <authorgroup>
+      <author>
+        <surname>Rabanal</surname>
+        <firstname>Pau</firstname>
+      </author>
+      <author>
+        <surname>Rubio-Ramirez</surname>
+        <firstname>Juan</firstname>
+      </author>
+    </authorgroup>
+    <pubdate>2003</pubdate>
+    <title>Comparing New Keynesian Models of the Business Cycle: A Bayesian Approach</title>
+  </biblioset>
+  <biblioset relation="wpseries">
+    <orgname>Federal Reserve of Atlanta</orgname>
+    <title>Working Paper Series</title>
+    <volumenum>2003-30</volumenum>
+  </biblioset>
+</biblioentry>
+
+<biblioentry id="schorfheide:2000" xreflabel="Schorfheide (2000)"> 
   <biblioset relation="article">
     <author>
       <surname>Schorfheide</surname>
@@ -3034,40 +3066,50 @@ Fabrice Collard (GREMAQ, University of Toulouse) has written a guide to stochast
   </biblioset>
 </biblioentry>
 
-<biblioentry> 
-  <authorgroup>
-    <author>
-      <surname>Schmitt-Grohe</surname>
-      <firstname>Stephanie</firstname>
-    </author>
-    <author>
-      <surname>Uribe</surname>
-      <firstname>Martin</firstname>
-    </author>
-  </authorgroup>
-  <pubdate>2002</pubdate>
-  <title>Solving Dynamic General Equilibrium Models Using a Second-Order Approximation to the Policy Function</title>
-  <orgname>Rutgers University</orgname>
+<biblioentry id="schmitt-grohe-uribe:2002" xreflabel="Schmitt-Grohe and Uribe (2002)">
+  <biblioset relation="article">
+    <authorgroup>
+      <author>
+        <surname>Schmitt-Grohe</surname>
+        <firstname>Stephanie</firstname>
+      </author>
+      <author>
+        <surname>Uribe</surname>
+        <firstname>Martin</firstname>
+      </author>
+    </authorgroup>
+    <pubdate>2002</pubdate>
+    <title>Solving Dynamic General Equilibrium Models Using a Second-Order Approximation to the Policy Function</title>
+  </biblioset>
+  <biblioset relation="wpseries">
+    <title>NBER Technical Working Papers</title>
+    <volumenum>0282</volumenum>
+  </biblioset>
 </biblioentry>
 
-<biblioentry> 
-  <authorgroup>
-    <author>
-      <surname>Smets</surname>
-      <firstname>Frank</firstname>
-    </author>
-    <author>
-      <surname>Wouters</surname>
+<biblioentry id="smets-wouters:2003" xreflabel="Smets and Wouters (2003)">
+  <biblioset relation="article">
+    <authorgroup>
+      <author>
+        <surname>Smets</surname>
+        <firstname>Frank</firstname>
+      </author>
+      <author>
+        <surname>Wouters</surname>
       <firstname>Rafael</firstname>
-    </author>
-  </authorgroup>
-  <pubdate>2002</pubdate>
-  <title>An Estimated Stochastic Dynamic General
-Equilibrium Model of the Euro Area</title>
-  <orgname>European Central Bank</orgname>
-      <citetitle>ECB Working Paper</citetitle>
-      <volumenum>171</volumenum>
+      </author>
+    </authorgroup>
+    <pubdate>2003</pubdate>
+    <title>An Estimated Dynamic Stochastic General Equilibrium Model of the Euro Area</title>
+  </biblioset>
+  <biblioset relation="journal">
+    <title>Journal of the European Economic Association</title>
+    <volumenum>1</volumenum>
+    <issuenum>5</issuenum>
+    <pagenums>1123-1175</pagenums>
+  </biblioset>
 </biblioentry>
+
 </bibliography>
 <index>
 </index>
