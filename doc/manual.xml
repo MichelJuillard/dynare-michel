@@ -302,7 +302,7 @@ Depending on the computing tasks requested in the <filename class="extension">.m
 </para>
 
 <para>
-The <varname>oo_</varname> structure is also saved in a file called <replaceable>FILENAME</replaceable><filename>_results.mat</filename>.
+The <varname>M_</varname> and <varname>oo_</varname> structures are also saved in a file called <replaceable>FILENAME</replaceable><filename>_results.mat</filename>.
 </para>
 </refsect1>
 
@@ -667,7 +667,7 @@ end;
 The following program:
 <programlisting>
 model;
-# gamma = 1 - 1/sigma
+# gamma = 1 - 1/sigma;
 u1 = c1^gamma/gamma;
 u2 = c2^gamma/gamma;
 end;
@@ -695,27 +695,29 @@ end;
 </sect1>
 
 <sect1><title>Initial and terminal conditions</title>
-<para>
-In many contexts, it is necessary to compute the steady state of a non-linear model <xref linkend='initval'/> specifies then numerical initial values for the non-linear solver.
+
+<para>For most simulation exercises, it is necessary to provide initial (and possibly terminal) conditions. It is also necessary to provide initial guess values for non-linear solvers. The following statements are used for those purposes:</para>
+<itemizedlist>
+  <listitem><para><xref linkend='initval'/></para></listitem>
+  <listitem><para><xref linkend='initval_file'/></para></listitem>
+  <listitem><para><xref linkend='endval'/></para></listitem>
+  <listitem><para><xref linkend='histval'/></para></listitem>
+</itemizedlist>
+
+<para>In many contexts (determistic or stochastic), it is necessary to compute the steady state of a non-linear model: <xref linkend='initval'/> then specifies numerical initial values for the non-linear solver.
 </para>
 <para>
 Used in perfect foresight mode, the types of forward-loking models for which Dynare was designed require both initial and terminal conditions. Most often these initial and terminal conditions are static equilibria, but not necessarily. 
 </para>
 <para>
-One typical application is to consider an economy at the equilibrium, trigger a shock in first period, and study the trajectory of return at the initial equilbrium. To do that, one needs <xref linkend='initval'/> and <xref linkend='shocks'/>(see next section). 
+One typical application is to consider an economy at the equilibrium, trigger a shock in first period, and study the trajectory of return at the initial equilbrium. To do that, one needs <xref linkend='initval'/> and <xref linkend='shocks'/> (see <xref linkend="sec:shocks"/>.
 </para>
 <para>
 Another one is to study, how an economy, starting from arbitrary initial conditions converges toward equilibrium. To do that, one needs <xref linkend='initval'/> and <xref linkend='endval'/>; 
 </para>
 <para>
-For models with lags on more than one period, the command <xref linkend='histval'/> permits to specify different historical initial values in different periods. 
+For models with lags on more than one period, the command <xref linkend='histval'/> permits to specify different historical initial values for periods before the beginning of the simulation.
 </para>
-<itemizedlist>
-<listitem><para><xref linkend='initval'/></para></listitem>
-<listitem><para><xref linkend='initval_file'/></para></listitem>
-<listitem><para><xref linkend='endval'/></para></listitem>
-<listitem><para><xref linkend='histval'/></para></listitem>
-</itemizedlist>
 
 <refentry id="initval">
   <refmeta>
@@ -729,35 +731,44 @@ For models with lags on more than one period, the command <xref linkend='histval
 
   <refsynopsisdiv>
     <cmdsynopsis>
-      <command>initval;</command><sbr/>
-      <arg choice="plain">
-	<replaceable>VARIABLE_NAME</replaceable> = <replaceable>EXPRESSION</replaceable>;
-	</arg><sbr/>
-	<arg rep="repeat">
-	<replaceable>VARIABLE_NAME</replaceable> = <replaceable>EXPRESSION</replaceable>;
-	  </arg><sbr/>
-	  <arg choice="plain">
-	    end;
-	  </arg>
+      <command>initval</command>;<sbr/>
+      <arg rep="repeat" choice="plain">
+	      <replaceable>VARIABLE_NAME</replaceable> = <replaceable>EXPRESSION</replaceable> ;
+      </arg>
+      <command>end</command>;
     </cmdsynopsis>
   </refsynopsisdiv>
 
 <refsect1><title>Description</title>
-<para>
-<replaceable>EXPRESSION</replaceable> is any valid expression returning a numerical value and can contain already initialized variable names.
-</para>
-<para>
-The <command>initval;</command> ... <command>end;</command> block serves two purposes. It set the initial and, possibly, terminal conditions for the simulation and provides numerical initialization for various computation tasks (<xref linkend='steady'/>, <xref linkend='simul'/>, <xref linkend='stoch_simul'/>).  
-</para>
-<para>
-Theoreticaly, initial conditions are only necessary for lagged variables. However, as <command>initval</command> provides also numerical initialization, it is necessary to provide values for all variables in the model, except if the model is declared as linear.
-</para>
-<para>
-For stochastic models, it isn't necessary to delcare 0 as initial values for exogneous stochastic variables as it is the only possible value.
-</para>
-<para>
-When the <command>initval</command> block is followed by the command <xref linkend='steady'/>, it is not necessary to provide exact initialization values for the endogenous variables. <xref linkend='steady'/> will use the values provided in the <command>initval</command> block as initial guess in the non-linear equation solver and computes exact values for the endogenous variables at the steady state. The steady state is defined by keeping constant the value of the exogenous variables.  
-</para>
+<para>The <command>initval</command> block serves two purposes: declaring the initial (and possibly terminal) conditions in a simulation exercise, and providing guess values for non-linear solvers.</para>
+
+<refsect2><title>In a deterministic (<foreignphrase>i.e.</foreignphrase> perfect foresight) model</title>
+
+<para>First, it provides the initial conditions for all the endogenous and exogenous variables at all the periods preceeding the first simulation period (unless some of these initial values are modified by <xref linkend="histval"/>).</para>
+
+<para>Second, in the absence of an <xref linkend="endval"/> block, it also sets the terminal conditions for all the periods succeeding the last simulation period.</para>
+
+<para>Third, it provides initial guess values for the non-linear solver implemented in <xref linkend="simul"/>. If there is no <xref linkend="endval"/> block, it provides initial guess values for all the simulation dates; otherwise, it provides initial guess values for all dates before the first simulation period (and <xref linkend="endval"/> provides the rest).</para>
+
+<para>For this last reason, it necessary to provide values for all the endogenous variables in an <command>initval</command> block (even though, theoretically, initial conditions are only necessary for lagged variables). If some exogenous variables are not mentionned in the <command>initval</command> block, a zero value is assumed.</para>
+
+<para>Note that if the <command>initval</command> block is immediately followed by a <xref linkend="steady"/> command, its semantics is changed. The <xref linkend="steady"/> command will compute the steady state of the model for all the endogenous variables, assuming that exogenous variables are kept constant to the value declared in the <command>initval</command> block, and using the values declared for the endogenous as initial guess values for the non-linear solver. An <command>initval</command> block followed by <xref linkend="steady"/> is formally equivalent to an <command>initval</command> block with the same values for the exogenous, and with the associated steady state values for the endogenous.</para>
+
+</refsect2>
+
+<refsect2><title>In a stochastic model</title>
+
+<para>The main purpose of <command>initval</command> is to provide initial guess values for the non-linear solver in the steady state computation. Note that if the <command>initval</command> block is not followed by <xref linkend="steady"/>, the steady state computation will still be triggered by subsequent commands (<xref linkend="stoch_simul"/>, <xref linkend="estimation"/>...).</para>
+
+<para>It is not necessary to declare <literal>0</literal> as initial value for exogenous stochastic variables, since it is the only possible value.</para>
+
+<para>This steady state will be used as the initial condition at all the periods preceeding the first simulation period for the two possible types of simulations in stochastic mode:</para>
+<itemizedlist>
+  <listitem><para>in <xref linkend="stoch_simul"/>, if the <option>simul</option> or <option>periods</option> options are specified</para></listitem>
+  <listitem><para>in <xref linkend="forecast"/> (in this case, note that it is still possible to modify some of these initial values with <xref linkend="histval"/>)</para></listitem>
+</itemizedlist>
+
+</refsect2>
 </refsect1>
 
 <refsect1><title>Example</title>
@@ -796,32 +807,25 @@ steady;
 
   <refsynopsisdiv>
     <cmdsynopsis>
-      <command>endval;</command><sbr/>
-      <arg choice="plain">
-	<replaceable>VARIABLE_NAME</replaceable> = <replaceable>EXPRESSION</replaceable>;
-	</arg><sbr/>
-	<arg rep="repeat">
-	<replaceable>VARIABLE_NAME</replaceable> = <replaceable>EXPRESSION</replaceable>;
-	  </arg><sbr/>
-	  <arg choice="plain">
-	    end;
-	  </arg>
+      <command>endval</command>;<sbr/>
+      <arg rep="repeat" choice="plain">
+	      <replaceable>VARIABLE_NAME</replaceable> = <replaceable>EXPRESSION</replaceable> ;
+      </arg>
+      <command>end</command>;
     </cmdsynopsis>
   </refsynopsisdiv>
 
 <refsect1><title>Description</title>
-<para>
-<replaceable>EXPRESSION</replaceable> is any valid expression returning a numerical value and can contain already initialized variable names.
-</para>
-<para>
-The optional <command>endval;</command> ... <command>end;</command> block serves two purposes. It set the terminal conditions for the simulation with the LBJ alogrithm, when those differ from the initial conditions. When it is the case, the <command>endval</command> block also provides the numerical initialization for various computation tasks (<xref linkend='steady'/>, <xref linkend='simul'/>), starting in period 1.  
-</para>
-<para>
-Theoreticaly, terminal conditions are required in the LBJ algorithm only for forward variables. However, as <command>endval</command> provides also numerical initialization, it is necessary to provide values for all variables in the model.
-</para>
-<para>
-When the <command>endval</command> block is followed by the command <xref linkend='steady'/>, it is not necessary to provide exact values for the endogenous variables. <xref linkend='steady'/> will use the values provided in the <command>endval</command> block as initial guess in the non-linear equation solver and computes exact values for the endogenous variables at the steady state. The steady state is defined by keeping constant the value of the exogenous variables.  
-</para>
+
+<para>The <command>endval</command> block makes only sense in a determistic model, and serves two purposes.</para>
+
+<para>First, it sets the terminal conditions for all the periods succeeding the last simulation period.</para>
+
+<para>Second, it provides initial guess values for the non-linear solver implemented in <xref linkend="simul"/>, for all dates after the first simulation period (<xref linkend="initval"/> provides the initial guess values for the dates before the first simulation period).</para>
+
+<para>For this last reason, it necessary to provide values for all the endogenous variables in an <command>endval</command> block (even though, theoretically, initial conditions are only necessary for forward variables). If some exogenous variables are not mentionned in the <command>endval</command> block, a zero value is assumed.</para>
+
+<para>Note that if the <command>endval</command> block is immediately followed by a <xref linkend="steady"/> command, its semantics is changed. The <xref linkend="steady"/> command will compute the steady state of the model for all the endogenous variables, assuming that exogenous variables are kept constant to the value declared in the <command>endval</command> block, and using the values declared for the endogenous as initial guess values for the non-linear solver. An <command>endval</command> block followed by <xref linkend="steady"/> is formally equivalent to an <command>endval</command> block with the same values for the exogenous, and with the associated steady state values for the endogenous.</para>
 </refsect1>
 
 <refsect1><title>Example</title>
@@ -846,7 +850,7 @@ end;
 steady;
 </programlisting>
 <para>
-The initial equilibrium is comptuted by <xref linkend='steady'/> for x=1, and the terminal one, for x=2.
+The initial equilibrium is computed by <xref linkend='steady'/> for <literal>x=1</literal>, and the terminal one, for <literal>x=2</literal>.
 </para>
 </refsect1>
 </refentry>
@@ -863,16 +867,11 @@ The initial equilibrium is comptuted by <xref linkend='steady'/> for x=1, and th
 
   <refsynopsisdiv>
     <cmdsynopsis>
-      <command>histval;</command><sbr/>
-      <arg choice="plain">
-	<replaceable>VARIABLE_NAME</replaceable> (<replaceable>INTEGER</replaceable>) = <replaceable>EXPRESSION</replaceable>;
-	</arg><sbr/>
-	<arg rep="repeat">
-	<replaceable>VARIABLE_NAME</replaceable> (<replaceable>INTEGER</replaceable>) = <replaceable>EXPRESSION</replaceable>;
-	  </arg><sbr/>
-	  <arg choice="plain">
-	    end;
-	  </arg>
+      <command>histval</command>;<sbr/>
+      <arg rep="repeat" choice="plain">
+	      <replaceable>VARIABLE_NAME</replaceable> = <replaceable>EXPRESSION</replaceable> ;
+      </arg>
+      <command>end</command>;
     </cmdsynopsis>
   </refsynopsisdiv>
 
@@ -919,7 +918,7 @@ end;
 </refentry>
 </sect1>
 
-<sect1><title>Shocks on exogenous variables</title>
+<sect1 id="sec:shocks"><title>Shocks on exogenous variables</title>
 <para>
 In a deterministic context, when one wants to study the transition of one equilibrium position to another, it is equivalent to analyze the consequences of a permanent shock and this in done in Dynare through the proper use of <xref linkend='initval'/> and <xref linkend='endval'/>.
 </para>
