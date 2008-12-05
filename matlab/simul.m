@@ -30,7 +30,7 @@ function simul(dr)
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
 global M_ options_ oo_ 
-global ys0_ ct_ endval_ 
+global ys0_ ct_
 
 if size(M_.lead_lag_incidence,2)-nnz(M_.lead_lag_incidence(M_.maximum_endo_lag+1,:)) > 0
   mess = ['DYNARE: error in model specification : variable ' M_.endo_names(find(M_.lead_lag_incidence(M_.maximum_lag+1,:)==0),:)] ;

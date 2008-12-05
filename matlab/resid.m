@@ -28,7 +28,7 @@ function resid(period)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-  global M_ options_ oo_ it_ endval_ z
+  global M_ options_ oo_ it_ z
   
   if M_.exo_nbr > 0
     oo_.exo_simul = ones(M_.maximum_lag+M_.maximum_lead+period,1)* ...
