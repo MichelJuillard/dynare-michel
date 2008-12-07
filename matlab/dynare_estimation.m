@@ -30,6 +30,7 @@ function dynare_estimation(var_list_,dname)
 
 global M_ options_ oo_ estim_params_ bayestopt_
 
+
 %% Build var_list_
 var_list_ = check_list_of_variables(options_, M_, var_list_);
 options_.varlist = var_list_;
@@ -125,6 +126,8 @@ else% If estim_params_ is empty...
     bayestopt_.p1 = [];
     bayestopt_.p2 = [];
     bayestopt_.p3 = [];
+    bayestopt_.p4 = [];
+    estim_params_.nvx = 0;
     estim_params_.nvn = 0;
     estim_params_.ncx = 0;
     estim_params_.ncn = 0;
