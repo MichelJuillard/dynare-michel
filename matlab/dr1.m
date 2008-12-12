@@ -219,7 +219,6 @@ function [dr,info,M_,options_,oo_] = dr1(dr,task,M_,options_,oo_)
     sdyn = M_.endo_nbr - nstatic;
     
     k0 = M_.lead_lag_incidence(M_.maximum_endo_lag+1,order_var);
-    k1 = M_.lead_lag_incidence(find([1:klen] ~= M_.maximum_endo_lag+1),:);
     b = jacobia_(:,k0);
     
     if M_.maximum_endo_lead == 0;  % backward models
@@ -240,15 +239,9 @@ function [dr,info,M_,options_,oo_] = dr1(dr,task,M_,options_,oo_)
             end
         end % end if useAIM and...
         %else use original Dynare solver
-        if ~((options_.useAIM == 1) && (task == 0) && (options_.order == 1)) 
-            a = jacobia_(:,nonzeros(k1'));
-            dr.ghx = zeros(size(a));
-            m = 0;
-            for i=M_.maximum_endo_lag:-1:1
-                k = nonzeros(M_.lead_lag_incidence(i,order_var));
-                dr.ghx(:,m+[1:length(k)]) = -b\a(:,k);
-                m = m+length(k);
-            end
+        if ~((options_.useAIM == 1) && (task == 0) && (options_.order == 1))
+            [k1,junk,k2] = find(kstate(:,4));
+            dr.ghx(:,k1) = -b\jacobia_(:,k2); 
             if M_.exo_nbr
                 dr.ghu = -b\jacobia_(:,nz+1:end);
             end
@@ -320,6 +313,7 @@ function [dr,info,M_,options_,oo_] = dr1(dr,task,M_,options_,oo_)
     end % end if useAIM and...
     %else  % use original Dynare solver
     if  ~((options_.useAIM == 1)&& (task == 0) && (options_.order == 1)) % || isempty(options_.useAIM)  
+        k1 = M_.lead_lag_incidence(find([1:klen] ~= M_.maximum_endo_lag+1),:);
         a = aa(:,nonzeros(k1'));
         b = aa(:,k0);
         b10 = b(1:nstatic,1:nstatic);
