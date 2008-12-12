@@ -4,7 +4,7 @@ function [xparam1, hh, gg, fval, igg] = newrat(func0, x, hh, gg, igg, ftol0, nit
 %
 %  [xparam1, hh, gg, fval, igg] = newrat(func0, x, hh, gg, igg, ftol0, nit, flagg, varargin)
 %
-%  Optimiser with outer product gradient and 'Gibbs type' steps
+%  Optimiser with outer product gradient and with sequences of univariate steps
 %  uses Chris Sims subroutine for line search
 %
 %  func0 = name of the function
@@ -112,9 +112,9 @@ while norm(gg)>gtol & check==0 & jit<nit,
         nig=[nig ig];
          if (fval-fvala)<gibbstol*(fval0(icount)-fval),
              igibbs=0;
-             disp('Last Gibbs step, gain too small!!')
+             disp('Last sequence of univariate step, gain too small!!')
          else
-            disp('Gibbs step!!')
+            disp('Sequence of univariate steps!!')
         end
         fval=fvala;
     end
