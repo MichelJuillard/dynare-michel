@@ -38,7 +38,6 @@ end
 dynareroot = strrep(which('dynare.m'),'dynare.m','');
 
 addpath([dynareroot '/distributions/'])
-addpath([dynareroot '/distributions/toolbox'])
 addpath([dynareroot '/kalman/'])
 addpath([dynareroot '/kalman/likelihood'])
 
