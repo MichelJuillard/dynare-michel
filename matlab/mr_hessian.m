@@ -35,11 +35,15 @@ func = str2func(func);
 [f0, ff0]=feval(func,x,varargin{:});
 n=size(x,1);
 h2=bayestopt_.ub-bayestopt_.lb;
+hmax=bayestopt_.ub-x;
+hmax=min(hmax,x-bayestopt_.lb);
 %h1=max(abs(x),gstep_*ones(n,1))*eps^(1/3);
 %h1=max(abs(x),sqrt(gstep_)*ones(n,1))*eps^(1/6);
 if isempty(h1),
     h1=max(abs(x),sqrt(gstep_)*ones(n,1))*eps^(1/4);
 end
+
+h1 = min(h1,0.5.*hmax);
 
 if htol0<htol, 
     htol=htol0;
@@ -88,6 +92,7 @@ while i<n,
             else
                 h1(i)=2.1*h1(i);
             end
+            h1(i) = min(h1(i),0.5*hmax(i));
             xh1(i)=x(i)+h1(i);
 %             c=mr_nlincon(xh1,varargin{:});
 %             while c
@@ -112,7 +117,7 @@ while i<n,
         it=it+1;
         dx(it)=(fx-f0);
         h0(it)=h1(i);
-        if h1(i)<1.e-12*min(1,h2(i)),
+        if h1(i)<1.e-12*min(1,h2(i)) & h1(i)<0.5*hmax(i),
             ic=1;
             hcheck=1;
         end
