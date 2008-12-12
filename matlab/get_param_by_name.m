@@ -33,7 +33,7 @@ function x = get_param_by_name(pname)
   i = strmatch(pname,M_.param_names,'exact');
   
   if isempty(i)
-    error(['Can''t find parameter ' pname])
+  error(sprintf('Can''t find parameter %s', pname))
   end
   
   x = M_.params(i);
