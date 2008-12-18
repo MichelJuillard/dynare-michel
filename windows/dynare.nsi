@@ -69,7 +69,7 @@ Section
  File ..\mex\octave\rcond.m ..\mex\octave\*.mex
 
  SetOutPath $INSTDIR\doc
- File ..\doc\manual.pdf ..\doc\guide.pdf ..\doc\userguide\DynareUserGuide_PublicBeta20081218.pdf ..\doc\bvar-a-la-sims.pdf ..\doc\macroprocessor\macroprocessor.pdf ..\doc\preprocessor\preprocessor.pdf
+ File ..\doc\manual.pdf ..\doc\guide.pdf ..\doc\userguide\UserGuide.pdf ..\doc\bvar-a-la-sims.pdf ..\doc\macroprocessor\macroprocessor.pdf ..\doc\preprocessor\preprocessor.pdf
 
  SetOutPath $INSTDIR\doc\manual-html
  File ..\doc\manual-html\*.html

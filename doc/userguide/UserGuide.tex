@@ -1,4 +1,4 @@
-\documentclass[a4paper,11pt,titlepage]{memoir}
+\documentclass[a4paper,11pt]{memoir}
 \maxsecnumdepth{subsection} 
 \setsecnumdepth{subsection} 
 \maxtocdepth{subsection} 
@@ -11,6 +11,7 @@
 \usepackage[applemac]{inputenc}
 \usepackage{amsbsy,enumerate}
 \usepackage{natbib}
+\usepackage{pdfpages}
 %\usepackage{makeidx}
 %\usepackage[pdftex]{hyperref}
 %\usepackage{hyperref}
@@ -35,50 +36,31 @@ pdftex}
 \begin{document}
 \frontmatter 
 
+\includepdf{Graphics/DynareTitle.pdf}
+
 \title{Dynare v4 - User Guide \\ Public beta version}
 \author{\\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\  Tommaso Mancini Griffoli\\ tommaso.mancini@stanfordalumni.org}
 \date{This draft: March 2007}
 
 \maketitle
 
+\thispagestyle{empty}
+
 \newpage
-.\\
-\\
-\\
-\\
-\\
-\\
-\\
-\\
-\\
-\\
-\\
-\\
-\\
-\\
-\\
-\\
-\\
-\\
-\\
-\\
-\\
-\\
-\\
-\\
-\\
-\\
-\\
 
-Copyright © 2007-2008 Tommaso Mancini Griffoli\\
-\\
-\\
+~\vfill
 
-Permission is granted to copy, distribute and/or modify this document under the terms of the GNU Free Documentation License, Version 1.3 or any later version published by the Free Software Foundation; with no Invariant Sections, no Front-Cover Texts, and no Back-Cover Texts.\\
-\\
-\\
+Copyright © 2007-2008 Tommaso Mancini Griffoli
 
-A copy of the license can be found at: http://www.gnu.org/licenses/fdl.txt\\
+\bigskip
+
+Permission is granted to copy, distribute and/or modify this document under the terms of the GNU Free Documentation License, Version 1.3 or any later version published by the Free Software Foundation; with no Invariant Sections, no Front-Cover Texts, and no Back-Cover Texts.
+
+\bigskip
+
+A copy of the license can be found at: \url{http://www.gnu.org/licenses/fdl.txt}
+
+\vfill
 
 \newpage
 
@@ -90,7 +72,7 @@ This is the second version of the Dynare User Guide which is still work in progr
 
 The second thing that a work in progress manuscript comes with is a few internal notes. These are mostly placeholders for future work, notes to myself or others of the Dynare development team, or at times notes to you - our readers - to highlight a feature not yet fully stable. Any such notes are marked with two stars (**). \\
 
-Thanks very much for your patience and good ideas. Please write either direclty to myself: tommaso.mancini@stanfordalumni.org, or \textbf{preferably on the Dynare Documentation Forum} available in the Forum section of the \href{http://www.cepremap.cnrs.fr/juillard/mambo/index.php?option=com_forum&Itemid=95}{Dynare website}. 
+Thanks very much for your patience and good ideas. Please write either direclty to myself: tommaso.mancini@stanfordalumni.org, or \textbf{preferably on the Dynare Documentation Forum} available in the Forum section of the \href{http://www.dynare.org}{Dynare website}. 
 
 \chapter*{Contacts and Credits} \label{ch:contacts}
 Dynare was originally developed by Michel Juillard in Paris, France. Currently, the development team of Dynare is composed of
@@ -99,8 +81,8 @@ Dynare was originally developed by Michel Juillard in Paris, France. Currently, 
 \item Stéphane Adjemian (stephane.adjemian``AT''ens.fr)
 \item Michel Juillard (michel.juillard``AT''ens.fr)
 \item Ferhat Mihoubi (ferhat.mihoubi``AT''univ-evry.fr)
-\item Ondra Kamenik (ondra.kamenik"AT"volny.cz)
-\item Marco Ratto (marco.ratto"AT"jrc.it)
+\item Ondra Kamenik (ondra.kamenik``AT''volny.cz)
+\item Marco Ratto (marco.ratto``AT''jrc.it)
 \item Sébastien Villemot (sebastien.villemot``AT''ens.fr)
 \end{itemize}
 
@@ -108,7 +90,7 @@ Several parts of Dynare use or have strongly benefitted from publicly available 
 
 Finally, the development of Dynare could not have come such a long ways withough an active community of users who continually pose questions, report bugs and suggest new features. The help of this community is gratefully acknowledged.\\
 
-The email addresses above are provided in case you wish to contact any one of the authors of Dynare directly. We nonetheless encourage you to first use the \href{http://www.cepremap.cnrs.fr/juillard/mambo/index.php?option=com_forum&Itemid=95}{Dynare forums} to ask your questions so that other users can benefit from them as well; remember, almost no question is specific enough to interest just one person, and yours is not the exception! 
+The email addresses above are provided in case you wish to contact any one of the authors of Dynare directly. We nonetheless encourage you to first use the \href{http://www.dynare.org/phpBB3}{Dynare forums} to ask your questions so that other users can benefit from them as well; remember, almost no question is specific enough to interest just one person, and yours is not the exception! 
 
 \mainmatter
 

@@ -1,6 +1,7 @@
 all: guide.pdf manual-html/index.html manual.pdf bvar-a-la-sims.pdf
 	make -C preprocessor
 	make -C macroprocessor
+	make -C userguide
 
 guide.pdf: guide.tex guide.bbl bibmad.sty
 	pdflatex guide
@@ -24,3 +25,4 @@ clean:
 	rm -rf manual.pdf manual-html
 	make -C preprocessor clean
 	make -C macroprocessor clean
+	make -C userguide clean
