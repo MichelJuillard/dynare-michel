@@ -1,6 +1,8 @@
+function y_=simult_(y0,dr,ex_,iorder)
 % function y_=simult_(y0,dr,ex_,iorder)
-% Monte Carlo simulations
-% Draws random shocks
+%
+% Simulates the model, given the path of exogenous variables and the
+% decision rules.
 %
 % INPUTS
 %    y0:       starting values
@@ -14,7 +16,6 @@
 %
 % SPECIAL REQUIREMENTS
 %    none
-%  
 
 % Copyright (C) 2001-2007 Dynare Team
 %
@@ -33,7 +34,6 @@
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-function y_=simult_(y0,dr,ex_,iorder)
 global M_ options_ it_
   iter = size(ex_,1);
   if ~isempty(dr.ghu)
