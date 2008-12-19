@@ -1,8 +1,6 @@
-
 function steady_()
-
 % function steady_()
-% computes the steady state 
+% Computes the steady state 
 %  
 % INPUTS
 %   none
@@ -29,9 +27,7 @@ function steady_()
 %
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
-
   global M_ oo_ it_ options_
-  
   
   if options_.steadystate_flag
     [oo_.steady_state,check] = feval([M_.fname '_steadystate'],...
@@ -48,8 +44,9 @@ function steady_()
 			       [oo_.exo_steady_state; ...
 		    oo_.exo_det_steady_state], M_.params))) > options_.dynatol ;
 	if check1
-	  error(['The seadystate values returned by ' M_.fname ...
-		'_steadystate.m don''t solve the static model!' ])
+            resid(1);
+            error(['The seadystate values returned by ' M_.fname ...
+                   '_steadystate.m don''t solve the static model!' ])
 	end
       end
     end
