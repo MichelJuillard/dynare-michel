@@ -66,7 +66,7 @@ function y = solve_one_boundary(fname, y, x, params, y_index_eq, nze, periods, i
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
 
-    global oo_ M_;
+    global oo_ M_ options_;
     Blck_size=size(y_index_eq,2);
     g2 = [];
     g3 = [];
@@ -90,9 +90,9 @@ function y = solve_one_boundary(fname, y, x, params, y_index_eq, nze, periods, i
        g1=spalloc( Blck_size, Blck_size, nze);
        while ~(cvg==1 | iter>maxit_),
            if(is_dynamic)
-             [r, g1] = feval(fname, y, x, params, it_, 0, g1, g2, g3);
+             [r, g1, g2, g3, b] = feval(fname, y, x, params, it_, 0, g1, g2, g3);
            else
-             [r, g1] = feval(fname, y, x, params, 0);
+             [r, g1, g2, g3, b] = feval(fname, y, x, params, 0);
            end;
            if(~isreal(r))
               max_res=(-(max(max(abs(r))))^2)^0.5;
@@ -100,10 +100,16 @@ function y = solve_one_boundary(fname, y, x, params, y_index_eq, nze, periods, i
               max_res=max(max(abs(r)));
            end;
            if(verbose==1)
-             disp(['iteration : ' int2str(iter) ' => ' num2str(max_res)]);
-             disp([M_.endo_names(y_index_eq,:) num2str([y(y_index_eq) r g1])]);
+             disp(['iteration : ' int2str(iter) ' => ' num2str(max_res) ' time = ' int2str(it_)]);
+             if(is_dynamic)
+               disp([M_.endo_names(y_index_eq,:) num2str([y(it_,y_index_eq)' r g1])]);
+             else
+               disp([M_.endo_names(y_index_eq,:) num2str([y(y_index_eq) r g1])]);
+             end;
            end;
-           if(is_linear)
+           if(~isreal(max_res) | isnan(max_res))
+              cvg = 0;
+           elseif(is_linear & iter>0)
               cvg = 1;
            else
               cvg=(max_res<solve_tolf);
@@ -122,7 +128,8 @@ function y = solve_one_boundary(fname, y, x, params, y_index_eq, nze, periods, i
                        disp(['The Jacobain matrix is singular, det(Jacobian)=' num2str(detJ,'%f') '.']);
                        disp(['    trying to correct the Jacobian matrix:']);
                        disp(['    correcting_factor=' num2str(correcting_factor,'%f') ' max(Jacobian)=' num2str(full(max_factor),'%f')]);
-                       dx = -r/(g1+correcting_factor*speye(Blck_size));
+                       dx = - r/(g1+correcting_factor*speye(Blck_size));
+                       %dx = -b'/(g1+correcting_factor*speye(Blck_size))-ya_save;
                        y(it_,y_index_eq)=ya_save+lambda*dx;
                        continue;
                      else
@@ -135,9 +142,9 @@ function y = solve_one_boundary(fname, y, x, params, y_index_eq, nze, periods, i
                    reduced = 1;
                    disp(['reducing the path length: lambda=' num2str(lambda,'%f')]);
                    if(is_dynamic)
-                     y(it_,y_index_eq)=ya_save+lambda*dx;
+                     y(it_,y_index_eq)=ya_save-lambda*dx;
                    else
-                     y(y_index_eq)=ya_save+lambda*dx;
+                     y(y_index_eq)=ya_save-lambda*dx;
                    end;
                    continue;
                  else
@@ -169,21 +176,51 @@ function y = solve_one_boundary(fname, y, x, params, y_index_eq, nze, periods, i
              end;
              ya_save=ya;
              g1a=g1;
-             if(simulation_method==0),
-                %dx = - inv(g1)*r;
-                num2str(eig(full(g1)),'%f')
-                dx = - g1\r;
-                ya = ya + lambda*dx;
+             if(~is_dynamic & options_.solve_algo == 0)
+               if exist('OCTAVE_VERSION') || isempty(ver('optim'))
+                 % Note that fsolve() exists under Octave, but has a different syntax
+                 % So we fail for the moment under Octave, until we add the corresponding code
+                  error('DYNARE_SOLVE: you can''t use solve_algo=0 since you don''t have Matlab''s Optimization Toolbox')
+               end
+               options=optimset('fsolve');
+               options.MaxFunEvals = 50000;
+               options.MaxIter = 2000;
+               options.TolFun=1e-8;
+               options.Display = 'iter';
+               options.Jacobian = 'on';
+               [yn,fval,exitval,output] = fsolve(@local_fname, y(y_index_eq), options, x, params, y, y_index_eq, fname, 0);
+               y(y_index_eq) = yn;
+               if exitval > 0
+                  info = 0;
+               else
+                  info = 1;
+               end
+             elseif(~is_dynamic & options_.solve_algo==2)
+                lambda=1;
+                stpmx = 100 ;
+                stpmax = stpmx*max([sqrt(y'*y);size(y_index_eq,2)]);
+                nn=1:size(y_index_eq,2);
+                g = (r'*g1)';
+                f = 0.5*r'*r;
+                p = -g1\r ;
+                [y,f,r,check]=lnsrch1(y,f,g,p,stpmax,fname,nn,y_index_eq,x, params, 0);
+             elseif(~is_dynamic & options_.solve_algo==3)
+                 [yn,info] = csolve(@local_fname, y(y_index_eq),@local_fname,1e-6,500, x, params, y, y_index_eq, fname, 1);
+                 y(y_index_eq) = yn;
+             elseif((simulation_method==0 & is_dynamic) | (~is_dynamic & options_.solve_algo==1)),
+                dx =  g1\r;
+                ya = ya - lambda*dx;
                 if(is_dynamic)
                   y(it_,y_index_eq) = ya';
                 else
                   y(y_index_eq) = ya;
                 end;
-             elseif(simulation_method==2),
+             elseif(simulation_method==2 & is_dynamic),
                 flag1=1;
                 while(flag1>0)
                    [L1, U1]=luinc(g1,luinc_tol);
                    [za,flag1] = gmres(g1,-r,Blck_size,1e-6,Blck_size,L1,U1);
+                   %[za,flag1] = gmres(-g1,b',Blck_size,1e-6,Blck_size,L1,U1);
                    if (flag1>0 | reduced)
                       if(flag1==1)
                          disp(['Error in simul: No convergence inside GMRES after ' num2str(iter,'%6d') ' iterations, in block' num2str(Block_Num,'%3d')]);
@@ -204,11 +241,12 @@ function y = solve_one_boundary(fname, y, x, params, y_index_eq, nze, periods, i
                       end;
                    end;
                 end;
-             elseif(simulation_method==3),
+             elseif(simulation_method==3 & is_dynamic),
                 flag1=1;
                 while(flag1>0)
                    [L1, U1]=luinc(g1,luinc_tol);
                    [za,flag1] = bicgstab(g1,-r,1e-7,Blck_size,L1,U1);
+                   %[za,flag1] = bicgstab(-g1,b',1e-7,Blck_size,L1,U1);
                    if (flag1>0 | reduced)
                       if(flag1==1)
                          disp(['Error in simul: No convergence inside BICGSTAB after ' num2str(iter,'%6d') ' iterations, in block' num2str(Block_Num,'%3d')]);
@@ -229,6 +267,14 @@ function y = solve_one_boundary(fname, y, x, params, y_index_eq, nze, periods, i
                       end;
                    end;
                 end;
+             else
+                 disp('unknown option : ');
+                 if(is_dynamic)
+                     disp(['options_.simulation_method = ' num2str(simulation_method) ' not implemented']);
+                 else
+                     disp(['options_.solve_algo = ' num2str(options_.solve_algo) ' not implemented']);
+                 end;
+                 return;
              end;
              iter=iter+1;
            end
@@ -254,8 +300,15 @@ function y = solve_one_boundary(fname, y, x, params, y_index_eq, nze, periods, i
       oo_.deterministic_simulation.status = 1;
       oo_.deterministic_simulation.error = max_res;
       oo_.deterministic_simulation.iterations = iter;
-      oo_.deterministic_simulation.block(Block_Num).status = 1;% Convergency failed.
+      oo_.deterministic_simulation.block(Block_Num).status = 1;
       oo_.deterministic_simulation.block(Block_Num).error = max_res;
       oo_.deterministic_simulation.block(Block_Num).iterations = iter;
     end;
     return;
+
+function [err, G]=local_fname(yl, x, params, y, y_index_eq, fname, is_csolve)
+  y(y_index_eq) = yl;
+  [err, G] = feval(fname, y, x, params, 0);
+  if(is_csolve)
+    G = full(G);
+  end;

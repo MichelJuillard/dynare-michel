@@ -31,8 +31,8 @@ rho = 0.7;
 psi = 0.787;
 del = 0.02;
 
-//model(sparse_dll,no_compiler,cutoff=1e-17);
-model(sparse);
+model(sparse_dll,cutoff=1e-17);
+//model(sparse);
 //model;
 dA = exp(gam+e_a);
 log(m) = (1-rho)*log(mst) + rho*log(m(-1))+e_m;
@@ -93,7 +93,7 @@ options_.solve_tolf=1e-10;
 options_.maxit_=100;
 steady;
 model_info;
-check;
+//check;
 shocks;
 var e_a;
 periods 1;
@@ -102,7 +102,7 @@ end;
 
 
 simul(periods=200, method=lu);
-stoch_simul(periods=200,order=1);
+//stoch_simul(periods=200,order=1);
 
 rplot y;
 rplot k;

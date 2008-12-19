@@ -23,8 +23,9 @@ scy = 0.0040;
 shy = 0.0015;
 shc = 0.0010;
 
-//model(sparse_dll,no_compiler);
-model(sparse);
+model(sparse_dll);
+//model(sparse,cutoff=0);
+//model(sparse);
 //model;
 exp(y) = exp(a)*exp(k(-1))^theta*exp(h)^(1-theta);
 a = (1-rho)*aa+rho*a(-1)+e;
@@ -70,15 +71,18 @@ eoh=         0;
 oy=    7.99331700544506;
 oc=    7.83132048725623;
 oh=    5.34253084908048;
-
+k=k+0.000001;
 
 end;
+
 options_.dynatol=1e-12;
-options_.maxit_=500;
+options_.maxit_=5;
 options_.slowc=1;
-steady(solve_algo=3);
-options_.dynatol=4e-8;
-check;
+steady(solve_algo=2);
+//steady;
+options_.dynatol=4e-5;
+
+//check;
 
 
 shocks;
@@ -89,7 +93,7 @@ end;
 options_.maxit_=20;
 model_info;
 
-simul(periods=2000, method=/*LU*/GMRES/*bicgstab*/);
+simul(periods=2000, method=LU/*GMRES*//*bicgstab*/);
 rplot y;
 rplot k;
 

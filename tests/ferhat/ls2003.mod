@@ -82,6 +82,7 @@ estimation(datafile=data_ca1,first_obs=8,nobs=79,mh_nblocks=10,prefilter=1,mh_js
 
 options_.maxit_=100;
 steady;
+
 model_info;
 check;
 
@@ -91,7 +92,10 @@ periods 1;
 values 0.5;
 end;
 
-simul(periods=200,method=bicgstab);
+//simul(periods=200,method=bicgstab);
+simul(periods=200);
+rplot vv;
+rplot ww;
 rplot A;
 rplot pie;
 

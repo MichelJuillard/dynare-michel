@@ -556,7 +556,7 @@ void SparseMatrix::Init(int periods, int y_kmin, int y_kmax, int Size, std::map<
 #ifdef PRINT_OUT
               mexPrintf(", lag =%d, ti_y_kmin=%d, ti_y_kmax=%d ", lag, ti_y_kmin, ti_y_kmax);
 #endif
-              if (lag<=ti_y_kmax && lag>=ti_y_kmin)
+              if (lag<=ti_y_kmax && lag>=ti_y_kmin)   /*Build the index for sparse matrix containing the jacobian : u*/
                 {
                   //mexPrintf("u_index=%d, eq=%d, var=%d, lag=%d ",it4->second+u_count_init*t, eq, var, lag);
                   var+=Size*t;
@@ -592,7 +592,7 @@ void SparseMatrix::Init(int periods, int y_kmin, int y_kmax, int Size, std::map<
                   mexPrintf("=> ");
 #endif
                 }
-              else
+              else       /*Build the additive terms ooutside the simulation periods related to the first lags and the las leads...*/
                 {
 #ifdef PRINT_OUT
                   mexPrintf("nn ");
@@ -604,7 +604,7 @@ void SparseMatrix::Init(int periods, int y_kmin, int y_kmax, int Size, std::map<
                   //mexPrintf("  u[%d](%f)*y[%d](%f)=%f",it4->second+u_count_init*t,u[it4->second+u_count_init*t],index_vara[var+Size*(y_kmin+t)],y[index_vara[var+Size*(y_kmin+t)]],u[it4->second+u_count_init*t]*y[index_vara[var+Size*(y_kmin+t)]]);
                 }
             }
-          else
+          else           /* ...and store it in the u vector*/
             {
 #ifdef PRINT_OUT
               mexPrintf("");
@@ -806,11 +806,11 @@ SparseMatrix::compare( int *save_op, int *save_opa, int *save_opaa, int beg_t, i
   t_save_op_s *save_op_s, *save_opa_s, *save_opaa_s;
   int *diff1, *diff2;
 #ifdef MEM_ALLOC_CHK
-  mexPrintf("diff1=(int*)mxMalloc(%d*sizeof(int))\n",nop);
+  mexPrintf("diff1=(int*)mxMalloc(%f)\n",double(nop)*double(sizeof(int))/1024);
 #endif
   diff1=(int*)mxMalloc(nop*sizeof(int));
 #ifdef MEM_ALLOC_CHK
-  mexPrintf("diff1=(int*)mxMalloc(%d*sizeof(int))\n",nop);
+  mexPrintf("diff2=(int*)mxMalloc(%f)\n",double(nop)*double(sizeof(int))/1024);
 #endif
   diff2=(int*)mxMalloc(nop*sizeof(int));
 #ifdef MEM_ALLOC_CHK
@@ -1010,7 +1010,9 @@ SparseMatrix::compare( int *save_op, int *save_opa, int *save_opaa, int beg_t, i
       mexErrMsgTxt(filename.c_str());
 #endif
     }
+  //mexPrintf("mxFree(diff1)\n");
   mxFree(diff1);
+  //mexPrintf("mxFree(diff2)\n");
   mxFree(diff2);
   return OK;
 }
@@ -1373,6 +1375,7 @@ SparseMatrix::bksub( int tbreak, int last_period, int Size, double slowc_l
 #endif
           yy=-(yy+y[eq]+u[b[pos]]);
           direction[eq]=yy;
+          //mexPrintf("direction[%d] = %f\n",eq,yy);
           y[eq] += slowc_l*yy;
 #ifdef PRINT_OUT_y1
           mexPrintf("=%f (%f)\n",double(yy),double(y[eq]));
@@ -1409,6 +1412,7 @@ SparseMatrix::Direct_Simulate(int blck, int y_size, int it_, int y_kmin, int y_k
   double uu, yy;
   //char tmp_s[150];
   //mexPrintf("period=%d\n",period);
+  //mexPrintf("Direct_Simulate\n");
 #ifdef PRINT_OUT
   for (j = 0;j < it_ -y_kmin;j++)
     {
@@ -1990,7 +1994,10 @@ SparseMatrix::simulate_NG1(int blck, int y_size, int it_, int y_kmin, int y_kmax
   tdelete1=0; tdelete2=0; tdelete21=0; tdelete22=0; tdelete221=0; tdelete222=0;
 #endif
   if (iter>0)
-    mexPrintf("Sim : %f ms\n",(1000.0*(double(clock())-double(time00)))/double(CLOCKS_PER_SEC));
+    {
+      mexPrintf("Sim : %f ms\n",(1000.0*(double(clock())-double(time00)))/double(CLOCKS_PER_SEC));
+      mexEvalString("drawnow;");
+    }
 #ifdef MEMORY_LEAKS
   mexEvalString("feature('memstats');");
 #endif
@@ -2037,12 +2044,15 @@ SparseMatrix::simulate_NG1(int blck, int y_size, int it_, int y_kmin, int y_kmax
         }
     }
   res1a=res1;
-  mexPrintf("-----------------------------------\n");
-  mexPrintf("      Simulate     iteration° %d     \n",iter+1);
-  mexPrintf("      max. error=%.10e       \n",double(max_res));
-  mexPrintf("      sqr. error=%.10e       \n",double(res2));
-  mexPrintf("      abs. error=%.10e       \n",double(res1));
-  mexPrintf("-----------------------------------\n");
+  if(print_it)
+    {
+      mexPrintf("-----------------------------------\n");
+      mexPrintf("      Simulate     iteration° %d     \n",iter+1);
+      mexPrintf("      max. error=%.10e       \n",double(max_res));
+      mexPrintf("      sqr. error=%.10e       \n",double(res2));
+      mexPrintf("      abs. error=%.10e       \n",double(res1));
+      mexPrintf("-----------------------------------\n");
+    }
   if (cvg)
     return(0);
 #ifdef PRINT_OUT

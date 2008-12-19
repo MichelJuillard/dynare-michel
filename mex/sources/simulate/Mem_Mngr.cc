@@ -61,25 +61,32 @@ NonZeroElem*
 Mem_Mngr::mxMalloc_NZE()
 {
   int i;
-  if (!Chunk_Stack.empty())
+  if (!Chunk_Stack.empty())           /*An unused block of memory available inside the heap*/
     {
       NonZeroElem* p1 = Chunk_Stack.back();
       Chunk_Stack.pop_back();
       return(p1);
     }
-  else if (CHUNK_heap_pos<CHUNK_SIZE) /*there is enough allocated memory space available*/
+  else if (CHUNK_heap_pos<CHUNK_SIZE) /*there is enough allocated memory space available we keep it at the top of the heap*/
     {
       int i=CHUNK_heap_pos++;
       return(NZE_Mem_add[i]);
     }
-  else                           /*We have to allocate extra memory space*/
+  else                                /*We have to allocate extra memory space*/
     {
       CHUNK_SIZE+=CHUNK_BLCK_SIZE;
+      /*mexPrintf("Allocate %f Ko\n",double(CHUNK_BLCK_SIZE)*double(sizeof(NonZeroElem))/double(1024));
+      mexEvalString("drawnow;");*/
       Nb_CHUNK++;
 #ifdef MEM_ALLOC_CHK
       mexPrintf("CHUNK_BLCK_SIZE=%d\n",CHUNK_BLCK_SIZE);
 #endif
       NZE_Mem=(NonZeroElem*)mxMalloc(CHUNK_BLCK_SIZE*sizeof(NonZeroElem));
+      if(!NZE_Mem)
+        {
+          mexPrintf("Not enough memory available\n");
+          mexEvalString("drawnow;");
+        }
 #ifdef MEM_ALLOC_CHK
       mexPrintf("CHUNK_SIZE=%d\n",CHUNK_SIZE);
 #endif
