@@ -1,9 +1,8 @@
-# $Id: Makefile 886 2006-09-01 11:56:07Z kamenik $
-# Copyright 2004, Ondra Kamenik
+# $Id: Makefile 843 2006-07-28 08:54:19Z tamas $
+# Copyright 2005, Ondra Kamenik
 
 
-#LD_LIBS := -llapack -lcblas -lf77blas -latlas -lg2c
-CC_FLAGS := -Wall -I../../sylv/cc \
+CC_FLAGS := -Wall -I../../sylv/cc -I../../tl/cc \
         $(CC_INCLUDE_PATH) -Ic:/"Program Files"/MATLAB_SV71/extern/include
 
 LDFLAGS = -Wl,-L"c:/Program Files"/MATLAB_SV71/extern/lib/win32/microsoft/ \
@@ -35,9 +34,20 @@ objects := $(patsubst %.cweb,%.o,$(cwebsource))
 hwebsource := $(wildcard *.hweb)
 hsource := $(patsubst %.hweb,%.h,$(hwebsource))
 
+tlcwebsource := $(wildcard ../../tl/cc/*.cweb)
+tlcppsource := $(patsubst %.cweb,%.cpp,$(tlcwebsource))
+tlhwebsource := $(wildcard ../../tl/cc/*.hweb)
+tlhsource := $(patsubst %.hweb,%.h,$(tlhwebsource))
+
 
 dummy.ch:
 	touch dummy.ch
+
+../../tl/cc/dummy.ch:
+	make -C ../../tl/cc dummy.ch
+
+../../tl/cc/%.h: ../../tl/cc/%.hweb ../../tl/cc/dummy.ch
+	make -C ../../tl/cc $*.h
 
 %.cpp: %.cweb dummy.ch
 	ctangle -bhp $*.cweb dummy.ch $*.cpp
@@ -45,22 +55,20 @@ dummy.ch:
 %.h: %.hweb dummy.ch
 	ctangle -bhp $*.hweb dummy.ch $*.h
 
-%.o : %.cpp $(hsource)
+%.o : %.cpp $(hsource) $(tlhsource)
 	$(CC) $(CC_FLAGS) $(EXTERN_DEFS) -c $*.cpp
-
-all: $(objects) $(cppsource) $(hsource)
-
-tl.pdf: doc
 
 doc: main.web $(hwebsource) $(cwebsource)
 	cweave -bhp main.web
 	pdftex main
-	mv main.pdf tl.pdf
+	mv main.pdf integ.pdf 
+
+all: $(objects) $(cppsource) $(hsource)
+
 
 clear:
 	rm -f $(cppsource)
 	rm -f $(hsource)
 	rm -f *.o
-	rm -f main.{dvi,idx,log,pdf,scn,tex,toc}
 	rm -f dummy.ch
 	rm -f *~

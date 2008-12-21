@@ -104,3 +104,6 @@ public:
 	int close();
 	
 };
+// convert Matlab endo and exo names array to C type array of strings
+const char ** DynareMxArrayToString(const mxArray * mxFldp, const int len, const int width );
+const char ** DynareMxArrayToString(const char * cArray, const int len, const int width );

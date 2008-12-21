@@ -18,8 +18,7 @@
 
 #include "mex.h" 
 
-#include "Dynare_pp/utils/cc/memory_file.h"
-#include "Dynare_pp/utils/cc/exception.h"
+#include "memory_file.h"
 
 
 //#include "k_order_perturbation.h"
@@ -77,17 +76,30 @@ void FistOrderApproximation::saveRuleDerivs(const FistOrder& fo)
 class KordpJacobian;
 
 KordpDynare::KordpDynare(const char** endo,  int num_endo,
-			   const char** exo, int nexog, int nPar, //const char** par,
-   			   Vector* ySteady, TwoDMatrix* vCov, Vector* params, int nstat,int nPred, int nForw, int nboth,
-			   const int nSteps, int nOrder, //const char* modName,
+			   const char** exo, int nexog, int npar, //const char** par,
+   			   Vector* ysteady, TwoDMatrix* vcov, Vector* inParams, int nstat,int npred, int nforw, int nboth,
+			   const int nsteps, int norder, //const char* modName,
 			   Journal& jr, DynamicModelDLL& dynamicDLL, double sstol)
-	: nStat(nstat), nBoth(nboth), nPred(nPred), nForw(nForw), nExog(nexog), nPar(nPar),
-	nYs(nYs), nYss(nYss),nY(nY), nSteps(nSteps), nOrder(nOrder), journal(jr),  dynamicDLL(dynamicDLL),
-	ySteady(ySteady), vCov(vCov), params (params),  md(1), dnl(NULL), denl(NULL), dsnl(NULL), ss_tol(sstol)
+	: nStat(nstat), nBoth(nboth), nPred(npred), nForw(nforw), nExog(nexog), nPar(npar),
+	nYs(npred + nboth), nYss(nboth + nforw),nY(num_endo), nSteps(nsteps), nOrder(norder), journal(jr),  dynamicDLL(dynamicDLL),
+	ySteady(ysteady), vCov(vcov), params (inParams),  md(1), dnl(NULL), denl(NULL), dsnl(NULL), ss_tol(sstol)
 {
+#ifdef DEBUG		
+   mexPrintf("k_ord_dynare Dynare constructor: ny=%d, order=%d, nPar=%d .\n", nY,nOrder,nPar);
+	for (int i = 0; i < nY; i++) {
+        mexPrintf("k_ord_dynare calling DynareNameList names[%d]= %s.\n", i, endo[i] );}
+	for (int i = 0; i < nPar; i++) {
+        mexPrintf("k_ord_perturbation: Params[%d]= %g.\n", i, (*params)[i]);  }
+	for (int i = 0; i < nY; i++) {
+        mexPrintf("k_ord_perturbation: ysteady[%d]= %g.\n", i, (*ySteady)[i]);  }
+    mexPrintf("k_ord_dynare: dynare constructor, trying namelists.\n");
+#endif		
 	try{
 		dnl = new DynareNameList(*this, endo);
 		denl = new DynareExogNameList(*this, exo);
+#ifdef DEBUG		
+    mexPrintf("k_ord_dynare: dynare constructor, trying StateNamelist.\n");
+#endif		
 		dsnl = new DynareStateNameList(*this, *dnl, *denl);
 
 /****
@@ -97,8 +109,10 @@ KordpDynare::KordpDynare(const char** endo,  int num_endo,
 ******/
 	//	throw DynareException(__FILE__, __LINE__, string("Could not open model file ")+modName);
 	}
-	catch (...)
-	{}
+	catch (...){
+        mexPrintf("k_ord_dynare: dynare constructor, error in StateNamelist construction.\n");
+        throw DynareException(__FILE__, __LINE__, string("Could not construct Name Lists. \n"));
+    }
 
 /// May need these later, GP, Oct. 08
 ///	writeModelInfo(journal);
@@ -144,8 +158,8 @@ KordpDynare::~KordpDynare()
 void KordpDynare::solveDeterministicSteady(Vector& steady)
 {
 	JournalRecordPair pa(journal);
-	pa << "Non-linear solver for deterministic steady state" << endrec;
-	//steady = (const Vector&) model->getInit();
+	pa << "Non-linear solver for deterministic steady state By-passed " << endrec;
+	/*************************;  GP Dec 08 by-pass
 	KordpVectorFunction dvf(*this);
 	KordpJacobian dj(*this);
 	ogu::NLSolver nls(dvf, dj, 500, ss_tol, journal);
@@ -153,14 +167,21 @@ void KordpDynare::solveDeterministicSteady(Vector& steady)
 	if (! nls.solve(*ySteady, iter))
 		throw DynareException(__FILE__, __LINE__,
 							  "Could not obtain convergence in non-linear solver");
+	***************************/
 }
 
 // evaluate system at given y_t=y_{t+1}=y_{t-1}, and given shocks x_t
 void KordpDynare::evaluateSystem(Vector& out, const Vector& yy, const Vector& xx)
 {
+/***
 	ConstVector yym(yy, nstat(), nys());
 	ConstVector yyp(yy, nstat()+npred(), nyss());
 	evaluateSystem(out, yym, yy, yyp, xx);
+***/
+	dynamicDLL.eval( yy,  xx, //int nb_row_x, 
+				 params, //int it_, 
+                 out, NULL, NULL);
+
 }
 
 // evaluate system at given y^*_{t-1}, y_t, y^{**}_{t+1} and at
@@ -176,10 +197,8 @@ void KordpDynare::evaluateSystem(Vector& out, const Vector& yym, const Vector& y
 	fe->eval(dav, del);
 ///////////////////////*/
 #ifdef DEBUG
-	mexPrintf("Call in EvaluateSystem\n");
+	mexPrintf("k_order_dynaare.cpp: Call eval in EvaluateSystem\n");
 #endif
-//	DynamicDLL->eval(double *y, double *x, int nb_row_x, double *params, int it_, 
-//				double *residual, double *g1, double *g2);
 	dynamicDLL.eval( yy,  xx, //int nb_row_x, 
 				 params, //int it_, 
                  out, NULL, NULL);
@@ -193,14 +212,22 @@ void KordpDynare::calcDerivatives(const Vector& yy, const Vector& xx)
 //	Vector yyp(yy, nstat()+npred(), nyss());
 
 	//double *g1, *g2;
-    TwoDMatrix *g1, *g2;
-	g1=new TwoDMatrix(0,0);
+    TwoDMatrix *g1;//, *g2;
+	g1=new TwoDMatrix(0,0); // just a signal: generate something so g1 (and out) are not null
     Vector& out= *(new Vector(nY));
+#ifdef DEBUG
+	mexPrintf("k_order_dynaare.cpp: Call eval in calcDerivatives\n");
+#endif
 	dynamicDLL.eval( yy,  xx, //int nb_row_x, 
 				params, //int it_, 
 				out, g1, NULL);
+#ifdef DEBUG
+	mexPrintf("k_order_dynaare.cpp: populate FSSparseTensor in calcDerivatives: cols=%d , rows=%d\n"
+        , g1->ncols(),g1->nrows());
+#endif
 
-   //    model derivatives FSSparseTensor instance
+   //    model derivatives FSSparseTensor instance for single order only 
+    //(higher orders requires Symetry to insert in particular position.)
         FSSparseTensor mdTi=*(new FSSparseTensor (1, g1->ncols(),g1->nrows())); 
         for (int i = 0; i<g1->ncols(); i++){
                 for (int j = 0; j<g1->nrows(); j++){
@@ -349,7 +376,15 @@ DynareNameList::DynareNameList(const  KordpDynare& dynare)
 }
 DynareNameList::DynareNameList(const KordpDynare& dynare, const char ** namesp)
 {
+#ifdef DEBUG		
+    mexPrintf("k_ord_dynare DynareNameList.\n");
+    mexPrintf("k_ord_dynare DynareNameList dynare.ny=%d .\n", dynare.ny());
+#endif		
+    
 	for (int i = 0; i < dynare.ny(); i++) {
+#ifdef DEBUG		
+    mexPrintf("k_ord_dynare DynareNameList names[%d]= %s.\n", i, namesp[i] );
+#endif		
 		names.push_back(namesp[i]);
 	}
 }
@@ -363,7 +398,13 @@ DynareExogNameList::DynareExogNameList(const KordpDynare& dynare)
 
 DynareExogNameList::DynareExogNameList(const KordpDynare& dynare, const char ** namesp)
 {
+#ifdef DEBUG		
+    mexPrintf("k_ord_dynare DynareExogNameList dynare.nexog=%d .\n", dynare.nexog());
+#endif		
 	for (int i = 0; i < dynare.nexog(); i++) {
+#ifdef DEBUG		
+    mexPrintf("k_ord_dynare DynareExogNameList names[%d]= %s.\n", i, namesp[i] );
+#endif		
 		names.push_back(namesp[i]);
 	}
 }
@@ -371,9 +412,17 @@ DynareExogNameList::DynareExogNameList(const KordpDynare& dynare, const char ** 
 DynareStateNameList::DynareStateNameList(const KordpDynare& dynare, const DynareNameList& dnl,
 										 const DynareExogNameList& denl)
 {
-	for (int i = 0; i < dynare.nys(); i++)
+	for (int i = 0; i < dynare.nys(); i++){
+#ifdef DEBUG		
+    mexPrintf("k_ord_dynare DynareStateNameList dnl names[%d]= %s.\n", i, dnl.getName(i+dynare.nstat()) );
+#endif		
 		names.push_back(dnl.getName(i+dynare.nstat()));
-	for (int i = 0; i < dynare.nexog(); i++)
+    }
+	for (int i = 0; i < dynare.nexog(); i++){
+#ifdef DEBUG		
+    mexPrintf("k_ord_dynare DynareStateNameList denl names[%d]= %s.\n", i, denl.getName(i));
+#endif		
 		names.push_back(denl.getName(i));
+    }
 }
 

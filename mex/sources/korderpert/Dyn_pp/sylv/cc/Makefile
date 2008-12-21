@@ -3,10 +3,17 @@
 # Tag $Name:  $
 
 CC_FLAGS := -Wall -I../testing -I../cc \
-        $(CC_INCLUDE_PATH)
+        $(CC_INCLUDE_PATH)  -Ic:/"Program Files"/MATLAB_SV71/extern/include
+
+LDFLAGS = -Wl,-L"c:/Program Files"/MATLAB_SV71/extern/lib/win32/microsoft/ \
+	-Wl,-llibmex -Wl,-llibmx  -Wl,-llibmwlapack -Wl,-llibdflapack \
+	-lg2c -lmingw32  -lstdc++ 
+
+LD_LIBS=$(LDFLAGS)
 
 ifeq ($(DEBUG),yes)
-	CC_FLAGS := $(CC_FLAGS) -g
+#	CC_FLAGS := $(CC_FLAGS) -g -DTL_DEBUG=2
+    CC_FLAGS := $(CC_FLAGS) -g -DMATLAB -DPOSIX_THREADS
 else
 	CC_FLAGS := $(CC_FLAGS) -O2
 endif

@@ -22,11 +22,11 @@
 
 #include "k_ord_dynare.h"
 #include "math.h"
-#include "string.h"
+#include <cstring>
 //#include "mex.h"
 //#include "k_order_perturbation.h"
 
-
+#include <cctype>
 
 #ifdef  _MSC_VER  //&&WINDOWS 
 
@@ -67,6 +67,7 @@ CK_order_perturbation::CK_order_perturbation()
 #endif // _MSC_VER && WINDOWS
 
 extern "C" {
+
 	
 	// Receives call from Dynare resol and runs instead of dr1.m
 	// but you need to run set_state_space first which s not in resol!!!
@@ -96,7 +97,7 @@ extern "C" {
 		const char*  fName = mxArrayToString(mFname);
 
 #ifdef DEBUG		
-		mexPrintf("MexPrintf 2: check_flag = %d ,  fName = %s .\n", check_flag,fName);
+		mexPrintf("k_order_perturbation: check_flag = %d ,  fName = %s .\n", check_flag,fName);
 #endif		
         int kOrder;
 		mxArray* mxFldp = mxGetField(options_, 0,"order" );
@@ -104,14 +105,27 @@ extern "C" {
 			kOrder = (int)mxGetScalar(mxFldp);
 		else
 			kOrder = 1;
-		if (nrhs != 12 + kOrder) {
-			mexErrMsgTxt("Must have exactly 11+order input parameters.\n");
-			return;
-		}
+		
 		mxFldp 	= mxGetField(M_, 0,"params" );
 		double * dparams = (double *) mxGetData(mxFldp);
-		int npar = (int)mxGetN(mxFldp);
+		int npar = (int)mxGetM(mxFldp);
 		Vector * modParams =  new Vector(dparams, npar);
+#ifdef DEBUG		
+    mexPrintf("k_ord_perturbation: nParams=%d .\n",npar);  
+    for (int i = 0; i < npar; i++) {
+        mexPrintf("k_ord_perturbation: dParams[%d]= %g.\n", i, dparams+i*(sizeof(double)) );  }
+    for (int i = 0; i < npar; i++) {
+        mexPrintf("k_ord_perturbation: Params[%d]= %g.\n", i, (*modParams)[i]);  }
+
+#endif		        
+		const mxArray* const mxParFldp  = mxGetField(M_, 0,"params" );
+        Vector params_vec((const double*)mxGetPr(mxParFldp), npar);
+#ifdef DEBUG		
+	for (int i = 0; i < npar; i++) {
+        mexPrintf("k_ord_perturbation: params_vec[%d]= %g.\n", i, params_vec[i] );   }
+
+#endif		        
+
 
 		mxFldp 	= mxGetField(M_, 0,"Sigma_e" );
 		dparams = (double *) mxGetData(mxFldp);
@@ -122,7 +136,7 @@ extern "C" {
 		mxFldp 	= mxGetField(oo_, 0,"steady_state" ); // use in order of declaration
 //		mxFldp 	= mxGetField(dr, 0,"ys" );  // and not in order of dr.order_var
 		dparams = (double *) mxGetData(mxFldp);
-		npar = (int)mxGetN(mxFldp);
+		npar = (int)mxGetM(mxFldp);
 		Vector * ySteady =  new Vector(dparams, npar);
 
 
@@ -150,14 +164,31 @@ extern "C" {
 		const int nMax_lag = (int)mxGetScalar(mxFldp);
 
         const int jcols = nExog+nEndo+nsPred+nsForw; // Num of Jacobian columns
-        
-		mxFldp 	= mxGetField(M_, 0,"endo_names" );
-		const char ** endoNames = (const char **) mxGetData(mxFldp);
-		const int nendo = (int)mxGetN(mxFldp);
+        mexPrintf("k_order_perturbation: jcols= %d .\n", jcols);
 
-		mxFldp 	= mxGetField(M_, 0,"exo_names" );
-		const char ** exoNames = (const char **) mxGetData(mxFldp);
-		const int nexo = (int)mxGetN(mxFldp);
+        mxFldp= mxGetField(M_, 0,"endo_names" );
+        mexPrintf("k_order_perturbation: Get nendo .\n");
+        const int nendo = (int)mxGetM(mxFldp);
+        const int widthEndo = (int)mxGetN(mxFldp);
+        const char**  endoNamesMX= DynareMxArrayToString( mxFldp,nendo,widthEndo);
+
+#ifdef DEBUG		
+        for (int i = 0; i < nEndo; i++) {
+            mexPrintf("k_ord_perturbation: EndoNameList[%d][0]= %s.\n", i, endoNamesMX[i] );
+        }
+#endif	     
+        mxFldp 	= mxGetField(M_, 0,"exo_names" );
+		const int nexo = (int)mxGetM(mxFldp);
+		const int widthExog = (int)mxGetN(mxFldp);
+        const char**  exoNamesMX= DynareMxArrayToString( mxFldp,nexo,widthExog);
+        
+#ifdef DEBUG		
+        for (int i = 0; i < nexo; i++) {
+            mexPrintf("k_ord_perturbation: ExoNameList[%d][0]= %s.\n", i, exoNamesMX[i] );
+        }
+//        mexPrintf("k_ord_perturbation:   endoNamesAr2Str=%s   endoNamesCharGetStr=%s.\n"
+//                ,  endoNamesStr,endoNamesCharStr );
+#endif	     
 /******
 		mxFldp 	= mxGetField(M_, 0,"param_names" );
 		const char ** paramNames = (char **) mxGetData(mxFldp);
@@ -169,8 +200,16 @@ extern "C" {
 		}
 
 #ifdef DEBUG		
-		mexPrintf("MexPrintf 2: check_flag = %d ,  fName = %s .\n", check_flag,fName);
-		mexPrintf("MexPrintf 2: nEndo = %d ,  nExo = %d .\n", nEndo,nExog);
+	for (int i = 0; i < nEndo; i++) {
+        mexPrintf("k_ord_perturbation: EndoNameList[%d]= %s.\n", i, endoNamesMX[i] );   }
+	for (int i = 0; i < nPar; i++) {
+        mexPrintf("k_ord_perturbation: params_vec[%d]= %g.\n", i, params_vec[i] );   }
+    for (int i = 0; i < nPar; i++) {
+        mexPrintf("k_ord_perturbation: Params[%d]= %g.\n", i, (*modParams)[i]);  }
+	for (int i = 0; i < nendo; i++) {
+        mexPrintf("k_ord_perturbation: ysteady[%d]= %g.\n", i, (*ySteady)[i]);  }
+
+		mexPrintf("k_order_perturbation: nEndo = %d ,  nExo = %d .\n", nEndo,nExog);
 #endif		
 		/* Fetch time index */
 		//		int it_ = (int) mxGetScalar(prhs[3]) - 1;
@@ -185,12 +224,16 @@ extern "C" {
 			std::string jName(fName); //params.basename);
 			jName += ".jnl";
 			Journal journal(jName.c_str());
-			
+#ifdef DEBUG		
+		mexPrintf("k_order_perturbation: Calling dynamicDLL constructor.\n");
+#endif				
 			//			DynamicFn * pDynamicFn = loadModelDynamicDLL (fname);
 			DynamicModelDLL dynamicDLL(fName, jcols, nMax_lag, nExog);
-			
+#ifdef DEBUG		
+		mexPrintf("k_order_perturbation: Calling dynare constructor.\n");
+#endif			
 			// make KordpDynare object
-			KordpDynare dynare(endoNames,  nEndo, exoNames,  nExog, nPar, // paramNames,
+			KordpDynare dynare(endoNamesMX,  nEndo, exoNamesMX,  nExog, nPar, // paramNames,
    			   ySteady, vCov, modParams, nStat, nPred, nForw, nBoth,
 			   nSteps, kOrder, journal, dynamicDLL, sstol);
     /************			
@@ -205,14 +248,23 @@ extern "C" {
     ****************/			
 			try {
 				// intiate tensor library
-				tls.init(dynare.order(),
+#ifdef DEBUG		
+		mexPrintf("k_order_perturbation: Call tls init\n");
+#endif
+                tls.init(dynare.order(),
 					dynare.nstat()+2*dynare.npred()+3*dynare.nboth()+
 					2*dynare.nforw()+dynare.nexog());
                 
 				// construct main K-order approximation class
 //				FistOrderApproximation app(dynare, journal, nSteps);
+#ifdef DEBUG		
+		mexPrintf("k_order_perturbation: Call Approximation constructor \n");
+#endif
 				Approximation app(dynare, journal, nSteps);
                 // run stochastic steady 
+#ifdef DEBUG		
+		mexPrintf("k_order_perturbation: Calling walkStochSteady.\n");
+#endif			
                 app.walkStochSteady();		
 
 			} catch (const KordException& e) {
@@ -287,6 +339,12 @@ extern "C" {
 			e.print();
 			return;// 255;
         }
+
+		// bones for future developement of the output.
+
+#ifdef DEBUG		
+		mexPrintf("k_order_perturbation: Filling outputs.\n");
+#endif			
 			
 			double  *dgy, *dgu, *ysteady;
 			int nb_row_x;
@@ -327,10 +385,95 @@ extern "C" {
 //		delete vCov;
 //		delete ySteady;
     };
-		
-// Load  <model>_Dyamic DLL );
+
 }; // end of extern C
 
+//////////////////////////////////////////////////////
+// Convert Matlab Dynare endo and exo names array to C type array of string pointers
+// Poblem is that Matlab mx function returns a long string concatenated by columns rather than rows
+// hence a rather low level approach is needed
+///////////////////////////////////////////////////////
+const char ** DynareMxArrayToString(const mxArray * mxFldp,const int len,const int width )
+{
+//mexPrintf("start DynareMxArrayToString: ccall mxArrayToString string \n");
+            char * cNamesCharStr= mxArrayToString(mxFldp);
+//            char * cNamesCharStr= "mPceWRkdnlggYPyd          yp__ A          __oo            oobb            bbss            ss    ";//mxArrayToString(mxFldp);
+
+			const char ** ret = DynareMxArrayToString(cNamesCharStr,len, width );
+/**
+			char cNamesMX[len][width+1] ;//
+#ifdef DEBUG
+mexPrintf("loop DynareMxArrayToString cNamesCharStr = %s \n", cNamesCharStr);
+#endif
+            for (int i=0;i<width;i++){
+                for (int j=0;j<len;j++){
+//            mexPrintf("k_ord_perturbation: GetEndoNameListP= %s.\n",  endoNamesP[i] );
+                  //  endoNamesS[i*(widthEndo+1)]=&(endoNamesP[i]);
+     			// Allow alphanumeric and underscores "_" only:
+                    if (isalnum(cNamesCharStr[j+i*len])||('_'==cNamesCharStr[j+i*len])){
+                        cNamesMX[j][i]=cNamesCharStr[j+i*len];
+                    }
+                    else cNamesMX[j][i]='\0';
+                }
+            }
+            const char ** ret= (const char **)mxCalloc (len, sizeof(char*));
+            for (int j=0;j<len;j++){
+				cNamesMX[j][width]='\0';
+#ifdef DEBUG
+//				mexPrintf("String [%d]= %s \n", j, cNamesMX[j]);
+#endif
+                char * token= (char*) mxCalloc ( strlen(cNamesMX[j])+1,sizeof(char));
+                strcpy (token, cNamesMX[j]);
+				ret[j]=token;
+#ifdef DEBUG
+				mexPrintf("ret [%d]= %s \n", j, ret[j]);
+#endif
+			}
+**/
+			return ret;
+}
+
+const char ** DynareMxArrayToString(const char * cNamesCharStr,const int len,const int width )
+{
+//mexPrintf("start DynareMxArrayToString: ccall mxArrayToString string \n");
+//            char * cNamesCharStr= mxArrayToString(mxFldp);
+//            char * cNamesCharStr= "mPceWRkdnlggYPyd          yp__ A          __oo            oobb            bbss            ss    ";//mxArrayToString(mxFldp);
+             char cNamesMX[len][width+1] ;//
+#ifdef DEBUG
+mexPrintf("loop DynareMxArrayToString cNamesCharStr = %s \n", cNamesCharStr);
+#endif
+            for (int i=0;i<width;i++){
+                for (int j=0;j<len;j++){
+//            mexPrintf("k_ord_perturbation: GetEndoNameListP= %s.\n",  endoNamesP[i] );
+                  //  endoNamesS[i*(widthEndo+1)]=&(endoNamesP[i]);
+     			// Allow alphanumeric and underscores "_" only:
+                    if (isalnum(cNamesCharStr[j+i*len])||('_'==cNamesCharStr[j+i*len])){
+                        cNamesMX[j][i]=cNamesCharStr[j+i*len];
+                    }
+                    else cNamesMX[j][i]='\0';
+                }
+            }
+            const char ** ret= (const char **)mxCalloc (len, sizeof(char*));
+            for (int j=0;j<len;j++){
+				cNamesMX[j][width]='\0';
+#ifdef DEBUG
+//				mexPrintf("String [%d]= %s \n", j, cNamesMX[j]);
+#endif
+                char * token= (char*) mxCalloc ( strlen(cNamesMX[j])+1,sizeof(char));
+                strcpy (token, cNamesMX[j]);
+				ret[j]=token;
+#ifdef DEBUG
+				mexPrintf("ret [%d]= %s \n", j, ret[j]);
+#endif
+			}
+			return ret;
+}
+
+
+/***********************************
+* Members of DynamicModelDLL for handling loading and calling 
+* <model>_dynamic () function
+**************************************/
 DynamicModelDLL::DynamicModelDLL(const char * modName, const int jcols, 
 								 const int nMax_lag, const int nExog)
 	:jcols( jcols), nMax_lag(nMax_lag), nExog(nExog)
@@ -342,8 +485,9 @@ DynamicModelDLL::DynamicModelDLL(const char * modName, const int jcols,
 	//		string sFname(fname);
 	//		string sExt("_.dll");
 //	mexPrintf("MexPrintf: Call exp  %d.\n", y[0]);
+#ifdef DEBUG
 		mexPrintf("MexPrintf: Call Load run DLL %s .\n", fName);
-	
+#endif	
 	try {
 		//			typedef void * (__stdcall *DynamicFn)();
 		
@@ -351,11 +495,13 @@ DynamicModelDLL::DynamicModelDLL(const char * modName, const int jcols,
 		
 		HINSTANCE dynamicHinstance;
 //		dynamicHinstance=::LoadLibraryEx(strcat(fNname,"_.dll"),NULL,DONT_RESOLVE_DLL_REFERENCES);//sExt); //"_.dll");
-		dynamicHinstance=::LoadLibrary(strcat(fName,"dynamic.dll"));//sExt); //"_.dll");
+		dynamicHinstance=::LoadLibrary(strcat(fName,"_dynamic.dll"));//sExt); //"_.dll");
 		if (dynamicHinstance==NULL)
 			throw 1; //alt: return;
 		//		(DynamicFn*)	typedef void * (__stdcall *DynamicFn)();
+#ifdef DEBUG
 		mexPrintf("MexPrintf: Call GetProcAddress  %s .\n", fName);
+#endif
 		Dynamic = (DynamicFn *) ::GetProcAddress(dynamicHinstance,"Dynamic");
         
 # else // __linux__
@@ -392,7 +538,9 @@ DynamicModelDLL::DynamicModelDLL(const char * modName, const int jcols,
 	}
 }
 
-			/*
+			/***************************** 
+			* bones for future alternative calls when model dyamic DLL is not available
+			***********************
 			try {
 			
 			  // Call	int mexCallMATLAB(int nlhs, mxArray *plhs[], int nrhs,
@@ -447,7 +595,7 @@ void DynamicModelDLL::eval(const Vector&y, const TwoDMatrix&x, const  Vector* mo
 		}
         if (g1!=NULL){
             if (g1->nrows()!=length){ // dummy
-                delete g2;
+                delete g1;
                 g1=	new TwoDMatrix( length, jcols); // and get a new one
             }
             dg1= const_cast<double*>(g1->base());
@@ -459,12 +607,21 @@ void DynamicModelDLL::eval(const Vector&y, const TwoDMatrix&x, const  Vector* mo
             }
             dg2= const_cast<double*>(g2->base());
         }
-
         dresidual=const_cast<double*>(residual.base());
         double *dy=const_cast<double*>(y.base());
         double *dx=const_cast<double*>(x.base());
         double *dbParams=const_cast<double*>(modParams->base());
-        
+#ifdef DEBUG		
+    	mexPrintf(" try eval Dynamic with ne g1: cols=%d , rows=%d\n"
+            , g1->ncols(),g1->nrows());
+        for (int i = 0; i < modParams->length(); i++) {
+            mexPrintf("k_ord_perturbation: Params[%d]= %g.\n", i, (*modParams)[i]);  }
+        for (int i = 0; i < length; i++) {
+            mexPrintf("k_ord_perturbation: Params[%d]= %g.\n", i, y[i]);} 
+		mexPrintf("k_order_perturbation: call <model> Dynamic dParams= %d ,  , dy = %d dx = %d .\n"
+            ,dbParams[0],dy[0],dx[0]);
+
+#endif        
         try{
             Dynamic(dy, dx, nExog, dbParams, it_, dresidual, dg1, dg2);
         }catch (...){
@@ -494,3 +651,4 @@ void DynamicModelDLL::eval(const Vector&y, const Vector&x, const Vector * modPar
 
 		eval(y, mx, modParams, nMax_lag, residual, g1, g2);	
 };
+

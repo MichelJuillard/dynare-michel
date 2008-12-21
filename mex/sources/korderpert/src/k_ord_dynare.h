@@ -23,12 +23,12 @@
 #include "decision_rule.h"
 #include "dynamic_model.h"
 
+#include "exception.h"
 #include "dynare_exception.h"
 #include "fs_tensor.h"
 #include "SylvException.h"
 #include "tl_exception.h"
 #include "kord_exception.h"
-#include "exception.h"
 #include "nlsolve.h"
 #include "approximation.h"
 #include "k_order_perturbation.h"
@@ -62,6 +62,8 @@ class KordpDynare;
 ***********/
 
 
+
+/*////////////////////////////////////////////*/
 // instantiations of pure abstract class NameList in dynamic_model.h:
 /*////////////////////////////////////////////*/
 class DynareNameList : public NameList {
@@ -116,9 +118,9 @@ friend class DynamicModelDLL;
 	const int nForw;
 	const int nExog;
 	const int nPar;
-	const int nYs;
-	const int nYss;
-	const int nY;
+	const int nYs; // ={npred + nboth ; }
+	const int nYss; // nyss ={ nboth + nforw ; }
+	const int nY;  // = num_endo={ nstat + npred + nboth + nforw ; }
 	const int nSteps;
 	const int nOrder;
 	Journal& journal;
@@ -152,7 +154,7 @@ public:
 	{return nForw;}
 	int nexog() const
 	{return nExog;}
-	int nys() const
+	int nys() const 
 	{return nYs;}
 	int nyss() const
 	{return nYss;}
@@ -168,7 +170,7 @@ public:
 	{return *dsnl;}
 	const NameList& getExogNames() const
 	{return *denl;}
-	TwoDMatrix& getVcov() const
+	const TwoDMatrix& getVcov() const
 	{return *vCov;}
 	Vector& getParams()
 	{return *params;}

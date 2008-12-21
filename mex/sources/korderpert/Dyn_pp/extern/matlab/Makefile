@@ -1,11 +1,19 @@
 CC = gcc
+DEBUG = yes
+MATLAB =1
+#CC_INCLUDE_PATH=$CC_INCLUDE_PATH -I'c:/"Program Files"/MATLAB_SV71/extern/include'
 CC_FLAGS = -Wall -I../../sylv/cc -I../../tl/cc -I../../kord -I../../integ/cc \
-	 $(CC_INCLUDE_PATH)
+	 $(CC_INCLUDE_PATH) -Ic:/"Program Files"/MATLAB_SV71/extern/include
 
-LDFLAGS = -llapack -lcblas -lf77blas -latlas -lg2c -lstdc++
+#LDFLAGS = -llapack -lcblas -lf77blas -latlas -lg2c -lstdc++
+
+LDFLAGS = -Wl,-L"c:/Program Files"/MATLAB_SV71/extern/lib/win32/microsoft/ \
+	-Wl,-llibmex -Wl,-llibmx  -Wl,-llibmwlapack -Wl,-llibdflapack \
+	-lg2c -lmingw32  -lstdc++ 
 
 ifeq ($(DEBUG),yes)
-	CC_FLAGS := $(CC_FLAGS) -g -DTL_DEBUG=2
+#	CC_FLAGS := $(CC_FLAGS) -g -DTL_DEBUG=2
+    CC_FLAGS := $(CC_FLAGS) -g -DMATLAB -DPOSIX_THREADS
 else
 	CC_FLAGS := $(CC_FLAGS) -O3 -DPOSIX_THREADS
 endif

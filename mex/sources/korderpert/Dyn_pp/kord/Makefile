@@ -1,19 +1,25 @@
 # $Id: Makefile 843 2006-07-28 08:54:19Z tamas $
 # Copyright 2004, Ondra Kamenik
 
-LD_LIBS := -llapack -lcblas -lf77blas -latlas -lg2c
+#LD_LIBS := -llapack -lcblas -lf77blas -latlas -lg2c
 CC_FLAGS := -Wall -I../tl/cc -I../sylv/cc -I../integ/cc \
-        $(CC_INCLUDE_PATH)
+        $(CC_INCLUDE_PATH) -Ic:/"Program Files"/MATLAB_SV71/extern/include
 
 #	-I/cygdrive/f/MinGW/include \
 #	-I/usr/local/atlas/include -I/usr/local/atlas/include/atlas \
 #	-I/cygdrive/f/Pthreads/Pre-built.2/include 
 
+LDFLAGS = -Wl,-L"c:/Program Files"/MATLAB_SV71/extern/lib/win32/microsoft/ \
+	-Wl,-llibmex -Wl,-llibmx  -Wl,-llibmwlapack -Wl,-llibdflapack \
+	-lg2c -lmingw32  -lstdc++ 
+
+LD_LIBS=$(LDFLAGS)
 
 ifeq ($(DEBUG),yes)
-	CC_FLAGS := $(CC_FLAGS) -g -DTL_DEBUG=2
+#	CC_FLAGS := $(CC_FLAGS) -g -DTL_DEBUG=2
+    CC_FLAGS := $(CC_FLAGS) -g -DMATLAB -DPOSIX_THREADS
 else
-	CC_FLAGS := $(CC_FLAGS) -O2 -DPOSIX_THREADS
+	CC_FLAGS := $(CC_FLAGS) -O3 -DPOSIX_THREADS
 endif
 
 ifeq ($(OS),Windows_NT)
