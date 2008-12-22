@@ -54,7 +54,7 @@ if exist('OCTAVE_VERSION')
 end
 
 % detect if MEX files are present; if not, use alternative M-files
-dynareroot = dynare_config();
+dynareroot = dynare_config;
 
 if nargin < 1
   error('DYNARE: you must provide the name of the MOD file in argument')
