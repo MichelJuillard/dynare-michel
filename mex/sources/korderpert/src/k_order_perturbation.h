@@ -68,7 +68,8 @@ class DynamicModelDLL
 {
 private:
 	DynamicFn * Dynamic;// pointer to the Dynamic function in DLL
-	const int jcols;  // tot num vars = Num of Jacobian columns
+	const int length;  // tot num vars = Num of Jacobian rows
+	const int jcols;  // tot num var t-1, t and t+1 instances + exogs = Num of Jacobian columns
 	const int nMax_lag; // no of lags
 	const int nExog; // no of exogenous
 #ifdef WINDOWS
@@ -80,8 +81,8 @@ private:
 
 public:
 	// construct and load Dynamic model DLL 
-	DynamicModelDLL(const char* fname, const int jcols, const int nMax_lag, 
-		const int nExog);
+	DynamicModelDLL(const char* fname, const int length,const int jcols, 
+		const int nMax_lag, const int nExog);
 	virtual ~DynamicModelDLL(){close();};
 	//	DynamicFn get(){return DynamicDLLfunc;};
 	//    void 

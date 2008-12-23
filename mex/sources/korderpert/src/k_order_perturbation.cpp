@@ -133,11 +133,12 @@ extern "C" {
 		TwoDMatrix * vCov =  new TwoDMatrix(npar, npar, dparams);
 
 
-		mxFldp 	= mxGetField(oo_, 0,"steady_state" ); // use in order of declaration
+//		mxFldp 	= mxGetField(oo_, 0,"steady_state" ); // use in order of declaration
 //		mxFldp 	= mxGetField(dr, 0,"ys" );  // and not in order of dr.order_var
+		mxFldp 	= mxGetField(oo_, 0,"dyn_ys" );  // extended ys
 		dparams = (double *) mxGetData(mxFldp);
-		npar = (int)mxGetM(mxFldp);
-		Vector * ySteady =  new Vector(dparams, npar);
+		const int nSteady = (int)mxGetM(mxFldp);
+		Vector * ySteady =  new Vector(dparams, nSteady);
 
 
 		mxFldp = mxGetField(dr, 0,"nstatic" );
@@ -166,7 +167,7 @@ extern "C" {
         const int jcols = nExog+nEndo+nsPred+nsForw; // Num of Jacobian columns
         mexPrintf("k_order_perturbation: jcols= %d .\n", jcols);
 
-        mxFldp= mxGetField(M_, 0,"endo_names" );
+        mxFldp= mxGetField(M_, 0,"var_order_endo_names" );
         mexPrintf("k_order_perturbation: Get nendo .\n");
         const int nendo = (int)mxGetM(mxFldp);
         const int widthEndo = (int)mxGetN(mxFldp);
@@ -206,7 +207,7 @@ extern "C" {
         mexPrintf("k_ord_perturbation: params_vec[%d]= %g.\n", i, params_vec[i] );   }
     for (int i = 0; i < nPar; i++) {
         mexPrintf("k_ord_perturbation: Params[%d]= %g.\n", i, (*modParams)[i]);  }
-	for (int i = 0; i < nendo; i++) {
+	for (int i = 0; i < nSteady; i++) {
         mexPrintf("k_ord_perturbation: ysteady[%d]= %g.\n", i, (*ySteady)[i]);  }
 
 		mexPrintf("k_order_perturbation: nEndo = %d ,  nExo = %d .\n", nEndo,nExog);
@@ -228,7 +229,7 @@ extern "C" {
 		mexPrintf("k_order_perturbation: Calling dynamicDLL constructor.\n");
 #endif				
 			//			DynamicFn * pDynamicFn = loadModelDynamicDLL (fname);
-			DynamicModelDLL dynamicDLL(fName, jcols, nMax_lag, nExog);
+			DynamicModelDLL dynamicDLL(fName,nEndo, jcols, nMax_lag, nExog);
 #ifdef DEBUG		
 		mexPrintf("k_order_perturbation: Calling dynare constructor.\n");
 #endif			
@@ -362,7 +363,7 @@ extern "C" {
 			if (nlhs >= 2)
 			{
 				/* Set the output pointer to the output matrix gy. */
-				plhs[1] = mxCreateDoubleMatrix(nEndo, nEndo, mxREAL);
+				plhs[1] = mxCreateDoubleMatrix(nEndo, jcols, mxREAL);
 //				plhs[1] = (double*)(gy->getData())->base();
 				/* Create a C pointer to a copy of the output matrix gy. */
 				dgy = mxGetPr(plhs[1]);
@@ -474,9 +475,9 @@ mexPrintf("loop DynareMxArrayToString cNamesCharStr = %s \n", cNamesCharStr);
 * Members of DynamicModelDLL for handling loading and calling 
 * <model>_dynamic () function
 **************************************/
-DynamicModelDLL::DynamicModelDLL(const char * modName, const int jcols, 
-								 const int nMax_lag, const int nExog)
-	:jcols( jcols), nMax_lag(nMax_lag), nExog(nExog)
+DynamicModelDLL::DynamicModelDLL(const char * modName, const int y_length, const int j_cols, 
+								 const int n_max_lag, const int n_exog)
+	: length(y_length),jcols( j_cols), nMax_lag(n_max_lag), nExog(n_exog)
 {
     char fName[MAX_MODEL_NAME];
     strcpy(fName,modName);
@@ -586,17 +587,23 @@ void DynamicModelDLL::eval(const Vector&y, const TwoDMatrix&x, const  Vector* mo
 //		int it_, double *residual, double *g1, double *g2)
 //        const double *dy, *dx, dbParams;
         double  *dresidual, *dg1=NULL, *dg2=NULL; 
-        int length=y.length();
-
+        //int length=y.length(); // not!
+		if ((jcols-nExog)!=y.length()){
+			// throw DLL Error
+			mexPrintf(" DLL Error: (jcols-nExog)!=ys.length() \n");
+			return;
+		}
         if (residual.length()<length){ // dummy or insufficient
             Vector*tempv= new Vector(length );
 			residual=*tempv;
             delete tempv;
+			residual.zeros();
 		}
         if (g1!=NULL){
             if (g1->nrows()!=length){ // dummy
                 delete g1;
                 g1=	new TwoDMatrix( length, jcols); // and get a new one
+				g1->zeros();
             }
             dg1= const_cast<double*>(g1->base());
         }
@@ -604,6 +611,7 @@ void DynamicModelDLL::eval(const Vector&y, const TwoDMatrix&x, const  Vector* mo
             if (g2->nrows()!=length){ // dummy 
                 delete g2;
                 g2=	new TwoDMatrix( length, jcols*jcols);// and get a new one
+				g2->zeros();
             }
             dg2= const_cast<double*>(g2->base());
         }
@@ -647,7 +655,8 @@ void DynamicModelDLL::eval(const Vector&y, const Vector&x, const Vector * modPar
 		* when calling <model>_dynamic(z,x,params,it_) x must be equal to
 		* zeros(M_.maximum_lag+1,M_.exo_nbr)
 		**/
-		const TwoDMatrix&mx = *(new const TwoDMatrix(nMax_lag+1, nExog));  
+		TwoDMatrix&mx = *(new TwoDMatrix(nMax_lag+1, nExog));
+		mx.zeros(); // initialise shocks to 0s
 
 		eval(y, mx, modParams, nMax_lag, residual, g1, g2);	
 };

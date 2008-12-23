@@ -58,17 +58,22 @@ int main(int argc, char* argv[])
 #endif		        
 	
 	double d2Dparams[4] = { //(double *) mxGetData(mxFldp);
-		0.1960e-3, 0.0,
+			0.1960e-3, 0.0,
 			0.0, 0.0250e-3};
 		npar = 2;//(int)mxGetN(mxFldp);
 		TwoDMatrix * vCov =  new TwoDMatrix(npar, npar, (d2Dparams));
 		
-		double dYSparams [16]= { // mxGetData(mxFldp);
-			1.0110, 2.2582, 0.4477, 1.0000, 4.5959, 1.0212, 5.8012, 0.8494,
-				0.1872, 0.8604, 1.0030, 1.0080, 1.0000, 1.0000, 0.5808, 1.0030
+		double dYSparams [29]= { // mxGetData(mxFldp);
+			1.0110, 2.2582, 5.8012, 1.0000, 1.0000, 0.5808, 1.0110, 2.2582,
+			0.4477, 1.0000, 4.5959, 1.0212, 5.8012, 0.8494, 0.1872, 0.8604,
+			1.0030, 1.0080, 1.0000, 1.0000, 0.5808, 1.0030, 1.0110, 2.2582,
+		    0.4477, 1.0000, 0.1872, 2.2582, 0.4477
 		};
-		int nvar = 16;//(int)mxGetM(mxFldp);
-		Vector * ySteady =  new Vector(dYSparams, nvar);
+//			1.0110, 2.2582, 0.4477, 1.0000, 4.5959, 1.0212, 5.8012, 0.8494,
+//				0.1872, 0.8604, 1.0030, 1.0080, 1.0000, 1.0000, 0.5808, 1.0030
+//		};
+		const int nSteady = 29;//16 (int)mxGetM(mxFldp);
+		Vector * ySteady =  new Vector(dYSparams, nSteady);
 		
 		//mxFldp = mxGetField(dr, 0,"nstatic" );
 		const int nStat = 7;//(int)mxGetScalar(mxFldp);
@@ -131,7 +136,7 @@ int main(int argc, char* argv[])
 		//        mexPrintf("k_ord_perturbation: params_vec[%d]= %g.\n", i, params_vec[i] );   }
 		for (int i = 0; i < nPar; i++) {
 			mexPrintf("k_ord_perturbation: Params[%d]= %g.\n", i, (*modParams)[i]);  }
-		for (int i = 0; i < nendo; i++) {
+		for (int i = 0; i < nSteady; i++) {
 			mexPrintf("k_ord_perturbation: ysteady[%d]= %g.\n", i, (*ySteady)[i]);  }
 		
 		mexPrintf("k_order_perturbation: nEndo = %d ,  nExo = %d .\n", nEndo,nExog);
@@ -153,7 +158,7 @@ int main(int argc, char* argv[])
 			mexPrintf("k_order_perturbation: Calling dynamicDLL constructor.\n");
 #endif				
 			//			DynamicFn * pDynamicFn = loadModelDynamicDLL (fname);
-			DynamicModelDLL dynamicDLL(fName, jcols, nMax_lag, nExog);
+			DynamicModelDLL dynamicDLL(fName, nEndo, jcols, nMax_lag, nExog);
 #ifdef DEBUG		
 			mexPrintf("k_order_perturbation: Calling dynare constructor.\n");
 #endif			
@@ -249,7 +254,7 @@ int main(int argc, char* argv[])
 		if (nlhs >= 2)
 		{
 			/* Set the output pointer to the output matrix gy. */
-			plhs[1] = mxCreateDoubleMatrix(nEndo, nEndo, mxREAL);
+			plhs[1] = mxCreateDoubleMatrix(nEndo, jcols, mxREAL);
 			//				plhs[1] = (double*)(gy->getData())->base();
 			/* Create a C pointer to a copy of the output matrix gy. */
 			dgy = mxGetPr(plhs[1]);
@@ -259,7 +264,7 @@ int main(int argc, char* argv[])
 		if (nlhs >= 3)
 		{
 			/* Set the output pointer to the output matrix gu. */
-			plhs[2] = mxCreateDoubleMatrix(nExog, nExog, mxREAL);
+			plhs[2] = mxCreateDoubleMatrix(nEndo, nExog, mxREAL);
 			//				plhs[2] = (double*)((gu->getData())->base());
 			/* Create a C pointer to a copy of the output matrix gu. */
 			dgu = mxGetPr(plhs[2]);
