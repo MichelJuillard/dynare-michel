@@ -222,7 +222,7 @@ void KordpDynare::calcDerivatives(const Vector& yy, const Vector& xx)
 				params, //int it_, 
 				out, g1, NULL);
 #ifdef DEBUG
-	mexPrintf("k_order_dynaare.cpp: populate FSSparseTensor in calcDerivatives: cols=%d , rows=%d\n"
+	mexPrintf("k_ord_dynare.cpp: populate FSSparseTensor in calcDerivatives: cols=%d , rows=%d\n"
         , g1->ncols(),g1->nrows());
 #endif
 
@@ -231,8 +231,8 @@ void KordpDynare::calcDerivatives(const Vector& yy, const Vector& xx)
         FSSparseTensor mdTi=*(new FSSparseTensor (1, g1->ncols(),g1->nrows())); 
         for (int i = 0; i<g1->ncols(); i++){
                 for (int j = 0; j<g1->nrows(); j++){
-                    if (g1->get(i,j)!=0.0) // populate sparse if not zero
-                        mdTi.insert(i, j,g1->get(i,j));
+                    if (g1->get(j,i)!=0.0) // populate sparse if not zero
+                        mdTi.insert(i, j,g1->get(j,i));
                 }
         }
         // md container
@@ -251,8 +251,10 @@ void KordpDynare::calcDerivatives(const Vector& yy, ogu::Jacobian& jacob)
 
 	//double *g1, *g2;
 	TwoDMatrix * jj= &jacob;
-    Vector& out= *(new Vector(nY));
-    Vector& xx= *(new Vector(nExog));
+    Vector& out= *(new Vector(nY)); 
+	out.zeros();
+    Vector& xx= *(new Vector(nExog)); 
+	xx.zeros();
 	dynamicDLL.eval( yy,  xx, //int nb_row_x, 
 				params, //int it_, 
 				out, jj, NULL);
