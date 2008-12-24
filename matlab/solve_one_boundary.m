@@ -42,7 +42,7 @@ function y = solve_one_boundary(fname, y, x, params, y_index_eq, nze, periods, i
 %   y                  [matrix]         All endogenous variables of the model      
 %  
 % ALGORITHM
-%   Newton with LU or GMRES or BicGstab
+%   Newton with LU or GMRES or BicGstab for dynamic block
 %    
 % SPECIAL REQUIREMENTS
 %   none.
@@ -90,9 +90,9 @@ function y = solve_one_boundary(fname, y, x, params, y_index_eq, nze, periods, i
        g1=spalloc( Blck_size, Blck_size, nze);
        while ~(cvg==1 | iter>maxit_),
            if(is_dynamic)
-             [r, g1, g2, g3, b] = feval(fname, y, x, params, it_, 0, g1, g2, g3);
+             [r, g1, g2, g3] = feval(fname, y, x, params, it_, 0);
            else
-             [r, g1, g2, g3, b] = feval(fname, y, x, params, 0);
+             [r, g1, g2, g3] = feval(fname, y, x, params, 0);
            end;
            if(~isreal(r))
               max_res=(-(max(max(abs(r))))^2)^0.5;
@@ -204,8 +204,10 @@ function y = solve_one_boundary(fname, y, x, params, y_index_eq, nze, periods, i
                 f = 0.5*r'*r;
                 p = -g1\r ;
                 [y,f,r,check]=lnsrch1(y,f,g,p,stpmax,fname,nn,y_index_eq,x, params, 0);
+                dx = ya - y(y_index_eq);
              elseif(~is_dynamic & options_.solve_algo==3)
                  [yn,info] = csolve(@local_fname, y(y_index_eq),@local_fname,1e-6,500, x, params, y, y_index_eq, fname, 1);
+                 dx = ya - yn;
                  y(y_index_eq) = yn;
              elseif((simulation_method==0 & is_dynamic) | (~is_dynamic & options_.solve_algo==1)),
                 dx =  g1\r;

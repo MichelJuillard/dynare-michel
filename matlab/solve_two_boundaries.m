@@ -72,9 +72,12 @@ function y = solve_two_boundaries(fname, y, x, params, y_index, nze, periods, y_
   g1=spalloc( Blck_size*periods, Jacobian_Size, nze*periods);
   reduced = 0;
   while ~(cvg==1 | iter>maxit_),
-    [r, g1, g2, g3, b]=feval(fname, y, x, params, periods, 0, g1, g2, g3, y_kmin, Blck_size);
+    [r, g1, g2, g3, b]=feval(fname, y, x, params, periods, 0, y_kmin, Blck_size);
     g1a=g1(:, y_kmin*Blck_size+1:(periods+y_kmin)*Blck_size);
-    b = b' -g1(:, 1+(y_kmin-y_kmin_l)*Blck_size:y_kmin*Blck_size)*reshape(y(1+y_kmin-y_kmin_l:y_kmin,y_index)',1,y_kmin_l*Blck_size)'-g1(:, (periods+y_kmin)*Blck_size+1:(periods+y_kmin+y_kmax_l)*Blck_size)*reshape(y(periods+y_kmin+1:periods+y_kmin+y_kmax_l,y_index)',1,y_kmax_l*Blck_size)';
+    %disp(['size(g1)=' int2str(size(g1))]);
+    %disp(['g1(:,' int2str(1:y_kmin_l*Blck_size) ')']);
+    %disp(['g1(:,' int2str((periods+y_kmin_l)*Blck_size+1:(periods+y_kmin_l+y_kmax_l)*Blck_size) ')']);
+    b = b' -g1(:, 1:y_kmin_l*Blck_size)*reshape(y(1+y_kmin-y_kmin_l:y_kmin,y_index)',1,y_kmin_l*Blck_size)'-g1(:, (periods+y_kmin_l)*Blck_size+1:(periods+y_kmin_l+y_kmax_l)*Blck_size)*reshape(y(periods+y_kmin+1:periods+y_kmin+y_kmax_l,y_index)',1,y_kmax_l*Blck_size)';
     if(~isreal(r))
       max_res=(-(max(max(abs(r))))^2)^0.5;
     else
