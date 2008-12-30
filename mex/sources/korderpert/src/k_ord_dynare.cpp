@@ -215,6 +215,7 @@ void KordpDynare::calcDerivatives(const Vector& yy, const Vector& xx)
     TwoDMatrix *g1;//, *g2;
 	g1=new TwoDMatrix(0,0); // just a signal: generate something so g1 (and out) are not null
     Vector& out= *(new Vector(nY));
+	out.zeros();
 #ifdef DEBUG
 	mexPrintf("k_order_dynaare.cpp: Call eval in calcDerivatives\n");
 #endif
@@ -228,7 +229,7 @@ void KordpDynare::calcDerivatives(const Vector& yy, const Vector& xx)
 
    //    model derivatives FSSparseTensor instance for single order only 
     //(higher orders requires Symetry to insert in particular position.)
-        FSSparseTensor mdTi=*(new FSSparseTensor (1, g1->ncols(),g1->nrows())); 
+        FSSparseTensor &mdTi=*(new FSSparseTensor (1, g1->ncols(),g1->nrows())); 
         for (int i = 0; i<g1->ncols(); i++){
                 for (int j = 0; j<g1->nrows(); j++){
                     if (g1->get(j,i)!=0.0) // populate sparse if not zero
@@ -237,8 +238,9 @@ void KordpDynare::calcDerivatives(const Vector& yy, const Vector& xx)
         }
         // md container
 //        md=*(new TensorContainer<FSSparseTensor>(1)); 
+//		FSSparseTensor mdSTi(mdTi);
         md.clear();
-        md.insert(&mdTi);
+        md.insert(&mdTi);//(&mdTi);
 }
 
 
@@ -259,7 +261,7 @@ void KordpDynare::calcDerivatives(const Vector& yy, ogu::Jacobian& jacob)
 				params, //int it_, 
 				out, jj, NULL);
    //    model derivatives FSSparseTensor instance
-        FSSparseTensor mdTi=*(new FSSparseTensor (1, jj->ncols(),jj->nrows())); 
+        FSSparseTensor &mdTi=*(new FSSparseTensor (1, jj->ncols(),jj->nrows())); 
         for (int i = 0; i<jj->ncols(); i++){
                 for (int j = 0; j<jj->nrows(); j++){
                     if (jj->get(i,j)!=0.0) // populate sparse if not zero
