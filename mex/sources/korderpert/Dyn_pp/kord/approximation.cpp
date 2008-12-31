@@ -111,7 +111,7 @@ void Approximation::approxAtSteady()
 		FirstOrderDerivs<KOrder::fold> fo_ders(fo);
 		saveRuleDerivs(fo_ders);
 	}
-	check(0.0);
+	//check(0.0);
 }
 
 /*:8*/
@@ -182,7 +182,7 @@ void Approximation::walkStochSteady()
 		/*:13*/
 		;
 		
-		check(sigma_so_far+dsigma);
+		//check(sigma_so_far+dsigma);
 		sigma_so_far+= dsigma;
 	}
 	
