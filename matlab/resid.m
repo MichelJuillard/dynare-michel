@@ -75,7 +75,6 @@ function resid(period)
     end
     disp(['Residual for equation number ' int2str(i) ' is equal to ' num2str(z(i))])
   end  
-  
   for i = 1:2
     disp(' ')
   end

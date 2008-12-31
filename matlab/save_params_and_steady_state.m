@@ -52,5 +52,4 @@ function save_params_and_steady_state(filename)
   for i = 1:M_.exo_nbr
     stored_values.(deblank(M_.exo_names(i,:))) = oo_.exo_steady_state(i);
   end
-  
-  save(filename, 'stored_values');
+  save('-v6',filename, 'stored_values');
