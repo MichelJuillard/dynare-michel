@@ -14,16 +14,27 @@ NOTE: at the moment the comp.bat compiles also:
 k_order_test_main.cpp - exe test driver main function
 nlsolv.cpp - i.e. not covered by the lib make files.
 
-to create debug, POSIX THREAD and Matlab Lapack verion of k_ord_dynarelib.a
+to create a debug, POSIX THREAD and Matlab Lapack verion of k_ord_dynarelib.a
 k_ord_dynarelibML_PTRD_DB.a, 
 
-1) Compile and create dynarelib.a with MingW and MATLAB LAPACK:
-go to Dynare_pp/extern/matlab and run make
+1) use cygwin shell to compile and create k_ord_lib.a under Windows 
+with MingW and MATLAB LAPACK:
+
+go to Dynare_pp/extern/matlab assuming MATLAB is already defined with directory
+and in your cygwin shell set 
+
+>WINDOWS=1
+>DEBUG=1
+>export WINDOWS DEBUG
+
+and run 
+
+> make k_ord_lib.a
 
 NOTE: At the momment the library still uses integ files - 
-those will be removed once makefiles are comopleted
+those may be removed at a later stage
 
-2) move/copy dynarelib.a to root src and rename it to 
+2) move/copy k_ord_lib.a to the root src and rename it to 
 k_ord_dynarelibML_PTRD_DB.a
 
 Then:
