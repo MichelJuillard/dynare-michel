@@ -33,23 +33,21 @@ sylvcppsource := $(wildcard ../../sylv/cc/*.cpp)
 sylvhsource := $(wildcard ../../sylv/cc/*.h)
 sylvobjects := $(patsubst %.cpp, %.o, $(sylvcppsource))
 
-tlcwebsource := $(wildcard ../../tl/cc/*.cweb)
-tlcppsource := $(patsubst %.cweb,%.cpp,$(tlcwebsource))
-tlhwebsource := $(wildcard ../../tl/cc/*.hweb)
-tlhsource := $(patsubst %.hweb,%.h,$(tlhwebsource))
-tlobjects := $(patsubst %.cweb,%.o,$(tlcwebsource))
+tlcppsource := $(wildcard ../../tl/cc/*.cpp)
+tlhsource := $(wildcard ../../tl/cc/*.h)
+tlobjects := $(patsubst %.cpp,%.o,$(tlcppsource))
 
-kordcwebsource := $(wildcard ../../kord/*.cweb)
-kordcppsource := $(patsubst %.cweb,%.cpp,$(kordcwebsource))
-kordhwebsource := $(wildcard ../../kord/*.hweb)
-kordhsource := $(patsubst %.hweb,%.h,$(kordhwebsource))
-kordobjects := $(patsubst %.cweb,%.o,$(kordcwebsource))
+#kordcwebsource := $(wildcard ../../kord/*.cweb)
+kordcppsource := $(wildcard ../../kord/*.cpp) # $(patsubst %.cweb,%.cpp,$(kordcwebsource))
+#kordhwebsource := $(wildcard ../../kord/*.hweb)
+kordhsource := $(wildcard ../../kord/*.h)# $(patsubst %.hweb,%.h,$(kordhwebsource))
+kordobjects := $(patsubst %.cpp,%.o,$(kordcppsource))
 
-integcwebsource := $(wildcard ../../integ/cc/*.cweb)
-integcppsource := $(patsubst %.cweb,%.cpp,$(integcwebsource))
-integhwebsource := $(wildcard ../../integ/cc/*.hweb)
-integhsource := $(patsubst %.hweb,%.h,$(integhwebsource))
-integobjects := $(patsubst %.cweb,%.o,$(integcwebsource))
+#integcwebsource := $(wildcard ../../integ/cc/*.cweb)
+#integcppsource := $(patsubst %.cweb,%.cpp,$(integcwebsource))
+#integhwebsource := $(wildcard ../../integ/cc/*.hweb)
+#integhsource := $(patsubst %.hweb,%.h,$(integhwebsource))
+#integobjects := $(patsubst %.cweb,%.o,$(integcwebsource))
 
 cppsource := $(wildcard *.cpp)
 mexobjects := $(patsubst %.cpp,%_.$(MEX_SUFFIX),$(cppsource))
@@ -96,14 +94,13 @@ all: $(mexobjects)
 ../../kord/%.o: ../../kord/%.cpp $(tlhsource) $(kordhsource) $(integhsource)
 	make -C ../../kord $*.o
 
-
-dynarelib.a: $(tlhwebsource) $(tlcwebsoure) $(tlhsource) $(tlcppsource) \
-         $(integhwebsource) $(integcwebsoure) $(integhsource) $(integcppsource) \
-         $(kordhwebsource) $(kordcwebsoure) $(kordhsource) $(kordcppsource) \
+k_ord_lib.a: $(tlhsource) $(tlcppsource) \
+          $(integhsource) $(integcppsource) \
+          $(kordhsource) $(kordcppsource) \
          $(sylvhsource) $(sylvcppsource) \
          $(kordobjects) $(tlobjects) $(integobjects) $(sylvobjects)
-	ar cr dynarelib.a $(kordobjects) $(tlobjects) $(integobjects) $(sylvobjects)
-	ranlib dynarelib.a
+	ar cr k_ord_lib.a  $(kordobjects) $(tlobjects) $(integobjects) $(sylvobjects)
+	ranlib k_ord_lib.a
 
 
 # to compile mex objects for Windows do:
@@ -112,20 +109,20 @@ dynarelib.a: $(tlhwebsource) $(tlcwebsoure) $(tlhsource) $(tlcppsource) \
 # 3. change -Ic:/MATLAB71/extern/include according your Matlab setup
 # 4. pray it works
 # OR: just use the mexopt.bat from the repository and check MATLAB root directory
-%_.$(MEX_SUFFIX): %.cpp $(tlhwebsource) $(tlcwebsoure) $(tlhsource) $(tlcppsource) \
-         $(integhwebsource) $(integcwebsoure) $(integhsource) $(integcppsource) \
-         $(kordhwebsource) $(kordcwebsoure) $(kordhsource) $(kordcppsource) \
+%_.$(MEX_SUFFIX): %.cpp  $(tlhsource) $(tlcppsource) \
+          $(integhsource) $(integcppsource) \
+          $(kordhsource) $(kordcppsource) \
          $(sylvhsource) $(sylvcppsource) \
-         dynarelib.a
+         k_ord_lib.a.a
 ifeq ($(OS),Windows_NT)
-	mex.bat -I../../sylv/cc -I../../tl/cc -I../../kord -I../../integ/cc COMPFLAGS\#"-c -DMATLAB_MEX_FILE -DPOSIX_THREADS" OPTIMFLAGS\#"-O3 -fexceptions -Ic:/MATLAB71/extern/include" GM_ADD_LIBS\#"$(LDFLAGS)" $*.cpp dynarelib.a
+	mex.bat -I../../sylv/cc -I../../tl/cc -I../../kord -I../../integ/cc COMPFLAGS\#"-c -DMATLAB_MEX_FILE -DPOSIX_THREADS" OPTIMFLAGS\#"-O3 -fexceptions -Ic:/MATLAB71/extern/include" GM_ADD_LIBS\#"$(LDFLAGS)" $*.cpp k_ord_lib.a.a
 else
-	mex -I../../sylv/cc/ -I../../tl/cc -I../../kord -I../../integ/cc $*.cpp CFLAGS='$$CFLAGS -fexceptions' dynarelib.a
+	mex -I../../sylv/cc/ -I../../tl/cc -I../../kord -I../../integ/cc $*.cpp CFLAGS='$$CFLAGS -fexceptions' k_ord_lib.a.a
 endif
 	mv $*.$(MEX_SUFFIX) $*_.$(MEX_SUFFIX)
 
 clear:
-	rm -f dynarelib.a
+	rm -f k_ord_lib.a.a
 	rm -f *.mexglx
 	rm -f *.dll
 	make -C ../../tl/testing clear
