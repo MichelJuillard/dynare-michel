@@ -184,7 +184,7 @@ function [alphahat,etahat,epsilonhat,ahat,SteadyState,trend_coeff,aK,T,R,P,PK,d,
       Z = QT(mf,:);
       R1 = QT'*R;
       [QQ,RR,EE] = qr(Z*ST(:,1:nk),0);
-      k = find(abs(diag(RR)) < 1e-8);
+      k = find(abs(diag([RR; zeros(nk-size(Z,1),size(RR,2))])) < 1e-8);
       if length(k) > 0
           k1 = EE(:,k);
 	  dd =ones(nk,1);

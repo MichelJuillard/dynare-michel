@@ -495,7 +495,7 @@ if options_.mode_compute > 0 & options_.posterior_mode_estimation
               end
               options_.mh_jscale = Scale;
               mouvement = max(max(abs(PostVar-OldPostVar)));
-              fval = DsgeLikelihood(xparam1,gend,data);
+              fval = DsgeLikelihood(xparam1,gend,data,data_index,number_of_observations,no_more_missing_observations);
               disp(['Change in the covariance matrix = ' num2str(mouvement) '.'])
               disp(['Mode improvement = ' num2str(abs(OldMode-fval))])
               OldMode = fval;
