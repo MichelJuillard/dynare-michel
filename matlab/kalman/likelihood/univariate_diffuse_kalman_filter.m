@@ -95,8 +95,8 @@ while newRank && (t<smpl)
             end
         elseif Fstar>kalman_tol
             lik(t) = lik(t) + log(Fstar) + prediction_error*prediction_error/Fstar;
-            a = a + Kstar*prediction_error/Fstar;
-            Pstar = Pstar - Kstar*Kstar'/Fstar;
+            a = a + Kstar*(prediction_error/Fstar);
+            Pstar = Pstar - Kstar*(Kstar'/Fstar);
         end
     end
     if newRank
@@ -125,11 +125,11 @@ while notsteady && (t<smpl)
     for i=1:length(data_index{t})
         Zi = Z(data_index{t}(i),:);
         prediction_error = Y(data_index{t}(i),t) - Zi*a;
-        Fi   = Zi*Pstar*Zi' + H(i);
+        Ki   = Pstar*Zi';
+        Fi   = Zi*Ki + H(i);
         if Fi > kalman_tol
-            Ki	= Pstar*Zi';
-            a	   = a + Ki*prediction_error/Fi;
-            Pstar  = Pstar - Ki*Ki'/Fi;
+            a	   = a + Ki*(prediction_error/Fi);
+            Pstar  = Pstar - Ki*(Ki'/Fi);
             lik(t) = lik(t) + log(Fi) + prediction_error*prediction_error/Fi;
         end
     end	
