@@ -77,12 +77,13 @@ class KordpJacobian;
 
 KordpDynare::KordpDynare(const char** endo,  int num_endo,
 			   const char** exo, int nexog, int npar, //const char** par,
-   			   Vector* ysteady, TwoDMatrix* vcov, Vector* inParams, int nstat,int npred, int nforw, int nboth,
-			   const int nsteps, int norder, //const char* modName,
+   			   Vector* ysteady, TwoDMatrix* vcov, Vector* inParams, int nstat,
+			   int npred, int nforw, int nboth, const int jcols, const int nsteps, int norder, //const char* modName,
 			   Journal& jr, DynamicModelDLL& dynamicDLL, double sstol)
 	: nStat(nstat), nBoth(nboth), nPred(npred), nForw(nforw), nExog(nexog), nPar(npar),
-	nYs(npred + nboth), nYss(nboth + nforw),nY(num_endo), nSteps(nsteps), nOrder(norder), journal(jr),  dynamicDLL(dynamicDLL),
-	ySteady(ysteady), vCov(vcov), params (inParams),  md(1), dnl(NULL), denl(NULL), dsnl(NULL), ss_tol(sstol)
+	nYs(npred + nboth), nYss(nboth + nforw),nY(num_endo), nJcols(jcols), nSteps(nsteps), nOrder(norder), 
+	journal(jr),  dynamicDLL(dynamicDLL), ySteady(ysteady), vCov(vcov), params (inParams), 
+	md(1), dnl(NULL), denl(NULL), dsnl(NULL), ss_tol(sstol)
 {
 #ifdef DEBUG		
    mexPrintf("k_ord_dynare Dynare constructor: ny=%d, order=%d, nPar=%d .\n", nY,nOrder,nPar);
@@ -121,7 +122,7 @@ KordpDynare::KordpDynare(const char** endo,  int num_endo,
 KordpDynare::KordpDynare(const KordpDynare& dynare)
 	: nStat(dynare.nStat), nBoth(dynare.nBoth),	nPred(dynare.nPred), 
 	nForw(dynare.nForw), nExog(dynare.nExog),  nPar(dynare.nPar),
-	nYs(dynare.nYs), nYss(dynare.nYss),nY(dynare.nY), 
+	nYs(dynare.nYs), nYss(dynare.nYss),nY(dynare.nY), nJcols(dynare.nJcols), 
 	nSteps(dynare.nSteps), nOrder(dynare.nOrder), journal(dynare.journal),
 	dynamicDLL(dynare.dynamicDLL), //modName(dynare.modName),
 	ySteady(NULL), params(NULL), vCov(NULL), md(dynare.md), 
@@ -212,16 +213,35 @@ void KordpDynare::calcDerivatives(const Vector& yy, const Vector& xx)
 //	Vector yyp(yy, nstat()+npred(), nyss());
 
 	//double *g1, *g2;
-    TwoDMatrix *g1;//, *g2;
-	g1=new TwoDMatrix(0,0); // just a signal: generate something so g1 (and out) are not null
+    //TwoDMatrix *g1;//, *g2;
+	TwoDMatrix * g1=new TwoDMatrix(nY,nJcols); // generate g1 for jacobian  
+	g1->zeros();
+
+	if ((nJcols != g1->ncols()) && ( nY != g1->nrows())) {
+		mexPrintf("k_ord_dynare.cpp: Error in calcDerivatives: Created wrong jacobian");
+		return;
+	}
+
     Vector& out= *(new Vector(nY));
 	out.zeros();
 #ifdef DEBUG
 	mexPrintf("k_order_dynaare.cpp: Call eval in calcDerivatives\n");
 #endif
-	dynamicDLL.eval( yy,  xx, //int nb_row_x, 
+	try {
+		dynamicDLL.eval( yy,  xx, //int nb_row_x, 
 				params, //int it_, 
 				out, g1, NULL);
+	}
+	catch (...){
+			mexPrintf("k_ord_dynare.cpp: Error in dynamicDLL.eval in calcDerivatives");
+			return;
+	}
+
+	if ((nJcols!=g1->ncols()) && ( nY != g1->nrows())) {
+			mexPrintf("k_ord_dynare.cpp: Error in calcDerivatives: dynamicDLL.eval returned wrong jacobian");
+			return;
+	}
+	
 #ifdef DEBUG
 	mexPrintf("k_ord_dynare.cpp: populate FSSparseTensor in calcDerivatives: cols=%d , rows=%d\n"
         , g1->ncols(),g1->nrows());
@@ -229,18 +249,18 @@ void KordpDynare::calcDerivatives(const Vector& yy, const Vector& xx)
 
    //    model derivatives FSSparseTensor instance for single order only 
     //(higher orders requires Symetry to insert in particular position.)
-        FSSparseTensor &mdTi=*(new FSSparseTensor (1, g1->ncols(),g1->nrows())); 
-        for (int i = 0; i<g1->ncols(); i++){
-                for (int j = 0; j<g1->nrows(); j++){
-                    if (g1->get(j,i)!=0.0) // populate sparse if not zero
-                        mdTi.insert(i, j,g1->get(j,i));
-                }
-        }
-        // md container
+    FSSparseTensor *mdTi=(new FSSparseTensor (1, g1->ncols(),g1->nrows())); 
+    for (int i = 0; i<g1->ncols(); i++){
+            for (int j = 0; j<g1->nrows(); j++){
+                if (g1->get(j,i)!=0.0) // populate sparse if not zero
+                    mdTi->insert(i, j,g1->get(j,i));
+            }
+    }
+    // md container
 //        md=*(new TensorContainer<FSSparseTensor>(1)); 
 //		FSSparseTensor mdSTi(mdTi);
-        md.clear();
-        md.insert(&mdTi);//(&mdTi);
+    md.clear();
+    md.insert(mdTi);//(&mdTi);
 }
 
 

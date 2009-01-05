@@ -236,7 +236,7 @@ extern "C" {
 			// make KordpDynare object
 			KordpDynare dynare(endoNamesMX,  nEndo, exoNamesMX,  nExog, nPar, // paramNames,
    			   ySteady, vCov, modParams, nStat, nPred, nForw, nBoth,
-			   nSteps, kOrder, journal, dynamicDLL, sstol);
+			   jcols, nSteps, kOrder, journal, dynamicDLL, sstol);
     /************			
 			// make list of shocks for which we will do IRFs
 			vector<int> irf_list_ind;

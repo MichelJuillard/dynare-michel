@@ -121,6 +121,7 @@ friend class DynamicModelDLL;
 	const int nYs; // ={npred + nboth ; }
 	const int nYss; // nyss ={ nboth + nforw ; }
 	const int nY;  // = num_endo={ nstat + npred + nboth + nforw ; }
+	const int nJcols; // no of jacobian columns= nExog+nEndo+nsPred+nsForw
 	const int nSteps;
 	const int nOrder;
 	Journal& journal;
@@ -138,7 +139,7 @@ public:
 	KordpDynare(const char** endo, int num_endo,
 		const char** exo, int num_exo, int num_par, //const char** par,
 		Vector* ySteady, TwoDMatrix* vCov, Vector* params, int nstat,int nPred, 
-		int nforw, int nboth, const int nSteps, const int ord, 	//const char* modName,
+		int nforw, int nboth, const int nJcols, const int nSteps, const int ord, 	//const char* modName,
 		Journal& jr, DynamicModelDLL& dynamicDLL, double sstol);
 
 	/** Makes a deep copy of the object. */

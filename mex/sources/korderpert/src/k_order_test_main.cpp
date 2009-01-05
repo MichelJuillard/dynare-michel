@@ -165,7 +165,7 @@ int main(int argc, char* argv[])
 			// make KordpDynare object
 			KordpDynare dynare(endoNamesMX,  nEndo, exoNamesMX,  nExog, nPar, // paramNames,
 				ySteady, vCov, modParams, nStat, nPred, nForw, nBoth,
-				nSteps, kOrder, journal, dynamicDLL, sstol);
+				jcols, nSteps, kOrder, journal, dynamicDLL, sstol);
 			try {
 				// intiate tensor library
 #ifdef DEBUG		
