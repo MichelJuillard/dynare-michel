@@ -70,29 +70,31 @@ while newRank && (t<smpl)
         if Finf>kalman_tol && newRank
             icc=icc+1;
             Kinf   = Pinf*Zi';
-            a	   = a + Kinf*(prediction_error/Finf);
-            Pstar  = Pstar + Kinf*(Kinf'*(Fstar/(Finf*Finf))) - (Kstar*Kinf'+Kinf*Kstar')/Finf;
-            Pinf   = Pinf - Kinf*(Kinf'/Finf);
+            Kinf_Finf = Kinf/Finf;
+            a	   = a + Kinf_Finf*prediction_error;
+            Pstar  = Pstar + Kinf*(Kinf_Finf'*(Fstar/Finf)) - Kstar*Kinf_Finf' ...
+                     - Kinf_Finf*Kstar';
+            Pinf   = Pinf - Kinf*Kinf_Finf';
             lik(t) = lik(t) + log(Finf);
-            if ~isempty(options_.diffuse_d)  
-                newRank = (icc<options_.diffuse_d);  
-                if newRank && (any(diag(Za*Pinf*Za')>kalman_tol)==0 & rank(Pinf,crit)==0); 
-                    options_.diffuse_d = icc;
-                    newRank=0;
-                    disp('WARNING: Change in OPTIONS_.DIFFUSE_D in univariate DKF')
-                    disp(['new OPTIONS_.DIFFUSE_D = ',int2str(icc)])
-                    disp('You may have to reset the optimisation')
-                end
-            else
-                newRank = (any(diag(Za*Pinf*Za')>kalman_tol) | rank(Pinf,crit));                 
-                if newRank==0
-                    P0=	T*Pinf*T';
-                    newRank = (any(diag(Za*P0*Za')>kalman_tol) | rank(P0,crit));
-                    if newRank==0
-                        options_.diffuse_d = icc;
-                    end
-                end
-            end
+% $$$             if ~isempty(options_.diffuse_d)  
+% $$$                 newRank = (icc<options_.diffuse_d);  
+% $$$                 if newRank && (any(diag(Za*Pinf*Za')>kalman_tol)==0 & rank(Pinf,crit)==0); 
+% $$$                     options_.diffuse_d = icc;
+% $$$                     newRank=0;
+% $$$                     disp('WARNING: Change in OPTIONS_.DIFFUSE_D in univariate DKF')
+% $$$                     disp(['new OPTIONS_.DIFFUSE_D = ',int2str(icc)])
+% $$$                     disp('You may have to reset the optimisation')
+% $$$                 end
+% $$$             else
+% $$$                 newRank = (any(diag(Za*Pinf*Za')>kalman_tol) | rank(Pinf,crit));                 
+% $$$                 if newRank==0
+% $$$                     P0=	T*Pinf*T';
+% $$$                     newRank = (any(diag(Za*P0*Za')>kalman_tol) | rank(P0,crit));
+% $$$                     if newRank==0
+% $$$                         options_.diffuse_d = icc;
+% $$$                     end
+% $$$                 end
+% $$$             end
         elseif Fstar>kalman_tol
             lik(t) = lik(t) + log(Fstar) + prediction_error*prediction_error/Fstar;
             a = a + Kstar*(prediction_error/Fstar);
