@@ -30,7 +30,7 @@ int main(int argc, char* argv[])
 
 
 	const int check_flag = 0;
-	const char*  fName = "fs2000a";//mxArrayToString(mFname);
+	const char*  fName = "fs2000k";//mxArrayToString(mFname);
 	
 #ifdef DEBUG		
 	mexPrintf("k_order_perturbation: check_flag = %d ,  fName = %s .\n", check_flag,fName);
@@ -63,35 +63,37 @@ int main(int argc, char* argv[])
 		npar = 2;//(int)mxGetN(mxFldp);
 		TwoDMatrix * vCov =  new TwoDMatrix(npar, npar, (d2Dparams));
 		
-		double dYSparams [29]= { // mxGetData(mxFldp);
+		double dYSparams [31]= { // mxGetData(mxFldp);
 			1.0110, 2.2582, 5.8012, 1.0000, 1.0000, 0.5808, 1.0110, 2.2582,
 			0.4477, 1.0000, 4.5959, 1.0212, 5.8012, 0.8494, 0.1872, 0.8604,
-			1.0030, 1.0080, 1.0000, 1.0000, 0.5808, 1.0030, 1.0110, 2.2582,
-		    0.4477, 1.0000, 0.1872, 2.2582, 0.4477
+			1.0030, 1.0080, 1.0000, 1.0000, 0.5808, 1.0030, 2.2582, 0.4477,
+			1.0110, 2.2582, 0.4477, 1.0000, 0.1872, 2.2582, 0.4477
 		};
-//			1.0110, 2.2582, 0.4477, 1.0000, 4.5959, 1.0212, 5.8012, 0.8494,
+
+		
+		//			1.0110, 2.2582, 0.4477, 1.0000, 4.5959, 1.0212, 5.8012, 0.8494,
 //				0.1872, 0.8604, 1.0030, 1.0080, 1.0000, 1.0000, 0.5808, 1.0030
 //		};
-		const int nSteady = 29;//16 (int)mxGetM(mxFldp);
+		const int nSteady = 31;//29, 16 (int)mxGetM(mxFldp);
 		Vector * ySteady =  new Vector(dYSparams, nSteady);
 		
 		//mxFldp = mxGetField(dr, 0,"nstatic" );
 		const int nStat = 7;//(int)mxGetScalar(mxFldp);
 		//	mxFldp = mxGetField(dr, 0,"npred" );
-		const int nPred = 6;//(int)mxGetScalar(mxFldp);
+		const int nPred = 4;//6 - nBoth (int)mxGetScalar(mxFldp);
 		//mxFldp = mxGetField(dr, 0,"nspred" );
 		const int nsPred = 6;//(int)mxGetScalar(mxFldp);
 		//mxFldp = mxGetField(dr, 0,"nboth" );
 		const int nBoth = 2;// (int)mxGetScalar(mxFldp);
 		//mxFldp = mxGetField(dr, 0,"nfwrd" );
-		const int nForw = 3;// (int)mxGetScalar(mxFldp);
+		const int nForw = 5;// 3 (int)mxGetScalar(mxFldp);
 		//mxFldp = mxGetField(dr, 0,"nsfwrd" );
 		const int nsForw = 7;//(int)mxGetScalar(mxFldp);
 		
 		//mxFldp = mxGetField(M_, 0,"exo_nbr" );
 		const int nExog =2;// (int)mxGetScalar(mxFldp);
 		//mxFldp = mxGetField(M_, 0,"endo_nbr" );
-		const int nEndo = 16;//(int)mxGetScalar(mxFldp);
+		const int nEndo = 18;//16(int)mxGetScalar(mxFldp);
 		//mxFldp = mxGetField(M_, 0,"param_nbr" );
 		const int nPar = 7;//(int)mxGetScalar(mxFldp);
         // it_ should be set to M_.maximum_lag
@@ -102,9 +104,9 @@ int main(int argc, char* argv[])
         mexPrintf("k_order_perturbation: jcols= %d .\n", jcols);
 		
         //mxFldp= mxGetField(M_, 0,"endo_names" );
-        const int nendo = 16;//(int)mxGetM(mxFldp);
+        const int nendo = 18;//16(int)mxGetM(mxFldp);
         const int widthEndo = 6;// (int)mxGetN(mxFldp);
-		const char * cNamesCharStr= "mPceWRkdnlggYPyd          yp__ A          __oo            oobb            bbss            ss    ";
+		const char * cNamesCharStr= "mPceWRkdnlggYPydPc          yp__ A22          __oo              oobb              bbss              ss      ";
 		//       const char**  endoNamesMX= DynareMxArrayToString( mxFldp,nendo,widthEndo);
 		const char**  endoNamesMX= DynareMxArrayToString( cNamesCharStr, nendo, widthEndo);
 #ifdef DEBUG		
