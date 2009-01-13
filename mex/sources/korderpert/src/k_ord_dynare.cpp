@@ -13,6 +13,7 @@
  */
 // GP, based on work by O.Kamenik
 
+#include <vector>
 #include "first_order.h"
 #include "k_ord_dynare.h"
 
@@ -79,11 +80,12 @@ KordpDynare::KordpDynare(const char** endo,  int num_endo,
 			   const char** exo, int nexog, int npar, //const char** par,
    			   Vector* ysteady, TwoDMatrix* vcov, Vector* inParams, int nstat,
 			   int npred, int nforw, int nboth, const int jcols, const int nsteps, int norder, //const char* modName,
-			   Journal& jr, DynamicModelDLL& dynamicDLL, double sstol)
+			   Journal& jr, DynamicModelDLL& dynamicDLL, double sstol, const int* var_order, 
+			   const TwoDMatrix * llincidence )
 	: nStat(nstat), nBoth(nboth), nPred(npred), nForw(nforw), nExog(nexog), nPar(npar),
 	nYs(npred + nboth), nYss(nboth + nforw),nY(num_endo), nJcols(jcols), nSteps(nsteps), nOrder(norder), 
 	journal(jr),  dynamicDLL(dynamicDLL), ySteady(ysteady), vCov(vcov), params (inParams), 
-	md(1), dnl(NULL), denl(NULL), dsnl(NULL), ss_tol(sstol)
+	md(1), dnl(NULL), denl(NULL), dsnl(NULL), ss_tol(sstol), varOrder( var_order), ll_Incidence(llincidence) 
 {
 #ifdef DEBUG		
    mexPrintf("k_ord_dynare Dynare constructor: ny=%d, order=%d, nPar=%d .\n", nY,nOrder,nPar);
@@ -109,6 +111,8 @@ KordpDynare::KordpDynare(const char** endo,  int num_endo,
 		vCov = new TwoDMatrix(*(vCov));
 ******/
 	//	throw DynareException(__FILE__, __LINE__, string("Could not open model file ")+modName);
+		JacobianIndices= ReorderDynareJacobianIndices( varOrder);
+
 	}
 	catch (...){
         mexPrintf("k_ord_dynare: dynare constructor, error in StateNamelist construction.\n");
@@ -126,7 +130,9 @@ KordpDynare::KordpDynare(const KordpDynare& dynare)
 	nSteps(dynare.nSteps), nOrder(dynare.nOrder), journal(dynare.journal),
 	dynamicDLL(dynare.dynamicDLL), //modName(dynare.modName),
 	ySteady(NULL), params(NULL), vCov(NULL), md(dynare.md), 
-	dnl(NULL), denl(NULL), dsnl(NULL), ss_tol(dynare.ss_tol)
+	dnl(NULL), denl(NULL), dsnl(NULL), ss_tol(dynare.ss_tol), 
+	varOrder(dynare.varOrder), ll_Incidence(dynare.ll_Incidence),
+	JacobianIndices(dynare.JacobianIndices)
 {
 ///	model = dynare.model->clone();
 	ySteady = new Vector(*(dynare.ySteady));
@@ -236,12 +242,12 @@ void KordpDynare::calcDerivatives(const Vector& yy, const Vector& xx)
 			mexPrintf("k_ord_dynare.cpp: Error in dynamicDLL.eval in calcDerivatives");
 			return;
 	}
-
 	if ((nJcols!=g1->ncols()) && ( nY != g1->nrows())) {
 			mexPrintf("k_ord_dynare.cpp: Error in calcDerivatives: dynamicDLL.eval returned wrong jacobian");
 			return;
 	}
-	
+	ReorderCols(g1, JacobianIndices);
+//	ReorderCols(out, varOrder);
 #ifdef DEBUG
 	mexPrintf("k_ord_dynare.cpp: populate FSSparseTensor in calcDerivatives: cols=%d , rows=%d\n"
         , g1->ncols(),g1->nrows());
@@ -249,17 +255,21 @@ void KordpDynare::calcDerivatives(const Vector& yy, const Vector& xx)
 
    //    model derivatives FSSparseTensor instance for single order only 
     //(higher orders requires Symetry to insert in particular position.)
-    FSSparseTensor *mdTi=(new FSSparseTensor (1, g1->ncols(),g1->nrows())); 
+    FSSparseTensor *mdTi=(new FSSparseTensor (1, g1->ncols(),g1->nrows()));
+
     for (int i = 0; i<g1->ncols(); i++){
             for (int j = 0; j<g1->nrows(); j++){
-                if (g1->get(j,i)!=0.0) // populate sparse if not zero
-                    mdTi->insert(i, j,g1->get(j,i));
+                if (g1->get(j,i)!=0.0){ // populate sparse if not zero
+                    IntSequence s(1,0);
+                    s[0]=i;
+                    mdTi->insert(s, j,g1->get(j,i));
+                }
             }
     }
     // md container
 //        md=*(new TensorContainer<FSSparseTensor>(1)); 
 //		FSSparseTensor mdSTi(mdTi);
-    md.clear();
+    md.clear();// this is to be used only for 1st order!!
     md.insert(mdTi);//(&mdTi);
 }
 
@@ -349,6 +359,108 @@ void KordpDynare::writeModelInfo(Journal& jr) const
 	**************/
 }
 
+
+/************************************
+* Reorder DynareJacobianIndices of variables in a vector according to
+* given int * varOrder together with lead & lag incidence matrix and 
+* any the extra columns for exogenous vars, and then, 
+* reorders its blocks given by the varOrder and the Dynare++ expectations:
+
+* extra	nboth+ npred (t-1) lags
+* varOrder
+		static:
+		pred
+		both    
+		forward    
+* extra both + nforw (t+1) leads, and 
+* extra exogen
+
+* so to match the jacobian organisation expected by the Appoximation class 
+		both + nforw (t+1) leads
+		static
+		pred
+		both
+		forward
+		nboth+ npred  (t-1) lags
+		exogen
+************************************/
+
+int * KordpDynare::ReorderDynareJacobianIndices( const int * varOrder){
+//	if ((nJcols != tdx->ncols()) && ( nY != tdx->nrows())) {
+//		mexPrintf("k_ord_dynare.cpp: Error in ReorderBlocks: wrong size of jacobian");
+//		return;
+//	}
+	// create temporary square 2D matrix size nEndo x nEndo (sparse)  
+	// for the lag, current and lead blocks of the jacobian
+	int * JacobianIndices = (int*) calloc(nJcols+1, sizeof(int)); 
+	vector <int> tmp(nY); 
+	int i,j, rjoff=nJcols-nExog-1; //, ll_off, j;
+	try{
+		for (int ll_row=0; ll_row< ll_Incidence->nrows(); ll_row++)
+		{
+			// reorder in orde-var order & populate temporary nEndo (sparse) vector with 
+			// the lag, current and lead blocks of the jacobian respectively
+			for (i=0;i<nY;i++){
+//				tmp[varOrder[j]]=(int)ll_Incidence->get(ll_row,j); 
+				tmp[i]=((int)ll_Incidence->get(ll_row,varOrder[i]-1)); 
+			}
+			// write the reordered blocks back to the jacobian
+			// in reverse order
+			for (j=nY-1;j>=0;j--){
+				if (tmp[j]){
+					JacobianIndices[rjoff]=tmp[j] -1;
+					rjoff--;
+					if (rjoff<0){
+	//					mexPrintf(" Error in ReorderIndices - negative rjoff index?");
+						break;
+	//					return NULL;
+					}
+				}
+			}
+		}
+	} catch (const TLException& e) {
+		mexPrintf("Caugth TL exception in ReorderIndices: ");
+		e.print();
+		return NULL;// 255;
+	}catch (...){
+		mexPrintf(" Error in ReorderIndices - wrong index?");
+	}
+	//add the indices for the nExog exogenous jacobians
+	for (j=nJcols-nExog;j<nJcols;j++){
+		JacobianIndices[j]=j;
+	}
+#ifdef DEBUG		
+	for (j=0;j<nJcols;j++)
+			mexPrintf("ReorderDynareJacobianIndice: [%d] =%d .\n", j, JacobianIndices[j]);
+#endif	
+	return JacobianIndices;
+}
+
+
+/************************************
+* Reorder first set of columns of variables in a (jacobian) matrix 
+* according to order given in  varsOrder together with the extras 
+* assuming tdx ncols() - nExog is eaqual or less than length of varOrder and
+* of any of its elements too.
+************************************/
+
+void KordpDynare::ReorderCols(TwoDMatrix * tdx, const int * varsOrder){
+
+	TwoDMatrix tmp(*tdx); // temporary 2D matrix
+	TwoDMatrix &tmpR=tmp;
+	tdx->zeros();// empty original matrix
+	// reorder the columns
+	try{
+		for (int i =0; i<tdx->ncols() ; i++)
+			tdx->copyColumn(tmpR,varsOrder[i],i);
+	} catch (const TLException& e) {
+		printf("Caugth TL exception in ReorderColumns: ");
+		e.print();
+		return;// 255;
+	}catch (...){
+		mexPrintf(" Error in ReorderColumns - wrong index?");
+	}
+}
 
 /****************************
 *  K-Order Perturbation instance of Jacobian:

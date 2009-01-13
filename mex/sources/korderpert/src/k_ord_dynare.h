@@ -135,12 +135,16 @@ friend class DynamicModelDLL;
 	DynareExogNameList* denl;
 	DynareStateNameList* dsnl;
 	const double ss_tol;
+	const int* varOrder;
+	const TwoDMatrix * ll_Incidence;
+	int * JacobianIndices;
 public:
 	KordpDynare(const char** endo, int num_endo,
 		const char** exo, int num_exo, int num_par, //const char** par,
 		Vector* ySteady, TwoDMatrix* vCov, Vector* params, int nstat,int nPred, 
 		int nforw, int nboth, const int nJcols, const int nSteps, const int ord, 	//const char* modName,
-		Journal& jr, DynamicModelDLL& dynamicDLL, double sstol);
+		Journal& jr, DynamicModelDLL& dynamicDLL, double sstol, 
+		const int* varOrder, const TwoDMatrix * ll_Incidence );
 
 	/** Makes a deep copy of the object. */
 	KordpDynare(const KordpDynare& dyn);
@@ -201,8 +205,11 @@ public:
 	///	void writeDump(const std::string& basename) const;
 	DynamicModel* clone() const
 	{return new KordpDynare(*this);}
+	void ReorderCols(TwoDMatrix * tdx, const int * varOrder);
 private:
 	void writeModelInfo(Journal& jr) const;
+	int * ReorderDynareJacobianIndices( const int * varOrder);
+	void ReorderBlocks(TwoDMatrix * tdx, const int * varOrder);
 };
 
   /****************************

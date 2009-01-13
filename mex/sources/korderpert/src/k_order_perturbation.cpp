@@ -144,7 +144,7 @@ extern "C" {
 		mxFldp = mxGetField(dr, 0,"nstatic" );
 		const int nStat = (int)mxGetScalar(mxFldp);
 		mxFldp = mxGetField(dr, 0,"npred" );
-		const int nPred = (int)mxGetScalar(mxFldp);
+		int nPred = (int)mxGetScalar(mxFldp);
 		mxFldp = mxGetField(dr, 0,"nspred" );
 		const int nsPred = (int)mxGetScalar(mxFldp);
 		mxFldp = mxGetField(dr, 0,"nboth" );
@@ -163,6 +163,22 @@ extern "C" {
         // it_ should be set to M_.maximum_lag
 		mxFldp = mxGetField(M_, 0,"maximum_lag" );
 		const int nMax_lag = (int)mxGetScalar(mxFldp);
+
+		nPred -= nBoth; // correct nPred for nBoth.
+
+		mxFldp 	= mxGetField(dr, 0,"order_var" );
+		int * var_order = (int *) mxGetData(mxFldp);
+		npar = (int)mxGetM(mxFldp);
+		if (npar != nEndo) {  //(nPar != npar)
+			mexErrMsgTxt("Incorrect number of input var_order vars.\n");
+			//return;
+		} 
+//		Vector * varOrder =  new Vector(var_order, nEndo);
+
+		mxFldp 	= mxGetField(M_, 0,"lead_lag_incidence" );
+		dparams = (double *) mxGetData(mxFldp);
+		npar = (int)mxGetN(mxFldp);
+		TwoDMatrix * llincidence =  new TwoDMatrix(npar, nEndo, dparams);
 
         const int jcols = nExog+nEndo+nsPred+nsForw; // Num of Jacobian columns
         mexPrintf("k_order_perturbation: jcols= %d .\n", jcols);
@@ -236,7 +252,8 @@ extern "C" {
 			// make KordpDynare object
 			KordpDynare dynare(endoNamesMX,  nEndo, exoNamesMX,  nExog, nPar, // paramNames,
    			   ySteady, vCov, modParams, nStat, nPred, nForw, nBoth,
-			   jcols, nSteps, kOrder, journal, dynamicDLL, sstol);
+			   jcols, nSteps, kOrder, journal, dynamicDLL, sstol, var_order, 
+			   llincidence );
     /************			
 			// make list of shocks for which we will do IRFs
 			vector<int> irf_list_ind;

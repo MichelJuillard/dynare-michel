@@ -76,7 +76,8 @@ int main(int argc, char* argv[])
 //		};
 		const int nSteady = 31;//29, 16 (int)mxGetM(mxFldp);
 		Vector * ySteady =  new Vector(dYSparams, nSteady);
-		
+
+
 		//mxFldp = mxGetField(dr, 0,"nstatic" );
 		const int nStat = 7;//(int)mxGetScalar(mxFldp);
 		//	mxFldp = mxGetField(dr, 0,"npred" );
@@ -99,15 +100,52 @@ int main(int argc, char* argv[])
         // it_ should be set to M_.maximum_lag
 		//mxFldp = mxGetField(M_, 0,"maximum_lag" );
 		const int nMax_lag = 1;//(int)mxGetScalar(mxFldp);
-		
-        const int jcols = nExog+nEndo+nsPred+nsForw; // Num of Jacobian columns
+
+		int var_order[]//[18]
+        = {
+			 5,  6,  8, 10, 11, 12, 16,  7, 13, 14, 15,  1,  2,  3, 4,  9, 17, 18
+		};
+		//Vector * varOrder =  new Vector(var_order, nEndo);
+
+		const double ll_incidence []//[3][18] 
+        = {
+/*            1,  2,  0,  0,  0,  0,  3,  0,  0,  0,  0,  0,  4,  5
+            ,  6,  0,  0,  0
+            ,  7,  8,  9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20
+            , 21, 22, 23, 24
+            ,  25, 26, 27, 28,  0,  0,  0,  0, 29,  0,  0,  0,  0,  0
+            ,  0,  0, 30, 31
+ */
+                1,   7,  25
+            ,   2,   8,  26
+            ,   0,   9,  27
+            ,   0,  10,  28
+            ,   0,  11,   0
+            ,   0,  12,   0
+            ,   3,  13,   0
+            ,   0,  14,   0
+            ,   0,  15,  29
+            ,   0,  16,   0
+            ,   0,  17,   0
+            ,   0,  18,   0
+            ,   4,  19,   0
+            ,   5,  20,   0
+            ,   6,  21,   0
+            ,   0,  22,   0
+            ,   0,  23,  30
+            ,   0,  24,  31 
+		};
+		TwoDMatrix * llincidence = new TwoDMatrix (	3, nEndo, ll_incidence );
+			
+		const int jcols = nExog+nEndo+nsPred+nsForw; // Num of Jacobian columns
+#ifdef DEBUG		
         mexPrintf("k_order_perturbation: jcols= %d .\n", jcols);
-		
+#endif
         //mxFldp= mxGetField(M_, 0,"endo_names" );
         const int nendo = 18;//16(int)mxGetM(mxFldp);
         const int widthEndo = 6;// (int)mxGetN(mxFldp);
 		const char * cNamesCharStr= "mPceWRkdnlggYPydPc          yp__ A22          __oo              oobb              bbss              ss      ";
-		//       const char**  endoNamesMX= DynareMxArrayToString( mxFldp,nendo,widthEndo);
+		//   const char**  endoNamesMX= DynareMxArrayToString( mxFldp,nendo,widthEndo);
 		const char**  endoNamesMX= DynareMxArrayToString( cNamesCharStr, nendo, widthEndo);
 #ifdef DEBUG		
         for (int i = 0; i < nEndo; i++) {
@@ -120,7 +158,6 @@ int main(int argc, char* argv[])
 		//        const char**  exoNamesMX= DynareMxArrayToString( mxFldp,nexo,widthExog);
 		const char * cExoNamesCharStr= "ee__am";
         const char**  exoNamesMX= DynareMxArrayToString( cExoNamesCharStr,nexo,widthExog);
-        
 #ifdef DEBUG		
         for (int i = 0; i < nexo; i++) {
             mexPrintf("k_ord_perturbation: ExoNameList[%d][0]= %s.\n", i, exoNamesMX[i] );
@@ -135,7 +172,7 @@ int main(int argc, char* argv[])
 		for (int i = 0; i < nEndo; i++) {
 			mexPrintf("k_ord_perturbation: EndoNameList[%d]= %s.\n", i, endoNamesMX[i] );   }
 		//	for (int i = 0; i < nPar; i++) {
-		//        mexPrintf("k_ord_perturbation: params_vec[%d]= %g.\n", i, params_vec[i] );   }
+		//, , mexPrintf("k_ord_perturbation: params_vec[%d]= %g.\n", i, params_vec[i] );   }
 		for (int i = 0; i < nPar; i++) {
 			mexPrintf("k_ord_perturbation: Params[%d]= %g.\n", i, (*modParams)[i]);  }
 		for (int i = 0; i < nSteady; i++) {
@@ -149,7 +186,7 @@ int main(int argc, char* argv[])
 		const int nSteps =0; // Dynare++ solving steps, for time being default to 0 = deterministic steady state
 		const double sstol=1.e-13; //NL solver tolerance from 
 		
-		THREAD_GROUP::max_parallel_threads = 2;//params.num_threads;
+		THREAD_GROUP::max_parallel_threads = 1;//2 params.num_threads;
 		
         try {
 			// make journal name and journal
@@ -165,9 +202,10 @@ int main(int argc, char* argv[])
 			mexPrintf("k_order_perturbation: Calling dynare constructor.\n");
 #endif			
 			// make KordpDynare object
-			KordpDynare dynare(endoNamesMX,  nEndo, exoNamesMX,  nExog, nPar, // paramNames,
-				ySteady, vCov, modParams, nStat, nPred, nForw, nBoth,
-				jcols, nSteps, kOrder, journal, dynamicDLL, sstol);
+			KordpDynare dynare(endoNamesMX,  nEndo, exoNamesMX,  nExog, nPar // paramNames,
+				, ySteady, vCov, modParams, nStat, nPred, nForw, nBoth
+				, jcols, nSteps, kOrder, journal, dynamicDLL, sstol, var_order 
+				, llincidence );
 			try {
 				// intiate tensor library
 #ifdef DEBUG		
@@ -176,7 +214,6 @@ int main(int argc, char* argv[])
                 tls.init(dynare.order(),
 					dynare.nstat()+2*dynare.npred()+3*dynare.nboth()+
 					2*dynare.nforw()+dynare.nexog());
-                
 				// construct main K-order approximation class
 				//				FistOrderApproximation app(dynare, journal, nSteps);
 #ifdef DEBUG		
@@ -202,11 +239,9 @@ int main(int argc, char* argv[])
 				mexErrMsgTxt("Caught Sylv exception.");
             }
 			
-            
 			// get latest ysteady 
             double * dYsteady = (dynare.getSteady().base());
             ySteady = (Vector*)(&dynare.getSteady());
-            
 		} catch (const KordException& e) {
 			printf("Caugth Kord exception: ");
 			e.print();
