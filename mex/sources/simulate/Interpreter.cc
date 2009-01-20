@@ -62,7 +62,7 @@ Interpreter::pow1(double a, double b)
 
 
 void
-Interpreter::compute_block_time() /*throw(EvalException)*/
+Interpreter::compute_block_time(int Per_u_) /*throw(EvalException)*/
 {
   int var, lag, op;
   double v1, v2;
@@ -586,7 +586,7 @@ Interpreter::simulate_a_block(int size,int type, string file_name, string bin_ba
 #endif
   //SparseMatrix sparse_matrix;
 
-  int nb_endo, u_count_init;
+  //int nb_endo, u_count_init;
 
 
   //mexPrintf("simulate_a_block\n");
@@ -608,12 +608,20 @@ Interpreter::simulate_a_block(int size,int type, string file_name, string bin_ba
           {
             set_code_pointer(begining);
             Per_y_=it_*y_size;
-            compute_block_time();
+            compute_block_time(0);
 #ifdef PRINT_OUT
             for (j = 0; j<size; j++)
               mexPrintf("y[%d, %d] = %f\n", Block_Contain[j].Variable, it_, y[Per_y_ + Block_Contain[j].Variable]);
 #endif
           }
+        /*mexPrintf("Evaluate Forward\n");
+        for (it_=y_kmin;it_<periods+y_kmin;it_++)
+          {
+            mexPrintf("it_=%d ",it_);
+            for(i=0; i<y_size; i++)
+              mexPrintf(" %f",y[i+it_*y_size]);
+            mexPrintf("\n");
+          }*/
         break;
       case EVALUATE_BACKWARD :
       case EVALUATE_BACKWARD_R :
@@ -625,7 +633,7 @@ Interpreter::simulate_a_block(int size,int type, string file_name, string bin_ba
           {
             set_code_pointer(begining);
             Per_y_=it_*y_size;
-            compute_block_time();
+            compute_block_time(0);
 #ifdef PRINT_OUT
             for (j = 0; j<size; j++)
               mexPrintf("y[%d, %d] = %f\n", Block_Contain[j].Variable, it_, y[Per_y_ + Block_Contain[j].Variable]);
@@ -648,7 +656,7 @@ Interpreter::simulate_a_block(int size,int type, string file_name, string bin_ba
               {
                 set_code_pointer(begining);
                 Per_y_=it_*y_size;
-                compute_block_time();
+                compute_block_time(0);
                 y[Per_y_+Block_Contain[0].Variable] += -r[0]/g1[0];
                 //mexPrintf("y[%d] += -r[0] (%f) / g1[0] (%f) = %f\n",Per_y_+Block_Contain[0].Variable,r[0],g1[0],y[Per_y_+Block_Contain[0].Variable]);
                 double rr;
@@ -685,9 +693,9 @@ Interpreter::simulate_a_block(int size,int type, string file_name, string bin_ba
               {
                 set_code_pointer(begining);
                 Per_y_=it_*y_size;
-                compute_block_time();
-                mexPrintf("Compute_block_time=> in SOLVE_BACKWARD_SIMPLE : OK\n");
-                mexEvalString("drawnow;");
+                compute_block_time(0);
+                /*mexPrintf("Compute_block_time=> in SOLVE_BACKWARD_SIMPLE : OK\n");
+                mexEvalString("drawnow;");*/
                 y[Per_y_+Block_Contain[0].Variable] += -r[0]/g1[0];
                 double rr;
                 rr=r[0]/(1+y[Per_y_+Block_Contain[0].Variable]);
@@ -781,19 +789,39 @@ Interpreter::simulate_a_block(int size,int type, string file_name, string bin_ba
           }
         break;*/
       case SOLVE_FORWARD_COMPLETE :
-//#ifdef DEBUGC
-        mexPrintf("SOLVE_FORWARD_COMPLETE\n");
-//#endif
+#ifdef DEBUGC
+        mexPrintf("SOLVE FORWARD_COMPLETE\n");
+        mexPrintf("confirmation!\n");
+        mexEvalString("drawnow;");
+#endif
         is_linear=get_code_bool;
+        //mexPrintf("is_linear=%d\n",is_linear);
+        //mexEvalString("drawnow;");
         max_lag_plus_max_lead_plus_1=get_code_int;
+        //mexPrintf("max_lag_plus_max_lead_plus_1=%d\n",max_lag_plus_max_lead_plus_1);
+        //mexEvalString("drawnow;");
         symbol_table_endo_nbr=get_code_int;
+        //mexPrintf("symbol_table_endo_nbr=%d\n",symbol_table_endo_nbr);
+        //mexEvalString("drawnow;");
         Block_List_Max_Lag=get_code_int;
+        //mexPrintf("Block_List_Max_Lag=%d\n",Block_List_Max_Lag);
+        //mexEvalString("drawnow;");
         Block_List_Max_Lead=get_code_int;
+        //mexPrintf("Block_List_Max_Lead=%d\n",Block_List_Max_Lead);
+        //mexEvalString("drawnow;");
+        u_count_int=get_code_int
+        //mexPrintf("u_count_int=%d\n",u_count_int);
+        //mexEvalString("drawnow;");
+        fixe_u(&u, u_count_int, u_count_int);
         //Read_file(file_name, periods, 0, symbol_table_endo_nbr, Block_List_Max_Lag, Block_List_Max_Lead, nb_endo, u_count, u_count_init, u);
         //sparse_matrix.initialize(periods, nb_endo, y_kmin, y_kmax, y_size, u_count, u_count_init, u, y, ya, slowc, y_decal, markowitz_c, res1, res2, max_res);
+        Read_SparseMatrix(bin_basename, size, 1, 0, 0);
+        //mexPrintf("size=%d\n",size);
         g1=(double*)mxMalloc(size*size*sizeof(double));
         r=(double*)mxMalloc(size*sizeof(double));
         begining=get_code_pointer;
+        Per_u_ = 0;
+
         if (!is_linear)
           {
             for (it_=y_kmin;it_<periods+y_kmin;it_++)
@@ -804,10 +832,11 @@ Interpreter::simulate_a_block(int size,int type, string file_name, string bin_ba
                 while (!(cvg||(iter>maxit_)))
                   {
                     set_code_pointer(begining);
-                    compute_block_time();
-                    mexPrintf("Compute_block_time=> in SOLVE_FORWARD_COMPLETE : OK\n");
-                    mexEvalString("drawnow;");
-                    Direct_Simulate(Block_Count, symbol_table_endo_nbr, it_, y_kmin, y_kmax, size, 0, false, iter);
+                    compute_block_time(0);
+                    /*mexPrintf("Compute_block_time=> in SOLVE_FORWARD_COMPLETE : OK\n");
+                    mexEvalString("drawnow;");*/
+                    //Direct_Simulate(Block_Count, symbol_table_endo_nbr, it_, y_kmin, y_kmax, size, 0, false, iter);
+                    simulate_NG(Block_Count, symbol_table_endo_nbr, it_, y_kmin, y_kmax, size, false, cvg, iter);
                     res2=0;
                     res1=0;
                     max_res=0;
@@ -841,15 +870,26 @@ Interpreter::simulate_a_block(int size,int type, string file_name, string bin_ba
                 res1=res2=max_res=0;
                 /*mexPrintf("Compute_block_time=> in SOLVE_FORWARD_COMPLETE before compute_block_time OK\n");
                 mexEvalString("drawnow;");*/
-                compute_block_time();
+                compute_block_time(0);
+                //mexPrintf("Compute_block_time=> in SOLVE_FORWARD_COMPLETE : OK\n");
                 /*mexPrintf("Compute_block_time=> in SOLVE_FORWARD_COMPLETE : %d OK\n",it_);
                 mexEvalString("drawnow;");*/
                 //Direct_Simulate(Block_Count, symbol_table_endo_nbr, it_, y_kmin, y_kmax, size, 0, false, iter);
                 //Direct_Simulate(Block_Count, symbol_table_endo_nbr, it_, y_kmin, y_kmax, size, 0, false, iter);
-                simulate_NG1(Block_Count, symbol_table_endo_nbr, it_, y_kmin, y_kmax, size, 0, /*true*/false, cvg, iter);
+                //simulate_NG1(Block_Count, symbol_table_endo_nbr, it_, y_kmin, y_kmax, size, 0, /*true*/false, cvg, iter);
+                simulate_NG(Block_Count, symbol_table_endo_nbr, it_, y_kmin, y_kmax, size, false, cvg, iter);
                 //simulate_NG1(Block_Count, symbol_table_endo_nbr, it_, y_kmin, y_kmax, size, periods, true, cvg, iter);
               }
+            /*mexPrintf("solve forward complete simulation\n");
+            for (it_=y_kmin;it_<periods+y_kmin;it_++)
+              {
+                mexPrintf("it_=%d ",it_);
+                for(i=0; i<y_size; i++)
+                  mexPrintf(" %f",y[i+it_*y_size]);
+                mexPrintf("\n");
+              }*/
           }
+        memset(direction,0,size_of_direction);
         mxFree(g1);
         mxFree(r);
         mxFree(u);
@@ -863,8 +903,13 @@ Interpreter::simulate_a_block(int size,int type, string file_name, string bin_ba
         symbol_table_endo_nbr=get_code_int;
         Block_List_Max_Lag=get_code_int;
         Block_List_Max_Lead=get_code_int;
-        Read_file(file_name, periods, 0, symbol_table_endo_nbr, Block_List_Max_Lag, Block_List_Max_Lead, nb_endo, u_count, u_count_init, u);
+        //Read_file(file_name, periods, 0, symbol_table_endo_nbr, Block_List_Max_Lag, Block_List_Max_Lead, nb_endo, u_count, u_count_init, u);
         //sparse_matrix.initialize(periods, nb_endo, y_kmin, y_kmax, y_size, u_count, u_count_init, u, y, ya, slowc, y_decal, markowitz_c, res1, res2, max_res);
+        u_count_int=get_code_int
+        //mexPrintf("u_count_int=%d\n",u_count_int);
+        //mexEvalString("drawnow;");
+        fixe_u(&u, u_count_int, u_count_int);
+        Read_SparseMatrix(bin_basename, size, 1, 0, 0);
         g1=(double*)mxMalloc(size*size*sizeof(double));
         r=(double*)mxMalloc(size*sizeof(double));
         begining=get_code_pointer;
@@ -878,10 +923,11 @@ Interpreter::simulate_a_block(int size,int type, string file_name, string bin_ba
                 while (!(cvg||(iter>maxit_)))
                   {
                     set_code_pointer(begining);
-                    compute_block_time();
-                    mexPrintf("Compute_block_time=> in SOLVE_BACKWARD_COMPLETE : OK\n");
-                    mexEvalString("drawnow;");
-                    Direct_Simulate(Block_Count, symbol_table_endo_nbr, it_, y_kmin, y_kmax, size, 0, false, iter);
+                    compute_block_time(0);
+                    /*mexPrintf("Compute_block_time=> in SOLVE_BACKWARD_COMPLETE : OK\n");
+                    mexEvalString("drawnow;");*/
+                    //Direct_Simulate(Block_Count, symbol_table_endo_nbr, it_, y_kmin, y_kmax, size, 0, false, iter);
+                    simulate_NG(Block_Count, symbol_table_endo_nbr, it_, y_kmin, y_kmax, size, false, cvg, iter);
                     res2=0;
                     res1=0;
                     max_res=0;
@@ -911,16 +957,19 @@ Interpreter::simulate_a_block(int size,int type, string file_name, string bin_ba
               {
                 set_code_pointer(begining);
                 Per_y_=it_*y_size;
-                compute_block_time();
-                Direct_Simulate(Block_Count, symbol_table_endo_nbr, it_, y_kmin, y_kmax, size, 1, false, iter);
+                compute_block_time(0);
+                //Direct_Simulate(Block_Count, symbol_table_endo_nbr, it_, y_kmin, y_kmax, size, 1, false, iter);
+                simulate_NG(Block_Count, symbol_table_endo_nbr, it_, y_kmin, y_kmax, size, false, cvg, iter);
               }
           }
+        memset(direction,0,size_of_direction);
         mxFree(g1);
         mxFree(r);
         mxFree(u);
         break;
       case SOLVE_TWO_BOUNDARIES_SIMPLE :
       case SOLVE_TWO_BOUNDARIES_COMPLETE:
+        mexPrintf("omp_get_max_threads=%d\n",omp_get_max_threads());
 #ifdef DEBUGC
         mexPrintf("SOLVE_TWO_BOUNDARIES_COMPLETE\n");
         mexEvalString("drawnow;");
@@ -982,7 +1031,7 @@ Interpreter::simulate_a_block(int size,int type, string file_name, string bin_ba
             Per_u_=0;
             Per_y_=it_*y_size;
             set_code_pointer(begining);
-            compute_block_time();
+            compute_block_time(0);
             linbcg.Initialize(filename, res1, res2, max_res, slowc, ya, direction, iter);
             linbcg.Preconditioner(periods, y_kmin, y_kmax, size, IM_i, index_vara, index_equa, y_size, y, true, 0, a, indx);
 #endif
@@ -1012,7 +1061,7 @@ Interpreter::simulate_a_block(int size,int type, string file_name, string bin_ba
                     //mexPrintf("ok\n");
                     //mexPrintf("compute_block_time\n");
                     set_code_pointer(begining);
-                    compute_block_time();
+                    compute_block_time(Per_u_);
                     //mexPrintf("end of compute_block_time\n");
                     /*if(Gaussian_Elimination)
                       initialize(periods, nb_endo, y_kmin, y_kmax, y_size, u_count, u_count_init, u, y, ya, slowc, y_decal, markowitz_c, res1, res2, max_res);*/
@@ -1084,7 +1133,7 @@ Interpreter::simulate_a_block(int size,int type, string file_name, string bin_ba
                 Per_u_=(it_-y_kmin)*max_lag_plus_max_lead_plus_1;
                 Per_y_=it_*y_size;
                 set_code_pointer(begining);
-                compute_block_time();
+                compute_block_time(Per_u_);
 #ifdef PRINT_OUT
                 for (j=0; j<max_lag_plus_max_lead_plus_1; j++)
                   {
@@ -1092,6 +1141,10 @@ Interpreter::simulate_a_block(int size,int type, string file_name, string bin_ba
                   }
                 mexPrintf("\n");
 #endif
+                /*mexPrintf("it_=%d ",it_);
+                for(i=0; i<y_size; i++)
+                  mexPrintf(" %f",y[i]);
+                mexPrintf("\n");*/
               }
             res1=res2=max_res=0;
             if(Gaussian_Elimination)
@@ -1103,6 +1156,14 @@ Interpreter::simulate_a_block(int size,int type, string file_name, string bin_ba
                 linbcg.SolveLinear(periods, y_kmin, y_kmax, size, IM_i, index_vara, index_equa, y_size, y, true, cvg, a, indx);
 #endif
               }
+            /*mexPrintf("Two boundaries simulation\n");
+            for (it_=y_kmin;it_<periods+y_kmin;it_++)
+              {
+                mexPrintf("it_=%d ",it_);
+                for(i=0; i<y_size; i++)
+                  mexPrintf(" %f",y[i+it_*y_size]);
+                mexPrintf("\n");
+              }*/
           }
 #ifdef  DEBUGC
         //mexErrMsgTxt("End of simulate");

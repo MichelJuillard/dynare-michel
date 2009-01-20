@@ -277,7 +277,7 @@ void
 Mem_Mngr::Free_All()
 {
   int i;
-  for (int i=0;i<Nb_CHUNK;i++)
+  for (i=0;i<Nb_CHUNK;i++)
     {
       mxFree(NZE_Mem_add[i*CHUNK_BLCK_SIZE]);
     }

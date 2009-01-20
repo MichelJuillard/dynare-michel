@@ -26,7 +26,12 @@
 #include <map>
 #include <ctime>
 #include "Mem_Mngr.hh"
-
+//! Openmp is available in GCC since version 4.3.2
+//! Test if GCC version is greater then 4.3.2 order to avoid a copilation error
+#define GNUVER 100*__GNUC__+10*__GNUC_MINOR__+__GNUC_PATCHLEVEL__
+#if GNUVER >= 432
+  #include <omp.h>
+#endif
 #define NEW_ALLOC
 #define MARKOVITZ
 //#define MEMORY_LEAKS
@@ -71,6 +76,7 @@ class SparseMatrix
   public:
     SparseMatrix();
     int simulate_NG1(int blck, int y_size, int it_, int y_kmin, int y_kmax, int Size, int periods, bool print_it, bool cvg, int &iter);
+    int simulate_NG(int blck, int y_size, int it_, int y_kmin, int y_kmax, int Size, bool print_it, bool cvg, int &iter);
     void Direct_Simulate(int blck, int y_size, int it_, int y_kmin, int y_kmax, int Size, int periods, bool print_it, int iter);
     void fixe_u(double **u, int u_count_int, int max_lag_plus_max_lead_plus_1);
     //void initialize(int periods_arg, int nb_endo_arg, int y_kmin_arg, int y_kmax_arg, int y_size_arg, int u_count_arg, int u_count_init_arg, double *u_arg, double *y_arg, double *ya_arg, double slowc_arg, int y_decal_arg, double markowitz_c_arg, double res1_arg, double res2_arg, double max_res_arg);
@@ -80,6 +86,7 @@ class SparseMatrix
  private:
     void Init(int periods, int y_kmin, int y_kmax, int Size, map<pair<pair<int, int> ,int>, int> IM);
     void ShortInit(int periods, int y_kmin, int y_kmax, int Size, map<pair<pair<int, int> ,int>, int> IM);
+    void Simple_Init(int it_, int y_kmin, int y_kmax, int Size, std::map<std::pair<std::pair<int, int> ,int>, int> IM);
     void End(int Size);
     bool compare( int *save_op, int *save_opa, int *save_opaa, int beg_t, int periods, long int nop4,  int Size
 #ifdef PROFILER
@@ -106,6 +113,7 @@ class SparseMatrix
     , long int *nmul
 #endif
     );
+    double simple_bksub(int it_, int Size, double slowc_l);
     void run_triangular(int nop_all,int *op_all);
     void run_it(int nop_all,int *op_all);
     void run_u_period1(int periods);

@@ -410,8 +410,8 @@ void SparseMatrix::Read_SparseMatrix(string file_name, int Size, int periods, in
       SaveCode.read(reinterpret_cast<char *>(&var), sizeof(var));
       SaveCode.read(reinterpret_cast<char *>(&lag), sizeof(lag));
       SaveCode.read(reinterpret_cast<char *>(&j), sizeof(j));
-      /*mexPrintf("0i=%d eq=%d var=%d lag=%d j=%d\n",i,eq,var,lag,j );
-      mexEvalString("drawnow;");*/
+      //mexPrintf("i=%d eq=%d var=%d lag=%d j=%d\n",i,eq,var,lag,j );
+      //mexEvalString("drawnow;");
       IM_i[std::make_pair(std::make_pair(eq, var), lag)] = j;
       /*mexPrintf("1i=%d\n",i);
       mexEvalString("drawnow;");*/
@@ -419,8 +419,6 @@ void SparseMatrix::Read_SparseMatrix(string file_name, int Size, int periods, in
 #ifdef MEM_ALLOC_CHK
   mexPrintf("index_vara=(int*)mxMalloc(%d*sizeof(int))\n",Size*(periods+y_kmin+y_kmax));
 #endif
-  /*mexPrintf("Size=%d periods=%d y_kmin=%d y_kmax=%d\n",Size,periods, y_kmin, y_kmax);
-  mexEvalString("drawnow;");*/
   index_vara=(int*)mxMalloc(Size*(periods+y_kmin+y_kmax)*sizeof(int));
 #ifdef MEM_ALLOC_CHK
   mexPrintf("ok\n");
@@ -430,18 +428,21 @@ void SparseMatrix::Read_SparseMatrix(string file_name, int Size, int periods, in
       SaveCode.read(reinterpret_cast<char *>(&index_vara[j]), sizeof(*index_vara));
       //mexPrintf("index_vara[%d]=%d\n",j,index_vara[j]);
     }
-  for (i=1;i<periods+y_kmin+y_kmax;i++)
+  if(periods+y_kmin+y_kmax>1)
     {
-      for (j=0;j<Size;j++)
+      for (i=1;i<periods+y_kmin+y_kmax;i++)
         {
-#ifdef PRINT_OUT
-          mexPrintf("index_vara[%d]=index_vara[%d]+y_size=",j+Size*i,j+Size*(i-1));
-#endif
-          index_vara[j+Size*i]=index_vara[j+Size*(i-1)]+y_size;
-#ifdef PRINT_OUT
-          mexPrintf("%d\n",index_vara[j+Size*i]);
-#endif
-        }
+          for (j=0;j<Size;j++)
+           {
+   #ifdef PRINT_OUT
+              mexPrintf("index_vara[%d]=index_vara[%d]+y_size=",j+Size*i,j+Size*(i-1));
+   #endif
+             index_vara[j+Size*i]=index_vara[j+Size*(i-1)]+y_size;
+   #ifdef PRINT_OUT
+             mexPrintf("%d\n",index_vara[j+Size*i]);
+  #endif
+           }
+       }
     }
   index_equa=(int*)mxMalloc(Size*sizeof(int));
   for(j=0;j<Size;j++)
@@ -452,13 +453,109 @@ void SparseMatrix::Read_SparseMatrix(string file_name, int Size, int periods, in
 }
 
 
+
+void SparseMatrix::Simple_Init(int it_, int y_kmin, int y_kmax, int Size, std::map<std::pair<std::pair<int, int> ,int>, int> IM)
+{
+  int i, eq, var, lag;
+  //double tmp_b=0.0;
+  std::map<std::pair<std::pair<int, int> ,int>, int>::iterator it4;
+  NonZeroElem* first;
+  //mexPrintf("periods=%d, y_kmin=%d, y_kmax=%d, SizeInit=%d, IM.size()=%d\n",periods, y_kmin, y_kmax, Size, IM.size());
+  pivot=(int*)mxMalloc(Size*sizeof(int));
+  pivotk=(int*)mxMalloc(Size*sizeof(int));
+  pivotv=(double*)mxMalloc(Size*sizeof(double));
+  pivotva=(double*)mxMalloc(Size*sizeof(double));
+  b=(int*)mxMalloc(Size*sizeof(int));
+  line_done=(bool*)mxMalloc(Size*sizeof(bool));
+  memset(line_done, 0, Size*sizeof(*line_done));
+  mem_mngr.init_CHUNK_BLCK_SIZE(u_count);
+  g_save_op=NULL;
+  g_nop_all=0;
+  i=Size*sizeof(NonZeroElem*);
+  FNZE_R=(NonZeroElem**)mxMalloc(i);
+  FNZE_C=(NonZeroElem**)mxMalloc(i);
+  memset(FNZE_R, 0, i);
+  memset(FNZE_C, 0, i);
+  NonZeroElem** temp_NZE_R=(NonZeroElem**)mxMalloc(i);
+  NonZeroElem** temp_NZE_C=(NonZeroElem**)mxMalloc(i);
+  memset(temp_NZE_R, 0, i);
+  memset(temp_NZE_C, 0, i);
+  i=Size*sizeof(int);
+  NbNZRow=(int*)mxMalloc(i);
+  NbNZCol=(int*)mxMalloc(i);
+  memset(NbNZRow, 0, i);
+  memset(NbNZCol, 0, i);
+  i=Size*sizeof(*b);
+  memset(b,0,i);
+  it4=IM.begin();
+  eq=-1;
+  double tmp_b[Size];
+  for(i=0; i< Size;i++);
+    tmp_b[i]=0;//u[i];
+  int u_count1=Size;
+  while (it4!=IM.end())
+    {
+      var=it4->first.first.second;
+      /*if (eq!=it4->first.first.first)
+        tmp_b=0;*/
+      eq=it4->first.first.first;
+      lag=it4->first.second;
+      if (lag==0)   /*Build the index for sparse matrix containing the jacobian : u*/
+        {
+          //mexPrintf("Add eq=%d, var=%d, lag=%d at it_=%d u=%f\n",eq,var,lag, it_, u[u_count1]);
+          //mexPrintf("    u_index=%d\n",/*it4->second+u_count_init*it_*/u_count1);
+          NbNZRow[eq]++;
+          NbNZCol[var]++;
+#ifdef NEW_ALLOC
+          first=mem_mngr.mxMalloc_NZE();
+#else
+          first=(NonZeroElem*)mxMalloc(sizeof(NonZeroElem));
+#endif
+          first->NZE_C_N=NULL;
+          first->NZE_R_N=NULL;
+          first->u_index=u_count1/*it4->second+u_count_init*it_*/;
+          first->r_index=eq;
+          first->c_index=var;
+          first->lag_index=lag;
+          //mexPrintf("  u[%d](%f)*y[%d](%f)=%f\n",u_count1, u[u_count1], index_vara[var]+it_*y_size, y[index_vara[var]+it_*y_size], u[u_count1]*y[index_vara[var]+it_*y_size]);
+          tmp_b[eq] += u[u_count1]*y[index_vara[var]+it_*y_size];
+          if (FNZE_R[eq]==NULL)
+            {
+              FNZE_R[eq]=first;
+            }
+          if (FNZE_C[var]==NULL)
+            FNZE_C[var]=first;
+          if (temp_NZE_R[eq]!=NULL)
+            temp_NZE_R[eq]->NZE_R_N=first;
+          if (temp_NZE_C[var]!=NULL)
+            temp_NZE_C[var]->NZE_C_N=first;
+          temp_NZE_R[eq]=first;
+          temp_NZE_C[var]=first;
+          u_count1++;
+        }
+      it4++;
+    }
+  for(i=0;i<Size;i++)
+    {
+      b[i]=u_count1+i;
+      u[b[i]]=-tmp_b[i];
+      //mexPrintf("b[%d]=%f\n",i,u[b[i]]);
+    }
+  //mexEvalString("Init");
+  mxFree(temp_NZE_R);
+  mxFree(temp_NZE_C);
+  /*mexPrintf("end of Simple_Init\n");
+  mexEvalString("drawnow;");*/
+}
+
+
 void SparseMatrix::Init(int periods, int y_kmin, int y_kmax, int Size, std::map<std::pair<std::pair<int, int> ,int>, int> IM)
 {
   int t,i, eq, var, lag;
   double tmp_b=0.0;
   std::map<std::pair<std::pair<int, int> ,int>, int>::iterator it4;
   NonZeroElem* first;
-  //mexPrintf("periods=%d, y_kmin=%d, y_kmax=%d, Size=%d, IM.size()=%d\n",periods, y_kmin, y_kmax, Size, IM.size());
+  //mexPrintf("periods=%d, y_kmin=%d, y_kmax=%d, SizeInit=%d, IM.size()=%d\n",periods, y_kmin, y_kmax, Size, IM.size());
 #ifdef MEM_ALLOC_CHK
   mexPrintf("pivot=(int*)mxMalloc(%d*sizeof(int))\n",Size*periods);
 #endif
@@ -1319,73 +1416,6 @@ SparseMatrix::complete(int beg_t, int Size, int periods, int *b)
   return(beg_t);
 }
 
-double
-SparseMatrix::bksub( int tbreak, int last_period, int Size, double slowc_l
-#ifdef PROFILER
-, /*NonZeroElem *first,*/ long int *nmul
-#endif
-)
-{
-  NonZeroElem *first;
-  int i, j, k;
-  double yy;
-  res1 = res2 = max_res = 0;
-  for (i=0;i<y_size*(periods+y_kmin);i++)
-    y[i]=ya[i];
-  if (symbolic && tbreak)
-    last_period=complete(tbreak, Size, periods, b);
-  else
-    last_period=periods;
-  for (int t=last_period+y_kmin-1;t>=y_kmin;t--)
-    {
-      int ti=(t-y_kmin)*Size;
-#ifdef PRINT_OUT
-      mexPrintf("t=%d ti=%d\n",t,ti);
-#endif
-      int cal=y_kmin*Size;
-      int cal_y=y_size*y_kmin;
-      for (i=ti-1;i>=ti-Size;i--)
-        {
-          j=i+cal;
-#ifdef PRINT_OUT_y
-          mexPrintf("t=%d, ti=%d j=%d i+Size=%d\n",t,ti,j,i+Size);
-#endif
-          int pos=pivot[/*j*/i+Size];
-#ifdef PRINT_OUT_y
-          mexPrintf("i-ti+Size=%d pos=%d j=%d\n",i-ti+Size,pos,j);
-#endif
-          int nb_var=At_Row(pos,&first);
-          first=first->NZE_R_N;
-          nb_var--;
-          int eq=index_vara[j]+y_size;
-#ifdef PRINT_OUT_y1
-          mexPrintf("y[index_vara[%d]=%d]=",j,index_vara[j]+y_size);
-#endif
-          yy=0;
-          for (k=0;k<nb_var;k++)
-            {
-              yy+=y[index_vara[first->c_index]+cal_y]*u[first->u_index];
-#ifdef PROFILER
-              (*nmul)++;
-#endif
-              first=first->NZE_R_N;
-            }
-#ifdef PRINT_OUT_y1
-          mexPrintf("|u[%d](%f)|",b[pos],double(u[b[pos]]));
-#endif
-          yy=-(yy+y[eq]+u[b[pos]]);
-          direction[eq]=yy;
-          //mexPrintf("direction[%d] = %f\n",eq,yy);
-          y[eq] += slowc_l*yy;
-#ifdef PRINT_OUT_y1
-          mexPrintf("=%f (%f)\n",double(yy),double(y[eq]));
-#endif
-        }
-    }
-  return res1;
-}
-
-
 void
 SparseMatrix::close_swp_file()
 {
@@ -1955,6 +1985,384 @@ SparseMatrix::Direct_Simulate(int blck, int y_size, int it_, int y_kmin, int y_k
 
 
 
+double
+SparseMatrix::bksub( int tbreak, int last_period, int Size, double slowc_l
+#ifdef PROFILER
+, /*NonZeroElem *first,*/ long int *nmul
+#endif
+)
+{
+  NonZeroElem *first;
+  int i, j, k;
+  double yy;
+  res1 = res2 = max_res = 0;
+  for (i=0;i<y_size*(periods+y_kmin);i++)
+    y[i]=ya[i];
+  if (symbolic && tbreak)
+    last_period=complete(tbreak, Size, periods, b);
+  else
+    last_period=periods;
+  for (int t=last_period+y_kmin-1;t>=y_kmin;t--)
+    {
+      int ti=(t-y_kmin)*Size;
+#ifdef PRINT_OUT
+      mexPrintf("t=%d ti=%d\n",t,ti);
+#endif
+      int cal=y_kmin*Size;
+      int cal_y=y_size*y_kmin;
+      for (i=ti-1;i>=ti-Size;i--)
+        {
+          j=i+cal;
+#ifdef PRINT_OUT_y
+          mexPrintf("t=%d, ti=%d j=%d i+Size=%d\n",t,ti,j,i+Size);
+#endif
+          int pos=pivot[/*j*/i+Size];
+#ifdef PRINT_OUT_y
+          mexPrintf("i-ti+Size=%d pos=%d j=%d\n",i-ti+Size,pos,j);
+#endif
+          int nb_var=At_Row(pos,&first);
+          first=first->NZE_R_N;
+          nb_var--;
+          int eq=index_vara[j]+y_size;
+#ifdef PRINT_OUT_y1
+          mexPrintf("y[index_vara[%d]=%d]=",j,index_vara[j]+y_size);
+#endif
+          yy=0;
+          for (k=0;k<nb_var;k++)
+            {
+              yy+=y[index_vara[first->c_index]+cal_y]*u[first->u_index];
+#ifdef PROFILER
+              (*nmul)++;
+#endif
+              first=first->NZE_R_N;
+            }
+#ifdef PRINT_OUT_y1
+          mexPrintf("|u[%d](%f)|",b[pos],double(u[b[pos]]));
+#endif
+          yy=-(yy+y[eq]+u[b[pos]]);
+          direction[eq]=yy;
+          //mexPrintf("direction[%d] = %f\n",eq,yy);
+          y[eq] += slowc_l*yy;
+#ifdef PRINT_OUT_y1
+          mexPrintf("=%f (%f)\n",double(yy),double(y[eq]));
+#endif
+        }
+    }
+  return res1;
+}
+
+
+double
+SparseMatrix::simple_bksub(int it_, int Size, double slowc_l)
+{
+  int i,k;
+  double yy;
+  NonZeroElem *first;
+  res1 = res2 = max_res = 0;
+  //mexPrintf("simple_bksub\n");
+  for (i=0;i<y_size;i++)
+    y[i+it_*y_size]=ya[i+it_*y_size];
+  //mexPrintf("setp 1\n");
+  //mexPrintf("Size=%d\n",Size);
+  for(i=Size-1;i>=0;i--)
+    {
+      //mexPrintf("i=%d\n",i);
+      int pos=pivot[i];
+      //mexPrintf("pos=%d\n",pos);
+      int nb_var=At_Row(pos,&first);
+      //mexPrintf("nb_var=%d\n",nb_var);
+      first=first->NZE_R_N;
+      nb_var--;
+      //mexPrintf("i=%d\n",i);
+      int eq=index_vara[i];
+      //mexPrintf("eq=%d\n",eq);
+      yy = 0;
+      for (k=0;k<nb_var;k++)
+        {
+          //mexPrintf("y[index_vara[%d]=%d]=%f\n",first->c_index, index_vara[first->c_index], y[index_vara[first->c_index]+it_*y_size]);
+          //mexPrintf("u[first->u_index=%d]=%f\n",first->u_index, u[first->u_index]);
+          yy+=y[index_vara[first->c_index]+it_*y_size]*u[first->u_index];
+          first=first->NZE_R_N;
+        }
+      yy=-(yy+y[eq+it_*y_size]+u[b[pos]]);
+      //mexPrintf("yy=%f\n",yy);
+      direction[eq+it_*y_size]=yy;
+      y[eq+it_*y_size] += slowc_l*yy;
+    }
+  return res1;
+}
+
+
+int
+SparseMatrix::simulate_NG(int blck, int y_size, int it_, int y_kmin, int y_kmax, int Size, bool print_it, bool cvg, int &iter)
+{
+  int i, j, k;
+  int pivj=0, pivk=0;
+  double piv_abs, first_elem;
+  NonZeroElem *first, *firsta, *first_sub, *first_piv, *first_suba;
+#ifdef MARKOVITZ
+  double piv_v[Size];
+  int pivj_v[Size], pivk_v[Size], NR[Size], l, N_max;
+  bool one;
+#endif
+
+  /*mexPrintf("In simulate_NG it_=%d\n",it_);
+  mexEvalString("drawnow;");*/
+  Simple_Init(it_, y_kmin, y_kmax, Size, IM_i);
+  if (isnan(res1) || isinf(res1))
+    {
+      if (slowc_save<1e-8)
+        {
+          mexPrintf("Dynare cannot improve the simulation\n");
+          mexEvalString("drawnow;");
+          mexEvalString("st=fclose('all');clear all;");
+          filename+=" stopped";
+          mexErrMsgTxt(filename.c_str());
+        }
+      slowc_save/=2;
+      mexPrintf("Error: Simulation diverging, trying to correct it using slowc=%f\n",slowc_save);
+      for (i=0;i<y_size;i++)
+        y[i+it_*y_size]=ya[i+it_*y_size]+slowc_save*direction[i+it_*y_size];
+      iter--;
+      return(0);
+    }
+  //mexPrintf("before the main loop y_size=%d\n",y_size);
+  for (i=0;i<Size;i++)
+    {
+      /*finding the max-pivot*/
+      double piv=piv_abs=0;
+      //mexPrintf("i=%d\n",i);
+      int nb_eq=At_Col(i, 0, &first);
+      //mexPrintf("nb_eq=%d\n",nb_eq);
+#ifdef MARKOVITZ
+      l=0; N_max=0;
+      one=false;
+      piv_abs=0;
+#endif
+      //mexPrintf("Size=%d\n",Size);
+      //#pragma omp parallel for
+      for (j=0;j<Size;j++)
+        {
+          //mexPrintf("j=%d  ",j);
+          //mexPrintf("first->r_index=%d\n", first->r_index);
+          if (!line_done[first->r_index])
+            {
+              k=first->u_index;
+              //mexPrintf("k=%d\n",k);
+              int jj=first->r_index;
+              //mexPrintf("jj=%d\n",jj);
+              int NRow_jj=NRow(jj);
+              //mexPrintf("NRow_jj=%d\n",NRow_jj);
+#ifdef PROFILER
+              nbpivot++;
+              nbpivot_it++;
+#endif
+
+#ifdef MARKOVITZ
+              //mexPrintf("l=%d\n",l);
+              piv_v[l]=u[k];
+              double piv_fabs=fabs(u[k]);
+              pivj_v[l]=jj;
+              pivk_v[l]=k;
+              NR[l]=NRow_jj;
+              //mexPrintf("one=%d\n",one);
+              if (NRow_jj==1 && !one)
+                {
+                  one=true;
+                  piv_abs=piv_fabs;
+                  N_max=NRow_jj;
+                }
+              if (!one)
+                {
+                  if (piv_fabs>piv_abs)
+                    piv_abs=piv_fabs;
+                  if (NRow_jj>N_max)
+                    N_max=NRow_jj;
+                }
+              else
+                {
+                  if (NRow_jj==1)
+                    {
+                      if (piv_fabs>piv_abs)
+                        piv_abs=piv_fabs;
+                      if (NRow_jj>N_max)
+                        N_max=NRow_jj;
+                    }
+                }
+              l++;
+#else
+              if (piv_abs<fabs(u[k])||NRow_jj==1)
+                {
+                  piv=u[k];
+                  piv_abs=fabs(piv);
+                  pivj=jj;   //Line number
+                  pivk=k;   //position in u
+                  if (NRow_jj==1)
+                  break;
+                }
+#endif
+            }
+          //mexPrintf("j=%d first->NZE_C_N=%x\n",j,first->NZE_C_N);
+          first=first->NZE_C_N;
+        }
+      //mexPrintf("Before Markovitz\n");
+#ifdef MARKOVITZ
+      double markovitz=0, markovitz_max=-9e70;
+      //mexPrintf("l=%d one=%d\n",l, one);
+      if (!one)
+        {
+          for (j=0;j<l;j++)
+            {
+              /*mexPrintf("j=%d\n",j);
+              mexPrintf("piv_abs=%f\n",piv_abs);
+              mexPrintf("piv_v[%d]=%f\n",j,piv_v[j]);
+              mexPrintf("N_max=%d\n",N_max);
+              mexPrintf("NR[%d]=%d\n",j,NR[j]);*/
+              markovitz=exp(log(fabs(piv_v[j])/piv_abs)-markowitz_c*log(double(NR[j])/double(N_max)));
+              //mexPrintf("markovitz=%f\n",markovitz);
+              if (markovitz>markovitz_max)
+                {
+                   piv=piv_v[j];
+                   pivj=pivj_v[j];   //Line number
+                   pivk=pivk_v[j];   //positi
+                   markovitz_max=markovitz;
+                }
+            }
+        }
+      else
+        {
+          for (j=0;j<l;j++)
+            {
+              markovitz=exp(log(fabs(piv_v[j])/piv_abs)-markowitz_c*log(NR[j]/N_max));
+              if (markovitz>markovitz_max && NR[j]==1)
+                {
+                  piv=piv_v[j];
+                  pivj=pivj_v[j];   //Line number
+                  pivk=pivk_v[j];   //positi
+                  markovitz_max=markovitz;
+                }
+            }
+        }
+#endif
+      //mexPrintf("OK i=%d\n", i);
+      pivot[i]=pivj;
+      //mexPrintf("pivot[%d]=%d\n",i,pivot[i]);
+      pivotk[i]=pivk;
+      pivotv[i]=piv;
+      line_done[pivj]=true;
+      if (piv_abs<eps)
+        {
+          mexPrintf("Error: singular system in Simulate_NG\n");
+          mexEvalString("drawnow;");
+          mexEvalString("st=fclose('all');clear all;");
+          filename+=" stopped";
+          mexErrMsgTxt(filename.c_str());
+        }
+      /*divide all the non zeros elements of the line pivj by the max_pivot*/
+      int nb_var=At_Row(pivj,&first);
+      for (j=0;j<nb_var;j++)
+        {
+          u[first->u_index]/=piv;
+          first=first->NZE_R_N;
+        }
+      u[b[pivj]]/=piv;
+      /*substract the elements on the non treated lines*/
+      nb_eq=At_Col(i,&first);
+      NonZeroElem *first_piva;
+      int nb_var_piva=At_Row(pivj,&first_piva);
+      for (j=0;j<Size;j++)
+        {
+          int row=first->r_index;
+          if (!line_done[row])
+            {
+              first_elem=u[first->u_index];
+              int nb_var_piv=nb_var_piva;
+              first_piv=first_piva;
+              int nb_var_sub=At_Row(row,&first_sub);
+              int l_sub=0, l_piv=0;
+              int sub_c_index=first_sub->c_index, piv_c_index=first_piv->c_index;
+              //int tmp_lag=first_sub->lag_index;
+              while (l_sub<nb_var_sub || l_piv<nb_var_piv)
+                {
+                  if (l_sub<nb_var_sub && (sub_c_index<piv_c_index || l_piv>=nb_var_piv))
+                    {
+                      first_sub=first_sub->NZE_R_N;
+                      if (first_sub)
+                        sub_c_index=first_sub->c_index;
+                      else
+                        sub_c_index=Size/* *periods*/;
+                      l_sub++;
+                    }
+                  else if (sub_c_index>piv_c_index || l_sub>=nb_var_sub)
+                    {
+                      int tmp_u_count=Get_u();
+                      //int lag=first_piv->c_index/Size-row/Size;
+                      Insert(row,first_piv->c_index,tmp_u_count,/*lag*/0);
+                      u[tmp_u_count]=-u[first_piv->u_index]*first_elem;
+                      first_piv=first_piv->NZE_R_N;
+                      if (first_piv)
+                        piv_c_index=first_piv->c_index;
+                      else
+                        piv_c_index=Size/* *periods*/;
+                      l_piv++;
+                    }
+                  else /*first_sub->c_index==first_piv->c_index*/
+                    {
+                      if (i==sub_c_index)
+                        {
+                          firsta=first;
+                          first_suba=first_sub->NZE_R_N;
+                          Delete(first_sub->r_index,first_sub->c_index, Size, b);
+                          first=firsta->NZE_C_N;
+                          first_sub=first_suba;
+                          if (first_sub)
+                            sub_c_index=first_sub->c_index;
+                          else
+                            sub_c_index=Size/* *periods*/;
+                          l_sub++;
+                          first_piv=first_piv->NZE_R_N;
+                          if (first_piv)
+                            piv_c_index=first_piv->c_index;
+                          else
+                            piv_c_index=Size;
+                          l_piv++;
+                        }
+                      else
+                        {
+                          u[first_sub->u_index]-=u[first_piv->u_index]*first_elem;
+                          first_sub=first_sub->NZE_R_N;
+                          if (first_sub)
+                            sub_c_index=first_sub->c_index;
+                          else
+                            sub_c_index=Size /* *periods*/;
+                          l_sub++;
+                          first_piv=first_piv->NZE_R_N;
+                          if (first_piv)
+                            piv_c_index=first_piv->c_index;
+                          else
+                            piv_c_index=Size/* *periods*/;
+                          l_piv++;
+                        }
+                    }
+                }
+              u[b[row]]-=u[b[pivj]]*first_elem;
+            }
+          else
+            first=first->NZE_C_N;
+        }
+    }
+  double slowc_lbx=slowc, res1bx;
+  //mexPrintf("before bksub it_=%d\n",it_);
+  for (i=0;i<y_size;i++)
+    ya[i+it_*y_size]=y[i+it_*y_size];
+  slowc_save=slowc;
+  //res1bx=bksub( NULL, 1, y_size, slowc_lbx);
+  res1bx=simple_bksub(it_,Size,slowc_lbx);
+  //mexPrintf("End of simulate_NG\n");
+  return(0);
+}
+
+
 
 
 
@@ -1976,6 +2384,7 @@ SparseMatrix::simulate_NG1(int blck, int y_size, int it_, int y_kmin, int y_kmax
   double piv_abs, first_elem;
   //SparseMatrix sparse_matrix;
   //mexPrintf("->u_count=%d &u_count=%x\n",u_count,&u_count);
+  mexPrintf("GNU version=%d\n",GNUVER);
 #ifdef RECORD_ALL
   int save_u_count=u_count;
 #endif
@@ -2208,8 +2617,10 @@ SparseMatrix::simulate_NG1(int blck, int y_size, int it_, int y_kmin, int y_kmax
                     bool one=false;
                     piv_abs=0;
 #endif
+                    //#pragma omp parallel for
                     for (j=0;j<nb_eq;j++)
                       {
+                        //mexPrintf("j=%d\n",j);
 #ifdef PRINT_OUT
                         mexPrintf("first=%x\n",first);
                         mexPrintf("examine col %d row %d with lag 0 line_done=%d \n",i,first->r_index,line_done[first->r_index]);
@@ -2275,6 +2686,7 @@ SparseMatrix::simulate_NG1(int blck, int y_size, int it_, int y_kmin, int y_kmax
                     double markovitz=0, markovitz_max=-9e70;
                     if (!one)
                       {
+                        /*#pragma omp parallel for private(j) shared(markovitz_max, piv, pivj, pivk)
                         for (j=0;j<l;j++)
                           {
                             markovitz=exp(log(fabs(piv_v[j])/piv_abs)-markowitz_c*log(double(NR[j])/double(N_max)));
@@ -2285,19 +2697,45 @@ SparseMatrix::simulate_NG1(int blck, int y_size, int it_, int y_kmin, int y_kmax
                                 pivk=pivk_v[j];   //positi
                                 markovitz_max=markovitz;
                               }
+                          }*/
+                        //#pragma omp parallel private(j, markovitz)
+                          {
+                            //#pragma omp for schedule(dynamic, 10) nowait
+                            //#pragma omp parallel for private(j, markovitz)
+                            #pragma omp parallel for private(j,markovitz)
+                            for (j=0;j<l;j++)
+                              {
+                                markovitz=exp(log(fabs(piv_v[j])/piv_abs)-markowitz_c*log(double(NR[j])/double(N_max)));
+                                 //printf("j=%d, markovitz=%f, markovitz_max=%f\n",j,markovitz, markovitz_max);
+                                if (markovitz>markovitz_max)
+                                  {
+                                    piv=piv_v[j];
+                                    pivj=pivj_v[j];   //Line number
+                                    pivk=pivk_v[j];   //positi
+                                    markovitz_max=markovitz;
+                                    //printf("j=%d, markovitz_max=%f\n",j, markovitz);
+                                  }
+                              }
                           }
                       }
                     else
                       {
-                        for (j=0;j<l;j++)
+                        //#pragma omp parallel for private(j) shared(markovitz_max, piv, pivj, pivk)
+                        //#pragma omp parallel private(j, markovitz)
                           {
-                            markovitz=exp(log(fabs(piv_v[j])/piv_abs)-markowitz_c*log(NR[j]/N_max));
-                            if (markovitz>markovitz_max && NR[j]==1)
+                            //#pragma omp for schedule(dynamic, 10) nowait
+                            //#pragma omp parallel for private(j, markovitz)
+                            #pragma omp parallel for private(j,markovitz)
+                            for (j=0;j<l;j++)
                               {
-                                piv=piv_v[j];
-                                pivj=pivj_v[j];   //Line number
-                                pivk=pivk_v[j];   //positi
-                                markovitz_max=markovitz;
+                                markovitz=exp(log(fabs(piv_v[j])/piv_abs)-markowitz_c*log(NR[j]/N_max));
+                                if (markovitz>markovitz_max && NR[j]==1)
+                                  {
+                                    piv=piv_v[j];
+                                    pivj=pivj_v[j];   //Line number
+                                    pivk=pivk_v[j];   //positi
+                                    markovitz_max=markovitz;
+                                  }
                               }
                           }
                       }
@@ -2373,7 +2811,7 @@ SparseMatrix::simulate_NG1(int blck, int y_size, int it_, int y_kmin, int y_kmax
 #endif
                 if (piv_abs<eps)
                   {
-                    mexPrintf("Error: singular system\n");
+                    mexPrintf("Error: singular system in Simulate_NG1\n");
                     mexEvalString("drawnow;");
                     mexEvalString("st=fclose('all');clear all;");
                     filename+=" stopped";
@@ -2388,6 +2826,7 @@ SparseMatrix::simulate_NG1(int blck, int y_size, int it_, int y_kmin, int y_kmax
 #ifdef PRINT_OUT
                 mexPrintf("nb_var=%d\n",nb_var);
 #endif
+                //#pragma omp parallel for
                 for (j=0;j<nb_var;j++)
                   {
 #ifdef PRINT_OUT
@@ -2520,6 +2959,7 @@ SparseMatrix::simulate_NG1(int blck, int y_size, int it_, int y_kmin, int y_kmax
                 mexEvalString("drawnow;");
                   }
 #endif
+                //#pragma omp parallel for
                 for (j=0;j<nb_eq;j++)
                   {
                     int row=first->r_index;
@@ -3099,8 +3539,10 @@ SparseMatrix::simulate_NG1(int blck, int y_size, int it_, int y_kmin, int y_kmax
 void
 SparseMatrix::fixe_u(double **u, int u_count_int, int max_lag_plus_max_lead_plus_1)
 {
+  //mexPrintf("u_count_int=%d\n",u_count_int);
   u_count=u_count_int * periods;
   u_count_alloc = 2*u_count;
+  //mexPrintf("mxMalloc(%d*sizeof(double)=%d)\n",u_count_alloc,u_count_alloc*sizeof(double));
   (*u)=(double*)mxMalloc(u_count_alloc*sizeof(double));
   memset((*u), 0, u_count_alloc*sizeof(double));
   u_count_init=max_lag_plus_max_lead_plus_1;

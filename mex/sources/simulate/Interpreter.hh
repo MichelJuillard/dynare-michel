@@ -63,7 +63,7 @@ class Interpreter : SparseMatrix
 {
   protected :
     double pow1(double a, double b);
-    void compute_block_time();
+    void compute_block_time(int Per_u_);
     void simulate_a_block(int size,int type, string file_name, string bin_basename, bool Gaussian_Elimination);
     double *T;
     vector<Block_contain_type> Block_Contain;
