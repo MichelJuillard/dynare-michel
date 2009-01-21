@@ -28,7 +28,7 @@ function [LIK, lik] = univariate_diffuse_kalman_filter(T,R,Q,H,Pinf,Pstar,Y,star
 % NOTES
 %   The vector "lik" is used to evaluate the jacobian of the likelihood.
 
-% Copyright (C) 2004-2008 Dynare Team
+% Copyright (C) 2004-2009 Dynare Team
 %
 % This file is part of Dynare.
 %
