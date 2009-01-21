@@ -349,174 +349,187 @@ end
 
 %% Estimation of the posterior mode or likelihood mode
 if options_.mode_compute > 0 & options_.posterior_mode_estimation
-  if ~options_.bvar_dsge
-    fh=str2func('DsgeLikelihood');
-  else
-    fh=str2func('DsgeVarLikelihood');
-  end
-  if options_.mode_compute == 1
-    optim_options = optimset('display','iter','LargeScale','off', ...
-			     'MaxFunEvals',100000,'TolFun',1e-8,'TolX',1e-6);
-    if isfield(options_,'optim_opt')
-      eval(['optim_options = optimset(optim_options,' options_.optim_opt ');']);
-    end
     if ~options_.bvar_dsge
-      [xparam1,fval,exitflag,output,lamdba,grad,hessian_fmincon] = ...
-          fmincon(fh,xparam1,[],[],[],[],lb,ub,[],optim_options,gend,data,data_index,number_of_observations,no_more_missing_observations);
+        fh=str2func('DsgeLikelihood');
     else
-      [xparam1,fval,exitflag,output,lamdba,grad,hessian_fmincon] = ...
-          fmincon(fh,xparam1,[],[],[],[],lb,ub,[],optim_options,gend);
+        fh=str2func('DsgeVarLikelihood');
     end
-  elseif options_.mode_compute == 2       
-      error('ESTIMATION: mode_compute=2 option (Lester Ingber''s Adaptive Simulated Annealing) is no longer available')
-  elseif options_.mode_compute == 3
-    optim_options = optimset('display','iter','MaxFunEvals',100000,'TolFun',1e-8,'TolX',1e-6);
-    if isfield(options_,'optim_opt')
-      eval(['optim_options = optimset(optim_options,' options_.optim_opt ');']);
+    switch options_.mode_compute
+      case 1
+        optim_options = optimset('display','iter','LargeScale','off', ...
+                                 'MaxFunEvals',100000,'TolFun',1e-8,'TolX',1e-6);
+        if isfield(options_,'optim_opt')
+            eval(['optim_options = optimset(optim_options,' options_.optim_opt ');']);
+        end
+        if ~options_.bvar_dsge
+            [xparam1,fval,exitflag,output,lamdba,grad,hessian_fmincon] = ...
+                fmincon(fh,xparam1,[],[],[],[],lb,ub,[],optim_options,gend,data,data_index,number_of_observations,no_more_missing_observations);
+        else
+            [xparam1,fval,exitflag,output,lamdba,grad,hessian_fmincon] = ...
+                fmincon(fh,xparam1,[],[],[],[],lb,ub,[],optim_options,gend);
+        end
+      case 2
+        error('ESTIMATION: mode_compute=2 option (Lester Ingber''s Adaptive Simulated Annealing) is no longer available')
+      case 3
+        optim_options = optimset('display','iter','MaxFunEvals',100000,'TolFun',1e-8,'TolX',1e-6);
+        if isfield(options_,'optim_opt')
+            eval(['optim_options = optimset(optim_options,' options_.optim_opt ');']);
+        end
+        if ~options_.bvar_dsge
+            [xparam1,fval,exitflag] = fminunc(fh,xparam1,optim_options,gend,data,data_index,number_of_observations,no_more_missing_observations);
+        else
+            [xparam1,fval,exitflag] = fminunc(fh,xparam1,optim_options,gend);
+        end
+      case 4
+        H0 = 1e-4*eye(nx);
+        crit = 1e-7;
+        nit = 1000;
+        verbose = 2;
+        if ~options_.bvar_dsge
+            [fval,xparam1,grad,hessian_csminwel,itct,fcount,retcodehat] = ...
+                csminwel('DsgeLikelihood',xparam1,H0,[],crit,nit,options_.gradient_method,gend,data,data_index,number_of_observations,no_more_missing_observations);
+            disp(sprintf('Objective function at mode: %f',fval))
+            disp(sprintf('Objective function at mode: %f',DsgeLikelihood(xparam1,gend,data,data_index,number_of_observations,no_more_missing_observations)))
+        else
+            [fval,xparam1,grad,hessian_csminwel,itct,fcount,retcodehat] = ...
+                csminwel('DsgeVarLikelihood',xparam1,H0,[],crit,nit,options_.gradient_method,gend);
+            disp(sprintf('Objective function at mode: %f',fval))
+            disp(sprintf('Objective function at mode: %f',DsgeVarLikelihood(xparam1,gend)))
+        end
+      case 5
+        if isfield(options_,'hess')
+            flag = options_.hess;
+        else
+            flag = 1;
+        end
+        if ~exist('igg'),  % by M. Ratto
+            hh=[];
+            gg=[];
+            igg=[];
+        end   % by M. Ratto
+        if isfield(options_,'ftol')
+            crit = options_.ftol;
+        else
+            crit = 1.e-7;
+        end
+        if isfield(options_,'nit')
+            nit = options_.nit;
+        else
+            nit=1000;
+        end
+        if ~options_.bvar_dsge
+            [xparam1,hh,gg,fval,invhess] = newrat('DsgeLikelihood',xparam1,hh,gg,igg,crit,nit,flag,gend,data,data_index,number_of_observations,no_more_missing_observations);
+        else
+            [xparam1,hh,gg,fval,invhess] = newrat('DsgeVarLikelihood',xparam1,hh,gg,igg,crit,nit,flag,gend);
+        end
+        save([M_.fname '_mode.mat'],'xparam1','hh','gg','fval','invhess');
+      case 6
+        if ~options_.bvar_dsge
+            fval = DsgeLikelihood(xparam1,gend,data,data_index,number_of_observations,no_more_missing_observations);
+        else
+            fval = DsgeVarLikelihood(xparam1,gend);
+        end
+        OldMode = fval;
+        if ~exist('MeanPar')
+            MeanPar = xparam1;
+        end
+        if exist('hh')
+            CovJump = inv(hh);
+        else% The covariance matrix is initialized with the prior
+            % covariance (a diagonal matrix) %%Except for infinite variances ;-)
+            varinit = 'prior';
+            if strcmpi(varinit,'prior')  
+                stdev = bayestopt_.pstdev;
+                indx = find(isinf(stdev));
+                stdev(indx) = ones(length(indx),1)*sqrt(10);
+                vars = stdev.^2;
+                CovJump = diag(vars);
+            elseif strcmpi(varinit,'eye')
+                vars = ones(length(bayestopt_.pstdev),1)*0.1;  
+                CovJump = diag(vars);          
+            else
+                disp('gmhmaxlik :: Error!')
+                return
+            end
+        end
+        OldPostVar = CovJump;
+        Scale = options_.mh_jscale;
+        for i=1:options_.Opt6Iter  
+            if i == 1
+                if options_.Opt6Iter > 1
+                    flag = '';
+                else
+                    flag = 'LastCall';
+                end
+                if ~options_.bvar_dsge
+                    [xparam1,PostVar,Scale,PostMean] = ...
+                        gmhmaxlik('DsgeLikelihood',xparam1,bounds,options_.Opt6Numb,Scale,flag,MeanPar,CovJump,gend,data,...
+                                  data_index,number_of_observations,no_more_missing_observations);
+                    fval = DsgeLikelihood(xparam1,gend,data,data_index,number_of_observations,no_more_missing_observations);
+                else
+                    [xparam1,PostVar,Scale,PostMean] = ...
+                        gmhmaxlik('DsgeVarLikelihood',xparam1,bounds,options_.Opt6Numb,Scale,flag,MeanPar,CovJump,gend);
+                    fval = DsgeVarLikelihood(xparam1,gend);
+                end
+                options_.mh_jscale = Scale;
+                mouvement = max(max(abs(PostVar-OldPostVar)));
+                disp(['Change in the covariance matrix = ' num2str(mouvement) '.'])
+                disp(['Mode improvement = ' num2str(abs(OldMode-fval))])
+                OldMode = fval;
+            else
+                OldPostVar = PostVar;
+                if i<options_.Opt6Iter
+                    flag = '';
+                else
+                    flag = 'LastCall';
+                end
+                if ~options_.bvar_dsge
+                    [xparam1,PostVar,Scale,PostMean] = ...
+                        gmhmaxlik('DsgeLikelihood',xparam1,bounds,...
+                                  options_.Opt6Numb,Scale,flag,PostMean,PostVar,gend,data,data_index,number_of_observations,no_more_missing_observations);
+                    fval = DsgeLikelihood(xparam1,gend,data,data_index,number_of_observations,no_more_missing_observations);
+                else
+                    [xparam1,PostVar,Scale,PostMean] = ...
+                        gmhmaxlik('DsgeVarLikelihood',xparam1,bounds,...
+                                  options_.Opt6Numb,Scale,flag,PostMean,PostVar,gend);
+                    fval = DsgeVarLikelihood(xparam1,gend);          
+                end
+                options_.mh_jscale = Scale;
+                mouvement = max(max(abs(PostVar-OldPostVar)));
+                fval = DsgeLikelihood(xparam1,gend,data,data_index,number_of_observations,no_more_missing_observations);
+                disp(['Change in the covariance matrix = ' num2str(mouvement) '.'])
+                disp(['Mode improvement = ' num2str(abs(OldMode-fval))])
+                OldMode = fval;
+            end
+            bayestopt_.jscale = ones(length(xparam1),1)*Scale;%??!
+        end
+        hh = inv(PostVar);    
+      case 7
+        optim_options = optimset('display','iter','MaxFunEvals',1000000,'MaxIter',6000,'TolFun',1e-8,'TolX',1e-6);
+        if isfield(options_,'optim_opt')
+            eval(['optim_options = optimset(optim_options,' options_.optim_opt ');']);
+        end
+        if ~options_.bvar_dsge
+            [xparam1,fval,exitflag] = fminsearch(fh,xparam1,optim_options,gend,data,data_index,number_of_observations,no_more_missing_observations);
+        else
+            [xparam1,fval,exitflag] = fminsearch(fh,xparam1,optim_options,gend);
+        end
+      otherwise
+        error(['ESTIMATION: mode_compute=' int2str(options_.mode_compute) ' option is unknown!'])
     end
-    if ~options_.bvar_dsge
-      [xparam1,fval,exitflag] = fminunc(fh,xparam1,optim_options,gend,data,data_index,number_of_observations,no_more_missing_observations);
-    else
-      [xparam1,fval,exitflag] = fminunc(fh,xparam1,optim_options,gend);
+    if options_.mode_compute ~= 5
+        if options_.mode_compute ~= 6
+            if ~options_.bvar_dsge
+                hh = reshape(hessian('DsgeLikelihood',xparam1,options_.gstep,gend,data,data_index,number_of_observations,no_more_missing_observations),nx,nx);
+            else
+                hh = reshape(hessian('DsgeVarLikelihood',xparam1,options_.gstep,gend),nx,nx);
+            end
+            save([M_.fname '_mode.mat'],'xparam1','hh','fval');
+        else
+            save([M_.fname '_mode.mat'],'xparam1','hh','fval');
+        end
     end
-  elseif options_.mode_compute == 4
-    H0 = 1e-4*eye(nx);
-    crit = 1e-7;
-    nit = 1000;
-    verbose = 2;
-    if ~options_.bvar_dsge
-      [fval,xparam1,grad,hessian_csminwel,itct,fcount,retcodehat] = ...
-          csminwel('DsgeLikelihood',xparam1,H0,[],crit,nit,options_.gradient_method,gend,data,data_index,number_of_observations,no_more_missing_observations);
-      disp(sprintf('Objective function at mode: %f',fval))
-      disp(sprintf('Objective function at mode: %f',DsgeLikelihood(xparam1,gend,data,data_index,number_of_observations,no_more_missing_observations)))
-    else
-      [fval,xparam1,grad,hessian_csminwel,itct,fcount,retcodehat] = ...
-          csminwel('DsgeVarLikelihood',xparam1,H0,[],crit,nit,options_.gradient_method,gend);
-      disp(sprintf('Objective function at mode: %f',fval))
-      disp(sprintf('Objective function at mode: %f',DsgeVarLikelihood(xparam1,gend)))
-    end
-  elseif options_.mode_compute == 5
-    if isfield(options_,'hess')
-      flag = options_.hess;
-    else
-      flag = 1;
-    end
-    if ~exist('igg'),  % by M. Ratto
-      hh=[];
-      gg=[];
-      igg=[];
-    end   % by M. Ratto
-    if isfield(options_,'ftol')
-      crit = options_.ftol;
-    else
-      crit = 1.e-7;
-    end
-    if isfield(options_,'nit')
-      nit = options_.nit;
-    else
-      nit=1000;
-    end
-    if ~options_.bvar_dsge
-      [xparam1,hh,gg,fval,invhess] = newrat('DsgeLikelihood',xparam1,hh,gg,igg,crit,nit,flag,gend,data,data_index,number_of_observations,no_more_missing_observations);
-    else
-      [xparam1,hh,gg,fval,invhess] = newrat('DsgeVarLikelihood',xparam1,hh,gg,igg,crit,nit,flag,gend);
-    end
-    save([M_.fname '_mode.mat'],'xparam1','hh','gg','fval','invhess');
-  elseif options_.mode_compute == 6
-      if ~options_.bvar_dsge
-          fval = DsgeLikelihood(xparam1,gend,data,data_index,number_of_observations,no_more_missing_observations);
-      else
-          fval = DsgeVarLikelihood(xparam1,gend);
-      end
-      OldMode = fval;
-      if ~exist('MeanPar')
-          MeanPar = xparam1;
-      end
-      if exist('hh')
-          CovJump = inv(hh);
-      else% The covariance matrix is initialized with the prior
-          % covariance (a diagonal matrix) %%Except for infinite variances ;-)
-          varinit = 'prior';
-          if strcmpi(varinit,'prior')  
-              stdev = bayestopt_.pstdev;
-              indx = find(isinf(stdev));
-              stdev(indx) = ones(length(indx),1)*sqrt(10);
-              vars = stdev.^2;
-              CovJump = diag(vars);
-          elseif strcmpi(varinit,'eye')
-              vars = ones(length(bayestopt_.pstdev),1)*0.1;  
-              CovJump = diag(vars);          
-          else
-              disp('gmhmaxlik :: Error!')
-              return
-          end
-      end
-      OldPostVar = CovJump;
-      Scale = options_.mh_jscale;
-      for i=1:options_.Opt6Iter  
-          if i == 1
-              if options_.Opt6Iter > 1
-                  flag = '';
-              else
-                  flag = 'LastCall';
-              end
-              if ~options_.bvar_dsge
-                  [xparam1,PostVar,Scale,PostMean] = ...
-                      gmhmaxlik('DsgeLikelihood',xparam1,bounds,options_.Opt6Numb,Scale,flag,MeanPar,CovJump,gend,data,...
-                                data_index,number_of_observations,no_more_missing_observations);
-                  fval = DsgeLikelihood(xparam1,gend,data,data_index,number_of_observations,no_more_missing_observations);
-              else
-                  [xparam1,PostVar,Scale,PostMean] = ...
-                      gmhmaxlik('DsgeVarLikelihood',xparam1,bounds,options_.Opt6Numb,Scale,flag,MeanPar,CovJump,gend);
-                  fval = DsgeVarLikelihood(xparam1,gend);
-              end
-              options_.mh_jscale = Scale;
-              mouvement = max(max(abs(PostVar-OldPostVar)));
-              disp(['Change in the covariance matrix = ' num2str(mouvement) '.'])
-              disp(['Mode improvement = ' num2str(abs(OldMode-fval))])
-              OldMode = fval;
-          else
-              OldPostVar = PostVar;
-              if i<options_.Opt6Iter
-                  flag = '';
-              else
-                  flag = 'LastCall';
-              end
-              if ~options_.bvar_dsge
-                  [xparam1,PostVar,Scale,PostMean] = ...
-                      gmhmaxlik('DsgeLikelihood',xparam1,bounds,...
-                                options_.Opt6Numb,Scale,flag,PostMean,PostVar,gend,data,data_index,number_of_observations,no_more_missing_observations);
-                  fval = DsgeLikelihood(xparam1,gend,data,data_index,number_of_observations,no_more_missing_observations);
-              else
-                  [xparam1,PostVar,Scale,PostMean] = ...
-                      gmhmaxlik('DsgeVarLikelihood',xparam1,bounds,...
-                                options_.Opt6Numb,Scale,flag,PostMean,PostVar,gend);
-                  fval = DsgeVarLikelihood(xparam1,gend);          
-              end
-              options_.mh_jscale = Scale;
-              mouvement = max(max(abs(PostVar-OldPostVar)));
-              fval = DsgeLikelihood(xparam1,gend,data,data_index,number_of_observations,no_more_missing_observations);
-              disp(['Change in the covariance matrix = ' num2str(mouvement) '.'])
-              disp(['Mode improvement = ' num2str(abs(OldMode-fval))])
-              OldMode = fval;
-          end
-          bayestopt_.jscale = ones(length(xparam1),1)*Scale;%??!
-      end
-      hh = inv(PostVar);    
-  end
-  if options_.mode_compute ~= 5
-    if options_.mode_compute ~= 6
-      if ~options_.bvar_dsge
-	hh = reshape(hessian('DsgeLikelihood',xparam1,options_.gstep,gend,data,data_index,number_of_observations,no_more_missing_observations),nx,nx);
-      else
-	hh = reshape(hessian('DsgeVarLikelihood',xparam1,options_.gstep,gend),nx,nx);
-      end
-      save([M_.fname '_mode.mat'],'xparam1','hh','fval');
-    else
-      save([M_.fname '_mode.mat'],'xparam1','hh','fval');
-    end
-  end
-  save([M_.fname '_mode.mat'],'xparam1','hh');
+    save([M_.fname '_mode.mat'],'xparam1','hh');
 end
 
 if options_.mode_check == 1 & options_.posterior_mode_estimation
