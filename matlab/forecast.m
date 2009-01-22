@@ -41,12 +41,8 @@ function info = forecast(var_list,task)
     old_options = options_;
 
     maximum_lag = M_.maximum_lag;
-    options_ = set_default_option(options_,'periods',40);
-    if options_.periods == 0
-        options_.periods = 40;
-    end
-    horizon = options_.periods;
-    options_ = set_default_option(options_,'conf_sig',0.9);
+    horizon = options_.forecast;
+
 
     endo_names = M_.endo_names;
     if isempty(var_list)
@@ -100,17 +96,17 @@ function info = forecast(var_list,task)
     end 
     
     if M_.exo_det_nbr == 0
-        [yf,int_width] = forcst(oo_.dr,y0,options_.periods,var_list);
+        [yf,int_width] = forcst(oo_.dr,y0,horizon,var_list);
     else
         exo_det_length = size(oo_.exo_det_simul,1);
-        if options_.periods > exo_det_length
-            ex = zeros(options_.periods,M_.exo_nbr);
+        if horizon > exo_det_length
+            ex = zeros(horizon,M_.exo_nbr);
             oo_.exo_det_simul = [ oo_.exo_det_simul;...
                     repmat(oo_.exo_det_steady_state',...
-                           options_.periods- ... 
+                           horizon- ... 
                            exo_det_length,1)];
             %ex_det_length,1),1)];
-        elseif options_.periods < exo_det_length 
+        elseif horizon < exo_det_length 
             ex = zeros(exo_det_length,M_.exo_nbr); 
         end
         [yf,int_width] = simultxdet(y0,ex,oo_.exo_det_simul,...

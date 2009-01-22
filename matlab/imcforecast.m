@@ -29,8 +29,8 @@ if options_.loglinear == 1 & ~options_.logdata
   rawdata = log(rawdata);
 end
 if options_.prefilter == 1
-  bayestopt_.mean_varobs = mean(rawdata,1);
-  data = transpose(rawdata-ones(gend,1)*bayestopt_.mean_varobs);
+  bayestopt_.mean_varobs = mean(rawdata,1)';
+  data = transpose(rawdata-repmat(bayestopt_.mean_varobs',gend,1));
 else
   data = transpose(rawdata);
 end
