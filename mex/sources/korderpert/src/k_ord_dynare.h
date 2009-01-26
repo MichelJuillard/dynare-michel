@@ -212,6 +212,8 @@ public:
 	DynamicModel* clone() const
 	{return new KordpDynare(*this);}
 	void ReorderCols(TwoDMatrix * tdx, const int * varOrder);
+	Vector * KordpDynare::LLxSteady( const Vector& yS); // returns ySteady extended with leads and lags 
+
 private:
 	void writeModelInfo(Journal& jr) const;
 	int * ReorderDynareJacobianIndices( const int * varOrder);

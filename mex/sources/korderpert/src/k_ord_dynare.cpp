@@ -236,11 +236,19 @@ void KordpDynare::calcDerivatives(const Vector& yy, const Vector& xx)
 
     Vector& out= *(new Vector(nY));
 	out.zeros();
+	const Vector * llxYYp; // getting around the constantness
+	if ((nJcols - nExog) > yy.length()){
+		llxYYp=  (LLxSteady( yy));
+	} else {
+		llxYYp= &yy;
+	}
+	const Vector & llxYY=*(llxYYp);
+
 #ifdef DEBUG
 	mexPrintf("k_order_dynaare.cpp: Call eval in calcDerivatives\n");
 #endif
 	try {
-		dynamicDLL.eval( yy,  xx, //int nb_row_x, 
+		dynamicDLL.eval( llxYY,  xx, //int nb_row_x, 
 				params, //int it_, 
 				out, g1, NULL);
 	}
@@ -363,6 +371,38 @@ void KordpDynare::writeModelInfo(Journal& jr) const
 		rec1 << "Number of substitutions:         " << sinfo->num_substs << endrec;
 	}
 	**************/
+}
+/*********************************************************
+* LLxSteady()
+* returns ySteady extended with leads and lags suitable for 
+* passing to <model>_dynamic DLL
+*************************************************************/
+Vector * KordpDynare::LLxSteady( const Vector& yS){
+	if ((nJcols-nExog) == yS.length()) {
+		mexPrintf("k_ord_dynare.cpp: Warning in LLxSteady: ySteady already. right size");
+		return NULL;
+	}
+	// create temporary square 2D matrix size nEndo x nEndo (sparse)  
+	// for the lag, current and lead blocks of the jacobian
+	Vector * llxSteady = new Vector(nJcols-nExog); 
+	try{
+		for (int ll_row=0; ll_row< ll_Incidence->nrows(); ll_row++)
+		{
+			// populate (non-sparse) vector with ysteady values 
+			for (int i=0;i<nY;i++){
+				if(ll_Incidence->get(ll_row,i))
+					(*llxSteady)[ll_Incidence->get(ll_row,i)-1] = yS[i];
+			}
+		}
+	} catch (const TLException& e) {
+		mexPrintf("Caugth TL exception in LLxSteady: ");
+		e.print();
+		return NULL;// 255;
+	}catch (...){
+		mexPrintf(" Error in LLxSteady - wrong index?");
+	}
+
+	return llxSteady;
 }
 
 

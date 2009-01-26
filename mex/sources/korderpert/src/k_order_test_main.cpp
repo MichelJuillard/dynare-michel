@@ -65,28 +65,24 @@ int main(int argc, char* argv[])
 			0.0, 0.0250e-3};
 		npar = 2;//(int)mxGetN(mxFldp);
 		TwoDMatrix * vCov =  new TwoDMatrix(npar, npar, (d2Dparams));
-		
-		double dYSparams [31]= { // mxGetData(mxFldp);
-			1.0110, 2.2582, 5.8012, 1.0000, 1.0000, 0.5808, 1.0110, 2.2582,
-			0.4477, 1.0000, 4.5959, 1.0212, 5.8012, 0.8494, 0.1872, 0.8604,
-			1.0030, 1.0080, 1.0000, 1.0000, 0.5808, 1.0030, 2.2582, 0.4477,
-			1.0110, 2.2582, 0.4477, 1.0000, 0.1872, 2.2582, 0.4477
+		double dYSparams [16]= { // 27 mxGetData(mxFldp);
+		//	1.0110,  2.2582,  5.8012,  0.5808,  
+			1.0110,  2.2582,  0.4477,  1.0000
+		,   4.5959,  1.0212,  5.8012,  0.8494
+		,   0.1872,  0.8604,  1.0030,  1.0080
+		,   0.5808,  1.0030,  2.2582,  0.4477
+		//,  1.0110,  2.2582,  0.4477,  1.0000,	0.1872,  2.2582,  0.4477
 		};
-
-		
-		//			1.0110, 2.2582, 0.4477, 1.0000, 4.5959, 1.0212, 5.8012, 0.8494,
-//				0.1872, 0.8604, 1.0030, 1.0080, 1.0000, 1.0000, 0.5808, 1.0030
-//		};
-		const int nSteady = 31;//29, 16 (int)mxGetM(mxFldp);
+		const int nSteady = 16;//27 //31;//29, 16 (int)mxGetM(mxFldp);
 		Vector * ySteady =  new Vector(dYSparams, nSteady);
 
 
 		//mxFldp = mxGetField(dr, 0,"nstatic" );
 		const int nStat = 7;//(int)mxGetScalar(mxFldp);
 		//	mxFldp = mxGetField(dr, 0,"npred" );
-		const int nPred = 4;//6 - nBoth (int)mxGetScalar(mxFldp);
+		const int nPred = 2;//6 - nBoth (int)mxGetScalar(mxFldp);
 		//mxFldp = mxGetField(dr, 0,"nspred" );
-		const int nsPred = 6;//(int)mxGetScalar(mxFldp);
+		const int nsPred = 4;//(int)mxGetScalar(mxFldp);
 		//mxFldp = mxGetField(dr, 0,"nboth" );
 		const int nBoth = 2;// (int)mxGetScalar(mxFldp);
 		//mxFldp = mxGetField(dr, 0,"nfwrd" );
@@ -97,7 +93,7 @@ int main(int argc, char* argv[])
 		//mxFldp = mxGetField(M_, 0,"exo_nbr" );
 		const int nExog =2;// (int)mxGetScalar(mxFldp);
 		//mxFldp = mxGetField(M_, 0,"endo_nbr" );
-		const int nEndo = 18;//16(int)mxGetScalar(mxFldp);
+		const int nEndo = 16;//16(int)mxGetScalar(mxFldp);
 		//mxFldp = mxGetField(M_, 0,"param_nbr" );
 		const int nPar = 7;//(int)mxGetScalar(mxFldp);
         // it_ should be set to M_.maximum_lag
@@ -106,37 +102,29 @@ int main(int argc, char* argv[])
 
 		int var_order[]//[18]
         = {
-			 5,  6,  8, 10, 11, 12, 16,  7, 13, 14, 15,  1,  2,  3, 4,  9, 17, 18
+			5,   6,   8,  10,  11,  12,  14,   7,  13,   1,   2,   3,   4,   9,   15,  16
+//			 5,  6,  8, 10, 11, 12, 16,  7, 13, 14, 15,  1,  2,  3, 4,  9, 17, 18
 		};
 		//Vector * varOrder =  new Vector(var_order, nEndo);
 
 		const double ll_incidence []//[3][18] 
         = {
-/*            1,  2,  0,  0,  0,  0,  3,  0,  0,  0,  0,  0,  4,  5
-            ,  6,  0,  0,  0
-            ,  7,  8,  9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20
-            , 21, 22, 23, 24
-            ,  25, 26, 27, 28,  0,  0,  0,  0, 29,  0,  0,  0,  0,  0
-            ,  0,  0, 30, 31
- */
-                1,   7,  25
-            ,   2,   8,  26
-            ,   0,   9,  27
-            ,   0,  10,  28
-            ,   0,  11,   0
-            ,   0,  12,   0
-            ,   3,  13,   0
-            ,   0,  14,   0
-            ,   0,  15,  29
-            ,   0,  16,   0
-            ,   0,  17,   0
-            ,   0,  18,   0
-            ,   4,  19,   0
-            ,   5,  20,   0
-            ,   6,  21,   0
-            ,   0,  22,   0
-            ,   0,  23,  30
-            ,   0,  24,  31 
+				1,   5,  21
+			,   2,   6,  22
+			,   0,   7,  23
+			,   0,   8,  24
+			,   0,   9,   0
+			,   0,  10,   0
+			,   3,  11,   0
+			,   0,  12,   0
+			,   0,  13,  25
+			,   0,  14,   0
+			,   0,  15,   0
+			,   0,  16,   0
+			,   4,  17,   0
+			,   0,  18,   0
+			,   0,  19,  26
+			,   0,  20,  27
 		};
 		TwoDMatrix * llincidence = new TwoDMatrix (	3, nEndo, ll_incidence );
 			
@@ -145,9 +133,9 @@ int main(int argc, char* argv[])
         mexPrintf("k_order_perturbation: jcols= %d .\n", jcols);
 #endif
         //mxFldp= mxGetField(M_, 0,"endo_names" );
-        const int nendo = 18;//16(int)mxGetM(mxFldp);
+        const int nendo = 16;//16(int)mxGetM(mxFldp);
         const int widthEndo = 6;// (int)mxGetN(mxFldp);
-		const char * cNamesCharStr= "mPceWRkdnlggYPydPc          yp__ A22          __oo              oobb              bbss              ss      ";
+		const char * cNamesCharStr= "mPceWRkdnlggydPc          yp A22          __              oo              bb              ss    ";
 		//   const char**  endoNamesMX= DynareMxArrayToString( mxFldp,nendo,widthEndo);
 		const char**  endoNamesMX= DynareMxArrayToString( cNamesCharStr, nendo, widthEndo);
 #ifdef DEBUG		
