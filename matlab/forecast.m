@@ -75,7 +75,7 @@ function info = forecast(var_list,task)
           v_name = deblank(M_.endo_names(i,:));
           y0(i,:) = y_smoothed.(v_name)(end-maximum_lag+1:end)+oo_.dr.ys(i);
       end
-      gend = size(y0,2);
+      gend = options_.nobs;
       if isfield(oo_.Smoother,'TrendCoeffs')
           var_obs = options_.varobs;
           endo_names = M_.endo_names;
@@ -90,6 +90,10 @@ function info = forecast(var_list,task)
               end
           end         
           trend = trend_coeffs*(gend+(1-M_.maximum_lag:horizon));
+      end
+      global bayestopt_
+      if isfield(bayestopt_,'mean_varobs')
+          trend = trend + repmat(bayestopt_.mean_varobs,1,horizon+M_.maximum_lag);
       end
      otherwise
       error('Wrong flag value')
