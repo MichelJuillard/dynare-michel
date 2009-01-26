@@ -33,7 +33,12 @@ global options_ oo_ M_ oo_recursive_
 var_list = check_list_of_variables(options_, M_, var_list);
 options_.varlist = var_list;
 
-nobs = options_.nobs;
+if isfield(options_,'nobs')
+    nobs = options_.nobs;
+else
+    nobs = [];
+end
+
 nnobs = length(nobs);
 horizon = options_.forecast;
 
