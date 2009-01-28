@@ -402,6 +402,10 @@ Vector * KordpDynare::LLxSteady( const Vector& yS){
 		mexPrintf(" Error in LLxSteady - wrong index?");
 	}
 
+#ifdef DEBUG		
+	for (int j=0;j<nJcols-nExog;j++)
+			mexPrintf("LLxSteady: [%d] =%f .\n", j, (*llxSteady)[j]);
+#endif	
 	return llxSteady;
 }
 

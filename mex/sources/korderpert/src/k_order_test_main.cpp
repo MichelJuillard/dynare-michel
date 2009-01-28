@@ -215,8 +215,7 @@ int main(int argc, char* argv[])
 			mexPrintf("k_order_perturbation: Calling walkStochSteady.\n");
 #endif			
             app.walkStochSteady();		
-			
-			
+						
 			// open mat file
 			std::string matfile(fName);//(params.basename);
 			matfile += ".mat";

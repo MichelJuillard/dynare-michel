@@ -269,39 +269,43 @@ extern "C" {
     		else
             	irf_list_ind = ((const DynareNameList&)dynare.getExogNames()).selectIndices(params.irf_list);
     ****************/			
-			try {
 				// intiate tensor library
 #ifdef DEBUG		
-		mexPrintf("k_order_perturbation: Call tls init\n");
+	mexPrintf("k_order_perturbation: Call tls init\n");
 #endif
-                tls.init(dynare.order(),
-					dynare.nstat()+2*dynare.npred()+3*dynare.nboth()+
-					2*dynare.nforw()+dynare.nexog());
-                
-				// construct main K-order approximation class
+            tls.init(dynare.order(),
+				dynare.nstat()+2*dynare.npred()+3*dynare.nboth()+
+				2*dynare.nforw()+dynare.nexog());
+            
+			// construct main K-order approximation class
 //				FistOrderApproximation app(dynare, journal, nSteps);
 #ifdef DEBUG		
-		mexPrintf("k_order_perturbation: Call Approximation constructor \n");
+	mexPrintf("k_order_perturbation: Call Approximation constructor \n");
 #endif
-				Approximation app(dynare, journal, nSteps);
-                // run stochastic steady 
+			Approximation app(dynare, journal, nSteps);
+            // run stochastic steady 
 #ifdef DEBUG		
-		mexPrintf("k_order_perturbation: Calling walkStochSteady.\n");
+	mexPrintf("k_order_perturbation: Calling walkStochSteady.\n");
 #endif			
-                app.walkStochSteady();		
+            app.walkStochSteady();		
 
-			} catch (const KordException& e) {
-				// tell about the exception and continue
-				printf("Caught (not yet fatal) Kord exception: ");
-				e.print();
-				JournalRecord rec(journal);
-				rec << "Solution routine not finished (" << e.get_message()
-					<< "), see what happens" << endrec; 
-			} catch (const TLException& e) {
-				mexErrMsgTxt("Caugth TL exception.");
-			} catch (SylvException& e) {
-				mexErrMsgTxt("Caught Sylv exception.");
-            }
+			// open mat file
+			std::string matfile(fName);//(params.basename);
+			matfile += ".mat";
+			FILE* matfd = NULL;
+			if (NULL == (matfd=fopen(matfile.c_str(), "wb"))) {
+				fprintf(stderr, "Couldn't open %s for writing.\n", matfile.c_str());
+				exit(1);
+			}
+
+			std::string ss_matrix_name(fName);//params.prefix);
+			ss_matrix_name += "_steady_states";
+			ConstTwoDMatrix(app.getSS()).writeMat4(matfd, ss_matrix_name.c_str());
+
+			// write the folded decision rule to the Mat-4 file
+			app.getFoldDecisionRule().writeMat4(matfd, fName);//params.prefix);
+
+			fclose(matfd);
 
 			/***********************            
 			std::string ss_matrix_name("K_ordp");//params.prefix);
