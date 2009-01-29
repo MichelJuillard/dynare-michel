@@ -70,15 +70,13 @@ function resid(period)
   end
   
   for i=1:length(z)
-    if abs(z(i)) < 10^(-12)
-      z(i) = 0;
+    if abs(z(i)) < options_.dynatol/100
+        tmp = 0;
+    else
+        tmp = z(i);
     end
-    disp(['Residual for equation number ' int2str(i) ' is equal to ' num2str(z(i))])
+    disp(['Residual for equation number ' int2str(i) ' is equal to ' num2str(tmp)])
   end  
   for i = 1:2
     disp(' ')
   end
-
-
-
-
