@@ -131,7 +131,7 @@ for iter = 1:options_.maxit
   oo_.endo_simul = oo_.endo_simul(:);
   err_f = 0;
   
-  fid = fopen('dynare.swp','w+') ;
+  fid = fopen([M_.fname '.swp'],'w+') ;
 
   it_ = 1+M_.maximum_lag ;
   ic = [1:ny] ;
