@@ -877,6 +877,7 @@ Interpreter::simulate_a_block(int size,int type, string file_name, string bin_ba
                 //Direct_Simulate(Block_Count, symbol_table_endo_nbr, it_, y_kmin, y_kmax, size, 0, false, iter);
                 //Direct_Simulate(Block_Count, symbol_table_endo_nbr, it_, y_kmin, y_kmax, size, 0, false, iter);
                 //simulate_NG1(Block_Count, symbol_table_endo_nbr, it_, y_kmin, y_kmax, size, 0, /*true*/false, cvg, iter);
+                cvg=false;
                 simulate_NG(Block_Count, symbol_table_endo_nbr, it_, y_kmin, y_kmax, size, false, cvg, iter);
                 //simulate_NG1(Block_Count, symbol_table_endo_nbr, it_, y_kmin, y_kmax, size, periods, true, cvg, iter);
               }
@@ -958,6 +959,7 @@ Interpreter::simulate_a_block(int size,int type, string file_name, string bin_ba
                 set_code_pointer(begining);
                 Per_y_=it_*y_size;
                 compute_block_time(0);
+                cvg=false;
                 //Direct_Simulate(Block_Count, symbol_table_endo_nbr, it_, y_kmin, y_kmax, size, 1, false, iter);
                 simulate_NG(Block_Count, symbol_table_endo_nbr, it_, y_kmin, y_kmax, size, false, cvg, iter);
               }
@@ -969,7 +971,9 @@ Interpreter::simulate_a_block(int size,int type, string file_name, string bin_ba
         break;
       case SOLVE_TWO_BOUNDARIES_SIMPLE :
       case SOLVE_TWO_BOUNDARIES_COMPLETE:
-        mexPrintf("omp_get_max_threads=%d\n",omp_get_max_threads());
+#if GNUVER >= 432
+        //mexPrintf("omp_get_max_threads=%d\n",omp_get_max_threads());
+#endif
 #ifdef DEBUGC
         mexPrintf("SOLVE_TWO_BOUNDARIES_COMPLETE\n");
         mexEvalString("drawnow;");
@@ -1147,6 +1151,7 @@ Interpreter::simulate_a_block(int size,int type, string file_name, string bin_ba
                 mexPrintf("\n");*/
               }
             res1=res2=max_res=0;
+            cvg = false;
             if(Gaussian_Elimination)
               simulate_NG1(Block_Count, symbol_table_endo_nbr, it_, y_kmin, y_kmax, size, periods, true, cvg, iter);
             else

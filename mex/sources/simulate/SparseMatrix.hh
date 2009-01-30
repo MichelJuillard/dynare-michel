@@ -34,6 +34,7 @@
 #endif
 #define NEW_ALLOC
 #define MARKOVITZ
+//#define PROFILER
 //#define MEMORY_LEAKS
 
 using namespace std;
@@ -84,17 +85,17 @@ class SparseMatrix
     void Read_file(string file_name, int periods, int u_size1, int y_size, int y_kmin, int y_kmax, int &nb_endo, int &u_count, int &u_count_init, double* u);
 
  private:
-    void Init(int periods, int y_kmin, int y_kmax, int Size, map<pair<pair<int, int> ,int>, int> IM);
-    void ShortInit(int periods, int y_kmin, int y_kmax, int Size, map<pair<pair<int, int> ,int>, int> IM);
-    void Simple_Init(int it_, int y_kmin, int y_kmax, int Size, std::map<std::pair<std::pair<int, int> ,int>, int> IM);
+    void Init(int periods, int y_kmin, int y_kmax, int Size, map<pair<pair<int, int> ,int>, int> &IM);
+    void ShortInit(int periods, int y_kmin, int y_kmax, int Size, map<pair<pair<int, int> ,int>, int> &IM);
+    void Simple_Init(int it_, int y_kmin, int y_kmax, int Size, std::map<std::pair<std::pair<int, int> ,int>, int> &IM);
     void End(int Size);
     bool compare( int *save_op, int *save_opa, int *save_opaa, int beg_t, int periods, long int nop4,  int Size
 #ifdef PROFILER
                  , long int *ndiv, long int *nsub
 #endif
                 );
-    void Insert(int r, int c, int u_index, int lag_index);
-    void Delete(int r,int c, int Size, int *b);
+    void Insert(const int r, const int c, const int u_index, const int lag_index);
+    void Delete(const int r,const int c, const int Size);
     int At_Row(int r, NonZeroElem **first);
     int At_Pos(int r, int c, NonZeroElem **first);
     int At_Col(int c, NonZeroElem **first);
