@@ -190,9 +190,9 @@ function y = solve_two_boundaries(fname, y, x, params, y_index, nze, periods, y_
           end;
         end;
       end;
-      iter=iter+1;
-      disp(['iteration: ' num2str(iter,'%d') ' error: ' num2str(max_res,'%e')]);
     end
+    iter=iter+1;
+    disp(['iteration: ' num2str(iter,'%d') ' error: ' num2str(max_res,'%e')]);
   end;
   if (iter>maxit_)
     disp(['No convergence after ' num2str(iter,'%4d') ' iterations in Block ' num2str(Block_Num,'%d')]);
