@@ -110,6 +110,11 @@ extern "C" {
 			kOrder = (int)mxGetScalar(mxFldp);
 		else
 			kOrder = 1;
+
+		double qz_criterium = 1+1e-6;
+		mxFldp = mxGetField(options_, 0,"qz_criterium" );
+		if (mxIsNumeric(mxFldp))
+			qz_criterium = (int)mxGetScalar(mxFldp);
 		
 		mxFldp 	= mxGetField(M_, 0,"params" );
 		double * dparams = (double *) mxGetData(mxFldp);
@@ -118,19 +123,14 @@ extern "C" {
 #ifdef DEBUG		
     mexPrintf("k_ord_perturbation: nParams=%d .\n",npar);  
     for (int i = 0; i < npar; i++) {
-        mexPrintf("k_ord_perturbation: dParams[%d]= %g.\n", i, dparams+i*(sizeof(double)) );  }
-    for (int i = 0; i < npar; i++) {
         mexPrintf("k_ord_perturbation: Params[%d]= %g.\n", i, (*modParams)[i]);  }
-
 #endif		        
-		const mxArray* const mxParFldp  = mxGetField(M_, 0,"params" );
-        Vector params_vec((const double*)mxGetPr(mxParFldp), npar);
+		//const mxArray* const mxParFldp  = mxGetField(M_, 0,"params" );
+        //Vector params_vec((const double*)mxGetPr(mxParFldp), npar);
 #ifdef DEBUG		
-	for (int i = 0; i < npar; i++) {
-        mexPrintf("k_ord_perturbation: params_vec[%d]= %g.\n", i, params_vec[i] );   }
-
+//	for (int i = 0; i < npar; i++) {
+//        mexPrintf("k_ord_perturbation: params_vec[%d]= %g.\n", i, params_vec[i] );   }
 #endif		        
-
 
 		mxFldp 	= mxGetField(M_, 0,"Sigma_e" );
 		dparams = (double *) mxGetData(mxFldp);
@@ -138,9 +138,9 @@ extern "C" {
 		TwoDMatrix * vCov =  new TwoDMatrix(npar, npar, dparams);
 
 
-//		mxFldp 	= mxGetField(oo_, 0,"steady_state" ); // use in order of declaration
+		mxFldp 	= mxGetField(oo_, 0,"steady_state" ); // use in order of declaration
 //		mxFldp 	= mxGetField(dr, 0,"ys" );  // and not in order of dr.order_var
-		mxFldp 	= mxGetField(oo_, 0,"dyn_ys" );  // extended ys
+//		mxFldp 	= mxGetField(oo_, 0,"dyn_ys" );  // and NOT extended ys
 		dparams = (double *) mxGetData(mxFldp);
 		const int nSteady = (int)mxGetM(mxFldp);
 		Vector * ySteady =  new Vector(dparams, nSteady);
@@ -172,18 +172,39 @@ extern "C" {
 		nPred -= nBoth; // correct nPred for nBoth.
 
 		mxFldp 	= mxGetField(dr, 0,"order_var" );
-		int * var_order = (int *) mxGetData(mxFldp);
+		dparams = (double *) mxGetData(mxFldp);
 		npar = (int)mxGetM(mxFldp);
 		if (npar != nEndo) {  //(nPar != npar)
 			mexErrMsgTxt("Incorrect number of input var_order vars.\n");
 			//return;
 		} 
-//		Vector * varOrder =  new Vector(var_order, nEndo);
+		vector<int> * var_order_vp = (new vector<int>(nEndo));//nEndo));
+		for (int v=0;v<nEndo;v++){
+			(*var_order_vp)[v] =(int)(*(dparams++));//[v];
+#ifdef DEBUG		
+			mexPrintf("var_order_vp)[%d] = %d .\n", v, (*var_order_vp)[v] );
+#endif
+		}
 
+		// the lag, current and lead blocks of the jacobian respectively
 		mxFldp 	= mxGetField(M_, 0,"lead_lag_incidence" );
 		dparams = (double *) mxGetData(mxFldp);
 		npar = (int)mxGetN(mxFldp);
-		TwoDMatrix * llincidence =  new TwoDMatrix(npar, nEndo, dparams);
+		int nrows = (int)mxGetM(mxFldp);
+#ifdef DEBUG		
+		mexPrintf("ll_Incidence nrows=%d, ncols = %d .\n", nrows, npar);
+#endif
+		TwoDMatrix * llincidence =  new TwoDMatrix ( nrows, npar,dparams);
+		if (npar != nEndo){
+			mexPrintf("Incorrect length of lead lag incidences: ncol=%d != nEndo =%d .\n", npar, nEndo);
+			return;
+		}
+#ifdef DEBUG		
+		for (int j=0;j<nrows;j++){
+			for (int i=0;i<nEndo;i++){
+				mexPrintf("llincidence->get(%d,%d) =%d .\n", 
+					j, i, (int)llincidence->get(j,i));}}
+#endif
 
         const int jcols = nExog+nEndo+nsPred+nsForw; // Num of Jacobian columns
         mexPrintf("k_order_perturbation: jcols= %d .\n", jcols);
@@ -218,16 +239,14 @@ extern "C" {
 ************/
 		if ((nEndo != nendo)||(nExog != nexo)) {  //(nPar != npar)
 			mexErrMsgTxt("Incorrect number of input parameters.\n");
-			//return;
+			return;
 		}
 
 #ifdef DEBUG		
 	for (int i = 0; i < nEndo; i++) {
         mexPrintf("k_ord_perturbation: EndoNameList[%d]= %s.\n", i, endoNamesMX[i] );   }
-	for (int i = 0; i < nPar; i++) {
-        mexPrintf("k_ord_perturbation: params_vec[%d]= %g.\n", i, params_vec[i] );   }
-    for (int i = 0; i < nPar; i++) {
-        mexPrintf("k_ord_perturbation: Params[%d]= %g.\n", i, (*modParams)[i]);  }
+//    for (int i = 0; i < nPar; i++) {
+//        mexPrintf("k_ord_perturbation: Params[%d]= %g.\n", i, (*modParams)[i]);  }
 	for (int i = 0; i < nSteady; i++) {
         mexPrintf("k_ord_perturbation: ysteady[%d]= %g.\n", i, (*ySteady)[i]);  }
 
@@ -257,8 +276,8 @@ extern "C" {
 			// make KordpDynare object
 			KordpDynare dynare(endoNamesMX,  nEndo, exoNamesMX,  nExog, nPar, // paramNames,
    			   ySteady, vCov, modParams, nStat, nPred, nForw, nBoth,
-			   jcols, nSteps, kOrder, journal, dynamicDLL, sstol, var_order, 
-			   llincidence );
+			   jcols, nSteps, kOrder, journal, dynamicDLL, sstol, var_order_vp, 
+			   llincidence,qz_criterium );
     /************			
 			// make list of shocks for which we will do IRFs
 			vector<int> irf_list_ind;
@@ -650,8 +669,8 @@ void DynamicModelDLL::eval(const Vector&y, const TwoDMatrix&x, const  Vector* mo
             , g1->ncols(),g1->nrows());
         for (int i = 0; i < modParams->length(); i++) {
             mexPrintf("k_ord_perturbation: Params[%d]= %g.\n", i, (*modParams)[i]);  }
-        for (int i = 0; i < length; i++) {
-            mexPrintf("k_ord_perturbation: Params[%d]= %g.\n", i, y[i]);} 
+        for (int i = 0; i < jcols-nExog; i++) {
+            mexPrintf("k_ord_perturbation: Ys[%d]= %g.\n", i, y[i]);} 
 		mexPrintf("k_order_perturbation: call <model> Dynamic dParams= %d ,  , dy = %d dx = %d .\n"
             ,dbParams[0],dy[0],dx[0]);
 

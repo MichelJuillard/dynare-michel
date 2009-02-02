@@ -141,16 +141,18 @@ friend class DynamicModelDLL;
 	DynareExogNameList* denl;
 	DynareStateNameList* dsnl;
 	const double ss_tol;
-	const int* varOrder;
+	const vector<int>* varOrder;
 	const TwoDMatrix * ll_Incidence;
-	int * JacobianIndices;
+	double qz_criterium;
+	vector<int> * JacobianIndices;
 public:
 	KordpDynare(const char** endo, int num_endo,
 		const char** exo, int num_exo, int num_par, //const char** par,
 		Vector* ySteady, TwoDMatrix* vCov, Vector* params, int nstat,int nPred, 
 		int nforw, int nboth, const int nJcols, const int nSteps, const int ord, 	//const char* modName,
 		Journal& jr, DynamicModelDLL& dynamicDLL, double sstol, 
-		const int* varOrder, const TwoDMatrix * ll_Incidence );
+		const vector<int>* varOrder, const TwoDMatrix * ll_Incidence, 
+		double qz_criterium );
 
 	/** Makes a deep copy of the object. */
 	KordpDynare(const KordpDynare& dyn);
@@ -212,11 +214,13 @@ public:
 	DynamicModel* clone() const
 	{return new KordpDynare(*this);}
 	void ReorderCols(TwoDMatrix * tdx, const int * varOrder);
+	void ReorderCols(TwoDMatrix * tdx, const vector<int> * varOrder);
 	Vector * KordpDynare::LLxSteady( const Vector& yS); // returns ySteady extended with leads and lags 
 
 private:
 	void writeModelInfo(Journal& jr) const;
 	int * ReorderDynareJacobianIndices( const int * varOrder);
+	vector<int> * ReorderDynareJacobianIndices( const vector<int> * varOrder);
 	void ReorderBlocks(TwoDMatrix * tdx, const int * varOrder);
 };
 

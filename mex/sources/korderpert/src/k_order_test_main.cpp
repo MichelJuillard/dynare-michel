@@ -31,7 +31,7 @@
 int main(int argc, char* argv[])
 {
 
-
+	double qz_criterium = 1+1e-6;
 	const int check_flag = 0;
 	const char*  fName = "fs2000k";//mxArrayToString(mFname);
 	
@@ -48,7 +48,6 @@ int main(int argc, char* argv[])
 		0.7870,
 		0.0200
 	};
-	
 	Vector * modParams =  new Vector(dparams, npar);
 	
 #ifdef DEBUG		
@@ -106,7 +105,10 @@ int main(int argc, char* argv[])
 //			 5,  6,  8, 10, 11, 12, 16,  7, 13, 14, 15,  1,  2,  3, 4,  9, 17, 18
 		};
 		//Vector * varOrder =  new Vector(var_order, nEndo);
-
+		vector<int> * var_order_vp = new vector<int>(nEndo);//nEndo));
+		for (int v=0;v<nEndo;v++)
+            (*var_order_vp)[v] =var_order[v];
+        
 		const double ll_incidence []//[3][18] 
         = {
 				1,   5,  21
@@ -195,8 +197,8 @@ int main(int argc, char* argv[])
 			// make KordpDynare object
 			KordpDynare dynare(endoNamesMX,  nEndo, exoNamesMX,  nExog, nPar // paramNames,
 				, ySteady, vCov, modParams, nStat, nPred, nForw, nBoth
-				, jcols, nSteps, kOrder, journal, dynamicDLL, sstol, var_order 
-				, llincidence );
+				, jcols, nSteps, kOrder, journal, dynamicDLL, sstol, var_order_vp //var_order 
+				, llincidence, qz_criterium);
 			// intiate tensor library
 #ifdef DEBUG		
 			mexPrintf("k_order_perturbation: Call tls init\n");
