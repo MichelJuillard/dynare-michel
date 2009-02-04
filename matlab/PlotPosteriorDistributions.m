@@ -80,7 +80,7 @@ for i=1:npar
   if TeX
     TeXNAMES = strvcat(TeXNAMES,texnam);
   end
-  [x2,f2,abscissa,dens,binf2,bsup2] = draw_prior_density(i);
+  [x2,f2,abscissa,dens,binf2,bsup2] = draw_prior_density(i,bayestopt_);
   top2 = max(f2); 
   if i <= nvx
     name = deblank(M_.exo_names(estim_params_.var_exo(i,1),:));  

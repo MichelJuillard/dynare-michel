@@ -49,7 +49,7 @@ if nbplt == 1
         NAMES    = []; 
     end    
     for i=1:npar
-        [x,f,abscissa,dens,binf,bsup] = draw_prior_density(i);
+        [x,f,abscissa,dens,binf,bsup] = draw_prior_density(i,bayestopt_);
         [nam,texnam] = get_the_name(i,TeX);
         if TeX
             TeXNAMES = strvcat(TeXNAMES,texnam);
@@ -93,7 +93,7 @@ else
             names = [];
             i = (plt-1)*nstar + index;
             [nam,texnam] = get_the_name(i,TeX);
-            [x,f,abscissa,dens,binf,bsup] = draw_prior_density(i);            
+            [x,f,abscissa,dens,binf,bsup] = draw_prior_density(i,bayestopt_);            
             if TeX
                 TeXNAMES = strvcat(TeXNAMES,texnam);
                 NAMES = strvcat(NAMES,nam);
@@ -131,7 +131,7 @@ else
     end    
     for index=1:npar-(nbplt-1)*nstar
         i = (nbplt-1)*nstar +  index;
-        [x,f,abscissa,dens,binf,bsup] = draw_prior_density(i);
+        [x,f,abscissa,dens,binf,bsup] = draw_prior_density(i,bayestopt_);
         [nam,texnam] = get_the_name(i,TeX);
         if TeX
             TeXNAMES = strvcat(TeXNAMES,texnam);

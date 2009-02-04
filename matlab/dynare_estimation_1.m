@@ -31,11 +31,6 @@ function dynare_estimation_1(var_list_,dname)
 
 global M_ options_ oo_ estim_params_ bayestopt_
 
-
-%% Build var_list_
-var_list_ = check_list_of_variables(options_, M_, var_list_);
-options_.varlist = var_list_;
-
 options_.lgyidx2varobs = zeros(size(M_.endo_names,1),1);
 for i = 1:size(M_.endo_names,1)
   tmp = strmatch(deblank(M_.endo_names(i,:)),options_.varobs,'exact');

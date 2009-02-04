@@ -1,22 +1,23 @@
-function [x,f,abscissa,dens,binf,bsup] = draw_prior_density(indx);
+function [x,f,abscissa,dens,binf,bsup] = draw_prior_density(indx,bayestopt_);
 % function [x,f,abscissa,dens,binf,bsup] = draw_prior_density(indx)
 % Computes values of prior density at many points (before plotting)
 %
 % INPUTS
-%    indx:      parameter number
+%    indx          [integer]    Parameter number.
+%    bayestopt_    [structure]  Describes the prior beliefs.
 %    
 % OUTPUTS
-%    x:         subset of 'abscissa' such as the density is less than 10
-%    f:         subset of 'dens' such as the density is less than 10
-%    abscissa:  abscissa 
-%    dens:      density
-%    binf:      first element of x
-%    bsup:      last element of x
+%    x             [double]     Row vector, subset of 'abscissa' such as the density is less than 10
+%    f             [double]     Row vector, subset of 'dens' such as the density is less than 10
+%    abscissa      [double]     Row vector, abscissa 
+%    dens          [double]     Row vector, density
+%    binf:         [double]     Scalar, first element of x
+%    bsup:         [double]     Scalar, last element of x
 %    
 % SPECIAL REQUIREMENTS
 %    none
 
-% Copyright (C) 2004-2008 Dynare Team
+% Copyright (C) 2004-2009 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -32,8 +33,6 @@ function [x,f,abscissa,dens,binf,bsup] = draw_prior_density(indx);
 %
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
-
-global bayestopt_
 
 pmean   = bayestopt_.pmean;
 pshape  = bayestopt_.pshape; 
