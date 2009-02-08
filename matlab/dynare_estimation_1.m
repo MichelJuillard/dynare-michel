@@ -526,7 +526,11 @@ if options_.mode_compute > 0 & options_.posterior_mode_estimation
                 end
             end
         end
-        save([M_.fname '_mode.mat'],'xparam1','hh','bayestopt_');
+        if options_.cova_compute
+            save([M_.fname '_mode.mat'],'xparam1','hh','bayestopt_');
+        else
+            save([M_.fname '_mode.mat'],'xparam1','bayestopt_');
+        end
     end
 end
 
