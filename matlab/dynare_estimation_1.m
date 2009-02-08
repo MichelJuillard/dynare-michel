@@ -341,7 +341,6 @@ if options_.mode_compute == 0 & length(options_.mode_file) == 0
         eval(['oo_.SmoothedShocks.' deblank(M_.exo_names(i,:)) ' = innov(i,:)'';']);
 	end
     end
-    save([M_.fname '_mode.mat'],'xparam1','hh','bayestopt_');
     return;
 end
 
