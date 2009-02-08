@@ -524,6 +524,8 @@ if options_.mode_compute > 0 & options_.posterior_mode_estimation
                 else
                     hh = reshape(hessian('DsgeVarLikelihood',xparam1,options_.gstep,gend),nx,nx);
                 end
+            else
+                nn = repmat(NaN,length(xparam1),length(xparam1))
             end
         end
         if options_.cova_compute
