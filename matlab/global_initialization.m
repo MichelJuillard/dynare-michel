@@ -182,6 +182,7 @@ function global_initialization()
   options_.trace_plot_ma = 200;
   options_.mh_autocorrelation_function_size = 30;
   options_.plot_priors = 0;
+  options_.cova_compute = 1;
   
   % Misc
   options_.conf_sig = 0.6;

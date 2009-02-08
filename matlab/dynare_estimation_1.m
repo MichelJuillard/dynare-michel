@@ -516,10 +516,14 @@ if options_.mode_compute > 0 & options_.posterior_mode_estimation
     end
     if options_.mode_compute ~= 5
         if options_.mode_compute ~= 6
-            if ~options_.bvar_dsge
-                hh = reshape(hessian('DsgeLikelihood',xparam1,options_.gstep,gend,data,data_index,number_of_observations,no_more_missing_observations),nx,nx);
-            else
-                hh = reshape(hessian('DsgeVarLikelihood',xparam1,options_.gstep,gend),nx,nx);
+            if options_.cova_compute == 1
+                if ~options_.bvar_dsge
+                    hh = reshape(hessian('DsgeLikelihood',xparam1, ...
+                                         options_.gstep,gend,data,data_index,number_of_observations,...
+                                         no_more_missing_observations),nx,nx);
+                else
+                    hh = reshape(hessian('DsgeVarLikelihood',xparam1,options_.gstep,gend),nx,nx);
+                end
             end
         end
         save([M_.fname '_mode.mat'],'xparam1','hh','bayestopt_');
