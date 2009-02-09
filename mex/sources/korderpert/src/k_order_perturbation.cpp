@@ -138,8 +138,8 @@ extern "C" {
 		TwoDMatrix * vCov =  new TwoDMatrix(npar, npar, dparams);
 
 
-		mxFldp 	= mxGetField(oo_, 0,"steady_state" ); // use in order of declaration
-//		mxFldp 	= mxGetField(dr, 0,"ys" );  // and not in order of dr.order_var
+//		mxFldp 	= mxGetField(oo_, 0,"steady_state" ); // use in order of declaration
+		mxFldp 	= mxGetField(dr, 0,"ys" );  // and not in order of dr.order_var
 //		mxFldp 	= mxGetField(oo_, 0,"dyn_ys" );  // and NOT extended ys
 		dparams = (double *) mxGetData(mxFldp);
 		const int nSteady = (int)mxGetM(mxFldp);
