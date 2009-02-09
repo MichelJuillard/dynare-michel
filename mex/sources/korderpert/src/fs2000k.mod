@@ -17,9 +17,13 @@
 // Note that there is an initial minus sign missing in equation (A1), p. S63.
 //
 // Michel Juillard, February 2004
+// Modified for testing k_order_perturbation by GP, Jan-Feb 09
+
 options_.usePartInfo=0;
-//var m P c e W R k d n l gy_obs gp_obs Y_obs P_obs y dA P2 c2;
-var m P c e W R k d n l gy_obs gp_obs y dA P2 c2;
+options_.use_k_order=0;
+
+//var m m_1 P P_1 c e W R k d n l gy_obs gp_obs Y_obs P_obs y dA P2 c2;
+var m m_1 P P_1 c e W R k d n l gy_obs gp_obs y dA P2 c2;
 varexo e_a e_m;
 
 parameters alp bet gam mst rho psi del;
@@ -34,7 +38,7 @@ del = 0.02;
 
 model (use_dll);
 dA = exp(gam+e_a);
-log(m) = (1-rho)*log(mst) + rho*log(m(-1))+e_m;
+log(m) = (1-rho)*log(mst) + rho*log(m_1(-1))+e_m;
 -P/(c(+1)*P(+1)*m)+bet*P(+1)*(alp*exp(-alp*(gam+log(e(+1))))*k^(alp-1)*n(+1)^(1-alp)+(1-del)*exp(-(gam+log(e(+1)))))/(c2(+1)*P2(+1)*m(+1))=0;
 W = l/n;
 -(psi/(1-psi))*(c*P/(1-n))+l/n = 0;
@@ -46,16 +50,20 @@ m-1+d = l;
 e = exp(e_a);
 y = k(-1)^alp*n^(1-alp)*exp(-alp*(gam+e_a));
 gy_obs = dA*y/y(-1);
-gp_obs = (P/P(-1))*m(-1)/dA;
+gp_obs = (P/P_1(-1))*m_1(-1)/dA;
 //Y_obs/Y_obs(-1) = gy_obs;
 //P_obs/P_obs(-1) = gp_obs;
 P2 = P(+1);
 c2 = c(+1);
+m_1 = m;
+P_1 = P;
 end;
 
 initval;
 m = mst;
+m_1=mst;
 P = 2.25;
+P_1 = 2.25;
 c = 0.45;
 e = 1;
 W = 4;
@@ -64,11 +72,9 @@ k = 6;
 d = 0.85;
 n = 0.19;
 l = 0.86;
+y = 0.6;
 gy_obs = exp(gam);
 gp_obs = exp(-gam); 
-//  Y_obs = 20000;
-//  P_obs = 51;
-y = 0.6;
 dA = exp(gam);
   P2=P;
   c2=c;
@@ -100,11 +106,12 @@ end;
 //varobs P_obs Y_obs;
 varobs gp_obs gy_obs;
 
+steady(solve_algo = 2);
+
 //observation_trends;
 //P_obs (log(mst)-gam);
 //Y_obs (gam);
 //end;
-
 
 //options_.useAIM = 1;
 estimation(datafile=fsdat,nobs=192,loglinear,mh_replic=2000,
