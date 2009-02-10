@@ -20,7 +20,7 @@ function [nvar,vartan,CorrFileNumber] = dsge_posterior_theoretical_correlation(S
 %                                                   th_autocovariances.m    
 %                                                   posterior_moments.m
 
-% Copyright (C) 2007-2008 Dynare Team
+% Copyright (C) 2007-2009 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -38,6 +38,7 @@ function [nvar,vartan,CorrFileNumber] = dsge_posterior_theoretical_correlation(S
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
 type = 'posterior';
+nodecomposition = 1;
     
 % Set varlist (vartan)
 [ivar,vartan] = set_stationary_variables_list;
@@ -80,7 +81,7 @@ for file = 1:NumberOfDrawsFiles
             set_parameters(pdraws{linee,1});
             [dr,info] = resol(oo_.steady_state,0);
         end
-        tmp = th_autocovariances(dr,ivar,M_,options_);
+        tmp = th_autocovariances(dr,ivar,M_,options_,nodecomposition);
         for i=1:nar
             Correlation_array(linea,:,:,i) = tmp{i+1};
         end

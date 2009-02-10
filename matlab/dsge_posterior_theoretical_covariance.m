@@ -19,7 +19,7 @@ function [nvar,vartan,CovarFileNumber] = dsge_posterior_theoretical_covariance(S
 %                                                   th_autocovariances.m    
 %                                                   posterior_moments.m
 
-% Copyright (C) 2007-2008 Dynare Team
+% Copyright (C) 2007-2009 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -37,7 +37,8 @@ function [nvar,vartan,CovarFileNumber] = dsge_posterior_theoretical_covariance(S
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
 type = 'posterior';
-    
+nodecomposition = 1;
+
 % Set varlist (vartan)
 [ivar,vartan] = set_stationary_variables_list;
 nvar = length(ivar);
@@ -79,7 +80,7 @@ for file = 1:NumberOfDrawsFiles
             set_parameters(pdraws{linee,1});
             [dr,info] = resol(oo_.steady_state,0);
         end
-        tmp = th_autocovariances(dr,ivar,M_,options_);
+        tmp = th_autocovariances(dr,ivar,M_,options_,nodecomposition);
         for i=1:nvar
             for j=i:nvar
                 Covariance_matrix(linea,symmetric_matrix_index(i,j,nvar)) = tmp{1}(i,j);
@@ -94,7 +95,7 @@ for file = 1:NumberOfDrawsFiles
                 Covariance_matrix = zeros(NumberOfLinesInTheLastCovarFile,nvar*(nvar+1)/2);
                 NumberOfCovarLines = NumberOfLinesInTheLastCovarFile;
                 CovarFileNumber = CovarFileNumber - 1;
-            elseif test<0;
+            elseif test<0
                 Covariance_matrix = zeros(MaXNumberOfCovarLines,nvar*(nvar+1)/2);
             else
                 clear('Covariance_matrix');

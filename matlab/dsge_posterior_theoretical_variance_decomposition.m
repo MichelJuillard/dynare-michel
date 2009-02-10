@@ -18,7 +18,7 @@ function [nvar,vartan,NumberOfDecompFiles] = ...
 %                                                   th_autocovariances.m    
 %                                                   posterior_moments.m
 
-% Copyright (C) 2007-2008 Dynare Team
+% Copyright (C) 2007-2009 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -36,6 +36,7 @@ function [nvar,vartan,NumberOfDecompFiles] = ...
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
 type = 'posterior';% To be defined as a input argument later...
+nodecomposition = 0;
 
 % Set varlist (vartan)
 [ivar,vartan] = set_stationary_variables_list;
@@ -50,7 +51,6 @@ DrawsFiles = dir([M_.dname '/metropolis/' M_.fname '_' type '_draws*' ]);
 NumberOfDrawsFiles = length(DrawsFiles);
 
 nexo = M_.exo_nbr;
-
 
 NumberOfDrawsFiles = rows(DrawsFiles);
 NumberOfSavedElementsPerSimulation = nvar*(nexo+1);
@@ -84,7 +84,7 @@ for file = 1:NumberOfDrawsFiles
             set_parameters(pdraws{linee,1});
             [dr,info] = resol(oo_.steady_state,0);
         end
-        tmp = th_autocovariances(dr,ivar,M_,options_);
+        tmp = th_autocovariances(dr,ivar,M_,options_,nodecomposition);
         for i=1:nvar
             for j=1:nexo
                 Decomposition_array(linea,(i-1)*nexo+j) = tmp{2}(i,j);

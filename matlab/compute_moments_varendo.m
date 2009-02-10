@@ -51,7 +51,7 @@ function oo_ = compute_moments_varendo(options_,M_,oo_,var_list_)
     end
     % VARIANCE DECOMPOSITION.
     for i=1:NumberOfEndogenousVariables
-        for j=i:NumberOfExogenousVariables
+        for j=1:NumberOfExogenousVariables
             oo_ = posterior_analysis('decomposition',var_list_(i,:),M_.exo_names(j,:),[],options_,M_,oo_);
         end
     end
