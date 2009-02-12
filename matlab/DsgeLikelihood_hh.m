@@ -171,7 +171,7 @@ function [fval,llik,cost_flag,ys,trend_coeff,info] = DsgeLikelihood_hh(xparam1,g
       if kalman_algo ~= 2
           kalman_algo = 1;
       end
-      Pstar = lyapunov_symm(T,R*Q*R',options_.qz_criterium);
+      Pstar = lyapunov_symm(T,R*Q*R',options_.qz_criterium,options_.lyapunov_complex_threshold);
       Pinf	= [];
   elseif options_.lik_init == 2	% Old Diffuse Kalman filter
       if kalman_algo ~= 2

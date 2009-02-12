@@ -44,6 +44,7 @@ function global_initialization()
   options_.Schur_vec_tol = 1e-8; % used to find nonstationary variables
                                  % in Schur decomposition of the
                                  % transition matrix
+  options_.lyapunov_complex_threshold = 1e-15;
   options_.solve_tolf = eps^(1/3);
   options_.solve_tolx = eps^(2/3);
   options_.solve_maxit = 500;
@@ -112,7 +113,7 @@ function global_initialization()
   options_.drop = 100;
   options_.simul_algo = 0;
   options_.model_mode = 0;
-  % if mjdgges.dll (or .mexw32 or ....) doesn't exit, matlab/qz is added to the path. 
+  % if mjdgges.dll (or .mexw32 or ....) doesn't exist, matlab/qz is added to the path. 
   % There exists now qz/mjdgges.m that contains the calls to the old Sims code 
   % Hence, if mjdgges.m is visible exist(...)==2, 
   % this means that the DLL isn't avaiable and use_qzdiv is set to 1
@@ -151,6 +152,7 @@ function global_initialization()
   options_.loglinear = 0;
   options_.markowitz = 0.5;
   options_.mh_conf_sig = 0.90;
+  options_.prior_interval = 0.90;
   options_.mh_drop = 0.5;
   options_.mh_jscale = 0.2;
   options_.mh_init_scale = 2*options_.mh_jscale;

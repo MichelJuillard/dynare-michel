@@ -93,7 +93,7 @@ function [Gamma_y,ivar] = th_autocovariances(dr,ivar,M_,options_,nodecomposition
     % state space representation for state variables only
     [A,B] = kalman_transition_matrix(dr,ipred,1:nx,dr.transition_auxiliary_variables,M_.exo_nbr);
     if options_.order == 2 | options_.hp_filter == 0
-        [vx, u] =  lyapunov_symm(A,B*M_.Sigma_e*B',options_.qz_criterium);
+        [vx, u] =  lyapunov_symm(A,B*M_.Sigma_e*B',options_.qz_criterium,options_.lyapunov_complex_threshold);
         iky = iv(ivar);
         if ~isempty(u)
             iky = iky(find(all(abs(ghx(iky,:)*u) < options_.Schur_vec_tol,2)));
@@ -132,10 +132,10 @@ function [Gamma_y,ivar] = th_autocovariances(dr,ivar,M_,options_,nodecomposition
             b1 = b1*cs;
             b2(:,exo_names_orig_ord) = ghu(iky,:);
             b2 = b2*cs;
-            vx  = lyapunov_symm(A,b1*b1',options_.qz_criterium,1);
+            vx  = lyapunov_symm(A,b1*b1',options_.qz_criterium,options_.lyapunov_complex_threshold,1);
             vv = diag(aa*vx*aa'+b2*b2');
             for i=1:M_.exo_nbr
-                vx1 = lyapunov_symm(A,b1(:,i)*b1(:,i)',options_.qz_criterium,2);
+                vx1 = lyapunov_symm(A,b1(:,i)*b1(:,i)',options_.qz_criterium,options_.lyapunov_complex_threshold,2);
                 Gamma_y{nar+2}(:,i) = abs(diag(aa*vx1*aa'+b2(:,i)*b2(:,i)'))./vv;
             end
         end

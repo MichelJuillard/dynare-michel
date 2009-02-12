@@ -26,7 +26,7 @@ function objective=calib_obj2(M_.Sigma_e,A,ghu1,ghx,ghu,targets,var_weights,iy,n
   M_.Sigma_e=diag(M_.Sigma_e);
   nx = size(ghx,2);
   b=ghu1*M_.Sigma_e*ghu1';
-  vx = lyapunov_symm(A,b,options_.qz_criterium);
+  vx = lyapunov_symm(A,b,options_.qz_criterium,options_.lyapunov_complex_threshold);
   oo_.gamma_y{1} = ghx*vx*ghx'+ ghu*M_.Sigma_e*ghu';
   if ~isempty(targets{1})
     objective{1} = sqrt(oo_.gamma_y{1}(iy{1}));

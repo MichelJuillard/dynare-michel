@@ -96,7 +96,7 @@ for i=M_.maximum_lag:-1:2
 end
 Gamma = zeros(nvar,cutoff+1);
 [A,B] = kalman_transition_matrix(dr,ikx',1:nx,dr.transition_auxiliary_variables,M_.exo_nbr);
-[vx, u] =  lyapunov_symm(A,B*M_.Sigma_e*B',options_.qz_criterium);
+[vx, u] =  lyapunov_symm(A,B*M_.Sigma_e*B',options_.qz_criterium,options_.lyapunov_complex_threshold);
 iky = iv(ivar);
 if ~isempty(u)
     iky = iky(find(any(abs(ghx(iky,:)*u) < options_.Schur_vec_tol,2)));

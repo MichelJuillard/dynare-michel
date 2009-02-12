@@ -28,11 +28,11 @@ function f=calib_obj(M_.Sigma_e,A,ghu1,ghx,ghu,targets,var_weights,iy,nar)
   b=ghu1*M_.Sigma_e*ghu1';
   vx = [];
   if isempty(vx)
-    vx = lyapunov_symm(A,b,options_.qz_criterium);
+    vx = lyapunov_symm(A,b,options_.qz_criterium,options_.lyapunov_complex_threshold);
   else
     [vx,status] = bicgstab_(@f_var,b(:),vx(:),1e-8,50,A,nx);
     if status
-      vx = lyapunov_symm(A,b,options_.qz_criterium);
+      vx = lyapunov_symm(A,b,options_.qz_criterium,options_.lyapunov_complex_threshold);
     else
       vx=reshape(vx,nx,nx);
     end
