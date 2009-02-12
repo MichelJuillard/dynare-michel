@@ -536,6 +536,18 @@ if options_.mode_compute > 0 & options_.posterior_mode_estimation
     end
 end
 
+try
+    chol(hh);
+catch
+    disp(' ')
+    disp('POSTERIOR KERNEL OPTIMIZATION PROBLEM!')
+    disp(' (minus) the hessian matrix at the "mode" is not positive definite!')
+    disp('=> posterior variance of the estimated parameters are not positive.')
+    disp('You should  try  to change the initial values of the parameters using')
+    disp('the estimated_params_init block, or use another optimization routine.')
+    error('I cannot go further!');
+end
+
 if options_.mode_check == 1 & options_.posterior_mode_estimation
   mode_check(xparam1,0,hh,gend,data,lb,ub,data_index,number_of_observations,no_more_missing_observations);
 end
