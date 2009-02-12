@@ -114,14 +114,14 @@ extern "C" {
 		double qz_criterium = 1+1e-6;
 		mxFldp = mxGetField(options_, 0,"qz_criterium" );
 		if (mxIsNumeric(mxFldp))
-			qz_criterium = (int)mxGetScalar(mxFldp);
+			qz_criterium = (double)mxGetScalar(mxFldp);
 		
 		mxFldp 	= mxGetField(M_, 0,"params" );
 		double * dparams = (double *) mxGetData(mxFldp);
 		int npar = (int)mxGetM(mxFldp);
 		Vector * modParams =  new Vector(dparams, npar);
 #ifdef DEBUG		
-    mexPrintf("k_ord_perturbation: nParams=%d .\n",npar);  
+    mexPrintf("k_ord_perturbation: qz_criterium=%g, nParams=%d .\n",qz_criterium,npar);  
     for (int i = 0; i < npar; i++) {
         mexPrintf("k_ord_perturbation: Params[%d]= %g.\n", i, (*modParams)[i]);  }
 #endif		        
@@ -271,7 +271,7 @@ extern "C" {
 			//			DynamicFn * pDynamicFn = loadModelDynamicDLL (fname);
 			DynamicModelDLL dynamicDLL(fName,nEndo, jcols, nMax_lag, nExog);
 #ifdef DEBUG		
-		mexPrintf("k_order_perturbation: Calling dynare constructor.\n");
+		mexPrintf("k_order_perturbation: Calling dynare constructor .\n");
 #endif			
 			// make KordpDynare object
 			KordpDynare dynare(endoNamesMX,  nEndo, exoNamesMX,  nExog, nPar, // paramNames,
@@ -299,9 +299,9 @@ extern "C" {
 			// construct main K-order approximation class
 //				FistOrderApproximation app(dynare, journal, nSteps);
 #ifdef DEBUG		
-	mexPrintf("k_order_perturbation: Call Approximation constructor \n");
+	mexPrintf("k_order_perturbation: Call Approximation constructor with qz_criterium=%f \n", qz_criterium);
 #endif
-			Approximation app(dynare, journal, nSteps);
+			Approximation app(dynare, journal,  nSteps, false, qz_criterium);
             // run stochastic steady 
 #ifdef DEBUG		
 	mexPrintf("k_order_perturbation: Calling walkStochSteady.\n");
