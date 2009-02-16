@@ -118,7 +118,7 @@ function SampleAddress = selec_posterior_draws(SampleSize,drsize)
                 old_mhblck = mhblck;
             end
             clear('x2')
-            save([fname '_posterior_draws'],'pdraws')
+            save([fname '_posterior_draws1'],'pdraws')
         else% The posterior draws are saved in xx files.
             NumberOfDrawsPerFile = fix(MAX_mega_bytes/drawsize);
             NumberOfFiles = ceil(SampleSize*drawsize/MAX_mega_bytes);      

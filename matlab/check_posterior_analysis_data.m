@@ -31,14 +31,17 @@ function [info,description] = check_posterior_analysis_data(type,M_)
     mhdate = get_date_of_a_file(mhname);
     
     %% Get informations about _posterior_draws files.
-    if ~exist([ M_.dname '/metropolis/' M_.fname '_posterior_draws.mat'])
+    drawsinfo = dir([ M_.dname '/metropolis/' M_.fname '_posterior_draws*.mat']);
+    if isempty(drawsinfo)
         info = 1; % select_posterior_draws has to be called first.
         if nargout>1
             description = 'select_posterior_draws has to be called.';
         end
         return
     else
-        pddate = get_date_of_a_file([ M_.dname '/metropolis/' M_.fname '_posterior_draws.mat']);
+        number_of_last_posterior_draws_file = length(drawsinfo);
+        pddate = get_date_of_a_file([ M_.dname '/metropolis/' M_.fname '_posterior_draws'...
+                            int2str(number_of_last_posterior_draws_file) '.mat']);
         if pddate<mhdate
             info = 2; % _posterior_draws files have to be updated.
             if nargout>1
