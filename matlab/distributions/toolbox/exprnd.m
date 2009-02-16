@@ -1,14 +1,14 @@
 function rnd = exprnd(a)
-%  Random samples from the exponential distribution with expectation 1/a
-%  and variance (1/a)^2.
+%  Random samples from the exponential distribution with expectation a
+%  and variance a^2.
 %
 %  INPUTS 
 %    a       [double]    m*n matrix of positive parameters
 %
 %  OUTPUT 
 %    rnd     [double]    m*n matrix, independent draws from the exponential
-%                        distribution rnd(j,j) has expectation 1/a(i,j) and     
-%                        variance (1/a(i,j))^2   
+%                        distribution rnd(j,j) has expectation a(i,j) and     
+%                        variance a(i,j)^2.   
 %
 %  ALGORITHM  
 %    Inverse transform sampling.
@@ -33,10 +33,10 @@ function rnd = exprnd(a)
 %
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
-    if any(a(:)<1e-15)
+    if any(a(:)<0)
         disp('exprnd:: The parameter of the exponential distribution has to be positive!')
         error;
     end
     [m,n] = size(a);
     uniform_variates = rand(m,n);
-    rnd = -log(uniform_variates)./a;
+    rnd = -log(uniform_variates).*a;
