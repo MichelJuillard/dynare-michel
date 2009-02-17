@@ -155,7 +155,9 @@ function [xparam1, estim_params_, bayestopt_, lb, ub, M_]=set_prior(estim_params
   % generalized location parameter by default for gamma distribution
   k = find(bayestopt_.pshape == 2);
   k1 = find(isnan(bayestopt_.p3(k)));
+  k2 = find(isnan(bayestopt_.p4(k)));
   bayestopt_.p3(k(k1)) = zeros(length(k1),1);
+  bayestopt_.p4(k(k2)) = Inf(length(k2),1);
   
   % truncation parameters by default for normal distribution
   k = find(bayestopt_.pshape == 3);
@@ -164,23 +166,34 @@ function [xparam1, estim_params_, bayestopt_, lb, ub, M_]=set_prior(estim_params
   k1 = find(isnan(bayestopt_.p4(k)));
   bayestopt_.p4(k(k1)) = Inf*ones(length(k1),1);
 
+  % inverse gamma distribution
   k = find(bayestopt_.pshape == 4);
   for i=1:length(k)
     [bayestopt_.p1(k(i)),bayestopt_.p2(k(i))] = ...
 	inverse_gamma_specification(bayestopt_.pmean(k(i)),bayestopt_.pstdev(k(i)),1);
   end
+  k1 = find(isnan(bayestopt_.p3(k)));
+  k2 = find(isnan(bayestopt_.p4(k)));
+  bayestopt_.p3(k(k1)) = zeros(length(k1),1);
+  bayestopt_.p4(k(k2)) = Inf(length(k2),1);
   
+  % uniform distribution
   k = find(bayestopt_.pshape == 5);
   for i=1:length(k)
     [bayestopt_.pmean(k(i)),bayestopt_.pstdev(k(i)),bayestopt_.p1(k(i)),bayestopt_.p2(k(i))] = ...
 	uniform_specification(bayestopt_.pmean(k(i)),bayestopt_.pstdev(k(i)),bayestopt_.p3(k(i)),bayestopt_.p4(k(i)));
   end
   
+  % inverse gamma distribution (type 2)
   k = find(bayestopt_.pshape == 6);
   for i=1:length(k)
     [bayestopt_.p1(k(i)),bayestopt_.p2(k(i))] = ...
 	inverse_gamma_specification(bayestopt_.pmean(k(i)),bayestopt_.pstdev(k(i)),2);
   end
+  k1 = find(isnan(bayestopt_.p3(k)));
+  k2 = find(isnan(bayestopt_.p4(k)));
+  bayestopt_.p3(k(k1)) = zeros(length(k1),1);
+  bayestopt_.p4(k(k2)) = Inf(length(k2),1);  
   
   k = find(isnan(xparam1));
   xparam1(k) = bayestopt_.pmean(k);
