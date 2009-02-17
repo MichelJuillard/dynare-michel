@@ -32,8 +32,6 @@ function set_parameters(xparam1)
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
   global estim_params_ M_
-  
-global estim_params_ M_
  
   nvx = estim_params_.nvx;
   ncx = estim_params_.ncx;
