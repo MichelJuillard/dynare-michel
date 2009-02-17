@@ -1,12 +1,12 @@
 function bounds = prior_bounds(bayestopt)
 % function bounds = prior_bounds(bayestopt)
-% computes practical bounds for prior density
+% computes bounds for prior density.
 %
 % INPUTS
-%    bayestopt:        structure characterizing priors (shape, mean, p1..p4)
+%    bayestopt  [structure]  characterizing priors (shape, mean, p1..p4)
 %    
 % OUTPUTS
-%    bounds:           matrix specifying bounds (row= parameter, column=upper&lower bound)
+%    bounds     [double]      matrix specifying prior bounds (row= parameter, column=upper&lower bound)
 %    
 % SPECIAL REQUIREMENTS
 %    none
@@ -61,8 +61,8 @@ for i=1:n
       bounds(i,1) = 1/sqrt(gaminv(1-options_.prior_trunc, p2(i)/2, 2/p1(i)));
       bounds(i,2) = 1/sqrt(gaminv(options_.prior_trunc, p2(i)/2, 2/p1(i)));
     case 5
-      bounds(i,1) = p1(i);
-      bounds(i,2) = p2(i);
+      bounds(i,1) = p1(i)+(p2(i)-p1(i))*options_.prior_trunc;
+      bounds(i,2) = p2(i)-(p2(i)-p1(i))*options_.prior_trunc;
     case 6
       bounds(i,1) = 1/gaminv(1-options_.prior_trunc, p2(i)/2, 2/p1(i));
       bounds(i,2) = 1/gaminv(options_.prior_trunc, p2(i)/2, 2/p1(i));
