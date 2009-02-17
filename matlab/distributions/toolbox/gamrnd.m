@@ -1,12 +1,19 @@
 function rnd = gamrnd(a,b,method)
-% GAMRND  Random samples from the Gamma distribution
-%  RND = gamrnd(A,B) returns a random sample from the
-%  Gamma distribution with parameters A and B (i.e. mean of
-%  the distribution is A*B and variance is A*B^2).
+% This function produces independent random variates from the Gamma distribution.
 %
-% Algorithm of Bauwens, Lubrano & Richard (page 316)
+%  INPUTS 
+%    a       [double]    n*1 vector of positive parameters.
+%    b       [double]    n*1 vector of positive parameters.    
+%    method  [string]    'BawensLubranoRichard' or anything else (see below).
+%
+%  OUTPUT 
+%    rnd     [double]    n*1 vector of independent variates from the gamma(a,b) distribution.
+%                        rnd(i) is gamma distributed with variance a(i)b(i) and variance a(i)b(i)^2.    
+%  
+%  ALGORITHMS     
+%    Described in Bauwens, Lubrano and Richard (1999, page 316) and Devroye (1986, chapter 9).
 
-% Copyright (C) 2006-2008 Dynare Team
+% Copyright (C) 2006-2009 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -36,7 +43,10 @@ if nargin==2
     end
     if ~strcmpi(method,'BauwensLubranoRichard')
         Devroye.big = 'Best'; % 'Cheng' , 'Best' 
-        % REMARK: The first algorithm (Cheng) is still producing obviously wrong simulations. 
+        % REMARK 1: The first algorithm (Cheng) is still producing obviously wrong simulations.
+        % REMARK 2: The second algorithm seems slightly slower than the algorithm advocated by Bauwens, 
+        %           Lubrano and Richard, but the comparison depends on the value of a (this should be 
+        %           investigated further).
     end
 end
 

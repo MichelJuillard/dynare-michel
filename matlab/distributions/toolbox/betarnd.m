@@ -1,11 +1,19 @@
 function rnd = betarnd(a, b)
-% BETARND  Random samples from the Beta distribution
-%  RND = betarnd(A,B) returns a random sample from the
-%  Beta distribution with parameters A and B (i.e. mean of
-%  the distribution is A/(A+B) and variance is
-%  A*B/(A+B)^2/(A+B+1) ).
+% This function produces independent random variates from the Beta distribution.
+%
+%  INPUTS 
+%    a       [double]    n*1 vector of positive parameters.
+%    b       [double]    n*1 vector of positive parameters.
+%
+%  OUTPUT 
+%    rnd     [double]    n*1 vector of independent variates from the beta(a,b) distribution.
+%                        rnd(i) is beta distributed with variance a(i)/(a(i)+b(i)) and 
+%                        variance a(i)b(i)/(a(i)+b(i))^2/(a(i)+b(i)+1).    
+%  
+%  ALGORITHMS     
+%    Described and Devroye (1986, chapter 9).
 
-% Copyright (C) 2008 Dynare Team
+% Copyright (C) 2008-2009 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -26,13 +34,20 @@ if (nargin ~= 2)
   error('betarnd: you must give two arguments');
 end
 
-if (~isscalar(a) || ~isscalar(b))
-  error('betarnd: A and B should be scalar parameters');
+if (any(a<0)) || (any(b<0)) || (any(a==Inf)) || (any(b==Inf))
+    error('betarnd:: Input arguments must be finite and positive!');
 end
 
-if (a <= 0 || a == Inf || b <= 0 || b == Inf)
-  rnd = NaN;
-else
-  x = gamrnd(a, 1);
-  rnd = x/(x+gamrnd(b, 1));
+[ma,na] = size(a);
+[mb,nb] = size(b);
+
+if ma~=mb || na~=nb
+    error('betarnd:: Input arguments must have the same size!');
 end
+
+if na~=1
+    error('betarnd:: Input arguments must be column vectors');
+end
+
+x = gamrnd(a,ones(ma,1));
+rnd = x./(x+gamrnd(b, ones(mb,1)));
