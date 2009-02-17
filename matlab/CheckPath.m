@@ -1,18 +1,17 @@
 function DirectoryName = CheckPath(type)
 
-% function DirectoryName = CheckPath(type)
-% Creates the repertory 'type' if it does not exist yet
+% Creates the subfolder "./M_.dname/type" if it does not exist yet.
 %
 % INPUTS
-%    type
+%    type  [string]    Name of the subfolder. 
 %
 % OUTPUTS
-%    none
+%    none.
 %
 % SPECIAL REQUIREMENTS
 %    none
 
-% Copyright (C) 2005-2007 Dynare Team
+% Copyright (C) 2005-2009 Dynare Team
 %
 % This file is part of Dynare.
 %
