@@ -6,7 +6,7 @@ function pdraw = prior_draw(init,  prior_structure)
 %   o prior_structure  [structure]  Describes the prior distribution [bayestopt_]
 %
 % OUTPUTS 
-%   o pdraw            [double]     npar*1 vector, draws from the joint prior density.
+%   o pdraw            [double]     1*npar vector, draws from the joint prior density.
 %
 %
 % SPECIAL REQUIREMENTS
@@ -98,3 +98,5 @@ if ~isempty(inverse_gamma_2_index)
     pdraw(inverse_gamma_2_index) = ...
         1./gamrnd(p2(inverse_gamma_2_index)/2,2./p1(inverse_gamma_2_index));
 end
+
+pdraw = transpose(pdraw);
