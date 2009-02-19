@@ -45,13 +45,7 @@ if nargin>0 && init
     p4 = prior_structure.p4;
     number_of_estimated_parameters = length(p1);
     a = NaN(number_of_estimated_parameters,1);
-    b = NaN(number_of_estimated_parameters,1); 
-    if ~isempty(cc)
-        bounds = cc;
-        nobounds_flag = 0;
-    else
-        nobounds_flag = 1;
-    end
+    b = NaN(number_of_estimated_parameters,1);
     beta_index = find(prior_shape==1);
     gamma_index = find(prior_shape==2);
     gaussian_index = find(prior_shape==3);
@@ -98,5 +92,3 @@ if ~isempty(inverse_gamma_2_index)
     pdraw(inverse_gamma_2_index) = ...
         1./gamrnd(p2(inverse_gamma_2_index)/2,2./p1(inverse_gamma_2_index));
 end
-
-pdraw = transpose(pdraw);

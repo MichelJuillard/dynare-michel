@@ -205,3 +205,5 @@ function global_initialization()
   options_.homotopy_mode = 0;
   options_.homotopy_steps = 1;
 
+  % prior analysis
+  options_.prior_mc = 20000;
