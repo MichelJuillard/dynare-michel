@@ -14,8 +14,7 @@ function [dr,info]=resol(ys,check_flag)
 %    info=3:         Blanchard Kahn conditions are not satisfied: no stable '...' equilibrium
 %    info=4:         Blanchard Kahn conditions are not satisfied:'...' indeterminacy
 %    info=5:         Blanchard Kahn conditions are not satisfied:'...' indeterminacy due to rank failure
-%    info=6:         Matrix E is complex (cannot apply the generalized Schur).
-%    info=7:         Matrix D is complex (cannot apply the generalized Schur).
+%    info=6:         The jacobian evaluated at the steady state is complex.
 %    info=20:        can't find steady state info(2) contains sum of sqare residuals
 %    info=30:        Variance can't be computed
 %

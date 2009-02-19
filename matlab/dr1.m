@@ -19,8 +19,7 @@ function [dr,info,M_,options_,oo_] = dr1(dr,task,M_,options_,oo_)
 %                                 info=4: BK order condition not satisfied info(2) contains "distance"
 %                                         indeterminacy.
 %                                 info=5: BK rank condition not satisfied.
-%                                 info=6: Matrix E has complex elements.
-%                                 info=7: Matrix D has complex elements.        
+%                                 info=6: The jacobian matrix evaluated at the steady state is complex.        
 %   M_         [matlab structure]            
 %   options_   [matlab structure]
 %   oo_        [matlab structure]
@@ -206,6 +205,15 @@ function [dr,info,M_,options_,oo_] = dr1(dr,task,M_,options_,oo_)
         save([M_.fname '_debug.mat'],'jacobia_')
     end
     
+    if ~isreal(jacobia_)
+        if max(max(abs(imag(jacobia_)))) < 1e-15
+            jacobia_ = real(jacobia_);
+        else
+            info(1) = 6;
+            return
+        end
+    end
+    
     dr=set_state_space(dr,M_);
     kstate = dr.kstate;
     kad = dr.kad;
@@ -352,23 +360,6 @@ function [dr,info,M_,options_,oo_] = dr1(dr,task,M_,options_,oo_)
         % contains the calls to the old Sims code 
         % 2) In  global_initialization.m, if mjdgges.m is visible exist(...)==2, 
         % this means that the DLL isn't avaiable and use_qzdiv is set to 1
-
-        if ~isreal(e)
-            if max(max(abs(imag(e)))) < 1e-15
-                e = real(e);
-            else
-                info(1) = 6;
-                return
-            end
-        end
-        if ~isreal(d)
-            if max(max(abs(imag(d)))) < 1e-15
-                d = real(d);
-            else
-                info(1) = 7;
-                return
-            end
-        end
         
         [ss,tt,w,sdim,dr.eigval,info1] = mjdgges(e,d,options_.qz_criterium);
 
