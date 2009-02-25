@@ -79,7 +79,7 @@ COMPILE_COMMAND = [ 'mex ' COMPILE_OPTIONS ' -outdir ' OUTPUT_DIR ];
 disp('Compiling mjdgges...')
 eval([ COMPILE_COMMAND ' mjdgges/mjdgges.c ' LAPACK_PATH ]);
 disp('Compiling sparse_hessian_times_B_kronecker_C...')
-eval([ COMPILE_COMMAND ' kronecker/sparse_hessian_times_B_kronecker_C.cc ' BLAS_PATH ]);
+eval([ COMPILE_COMMAND ' kronecker/sparse_hessian_times_B_kronecker_C.cc ']);% BLAS_PATH ]);
 disp('Compiling A_times_B_kronecker_C...')
 eval([ COMPILE_COMMAND ' kronecker/A_times_B_kronecker_C.cc ' BLAS_PATH ]);
 disp('Compiling gensylv...')
