@@ -308,6 +308,8 @@ extern "C" {
 #endif			
             app.walkStochSteady();		
 
+
+			ConstTwoDMatrix ss(app.getSS());
 			// open mat file
 			std::string matfile(fName);//(params.basename);
 			matfile += ".mat";
@@ -319,12 +321,31 @@ extern "C" {
 
 			std::string ss_matrix_name(fName);//params.prefix);
 			ss_matrix_name += "_steady_states";
-			ConstTwoDMatrix(app.getSS()).writeMat4(matfd, ss_matrix_name.c_str());
+//			ConstTwoDMatrix(app.getSS()).writeMat4(matfd, ss_matrix_name.c_str());
+			ss.writeMat4(matfd, ss_matrix_name.c_str());
 
 			// write the folded decision rule to the Mat-4 file
 			app.getFoldDecisionRule().writeMat4(matfd, fName);//params.prefix);
 
 			fclose(matfd);
+
+			/* Write derivative outputs into memory map */
+			map<string,ConstTwoDMatrix> mm;
+			app.getFoldDecisionRule().writeMMap(&mm);
+
+#ifdef DEBUG		
+			app.getFoldDecisionRule().print();
+			mexPrintf("k_order_perturbation: Map print: \n");
+			for (map<string,ConstTwoDMatrix>::const_iterator cit=mm.begin();
+				cit !=mm.end(); ++cit) {
+//                    const string& sym =(*cit).first;
+					mexPrintf("k_order_perturbation: Map print: string: %s , g:\n", (*cit).first.c_str());
+//					mexPrintf("k_order_perturbation: Map print: g: \n");
+//					if ((*cit).first==string("g_1")) 
+                        (*cit).second.print();
+			}
+#endif
+
 
 			/***********************            
 			std::string ss_matrix_name("K_ordp");//params.prefix);
@@ -365,6 +386,61 @@ extern "C" {
             double * dYsteady = (dynare.getSteady().base());
             ySteady = (Vector*)(&dynare.getSteady());
             
+
+		// bones for future developement of the output.
+
+#ifdef DEBUG		
+		mexPrintf("k_order_perturbation: Filling outputs.\n");
+#endif			
+			
+			double  *dgy, *dgu, *ysteady;
+			int nb_row_x;
+			
+			ysteady = NULL;
+			if (nlhs >= 1)
+			{
+				/* Set the output pointer to the output matrix ysteady. */
+				plhs[0] = mxCreateDoubleMatrix(nEndo,1, mxREAL);
+				/* Create a C pointer to a copy of the output ysteady. */
+//				ysteady = mxGetPr(plhs[0]);
+
+
+				TwoDMatrix tmp_ss(nEndo,1, mxGetPr(plhs[0]));
+				tmp_ss = (const TwoDMatrix&)ss;
+//				tmp_ss.print();  !! This print Crashes???
+//				delete ss;
+				
+			}
+			if (nlhs >= 2)
+			{
+				/* Set the output pointer to the combined output matrix gyu = [gy gu]. */
+//				plhs[1] = mxCreateDoubleMatrix(nEndo, nPred+nExog, mxREAL);
+//				plhs[1] = (double*)(gy->getData())->base();
+				/* Create a C pointer to a copy of the output matrix gy. */
+//				dgy = mxGetPr(plhs[1]);
+			
+			
+//				tmp_ss = (const TwoDMatrix&)ss;
+				int ii=1;
+				for (map<string,ConstTwoDMatrix>::const_iterator cit=mm.begin();
+					((cit !=mm.end())&&(ii<nlhs)); ++cit) 
+				{
+	//                    const string& sym =(*cit).first;
+					if ((*cit).first!="g_0") 
+					{
+						plhs[ii] = mxCreateDoubleMatrix((*cit).second.numRows(), (*cit).second.numCols(), mxREAL);
+						TwoDMatrix dgyu((*cit).second.numRows(), (*cit).second.numCols(), mxGetPr(plhs[ii]));
+						dgyu = (const TwoDMatrix&)(*cit).second;
+#ifdef DEBUG		
+			mexPrintf("k_order_perturbation: cit %d print: \n", ii);
+                        (*cit).second.print();
+			mexPrintf("k_order_perturbation: dguy %d print: \n", ii);
+  //                      dgyu.print(); !! This print Crashes???
+#endif					
+						++ii;
+					}
+				}
+			}
 		} catch (const KordException& e) {
 			printf("Caugth Kord exception: ");
 			e.print();
@@ -386,43 +462,6 @@ extern "C" {
 			return;// 255;
         }
 
-		// bones for future developement of the output.
-
-#ifdef DEBUG		
-		mexPrintf("k_order_perturbation: Filling outputs.\n");
-#endif			
-			
-			double  *dgy, *dgu, *ysteady;
-			int nb_row_x;
-			
-			ysteady = NULL;
-			if (nlhs >= 1)
-			{
-				/* Set the output pointer to the output matrix ysteady. */
-				plhs[0] = mxCreateDoubleMatrix(nEndo,1, mxREAL);
-				/* Create a C pointer to a copy of the output ysteady. */
-				ysteady = mxGetPr(plhs[0]);
-			}
-			
-			dgy = NULL;
-			if (nlhs >= 2)
-			{
-				/* Set the output pointer to the output matrix gy. */
-				plhs[1] = mxCreateDoubleMatrix(nEndo, jcols, mxREAL);
-//				plhs[1] = (double*)(gy->getData())->base();
-				/* Create a C pointer to a copy of the output matrix gy. */
-				dgy = mxGetPr(plhs[1]);
-			}
-            
-			dgu = NULL;
-			if (nlhs >= 3)
-			{
-				/* Set the output pointer to the output matrix gu. */
-				plhs[2] = mxCreateDoubleMatrix(nExog, nExog, mxREAL);
-//				plhs[2] = (double*)((gu->getData())->base());
-				/* Create a C pointer to a copy of the output matrix gu. */
-				dgu = mxGetPr(plhs[2]);
-			}
             
             
 			

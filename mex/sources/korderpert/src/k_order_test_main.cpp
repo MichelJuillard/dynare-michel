@@ -211,7 +211,7 @@ int main(int argc, char* argv[])
 #ifdef DEBUG		
 			mexPrintf("k_order_perturbation: Call Approximation constructor \n");
 #endif
-			Approximation app(dynare, journal, nSteps);
+			Approximation app(dynare, journal, nSteps, false, qz_criterium);
             // run stochastic steady 
 #ifdef DEBUG		
 			mexPrintf("k_order_perturbation: Calling walkStochSteady.\n");
@@ -235,6 +235,21 @@ int main(int argc, char* argv[])
 			app.getFoldDecisionRule().writeMat4(matfd, fName);//params.prefix);
 
 			fclose(matfd);
+
+			map<string,ConstTwoDMatrix> mm;
+			app.getFoldDecisionRule().writeMMap(&mm);
+#ifdef DEBUG		
+			app.getFoldDecisionRule().print();
+			mexPrintf("k_order_perturbation: Map print: \n");
+			for (map<string,ConstTwoDMatrix>::const_iterator cit=mm.begin();
+				cit !=mm.end(); ++cit) {
+//                    const string& sym =(*cit).first;
+					mexPrintf("k_order_perturbation: Map print: string: %s , g:\n", (*cit).first.c_str());
+//					mexPrintf("k_order_perturbation: Map print: g: \n");
+//					if ((*cit).first==string("g_1")) 
+                        (*cit).second.print();
+			}
+#endif
 
 			// get latest ysteady 
             double * dYsteady = (dynare.getSteady().base());
