@@ -133,13 +133,14 @@ function [dr,info,M_,options_,oo_] = dr1(dr,task,M_,options_,oo_)
 %            z = z(iyr0) ;
 %            oo_.dyn_ys=z;  % extended ys 
         try
-            [ysteady, gx, gu]=k_order_perturbation(dr,task,M_,options_, oo_ );
-            load(M_.fname);
-            ghxu = eval([M_.fname '_g_1']);
-            sss= size(ghxu,2);
-            dr.ghx= ghxu(:,1:sss-M_.exo_nbr); 
-            dr.ghu= ghxu(:,sss-M_.exo_nbr+1:end); 
-            dr.ys=eval([M_.fname '_ss']);
+            [ysteady, ghx_u]=k_order_perturbation(dr,task,M_,options_, oo_ , ['.' mexext]);
+%            load(M_.fname);
+%            dr.ys=eval([M_.fname '_ss']);
+            dr.ys=ysteady;
+%            ghxu = eval([M_.fname '_g_1']);
+            sss= size(ghx_u,2);
+            dr.ghx= ghx_u(:,1:sss-M_.exo_nbr); 
+            dr.ghu= ghx_u(:,sss-M_.exo_nbr+1:end); 
         catch
             disp('*************************************************************************************');
 %           disp('Problem with using k_order perturbation solver - Using Dynare solver instead');
