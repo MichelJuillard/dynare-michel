@@ -77,6 +77,7 @@ private:
 	const int jcols;  // tot num var t-1, t and t+1 instances + exogs = Num of Jacobian columns
 	const int nMax_lag; // no of lags
 	const int nExog; // no of exogenous
+//	const char * sExt; // dynamic file extension: dll, mexw32, ...
 #ifdef WINDOWS
 	HINSTANCE dynamicHinstance;  // DLL instance pointer in Windows
 # else // linux
@@ -87,7 +88,7 @@ private:
 public:
 	// construct and load Dynamic model DLL 
 	DynamicModelDLL(const char* fname, const int length,const int jcols, 
-		const int nMax_lag, const int nExog);
+		const int nMax_lag, const int nExog, const char * sExt);
 	virtual ~DynamicModelDLL(){close();};
 	//	DynamicFn get(){return DynamicDLLfunc;};
 	//    void 

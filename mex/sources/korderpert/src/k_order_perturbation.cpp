@@ -100,9 +100,14 @@ extern "C" {
 			mexErrMsgTxt("Input must be of type char.");
 		}
 		const char*  fName = mxArrayToString(mFname);
+		const char * dfExt=NULL ;//Dyanamic file extension, e.g.".dll" or .mexw32; 
+		if (prhs[5] != NULL){
+			const mxArray* mexExt = prhs[5];
+			dfExt= mxArrayToString(mexExt);
+		} 
 
 #ifdef DEBUG		
-		mexPrintf("k_order_perturbation: check_flag = %d ,  fName = %s .\n", check_flag,fName);
+		mexPrintf("k_order_perturbation: check_flag = %d ,  fName = %s , mexExt=%s.\n", check_flag,fName, dfExt);
 #endif		
         int kOrder;
 		mxArray* mxFldp = mxGetField(options_, 0,"order" );
@@ -269,7 +274,7 @@ extern "C" {
 		mexPrintf("k_order_perturbation: Calling dynamicDLL constructor.\n");
 #endif				
 			//			DynamicFn * pDynamicFn = loadModelDynamicDLL (fname);
-			DynamicModelDLL dynamicDLL(fName,nEndo, jcols, nMax_lag, nExog);
+			DynamicModelDLL dynamicDLL(fName,nEndo, jcols, nMax_lag, nExog, dfExt);
 #ifdef DEBUG		
 		mexPrintf("k_order_perturbation: Calling dynare constructor .\n");
 #endif			
@@ -444,6 +449,16 @@ extern "C" {
 		} catch (const KordException& e) {
 			printf("Caugth Kord exception: ");
 			e.print();
+			mexPrintf("Caugth Kord exception: %s", e.get_message());
+			std::string errfile(fName);//(params.basename);
+			errfile += "_error.log";
+			FILE* errfd = NULL;
+			if (NULL == (errfd=fopen(errfile.c_str(), "wb"))) {
+				fprintf(stderr, "Couldn't open %s for writing.\n", errfile.c_str());
+				return;// e.code();
+			}
+			fprintf(errfd ,"Caugth Kord exception: %s", e.get_message());
+			fclose(errfd);
 			return;// e.code();
 		} catch (const TLException& e) {
 			printf("Caugth TL exception: ");
@@ -455,10 +470,30 @@ extern "C" {
 			return;// 255;
 		} catch (const DynareException& e) {
 			printf("Caught KordpDynare exception: %s\n", e.message());
+			mexPrintf("Caugth Dynare exception: %s", e.message());
+			std::string errfile(fName);//(params.basename);
+			errfile += "_error.log";
+			FILE* errfd = NULL;
+			if (NULL == (errfd=fopen(errfile.c_str(), "wb"))) {
+				fprintf(stderr, "Couldn't open %s for writing.\n", errfile.c_str());
+				return;// e.code();
+			}
+			fprintf(errfd ,"Caugth KordDynare  exception: %s", e.message());
+			fclose(errfd);
 			return;// 255;
 		} catch (const ogu::Exception& e) {
 			printf("Caught ogu::Exception: ");
 			e.print();
+			mexPrintf("Caugth general exception: %s", e.message());
+			std::string errfile(fName);//(params.basename);
+			errfile += "_error.log";
+			FILE* errfd = NULL;
+			if (NULL == (errfd=fopen(errfile.c_str(), "wb"))) {
+				fprintf(stderr, "Couldn't open %s for writing.\n", errfile.c_str());
+				return;// e.code();
+			}
+			e.print(errfd);
+			fclose(errfd);
 			return;// 255;
         }
 
@@ -560,7 +595,7 @@ mexPrintf("loop DynareMxArrayToString cNamesCharStr = %s \n", cNamesCharStr);
 * <model>_dynamic () function
 **************************************/
 DynamicModelDLL::DynamicModelDLL(const char * modName, const int y_length, const int j_cols, 
-								 const int n_max_lag, const int n_exog)
+								 const int n_max_lag, const int n_exog, const char * sExt)
 	: length(y_length),jcols( j_cols), nMax_lag(n_max_lag), nExog(n_exog)
 {
     char fName[MAX_MODEL_NAME];
@@ -570,6 +605,7 @@ DynamicModelDLL::DynamicModelDLL(const char * modName, const int y_length, const
 	//		string sFname(fname);
 	//		string sExt("_.dll");
 //	mexPrintf("MexPrintf: Call exp  %d.\n", y[0]);
+	strcat(fName,"_dynamic");
 #ifdef DEBUG
 		mexPrintf("MexPrintf: Call Load run DLL %s .\n", fName);
 #endif	
@@ -577,10 +613,10 @@ DynamicModelDLL::DynamicModelDLL(const char * modName, const int y_length, const
 		//			typedef void * (__stdcall *DynamicFn)();
 		
 #ifdef WINDOWS
-		
+		if (sExt==NULL) sExt=(".dll");
 		HINSTANCE dynamicHinstance;
 //		dynamicHinstance=::LoadLibraryEx(strcat(fNname,"_.dll"),NULL,DONT_RESOLVE_DLL_REFERENCES);//sExt); //"_.dll");
-		dynamicHinstance=::LoadLibrary(strcat(fName,"_dynamic.dll"));//sExt); //"_.dll");
+		dynamicHinstance=::LoadLibrary(strcat(fName,sExt));//.dll); //"_.dll");
 		if (dynamicHinstance==NULL)
 			throw 1; //alt: return;
 		//		(DynamicFn*)	typedef void * (__stdcall *DynamicFn)();
@@ -590,8 +626,8 @@ DynamicModelDLL::DynamicModelDLL(const char * modName, const int y_length, const
 		Dynamic = (DynamicFn *) ::GetProcAddress(dynamicHinstance,"Dynamic");
         
 # else // __linux__
-		
-		void *dynamicHinstance = dlopen(strcat(fNname,"_dynamic.so"), RTLD_NOW);
+		if (sExt==NULL) sExt=(".so");
+		void *dynamicHinstance = dlopen(strcat(fNname,sExt), RTLD_NOW);
 		if((dynamicHinstance == NULL) || dlerr()){
 			cerr << dlerror() << endl;
 			mexPrintf("MexPrintf:Error loading DLL: %s", dlerror);

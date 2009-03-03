@@ -1,6 +1,6 @@
 k_order_perturbation project status
 
-Last upate: 21/12/08
+Last upate: 3/3/09
 
 Makefiles are not complete and in final verison yet 
 but they and C++ files are ready for creation of a library 
@@ -29,27 +29,56 @@ and in your cygwin shell set
 
 and run 
 
-> make k_ord_lib.a
+> make dynarelib.a
 
-NOTE: At the momment the library still uses integ files - 
+NOTE: At the momment the library still uses integ files too - 
 those may be removed at a later stage
 
-2) move/copy k_ord_lib.a to the root src and rename it to 
-k_ord_dynarelibML_PTRD_DB.a
 
 Then:
-3) Compile extensions with MingW using the temporary comp.bat:
+2) Compile extensions with MingW using the temporary comp.bat:
 go to the root src directory and run comp.bat 
 
 
-4) to link statically linked test exe driver k_orddbgtest.exe run 
+3) to link statically linked test exe driver k_orddbgtest.exe run 
 linkdbgexe.bat
  
-5) to link Matlab callable DLL 
+4) to link Matlab callable DLL 
 linkDLL.bat
 
 
-NOTE: The dll is called from Matlab Dynare dr1, after set_state_space as:
+NOTE: The dll  (mexw32 or so) is called from new Matlab Dynare function dr1_k_order
+derived from dr1, after set_state_space as:
 
-[ysteady, gx, gu]=k_ord_dynare_perturbation(dr,task,M_,options_, oo_ )
+[ysteady, ghx_u]=k_ord_dynare_perturbation(dr,task,M_,options_, oo_, ['.' mexext])
 
+where last term is optional but it will default to .dll on windows and .so on linux.
+
+dr1_k_order is called by amended resol.m:
+
+elseif(options_.use_k_order==1)&& (check_flag == 0)
+    [dr,info,M_,options_,oo_] = dr1_k_order(dr,check_flag,M_,options_,oo_);
+else
+
+and requirese options to be set
+
+options_.use_k_order=1;
+
+==================
+Tests:
+
+first_order.m is matlab emulation of Dynare++ c++ first_order.cpp for testing pruposes
+
+
+==================
+ToDO:
+==================
+1) amend <model>.m to use Dynamic_mexopts.bat
+
+   mex -f Dynamic_mexopts.bat -O fs2000k_no_both_UR_dynamic.c
+
+or amend preprocessor to make mex to export Dynamic() function as well as mexFunction() as the Dynamic_mexopts.bat does, e.g.:
+
+set LINKFLAGS=/dll /export:Dynamic /export:%ENTRYPOINT% /MAP ....
+
+2) make k_order_perturbation handle models  which have the "both" variables (i.e. variables that appear both as lag and as lead)
