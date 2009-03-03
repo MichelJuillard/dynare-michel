@@ -123,7 +123,7 @@ function global_initialization()
       options_.use_qzdiv = 0;
   end
   options_.useAIM = 0; % i.e. by default do not use G.Anderson's AIM solver, use mjdgges instead
-  
+  options_.use_k_order=0; % by default do not use k_order_perturbation but mjdgges
   
   % Ramsey policy
   options_.planner_discount = 1.0;
