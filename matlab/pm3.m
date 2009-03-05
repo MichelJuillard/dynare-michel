@@ -114,7 +114,7 @@ function pm3(n1,n2,ifil,B,tit1,tit2,tit3,tit_tex,names1,names2,name3,DirectoryNa
       end
       title(name,'Interpreter','none')
     end
-    if subplotnum == MaxNumberOfPlotsPerFigure | j == nvar  
+    if subplotnum == MaxNumberOfPlotsPerFigure | i == nvar  
       eval(['print -depsc2 ' M_.dname '/Output/'  M_.fname '_' name3 '_' deblank(tit3(i,:)) '.eps' ]);
       if ~exist('OCTAVE_VERSION')
           eval(['print -dpdf ' M_.dname '/Output/' M_.fname  '_' name3 '_' deblank(tit3(i,:))]);
@@ -139,7 +139,9 @@ function pm3(n1,n2,ifil,B,tit1,tit2,tit3,tit_tex,names1,names2,name3,DirectoryNa
       end
       subplotnum = 0;
       figunumber = figunumber+1;
-      hh = figure('Name',[name3 ' ' int2str(figunumber+1)]);
+      if (i ~= nvar)
+        hh = figure('Name',[name3 ' ' int2str(figunumber+1)]);
+      end
     end
 
   end
