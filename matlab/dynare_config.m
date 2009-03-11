@@ -61,6 +61,13 @@ else
     end
 end
 
+if isopenmp
+    number_of_threads = set_dynare_threads();
+    multithread_flag = number_of_threads-1;
+else
+    multithread_flag = 0;
+end
+
 %% Set mex routine names
 mex_status = cell(1,3);
 mex_status(1,1) = {'mjdgges'};
@@ -98,14 +105,22 @@ for i=1:number_of_mex_files
         addpath([dynareroot mex_status{i,2}]);
         message = '[m]   ';
     else
-        message = '[mex] '; 
+        if multithread_flag && strcmpi(mex_status(i,1),'sparse_hessian_times_B_kronecker_C')
+            message = [ '[mex][multithread version, ' int2str(multithread_flag+1) ' threads are used] ' ]; 
+        else
+            message = '[mex] ';
+        end
     end
     disp([ message mex_status{i,3} '.' ])
 end
 
 % Test if simulate DLL is present
 if exist('simulate') == 3
-  message = '[mex] ';
+  if ~multithread_flag
+      message = '[mex] ';
+  else
+      message = [ '[mex][multithread version, ' int2str(multithread_flag+1) ' threads are used] ' ];
+  end
 else
   message = '[no]  ';
 end

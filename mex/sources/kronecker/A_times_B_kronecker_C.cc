@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2007-2008 Dynare Team
+ * Copyright (C) 2007-2009 Dynare Team
  *
  * This file is part of Dynare.
  *
@@ -22,6 +22,9 @@
  * one can consider large matrices B and/or C. 
  */
 
+#define USE_OMP 0
+#define DEBUG_OMP 0
+
 #include <string.h>
 #include "mex.h"
 
@@ -41,6 +44,12 @@ extern "C" {
 # include "blas.h"
 #endif /* NO_BLAS_H */
 
+#if USE_OMP
+  #include <omp.h>
+#else
+  #define DEBUG_OMP 0
+#endif
+
 void full_A_times_kronecker_B_C(double *A, double *B, double *C, double *D,
 				int mA, int nA, int mB, int nB, int mC, int nC)
 {
@@ -49,8 +58,14 @@ void full_A_times_kronecker_B_C(double *A, double *B, double *C, double *D,
   unsigned long int kd = 0, ka = 0 ;
   char transpose[2] = "N";
   double one = 1.0 ;
+  #if USE_OMP
+    #pragma omp parallel for num_threads(atoi(getenv("DYNARE_NUM_THREADS")))
+  #endif
   for(unsigned long int col=0; col<nB; col++)
     {
+      #if DEBUG_OMP
+        mexPrintf("%d thread number is %d (%d).\n",col,omp_get_thread_num(),omp_get_num_threads());
+      #endif
       ka = 0 ;
       for(unsigned long int row=0; row<mB; row++)
 	{
@@ -69,8 +84,14 @@ void full_A_times_kronecker_B_B(double *A, double *B, double *D, int mA, int nA,
   unsigned long int kd = 0, ka = 0 ;
   char transpose[2] = "N";
   double one = 1.0;
+  #if USE_OMP
+    #pragma omp parallel for num_threads(atoi(getenv("DYNARE_NUM_THREADS")))
+  #endif
   for(unsigned long int col=0; col<nB; col++)
     {
+      #if DEBUG_OMP
+        mexPrintf("%d thread number is %d (%d).\n",col,omp_get_thread_num(),omp_get_num_threads());
+      #endif
       ka = 0 ;
       for(unsigned long int row=0; row<mB; row++)
 	{

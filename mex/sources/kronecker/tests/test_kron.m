@@ -9,8 +9,8 @@ function test_kron(test)
     if test == 1
     
         percentage_of_non_zero_elements = 10e-4;
-        NumberOfVariables = 100;
-        NumberOfEquations = 50 ;
+        NumberOfVariables = 549;%100;
+        NumberOfEquations = 256;%50
         NumberOfColsInB   = 50 ; 
         A = zeros(NumberOfEquations,NumberOfVariables^2);
         for i = 1:NumberOfEquations
@@ -27,7 +27,6 @@ function test_kron(test)
         end
         A = sparse(A);
         B = randn(NumberOfVariables,NumberOfColsInB);
-        
         disp('')
         disp('Computation of A*kron(B,B) with the mex file (v1):')
         tic 
@@ -40,11 +39,12 @@ function test_kron(test)
             D2 = sparse_hessian_times_B_kronecker_C(A,B,B);
         toc
         
+        size(D1)
         
         disp('');
         disp(['Difference between D1 and D2 = ' num2str(max(max(abs(D1-D2))))]);
         
-        
+        return
         disp(' ')
         disp('Computation of A*kron(B,B) with two nested loops:')
         tic
@@ -131,15 +131,19 @@ if test > 1
 end
 
 if test>2
-    A = randn(100,100);
-    B = randn(10,10);
-    C = randn(10,10);
+    A = randn(100,10000);
+    B = randn(100,10);
+    C = randn(100,10);
     disp('Test with full format matrix -- 1')
     D1 = A*kron(B,C);
+    tic
     D2 = A_times_B_kronecker_C(A,B,C);
+    toc
     disp(['Difference between D1 and D2 = ' num2str(max(max(abs(D1-D2))))]);
     disp('Test with full format matrix -- 1')
     D1 = A*kron(B,B);
+    tic
     D2 = A_times_B_kronecker_C(A,B);
+    toc
     disp(['Difference between D1 and D2 = ' num2str(max(max(abs(D1-D2))))]);
 end

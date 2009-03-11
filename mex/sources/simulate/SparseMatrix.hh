@@ -26,10 +26,7 @@
 #include <map>
 #include <ctime>
 #include "Mem_Mngr.hh"
-//! Openmp is available in GCC since version 4.3.2
-//! Test if GCC version is greater then 4.3.2 order to avoid a copilation error
-#define GNUVER 100*__GNUC__+10*__GNUC_MINOR__+__GNUC_PATCHLEVEL__
-#if GNUVER >= 432
+#ifdef _OPENMP
   #include <omp.h>
 #endif
 #define NEW_ALLOC

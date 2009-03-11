@@ -72,14 +72,37 @@ else
 end
 
 % Comment next line to suppress compilation debugging info
-COMPILE_OPTIONS = [ COMPILE_OPTIONS ' -v' ];
+% COMPILE_OPTIONS = [ COMPILE_OPTIONS ' -v' ];
 
 COMPILE_COMMAND = [ 'mex ' COMPILE_OPTIONS ' -outdir ' OUTPUT_DIR ];
+
+CFLAGS   = ' CFLAGS="\$CFLAGS -fopenmp" ';
+CXXFLAGS = ' CXXFLAGS="\$CXXFLAGS -fopenmp" ';
+LDFLAGS  = ' LDFLAGS="\$LDFLAGS -fopenmp" ';
+
+disp('Compiling isopenmp...')
+try
+    eval([ 'mex ' COMPILE_OPTIONS  CFLAGS CXXFLAGS LDFLAGS  ' -outdir ' OUTPUT_DIR ' threads/isopenmp.cc ' ]);
+    disp(' ')
+    disp('|------------------------------------------------|')
+    disp('|  OpenMp is used (multithreaded mex files) for: |')
+    disp('|   * sparse_hessian_times_B_kronecker_C.cc      |')
+    disp('|   * simulate (SparseMatrix.cc)                 |')
+    disp('|------------------------------------------------|')
+    disp(' ')
+catch
+    eval([ 'mex ' COMPILE_OPTIONS ' -outdir ' OUTPUT_DIR ' threads/isopenmp.cc ' ]);
+    CFLAGS = [];
+    CXXFLAGS = [];
+    LDFLAGS = [];
+end
+
+COMPILE_COMMAND_OMP = [ 'mex ' COMPILE_OPTIONS  CFLAGS CXXFLAGS LDFLAGS  ' -outdir ' OUTPUT_DIR ];
 
 disp('Compiling mjdgges...')
 eval([ COMPILE_COMMAND ' mjdgges/mjdgges.c ' LAPACK_PATH ]);
 disp('Compiling sparse_hessian_times_B_kronecker_C...')
-eval([ COMPILE_COMMAND ' kronecker/sparse_hessian_times_B_kronecker_C.cc ']);% BLAS_PATH ]);
+eval([ COMPILE_COMMAND_OMP ' kronecker/sparse_hessian_times_B_kronecker_C.cc' ]);
 disp('Compiling A_times_B_kronecker_C...')
 eval([ COMPILE_COMMAND ' kronecker/A_times_B_kronecker_C.cc ' BLAS_PATH ]);
 disp('Compiling gensylv...')
@@ -103,5 +126,6 @@ eval([ COMPILE_COMMAND ' -DMATLAB -Igensylv/cc ' ...
        'gensylv/cc/TriangularSylvester.cpp ' ...
        'gensylv/cc/Vector.cpp ' ...
        BLAS_PATH ' ' LAPACK_PATH ]);
+
 disp('Compiling simulate...')
-eval([ COMPILE_COMMAND ' -Isimulate -I../../preprocessor/include simulate/simulate.cc simulate/Interpreter.cc simulate/Mem_Mngr.cc simulate/SparseMatrix.cc' ]);
+eval([ COMPILE_COMMAND_OMP ' -Isimulate -I../../preprocessor/include simulate/simulate.cc simulate/Interpreter.cc simulate/Mem_Mngr.cc simulate/SparseMatrix.cc']);

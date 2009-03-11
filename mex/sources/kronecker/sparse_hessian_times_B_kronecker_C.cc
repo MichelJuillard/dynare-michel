@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2007-2008 Dynare Team
+ * Copyright (C) 2007-2009 Dynare Team
  *
  * This file is part of Dynare.
  *
@@ -23,12 +23,21 @@
  * (dynare format). This mex file should not be used outside dr1.m.
  */
 
+#define USE_OMP 1
+#define DEBUG_OMP 0
+
 #include <string.h>
 #include "mex.h"
 
+#if USE_OMP
+  #include <omp.h>
+#else
+  #define DEBUG_OMP 0
+#endif
+
 #ifdef MWTYPES_NOT_DEFINED
-typedef int mwIndex;
-typedef int mwSize;
+  typedef int mwIndex;
+  typedef int mwSize;
 #endif
 
 void sparse_hessian_times_B_kronecker_B(mwIndex *isparseA, mwIndex *jsparseA, double *vsparseA, 
@@ -39,36 +48,40 @@ void sparse_hessian_times_B_kronecker_B(mwIndex *isparseA, mwIndex *jsparseA, do
   **   This loop is splitted into two nested loops because we use the
   **   symmetric pattern of the hessian matrix.     
   */
-  unsigned long int jj, ii, iv;
-  unsigned int i1B, i2B, j1B, j2B, k1, k2, kk, k;
-  unsigned int nz_in_column_ii_of_A;
-  double bb;
-  for(j1B=0; j1B<nB; j1B++)
+  #if USE_OMP
+    #pragma omp parallel for num_threads(atoi(getenv("DYNARE_NUM_THREADS")))
+  #endif
+  for(unsigned int j1B=0; j1B<nB; j1B++)
     {
-      for(j2B=j1B; j2B<nB; j2B++)
+      #if DEBUG_OMP
+        mexPrintf("%d thread number is %d (%d).\n",j1B,omp_get_thread_num(),omp_get_num_threads());
+      #endif
+      for(unsigned int j2B=j1B; j2B<nB; j2B++)
 	{
-	  jj = j1B*nB+j2B;// column of kron(B,B) index.
-	  nz_in_column_ii_of_A = 0;
-	  k1 = k2 = iv = 0;
+	  unsigned long int jj = j1B*nB+j2B;// column of kron(B,B) index.
+	  unsigned long int iv =0;
+          unsigned int nz_in_column_ii_of_A = 0;
+	  unsigned int k1 = 0;
+          unsigned int k2 = 0;
 	  /*
 	  ** Loop over the rows of kron(B,B) (column jj).
 	  */
-	  for(ii=0; ii<nA; ii++)
+	  for(unsigned long int ii=0; ii<nA; ii++)
 	    {
 	      k1 = jsparseA[ii];
 	      k2 = jsparseA[ii+1];
 	      if (k1 < k2)// otherwise column ii of A does not have non zero elements (and there is nothing to compute).
 		{
 		  ++nz_in_column_ii_of_A;
-		  i1B = (ii/mB);
-		  i2B = (ii%mB);
-		  bb = B[j1B*mB+i1B]*B[j2B*mB+i2B];
+		  unsigned int i1B = (ii/mB);
+		  unsigned int i2B = (ii%mB);
+		  double bb  = B[j1B*mB+i1B]*B[j2B*mB+i2B];
 		  /*
 		  ** Loop over the non zero entries of A(:,ii).
 		  */
-		  for(k=k1; k<k2; k++)
+		  for(unsigned int k=k1; k<k2; k++)
 		    {
-		      kk = isparseA[k];
+		      unsigned int kk = isparseA[k];
 		      D[jj*mA+kk] = D[jj*mA+kk] + bb*vsparseA[iv];
 		      iv++;
 		    }
@@ -89,35 +102,40 @@ void sparse_hessian_times_B_kronecker_C(mwIndex *isparseA, mwIndex *jsparseA, do
   /* 
   **   Loop over the columns of kron(B,B) (or of the result matrix D).
   */
-  unsigned long int jj, ii, iv;
-  unsigned int iB, iC, jB, jC, k1, k2, kk, k;
-  unsigned int nz_in_column_ii_of_A;
-  double cb;
-  for(jj=0; jj<nB*nC; jj++)// column of kron(B,B) index.
+  #if USE_OMP
+    #pragma omp parallel for num_threads(atoi(getenv("DYNARE_NUM_THREADS")))
+  #endif
+  for(unsigned long int jj=0; jj<nB*nC; jj++)// column of kron(B,C) index.
     {
-      jB = jj/nC;
-      jC = jj%nC;
-      iv = k1 = k2 = 0;
-      nz_in_column_ii_of_A = 0;
+      // Uncomment the following line to check if all processors are used.
+      #if DEBUG_OMP
+        mexPrintf("%d thread number is %d (%d).\n",jj,omp_get_thread_num(),omp_get_num_threads());
+      #endif
+      unsigned int jB = jj/nC;
+      unsigned int jC = jj%nC;
+      unsigned int k1 = 0;
+      unsigned int k2 = 0;
+      unsigned long int iv = 0;
+      unsigned int nz_in_column_ii_of_A = 0;
       /*
-      ** Loop over the rows of kron(B,B) (column jj).
+      ** Loop over the rows of kron(B,C) (column jj).
       */
-      for(ii=0; ii<nA; ii++)
+      for(unsigned long int ii=0; ii<nA; ii++)
 	{
 	  k1 = jsparseA[ii];
 	  k2 = jsparseA[ii+1];
 	  if (k1 < k2)// otherwise column ii of A does not have non zero elements (and there is nothing to compute).
 	    {
 	      ++nz_in_column_ii_of_A;
-	      iC = (ii%mB);
-	      iB = (ii/mB);
-	      cb = C[jC*mC+iC]*B[jB*mB+iB];
+	      unsigned int iC = (ii%mB);
+	      unsigned int iB = (ii/mB);
+	      double cb = C[jC*mC+iC]*B[jB*mB+iB];
 	      /*
 	      ** Loop over the non zero entries of A(:,ii).
 	      */
-	      for(k=k1; k<k2; k++)
+	      for(unsigned int k=k1; k<k2; k++)
 		{
-		  kk = isparseA[k];
+		  unsigned int kk = isparseA[k];
 		  D[jj*mA+kk] = D[jj*mA+kk] + cb*vsparseA[iv];
 		  iv++;
 		}
