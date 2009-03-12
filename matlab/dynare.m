@@ -33,7 +33,27 @@ function dynare(fname, varargin)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-warning_config
+if strcmpi(fname,'help')
+    disp(' ')
+    disp(['This is dynare version ' dynare_version() '.'])
+    disp(' ')
+    disp('USAGE: dynare FILENAME [.mod,.dyn] [OPTIONS]')
+    disp(' ')
+    disp('dynare executes instruction included in FILENAME.mod.')
+    disp(' ')
+    disp('OPTIONS:')
+    disp(' o  noclearall: By default, dynare  will issue a clear all command to Matlab or Octave,')
+    disp('                thereby deleting all workspace variables; this options instructs dynare') 
+    disp('                not to clear the workspace.')
+    disp(' o savemacro:   Instructs dynare  to save the intermediary file which is obtained after') 
+    disp('                macro-processing; saved output will go in FILENAME -macroexp.mod.')
+    disp(' o debug:       Instructs the preprocessor to write some debugging informations about the') 
+    disp('                scanning and parsing of the .mod file.')
+    disp(' ')
+    return
+end
+
+warning_config()
 
 if exist('OCTAVE_VERSION')
   if octave_ver_less_than('3.0.0')
@@ -65,7 +85,7 @@ if ~ischar(fname)
 end
 
 % Testing if file have extension
-% If no extension defalut .mod is added
+% If no extension default .mod is added
 if isempty(strfind(fname,'.'))
   fname1 = [fname '.dyn'];
   d = dir(fname1);
