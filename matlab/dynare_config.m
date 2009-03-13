@@ -61,7 +61,7 @@ else
     end
 end
 
-if isopenmp
+if exist('isopenmp') && isopenmp
     number_of_threads = set_dynare_threads();
     multithread_flag = number_of_threads-1;
 else
