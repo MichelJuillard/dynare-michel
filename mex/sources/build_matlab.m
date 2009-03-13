@@ -128,4 +128,4 @@ eval([ COMPILE_COMMAND ' -DMATLAB -Igensylv/cc ' ...
        BLAS_PATH ' ' LAPACK_PATH ]);
 
 disp('Compiling simulate...')
-eval([ COMPILE_COMMAND_OMP ' -Isimulate -I../../preprocessor/include simulate/simulate.cc simulate/Interpreter.cc simulate/Mem_Mngr.cc simulate/SparseMatrix.cc']);
+eval([ COMPILE_COMMAND_OMP ' -Isimulate -I../../preprocessor simulate/simulate.cc simulate/Interpreter.cc simulate/Mem_Mngr.cc simulate/SparseMatrix.cc']);
