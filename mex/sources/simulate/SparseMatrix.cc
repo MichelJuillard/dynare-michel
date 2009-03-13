@@ -621,7 +621,7 @@ void SparseMatrix::Init(int periods, int y_kmin, int y_kmax, int Size, std::map<
   mexPrintf("Now looping\n");
   mexEvalString("drawnow;");
 #endif
-#pragma omp parallel for num_threads(atoi(getenv("DYNARE_NUM_THREADS"))) ordered private(it4, ti_y_kmin, ti_y_kmax, eq, var, lag, tmp_b) schedule(dynamic)
+  #pragma omp parallel for num_threads(atoi(getenv("DYNARE_NUM_THREADS"))) ordered private(it4, ti_y_kmin, ti_y_kmax, eq, var, lag) schedule(dynamic)
   for (t=0;t<periods;t++)
     {
 #ifdef PRINT_OUT
@@ -631,6 +631,7 @@ void SparseMatrix::Init(int periods, int y_kmin, int y_kmax, int Size, std::map<
       ti_y_kmax= min( periods-(t+1), y_kmax);
       it4=IM.begin();
       eq=-1;
+      #pragma omp ordered
       while (it4!=IM.end())
         {
           var=it4->first.first.second;
@@ -725,7 +726,7 @@ void SparseMatrix::ShortInit(int periods, int y_kmin, int y_kmax, int Size, std:
   int t, eq, var, lag, ti_y_kmin, ti_y_kmax;
   double tmp_b=0.0;
   std::map<std::pair<std::pair<int, int> ,int>, int>::iterator it4;
-  #pragma omp parallel for num_threads(atoi(getenv("DYNARE_NUM_THREADS"))) ordered private(it4, ti_y_kmin, ti_y_kmax, eq, var, lag, tmp_b) schedule(dynamic)
+  //#pragma omp parallel for num_threads(atoi(getenv("DYNARE_NUM_THREADS"))) ordered private(it4, ti_y_kmin, ti_y_kmax, eq, var, lag, tmp_b) schedule(dynamic)
   for (t=0;t<periods;t++)
     {
 #ifdef PRINT_OUT
@@ -981,12 +982,14 @@ SparseMatrix::compare( int *save_op, int *save_opa, int *save_opaa, int beg_t, i
               mexErrMsgTxt("Exit from Dynare");
             }
           }
-      #pragma omp parallel for num_threads(atoi(getenv("DYNARE_NUM_THREADS"))) ordered private(i,j, save_op_s, index_d, r) schedule(dynamic)
+      /*#pragma omp parallel num_threads(atoi(getenv("DYNARE_NUM_THREADS")))
+        mexPrintf("omp_in_parallel=%hd, omp_get_thread_num=%d, omp_get_num_threads=%d, t=%d\n",omp_in_parallel(), omp_get_thread_num(), omp_get_num_threads(), t);*/
+      //#pragma omp parallel for num_threads(atoi(getenv("DYNARE_NUM_THREADS"))) ordered private(i,j, save_op_s, index_d, r) schedule(dynamic)
       for (t=1;t<periods-beg_t-max(y_kmax,y_kmin);t++)
         {
           //mexPrintf("omp_in_parallel=%hd, omp_get_thread_num=%d, t=%d\n",omp_in_parallel(), omp_get_thread_num(), t);
           i=j=0;
-          #pragma omp ordered
+          //#pragma omp ordered
           while (i<nop4)
             {
               save_op_s=(t_save_op_s*)(&(save_op[i]));
@@ -1047,12 +1050,13 @@ SparseMatrix::compare( int *save_op, int *save_opa, int *save_opaa, int beg_t, i
             }
           }*/
       //mexPrintf("beg_t=%d, starting at t1=%d\n",beg_t,t1);
-      #pragma omp parallel for num_threads(atoi(getenv("DYNARE_NUM_THREADS"))) ordered private(t, i,j, save_op_s, index_d, r) schedule(dynamic)
+      //#pragma omp parallel for num_threads(atoi(getenv("DYNARE_NUM_THREADS"))) ordered private(t, i,j, save_op_s, index_d, r) schedule(dynamic)
+
       for (t=t1;t<periods-beg_t;t++)
         {
           //mexPrintf("omp_in_parallel=%hd, omp_get_thread_num=%d, t=%d\n",omp_in_parallel(), omp_get_thread_num(), t);
           i=j=0;
-          #pragma omp ordered
+          //#pragma omp ordered
           while (i<nop4)
             {
               save_op_s=(t_save_op_s*)(&(save_op[i]));
