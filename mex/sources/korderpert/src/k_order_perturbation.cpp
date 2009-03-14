@@ -275,6 +275,12 @@ extern "C" {
 #endif				
 			//			DynamicFn * pDynamicFn = loadModelDynamicDLL (fname);
 			DynamicModelDLL dynamicDLL(fName,nEndo, jcols, nMax_lag, nExog, dfExt);
+
+#ifdef DEBUG		
+			mexPrintf("k_order_perturbation: Call tls init\n");
+#endif
+            tls.init(kOrder, nStat+2*nPred+3*nBoth+2*nForw+nExog);
+
 #ifdef DEBUG		
 		mexPrintf("k_order_perturbation: Calling dynare constructor .\n");
 #endif			
@@ -295,12 +301,12 @@ extern "C" {
     ****************/			
 				// intiate tensor library
 #ifdef DEBUG		
-	mexPrintf("k_order_perturbation: Call tls init\n");
+//	mexPrintf("k_order_perturbation: Call tls init\n");
 #endif
-            tls.init(dynare.order(),
+/*            tls.init(dynare.order(),
 				dynare.nstat()+2*dynare.npred()+3*dynare.nboth()+
 				2*dynare.nforw()+dynare.nexog());
-            
+*/            
 			// construct main K-order approximation class
 //				FistOrderApproximation app(dynare, journal, nSteps);
 #ifdef DEBUG		

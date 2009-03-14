@@ -40,7 +40,7 @@ int main(int argc, char* argv[])
 #ifdef DEBUG		
 	mexPrintf("k_order_perturbation: check_flag = %d ,  fName = %s .\n", check_flag,fName);
 #endif		
-	int kOrder =1;
+	int kOrder =3;
 	int npar = 7;//(int)mxGetM(mxFldp);
 	double dparams[7]={ 0.3300,
 		0.9900,
@@ -188,6 +188,13 @@ int main(int argc, char* argv[])
 			std::string jName(fName); //params.basename);
 			jName += ".jnl";
 			Journal journal(jName.c_str());
+
+#ifdef DEBUG		
+			mexPrintf("k_order_perturbation: Call tls init\n");
+#endif
+            tls.init(kOrder, nStat+2*nPred+3*nBoth+2*nForw+nExog);
+
+
 #ifdef DEBUG		
 			mexPrintf("k_order_perturbation: Calling dynamicDLL constructor.\n");
 #endif				
@@ -203,11 +210,12 @@ int main(int argc, char* argv[])
 				, llincidence, qz_criterium);
 			// intiate tensor library
 #ifdef DEBUG		
-			mexPrintf("k_order_perturbation: Call tls init\n");
+//			mexPrintf("k_order_perturbation: Call tls init\n");
 #endif
-            tls.init(dynare.order(),
+/*            tls.init(dynare.order(),
 				dynare.nstat()+2*dynare.npred()+3*dynare.nboth()+
 				2*dynare.nforw()+dynare.nexog());
+*/
 			// construct main K-order approximation class
 			//				FistOrderApproximation app(dynare, journal, nSteps);
 #ifdef DEBUG		

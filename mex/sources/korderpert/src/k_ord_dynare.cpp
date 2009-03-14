@@ -91,7 +91,7 @@ KordpDynare::KordpDynare(const char** endo,  int num_endo,
 	: nStat(nstat), nBoth(nboth), nPred(npred), nForw(nforw), nExog(nexog), nPar(npar),
 	nYs(npred + nboth), nYss(nboth + nforw),nY(num_endo), nJcols(jcols), nSteps(nsteps), nOrder(norder), 
 	journal(jr),  dynamicDLL(dynamicDLL), ySteady(ysteady), vCov(vcov), params (inParams), 
-	md(1), dnl(NULL), denl(NULL), dsnl(NULL), ss_tol(sstol), varOrder( var_order), 
+	md(norder), dnl(NULL), denl(NULL), dsnl(NULL), ss_tol(sstol), varOrder( var_order), 
 	ll_Incidence(llincidence), qz_criterium(criterium) 
 {
 #ifdef DEBUG		
@@ -119,6 +119,26 @@ KordpDynare::KordpDynare(const char** endo,  int num_endo,
 ******/
 	//	throw DynareException(__FILE__, __LINE__, string("Could not open model file ")+modName);
 		JacobianIndices= ReorderDynareJacobianIndices( varOrder);
+
+	//	Initialise ModelDerivativeContainer(*this, this->md, nOrder);
+    	for (int iord = 1; iord <= nOrder; iord++) {
+    		FSSparseTensor* t = new FSSparseTensor(iord, nY+nYs+nYss+nExog,nY);
+        	md.insert(t);
+        }
+/******
+		FSSparseTensor *ysTi=(new FSSparseTensor (0, 1,nY));
+			for (int j = 0; j<nY; j++){
+				if ((double)(*ySteady)[j]!=0.0){ // populate sparse if not zero
+					IntSequence s(1,0);
+					s[0]=j;
+					ysTi->insert(s, j,(double)(*ySteady)[j]);
+				}
+		}
+		md.remove(Symmetry(0));
+		md.insert(ysTi);//(&mdTi);
+		md.print();
+//		exit(0);
+******/
 
 	}
 	catch (...){
@@ -168,6 +188,20 @@ KordpDynare::~KordpDynare()
 	if (denl)
 		delete denl;
 }
+
+
+/** This clears the container of model derivatives and initializes it
+ * inserting empty sparse tensors up to the given order. */
+ModelDerivativeContainer::ModelDerivativeContainer(const KordpDynare& model, 
+		TensorContainer<FSSparseTensor>& mod_ders, int order): md(mod_ders)
+{
+	md.clear();
+	for (int iord = 1; iord <= order; iord++) {
+		FSSparseTensor* t = new FSSparseTensor(iord, model.ny()+model.nys()+model.nyss()+model.nexog(), model.ny());
+		md.insert(t);
+	}
+}
+
 
 void KordpDynare::solveDeterministicSteady(Vector& steady)
 {
@@ -284,7 +318,8 @@ void KordpDynare::calcDerivatives(const Vector& yy, const Vector& xx)
     // md container
 //        md=*(new TensorContainer<FSSparseTensor>(1)); 
 //		FSSparseTensor mdSTi(mdTi);
-    md.clear();// this is to be used only for 1st order!!
+    //md.clear();// this is to be used only for 1st order!!
+    md.remove(Symmetry(1));
     md.insert(mdTi);//(&mdTi);
 }
 
@@ -315,7 +350,7 @@ void KordpDynare::calcDerivatives(const Vector& yy, ogu::Jacobian& jacob)
         }
         // md container
 //        md=*(new TensorContainer<FSSparseTensor>(1)); 
-        md.clear();
+        //md.clear();
         md.insert(&mdTi);
 		delete &out;
 		delete &xx;

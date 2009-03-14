@@ -224,6 +224,21 @@ private:
 	void ReorderBlocks(TwoDMatrix * tdx, const int * varOrder);
 };
 
+/****************************
+* ModelDerivativeContainer manages derivatives container
+************************************/
+
+class ModelDerivativeContainer //: public ogp::FormulaDerEvalLoader 
+{
+protected:
+//	const ogp::FineAtoms& atoms;
+	TensorContainer<FSSparseTensor>& md;
+public:
+	ModelDerivativeContainer(const KordpDynare& model, TensorContainer<FSSparseTensor>& mod_ders,
+						int order);
+	void load(int i, int iord, const int* vars, double res);
+};
+
   /****************************
   *  K-Order Perturbation instance of Jacobian:
   ************************************/
