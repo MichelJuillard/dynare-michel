@@ -215,7 +215,7 @@ public:
 	{return new KordpDynare(*this);}
 	void ReorderCols(TwoDMatrix * tdx, const int * varOrder);
 	void ReorderCols(TwoDMatrix * tdx, const vector<int> * varOrder);
-	Vector * KordpDynare::LLxSteady( const Vector& yS); // returns ySteady extended with leads and lags 
+	Vector * LLxSteady( const Vector& yS); // returns ySteady extended with leads and lags 
 
 private:
 	void writeModelInfo(Journal& jr) const;
