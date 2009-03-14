@@ -51,7 +51,7 @@ void sparse_hessian_times_B_kronecker_B(mwIndex *isparseA, mwIndex *jsparseA, do
   #if USE_OMP
     #pragma omp parallel for num_threads(atoi(getenv("DYNARE_NUM_THREADS")))
   #endif
-  for(unsigned int j1B=0; j1B<nB; j1B++)
+  for(int j1B=0; j1B<nB; j1B++)
     {
       #if DEBUG_OMP
         mexPrintf("%d thread number is %d (%d).\n",j1B,omp_get_thread_num(),omp_get_num_threads());
@@ -105,7 +105,7 @@ void sparse_hessian_times_B_kronecker_C(mwIndex *isparseA, mwIndex *jsparseA, do
   #if USE_OMP
     #pragma omp parallel for num_threads(atoi(getenv("DYNARE_NUM_THREADS")))
   #endif
-  for(unsigned long int jj=0; jj<nB*nC; jj++)// column of kron(B,C) index.
+  for(long int jj=0; jj<nB*nC; jj++)// column of kron(B,C) index.
     {
       // Uncomment the following line to check if all processors are used.
       #if DEBUG_OMP
