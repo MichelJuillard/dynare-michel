@@ -86,9 +86,9 @@ Fstar           = zeros(pp,smpl_diff);
 Finf            = zeros(pp,smpl_diff);
 Fi              = zeros(pp,smpl);
 Ki              = zeros(mm,pp,smpl);
-Li              = zeros(mm,mm,pp,smpl);
-Linf            = zeros(mm,mm,pp,smpl_diff);
-L0              = zeros(mm,mm,pp,smpl_diff);
+%Li              = zeros(mm,mm,pp,smpl);
+%Linf            = zeros(mm,mm,pp,smpl_diff);
+%L0              = zeros(mm,mm,pp,smpl_diff);
 Kstar           = zeros(mm,pp,smpl_diff);
 P               = zeros(mm,mm,smpl+1);
 P1              = P;
@@ -128,8 +128,8 @@ while newRank & t < smpl
     if Finf(i,t) > crit & newRank
       icc=icc+1;
       Kinf(:,i,t)       = Pinf(:,:,t)*Zi';
-      Linf(:,:,i,t)     = eye(mm) - Kinf(:,i,t)*Z(i,:)/Finf(i,t);
-      L0(:,:,i,t)       = (Kinf(:,i,t)*Fstar(i,t)/Finf(i,t) - Kstar(:,i,t))*Zi/Finf(i,t);
+%      Linf(:,:,i,t)     = eye(mm) - Kinf(:,i,t)*Z(i,:)/Finf(i,t);
+%      L0(:,:,i,t)       = (Kinf(:,i,t)*Fstar(i,t)/Finf(i,t) - Kstar(:,i,t))*Zi/Finf(i,t);
       a(:,t)            = a(:,t) + Kinf(:,i,t)*v(i,t)/Finf(i,t);
       Pstar(:,:,t)      = Pstar(:,:,t) + ...
         Kinf(:,i,t)*Kinf(:,i,t)'*Fstar(i,t)/(Finf(i,t)*Finf(i,t)) - ...
@@ -158,7 +158,7 @@ while newRank & t < smpl
       %% Note that : (1) rank(Pinf)=0 implies that Finf = 0, (2) outside this loop (when for some i and t the condition
       %% rank(Pinf)=0 is satisfied we have P = Pstar and F = Fstar and (3) Finf = 0 does not imply that
       %% rank(Pinf)=0. [stéphane,11-03-2004].     
-      Li(:,:,i,t)    = eye(mm)-Kstar(:,i,t)*Z(i,:)/Fstar(i,t);  % we need to store Li for DKF smoother
+      %Li(:,:,i,t)    = eye(mm)-Kstar(:,i,t)*Z(i,:)/Fstar(i,t);  % we need to store Li for DKF smoother
       a(:,t)            = a(:,t) + Kstar(:,i,t)*v(i,t)/Fstar(i,t);
       Pstar(:,:,t)      = Pstar(:,:,t) - Kstar(:,i,t)*Kstar(:,i,t)'/Fstar(i,t);
       Pstar(:,:,t)=tril(Pstar(:,:,t))+tril(Pstar(:,:,t),-1)';
@@ -179,8 +179,8 @@ end
 
 d = t;
 P(:,:,d+1) = Pstar(:,:,d+1);
-Linf  = Linf(:,:,:,1:d);
-L0  = L0(:,:,:,1:d);
+%Linf  = Linf(:,:,:,1:d);
+%L0  = L0(:,:,:,1:d);
 Fstar = Fstar(:,1:d);
 Finf = Finf(:,1:d);
 Kstar = Kstar(:,:,1:d);
@@ -201,7 +201,7 @@ while notsteady & t<smpl
     Fi(i,t) = Zi*P(:,:,t)*Zi';
     Ki(:,i,t) = P(:,:,t)*Zi';
     if Fi(i,t) > crit
-      Li(:,:,i,t)    = eye(mm)-Ki(:,i,t)*Z(i,:)/Fi(i,t);
+      %Li(:,:,i,t)    = eye(mm)-Ki(:,i,t)*Z(i,:)/Fi(i,t);
       a(:,t) = a(:,t) + Ki(:,i,t)*v(i,t)/Fi(i,t);
       P(:,:,t) = P(:,:,t) - Ki(:,i,t)*Ki(:,i,t)'/Fi(i,t);
       P(:,:,t)=tril(P(:,:,t))+tril(P(:,:,t),-1)';
@@ -255,7 +255,7 @@ while t > d+1
   di = flipud(data_index{t})';
   for i = di
     if Fi(i,t) > crit
-      ri = Z(i,:)'/Fi(i,t)*v(i,t)+Li(:,:,i,t)'*ri;
+      ri = Z(i,:)'/Fi(i,t)*v(i,t)+ri-Ki(:,i,t)'*ri/Fi(i,t)*Z(i,:)';
     end
   end
   r(:,t) = ri;
@@ -273,10 +273,11 @@ if d
           %      if Finf(i,t) > crit & ~(t==d & i>options_.diffuse_d),  % use of options_.diffuse_d to be sure of DKF termination
           if Finf(i,t) > crit 
               r1(:,t) = Z(i,:)'*v(i,t)/Finf(i,t) + ...
-                        L0(:,:,i,t)'*r0(:,t) + Linf(:,:,i,t)'*r1(:,t);
-              r0(:,t) = Linf(:,:,i,t)'*r0(:,t);
+                        (Kinf(:,i,t)'*Fstar(i,t)/Finf(i,t)-Kstar(:,i,t)')*r0(:,t)/Finf(i,t)*Z(i,:)' + ...
+                        r1(:,t)-Kinf(:,i,t)'*r1(:,t)/Finf(i,t)*Z(i,:)';
+              r0(:,t) = r0(:,t)-Kinf(:,i,t)'*r0(:,t)/Finf(i,t)*Z(i,:)';
           elseif Fstar(i,t) > crit % step needed whe Finf == 0
-              r0(:,t) = Z(i,:)'/Fstar(i,t)*v(i,t)+Li(:,:,i,t)'*r0(:,t);
+              r0(:,t) = Z(i,:)'/Fstar(i,t)*v(i,t)+r0(:,t)-(Kstar(:,i,t)'*r0(:,t))/Fstar(i,t)*Z(i,:)';
           end
       end
       alphahat(:,t) = a1(:,t) + Pstar1(:,:,t)*r0(:,t) + Pinf1(:,:,t)*r1(:,t);
@@ -289,6 +290,8 @@ if d
   end
 end
 
+disp('smoother done');
+
 if nargout > 7
     decomp = zeros(nk,mm,rr,smpl+nk);
     ZRQinv = inv(Z*QQ*Z');
@@ -297,7 +300,7 @@ if nargout > 7
         di = flipud(data_index{t})';
         for i = di
             if Fi(i,t) > crit
-                ri_d = Z(i,:)'/Fi(i,t)*v(i,t)+Li(:,:,i,t)'*ri_d;
+                ri_d = Z(i,:)'/Fi(i,t)*v(i,t)+ri_d-Ki(:,i,t)'*ri_d/Fi(i,t)*Z(i,:)';
             end
         end
         
@@ -305,11 +308,11 @@ if nargout > 7
         eta_tm1t = QRt*ri_d;
         % calculate decomposition
         Ttok = eye(mm,mm); 
+        AAA = P1(:,:,t)*Z'*ZRQinv*Z*R;
         for h = 1:nk
+            BBB = Ttok*AAA;
             for j=1:rr
-                eta=zeros(rr,1);
-                eta(j) = eta_tm1t(j);
-                decomp(h,:,j,t+h) = Ttok*P1(:,:,t)*Z'*ZRQinv*Z*R*eta;
+                decomp(h,:,j,t+h) = eta_tm1t(j)*BBB(:,j);
             end
             Ttok = T*Ttok;
         end
