@@ -22,32 +22,31 @@
  * one can consider large matrices B and/or C. 
  */
 
-#define USE_OMP 1
-#define DEBUG_OMP 0
-
 #include <string.h>
 #include "mex.h"
+
+#ifdef _OPENMP
+  #define USE_OMP 1
+  #define DEBUG_OMP 0
+  #include <omp.h>
+#else
+  #define USE_OMP 0
+  #define DEBUG_OMP 0
+  #ifdef NO_BLAS_H
+    #if defined(__linux__) || defined(OCTAVE)
+      #define dgemm dgemm_
+    #endif
+    extern "C" {
+    int dgemm(char*, char*, int*, int*, int*, double*, double*, int*, double*, int*, double*, double*, int*);
+    }
+  #else /* NO_BLAS_H */
+    #include "blas.h"
+  #endif /* NO_BLAS_H */
+#endif
 
 #ifdef MWTYPES_NOT_DEFINED
 typedef int mwIndex;
 typedef int mwSize;
-#endif
-
-#ifdef NO_BLAS_H
-# if defined(__linux__) || defined(OCTAVE)
-#  define dgemm dgemm_
-# endif
-extern "C" {
-  int dgemm(char*, char*, int*, int*, int*, double*, double*, int*, double*, int*, double*, double*, int*);
-}
-#else /* NO_BLAS_H */
-# include "blas.h"
-#endif /* NO_BLAS_H */
-
-#if USE_OMP
-  #include <omp.h>
-#else
-  #define DEBUG_OMP 0
 #endif
 
 void full_A_times_kronecker_B_C(double *A, double *B, double *C, double *D,
@@ -137,9 +136,6 @@ void full_A_times_kronecker_B_B(double *A, double *B, double *D, int mA, int nA,
       }
    #endif
 }
-
-
-
 
 void mexFunction( int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[] )
 {

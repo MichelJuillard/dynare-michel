@@ -23,15 +23,15 @@
  * (dynare format). This mex file should not be used outside dr1.m.
  */
 
-#define USE_OMP 1
-#define DEBUG_OMP 0
-
 #include <string.h>
 #include "mex.h"
 
-#if USE_OMP
+#ifdef _OPENMP
+  #define USE_OMP 1
+  #define DEBUG_OMP 0
   #include <omp.h>
 #else
+  #define USE_OMP 1
   #define DEBUG_OMP 0
 #endif
 
