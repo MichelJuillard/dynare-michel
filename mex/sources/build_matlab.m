@@ -87,11 +87,17 @@ try
     disp('|------------------------------------------------|')
     disp('|  OpenMp is used (multithreaded mex files) for: |')
     disp('|   * sparse_hessian_times_B_kronecker_C.cc      |')
+    disp('|   * A_times_B_kronecker_C.cc                   |')
     disp('|   * simulate (SparseMatrix.cc)                 |')
     disp('|------------------------------------------------|')
     disp(' ')
 catch
     eval([ 'mex ' COMPILE_OPTIONS ' -outdir ' OUTPUT_DIR ' threads/isopenmp.cc ' ]);
+    disp(' ')
+    disp('|------------------------------------------------|')
+    disp('|  OpenMp is not available on this platform!     |')
+    disp('|------------------------------------------------|')
+    disp(' ')
     CFLAGS = [];
     CXXFLAGS = [];
     LDFLAGS = [];
@@ -99,12 +105,21 @@ end
 
 COMPILE_COMMAND_OMP = [ 'mex ' COMPILE_OPTIONS  CFLAGS CXXFLAGS LDFLAGS  ' -outdir ' OUTPUT_DIR ];
 
+system(['cp ' OUTPUT_DIR '/isopenmp.' mexext ' ./isopenmp.' mexext]);
+
 disp('Compiling mjdgges...')
 eval([ COMPILE_COMMAND ' mjdgges/mjdgges.c ' LAPACK_PATH ]);
+
 disp('Compiling sparse_hessian_times_B_kronecker_C...')
 eval([ COMPILE_COMMAND_OMP ' kronecker/sparse_hessian_times_B_kronecker_C.cc' ]);
+
 disp('Compiling A_times_B_kronecker_C...')
-eval([ COMPILE_COMMAND ' kronecker/A_times_B_kronecker_C.cc ' BLAS_PATH ]);
+if isopenmp
+    eval([ COMPILE_COMMAND_OMP ' kronecker/A_times_B_kronecker_C.cc ']);    
+else
+    eval([ COMPILE_COMMAND ' kronecker/A_times_B_kronecker_C.cc ' BLAS_PATH]);
+end
+
 disp('Compiling gensylv...')
 eval([ COMPILE_COMMAND ' -DMATLAB -Igensylv/cc ' ...
        'gensylv/matlab/gensylv.cpp ' ...
@@ -129,3 +144,6 @@ eval([ COMPILE_COMMAND ' -DMATLAB -Igensylv/cc ' ...
 
 disp('Compiling simulate...')
 eval([ COMPILE_COMMAND_OMP ' -Isimulate -I../../preprocessor simulate/simulate.cc simulate/Interpreter.cc simulate/Mem_Mngr.cc simulate/SparseMatrix.cc']);
+
+% Clean up
+system(['rm ./isopenmp.' mexext]);
