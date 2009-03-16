@@ -1,4 +1,4 @@
-function moments=compute_model_moments(dr,M_,options,_)
+function moments=compute_model_moments(dr,M_,options_)
 %
 % INPUTS
 %    dr:        structure describing model solution
