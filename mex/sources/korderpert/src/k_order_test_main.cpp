@@ -40,7 +40,7 @@ int main(int argc, char* argv[])
 #ifdef DEBUG		
 	mexPrintf("k_order_perturbation: check_flag = %d ,  fName = %s .\n", check_flag,fName);
 #endif		
-	int kOrder =3;
+	int kOrder =2;
 	int npar = 7;//(int)mxGetM(mxFldp);
 	double dparams[7]={ 0.3300,
 		0.9900,

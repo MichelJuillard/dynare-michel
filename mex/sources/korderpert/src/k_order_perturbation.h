@@ -57,7 +57,11 @@
 //K_ORDER_PERTURBATION_API int fnK_order_perturbation(void);
 
 // <model>_Dynamic DLL pointer
-typedef void  (*DynamicFn)
+#ifdef WINDOWS
+    typedef void  *(DynamicFn)
+#else // linux
+    typedef void  (*DynamicFn)
+#endif
 (double *y, double *x, int nb_row_x, double *params, 
  int it_, double *residual, double *g1, double *g2);
 

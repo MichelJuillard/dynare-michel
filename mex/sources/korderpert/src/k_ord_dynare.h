@@ -222,6 +222,7 @@ private:
 	int * ReorderDynareJacobianIndices( const int * varOrder);
 	vector<int> * ReorderDynareJacobianIndices( const vector<int> * varOrder);
 	void ReorderBlocks(TwoDMatrix * tdx, const int * varOrder);
+	void populateDerivativesContainer(TwoDMatrix*g, int ord);
 };
 
 /****************************
