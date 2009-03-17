@@ -57,9 +57,11 @@
 //K_ORDER_PERTURBATION_API int fnK_order_perturbation(void);
 
 // <model>_Dynamic DLL pointer
-typedef void * (DynamicFn)
+typedef void  (*DynamicFn)
 (double *y, double *x, int nb_row_x, double *params, 
  int it_, double *residual, double *g1, double *g2);
+
+//DynamicFn Dynamic;
 
 typedef void *(mexFunctionPtr)(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]);
 
@@ -72,7 +74,11 @@ const int MAX_MODEL_NAME=100;
 class DynamicModelDLL
 {
 private:
-	DynamicFn * Dynamic;// pointer to the Dynamic function in DLL
+#ifdef WINDOWS
+        DynamicFn  *Dynamic;// pointer to the Dynamic function in DLL
+#else
+        DynamicFn  Dynamic;// pointer to the Dynamic function in DLL
+#endif
 	const int length;  // tot num vars = Num of Jacobian rows
 	const int jcols;  // tot num var t-1, t and t+1 instances + exogs = Num of Jacobian columns
 	const int nMax_lag; // no of lags

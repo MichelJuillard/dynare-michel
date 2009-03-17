@@ -633,21 +633,20 @@ DynamicModelDLL::DynamicModelDLL(const char * modName, const int y_length, const
         
 # else // __linux__
 		if (sExt==NULL) sExt=(".so");
-		void *dynamicHinstance = dlopen(strcat(fNname,sExt), RTLD_NOW);
-		if((dynamicHinstance == NULL) || dlerr()){
+		void *dynamicHinstance = dlopen(strcat(fName,sExt), RTLD_NOW);
+		if((dynamicHinstance == NULL) || dlerror()){
 			cerr << dlerror() << endl;
 			mexPrintf("MexPrintf:Error loading DLL: %s", dlerror);
 			throw 1;
 		}
-		void *mkr = dlsym(dynamicHinstance, "Dynamic");
-		if((mkr  == NULL) || dlerr()){
+		Dynamic = (DynamicFn)dlsym(dynamicHinstance, "Dynamic");
+		if((Dynamic  == NULL) || dlerror()){
 			cerr << dlerror() << endl;
 			mexPrintf("MexPrintf:Error finding DLL function: %s", dlerror);
 			throw 2;
 		}
 		//The pointer to maker must be of type void *, since that is the type returned 
 		//DynamicFn * 
-		Dynamic = static_cast<DynamicFn*()>(mkr)();
 # endif
 		
 //		if (Dynamic == NULL)
