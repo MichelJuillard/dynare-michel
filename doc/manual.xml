@@ -297,11 +297,20 @@ This user-supplied file contains the model and the processing instructions, as d
 <command>dynare</command> begins by launching the preprocessor on the <filename class="extension">.mod</filename> file.
 
 By default (unless <option>use_dll</option> option has been given to <xref linkend="model"/>), the preprocessor creates three intermediary files:
-<itemizedlist spacing='compact'>
-  <listitem><para><replaceable>FILENAME</replaceable><filename>.m</filename>: contains variable declarations, and computing tasks</para></listitem>
-  <listitem><para><replaceable>FILENAME</replaceable><filename>_dynamic.m</filename>: contains the dynamic model equations</para></listitem>
-  <listitem><para><replaceable>FILENAME</replaceable><filename>_static.m</filename>: contains the long run static model equations</para></listitem>
-</itemizedlist>
+<variablelist>
+  <varlistentry>
+    <term><replaceable>FILENAME</replaceable><filename>.m</filename></term>
+    <listitem><para>Contains variable declarations, and computing tasks</para></listitem>
+  </varlistentry>
+  <varlistentry>
+    <term><replaceable>FILENAME</replaceable><filename>_dynamic.m</filename></term>
+    <listitem><para>Contains the dynamic model equations</para></listitem>
+  </varlistentry>
+  <varlistentry>
+    <term><replaceable>FILENAME</replaceable><filename>_static.m</filename></term>
+    <listitem><para>Contains the long run static model equations</para></listitem>
+    </varlistentry>
+</variablelist>
 These files may be looked at to understand errors reported at the simulation stage.
 </para>
 <para><command>dynare</command> will then run the computing tasks by executing <replaceable>FILENAME</replaceable><filename>.m</filename>.</para>
@@ -309,11 +318,20 @@ These files may be looked at to understand errors reported at the simulation sta
 
 <refsect1><title>Options</title>
 
-  <itemizedlist spacing='compact'>
-    <listitem><para><option>noclearall</option>: by default, <command>dynare</command> will issue a <command>clear all</command> command to <trademark class="registered">Matlab</trademark> or Octave, thereby deleting all workspace variables; this options instructs <command>dynare</command> not to clear the workspace</para></listitem>
-    <listitem><para><option>savemacro</option>: instructs <command>dynare</command> to save the intermediary file which is obtained after macro-processing (see <xref linkend="macrolanguage"/>); the saved output will go in <replaceable>FILENAME</replaceable><filename>-macroexp.mod</filename></para></listitem>
-    <listitem><para><option>debug</option>: instructs the preprocessor to write some debugging information about the scanning and parsing of the <filename class="extension">.mod</filename> file</para></listitem>
-  </itemizedlist>
+  <variablelist>
+    <varlistentry>
+      <term><option>noclearall</option></term>
+      <listitem><para>By default, <command>dynare</command> will issue a <command>clear all</command> command to <trademark class="registered">Matlab</trademark> or Octave, thereby deleting all workspace variables; this options instructs <command>dynare</command> not to clear the workspace</para></listitem>
+    </varlistentry>
+    <varlistentry>
+      <term><option>savemacro</option></term>
+      <listitem><para>Instructs <command>dynare</command> to save the intermediary file which is obtained after macro-processing (see <xref linkend="macrolanguage"/>); the saved output will go in <replaceable>FILENAME</replaceable><filename>-macroexp.mod</filename></para></listitem>
+    </varlistentry>
+    <varlistentry>
+      <term><option>debug</option></term>
+      <listitem><para>Instructs the preprocessor to write some debugging information about the scanning and parsing of the <filename class="extension">.mod</filename> file</para></listitem>
+    </varlistentry>
+  </variablelist>
 
 </refsect1>
 
@@ -398,7 +416,7 @@ In the description of Dynare commands, the following conventions are observed:
 <para>
 This required command declares the endogenous variables in the model. See <xref linkend="conventions"/> for the syntax of <replaceable>VARIABLE_NAME</replaceable>.
 </para>
-<para><command>var</command> commands can appear sereval time in the file and Dynare will concatenate them.</para>
+<para><command>var</command> commands can appear several times in the file and Dynare will concatenate them.</para>
 </refsect1>
 
 <refsect1><title>Example</title>
@@ -438,7 +456,7 @@ This optional command declares the exogenous variables in the model. See <xref l
 <para>
 Exogenous variables are required if the user wants to be able to apply shocks to her model. 
 </para>
-<para><command>varexo</command> commands can appear sereval time in the file and Dynare will concatenate them.</para>
+<para><command>varexo</command> commands can appear several times in the file and Dynare will concatenate them.</para>
 </refsect1>
 
 <refsect1><title>Example</title>
@@ -477,7 +495,7 @@ This optional command declares exogenous deterministic variables in a stochastic
 </para>
 <para>It is possible to mix deterministic and stochastic shocks to build models where agents know from the start of the simulation about future exogenous changes. In that case <xref linkend="stoch_simul"/> will compute the rational expectation solution adding future information to the state space (nothing is shown in the output of <xref linkend="stoch_simul"/>) and <xref linkend="forecast"/> will compute a simulation conditional on initial conditions and future information.
 </para>
-<para><command>varexo_det</command> commands can appear sereval time in the file and Dynare will concatenate them.</para>
+<para><command>varexo_det</command> commands can appear several times in the file and Dynare will concatenate them.</para>
 </refsect1>
 
 <refsect1><title>Example</title>
@@ -517,7 +535,7 @@ This optional command declares parameters used in the model, in variable initial
 </para>
 <para>The parameters must subsequently be assigned values, see <xref linkend="param_init"/>.
 </para>
-<para><command>parameters</command> commands can appear sereval time in the file and Dynare will concatenate them.</para>
+<para><command>parameters</command> commands can appear several times in the file and Dynare will concatenate them.</para>
 </refsect1>
 
 <refsect1><title>Example</title>
@@ -818,6 +836,13 @@ steady;
     <refname>initval_file</refname>
     <refpurpose>use an external file for specifying initial values (for steady-state computation or for simulations)</refpurpose>
   </refnamediv>
+
+  <refsynopsisdiv>
+    <cmdsynopsis>
+      <command>initval_file</command>(<option>filename</option> = <replaceable>FILENAME</replaceable>);
+    </cmdsynopsis>
+  </refsynopsisdiv>
+
 </refentry>
 
 <refentry id="endval">
@@ -951,7 +976,7 @@ In a deterministic context, when one wants to study the transition of one equili
 Another typical experiment is to study the effects of a temporary shock after which the system goes back to the original equilibrium (if the model is stable ...). A temporary shock is a temporary change of value of one or several exogenous variables in the model. Temporary shocks are specified with the command <xref linkend='shocks'/>.
 </para>
 <para>
-In a stochastic framework, the exogenous variables take random values in each period. In Dynare, these random values follow a normal distribution with zero mean, but it belongs to the user to specify the variability of these shocks. The non-zero elements of the matrix of variance-covariance of the shocks can be entered with the <xref linkend='shocks'/> command. Or, the entire matrix can be direclty entered with <xref linkend='Sigma_e'/>. Note that, starting with version 2.5.2, the direct specification of the <emphasis>internal</emphasis> matrix <varname>Sigma_e_</varname>, prone to errors, is discouraged.
+In a stochastic framework, the exogenous variables take random values in each period. In Dynare, these random values follow a normal distribution with zero mean, but it belongs to the user to specify the variability of these shocks. The non-zero elements of the matrix of variance-covariance of the shocks can be entered with the <xref linkend='shocks'/> command. Or, the entire matrix can be direclty entered with <xref linkend='Sigma_e'/> (this use is however deprecated).
 </para>
 <para>
 If the variance of an exogenous variable is set to zero, this variable will appear in the report on policy and transition functions, but isn't used in the computation of moments and of Impulse Response Functions. Setting a variance to zero is an easy way of removing an exogenous shock.
@@ -974,74 +999,36 @@ If the variance of an exogenous variable is set to zero, this variable will appe
 
   <refsynopsisdiv>
     <cmdsynopsis>
-      <command>shocks</command>
-      <arg>(<arg rep="repeat" choice="plain"><replaceable>OPTION</replaceable>,</arg>);</arg><sbr/>
-      <group choice="plain">
-	<arg choice="plain">
-	  <synopfragmentref linkend="det_shock">DETERMINISTIC SHOCK STATEMENT</synopfragmentref>
-	</arg>
-	<arg choice="plain">
-	  <synopfragmentref linkend="st_shock">STOCHASTIC SHOCK STATEMENT</synopfragmentref>
-	</arg>
-      </group><sbr/>
-      <group rep="repeat">
-	<arg choice="plain">
-	  <synopfragmentref linkend="det_shock">DETERMINISTIC SHOCK STATEMENT</synopfragmentref>
-	</arg>
-	<arg choice="plain">
-	  <synopfragmentref linkend="st_shock">STOCHASTIC SHOCK STATEMENT</synopfragmentref>
-	</arg>
-      </group><sbr/>
-      <arg choice ="plain">end;</arg>
+      <command>shocks</command>;<sbr/>
+      <arg rep="repeat">
+        <group>
+	        <arg choice="plain">
+	          <synopfragmentref linkend="det_shock">DETERMINISTIC SHOCK STATEMENT</synopfragmentref>
+	        </arg>
+	        <arg choice="plain">
+	          <synopfragmentref linkend="sto_shock">STOCHASTIC SHOCK STATEMENT</synopfragmentref>
+	        </arg>
+        </group>
+      </arg>
+      <command>end</command>;
+
       <synopfragment id="det_shock">
-	<arg choice="plain">var <replaceable>VARIABLE_NAME</replaceable>;</arg>
-	<arg choice="plain">periods <synopfragmentref linkend="period_st">PERIOD STATEMENT</synopfragmentref>;</arg>
-	<arg choice="plain">values EXPRESSION;</arg>
+	      var <replaceable>VARIABLE_NAME</replaceable>;
+	      periods <replaceable>INTEGER</replaceable><arg>:<replaceable>INTEGER</replaceable></arg>
+          <arg rep="repeat"><arg>,</arg> <replaceable>INTEGER</replaceable><arg>:<replaceable>INTEGER</replaceable></arg></arg>;
+	          values <replaceable>EXPRESSION</replaceable> <arg rep="repeat"><arg>,</arg> <replaceable>EXPRESSION</replaceable></arg>;
       </synopfragment>
-      <synopfragment id="period_st">
-	    <arg choice="plain"><replaceable>INTEGER</replaceable></arg>
-	    <arg>: <replaceable>INTEGER</replaceable></arg>
-	    <arg rep="repeat"><replaceable>INTEGER</replaceable>
-	    <arg>: <replaceable>INTEGER</replaceable></arg>
-	    </arg><arg choice="plain">;</arg>
-      </synopfragment>
-      <synopfragment id="st_shock">
-	<group choice="plain">
-	  <arg choice="plain">
-	    <synopfragmentref linkend="var_st">VARIANCE STATEMENT</synopfragmentref>
-	  </arg>
-	  <arg choice="plain">
-	    <synopfragmentref linkend="covar_st">COVARIANCE STATEMENT</synopfragmentref>
-	  </arg>
-	  <arg choice="plain">
-	    <synopfragmentref linkend="stderr_st">STANDARD ERROR STATEMENT</synopfragmentref>
-	  </arg>
-	</group>
-      </synopfragment>
-      <synopfragment id="var_st">
-	<arg choice="plain">
-	  var <replaceable>VARIABLE_NAME</replaceable> = <replaceable>EXPRESSION</replaceable>;
-	</arg>
-      </synopfragment>
-      <synopfragment id="covar_st">
-	<arg choice="plain">
-	  var <replaceable>VARIABLE_NAME</replaceable> , <replaceable>VARIABLE_NAME</replaceable> = <replaceable>EXPRESSION</replaceable>;
-	</arg>
-      </synopfragment>
-      <synopfragment id="stderr_st">
-	<arg choice="plain">
-	  var <replaceable>VARIABLE_NAME</replaceable>; stderr <replaceable>EXPRESSION</replaceable>;
-	</arg>
+
+      <synopfragment id="sto_shock">
+	      <group choice="plain">
+          <arg choice="plain">var <replaceable>VARIABLE_NAME</replaceable>; stderr <replaceable>EXPRESSION</replaceable>;</arg>
+	        <arg choice="plain">var <replaceable>VARIABLE_NAME</replaceable> = <replaceable>EXPRESSION</replaceable>;</arg>
+          <arg choice="plain">var <replaceable>VARIABLE_NAME</replaceable>, <replaceable>VARIABLE_NAME</replaceable> = <replaceable>EXPRESSION</replaceable>;</arg>
+          <arg choice="plain">corr <replaceable>VARIABLE_NAME</replaceable>, <replaceable>VARIABLE_NAME</replaceable> = <replaceable>EXPRESSION</replaceable>;</arg>
+        </group>
       </synopfragment>
     </cmdsynopsis>
   </refsynopsisdiv>
-<refsect1><title>Options</title>
-<itemizedlist spacing='compact'>
-<listitem>
-  <para><command>shocks_file</command> = FILENAME: reads sequence of deterministic shocks from FILENAME. It can be either a *.m or a *.mat file. The file must create vectors with the same names as the deterministic exogenous variables.</para>
-</listitem>
-</itemizedlist>
-</refsect1>
 
 <refsect1><title>Description</title>
 <refsect2><title>In deterministic context</title>
@@ -1049,8 +1036,7 @@ If the variance of an exogenous variable is set to zero, this variable will appe
 For deterministic simulations, the <command>shocks</command> block specifies temporary changes in the value of an exogenous variables. For permanent shocks, use an <xref linkend='endval'/> block.
 </para>
 
-<para>
-  When specifying shocks on several periods, the <command>values</command> <replaceable>EXPRESSION</replaceable> must return either a scalar value common to all periods with a shock or a column vector with as many elements as there are periods in the <command>periods</command> statement just before it.
+<para>When specifying shocks on several periods, the <command>values</command> <replaceable>EXPRESSION</replaceable> must return either a scalar value common to all periods with a shock or a column vector with as many elements as there are periods in the <command>periods</command> statement just before it.
 </para>
 
 <refsect3><title>Example</title> 
@@ -1075,23 +1061,21 @@ end;
 
 <refsect2><title>In stochastic context</title>
 <para>
-For stochastic simulations (available only in the Matlab or Scilab versions), the <command>shocks</command> block specifies the non zero elements of the covariance matrix of the shocks.
+For stochastic simulations, the <command>shocks</command> block specifies the non zero elements of the covariance matrix of the shocks.
 </para>
 
 <refsect3><title>Example</title> 
 <programlisting>
 shocks;
 var e = 0.000081;
-var e,u = phi*0.009*0.009;
-var u = 0.000081;
-var v; stderr 0.009;
+var u; stderr 0.009;
+corr e, u = 0.8;
+var v, w = 2;
 end;
 </programlisting>
 </refsect3>
 <refsect3><title>See also</title>
-<para>
-<command>Sigma_e</command>
-</para>
+<para><link linkend="Sigma_e">Sigma_e</link></para>
 </refsect3>
 </refsect2>
 
@@ -1134,6 +1118,40 @@ forecast;
     <refname>mshocks</refname>
     <refpurpose>specifies multiplicative shocks on deterministic or stochastic exogenous variables</refpurpose>
   </refnamediv>
+
+  <refsynopsisdiv>
+    <cmdsynopsis>
+      <command>mshocks</command>;<sbr/>
+      <arg rep="repeat">
+        <group>
+	        <arg choice="plain">
+	          <synopfragmentref linkend="det_mshock">DETERMINISTIC SHOCK STATEMENT</synopfragmentref>
+	        </arg>
+	        <arg choice="plain">
+	          <synopfragmentref linkend="sto_mshock">STOCHASTIC SHOCK STATEMENT</synopfragmentref>
+	        </arg>
+        </group>
+      </arg>
+      <command>end</command>;
+
+      <synopfragment id="det_mshock">
+	      var <replaceable>VARIABLE_NAME</replaceable>;
+	      periods <replaceable>INTEGER</replaceable><arg>:<replaceable>INTEGER</replaceable></arg>
+          <arg rep="repeat"><arg>,</arg> <replaceable>INTEGER</replaceable><arg>:<replaceable>INTEGER</replaceable></arg></arg>;
+	          values <replaceable>EXPRESSION</replaceable> <arg rep="repeat"><arg>,</arg> <replaceable>EXPRESSION</replaceable></arg>;
+      </synopfragment>
+
+      <synopfragment id="sto_mshock">
+	      <group choice="plain">
+          <arg choice="plain">var <replaceable>VARIABLE_NAME</replaceable>; stderr <replaceable>EXPRESSION</replaceable>;</arg>
+	        <arg choice="plain">var <replaceable>VARIABLE_NAME</replaceable> = <replaceable>EXPRESSION</replaceable>;</arg>
+          <arg choice="plain">var <replaceable>VARIABLE_NAME</replaceable>, <replaceable>VARIABLE_NAME</replaceable> = <replaceable>EXPRESSION</replaceable>;</arg>
+          <arg choice="plain">corr <replaceable>VARIABLE_NAME</replaceable>, <replaceable>VARIABLE_NAME</replaceable> = <replaceable>EXPRESSION</replaceable>;</arg>
+        </group>
+      </synopfragment>
+    </cmdsynopsis>
+  </refsynopsisdiv>
+
 </refentry>
 
 <refentry id="Sigma_e">
@@ -1149,41 +1167,20 @@ forecast;
   <refsynopsisdiv>
     <cmdsynopsis>
       <command>Sigma_e</command>
-      <arg choice="plain">
-	= [<synopfragmentref linkend="matrix_el">MATRIX ELEMENT</synopfragmentref>
-	<arg rep="repeat"><arg>,</arg><synopfragmentref linkend="matrix_el">MATRIX ELEMENT</synopfragmentref></arg>
-	<arg rep="repeat"><arg choice="plain">;</arg><synopfragmentref linkend="matrix_el">MATRIX ELEMENT</synopfragmentref></arg>];
-      </arg>
-
-      <synopfragment id="matrix_el">
-	<group choice="plain">
-	  <arg choice="plain">
-	    <replaceable>INTEGER</replaceable>
-	  </arg>
-	  <arg choice="plain">
-	    <replaceable>DOUBLE</replaceable>
-	  </arg>
-	  <arg choice="plain">
-	    (<replaceable>EXPRESSION</replaceable>)
-	  </arg>
-	</group>
-      </synopfragment>
+	= [ <replaceable>EXPRESSION</replaceable> <arg rep="repeat"><arg>,</arg> <replaceable>EXPRESSION</replaceable></arg>
+      <arg rep="repeat">; <replaceable>EXPRESSION</replaceable> <arg rep="repeat"><arg>,</arg> <replaceable>EXPRESSION</replaceable></arg></arg> ];
     </cmdsynopsis>
-    <para>
-      WARNING: the matrix elements are actually written beween square brackets ([]). Here, the initial [ and final ] don't have the meaning of "optional element" as elsewhere.
-    </para>
+    <warning>
+      <para>The matrix elements are actually written between square brackets (<literal>[]</literal>). Here, the initial <literal>[</literal> and final <literal>]</literal> don't have the meaning of <quote>optional element</quote> as elsewhere.</para>
+    </warning>
   </refsynopsisdiv>
 
 
 <refsect1><title>Description</title>
 
 <para>
-The matrix of variance-covariance of the shocks can be directly specified as a upper (or lower) triangular matrix. Dynare builds the corresponding symmetrix matrix. Each row of the triangular matrix, except the last one, must be terminated by a semi-colon ';'. For a given element, an <replaceable>EXPRESSION</replaceable> using predefined parameters is allowed but must be placed between parentheses. THE ORDER OF THE COVARIANCES IN THE MATRIX IS THE SAME AS THE ONE USED IN THE VAREXO DECLARATION.
+The matrix of variance-covariance of the shocks can be directly specified as a upper (or lower) triangular matrix. Dynare builds the corresponding symmetrix matrix. Each row of the triangular matrix, except the last one, must be terminated by a semi-colon <literal>;</literal>. For a given element, an arbitrary <replaceable>EXPRESSION</replaceable> is allowed (instead of a simple constant), but in that case you need to enclose the expression in parentheses. <emphasis>The order of the covariances in the matrix is the same as the one used in the <xref linkend="varexo"/> declaration.</emphasis>
 </para>
-<note>
-<para>In previous versions, it was possible to directly set Dynare's internal covariance matrix <varname>Sigma_e_</varname>. This is still possible for compatibility with older <filename class="extension">.mod</filename> files, but STRONGLY DISCOURAGED as too prone to error. When setting <varname>Sigma_e_</varname> directly, the order of the exogenous shocks is the ALPHABETICAL order of their names.
-</para>
-</note>
 </refsect1>
 
 <refsect1><title>Example</title>
@@ -1215,6 +1212,14 @@ where the variance of <varname>u</varname> is 0.81, the variance of <varname>e</
     <refname>dsample</refname>
     <refpurpose>reduces the number of periods considered in subsequent output commands</refpurpose>
   </refnamediv>
+
+  <refsynopsisdiv>
+    <cmdsynopsis>
+      <command>dsample</command>
+      <replaceable>INTEGER</replaceable>
+      <arg><replaceable>INTEGER</replaceable></arg>;
+    </cmdsynopsis>
+  </refsynopsisdiv>
 </refentry>
 
 <refentry id="periods">
@@ -1240,7 +1245,7 @@ where the variance of <varname>u</varname> is 0.81, the variance of <varname>e</
 This command is now deprecated (but will still work for older model files). It is not necessary when no simulation is performed and is replaced by an option <option>periods</option> in <xref linkend="simul"/> and <xref linkend="stoch_simul"/>.
 </para>
 <para>
-Sets the number of periods in the simulation. The periods are numbered from 1 to <replaceable>INTEGER</replaceable>. In perfect foresight simulations, it is assumed that all future events are perfectly known at the beginning of period 1.
+Sets the number of periods in the simulation. The periods are numbered from <literal>1</literal> to <replaceable>INTEGER</replaceable>. In perfect foresight simulations, it is assumed that all future events are perfectly known at the beginning of period <literal>1</literal>.
 </para>
 </refsect1>
 
@@ -1273,31 +1278,39 @@ Dynare has special commands for the computation of the static equilibrium of the
 
   <refnamediv>
     <refname>steady</refname>
-    <refpurpose>copmutes the steady state of a model</refpurpose>
+    <refpurpose>computes the steady state of a model</refpurpose>
   </refnamediv>
 
   <refsynopsisdiv>
     <cmdsynopsis>
       <command>steady</command>
-      <arg>
-      (solve_algo = 
-      <group choice="plain">
-	<arg choice="plain">0</arg>
-	<arg choice="plain">1</arg>
-	<arg choice="plain">2</arg>
-      </group>)
-      </arg>
-      <arg choice='plain'>;</arg>
+      <arg>(<replaceable>OPTION</replaceable><arg rep="repeat">, <replaceable>OPTION</replaceable></arg>)</arg>;
     </cmdsynopsis>
   </refsynopsisdiv>
 
 <refsect1><title>Options</title>
-<itemizedlist spacing='compact'>
-<listitem><para><command>solve_algo = 0</command>: uses Matlab Optimization Toolbox FSOLVE</para></listitem>
-<listitem><para><command>solve_algo = 1</command>: uses Dynare's own nonlinear equation solver</para></listitem>
-<listitem><para><command>solve_algo = 2</command>: splits the model into recursive blocks and solves each block in turn. (Thanks to Manfred Gilli for showing me Matlab's function DMPERM) (this is the default since Dynare version 3.046).</para>
-</listitem>
-</itemizedlist>
+<variablelist spacing='compact'>
+  <varlistentry>
+    <term><option>solve_algo</option> = <replaceable>INTEGER</replaceable></term>
+    <listitem><para>Determines the non-linear solver to use. Possible values for the option are:
+      <itemizedlist>
+        <listitem><para><literal>0</literal>: uses <trademark class="registered">Matlab</trademark> Optimization Toolbox FSOLVE</para></listitem>
+        <listitem><para><literal>1</literal>: uses Dynare's own nonlinear equation solver</para></listitem>
+        <listitem><para><literal>2</literal>: splits the model into recursive blocks and solves each block in turn. This is the default.</para></listitem>
+        <listitem><para><literal>3</literal>: Chris Sims' solver</para></listitem>
+        <listitem><para><literal>4</literal>: similar to value <literal>2</literal>, except that it deals differently with nearly singular Jacobian</para></listitem>
+      </itemizedlist>
+    </para></listitem>
+  </varlistentry>
+  <varlistentry>
+    <term><option>homotopy_mode</option> = <replaceable>INTEGER</replaceable></term>
+    <listitem><para>...</para></listitem>
+  </varlistentry>
+  <varlistentry>
+    <term><option>homotopy_steps</option> = <replaceable>INTEGER</replaceable></term>
+    <listitem><para>...</para></listitem>
+  </varlistentry>
+</variablelist>
 </refsect1>
 
 <refsect1><title>Description</title>
@@ -1312,14 +1325,14 @@ Computes the equilibrium value of the endogenous variables for the value of the 
 For complicated models, finding good numerical initial values for the endogenous variables is the trickiest part of finding the equilibrium of that model. Often, it is better to start with a smaller model and add new variables one by one.
 </para>
 
-<para>If you know how to compute the steady state for your model, you can provide a Matlab function doing the computation instead of using <command>steady</command>. The function should be called with the name of the <filename class="extension">.mod</filename> file followed by <filename>_steadystate</filename>. See <filename>fs2000a_steadystate.m</filename> in <filename>examples/fs2000</filename> directory.
+<para>If you know how to compute the steady state for your model, you can provide a <trademark class="registered">Matlab</trademark> function doing the computation instead of using <command>steady</command>. The function should be called with the name of the <filename class="extension">.mod</filename> file followed by <filename>_steadystate</filename>. See <filename>fs2000a_steadystate.m</filename> in <filename>examples/fs2000</filename> directory.
 </para>
 
 </refsect1>
 
 <refsect1><title>Output variables</title>
 <para>
-  The steeady state is available in <varname>oo_.steady_state</varname>. Endogenous variables are ordered in order of declaration used in <command>var</command><xref linkend="var"/> command as in <varname>M_.endo_names</varname>.  
+  The steady state is available in <varname>oo_.steady_state</varname>. Endogenous variables are ordered in order of declaration used in <xref linkend="var"/> command as in <varname>M_.endo_names</varname>.  
 </para>
 </refsect1> 
 
