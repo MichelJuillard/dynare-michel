@@ -3,15 +3,39 @@
 <book>
   <bookinfo>
     <title>Dynare Manual</title>
-    <subtitle>Version 4.0.2 (draft)</subtitle>
+    <subtitle>Version 4.0.3 (draft)</subtitle>
+    <author>
+      <firstname>Stéphane</firstname><surname>Adjemian</surname>
+      <affiliation><orgname>Université du Mans et CEPREMAP</orgname></affiliation>
+      <email>stephane.adjemian@gmail.com</email>
+      <address><street>142 rue du Chevaleret</street><postcode>75013</postcode><city>Paris</city><country>France</country></address>
+    </author>
     <author>
       <firstname>Michel</firstname><surname>Juillard</surname>
-      <affiliation><orgname>CEPREMAP and University Paris 8</orgname></affiliation>
+      <affiliation><orgname>Banque de France and CEPREMAP</orgname></affiliation>
       <email>michel.juillard@ens.fr</email>
-      <address><street>48 bd Jourdan</street><postcode>75014</postcode><city>Paris</city><country>France</country></address>
+      <address><street>142 rue du Chevaleret</street><postcode>75013</postcode><city>Paris</city><country>France</country></address>
+    </author>
+    <author>
+      <firstname>Ferhat</firstname><surname>Mihoubi</surname>
+      <affiliation><orgname>Université d'Évry and CEPREMAP</orgname></affiliation>
+      <email>fmihoubi@univ-evry.fr</email>
+      <address><street>142 rue du Chevaleret</street><postcode>75013</postcode><city>Paris</city><country>France</country></address>
+    </author>
+    <author>
+      <firstname>George</firstname><surname>Perendia</surname>
+      <affiliation><orgname>CEPREMAP</orgname></affiliation>
+      <email>george@perendia.orangehome.co.uk</email>
+      <address><street>142 rue du Chevaleret</street><postcode>75013</postcode><city>Paris</city><country>France</country></address>
+    </author>
+    <author>
+      <firstname>Sébastien</firstname><surname>Villemot</surname>
+      <affiliation><orgname>Banque de France and CEPREMAP</orgname></affiliation>
+      <email>sebastien.villemot@ens.fr</email>
+      <address><street>142 rue du Chevaleret</street><postcode>75013</postcode><city>Paris</city><country>France</country></address>
     </author>
 
-    <copyright><year>1996-2008</year><holder>Dynare Team</holder></copyright>
+    <copyright><year>1996-2009</year><holder>Dynare Team</holder></copyright>
 
 <legalnotice>
 <para>
@@ -93,13 +117,10 @@ Starting with version 3.0, it is possible to use Dynare to estimate model parame
 </para>
 
 <para>
-Currently the development team of Dynare is composed of S. Adjemian, M. Juillard, O. Kamenik, F. Mihoubi and S. Villemot. Several parts of Dynare use or have strongly benefited from publicly available programs by F. Collard, L. Ingber, P. Klein, M. Ratto, S. Sakata, F. Schorfheide, C. Sims, P. Soederlind and R. Wouters.  
+Currently the development team of Dynare is composed of S. Adjemian, M. Juillard, O. Kamenik, F. Mihoubi, G. Perendia, M. Ratto and S. Villemot. Several parts of Dynare use or have strongly benefited from publicly available programs by F. Collard, L. Ingber, P. Klein, S. Sakata, F. Schorfheide, C. Sims, P. Soederlind and R. Wouters.  
 </para>
 </sect1>
 
-<sect1><title>Changes since version 3</title>
-
-</sect1>
 </chapter>
 
 <chapter><title>Installation and configuration</title>
@@ -377,6 +398,7 @@ In the description of Dynare commands, the following conventions are observed:
 <para>
 This required command declares the endogenous variables in the model. See <xref linkend="conventions"/> for the syntax of <replaceable>VARIABLE_NAME</replaceable>.
 </para>
+<para><command>var</command> commands can appear sereval time in the file and Dynare will concatenate them.</para>
 </refsect1>
 
 <refsect1><title>Example</title>
@@ -416,6 +438,7 @@ This optional command declares the exogenous variables in the model. See <xref l
 <para>
 Exogenous variables are required if the user wants to be able to apply shocks to her model. 
 </para>
+<para><command>varexo</command> commands can appear sereval time in the file and Dynare will concatenate them.</para>
 </refsect1>
 
 <refsect1><title>Example</title>
@@ -454,6 +477,7 @@ This optional command declares exogenous deterministic variables in a stochastic
 </para>
 <para>It is possible to mix deterministic and stochastic shocks to build models where agents know from the start of the simulation about future exogenous changes. In that case <xref linkend="stoch_simul"/> will compute the rational expectation solution adding future information to the state space (nothing is shown in the output of <xref linkend="stoch_simul"/>) and <xref linkend="forecast"/> will compute a simulation conditional on initial conditions and future information.
 </para>
+<para><command>varexo_det</command> commands can appear sereval time in the file and Dynare will concatenate them.</para>
 </refsect1>
 
 <refsect1><title>Example</title>
@@ -493,6 +517,7 @@ This optional command declares parameters used in the model, in variable initial
 </para>
 <para>The parameters must subsequently be assigned values, see <xref linkend="param_init"/>.
 </para>
+<para><command>parameters</command> commands can appear sereval time in the file and Dynare will concatenate them.</para>
 </refsect1>
 
 <refsect1><title>Example</title>
@@ -1294,9 +1319,9 @@ For complicated models, finding good numerical initial values for the endogenous
 
 <refsect1><title>Output variables</title>
 <para>
-  The steeady state is available in <varname>ys_</varname>. Endogenous variables are ordered alphabeticaly as in <varname>lgy_</varname>.  
+  The steeady state is available in <varname>oo_.steady_state</varname>. Endogenous variables are ordered in order of declaration used in <command>var</command><xref linkend="var"/> command as in <varname>M_.endo_names</varname>.  
 </para>
-</refsect1>
+</refsect1> 
 
 <refsect1><title>Examples</title>
 <para>
