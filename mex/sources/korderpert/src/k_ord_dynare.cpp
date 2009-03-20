@@ -310,8 +310,10 @@ void KordpDynare::calcDerivatives(const Vector& yy, const Vector& xx)
 	}
 	ReorderCols(g1, JacobianIndices);//	ReorderCols(out, varOrder);
 	populateDerivativesContainer(g1,1);
-	if (nOrder>1)
+	if (nOrder>1){
+		ReorderBlocks(g2,JacobianIndices);
 		populateDerivativesContainer(g2,2);
+	}
 
 }
 /*******************************************************************************
@@ -597,6 +599,55 @@ void KordpDynare::ReorderCols(TwoDMatrix * tdx, const int * vOrder){
 		mexPrintf(" Error in ReorderColumns - wrong index?");
 	}
 }
+
+/***********************************************************************
+* Recursive hierarchical block reordering of the higher order, input model 
+*	derivatives inc. Hessian
+***********************************************************************/
+
+void KordpDynare::ReorderBlocks(TwoDMatrix * tdx, const vector<int> * vOrder){
+	// determine order of the matrix
+
+	double dbOrder = log(tdx->ncols())/log(nJcols);
+	int ibOrder= (int) dbOrder;
+	if ((double )ibOrder != dbOrder || ibOrder>nOrder) {
+		mexPrintf(" Error in ReorderBlocks - wrong order %d", dbOrder);
+		return;
+	}
+	TwoDMatrix tmp(*tdx); // temporary 2D matrix
+	TwoDMatrix &tmpR=tmp;
+	tdx->zeros();// empty original matrix
+
+	if(ibOrder>1){
+		int nBlocks=tmp.ncols()/ nJcols; //pow((float)nJcols,ibOrder-1);
+		int bSize=tmp.ncols()/nBlocks;
+		for (int j = 0; j<nBlocks;  ++j){
+			TwoDMatrix subtdx(tmpR, bSize*((*vOrder)[j]), bSize);
+////			for (int bix=1; bix<nBlocks; ++bix){
+			ReorderBlocks(&subtdx, vOrder);
+////			}
+			tdx->place(subtdx, 0, bSize*j);
+		}
+	} else{
+		//ReorderColumns(TwoDMatrix * subtdx, const vector<int> * vOrder)
+		if (tdx->ncols() > vOrder->size()){
+			mexPrintf(" Error in ReorderColumns - size of order var is too small");
+			return;
+		}
+		// reorder the columns
+		try{
+			for (int i =0; i<tdx->ncols() ; i++)
+				tdx->copyColumn(tmpR,(*vOrder)[i],i);
+		} catch (const TLException& e) {
+			printf("Caugth TL exception in ReorderColumns: ");
+			e.print();
+			return;// 255;
+		}catch (...){
+			mexPrintf(" Error in ReorderColumns - wrong index?");
+		}
+	}
+}
+
 
 /****************************
 *  K-Order Perturbation instance of Jacobian:
