@@ -117,7 +117,7 @@ Starting with version 3.0, it is possible to use Dynare to estimate model parame
 </para>
 
 <para>
-Currently the development team of Dynare is composed of S. Adjemian, M. Juillard, O. Kamenik, F. Mihoubi, G. Perendia, M. Ratto and S. Villemot. Several parts of Dynare use or have strongly benefited from publicly available programs by F. Collard, L. Ingber, P. Klein, S. Sakata, F. Schorfheide, C. Sims, P. Soederlind and R. Wouters.  
+Currently the development team of Dynare is composed of S. Adjemian, M. Juillard, O. Kamenik, F. Mihoubi, G. Perendia, M. Ratto and S. Villemot. Several parts of Dynare use or have strongly benefited from publicly available programs by G. Anderson, F. Collard, L. Ingber, P. Klein, S. Sakata, F. Schorfheide, C. Sims, P. Soederlind and R. Wouters.  
 </para>
 </sect1>
 
@@ -282,6 +282,7 @@ second step, the program actually runs the computations. Boths steps are trigger
       <arg><option>noclearall</option></arg>
       <arg><option>savemacro</option></arg>
       <arg><option>debug</option></arg>
+      <arg><option>notmpterms</option></arg>
     </cmdsynopsis>
   </refsynopsisdiv>
 
@@ -330,6 +331,10 @@ These files may be looked at to understand errors reported at the simulation sta
     <varlistentry>
       <term><option>debug</option></term>
       <listitem><para>Instructs the preprocessor to write some debugging information about the scanning and parsing of the <filename class="extension">.mod</filename> file</para></listitem>
+    </varlistentry>
+    <varlistentry>
+      <term><option>notmpterms</option></term>
+      <listitem><para>Instructs the preprocessor to omit temporary terms in the static and dynamic files; this generally decreases performance, but is used for debugging purposes since it makes the static and dynamic files more readable</para></listitem>
     </varlistentry>
   </variablelist>
 
