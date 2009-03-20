@@ -351,10 +351,12 @@ The <varname>M_</varname>, <varname>oo_</varname> and <varname>options_</varname
 </refsect1>
 
 <refsect1><title>Examples</title>
+<informalexample>
 <programlisting>
 dynare ramst
 dynare ramst.mod savemacro
 </programlisting>
+</informalexample>
 </refsect1>
 </refentry>
 </chapter>
@@ -425,9 +427,11 @@ This required command declares the endogenous variables in the model. See <xref 
 </refsect1>
 
 <refsect1><title>Example</title>
+<informalexample>
 <programlisting>
 var c gnp q1 q2;
 </programlisting>
+</informalexample>
 </refsect1>
 </refentry>
 
@@ -465,9 +469,11 @@ Exogenous variables are required if the user wants to be able to apply shocks to
 </refsect1>
 
 <refsect1><title>Example</title>
+<informalexample>
 <programlisting>
 varexo m gov;
 </programlisting>
+</informalexample>
 </refsect1>
 </refentry>
 
@@ -504,10 +510,12 @@ This optional command declares exogenous deterministic variables in a stochastic
 </refsect1>
 
 <refsect1><title>Example</title>
+<informalexample>
 <programlisting>
 varexo m gov;
 varexo_det tau;
 </programlisting>
+</informalexample>
 </refsect1>
 </refentry>
 
@@ -544,9 +552,11 @@ This optional command declares parameters used in the model, in variable initial
 </refsect1>
 
 <refsect1><title>Example</title>
+<informalexample>
 <programlisting>
 parameters alpha, bet;
 </programlisting>
+</informalexample>
 </refsect1>
 </refentry>
 </sect1>
@@ -624,6 +634,7 @@ parameters alpha, bet;
 
 <formalpara><title>Example</title>
 
+<informalexample>
 <programlisting>
 parameters alpha, bet;
 
@@ -631,6 +642,7 @@ beta = 0.99;
 alpha = 0.36;
 A = 1-alpha*beta;
 </programlisting>
+</informalexample>
 </formalpara>
 
 </sect1>
@@ -698,6 +710,7 @@ Inside the model block, Dynare allows the creation of <emphasis>model-local vari
 
 <refsect1><title>Examples</title>
 <refsect2><title>Example 1: elementary RBC model</title>
+<informalexample>
 <programlisting>
 var c k;
 varexo x;
@@ -708,10 +721,12 @@ c =  - k + aa*x*k(-1)^alph + (1-delt)*k(-1);
 c^(-gam) = (aa*alph*x(+1)*k^(alph-1) + 1 - delt)*c(+1)^(-gam)/(1+bet);
 end;
 </programlisting>
+</informalexample>
 </refsect2>
 
 <refsect2><title>Example 2: use of model local variables</title>
 
+<informalexample>
 The following program:
 <programlisting>
 model;
@@ -728,15 +743,18 @@ u1 = c1^(1-1/sigma)/(1-1/sigma);
 u2 = c2^(1-1/sigma)/(1-1/sigma);
 end;
 </programlisting>
+</informalexample>
 </refsect2>
 
 <refsect2><title>Example 3: a linear model</title>
+<informalexample>
 <programlisting>
 model(linear);
 x = a*x(-1)+b*y(+1)+e_x;
 y = d*y(-1)+e_y;
 end;
 </programlisting>
+</informalexample>
 </refsect2>
 </refsect1>
 </refentry>
@@ -820,6 +838,7 @@ For models with lags on more than one period, the command <xref linkend='histval
 </refsect1>
 
 <refsect1><title>Example</title>
+<informalexample>
 <programlisting>
 initval;
 c = 1.2;
@@ -829,6 +848,7 @@ end;
 
 steady;
 </programlisting>
+</informalexample>
 </refsect1>
 </refentry>
 
@@ -884,6 +904,7 @@ steady;
 </refsect1>
 
 <refsect1><title>Example</title>
+<informalexample>
 <programlisting>
 var c k;
 varexo x;
@@ -904,6 +925,7 @@ end;
 
 steady;
 </programlisting>
+</informalexample>
 <para>
 The initial equilibrium is computed by <xref linkend='steady'/> for <literal>x=1</literal>, and the terminal one, for <literal>x=2</literal>.
 </para>
@@ -946,6 +968,7 @@ If your lagged variables are linked by identities, be careful to satisfy these i
 </refsect1>
 
 <refsect1><title>Example</title>
+<informalexample>
 <programlisting>
 var x y;
 varexo e;
@@ -968,6 +991,7 @@ y(0) = 1.1;
 y(-1) = 0.9;
 end;
 </programlisting>
+</informalexample>
 </refsect1>
 
 </refentry>
@@ -1045,6 +1069,7 @@ For deterministic simulations, the <command>shocks</command> block specifies tem
 </para>
 
 <refsect3><title>Example</title> 
+<informalexample>
 <programlisting>
 shocks;
 var e;
@@ -1061,6 +1086,7 @@ periods 4  5   6;
 values  1 1.1 0.9;
 end;
 </programlisting>
+</informalexample>
 </refsect3>
 </refsect2>
 
@@ -1070,6 +1096,7 @@ For stochastic simulations, the <command>shocks</command> block specifies the no
 </para>
 
 <refsect3><title>Example</title> 
+<informalexample>
 <programlisting>
 shocks;
 var e = 0.000081;
@@ -1078,6 +1105,7 @@ corr e, u = 0.8;
 var v, w = 2;
 end;
 </programlisting>
+</informalexample>
 </refsect3>
 <refsect3><title>See also</title>
 <para><link linkend="Sigma_e">Sigma_e</link></para>
@@ -1189,6 +1217,7 @@ The matrix of variance-covariance of the shocks can be directly specified as a u
 </refsect1>
 
 <refsect1><title>Example</title>
+<informalexample>
 <programlisting>
 varexo u, e;
 ...
@@ -1197,6 +1226,7 @@ Sigma_e = [ 0.81 (phi*0.9*0.009); 0.000081];
 <para>
 where the variance of <varname>u</varname> is 0.81, the variance of <varname>e</varname>, 0.000081, and the correlation between <varname>e</varname> and <varname>u</varname> is <varname>phi</varname>.
 </para>
+</informalexample>
 </refsect1>
 </refentry>
 </sect1>
@@ -1255,9 +1285,11 @@ Sets the number of periods in the simulation. The periods are numbered from <lit
 </refsect1>
 
 <refsect1><title>Example</title>
+<informalexample>
 <programlisting>
 periods 100;
 </programlisting>
+</informalexample>
 </refsect1>
 </refentry>
 
@@ -1301,10 +1333,11 @@ Dynare has special commands for the computation of the static equilibrium of the
       <itemizedlist>
         <listitem><para><literal>0</literal>: uses <trademark class="registered">Matlab</trademark> Optimization Toolbox FSOLVE</para></listitem>
         <listitem><para><literal>1</literal>: uses Dynare's own nonlinear equation solver</para></listitem>
-        <listitem><para><literal>2</literal>: splits the model into recursive blocks and solves each block in turn. This is the default.</para></listitem>
+        <listitem><para><literal>2</literal>: splits the model into recursive blocks and solves each block in turn</para></listitem>
         <listitem><para><literal>3</literal>: Chris Sims' solver</para></listitem>
         <listitem><para><literal>4</literal>: similar to value <literal>2</literal>, except that it deals differently with nearly singular Jacobian</para></listitem>
       </itemizedlist>
+      Default value is 2.
     </para></listitem>
   </varlistentry>
   <varlistentry>
@@ -1357,6 +1390,14 @@ See <xref linkend='initval'/> and <xref linkend='endval'/>.
     <refname>homotopy_setup</refname>
     <refpurpose>instructs <xref linkend="steady"/> to use homotopy methods</refpurpose>
   </refnamediv>
+
+  <refsynopsisdiv>
+    <cmdsynopsis>
+      <command>homotopy_setup</command>;<sbr/>
+      <arg rep="repeat"><replaceable>VARIABLE_NAME</replaceable>, <replaceable>EXPRESSION</replaceable><arg>, <replaceable>EXPRESSION</replaceable></arg>;</arg>
+      <command>end</command>;
+    </cmdsynopsis>
+  </refsynopsisdiv>
 </refentry>
 
 <refentry id="check">
@@ -1372,13 +1413,22 @@ See <xref linkend='initval'/> and <xref linkend='endval'/>.
   <refsynopsisdiv>
     <cmdsynopsis>
       <command>check</command>
-      <arg choice='plain'>;</arg>
+      <arg>(<option>solve_algo</option> = <replaceable>INTEGER</replaceable>)</arg>;
     </cmdsynopsis>
   </refsynopsisdiv>
 
+<refsect1><title>Options</title>
+<variablelist spacing='compact'>
+  <varlistentry>
+    <term><option>solve_algo</option> = <replaceable>INTEGER</replaceable></term>
+    <listitem><para>See <xref linkend="steady"/> for the possible values and their meaning</para></listitem>
+  </varlistentry>
+</variablelist>
+</refsect1>
+
 <refsect1><title>Description</title>
 <para>
-Computes the eigenvalues of the model linearized around the values specified by the last <xref linkend='initval'/>, <xref linkend='endval'/> or <xref linkend='steady'/> statement. Generally, the eigenvalues are only meaningfull if the linearization is done around a steady state of the model. It is a device for local analysis in the neighborhood of this steady state.
+Computes the eigenvalues of the model linearized around the values specified by the last <xref linkend='initval'/>, <xref linkend='endval'/> or <xref linkend='steady'/> statement. Generally, the eigenvalues are only meaningful if the linearization is done around a steady state of the model. It is a device for local analysis in the neighborhood of this steady state.
 </para>
 <para>
 A necessary condition for the uniqueness of a stable equilibrium in the neighborhood of the steady state is that there are as many eigenvalues larger than one in modulus as there are forward looking variables in the system. An additional rank condition requires that the square submatrix of the right Schur vectors corresponding to the forward looking variables (jumpers) and to the explosive eigenvalues must have full rank.
@@ -1387,7 +1437,7 @@ A necessary condition for the uniqueness of a stable equilibrium in the neighbor
 
 <refsect1><title>Output variables</title>
 <para>
-<command>check</command> returns the eigenvalues in the global variable <varname>eigenvalues_</varname>.
+<command>check</command> returns the eigenvalues in the global variable <varname>oo_.dr.eigval</varname>.
 </para>
 </refsect1>
 </refentry>
@@ -1405,18 +1455,23 @@ A necessary condition for the uniqueness of a stable equilibrium in the neighbor
   <refsynopsisdiv>
     <cmdsynopsis>
       <command>forecast</command>
-      <arg>(<arg rep="repeat" choice="plain"><replaceable>OPTION</replaceable>,</arg>)</arg>
-      <arg choice="plain"><replaceable>VARIABLE_NAME</replaceable></arg>
-      <arg rep="repeat"><replaceable>VARIABLE_NAME</replaceable></arg>
-      <arg choice='plain'>;</arg>
+      <arg>(<replaceable>OPTION</replaceable><arg rep="repeat">, <replaceable>OPTION</replaceable></arg>)</arg>
+      <arg><replaceable>VARIABLE_NAME</replaceable></arg>
+      <arg rep="repeat"><arg>,</arg> <replaceable>VARIABLE_NAME</replaceable></arg>;
     </cmdsynopsis>
   </refsynopsisdiv>
 
 <refsect1><title>Options</title>
-<itemizedlist spacing='compact'>
-<listitem><para><command>periods</command> = INTEGER: number of periods of the forecast (default = 40)</para></listitem>
-<listitem><para><command>conf_sig</command> = DOUBLE: level of significance for confidence interval (default = 0.90)</para></listitem>
-</itemizedlist>
+<variablelist spacing='compact'>
+  <varlistentry>
+    <term><option>periods</option> = <replaceable>INTEGER</replaceable></term>
+    <listitem><para>Number of periods of the forecast. Default: 40</para></listitem>
+  </varlistentry>
+  <varlistentry>
+    <term><option>conf_sig</option> = <replaceable>DOUBLE</replaceable></term>
+    <listitem><para>Level of significance for confidence interval. Default: 0.90</para></listitem>
+  </varlistentry>
+</variablelist>
 </refsect1>
 
 <refsect1><title>Description</title>
@@ -1425,16 +1480,16 @@ A necessary condition for the uniqueness of a stable equilibrium in the neighbor
 
 <para><command>forecast</command> must be called after <xref linkend="stoch_simul"/>.</para>
 
-<para> <command>forecast</command> plots the trajectory of endogenous variables. When a list of variable names follows the command, only those variables are ploted. A 90% confidence interval is ploted around the mean trajectory. Use option <command>conf_sig</command> to change the level of the confidence interval.</para>
+<para><command>forecast</command> plots the trajectory of endogenous variables. When a list of variable names follows the command, only those variables are plotted. A 90% confidence interval is plotted around the mean trajectory. Use option <option>conf_sig</option> to change the level of the confidence interval.</para>
 </refsect1>
 
 <refsect1><title>Output variables</title>
 <para>The following variables are set in structure <varname>oo_</varname>:
 <itemizedlist spacing="compact">
-<listitem><para><varname>oo_.forecast.Mean.</varname><replaceable>VARIABLE NAME</replaceable>: mean forecast of endogenous variables</para></listitem>
-<listitem><para><varname>oo_.forecast.HPDinf.</varname><replaceable>VARIABLE NAME</replaceable>: lower bound of a confidence interval around the forecast</para></listitem>
-<listitem><para><varname>oo_.forecast.HPDsup.</varname><replaceable>VARIABLE NAME</replaceable>: upper bound of a confidence interval around the forecast</para></listitem>
-<listitem><para><varname>oo_.forecast.Exogenous.</varname><replaceable>VARIABLE NAME</replaceable>: trajectory of the deterministic exogenous variables</para></listitem>
+<listitem><para><varname>oo_.forecast.Mean.<replaceable>VARIABLE_NAME</replaceable></varname>: mean forecast of endogenous variables</para></listitem>
+<listitem><para><varname>oo_.forecast.HPDinf.<replaceable>VARIABLE_NAME</replaceable></varname>: lower bound of a confidence interval around the forecast</para></listitem>
+<listitem><para><varname>oo_.forecast.HPDsup.<replaceable>VARIABLE_NAME</replaceable></varname>: upper bound of a confidence interval around the forecast</para></listitem>
+<listitem><para><varname>oo_.forecast.Exogenous.<replaceable>VARIABLE_NAME</replaceable></varname>: trajectory of the deterministic exogenous variables</para></listitem>
 </itemizedlist>
 </para>
 </refsect1>
@@ -1476,21 +1531,19 @@ forecast;
   <refsynopsisdiv>
     <cmdsynopsis>
       <command>simul</command>
-      <arg>
-	(periods=<replaceable>INTEGER</replaceable>)
-      </arg>
-      <arg choice='plain'>;</arg>
+      <arg>(<option>periods</option>=<replaceable>INTEGER</replaceable>)
+      </arg>;
     </cmdsynopsis>
   </refsynopsisdiv>
 
   <refsect1><title>Description</title>
   <para>
-    Triggers the computation of a deterministic simulation of the model for the number of periods set in the option <command>periods=</command>. <command>simul</command> uses a Newton method to solve simultaneously all the equations for every period (see Juillard, 1996).
+    Triggers the computation of a deterministic simulation of the model for the number of periods set in the option <option>periods</option>. <command>simul</command> uses a Newton method to solve simultaneously all the equations for every period (see <xref linkend="juillard:1996"/>).
   </para>
   </refsect1>
 <refsect1><title>Output variables</title>
 <para>
-the simulated variables are available in global matrix <varname>y_</varname>. The variables are arranged row by row, in alphabetical order.
+The simulated endogenous variables are available in global matrix <varname>oo_.endo_simul</varname>. The variables are arranged row by row, in order of declaration (as in <varname>M_.endo_names</varname>). Note that this variable also contains initial and terminal conditions, so it has more columns than the value of <option>periods</option> option.
 </para>
 </refsect1>
 </refentry>
@@ -1509,92 +1562,121 @@ the simulated variables are available in global matrix <varname>y_</varname>. Th
   <refsynopsisdiv>
     <cmdsynopsis>
       <command>stoch_simul</command>
-      <arg>(<arg choice="plain"><replaceable>OPTION</replaceable></arg>
-        <arg rep="repeat">, <replaceable>OPTION</replaceable></arg>)</arg>
-      <arg rep="repeat"><replaceable>VARIABLE_NAME</replaceable></arg>
-      <arg choice='plain'>;</arg>
+      <arg>(<replaceable>OPTION</replaceable><arg rep="repeat">, <replaceable>OPTION</replaceable></arg>)</arg>
+      <arg rep="repeat"><replaceable>VARIABLE_NAME</replaceable></arg>;
     </cmdsynopsis>
   </refsynopsisdiv>
 
 <refsect1><title>Options</title>
-<itemizedlist spacing='compact'>
-<listitem><para><anchor id="ar" xreflabel="ar"/> <command>ar</command> = <replaceable>INTEGER</replaceable>:
-Order of autocorrelation coefficients to compute and to print (default = 5)
-n</para></listitem>
-<listitem><para> <command>dr_algo = 0 | 1</command>: 
-specifies the algorithm used for computing the quadratic approximation of the decision rules:
-<itemizedlist spacing='compact'>
-<listitem><para> 0: uses a <emphasis>pure</emphasis> perturbation approach as in <xref linkend="schmitt-grohe-uribe:2002"/> (default)
-</para></listitem>
-<listitem><para> 1: moves the point around which the Taylor expansion is computed toward the means of the distribution as in Collard and Juillard (2001)
-</para></listitem>
-</itemizedlist>
-</para></listitem>
-<listitem><para> <command>drop</command> = <replaceable>INTEGER</replaceable>:
-number of points dropped at the beginning of simulation before computing the summary statistics (default = 100)
-</para></listitem>
-<listitem><para> <command>hp_filter</command> = <replaceable>INTEGER</replaceable>:
- uses HP filter with lambda = <replaceable>INTEGER</replaceable> before computing moments (default: no filter)
-</para></listitem>
-<listitem><para> <command>hp_ngrid</command> = <replaceable>INTEGER</replaceable>:
-number of points in the grid for the discreet Inverse Fast Fourier Transform used in the HP filter computation. It may be necessary to increase it for highly autocorrelated processes (default = 512) 
-</para></listitem>
-<listitem><para> <command>irf</command> = <replaceable>INTEGER</replaceable>:
- number of periods on which to compute the IRFs (default = 40). Setting IRF=0, suppresses the plotting of IRF's. 
-</para></listitem>
-<listitem><para><command>relative_irf</command> requests the computation of normalized IRFs in percentage of the standard error of each shock</para></listitem>
-<listitem><para> <command>linear</command>:
- indicates that the original model is linear (put it rather in the MODEL command).
-</para></listitem>
-<listitem><para> <command>nocorr</command>: 
-doesn't print the correlation matrix (printing them is the default)
-</para></listitem>
-<listitem><para> <command>nofunctions</command>:
- doesn't print the coefficients of the approximated solution (printing them is the default)
-</para></listitem>
-<listitem><para> <command>nomoments</command>: 
-doesn't print moments of the endogenous variables (printing them is the default)</para></listitem>
-<listitem><para> <command>noprint</command>: cancel any printing. Usefull for loops.</para></listitem>
-<listitem><para> <command>order</command> = 1 | 2 :
-order of Taylor approximation (default = 2)
-</para></listitem>
-<listitem><para> <command>periods</command> = <replaceable>INTEGER</replaceable>: specifies the number of periods to use in simulations. At order=1, no simulation is necessary to compute theoretical moments and IRFs. A number of periods larger than one triggers automatically option <command>simul</command> (default = 0).
-</para></listitem>
-<listitem><para> <command>qz_criterium</command> = <replaceable>INTEGER</replaceable> | <replaceable>DOUBLE</replaceable>:
-value used to split stable from unstable eigenvalues in reordering the Generalized Schur decomposition used for solving 1st order problems (default 1.000001)
-</para></listitem>
-<listitem><para> <command>replic</command> = <replaceable>INTEGER</replaceable>: number of simulated series used to compute the IRFs (default = 1, if order = 1, and 50 otherwise)
-</para></listitem>
-<listitem><para> <command>simul</command>: 
-computes a stochastic simulation of the model for the number of periods specified in the <command>periods</command> statement. Uses <xref linkend='initval'/> values, possibly recomputed by <xref linkend='steady'/>, as initial values for the simulation. The simulated endogenous variables are made available to the user in a vector for each variable and in the global matrix <varname>y_</varname>. The variables are ordered alphabeticaly in the <varname>y_</varname> matrix (default: no simulation)
-</para></listitem>
-<listitem><para> <command>simul_seed</command> = <replaceable>INTEGER</replaceable>|<replaceable>DOUBLE</replaceable>|<replaceable>(EXPRESSION)</replaceable>:
- specifies a seed for the random generator so as to obtain the same random sample at each run of the program. Otherwise a different sample is used for each run (default: seed not specified). Note that if you use an EXPRESSION rather than an INTEGER or a DOUBLE, the EXPRESSION must be in parenthesis.
-</para></listitem>
-<listitem><para> all <command>steady</command> options (see <xref linkend='steady'/>)</para></listitem>
-</itemizedlist>
-<para>
-When a list of VARIABLE_NAMEs is specified, results are displayed only for these variables.
-</para>
+<variablelist spacing='compact'>
+  <varlistentry>
+    <term><anchor id="ar" xreflabel="ar"/> <option>ar</option> = <replaceable>INTEGER</replaceable></term>
+    <listitem><para>Order of autocorrelation coefficients to compute and to print. Default: 5</para></listitem>
+  </varlistentry>
+  <varlistentry>
+    <term><option>drop</option> = <replaceable>INTEGER</replaceable></term>
+    <listitem><para>Number of points dropped at the beginning of simulation before computing the summary statistics. Default: 100</para></listitem>
+  </varlistentry>
+  <varlistentry>
+    <term><option>hp_filter</option> = <replaceable>INTEGER</replaceable></term>
+    <listitem><para>Uses HP filter with &lambda; = <replaceable>INTEGER</replaceable> before computing moments. Default: no filter</para></listitem>
+  </varlistentry>
+  <varlistentry>
+    <term><option>hp_ngrid</option> = <replaceable>INTEGER</replaceable></term>
+    <listitem><para>Number of points in the grid for the discrete Inverse Fast Fourier Transform used in the HP filter computation. It may be necessary to increase it for highly autocorrelated processes. Default: 512</para></listitem>
+  </varlistentry>
+  <varlistentry>
+    <term><option>irf</option> = <replaceable>INTEGER</replaceable></term>
+    <listitem><para>Number of periods on which to compute the IRFs. Setting <option>irf</option>=0, suppresses the plotting of IRF's. Default: 40</para></listitem>
+  </varlistentry>
+  <varlistentry>
+    <term><option>relative_irf</option></term>
+    <listitem><para>Requests the computation of normalized IRFs in percentage of the standard error of each shock</para></listitem>
+  </varlistentry>
+  <varlistentry>
+    <term><option>linear</option></term>
+    <listitem><para>Indicates that the original model is linear (put it rather in the <xref linkend="model"/> command)</para></listitem>
+  </varlistentry>
+  <varlistentry>
+    <term><option>nocorr</option></term>
+    <listitem><para>Don't print the correlation matrix (printing them is the default)</para></listitem>
+  </varlistentry>
+  <varlistentry>
+    <term><option>nofunctions</option></term>
+    <listitem><para>Don't print the coefficients of the approximated solution (printing them is the default)</para></listitem>
+  </varlistentry>
+  <varlistentry>
+    <term><option>nomoments</option></term>
+    <listitem><para>Don't print moments of the endogenous variables (printing them is the default)</para></listitem>
+  </varlistentry>
+  <varlistentry>
+    <term><option>nograph</option></term>
+    <listitem><para>...</para></listitem>
+  </varlistentry>
+  <varlistentry>
+    <term><option>noprint</option></term>
+    <listitem><para>Don't print anything. Useful for loops</para></listitem>
+  </varlistentry>
+  <varlistentry>
+    <term><option>print</option></term>
+    <listitem><para>...</para></listitem>
+  </varlistentry>
+  <varlistentry>
+    <term><option>order = <replaceable>INTEGER</replaceable></option></term>
+    <listitem><para>Order of Taylor approximation. Acceptable values are 1 and 2. Default: 2</para></listitem>
+  </varlistentry>
+  <varlistentry>
+    <term><option>periods</option> = <replaceable>INTEGER</replaceable></term>
+    <listitem><para>Specifies the number of periods to use in simulations. If <option>order</option>=1, no simulation is necessary to compute theoretical moments and IRFs. A number of periods larger than one triggers automatically option <option>simul</option>. Default: 0</para></listitem>
+  </varlistentry>
+  <varlistentry>
+    <term><option>qz_criterium</option> = <replaceable>DOUBLE</replaceable></term>
+    <listitem><para>Value used to split stable from unstable eigenvalues in reordering the Generalized Schur decomposition used for solving 1<superscript>st</superscript> order problems. Default: 1.000001</para></listitem>
+  </varlistentry>
+  <varlistentry>
+    <term><option>replic</option> = <replaceable>INTEGER</replaceable></term>
+    <listitem><para>Number of simulated series used to compute the IRFs. Default: 1 if <option>order</option>=1, and 50 otherwise</para></listitem>
+  </varlistentry>
+  <varlistentry>
+    <term><option>simul</option></term>
+    <listitem><para>Computes a stochastic simulation of the model for the number of periods specified in the <option>periods</option> option. Uses <xref linkend='initval'/> values, possibly recomputed by <xref linkend='steady'/>, as initial values for the simulation. The simulated endogenous variables are made available to the user in a vector for each variable and in the global matrix <varname>oo_.endo_simul</varname>. The variables in the <varname>oo_.endo_simul</varname> matrix, in their order of declaration (as in <varname>M_.endo_names</varname>). Default: no simulation</para></listitem>
+  </varlistentry>
+  <varlistentry>
+    <term><option>simul_seed</option> = <replaceable>INTEGER</replaceable></term>
+    <listitem><para>Specifies a seed for the random generator so as to obtain the same random sample at each run of the program. Otherwise a different sample is used for each run. Default: seed not specified</para></listitem>
+  </varlistentry>
+  <varlistentry>
+    <term><option>simul_algo</option> = <replaceable>INTEGER</replaceable></term>
+    <listitem><para>...</para></listitem>
+  </varlistentry>
+  <varlistentry>
+    <term><option>solve_algo</option> = <replaceable>INTEGER</replaceable></term>
+    <listitem><para>See <xref linkend="steady"/> for the possible values and their meaning</para></listitem>
+  </varlistentry>
+</variablelist>
+
 </refsect1>
 <refsect1><title>Description</title>
 <para>
 <command>stoch_simul</command> computes a Taylor approximation of the decision and transition functions for the model, impulse response functions and various descriptive statistics (moments, variance decomposition, correlation and autocorrelation coefficients). For correlated shocks, the variance decomposition is computed as in the VAR literature through a Cholesky decomposition of the covariance matrix of the exogenous variables. When the shocks are correlated, the variance decomposition depends upon the order of the variables in the <xref linkend='varexo'/> command.
 </para>
 
-<para>The Taylor approximation is computed around the steady state (except whith option <command>dr_algo=1</command>). If you know how to compute the steady state for your model, you can provide a Matlab function doing the computation instead of using the nonlinear solver. The function should be called with the name of the <filename class="extension">.mod</filename> file followed by <filename>_steadystate</filename>. See <filename>fs2000a_steadystate.m</filename> in <filename>examples/fs2000</filename> directory.
+<para>The Taylor approximation is computed around the steady state. If you know how to compute the steady state for your model, you can provide a <trademark class="registered">Matlab</trademark> function doing the computation instead of using the nonlinear solver. The function should be called with the name of the <filename class="extension">.mod</filename> file followed by <filename>_steadystate</filename>. See <filename>fs2000a_steadystate.m</filename> in <filename>examples/fs2000</filename> directory.
 </para>
 
 <para>
-Variance decomposition, correlation, autocorrelation are only displayed for variables with positive variance. Impulse response functions are only ploted for variables with response larger than 1e-10.
+Variance decomposition, correlation, autocorrelation are only displayed for variables with positive variance. Impulse response functions are only plotted for variables with response larger than 10<superscript>-10</superscript>.
 </para>
 <para>
-Currently, the IRF's are only ploted for 12 variables. Select the ones you want to see, if your model contains more than 12 endogenous variables.
+Currently, the IRFs are only plotted for 12 variables. Select the ones you want to see, if your model contains more than 12 endogenous variables.
 </para>
 <para>Currently, the HP filter is only available when computing theoretical moments, not for for moments of simulated variables.
 </para>
 <para>
 The covariance matrix of the shocks is specified either with the <xref linkend='shocks'/> command or with the <xref linkend='Sigma_e'/> command.
+</para>
+<para>
+When a list of <replaceable>VARIABLE_NAME</replaceable> is specified, results are displayed only for these variables.
 </para>
 </refsect1>
 
@@ -1626,16 +1708,16 @@ where ys is the steady state value of y, yh<subscript>t</subscript>=y<subscript>
 <para>
 <command>stoch_simul</command> sets several fields in global variable <varname>oo_</varname>. The descriptive statistics are theoretical moments when no simulation is requested and otherwise represent the moments of the simulated variables. 
 <itemizedlist>
-<listitem><para>the coefficients of the decision rules are stored in global structure<varname>dr_</varname>. Here is the correspondance with the symbols used in the above description of the decision rules:
+<listitem><para>the coefficients of the decision rules are stored in global structure <varname>oo_.dr</varname>. Here is the correspondance with the symbols used in the above description of the decision rules:
 <itemizedlist><title>Decision rule coefficients</title>
 
-<listitem><para><varname>ys</varname>: <varname>dr_.ys</varname>. The vector rows correspond to variables in alphabetical order of the variable names.</para></listitem>
-<listitem><para>&Delta;<superscript>2</superscript>: <varname>dr_.ghs2</varname>. The vector rows correspond to re-ordered variables (see below).</para></listitem>
-<listitem><para><varname>A</varname>: <varname>dr_.ghx</varname>. The matrix rows correspond to re-ordered variables. The matrix columns correspond to state variables (see below).</para></listitem>
-<listitem><para><varname>B</varname>: <varname>dr_.ghu</varname>. The matrix rows correspond to re-ordered variables (see below). The matrix columns correspond to exogenous variables in alphabetical order.</para></listitem>
-<listitem><para><varname>C</varname>: <varname>dr_.ghxx</varname>. The matrix rows correspond to re-ordered variables. The matrix columns correspond to the Kronecker product of the vector of state variables (see below).</para></listitem>
-<listitem><para><varname>D</varname>: <varname>dr_.ghuu</varname>. The matrix rows correspond to re-ordered variables (see below). The matrix columns correspond to the Kronecker product of exogenous variables in alphabetical order.</para></listitem>
-<listitem><para><varname>E</varname>: <varname>dr_.ghxu</varname>. The matrix rows correspond to re-ordered variables. The matrix columns correspond to the Kronecker product of the vector of state variables (see below) by the vector of exogenous variables in alphabetical order.</para></listitem>
+<listitem><para><varname>ys</varname>: <varname>oo_.dr.ys</varname>. The vector rows correspond to variables in alphabetical order of the variable names.</para></listitem>
+<listitem><para>&Delta;<superscript>2</superscript>: <varname>oo_.dr.ghs2</varname>. The vector rows correspond to re-ordered variables (see below).</para></listitem>
+<listitem><para><varname>A</varname>: <varname>oo_.dr.ghx</varname>. The matrix rows correspond to re-ordered variables. The matrix columns correspond to state variables (see below).</para></listitem>
+<listitem><para><varname>B</varname>: <varname>oo_.dr.ghu</varname>. The matrix rows correspond to re-ordered variables (see below). The matrix columns correspond to exogenous variables in alphabetical order.</para></listitem>
+<listitem><para><varname>C</varname>: <varname>oo_.dr.ghxx</varname>. The matrix rows correspond to re-ordered variables. The matrix columns correspond to the Kronecker product of the vector of state variables (see below).</para></listitem>
+<listitem><para><varname>D</varname>: <varname>oo_.dr.ghuu</varname>. The matrix rows correspond to re-ordered variables (see below). The matrix columns correspond to the Kronecker product of exogenous variables in alphabetical order.</para></listitem>
+<listitem><para><varname>E</varname>: <varname>oo_.dr.ghxu</varname>. The matrix rows correspond to re-ordered variables. The matrix columns correspond to the Kronecker product of the vector of state variables (see below) by the vector of exogenous variables in alphabetical order.</para></listitem>
 </itemizedlist>
 When reordered, the variables are stored in the following order: static variables, purely predetermined variables (variables that appear only at the current and lagged periods in the model), variables that are both predetermined and forward-looking (variables that appear at the current, future and lagged periods in the model), purely forward-looking variables (variables that appear only at the current and future periods in the model). In each category, the variables are arranged alphabetically.</para>
 <para>
@@ -1645,27 +1727,30 @@ The state variables of the model are purely predetermined variables and variable
 <listitem><para>The mean of the endogenous variables is available in the vector <varname>oo_.mean</varname>. The variables are arranged in alphabetical order.
 </para></listitem>
 <listitem><para>The matrix of variance-covariance of the endogenous variables in the matrix <varname>oo_.var</varname>. The variables are arranged in alphabetical order.</para></listitem>
-<listitem><para>The matrix of autocorrelation of the endogenous variables are made available in cell array <varname>oo_.autocorr</varname>. The element number of the matrix in the cell array corresponds to the order of autocorrelation. The option <varname>AR</varname> (default ar=5) specifies the number of autocorrelation matrices available.
+<listitem><para>The matrix of autocorrelation of the endogenous variables are made available in cell array <varname>oo_.autocorr</varname>. The element number of the matrix in the cell array corresponds to the order of autocorrelation. The option <option>ar</option> specifies the number of autocorrelation matrices available.
 </para></listitem>
 <listitem>
 <para>
-  Simulated variables, when they have been computed, are available in Matlab
+  Simulated variables, when they have been computed, are available in <trademark class="registered">Matlab</trademark>
 vectors with the same name as the endogenous variables.</para>
 </listitem>
 <listitem>
 <para>
-  Impulse responses, when they have been computed, are available in Matlab vectors witht the following naming convention <replaceable>VARIABLE_NAME</replaceable>_<replaceable>shock name</replaceable>.
+  Impulse responses, when they have been computed, are available in <trademark class="registered">Matlab</trademark> vectors with the following naming convention <varname><replaceable>VARIABLE_NAME</replaceable>_<replaceable>SHOCK_NAME</replaceable></varname>.
 </para>
-<informalexample><para>
-  <varname>gnp_ea</varname> contains the effect on <varname>gnp</varname> of a one standard deviation shock on <varname>ea</varname>.
-</para>
+<informalexample>
+  <para>Example:
+    <varname>gnp_ea</varname> contains the effect on <varname>gnp</varname> of a one standard deviation shock on <varname>ea</varname>.
+  </para>
 </informalexample>
 </listitem>
 </itemizedlist>
 </para>
 </refsect1>
 
-<refsect1><title>Example 1</title>
+<refsect1><title>Examples</title>
+<refsect2><title>Example 1</title>
+<informalexample>
 <programlisting>
 shocks;
 var e;
@@ -1675,17 +1760,22 @@ end;
 stoch_simul;
 </programlisting>
 <para>
-performs the simulation of the 2nd order approximation of a model with a single stochastic shock, e, with a standard error of 0.0348.
+Performs the simulation of the 2<superscript>nd</superscript> order approximation of a model with a single stochastic shock <varname>e</varname>, with a standard error of 0.0348.
 </para>
-</refsect1>
+</informalexample>
+</refsect2>
 
-<refsect1><title>Example 2</title>
+<refsect2><title>Example 2</title>
+
+<informalexample>
 <programlisting>
 stoch_simul(linear,irf=60) y k;
 </programlisting>
 <para>
-performs the simulation of a linear model and displays impulse response functions on 60 periods for variables <varname>y</varname> and <varname>k</varname>.
+Performs the simulation of a linear model and displays impulse response functions on 60 periods for variables <varname>y</varname> and <varname>k</varname>.
 </para>
+</informalexample>
+</refsect2>
 </refsect1>
 </refentry>
 </sect1>
@@ -1741,13 +1831,11 @@ Note that in order to avoid stochastic singularity, you must have at least as ma
 </refsect1>
 
 <refsect1><title>Example</title>
-<para>
   <informalexample>
     <programlisting>
       varobs C y rr;
     </programlisting>
   </informalexample>
-</para>
 </refsect1>
 
 </refentry>
@@ -1784,7 +1872,6 @@ Note that in order to avoid stochastic singularity, you must have at least as ma
 </refsect1>
 
 <refsect1><title>Example</title>
-<para>
   <informalexample>
     <programlisting>
       observation_trends;
@@ -1793,7 +1880,6 @@ Note that in order to avoid stochastic singularity, you must have at least as ma
       end;
     </programlisting>
   </informalexample>
-</para>
 </refsect1>
 
 </refentry>
@@ -1913,7 +1999,7 @@ Sometimes, it is desirable to estimate a transformation of a parameter appearing
 </para>
 
 <para>
-In such a case, it is possible to declare the parameter to be estimated in the <xref linkend="parameters"/> statement and to define the transformation at the top of the <xref linkend="model"/> section, as a Matlab expression. The first character of the line must be a pound  sign (#).
+In such a case, it is possible to declare the parameter to be estimated in the <xref linkend="parameters"/> statement and to define the transformation at the top of the <xref linkend="model"/> section, as a <trademark class="registered">Matlab</trademark> expression. The first character of the line must be a pound  sign (#).
 </para>
 </refsect1>
 
@@ -2097,15 +2183,15 @@ Each line corresponds to an estimated parameter and follows this syntax:
 <listitem><para><command>mode_compute</command>=<replaceable>INTEGER</replaceable>: specifies the optimizer for the mode computation.
 <itemizedlist spacing='compact'>
   <listitem><para>0: the mode isn't computed. mode_file must be specified</para></listitem>
-  <listitem><para>1: uses Matlab <command>fmincon</command>.</para></listitem>
+  <listitem><para>1: uses <trademark class="registered">Matlab</trademark> <command>fmincon</command>.</para></listitem>
   <listitem><para>2: uses Lester Ingber's Adaptive Simulated Annealing.</para></listitem>
-  <listitem><para>3: uses Matlab <command>fminunc</command>.</para></listitem>
+  <listitem><para>3: uses <trademark class="registered">Matlab</trademark> <command>fminunc</command>.</para></listitem>
   <listitem><para>4 (default): uses Chris Sim's <command>csminwel</command>.</para></listitem>
 </itemizedlist></para></listitem>
 <listitem><para><command>mode_check</command>: when <command>mode_check</command> is set, Dynare plots the posterior density for values around the computed mode for each estimated parameter in turn. This is helpful to diagnose problems with the optimizer.</para></listitem>
 <listitem><para><command>prior_trunc</command>=<replaceable>DOUBLE</replaceable>: probability of extreme values of the prior density that is ignored when computing bounds for the parameters (default=1e-32).</para></listitem>
 <listitem><anchor id="load_mh_file" xreflabel="load_mh_file"/><para><command>load_mh_file</command>: when <command>load_mh_file</command> is declared, Dynare adds to previous Metropolis-Hastings simulations instead of starting from scratch. Shouldn't be used together with <link linkend="mh_recover">mh_recover</link>.</para></listitem>
-<listitem><para><command>optim</command>=(<replaceable>fmincon options</replaceable>): can be used to set options for fmincon, the optimizing function of Matlab Optimizaiton toolbox. Use Matlab syntax for these options</para>
+<listitem><para><command>optim</command>=(<replaceable>fmincon options</replaceable>): can be used to set options for fmincon, the optimizing function of <trademark class="registered">Matlab</trademark> Optimizaiton toolbox. Use <trademark class="registered">Matlab</trademark> syntax for these options</para>
 <para> (default: ('display','iter','LargeScale','off','MaxFunEvals',100000,'TolFun',1e-8,'TolX',1e-6))</para></listitem>
 <listitem>
   <para>
@@ -2250,7 +2336,7 @@ oo_.posterior_hpdsup.measurement_errors_corr.gdp_conso
 </refsect1>
 
 <refsect1><title>Note on steady state computation</title>
-<para>If you know how to compute the steady state for your model, you can provide a Matlab function doing the computation instead of using <command>steady</command>. The function should be called with the name of the <filename class="extension">.mod</filename> file followed by <filename>_steadystate</filename>. See <filename>fs2000a_steadystate.m</filename> in <filename>examples/fs2000</filename> directory.
+<para>If you know how to compute the steady state for your model, you can provide a <trademark class="registered">Matlab</trademark> function doing the computation instead of using <command>steady</command>. The function should be called with the name of the <filename class="extension">.mod</filename> file followed by <filename>_steadystate</filename>. See <filename>fs2000a_steadystate.m</filename> in <filename>examples/fs2000</filename> directory.
 </para>
 </refsect1>
 </refentry>
@@ -2308,7 +2394,7 @@ oo_.posterior_hpdsup.measurement_errors_corr.gdp_conso
 <para>When <command>unit_root_vars</command> is used the <command>lik_init</command> option of <xref linkend="estimation"/> has no effect.
 </para>
 
-<para>When there are nonstationary variables in a model, there is no unique deterministic steady state. The user must supply a Matlab function that computes the steady state values of the stationary variables in the model and returns dummy values for the nonstationary ones. The function should be called with the name of the <filename>.mod</filename> file followed by <filename>_steadystate</filename>. See <filename>fs2000a_steadystate.m</filename> in <filename>examples/fs2000</filename> directory.
+<para>When there are nonstationary variables in a model, there is no unique deterministic steady state. The user must supply a <trademark class="registered">Matlab</trademark> function that computes the steady state values of the stationary variables in the model and returns dummy values for the nonstationary ones. The function should be called with the name of the <filename>.mod</filename> file followed by <filename>_steadystate</filename>. See <filename>fs2000a_steadystate.m</filename> in <filename>examples/fs2000</filename> directory.
 </para>
 
 <para>Note that the nonstationary variables in the model must be integrated processes(their first difference or k-difference must be stationary).</para>
@@ -2601,7 +2687,7 @@ Plots one or several variables
 <command>dynasave</command> saves the listed variables in a binary file named <replaceable>FILENAME</replaceable>. If no <replaceable>VARIABLE_NAME</replaceable> are listed, all endogenous variables are saved.
 </para>
 <para>
-In Matlab, variables saved with the <command>dynasave</command> command can be retrieved by the Matlab command <command>load -mat <replaceable>FILENAME</replaceable></command>.
+In <trademark class="registered">Matlab</trademark>, variables saved with the <command>dynasave</command> command can be retrieved by the <trademark class="registered">Matlab</trademark> command <command>load -mat <replaceable>FILENAME</replaceable></command>.
 </para>
 </refsect1>
 </refentry>
