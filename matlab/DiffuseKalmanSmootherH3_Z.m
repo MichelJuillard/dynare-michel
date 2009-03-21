@@ -254,7 +254,7 @@ while t>d+1
       ri = Z(i,:)'/Fi(i,t)*v(i,t)+Li(:,:,i,t)'*ri;
     end
   end
-  r(:,t) = ri(:,t);
+  r(:,t) = ri;
   alphahat(:,t) = a1(:,t) + P1(:,:,t)*r(:,t);
   etahat(:,t) = QRt*r(:,t);
   ri = T'*ri;
