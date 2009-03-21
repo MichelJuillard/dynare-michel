@@ -39,11 +39,6 @@ for i = 1:size(M_.endo_names,1)
   end
 end
 
-%% Decide if a DSGE or DSGE-VAR has to be estimated.
-if ~isempty(strmatch('dsge_prior_weight',M_.param_names))
-    options_.bvar_dsge = 1;
-end
-
 %% Set the order of approximation to one (if needed).
 if options_.order > 1
     options_.order = 1;

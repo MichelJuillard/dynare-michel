@@ -30,6 +30,11 @@ function dynare_estimation(var_list,varargin)
 
 global options_ oo_ M_ oo_recursive_
 
+%% Decide if a DSGE or DSGE-VAR has to be estimated.
+if ~isempty(strmatch('dsge_prior_weight',M_.param_names))
+    options_.bvar_dsge = 1;
+end
+
 var_list = check_list_of_variables(options_, M_, var_list);
 options_.varlist = var_list;
 
