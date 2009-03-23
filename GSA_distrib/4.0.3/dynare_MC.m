@@ -113,8 +113,8 @@ for b=1:B
   if opt_gsa.lik_only==0,
   [atT,innov,measurement_error,filtered_state_vector,ys,trend_coeff, aK] = DsgeSmoother(deep,gend,data);
   stock_smooth(:,:,ib)=atT(1:M_.endo_nbr,:);
-  stock_filter(:,:,ib)=filtered_state_vector(1:M_.endo_nbr,:);
-  %stock_filter(:,:,ib)=aK(options_.filter_step_ahead,1:M_.endo_nbr,:);
+%   stock_filter(:,:,ib)=filtered_state_vector(1:M_.endo_nbr,:);
+  stock_filter(:,:,ib)=aK(1,1:M_.endo_nbr,:);
   stock_ys(ib,:)=ys';
   if ib==40,
     ib=0;
