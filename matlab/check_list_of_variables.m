@@ -31,19 +31,20 @@ function varlist = check_list_of_variables(options_, M_, varlist)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
+    msg = 0;
     if options_.bvar_dsge && options_.bayesian_irf
        if ~isempty(varlist)
            for i=1:size(varlist,1)
                idx = strmatch(deblank(varlist(i,:)),options_.varobs,'exact');
                if isempty(idx)
                    disp([varlist(i,:) ' is not an observed variable!']);
-                   message = 1;
+                   msg = 1;
                end
            end
            if size(varlist,1)~=size(options_.varobs)
-               message = 1;
+               msg = 1;
            end
-           if message
+           if msg
                disp(' ')
                disp('Posterior IRFs will be computed for all observed variables.')
                disp(' ')
