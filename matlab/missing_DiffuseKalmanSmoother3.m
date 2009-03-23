@@ -1,4 +1,4 @@
-function [alphahat,etahat,a, aK] = missing_DiffuseKalmanSmoother3(T,R,Q,Pinf1,Pstar1,Y,trend,pp,mm,smpl,mf,data_index)
+function [alphahat,etahat,a,P,aK,PK,d,decomp] = missing_DiffuseKalmanSmoother3(T,R,Q,Pinf1,Pstar1,Y,trend,pp,mm,smpl,mf,data_index)
 % function [alphahat,etahat,a1, aK] = missing_DiffuseKalmanSmoother3(T,R,Q,Pinf1,Pstar1,Y,trend,pp,mm,smpl,mf,data_index)
 % Computes the diffuse kalman smoother without measurement error, in the case of a singular var-cov matrix.
 % Univariate treatment of multivariate time series.
@@ -59,13 +59,16 @@ function [alphahat,etahat,a, aK] = missing_DiffuseKalmanSmoother3(T,R,Q,Pinf1,Ps
 
 global options_
 
+d=0;
+decomp=[];
 nk = options_.nk;
 spinf   	= size(Pinf1);
 spstar  	= size(Pstar1);
 v       	= zeros(pp,smpl);
 a       	= zeros(mm,smpl);
 a1       	= zeros(mm,smpl+1);
-aK          = zeros(nk,mm,smpl+nk);
+aK              = zeros(nk,mm,smpl+nk);
+PK              = zeros(nk,mm,mm,smpl+nk);
 
 if isempty(options_.diffuse_d),
   smpl_diff = 1;
@@ -208,8 +211,11 @@ while notsteady & t<smpl
     end
   end
   a1(:,t+1) = T*a(:,t);
+  Pf          = P(:,:,t);
   for jnk=1:nk,
-    aK(jnk,:,t+jnk) 	 	= T^jnk*a(:,t);
+      Pf = T*Pf*T' + QQ;
+      aK(jnk,:,t+jnk) = T^jnk*a1(:,t);
+      PK(jnk,:,:,t+jnk) = Pf;
   end
   P(:,:,t+1) = T*P(:,:,t)*transpose(T) + QQ;
 %  notsteady   = ~(max(max(abs(P(:,:,t+1)-P(:,:,t))))<crit);
@@ -282,4 +288,23 @@ if d
   end
 end
 
+if nargout > 7
+    decomp = zeros(nk,mm,rr,smpl+nk);
+    ZRQinv = inv(Z*QQ*Z');
+    for t = max(d,1):smpl
+        ri_d = Z'*iF(:,:,t)*v(:,t);
+        
+        % calculate eta_tm1t
+        eta_tm1t = QRt*ri_d;
+        % calculate decomposition
+        Ttok = eye(mm,mm); 
+        for h = 1:nk
+            for j=1:rr
+                eta=zeros(rr,1);
+                eta(j) = eta_tm1t(j);
+                decomp(h,:,j,t+h) = T^(h-1)*P(:,:,t)*Z'*ZRQinv*Z*R*eta;
+            end
+        end
+    end
+end
 
