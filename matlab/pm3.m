@@ -53,7 +53,7 @@ function pm3(n1,n2,ifil,B,tit1,tit2,tit3,tit_tex,names1,names2,name3,DirectoryNa
   for file = 1:ifil
     load([DirectoryName '/' M_.fname var_type int2str(file)]);
     if size(size(stock),2) == 4
-        stock = squeeze(stock(1,:,:,:));
+        stock = squeeze(stock(1,:,1:n2,:));
     end
     k = k(end)+(1:size(stock,3));
     stock1(:,:,k) = stock;
