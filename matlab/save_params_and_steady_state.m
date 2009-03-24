@@ -2,7 +2,7 @@ function save_params_and_steady_state(filename)
 % function save_params_and_steady_state(filename)
 %
 % For all parameters, endogenous and exogenous variables, stores
-% their value in a file, using a simple name/value associative array.
+% their value in a text file.
 % * for parameters, the value is taken from the last parameter
 %   initialization
 % * for exogenous, the value is taken from the last initval block
@@ -22,7 +22,7 @@ function save_params_and_steady_state(filename)
 % SPECIAL REQUIREMENTS
 %   none
 
-% Copyright (C) 2008 Dynare Team
+% Copyright (C) 2008-2009 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -41,15 +41,25 @@ function save_params_and_steady_state(filename)
 
   global M_ oo_
 
+  fid = fopen(filename, 'w');
+  if fid < 0
+      error([ 'SAVE_PARAMS_AND_STEADY_STATE: Can''t open ' filename ]);
+  end
+
   for i = 1:M_.param_nbr
-    stored_values.(deblank(M_.param_names(i,:))) = M_.params(i);
+      fprintf(fid, '%s %.16g\n', M_.param_names(i,:), M_.params(i));
   end
   
   for i = 1:M_.endo_nbr
-    stored_values.(deblank(M_.endo_names(i,:))) = oo_.steady_state(i);
+      fprintf(fid, '%s %.16g\n', M_.endo_names(i,:), oo_.steady_state(i));
   end
 
   for i = 1:M_.exo_nbr
-    stored_values.(deblank(M_.exo_names(i,:))) = oo_.exo_steady_state(i);
+      fprintf(fid, '%s %.16g\n', M_.exo_names(i,:), oo_.exo_steady_state(i));
   end
-  save('-v6',filename, 'stored_values');
+
+  for i = 1:M_.exo_det_nbr
+      fprintf(fid, '%s %.16g\n', M_.exo_det_names(i,:), oo_.exo_det_steady_state(i));
+  end
+
+  fclose(fid);
