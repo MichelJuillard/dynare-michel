@@ -15,7 +15,7 @@ function sim1
 % SPECIAL REQUIREMENTS
 %   None.
 
-% Copyright (C) 1996-2008 Dynare Team
+% Copyright (C) 1996-2009 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -69,19 +69,19 @@ for iter = 1:options_.maxit
     
     it_ = it_init ;
     z = [oo_.endo_simul(iyp,it_-1) ; oo_.endo_simul(:,it_) ; oo_.endo_simul(iyf,it_+1)] ;
-    [d1,M_.jacobia] = feval([M_.fname '_dynamic'],z,oo_.exo_simul, M_.params, it_);
-    M_.jacobia = [M_.jacobia(:,iz) -d1] ;
+    [d1,jacobian] = feval([M_.fname '_dynamic'],z,oo_.exo_simul, M_.params, it_);
+    jacobian = [jacobian(:,iz) -d1] ;
     ic = [1:ny] ;
     icp = iyp ;
-    c (ic,:) = M_.jacobia(:,is)\M_.jacobia(:,isf1) ;
+    c (ic,:) = jacobian(:,is)\jacobian(:,isf1) ;
     for it_ = it_init+(1:options_.periods-1)
         z = [oo_.endo_simul(iyp,it_-1) ; oo_.endo_simul(:,it_) ; oo_.endo_simul(iyf,it_+1)] ;
-        [d1,M_.jacobia] = feval([M_.fname '_dynamic'],z,oo_.exo_simul, M_.params, it_);
-        M_.jacobia = [M_.jacobia(:,iz) -d1] ;
-        M_.jacobia(:,[isf nrs]) = M_.jacobia(:,[isf nrs])-M_.jacobia(:,isp)*c(icp,:) ;
+        [d1,jacobian] = feval([M_.fname '_dynamic'],z,oo_.exo_simul, M_.params, it_);
+        jacobian = [jacobian(:,iz) -d1] ;
+        jacobian(:,[isf nrs]) = jacobian(:,[isf nrs])-jacobian(:,isp)*c(icp,:) ;
         ic = ic + ny ;
         icp = icp + ny ;
-        c (ic,:) = M_.jacobia(:,is)\M_.jacobia(:,isf1) ;
+        c (ic,:) = jacobian(:,is)\jacobian(:,isf1) ;
     end
     
     if ct_ == 1

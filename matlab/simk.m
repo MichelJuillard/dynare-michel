@@ -17,7 +17,7 @@ function simk
 %   None.
 %  
 
-% Copyright (C) 1996-2007 Dynare Team
+% Copyright (C) 1996-2009 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -144,20 +144,20 @@ for iter = 1:options_.maxit
       d1 = -feval([M_.fname '_dynamic'],oo_.endo_simul(iyr),z,oo_.exo_simul, M_.params, it_);
     else
       %jacob(func_name,oo_.endo_simul(iyr)) ;
-      [d1,M_.jacobia] = feval([M_.fname '_dynamic'],oo_.endo_simul(iyr),oo_.exo_simul, M_.params, it_);
+      [d1,jacobian] = feval([M_.fname '_dynamic'],oo_.endo_simul(iyr),oo_.exo_simul, M_.params, it_);
       d1 = -d1 ;
     end
     err_f = max(err_f,max(abs(d1)));
     if lky(i) ~= 0
       j1i = ky(1:lky(i),i) ;
-      w0 = M_.jacobia(:,isc(i-1)+1:isc(i)) ;
+      w0 = jacobian(:,isc(i-1)+1:isc(i)) ;
     else
       w0 = [];
     end
     ttemp = iy(i+1:i+M_.maximum_endo_lead,:)' ;
     jwci = find(ttemp) ;
     if ~ isempty(jwci)
-      w = M_.jacobia(:,isc(i)+1:isc(i+M_.maximum_endo_lead)) ;
+      w = jacobian(:,isc(i)+1:isc(i+M_.maximum_endo_lead)) ;
     end
     j = i ;
     while j <= M_.maximum_endo_lag
@@ -189,7 +189,7 @@ for iter = 1:options_.maxit
 	j1i = [];
 	if lky(j+M_.maximum_endo_lead) ~= 0
 	  jwci = ky(1:lky(j+M_.maximum_endo_lead),j+M_.maximum_endo_lead) + (M_.maximum_endo_lead-1)*ny ;
-	  w = M_.jacobia(:,isc(j+M_.maximum_endo_lead-1)+1:isc(j+M_.maximum_endo_lead)) ;
+	  w = jacobian(:,isc(j+M_.maximum_endo_lead-1)+1:isc(j+M_.maximum_endo_lead)) ;
 	else
 	  jwci = [] ;
 	end
@@ -199,7 +199,7 @@ for iter = 1:options_.maxit
 	if size(jwci,1) == size(j1i,1)
 	  if lky(j+M_.maximum_endo_lead) ~= 0
 	    jwci = ky(1:lky(j+M_.maximum_endo_lead),j+M_.maximum_endo_lead)+(M_.maximum_endo_lead-1)*ny ;
-	    w = M_.jacobia(:,isc(j+M_.maximum_endo_lead-1)+1:isc(j+M_.maximum_endo_lead)) ;
+	    w = jacobian(:,isc(j+M_.maximum_endo_lead-1)+1:isc(j+M_.maximum_endo_lead)) ;
 	  else
 	    jwci = [] ;
 	  end
@@ -208,7 +208,7 @@ for iter = 1:options_.maxit
 	  w = w(:,size(j1i,1)+1:size(w,2)) ; 
 	  if lky(j+M_.maximum_endo_lead) ~= 0
 	    jwci = [ jwci; ky(1: lky(j+M_.maximum_endo_lead),j+M_.maximum_endo_lead)+(M_.maximum_endo_lead-1)*ny] ;
-	    w = [w M_.jacobia(:,isc(j+M_.maximum_endo_lead-1)+1:isc(j+M_.maximum_endo_lead))] ;
+	    w = [w jacobian(:,isc(j+M_.maximum_endo_lead-1)+1:isc(j+M_.maximum_endo_lead))] ;
 %	  else
 %	    jwci = [] ;
 	  end
@@ -237,12 +237,12 @@ for iter = 1:options_.maxit
        d1 = -feval([M_.fname '_dynamic'],oo_.endo_simul(iyr),z,oo_.exo_simul, M_.params, it_);
     else
       %jacob(func_name,oo_.endo_simul(iyr)) ;
-      [d1,M_.jacobia] = feval([M_.fname '_dynamic'],oo_.endo_simul(iyr),oo_.exo_simul, M_.params, it_);
+      [d1,jacobian] = feval([M_.fname '_dynamic'],oo_.endo_simul(iyr),oo_.exo_simul, M_.params, it_);
       d1 = -d1 ;
     end
     err_f = max(err_f,max(abs(d1)));
-    w0 = M_.jacobia(:,1:isc(1)) ;
-    w = M_.jacobia(:,isc(1)+1:isc(1+M_.maximum_endo_lead)) ;
+    w0 = jacobian(:,1:isc(1)) ;
+    w = jacobian(:,isc(1)+1:isc(1+M_.maximum_endo_lead)) ;
     j = 1 ;
     while j <= M_.maximum_endo_lag
       icr = j1(1:lj1(j),j)-(j-1)*ny ;
@@ -263,12 +263,12 @@ for iter = 1:options_.maxit
       j = j + 1 ;
       w0 = w(:,1:lj1(j)) ;
       if M_.maximum_endo_lead == 1
-	w = M_.jacobia(:,isc(j+M_.maximum_endo_lead-1)+1:isc(j+M_.maximum_endo_lead)) ;
+	w = jacobian(:,isc(j+M_.maximum_endo_lead-1)+1:isc(j+M_.maximum_endo_lead)) ;
       else
 	w = w(:,lj1(j)+1:size(w,2)) ;
 
 	if lky(j+M_.maximum_endo_lead) > 0
-	  w = [w M_.jacobia(:,isc(j+M_.maximum_endo_lead-1)+1:isc(j+M_.maximum_endo_lead))] ;
+	  w = [w jacobian(:,isc(j+M_.maximum_endo_lead-1)+1:isc(j+M_.maximum_endo_lead))] ;
 	end
       end
     end
