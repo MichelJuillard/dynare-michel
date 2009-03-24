@@ -100,7 +100,15 @@ if aimcode==1 %if OK
         col_order=[((i-1)*neq)+dr.order_var' col_order];
     end
     bb_ord= bb(dr.order_var,col_order); % derive ordered gy
-    dr.ghx= bb_ord(:,find(any(bb_ord,1))); % get non-zero columns only
+    
+    % variables are present in the state space at the lag at which they
+    % appear and at all smaller lags. The are ordered from smaller to
+    % higher lag (reversed order of M_.lead_lag_incidence rows for lagged
+    % variables)
+    i_lagged_vars = flipud(cumsum(M_.lead_lag_incidence(1:M_.maximum_lag,dr.order_var),1))';
+
+    dr.ghx= bb_ord(:,find(i_lagged_vars(:))); % get columns reported in
+                                              % Dynare solution
     if M_.exo_nbr % if there are exogenous shocks then derive gu for the shocks:
     %   get H0 and H+1=HM
     %    theH0= theAIM_H (:,M_.maximum_endo_lag*neq+1: (M_.maximum_endo_lag+1)*neq);
