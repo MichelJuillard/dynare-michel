@@ -55,6 +55,13 @@ end;
 
 steady;
 
-options_.useAIM = 0;
+options_.useAIM = 1;
 stoch_simul(order=1,irf=0);
 
+benchmark = load('fs2000x10_L9_L_results');
+
+if max(max(abs(benchmark.oo_.dr.ghx-dr.ghx) > 1e-12));
+  exit('error in ghx');
+elseif max(max(abs(benchmark.oo_.dr.ghu-dr.ghu) > 1e-12));
+  exit('error in ghy');
+end;
