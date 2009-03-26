@@ -210,6 +210,7 @@ function [dr,info,M_,options_,oo_] = dr1(dr,task,M_,options_,oo_)
             jacobia_ = real(jacobia_);
         else
             info(1) = 6;
+            info(2) = sum(sum(imag(jacobia_).^2));
             return
         end
     end
