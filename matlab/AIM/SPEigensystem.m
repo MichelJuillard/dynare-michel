@@ -30,13 +30,14 @@
 
 function [w,rts,lgroots,flag_trouble] = SPEigensystem(a,uprbnd,rowsLeft) 
 opts.disp=0; 
-try
-    [w,d]   = eigs(a',rowsLeft,'LM',opts);
-    rts     = diag(d);
-    mag     = abs(rts);
-    [mag,k] = sort(-mag);
-    rts     = rts(k);
-catch
+% next block is commented out because eigs() intermitently returns different rts
+%try
+%    [w,d]   = eigs(a',rowsLeft,'LM',opts);
+%    rts     = diag(d);
+%    mag     = abs(rts);
+%    [mag,k] = sort(-mag);
+%    rts     = rts(k);
+%catch
     %disp('Catch in SPE');
     %pause(0.5);
     %aStr=datestr(clock);
@@ -53,7 +54,7 @@ catch
     mag     = abs(rts);
     [mag,k] = sort(-mag);
     rts     = rts(k);
-end
+%end
 flag_trouble=0; 
 
 %ws=SPSparse(w);
