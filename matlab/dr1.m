@@ -1,5 +1,6 @@
 function [dr,info,M_,options_,oo_] = dr1(dr,task,M_,options_,oo_)
-% Computes the reduced form solution of a rational expectation model (first or second order
+% function [dr,info,M_,options_,oo_] = dr1(dr,task,M_,options_,oo_)
+% computes the reduced form solution of a rational expectation model (first or second order
 % approximation of the stochastic model around the deterministic steady state). 
 %
 % INPUTS
@@ -31,7 +32,7 @@ function [dr,info,M_,options_,oo_] = dr1(dr,task,M_,options_,oo_)
 %   none.
 %  
 
-% Copyright (C) 1996-2008 Dynare Team
+% Copyright (C) 1996-2009 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -229,8 +230,10 @@ function [dr,info,M_,options_,oo_] = dr1(dr,task,M_,options_,oo_)
     
     sdyn = M_.endo_nbr - nstatic;
     
-    k0 = M_.lead_lag_incidence(M_.maximum_endo_lag+1,order_var);
-    b = jacobia_(:,k0);
+    [junk,cols_b,cols_j] = find(M_.lead_lag_incidence(M_.maximum_endo_lag+1, ...
+                                                      order_var));
+    b = zeros(M_.endo_nbr,M_.endo_nbr);
+    b(:,cols_b) = jacobia_(:,cols_j);
     
     if M_.maximum_endo_lead == 0;  % backward models
         % If required, try Gary Anderson and G Moore AIM solver if not
@@ -326,7 +329,7 @@ function [dr,info,M_,options_,oo_] = dr1(dr,task,M_,options_,oo_)
     if  ~((options_.useAIM == 1)&& (task == 0) && (options_.order == 1)) % || isempty(options_.useAIM)  
         k1 = M_.lead_lag_incidence(find([1:klen] ~= M_.maximum_endo_lag+1),:);
         a = aa(:,nonzeros(k1'));
-        b = aa(:,k0);
+        b(:,cols_b) = aa(:,cols_j);
         b10 = b(1:nstatic,1:nstatic);
         b11 = b(1:nstatic,nstatic+1:end);
         b2 = b(nstatic+1:end,nstatic+1:end);
