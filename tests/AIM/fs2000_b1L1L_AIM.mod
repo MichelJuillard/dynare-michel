@@ -78,6 +78,13 @@ unit_root_vars P_obs Y_obs;
 
 steady;
  
-options_.useAIM = 0;
+options_.useAIM = 1;
 stoch_simul(order=1,irf=0);
  
+benchmark = load('fs2000_b1L1L_results');
+ 
+if max(max(abs(benchmark.oo_.dr.ghx-oo_.dr.ghx) > 1e-12));
+  exit('error in ghx');
+elseif max(max(abs(benchmark.oo_.dr.ghu-oo_.dr.ghu) > 1e-12));
+  exit('error in ghy');
+end;

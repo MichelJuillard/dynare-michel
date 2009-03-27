@@ -19,10 +19,8 @@ rho_pies = 0.7;
 // GP extended to see effect of 2 lags and 2 leads
 model(linear);
 //y = y(+1) - (tau +alpha*(2-alpha)*(1-tau))*(R-pie(+1))-alpha*(tau +alpha*(2-alpha)*(1-tau))*dq(+1) + alpha*(2-alpha)*((1-tau)/tau)*(y_s-y_s(+1))-A(+1);
-y = 0.3*y  +0.3*y(-1) +0.3*y(-2)-(tau +alpha*(2-alpha)*(1-tau))*(R-pie)-alpha*(tau +alpha*(2-alpha)*(1-tau))*dq + alpha*(2-alpha)*((1-tau)/tau)*(y_s(11)-y_s)-A;
-//y = 0.3*y(+2)+0.3*y(+1)+0.3*y(-2) - (tau +alpha*(2-alpha)*(1-tau))*(R-pie(+1))-alpha*(tau +alpha*(2-alpha)*(1-tau))*dq(+1) + alpha*(2-alpha)*((1-tau)/tau)*(y_s-y_s(+1))-A(+1);
-//pie = exp(-rr/400)*pie(+1)+alpha*exp(-rr/400)*dq(+1)-alpha*dq+(k/(tau+alpha*(2-alpha)*(1-tau)))*y+alpha*(2-alpha)*(1-tau)/(tau*(tau+alpha*(2-alpha)*(1-tau)))*y_s;
-pie = exp(-rr/400)*pie(-1)+alpha*exp(-rr/400)*dq-alpha*dq(-1)+(k/(tau+alpha*(2-alpha)*(1-tau)))*y+alpha*(2-alpha)*(1-tau)/(tau*(tau+alpha*(2-alpha)*(1-tau)))*y_s;
+y = 0.3*y(+2)+0.3*y(+1)+0.3*y(-2) - (tau +alpha*(2-alpha)*(1-tau))*(R-pie(+1))-alpha*(tau +alpha*(2-alpha)*(1-tau))*dq(+1) + alpha*(2-alpha)*((1-tau)/tau)*(y_s-y_s(+1))-A(+1);
+pie = exp(-rr/400)*pie(+1)+alpha*exp(-rr/400)*dq(+1)-alpha*dq+(k/(tau+alpha*(2-alpha)*(1-tau)))*y+alpha*(2-alpha)*(1-tau)/(tau*(tau+alpha*(2-alpha)*(1-tau)))*y_s;
 pie = de+(1-alpha)*dq+pie_s;
 R = rho_R*R(-1)+(1-rho_R)*(psi1*pie+psi2*(y+alpha*(2-alpha)*((1-tau)/tau)*y_s)+psi3*de)+e_R;
 dq = rho_q*dq(-1)+e_q;
@@ -43,6 +41,14 @@ var e_ys = 1.89;
 var e_pies = 1.89;
 end;
 
-options_.useAIM = 0;
+options_.useAIM = 1;
 stoch_simul(order=1,irf=0);
  
+benchmark = load('ls2003_2L2L_results');
+ 
+if max(max(abs(benchmark.oo_.dr.ghx-oo_.dr.ghx) > 1e-12));
+  exit('error in ghx');
+elseif max(max(abs(benchmark.oo_.dr.ghu-oo_.dr.ghu) > 1e-12));
+  exit('error in ghy');
+end;
+
