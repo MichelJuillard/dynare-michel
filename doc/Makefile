@@ -19,10 +19,8 @@ manual.pdf: manual.xml
 	dblatex manual.xml
 
 clean:
-	rm -f *~
-	rm -f guide.{pdf,log,aux}
-	rm -f bvar-a-la-sims.{pdf,log,aux}
-	rm -rf manual.pdf manual-html
+	rm -f *~ *.pdf *.log *.aux
+	rm -rf manual-html
 	make -C preprocessor clean
 	make -C macroprocessor clean
 	make -C userguide clean
