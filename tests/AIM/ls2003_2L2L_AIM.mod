@@ -46,9 +46,9 @@ stoch_simul(order=1,irf=0);
  
 benchmark = load('ls2003_2L2L_results');
  
-if max(max(abs(benchmark.oo_.dr.ghx-oo_.dr.ghx) > 1e-12));
+if max(max(abs(benchmark.oo_.dr.ghx-oo_.dr.ghx) > 1e-10));
   exit('error in ghx');
-elseif max(max(abs(benchmark.oo_.dr.ghu-oo_.dr.ghu) > 1e-12));
+elseif max(max(abs(benchmark.oo_.dr.ghu-oo_.dr.ghu) > 1e-10));
   exit('error in ghy');
 end;
 
