@@ -20,6 +20,10 @@
 #include <string.h>
 #include "mex.h"
 
+#ifdef MWSIGNEDINDEX_NOT_DEFINED
+#  define mwSignedIndex int
+#endif
+
 #ifdef NO_LAPACK_H
 # if defined(__linux__) || defined(OCTAVE)
 #  define dgges dgges_
@@ -32,26 +36,26 @@ void dgges(char *, char *, char *, int (*)(), int *, double *, int *, double *, 
 
 double criterium;
 
-int my_criteria(double *alphar, double *alphai, double *beta)
+mwSignedIndex my_criteria(double *alphar, double *alphai, double *beta)
 {
   return( (*alphar * *alphar + *alphai * *alphai) < criterium * *beta * *beta);
 }
 
 void mjdgges(double *a, double *b, double *z, double *n, double *sdim, double *eval_r, double *eval_i, double *info)
 {
-  int i_n, i_info, i_sdim, one, lwork;
+  mwSignedIndex i_n, i_info, i_sdim, one, lwork;
   double *alphar, *alphai, *beta, *work, *par, *pai, *pb, *per, *pei;
   double *junk;
-  int *bwork;
+  mwSignedIndex *bwork;
 
   one = 1;
-  i_n = (int)*n;
+  i_n = (mwSignedIndex)*n;
   alphar = mxCalloc(i_n,sizeof(double));
   alphai = mxCalloc(i_n,sizeof(double));
   beta = mxCalloc(i_n,sizeof(double));
   lwork = 16*i_n+16;
   work = mxCalloc(lwork,sizeof(double));
-  bwork = mxCalloc(i_n,sizeof(int));
+  bwork = mxCalloc(i_n,sizeof(mwSignedIndex));
   /* made necessary by bug in Lapack */
   junk = mxCalloc(i_n*i_n,sizeof(double));
 
