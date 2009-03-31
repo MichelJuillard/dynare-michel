@@ -20,7 +20,7 @@
 #include <string.h>
 #include "mex.h"
 
-#ifdef MWTYPES_NOT_DEFINED
+#if defined(MWTYPES_NOT_DEFINED) || defined(OCTAVE)
 typedef int mwSignedIndex;
 #endif
 
