@@ -20,8 +20,8 @@
 #include <string.h>
 #include "mex.h"
 
-#ifdef MWSIGNEDINDEX_NOT_DEFINED
-#  define mwSignedIndex int
+#ifdef MWTYPES_NOT_DEFINED
+typedef int mwSignedIndex;
 #endif
 
 #ifdef NO_LAPACK_H
