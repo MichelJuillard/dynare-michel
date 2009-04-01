@@ -27,7 +27,7 @@ function B = dynare_squeeze(A);
         if sizA(1)==1
             B = transpose(A);
         elseif sizA(2)==1
-            B = A(:,1)
+            B = A(:,1);
         else
             B = A;
         end
