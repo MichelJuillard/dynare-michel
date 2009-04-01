@@ -195,7 +195,7 @@ function [alphahat,etahat,epsilonhat,ahat,SteadyState,trend_coeff,aK,T,R,P,PK,d,
   % -----------------------------------------------------------------------------
   %  4. Kalman smoother
   % -----------------------------------------------------------------------------
-  if any(any(H ~= 0))   % should be replaced by a flag
+  if any(any(H ~= 0))   % should be replaced by a flag
       if kalman_algo == 1
           [alphahat,epsilonhat,etahat,ahat,aK] = ...
               DiffuseKalmanSmootherH1(T,R,Q,H,Pinf,Pstar,Y,trend,nobs,np,smpl,mf);
@@ -313,17 +313,23 @@ function [alphahat,etahat,epsilonhat,ahat,SteadyState,trend_coeff,aK,T,R,P,PK,d,
           alphahat = QT*alphahat;
           ahat = QT*ahat;
           nk = options_.nk;
+% $$$           if M_.exo_nbr<2 % Fix the crash of Dynare when the estimated model has only one structural shock (problem with 
+% $$$                           % the squeeze function, that does not affect 2D arrays).
+% $$$               size_decomp = 0;
+% $$$           else
+% $$$               size_decomp = size(decomp,4);
+% $$$           end
           for jnk=1:nk
               aK(jnk,:,:) = QT*squeeze(aK(jnk,:,:));
               for i=1:size(PK,4)
-                  PK(jnk,:,:,i) = QT*squeeze(PK(jnk,:,:,i))*QT';
+                  PK(jnk,:,:,i) = QT*dynare_squeeze(PK(jnk,:,:,i))*QT';
               end
               for i=1:size(decomp,4)
-                  decomp(jnk,:,:,i) = QT*squeeze(decomp(jnk,:,:,i));
+                  decomp(jnk,:,:,i) = QT*dynare_squeeze(decomp(jnk,:,:,i));
               end
           end
           for i=1:size(P,4)
-              P(:,:,i) = QT*squeeze(P(:,:,i))*QT';
+              P(:,:,i) = QT*dynare_squeeze(P(:,:,i))*QT';
           end
       end
   end
