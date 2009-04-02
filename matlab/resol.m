@@ -16,12 +16,15 @@ function [dr,info]=resol(ys,check_flag)
 %    info=5:         Blanchard Kahn conditions are not satisfied:'...' indeterminacy due to rank failure
 %    info=6:         The jacobian evaluated at the steady state is complex.
 %    info=20:        can't find steady state info(2) contains sum of sqare residuals
+%    info=21:        steady state is complex 
+%                               info(2) contains sum of sqare of
+%                               imaginary part of steady state
 %    info=30:        Variance can't be computed
 %
 % SPECIAL REQUIREMENTS
 %    none
 
-% Copyright (C) 2001-2008 Dynare Team
+% Copyright (C) 2001-2009 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -97,6 +100,12 @@ if check1
   end   
   info(2) = resid'*resid ; % penalty...
   return
+end
+
+if ~isreal(dr.ys)
+    info(1) = 21;
+    info(2) = sum(imag(ys).^2);
+    dr.ys = real(dr.ys);
 end
 
 dr.fbias = zeros(M_.endo_nbr,1);
