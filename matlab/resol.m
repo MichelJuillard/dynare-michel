@@ -89,9 +89,13 @@ else
 end
 % testing for problem
 if check1
-  info(1) = 20;
-  resid = feval(fh,ys,oo_.exo_steady_state, M_.params);
-  info(2) = resid'*resid; % penalty...
+  info(1)= 20;
+  if options_.steadystate_flag
+      resid = check1 ;
+  else
+      resid = feval(fh,ys,oo_.exo_steady_state, M_.params);
+  end   
+  info(2) = resid'*resid ; % penalty...
   return
 end
 
