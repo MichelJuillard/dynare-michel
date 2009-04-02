@@ -32,13 +32,18 @@ function model_diagnostics(M_,options_,oo_)
 %
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
+  
+    global jacob
     
+    endo_nbr = M_.endo_nbr;
     endo_names = M_.endo_names;
     lead_lag_incidence = M_.lead_lag_incidence;
     maximum_lag = M_.maximum_lag;
     maximum_lead = M_.maximum_lead;
     
-% missing variables at the current period
+    %
+    % missing variables at the current period
+    %
     k = find(lead_lag_incidence(maximum_lag+1,:)==0);
     if ~isempty(k)
         disp(['The following endogenous variables aren''t present at ' ...
@@ -48,3 +53,105 @@ function model_diagnostics(M_,options_,oo_)
         end
     end
     
+    %
+    % check steady state
+    %
+    info = 0;
+
+    it_ = M_.maximum_lag + 1 ;
+
+    if M_.exo_nbr == 0
+        oo_.exo_steady_state = [] ;
+    end
+
+    % check if ys is steady state
+    tempex = oo_.exo_simul;
+    oo_.exo_simul = repmat(oo_.exo_steady_state',M_.maximum_lag+M_.maximum_lead+1,1);
+    if M_.exo_det_nbr > 0 
+        tempexdet = oo_.exo_det_simul;
+        oo_.exo_det_simul = repmat(oo_.exo_det_steady_state',M_.maximum_lag+M_.maximum_lead+1,1);
+    end
+    dr.ys = oo_.steady_state;
+    check1 = 0;
+    % testing for steadystate file
+    fh = str2func([M_.fname '_static']);
+    if options_.steadystate_flag
+        [dr.ys,check1] = feval([M_.fname '_steadystate'],dr.ys,...
+                               [oo_.exo_steady_state; oo_.exo_det_steady_state]);
+    else
+        % testing if ys isn't a steady state or if we aren't computing Ramsey policy
+        if  options_.ramsey_policy == 0
+            if options_.linear == 0
+                % nonlinear models
+                if max(abs(feval(fh,dr.ys,[oo_.exo_steady_state; ...
+                                        oo_.exo_det_steady_state], M_.params))) > options_.dynatol
+                    [dr.ys,check1] = dynare_solve(fh,dr.ys,1,...
+                                                  [oo_.exo_steady_state; ...
+                                        oo_.exo_det_steady_state], M_.params);
+                end
+            else
+                % linear models
+                [fvec,jacob] = feval(fh,dr.ys,[oo_.exo_steady_state;...
+                                    oo_.exo_det_steady_state], M_.params);
+                if max(abs(fvec)) > 1e-12
+                    dr.ys = dr.ys-jacob\fvec;
+                end
+            end
+        end
+    end
+    % testing for problem
+    if check1
+        disp('model diagnostic can''t obtain the steady state')
+        return
+    end
+
+    if ~isreal(dr.ys)
+        disp(['model diagnostic obtains a steady state with complex ' ...
+              'numbers'])
+        return
+    end
+
+    %
+    % singular Jacobian of static model
+    %
+    
+    [res,jacob]=feval(fh,dr.ys,[dr.ys; oo_.exo_det_steady_state], ...
+                      M_.params);
+    rank_jacob = rank(jacob);
+    if rank_jacob < endo_nbr
+        disp(['model_diagnostic: the Jacobian of the static model is ' ...
+              'singular'])
+        disp(['there is ' num2str(endo_nbr-rank_jacob) ...
+              ' colinear relationships between the variables and the equations'])
+        ncol = null(jacob);
+        n_rel = size(ncol,2);
+        for i = 1:n_rel
+            if n_rel  > 1
+                disp(['Relation ' int2str(i)])
+            end
+            disp('Colinear variables:')
+            for j=1:10
+              k = find(abs(ncol(:,i)) > 10^-j);
+              if max(abs(jacob(:,k)*ncol(k,i))) < 1e-6
+                  break
+              end
+            end
+            disp(endo_names(k,:))
+        end
+        neq = null(jacob');
+        n_rel = size(neq,2);
+        for i = 1:n_rel
+            if n_rel  > 1
+                disp(['Relation ' int2str(i)])
+            end
+            disp('Colinear equations')
+            for j=1:10
+              k = find(abs(neq(:,i)) > 10^-j);
+              if max(abs(jacob(k,:)'*neq(k,i))) < 1e-6
+                  break
+              end
+            end
+            disp(k')
+        end
+    end
+  
