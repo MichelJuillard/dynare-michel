@@ -127,26 +127,26 @@ function [fval,cost_flag,ys,trend_coeff,info] = DsgeLikelihood(xparam1,gend,data
   [T,R,SteadyState,info] = dynare_resolve(bayestopt_.restrict_var_list,...
 					  bayestopt_.restrict_columns,...
 					  bayestopt_.restrict_aux);
-  if info(1) == 1 | info(1) == 2 | info(1) == 5
-    fval = bayestopt_.penalty+1;
-    cost_flag = 0;
-    return
-  elseif info(1) == 3 | info(1) == 4 | info(1) == 20
-    fval = bayestopt_.penalty+info(2);%^2; % penalty power raised in DR1.m and resol already. GP July'08
-    cost_flag = 0;
-    return
+  if info(1) == 1 || info(1) == 2 || info(1) == 5
+      fval = bayestopt_.penalty+1;
+      cost_flag = 0;
+      return
+  elseif info(1) == 3 || info(1) == 4 || info(1) == 20 || info(1) == 21
+      fval = bayestopt_.penalty+info(2);%^2; % penalty power raised in DR1.m and resol already. GP July'08
+      cost_flag = 0;
+      return
   end
   bayestopt_.mf = bayestopt_.mf1;
-  if ~options_.noconstant
-    if options_.loglinear == 1
-      constant = log(SteadyState(bayestopt_.mfys));
-    else
-      constant = SteadyState(bayestopt_.mfys);
-    end
-  else
-    constant = zeros(nobs,1);
+  if options_.noconstant
+      constant = zeros(nobs,1);  
+  else    
+      if options_.loglinear
+          constant = log(SteadyState(bayestopt_.mfys));
+      else
+          constant = SteadyState(bayestopt_.mfys);
+      end
   end
-  if bayestopt_.with_trend == 1
+  if bayestopt_.with_trend
     trend_coeff = zeros(nobs,1);
     t = options_.trend_coeffs;
     for i=1:length(t)

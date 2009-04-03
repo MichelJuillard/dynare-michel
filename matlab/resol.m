@@ -106,6 +106,7 @@ if ~isreal(dr.ys)
     info(1) = 21;
     info(2) = sum(imag(ys).^2);
     dr.ys = real(dr.ys);
+    return
 end
 
 dr.fbias = zeros(M_.endo_nbr,1);
