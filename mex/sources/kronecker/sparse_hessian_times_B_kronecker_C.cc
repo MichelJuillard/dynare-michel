@@ -26,13 +26,13 @@
 #include <string.h>
 #include "mex.h"
 
-#ifdef _OPENMP
-  #define USE_OMP 1
+#ifdef NO_OPENMP
+  #define USE_OMP 0
   #define DEBUG_OMP 0
-  #include <omp.h>
 #else
   #define USE_OMP 1
   #define DEBUG_OMP 0
+  #include <omp.h>
 #endif
 
 #ifdef MWTYPES_NOT_DEFINED

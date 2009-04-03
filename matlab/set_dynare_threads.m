@@ -27,16 +27,9 @@ function not = set_dynare_threads(n)
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
     not = 1;
-    if exist('isopenmp') && ~isopenmp()% This version of Dynare does not use multithreaded mex files!
+    if ~isopenmp()% This version of Dynare does not use multithreaded mex files!
         disp(' ')
         disp('Multithreading is not available on your platform!')
-        disp(' ')
-        return
-    end
-    if ~exist('isopenmp')%  mex file is missing!
-        disp(' ')
-        disp('Multithreading is not available on your platform!')
-        disp('You should (re)build the mex files.')
         disp(' ')
         return
     end

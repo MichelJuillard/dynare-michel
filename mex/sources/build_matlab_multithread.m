@@ -82,9 +82,7 @@ else
 end
 disp(' ')
 
-COMPILE_OPTIONS = [ COMPILE_OPTIONS ' -DNO_OPENMP' ]; % Single thread version. To compile multithreaded versions of the mex file 
-                                                      % use build_matlab_multithread.m instead.
-                                                      % Read http://www.dynare.org/DynareWiki/UsingMultithreadedDlls. 
+
 % Set Optimization and Debug flags
 CXXOPTIMFLAGS = ' CXXOPTIMFLAGS=-O3 ';
 COPTIMFLAGS = ' COPTIMFLAGS=-O3 ';
@@ -99,14 +97,42 @@ COMPILE_OPTIONS = [ COMPILE_OPTIONS CDEBUGFLAGS COPTIMFLAGS CXXDEBUGFLAGS CXXOPT
 
 COMPILE_COMMAND = [ 'mex ' COMPILE_OPTIONS ' -outdir ' OUTPUT_DIR ];
 
+CFLAGS   = ' CFLAGS="\$CFLAGS -fopenmp" ';
+CXXFLAGS = ' CXXFLAGS="\$CXXFLAGS -fopenmp" ';
+LDFLAGS  = ' LDFLAGS="\$LDFLAGS -fopenmp" ';
+
+disp('Compiling isopenmp...')
+try
+    eval([ 'mex ' COMPILE_OPTIONS  CFLAGS CXXFLAGS LDFLAGS  ' -outdir ' OUTPUT_DIR ' threads/isopenmp.cc ' ]);
+    disp(' ')
+    disp('|------------------------------------------------|')
+    disp('|  OpenMp is used (multithreaded mex files) for: |')
+    disp('|   * sparse_hessian_times_B_kronecker_C.cc      |')
+    disp('|   * A_times_B_kronecker_C.cc                   |')
+    disp('|   * simulate (SparseMatrix.cc)                 |')
+    disp('|------------------------------------------------|')
+    disp(' ')
+    COMPILE_OPTIONS_OMP = [ COMPILE_OPTIONS  CFLAGS CXXFLAGS LDFLAGS ];
+catch
+    disp(' ')
+    disp('|------------------------------------------------|')
+    disp('|  OpenMp is not available on this platform!     |')
+    disp('|------------------------------------------------|')
+    disp(' ')
+    CFLAGS = []; CXXFLAGS = []; LDFLAGS = [];
+    COMPILE_OPTIONS_OMP = [ COMPILE_OPTIONS ' -DNO_OPENMP' ];
+end
+
+COMPILE_COMMAND_OMP = [ 'mex ' COMPILE_OPTIONS_OMP ' -outdir ' OUTPUT_DIR ];
+
 disp('Compiling mjdgges...')
 eval([ COMPILE_COMMAND ' mjdgges/mjdgges.c ' LAPACK_PATH ]);
 
 disp('Compiling sparse_hessian_times_B_kronecker_C...')
-eval([ COMPILE_COMMAND ' kronecker/sparse_hessian_times_B_kronecker_C.cc' ]);
-
+eval([ COMPILE_COMMAND_OMP ' kronecker/sparse_hessian_times_B_kronecker_C.cc' ]);
+    
 disp('Compiling A_times_B_kronecker_C...')
-eval([ COMPILE_COMMAND ' kronecker/A_times_B_kronecker_C.cc ' BLAS_PATH]);
+eval([ COMPILE_COMMAND_OMP ' kronecker/A_times_B_kronecker_C.cc ']);    
 
 disp('Compiling gensylv...')
 eval([ COMPILE_COMMAND ' -DMATLAB -Igensylv/cc ' ...
@@ -131,4 +157,4 @@ eval([ COMPILE_COMMAND ' -DMATLAB -Igensylv/cc ' ...
        BLAS_PATH ' ' LAPACK_PATH ]);
 
 disp('Compiling simulate...')
-eval([ COMPILE_COMMAND ' -Isimulate -I../../preprocessor simulate/simulate.cc simulate/Interpreter.cc simulate/Mem_Mngr.cc simulate/SparseMatrix.cc']);
+eval([ COMPILE_COMMAND_OMP ' -Isimulate -I../../preprocessor simulate/simulate.cc simulate/Interpreter.cc simulate/Mem_Mngr.cc simulate/SparseMatrix.cc']);

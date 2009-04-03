@@ -52,21 +52,15 @@ if exist([dynareroot '/AIM'])==7  % Add path to G.Anderson AIM solver (added by 
 end
 
 if exist('OCTAVE_VERSION')
-    addpath([dynareroot '../mex/octave/'])
+    path_to_mex_files = [dynareroot '../mex/octave/'] ;
 else
     if matlab_ver_less_than('7.5')
-        addpath([dynareroot '../mex/2007a/'])
+        path_to_mex_files = [dynareroot '../mex/2007a/'] ;
     else
-        addpath([dynareroot '../mex/2007b/'])
+        path_to_mex_files = [dynareroot '../mex/2007b/'] ;
     end
 end
-
-if exist('isopenmp') && isopenmp
-    number_of_threads = set_dynare_threads();
-    multithread_flag = number_of_threads-1;
-else
-    multithread_flag = 0;
-end
+addpath(path_to_mex_files);
 
 %% Set mex routine names
 mex_status = cell(1,3);
@@ -87,6 +81,16 @@ number_of_mex_files = size(mex_status,1);
 %% added dynare_v4/matlab with the subfolders. Matlab has to ignore these
 %% subfolders if valid mex files exist.
 matlab_path = path;
+test = strfind(matlab_path,[dynareroot 'threads/single']);
+if length(test)
+    rmpath([dynareroot 'threads/single']);
+    matlab_path = path;
+end
+test = strfind(matlab_path,[dynareroot 'threads/multi']);
+if length(test)
+    rmpath([dynareroot 'threads/multi']);
+    matlab_path = path;
+end
 for i=1:number_of_mex_files
     test = strfind(matlab_path,[dynareroot mex_status{i,2}]);
     action = length(test);
@@ -95,17 +99,27 @@ for i=1:number_of_mex_files
         matlab_path = path;
     end
 end
+%% Test if multithread mex files are available.
+if exist('isopenmp')==3
+    addpath([dynareroot '/threads/multi/'])
+    number_of_threads = set_dynare_threads();
+    multithread_flag  = number_of_threads-1;
+else
+    addpath([dynareroot '/threads/single/'])
+    multithread_flag = 0;
+end
 %% Test if valid mex files are available, if a mex file is not available
 %% a matlab version of the routine is included in the path.
 disp(' ')
 disp('Configuring Dynare ...')
 for i=1:number_of_mex_files
-    test = (exist(mex_status{i,1}) == 3);
+    test = (exist([ path_to_mex_files  mex_status{i,1}]) == 3);
     if ~test
         addpath([dynareroot mex_status{i,2}]);
         message = '[m]   ';
     else
-        if multithread_flag && strcmpi(mex_status(i,1),'sparse_hessian_times_B_kronecker_C')
+        if multithread_flag && ( strcmpi(mex_status(i,1),'sparse_hessian_times_B_kronecker_C') || ...
+                                 strcmpi(mex_status(i,1),'A_times_B_kronecker_C') )
             message = [ '[mex][multithread version, ' int2str(multithread_flag+1) ' threads are used] ' ]; 
         else
             message = '[mex] ';

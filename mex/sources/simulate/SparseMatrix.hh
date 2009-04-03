@@ -26,7 +26,9 @@
 #include <map>
 #include <ctime>
 #include "Mem_Mngr.hh"
-#ifdef _OPENMP
+#ifdef NO_OPENMP
+// Nothing to single thread version.
+#else
   #include <omp.h>
 #endif
 #define NEW_ALLOC
