@@ -38,6 +38,13 @@ function [x,u] = lyapunov_symm(a,b,qz_criterium,lyapunov_complex_threshold,metho
 %
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
+    persistent test1 test2
+    
+    if isempty(test1)
+        test1 = exist('OCTAVE_VERSION') || matlab_ver_less_than('7.0.1') ;
+        test2 = exist('ordschur','builtin');
+    end
+    
     if nargin<5
         method = 0;
     end
@@ -58,14 +65,14 @@ function [x,u] = lyapunov_symm(a,b,qz_criterium,lyapunov_complex_threshold,metho
     
     if method<2
         [U,T] = schur(a);
-        if exist('OCTAVE_VERSION') || matlab_ver_less_than('7.0.1')
+        if test1
             e1 = abs(my_ordeig(T)) > 2-qz_criterium;
         else
             e1 = abs(ordeig(T)) > 2-qz_criterium;
         end
         k = sum(e1);       % Number of unit roots. 
         n = length(e1)-k;  % Number of stationary variables.
-        if exist('ordschur','builtin')
+        if test2
             % Selects stable roots
             [U,T] = ordschur(U,T,e1);
             T = T(k+1:end,k+1:end);
