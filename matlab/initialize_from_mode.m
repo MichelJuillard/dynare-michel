@@ -32,7 +32,7 @@ function estim_params_ = initialize_from_mode(fname,M_,estim_params_)
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
     
-    load(fname);
+    load(fname,'xparam1','parameter_names');
     
     endo_names = M_.endo_names;
     exo_names = M_.exo_names;
@@ -42,9 +42,8 @@ function estim_params_ = initialize_from_mode(fname,M_,estim_params_)
     var_endo = estim_params_.var_endo;
     corrx = estim_params_.corrx;
     corrn = estim_params_.corrn;
-    names = bayestopt_.name;
-    for i=1:length(names)
-        name = names{i};
+    for i=1:length(parameter_names)
+        name = parameter_names{i};
         k1 = strmatch(name,param_names,'exact');
         if ~isempty(k1)
             k2 = find(param_vals(:,1) == k1);
