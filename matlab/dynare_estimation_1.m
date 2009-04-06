@@ -273,7 +273,7 @@ options_ = set_default_option(options_,'nodiagnostic',0);
 
 % load mode file is necessary
 if length(options_.mode_file) > 0 && options_.posterior_mode_estimation
-  eval(['load ' options_.mode_file ';']);
+  load(options_.mode_file);
 end
 
 %% Compute the steady state: 
@@ -417,7 +417,8 @@ if options_.mode_compute > 0 & options_.posterior_mode_estimation
         else
             [xparam1,hh,gg,fval,invhess] = newrat('DsgeVarLikelihood',xparam1,hh,gg,igg,crit,nit,flag,gend);
         end
-        save([M_.fname '_mode.mat'],'xparam1','hh','gg','fval','invhess','bayestopt_');
+        parameter_names = bayestopt_.name;
+        save([M_.fname '_mode.mat'],'xparam1','hh','gg','fval','invhess','parameter_names');
       case 6
         if ~options_.bvar_dsge
             fval = DsgeLikelihood(xparam1,gend,data,data_index,number_of_observations,no_more_missing_observations);
@@ -509,6 +510,56 @@ if options_.mode_compute > 0 & options_.posterior_mode_estimation
         else
             [xparam1,fval,exitflag] = fminsearch(fh,xparam1,optim_options,gend);
         end
+    case 101
+        myoptions=soptions;
+        myoptions(2)=1e-6; %accuracy of argument
+        myoptions(3)=1e-6; %accuracy of function (see Solvopt p.29)
+        myoptions(5)= 1.0;
+        
+        [xparam1,fval]=solvopt(xparam1,fh,[],myoptions,gend,data);
+    case 102
+        %simulating annealing
+        %        LB=zeros(size(xparam1))-20;
+        % UB=zeros(size(xparam1))+20;
+        LB = xparam1 - 1;
+        UB = xparam1 + 1;
+        neps=10;
+        %  Set input parameters. 
+        maxy=0;
+        eps=1.0e-9;
+        rt_=.10;
+        t=15.0;
+        ns=10;
+        nt=10;
+        maxevl=100000000;
+        idisp =1;
+        npar=length(xparam1);
+        
+        disp(['size of param',num2str(length(xparam1))])    
+        c=.1*ones(npar,1);
+        %*  Set input values of the input/output parameters.*
+        
+        vm=1*ones(npar,1);
+        disp(['number of parameters= ' num2str(npar) 'max= '  num2str(maxy) 't=  ' num2str(t)]);
+        disp(['rt_=  '  num2str(rt_) 'eps=  '  num2str(eps) 'ns=  '  num2str(ns)]);
+        disp(['nt=  '  num2str(nt) 'neps= '   num2str(neps) 'maxevl=  '  num2str(maxevl)]);
+        %      disp(['iprint=   '   num2str(iprint) 'seed=   '   num2str(seed)]);
+        disp '  ';
+        disp '  ';
+        disp(['starting values(x)  ' num2str(xparam1')]);
+        disp(['initial step length(vm)  '  num2str(vm')]);
+        disp(['lower bound(lb)', 'initial conditions', 'upper bound(ub)' ]);
+        disp([LB xparam1 UB]);
+        disp(['c vector   ' num2str(c')]);
+        
+        %  keyboard 
+        if ~options_.bvar_dsge
+            [xparam1, fval, nacc, nfcnev, nobds, ier, t, vm] = sa(fh,xparam1,maxy,rt_,eps,ns,nt ...
+                                                              ,neps,maxevl,LB,UB,c,idisp ,t,vm,gend,data,data_index,number_of_observations,no_more_missing_observations);
+        else
+            [xparam1, fval, nacc, nfcnev, nobds, ier, t, vm] = sa(fh,xparam1,maxy,rt_,eps,ns,nt ...
+                                                              ,neps,maxevl,LB,UB,c,idisp ,t,vm,gend);
+        end
       otherwise
         error(['ESTIMATION: mode_compute=' int2str(options_.mode_compute) ' option is unknown!'])
     end
@@ -526,12 +577,17 @@ if options_.mode_compute > 0 & options_.posterior_mode_estimation
                 nn = repmat(NaN,length(xparam1),length(xparam1))
             end
         end
+        parameter_names = bayestopt_.name;
         if options_.cova_compute
-            save([M_.fname '_mode.mat'],'xparam1','hh','bayestopt_');
+            save([M_.fname '_mode.mat'],'xparam1','hh','parameter_names');
         else
-            save([M_.fname '_mode.mat'],'xparam1','bayestopt_');
+            save([M_.fname '_mode.mat'],'xparam1','parameter_names');
         end
     end
+end
+
+if options_.cova_compute == 0
+    hh = repmat(NaN,length(xparam1),length(xparam1));
 end
 
 try
@@ -543,7 +599,7 @@ catch
     disp('=> posterior variance of the estimated parameters are not positive.')
     disp('You should  try  to change the initial values of the parameters using')
     disp('the estimated_params_init block, or use another optimization routine.')
-    error('I cannot go further!');
+    warning('The results below are most likely wrong!');
 end
 
 if options_.mode_check == 1 & options_.posterior_mode_estimation
