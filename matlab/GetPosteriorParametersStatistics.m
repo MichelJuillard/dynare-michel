@@ -15,7 +15,7 @@ function oo_ = GetPosteriorParametersStatistics(estim_params_, M_, options_, bay
 % SPECIAL REQUIREMENTS
 %   None.
 
-% Copyright (C) 2006-2008 Dynare Team
+% Copyright (C) 2006-2009 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -96,14 +96,14 @@ if np
                 oo_ = Filloo(oo_,name,type,post_mean,hpd_interval,post_median,post_var,post_deciles,density);                
             end
         end
-        disp(sprintf(pformat,name,bayestopt_.pmean(ip),...
+        disp(sprintf(pformat,name,bayestopt_.p1(ip),...
                      post_mean, ...
                      hpd_interval, ...
                      pnames(bayestopt_.pshape(ip)+1,:), ...
-                     bayestopt_.pstdev(ip)));    
+                     bayestopt_.p2(ip)));    
         if TeX
-            TeXCore(fid,name,deblank(pnames(bayestopt_.pshape(ip)+1,:)),bayestopt_.pmean(ip),...
-                    bayestopt_.pstdev(ip),post_mean,sqrt(post_var),hpd_interval);
+            TeXCore(fid,name,deblank(pnames(bayestopt_.pshape(ip)+1,:)),bayestopt_.p1(ip),...
+                    bayestopt_.p2(ip),post_mean,sqrt(post_var),hpd_interval);
         end
         ip = ip+1;
     end
@@ -144,11 +144,11 @@ if nvx
                 M_.Sigma_e(k,k) = post_mean*post_mean;
             end
         end
-        disp(sprintf(pformat,name,bayestopt_.pmean(ip),post_mean,hpd_interval,...
-                     pnames(bayestopt_.pshape(ip)+1,:),bayestopt_.pstdev(ip)));
+        disp(sprintf(pformat,name,bayestopt_.p1(ip),post_mean,hpd_interval,...
+                     pnames(bayestopt_.pshape(ip)+1,:),bayestopt_.p2(ip)));
         if TeX
-            TeXCore(fid,name,deblank(pnames(bayestopt_.pshape(ip)+1,:)),bayestopt_.pmean(ip),...
-                    bayestopt_.pstdev(ip),post_mean,sqrt(post_var),hpd_interval);
+            TeXCore(fid,name,deblank(pnames(bayestopt_.pshape(ip)+1,:)),bayestopt_.p1(ip),...
+                    bayestopt_.p2(ip),post_mean,sqrt(post_var),hpd_interval);
         end
         ip = ip+1;
     end
@@ -184,11 +184,11 @@ if nvn
                 oo_ = Filloo(oo_,name,type,post_mean,hpd_interval,post_median,post_var,post_deciles,density);
             end
         end
-        disp(sprintf(pformat,name,bayestopt_.pmean(ip),post_mean,hpd_interval, ...
-                     pnames(bayestopt_.pshape(ip)+1,:),bayestopt_.pstdev(ip)));
+        disp(sprintf(pformat,name,bayestopt_.p1(ip),post_mean,hpd_interval, ...
+                     pnames(bayestopt_.pshape(ip)+1,:),bayestopt_.p2(ip)));
         if TeX
-            TeXCore(fid,name,deblank(pnames(bayestopt_.pshape(ip)+1,:)),bayestopt_.pmean(ip),...
-                    bayestopt_.pstdev(ip),post_mean,sqrt(post_var),hpd_interval);
+            TeXCore(fid,name,deblank(pnames(bayestopt_.pshape(ip)+1,:)),bayestopt_.p1(ip),...
+                    bayestopt_.p2(ip),post_mean,sqrt(post_var),hpd_interval);
         end
         ip = ip+1;
     end
@@ -237,11 +237,11 @@ if ncx
                 M_.Sigma_e(k2,k1) = M_.Sigma_e(k1,k2);
             end
         end
-        disp(sprintf(pformat, name,bayestopt_.pmean(ip),post_mean,hpd_interval, ...
-                     pnames(bayestopt_.pshape(ip)+1,:),bayestopt_.pstdev(ip)));
+        disp(sprintf(pformat, name,bayestopt_.p1(ip),post_mean,hpd_interval, ...
+                     pnames(bayestopt_.pshape(ip)+1,:),bayestopt_.p2(ip)));
         if TeX
-            TeXCore(fid,name,deblank(pnames(bayestopt_.pshape(ip)+1,:)),bayestopt_.pmean(ip),...
-                    bayestopt_.pstdev(ip),post_mean,sqrt(post_var),hpd_interval);
+            TeXCore(fid,name,deblank(pnames(bayestopt_.pshape(ip)+1,:)),bayestopt_.p1(ip),...
+                    bayestopt_.p2(ip),post_mean,sqrt(post_var),hpd_interval);
         end
         ip = ip+1;
     end
@@ -288,11 +288,11 @@ if ncn
                              post_median,post_var,post_deciles,density);
             end
         end
-        disp(sprintf(pformat, name,bayestopt_.pmean(ip),post_mean,hpd_interval, ...
-                     pnames(bayestopt_.pshape(ip)+1,:),bayestopt_.pstdev(ip)));
+        disp(sprintf(pformat, name,bayestopt_.p1(ip),post_mean,hpd_interval, ...
+                     pnames(bayestopt_.pshape(ip)+1,:),bayestopt_.p2(ip)));
         if TeX
-            TeXCore(fid,name,deblank(pnames(bayestopt_.pshape(ip)+1,:)),bayestopt_.pmean(ip),...
-                    bayestopt_.pstdev(ip),post_mean,sqrt(post_var),hpd_interval);            
+            TeXCore(fid,name,deblank(pnames(bayestopt_.pshape(ip)+1,:)),bayestopt_.p1(ip),...
+                    bayestopt_.p2(ip),post_mean,sqrt(post_var),hpd_interval);            
         end
         ip = ip+1;
     end

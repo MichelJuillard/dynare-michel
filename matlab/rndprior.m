@@ -11,7 +11,7 @@ function y = rndprior(bayestopt_)
 % SPECIAL REQUIREMENTS
 %    none
 
-% Copyright (C) 2003-2008 Dynare Team
+% Copyright (C) 2003-2009 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -29,52 +29,29 @@ function y = rndprior(bayestopt_)
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
 pshape=bayestopt_.pshape;
-pmean=bayestopt_.pmean;
-p1=bayestopt_.p1;
-p2=bayestopt_.p2;
 p3=bayestopt_.p3;
 p4=bayestopt_.p4;
- 
-for i=1:length(pmean),
-    
-    switch pshape(i)
-        
-     case 1 % Beta
-      mu = (pmean(i)-p3(i))/(p4(i)-p3(i));
-      stdd = p2(i)/(p4(i)-p3(i));
-      A = (1-mu)*mu^2/stdd^2 - mu;
-      B = A*(1/mu - 1);
-      y(1,i) = betarnd(A, B);
-      y(1,i) = y(1,i) * (p4(i)-p3(i)) + p3(i);
-      
-     case 2 % Generalized gamma
-      mu = pmean(i)-p3(i);
-      B = p2(i)^2/mu;
-      A = mu/B;
-      y(1,i) = gamrnd(A, B) + p3(i);
-      
-     case 3 % Gaussian
-      MU = pmean(i);
-      SIGMA = p2(i);
-      y(1,i) = randn*SIGMA+ MU;
-      
-     case 4 % Inverse-gamma type 1
-      nu = p2(i);
-      s = p1(i);
-      y(1,i) = 1/sqrt(gamrnd(nu/2, 2/s));
-      
-     case 5 % Uniform
-      y(1,i) = rand*(p2(i)-p1(i)) + p1(i);
+p6=bayestopt_.p6;
+p7=bayestopt_.p7;
 
-     case 6 % Inverse-gamma type 2
-      nu = p2(i);
-      s = p1(i);
-      y(1,i) = 1/gamrnd(nu/2, 2/s);
-      
-     otherwise
-      error(sprintf('rndprior: unknown distribution shape (index %d, type %d)', i, pshape(i)));
+y = NaN(1,length(pshape)); 
+
+for i=1:length(pshape)
+    switch pshape(i)
+      case 1 % Beta
+        y(i) = betarnd(p6(i),p7(i));
+        y(i) = y(1,i) * (p4(i)-p3(i)) + p3(i);
+      case 2 % Generalized gamma
+        y(i) = gamrnd(p6(i),p7(i)) + p3(i);
+      case 3 % Gaussian
+        y(i) = randn*p7(i) + p6(i) ;
+      case 4 % Inverse-gamma type 1
+        y(i) = 1/sqrt(gamrnd(p7(i)/2, 2/p6(i))) + p3(i);
+      case 5 % Uniform
+        y(i) = rand*(p4(i)-p3(i)) + p3(i);
+      case 6 % Inverse-gamma type 2
+        y(i) = 1/gamrnd(p7(i)/2, 2/p6(i)) + p3(i); 
+      otherwise
+        error(sprintf('rndprior: unknown distribution shape (index %d, type %d)', i, pshape(i)));
     end
 end
-
-% initial version by Marco Ratto
-

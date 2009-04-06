@@ -1,6 +1,5 @@
 function [x,f,abscissa,dens,binf,bsup] = draw_prior_density(indx,bayestopt_);
-% function [x,f,abscissa,dens,binf,bsup] = draw_prior_density(indx)
-% Computes values of prior density at many points (before plotting)
+% Computes values of prior densities at many points (before plotting)
 %
 % INPUTS
 %    indx          [integer]    Parameter number.
@@ -13,9 +12,7 @@ function [x,f,abscissa,dens,binf,bsup] = draw_prior_density(indx,bayestopt_);
 %    dens          [double]     Row vector, density
 %    binf:         [double]     Scalar, first element of x
 %    bsup:         [double]     Scalar, last element of x
-%    
-% SPECIAL REQUIREMENTS
-%    none
+
 
 % Copyright (C) 2004-2009 Dynare Team
 %
@@ -34,73 +31,58 @@ function [x,f,abscissa,dens,binf,bsup] = draw_prior_density(indx,bayestopt_);
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-pmean   = bayestopt_.pmean;
-pshape  = bayestopt_.pshape; 
-p1      = bayestopt_.p1;
-p2      = bayestopt_.p2;
+pshape  = bayestopt_.pshape;
 p3      = bayestopt_.p3;
 p4      = bayestopt_.p4;
+p6      = bayestopt_.p6;
+p7      = bayestopt_.p7;
 
 truncprior = 1e-3;
 steps = 200;
 
+indx
+
 switch pshape(indx)
- case 1  % Beta prior
+  case 1% Beta prior
     density = @(x,a,b,aa,bb) betapdf((x-aa)/(bb-aa), a, b)/(bb-aa);
-    mu = (p1(indx)-p3(indx))/(p4(indx)-p3(indx));
-    stdd = p2(indx)/(p4(indx)-p3(indx));
-    a = (1-mu)*mu^2/stdd^2 - mu;
-    b = a*(1/mu-1);
-    aa = p3(indx);
-    bb = p4(indx);
-    infbound = betainv(truncprior,a,b)*(bb-aa)+aa;
-    supbound = betainv(1-truncprior,a,b)*(bb-aa)+aa;
+    infbound = betainv(truncprior,p6(indx),p7(indx))*(p4(indx)-p3(indx))+p3(indx);
+    supbound = betainv(1-truncprior,p6(indx),p7(indx))*(p4(indx)-p3(indx))+p3(indx);
     stepsize = (supbound-infbound)/steps;
     abscissa = infbound:stepsize:supbound;
-    dens = density(abscissa,a,b,aa,bb);
- case 2  % Generalized Gamma prior
+    dens = density(abscissa,p6(indx),p7(indx),p3(indx),p4(indx));
+  case 2% Generalized Gamma prior
     density = @(x,a,b,c) gampdf(x-c,a,b);
-    mu = p1(indx)-p3(indx);
-    b  = p2(indx)^2/mu;
-    a  = mu/b;
-    c = p3(indx);
-    infbound = gaminv(truncprior,a,b)+c;
-    supbound = gaminv(1-truncprior,a,b)+c;
+    infbound = gaminv(truncprior,p6(indx),p7(indx))+p3(indx);
+    supbound = gaminv(1-truncprior,p6(indx),p7(indx))+p3(indx);
     stepsize = (supbound-infbound)/steps;
     abscissa = infbound:stepsize:supbound;
-    dens = density(abscissa,a,b,c);
- case 3  % Gaussian prior
-    a = p1(indx);
-    b = p2(indx);
-    infbound = norminv(truncprior,a,b); 
-    supbound = norminv(1-truncprior,a,b);
+    dens = density(abscissa,p6(indx),p7(indx),p3(indx));
+  case 3% Gaussian prior
+    infbound = norminv(truncprior,p6(indx),p7(indx)); 
+    supbound = norminv(1-truncprior,p6(indx),p7(indx));
     stepsize = (supbound-infbound)/steps;
     abscissa = infbound:stepsize:supbound;
-    dens = normpdf(abscissa,a,b);  
- case 4  % Inverse-gamma of type 1 prior
-    nu = p2(indx);
-    s  = p1(indx);
-    infbound = 1/sqrt(gaminv(1-10*truncprior, nu/2, 2/s));
-    supbound = 1/sqrt(gaminv(10*truncprior, nu/2, 2/s));
+    dens = normpdf(abscissa,p6(indx),p7(indx));  
+  case 4% Inverse-gamma of type 1 prior
+    infbound = 1/sqrt(gaminv(1-10*truncprior, p7(indx)/2, 2/p6(indx)))+p3(indx);
+    supbound = 1/sqrt(gaminv(10*truncprior, p7(indx)/2, 2/p6(indx)))+p3(indx);
     stepsize = (supbound-infbound)/steps;
     abscissa = infbound:stepsize:supbound;
-    dens = exp(lpdfig1(abscissa,s,nu));  
- case 5  % Uniform prior
-    infbound = p1(indx); 
-    supbound = p2(indx);
+    dens = exp(lpdfig1(abscissa-p3(indx),p6(indx),p7(indx)));  
+  case 5% Uniform prior
+    infbound = p6(indx);
+    supbound = p7(indx);
     stepsize = (supbound-infbound)/steps;
     abscissa = infbound:stepsize:supbound;
     dens = ones(1, steps) / (supbound-infbound);
- case 6  % Inverse-gamma of type 2 prior
-    nu = p2(indx);
-    s  = p1(indx);
-    infbound = 1/(gaminv(1-10*truncprior, nu/2, 2/s));
-    supbound = 1/(gaminv(10*truncprior, nu/2, 2/s));
-    stepsize = (supbound-infbound)/steps;
+  case 6% Inverse-gamma of type 2 prior
+    infbound = 1/(gaminv(1-10*truncprior, p7(indx)/2, 2/p6(indx)))+p3(indx);
+    supbound = 1/(gaminv(10*truncprior, p7(indx)/2, 2/p6(indx)))+p3(indx);
+    stepsize = (supbound-infbound)/steps ;
     abscissa = infbound:stepsize:supbound;
-    dens = exp(lpdfig2(abscissa,s,nu));
- otherwise
-  error(sprintf('draw_prior_density: unknown distribution shape (index %d, type %d)', indx, pshape(indx)));
+    dens = exp(lpdfig2(abscissa-p3(indx),p6(indx),p7(indx)));
+  otherwise
+    error(sprintf('draw_prior_density: unknown distribution shape (index %d, type %d)', indx, pshape(indx)));
 end 
 
 k = [1:length(dens)];

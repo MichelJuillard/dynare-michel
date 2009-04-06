@@ -1,6 +1,4 @@
-function [m,s,p1,p2] = uniform_specification(m,s,p3,p4)
-
-% function [m,s,p1,p2] = uniform_specification(m,s,p3,p4)
+function [m,s,p6,p7] = uniform_specification(m,s,p3,p4)
 % Specification of the uniform density function parameters
 %
 % INPUTS
@@ -18,7 +16,7 @@ function [m,s,p1,p2] = uniform_specification(m,s,p3,p4)
 % SPECIAL REQUIREMENTS
 %    none
 
-% Copyright (C) 2004-2008 Dynare Team
+% Copyright (C) 2004-2009 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -36,11 +34,11 @@ function [m,s,p1,p2] = uniform_specification(m,s,p3,p4)
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
     if ~(isnan(p3) | isnan(p4))
-      p1 = p3;
-      p2 = p4;
-      m = (p3+p4)/2;
-      s = (p4-p3)/(sqrt(12));
+      p6 = p3;
+      p7 = p4;
+      m  = (p3+p4)/2;
+      s  = (p4-p3)/(sqrt(12));
     else
-      p1 = m-s*sqrt(3);
-      p2 = m+s*sqrt(3);
+      p6 = m-s*sqrt(3);
+      p7 = m+s*sqrt(3);
     end

@@ -54,8 +54,8 @@ function get_prior_info(info)
         for i=1:size(bayestopt_.name,1)
             [tmp,TexName] = get_the_name(i,1);
             PriorShape = PriorNames{ bayestopt_.pshape(i) };
-            PriorMean = bayestopt_.pmean(i);
-            PriorStandardDeviation = bayestopt_.pstdev(i);
+            PriorMean = bayestopt_.p1(i);
+            PriorStandardDeviation = bayestopt_.p2(i);
             switch bayestopt_.pshape(i)
               case { 1 , 5 }
                 LowerBound = bayestopt_.p3(i);
@@ -102,10 +102,9 @@ function get_prior_info(info)
     
     
     
-    
 function format_string = build_format_string(bayestopt,i)
     format_string = ['%s & %s & %6.4f &'];
-    if isinf(bayestopt.pstdev(i))
+    if isinf(bayestopt.p2(i))
         format_string = [ format_string , ' %s &'];
     else
         format_string = [ format_string , ' %6.4f &'];

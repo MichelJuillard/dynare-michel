@@ -1,29 +1,19 @@
-function lnprior = priordens(para, pshape, p1, p2, p3, p4)
-
-% function lnprior = priordens(para, pshape, p1, p2, p3, p4)
-% computes a prior density for the structural parameters of DSGE models
+function logged_prior_density = priordens(x, pshape, p6, p7, p3, p4)
+% Computes a prior density for the structural parameters of DSGE models
 %
-% INPUTS
-%    para:       parameter value
-%    pshape:     0 is point mass, both para and p2 are ignored
-%                1 is BETA
-%                2 is GAMMA
-%                3 is NORMAL
-%                4 is INVERTED GAMMA TYPE I
-%                5 is UNIFORM
-%                6 is INVERTED GAMMA TYPE II
-%    p1:         mean
-%    p2:         standard deviation
-%    p3:         lower bound
-%    p4:         upper bound
+% INPUTS 
+%    x         [double]      vector with n elements.
+%    pshape    [integer]     vector with n elements (bayestopt_.pshape).
+%    p6:       [double]      vector with n elements, first  parameter of the prior distribution (bayestopt_.p6).
+%    p7:       [double]      vector with n elements, second parameter of the prior distribution (bayestopt_.p7).
+%    p3:       [double]      vector with n elements, lower bounds.
+%    p4:       [double]      vector with n elements, upper bound.
 %    
-% OUTPUTS
-%    lnprior:    log of the prior density
+% OUTPUTS 
+%    logged_prior_density  [double]  scalar, log of the prior density evaluated at x.
 %
-% SPECIAL REQUIREMENTS
-%    none
 
-% Copyright (C) 2003-2008 Dynare Team
+% Copyright (C) 2003-2009 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -40,39 +30,89 @@ function lnprior = priordens(para, pshape, p1, p2, p3, p4)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-lnprior = 0;
-nprio 	= length(pshape);
+persistent pflag
+persistent id1 id2 id3 id4 id5 id6
+persistent tt1 tt2 tt3 tt4 tt5 tt6
 
-i = 1;
-while i <=  nprio;
-    a = 0;	
-    b = 0;
-    if pshape(i) == 1;     % (generalized) BETA Prior 
-        mu = (p1(i)-p3(i))/(p4(i)-p3(i));
-        stdd = p2(i)/(p4(i)-p3(i));
-        a = (1-mu)*mu^2/stdd^2 - mu;
-        b = a*(1/mu - 1);
-        lnprior = lnprior + lpdfgbeta(para(i),a,b,p3(i),p4(i))   ;
-    elseif pshape(i) == 2; % GAMMA PRIOR 
-     	b = p2(i)^2/(p1(i)-p3(i));
-        a = (p1(i)-p3(i))/b;
-        lnprior = lnprior + lpdfgam(para(i)-p3(i),a,b);
-    elseif pshape(i) == 3; % GAUSSIAN PRIOR 
-        lnprior = lnprior + lpdfnorm(para(i),p1(i),p2(i));
-    elseif pshape(i) == 4; % INVGAMMA1 PRIOR 
-     	lnprior = lnprior + lpdfig1(para(i),p1(i),p2(i));
-    elseif pshape(i) == 5; % UNIFORM PRIOR 
-     	lnprior = lnprior + log(1/(p2(i)-p1(i)));
-    elseif pshape(i) == 6; % INVGAMMA2 PRIOR 
-    	lnprior = lnprior + lpdfig2(para(i),p1(i),p2(i));
-    end;
-    i = i+1;
-end;
+if isempty(pflag)
+    Number0fParameters = length(pshape); 
+    % Beta indices.
+    tt1 = 1;
+    id1 = find(pshape==1);
+    if isempty(id1)
+        tt1 = 0;
+    end
+    % Gamma indices.
+    tt2 = 1;
+    id2 = find(pshape==2);
+    if isempty(id2)
+        tt2 = 0;
+    end
+    % Gaussian indices.
+    tt3 = 1;
+    id3 = find(pshape==3);
+    if isempty(id3)
+        tt3 = 0;
+    end
+    % Inverse-Gamma-1 indices.
+    tt4 = 1;
+    id4 = find(pshape==4);
+    if isempty(id4)
+        tt4 = 0;
+    end
+    % Uniform indices.
+    tt5 = 1;
+    id5 = find(pshape==5);
+    if isempty(id5)
+        tt5 = 0;
+    end
+    % Inverse-Gamma-2 indices.
+    tt6 = 1;
+    id6 = find(pshape==6);
+    if isempty(id6)
+        tt6 = 0;
+    end
+    pflag = 1;
+end
 
-% 10/11/03 MJ adapted from an earlier version in GAUSS by F. Schorfheide
-%             and translated to Matlab by R. Wouters
-% 11/18/03 MJ adopted M.Ratto's suggestion for inverse gamma
-%             changed order of input parameters
-% 01/16/04 MJ added invgamma2
-%             for invgamma p2 is now standard error
-% 16/02/04 SA changed beta prior call
+logged_prior_density = 0.0;
+
+if tt1
+    logged_prior_density = logged_prior_density + sum(lpdfgbeta(x(id1),p6(id1),p7(id1),p3(id1),p4(id1))) ;
+    if isinf(logged_prior_density)
+        return
+    end
+end
+
+if tt2
+    logged_prior_density = logged_prior_density + sum(lpdfgam(x(id2)-p3(id2),p6(id2),p7(id2))) ;
+    if isinf(logged_prior_density)
+        return
+    end
+end
+
+if tt3
+    logged_prior_density = logged_prior_density + sum(lpdfnorm(x(id3),p6(id3),p7(id3))) ;
+end
+
+if tt4
+    logged_prior_density = logged_prior_density + sum(lpdfig1(x(id4)-p3(id4),p6(id4),p7(id4))) ;
+    if isinf(logged_prior_density)
+        return
+    end
+end
+
+if tt5
+    if any(x(id5)-p3(id5)<0) || any(x(id5)-p4(id5)>0)
+        logged_prior_density = -Inf ;
+        return
+    end
+    logged_prior_density = logged_prior_density + sum(log(1./(p4(id5)-p3(id5)))) ;
+end
+
+if tt6
+    logged_prior_density = logged_prior_density + sum(lpdfig2(x(id6)-p3(id6),p6(id6),p7(id6))) ;
+    if isinf(logged_prior_density)
+        return
+    end
+end

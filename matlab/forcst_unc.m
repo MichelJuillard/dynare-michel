@@ -123,7 +123,7 @@ function forcst_unc(y0,var_list)
   end
 
   % compute shock uncertainty around forecast with mean prior
-  set_parameters(bayestopt_.pmean);
+  set_parameters(bayestopt_.p1);
   [dr,info] = resol(oo_.steady_state,0);
   [yf3,yf3_intv] = forcst(dr,y0,periods,var_list);
   yf3_1 = yf3'-[zeros(maximum_lag,n); yf3_intv];

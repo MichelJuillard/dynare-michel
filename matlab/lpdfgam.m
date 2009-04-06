@@ -1,20 +1,19 @@
 function  ldens = lpdfgam(x,a,b);
-
-% function ldens = lpdfgam(x,a,b)
-% log GAMMA PDF
+% Evaluates the logged GAMMA PDF at x.
 %
-% INPUTS
-%    x:      density evatuated at x
-%    a:      GAMMA distribution paramerer 
-%    b:      GAMMA distribution paramerer 
-%    
+% INPUTS     
+%    x     [double]  m*n matrix of locations,
+%    a     [double]  m*n matrix or scalar, First GAMMA distribution parameters, 
+%    b     [double]  m*n matrix or scalar, Second GAMMA distribution parameters, 
+%
 % OUTPUTS
-%    ldens:  the log GAMMA PDF
+%    ldens [double]  m*n matrix of logged GAMMA densities evaluated at x.
+%     
 %        
 % SPECIAL REQUIREMENTS
 %    none
 
-% Copyright (C) 2003-2008 Dynare Team
+% Copyright (C) 2003-2009 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -31,8 +30,11 @@ function  ldens = lpdfgam(x,a,b);
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-  ldens = -gammaln(a) -a*log(b)+ (a-1)*log(x) -x/b ;
-
-% 10/11/03  MJ adapted from an earlier GAUSS version by F. Schorfeide,
-%              translated to MATLAB by R. Wouters  
-%              use MATLAB gammaln rather than lngam
+    ldens = -Inf( size(x) ) ;
+    idx = find( x>0 );
+    
+    if length(a)==1
+        ldens(idx) = -gammaln(a) - a*log(b) + (a-1)*log(x(idx)) - x(idx)/b ;
+    else
+        ldens(idx) = -gammaln(a(idx)) - a(idx).*log(b(idx)) + (a(idx)-1).*log(x(idx)) - x(idx)./b(idx) ;
+    end

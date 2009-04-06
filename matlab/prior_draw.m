@@ -32,63 +32,73 @@ function pdraw = prior_draw(init,  prior_structure)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-persistent prior_mean prior_standard_deviation a b p1 p2 p3 p4
+persistent p6 p7 p3 p4
 persistent uniform_index gaussian_index gamma_index beta_index inverse_gamma_1_index inverse_gamma_2_index
+persistent uniform_draws gaussian_draws gamma_draws beta_draws inverse_gamma_1_draws inverse_gamma_2_draws
+
 
 if nargin>0 && init
-    prior_shape = prior_structure.pshape;
-    prior_mean = prior_structure.pmean;
-    prior_standard_deviation  = prior_structure.pstdev;
-    p1 = prior_structure.p1;
-    p2 = prior_structure.p2;
+    p6 = prior_structure.p6;
+    p7 = prior_structure.p7;
     p3 = prior_structure.p3;
     p4 = prior_structure.p4;
-    number_of_estimated_parameters = length(p1);
-    a = NaN(number_of_estimated_parameters,1);
-    b = NaN(number_of_estimated_parameters,1);
+    number_of_estimated_parameters = length(p6);
     beta_index = find(prior_shape==1);
+    beta_draws = 1;
+    if isempty(beta_index)
+        beta_draws = 0;
+    end
     gamma_index = find(prior_shape==2);
+    gamma_draws = 1;
+    if isempty(gamma_index)
+        gamma_draws = 0;
+    end
     gaussian_index = find(prior_shape==3);
+    gaussian_draws = 1;
+    if isempty(gaussian_index)
+        gaussian_draws = 0;
+    end
     inverse_gamma_1_index = find(prior_shape==4);
+    inverse_gamma_1_draws = 1;
+    if isempty(inverse_gamma_1_index)
+        inverse_gamma_1_draws = 0;
+    end
     uniform_index = find(prior_shape==5);
+    uniform_draws = 1;
+    if isempty(uniform_index)
+        uniform_draws = 0;
+    end
     inverse_gamma_2_index = find(prior_shape==6);
-    % Set parameters for the beta prior
-    mu = (p1(beta_index)-p3(beta_index))./(p4(beta_index)-p3(beta_index));
-    stdd = p2(beta_index)./(p4(beta_index)-p3(beta_index));
-    a(beta_index) = (1-mu).*mu.^2./stdd.^2 - mu;
-    b(beta_index) = a(beta_index).*(1./mu - 1);
-    % Set parameters for the gamma prior
-    mu = p1(gamma_index)-p3(gamma_index);
-    b(gamma_index) = p2(gamma_index).^2./mu;
-    a(gamma_index) = mu./b(gamma_index);
-    % Initialization of the vector of prior draws.
+    inverse_gamma_2_draws = 1;
+    if isempty(inverse_gamma_2_index)
+        inverse_gamma_2_draws = 0;
+    end
     pdraw = zeros(number_of_estimated_parameters,1);
     return
 end
 
-% Uniform draws.
-if ~isempty(uniform_index)
+if uniform_draws
     pdraw(uniform_index) = rand(length(uniform_index),1).*(p4(uniform_index)-p3(uniform_index)) + p3(uniform_index);  
 end
-% Gaussian draws.
-if ~isempty(gaussian_index)
-    pdraw(gaussian_index) = randn(length(gaussian_index),1).*prior_standard_deviation(gaussian_index) + prior_mean(gaussian_index);
+
+if gaussian_draws
+    pdraw(gaussian_index) = randn(length(gaussian_index),1).*p7(gaussian_index) + p6(gaussian_index);
 end
-% Gamma draws.
-if ~isempty(gamma_index)
-    pdraw(gamma_index) = gamrnd(a(gamma_index),b(gamma_index))+p3(gamma_index);
+
+if gamma_draws
+    pdraw(gamma_index) = gamrnd(p6(gamma_index),p7(gamma_index))+p3(gamma_index);
 end
-% Beta draws.
-if ~isempty(beta_index)
-    pdraw(beta_index) = (p4(beta_index)-p3(beta_index)).*betarnd(a(beta_index),b(beta_index))+p3(beta_index);
+
+if beta_draws
+    pdraw(beta_index) = (p4(beta_index)-p3(beta_index)).*betarnd(p6(beta_index),p7(beta_index))+p3(beta_index);
 end
-% Inverted gamma (type 1) draws.
-if ~isempty(inverse_gamma_1_index)
+
+if inverse_gamma_1_draws
     pdraw(inverse_gamma_1_index) = ...
-        sqrt(1./gamrnd(p2(inverse_gamma_1_index)/2,2./p1(inverse_gamma_1_index)));
+        sqrt(1./gamrnd(p7(inverse_gamma_1_index)/2,2./p6(inverse_gamma_1_index)))+p3(inverse_gamma_1_index);
 end
-% Inverted gamma (type 2) draws.
-if ~isempty(inverse_gamma_2_index)
+
+if inverse_gamma_2_draws
     pdraw(inverse_gamma_2_index) = ...
-        1./gamrnd(p2(inverse_gamma_2_index)/2,2./p1(inverse_gamma_2_index));
+        1./gamrnd(p7(inverse_gamma_2_index)/2,2./p6(inverse_gamma_2_index))+p3(inverse_gamma_2_index);
 end

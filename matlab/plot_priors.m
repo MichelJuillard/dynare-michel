@@ -13,7 +13,7 @@ function plot_priors(bayestopt_,M_,options_)
 % SPECIAL REQUIREMENTS
 %    None
 
-% Copyright (C) 2004-2008 Dynare Team
+% Copyright (C) 2004-2009 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -33,7 +33,7 @@ function plot_priors(bayestopt_,M_,options_)
 TeX = options_.TeX;
 
 figurename = 'Priors';
-npar = length(bayestopt_.pmean);
+npar = length(bayestopt_.p1);
 [nbplt,nr,nc,lr,lc,nstar] = pltorg(npar);
 
 if TeX

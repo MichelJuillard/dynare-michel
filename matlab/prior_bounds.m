@@ -11,7 +11,7 @@ function bounds = prior_bounds(bayestopt)
 % SPECIAL REQUIREMENTS
 %    none
 
-% Copyright (C) 2003-2008 Dynare Team
+% Copyright (C) 2003-2009 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -31,41 +31,33 @@ function bounds = prior_bounds(bayestopt)
 global options_
 
 pshape = bayestopt.pshape;
-pmean = bayestopt.pmean;
-p1 = bayestopt.p1;
-p2 = bayestopt.p2;
 p3 = bayestopt.p3;
 p4 = bayestopt.p4;
+p6 = bayestopt.p6;
+p7 = bayestopt.p7;
 
-n = length(pmean);
-bounds = zeros(n,2);
+bounds = zeros(length(p6),2);
 
-for i=1:n
+for i=1:length(p6)
   switch pshape(i)
     case 1
-      mu = (pmean(i)-p3(i))/(p4(i)-p3(i));
-      stdd = p2(i)/(p4(i)-p3(i));
-      A = (1-mu)*mu^2/stdd^2 - mu;
-      B = A*(1/mu - 1);
-      bounds(i,1) = betainv(options_.prior_trunc,A,B)*(p4(i)-p3(i))+p3(i);
-      bounds(i,2) = betainv(1-options_.prior_trunc,A,B)*(p4(i)-p3(i))+p3(i);
+      bounds(i,1) = betainv(options_.prior_trunc,p6(i),p7(i))*(p4(i)-p3(i))+p3(i);
+      bounds(i,2) = betainv(1-options_.prior_trunc,p6(i),p7(i))*(p4(i)-p3(i))+p3(i);
     case 2
-      b = p2(i)^2/(pmean(i)-p3(i));
-      a = (pmean(i)-p3(i))/b;
-      bounds(i,1) = gaminv(options_.prior_trunc,a,b)+p3(i);
-      bounds(i,2) = gaminv(1-options_.prior_trunc,a,b)+p3(i);
+      bounds(i,1) = gaminv(options_.prior_trunc,p6(i),p7(i))+p3(i);
+      bounds(i,2) = gaminv(1-options_.prior_trunc,p6(i),p7(i))+p3(i);
     case 3
-      bounds(i,1) = norminv(options_.prior_trunc,pmean(i),p2(i));
-      bounds(i,2) = norminv(1-options_.prior_trunc,pmean(i),p2(i));
+      bounds(i,1) = norminv(options_.prior_trunc,p6(i),p7(i));
+      bounds(i,2) = norminv(1-options_.prior_trunc,p6(i),p7(i));
     case 4
-      bounds(i,1) = 1/sqrt(gaminv(1-options_.prior_trunc, p2(i)/2, 2/p1(i)));
-      bounds(i,2) = 1/sqrt(gaminv(options_.prior_trunc, p2(i)/2, 2/p1(i)));
+      bounds(i,1) = 1/sqrt(gaminv(1-options_.prior_trunc, p7(i)/2, 2/p6(i)))+p3(i);
+      bounds(i,2) = 1/sqrt(gaminv(options_.prior_trunc, p7(i)/2, 2/p6(i)))+p3(i);
     case 5
-      bounds(i,1) = p1(i)+(p2(i)-p1(i))*options_.prior_trunc;
-      bounds(i,2) = p2(i)-(p2(i)-p1(i))*options_.prior_trunc;
+      bounds(i,1) = p6(i)+(p7(i)-p6(i))*options_.prior_trunc;
+      bounds(i,2) = p7(i)-(p7(i)-p6(i))*options_.prior_trunc;
     case 6
-      bounds(i,1) = 1/gaminv(1-options_.prior_trunc, p2(i)/2, 2/p1(i));
-      bounds(i,2) = 1/gaminv(options_.prior_trunc, p2(i)/2, 2/p1(i));
+      bounds(i,1) = 1/gaminv(1-options_.prior_trunc, p7(i)/2, 2/p6(i))+p3(i);
+      bounds(i,2) = 1/gaminv(options_.prior_trunc, p7(i)/2, 2/p6(i))+p3(i);
     otherwise
       error(sprintf('prior_bounds: unknown distribution shape (index %d, type %d)', i, pshape(i)));
   end

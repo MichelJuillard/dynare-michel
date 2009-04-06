@@ -217,7 +217,7 @@ else
   lik = .5*lik;% Minus likelihood
 end      
 
-lnprior = priordens(xparam1,bayestopt_.pshape,bayestopt_.p1,bayestopt_.p2,bayestopt_.p3,bayestopt_.p4);
+lnprior = priordens(xparam1,bayestopt_.pshape,bayestopt_.p6,bayestopt_.p7,bayestopt_.p3,bayestopt_.p4);
 fval = (lik-lnprior);
 
 if (nargout == 6)

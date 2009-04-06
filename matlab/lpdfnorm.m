@@ -1,19 +1,19 @@
-function  f = lpdfnorm(x,m,s)
-% function f = lpdfnorm(x,m,s)
-% The log of the normal density function 
+function  ldens = lpdfnorm(x,a,b)
+% Evaluates the logged UNIVARIATE GAUSSIAN PDF at x.
 %
-% INPUTS
-%    x:      density evatuated at x
-%    m:      mean 
-%    s:      standard deviation 
+% INPUTS 
+%    x     [double]  m*n matrix of locations,
+%    a     [double]  m*n matrix or scalar, First GAUSSIAN distribution parameters (expectation) 
+%    b     [double]  m*n matrix or scalar, Second GAUSSIAN distribution parameters (standard deviation). 
 %
-% OUTPUTS
-%    f:      the log of the normal density function
+% OUTPUTS 
+%    ldens [double]  m*n matrix of logged GAUSSIAN densities evaluated at x.
+%     
 %        
 % SPECIAL REQUIREMENTS
 %    none
 
-% Copyright (C) 2003-2008 Dynare Team
+% Copyright (C) 2003-2009 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -30,7 +30,6 @@ function  f = lpdfnorm(x,m,s)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-if nargin<3, s=1; end
-if nargin<2, m=0; end
-f = -log(s)-log(2*pi)/2-((x-m)./s).^2/2;
-
+if nargin<3, b=1; end
+if nargin<2, a=0; end
+ldens = -log(b) -.5*log(2*pi) - .5*((x-a)./b).*((x-a)./b) ;
