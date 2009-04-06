@@ -41,7 +41,7 @@ function [dr,info]=resol(ys,check_flag)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-global M_ options_ oo_ bayestopt_
+global M_ options_ oo_
 global it_
 
 jacobian_flag = 0; 
