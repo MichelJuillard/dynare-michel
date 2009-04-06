@@ -7,7 +7,7 @@
     <author>
       <firstname>Stéphane</firstname><surname>Adjemian</surname>
       <affiliation><orgname>Université du Mans et CEPREMAP</orgname></affiliation>
-      <email>stephane.adjemian@gmail.com</email>
+      <email>stephane.adjemian@ens.fr</email>
       <address><street>142 rue du Chevaleret</street><postcode>75013</postcode><city>Paris</city><country>France</country></address>
     </author>
     <author>
@@ -2184,9 +2184,12 @@ Each line corresponds to an estimated parameter and follows this syntax:
 <itemizedlist spacing='compact'>
   <listitem><para>0: the mode isn't computed. mode_file must be specified</para></listitem>
   <listitem><para>1: uses <trademark class="registered">Matlab</trademark> <command>fmincon</command>.</para></listitem>
-  <listitem><para>2: uses Lester Ingber's Adaptive Simulated Annealing.</para></listitem>
+  <listitem><para>2: [not available anymore] uses Lester Ingber's Adaptive Simulated Annealing.</para></listitem>
   <listitem><para>3: uses <trademark class="registered">Matlab</trademark> <command>fminunc</command>.</para></listitem>
-  <listitem><para>4 (default): uses Chris Sim's <command>csminwel</command>.</para></listitem>
+  <listitem><para>4: (default): uses Chris Sim's <command>csminwel</command>.</para></listitem>
+  <listitem><para>5: uses a routine by Marco Ratto.</para></listitem> 
+  <listitem><para>6: uses a simulated annealing - like algorithm.</para></listitem>
+  <listitem><para>7: uses <trademark class="registered">Matlab</trademark> <command>fminsearch</command> (a simplex based routine).</para></listitem>
 </itemizedlist></para></listitem>
 <listitem><para><command>mode_check</command>: when <command>mode_check</command> is set, Dynare plots the posterior density for values around the computed mode for each estimated parameter in turn. This is helpful to diagnose problems with the optimizer.</para></listitem>
 <listitem><para><command>prior_trunc</command>=<replaceable>DOUBLE</replaceable>: probability of extreme values of the prior density that is ignored when computing bounds for the parameters (default=1e-32).</para></listitem>
