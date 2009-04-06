@@ -1,7 +1,7 @@
 function [d1,d2] = get_date_of_a_file(filename)
 %function [d1,d2] = get_date_of_a_file(filename)
 
-% Copyright (C) 2008 Dynare Team
+% Copyright (C) 2008-2009 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -19,6 +19,9 @@ function [d1,d2] = get_date_of_a_file(filename)
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
     info = dir(filename);
+    if isempty(info)
+        error(['get_date_of_a_file:: I''m not able to find ' filename '!'])
+    end
     d1 = info.datenum;
     if nargout>1
         d2 = info.date;
