@@ -18,7 +18,7 @@ function mode_check(x,fval,hessian,gend,data,lb,ub,data_index,number_of_observat
 % SPECIAL REQUIREMENTS
 %    none
 
-% Copyright (C) 2003-2008 Dynare Team
+% Copyright (C) 2003-2009 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -38,13 +38,16 @@ function mode_check(x,fval,hessian,gend,data,lb,ub,data_index,number_of_observat
 global bayestopt_ M_ options_
 
 TeX = options_.TeX;
-[s_min,k] = min(diag(hessian))
+[ s_min, k ] = min(diag(hessian)) ;
   
-disp('\nMODE CHECK\n')
-disp(sprintf('Fval obtained by fmincon: %f', fval))
-disp(bayestopt_.name)
-cname = bayestopt_.name{k};
-disp(sprintf('Most negative variance %f for parameter %d (%s = %f)',s_min,k,cname,x(k)))
+disp(' ')
+disp('MODE CHECK')
+disp(' ')
+disp(sprintf('Fval obtained by the minimization routine: %f', fval))
+disp(' ')
+if s_min<eps
+    disp(sprintf('Most negative variance %f for parameter %d (%s = %f)', s_min, k , bayestopt_.name{k}, x(k)))
+end
 
 [nbplt,nr,nc,lr,lc,nstar] = pltorg(length(x));
 
