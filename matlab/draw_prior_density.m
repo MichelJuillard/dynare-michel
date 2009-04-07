@@ -40,8 +40,6 @@ p7      = bayestopt_.p7;
 truncprior = 1e-3;
 steps = 200;
 
-indx
-
 switch pshape(indx)
   case 1% Beta prior
     density = @(x,a,b,aa,bb) betapdf((x-aa)/(bb-aa), a, b)/(bb-aa);
