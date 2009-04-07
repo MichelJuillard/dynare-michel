@@ -54,6 +54,11 @@ if matlab_ver_less_than('7.3')
     COMPILE_OPTIONS = [ COMPILE_OPTIONS ' -DMWTYPES_NOT_DEFINED' ];
 end
 
+% Matlab Lapack expects mwSignedIndex arguments only starting with Matlab 7.8
+if ~matlab_ver_less_than('7.8')
+    COMPILE_OPTIONS = [ COMPILE_OPTIONS ' -DLAPACK_USE_MWSIGNEDINDEX' ];
+end
+
 % Large array dims for 64 bits platforms appeared in Matlab 7.3
 if (strcmpi('GLNXA64', computer) || strcmpi('PCWIN64', computer)) ...
       && ~matlab_ver_less_than('7.3')
