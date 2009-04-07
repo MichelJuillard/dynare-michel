@@ -42,6 +42,7 @@ if nargin>0 && init
     p7 = prior_structure.p7;
     p3 = prior_structure.p3;
     p4 = prior_structure.p4;
+    prior_shape = prior_structure.pshape ;
     number_of_estimated_parameters = length(p6);
     beta_index = find(prior_shape==1);
     beta_draws = 1;
