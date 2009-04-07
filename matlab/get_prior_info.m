@@ -94,8 +94,16 @@ function get_prior_info(info)
     M_.dname = M_.fname;
     
     if info% Prior simulations.
-       results = prior_sampler(1,M_,bayestopt_,options_,oo_);
-       results.prior.mass
+       results = prior_sampler(0,M_,bayestopt_,options_,oo_);
+       disp(['Prior mass = ' num2str(results.prior.mass)])
+       disp(['BK indeterminacy share                = ' num2str(results.bk.indeterminacy_share)])
+       disp(['BK unstability share                  = ' num2str(results.bk.unstability_share)])
+       disp(['BK singularity share                  = ' num2str(results.bk.singularity_share)])
+       disp(['Complex jacobian share                = ' num2str(results.jacobian.problem_share)])
+       disp(['mjdgges crash share                   = ' num2str(results.dll.problem_share)])
+       disp(['Steady state problem share            = ' num2str(results.ss.problem_share)])
+       disp(['Complex steady state  share           = ' num2str(results.ss.complex_share)])
+       disp(['Analytical steady state problem share = ' num2str(results.ass.problem_share)])
     end
     
     

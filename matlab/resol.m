@@ -15,6 +15,7 @@ function [dr,info]=resol(ys,check_flag)
 %    info=4:         Blanchard Kahn conditions are not satisfied:'...' indeterminacy
 %    info=5:         Blanchard Kahn conditions are not satisfied:'...' indeterminacy due to rank failure
 %    info=6:         The jacobian evaluated at the steady state is complex.
+%    info=19:        The steadystate file did not compute the steady state (inconsistent deep parameters).
 %    info=20:        can't find steady state info(2) contains sum of sqare residuals
 %    info=21:        steady state is complex 
 %                               info(2) contains sum of sqare of
@@ -92,14 +93,15 @@ else
 end
 % testing for problem
 if check1
-  info(1)= 20;
-  if options_.steadystate_flag
-      resid = check1 ;
-  else
-      resid = feval(fh,ys,oo_.exo_steady_state, M_.params);
-  end   
-  info(2) = resid'*resid ; % penalty...
-  return
+    if options_.steadystate_flag
+        info(1)= 19;
+        resid = check1 ;
+    else
+        info(1)= 20;
+        resid = feval(fh,ys,oo_.exo_steady_state, M_.params);
+    end
+    info(2) = resid'*resid ;
+    return
 end
 
 if ~isreal(dr.ys)

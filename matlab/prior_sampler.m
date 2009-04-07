@@ -42,17 +42,21 @@ function results = prior_sampler(drsave,M_,bayestopt_,options_,oo_)
     count_bk_singularity = 0;
     count_static_var_def = 0;
     count_no_steadystate = 0;
+    count_steadystate_file_exit = 0;
     count_dll_problem = 0;
+    count_complex_jacobian = 0;
+    count_complex_steadystate = 0;
     count_unknown_problem = 0;
     NumberOfSimulations = options_.prior_mc;
     NumberOfParameters = length(bayestopt_.p1);
     NumberOfEndogenousVariables = size(M_.endo_names,1);
     NumberOfElementsPerFile = ceil(options_.MaxNumberOfBytes/NumberOfParameters/NumberOfEndogenousVariables/8) ;
+    
     if NumberOfSimulations <= NumberOfElementsPerFile
         TableOfInformations = [ 1 ,  NumberOfSimulations , 1] ;
     else
         NumberOfFiles = fix(NumberOfSimulations/NumberOfElementsPerFile) ;
-        NumberOfElementsInTheLastFile = NumberOfSimulations - NumberOfElementsPerFile*NumberOfFiles ;
+        NumberOfElementsInTheLastFile = NumberOfSimulations - NumberOfElementsPerFile*(NumberOfFiles-1) ;
         if ~isint(NumberOfSimulations/NumberOfElementsPerFile)
             NumberOfFiles = NumberOfFiles + 1 ;
         end
@@ -63,10 +67,10 @@ function results = prior_sampler(drsave,M_,bayestopt_,options_,oo_)
         TableOfInformations(1,3) = 1;
         TableOfInformations(2:end,3) = cumsum(TableOfInformations(2:end,2))+1;
     end
+    
     pdraws = cell(TableOfInformations(1,2),drsave+1) ;
     sampled_prior_expectation = zeros(NumberOfParameters,1);
     sampled_prior_covariance  = zeros(NumberOfParameters,NumberOfParameters);
-    
     
     % Simulations.
     while iteration <= NumberOfSimulations
@@ -100,10 +104,14 @@ function results = prior_sampler(drsave,M_,bayestopt_,options_,oo_)
             count_bk_singularity = count_bk_singularity + 1 ;
           case 20
             count_no_steadystate = count_no_steadystate + 1 ;
+          case 19
+            count_steadystate_file_exit = count_steadystate_file_exit + 1 ;
+          case 6
+            count_complex_jacobian = count_complex_jacobian + 1 ;
+          case 21
+            count_complex_steadystate = count_complex_steadystate + 1 ;
           otherwise
-            % To be checked...
             count_unknown_problem = count_unknown_problem + 1 ;
-            continue
         end
     end
     
@@ -116,16 +124,21 @@ function results = prior_sampler(drsave,M_,bayestopt_,options_,oo_)
     results.bk.singularity_share = count_bk_singularity/loop_indx;
     results.dll.problem_share = count_dll_problem/loop_indx;
     results.ss.problem_share = count_no_steadystate/loop_indx;
-    results.garbage_share = results.bk.indeterminacy_share + ...
+    results.ss.complex_share = count_complex_steadystate/loop_indx;
+    results.ass.problem_share = count_steadystate_file_exit/loop_indx;
+    results.jacobian.problem_share = count_complex_jacobian/loop_indx;
+    results.garbage_share = ...
+        results.bk.indeterminacy_share + ...
         results.bk.unstability_share + ...
         results.bk.singularity_share + ...
         results.dll.problem_share + ...
         results.ss.problem_share + ...
-        (count_unknown_problem/loop_indx) ;
+        results.ass.problem_share + ...
+        results.jacobian.problem_share + ...
+        count_unknown_problem/loop_indx ;
     results.prior.mean = sampled_prior_expectation;
     results.prior.variance = sampled_prior_covariance;
     results.prior.mass = 1-results.garbage_share;
-    
     
     
 function [mu,sigma] = recursive_prior_moments(m0,s0,newobs,iter)
