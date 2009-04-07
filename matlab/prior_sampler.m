@@ -47,7 +47,7 @@ function results = prior_sampler(drsave,M_,bayestopt_,options_,oo_)
     NumberOfSimulations = options_.prior_mc;
     NumberOfParameters = length(bayestopt_.p1);
     NumberOfEndogenousVariables = size(M_.endo_names,1);
-    NumberOfElementsPerFile = ceil(options_.MaxNumberOfBytes/NumberOfParameters/NumberOfEndogenousVariables/8)
+    NumberOfElementsPerFile = ceil(options_.MaxNumberOfBytes/NumberOfParameters/NumberOfEndogenousVariables/8) ;
     if NumberOfSimulations <= NumberOfElementsPerFile
         TableOfInformations = [ 1 ,  NumberOfSimulations , 1] ;
     else
