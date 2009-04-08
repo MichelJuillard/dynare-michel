@@ -59,7 +59,7 @@ clear record;
 
 pnames=['     ';'beta ';'gamm ';'norm ';'invg ';'unif ';'invg2'];
 tit2 = sprintf('%10s %7s %10s %14s %4s %6s\n',' ','prior mean','post. mean','conf. interval','prior','pstdev');
-pformat = '%12s %7.3f %8.4f %7.4f %7.4f %4s %6.4f';
+pformat = '%-*s %7.3f %8.4f %7.4f %7.4f %4s %6.4f';
 
 disp(' ');disp(' ');disp('ESTIMATION RESULTS');disp(' ');
 try
@@ -68,6 +68,7 @@ catch
     [marginal,oo_] = marginal_density(M_, options_, estim_params_, oo_)
     disp(sprintf('Log data density is %f.',oo_.MarginalDensity.ModifiedHarmonicMean))
 end
+header_width = row_header_width(M_,estim_params,bayestopt_);
 if np
     type = 'parameters';
     if TeX
@@ -97,6 +98,7 @@ if np
             end
         end
         disp(sprintf(pformat,name,bayestopt_.p1(ip),...
+                     header_width, ...
                      post_mean, ...
                      hpd_interval, ...
                      pnames(bayestopt_.pshape(ip)+1,:), ...
@@ -144,7 +146,7 @@ if nvx
                 M_.Sigma_e(k,k) = post_mean*post_mean;
             end
         end
-        disp(sprintf(pformat,name,bayestopt_.p1(ip),post_mean,hpd_interval,...
+        disp(sprintf(pformat,header_width,name,bayestopt_.p1(ip),post_mean,hpd_interval,...
                      pnames(bayestopt_.pshape(ip)+1,:),bayestopt_.p2(ip)));
         if TeX
             TeXCore(fid,name,deblank(pnames(bayestopt_.pshape(ip)+1,:)),bayestopt_.p1(ip),...
@@ -184,7 +186,7 @@ if nvn
                 oo_ = Filloo(oo_,name,type,post_mean,hpd_interval,post_median,post_var,post_deciles,density);
             end
         end
-        disp(sprintf(pformat,name,bayestopt_.p1(ip),post_mean,hpd_interval, ...
+        disp(sprintf(pformat,header_width,name,bayestopt_.p1(ip),post_mean,hpd_interval, ...
                      pnames(bayestopt_.pshape(ip)+1,:),bayestopt_.p2(ip)));
         if TeX
             TeXCore(fid,name,deblank(pnames(bayestopt_.pshape(ip)+1,:)),bayestopt_.p1(ip),...
@@ -237,7 +239,7 @@ if ncx
                 M_.Sigma_e(k2,k1) = M_.Sigma_e(k1,k2);
             end
         end
-        disp(sprintf(pformat, name,bayestopt_.p1(ip),post_mean,hpd_interval, ...
+        disp(sprintf(pformat, header_width,name,bayestopt_.p1(ip),post_mean,hpd_interval, ...
                      pnames(bayestopt_.pshape(ip)+1,:),bayestopt_.p2(ip)));
         if TeX
             TeXCore(fid,name,deblank(pnames(bayestopt_.pshape(ip)+1,:)),bayestopt_.p1(ip),...
@@ -288,7 +290,7 @@ if ncn
                              post_median,post_var,post_deciles,density);
             end
         end
-        disp(sprintf(pformat, name,bayestopt_.p1(ip),post_mean,hpd_interval, ...
+        disp(sprintf(pformat, header_width,name,bayestopt_.p1(ip),post_mean,hpd_interval, ...
                      pnames(bayestopt_.pshape(ip)+1,:),bayestopt_.p2(ip)));
         if TeX
             TeXCore(fid,name,deblank(pnames(bayestopt_.pshape(ip)+1,:)),bayestopt_.p1(ip),...

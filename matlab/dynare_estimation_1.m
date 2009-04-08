@@ -624,7 +624,10 @@ if any(bayestopt_.pshape > 0) & options_.posterior_mode_estimation
   for i = 1:nx
     tstath(i) = abs(xparam1(i))/stdh(i);
   end
-  tit1 = sprintf('%10s %7s %8s %7s %6s %4s %6s\n',' ','prior mean', ...
+  
+  header_width = row_header_width(M_,estim_params_,bayestopt_);
+  
+  tit1 = sprintf('%-*s %7s %8s %7s %6s %4s %6s\n',header_width-2,' ','prior mean', ...
 		 'mode','s.d.','t-stat','prior','pstdev');
   if np
     ip = nvx+nvn+ncx+ncn+1;
@@ -632,8 +635,8 @@ if any(bayestopt_.pshape > 0) & options_.posterior_mode_estimation
     disp(tit1)
     for i=1:np
       name = bayestopt_.name{ip};
-      disp(sprintf('%12s %7.3f %8.4f %7.4f %7.4f %4s %6.4f', ...
-		   name, ...
+      disp(sprintf('%-*s %7.3f %8.4f %7.4f %7.4f %4s %6.4f', ...
+		   header_width,name, ...
 		   bayestopt_.p1(ip),xparam1(ip),stdh(ip),tstath(ip), ...
 		   pnames(bayestopt_.pshape(ip)+1,:), ...
 		   bayestopt_.p2(ip)));
@@ -649,8 +652,8 @@ if any(bayestopt_.pshape > 0) & options_.posterior_mode_estimation
     for i=1:nvx
       k = estim_params_.var_exo(i,1);
       name = deblank(M_.exo_names(k,:));
-      disp(sprintf('%12s %7.3f %8.4f %7.4f %7.4f %4s %6.4f', ...
-		   name,bayestopt_.p1(ip),xparam1(ip), ...
+      disp(sprintf('%-*s %7.3f %8.4f %7.4f %7.4f %4s %6.4f', ...
+		   header_width,name,bayestopt_.p1(ip),xparam1(ip), ...
 		   stdh(ip),tstath(ip),pnames(bayestopt_.pshape(ip)+1,:), ...
 		   bayestopt_.p2(ip))); 
       M_.Sigma_e(k,k) = xparam1(ip)*xparam1(ip);
@@ -665,8 +668,8 @@ if any(bayestopt_.pshape > 0) & options_.posterior_mode_estimation
     ip = nvx+1;
     for i=1:nvn
       name = deblank(options_.varobs(estim_params_.var_endo(i,1),:));
-      disp(sprintf('%12s %7.3f %8.4f %7.4f %7.4f %4s %6.4f', ...
-		   name,bayestopt_.p1(ip), ...
+      disp(sprintf('%-*s %7.3f %8.4f %7.4f %7.4f %4s %6.4f', ...
+		   header_width,name,bayestopt_.p1(ip), ...
 		   xparam1(ip),stdh(ip),tstath(ip), ...
 		   pnames(bayestopt_.pshape(ip)+1,:), ...
 		   bayestopt_.p2(ip)));
@@ -684,8 +687,8 @@ if any(bayestopt_.pshape > 0) & options_.posterior_mode_estimation
       k2 = estim_params_.corrx(i,2);
       name = [deblank(M_.exo_names(k1,:)) ',' deblank(M_.exo_names(k2,:))];
       NAME = [deblank(M_.exo_names(k1,:)) '_' deblank(M_.exo_names(k2,:))];
-      disp(sprintf('%12s %7.3f %8.4f %7.4f %7.4f %4s %6.4f', name, ...
-		   bayestopt_.p1(ip),xparam1(ip),stdh(ip),tstath(ip),  ...
+      disp(sprintf('%-*s %7.3f %8.4f %7.4f %7.4f %4s %6.4f', name, ...
+		   header_width,bayestopt_.p1(ip),xparam1(ip),stdh(ip),tstath(ip),  ...
 		   pnames(bayestopt_.pshape(ip)+1,:), bayestopt_.p2(ip)));
       M_.Sigma_e(k1,k2) = xparam1(ip)*sqrt(M_.Sigma_e(k1,k1)*M_.Sigma_e(k2,k2));
       M_.Sigma_e(k2,k1) = M_.Sigma_e(k1,k2);
@@ -703,8 +706,8 @@ if any(bayestopt_.pshape > 0) & options_.posterior_mode_estimation
       k2 = estim_params_.corrn(i,2);
       name = [deblank(M_.endo_names(k1,:)) ',' deblank(M_.endo_names(k2,:))];
       NAME = [deblank(M_.endo_names(k1,:)) '_' deblank(M_.endo_names(k2,:))];
-      disp(sprintf('%12s %7.3f %8.4f %7.4f %7.4f %4s %6.4f', name, ...
-		   bayestopt_.p1(ip),xparam1(ip),stdh(ip),tstath(ip), ...
+      disp(sprintf('%-*s %7.3f %8.4f %7.4f %7.4f %4s %6.4f', name, ...
+		   header_width,bayestopt_.p1(ip),xparam1(ip),stdh(ip),tstath(ip), ...
 		   pnames(bayestopt_.pshape(ip)+1,:), bayestopt_.p2(ip)));
       eval(['oo_.posterior_mode.measurement_errors_corr.' NAME ' = xparam1(ip);']);
       eval(['oo_.posterior_std.measurement_errors_corr.' NAME ' = stdh(ip);']); 
@@ -733,15 +736,16 @@ elseif ~any(bayestopt_.pshape > 0) & options_.posterior_mode_estimation
   for i = 1:nx
     tstath(i) = abs(xparam1(i))/stdh(i);
   end
-  tit1 = sprintf('%10s %10s %7s %6s\n',' ','Estimate','s.d.','t-stat');
+  header_width = row_header_width(M_,estim_params_,bayestopt_);
+  tit1 = sprintf('%-*s %10s %7s %6s\n',header_width-2,' ','Estimate','s.d.','t-stat');
   if np
     ip = nvx+nvn+ncx+ncn+1;
     disp('parameters')
     disp(tit1)
     for i=1:np
       name = bayestopt_.name{ip};
-      disp(sprintf('%12s %8.4f %7.4f %7.4f', ...
-		   name,xparam1(ip),stdh(ip),tstath(ip)));
+      disp(sprintf('%-*s %8.4f %7.4f %7.4f', ...
+		   header_width,name,xparam1(ip),stdh(ip),tstath(ip)));
       eval(['oo_.mle_mode.parameters.' name ' = xparam1(ip);']);
       eval(['oo_.mle_std.parameters.' name ' = stdh(ip);']); 
       ip = ip+1;
@@ -754,7 +758,7 @@ elseif ~any(bayestopt_.pshape > 0) & options_.posterior_mode_estimation
     for i=1:nvx
       k = estim_params_.var_exo(i,1);
       name = deblank(M_.exo_names(k,:));
-      disp(sprintf('%12s %8.4f %7.4f %7.4f',name,xparam1(ip),stdh(ip),tstath(ip)));
+      disp(sprintf('%-*s %8.4f %7.4f %7.4f',header_width,name,xparam1(ip),stdh(ip),tstath(ip)));
       M_.Sigma_e(k,k) = xparam1(ip)*xparam1(ip);
       eval(['oo_.mle_mode.shocks_std.' name ' = xparam1(ip);']);
       eval(['oo_.mle_std.shocks_std.' name ' = stdh(ip);']); 
@@ -767,7 +771,7 @@ elseif ~any(bayestopt_.pshape > 0) & options_.posterior_mode_estimation
     ip = nvx+1;
     for i=1:nvn
       name = deblank(options_.varobs(estim_params_.var_endo(i,1),:));
-      disp(sprintf('%12s %8.4f %7.4f %7.4f',name,xparam1(ip),stdh(ip),tstath(ip)))
+      disp(sprintf('%-*s %8.4f %7.4f %7.4f',header_width,name,xparam1(ip),stdh(ip),tstath(ip)))
       eval(['oo_.mle_mode.measurement_errors_std.' name ' = xparam1(ip);']);
       eval(['oo_.mle_std.measurement_errors_std.' name ' = stdh(ip);']);      
       ip = ip+1;
@@ -782,7 +786,7 @@ elseif ~any(bayestopt_.pshape > 0) & options_.posterior_mode_estimation
       k2 = estim_params_.corrx(i,2);
       name = [deblank(M_.exo_names(k1,:)) ',' deblank(M_.exo_names(k2,:))];
       NAME = [deblank(M_.exo_names(k1,:)) '_' deblank(M_.exo_names(k2,:))];
-      disp(sprintf('%12s %8.4f %7.4f %7.4f', name,xparam1(ip),stdh(ip),tstath(ip)));
+      disp(sprintf('%-*s %8.4f %7.4f %7.4f', header_width,name,xparam1(ip),stdh(ip),tstath(ip)));
       M_.Sigma_e(k1,k2) = xparam1(ip)*sqrt(M_.Sigma_e(k1,k1)*M_.Sigma_e(k2,k2));
       M_.Sigma_e(k2,k1) = M_.Sigma_e(k1,k2);
       eval(['oo_.mle_mode.shocks_corr.' NAME ' = xparam1(ip);']);
@@ -799,7 +803,7 @@ elseif ~any(bayestopt_.pshape > 0) & options_.posterior_mode_estimation
       k2 = estim_params_.corrn(i,2);
       name = [deblank(M_.endo_names(k1,:)) ',' deblank(M_.endo_names(k2,:))];
       NAME = [deblank(M_.endo_names(k1,:)) '_' deblank(M_.endo_names(k2,:))];
-      disp(sprintf('%12s %8.4f %7.4f %7.4f',name,xparam1(ip),stdh(ip),tstath(ip)));
+      disp(sprintf('%-*s %8.4f %7.4f %7.4f',header_width,name,xparam1(ip),stdh(ip),tstath(ip)));
       eval(['oo_.mle_mode.measurement_error_corr.' NAME ' = xparam1(ip);']);
       eval(['oo_.mle_std.measurement_error_corr.' NAME ' = stdh(ip);']);
       ip = ip+1;
@@ -1549,3 +1553,4 @@ if np > 0
     pindx = estim_params_.param_vals(:,1);
     save([M_.fname '_pindx.mat'] ,'pindx');
 end
+
