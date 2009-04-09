@@ -30,7 +30,7 @@ function [dr,info,M_,options_,oo_] = dr1_sparse(dr,task,M_,options_,oo_)
 %   none.
 %  
 
-% Copyright (C) 1996-2008 Dynare Team
+% Copyright (C) 1996-2009 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -190,7 +190,7 @@ function [dr,info,M_,options_,oo_] = dr1_sparse(dr,task,M_,options_,oo_)
         it_ = M_.maximum_lag + 1;
         z = repmat(dr.ys,1,klen);
         z = z(iyr0) ;
-        if options_.model_mode==0
+        if options_.model_mode==0 || options_.model_mode == 2
           if options_.order == 1
               [junk,jacobia_] = feval([M_.fname '_dynamic'],z,[oo_.exo_simul ...
                                   oo_.exo_det_simul], M_.params, it_);
