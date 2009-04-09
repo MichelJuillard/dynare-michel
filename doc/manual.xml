@@ -3,7 +3,7 @@
 <book>
   <bookinfo>
     <title>Dynare Manual</title>
-    <subtitle>Version 4.0.3 (draft)</subtitle>
+    <subtitle>Version 4.0.4 (draft)</subtitle>
     <author>
       <firstname>Stéphane</firstname><surname>Adjemian</surname>
       <affiliation><orgname>Université du Mans et CEPREMAP</orgname></affiliation>
@@ -415,7 +415,7 @@ In the description of Dynare commands, the following conventions are observed:
       <arg rep="repeat"><arg>,</arg>
 	      <replaceable>VARIABLE_NAME</replaceable>
       </arg>
-      <arg choice="plain">;</arg>
+      ;
     </cmdsynopsis>
   </refsynopsisdiv>
 
@@ -454,7 +454,7 @@ var c gnp q1 q2;
       <arg rep="repeat"><arg>,</arg>
 	      <replaceable>VARIABLE_NAME</replaceable>
       </arg>
-    <arg choice="plain">;</arg>
+      ;
     </cmdsynopsis>
   </refsynopsisdiv>
 
@@ -496,7 +496,7 @@ varexo m gov;
       <arg rep="repeat"><arg>,</arg>
 	      <replaceable>VARIABLE_NAME</replaceable>
       </arg>
-      <arg choice="plain">;</arg>
+      ;
     </cmdsynopsis>
   </refsynopsisdiv>
 
@@ -538,7 +538,7 @@ varexo_det tau;
       <arg rep="repeat"><arg>,</arg>
 	      <replaceable>PARAMETER_NAME</replaceable>
       </arg>
-      <arg choice="plain">;</arg>
+      ;
     </cmdsynopsis>
   </refsynopsisdiv>
 
@@ -667,7 +667,7 @@ A = 1-alpha*beta;
       <arg>(<replaceable>OPTION</replaceable><arg rep="repeat">, <replaceable>OPTION</replaceable></arg>)</arg>
       ;
       <sbr/>
-      <arg rep="repeat">
+      <arg choice="plain" rep="repeat">
         <group>
           <arg choice="plain"><replaceable>MODEL_EXPRESSION</replaceable> = <replaceable>MODEL_EXPRESSION</replaceable> ;</arg>
           <arg choice="plain"><replaceable>MODEL_EXPRESSION</replaceable> ;</arg>
@@ -1394,7 +1394,7 @@ See <xref linkend='initval'/> and <xref linkend='endval'/>.
   <refsynopsisdiv>
     <cmdsynopsis>
       <command>homotopy_setup</command>;<sbr/>
-      <arg rep="repeat"><replaceable>VARIABLE_NAME</replaceable>, <replaceable>EXPRESSION</replaceable><arg>, <replaceable>EXPRESSION</replaceable></arg>;</arg>
+      <arg choice="plain" rep="repeat"><replaceable>VARIABLE_NAME</replaceable>, <replaceable>EXPRESSION</replaceable><arg>, <replaceable>EXPRESSION</replaceable></arg>;</arg>
       <command>end</command>;
     </cmdsynopsis>
   </refsynopsisdiv>
@@ -1570,7 +1570,7 @@ The simulated endogenous variables are available in global matrix <varname>oo_.e
 <refsect1><title>Options</title>
 <variablelist spacing='compact'>
   <varlistentry>
-    <term><anchor id="ar" xreflabel="ar"/> <option>ar</option> = <replaceable>INTEGER</replaceable></term>
+    <term><anchor id="ar" xreflabel="ar"/><option>ar</option> = <replaceable>INTEGER</replaceable></term>
     <listitem><para>Order of autocorrelation coefficients to compute and to print. Default: 5</para></listitem>
   </varlistentry>
   <varlistentry>
@@ -1794,7 +1794,6 @@ Note that in order to avoid stochastic singularity, you must have at least as ma
 <listitem><para><xref linkend='estimated_params'/></para></listitem>
 <listitem><para><xref linkend='estimated_params_init'/></para></listitem>
 <listitem><para><xref linkend='estimated_params_bounds'/></para></listitem>
-<listitem><para><xref linkend='estimated_params_init'/></para></listitem>
 <listitem><para><xref linkend='estimation'/></para></listitem>
 <listitem><para><xref linkend='prior_analysis'/></para></listitem>
 <listitem><para><xref linkend='posterior_analysis'/></para></listitem>
@@ -1815,12 +1814,9 @@ Note that in order to avoid stochastic singularity, you must have at least as ma
     <cmdsynopsis>
       <command>varobs</command>
       <arg choice="plain" rep="repeat">
-	<replaceable>VARIABLE_NAME</replaceable>
+	      <replaceable>VARIABLE_NAME</replaceable>
       </arg>
-      <arg rep="repeat">
-	<replaceable>VARIABLE_NAME</replaceable>
-      </arg>
-      <arg choice="plain">;</arg>
+      ;
     </cmdsynopsis>
   </refsynopsisdiv>
 
@@ -1832,9 +1828,9 @@ Note that in order to avoid stochastic singularity, you must have at least as ma
 
 <refsect1><title>Example</title>
   <informalexample>
-    <programlisting>
-      varobs C y rr;
-    </programlisting>
+<programlisting>
+varobs C y rr;
+</programlisting>
   </informalexample>
 </refsect1>
 
@@ -1852,16 +1848,11 @@ Note that in order to avoid stochastic singularity, you must have at least as ma
 
   <refsynopsisdiv>
     <cmdsynopsis>
-      <command>observation_trends;</command><sbr/>
-      <arg choice="plain">
-	<replaceable>VARIABLE_NAME</replaceable>
+      <command>observation_trends</command>;<sbr/>
+      <arg choice="plain" rep="repeat">
+	      <replaceable>VARIABLE_NAME</replaceable>(<replaceable>EXPRESSION</replaceable>);
       </arg>
-      <arg choice="plain">
-	(<replaceable>EXPRESSION</replaceable>);
-      </arg><sbr/>
-      <arg choice="plain">
-	end;
-      </arg>
+	    <command>end</command>;
     </cmdsynopsis>
   </refsynopsisdiv>
 
@@ -1873,12 +1864,12 @@ Note that in order to avoid stochastic singularity, you must have at least as ma
 
 <refsect1><title>Example</title>
   <informalexample>
-    <programlisting>
-      observation_trends;
-      Y (eta);
-      P (mu/eta);
-      end;
-    </programlisting>
+<programlisting>
+observation_trends;
+Y (eta);
+P (mu/eta);
+end;
+</programlisting>
   </informalexample>
 </refsect1>
 
@@ -1895,100 +1886,163 @@ Note that in order to avoid stochastic singularity, you must have at least as ma
   </refnamediv>
 
   <refsynopsisdiv>
-    <para>Syntax I (maximum likelihood estimation)</para>
-    <cmdsynopsis>
-      <command>estimated_params;</command><sbr/>
-      <group choice="req">
-      <arg choice="plain">
-	stderr <replaceable>VARIABLE_NAME</replaceable>
-      </arg>
-      <arg choice="plain">
-	corr <replaceable>VARIABLE_NAME_1, VARIABLE_NAME_2</replaceable>
-      </arg>
-      <arg choice="plain">
-	<replaceable>PARAMETER_NAME</replaceable>
-	</arg>
-      </group>
-	<arg choice="plain">
-	  <replaceable>, INITIAL_VALUE</replaceable>
-	</arg>
-	<arg choice="opt">
-	  <replaceable>, LOWER_BOUND</replaceable>
-	</arg>
-	<arg choice="opt">
-	  <replaceable>, UPPER_BOUND</replaceable>
-	</arg>
-	<arg choice="plain">;</arg><sbr/>
-	<arg choice='plain'>...</arg><sbr/>
-	  <arg choice="plain">end;</arg>
-    </cmdsynopsis>
-    <para>Syntax II (Bayesian estimation)</para>
-    <cmdsynopsis>
-      <command>estimated_params;</command><sbr/>
-      <group choice="req">
-      <arg choice="plain">
-	stderr <replaceable>VARIABLE_NAME</replaceable>
-      </arg>
-      <arg choice="plain">
-	corr <replaceable>VARIABLE_NAME_1, VARIABLE_NAME_2</replaceable>
-      </arg>
-      <arg choice="plain">
-	<replaceable>PARAMETER_NAME</replaceable>
-	</arg>
-      </group>
-      <arg choice="plain">
-	<replaceable>, PRIOR_SHAPE</replaceable>
-      </arg>
-      <arg choice="plain">
-	<replaceable>, PRIOR_MEAN</replaceable>
-      </arg>
-      <arg choice="plain">
-	<replaceable>, PRIOR_STANDARD_ERROR</replaceable>
-      </arg>
-      <arg choice="opt">
-	  <replaceable>, PRIOR_3RD_PARAMETER</replaceable>
-      </arg>
-      <arg choice="opt">
-	<replaceable>, PRIOR_4TH_PARAMETER</replaceable>
-      </arg>
-      <arg choice="opt">
-	<replaceable>, SCALE_PARAMETER</replaceable>
-      </arg>
-	<arg choice="plain">;</arg>
-	<sbr/>
-	<arg choice="plain">...</arg><sbr/>
-	<arg choice="plain">end;</arg>
-    </cmdsynopsis>
+    <refsect2><title>Syntax I (Maximum likelihood estimation)</title>
+      <cmdsynopsis>
+        <command>estimated_params</command>;<sbr/>
+        <arg choice="plain" rep="repeat">
+          <group choice="req">
+            <arg choice="plain">
+	            <option>stderr</option> <replaceable>VARIABLE_NAME</replaceable>
+            </arg>
+            <arg choice="plain">
+	            <option>corr</option> <replaceable>VARIABLE_NAME_1</replaceable>, <replaceable>VARIABLE_NAME_2</replaceable>
+            </arg>
+            <arg choice="plain">
+	            <replaceable>PARAMETER_NAME</replaceable>
+	          </arg>
+          </group>
+          ,
+	        <arg choice="plain">
+	          <replaceable>INITIAL_VALUE</replaceable>
+	        </arg>
+	        <arg>
+	          , <replaceable>LOWER_BOUND</replaceable>
+	          , <replaceable>UPPER_BOUND</replaceable>
+	        </arg>
+          ;
+        </arg>
+	      <command>end</command>;
+      </cmdsynopsis>
+    </refsect2>
+    <refsect2>
+      <title>Syntax II (Bayesian estimation)</title>
+      <cmdsynopsis>
+        <command>estimated_params</command>;<sbr/>
+        <arg choice="plain" rep="repeat">
+          <group choice="req">
+            <arg choice="plain">
+	            <option>stderr</option> <replaceable>VARIABLE_NAME</replaceable>
+            </arg>
+            <arg choice="plain">
+	            <option>corr</option> <replaceable>VARIABLE_NAME_1</replaceable>, <replaceable>VARIABLE_NAME_2</replaceable>
+            </arg>
+            <arg choice="plain">
+	            <replaceable>PARAMETER_NAME</replaceable>
+	          </arg>
+          </group>
+	        <arg>
+	          , <replaceable>INITIAL_VALUE</replaceable>
+	          <arg>
+	            , <replaceable>LOWER_BOUND</replaceable>
+	            , <replaceable>UPPER_BOUND</replaceable>
+	          </arg>
+	        </arg>
+
+          <arg choice="plain">
+	          , <synopfragmentref linkend="prior_shape"><replaceable>PRIOR_SHAPE</replaceable></synopfragmentref>
+          </arg>
+          <arg choice="plain">
+	          , <replaceable>PRIOR_MEAN</replaceable>
+          </arg>
+          <arg choice="plain">
+	          , <replaceable>PRIOR_STANDARD_ERROR</replaceable>
+          </arg>
+          <arg>
+	          , <replaceable>PRIOR_3RD_PARAMETER</replaceable>
+            <arg>
+	            , <replaceable>PRIOR_4TH_PARAMETER</replaceable>
+              <arg>
+	              , <replaceable>SCALE_PARAMETER</replaceable>
+              </arg>
+            </arg>
+          </arg>
+          ;
+        </arg>
+	      <command>end</command>;
+
+        <synopfragment id="prior_shape">
+          <group choice="plain">
+            <arg choice="plain"><option>beta_pdf</option></arg>
+            <arg choice="plain"><option>gamma_pdf</option></arg>
+            <arg choice="plain"><option>normal_pdf</option></arg>
+            <arg choice="plain"><option>uniform_pdf</option></arg>
+            <arg choice="plain"><option>inv_gamma_pdf</option></arg>
+            <arg choice="plain"><option>inv_gamma1_pdf</option></arg>
+            <arg choice="plain"><option>inv_gamma2_pdf</option></arg>
+          </group>
+        </synopfragment>
+      </cmdsynopsis>
+    </refsect2>
   </refsynopsisdiv>
 
 <refsect1><title>Description</title>
 <para>
-  The <command>estimated_params;....end;</command> block lists all parameters to be estimated and specifies bounds and priors as necessary.
+  The <command>estimated_params</command> block lists all parameters to be estimated and specifies bounds and priors as necessary.
 </para>
 </refsect1>
 
 <refsect1><title>Estimated parameter specification</title>
 <para>
 Each line corresponds to an estimated parameter and follows this syntax:
-<itemizedlist spacing='compact'> 
-  <listitem><para><command>stderr</command> is a keyword indicating that the standard error of the exogenous variable, <replaceable>VARIABLE_NAME</replaceable>, or of the observation error associated with endogenous observed variable, <replaceable>VARIABLE_NAME</replaceable>, is to be estimated</para></listitem>
-  <listitem><para><command>corr</command> is a keyword indicating that the correlation between the exogenous variables, <replaceable>VARIABLE_NAME_1</replaceable> and <replaceable>VARIABLE_NAME_2</replaceable>, or the correlation of the observation errors associated with endogenous observed variables, <replaceable>VARIABLE_NAME_1</replaceable> and <replaceable>VARIABLE_NAME_2</replaceable>, is to be estimated</para></listitem>
-  <listitem><para> <replaceable>PARAMETER_NAME</replaceable> is the name of a model parameter to be estimated</para></listitem>
-<listitem><para> <replaceable>INITIAL_VALUE</replaceable> specifies a starting value for maximum likelihood estimation</para></listitem>
-<listitem><para> <replaceable>LOWER_BOUND</replaceable> specifies a lower bound for the parameter value in maximum likelihood estimation</para></listitem>
-<listitem><para> <replaceable>UPPER_BOUND</replaceable> specifies an upper bound for the parameter value in maximum likelihood estimation</para></listitem>
-  <listitem><para> <replaceable>PRIOR_SHAPE</replaceable> is prior density among <command>beta_pdf</command>, <command>gamma_pdf</command>, <command>normal_pdf</command>, <command>inv_gamma_pdf</command>, <command>inv_gamma1_pdf</command>, <command>inv_gamma2_pdf</command>, <command>uniform_pdf</command></para></listitem>
-  <listitem><para> <replaceable>PRIOR_MEAN</replaceable> is the mean of the prior distribution</para></listitem>
-  <listitem><para> <replaceable>PRIOR_STANDARD_ERROR</replaceable> is the standard error of the prior distribution</para></listitem>
-  <listitem><para> <replaceable>PRIOR_3RD_PARAMETER</replaceable> is a third parameter of the prior used for generalized beta distribution, generalized gamma and for the uniform distribution (default 0)</para></listitem>
-  <listitem><para> <replaceable>PRIOR_4TH_PARAMETER</replaceable> is a fourth parameter of the prior used for generalized beta distribution, generalized gamma and for the uniform distribution (default 1)</para></listitem>
-  <listitem><para> <replaceable>SCALE_PARAMETER</replaceable> is the scale parameter to be used for the jump distribution of the Metropolis-Hasting algorithm</para></listitem>
-</itemizedlist>
+<variablelist>
+  <varlistentry>
+    <term><option>stderr</option> <replaceable>VARIABLE_NAME</replaceable></term>
+    <listitem><para>Indicates that the standard error of the exogenous variable <replaceable>VARIABLE_NAME</replaceable>, or of the observation error associated with endogenous observed variable <replaceable>VARIABLE_NAME</replaceable>, is to be estimated</para></listitem>
+  </varlistentry>
+  <varlistentry>
+    <term><option>corr</option> <replaceable>VARIABLE_NAME_1</replaceable>, <replaceable>VARIABLE_NAME_2</replaceable></term>
+    <listitem><para>Indicates that the correlation between the exogenous variables <replaceable>VARIABLE_NAME_1</replaceable> and <replaceable>VARIABLE_NAME_2</replaceable>, or the correlation of the observation errors associated with endogenous observed variables <replaceable>VARIABLE_NAME_1</replaceable> and <replaceable>VARIABLE_NAME_2</replaceable>, is to be estimated</para></listitem>
+  </varlistentry>
+  <varlistentry>
+    <term><replaceable>PARAMETER_NAME</replaceable></term>
+    <listitem><para>The name of a model parameter to be estimated</para></listitem>
+  </varlistentry>
+  <varlistentry>
+    <term><replaceable>INITIAL_VALUE</replaceable></term>
+    <listitem><para>Specifies a starting value for maximum likelihood estimation</para></listitem>
+  </varlistentry>
+  <varlistentry>
+    <term><replaceable>LOWER_BOUND</replaceable></term>
+    <listitem><para>Specifies a lower bound for the parameter value in maximum likelihood estimation</para></listitem>
+  </varlistentry>
+  <varlistentry>
+    <term><replaceable>UPPER_BOUND</replaceable></term>
+    <listitem><para>Specifies an upper bound for the parameter value in maximum likelihood estimation</para></listitem>
+  </varlistentry>
+  <varlistentry>
+    <term><replaceable>PRIOR_SHAPE</replaceable></term>
+    <listitem><para>A keyword specifying the shape of the prior density. See the <link linkend="prior_shape">list of possible values</link>. Note that <option>inv_gamma_pdf</option> is equivalent to <option>inv_gamma1_pdf</option></para></listitem>
+  </varlistentry>
+  <varlistentry>
+    <term><replaceable>PRIOR_MEAN</replaceable></term>
+    <listitem><para>The mean of the prior distribution</para></listitem>
+  </varlistentry>
+  <varlistentry>
+    <term><replaceable>PRIOR_STANDARD_ERROR</replaceable></term>
+    <listitem><para>The standard error of the prior distribution</para></listitem>
+  </varlistentry>
+  <varlistentry>
+    <term><replaceable>PRIOR_3RD_PARAMETER</replaceable></term>
+    <listitem><para>A third parameter of the prior used for generalized beta distribution, generalized gamma and for the uniform distribution. Default: 0</para></listitem>
+  </varlistentry>
+  <varlistentry>
+    <term><replaceable>PRIOR_4TH_PARAMETER</replaceable></term>
+    <listitem><para>A fourth parameter of the prior used for generalized beta distribution, generalized gamma and for the uniform distribution. Default: 1</para></listitem>
+  </varlistentry>
+  <varlistentry>
+    <term><replaceable>SCALE_PARAMETER</replaceable></term>
+    <listitem><para>The scale parameter to be used for the jump distribution of the Metropolis-Hasting algorithm</para></listitem>
+  </varlistentry>
+</variablelist>
 
-<note><para> At minimum, one must specify the name of the parameter and an initial guess. That will trigger unconstrained maximum likelihood estimation.
+<note>
+<para><replaceable>INITIAL_VALUE</replaceable>, <replaceable>LOWER_BOUND</replaceable>, <replaceable>UPPER_BOUND</replaceable>, <replaceable>PRIOR_MEAN</replaceable>, <replaceable>PRIOR_STANDARD_ERROR</replaceable>, <replaceable>PRIOR_3RD_PARAMETER</replaceable>, <replaceable>PRIOR_4TH_PARAMETER</replaceable> and <replaceable>SCALE_PARAMETER</replaceable> must be positive or negative <replaceable>INTEGER</replaceable> or <replaceable>DOUBLE</replaceable>. Some of them can be empty, in which Dynare will select a default value depending on the context and the prior shape.</para>
+</note>
+
+<note><para>At minimum, one must specify the name of the parameter and an initial guess. That will trigger unconstrained maximum likelihood estimation.
 </para></note>
 
-<note><para> As one uses options more towards the end of the list, all previous options must be filled: if you want to specify <replaceable>jscale</replaceable>, you must specify <replaceable>prior_p3</replaceable> and <replaceable>prior_p4</replaceable>. Use default values, if these parameters don't apply. 
+<note><para>As one uses options more towards the end of the list, all previous options must be filled: for example, if you want to specify <replaceable>SCALE_PARAMETER</replaceable>, you must specify <replaceable>PRIOR_3RD_PARAMETER</replaceable> and <replaceable>PRIOR_4TH_PARAMETER</replaceable>. Use empty values, if these parameters don't apply. 
 </para></note>
 </para>
 </refsect1>
@@ -1999,24 +2053,24 @@ Sometimes, it is desirable to estimate a transformation of a parameter appearing
 </para>
 
 <para>
-In such a case, it is possible to declare the parameter to be estimated in the <xref linkend="parameters"/> statement and to define the transformation at the top of the <xref linkend="model"/> section, as a <trademark class="registered">Matlab</trademark> expression. The first character of the line must be a pound  sign (#).
+In such a case, it is possible to declare the parameter to be estimated in the <xref linkend="parameters"/> statement and to define the transformation, using a pound sign (#) expression (see <xref linkend="model"/>).
 </para>
 </refsect1>
 
 <refsect1><title>Example</title>
-<informalexample>
-    <programlisting>
-      parameters bet;
+  <informalexample>
+<programlisting>
+parameters bet;
 
-      model;
-      # sig = 1/bet;
-      c = sig*c(+1)*mpk;
-      end;
+model;
+# sig = 1/bet;
+c = sig*c(+1)*mpk;
+end;
 
-      estimated_params;
-      bet,normal_pdf,1,0.05;
-      end;
-    </programlisting>
+estimated_params;
+bet, normal_pdf, 1, 0.05;
+end;
+</programlisting>
   </informalexample>
 </refsect1>
 
@@ -2036,43 +2090,36 @@ In such a case, it is possible to declare the parameter to be estimated in the <
 
   <refsynopsisdiv>
     <cmdsynopsis>
-      <command>estimated_params_init;</command><sbr/>
-      <group choice="req">
-      <arg choice="plain">
-	stderr <replaceable>VARIABLE_NAME</replaceable>
-      </arg>
-      <arg choice="plain">
-	corr <replaceable>VARIABLE_NAME_1, VARIABLE_NAME_2</replaceable>
-      </arg>
-      <arg choice="plain">
-	<replaceable>PARAMETER_NAME</replaceable>
-	</arg>
-      </group>
-	<arg choice="plain">
-	  <replaceable>, INITIAL_VALUE</replaceable>
-	</arg> 
-	<arg choice="plain">;</arg><sbr/>
-	<arg choice='plain'>...</arg><sbr/>
-	  <arg choice="plain">end;</arg>
+      <command>estimated_params_init</command>;<sbr/>
+        <arg choice="plain" rep="repeat">
+          <group choice="req">
+            <arg choice="plain">
+	            <option>stderr</option> <replaceable>VARIABLE_NAME</replaceable>
+            </arg>
+            <arg choice="plain">
+	            <option>corr</option> <replaceable>VARIABLE_NAME_1</replaceable>, <replaceable>VARIABLE_NAME_2</replaceable>
+            </arg>
+            <arg choice="plain">
+	            <replaceable>PARAMETER_NAME</replaceable>
+	          </arg>
+          </group>
+          ,
+	        <arg choice="plain">
+	          <replaceable>INITIAL_VALUE</replaceable>
+	        </arg>
+          ;
+        </arg>
+	      <command>end</command>;
     </cmdsynopsis>
   </refsynopsisdiv>
 
 <refsect1><title>Description</title>
-<para>
-  The <command>estimated_params_init;....end;</command> block declares numerical initial values for the optimizer when these ones are different from the prior mean
+<para>The <command>estimated_params_init</command> block declares numerical initial values for the optimizer when these ones are different from the prior mean.
 </para>
 </refsect1>
 
 <refsect1><title>Estimated parameter initial value specification</title>
-<para>
-Each line corresponds to an estimated parameter and follows this syntax:
-<itemizedlist spacing='compact'> 
-  <listitem><para><command>stderr</command> is a keyword indicating that the standard error of the exogenous variable, <replaceable>VARIABLE_NAME</replaceable>, or of the observation error associated with endogenous observed variable, <replaceable>VARIABLE_NAME</replaceable>, is to be estimated</para></listitem>
-  <listitem><para><command>corr</command> is a keyword indicating that the correlation between the exogenous variables, <replaceable>VARIABLE_NAME_1</replaceable> and <replaceable>VARIABLE_NAME_2</replaceable>, or the correlation of the observation errors associated with endogenous observed variables, <replaceable>VARIABLE_NAME_1</replaceable> and <replaceable>VARIABLE_NAME_2</replaceable>, is to be estimated</para></listitem>
-  <listitem><para> <replaceable>PARAMETER_NAME</replaceable> is the name of a model parameter to be estimated</para></listitem>
-<listitem><para> <replaceable>INITIAL_VALUE</replaceable> specifies a starting value for maximum likelihood estimation</para></listitem>
-</itemizedlist>
-</para>
+<para>See <xref linkend="estimated_params" /> for the meaning and syntax of the various components.</para>
 </refsect1>
 
 </refentry>
@@ -2089,48 +2136,41 @@ Each line corresponds to an estimated parameter and follows this syntax:
 
   <refsynopsisdiv>
     <cmdsynopsis>
-      <command>estimated_params_bounds;</command><sbr/>
-      <group choice="req">
-      <arg choice="plain">
-	stderr <replaceable>VARIABLE_NAME</replaceable>
+      <command>estimated_params_bounds</command>;<sbr/>
+      <arg choice="plain" rep="repeat">
+        <group choice="req">
+          <arg choice="plain">
+	          <option>stderr</option> <replaceable>VARIABLE_NAME</replaceable>
+          </arg>
+          <arg choice="plain">
+	          <option>corr</option> <replaceable>VARIABLE_NAME_1</replaceable>, <replaceable>VARIABLE_NAME_2</replaceable>
+          </arg>
+          <arg choice="plain">
+	          <replaceable>PARAMETER_NAME</replaceable>
+	        </arg>
+        </group>
+        ,
+	      <arg choice="plain">
+          <replaceable>LOWER_BOUND</replaceable>
+	      </arg>
+        ,
+	      <arg choice="plain">
+	        <replaceable>UPPER_BOUND</replaceable>
+	      </arg>
+        ;
       </arg>
-      <arg choice="plain">
-	corr <replaceable>VARIABLE_NAME_1, VARIABLE_NAME_2</replaceable>
-      </arg>
-      <arg choice="plain">
-	<replaceable>PARAMETER_NAME</replaceable>
-	</arg>
-      </group>
-	<arg choice="plain">
-	  <replaceable>, LOWER_BOUND</replaceable>
-	</arg>
-	<arg choice="plain">
-	  <replaceable>, UPPER_BOUND</replaceable>
-	</arg>
-	<arg choice="plain">;</arg><sbr/>
-	<arg choice='plain'>...</arg><sbr/>
-	  <arg choice="plain">end;</arg>
+	    <command>end</command>;
     </cmdsynopsis>
   </refsynopsisdiv>
 
 <refsect1><title>Description</title>
-<para>
-  The <command>estimated_params;....end;</command> block lists all parameter to be estimated and specifies bounds and priors when required.
-</para>
+<para>The <command>estimated_params_bounds</command> block declares lower and upper bounds for parameters in maximum likelihood estimation.</para>
 </refsect1>
 
-<refsect1><title>Estimated parameter specification</title>
-<para>
-Each line corresponds to an estimated parameter and follows this syntax:
-<itemizedlist spacing='compact'> 
-  <listitem><para><command>stderr</command> is a keyword indicating that the standard error of the exogenous variable, <replaceable>VARIABLE_NAME</replaceable>, or of the observation error associated with endogenous observed variable, <replaceable>VARIABLE_NAME</replaceable>, is to be estimated</para></listitem>
-  <listitem><para><command>corr</command> is a keyword indicating that the correlation between the exogenous variables, <replaceable>VARIABLE_NAME_1</replaceable> and <replaceable>VARIABLE_NAME_2</replaceable>, or the correlation of the observation errors associated with endogenous observed variables, <replaceable>VARIABLE_NAME_1</replaceable> and <replaceable>VARIABLE_NAME_2</replaceable>, is to be estimated</para></listitem>
-  <listitem><para> <replaceable>PARAMETER_NAME</replaceable> is the name of a model parameter to be estimated</para></listitem>
-<listitem><para> <replaceable>LOWER_BOUND</replaceable> specifies a lower bound for the parameter value in maximum likelihood estimation</para></listitem>
-<listitem><para> <replaceable>UPPER_BOUND</replaceable> specifies an upper bound for the parameter value in maximum likelihood estimation</para></listitem>
-</itemizedlist>
-</para>
+<refsect1><title>Estimated parameter bounds specification</title>
+<para>See <xref linkend="estimated_params" /> for the meaning and syntax of the various components.</para>
 </refsect1>
+
 </refentry>
 
 <refentry id="estimation">
