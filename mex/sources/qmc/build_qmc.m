@@ -16,12 +16,10 @@ if (strcmpi('GLNXA64', computer) || strcmpi('PCWIN64', computer)) ...
 end
 
 if matlab_ver_less_than('7.5')
-    OUTPUT_DIR = '../2007a';
+    OUTPUT_DIR = '../../2007a';
 else
-    OUTPUT_DIR = '../2007b';
+    OUTPUT_DIR = '../../2007b';
 end
-
-OUTPUT_DIR = ' ';
 
 disp(' ')
 if exist(OUTPUT_DIR,'dir')
@@ -34,6 +32,8 @@ else
 end
 disp(' ')
 
+% Comment next line to suppress compilation debugging info
+% COMPILE_OPTIONS = [ COMPILE_OPTIONS ' -v '  ];
 
 % Set Optimization and Debug flags
 CXXOPTIMFLAGS = ' CXXOPTIMFLAGS=-O3 ';
@@ -42,21 +42,18 @@ CXXDEBUGFLAGS = ' CXXDEBUGFLAGS= ';
 CDEBUGFLAGS = ' CDEBUGFLAGS= ';
 LDOPTIMFLAGS = ' LDOPTIMFLAGS=-O3 ';
 LDDEBUGFLAGS = ' LDDEBUGFLAGS= ';
+
 COMPILE_OPTIONS = [ COMPILE_OPTIONS CDEBUGFLAGS COPTIMFLAGS CXXDEBUGFLAGS CXXOPTIMFLAGS LDDEBUGFLAGS LDOPTIMFLAGS];
 
-% Comment next line to suppress compilation debugging info
-% COMPILE_OPTIONS = [ COMPILE_OPTIONS ' -v '  ];
+FC='FC=/usr/bin/gfortran ' ;
+FFLAGS= 'FFLAGS= ' ;
+FLIBS = 'FLIBS=-L/usr/lib -lgfortran ' ;
+FOPTIMFLAGS = 'FOPTIMFLAGS=-O ' ;
 
-FC='FC=/usr/bin/gfortran '
-FFLAGS= 'FFLAGS= '
-FLIBS = 'FLIBS=-L/usr/lib -lgfortran '
-FOPTIMFLAGS = '-O ';
-FOPTIMFLAGS = 'FOPTIMFLAGS=-O '
+COMPILE_OPTIONS = [ COMPILE_OPTIONS FC FFLAGS FOPTIMFLAGS FLIBS ];
 
-COMPILE_OPTIONS = [ COMPILE_OPTIONS FC FFLAGS FOPTIMFLAGS FLIBS];
-
-COMPILE_COMMAND = [ 'mex ' COMPILE_OPTIONS ];%' -outdir ' OUTPUT_DIR ];
+COMPILE_COMMAND = [ 'mex ' COMPILE_OPTIONS ' -outdir ' OUTPUT_DIR ] ;
 
 disp('Compiling qmc')
 system('gfortran -c -O3 low_discrepancy.f');
-eval([ COMPILE_COMMAND ' qmc_sequence.cc low_discrepancy.o' ]);
+eval([ COMPILE_COMMAND ' qmc_sequence.cc low_discrepancy.o' ]) ;
