@@ -217,10 +217,10 @@ while ~done
       f2=f;f3=f;f1=f;retcode2=retcode1;retcode3=retcode1;
    end
    %how to pick gh and xh
-   if f3 < f - crit & badg3==0
+   if f3 < f - crit & badg3==0 & f3 < f2 & f3 < f1
       ih=3;
       fh=f3;xh=x3;gh=g3;badgh=badg3;retcodeh=retcode3;
-   elseif f2 < f - crit & badg2==0
+   elseif f2 < f - crit & badg2==0 & f2 < f1
       ih=2;
       fh=f2;xh=x2;gh=g2;badgh=badg2;retcodeh=retcode2;
    elseif f1 < f - crit & badg1==0
