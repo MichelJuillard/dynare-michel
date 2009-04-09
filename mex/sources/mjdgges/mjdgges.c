@@ -19,12 +19,7 @@
 
 #include <string.h>
 #include "mex.h"
-
-#if !defined(LAPACK_USE_MWSIGNEDINDEX) || defined(OCTAVE)
-typedef int lapack_int;
-#else
-typedef mwSignedIndex lapack_int;
-#endif
+#include "../matlab_versions_compatibility.h"
 
 #ifdef NO_LAPACK_H
 # if defined(__linux__) || defined(OCTAVE)
