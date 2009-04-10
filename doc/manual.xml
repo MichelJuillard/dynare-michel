@@ -1611,7 +1611,7 @@ The simulated endogenous variables are available in global matrix <varname>oo_.e
   </varlistentry>
   <varlistentry>
     <term><option>nograph</option></term>
-    <listitem><para>...</para></listitem>
+    <listitem><para>Doesn't do the graphs. Useful for loops</para></listitem>
   </varlistentry>
   <varlistentry>
     <term><option>noprint</option></term>
@@ -1619,7 +1619,7 @@ The simulated endogenous variables are available in global matrix <varname>oo_.e
   </varlistentry>
   <varlistentry>
     <term><option>print</option></term>
-    <listitem><para>...</para></listitem>
+    <listitem><para>Print results (opposite of the above)</para></listitem>
   </varlistentry>
   <varlistentry>
     <term><option>order = <replaceable>INTEGER</replaceable></option></term>
@@ -1647,7 +1647,7 @@ The simulated endogenous variables are available in global matrix <varname>oo_.e
   </varlistentry>
   <varlistentry>
     <term><option>simul_algo</option> = <replaceable>INTEGER</replaceable></term>
-    <listitem><para>...</para></listitem>
+    <listitem><para>Obsolete. Use only the default = 0</para></listitem>
   </varlistentry>
   <varlistentry>
     <term><option>solve_algo</option> = <replaceable>INTEGER</replaceable></term>
@@ -1711,32 +1711,32 @@ where ys is the steady state value of y, yh<subscript>t</subscript>=y<subscript>
 <listitem><para>the coefficients of the decision rules are stored in global structure <varname>oo_.dr</varname>. Here is the correspondance with the symbols used in the above description of the decision rules:
 <itemizedlist><title>Decision rule coefficients</title>
 
-<listitem><para><varname>ys</varname>: <varname>oo_.dr.ys</varname>. The vector rows correspond to variables in alphabetical order of the variable names.</para></listitem>
+<listitem><para><varname>ys</varname>: <varname>oo_.dr.ys</varname>. The vector rows correspond to variables in the declaration order of the variable names.</para></listitem>
 <listitem><para>&Delta;<superscript>2</superscript>: <varname>oo_.dr.ghs2</varname>. The vector rows correspond to re-ordered variables (see below).</para></listitem>
 <listitem><para><varname>A</varname>: <varname>oo_.dr.ghx</varname>. The matrix rows correspond to re-ordered variables. The matrix columns correspond to state variables (see below).</para></listitem>
-<listitem><para><varname>B</varname>: <varname>oo_.dr.ghu</varname>. The matrix rows correspond to re-ordered variables (see below). The matrix columns correspond to exogenous variables in alphabetical order.</para></listitem>
+<listitem><para><varname>B</varname>: <varname>oo_.dr.ghu</varname>. The matrix rows correspond to re-ordered variables (see below). The matrix columns correspond to exogenous variables in declaration order.</para></listitem>
 <listitem><para><varname>C</varname>: <varname>oo_.dr.ghxx</varname>. The matrix rows correspond to re-ordered variables. The matrix columns correspond to the Kronecker product of the vector of state variables (see below).</para></listitem>
-<listitem><para><varname>D</varname>: <varname>oo_.dr.ghuu</varname>. The matrix rows correspond to re-ordered variables (see below). The matrix columns correspond to the Kronecker product of exogenous variables in alphabetical order.</para></listitem>
-<listitem><para><varname>E</varname>: <varname>oo_.dr.ghxu</varname>. The matrix rows correspond to re-ordered variables. The matrix columns correspond to the Kronecker product of the vector of state variables (see below) by the vector of exogenous variables in alphabetical order.</para></listitem>
+<listitem><para><varname>D</varname>: <varname>oo_.dr.ghuu</varname>. The matrix rows correspond to re-ordered variables (see below). The matrix columns correspond to the Kronecker product of exogenous variables in declaration order.</para></listitem>
+<listitem><para><varname>E</varname>: <varname>oo_.dr.ghxu</varname>. The matrix rows correspond to re-ordered variables. The matrix columns correspond to the Kronecker product of the vector of state variables (see below) by the vector of exogenous variables in declaration order.</para></listitem>
 </itemizedlist>
-When reordered, the variables are stored in the following order: static variables, purely predetermined variables (variables that appear only at the current and lagged periods in the model), variables that are both predetermined and forward-looking (variables that appear at the current, future and lagged periods in the model), purely forward-looking variables (variables that appear only at the current and future periods in the model). In each category, the variables are arranged alphabetically.</para>
+When reordered, the variables are stored in the following order: static variables, purely predetermined variables (variables that appear only at the current and lagged periods in the model), variables that are both predetermined and forward-looking (variables that appear at the current, future and lagged periods in the model), purely forward-looking variables (variables that appear only at the current and future periods in the model). In each category, the variables are arranged in declaration order.</para>
 <para>
 The state variables of the model are purely predetermined variables and variables that are both predetermined and forward-looking. They are ordered in that order. When there are lags on more than one period, the state variables are ordered first according to their lag: first variables from the previous period, then variables from two periods before and so on. Note also that when a variable appears in the model at a lag larger than one period, it is automatically included at all inferior lags.
 </para>
 </listitem>
-<listitem><para>The mean of the endogenous variables is available in the vector <varname>oo_.mean</varname>. The variables are arranged in alphabetical order.
+<listitem><para>The mean of the endogenous variables is available in the vector <varname>oo_.mean</varname>. The variables are arranged in declaration order.
 </para></listitem>
-<listitem><para>The matrix of variance-covariance of the endogenous variables in the matrix <varname>oo_.var</varname>. The variables are arranged in alphabetical order.</para></listitem>
+<listitem><para>The matrix of variance-covariance of the endogenous variables in the matrix <varname>oo_.var</varname>. The variables are arranged in declaration order.</para></listitem>
 <listitem><para>The matrix of autocorrelation of the endogenous variables are made available in cell array <varname>oo_.autocorr</varname>. The element number of the matrix in the cell array corresponds to the order of autocorrelation. The option <option>ar</option> specifies the number of autocorrelation matrices available.
 </para></listitem>
 <listitem>
 <para>
   Simulated variables, when they have been computed, are available in <trademark class="registered">Matlab</trademark>
-vectors with the same name as the endogenous variables.</para>
+vectors with the same name as the endogenous variables. They are also available in the <varname>oo_.endo_simul</varname> matrix. The series are arranged by row, in declaration order of the variable names</para>
 </listitem>
 <listitem>
 <para>
-  Impulse responses, when they have been computed, are available in <trademark class="registered">Matlab</trademark> vectors with the following naming convention <varname><replaceable>VARIABLE_NAME</replaceable>_<replaceable>SHOCK_NAME</replaceable></varname>.
+  Impulse responses, when they have been computed, are available in <trademark class="registered">Matlab</trademark> vectors with the following naming convention <varname><replaceable>VARIABLE_NAME</replaceable>_<replaceable>SHOCK_NAME</replaceable></varname>. They are also available in <varname>oo_.irfs</varname>.
 </para>
 <informalexample>
   <para>Example:
@@ -1797,7 +1797,7 @@ Note that in order to avoid stochastic singularity, you must have at least as ma
 <listitem><para><xref linkend='estimation'/></para></listitem>
 <listitem><para><xref linkend='prior_analysis'/></para></listitem>
 <listitem><para><xref linkend='posterior_analysis'/></para></listitem>
-<listitem><para><xref linkend='unit_root_vars'/></para></listitem>
+<listitem><para><xref linkend='unit_root_vars'/> (deprecated)</para></listitem>
 </itemizedlist>
 
 <refentry id="varobs">
@@ -2431,7 +2431,7 @@ oo_.posterior_hpdsup.measurement_errors_corr.gdp_conso
 
 <refsect1><title>Description</title>
 <para>
-<command>unit_root_vars</command> is used to declare unit-root variables of a model so that a diffuse prior can be used in the initialization of the Kalman filter for these variables only. For stationary variables, the unconditional covariance matrix of these variables is used for initialization. The algorithm to compute a true diffuse prior is taken from <xref linkend="durbin-koopman:2001"/> and <xref linkend="koopman-durbin:2003"/>.
+<command>unit_root_vars</command> is now deprecated and will result in no action, It was used to declare unit-root variables of a model so that a diffuse prior can be used in the initialization of the Kalman filter for these variables only. For stationary variables, the unconditional covariance matrix of these variables is used for initialization. The algorithm to compute a true diffuse prior is taken from <xref linkend="durbin-koopman:2001"/> and <xref linkend="koopman-durbin:2003"/>.
 </para>
 
 <para>When <command>unit_root_vars</command> is used the <command>lik_init</command> option of <xref linkend="estimation"/> has no effect.
@@ -2605,7 +2605,7 @@ This problem is solved using a numerical optimizer.
 
   <refnamediv>
     <refname>ramsey_policy</refname>
-    <refpurpose>computes the first order approximation of the policy that maximizes the policy maker objective function (see <xref linkend="planner_objective"/>) submitted to the constraints provided by the equilibrium path of the economy</refpurpose>
+    <refpurpose>computes the first order approximation of the policy that maximizes the policy maker objective function (see <xref linkend="planner_objective"/>) submitted to the constraints provided by the equilibrium path of the economy. See <ulink url="http://www.dynare.org/DynareWiki/OptimalPolicy">http://www.dynare.org/DynareWiki/OptimalPolicy</ulink> for more information.</refpurpose>
   </refnamediv>
 </refentry>
 
@@ -2620,7 +2620,7 @@ This problem is solved using a numerical optimizer.
 
   <refnamediv>
     <refname>dynare_sensitivity</refname>
-    <refpurpose>interface to the global sensitivity analysis (GSA) toolbox developed by the Joint Research Center of the European Commission</refpurpose>
+    <refpurpose>interface to the global sensitivity analysis (GSA) toolbox developed by the Joint Research Center of the European Commission. The GSA toolbox needs to be downloaded separately from the JRC web site (<ulink url="http://eemc.jrc.ec.europa.eu/Software-DYNARE.htm">http://eemc.jrc.ec.europa.eu/Software-DYNARE.htm</ulink>)</refpurpose>
   </refnamediv>
 </refentry>
 
