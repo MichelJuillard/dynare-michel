@@ -1,4 +1,4 @@
-function y = solve_one_boundary(fname, y, x, params, y_index_eq, nze, periods, is_linear, Block_Num, y_kmin, maxit_, solve_tolf, lambda, cutoff, simulation_method, forward_backward, is_dynamic, verbose)
+function [y, info] = solve_one_boundary(fname, y, x, params, y_index_eq, nze, periods, is_linear, Block_Num, y_kmin, maxit_, solve_tolf, lambda, cutoff, simulation_method, forward_backward, is_dynamic, verbose)
 % Computes the deterministic simulation of a block of equation containing
 % lead or lag variables 
 %
@@ -134,6 +134,7 @@ function y = solve_one_boundary(fname, y, x, params, y_index_eq, nze, periods, i
                        continue;
                      else
                        disp('The singularity of the jacobian matrix could not be corrected');
+                       info = -Block_Num*10;
                        return;
                      end;
                    end;
@@ -161,6 +162,7 @@ function y = solve_one_boundary(fname, y, x, params, y_index_eq, nze, periods, i
                      oo_.deterministic_simulation.block(Block_Num).error = max_res;
                      oo_.deterministic_simulation.block(Block_Num).iterations = iter;
                    end;
+                   info = -Block_Num*10;
                    return;
                  end;
                else
@@ -193,7 +195,7 @@ function y = solve_one_boundary(fname, y, x, params, y_index_eq, nze, periods, i
                if exitval > 0
                   info = 0;
                else
-                  info = 1;
+                  info = -Block_Num*10;
                end
              elseif(~is_dynamic & options_.solve_algo==2)
                 lambda=1;
@@ -276,6 +278,7 @@ function y = solve_one_boundary(fname, y, x, params, y_index_eq, nze, periods, i
                  else
                      disp(['options_.solve_algo = ' num2str(options_.solve_algo) ' not implemented']);
                  end;
+                 info = -Block_Num*10;
                  return;
              end;
              iter=iter+1;
@@ -295,9 +298,11 @@ function y = solve_one_boundary(fname, y, x, params, y_index_eq, nze, periods, i
              oo_.deterministic_simulation.block(Block_Num).error = max_res;
              oo_.deterministic_simulation.block(Block_Num).iterations = iter;
            end;
+           info = -Block_Num*10;
            return;
        end
     end
+    info = 1;
     if(is_dynamic)
       oo_.deterministic_simulation.status = 1;
       oo_.deterministic_simulation.error = max_res;

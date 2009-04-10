@@ -33,8 +33,22 @@ function [x,info] = dynare_solve(func,x,jacobian_flag,varargin)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-  global options_
+  global options_ M_
   
+  exist_block_structure=isfield(M_,'block_structure');
+  %disp(['exist_block_structure = ' int2str(exist_block_structure)]);
+  if exist_block_structure
+      %block decomposition is inplemented
+      [x, info]= feval([M_.fname '_static']);
+      %size(x)
+      %info
+      if info<=0
+          error('solve_one_boundary has failed in block %d\n',-info/10);
+      else
+          info = 0;
+      end;
+      return;
+  end;
   options_ = set_default_option(options_,'solve_algo',2);
   info = 0;
   if options_.solve_algo == 0
