@@ -3,7 +3,7 @@
 <book>
   <bookinfo>
     <title>Dynare Manual</title>
-    <subtitle>Version 4.0.4 (draft)</subtitle>
+    <subtitle>Version 4.0.3.1 (draft)</subtitle>
     <author>
       <firstname>Stéphane</firstname><surname>Adjemian</surname>
       <affiliation><orgname>Université du Mans et CEPREMAP</orgname></affiliation>
@@ -673,7 +673,7 @@ A = 1-alpha*beta;
           <arg choice="plain"><replaceable>MODEL_EXPRESSION</replaceable> ;</arg>
           <arg choice="plain"># <replaceable>VARIABLE_NAME</replaceable> = <replaceable>MODEL_EXPRESSION</replaceable> ;</arg>
         </group>
-      </arg>
+      </arg><sbr/>
       <command>end</command>;
     </cmdsynopsis>
   </refsynopsisdiv>
@@ -800,7 +800,7 @@ For models with lags on more than one period, the command <xref linkend='histval
       <command>initval</command>;<sbr/>
       <arg rep="repeat" choice="plain">
 	      <replaceable>VARIABLE_NAME</replaceable> = <replaceable>EXPRESSION</replaceable> ;
-      </arg>
+      </arg><sbr/>
       <command>end</command>;
     </cmdsynopsis>
   </refsynopsisdiv>
@@ -885,7 +885,7 @@ steady;
       <command>endval</command>;<sbr/>
       <arg rep="repeat" choice="plain">
 	      <replaceable>VARIABLE_NAME</replaceable> = <replaceable>EXPRESSION</replaceable> ;
-      </arg>
+      </arg><sbr/>
       <command>end</command>;
     </cmdsynopsis>
   </refsynopsisdiv>
@@ -947,7 +947,7 @@ The initial equilibrium is computed by <xref linkend='steady'/> for <literal>x=1
       <command>histval</command>;<sbr/>
       <arg rep="repeat" choice="plain">
 	      <replaceable>VARIABLE_NAME</replaceable> = <replaceable>EXPRESSION</replaceable> ;
-      </arg>
+      </arg><sbr/>
       <command>end</command>;
     </cmdsynopsis>
   </refsynopsisdiv>
@@ -1038,7 +1038,7 @@ If the variance of an exogenous variable is set to zero, this variable will appe
 	          <synopfragmentref linkend="sto_shock">STOCHASTIC SHOCK STATEMENT</synopfragmentref>
 	        </arg>
         </group>
-      </arg>
+      </arg><sbr/>
       <command>end</command>;
 
       <synopfragment id="det_shock">
@@ -1164,7 +1164,7 @@ forecast;
 	          <synopfragmentref linkend="sto_mshock">STOCHASTIC SHOCK STATEMENT</synopfragmentref>
 	        </arg>
         </group>
-      </arg>
+      </arg><sbr/>
       <command>end</command>;
 
       <synopfragment id="det_mshock">
@@ -1337,7 +1337,7 @@ Dynare has special commands for the computation of the static equilibrium of the
         <listitem><para><literal>3</literal>: Chris Sims' solver</para></listitem>
         <listitem><para><literal>4</literal>: similar to value <literal>2</literal>, except that it deals differently with nearly singular Jacobian</para></listitem>
       </itemizedlist>
-      Default value is 2.
+      Default value is <literal>2</literal>.
     </para></listitem>
   </varlistentry>
   <varlistentry>
@@ -1394,7 +1394,7 @@ See <xref linkend='initval'/> and <xref linkend='endval'/>.
   <refsynopsisdiv>
     <cmdsynopsis>
       <command>homotopy_setup</command>;<sbr/>
-      <arg choice="plain" rep="repeat"><replaceable>VARIABLE_NAME</replaceable>, <replaceable>EXPRESSION</replaceable><arg>, <replaceable>EXPRESSION</replaceable></arg>;</arg>
+      <arg choice="plain" rep="repeat"><replaceable>VARIABLE_NAME</replaceable>, <replaceable>EXPRESSION</replaceable><arg>, <replaceable>EXPRESSION</replaceable></arg>;</arg><sbr/>
       <command>end</command>;
     </cmdsynopsis>
   </refsynopsisdiv>
@@ -1465,11 +1465,11 @@ A necessary condition for the uniqueness of a stable equilibrium in the neighbor
 <variablelist spacing='compact'>
   <varlistentry>
     <term><option>periods</option> = <replaceable>INTEGER</replaceable></term>
-    <listitem><para>Number of periods of the forecast. Default: 40</para></listitem>
+    <listitem><para>Number of periods of the forecast. Default: <literal>40</literal></para></listitem>
   </varlistentry>
   <varlistentry>
     <term><option>conf_sig</option> = <replaceable>DOUBLE</replaceable></term>
-    <listitem><para>Level of significance for confidence interval. Default: 0.90</para></listitem>
+    <listitem><para>Level of significance for confidence interval. Default: <literal>0.90</literal></para></listitem>
   </varlistentry>
 </variablelist>
 </refsect1>
@@ -1571,11 +1571,11 @@ The simulated endogenous variables are available in global matrix <varname>oo_.e
 <variablelist spacing='compact'>
   <varlistentry>
     <term><anchor id="ar" xreflabel="ar"/><option>ar</option> = <replaceable>INTEGER</replaceable></term>
-    <listitem><para>Order of autocorrelation coefficients to compute and to print. Default: 5</para></listitem>
+    <listitem><para>Order of autocorrelation coefficients to compute and to print. Default: <literal>5</literal></para></listitem>
   </varlistentry>
   <varlistentry>
     <term><option>drop</option> = <replaceable>INTEGER</replaceable></term>
-    <listitem><para>Number of points dropped at the beginning of simulation before computing the summary statistics. Default: 100</para></listitem>
+    <listitem><para>Number of points dropped at the beginning of simulation before computing the summary statistics. Default: <literal>100</literal></para></listitem>
   </varlistentry>
   <varlistentry>
     <term><option>hp_filter</option> = <replaceable>INTEGER</replaceable></term>
@@ -1583,11 +1583,11 @@ The simulated endogenous variables are available in global matrix <varname>oo_.e
   </varlistentry>
   <varlistentry>
     <term><option>hp_ngrid</option> = <replaceable>INTEGER</replaceable></term>
-    <listitem><para>Number of points in the grid for the discrete Inverse Fast Fourier Transform used in the HP filter computation. It may be necessary to increase it for highly autocorrelated processes. Default: 512</para></listitem>
+    <listitem><para>Number of points in the grid for the discrete Inverse Fast Fourier Transform used in the HP filter computation. It may be necessary to increase it for highly autocorrelated processes. Default: <literal>512</literal></para></listitem>
   </varlistentry>
   <varlistentry>
     <term><option>irf</option> = <replaceable>INTEGER</replaceable></term>
-    <listitem><para>Number of periods on which to compute the IRFs. Setting <option>irf</option>=0, suppresses the plotting of IRF's. Default: 40</para></listitem>
+    <listitem><para>Number of periods on which to compute the IRFs. Setting <option>irf</option>=0, suppresses the plotting of IRF's. Default: <literal>40</literal></para></listitem>
   </varlistentry>
   <varlistentry>
     <term><option>relative_irf</option></term>
@@ -1623,19 +1623,19 @@ The simulated endogenous variables are available in global matrix <varname>oo_.e
   </varlistentry>
   <varlistentry>
     <term><option>order = <replaceable>INTEGER</replaceable></option></term>
-    <listitem><para>Order of Taylor approximation. Acceptable values are 1 and 2. Default: 2</para></listitem>
+    <listitem><para>Order of Taylor approximation. Acceptable values are <literal>1</literal> and <literal>2</literal>. Default: <literal>2</literal></para></listitem>
   </varlistentry>
   <varlistentry>
     <term><option>periods</option> = <replaceable>INTEGER</replaceable></term>
-    <listitem><para>Specifies the number of periods to use in simulations. If <option>order</option>=1, no simulation is necessary to compute theoretical moments and IRFs. A number of periods larger than one triggers automatically option <option>simul</option>. Default: 0</para></listitem>
+    <listitem><para>Specifies the number of periods to use in simulations. If <option>order</option>=<literal>1</literal>, no simulation is necessary to compute theoretical moments and IRFs. A number of periods larger than one triggers automatically option <option>simul</option>. Default: <literal>0</literal></para></listitem>
   </varlistentry>
   <varlistentry>
     <term><option>qz_criterium</option> = <replaceable>DOUBLE</replaceable></term>
-    <listitem><para>Value used to split stable from unstable eigenvalues in reordering the Generalized Schur decomposition used for solving 1<superscript>st</superscript> order problems. Default: 1.000001</para></listitem>
+    <listitem><para>Value used to split stable from unstable eigenvalues in reordering the Generalized Schur decomposition used for solving 1<superscript>st</superscript> order problems. Default: <literal>1.000001</literal></para></listitem>
   </varlistentry>
   <varlistentry>
     <term><option>replic</option> = <replaceable>INTEGER</replaceable></term>
-    <listitem><para>Number of simulated series used to compute the IRFs. Default: 1 if <option>order</option>=1, and 50 otherwise</para></listitem>
+    <listitem><para>Number of simulated series used to compute the IRFs. Default: <literal>1</literal> if <option>order</option>=<literal>1</literal>, and <literal>50</literal> otherwise</para></listitem>
   </varlistentry>
   <varlistentry>
     <term><option>simul</option></term>
@@ -1851,7 +1851,7 @@ varobs C y rr;
       <command>observation_trends</command>;<sbr/>
       <arg choice="plain" rep="repeat">
 	      <replaceable>VARIABLE_NAME</replaceable>(<replaceable>EXPRESSION</replaceable>);
-      </arg>
+      </arg><sbr/>
 	    <command>end</command>;
     </cmdsynopsis>
   </refsynopsisdiv>
@@ -1910,7 +1910,7 @@ end;
 	          , <replaceable>UPPER_BOUND</replaceable>
 	        </arg>
           ;
-        </arg>
+        </arg><sbr/>
 	      <command>end</command>;
       </cmdsynopsis>
     </refsect2>
@@ -1957,7 +1957,7 @@ end;
             </arg>
           </arg>
           ;
-        </arg>
+        </arg><sbr/>
 	      <command>end</command>;
 
         <synopfragment id="prior_shape">
@@ -2023,11 +2023,11 @@ Each line corresponds to an estimated parameter and follows this syntax:
   </varlistentry>
   <varlistentry>
     <term><replaceable>PRIOR_3RD_PARAMETER</replaceable></term>
-    <listitem><para>A third parameter of the prior used for generalized beta distribution, generalized gamma and for the uniform distribution. Default: 0</para></listitem>
+    <listitem><para>A third parameter of the prior used for generalized beta distribution, generalized gamma and for the uniform distribution. Default: <literal>0</literal></para></listitem>
   </varlistentry>
   <varlistentry>
     <term><replaceable>PRIOR_4TH_PARAMETER</replaceable></term>
-    <listitem><para>A fourth parameter of the prior used for generalized beta distribution, generalized gamma and for the uniform distribution. Default: 1</para></listitem>
+    <listitem><para>A fourth parameter of the prior used for generalized beta distribution, generalized gamma and for the uniform distribution. Default: <literal>1</literal></para></listitem>
   </varlistentry>
   <varlistentry>
     <term><replaceable>SCALE_PARAMETER</replaceable></term>
@@ -2108,7 +2108,7 @@ end;
 	          <replaceable>INITIAL_VALUE</replaceable>
 	        </arg>
           ;
-        </arg>
+        </arg><sbr/>
 	      <command>end</command>;
     </cmdsynopsis>
   </refsynopsisdiv>
@@ -2158,7 +2158,7 @@ end;
 	        <replaceable>UPPER_BOUND</replaceable>
 	      </arg>
         ;
-      </arg>
+      </arg><sbr/>
 	    <command>end</command>;
     </cmdsynopsis>
   </refsynopsisdiv>
@@ -2180,77 +2180,209 @@ end;
 
   <refnamediv>
     <refname>estimation</refname>
-    <refpurpose>computes estimation.</refpurpose>
+    <refpurpose>computes estimation</refpurpose>
   </refnamediv>
 
   <refsynopsisdiv>
     <cmdsynopsis>
       <command>estimation</command>
-      <arg>(OPTIONS)</arg>
-      <arg choice='plain'>;</arg>
+      <arg>(<replaceable>OPTION</replaceable><arg rep="repeat">, <replaceable>OPTION</replaceable></arg>)</arg>
+      <arg rep="repeat"><replaceable>VARIABLE_NAME</replaceable></arg>;
     </cmdsynopsis>
   </refsynopsisdiv>
 
-<refsect1><title>OPTIONS</title>
-<itemizedlist spacing='compact'>
-<listitem><para> <command>datafile</command> =
-	  <replaceable>FILENAME</replaceable>: the datafile (a .m file, a .mat file or a .xls file)</para></listitem>
-<listitem><para><command>xls_sheet</command> = <replaceable>NAME</replaceable>: the name of the sheet with the data in an Excel file</para></listitem>
-<listitem><para><command>xls_range</command> = <replaceable>RANGE</replaceable>: the range with the data in an Excel file</para></listitem>
-<listitem><para><command>nobs</command> = <replaceable>INTEGER</replaceable>: the number of observations to be used (default: all observations in the file)</para>
-<para><command>nobs</command> = ([<replaceable>INTEGER_1</replaceable>:<replaceable>INTEGER_2</replaceable>]): runs a recursive estimation and forecast for samples of size ranging of <varname>INTEGER_1</varname> to <varname>INTEGER_2</varname>. Option <varname>FORECAST</varname> must also be specified.</para> 
-</listitem>
-<listitem><para> <command>first_obs</command> = <replaceable>INTEGER</replaceable>: the number of the first observation to be used (default = 1)</para></listitem>
-<listitem><para> <command>prefilter</command> = 1: the estimation procedure demeans the data (default=0, no prefiltering)</para></listitem>
-<listitem><para> <command>presample</command> = <replaceable>INTEGER</replaceable>: the number of observations to be skipped before evaluating the likelihood (default = 0)</para></listitem>
-<listitem><para> <command>loglinear</command>: computes a log--linear approximation of the model instead of a linear (default) approximation. The data must correspond to the definition of the variables used in the modelx.</para></listitem>
-<listitem><para> <command>nograph</command>: no graphs should be plotted</para></listitem>
-<listitem><para> <command>lik_init</command>: <replaceable>INTEGER</replaceable>: type of initialization of Kalman filter.
-<itemizedlist spacing='compact'>
-  <listitem><para>1 (default): for stationary models, the initial matrix of variance of the error of forecast is set equal to the unconditional variance of the state variables.</para></listitem>
-  <listitem><para>2: for nonstationary models: a wide prior is used with an initial matrix of variance of the error of forecast diagonal with 10 on the diagonal.</para></listitem>
-</itemizedlist>
-</para></listitem>
-<listitem><anchor id="conf_sig" xreflabel="conf_sig"/><para><command>conf_sig</command> = <replaceable>{INTEGER | DOUBLE}</replaceable>: the level for the confidence intervals reported in the results (default = 0.90)</para></listitem>
-<listitem><anchor id="mh_replic" xreflabel="mh_replic"/><para> <command>mh_replic</command> = <replaceable>INTEGER</replaceable>: number of replication for Metropolis Hasting algorithm. For the time being, mh_replic should be larger than 1200 (default = 20000.)</para></listitem>
-<listitem><para> <command>mh_nblocks</command> = <replaceable>INTEGER</replaceable>: number of paralletl chains for Metropolis Hasting algorithm (default = 2).</para></listitem>
-<listitem><para> <command>mh_drop</command> = <replaceable>DOUBLE</replaceable>: the fraction of initially generated parameter vectors to be dropped before using posterior simulations (default = 0.5)</para></listitem>
-<listitem><para> <command>mh_jscale</command> = <replaceable>DOUBLE</replaceable>: the scale to be used for the jumping distribution in MH algorithm. The default value is rarely satisfactory. This option must be tune to obtain, ideally, an accpetation rate of 25% in the Metropolis-Hastings algorithm (default = 0.2).</para></listitem>
-<listitem><para><command>mh_init_scale</command>=<replaceable>DOUBLE</replaceable>: the scale to be used for drawing the initial value of the Metropolis-Hastings chain (default=2*mh_scale).</para>
-</listitem>
-<listitem><anchor id="mh_recover" xreflabel="mh_recover"/><para><command>mh_recover</command> attempts to recover a Metropolis simulation that crashed prematurely. Shouldn't be used together with <link linkend="load_mh_file">load_mh_file</link></para></listitem>
-<listitem><para><command>mode_file</command>=<replaceable>FILENAME</replaceable>: name of the file containing previous value for the mode. When computing the mode, Dynare stores the mode (<varname>xparam1</varname>) and the hessian (<varname>hh</varname>) in a file called <filename><replaceable>MODEL NAME</replaceable>_mode</filename>.</para></listitem>
-<listitem><para><command>mode_compute</command>=<replaceable>INTEGER</replaceable>: specifies the optimizer for the mode computation.
-<itemizedlist spacing='compact'>
-  <listitem><para>0: the mode isn't computed. mode_file must be specified</para></listitem>
-  <listitem><para>1: uses <trademark class="registered">Matlab</trademark> <command>fmincon</command>.</para></listitem>
-  <listitem><para>2: [not available anymore] uses Lester Ingber's Adaptive Simulated Annealing.</para></listitem>
-  <listitem><para>3: uses <trademark class="registered">Matlab</trademark> <command>fminunc</command>.</para></listitem>
-  <listitem><para>4: (default): uses Chris Sim's <command>csminwel</command>.</para></listitem>
-  <listitem><para>5: uses a routine by Marco Ratto.</para></listitem> 
-  <listitem><para>6: uses a simulated annealing - like algorithm.</para></listitem>
-  <listitem><para>7: uses <trademark class="registered">Matlab</trademark> <command>fminsearch</command> (a simplex based routine).</para></listitem>
-</itemizedlist></para></listitem>
-<listitem><para><command>mode_check</command>: when <command>mode_check</command> is set, Dynare plots the posterior density for values around the computed mode for each estimated parameter in turn. This is helpful to diagnose problems with the optimizer.</para></listitem>
-<listitem><para><command>prior_trunc</command>=<replaceable>DOUBLE</replaceable>: probability of extreme values of the prior density that is ignored when computing bounds for the parameters (default=1e-32).</para></listitem>
-<listitem><anchor id="load_mh_file" xreflabel="load_mh_file"/><para><command>load_mh_file</command>: when <command>load_mh_file</command> is declared, Dynare adds to previous Metropolis-Hastings simulations instead of starting from scratch. Shouldn't be used together with <link linkend="mh_recover">mh_recover</link>.</para></listitem>
-<listitem><para><command>optim</command>=(<replaceable>fmincon options</replaceable>): can be used to set options for fmincon, the optimizing function of <trademark class="registered">Matlab</trademark> Optimizaiton toolbox. Use <trademark class="registered">Matlab</trademark> syntax for these options</para>
-<para> (default: ('display','iter','LargeScale','off','MaxFunEvals',100000,'TolFun',1e-8,'TolX',1e-6))</para></listitem>
-<listitem>
-  <para>
-    <command>nodiagnostic</command>: doesn't compute the convergence diagnostics for Metropolis (default: diagnostics are computed and displayed).
-  </para>
-</listitem>
-<listitem><para><anchor id="bayesian_irf" xreflabel="bayesian_irf"/><command>bayesian_irf</command> triggers the computation of the posterior distribution of IRFs. The length of the IRFs are controlled by the <command>irf</command> option</para></listitem>
-<listitem><para><anchor id="moments_varendo" xreflabel="moments_varendo"/><command>moments_varendo</command> triggers the computation of the posterior distribution of the theoretical moments of the endogenous variables</para></listitem>
-<listitem><para><anchor id="filtered_vars" xreflabel="filtered_vars"/><command>filtered_vars</command> triggers the computation of the posterior distribution of filtered endogenous variables and shocks</para></listitem>
-<listitem><anchor id="smoother" xreflabel="smoother"/><para><command>smoother</command> triggers the computation of the posterior distribution of smoothered endogenous variables and shocks</para></listitem>
-<listitem><para><anchor id="forecast_opt" xreflabel="forecast"/><command>forecast = </command><replaceable>INTEGER</replaceable> computes the posterior distribution of a forecast on <replaceable>INTEGER</replaceable> periods after the end of the sample used in estimation</para></listitem>
-<listitem><para><command>tex</command> requests the printing of results and graphs in TeX tables and graphics that can be later directly included in Latex files (not yet implemented)</para></listitem>
-<listitem><para>All options for <xref linkend="stoch_simul"/></para></listitem>
-</itemizedlist>
+<refsect1><title>Options</title>
+<variablelist>
+  <varlistentry>
+    <term><option>datafile</option> = <replaceable>FILENAME</replaceable></term>
+    <listitem><para>The datafile (a <filename class="extension">.m</filename> file, a <filename class="extension">.mat</filename> file or a <filename class="extension">.xls</filename> file)</para></listitem>
+  </varlistentry>
+  <varlistentry>
+    <term><option>xls_sheet</option> = <replaceable>NAME</replaceable></term>
+    <listitem><para>The name of the sheet with the data in an Excel file</para></listitem>
+  </varlistentry>
+  <varlistentry>
+    <term><option>xls_range</option> = <replaceable>RANGE</replaceable></term>
+    <listitem><para>The range with the data in an Excel file</para></listitem>
+  </varlistentry>
+  <varlistentry>
+    <term><option>nobs</option> = <replaceable>INTEGER</replaceable></term>
+    <listitem><para>The number of observations to be used. Default: all observations in the file</para></listitem>
+  </varlistentry>
+  <varlistentry>
+    <term><option>nobs</option> = [<replaceable>INTEGER_1</replaceable>:<replaceable>INTEGER_2</replaceable>]</term>
+    <listitem><para>Runs a recursive estimation and forecast for samples of size ranging of <replaceable>INTEGER_1</replaceable> to <replaceable>INTEGER_2</replaceable>. Option <option>forecast</option> must also be specified</para></listitem>
+  </varlistentry>
+  <varlistentry>
+    <term><option>first_obs</option> = <replaceable>INTEGER</replaceable></term>
+    <listitem><para>The number of the first observation to be used. Default: <literal>1</literal></para></listitem>
+  </varlistentry>
+  <varlistentry>
+    <term><option>prefilter</option> = <replaceable>INTEGER</replaceable></term>
+    <listitem><para>A value of <literal>1</literal> means that the estimation procedure will demean the data. Default: <literal>0</literal>, <foreignphrase>i.e.</foreignphrase> no prefiltering</para></listitem>
+  </varlistentry>
+  <varlistentry>
+    <term><option>presample</option> = <replaceable>INTEGER</replaceable></term>
+    <listitem><para>The number of observations to be skipped before evaluating the likelihood. Default: <literal>0</literal></para></listitem>
+  </varlistentry>
+  <varlistentry>
+    <term><option>loglinear</option></term>
+    <listitem><para>Computes a log--linear approximation of the model instead of a linear approximation. The data must correspond to the definition of the variables used in the model. Default: computes a linear approximation</para></listitem>
+  </varlistentry>
+  <varlistentry>
+    <term><option>nograph</option></term>
+    <listitem><para>No graphs should be plotted</para></listitem>
+  </varlistentry>
+  <varlistentry>
+    <term><option>lik_init</option> = <replaceable>INTEGER</replaceable></term>
+    <listitem><para>Type of initialization of Kalman filter:
+        <itemizedlist>
+          <listitem><para><literal>1</literal>: for stationary models, the initial matrix of variance of the error of forecast is set equal to the unconditional variance of the state variables</para></listitem>
+          <listitem><para><literal>2</literal>: for nonstationary models: a wide prior is used with an initial matrix of variance of the error of forecast diagonal with 10 on the diagonal</para></listitem>
+        </itemizedlist>
+        Default value is <literal>1</literal>.
+    </para></listitem>
+  </varlistentry>
+  <varlistentry>
+    <term><option>lik_algo</option> = <replaceable>INTEGER</replaceable></term>
+    <listitem><para>...</para></listitem>
+  </varlistentry>
+  <varlistentry id="conf_sig" xreflabel="conf_sig">
+    <term><option>conf_sig</option> = <replaceable>DOUBLE</replaceable></term>
+    <listitem><para>The level for the confidence intervals reported in the results. Default: <literal>0.90</literal></para></listitem>
+  </varlistentry>
+  <varlistentry id="mh_replic" xreflabel="mh_replic">
+    <term><option>mh_replic</option> = <replaceable>INTEGER</replaceable></term>
+    <listitem><para>Number of replications for Metropolis-Hastings algorithm. For the time being, <option>mh_replic</option> should be larger than <literal>1200</literal>. Default: <literal>20000</literal></para></listitem>
+  </varlistentry>
+  <varlistentry>
+    <term><option>mh_nblocks</option> = <replaceable>INTEGER</replaceable></term>
+    <listitem><para>Number of parallel chains for Metropolis-Hastings algorithm. Default: <literal>2</literal></para></listitem>
+  </varlistentry>
+  <varlistentry>
+    <term><option>mh_drop</option> = <replaceable>DOUBLE</replaceable></term>
+    <listitem><para>The fraction of initially generated parameter vectors to be dropped before using posterior simulations. Default: <literal>0.5</literal></para></listitem>
+  </varlistentry>
+  <varlistentry>
+    <term><option>mh_jscale</option> = <replaceable>DOUBLE</replaceable></term>
+    <listitem><para>The scale to be used for the jumping distribution in Metropolis-Hastings algorithm. The default value is rarely satisfactory. This option must be tuned to obtain, ideally, an acceptation rate of 25% in the Metropolis-Hastings algorithm. Default: <literal>0.2</literal></para></listitem>
+  </varlistentry>
+  <varlistentry>
+    <term><option>mh_init_scale</option> = <replaceable>DOUBLE</replaceable></term>
+    <listitem><para>The scale to be used for drawing the initial value of the Metropolis-Hastings chain. Default: 2*<option>mh_scale</option></para></listitem>
+  </varlistentry>
+  <varlistentry id="mh_recover" xreflabel="mh_recover">
+    <term><option>mh_recover</option></term>
+    <listitem><para>Attempts to recover a Metropolis-Hastings simulation that crashed prematurely. Shouldn't be used together with <link linkend="load_mh_file"><option>load_mh_file</option></link></para></listitem>
+  </varlistentry>
+  <varlistentry>
+    <term><option>mh_mode</option> = <replaceable>INTEGER</replaceable></term>
+    <listitem><para>...</para></listitem>
+  </varlistentry>
+  <varlistentry>
+    <term><option>mode_file</option> = <replaceable>FILENAME</replaceable></term>
+    <listitem><para>Name of the file containing previous value for the mode. When computing the mode, Dynare stores the mode (<varname>xparam1</varname>) and the hessian (<varname>hh</varname>) in a file called <filename><replaceable>MODEL_FILENAME</replaceable>_mode.mat</filename></para></listitem>
+  </varlistentry>
+  <varlistentry>
+    <term><option>mode_compute</option> = <replaceable>INTEGER</replaceable></term>
+    <listitem><para>Specifies the optimizer for the mode computation:
+        <itemizedlist>
+          <listitem><para><literal>0</literal>: the mode isn't computed. mode_file must be specified</para></listitem>
+          <listitem><para><literal>1</literal>: uses <trademark class="registered">Matlab</trademark>'s <command>fmincon</command></para></listitem>
+          <listitem><para><literal>2</literal>: value no longer used</para></listitem>
+          <listitem><para><literal>3</literal>: uses <trademark class="registered">Matlab</trademark>'s <command>fminunc</command></para></listitem>
+          <listitem><para><literal>4</literal>: uses Chris Sim's <command>csminwel</command></para></listitem>
+          <listitem><para><literal>5</literal>: uses a routine by Marco Ratto</para></listitem> 
+          <listitem><para><literal>6</literal>: uses a simulated annealing-like algorithm</para></listitem>
+          <listitem><para><literal>7</literal>: uses <trademark class="registered">Matlab</trademark>'s <command>fminsearch</command> (a simplex based routine)</para></listitem>
+        </itemizedlist>
+        Default value is <literal>4</literal>.
+    </para></listitem>
+  </varlistentry>
+  <varlistentry>
+    <term><option>mode_check</option></term>
+    <listitem><para>Tells Dynare to plot the posterior density for values around the computed mode for each estimated parameter in turn. This is helpful to diagnose problems with the optimizer</para></listitem>
+  </varlistentry>
+  <varlistentry>
+    <term><option>prior_trunc</option> = <replaceable>DOUBLE</replaceable></term>
+    <listitem><para>Probability of extreme values of the prior density that is ignored when computing bounds for the parameters. Default: <literal>1e-32</literal></para></listitem>
+  </varlistentry>
+  <varlistentry id="load_mh_file" xreflabel="load_mh_file">
+    <term><option>load_mh_file</option></term>
+    <listitem><para>Tells Dynare to add to previous Metropolis-Hastings simulations instead of starting from scratch. Shouldn't be used together with <link linkend="mh_recover">mh_recover</link></para></listitem>
+  </varlistentry>
+  <varlistentry>
+    <term><option>optim</option> = (<replaceable>fmincon options</replaceable>)</term>
+    <listitem><para>Can be used to set options for <command>fmincon</command>, the optimizing function of <trademark class="registered">Matlab</trademark> Optimizaiton toolbox. Use <trademark class="registered">Matlab</trademark>'s syntax for these options. Default: <literal>('display','iter','LargeScale','off','MaxFunEvals',100000,'TolFun',1e-8,'TolX',1e-6)</literal></para></listitem>
+  </varlistentry>
+  <varlistentry>
+    <term><option>nodiagnostic</option></term>
+    <listitem><para>Doesn't compute the convergence diagnostics for Metropolis-Hastings. Default: diagnostics are computed and displayed</para></listitem>
+  </varlistentry>
+  <varlistentry id="bayesian_irf" xreflabel="bayesian_irf">
+    <term><option>bayesian_irf</option></term>
+    <listitem><para>Triggers the computation of the posterior distribution of IRFs. The length of the IRFs are controlled by the <option>irf</option> option</para></listitem>
+  </varlistentry>
+  <varlistentry id="moments_varendo" xreflabel="moments_varendo">
+    <term><option>moments_varendo</option></term>
+    <listitem><para>Triggers the computation of the posterior distribution of the theoretical moments of the endogenous variables</para></listitem>
+  </varlistentry>
+  <varlistentry id="filtered_vars" xreflabel="filtered_vars">
+    <term><option>filtered_vars</option></term>
+    <listitem><para>Triggers the computation of the posterior distribution of filtered endogenous variables and shocks</para></listitem>
+  </varlistentry>
+  <varlistentry id="smoother" xreflabel="smoother">
+    <term><option>smoother</option></term>
+    <listitem><para>Triggers the computation of the posterior distribution of smoothered endogenous variables and shocks</para></listitem>
+  </varlistentry>
+  <varlistentry id="forecast_opt" xreflabel="forecast">
+    <term><option>forecast</option> = <replaceable>INTEGER</replaceable></term>
+    <listitem><para>Computes the posterior distribution of a forecast on <replaceable>INTEGER</replaceable> periods after the end of the sample used in estimation</para></listitem>
+  </varlistentry>
+  <varlistentry>
+    <term><option>tex</option></term>
+    <listitem><para>Requests the printing of results and graphs in TeX tables and graphics that can be later directly included in LaTeX files (not yet implemented)</para></listitem>
+  </varlistentry>
+  <varlistentry>
+    <term><option>kalman_algo</option> = <replaceable>INTEGER</replaceable></term>
+    <listitem><para>...</para></listitem>
+  </varlistentry>
+  <varlistentry>
+    <term><option>kalman_tol</option> = <replaceable>INTEGER</replaceable></term>
+    <listitem><para>...</para></listitem>
+  </varlistentry>
+  <varlistentry>
+    <term><option>filter_step_ahead</option> = [<replaceable>INTEGER_1</replaceable>:<replaceable>INTEGER_2</replaceable>]</term>
+    <listitem><para>...</para></listitem>
+  </varlistentry>
+  <varlistentry>
+    <term><option>constant</option></term>
+    <listitem><para>...</para></listitem>
+  </varlistentry>
+  <varlistentry>
+    <term><option>noconstant</option></term>
+    <listitem><para>...</para></listitem>
+  </varlistentry>
+  <varlistentry>
+    <term><option>diffuse_filter</option></term>
+    <listitem><para>...</para></listitem>
+  </varlistentry>
+  <varlistentry>
+    <term><option>solve_algo</option> = <replaceable>INTEGER</replaceable></term>
+    <listitem><para>See <xref linkend="steady"/></para></listitem>
+  </varlistentry>
+  <varlistentry>
+    <term><option>order</option> = <replaceable>INTEGER</replaceable></term>
+    <listitem><para>See <xref linkend="stoch_simul"/></para></listitem>
+  </varlistentry>
+  <varlistentry>
+    <term><option>irf</option> = <replaceable>INTEGER</replaceable></term>
+    <listitem><para>See <xref linkend="stoch_simul"/></para></listitem>
+  </varlistentry>
+</variablelist>
 
-<note><para> If no <command>mh_jscale</command> parameter is used in estimated_params, the procedure uses <command>mh_jscale</command> for all parameters. If <command>mh_jscale</command> option isn't set, the procedure uses 0.2 for all parameters.
+
+<note><para> If no <option>mh_jscale</option> parameter is used in estimated_params, the procedure uses <option>mh_jscale</option> for all parameters. If <option>mh_jscale</option> option isn't set, the procedure uses <literal>0.2</literal> for all parameters.
 </para></note>
 </refsect1>
 
@@ -2268,7 +2400,7 @@ end;
 <refsect1><title>Output</title>
 <para>After running <command>estimation</command>, the parameters and the variance matrix of the shocks are set to the mode for maximum likelihood estimation or posterior mode computation without Metropolis iterations.
 </para>
-<para>After <command>estimation</command> with Metropolis iterations (option <command>mh_replic</command> > 0 or option <command>load_mh_file</command> set) the parameters and the variance matrix of the shocks are set to the posterior mean.</para>
+<para>After <command>estimation</command> with Metropolis iterations (option <option>mh_replic</option> > 0 or option <option>load_mh_file</option> set) the parameters and the variance matrix of the shocks are set to the posterior mean.</para>
 
 <para>Depending on the options, <command>estimation</command> stores results in the following fields of structure <varname>oo_</varname>:
 <table orient="land"><title>Content of <varname>oo_</varname></title><tgroup cols='6'>
