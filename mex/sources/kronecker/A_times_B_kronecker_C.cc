@@ -95,7 +95,7 @@ void full_A_times_kronecker_B_C(double *A, double *B, double *C, double *D,
 }
 
 
-void full_A_times_kronecker_B_B(double *A, double *B, double *D, lapack_int mA, lapack_int lapack_nA, lapack_int mB, lapack_int nB)
+void full_A_times_kronecker_B_B(double *A, double *B, double *D, lapack_int mA, lapack_int nA, lapack_int mB, lapack_int nB)
 {
   #if USE_OMP
     #pragma omp parallel for num_threads(atoi(getenv("DYNARE_NUM_THREADS")))
