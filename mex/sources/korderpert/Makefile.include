@@ -1,0 +1,15 @@
+CC := gcc
+DEBUG := yes
+MATLAB := 1
+DYNAREPPDIR = /home/michel/dynare/svn/dynare++/dynare++
+# George
+#MATLAB_PATH := c:/"Program Files"/MATLAB_SV71
+#MEX_SUFFIX := dll
+#LDFLAGS := -Wl,-L"c:/Program Files"/MATLAB_SV71/extern/lib/win32/microsoft/ \
+#	-Wl,-llibmex -Wl,-llibmx  -Wl,-llibmwlapack -Wl,-llibdflapack \
+#	-lg2c -lmingw32  -lstdc++ 
+# Michel
+MATLAB_PATH := /home/michel/usr/bin/matlab
+MEX_SUFFIX := mexa64
+CC_FLAGS := -fPIC
+LDFLAGS := -Wl,-L/home/michel/usr/bin/matlab/bin/glnxa64 -lmwlapack -lmwblas
