@@ -633,7 +633,7 @@ DynamicModelDLL::DynamicModelDLL(const char * modName, const int y_length, const
         
 # else // __linux__
 		if (sExt==NULL) sExt=(".so");
-		void *dynamicHinstance = dlopen(strcat(fName,sExt), RTLD_NOW);
+		dynamicHinstance = dlopen(strcat(fName,sExt), RTLD_NOW);
 		if((dynamicHinstance == NULL) || dlerror()){
 			cerr << dlerror() << endl;
 			mexPrintf("MexPrintf:Error loading DLL: %s", dlerror);
@@ -750,8 +750,8 @@ void DynamicModelDLL::eval(const Vector&y, const TwoDMatrix&x, const  Vector* mo
         for (int i = 0; i < modParams->length(); i++) {
             mexPrintf("k_ord_perturbation: Params[%d]= %g.\n", i, (*modParams)[i]);  }
         for (int i = 0; i < jcols-nExog; i++) {
-            mexPrintf("k_ord_perturbation: Ys[%d]= %g.\n", i, y[i]);} 
-		mexPrintf("k_order_perturbation: call <model> Dynamic dParams= %d ,  , dy = %d dx = %d .\n"
+            mexPrintf("k_ord_perturbation: Ys[%d]= %g.\n", i, dy[i]);} 
+	mexPrintf("k_order_perturbation: call <model> Dynamic dParams= %g ,  , dy = %g dx = %f .\n"
             ,dbParams[0],dy[0],dx[0]);
 
 #endif        
