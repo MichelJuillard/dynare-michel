@@ -24,6 +24,12 @@
 #ifndef CPPLAPACK_H
 #define CPPLAPACK_H
 
+#ifdef MATLAB
+#include "mex.h"
+#endif
+
+#include "../../matlab_versions_compatibility.h"
+
 #if defined(MATLAB) && !defined(__linux__) && !defined(OCTAVE)
 #define LAPACK_dgetrs dgetrs
 #define LAPACK_dgetrf dgetrf
@@ -46,6 +52,7 @@
 #define LAPACK_dsyev  dsyev_
 #endif
 
+#if defined NO_LAPACK_H
 #define LACHAR const char*
 #define CONST_LAINT const int*
 #define LAINT int*
@@ -83,7 +90,9 @@ extern "C" {
 	void LAPACK_dsyev(LACHAR jobz, LACHAR uplo, CONST_LAINT n, LADOU a, CONST_LAINT lda,
 					  LADOU w, LADOU work, CONST_LAINT lwork, LAINT info); 
 };
-
+#else /* NO_LAPACK_H isn't defined */
+#include "lapack.h"
+#endif
 
 #endif /* CPPLAPACK_H */
 

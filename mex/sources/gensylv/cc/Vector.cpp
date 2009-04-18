@@ -41,11 +41,11 @@ using namespace std;
 
 ZeroPad zero_pad;
 
-void Vector::copy(const double* d, int inc)
+void Vector::copy(const double* d, lapack_int inc)
 {
-	int n = length();
-	int incy = skip();
-	BLAS_dcopy(&n, d, &inc, base(), &incy);
+	blas_int n = length();
+	blas_int incy = skip();
+	BLAS_dcopy(&n, const_cast<double*>(d), &inc, const_cast<double*>(base()), &incy);
 }
 
 Vector::Vector(const Vector& v)
@@ -190,10 +190,10 @@ void Vector::add(double r, const Vector& v)
 
 void Vector::add(double r, const ConstVector& v)
 {
-	int n = length();
-	int incx = v.skip();
-	int incy = skip();
-	BLAS_daxpy(&n, &r, v.base(), &incx, base(), &incy);
+	blas_int n = length();
+	blas_int incx = v.skip();
+	blas_int incy = skip();
+	BLAS_daxpy(&n, &r, const_cast<double*>(v.base()), &incx, base(), &incy);
 }
 
 void Vector::add(const double* z, const Vector& v)
@@ -203,16 +203,16 @@ void Vector::add(const double* z, const Vector& v)
 
 void Vector::add(const double* z, const ConstVector& v)
 {
-	int n = length()/2;
-	int incx = v.skip();
-	int incy = skip();
-	BLAS_zaxpy(&n, z, v.base(), &incx, base(), &incy);
+	blas_int n = length()/2;
+	blas_int incx = v.skip();
+	blas_int incy = skip();
+	BLAS_zaxpy(&n, const_cast<double*>(z), const_cast<double*>(v.base()), &incx, base(), &incy);
 }
 
 void Vector::mult(double r)
 {
-	int n = length();
-	int incx = skip();
+	blas_int n = length();
+	blas_int incx = skip();
 	BLAS_dscal(&n, &r, base(), &incx);
 }
 
@@ -334,10 +334,10 @@ double ConstVector::dot(const ConstVector& y) const
 {
 	if (length() != y.length())
 		throw SYLV_MES_EXCEPTION("Vector has different length in ConstVector::dot.");
-	int n = length();
-	int incx = skip();
-	int incy = y.skip();
-	return BLAS_ddot(&n, base(), &incx, y.base(), &incy);
+	blas_int n = length();
+	blas_int incx = skip();
+	blas_int incy = y.skip();
+	return BLAS_ddot(&n, const_cast<double*>(base()), &incx, const_cast<double*>(y.base()), &incy);
 }
 
 bool ConstVector::isFinite() const

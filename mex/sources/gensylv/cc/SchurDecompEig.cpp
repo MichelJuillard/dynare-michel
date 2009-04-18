@@ -64,12 +64,12 @@ bool SchurDecompEig::tryToSwap(diag_iter& it, diag_iter& itadd)
 	itadd = it;
 	--itadd;
 
-	int n = getDim();
-	int ifst = (*it).getIndex() + 1;
-	int ilst = (*itadd).getIndex() + 1;
+	lapack_int n = getDim();
+	lapack_int ifst = (*it).getIndex() + 1;
+	lapack_int ilst = (*itadd).getIndex() + 1;
 	double* work = new double[n];
-	int info;
-	LAPACK_dtrexc("V", &n, getT().base(), &n, getQ().base(), &n, &ifst, &ilst, work,
+	lapack_int info;
+	LAPACK_dtrexc(const_cast<char*>("V"), &n, getT().base(), &n, getQ().base(), &n, &ifst, &ilst, work,
 				  &info);
 	delete [] work;
 	if (info < 0) {

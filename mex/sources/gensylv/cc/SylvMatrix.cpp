@@ -63,16 +63,17 @@ void SylvMatrix::multLeft(int zero_cols, const GeneralMatrix& a, const GeneralMa
 	// another copy of (usually big) b (we are not able to do inplace
 	// submatrix of const GeneralMatrix)
 	if (a.getLD() > 0 && ld > 0) {
-		int mm = a.numRows();
-		int nn = cols;
-		int kk = a.numCols();
+		blas_int mm = a.numRows();
+		blas_int nn = cols;
+		blas_int kk = a.numCols();
 		double alpha = 1.0;
-		int lda = a.getLD();
-		int ldb = ld;
+		blas_int lda = a.getLD();
+		blas_int ldb = ld;
 		double beta = 0.0;
-		int ldc = ld;
-		BLAS_dgemm("N", "N", &mm, &nn, &kk, &alpha, a.getData().base(), &lda,
-				   b.getData().base()+off, &ldb, &beta, data.base(), &ldc);
+		blas_int ldc = ld;
+		BLAS_dgemm(const_cast<char*>("N"), const_cast<char*>("N"), &mm, &nn, &kk, &alpha, 
+			   const_cast<double*>(a.getData().base()), &lda,
+			   const_cast<double*>(b.getData().base()+off), &ldb, &beta, data.base(), &ldc);
 	}
 }
 
@@ -225,29 +226,30 @@ void SqSylvMatrix::multInvLeft2(GeneralMatrix& a, GeneralMatrix& b,
 	}
 	// PLU factorization
 	Vector inv(data);
-	int * const ipiv = new int[rows];
-	int info;
-	LAPACK_dgetrf(&rows, &rows, inv.base(), &rows, ipiv, &info);
+	lapack_int * const ipiv = new lapack_int[rows];
+	lapack_int info;
+	lapack_int rows_arg = rows;
+	LAPACK_dgetrf(&rows_arg, &rows_arg, inv.base(), &rows_arg, ipiv, &info);
 	// solve a
-	int acols = a.numCols();
+	lapack_int acols = a.numCols();
 	double* abase = a.base();
-	LAPACK_dgetrs("N", &rows, &acols, inv.base(), &rows, ipiv,
-				  abase, &rows, &info);
+	LAPACK_dgetrs(const_cast<char*>("N"), &rows_arg, &acols, inv.base(), &rows_arg, ipiv,
+				  abase, &rows_arg, &info);
 	// solve b
-	int bcols = b.numCols();
+	lapack_int bcols = b.numCols();
 	double* bbase = b.base();
-	LAPACK_dgetrs("N", &rows, &bcols, inv.base(), &rows, ipiv,
-				  bbase, &rows, &info);
+	LAPACK_dgetrs(const_cast<char*>("N"), &rows_arg, &bcols, inv.base(), &rows_arg, ipiv,
+				  bbase, &rows_arg, &info);
 	delete [] ipiv;
 
 	// condition numbers
 	double* const work = new double[4*rows];
-	int* const iwork = new int[rows];
+	lapack_int* const iwork = new lapack_int[rows];
 	double norm1 = getNorm1();
-	LAPACK_dgecon("1", &rows, inv.base(), &rows, &norm1, &rcond1, 
+	LAPACK_dgecon(const_cast<char*>("1"), &rows_arg, inv.base(), &rows_arg, &norm1, &rcond1, 
 				  work, iwork, &info);
 	double norminf = getNormInf();
-	LAPACK_dgecon("I", &rows, inv.base(), &rows, &norminf, &rcondinf, 
+	LAPACK_dgecon(const_cast<char*>("I"), &rows_arg, inv.base(), &rows_arg, &norminf, &rcondinf, 
 				  work, iwork, &info);
 	delete [] iwork;
 	delete [] work;

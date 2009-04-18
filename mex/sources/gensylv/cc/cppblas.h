@@ -24,6 +24,12 @@
 #ifndef CPPBLAS_H
 #define CPPBLAS_H
 
+#ifdef MATLAB
+#include "mex.h"
+#endif
+
+#include "../../matlab_versions_compatibility.h"
+
 #if defined(MATLAB) && !defined(__linux__) && !defined(OCTAVE)
 #define BLAS_dgemm dgemm
 #define BLAS_dgemv dgemv
@@ -48,6 +54,7 @@
 #define BLAS_ddot  ddot_
 #endif
 
+#if defined NO_BLAS_H
 #define BLCHAR const char*
 #define CONST_BLINT const int*
 #define CONST_BLDOU const double*
@@ -78,7 +85,9 @@ extern "C" {
 	double BLAS_ddot(CONST_BLINT n, CONST_BLDOU x, CONST_BLINT incx, CONST_BLDOU y,
 					 CONST_BLINT incy);
 };
-
+#else /* NO_BLAS_H isn't defined */
+#include "blas.h"
+#endif
 
 #endif /* CPPBLAS_H */
 

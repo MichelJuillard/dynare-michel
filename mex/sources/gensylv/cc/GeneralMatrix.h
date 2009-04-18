@@ -25,6 +25,8 @@
 #define GENERAL_MATRIX_H
 
 #include "Vector.h"
+#include "cppblas.h"
+#include "cpplapack.h"
 
 class GeneralMatrix;
 
@@ -82,7 +84,7 @@ public:
 
 	virtual void print() const;
 protected:
-	void multInvLeft(const char* trans, int mrows, int mcols, int mld, double* d) const;
+	void multInvLeft(const char* trans, lapack_int mrows, lapack_int mcols, lapack_int mld, double* d) const;
 };
 
 

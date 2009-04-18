@@ -24,6 +24,12 @@
 #ifndef VECTOR_H
 #define VECTOR_H
 
+#ifdef MATLAB
+#include "mex.h"
+#endif
+
+#include "../../matlab_versions_compatibility.h"
+
 /* NOTE! Vector and ConstVector have not common super class in order
  * to avoid running virtual method invokation mechanism. Some
  * members, and methods are thus duplicated */ 
@@ -110,7 +116,7 @@ public:
 					   const Vector& b1, const Vector& b2)
 		{mult2a(-alpha, -beta1, -beta2, x1, x2, b1, b2);}
 private:
-	void copy(const double* d, int inc);
+	void copy(const double* d, lapack_int inc);
 	const Vector& operator=(int); // must not be used (not implemented)
 	const Vector& operator=(double); // must not be used (not implemented)
 };
