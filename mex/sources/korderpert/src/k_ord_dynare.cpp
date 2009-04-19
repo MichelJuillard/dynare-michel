@@ -329,13 +329,24 @@ void KordpDynare::populateDerivativesContainer(TwoDMatrix*g, int ord)
 
    //    model derivatives FSSparseTensor instance for single order only 
     //(higher orders requires Symetry to insert in particular position.)
-    FSSparseTensor *mdTi=(new FSSparseTensor (ord, g->ncols(),g->nrows()));
+//    FSSparseTensor *mdTi=(new FSSparseTensor (ord, g->ncols(),g->nrows()));
+    FSSparseTensor *mdTi=(new FSSparseTensor (ord, nJcols,g->nrows()));
 
     for (int i = 0; i<g->ncols(); i++){
             for (int j = 0; j<g->nrows(); j++){
                 if (g->get(j,i)!=0.0){ // populate sparse if not zero
-                    IntSequence s(1,0);
-                    s[0]=i;
+                    IntSequence s(ord,0);
+//                    s[ord-1]=i;
+					double intp;
+					int vx=i;  // variable index
+					for (int ordc=0;ordc<ord, vx>0;ordc++){
+						intp=0;
+						if (vx >= nJcols)
+							modf((double)vx/nJcols, &intp);
+//							modf(((double)vx)/pow(nJcol,ord-ordc), &intp);
+	                    s[ordc]=vx-(intp*nJcols);//(int)i/pow(nJcol,ordc);
+						vx=(int)intp;
+					}
                     mdTi->insert(s, j,g->get(j,i));
                 }
             }
