@@ -127,7 +127,7 @@ function [dr,info,M_,options_,oo_] = dr1(dr,task,M_,options_,oo_)
    
         
         
-    if options_.order == 1
+    if options_.order < 3
         M_.var_order_endo_names=M_.endo_names(dr.order_var,:);
 %            z = repmat(dr.ys,1,klen);
 %            z = z(iyr0) ;
@@ -153,7 +153,7 @@ function [dr,info,M_,options_,oo_] = dr1(dr,task,M_,options_,oo_)
             return
         end
 
-    elseif options_.order > 1
+    elseif options_.order > 2
         error(' can not use order > 1 with K-Order yet!')
         % or ???
         disp('********************************************************************');
