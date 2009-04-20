@@ -89,7 +89,11 @@ while i<n,
                 h1(i)= htol/abs(dx(it))*h1(i);
                 xh1(i)=x(i)+h1(i);
             end
+            try
             fx = feval(func,xh1,varargin{:});
+            catch
+              fx=1.e8;
+            end
             it=it+1;
             dx(it)=(fx-f0);
             h0(it)=h1(i);

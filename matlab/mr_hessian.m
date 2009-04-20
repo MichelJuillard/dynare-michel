@@ -77,7 +77,11 @@ while i<n,
     hcheck=0;
     dx=[];
     xh1(i)=x(i)+h1(i);
-    [fx, ffx]=feval(func,xh1,varargin{:});
+    try
+      [fx, ffx]=feval(func,xh1,varargin{:});
+    catch
+      fx=1.e8;
+    end
     it=1;
     dx=(fx-f0);
     ic=0;
@@ -116,12 +120,20 @@ while i<n,
 %                 c=mr_nlincon(xh1,varargin{:});        
 %                 ic=1;
 %             end  
+            try 
             [fx, ffx]=feval(func,xh1,varargin{:});
+            catch
+              fx=1.e8;
+            end
         end
         if abs(dx(it))>(2*htol),
             h1(i)= htol/abs(dx(it))*h1(i);
             xh1(i)=x(i)+h1(i);
-            [fx, ffx]=feval(func,xh1,varargin{:});
+            try
+              [fx, ffx]=feval(func,xh1,varargin{:});
+            catch
+              fx=1.e8;
+            end
             while (fx-f0)==0,
                 h1(i)= h1(i)*2;
                 xh1(i)=x(i)+h1(i);

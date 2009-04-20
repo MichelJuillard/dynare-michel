@@ -197,7 +197,11 @@ while norm(gg)>gtol & check==0 & jit<nit,
         end
         
         if norm(x(:,icount)-xparam1)>1.e-12,
+          try 
             save m1 x fval0 nig -append
+          catch
+            save m1 x fval0 nig 
+          end
             [dum, gg, htol0, igg, hhg]=mr_hessian(func_hh,xparam1,flagit,htol,varargin{:});
             if htol0>htol, %ftol,
                 %ftol=htol0;
