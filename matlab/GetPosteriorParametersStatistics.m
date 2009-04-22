@@ -58,17 +58,17 @@ NumberOfDraws = TotalNumberOfMhDraws-floor(options_.mh_drop*TotalNumberOfMhDraws
 clear record;
 
 pnames=['     ';'beta ';'gamm ';'norm ';'invg ';'unif ';'invg2'];
-tit2 = sprintf('%10s %7s %10s %14s %4s %6s\n',' ','prior mean','post. mean','conf. interval','prior','pstdev');
-pformat = '%-*s %7.3f %8.4f %7.4f %7.4f %4s %6.4f';
+header_width = row_header_width(M_,estim_params_,bayestopt_);
+tit2 = sprintf('%-*s %10s %10s %16s %6s %10s\n',header_width+2,' ','prior mean','post. mean','conf. interval','prior','pstdev');
+pformat = '%-*s %10.3f %10.4f %10.4f %8.4f %6s %10.4f';
 
 disp(' ');disp(' ');disp('ESTIMATION RESULTS');disp(' ');
 try
     disp(sprintf('Log data density is %f.',oo_.MarginalDensity.ModifiedHarmonicMean))
 catch
-    [marginal,oo_] = marginal_density(M_, options_, estim_params_, oo_)
+    [marginal,oo_] = marginal_density(M_, options_, estim_params_, oo_);
     disp(sprintf('Log data density is %f.',oo_.MarginalDensity.ModifiedHarmonicMean))
 end
-header_width = row_header_width(M_,estim_params,bayestopt_);
 if np
     type = 'parameters';
     if TeX
@@ -97,8 +97,7 @@ if np
                 oo_ = Filloo(oo_,name,type,post_mean,hpd_interval,post_median,post_var,post_deciles,density);                
             end
         end
-        disp(sprintf(pformat,name,bayestopt_.p1(ip),...
-                     header_width, ...
+        disp(sprintf(pformat,header_width,name,bayestopt_.p1(ip),...
                      post_mean, ...
                      hpd_interval, ...
                      pnames(bayestopt_.pshape(ip)+1,:), ...
