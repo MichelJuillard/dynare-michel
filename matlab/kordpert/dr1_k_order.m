@@ -136,7 +136,43 @@ function [dr,info,M_,options_,oo_] = dr1(dr,task,M_,options_,oo_)
             if options_.order < 2 % 1st order
                 [ysteady, ghx_u]=k_order_perturbation(dr,task,M_,options_, oo_ , ['.' mexext]);
             else % 2nd order
-                [ysteady, ghx_u, ghxu_2]=k_order_perturbation(dr,task,M_,options_, oo_ , ['.' mexext]);
+                [ysteady, ghx_u, g_2]=k_order_perturbation(dr,task,M_,options_, oo_ , ['.' mexext]);
+                
+                %Here is pseud code for recovering ghxx ghxu ghxx ghs2
+                s0 = 0;
+                s1 = 0;%0
+                g_2cols=size(g_2,2);
+                g_2rows=size(g_2,1);
+                nExog=M_.exo_nbr;
+                nspred=dr.nspred;
+                %ghxx=zeros(g_2rows);
+                for i=1:g_2cols
+                   if s0 < nspred & s1 < nspred%+1
+                       for j=1:g_2rows
+                           ghxx(j,s0*nspred+s1+1) = 2*g_2(j,i);
+                       end
+                   elseif s0 < nspred & s1 < nspred+nExog %+1
+                       for j=1:g_2rows
+                           ghxu(j,(s0*nspred+s1-nspred+1)) = 2*g_2(j,i);
+                       end
+                   elseif s0 < nspred+nExog & s1 < nspred+nExog%+1
+                       for j=1:g_2rows
+                           ghuu(j,(s0-nspred)*nExog+s1-nExog+1) = 2*g_2(j,i);
+                       end
+                   else
+                       for j=1:g_2rows
+                           ghs2(j,1) = 2*g_2(j,i);
+                       end
+                   end
+                       
+                   % Note: j is the row jumber
+                   s1=s1+1;
+                   if s1 == nspred+nExog+1
+                        s0=s0+1;
+                        s1 =s0;
+                   end
+                end % for loop
+
             end
 %            load(M_.fname);
 %            dr.ys=eval([M_.fname '_ss']);
