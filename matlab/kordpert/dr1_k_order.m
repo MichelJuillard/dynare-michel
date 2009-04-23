@@ -133,7 +133,11 @@ function [dr,info,M_,options_,oo_] = dr1(dr,task,M_,options_,oo_)
 %            z = z(iyr0) ;
 %            oo_.dyn_ys=z;  % extended ys 
         try
-            [ysteady, ghx_u]=k_order_perturbation(dr,task,M_,options_, oo_ , ['.' mexext]);
+            if options_.order < 2 % 1st order
+                [ysteady, ghx_u]=k_order_perturbation(dr,task,M_,options_, oo_ , ['.' mexext]);
+            else % 2nd order
+                [ysteady, ghx_u, ghxu_2]=k_order_perturbation(dr,task,M_,options_, oo_ , ['.' mexext]);
+            end
 %            load(M_.fname);
 %            dr.ys=eval([M_.fname '_ss']);
             dr.ys=ysteady;
@@ -153,8 +157,8 @@ function [dr,info,M_,options_,oo_] = dr1(dr,task,M_,options_,oo_)
             return
         end
 
-    elseif options_.order > 2
-        error(' can not use order > 1 with K-Order yet!')
+    else %if options_.order > 2
+        error(' can not use order > 2 with K-Order yet!')
         % or ???
         disp('********************************************************************');
         disp(' can not use order > 1 with K-Order yet - Using Dynare solver instead');
@@ -224,8 +228,7 @@ function [dr,info,M_,options_,oo_] = dr1(dr,task,M_,options_,oo_)
     dr.ghx = real(dr.ghx);
     dr.ghu = real(dr.ghu);
         
-return
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
     %exogenous deterministic variables
     if M_.exo_det_nbr > 0
         f1 = sparse(jacobia_(:,nonzeros(M_.lead_lag_incidence(M_.maximum_endo_lag+2:end,order_var))));
@@ -239,6 +242,8 @@ return
             dr.ghud{i} = -M2*dr.ghud{i-1}(end-nyf+1:end,:);
         end
     end
+return
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     
     if options_.order == 1
         return
