@@ -308,18 +308,18 @@ void KordpDynare::calcDerivatives(const Vector& yy, const Vector& xx)
 			mexPrintf("k_ord_dynare.cpp: Error in calcDerivatives: dynamicDLL.eval returned wrong jacobian");
 			return;
 	}
-	ReorderCols(g1, JacobianIndices);//	ReorderCols(out, varOrder);
-	populateDerivativesContainer(g1,1);
+	//	ReorderCols(g1, JacobianIndices);//	ReorderCols(out, varOrder);
+	populateDerivativesContainer(g1,1,JacobianIndices);
 	if (nOrder>1){
-		ReorderBlocks(g2,JacobianIndices);
-		populateDerivativesContainer(g2,2);
+	  //		ReorderBlocks(g2,JacobianIndices);
+	  populateDerivativesContainer(g2,2,JacobianIndices);
 	}
 
 }
 /*******************************************************************************
 * populateDerivatives to sparse Tensor and fit it in the Derivatives Container
 *******************************************************************************/
-void KordpDynare::populateDerivativesContainer(TwoDMatrix*g, int ord)
+void KordpDynare::populateDerivativesContainer(TwoDMatrix*g, int ord, const vector<int>*  vOrder)
 {
 
 #ifdef DEBUG
@@ -332,25 +332,82 @@ void KordpDynare::populateDerivativesContainer(TwoDMatrix*g, int ord)
 //    FSSparseTensor *mdTi=(new FSSparseTensor (ord, g->ncols(),g->nrows()));
     FSSparseTensor *mdTi=(new FSSparseTensor (ord, nJcols,g->nrows()));
 
-    for (int i = 0; i<g->ncols(); i++){
-            for (int j = 0; j<g->nrows(); j++){
-                if (g->get(j,i)!=0.0){ // populate sparse if not zero
-                    IntSequence s(ord,0);
-//                    s[ord-1]=i;
-					double intp;
-					int vx=i;  // variable index
-					for (int ordc=0;ordc<ord, vx>0;ordc++){
-						intp=0;
-						if (vx >= nJcols)
-							modf((double)vx/nJcols, &intp);
-//							modf(((double)vx)/pow(nJcol,ord-ordc), &intp);
-	                    s[ordc]=vx-(intp*nJcols);//(int)i/pow(nJcol,ordc);
-						vx=(int)intp;
-					}
-                    mdTi->insert(s, j,g->get(j,i));
-                }
-            }
+//     for (int i = 0; i<g->ncols(); i++){
+//             for (int j = 0; j<g->nrows(); j++){
+//                 if (g->get(j,i)!=0.0){ // populate sparse if not zero
+//                     IntSequence s(ord,0);
+// //                    s[ord-1]=i;
+// 					double intp;
+// 					int vx=i;  // variable index
+// 					for (int ordc=0;ordc<ord, vx>0;ordc++){
+// 						intp=0;
+// 						if (vx >= nJcols)
+// 							modf((double)vx/nJcols, &intp);
+// //							modf(((double)vx)/pow(nJcol,ord-ordc), &intp);
+// 	                    s[ordc]=vx-(intp*nJcols);//(int)i/pow(nJcol,ordc);
+// 						vx=(int)intp;
+// 					}
+//                     mdTi->insert(s, j,g->get(j,i));
+//                 }
+//             }
+//    }
+
+    IntSequence s(ord,0);
+    s[0] = 0;
+    s[1] = 0;
+    int i = 0;
+    while (i < g->ncols()){
+
+      // insert new elements in each row
+      if (ord == 1){
+	for (int j = 0; j < g->nrows(); j++){
+	  double x;
+	  if (s[0] < nJcols-nExog)
+	    x = g->get(j,(*vOrder)[s[0]]);
+	  else
+	    x = g->get(j,s[0]);
+	  if (x != 0.0)
+	    mdTi->insert(s, j, x);
+	}
+	s[0]++;
+      }
+      else{	
+	int s0, s1;
+	if (s[0] < nJcols-nExog)
+	  s0 = (*vOrder)[s[0]];
+	else
+	  s0 = s[0];
+	if (s[1] < nJcols-nExog)
+	  s1 = (*vOrder)[s[1]];
+	else
+	  s1 = s[1];
+	if (s[1] >= s[0]){
+	  s.print();
+	  std::cout << s0 << " " << s1 << "\n";
+	  int i1 = s0*nJcols+s1;
+	  for (int j = 0; j < g->nrows(); j++){
+	    double x = g->get(j,i1);
+	    if (x != 0.0)
+	      mdTi->insert(s, j, x);
+	  }
+	}
+	s[1]++;
+	// when one order index is finished
+	// increase the previous one
+	if (s[1] == nJcols){
+	  s[0]++;
+	  // update starting position of next indices
+	  // in order to avoid dealing twice with the same
+	  // symmetry. Increase matrix column counter
+	  // accordingly
+	  s[1] = 0;
+	}
+      }
+
+      i++;
+
     }
+    mdTi->print();
     // md container
     //md.clear();// this is to be used only for 1st order!!
     md.remove(Symmetry(ord));
