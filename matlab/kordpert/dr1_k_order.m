@@ -173,7 +173,7 @@ function [dr,info,M_,options_,oo_] = dr1(dr,task,M_,options_,oo_)
  %                      end
                    elseif s0 < nspred+nExog & s1 < nExog% nspred+nExog%+1
                        for j=1:g_2rows
-                           ghuu(j,(s0-nspred)*nExog+s1-nExog+1) = 2*g_2(j,i);
+                           ghuu(j,(s0-nspred)*nExog+s1+1) = 2*g_2(j,i);
                        end
                    else
                        for j=1:g_2rows
