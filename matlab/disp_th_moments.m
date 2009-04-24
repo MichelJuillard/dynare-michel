@@ -57,7 +57,7 @@ function disp_th_moments(dr,var_list)
       title = [title ' (HP filter, lambda = ' int2str(options_.hp_filter) ')'];
     end
     headers=strvcat('VARIABLE','MEAN','STD. DEV.','VARIANCE');
-    table(title,headers,deblank(M_.endo_names(ivar,:)),z,lh,11,4);
+    dyntable(title,headers,deblank(M_.endo_names(ivar,:)),z,lh,11,4);
     if M_.exo_nbr > 1
       disp(' ')
       title='VARIANCE DECOMPOSITION (in percent)';
@@ -68,7 +68,7 @@ function disp_th_moments(dr,var_list)
       headers = M_.exo_names;
       headers(M_.exo_names_orig_ord,:) = headers;
       headers = strvcat(' ',headers);
-      table(title,headers,deblank(M_.endo_names(ivar(i1),:)),100*oo_.gamma_y{options_.ar+2}(i1,:), ...
+      dyntable(title,headers,deblank(M_.endo_names(ivar(i1),:)),100*oo_.gamma_y{options_.ar+2}(i1,:), ...
 	    lh,8,2);
     end
   end
@@ -82,7 +82,7 @@ function disp_th_moments(dr,var_list)
     labels = deblank(M_.endo_names(ivar,:));
     headers = strvcat('Variables',labels(i1,:));
     corr = oo_.gamma_y{1}(i1,i1)./(sd(i1)*sd(i1)');
-    table(title,headers,labels(i1,:),corr,lh,8,4);
+    dyntable(title,headers,labels(i1,:),corr,lh,8,4);
   end
   
   if options_.ar > 0
@@ -98,7 +98,7 @@ function disp_th_moments(dr,var_list)
       oo_.autocorr{i} = oo_.gamma_y{i+1};
       z(:,i) = diag(oo_.gamma_y{i+1}(i1,i1));
     end
-    table(title,headers,labels,z,0,8,4);
+    dyntable(title,headers,labels,z,0,8,4);
   end
   
 % 10/09/02 MJ 

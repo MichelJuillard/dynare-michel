@@ -114,7 +114,7 @@ function dr=mult_elimination(varlist,M_, options_, oo_)
       lab1 = M_.endo_names(dr.order_var(dr.nstatic+[ 1 2 5:8]),:);
       labels = strvcat(lab1,lab1,M_.exo_names,M_.exo_names);
       lh = size(labels,2)+2;
-      table(my_title,headers,labels,res_table,lh,10,6);
+      dyntable(my_title,headers,labels,res_table,lh,10,6);
       disp(' ')
   end
       

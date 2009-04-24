@@ -60,7 +60,7 @@ function info=stoch_simul(var_list)
     labels = deblank(M_.exo_names);
     headers = strvcat('Variables',labels);
     lh = size(labels,2)+2;
-    table(my_title,headers,labels,M_.Sigma_e,lh,10,6);
+    dyntable(my_title,headers,labels,M_.Sigma_e,lh,10,6);
     disp(' ')
     disp_dr(oo_.dr,options_.order,var_list);
   end

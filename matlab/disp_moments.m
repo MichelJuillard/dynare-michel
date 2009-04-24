@@ -57,7 +57,7 @@ function disp_moments(y,var_list)
     end
     headers=strvcat('VARIABLE','MEAN','STD. DEV.','VARIANCE','SKEWNESS', ...
 		    'KURTOSIS');
-    table(title,headers,labels,z,size(labels,2)+2,16,6);
+    dyntable(title,headers,labels,z,size(labels,2)+2,16,6);
   end
   
   if options_.nocorr == 0
@@ -68,7 +68,7 @@ function disp_moments(y,var_list)
 	       int2str(options_.hp_filter) ')'];
     end
     headers = strvcat('VARIABLE',M_.endo_names(ivar,:));
-    table(title,headers,labels,corr,size(labels,2)+2,8,4);
+    dyntable(title,headers,labels,corr,size(labels,2)+2,8,4);
   end
   
   ar = options_.ar;
@@ -86,7 +86,7 @@ function disp_moments(y,var_list)
 	       int2str(options_.hp_filter) ')'];
     end
     headers = strvcat('VARIABLE',int2str([1:ar]'));
-    table(title,headers,labels,autocorr,size(labels,2)+2,8,4);
+    dyntable(title,headers,labels,autocorr,size(labels,2)+2,8,4);
   end
   
   warning(warning_old_state);

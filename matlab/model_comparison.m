@@ -107,7 +107,7 @@ else
               exp(lmpd-lmpd(1))'; elmpd'/sum(elmpd)];
 end
 
-table(title,headers,labels,values, 0, 15, 6);
+dyntable(title,headers,labels,values, 0, 15, 6);
 
 
 function name = get_model_name_without_path(modelname)
