@@ -15,7 +15,7 @@ function dynareroot = dynare_config(path_to_dynare)
 % SPECIAL REQUIREMENTS
 %   none
 
-% Copyright (C) 2001-2008 Dynare Team
+% Copyright (C) 2001-2009 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -40,17 +40,23 @@ dynareroot = strrep(which('dynare.m'),'dynare.m','');
 addpath([dynareroot '/distributions/'])
 addpath([dynareroot '/kalman/'])
 addpath([dynareroot '/kalman/likelihood'])
+addpath([dynareroot '/AIM/'])
 
-% Add path to distribution-related function if under Matlab
-% without the statistics toolbox
-if ~exist('OCTAVE_VERSION') && isempty(ver('stats'))
-    addpath([dynareroot '/distributions/toolbox/'])
+% For functions that exist under Octave and not under Matlab, or vice-versa,
+% we provide some replacement functions
+if exist('OCTAVE_VERSION')
+    % Functions missing under Octave
+    addpath([dynareroot '/octave/'])
+else
+    % Functions missing under Matlab
+    addpath([dynareroot '/matlab/'])
+    if isempty(ver('stats'))
+        % Replacements for functions of the stats toolbox
+        addpath([dynareroot '/matlab/stats/'])
+    end
 end
 
-if exist([dynareroot '/AIM'])==7  % Add path to G.Anderson AIM solver (added by GP July'08)
-    addpath([dynareroot '/AIM/']);
-end
-
+% Add path to MEX files
 if exist('OCTAVE_VERSION')
     path_to_mex_files = [dynareroot '../mex/octave/'] ;
 else

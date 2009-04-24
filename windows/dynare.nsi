@@ -66,7 +66,7 @@ Section
  File ..\mex\2007b\*.mexw32
 
  SetOutPath $INSTDIR\mex\octave
- File ..\mex\octave\rcond.m ..\mex\octave\*.mex
+ File ..\mex\octave\*.mex
 
  SetOutPath $INSTDIR\doc
  File ..\doc\manual.pdf ..\doc\guide.pdf ..\doc\userguide\UserGuide.pdf ..\doc\bvar-a-la-sims.pdf ..\doc\macroprocessor\macroprocessor.pdf ..\doc\preprocessor\preprocessor.pdf

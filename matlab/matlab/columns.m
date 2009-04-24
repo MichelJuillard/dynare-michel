@@ -1,6 +1,8 @@
-function nr=rows(x)
+function c = columns(M)
+% Computes the number of columns of a matrix
+% NOTE: this function is builtin in Octave
 
-% Copyright (C) 2005 Dynare Team
+% Copyright (C) 2008-2009 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -17,4 +19,4 @@ function nr=rows(x)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-  nr = size(x,1);
+    c = size(M,2);

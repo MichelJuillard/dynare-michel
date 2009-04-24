@@ -71,7 +71,7 @@ linea = 0;
 for file = 1:NumberOfDrawsFiles
     load([M_.dname '/metropolis/' DrawsFiles(file).name ],'pdraws');
     NumberOfDraws = rows(pdraws);
-    isdrsaved = cols(pdraws)-1;
+    isdrsaved = columns(pdraws)-1;
     for linee = 1:NumberOfDraws
         linea = linea+1;
         if isdrsaved
