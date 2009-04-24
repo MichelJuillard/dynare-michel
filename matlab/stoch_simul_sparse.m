@@ -1,4 +1,4 @@
-function info=stoch_simul(var_list)
+function info=stoch_simul_sparse(var_list)
 
 % Copyright (C) 2001-2008 Dynare Team
 %
