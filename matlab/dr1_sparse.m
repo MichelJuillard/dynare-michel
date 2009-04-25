@@ -80,10 +80,10 @@ function [dr,info,M_,options_,oo_] = dr1_sparse(dr,task,M_,options_,oo_)
         end
         old_solve_algo = options_.solve_algo;
         %  options_.solve_algo = 1;
-        oo_.steady_state = dynare_solve('ramsey_static',oo_.steady_state,0,M_,options_,oo_,it_);
+        oo_.steady_state = dynare_solve('dyn_ramsey_static_',oo_.steady_state,0,M_,options_,oo_,it_);
         options_.solve_algo = old_solve_algo;
-        [junk,junk,multbar] = ramsey_static(oo_.steady_state,M_,options_,oo_,it_);
-        [jacobia_,M_] = ramsey_dynamic(oo_.steady_state,multbar,M_,options_,oo_,it_);
+        [junk,junk,multbar] = dyn_ramsey_static_(oo_.steady_state,M_,options_,oo_,it_);
+        [jacobia_,M_] = dyn_ramsey_dynamic_(oo_.steady_state,multbar,M_,options_,oo_,it_);
         klen = M_.maximum_lag + M_.maximum_lead + 1;
         dr.ys = [oo_.steady_state;zeros(M_.exo_nbr,1);multbar];
 % $$$         if options_.ramsey_policy == 2

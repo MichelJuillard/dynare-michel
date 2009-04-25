@@ -1,7 +1,7 @@
-function [J,M_] = ramsey_dynamic(ys,lbar,M_,options_,oo_,it_)
+function [J,M_] = dyn_ramsey_dynamic_(ys,lbar,M_,options_,oo_,it_)
 
-% function J = ramsey_dynamic(ys,lbar)
-% ramsey_dynamic sets up the Jacobian of the expanded model for optimal
+% function J = dyn_ramsey_dynamic_(ys,lbar)
+% dyn_ramsey_dynamic_ sets up the Jacobian of the expanded model for optimal
 % policies. It modifies several fields of M_
 %
 % INPUTS:

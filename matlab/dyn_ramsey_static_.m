@@ -1,6 +1,6 @@
-function [resids, rJ,mult] = ramsey_static(x,M_,options_,oo_,it_)
+function [resids, rJ,mult] = dyn_ramsey_static_(x,M_,options_,oo_,it_)
 
-% function [resids, rJ,mult] = ramsey_static(x)
+% function [resids, rJ,mult] = dyn_ramsey_static_(x)
 % Computes the static first order conditions for optimal policy
 %
 % INPUTS
