@@ -149,31 +149,32 @@ function [dr,info,M_,options_,oo_] = dr1(dr,task,M_,options_,oo_)
                 ghxu=zeros(g_2rows, nspred*nExog);
                 ghuu=zeros(g_2rows, nExog^2);
                 ghs2=zeros(g_2rows, 1);
-%                for i=1:g_2cols
+%                for i=1:g_2cols  - can not use for loop as i needs to be
+%                decremented inside loop when copying symmetric derivatives
                 i=0;
                 while i<g_2cols
-                    i=i+1
+                    i=i+1;
                    if s0 < nspred & s1 < nspred%+1
-                       if  s1 < s0
-                           ghxx(:,s0*nspred+s1+1) = ghxx(:,(s0+1)+(nspred+1)*s1);
-                           i=i-1;
+                       if  s1 < s0  % copy symmetric derivatives
+                           ghxx(:,s0*nspred+s1+1) = ghxx(:,(s0+1)+(nspred)*s1);
+                           i=i-1; % reduce conter
                        else
                            for j=1:g_2rows % j is the row jumber
                                ghxx(j,s0*nspred+s1+1) = 2*g_2(j,i);
                            end
                        end
-                   elseif s0 < nspred & s1 < nspred+nExog %+1
-%                       if  s1 < s0+nspred
-%                           ghxu(:,s0*nExog+s1-nspred+1) = ghxu(:,(s0+1)+(nExog+1)*(s1-nspred));
-%                           i=i-1;
- %                      else
+                   elseif s0 < nspred & s1 < nspred+nExog 
                            for j=1:g_2rows
                                ghxu(j,(s0*nExog+s1-nspred+1)) = 2*g_2(j,i);
                            end
- %                      end
                    elseif s0 < nspred+nExog & s1 < nExog% nspred+nExog%+1
-                       for j=1:g_2rows
-                           ghuu(j,(s0-nspred)*nExog+s1+1) = 2*g_2(j,i);
+                       if  s1 < s0-nspred  % copy symmetric derivatives
+                           ghuu(:,(s0-nspred)*nExog+s1+1) = ghuu(:,(s0-nspred+1)+(nExog+1)*(s1));
+                           i=i-1;
+                       else
+                           for j=1:g_2rows
+                               ghuu(j,(s0-nspred)*nExog+s1+1) = 2*g_2(j,i);
+                           end
                        end
                    else
                        for j=1:g_2rows
@@ -181,9 +182,9 @@ function [dr,info,M_,options_,oo_] = dr1(dr,task,M_,options_,oo_)
                        end
                    end
                    s1=s1+1;
-                   if s1 == nspred+nExog%+1
+                   if (s1 == nspred+nExog & s0<nspred)|(s1 == nExog & s0>=nspred)
                         s0=s0+1;
-                        s1 =0 %s0;
+                        s1 =0; 
                    end
                 end % for loop
                 dr.ghxx = ghxx;
@@ -192,10 +193,11 @@ function [dr,info,M_,options_,oo_] = dr1(dr,task,M_,options_,oo_)
                 dr.ghs2 = ghs2;
 
             end
-%            load(M_.fname);
+            % alternative method wnen/if direct memory transfer does not work
+%            load(M_.fname); 
 %            dr.ys=eval([M_.fname '_ss']);
+%            ghx_u = eval([M_.fname '_g_1']);
             dr.ys=ysteady;
-%            ghxu = eval([M_.fname '_g_1']);
             sss= size(ghx_u,2);
             dr.ghx= ghx_u(:,1:sss-M_.exo_nbr); 
             dr.ghu= ghx_u(:,sss-M_.exo_nbr+1:end); 
