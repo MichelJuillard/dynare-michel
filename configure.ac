@@ -37,6 +37,7 @@ if test -z "$BISON"; then
 fi
 
 AC_CHECK_HEADERS([boost/graph/adjacency_list.hpp], [], [AC_MSG_ERROR([Can't find Boost Graph Library])])
+AC_CHECK_HEADERS([boost/graph/max_cardinality_matching.hpp], [], [AC_MSG_ERROR([Your Boost version is too old. Please install a newer one.])])
 
 # Don't use deprecated hash structures
 AC_DEFINE([BOOST_NO_HASH])
