@@ -41,6 +41,25 @@ AC_CHECK_HEADERS([boost/graph/adjacency_list.hpp], [], [AC_MSG_ERROR([Can't find
 # Don't use deprecated hash structures
 AC_DEFINE([BOOST_NO_HASH])
 
-AC_CONFIG_FILES([preprocessor/Makefile])
+AC_CHECK_PROG([PDFLATEX], [pdflatex], [pdflatex])
+AC_CHECK_PROG([BIBTEX], [bibtex], [bibtex])
+AC_CHECK_PROG([DBLATEX], [dblatex], [dblatex])
+AC_CHECK_PROG([XSLTPROC], [xsltproc], [xsltproc])
+
+if test -n "${XSLTPROC}" -a -f /etc/xml/catalog
+then
+  AC_PROG_GREP
+  AC_MSG_CHECKING([for DocBook XSL files in XML catalog])
+  cat /etc/xml/catalog | ${GREP} -q http://docbook.sourceforge.net/release/xsl/
+  if test $? -eq 0
+  then
+      AC_MSG_RESULT([yes])
+  else
+      AC_MSG_RESULT([no])
+      AC_MSG_WARN([The creation of the HTML version will be very slow! You should install the docbook-xsl package.])
+  fi
+fi
+
+AC_CONFIG_FILES([preprocessor/Makefile doc/Makefile doc/preprocessor/Makefile doc/macroprocessor/Makefile doc/userguide/Makefile])
 
 AC_OUTPUT
