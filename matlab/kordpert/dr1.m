@@ -137,10 +137,10 @@ function [dr,info,M_,options_,oo_] = dr1(dr,task,M_,options_,oo_)
                 [ysteady, ghx_u]=k_order_perturbation(dr,task,M_,options_, oo_ , ['.' mexext]);
             else % 2nd order
                 [ysteady, ghx_u, g_2]=k_order_perturbation(dr,task,M_,options_, oo_ , ['.' mexext]);
-                
+                save g_2
                 %Here is code for recovering ghxx ghxu ghxx ghs2
                 s0 = 0;
-                s1 = 0;%0
+                s1 = 0;
                 g_2cols=size(g_2,2);
                 g_2rows=size(g_2,1);
                 nExog=M_.exo_nbr;
@@ -170,13 +170,13 @@ function [dr,info,M_,options_,oo_] = dr1(dr,task,M_,options_,oo_)
                        end
                    else
                        for j=1:g_2rows
-                           ghs2(j,1) = 2*g_2(j,i);
+                           ghs2(j,1) = 2*g_2(j,end);
                        end
                    end
-                   s1=s1+1;
-                   if s1 == nspred+nExog+1
-                       s0=s0+1;
-                       s1 =0; 
+                   s1 = s1+1;
+                   if s1 == nspred+nExog
+                       s0 = s0+1;
+                       s1 = s0; 
                    end
                 end % for loop
                 dr.ghxx = ghxx;
