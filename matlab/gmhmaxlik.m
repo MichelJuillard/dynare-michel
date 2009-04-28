@@ -97,7 +97,11 @@ isux = 0; jsux = 0; test = 0;
 ix2 = ModePar;% initial condition!
 ilogpo2 = - feval(ObjFun,ix2,varargin{:});% initial posterior density
 mlogpo2 = ilogpo2;
-dd = transpose(chol(CovJump));
+try 
+    dd = transpose(chol(CovJump));
+catch
+    dd = eye(length(CovJump));
+end
 while j<=MaxNumberOfTuningSimulations
   proposal = iScale*dd*randn(npar,1) + ix2;
   if all(proposal > mh_bounds(:,1)) & all(proposal < mh_bounds(:,2))
