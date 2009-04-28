@@ -151,27 +151,19 @@ function [dr,info,M_,options_,oo_] = dr1(dr,task,M_,options_,oo_)
                 ghs2=zeros(g_2rows, 1);
                 for i=1:g_2cols
                    if s0 < nspred & s1 < nspred
-                       for j=1:g_2rows
-                           ghxx(j,s0*nspred+s1+1) = 2*g_2(j,i);
+                           ghxx(:,s0*nspred+s1+1) = 2*g_2(:,i);
                            if s1 > s0
-                               ghxx(j,s1*nspred+s0+1) = 2*g_2(j,i);
+                               ghxx(:,s1*nspred+s0+1) = 2*g_2(:,i);
                            end
-                       end
                    elseif s0 < nspred & s1 < nspred+nExog 
-                           for j=1:g_2rows
-                               ghxu(j,(s0*nExog+s1-nspred+1)) = 2*g_2(j,i);
-                           end
+                               ghxu(:,(s0*nExog+s1-nspred+1)) = 2*g_2(:,i);
                    elseif s0 < nspred+nExog & s1 < nspred+nExog
-                       for j=1:g_2rows
-                           ghuu(j,(s0-nspred)*nExog+s1-nspred +1) = 2*g_2(j,i);
+                           ghuu(:,(s0-nspred)*nExog+s1-nspred +1) = 2*g_2(:,i);
                            if s1 > s0
-                               ghuu(j,(s1-nspred)*nExog+s0-nspred+1) = 2*g_2(j,i);
+                               ghuu(:,(s1-nspred)*nExog+s0-nspred+1) = 2*g_2(:,i);
                            end
-                       end
                    else
-                       for j=1:g_2rows
-                           ghs2(j,1) = 2*g_2(j,end);
-                       end
+                           ghs2(:,1) = 2*g_2(:,end);
                    end
                    s1 = s1+1;
                    if s1 == nspred+nExog
