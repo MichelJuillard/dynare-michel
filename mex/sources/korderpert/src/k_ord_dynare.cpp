@@ -33,50 +33,6 @@
 #define DYNVERSION "unknown"
 #endif
 
-    /******
-void FistOrderApproximation::approxAtSteady()
-{
-	model.calcDerivativesAtSteady();
-	FirstOrder fo(model.nstat(),model.npred(),model.nboth(),model.nforw(),
-		model.nexog(),*(model.getModelDerivatives().get(Symmetry(1))),
-		journal);
-	KORD_RAISE_IF_X(!fo.isStable(),
-		"The model is not Blanchard-Kahn stable",
-		KORD_MD_NOT_STABLE);
-	
-	if(model.order()>=2){
-		KOrder korder(model.nstat(),model.npred(),model.nboth(),model.nforw(),
-			model.getModelDerivatives(),fo.getGy(),fo.getGu(),
-			model.getVcov(),journal);
-		korder.switchToFolded();
-		for(int k= 2;k<=model.order();k++)
-			korder.performStep<KOrder::fold> (k);
-		
-		saveRuleDerivs(korder.getFoldDers());
-	}else{
-		FirstOrderDerivs<KOrder::fold> fo_ders(fo);
-		saveRuleDerivs(fo_ders);
-        
-	}
-	check(0.0);
-    Approximation::approxAtSteady();
-    
-	//saveRuleDerivs(fo);
-}
-
-
-void FistOrderApproximation::saveRuleDerivs(const FistOrder& fo)
-{
-	if(gy){
-		delete gy;
-		delete gu;
-	}
-	gy= new TwoDMatrix(fo.getGy);
-	gu= new TwoDMatrix(fo.getGu);
-}
-     ****************/
-
-/////////////////////////
 /**************************************************************************************/
 /*       Dynare DynamicModel class                                                                 */
 /**************************************************************************************/
@@ -112,12 +68,6 @@ KordpDynare::KordpDynare(const char** endo,  int num_endo,
 #endif		
 		dsnl = new DynareStateNameList(*this, *dnl, *denl);
 
-/****
-		ySteady = new Vector(*(ySteady));
-		params = new Vector(*(params));
-		vCov = new TwoDMatrix(*(vCov));
-******/
-	//	throw DynareException(__FILE__, __LINE__, string("Could not open model file ")+modName);
 		JacobianIndices= ReorderDynareJacobianIndices( varOrder);
 
 	//	Initialise ModelDerivativeContainer(*this, this->md, nOrder);
@@ -125,29 +75,12 @@ KordpDynare::KordpDynare(const char** endo,  int num_endo,
     		FSSparseTensor* t = new FSSparseTensor(iord, nY+nYs+nYss+nExog,nY);
         	md.insert(t);
         }
-/******
-		FSSparseTensor *ysTi=(new FSSparseTensor (0, 1,nY));
-			for (int j = 0; j<nY; j++){
-				if ((double)(*ySteady)[j]!=0.0){ // populate sparse if not zero
-					IntSequence s(1,0);
-					s[0]=j;
-					ysTi->insert(s, j,(double)(*ySteady)[j]);
-				}
-		}
-		md.remove(Symmetry(0));
-		md.insert(ysTi);//(&mdTi);
-//		md.print();
-//		exit(0);
-******/
 
 	}
 	catch (...){
         mexPrintf("k_ord_dynare: dynare constructor, error in StateNamelist construction.\n");
         throw DynareException(__FILE__, __LINE__, string("Could not construct Name Lists. \n"));
     }
-
-/// May need these later, GP, Oct. 08
-///	writeModelInfo(journal);
 }
 
 KordpDynare::KordpDynare(const KordpDynare& dynare)
@@ -161,13 +94,9 @@ KordpDynare::KordpDynare(const KordpDynare& dynare)
 	varOrder(dynare.varOrder), ll_Incidence(dynare.ll_Incidence),
 	JacobianIndices(dynare.JacobianIndices), qz_criterium(dynare.qz_criterium)
 {
-///	model = dynare.model->clone();
 	ySteady = new Vector(*(dynare.ySteady));
 	params = new Vector(*(dynare.params));
 	vCov = new TwoDMatrix(*(dynare.vCov));
-//	if (dynare.md)// !=NULL)
-//	Inititalise ModelDerivatives md
-//	md= *(new TensorContainer<FSSparseTensor>(dynare.md));
 	dnl = new DynareNameList(dynare);//(*this);
 	denl = new DynareExogNameList(dynare);//(*this);
 	dsnl = new DynareStateNameList(*this, *dnl, *denl);
@@ -221,11 +150,6 @@ void KordpDynare::solveDeterministicSteady(Vector& steady)
 // evaluate system at given y_t=y_{t+1}=y_{t-1}, and given shocks x_t
 void KordpDynare::evaluateSystem(Vector& out, const Vector& yy, const Vector& xx)
 {
-/***
-	ConstVector yym(yy, nstat(), nys());
-	ConstVector yyp(yy, nstat()+npred(), nyss());
-	evaluateSystem(out, yym, yy, yyp, xx);
-***/
 	dynamicDLL.eval( yy,  xx, //int nb_row_x, 
 				 params, //int it_, 
                  out, NULL, NULL);
@@ -239,11 +163,6 @@ void KordpDynare::evaluateSystem(Vector& out, const Vector& yy, const Vector& xx
 void KordpDynare::evaluateSystem(Vector& out, const Vector& yym, const Vector& yy,
 							const Vector& yyp, const Vector& xx)
 {
-/*//////////////////////////
-	ogdyn::DynareAtomValues dav(model->getAtoms(), model->getParams(), yym, yy, yyp, xx);
-	DynareEvalLoader del(model->getAtoms(), out);
-	fe->eval(dav, del);
-///////////////////////*/
 #ifdef DEBUG
 	mexPrintf("k_order_dynaare.cpp: Call eval in EvaluateSystem\n");
 #endif
@@ -251,15 +170,14 @@ void KordpDynare::evaluateSystem(Vector& out, const Vector& yym, const Vector& y
 				 params, //int it_, 
                  out, NULL, NULL);
 }
+/************************************************
+* this is main derivative calculation functin that indirectly calls dynamic.dll
+* which performs actual calculation and reorders
+***************************************************/ 
 //void KordpDynare::calcDerivatives(const Vector& yy, const TwoDMatrix& xx)
 void KordpDynare::calcDerivatives(const Vector& yy, const Vector& xx)
 {
-//	ConstVector yym(yy, nstat(), nys());
-//	ConstVector yyp(yy, nstat()+npred(), nyss());
-
-//	Vector yyp(yy, nstat()+npred(), nyss());
-
-	//double *g1, *g2;
+   // Hessian TwoDMatrix *g2;
 	TwoDMatrix *g2=NULL;
     //Jacobian 
 	TwoDMatrix * g1=new TwoDMatrix(nY,nJcols); // generate g1 for jacobian  
@@ -290,12 +208,7 @@ void KordpDynare::calcDerivatives(const Vector& yy, const Vector& xx)
 	mexPrintf("k_order_dynaare.cpp: Call eval in calcDerivatives\n");
 #endif
 	try {
-/**		if (nOrder<2){
 			dynamicDLL.eval( llxYY,  xx, //int nb_row_x, 
-					params, //int it_, 
-					out, g1, NULL);
-		}else{
-**/			dynamicDLL.eval( llxYY,  xx, //int nb_row_x, 
 					params, //int it_, 
 					out, g1, g2);
 //		}
@@ -308,7 +221,7 @@ void KordpDynare::calcDerivatives(const Vector& yy, const Vector& xx)
 			mexPrintf("k_ord_dynare.cpp: Error in calcDerivatives: dynamicDLL.eval returned wrong jacobian");
 			return;
 	}
-	//	ReorderCols(g1, JacobianIndices);//	ReorderCols(out, varOrder);
+	//	ReorderCols(g1, JacobianIndices); and populate container
 	populateDerivativesContainer(g1,1,JacobianIndices);
 	if (nOrder>1){
 	  //		ReorderBlocks(g2,JacobianIndices);
@@ -316,105 +229,7 @@ void KordpDynare::calcDerivatives(const Vector& yy, const Vector& xx)
 	}
 
 }
-/*******************************************************************************
-* populateDerivatives to sparse Tensor and fit it in the Derivatives Container
-*******************************************************************************/
-void KordpDynare::populateDerivativesContainer(TwoDMatrix*g, int ord, const vector<int>*  vOrder)
-{
-
-#ifdef DEBUG
-	mexPrintf("k_ord_dynare.cpp: populate FSSparseTensor in calcDerivatives: cols=%d , rows=%d\n"
-        , g->ncols(),g->nrows());
-#endif
-
-   //    model derivatives FSSparseTensor instance for single order only 
-    //(higher orders requires Symetry to insert in particular position.)
-//    FSSparseTensor *mdTi=(new FSSparseTensor (ord, g->ncols(),g->nrows()));
-    FSSparseTensor *mdTi=(new FSSparseTensor (ord, nJcols,g->nrows()));
-
-//     for (int i = 0; i<g->ncols(); i++){
-//             for (int j = 0; j<g->nrows(); j++){
-//                 if (g->get(j,i)!=0.0){ // populate sparse if not zero
-//                     IntSequence s(ord,0);
-// //                    s[ord-1]=i;
-// 					double intp;
-// 					int vx=i;  // variable index
-// 					for (int ordc=0;ordc<ord, vx>0;ordc++){
-// 						intp=0;
-// 						if (vx >= nJcols)
-// 							modf((double)vx/nJcols, &intp);
-// //							modf(((double)vx)/pow(nJcol,ord-ordc), &intp);
-// 	                    s[ordc]=vx-(intp*nJcols);//(int)i/pow(nJcol,ordc);
-// 						vx=(int)intp;
-// 					}
-//                     mdTi->insert(s, j,g->get(j,i));
-//                 }
-//             }
-//    }
-
-    IntSequence s(ord,0);
-    s[0] = 0;
-    s[1] = 0;
-    int i = 0;
-    while (i < g->ncols()){
-
-      // insert new elements in each row
-      if (ord == 1){
-	for (int j = 0; j < g->nrows(); j++){
-	  double x;
-	  if (s[0] < nJcols-nExog)
-	    x = g->get(j,(*vOrder)[s[0]]);
-	  else
-	    x = g->get(j,s[0]);
-	  if (x != 0.0)
-	    mdTi->insert(s, j, x);
-	}
-	s[0]++;
-      }
-      else{	
-	int s0, s1;
-	if (s[0] < nJcols-nExog)
-	  s0 = (*vOrder)[s[0]];
-	else
-	  s0 = s[0];
-	if (s[1] < nJcols-nExog)
-	  s1 = (*vOrder)[s[1]];
-	else
-	  s1 = s[1];
-	if (s[1] >= s[0]){
-	  s.print();
-	  std::cout << s0 << " " << s1 << "\n";
-	  int i1 = s0*nJcols+s1;
-	  for (int j = 0; j < g->nrows(); j++){
-	    double x = g->get(j,i1);
-	    if (x != 0.0)
-	      mdTi->insert(s, j, x);
-	  }
-	}
-	s[1]++;
-	// when one order index is finished
-	// increase the previous one
-	if (s[1] == nJcols){
-	  s[0]++;
-	  // update starting position of next indices
-	  // in order to avoid dealing twice with the same
-	  // symmetry. Increase matrix column counter
-	  // accordingly
-	  s[1] = 0;
-	}
-      }
-
-      i++;
-
-    }
-    mdTi->print();
-    // md container
-    //md.clear();// this is to be used only for 1st order!!
-    md.remove(Symmetry(ord));
-    md.insert(mdTi);//(&mdTi);
-}
-
-
+/* This version is not currently in use */
 void KordpDynare::calcDerivatives(const Vector& yy, ogu::Jacobian& jacob)
 {
 //	ConstVector yym(yy, nstat(), nys());
@@ -440,18 +255,94 @@ void KordpDynare::calcDerivatives(const Vector& yy, ogu::Jacobian& jacob)
                 }
         }
         // md container
-//        md=*(new TensorContainer<FSSparseTensor>(1)); 
-        //md.clear();
         md.insert(&mdTi);
 		delete &out;
 		delete &xx;
 }
+
 void KordpDynare::calcDerivativesAtSteady()
 {
 	Vector xx(nexog());
 	xx.zeros();
 	calcDerivatives(*ySteady, xx);
 }
+
+/*******************************************************************************
+* populateDerivatives to sparse Tensor and fit it in the Derivatives Container
+*******************************************************************************/
+void KordpDynare::populateDerivativesContainer(TwoDMatrix*g, int ord, const vector<int>*  vOrder)
+{
+
+#ifdef DEBUG
+	mexPrintf("k_ord_dynare.cpp: populate FSSparseTensor in calcDerivatives: cols=%d , rows=%d\n"
+        , g->ncols(),g->nrows());
+#endif
+
+	// model derivatives FSSparseTensor instance 
+    FSSparseTensor *mdTi=(new FSSparseTensor (ord, nJcols,g->nrows()));
+
+    IntSequence s(ord,0);
+    s[0] = 0;
+    s[1] = 0;
+    int i = 0;
+    while (i < g->ncols()){
+
+      // insert new elements in each row
+      if (ord == 1){
+		for (int j = 0; j < g->nrows(); j++){
+		  double x;
+		  if (s[0] < nJcols-nExog)
+			x = g->get(j,(*vOrder)[s[0]]);
+		  else
+			x = g->get(j,s[0]);
+		  if (x != 0.0)
+			mdTi->insert(s, j, x);
+		}
+		s[0]++;
+      }
+      else{	
+		int s0, s1;
+		if (s[0] < nJcols-nExog)
+		  s0 = (*vOrder)[s[0]];
+		else
+		  s0 = s[0];
+		if (s[1] < nJcols-nExog)
+		  s1 = (*vOrder)[s[1]];
+		else
+		  s1 = s[1];
+		if (s[1] >= s[0]){
+		  s.print();
+		  std::cout << s0 << " " << s1 << "\n";
+		  int i1 = s0*nJcols+s1;
+		  for (int j = 0; j < g->nrows(); j++){
+			double x = g->get(j,i1);
+			if (x != 0.0)
+			  mdTi->insert(s, j, x);
+		  }
+		}
+		s[1]++;
+		// when one order index is finished
+		// increase the previous one
+		if (s[1] == nJcols){
+		  s[0]++;
+		  // update starting position of next indices
+		  // in order to avoid dealing twice with the same
+		  // symmetry. Increase matrix column counter
+		  // accordingly
+		  s[1] = 0;
+		}
+      }
+
+      i++;
+
+    }
+    mdTi->print();
+    // md container
+    //md.clear();// this is to be used only for 1st order!!
+    md.remove(Symmetry(ord));
+    md.insert(mdTi);//(&mdTi);
+}
+
 
 void KordpDynare::writeModelInfo(Journal& jr) const
 {
@@ -473,31 +364,6 @@ void KordpDynare::writeModelInfo(Journal& jr) const
 		rec6 << "Number of both:                  " << nboth() << endrec;
 	}
 
-/************** May be needed
-	// write info on forward substitutions
-	const ogdyn::ForwSubstInfo* finfo = model->get_forw_subst_info();
-	if (finfo) {
-		JournalRecordPair rp(journal);
-		rp << "Information on forward substitutions" << endrec;
-		JournalRecord rec1(journal);
-		rec1 << "Number of affected equations:    " << finfo->num_affected_equations << endrec;
-		JournalRecord rec2(journal);
-		rec2 << "Number of substituted terms:     " << finfo->num_subst_terms << endrec;
-		JournalRecord rec3(journal);
-		rec3 << "Number of auxiliary variables:   " << finfo->num_aux_variables << endrec;
-		JournalRecord rec4(journal);
-		rec4 << "Number of new terms in the tree: " << finfo->num_new_terms << endrec;
-	}
-
-	// write info on substitutions
-	const ogp::SubstInfo* sinfo = model->get_subst_info();
-	if (sinfo) {
-		JournalRecordPair rp(journal);
-		rp << "Information on substitutions" << endrec;
-		JournalRecord rec1(journal);
-		rec1 << "Number of substitutions:         " << sinfo->num_substs << endrec;
-	}
-	**************/
 }
 /*********************************************************
 * LLxSteady()
@@ -670,7 +536,8 @@ void KordpDynare::ReorderCols(TwoDMatrix * tdx, const int * vOrder){
 
 /***********************************************************************
 * Recursive hierarchical block reordering of the higher order, input model 
-*	derivatives inc. Hessian
+*	derivatives inc. Hessian   
+* This is now obsolete but kept in in case it is needed
 ***********************************************************************/
 
 void KordpDynare::ReorderBlocks(TwoDMatrix * tdx, const vector<int> * vOrder){
@@ -691,9 +558,7 @@ void KordpDynare::ReorderBlocks(TwoDMatrix * tdx, const vector<int> * vOrder){
 		int bSize=tmp.ncols()/nBlocks;
 		for (int j = 0; j<nBlocks;  ++j){
 			TwoDMatrix subtdx(tmpR, bSize*((*vOrder)[j]), bSize);
-////			for (int bix=1; bix<nBlocks; ++bix){
 			ReorderBlocks(&subtdx, vOrder);
-////			}
 			tdx->place(subtdx, 0, bSize*j);
 		}
 	} else{

@@ -17,19 +17,31 @@
  * along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-// k_order_perturbation.cpp : Defines the entry point for the DLL application.
+/****************************************************** 
+// k_order_perturbation.cpp : Defines the entry point for the k-order perturbation application DLL.
 //
-// Receives call from Dynare resol and runs instead of dr1.m
-// [dr,info,M_,options_,oo_] = k_ord_perturbation(M_,options_,oo_);
-// receives M_,options_,oo_ and returns dr1, in addition to M_,options_,oo_
-//
+// called from Dynare dr1_k_order.m, (itself called form resol.m instead of regular dr1.m)
+//            if options_.order < 2 % 1st order only
+//                [ysteady, ghx_u]=k_order_perturbation(dr,task,M_,options_, oo_ , ['.' mexext]);
+//            else % 2nd order
+//                [ysteady, ghx_u, g_2]=k_order_perturbation(dr,task,M_,options_, oo_ , ['.' mexext]);
+// inputs: 
+//			dr,		- Dynare structure
+//			task,  - check or not, not used
+//			M_		- Dynare structure
+//			options_ - Dynare structure
+//			oo_		- Dynare structure 
+//			['.' mexext] Matlab dll extension
+// returns:
+//			 ysteady steady state
+//			ghx_u - first order rules packed in one matrix
+//			g_2 - 2nd order rules packed in one matrix
+**********************************************************/
 
 
 #include "k_ord_dynare.h"
 #include "math.h"
 #include <cstring>
-//#include "mex.h"
-//#include "k_order_perturbation.h"
 
 #include <cctype>
 
@@ -52,7 +64,7 @@ BOOL APIENTRY DllMain( HANDLE hModule,
     return TRUE;
 }
 
-
+// Some MS Windows preambles
 // This is an example of an exported variable
 K_ORDER_PERTURBATION_API int nK_order_perturbation=0;
 
@@ -61,7 +73,6 @@ K_ORDER_PERTURBATION_API int fnK_order_perturbation(void)
 {
 	return 42;
 }
-
 // This is the constructor of a class that has been exported.
 // see k_order_perturbation.h for the class definition
 CK_order_perturbation::CK_order_perturbation()
@@ -72,15 +83,9 @@ CK_order_perturbation::CK_order_perturbation()
 #endif // _MSC_VER && WINDOWS
 
 extern "C" {
+	
+	// mexFunction: Matlab Inerface point and the main application driver	
 
-	
-	// Receives call from Dynare resol and runs instead of dr1.m
-	// but you need to run set_state_space first which s not in resol!!!
-	// [dr,info,M_,options_,oo_] = 
-	//		k_ord_perturbation(dr,check_flag,M_,options_,oo_);
-	// receives dr, check_flag,, M_,options_,oo_  and 
-	// returns dr1, in addition to M_,options_,oo_
-	
 	void mexFunction(int nlhs, mxArray* plhs[],
 		int nrhs, const mxArray* prhs[])
 	{
@@ -129,10 +134,6 @@ extern "C" {
     mexPrintf("k_ord_perturbation: qz_criterium=%g, nParams=%d .\n",qz_criterium,npar);  
     for (int i = 0; i < npar; i++) {
         mexPrintf("k_ord_perturbation: Params[%d]= %g.\n", i, (*modParams)[i]);  }
-#endif		        
-		//const mxArray* const mxParFldp  = mxGetField(M_, 0,"params" );
-        //Vector params_vec((const double*)mxGetPr(mxParFldp), npar);
-#ifdef DEBUG		
 //	for (int i = 0; i < npar; i++) {
 //        mexPrintf("k_ord_perturbation: params_vec[%d]= %g.\n", i, params_vec[i] );   }
 #endif		        
@@ -234,14 +235,7 @@ extern "C" {
         for (int i = 0; i < nexo; i++) {
             mexPrintf("k_ord_perturbation: ExoNameList[%d][0]= %s.\n", i, exoNamesMX[i] );
         }
-//        mexPrintf("k_ord_perturbation:   endoNamesAr2Str=%s   endoNamesCharGetStr=%s.\n"
-//                ,  endoNamesStr,endoNamesCharStr );
-#endif	     
-/******
-		mxFldp 	= mxGetField(M_, 0,"param_names" );
-		const char ** paramNames = (char **) mxGetData(mxFldp);
-		const int npar = (int)mxGetN(mxFldp);
-************/
+#endif
 		if ((nEndo != nendo)||(nExog != nexo)) {  //(nPar != npar)
 			mexErrMsgTxt("Incorrect number of input parameters.\n");
 			return;
@@ -276,6 +270,7 @@ extern "C" {
 			//			DynamicFn * pDynamicFn = loadModelDynamicDLL (fname);
 			DynamicModelDLL dynamicDLL(fName,nEndo, jcols, nMax_lag, nExog, dfExt);
 
+			// intiate tensor library
 #ifdef DEBUG		
 			mexPrintf("k_order_perturbation: Call tls init\n");
 #endif
@@ -289,26 +284,8 @@ extern "C" {
    			   ySteady, vCov, modParams, nStat, nPred, nForw, nBoth,
 			   jcols, nSteps, kOrder, journal, dynamicDLL, sstol, var_order_vp, 
 			   llincidence,qz_criterium );
-    /************			
-			// make list of shocks for which we will do IRFs
-			vector<int> irf_list_ind;
-			if (params.do_irfs_all){
-                for (int i = 0; i < dynare.nexog(); i++)
-                    irf_list_ind.push_back(i);
-            }
-    		else
-            	irf_list_ind = ((const DynareNameList&)dynare.getExogNames()).selectIndices(params.irf_list);
-    ****************/			
-				// intiate tensor library
-#ifdef DEBUG		
-//	mexPrintf("k_order_perturbation: Call tls init\n");
-#endif
-/*            tls.init(dynare.order(),
-				dynare.nstat()+2*dynare.npred()+3*dynare.nboth()+
-				2*dynare.nforw()+dynare.nexog());
-*/            
+
 			// construct main K-order approximation class
-//				FistOrderApproximation app(dynare, journal, nSteps);
 #ifdef DEBUG		
 	mexPrintf("k_order_perturbation: Call Approximation constructor with qz_criterium=%f \n", qz_criterium);
 #endif
@@ -349,57 +326,17 @@ extern "C" {
 			mexPrintf("k_order_perturbation: Map print: \n");
 			for (map<string,ConstTwoDMatrix>::const_iterator cit=mm.begin();
 				cit !=mm.end(); ++cit) {
-//                    const string& sym =(*cit).first;
 					mexPrintf("k_order_perturbation: Map print: string: %s , g:\n", (*cit).first.c_str());
-//					mexPrintf("k_order_perturbation: Map print: g: \n");
-//					if ((*cit).first==string("g_1")) 
-                        (*cit).second.print();
+					(*cit).second.print();
 			}
 #endif
-
-
-			/***********************            
-			std::string ss_matrix_name("K_ordp");//params.prefix);
-			ss_matrix_name += "_steady_states";
-			
-			//		ConstTwoDMatrix(app.getSS()).writeMat4(matfd, ss_matrix_name.c_str());
-			
-             May be needed to
-			// check the approximation
-			if (params.check_along_path || params.check_along_shocks
-			|| params.check_on_ellipse) {
-			GlobalChecker gcheck(app, THREAD_GROUP::max_parallel_threads, journal);
-			if (params.check_along_shocks)
-			gcheck.checkAlongShocksAndSave(matfd, params.prefix,
-			params.getCheckShockPoints(),
-			params.getCheckShockScale(),
-			params.check_evals);
-			if (params.check_on_ellipse)
-			gcheck.checkOnEllipseAndSave(matfd, params.prefix,
-											 params.getCheckEllipsePoints(),
-											 params.getCheckEllipseScale(),
-											 params.check_evals);
-											 if (params.check_along_path)
-											 gcheck.checkAlongSimulationAndSave(matfd, params.prefix,
-											 params.getCheckPathPoints(),
-											 params.check_evals);
-											 }
-			*****************************/
-            
-        // get protected derivatives from Approximation 
-
-//          FGSContainer* rule_ders = app.GetRuleDers();
-//        	FGSContainer* rule_ders_ss = app.GetRuleDersSS();
-//			TwoDMatrix* gy = new TwoDMatrix(app.GetGy());
-//			TwoDMatrix* gu = new TwoDMatrix(app.GetGu());
-            
+           
         // get latest ysteady 
             double * dYsteady = (dynare.getSteady().base());
             ySteady = (Vector*)(&dynare.getSteady());
             
 
-		// bones for future developement of the output.
-
+		// developement of the output.
 #ifdef DEBUG		
 		mexPrintf("k_order_perturbation: Filling outputs.\n");
 #endif			
@@ -413,30 +350,19 @@ extern "C" {
 				/* Set the output pointer to the output matrix ysteady. */
 				plhs[0] = mxCreateDoubleMatrix(nEndo,1, mxREAL);
 				/* Create a C pointer to a copy of the output ysteady. */
-//				ysteady = mxGetPr(plhs[0]);
-
-
 				TwoDMatrix tmp_ss(nEndo,1, mxGetPr(plhs[0]));
 				tmp_ss = (const TwoDMatrix&)ss;
+#ifdef DEBUG		
 //				tmp_ss.print();  !! This print Crashes???
-//				delete ss;
-				
+#endif					
 			}
 			if (nlhs >= 2)
 			{
 				/* Set the output pointer to the combined output matrix gyu = [gy gu]. */
-//				plhs[1] = mxCreateDoubleMatrix(nEndo, nPred+nExog, mxREAL);
-//				plhs[1] = (double*)(gy->getData())->base();
-				/* Create a C pointer to a copy of the output matrix gy. */
-//				dgy = mxGetPr(plhs[1]);
-			
-			
-//				tmp_ss = (const TwoDMatrix&)ss;
 				int ii=1;
 				for (map<string,ConstTwoDMatrix>::const_iterator cit=mm.begin();
 					((cit !=mm.end())&&(ii<nlhs)); ++cit) 
 				{
-	//                    const string& sym =(*cit).first;
 					if ((*cit).first!="g_0") 
 					{
 						plhs[ii] = mxCreateDoubleMatrix((*cit).second.numRows(), (*cit).second.numCols(), mxREAL);
@@ -502,16 +428,7 @@ extern "C" {
 			fclose(errfd);
 			return;// 255;
         }
-
-            
-            
-			
-			/* Call the C subroutines. */
-//		delete params;
-//		delete vCov;
-//		delete ySteady;
     };
-
 }; // end of extern C
 
 //////////////////////////////////////////////////////
@@ -521,57 +438,19 @@ extern "C" {
 ///////////////////////////////////////////////////////
 const char ** DynareMxArrayToString(const mxArray * mxFldp,const int len,const int width )
 {
-//mexPrintf("start DynareMxArrayToString: ccall mxArrayToString string \n");
             char * cNamesCharStr= mxArrayToString(mxFldp);
-//            char * cNamesCharStr= "mPceWRkdnlggYPyd          yp__ A          __oo            oobb            bbss            ss    ";//mxArrayToString(mxFldp);
-
 			const char ** ret = DynareMxArrayToString(cNamesCharStr,len, width );
-/**
-			char cNamesMX[len][width+1] ;//
-#ifdef DEBUG
-mexPrintf("loop DynareMxArrayToString cNamesCharStr = %s \n", cNamesCharStr);
-#endif
-            for (int i=0;i<width;i++){
-                for (int j=0;j<len;j++){
-//            mexPrintf("k_ord_perturbation: GetEndoNameListP= %s.\n",  endoNamesP[i] );
-                  //  endoNamesS[i*(widthEndo+1)]=&(endoNamesP[i]);
-     			// Allow alphanumeric and underscores "_" only:
-                    if (isalnum(cNamesCharStr[j+i*len])||('_'==cNamesCharStr[j+i*len])){
-                        cNamesMX[j][i]=cNamesCharStr[j+i*len];
-                    }
-                    else cNamesMX[j][i]='\0';
-                }
-            }
-            const char ** ret= (const char **)mxCalloc (len, sizeof(char*));
-            for (int j=0;j<len;j++){
-				cNamesMX[j][width]='\0';
-#ifdef DEBUG
-//				mexPrintf("String [%d]= %s \n", j, cNamesMX[j]);
-#endif
-                char * token= (char*) mxCalloc ( strlen(cNamesMX[j])+1,sizeof(char));
-                strcpy (token, cNamesMX[j]);
-				ret[j]=token;
-#ifdef DEBUG
-				mexPrintf("ret [%d]= %s \n", j, ret[j]);
-#endif
-			}
-**/
 			return ret;
 }
 
 const char ** DynareMxArrayToString(const char * cNamesCharStr,const int len,const int width )
 {
-//mexPrintf("start DynareMxArrayToString: ccall mxArrayToString string \n");
-//            char * cNamesCharStr= mxArrayToString(mxFldp);
-//            char * cNamesCharStr= "mPceWRkdnlggYPyd          yp__ A          __oo            oobb            bbss            ss    ";//mxArrayToString(mxFldp);
              char cNamesMX[len][width+1] ;//
 #ifdef DEBUG
 mexPrintf("loop DynareMxArrayToString cNamesCharStr = %s \n", cNamesCharStr);
 #endif
             for (int i=0;i<width;i++){
                 for (int j=0;j<len;j++){
-//            mexPrintf("k_ord_perturbation: GetEndoNameListP= %s.\n",  endoNamesP[i] );
-                  //  endoNamesS[i*(widthEndo+1)]=&(endoNamesP[i]);
      			// Allow alphanumeric and underscores "_" only:
                     if (isalnum(cNamesCharStr[j+i*len])||('_'==cNamesCharStr[j+i*len])){
                         cNamesMX[j][i]=cNamesCharStr[j+i*len];
@@ -607,17 +486,12 @@ DynamicModelDLL::DynamicModelDLL(const char * modName, const int y_length, const
     char fName[MAX_MODEL_NAME];
     strcpy(fName,modName);
 	using namespace std;
-	//		string sFname(mFname);
-	//		string sFname(fname);
-	//		string sExt("_.dll");
-//	mexPrintf("MexPrintf: Call exp  %d.\n", y[0]);
 	strcat(fName,"_dynamic");
 #ifdef DEBUG
 		mexPrintf("MexPrintf: Call Load run DLL %s .\n", fName);
 #endif	
+
 	try {
-		//			typedef void * (__stdcall *DynamicFn)();
-		
 #ifdef WINDOWS
 		if (sExt==NULL) sExt=(".dll");
 		HINSTANCE dynamicHinstance;
@@ -645,12 +519,7 @@ DynamicModelDLL::DynamicModelDLL(const char * modName, const int y_length, const
 			mexPrintf("MexPrintf:Error finding DLL function: %s", dlerror);
 			throw 2;
 		}
-		//The pointer to maker must be of type void *, since that is the type returned 
-		//DynamicFn * 
 # endif
-		
-//		if (Dynamic == NULL)
-//			throw 3; //return;
 		
 	} catch (int i) {
 		mexPrintf("MexPrintf: error in Load and run DLL %s , %d.\n", fName, i);
@@ -663,30 +532,6 @@ DynamicModelDLL::DynamicModelDLL(const char * modName, const int y_length, const
 		return;
 	}
 }
-
-			/***************************** 
-			* bones for future alternative calls when model dyamic DLL is not available
-			***********************
-			try {
-			
-			  // Call	int mexCallMATLAB(int nlhs, mxArray *plhs[], int nrhs,
-			  //			mxArray *prhs[], const char *name);
-			  int success = mexCallMATLAB( nlhs, plhs, nrhs-1,  rhs1 , mFname);
-			  //			int success = mexCallMATLAB( nlhs, plhs, nrhs-1, (struct mxArray *[]) &aa , mFname);
-			  //plhs[0] = res;
-			  
-				
-				  
-					
-					  } catch (...) {
-					  mexErrMsgTxt("Err: Unknown error in Call MATLAB function .\n");
-					  mexPrintf("MexPrintf: Unknown error in Call MATLAB function %s.\n", mFname);
-					  return;
-					  }
-			*/
-			//		basic_string sFname(mFname);
-			
-
 
 // close DLL: If the referenced object was successfully closed, 
 // close() returns 0, non 0 otherwise
@@ -708,9 +553,6 @@ int DynamicModelDLL::close(){
 void DynamicModelDLL::eval(const Vector&y, const TwoDMatrix&x, const  Vector* modParams, 
 		int it_, Vector&residual, TwoDMatrix*g1, TwoDMatrix*g2){
 
-//		DynamicDLLfunc(double *y, double *x, int nb_row_x, double *params, 
-//		int it_, double *residual, double *g1, double *g2)
-//        const double *dy, *dx, dbParams;
         double  *dresidual, *dg1=NULL, *dg2=NULL; 
         //int length=y.length(); // not!
 		if ((jcols-nExog)!=y.length()){
@@ -760,11 +602,6 @@ void DynamicModelDLL::eval(const Vector&y, const TwoDMatrix&x, const  Vector* mo
         }catch (...){
             mexPrintf("MexPrintf: error in run Dynamic DLL \n");
         }
-        
-//		g1=	&(TwoDMatrix(double* d, int rows, int cols));
-//        g1=	new TwoDMatrix( length,  sizeof(dg1)/length, dg1);
-//        g2=	new TwoDMatrix( length,  sizeof(dg2)/length, dg2);
-//        residual=Vector(dresidual,length );
 };
 
 void DynamicModelDLL::eval(const Vector&y, const TwoDMatrix&x, const Vector * modParams, 

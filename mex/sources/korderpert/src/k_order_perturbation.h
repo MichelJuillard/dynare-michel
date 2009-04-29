@@ -40,22 +40,6 @@
 #include <string>
 #include "mex.h"
 
-// This class is exported from the k_order_perturbation.dll
-//class K_ORDER_PERTURBATION_API CK_order_perturbation {
-//public:
-//	CK_order_perturbation(void);
-// TODO: add your methods here.
-
-//extern void Dynamic(double *y, double *x, int nb_row_x, double *params, int it_, double *residual, double *g1, double *g2);
-
-
-
-//};
-
-//extern K_ORDER_PERTURBATION_API int nK_order_perturbation;
-
-//K_ORDER_PERTURBATION_API int fnK_order_perturbation(void);
-
 // <model>_Dynamic DLL pointer
 #ifdef WINDOWS
     typedef void  *(DynamicFn)

@@ -66,35 +66,35 @@ int main(int argc, char* argv[])
 			0.0, 0.0250e-3};
 		npar = 2;//(int)mxGetN(mxFldp);
 		TwoDMatrix * vCov =  new TwoDMatrix(npar, npar, (d2Dparams));
-		double dYSparams [18]= { // 27 mxGetData(mxFldp);
+		double dYSparams [16]= { // 27 mxGetData(mxFldp);
 		//	1.0110,  2.2582,  5.8012,  0.5808,  
-		  1.0110,  1.0110, 2.2582, 2.2582, 0.4477,  1.0000
+			1.0110,  2.2582,  0.4477,  1.0000
 		,   4.5959,  1.0212,  5.8012,  0.8494
 		,   0.1872,  0.8604,  1.0030,  1.0080
 		,   0.5808,  1.0030,  2.2582,  0.4477
 		//,  1.0110,  2.2582,  0.4477,  1.0000,	0.1872,  2.2582,  0.4477
 		};
-		const int nSteady = 18;//27 //31;//29, 16 (int)mxGetM(mxFldp);
+		const int nSteady = 16;//27 //31;//29, 16 (int)mxGetM(mxFldp);
 		Vector * ySteady =  new Vector(dYSparams, nSteady);
 
 
 		//mxFldp = mxGetField(dr, 0,"nstatic" );
 		const int nStat = 7;//(int)mxGetScalar(mxFldp);
 		//	mxFldp = mxGetField(dr, 0,"npred" );
-		const int nPred = 4;//6 - nBoth (int)mxGetScalar(mxFldp);
+		const int nPred = 2;//6 - nBoth (int)mxGetScalar(mxFldp);
 		//mxFldp = mxGetField(dr, 0,"nspred" );
 		const int nsPred = 4;//(int)mxGetScalar(mxFldp);
 		//mxFldp = mxGetField(dr, 0,"nboth" );
-		const int nBoth = 0;// (int)mxGetScalar(mxFldp);
+		const int nBoth = 2;// (int)mxGetScalar(mxFldp);
 		//mxFldp = mxGetField(dr, 0,"nfwrd" );
-		const int nForw = 7;// 3 (int)mxGetScalar(mxFldp);
+		const int nForw = 5;// 3 (int)mxGetScalar(mxFldp);
 		//mxFldp = mxGetField(dr, 0,"nsfwrd" );
 		const int nsForw = 7;//(int)mxGetScalar(mxFldp);
 		
 		//mxFldp = mxGetField(M_, 0,"exo_nbr" );
 		const int nExog =2;// (int)mxGetScalar(mxFldp);
 		//mxFldp = mxGetField(M_, 0,"endo_nbr" );
-		const int nEndo = 18;//16(int)mxGetScalar(mxFldp);
+		const int nEndo = 16;//16(int)mxGetScalar(mxFldp);
 		//mxFldp = mxGetField(M_, 0,"param_nbr" );
 		const int nPar = 7;//(int)mxGetScalar(mxFldp);
         // it_ should be set to M_.maximum_lag
@@ -103,8 +103,7 @@ int main(int argc, char* argv[])
 
 		int var_order[]//[18]
         = {
-		  7,   8,   10,  12,  13,  14,   16, 2, 4, 9, 15,    
-                  1, 3, 5, 6, 11, 17, 18
+			5,   6,   8,  10,  11,  12,  14,   7,  13,   1,   2,   3,   4,   9,   15,  16
 //			 5,  6,  8, 10, 11, 12, 16,  7, 13, 14, 15,  1,  2,  3, 4,  9, 17, 18
 		};
 		//Vector * varOrder =  new Vector(var_order, nEndo);
@@ -114,24 +113,22 @@ int main(int argc, char* argv[])
         
 		const double ll_incidence []//[3][18] 
         = {
-			    0,   5,  23
-			,   1,   6,   0
-			,   0,   7,  24
-			,   2,   8,   0
-			,   0,   9,  25
-			,   0,  10,  26
-			,   0,  11,   0
+				1,   5,  21
+			,   2,   6,  22
+			,   0,   7,  23
+			,   0,   8,  24
+			,   0,   9,   0
+			,   0,  10,   0
+			,   3,  11,   0
 			,   0,  12,   0
-			,   3,  13,   0
+			,   0,  13,  25
 			,   0,  14,   0
-			,   0,  15,  27
+			,   0,  15,   0
 			,   0,  16,   0
-			,   0,  17,   0
+			,   4,  17,   0
 			,   0,  18,   0
-			,   4,  19,   0
-			,   0,  20,   0
-			,   0,  21,  28
-			,   0,  22,  29
+			,   0,  19,  26
+			,   0,  20,  27
 		};
 		TwoDMatrix * llincidence = new TwoDMatrix (	3, nEndo, ll_incidence );
 			
@@ -140,9 +137,9 @@ int main(int argc, char* argv[])
         mexPrintf("k_order_perturbation: jcols= %d .\n", jcols);
 #endif
         //mxFldp= mxGetField(M_, 0,"endo_names" );
-        const int nendo = 18;//16(int)mxGetM(mxFldp);
+        const int nendo = 16;//16(int)mxGetM(mxFldp);
         const int widthEndo = 6;// (int)mxGetN(mxFldp);
-		const char * cNamesCharStr= "mmPPceWRkdnlggydPc 1 1        yp A22            __                oo                bb                ss    ";
+		const char * cNamesCharStr= "mPceWRkdnlggydPc          yp A22          __              oo              bb              ss    ";
 		//   const char**  endoNamesMX= DynareMxArrayToString( mxFldp,nendo,widthEndo);
 		const char**  endoNamesMX= DynareMxArrayToString( cNamesCharStr, nendo, widthEndo);
 #ifdef DEBUG		
@@ -195,7 +192,8 @@ int main(int argc, char* argv[])
 #ifdef DEBUG		
 			mexPrintf("k_order_perturbation: Call tls init\n");
 #endif
-            tls.init(kOrder, nStat+2*nPred+3*nBoth+2*nForw+nExog);
+
+            tls.init(kOrder, (nStat+2*nPred+3*nBoth+2*nForw+nExog));
 
 
 #ifdef DEBUG		
@@ -211,16 +209,6 @@ int main(int argc, char* argv[])
 				, ySteady, vCov, modParams, nStat, nPred, nForw, nBoth
 				, jcols, nSteps, kOrder, journal, dynamicDLL, sstol, var_order_vp //var_order 
 				, llincidence, qz_criterium);
-			// intiate tensor library
-#ifdef DEBUG		
-//			mexPrintf("k_order_perturbation: Call tls init\n");
-#endif
-/*            tls.init(dynare.order(),
-				dynare.nstat()+2*dynare.npred()+3*dynare.nboth()+
-				2*dynare.nforw()+dynare.nexog());
-*/
-			// construct main K-order approximation class
-			//				FistOrderApproximation app(dynare, journal, nSteps);
 #ifdef DEBUG		
 			mexPrintf("k_order_perturbation: Call Approximation constructor \n");
 #endif
@@ -240,6 +228,9 @@ int main(int argc, char* argv[])
 				exit(1);
 			}
 
+#ifdef DEBUG		
+			mexPrintf("k_order_perturbation: Filling Mat file outputs.\n");
+#endif			
 			std::string ss_matrix_name(fName);//params.prefix);
 			ss_matrix_name += "_steady_states";
 			ConstTwoDMatrix(app.getSS()).writeMat4(matfd, ss_matrix_name.c_str());
@@ -256,10 +247,7 @@ int main(int argc, char* argv[])
 			mexPrintf("k_order_perturbation: Map print: \n");
 			for (map<string,ConstTwoDMatrix>::const_iterator cit=mm.begin();
 				cit !=mm.end(); ++cit) {
-//                    const string& sym =(*cit).first;
 					mexPrintf("k_order_perturbation: Map print: string: %s , g:\n", (*cit).first.c_str());
-//					mexPrintf("k_order_perturbation: Map print: g: \n");
-//					if ((*cit).first==string("g_1")) 
                         (*cit).second.print();
 			}
 #endif
@@ -288,8 +276,7 @@ int main(int argc, char* argv[])
 			return 5;// 255;
 		}
 
-		// bones for future developement of the output.
-
+		// bones for future developement of the Matlab output.
 		const int nrhs=5;
 		const int nlhs=2;
 
@@ -297,7 +284,7 @@ int main(int argc, char* argv[])
 		mxArray* plhs[nlhs];
 
 #ifdef DEBUG		
-		mexPrintf("k_order_perturbation: Filling outputs.\n");
+		mexPrintf("k_order_perturbation: Filling Matlab outputs.\n");
 #endif			
 		
 		double  *dgy, *dgu, *ysteady;
