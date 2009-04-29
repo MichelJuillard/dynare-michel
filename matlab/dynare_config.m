@@ -118,8 +118,11 @@ end
 %% a matlab version of the routine is included in the path.
 disp(' ')
 disp('Configuring Dynare ...')
+
+remove_path_to_mex = 1;
+
 for i=1:number_of_mex_files
-    test = (exist([ path_to_mex_files  mex_status{i,1}]) == 3);
+    test = (exist(mex_status{i,1}) == 3);
     if ~test
         addpath([dynareroot mex_status{i,2}]);
         message = '[m]   ';
@@ -130,12 +133,14 @@ for i=1:number_of_mex_files
         else
             message = '[mex] ';
         end
+        remove_path_to_mex = 0;
     end
     disp([ message mex_status{i,3} '.' ])
 end
 
 % Test if simulate DLL is present
 if exist('simulate') == 3
+  remove_path_to_mex = 0;
   if ~multithread_flag
       message = '[mex] ';
   else
@@ -145,5 +150,9 @@ else
   message = '[no]  ';
 end
 disp([ message 'Fast model evaluation.' ])
+
+if remove_path_to_mex
+  rmpath(path_to_mex_files);
+end
 
 disp(' ')
