@@ -35,7 +35,7 @@ function dyn_data_01=read_variables(file_name_01,var_names_01,dyn_data_01,xls_sh
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
 
-    old_pwd = cd;
+    old_pwd = pwd;
     [path_name_02,file_name_02,ext_name_02] = fileparts(file_name_01);
     if ~isempty(path_name_02)
         file_name_01 = [file_name_02, ext_name_02];
