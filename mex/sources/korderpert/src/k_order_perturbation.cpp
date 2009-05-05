@@ -363,7 +363,7 @@ extern "C" {
 				for (map<string,ConstTwoDMatrix>::const_iterator cit=mm.begin();
 					((cit !=mm.end())&&(ii<nlhs)); ++cit) 
 				{
-					if ((*cit).first!="g_0") 
+					//if ((*cit).first!="g_0") 
 					{
 						plhs[ii] = mxCreateDoubleMatrix((*cit).second.numRows(), (*cit).second.numCols(), mxREAL);
 						TwoDMatrix dgyu((*cit).second.numRows(), (*cit).second.numCols(), mxGetPr(plhs[ii]));
