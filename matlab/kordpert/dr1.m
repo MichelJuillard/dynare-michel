@@ -134,9 +134,9 @@ function [dr,info,M_,options_,oo_] = dr1(dr,task,M_,options_,oo_)
 %            oo_.dyn_ys=z;  % extended ys 
         try
             if options_.order < 2 % 1st order
-                [ysteady, ghx_u]=k_order_perturbation(dr,task,M_,options_, oo_ , ['.' mexext]);
+                [ysteady, ghs2, ghx_u]=k_order_perturbation(dr,task,M_,options_, oo_ , ['.' mexext]);
             else % 2nd order
-                [ysteady, ghx_u, g_2]=k_order_perturbation(dr,task,M_,options_, oo_ , ['.' mexext]);
+                [ysteady, ghs2, ghx_u, g_2]=k_order_perturbation(dr,task,M_,options_, oo_ , ['.' mexext]);
                 save g_2
                 %Here is code for recovering ghxx ghxu ghxx ghs2
                 s0 = 0;
@@ -148,7 +148,6 @@ function [dr,info,M_,options_,oo_] = dr1(dr,task,M_,options_,oo_)
                 ghxx=zeros(g_2rows, nspred^2);
                 ghxu=zeros(g_2rows, nspred*nExog);
                 ghuu=zeros(g_2rows, nExog^2);
-                ghs2=zeros(g_2rows, 1);
                 for i=1:g_2cols
                    if s0 < nspred & s1 < nspred
                            ghxx(:,s0*nspred+s1+1) = 2*g_2(:,i);
@@ -163,7 +162,7 @@ function [dr,info,M_,options_,oo_] = dr1(dr,task,M_,options_,oo_)
                                ghuu(:,(s1-nspred)*nExog+s0-nspred+1) = 2*g_2(:,i);
                            end
                    else
-                           ghs2(:,1) = 2*g_2(:,end);
+                           error('dr1:k_order_perturbation:g_2','Unaccounted columns in g_2');
                    end
                    s1 = s1+1;
                    if s1 == nspred+nExog
