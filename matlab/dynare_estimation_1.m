@@ -450,7 +450,7 @@ if options_.mode_compute > 0 & options_.posterior_mode_estimation
         end
         OldPostVar = CovJump;
         Scale = options_.mh_jscale;
-        for i=1:options_.Opt6Iter  
+        for i=1:options_.Opt6Iter
             if i == 1
                 if options_.Opt6Iter > 1
                     flag = '';
@@ -497,9 +497,10 @@ if options_.mode_compute > 0 & options_.posterior_mode_estimation
                 disp(['Mode improvement = ' num2str(abs(OldMode-fval))])
                 OldMode = fval;
             end
+            hh = inv(PostVar);
+            save([M_.fname '_mode.mat'],'xparam1','hh');
             bayestopt_.jscale = ones(length(xparam1),1)*Scale;%??!
-        end
-        hh = inv(PostVar);    
+        end    
       case 7
         optim_options = optimset('display','iter','MaxFunEvals',1000000,'MaxIter',6000,'TolFun',1e-8,'TolX',1e-6);
         if isfield(options_,'optim_opt')
