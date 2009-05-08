@@ -2,37 +2,39 @@
 function fparallel(fblck,nblck,whoiam,ThisMatlab,fname);
 
     
+% configure dynare environment
+dynareroot = dynare_config();
 
-    if (ThisMatlab)
-        dynareroot = dynare_config();
+load( [fname,'_input']) 
+% keyboard;
+global fname
+if exist('fGlobalVar'),
+  globalVars = fieldnames(fGlobalVar);
+  for j=1:length(globalVars),
+    eval(['global ',globalVars{j},';'])
+  end
+  struct2local(fGlobalVar);
+end
 
-    end
-
-feval(fname,fblck,nblck,whoiam,ThisMatlab);
+% lounch the routine to be run in parallel
+fOutputVar = feval(fname, fInputVar ,fblck, nblck, whoiam, ThisMatlab);
 
 
 %%% Sincronismo "Esterno" %%%%%%%%%%%%%
-%%% Ogni Processo quando ha finito lo notifica cancellando un file ... Magari Sistemma 
+%%% Ogni Processo quando ha finito lo notifica cancellando un file ... 
 % keyboard;
-if (ThisMatlab)
-    if(whoiam)
-       load([ fname,'_input'],'MasterName','DyMo','options_' )
-        %            fid1 = fopen('P',int2str(whoiam),'End.txt','w+');
-        %            fclose(fid1);
-        if options_.parallel(ThisMatlab).Local
-            
-            delete(['P_',fname,'_',int2str(whoiam),'End.txt']);
-        else
-            delete(['\\',MasterName,'\',DyMo(1),'$\',DyMo(4:end),'\P_',fname,'_',int2str(whoiam),'End.txt']);
-%             system (['del \\',MasterName,'\',DyMo(1),'$\',DyMo(4:end),'\P',int2str(whoiam),'End.txt']);
-        end
-    end
-
+if(whoiam)
+  save([ fname,'_output_',int2str(whoiam)],'fOutputVar' )
+  
+  
+  if options_.parallel(ThisMatlab).Local
+    delete(['P_',fname,'_',int2str(whoiam),'End.txt']);
+  else
+    delete(['\\',fInputVar.MasterName,'\',fInputVar.DyMo(1),'$\',fInputVar.DyMo(4:end),'\P_',fname,'_',int2str(whoiam),'End.txt']);
+   
+  end
 end
 
 
-if (ThisMatlab==0)
-     return;
-else
-    exit;
-end
+
+exit;
