@@ -41,7 +41,6 @@ function info = forecast(var_list,task)
     old_options = options_;
 
     maximum_lag = M_.maximum_lag;
-    horizon = options_.forecast;
 
 
     endo_names = M_.endo_names;
@@ -62,13 +61,18 @@ function info = forecast(var_list,task)
     
     trend = 0;
     switch task
-     case 'simul'
+      case 'simul'
+       horizon = options_.periods;
+       if horizon == 0
+           horizon = 5;
+       end
       if size(oo_.endo_simul,2) < maximum_lag
           y0 = repmat(oo_.steady_state,1,maximum_lag);
       else
           y0 = oo_.endo_simul(:,1:maximum_lag);
       end
      case 'smoother'
+       horizon = options_.forecast;
       y_smoothed = oo_.SmoothedVariables;
       y0 = zeros(M_.endo_nbr,maximum_lag);
       for i = 1:M_.endo_nbr
