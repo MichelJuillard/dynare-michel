@@ -131,8 +131,8 @@ function [fval,cost_flag,ys,trend_coeff,info] = DsgeLikelihood(xparam1,gend,data
       fval = bayestopt_.penalty+1;
       cost_flag = 0;
       return
-  elseif info(1) == 3 || info(1) == 4 || info(1) == 20 || info(1) == 21
-      fval = bayestopt_.penalty+info(2);%^2; % penalty power raised in DR1.m and resol already. GP July'08
+  elseif info(1) == 3 || info(1) == 4 || info(1) == 19 || info(1) == 20 || info(1) == 21
+      fval = bayestopt_.penalty+info(2);
       cost_flag = 0;
       return
   end
