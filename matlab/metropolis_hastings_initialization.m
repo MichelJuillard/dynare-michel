@@ -160,8 +160,15 @@ if ~options_.load_mh_file & ~options_.mh_recover
     record.MhDraws(1,2) = AnticipatedNumberOfFiles;
     record.MhDraws(1,3) = AnticipatedNumberOfLinesInTheLastFile;
     record.AcceptationRates = zeros(1,nblck);
-    record.Seeds.Normal = randn('state');
-    record.Seeds.Unifor = rand('state');
+    % separate initializaton for each chain
+    JSUM = 0;
+    for j=1:nblck,
+      JSUM  = JSUM + sum(100*clock);
+      randn('state',JSUM);
+      rand('state',JSUM);
+      record.Seeds(j).Normal = randn('state');
+      record.Seeds(j).Unifor = rand('state');
+    end
     record.InitialParameters = ix2;
     record.InitialLogLiK = ilogpo2;
     record.LastParameters = zeros(nblck,npar);
@@ -174,14 +181,16 @@ if ~options_.load_mh_file & ~options_.mh_recover
     fprintf(fidlog,['    Expected number of lines in the last file: ' ...
                     int2str(AnticipatedNumberOfLinesInTheLastFile) '.\n']);
     fprintf(fidlog,['\n']);
-    fprintf(fidlog,['    Initial seed (randn):\n']);
-    for i=1:length(record.Seeds.Normal)
-        fprintf(fidlog,['      ' num2str(record.Seeds.Normal(i)') '\n']);
+    for j = 1:nblck,
+    fprintf(fidlog,['    Initial seed (randn) for chain number ',int2str(j),':\n']);
+    for i=1:length(record.Seeds(j).Normal)
+        fprintf(fidlog,['      ' num2str(record.Seeds(j).Normal(i)') '\n']);
     end
-    fprintf(fidlog,['    Initial seed (rand).:\n']);
-    for i=1:length(record.Seeds.Unifor)
-        fprintf(fidlog,['      ' num2str(record.Seeds.Unifor(i)') '\n']);
+    fprintf(fidlog,['    Initial seed (rand) for chain number ',int2str(j),':\n']);
+    for i=1:length(record.Seeds(j).Unifor)
+        fprintf(fidlog,['      ' num2str(record.Seeds(j).Unifor(i)') '\n']);
     end
+    end,
     fprintf(fidlog,' \n');
     fclose(fidlog);
 elseif options_.load_mh_file & ~options_.mh_recover
@@ -239,8 +248,8 @@ elseif options_.load_mh_file & ~options_.mh_recover
     record.MhDraws(end,1) = nruns(1);
     record.MhDraws(end,2) = AnticipatedNumberOfFiles;
     record.MhDraws(end,3) = AnticipatedNumberOfLinesInTheLastFile;
-    randn('state',record.Seeds.Normal);
-    rand('state',record.Seeds.Unifor);
+%     randn('state',record.Seeds.Normal);
+%     rand('state',record.Seeds.Unifor);
     save([MhDirectoryName '/' ModelName '_mh_history.mat'],'record');
     disp(['MH: ... It''s done. I''ve loaded ' int2str(NumberOfPreviousSimulations) ' simulations.'])
     disp(' ')

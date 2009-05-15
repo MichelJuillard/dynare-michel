@@ -57,6 +57,8 @@ load([MhDirectoryName '/' ModelName '_mh_history'],'record');
 InitSizeArray = min([MAX_nruns*ones(nblck) nruns],[],2);
 jscale = diag(bayestopt_.jscale);
 for b = fblck:nblck
+   randn('state',record.Seeds(b).Normal);
+   rand('state',record.Seeds(b).Unifor);
     if (options_.load_mh_file~=0)  & (fline(b)>1) & OpenOldFile(b)
         load(['./' MhDirectoryName '/' ModelName '_mh' int2str(NewFile(b)) ...
               '_blck' int2str(b) '.mat'])
@@ -141,9 +143,9 @@ for b = fblck:nblck
     end% End of the simulations for one mh-block.
     record.AcceptationRates(b) = isux/j;
     close(hh);
+    record.Seeds(b).Normal = randn('state');
+    record.Seeds(b).Unifor = rand('state');
 end% End of the loop over the mh-blocks.
-record.Seeds.Normal = randn('state');
-record.Seeds.Unifor = rand('state');
 save([MhDirectoryName '/' ModelName '_mh_history'],'record');
 disp(['MH: Number of mh files			: ' int2str(NewFile(1)) ' per block.'])
 disp(['MH: Total number of generated files	: ' int2str(NewFile(1)*nblck) '.'])
