@@ -36,126 +36,83 @@ function random_walk_metropolis_hastings(TargetFun,ProposalFun,xparam1,vv,mh_bou
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-global M_ options_ bayestopt_
+global M_ options_ bayestopt_ estim_params_ oo_
 %%%%
 %%%% Initialization of the random walk metropolis-hastings chains.
 %%%%
 [ ix2, ilogpo2, ModelName, MhDirectoryName, fblck, fline, npar, nblck, nruns, NewFile, MAX_nruns, d ] = ...
     metropolis_hastings_initialization(TargetFun, xparam1, vv, mh_bounds, varargin{:});
-options_.lik_algo = 1;
-OpenOldFile = ones(nblck,1);
-if strcmpi(ProposalFun,'rand_multivariate_normal')
-    n = npar;
-elseif strcmpi(ProposalFun,'rand_multivariate_student')
-    n = options_.student_degrees_of_freedom;
-end
-load([MhDirectoryName '/' ModelName '_mh_history.mat'],'record');
-%%%%
-%%%% NOW i run the (nblck-fblck+1) metropolis-hastings chains
-%%%%
+
 InitSizeArray = min([repmat(MAX_nruns,nblck,1) fline+nruns-1],[],2);
-jscale = diag(bayestopt_.jscale);
-for b = fblck:nblck
-    if (options_.load_mh_file~=0)  & (fline(b)>1) & OpenOldFile(b)
-        load(['./' MhDirectoryName '/' ModelName '_mh' int2str(NewFile(b)) ...
-              '_blck' int2str(b) '.mat'])
-        x2 = [x2;zeros(InitSizeArray(b)-fline(b)+1,npar)];
-        logpo2 = [logpo2;zeros(InitSizeArray(b)-fline(b)+1,1)];
-        OpenOldFile(b) = 0;
-    else
-        x2 = zeros(InitSizeArray(b),npar);
-        logpo2 = zeros(InitSizeArray(b),1);
+
+load([MhDirectoryName '/' ModelName '_mh_history.mat'],'record');
+
+
+localVars =   struct('TargetFun', TargetFun, ...
+  'ProposalFun', ProposalFun, ...
+  'xparam1', xparam1, ...
+  'vv', vv, ...
+  'mh_bounds', mh_bounds, ...
+  'ix2', ix2, ...
+  'ilogpo2', ilogpo2, ...
+  'ModelName', ModelName, ...
+  'fline', fline, ...
+  'npar', npar, ...
+  'nruns', nruns, ...
+  'NewFile', NewFile, ...
+  'MAX_nruns', MAX_nruns, ...
+  'd', d);
+localVars.InitSizeArray=InitSizeArray;
+localVars.record=record;
+localVars.varargin=varargin;
+
+tic,
+
+
+if isnumeric(options_.parallel) | isunix, % for the moment exclude unix platform from parallel implementation
+    fout = random_walk_metropolis_hastings_core(localVars, fblck, nblck, 0);
+    record = fout.record;
+    
+else
+    % global variables for parallel routines
+    globalVars = struct('M_',M_, ...
+      'options_', options_, ...
+      'bayestopt_', bayestopt_, ...
+      'estim_params_', estim_params_, ...
+      'oo_', oo_);
+    
+    % which files have to be copied to run remotely
+    NamFileInput(1,:) = {'',[ModelName '_static.m']};
+    NamFileInput(2,:) = {'',[ModelName '_dynamic.m']};
+    if options_.steadystate_flag,
+        NamFileInput(length(NamFileInput)+1,:)={'',[ModelName '_steadystate.m']};
     end
-    if exist('OCTAVE_VERSION')
-      diary off;
-    else
-      hh = waitbar(0,['Please wait... Metropolis-Hastings (' int2str(b) '/' int2str(nblck) ')...']);
-      set(hh,'Name','Metropolis-Hastings');
+    if (options_.load_mh_file~=0)  & any(fline>1) ,
+        NamFileInput(length(NamFileInput)+1,:)={[M_.dname '\metropolis\'],[ModelName '_mh' int2str(NewFile(1)) '_blck*.mat']};
     end
-    isux = 0;
-    jsux = 0;
-    irun = fline(b);
-    j = 1;
-    while j <= nruns(b)
-        par = feval(ProposalFun, ix2(b,:), d * jscale, n);
-        if all( par(:) > mh_bounds(:,1) ) & all( par(:) < mh_bounds(:,2) )
-            logpost = - feval(TargetFun, par(:), varargin{:});
-        else
-            logpost = -inf;
-        end
-        if (logpost > -inf) & (log(rand) < logpost-ilogpo2(b))
-            x2(irun,:) = par;
-            ix2(b,:) = par;
-            logpo2(irun) = logpost; 
-            ilogpo2(b) = logpost;
-            isux = isux + 1;
-            jsux = jsux + 1;
-        else    
-            x2(irun,:) = ix2(b,:);
-            logpo2(irun) = ilogpo2(b);
-        end
-        prtfrc = j/nruns(b);
-        if exist('OCTAVE_VERSION')
-          if mod(j, 10) == 0
-            printf('MH: Computing Metropolis-Hastings (chain %d/%d): %3.f%% done, acception rate: %3.f%%\r', b, nblck, 100 * prtfrc, 100 * isux / j);
-          end
-        else
-          waitbar(prtfrc,hh,[ '(' int2str(b) '/' int2str(nblck) ') ' sprintf('%f done, acceptation rate %f',prtfrc,isux/j)]);
-        end
-          
-        if (irun == InitSizeArray(b)) | (j == nruns(b)) % Now I save the simulations
-            save([MhDirectoryName '/' ModelName '_mh' int2str(NewFile(b)) '_blck' int2str(b) '.mat'],'x2','logpo2');
-            fidlog = fopen([MhDirectoryName '/metropolis.log'],'a');
-            fprintf(fidlog,['\n']);
-            fprintf(fidlog,['%% Mh' int2str(NewFile(b)) 'Blck' int2str(b) ' (' datestr(now,0) ')\n']);
-            fprintf(fidlog,' \n');
-            fprintf(fidlog,['  Number of simulations.: ' int2str(length(logpo2)) '\n']);
-            fprintf(fidlog,['  Acceptation rate......: ' num2str(jsux/length(logpo2)) '\n']);
-            fprintf(fidlog,['  Posterior mean........:\n']);
-            for i=1:length(x2(1,:))
-                fprintf(fidlog,['    params:' int2str(i) ': ' num2str(mean(x2(:,i))) '\n']);
-            end
-            fprintf(fidlog,['    log2po:' num2str(mean(logpo2)) '\n']);
-            fprintf(fidlog,['  Minimum value.........:\n']);;
-            for i=1:length(x2(1,:))
-                fprintf(fidlog,['    params:' int2str(i) ': ' num2str(min(x2(:,i))) '\n']);
-            end
-            fprintf(fidlog,['    log2po:' num2str(min(logpo2)) '\n']);
-            fprintf(fidlog,['  Maximum value.........:\n']);
-            for i=1:length(x2(1,:))
-                fprintf(fidlog,['    params:' int2str(i) ': ' num2str(max(x2(:,i))) '\n']);
-            end
-            fprintf(fidlog,['    log2po:' num2str(max(logpo2)) '\n']);
-            fprintf(fidlog,' \n');
-            fclose(fidlog);
-            jsux = 0;
-            if j == nruns(b) % I record the last draw...
-                record.LastParameters(b,:) = x2(end,:);
-                record.LastLogLiK(b) = logpo2(end);
-            end
-            % size of next file in chain b
-            InitSizeArray(b) = min(nruns(b)-j,MAX_nruns);
-            % initialization of next file if necessary
-            if InitSizeArray(b)
-                x2 = zeros(InitSizeArray(b),npar);
-                logpo2 = zeros(InitSizeArray(b),1);
-                NewFile(b) = NewFile(b) + 1;
-                irun = 0;
-            end
-        end
-        j=j+1;
-        irun = irun + 1;
-    end% End of the simulations for one mh-block.
-    record.AcceptationRates(b) = isux/j;
-    if exist('OCTAVE_VERSION')
-      printf('\n');
-      diary on;
-    else
-      close(hh);
+       
+    % from where to get back results
+%     NamFileOutput(1,:) = {[M_.dname,'\metropolis\'],'*.*'};
+    
+    [fout, nBlockPerCPU, totCPU] = masterParallel(options_.parallel, fblck, nblck,NamFileInput,'random_walk_metropolis_hastings_core', localVars, globalVars);
+    for j=1:totCPU,
+       offset = sum(nBlockPerCPU(1:j-1))+fblck-1;
+       record.LastLogLiK(offset+1:sum(nBlockPerCPU(1:j)))=fout(j).record.LastLogLiK(offset+1:sum(nBlockPerCPU(1:j)));
+       record.LastParameters(offset+1:sum(nBlockPerCPU(1:j)),:)=fout(j).record.LastParameters(offset+1:sum(nBlockPerCPU(1:j)),:);
+       record.AcceptationRates(offset+1:sum(nBlockPerCPU(1:j)))=fout(j).record.AcceptationRates(offset+1:sum(nBlockPerCPU(1:j)));
+       record.Seeds(offset+1:sum(nBlockPerCPU(1:j)))=fout(j).record.Seeds(offset+1:sum(nBlockPerCPU(1:j)));
     end
-end% End of the loop over the mh-blocks.
-record.Seeds.Normal = randn('state');
-record.Seeds.Unifor = rand('state');
+
+end
+
+irun = fout(1).irun;
+NewFile = fout(1).NewFile;
+
+    
+ComptationalTime=toc,
+
+% record.Seeds.Normal = randn('state');
+% record.Seeds.Unifor = rand('state');
 save([MhDirectoryName '/' ModelName '_mh_history.mat'],'record');
 disp(['MH: Number of mh files			: ' int2str(NewFile(1)) ' per block.'])
 disp(['MH: Total number of generated files	: ' int2str(NewFile(1)*nblck) '.'])
