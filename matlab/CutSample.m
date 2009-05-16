@@ -14,7 +14,7 @@ function CutSample(M_, options_, estim_params_)
 % SPECIAL REQUIREMENTS
 %    none
 
-% Copyright (C) 2005-2007 Dynare Team
+% Copyright (C) 2005-2009 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -37,14 +37,14 @@ DirectoryName = CheckPath('metropolis');
 file = dir([ DirectoryName '/'  M_.fname '_mh_history.mat']);
 files = dir([ DirectoryName '/' M_.fname '_mh*.mat' ]);
 if ~length(files)
-  disp('MH:: FAILURE! there is no MH file to load here!')
-  return
+    disp('MH:: FAILURE! there is no MH file to load here!')
+    return
 end
 if ~length(file)
-  disp('MH:: FAILURE! there is no MH-history file!')
-  return
+    disp('MH:: FAILURE! there is no MH-history file!')
+    return
 else
-  load([ DirectoryName '/'  M_.fname '_mh_history.mat'])
+    load([ DirectoryName '/'  M_.fname '_mh_history.mat'])
 end
 TotalNumberOfMhFiles = sum(record.MhDraws(:,2));
 TotalNumberOfMhDraws = sum(record.MhDraws(:,1));
@@ -55,13 +55,13 @@ FirstLine = FirstDraw-(FirstMhFile-1)*MAX_nruns;
 record.KeepedDraws.FirstMhFile = FirstMhFile;
 record.KeepedDraws.FirstLine = FirstLine;
 if (TotalNumberOfMhFiles-1)-(FirstMhFile+1)+1 > 0
-  record.KeepedDraws.Distribution = [ MAX_nruns-FirstLine+1 ; ...
-		    ones((TotalNumberOfMhFiles-1)-(FirstMhFile+1)+1,1)*MAX_nruns ; ...
-		    record.MhDraws(end,3) ];
+    record.KeepedDraws.Distribution = [ MAX_nruns-FirstLine+1 ; ...
+                        ones((TotalNumberOfMhFiles-1)-(FirstMhFile+1)+1,1)*MAX_nruns ; ...
+                        record.MhDraws(end,3) ];
 elseif TotalNumberOfMhFiles == 1
-  record.KeepedDraws.Distribution = [];
+    record.KeepedDraws.Distribution = [];
 elseif TotalNumberOfMhFiles == 2 & FirstMhFile > 1
-  record.KeepedDraws.Distribution = [MAX_nruns-FirstLine+1 ; record.MhDraws(end,3)];  
+    record.KeepedDraws.Distribution = [MAX_nruns-FirstLine+1 ; record.MhDraws(end,3)];  
 end
 save([DirectoryName '/' M_.fname '_mh_history.mat'],'record');
 fprintf('MH: Total number of Mh draws: %d.\n',TotalNumberOfMhDraws);
