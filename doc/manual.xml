@@ -3,7 +3,7 @@
 <book>
   <bookinfo>
     <title>Dynare Manual</title>
-    <subtitle>Version 4.0.3.1 (draft)</subtitle>
+    <subtitle>Version 4.0.4</subtitle>
     <author>
       <firstname>Stéphane</firstname><surname>Adjemian</surname>
       <affiliation><orgname>Université du Mans et CEPREMAP</orgname></affiliation>
@@ -1327,7 +1327,7 @@ Dynare has special commands for the computation of the static equilibrium of the
 
 <refsect1><title>Options</title>
 <variablelist spacing='compact'>
-  <varlistentry>
+  <varlistentry id="solve_algo" xreflabel="solve_algo">
     <term><option>solve_algo</option> = <replaceable>INTEGER</replaceable></term>
     <listitem><para>Determines the non-linear solver to use. Possible values for the option are:
       <itemizedlist>
@@ -1421,7 +1421,7 @@ See <xref linkend='initval'/> and <xref linkend='endval'/>.
 <variablelist spacing='compact'>
   <varlistentry>
     <term><option>solve_algo</option> = <replaceable>INTEGER</replaceable></term>
-    <listitem><para>See <xref linkend="steady"/> for the possible values and their meaning</para></listitem>
+    <listitem><para>See <link linkend="solve_algo">there</link> for the possible values and their meaning</para></listitem>
   </varlistentry>
 </variablelist>
 </refsect1>
@@ -1467,7 +1467,7 @@ A necessary condition for the uniqueness of a stable equilibrium in the neighbor
     <term><option>periods</option> = <replaceable>INTEGER</replaceable></term>
     <listitem><para>Number of periods of the forecast. Default: <literal>40</literal></para></listitem>
   </varlistentry>
-  <varlistentry>
+  <varlistentry id="conf_sig" xreflabel="conf_sig">
     <term><option>conf_sig</option> = <replaceable>DOUBLE</replaceable></term>
     <listitem><para>Level of significance for confidence interval. Default: <literal>0.90</literal></para></listitem>
   </varlistentry>
@@ -1585,7 +1585,7 @@ The simulated endogenous variables are available in global matrix <varname>oo_.e
     <term><option>hp_ngrid</option> = <replaceable>INTEGER</replaceable></term>
     <listitem><para>Number of points in the grid for the discrete Inverse Fast Fourier Transform used in the HP filter computation. It may be necessary to increase it for highly autocorrelated processes. Default: <literal>512</literal></para></listitem>
   </varlistentry>
-  <varlistentry>
+  <varlistentry id="irf" xreflabel="irf">
     <term><option>irf</option> = <replaceable>INTEGER</replaceable></term>
     <listitem><para>Number of periods on which to compute the IRFs. Setting <option>irf</option>=0, suppresses the plotting of IRF's. Default: <literal>40</literal></para></listitem>
   </varlistentry>
@@ -1609,7 +1609,7 @@ The simulated endogenous variables are available in global matrix <varname>oo_.e
     <term><option>nomoments</option></term>
     <listitem><para>Don't print moments of the endogenous variables (printing them is the default)</para></listitem>
   </varlistentry>
-  <varlistentry>
+  <varlistentry id="nograph" xreflabel="nograph">
     <term><option>nograph</option></term>
     <listitem><para>Doesn't do the graphs. Useful for loops</para></listitem>
   </varlistentry>
@@ -1621,7 +1621,7 @@ The simulated endogenous variables are available in global matrix <varname>oo_.e
     <term><option>print</option></term>
     <listitem><para>Print results (opposite of the above)</para></listitem>
   </varlistentry>
-  <varlistentry>
+  <varlistentry id="order" xreflabel="order">
     <term><option>order = <replaceable>INTEGER</replaceable></option></term>
     <listitem><para>Order of Taylor approximation. Acceptable values are <literal>1</literal> and <literal>2</literal>. Default: <literal>2</literal></para></listitem>
   </varlistentry>
@@ -1651,7 +1651,7 @@ The simulated endogenous variables are available in global matrix <varname>oo_.e
   </varlistentry>
   <varlistentry>
     <term><option>solve_algo</option> = <replaceable>INTEGER</replaceable></term>
-    <listitem><para>See <xref linkend="steady"/> for the possible values and their meaning</para></listitem>
+    <listitem><para>See <link linkend="solve_algo">there</link> for the possible values and their meaning</para></listitem>
   </varlistentry>
 </variablelist>
 
@@ -2197,11 +2197,11 @@ end;
     <term><option>datafile</option> = <replaceable>FILENAME</replaceable></term>
     <listitem><para>The datafile (a <filename class="extension">.m</filename> file, a <filename class="extension">.mat</filename> file or a <filename class="extension">.xls</filename> file)</para></listitem>
   </varlistentry>
-  <varlistentry>
+  <varlistentry id="xls_sheet" xreflabel="xls_sheet">
     <term><option>xls_sheet</option> = <replaceable>NAME</replaceable></term>
     <listitem><para>The name of the sheet with the data in an Excel file</para></listitem>
   </varlistentry>
-  <varlistentry>
+  <varlistentry id="xls_range" xreflabel="xls_range">
     <term><option>xls_range</option> = <replaceable>RANGE</replaceable></term>
     <listitem><para>The range with the data in an Excel file</para></listitem>
   </varlistentry>
@@ -2233,7 +2233,7 @@ end;
     <term><option>nograph</option></term>
     <listitem><para>No graphs should be plotted</para></listitem>
   </varlistentry>
-  <varlistentry>
+  <varlistentry id="lik_init" xreflabel="lik_init">
     <term><option>lik_init</option> = <replaceable>INTEGER</replaceable></term>
     <listitem><para>Type of initialization of Kalman filter:
         <itemizedlist>
@@ -2247,9 +2247,9 @@ end;
     <term><option>lik_algo</option> = <replaceable>INTEGER</replaceable></term>
     <listitem><para>...</para></listitem>
   </varlistentry>
-  <varlistentry id="conf_sig" xreflabel="conf_sig">
+  <varlistentry>
     <term><option>conf_sig</option> = <replaceable>DOUBLE</replaceable></term>
-    <listitem><para>The level for the confidence intervals reported in the results. Default: <literal>0.90</literal></para></listitem>
+    <listitem><para>See <link linkend="conf_sig">there</link></para></listitem>
   </varlistentry>
   <varlistentry id="mh_replic" xreflabel="mh_replic">
     <term><option>mh_replic</option> = <replaceable>INTEGER</replaceable></term>
@@ -2303,7 +2303,7 @@ end;
     <term><option>mode_check</option></term>
     <listitem><para>Tells Dynare to plot the posterior density for values around the computed mode for each estimated parameter in turn. This is helpful to diagnose problems with the optimizer</para></listitem>
   </varlistentry>
-  <varlistentry>
+  <varlistentry id="prior_trunc" xreflabel="prior_trunc">
     <term><option>prior_trunc</option> = <replaceable>DOUBLE</replaceable></term>
     <listitem><para>Probability of extreme values of the prior density that is ignored when computing bounds for the parameters. Default: <literal>1e-32</literal></para></listitem>
   </varlistentry>
@@ -2339,7 +2339,7 @@ end;
     <term><option>forecast</option> = <replaceable>INTEGER</replaceable></term>
     <listitem><para>Computes the posterior distribution of a forecast on <replaceable>INTEGER</replaceable> periods after the end of the sample used in estimation</para></listitem>
   </varlistentry>
-  <varlistentry>
+  <varlistentry id="tex" xreflabel="tex">
     <term><option>tex</option></term>
     <listitem><para>Requests the printing of results and graphs in TeX tables and graphics that can be later directly included in LaTeX files (not yet implemented)</para></listitem>
   </varlistentry>
@@ -2351,7 +2351,7 @@ end;
     <term><option>kalman_tol</option> = <replaceable>INTEGER</replaceable></term>
     <listitem><para>...</para></listitem>
   </varlistentry>
-  <varlistentry>
+  <varlistentry id="filter_step_ahead" xreflabel="filter_step_ahead">
     <term><option>filter_step_ahead</option> = [<replaceable>INTEGER_1</replaceable>:<replaceable>INTEGER_2</replaceable>]</term>
     <listitem><para>...</para></listitem>
   </varlistentry>
@@ -2369,15 +2369,15 @@ end;
   </varlistentry>
   <varlistentry>
     <term><option>solve_algo</option> = <replaceable>INTEGER</replaceable></term>
-    <listitem><para>See <xref linkend="steady"/></para></listitem>
+    <listitem><para>See <link linkend="solve_algo">there</link></para></listitem>
   </varlistentry>
   <varlistentry>
     <term><option>order</option> = <replaceable>INTEGER</replaceable></term>
-    <listitem><para>See <xref linkend="stoch_simul"/></para></listitem>
+    <listitem><para>See <link linkend="order">there</link></para></listitem>
   </varlistentry>
   <varlistentry>
     <term><option>irf</option> = <replaceable>INTEGER</replaceable></term>
-    <listitem><para>See <xref linkend="stoch_simul"/></para></listitem>
+    <listitem><para>See <link linkend="irf">there</link></para></listitem>
   </varlistentry>
 </variablelist>
 
@@ -2525,6 +2525,71 @@ oo_.posterior_hpdsup.measurement_errors_corr.gdp_conso
     <refname>prior_analysis</refname>
     <refpurpose>Prior distribution analysis</refpurpose>
   </refnamediv>
+
+  <refsynopsisdiv>
+    <cmdsynopsis>
+      <command>prior_analysis</command>
+      <arg>(<replaceable>OPTION</replaceable><arg rep="repeat">, <replaceable>OPTION</replaceable></arg>)</arg>;
+    </cmdsynopsis>
+  </refsynopsisdiv>
+
+  <refsect1><title>Options</title>
+    <variablelist>
+      <varlistentry>
+        <term><option>nograph</option></term>
+        <listitem><para>See <link linkend="nograph">there</link></para></listitem>
+      </varlistentry>
+      <varlistentry>
+        <term><option>conf_sig</option> = <replaceable>DOUBLE</replaceable></term>
+        <listitem><para>See <link linkend="conf_sig">there</link></para></listitem>
+      </varlistentry>
+      <varlistentry>
+        <term><option>prior_trunc</option> = <replaceable>DOUBLE</replaceable></term>
+        <listitem><para>See <link linkend="prior_trunc">there</link></para></listitem>
+      </varlistentry>
+      <varlistentry>
+        <term><option>bayesian_irf</option></term>
+        <listitem><para>See <link linkend="bayesian_irf">there</link></para></listitem>
+      </varlistentry>
+      <varlistentry>
+        <term><option>irf</option> = <replaceable>INTEGER</replaceable></term>
+        <listitem><para>See <link linkend="irf">there</link></para></listitem>
+      </varlistentry>
+      <varlistentry>
+        <term><option>tex</option></term>
+        <listitem><para>See <link linkend="tex">there</link></para></listitem>
+      </varlistentry>
+      <varlistentry>
+        <term><option>forecast</option> = <replaceable>INTEGER</replaceable></term>
+        <listitem><para>See <link linkend="forecast_opt">there</link></para></listitem>
+      </varlistentry>
+      <varlistentry>
+        <term><option>smoother</option></term>
+        <listitem><para>See <link linkend="smoother">there</link></para></listitem>
+      </varlistentry>
+      <varlistentry>
+        <term><option>moments_varendo</option></term>
+        <listitem><para>See <link linkend="moments_varendo">there</link></para></listitem>
+      </varlistentry>
+      <varlistentry>
+        <term><option>filtered_vars</option></term>
+        <listitem><para>See <link linkend="filtered_vars">there</link></para></listitem>
+      </varlistentry>
+      <varlistentry>
+        <term><option>xls_sheet</option> = <replaceable>NAME</replaceable></term>
+        <listitem><para>See <link linkend="xls_sheet">there</link></para></listitem>
+      </varlistentry>
+      <varlistentry>
+        <term><option>xls_range</option> = <replaceable>RANGE</replaceable></term>
+        <listitem><para>See <link linkend="xls_range">there</link></para></listitem>
+      </varlistentry>
+      <varlistentry>
+        <term><option>filter_step_ahead</option> = [<replaceable>INTEGER_1</replaceable>:<replaceable>INTEGER_2</replaceable>]</term>
+        <listitem><para>See <link linkend="filter_step_ahead">there</link></para></listitem>
+      </varlistentry>
+    </variablelist>
+  </refsect1>
+
 </refentry>
 
 <refentry id="posterior_analysis">
@@ -2536,6 +2601,17 @@ oo_.posterior_hpdsup.measurement_errors_corr.gdp_conso
     <refname>posterior_analysis</refname>
     <refpurpose>Posterior distribution analysis</refpurpose>
   </refnamediv>
+
+  <refsynopsisdiv>
+    <cmdsynopsis>
+      <command>posterior_analysis</command>
+      <arg>(<replaceable>OPTION</replaceable><arg rep="repeat">, <replaceable>OPTION</replaceable></arg>)</arg>;
+    </cmdsynopsis>
+  </refsynopsisdiv>
+
+  <refsect1><title>Options</title>
+    <para>This command accepts exactly the same options than <xref linkend="prior_analysis"/></para>
+  </refsect1>
 </refentry>
 
 <refentry id="unit_root_vars">
@@ -2552,12 +2628,12 @@ oo_.posterior_hpdsup.measurement_errors_corr.gdp_conso
     <cmdsynopsis>
       <command>unit_root_vars</command>
       <arg choice="plain">
-      <replaceable>VARIABLE_NAME</replaceable>
+	      <replaceable>VARIABLE_NAME</replaceable>
       </arg>
-      <arg rep="repeat">
-      <replaceable>VARIABLE_NAME</replaceable>
+      <arg rep="repeat"><arg>,</arg>
+	      <replaceable>VARIABLE_NAME</replaceable>
       </arg>
-      <arg choice="plain">;</arg>
+      ;
     </cmdsynopsis>
   </refsynopsisdiv>
 
@@ -2566,7 +2642,7 @@ oo_.posterior_hpdsup.measurement_errors_corr.gdp_conso
 <command>unit_root_vars</command> is now deprecated and will result in no action, It was used to declare unit-root variables of a model so that a diffuse prior can be used in the initialization of the Kalman filter for these variables only. For stationary variables, the unconditional covariance matrix of these variables is used for initialization. The algorithm to compute a true diffuse prior is taken from <xref linkend="durbin-koopman:2001"/> and <xref linkend="koopman-durbin:2003"/>.
 </para>
 
-<para>When <command>unit_root_vars</command> is used the <command>lik_init</command> option of <xref linkend="estimation"/> has no effect.
+<para>When <command>unit_root_vars</command> is used the <link linkend="lik_init">lik_init</link> option of <xref linkend="estimation"/> has no effect.
 </para>
 
 <para>When there are nonstationary variables in a model, there is no unique deterministic steady state. The user must supply a <trademark class="registered">Matlab</trademark> function that computes the steady state values of the stationary variables in the model and returns dummy values for the nonstationary ones. The function should be called with the name of the <filename>.mod</filename> file followed by <filename>_steadystate</filename>. See <filename>fs2000a_steadystate.m</filename> in <filename>examples/fs2000</filename> directory.
