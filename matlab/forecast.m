@@ -17,7 +17,7 @@ function info = forecast(var_list,task)
 % SPECIAL REQUIREMENTS
 %    none
 
-% Copyright (C) 2003-2008 Dynare Team
+% Copyright (C) 2003-2009 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -62,45 +62,45 @@ function info = forecast(var_list,task)
     trend = 0;
     switch task
       case 'simul'
-       horizon = options_.periods;
-       if horizon == 0
-           horizon = 5;
-       end
-      if size(oo_.endo_simul,2) < maximum_lag
-          y0 = repmat(oo_.steady_state,1,maximum_lag);
-      else
-          y0 = oo_.endo_simul(:,1:maximum_lag);
-      end
-     case 'smoother'
-       horizon = options_.forecast;
-      y_smoothed = oo_.SmoothedVariables;
-      y0 = zeros(M_.endo_nbr,maximum_lag);
-      for i = 1:M_.endo_nbr
-          v_name = deblank(M_.endo_names(i,:));
-          y0(i,:) = y_smoothed.(v_name)(end-maximum_lag+1:end)+oo_.dr.ys(i);
-      end
-      gend = options_.nobs;
-      if isfield(oo_.Smoother,'TrendCoeffs')
-          var_obs = options_.varobs;
-          endo_names = M_.endo_names;
-          order_var = oo_.dr.order_var;
-          i_var_obs = [];
-          trend_coeffs = [];
-          for i=1:size(var_obs,1)
-              tmp = strmatch(var_obs(i,:),endo_names(i_var,:),'exact');
-              if ~isempty(tmp)
-                  i_var_obs = [ i_var_obs; tmp];
-                  trend_coeffs = [trend_coeffs; oo_.Smoother.TrendCoeffs(i)];
-              end
-          end         
-          trend = trend_coeffs*(gend+(1-M_.maximum_lag:horizon));
-      end
-      global bayestopt_
-      if isfield(bayestopt_,'mean_varobs')
-          trend = trend + repmat(bayestopt_.mean_varobs,1,horizon+M_.maximum_lag);
-      end
-     otherwise
-      error('Wrong flag value')
+        horizon = options_.periods;
+        if horizon == 0
+            horizon = 5;
+        end
+        if size(oo_.endo_simul,2) < maximum_lag
+            y0 = repmat(oo_.steady_state,1,maximum_lag);
+        else
+            y0 = oo_.endo_simul(:,1:maximum_lag);
+        end
+      case 'smoother'
+        horizon = options_.forecast;
+        y_smoothed = oo_.SmoothedVariables;
+        y0 = zeros(M_.endo_nbr,maximum_lag);
+        for i = 1:M_.endo_nbr
+            v_name = deblank(M_.endo_names(i,:));
+            y0(i,:) = y_smoothed.(v_name)(end-maximum_lag+1:end)+oo_.dr.ys(i);
+        end
+        gend = options_.nobs;
+        if isfield(oo_.Smoother,'TrendCoeffs')
+            var_obs = options_.varobs;
+            endo_names = M_.endo_names;
+            order_var = oo_.dr.order_var;
+            i_var_obs = [];
+            trend_coeffs = [];
+            for i=1:size(var_obs,1)
+                tmp = strmatch(var_obs(i,:),endo_names(i_var,:),'exact');
+                if ~isempty(tmp)
+                    i_var_obs = [ i_var_obs; tmp];
+                    trend_coeffs = [trend_coeffs; oo_.Smoother.TrendCoeffs(i)];
+                end
+            end         
+            trend = trend_coeffs*(gend+(1-M_.maximum_lag:horizon));
+        end
+        global bayestopt_
+        if isfield(bayestopt_,'mean_varobs')
+            trend = trend + repmat(bayestopt_.mean_varobs,1,horizon+M_.maximum_lag);
+        end
+      otherwise
+        error('Wrong flag value')
     end 
     
     if M_.exo_det_nbr == 0
@@ -110,9 +110,9 @@ function info = forecast(var_list,task)
         if horizon > exo_det_length
             ex = zeros(horizon,M_.exo_nbr);
             oo_.exo_det_simul = [ oo_.exo_det_simul;...
-                    repmat(oo_.exo_det_steady_state',...
-                           horizon- ... 
-                           exo_det_length,1)];
+                                repmat(oo_.exo_det_steady_state',...
+                                       horizon- ... 
+                                       exo_det_length,1)];
             %ex_det_length,1),1)];
         elseif horizon < exo_det_length 
             ex = zeros(exo_det_length,M_.exo_nbr); 
