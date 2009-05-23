@@ -317,7 +317,7 @@ missing_value = ~(number_of_observations == gend*n_varobs);
 
 initial_estimation_checks(xparam1,gend,data,data_index,number_of_observations,no_more_missing_observations);
 
-if options_.mode_compute == 0 & length(options_.mode_file) == 0
+if options_.mode_compute == 0 
     if options_.smoother == 1
 	[atT,innov,measurement_error,updated_variables,ys,trend_coeff,aK,T,R,P,PK,d,decomp] = DsgeSmoother(xparam1,gend,data,data_index,missing_value);
 	oo_.Smoother.SteadyState = ys;
@@ -336,10 +336,12 @@ if options_.mode_compute == 0 & length(options_.mode_file) == 0
 	    eval(['oo_.UpdatedVariables.' deblank(M_.endo_names(dr.order_var(i),:)) ' = updated_variables(i,:)'';']);
 	end
 	for i=1:M_.exo_nbr
-        eval(['oo_.SmoothedShocks.' deblank(M_.exo_names(i,:)) ' = innov(i,:)'';']);
+            eval(['oo_.SmoothedShocks.' deblank(M_.exo_names(i,:)) ' = innov(i,:)'';']);
 	end
     end
-    return;
+    if length(options_.mode_file) == 0
+        return;
+    end
 end
 
 %% Estimation of the posterior mode or likelihood mode
