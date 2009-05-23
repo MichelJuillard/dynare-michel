@@ -4,7 +4,8 @@
 DEBUG = yes
 
 LD_LIBS := -llapack -lcblas -lf77blas -latlas -lg2c
-CC_FLAGS :=  -DMATLAB -DWINDOWS	-Wall -I../sylv/cc  \
+CC_FLAGS :=  -DMATLAB -DWINDOWS	-DNO_BLAS_H -DNO_LAPACK_H \
+		-Wall -I../../gensylv/cc  \
 		-Ic:/"Program Files"/MATLAB_SV71/extern/include
 
 ifeq ($(DEBUG),yes)
@@ -28,9 +29,9 @@ endif
 # end add
 
 matrix_interface := GeneralMatrix Vector SylvException 
-matobjs := $(patsubst %, ../sylv/cc/%.o, $(matrix_interface))
-mathsource := $(patsubst %,  ../sylv/cc/%.h, $(matrix_interface))
-matcppsource := $(patsubst %,  ../sylv/cc/%.cpp, $(matrix_interface))
+matobjs := $(patsubst %, ../../gensylv/cc/%.o, $(matrix_interface))
+mathsource := $(patsubst %,  ../../gensylv/cc/%.h, $(matrix_interface))
+matcppsource := $(patsubst %,  ../../gensylv/cc/%.cpp, $(matrix_interface))
 cwebsource := $(wildcard *.cweb)
 # cppsource := $(patsubst %.cweb,%.cpp,$(cwebsource)) 
 cppsource := $(wildcard *.cpp)
