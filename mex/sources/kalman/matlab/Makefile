@@ -1,80 +1,83 @@
-# $Id: Makefile 532 2005-11-30 13:51:33Z kamenik $
-
+# $Id: Makefile 531 2005-11-30 13:49:48Z kamenik $
 # Copyright 2005, Ondra Kamenik
 
-CC = gcc
-CC_FLAGS = -Wall -I../../sylv/cc/
-LDFLAGS = -llapack -lcblas -lf77blas -latlas -lg2c -lstdc++
+DEBUG = yes
+
+LD_LIBS := -llapack -lcblas -lf77blas -latlas -lg2c
+CC_FLAGS :=  -DMATLAB -DWINDOWS  -DNO_BLAS_H -DNO_LAPACK_H \
+	-Wall -I../../gensylv/cc -I../cc \
+	-Ic:/"Program Files"/MATLAB_SV71/extern/include 
 
 ifeq ($(DEBUG),yes)
-	CC_FLAGS := $(CC_FLAGS) -g
+	CC_FLAGS := -DDEBUG $(CC_FLAGS) -g
 else
-	CC_FLAGS := $(CC_FLAGS) -O3
+	CC_FLAGS := $(CC_FLAGS) -O2
 endif
 
-ifeq ($(OS),Windows_NT)
-	CC_FLAGS := -mno-cygwin $(CC_FLAGS)
-	LDFLAGS := -mno-cygwin $(LDFLAGS)
-	ARCH := w32
-	MEX_SUFFIX = dll
-else
-	LDFLAGS := $(LDFLAGS)
-	ARCH := linux
-	MEX_SUFFIX = mexglx
-endif
+# Added by GP
+#    LDFLAGS := -llapack -lcblas -lf77blas -latlas -lg2c -lstdc++ -lmingw32
+        LDFLAGS := -Wl,--library-path $(LD_LIBRARY_PATH) \
+             -Wl,-L'f:/MinGW/lib' \
+        -Wl,-L"c:/Program Files"/MATLAB_SV71/extern/lib/win32/microsoft/ \
+        -Wl,-llibmex -Wl,-llibmx  -Wl,-llibmwlapack -Wl,-llibdflapack \
+        -lg2c -lmingw32  -lstdc++ $(LDFLAGS)
+
+#                  -Wl,-L'f:/CygWin/usr/local/atlas/lib' \
+#                  -Wl,-L'f:/CygWin/lib' \
+#                 $(LDFLAGS)
+    LD_LIBS :=$(LDFLAGS)
+# end add
 
 matrix_interface := GeneralMatrix Vector SylvException 
-matobjs := $(patsubst %, ../../sylv/cc/%.o, $(matrix_interface))
-mathsource := $(patsubst %, ../../sylv/cc/%.h, $(matrix_interface))
-matcppsource := $(patsubst %, ../../sylv/cc/%.cpp, $(matrix_interface))
-
-tscwebsource := $(wildcard ../cc/*.cweb)
-tscppsource := $(patsubst %.cweb,%.cpp,$(tscwebsource))
-tshwebsource := $(wildcard ../cc/*.hweb)
-tshsource := $(patsubst %.hweb,%.h,$(tshwebsource))
-tsobjects := $(patsubst %.cweb,%.o,$(tscwebsource))
-
+matobjs := $(patsubst %, ../../gensylv/cc/%.o, $(matrix_interface))
+mathsource := $(patsubst %,  ../../gensylv/cc/%.h, $(matrix_interface))
+matcppsource := $(patsubst %,  ../../gensylv/cc/%.cpp, $(matrix_interface))
+# cppsource := $(patsubst %.cweb,%.cpp,$(cwebsource)) 
+kalmancppsource := $(wildcard ../cc/*.cpp)
+kalmanhsource := $(wildcard ../cc/*.h)
+kalmanobjects := $(patsubst %.cpp,%.o,$(kalmancppsource))
 cppsource := $(wildcard *.cpp)
-mexobjects := $(patsubst %.cpp,%_.$(MEX_SUFFIX),$(cppsource))
+hsource := $(wildcard *.h)
+objects := $(patsubst %.cpp,%.o,$(cppsource))
+hwebsource := $(wildcard *.hweb)
+cwebsource := $(wildcard *.cweb)
 
-all: $(mexobjects)
+dummy.ch:
+	touch dummy.ch
 
-../cc/dummy.ch:
-	make -C ../cc dummy.ch
+# %.cpp: %.cweb dummy.ch
+# 	ctangle -bhp $*.cweb dummy.ch $*.cpp
 
-../cc/%.cpp: ../cc/%.cweb ../cc/dummy.ch
-	make -C ../cc $*.cpp
+# %.h: %.hweb dummy.ch
+# 	ctangle -bhp $*.hweb dummy.ch $*.h
 
-../cc/%.h: ../cc/%.hweb ../cc/dummy.ch
-	make -C ../cc $*.h
+#%.o: %.cpp $(hsource) $(cppsource) #$(kalmanhsource) $(mathsource)
 
-../cc/%.o: ../cc/%.cpp $(tshsource)
-	make -C ../cc $*.o
+%.o: %.cpp $(hsource) $(cppsource)
+	c++ $(CC_FLAGS) -c $*.cpp
 
-tslib.a: $(tshwebsource) $(tscwebsoure) $(tshsource) $(tscppsource) \
-         $(mathsource) $(matcppsource) \
-         $(tsobjects) $(matobjs)
-	ar cr tslib.a $(tsobjects) $(matobjs)
-	ranlib tslib.a
 
-# to compile mex objects for Windows do:
-# 1. install gnumex
-# 2. create mexopts.bat via gnumex in this directory, specify MinGW compilation, and dll output
-# 3. change -Ic:/MATLAB7/extern/include according your Matlab setup
-# 4. pray it works
-%_.$(MEX_SUFFIX): %.cpp $(tshwebsource) $(tscwebsoure) $(tshsource) $(tscppsource) \
-         $(mathsource) $(matcppsource) \
-         tslib.a
-ifeq ($(OS),Windows_NT)
-	mex.bat -I../../sylv/cc/ -I../cc COMPFLAGS\#"-c -DMATLAB_MEX_FILE" OPTIMFLAGS\#"-O3 -fexceptions -Ic:/MATLAB7/extern/include" GM_ADD_LIBS\#"$(LDFLAGS)" $*.cpp tslib.a
-else
-	mex -cxx -I../../sylv/cc/ -I../cc $*.cpp CFLAGS="$(CC_FLAGS) -fexceptions" tslib.a $(LDFLAGS)
-endif
-	mv $*.$(MEX_SUFFIX) $*_.$(MEX_SUFFIX)
+kalmanlib.a: $(objects) #$(kalmanobjects) $(matobjs) 
+	ar cr kalmanlib.a $(objects) $(kalmanobjects) $(matobjs) 
+	ranlib kalmanlib.a
+
+kalman_smoother_dll.dll: kalman_smoother.o kalmanlib.a #$(hsource) $(cppsource) 
+	gcc -shared $(CC_FLAGS) -o kalman_smoother_dll.dll kalman_smoother.o \
+	kalmanlib.a $(LD_LIBS) 
+
+kalman_filter_dll.dll: kalman_filter.o kalmanlib.a # $(hsource) $(cppsource) 
+	gcc -shared $(CC_FLAGS) -o kalman_filter_dll.dll kalman_filter.o \
+	kalmanlib.a $(LD_LIBS) 
+
+all: $(objects) kalmanlib.a kalman_smoother_dll.dll kalman_filter_dll.dll # $(cppsource) $(hsource) $(kalmanhsource) $(kalmancppsource)
+
+doc: main.web $(hwebsource) $(cwebsource)
+	cweave -bhp main.web
+	pdftex main
+	mv main.pdf ts.pdf 
 
 clear:
-	rm -f tslib.a
-	rm -f *.mexglx
-	rm -f *.dll
-	make -C ../testing clear
-	make -C ../cc clear
+	rm -f *.o
+	rm -f *.{pdf,dvi,log,scn,idx,toc}
+#	rm -f *.cpp
+#	rm -f *.h
