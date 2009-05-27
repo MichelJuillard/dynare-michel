@@ -42,9 +42,14 @@ if exist('fGlobalVar'),
   struct2local(fGlobalVar);
 end
 
+if isunix & Parallel(ThisMatlab).Local==0,
+    system('mkdir ~/MasterRemoteMirror');
+    system(['sshfs ',Parallel(ThisMatlab).user,'@',fInputVar.MasterName,':/',fInputVar.DyMo,' ~/MasterRemoteMirror']);
+end
+
 if isfield(fInputVar,'MhDirectoryName') & Parallel(ThisMatlab).Local==0,
     if isunix,
-%         fInputVar.MhDirectoryName = ['\\',fInputVar.MasterName,'\',fInputVar.DyMo(1),'$\',fInputVar.DyMo(4:end),'\',fInputVar.MhDirectoryName];
+        fInputVar.MhDirectoryName = ['~/MasterRemoteMirror/',fInputVar.MhDirectoryName];
     else
         fInputVar.MhDirectoryName = ['\\',fInputVar.MasterName,'\',fInputVar.DyMo(1),'$\',fInputVar.DyMo(4:end),'\',fInputVar.MhDirectoryName];
     end
@@ -79,6 +84,8 @@ if(whoiam)
       end
       system(['scp ',fname,'_output_',int2str(whoiam),'.mat ',Parallel(ThisMatlab).user,'@',fInputVar.MasterName,':',fInputVar.DyMo]);
       system(['ssh ',Parallel(ThisMatlab).user,'@',fInputVar.MasterName,' rm -f ',fInputVar.DyMo,'/P_',fname,'_',int2str(whoiam),'End.txt']);
+      system('fusermount -u ~/MasterRemoteMirror');
+      system('rm -r ~/MasterRemoteMirror');      
     else
       for j=1:size(OutputFileName,1),
         copyfile([OutputFileName{j,1},OutputFileName{j,2}],['\\',fInputVar.MasterName,'\',fInputVar.DyMo(1),'$\',fInputVar.DyMo(4:end),'\',OutputFileName{j,1}])
