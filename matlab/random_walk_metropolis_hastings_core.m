@@ -67,7 +67,7 @@ for b = fblck:nblck,
 %       keyboard;
       waitbarString = ['Please wait... Metropolis-Hastings (' int2str(b) '/' int2str(options_.mh_nblck) ')...'];
       waitbarTitle=['Metropolis-Hastings ',options_.parallel(ThisMatlab).PcName];
-      fMessageStatus(0,b,waitbarString, waitbarTitle, options_.parallel(ThisMatlab).Local, MasterName, DyMo);
+      fMessageStatus(0,b,waitbarString, waitbarTitle, options_.parallel(ThisMatlab), MasterName, DyMo);
       
     end
     isux = 0;
@@ -103,7 +103,7 @@ for b = fblck:nblck,
           elseif mod(j,50)==0 & whoiam,  
 %             keyboard;
             waitbarString = [ '(' int2str(b) '/' int2str(options_.mh_nblck) ') ' sprintf('%f done, acceptation rate %f',prtfrc,isux/j)];
-            fMessageStatus(prtfrc,b,waitbarString, waitbarTitle, options_.parallel(ThisMatlab).Local, MasterName, DyMo)
+            fMessageStatus(prtfrc,b,waitbarString, waitbarTitle, options_.parallel(ThisMatlab), MasterName, DyMo)
           end
         end
           
@@ -159,7 +159,7 @@ for b = fblck:nblck,
     end
     record.Seeds(b).Normal = randn('state');
     record.Seeds(b).Unifor = rand('state');
-    OutputFileName(jloop,:) = {[MhDirectoryName,'\'], [ModelName '_mh*_blck' int2str(b) '.mat']};
+    OutputFileName(jloop,:) = {[MhDirectoryName,'/'], [ModelName '_mh*_blck' int2str(b) '.mat']};
 end% End of the loop over the mh-blocks.
 
 
