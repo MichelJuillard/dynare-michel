@@ -7,12 +7,11 @@
 #define AFX_STDAFX_H__6D080F4C_4FEB_4290_90B5_6943DFBBE92A__INCLUDED_
 
 #if _MSC_VER > 1000
-#pragma once
+# pragma once
 #endif // _MSC_VER > 1000
 
-
 // Insert your headers here
-#define WIN32_LEAN_AND_MEAN		// Exclude rarely-used stuff from Windows headers
+#define WIN32_LEAN_AND_MEAN             // Exclude rarely-used stuff from Windows headers
 
 #include <windows.h>
 #endif // _MSC_VER > 1000

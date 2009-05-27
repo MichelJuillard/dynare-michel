@@ -44,46 +44,70 @@ class KordpDynare;
 /*////////////////////////////////////////////*/
 // instantiations of pure abstract class NameList in dynamic_model.h:
 /*////////////////////////////////////////////*/
-class DynareNameList : public NameList {
-  vector<const char*> names;
+class DynareNameList : public NameList
+{
+  vector<const char *> names;
 public:
-  DynareNameList(const KordpDynare& dynare);
-  DynareNameList(const KordpDynare& dynare, const char ** names);
-  int getNum() const {return (int)names.size();}
-  const char* getName(int i) const {return names[i];}
+  DynareNameList(const KordpDynare &dynare);
+  DynareNameList(const KordpDynare &dynare, const char **names);
+  int
+  getNum() const
+  {
+    return (int) names.size();
+  }
+  const char *
+  getName(int i) const
+  {
+    return names[i];
+  }
   /** This for each string of the input vector calculates its index
-  * in the names. And returns the resulting vector of indices. If
-  * the name cannot be found, then an exception is raised. */
-  vector<int> selectIndices(const vector<const char*>& ns) const;
+   * in the names. And returns the resulting vector of indices. If
+   * the name cannot be found, then an exception is raised. */
+  vector<int> selectIndices(const vector<const char *> &ns) const;
 };
 
-class DynareExogNameList : public NameList {
-  vector<const char*> names;
+class DynareExogNameList : public NameList
+{
+  vector<const char *> names;
 public:
-  DynareExogNameList(const  KordpDynare& dynare);
-  DynareExogNameList(const KordpDynare& dynare, const char ** names);
-  int getNum() const
-  {return (int)names.size();}
-  const char* getName(int i) const
-  {return names[i];}
+  DynareExogNameList(const  KordpDynare &dynare);
+  DynareExogNameList(const KordpDynare &dynare, const char **names);
+  int
+  getNum() const
+  {
+    return (int) names.size();
+  }
+  const char *
+  getName(int i) const
+  {
+    return names[i];
+  }
 };
 
-class DynareStateNameList : public NameList {
-  vector<const char*> names;
+class DynareStateNameList : public NameList
+{
+  vector<const char *> names;
 public:
-  DynareStateNameList(const KordpDynare& dynare, const DynareNameList& dnl,
-    const DynareExogNameList& denl);
-  int getNum() const
-  {return (int)names.size();}
-  const char* getName(int i) const
-  {return names[i];}
+  DynareStateNameList(const KordpDynare &dynare, const DynareNameList &dnl,
+                      const DynareExogNameList &denl);
+  int
+  getNum() const
+  {
+    return (int) names.size();
+  }
+  const char *
+  getName(int i) const
+  {
+    return names[i];
+  }
 };
 /*********************************************/
 // The following only implements DynamicModel with help of ogdyn::DynareModel
 // instantiation of pure abstract DynamicModel decl. in dynamic_model.h
 //class DynamicModelDLL;
 class KordpJacobian;
-class KordpDynare : public DynamicModel {
+class KordpDynare : public DynamicModel
+{
   friend class DynareNameList;
   friend class DynareExogNameList;
   friend class DynareStateNameList;
@@ -102,148 +126,220 @@ class KordpDynare : public DynamicModel {
   const int nJcols; // no of jacobian columns= nExog+nEndo+nsPred+nsForw
   const int nSteps;
   const int nOrder;
-  Journal& journal;
+  Journal &journal;
   ///	DynamicModel* model;
   ///const char* modName;
-  Vector* ySteady;
-  Vector* params;
-  TwoDMatrix* vCov;
+  Vector *ySteady;
+  Vector *params;
+  TwoDMatrix *vCov;
   TensorContainer<FSSparseTensor> md; // ModelDerivatives
-  DynareNameList* dnl;  
-  DynareExogNameList* denl;
-  DynareStateNameList* dsnl;
+  DynareNameList *dnl;
+  DynareExogNameList *denl;
+  DynareStateNameList *dsnl;
   const double ss_tol;
-  const vector<int>* varOrder;
-  const TwoDMatrix * ll_Incidence;
+  const vector<int> *varOrder;
+  const TwoDMatrix *ll_Incidence;
   double qz_criterium;
-  vector<int> * JacobianIndices;
+  vector<int> *JacobianIndices;
 public:
-  KordpDynare(const char** endo, int num_endo,
-    const char** exo, int num_exo, int num_par, //const char** par,
-    Vector* ySteady, TwoDMatrix* vCov, Vector* params, int nstat,int nPred, 
-    int nforw, int nboth, const int nJcols, const int nSteps, const int ord, 	//const char* modName,
-    Journal& jr, DynamicModelDLL& dynamicDLL, double sstol, 
-    const vector<int>* varOrder, const TwoDMatrix * ll_Incidence, 
-    double qz_criterium );
-  
+  KordpDynare(const char **endo, int num_endo,
+              const char **exo, int num_exo, int num_par, //const char** par,
+              Vector *ySteady, TwoDMatrix *vCov, Vector *params, int nstat, int nPred,
+              int nforw, int nboth, const int nJcols, const int nSteps, const int ord,    //const char* modName,
+              Journal &jr, DynamicModelDLL &dynamicDLL, double sstol,
+              const vector<int> *varOrder, const TwoDMatrix *ll_Incidence,
+              double qz_criterium);
+
   /** Makes a deep copy of the object. */
-  KordpDynare(const KordpDynare& dyn);
+  KordpDynare(const KordpDynare &dyn);
   virtual ~KordpDynare();
-  int nstat() const
-  {return nStat;}
-  int nboth() const
-  {return nBoth;}
-  int npred() const
-  {return nPred;}
-  int nforw() const
-  {return nForw;}
-  int nexog() const
-  {return nExog;}
-  int nys() const 
-  {return nYs;}
-  int nyss() const
-  {return nYss;}
-  int ny() const
-  {return nY;}
-  int steps() const
-  {return nSteps;}
-  int order() const
-  {return nOrder;}
-  const NameList& getAllEndoNames() const
-  {return *dnl;}
-  const NameList& getStateNames() const
-  {return *dsnl;}
-  const NameList& getExogNames() const
-  {return *denl;}
-  const TwoDMatrix& getVcov() const
-  {return *vCov;}
-  Vector& getParams()
-  {return *params;}
-  
-  const TensorContainer<FSSparseTensor>& getModelDerivatives() const
-  {return md;}
-  const Vector& getSteady() const
-  {return *ySteady;}
-  Vector& getSteady()
-  {return *ySteady;}
-  
+  int
+  nstat() const
+  {
+    return nStat;
+  }
+  int
+  nboth() const
+  {
+    return nBoth;
+  }
+  int
+  npred() const
+  {
+    return nPred;
+  }
+  int
+  nforw() const
+  {
+    return nForw;
+  }
+  int
+  nexog() const
+  {
+    return nExog;
+  }
+  int
+  nys() const
+  {
+    return nYs;
+  }
+  int
+  nyss() const
+  {
+    return nYss;
+  }
+  int
+  ny() const
+  {
+    return nY;
+  }
+  int
+  steps() const
+  {
+    return nSteps;
+  }
+  int
+  order() const
+  {
+    return nOrder;
+  }
+  const NameList &
+  getAllEndoNames() const
+  {
+    return *dnl;
+  }
+  const NameList &
+  getStateNames() const
+  {
+    return *dsnl;
+  }
+  const NameList &
+  getExogNames() const
+  {
+    return *denl;
+  }
+  const TwoDMatrix &
+  getVcov() const
+  {
+    return *vCov;
+  }
+  Vector &
+  getParams()
+  {
+    return *params;
+  }
+
+  const TensorContainer<FSSparseTensor> &
+  getModelDerivatives() const
+  {
+    return md;
+  }
+  const Vector &
+  getSteady() const
+  {
+    return *ySteady;
+  }
+  Vector &
+  getSteady()
+  {
+    return *ySteady;
+  }
+
   // here is true public interface
-  void solveDeterministicSteady(Vector& steady);
-  void solveDeterministicSteady()
-  {solveDeterministicSteady(*ySteady);}
-  void evaluateSystem(Vector& out, const Vector& yy, const Vector& xx);
-  void evaluateSystem(Vector& out, const Vector& yym, const Vector& yy,
-    const Vector& yyp, const Vector& xx);
-  void calcDerivatives(const Vector& yy, const Vector& xx);
+  void solveDeterministicSteady(Vector &steady);
+  void
+  solveDeterministicSteady()
+  {
+    solveDeterministicSteady(*ySteady);
+  }
+  void evaluateSystem(Vector &out, const Vector &yy, const Vector &xx);
+  void evaluateSystem(Vector &out, const Vector &yym, const Vector &yy,
+                      const Vector &yyp, const Vector &xx);
+  void calcDerivatives(const Vector &yy, const Vector &xx);
   //void calcDerivatives(const Vector& yy, TwoDMatrix& jj);
-  void calcDerivatives(const Vector& yy, ogu::Jacobian& jacob);
+  void calcDerivatives(const Vector &yy, ogu::Jacobian &jacob);
   void calcDerivativesAtSteady();
-  DynamicModelDLL& dynamicDLL;
+  DynamicModelDLL &dynamicDLL;
   ///	void writeMat4(FILE* fd, const char* prefix) const;
   ///	void writeDump(const std::string& basename) const;
-  DynamicModel* clone() const
-  {return new KordpDynare(*this);}
-  void ReorderCols(TwoDMatrix * tdx, const int * varOrder);
-  void ReorderCols(TwoDMatrix * tdx, const vector<int> * varOrder);
-  Vector * LLxSteady( const Vector& yS); // returns ySteady extended with leads and lags 
-  
+  DynamicModel *
+  clone() const
+  {
+    return new KordpDynare(*this);
+  }
+  void ReorderCols(TwoDMatrix *tdx, const int *varOrder);
+  void ReorderCols(TwoDMatrix *tdx, const vector<int> *varOrder);
+  Vector *LLxSteady(const Vector &yS); // returns ySteady extended with leads and lags
+
 private:
-  void writeModelInfo(Journal& jr) const;
-  int * ReorderDynareJacobianIndices( const int * varOrder);
-  vector<int> * ReorderDynareJacobianIndices( const vector<int> * varOrder);
-  void ReorderBlocks(TwoDMatrix * tdx, const int * varOrder);
-  void ReorderBlocks(TwoDMatrix * tdx, const vector<int> * vOrder);
-  void populateDerivativesContainer(TwoDMatrix*g, int ord, const vector<int>* vOrder);
+  void writeModelInfo(Journal &jr) const;
+  int *ReorderDynareJacobianIndices(const int *varOrder);
+  vector<int> *ReorderDynareJacobianIndices(const vector<int> *varOrder);
+  void ReorderBlocks(TwoDMatrix *tdx, const int *varOrder);
+  void ReorderBlocks(TwoDMatrix *tdx, const vector<int> *vOrder);
+  void populateDerivativesContainer(TwoDMatrix *g, int ord, const vector<int> *vOrder);
 };
 
 /****************************
-* ModelDerivativeContainer manages derivatives container
-************************************/
+ * ModelDerivativeContainer manages derivatives container
+ ************************************/
 
-class ModelDerivativeContainer //: public ogp::FormulaDerEvalLoader 
+class ModelDerivativeContainer //: public ogp::FormulaDerEvalLoader
 {
 protected:
   //	const ogp::FineAtoms& atoms;
-  TensorContainer<FSSparseTensor>& md;
+  TensorContainer<FSSparseTensor> &md;
 public:
-  ModelDerivativeContainer(const KordpDynare& model, TensorContainer<FSSparseTensor>& mod_ders,
-    int order);
-  void load(int i, int iord, const int* vars, double res);
+  ModelDerivativeContainer(const KordpDynare &model, TensorContainer<FSSparseTensor> &mod_ders,
+                           int order);
+  void load(int i, int iord, const int *vars, double res);
 };
 
 /****************************
-*  K-Order Perturbation instance of Jacobian:
-************************************/
+ *  K-Order Perturbation instance of Jacobian:
+ ************************************/
 
-class KordpJacobian : public ogu::Jacobian ///, public ogp::FormulaDerEvalLoader 
+class KordpJacobian : public ogu::Jacobian ///, public ogp::FormulaDerEvalLoader
 {
 protected:
-  KordpDynare& dyn;
+  KordpDynare &dyn;
 public:
-  KordpJacobian(	KordpDynare& dyn);
-  virtual ~KordpJacobian() {}
-  // Load <mod>_dynamic.DLL 
+  KordpJacobian(KordpDynare &dyn);
+  virtual ~KordpJacobian()
+  {
+  }
+  // Load <mod>_dynamic.DLL
   //	  void load(const char** modName);
-  void eval(const Vector& in);
+  void eval(const Vector &in);
 };
 
-
 /****************************
-*  K-Order Perturbation instance of VectorFunction:
-************************************/
+ *  K-Order Perturbation instance of VectorFunction:
+ ************************************/
 
-class 	KordpVectorFunction : public ogu::VectorFunction {
+class KordpVectorFunction : public ogu::VectorFunction
+{
 protected:
-  KordpDynare& d;
+  KordpDynare &d;
 public:
-  KordpVectorFunction(	KordpDynare& dyn)
-		  : d(dyn) {}
-  virtual ~KordpVectorFunction() {}
-  int inDim() const
-  {return d.ny();}
-  int outDim() const
-  {return d.ny();}
-  void eval(const ConstVector& in, Vector& out);
+  KordpVectorFunction(KordpDynare &dyn)
+    : d(dyn)
+  {
+  }
+  virtual ~KordpVectorFunction()
+  {
+  }
+  int
+  inDim() const
+  {
+    return d.ny();
+  }
+  int
+  outDim() const
+  {
+    return d.ny();
+  }
+  void eval(const ConstVector &in, Vector &out);
 };
 
 #endif
