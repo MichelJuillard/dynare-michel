@@ -77,20 +77,6 @@ extern "C" {
       mexErrMsgTxt("Must have 8, 9, or 10 input parameters.\n");
     if (nlhs < 1 || nlhs > 3)
       mexErrMsgTxt("Must have 1, 2, or 3 output parameters.\n");
-    
-    // test for univariate case
-    bool uni = false;
-    const mxArray* const last = prhs[nrhs-1];
-    if (mxIsChar(last)
-      && ((*mxGetChars(last)) == 'u' || (*mxGetChars(last)) == 'U'))
-      uni = true;
-    
-    // test for diffuse case
-    bool diffuse = false;
-    if ((mxIsChar(last) && nrhs == 10) ||
-      (!mxIsChar(last) && nrhs == 9))
-      diffuse = true;
-
     int start = 1; // default start of likelihood calculation
     try 
       {
@@ -99,17 +85,17 @@ extern "C" {
       GeneralMatrix R(mxGetPr(prhs[1]), mxGetM(prhs[1]), mxGetN(prhs[1]));
       GeneralMatrix Q(mxGetPr(prhs[2]), mxGetM(prhs[2]), mxGetN(prhs[2]));
       GeneralMatrix H(mxGetPr(prhs[3]), mxGetM(prhs[3]), mxGetN(prhs[3]));
-      GeneralMatrix P(mxGetPr(prhs[4]), mxGetM(prhs[4]), mxGetN(prhs[4]));
-      GeneralMatrix Y(mxGetPr(prhs[5]), mxGetM(prhs[5]), mxGetN(prhs[5]));
-      if (nrhs>6) start = (int)mxGetScalar(prhs[6]);
-      GeneralMatrix Z(mxGetPr(prhs[7]), mxGetM(prhs[7]), mxGetN(prhs[7]));
+      GeneralMatrix Pinf(mxGetPr(prhs[4]), mxGetM(prhs[4]), mxGetN(prhs[4]));
+      GeneralMatrix P(mxGetPr(prhs[5]), mxGetM(prhs[5]), mxGetN(prhs[5]));
+      GeneralMatrix Y(mxGetPr(prhs[6]), mxGetM(prhs[6]), mxGetN(prhs[6]));
+      if (nrhs>6) start = (int)mxGetScalar(prhs[7]);
+      GeneralMatrix Z(mxGetPr(prhs[8]), mxGetM(prhs[8]), mxGetN(prhs[8]));
       int nper = mxGetN(prhs[5]); // no of periods
       GeneralMatrix a( mxGetN(prhs[0]), 1);// initiate inital state to 0s
       a.zeros();
 #ifdef DEBUG		
       mexPrintf("kalman_filter: periods = %d ", nper);
 #endif		
-     
       // make storage for output
       double loglik;
       int per;
@@ -118,12 +104,12 @@ extern "C" {
       std::vector<double>* vll=new std::vector<double> (nper);
       // create state init
       StateInit* init = NULL;
-      init = new StateInit(P, a.getData());
+      init = new StateInit(P, Pinf, a.getData());
       // fork, create objects and do filtering
       KalmanTask kt(Y, Z, H, T, R, Q, *init);
-      // developement of the output.
+    // developement of the output.
 #ifdef DEBUG		
-      mexPrintf("kalman_filter: running and filling outputs.\n");
+    mexPrintf("kalman_filter: running and filling outputs.\n");
 #endif			
       loglik = kt.filter(per, d, (start-1), vll);
       // destroy init

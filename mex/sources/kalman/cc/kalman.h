@@ -19,6 +19,25 @@
 
 /* derived from c++kalman_filter library by O. Kamenik */
 
+/*************
+This file defines two most important classes: |KalmanTask| and
+|KalmanUniTask|. Both define a linear filtering and smoothing problem;
+one for multivariate observations, the other for univariate
+observations. The Kalman task consists of three things: the state
+space, observed data, and initialization.
+
+In addition to these two classes, we have also an abstraction for
+filter results, for diffuse filter results and smoother results. These
+are only containers of series of matrices and vectors. The filter
+results are used as an input for smoothing.
+
+The important convention is that whenever a parameter $t$ stands for a
+time period (which is always), it starts from 1 (not zero as in
+C/C++).
+
+In this file, we use the same naming scheme as in Durbin \& Koopman.
+*************/
+
 #ifndef KALMAN_H
 #define KALMAN_H
 
@@ -29,8 +48,17 @@
 
 #include <vector> 
 
+/*************
+This is an output of the filtering and input for the smoothing. This
+class is inherited by |DiffuseFilterResults| which enriches the
+|FilterResults| with additional information coming from the diffuse
+periods.
 
-
+The object is initialized for a given number of periods, and maintains
+a number of periods for which the filter results were set. If this
+number, |maxt|, is less than the number of overall periods, it means
+that the filter has not finished.
+**************/
 class FilterResults{
   protected:
     std::vector<PLUFact*> Finv;
@@ -59,9 +87,11 @@ class FilterResults{
     const Vector&getA(int t)const;
     const GeneralMatrix&getP(int)const;
     double getLogLikelihood()const;
+    double getLogLikelihood(int start)const;
+    double getLogLikelihood(std::vector<double> *vloglik)const;
+    double getLogLikelihood(int start,std::vector<double> *vloglik)const;
   };
 
-;
 
 class DiffuseFilterResults:public FilterResults{
   protected:
@@ -103,8 +133,6 @@ class DiffuseFilterResults:public FilterResults{
     const GeneralMatrix&getPinf(int t)const;
   };
 
-;
-
 class SmootherResults{
   protected:
     std::vector<Vector*> alpha;
@@ -126,8 +154,6 @@ class SmootherResults{
   };
 
 
-;
-
 class KalmanUniTask;
 class KalmanTask{
   friend class KalmanUniTask;
@@ -144,6 +170,7 @@ class KalmanTask{
       const TMatrix&R,const TMatrix&Q,
       const StateInit&init_state);
     double filter(int&per,int&d)const;
+    double filter(int&per,int&d, int start, std::vector<double>* vll)const;
     double filter_and_smooth(SmootherResults&sres,int&per,int&d)const;
   protected:
     void filterNonDiffuse(const Vector&a,const GeneralMatrix&Pstar,
@@ -159,12 +186,6 @@ class KalmanTask{
       Vector&etat)const;
     static double calcStepLogLik(const PLUFact&Finv,const Vector&v);
   };
-
-
-;
-
-;
-
 
 class FilterUniResults{
   protected:
@@ -194,9 +215,11 @@ class FilterUniResults{
     const Vector&getA(int t)const;
     const GeneralMatrix&getP(int)const;
     double getLogLikelihood()const;
+    double getLogLikelihood(int start)const;
+    double getLogLikelihood(std::vector<double>* vloglik)const;
+    double getLogLikelihood(int start,std::vector<double>* vloglik)const;
   };
 
-;
 
 class DiffuseFilterUniResults:public FilterUniResults{
   protected:
@@ -238,7 +261,6 @@ class DiffuseFilterUniResults:public FilterUniResults{
     const GeneralMatrix&getPinf(int t)const;
   };
 
-;
 
 class KalmanUniTask{
   private:
@@ -250,6 +272,7 @@ class KalmanUniTask{
   public:
     KalmanUniTask(const KalmanTask&kt);
     double filter(int&per,int&d)const;
+    double filter(int&per,int&d, int start, std::vector<double>* vll)const;
     double filter_and_smooth(SmootherResults&sres,int&per,int&d)const;
   protected:
     void filterNonDiffuse(const Vector&a,const GeneralMatrix&Pstar,
@@ -266,9 +289,6 @@ class KalmanUniTask{
     static double calcStepLogLik(double F,double v);
   };
 
-
-
-;
 
 #endif
 

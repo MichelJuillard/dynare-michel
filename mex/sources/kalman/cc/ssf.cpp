@@ -225,11 +225,11 @@ MesEquation::MesEquation(const GeneralMatrix&data,const TMatrix&zz,
                          const TMatrix&hh)
                          :y(data),
                          Z((zz.period()*hh.period()==1)?(TMatrix*)new TMatrixInvariant(zz[1]):
-(zz.period()*hh.period()==0)?(TMatrix*)new TMatrixCycle(y.numCols(),
+  (zz.period()*hh.period()==0)?(TMatrix*)new TMatrixCycle(y.numCols(),
                                                         zz.numRows(),zz.numCols())
                                                         :(TMatrix*)new TMatrixCycle(zz.period()*hh.period(),zz.numRows(),zz.numCols())),
                                                         H((zz.period()*hh.period()==1)?(TMatrix*)new TMatrixInvariant(hh[1]):
-(zz.period()*hh.period()==0)?(TMatrix*)new TMatrixCycle(y.numCols(),
+  (zz.period()*hh.period()==0)?(TMatrix*)new TMatrixCycle(y.numCols(),
                                                         hh.numRows(),hh.numCols())
                                                         :(TMatrix*)new TMatrixCycle(zz.period()*hh.period(),hh.numRows(),hh.numCols()))
   {
@@ -238,53 +238,52 @@ MesEquation::MesEquation(const GeneralMatrix&data,const TMatrix&zz,
     "Incompatible dimension in MesEquation constructor");
   
   int mper= zz.period()*hh.period();
-  if(mper==1){
+  if(mper==1)
+    {
     construct_invariant();
-    }else{
+    }
+  else
+    {
     std::vector<NormCholesky*> chols;
     int per= (mper==0)?y.numCols():mper;
-    for(int t= 1;t<=per;t++){
-      
+    for(int t= 1;t<=per;t++)
+      {
       GeneralMatrix ycol(y,0,t-1,y.numRows(),1);
       int hi= t;
       if(hh.period()> 0)
         hi= (t-1)%hh.period()+1;
-      
-      ;
-      
       NormCholesky*ch;
-      if(hh.period()==0){
+      if(hh.period()==0)
+        {
         ch= new NormCholesky(hh[t]);
-        }else if(hi-1>=(int)chols.size()){
+        }
+      else if(hi-1>=(int)chols.size())
+        {
         ch= new NormCholesky(hh[t]);
         chols.push_back(ch);
-          }else{
-          ch= chols[hi-1];
-            }
-          
-          ;
-          
-          ch->getL().multInvLeftUnit(ycol);
-          if(t-1<mper){
-            GeneralMatrix Zt(zz[t]);
-            ch->getL().multInvLeftUnit(Zt);
-            ((TMatrixCycle*)Z)->set(t,Zt);
-            GeneralMatrix Ht(hh.numRows(),hh.numRows());
-            Ht.zeros();
-            for(int i= 0;i<Ht.numRows();i++)
-              Ht.get(i,i)= ch->getD()[i];
-            ((TMatrixCycle*)H)->set(t,Ht);
-            }
-          
-          
-          
-          ;
-          if(hh.period()==0)
-            delete ch;
+        }
+      else
+        {
+        ch= chols[hi-1];
+        }
+      ch->getL().multInvLeftUnit(ycol);
+      if(t-1<mper)
+        {
+        GeneralMatrix Zt(zz[t]);
+        ch->getL().multInvLeftUnit(Zt);
+        ((TMatrixCycle*)Z)->set(t,Zt);
+        GeneralMatrix Ht(hh.numRows(),hh.numRows());
+        Ht.zeros();
+        for(int i= 0;i<Ht.numRows();i++)
+          Ht.get(i,i)= ch->getD()[i];
+        ((TMatrixCycle*)H)->set(t,Ht);
+        }
+      if(hh.period()==0)
+        delete ch;
       }
     for(unsigned int i= 0;i<chols.size();i++)
       delete chols[i];
-      }
+    }
   }
 
 MesEquation::MesEquation(const GeneralMatrix&data,const GeneralMatrix&zz,
@@ -309,7 +308,8 @@ MesEquation::~MesEquation()
 
 void MesEquation::construct_invariant()
   {
-  if(!TSUtils::isDiagonal((*H)[1])){
+  if(!TSUtils::isDiagonal((*H)[1]))
+    {
     NormCholesky chol((*H)[1]);
     chol.getL().multInvLeftUnit(y);
     chol.getL().multInvLeftUnit((*Z)[1]);

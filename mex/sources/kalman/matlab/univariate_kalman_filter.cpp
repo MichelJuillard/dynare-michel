@@ -77,20 +77,6 @@ extern "C" {
       mexErrMsgTxt("Must have 8, 9, or 10 input parameters.\n");
     if (nlhs < 1 || nlhs > 3)
       mexErrMsgTxt("Must have 1, 2, or 3 output parameters.\n");
-    
-    // test for univariate case
-    bool uni = false;
-    const mxArray* const last = prhs[nrhs-1];
-    if (mxIsChar(last)
-      && ((*mxGetChars(last)) == 'u' || (*mxGetChars(last)) == 'U'))
-      uni = true;
-    
-    // test for diffuse case
-    bool diffuse = false;
-    if ((mxIsChar(last) && nrhs == 10) ||
-      (!mxIsChar(last) && nrhs == 9))
-      diffuse = true;
-
     int start = 1; // default start of likelihood calculation
     try 
       {
@@ -125,7 +111,10 @@ extern "C" {
 #ifdef DEBUG		
       mexPrintf("kalman_filter: running and filling outputs.\n");
 #endif			
-      loglik = kt.filter(per, d, (start-1), vll);
+      KalmanUniTask kut(kt);
+      loglik = kut.filter(per, d, (start-1), vll);
+      per = per / Y.numRows();
+      d = d / Y.numRows();
       // destroy init
       delete init;
       
