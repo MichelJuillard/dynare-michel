@@ -176,6 +176,7 @@ end
     
     if isunix,
     system('sh ConcurrentCommand1.bat &');
+    pause(1)
     else
     system('ConcurrentCommand1.bat');
     end
