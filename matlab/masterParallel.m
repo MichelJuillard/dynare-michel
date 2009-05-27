@@ -22,7 +22,11 @@ global options_
 totCPU=0;
 DyMo=pwd;
 fInputVar.DyMo=DyMo;
-[tempo, MasterName]=system('hostname');
+if isunix,
+  [tempo, MasterName]=system(['ifconfig  | grep ''inet addr:''| grep -v ''127.0.0.1'' | cut -d: -f2 | awk ''{ print $1}''']);
+else    
+  [tempo, MasterName]=system('hostname');
+end
 MasterName=MasterName(1:end-1);
 fInputVar.MasterName = MasterName;
 
@@ -104,28 +108,26 @@ end
             if ~( strcmpi(Parallel(indPC).PcName,MasterName) &  strcmpi([Parallel(indPC).RemoteDrive,':\',Parallel(indPC).RemoteFolder],pwd))
                 if j==nCPU0+1,
                     if isunix,
-%                     delete(['\\',Parallel(indPC).PcName,'\',Parallel(indPC).RemoteDrive,'$\',Parallel(indPC).RemoteFolder,'\*.*']);
-%                     adir=ls(['\\',Parallel(indPC).PcName,'\',Parallel(indPC).RemoteDrive,'$\',Parallel(indPC).RemoteFolder,'\']);
+                      system(['ssh ',Parallel(indPC).user,'@',Parallel(indPC).PcName,' rm -fr ',Parallel(indPC).RemoteFolder,'/*']);
                     else
                       delete(['\\',Parallel(indPC).PcName,'\',Parallel(indPC).RemoteDrive,'$\',Parallel(indPC).RemoteFolder,'\*.*']);
                       adir=ls(['\\',Parallel(indPC).PcName,'\',Parallel(indPC).RemoteDrive,'$\',Parallel(indPC).RemoteFolder,'\']);
-                    end
-                    for jdir=3:size(adir,1)
-                        if isunix,
-%                           STATUS = rmdir(['\\',Parallel(indPC).PcName,'\',Parallel(indPC).RemoteDrive,'$\',Parallel(indPC).RemoteFolder,'\',deblank(adir(jdir,:))],'s');
-                        else
-                          STATUS = rmdir(['\\',Parallel(indPC).PcName,'\',Parallel(indPC).RemoteDrive,'$\',Parallel(indPC).RemoteFolder,'\',deblank(adir(jdir,:))],'s');
-                        end
+                      for jdir=3:size(adir,1)
+                        STATUS = rmdir(['\\',Parallel(indPC).PcName,'\',Parallel(indPC).RemoteDrive,'$\',Parallel(indPC).RemoteFolder,'\',deblank(adir(jdir,:))],'s');
                         if STATUS == 0,
                           disp(['Warning!: Directory ',deblank(adir(jdir,:)),' could not be removed from ',Parallel(indPC).PcName,'.'])
                         end
+                      end
                     end
                     
                     if isunix,
-%                       copyfile([fname,'_input.mat'], ['\\',Parallel(indPC).PcName,'\',Parallel(indPC).RemoteDrive,'$\',Parallel(indPC).RemoteFolder]);
-%                       for jfil=1:size(NamFileInput,1)
-%                          copyfile([NamFileInput{jfil,1},NamFileInput{jfil,2}],['\\',Parallel(indPC).PcName,'\',Parallel(indPC).RemoteDrive,'$\',Parallel(indPC).RemoteFolder,'\',NamFileInput{jfil,1}])
-%                       end
+                       system(['scp ',fname,'_input.mat ',Parallel(indPC).user,'@',Parallel(indPC).PcName,':',Parallel(indPC).RemoteFolder]);
+                      for jfil=1:size(NamFileInput,1)
+                         if ~isempty(NamFileInput{jfil,1})
+                             system(['ssh ',Parallel(indPC).user,'@',Parallel(indPC).PcName,' mkdir -p ',Parallel(indPC).RemoteFolder,'/',NamFileInput{jfil,1}])
+                         end
+                         system(['scp ',NamFileInput{jfil,1},NamFileInput{jfil,2},' ',Parallel(indPC).user,'@',Parallel(indPC).PcName,':',Parallel(indPC).RemoteFolder,'/',NamFileInput{jfil,1}]);
+                      end
                     else
                       copyfile([fname,'_input.mat'], ['\\',Parallel(indPC).PcName,'\',Parallel(indPC).RemoteDrive,'$\',Parallel(indPC).RemoteFolder]);
                       for jfil=1:size(NamFileInput,1)
@@ -136,13 +138,7 @@ end
             end
             
             if isunix,
-%               if ~strcmp(Parallel(indPC).PcName,MasterName), % run on a remote machine
-%                 command1=['start /B psexec \\',Parallel(indPC).PcName,' -e -u ',Parallel(indPC).user,' -p ',Parallel(indPC).passwd,' -W ',Parallel(indPC).RemoteDrive,':\',Parallel(indPC).RemoteFolder,'\ -a ',int2str(Parallel(indPC).NumCPU(j-nCPU0)), ...
-%                   ' -low  matlab -nosplash -nodesktop -minimize -r fParallel(',int2str(offset+1),',',int2str(sum(nBlockPerCPU(1:j))),',',int2str(j),',',int2str(indPC),',''',fname,''')'];
-%               else  % run on the local machine
-%                 command1=['start /B psexec \\',Parallel(indPC).PcName,' -e -W ',Parallel(indPC).RemoteDrive,':\',Parallel(indPC).RemoteFolder,'\ -a ',int2str(Parallel(indPC).NumCPU(j-nCPU0)), ...
-%                   ' -low  matlab -nosplash -nodesktop -minimize -r fParallel(',int2str(offset+1),',',int2str(sum(nBlockPerCPU(1:j))),',',int2str(j),',',int2str(indPC),',''',fname,''')'];
-%               end
+                command1=['ssh ',Parallel(indPC).user,'@',Parallel(indPC).PcName,' "cd ',Parallel(indPC).RemoteFolder, '; matlab -nosplash -nodesktop -minimize -r fParallel\(',int2str(offset+1),',',int2str(sum(nBlockPerCPU(1:j))),',',int2str(j),',',int2str(indPC),',\''',fname,'\''\);" &'];
             else
               if ~strcmp(Parallel(indPC).PcName,MasterName), % run on a remote machine
                 command1=['start /B psexec \\',Parallel(indPC).PcName,' -e -u ',Parallel(indPC).user,' -p ',Parallel(indPC).passwd,' -W ',Parallel(indPC).RemoteDrive,':\',Parallel(indPC).RemoteFolder,'\ -a ',int2str(Parallel(indPC).NumCPU(j-nCPU0)), ...
@@ -163,9 +159,9 @@ end
     fclose(fid);
     
     if isunix,
-    system('sh ConcurrentCommand1.bat')
+    system('sh ConcurrentCommand1.bat &');
     else
-    system('ConcurrentCommand1.bat')
+    system('ConcurrentCommand1.bat');
     end
     delete ConcurrentCommand1.bat
     
