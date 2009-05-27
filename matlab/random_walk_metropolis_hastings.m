@@ -69,7 +69,7 @@ localVars.varargin=varargin;
 tic,
 
 
-if isnumeric(options_.parallel) | isunix, % for the moment exclude unix platform from parallel implementation
+if isnumeric(options_.parallel),% | isunix, % for the moment exclude unix platform from parallel implementation
     fout = random_walk_metropolis_hastings_core(localVars, fblck, nblck, 0);
     record = fout.record;
     
@@ -88,11 +88,11 @@ else
         NamFileInput(length(NamFileInput)+1,:)={'',[ModelName '_steadystate.m']};
     end
     if (options_.load_mh_file~=0)  & any(fline>1) ,
-        NamFileInput(length(NamFileInput)+1,:)={[M_.dname '\metropolis\'],[ModelName '_mh' int2str(NewFile(1)) '_blck*.mat']};
+        NamFileInput(length(NamFileInput)+1,:)={[M_.dname '/metropolis/'],[ModelName '_mh' int2str(NewFile(1)) '_blck*.mat']};
     end
        
     % from where to get back results
-%     NamFileOutput(1,:) = {[M_.dname,'\metropolis\'],'*.*'};
+%     NamFileOutput(1,:) = {[M_.dname,'/metropolis/'],'*.*'};
     
     [fout, nBlockPerCPU, totCPU] = masterParallel(options_.parallel, fblck, nblck,NamFileInput,'random_walk_metropolis_hastings_core', localVars, globalVars);
     for j=1:totCPU,
