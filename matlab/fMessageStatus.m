@@ -1,4 +1,4 @@
-function fMessageStatus(prtfrc, njob, waitbarString, waitbarTitle, Local, MasterName, DyMo)
+function fMessageStatus(prtfrc, njob, waitbarString, waitbarTitle, Parallel, MasterName, DyMo)
 
 % Copyright (C) 2009 Dynare Team
 %
@@ -19,14 +19,14 @@ function fMessageStatus(prtfrc, njob, waitbarString, waitbarTitle, Local, Master
 
 global funcName
 
-if nargin<4,
-  Local=1;
+if nargin<5,
+  Parallel.Local=1;
 end
 
 save(['comp_status_',funcName,int2str(njob)],'prtfrc','njob','waitbarString','waitbarTitle');
-if Local==0,
+if Parallel.Local==0,
   if isunix,
-%     copyfile(['comp_status_',funcName,int2str(njob),'.mat'],['\\',MasterName,'\',DyMo(1),'$\',DyMo(4:end),'\']);
+    system(['scp comp_status_',funcName,int2str(njob),'.mat ',Parallel.user,'@',MasterName,':',DyMo]);
   else
     copyfile(['comp_status_',funcName,int2str(njob),'.mat'],['\\',MasterName,'\',DyMo(1),'$\',DyMo(4:end),'\']);
   end
