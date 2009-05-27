@@ -95,7 +95,7 @@ end
         
         if Parallel(indPC).Local == 1, % run on the local machine
           if isunix,
-%             command1=['start /B psexec -W ',DyMo, ' -a ',int2str(Parallel(indPC).NumCPU(j-nCPU0)),' -low  matlab -nosplash -nodesktop -minimize -r fParallel(',int2str(offset+1),',',int2str(sum(nBlockPerCPU(1:j))),',',int2str(j),',',int2str(indPC),',''',fname,''')'];
+            command1=['ssh localhost "cd ',DyMo, '; ',matlabroot,'/bin/matlab -nosplash -nodesktop -minimize -r fParallel\(',int2str(offset+1),',',int2str(sum(nBlockPerCPU(1:j))),',',int2str(j),',',int2str(indPC),',\''',fname,'\''\);" &'];
           else
             command1=['start /B psexec -W ',DyMo, ' -a ',int2str(Parallel(indPC).NumCPU(j-nCPU0)),' -low  matlab -nosplash -nodesktop -minimize -r fParallel(',int2str(offset+1),',',int2str(sum(nBlockPerCPU(1:j))),',',int2str(j),',',int2str(indPC),',''',fname,''')'];
           end
@@ -162,7 +162,11 @@ end
     
     fclose(fid);
     
+    if isunix,
+    system('sh ConcurrentCommand1.bat')
+    else
     system('ConcurrentCommand1.bat')
+    end
     delete ConcurrentCommand1.bat
     
     status_string={'Starting remote parallel computation ... '};
@@ -173,11 +177,11 @@ end
         pause(1)
 %         keyboard;
         %             if (cputime-t0)>10,
-        stax = ls(['comp_status_',fname,'*.mat']);
-        for j=1:size(stax,1),
+        stax = dir(['comp_status_',fname,'*.mat']);
+        for j=1:length(stax),
             
             try
-                load(stax(j,:))
+                load(stax(j).name)
                 %                         status_string{j}=(['Chain ',int2str(whoiam),' at ',num2str(100*jstatus/nruns(whoiam)),'% accept. rate ',num2str(isux/jstatus,4),'.']);
             catch
                 
@@ -185,7 +189,7 @@ end
             %                   disp(status_string{j})
             if ishandle(hh(njob)),
                 waitbar(prtfrc,hh(njob),waitbarString);
-                if prtfrc==1, close(hh(njob)); delete(stax(j,:)), end
+                if prtfrc==1, close(hh(njob)); delete(stax(j).name), end
             else
                 hh(njob) = waitbar(0,waitbarString);
                 set(hh(njob),'Name',['Parallel ',waitbarTitle]);
@@ -195,7 +199,7 @@ end
         %                 disp(' ')
         %                 t0=cputime;
         %             end
-        if isempty(ls(['P_',fname,'_*End.txt'])) 
+        if isempty(dir(['P_',fname,'_*End.txt'])) 
             delete(['comp_status_',fname,'*.mat'])
             for j=1:length(hh),
                 if ishandle(hh(j)),
