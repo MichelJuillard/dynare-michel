@@ -105,7 +105,23 @@ end
           end
         else
 %           keyboard;
-            if ~( strcmpi(Parallel(indPC).PcName,MasterName) &  strcmpi([Parallel(indPC).RemoteDrive,':\',Parallel(indPC).RemoteFolder],pwd))
+            if isunix,
+              [tempo, RemoteName]=system(['ssh ',Parallel(indPC).user,'@',Parallel(indPC).PcName,' "ifconfig  | grep \''inet addr:\''| grep -v \''127.0.0.1\'' | cut -d: -f2 | awk \''{ print $1}\''"']);
+              RemoteName=RemoteName(1:end-1);
+              RemoteFolder = Parallel(indPC).RemoteFolder;
+            else    
+              RemoteName = Parallel(indPC).PcName;
+              RemoteFolder = [Parallel(indPC).RemoteDrive,':\',Parallel(indPC).RemoteFolder];
+            end
+            
+            remoteFlag=1;
+
+            if strcmpi(RemoteName,MasterName),
+                if ~copyfile(['P_',fname,'_',int2str(j),'End.txt'],RemoteFolder),
+                    remoteFlag=0;
+                end
+            end
+            if remoteFlag,
                 if j==nCPU0+1,
                     if isunix,
                       system(['ssh ',Parallel(indPC).user,'@',Parallel(indPC).PcName,' rm -fr ',Parallel(indPC).RemoteFolder,'/*']);
