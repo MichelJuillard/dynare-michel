@@ -42,10 +42,25 @@ if exist('fGlobalVar'),
   struct2local(fGlobalVar);
 end
 
+if isfield(fInputVar,'MhDirectoryName') & Parallel(ThisMatlab).Local==0,
+    if isunix,
+%         fInputVar.MhDirectoryName = ['\\',fInputVar.MasterName,'\',fInputVar.DyMo(1),'$\',fInputVar.DyMo(4:end),'\',fInputVar.MhDirectoryName];
+    else
+        fInputVar.MhDirectoryName = ['\\',fInputVar.MasterName,'\',fInputVar.DyMo(1),'$\',fInputVar.DyMo(4:end),'\',fInputVar.MhDirectoryName];
+    end
+end
+
+fInputVar.Parallel = Parallel;
 % lounch the routine to be run in parallel
 tic,
-[fOutputVar, OutputFileName] = feval(fname, fInputVar ,fblck, nblck, whoiam, ThisMatlab);
+fOutputVar = feval(fname, fInputVar ,fblck, nblck, whoiam, ThisMatlab);
 toc,
+if isfield(fOutputVar,'OutputFileName'),
+    OutputFileName = fOutputVar.OutputFileName;
+%     rmfield(fOutputVar,'OutputFileName');
+else
+    OutputFileName = '';
+end
 
 %%% Sincronismo "Esterno" %%%%%%%%%%%%%
 %%% Ogni Processo quando ha finito lo notifica cancellando un file ... 
@@ -54,7 +69,7 @@ if(whoiam)
   save([ fname,'_output_',int2str(whoiam)],'fOutputVar' )
   
   
-  if options_.parallel(ThisMatlab).Local
+  if Parallel(ThisMatlab).Local
     delete(['P_',fname,'_',int2str(whoiam),'End.txt']);
 
   else
