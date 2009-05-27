@@ -52,8 +52,6 @@ function [LIK, lik] = kalman_filter(T,R,Q,H,P,Y,start,mf,kalman_tol,riccati_tol)
     lik  = zeros(smpl+1,1);                         % Initialization of the vector gathering the densities.
     LIK  = Inf;                                     % Default value of the log likelihood.
     oldK = 0;
-    number_of_observations = smpl*pp;
-    lik(smpl+1) = number_of_observations*log(2*pi); % Log likelihood constant.
     notsteady   = 1;                                % Steady state flag.
     F_singular  = 1;
 
@@ -77,7 +75,7 @@ function [LIK, lik] = kalman_filter(T,R,Q,H,P,Y,start,mf,kalman_tol,riccati_tol)
             a      = T*(a+K*v);
             P      = T*(P-K*P(mf,:))*transpose(T)+QQ;
         end
-        notsteady = max(max(abs(K-oldK)))>riccati_tol;
+        notsteady = max(max(abs(K-oldK))) > riccati_tol;
         oldK = K;
     end
 
@@ -85,12 +83,18 @@ function [LIK, lik] = kalman_filter(T,R,Q,H,P,Y,start,mf,kalman_tol,riccati_tol)
         error('The variance of the forecast error remains singular until the end of the sample')
     end
 
-    reste = smpl-t;
-    while t < smpl
-        t = t+1;
-        v = Y(:,t)-a(mf);
-        a = T*(a+K*v);
-        lik(t) = transpose(v)*iF*v;
-    end
-    lik(t) = lik(t) + reste*log(dF);
-    LIK    = .5*(sum(lik(start:end))-(start-1)*lik(smpl+1)/smpl);% Minus the log-likelihood.
+    if t < smpl
+        t0 = t+1;
+        while t < smpl
+            t = t+1;
+            v = Y(:,t)-a(mf);
+            a = T*(a+K*v);
+            lik(t) = transpose(v)*iF*v;
+        end
+        lik(t0:smpl) = lik(t0:smpl) + log(dF);
+    end    
+    
+    % adding log-likelihhod constants
+    lik = lik + pp*log(2*pi);
+
+    LIK    = .5*sum(lik(start:end));% Minus the log-likelihood.
