@@ -1,4 +1,4 @@
-function [myoutput, OutputFileName] = random_walk_metropolis_hastings_core(myinputs,fblck,nblck,whoiam, ThisMatlab)
+function myoutput = random_walk_metropolis_hastings_core(myinputs,fblck,nblck,whoiam, ThisMatlab)
 
 % Copyright (C) 2006-2008 Dynare Team
 %
@@ -166,5 +166,6 @@ end% End of the loop over the mh-blocks.
 myoutput.record = record;
 myoutput.irun = irun;
 myoutput.NewFile = NewFile;
+myoutput.OutputFileName = OutputFileName;
 
 
