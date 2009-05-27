@@ -25,8 +25,13 @@ fInputVar.DyMo=DyMo;
 [tempo, MasterName]=system('hostname');
 MasterName=MasterName(1:end-1);
 fInputVar.MasterName = MasterName;
-save([fname,'_input.mat'],'fInputVar','fGlobalVar') 
 
+if exist('fGlobalVar'),
+save([fname,'_input.mat'],'fInputVar','fGlobalVar') 
+else
+save([fname,'_input.mat'],'fInputVar') 
+end
+save([fname,'_input.mat'],'Parallel','-append') 
 for j=1:length(Parallel),
     nCPU(j)=length(Parallel(j).NumCPU);
     totCPU=totCPU+nCPU(j);
@@ -210,8 +215,10 @@ end
             break
         end
     end
+    delete([fname,'_input.mat'])
     for j=1:totCPU,
       load([fname,'_output_',int2str(j),'.mat'],'fOutputVar');
+      delete([fname,'_output_',int2str(j),'.mat']);
       fOutVar(j)=fOutputVar;
 
       
