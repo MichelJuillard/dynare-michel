@@ -65,8 +65,8 @@ kalman_smoother_dll.dll: kalman_smoother.o kalmanlib.a #$(hsource) $(cppsource)
 	gcc -shared $(CC_FLAGS) -o kalman_smoother_dll.dll kalman_smoother.o \
 	kalmanlib.a $(LD_LIBS) 
 
-kalman_filter_dll.dll: kalman_filter.o kalmanlib.a # $(hsource) $(cppsource) 
-	gcc -shared $(CC_FLAGS) -o kalman_filter_dll.dll kalman_filter.o \
+kalman_filter_dll.dll: kalman_filters.o kalmanlib.a # $(hsource) $(cppsource) 
+	gcc -shared $(CC_FLAGS) -o kalman_filter_dll.dll kalman_filters.o \
 	kalmanlib.a $(LD_LIBS) 
 
 all: $(objects) kalmanlib.a kalman_smoother_dll.dll kalman_filter_dll.dll # $(cppsource) $(hsource) $(kalmanhsource) $(kalmancppsource)
