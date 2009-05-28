@@ -49,7 +49,7 @@ function [LIK, lik] = kalman_filter(T,R,Q,H,P,Y,start,mf,kalman_tol,riccati_tol)
     dF   = 1;                                       % det(F).
     QQ   = R*Q*transpose(R);                        % Variance of R times the vector of structural innovations.
     t    = 0;                                       % Initialization of the time index.
-    lik  = zeros(smpl+1,1);                         % Initialization of the vector gathering the densities.
+    lik  = zeros(smpl,1);                         % Initialization of the vector gathering the densities.
     LIK  = Inf;                                     % Default value of the log likelihood.
     oldK = 0;
     notsteady   = 1;                                % Steady state flag.
@@ -95,6 +95,6 @@ function [LIK, lik] = kalman_filter(T,R,Q,H,P,Y,start,mf,kalman_tol,riccati_tol)
     end    
     
     % adding log-likelihhod constants
-    lik = lik + pp*log(2*pi);
+    lik = (lik + pp*log(2*pi))/2;
 
-    LIK    = .5*sum(lik(start:end));% Minus the log-likelihood.
+    LIK = sum(lik(start:end)); % Minus the log-likelihood.

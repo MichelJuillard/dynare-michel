@@ -53,8 +53,7 @@ rr = size(R,2);                            % Number of structural innovations.
 smpl   = size(Y,2);                        % Number of periods in the dataset.
 a      = zeros(mm+pp,1);                      % Initial condition of the state vector.
 t      = 0;
-lik    = zeros(smpl+1,1);	
-lik(smpl+1) = number_of_observations*log(2*pi);	    % the constant of minus two times the log-likelihood
+lik    = zeros(smpl,1);	
 notsteady   = 1;
 
 TT = zeros(mm+pp);
@@ -72,16 +71,19 @@ QQQQ = zeros(mm+pp);
 RQR  = R*Q*R';
 QQQQ(1:mm,1:mm) = RQR;
 QQQQ(mm+1:end,mm+1:end) = H;
+l2pi = log(2*pi);
 
 while notsteady && t<smpl
     t  = t+1;
-    MF = mf(data_index{t});
+    d_index = data_index{t};
+    MF = mf(d_index);
     oldPP = PP;
     for i=1:length(MF)
-        prediction_error = Y(data_index{t}(i),t) - a(MF(i)) - a( mm+i );
+        prediction_error = Y(d_index(i),t) - a(MF(i)) - a( mm+i );
         Fi = PP(MF(i),MF(i)) + PP(mm+i,mm+i);         
         if Fi > kalman_tol
-            lik(t) = lik(t) + log(Fi) + prediction_error*prediction_error/Fi;
+            lik(t) = lik(t) + log(Fi) + prediction_error*prediction_error/Fi ...
+                     + l2pi;
             Ki	   = sum(PP(:,[MF(i) mm+i]),2)/Fi;
             a      = a + Ki*prediction_error;
             PP 	   = PP - (Ki*Fi)*transpose(Ki);
@@ -109,11 +111,14 @@ while t < smpl
             Ki = ( PPPP(:,mf(i)) + PPPP(:,mm+i) )/Fi;
             a  = a + Ki*prediction_error;
             PPPP  = PPPP - (Fi*Ki)*transpose(Ki);
-            lik(t) = lik(t) + log(Fi) + prediction_error*prediction_error/Fi;
+            lik(t) = lik(t) + log(Fi) + prediction_error*prediction_error/Fi ...
+                     + l2pi;
         end
     end
     a(1:mm) = T*a(1:mm);
     a(mm+1:end) = zeros(pp,1);
 end
 
-LIK = .5*(sum(lik(start:end))-(start-1)*lik(smpl+1)/smpl);
+lik = lik/2;
+
+LIK = sum(lik(start:end));

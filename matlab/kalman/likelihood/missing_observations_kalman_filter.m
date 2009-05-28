@@ -53,23 +53,23 @@ function  [LIK, lik] = missing_observations_kalman_filter(T,R,Q,H,P,Y,start,mf,k
     dF   = 1;                                       % det(F).
     QQ   = R*Q*transpose(R);                        % Variance of R times the vector of structural innovations. 
     t    = 0;                                       % Initialization of the time index.
-    lik  = zeros(smpl+1,1);                         % Initialization of the vector gathering the densities.
+    lik  = zeros(smpl,1);                         % Initialization of the vector gathering the densities.
     LIK  = Inf;                                     % Default value of the log likelihood.
     oldK = 0;
-    lik(smpl+1) = number_of_observations*log(2*pi); % Log likelihood constant.  
     notsteady   = 1;                                % Steady state flag.
     F_singular  = 1;
     
     while notsteady & t<smpl 
         t  = t+1;
-        if isempty(data_index{t})
+        d_index = data_index{t}
+        if isempty(d_index)
             a = T*a;
             P = T*P*transpose(T)+QQ;
         else
-            MF = mf(data_index{t});                 % Set the selection for observed variables. 
-            v  = Y(data_index{t},t)-a(MF);
+            MF = mf(d_index);                 % Set the selection for observed variables. 
+            v  = Y(d_index,t)-a(MF);
             if ~isscalar(H)                         % => Errors in the measurement equation.
-                F = P(MF,MF) + H(data_index{t},data_index{t}); 
+                F = P(MF,MF) + H(d_index,d_index); 
             else% => 
                 % case 1. No errors in the measurement (H=0) and more than one variable is observed in this state space model. 
                 % case 2. Errors in the measurement equation, but only one variable is observed in this state-space model.
@@ -86,7 +86,7 @@ function  [LIK, lik] = missing_observations_kalman_filter(T,R,Q,H,P,Y,start,mf,k
                 F_singular = 0;
                 dF     = det(F);
                 iF     = inv(F);
-                lik(t) = log(dF)+transpose(v)*iF*v;
+                lik(t) = log(dF) + transpose(v)*iF*v + length(d_index)*log(2*pi);
                 K      = P(:,MF)*iF;
                 a      = T*(a+K*v);
                 P      = T*(P-K*P(MF,:))*transpose(T)+QQ;
@@ -102,12 +102,17 @@ function  [LIK, lik] = missing_observations_kalman_filter(T,R,Q,H,P,Y,start,mf,k
         error('The variance of the forecast error remains singular until the end of the sample')
     end
     
-    reste = smpl-t;
-    while t < smpl
-        t = t+1;
-        v = Y(:,t)-a(mf);
-        a = T*(a+K*v);
-        lik(t) = transpose(v)*iF*v;
+    if t < smpl
+        t0 = t;
+        while t < smpl
+            t = t+1;
+            v = Y(:,t)-a(mf);
+            a = T*(a+K*v);
+            lik(t) = v'*iF*v;
+        end
+        lik(t0:smpl) = lik(t0:smpl) + log(dF) + pp*log(2*pi);
     end
-    lik(t) = lik(t) + reste*log(dF);
-    LIK    = .5*(sum(lik(start:end))-(start-1)*lik(smpl+1)/smpl);% Minus the log-likelihood.
+    
+    lik = lik/2;
+
+    LIK    = sum(lik(start:end));

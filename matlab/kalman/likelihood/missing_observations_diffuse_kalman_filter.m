@@ -51,21 +51,20 @@ function [LIK, lik] = missing_observations_diffuse_kalman_filter(T,R,Q,H,Pinf,Ps
   QQ   = R*Q*transpose(R);
   t    = 0;
   oldK = 0;
-  lik  = zeros(smpl+1,1);
+  lik  = zeros(smpl,1);
   LIK  = Inf;
-  lik(smpl+1) = number_of_observations*log(2*pi);
   notsteady   = 1;
-  reste       = 0;
   
   while rank(Pinf,kalman_tol) && (t<smpl)
       t  = t+1;
-      if isempty(data_index{t})
+      d_index = data_index{t};
+      if isempty(d_index)
           a = T*a;
           Pstar = T*Pstar*transpose(T)+QQ;
           Pinf  = T*Pinf*transpose(T);     
       else
-          ZZ = Z(data_index{t},:);
-          v  = Y(data_index{t},t)-ZZ*a;
+          ZZ = Z(d_index,:);
+          v  = Y(d_index,t)-ZZ*a;
           Finf  = ZZ*Pinf*ZZ';
           if rcond(Finf) < kalman_tol 
               if ~all(abs(Finf(:)) < kalman_tol)
@@ -73,7 +72,7 @@ function [LIK, lik] = missing_observations_diffuse_kalman_filter(T,R,Q,H,Pinf,Ps
                   return
               else
                   if ~isscalar(H)                        % => Errors in the measurement equation.
-                      Fstar = ZZ*Pstar*ZZ' + H(data_index{t},data_index{t}); 
+                      Fstar = ZZ*Pstar*ZZ' + H(d_index,d_index); 
                   else% => 
                       % case 1. No errors in the measurement (H=0) and more than one variable is observed in this state space model. 
                       % case 2. Errors in the measurement equation, but only one variable is observed in this state-space model.
@@ -92,7 +91,7 @@ function [LIK, lik] = missing_observations_diffuse_kalman_filter(T,R,Q,H,Pinf,Ps
                       iFstar = inv(Fstar);
                       dFstar = det(Fstar);
                       Kstar  = Pstar*ZZ'*iFstar;
-                      lik(t) = log(dFstar) + v'*iFstar*v;
+                      lik(t) = log(dFstar) + v'*iFstar*v + length(d_index)*log(2*pi);
                       Pinf   = T*Pinf*transpose(T);
                       Pstar  = T*(Pstar-Pstar*ZZ'*Kstar')*T'+QQ;
                       a	     = T*(a+Kstar*v);
@@ -118,14 +117,15 @@ function [LIK, lik] = missing_observations_diffuse_kalman_filter(T,R,Q,H,Pinf,Ps
   F_singular = 1;
   while notsteady && (t<smpl)
       t = t+1;
-      if isempty(data_index{t})
+      d_index = data_index{t};
+      if isempty(d_index)
           a = T*a;
           Pstar = T*Pstar*transpose(T)+QQ;      
       else
-          ZZ = Z(data_index{t},:);
-          v = Y(data_index{t},t)-ZZ*a;
+          ZZ = Z(d_index,:);
+          v = Y(d_index,t)-ZZ*a;
           if ~isscalar(H)                        % => Errors in the measurement equation.
-              F = ZZ*Pstar*ZZ' + H(data_index{t},data_index{t}); 
+              F = ZZ*Pstar*ZZ' + H(d_index,d_index); 
           else% => 
               % case 1. No errors in the measurement (H=0) and more than one variable is observed in this state space model. 
               % case 2. Errors in the measurement equation, but only one variable is observed in this state-space model.
@@ -142,7 +142,7 @@ function [LIK, lik] = missing_observations_diffuse_kalman_filter(T,R,Q,H,Pinf,Ps
           else
               F_singular = 0;
               iF     = inv(F);
-              lik(t) = log(dF)+v'*iF*v;
+              lik(t) = log(dF) + v'*iF*v  + length(d_index)*log(2*pi);
               K      = Pstar*ZZ'*iF;
               a      = T*(a+K*v);	
               Pstar  = T*(Pstar-K*ZZ*Pstar)*T'+QQ;
@@ -158,13 +158,17 @@ function [LIK, lik] = missing_observations_diffuse_kalman_filter(T,R,Q,H,Pinf,Ps
       error(['The variance of the forecast error remains singular until the end of the sample'])
   end
   
-  reste = smpl-t;
-  while t<smpl
-      t = t+1;
-      v = Y(:,t)-Z*a;
-      a = T*(a+K*v);
-      lik(t) = v'*iF*v;
+  if t < smpl
+      t0 = t;
+      while t<smpl
+          t = t+1;
+          v = Y(:,t)-Z*a;
+          a = T*(a+K*v);
+          lik(t) = v'*iF*v;
+      end
+      lik(t0:smpl) = lik(t0:smpl) + log(dF) + pp*log(2*pi);
   end
-  lik(t) = lik(t) + reste*log(dF);
   
-  LIK    = .5*(sum(lik(start:end))-(start-1)*lik(smpl+1)/smpl);% Minus the log-likelihood.
+  lik = lik/2;
+  
+  LIK    = sum(lik(start:end));% Minus the log-likelihood.

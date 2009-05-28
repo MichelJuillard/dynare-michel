@@ -51,8 +51,7 @@ mm = size(T,1);
 a  = zeros(mm,1);
 QQ = R*Q*transpose(R);
 t  = 0;
-lik = zeros(smpl+1,1);
-lik(smpl+1) = number_of_observations*log(2*pi);
+lik = zeros(smpl,1);
 notsteady = 1;
 crit = 1.e-6;
 newRank	= rank(Pinf,crit);
@@ -87,13 +86,15 @@ PP(1:mm,1:mm) = Pinf;
 Pinf = PP;
 
 ZZ = [Z eye(pp)];
+l2pi = log(2*pi);
 
 while newRank && (t<smpl)
     t = t+1;
-    Za = ZZ(data_index{t},:);
-    for i=1:length(data_index{t})
-        Zi = ZZ(data_index{t}(i),:);
-        prediction_error = Y(data_index{t}(i),t) - Zi*a;
+    d_index = data_index{t};
+    Za = ZZ(d_index,:);
+    for i=1:length(d_index)
+        Zi = ZZ(d_index(i),:);
+        prediction_error = Y(d_index(i),t) - Zi*a;
         Fstar = Zi*Pstar*Zi' + H(i);
         Finf  = Zi*Pinf*Zi';
         Kstar = Pstar*Zi';
@@ -103,7 +104,7 @@ while newRank && (t<smpl)
             a	   = a + Kinf*(prediction_error/Finf);
             Pstar  = Pstar + Kinf*(Kinf'*(Fstar/(Finf*Finf))) - (Kstar*Kinf'+Kinf*Kstar')/Finf;
             Pinf   = Pinf - Kinf*(Kinf'/Finf);
-            lik(t) = lik(t) + log(Finf);
+            lik(t) = lik(t) + log(Finf) + l2pi;
             if ~isempty(options_.diffuse_d)
                 newRank = (icc<options_.diffuse_d);
                 if newRank && (any(diag(Za*Pinf*Za')>kalman_tol)==0 & rank(Pinf,crit)==0); 
@@ -124,7 +125,8 @@ while newRank && (t<smpl)
                 end
             end
         elseif Fstar>kalman_tol
-            lik(t) = lik(t) + log(Fstar) + prediction_error*prediction_error/Fstar;
+            lik(t) = lik(t) + log(Fstar) + prediction_error* ...
+                     prediction_error/Fstar + l2pi;
             a = a + Kstar*prediction_error/Fstar;
             Pstar = Pstar - Kstar*Kstar'/Fstar;
         end
@@ -151,16 +153,18 @@ end
 
 while notsteady && (t<smpl)
     t = t+1;
+    d_index = date_index{t};
     oldP = Pstar;
-    for i=1:length(data_index{t})
-        Zi = ZZ(data_index{t}(i),:);
-        prediction_error = Y(data_index{t}(i),t) - Zi*a;
+    for i=1:length(d_index)
+        Zi = ZZ(d_index(i),:);
+        prediction_error = Y(d_index(i),t) - Zi*a;
         Fi   = Zi*Pstar*Zi' + H(i);
         if Fi > kalman_tol
             Ki	= Pstar*Zi';
             a	   = a + Ki*prediction_error/Fi;
             Pstar  = Pstar - Ki*Ki'/Fi;
-            lik(t) = lik(t) + log(Fi) + prediction_error*prediction_error/Fi;
+            lik(t) = lik(t) + log(Fi) + prediction_error*prediction_error/Fi ...
+                     + l2pi;
         end
     end	
     a 	  = T*a;
@@ -178,13 +182,16 @@ while t < smpl
         prediction_error = Y(i,t) - Zi*a;
         Fi   = Zi*Pstar*Zi'+H(i);
         if Fi > crit
-            Ki 		= Pstar*Zi';
-            a 		= a + Ki*prediction_error/Fi;
-            Pstar 	= Pstar - Ki*Ki'/Fi;
-            lik(t)    	= lik(t) + log(Fi) + prediction_error*prediction_error/Fi;
+            Ki 	   = Pstar*Zi';
+            a 	   = a + Ki*prediction_error/Fi;
+            Pstar  = Pstar - Ki*Ki'/Fi;
+            lik(t) = lik(t) + log(Fi) + prediction_error*prediction_error/Fi ...
+                + l2pi;
         end
     end	
     a = T*a;
 end
 
-LIK = .5*(sum(lik(start:end))-(start-1)*lik(smpl+1)/smpl);
+lik = lik/2;
+
+LIK = sum(lik(start:end));

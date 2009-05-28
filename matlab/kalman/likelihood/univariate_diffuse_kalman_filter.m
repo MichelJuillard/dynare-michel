@@ -51,52 +51,33 @@ mm = size(T,1);
 a  = zeros(mm,1);
 QQ = R*Q*transpose(R);
 t  = 0;
-lik = zeros(smpl+1,1);
-lik(smpl+1) = number_of_observations*log(2*pi);
+lik = zeros(smpl,1);
 notsteady = 1;
 crit = 1.e-6;
 newRank	= rank(Pinf,crit);
-icc=0;
+l2pi = log(2*pi);
 
 while newRank && (t<smpl)
     t = t+1;
-    Za = Z(data_index{t},:);
-    for i=1:length(data_index{t})
-        Zi = Z(data_index{t}(i),:);
-        prediction_error = Y(data_index{t}(i),t) - Zi*a;
+    d_index = data_index{t};
+    Za = Z(d_index,:);
+    for i=1:length(d_index)
+        Zi = Z(d_index(i),:);
+        prediction_error = Y(d_index(i),t) - Zi*a;
         Fstar = Zi*Pstar*Zi' + H(i);
         Finf  = Zi*Pinf*Zi';
         Kstar = Pstar*Zi';
         if Finf>kalman_tol && newRank
-            icc=icc+1;
             Kinf   = Pinf*Zi';
             Kinf_Finf = Kinf/Finf;
             a	   = a + Kinf_Finf*prediction_error;
             Pstar  = Pstar + Kinf*(Kinf_Finf'*(Fstar/Finf)) - Kstar*Kinf_Finf' ...
                      - Kinf_Finf*Kstar';
             Pinf   = Pinf - Kinf*Kinf_Finf';
-            lik(t) = lik(t) + log(Finf);
-% $$$             if ~isempty(options_.diffuse_d)  
-% $$$                 newRank = (icc<options_.diffuse_d);  
-% $$$                 if newRank && (any(diag(Za*Pinf*Za')>kalman_tol)==0 & rank(Pinf,crit)==0); 
-% $$$                     options_.diffuse_d = icc;
-% $$$                     newRank=0;
-% $$$                     disp('WARNING: Change in OPTIONS_.DIFFUSE_D in univariate DKF')
-% $$$                     disp(['new OPTIONS_.DIFFUSE_D = ',int2str(icc)])
-% $$$                     disp('You may have to reset the optimisation')
-% $$$                 end
-% $$$             else
-% $$$                 newRank = (any(diag(Za*Pinf*Za')>kalman_tol) | rank(Pinf,crit));                 
-% $$$                 if newRank==0
-% $$$                     P0=	T*Pinf*T';
-% $$$                     newRank = (any(diag(Za*P0*Za')>kalman_tol) | rank(P0,crit));
-% $$$                     if newRank==0
-% $$$                         options_.diffuse_d = icc;
-% $$$                     end
-% $$$                 end
-% $$$             end
+            lik(t) = lik(t) + log(Finf) + l2pi;
         elseif Fstar>kalman_tol
-            lik(t) = lik(t) + log(Fstar) + prediction_error*prediction_error/Fstar;
+            lik(t) = lik(t) + log(Fstar) + prediction_error* ...
+                     prediction_error/Fstar + l2pi;
             a = a + Kstar*(prediction_error/Fstar);
             Pstar = Pstar - Kstar*(Kstar'/Fstar);
         end
@@ -124,15 +105,17 @@ end
 while notsteady && (t<smpl)
     t = t+1;
     oldP = Pstar;
-    for i=1:length(data_index{t})
-        Zi = Z(data_index{t}(i),:);
-        prediction_error = Y(data_index{t}(i),t) - Zi*a;
+    d_index = data_index{t};
+    for i=1:length(d_index)
+        Zi = Z(d_index(i),:);
+        prediction_error = Y(d_index(i),t) - Zi*a;
         Ki   = Pstar*Zi';
         Fi   = Zi*Ki + H(i);
         if Fi > kalman_tol
             a	   = a + Ki*(prediction_error/Fi);
             Pstar  = Pstar - Ki*(Ki'/Fi);
-            lik(t) = lik(t) + log(Fi) + prediction_error*prediction_error/Fi;
+            lik(t) = lik(t) + log(Fi) + prediction_error*prediction_error/Fi ...
+                     + l2pi;
         end
     end	
     a 	  = T*a;
@@ -150,13 +133,16 @@ while t < smpl
         prediction_error = Y(i,t) - Zi*a;
         Fi   = Zi*Pstar*Zi'+H(i);
         if Fi > crit
-            Ki 		= Pstar*Zi';
-            a 		= a + Ki*prediction_error/Fi;
-            Pstar 	= Pstar - Ki*Ki'/Fi;
-            lik(t)    	= lik(t) + log(Fi) + prediction_error*prediction_error/Fi;
+            Ki 	   = Pstar*Zi';
+            a 	   = a + Ki*prediction_error/Fi;
+            Pstar  = Pstar - Ki*Ki'/Fi;
+            lik(t) = lik(t) + log(Fi) + prediction_error*prediction_error/Fi ...
+                + l2pi;
         end
     end	
     a = T*a;
 end
 
-LIK = .5*(sum(lik(start:end))-(start-1)*lik(smpl+1)/smpl);
+lik = lik/2;
+
+LIK = sum(lik(start:end));

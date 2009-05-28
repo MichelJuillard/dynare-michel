@@ -51,22 +51,24 @@ smpl   = size(Y,2);                            % Number of periods in the datase
 a      = zeros(mm,1);                          % Initial condition of the state vector.
 QQ     = R*Q*transpose(R);
 t      = 0;
-lik    = zeros(smpl+1,1);	
-lik(smpl+1) = number_of_observations*log(2*pi);	       % the constant of minus two times the log-likelihood
+lik    = zeros(smpl,1);	
 notsteady   = 1;
+l2pi = log(2*pi);
 
 while notsteady && t<smpl
     t  = t+1;
-    MF = mf(data_index{t});
+    d_index = data_index{t};
+    MF = mf(d_index);
     oldP = P;
     for i=1:length(MF)
-        prediction_error = Y(data_index{t}(i),t) - a(MF(i));
-        Fi = P(MF(i),MF(i)) + H(data_index{t}(i));
+        prediction_error = Y(d_index(i),t) - a(MF(i));
+        Fi = P(MF(i),MF(i)) + H(d_index(i));
         if Fi > kalman_tol
             Ki	   = P(:,MF(i))/Fi;
             a	   = a + Ki*prediction_error;
             P 	   = P - (Fi*Ki)*transpose(Ki);
-            lik(t) = lik(t) + log(Fi) + prediction_error*prediction_error/Fi;
+            lik(t) = lik(t) + log(Fi) + prediction_error*prediction_error/Fi ...
+                     + l2pi;
         end
     end
     a = T*a;
@@ -87,10 +89,13 @@ while t < smpl
             Ki = PP(:,mf(i))/Fi;
             a  = a + Ki*prediction_error;
             PP  = PP - (Fi*Ki)*transpose(Ki);
-            lik(t) = lik(t) + log(Fi) + prediction_error*prediction_error/Fi;
+            lik(t) = lik(t) + log(Fi) + prediction_error*prediction_error/Fi ...
+                     + l2pi;
         end
     end
     a = T*a;
 end
 
-LIK = .5*(sum(lik(start:end))-(start-1)*lik(smpl+1)/smpl);
+lik = lik/2;
+
+LIK = sum(lik(start:end));
