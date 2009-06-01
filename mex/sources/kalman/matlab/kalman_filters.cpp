@@ -72,6 +72,7 @@ extern "C" {
   void mexFunction(int nlhs, mxArray* plhs[],
     int nrhs, const mxArray* prhs[])
     {
+
     if (nrhs < 9 || nrhs > 11)
       mexErrMsgTxt("Must have  9, 10 or 11 input parameters.\n");
     if (nlhs < 1 || nlhs > 4)
@@ -123,6 +124,10 @@ extern "C" {
         init = new StateInit(P, a.getData());
         }
       // fork, create objects and do filtering
+#ifdef TIMING_LOOP
+  for (int tt=0;tt<10000;++tt)
+    {
+#endif
       KalmanTask kt(Y, Z, H, T, R, Q, *init);
       if (uni) 
         {
@@ -135,6 +140,10 @@ extern "C" {
         {
         loglik = kt.filter(per, d, (start-1), vll);
         }
+#ifdef TIMING_LOOP
+    }
+    //mexPrintf("kalman_filter: finished 10,000 loops");
+#endif
         // destroy init
       delete init;
       
@@ -160,12 +169,17 @@ extern "C" {
           mxll[j]=(*vll)[j];
         }
       
-      } catch (const TSException& e) {
+      } 
+    catch (const TSException& e) 
+      {
       mexErrMsgTxt(e.getMessage());
-        } catch (SylvException& e) {
-        char mes[300];
-        e.printMessage(mes, 299);
-        mexErrMsgTxt(mes);
-          }
-    }
-  };
+      } 
+    catch (SylvException& e) 
+      {
+      char mes[300];
+      e.printMessage(mes, 299);
+      mexErrMsgTxt(mes);
+      }
+
+    } // mexFunction
+  }; // extern 'C'

@@ -1,7 +1,7 @@
 # $Id: Makefile 531 2005-11-30 13:49:48Z kamenik $
 # Copyright 2005, Ondra Kamenik
 
-DEBUG = yes
+#DEBUG = yes
 
 LD_LIBS := -llapack -lcblas -lf77blas -latlas -lg2c
 CC_FLAGS :=  -DMATLAB -DWINDOWS  -DNO_BLAS_H -DNO_LAPACK_H \
@@ -12,6 +12,7 @@ ifeq ($(DEBUG),yes)
 	CC_FLAGS := -DDEBUG $(CC_FLAGS) -g
 else
 	CC_FLAGS := $(CC_FLAGS) -O2
+#	CC_FLAGS := -DTIMING_LOOP $(CC_FLAGS) -O2
 endif
 
 # Added by GP
@@ -57,8 +58,8 @@ dummy.ch:
 	c++ $(CC_FLAGS) -c $*.cpp
 
 
-kalmanlib.a: $(objects) #$(kalmanobjects) $(matobjs) 
-	ar cr kalmanlib.a $(objects) $(kalmanobjects) $(matobjs) 
+kalmanlib.a: $(objects) # $(matobjs) #$(kalmanobjects)
+	ar cr kalmanlib.a $(kalmanobjects) $(matobjs) # $(objects)  
 	ranlib kalmanlib.a
 
 kalman_smoother_dll.dll: kalman_smoother.o kalmanlib.a #$(hsource) $(cppsource) 
@@ -70,6 +71,13 @@ kalman_filter_dll.dll: kalman_filters.o kalmanlib.a # $(hsource) $(cppsource)
 	kalmanlib.a $(LD_LIBS) 
 
 all: $(objects) kalmanlib.a kalman_smoother_dll.dll kalman_filter_dll.dll # $(cppsource) $(hsource) $(kalmanhsource) $(kalmancppsource)
+
+kalman_filter_loop.o: kalman_filters.cpp
+    c++ -DTIMING_LOOP $(CC_FLAGS) -o kalman_filter_loop.o kalman_filters.cpp
+
+#kalman_filter_loop.dll: kalman_filter_loop.o kalmanlib.a # $(hsource) $(cppsource) 
+#    gcc -shared -DTIMING_LOOP $(CC_FLAGS) -o kalman_filter_loop.dll kalman_filter_loop.o \
+#    kalmanlib.a $(LD_LIBS) 
 
 doc: main.web $(hwebsource) $(cwebsource)
 	cweave -bhp main.web
