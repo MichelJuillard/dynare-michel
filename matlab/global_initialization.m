@@ -183,10 +183,17 @@ function global_initialization()
   options_.student_degrees_of_freedom = 3;
   options_.trace_plot_ma = 200;
   options_.mh_autocorrelation_function_size = 30;
-  options_.plot_priors = 0;
+  options_.plot_priors = 1;
   options_.cova_compute = 1;
   options_.parallel = 0;
-  
+  options_.number_of_grid_points_for_kde = 2^9;
+  quarter = 1;
+  years = [1 2 3 4 5 10 20 30 40 50];
+  options_.conditional_variance_decomposition_dates = zeros(1,length(years));
+  for i=1:length(years)
+      options_.conditional_variance_decomposition_dates(i) = ...
+          (years(i)-1)*4+quarter;
+  end
   % Misc
   options_.conf_sig = 0.6;
   oo_.exo_simul = [];

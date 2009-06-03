@@ -35,6 +35,7 @@ function oo_ = compute_moments_varendo(options_,M_,oo_,var_list_)
     NumberOfExogenousVariables = M_.exo_nbr;
     list_of_exogenous_variables = M_.exo_names;
     NumberOfLags = options_.ar;
+    Steps = options_.conditional_variance_decomposition_dates;
     % COVARIANCE MATRIX.
     for i=1:NumberOfEndogenousVariables
         for j=i:NumberOfEndogenousVariables
@@ -53,5 +54,11 @@ function oo_ = compute_moments_varendo(options_,M_,oo_,var_list_)
     for i=1:NumberOfEndogenousVariables
         for j=1:NumberOfExogenousVariables
             oo_ = posterior_analysis('decomposition',var_list_(i,:),M_.exo_names(j,:),[],options_,M_,oo_);
+        end
+    end
+    % CONDITIONAL VARIANCE DECOMPOSITION.
+    for i=1:NumberOfEndogenousVariables
+        for j=1:NumberOfExogenousVariables
+            oo_ = posterior_analysis('conditional decomposition',var_list_(i,:),M_.exo_names(j,:),Steps,options_,M_,oo_);
         end
     end

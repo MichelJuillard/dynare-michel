@@ -1,5 +1,4 @@
 function oo_ = posterior_analysis(type,arg1,arg2,arg3,options_,M_,oo_)  
-
 % Copyright (C) 2008 Dynare Team
 %
 % This file is part of Dynare.
@@ -46,7 +45,7 @@ function oo_ = posterior_analysis(type,arg1,arg2,arg3,options_,M_,oo_)
 function oo_ = job(type,SampleSize,arg1,arg2,arg3,options_,M_,oo_,nvar,vartan)
     narg1 = 8;
     narg2 = 10;
-    if ~(nargin==narg1 | nargin==narg2)
+    if ~(nargin==narg1 || nargin==narg2)
         error('posterior_analysis:: Call to function job is buggy!')
     end
     switch type
@@ -70,7 +69,14 @@ function oo_ = job(type,SampleSize,arg1,arg2,arg3,options_,M_,oo_,nvar,vartan)
                 dsge_posterior_theoretical_correlation(SampleSize,arg3,M_,options_,oo_);
         end
         oo_ = correlation_posterior_analysis(SampleSize,M_.dname,M_.fname,...
-                                             vartan,nvar,arg1,arg2,arg3,options_.mh_conf_sig,oo_,M_,options_);          
+                                             vartan,nvar,arg1,arg2,arg3,options_.mh_conf_sig,oo_,M_,options_);
+      case 'conditional decomposition'
+        if nargin==narg1
+            [nvar,vartan,NumberOfFiles] = ...
+                dsge_posterior_theoretical_conditional_variance_decomposition(SampleSize,arg3,M_,options_,oo_);
+        end
+        oo_ = conditional_variance_decomposition_posterior_analysis(SampleSize,M_.dname,M_.fname,...
+                                                        arg3,M_.exo_names,arg2,vartan,arg1,options_.mh_conf_sig,oo_);
       otherwise
         disp('Not yet implemented')
     end

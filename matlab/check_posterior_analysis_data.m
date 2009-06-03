@@ -64,8 +64,8 @@ function [info,description] = check_posterior_analysis_data(type,M_)
         generic_post_data_file_name = 'PosteriorVarianceDecomposition';
       case 'correlation'
         generic_post_data_file_name = 'PosteriorCorrelations';
-      case 'dynamic_decomposition'
-        generic_post_data_file_name = 'PosteriorDynamicVarianceDecomposition';
+      case 'conditional decomposition'
+        generic_post_data_file_name = 'PosteriorConditionalVarianceDecomposition';
       otherwise
         disp('This feature is not yest implemented!')
     end
