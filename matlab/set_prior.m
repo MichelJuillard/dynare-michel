@@ -152,7 +152,7 @@ function [xparam1, estim_params_, bayestopt_, lb, ub, M_]=set_prior(estim_params
         stdd = bayestopt_.p2(k(i))/(bayestopt_.p4(k(i))-bayestopt_.p3(k(i)));
         bayestopt_.p6(k(i)) = (1-mu)*mu^2/stdd^2 - mu ;
         bayestopt_.p7(k(i)) = bayestopt_.p6(k(i))*(1/mu-1) ;
-        m = compute_prior_mode([ bayestopt_.p6(k(i)) , bayestopt_.p7(k(i)) ],1);
+        m = compute_prior_mode([ bayestopt_.p6(k(i)) , bayestopt_.p7(k(i)) , bayestopt_.p3(k(i)) , bayestopt_.p4(k(i)) ],1);
         if length(m)==1
             bayestopt_.p5(k(i)) = m;
         else
@@ -171,7 +171,7 @@ function [xparam1, estim_params_, bayestopt_, lb, ub, M_]=set_prior(estim_params
         mu = bayestopt_.p1(k(i))-bayestopt_.p3(k(i));
         bayestopt_.p7(k(i)) = bayestopt_.p2(k(i))^2/mu ;
         bayestopt_.p6(k(i)) = mu/bayestopt_.p7(k(i)) ;  
-        bayestopt_.p5(k(i)) = compute_prior_mode([ bayestopt_.p6(k(i)) , bayestopt_.p7(k(i)) ], 2) ;
+        bayestopt_.p5(k(i)) = compute_prior_mode([ bayestopt_.p6(k(i)) , bayestopt_.p7(k(i)) , bayestopt_.p3(k(i)) ], 2) ;
     end
     
     % truncation parameters by default for normal distribution
@@ -186,7 +186,7 @@ function [xparam1, estim_params_, bayestopt_, lb, ub, M_]=set_prior(estim_params
         bayestopt_.p5(k(i)) = bayestopt_.p1(k(i)) ;
     end
 
-    % inverse gamma distribution
+    % inverse gamma distribution (type 1)
     k = find(bayestopt_.pshape == 4);
     k1 = find(isnan(bayestopt_.p3(k)));
     k2 = find(isnan(bayestopt_.p4(k)));
