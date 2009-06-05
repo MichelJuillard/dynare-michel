@@ -90,15 +90,16 @@ function [y, info] = solve_one_boundary(fname, y, x, params, y_index_eq, nze, pe
        g1=spalloc( Blck_size, Blck_size, nze);
        while ~(cvg==1 | iter>maxit_),
            if(is_dynamic)
-             [r, g1, g2, g3] = feval(fname, y, x, params, it_, 0);
+             [r, y, g1, g2, g3] = feval(fname, y, x, params, it_, 0);
            else
-             [r, g1, g2, g3] = feval(fname, y, x, params, 0);
+             [r, y, g1, g2, g3] = feval(fname, y, x, params, 0);
            end;
            if(~isreal(r))
               max_res=(-(max(max(abs(r))))^2)^0.5;
            else
               max_res=max(max(abs(r)));
            end;
+           %['max_res=' num2str(max_res) ' Block_Num=' int2str(Block_Num) ' it_=' int2str(it_)]
            if(verbose==1)
              disp(['iteration : ' int2str(iter) ' => ' num2str(max_res) ' time = ' int2str(it_)]);
              if(is_dynamic)
@@ -315,7 +316,7 @@ function [y, info] = solve_one_boundary(fname, y, x, params, y_index_eq, nze, pe
 
 function [err, G]=local_fname(yl, x, params, y, y_index_eq, fname, is_csolve)
   y(y_index_eq) = yl;
-  [err, G] = feval(fname, y, x, params, 0);
+  [err, y, G] = feval(fname, y, x, params, 0);
   if(is_csolve)
     G = full(G);
   end;

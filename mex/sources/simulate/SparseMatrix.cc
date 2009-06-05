@@ -453,7 +453,7 @@ void SparseMatrix::Simple_Init(int it_, int y_kmin, int y_kmax, int Size, std::m
   it4=IM.begin();
   eq=-1;
   double tmp_b[Size];
-  #pragma omp parallel for num_threads(atoi(getenv("DYNARE_NUM_THREADS")))
+  ///#pragma omp parallel for num_threads(atoi(getenv("DYNARE_NUM_THREADS")))
   for(i=0; i< Size;i++)
     {
       tmp_b[i]=0;//u[i];
@@ -509,7 +509,7 @@ void SparseMatrix::Simple_Init(int it_, int y_kmin, int y_kmax, int Size, std::m
         }
       it4++;
     }
-  #pragma omp parallel for num_threads(atoi(getenv("DYNARE_NUM_THREADS")))
+  ///#pragma omp parallel for num_threads(atoi(getenv("DYNARE_NUM_THREADS")))
   for(i=0;i<Size;i++)
     {
       b[i]=u_count1+i;
@@ -600,13 +600,13 @@ void SparseMatrix::Init(int periods, int y_kmin, int y_kmax, int Size, std::map<
   //i=periods*Size*sizeof(*b);
   //memset(b,0,i);
 
-  #pragma omp parallel for num_threads(atoi(getenv("DYNARE_NUM_THREADS")))
+  ///#pragma omp parallel for num_threads(atoi(getenv("DYNARE_NUM_THREADS")))
   for(i=0; i< periods*Size;i++)
     {
       b[i]=0;
       line_done[i]=0;
     }
-  #pragma omp parallel for num_threads(atoi(getenv("DYNARE_NUM_THREADS")))
+  ///#pragma omp parallel for num_threads(atoi(getenv("DYNARE_NUM_THREADS")))
   for(i=0; i< (periods+y_kmax+1)*Size;i++)
     {
       FNZE_C[i]=0;
@@ -621,7 +621,7 @@ void SparseMatrix::Init(int periods, int y_kmin, int y_kmax, int Size, std::map<
   mexPrintf("Now looping\n");
   mexEvalString("drawnow;");
 #endif
-  #pragma omp parallel for num_threads(atoi(getenv("DYNARE_NUM_THREADS"))) ordered private(it4, ti_y_kmin, ti_y_kmax, eq, var, lag) schedule(dynamic)
+  ///#pragma omp parallel for num_threads(atoi(getenv("DYNARE_NUM_THREADS"))) ordered private(it4, ti_y_kmin, ti_y_kmax, eq, var, lag) schedule(dynamic)
   for (t=0;t<periods;t++)
     {
 #ifdef PRINT_OUT
@@ -631,7 +631,7 @@ void SparseMatrix::Init(int periods, int y_kmin, int y_kmax, int Size, std::map<
       ti_y_kmax= min( periods-(t+1), y_kmax);
       it4=IM.begin();
       eq=-1;
-      #pragma omp ordered
+      ///#pragma omp ordered
       while (it4!=IM.end())
         {
           var=it4->first.first.second;
@@ -948,18 +948,17 @@ SparseMatrix::compare( int *save_op, int *save_opa, int *save_opaa, int beg_t, i
 #endif
   // the same pivot for all remaining periods
   if (OK)
-    #pragma omp parallel for  num_threads(atoi(getenv("DYNARE_NUM_THREADS"))) ordered private(j) schedule(dynamic)
+    ///#pragma omp parallel for  num_threads(atoi(getenv("DYNARE_NUM_THREADS"))) ordered private(j) schedule(dynamic)
     for (i=beg_t;i<periods;i++)
       {
         for (j=0;j<Size;j++)
           {
-            #pragma omp ordered
+            ///#pragma omp ordered
             pivot[i*Size+j]=pivot[(i-1)*Size+j]+Size;
           }
       }
   if (OK)
     {
-
 #ifdef WRITE_u
       long int i_toto=0;
       fstream toto;
@@ -972,9 +971,6 @@ SparseMatrix::compare( int *save_op, int *save_opa, int *save_opaa, int beg_t, i
           mexPrintf("u=(double*)mxRealloc(u,u_count_alloc*sizeof(double))=%d, t=%d, omp_get_thread_num()=%d\n",u_count_alloc,t,omp_get_thread_num());
 #endif
           u=(double*)mxRealloc(u,u_count_alloc*sizeof(double));
-#ifdef MEM_ALLOC_CHK
-          mexPrintf("ok\n");
-#endif
           if (!u)
             {
               mexPrintf("Error in Get_u: memory exhausted (realloc(%d))\n",u_count_alloc*sizeof(double));
@@ -1028,30 +1024,27 @@ SparseMatrix::compare( int *save_op, int *save_opa, int *save_opaa, int beg_t, i
                     break;
                 }
               j++;
+              if (index_d+3>=u_count_alloc)
+                {
+                  u_count_alloc+=2*u_count_alloc_save;
+#ifdef MEM_ALLOC_CHK
+                  mexPrintf("u=(double*)mxRealloc(u,u_count_alloc*sizeof(double))=%d, t=%d, omp_get_thread_num()=%d\n",u_count_alloc,t,omp_get_thread_num());
+#endif
+                  u=(double*)mxRealloc(u,u_count_alloc*sizeof(double));
+#ifdef MEM_ALLOC_CHK
+                  mexPrintf("ok\n");
+#endif
+                  if (!u)
+                    {
+                      mexPrintf("Error in Get_u: memory exhausted (realloc(%d))\n",u_count_alloc*sizeof(double));
+                      mexEvalString("st=fclose('all');clear all;");
+                      mexErrMsgTxt("Exit from Dynare");
+                    }
+                }
             }
         }
       int t1=periods-beg_t-max(y_kmax,y_kmin);
-      //mexPrintf("=>t=%d\n",t);
-      /*if (index_d+(periods-beg_t-t1)*s_nop4>=u_count_alloc)
-        {
-          u_count_alloc+=5*u_count_alloc_save;
-//#ifdef MEM_ALLOC_CHK
-          mexPrintf("u=(double*)mxRealloc(u,u_count_alloc*sizeof(double))=%d, t=%d, omp_get_thread_num()=%d\n",u_count_alloc,t,omp_get_thread_num());
-//#endif
-          u=(double*)mxRealloc(u,u_count_alloc*sizeof(double));
-#ifdef MEM_ALLOC_CHK
-          mexPrintf("ok\n");
-#endif
-          if (!u)
-            {
-              mexPrintf("Error in Get_u: memory exhausted (realloc(%d))\n",u_count_alloc*sizeof(double));
-              mexEvalString("st=fclose('all');clear all;");
-              mexErrMsgTxt("Exit from Dynare");
-            }
-          }*/
-      //mexPrintf("beg_t=%d, starting at t1=%d\n",beg_t,t1);
       //#pragma omp parallel for num_threads(atoi(getenv("DYNARE_NUM_THREADS"))) ordered private(t, i,j, save_op_s, index_d, r) schedule(dynamic)
-
       for (t=t1;t<periods-beg_t;t++)
         {
           //mexPrintf("omp_in_parallel=%hd, omp_get_thread_num=%d, t=%d\n",omp_in_parallel(), omp_get_thread_num(), t);
@@ -1093,6 +1086,23 @@ SparseMatrix::compare( int *save_op, int *save_opa, int *save_opaa, int beg_t, i
 #endif
                         i+=3;
                         break;
+                    }
+                  if (index_d+3>=u_count_alloc)
+                    {
+                      u_count_alloc+=2*u_count_alloc_save;
+#ifdef MEM_ALLOC_CHK
+                      mexPrintf("u=(double*)mxRealloc(u,u_count_alloc*sizeof(double))=%d, t=%d, omp_get_thread_num()=%d\n",u_count_alloc,t,omp_get_thread_num());
+#endif
+                      u=(double*)mxRealloc(u,u_count_alloc*sizeof(double));
+#ifdef MEM_ALLOC_CHK
+                      mexPrintf("ok\n");
+#endif
+                      if (!u)
+                        {
+                          mexPrintf("Error in Get_u: memory exhausted (realloc(%d))\n",u_count_alloc*sizeof(double));
+                          mexEvalString("st=fclose('all');clear all;");
+                          mexErrMsgTxt("Exit from Dynare");
+                        }
                     }
                 }
               else
@@ -2131,7 +2141,8 @@ SparseMatrix::simulate_NG(int blck, int y_size, int it_, int y_kmin, int y_kmax,
     {
       if (slowc_save<1e-8)
         {
-          mexPrintf("Dynare cannot improve the simulation\n");
+          mexPrintf("slowc_save=%g\n", slowc_save);
+          mexPrintf("Dynare cannot improve the simulation in block %d at time %d\n", blck, it_);
           mexEvalString("drawnow;");
           mexEvalString("st=fclose('all');clear all;");
           filename+=" stopped";
@@ -2415,9 +2426,12 @@ SparseMatrix::simulate_NG1(int blck, int y_size, int it_, int y_kmin, int y_kmax
     {
       if (slowc_save<1e-8)
         {
-          mexPrintf("Dynare cannot improve the simulation\n");
+          mexPrintf("slowc_save=%g\n", slowc_save);
+          for(j=0;j<y_size; j++)
+            mexPrintf("variable %d at time %d = %f\n",j+1, it_, y[j+it_*y_size]);
+          mexPrintf("Dynare cannot improve the simulation in block %d at time %d (variable %d)\n", blck+1, it_+1, max_res_idx);
           mexEvalString("drawnow;");
-          mexEvalString("st=fclose('all');clear all;");
+          //mexEvalString("st=fclose('all');clear all;");
           filename+=" stopped";
           mexErrMsgTxt(filename.c_str());
         }
@@ -2791,10 +2805,6 @@ SparseMatrix::simulate_NG1(int blck, int y_size, int it_, int y_kmin, int y_kmax
                     mexErrMsgTxt(filename.c_str());
                   }
                 /*divide all the non zeros elements of the line pivj by the max_pivot*/
-#ifdef PRINT_OUT
-                mexPrintf("ok2\n");
-                mexEvalString("drawnow;");
-#endif
                 int nb_var=At_Row(pivj,&first);
                 NonZeroElem* bb[nb_var];
                 for(j=0;j<nb_var;j++)
@@ -2882,10 +2892,6 @@ SparseMatrix::simulate_NG1(int blck, int y_size, int it_, int y_kmin, int y_kmax
                     toto << i_toto << " u[" /*<< b[pivj]*/ << "]/=" << piv << "=" << u[b[pivj]] << endl;
                     i_toto++;
                   }
-#endif
-#ifdef PRINT_OUT
-                mexPrintf("ok3\n");
-                mexEvalString("drawnow;");
 #endif
 #ifdef PRINT_u
                 mexPrintf("FDIV u[%d](%f)/=piv(%f)=(%f)   |",b[pivj],u[b[pivj]],piv,u[b[pivj]]);
@@ -3110,11 +3116,6 @@ SparseMatrix::simulate_NG1(int blck, int y_size, int it_, int y_kmin, int y_kmax
 #endif
                                     firsta=first;
                                     first_suba=first_sub->NZE_R_N;
-                                    /*if(iter>0)
-                                      {
-                                        mexPrintf("just after\n");
-                                        mexEvalString("drawnow;");
-                                      }*/
 #ifdef PROFILER
                                     clock_t td0=clock();
 #endif
@@ -3240,11 +3241,6 @@ SparseMatrix::simulate_NG1(int blck, int y_size, int it_, int y_kmin, int y_kmax
                         mexPrintf("FSUB u[%d]-=u[%d](%f)*r(%f)=(%f)   |",b[row],b[pivj],u[b[pivj]],first_elem,u[b[row]]);
                         Print_u();mexPrintf("\n");
 #endif
-                        /*if(iter>0)
-                          {
-                            mexPrintf("ok4f j=%d\n",j);
-                            mexEvalString("drawnow;");
-                          }*/
 
                         if (symbolic)
                           {
@@ -3325,6 +3321,7 @@ SparseMatrix::simulate_NG1(int blck, int y_size, int it_, int y_kmin, int y_kmax
                         ))
                           {
 #ifdef PROFILER
+                            mexPrintf("done OK\n");
                             mexPrintf("t=%d over periods=%d t0=%f t1=%f y_kmin=%d y_kmax=%d\n",t,periods,1000*(ta-t00), 1000.0*(double(clock())-double(ta))/double(CLOCKS_PER_SEC),y_kmin, y_kmax);
                             mexPrintf("compare time %f ms\n",1000.0*(double(clock())-double(ta))/double(CLOCKS_PER_SEC));
 #endif

@@ -58,7 +58,7 @@ function y = solve_two_boundaries(fname, y, x, params, y_index, nze, periods, y_
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-  global oo_;
+  global oo_ M_;
   cvg=0;
   iter=0;
   Per_u_=0;
@@ -72,17 +72,18 @@ function y = solve_two_boundaries(fname, y, x, params, y_index, nze, periods, y_
   g1=spalloc( Blck_size*periods, Jacobian_Size, nze*periods);
   reduced = 0;
   while ~(cvg==1 | iter>maxit_),
-    [r, g1, g2, g3, b]=feval(fname, y, x, params, periods, 0, y_kmin, Blck_size);
+    [r, y, g1, g2, g3, b]=feval(fname, y, x, params, periods, 0, y_kmin, Blck_size);
     g1a=g1(:, y_kmin*Blck_size+1:(periods+y_kmin)*Blck_size);
-    %disp(['size(g1)=' int2str(size(g1))]);
-    %disp(['g1(:,' int2str(1:y_kmin_l*Blck_size) ')']);
-    %disp(['g1(:,' int2str((periods+y_kmin_l)*Blck_size+1:(periods+y_kmin_l+y_kmax_l)*Blck_size) ')']);
-    b = b' -g1(:, 1:y_kmin_l*Blck_size)*reshape(y(1+y_kmin-y_kmin_l:y_kmin,y_index)',1,y_kmin_l*Blck_size)'-g1(:, (periods+y_kmin_l)*Blck_size+1:(periods+y_kmin_l+y_kmax_l)*Blck_size)*reshape(y(periods+y_kmin+1:periods+y_kmin+y_kmax_l,y_index)',1,y_kmax_l*Blck_size)';
+    b = b -g1(:, 1:y_kmin_l*Blck_size)*reshape(y(1+y_kmin-y_kmin_l:y_kmin,y_index)',1,y_kmin_l*Blck_size)'-g1(:, (periods+y_kmin_l)*Blck_size+1:(periods+y_kmin_l+y_kmax_l)*Blck_size)*reshape(y(periods+y_kmin+1:periods+y_kmin+y_kmax_l,y_index)',1,y_kmax_l*Blck_size)';
+    [max_res, max_indx]=max(max(abs(r')));
     if(~isreal(r))
-      max_res=(-(max(max(abs(r))))^2)^0.5;
-    else
-      max_res=max(max(abs(r)));
+      max_res = (-max_res^2)^0.5;
     end;
+%     if(~isreal(r))
+%       max_res=(-(max(max(abs(r))))^2)^0.5;
+%     else
+%       max_res=max(max(abs(r)));
+%     end;
     if(~isreal(max_res) | isnan(max_res))
       cvg = 0;
     elseif(is_linear & iter>0)
@@ -93,6 +94,9 @@ function y = solve_two_boundaries(fname, y, x, params, y_index, nze, periods, y_
     if(~cvg)
       if(iter>0)
         if(~isreal(max_res) | isnan(max_res) | (max_resa<max_res && iter>1))
+          if(~isreal(max_res))
+            disp(['Variable ' M_.endo_names(max_indx,:) ' (' int2str(max_indx) ') returns an undefined value']);
+          end;
           if(isnan(max_res))
             detJ=det(g1aa);
             if(abs(detJ)<1e-7)

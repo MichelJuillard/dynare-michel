@@ -158,7 +158,7 @@ class SparseMatrix
     map<pair<pair<int, int> ,int>, int> IM_i;
 protected:
     double *u, *y, *ya;
-    double res1, res2, max_res;
+    double res1, res2, max_res, max_res_idx;
     double slowc, slowc_save, markowitz_c;
     int y_kmin, y_kmax, y_size, periods, y_decal;
 //public:

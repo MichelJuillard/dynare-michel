@@ -16,9 +16,8 @@
  * You should have received a copy of the GNU General Public License
  * along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
  */
-
+//#define DEBUGC
 #include <cstring>
-
 #include "Interpreter.hh"
 
 Interpreter::Interpreter(double *params_arg, double *y_arg, double *ya_arg, double *x_arg, double *direction_arg, int y_size_arg,
@@ -77,16 +76,22 @@ Interpreter::compute_block_time(int Per_u_) /*throw(EvalException)*/
           case FLDV :
             //load a variable in the processor
 #ifdef DEBUGC
-            mexPrintf("FLDV");
-            mexEvalString("drawnow;");
+            if(Block_Count==2)
+              {
+                mexPrintf("FLDV\n");
+                mexEvalString("drawnow;");
+              }
 #endif
             switch (get_code_char)
               {
                 case eParameter :
                   var=get_code_int
 #ifdef DEBUGC
-                  mexPrintf(" params[%d]=%f\n",var,params[var]);
-                  mexEvalString("drawnow;");
+                  if(Block_Count==2)
+                    {
+                      mexPrintf(" params[%d]=%f\n",var,params[var]);
+                      mexEvalString("drawnow;");
+                    }
 #endif
                   Stack.push(params[var]);
                   break;
@@ -94,27 +99,32 @@ Interpreter::compute_block_time(int Per_u_) /*throw(EvalException)*/
                   var=get_code_int
                   lag=get_code_int
 #ifdef DEBUGC
-                  if(var==153)
+                  if(Block_Count==2)
                     {
-                      mexPrintf(" FLD y[var=%d,time=%d,lag=%d,%d]=%f\n",var,it_,lag,(it_+lag)*y_size+var,y[(it_+lag)*y_size+var]);
-                      mexEvalString("drawnow;");
+                      mexPrintf("y[%d, %d]=%f\n",it_+lag, var+1, y[(it_+lag)*y_size+var]);
                     }
 #endif
                   Stack.push(y[(it_+lag)*y_size+var]);
                   break;
                 case eExogenous :
+#ifdef DEBUGC
+                  mexPrintf("Exogenous\n");
+#endif
                   var=get_code_int
                   lag=get_code_int
 #ifdef DEBUGC
-                  if(var==650 or var==643 or var==628)
+                  if(Block_Count==2)
                     {
-                      mexPrintf(" FLD x[%d, time=%d, var=%d, lag=%d]=%f\n",it_+lag+var*nb_row_x,it_,var,lag,x[it_+lag+var*nb_row_x]);
-                      mexEvalString("drawnow;");
+                      mexPrintf("x[%d, %d]\n",it_+lag, var+1);
                     }
 #endif
                   Stack.push(x[it_+lag+var*nb_row_x]);
                   break;
                 case eExogenousDet :
+#ifdef DEBUGC
+                  mexPrintf("ExogenousDet\n");
+#endif
+
                   var=get_code_int
                   lag=get_code_int
 #ifdef DEBUGC
@@ -123,6 +133,8 @@ Interpreter::compute_block_time(int Per_u_) /*throw(EvalException)*/
 #endif
                   Stack.push(x[it_+lag+var*nb_row_xd]);
                   break;
+                default:
+                  mexPrintf("Unknown vraibale type\n");
               }
             break;
           case FLDT :
@@ -183,39 +195,53 @@ Interpreter::compute_block_time(int Per_u_) /*throw(EvalException)*/
                 case eParameter :
                   var=get_code_int
                   params[var] = Stack.top();
+#ifdef DEBUGC
+                  mexPrintf("FSTP params[%d]=%f\n", var, params[var]);
+                  mexEvalString("drawnow;");
+#endif
                   Stack.pop();
                   break;
                 case eEndogenous :
+#ifdef DEBUGC
+                  mexPrintf("FSTP Endogenous\n");
+#endif
                   var=get_code_int
                   lag=get_code_int
 #ifdef DEBUGC
-                  mexPrintf("y[%d(it_=%d, lag=%d, y_size=%d, var=%d)](%d)=",(it_+lag)*y_size+var,it_, lag, y_size, var, Stack.size());
+                  //mexPrintf("y[%d(it_=%d, lag=%d, y_size=%d, var=%d)](%d)=",(it_+lag)*y_size+var,it_, lag, y_size, var, Stack.size());
+                  mexPrintf("y[it_=%d, lag=%d, y_size=%d, var=%d, block=%d)]=",it_, lag, y_size, var+1, Block_Count+1);
                   mexEvalString("drawnow;");
 #endif
                   y[(it_+lag)*y_size+var] = Stack.top();
 #ifdef DEBUGC
-                   if(var==557 || var==558)
-                    {
-                      mexPrintf(" FSTP y[var=%d,time=%d,lag=%d,%d]=%f\n",var,it_,lag,(it_+lag)*y_size+var,y[(it_+lag)*y_size+var]);
-                      mexEvalString("drawnow;");
-                    }
-                  /*mexPrintf("%f\n",y[(it_+lag)*y_size+var]);
-                  mexEvalString("drawnow;");*/
+                  mexPrintf("%f\n",y[(it_+lag)*y_size+var]);
+                  mexEvalString("drawnow;");
 #endif
                   Stack.pop();
                   break;
                 case eExogenous :
+#ifdef DEBUGC
+                  mexPrintf("Exogenous\n");
+#endif
+                  var=get_code_int
                   var=get_code_int
                   lag=get_code_int
                   x[it_+lag+var*nb_row_x]  = Stack.top();
                   Stack.pop();
                   break;
                 case eExogenousDet :
+#ifdef DEBUGC
+                  mexPrintf("ExogenousDet\n");
+#endif
+                  var=get_code_int
+
                   var=get_code_int
                   lag=get_code_int
                   x[it_+lag+var*nb_row_xd] = Stack.top();
                   Stack.pop();
                   break;
+                default:
+                  mexPrintf("Unknown vraibale type\n");
               }
             break;
           case FSTPT :
@@ -584,7 +610,7 @@ Interpreter::simulate_a_block(int size,int type, string file_name, string bin_ba
   Mat_DP a;
   Vec_INT indx;
 #endif
-  //SparseMatrix sparse_matrix;
+    //SparseMatrix sparse_matrix;
 
   //int nb_endo, u_count_init;
 
@@ -599,19 +625,22 @@ Interpreter::simulate_a_block(int size,int type, string file_name, string bin_ba
   switch (type)
     {
       case EVALUATE_FORWARD :
-      case EVALUATE_FORWARD_R :
+      //case EVALUATE_FORWARD_R :
 #ifdef DEBUGC
         mexPrintf("EVALUATE_FORWARD\n");
 #endif
         begining=get_code_pointer;
         for (it_=y_kmin;it_<periods+y_kmin;it_++)
           {
+            //mexPrintf("begining=%x\n",begining);
             set_code_pointer(begining);
             Per_y_=it_*y_size;
+            //mexPrintf("bef compute_block_time()\n");
             compute_block_time(0);
 #ifdef PRINT_OUT
-            for (j = 0; j<size; j++)
-              mexPrintf("y[%d, %d] = %f\n", Block_Contain[j].Variable, it_, y[Per_y_ + Block_Contain[j].Variable]);
+            for (int j = 34; j</*size*/37; j++)
+              mexPrintf("y[%d, %d] = %f\n",j+1, it_, y[j+it_*y_size]);
+              //mexPrintf("y[%d, %d] = %f\n", Block_Contain[j].Variable, it_, y[Per_y_ + Block_Contain[j].Variable]);
 #endif
           }
         /*mexPrintf("Evaluate Forward\n");
@@ -624,12 +653,12 @@ Interpreter::simulate_a_block(int size,int type, string file_name, string bin_ba
           }*/
         break;
       case EVALUATE_BACKWARD :
-      case EVALUATE_BACKWARD_R :
+      //case EVALUATE_BACKWARD_R :
 #ifdef DEBUGC
         mexPrintf("EVALUATE_BACKWARD\n");
 #endif
         begining=get_code_pointer;
-        for (it_=periods+y_kmin;it_>y_kmin;it_--)
+        for (it_=periods+y_kmin-1;it_>=y_kmin;it_--)
           {
             set_code_pointer(begining);
             Per_y_=it_*y_size;
@@ -824,6 +853,7 @@ Interpreter::simulate_a_block(int size,int type, string file_name, string bin_ba
 
         if (!is_linear)
           {
+            max_res_idx=0;
             for (it_=y_kmin;it_<periods+y_kmin;it_++)
               {
                 cvg=false;
@@ -845,7 +875,10 @@ Interpreter::simulate_a_block(int size,int type, string file_name, string bin_ba
                         double rr;
                         rr=r[i]/(1+y[Per_y_+Block_Contain[i].Variable]);
                         if (max_res<fabs(rr))
-                          max_res=fabs(rr);
+                          {
+                            max_res=fabs(rr);
+                            max_res_idx=i;
+                          }
                         res2+=rr*rr;
                         res1+=fabs(rr);
                       }
@@ -867,7 +900,7 @@ Interpreter::simulate_a_block(int size,int type, string file_name, string bin_ba
                 set_code_pointer(begining);
                 Per_y_=it_*y_size;
                 iter = 0;
-                res1=res2=max_res=0;
+                res1=res2=max_res=0;max_res_idx=0;
                 /*mexPrintf("Compute_block_time=> in SOLVE_FORWARD_COMPLETE before compute_block_time OK\n");
                 mexEvalString("drawnow;");*/
                 compute_block_time(0);
@@ -916,6 +949,7 @@ Interpreter::simulate_a_block(int size,int type, string file_name, string bin_ba
         begining=get_code_pointer;
         if (!is_linear)
           {
+            max_res_idx=0;
             for (it_=periods+y_kmin;it_>y_kmin;it_--)
               {
                 cvg=false;
@@ -937,7 +971,10 @@ Interpreter::simulate_a_block(int size,int type, string file_name, string bin_ba
                         double rr;
                         rr=r[i]/(1+y[Per_y_+Block_Contain[i].Variable]);
                         if (max_res<fabs(rr))
-                          max_res=fabs(rr);
+                          {
+                            max_res=fabs(rr);
+                            max_res_idx=i;
+                          }
                         res2+=rr*rr;
                         res1+=fabs(rr);
                       }
@@ -1056,6 +1093,7 @@ Interpreter::simulate_a_block(int size,int type, string file_name, string bin_ba
                 res2=0;
                 res1=0;
                 max_res=0;
+                max_res_idx=0;
                 memcpy(y_save, y, y_size*sizeof(double)*(periods+y_kmax+y_kmin));
                 for (it_=y_kmin;it_<periods+y_kmin;it_++)
                   {
@@ -1063,14 +1101,15 @@ Interpreter::simulate_a_block(int size,int type, string file_name, string bin_ba
                     //mexPrintf("Per_u_=%d\n",Per_u_);
                     Per_y_=it_*y_size;
                     //mexPrintf("ok\n");
-                    //mexPrintf("compute_block_time\n");
+                    /*mexPrintf("compute_block_time it_=%d periods=%d y_kmin=%d\n",it_, periods, y_kmin);
+                    mexEvalString("drawnow;");*/
                     set_code_pointer(begining);
                     compute_block_time(Per_u_);
-                    //mexPrintf("end of compute_block_time\n");
+                    /*mexPrintf("end of compute_block_time it_=%d\n",it_);*/
                     /*if(Gaussian_Elimination)
                       initialize(periods, nb_endo, y_kmin, y_kmax, y_size, u_count, u_count_init, u, y, ya, slowc, y_decal, markowitz_c, res1, res2, max_res);*/
                     //mexPrintf("ok1\n");
-                    //mexEvalString("drawnow;");
+                    /*mexEvalString("drawnow;");*/
                     if (isnan(res1)||isinf(res1))
                       {
                         memcpy(y, y_save, y_size*sizeof(double)*(periods+y_kmax+y_kmin));
@@ -1089,7 +1128,10 @@ Interpreter::simulate_a_block(int size,int type, string file_name, string bin_ba
                         /*else
                           rr=r[i];*/
                         if (max_res<fabs(rr))
-                          max_res=fabs(rr);
+                          {
+                            max_res=fabs(rr);
+                            max_res_idx=i;
+                          }
                         res2+=rr*rr;
                         res1+=fabs(rr);
                         /*if (GaussSeidel && giter)
@@ -1150,7 +1192,7 @@ Interpreter::simulate_a_block(int size,int type, string file_name, string bin_ba
                   mexPrintf(" %f",y[i]);
                 mexPrintf("\n");*/
               }
-            res1=res2=max_res=0;
+            res1=res2=max_res=0;max_res_idx=0;
             cvg = false;
             if(Gaussian_Elimination)
               simulate_NG1(Block_Count, symbol_table_endo_nbr, it_, y_kmin, y_kmax, size, periods, true, cvg, iter);
@@ -1248,7 +1290,7 @@ Interpreter::compute_blocks(string file_name, string bin_basename)
 #endif
             lBlock.begin=get_code_pos-(long int)(Init_Code);
 #ifdef DEBUGC
-            mexPrintf("Block[Block_Count].begin=%d\n",lBlock.begin);
+            mexPrintf("Block[%d].begin=%d\n",Block_Count, lBlock.begin);
             mexEvalString("drawnow;");
 #endif
             lBlock.size=get_code_int
@@ -1278,8 +1320,10 @@ Interpreter::compute_blocks(string file_name, string bin_basename)
                 //mexPrintf("Block_Contain[%d].Own_Derivative=%d\n",i,lBlock_Contain.Own_Derivative);
                 Block_Contain.push_back(lBlock_Contain);
               }
-            /*mexPrintf("Block Completed\n");
-            mexEvalString("drawnow;");*/
+#ifdef DEBUGC
+            mexPrintf("Block Completed\n");
+            mexEvalString("drawnow;");
+#endif
             simulate_a_block(lBlock.size,lBlock.type, file_name, bin_basename,true);
             //simulate_a_block(lBlock.size,lBlock.type, file_name, bin_basename,false);
             break;

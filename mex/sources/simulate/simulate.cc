@@ -156,8 +156,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
   /* Call the C subroutines. */
   //mexPrintf("Call subroutines\n");
   //mexEvalString("drawnow;");
-
-  //t0= pctimer();
+ //t0= pctimer();
   t0= clock();
   Interpreter interprete(params, y, ya, x, direction, y_size, nb_row_x, nb_row_xd, periods, y_kmin, y_kmax, maxit_, solve_tolf, size_of_direction, slowc, y_decal, markowitz_c, file_name);
   string f(fname);

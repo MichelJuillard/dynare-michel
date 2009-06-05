@@ -30,26 +30,27 @@ mst = 1.011;
 rho = 0.7;
 psi = 0.787;
 del = 0.02;
+toto = [2  3];
 
-model(sparse_dll,cutoff=1e-17);
-//model(sparse);
+//model(sparse_dll,cutoff=1e-17);
+model(sparse, cutoff=0);
 //model;
-dA = exp(gam+e_a);
-log(m) = (1-rho)*log(mst) + rho*log(m(-1))+e_m;
--P/(c(+1)*P(+1)*m)+bet*P(+1)*(alp*exp(-alp*(gam+log(e(+1))))*k^(alp-1)*n(+1)^(1-alp)+(1-del)*exp(-(gam+log(e(+1)))))/(c(+2)*P(+2)*m(+1))=0;
-W = l/n;
--(psi/(1-psi))*(c*P/(1-n))+l/n = 0;
-R = P*(1-alp)*exp(-alp*(gam+e_a))*k(-1)^alp*n^(-alp)/W;
-1/(c*P)-bet*P*(1-alp)*exp(-alp*(gam+e_a))*k(-1)^alp*n^(1-alp)/(m*l*c(+1)*P(+1)) = 0;
-c+k = exp(-alp*(gam+e_a))*k(-1)^alp*n^(1-alp)+(1-del)*exp(-(gam+e_a))*k(-1);
-P*c = m;
-m-1+d = l;
-e = exp(e_a);
-y = k(-1)^alp*n^(1-alp)*exp(-alp*(gam+e_a));
-gy_obs = dA*y/y(-1);
-gp_obs = (P/P(-1))*m(-1)/dA;
-vv = 0.2*ww+0.5*vv(-1)+1+c(-1)+e_a;
-ww = 0.1*vv+0.5*ww(-1)+2;
+/*0*/  exp(gam+e_a) = dA ;
+/*1*/  log(m) = (1-rho)*log(mst) + rho*log(m(-1))+e_m;
+/*2*/  -P/(c(+1)*P(+1)*m)+bet*P(+1)*(alp*exp(-alp*(gam+log(e(+1))))*k^(alp-1)*n(+1)^(1-alp)+(1-del)*exp(-(gam+log(e(+1)))))/(c(+2)*P(+2)*m(+1))=0;
+/*3*/  l/n = W;
+/*4*/  -(psi/(1-psi))*(c*P/(1-n))+l/n = 0;
+/*5*/  R = P*(1-alp)*exp(-alp*(gam+e_a))*k(-1)^alp*n^(-alp)/W;
+/*6*/  1/(c*P)-bet*P*(1-alp)*exp(-alp*(gam+e_a))*k(-1)^alp*n^(1-alp)/(m*l*c(+1)*P(+1)) = 0;
+/*7*/  c+k = exp(-alp*(gam+e_a))*k(-1)^alp*n^(1-alp)+(1-del)*exp(-(gam+e_a))*k(-1);
+/*8*/  P*c = m; 
+/*9*/  m-1+d = l;
+/*10*/ e = exp(e_a);
+/*11*/ k(-1)^alp*n^(1-alp)*exp(-alp*(gam+e_a)) = y ;
+/*12*/ gy_obs = dA*y/y(-1);
+/*13*/ gp_obs = (P/P(-1))*m(-1)/dA;
+/*14*/ vv = 0.2*ww+0.5*vv(-1)+1+c(-1)+e_a;
+/*15*/ ww = 0.1*vv+0.5*ww(-1)+2;
 /* A lt=
  0.5*vv-0.2*ww = 1
 -0.1*vv+0.5*ww = 2
@@ -58,7 +59,7 @@ ww = 0.1*vv+0.5*ww(-1)+2;
 [-0.1  0.5][ww]   [2]
 det = 0.25-0.02 = 0.23
 [vv]           [0.5  0.2] [1]           [0.9]   [3.91304]
-     = 1/0.23*                = 1/0.23*       = 
+     = 1/0.23*                = 1/0.23*       =
 [ww]           [0.1  0.5] [2]           [1.1]   [4.7826]
 */
 end;
@@ -89,6 +90,7 @@ var e_a; stderr 0.014;
 var e_m; stderr 0.005;
 end;
 
+
 options_.solve_tolf=1e-10;
 options_.maxit_=100;
 steady;
@@ -100,6 +102,8 @@ periods 1;
 values 0.16;
 end;
 
+
+disp(toto(1,2));
 
 simul(periods=200, method=lu);
 //stoch_simul(periods=200,order=1);
