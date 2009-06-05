@@ -92,8 +92,8 @@ function get_prior_info(info)
     end
     
     M_.dname = M_.fname;
-    
-    if info% Prior simulations.
+
+    if info==1% Prior simulations.
        results = prior_sampler(0,M_,bayestopt_,options_,oo_);
        disp(['Prior mass = ' num2str(results.prior.mass)])
        disp(['BK indeterminacy share                = ' num2str(results.bk.indeterminacy_share)])
@@ -106,7 +106,52 @@ function get_prior_info(info)
        disp(['Analytical steady state problem share = ' num2str(results.ass.problem_share)])
     end
     
-    
+    if info==2% Prior optimization.
+       
+        k = find(~isnan(bayestopt_.p5));
+        xparam1(k) = bayestopt_.p5(k);
+        
+        look_for_admissible_initial_condition = 1;
+        scale = 1.0;
+        iter  = 0;
+        
+        while look_for_admissible_initial_condition
+            xinit = xparam1+scale*randn(size(xparam1));
+            if all(xinit>bayestopt_.p3) && all(xinit<bayestopt_.p4)
+                look_for_admissible_initial_condition = 0;
+            else
+                if iter == 2000;
+                    scale = scale/1.1;
+                    iter  = 0;
+                else
+                    iter = iter+1;
+                end
+            end
+        end
+        
+        [xparams,lpd,hessian] = ...
+        maximize_prior_density(xinit, bayestopt_.pshape, ...
+                               bayestopt_.p6, ...
+                               bayestopt_.p7, ...
+                               bayestopt_.p3, ...
+                               bayestopt_.p4);
+       disp(' ')
+       disp(' ')
+       disp('------------------')
+       disp('PRIOR OPTIMIZATION')
+       disp('------------------')
+       disp(' ')
+       
+       
+       
+       for i = 1:length(xparams)
+           disp(['deep parameter ' int2str(i) ': ' get_the_name(i,0) '.'])
+           disp(['  Initial condition ....... ' num2str(xinit(i)) '.'])
+           disp(['  Prior mode .............. ' num2str(bayestopt_.p5(i)) '.'])
+           disp(['  Optimized prior mode .... ' num2str(xparams(i)) '.'])
+           disp(' ')
+       end
+    end
     
     
     
