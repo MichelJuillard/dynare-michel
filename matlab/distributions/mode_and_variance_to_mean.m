@@ -119,13 +119,13 @@ function [mu, parameters] = mode_and_variance_to_mean(m,s2,distribution,lower_bo
         m = m - lower_bound ;
         if isinf(s2)
            nu = 2;
-           s  = 1/(m*m);
+           s  = 3*(m*m);
         else
             [mu, parameters] = mode_and_variance_to_mean(m,s2,2);
             nu = sqrt(parameters(1));
             nu2 = 2*nu;
             nu1 = 2;
-            err = s2*(m*m) - (nu-1)/(nu-2) + .5*(nu-1)*(gamma((nu-1)/2)/gamma(nu/2))^2;
+            err = s2/(m*m) - (nu+1)/(nu-2) + .5*(nu+1)*(gamma((nu-1)/2)/gamma(nu/2))^2;
             while abs(nu2-nu1) > 1e-12
                 if err < 0
                     nu1 = nu;
@@ -139,9 +139,9 @@ function [mu, parameters] = mode_and_variance_to_mean(m,s2,distribution,lower_bo
                     nu2 = nu;
                 end
                 nu =  (nu1+nu2)/2;
-                err = s2*(m*m) - (nu-1)/(nu-2) + .5*(nu-1)*(gamma((nu-1)/2)/gamma(nu/2))^2;
+                err = s2/(m*m) - (nu+1)/(nu-2) + .5*(nu+1)*(gamma((nu-1)/2)/gamma(nu/2))^2;
             end
-            s = (nu-1)/(m*m) ;
+            s = (nu+1)*(m*m) ;
         end
         parameters(1) = nu;
         parameters(2) = s;

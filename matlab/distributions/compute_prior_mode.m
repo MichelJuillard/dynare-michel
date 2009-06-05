@@ -69,7 +69,7 @@ function m = compute_prior_mode(hyperparameters,shape)
       case 4
         % s  = hyperparameters(1)
         % nu = hyperparameters(2)
-        m = sqrt((hyperparameters(2)-1)/hyperparameters(1));
+        m = 1/sqrt((hyperparameters(2)+1)/hyperparameters(1));%sqrt((hyperparameters(2)-1)/hyperparameters(1))
         if length(hyperparameters)>2
             m = m + hyperparameters(3);
         end
