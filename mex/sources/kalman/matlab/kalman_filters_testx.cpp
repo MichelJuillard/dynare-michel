@@ -230,7 +230,7 @@ int main(int argc, char* argv[])
         }
       // fork, create objects and do filtering
 #ifdef TIMING_LOOP
-  for (int tt=0;tt<1000;++tt)
+  for (int tt=0;tt<10000;++tt)
     {
 #endif
       KalmanTask kt(Y, Z, H, T, R, Q, *init);
