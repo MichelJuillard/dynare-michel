@@ -1,23 +1,27 @@
 # $Id: Makefile 531 2005-11-30 13:49:48Z kamenik $
 # Copyright 2005, Ondra Kamenik
 
-#DEBUG = yes
+DEBUG = yes
 
-LD_LIBS := -llapack -lcblas -lf77blas -latlas -lg2c
+#LD_LIBS := -llapack -lcblas -lf77blas -latlas -lg2c
 CC_FLAGS :=  -DMATLAB -DWINDOWS  -DNO_BLAS_H -DNO_LAPACK_H \
 	-Wall -I../../gensylv/cc -I../cc \
 	-Ic:/"Program Files"/MATLAB_SV71/extern/include 
 
 ifeq ($(DEBUG),yes)
-	CC_FLAGS := -DDEBUG $(CC_FLAGS) -g
+#	CC_FLAGS := -DDEBUG $(CC_FLAGS) -g
+	CC_FLAGS := -DTIMING_LOOP -DDEBUG $(CC_FLAGS) -g -pg #-Wl,-pg
+	KALMANLIB := kalmanlib_dbg.a
 else
-	CC_FLAGS := $(CC_FLAGS) -O2
-#	CC_FLAGS := -DTIMING_LOOP $(CC_FLAGS) -O2
+#	CC_FLAGS := $(CC_FLAGS) -O2
+	CC_FLAGS := -DTIMING_LOOP $(CC_FLAGS) -O2
+	KALMANLIB := kalmanlib.a
 endif
 
 # Added by GP
 #    LDFLAGS := -llapack -lcblas -lf77blas -latlas -lg2c -lstdc++ -lmingw32
-        LDFLAGS := -Wl,--library-path $(LD_LIBRARY_PATH) \
+        #LDFLAGS := -Wl,--library-path 
+        LD_LIBS := -Wl,--library-path $(LD_LIBRARY_PATH) \
              -Wl,-L'f:/MinGW/lib' \
         -Wl,-L"c:/Program Files"/MATLAB_SV71/extern/lib/win32/microsoft/ \
         -Wl,-llibmex -Wl,-llibmx  -Wl,-llibmwlapack -Wl,-llibdflapack \
@@ -26,7 +30,7 @@ endif
 #                  -Wl,-L'f:/CygWin/usr/local/atlas/lib' \
 #                  -Wl,-L'f:/CygWin/lib' \
 #                 $(LDFLAGS)
-    LD_LIBS :=$(LDFLAGS)
+#    LD_LIBS :=$(LDFLAGS)
 # end add
 
 matrix_interface := GeneralMatrix Vector SylvException 
@@ -66,9 +70,17 @@ kalman_smoother_dll.dll: kalman_smoother.o kalmanlib.a #$(hsource) $(cppsource)
 	gcc -shared $(CC_FLAGS) -o kalman_smoother_dll.dll kalman_smoother.o \
 	kalmanlib.a $(LD_LIBS) 
 
+minv.dll: minv.o kalmanlib.a # $(hsource) $(cppsource) 
+	gcc -shared $(CC_FLAGS) -o minv.dll minv.o \
+	kalmanlib.a $(LD_LIBS) 
+
 kalman_filter_dll.dll: kalman_filters.o kalmanlib.a # $(hsource) $(cppsource) 
 	gcc -shared $(CC_FLAGS) -o kalman_filter_dll.dll kalman_filters.o \
-	kalmanlib.a $(LD_LIBS) 
+	$(KALMANLIB) $(LD_LIBS) 
+
+kalman_filters_testx.exe: kalman_filters_testx.o kalmanlib.a # $(hsource) $(cppsource) 
+	gcc $(CC_FLAGS) -pg -o kalman_filters_testx.exe kalman_filters_testx.o \
+	$(KALMANLIB) $(LD_LIBS) 
 
 all: $(objects) kalmanlib.a kalman_smoother_dll.dll kalman_filter_dll.dll # $(cppsource) $(hsource) $(kalmanhsource) $(kalmancppsource)
 

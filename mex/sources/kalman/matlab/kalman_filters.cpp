@@ -124,10 +124,6 @@ extern "C" {
         init = new StateInit(P, a.getData());
         }
       // fork, create objects and do filtering
-#ifdef TIMING_LOOP
-  for (int tt=0;tt<10000;++tt)
-    {
-#endif
       KalmanTask kt(Y, Z, H, T, R, Q, *init);
       if (uni) 
         {
@@ -138,12 +134,16 @@ extern "C" {
         } 
       else 
         {
+#ifdef TIMING_LOOP
+  for (int tt=0;tt<1000;++tt)
+    {
+#endif
         loglik = kt.filter(per, d, (start-1), vll);
-        }
 #ifdef TIMING_LOOP
     }
     //mexPrintf("kalman_filter: finished 10,000 loops");
 #endif
+        }
         // destroy init
       delete init;
       
