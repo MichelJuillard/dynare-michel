@@ -1,7 +1,7 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ([2.63])
-AC_INIT([dynare], [4.1-Prerelease])
+AC_INIT([dynare], [4.1-unstable])
 AC_CONFIG_SRCDIR([preprocessor/DynareMain.cc])
 
 AC_PROG_CXX
@@ -61,6 +61,13 @@ then
   fi
 fi
 
-AC_CONFIG_FILES([Makefile preprocessor/Makefile doc/Makefile doc/preprocessor/Makefile doc/macroprocessor/Makefile doc/userguide/Makefile])
+AC_CONFIG_FILES([Makefile
+                 preprocessor/Makefile
+                 doc/Makefile
+                 doc/preprocessor/Makefile
+                 doc/macroprocessor/Makefile
+                 doc/userguide/Makefile
+                 matlab/dynare_version.m
+                 windows/dynare-version.nsi])
 
 AC_OUTPUT
