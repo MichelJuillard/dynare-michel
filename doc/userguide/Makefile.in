@@ -22,3 +22,6 @@ clean:
 	rm -f *.log *.aux *.toc *.lof *.blg *.bbl *.out
 	rm -f UserGuide.pdf
 .PHONY: clean
+
+Makefile: Makefile.in ../../config.status
+	cd ../.. && ./config.status

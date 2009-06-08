@@ -3955,7 +3955,7 @@ $as_echo "$as_me: WARNING: The creation of the HTML version will be very slow! Y
   fi
 fi
 
-ac_config_files="$ac_config_files preprocessor/Makefile doc/Makefile doc/preprocessor/Makefile doc/macroprocessor/Makefile doc/userguide/Makefile"
+ac_config_files="$ac_config_files Makefile preprocessor/Makefile doc/Makefile doc/preprocessor/Makefile doc/macroprocessor/Makefile doc/userguide/Makefile"
 
 
 cat >confcache <<\_ACEOF
@@ -4566,6 +4566,7 @@ cat >>$CONFIG_STATUS <<\_ACEOF || ac_write_fail=1
 for ac_config_target in $ac_config_targets
 do
   case $ac_config_target in
+    "Makefile") CONFIG_FILES="$CONFIG_FILES Makefile" ;;
     "preprocessor/Makefile") CONFIG_FILES="$CONFIG_FILES preprocessor/Makefile" ;;
     "doc/Makefile") CONFIG_FILES="$CONFIG_FILES doc/Makefile" ;;
     "doc/preprocessor/Makefile") CONFIG_FILES="$CONFIG_FILES doc/preprocessor/Makefile" ;;

@@ -37,3 +37,6 @@ clean:
 	make -C macroprocessor clean
 	make -C userguide clean
 .PHONY: clean
+
+Makefile: Makefile.in ../config.status
+	cd .. && ./config.status

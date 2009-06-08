@@ -61,6 +61,6 @@ then
   fi
 fi
 
-AC_CONFIG_FILES([preprocessor/Makefile doc/Makefile doc/preprocessor/Makefile doc/macroprocessor/Makefile doc/userguide/Makefile])
+AC_CONFIG_FILES([Makefile preprocessor/Makefile doc/Makefile doc/preprocessor/Makefile doc/macroprocessor/Makefile doc/userguide/Makefile])
 
 AC_OUTPUT
