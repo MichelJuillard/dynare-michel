@@ -15,7 +15,7 @@ clean:
 distclean: clean
 	rm -f config.log config.status
 	rm -rf autom4te.cache
-	rm -f Makefile preprocessor/Makefile doc/Makefile doc/preprocessor/Makefile doc/macroprocessor/Makefile doc/userguide/Makefile
+	rm -f Makefile preprocessor/Makefile doc/Makefile doc/preprocessor/Makefile doc/macroprocessor/Makefile doc/userguide/Makefile matlab/dynare_version.m windows/dynare-version.nsi
 .PHONY: distclean
 
 TARBASENAME=@PACKAGE_NAME@-@PACKAGE_VERSION@
