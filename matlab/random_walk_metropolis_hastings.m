@@ -66,7 +66,7 @@ localVars.InitSizeArray=InitSizeArray;
 localVars.record=record;
 localVars.varargin=varargin;
 
-tic,
+% tic,
 
 
 if isnumeric(options_.parallel),% | isunix, % for the moment exclude unix platform from parallel implementation
@@ -109,7 +109,7 @@ irun = fout(1).irun;
 NewFile = fout(1).NewFile;
 
     
-ComptationalTime=toc,
+% ComptationalTime=toc,
 
 % record.Seeds.Normal = randn('state');
 % record.Seeds.Unifor = rand('state');
