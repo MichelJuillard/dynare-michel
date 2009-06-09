@@ -93,8 +93,9 @@ function get_prior_info(info)
     
     M_.dname = M_.fname;
 
-    if info==1% Prior simulations.
+    if info==1% Prior simulations (BK).
        results = prior_sampler(0,M_,bayestopt_,options_,oo_);
+       % Display prior mass info
        disp(['Prior mass = ' num2str(results.prior.mass)])
        disp(['BK indeterminacy share                = ' num2str(results.bk.indeterminacy_share)])
        disp(['BK unstability share                  = ' num2str(results.bk.unstability_share)])
@@ -150,7 +151,63 @@ function get_prior_info(info)
        end
     end
     
-    
+    if info==3% Prior simulations (BK+moments).
+       results = prior_sampler(1,M_,bayestopt_,options_,oo_);
+       % Display prior mass info.
+       disp(['Prior mass = ' num2str(results.prior.mass)])
+       disp(['BK indeterminacy share                = ' num2str(results.bk.indeterminacy_share)])
+       disp(['BK unstability share                  = ' num2str(results.bk.unstability_share)])
+       disp(['BK singularity share                  = ' num2str(results.bk.singularity_share)])
+       disp(['Complex jacobian share                = ' num2str(results.jacobian.problem_share)])
+       disp(['mjdgges crash share                   = ' num2str(results.dll.problem_share)])
+       disp(['Steady state problem share            = ' num2str(results.ss.problem_share)])
+       disp(['Complex steady state  share           = ' num2str(results.ss.complex_share)])
+       disp(['Analytical steady state problem share = ' num2str(results.ass.problem_share)])
+       assignin('base','prior_mass_analysis',results);
+       % Compute prior moments.
+       PriorMomentsDirectoryName = CheckPath('prior/moments');
+       prior_draws_info = dir([ M_.dname '/prior/draws/prior_draws*.mat']);
+       number_of_prior_draws_files = length(prior_draws_info);
+       total_number_of_simulations = 0;
+       nvar = rows(options_.prior_analysis_endo_var_list);
+       if nvar == 0
+           nvar = M_.endo_nbr;
+           ivar = [1:nvar]';
+       else
+           ivar=zeros(nvar,1);
+           for i=1:nvar
+               i_tmp = strmatch(options_.prior_analysis_endo_var_list(i,:),M_.endo_names,'exact');
+               if isempty(i_tmp)
+                   error (['One of the variable specified does not exist']) ;
+               else
+                   ivar(i) = i_tmp;
+               end
+           end
+       end
+       for f=1:number_of_prior_draws_files
+           load([ M_.dname '/prior/draws/prior_draws' int2str(f) '.mat']);
+           number_of_simulations = length(pdraws);
+           total_number_of_simulations = total_number_of_simulations + number_of_simulations;
+           covariance_cell = cell(number_of_simulations);
+           correlation_cell = cell(number_of_simulations);
+           decomposition_cell = cell(number_of_simulations);
+           for s=1:number_of_simulations
+               dr = pdraws{s,2};
+               [gamma_y,ivar] = th_autocovariances(dr,ivar,M_,options_);
+               covariance_cell(s) = {vech(gamma_y{1})};
+               tmp = zeros(ivar,options_.ar);
+               for i=1:length(ivar)
+                   for lag=1:options_.ar
+                       tmp(i,lag) = gamma_y{lag+1}(i,i); 
+                   end
+               end
+               correlation_cell(s) = {tmp};
+               decomposition_cell(s) = {gamma_y{options_.ar+2}};
+           end
+           save([ PriorMomentsDirectoryName '/prior_moments_draws' int2str(f) '.mat' ],'covariance_cell','correlation_cell','decomposition_cell');
+       end
+       clear('covariance_cell','correlation_cell','decomposition_cell')
+    end
     
 function format_string = build_format_string(bayestopt,i)
     format_string = ['%s & %s & %6.4f &'];
