@@ -44,6 +44,7 @@ function global_initialization()
   options_.Schur_vec_tol = 1e-8; % used to find nonstationary variables
                                  % in Schur decomposition of the
                                  % transition matrix
+  options_.qz_criterium = 1.000001;
   options_.lyapunov_complex_threshold = 1e-15;
   options_.solve_tolf = eps^(1/3);
   options_.solve_tolx = eps^(2/3);
@@ -129,7 +130,7 @@ function global_initialization()
   options_.planner_discount = 1.0;
   options_.ramsey_policy = 0;
   options_.timeless = 0;
-  
+    
   % estimation
   options_.MaxNumberOfBytes = 1e6;
   options_.MaximumNumberOfMegaBytes = 111;
