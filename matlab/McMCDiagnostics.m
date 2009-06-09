@@ -50,7 +50,7 @@ load([MhDirectoryName '/'  M_.fname '_mh_history.mat'])
 
 mcfiles = [];
 for blck = 1:nblck
-  mcfiles = cat(3,mcfiles,dir([MhDirectoryName '/' M_.fname '_mh*_blck' int2str(blck) '.mat']));
+  mcfiles = cat(3,mcfiles,dir([MhDirectoryName ,filesep, M_.fname '_mh*_blck' int2str(blck) '.mat']));
 end
 NumberOfMcFilesPerBlock = size(mcfiles,1);
 
@@ -102,8 +102,9 @@ if isnumeric(options_.parallel),% | isunix, % for the moment exclude unix platfo
 else
            
     [fout, nBlockPerCPU, totCPU] = masterParallel(options_.parallel, 1, npar,{},'McMCDiagnostics_core', localVars);
-    UDIAG = [];
-    for j=1:totCPU,
+
+    UDIAG = fout(1).UDIAG;
+    for j=2:totCPU,
         UDIAG = cat(3,UDIAG ,fout(j).UDIAG);
     end
 
