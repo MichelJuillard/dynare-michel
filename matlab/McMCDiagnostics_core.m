@@ -17,7 +17,12 @@ UDIAG = zeros(NumberOfLines,6,npar-fpar+1);
     if whoiam
 %       keyboard;
       waitbarString = ['Please wait... McMCDiagnostics (' int2str(fpar) 'of' int2str(npar) ')...'];
-      waitbarTitle=['McMCDiagnostics ',Parallel(ThisMatlab).PcName];
+%       waitbarTitle=['McMCDiagnostics ',Parallel(ThisMatlab).PcName];
+      if Parallel(ThisMatlab).Local,
+        waitbarTitle=['Local '];
+      else
+        waitbarTitle=[Parallel(ThisMatlab).PcName];
+      end        
       fMessageStatus(0,whoiam,waitbarString, waitbarTitle, Parallel(ThisMatlab), MasterName, DyMo);
       
     end
