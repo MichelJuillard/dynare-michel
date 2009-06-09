@@ -71,7 +71,7 @@ end
 %%% Ogni Processo quando ha finito lo notifica cancellando un file ... 
 % keyboard;
 if(whoiam)
-  save([ fname,'_output_',int2str(whoiam)],'fOutputVar' )
+  save([ fname,'_output_',int2str(whoiam),'.mat'],'fOutputVar' )
   
   
   if Parallel(ThisMatlab).Local
