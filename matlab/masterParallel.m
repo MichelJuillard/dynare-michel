@@ -27,7 +27,7 @@ if isunix,
 else    
   [tempo, MasterName]=system('hostname');
 end
-MasterName=MasterName(1:end-1);
+MasterName=deblank(MasterName);
 fInputVar.MasterName = MasterName;
 
 if exist('fGlobalVar'),
@@ -40,6 +40,7 @@ for j=1:length(Parallel),
     nCPU(j)=length(Parallel(j).NumCPU);
     totCPU=totCPU+nCPU(j);
 end
+% keyboard;
 nCPU=cumsum(nCPU);
 offset0 = fBlock-1;
 if (nBlock-offset0)>totCPU,
@@ -80,8 +81,8 @@ end
 %     load([fname,'_output_1.mat'],'fOutputVar');
 %     
 % else
-    delete(['comp_status_',fname,'*.mat'])
-    delete(['P_',fname,'*End.txt']);
+    mydelete(['comp_status_',fname,'*.mat'])
+    mydelete(['P_',fname,'*End.txt']);
     fid = fopen('ConcurrentCommand1.bat','w+');
     for j=1:totCPU,
         
@@ -99,10 +100,18 @@ end
         
         if Parallel(indPC).Local == 1, % run on the local machine
           if isunix,
+            if exist('OCTAVE_VERSION')
+            command1=['octave --eval fParallel\(',int2str(offset+1),',',int2str(sum(nBlockPerCPU(1:j))),',',int2str(j),',',int2str(indPC),',\''',fname,'\''\) &'];
 %             command1=['ssh localhost "cd ',DyMo, '; ',matlabroot,'/bin/matlab -nosplash -nodesktop -minimize -r fParallel\(',int2str(offset+1),',',int2str(sum(nBlockPerCPU(1:j))),',',int2str(j),',',int2str(indPC),',\''',fname,'\''\);" &'];
+            else
             command1=['matlab -nosplash -nodesktop -minimize -r fParallel\(',int2str(offset+1),',',int2str(sum(nBlockPerCPU(1:j))),',',int2str(j),',',int2str(indPC),',\''',fname,'\''\) &'];
+            end
           else
-            command1=['start /B psexec -W ',DyMo, ' -a ',int2str(Parallel(indPC).NumCPU(j-nCPU0)),' -low  matlab -nosplash -nodesktop -minimize -r fParallel(',int2str(offset+1),',',int2str(sum(nBlockPerCPU(1:j))),',',int2str(j),',',int2str(indPC),',''',fname,''')'];
+            if exist('OCTAVE_VERSION')
+              command1=['start /B psexec -W ',DyMo, ' -a ',int2str(Parallel(indPC).NumCPU(j-nCPU0)),' -low  octave --eval fParallel(',int2str(offset+1),',',int2str(sum(nBlockPerCPU(1:j))),',',int2str(j),',',int2str(indPC),',''',fname,''')'];
+            else
+              command1=['start /B psexec -W ',DyMo, ' -a ',int2str(Parallel(indPC).NumCPU(j-nCPU0)),' -low  matlab -nosplash -nodesktop -minimize -r fParallel(',int2str(offset+1),',',int2str(sum(nBlockPerCPU(1:j))),',',int2str(j),',',int2str(indPC),',''',fname,''')'];
+            end
           end
         else
 %           keyboard;
@@ -127,12 +136,13 @@ end
                     if isunix,
                       system(['ssh ',Parallel(indPC).user,'@',Parallel(indPC).PcName,' rm -fr ',Parallel(indPC).RemoteFolder,'/*']);
                     else
-                      delete(['\\',Parallel(indPC).PcName,'\',Parallel(indPC).RemoteDrive,'$\',Parallel(indPC).RemoteFolder,'\*.*']);
-                      adir=ls(['\\',Parallel(indPC).PcName,'\',Parallel(indPC).RemoteDrive,'$\',Parallel(indPC).RemoteFolder,'\']);
-                      for jdir=3:size(adir,1)
-                        STATUS = rmdir(['\\',Parallel(indPC).PcName,'\',Parallel(indPC).RemoteDrive,'$\',Parallel(indPC).RemoteFolder,'\',deblank(adir(jdir,:))],'s');
+%                       delete(['\\',Parallel(indPC).PcName,'\',Parallel(indPC).RemoteDrive,'$\',Parallel(indPC).RemoteFolder,'\*.*']);
+                      mydelete('*.*',['\\',Parallel(indPC).PcName,'\',Parallel(indPC).RemoteDrive,'$\',Parallel(indPC).RemoteFolder,'\']);
+                      adir=dir(['\\',Parallel(indPC).PcName,'\',Parallel(indPC).RemoteDrive,'$\',Parallel(indPC).RemoteFolder,'\']);
+                      for jdir=3:length(adir)
+                        STATUS = rmdir(['\\',Parallel(indPC).PcName,'\',Parallel(indPC).RemoteDrive,'$\',Parallel(indPC).RemoteFolder,'\',adir(jdir).name],'s');
                         if STATUS == 0,
-                          disp(['Warning!: Directory ',deblank(adir(jdir,:)),' could not be removed from ',Parallel(indPC).PcName,'.'])
+                          disp(['Warning!: Directory ',adir(jdir).name,' could not be removed from ',Parallel(indPC).PcName,'.'])
                         end
                       end
                     end
@@ -155,14 +165,28 @@ end
             end
             
             if isunix,
+              if exist('OCTAVE_VERSION'),
+                command1=['ssh ',Parallel(indPC).user,'@',Parallel(indPC).PcName,' "cd ',Parallel(indPC).RemoteFolder, '; octave --eval fParallel\(',int2str(offset+1),',',int2str(sum(nBlockPerCPU(1:j))),',',int2str(j),',',int2str(indPC),',\''',fname,'\''\);" &'];              
+              else
                 command1=['ssh ',Parallel(indPC).user,'@',Parallel(indPC).PcName,' "cd ',Parallel(indPC).RemoteFolder, '; matlab -nosplash -nodesktop -minimize -r fParallel\(',int2str(offset+1),',',int2str(sum(nBlockPerCPU(1:j))),',',int2str(j),',',int2str(indPC),',\''',fname,'\''\);" &'];
+              end
             else
               if ~strcmp(Parallel(indPC).PcName,MasterName), % run on a remote machine
+              if exist('OCTAVE_VERSION'),
+                command1=['start /B psexec \\',Parallel(indPC).PcName,' -e -u ',Parallel(indPC).user,' -p ',Parallel(indPC).passwd,' -W ',Parallel(indPC).RemoteDrive,':\',Parallel(indPC).RemoteFolder,'\ -a ',int2str(Parallel(indPC).NumCPU(j-nCPU0)), ...
+                  ' -low  octave --eval fParallel(',int2str(offset+1),',',int2str(sum(nBlockPerCPU(1:j))),',',int2str(j),',',int2str(indPC),',''',fname,''')'];              
+              else
                 command1=['start /B psexec \\',Parallel(indPC).PcName,' -e -u ',Parallel(indPC).user,' -p ',Parallel(indPC).passwd,' -W ',Parallel(indPC).RemoteDrive,':\',Parallel(indPC).RemoteFolder,'\ -a ',int2str(Parallel(indPC).NumCPU(j-nCPU0)), ...
                   ' -low  matlab -nosplash -nodesktop -minimize -r fParallel(',int2str(offset+1),',',int2str(sum(nBlockPerCPU(1:j))),',',int2str(j),',',int2str(indPC),',''',fname,''')'];
+              end
               else % run on the local machine via the network
+              if exist('OCTAVE_VERSION'),
+                command1=['start /B psexec \\',Parallel(indPC).PcName,' -e -W ',Parallel(indPC).RemoteDrive,':\',Parallel(indPC).RemoteFolder,'\ -a ',int2str(Parallel(indPC).NumCPU(j-nCPU0)), ...
+                  ' -low  octave --eval fParallel(',int2str(offset+1),',',int2str(sum(nBlockPerCPU(1:j))),',',int2str(j),',',int2str(indPC),',''',fname,''')'];              
+              else
                 command1=['start /B psexec \\',Parallel(indPC).PcName,' -e -W ',Parallel(indPC).RemoteDrive,':\',Parallel(indPC).RemoteFolder,'\ -a ',int2str(Parallel(indPC).NumCPU(j-nCPU0)), ...
                   ' -low  matlab -nosplash -nodesktop -minimize -r fParallel(',int2str(offset+1),',',int2str(sum(nBlockPerCPU(1:j))),',',int2str(j),',',int2str(indPC),',''',fname,''')'];
+              end
               end
             end
 
@@ -181,13 +205,35 @@ end
     else
     system('ConcurrentCommand1.bat');
     end
-    delete ConcurrentCommand1.bat
     
-    status_string={'Starting remote parallel computation ... '};
     t0=cputime;
     t00=cputime;
     hh=NaN(1,nBlock);
+    if exist('OCTAVE_VERSION'),
+        diary off;
+%         frmt_done = '';
+%         for j=1:totCPU,
+%           frmt_done = [frmt_done,' %3.f%% '];
+%         end
+    else
+        hfigstatus = figure('name',['Parallel ',fname],...
+            'MenuBar', 'none', ...
+            'NumberTitle','off');
+        vspace = 0.1;
+        ncol = ceil(totCPU/10);
+        hspace = 0.9/ncol;
+        for j=1:totCPU,
+          jrow = mod(j-1,10)+1;
+          jcol = ceil(j/10);  
+          hstatus(j) = axes('position',[0.05/ncol+(jcol-1)/ncol 0.92-vspace*(jrow-1) 0.9/ncol 0.03], ...
+              'box','on','xtick',[],'ytick',[],'xlim',[0 1],'ylim',[0 1]);
+        end
+        cumBlockPerCPU = cumsum(nBlockPerCPU);
+    end
+        pcerdone = NaN(1,totCPU);
     while (1)
+        waitbarString = '';
+        statusString = '';
         pause(1)
 %         keyboard;
         %             if (cputime-t0)>10,
@@ -196,29 +242,63 @@ end
             
             try
                 load(stax(j).name)
-                %                         status_string{j}=(['Chain ',int2str(whoiam),' at ',num2str(100*jstatus/nruns(whoiam)),'% accept. rate ',num2str(isux/jstatus,4),'.']);
+                pcerdone(j) = prtfrc;
+              if exist('OCTAVE_VERSION'),
+                statusString = [statusString, waitbarString, ', %3.f%% done! '];
+              else
+                status_String{j} = waitbarString;  
+                status_Title{j} = waitbarTitle;  
+                idCPU(j) = njob;
+%                 idThisMatlab(j) = ThisMatlab;
+%                 idCPU(j) = min((find(cumBlockPerCPU>=njob)));
+              end
+                if prtfrc==1, delete(stax(j).name), end
             catch
                 
             end
-            %                   disp(status_string{j})
-            if ishandle(hh(njob)),
-                waitbar(prtfrc,hh(njob),waitbarString);
-                if prtfrc==1, close(hh(njob)); delete(stax(j).name), end
-            else
-                hh(njob) = waitbar(0,waitbarString);
-                set(hh(njob),'Name',['Parallel ',waitbarTitle]);
-            end
-            
+%             if ~exist('OCTAVE_VERSION'),
+%                 if ishandle(hh(njob)),
+%                     waitbar(prtfrc,hh(njob),waitbarString);
+%                     if prtfrc==1, close(hh(njob));  end
+%                 else
+%                     hh(njob) = waitbar(0,waitbarString);
+%                     set(hh(njob),'Name',['Parallel ',waitbarTitle]);
+%                 end
+%             end
+
         end
+            if exist('OCTAVE_VERSION'),
+              printf([statusString,'\r'], 100 .* pcerdone);
+            else
+                  figure(hfigstatus),
+              for j=1:length(stax),
+                  axes(hstatus(idCPU(j))),
+%                   delete(get(gca,'children'))
+                  hpat = findobj(hstatus(idCPU(j)),'Type','patch');
+                  if ~isempty(hpat),
+                    set(hpat,'XData',[0 0 pcerdone(j) pcerdone(j)])
+                  else
+                    patch([0 0 pcerdone(j) pcerdone(j)],[0 1 1 0],'r','EdgeColor','r')
+                  end
+%                   xlabel(status_String{j});
+                  title([status_Title{j},' - ',status_String{j}]);
+              end
+            end
         %                 disp(' ')
         %                 t0=cputime;
         %             end
         if isempty(dir(['P_',fname,'_*End.txt'])) 
-            delete(['comp_status_',fname,'*.mat'])
-            for j=1:length(hh),
-                if ishandle(hh(j)),
-                    close(hh(j))
-                end
+            mydelete(['comp_status_',fname,'*.mat'])
+            if ~exist('OCTAVE_VERSION'),
+%                 for j=1:length(hh),
+%                     if ishandle(hh(j)),
+%                         close(hh(j))
+%                     end
+%                 end
+                close(hfigstatus),
+            else
+                printf('\n');
+                diary on;
             end
 
 %             for j=1:indPC,
@@ -242,5 +322,6 @@ end
       
     end
       
-      
+delete ConcurrentCommand1.bat
+
 % end
