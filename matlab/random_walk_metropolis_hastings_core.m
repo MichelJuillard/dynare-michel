@@ -60,14 +60,19 @@ for b = fblck:nblck,
     end
     if exist('OCTAVE_VERSION')
       diary off;
-    elseif ~whoiam
-      hh = waitbar(0,['Please wait... Metropolis-Hastings (' int2str(b) '/' int2str(options_.mh_nblck) ')...']);
-      set(hh,'Name','Metropolis-Hastings');
     elseif whoiam
 %       keyboard;
       waitbarString = ['Please wait... Metropolis-Hastings (' int2str(b) '/' int2str(options_.mh_nblck) ')...'];
-      waitbarTitle=['Metropolis-Hastings ',options_.parallel(ThisMatlab).PcName];
-      fMessageStatus(0,b,waitbarString, waitbarTitle, options_.parallel(ThisMatlab), MasterName, DyMo);
+%       waitbarTitle=['Metropolis-Hastings ',options_.parallel(ThisMatlab).PcName];
+      if options_.parallel(ThisMatlab).Local,
+        waitbarTitle=['Local '];
+      else
+        waitbarTitle=[options_.parallel(ThisMatlab).PcName];
+      end        
+      fMessageStatus(0,whoiam,waitbarString, waitbarTitle, options_.parallel(ThisMatlab), MasterName, DyMo);
+    else,
+      hh = waitbar(0,['Please wait... Metropolis-Hastings (' int2str(b) '/' int2str(options_.mh_nblck) ')...']);
+      set(hh,'Name','Metropolis-Hastings');
       
     end
     isux = 0;
@@ -94,8 +99,13 @@ for b = fblck:nblck,
         end
         prtfrc = j/nruns(b);
         if exist('OCTAVE_VERSION')
-          if mod(j, 10) == 0 & ~whoiam
+          if mod(j, 10) == 0,
             printf('MH: Computing Metropolis-Hastings (chain %d/%d): %3.f%% done, acception rate: %3.f%%\r', b, nblck, 100 * prtfrc, 100 * isux / j);
+          end
+          if mod(j,50)==0 & whoiam,  
+%             keyboard;
+            waitbarString = [ '(' int2str(b) '/' int2str(options_.mh_nblck) '), ' sprintf('accept. %3.f%%%%', 100 * isux/j)];
+            fMessageStatus(prtfrc,whoiam,waitbarString, '', options_.parallel(ThisMatlab), MasterName, DyMo)
           end
         else
           if mod(j, 3)==0 & ~whoiam
@@ -103,7 +113,7 @@ for b = fblck:nblck,
           elseif mod(j,50)==0 & whoiam,  
 %             keyboard;
             waitbarString = [ '(' int2str(b) '/' int2str(options_.mh_nblck) ') ' sprintf('%f done, acceptation rate %f',prtfrc,isux/j)];
-            fMessageStatus(prtfrc,b,waitbarString, waitbarTitle, options_.parallel(ThisMatlab), MasterName, DyMo)
+            fMessageStatus(prtfrc,whoiam,waitbarString, waitbarTitle, options_.parallel(ThisMatlab), MasterName, DyMo)
           end
         end
           
@@ -159,7 +169,7 @@ for b = fblck:nblck,
     end
     record.Seeds(b).Normal = randn('state');
     record.Seeds(b).Unifor = rand('state');
-    OutputFileName(jloop,:) = {[MhDirectoryName,'/'], [ModelName '_mh*_blck' int2str(b) '.mat']};
+    OutputFileName(jloop,:) = {[MhDirectoryName,filesep], [ModelName '_mh*_blck' int2str(b) '.mat']};
 end% End of the loop over the mh-blocks.
 
 
