@@ -67,25 +67,22 @@ function results = prior_sampler(drsave,M_,bayestopt_,options_,oo_)
         TableOfInformations(1,3) = 1;
         TableOfInformations(2:end,3) = cumsum(TableOfInformations(2:end,2))+1;
     end
-    
-    TableOfInformations
-    pause
 
     pdraws = cell(TableOfInformations(1,2),drsave+1) ;
     sampled_prior_expectation = zeros(NumberOfParameters,1);
     sampled_prior_covariance  = zeros(NumberOfParameters,NumberOfParameters);
     
     file_line_number = 1;
+    file_indx_number = 1;
 
     % Simulations.
     while iteration <= NumberOfSimulations
         loop_indx = loop_indx+1;
-        file_indx = find(TableOfInformations(2:end,3)==iteration);
-        if ~isempty(file_indx) && file_indx<rows(TableOfInformations)
-            file_indx
-            save([ PriorDirectoryName '/prior_draws' int2str(TableOfInformations(file_indx,1)) '.mat' ],'pdraws');
-            pdraws = cell(TableOfInformations(file_indx,2),drsave+1);
+        if ( (file_line_number-1)==TableOfInformations(file_indx_number,2))
+            save([ PriorDirectoryName '/prior_draws' int2str(file_indx_number) '.mat' ],'pdraws');
             file_line_number = 1;
+            file_indx_number = file_indx_number + 1;
+            pdraws = cell(TableOfInformations(file_indx_number,2),drsave+1) ;
         end
         params = prior_draw();
         set_all_parameters(params);
@@ -124,7 +121,7 @@ function results = prior_sampler(drsave,M_,bayestopt_,options_,oo_)
     end
     
     % Save last prior_draw*.mat file
-    save([ PriorDirectoryName '/prior_draws' int2str(TableOfInformations(end,1)) '.mat' ],'pdraws');
+    % save([ PriorDirectoryName '/prior_draws' int2str(TableOfInformations(end,1)) '.mat' ],'pdraws');
     
     % Get informations about BK conditions and other things...
     results.bk.indeterminacy_share = count_bk_indeterminacy/loop_indx;
