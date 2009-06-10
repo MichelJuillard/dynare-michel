@@ -68,28 +68,36 @@ function results = prior_sampler(drsave,M_,bayestopt_,options_,oo_)
         TableOfInformations(2:end,3) = cumsum(TableOfInformations(2:end,2))+1;
     end
     
+    TableOfInformations
+    pause
+
     pdraws = cell(TableOfInformations(1,2),drsave+1) ;
     sampled_prior_expectation = zeros(NumberOfParameters,1);
     sampled_prior_covariance  = zeros(NumberOfParameters,NumberOfParameters);
     
+    file_line_number = 1;
+
     % Simulations.
     while iteration <= NumberOfSimulations
         loop_indx = loop_indx+1;
-        file_indx = find(TableOfInformations(:,3)==iteration);
-        if ~isempty(file_indx) && file_indx>1
-            save([ PriorDirectoryName '/prior_draws' int2str(file_indx-1) '.mat' ],'pdraws');
+        file_indx = find(TableOfInformations(2:end,3)==iteration);
+        if ~isempty(file_indx) && file_indx<rows(TableOfInformations)
+            file_indx
+            save([ PriorDirectoryName '/prior_draws' int2str(TableOfInformations(file_indx,1)) '.mat' ],'pdraws');
             pdraws = cell(TableOfInformations(file_indx,2),drsave+1);
+            file_line_number = 1;
         end
         params = prior_draw();
         set_all_parameters(params);
         [dr,INFO] = resol(oo_.steady_state,work);
         switch INFO(1)
           case 0
-            pdraws(iteration,1) = {params};
+            pdraws(file_line_number,1) = {params};
             if drsave
-                pdraws(iteration,2) = {dr};
+                pdraws(file_line_number,2) = {dr};
             end
             iteration = iteration+1;
+            file_line_number = file_line_number+1;
             [sampled_prior_expectation,sampled_prior_covariance] = ...
                 recursive_prior_moments(sampled_prior_expectation,sampled_prior_covariance,params,iteration) ;
           case 1
