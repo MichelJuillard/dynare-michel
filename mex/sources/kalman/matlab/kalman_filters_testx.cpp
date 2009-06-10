@@ -219,37 +219,63 @@ int main(int argc, char* argv[])
       // create state init
       StateInit* init = NULL;
       std::vector<double>* vll=new std::vector<double> (nper);
-      if (diffuse) {
-        GeneralMatrix Pinf(P.numRows(),P.numCols());
-        Pinf.zeros();
-        init = new StateInit(P, Pinf, a.getData());
-        } 
-      else 
+
+      if (diffuse||uni) 
+        {
+        if (diffuse) 
+          {
+          GeneralMatrix Pinf(P.numRows(),P.numCols());
+          Pinf.zeros();
+          init = new StateInit(P, Pinf, a.getData());
+          } 
+        else 
+          {
+          init = new StateInit(P, a.getData());
+          }
+        // fork, create objects and do filtering
+  #ifdef TIMING_LOOP
+    for (int tt=0;tt<10000;++tt)
+      {
+  #endif
+        KalmanTask kt(Y, Z, H, T, R, Q, *init);
+        if (uni) 
+          {
+          KalmanUniTask kut(kt);
+          loglik = kut.filter(per, d, (start-1), vll);
+          per = per / Y.numRows();
+          d = d / Y.numRows();
+          } 
+        else 
+          {
+          loglik = kt.filter(per, d, (start-1), vll);
+          }
+  #ifdef TIMING_LOOP
+    //    mexPrintf("kalman_filter: finished %d loops", tt);
+      }
+      mexPrintf("kalman_filter: finished 10,000 loops");
+  #endif
+
+        }
+      else // basic Kalman
         {
         init = new StateInit(P, a.getData());
-        }
-      // fork, create objects and do filtering
+        BasicKalmanTask bkt(Y, Z, H, T, R, Q, *init);
 #ifdef TIMING_LOOP
   for (int tt=0;tt<10000;++tt)
     {
 #endif
-      KalmanTask kt(Y, Z, H, T, R, Q, *init);
-      if (uni) 
-        {
-        KalmanUniTask kut(kt);
-        loglik = kut.filter(per, d, (start-1), vll);
-        per = per / Y.numRows();
-        d = d / Y.numRows();
-        } 
-      else 
-        {
-        loglik = kt.filter(per, d, (start-1), vll);
-        }
+        loglik = bkt.filter( per, d, (start-1), vll);
+#ifdef DEBUG		
+    mexPrintf("Basickalman_filter: loglik=%d \n", loglik);
+#endif		
 #ifdef TIMING_LOOP
-  //    mexPrintf("kalman_filter: finished %d loops", tt);
     }
-    mexPrintf("kalman_filter: finished 10,000 loops");
+    mexPrintf("Basickalman_filter: finished 10,000 loops");
 #endif
+
+        }
+
+
         // destroy init
       delete init;
       mexPrintf("logLik = %f \n", loglik);

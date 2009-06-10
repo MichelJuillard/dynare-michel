@@ -1,16 +1,16 @@
 # $Id: Makefile 531 2005-11-30 13:49:48Z kamenik $
 # Copyright 2005, Ondra Kamenik
 
-DEBUG = yes
+#DEBUG = yes
 
 #LD_LIBS := -llapack -lcblas -lf77blas -latlas -lg2c
-CC_FLAGS :=  -DMATLAB -DWINDOWS  -DNO_BLAS_H -DNO_LAPACK_H \
-	-Wall -I../../gensylv/cc -I../cc \
+CC_FLAGS :=  -DMATLAB -DWINDOWS  -DNO_BLAS_H -DNO_LAPACK_H  \
+	-Wall -I../sylv/cc -I../cc \
 	-Ic:/"Program Files"/MATLAB_SV71/extern/include 
 
 ifeq ($(DEBUG),yes)
 #	CC_FLAGS := -DDEBUG $(CC_FLAGS) -g
-	CC_FLAGS := -DTIMING_LOOP -DDEBUG $(CC_FLAGS) -g -pg #-Wl,-pg
+	CC_FLAGS := -DTIMING_LOOP -DDEBUG $(CC_FLAGS) -g #-pg #-Wl,-pg
 	KALMANLIB := kalmanlib_dbg.a
 else
 #	CC_FLAGS := $(CC_FLAGS) -O2
@@ -34,9 +34,9 @@ endif
 # end add
 
 matrix_interface := GeneralMatrix Vector SylvException 
-matobjs := $(patsubst %, ../../gensylv/cc/%.o, $(matrix_interface))
-mathsource := $(patsubst %,  ../../gensylv/cc/%.h, $(matrix_interface))
-matcppsource := $(patsubst %,  ../../gensylv/cc/%.cpp, $(matrix_interface))
+matobjs := $(patsubst %, ../sylv/cc/%.o, $(matrix_interface))
+mathsource := $(patsubst %,  ../sylv/cc/%.h, $(matrix_interface))
+matcppsource := $(patsubst %,  ../sylv/cc/%.cpp, $(matrix_interface))
 # cppsource := $(patsubst %.cweb,%.cpp,$(cwebsource)) 
 kalmancppsource := $(wildcard ../cc/*.cpp)
 kalmanhsource := $(wildcard ../cc/*.h)
@@ -62,27 +62,27 @@ dummy.ch:
 	c++ $(CC_FLAGS) -c $*.cpp
 
 
-kalmanlib.a: $(objects) # $(matobjs) #$(kalmanobjects)
-	ar cr kalmanlib.a $(kalmanobjects) $(matobjs) # $(objects)  
-	ranlib kalmanlib.a
+$(KALMANLIB): $(objects) # $(matobjs) #$(kalmanobjects)
+	ar cr $(KALMANLIB) $(kalmanobjects) $(matobjs) # $(objects)  
+	ranlib $(KALMANLIB)
 
-kalman_smoother_dll.dll: kalman_smoother.o kalmanlib.a #$(hsource) $(cppsource) 
+kalman_smoother_dll.dll: kalman_smoother.o $(KALMANLIB) #$(hsource) $(cppsource) 
 	gcc -shared $(CC_FLAGS) -o kalman_smoother_dll.dll kalman_smoother.o \
 	kalmanlib.a $(LD_LIBS) 
 
-minv.dll: minv.o kalmanlib.a # $(hsource) $(cppsource) 
+minv.dll: minv.o $(KALMANLIB) # $(hsource) $(cppsource) 
 	gcc -shared $(CC_FLAGS) -o minv.dll minv.o \
 	kalmanlib.a $(LD_LIBS) 
 
-kalman_filter_dll.dll: kalman_filters.o kalmanlib.a # $(hsource) $(cppsource) 
+kalman_filter_dll.dll: kalman_filters.o $(KALMANLIB) # $(hsource) $(cppsource) 
 	gcc -shared $(CC_FLAGS) -o kalman_filter_dll.dll kalman_filters.o \
 	$(KALMANLIB) $(LD_LIBS) 
 
-kalman_filters_testx.exe: kalman_filters_testx.o kalmanlib.a # $(hsource) $(cppsource) 
+kalman_filters_testx.exe: kalman_filters_testx.o $(KALMANLIB) # $(hsource) $(cppsource) 
 	gcc $(CC_FLAGS) -pg -o kalman_filters_testx.exe kalman_filters_testx.o \
 	$(KALMANLIB) $(LD_LIBS) 
 
-all: $(objects) kalmanlib.a kalman_smoother_dll.dll kalman_filter_dll.dll # $(cppsource) $(hsource) $(kalmanhsource) $(kalmancppsource)
+all: $(objects) $(KALMANLIB) kalman_smoother_dll.dll kalman_filter_dll.dll # $(cppsource) $(hsource) $(kalmanhsource) $(kalmancppsource)
 
 kalman_filter_loop.o: kalman_filters.cpp
     c++ -DTIMING_LOOP $(CC_FLAGS) -o kalman_filter_loop.o kalman_filters.cpp

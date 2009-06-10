@@ -154,6 +154,50 @@ class SmootherResults{
   };
 
 
+class BasicKalmanTask{
+//  friend class KalmanUniTask;
+//  SSForm ssf;
+  const GeneralMatrix &data;
+  const ConstGeneralMatrix &Zt;
+  const ConstGeneralMatrix &Ht;
+  const ConstGeneralMatrix &Tt;
+  const ConstGeneralMatrix &Rt;
+  const ConstGeneralMatrix &Qt;
+  const StateInit&init;
+  public:
+    BasicKalmanTask(const GeneralMatrix&d,const GeneralMatrix&ZZ,
+      const GeneralMatrix&HH,const GeneralMatrix&TT,
+      const GeneralMatrix&RR,const GeneralMatrix&QQ,
+      const StateInit&init_state);
+//    BasicKalmanTask(const GeneralMatrix&d,const TMatrix&Z,
+//      const TMatrix&H,const TMatrix&T,
+//      const TMatrix&R,const TMatrix&Q,
+//      const StateInit&init_state);
+    BasicKalmanTask(const GeneralMatrix&d,const ConstGeneralMatrix&ZZ,
+       const ConstGeneralMatrix&HH,const ConstGeneralMatrix&TT,
+       const ConstGeneralMatrix&RR,const ConstGeneralMatrix&QQ,
+       const StateInit&init_state);
+    virtual ~BasicKalmanTask();
+//    double filter(int&per,int&d)const;
+//    double filter(int&per,int&d, int start, std::vector<double>* vll)const;
+    double filter(int&per,int&d,int start, std::vector<double>* vll)const;
+//    double filter_and_smooth(SmootherResults&sres,int&per,int&d)const;
+  protected:
+    double filterNonDiffuse(const Vector&a,const GeneralMatrix&Pstar,
+      int start, std::vector<double>* vll) const; //int first,FilterResults&fres)const;
+//    void filterDiffuse(const Vector&a,const GeneralMatrix&Pstar,
+//      const GeneralMatrix&Pinf,int first,
+//      DiffuseFilterResults&fres)const;
+//    void smootherNonDiffuse(const FilterResults&fres,SmootherResults&sres)const;
+//    void smootherDiffuse(const DiffuseFilterResults&fres,SmootherResults&sres)const;
+//    void smootherNonDiffuseStep(int t,const FilterResults&fres,
+//      Vector&rt,GeneralMatrix&Nt,
+//      Vector&alphat,GeneralMatrix&Vt,
+//      Vector&etat)const;
+    static double calcStepLogLik(const PLUFact&Finv,const Vector&v);
+  };
+
+
 class KalmanUniTask;
 class KalmanTask{
   friend class KalmanUniTask;
