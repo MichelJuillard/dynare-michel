@@ -1040,7 +1040,7 @@ if (any(bayestopt_.pshape  >0 ) & options_.mh_replic) | ...
     PosteriorIRF('posterior');
   end
   if options_.moments_varendo
-      oo_ = compute_moments_varendo(options_,M_,oo_,var_list_);
+      oo_ = compute_moments_varendo('posterior',options_,M_,oo_,var_list_);
   end
   if options_.smoother | ~isempty(options_.filter_step_ahead) | options_.forecast
     prior_posterior_statistics('posterior',data,gend,data_index,missing_value);

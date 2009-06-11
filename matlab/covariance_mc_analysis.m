@@ -21,12 +21,10 @@ function oo_ = covariance_mc_analysis(NumberOfSimulations,type,dname,fname,varta
 
     if strcmpi(type,'posterior')
         TYPE = 'Posterior';
-        PATH = [dname '/metropolis/']
-        posterior = 1;
+        PATH = [dname '/metropolis/'];
     else
         TYPE = 'Prior';
-        PATH = [dname '/prior/moments/']
-        posterior = 0;
+        PATH = [dname '/prior/moments/'];
     end
 
     indx1 = check_name(vartan,var1);
@@ -37,7 +35,7 @@ function oo_ = covariance_mc_analysis(NumberOfSimulations,type,dname,fname,varta
     if ~isempty(var2)
         indx2 = check_name(vartan,var2);
         if isempty(indx2)
-            disp([ prior '_analysis:: ' var2 ' is not a stationary endogenous variable!'])
+            disp([ type '_analysis:: ' var2 ' is not a stationary endogenous variable!'])
             return
         end
     else
