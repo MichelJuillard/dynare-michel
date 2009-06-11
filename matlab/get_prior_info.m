@@ -115,7 +115,7 @@ function get_prior_info(info)
         look_for_admissible_initial_condition = 1;
         scale = 1.0;
         iter  = 0;
-        while look_for_admissible_initial_condition
+        While look_for_admissible_initial_condition
             xinit = xparam1+scale*randn(size(xparam1));
             if all(xinit>bayestopt_.p3) && all(xinit<bayestopt_.p4)
                 look_for_admissible_initial_condition = 0;
@@ -151,7 +151,7 @@ function get_prior_info(info)
        end
     end
     
-    if info==3% Prior simulations (BK+moments).
+    if info==3% Prior simulations (BK + 2nd order moments).
        results = prior_sampler(1,M_,bayestopt_,options_,oo_);
        % Display prior mass info.
        disp(['Prior mass = ' num2str(results.prior.mass)])
@@ -188,17 +188,16 @@ function get_prior_info(info)
            load([ M_.dname '/prior/draws/prior_draws' int2str(f) '.mat']);
            number_of_simulations = length(pdraws);
            total_number_of_simulations = total_number_of_simulations + number_of_simulations;
-           covariance_cell = cell(number_of_simulations);
-           correlation_cell = cell(number_of_simulations);
-           decomposition_cell = cell(number_of_simulations);
+           covariance_cell = cell(number_of_simulations,1);
+           correlation_cell = cell(number_of_simulations,1);
+           decomposition_cell = cell(number_of_simulations,1);
            for s=1:number_of_simulations
-               dr = pdraws{s,2};
-               [gamma_y,ivar] = th_autocovariances(dr,ivar,M_,options_);
+               [gamma_y,ivar] = th_autocovariances(pdraws{s,2},ivar,M_,options_);
                covariance_cell(s) = {vech(gamma_y{1})};
-               tmp = zeros(ivar,options_.ar);
+               tmp = zeros(length(ivar),options_.ar);
                for i=1:length(ivar)
                    for lag=1:options_.ar
-                       tmp(i,lag) = gamma_y{lag+1}(i,i); 
+                       tmp(i,lag) = gamma_y{i,lag+1}; 
                    end
                end
                correlation_cell(s) = {tmp};
@@ -207,7 +206,21 @@ function get_prior_info(info)
            save([ PriorMomentsDirectoryName '/prior_moments_draws' int2str(f) '.mat' ],'covariance_cell','correlation_cell','decomposition_cell');
        end
        clear('covariance_cell','correlation_cell','decomposition_cell')
-    end
+       prior_moments_info = dir([ M_.dname '/prior/moments/prior_moments*.mat']);
+       number_of_prior_moments_files = length(prior_moments_info);
+       % Covariance analysis
+       disp(' ')
+       disp('-------------------------')
+       disp('Prior variance analysis')
+       disp('-------------------------')
+       disp(' ')
+       for i=1:length(ivar)
+           for file = 1:number_of_prior_moments_file
+               load()
+           end
+       end
+       
+    end 
     
 function format_string = build_format_string(bayestopt,i)
     format_string = ['%s & %s & %6.4f &'];

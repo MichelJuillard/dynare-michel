@@ -119,10 +119,7 @@ function results = prior_sampler(drsave,M_,bayestopt_,options_,oo_)
             count_unknown_problem = count_unknown_problem + 1 ;
         end
     end
-    
-    % Save last prior_draw*.mat file
-    % save([ PriorDirectoryName '/prior_draws' int2str(TableOfInformations(end,1)) '.mat' ],'pdraws');
-    
+  
     % Get informations about BK conditions and other things...
     results.bk.indeterminacy_share = count_bk_indeterminacy/loop_indx;
     results.bk.unstability_share = count_bk_unstability/loop_indx;
