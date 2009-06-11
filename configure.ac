@@ -61,12 +61,15 @@ then
   fi
 fi
 
+AC_CHECK_PROG([OCTAVE], [octave], [octave])
+
 AC_CONFIG_FILES([Makefile
                  preprocessor/Makefile
                  doc/Makefile
                  doc/preprocessor/Makefile
                  doc/macroprocessor/Makefile
                  doc/userguide/Makefile
+                 tests/Makefile
                  matlab/dynare_version.m
                  windows/dynare-version.nsi])
 

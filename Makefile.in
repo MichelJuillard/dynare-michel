@@ -1,11 +1,16 @@
 all:
-	make -C preprocessor
-	make -C doc
+	make -C preprocessor $@
+	make -C doc $@
 .PHONY: all
 
+check:
+	make -C tests $@
+.PHONY: check
+
 clean:
-	make -C preprocessor clean
-	make -C doc clean
+	make -C preprocessor $@
+	make -C doc $@
+	make -C tests $@
 	rm -f matlab/dynare_m matlab/dynare_m.exe
 	rm -f mex/2007a/* mex/2007b/* mex/octave/*.mex
 	rm -f windows/*.exe
