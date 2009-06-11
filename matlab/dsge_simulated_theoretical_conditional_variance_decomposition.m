@@ -1,16 +1,20 @@
 function [nvar,vartan,NumberOfConditionalDecompFiles] = ...
-        dsge_posterior_theoretical_conditional_variance_decomposition(SampleSize,Steps,M_,options_,oo_)
-% This function estimates the posterior distribution of the conditional variance
+        dsge_simulated_theoretical_conditional_variance_decomposition(SampleSize,Steps,M_,options_,oo_,type)
+% This function computes the posterior or prior distribution of the conditional variance
 % decomposition of the endogenous variables (or a subset of the endogenous variables).
 % 
 % INPUTS 
-%   SampleSize     [integer]   scalar, number of draws in the posterior distribution.
-%   Steps          [integer]   1*h vector of dates.
-%  
-% OUTPUTS 
-%   nvar                             [integer]   scalar, number of endogenous variables.
-%   vartan                           [string]    array, list of endogenous variables.
-%   NumberOfConditionalDecompFiles   [integer]   scalar.
+%   SampleSize   [integer]       scalar, number of simulations.
+%   M_           [structure]     Dynare structure describing the model.
+%   options_     [structure]     Dynare structure defining global options.
+%   oo_          [structure]     Dynare structure where the results are saved.
+%   type         [string]        'prior' or 'posterior'
+%
+%
+% OUTPUTS  
+%   nvar                             [integer]  nvar is the number of stationary variables.
+%   vartan                           [char]     array of characters (with nvar rows).
+%   NumberOfConditionalDecompFiles   [integer]  scalar, number of prior or posterior data files (for covariance).
 
 % Copyright (C) 2009 Dynare Team
 %
@@ -29,8 +33,6 @@ function [nvar,vartan,NumberOfConditionalDecompFiles] = ...
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-type = 'posterior';% To be defined as a input argument later...
-
 % Set varlist (vartan)
 [ivar,vartan] = set_stationary_variables_list;
 nvar = length(ivar);
@@ -40,7 +42,17 @@ nar = options_.ar;
 options_.ar = 0;
 
 % Get informations about the _posterior_draws files.
-DrawsFiles = dir([M_.dname '/metropolis/' M_.fname '_' type '_draws*' ]);
+if strcmpi(type,'posterior')
+    DrawsFiles = dir([M_.dname '/metropolis/' M_.fname '_' type '_draws*' ]);
+    posterior = 1;
+elseif strcmpi(type,'prior')
+    DrawsFiles = dir([M_.dname '/prior/draws/' type '_draws*' ]);
+    posterior = 0;
+else
+    disp('dsge_simulated_theoretical_conditional_variance_decomposition:: Unknown type!')
+    error()
+end
+
 NumberOfDrawsFiles = length(DrawsFiles);
 
 NumberOfDrawsFiles = rows(DrawsFiles);
@@ -74,7 +86,11 @@ aux(k,2) = aux(k,2) + oo_.dr.nfwrd;
 
 linea = 0;
 for file = 1:NumberOfDrawsFiles
-    load([M_.dname '/metropolis/' DrawsFiles(file).name ]);
+    if posterior
+        load([M_.dname '/metropolis/' DrawsFiles(file).name ]);
+    else
+        load([M_.dname '/prior/draws/' DrawsFiles(file).name ]);
+    end
     isdrsaved = columns(pdraws)-1;
     NumberOfDraws = rows(pdraws);
     for linee = 1:NumberOfDraws
@@ -91,8 +107,13 @@ for file = 1:NumberOfDrawsFiles
         clear('dr');
         Conditional_decomposition_array(:,:,:,linea) = conditional_variance_decomposition(StateSpaceModel, Steps, ivar);   
         if linea == NumberOfConditionalDecompLines
-            save([M_.dname '/metropolis/' M_.fname '_PosteriorConditionalVarianceDecomposition' int2str(ConditionalDecompFileNumber) '.mat' ], ...
-                 'Conditional_decomposition_array');
+            if posterior
+                save([M_.dname '/metropolis/' M_.fname '_PosteriorConditionalVarianceDecomposition' int2str(ConditionalDecompFileNumber) '.mat' ], ...
+                     'Conditional_decomposition_array');
+            else
+                save([M_.dname '/prior/moments/' M_.fname '_PriorConditionalVarianceDecomposition' int2str(ConditionalDecompFileNumber) '.mat' ], ...
+                     'Conditional_decomposition_array');
+            end
             ConditionalDecompFileNumber = ConditionalDecompFileNumber + 1;
             linea = 0;
             test = ConditionalDecompFileNumber-NumberOfConditionalDecompFiles;

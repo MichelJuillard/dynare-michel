@@ -52,28 +52,28 @@ function oo_ = job(type,SampleSize,arg1,arg2,arg3,options_,M_,oo_,nvar,vartan)
       case 'variance'
         if nargin==narg1
             [nvar,vartan,NumberOfFiles] = ...
-                dsge_posterior_theoretical_covariance(SampleSize,M_,options_,oo_);
+                dsge_simulated_theoretical_covariance(SampleSize,M_,options_,oo_,'posterior');
         end
         oo_ = covariance_posterior_analysis(SampleSize,M_.dname,M_.fname,...
                                             vartan,nvar,arg1,arg2,options_.mh_conf_sig,oo_);          
       case 'decomposition'
         if nargin==narg1
             [nvar,vartan,NumberOfFiles] = ...
-                dsge_posterior_theoretical_variance_decomposition(SampleSize,M_,options_,oo_);
+                dsge_simulated_theoretical_variance_decomposition(SampleSize,M_,options_,oo_,'posterior');
         end
         oo_ = variance_decomposition_posterior_analysis(SampleSize,M_.dname,M_.fname,...
                                                         M_.exo_names,arg2,vartan,arg1,options_.mh_conf_sig,oo_);
       case 'correlation'
         if nargin==narg1
             [nvar,vartan,NumberOfFiles] = ...
-                dsge_posterior_theoretical_correlation(SampleSize,arg3,M_,options_,oo_);
+                dsge_simulated_theoretical_correlation(SampleSize,arg3,M_,options_,oo_,'posterior');
         end
         oo_ = correlation_posterior_analysis(SampleSize,M_.dname,M_.fname,...
                                              vartan,nvar,arg1,arg2,arg3,options_.mh_conf_sig,oo_,M_,options_);
       case 'conditional decomposition'
         if nargin==narg1
             [nvar,vartan,NumberOfFiles] = ...
-                dsge_posterior_theoretical_conditional_variance_decomposition(SampleSize,arg3,M_,options_,oo_);
+                dsge_simulated_theoretical_conditional_variance_decomposition(SampleSize,arg3,M_,options_,oo_,'posterior');
         end
         oo_ = conditional_variance_decomposition_posterior_analysis(SampleSize,M_.dname,M_.fname,...
                                                         arg3,M_.exo_names,arg2,vartan,arg1,options_.mh_conf_sig,oo_);

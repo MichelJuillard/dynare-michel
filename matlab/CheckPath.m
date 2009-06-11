@@ -1,5 +1,4 @@
 function DirectoryName = CheckPath(type)
-
 % Creates the subfolder "./M_.dname/type" if it does not exist yet.
 %
 % INPUTS

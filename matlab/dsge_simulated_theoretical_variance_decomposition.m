@@ -1,22 +1,20 @@
 function [nvar,vartan,NumberOfDecompFiles] = ...
-        dsge_posterior_theoretical_variance_decomposition(SampleSize,M_,options_,oo_)
-% This function estimates the posterior distribution of the variance
+        dsge_simulated_theoretical_variance_decomposition(SampleSize,M_,options_,oo_,type)
+% This function computes the posterior or prior distribution of the variance
 % decomposition of the observed endogenous variables.
 % 
 % INPUTS 
-%   None.
-%  
-% OUTPUTS 
-%   None.
+%   SampleSize   [integer]       scalar, number of simulations.
+%   M_           [structure]     Dynare structure describing the model.
+%   options_     [structure]     Dynare structure defining global options.
+%   oo_          [structure]     Dynare structure where the results are saved.
+%   type         [string]        'prior' or 'posterior'
 %
-% SPECIAL REQUIREMENTS
-%    Other matlab routines distributed with Dynare: set_stationary_variables_list.m
-%                                                   CheckPath.m
-%                                                   selec_posterior_draws.m                          
-%                                                   set_parameters.m
-%                                                   resol.m
-%                                                   th_autocovariances.m    
-%                                                   posterior_moments.m
+%
+% OUTPUTS  
+%   nvar              [integer]  nvar is the number of stationary variables.
+%   vartan            [char]     array of characters (with nvar rows).
+%   CovarFileNumber   [integer]  scalar, number of prior or posterior data files (for covariance).
 
 % Copyright (C) 2007-2009 Dynare Team
 %
@@ -35,7 +33,6 @@ function [nvar,vartan,NumberOfDecompFiles] = ...
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-type = 'posterior';% To be defined as a input argument later...
 nodecomposition = 0;
 
 % Set varlist (vartan)
@@ -47,7 +44,16 @@ nar = options_.ar;
 options_.ar = 0;    
 
 % Get informations about the _posterior_draws files.
-DrawsFiles = dir([M_.dname '/metropolis/' M_.fname '_' type '_draws*' ]);
+if strcmpi(type,'posterior')
+    DrawsFiles = dir([M_.dname '/metropolis/' M_.fname '_' type '_draws*' ]);
+    posterior = 1;
+elseif strcmpi(type,'prior') 
+    DrawsFiles = dir([M_.dname '/prior/draws/' type '_draws*' ]);
+    posterior = 0;
+else
+    disp('dsge_simulated_theoretical_variance_decomposition:: Unknown type!')
+    error()
+end
 NumberOfDrawsFiles = length(DrawsFiles);
 
 nexo = M_.exo_nbr;
@@ -68,12 +74,15 @@ end
 NumberOfDecompLines = rows(Decomposition_array);
 DecompFileNumber = 1;
 
-
 % Compute total variances (covariances are not saved) and variances
 % implied by each structural shock.
 linea = 0;
 for file = 1:NumberOfDrawsFiles
-    load([M_.dname '/metropolis/' DrawsFiles(file).name ]);
+    if posterior
+        load([M_.dname '/metropolis/' DrawsFiles(file).name ]);
+    else
+        load([M_.dname '/prior/draws/' DrawsFiles(file).name ]);
+    end
     isdrsaved = columns(pdraws)-1;
     NumberOfDraws = rows(pdraws);
     for linee = 1:NumberOfDraws
@@ -91,7 +100,11 @@ for file = 1:NumberOfDrawsFiles
             end
         end
         if linea == NumberOfDecompLines
-            save([M_.dname '/metropolis/' M_.fname '_PosteriorVarianceDecomposition' int2str(DecompFileNumber) '.mat' ],'Decomposition_array');
+            if posterior
+                save([M_.dname '/metropolis/' M_.fname '_PosteriorVarianceDecomposition' int2str(DecompFileNumber) '.mat' ],'Decomposition_array');
+            else
+                save([M_.dname '/prior/moments/' M_.fname '_PriorVarianceDecomposition' int2str(DecompFileNumber) '.mat' ],'Decomposition_array');
+            end
             DecompFileNumber = DecompFileNumber + 1;
             linea = 0;
             test = DecompFileNumber-NumberOfDecompFiles;

@@ -1,23 +1,19 @@
-function [nvar,vartan,CovarFileNumber] = dsge_posterior_theoretical_covariance(SampleSize,M_,options_,oo_)
-% This function estimates the posterior density of the endogenous
+function [nvar,vartan,CovarFileNumber] = dsge_simulated_theoretical_covariance(SampleSize,M_,options_,oo_,type)
+% This function computes the posterior or prior distribution of the endogenous
 % variables second order moments. 
 % 
 % INPUTS 
-%   SampleSize   [integer]
-%   
+%   SampleSize   [integer]       scalar, number of simulations.
+%   M_           [structure]     Dynare structure describing the model.
+%   options_     [structure]     Dynare structure defining global options.
+%   oo_          [structure]     Dynare structure where the results are saved.
+%   type         [string]        'prior' or 'posterior'
 %
 %
-% OUTPUTS 
-%   None.
-%
-% SPECIAL REQUIREMENTS
-%    Other matlab routines distributed with Dynare: set_stationary_variables_list.m
-%                                                   CheckPath.m
-%                                                   selec_posterior_draws.m                          
-%                                                   set_parameters.m
-%                                                   resol.m
-%                                                   th_autocovariances.m    
-%                                                   posterior_moments.m
+% OUTPUTS  
+%   nvar              [integer]  nvar is the number of stationary variables.
+%   vartan            [char]     array of characters (with nvar rows).
+%   CovarFileNumber   [integer]  scalar, number of prior or posterior data files (for covariance).
 
 % Copyright (C) 2007-2009 Dynare Team
 %
@@ -36,7 +32,6 @@ function [nvar,vartan,CovarFileNumber] = dsge_posterior_theoretical_covariance(S
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-type = 'posterior';
 nodecomposition = 1;
 
 % Set varlist (vartan)
@@ -48,7 +43,16 @@ nar = options_.ar;
 options_.ar = 0;    
 
 % Get informations about the _posterior_draws files.
-DrawsFiles = dir([M_.dname '/metropolis/' M_.fname '_' type '_draws*' ]);
+if strcmpi(type,'posterior')
+    DrawsFiles = dir([M_.dname '/metropolis/' M_.fname '_' type '_draws*' ]);
+    posterior = 1;
+elseif strcmpi(type,'prior')
+    DrawsFiles = dir([M_.dname '/prior/draws/' type '_draws*' ]);
+    posterior = 0;
+else
+    disp('dsge_simulated_theoretical_covariance:: Unknown type!')
+    error();
+end
 NumberOfDrawsFiles = length(DrawsFiles);
 
 % Number of lines in posterior data files.
@@ -66,10 +70,14 @@ end
 NumberOfCovarLines = rows(Covariance_matrix);
 CovarFileNumber = 1;
 
-% Compute 2nd order moments and save them in *_Posterior2ndOrderMoments* files
+% Compute 2nd order moments and save them in *_[Posterior, Prior]2ndOrderMoments* files
 linea = 0;
 for file = 1:NumberOfDrawsFiles
-    load([M_.dname '/metropolis/' DrawsFiles(file).name ],'pdraws');
+    if posterior
+        load([M_.dname '/metropolis/' DrawsFiles(file).name ],'pdraws');
+    else
+        load([M_.dname '/prior/draws/' DrawsFiles(file).name ],'pdraws');
+    end
     NumberOfDraws = rows(pdraws);
     isdrsaved = columns(pdraws)-1;
     for linee = 1:NumberOfDraws
@@ -87,7 +95,11 @@ for file = 1:NumberOfDrawsFiles
             end
         end
         if linea == NumberOfCovarLines
-            save([ M_.dname '/metropolis/' M_.fname '_Posterior2ndOrderMoments' int2str(CovarFileNumber) '.mat' ],'Covariance_matrix');
+            if posterior
+                save([ M_.dname '/metropolis/' M_.fname '_Posterior2ndOrderMoments' int2str(CovarFileNumber) '.mat' ],'Covariance_matrix');
+            else
+                save([ M_.dname '/prior/moments/' M_.fname '_Prior2ndOrderMoments' int2str(CovarFileNumber) '.mat' ],'Covariance_matrix');
+            end
             CovarFileNumber = CovarFileNumber + 1;
             linea = 0;
             test = CovarFileNumber-NumberOfCovarFiles;

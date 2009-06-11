@@ -1,24 +1,19 @@
-function [nvar,vartan,CorrFileNumber] = dsge_posterior_theoretical_correlation(SampleSize,nar,M_,options_,oo_)
-%function [nvar,vartan,CorrFileNumber] = dsge_posterior_theoretical_correlation(SampleSize,nar,M_,options_,oo_)
-% This function estimates the posterior density of the endogenous
+function [nvar,vartan,CorrFileNumber] = dsge_simulated_theoretical_correlation(SampleSize,nar,M_,options_,oo_,type)
+% This function computes the posterior or prior distribution of the endogenous
 % variables second order moments. 
 % 
 % INPUTS 
 %   SampleSize   [integer]
-%   
-%
+%   nar          [integer] 
+%   M_           [structure]
+%   options_     [structure]
+%   oo_          [structure]
+%   type         [string]
 %
 % OUTPUTS 
-%   None.
-%
-% SPECIAL REQUIREMENTS
-%    Other matlab routines distributed with Dynare: set_stationary_variables_list.m
-%                                                   CheckPath.m
-%                                                   selec_posterior_draws.m                          
-%                                                   set_parameters.m
-%                                                   resol.m
-%                                                   th_autocovariances.m    
-%                                                   posterior_moments.m
+%   nvar           [integer]
+%   vartan         [char]
+%   CorrFileNumber [integer]
 
 % Copyright (C) 2007-2009 Dynare Team
 %
@@ -37,7 +32,6 @@ function [nvar,vartan,CorrFileNumber] = dsge_posterior_theoretical_correlation(S
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-type = 'posterior';
 nodecomposition = 1;
     
 % Set varlist (vartan)
@@ -49,7 +43,16 @@ oldnar = options_.ar;
 options_.ar = nar;    
 
 % Get informations about the _posterior_draws files.
-DrawsFiles = dir([M_.dname '/metropolis/' M_.fname '_' type '_draws*' ]);
+if strcmpi(type,'posterior')
+    DrawsFiles = dir([M_.dname '/metropolis/' M_.fname '_' type '_draws*' ]);
+    posterior = 1;
+elseif strcmpi(type,'prior')
+    DrawsFiles = dir([M_.dname '/prior/draws/' type '_draws*' ]);
+    posterior = 0;
+else
+    disp('dsge_simulated_theoretical_correlation:: Unknown type!');
+    error()
+end
 NumberOfDrawsFiles = length(DrawsFiles);
 
 % Number of lines in posterior data files.
@@ -67,10 +70,14 @@ end
 NumberOfCorrLines = rows(Correlation_array);
 CorrFileNumber = 1;
 
-% Compute 2nd order moments and save them in *_PosteriorCorrelations* files
+% Compute 2nd order moments and save them in *_[Posterior, Prior]Correlations* files
 linea = 0;
 for file = 1:NumberOfDrawsFiles
-    load([M_.dname '/metropolis/' DrawsFiles(file).name ]);
+    if posterior
+        load([M_.dname '/metropolis/' DrawsFiles(file).name ]);
+    else
+        load([M_.dname '/prior/draws/' DrawsFiles(file).name]);
+    end
     NumberOfDraws = rows(pdraws);
     isdrsaved = columns(pdraws)-1;
     for linee = 1:NumberOfDraws
@@ -86,7 +93,11 @@ for file = 1:NumberOfDrawsFiles
             Correlation_array(linea,:,:,i) = tmp{i+1};
         end
         if linea == NumberOfCorrLines
-            save([ M_.dname '/metropolis/' M_.fname '_PosteriorCorrelations' int2str(CorrFileNumber) '.mat' ],'Correlation_array');
+            if posterior
+                save([ M_.dname '/metropolis/' M_.fname '_PosteriorCorrelations' int2str(CorrFileNumber) '.mat' ],'Correlation_array');
+            else
+                save([ M_.dname '/prior/moments/' M_.fname '_PriorCorrelations' int2str(CorrFileNumber) '.mat' ],'Correlation_array');
+            end
             CorrFileNumber = CorrFileNumber + 1;
             linea = 0;
             test = CorrFileNumber-NumberOfCorrFiles;
