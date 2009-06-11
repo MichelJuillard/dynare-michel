@@ -223,8 +223,10 @@ function [xparam1, estim_params_, bayestopt_, lb, ub, M_]=set_prior(estim_params
     k = find(isnan(xparam1));
     xparam1(k) = bayestopt_.p1(k);
 
+    % I create subfolder M_.dname/prior if needed.
     CheckPath('prior');
 
+    % I save the prior definition if the prior has changed.
     if exist([ M_.dname '/prior/definition.mat'])
         bayestopt_old = load([M_.dname '/prior/definition.mat'],'bayestopt_');
         prior_has_changed = 0;
