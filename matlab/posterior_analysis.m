@@ -63,7 +63,7 @@ function oo_ = job(type,SampleSize,arg1,arg2,arg3,options_,M_,oo_,nvar,vartan)
         end
         oo_ = variance_decomposition_mc_analysis(SampleSize,'posterior',M_.dname,M_.fname,...
                                                         M_.exo_names,arg2,vartan,arg1,options_.mh_conf_sig,oo_);
-      case OB'correlation'
+      case 'correlation'
         if nargin==narg1
             [nvar,vartan,NumberOfFiles] = ...
                 dsge_simulated_theoretical_correlation(SampleSize,arg3,M_,options_,oo_,'posterior');

@@ -42,15 +42,15 @@ function oo_ = correlation_mc_analysis(SampleSize,type,dname,fname,vartan,nvar,v
         indx2 = indx1;
         var2 = var1;
     end
-`
+
     if isfield(oo_,[TYPE 'TheoreticalMoments'])
         eval(['temporary_structure = oo_.' TYPE 'TheoreticalMoments;'])
         if isfield(temporary_structure,'dsge')
             eval(['temporary_structure = oo_.' TYPE 'TheoreticalMoments.dsge;'])
             if isfield(temporary_structure,'correlation')
-                eval(['temporary_structure = oo_.' TYPE 'TheoreticalMoments.dsge.mean;'])
+                eval(['temporary_structure = oo_.' TYPE 'TheoreticalMoments.dsge.correlation.mean;'])
                 if isfield(temporary_structure,var1)
-                    eval(['temporary_structure_1 = oo_.' TYPE 'TheoreticalMoments.dsge.mean.' var1 ';']) 
+                    eval(['temporary_structure_1 = oo_.' TYPE 'TheoreticalMoments.dsge.correlation.mean.' var1 ';']) 
                     if isfield(temporary_structure_1,var2)
                         eval(['temporary_structure_2 = temporary_structure_1.' var2 ';'])
                         l1 = length(temporary_structure_2);
@@ -130,23 +130,23 @@ function oo_ = initialize_output_structure(var1,var2,nar,type,oo_)
     name = [ var1 '.' var2 ];
     eval(['oo_.' type 'TheoreticalMoments.dsge.correlation.mean.' name ' = NaN(' int2str(nar) ',1);']);
     eval(['oo_.' type 'TheoreticalMoments.dsge.correlation.median.' name ' = NaN(' int2str(nar) ',1);']);
-    eval(['oo_.' type 'PosteriorTheoreticalMoments.dsge.correlation.variance.' name ' = NaN(' int2str(nar) ',1);']);
-    eval(['oo_.' type 'PosteriorTheoreticalMoments.dsge.correlation.hpdinf.' name ' = NaN(' int2str(nar) ',1);']);
-    eval(['oo_.' type 'PosteriorTheoreticalMoments.dsge.correlation.hpdsup.' name ' = NaN(' int2str(nar) ',1);']);
-    eval(['oo_.' type 'PosteriorTheoreticalMoments.dsge.correlation.deciles.' name ' = cell(' int2str(nar) ',1);']);
-    eval(['oo_.' type 'PosteriorTheoreticalMoments.dsge.correlation.density.' name ' = cell(' int2str(nar) ',1);']);
+    eval(['oo_.' type 'TheoreticalMoments.dsge.correlation.variance.' name ' = NaN(' int2str(nar) ',1);']);
+    eval(['oo_.' type 'TheoreticalMoments.dsge.correlation.hpdinf.' name ' = NaN(' int2str(nar) ',1);']);
+    eval(['oo_.' type 'TheoreticalMoments.dsge.correlation.hpdsup.' name ' = NaN(' int2str(nar) ',1);']);
+    eval(['oo_.' type 'TheoreticalMoments.dsge.correlation.deciles.' name ' = cell(' int2str(nar) ',1);']);
+    eval(['oo_.' type 'TheoreticalMoments.dsge.correlation.density.' name ' = cell(' int2str(nar) ',1);']);
     for i=1:nar
         eval(['oo_.' type 'TheoreticalMoments.dsge.correlation.density.' name '(' int2str(i) ',1) = {NaN};']);
         eval(['oo_.' type 'TheoreticalMoments.dsge.correlation.deciles.' name '(' int2str(i) ',1) = {NaN};']);
     end
     
-function oo_ = fill_output_structure(var1,var2,type,oo_,lag,result)
+function oo_ = fill_output_structure(var1,var2,type,oo_,moment,lag,result)
     name = [ var1 '.' var2 ];
-    switch type
+    switch moment
       case {'mean','median','variance','hpdinf','hpdsup'} 
-        eval(['oo_.' type  'TheoreticalMoments.dsge.correlation.' type '.' name '(' int2str(lag) ',1) = result;']);
+        eval(['oo_.' type  'TheoreticalMoments.dsge.correlation.' moment '.' name '(' int2str(lag) ',1) = result;']);
       case {'deciles','density'}
-        eval(['oo_.' type 'TheoreticalMoments.dsge.correlation.' type '.' name '(' int2str(lag) ',1) = {result};']);
+        eval(['oo_.' type 'TheoreticalMoments.dsge.correlation.' moment '.' name '(' int2str(lag) ',1) = {result};']);
       otherwise
         disp('fill_output_structure:: Unknown field!')
     end

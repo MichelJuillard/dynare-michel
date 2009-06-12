@@ -1,4 +1,4 @@
-function oo_ = conditional_variance_decomposition_mc_analysis(NumberOfSimulations, typr, dname, fname, Steps, exonames, exo, vartan, var, mh_conf_sig, oo_)
+function oo_ = conditional_variance_decomposition_mc_analysis(NumberOfSimulations, type, dname, fname, Steps, exonames, exo, vartan, var, mh_conf_sig, oo_)
 % This function analyses the (posterior or prior) distribution of the
 % endogenous conditional variance decomposition.
 
@@ -59,7 +59,7 @@ function oo_ = conditional_variance_decomposition_mc_analysis(NumberOfSimulation
     ListOfFiles = dir([ PATH  fname '_' TYPE 'ConditionalVarianceDecomposition*.mat']);
     i1 = 1; tmp = zeros(NumberOfSimulations,length(Steps));
     for file = 1:length(ListOfFiles)
-        load([ PATH fname ListOfFiles(file).name ]);
+        load([ PATH ListOfFiles(file).name ]);
         % 4D-array (endovar,time,exovar,simul)
         i2 = i1 + size(Conditional_decomposition_array,4) - 1;
         tmp(i1:i2,:) = transpose(dynare_squeeze(Conditional_decomposition_array(endogenous_variable_index,:,exogenous_variable_index,:)));

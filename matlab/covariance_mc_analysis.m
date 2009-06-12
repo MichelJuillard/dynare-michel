@@ -86,7 +86,7 @@ function oo_ = covariance_mc_analysis(NumberOfSimulations,type,dname,fname,varta
         eval(['oo_.' TYPE 'TheoreticalMoments.dsge.covariance.hpdinf.' name ' = hpd_interval(1);']);
         eval(['oo_.' TYPE 'TheoreticalMoments.dsge.covariance.hpdsup.' name ' = hpd_interval(2);']);
         eval(['oo_.' TYPE 'TheoreticalMoments.dsge.covariance.deciles.' name ' = p_deciles;']);
-        eval(['oo_.' TYPE 'Theoreticalmoments.dsge.covariance.density.' name ' = density;']);
+        eval(['oo_.' TYPE 'TheoreticalMoments.dsge.covariance.density.' name ' = density;']);
     else
         eval(['oo_.' NAME 'TheoreticalMoments.dsge.covariance.mean.' name ' = NaN;']);
         eval(['oo_.' NAME 'TheoreticalMoments.dsge.covariance.median.' name ' = NaN;']);
