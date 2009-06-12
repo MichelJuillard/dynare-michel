@@ -230,25 +230,29 @@ function [xparam1, estim_params_, bayestopt_, lb, ub, M_]=set_prior(estim_params
     if exist([ M_.dname '/prior/definition.mat'])
         old = load([M_.dname '/prior/definition.mat'],'bayestopt_');
         prior_has_changed = 0;
-        if any(bayestopt_.p1-old.bayestopt_.p1)
-            prior_has_changed = 1;
-        end
-        if any(bayestopt_.p2-old.bayestopt_.p2)
-            prior_has_changed = 1;
-        end
-        if any(bayestopt_.p3-old.bayestopt_.p3)
-            prior_has_changed = 1;
-        end
-        if any(bayestopt_.p4-old.bayestopt_.p4)
-            prior_has_changed = 1;
-        end
-        if any(bayestopt_.p5-old.bayestopt_.p5)
-            prior_has_changed = 1;
-        end
-        if any(bayestopt_.p6-old.bayestopt_.p6)
-            prior_has_changed = 1;
-        end
-        if any(bayestopt_.p7-old.bayestopt_.p7)
+        if length(bayestopt_.p1)==length(old.bayestopt_.p1)
+            if any(bayestopt_.p1-old.bayestopt_.p1)
+                prior_has_changed = 1;
+            end
+            if any(bayestopt_.p2-old.bayestopt_.p2)
+                prior_has_changed = 1;
+            end
+            if any(bayestopt_.p3-old.bayestopt_.p3)
+                prior_has_changed = 1;
+            end
+            if any(bayestopt_.p4-old.bayestopt_.p4)
+                prior_has_changed = 1;
+            end
+            if any(bayestopt_.p5-old.bayestopt_.p5)
+                prior_has_changed = 1;
+            end
+            if any(bayestopt_.p6-old.bayestopt_.p6)
+                prior_has_changed = 1;
+            end
+            if any(bayestopt_.p7-old.bayestopt_.p7)
+                prior_has_changed = 1;
+            end
+        else
             prior_has_changed = 1;
         end
         if prior_has_changed
