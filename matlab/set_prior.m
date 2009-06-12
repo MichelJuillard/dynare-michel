@@ -228,27 +228,27 @@ function [xparam1, estim_params_, bayestopt_, lb, ub, M_]=set_prior(estim_params
 
     % I save the prior definition if the prior has changed.
     if exist([ M_.dname '/prior/definition.mat'])
-        bayestopt_old = load([M_.dname '/prior/definition.mat'],'bayestopt_');
+        old = load([M_.dname '/prior/definition.mat'],'bayestopt_');
         prior_has_changed = 0;
-        if any(bayestopt_.p1-bayestopt_old.p1)
+        if any(bayestopt_.p1-old.bayestopt_.p1)
             prior_has_changed = 1;
         end
-        if any(bayestopt_.p2-bayestopt_old.p2)
+        if any(bayestopt_.p2-old.bayestopt_.p2)
             prior_has_changed = 1;
         end
-        if any(bayestopt_.p3-bayestopt_old.p3)
+        if any(bayestopt_.p3-old.bayestopt_.p3)
             prior_has_changed = 1;
         end
-        if any(bayestopt_.p4-bayestopt_old.p4)
+        if any(bayestopt_.p4-old.bayestopt_.p4)
             prior_has_changed = 1;
         end
-        if any(bayestopt_.p5-bayestopt_old.p5)
+        if any(bayestopt_.p5-old.bayestopt_.p5)
             prior_has_changed = 1;
         end
-        if any(bayestopt_.p6-bayestopt_old.p6)
+        if any(bayestopt_.p6-old.bayestopt_.p6)
             prior_has_changed = 1;
         end
-        if any(bayestopt_.p7-bayestopt_old.p7)
+        if any(bayestopt_.p7-old.bayestopt_.p7)
             prior_has_changed = 1;
         end
         if prior_has_changed
