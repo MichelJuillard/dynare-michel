@@ -33,13 +33,6 @@ function [nvar,vartan,NumberOfConditionalDecompFiles] = ...
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-% Set varlist (vartan)
-[ivar,vartan] = set_stationary_variables_list;
-nvar = length(ivar);
-
-% Set the size of the auto-correlation function to zero.
-nar = options_.ar;
-options_.ar = 0;
 
 % Get informations about the _posterior_draws files.
 if strcmpi(type,'posterior')
@@ -53,6 +46,26 @@ else
     error()
 end
 
+% Set varlist (vartan)
+if ~posterior
+    if isfield(options_,'varlist')
+        temp = options_.varlist;
+    end
+    options_.varlist = options_.prior_analysis_endo_var_list;
+end
+[ivar,vartan, options_] = set_stationary_variables_list(options_, M_);
+if ~posterior
+    if exist('temp','var')
+        options_.varlist = temp;
+    end
+end
+nvar = length(ivar);
+
+% Set the size of the auto-correlation function to zero.
+nar = options_.ar;
+options_.ar = 0;
+
+
 NumberOfDrawsFiles = length(DrawsFiles);
 
 NumberOfDrawsFiles = rows(DrawsFiles);
@@ -65,7 +78,7 @@ if SampleSize<=MaXNumberOfConditionalDecompLines
 else
     Conditional_decomposition_array = zeros(nvar*(nvar+1)/2,length(Steps),M_.exo_nbr,MaXNumberOfConditionalDecompLines);
     NumberOfLinesInTheLastConditionalDecompFile = mod(SampleSize,MaXNumberOfConditionalDecompLines);
-    NumberOfConditionalDecompFiles = ceil(SampleSize/MaXNumberOfCOnditionalDecompLines);
+    NumberOfConditionalDecompFiles = ceil(SampleSize/MaXNumberOfConditionalDecompLines);
 end
 
 NumberOfConditionalDecompLines = rows(Conditional_decomposition_array);

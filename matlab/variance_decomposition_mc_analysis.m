@@ -76,7 +76,7 @@ function oo_ = variance_decomposition_mc_analysis(NumberOfSimulations,type,dname
         p_median = t1;
         p_var = 0;
         hpd_interval = NaN(2,1);
-        post_deciles = NaN(9,1);
+        p_deciles = NaN(9,1);
         density = NaN;
     else
         [p_mean, p_median, p_var, hpd_interval, p_deciles, density] = ...

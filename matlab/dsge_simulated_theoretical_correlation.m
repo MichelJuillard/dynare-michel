@@ -33,14 +33,6 @@ function [nvar,vartan,CorrFileNumber] = dsge_simulated_theoretical_correlation(S
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
 nodecomposition = 1;
-    
-% Set varlist (vartan)
-[ivar,vartan] = set_stationary_variables_list;
-nvar = length(ivar);
-
-% Set the size of the auto-correlation function to nar.
-oldnar = options_.ar;
-options_.ar = nar;    
 
 % Get informations about the _posterior_draws files.
 if strcmpi(type,'posterior')
@@ -54,6 +46,25 @@ else
     error()
 end
 NumberOfDrawsFiles = length(DrawsFiles);
+    
+% Set varlist (vartan)
+if ~posterior
+    if isfield(options_,'varlist')
+        temp = options_.varlist;
+    end
+    options_.varlist = options_.prior_analysis_endo_var_list;
+end
+[ivar,vartan, options_] = set_stationary_variables_list(options_, M_);
+if ~posterior
+    if exist('temp','var')
+        options_.varlist = temp;
+    end
+end
+nvar = length(ivar);
+
+% Set the size of the auto-correlation function to nar.
+oldnar = options_.ar;
+options_.ar = nar;
 
 % Number of lines in posterior data files.
 MaXNumberOfCorrLines = ceil(options_.MaxNumberOfBytes/(nvar*nvar*nar)/8);

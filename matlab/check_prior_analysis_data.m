@@ -26,9 +26,10 @@ function [info,description] = check_prior_analysis_data(type,M_)
         disp('check_prior_analysis_data:: Can''t find any prior draws file!')
         return
     end
+
     prior_draws_info = dir([ M_.dname '/prior/draws/prior_draws*.mat']);
-    name_of_the_last_prior_draw_file = prior_draws_info(end).name ;%mhname
-    date_of_the_last_prior_draw_file = prior_draws_info(end).datenum ;%mhdate
+    name_of_the_last_prior_draw_file = prior_draws_info(end).name;
+    date_of_the_last_prior_draw_file = prior_draws_info(end).datenum;
     
     %% Get informations about _posterior_draws files.
     if isempty(prior_draws_info)
@@ -65,9 +66,9 @@ function [info,description] = check_prior_analysis_data(type,M_)
       case 'conditional decomposition'
         generic_prior_data_file_name = 'PriorConditionalVarianceDecomposition';
       otherwise
-        disp(['This feature is not yet implemented!')
+        disp(['This feature is not yet implemented!'])
     end
-    CheckPath('prior/moments')
+    CheckPath('prior/moments');
     pdfinfo = dir([ M_.dname '/prior/' generic_prior_data_file_name '*']);
     if isempty(pdfinfo)
         info = 4;

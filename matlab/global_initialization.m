@@ -218,3 +218,4 @@ function global_initialization()
 
   % prior analysis
   options_.prior_mc = 20000;
+  options_.prior_analysis_endo_var_list = [];

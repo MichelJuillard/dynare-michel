@@ -4,6 +4,7 @@ function oo_ = compute_moments_varendo(type,options_,M_,oo_,var_list_)
 % var_list_. The results are saved in oo_
 %  
 % INPUTS:
+%   type            [string]       'posterior' or 'prior'
 %   options_        [structure]    Dynare structure.
 %   M_              [structure]    Dynare structure (related to model definition).
 %   oo_             [structure]    Dynare structure (results).
@@ -34,8 +35,17 @@ function oo_ = compute_moments_varendo(type,options_,M_,oo_,var_list_)
     
     if strcmpi(type,'posterior')
         posterior = 1;
+        if nargin==4
+            var_list_ = options_.varobs;
+        end
     elseif strcmpi(type,'prior')
         posterior = 0;
+        if nargin==4
+            var_list_ = options_.prior_analysis_endo_var_list;
+            if isempty(var_list_)
+                options_.prior_analysis_var_list = options_.varobs;
+            end
+        end
     else
         disp('compute_moments_varendo:: Unknown type!')
         error()

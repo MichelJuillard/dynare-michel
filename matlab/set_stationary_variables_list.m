@@ -1,22 +1,23 @@
-function [ivar,vartan] = set_stationary_variables_list()
+function [ivar,vartan,options_] = set_stationary_variables_list(options_,M_)
 % This function builds a vector of indices targeting to the stationary
 % variables in varlist.
 % 
 % INPUTS 
-%   None.
-%  
+%   o options_   [structure]  Describes global options. 
+%   o M_         [structure]  Describes the model.
 % OUTPUTS 
-%   o ivar       [integer]  nvar*1 vector of indices (nvar is the number
-%                           of stationary variables).
-%   o vartan     [char]     array of characters (with nvar rows).
-%
+%   o ivar       [integer]    nvar*1 vector of indices (nvar is the number
+%                             of stationary variables).
+%   o vartan     [char]       array of characters (with nvar rows).
+%   o options_   [structure]  Describes global options.
+% 
 % ALGORITHM 
 %   None.       
 %
 % SPECIAL REQUIREMENTS
 %   None.
 
-% Copyright (C) 2007 Dynare Team
+% Copyright (C) 2007-2009 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -33,7 +34,6 @@ function [ivar,vartan] = set_stationary_variables_list()
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-global options_ M_    
 varlist = options_.varlist;
 if isempty(varlist)
     varlist = options_.varobs;

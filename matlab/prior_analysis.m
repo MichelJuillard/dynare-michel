@@ -34,7 +34,7 @@ function oo_ = prior_analysis(type,arg1,arg2,arg3,options_,M_,oo_)
       case {4,5}
         oo_ = job(type,SampleSize,arg1,arg2,arg3,options_,M_,oo_);
       case 6
-        [ivar,vartan] = set_stationary_variables_list;
+        [ivar,vartan] = set_stationary_variables_list(options_,M_);
         nvar = length(ivar);
         oo_ = job(type,SampleSize,arg1,arg2,arg3,options_,M_,oo_,nvar,vartan);
       otherwise

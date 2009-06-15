@@ -88,11 +88,11 @@ function oo_ = covariance_mc_analysis(NumberOfSimulations,type,dname,fname,varta
         eval(['oo_.' TYPE 'TheoreticalMoments.dsge.covariance.deciles.' name ' = p_deciles;']);
         eval(['oo_.' TYPE 'TheoreticalMoments.dsge.covariance.density.' name ' = density;']);
     else
-        eval(['oo_.' NAME 'TheoreticalMoments.dsge.covariance.mean.' name ' = NaN;']);
-        eval(['oo_.' NAME 'TheoreticalMoments.dsge.covariance.median.' name ' = NaN;']);
-        eval(['oo_.' NAME 'TheoreticalMoments.dsge.covariance.variance.' name ' = NaN;']);
-        eval(['oo_.' NAME 'TheoreticalMoments.dsge.covariance.hpdinf.' name ' = NaN;']);
-        eval(['oo_.' NAME 'TheoreticalMoments.dsge.covariance.hpdsup.' name ' = NaN;']);
-        eval(['oo_.' NAME 'TheoreticalMoments.dsge.covariance.deciles.' name ' = NaN;']);
-        eval(['oo_.' NAME 'TheoreticalMoments.dsge.covariance.density.' name ' = NaN;']);
+        eval(['oo_.' TYPE 'TheoreticalMoments.dsge.covariance.mean.' name ' = NaN;']);
+        eval(['oo_.' TYPE 'TheoreticalMoments.dsge.covariance.median.' name ' = NaN;']);
+        eval(['oo_.' TYPE 'TheoreticalMoments.dsge.covariance.variance.' name ' = NaN;']);
+        eval(['oo_.' TYPE 'TheoreticalMoments.dsge.covariance.hpdinf.' name ' = NaN;']);
+        eval(['oo_.' TYPE 'TheoreticalMoments.dsge.covariance.hpdsup.' name ' = NaN;']);
+        eval(['oo_.' TYPE 'TheoreticalMoments.dsge.covariance.deciles.' name ' = NaN;']);
+        eval(['oo_.' TYPE 'TheoreticalMoments.dsge.covariance.density.' name ' = NaN;']);
     end
