@@ -39,7 +39,8 @@ global bayestopt_ M_ options_
 
 TeX = options_.TeX;
 [ s_min, k ] = min(diag(hessian)) ;
-  
+fval = DsgeLikelihood(x,gend,data,data_index,number_of_observations,no_more_missing_observations);
+bayestopt_.penalty=fval;  
 disp(' ')
 disp('MODE CHECK')
 disp(' ')
@@ -59,176 +60,82 @@ if TeX
 end
 
 
-if nbplt == 1
+for plt = 1:nbplt,
     if TeX
         NAMES = [];
         TeXNAMES = [];
-    end    
+    end
     hh = figure('Name','Check plots');
-    for k=1:length(x)
+    for k=1:min(nstar,length(x)-(plt-1)*nstar)
         subplot(nr,nc,k)
-        [name,texname] = get_the_name(k,TeX);
-        if TeX
-            NAMES = strvcat(NAMES,name);
-            TeXNAMES = strvcat(TeXNAMES,texname);
-        end    
-        xx = x;
-        l1 = max(lb(k),0.8*x(k)); % kk -> k
-        l2 = min(ub(k),1.2*x(k)); % kk -> k
-        z = [l1:(l2-l1)/20:l2];
-        y = zeros(length(z),1);
-        for i=1:length(z)
-            xx(k) = z(i); % kk -> k
-            if isempty(strmatch('dsge_prior_weight',M_.param_names))
-                y(i) = DsgeLikelihood(xx,gend,data,data_index,number_of_observations,no_more_missing_observations);
-            else
-                y(i) = DsgeVarLikelihood(xx,gend);
-            end
-        end
-        plot(z,y)
-        hold on
-        yl=get(gca,'ylim');
-        plot([x(k) x(k)],yl,'c','LineWidth', 1);% kk -> k
-        title(name,'interpreter','none');
-        hold off
-        drawnow
-    end
-    eval(['print -depsc2 ' M_.fname '_CheckPlots' int2str(1) '.eps' ]);
-    if ~exist('OCTAVE_VERSION')
-        eval(['print -dpdf ' M_.fname '_CheckPlots' int2str(1)]);
-        saveas(hh,[M_.fname '_CheckPlots' int2str(1) '.fig']);
-    end
-    if options_.nograph, close(hh), end  
-    % TeX eps loader file
-    if TeX
-        fprintf(fidTeX,'\\begin{figure}[H]\n');
-        for jj = 1:length(x)
-            fprintf(fidTeX,'\\psfrag{%s}[1][][0.5][0]{%s}\n',deblank(NAMES(jj,:)),deblank(TeXNAMES(jj,:)));
-        end    
-        fprintf(fidTeX,'\\centering \n');
-        fprintf(fidTeX,'\\includegraphics[scale=0.5]{%s_CheckPlots%s}\n',M_.fname,int2str(1));
-        fprintf(fidTeX,'\\caption{Priors.}');
-        fprintf(fidTeX,'\\label{Fig:CheckPlots:%s}\n',int2str(1));
-        fprintf(fidTeX,'\\end{figure}\n');
-        fprintf(fidTeX,'\n');
-        fprintf(fidTeX,'%% End of TeX file.\n');
-        fclose(fidTeX);
-    end    
-else
-    for plt = 1:nbplt-1
-        if TeX
-            NAMES = [];
-            TeXNAMES = [];
-        end    
-        hh = figure('Name','Check plots');
-        for k=1:nstar
-            subplot(nr,nc,k)
-            kk = (plt-1)*nstar+k;
-            [name,texname] = get_the_name(kk,TeX);
-            if TeX
-                NAMES = strvcat(NAMES,name);
-                TeXNAMES = strvcat(TeXNAMES,texname);
-            end    
-            xx = x;
-            l1 = max(lb(kk),0.8*x(kk));
-            l2 = min(ub(kk),1.2*x(kk));
-            z = [l1:(l2-l1)/20:l2];
-            y = zeros(length(z),1);
-            for i=1:length(z)
-                xx(kk) = z(i);
-                if isempty(strmatch('dsge_prior_weight',M_.param_names))
-                    y(i) = DsgeLikelihood(xx,gend,data,data_index,number_of_observations,no_more_missing_observations);
-                else
-                    y(i) = DsgeVarLikelihood(xx,gend);
-                end                
-            end
-            plot(z,y);
-            hold on
-            yl=get(gca,'ylim');
-            plot( [x(kk) x(kk)], yl, 'c', 'LineWidth', 1)
-            title(name,'interpreter','none')
-            hold off
-            drawnow
-        end    
-        eval(['print -depsc2 ' M_.fname '_CheckPlots' int2str(plt) '.eps']);
-        if ~exist('OCTAVE_VERSION')
-            eval(['print -dpdf ' M_.fname '_CheckPlots' int2str(plt)]);
-            saveas(hh,[M_.fname '_CheckPlots' int2str(plt) '.fig']);
-        end
-        if options_.nograph, close(hh), end
-        if TeX
-            % TeX eps loader file    
-            fprintf(fidTeX,'\\begin{figure}[H]\n');
-            for jj = 1:nstar
-                fprintf(fidTeX,'\\psfrag{%s}[1][][0.5][0]{%s}\n',deblank(NAMES(jj,:)),deblank(TeXNAMES(jj,:)));
-            end    
-            fprintf(fidTeX,'\\centering \n');
-            fprintf(fidTeX,'\\includegraphics[scale=0.5]{%s_CheckPlots%s}\n',M_.fname,int2str(plt));
-            fprintf(fidTeX,'\\caption{Check plots.}');
-            fprintf(fidTeX,'\\label{Fig:CheckPlots:%s}\n',int2str(plt));
-            fprintf(fidTeX,'\\end{figure}\n');
-            fprintf(fidTeX,' \n');
-        end
-    end
-    hh = figure('Name','Check plots');
-    k = 1;
-    if TeX
-        NAMES = [];
-        TeXNAMES = [];
-    end
-    while (nbplt-1)*nstar+k <= length(x)
-        kk = (nbplt-1)*nstar+k;
+        kk = (plt-1)*nstar+k;
         [name,texname] = get_the_name(kk,TeX);
         if TeX
             NAMES = strvcat(NAMES,name);
             TeXNAMES = strvcat(TeXNAMES,texname);
-        end    
-        if lr ~= 0
-            subplot(lr,lc,k)
-        else
-            subplot(nr,nc,k)
-        end    
+        end
         xx = x;
-        l1 = max(lb(kk),0.8*x(kk));
-        l2 = min(ub(kk),1.2*x(kk));
+        l1 = max(lb(kk),0.5*x(kk));
+        l2 = min(ub(kk),1.5*x(kk));
         z = [l1:(l2-l1)/20:l2];
-        y = zeros(length(z),1);
+        if options_.mode_check_nolik==0,
+          y = zeros(length(z),2);
+          dy = priordens(xx,bayestopt_.pshape,bayestopt_.p6,bayestopt_.p7,bayestopt_.p3,bayestopt_.p4);
+        end
         for i=1:length(z)
             xx(kk) = z(i);
-            if isempty(strmatch('dsge_prior_weight',M_.param_names))
-                y(i) = DsgeLikelihood(xx,gend,data,data_index,number_of_observations,no_more_missing_observations);
+            if isempty(strmatch('dsge_prior_weight',M_.param_names)),
+                try
+                    y(i,1) = DsgeLikelihood(xx,gend,data,data_index,number_of_observations,no_more_missing_observations);
+                catch
+                    y(i,1) = bayestopt_.penalty;
+                end
             else
-                y(i) = DsgeVarLikelihood(xx,gend);
-            end                
+                y(i,1) = DsgeVarLikelihood(xx,gend);
+            end
+            if options_.mode_check_nolik==0,
+            lnprior = priordens(xx,bayestopt_.pshape,bayestopt_.p6,bayestopt_.p7,bayestopt_.p3,bayestopt_.p4);
+            y(i,2)    = (y(i,1)+lnprior-dy);
+            end
         end
-        plot(z,y)
+        plot(z,y);
         hold on
         yl=get(gca,'ylim');
         plot( [x(kk) x(kk)], yl, 'c', 'LineWidth', 1)
         title(name,'interpreter','none')
         hold off
-        k = k + 1;
         drawnow
     end
-    eval(['print -depsc2 ' M_.fname '_CheckPlots' int2str(nbplt) '.eps']);
+    if options_.mode_check_nolik==0,
+        if exist('OCTAVE_VERSION'),
+            axes('outerposition',[0.3 0.93 0.42 0.07],'box','on'),
+        else
+            axes('position',[0.3 0.01 0.42 0.05],'box','on'),
+        end
+        plot([0.48 0.68],[0.5 0.5],'color',[0 0.5 0])
+        hold on, plot([0.04 0.24],[0.5 0.5],'b')
+        set(gca,'xlim',[0 1],'ylim',[0 1],'xtick',[],'ytick',[])
+        text(0.25,0.5,'log-post')
+        text(0.69,0.5,'log-lik kernel')
+    end
+    eval(['print -depsc2 ' M_.fname '_CheckPlots' int2str(plt) '.eps']);
     if ~exist('OCTAVE_VERSION')
-        eval(['print -dpdf ' M_.fname '_CheckPlots' int2str(nbplt)]);
-        saveas(hh,[M_.fname '_CheckPlots' int2str(nbplt) '.fig']);
+        eval(['print -dpdf ' M_.fname '_CheckPlots' int2str(plt)]);
+        saveas(hh,[M_.fname '_CheckPlots' int2str(plt) '.fig']);
     end
     if options_.nograph, close(hh), end
     if TeX
+        % TeX eps loader file
         fprintf(fidTeX,'\\begin{figure}[H]\n');
-        for jj = 1:lr*lc
+        for jj = 1:nstar
             fprintf(fidTeX,'\\psfrag{%s}[1][][0.5][0]{%s}\n',deblank(NAMES(jj,:)),deblank(TeXNAMES(jj,:)));
-        end    
+        end
         fprintf(fidTeX,'\\centering \n');
-        fprintf(fidTeX,'\\includegraphics[scale=0.5]{%s_CheckPlots%s}\n',M_.fname,int2str(nbplt));
+        fprintf(fidTeX,'\\includegraphics[scale=0.5]{%s_CheckPlots%s}\n',M_.fname,int2str(plt));
         fprintf(fidTeX,'\\caption{Check plots.}');
-        fprintf(fidTeX,'\\label{Fig:CheckPlots:%s}\n',int2str(nbplt));
+        fprintf(fidTeX,'\\label{Fig:CheckPlots:%s}\n',int2str(plt));
         fprintf(fidTeX,'\\end{figure}\n');
         fprintf(fidTeX,' \n');
-        fprintf(fidTeX,'%% End of TeX file.\n');
-        fclose(fidTeX);
     end
 end
 
