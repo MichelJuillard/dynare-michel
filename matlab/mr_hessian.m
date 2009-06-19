@@ -288,7 +288,7 @@ if hflag>0 & min(eig(reshape(hessian_mat,n,n)))>0,
     sd=sqrt(diag(ihh));   %standard errors
     sdh=sqrt(1./diag(hh));   %diagonal standard errors
     for j=1:length(sd),
-        sd0(j,1)=min(bayestopt_.pstdev(j), sd(j));  %prior std
+        sd0(j,1)=min(bayestopt_.p2(j), sd(j));  %prior std
         sd0(j,1)=10^(0.5*(log10(sd0(j,1))+log10(sdh(j,1))));
         %sd0(j,1)=0.5*(sd0(j,1)+sdh(j,1));
     end
