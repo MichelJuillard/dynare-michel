@@ -162,6 +162,7 @@ function global_initialization()
   options_.mh_recover = 0;
   options_.mh_replic = 20000;
   options_.mode_check = 0;
+  options_.mode_check_nolik = 0;
   options_.mode_compute = 4;
   options_.mode_file = '';
   options_.moments_varendo = 0;
