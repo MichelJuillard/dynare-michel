@@ -122,7 +122,7 @@ disp('Configuring Dynare ...')
 remove_path_to_mex = 1;
 
 for i=1:number_of_mex_files
-    test = (exist(mex_status{i,1}) == 3);
+    test = (exist(mex_status{i,1},'file') == 3);
     if ~test
         addpath([dynareroot mex_status{i,2}]);
         message = '[m]   ';
