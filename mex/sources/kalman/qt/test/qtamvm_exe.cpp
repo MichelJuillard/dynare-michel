@@ -24,6 +24,12 @@
 %
 % function [a] = qtamvm(QT,a)
 %
+% use:
+%     qtamvm_exe QTt_file a_file size [loops - if enabled]
+%
+% NOTE: due to fortran matrix orientation, input matrices need to be passed 
+% as transposed so QTt instead QT
+%
 %  1. T1 = QT2T(QT;n) and Ld = QT2Ld(QT;n);
 %  2. Ta = LdV(Ld;a;n)+TV(T1;a;n).
 %
@@ -32,7 +38,8 @@
 %    a                      [double]    mm state vector.
 %
 % OUTPUTS
-%    Tinverse               [double]    mm*mm transition matrix of the state equation.
+%    a update               [double]    mm vector of the state equation.
+%                                       as file: a_file_out
 **********************************************************/
 
 #include "qt.h"
