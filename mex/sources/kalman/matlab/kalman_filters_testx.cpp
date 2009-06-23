@@ -279,6 +279,7 @@ int main(int argc, char* argv[])
         // destroy init
       delete init;
       mexPrintf("logLik = %f \n", loglik);
+      delete vll;
       // create output and upload output data
 /************
       if (nlhs >= 1)

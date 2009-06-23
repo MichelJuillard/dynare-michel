@@ -99,29 +99,35 @@ void GeneralMatrix::place(const ConstGeneralMatrix& m, int i, int j)
 	tmpsub.copy(m);
 }
 
+/* this = a*b */
 void GeneralMatrix::mult(const ConstGeneralMatrix& a, const ConstGeneralMatrix& b)
 {
 	gemm("N", a, "N", b, 1.0, 0.0);
 }
 
+/* this = this + scalar*a*b */
 void GeneralMatrix::multAndAdd(const ConstGeneralMatrix& a, const ConstGeneralMatrix& b,
 							   double mult)
 {
 	gemm("N", a, "N", b, mult, 1.0);
 }
 
+
+/* this = this + scalar*a*b' */
 void GeneralMatrix::multAndAdd(const ConstGeneralMatrix& a, const ConstGeneralMatrix& b,
 							   const char* dum, double mult)
 {
 	gemm("N", a, "T", b, mult, 1.0);
 }
 
+/* this = this + scalar*a'*b */
 void GeneralMatrix::multAndAdd(const ConstGeneralMatrix& a, const char* dum,
 							   const ConstGeneralMatrix& b, double mult)
 {
 	gemm("T", a, "N", b, mult, 1.0);
 }
 
+/* this = this + scalar*a'*b' */
 void GeneralMatrix::multAndAdd(const ConstGeneralMatrix& a, const char* dum1,
 							   const ConstGeneralMatrix& b, const char* dum2, double mult)
 {
@@ -240,6 +246,26 @@ void GeneralMatrix::add(double a, const ConstGeneralMatrix& m, const char* dum)
 			get(i,j) += a*m.get(j,i);
 }
 
+/* x = scalar(a)*x + scalar(b)*this*d */
+void GeneralMatrix::multVec(double a, Vector& x, double b, const ConstVector& d) const
+{
+	if (x.length() != rows || cols != d.length()) {
+		throw SYLV_MES_EXCEPTION("Wrong dimensions for vector multiply.");
+	}
+	if (rows > 0) {
+		int mm = rows;
+		int nn = cols;
+		double alpha = b;
+		int lda = ld;
+		int incx = d.skip();
+		double beta = a;
+		int incy = x.skip();
+		BLAS_dgemv("N", &mm, &nn, &alpha, data.base(), &lda, d.base(), &incx,
+				   &beta, x.base(), &incy);
+	}
+	
+}
+
 void GeneralMatrix::copy(const ConstGeneralMatrix& m, int ioff, int joff)
 {
 	for (int i = 0; i < rows; i++)
@@ -248,19 +274,17 @@ void GeneralMatrix::copy(const ConstGeneralMatrix& m, int ioff, int joff)
 }
 
 
-inline void 
+void 
 GeneralMatrix::copy(const ConstGeneralMatrix& m)
   {
   memcpy(data.base() ,m.getData().base() ,m.numCols()*m.numRows()*sizeof(double));
   };
 	
-
-inline void 
+void 
 GeneralMatrix::copy(const GeneralMatrix& m)
   {
   memcpy(data.base(),m.getData().base(),m.numCols()*m.numRows()*sizeof(double));
   };
-
 
 void GeneralMatrix::gemm(const char* transa, const ConstGeneralMatrix& a,
 						 const char* transb, const ConstGeneralMatrix& b,
@@ -350,6 +374,7 @@ ConstGeneralMatrix::ConstGeneralMatrix(const ConstGeneralMatrix& m, int i, int j
 ConstGeneralMatrix::ConstGeneralMatrix(const GeneralMatrix& m)
 		: data(m.data), rows(m.rows), cols(m.cols), ld(m.ld) {}
 
+
 double ConstGeneralMatrix::getNormInf() const
 {
 	double norm = 0.0;
@@ -374,6 +399,7 @@ double ConstGeneralMatrix::getNorm1() const
 	return norm;
 }
 
+/* x = scalar(a)*x + scalar(b)*this*d */
 void ConstGeneralMatrix::multVec(double a, Vector& x, double b, const ConstVector& d) const
 {
 	if (x.length() != rows || cols != d.length()) {

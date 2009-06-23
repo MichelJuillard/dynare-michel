@@ -4,9 +4,10 @@
 #DEBUG = yes
 
 #LD_LIBS := -llapack -lcblas -lf77blas -latlas -lg2c
-CC_FLAGS :=  -DMATLAB -DWINDOWS  -DNO_BLAS_H -DNO_LAPACK_H  \
-	-Wall -I../sylv/cc -I../cc \
-	-Ic:/"Program Files"/MATLAB_SV71/extern/include 
+
+CC_FLAGS :=  -DMATLAB -DWINDOWS  -DNO_BLAS_H -DNO_LAPACK_H \
+	-Wall -I../qt/cc -I../sylv/cc -I../cc \
+	-Ic:/"Program Files"/MATLAB_SV71/extern/include  #-pg
 
 ifeq ($(DEBUG),yes)
 #	CC_FLAGS := -DDEBUG $(CC_FLAGS) -g
@@ -20,15 +21,17 @@ endif
 
 # Added by GP
 #    LDFLAGS := -llapack -lcblas -lf77blas -latlas -lg2c -lstdc++ -lmingw32
-        #LDFLAGS := -Wl,--library-path 
-        LD_LIBS := -Wl,--library-path $(LD_LIBRARY_PATH) \
-             -Wl,-L'f:/MinGW/lib' \
+        #LDFLAGS := -Wl,--library-path  $(LD_LIBRARY_PATH) 
+
+        LD_LIBS := -Wl,--library-path  \
+              -Wl,-L'f:/MinGW/lib' \
         -Wl,-L"c:/Program Files"/MATLAB_SV71/extern/lib/win32/microsoft/ \
         -Wl,-llibmex -Wl,-llibmx  -Wl,-llibmwlapack -Wl,-llibdflapack \
-        -lg2c -lmingw32  -lstdc++ $(LDFLAGS)
+        -lf95 -lg2c -lmingw32  -lstdc++ $(LDFLAGS) \
+        -Wl,-L'C:/MinGW/lib/gcc-lib/i686-pc-mingw32/4.0.4' -Wl,-L'C:/MinGW/lib' 
 
-#                  -Wl,-L'f:/CygWin/usr/local/atlas/lib' \
-#                  -Wl,-L'f:/CygWin/lib' \
+#                  -Wl,-L'f:/CygWin/usr/local/atlas/lib' 
+#                  -Wl,-L'f:/CygWin/lib' 
 #                 $(LDFLAGS)
 #    LD_LIBS :=$(LDFLAGS)
 # end add
@@ -37,6 +40,8 @@ matrix_interface := GeneralMatrix Vector SylvException
 matobjs := $(patsubst %, ../sylv/cc/%.o, $(matrix_interface))
 mathsource := $(patsubst %,  ../sylv/cc/%.h, $(matrix_interface))
 matcppsource := $(patsubst %,  ../sylv/cc/%.cpp, $(matrix_interface))
+qtf90source := $(wildcard ../qt/f90/*.f90)
+qtobjs := $(patsubst %.f90,%.o,$(qtf90source))
 # cppsource := $(patsubst %.cweb,%.cpp,$(cwebsource)) 
 kalmancppsource := $(wildcard ../cc/*.cpp)
 kalmanhsource := $(wildcard ../cc/*.h)
@@ -62,8 +67,8 @@ dummy.ch:
 	c++ $(CC_FLAGS) -c $*.cpp
 
 
-$(KALMANLIB): $(objects) # $(matobjs) #$(kalmanobjects)
-	ar cr $(KALMANLIB) $(kalmanobjects) $(matobjs) # $(objects)  
+$(KALMANLIB): $(objects) # $(matobjs) $(qtobjs) #$(kalmanobjects)
+	ar cr $(KALMANLIB) $(kalmanobjects) $(matobjs) $(qtobjs)  
 	ranlib $(KALMANLIB)
 
 kalman_smoother_dll.dll: kalman_smoother.o $(KALMANLIB) #$(hsource) $(cppsource) 
@@ -72,6 +77,18 @@ kalman_smoother_dll.dll: kalman_smoother.o $(KALMANLIB) #$(hsource) $(cppsource)
 
 minv.dll: minv.o $(KALMANLIB) # $(hsource) $(cppsource) 
 	gcc -shared $(CC_FLAGS) -o minv.dll minv.o \
+	kalmanlib.a $(LD_LIBS) 
+
+gmvm.dll: gmvm.o $(KALMANLIB) # $(hsource) $(cppsource) 
+	gcc -shared $(CC_FLAGS) -o gmvm.dll gmvm.o \
+	kalmanlib.a $(LD_LIBS) 
+
+qtamvm.dll: qtamvm.o $(KALMANLIB) # $(hsource) $(cppsource) 
+	gcc -shared $(CC_FLAGS) -o qtamvm.dll qtamvm.o \
+	kalmanlib.a $(LD_LIBS) 
+
+qtmvm.dll: qtmvm.o $(KALMANLIB) # $(hsource) $(cppsource) 
+	gcc -shared $(CC_FLAGS) -o qtmvm.dll qtmvm.o \
 	kalmanlib.a $(LD_LIBS) 
 
 kalman_filter_dll.dll: kalman_filters.o $(KALMANLIB) # $(hsource) $(cppsource) 

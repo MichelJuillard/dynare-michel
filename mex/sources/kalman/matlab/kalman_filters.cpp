@@ -190,6 +190,7 @@ extern "C" {
         for (int j=0;j<nper;++j)
           mxll[j]=(*vll)[j];
         }
+      delete vll;
       
       } 
     catch (const TSException& e) 

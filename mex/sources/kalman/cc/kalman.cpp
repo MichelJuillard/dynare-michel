@@ -670,6 +670,8 @@ BasicKalmanTask::filterNonDiffuse(const Vector&a,const GeneralMatrix&P,
   double loglik=0;
   Vector at(a);
   GeneralMatrix Pt(P);
+  GeneralMatrix PtZeros(Pt.numRows(), Pt.numCols());
+  PtZeros.zeros();
   if(TSUtils::hasNegativeDiagonal(Pt)||!TSUtils::isSymDiagDominant(Pt))
     return 0.0;
     /*
@@ -679,6 +681,9 @@ BasicKalmanTask::filterNonDiffuse(const Vector&a,const GeneralMatrix&P,
     ConstGeneralMatrix Qt(Q);
     ConstGeneralMatrix Rt(R);
   */
+  GeneralMatrix Ft (Ht.numRows(), Ht.numCols()  );
+//  PLUFact Ftinv(Ft);
+
   bool isTunit=0;// Tt->isUnit();
   bool isQzero= Qt.isZero();
   bool isRzero= Rt.isZero();
@@ -699,11 +704,11 @@ BasicKalmanTask::filterNonDiffuse(const Vector&a,const GeneralMatrix&P,
     This calculates $$F_t = Z_tP_tZ_t^T+H_t.$$
     *****************/   
     GeneralMatrix Mt(Pt,Zt,"trans");
-    GeneralMatrix Ft(Ht);
+//    GeneralMatrix Ft(Ht);
+    Ft=Ht;
     Ft.multAndAdd(Zt,ConstGeneralMatrix(Mt));
     
-    
-    PLUFact Ftinv(Ft);
+    PLUFact Ftinv(Ft); //    Ftinv=Ft;
     if(!Ftinv.isRegular())
       return 0.0;
     
@@ -746,8 +751,10 @@ BasicKalmanTask::filterNonDiffuse(const Vector&a,const GeneralMatrix&P,
       GeneralMatrix PtLttrans(Pt,Lt,"trans");
       if(!isTunit)
         {
-        Pt.zeros();
+//        Pt.zeros();
+        Pt=PtZeros;
         Pt.multAndAdd(Tt,ConstGeneralMatrix(PtLttrans));
+//        Pt=mult(Tt,ConstGeneralMatrix(PtLttrans));        
         }
       else
         {

@@ -246,6 +246,10 @@ void Vector::print() const
   {
   for (int i = 0; i < length(); i++) {
     printf("%d\t%8.4g\n", i, operator[](i));
+#ifdef MATLAB
+//#include "mex.h"
+    mexPrintf("%d\t%8.4g\n", i, operator[](i));
+#endif
     }
   }
 

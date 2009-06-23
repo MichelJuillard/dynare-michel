@@ -9,6 +9,12 @@
  * to avoid running virtual method invokation mechanism. Some
  * members, and methods are thus duplicated */ 
 
+
+#ifdef MATLAB
+#include "mex.h"
+#define printf mexPrintf
+#endif
+
 #include <stdio.h>
 
 class GeneralMatrix;
