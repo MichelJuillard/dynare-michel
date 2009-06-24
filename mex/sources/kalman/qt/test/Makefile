@@ -65,7 +65,11 @@ qtvmvm_exe.exe: qtvmvm_exe.o $(qtobjs) $(hsource) $(cppsource)
 	gcc $(CC_FLAGS) -o qtvmvm_exe.exe qtvmvm_exe.o ascii_array.o \
 	$(qtobjs) $(LD_LIBS) 
 
-all: $(objects) dgemvm_exe.exe qtvmvm_exe.exe qtamvm_exe.exe # $(cppsource) $(hsource) $(kalmanhsource) $(kalmancppsource)
+qtv1mvm_exe.exe: qtv1mvm_exe.o $(qtobjs) $(hsource) $(cppsource) 
+	gcc $(CC_FLAGS) -o qtv1mvm_exe.exe qtv1mvm_exe.o ascii_array.o \
+	$(qtobjs) $(LD_LIBS) 
+
+all: $(objects) qtv1mvm_exe.exe dgemvm_exe.exe qtvmvm_exe.exe qtamvm_exe.exe # $(cppsource) $(hsource) $(kalmanhsource) $(kalmancppsource)
 
 clear:
 	rm -f *.o
