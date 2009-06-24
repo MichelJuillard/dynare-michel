@@ -22,16 +22,15 @@
 % This provides an interface to QT f90 library by Andrea Pagano 
 % to multiply Quasi trinagular matrix (T) with a vector a
 %
-% function [a] = qtamvm(QT,a)
+% function [a] = qtvmvm(QT,a)
 %
 % use:
-%     qtamvm_exe QTt_file a_file size [loops - if enabled]
+%     qtvmvm_exe QTt_file a_file size [loops - if enabled]
 %
 % NOTE: due to fortran matrix orientation, input matrices need to be passed 
 % as transposed so QTt instead QT
 %
-%  1. T1 = QT2T(QT;n) and Ld = QT2Ld(QT;n);
-%  2. Ta = LdV(Ld;a;n)+TV(T1;a;n).
+%  2. Ta = QTV(T1;a;n).
 %
 % INPUTS
 %    T                      [double]    mm*mm transition matrix of the state equation.
@@ -63,13 +62,10 @@ int main(int argc, char* argv[])
       {
       // make input matrices
       int n=atoi(argv[3]);
-      double *T1, *Ld, *TV, * Ta ;
+      double  *Ta ;
       AsciiNumberArray QT, a;
       QT.GetMX(argv[1],n,n);
       a.GetMX(argv[2],n,1);
-      T1=(double *)calloc(n*n, sizeof(double));
-      Ld=(double *)calloc(n*n,sizeof(double));
-      TV=(double *)calloc(n, sizeof(double));
       // create output and upload output data
       Ta=(double *)calloc(n, sizeof(double));
 
@@ -85,14 +81,7 @@ int main(int argc, char* argv[])
       //  QT.print();
 #endif
         // 1. T1 = QT2T(QT;n) and Ld = QT2Ld(QT;n);
-        qt2t_(T1, QT.data ,&n) ;
-        qt2ld_(Ld , QT.data,&n);
-        // 2. Ta = LdV(Ld;a;n)+TV(T1;a;n).
-        ldv_(Ta, Ld,a.data ,&n);
-        tv_(TV, T1 ,a.data,&n);
-//        Ta.add(1.0,TV);
-          for (int j=0; j<n;++j)
-            Ta[j]+=TV[j];
+        qtv_(Ta, QT.data, a.data, &n) ;
 
 
 #ifdef TIMING_LOOP
@@ -101,9 +90,6 @@ int main(int argc, char* argv[])
 #endif
       // create output and upload output data
       WriteMX(argv[2], Ta,n,1);
-      free(T1);
-      free(Ld);
-      free(TV);
       free(Ta);
       } 
     catch (std::exception e) 

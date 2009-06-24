@@ -19,19 +19,18 @@
 
 /****************************************************** 
 %
-% This provides an interface to QT f90 library by Andrea Pagano 
+% This provides an interface to BLAS dgemv f90 library function  
 % to multiply Quasi trinagular matrix (T) with a vector a
 %
-% function [a] = qtamvm(QT,a)
+% function [a] = dgevm(QT,a)
 %
 % use:
-%     qtamvm_exe QTt_file a_file size [loops - if enabled]
+%     dgemvm_exe QTt_file a_file size [loops - if enabled]
 %
 % NOTE: due to fortran matrix orientation, input matrices need to be passed 
 % as transposed so QTt instead QT
 %
-%  1. T1 = QT2T(QT;n) and Ld = QT2Ld(QT;n);
-%  2. Ta = LdV(Ld;a;n)+TV(T1;a;n).
+%  1. Ta = dgemv(Ld;a;n)+TV(T1;a;n).
 %
 % INPUTS
 %    T                      [double]    mm*mm transition matrix of the state equation.
@@ -42,7 +41,7 @@
 %                                       as file: a_file_out
 **********************************************************/
 
-#include "qt.h"
+#include "cppblas.h"
 #include <stdio.h>
 #include <math.h>
 #include "ascii_array.h"
@@ -63,13 +62,14 @@ int main(int argc, char* argv[])
       {
       // make input matrices
       int n=atoi(argv[3]);
-      double *T1, *Ld, *TV, * Ta ;
+      double *Ta ;
       AsciiNumberArray QT, a;
       QT.GetMX(argv[1],n,n);
       a.GetMX(argv[2],n,1);
-      T1=(double *)calloc(n*n, sizeof(double));
-      Ld=(double *)calloc(n*n,sizeof(double));
-      TV=(double *)calloc(n, sizeof(double));
+      const double alpha=1.0;
+      const double beta=0.0;
+      int inc =1;
+      //alpha=1.0;beta=0.0;
       // create output and upload output data
       Ta=(double *)calloc(n, sizeof(double));
 
@@ -85,14 +85,11 @@ int main(int argc, char* argv[])
       //  QT.print();
 #endif
         // 1. T1 = QT2T(QT;n) and Ld = QT2Ld(QT;n);
-        qt2t_(T1, QT.data ,&n) ;
-        qt2ld_(Ld , QT.data,&n);
-        // 2. Ta = LdV(Ld;a;n)+TV(T1;a;n).
-        ldv_(Ta, Ld,a.data ,&n);
-        tv_(TV, T1 ,a.data,&n);
-//        Ta.add(1.0,TV);
-          for (int j=0; j<n;++j)
-            Ta[j]+=TV[j];
+//	void BLAS_dgemv(BLCHAR trans, CONST_BLINT m, CONST_BLINT n, CONST_BLDOU alpha,
+//					CONST_BLDOU a, CONST_BLINT lda, CONST_BLDOU x, CONST_BLINT incx,
+//					CONST_BLDOU beta, BLDOU y, CONST_BLINT incy);
+
+	  BLAS_dgemv("N",  &n,  &n, &alpha, QT.data, &n, a.data, &inc, &beta, Ta, &inc);
 
 
 #ifdef TIMING_LOOP
@@ -101,9 +98,6 @@ int main(int argc, char* argv[])
 #endif
       // create output and upload output data
       WriteMX(argv[2], Ta,n,1);
-      free(T1);
-      free(Ld);
-      free(TV);
       free(Ta);
       } 
     catch (std::exception e) 

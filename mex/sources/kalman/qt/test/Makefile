@@ -1,12 +1,12 @@
 # $Id: Makefile 531 2005-11-30 13:49:48Z kamenik $
 # Copyright 2005, Ondra Kamenik
 
-DEBUG = yes
+#DEBUG = yes
 
 #LD_LIBS := -llapack -lcblas -lf77blas -latlas -lg2c
 
 CC_FLAGS :=  -DMATLAB -DWINDOWS  -DNO_BLAS_H -DNO_LAPACK_H \
-	-Wall -I../cc -I../sylv/cc -I../cc \
+	-Wall -I../cc -I../../sylv/cc -I../cc \
 	-Ic:/"Program Files"/MATLAB_SV71/extern/include  #-pg
 
 ifeq ($(DEBUG),yes)
@@ -14,8 +14,8 @@ ifeq ($(DEBUG),yes)
 #	CC_FLAGS := -DTIMING_LOOP -DDEBUG $(CC_FLAGS) -g  
 	KALMANLIB := kalmanlib_dbg.a
 else
-#	CC_FLAGS := $(CC_FLAGS) -O2
-	CC_FLAGS := -DTIMING_LOOP $(CC_FLAGS) -O2
+#	CC_FLAGS := $(CC_FLAGS) -O3
+	CC_FLAGS := -DTIMING_LOOP $(CC_FLAGS) -O3
 	KALMANLIB := kalmanlib.a
 endif
 
@@ -53,11 +53,19 @@ dummy.ch:
 %.o: %.cpp $(hsource) $(cppsource)
 	c++ $(CC_FLAGS) -c $*.cpp
 
+dgemvm_exe.exe: dgemvm_exe.o $(qtobjs) $(hsource) $(cppsource) 
+	gcc $(CC_FLAGS) -o dgemvm_exe.exe dgemvm_exe.o ascii_array.o \
+	$(qtobjs) $(LD_LIBS) 
+
 qtamvm_exe.exe: qtamvm_exe.o $(qtobjs) $(hsource) $(cppsource) 
 	gcc $(CC_FLAGS) -o qtamvm_exe.exe qtamvm_exe.o ascii_array.o \
 	$(qtobjs) $(LD_LIBS) 
 
-all: $(objects) qtamvm_exe.exe # $(cppsource) $(hsource) $(kalmanhsource) $(kalmancppsource)
+qtvmvm_exe.exe: qtvmvm_exe.o $(qtobjs) $(hsource) $(cppsource) 
+	gcc $(CC_FLAGS) -o qtvmvm_exe.exe qtvmvm_exe.o ascii_array.o \
+	$(qtobjs) $(LD_LIBS) 
+
+all: $(objects) dgemvm_exe.exe qtvmvm_exe.exe qtamvm_exe.exe # $(cppsource) $(hsource) $(kalmanhsource) $(kalmancppsource)
 
 clear:
 	rm -f *.o
