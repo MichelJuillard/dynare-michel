@@ -41,7 +41,7 @@ function info=stoch_simul_sparse(var_list)
 
   if info(1)
     options_ = options_old;
-    print_info(info);
+    print_info(info, options_.noprint);
     return
   end  
   

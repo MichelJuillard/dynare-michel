@@ -87,7 +87,7 @@ function initial_estimation_checks(xparam1,gend,data,data_index,number_of_observ
   
   if info(1) > 0
       disp('Error in computing likelihood for initial parameter values')
-      print_info(info)
+      print_info(info, options_.noprint)
   end
   
   if any(abs(oo_.steady_state(bayestopt_.mfys))>1e-9) & (options_.prefilter==1) 

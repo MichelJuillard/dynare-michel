@@ -52,7 +52,7 @@ function global_initialization()
   options_.deterministic_simulation_initialization = 0;
 
   % steady state file
-  if exist([M_.fname '_steadystate'])
+  if exist([M_.fname '_steadystate.m'],'file')
     options_.steadystate_flag = 1;
   else
     options_.steadystate_flag = 0;
