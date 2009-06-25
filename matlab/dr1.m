@@ -538,9 +538,6 @@ function [dr,info,M_,options_,oo_] = dr1(dr,task,M_,options_,oo_)
     zu=[zu; eye(M_.exo_nbr);zeros(M_.exo_det_nbr,M_.exo_nbr)];
     [nrzx,nczx] = size(zx);
 
-    % Workaround for USE_DLL option: at this time, it returns a full hessian
-    hessian = sparse(hessian);
-    
     rhs = -sparse_hessian_times_B_kronecker_C(hessian,zx);
     
     %lhs
