@@ -304,64 +304,53 @@ KordpDynare::populateDerivativesContainer(TwoDMatrix *g, int ord, const vector<i
   IntSequence s(ord, 0);
   s[0] = 0;
   s[1] = 0;
-  int i = 0;
-  while (i < g->ncols())
+
+  if (ord == 1)
     {
+      for (int i = 0; i < g->ncols(); i++)
+	{
+	  for (int j = 0; j < g->nrows(); j++)
+	    {
+	      double x;
+	      if (s[0] < nJcols-nExog)
+		x = g->get(j, (*vOrder)[s[0]]);
+	      else
+		x = g->get(j, s[0]);
+	      if (x != 0.0)
+		mdTi->insert(s, j, x);
+	    }
+	  s[0]++;
+	}
+    }
+  else if (ord == 2) 
+    {
+      nJcols1 = nJcols-nExog;
+      vector<int> revOrder(nJcols1);
+      for (int i = 0; i < nJcols1; i++)
+	revOrder[*vOrder[i]] = i;
+      for (int i = 0; i < g->nrows(); i++)
+	{
+	  int j = g->get(i,0);
+	  int i1 = g->get(i,1);
+	  int s0 = floor(i1/nJcols);
+	  if (s0 < nJcols1)
+	    s[0] = revOrder[s0];
+	  else 
+	    s[0] = s0;
+	  if (s1 < nJcols1)
+	    s[1] = revOrder[s1];
+	  else
+	    s[1] = s1;
+	  if (s[1] >= s[0])
+	    {
+	      s.print();
+	      std::cout << s0 << " " << s1 << "\n";
+	      double x = g->get(i,2);
+		mdTi->insert(s, j, x);
+	    }
 
-      // insert new elements in each row
-      if (ord == 1)
-        {
-          for (int j = 0; j < g->nrows(); j++)
-            {
-              double x;
-              if (s[0] < nJcols-nExog)
-                x = g->get(j, (*vOrder)[s[0]]);
-              else
-                x = g->get(j, s[0]);
-              if (x != 0.0)
-                mdTi->insert(s, j, x);
-            }
-          s[0]++;
-        }
-      else
-        {
-          int s0, s1;
-          if (s[0] < nJcols-nExog)
-            s0 = (*vOrder)[s[0]];
-          else
-            s0 = s[0];
-          if (s[1] < nJcols-nExog)
-            s1 = (*vOrder)[s[1]];
-          else
-            s1 = s[1];
-          if (s[1] >= s[0])
-            {
-              s.print();
-              std::cout << s0 << " " << s1 << "\n";
-              int i1 = s0*nJcols+s1;
-              for (int j = 0; j < g->nrows(); j++)
-                {
-                  double x = g->get(j, i1);
-                  if (x != 0.0)
-                    mdTi->insert(s, j, x);
-                }
-            }
-          s[1]++;
-          // when one order index is finished
-          // increase the previous one
-          if (s[1] == nJcols)
-            {
-              s[0]++;
-              // update starting position of next indices
-              // in order to avoid dealing twice with the same
-              // symmetry. Increase matrix column counter
-              // accordingly
-              s[1] = 0;
-            }
-        }
 
-      i++;
-
+	}
     }
   mdTi->print();
   // md container
