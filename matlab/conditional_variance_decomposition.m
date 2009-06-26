@@ -35,6 +35,7 @@ function PackedConditionalVarianceDecomposition = conditional_variance_decomposi
     ConditionalVariance = zeros(StateSpaceModel.number_of_state_equations,StateSpaceModel.number_of_state_equations);
     ConditionalVariance = repmat(ConditionalVariance,[1 1 length(Steps) StateSpaceModel.number_of_state_innovations]);
     BB = StateSpaceModel.impulse_matrix*transpose(StateSpaceModel.impulse_matrix);
+    
     for h = 1:length(Steps)
         for t = 0:Steps(h)
             for i=1:StateSpaceModel.number_of_state_innovations
@@ -44,6 +45,7 @@ function PackedConditionalVarianceDecomposition = conditional_variance_decomposi
             end
         end
     end
+
     ConditionalVariance = ConditionalVariance(SubsetOfVariables,SubsetOfVariables,:,:);
     NumberOfVariables = length(SubsetOfVariables);
     PackedConditionalVarianceDecomposition = zeros(NumberOfVariables*(NumberOfVariables+1)/2,length(Steps),StateSpaceModel.number_of_state_innovations); 

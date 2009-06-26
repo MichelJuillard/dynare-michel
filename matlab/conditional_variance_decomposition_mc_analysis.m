@@ -45,7 +45,7 @@ function oo_ = conditional_variance_decomposition_mc_analysis(NumberOfSimulation
         if isfield(temporary_structure,'dsge')
             eval(['temporary_structure = oo_.' TYPE 'TheoreticalMoments.dsge;'])
             if isfield(temporary_structure,'ConditionalVarianceDecomposition')
-                eval(['temporary_structure = oo_.' TYPE 'TheoreticalMoments.dsge.VarianceDecomposition.mean;'])
+                eval(['temporary_structure = oo_.' TYPE 'TheoreticalMoments.dsge.ConditionalVarianceDecomposition.mean;'])
                 if isfield(temporary_structure,name)
                     if sum(Steps-temporary_structure.(name)(1,:)) == 0
                         % Nothing (new) to do here...

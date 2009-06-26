@@ -41,6 +41,7 @@ if strcmpi(type,'posterior')
     posterior = 1;
 elseif strcmpi(type,'prior') 
     DrawsFiles = dir([M_.dname '/prior/draws/' type '_draws*' ]);
+    CheckPath('prior/moments');
     posterior = 0;
 else
     disp('dsge_simulated_theoretical_variance_decomposition:: Unknown type!')

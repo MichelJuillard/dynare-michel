@@ -34,7 +34,7 @@ function results = prior_sampler(drsave,M_,bayestopt_,options_,oo_)
     prior_draw(1,bayestopt_);
     PriorDirectoryName = CheckPath('prior/draws');
     work = ~drsave;
-    iteration = 1;
+    iteration = 0;
     loop_indx = 0;
     file_indx = [];
     count_bk_indeterminacy = 0;
@@ -55,48 +55,39 @@ function results = prior_sampler(drsave,M_,bayestopt_,options_,oo_)
     if NumberOfSimulations <= NumberOfElementsPerFile
         TableOfInformations = [ 1 ,  NumberOfSimulations , 1] ;
     else
-        NumberOfFiles = fix(NumberOfSimulations/NumberOfElementsPerFile) ;
+        NumberOfFiles = ceil(NumberOfSimulations/NumberOfElementsPerFile) ;
         NumberOfElementsInTheLastFile = NumberOfSimulations - NumberOfElementsPerFile*(NumberOfFiles-1) ;
-        if ~isint(NumberOfSimulations/NumberOfElementsPerFile)
-            NumberOfFiles = NumberOfFiles + 1 ;
-        end
-        TableOfInformations = NaN(NumberOfFiles,3);
+        TableOfInformations = NaN(NumberOfFiles,3) ;
         TableOfInformations(:,1) = transpose(1:NumberOfFiles) ;
         TableOfInformations(1:NumberOfFiles-1,2) = NumberOfElementsPerFile*ones(NumberOfFiles-1,1) ;
         TableOfInformations(NumberOfFiles,2) = NumberOfElementsInTheLastFile ;
         TableOfInformations(1,3) = 1;
-        TableOfInformations(2:end,3) = cumsum(TableOfInformations(2:end,2))+1;
+        TableOfInformations(2:end,3) = cumsum(TableOfInformations(1:end-1,2))+1;
     end
 
     pdraws = cell(TableOfInformations(1,2),drsave+1) ;
     sampled_prior_expectation = zeros(NumberOfParameters,1);
     sampled_prior_covariance  = zeros(NumberOfParameters,NumberOfParameters);
     
-    file_line_number = 1;
-    file_indx_number = 1;
-
+    file_line_number = 0;
+    file_indx_number = 0;
+    
     % Simulations.
-    while iteration <= NumberOfSimulations
+    while iteration < NumberOfSimulations
         loop_indx = loop_indx+1;
-        if ( (file_line_number-1)==TableOfInformations(file_indx_number,2))
-            save([ PriorDirectoryName '/prior_draws' int2str(file_indx_number) '.mat' ],'pdraws');
-            file_line_number = 1;
-            file_indx_number = file_indx_number + 1;
-            pdraws = cell(TableOfInformations(file_indx_number,2),drsave+1) ;
-        end
         params = prior_draw();
         set_all_parameters(params);
         [dr,INFO] = resol(oo_.steady_state,work);
-        switch INFO(1)
+        switch INFO(1)  
           case 0
+            file_line_number = file_line_number + 1 ;
+            iteration = iteration + 1;
             pdraws(file_line_number,1) = {params};
             if drsave
                 pdraws(file_line_number,2) = {dr};
             end
-            iteration = iteration+1;
-            file_line_number = file_line_number+1;
             [sampled_prior_expectation,sampled_prior_covariance] = ...
-                recursive_prior_moments(sampled_prior_expectation,sampled_prior_covariance,params,iteration) ;
+                recursive_prior_moments(sampled_prior_expectation,sampled_prior_covariance,params,iteration);
           case 1
             count_static_undefined = count_static_undefined + 1;
           case 2
@@ -117,6 +108,14 @@ function results = prior_sampler(drsave,M_,bayestopt_,options_,oo_)
             count_complex_steadystate = count_complex_steadystate + 1 ;
           otherwise
             count_unknown_problem = count_unknown_problem + 1 ;
+        end
+        if ( file_line_number==TableOfInformations(file_indx_number+1,2) )
+            file_indx_number = file_indx_number + 1;
+            save([ PriorDirectoryName '/prior_draws' int2str(file_indx_number) '.mat' ],'pdraws');
+            if file_indx_number<NumberOfFiles
+                pdraws = cell(TableOfInformations(file_indx_number+1,2),drsave+1);
+            end
+            file_line_number = 0;
         end
     end
   
@@ -141,8 +140,7 @@ function results = prior_sampler(drsave,M_,bayestopt_,options_,oo_)
     results.prior.mean = sampled_prior_expectation;
     results.prior.variance = sampled_prior_covariance;
     results.prior.mass = 1-results.garbage_share;
-    
-    
+
 function [mu,sigma] = recursive_prior_moments(m0,s0,newobs,iter)
 %  Recursive estimation of order one and two moments (expectation and
 %  covariance matrix). newobs should be a row vector. I do not use the
