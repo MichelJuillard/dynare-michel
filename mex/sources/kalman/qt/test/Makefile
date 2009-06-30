@@ -6,11 +6,11 @@
 #LD_LIBS := -llapack -lcblas -lf77blas -latlas -lg2c
 
 CC_FLAGS :=  -DMATLAB -DWINDOWS  -DNO_BLAS_H -DNO_LAPACK_H \
-	-Wall -I../cc -I../../sylv/cc -I../cc \
+	-Wall -I../cc -I../../sylv/cc -I../cc -mno-cygwin -mwindows \
 	-Ic:/"Program Files"/MATLAB_SV71/extern/include  #-pg
 
 ifeq ($(DEBUG),yes)
-	CC_FLAGS := -DDEBUG $(CC_FLAGS) -g
+	CC_FLAGS := -DDEBUG $(CC_FLAGS) -g -pg
 #	CC_FLAGS := -DTIMING_LOOP -DDEBUG $(CC_FLAGS) -g  
 	KALMANLIB := kalmanlib_dbg.a
 else
@@ -25,10 +25,10 @@ endif
 
         LD_LIBS := -Wl,--library-path  \
               -Wl,-L'f:/MinGW/lib' \
+        -Wl,-L'C:/MinGW/lib/gcc-lib/i686-pc-mingw32/4.0.4' -Wl,-L'C:/MinGW/lib' \
         -Wl,-L"c:/Program Files"/MATLAB_SV71/extern/lib/win32/microsoft/ \
         -Wl,-llibmex -Wl,-llibmx  -Wl,-llibmwlapack -Wl,-llibdflapack \
-        -lf95 -lg2c -lmingw32  -lstdc++ $(LDFLAGS) \
-        -Wl,-L'C:/MinGW/lib/gcc-lib/i686-pc-mingw32/4.0.4' -Wl,-L'C:/MinGW/lib' 
+        -lf95 -lg2c -lmingw32  -lstdc++ $(LDFLAGS)
 
 #                  -Wl,-L'f:/CygWin/usr/local/atlas/lib' 
 #                  -Wl,-L'f:/CygWin/lib' 
@@ -53,6 +53,14 @@ dummy.ch:
 %.o: %.cpp $(hsource) $(cppsource)
 	c++ $(CC_FLAGS) -c $*.cpp
 
+dgemmmtm_exe.exe: dgemmmtm_exe.o $(objects) $(qtobjs) $(hsource) $(cppsource) 
+	gcc $(CC_FLAGS) -o dgemmmtm_exe.exe dgemmmtm_exe.o ascii_array.o \
+	$(qtobjs) $(LD_LIBS) 
+
+qtmmmtm_exe.exe: qtmmmtm_exe.o $(objects) $(qtobjs) $(hsource) $(cppsource) 
+	gcc $(CC_FLAGS) -o qtmmmtm_exe.exe qtmmmtm_exe.o ascii_array.o \
+	$(qtobjs) $(LD_LIBS) 
+
 dgemvm_exe.exe: dgemvm_exe.o $(qtobjs) $(hsource) $(cppsource) 
 	gcc $(CC_FLAGS) -o dgemvm_exe.exe dgemvm_exe.o ascii_array.o \
 	$(qtobjs) $(LD_LIBS) 
@@ -69,7 +77,7 @@ qtv1mvm_exe.exe: qtv1mvm_exe.o $(qtobjs) $(hsource) $(cppsource)
 	gcc $(CC_FLAGS) -o qtv1mvm_exe.exe qtv1mvm_exe.o ascii_array.o \
 	$(qtobjs) $(LD_LIBS) 
 
-all: $(objects) qtv1mvm_exe.exe dgemvm_exe.exe qtvmvm_exe.exe qtamvm_exe.exe # $(cppsource) $(hsource) $(kalmanhsource) $(kalmancppsource)
+all: $(objects) dgemmmtm_exe.exe qtmmmtm_exe.exe qtv1mvm_exe.exe dgemvm_exe.exe qtvmvm_exe.exe qtamvm_exe.exe # $(cppsource) $(hsource) $(kalmanhsource) $(kalmancppsource)
 
 clear:
 	rm -f *.o
