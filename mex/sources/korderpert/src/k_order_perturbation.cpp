@@ -222,6 +222,14 @@ extern "C" {
       }
 #endif
 
+    //get NNZH =NNZD(2) = the total number of non-zero Hessian elements 
+    mxFldp = mxGetField(M_, 0, "NNZDerivatives");
+    dparams = (double *) mxGetData(mxFldp);
+    Vector *NNZD =  new Vector (dparams, (int) mxGetM(mxFldp));
+#ifdef DEBUG
+    mexPrintf("NNZH=%d, \n", (int) (*NNZD)[1]);
+#endif
+
     const int jcols = nExog+nEndo+nsPred+nsForw; // Num of Jacobian columns
     mexPrintf("k_order_perturbation: jcols= %d .\n", jcols);
 
@@ -300,8 +308,8 @@ extern "C" {
         // make KordpDynare object
         KordpDynare dynare(endoNamesMX,  nEndo, exoNamesMX,  nExog, nPar, // paramNames,
                            ySteady, vCov, modParams, nStat, nPred, nForw, nBoth,
-                           jcols, nSteps, kOrder, journal, dynamicDLL, sstol, var_order_vp,
-                           llincidence, qz_criterium);
+                           jcols, NNZD, nSteps, kOrder, journal, dynamicDLL, 
+                           sstol, var_order_vp, llincidence, qz_criterium);
 
         // construct main K-order approximation class
 #ifdef DEBUG
@@ -626,12 +634,6 @@ DynamicModelDLL::eval(const Vector &y, const TwoDMatrix &x, const  Vector *modPa
     }
   if (g2 != NULL)
     {
-      if (g2->nrows() != length)  // dummy
-        {
-          delete g2;
-          g2 =     new TwoDMatrix(length, jcols*jcols); // and get a new one
-          g2->zeros();
-        }
       dg2 = const_cast<double *>(g2->base());
     }
   dresidual = const_cast<double *>(residual.base());

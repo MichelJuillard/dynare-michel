@@ -40,12 +40,13 @@ class KordpJacobian;
 KordpDynare::KordpDynare(const char **endo,  int num_endo,
                          const char **exo, int nexog, int npar, //const char** par,
                          Vector *ysteady, TwoDMatrix *vcov, Vector *inParams, int nstat,
-                         int npred, int nforw, int nboth, const int jcols, const int nsteps, int norder, //const char* modName,
-                         Journal &jr, DynamicModelDLL &dynamicDLL, double sstol, const vector<int> *var_order,
-                         const TwoDMatrix *llincidence, double criterium)
+                         int npred, int nforw, int nboth, const int jcols, const Vector *nnzd, 
+                         const int nsteps, int norder, //const char* modName,
+                         Journal &jr, DynamicModelDLL &dynamicDLL, double sstol, 
+                         const vector<int> *var_order, const TwoDMatrix *llincidence, double criterium)
   : nStat(nstat), nBoth(nboth), nPred(npred), nForw(nforw), nExog(nexog), nPar(npar),
-  nYs(npred + nboth), nYss(nboth + nforw), nY(num_endo), nJcols(jcols), nSteps(nsteps), nOrder(norder),
-  journal(jr),  dynamicDLL(dynamicDLL), ySteady(ysteady), vCov(vcov), params(inParams),
+  nYs(npred + nboth), nYss(nboth + nforw), nY(num_endo), nJcols(jcols), NNZD(nnzd), nSteps(nsteps), 
+  nOrder(norder), journal(jr),  dynamicDLL(dynamicDLL), ySteady(ysteady), vCov(vcov), params(inParams),
   md(1), dnl(NULL), denl(NULL), dsnl(NULL), ss_tol(sstol), varOrder(var_order),
   ll_Incidence(llincidence), qz_criterium(criterium)
 {
@@ -94,8 +95,8 @@ KordpDynare::KordpDynare(const KordpDynare &dynare)
   : nStat(dynare.nStat), nBoth(dynare.nBoth),       nPred(dynare.nPred),
   nForw(dynare.nForw), nExog(dynare.nExog),  nPar(dynare.nPar),
   nYs(dynare.nYs), nYss(dynare.nYss), nY(dynare.nY), nJcols(dynare.nJcols),
-  nSteps(dynare.nSteps), nOrder(dynare.nOrder), journal(dynare.journal),
-  dynamicDLL(dynare.dynamicDLL), //modName(dynare.modName),
+  NNZD(dynare.NNZD), nSteps(dynare.nSteps), nOrder(dynare.nOrder), 
+  journal(dynare.journal), dynamicDLL(dynare.dynamicDLL), //modName(dynare.modName),
   ySteady(NULL), params(NULL), vCov(NULL), md(dynare.md),
   dnl(NULL), denl(NULL), dsnl(NULL), ss_tol(dynare.ss_tol),
   varOrder(dynare.varOrder), ll_Incidence(dynare.ll_Incidence),
@@ -202,9 +203,14 @@ KordpDynare::calcDerivatives(const Vector &yy, const Vector &xx)
   // Hessian TwoDMatrix *g2;
   if (nOrder > 1)
     {
-      //TwoDMatrix *
-      g2 = new TwoDMatrix(nY, nJcols*nJcols); // generate g2 for Hessian
+      //g2 = new TwoDMatrix(nY, nJcols*nJcols); // generate g2 for Hessian
+      // generate g2 space for sparse Hessian 3x NNZH = 3x NNZD[1]
+      g2 = new TwoDMatrix((int) (*NNZD)[1],3);
       g2->zeros();
+#ifdef DEBUG
+      mexPrintf(" g2 cols %d rows %d \n", g2->numCols(), g2->numRows());
+      //g2->print();
+#endif
     }
   Vector &out = *(new Vector(nY));
   out.zeros();
@@ -244,6 +250,12 @@ KordpDynare::calcDerivatives(const Vector &yy, const Vector &xx)
   if (nOrder > 1)
     {
       //		ReorderBlocks(g2,JacobianIndices);
+#ifdef DEBUG
+      mexPrintf(" post dll g2 cols %d rows %d \n", g2->numCols(), g2->numRows());
+      for (int ii=0;ii<g2->numRows(); ii++)
+        mexPrintf(" g2[%d]:  %d %d %f \n", ii, (int)g2->get(ii,0),(int)g2->get(ii,1),g2->get(ii,2));
+      //g2->print();
+#endif
       populateDerivativesContainer(g2, 2, JacobianIndices);
     }
 
@@ -294,65 +306,70 @@ KordpDynare::populateDerivativesContainer(TwoDMatrix *g, int ord, const vector<i
 {
 
 #ifdef DEBUG
-  mexPrintf("k_ord_dynare.cpp: populate FSSparseTensor in calcDerivatives: cols=%d , rows=%d\n",
-            g->ncols(), g->nrows());
+  mexPrintf("k_ord_dynare.cpp: populate FSSparseTensor in calcDerivatives: ord=%d cols=%d , rows=%d\n",
+            ord, g->ncols(), g->nrows());
 #endif
 
   // model derivatives FSSparseTensor instance
   FSSparseTensor *mdTi = (new FSSparseTensor(ord, nJcols, g->nrows()));
 
   IntSequence s(ord, 0);
-  s[0] = 0;
-  s[1] = 0;
+  //s[0] = 0;
+  //s[1] = 0;
 
   if (ord == 1)
     {
       for (int i = 0; i < g->ncols(); i++)
-	{
-	  for (int j = 0; j < g->nrows(); j++)
-	    {
+  	  {
+	    for (int j = 0; j < g->nrows(); j++)
+	      {
 	      double x;
 	      if (s[0] < nJcols-nExog)
-		x = g->get(j, (*vOrder)[s[0]]);
+      		x = g->get(j, (*vOrder)[s[0]]);
 	      else
-		x = g->get(j, s[0]);
+		      x = g->get(j, s[0]);
 	      if (x != 0.0)
-		mdTi->insert(s, j, x);
-	    }
-	  s[0]++;
-	}
+		      mdTi->insert(s, j, x);
+	      }
+	    s[0]++;
+  	  }
     }
   else if (ord == 2) 
     {
-      nJcols1 = nJcols-nExog;
-      vector<int> revOrder(nJcols1);
-      for (int i = 0; i < nJcols1; i++)
-	revOrder[*vOrder[i]] = i;
-      for (int i = 0; i < g->nrows(); i++)
-	{
-	  int j = g->get(i,0);
-	  int i1 = g->get(i,1);
-	  int s0 = floor(i1/nJcols);
-	  if (s0 < nJcols1)
-	    s[0] = revOrder[s0];
-	  else 
-	    s[0] = s0;
-	  if (s1 < nJcols1)
-	    s[1] = revOrder[s1];
-	  else
-	    s[1] = s1;
-	  if (s[1] >= s[0])
-	    {
-	      s.print();
-	      std::cout << s0 << " " << s1 << "\n";
+    int nJcols1 = nJcols-nExog;
+    vector<int> revOrder(nJcols1);
+    for (int i = 0; i < nJcols1; i++)
+      revOrder[(*vOrder)[i]] = i;
+    for (int i = 0; i < g->nrows(); i++)
+    	{
+	    int j = (int)g->get(i,0)-1; // hessian indices start with 1
+	    int i1 = (int)g->get(i,1) -1;
+	    int s0 = (int)floor(i1/nJcols);
+      int s1 = i1- (nJcols*s0);
+	    if (s0 < nJcols1)
+	      s[0] = revOrder[s0];
+	    else 
+	      s[0] = s0;
+	    if (s1 < nJcols1)
+	      s[1] = revOrder[s1];
+	    else
+	      s[1] = s1;
+	    if (s[1] >= s[0])
+	      {
 	      double x = g->get(i,2);
-		mdTi->insert(s, j, x);
-	    }
-
-
-	}
+    		mdTi->insert(s, j, x);
+#ifdef DEBUG
+        mexPrintf(" s[0]=%d  s[1]=%d j=%d  x=%f \n", s[0],s[1],j,x);
+	      s.print();
+	      std::cout << s[0] << " " << s[1] << "\n";
+#endif
+	      }
+    	}
     }
+#ifdef DEBUG
+  mexPrintf("k_ord_dynare.cpp: END populate FSSparseTensor in calcDerivatives: ord=%d \n",ord);
   mdTi->print();
+#endif
   // md container
   //md.clear();// this is to be used only for 1st order!!
   md.remove(Symmetry(ord));
