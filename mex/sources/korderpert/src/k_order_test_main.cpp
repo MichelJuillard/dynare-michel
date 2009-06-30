@@ -80,7 +80,7 @@ main(int argc, char *argv[])
   const int nSteady = 16; //27 //31;//29, 16 (int)mxGetM(mxFldp);
   Vector *ySteady =  new Vector(dYSparams, nSteady);
 
-  double nnzd[3]={ 0,0,0};
+  double nnzd[3]={ 77,217,0};
   const Vector *NNZD =  new Vector(nnzd, 3);
 
   //mxFldp = mxGetField(dr, 0,"nstatic" );
