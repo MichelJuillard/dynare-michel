@@ -16,16 +16,16 @@ OCTAVE_MODS = \
 	arima/mod2.mod \
 	arima/mod2c.mod \
 	fs2000/fs2000.mod \
-	homotopy/ramst_homotopy.mod
+	homotopy/ramst_homotopy.mod \
+	bvar_a_la_sims/bvar_standalone.mod \
+	bvar_a_la_sims/bvar_and_dsge.mod
 
 MODS = $(OCTAVE_MODS) \
 	arima/mod1b.mod \
 	arima/mod1c.mod \
 	arima/mod2a.mod \
 	arima/mod2b.mod \
-	fs2000/fs2000a.mod \
-	bvar_a_la_sims/bvar_standalone.mod \
-	bvar_a_la_sims/bvar_and_dsge.mod
+	fs2000/fs2000a.mod
 
 check: check-octave check-matlab
 .PHONY: check
