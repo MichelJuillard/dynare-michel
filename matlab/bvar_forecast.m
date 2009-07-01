@@ -155,7 +155,10 @@ function bvar_forecast(nlags)
 
     DirectoryName = [ M_.fname '/bvar_forecast' ];
     if ~isdir(DirectoryName)
-        mkdir('.',DirectoryName);
+        if ~isdir(M_.fname)
+            mkdir(M_.fname);
+        end
+        mkdir(DirectoryName);
     end
     save([ DirectoryName '/simulations.mat'], 'sims_no_shock', 'sims_with_shocks');
 
