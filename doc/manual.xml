@@ -2677,39 +2677,21 @@ oo_.posterior_hpdsup.measurement_errors_corr.gdp_conso
 
   <refsynopsisdiv>
     <cmdsynopsis>
-      <command>optim_weights;</command><sbr/>
-	<group choice="plain">
-	  <arg choice="plain">
-	    <synopfragmentref linkend="var_st1">VARIANCE STATEMENT</synopfragmentref>
-	  </arg>
-	  <arg choice="plain">
-	    <synopfragmentref linkend="covar_st1">COVARIANCE STATEMENT</synopfragmentref>
-	  </arg>
-	  <arg choice="plain">
-	    <synopfragmentref linkend="stderr_st1">STANDARD ERROR STATEMENT</synopfragmentref>
-	  </arg>
-	</group>
-      <arg choice ="plain">end;</arg>
-      <synopfragment id="var_st1">
-	<arg choice="plain">
-	  var <replaceable>VARIABLE_NAME</replaceable> = <replaceable>EXPRESSION</replaceable>;
-	</arg>
-      </synopfragment>
-      <synopfragment id="covar_st1">
-	<arg choice="plain">
-	  var <replaceable>VARIABLE_NAME</replaceable> , <replaceable>VARIABLE_NAME</replaceable> = <replaceable>EXPRESSION</replaceable>;
-	</arg>
-      </synopfragment>
-      <synopfragment id="stderr_st1">
-	<arg choice="plain">
-	  var <replaceable>VARIABLE_NAME</replaceable>; stderr <replaceable>EXPRESSION</replaceable>;
-	</arg>
-      </synopfragment>
+      <command>optim_weights</command>;<sbr/>
+      <arg rep="repeat">
+	      <group choice="plain">
+          <arg choice="plain"><replaceable>VARIABLE_NAME</replaceable> <replaceable>EXPRESSION</replaceable>;</arg>
+          <arg choice="plain"><replaceable>VARIABLE_NAME</replaceable>, <replaceable>VARIABLE_NAME</replaceable> <replaceable>EXPRESSION</replaceable>;</arg>
+        </group>
+      </arg>
+      <command>end</command>;
     </cmdsynopsis>
   </refsynopsisdiv>
+
+
 <refsect1><title>Description</title>
 <para>
-<command>optim_weights</command> secifies the nonzero elements of the quadratic weight matrices for the objectives in <xref linkend='osr'/>
+<command>optim_weights</command> secifies the nonzero elements of the quadratic weight matrices for the objectives in <xref linkend='osr'/>.
 </para>
 </refsect1>
 </refentry>
@@ -2727,22 +2709,18 @@ oo_.posterior_hpdsup.measurement_errors_corr.gdp_conso
   <refsynopsisdiv>
     <cmdsynopsis>
       <command>osr</command>
-      <arg>(<arg rep="repeat" choice="plain"><replaceable>OPTION</replaceable>,</arg>)</arg>
-      <arg choice="plain"><replaceable>VARIABLE_NAME</replaceable></arg>
-      <arg rep="repeat"><replaceable>VARIABLE_NAME</replaceable></arg>
-      <arg choice='plain'>;</arg>
+      <arg>(<replaceable>OPTION</replaceable><arg rep="repeat">, <replaceable>OPTION</replaceable></arg>)</arg>
+      <arg rep="repeat"><replaceable>VARIABLE_NAME</replaceable></arg>;
     </cmdsynopsis>
   </refsynopsisdiv>
 
-<refsect1><title>OPTIONS</title>
-<itemizedlist spacing='compact'>
-<listitem><para>All options for <xref linkend="stoch_simul"/></para></listitem>
-</itemizedlist>
+<refsect1><title>Options</title>
+<para>All options for <xref linkend="stoch_simul"/>.</para>
 </refsect1>
 
 <refsect1><title>Description</title>
 <para>
-<command>osr</command> computes optimal simple policy rules for linear--quadratic problems of the form
+<command>osr</command> computes optimal simple policy rules for linear--quadratic problems of the form:
 </para>
 <blockquote><para>
 max<subscript>&gamma;</subscript> E(y'<subscript>t</subscript>Wy<subscript>t</subscript>)
@@ -2752,7 +2730,7 @@ max<subscript>&gamma;</subscript> E(y'<subscript>t</subscript>Wy<subscript>t</su
   A<subscript>1</subscript>E<subscript>t</subscript>(y<subscript>t+1</subscript>)+A<subscript>2</subscript>y<subscript>t</subscript>+A<subscript>3</subscript>y<subscript>t-1</subscript>+Ce<subscript>t</subscript>=0
 </para>
 </blockquote>
-<para>with</para>
+<para>with:</para>
 <itemizedlist>
 <listitem><para>&gamma;: parameters to be optimized. They must be elements of matrices A<subscript>1</subscript>, A<subscript>2</subscript>, A<subscript>3</subscript>.</para></listitem>
 <listitem><para>y: endogenous variables</para></listitem>
@@ -2783,7 +2761,7 @@ This problem is solved using a numerical optimizer.
       <command>osr_params</command>
       <arg choice="plain"><replaceable>PARAMETER_NAME</replaceable></arg>
       <arg rep="repeat"><replaceable>PARAMETER_NAME</replaceable></arg>
-      <arg choice='plain'>;</arg>
+      ;
     </cmdsynopsis>
   </refsynopsisdiv>
 
@@ -2804,6 +2782,15 @@ This problem is solved using a numerical optimizer.
     <refname>planner_objective</refname>
     <refpurpose>declares the policy maker objective, for use with <xref linkend="ramsey_policy"/></refpurpose>
   </refnamediv>
+
+  <refsynopsisdiv>
+    <cmdsynopsis>
+      <command>planner_objective</command>
+      <arg choice="plain"><replaceable>MODEL_EXPRESSION</replaceable></arg>
+      ;
+    </cmdsynopsis>
+  </refsynopsisdiv>
+
 </refentry>
 
 <refentry id="ramsey_policy">
@@ -2813,8 +2800,28 @@ This problem is solved using a numerical optimizer.
 
   <refnamediv>
     <refname>ramsey_policy</refname>
-    <refpurpose>computes the first order approximation of the policy that maximizes the policy maker objective function (see <xref linkend="planner_objective"/>) submitted to the constraints provided by the equilibrium path of the economy. See <ulink url="http://www.dynare.org/DynareWiki/OptimalPolicy">http://www.dynare.org/DynareWiki/OptimalPolicy</ulink> for more information.</refpurpose>
+    <refpurpose>computes the first order approximation of the policy that maximizes the policy maker objective function (see <xref linkend="planner_objective"/>) submitted to the constraints provided by the equilibrium path of the economy</refpurpose>
   </refnamediv>
+
+  <refsynopsisdiv>
+    <cmdsynopsis>
+      <command>ramsey_policy</command>
+      <arg>(<replaceable>OPTION</replaceable><arg rep="repeat">, <replaceable>OPTION</replaceable></arg>)</arg>
+      <arg rep="repeat"><replaceable>VARIABLE_NAME</replaceable></arg>;
+    </cmdsynopsis>
+  </refsynopsisdiv>
+
+<refsect1><title>Options</title>
+
+<para>All options for <xref linkend="stoch_simul"/>, plus:</para>
+<variablelist>
+  <varlistentry>
+    <term><option>planner_discount</option> = <replaceable>DOUBLE</replaceable></term>
+    <listitem><para>Declares the discount factor of the central planner. Default: <literal>1.0</literal></para></listitem>
+  </varlistentry>
+</variablelist>
+</refsect1>
+
 </refentry>
 
 </sect1>
@@ -2828,8 +2835,25 @@ This problem is solved using a numerical optimizer.
 
   <refnamediv>
     <refname>dynare_sensitivity</refname>
-    <refpurpose>interface to the global sensitivity analysis (GSA) toolbox developed by the Joint Research Center of the European Commission. The GSA toolbox needs to be downloaded separately from the JRC web site (<ulink url="http://eemc.jrc.ec.europa.eu/Software-DYNARE.htm">http://eemc.jrc.ec.europa.eu/Software-DYNARE.htm</ulink>)</refpurpose>
+    <refpurpose>interface to the global sensitivity analysis (GSA) toolbox</refpurpose>
   </refnamediv>
+
+  <refsynopsisdiv>
+    <cmdsynopsis>
+      <command>dynare_sensitivity</command>
+      <arg>(<replaceable>OPTION</replaceable><arg rep="repeat">, <replaceable>OPTION</replaceable></arg>)</arg>
+      ;
+    </cmdsynopsis>
+  </refsynopsisdiv>
+
+<refsect1><title>Description</title>
+<para>This function is an interface to the global sensitivity analysis (GSA) toolbox developed by the Joint Research Center (JRC) of the European Commission. The GSA toolbox needs to be downloaded separately from the JRC web site (<ulink url="http://eemc.jrc.ec.europa.eu/Software-DYNARE.htm">http://eemc.jrc.ec.europa.eu/Software-DYNARE.htm</ulink>).</para>
+</refsect1>
+
+<refsect1><title>Options</title>
+<para>Please refer to the documentation of the GSA toolbox on the official website.</para>
+</refsect1>
+
 </refentry>
 
 </sect1>
@@ -2857,18 +2881,14 @@ Dynare has comments to plot the results of a simulation and to save the results.
   <refsynopsisdiv>
     <cmdsynopsis>
       <command>rplot</command>
-      <arg choice="plain">
-      <replaceable>VARIABLE_NAME</replaceable>
-      </arg>
-      <arg rep="repeat">
-      <replaceable>VARIABLE_NAME</replaceable>
-      </arg>
-      <arg choice="plain">;</arg>
+      <arg choice="plain"><replaceable>VARIABLE_NAME</replaceable></arg>
+      <arg rep="repeat"><replaceable>VARIABLE_NAME</replaceable></arg>
+      ;
     </cmdsynopsis>
   </refsynopsisdiv>
 <refsect1><title>Description</title>
 <para>
-Plots one or several variables
+Plots the simulated path of one or several variables.
 </para>
 </refsect1>
 </refentry>
@@ -2886,22 +2906,15 @@ Plots one or several variables
   <refsynopsisdiv>
     <cmdsynopsis>
       <command>dynatype</command>
-      <arg>
-      (<replaceable>FILENAME</replaceable>)
-      </arg>
-      <arg choice="plain">
-      <replaceable>VARIABLE_NAME</replaceable>
-      </arg>
-      <arg rep="repeat">
-      <replaceable>VARIABLE_NAME</replaceable>
-      </arg>
-      <arg choice="plain">;</arg>
+      <arg choice="plain">(<replaceable>FILENAME</replaceable>)</arg>
+      <arg rep="repeat"><replaceable>VARIABLE_NAME</replaceable></arg>
+      ;
     </cmdsynopsis>
   </refsynopsisdiv>
 
 <refsect1><title>Description</title>
 <para>
-<command>dynatype</command> prints the listed variables in a text file named <replaceable>FILENAME</replaceable>. If no <replaceable>VARIABLE_NAME</replaceable> are listed, all endogenous variables are printed.
+<command>dynatype</command> prints the listed variables in a text file named <replaceable>FILENAME</replaceable>. If no <replaceable>VARIABLE_NAME</replaceable> is listed, all endogenous variables are printed.
 </para>
 </refsect1>
 
@@ -2920,16 +2933,9 @@ Plots one or several variables
   <refsynopsisdiv>
     <cmdsynopsis>
       <command>dynasave</command>
-      <arg>
-      (<replaceable>FILENAME</replaceable>)
-      </arg>
-      <arg choice="plain">
-      <replaceable>VARIABLE_NAME</replaceable>
-      </arg>
-      <arg rep="repeat">
-      <replaceable>VARIABLE_NAME</replaceable>
-      </arg>
-      <arg choice="plain">;</arg>
+      <arg choice="plain">(<replaceable>FILENAME</replaceable>)</arg>
+      <arg rep="repeat"><replaceable>VARIABLE_NAME</replaceable></arg>
+      ;
     </cmdsynopsis>
   </refsynopsisdiv>
 
