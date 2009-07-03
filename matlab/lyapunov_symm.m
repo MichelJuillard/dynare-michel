@@ -20,7 +20,7 @@ function [x,u] = lyapunov_symm(a,b,qz_criterium,lyapunov_complex_threshold,metho
 %   Uses reordered Schur decomposition
 %
 % SPECIAL REQUIREMENTS
-%   needs Matlab >= 7.0.1 for ordeig function (otherwise uses my_ordeig)
+%   None
 
 % Copyright (C) 2006-2009 Dynare Team
 %
@@ -38,12 +38,6 @@ function [x,u] = lyapunov_symm(a,b,qz_criterium,lyapunov_complex_threshold,metho
 %
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
-    persistent test1 test2
-    
-    if isempty(test1)
-        test1 = exist('OCTAVE_VERSION') || matlab_ver_less_than('7.0.1') ;
-        test2 = exist('ordschur','builtin');
-    end
     
     if nargin<5
         method = 0;
@@ -65,21 +59,13 @@ function [x,u] = lyapunov_symm(a,b,qz_criterium,lyapunov_complex_threshold,metho
     
     if method<2
         [U,T] = schur(a);
-        if test1
-            e1 = abs(my_ordeig(T)) > 2-qz_criterium;
-        else
-            e1 = abs(ordeig(T)) > 2-qz_criterium;
-        end
+        e1 = abs(ordeig(T)) > 2-qz_criterium;
         k = sum(e1);       % Number of unit roots. 
         n = length(e1)-k;  % Number of stationary variables.
-        if test2
+        if k > 0
             % Selects stable roots
             [U,T] = ordschur(U,T,e1);
             T = T(k+1:end,k+1:end);
-        elseif k > 0
-            % Problem for Matlab version that don't have ordschur
-            error(['lyapunov_sym: you need a Matlab version > 6.5 to handle models' ...
-                   ' with unit roots'])
         end
     end
     

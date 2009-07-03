@@ -184,17 +184,9 @@ function [fval,llik,cost_flag,ys,trend_coeff,info] = DsgeLikelihood_hh(xparam1,g
           kalman_algo = 3;
       end
       [QT,ST] = schur(T);
-      if exist('OCTAVE_VERSION') || matlab_ver_less_than('7.0.1')
-          e1 = abs(my_ordeig(ST)) > 2-options_.qz_criterium;
-      else
-          e1 = abs(ordeig(ST)) > 2-options_.qz_criterium;
-      end
+      e1 = abs(ordeig(ST)) > 2-options_.qz_criterium;
       [QT,ST] = ordschur(QT,ST,e1);
-      if exist('OCTAVE_VERSION') || matlab_ver_less_than('7.0.1')
-          k = find(abs(my_ordeig(ST)) > 2-options_.qz_criterium);
-      else
-          k = find(abs(ordeig(ST)) > 2-options_.qz_criterium);
-      end
+      k = find(abs(ordeig(ST)) > 2-options_.qz_criterium);
       nk = length(k);
       nk1 = nk+1;
       Pinf = zeros(np,np);

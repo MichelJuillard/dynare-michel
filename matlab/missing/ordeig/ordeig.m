@@ -1,5 +1,5 @@
-function eigs = my_ordeig(t)
-% function eval = my_ordeig(t)
+function eigs = ordeig(t)
+% function eval = ordeig(t)
 % Computes the eigenvalues of a quasi-triangular matrix
 %
 % INPUTS

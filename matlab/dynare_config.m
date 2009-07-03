@@ -42,18 +42,32 @@ addpath([dynareroot '/kalman/'])
 addpath([dynareroot '/kalman/likelihood'])
 addpath([dynareroot '/AIM/'])
 
-% For functions that exist under Octave and not under Matlab, or vice-versa,
-% we provide some replacement functions
-if exist('OCTAVE_VERSION')
-    % Functions missing under Octave
-    addpath([dynareroot '/octave/'])
-else
-    % Functions missing under Matlab
-    addpath([dynareroot '/matlab/'])
+% For functions that exist only under some Octave versions
+% or some MATLAB versions, and for which we provide some replacement functions
+
+if ~exist('OCTAVE_VERSION')
+    % Replacements for rows() and columns() (inexistent under MATLAB)
+    addpath([dynareroot '/missing/rows_columns'])
     if isempty(ver('stats'))
         % Replacements for functions of the stats toolbox
-        addpath([dynareroot '/matlab/stats/'])
+        addpath([dynareroot '/missing/stats/'])
     end
+end
+
+% ordeig() was introducted in MATLAB 7.0.1, and doesn't exist in Octave
+if exist('OCTAVE_VERSION') || matlab_ver_less_than('7.0.1')
+    addpath([dynareroot '/missing/ordeig'])
+end
+
+% rcond() was introduced in Octave 3.2.0
+if exist('OCTAVE_VERSION') && octave_ver_less_than('3.2.0')
+    addpath([dynareroot '/missing/rcond'])
+end
+
+% orschur() is missing in Octave; we don't have a real replacement;
+% the one we provide just exits with an error message
+if exist('OCTAVE_VERSION')
+    addpath([dynareroot '/missing/ordschur'])
 end
 
 % Add path to MEX files
