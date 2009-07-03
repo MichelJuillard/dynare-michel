@@ -1,5 +1,5 @@
-function [fval,cost_flag,ys,trend_coeff,info] = DsgeLikelihood(xparam1,gend,data,data_index,number_of_observations,no_more_missing_observations)
-% function [fval,cost_flag,ys,trend_coeff,info] = DsgeLikelihood(xparam1,gend,data,data_index,number_of_observations,no_more_missing_observations)
+function [fval,cost_flag,ys,trend_coeff,info] = dsge_posterior_kernel(xparam1,gend,data,data_index,number_of_observations,no_more_missing_observations)
+% function [fval,cost_flag,ys,trend_coeff,info] = dsge_posterior_kernel(xparam1,gend,data,data_index,number_of_observations,no_more_missing_observations)
 % Evaluates the posterior kernel of a dsge model. 
 % 
 % INPUTS 
