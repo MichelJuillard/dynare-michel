@@ -29,6 +29,9 @@ routines.
 #include "kalman.h"
 #include "ts_exception.h"
 
+#include "cppblas.h"
+//#include "cpplapack.h"
+
 #include <math.h> 
 #include <float.h> 
 #include <cmath> 
@@ -609,7 +612,8 @@ BasicKalmanTask::filter(int&per,int&d, int start, std::vector<double>* vll)const
   per= vll->size() ;
   return filterNonDiffuse(init.getA(),init.getPstar(), start, vll);
   }
-  /*****************
+
+/*****************
   This is public interface that runs a filter followed by a smoother. 
   In addition to things returned by |KalmanTask::filter|, it fills also 
   |SmootherResults|, which must be initialized to the number of columns 
@@ -648,7 +652,7 @@ KalmanTask::filter_and_smooth(SmootherResults&sres,
   }
 
 
-  /*****************
+/*****************
   This runs a Basic non-diffuse filter with the given $t$, $a_t$ and
   $P_t$. It fills the |FilterResults|.
   
@@ -670,24 +674,24 @@ BasicKalmanTask::filterNonDiffuse(const Vector&a,const GeneralMatrix&P,
   double loglik=0;
   Vector at(a);
   GeneralMatrix Pt(P);
-  GeneralMatrix PtZeros(Pt.numRows(), Pt.numCols());
-  PtZeros.zeros();
+//  GeneralMatrix PtZeros(Pt.numRows(), Pt.numCols());
+//  PtZeros.zeros();
   if(TSUtils::hasNegativeDiagonal(Pt)||!TSUtils::isSymDiagDominant(Pt))
     return 0.0;
-    /*
-    ConstGeneralMatrix Zt(Z);
-    ConstGeneralMatrix Ht(H);
-    ConstGeneralMatrix Tt(T);
-    ConstGeneralMatrix Qt(Q);
-    ConstGeneralMatrix Rt(R);
-  */
   GeneralMatrix Ft (Ht.numRows(), Ht.numCols()  );
+  GeneralMatrix Lt(Tt);
 //  PLUFact Ftinv(Ft);
 
   bool isTunit=0;// Tt->isUnit();
   bool isQzero= Qt.isZero();
   bool isRzero= Rt.isZero();
-  
+  const double alpha=1.0;
+  const double neg_alpha=-1.0;
+  const double omega=0.0;
+  const int m=Pt.numRows();
+  const int n=Zt.numRows();
+  const int rcols= Rt.numCols();
+
   int t= 1; 
   int nonsteady=1;
   for(;t<=data.numCols()&&nonsteady;++t)
@@ -706,7 +710,10 @@ BasicKalmanTask::filterNonDiffuse(const Vector&a,const GeneralMatrix&P,
     GeneralMatrix Mt(Pt,Zt,"trans");
 //    GeneralMatrix Ft(Ht);
     Ft=Ht;
-    Ft.multAndAdd(Zt,ConstGeneralMatrix(Mt));
+//    Ft.multAndAdd(Zt,ConstGeneralMatrix(Mt));
+    // DGEMM: C := alpha*op( A )*op( B ) + beta*C,
+		BLAS_dgemm("N", "N", &n, &n, &m, &alpha, Zt.base(), &n,
+				   Mt.base(), &m, &alpha, Ft.base(), &n); 
     
     PLUFact Ftinv(Ft); //    Ftinv=Ft;
     if(!Ftinv.isRegular())
@@ -721,8 +728,12 @@ BasicKalmanTask::filterNonDiffuse(const Vector&a,const GeneralMatrix&P,
     /*****************
     This calculates  $$L_t = T_t-K_tZ_t.$$
     *****************/   
-    GeneralMatrix Lt(Tt);
-    Lt.multAndAdd(ConstGeneralMatrix(Kt),Zt,-1.0);
+    //GeneralMatrix Lt(Tt);
+    Lt=Tt;
+    //Lt.multAndAdd(ConstGeneralMatrix(Kt),Zt,-1.0);
+    // DGEMM: C := alpha*op( A )*op( B ) + beta*C,
+		BLAS_dgemm("N", "N", &m, &m, &n, &neg_alpha, Kt.base(), &m,
+				   Zt.base(), &n, &alpha, Lt.base(), &m); 
     
     
     /*****************
@@ -752,9 +763,11 @@ BasicKalmanTask::filterNonDiffuse(const Vector&a,const GeneralMatrix&P,
       if(!isTunit)
         {
 //        Pt.zeros();
-        Pt=PtZeros;
-        Pt.multAndAdd(Tt,ConstGeneralMatrix(PtLttrans));
-//        Pt=mult(Tt,ConstGeneralMatrix(PtLttrans));        
+//        Pt=PtZeros;
+//        Pt.multAndAdd(Tt,ConstGeneralMatrix(PtLttrans));
+        // DGEMM: C := alpha*op( A )*op( B ) + beta*C,
+		    BLAS_dgemm("N", "N", &m, &m, &m, &alpha, Tt.base(), &m,
+				       PtLttrans.base(), &m, &omega, Pt.base(), &m); 
         }
       else
         {
@@ -763,7 +776,10 @@ BasicKalmanTask::filterNonDiffuse(const Vector&a,const GeneralMatrix&P,
       if(!isRzero&&!isQzero)
         {
         GeneralMatrix QtRttrans(Qt,Rt,"trans");
-        Pt.multAndAdd(Rt,ConstGeneralMatrix(QtRttrans));
+ //       Pt.multAndAdd(Rt,ConstGeneralMatrix(QtRttrans));
+        // DGEMM: C := alpha*op( A )*op( B ) + beta*C,
+		    BLAS_dgemm("N", "N", &m, &m,  &rcols, &alpha, Rt.base(), &m,
+				       QtRttrans.base(), &rcols, &alpha, Pt.base(), &m); 
         }
       
       }

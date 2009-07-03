@@ -59,12 +59,16 @@
 %   The vector "vll" is used to evaluate the jacobian of the likelihood.
 **********************************************************/
 
+#include <iostream>
+using namespace std;
+
 #include "kalman.h"
 #include "ts_exception.h"
 
 #include "GeneralMatrix.h"
 #include "Vector.h"
 #include "SylvException.h"
+
 
 #include "mex.h"
 
@@ -263,10 +267,11 @@ int main(int argc, char* argv[])
 #ifdef TIMING_LOOP
   for (int tt=0;tt<10000;++tt)
     {
-#endif
+#endif 
         loglik = bkt.filter( per, d, (start-1), vll);
 #ifdef DEBUG		
-    mexPrintf("Basickalman_filter: loglik=%d \n", loglik);
+//    mexPrintf("Basickalman_filter: loglik=%f \n", loglik);
+//    cout << "loglik " << loglik << "\n";
 #endif		
 #ifdef TIMING_LOOP
     }

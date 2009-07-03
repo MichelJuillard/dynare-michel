@@ -6,32 +6,34 @@
 #LD_LIBS := -llapack -lcblas -lf77blas -latlas -lg2c
 
 CC_FLAGS :=  -DMATLAB -DWINDOWS  -DNO_BLAS_H -DNO_LAPACK_H \
-	-Wall -I../qt/cc -I../sylv/cc -I../cc \
+	-Wall -mno-cygwin -I../qt/cc -I../sylv/cc -I../cc \
 	-Ic:/"Program Files"/MATLAB_SV71/extern/include  #-pg
 
 ifeq ($(DEBUG),yes)
-#	CC_FLAGS := -DDEBUG $(CC_FLAGS) -g
-	CC_FLAGS := -DTIMING_LOOP -DDEBUG $(CC_FLAGS) -g #-pg #-Wl,-pg
+	CC_FLAGS := -DDEBUG $(CC_FLAGS) -g
+#	CC_FLAGS := -DTIMING_LOOP -DDEBUG $(CC_FLAGS) -g #-pg #-Wl,-pg
 	KALMANLIB := kalmanlib_dbg.a
 else
-#	CC_FLAGS := $(CC_FLAGS) -O2
-	CC_FLAGS := -DTIMING_LOOP $(CC_FLAGS) -O2
+#	CC_FLAGS := $(CC_FLAGS) -O3
+	CC_FLAGS := -DTIMING_LOOP $(CC_FLAGS) -O3
 	KALMANLIB := kalmanlib.a
 endif
 
 # Added by GP
 #    LDFLAGS := -llapack -lcblas -lf77blas -latlas -lg2c -lstdc++ -lmingw32
-        #LDFLAGS := -Wl,--library-path  $(LD_LIBRARY_PATH) 
+        #LDFLAG := -Wl,--library-path  $(LD_LIBRARY_PATH) 
 
         LD_LIBS := -Wl,--library-path  \
-              -Wl,-L'f:/MinGW/lib' \
+                  -Wl,-L'f:/CygWin/lib' \
         -Wl,-L"c:/Program Files"/MATLAB_SV71/extern/lib/win32/microsoft/ \
         -Wl,-llibmex -Wl,-llibmx  -Wl,-llibmwlapack -Wl,-llibdflapack \
         -lf95 -lg2c -lmingw32  -lstdc++ $(LDFLAGS) \
-        -Wl,-L'C:/MinGW/lib/gcc-lib/i686-pc-mingw32/4.0.4' -Wl,-L'C:/MinGW/lib' 
+        -Wl,-L'C:/MinGW/lib/gcc-lib/i686-pc-mingw32/4.0.4' \
+	-Wl,-L'C:/MinGW/lib'  kalmanlib.def
 
 #                  -Wl,-L'f:/CygWin/usr/local/atlas/lib' 
 #                  -Wl,-L'f:/CygWin/lib' 
+#              -Wl,-L'f:/MinGW/lib' 
 #                 $(LDFLAGS)
 #    LD_LIBS :=$(LDFLAGS)
 # end add
@@ -93,7 +95,7 @@ qtmvm.dll: qtmvm.o $(KALMANLIB) # $(hsource) $(cppsource)
 
 kalman_filter_dll.dll: kalman_filters.o $(KALMANLIB) # $(hsource) $(cppsource) 
 	gcc -shared $(CC_FLAGS) -o kalman_filter_dll.dll kalman_filters.o \
-	$(KALMANLIB) $(LD_LIBS) 
+	$(KALMANLIB) $(LD_LIBS)
 
 kalman_filters_testx.exe: kalman_filters_testx.o $(KALMANLIB) # $(hsource) $(cppsource) 
 	gcc $(CC_FLAGS) -pg -o kalman_filters_testx.exe kalman_filters_testx.o \

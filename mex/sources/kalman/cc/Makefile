@@ -1,17 +1,17 @@
 # $Id: Makefile 531 2005-11-30 13:49:48Z kamenik $
 # Copyright 2005, Ondra Kamenik
 
-DEBUG = yes
+#DEBUG = yes
 
 LD_LIBS := -llapack -lcblas -lf77blas -latlas -lg2c
-CC_FLAGS :=  -DMATLAB -DWINDOWS	-DNO_BLAS_H -DNO_LAPACK_H \
-		-Wall -I../../gensylv/cc  \
-		-Ic:/"Program Files"/MATLAB_SV71/extern/include
+CC_FLAGS :=  -DMATLAB -DWINDOWS -DNO_BLAS_H -DNO_LAPACK_H  \
+		-Wall -I../sylv/cc  \
+		-Ic:/"Program Files"/MATLAB_SV71/extern/include #-pg
 
 ifeq ($(DEBUG),yes)
 	CC_FLAGS :=  -DDEBUG $(CC_FLAGS) -g
 else
-	CC_FLAGS := $(CC_FLAGS) -O2
+	CC_FLAGS := $(CC_FLAGS) -O3
 endif
 
 # Added by GP
@@ -29,9 +29,9 @@ endif
 # end add
 
 matrix_interface := GeneralMatrix Vector SylvException 
-matobjs := $(patsubst %, ../../gensylv/cc/%.o, $(matrix_interface))
-mathsource := $(patsubst %,  ../../gensylv/cc/%.h, $(matrix_interface))
-matcppsource := $(patsubst %,  ../../gensylv/cc/%.cpp, $(matrix_interface))
+matobjs := $(patsubst %, ../sylv/cc/%.o, $(matrix_interface))
+mathsource := $(patsubst %,  ../sylv/cc/%.h, $(matrix_interface))
+matcppsource := $(patsubst %,  ../sylv/cc/%.cpp, $(matrix_interface))
 cwebsource := $(wildcard *.cweb)
 # cppsource := $(patsubst %.cweb,%.cpp,$(cwebsource)) 
 cppsource := $(wildcard *.cpp)
