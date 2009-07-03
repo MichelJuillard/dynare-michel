@@ -35,7 +35,7 @@ function dynareroot = dynare_config(path_to_dynare)
 if nargin
     addpath(path_to_dynare);
 end
-dynareroot = strrep(which('dynare.m'),'dynare.m','');
+dynareroot = strrep(which('dynare'),'dynare.m','');
 
 addpath([dynareroot '/distributions/'])
 addpath([dynareroot '/kalman/'])
