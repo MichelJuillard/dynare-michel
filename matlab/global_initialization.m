@@ -41,9 +41,9 @@ function global_initialization()
   options_.gstep = 1e-2;
   options_.debug = 0;
   options_.initval_file = 0;
-  options_.Schur_vec_tol = 1e-8; % used to find nonstationary variables
-                                 % in Schur decomposition of the
-                                 % transition matrix
+  options_.Schur_vec_tol = 1e-11; % used to find nonstationary variables
+                                  % in Schur decomposition of the
+                                  % transition matrix
   options_.qz_criterium = 1.000001;
   options_.lyapunov_complex_threshold = 1e-15;
   options_.solve_tolf = eps^(1/3);

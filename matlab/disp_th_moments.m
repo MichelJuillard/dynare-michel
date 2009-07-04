@@ -35,8 +35,10 @@ function disp_th_moments(dr,var_list)
     end
   end
   
-  [oo_.gamma_y,ivar] = th_autocovariances(dr,ivar,M_,options_);
+  [oo_.gamma_y,stationary_vars] = th_autocovariances(dr,ivar,M_,options_);
   m = dr.ys(ivar);
+  non_stationary_vars = setdiff(1:length(ivar),stationary_vars);
+  m(ivar(non_stationary_vars)) = NaN;
 
   
   i1 = find(abs(diag(oo_.gamma_y{1})) > 1e-12);
@@ -50,14 +52,15 @@ function disp_th_moments(dr,var_list)
   oo_.mean = m;
   oo_.var = oo_.gamma_y{1};
   
-  lh = size(deblank(M_.endo_names(ivar,:)),2)+2;
   if options_.nomoments == 0
     title='THEORETICAL MOMENTS';
     if options_.hp_filter
       title = [title ' (HP filter, lambda = ' int2str(options_.hp_filter) ')'];
     end
     headers=strvcat('VARIABLE','MEAN','STD. DEV.','VARIANCE');
-    dyntable(title,headers,deblank(M_.endo_names(ivar,:)),z,lh,11,4);
+    labels = deblank(M_.endo_names(ivar,:));
+    lh = size(labels,2)+2;
+    dyntable(title,headers,labels,z,lh,11,4);
     if M_.exo_nbr > 1
       disp(' ')
       title='VARIANCE DECOMPOSITION (in percent)';
@@ -68,8 +71,9 @@ function disp_th_moments(dr,var_list)
       headers = M_.exo_names;
       headers(M_.exo_names_orig_ord,:) = headers;
       headers = strvcat(' ',headers);
-      dyntable(title,headers,deblank(M_.endo_names(ivar(i1),:)),100*oo_.gamma_y{options_.ar+2}(i1,:), ...
-	    lh,8,2);
+      lh = size(deblank(M_.endo_names(ivar(stationary_vars),:)),2)+2;
+      dyntable(title,headers,deblank(M_.endo_names(ivar(stationary_vars), ...
+                                                   :)),100*oo_.gamma_y{options_.ar+2}(stationary_vars,:),lh,8,2);
     end
   end
   
@@ -79,10 +83,11 @@ function disp_th_moments(dr,var_list)
     if options_.hp_filter
       title = [title ' (HP filter, lambda = ' int2str(options_.hp_filter) ')'];
     end
-    labels = deblank(M_.endo_names(ivar,:));
-    headers = strvcat('Variables',labels(i1,:));
+    labels = deblank(M_.endo_names(ivar(i1),:));
+    headers = strvcat('Variables',labels);
     corr = oo_.gamma_y{1}(i1,i1)./(sd(i1)*sd(i1)');
-    dyntable(title,headers,labels(i1,:),corr,lh,8,4);
+    lh = size(labels,2)+2;
+    dyntable(title,headers,labels,corr,lh,8,4);
   end
   
   if options_.ar > 0
@@ -98,7 +103,8 @@ function disp_th_moments(dr,var_list)
       oo_.autocorr{i} = oo_.gamma_y{i+1};
       z(:,i) = diag(oo_.gamma_y{i+1}(i1,i1));
     end
-    dyntable(title,headers,labels,z,0,8,4);
+    lh = size(labels,2)+2;
+    dyntable(title,headers,labels,z,lh,8,4);
   end
   
 % 10/09/02 MJ 

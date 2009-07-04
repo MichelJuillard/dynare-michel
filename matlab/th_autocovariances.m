@@ -1,4 +1,4 @@
-function [Gamma_y,ivar] = th_autocovariances(dr,ivar,M_,options_,nodecomposition)
+function [Gamma_y,stationary_vars] = th_autocovariances(dr,ivar,M_,options_,nodecomposition)
 % Computes the theoretical auto-covariances, Gamma_y, for an AR(p) process 
 % with coefficients dr.ghx and dr.ghu and shock variances Sigma_e_
 % for a subset of variables ivar (indices in lgy_)
@@ -19,7 +19,8 @@ function [Gamma_y,ivar] = th_autocovariances(dr,ivar,M_,options_,nodecomposition
 %                                      Gamma_y{nar+2}   [double]  Variance decomposition.  
 %                                      Gamma_y{nar+3}   [double]  Expectation of the endogenous variables associated with a second 
 %                                                                 order approximation.    
-%   ivar              [integer]      Vector of indices for a subset of variables.
+%   stationary_vars   [integer]      Vector of indices of stationary
+%                                           variables in declaration order
 %
 % SPECIAL REQUIREMENTS
 %   
@@ -45,6 +46,7 @@ function [Gamma_y,ivar] = th_autocovariances(dr,ivar,M_,options_,nodecomposition
         nodecomposition = 0;
     end
     
+    endo_nbr = M_.endo_nbr;
     exo_names_orig_ord  = M_.exo_names_orig_ord;
     if exist('OCTAVE_VERSION')
         warning('off', 'Octave:divide-by-zero')
@@ -54,7 +56,7 @@ function [Gamma_y,ivar] = th_autocovariances(dr,ivar,M_,options_,nodecomposition
     nar = options_.ar;
     Gamma_y = cell(nar+1,1);
     if isempty(ivar)
-        ivar = [1:M_.endo_nbr]';
+        ivar = [1:endo_nbr]';
     end
     nvar = size(ivar,1);
   
@@ -63,8 +65,8 @@ function [Gamma_y,ivar] = th_autocovariances(dr,ivar,M_,options_,nodecomposition
     npred = dr.npred;
     nstatic = dr.nstatic;
     kstate = dr.kstate;
-    order = dr.order_var;
-    iv(order) = [1:length(order)];
+    order_var = dr.order_var;
+    inv_order_var = dr.inv_order_var;
     nx = size(ghx,2);
   
     ikx = [nstatic+1:nstatic+npred];
@@ -94,10 +96,12 @@ function [Gamma_y,ivar] = th_autocovariances(dr,ivar,M_,options_,nodecomposition
     [A,B] = kalman_transition_matrix(dr,ipred,1:nx,dr.transition_auxiliary_variables,M_.exo_nbr);
     if options_.order == 2 | options_.hp_filter == 0
         [vx, u] =  lyapunov_symm(A,B*M_.Sigma_e*B',options_.qz_criterium,options_.lyapunov_complex_threshold);
-        iky = iv(ivar);
+        iky = inv_order_var(ivar);
+        stationary_vars = (1:length(ivar))';
         if ~isempty(u)
-            iky = iky(find(all(abs(ghx(iky,:)*u) < options_.Schur_vec_tol,2)));
-            ivar = dr.order_var(iky);
+            x = abs(ghx*u);
+            iky = iky(find(all(x(iky,:) < options_.Schur_vec_tol,2)));
+            stationary_vars = find(all(x(inv_order_var(ivar(stationary_vars)),:) < options_.Schur_vec_tol,2));
         end
         aa = ghx(iky,:);
         bb = ghu(iky,:);
@@ -109,23 +113,28 @@ function [Gamma_y,ivar] = th_autocovariances(dr,ivar,M_,options_,nodecomposition
         end
     end
     if options_.hp_filter == 0
-        Gamma_y{1} = aa*vx*aa'+ bb*M_.Sigma_e*bb';
-        k = find(abs(Gamma_y{1}) < 1e-12);
-        Gamma_y{1}(k) = 0;    
+        v = NaN*ones(nvar,nvar);
+        v(stationary_vars,stationary_vars) = aa*vx*aa'+ bb*M_.Sigma_e*bb';
+        k = find(abs(v) < 1e-12);
+        v(k) = 0;
+        Gamma_y{1} = v;
         % autocorrelations
         if nar > 0
             vxy = (A*vx*aa'+ghu1*M_.Sigma_e*bb');    
             sy = sqrt(diag(Gamma_y{1}));
+            sy = sy(stationary_vars);
             sy = sy *sy';
-            Gamma_y{2} = aa*vxy./sy;
+            Gamma_y{2} = NaN*ones(nvar,nvar);
+            Gamma_y{2}(stationary_vars,stationary_vars) = aa*vxy./sy;
             for i=2:nar
                 vxy = A*vxy;
-                Gamma_y{i+1} = aa*vxy./sy;
+                Gamma_y{i+1} = NaN*ones(nvar,nvar);
+                Gamma_y{i+1}(stationary_vars,stationary_vars) = aa*vxy./sy;
             end
         end
         % variance decomposition
         if ~nodecomposition && M_.exo_nbr > 1
-            Gamma_y{nar+2} = zeros(length(ivar),M_.exo_nbr);
+            Gamma_y{nar+2} = zeros(nvar,M_.exo_nbr);
             SS(exo_names_orig_ord,exo_names_orig_ord)=M_.Sigma_e+1e-14*eye(M_.exo_nbr);
             cs = chol(SS)';
             b1(:,exo_names_orig_ord) = ghu1;
@@ -136,12 +145,12 @@ function [Gamma_y,ivar] = th_autocovariances(dr,ivar,M_,options_,nodecomposition
             vv = diag(aa*vx*aa'+b2*b2');
             for i=1:M_.exo_nbr
                 vx1 = lyapunov_symm(A,b1(:,i)*b1(:,i)',options_.qz_criterium,options_.lyapunov_complex_threshold,2);
-                Gamma_y{nar+2}(:,i) = abs(diag(aa*vx1*aa'+b2(:,i)*b2(:,i)'))./vv;
+                Gamma_y{nar+2}(stationary_vars,i) = abs(diag(aa*vx1*aa'+b2(:,i)*b2(:,i)'))./vv;
             end
         end
     else% ==> Theoretical HP filter.
         if options_.order < 2
-            iky = iv(ivar);  
+            iky = inv_order_var(ivar);  
             aa = ghx(iky,:);
             bb = ghu(iky,:);
         end
