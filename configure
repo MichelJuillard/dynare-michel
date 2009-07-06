@@ -1351,7 +1351,7 @@ Optional Packages:
   --without-PACKAGE       do not use PACKAGE (same as --with-PACKAGE=no)
   --with-matlab=ARG       check for Matlab [yes]
   --with-mex-options=ARG  use MEX options file ARG [standard]
-  --with-dynarepp=ARG     path to Dynare++ [yes]
+  --with-dynarepp=ARG     path to Dynare++
 
 Some influential environment variables:
   CXX         C++ compiler command

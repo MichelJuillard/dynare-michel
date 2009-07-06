@@ -29,7 +29,7 @@ srctarball $(TARBASENAME).tar.gz: distclean
 	tar cvzf ../$(TARBASENAME).tar.gz --transform 's,^\./,$(TARBASENAME)/,' --exclude='*~' --exclude-vcs .
 .PHONY: srctarball
 
-configure: configure.ac m4/matlab.m4 m4/matlabarch.m4 m4/matlabver.m4 m4/mex.m4 m4/mexext.m4 m4/mexopt.m4
+configure: configure.ac m4/matlab.m4 m4/matlabarch.m4 m4/matlabver.m4 m4/mex.m4 m4/mexext.m4 m4/mexopt.m4 m4/dynarepp.m4
 	aclocal -I m4
 	autoconf
 

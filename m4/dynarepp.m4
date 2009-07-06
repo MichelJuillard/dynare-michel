@@ -26,7 +26,7 @@ AC_DEFUN([AX_DYNAREPP],
 [dnl
 AC_PREREQ([2.63])
 ax_enable_dynarepp=
-AC_ARG_WITH([dynarepp], AC_HELP_STRING([--with-dynarepp=ARG], [path to Dynare++ [[yes]]]),
+AC_ARG_WITH([dynarepp], AC_HELP_STRING([--with-dynarepp=ARG], [path to Dynare++]),
 [case $withval in
   no)
     # Explicitly enable or disable Dynare++ but determine
