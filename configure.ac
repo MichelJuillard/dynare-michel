@@ -1,4 +1,21 @@
-# Process this file with autoconf to produce a configure script.
+dnl Process this file with autoconf to produce a configure script.
+
+dnl Copyright (C) 2009 Dynare Team
+dnl
+dnl This file is part of Dynare.
+dnl
+dnl Dynare is free software: you can redistribute it and/or modify
+dnl it under the terms of the GNU General Public License as published by
+dnl the Free Software Foundation, either version 3 of the License, or
+dnl (at your option) any later version.
+dnl
+dnl Dynare is distributed in the hope that it will be useful,
+dnl but WITHOUT ANY WARRANTY; without even the implied warranty of
+dnl MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+dnl GNU General Public License for more details.
+dnl
+dnl You should have received a copy of the GNU General Public License
+dnl along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
 AC_PREREQ([2.63])
 AC_INIT([dynare], [4.1-unstable])
@@ -62,6 +79,17 @@ then
 fi
 
 AC_CHECK_PROG([OCTAVE], [octave], [octave])
+
+AX_MATLAB
+
+if test "$ax_enable_matlab" = "yes"
+then
+  AX_PATH_MEX
+  AX_MEXEXT
+  AX_MATLAB_ARCH
+fi
+
+AX_DYNAREPP
 
 AC_CONFIG_FILES([Makefile
                  preprocessor/Makefile

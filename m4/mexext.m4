@@ -1,6 +1,7 @@
 dnl mexext.m4 --- check for MEX-file suffix.
 dnl
 dnl Copyright (C) 2000--2003 Ralph Schleicher
+dnl Copyright (C) 2009 Dynare Team
 dnl
 dnl This program is free software; you can redistribute it and/or
 dnl modify it under the terms of the GNU General Public License as
@@ -31,35 +32,20 @@ dnl Code:
 AC_DEFUN([AX_MEXEXT],
 [dnl
 AC_PREREQ([2.50])
-AC_REQUIRE([AX_PATH_MEX])
+AC_REQUIRE([AX_MATLAB])
+AC_REQUIRE([AC_CANONICAL_HOST])
 AC_CACHE_CHECK([for MEX-file suffix], [ax_cv_mexext],
 [if test "${MEXEXT+set}" = set ; then
     ax_cv_mexext="$MEXEXT"
 else
-    echo 'mexFunction () {}' > ax_c_test.c
-    $MEX $MEXOPTS $MEXFLAGS -output ax_c_test ax_c_test.c $MEXLDADD 2> /dev/null 1>&2
-    if test -f ax_c_test.dll ; then
-	ax_cv_mexext=dll
-    elif test -f ax_c_test.mex ; then
-	ax_cv_mexext=mex
-    elif test -f ax_c_test.mexaxp ; then
-	ax_cv_mexext=mexaxp
-    elif test -f ax_c_test.mexglx ; then
-	ax_cv_mexext=mexglx
-    elif test -f ax_c_test.mexhp7 ; then
-	ax_cv_mexext=mexhp7
-    elif test -f ax_c_test.mexhpux ; then
-	ax_cv_mexext=mexhpux
-    elif test -f ax_c_test.mexrs6 ; then
-	ax_cv_mexext=mexrs6
-    elif test -f ax_c_test.mexsg ; then
-	ax_cv_mexext=mexsg
-    elif test -f ax_c_test.mexsol ; then
-	ax_cv_mexext=mexsol
-    else
-	ax_cv_mexext=unknown
-    fi
-    rm -f ax_c_test*
+    case $host_os in
+      *cygwin* | *mingw32*)
+        ax_cv_mexext=`$MATLAB/bin/mexext.bat | sed 's/\r//'`
+        ;;
+      *)
+        ax_cv_mexext=`$MATLAB/bin/mexext`
+        ;;
+    esac
 fi])
 MEXEXT="$ax_cv_mexext"
 AC_SUBST([MEXEXT])
@@ -85,3 +71,7 @@ esac
 ])
 
 dnl mexext.m4 ends here
+
+dnl Local variables:
+dnl tab-width: 8
+dnl End:

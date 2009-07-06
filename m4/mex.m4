@@ -57,3 +57,7 @@ AC_SUBST([MEXLDADD])
 ])
 
 dnl mex.m4 ends here
+
+dnl Local variables:
+dnl tab-width: 8
+dnl End:

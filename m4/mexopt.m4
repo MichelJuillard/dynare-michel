@@ -71,3 +71,7 @@ AC_SUBST([MEXOPTS])
 ])
 
 dnl mexopt.m4 ends here
+
+dnl Local variables:
+dnl tab-width: 8
+dnl End:

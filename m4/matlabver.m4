@@ -131,3 +131,7 @@ fi])
 ])
 
 dnl matlabver.m4 ends here
+
+dnl Local variables:
+dnl tab-width: 8
+dnl End:

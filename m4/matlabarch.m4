@@ -1,6 +1,7 @@
 dnl matlabarch.m4 --- check for Matlab machine architecture.
 dnl
 dnl Copyright (C) 2002, 2003 Ralph Schleicher
+dnl Copyright (C) 2009 Dynare Team
 dnl
 dnl This program is free software; you can redistribute it and/or
 dnl modify it under the terms of the GNU General Public License as
@@ -40,29 +41,17 @@ else
       dll)
 	ax_cv_matlab_arch=win32
 	;;
-      mex)
-	ax_cv_matlab_arch=mac
+      mexw32)
+	ax_cv_matlab_arch=win32
 	;;
-      mexaxp)
-	ax_cv_matlab_arch=alpha
+      mexw64)
+	ax_cv_matlab_arch=win64
 	;;
       mexglx)
 	ax_cv_matlab_arch=glnx86
 	;;
-      mexhp7)
-	ax_cv_matlab_arch=hp700
-	;;
-      mexhpux)
-	ax_cv_matlab_arch=hpux
-	;;
-      mexrs6)
-	ax_cv_matlab_arch=ibm_rs
-	;;
-      mexsg)
-	ax_cv_matlab_arch=sgi
-	;;
-      mexsol)
-	ax_cv_matlab_arch=sol2
+      mexa64)
+	ax_cv_matlab_arch=glnxa64
 	;;
       *)
 	ax_cv_matlab_arch=unknown
@@ -74,3 +63,7 @@ AC_SUBST([MATLAB_ARCH])
 ])
 
 dnl matlabarch.m4 ends here
+
+dnl Local variables:
+dnl tab-width: 8
+dnl End:

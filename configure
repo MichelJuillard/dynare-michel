@@ -637,6 +637,15 @@ ac_includes_default="\
 
 ac_subst_vars='LTLIBOBJS
 LIBOBJS
+DYNAREPP
+MATLAB_ARCH
+MEXEXT
+MEXLDADD
+MEXFLAGS
+MEX
+MEXOPTS
+mexopts_sh
+MATLAB
 OCTAVE
 XSLTPROC
 DBLATEX
@@ -702,6 +711,9 @@ SHELL'
 ac_subst_files=''
 ac_user_opts='
 enable_option_checking
+with_matlab
+with_mex_options
+with_dynarepp
 '
       ac_precious_vars='build_alias
 host_alias
@@ -1333,6 +1345,13 @@ if test -n "$ac_init_help"; then
      short | recursive ) echo "Configuration of dynare 4.1-unstable:";;
    esac
   cat <<\_ACEOF
+
+Optional Packages:
+  --with-PACKAGE[=ARG]    use PACKAGE [ARG=yes]
+  --without-PACKAGE       do not use PACKAGE (same as --with-PACKAGE=no)
+  --with-matlab=ARG       check for Matlab [yes]
+  --with-mex-options=ARG  use MEX options file ARG [standard]
+  --with-dynarepp=ARG     path to Dynare++ [yes]
 
 Some influential environment variables:
   CXX         C++ compiler command
@@ -3991,6 +4010,332 @@ else
   { $as_echo "$as_me:$LINENO: result: no" >&5
 $as_echo "no" >&6; }
 fi
+
+
+
+
+ax_enable_matlab=
+
+# Check whether --with-matlab was given.
+if test "${with_matlab+set}" = set; then
+  withval=$with_matlab; case $withval in
+  yes | no)
+    # Explicitly enable or disable Matlab but determine
+    # Matlab prefix automatically.
+    ax_enable_matlab=$withval
+    ;;
+  *)
+    # Enable Matlab and use ARG as the Matlab prefix.
+    # ARG must be an existing directory.
+    ax_enable_matlab=yes
+    MATLAB=`cd "${withval-/}" > /dev/null 2>&1 && pwd`
+    if test -z "$MATLAB" ; then
+	{ { $as_echo "$as_me:$LINENO: error: invalid value '$withval' for --with-matlab" >&5
+$as_echo "$as_me: error: invalid value '$withval' for --with-matlab" >&2;}
+   { (exit 1); exit 1; }; }
+    fi
+    ;;
+esac
+fi
+
+{ $as_echo "$as_me:$LINENO: checking for Matlab prefix" >&5
+$as_echo_n "checking for Matlab prefix... " >&6; }
+if test "${ax_cv_matlab+set}" = set; then
+  $as_echo_n "(cached) " >&6
+else
+  if test "${MATLAB+set}" = set ; then
+    ax_cv_matlab=`cd "${MATLAB-/}" > /dev/null 2>&1 && pwd`
+else
+    ax_cv_matlab=
+    IFS=${IFS= 	} ; ax_ifs=$IFS ; IFS=:
+    for ax_dir in ${PATH-/opt/bin:/usr/local/bin:/usr/bin:/bin} ; do
+	if test -z "$ax_dir" ; then
+	    ax_dir=.
+	fi
+	if test -x "$ax_dir/matlab" ; then
+	    ax_dir=`echo "$ax_dir" | sed 's,/bin$,,'`
+	    # Directory sanity check.
+	    ax_cv_matlab=`cd "${ax_dir-/}" > /dev/null 2>&1 && pwd`
+	    if test -n "$ax_cv_matlab" ; then
+		break
+	    fi
+	fi
+    done
+    IFS=$ax_ifs
+fi
+if test -z "$ax_cv_matlab" ; then
+    ax_cv_matlab="not found"
+fi
+fi
+{ $as_echo "$as_me:$LINENO: result: $ax_cv_matlab" >&5
+$as_echo "$ax_cv_matlab" >&6; }
+if test "$ax_cv_matlab" = "not found" ; then
+    unset MATLAB
+else
+    # Strip trailing dashes.
+    MATLAB=`echo "$ax_cv_matlab" | sed 's,/*$,,'`
+fi
+{ $as_echo "$as_me:$LINENO: checking whether to enable Matlab support" >&5
+$as_echo_n "checking whether to enable Matlab support... " >&6; }
+if test x$ax_enable_matlab != xno ; then
+    if test "${MATLAB+set}" = set && test -d "$MATLAB/extern/include" ; then
+	ax_enable_matlab=yes
+    elif test x$ax_enable_matlab = x ; then
+	ax_enable_matlab=no
+    else
+	# Fail if Matlab was explicitly enabled.
+	{ $as_echo "$as_me:$LINENO: result: failure" >&5
+$as_echo "failure" >&6; }
+	{ { $as_echo "$as_me:$LINENO: error: check your Matlab setup" >&5
+$as_echo "$as_me: error: check your Matlab setup" >&2;}
+   { (exit 1); exit 1; }; }
+    fi
+fi
+{ $as_echo "$as_me:$LINENO: result: $ax_enable_matlab" >&5
+$as_echo "$ax_enable_matlab" >&6; }
+if test x$ax_enable_matlab = xyes ; then
+
+cat >>confdefs.h <<\_ACEOF
+#define HAVE_MATLAB 1
+_ACEOF
+
+fi
+
+
+
+if test "$ax_enable_matlab" = "yes"
+then
+
+mex_options=yes
+
+# Check whether --with-mex-options was given.
+if test "${with_mex_options+set}" = set; then
+  withval=$with_mex_options; mex_options=$withval
+fi
+
+{ $as_echo "$as_me:$LINENO: checking for MEX options file handling" >&5
+$as_echo_n "checking for MEX options file handling... " >&6; }
+case $mex_options in
+  yes)
+    { $as_echo "$as_me:$LINENO: result: standard" >&5
+$as_echo "standard" >&6; }
+    mexopts_sh=
+    ;;
+  no)
+    { $as_echo "$as_me:$LINENO: result: disabled" >&5
+$as_echo "disabled" >&6; }
+    mexopts_sh=$ac_aux_dir/noopts.sh
+    ;;
+  *)
+    { $as_echo "$as_me:$LINENO: result: enabled" >&5
+$as_echo "enabled" >&6; }
+    mexopts_sh=$mex_options
+    ;;
+esac
+if test -n "$mexopts_sh" ; then
+    { $as_echo "$as_me:$LINENO: checking whether MEX options file exists" >&5
+$as_echo_n "checking whether MEX options file exists... " >&6; }
+    if test -f "$mexopts_sh" ; then
+	{ $as_echo "$as_me:$LINENO: result: yes" >&5
+$as_echo "yes" >&6; }
+	# Canonicalize file name.
+	mexopts_sh_dir=`echo "$mexopts_sh" | sed 's,[^/]*$,,'`
+	mexopts_sh_dir=`cd "${mexopts_sh_dir-.}" && pwd`
+	mexopts_sh_name=`echo "$mexopts_sh" | sed 's,.*/,,'`
+	mexopts_sh="$mexopts_sh_dir/$mexopts_sh_name"
+    else
+	{ $as_echo "$as_me:$LINENO: result: no" >&5
+$as_echo "no" >&6; }
+	{ { $as_echo "$as_me:$LINENO: error: $mexopts_sh: no such file" >&5
+$as_echo "$as_me: error: $mexopts_sh: no such file" >&2;}
+   { (exit 1); exit 1; }; }
+    fi
+    MEXOPTS="-f $mexopts_sh"
+else
+    MEXOPTS=
+fi
+
+
+
+
+
+
+
+if test "${MEX+set}" != set ; then
+    case $host_os in
+      *cygwin* | *mingw32*)
+	ax_list='mextool mex mex.bat'
+	;;
+      *)
+	ax_list='mex'
+	;;
+    esac
+    for ac_prog in $ax_list
+do
+  # Extract the first word of "$ac_prog", so it can be a program name with args.
+set dummy $ac_prog; ac_word=$2
+{ $as_echo "$as_me:$LINENO: checking for $ac_word" >&5
+$as_echo_n "checking for $ac_word... " >&6; }
+if test "${ac_cv_path_MEX+set}" = set; then
+  $as_echo_n "(cached) " >&6
+else
+  case $MEX in
+  [\\/]* | ?:[\\/]*)
+  ac_cv_path_MEX="$MEX" # Let the user override the test with a path.
+  ;;
+  *)
+  as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
+as_dummy="$MATLAB/bin:$PATH"
+for as_dir in $as_dummy
+do
+  IFS=$as_save_IFS
+  test -z "$as_dir" && as_dir=.
+  for ac_exec_ext in '' $ac_executable_extensions; do
+  if { test -f "$as_dir/$ac_word$ac_exec_ext" && $as_test_x "$as_dir/$ac_word$ac_exec_ext"; }; then
+    ac_cv_path_MEX="$as_dir/$ac_word$ac_exec_ext"
+    $as_echo "$as_me:$LINENO: found $as_dir/$ac_word$ac_exec_ext" >&5
+    break 2
+  fi
+done
+done
+IFS=$as_save_IFS
+
+  ;;
+esac
+fi
+MEX=$ac_cv_path_MEX
+if test -n "$MEX"; then
+  { $as_echo "$as_me:$LINENO: result: $MEX" >&5
+$as_echo "$MEX" >&6; }
+else
+  { $as_echo "$as_me:$LINENO: result: no" >&5
+$as_echo "no" >&6; }
+fi
+
+
+  test -n "$MEX" && break
+done
+test -n "$MEX" || MEX="mex"
+
+fi
+
+if test "${MEXFLAGS+set}" != set ; then
+    MEXFLAGS=-O
+fi
+
+if test "${MEXLDADD+set}" != set ; then
+    MEXLDADD=
+fi
+
+
+
+
+
+{ $as_echo "$as_me:$LINENO: checking for MEX-file suffix" >&5
+$as_echo_n "checking for MEX-file suffix... " >&6; }
+if test "${ax_cv_mexext+set}" = set; then
+  $as_echo_n "(cached) " >&6
+else
+  if test "${MEXEXT+set}" = set ; then
+    ax_cv_mexext="$MEXEXT"
+else
+    case $host_os in
+      *cygwin* | *mingw32*)
+        ax_cv_mexext=`$MATLAB/bin/mexext.bat | sed 's/\r//'`
+        ;;
+      *)
+        ax_cv_mexext=`$MATLAB/bin/mexext`
+        ;;
+    esac
+fi
+fi
+{ $as_echo "$as_me:$LINENO: result: $ax_cv_mexext" >&5
+$as_echo "$ax_cv_mexext" >&6; }
+MEXEXT="$ax_cv_mexext"
+
+
+
+
+{ $as_echo "$as_me:$LINENO: checking for Matlab machine architecture" >&5
+$as_echo_n "checking for Matlab machine architecture... " >&6; }
+if test "${ax_cv_matlab_arch+set}" = set; then
+  $as_echo_n "(cached) " >&6
+else
+  if test "${MATLAB_ARCH+set}" = set ; then
+    ax_cv_matlab_arch="$MATLAB_ARCH"
+else
+    case $MEXEXT in
+      dll)
+	ax_cv_matlab_arch=win32
+	;;
+      mexw32)
+	ax_cv_matlab_arch=win32
+	;;
+      mexw64)
+	ax_cv_matlab_arch=win64
+	;;
+      mexglx)
+	ax_cv_matlab_arch=glnx86
+	;;
+      mexa64)
+	ax_cv_matlab_arch=glnxa64
+	;;
+      *)
+	ax_cv_matlab_arch=unknown
+	;;
+    esac
+fi
+fi
+{ $as_echo "$as_me:$LINENO: result: $ax_cv_matlab_arch" >&5
+$as_echo "$ax_cv_matlab_arch" >&6; }
+MATLAB_ARCH="$ax_cv_matlab_arch"
+
+
+fi
+
+
+ax_enable_dynarepp=
+
+# Check whether --with-dynarepp was given.
+if test "${with_dynarepp+set}" = set; then
+  withval=$with_dynarepp; case $withval in
+  no)
+    # Explicitly enable or disable Dynare++ but determine
+    # Matlab prefix automatically.
+    ax_enable_dynarepp=no
+    ;;
+  *)
+    # Enable Dynare++ and use ARG as the Dynare++ prefix.
+    # ARG must be an existing directory.
+    ax_enable_dynarepp=yes
+    DYNAREPP=`cd "${withval-/}" > /dev/null 2>&1 && pwd`
+    if test -z "$DYNAREPP" ; then
+	{ { $as_echo "$as_me:$LINENO: error: invalid value '$withval' for --with-dynarepp" >&5
+$as_echo "$as_me: error: invalid value '$withval' for --with-dynarepp" >&2;}
+   { (exit 1); exit 1; }; }
+    fi
+    ;;
+esac
+fi
+
+{ $as_echo "$as_me:$LINENO: checking for Dynare++" >&5
+$as_echo_n "checking for Dynare++... " >&6; }
+if test x$ax_enable_dynarepp != xno ; then
+    if test "${DYNAREPP+set}" = set && test -d "$DYNAREPP/kord" ; then
+	ax_enable_dynarepp=yes
+    elif test x$ax_enable_dynarepp = x ; then
+	ax_enable_dynarepp=no
+    else
+	# Fail if Matlab was explicitly enabled.
+	{ $as_echo "$as_me:$LINENO: result: failure" >&5
+$as_echo "failure" >&6; }
+	{ { $as_echo "$as_me:$LINENO: error: check your Dynare++ setup" >&5
+$as_echo "$as_me: error: check your Dynare++ setup" >&2;}
+   { (exit 1); exit 1; }; }
+    fi
+fi
+{ $as_echo "$as_me:$LINENO: result: $ax_enable_dynarepp" >&5
+$as_echo "$ax_enable_dynarepp" >&6; }
 
 
 

@@ -121,3 +121,7 @@ AM_CONDITIONAL([MATLAB], [test x$ax_enable_matlab = xyes])
 ])
 
 dnl matlab.m4 ends here
+
+dnl Local variables:
+dnl tab-width: 8
+dnl End:
