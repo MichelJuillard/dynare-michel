@@ -61,7 +61,7 @@ function  [LIK, lik] = missing_observations_kalman_filter(T,R,Q,H,P,Y,start,mf,k
     
     while notsteady & t<smpl 
         t  = t+1;
-        d_index = data_index{t}
+        d_index = data_index{t};
         if isempty(d_index)
             a = T*a;
             P = T*P*transpose(T)+QQ;
