@@ -678,8 +678,16 @@ BasicKalmanTask::filterNonDiffuse(const Vector&a,const GeneralMatrix&P,
 //  PtZeros.zeros();
   if(TSUtils::hasNegativeDiagonal(Pt)||!TSUtils::isSymDiagDominant(Pt))
     return 0.0;
+  const int m=Pt.numRows();
+  const int n=Zt.numRows();
+  int inc =1;
+  const int rcols= Rt.numCols();
   GeneralMatrix Ft (Ht.numRows(), Ht.numCols()  );
   GeneralMatrix Lt(Tt);
+  GeneralMatrix PtLttrans(m,m);
+  GeneralMatrix Mt(m,n);
+  GeneralMatrix Kt(m,n);
+  GeneralMatrix QtRttrans(rcols,Rt.numRows());
 //  PLUFact Ftinv(Ft);
 
   bool isTunit=0;// Tt->isUnit();
@@ -688,10 +696,8 @@ BasicKalmanTask::filterNonDiffuse(const Vector&a,const GeneralMatrix&P,
   const double alpha=1.0;
   const double neg_alpha=-1.0;
   const double omega=0.0;
-  const int m=Pt.numRows();
-  const int n=Zt.numRows();
-  const int rcols= Rt.numCols();
-
+  Vector vt(n);
+  Vector atsave(m);//((const Vector&)at);
   int t= 1; 
   int nonsteady=1;
   for(;t<=data.numCols()&&nonsteady;++t)
@@ -701,13 +707,19 @@ BasicKalmanTask::filterNonDiffuse(const Vector&a,const GeneralMatrix&P,
     /*****************
     This calculates  $$v_t = y_t - Z_t*a_t.$$
     *****************/   
-    Vector vt(yt);
-    Zt.multsVec(vt,at);
+//    Vector vt(yt);
+    vt=yt;
+//    Zt.multsVec(vt,at);
+	  BLAS_dgemv("N",  &n,  &m, &neg_alpha, Zt.base(), &n, at.base(), 
+        &inc, &alpha, vt.base(), &inc);
     
     /*****************
     This calculates $$F_t = Z_tP_tZ_t^T+H_t.$$
     *****************/   
-    GeneralMatrix Mt(Pt,Zt,"trans");
+//    GeneralMatrix Mt(Pt,Zt,"trans");
+		BLAS_dgemm("N", "T", &m, &n, &m, &alpha, Pt.base(), &m,
+				   Zt.base(), &n, &omega, Mt.base(), &m); 
+
 //    GeneralMatrix Ft(Ht);
     Ft=Ht;
 //    Ft.multAndAdd(Zt,ConstGeneralMatrix(Mt));
@@ -722,7 +734,9 @@ BasicKalmanTask::filterNonDiffuse(const Vector&a,const GeneralMatrix&P,
     /*****************
     This calculates $$K_t = T_tP_tZ_t^TF_t^{-1}.$$
     *****************/   
-    GeneralMatrix Kt(Tt,Mt);
+//    GeneralMatrix Kt(Tt,Mt);
+		BLAS_dgemm("N", "N", &m, &n, &m, &alpha, Tt.base(), &m,
+				   Mt.base(), &m, &omega, Kt.base(), &m); 
     Ftinv.multInvRight(Kt);
     
     /*****************
@@ -751,7 +765,8 @@ BasicKalmanTask::filterNonDiffuse(const Vector&a,const GeneralMatrix&P,
       *****************/   
       if(!isTunit)
         {
-        Vector atsave((const Vector&)at);
+//        Vector atsave((const Vector&)at);
+        atsave=at;
         Tt.multVec(0.0,at,1.0,atsave);
         }
       Kt.multVec(1.0,at,1.0,ConstVector(vt));
@@ -759,7 +774,10 @@ BasicKalmanTask::filterNonDiffuse(const Vector&a,const GeneralMatrix&P,
       /*****************
       This calculates $$P_{t+1} = T_tP_tL_t^T + R_tQ_tR_t^T.$$
       *****************/   
-      GeneralMatrix PtLttrans(Pt,Lt,"trans");
+//    GeneralMatrix PtLttrans(Pt,Lt,"trans");
+   // DGEMM: C := alpha*op( A )*op( B ) + beta*C,
+  		BLAS_dgemm("N", "T", &m, &m, &m, &alpha, Pt.base(), &m,
+				   Lt.base(), &m, &omega, PtLttrans.base(), &m); 
       if(!isTunit)
         {
 //        Pt.zeros();
@@ -775,7 +793,10 @@ BasicKalmanTask::filterNonDiffuse(const Vector&a,const GeneralMatrix&P,
         }
       if(!isRzero&&!isQzero)
         {
-        GeneralMatrix QtRttrans(Qt,Rt,"trans");
+//      GeneralMatrix QtRttrans(Qt,Rt,"trans");
+        BLAS_dgemm("N", "T", &rcols, &m, &rcols, &alpha, Qt.base(), &rcols,
+				   Rt.base(), &m, &omega, QtRttrans.base(), &rcols); 
+
  //       Pt.multAndAdd(Rt,ConstGeneralMatrix(QtRttrans));
         // DGEMM: C := alpha*op( A )*op( B ) + beta*C,
 		    BLAS_dgemm("N", "N", &m, &m,  &rcols, &alpha, Rt.base(), &m,
@@ -910,321 +931,313 @@ BasicKalmanTask::filterNonDiffuse(const Vector&a,const GeneralMatrix&P,
       }
     }
   
-    /*****************
-    This runs a diffuse filter. Similarly as for
-    |KalmanTask::filterNonDiffuse| the filter is started with a given $t$,
-    $a_t$, $P_*$, and $P_\infty$ and stores the results to
-    |DiffuseFilterResults| |fres|.
+/*****************
+This runs a diffuse filter. Similarly as for
+|KalmanTask::filterNonDiffuse| the filter is started with a given $t$,
+$a_t$, $P_*$, and $P_\infty$ and stores the results to
+|DiffuseFilterResults| |fres|.
     
-      This executes the diffuse multivariate filter period by period and if
-      the variance of states $P=P_*+\kappa P_\infty$ is finite for
-      $kappa->oo $, then we switch to |KalmanTask::filterNonDiffuse|. 
-      
-        The switching has two reasons: 
-        The first is that the non-diffuse filter is computationally more efficient
-        (since it avoids multiplications of zero matrices). The second reason
-        is much more important. As $P_\infty$ approaches to zero, then
-        $F_\infty=Z P_\infty Z^T$ approaches to zero and might contain severe
-        roundoffs. All the operations employing its inverse, $F_\infty^{-1}$,
-        will commit very bad roundoff errors, and the results will become
-        unusable. That is why it is important to not only switch to
-        non-diffuse filter, but also to switch at the right period.
-        
-          In theory, the period $d$ of switching is equal to a number of
-          (univariate) observations for which $F_\infty$ is regular. This is
-          because the regular $F_\infty=ZP_\infty Z^T$ conveys some information
-          to $P=P_*+\kappa P_\infty$. However, it is only a theoretical result;
-          in real floating point world it is difficult to recognize a regular
-          matrix in this process. Moreover, the $F_\infty$ might be singular and
-          still convey some information for the diffuse elements since it might
-          have non-zero rank.
-          
-            In this implementation, we use the above idea with the following test
-            for regularity of $F_\infty$. $F_\infty$ is considered to be regular,
-            if its PLU factorization yields a condition number estimate less than
-            $10^10$. During the process it might happen that $P_\infty$ is
-            indefinite. In this case we correct it by setting its negative
-            eigenvalues to zero. So $F_\infty=ZP_\infty Z$ is always positive
-            semidefinite, so no tests for a sign of its determinant are
-            necessary. Further, the test for $F_\infty=0$ here is equivalent to an
-            exact match. This can be done since the roundoff errors are believed
-            to be eliminated during correcting the $P_\infty$ matrix, where not
-            only negative eigenvalues but also very small positive eigenvalues are
-            corrected to zeros. In neither case, this is if $F_\infty$ is regular
-            and still is non-zero, we raise end the filter. This error can be
-            recognized by |FilterResults::per| less than a number of periods.
-            
-              This is just one of many ways, how to implement this non-continuous
-              algorithm. It is theoretically continuous (since the non-diffuse
-              periods having $P_\infty$ zero are covered by the branch where
-              $F_\infty=0$). However, it is computationally discontinuous, since the
-              calcs depend on when we switch to non-diffuse filter. Because of the
-              roundoff errors we are uncertain about the switch. An experience shows
-              that if we switch late, the results can be very bad due to roundoff
-              errors implied by late switch, if we switch too early, the results
-              might be wrong since we neglect some uncertainity.
-              
-                Main decision point is |ndiff|. Whenever |ndiff<=0|, we consider
-                $P_\infty$ as zero and carry on as in non-diffuse filter.
-                *****************/   
-                
-                void 
-                  KalmanTask::filterDiffuse(const Vector&a,const GeneralMatrix&Pstar,
-                  const GeneralMatrix&Pinf,int first,
-                  DiffuseFilterResults&fres)const
-                  {
-                  Vector at(a);
-                  GeneralMatrix Ptstar(Pstar);
-                  GeneralMatrix Ptinf(Pinf);
-                  int ndiff= init.getNDiff();
-                  for(int t= first;t<=data.numCols();t++)
-                    {
-                    
-                    /*****************
-                    If $P_\infty$ is exactly zero, then we run the non-diffuse
-                    filter. The $P_\infty$ might become exactly zero by negative or zero
-                    |ndiff|, or by $P\infty$ definitness correction.    
-                    *****************/   
-                    if(TSUtils::isZero(Ptinf))
-                      {
-                      filterNonDiffuse(at,Ptstar,t,fres);
-                      return;
-                      }
-                    
-                    ConstVector yt(data,t-1);
-                    ConstGeneralMatrix Zt(((const TMatrix&)*ssf.Z)[t]);
-                    ConstGeneralMatrix Ht(((const TMatrix&)*ssf.H)[t]);
-                    ConstGeneralMatrix Tt(((const TMatrix&)*ssf.T)[t]);
-                    ConstGeneralMatrix Qt(((const TMatrix&)*ssf.Q)[t]);
-                    ConstGeneralMatrix Rt(((const TMatrix&)*ssf.R)[t]);
-                    bool isTunit= ssf.T->isUnit(t);
-                    bool isQzero= ssf.Q->isZero(t);
-                    bool isRzero= ssf.R->isZero(t);
-                    
-                    /*****************
-                    This calculates  $$v_t = y_t - Z_t*a_t.$$
-                    *****************/   
-                    Vector vt(yt);
-                    Zt.multsVec(vt,at);
-                    
-                    
-                    /*****************
-                    This calculates $$M_{*,t} = P_{*,t}Z_t^T.$$
-                    *****************/   
-                    GeneralMatrix Mtstar(Ptstar,Zt,"trans");
-                    
-                    
-                    
-                    /*****************
-                    This calculates $$F_{*,t} = Z_tP_{*,t}^T+H_t.$$
-                    *****************/   
-                    GeneralMatrix Ftstar(Ht);
-                    Ftstar.multAndAdd(Zt,ConstGeneralMatrix(Mtstar));
-                    
-                    
-                    
-                    /*****************
-                    This calculates $$M_{\infty,t} = P_{\infty,t}Z_t^T.$$
-                    *****************/   
-                    GeneralMatrix Mtinf(Ptinf,Zt,"trans");
-                    
-                    
-                    
-                    /*****************
-                    This calculates $$F_{\infty,t} = Z_tP_{\infty,t}Z_t^T.$$
-                    *****************/   
-                    GeneralMatrix Ftinf(Zt,ConstGeneralMatrix(Mtinf));
-                    
-                    
-                    PLUFact Ftinfinv(Ftinf);
-                    if(Ftinfinv.isRegular()&&Ftinfinv.getRcond()> 1.e-10)
-                      {
-                      ndiff-= ssf.p;
-                      
-                      /*****************
-                      We calculate all other matrices, and if we have not come to the end,
-                      also $a_{t+1}$, $P_{*,t+1}$ and $P_{\infty,t+1}$. If |ndiff<=0|, we
-                      set $P_{\infty,t+1}=0$. The matrix can be set to zero even if it is
-                      not positive semidefinite in the code correcting definitness of
-                      $P_\infty$.
-                      *****************/   
-                      
-                      /*****************
-                      This calculates $$F_t^{(2)} = -F_{\infty,t}^{-1}F_{*,t}F_{\infty,t}^{-1}.$$
-                      *****************/   
-                      GeneralMatrix Ft_2(Ftstar);
-                      Ftinfinv.multInvRight(Ft_2);
-                      Ftinfinv.multInvLeft(Ft_2);
-                      Ft_2.mult(-1.0);
-                      
-                      /*****************
-                      This calculates $$K_t^{(0)} = T_tM_{\infty,t}F_t^{(1)}.$$
-                      *****************/   
-                      GeneralMatrix Kt_0(Tt,Mtinf);
-                      Ftinfinv.multInvRight(Kt_0);
-                      
-                      /*****************
-                      This calculates $$K_t^{(1)} = T_t(M_{\infty,t}F_t^{(2)}+M_{*,t}F_t^{(1)}).$$
-                      *****************/   
-                      GeneralMatrix Kt_1(Mtstar);
-                      Ftinfinv.multInvRight(Kt_1);
-                      Kt_1.multAndAdd(Mtinf,Ft_2);
-                      if(!isTunit)
-                        Kt_1.multLeft(Tt);
-                      
-                        /*****************
-                        This calculates $$L_t^{(0)} = T_t-K_t^{(0)}Z_t.$$
-                      *****************/   
-                      GeneralMatrix Lt_0(Tt);
-                      Lt_0.multAndAdd(ConstGeneralMatrix(Kt_0),Zt,-1.0);
-                      
-                      /*****************
-                      This calculates $$L_t^{(1)} = -K_t^{(1)}Z_t.$$
-                      *****************/   
-                      GeneralMatrix Lt_1(Kt_1,Zt);
-                      Lt_1.mult(-1.0);
-                      
-                      /*****************
-                      This calculates log likelihood and store results
-                      *****************/   
-                      double ll= -0.5*(ssf.p*log(2*M_PI)+Ftinfinv.getLogDeterminant());
-                      fres.set(t,Ftinfinv,Ft_2,vt,Lt_0,Lt_1,at,Pstar,Pinf,ll);
-                      
-                      if(t<data.numCols())
-                        {
-                        if(!isTunit)
-                          {
-                          Vector atsave((const Vector&)at);
-                          Tt.multVec(0.0,at,1.0,atsave);
-                          }
-                        Kt_0.multVec(1.0,at,1.0,vt);
-                        
-                        /*****************
-                        This calculates
-                        $$P_{*,t+1} = T_t(P_{*,t}L_t^{(0)T}+P_{\infty,t}L_t^{(1)T})+R_tQ_tR_t^T.$$
-                        *****************/
-                        GeneralMatrix tmp(Ptstar,Lt_0,"trans");
-                        tmp.multAndAdd(Ptinf,Lt_1,"trans");
-                        if(!isTunit)
-                          Ptstar.mult(Tt,ConstGeneralMatrix(tmp));
-                        else
-                          Ptstar= (const GeneralMatrix&)tmp;
-                        if(!isQzero&&!isRzero)
-                          {
-                          GeneralMatrix QtRttrans(Qt,Rt,"trans");
-                          Ptstar.multAndAdd(Rt,ConstGeneralMatrix(QtRttrans));
-                          }
-                        
-                          /*****************
-                          We call |TSUtils::correctDefinitness| only if it has a negative
-                          diagonal or it is not diagonall dominant. We could call the routine in
-                          all any case, but it is costly.        
-                        *****************/
-                        if(TSUtils::hasNegativeDiagonal(Ptstar)||!TSUtils::isSymDiagDominant(Ptstar))
-                          TSUtils::correctDefinitness(Ptstar);
-                        
-                          /*****************
-                          This calculates $$P_{\infty,t+1} = T_tP_{\infty,t}L_t^{(0)T}.$$ Due
-                          to possible roundoff errors, the resulting matrix might not be
-                          symmetric, so we amend it by putting it to ${1\over
-                          2}(P_{\infty,t+1}+P_{\infty,t+1}^T)$.        
-                        *****************/
-                        if(!isTunit)
-                          Ptinf.multLeft(Tt);
-                        Ptinf.multRightTrans(Lt_0);
-                        TSUtils::correctSymmetricity(Ptinf);
-                        
-                        /*****************
-                        We check the semidefinitness of new $P_{\infty,t+1}$. If it is not,
-                        then the roundoff error is guilty for the mess and we have to correct
-                        the matrix to be semidefinite.        
-                        *****************/
-                        if(TSUtils::hasNegativeDiagonal(Ptinf)||!TSUtils::isSymDiagDominant(Ptinf))
-                          TSUtils::correctDefinitness(Ptinf);
-                        
-                        if(ndiff<=0)
-                          Ptinf.zeros();
-                        }
+This executes the diffuse multivariate filter period by period and if
+the variance of states $P=P_*+\kappa P_\infty$ is finite for
+$kappa->oo $, then we switch to |KalmanTask::filterNonDiffuse|. 
+
+The switching has two reasons: 
+The first is that the non-diffuse filter is computationally more efficient
+(since it avoids multiplications of zero matrices). The second reason
+is much more important. As $P_\infty$ approaches to zero, then
+$F_\infty=Z P_\infty Z^T$ approaches to zero and might contain severe
+roundoffs. All the operations employing its inverse, $F_\infty^{-1}$,
+will commit very bad roundoff errors, and the results will become
+unusable. That is why it is important to not only switch to
+non-diffuse filter, but also to switch at the right period.
+
+In theory, the period $d$ of switching is equal to a number of
+(univariate) observations for which $F_\infty$ is regular. This is
+because the regular $F_\infty=ZP_\infty Z^T$ conveys some information
+to $P=P_*+\kappa P_\infty$. However, it is only a theoretical result;
+in real floating point world it is difficult to recognize a regular
+matrix in this process. Moreover, the $F_\infty$ might be singular and
+still convey some information for the diffuse elements since it might
+have non-zero rank.
+
+In this implementation, we use the above idea with the following test
+for regularity of $F_\infty$. $F_\infty$ is considered to be regular,
+if its PLU factorization yields a condition number estimate less than
+$10^10$. During the process it might happen that $P_\infty$ is
+indefinite. In this case we correct it by setting its negative
+eigenvalues to zero. So $F_\infty=ZP_\infty Z$ is always positive
+semidefinite, so no tests for a sign of its determinant are
+necessary. Further, the test for $F_\infty=0$ here is equivalent to an
+exact match. This can be done since the roundoff errors are believed
+to be eliminated during correcting the $P_\infty$ matrix, where not
+only negative eigenvalues but also very small positive eigenvalues are
+corrected to zeros. In neither case, this is if $F_\infty$ is regular
+and still is non-zero, we raise end the filter. This error can be
+recognized by |FilterResults::per| less than a number of periods.
+
+This is just one of many ways, how to implement this non-continuous
+algorithm. It is theoretically continuous (since the non-diffuse
+periods having $P_\infty$ zero are covered by the branch where
+$F_\infty=0$). However, it is computationally discontinuous, since the
+calcs depend on when we switch to non-diffuse filter. Because of the
+roundoff errors we are uncertain about the switch. An experience shows
+that if we switch late, the results can be very bad due to roundoff
+errors implied by late switch, if we switch too early, the results
+might be wrong since we neglect some uncertainity.
+
+Main decision point is |ndiff|. Whenever |ndiff<=0|, we consider
+$P_\infty$ as zero and carry on as in non-diffuse filter.
+*****************/   
+
+void 
+KalmanTask::filterDiffuse(const Vector&a,const GeneralMatrix&Pstar,
+const GeneralMatrix&Pinf,int first,
+DiffuseFilterResults&fres)const
+  {
+  Vector at(a);
+  GeneralMatrix Ptstar(Pstar);
+  GeneralMatrix Ptinf(Pinf);
+  int ndiff= init.getNDiff();
+  for(int t= first;t<=data.numCols();t++)
+    {
+    
+    /*****************
+    If $P_\infty$ is exactly zero, then we run the non-diffuse
+    filter. The $P_\infty$ might become exactly zero by negative or zero
+    |ndiff|, or by $P\infty$ definitness correction.    
+    *****************/   
+    if(TSUtils::isZero(Ptinf))
+      {
+      filterNonDiffuse(at,Ptstar,t,fres);
+      return;
       }
-      else if(TSUtils::isZero(Ftinf))
+    
+    ConstVector yt(data,t-1);
+    ConstGeneralMatrix Zt(((const TMatrix&)*ssf.Z)[t]);
+    ConstGeneralMatrix Ht(((const TMatrix&)*ssf.H)[t]);
+    ConstGeneralMatrix Tt(((const TMatrix&)*ssf.T)[t]);
+    ConstGeneralMatrix Qt(((const TMatrix&)*ssf.Q)[t]);
+    ConstGeneralMatrix Rt(((const TMatrix&)*ssf.R)[t]);
+    bool isTunit= ssf.T->isUnit(t);
+    bool isQzero= ssf.Q->isZero(t);
+    bool isRzero= ssf.R->isZero(t);
+    
+    /*****************
+    This calculates  $$v_t = y_t - Z_t*a_t.$$
+    *****************/   
+    Vector vt(yt);
+    Zt.multsVec(vt,at);
+    
+    
+    /*****************
+    This calculates $$M_{*,t} = P_{*,t}Z_t^T.$$
+    *****************/   
+    GeneralMatrix Mtstar(Ptstar,Zt,"trans");
+    
+    /*****************
+    This calculates $$F_{*,t} = Z_tP_{*,t}^T+H_t.$$
+    *****************/   
+    GeneralMatrix Ftstar(Ht);
+    Ftstar.multAndAdd(Zt,ConstGeneralMatrix(Mtstar));
+    
+    /*****************
+    This calculates $$M_{\infty,t} = P_{\infty,t}Z_t^T.$$
+    *****************/   
+    GeneralMatrix Mtinf(Ptinf,Zt,"trans");
+    
+    /*****************
+    This calculates $$F_{\infty,t} = Z_tP_{\infty,t}Z_t^T.$$
+    *****************/   
+    GeneralMatrix Ftinf(Zt,ConstGeneralMatrix(Mtinf));
+    
+    
+    PLUFact Ftinfinv(Ftinf);
+    if(Ftinfinv.isRegular()&&Ftinfinv.getRcond()> 1.e-10)
+      {
+      ndiff-= ssf.p;
+      
+      /*****************
+      We calculate all other matrices, and if we have not come to the end,
+      also $a_{t+1}$, $P_{*,t+1}$ and $P_{\infty,t+1}$. If |ndiff<=0|, we
+      set $P_{\infty,t+1}=0$. The matrix can be set to zero even if it is
+      not positive semidefinite in the code correcting definitness of
+      $P_\infty$.
+      *****************/   
+      
+      /*****************
+      This calculates $$F_t^{(2)} = -F_{\infty,t}^{-1}F_{*,t}F_{\infty,t}^{-1}.$$
+      *****************/   
+      GeneralMatrix Ft_2(Ftstar);
+      Ftinfinv.multInvRight(Ft_2);
+      Ftinfinv.multInvLeft(Ft_2);
+      Ft_2.mult(-1.0);
+      
+      /*****************
+      This calculates $$K_t^{(0)} = T_tM_{\infty,t}F_t^{(1)}.$$
+      *****************/   
+      GeneralMatrix Kt_0(Tt,Mtinf);
+      Ftinfinv.multInvRight(Kt_0);
+      
+      /*****************
+      This calculates $$K_t^{(1)} = T_t(M_{\infty,t}F_t^{(2)}+M_{*,t}F_t^{(1)}).$$
+      *****************/   
+      GeneralMatrix Kt_1(Mtstar);
+      Ftinfinv.multInvRight(Kt_1);
+      Kt_1.multAndAdd(Mtinf,Ft_2);
+      if(!isTunit)
+        Kt_1.multLeft(Tt);
+      
+      /*****************
+      This calculates $$L_t^{(0)} = T_t-K_t^{(0)}Z_t.$$
+      *****************/   
+      GeneralMatrix Lt_0(Tt);
+      Lt_0.multAndAdd(ConstGeneralMatrix(Kt_0),Zt,-1.0);
+      
+      /*****************
+      This calculates $$L_t^{(1)} = -K_t^{(1)}Z_t.$$
+      *****************/   
+      GeneralMatrix Lt_1(Kt_1,Zt);
+      Lt_1.mult(-1.0);
+      
+      /*****************
+      This calculates log likelihood and store results
+      *****************/   
+      double ll= -0.5*(ssf.p*log(2*M_PI)+Ftinfinv.getLogDeterminant());
+      fres.set(t,Ftinfinv,Ft_2,vt,Lt_0,Lt_1,at,Pstar,Pinf,ll);
+      
+      if(t<data.numCols())
         {
+        if(!isTunit)
+          {
+          Vector atsave((const Vector&)at);
+          Tt.multVec(0.0,at,1.0,atsave);
+          }
+        Kt_0.multVec(1.0,at,1.0,vt);
+        
         /*****************
-        If $F_{*,t}$ is not regular, we return and the filter has not
-        finished. The regularity is checked exactly.        
+        This calculates
+        $$P_{*,t+1} = T_t(P_{*,t}L_t^{(0)T}+P_{\infty,t}L_t^{(1)T})+R_tQ_tR_t^T.$$
         *****************/
-        PLUFact Ftstarinv(Ftstar);
-        if(!Ftstarinv.isRegular())
+        GeneralMatrix tmp(Ptstar,Lt_0,"trans");
+        tmp.multAndAdd(Ptinf,Lt_1,"trans");
+        if(!isTunit)
+          Ptstar.mult(Tt,ConstGeneralMatrix(tmp));
+        else
+          Ptstar= (const GeneralMatrix&)tmp;
+        if(!isQzero&&!isRzero)
           {
-          return;
+          GeneralMatrix QtRttrans(Qt,Rt,"trans");
+          Ptstar.multAndAdd(Rt,ConstGeneralMatrix(QtRttrans));
           }
         
-          /*****************
-          This calculates $$K_t^{(0)} = T_tM_{*,t}F_{*,t}^{-1}.$$
-        *****************/   
-        GeneralMatrix Kt_0(Tt,Mtstar);
-        Ftstarinv.multInvRight(Kt_0);
+        /*****************
+        We call |TSUtils::correctDefinitness| only if it has a negative
+        diagonal or it is not diagonall dominant. We could call the routine in
+        all any case, but it is costly.        
+        *****************/
+        if(TSUtils::hasNegativeDiagonal(Ptstar)||!TSUtils::isSymDiagDominant(Ptstar))
+          TSUtils::correctDefinitness(Ptstar);
         
         /*****************
-        This calculates $$L_t^{(0)} = T_t-K_t^{(0)}Z_t.$$
-        *****************/   
-        GeneralMatrix Lt_0(Tt);
-        Lt_0.multAndAdd(ConstGeneralMatrix(Kt_0),Zt,-1.0);
-        
+        This calculates $$P_{\infty,t+1} = T_tP_{\infty,t}L_t^{(0)T}.$$ Due
+        to possible roundoff errors, the resulting matrix might not be
+        symmetric, so we amend it by putting it to ${1\over
+        2}(P_{\infty,t+1}+P_{\infty,t+1}^T)$.        
+        *****************/
+        if(!isTunit)
+          Ptinf.multLeft(Tt);
+        Ptinf.multRightTrans(Lt_0);
+        TSUtils::correctSymmetricity(Ptinf);
         
         /*****************
-        This calculates log likelihood and store results
-        *****************/   
-        double ll= calcStepLogLik(Ftstarinv,vt);
-        fres.set(t,Ftstarinv,vt,Lt_0,at,Ptstar,Ptinf,ll);
+        We check the semidefinitness of new $P_{\infty,t+1}$. If it is not,
+        then the roundoff error is guilty for the mess and we have to correct
+        the matrix to be semidefinite.        
+        *****************/
+        if(TSUtils::hasNegativeDiagonal(Ptinf)||!TSUtils::isSymDiagDominant(Ptinf))
+          TSUtils::correctDefinitness(Ptinf);
         
-        
-        if(t<data.numCols())
-          {
-          /*****************
-          This calculates $$a_{t+1} = T_ta_t+K_t^{(0)}v_t.$$
-          *****************/   
-          if(!isTunit)
-            {
-            Vector atsave((const Vector&)at);
-            Tt.multVec(0.0,at,1.0,atsave);
-            }
-          Kt_0.multVec(1.0,at,1.0,vt);
-          
-          /*****************
-          This calculates $$P_{\infty,t+1} = T_tP_{\infty,t}T_t^T.$$
-          *****************/   
-          if(!isTunit){
-            GeneralMatrix PtinfTttrans(Ptinf,Tt,"trans");
-            Ptinf.mult(Tt,ConstGeneralMatrix(PtinfTttrans));
-            }
-          
-          
-          if(TSUtils::hasNegativeDiagonal(Ptinf)||!TSUtils::isSymDiagDominant(Ptinf))
-            TSUtils::correctDefinitness(Ptinf);
-          
-            /*****************
-            This calculates $$P_{*,t+1} = T_tP_{*,t}L_t^{(0)T}+R_tQ_tR_t^T.$$   
-          *****************/   
-          GeneralMatrix PtstarLt_0trans(Ptstar,Lt_0,"trans");
-          if(!isTunit)
-            Ptstar.mult(Tt,ConstGeneralMatrix(PtstarLt_0trans));
-          else
-            Ptstar= (const GeneralMatrix&)PtstarLt_0trans;
-          if(!isQzero&&!isRzero)
-            {
-            GeneralMatrix QtRttrans(Qt,Rt,"trans");
-            Ptstar.multAndAdd(Rt,ConstGeneralMatrix(QtRttrans));
-            }
-          
-          
-          if(TSUtils::hasNegativeDiagonal(Ptstar)||!TSUtils::isSymDiagDominant(Ptstar))
-            TSUtils::correctDefinitness(Ptstar);
-          }
+        if(ndiff<=0)
+          Ptinf.zeros();
         }
-      else
+      }
+    else if(TSUtils::isZero(Ftinf))
+      {
+      /*****************
+      If $F_{*,t}$ is not regular, we return and the filter has not
+      finished. The regularity is checked exactly.        
+      *****************/
+      PLUFact Ftstarinv(Ftstar);
+      if(!Ftstarinv.isRegular())
         {
         return;
         }
+      
+      /*****************
+      This calculates $$K_t^{(0)} = T_tM_{*,t}F_{*,t}^{-1}.$$
+      *****************/   
+      GeneralMatrix Kt_0(Tt,Mtstar);
+      Ftstarinv.multInvRight(Kt_0);
+      
+      /*****************
+      This calculates $$L_t^{(0)} = T_t-K_t^{(0)}Z_t.$$
+      *****************/   
+      GeneralMatrix Lt_0(Tt);
+      Lt_0.multAndAdd(ConstGeneralMatrix(Kt_0),Zt,-1.0);
+      
+      
+      /*****************
+      This calculates log likelihood and store results
+      *****************/   
+      double ll= calcStepLogLik(Ftstarinv,vt);
+      fres.set(t,Ftstarinv,vt,Lt_0,at,Ptstar,Ptinf,ll);
+      
+      
+      if(t<data.numCols())
+        {
+        /*****************
+        This calculates $$a_{t+1} = T_ta_t+K_t^{(0)}v_t.$$
+        *****************/   
+        if(!isTunit)
+          {
+          Vector atsave((const Vector&)at);
+          Tt.multVec(0.0,at,1.0,atsave);
+          }
+        Kt_0.multVec(1.0,at,1.0,vt);
+        
+        /*****************
+        This calculates $$P_{\infty,t+1} = T_tP_{\infty,t}T_t^T.$$
+        *****************/   
+        if(!isTunit)
+          {
+          GeneralMatrix PtinfTttrans(Ptinf,Tt,"trans");
+          Ptinf.mult(Tt,ConstGeneralMatrix(PtinfTttrans));
+          }
+        if(TSUtils::hasNegativeDiagonal(Ptinf)||!TSUtils::isSymDiagDominant(Ptinf))
+          TSUtils::correctDefinitness(Ptinf);
+        
+        /*****************
+        This calculates $$P_{*,t+1} = T_tP_{*,t}L_t^{(0)T}+R_tQ_tR_t^T.$$   
+        *****************/   
+        GeneralMatrix PtstarLt_0trans(Ptstar,Lt_0,"trans");
+        if(!isTunit)
+          Ptstar.mult(Tt,ConstGeneralMatrix(PtstarLt_0trans));
+        else
+          Ptstar= (const GeneralMatrix&)PtstarLt_0trans;
+        if(!isQzero&&!isRzero)
+          {
+          GeneralMatrix QtRttrans(Qt,Rt,"trans");
+          Ptstar.multAndAdd(Rt,ConstGeneralMatrix(QtRttrans));
+          }
+        
+        if(TSUtils::hasNegativeDiagonal(Ptstar)||!TSUtils::isSymDiagDominant(Ptstar))
+          TSUtils::correctDefinitness(Ptstar);
+        }
+      }
+    else
+      {
+      return;
+      }
     }
   }
   
@@ -1234,7 +1247,7 @@ BasicKalmanTask::filterNonDiffuse(const Vector&a,const GeneralMatrix&P,
   $r_t$, and $N_t$ and outputs $\alpha_t$, $V_t$ and $\eta_t$. The code is clear.
   *****************/
   void 
-    KalmanTask::smootherNonDiffuseStep(int t,const FilterResults&fres,
+  KalmanTask::smootherNonDiffuseStep(int t,const FilterResults&fres,
     Vector&rt,GeneralMatrix&Nt,
     Vector&alphat,GeneralMatrix&Vt,
     Vector&etat)const
@@ -1263,8 +1276,8 @@ BasicKalmanTask::filterNonDiffuse(const Vector&a,const GeneralMatrix&P,
     
     
     
-      /*****************
-      This calculates $$r_{t-1} = Z^T_tF_t^{-1}v_t + L^T_tr_t.$$
+    /*****************
+    This calculates $$r_{t-1} = Z^T_tF_t^{-1}v_t + L^T_tr_t.$$
     *****************/
     Vector rtsav((const Vector&)rt);
     Lt.multVecTrans(0.0,rt,1.0,rtsav);
@@ -1300,13 +1313,14 @@ BasicKalmanTask::filterNonDiffuse(const Vector&a,const GeneralMatrix&P,
     GeneralMatrix NtPt(Nt,Pt);
     Vt.multAndAdd(Pt,NtPt,-1.0);
     
-    }
-  
-    /*****************
-    The non-diffuse smoother just performs a series of
-    |KalmanTask::smootherNonDiffuseStep|.
+  }
+
+  /*****************
+  The non-diffuse smoother just performs a series of
+  |KalmanTask::smootherNonDiffuseStep|.
   *****************/
-  void KalmanTask::smootherNonDiffuse(const FilterResults&fres,
+  void 
+  KalmanTask::smootherNonDiffuse(const FilterResults&fres,
     SmootherResults&sres)const
     {
     Vector rt(ssf.m);
@@ -1323,12 +1337,13 @@ BasicKalmanTask::filterNonDiffuse(const Vector&a,const GeneralMatrix&P,
       }
     }
   
-    /*****************
-    Here we cycle from $t=T,\ldots, 1$. Whenever $P_\infty$ is zero, we
-    perform the non-diffuse step. Otherwise we permorn a common code to
-    diffuse smoothing and then fork according to regularity of $F_\infty$.
+  /*****************
+  Here we cycle from $t=T,\ldots, 1$. Whenever $P_\infty$ is zero, we
+  perform the non-diffuse step. Otherwise we permorn a common code to
+  diffuse smoothing and then fork according to regularity of $F_\infty$.
   *****************/
-  void KalmanTask::smootherDiffuse(const DiffuseFilterResults&fres,
+  void 
+  KalmanTask::smootherDiffuse(const DiffuseFilterResults&fres,
     SmootherResults&sres)const
     {
     Vector rt_0(ssf.m);
