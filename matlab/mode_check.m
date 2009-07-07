@@ -98,7 +98,7 @@ for plt = 1:nbplt,
             y(i,2)    = (y(i,1)+lnprior-dy);
             end
         end
-        plot(z,y);
+        plot(z,-y);
         hold on
         yl=get(gca,'ylim');
         plot( [x(kk) x(kk)], yl, 'c', 'LineWidth', 1)
