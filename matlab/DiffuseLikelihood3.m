@@ -61,8 +61,7 @@ smpl   = size(Y,2);
 a      = zeros(mm,1);
 QQ     = R*Q*transpose(R);
 t      = 0;
-lik	   = zeros(smpl+1,1);	
-lik(smpl+1) = smpl*pp*log(2*pi);		%% the constant of minus two times the log-likelihood
+lik	   = zeros(smpl,1);	
 notsteady 	= 1;
 crit      	= options_.kalman_tol;
 crit1      	= 1.e-6;
@@ -190,5 +189,7 @@ while t < smpl
   a = T*a;
 end
 
-LIK = .5*(sum(lik(start:end))-(start-1)*lik(smpl+1)/smpl);
+% adding log-likelihhod constants
+lik = (lik + pp*log(2*pi))/2;
 
+LIK = sum(lik(start:end)); % Minus the log-likelihood.

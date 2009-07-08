@@ -1,4 +1,4 @@
-function LIK = DiffuseLikelihoodH3corr(T,R,Q,H,Pinf,Pstar,Y,trend,start)
+function [LIK lik] = DiffuseLikelihoodH3corr(T,R,Q,H,Pinf,Pstar,Y,trend,start)
 % Same as DiffuseLikelihoodH3 but allows correlation between the measurement
 % errors (this is not a problem with the multivariate approach). 
 
@@ -36,8 +36,7 @@ Pstar  = cat(1,cat(2,Pstar,zeros(mm,pp)),cat(2,zeros(pp,mm),H));
 a      = zeros(mm+pp,1);
 QQ     = R*Q*transpose(R);
 t      = 0;
-lik    = zeros(smpl+1,1);
-lik(smpl+1) = smpl*pp*log(2*pi); %% the constant of minus two times the log-likelihood 
+lik    = zeros(smpl,1);
 notsteady 	= 1;
 crit      	= options_.kalman_tol;
 newRank	  	= rank(Pinf,crit);
@@ -110,4 +109,7 @@ while t < smpl
 	end	
     a = T*a;
 end
-LIK = .5*(sum(lik(start:end))-(start-1)*lik(smpl+1)/smpl);
+% adding log-likelihhod constants
+lik = (lik + pp*log(2*pi))/2;
+
+LIK = sum(lik(start:end)); % Minus the log-likelihood.

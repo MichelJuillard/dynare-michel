@@ -317,5 +317,5 @@ function [fval,llik,cost_flag,ys,trend_coeff,info] = DsgeLikelihood_hh(xparam1,g
   lnprior = priordens(xparam1,bayestopt_.pshape,bayestopt_.p6,bayestopt_.p7,bayestopt_.p3,bayestopt_.p4);
   fval    = (likelihood-lnprior);
   options_.kalman_algo = kalman_algo;
-  llik=[-lnprior; .5*lik(start:end)];
+  llik=[-lnprior; lik(start:end)];
   
