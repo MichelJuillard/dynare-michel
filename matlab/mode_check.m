@@ -84,26 +84,37 @@ for plt = 1:nbplt,
         end
         for i=1:length(z)
             xx(kk) = z(i);
-            if isempty(strmatch('dsge_prior_weight',M_.param_names)),
-                try
-                    y(i,1) = DsgeLikelihood(xx,gend,data,data_index,number_of_observations,no_more_missing_observations);
-                catch
-                    y(i,1) = bayestopt_.penalty;
+            if isempty(strmatch('dsge_prior_weight',M_.param_names))
+                [fval,cost_flag] = DsgeLikelihood(xx,gend,data,data_index,number_of_observations,no_more_missing_observations); 
+                if cost_flag
+                    y(i,1) = fval;
+                else
+                    y(i,1) = NaN;
                 end
             else
-                y(i,1) = DsgeVarLikelihood(xx,gend);
+                [fval,cost_flag] = DsgeVarLikelihood(xx,gend);
+                if cost_flag
+                    y(i,1) = fval;
+                else
+                    y(i,1) = NaN;
+                end
             end
-            if options_.mode_check_nolik==0,
-            lnprior = priordens(xx,bayestopt_.pshape,bayestopt_.p6,bayestopt_.p7,bayestopt_.p3,bayestopt_.p4);
-            y(i,2)    = (y(i,1)+lnprior-dy);
+            if options_.mode_check_nolik==0
+                lnprior = priordens(xx,bayestopt_.pshape,bayestopt_.p6,bayestopt_.p7,bayestopt_.p3,bayestopt_.p4);
+                y(i,2)  = (y(i,1)+lnprior-dy);
             end
         end
         plot(z,-y);
         hold on
         yl=get(gca,'ylim');
         plot( [x(kk) x(kk)], yl, 'c', 'LineWidth', 1)
+        NaN_index = find(isnan(y(:,1)));
+        zNaN = z(NaN_index);
+        yNaN = yl(1)*ones(size(NaN_index));
+        plot(zNaN,yNaN,'o','MarkerEdgeColor','r','MarkerFaceColor','r','MarkerSize',6);
         title(name,'interpreter','none')
         hold off
+        axis tight
         drawnow
     end
     if options_.mode_check_nolik==0,
@@ -138,8 +149,3 @@ for plt = 1:nbplt,
         fprintf(fidTeX,' \n');
     end
 end
-
-% SA 07-31-2004		* New default : no more than nine plots per figure.
-%					* Figures are automatically saved in eps, pdf and fig formats.
-%					* Figures are automatically closed (this should be an option).
-%					* Creation of a TeX-loader file for the postcript file. 
