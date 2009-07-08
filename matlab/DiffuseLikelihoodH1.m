@@ -52,12 +52,10 @@ function [LIK, lik] = DiffuseLikelihoodH1(T,R,Q,H,Pinf,Pstar,Y,trend,start)
   dF = 1;
   QQ   = R*Q*transpose(R);
   t    = 0;
-  lik  = zeros(smpl+1,1);
+  lik  = zeros(smpl,1);
   LIK  = Inf;
-  lik(smpl+1) = smpl*pp*log(2*pi);
   notsteady   = 1;
   crit        = options_.kalman_tol;
-  reste       = 0;
   while rank(Pinf,crit) & t < smpl
     t     = t+1;
     v  	  = Y(:,t)-a(mf)-trend(:,t);
@@ -117,14 +115,17 @@ function [LIK, lik] = DiffuseLikelihoodH1(T,R,Q,H,Pinf,Pstar,Y,trend,start)
     error(['The variance of the forecast error remains singular until the' ...
 	   'end of the sample'])
   end
-  reste = smpl-t;
-  while t < smpl
-    t = t+1;
-    v = Y(:,t)-a(mf)-trend(:,t);
-    a = T*(a+K*v);
-    lik(t) = transpose(v)*iF*v;
+  if t < smpl
+    t0 = t+1;
+    while t < smpl
+      t = t+1;
+      v = Y(:,t)-a(mf)-trend(:,t);
+      a = T*(a+K*v);
+      lik(t) = transpose(v)*iF*v;
+    end
+    lik(t0:smpl) = lik(t0:smpl) + log(dF);
   end
-  lik(t) = lik(t) + reste*log(dF);
-  LIK    = .5*(sum(lik(start:end))-(start-1)*lik(smpl+1)/smpl);% Minus the
-							       % log-likelihood.
-							       
+  % adding log-likelihhod constants
+  lik = (lik + pp*log(2*pi))/2;
+
+  LIK = sum(lik(start:end)); % Minus the log-likelihood.							       
