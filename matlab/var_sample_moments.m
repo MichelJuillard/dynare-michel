@@ -1,5 +1,5 @@
 function [YtY,XtY,YtX,XtX,Y,X] = ...
-    var_sample_moments(FirstObservation,LastObservation,qlag,var_trend_order,datafile,varobs)
+    var_sample_moments(FirstObservation,LastObservation,qlag,var_trend_order,datafile,varobs,xls_sheet,xls_range)
 % Computes the sample moments of a VAR model.
 %
 % The VAR(p) model is defined by:
@@ -11,7 +11,7 @@ function [YtY,XtY,YtX,XtX,Y,X] = ...
 % exogenous (deterministic) variables, C is a q*m real matrix and
 % e_t is a vector of exogenous stochastic shocks. T is the number
 % of observations. The deterministic exogenous variables are assumed to 
-% be a polynomial trend of order q = "var_trend_ordre".  
+% be a polynomial trend of order q = "var_trend_order".  
 %
 % We define: 
 %
@@ -75,16 +75,7 @@ YtX = [];
 XtY = [];
 XtX = [];
 
-if exist(datafile)
-  eval(datafile);
-else
-  eval(['load ' datafile]);
-end
-
-data = [ ];
-for i=1:size(varobs,1)% m is equal to options_.varobs
-  data = [data eval(deblank(varobs(i,:)))];
-end
+data = read_variables(datafile,varobs,[],xls_sheet,xls_range);
 
 if qlag > FirstObservation
   disp('VarSampleMoments :: not enough data to initialize! Try to increase FirstObservation.')

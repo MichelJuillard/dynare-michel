@@ -131,7 +131,8 @@ if MAX_nirfs_dsgevar
     end
     [mYY,mXY,mYX,mXX,Ydata,Xdata] = ...
         var_sample_moments(options_.first_obs,options_.first_obs+options_.nobs-1,...
-                           options_.varlag,-1,options_.datafile,options_.varobs);
+                           options_.varlag,-1,options_.datafile,options_.varobs,...
+                           options_.xls_sheet,options_.xls_range);
     NumberOfLags = options_.varlag;
     NumberOfLagsTimesNvobs = NumberOfLags*nvobs;
     if options_.noconstant
