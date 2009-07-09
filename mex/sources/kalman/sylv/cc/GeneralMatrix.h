@@ -76,7 +76,7 @@ class GeneralMatrix {
     int rows;
     int cols;
     int ld;
-
+    GeneralMatrix * tmpGMp;
 public:
     GeneralMatrix(int m, int n)
       : data(m*n), rows(m), cols(n), ld(m) {}
@@ -194,6 +194,9 @@ public:
     void multLeftTrans(const ConstGeneralMatrix& m);
     void multLeftTrans(const GeneralMatrix& m)
       {multLeftTrans(ConstGeneralMatrix(m));}
+
+    /* this = this * m^(-1)  */
+    void multInvRight(GeneralMatrix&m);
     
     /* x = scalar(a)*x + scalar(b)*this*d */
     void multVec(double a, Vector& x, double b, const ConstVector& d) const;
