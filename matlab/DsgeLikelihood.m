@@ -176,7 +176,7 @@ function [fval,cost_flag,ys,trend_coeff,info] = DsgeLikelihood(xparam1,gend,data
       if kalman_algo ~= 2
           kalman_algo = 1;
       end
-      Pstar = 10*eye(np);
+      Pstar = options_.Harvey_scale_factor*eye(np);
       Pinf = [];
   elseif options_.lik_init == 3	% Diffuse Kalman filter
       if kalman_algo ~= 4

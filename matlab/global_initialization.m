@@ -132,6 +132,7 @@ function global_initialization()
   options_.timeless = 0;
     
   % estimation
+  options_.Harvey_scale_factor = 10;
   options_.MaxNumberOfBytes = 1e6;
   options_.MaximumNumberOfMegaBytes = 111;
   options_.PosteriorSampleSize = 1000;
