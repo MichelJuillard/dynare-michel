@@ -77,13 +77,9 @@ function homotopy1(values, step_nbr)
     oo_.exo_steady_state(values(ix,2)) = points(ix,i);
     oo_.exo_det_steady_state(values(ixd,2)) = points(ixd,i);
 
-    [oo_.steady_state,check] = dynare_solve([M_.fname '_static'],...
-                                            oo_.steady_state,...
-                                            options_.jacobian_flag, ...	    
-                                            [oo_.exo_steady_state; ...
-                        oo_.exo_det_steady_state], M_.params);
-  
-    if check
+    try
+      steady_;
+    catch
       error('HOMOTOPY mode 1: failed')
     end
   end

@@ -99,13 +99,10 @@ function homotopy2(values, step_nbr)
       end
 
       disp([ 'HOMOTOPY mode 2: lauching solver with ' strtrim(varname) ' = ' num2str(v) ' ...'])
-      [oo_.steady_state,check] = dynare_solve([M_.fname '_static'],...
-                                              oo_.steady_state,...
-                                              options_.jacobian_flag, ...	    
-                                              [oo_.exo_steady_state; ...
-                          oo_.exo_det_steady_state], M_.params);
       
-      if check
+      try
+        steady_;
+      catch
         error('HOMOTOPY mode 2: failed')
       end
     end

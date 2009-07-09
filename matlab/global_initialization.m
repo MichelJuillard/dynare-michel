@@ -221,3 +221,7 @@ function global_initialization()
   % prior analysis
   options_.prior_mc = 20000;
   options_.prior_analysis_endo_var_list = [];
+  
+  % block decomposition + minimum feedback set for steady state computation
+  options_.block_mfs = 0;
+  
