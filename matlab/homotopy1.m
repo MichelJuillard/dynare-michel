@@ -23,7 +23,7 @@ function homotopy1(values, step_nbr)
 % SPECIAL REQUIREMENTS
 %    none
 
-% Copyright (C) 2008 Dynare Team
+% Copyright (C) 2008-2009 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -48,7 +48,7 @@ function homotopy1(values, step_nbr)
   ix = find(values(:,1) == 1); % Exogenous
   ixd = find(values(:,1) == 2); % Exogenous deterministic
 
-  if length([ip, ix, ixd]) ~= nv
+  if length([ip; ix; ixd]) ~= nv
     error('HOMOTOPY mode 1: incorrect variable types specified')
   end
 
