@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
  */
-
+#include <stdint.h>
 #include "Mem_Mngr.hh"
 
 Mem_Mngr::Mem_Mngr()
@@ -82,6 +82,7 @@ Mem_Mngr::mxMalloc_NZE()
       mexPrintf("CHUNK_BLCK_SIZE=%d\n",CHUNK_BLCK_SIZE);
 #endif
       NZE_Mem=(NonZeroElem*)mxMalloc(CHUNK_BLCK_SIZE*sizeof(NonZeroElem));
+      //mexPrintf("in mxMalloc NZE_Mem=%x CHUNK_heap_pos=%d CHUNK_BLCK_SIZE=%d Nb_CHUNK=%d\n",NZE_Mem, CHUNK_heap_pos, CHUNK_BLCK_SIZE, Nb_CHUNK);
       if(!NZE_Mem)
         {
           mexPrintf("Not enough memory available\n");
@@ -123,7 +124,7 @@ Mem_Mngr::mxFree_NZE(void* pos)
           mexPrintf("NZE_Mem_add[i*CHUNK_BLCK_SIZE]=%d\n",NZE_Mem_add[i*CHUNK_BLCK_SIZE]);
           mexEvalString("drawnow;");
         }*/
-      gap=((long int)(pos)-(long int)(NZE_Mem_add[i*CHUNK_BLCK_SIZE]))/sizeof(NonZeroElem);
+      gap=((uint64_t)(pos)-(uint64_t)(NZE_Mem_add[i*CHUNK_BLCK_SIZE]))/sizeof(NonZeroElem);
       if ((gap<CHUNK_BLCK_SIZE) && (gap>=0))
         break;
     }
@@ -277,8 +278,12 @@ void
 Mem_Mngr::Free_All()
 {
   int i;
+  /*mexPrintf("Nb_CHUNK=%d\n",Nb_CHUNK);
+  mexEvalString("drawnow;");*/
   for (i=0;i<Nb_CHUNK;i++)
     {
+      /*mexPrintf("NZE_Mem_add[%d]=%x\n",i*CHUNK_BLCK_SIZE,NZE_Mem_add[i*CHUNK_BLCK_SIZE]);
+      mexEvalString("drawnow;");*/
       mxFree(NZE_Mem_add[i*CHUNK_BLCK_SIZE]);
     }
   mxFree(NZE_Mem_add);

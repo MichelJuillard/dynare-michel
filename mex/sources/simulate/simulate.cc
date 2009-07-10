@@ -42,28 +42,157 @@ max(int a, int b)
 
 
 
+#ifdef DEBUG_EX
+/*The Matlab c++ interface*/
 
+using namespace std;
+#include <sstream>
+#include "mex_interface.hh"
 
-
-
-/*class EvalException
+int
+main( int argc, const char* argv[] )
 {
-};*/
+  FILE *fid;
+  printf("argc=%d\n",argc);
+  float f_tmp;
+  ostringstream tmp_out("");
+  tmp_out << argv[1] << "_options.txt";
+  cout << tmp_out.str().c_str() << "\n";
+  int nb_params;
+  int i, row_y, col_y, row_x, col_x;
+  double *yd, *xd;
+  double *direction;
+
+  string file_name(argv[1]);
+  //mexPrintf("file_name=%s\n",file_name.c_str());
+
+  fid = fopen(tmp_out.str().c_str(),"r");
+  fscanf(fid,"%d",&periods);
+  fscanf(fid,"%d",&maxit_);
+  fscanf(fid,"%f",&f_tmp);
+  slowc = f_tmp;
+  //mexPrintf("slowc_save=%f\n",slowc_save);
+  fscanf(fid,"%f",&f_tmp);
+  markowitz_c = f_tmp;
+  fscanf(fid,"%f",&f_tmp);
+  solve_tolf = f_tmp;
+  fclose(fid);
+
+  tmp_out.str("");
+  tmp_out << argv[1] << "_M.txt";
+  //printf("%s\n",tmp_out.str().c_str());
+  fid = fopen(tmp_out.str().c_str(),"r");
+  fscanf(fid,"%d",&y_kmin);
+  //printf("y_kmin=%d\n",y_kmin);
+  fscanf(fid,"%d",&y_kmax);
+  //printf("y_kmax=%d\n",y_kmax);
+  fscanf(fid,"%d",&y_decal);
+  //printf("y_decal=%d\n",y_decal);
+  fscanf(fid,"%d",&nb_params);
+  //printf("nb_params=%d\n",nb_params);
+  fscanf(fid,"%d",&row_x);
+  //printf("row_x=%d\n",row_x);
+  fscanf(fid,"%d",&col_x);
+  //printf("col_x=%d\n",col_x);
+  fscanf(fid,"%d",&row_y);
+  //printf("row_y=%d\n",row_y);
+  fscanf(fid,"%d",&col_y);
+  //printf("col_y=%d\n",col_y);
+  fscanf(fid,"%d",&nb_row_xd);
+  //printf("nb_row_xd=%d\n",nb_row_xd);
+  params = (double*)malloc(nb_params*sizeof(params[0]));
+  //printf("OK1\n");
+  for(i=0; i < nb_params; i++)
+    {
+      fscanf(fid,"%f",&f_tmp);
+      params[i] = f_tmp;
+      //printf("param[%d]=%f\n",i,params[i]);
+    }
+  //printf("OK2\n");
+  fclose(fid);
+  yd = (double*)malloc(row_y*col_y*sizeof(yd[0]));
+  xd = (double*)malloc(row_x*col_x*sizeof(xd[0]));
+  tmp_out.str("");
+  tmp_out << argv[1] << "_oo.txt";
+  fid = fopen(tmp_out.str().c_str(),"r");
+  for(i=0; i < col_y*row_y; i++)
+    {
+      fscanf(fid,"%f",&f_tmp);
+      yd[i] = f_tmp;
+    }
+  for(i=0; i < col_x*row_x; i++)
+    {
+      fscanf(fid,"%f",&f_tmp);
+      xd[i] = f_tmp;
+    }
+  fclose(fid);
+
+  size_of_direction=col_y*row_y*sizeof(double);
+  y=(double*)mxMalloc(size_of_direction);
+  ya=(double*)mxMalloc(size_of_direction);
+  direction=(double*)mxMalloc(size_of_direction);
+  memset(direction,0,size_of_direction);
+  x=(double*)mxMalloc(col_x*row_x*sizeof(double));
+  for (i=0;i<row_x*col_x;i++)
+     x[i]=double(xd[i]);
+  for (i=0;i<row_y*col_y;i++)
+    y[i]=double(yd[i]);
+  free(yd);
+  free(xd);
+
+  y_size=row_y;
+  x_size=col_x/*row_x*/;
+  nb_row_x=row_x;
+  /*for(int i=0; i<y_size; i++)
+    {
+      for(int it_=0; it_<8;it_++)
+        mexPrintf("y[t=%d, var=%d]=%f  ",it_+1, i+1, y[(it_)*y_size+i]);
+      mexPrintf("\n");
+    }
+
+  for(int i=0; i<col_x; i++)
+    {
+      for(int it_=0; it_<8;it_++)
+        mexPrintf("x[t=%d, var=%d]=%f  ",it_, i+1, x[it_+i*nb_row_x]);
+      mexPrintf("\n");
+    }*/
+
+  t0= clock();
+  Interpreter interprete(params, y, ya, x, direction, y_size, nb_row_x, nb_row_xd, periods, y_kmin, y_kmax, maxit_, solve_tolf, size_of_direction, slowc, y_decal, markowitz_c, file_name);
+  string f(file_name);
+  interprete.compute_blocks(f+"_dynamic", f);
+  t1= clock();
+  mexPrintf("Simulation Time=%f milliseconds\n",1000.0*(double(t1)-double(t0))/double(CLOCKS_PER_SEC));
+  /*if (nlhs>0)
+    {
+      plhs[0] = mxCreateDoubleMatrix(row_y, col_y, mxREAL);
+      pind = mxGetPr(plhs[0]);
+      for (i=0;i<row_y*col_y;i++)
+        pind[i]=y[i];
+    }*/
+  if(x)
+    mxFree(x);
+  if(y)
+    mxFree(y);
+  if(ya)
+    mxFree(ya);
+  if(direction)
+    mxFree(direction);
 
 
-//#define DEBUG
+  free(params);
+
+}
+
+#else
 /* The gateway routine */
-
-void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
+void
+mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 {
   mxArray *M_, *oo_, *options_;
   int i, row_y, col_y, row_x, col_x;
   double * pind ;
   double *direction;
-  //mexPrintf("mexFunction\n");
-  //mexEvalString("drawnow;");
-  /* Gets model parameters from global workspace of Matlab */
-  //mexPrintf("starting simulation\n");
   M_ = mexGetVariable("global","M_");
   if (M_ == NULL )
     {
@@ -100,7 +229,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
   periods=int(floor(*(mxGetPr(mxGetFieldByNumber(options_, 0, mxGetFieldNumber(options_,"periods"))))));
   maxit_=int(floor(*(mxGetPr(mxGetFieldByNumber(options_, 0, mxGetFieldNumber(options_,"maxit_"))))));
   slowc=double(*(mxGetPr(mxGetFieldByNumber(options_, 0, mxGetFieldNumber(options_,"slowc")))));
-  slowc_save=slowc;
+  //slowc_save=slowc;
   markowitz_c=double(*(mxGetPr(mxGetFieldByNumber(options_, 0, mxGetFieldNumber(options_,"markowitz")))));
   nb_row_xd=int(floor(*(mxGetPr(mxGetFieldByNumber(M_, 0, mxGetFieldNumber(M_,"exo_det_nbr"))))));
   mxArray *mxa=mxGetFieldByNumber(M_, 0, mxGetFieldNumber(M_,"fname"));
@@ -111,15 +240,8 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
   int status = mxGetString(mxa, fname, buflen);
   if (status != 0)
     mexWarnMsgTxt("Not enough space. Filename is truncated.");
-  //mexPrintf("fname=%s\n",fname);
   col_y=mxGetN(mxGetFieldByNumber(oo_, 0, mxGetFieldNumber(oo_,"endo_simul")));;
-  /*if (col_y<row_x)
-    {
-      row_y=row_y/row_x;
-      col_y=row_x;
-    }*/
   solve_tolf=*(mxGetPr(mxGetFieldByNumber(options_, 0, mxGetFieldNumber(options_,"dynatol"))));
-  //mexPrintf("col_y=%d row_y=%d\n",col_y, row_y);
   size_of_direction=col_y*row_y*sizeof(double);
   y=(double*)mxMalloc(size_of_direction);
   ya=(double*)mxMalloc(size_of_direction);
@@ -128,46 +250,32 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
   x=(double*)mxMalloc(col_x*row_x*sizeof(double));
   for (i=0;i<row_x*col_x;i++)
      x[i]=double(xd[i]);
-  /*mexPrintf("1 ");
-  for (i=0;i<row_x*col_x;i++)
-    {
-      x[i]=double(xd[i]);
-      if(!(i % row_x) && i>0)
-        mexPrintf("\n%d %f  ",i/row_x+1,x[i]);
-      else
-        mexPrintf("%f  ",x[i]);
-    }
-  for(i=0;i<row_x;i++)
-    {
-      for(j=0;j<col_x;j++)
-        {
-          x[j*row_x+i]=xd[i*col_x+j];
-          mexPrintf("%f ",xd[i*col_x+j]);
-        }
-      mexPrintf("\n");
-    }
-  */
   for (i=0;i<row_y*col_y;i++)
     y[i]=double(yd[i]);
   y_size=row_y;
-  x_size=row_x;
+  x_size=col_x/*row_x*/;
   nb_row_x=row_x;
 
-  /* Call the C subroutines. */
-  //mexPrintf("Call subroutines\n");
-  //mexEvalString("drawnow;");
- //t0= pctimer();
+  /*for(int i=0; i<y_size; i++)
+    {
+      for(int it_=0; it_<8;it_++)
+        mexPrintf("y[t=%d, var=%d]=%f  ",it_+1, i+1, y[(it_)*y_size+i]);
+      mexPrintf("\n");
+    }
+
+  for(int i=0; i<col_x; i++)
+    {
+      for(int it_=0; it_<8;it_++)
+        mexPrintf("x[t=%d, var=%d]=%f  ",it_, i+1, x[it_+i*nb_row_x]);
+      mexPrintf("\n");
+    }*/
+
   t0= clock();
   Interpreter interprete(params, y, ya, x, direction, y_size, nb_row_x, nb_row_xd, periods, y_kmin, y_kmax, maxit_, solve_tolf, size_of_direction, slowc, y_decal, markowitz_c, file_name);
   string f(fname);
   interprete.compute_blocks(f+"_dynamic", f);
-  //t1= pctimer();
   t1= clock();
   mexPrintf("Simulation Time=%f milliseconds\n",1000.0*(double(t1)-double(t0))/double(CLOCKS_PER_SEC));
-  //mexPrintf("SaveCode.is_open()=%d nlhs=%d \n",SaveCode.is_open(),nlhs);
-  //interprete.sparse_matrix.close_SaveCode();
-
-  //mexPrintf("End all-1\n");
   if (nlhs>0)
     {
       plhs[0] = mxCreateDoubleMatrix(row_y, col_y, mxREAL);
@@ -175,7 +283,6 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
       for (i=0;i<row_y*col_y;i++)
         pind[i]=y[i];
     }
-  //mexPrintf("End all0\n");
   if(x)
     mxFree(x);
   if(y)
@@ -184,5 +291,5 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
     mxFree(ya);
   if(direction)
     mxFree(direction);
-  //mexPrintf("End all\n");
 }
+#endif
