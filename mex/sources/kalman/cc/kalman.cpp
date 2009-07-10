@@ -683,12 +683,12 @@ BasicKalmanTask::filterNonDiffuse(const Vector&a,const GeneralMatrix&P,
   int inc =1;
   const int rcols= Rt.numCols();
   GeneralMatrix Ft (Ht.numRows(), Ht.numCols()  );
+  PLUFact Ftinv(Ht.numRows(), Ht.numCols()); 
   GeneralMatrix Lt(Tt);
   GeneralMatrix PtLttrans(m,m);
   GeneralMatrix Mt(m,n);
   GeneralMatrix Kt(m,n);
   GeneralMatrix QtRttrans(rcols,Rt.numRows());
-//  PLUFact Ftinv(Ft);
 
   bool isTunit=0;// Tt->isUnit();
   bool isQzero= Qt.isZero();
@@ -702,13 +702,14 @@ BasicKalmanTask::filterNonDiffuse(const Vector&a,const GeneralMatrix&P,
   int nonsteady=1;
   for(;t<=data.numCols()&&nonsteady;++t)
     {
-    ConstVector yt(data,t-1);
+//    ConstVector yt(data,t-1);
     
     /*****************
     This calculates  $$v_t = y_t - Z_t*a_t.$$
     *****************/   
 //    Vector vt(yt);
-    vt=yt;
+//    vt=yt;
+    memcpy(vt.base(), &(data.get(0,t-1)), n*sizeof(double));
 //    Zt.multsVec(vt,at);
 	  BLAS_dgemv("N",  &n,  &m, &neg_alpha, Zt.base(), &n, at.base(), 
         &inc, &alpha, vt.base(), &inc);
@@ -727,10 +728,10 @@ BasicKalmanTask::filterNonDiffuse(const Vector&a,const GeneralMatrix&P,
 		BLAS_dgemm("N", "N", &n, &n, &m, &alpha, Zt.base(), &n,
 				   Mt.base(), &m, &alpha, Ft.base(), &n); 
     
-    PLUFact Ftinv(Ft); //    Ftinv=Ft;
-    if(!Ftinv.isRegular())
-      return 0.0;
-    
+//    PLUFact Ftinv(Ft); 
+//    if(!Ftinv.isRegular())
+//      return 0.0;
+    Ftinv=Ft;
     /*****************
     This calculates $$K_t = T_tP_tZ_t^TF_t^{-1}.$$
     *****************/   
@@ -738,6 +739,7 @@ BasicKalmanTask::filterNonDiffuse(const Vector&a,const GeneralMatrix&P,
 		BLAS_dgemm("N", "N", &m, &n, &m, &alpha, Tt.base(), &m,
 				   Mt.base(), &m, &omega, Kt.base(), &m); 
     Ftinv.multInvRight(Kt);
+//    Kt.multInvRight(Ft);
     
     /*****************
     This calculates  $$L_t = T_t-K_tZ_t.$$
@@ -824,112 +826,112 @@ BasicKalmanTask::filterNonDiffuse(const Vector&a,const GeneralMatrix&P,
     }
   
   
-    /*****************
-    This runs a non-diffuse filter with the given $t$, $a_t$ and
-    $P_t$. It fills the |FilterResults|.
-    
-      First we check that the passed $P_t$ is positive definite by checking
-      that it has not negative diagonal and is symmetric diagonally
-      dominant. This is not equivalent to positive definitness but it excludes
-      ``much'' of indefinite matrices. This check is important since this
-      routine is called from a diffuse filter and it is possible due to a
-      wrong guess/calculation of a number of diffuse periods that numerical
-      instability and roundoff errors make the matrix $P_*$ broken.
-      
-        Then we cycle until the end of period and perform a classical Kalman
-        filter operations.
-  *****************/
-  void 
-    KalmanTask::filterNonDiffuse(const Vector&a,const GeneralMatrix&P,
-    int first,FilterResults&fres)const
+/*****************
+This runs a non-diffuse filter with the given $t$, $a_t$ and
+$P_t$. It fills the |FilterResults|.
+
+First we check that the passed $P_t$ is positive definite by checking
+that it has not negative diagonal and is symmetric diagonally
+dominant. This is not equivalent to positive definitness but it excludes
+``much'' of indefinite matrices. This check is important since this
+routine is called from a diffuse filter and it is possible due to a
+wrong guess/calculation of a number of diffuse periods that numerical
+instability and roundoff errors make the matrix $P_*$ broken.
+
+Then we cycle until the end of period and perform a classical Kalman
+filter operations.
+*****************/
+void 
+KalmanTask::filterNonDiffuse(const Vector&a,const GeneralMatrix&P,
+int first,FilterResults&fres)const
+  {
+  Vector at(a);
+  GeneralMatrix Pt(P);
+  if(TSUtils::hasNegativeDiagonal(Pt)||!TSUtils::isSymDiagDominant(Pt))
+    return;
+  
+  for(int t= first;t<=data.numCols();t++)
     {
-    Vector at(a);
-    GeneralMatrix Pt(P);
-    if(TSUtils::hasNegativeDiagonal(Pt)||!TSUtils::isSymDiagDominant(Pt))
+    ConstVector yt(data,t-1);
+    ConstGeneralMatrix Zt(((const TMatrix&)*ssf.Z)[t]);
+    ConstGeneralMatrix Ht(((const TMatrix&)*ssf.H)[t]);
+    ConstGeneralMatrix Tt(((const TMatrix&)*ssf.T)[t]);
+    ConstGeneralMatrix Qt(((const TMatrix&)*ssf.Q)[t]);
+    ConstGeneralMatrix Rt(((const TMatrix&)*ssf.R)[t]);
+    bool isTunit= ssf.T->isUnit(t);
+    bool isQzero= ssf.Q->isZero(t);
+    bool isRzero= ssf.R->isZero(t);
+    
+    /*****************
+    This calculates  $$v_t = y_t - Z_t*a_t.$$
+    *****************/   
+    Vector vt(yt);
+    Zt.multsVec(vt,at);
+    
+    /*****************
+    This calculates $$F_t = Z_tP_tZ_t^T+H_t.$$
+    *****************/   
+    GeneralMatrix Mt(Pt,Zt,"trans");
+    GeneralMatrix Ft(Ht);
+    Ft.multAndAdd(Zt,ConstGeneralMatrix(Mt));
+    
+    
+    PLUFact Ftinv(Ft);
+    if(!Ftinv.isRegular())
       return;
     
-    for(int t= first;t<=data.numCols();t++)
+      /*****************
+      This calculates $$K_t = T_tP_tZ_t^TF_t^{-1}.$$
+    *****************/   
+    GeneralMatrix Kt(Tt,Mt);
+    Ftinv.multInvRight(Kt);
+    
+    /*****************
+    This calculates  $$L_t = T_t-K_tZ_t.$$
+    *****************/   
+    GeneralMatrix Lt(Tt);
+    Lt.multAndAdd(ConstGeneralMatrix(Kt),Zt,-1.0);
+    
+    
+    /*****************
+    Here we calc likelihood and store results.
+    *****************/   
+    double ll= calcStepLogLik(Ftinv,vt);
+    fres.set(t,Ftinv,vt,Lt,at,Pt,ll);
+    
+    if(t<data.numCols())
       {
-      ConstVector yt(data,t-1);
-      ConstGeneralMatrix Zt(((const TMatrix&)*ssf.Z)[t]);
-      ConstGeneralMatrix Ht(((const TMatrix&)*ssf.H)[t]);
-      ConstGeneralMatrix Tt(((const TMatrix&)*ssf.T)[t]);
-      ConstGeneralMatrix Qt(((const TMatrix&)*ssf.Q)[t]);
-      ConstGeneralMatrix Rt(((const TMatrix&)*ssf.R)[t]);
-      bool isTunit= ssf.T->isUnit(t);
-      bool isQzero= ssf.Q->isZero(t);
-      bool isRzero= ssf.R->isZero(t);
-      
       /*****************
-      This calculates  $$v_t = y_t - Z_t*a_t.$$
+      This calculates $$a_{t+1} = T_ta_t + K_tv_t.$$
       *****************/   
-      Vector vt(yt);
-      Zt.multsVec(vt,at);
-      
-      /*****************
-      This calculates $$F_t = Z_tP_tZ_t^T+H_t.$$
-      *****************/   
-      GeneralMatrix Mt(Pt,Zt,"trans");
-      GeneralMatrix Ft(Ht);
-      Ft.multAndAdd(Zt,ConstGeneralMatrix(Mt));
-      
-      
-      PLUFact Ftinv(Ft);
-      if(!Ftinv.isRegular())
-        return;
-      
-        /*****************
-        This calculates $$K_t = T_tP_tZ_t^TF_t^{-1}.$$
-      *****************/   
-      GeneralMatrix Kt(Tt,Mt);
-      Ftinv.multInvRight(Kt);
-      
-      /*****************
-      This calculates  $$L_t = T_t-K_tZ_t.$$
-      *****************/   
-      GeneralMatrix Lt(Tt);
-      Lt.multAndAdd(ConstGeneralMatrix(Kt),Zt,-1.0);
-      
-      
-      /*****************
-      Here we calc likelihood and store results.
-      *****************/   
-      double ll= calcStepLogLik(Ftinv,vt);
-      fres.set(t,Ftinv,vt,Lt,at,Pt,ll);
-      
-      if(t<data.numCols())
+      if(!isTunit)
         {
-        /*****************
-        This calculates $$a_{t+1} = T_ta_t + K_tv_t.$$
-        *****************/   
-        if(!isTunit)
-          {
-          Vector atsave((const Vector&)at);
-          Tt.multVec(0.0,at,1.0,atsave);
-          }
-        Kt.multVec(1.0,at,1.0,ConstVector(vt));
-        
-        /*****************
-        This calculates $$P_{t+1} = T_tP_tL_t^T + R_tQ_tR_t^T.$$
-        *****************/   
-        GeneralMatrix PtLttrans(Pt,Lt,"trans");
-        if(!isTunit)
-          {
-          Pt.zeros();
-          Pt.multAndAdd(Tt,ConstGeneralMatrix(PtLttrans));
-          }
-        else
-          {
-          Pt= (const GeneralMatrix&)PtLttrans;
-          }
-        if(!isRzero&&!isQzero)
-          {
-          GeneralMatrix QtRttrans(Qt,Rt,"trans");
-          Pt.multAndAdd(Rt,ConstGeneralMatrix(QtRttrans));
-          }
+        Vector atsave((const Vector&)at);
+        Tt.multVec(0.0,at,1.0,atsave);
+        }
+      Kt.multVec(1.0,at,1.0,ConstVector(vt));
+      
+      /*****************
+      This calculates $$P_{t+1} = T_tP_tL_t^T + R_tQ_tR_t^T.$$
+      *****************/   
+      GeneralMatrix PtLttrans(Pt,Lt,"trans");
+      if(!isTunit)
+        {
+        Pt.zeros();
+        Pt.multAndAdd(Tt,ConstGeneralMatrix(PtLttrans));
+        }
+      else
+        {
+        Pt= (const GeneralMatrix&)PtLttrans;
+        }
+      if(!isRzero&&!isQzero)
+        {
+        GeneralMatrix QtRttrans(Qt,Rt,"trans");
+        Pt.multAndAdd(Rt,ConstGeneralMatrix(QtRttrans));
         }
       }
     }
+  }
   
 /*****************
 This runs a diffuse filter. Similarly as for

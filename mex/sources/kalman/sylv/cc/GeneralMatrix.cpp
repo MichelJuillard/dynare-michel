@@ -85,8 +85,6 @@ GeneralMatrix::GeneralMatrix(const GeneralMatrix& a, const char* dum1,
 
 GeneralMatrix::~GeneralMatrix()
   {
-     if(tmpGMp)
-       delete tmpGMp;
   }
 
 
@@ -180,13 +178,15 @@ void
 GeneralMatrix::multInvRight( GeneralMatrix&A)
   {
   // check or allocate tmp space for Transpose *this
+  /**
   if (tmpGMp)
     {
     if (tmpGMp->numCols()!=rows || tmpGMp->numRows()!=cols)
       delete (tmpGMp);
     }
   if (!tmpGMp) 
-    tmpGMp= new GeneralMatrix(cols,rows); // allocate space only once if and when needed!
+  ********/
+  tmpGMp= new GeneralMatrix(cols,rows); // allocate space only once if and when needed!
 
   // tmpGMp=(*this)' i.e. Transpose (*this)
   for (int i = 0; i < rows; i++)
@@ -216,7 +216,7 @@ GeneralMatrix::multInvRight( GeneralMatrix&A)
       for (int j = 0; j < cols; j++)
         get(i,j) = tmpGMp->get(j,i);
     }
-
+  delete tmpGMp;  
   }
 
 

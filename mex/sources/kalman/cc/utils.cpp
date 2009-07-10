@@ -83,23 +83,17 @@ NormCholesky::NormCholesky(const GeneralMatrix&a)
   TS_RAISE_IF(info<0,
     "Internal error in NormCholesky constructor");
   
-  ;
-  
   for(int i= 0;i<L.numRows();i++)
     for(int j= i+1;j<L.numCols();j++)
       L.get(i,j)= 0.0;
     
-    ;
-    
-    for(int j= 0;j<L.numCols();j++){
-      double d= L.get(j,j);
-      Vector Lj(L,j);
-      Lj.mult(1.0/d);
-      D[j]= d*d;
-      }
-    
-    
-    ;
+  for(int j= 0;j<L.numCols();j++){
+    double d= L.get(j,j);
+    Vector Lj(L,j);
+    Lj.mult(1.0/d);
+    D[j]= d*d;
+    }
+  
   }
 
 ;
@@ -132,13 +126,47 @@ rows(m.numRows())
   calcDetSign();
   }
 
-;
 
 PLUFact::PLUFact(const PLUFact&fact)
 :inv(fact.inv),ipiv(new int[fact.rows]),
 rows(fact.rows),rcond(fact.rcond),detsign(fact.detsign),info(fact.info)
   {
   memcpy(ipiv,fact.ipiv,rows*sizeof(int));
+  }
+
+PLUFact::PLUFact(const int nc,const int nr )
+    :inv(nr*nc),ipiv(new int[nr]),rows(nr)
+  {
+  TS_RAISE_IF(nr!=nc,
+    "Matrix not square in PLUFact constructor");
+  }
+
+const PLUFact&
+PLUFact::operator = (const GeneralMatrix&m)
+  {
+  TS_RAISE_IF(!m.isFinite(),
+    "Matrix is not finite in PLUFact assignement");
+  TS_RAISE_IF(m.numRows()!=m.numCols(),
+    "Matrix not square in PLUFact assignement");
+  TS_RAISE_IF(m.numRows()!=rows,
+    "Matrix not matching PLUFact size for assignement");
+  inv= m.getData();
+  LAPACK_dgetrf(&rows,&rows,inv.base(),&rows,ipiv,&info);
+  TS_RAISE_IF(info<0,
+    "Internal error in PLUFact assignement");
+  
+  double mnorm= m.getNormInf();
+  double*work= new double[4*rows];
+  int*iwork= new int[rows];
+  int infotmp;
+  LAPACK_dgecon("I",&rows,inv.base(),&rows,&mnorm,&rcond,work,
+    iwork,&infotmp);
+  delete[]iwork;
+  delete[]work;
+  TS_RAISE_IF(infotmp<0,
+    "Internal error in PLUFact assignement");
+  calcDetSign();
+  return *this;
   }
 
 ;
@@ -230,13 +258,10 @@ void PLUFact::calcDetSign()
     if(ipiv[i]!=i+1)
       detsign*= -1;
     
-    ;
-    
-    for(int i= 0;i<rows;i++)
-      if(inv[i*(rows+1)]<0)
-        detsign*= -1;
+  for(int i= 0;i<rows;i++)
+    if(inv[i*(rows+1)]<0)
+      detsign*= -1;
       
-      ;
   }
 
 ;

@@ -61,8 +61,10 @@ class PLUFact{
   public:
     PLUFact(const GeneralMatrix&m);
     PLUFact(const PLUFact&plu);
+    PLUFact(const int nc,const int nr );
     virtual~PLUFact()
       {delete[]ipiv;}
+    const PLUFact& operator = (const GeneralMatrix&m);
     void multInvLeft(GeneralMatrix&a)const;
     void multInvRight(GeneralMatrix&a)const;
     void multInvLeft(Vector&a)const;
