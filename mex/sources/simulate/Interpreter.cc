@@ -505,7 +505,7 @@ Interpreter::compute_block_time(int Per_u_) /*throw(EvalException)*/
                   mexEvalString("drawnow;");
 #endif
                   break;
-/*                case oAcosh:
+                case oAcosh:
                   Stack.push(acosh(v1));
 #ifdef DEBUGC
                   mexPrintf("acosh\n");
@@ -525,7 +525,7 @@ Interpreter::compute_block_time(int Per_u_) /*throw(EvalException)*/
                   mexPrintf("atanh\n");
                   mexEvalString("drawnow;");
 #endif
-                  break;*/
+                  break;
                 case oSqrt:
                   Stack.push(sqrt(v1));
 #ifdef DEBUGC
@@ -1226,17 +1226,17 @@ Interpreter::compute_blocks(string file_name, string bin_basename)
             Block.clear();
             Block_Contain.clear();
             Block_contain_type lBlock_Contain;
-//#ifdef DEBUGC
+#ifdef DEBUGC
             mexPrintf("FBEGINBLOCK\n");
             mexEvalString("drawnow;");
-//#endif
+#endif
             /*uint64_t *Init_Code_64;
             memcpy(Init_Code_64, Init_Code, sizeof(*Init_Code_64));*/
-            lBlock.begin=get_code_pos-(uint64_t*)Init_Code;
-//#ifdef DEBUGC
+            lBlock.begin=get_code_pos-(uint64_t)Init_Code;
+#ifdef DEBUGC
             mexPrintf("Block[%d].begin=%d\n",Block_Count, lBlock.begin);
             mexEvalString("drawnow;");
-//#endif
+#endif
             lBlock.size=get_code_int;
 //#ifdef DEBUGC
             mexPrintf("Block[Block_Count].size=%d\n",lBlock.size);
