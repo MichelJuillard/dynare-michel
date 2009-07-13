@@ -196,13 +196,26 @@ void PLUFact::multInvRight(GeneralMatrix&a)const
   {
   GeneralMatrix atrans(a,"trans");
   TS_RAISE_IF(rows!=atrans.numRows(),
-    "Wrong dimension of the matrix in PLUFact::multInvLeft");
+    "Wrong dimension of the matrix in PLUFact::multInvRight");
   PL_dgetrs("T",atrans.getData().base(),atrans.getLD(),atrans.numCols());
   for(int i= 0;i<a.numRows();i++)
     for(int j= 0;j<a.numCols();j++)
       a.get(i,j)= atrans.get(j,i);
   }
 
+// pass also a temporary GM space for atrans to avoid matrix construction:
+void PLUFact::multInvRight(GeneralMatrix&a, GeneralMatrix&atrans)const
+  {
+  TS_RAISE_IF(rows!=atrans.numRows(),
+    "Wrong dimension of the matrix in PLUFact::multInvRight");
+  for(int i= 0;i<a.numRows();i++)
+    for(int j= 0;j<a.numCols();j++)
+      atrans.get(j,i)= a.get(i,j);
+  PL_dgetrs("T",atrans.getData().base(),atrans.getLD(),atrans.numCols());
+  for(int i= 0;i<a.numRows();i++)
+    for(int j= 0;j<a.numCols();j++)
+      a.get(i,j)= atrans.get(j,i);
+  }
 ;
 
 void PLUFact::multInvLeft(Vector&a)const

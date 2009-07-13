@@ -688,6 +688,7 @@ BasicKalmanTask::filterNonDiffuse(const Vector&a,const GeneralMatrix&P,
   GeneralMatrix PtLttrans(m,m);
   GeneralMatrix Mt(m,n);
   GeneralMatrix Kt(m,n);
+  GeneralMatrix KtTransTmp(n,m); // perm space for temp Kt trans
   GeneralMatrix QtRttrans(rcols,Rt.numRows());
 
   bool isTunit=0;// Tt->isUnit();
@@ -697,8 +698,11 @@ BasicKalmanTask::filterNonDiffuse(const Vector&a,const GeneralMatrix&P,
   const double neg_alpha=-1.0;
   const double omega=0.0;
   Vector vt(n);
+  Vector Finvv(n);
   Vector atsave(m);//((const Vector&)at);
+  int p;
   int t= 1; 
+  double vFinvv,ll;
   int nonsteady=1;
   for(;t<=data.numCols()&&nonsteady;++t)
     {
@@ -738,7 +742,8 @@ BasicKalmanTask::filterNonDiffuse(const Vector&a,const GeneralMatrix&P,
 //    GeneralMatrix Kt(Tt,Mt);
 		BLAS_dgemm("N", "N", &m, &n, &m, &alpha, Tt.base(), &m,
 				   Mt.base(), &m, &omega, Kt.base(), &m); 
-    Ftinv.multInvRight(Kt);
+//    Ftinv.multInvRight(Kt);
+    Ftinv.multInvRight(Kt, KtTransTmp); // using perm space for temp KT trans
 //    Kt.multInvRight(Ft);
     
     /*****************
@@ -755,8 +760,14 @@ BasicKalmanTask::filterNonDiffuse(const Vector&a,const GeneralMatrix&P,
     /*****************
     Here we calc likelihood and store results.
     *****************/   
-    double ll= calcStepLogLik(Ftinv,vt);
-    //    fres.set(t,Ftinv,vt,Lt,at,Pt,ll);
+    // double ll= calcStepLogLik(Ftinv,vt);
+    p= Ftinv.numRows();
+    Finvv=vt;
+    Ftinv.multInvLeft(Finvv);
+    vFinvv= vt.dot(Finvv);
+    ll=-0.5*(p*log(2*M_PI)+Ftinv.getLogDeterminant()+vFinvv);
+
+    // fres.set(t,Ftinv,vt,Lt,at,Pt,ll);
     (*vll)[t-1]=ll;
     if (t>start) loglik+=ll;
     

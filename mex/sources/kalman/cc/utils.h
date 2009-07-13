@@ -67,6 +67,8 @@ class PLUFact{
     const PLUFact& operator = (const GeneralMatrix&m);
     void multInvLeft(GeneralMatrix&a)const;
     void multInvRight(GeneralMatrix&a)const;
+    // pass temporary GM space for atrans to avoid matrix construction:
+    void multInvRight(GeneralMatrix&a, GeneralMatrix&atrans)const;
     void multInvLeft(Vector&a)const;
     void multInvRight(Vector&a)const;
     bool isRegular()const
