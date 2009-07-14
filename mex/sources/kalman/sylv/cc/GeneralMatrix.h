@@ -62,7 +62,6 @@ class ConstGeneralMatrix {
     bool isFinite() const;
     /** Returns true of the matrix is exactly zero. */
     bool isZero() const;
-    
     virtual void print() const;
   protected:
     void multInvLeft(const char* trans, int mrows, int mcols, int mld, double* d) const;
@@ -247,6 +246,12 @@ public:
     void add(double a, const GeneralMatrix& m, const char* dum)
       {add(a, ConstGeneralMatrix(m), dum);}
     
+    /* Returns true if this and m matrices are different for more than tolerance tol */
+    bool isDiff(const GeneralMatrix& m, const double tol)const;
+    bool isDiffSym(const GeneralMatrix& m, const double tol)const;
+    bool isDiffUpprTriang(const GeneralMatrix& m, const double tol=0.0)const
+      {return isDiffSym(m, tol);}
+
     bool isFinite() const
       {return (ConstGeneralMatrix(*this)).isFinite();}
     

@@ -474,14 +474,15 @@ void SmootherResults::exportV(GeneralMatrix&out)const
 BasicKalmanTask::BasicKalmanTask(const GeneralMatrix&d,const GeneralMatrix&ZZ,
                                  const GeneralMatrix&HH,const GeneralMatrix&TT,
                                  const GeneralMatrix&RR,const GeneralMatrix&QQ,
-                                 const StateInit&init_state)
+                                 const StateInit&init_state, const double rTol)
                                  :  // ssf(Z,H,T,R,Q),
 data(d), Zt(*(new ConstGeneralMatrix(ZZ))), 
 Ht(*(new ConstGeneralMatrix(HH))), 
 Tt(*(new ConstGeneralMatrix(TT))), 
 Rt(*(new ConstGeneralMatrix(RR))), 
 Qt(*(new ConstGeneralMatrix(QQ))),
-init(init_state)
+init(init_state),
+riccatiTol(rTol)
   {
   TS_RAISE_IF(d.numRows()!=Zt.numRows(),
     "Data not compatible with BasicKalmanTask constructor");
@@ -492,9 +493,9 @@ init(init_state)
 BasicKalmanTask::BasicKalmanTask(const GeneralMatrix&d,const ConstGeneralMatrix&ZZ,
                                  const ConstGeneralMatrix&HH,const ConstGeneralMatrix&TT,
                                  const ConstGeneralMatrix&RR,const ConstGeneralMatrix&QQ,
-                                 const StateInit&init_state)
+                                 const StateInit&init_state, const double rTol)
                                  :  // ssf(Z,H,T,R,Q),
-data(d), Zt(ZZ), Ht(HH), Tt(TT), Rt(RR), Qt(QQ),init(init_state)
+data(d), Zt(ZZ), Ht(HH), Tt(TT), Rt(RR), Qt(QQ),init(init_state), riccatiTol(rTol)
   {
   TS_RAISE_IF(d.numRows()!=Zt.numRows(),
     "Data not compatible with BasicKalmanTask constructor");
@@ -686,6 +687,7 @@ BasicKalmanTask::filterNonDiffuse(const Vector&a,const GeneralMatrix&P,
   PLUFact Ftinv(Ht.numRows(), Ht.numCols()); 
   GeneralMatrix Lt(Tt);
   GeneralMatrix PtLttrans(m,m);
+  GeneralMatrix PtOld(m,m);
   GeneralMatrix Mt(m,n);
   GeneralMatrix Kt(m,n);
   GeneralMatrix KtTransTmp(n,m); // perm space for temp Kt trans
@@ -703,8 +705,8 @@ BasicKalmanTask::filterNonDiffuse(const Vector&a,const GeneralMatrix&P,
   int p;
   int t= 1; 
   double vFinvv,ll;
-  int nonsteady=1;
-  for(;t<=data.numCols()&&nonsteady;++t)
+  bool nonSteady=true;
+  for(;t<=data.numCols()&&nonSteady;++t)
     {
 //    ConstVector yt(data,t-1);
     
@@ -787,6 +789,7 @@ BasicKalmanTask::filterNonDiffuse(const Vector&a,const GeneralMatrix&P,
       /*****************
       This calculates $$P_{t+1} = T_tP_tL_t^T + R_tQ_tR_t^T.$$
       *****************/   
+      PtOld=Pt;
 //    GeneralMatrix PtLttrans(Pt,Lt,"trans");
    // DGEMM: C := alpha*op( A )*op( B ) + beta*C,
   		BLAS_dgemm("N", "T", &m, &m, &m, &alpha, Pt.base(), &m,
@@ -815,13 +818,58 @@ BasicKalmanTask::filterNonDiffuse(const Vector&a,const GeneralMatrix&P,
 		    BLAS_dgemm("N", "N", &m, &m,  &rcols, &alpha, Rt.base(), &m,
 				       QtRttrans.base(), &rcols, &alpha, Pt.base(), &m); 
         }
-      
+      if (PtOld.isDiffSym(Pt, riccatiTol)==false)
+        nonSteady=false;
       }
     }
+
+    
 //  for(;t<=data.numCols();t++)
 //    {
 //    ConstVector yt(data,t-1);
 //    }
+
+  // Steady 
+  double detF=p*log(2*M_PI)+Ftinv.getLogDeterminant();
+#ifdef DEBUG		
+  if (nonSteady==false)
+    mexPrintf("Basickalman_filter Steady at t=%d / %d \n", t,data.numCols());
+#endif		
+
+  for(;t<=data.numCols();++t)
+    {
+    /*****************
+    This calculates  $$v_t = y_t - Z_t*a_t.$$
+    *****************/   
+    memcpy(vt.base(), &(data.get(0,t-1)), n*sizeof(double));
+//    Zt.multsVec(vt,at);
+	  BLAS_dgemv("N",  &n,  &m, &neg_alpha, Zt.base(), &n, at.base(), 
+        &inc, &alpha, vt.base(), &inc);
+    
+    /*****************
+    Here we calc likelihood and store results.
+    *****************/   
+    // double ll= calcStepLogLik(Ftinv,vt);
+    Finvv=vt;
+    Ftinv.multInvLeft(Finvv);
+    vFinvv= vt.dot(Finvv);
+    ll=-0.5*(detF+vFinvv);
+
+    // fres.set(t,Ftinv,vt,Lt,at,Pt,ll);
+    (*vll)[t-1]=ll;
+    if (t>start) loglik+=ll;
+    
+    if(t<data.numCols())
+      {
+      /*****************
+      This calculates $$a_{t+1} = T_ta_t + K_tv_t.$$
+      *****************/   
+      atsave=at;
+      Tt.multVec(0.0,at,1.0,atsave);
+      Kt.multVec(1.0,at,1.0,ConstVector(vt));
+      }
+    }
+
   return loglik;
   }
   

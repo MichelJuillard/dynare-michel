@@ -201,7 +201,7 @@ int main(int argc, char* argv[])
           }
         }
 ***********/   
-
+      double riccatiTol=0.000001;
       int start = 1;
       GeneralMatrix Z(Zmat, 4, 8);
       GeneralMatrix a(8, 1);
@@ -263,7 +263,7 @@ int main(int argc, char* argv[])
       else // basic Kalman
         {
         init = new StateInit(P, a.getData());
-        BasicKalmanTask bkt(Y, Z, H, T, R, Q, *init);
+        BasicKalmanTask bkt(Y, Z, H, T, R, Q, *init, riccatiTol);
 #ifdef TIMING_LOOP
   for (int tt=0;tt<10000;++tt)
     {

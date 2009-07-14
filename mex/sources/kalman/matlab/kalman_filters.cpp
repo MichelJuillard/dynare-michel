@@ -80,6 +80,7 @@ extern "C" {
     //int start = 1; // default start of likelihood calculation
     // test for univariate case
     bool uni = false;
+    double riccatiTol=0.000001;
     const mxArray* const last = prhs[nrhs-1];
     if (mxIsChar(last)
       && ((*mxGetChars(last)) == 'u' || (*mxGetChars(last)) == 'U'))
@@ -151,14 +152,14 @@ extern "C" {
       else // basic Kalman
         {
         init = new StateInit(P, a.getData());
-        BasicKalmanTask bkt(Y, Z, H, T, R, Q, *init);
+        BasicKalmanTask bkt(Y, Z, H, T, R, Q, *init, riccatiTol);
 #ifdef TIMING_LOOP
   for (int tt=0;tt<1000;++tt)
     {
 #endif
         loglik = bkt.filter( per, d, (start-1), vll);
 #ifdef DEBUG		
-    mexPrintf("Basickalman_filter: loglik=%d \n", loglik);
+    mexPrintf("Basickalman_filter: loglik=%f \n", loglik);
 #endif		
 #ifdef TIMING_LOOP
     }

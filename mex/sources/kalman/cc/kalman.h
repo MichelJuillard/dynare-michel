@@ -164,11 +164,12 @@ class BasicKalmanTask{
   const ConstGeneralMatrix &Rt;
   const ConstGeneralMatrix &Qt;
   const StateInit&init;
+  const double riccatiTol;
   public:
     BasicKalmanTask(const GeneralMatrix&d,const GeneralMatrix&ZZ,
       const GeneralMatrix&HH,const GeneralMatrix&TT,
       const GeneralMatrix&RR,const GeneralMatrix&QQ,
-      const StateInit&init_state);
+      const StateInit&init_state, const double riccatiTol);
 //    BasicKalmanTask(const GeneralMatrix&d,const TMatrix&Z,
 //      const TMatrix&H,const TMatrix&T,
 //      const TMatrix&R,const TMatrix&Q,
@@ -176,7 +177,7 @@ class BasicKalmanTask{
     BasicKalmanTask(const GeneralMatrix&d,const ConstGeneralMatrix&ZZ,
        const ConstGeneralMatrix&HH,const ConstGeneralMatrix&TT,
        const ConstGeneralMatrix&RR,const ConstGeneralMatrix&QQ,
-       const StateInit&init_state);
+       const StateInit&init_state, const double riccatiTol);
     virtual ~BasicKalmanTask();
 //    double filter(int&per,int&d)const;
 //    double filter(int&per,int&d, int start, std::vector<double>* vll)const;

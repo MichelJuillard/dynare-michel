@@ -294,6 +294,30 @@ void GeneralMatrix::add(double a, const ConstGeneralMatrix& m, const char* dum)
       get(i,j) += a*m.get(j,i);
   }
 
+
+bool GeneralMatrix::isDiff(const GeneralMatrix& m, const double tol=0.0)const
+  {
+  if (m.numRows() != rows || m.numCols() != cols)
+    throw SYLV_MES_EXCEPTION("Matrix has different size in GeneralMatrix::isDiff.");
+  for (int i = 0; i < rows; i++) 
+    for (int j = 0; j < cols; j++)
+      if (fabs(get(i,j) - m.get(i,j))>tol)
+        return true;
+    return false;
+  }
+
+bool GeneralMatrix::isDiffSym(const GeneralMatrix& m, const double tol=0.0)const
+  {
+  if (m.numRows() != rows || m.numCols() != cols || m.numRows() != cols || m.numCols() != rows)
+    throw SYLV_MES_EXCEPTION("Matrix has different size or not square in GeneralMatrix::isDiffSym.");
+  for (int i = 0; i < cols; i++) 
+    for (int j = 0; i+j < cols ; j++) // traverse the upper triangle only
+      if (fabs(get(j,j+i) - m.get(j,j+i))>tol) // along diagonals where higher changes occur
+        return true;
+    return false;
+  }
+
+
 /* x = scalar(a)*x + scalar(b)*this*d */
 void GeneralMatrix::multVec(double a, Vector& x, double b, const ConstVector& d) const
   {
