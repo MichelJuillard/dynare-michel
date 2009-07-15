@@ -1,4 +1,4 @@
-function [alphahat,etahat,a, aK] = DiffuseKalmanSmoother3(T,R,Q,Pinf1,Pstar1,Y,trend,pp,mm,smpl,mf)
+function [alphahat,etahat,a,P,aK,PK,d,decomp] = DiffuseKalmanSmoother3(T,R,Q,Pinf1,Pstar1,Y,trend,pp,mm,smpl,mf)
 % function [alphahat,etahat,a1, aK] = DiffuseKalmanSmoother3(T,R,Q,Pinf1,Pstar1,Y,trend,pp,mm,smpl,mf)
 % Computes the diffuse kalman smoother without measurement error, in the case of a singular var-cov matrix.
 % Univariate treatment of multivariate time series.
@@ -58,13 +58,16 @@ function [alphahat,etahat,a, aK] = DiffuseKalmanSmoother3(T,R,Q,Pinf1,Pstar1,Y,t
 
 global options_
 
+d=0;
+decomp=[];
 nk = options_.nk;
 spinf   	= size(Pinf1);
 spstar  	= size(Pstar1);
 v       	= zeros(pp,smpl);
 a       	= zeros(mm,smpl);
 a1       	= zeros(mm,smpl+1);
-aK          = zeros(nk,mm,smpl+nk);
+aK              = zeros(nk,mm,smpl+nk);
+PK              = zeros(nk,mm,mm,smpl+nk);
 
 if isempty(options_.diffuse_d),
   smpl_diff = 1;
@@ -205,8 +208,11 @@ while notsteady & t<smpl
     end
   end
   a1(:,t+1) = T*a(:,t);
+  Pf          = P(:,:,t);
   for jnk=1:nk,
-    aK(jnk,:,t+jnk) 	 	= T^jnk*a(:,t);
+      Pf = T*Pf*T' + QQ;
+      aK(jnk,:,t+jnk) = T^jnk*a(:,t);
+      PK(jnk,:,:,t+jnk) = Pf;
   end
   P(:,:,t+1) = T*P(:,:,t)*transpose(T) + QQ;
   notsteady   = ~(max(max(abs(P(:,:,t+1)-P(:,:,t))))<crit);
@@ -232,8 +238,11 @@ while t<smpl
     end
   end
   a1(:,t+1) = T*a(:,t);
+  Pf          = P(:,:,t);
   for jnk=1:nk,
-    aK(jnk,:,t+jnk)	= T^jnk*a(:,t);
+      Pf = T*Pf*T' + QQ;
+      aK(jnk,:,t+jnk) = T^jnk*a(:,t);
+      PK(jnk,:,:,t+jnk) = Pf;
   end
 end
 ri=zeros(mm,1);
@@ -275,4 +284,29 @@ if d
   end
 end
 
+if nargout > 7
+    decomp = zeros(nk,mm,rr,smpl+nk);
+    ZRQinv = inv(Z*QQ*Z');
+    for t = max(d,1):smpl
+        ri_d = zeros(mm,1);
+        for i=pp:-1:1
+            if Fi(i,t) > crit
+                ri_d = Z(i,:)'/Fi(i,t)*v(i,t)+Li(:,:,i,t)'*ri_d;
+            end
+        end
+        
+        % calculate eta_tm1t
+        eta_tm1t = QRt*ri_d;
+        % calculate decomposition
+        Ttok = eye(mm,mm); 
+        for h = 1:nk
+            for j=1:rr
+                eta=zeros(rr,1);
+                eta(j) = eta_tm1t(j);
+                decomp(h,:,j,t+h) = Ttok*P1(:,:,t)*Z'*ZRQinv*Z*R*eta;
+            end
+            Ttok = T*Ttok;
+        end
+    end
+end
 
