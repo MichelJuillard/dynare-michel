@@ -123,7 +123,7 @@ extern "C" {
           if (nhls >= 6) {
             int dims[3]; dims[0] = T.numRows();
             dims[1] = T.numRows(); dims[2] = Y.numCols();
-            plhs[5] = mxCreateNumericArray(3, dims, mxDOUBLE_CLASS, mxREAL);
+            plhs[5] = mxCreateNumericMatrix(3, dims[0], mxDOUBLE_CLASS, mxREAL);
             if (per == Y.numCols()) {
               GeneralMatrix tmp(mxGetPr(plhs[5]), T.numRows(),
                 T.numRows()*Y.numCols());

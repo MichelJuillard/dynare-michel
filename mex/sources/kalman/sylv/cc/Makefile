@@ -2,10 +2,10 @@
 
 # Tag $Name:  $
 
-CC_FLAGS := -Wall -Winline -I../testing -I../cc -DMATLAB  \
-        $(CC_INCLUDE_PATH) -Ic:/"Program Files"/MATLAB_SV71/extern/include #-pg
+CC_FLAGS := -Wall -Winline -fpic -I../testing -I../cc -DMATLAB  \
+        $(CC_INCLUDE_PATH) -I$(MATLAB)/extern/include #-pg
 
-LDFLAGS = -Wl,-L"c:/Program Files"/MATLAB_SV71/extern/lib/win32/microsoft/ \
+LDFLAGS = -Wl,-L$(MATLAB_PATH)/extern/lib/win32/microsoft/ \
 	-Wl,-llibmex -Wl,-llibmx  -Wl,-llibmwlapack -Wl,-llibdflapack \
 	-lg2c -lmingw32  -lstdc++ 
 

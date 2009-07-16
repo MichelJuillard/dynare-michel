@@ -5,8 +5,8 @@
 
 LD_LIBS := -llapack -lcblas -lf77blas -latlas -lg2c
 CC_FLAGS :=  -DMATLAB -DWINDOWS -DNO_BLAS_H -DNO_LAPACK_H  \
-		-Wall -I../sylv/cc  \
-		-Ic:/"Program Files"/MATLAB_SV71/extern/include #-pg
+		-fpic -Wall -I../sylv/cc  \
+		-I$(MATLAB_PATH)/extern/include #-pg
 
 ifeq ($(DEBUG),yes)
 	CC_FLAGS :=  -DDEBUG $(CC_FLAGS) -g
@@ -17,8 +17,7 @@ endif
 # Added by GP
 #    LDFLAGS := -llapack -lcblas -lf77blas -latlas -lg2c -lstdc++ -lmingw32
         LDFLAGS := -Wl,--library-path $(LD_LIBRARY_PATH) \
-             -Wl,-L'f:/MinGW/lib' \
-        -Wl,-L"c:/Program Files"/MATLAB_SV71/extern/lib/win32/microsoft/ \
+        -Wl,-L$(MATLAB_PATH)/extern/lib/win32/microsoft/ \
         -Wl,-llibmex -Wl,-llibmx  -Wl,-llibmwlapack -Wl,-llibdflapack \
         -lg2c -lmingw32  -lstdc++ $(LDFLAGS)
 

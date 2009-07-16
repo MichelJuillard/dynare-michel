@@ -167,7 +167,7 @@ struct SSForm{
   SSForm(const GeneralMatrix&zz,const GeneralMatrix&hh,
     const GeneralMatrix&tt,const GeneralMatrix&rr,
     const GeneralMatrix&qq);
-  SSForm::SSForm(const SSForm&f);
+  SSForm(const SSForm&f);
   
   ~SSForm();
   };
