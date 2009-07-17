@@ -2,7 +2,7 @@
 // Based on work of 2005, Ondra Kamenik
 
 #include "ascii_array.h"
-
+#include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 #include <iostream>

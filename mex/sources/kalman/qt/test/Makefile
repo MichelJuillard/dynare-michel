@@ -4,10 +4,10 @@
 #DEBUG = yes
 
 #LD_LIBS := -llapack -lcblas -lf77blas -latlas -lg2c
-
-CC_FLAGS :=  -DMATLAB -DWINDOWS  -DNO_BLAS_H -DNO_LAPACK_H \
-	-Wall -I../cc -I../../sylv/cc -I../cc -mno-cygwin -mwindows \
-	-Ic:/"Program Files"/MATLAB_SV71/extern/include  #-pg
+#-mno-cygwin -DWINDOWS  
+CC_FLAGS :=  -DMATLAB -DNO_BLAS_H -DNO_LAPACK_H \
+	-Wall -I../cc -I../../sylv/cc -I../cc \
+	-I$(MATLAB_PATH)/extern/include  #-pg
 
 ifeq ($(DEBUG),yes)
 	CC_FLAGS := -DDEBUG $(CC_FLAGS) -g -pg
@@ -22,13 +22,13 @@ endif
 # Added by GP
 #    LDFLAGS := -llapack -lcblas -lf77blas -latlas -lg2c -lstdc++ -lmingw32
         #LDFLAGS := -Wl,--library-path  $(LD_LIBRARY_PATH) 
+        #      -Wl,-L'f:/MinGW/lib' 
+        #-Wl,-L'C:/MinGW/lib/gcc-lib/i686-pc-mingw32/4.0.4' -Wl,-L'C:/MinGW/lib'
 
-        LD_LIBS := -Wl,--library-path  \
-              -Wl,-L'f:/MinGW/lib' \
-        -Wl,-L'C:/MinGW/lib/gcc-lib/i686-pc-mingw32/4.0.4' -Wl,-L'C:/MinGW/lib' \
-        -Wl,-L"c:/Program Files"/MATLAB_SV71/extern/lib/win32/microsoft/ \
-        -Wl,-llibmex -Wl,-llibmx  -Wl,-llibmwlapack -Wl,-llibdflapack \
-        -lf95 -lg2c -lmingw32  -lstdc++ $(LDFLAGS)
+        LD_LIBS := -Wl,-rpath-link,$(MATLAB_PATH)/bin/glnxa64 \
+        -Wl,-L$(MATLAB_PATH)/bin/glnxa64 \
+        -Wl,-lmex -lmx -lmwlapack -lmwblas -lmat -lm \
+        -Wl,-lstdc++ -lgfortran $(LDFLAGS)
 
 #                  -Wl,-L'f:/CygWin/usr/local/atlas/lib' 
 #                  -Wl,-L'f:/CygWin/lib' 

@@ -1,7 +1,8 @@
 # $Id: Makefile 531 2005-11-30 13:49:48Z kamenik $
 # Copyright 2005, Ondra Kamenik
 
-DEBUG = yes
+
+#DEBUG = yes
 
 #LD_LIBS := -llapack -lcblas -lf77blas -latlas -lg2c
 

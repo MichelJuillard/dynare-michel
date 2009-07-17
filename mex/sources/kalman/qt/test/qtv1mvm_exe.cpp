@@ -42,6 +42,7 @@
 **********************************************************/
 
 #include "qt.h"
+#include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
 #include "ascii_array.h"
@@ -81,7 +82,11 @@ int main(int argc, char* argv[])
       //  QT.print();
 #endif
         // 1. T1 = QT2T(QT;n) and Ld = QT2Ld(QT;n);
+#ifdef WINDOWS
         qtv_1__(Ta, QT.data, a.data, &n) ;
+#else
+        qtv_1_(Ta, QT.data, a.data, &n) ;
+#endif
 
 
 #ifdef TIMING_LOOP

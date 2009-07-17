@@ -1,7 +1,7 @@
 # $Header: /var/lib/cvs/dynare_cpp/sylv/cc/Makefile,v 1.4 2005/01/18 21:28:26 kamenik Exp $
 
 # Tag $Name:  $
-FF=f95
+FF=gfortran
 
 CC_FLAGS := -Wall -Winline -fpic
 #CC_FLAGS := -Wall -Winline -I../testing -I../cc -DMATLAB  \

@@ -42,6 +42,7 @@
 **********************************************************/
 
 #include "cppblas.h"
+#include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
 #include "ascii_array.h"
@@ -69,7 +70,6 @@ int main(int argc, char* argv[])
       const double alpha=1.0;
       const double beta=0.0;
       int inc =1;
-      //alpha=1.0;beta=0.0;
       // create output and upload output data
       Ta=(double *)calloc(n, sizeof(double));
 
@@ -81,10 +81,6 @@ int main(int argc, char* argv[])
       for (int tt=0;tt<loops;++tt)
         {
 #endif
-#ifdef DEBUG	
-      //  QT.print();
-#endif
-        // 1. T1 = QT2T(QT;n) and Ld = QT2Ld(QT;n);
 //	void BLAS_dgemv(BLCHAR trans, CONST_BLINT m, CONST_BLINT n, CONST_BLDOU alpha,
 //					CONST_BLDOU a, CONST_BLINT lda, CONST_BLDOU x, CONST_BLINT incx,
 //					CONST_BLDOU beta, BLDOU y, CONST_BLINT incy);

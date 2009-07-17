@@ -40,6 +40,7 @@
 **********************************************************/
 
 #include "cppblas.h"
+#include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
 #include "ascii_array.h"
