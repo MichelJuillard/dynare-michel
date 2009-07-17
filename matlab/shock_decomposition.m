@@ -1,4 +1,4 @@
-function z = shock_decomposition(M_,oo_,varlist)
+function oo_ = shock_decomposition(M_,oo_,options_,varlist)
 % function z = shock_decomposition(R,epsilon,varlist)
 % Computes shocks contribution to a simulated trajectory
 %
@@ -33,7 +33,7 @@ function z = shock_decomposition(M_,oo_,varlist)
 % number of variables
     endo_nbr = M_.endo_nbr;
 
-% number of shocks
+    % number of shocks
     nshocks = M_.exo_nbr;
 
     % indices of endogenous variables
@@ -64,6 +64,7 @@ function z = shock_decomposition(M_,oo_,varlist)
 
     maximum_lag = M_.maximum_lag;
     lead_lag_incidence = M_.lead_lag_incidence;
+    
     for i=1:gend
         if i > 1 & i <= maximum_lag+1
             lags = min(i-1,maximum_lag):-1:1;
@@ -79,9 +80,15 @@ function z = shock_decomposition(M_,oo_,varlist)
             lags = lags+1;
         end
 
-        z(:,1:nshocks,i) = z(:,1:nshocks,i) + B(inv_order_var,:).*repmat(epsilon(:,i)',nvar,1);
+        z(:,1:nshocks,i) = z(:,1:nshocks,i) + B(inv_order_var,:).*repmat(epsilon(:,i)',endo_nbr,1);
         z(:,nshocks+1,i) = z(:,nshocks+2,i) - sum(z(:,1:nshocks,i),2);
     end
     
     
+    oo_.shock_decomposition = z;
     
+    options_.initial_date.freq = 1;
+    options_.initial_date.period = 1;
+    options_.initial_date.sub_period = 0;
+    
+    graph_decomp(z,M_.exo_names,varlist,options_.initial_date)

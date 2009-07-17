@@ -1,4 +1,4 @@
-function []=graph_decomp(z,varlist,initial_period,freq)
+function []=graph_decomp(z,shock_names,varlist,initial_date)
 %function []=graph_decomp(z,varlist,initial_period,freq)
 
 % Copyright (C) 2009 Dynare Team
@@ -19,13 +19,16 @@ function []=graph_decomp(z,varlist,initial_period,freq)
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
     global M_ 
-    exo_nbr = M_.exo_nbr;
+    % number of components equals number of shocks + 1 (initial conditions)
+    comp_nbr = size(z,2)-1;
 
     gend = size(z,3);
+    freq = initial_date.freq;
+    initial_period = initial_date.period + initial_date.sub_period/freq;
     x = initial_period-1/freq:(1/freq):initial_period+(gend-1)/freq;
     
     [i_var,nvar] = varlist_indices(varlist);
-    for j=1:nvar;
+    for j=1:nvar
         z1 = squeeze(z(i_var(j),:,:));
         xmin = x(1);
         xmax = x(end);
@@ -45,7 +48,7 @@ function []=graph_decomp(z,varlist,initial_period,freq)
             i_1 = i-1;
             yp = 0;
             ym = 0;
-            for k = 1:exo_nbr+1 
+            for k = 1:comp_nbr 
                 zz = z1(k,i);
                 if zz > 0
                     fill([x(i) x(i) x(i+1) x(i+1)],[yp yp+zz yp+zz yp],k);
@@ -65,10 +68,10 @@ function []=graph_decomp(z,varlist,initial_period,freq)
         axis off;
         hold on;
         y1 = 0;
-        height = 1/(exo_nbr+1);
-        labels = strvcat(M_.exo_names,'Initial values');
+        height = 1/comp_nbr;
+        labels = strvcat(shock_names,'Initial values');
         
-        for j=1:exo_nbr+1
+        for j=1:comp_nbr
             fill([0 0 0.2 0.2],[y1 y1+0.7*height y1+0.7*height y1],j);
             hold on
             text(0.3,y1+0.3*height,labels(j,:),'Interpreter','none');
