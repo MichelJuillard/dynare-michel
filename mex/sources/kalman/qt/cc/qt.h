@@ -26,6 +26,11 @@ void tu_(BLDOU,C_BLDOU, C_BLDOU, C_BLINT);
 void tut_(BLDOU,C_BLDOU, C_BLDOU, C_BLINT);
 void tv_(BLDOU,C_BLDOU, C_BLDOU, C_BLINT);
 void qtv_(BLDOU,C_BLDOU, C_BLDOU, C_BLINT);
+#ifdef WINDOWS
+void qtv_1__(BLDOU,C_BLDOU, C_BLDOU, C_BLINT);
+#else
+void qtv_1_(BLDOU,C_BLDOU, C_BLDOU, C_BLINT);
+#endif
 void qtsqtt_(BLDOU,C_BLDOU, C_BLDOU, C_BLINT);
 
 };
