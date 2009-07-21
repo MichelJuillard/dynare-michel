@@ -5,9 +5,9 @@
 using namespace std;
 
 int
-mexPrintf(string str, ...)
+mexPrintf(/*string */const char *str, ...)
 {
-  va_list vl;
+  /*va_list vl;
   size_t found, found_p=0;
   found=str.find_first_of("%");
   va_start(vl,str);
@@ -49,7 +49,16 @@ mexPrintf(string str, ...)
     found=str.find_first_of("%",found_p);
    }
   printf(str.substr(found_p, str.size()-found_p+1).c_str());
-  return 0;
+  return 0;*/
+  va_list args;
+        int retval;
+
+        va_start (args, str);
+        retval = vprintf (str, args);
+        va_end (args);
+
+        return retval;
+
 }
 
 void

@@ -20,9 +20,14 @@
 #ifndef MEM_MNGR_HH_INCLUDED
 #define MEM_MNGR_HH_INCLUDED
 
+//#include <stack>
 #include <vector>
 #include <fstream>
-#include "mex.h"
+#ifndef DEBUG_EX
+  #include "mex.h"
+#else
+  #include "mex_interface.hh"
+#endif
 using namespace std;
 
 struct NonZeroElem
@@ -59,6 +64,7 @@ private:
     int CHUNK_heap_pos/*, CHUNK_heap_max_size*/;
     NonZeroElem** NZE_Mem_add;
     NonZeroElem* NZE_Mem;
+    vector<NonZeroElem*> NZE_Mem_Allocated;
     int swp_f_b;
     fstream  SaveCode_swp;
     string filename;

@@ -32,7 +32,11 @@
 #ifdef LINBCG
 # include "linbcg.hh"
 #endif
-#include "mex.h"
+#ifndef DEBUG_EX
+  #include "mex.h"
+#else
+  #include "mex_interface.hh"
+#endif
 
 //#define DEBUGC
 

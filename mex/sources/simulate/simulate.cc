@@ -178,10 +178,7 @@ main( int argc, const char* argv[] )
     mxFree(ya);
   if(direction)
     mxFree(direction);
-
-
   free(params);
-
 }
 
 #else

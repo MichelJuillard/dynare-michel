@@ -41,7 +41,7 @@ using namespace std;
 struct t_save_op_s
 {
   short int lag, operat;
-  int first, second;
+  long int first, second;
 };
 
 const int IFLD  =0;
@@ -52,23 +52,9 @@ const int IFLDZ =4;
 const int IFMUL =5;
 const int IFSTP =6;
 const int IFADD =7;
-const double eps=1e-7;
+const double eps=1e-10;
 const double very_big=1e24;
 const int alt_symbolic_count_max=1;
-
-struct t_table_y
-  {
-    int index, nb;
-    int *u_index, *y_index;
-  };
-
-struct t_table_u
-  {
-    t_table_u* pNext;
-    unsigned char type;
-    int index;
-    int op1, op2;
-  };
 
 
 class SparseMatrix
@@ -107,6 +93,8 @@ class SparseMatrix
     void Delete_u(int pos);
     void Clear_u();
     void Print_u();
+    void CheckIt(int y_size, int y_kmin, int y_kmax, int Size, int periods, int iter);
+    void Check_the_Solution(int periods, int y_kmin, int y_kmax, int Size, double *u, int* pivot, int* b);
     int complete(int beg_t, int Size, int periods, int *b);
     double bksub( int tbreak, int last_period, int Size, double slowc_l
 #ifdef PROFILER
@@ -118,19 +106,11 @@ class SparseMatrix
     void run_it(int nop_all,int *op_all);
     void run_u_period1(int periods);
     void close_swp_file();
-
-    void read_file_table_u(t_table_u **table_u, t_table_u **F_table_u, t_table_u **i_table_u, t_table_u **F_i_table_u, int *nb_table_u, bool i_to_do, bool shifting, int *nb_add_u_count, int y_kmin, int y_kmax, int u_size);
-    void read_file_table_y(t_table_y **table_y, t_table_y **i_table_y, int *nb_table_y, bool i_to_do, bool shifting, int y_kmin, int y_kmax, int u_size, int y_size);
-    void close_SaveCode();
-
     stack<double> Stack;
     int nb_prologue_table_u, nb_first_table_u, nb_middle_table_u, nb_last_table_u;
     int nb_prologue_table_y, nb_first_table_y, nb_middle_table_y, nb_last_table_y;
     int middle_count_loop;
     char type;
-    t_table_u *prologue_table_u, *first_table_u, *first_i_table_u, *middle_table_u, *middle_i_table_u, *last_table_u;
-    t_table_y *prologue_table_y, *first_table_y, *middle_table_y, *middle_i_table_y, *last_table_y;
-    t_table_u *F_prologue_table_u, *F_first_table_u, *F_first_i_table_u, *F_middle_table_u, *F_middle_i_table_u, *F_last_table_u;
     fstream SaveCode;
     string filename;
     int max_u, min_u;
@@ -142,7 +122,7 @@ class SparseMatrix
     NonZeroElem **FNZE_R, **FNZE_C;
     int nb_endo, u_count_init;
 
-    int *pivot, *pivotk;
+    int *pivot, *pivotk, *pivot_save;
     double *pivotv, *pivotva;
     int *b;
     bool *line_done;
@@ -154,7 +134,7 @@ class SparseMatrix
     int u_count_alloc, u_count_alloc_save;
     double markowitz_c_s;
     double res1a;
-    long int nop_all, /*nopa_all,*/ nop1, nop2;
+    long int nop_all, nop1, nop2;
     map<pair<pair<int, int> ,int>, int> IM_i;
 protected:
     double *u, *y, *ya;
@@ -166,7 +146,8 @@ protected:
     int u_count, tbreak_g;
     int iter;
     double *direction;
-
+    int start_compare;
+    int restart;
   };
 
 

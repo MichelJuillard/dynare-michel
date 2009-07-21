@@ -58,7 +58,7 @@ function y = solve_two_boundaries(fname, y, x, params, y_index, nze, periods, y_
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-  global oo_ M_;
+  global oo_ M_ T9025 T1149 T11905;
   cvg=0;
   iter=0;
   Per_u_=0;
@@ -73,8 +73,33 @@ function y = solve_two_boundaries(fname, y, x, params, y_index, nze, periods, y_
   reduced = 0;
   while ~(cvg==1 | iter>maxit_),
     [r, y, g1, g2, g3, b]=feval(fname, y, x, params, periods, 0, y_kmin, Blck_size);
+%     for i=1:periods;
+%       disp([sprintf('%5.14f ',[T9025(i) T1149(i) T11905(i)])]);
+%     end;
+%     return;
+    residual = r(:,y_kmin+1:y_kmin+1+y_kmax_l);
+    %num2str(residual,' %1.6f')
+    %jac_ = g1(1:(y_kmin)*Blck_size, 1:(y_kmin+1+y_kmax_l)*Blck_size);
+    %jac_
+    
     g1a=g1(:, y_kmin*Blck_size+1:(periods+y_kmin)*Blck_size);
-    b = b -g1(:, 1:y_kmin_l*Blck_size)*reshape(y(1+y_kmin-y_kmin_l:y_kmin,y_index)',1,y_kmin_l*Blck_size)'-g1(:, (periods+y_kmin_l)*Blck_size+1:(periods+y_kmin_l+y_kmax_l)*Blck_size)*reshape(y(periods+y_kmin+1:periods+y_kmin+y_kmax_l,y_index)',1,y_kmax_l*Blck_size)';
+    term1 = g1(:, 1:y_kmin_l*Blck_size)*reshape(y(1+y_kmin-y_kmin_l:y_kmin,y_index)',1,y_kmin_l*Blck_size)';
+    term2 = g1(:, (periods+y_kmin_l)*Blck_size+1:(periods+y_kmin_l+y_kmax_l)*Blck_size)*reshape(y(periods+y_kmin+1:periods+y_kmin+y_kmax_l,y_index)',1,y_kmax_l*Blck_size)';
+    b = b - term1 - term2;
+    
+%     fid = fopen(['result' num2str(iter)],'w');
+%     fg1a = full(g1a);
+%     fprintf(fid,'%d\n',size(fg1a,1));
+%     fprintf(fid,'%d\n',size(fg1a,2));
+%     fprintf(fid,'%5.14f\n',fg1a);
+%     fprintf(fid,'%d\n',size(b,1));
+%     fprintf(fid,'%5.14f\n',b);
+%     fclose(fid);
+%     return;
+    %ipconfigb_ = b(1:(1+y_kmin)*Blck_size);
+    %b_ 
+    
+    
     [max_res, max_indx]=max(max(abs(r')));
     if(~isreal(r))
       max_res = (-max_res^2)^0.5;
@@ -151,6 +176,14 @@ function y = solve_two_boundaries(fname, y, x, params, y_index, nze, periods, y_
         dx = g1a\b- ya;
         ya = ya + lambda*dx;
         y(1+y_kmin:periods+y_kmin,y_index)=reshape(ya',length(y_index),periods)';
+%         v = '';
+%         for i=1:(size(y_index,2))
+%           v = [v ' %1.6f'];
+%         end;
+%         v = [v '\n'];
+%         v
+%         sprintf(v,y(:,y_index)')
+%         return;
       elseif(simulation_method==2),
         flag1=1;
         while(flag1>0)

@@ -10,8 +10,8 @@ bet=0.05;
 aa=0.5;
 
 
-model(sparse);
-//model(sparse_dll);
+//model(sparse);
+model(sparse_dll);
 //model;
 //s = aa*x*k(-1)^alph - c;
 c + k - aa*x*k(-1)^alph - (1-delt)*k(-1);// + 0.00000001*s;

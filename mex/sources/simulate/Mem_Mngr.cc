@@ -23,7 +23,6 @@ Mem_Mngr::Mem_Mngr()
 {
   swp_f=false;
   swp_f_b=0;
-  //verbose=false;
 }
 void
 Mem_Mngr::Print_heap()
@@ -44,6 +43,7 @@ Mem_Mngr::init_Mem()
   NZE_Mem=NULL;
   NZE_Mem_add=NULL;
   CHUNK_heap_pos=0;
+  NZE_Mem_Allocated.clear();
 }
 
 void Mem_Mngr::fixe_file_name(string filename_arg)
@@ -60,7 +60,7 @@ Mem_Mngr::init_CHUNK_BLCK_SIZE(int u_count)
 NonZeroElem*
 Mem_Mngr::mxMalloc_NZE()
 {
-  int i;
+  long int i;
   if (!Chunk_Stack.empty())           /*An unused block of memory available inside the heap*/
     {
       NonZeroElem* p1 = Chunk_Stack.back();
@@ -69,32 +69,27 @@ Mem_Mngr::mxMalloc_NZE()
     }
   else if (CHUNK_heap_pos<CHUNK_SIZE) /*there is enough allocated memory space available we keep it at the top of the heap*/
     {
-      int i=CHUNK_heap_pos++;
+      i=CHUNK_heap_pos++;
       return(NZE_Mem_add[i]);
     }
   else                                /*We have to allocate extra memory space*/
     {
+    	//mexPrintf("CHUNK_SIZE=%d CHUNK_BLCK_SIZE=%d Nb_CHUNK=%d\n",CHUNK_SIZE,CHUNK_BLCK_SIZE,Nb_CHUNK);
       CHUNK_SIZE+=CHUNK_BLCK_SIZE;
-      /*mexPrintf("Allocate %f Ko\n",double(CHUNK_BLCK_SIZE)*double(sizeof(NonZeroElem))/double(1024));
-      mexEvalString("drawnow;");*/
       Nb_CHUNK++;
-#ifdef MEM_ALLOC_CHK
-      mexPrintf("CHUNK_BLCK_SIZE=%d\n",CHUNK_BLCK_SIZE);
-#endif
-      NZE_Mem=(NonZeroElem*)mxMalloc(CHUNK_BLCK_SIZE*sizeof(NonZeroElem));
-      //mexPrintf("in mxMalloc NZE_Mem=%x CHUNK_heap_pos=%d CHUNK_BLCK_SIZE=%d Nb_CHUNK=%d\n",NZE_Mem, CHUNK_heap_pos, CHUNK_BLCK_SIZE, Nb_CHUNK);
+      NZE_Mem=(NonZeroElem*)mxMalloc(CHUNK_BLCK_SIZE*sizeof(NonZeroElem));      /*The block of memory allocated*/
+      NZE_Mem_Allocated.push_back(NZE_Mem);
       if(!NZE_Mem)
         {
           mexPrintf("Not enough memory available\n");
           mexEvalString("drawnow;");
         }
-#ifdef MEM_ALLOC_CHK
-      mexPrintf("CHUNK_SIZE=%d\n",CHUNK_SIZE);
-#endif
-      NZE_Mem_add=(NonZeroElem**)mxRealloc(NZE_Mem_add, CHUNK_SIZE*sizeof(NonZeroElem*));
-#ifdef MEM_ALLOC_CHK
-      mexPrintf("ok\n");
-#endif
+      NZE_Mem_add=(NonZeroElem**)mxRealloc(NZE_Mem_add, CHUNK_SIZE*sizeof(NonZeroElem*));   /*We have to redefine the size of pointer on the memory*/
+      if(!NZE_Mem_add)
+        {
+          mexPrintf("Not enough memory available\n");
+          mexEvalString("drawnow;");
+        }
       for (i=CHUNK_heap_pos;i<CHUNK_SIZE;i++)
         {
           NZE_Mem_add[i]=(NonZeroElem*)(NZE_Mem+(i-CHUNK_heap_pos));
@@ -109,36 +104,13 @@ void
 Mem_Mngr::mxFree_NZE(void* pos)
 {
   int i, gap;
-  /*if(verbose)
-    {
-      mexPrintf("pos=%x Nb_CHUNK=%d CHUNK_BLCK_SIZE=%d\n",pos,Nb_CHUNK, CHUNK_BLCK_SIZE);
-      mexEvalString("drawnow;");
-    }
-  */
   for (i=0;i<Nb_CHUNK;i++)
     {
-      /*if(verbose)
-        {
-          mexPrintf("i=%d\n",i);
-          mexEvalString("drawnow;");
-          mexPrintf("NZE_Mem_add[i*CHUNK_BLCK_SIZE]=%d\n",NZE_Mem_add[i*CHUNK_BLCK_SIZE]);
-          mexEvalString("drawnow;");
-        }*/
       gap=((uint64_t)(pos)-(uint64_t)(NZE_Mem_add[i*CHUNK_BLCK_SIZE]))/sizeof(NonZeroElem);
       if ((gap<CHUNK_BLCK_SIZE) && (gap>=0))
         break;
     }
-  /*if(verbose)
-    {
-      mexPrintf("push_back()\n");
-      mexEvalString("drawnow;");
-    }*/
   Chunk_Stack.push_back((NonZeroElem*)pos);
-  /*if(verbose)
-    {
-      mexPrintf("End\n");
-      mexEvalString("drawnow;");
-    }*/
 }
 
 
@@ -151,9 +123,6 @@ Mem_Mngr::write_swp_f(int *save_op_all,long int *nop_all)
   if (!SaveCode_swp.is_open())
     {
       mexPrintf("open the swp file for writing\n");
-#ifdef PRINT_OUT
-      mexPrintf("file opened\n");
-#endif
       SaveCode_swp.open((filename + ".swp").c_str(), std::ios::out | std::ios::binary);
       if (!SaveCode_swp.is_open())
         {
@@ -161,9 +130,6 @@ Mem_Mngr::write_swp_f(int *save_op_all,long int *nop_all)
           mexEvalString("st=fclose('all');clear all;");
           mexErrMsgTxt("Exit from Dynare");
         }
-#ifdef PRINT_OUT
-      mexPrintf("done\n");
-#endif
     }
   SaveCode_swp.write(reinterpret_cast<char *>(nop_all), sizeof(*nop_all));
   SaveCode_swp.write(reinterpret_cast<char *>(save_op_all), (*nop_all)*sizeof(int));
@@ -177,9 +143,6 @@ Mem_Mngr::read_swp_f(int **save_op_all,long int *nop_all)
   swp_f=true;
   if (!SaveCode_swp.is_open())
     {
-#ifdef PRINT_OUT
-      mexPrintf("file opened\n");
-#endif
       mexPrintf("open the file %s\n",(filename + ".swp").c_str());
       SaveCode_swp.open((filename + ".swp").c_str(), std::ios::in | std::ios::binary);
       j=SaveCode_swp.is_open();
@@ -191,9 +154,6 @@ Mem_Mngr::read_swp_f(int **save_op_all,long int *nop_all)
           mexEvalString("st=fclose('all');clear all;");
           mexErrMsgTxt("Exit from Dynare");
         }
-#ifdef PRINT_OUT
-      mexPrintf("done\n");
-#endif
       SaveCode_swp.seekg(0);
     }
 
@@ -277,15 +237,11 @@ Mem_Mngr::chk_avail_mem(int **save_op_all,long int *nop_all,long int *nopa_all,i
 void
 Mem_Mngr::Free_All()
 {
-  int i;
-  /*mexPrintf("Nb_CHUNK=%d\n",Nb_CHUNK);
-  mexEvalString("drawnow;");*/
-  for (i=0;i<Nb_CHUNK;i++)
-    {
-      /*mexPrintf("NZE_Mem_add[%d]=%x\n",i*CHUNK_BLCK_SIZE,NZE_Mem_add[i*CHUNK_BLCK_SIZE]);
-      mexEvalString("drawnow;");*/
-      mxFree(NZE_Mem_add[i*CHUNK_BLCK_SIZE]);
-    }
+	while(NZE_Mem_Allocated.size())
+	  {
+	  	mxFree(NZE_Mem_Allocated.back());
+	  	NZE_Mem_Allocated.pop_back();
+	  }
   mxFree(NZE_Mem_add);
   init_Mem();
 }

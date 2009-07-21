@@ -5,7 +5,7 @@
 #include <stdarg.h>
 using namespace std;
 
-int mexPrintf(const string str, ...);
+int mexPrintf(/*const string*/const char* str, ...);
 void mexErrMsgTxt(const string str);
 void* mxMalloc(int amount);
 void* mxRealloc(void* to_extend, int amount);
