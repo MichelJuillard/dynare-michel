@@ -201,7 +201,7 @@ int main(int argc, char* argv[])
           }
         }
 ***********/   
-      double riccatiTol=0.000001;
+      double riccatiTol=0.000000000001;
       int start = 1;
       GeneralMatrix Z(Zmat, 4, 8);
       GeneralMatrix a(8, 1);
@@ -223,8 +223,8 @@ int main(int argc, char* argv[])
       // create state init
       StateInit* init = NULL;
       std::vector<double>* vll=new std::vector<double> (nper);
-
-      if (diffuse||uni) 
+      bool basicKF=true;//false;
+      if (diffuse||uni||basicKF==false) 
         {
         if (diffuse) 
           {
