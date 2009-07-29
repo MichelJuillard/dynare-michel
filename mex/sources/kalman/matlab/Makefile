@@ -101,6 +101,10 @@ qtmvm.dll: qtmvm.o $(KALMANLIB) # $(hsource) $(cppsource)
 	gcc -shared $(CC_FLAGS) -o qtmvm.dll qtmvm.o \
 	kalmanlib.a $(LD_LIBS) 
 
+disclyap_fast_dll.dll: disclyap_fast_dll.o $(KALMANLIB) # $(hsource) $(cppsource) 
+	gcc -shared $(CC_FLAGS) -o disclyap_fast_dll.dll disclyap_fast_dll.o \
+	$(KALMANLIB) $(LD_LIBS) kalmanlib.def
+
 kalman_filter_dll.dll: kalman_filters.o $(KALMANLIB) # $(hsource) $(cppsource) 
 	gcc -shared $(CC_FLAGS) -o kalman_filter_dll.dll kalman_filters.o \
 	$(KALMANLIB) $(LD_LIBS)
