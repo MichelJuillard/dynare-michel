@@ -19,7 +19,7 @@ function [vdec, corr, autocorr, z, zz] = th_moments(dr,var_list)
     end
   end
   
-  [gamma_y,ivar] = th_autocovariances(dr,ivar);
+  [gamma_y,ivar] = th_autocovariances(dr,ivar,M_, options_);
   m = dr.ys(ivar);
 
   

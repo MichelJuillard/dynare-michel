@@ -123,7 +123,7 @@ if fload==0,
           lpmat(:,j)=lpmat(randperm(Nsam),j);
         end
       end
-    else ilptau==0
+    else %ilptau==0
       %[lpmat] = rand(Nsam,np);
       for j=1:np,
         lpmat(:,j) = randperm(Nsam)'./(Nsam+1); %latin hypercube
@@ -131,16 +131,16 @@ if fload==0,
 
     end
   end
-  try 
+%   try 
     dummy=prior_draw_gsa(1);
-  catch
-    if pprior,
-      if opt_gsa.prior_range==0;
-        error('Some unknown prior is specified or ML estimation,: use prior_range=1 option!!');
-      end
-    end
-      
-  end
+%   catch
+%     if pprior,
+%       if opt_gsa.prior_range==0;
+%         error('Some unknown prior is specified or ML estimation,: use prior_range=1 option!!');
+%       end
+%     end
+%       
+%   end
   if pprior,
     for j=1:nshock,
       if opt_gsa.morris~=1,
@@ -151,11 +151,27 @@ if fload==0,
       end
     end
     if opt_gsa.prior_range
+      if opt_gsa.identification,
+        deltx=min(0.001, 1/Nsam/2);
+        for j=1:np,
+          xdelt(:,:,j)=prior_draw_gsa(0,[lpmat0 lpmat]+deltx);
+        end
+      end
       for j=1:np,
         lpmat(:,j)=lpmat(:,j).*(bayestopt_.ub(j+nshock)-bayestopt_.lb(j+nshock))+bayestopt_.lb(j+nshock);
       end
     else
       xx=prior_draw_gsa(0,[lpmat0 lpmat]);
+      if opt_gsa.identification,
+        deltx=min(0.001, 1/Nsam/2);
+        ldum=[lpmat0 lpmat];
+        ldum = prior_draw_gsa(0,ldum+deltx);
+        for j=1:nshock+np,
+          xdelt(:,:,j)=xx;
+          xdelt(:,j,j)=ldum(:,j);
+        end
+        clear ldum
+      end
       lpmat0=xx(:,1:nshock);
       lpmat=xx(:,nshock+1:end);
       clear xx;

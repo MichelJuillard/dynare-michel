@@ -53,6 +53,7 @@ rawdata = read_variables(options_.datafile,options_.varobs,[],options_.xls_sheet
 
 options_ = set_default_option(options_,'nobs',size(rawdata,1)-options_.first_obs+1);
 gend = options_.nobs;
+n_varobs = size(options_.varobs,1);
 
 rawdata = rawdata(options_.first_obs:options_.first_obs+gend-1,:);
 if options_.loglinear == 1 & ~options_.logdata
@@ -64,6 +65,7 @@ if options_.prefilter == 1
 else
   data = transpose(rawdata);
 end
+[data_index,number_of_observations,no_more_missing_observations] = describe_missing_data(data,gend,n_varobs);
 
 if ~isreal(rawdata)
   error(['There are complex values in the data. Probably  a wrong' ...
@@ -89,7 +91,7 @@ load([OutDir,'\',namfile],'lpmat', 'lpmat0', 'istable')
 x=[lpmat0(istable,:) lpmat(istable,:)];
 clear lpmat lpmat0 istable %iunstable egg yys T
 B = size(x,1);
-[atT,innov,measurement_error,filtered_state_vector,ys,trend_coeff, aK] = DsgeSmoother(x(1,:)',gend,data);
+[atT,innov,measurement_error,filtered_state_vector,ys,trend_coeff, aK] = DsgeSmoother(x(1,:)',gend,data,{},0);
 n1=size(atT,1);
 
 nfil=B/40;
@@ -103,18 +105,19 @@ delete([OutDir,'\',namfile,'_*.mat'])
 ib=0;
 ifil=0;
 opt_gsa=options_.opt_gsa;
+options_.filter_step_ahead=1;
 for b=1:B
   ib=ib+1;
   deep = x(b,:)';
   set_all_parameters(deep);
   dr = resol(oo_.steady_state,0);
   %deep(1:offset) = xparam1(1:offset);
-  logpo2(b,1) = DsgeLikelihood(deep,gend,data);
+  logpo2(b,1) = DsgeLikelihood(deep,gend,data,data_index,number_of_observations,no_more_missing_observations);
   if opt_gsa.lik_only==0,
-  [atT,innov,measurement_error,filtered_state_vector,ys,trend_coeff, aK] = DsgeSmoother(deep,gend,data);
+  [atT,innov,measurement_error,filtered_state_vector,ys,trend_coeff, aK] = DsgeSmoother(deep,gend,data,{},0);
   stock_smooth(:,:,ib)=atT(1:M_.endo_nbr,:);
-  stock_filter(:,:,ib)=filtered_state_vector(1:M_.endo_nbr,:);
-  %stock_filter(:,:,ib)=aK(options_.filter_step_ahead,1:M_.endo_nbr,:);
+%   stock_filter(:,:,ib)=filtered_state_vector(1:M_.endo_nbr,:);
+  stock_filter(:,:,ib)=aK(1,1:M_.endo_nbr,:);
   stock_ys(ib,:)=ys';
   if ib==40,
     ib=0;

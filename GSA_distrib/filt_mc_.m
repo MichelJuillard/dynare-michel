@@ -119,7 +119,7 @@ if ~loadSA,
   else
     %load([DirectoryName '/' M_.fname '_data.mat']);
     [stock_gend, stock_data] = read_data;
-    filfilt = dir([DirectoryName '/' M_.fname '_filter*.mat']);
+    filfilt = dir([DirectoryName '/' M_.fname '_filter_step_ahead*.mat']);
     filparam = dir([DirectoryName '/' M_.fname '_param*.mat']);
     x=[];
     logpo2=[];
@@ -154,21 +154,23 @@ if ~loadSA,
     jxj = strmatch(vj,lgy_(dr_.order_var,:),'exact');
     js = strmatch(vj,lgy_,'exact');
     if exist('xparam1','var') 
-      if isfield(oo_,'FilteredVariables')
-      eval(['rmse_mode(i) = sqrt(mean((vobs(istart:end)-oo_.steady_state(js)-oo_.FilteredVariables.',vj,'(istart:end-1)).^2));'])
-      else
-        [alphahat,etahat,epsilonhat,ahat,SteadyState,trend_coeff,aK] = DsgeSmoother(xparam1,stock_gend,stock_data);
-      y0 = ahat(jxj,:)' + ...
-        kron(ys_mode(js,:),ones(size(ahat,2),1));
+%       if isfield(oo_,'FilteredVariables')
+%       eval(['rmse_mode(i) = sqrt(mean((vobs(istart:end)-oo_.steady_state(js)-oo_.FilteredVariables.',vj,'(istart:end-1)).^2));'])
+%       else
+        [alphahat,etahat,epsilonhat,ahat,SteadyState,trend_coeff,aK] = DsgeSmoother(xparam1,stock_gend,stock_data,{},0);
+      y0 = squeeze(aK(1,jxj,:)) + ...
+        kron(ys_mode(js,:),ones(size(aK,3),1));
+%       y0 = ahat(jxj,:)' + ...
+%         kron(ys_mode(js,:),ones(size(ahat,2),1));
       rmse_mode(i) = sqrt(mean((vobs(istart:end)-y0(istart:end-1)).^2));
-      end
+%       end
     end
     y0=zeros(nobs+1,nruns);
     if options_.opt_gsa.ppost
       %y0=zeros(nobs+max(options_.filter_step_ahead),nruns);
       nbb=0;
       for j=1:length(filfilt),
-        load([DirectoryName '/' M_.fname '_filter',num2str(j),'.mat']);
+        load([DirectoryName '/' M_.fname '_filter_step_ahead',num2str(j),'.mat']);
         nb = size(stock,4);
 %         y0(:,nbb+1:nbb+nb)=squeeze(stock(1,js,:,:)) + ...
 %           kron(sto_ys(nbb+1:nbb+nb,js)',ones(size(stock,3),1));
@@ -200,9 +202,11 @@ if ~loadSA,
     end
     if exist('xparam1_mean','var')
       %eval(['rmse_pmean(i) = sqrt(mean((',vj,'(fobs-1+istart:fobs-1+nobs)-y0M(istart:end-1)).^2));'])
-      [alphahat,etahat,epsilonhat,ahat,SteadyState,trend_coeff,aK] = DsgeSmoother(xparam1_mean,stock_gend,stock_data);
-      y0 = ahat(jxj,:)' + ...
-        kron(ys_mean(js,:),ones(size(ahat,2),1));
+      [alphahat,etahat,epsilonhat,ahat,SteadyState,trend_coeff,aK] = DsgeSmoother(xparam1_mean,stock_gend,stock_data,{},0);
+      y0 = squeeze(aK(1,jxj,:)) + ...
+        kron(ys_mean(js,:),ones(size(aK,3),1));
+%       y0 = ahat(jxj,:)' + ...
+%         kron(ys_mean(js,:),ones(size(ahat,2),1));
       rmse_pmean(i) = sqrt(mean((vobs(istart:end)-y0(istart:end-1)).^2));
     end
   end
@@ -554,7 +558,7 @@ for ix=1:ceil(length(nsnam)/5),
     subplot(2,3,j-5*(ix-1))
     optimal_bandwidth = mh_optimal_bandwidth(x(:,nsnam(j)),size(x,1),bandwidth,kernel_function); 
     [x1,f1] = kernel_density_estimate(x(:,nsnam(j)),number_of_grid_points,...
-        optimal_bandwidth,kernel_function);
+        size(x,1),optimal_bandwidth,kernel_function);
     h0 = plot(x1, f1,'k');
     hold on,
     np=find(SP(nsnam(j),:));
@@ -563,7 +567,7 @@ for ix=1:ceil(length(nsnam)/5),
     for i=1:nsp(nsnam(j)), %size(vvarvecm,1),
       optimal_bandwidth = mh_optimal_bandwidth(x(ixx(1:nfilt0(np(i)),np(i)),nsnam(j)),nfilt,bandwidth,kernel_function); 
       [x1,f1] = kernel_density_estimate(x(ixx(1:nfilt0(np(i)),np(i)),nsnam(j)),number_of_grid_points,...
-          optimal_bandwidth,kernel_function);
+          nfilt, optimal_bandwidth,kernel_function);
       h0 = plot(x1, f1);
       set(h0,'color',a0(i,:))
     end
@@ -613,11 +617,11 @@ close all
 %         subplot(3,4,i-12*(nfig-1))
 %         optimal_bandwidth = mh_optimal_bandwidth(x(ixx(1:nfilt,j),np(i)),nfilt,bandwidth,kernel_function); 
 %         [x1,f1] = kernel_density_estimate(x(ixx(1:nfilt,j),np(i)),number_of_grid_points,...
-%             optimal_bandwidth,kernel_function);
+%             nfilt, optimal_bandwidth,kernel_function);
 %         plot(x1, f1,':k','linewidth',2)
 %         optimal_bandwidth = mh_optimal_bandwidth(x(ixx(nfilt+1:end,j),np(i)),nruns-nfilt,bandwidth,kernel_function); 
 %         [x1,f1] = kernel_density_estimate(x(ixx(nfilt+1:end,j),np(i)),number_of_grid_points,...
-%             optimal_bandwidth,kernel_function);
+%             nruns-nfilt,optimal_bandwidth,kernel_function);
 %         hold on, plot(x1, f1,'k','linewidth',2)
 %         ydum=get(gca,'ylim');
 %         %xdum=xparam1(nshock+np(i));
