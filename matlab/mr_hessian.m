@@ -165,7 +165,11 @@ while i<n,
     %         end           
     %     end
     f1(:,i)=fx;
-    ff1=ffx;
+    if any(isnan(ffx)),
+      ff1=ones(size(ff0)).*fx/length(ff0);
+    else
+      ff1=ffx;
+    end
     if hflag,  % two point based derivatives
         xh1(i)=x(i)-h1(i);
 %         c=mr_nlincon(xh1,varargin{:});
@@ -178,7 +182,11 @@ while i<n,
 %         end    
         [fx, ffx]=feval(func,xh1,varargin{:});
         f_1(:,i)=fx;
-        ff_1=ffx;
+        if any(isnan(ffx)),
+          ff_1=ones(size(ff0)).*fx/length(ff0);
+        else
+          ff_1=ffx;
+        end
 %         if ic,
 %             xh1(i)=x(i)+h1(i);
 %             [f1(:,i), ff1]=feval(func,xh1,varargin{:});
@@ -307,7 +315,7 @@ if hflag<2,
     hessian_mat=hh_mat0(:);
 end
 
-if isnan(hessian_mat),
+if any(isnan(hessian_mat)),
     hh_mat0=eye(length(hh_mat0));
     ihh=hh_mat0;
     hessian_mat=hh_mat0(:);    
