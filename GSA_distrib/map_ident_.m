@@ -18,14 +18,21 @@ pnames = M_.param_names(estim_params_.param_vals(:,1),:);
 
 filetoload=[OutputDirectoryName '\' fname_ '_prior'];
 load(filetoload,'lpmat','lpmat0','istable','T','nspred','nboth','nfwrd')
+if ~isempty(lpmat0),
+  lpmatx=lpmat0(istable,:);
+else
+  lpmatx=[];
+end
 Nsam = size(lpmat,1);
 nshock = size(lpmat0,2);
 npT = np+nshock;
 
 fname_ = M_.fname;
 
+if opt_gsa.load_ident==0,
 % th moments
-[vdec, cc, ac] = mc_moments(T, lpmat0(istable,:), oo_.dr);
+[vdec, cc, ac] = mc_moments(T, lpmatx, oo_.dr);
+clear lpmatx;
 if opt_gsa.morris==0,
   ifig=0;
   for j=1:M_.exo_nbr,
@@ -51,6 +58,7 @@ if opt_gsa.morris==0,
       saveas(gcf,[OutputDirectoryName,'\',fname_,'_vdec_exo_',int2str(ifig)])
       eval(['print -depsc2 ' OutputDirectoryName '\' fname_ '_vdec_exo_',int2str(ifig)]);
       eval(['print -dpdf ' OutputDirectoryName '\' fname_ '_vdec_exo_',int2str(ifig)]);
+      close(gcf),
     end
   end
 end
@@ -90,6 +98,7 @@ R=A(:,nr+1:nc,:);
 [ytr, j0r]=teff(R,Nsam,istable);
 
 yt=[yt1 yt2 ytr];
+end
 
 %   for j=1:nr,
 %     for i=1:nc,
@@ -106,13 +115,17 @@ yt=[yt1 yt2 ytr];
 
 if opt_gsa.morris==1,
   %OutputDir = CheckPath('GSA\SCREEN');
+  if opt_gsa.load_ident==0,
   SAMorris = [];
   for i=1:size(vdec,2),
     [SAmeas, SAMorris(:,:,i)] = Morris_Measure_Groups(npT, [lpmat0 lpmat], vdec(:,i),nliv);
   end
   SAvdec = squeeze(SAMorris(:,1,:))';
   save([OutputDirectoryName,'\',fname_,'_morris_IDE'],'SAvdec','vdec','ir_vdec','ic_vdec')
-
+  else
+    load([OutputDirectoryName,'\',fname_,'_morris_IDE'],'SAvdec','vdec','ir_vdec','ic_vdec')
+  end
+  
   figure,
 %   boxplot(SAvdec,'whis',10,'symbol','r.')
   myboxplot(SAvdec,[],'.',[],10)
@@ -129,6 +142,7 @@ if opt_gsa.morris==1,
   saveas(gcf,[OutputDirectoryName,'\',fname_,'_morris_vdec'])
   eval(['print -depsc2 ' OutputDirectoryName '\' fname_ '_morris_vdec']);
   eval(['print -dpdf ' OutputDirectoryName '\' fname_ '_morris_vdec']);
+  close(gcf)
 
   ifig = 0;
   for j=1:size(options_.varobs,1)
@@ -161,6 +175,7 @@ if opt_gsa.morris==1,
       saveas(gcf,[OutputDirectoryName,'\',fname_,'_morris_vdec_varobs_',int2str(ifig)])
       eval(['print -depsc2 ' OutputDirectoryName '\' fname_ '_morris_vdec_varobs_',int2str(ifig)]);
       eval(['print -dpdf ' OutputDirectoryName '\' fname_ '_morris_vdec_varobs_',int2str(ifig)]);
+      close(gcf)
     end
   end
 
@@ -195,16 +210,21 @@ if opt_gsa.morris==1,
       saveas(gcf,[OutputDirectoryName,'\',fname_,'_morris_vdec_exo_',int2str(ifig)])
       eval(['print -depsc2 ' OutputDirectoryName '\' fname_ '_morris_vdec_exo_',int2str(ifig)]);
       eval(['print -dpdf ' OutputDirectoryName '\' fname_ '_morris_vdec_exo_',int2str(ifig)]);
+      close(gcf),
     end
   end
 
 
+  if opt_gsa.load_ident==0,
   SAMorris = [];
   for i=1:size(cc,2),
     [SAmeas, SAMorris(:,:,i)] = Morris_Measure_Groups(npT, [lpmat0 lpmat], cc(:,i),nliv);
   end
   SAcc = squeeze(SAMorris(:,1,:))';
   save([OutputDirectoryName,'\',fname_,'_morris_IDE'],'SAcc','cc','ir_cc','ic_cc','-append')
+  else
+    load([OutputDirectoryName,'\',fname_,'_morris_IDE'],'SAcc','cc','ir_cc','ic_cc')
+  end
   
   figure,
 %   boxplot(SAcc,'whis',10,'symbol','r.')
@@ -222,6 +242,7 @@ if opt_gsa.morris==1,
   saveas(gcf,[OutputDirectoryName,'\',fname_,'_morris_cc'])
   eval(['print -depsc2 ' OutputDirectoryName '\' fname_ '_morris_cc']);
   eval(['print -dpdf ' OutputDirectoryName '\' fname_ '_morris_cc']);
+  close(gcf),
 
   ifig = 0;
   for j=1:size(options_.varobs,1)
@@ -255,10 +276,12 @@ if opt_gsa.morris==1,
       saveas(gcf,[OutputDirectoryName,'\',fname_,'_morris_cc_',int2str(ifig)])
       eval(['print -depsc2 ' OutputDirectoryName '\' fname_ '_morris_cc_',int2str(ifig)]);
       eval(['print -dpdf ' OutputDirectoryName '\' fname_ '_morris_cc_',int2str(ifig)]);
+      close(gcf),
     end
   end
 
 
+  if opt_gsa.load_ident==0,
   SAMorris = [];
   for i=1:size(ac,2),
     [SAmeas, SAMorris(:,:,i)] = Morris_Measure_Groups(npT, [lpmat0 lpmat], ac(:,i),nliv);
@@ -266,7 +289,9 @@ if opt_gsa.morris==1,
   %end
   SAac = squeeze(SAMorris(:,1,:))';
   save([OutputDirectoryName,'\',fname_,'_morris_IDE'],'SAac','ac','ir_ac','ic_ac','-append')
-
+  else
+    load([OutputDirectoryName,'\',fname_,'_morris_IDE'],'SAac','ac','ir_ac','ic_ac')
+  end
   figure,
 %   boxplot(SAac,'whis',10,'symbol','r.')
   myboxplot(SAac,[],'.',[],10)
@@ -283,6 +308,7 @@ if opt_gsa.morris==1,
   saveas(gcf,[OutputDirectoryName,'\',fname_,'_morris_ac'])
   eval(['print -depsc2 ' OutputDirectoryName '\' fname_ '_morris_ac']);
   eval(['print -dpdf ' OutputDirectoryName '\' fname_ '_morris_ac']);
+  close(gcf),
 
   ifig = 0;
   for j=1:size(options_.varobs,1)
@@ -315,9 +341,11 @@ if opt_gsa.morris==1,
       saveas(gcf,[OutputDirectoryName,'\',fname_,'_morris_ac_',int2str(ifig)])
       eval(['print -depsc2 ' OutputDirectoryName '\' fname_ '_morris_ac_',int2str(ifig)]);
       eval(['print -dpdf ' OutputDirectoryName '\' fname_ '_morris_ac_',int2str(ifig)]);
+      close(gcf),
     end
   end
 
+  if opt_gsa.load_ident==0,
   js=0;
   %for j=1:size(tadj,1),
   SAMorris = [];
@@ -332,7 +360,10 @@ if opt_gsa.morris==1,
   end
   SAtadj = SAtadj';
   save([OutputDirectoryName,'\',fname_,'_morris_IDE'],'SAtadj','tadj','ir_tadj','ic_tadj','-append')
-  
+  else
+    load([OutputDirectoryName,'\',fname_,'_morris_IDE'],'SAtadj','tadj','ir_tadj','ic_tadj')
+  end
+  if opt_gsa.load_ident==0,
   js=0;
   SAMorris = [];
   for i=1:size(iff,2),
@@ -345,7 +376,9 @@ if opt_gsa.morris==1,
   end
   SAIF = SAIF';
   save([OutputDirectoryName,'\',fname_,'_morris_IDE'],'SAIF','iff','ir_if','ic_if','-append')
-
+  else
+    load([OutputDirectoryName,'\',fname_,'_morris_IDE'],'SAIF','iff','ir_if','ic_if')
+  end
   figure,
   %bar(SAtadj),
 %   boxplot(SAtadj,'whis',10,'symbol','r.')
@@ -362,6 +395,7 @@ if opt_gsa.morris==1,
   saveas(gcf,[OutputDirectoryName,'\',fname_,'_morris_tadj'])
   eval(['print -depsc2 ' OutputDirectoryName '\' fname_ '_morris_tadj']);
   eval(['print -dpdf ' OutputDirectoryName '\' fname_ '_morris_tadj']);
+  close(gcf),
 
   ifig = 0;
   for j=1:size(options_.varobs,1)
@@ -394,6 +428,7 @@ if opt_gsa.morris==1,
       saveas(gcf,[OutputDirectoryName,'\',fname_,'_morris_tadj_varobs_',int2str(ifig)])
       eval(['print -depsc2 ' OutputDirectoryName '\' fname_ '_morris_tadj_varobs_',int2str(ifig)]);
       eval(['print -dpdf ' OutputDirectoryName '\' fname_ '_morris_tadj_varobs_',int2str(ifig)]);
+      close(gcf),
     end
   end
 
@@ -428,6 +463,7 @@ if opt_gsa.morris==1,
       saveas(gcf,[OutputDirectoryName,'\',fname_,'_morris_tadj_exo_',int2str(ifig)])
       eval(['print -depsc2 ' OutputDirectoryName '\' fname_ '_morris_tadj_exo_',int2str(ifig)]);
       eval(['print -dpdf ' OutputDirectoryName '\' fname_ '_morris_tadj_exo_',int2str(ifig)]);
+      close(gcf),
     end
   end
 
@@ -448,6 +484,7 @@ if opt_gsa.morris==1,
   saveas(gcf,[OutputDirectoryName,'\',fname_,'_morris_gain'])
   eval(['print -depsc2 ' OutputDirectoryName '\' fname_ '_morris_gain']);
   eval(['print -dpdf ' OutputDirectoryName '\' fname_ '_morris_gain']);
+  close(gcf),
   %figure, bar(SAIF'), title('All Gain Relationships')
   ifig = 0;
   for j=1:size(options_.varobs,1)
@@ -480,6 +517,7 @@ if opt_gsa.morris==1,
       saveas(gcf,[OutputDirectoryName,'\',fname_,'_morris_gain_varobs_',int2str(ifig)])
       eval(['print -depsc2 ' OutputDirectoryName '\' fname_ '_morris_gain_varobs_',int2str(ifig)]);
       eval(['print -dpdf ' OutputDirectoryName '\' fname_ '_morris_gain_varobs_',int2str(ifig)]);
+      close(gcf),
     end
   end
 
@@ -514,10 +552,12 @@ if opt_gsa.morris==1,
       saveas(gcf,[OutputDirectoryName,'\',fname_,'_morris_gain_exo_',int2str(ifig)])
       eval(['print -depsc2 ' OutputDirectoryName '\' fname_ '_morris_gain_exo_',int2str(ifig)]);
       eval(['print -dpdf ' OutputDirectoryName '\' fname_ '_morris_gain_exo_',int2str(ifig)]);
+      close(gcf),
     end
   end
 
 
+  if opt_gsa.load_ident==0,
   SAMorris = [];
   for j=1:j0,
     [SAmeas, SAMorris(:,:,j)] = Morris_Measure_Groups(npT, [lpmat0 lpmat], yt(:,j),nliv);
@@ -530,15 +570,18 @@ if opt_gsa.morris==1,
   end
   [dum, irel]=sort(irex);
 
-  SAMmu = squeeze(SAMorris(:,2,:));
+  SAMmu = squeeze(SAMorris(nshock+1:end,2,:));
   for j=1:j0
     SAmunorm(:,j)=SAMmu(:,j)./max(SAM(:,j));  % normalised w.r.t. mu*
   end
-  SAMsig = squeeze(SAMorris(:,3,:));
+  SAMsig = squeeze(SAMorris(nshock+1:end,3,:));
   for j=1:j0
     SAsignorm(:,j)=SAMsig(:,j)./max(SAMsig(:,j));
   end
-
+    save([OutputDirectoryName,'\',fname_,'_morris_IDE'],'SAnorm','SAmunorm','SAsignorm','-append')
+  else
+    load([OutputDirectoryName,'\',fname_,'_morris_IDE'],'SAnorm','SAmunorm','SAsignorm')
+  end
   figure, %bar(SAnorm(:,irel))
 %   boxplot(SAnorm','whis',10,'symbol','r.')
   myboxplot(SAnorm',[],'.',[],10)
@@ -667,12 +710,12 @@ else,
   nrun=length(istable);
   nest=min(250,nrun);
   nfit=min(1000,nrun);
+  if opt_gsa.load_ident==0,
   try 
     EET=load([OutputDirectoryName,'\SCREEN\',fname_,'_morris_IDE'],'SAvdec','vdec','ir_vdec','ic_vdec');
   catch
     EET=[];
   end
-  
   SAvdec=zeros(size(vdec,2),npT);
 
   for j=1:size(vdec,2),
@@ -698,8 +741,10 @@ else,
     SAvdec(j,imap)=gsa_(j).si;
     imap_vdec{j}=imap;
   end
-  save([OutputDirectoryName,'\',fname_,'_main_eff'],'imap_vdec','SAvdec','vdec','ir_vdec','ic_vdec')
-
+  save([OutputDirectoryName,'\',fname_,'_main_eff'],'imap_vdec','SAvdec','vdec','ir_vdec','ic_vdec','-append')
+  else
+  load([OutputDirectoryName,'\',fname_,'_main_eff'],'imap_vdec','SAvdec','vdec','ir_vdec','ic_vdec')
+  end
   figure,
 %   boxplot(SAvdec,'whis',10,'symbol','r.')
   myboxplot(SAvdec,[],'.',[],10)
@@ -717,6 +762,7 @@ else,
   saveas(gcf,[OutputDirectoryName,'\',fname_,'_map_vdec',fsuffix])
   eval(['print -depsc2 ' OutputDirectoryName '\' fname_ '_map_vdec',fsuffix]);
   eval(['print -dpdf ' OutputDirectoryName '\' fname_ '_map_vdec',fsuffix]);
+  close(gcf),
 
   ifig = 0;
   for j=1:size(options_.varobs,1)
@@ -750,6 +796,7 @@ else,
       saveas(gcf,[OutputDirectoryName,'\',fname_,'_map_vdec',fsuffix,'_varobs_',int2str(ifig)])
       eval(['print -depsc2 ' OutputDirectoryName '\' fname_ '_map_vdec',fsuffix,'_varobs_',int2str(ifig)]);
       eval(['print -dpdf ' OutputDirectoryName '\' fname_ '_map_vdec',fsuffix,'_varobs_',int2str(ifig)]);
+      close(gcf),
     end
   end
 
@@ -786,9 +833,11 @@ else,
       saveas(gcf,[OutputDirectoryName,'\',fname_,'_map_vdec',fsuffix,'_exo_',int2str(ifig)])
       eval(['print -depsc2 ' OutputDirectoryName '\' fname_ '_map_vdec',fsuffix,'_exo_',int2str(ifig)]);
       eval(['print -dpdf ' OutputDirectoryName '\' fname_ '_map_vdec',fsuffix,'_exo_',int2str(ifig)]);
+      close(gcf),
     end
   end
 
+  if opt_gsa.load_ident==0,
   try 
     EET=load([OutputDirectoryName,'\SCREEN\',fname_,'_morris_IDE'],'SAcc','ir_cc','ic_cc');
   catch
@@ -818,8 +867,11 @@ else,
     imap_cc{j}=imap;
 
   end
-  save([OutputDirectoryName,'\',fname_,'_main_eff'],'imap_cc','SAcc','cc','ir_cc','ic_cc')
-
+  save([OutputDirectoryName,'\',fname_,'_main_eff'],'imap_cc','SAcc','cc','ir_cc','ic_cc','-append')
+  else
+    load([OutputDirectoryName,'\',fname_,'_main_eff'],'imap_cc','SAcc','cc','ir_cc','ic_cc')
+    
+  end
   figure,
 %   boxplot(SAcc,'whis',10,'symbol','r.')
   myboxplot(SAcc,[],'.',[],10)
@@ -838,6 +890,7 @@ else,
   saveas(gcf,[OutputDirectoryName,'\',fname_,'_map_cc',fsuffix])
   eval(['print -depsc2 ' OutputDirectoryName '\' fname_ '_map_cc',fsuffix]);
   eval(['print -dpdf ' OutputDirectoryName '\' fname_ '_map_cc',fsuffix]);
+  close(gcf),
 
   ifig = 0;
   for j=1:size(options_.varobs,1)
@@ -873,9 +926,11 @@ else,
       saveas(gcf,[OutputDirectoryName,'\',fname_,'_map_cc',fsuffix,'_',int2str(ifig)])
       eval(['print -depsc2 ' OutputDirectoryName '\' fname_ '_map_cc',fsuffix,'_',int2str(ifig)]);
       eval(['print -dpdf ' OutputDirectoryName '\' fname_ '_map_cc',fsuffix,'_',int2str(ifig)]);
+      close(gcf),
     end
   end
 
+  if opt_gsa.load_ident==0,
   try 
     EET=load([OutputDirectoryName,'\SCREEN\',fname_,'_morris_IDE'],'SAac','ir_ac','ic_ac');
   catch
@@ -905,7 +960,10 @@ else,
     imap_ac{j}=imap;
 
   end
-  save([OutputDirectoryName,'\',fname_,'_main_eff'],'imap_ac','SAac','ac','ir_ac','ic_ac')
+  save([OutputDirectoryName,'\',fname_,'_main_eff'],'imap_ac','SAac','ac','ir_ac','ic_ac','-append')
+  else
+  load([OutputDirectoryName,'\',fname_,'_main_eff'],'imap_ac','SAac','ac','ir_ac','ic_ac')
+  end
 
   figure,
 %   boxplot(SAac,'whis',10,'symbol','r.')
@@ -923,6 +981,7 @@ else,
   saveas(gcf,[OutputDirectoryName,'\',fname_,'_map_ac',fsuffix])
   eval(['print -depsc2 ' OutputDirectoryName '\' fname_ '_map_ac',fsuffix]);
   eval(['print -dpdf ' OutputDirectoryName '\' fname_ '_map_ac',fsuffix]);
+  close(gcf),
 
   ifig = 0;
   for j=1:size(options_.varobs,1)
@@ -958,12 +1017,14 @@ else,
       saveas(gcf,[OutputDirectoryName,'\',fname_,'_map_ac',fsuffix,'_',int2str(ifig)])
       eval(['print -depsc2 ' OutputDirectoryName '\' fname_ '_map_ac',fsuffix,'_',int2str(ifig)]);
       eval(['print -dpdf ' OutputDirectoryName '\' fname_ '_map_ac',fsuffix,'_',int2str(ifig)]);
+      close(gcf),
     end
   end
   
   x0=x0(:,nshock+1:end);
   imap=[1:np];
 
+  if opt_gsa.load_ident==0,
   try 
     EET=load([OutputDirectoryName,'\SCREEN\',fname_,'_morris_IDE'],'SAtadj','ir_tadj','ic_tadj');
     ny=size(EET.SAtadj,1);
@@ -1004,7 +1065,10 @@ else,
     imap_tadj{j}=imap;
 
   end
-  save([OutputDirectoryName,'\',fname_,'_main_eff'],'imap_tadj','SAtadj','tadj','ir_tadj','ic_tadj')
+  save([OutputDirectoryName,'\',fname_,'_main_eff'],'imap_tadj','SAtadj','tadj','ir_tadj','ic_tadj','-append')
+  else
+  load([OutputDirectoryName,'\',fname_,'_main_eff'],'imap_tadj','SAtadj','tadj','ir_tadj','ic_tadj')
+  end
 
   figure,
 %   boxplot(SAtadj,'whis',10,'symbol','r.')
@@ -1022,6 +1086,7 @@ else,
   saveas(gcf,[OutputDirectoryName,'\',fname_,'_map_tadj',fsuffix])
   eval(['print -depsc2 ' OutputDirectoryName '\' fname_ '_map_tadj',fsuffix]);
   eval(['print -dpdf ' OutputDirectoryName '\' fname_ '_map_tadj',fsuffix]);
+  close(gcf),
 
   ifig = 0;
   for j=1:size(options_.varobs,1)
@@ -1054,6 +1119,7 @@ else,
       saveas(gcf,[OutputDirectoryName,'\',fname_,'_map_tadj',fsuffix,'_varobs_',int2str(ifig)])
       eval(['print -depsc2 ' OutputDirectoryName '\' fname_ '_map_tadj',fsuffix,'_varobs_',int2str(ifig)]);
       eval(['print -dpdf ' OutputDirectoryName '\' fname_ '_map_tadj',fsuffix,'_varobs_',int2str(ifig)]);
+      close(gcf),
     end
   end
 
@@ -1088,10 +1154,12 @@ else,
       saveas(gcf,[OutputDirectoryName,'\',fname_,'_map_tadj',fsuffix,'_exo_',int2str(ifig)])
       eval(['print -depsc2 ' OutputDirectoryName '\' fname_ '_map_tadj',fsuffix,'_exo_',int2str(ifig)]);
       eval(['print -dpdf ' OutputDirectoryName '\' fname_ '_map_tadj',fsuffix,'_exo_',int2str(ifig)]);
+      close(gcf),
     end
   end
 
 
+  if opt_gsa.load_ident==0,
   try 
     EET=load([OutputDirectoryName,'\SCREEN\',fname_,'_morris_IDE'],'SAIF','ir_if','ic_if');
   catch
@@ -1121,7 +1189,10 @@ else,
     imap_if{j}=imap;
     
   end
-  save([OutputDirectoryName,'\',fname_,'_main_eff'],'imap_if','SAif','iff','ir_if','ic_if')
+  save([OutputDirectoryName,'\',fname_,'_main_eff'],'imap_if','SAif','iff','ir_if','ic_if','-append')
+  else
+  load([OutputDirectoryName,'\',fname_,'_main_eff'],'imap_if','SAif','iff','ir_if','ic_if')
+  end
 
   figure,
 %   boxplot(SAif,'whis',10,'symbol','r.')
@@ -1139,6 +1210,7 @@ else,
   saveas(gcf,[OutputDirectoryName,'\',fname_,'_map_if',fsuffix])
   eval(['print -depsc2 ' OutputDirectoryName '\' fname_ '_map_if',fsuffix]);
   eval(['print -dpdf ' OutputDirectoryName '\' fname_ '_map_if',fsuffix]);
+  close(gcf),
 
   ifig = 0;
   for j=1:size(options_.varobs,1)
@@ -1171,6 +1243,7 @@ else,
       saveas(gcf,[OutputDirectoryName,'\',fname_,'_map_if',fsuffix,'_varobs_',int2str(ifig)])
       eval(['print -depsc2 ' OutputDirectoryName '\' fname_ '_map_if',fsuffix,'_varobs_',int2str(ifig)]);
       eval(['print -dpdf ' OutputDirectoryName '\' fname_ '_map_if',fsuffix,'_varobs_',int2str(ifig)]);
+      close(gcf),
     end
   end
 
@@ -1205,7 +1278,109 @@ else,
       saveas(gcf,[OutputDirectoryName,'\',fname_,'_map_if',fsuffix,'_exo_',int2str(ifig)])
       eval(['print -depsc2 ' OutputDirectoryName '\' fname_ '_map_if',fsuffix,'_exo_',int2str(ifig)]);
       eval(['print -dpdf ' OutputDirectoryName '\' fname_ '_map_if',fsuffix,'_exo_',int2str(ifig)]);
+      close(gcf),
     end
   end
+  SAmom = [SAvdec' SAcc' SAac']';
+  SAdyn = [SAtadj' SAif']';
+  SAall = [SAmom(:,nshock+1:end)' SAdyn']';
+  
+  figure,
+  %   boxplot(SAtadj,'whis',10,'symbol','r.')
+  myboxplot(SAmom,[],'.',[],10)
+  set(gca,'xticklabel',' ','fontsize',10,'xtick',[1:npT])
+  set(gca,'xlim',[0.5 npT+0.5])
+  ydum = get(gca,'ylim');
+  set(gca,'ylim',[0 ydum(2)])
+  set(gca,'position',[0.13 0.2 0.775 0.7])
+  for ip=1:npT,
+    %     text(ip,-0.02,deblank(pnames(ip,:)),'rotation',90,'HorizontalAlignment','right','interpreter','none')
+    text(ip,-0.02,bayestopt_.name{ip},'rotation',90,'HorizontalAlignment','right','interpreter','none')
+  end
+  xlabel(' ')
+  title(['Main effects theoretical moments ',fsuffix],'interpreter','none')
+  saveas(gcf,[OutputDirectoryName,'\',fname_,'_map_moments',fsuffix])
+  eval(['print -depsc2 ' OutputDirectoryName '\' fname_ '_map_moments',fsuffix]);
+  eval(['print -dpdf ' OutputDirectoryName '\' fname_ '_map_moments',fsuffix]);
+%   close(gcf),
+  
+  figure,
+  %   boxplot(SAtadj,'whis',10,'symbol','r.')
+  myboxplot(SAdyn,[],'.',[],10)
+  set(gca,'xticklabel',' ','fontsize',10,'xtick',[1:np])
+  set(gca,'xlim',[0.5 np+0.5])
+  ydum = get(gca,'ylim');
+  set(gca,'ylim',[0 ydum(2)])
+  set(gca,'position',[0.13 0.2 0.775 0.7])
+  for ip=1:np,
+    text(ip,-0.02,deblank(pnames(ip,:)),'rotation',90,'HorizontalAlignment','right','interpreter','none')
+%     text(ip,-0.02,bayestopt_.name{ip},'rotation',90,'HorizontalAlignment','right','interpreter','none')
+  end
+  xlabel(' ')
+  title(['Main effects short-long term dynamics ',fsuffix],'interpreter','none')
+  saveas(gcf,[OutputDirectoryName,'\',fname_,'_map_dynamics',fsuffix])
+  eval(['print -depsc2 ' OutputDirectoryName '\' fname_ '_map_dynamics',fsuffix]);
+  eval(['print -dpdf ' OutputDirectoryName '\' fname_ '_map_dynamics',fsuffix]);
+%   close(gcf),
 
+  figure,
+  %   boxplot(SAtadj,'whis',10,'symbol','r.')
+  myboxplot(SAall,[],'.',[],10)
+  set(gca,'xticklabel',' ','fontsize',10,'xtick',[1:np])
+  set(gca,'xlim',[0.5 np+0.5])
+  ydum = get(gca,'ylim');
+  set(gca,'ylim',[0 ydum(2)])
+  set(gca,'position',[0.13 0.2 0.775 0.7])
+  for ip=1:np,
+    text(ip,-0.02,deblank(pnames(ip,:)),'rotation',90,'HorizontalAlignment','right','interpreter','none')
+%     text(ip,-0.02,bayestopt_.name{ip},'rotation',90,'HorizontalAlignment','right','interpreter','none')
+  end
+  xlabel(' ')
+  title(['Main effects all ',fsuffix],'interpreter','none')
+  saveas(gcf,[OutputDirectoryName,'\',fname_,'_map_ALL',fsuffix])
+  eval(['print -depsc2 ' OutputDirectoryName '\' fname_ '_map_ALL',fsuffix]);
+  eval(['print -dpdf ' OutputDirectoryName '\' fname_ '_map_ALL',fsuffix]);
+%   close(gcf),
+
+  for j=1:size(SAall,1),
+    SAallN(j,:)=SAall(j,:)./max(SAall(j,:));
+  end
+  SAmean=mean(SAallN);
+  for j=1:size(SAmom,1),
+    SAmomN(j,:)=SAmom(j,1:nshock)./max(SAmom(j,1:nshock));
+  end
+  SAmomN(find(isnan(SAmomN)))=0;
+  SAmeanexo=mean(SAmomN(:,1:nshock));
+
+  figure, bar(SAmean),
+  set(gca,'xticklabel',' ','fontsize',10,'xtick',[1:np])
+  set(gca,'xlim',[0.5 np+0.5])
+  ydum = get(gca,'ylim');
+  set(gca,'ylim',[0 ydum(2)])
+  set(gca,'position',[0.13 0.2 0.775 0.7])
+  for ip=1:np,
+    text(ip,-0.02*(ydum(2)),deblank(pnames(ip,:)),'rotation',90,'HorizontalAlignment','right','interpreter','none')
+    %     text(ip,-0.02,bayestopt_.name{ip},'rotation',90,'HorizontalAlignment','right','interpreter','none')
+  end
+  xlabel(' ')
+  title(['Identifiability indices ',fsuffix],'interpreter','none')
+  saveas(gcf,[OutputDirectoryName,'\',fname_,'_ident_ALL',fsuffix])
+  eval(['print -depsc2 ' OutputDirectoryName '\' fname_ '_ident_ALL',fsuffix]);
+  eval(['print -dpdf ' OutputDirectoryName '\' fname_ '_ident_ALL',fsuffix]);
+
+  figure, bar(SAmeanexo),
+  set(gca,'xticklabel',' ','fontsize',10,'xtick',[1:nshock])
+  set(gca,'xlim',[0.5 nshock+0.5])
+  ydum = get(gca,'ylim');
+  set(gca,'ylim',[0 ydum(2)])
+  set(gca,'position',[0.13 0.2 0.775 0.7])
+  for ip=1:nshock,
+    %     text(ip,-0.02*(ydum(2)),deblank(pnames(ip,:)),'rotation',90,'HorizontalAlignment','right','interpreter','none')
+    text(ip,-0.02*(ydum(2)),bayestopt_.name{ip},'rotation',90,'HorizontalAlignment','right','interpreter','none')
+  end
+  xlabel(' ')
+  title(['Identifiability indices for shocks',fsuffix],'interpreter','none')
+  saveas(gcf,[OutputDirectoryName,'\',fname_,'_ident_SHOCKS',fsuffix])
+  eval(['print -depsc2 ' OutputDirectoryName '\' fname_ '_ident_SHOCKS',fsuffix]);
+  eval(['print -dpdf ' OutputDirectoryName '\' fname_ '_ident_SHOCKS',fsuffix]);
 end
