@@ -49,7 +49,7 @@ function [LIK, lik] = diffuse_kalman_filter(T,R,Q,H,Pinf,Pstar,Y,start,Z,kalman_
   oldK = 0;
   lik  = zeros(smpl,1);
   LIK  = Inf;
-  lik(smpl+1) = smpl*pp*log(2*pi);
+%   lik(smpl+1) = smpl*pp*log(2*pi);
   notsteady   = 1;
   reste       = 0;
   
