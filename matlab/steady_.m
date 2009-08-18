@@ -70,6 +70,9 @@ function steady_()
         [y, check] = dynare_solve('block_mfs_steadystate', ...
                                   ss(M_.blocksMFS{b}), ...
                                   options_.jacobian_flag, b);
+        if check ~= 0
+          error('STEADY: convergence problems')
+        end
         ss(M_.blocksMFS{b}) = y;
       end
       [r, g1, oo_.steady_state] = feval([M_.fname '_static'], b, ss, ...
