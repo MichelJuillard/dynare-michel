@@ -61,7 +61,7 @@ function [x,info] = dynare_solve(func,x,jacobian_flag,varargin)
     end
   elseif options_.solve_algo == 1
     nn = size(x,1);
-    [x,info]=solve1(func,x,1:nn,1:nn,jacobian_flag,varargin{:});
+    [x,info]=solve1(func,x,1:nn,1:nn,jacobian_flag,1,varargin{:});
   elseif options_.solve_algo == 2 || options_.solve_algo == 4
     nn = size(x,1) ;
     tolf = options_.solve_tolf ;
@@ -101,27 +101,22 @@ function [x,info] = dynare_solve(func,x,jacobian_flag,varargin)
     if options_.debug
       disp(['DYNARE_SOLVE (solve_algo=2|4): number of blocks = ' num2str(length(r))]);
     end
+
+    % Activate bad conditioning flag for solve_algo = 2, but not for solve_algo = 4
+    bad_cond_flag = (options_.solve_algo == 2);
     
     for i=length(r)-1:-1:1
       if options_.debug
         disp(['DYNARE_SOLVE (solve_algo=2|4): solving block ' num2str(i) ', of size ' num2str(r(i+1)-r(i)) ]);
       end
-      if options_.solve_algo == 2
-        [x,info]=solve1(func,x,j1(r(i):r(i+1)-1),j2(r(i):r(i+1)-1),jacobian_flag,varargin{:});
-      else % solve_algo=4
-        [x,info]=solve2(func,x,j1(r(i):r(i+1)-1),j2(r(i):r(i+1)-1),jacobian_flag,varargin{:});
-      end
+      [x,info]=solve1(func,x,j1(r(i):r(i+1)-1),j2(r(i):r(i+1)-1),jacobian_flag, bad_cond_flag, varargin{:});
       if info
         return
       end
     end
     fvec = feval(func,x,varargin{:});
     if max(abs(fvec)) > tolf
-      if options_.solve_algo == 2
-        [x,info]=solve1(func,x,1:nn,1:nn,jacobian_flag,varargin{:});
-      else % solve_algo=4
-        [x,info]=solve2(func,x,1:nn,1:nn,jacobian_flag,varargin{:});
-      end
+        [x,info]=solve1(func,x,1:nn,1:nn,jacobian_flag, bad_cond_flag, varargin{:});
     end
   elseif options_.solve_algo == 3
     if jacobian_flag

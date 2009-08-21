@@ -1,5 +1,5 @@
-function [x,check] = solve1(func,x,j1,j2,jacobian_flag,varargin)
-% function [x,check] = solve1(func,x,j1,j2,jacobian_flag,varargin)
+function [x,check] = solve1(func,x,j1,j2,jacobian_flag,bad_cond_flag,varargin)
+% function [x,check] = solve1(func,x,j1,j2,jacobian_flag,bad_cond_flag,varargin)
 % Solves systems of non linear equations of several variables
 %
 % INPUTS
@@ -9,7 +9,9 @@ function [x,check] = solve1(func,x,j1,j2,jacobian_flag,varargin)
 %    j2:              unknown variables index
 %    jacobian_flag=1: jacobian given by the 'func' function
 %    jacobian_flag=0: jacobian obtained numerically
-%    varargin:        list of arguments following jacobian_flag
+%    bad_cond_flag=1: when Jacobian is badly conditionned, use an
+%                     alternative formula to Newton step
+%    varargin:        list of arguments following bad_cond_flag
 %    
 % OUTPUTS
 %    x:               results
@@ -18,7 +20,7 @@ function [x,check] = solve1(func,x,j1,j2,jacobian_flag,varargin)
 % SPECIAL REQUIREMENTS
 %    none
 
-% Copyright (C) 2001-2008 Dynare Team
+% Copyright (C) 2001-2009 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -113,8 +115,7 @@ function [x,check] = solve1(func,x,j1,j2,jacobian_flag,varargin)
 	    fvec = q'*fvec;
 	    p = e*[-r(1:end-n,1:end-n)\fvec(1:end-n);zeros(n,1)];
       end	
-%    elseif cond(fjac) > 10*sqrt(eps)
-    elseif cond(fjac) > 1/sqrt(eps)
+    elseif bad_cond_flag && cond(fjac) > 1/sqrt(eps)
 	  fjac2=fjac'*fjac;
 	  p=-(fjac2+sqrt(nn*eps)*max(sum(abs(fjac2)))*eye(nn))\(fjac'*fvec);
     else
