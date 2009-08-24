@@ -37,7 +37,6 @@
 #include "kord_exception.h"
 #include "nlsolve.h"
 #include "approximation.h"
-#include "k_order_perturbation.h"
 
 class KordpDynare;
 

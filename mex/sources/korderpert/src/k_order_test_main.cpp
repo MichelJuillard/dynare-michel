@@ -26,6 +26,7 @@
 
 //#include "stdafx.h"
 #include "k_ord_dynare.h"
+#include "dynamic_dll.h"
 
 int
 main(int argc, char *argv[])

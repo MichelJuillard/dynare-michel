@@ -22,6 +22,7 @@
 #include <vector>
 #include "first_order.h"
 #include "k_ord_dynare.h"
+#include "dynamic_dll.h"
 
 #include "mex.h"
 
