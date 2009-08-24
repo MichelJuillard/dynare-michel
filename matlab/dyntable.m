@@ -1,7 +1,7 @@
 function dyntable(title,headers,labels,values,label_width,val_width, ...
 	       val_precis)
 
-% Copyright (C) 2002 Dynare Team
+% Copyright (C) 2002-2009 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -17,6 +17,12 @@ function dyntable(title,headers,labels,values,label_width,val_width, ...
 %
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
+
+  global options_
+  
+  if options_.noprint
+    return
+  end
 
   label_width = max(size(deblank(strvcat(headers(1,:),labels)),2)+2, ...
 		    label_width);
