@@ -1664,6 +1664,9 @@ The simulated endogenous variables are available in global matrix <varname>oo_.e
 <para>The Taylor approximation is computed around the steady state. If you know how to compute the steady state for your model, you can provide a <trademark class="registered">Matlab</trademark> function doing the computation instead of using the nonlinear solver. The function should be called with the name of the <filename class="extension">.mod</filename> file followed by <filename>_steadystate</filename>. See <filename>fs2000a_steadystate.m</filename> in <filename>examples/fs2000</filename> directory.
 </para>
 
+<para>The IRFs are computed as the difference between the trajectory of a variable following a shock at the beginning of period 1 and its steady state value.
+</para>
+
 <para>
 Variance decomposition, correlation, autocorrelation are only displayed for variables with positive variance. Impulse response functions are only plotted for variables with response larger than 10<superscript>-10</superscript>.
 </para>
@@ -1736,11 +1739,13 @@ vectors with the same name as the endogenous variables. They are also available 
 </listitem>
 <listitem>
 <para>
-  Impulse responses, when they have been computed, are available in <trademark class="registered">Matlab</trademark> vectors with the following naming convention <varname><replaceable>VARIABLE_NAME</replaceable>_<replaceable>SHOCK_NAME</replaceable></varname>. They are also available in <varname>oo_.irfs</varname>.
+  Impulse responses, when they have been computed, are available in <varname>oo_.irfs</varname>, with the following naming convention: <varname><replaceable>VARIABLE_NAME</replaceable>_<replaceable>SHOCK_NAME</replaceable></varname>.</para>
+
+<para>(DEPRECATED) They are currently also available in <trademark class="registered">Matlab</trademark> vectors in the global workspace, however they will disappear there in a future version.
 </para>
 <informalexample>
   <para>Example:
-    <varname>gnp_ea</varname> contains the effect on <varname>gnp</varname> of a one standard deviation shock on <varname>ea</varname>.
+    <varname>oo_.irfs.gnp_ea</varname> contains the effect on <varname>gnp</varname> of a one standard deviation shock on <varname>ea</varname>.
   </para>
 </informalexample>
 </listitem>
