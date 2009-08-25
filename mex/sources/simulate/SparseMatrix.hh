@@ -33,15 +33,13 @@
 #endif
 #define NEW_ALLOC
 #define MARKOVITZ
-//#define PROFILER
-//#define MEMORY_LEAKS
 
 using namespace std;
 
 struct t_save_op_s
 {
   short int lag, operat;
-  long int first, second;
+  int first, second;
 };
 
 const int IFLD  =0;
@@ -62,11 +60,10 @@ class SparseMatrix
   public:
     SparseMatrix();
     int simulate_NG1(int blck, int y_size, int it_, int y_kmin, int y_kmax, int Size, int periods, bool print_it, bool cvg, int &iter);
-    int simulate_NG(int blck, int y_size, int it_, int y_kmin, int y_kmax, int Size, bool print_it, bool cvg, int &iter);
+    bool simulate_NG(int blck, int y_size, int it_, int y_kmin, int y_kmax, int Size, bool print_it, bool cvg, int &iter, bool steady_state);
     void Direct_Simulate(int blck, int y_size, int it_, int y_kmin, int y_kmax, int Size, int periods, bool print_it, int iter);
     void fixe_u(double **u, int u_count_int, int max_lag_plus_max_lead_plus_1);
-    //void initialize(int periods_arg, int nb_endo_arg, int y_kmin_arg, int y_kmax_arg, int y_size_arg, int u_count_arg, int u_count_init_arg, double *u_arg, double *y_arg, double *ya_arg, double slowc_arg, int y_decal_arg, double markowitz_c_arg, double res1_arg, double res2_arg, double max_res_arg);
-    void Read_SparseMatrix(string file_name, int Size, int periods, int y_kmin, int y_kmax);
+    void Read_SparseMatrix(string file_name, int Size, int periods, int y_kmin, int y_kmax, bool steady_state);
     void Read_file(string file_name, int periods, int u_size1, int y_size, int y_kmin, int y_kmax, int &nb_endo, int &u_count, int &u_count_init, double* u);
 
  private:
@@ -80,7 +77,7 @@ class SparseMatrix
 #endif
                 );
     void Insert(const int r, const int c, const int u_index, const int lag_index);
-    void Delete(const int r,const int c, const int Size);
+    void Delete(const int r,const int c);
     int At_Row(int r, NonZeroElem **first);
     int At_Pos(int r, int c, NonZeroElem **first);
     int At_Col(int c, NonZeroElem **first);
@@ -102,9 +99,6 @@ class SparseMatrix
 #endif
     );
     double simple_bksub(int it_, int Size, double slowc_l);
-    void run_triangular(int nop_all,int *op_all);
-    void run_it(int nop_all,int *op_all);
-    void run_u_period1(int periods);
     void close_swp_file();
     stack<double> Stack;
     int nb_prologue_table_u, nb_first_table_u, nb_middle_table_u, nb_last_table_u;
@@ -118,6 +112,7 @@ class SparseMatrix
 
     Mem_Mngr mem_mngr;
     vector<int> u_liste;
+    map<pair<int, int>,NonZeroElem*> Mapped_Array;
     int *NbNZRow, *NbNZCol;
     NonZeroElem **FNZE_R, **FNZE_C;
     int nb_endo, u_count_init;
@@ -148,6 +143,7 @@ protected:
     double *direction;
     int start_compare;
     int restart;
+    bool error_not_printed;
   };
 
 

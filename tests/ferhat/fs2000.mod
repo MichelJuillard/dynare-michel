@@ -93,7 +93,7 @@ end;
 
 //options_.solve_tolf=1e-10;
 options_.maxit_=10;
-steady(block_mfs);
+steady;//(block_mfs);
 model_info;
 //check;
 shocks;

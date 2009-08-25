@@ -58,7 +58,7 @@ function y = solve_two_boundaries(fname, y, x, params, y_index, nze, periods, y_
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-  global oo_ M_ T9025 T1149 T11905;
+  global options_ oo_ M_ T9025 T1149 T11905;
   cvg=0;
   iter=0;
   Per_u_=0;
@@ -73,11 +73,48 @@ function y = solve_two_boundaries(fname, y, x, params, y_index, nze, periods, y_
   reduced = 0;
   while ~(cvg==1 | iter>maxit_),
     [r, y, g1, g2, g3, b]=feval(fname, y, x, params, periods, 0, y_kmin, Blck_size);
+
+%     fjac = zeros(Blck_size, Blck_size*(y_kmin_l+1+y_kmax_l));
+%     disp(['Blck_size=' int2str(Blck_size) ' size(y_index)=' int2str(size(y_index,2))]);
+%     dh = max(abs(y(y_kmin+1-y_kmin_l:y_kmin+1+y_kmax_l, y_index)),options_.gstep*ones(y_kmin_l+1+y_kmax_l, Blck_size))*eps^(1/3);
+%     fvec = r;
+%     %for i = y_kmin+1-y_kmin_l:y_kmin+1+y_kmax_l
+%     i = y_kmin+1;
+%       i
+%       for j = 1:Blck_size
+%     	  ydh = y ;
+%           ydh(i, y_index(j)) = ydh(i, y_index(j)) + dh(i, j)  ;
+%           if(j==11 && i==2)
+%               disp(['y(i,y_index(11)=' int2str(y_index(11)) ')= ' num2str(y(i,y_index(11))) ' ydh(i, y_index(j))=' num2str(ydh(i, y_index(j))) ' dh(i,j)= ' num2str(dh(i,j))]);
+%           end;
+%           [t, y1, g11, g21, g31, b1]=feval(fname, ydh, x, params, periods, 0, y_kmin, Blck_size);
+%           fjac(:,j+(i-(y_kmin+1-y_kmin_l))*Blck_size) = (t(:, 1+y_kmin) - fvec(:, 1+y_kmin))./dh(i, j) ;
+%           if(j==11 && i==2)
+%                disp(['fjac(:,' int2str(j+(i-(y_kmin+1-y_kmin_l))*Blck_size) ')=']);
+%                disp([num2str(fjac(:,j+(i-(y_kmin+1-y_kmin_l))*Blck_size))]);
+%           end;
+%       end;
+% %    end
+%     %diff = g1(1:Blck_size, 1:Blck_size*(y_kmin_l+1+y_kmax_l)) -fjac;
+%     diff = g1(1:Blck_size, y_kmin_l*Blck_size+1:(y_kmin_l+1)*Blck_size) -fjac(1:Blck_size, y_kmin_l*Blck_size+1:(y_kmin_l+1)*Blck_size);
+%     disp(diff);
+%     [c_max, i_c_max] = max(abs(diff));
+%     [l_c_max, i_r_max] = max(c_max);
+%     disp(['maximum element row=' int2str(i_c_max(i_r_max)) ' and column=' int2str(i_r_max) ' value = ' num2str(l_c_max)]);
+%     equation = i_c_max(i_r_max);
+%     variable = i_r_max;
+%     variable
+%     disp(['equation ' int2str(equation) ' and variable ' int2str(y_index(mod(variable, Blck_size))) ' ' M_.endo_names(y_index(mod(variable, Blck_size)), :)]);
+%     disp(['g1(' int2str(equation) ', ' int2str(variable) ')=' num2str(g1(equation, y_kmin_l*Blck_size+variable),'%3.10f') ' fjac(' int2str(equation) ', ' int2str(variable) ')=' num2str(fjac(equation, y_kmin_l*Blck_size+variable), '%3.10f')]);
+%     return;
+
+
+
 %     for i=1:periods;
 %       disp([sprintf('%5.14f ',[T9025(i) T1149(i) T11905(i)])]);
 %     end;
 %     return;
-    residual = r(:,y_kmin+1:y_kmin+1+y_kmax_l);
+    %residual = r(:,y_kmin+1:y_kmin+1+y_kmax_l);
     %num2str(residual,' %1.6f')
     %jac_ = g1(1:(y_kmin)*Blck_size, 1:(y_kmin+1+y_kmax_l)*Blck_size);
     %jac_
@@ -87,15 +124,15 @@ function y = solve_two_boundaries(fname, y, x, params, y_index, nze, periods, y_
     term2 = g1(:, (periods+y_kmin_l)*Blck_size+1:(periods+y_kmin_l+y_kmax_l)*Blck_size)*reshape(y(periods+y_kmin+1:periods+y_kmin+y_kmax_l,y_index)',1,y_kmax_l*Blck_size)';
     b = b - term1 - term2;
     
-%     fid = fopen(['result' num2str(iter)],'w');
-%     fg1a = full(g1a);
-%     fprintf(fid,'%d\n',size(fg1a,1));
-%     fprintf(fid,'%d\n',size(fg1a,2));
-%     fprintf(fid,'%5.14f\n',fg1a);
-%     fprintf(fid,'%d\n',size(b,1));
-%     fprintf(fid,'%5.14f\n',b);
-%     fclose(fid);
-%     return;
+%      fid = fopen(['result' num2str(iter)],'w');
+%      fg1a = full(g1a);
+%      fprintf(fid,'%d\n',size(fg1a,1));
+%      fprintf(fid,'%d\n',size(fg1a,2));
+%      fprintf(fid,'%5.14f\n',fg1a);
+%      fprintf(fid,'%d\n',size(b,1));
+%      fprintf(fid,'%5.14f\n',b);
+%      fclose(fid);
+%      return;
     %ipconfigb_ = b(1:(1+y_kmin)*Blck_size);
     %b_ 
     

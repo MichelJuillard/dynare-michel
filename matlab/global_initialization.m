@@ -224,4 +224,7 @@ function global_initialization()
   
   % block decomposition + minimum feedback set for steady state computation
   options_.block_mfs = 0;
-  
+
+  % block decomposition + minimum feedback set for steady state computation
+  % using simulate.dll
+  options_.block_mfs_dll = 0;

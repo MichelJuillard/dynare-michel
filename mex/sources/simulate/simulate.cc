@@ -43,7 +43,6 @@ max(int a, int b)
 
 
 #ifdef DEBUG_EX
-/*The Matlab c++ interface*/
 
 using namespace std;
 #include <sstream>
@@ -53,7 +52,14 @@ int
 main( int argc, const char* argv[] )
 {
   FILE *fid;
+  bool steady_state = false;
   printf("argc=%d\n",argc);
+  if(argc<2)
+    {
+    	mexPrintf("model filename expected\n");
+    	mexEvalString("st=fclose('all');clear all;");
+      mexErrMsgTxt("Exit from Dynare");
+    }
   float f_tmp;
   ostringstream tmp_out("");
   tmp_out << argv[1] << "_options.txt";
@@ -64,51 +70,48 @@ main( int argc, const char* argv[] )
   double *direction;
 
   string file_name(argv[1]);
-  //mexPrintf("file_name=%s\n",file_name.c_str());
 
+  if(argc>2)
+    {
+      string f(argv[1]);
+      if(f == "steady_state")
+        steady_state = true;
+    }
   fid = fopen(tmp_out.str().c_str(),"r");
+  int periods;
   fscanf(fid,"%d",&periods);
+  int maxit_;
   fscanf(fid,"%d",&maxit_);
   fscanf(fid,"%f",&f_tmp);
-  slowc = f_tmp;
-  //mexPrintf("slowc_save=%f\n",slowc_save);
+  double slowc = f_tmp;
   fscanf(fid,"%f",&f_tmp);
-  markowitz_c = f_tmp;
+  double markowitz_c = f_tmp;
   fscanf(fid,"%f",&f_tmp);
-  solve_tolf = f_tmp;
+  double solve_tolf = f_tmp;
   fclose(fid);
 
   tmp_out.str("");
   tmp_out << argv[1] << "_M.txt";
-  //printf("%s\n",tmp_out.str().c_str());
   fid = fopen(tmp_out.str().c_str(),"r");
+  int y_kmin;
   fscanf(fid,"%d",&y_kmin);
-  //printf("y_kmin=%d\n",y_kmin);
+  int y_kmax;
   fscanf(fid,"%d",&y_kmax);
-  //printf("y_kmax=%d\n",y_kmax);
+  int y_decal;
   fscanf(fid,"%d",&y_decal);
-  //printf("y_decal=%d\n",y_decal);
   fscanf(fid,"%d",&nb_params);
-  //printf("nb_params=%d\n",nb_params);
   fscanf(fid,"%d",&row_x);
-  //printf("row_x=%d\n",row_x);
   fscanf(fid,"%d",&col_x);
-  //printf("col_x=%d\n",col_x);
   fscanf(fid,"%d",&row_y);
-  //printf("row_y=%d\n",row_y);
   fscanf(fid,"%d",&col_y);
-  //printf("col_y=%d\n",col_y);
+  int nb_row_xd;
   fscanf(fid,"%d",&nb_row_xd);
-  //printf("nb_row_xd=%d\n",nb_row_xd);
-  params = (double*)malloc(nb_params*sizeof(params[0]));
-  //printf("OK1\n");
+  double * params = (double*)malloc(nb_params*sizeof(params[0]));
   for(i=0; i < nb_params; i++)
     {
       fscanf(fid,"%f",&f_tmp);
       params[i] = f_tmp;
-      //printf("param[%d]=%f\n",i,params[i]);
     }
-  //printf("OK2\n");
   fclose(fid);
   yd = (double*)malloc(row_y*col_y*sizeof(yd[0]));
   xd = (double*)malloc(row_x*col_x*sizeof(xd[0]));
@@ -127,12 +130,12 @@ main( int argc, const char* argv[] )
     }
   fclose(fid);
 
-  size_of_direction=col_y*row_y*sizeof(double);
-  y=(double*)mxMalloc(size_of_direction);
-  ya=(double*)mxMalloc(size_of_direction);
+  int size_of_direction=col_y*row_y*sizeof(double);
+  double * y=(double*)mxMalloc(size_of_direction);
+  double * ya=(double*)mxMalloc(size_of_direction);
   direction=(double*)mxMalloc(size_of_direction);
   memset(direction,0,size_of_direction);
-  x=(double*)mxMalloc(col_x*row_x*sizeof(double));
+  double * x=(double*)mxMalloc(col_x*row_x*sizeof(double));
   for (i=0;i<row_x*col_x;i++)
      x[i]=double(xd[i]);
   for (i=0;i<row_y*col_y;i++)
@@ -140,36 +143,14 @@ main( int argc, const char* argv[] )
   free(yd);
   free(xd);
 
-  y_size=row_y;
-  x_size=col_x/*row_x*/;
-  nb_row_x=row_x;
-  /*for(int i=0; i<y_size; i++)
-    {
-      for(int it_=0; it_<8;it_++)
-        mexPrintf("y[t=%d, var=%d]=%f  ",it_+1, i+1, y[(it_)*y_size+i]);
-      mexPrintf("\n");
-    }
-
-  for(int i=0; i<col_x; i++)
-    {
-      for(int it_=0; it_<8;it_++)
-        mexPrintf("x[t=%d, var=%d]=%f  ",it_, i+1, x[it_+i*nb_row_x]);
-      mexPrintf("\n");
-    }*/
-
-  t0= clock();
+  int y_size=row_y;
+  int nb_row_x=row_x;
+  clock_t t0= clock();
   Interpreter interprete(params, y, ya, x, direction, y_size, nb_row_x, nb_row_xd, periods, y_kmin, y_kmax, maxit_, solve_tolf, size_of_direction, slowc, y_decal, markowitz_c, file_name);
   string f(file_name);
-  interprete.compute_blocks(f+"_dynamic", f);
-  t1= clock();
+  interprete.compute_blocks(f, f, steady_state);
+  clock_t t1= clock();
   mexPrintf("Simulation Time=%f milliseconds\n",1000.0*(double(t1)-double(t0))/double(CLOCKS_PER_SEC));
-  /*if (nlhs>0)
-    {
-      plhs[0] = mxCreateDoubleMatrix(row_y, col_y, mxREAL);
-      pind = mxGetPr(plhs[0]);
-      for (i=0;i<row_y*col_y;i++)
-        pind[i]=y[i];
-    }*/
   if(x)
     mxFree(x);
   if(y)
@@ -187,9 +168,24 @@ void
 mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 {
   mxArray *M_, *oo_, *options_;
-  int i, row_y, col_y, row_x, col_x;
+  int i, row_y, col_y, row_x, col_x, nb_row_xd;
+  int y_kmin=0, y_kmax=0, y_decal=0, periods=1;
   double * pind ;
   double *direction;
+  bool steady_state = false;
+  if(nrhs>0)
+    {
+    	const mxArray *mxa = prhs[0];
+      int buflen=mxGetM(mxa) * mxGetN(mxa) + 1;
+      char *first_argument;
+      first_argument=(char*)mxCalloc(buflen, sizeof(char));
+      int status = mxGetString(mxa, first_argument, buflen);
+      if (status != 0)
+        mexWarnMsgTxt("Not enough space. The first argument is truncated.");
+      string f(first_argument);
+      if(f == "steady_state")
+        steady_state = true;
+    }
   M_ = mexGetVariable("global","M_");
   if (M_ == NULL )
     {
@@ -213,22 +209,41 @@ mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
       mexErrMsgTxt("options_ \n");
     }
   //mexPrintf("ok0\n");
-  params = mxGetPr(mxGetFieldByNumber(M_, 0, mxGetFieldNumber(M_,"params")));
+  double * params = mxGetPr(mxGetFieldByNumber(M_, 0, mxGetFieldNumber(M_,"params")));
   double *yd, *xd;
-  yd= mxGetPr(mxGetFieldByNumber(oo_, 0, mxGetFieldNumber(oo_,"endo_simul")));
-  row_y=mxGetM(mxGetFieldByNumber(oo_, 0, mxGetFieldNumber(oo_,"endo_simul")));
-  xd= mxGetPr(mxGetFieldByNumber(oo_, 0, mxGetFieldNumber(oo_,"exo_simul")));
-  row_x=mxGetM(mxGetFieldByNumber(oo_, 0, mxGetFieldNumber(oo_,"exo_simul")));
-  col_x=mxGetN(mxGetFieldByNumber(oo_, 0, mxGetFieldNumber(oo_,"exo_simul")));
-  y_kmin=int(floor(*(mxGetPr(mxGetFieldByNumber(M_, 0, mxGetFieldNumber(M_,"maximum_lag"))))));
-  y_kmax=int(floor(*(mxGetPr(mxGetFieldByNumber(M_, 0, mxGetFieldNumber(M_,"maximum_lead"))))));
-  y_decal=max(0,y_kmin-int(floor(*(mxGetPr(mxGetFieldByNumber(M_, 0, mxGetFieldNumber(M_,"maximum_endo_lag")))))));
-  periods=int(floor(*(mxGetPr(mxGetFieldByNumber(options_, 0, mxGetFieldNumber(options_,"periods"))))));
-  maxit_=int(floor(*(mxGetPr(mxGetFieldByNumber(options_, 0, mxGetFieldNumber(options_,"maxit_"))))));
-  slowc=double(*(mxGetPr(mxGetFieldByNumber(options_, 0, mxGetFieldNumber(options_,"slowc")))));
-  //slowc_save=slowc;
-  markowitz_c=double(*(mxGetPr(mxGetFieldByNumber(options_, 0, mxGetFieldNumber(options_,"markowitz")))));
-  nb_row_xd=int(floor(*(mxGetPr(mxGetFieldByNumber(M_, 0, mxGetFieldNumber(M_,"exo_det_nbr"))))));
+  if(!steady_state)
+    {
+      yd= mxGetPr(mxGetFieldByNumber(oo_, 0, mxGetFieldNumber(oo_,"endo_simul")));
+      row_y=mxGetM(mxGetFieldByNumber(oo_, 0, mxGetFieldNumber(oo_,"endo_simul")));
+      col_y=mxGetN(mxGetFieldByNumber(oo_, 0, mxGetFieldNumber(oo_,"endo_simul")));;
+      xd= mxGetPr(mxGetFieldByNumber(oo_, 0, mxGetFieldNumber(oo_,"exo_simul")));
+      row_x=mxGetM(mxGetFieldByNumber(oo_, 0, mxGetFieldNumber(oo_,"exo_simul")));
+      col_x=mxGetN(mxGetFieldByNumber(oo_, 0, mxGetFieldNumber(oo_,"exo_simul")));
+      nb_row_xd=int(floor(*(mxGetPr(mxGetFieldByNumber(M_, 0, mxGetFieldNumber(M_,"exo_det_nbr"))))));
+
+      y_kmin=int(floor(*(mxGetPr(mxGetFieldByNumber(M_, 0, mxGetFieldNumber(M_,"maximum_lag"))))));
+      y_kmax=int(floor(*(mxGetPr(mxGetFieldByNumber(M_, 0, mxGetFieldNumber(M_,"maximum_lead"))))));
+      y_decal=max(0,y_kmin-int(floor(*(mxGetPr(mxGetFieldByNumber(M_, 0, mxGetFieldNumber(M_,"maximum_endo_lag")))))));
+      periods=int(floor(*(mxGetPr(mxGetFieldByNumber(options_, 0, mxGetFieldNumber(options_,"periods"))))));
+    }
+	else
+	  {
+	  	yd= mxGetPr(mxGetFieldByNumber(oo_, 0, mxGetFieldNumber(oo_,"steady_state")));
+      row_y=mxGetM(mxGetFieldByNumber(oo_, 0, mxGetFieldNumber(oo_,"steady_state")));
+      col_y=mxGetN(mxGetFieldByNumber(oo_, 0, mxGetFieldNumber(oo_,"steady_state")));;
+      xd= mxGetPr(mxGetFieldByNumber(oo_, 0, mxGetFieldNumber(oo_,"exo_steady_state")));
+      row_x=mxGetM(mxGetFieldByNumber(oo_, 0, mxGetFieldNumber(oo_,"exo_steady_state")));
+      col_x=mxGetN(mxGetFieldByNumber(oo_, 0, mxGetFieldNumber(oo_,"exo_steady_state")));
+      nb_row_xd=int(floor(*(mxGetPr(mxGetFieldByNumber(M_, 0, mxGetFieldNumber(M_,"exo_det_nbr"))))));
+	  }
+	int maxit_=int(floor(*(mxGetPr(mxGetFieldByNumber(options_, 0, mxGetFieldNumber(options_,"maxit_"))))));
+  double slowc=double(*(mxGetPr(mxGetFieldByNumber(options_, 0, mxGetFieldNumber(options_,"slowc")))));
+  double markowitz_c=double(*(mxGetPr(mxGetFieldByNumber(options_, 0, mxGetFieldNumber(options_,"markowitz")))));
+  double solve_tolf;
+  if(steady_state)
+    solve_tolf=*(mxGetPr(mxGetFieldByNumber(options_, 0, mxGetFieldNumber(options_,"solve_tolf"))));
+	else
+    solve_tolf=*(mxGetPr(mxGetFieldByNumber(options_, 0, mxGetFieldNumber(options_,"dynatol"))));
   mxArray *mxa=mxGetFieldByNumber(M_, 0, mxGetFieldNumber(M_,"fname"));
   int buflen=mxGetM(mxa) * mxGetN(mxa) + 1;
   char *fname;
@@ -237,48 +252,47 @@ mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
   int status = mxGetString(mxa, fname, buflen);
   if (status != 0)
     mexWarnMsgTxt("Not enough space. Filename is truncated.");
-  col_y=mxGetN(mxGetFieldByNumber(oo_, 0, mxGetFieldNumber(oo_,"endo_simul")));;
-  solve_tolf=*(mxGetPr(mxGetFieldByNumber(options_, 0, mxGetFieldNumber(options_,"dynatol"))));
-  size_of_direction=col_y*row_y*sizeof(double);
-  y=(double*)mxMalloc(size_of_direction);
-  ya=(double*)mxMalloc(size_of_direction);
+
+
+  int size_of_direction=col_y*row_y*sizeof(double);
+  double * y=(double*)mxMalloc(size_of_direction);
+  double * ya=(double*)mxMalloc(size_of_direction);
   direction=(double*)mxMalloc(size_of_direction);
   memset(direction,0,size_of_direction);
-  x=(double*)mxMalloc(col_x*row_x*sizeof(double));
+  double * x=(double*)mxMalloc(col_x*row_x*sizeof(double));
   for (i=0;i<row_x*col_x;i++)
      x[i]=double(xd[i]);
   for (i=0;i<row_y*col_y;i++)
     y[i]=double(yd[i]);
-  y_size=row_y;
-  x_size=col_x/*row_x*/;
-  nb_row_x=row_x;
+  int y_size=row_y;
+  int nb_row_x=row_x;
 
-  /*for(int i=0; i<y_size; i++)
-    {
-      for(int it_=0; it_<8;it_++)
-        mexPrintf("y[t=%d, var=%d]=%f  ",it_+1, i+1, y[(it_)*y_size+i]);
-      mexPrintf("\n");
-    }
+  /*int it_ = y_kmin;
+  for (int j = 0; j < y_size; j++)
+		mexPrintf("   variable %d at time %d and %d = %f\n", j+1, it_, it_+1, y[j+it_*y_size]);*/
 
-  for(int i=0; i<col_x; i++)
-    {
-      for(int it_=0; it_<8;it_++)
-        mexPrintf("x[t=%d, var=%d]=%f  ",it_, i+1, x[it_+i*nb_row_x]);
-      mexPrintf("\n");
-    }*/
-
-  t0= clock();
+  clock_t t0= clock();
   Interpreter interprete(params, y, ya, x, direction, y_size, nb_row_x, nb_row_xd, periods, y_kmin, y_kmax, maxit_, solve_tolf, size_of_direction, slowc, y_decal, markowitz_c, file_name);
   string f(fname);
-  interprete.compute_blocks(f+"_dynamic", f);
-  t1= clock();
-  mexPrintf("Simulation Time=%f milliseconds\n",1000.0*(double(t1)-double(t0))/double(CLOCKS_PER_SEC));
+  bool result = interprete.compute_blocks(f, f, steady_state);
+  clock_t t1= clock();
+  if(!steady_state)
+    mexPrintf("Simulation Time=%f milliseconds\n",1000.0*(double(t1)-double(t0))/double(CLOCKS_PER_SEC));
   if (nlhs>0)
     {
       plhs[0] = mxCreateDoubleMatrix(row_y, col_y, mxREAL);
       pind = mxGetPr(plhs[0]);
       for (i=0;i<row_y*col_y;i++)
         pind[i]=y[i];
+			if(nlhs>1)
+			  {
+			    plhs[1] = mxCreateDoubleMatrix(1, 1, mxREAL);
+			    pind = mxGetPr(plhs[1]);
+			    if(result)
+			      pind[0] = 0;
+					else
+					  pind[0] = 1;
+			  }
     }
   if(x)
     mxFree(x);

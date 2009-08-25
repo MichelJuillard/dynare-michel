@@ -24,23 +24,23 @@ function model_info;
  if(isfield(M_,'block_structure'))
    nb_blocks=length(M_.block_structure.block);
    fprintf('The model has %d equations and is decomposed in %d blocks as follow:\n',M_.endo_nbr,nb_blocks);
-   fprintf('==============================================================================================================\n');
-   fprintf('| %10s | %10s | %30s | %14s | %30s |\n','Block n°','Size','Block Type','Equation','Dependent variable');
-   fprintf('|============|============|================================|================|================================|\n');
+   fprintf('===============================================================================================================\n');
+   fprintf('| %10s | %10s | %30s | %14s | %31s |\n','Block n°','Size','Block Type','E   quation','Dependent variable');
+   fprintf('|============|============|================================|================|=================================|\n');
    for i=1:nb_blocks
        size_block=length(M_.block_structure.block(i).equation);
        if(i>1)
-         fprintf('|------------|------------|--------------------------------|----------------|--------------------------------|\n');
+         fprintf('|------------|------------|--------------------------------|----------------|---------------------------------|\n');
        end;
        for j=1:size_block
            if(j==1)
-               fprintf('| %3d (%4d) | %10d | %30s | %14d | %30s |\n',i,M_.block_structure.block(i).num,size_block,Sym_type(M_.block_structure.block(i).Simulation_Type),M_.block_structure.block(i).equation(j),M_.endo_names(M_.block_structure.block(i).variable(j),:));
+               fprintf('| %3d (%4d) | %10d | %30s | %14d | %-6d %24s |\n',i,M_.block_structure.block(i).num,size_block,Sym_type(M_.block_structure.block(i).Simulation_Type),M_.block_structure.block(i).equation(j),M_.block_structure.block(i).variable(j),M_.endo_names(M_.block_structure.block(i).variable(j),:));
            else
-               fprintf('| %10s | %10s | %30s | %14d | %30s |\n','','','',M_.block_structure.block(i).equation(j),M_.endo_names(M_.block_structure.block(i).variable(j),:));
+               fprintf('| %10s | %10s | %30s | %14d | %-6d %24s |\n','','','',M_.block_structure.block(i).equation(j),M_.block_structure.block(i).variable(j),M_.endo_names(M_.block_structure.block(i).variable(j),:));
            end;
        end;
    end;
-   fprintf('==============================================================================================================\n');
+   fprintf('===============================================================================================================\n');
    fprintf('\n');
    for k=1:M_.maximum_endo_lag+M_.maximum_endo_lead+1
        if(k==M_.maximum_endo_lag+1)

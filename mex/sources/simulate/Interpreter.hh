@@ -67,8 +67,9 @@ class Interpreter : SparseMatrix
 {
   protected :
     double pow1(double a, double b);
+    double log1(double a);
     void compute_block_time(int Per_u_);
-    void simulate_a_block(int size,int type, string file_name, string bin_basename, bool Gaussian_Elimination);
+    bool simulate_a_block(int size,int type, string file_name, string bin_basename, bool Gaussian_Elimination, bool steady_state, int block_num);
     double *T;
     vector<Block_contain_type> Block_Contain;
     vector<Block_type> Block;
@@ -83,6 +84,7 @@ class Interpreter : SparseMatrix
     double *x, *params;
     //double *y, *ya, *x, *direction;
     map<pair<pair<int, int> ,int>, int> IM_i;
+    int equation, derivative_equation, derivative_variable;
     string filename;
   public :
     //ReadBinFile read_bin_file;
@@ -90,7 +92,7 @@ class Interpreter : SparseMatrix
     Interpreter(double *params_arg, double *y_arg, double *ya_arg, double *x_arg, double *direction_arg, int y_size_arg, int nb_row_x_arg,
                 int nb_row_xd_arg, int periods_arg, int y_kmin_arg, int y_kmax_arg, int maxit_arg_, double solve_tolf_arg, int size_o_direction_arg,
                 double slowc_arg, int y_decal_arg, double markowitz_c_arg, string &filename_arg);
-    void compute_blocks(string file_name, string bin_basename);
+    bool compute_blocks(string file_name, string bin_basename, bool steady_state);
 };
 
 

@@ -34,7 +34,7 @@ struct NonZeroElem
   {
     int u_index;
     int r_index, c_index, lag_index;
-    NonZeroElem *NZE_R_N, *NZE_C_N;
+    NonZeroElem *NZE_R_N, *NZE_C_N/*, *NZE_C_P*/;
   };
 
 typedef vector<NonZeroElem*> v_NonZeroElem;

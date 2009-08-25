@@ -852,7 +852,7 @@ W0906=0.0800069594276;
 W0907=0.147854375051;
 W0908=0.206834342322;
 W0909=-1;
-model(SPARSE_DLL,markowitz=2/*0.5*//*2.0*/);
+model(SPARSE_DLL,markowitz=3, mfs = 3);
 //model(SPARSE,markowitz=2.0);
 //model;
  ( log(US_CPI)-(log(US_CPI(-1)))) = US_CPI1*( log(US_PIM)-(log(US_PIM(-1))))+US_CPI2*( log(US_PGNP)-(log(US_PGNP(-1))))+(1-US_CPI1-US_CPI2)*log(US_CPI(-1)/US_CPI(-2))+RES_US_CPI ;

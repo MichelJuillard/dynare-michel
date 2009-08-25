@@ -100,8 +100,42 @@ function [y, info] = solve_one_boundary(fname, y, x, params, y_index_eq, nze, pe
               max_res=max(max(abs(r)));
            end;
            %['max_res=' num2str(max_res) ' Block_Num=' int2str(Block_Num) ' it_=' int2str(it_)]
+           disp(['iteration : ' int2str(iter+1) ' => ' num2str(max_res) ' time = ' int2str(it_)]);
+           
+%     fjac = zeros(Blck_size, Blck_size);
+%     disp(['Blck_size=' int2str(Blck_size) ' it_=' int2str(it_)]);
+%     dh = max(abs(y(it_, y_index_eq)),options_.gstep*ones(1, Blck_size))*eps^(1/3);
+%     fvec = r;
+%       for j = 1:Blck_size
+%     	  ydh = y ;
+%           ydh(it_, y_index_eq(j)) = ydh(it_, y_index_eq(j)) + dh(j)  ;
+%           [t, y1, g11, g21, g31]=feval(fname, ydh, x, params, it_, 0);
+%           fjac(:,j) = (t - fvec)./dh(j) ;
+%       end;
+%     diff = g1 -fjac;
+%     diff
+%     disp('g1');
+%     disp([num2str(g1,'%4.5f')]);
+%     disp('fjac');
+%     disp([num2str(fjac,'%4.5f')]);
+%     [c_max, i_c_max] = max(abs(diff));
+%     [l_c_max, i_r_max] = max(c_max);
+%     disp(['maximum element row=' int2str(i_c_max(i_r_max)) ' and column=' int2str(i_r_max) ' value = ' num2str(l_c_max)]);
+%     equation = i_c_max(i_r_max);
+%     variable = i_r_max;
+%     variable
+%     mod(variable, Blck_size)
+%     disp(['equation ' int2str(equation) ' and variable ' int2str(y_index_eq(variable)) ' ' M_.endo_names(y_index_eq(variable), :)]);
+%     disp(['g1(' int2str(equation) ', ' int2str(variable) ')=' num2str(g1(equation, variable),'%3.10f') ' fjac(' int2str(equation) ', ' int2str(variable) ')=' num2str(fjac(equation, variable), '%3.10f') ' y(' int2str(it_) ', ' int2str(variable) ')=' num2str(y(it_, variable))]);
+%     %return;
+%     %g1 = fjac;
+
+           
+           
+           
+           
            if(verbose==1)
-             disp(['iteration : ' int2str(iter) ' => ' num2str(max_res) ' time = ' int2str(it_)]);
+             disp(['iteration : ' int2str(iter+1) ' => ' num2str(max_res) ' time = ' int2str(it_)]);
              if(is_dynamic)
                disp([M_.endo_names(y_index_eq,:) num2str([y(it_,y_index_eq)' r g1])]);
              else
@@ -118,7 +152,7 @@ function [y, info] = solve_one_boundary(fname, y, x, params, y_index_eq, nze, pe
            if(~cvg)
              if(iter>0)
                if(~isreal(max_res) | isnan(max_res) | (max_resa<max_res && iter>1))
-                 if(isnan(max_res))
+                 if(isnan(max_res)| (max_resa<max_res && iter>0))
                    detJ=det(g1a);
                    if(abs(detJ)<1e-7)
                      max_factor=max(max(abs(g1a)));
@@ -198,15 +232,23 @@ function [y, info] = solve_one_boundary(fname, y, x, params, y_index_eq, nze, pe
                else
                   info = -Block_Num*10;
                end
-             elseif(~is_dynamic & options_.solve_algo==2)
+             elseif((~is_dynamic & options_.solve_algo==2) || (is_dynamic & options_.solve_algo==4))
                 lambda=1;
                 stpmx = 100 ;
-                stpmax = stpmx*max([sqrt(y'*y);size(y_index_eq,2)]);
+                if (is_dynamic)
+                    stpmax = stpmx*max([sqrt(y*y');size(y_index_eq,2)]);
+                else
+                    stpmax = stpmx*max([sqrt(y'*y);size(y_index_eq,2)]);
+                end;
                 nn=1:size(y_index_eq,2);
                 g = (r'*g1)';
                 f = 0.5*r'*r;
                 p = -g1\r ;
-                [y,f,r,check]=lnsrch1(y,f,g,p,stpmax,fname,nn,y_index_eq,x, params, 0);
+                if (is_dynamic)
+                    [y,f,r,check]=lnsrch1(y,f,g,p,stpmax,fname,nn,y_index_eq,x, params, it_, 0);
+                else
+                    [y,f,r,check]=lnsrch1(y,f,g,p,stpmax,fname,nn,y_index_eq,x, params, 0);
+                end;
                 dx = ya - y(y_index_eq);
              elseif(~is_dynamic & options_.solve_algo==3)
                  [yn,info] = csolve(@local_fname, y(y_index_eq),@local_fname,1e-6,500, x, params, y, y_index_eq, fname, 1);
@@ -283,6 +325,7 @@ function [y, info] = solve_one_boundary(fname, y, x, params, y_index_eq, nze, pe
                  return;
              end;
              iter=iter+1;
+             max_resa = max_res;
            end
        end
        if cvg==0

@@ -31,32 +31,6 @@
 using namespace std;
 
 
-
-
-int nb_row_x, nb_row_xd, u_size, y_size, x_size, y_kmin, y_kmax, y_decal;
-int periods, maxit_;
-double *params, markowitz_c, slowc, slowc_save;
-double  *u, *y, *x, *r, *g1, *g2, *ya;
-double solve_tolf;
-//pctimer_t t0, t1;
-clock_t t0, t1;
-int size_of_direction;
-int i, j, k;
-
-
-/*double err;
-
-
-
-
-
-
-double res1, res2;
-
-double max_res;
-bool cvg;
-
-*/
-
+//double  *u, *y, *x, *r, *g1, *g2, *ya;
 
 #endif // SIMULATE_HH_INCLUDED
