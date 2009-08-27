@@ -100,7 +100,7 @@ function [y, info] = solve_one_boundary(fname, y, x, params, y_index_eq, nze, pe
               max_res=max(max(abs(r)));
            end;
            %['max_res=' num2str(max_res) ' Block_Num=' int2str(Block_Num) ' it_=' int2str(it_)]
-           disp(['iteration : ' int2str(iter+1) ' => ' num2str(max_res) ' time = ' int2str(it_)]);
+           %disp(['iteration : ' int2str(iter+1) ' => ' num2str(max_res) ' time = ' int2str(it_)]);
            
 %     fjac = zeros(Blck_size, Blck_size);
 %     disp(['Blck_size=' int2str(Blck_size) ' it_=' int2str(it_)]);
@@ -232,7 +232,7 @@ function [y, info] = solve_one_boundary(fname, y, x, params, y_index_eq, nze, pe
                else
                   info = -Block_Num*10;
                end
-             elseif((~is_dynamic & options_.solve_algo==2) || (is_dynamic & options_.solve_algo==4))
+             elseif((~is_dynamic & options_.solve_algo==2) || (is_dynamic & simulation_method==4))
                 lambda=1;
                 stpmx = 100 ;
                 if (is_dynamic)
