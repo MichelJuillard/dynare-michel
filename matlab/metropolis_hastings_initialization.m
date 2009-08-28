@@ -48,7 +48,7 @@ MhDirectoryName = CheckPath('metropolis');
 nblck = options_.mh_nblck;
 nruns = ones(nblck,1)*options_.mh_replic;
 npar  = length(xparam1);
-MAX_nruns = 300;%ceil(options_.MaxNumberOfBytes/(npar+2)/8);
+MAX_nruns = ceil(options_.MaxNumberOfBytes/(npar+2)/8);
 d = chol(vv);
 
 if ~options_.load_mh_file & ~options_.mh_recover
