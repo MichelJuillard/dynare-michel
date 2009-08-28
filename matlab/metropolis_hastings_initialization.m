@@ -48,7 +48,7 @@ MhDirectoryName = CheckPath('metropolis');
 nblck = options_.mh_nblck;
 nruns = ones(nblck,1)*options_.mh_replic;
 npar  = length(xparam1);
-MAX_nruns = ceil(options_.MaxNumberOfBytes/(npar+2)/8);
+MAX_nruns = 300;%ceil(options_.MaxNumberOfBytes/(npar+2)/8);
 d = chol(vv);
 
 if ~options_.load_mh_file & ~options_.mh_recover
@@ -248,8 +248,6 @@ elseif options_.load_mh_file & ~options_.mh_recover
     record.MhDraws(end,1) = nruns(1);
     record.MhDraws(end,2) = AnticipatedNumberOfFiles;
     record.MhDraws(end,3) = AnticipatedNumberOfLinesInTheLastFile;
-%     randn('state',record.Seeds.Normal);
-%     rand('state',record.Seeds.Unifor);
     save([MhDirectoryName '/' ModelName '_mh_history.mat'],'record');
     disp(['MH: ... It''s done. I''ve loaded ' int2str(NumberOfPreviousSimulations) ' simulations.'])
     disp(' ')
@@ -266,7 +264,7 @@ elseif options_.mh_recover
     else
         load([ MhDirectoryName '/'  ModelName '_mh_history.mat'])
     end
-    nblck = record.Nblck;
+    nblck = record.Nblck;% Number of "parallel" mcmc chains.
     options_.mh_nblck = nblck;
     if size(record.MhDraws,1) == 1
         OldMh = 0;% The crashed metropolis was the first session.
@@ -281,25 +279,24 @@ elseif options_.mh_recover
         ilogpo2 = record.InitialLogLiK;
         ix2 = record.InitialParameters;
     end
-    %% Set "NewFile":
+    %% Set NewFile, a nblck*1 vector of integers, and fline (first line), a nblck*1 vector of integers.
     if OldMh
-        LastLineNumberInThePreviousMh = record.MhDraws(end-1,3);
-        LastFileNumberInThePreviousMh = sum(record.MhDraws(1:end-1,2),1);
-        if LastLineNumberInThePreviousMh < MAX_nruns
+        LastLineNumberInThePreviousMh = record.MhDraws(end-1,3);% Number of lines in the last mh files of the previous session.
+        LastFileNumberInThePreviousMh = sum(record.MhDraws(1:end-1,2),1);% Number of mh files in the the previous sessions.
+        if LastLineNumberInThePreviousMh < MAX_nruns% Test if the last mh files of the previous session are not complete (yes)
             NewFile = ones(nblck,1)*LastFileNumberInThePreviousMh;
-        else
+            fline = ones(nblck,1)*(LastLineNumberInThePreviousMh+1);
+        else% The last mh files of the previous session are complete.
             NewFile = ones(nblck,1)*(LastFileNumberInThePreviousMh+1);
+            fline = ones(nblck,1);
         end
     else
+        LastLineNumberInThePreviousMh = 0;
+        LastFileNumberInThePreviousMh = 0;
         NewFile = ones(nblck,1);
-    end
-    %% Set fline (First line):
-    if OldMh
-        fline = ones(nblck,1)*(LastLineNumberInThePreviousMh+1);
-    else
         fline = ones(nblck,1);
     end
-    %% Set fblck (First block):
+    %% Set fblck (First block), an integer targeting the crashed mcmc chain.
     fblck = 1;
     %% How many mh files should we have ?
     ExpectedNumberOfMhFilesPerBlock = sum(record.MhDraws(:,2),1);
@@ -307,99 +304,43 @@ elseif options_.mh_recover
     %% I count the total number of saved mh files...
     AllMhFiles = dir([MhDirectoryName '/' ModelName '_mh*_blck*.mat']);
     TotalNumberOfMhFiles = length(AllMhFiles);
-    %% I count the number of saved mh files per block
+    %% And I quit if I can't find a crashed mcmc chain. 
+    if (TotalNumberOfMhFiles==ExpectedNumberOfMhFiles)
+        disp('MH: It appears that you don''t need to use the mh_recover option!')
+        disp('    You have to edit the mod file and remove the mh_recover') 
+        disp('    in the estimation command')
+        error
+    end
+    %% I count the number of saved mh files per block.
     NumberOfMhFilesPerBlock = zeros(nblck,1);
-    for i = 1:nblck
-        BlckMhFiles = dir([ MhDirectoryName '/' ModelName '_mh*_blck' int2str(i) '.mat']);
-        NumberOfMhFilesPerBlock(i) = length(BlckMhFiles);
+    for b = 1:nblck
+        BlckMhFiles = dir([ MhDirectoryName '/' ModelName '_mh*_blck' int2str(b) '.mat']);
+        NumberOfMhFilesPerBlock(b) = length(BlckMhFiles);
     end
-    tmp = NumberOfMhFilesPerBlock(1);
     %% Is there a chain with less mh files than expected ? 
-    CrashedBlck = 1; b = 1;
-    while b <= nblck
-        if  NumberOfMhFilesPerBlock(b) < ExpectedNumberOfMhFilesPerBlock
-            CrashedBlck = b;% YES, chain b!
-            disp(['MH: Chain ' int2str(b) ' is not complete!'])
+    while fblck <= nblck
+        if  NumberOfMhFilesPerBlock(fblck) < ExpectedNumberOfMhFilesPerBlock
+            disp(['MH: Chain ' int2str(fblck) ' is not complete!'])
             break
+            % The mh_recover session will start from chain fblck.
         else
-            disp(['MH: Chain ' int2str(b) ' is complete!'])
+            disp(['MH: Chain ' int2str(fblck) ' is complete!'])
         end
-        b = b+1;
+        fblck = fblck+1;
     end
-    if b>nblck
-        disp('MH: You probably don''t need to recover a previous crashed metropolis...')
-        disp('    or Dynare is unable to recover it.')
-        error('I stop. You should modify your mod file...')
-    end
-    %% The new metropolis-hastings should start from chain... (fblck=CrashedBlck)
-    fblck = CrashedBlck;
     %% How many mh-files are saved in this block?
-    NumberOfSavedMhFilesInTheCrashedBlck = NumberOfMhFilesPerBlock(CrashedBlck);
-    %% How many mh-files were saved in this block during the last session
-    %% (if there was a complete session before the crash)
+    NumberOfSavedMhFilesInTheCrashedBlck = NumberOfMhFilesPerBlock(fblck);
+    %% Correct the number of saved mh files if the crashed metropolis was not the first session (so
+    %% that NumberOfSavedMhFilesInTheCrashedBlck is the number of saved mh files in the crashed chain 
+    %% of the current session).  
     if OldMh
-        ante = sum(record.MhDraws(1:end-1,2),1);
-        NumberOfSavedMhFilesInTheCrashedBlck = NumberOfSavedMhFilesInTheCrashedBlck - ante;
+        NumberOfSavedMhFilesInTheCrashedBlck = NumberOfSavedMhFilesInTheCrashedBlck - LastFileNumberInThePreviousMh;
     end
-    %% Is the last mh-file of the previous session full ?
-    %% (if there was a complete session before the crash)
-    if OldMh && ~NumberOfSavedMhFilesInTheCrashedBlck
-        load([MhDirectoryName '/' ModelName '_mh' int2str(ante) '_blck' int2str(CrashedBlck) '.mat'],'logpo2');
-        if length(logpo2) == MAX_nruns
-            IsTheLastFileOfThePreviousMhFull = 1;
-            NumberOfCompletedMhFiles = NumberOfMhFilesPerBlock(CrashedBlck);
-            reste = 0;
-        else
-            IsTheLastFileOfThePreviousMhFull = 0;
-            NumberOfCompletedMhFiles = ante-1;
-            reste = MAX_nruns-LastLineNumberInThePreviousMh; 
-        end
-    elseif OldMh && NumberOfSavedMhFilesInTheCrashedBlck
-        IsTheLastFileOfThePreviousMhFull = 1;
-        NumberOfCompletedMhFiles = NumberOfMhFilesPerBlock(CrashedBlck);
-        reste = 0;
-    elseif ~OldMh && NumberOfSavedMhFilesInTheCrashedBlck
-        IsTheLastFileOfThePreviousMhFull = 0;
-        NumberOfCompletedMhFiles = NumberOfMhFilesPerBlock(CrashedBlck);
-        reste = 0;
+    NumberOfSavedMhFiles = NumberOfSavedMhFilesInTheCrashedBlck+LastFileNumberInThePreviousMh;
+    %% Correct initial conditions.
+    if NumberOfSavedMhFiles
+        load([MhDirectoryName '/' ModelName '_mh' int2str(NumberOfSavedMhFiles) '_blck' int2str(fblck) '.mat']);
+        ilogpo2(fblck) = logpo2(end);
+        ix2(fblck,:) = x2(end,:);
     end
-    %% How many runs were saved ?
-    NumberOfSavedDraws = MAX_nruns*NumberOfCompletedMhFiles + reste;
-    %% Here is the number of draws we still need to complete the block:
-    if OldMh
-        nruns(CrashedBlck) = nruns(CrashedBlck)-(NumberOfSavedDraws-sum(record.MhDraws(1:end-1,1)));
-    end
-    %% I've got all the needed information... I can initialize the MH:
-    if OldMh
-        if NumberOfSavedMhFilesInTheCrashedBlck
-            load([MhDirectoryName '/' ModelName '_mh' ...
-                  int2str(NumberOfCompletedMhFiles) '_blck' int2str(CrashedBlck) '.mat']);
-            fline(CrashedBlck,1) = 1;
-            NewFile(CrashedBlck) = NumberOfCompletedMhFiles+1;% NumberOfSavedMhFilesInTheCrashedBlck+1;
-        else
-            load([MhDirectoryName '/' ModelName '_mh' ...
-                  int2str(ante) '_blck' int2str(CrashedBlck) '.mat']);
-            if reste
-                fline(CrashedBlck,1) = length(logpo2)+1;
-                NewFile(CrashedBlck) = LastFileNumberInThePreviousMh;
-            else
-                fline(CrashedBlck,1) = 1;
-                NewFile(CrashedBlck) = LastFileNumberInThePreviousMh+1;
-            end
-        end
-        ilogpo2(CrashedBlck) = logpo2(end);
-        ix2(CrashedBlck,:) = x2(end,:); 
-    else
-        if NumberOfSavedMhFilesInTheCrashedBlck
-            load([MhDirectoryName '/' ModelName '_mh' ...
-                  int2str(NumberOfCompletedMhFiles) '_blck' int2str(CrashedBlck) '.mat']);
-            fline(CrashedBlck,1) = 1;
-            NewFile(CrashedBlck) = NumberOfCompletedMhFiles+1;% NumberOfSavedMhFilesInTheCrashedBlck+1;
-            ilogpo2(CrashedBlck) = logpo2(end);
-            ix2(CrashedBlck,:) = x2(end,:);
-        else
-            fline(CrashedBlck,1) = 1;
-            NewFile(CrashedBlck) = 1;
-        end
-    end
-end% of (if options_.load_mh_file == {0,1 or -1})
+end
