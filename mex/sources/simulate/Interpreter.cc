@@ -811,7 +811,7 @@ Interpreter::simulate_a_block(int size,int type, string file_name, string bin_ba
         Block_List_Max_Lead=get_code_int;
         u_count_int=get_code_int;
         fixe_u(&u, u_count_int, u_count_int);
-        Read_SparseMatrix(bin_basename, size, 1, 0, 0, steady_state);
+        Read_SparseMatrix(bin_basename, size, 1, 0, 0, steady_state, false);
         g1=(double*)mxMalloc(size*size*sizeof(double));
         r=(double*)mxMalloc(size*sizeof(double));
         begining=get_code_pointer;
@@ -966,7 +966,7 @@ Interpreter::simulate_a_block(int size,int type, string file_name, string bin_ba
         Block_List_Max_Lead=get_code_int;
         u_count_int=get_code_int;
         fixe_u(&u, u_count_int, u_count_int);
-        Read_SparseMatrix(bin_basename, size, 1, 0, 0, steady_state);
+        Read_SparseMatrix(bin_basename, size, 1, 0, 0, steady_state, false);
         g1=(double*)mxMalloc(size*size*sizeof(double));
         r=(double*)mxMalloc(size*sizeof(double));
         begining=get_code_pointer;
@@ -1121,7 +1121,7 @@ Interpreter::simulate_a_block(int size,int type, string file_name, string bin_ba
         Block_List_Max_Lead=get_code_int;
         u_count_int=get_code_int;
         fixe_u(&u, u_count_int, u_count_int);
-        Read_SparseMatrix(bin_basename, size, periods, y_kmin, y_kmax, steady_state);
+        Read_SparseMatrix(bin_basename, size, periods, y_kmin, y_kmax, steady_state, true);
         u_count=u_count_int*(periods+y_kmax+y_kmin);
         r=(double*)mxMalloc(size*sizeof(double));
         y_save=(double*)mxMalloc(y_size*sizeof(double)*(periods+y_kmax+y_kmin));
@@ -1230,7 +1230,8 @@ Interpreter::compute_blocks(string file_name, string bin_basename, bool steady_s
 {
   ifstream CompiledCode;
   bool result = true;
-  int Code_Size, var;
+  streamoff Code_Size;
+  int var;
   if(steady_state)
     file_name += "_static";
 	else
@@ -1271,7 +1272,7 @@ Interpreter::compute_blocks(string file_name, string bin_basename, bool steady_s
             Block.clear();
             Block_Contain.clear();
             Block_contain_type lBlock_Contain;
-            lBlock.begin=get_code_pos-(uint64_t)Init_Code;
+            lBlock.begin=get_code_pos-(long int*)Init_Code;
             lBlock.size=get_code_int;
             lBlock.type=get_code_int;
             Block.push_back(lBlock);
@@ -1302,7 +1303,7 @@ Interpreter::compute_blocks(string file_name, string bin_basename, bool steady_s
             T=(double*)mxMalloc(var*sizeof(double));
             break;
           default :
-            mexPrintf("Unknow command : %d at pos %d !!\n",(long int)(code),(uint64_t*)(get_code_pos)-(uint64_t*)(Init_Code));
+            mexPrintf("Unknow command : %d at pos %d !!\n",(long int)(code),(long int*)(get_code_pos)-(long int*)(Init_Code));
             mexEvalString("st=fclose('all');clear all;");
             mexEvalString("drawnow;");
             mexErrMsgTxt("End of simulate");

@@ -42,9 +42,9 @@ typedef vector<NonZeroElem*> v_NonZeroElem;
 class Mem_Mngr
 {
 public:
-    void write_swp_f(int *save_op_all,long int *nop_all);
+    /*void write_swp_f(int *save_op_all,long int *nop_all);
     bool read_swp_f(int **save_op_all,long int *nop_all);
-    void close_swp_f();
+    void close_swp_f();*/
     void Print_heap();
     void init_Mem();
     void mxFree_NZE(void* pos);
@@ -53,9 +53,9 @@ public:
     void Free_All();
     Mem_Mngr();
     void fixe_file_name(string filename_arg);
-    int* malloc_std(long int nop);
+    /*int* malloc_std(long int nop);
     int* realloc_std(int* save_op_o, long int &nopa);
-    void chk_avail_mem(int **save_op_all,long int *nop_all,long int *nopa_all,int add, int t);
+    void chk_avail_mem(int **save_op_all,long int *nop_all,long int *nopa_all,int add, int t);*/
     bool swp_f;
     //bool verbose;
 private:

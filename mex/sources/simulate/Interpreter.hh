@@ -58,7 +58,7 @@ struct Block_type
 #define get_code_pdouble      (double*)Code; Code+=sizeof(double);
 #define get_code_bool         *((bool*)(Code++))
 #define get_code_char         *((char*)(Code++))
-#define get_code_pos          (long int)Code
+#define get_code_pos          (long int*)Code
 #define get_code_pointer      Code
 #define set_code_pointer(pos) Code=pos
 

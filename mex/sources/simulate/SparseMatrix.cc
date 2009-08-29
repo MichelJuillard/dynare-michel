@@ -40,6 +40,11 @@ SparseMatrix::SparseMatrix()
   start_compare = 0;
   restart = 0;
   IM_i.clear();
+#ifdef _MSC_VER
+  nan__[0] = 0xffffffff;
+  nan__[1] = 0x7fffffff;
+  NAN = *( double* )nan__;
+#endif
 }
 
 int
@@ -339,7 +344,7 @@ SparseMatrix::Insert(const int r, const int c, const int u_index, const int lag_
 }
 
 void
-SparseMatrix::Read_SparseMatrix(string file_name, int Size, int periods, int y_kmin, int y_kmax, bool steady_state)
+SparseMatrix::Read_SparseMatrix(string file_name, int Size, int periods, int y_kmin, int y_kmax, bool steady_state, bool two_boundaries)
 {
   int i, j, eq, var, lag;
   filename = file_name;
@@ -361,14 +366,47 @@ SparseMatrix::Read_SparseMatrix(string file_name, int Size, int periods, int y_k
         }
     }
   IM_i.clear();
-  for (i = 0; i < u_count_init; i++)
-    {
-      SaveCode.read(reinterpret_cast<char *>(&eq), sizeof(eq));
-      SaveCode.read(reinterpret_cast<char *>(&var), sizeof(var));
-      SaveCode.read(reinterpret_cast<char *>(&lag), sizeof(lag));
-      SaveCode.read(reinterpret_cast<char *>(&j), sizeof(j));
-      IM_i[make_pair(make_pair(eq, var), lag)] = j;
-    }
+	if(two_boundaries)
+	  {
+	  	for (i = 0; i < u_count_init-Size; i++)
+        {
+          SaveCode.read(reinterpret_cast<char *>(&eq), sizeof(eq));
+          SaveCode.read(reinterpret_cast<char *>(&var), sizeof(var));
+          //mexPrintf("var=%d\n",var);
+          SaveCode.read(reinterpret_cast<char *>(&lag), sizeof(lag));
+          SaveCode.read(reinterpret_cast<char *>(&j), sizeof(j));
+          IM_i[make_pair(make_pair(eq, var), lag)] = j;
+        }
+        /*
+	      		int eqr1=j;
+            int varr=Size*(block_triangular.periods
+                     +block_triangular.incidencematrix.Model_Max_Lead_Endo);
+            int k1=0;
+            SaveCode.write(reinterpret_cast<char *>(&eqr1), sizeof(eqr1));
+            SaveCode.write(reinterpret_cast<char *>(&varr), sizeof(varr));
+            SaveCode.write(reinterpret_cast<char *>(&k1), sizeof(k1));
+            SaveCode.write(reinterpret_cast<char *>(&eqr1), sizeof(eqr1));
+            u_count_int++;
+      */
+      for (j=0;j<Size;j++)
+       {
+       	 //mexPrintf("var = %d\n",Size*(periods+y_kmax));
+         IM_i[make_pair(make_pair(j, Size*(periods+y_kmax)), 0)] = j;
+         //u_count_init++;
+       }
+	  }
+	else
+	  {
+	  	for (i = 0; i < u_count_init; i++)
+        {
+          SaveCode.read(reinterpret_cast<char *>(&eq), sizeof(eq));
+          SaveCode.read(reinterpret_cast<char *>(&var), sizeof(var));
+          //mexPrintf("var=%d\n",var);
+          SaveCode.read(reinterpret_cast<char *>(&lag), sizeof(lag));
+          SaveCode.read(reinterpret_cast<char *>(&j), sizeof(j));
+          IM_i[make_pair(make_pair(eq, var), lag)] = j;
+        }
+	  }
   index_vara = (int *) mxMalloc(Size*(periods+y_kmin+y_kmax)*sizeof(int));
   for (j = 0; j < Size; j++)
     SaveCode.read(reinterpret_cast<char *>(&index_vara[j]), sizeof(*index_vara));
@@ -985,12 +1023,12 @@ SparseMatrix::complete(int beg_t, int Size, int periods, int *b)
   return (beg_t);
 }
 
-void
+/*void
 SparseMatrix::close_swp_file()
 {
   mem_mngr.close_swp_f();
 }
-
+*/
 double
 SparseMatrix::bksub(int tbreak, int last_period, int Size, double slowc_l)
 {
@@ -1074,10 +1112,15 @@ SparseMatrix::simulate_NG(int blck, int y_size, int it_, int y_kmin, int y_kmax,
   int pivj = 0, pivk = 0;
   double piv_abs/*, first_elem*/;
   NonZeroElem *first, *firsta, *first_suba;
-  double piv_v[Size];
-  int pivj_v[Size], pivk_v[Size], NR[Size], l, N_max;
+  double *piv_v;
+  int *pivj_v, *pivk_v, *NR;
+  int l, N_max;
   bool one;
   Clear_u();
+  piv_v = (double*)mxMalloc(Size*sizeof(double));
+  pivj_v = (int*)mxMalloc(Size*sizeof(int));
+  pivk_v = (int*)mxMalloc(Size*sizeof(int));
+  NR = (int*)mxMalloc(Size*sizeof(int));
   error_not_printed = true;
   u_count_alloc_save = u_count_alloc;
   if (isnan(res1) || isinf(res1))
@@ -1102,6 +1145,10 @@ SparseMatrix::simulate_NG(int blck, int y_size, int it_, int y_kmin, int y_kmax,
           mexPrintf("The initial values of endogenous variables are too far from the solution.\n");
           mexPrintf("Change them!\n");
           mexEvalString("drawnow;");
+          mxFree(piv_v);
+          mxFree(pivj_v);
+          mxFree(pivk_v);
+          mxFree(NR);
           if(steady_state)
             return false;
 					else
@@ -1129,14 +1176,18 @@ SparseMatrix::simulate_NG(int blck, int y_size, int it_, int y_kmin, int y_kmax,
             }
           mexPrintf("Dynare cannot improve the simulation in block %d at time %d (variable %d)\n", blck+1, it_+1, max_res_idx);
           mexEvalString("drawnow;");
+          mxFree(piv_v);
+          mxFree(pivj_v);
+          mxFree(pivk_v);
+          mxFree(NR);
           if(steady_state)
             return false;
-					else
-					  {
+          else
+            {
               mexEvalString("st=fclose('all');clear all;");
               filename += " stopped";
-               mexErrMsgTxt(filename.c_str());
-					  }
+              mexErrMsgTxt(filename.c_str());
+            }
         }
       slowc_save /= 2;
       mexPrintf("Error: Simulation diverging, trying to correct it using slowc=%f\n", slowc_save);
@@ -1144,6 +1195,10 @@ SparseMatrix::simulate_NG(int blck, int y_size, int it_, int y_kmin, int y_kmax,
         y[i+it_*y_size] = ya[i+it_*y_size] + slowc_save*direction[i+it_*y_size];
       /*for (i = 0; i < y_size*(periods+y_kmin); i++)
         y[i] = ya[i]+slowc_save*direction[i];*/
+      mxFree(piv_v);
+      mxFree(pivj_v);
+      mxFree(pivk_v);
+      mxFree(NR);
       iter--;
       return true;
     }
@@ -1157,8 +1212,16 @@ SparseMatrix::simulate_NG(int blck, int y_size, int it_, int y_kmin, int y_kmax,
       mexPrintf("-----------------------------------\n");
     }*/
   if (cvg)
-    return (true);
+    {
+      mxFree(piv_v);
+      mxFree(pivj_v);
+      mxFree(pivk_v);
+      mxFree(NR);
+      return (true);
+    }
   Simple_Init(it_, y_kmin, y_kmax, Size, IM_i);
+  NonZeroElem **bc;
+  bc = (NonZeroElem**)mxMalloc(Size*sizeof(*bc));
   for (i = 0; i < Size; i++)
     {
       /*finding the max-pivot*/
@@ -1244,14 +1307,19 @@ SparseMatrix::simulate_NG(int blck, int y_size, int it_, int y_kmin, int y_kmax,
         {
           mexPrintf("Error: singular system in Simulate_NG in block %d\n",blck+1);
           mexEvalString("drawnow;");
+          mxFree(piv_v);
+          mxFree(pivj_v);
+          mxFree(pivk_v);
+          mxFree(NR);
+          mxFree(bc);
           if(steady_state)
             return false;
-					else
-					  {
+          else
+            {
               mexEvalString("st=fclose('all');clear all;");
               filename += " stopped";
               mexErrMsgTxt(filename.c_str());
-					  }
+            }
         }
       /*divide all the non zeros elements of the line pivj by the max_pivot*/
       int nb_var = At_Row(pivj, &first);
@@ -1265,14 +1333,13 @@ SparseMatrix::simulate_NG(int blck, int y_size, int it_, int y_kmin, int y_kmax,
       nb_eq = At_Col(i, &first);
       NonZeroElem *first_piva;
       int nb_var_piva = At_Row(pivj, &first_piva);
-      NonZeroElem *bc[nb_eq];
-			int nb_eq_todo = 0;
+      int nb_eq_todo = 0;
       for (j = 0; j < nb_eq && first; j++)
-				{
+		{
           if (!line_done[first->r_index])
             bc[nb_eq_todo++] = first;
           first = first->NZE_C_N;
-				}
+		}
       //#pragma omp parallel for num_threads(atoi(getenv("DYNARE_NUM_THREADS")))
       for (j = 0; j < nb_eq_todo; j++)
 				{
@@ -1352,14 +1419,19 @@ SparseMatrix::simulate_NG(int blck, int y_size, int it_, int y_kmin, int y_kmax,
             }
           u[b[row]] -= u[b[pivj]]*first_elem;
           first = first->NZE_C_N;
-				}
-		}
+        }
+    }
   double slowc_lbx = slowc, res1bx;
   for (i = 0; i < y_size; i++)
     ya[i+it_*y_size] = y[i+it_*y_size];
   slowc_save = slowc;
   res1bx = simple_bksub(it_, Size, slowc_lbx);
   End(Size);
+  mxFree(piv_v);
+  mxFree(pivj_v);
+  mxFree(pivk_v);
+  mxFree(NR);
+  mxFree(bc);
   return true;
 }
 
@@ -1419,7 +1491,8 @@ SparseMatrix::CheckIt(int y_size, int y_kmin, int y_kmax, int Size, int periods,
   mexPrintf("G1a red done\n");
   SaveResult >> row;
   mexPrintf("row(2)=%d\n", row);
-  double B[row];
+  double *B;
+  B = (double*)mxMalloc(row*sizeof(double));
   for (int i = 0; i < row; i++)
     SaveResult >> B[i];
   SaveResult.close();
@@ -1430,6 +1503,7 @@ SparseMatrix::CheckIt(int y_size, int y_kmin, int y_kmax, int Size, int periods,
       if (abs(u[b[i]]+B[i]) > epsilon)
         mexPrintf("Problem at i=%d u[b[i]]=%f B[i]=%f\n", i, u[b[i]], B[i]);
     }
+  mxFree(B);
 }
 
 void
@@ -1582,15 +1656,21 @@ SparseMatrix::simulate_NG1(int blck, int y_size, int it_, int y_kmin, int y_kmax
   else
     {
       Init(periods, y_kmin, y_kmax, Size, IM_i);
+      double *piv_v;
+      int *pivj_v, *pivk_v, *NR;
+      piv_v = (double*)mxMalloc(Size*sizeof(double));
+      pivj_v = (int*)mxMalloc(Size*sizeof(int));
+      pivk_v = (int*)mxMalloc(Size*sizeof(int));
+      NR = (int*)mxMalloc(Size*sizeof(int));
       for (int t = 0; t < periods; t++)
         {
           if (record && symbolic)
             {
-              if (save_op) ;
-              {
-                mxFree(save_op);
-                save_op = NULL;
-              }
+              if (save_op)
+                {
+                  mxFree(save_op);
+                  save_op = NULL;
+                }
               save_op = (int *) mxMalloc(nop*sizeof(int));
               nopa = nop;
             }
@@ -1604,8 +1684,7 @@ SparseMatrix::simulate_NG1(int blck, int y_size, int it_, int y_kmin, int y_kmax
               int nb_eq = At_Col(i, 0, &first);
               if ((symbolic && t <= start_compare) || !symbolic)
                 {
-                  double piv_v[Size];
-                  int pivj_v[Size], pivk_v[Size], NR[Size], l = 0, N_max = 0;
+                  int l = 0, N_max = 0;
                   bool one = false;
                   piv_abs = 0;
                   for (j = 0; j < nb_eq; j++)
@@ -1666,7 +1745,7 @@ SparseMatrix::simulate_NG1(int blck, int y_size, int it_, int y_kmin, int y_kmax
                     {
                       for (j = 0; j < l; j++)
                         {
-                          markovitz = exp(log(fabs(piv_v[j])/piv_abs)-markowitz_c*log(NR[j]/N_max));
+                          markovitz = exp(log(fabs(piv_v[j])/piv_abs)-markowitz_c*log((double)(NR[j]/N_max)));
                           if (markovitz > markovitz_max && NR[j] == 1)
                             {
                               piv = piv_v[j];
@@ -1717,10 +1796,14 @@ SparseMatrix::simulate_NG1(int blck, int y_size, int it_, int y_kmin, int y_kmax
                 }
               /*divide all the non zeros elements of the line pivj by the max_pivot*/
               int nb_var = At_Row(pivj, &first);
-              NonZeroElem *bb[nb_var];
+              NonZeroElem **bb;
+              bb = (NonZeroElem**)mxMalloc(nb_var*sizeof(first));
+              //mexPrintf("nb_var=%d\n",nb_var);
               for (j = 0; j < nb_var; j++)
                 {
                   bb[j] = first;
+                  /*if(nb_var==122)
+                    mexPrintf("j=%d first=%x\n",j,first);*/
                   first = first->NZE_R_N;
                 }
 
@@ -1744,6 +1827,7 @@ SparseMatrix::simulate_NG1(int blck, int y_size, int it_, int y_kmin, int y_kmax
                         }
                     }
                 }
+              mxFree(bb);
               nop += nb_var*2;
               u[b[pivj]] /= piv;
               if (symbolic)
@@ -1767,7 +1851,9 @@ SparseMatrix::simulate_NG1(int blck, int y_size, int it_, int y_kmin, int y_kmax
               NonZeroElem *first_piva;
               int nb_var_piva = At_Row(pivj, &first_piva);
 
-              NonZeroElem *bc[nb_eq];
+              NonZeroElem **bc;
+              bc = (NonZeroElem**)mxMalloc(nb_eq*sizeof(first));
+              //NonZeroElem *bc[nb_eq];
               int nb_eq_todo = 0;
               for (j = 0; j < nb_eq && first; j++)
                 {
@@ -1950,6 +2036,7 @@ SparseMatrix::simulate_NG1(int blck, int y_size, int it_, int y_kmin, int y_kmax
                       nop += 3;
                     }
                 }
+              mxFree(bc);
             }
           if (symbolic)
             {
@@ -2006,6 +2093,10 @@ SparseMatrix::simulate_NG1(int blck, int y_size, int it_, int y_kmin, int y_kmax
             }
           //record = true;
         }
+      mxFree(piv_v);
+      mxFree(pivj_v);
+      mxFree(pivk_v);
+      mxFree(NR);
     }
   nop_all += nop;
   if (symbolic)
@@ -2017,7 +2108,7 @@ SparseMatrix::simulate_NG1(int blck, int y_size, int it_, int y_kmin, int y_kmax
       if (save_opaa)
         mxFree(save_opaa);
     }
-  close_swp_file();
+  //close_swp_file();
 
   /*The backward substitution*/
   double slowc_lbx = slowc, res1bx;
@@ -2034,7 +2125,7 @@ SparseMatrix::simulate_NG1(int blck, int y_size, int it_, int y_kmin, int y_kmax
       mexEvalString("drawnow;");
     }
 
-  close_swp_file();
+  //close_swp_file();
   time00 = clock();
   if (tbreak_g == 0)
     tbreak_g = periods;
@@ -2043,7 +2134,6 @@ SparseMatrix::simulate_NG1(int blck, int y_size, int it_, int y_kmin, int y_kmax
 
   /*Check_the_Solution(periods, y_kmin, y_kmax, Size, ua, pivot, b);
      mxFree(ua);*/
-
   return (0);
 }
 

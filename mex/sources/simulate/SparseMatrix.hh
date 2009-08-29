@@ -31,10 +31,16 @@
 #else
   #include <omp.h>
 #endif
+#ifdef _MSC_VER
+  #include <limits>
+#endif
 #define NEW_ALLOC
 #define MARKOVITZ
 
 using namespace std;
+
+
+
 
 struct t_save_op_s
 {
@@ -63,8 +69,45 @@ class SparseMatrix
     bool simulate_NG(int blck, int y_size, int it_, int y_kmin, int y_kmax, int Size, bool print_it, bool cvg, int &iter, bool steady_state);
     void Direct_Simulate(int blck, int y_size, int it_, int y_kmin, int y_kmax, int Size, int periods, bool print_it, int iter);
     void fixe_u(double **u, int u_count_int, int max_lag_plus_max_lead_plus_1);
-    void Read_SparseMatrix(string file_name, int Size, int periods, int y_kmin, int y_kmax, bool steady_state);
+    void Read_SparseMatrix(string file_name, int Size, int periods, int y_kmin, int y_kmax, bool steady_state, bool two_boundaries);
     void Read_file(string file_name, int periods, int u_size1, int y_size, int y_kmin, int y_kmax, int &nb_endo, int &u_count, int &u_count_init, double* u);
+
+#ifdef _MSC_VER
+    unsigned long nan__[2];
+    double NAN;
+
+    inline bool isnan(double value)
+     {
+       return value != value;
+     }
+
+    inline bool isinf(double value)
+      {
+        return (std::numeric_limits<double>::has_infinity &&
+        value == std::numeric_limits<double>::infinity());
+      }
+
+
+    inline double asinh(double x)
+     {
+       return log(x+sqrt(x*x+1));
+     }
+
+    template<typename T>
+    inline T acosh(T x)
+      {
+        if(!(x>=1.0)) return sqrt(-1.0);
+        return log(x+sqrt(x*x-1.0));
+      }
+
+    template<typename T>
+    inline T atanh(T x)
+      {
+        if(!(x>-1.0 && x<1.0)) return sqrt(-1.0);
+        return log((1.0+x)/(1.0-x))/2.0;
+      }
+
+#endif
 
  private:
     void Init(int periods, int y_kmin, int y_kmax, int Size, map<pair<pair<int, int> ,int>, int> &IM);
@@ -99,7 +142,7 @@ class SparseMatrix
 #endif
     );
     double simple_bksub(int it_, int Size, double slowc_l);
-    void close_swp_file();
+    /*void close_swp_file();*/
     stack<double> Stack;
     int nb_prologue_table_u, nb_first_table_u, nb_middle_table_u, nb_last_table_u;
     int nb_prologue_table_y, nb_first_table_y, nb_middle_table_y, nb_last_table_y;
@@ -145,8 +188,6 @@ protected:
     int restart;
     bool error_not_printed;
   };
-
-
 
 
 

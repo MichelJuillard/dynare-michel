@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <stdint.h>
+//#include "stdint.h"
 #include "Mem_Mngr.hh"
 
 Mem_Mngr::Mem_Mngr()
@@ -103,136 +103,17 @@ Mem_Mngr::mxMalloc_NZE()
 void
 Mem_Mngr::mxFree_NZE(void* pos)
 {
-  int i, gap;
+  int i;
+  size_t gap;
   for (i=0;i<Nb_CHUNK;i++)
     {
-      gap=((uint64_t)(pos)-(uint64_t)(NZE_Mem_add[i*CHUNK_BLCK_SIZE]))/sizeof(NonZeroElem);
+      gap=((size_t)(pos)-(size_t)(NZE_Mem_add[i*CHUNK_BLCK_SIZE]))/sizeof(NonZeroElem);
       if ((gap<CHUNK_BLCK_SIZE) && (gap>=0))
         break;
     }
   Chunk_Stack.push_back((NonZeroElem*)pos);
 }
 
-
-void
-Mem_Mngr::write_swp_f(int *save_op_all,long int *nop_all)
-{
-  swp_f=true;
-  swp_f_b++;
-  mexPrintf("writing the block %d with size=%d\n",swp_f_b,*nop_all);
-  if (!SaveCode_swp.is_open())
-    {
-      mexPrintf("open the swp file for writing\n");
-      SaveCode_swp.open((filename + ".swp").c_str(), std::ios::out | std::ios::binary);
-      if (!SaveCode_swp.is_open())
-        {
-          mexPrintf("Error : Can't open file \"%s\" for writing\n", (filename + ".swp").c_str());
-          mexEvalString("st=fclose('all');clear all;");
-          mexErrMsgTxt("Exit from Dynare");
-        }
-    }
-  SaveCode_swp.write(reinterpret_cast<char *>(nop_all), sizeof(*nop_all));
-  SaveCode_swp.write(reinterpret_cast<char *>(save_op_all), (*nop_all)*sizeof(int));
-  (*nop_all)=0;
-}
-
-bool
-Mem_Mngr::read_swp_f(int **save_op_all,long int *nop_all)
-{
-  int j;
-  swp_f=true;
-  if (!SaveCode_swp.is_open())
-    {
-      mexPrintf("open the file %s\n",(filename + ".swp").c_str());
-      SaveCode_swp.open((filename + ".swp").c_str(), std::ios::in | std::ios::binary);
-      j=SaveCode_swp.is_open();
-      mexPrintf("is_open()=%d\n",j);
-
-      if (!SaveCode_swp.is_open())
-        {
-          mexPrintf("Error : Can't open file \"%s\" for reading\n", (filename + ".swp").c_str());
-          mexEvalString("st=fclose('all');clear all;");
-          mexErrMsgTxt("Exit from Dynare");
-        }
-      SaveCode_swp.seekg(0);
-    }
-
-  j=SaveCode_swp.tellg();
-  SaveCode_swp.read(reinterpret_cast<char *>(nop_all), sizeof(*nop_all));
-  (*save_op_all)=(int*)mxMalloc((*nop_all)*sizeof(int));
-  SaveCode_swp.read(reinterpret_cast<char *>(*save_op_all), (*nop_all)*sizeof(int));
-  return(SaveCode_swp.good());
-}
-
-
-void
-Mem_Mngr::close_swp_f()
-{
-  if (SaveCode_swp.is_open())
-    {
-      SaveCode_swp.close();
-      mexPrintf("close the swp file\n");
-    }
-}
-
-int*
-Mem_Mngr::malloc_std(long int nop)
-{
-  return((int*)malloc(nop*sizeof(int)));
-}
-
-int*
-Mem_Mngr::realloc_std(int* save_op_o, long int &nopa)
-{
-  int *save_op=(int*)realloc(save_op_o,nopa*sizeof(int));
-  if (!save_op)
-    {
-      int nopag=int(nopa/3);
-      nopa=nopa-nopag;
-      while (!save_op && nopag>0)
-        {
-          nopag=int(nopag*0.66);
-          save_op=(int*)realloc(save_op_o,nopa*sizeof(int));
-        }
-      if (!save_op)
-        {
-          mexPrintf("Memory exhausted\n");
-          mexEvalString("drawnow;");
-          mexEvalString("st=fclose('all');clear all;");
-          filename+=" stopped";
-          mexErrMsgTxt(filename.c_str());
-        }
-    }
-  return(save_op);
-}
-
-void
-Mem_Mngr::chk_avail_mem(int **save_op_all,long int *nop_all,long int *nopa_all,int add, int t)
-  {
-    mexPrintf("Error: out of save_op_all[%d] nopa_all=%d t=%d\n",(*nop_all)+add,(*nopa_all),t);
-    int tmp_nopa_all=int(1.5*(*nopa_all));
-    int *tmp_i;
-    if (tmp_nopa_all*sizeof(int)<1024*1024)
-      {
-        mexPrintf("allocate %d bites save_op_all=%x\n",tmp_nopa_all*sizeof(int),*save_op_all);
-        tmp_i=(int*)mxRealloc(*save_op_all,tmp_nopa_all*sizeof(int));
-        mexPrintf("tmp_i=");
-        mexPrintf("%x\n",tmp_i);
-      }
-    else
-      tmp_i=NULL;
-    if (!tmp_i)
-      {
-        write_swp_f((*save_op_all),nop_all);
-      }
-    else
-      {
-        mexPrintf("allocated\n");
-        (*save_op_all)=tmp_i;
-        (*nopa_all)=tmp_nopa_all;
-      }
-    mexPrintf("end of chk\n");
-  }
 
 void
 Mem_Mngr::Free_All()
