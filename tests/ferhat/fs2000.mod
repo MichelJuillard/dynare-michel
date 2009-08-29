@@ -32,7 +32,7 @@ psi = 0.787;
 del = 0.02;
 toto = [2  3];
 
-model(sparse_dll);
+model(block, bytecode);
 //model(sparse);
 //model;
 /*0*/  exp(gam+e_a) = dA ;

@@ -852,7 +852,7 @@ W0906=0.0800069594276;
 W0907=0.147854375051;
 W0908=0.206834342322;
 W0909=-1;
-model(SPARSE_DLL,markowitz=3, mfs = 3);
+model(block, bytecode, mfs = 3, cutoff =0);
 //model(SPARSE,markowitz=2.0);
 //model;
  ( log(US_CPI)-(log(US_CPI(-1)))) = US_CPI1*( log(US_PIM)-(log(US_PIM(-1))))+US_CPI2*( log(US_PGNP)-(log(US_PGNP(-1))))+(1-US_CPI1-US_CPI2)*log(US_CPI(-1)/US_CPI(-2))+RES_US_CPI ;
@@ -2753,7 +2753,7 @@ options_.dynatol = 1e-4;
 options_.maxit_ = 5;
 
 
-simul(periods=80,datafile=mark3);
+simul(periods=80,datafile=mark3,markowitz=3);
 
 
 //simul(periods=10,datafile=mark3, method=lu);

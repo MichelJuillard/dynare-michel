@@ -223,8 +223,7 @@ function global_initialization()
   options_.prior_analysis_endo_var_list = [];
   
   % block decomposition + minimum feedback set for steady state computation
-  options_.block_mfs = 0;
+  options_.block = 0;
 
-  % block decomposition + minimum feedback set for steady state computation
-  % using simulate.dll
-  options_.block_mfs_dll = 0;
+  % model evaluated using simulate.dll
+  options_.bytecode = 0;

@@ -73,7 +73,6 @@ function y = solve_two_boundaries(fname, y, x, params, y_index, nze, periods, y_
   reduced = 0;
   while ~(cvg==1 | iter>maxit_),
     [r, y, g1, g2, g3, b]=feval(fname, y, x, params, periods, 0, y_kmin, Blck_size);
-
 %     fjac = zeros(Blck_size, Blck_size*(y_kmin_l+1+y_kmax_l));
 %     disp(['Blck_size=' int2str(Blck_size) ' size(y_index)=' int2str(size(y_index,2))]);
 %     dh = max(abs(y(y_kmin+1-y_kmin_l:y_kmin+1+y_kmax_l, y_index)),options_.gstep*ones(y_kmin_l+1+y_kmax_l, Blck_size))*eps^(1/3);

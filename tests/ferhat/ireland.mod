@@ -23,9 +23,9 @@ scy = 0.0040;
 shy = 0.0015;
 shc = 0.0010;
 
-//model(sparse_dll, cutoff=0);
-model(sparse,cutoff=0);
-//model(sparse);
+//model(block, bytecode, cutoff=0);
+model(block,cutoff=0);
+//model(block);
 //model;
 exp(y) = exp(a)*exp(k(-1))^theta*exp(h)^(1-theta);
 a = (1-rho)*aa+rho*a(-1)+e;

@@ -62,7 +62,7 @@ function steady_()
 					      options_.jacobian_flag, ...	    
 					      [oo_.exo_steady_state;oo_.exo_det_steady_state],indv);
     end
-  elseif options_.block_mfs
+  elseif options_.block && ~options_.bytecode
     for b = 1:size(M_.blocksMFS,1)
       n = size(M_.blocksMFS{b}, 1);
       ss = oo_.steady_state;
@@ -79,7 +79,7 @@ function steady_()
                           [oo_.exo_steady_state; ...
                           oo_.exo_det_steady_state], M_.params);
     end
-  elseif options_.block_mfs_dll
+  elseif options_.block && options_.bytecode
       [oo_.steady_state,check] = simulate('steady_state');
   else
     [oo_.steady_state,check] = dynare_solve([M_.fname '_static'],...

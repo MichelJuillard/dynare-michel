@@ -17,7 +17,7 @@ rho_ys = 0.9;
 rho_pies = 0.7;
 
 
-model(sparse_dll, markowitz=0, cutoff=0);
+model(block, bytecode, cutoff=0);
 //model(sparse);
 //model;
 y = y(+1) - (tau +alpha*(2-alpha)*(1-tau))*(R-pie(+1))-alpha*(tau +alpha*(2-alpha)*(1-tau))*dq(+1) + alpha*(2-alpha)*((1-tau)/tau)*(y_s-y_s(+1))-A(+1);
@@ -93,7 +93,7 @@ values 0.5;
 end;
 
 //simul(periods=200,method=bicgstab);
-simul(periods=20);
+simul(periods=20, markowitz=0);
 rplot vv;
 rplot ww;
 rplot A;
