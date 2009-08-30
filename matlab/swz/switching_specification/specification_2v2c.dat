@@ -1,0 +1,98 @@
+/******************************************************************************/
+/********************* Markov State Variable Information **********************/
+/******************************************************************************/
+
+//== Flat Independent Markov States and Simple Restrictions ==//
+
+
+//This number is NOT used but read in.
+//== Number Observations ==//
+200
+
+//== Number Independent State Variables ==//
+2
+
+//=====================================================//
+//== state_variable[i] (1 <= i <= n_state_variables) ==//
+//=====================================================//
+//== Number of states for state_variable[1] ==//
+2
+
+//== 03/15/06: DW TVBVAR code reads the data below and overwrite the prior data read somewhere else if any.
+//== Each column contains the parameters for a Dirichlet prior on the corresponding
+//== column of the transition matrix.  Each element must be positive.  For each column,
+//== the relative size of the prior elements determine the relative size of the elements
+//== of the transition matrix and overall larger sizes implies a tighter prior.
+//== Transition matrix prior for state_variable[1]. (n_states x n_states) ==//
+ 5.6666666666666661e+000  1.0000000000000000e+000
+ 1.0000000000000000e+000  5.6666666666666661e+000
+
+
+//== Free Dirichet dimensions for state_variable[1]  ==//
+2 2
+
+//== The jth restriction matrix is n_states-by-free[j].  Each row of the restriction
+//== matrix has exactly one non-zero entry and the sum of each column must be one.
+//== Column restrictions for state_variable[1] ==//
+1 0
+0 1
+
+1 0
+0 1
+
+
+//== Number of states for state_variable[2] ==//
+2
+
+//== Each column contains the parameters for a Dirichlet prior on the corresponding
+//== column of the transition matrix.  Each element must be positive.  For each column,
+//== the relative size of the prior elements determine the relative size of the elements
+//== of the transition matrix and overall larger sizes implies a tighter prior.
+//== Transition matrix prior for state_variable[2]. (n_states x n_states) ==//
+ 5.6666666666666661e+000  1.0000000000000000e+000
+ 1.0000000000000000e+000  5.6666666666666661e+000
+
+//== Free Dirichet dimensions for state_variable[2]  ==//
+2 2
+
+//== The jth restriction matrix is n_states x free[j].  Each row of the restriction
+//== matrix has exactly one non-zero entry and the sum of each column must be one.
+//== Column restrictions for state_variable[2] ==//
+1 0
+0 1
+
+1 0
+0 1
+
+/******************************************************************************/
+/******************************* VAR Parameters *******************************/
+/******************************************************************************/
+//NOT read
+//== Number Variables ==//
+3
+
+//NOT read
+//== Number Lags ==//
+3
+
+//NOT read
+//== Exogenous Variables ==//
+1
+
+//== nvar x n_state_variables matrix.  In the jth row, a non-zero value implies that
+this state variable controls the jth column of A0 and Aplus
+//== Controlling states variables for coefficients ==//
+0 1
+0 1
+0 1
+0 1
+0 1
+
+//== nvar x n_state_variables matrix.  In the jth row, a non-zero value implies that
+this state variable controls the jth diagonal element of Xi
+//== Controlling states variables for variance ==//
+ 1 0
+ 1 0
+ 1 0
+ 1 0
+ 1 0
