@@ -227,3 +227,54 @@ function global_initialization()
 
   % model evaluated using simulate.dll
   options_.bytecode = 0;
+
+  
+  % SWZ SBVAR
+  options_.ms.freq = 1;
+  options_.ms.initial_subperiod = 1;
+  options_.ms.final_subperiod=4;
+  options_.ms.log_var = [ ];
+  options_.ms.forecast = 1;
+  options_.ms.nlags = 1;
+  options_.ms.cross_restrictions = 0;
+  options_.ms.contemp_reduced_form = 0;
+  options_.ms.real_pseudo_forecast = 0;
+  options_.ms.bayesian_prior = 1;
+  options_.ms.dummy_obs = 0;
+  options_.ms.ncsk = 0;
+  options_.ms.nstd = 6;
+  options_.ms.ninv = 1000;
+  options_.ms.indxparr = 1;
+  options_.ms.indxovr = 0;
+  options_.ms.aband = 1;
+  options_.ms.indxap = 1;
+  options_.ms.apband = 1;
+  options_.ms.indximf = 1;
+  options_.ms.imfband = 1;
+  options_.ms.indxfore = 0;
+  options_.ms.foreband = 0;
+  options_.ms.indxgforhat = 1;
+  options_.ms.indxgimfhat = 1;
+  options_.ms.indxestima = 1;
+  options_.ms.indxgdls = 1;
+  options_.ms.cms =0;
+  options_.ms.ncms = 0;
+  options_.ms.eq_cms = 1;
+  options_.ms.cnum = 0;
+  options_.ms.banact = 1;
+  options_.ms.nstates = 2;
+  options_.ms.indxscalesstates = 0;
+  options_.ms.alpha = 1.0;
+  options_.ms.beta = 1.0;
+  options_.ms.gsig2_lmd = 50^2;
+  options_.ms.gsig2_lmdm = 50^2;
+  options_.ms.q_diag = 0.85;
+  options_.ms.flat_prior = 0;
+  options_.ms.create_initialization_file = 1;
+  options_.ms.estimate_msmodel = 1;
+  options_.ms.compute_mdd = 1;
+  options_.ms.compute_probabilities = 1;
+  options_.ms.print_draws = 1;
+  options_.ms.n_draws=1000;
+  options_.ms.thinning_factor=1;
+  options_.ms.proposal_draws = 100000;
