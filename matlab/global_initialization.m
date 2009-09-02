@@ -113,7 +113,6 @@ function global_initialization()
   options_.replic = 50;
   options_.drop = 100;
   options_.simul_algo = 0;
-  options_.model_mode = 0;
   % if mjdgges.dll (or .mexw32 or ....) doesn't exist, matlab/qz is added to the path. 
   % There exists now qz/mjdgges.m that contains the calls to the old Sims code 
   % Hence, if mjdgges.m is visible exist(...)==2, 

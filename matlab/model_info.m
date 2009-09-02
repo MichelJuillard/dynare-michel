@@ -67,7 +67,7 @@ function model_info;
        fprintf('\n\n');
    end;
  else
-   fprintf('There is no block decomposition of the model.\nUse ''sparse'' or ''sparse_dll'' model''s option.\n');
+   fprintf('There is no block decomposition of the model.\nUse ''block'' model''s option.\n');
  end;
  
  

@@ -49,11 +49,7 @@ global M_ options_ oo_
     oo_.exo_simul = tempex;
     
     eigenvalues_ = dr.eigval;
-    if(options_.model_mode == 1)
-        nyf = dr.nyf;  
-    else
-        nyf = nnz(dr.kstate(:,2)>M_.maximum_endo_lag+1);
-    end;
+    nyf = nnz(dr.kstate(:,2)>M_.maximum_endo_lag+1);
     [m_lambda,i]=sort(abs(eigenvalues_));
     n_explod = nnz(abs(eigenvalues_) > options_.qz_criterium);
      

@@ -49,21 +49,10 @@ function resid(period)
   y =oo_.endo_simul(:);
   z = zeros(n,period);
   fh = str2func([M_.fname '_dynamic']);
-  if(options_.model_mode == 1 || options_.model_mode == 3)
-      addpath(M_.fname);
-  end;
   for it_=M_.maximum_lag+1:period+M_.maximum_lag
-    %if(options_.model_mode == 1 || options_.model_mode == 3)
-    %    z(:,it_-M_.maximum_lag) = feval(fh,oo_.endo_simul',oo_.exo_simul, M_.params, it_);
-    %else
         z(:,it_-M_.maximum_lag) = feval(fh,y(iyr0),oo_.exo_simul, M_.params, it_);
         iyr0 = iyr0 + n;
-    %end;
   end
-  if(options_.model_mode == 1 || options_.model_mode == 3)
-      rmpath(M_.fname);
-  end;
-  % disp([[1:period]' z']); 
 
   for i = 1:4
     disp(' ')
