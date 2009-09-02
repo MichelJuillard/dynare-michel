@@ -1,4 +1,4 @@
-function y = solve_two_boundaries(fname, y, x, params, y_index, nze, periods, y_kmin_l, y_kmax_l, is_linear, Block_Num, y_kmin, maxit_, solve_tolf, lambda, cutoff, simulation_method)
+function y = solve_two_boundaries(fname, y, x, params, y_index, nze, periods, y_kmin_l, y_kmax_l, is_linear, Block_Num, y_kmin, maxit_, solve_tolf, lambda, cutoff, stack_solve_algo)
 % Computes the deterministic simulation of a block of equation containing
 % both lead and lag variables using relaxation methods 
 %
@@ -25,11 +25,12 @@ function y = solve_two_boundaries(fname, y, x, params, y_index, nze, periods, y_
 %   Newton
 %   cutoff              [double]        cutoff to correct the direction in Newton in case
 %                                       of singular jacobian matrix
-%   simulation_method   [integer]       linear solver method used in the
+%   stack_solve_algo    [integer]       linear solver method used in the
 %                                       Newton algorithm : 
-%                                            - 0 sprse LU
+%                                            - 1 sprse LU
 %                                            - 2 GMRES
 %                                            - 3 BicGStab
+%                                            - 4 Optimal path length
 %
 % OUTPUTS
 %   y                   [matrix]        All endogenous variables of the model      
@@ -41,7 +42,7 @@ function y = solve_two_boundaries(fname, y, x, params, y_index, nze, periods, y_
 %   none.
 %  
 
-% Copyright (C) 1996-2008 Dynare Team
+% Copyright (C) 1996-2009 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -58,7 +59,7 @@ function y = solve_two_boundaries(fname, y, x, params, y_index, nze, periods, y_
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-  global options_ oo_ M_ T9025 T1149 T11905;
+  global oo_ M_;
   cvg=0;
   iter=0;
   Per_u_=0;
@@ -208,7 +209,7 @@ function y = solve_two_boundaries(fname, y, x, params, y_index, nze, periods, y_
       g1aa=g1a;
       ba=b;
       max_resa=max_res;
-      if(simulation_method==0),
+      if(stack_solve_algo==1),
         dx = g1a\b- ya;
         ya = ya + lambda*dx;
         y(1+y_kmin:periods+y_kmin,y_index)=reshape(ya',length(y_index),periods)';
@@ -220,7 +221,7 @@ function y = solve_two_boundaries(fname, y, x, params, y_index, nze, periods, y_
 %         v
 %         sprintf(v,y(:,y_index)')
 %         return;
-      elseif(simulation_method==2),
+      elseif(stack_solve_algo==2),
         flag1=1;
         while(flag1>0)
           [L1, U1]=luinc(g1a,luinc_tol);
@@ -241,7 +242,7 @@ function y = solve_two_boundaries(fname, y, x, params, y_index, nze, periods, y_
             y(1+y_kmin:periods+y_kmin,y_index)=reshape(ya',length(y_index),periods)';
           end;
         end;
-      elseif(simulation_method==3),
+      elseif(stack_solve_algo==3),
         flag1=1;
         while(flag1>0)
           [L1, U1]=luinc(g1a,luinc_tol);
@@ -262,6 +263,8 @@ function y = solve_two_boundaries(fname, y, x, params, y_index, nze, periods, y_
             y(1+y_kmin:periods+y_kmin,y_index)=reshape(ya',length(y_index),periods)';
           end;
         end;
+      elseif(stack_solve_algo==4),
+          error('SOLVE_TWO_BOUNDARIES: stack_solve_algo=4 not implemented')
       end;
     end
     iter=iter+1;

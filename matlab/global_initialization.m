@@ -106,6 +106,9 @@ function global_initialization()
   % Model
   options_.linear = 0;
 
+  % Deterministic simulation
+  options_.stack_solve_algo = 0;
+  
   % Solution
   options_.order = 2;
   options_.solve_algo = 2;
@@ -173,7 +176,6 @@ function global_initialization()
   options_.prefilter = 0;
   options_.presample = 0;
   options_.prior_trunc = 1e-10;
-  options_.simulation_method = 0;
   options_.smoother = 0;
   options_.student_degrees_of_freedom = 3;
   options_.subdraws = [];

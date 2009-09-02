@@ -28,6 +28,13 @@ function steady_()
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
   global M_ oo_ it_ options_
+
+  if options_.bytecode && options_.solve_algo ~= 5
+      error('STEADY: for the moment, you must use solve_algo=5 with bytecode option')
+  end
+  if ~options_.bytecode && options_.solve_algo == 5
+      error('STEADY: you can''t yet use solve_algo=5 without bytecode option')
+  end
   
   if options_.steadystate_flag
     [oo_.steady_state,check] = feval([M_.fname '_steadystate'],...

@@ -1,4 +1,4 @@
-function [y, info] = solve_one_boundary(fname, y, x, params, y_index_eq, nze, periods, is_linear, Block_Num, y_kmin, maxit_, solve_tolf, lambda, cutoff, simulation_method, forward_backward, is_dynamic, verbose)
+function [y, info] = solve_one_boundary(fname, y, x, params, y_index_eq, nze, periods, is_linear, Block_Num, y_kmin, maxit_, solve_tolf, lambda, cutoff, stack_solve_algo, forward_backward, is_dynamic, verbose)
 % Computes the deterministic simulation of a block of equation containing
 % lead or lag variables 
 %
@@ -23,11 +23,12 @@ function [y, info] = solve_one_boundary(fname, y, x, params, y_index_eq, nze, pe
 %   Newton
 %   cutoff              [double]        cutoff to correct the direction in Newton in case
 %                                       of singular jacobian matrix
-%   simulation_method   [integer]       linear solver method used in the
+%   stack_solve_algo    [integer]       linear solver method used in the
 %                                       Newton algorithm : 
-%                                            - 0 sprse LU
+%                                            - 1 sparse LU
 %                                            - 2 GMRES
 %                                            - 3 BicGStab
+%                                            - 4 Optimal path length
 %   forward_backward    [integer]       The block has to be solve forward
 %                                       (1) or backward (0)
 %   is_dynamic          [integer]       (1) The block belong to the dynamic
@@ -35,7 +36,7 @@ function [y, info] = solve_one_boundary(fname, y, x, params, y_index_eq, nze, pe
 %                                       (0) The block belong to the static
 %                                           file and th oo_.deteerminstic
 %                                           field remains unchanged
-%   verobse            [integer]        (0) iterations are not printed
+%   verbose            [integer]        (0) iterations are not printed
 %                                       (1) iterations are printed
 %
 % OUTPUTS
@@ -48,7 +49,7 @@ function [y, info] = solve_one_boundary(fname, y, x, params, y_index_eq, nze, pe
 %   none.
 %  
 
-% Copyright (C) 1996-2008 Dynare Team
+% Copyright (C) 1996-2009 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -232,7 +233,7 @@ function [y, info] = solve_one_boundary(fname, y, x, params, y_index_eq, nze, pe
                else
                   info = -Block_Num*10;
                end
-             elseif((~is_dynamic & options_.solve_algo==2) || (is_dynamic & simulation_method==4))
+             elseif((~is_dynamic & options_.solve_algo==2) || (is_dynamic & stack_solve_algo==4))
                 lambda=1;
                 stpmx = 100 ;
                 if (is_dynamic)
@@ -254,7 +255,7 @@ function [y, info] = solve_one_boundary(fname, y, x, params, y_index_eq, nze, pe
                  [yn,info] = csolve(@local_fname, y(y_index_eq),@local_fname,1e-6,500, x, params, y, y_index_eq, fname, 1);
                  dx = ya - yn;
                  y(y_index_eq) = yn;
-             elseif((simulation_method==0 & is_dynamic) | (~is_dynamic & options_.solve_algo==1)),
+             elseif((stack_solve_algo==1 & is_dynamic) | (~is_dynamic & options_.solve_algo==1)),
                 dx =  g1\r;
                 ya = ya - lambda*dx;
                 if(is_dynamic)
@@ -262,7 +263,7 @@ function [y, info] = solve_one_boundary(fname, y, x, params, y_index_eq, nze, pe
                 else
                   y(y_index_eq) = ya;
                 end;
-             elseif(simulation_method==2 & is_dynamic),
+             elseif(stack_solve_algo==2 & is_dynamic),
                 flag1=1;
                 while(flag1>0)
                    [L1, U1]=luinc(g1,luinc_tol);
@@ -288,7 +289,7 @@ function [y, info] = solve_one_boundary(fname, y, x, params, y_index_eq, nze, pe
                       end;
                    end;
                 end;
-             elseif(simulation_method==3 & is_dynamic),
+             elseif(stack_solve_algo==3 & is_dynamic),
                 flag1=1;
                 while(flag1>0)
                    [L1, U1]=luinc(g1,luinc_tol);
@@ -317,7 +318,7 @@ function [y, info] = solve_one_boundary(fname, y, x, params, y_index_eq, nze, pe
              else
                  disp('unknown option : ');
                  if(is_dynamic)
-                     disp(['options_.simulation_method = ' num2str(simulation_method) ' not implemented']);
+                     disp(['options_.stack_solve_algo = ' num2str(stack_solve_algo) ' not implemented']);
                  else
                      disp(['options_.solve_algo = ' num2str(options_.solve_algo) ' not implemented']);
                  end;
