@@ -221,12 +221,11 @@ function global_initialization()
   options_.prior_mc = 20000;
   options_.prior_analysis_endo_var_list = [];
   
-  % block decomposition + minimum feedback set for steady state computation
+  % did model undergo block decomposition + minimum feedback set computation ?
   options_.block = 0;
 
   % model evaluated using simulate.dll
   options_.bytecode = 0;
-
   
   % SWZ SBVAR
   options_.ms.freq = 1;
