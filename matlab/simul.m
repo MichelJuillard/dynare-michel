@@ -57,21 +57,33 @@ ct_=0;
 
 if options_.simul_algo == 0
   if ~ options_.initval_file
-      make_ex_;
-      make_y_;
+      if ~isfield(options_,'datafile')
+        make_ex_;
+        make_y_;
+      else
+          read_data_;
+      end
   end
-
+  
   if isempty(options_.scalv) | options_.scalv == 0
     options_.scalv = oo_.steady_state ;
   end
 
   options_.scalv= 1 ;
 
-  if M_.maximum_endo_lag ==1 & M_.maximum_endo_lead <= 1
-    sim1 ;
+  if(options_.block)
+      if(options_.bytecode)
+          oo_.endo_simul=bytecode('dynamic');
+      else
+          eval([M_.fname '_dynamic']);
+      end;
   else
-    simk ;
-  end
+      if M_.maximum_endo_lag ==1 & M_.maximum_endo_lead <= 1
+         sim1 ;
+      else
+         simk ;
+      end
+  end;
 else
   set_default_option('replic',1);
   set_default_option('simul_seed',1);

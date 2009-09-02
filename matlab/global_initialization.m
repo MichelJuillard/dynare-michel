@@ -224,7 +224,7 @@ function global_initialization()
   % did model undergo block decomposition + minimum feedback set computation ?
   options_.block = 0;
 
-  % model evaluated using simulate.dll
+  % model evaluated using bytecode.dll
   options_.bytecode = 0;
   
   % SWZ SBVAR

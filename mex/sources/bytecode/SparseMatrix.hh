@@ -26,11 +26,11 @@
 #include <map>
 #include <ctime>
 #include "Mem_Mngr.hh"
-#ifdef NO_OPENMP
+/*#ifdef NO_OPENMP
 // Nothing to single thread version.
 #else
   #include <omp.h>
-#endif
+#endif*/
 #ifdef _MSC_VER
   #include <limits>
 #endif

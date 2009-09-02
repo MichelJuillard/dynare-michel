@@ -135,5 +135,5 @@ eval([ COMPILE_COMMAND ' -DMATLAB -Igensylv/cc ' ...
        'gensylv/cc/Vector.cpp ' ...
        BLAS_PATH ' ' LAPACK_PATH ]);
 
-disp('Compiling simulate...')
-eval([ COMPILE_COMMAND ' -Isimulate -I../../preprocessor simulate/simulate.cc simulate/Interpreter.cc simulate/Mem_Mngr.cc simulate/SparseMatrix.cc']);
+disp('Compiling bytecode...')
+eval([ COMPILE_COMMAND ' -Ibytecode -I../../preprocessor bytecode/bytecode.cc bytecode/Interpreter.cc bytecode/Mem_Mngr.cc bytecode/SparseMatrix.cc']);

@@ -114,7 +114,7 @@ try
     disp('|  OpenMp is used (multithreaded mex files) for: |')
     disp('|   * sparse_hessian_times_B_kronecker_C.cc      |')
     disp('|   * A_times_B_kronecker_C.cc                   |')
-    disp('|   * simulate (SparseMatrix.cc)                 |')
+    disp('|   * bytecode (SparseMatrix.cc)                 |')
     disp('|------------------------------------------------|')
     disp(' ')
     COMPILE_OPTIONS_OMP = [ COMPILE_OPTIONS  CFLAGS CXXFLAGS LDFLAGS ];
@@ -161,5 +161,5 @@ eval([ COMPILE_COMMAND ' -DMATLAB -Igensylv/cc ' ...
        'gensylv/cc/Vector.cpp ' ...
        BLAS_PATH ' ' LAPACK_PATH ]);
 
-disp('Compiling simulate...')
-eval([ COMPILE_COMMAND_OMP ' -Isimulate -I../../preprocessor simulate/simulate.cc simulate/Interpreter.cc simulate/Mem_Mngr.cc simulate/SparseMatrix.cc']);
+disp('Compiling bytecode...')
+eval([ COMPILE_COMMAND_OMP ' -Ibytecode -I../../preprocessor bytecode/bytecode.cc bytecode/Interpreter.cc bytecode/Mem_Mngr.cc bytecode/SparseMatrix.cc']);

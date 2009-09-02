@@ -24,7 +24,7 @@
 ////////////////////////////////////////////////////////////////////////
 
 #include <cstring>
-#include "simulate.hh"
+#include "bytecode.hh"
 #include "Interpreter.hh"
 #include "Mem_Mngr.hh"
 

@@ -152,8 +152,8 @@ for i=1:number_of_mex_files
     disp([ message mex_status{i,3} '.' ])
 end
 
-% Test if simulate DLL is present
-if exist('simulate') == 3
+% Test if bytecode DLL is present
+if exist('bytecode') == 3
   remove_path_to_mex = 0;
   if ~multithread_flag
       message = '[mex] ';
@@ -163,7 +163,7 @@ if exist('simulate') == 3
 else
   message = '[no]  ';
 end
-disp([ message 'Fast model evaluation.' ])
+disp([ message 'Bytecode evaluation.' ])
 
 if remove_path_to_mex
   rmpath(path_to_mex_files);
