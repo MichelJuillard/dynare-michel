@@ -103,7 +103,8 @@ function homotopy3(values, step_nbr)
       end
       oldvalues = curvalues;
       inc = 2*inc;
-    catch
+    catch E
+      disp(E.message)
       disp('HOMOTOPY mode 3: failed step, now dividing increment by 2...')
       inc = inc/2;
       oo_.steady_state = old_ss;

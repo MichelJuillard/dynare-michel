@@ -77,9 +77,5 @@ function homotopy1(values, step_nbr)
     oo_.exo_steady_state(values(ix,2)) = points(ix,i);
     oo_.exo_det_steady_state(values(ixd,2)) = points(ixd,i);
 
-    try
-      steady_;
-    catch
-      error('HOMOTOPY mode 1: failed')
-    end
+    steady_;
   end

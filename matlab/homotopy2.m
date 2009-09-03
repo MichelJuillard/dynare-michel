@@ -100,11 +100,7 @@ function homotopy2(values, step_nbr)
 
       disp([ 'HOMOTOPY mode 2: lauching solver with ' strtrim(varname) ' = ' num2str(v) ' ...'])
       
-      try
-        steady_;
-      catch
-        error('HOMOTOPY mode 2: failed')
-      end
+      steady_;
     end
   end
   
