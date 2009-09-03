@@ -44,6 +44,8 @@ function print_info(info,noprint)
       case 5
         error(['Blanchard Kahn conditions are not satisfied:' ...
                ' indeterminacy due to rank failure'])
+      case 6
+        error('The jacobian matrix evaluated at the steady state is complex')
       case 19
         error('The steadystate file did not compute the steady state (inconsistent deep parameters).')
       case 20
