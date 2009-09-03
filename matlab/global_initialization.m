@@ -140,7 +140,6 @@ function global_initialization()
   options_.PosteriorSampleSize = 1000;
   options_.bayesian_irf = 0;
   options_.bayesian_th_moments = 0;
-  options_.cutoff = 1e-12;
   options_.diffuse_d = [];
   options_.diffuse_filter = 0;
   options_.filter_step_ahead = [];
