@@ -10,7 +10,7 @@ aa=0.5;
 
 
 model;
-c + k - aa*x*k(-1)^alph - (1-delt)*k(-1);
+[ yo = 'plouf', onx = 'inx' ] c + k - aa*x*k(-1)^alph - (1-delt)*k(-1);
 c^(-gam) - (1+bet)^(-1)*(aa*alph*x(+1)*k^(alph-1) + 1 - delt)*c(+1)^(-gam);
 end;
 
@@ -20,9 +20,9 @@ k = ((delt+bet)/(1.0*aa*alph))^(1/(alph-1));
 c = aa*k^alph-delt*k;
 end;
 
-steady;
+steady(solve_algo=2);
 
-check;
+//check;
 
 shocks;
 var x;
