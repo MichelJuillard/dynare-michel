@@ -76,8 +76,10 @@ if exist('OCTAVE_VERSION')
 else
     if matlab_ver_less_than('7.5')
         path_to_mex_files = [dynareroot '../mex/2007a/'] ;
-    else
+    elseif matlab_ver_less_than('7.8') || ~regexp(computer, '.*64')
         path_to_mex_files = [dynareroot '../mex/2007b/'] ;
+    else
+        path_to_mex_files = [dynareroot '../mex/2009a-64bit/'] ;
     end
 end
 addpath(path_to_mex_files);
