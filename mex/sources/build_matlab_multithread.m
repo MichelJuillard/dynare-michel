@@ -72,7 +72,7 @@ end
 
 if matlab_ver_less_than('7.5')
     OUTPUT_DIR = '../2007a';
-elseif matlab_ver_less_than('7.8') || ~regexp(computer, '.*64')
+elseif matlab_ver_less_than('7.8') || isempty(regexp(computer, '.*64','ONCE'))
     OUTPUT_DIR = '../2007b';
 else
     OUTPUT_DIR = '../2009a-64bit';
