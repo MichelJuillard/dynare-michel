@@ -29,7 +29,11 @@ function result = check
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
 global M_ options_ oo_
-  
+
+    if options_.block || options_.bytecode
+        error('CHECK: incompatibility with "block" or "bytecode" option')
+    end
+
     temp_options = options_;
     tempex = oo_.exo_simul;
     if ~options_.initval_file & M_.exo_nbr > 1
