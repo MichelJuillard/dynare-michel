@@ -5,16 +5,16 @@
 # NOTE: if you want to build from Debian, you'll need to replace /usr/share/nsis/Plugins/System.dll by the System.dll included in the windows distribution of NSIS (see http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=319999)
 
 # How to build the installer:
-# - build the preprocessor, the MEX binaries (for Matlab 7.4, 7.5 and for Octave), and the documentation (PDF files + HTML manual)
+# - build: the preprocessor, the MEX binaries (for Matlab 7.4 (32bit), 7.5 (32+64bit), 7.8 (64bit) and for Octave), and the documentation (PDF files + HTML manual)
 # - note that MEX files in the mex/2007a directory must have the .dll extension (and not the .mexw32 extension, which is only supported since Matlab 7.1)
 # - run "makensis dynare.nsi" to create the installer
-# - if there is no failure, this will create a file "dynare-VERSION-win32.exe" in the current directory
+# - if there is no failure, this will create a file "dynare-VERSION-win.exe" in the current directory
 
 !include dynare-version.nsi
 
 Name "Dynare ${VERSION}"
 
-OutFile "dynare-${VERSION}-win32.exe"
+OutFile "dynare-${VERSION}-win.exe"
 
 InstallDir "c:\dynare\${VERSION}"
 
@@ -38,6 +38,9 @@ InstallDir "c:\dynare\${VERSION}"
 
 !define REGLOC "Software\Microsoft\Windows\CurrentVersion\Uninstall\Dynare ${VERSION}"
 !define SMLOC "$SMPROGRAMS\Dynare ${VERSION}"
+
+# Strip preprocessor binary
+!system 'strip ..\matlab\dynare_m.exe'
 
 !macro DETERMINE_CONTEXT
  # Determine if we are admin or not
@@ -63,7 +66,10 @@ Section
  File ..\mex\2007a\*.dll
 
  SetOutPath $INSTDIR\mex\2007b
- File ..\mex\2007b\*.mexw32
+ File ..\mex\2007b\*.mexw32 ..\mex\2007b\*.mexw64
+
+ SetOutPath $INSTDIR\mex\2009a-64bit
+ File ..\mex\2009a-64bit\*.mexw64
 
  SetOutPath $INSTDIR\mex\octave
  File ..\mex\octave\*.mex
