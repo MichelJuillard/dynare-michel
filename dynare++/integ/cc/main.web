@@ -1,0 +1,41 @@
+@q $Id: main.web 2333 2009-01-14 10:32:55Z kamenik $ @>
+@q Copyright 2005, Ondra Kamenik @>
+
+\let\ifpdf\relax
+\input eplain
+\def\title{{\mainfont Numerical Integration Module}}
+
+
+@i c++lib.w
+@s Vector int
+@s ConstVector int
+@s IntSequence int
+@s GeneralMatrix int
+@s THREAD int
+@s THREAD_GROUP int
+@s SYNCHRO int
+
+\titletrue
+\null\vfill
+\centerline{\titlefont Numerical Integration Module}
+\vfill\vfill
+Copyright \copyright\ 2005 by Ondra Kamenik
+
+\penalty-10000
+
+@i vector_function.hweb
+@i vector_function.cweb
+
+@i quadrature.hweb
+@i quadrature.cweb
+
+@i product.hweb
+@i product.cweb
+
+@i smolyak.hweb
+@i smolyak.cweb
+
+@i quasi_mcarlo.hweb
+@i quasi_mcarlo.cweb
+
+

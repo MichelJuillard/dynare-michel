@@ -1,0 +1,618 @@
+@q $Id: sthread.hweb 411 2005-08-11 12:26:13Z kamenik $ @>
+@q Copyright 2004, Ondra Kamenik @>
+
+@*2 Simple threads. Start of {\tt sthreads.h} file.
+
+This file defines types making a simple interface to
+multi-threading. It follows the classical C++ idioms for traits. We
+have three sorts of traits. The first is a |thread_traits|, which make
+interface to thread functions (run, exit, create and join), the second
+is |mutex_traits|, which make interface to mutexes (create, lock,
+unlock), and third is |cond_traits|, which make interface to
+conditions (create, wait, broadcast, and destroy). At present, there
+are two implementations. The first are POSIX threads, mutexes, and
+conditions, the second is serial (no parallelization).
+
+The file provides the following interfaces templated by the types
+implementing the threading (like types |pthread_t|, and |pthread_mutex_t|
+for POSIX thread and mutex):
+\unorderedlist
+\li |thread| is a pure virtual class, which must be inherited and a
+method |operator()()| be implemented as the running code of the
+thread. This code is run as a new thread by calling |run| method.
+\li |thread_group| allows insertion of |thread|s and running all of
+them simultaneously joining them. The number of maximum parallel
+threads can be controlled. See below.
+\li |synchro| object locks a piece of code to be executed only serially
+for a given data and specified entry-point. It locks the code until it
+is destructed. So, the typical use is to create the |synchro| object
+on the stack of a function which is to be synchronized. The
+synchronization can be subjected to specific data (then a pointer can
+be passed to |synchro|'s constructor), and can be subjected to
+specific entry-point (then |const char*| is passed to the
+constructor).
+\li |detach_thread| inherits from |thread| and models a detached
+thread in contrast to |thread| which models the joinable thread.
+\li |detach_thread_group| groups the detached threads and runs them. They
+are not joined, they are synchronized by means of a counter counting
+running threads. A change of the counter is checked by waiting on an
+associated condition.
+\endunorderedlist
+
+What implementation is selected is governed (at present) by
+|POSIX_THREADS|. If it is defined, then POSIX threads are linked. If
+it is not defined, then serial implementation is taken. In accordance
+with this, the header file defines macros |THREAD|, |THREAD_GROUP|,
+and |SYNCHRO| as the picked specialization of |thread| (or |detach_thread|),
+|thread_group| (or |detach_thread_group|), and |synchro|.
+
+The type of implementation is controlled by |thread_impl| integer
+template parameter, this can be |posix| or |empty|.
+
+The number of maximum parallel threads is controlled via a static
+member of |thread_group| and |detach_thread_group| classes.
+
+@s _Tthread int
+@s thread_traits int
+@s thread int
+@s thread_group int
+@s detach_thread int
+@s detach_thread_group int
+@s cond_traits int
+@s condition_counter int
+@s mutex_traits int
+@s mutex_map int
+@s synchro int
+@s _Tmutex int
+@s pthread_t int
+@s pthread_mutex_t int
+@s pthread_cond_t int
+@s pthread_attr_t int
+@s IF int
+@s Then int
+@s Else int
+@s RET int
+@s thread_impl int
+
+@c
+#ifndef STHREAD_H
+#define STHREAD_H
+
+#ifdef POSIX_THREADS
+# include <pthread.h>
+#endif
+
+#include <stdio.h>
+#include <list>
+#include <map>
+
+namespace sthread {
+	using namespace std;
+
+	class Empty {};
+	@<classical IF template@>;
+	enum {@+ posix, empty@+};
+	template <int> class thread_traits;
+	template <int> class detach_thread;
+	@<|thread| template class declaration@>;
+	@<|thread_group| template class declaration@>;
+	@<|thread_traits| template class declaration@>;
+	@<|mutex_traits| template class declaration@>;
+	@<|mutex_map| template class declaration@>;
+	@<|synchro| template class declaration@>;
+	@<|cond_traits| template class declaration@>;
+	@<|condition_counter| template class declaration@>;
+	@<|detach_thread| template class declaration@>;
+	@<|detach_thread_group| template class declaration@>;
+#ifdef POSIX_THREADS
+	@<POSIX thread specializations@>;
+#else
+	@<No threading specializations@>;
+#endif
+};
+
+#endif
+
+@ Here is the classical IF template.
+@<classical IF template@>=
+template<bool condition, class Then, class Else>
+struct IF {
+	typedef Then RET;
+};
+
+template<class Then, class Else>
+struct IF<false, Then, Else> {
+	typedef Else RET;
+};
+
+
+
+@ The class of |thread| is clear. The user implements |operator()()|,
+the method |run| runs the user's code as joinable thread, |exit| kills the
+execution.
+
+@<|thread| template class declaration@>=
+template <int thread_impl>
+class thread {
+	typedef thread_traits<thread_impl> _Ttraits; 
+	typedef typename _Ttraits::_Tthread _Tthread;
+	_Tthread th;
+public:@;
+	virtual ~thread() {}
+	_Tthread& getThreadIden()
+		{@+ return th;@+}
+	const _Tthread& getThreadIden() const
+		{@+ return th;@+}
+	virtual void operator()() = 0;
+	void run()
+		{@+ _Ttraits::run(this);@+}
+	void detach_run()
+		{@+ _Ttraits::detach_run(this);@+}
+	void exit()
+		{@+ _Ttraits::exit();@+}
+};
+
+@ The |thread_group| is also clear. We allow a user to insert the
+|thread|s, and then launch |run|, which will run all the threads not
+allowing more than |max_parallel_threads| joining them at the
+end. This static member can be set from outside.
+
+@<|thread_group| template class declaration@>=
+template <int thread_impl>
+class thread_group {
+	typedef thread_traits<thread_impl> _Ttraits;
+	typedef thread<thread_impl> _Ctype;
+	list<_Ctype*> tlist;
+	typedef typename list<_Ctype*>::iterator iterator;
+public:@;
+	static int max_parallel_threads;
+	void insert(_Ctype* c)
+		{@+ tlist.push_back(c);@+}
+	@<|thread_group| destructor code@>;
+	@<|thread_group::run| code@>;
+private:@;
+	@<|thread_group::run_portion| code@>;
+};
+
+@ The thread group class maintains list of pointers to threads. It
+takes responsibility of deallocating the threads. So we implement the
+destructor.
+@<|thread_group| destructor code@>=
+~thread_group()
+{
+	while (! tlist.empty()) {
+		delete tlist.front();
+		tlist.pop_front();
+	}
+}
+
+@ This runs a given number of threads in parallel starting from the
+given iterator. It returns the first iterator not run.
+
+@<|thread_group::run_portion| code@>=
+iterator run_portion(iterator start, int n)
+{
+	int c = 0;
+	for (iterator i = start; c < n; ++i, c++) {
+		(*i)->run();
+	}
+	iterator ret;
+	c = 0;
+	for (ret = start; c < n; ++ret, c++) {
+		_Ttraits::join(*ret);
+	}
+	return ret;
+}
+
+
+@ Here we run the threads ensuring that not more than
+|max_parallel_threads| are run in parallel. More over, we do not want
+to run a too low number of threads, since it is wasting with resource
+(if there are). Therefore, we run in parallel |max_parallel_threads|
+batches as long as the remaining threads are greater than the double
+number. And then the remaining batch (less than |2*max_parallel_threads|)
+is run half by half.
+
+@<|thread_group::run| code@>=
+void run()
+{
+	int rem = tlist.size();
+	iterator pfirst = tlist.begin();
+	while (rem > 2*max_parallel_threads) {
+		pfirst = run_portion(pfirst, max_parallel_threads);
+		rem -= max_parallel_threads;
+	}
+	if (rem > max_parallel_threads) {
+		pfirst = run_portion(pfirst, rem/2);
+		rem -= rem/2;
+	}
+	run_portion(pfirst, rem);
+}
+
+
+
+
+@ Clear. We have only |run|, |detach_run|, |exit| and |join|, since
+this is only a simple interface.
+
+@<|thread_traits| template class declaration@>=
+template <int thread_impl>
+struct thread_traits {
+	typedef typename IF<thread_impl==posix, pthread_t, Empty>::RET _Tthread;
+	typedef thread<thread_impl> _Ctype;
+	typedef detach_thread<thread_impl> _Dtype;
+	static void run(_Ctype* c);
+	static void detach_run(_Dtype* c);
+	static void exit();
+	static void join(_Ctype* c);
+};
+
+@ Clear. We have only |init|, |lock|, and |unlock|.
+@<|mutex_traits| template class declaration@>=
+struct ltmmkey;
+typedef pair<const void*, const char*> mmkey;
+@#
+template <int thread_impl>
+struct mutex_traits {
+	typedef typename IF<thread_impl==posix, pthread_mutex_t, Empty>::RET _Tmutex;
+	typedef map<mmkey, pair<_Tmutex, int>, ltmmkey> mutex_int_map;
+	static void init(_Tmutex& m);
+	static void lock(_Tmutex& m);
+	static void unlock(_Tmutex& m);
+};
+
+@ Here we define a map of mutexes keyed by a pair of address, and a
+string. A purpose of the map of mutexes is that, if synchronizing, we
+need to publish mutexes locking some piece of codes (characterized by
+the string) accessing the data (characterized by the pointer). So, if
+any thread needs to pass a |synchro| object, it creates its own with
+the same address and string, and must look to some public storage to
+unlock the mutex. If the |synchro| object is created for the first
+time, the mutex is created and inserted to the map. We count the
+references to the mutex (number of waiting threads) to know, when it
+is save to remove the mutex from the map. This is the only purpose of
+counting the references. Recall, that the mutex is keyed by an address
+of the data, and without removing, the number of mutexes would only
+grow.
+
+The map itself needs its own mutex to avoid concurrent insertions and
+deletions.
+
+@s mutex_int_map int
+
+@<|mutex_map| template class declaration@>=
+struct ltmmkey {
+	bool operator()(const mmkey& k1, const mmkey& k2) const
+		{return k1.first < k2.first ||
+			 (k1.first == k2.first && strcmp(k1.second, k2.second) < 0);} 
+};
+@#
+template <int thread_impl>
+class mutex_map
+	: public mutex_traits<thread_impl>::mutex_int_map
+{
+	typedef typename mutex_traits<thread_impl>::_Tmutex _Tmutex;
+	typedef mutex_traits<thread_impl> _Mtraits;
+	typedef pair<_Tmutex, int> mmval;
+	typedef map<mmkey, mmval, ltmmkey> _Tparent;
+	typedef typename _Tparent::iterator iterator;
+	typedef typename _Tparent::value_type _mvtype;
+	_Tmutex m;
+public:@;
+	mutex_map()
+		{@+ _Mtraits::init(m);@+}
+	void insert(const void* c, const char* id, const _Tmutex& m)
+		{@+ _Tparent::insert(_mvtype(mmkey(c,id), mmval(m,0)));@+}
+	bool check(const void* c, const char* id) const
+		{@+ return _Tparent::find(mmkey(c, id)) != _Tparent::end();@+}
+	@<|mutex_map::get| code@>;
+	@<|mutex_map::remove| code@>;
+	void lock_map()
+		{@+ _Mtraits::lock(m);@+}
+	void unlock_map()
+		{@+ _Mtraits::unlock(m);@+}
+
+};
+
+@ This returns a pointer to the pair of mutex and count reference number.
+@<|mutex_map::get| code@>=
+mmval* get(const void* c, const char* id)
+{
+	iterator it = _Tparent::find(mmkey(c, id));
+	if (it == _Tparent::end())
+		return NULL;
+	return &((*it).second);
+}
+
+@ This removes unconditionally the mutex from the map regardless its
+number of references. The only user of this class should be |synchro|
+class, it implementation must not remove referenced mutex.
+
+@<|mutex_map::remove| code@>=
+void remove(const void* c, const char* id)
+{
+	iterator it = _Tparent::find(mmkey(c, id));
+	if (it != _Tparent::end())
+		erase(it);
+}
+
+@ This is the |synchro| class. The constructor of this class tries to
+lock a mutex for a particular address (identification of data) and
+string (identification of entry-point). If the mutex is already
+locked, it waits until it is unlocked and then returns. The destructor
+releases the lock. The typical use is to construct the object on the
+stacked of the code being synchronized.
+
+@<|synchro| template class declaration@>=
+template <int thread_impl>
+class synchro {
+	typedef typename mutex_traits<thread_impl>::_Tmutex _Tmutex;
+	typedef mutex_traits<thread_impl> _Mtraits;
+public:@;
+	typedef mutex_map<thread_impl> mutex_map_t; 
+private:@;
+	const void* caller;
+	const char* iden;
+	mutex_map_t& mutmap;
+public:@;
+	synchro(const void* c, const char* id, mutex_map_t& mmap)
+		: caller(c), iden(id), mutmap(mmap)
+		{@+ lock();@+}
+	~synchro()
+		{@+ unlock();@+}
+private:@;
+	@<|synchro::lock| code@>;
+	@<|synchro::unlock| code@>;
+};
+
+@ The |lock| function acquires the mutex in the map. First it tries to
+get an exclusive access to the map. Then it increases a number of
+references of the mutex (if it does not exists, it inserts it). Then
+unlocks the map, and finally tries to lock the mutex of the map.
+   
+@<|synchro::lock| code@>=
+void lock() {
+	mutmap.lock_map();
+	if (!mutmap.check(caller, iden)) {
+		_Tmutex mut;
+		_Mtraits::init(mut);
+		mutmap.insert(caller, iden, mut);
+	}
+	mutmap.get(caller, iden)->second++;
+	mutmap.unlock_map();
+	_Mtraits::lock(mutmap.get(caller, iden)->first);
+}
+
+@ The |unlock| function first locks the map. Then releases the lock,
+and decreases a number of references. If it is zero, it removes the
+mutex.
+
+@<|synchro::unlock| code@>=
+void unlock() {
+	mutmap.lock_map();
+	if (mutmap.check(caller, iden)) {
+		_Mtraits::unlock(mutmap.get(caller, iden)->first);
+		mutmap.get(caller, iden)->second--;
+		if (mutmap.get(caller, iden)->second == 0)
+			mutmap.remove(caller, iden);
+	}
+	mutmap.unlock_map();
+}
+
+@ These are traits for conditions. We need |init|, |broadcast|, |wait|
+and |destroy|.
+
+@<|cond_traits| template class declaration@>=
+template <int thread_impl>
+struct cond_traits {
+	typedef typename IF<thread_impl==posix, pthread_cond_t, Empty>::RET _Tcond;
+	typedef typename mutex_traits<thread_impl>::_Tmutex _Tmutex;
+	static void init(_Tcond& cond);
+	static void broadcast(_Tcond& cond);
+	static void wait(_Tcond& cond, _Tmutex& mutex);
+	static void destroy(_Tcond& cond);
+};
+
+@ Here is the condition counter. It is a counter which starts at 0,
+and can be increased and decreased. A thread can wait until the
+counter is changed, this is implemented by condition. After the wait
+is done, another (or the same) thread, by calling |waitForChange|
+waits for another change. This can be dangerous, since it is possible
+to wait for a change which will not happen, because all the threads
+which can cause the change (by increase of decrease) might had
+finished.
+
+@<|condition_counter| template class declaration@>=
+template <int thread_impl>
+class condition_counter {
+	typedef typename mutex_traits<thread_impl>::_Tmutex _Tmutex;
+	typedef typename cond_traits<thread_impl>::_Tcond _Tcond;
+	int counter;
+	_Tmutex mut;
+	_Tcond cond;
+	bool changed;
+public:@;
+	@<|condition_counter| constructor code@>;
+	@<|condition_counter| destructor code@>;
+	@<|condition_counter::increase| code@>;
+	@<|condition_counter::decrease| code@>;
+	@<|condition_counter::waitForChange| code@>;
+};
+
+@ We initialize the counter to 0, and |changed| flag to |true|, since
+the counter was change from undefined value to 0.
+
+@<|condition_counter| constructor code@>=
+condition_counter()
+	: counter(0), changed(true)
+{
+	mutex_traits<thread_impl>::init(mut);
+	cond_traits<thread_impl>::init(cond);
+}
+
+@ In destructor, we only release the resources associated with the
+condition.
+
+@<|condition_counter| destructor code@>=
+~condition_counter()
+{
+	cond_traits<thread_impl>::destroy(cond);
+}
+
+@ When increasing, we lock the mutex, advance the counter, remember it
+is changed, broadcast, and release the mutex.
+
+@<|condition_counter::increase| code@>=
+void increase()
+{
+	mutex_traits<thread_impl>::lock(mut);
+	counter++;
+	changed = true;
+	cond_traits<thread_impl>::broadcast(cond);
+	mutex_traits<thread_impl>::unlock(mut);
+}
+
+@ Same as increase.
+@<|condition_counter::decrease| code@>=
+void decrease()
+{
+	mutex_traits<thread_impl>::lock(mut);
+	counter--;
+	changed = true;
+	cond_traits<thread_impl>::broadcast(cond);
+	mutex_traits<thread_impl>::unlock(mut);
+}
+
+@ We lock the mutex, and if there was a change since the last call of
+|waitForChange|, we return immediately, otherwise we wait for the
+change. The mutex is released.
+
+@<|condition_counter::waitForChange| code@>=
+int waitForChange()
+{
+	mutex_traits<thread_impl>::lock(mut);
+	if (!changed) {
+		cond_traits<thread_impl>::wait(cond, mut);
+	}
+	changed = false;
+	int res = counter;
+	mutex_traits<thread_impl>::unlock(mut);
+	return res;
+}
+
+
+@ The detached thread is the same as joinable |thread|. We only
+re-implement |run| method to call |thread_traits::detach_run|, and add
+a method which installs a counter. The counter is increased and
+decreased on the body of the new thread.
+
+@<|detach_thread| template class declaration@>=
+template <int thread_impl>
+class detach_thread : public thread<thread_impl> {
+public:@;
+	condition_counter<thread_impl>* counter;
+	detach_thread() : counter(NULL) {}
+	void installCounter(condition_counter<thread_impl>* c)
+		{@+ counter = c;@+}
+	void run()
+		{@+thread_traits<thread_impl>::detach_run(this);@+}
+};
+
+@ The detach thread group is (by interface) the same as
+|thread_group|. The extra thing we have here is the |counter|. The
+implementation of |insert| and |run| is different.
+
+@<|detach_thread_group| template class declaration@>=
+template<int thread_impl>
+class detach_thread_group {	
+	typedef thread_traits<thread_impl> _Ttraits;
+	typedef cond_traits<thread_impl> _Ctraits;
+	typedef detach_thread<thread_impl> _Ctype;
+	list<_Ctype *> tlist;
+	typedef typename list<_Ctype*>::iterator iterator;
+	condition_counter<thread_impl> counter;
+public:@;
+	static int max_parallel_threads;
+	@<|detach_thread_group::insert| code@>;
+	@<|detach_thread_group| destructor code@>;
+	@<|detach_thread_group::run| code@>;
+};
+
+@ When inserting, the counter is installed to the thread.
+@<|detach_thread_group::insert| code@>=
+void insert(_Ctype* c)
+{
+	tlist.push_back(c);
+	c->installCounter(&counter);
+}
+
+@ The destructor is clear.
+@<|detach_thread_group| destructor code@>=
+~detach_thread_group()
+{
+	while (!tlist.empty()) {
+		delete tlist.front();
+		tlist.pop_front();
+	}
+}
+
+@ We cycle through all threads in the group, and in each cycle we wait
+for the change in the |counter|. If the counter indicates less than
+maximum parallel threads running, then a new thread is run, and the
+iterator in the list is moved.
+
+At the end we have to wait for all thread to finish.
+
+@<|detach_thread_group::run| code@>=
+void run()
+{
+	int mpt = max_parallel_threads;
+	iterator it = tlist.begin();
+	while (it != tlist.end()) {
+		if (counter.waitForChange() < mpt) {
+			counter.increase();
+			(*it)->run();
+			++it;
+		}
+	}
+	while (counter.waitForChange() > 0) {}
+}
+
+
+@ Here we only define the specializations for POSIX threads. Then we
+define the macros. Note that the |PosixSynchro| class construct itself
+from the static map defined in {\tt sthreads.cpp}.
+ 
+@<POSIX thread specializations@>=
+typedef detach_thread<posix> PosixThread;
+typedef detach_thread_group<posix> PosixThreadGroup;
+typedef synchro<posix> posix_synchro;
+class PosixSynchro : public posix_synchro {
+public:@;
+	PosixSynchro(const void* c, const char* id);
+};
+@#
+#define THREAD@, sthread::PosixThread
+#define THREAD_GROUP@, sthread::PosixThreadGroup
+#define SYNCHRO@, sthread::PosixSynchro
+
+@ Here we define an empty class and use it as thread and
+mutex. |NoSynchro| class is also empty, but an empty constructor is
+declared. The empty destructor is declared only to avoid ``unused
+variable warning''.
+
+@<No threading specializations@>=
+typedef thread<empty> NoThread;
+typedef thread_group<empty> NoThreadGroup;
+typedef synchro<empty> no_synchro;
+class NoSynchro {
+public:@;
+	NoSynchro(const void* c, const char* id) {}
+	~NoSynchro() {}
+};
+@#
+#define THREAD@, sthread::NoThread
+#define THREAD_GROUP@, sthread::NoThreadGroup
+#define SYNCHRO@, sthread::NoSynchro
+
+@ End of {\tt sthreads.h} file.

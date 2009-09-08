@@ -1,0 +1,157 @@
+\documentclass[10pt]{article} 
+\usepackage{array,natbib,times}
+\usepackage{amsmath, amsthm, amssymb}
+
+%\usepackage[pdftex,colorlinks]{hyperref}
+
+\begin{document}
+
+\title{Implementation of Ramsey Optimal Policy in Dynare++, Timeless Perspective}
+
+\author{Ondra Kamen\'\i k}
+
+\date{June 2006}
+\maketitle
+
+\textbf{Abstract:} This document provides a derivation of Ramsey
+optimal policy from timeless perspective and describes its
+implementation in Dynare++.
+
+\section{Derivation of the First Order Conditions}
+
+Let us start with an economy populated by agents who take a number of
+variables exogenously, or given. These may include taxes or interest
+rates for example. These variables can be understood as decision (or control)
+variables of the timeless Ramsey policy (or social planner). The agent's
+information set at time $t$ includes mass-point distributions of these
+variables for all times after $t$. If $i_t$ denotes an interest rate
+for example, then the information set $I_t$ includes
+$i_{t|t},i_{t+1|t},\ldots,i_{t+k|t},\ldots$ as numbers. In addition
+the information set includes all realizations of past exogenous
+innovations $u_\tau$ for $\tau=t,t-1,\ldots$ and distibutions
+$u_\tau\sim N(0,\Sigma)$ for $\tau=t+1,\ldots$. These information sets will be denoted $I_t$.
+
+An information set including only the information on past realizations
+of $u_\tau$ and future distributions of $u_\tau\sim N(0\sigma)$ will
+be denoted $J_t$. We will use the following notation for expectations
+through these sets:
+\begin{eqnarray*}
+E^I_t[X] &=& E(X|I_t)\\
+E^J_t[X] &=& E(X|J_t)
+\end{eqnarray*}
+
+The agents optimize taking the decision variables of the social
+planner at $t$ and future as given. This means that all expectations
+they form are conditioned on the set $I_t$. Let $y_t$ denote a vector
+of all endogenous variables including the planer's decision
+variables. Let the number of endogenous variables be $n$. The economy
+can be described by $m$ equations including the first order conditions
+and transition equations:
+\begin{equation}\label{constr}
+E_t^I\left[f(y_{t-1},y_t,y_{t+1},u_t)\right] = 0.
+\end{equation}
+This lefts $n-m$
+the planner's control variables. The solution of this problem is a
+decision rule of the form:
+\begin{equation}\label{agent_dr}
+y_t=g(y_{t-1},u_t,c_{t|t},c_{t+1|t},\ldots,c_{t+k|t},\ldots),
+\end{equation}
+where $c$ is a vector of planner's control variables.
+
+Each period the social planner chooses the vector $c_t$ to maximize
+his objective such that \eqref{agent_dr} holds for all times following
+$t$. This would lead to $n-m$ first order conditions with respect to
+$c_t$. These first order conditions would contain unknown derivatives
+of endogenous variables with respect to $c$, which would have to be
+retrieved from the implicit constraints \eqref{constr} since the
+explicit form \eqref{agent_dr} is not known.
+
+The other way to proceed is to assume that the planner is so dumb that
+he is not sure what are his control variables. So he optimizes with
+respect to all $y_t$ given the constraints \eqref{constr}. If the
+planner's objective is $b(y_{t-1},y_t,y_{t+1},u_t)$ with a discount rate
+$\beta$, then the optimization problem looks as follows:
+\begin{align}
+\max_{\left\{y_\tau\right\}^\infty_t}&E_t^J
+\left[\sum_{\tau=t}^\infty\beta^{\tau-t}b(y_{\tau-1},y_\tau,y_{\tau+1},u_\tau)\right]\notag\\
+&\rm{s.t.}\label{planner_optim}\\
+&\hskip1cm E^I_\tau\left[f(y_{\tau-1},y_\tau,y_{\tau+1},u_\tau)\right]=0\quad\rm{for\ }
+\tau=\ldots,t-1,t,t+1,\ldots\notag
+\end{align}
+Note two things: First, each constraint \eqref{constr} in
+\eqref{planner_optim} is conditioned on $I_\tau$ not $I_t$. This is
+very important, since the behaviour of agents at period $\tau=t+k$ is
+governed by the constraint using expectations conditioned on $t+k$,
+not $t$. The social planner knows that at $t+k$ the agents will use
+all information available at $t+k$. Second, the constraints for the
+planner's decision made at $t$ include also constraints for agent's
+behaviour prior to $t$. This is because the agent's decision rules are
+given in the implicit form \eqref{constr} and not in the explicit form
+\eqref{agent_dr}.
+
+Using Lagrange multipliers, this can be rewritten as
+\begin{align}
+\max_{y_t}E_t^J&\left[\sum_{\tau=t}^\infty\beta^{\tau-t}b(y_{\tau-1},y_\tau,y_{\tau+1},u_\tau)\right.\notag\\
+&\left.+\sum_{\tau=-\infty}^{\infty}\beta^{\tau-t}\lambda^T_\tau E_\tau^I\left[f(y_{\tau-1},y_\tau,y_{\tau+1},u_\tau)\right]\right],
+\label{planner_optim_l}
+\end{align}
+where $\lambda_t$ is a vector of Lagrange multipliers corresponding to
+constraints \eqref{constr}. Note that the multipliers are multiplied
+by powers of $\beta$ in order to make them stationary. Taking a
+derivative wrt $y_t$ and putting it to zero yields the first order
+conditions of the planner's problem:
+\begin{align}
+E^J_t\left[\vphantom{\frac{\int^(_)}{\int^(\_)}}\right.&\frac{\partial}{\partial y_t}b(y_{t-1},y_t,y_{t+1},u_t)+
+\beta L^{+1}\frac{\partial}{\partial y_{t-1}}b(y_{t-1},y_t,y_{t+1},u_t)\notag\\
+&+\beta^{-1}\lambda_{t-1}^TE^I_{t-1}\left[L^{-1}\frac{\partial}{\partial y_{t+1}}f(y_{t-1},y_t,y_{t+1},u_t)\right]\notag\\
+&+\lambda_t^TE^I_t\left[\frac{\partial}{\partial y_{t}}f(y_{t-1},y_t,y_{t+1},u_t)\right]\notag\\
+&+\beta\lambda_{t+1}^TE^I_{t+1}\left[L^{+1}\frac{\partial}{\partial y_{t-1}}f(y_{t-1},y_t,y_{t+1},u_t)\right]
+\left.\vphantom{\frac{\int^(_)}{\int^(\_)}}\right]
+ = 0,\label{planner_optim_foc}
+\end{align}
+where $L^{+1}$ and $L^{-1}$ are one period lead and lag operators respectively.
+
+Now we have to make a few assertions concerning expectations
+conditioned on the different information sets to simplify
+\eqref{planner_optim_foc}. Recall the formula for integration through
+information on which another expectation is conditioned, this is:
+$$E\left[E\left[u|v\right]\right] = E[u],$$
+where the outer expectation integrates through $v$. Since $J_t\subset
+I_t$, by easy application of the above formula we obtain
+\begin{eqnarray}
+E^J_t\left[E^I_t\left[X\right]\right] &=& E^J_t\left[X\right]\quad\rm{and}\notag\\
+E^J_t\left[E^I_{t-1}\left[X\right]\right] &=& E^J_t\left[X\right]\label{e_iden}\\
+E^J_t\left[E^I_{t+1}\left[X\right]\right] &=& E^J_{t+1}\left[X\right]\notag
+\end{eqnarray}
+Now, the last term of \eqref{planner_optim_foc} needs a special
+attention. It is equal to
+$E^J_t\left[\beta\lambda^T_{t+1}E^I_{t+1}[X]\right]$. If we assume
+that the problem \eqref{planner_optim} has a solution, then there is a
+deterministic function from $J_{t+1}$ to $\lambda_{t+1}$ and so
+$\lambda_{t+1}\in J_{t+1}\subset I_{t+1}$. And the last term is equal
+to $E^J_{t}\left[E^I_{t+1}[\beta\lambda^T_{t+1}X]\right]$, which is
+$E^J_{t+1}\left[\beta\lambda^T_{t+1}X\right]$. This term can be
+equivalently written as
+$E^J_{t}\left[\beta\lambda^T_{t+1}E^J_{t+1}[X]\right]$. The reason why
+we write the term in this way will be clear later. All in all, we have
+\begin{align}
+E^J_t\left[\vphantom{\frac{\int^(_)}{\int^(\_)}}\right.&\frac{\partial}{\partial y_t}b(y_{t-1},y_t,y_{t+1},u_t)+
+\beta L^{+1}\frac{\partial}{\partial y_{t-1}}b(y_{t-1},y_t,y_{t+1},u_t)\notag\\
+&+\beta^{-1}\lambda_{t-1}^TL^{-1}\frac{\partial}{\partial y_{t+1}}f(y_{t-1},y_t,y_{t+1},u_t)\notag\\
+&+\lambda_t^T\frac{\partial}{\partial y_{t}}f(y_{t-1},y_t,y_{t+1},u_t)\notag\\
+&+\beta\lambda_{t+1}^TE^J_{t+1}\left[L^{+1}\frac{\partial}{\partial y_{t-1}}f(y_{t-1},y_t,y_{t+1},u_t)\right]
+\left.\vphantom{\frac{\int^(_)}{\int^(\_)}}\right]
+ = 0.\label{planner_optim_foc2}
+\end{align}
+Note that we have not proved that \eqref{planner_optim_foc} and
+\eqref{planner_optim_foc2} are equivalent. We proved only that if
+\eqref{planner_optim_foc} has a solution, then
+\eqref{planner_optim_foc2} is equivalent (and has the same solution).
+
+\section{Implementation}
+
+The user inputs $b(y_{t-1},y_t,y_{t+1},u_t)$, $\beta$, and agent's
+first order conditions \eqref{constr}. The algorithm has to produce
+\eqref{planner_optim_foc2}.
+
+\end{document}

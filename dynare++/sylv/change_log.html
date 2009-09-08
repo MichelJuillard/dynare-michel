@@ -1,0 +1,140 @@
+<HTML>
+<!-- $Header: /var/lib/cvs/dynare_cpp/sylv/change_log.html,v 1.1.1.1 2004/06/04 13:00:05 kamenik Exp $ -->
+<!-- Tag $Name:  $ -->
+<TITLE>
+Sylvester Solver Change Log
+</TITLE>
+<BODY>
+<TABLE CELLSPACING=2 ALIGN="CENTER" BORDER=1>
+<TR>
+<TD BGCOLOR="#d0d0d0" WIDTH="85"> Tag    </TD>
+<TD BGCOLOR="#d0d0d0" WIDTH="80"> Date   </TD>
+<TD BGCOLOR="#d0d0d0" WIDTH="600"> Description/Changes</TD>
+</TR>
+<TR>
+<TD></TD>
+<TD>2003/09/10</TD>
+<TD>Initial version solving triangular system put to repository</TD>
+</TR>
+<TR>
+<TD></TD>
+<TD></TD>
+<TD>Implemented solution of general case.</TD>
+</TR>
+<TR>
+<TD></TD>
+<TD></TD>
+<TD>Implemented a memory pool (Paris).</TD>
+</TR>
+<TR>
+<TD></TD>
+<TD></TD>
+<TD>Implemented MEX interface to the routine (Paris).</TD>
+</TR>
+<TR>
+<TD></TD>
+<TD></TD>
+<TD>Implemented QuasiTriangularZero (Paris) (not fully used yet).</TD>
+</TR>
+<TR>
+<TD>rel-1</TD>
+<TD>2003/10-02</TD>
+<TD>Version sent to Michel.</TD>
+</TR>
+<TR>
+<TD></TD>
+<TD></TD>
+<TD>Inheritance streamlined, QuasiTriangular inherits from GeneralMatrix.</TD>
+</TR>
+<TR>
+<TD></TD>
+<TD></TD>
+<TD>Implemented block diagonalization algorithm.</TD>
+</TR>
+<TR>
+<TD></TD>
+<TD></TD>
+<TD>Solution routines rewritten so that the output rewrites input,
+considerable memory improvement.</TD>
+</TR>
+<TR>
+<TD></TD>
+<TD></TD>
+<TD>MEX interface now links with LAPACK library from Matlab.</TD>
+</TR>
+<TR>
+<TD></TD>
+<TD></TD>
+<TD>Added a hack to MEX library loading in order to avoid Matlab crash in Wins.</TD>
+</TR>
+<TR>
+<TD>rel-2</TD>
+<TD>2003/10/15</TD>
+<TD>Version sent to Michel.</TD>
+</TR>
+<TR>
+<TD></TD>
+<TD></TD>
+<TD>KronUtils now rewrite input by output using less memory.</TD>
+</TR>
+<TR>
+<TD></TD>
+<TD></TD>
+<TD>Added iterative solution algorithm (doubling).</TD>
+</TR>
+<TR>
+<TD></TD>
+<TD></TD>
+<TD>Introduced abstraction for set of parameters (SylvParams).</TD>
+</TR>
+<TR>
+<TD></TD>
+<TD></TD>
+<TD>Algorithm enabled to solve problems with singular C.</TD>
+</TR>
+<TR>
+<TD></TD>
+<TD></TD>
+<TD>Implemented a class chooser chossing between QuasiTriangularZero,
+and QuasiTriangular (padded with zero) depending on size of the
+problem. Full use of QuasiTriangularZero.</TD>
+</TR>
+<TR>
+<TD></TD>
+<TD></TD>
+<TD>Reimplemented QuasiTriangular::solve, offdiagonal elements are
+eleiminated by gauss with partial pivoting, not by transformation of
+complex eigenvalues. More stable for ill conditioned eigenvalues.</TD>
+</TR>
+<TR>
+<TD></TD>
+<TD></TD>
+<TD>Reimplemented calculation of eliminating vectors, much more
+numerically stable now.</TD>
+</TR>
+<TR>
+<TD></TD>
+<TD></TD>
+<TD>Implemented algorithm for ordering of eigenvalues (not used now,
+no numerical improvements).</TD>
+</TR>
+<TR>
+<TD>rel-3</TD>
+<TD>2003/12/4</TD>
+<TD>Version sent to Michel.</TD>
+</TR>
+<TR>
+<TD></TD>
+<TD></TD>
+<TD>GeneralMatrix separated for use outside, in sylv module we use
+its subclass SylvMatrix. Implemented ConstGeneralMatrix (useful outside).
+</TD>
+</TR>
+<TR>
+<TD>rel-4</TD>
+<TD>2004/6/4</TD>
+<TD>Version, which was moved to pythie.cepremap.cnrs.fr repository.</TD>
+</TR>
+</TABLE>
+</BODY>
+</HTML>

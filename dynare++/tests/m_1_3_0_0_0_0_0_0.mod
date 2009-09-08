@@ -1,0 +1,53 @@
+var lambda a1 a2 k1 k2 i1 i2 c1 c2 l1 l2;
+varexo e  e1 e2;
+parameters beta delta rho sigma phi AA alpha Le  gamma1 gamma2 mu1 mu2 chi1 chi2 b1 b2 tau1 tau2;
+beta = 0.99;
+delta = 0.025;
+rho = 0.95;
+sigma = 0.01;
+phi = 0.5;
+alpha = 0.36;
+AA = 0.028058361;
+tau1 = 1.0604611e-11;
+tau2 = 2.9305887e-08;
+Le = 2.5;
+gamma1 = 0.2;
+gamma2 = 0.4;
+chi1 = 0.75;
+chi2 = 0.9;
+mu1 = -0.3;
+mu2 = 0.3;
+b1 =  3.6164368;
+b2 =  1.4937381;
+
+model;
+log(a1) = rho*log(a1(-1))+sigma*(e+e1);
+log(a2) = rho*log(a2(-1))+sigma*(e+e2);
+lambda = tau1*c1^(-1/chi1)*(c1^(1-1/chi1)+b1*(Le-l1)^(1-1/chi1))^((1-1/gamma1)/(1-1/chi1)-1);
+lambda = tau2*c2^(-1/chi2)*(c2^(1-1/chi2)+b2*(Le-l2)^(1-1/chi2))^((1-1/gamma2)/(1-1/chi2)-1);
+tau1*(-b1)*(Le-l1)^(-1/chi1)*(c1^(1-1/chi1)+b1*(Le-l1)^(1-1/chi1))^((1-1/gamma1)/(1-1/chi1)-1) = -lambda*a1*AA*(1-alpha)*l1^(mu1-1)*(alpha*k1(-1)^mu1+(1-alpha)*l1^mu1)^(1/mu1-1);
+tau2*(-b2)*(Le-l2)^(-1/chi2)*(c2^(1-1/chi2)+b2*(Le-l2)^(1-1/chi2))^((1-1/gamma2)/(1-1/chi2)-1) = -lambda*a2*AA*(1-alpha)*l2^(mu2-1)*(alpha*k2(-1)^mu2+(1-alpha)*l2^mu2)^(1/mu2-1);
+lambda*(1+phi*(i1/k1(-1)-delta)) =beta*lambda(+1)*(1+a1(+1)*AA*alpha*k1^(mu1-1)*(alpha*k1^mu1+(1-alpha)*l1(+1)^mu1)^(1/mu1-1)+phi*(1-delta+i1(+1)/k1-0.5*(i1(+1)/k1-delta))*(i1(+1)/k1-delta));
+lambda*(1+phi*(i2/k2(-1)-delta)) =beta*lambda(+1)*(1+a2(+1)*AA*alpha*k2^(mu2-1)*(alpha*k2^mu2+(1-alpha)*l2(+1)^mu2)^(1/mu2-1)+phi*(1-delta+i2(+1)/k2-0.5*(i2(+1)/k2-delta))*(i2(+1)/k2-delta));
+k1 = i1 + (1-delta)*k1(-1);
+k2 = i2 + (1-delta)*k2(-1);
+c1+i1-delta*k1(-1) + c2+i2-delta*k2(-1) = a1*AA*(alpha*k1(-1)^mu1+(1-alpha)*l1^mu1)^(1/mu1)-(phi/2)*k1(-1)*(i1/k1(-1)-delta)^2 + a2*AA*(alpha*k2(-1)^mu2+(1-alpha)*l2^mu2)^(1/mu2)-(phi/2)*k2(-1)*(i2/k2(-1)-delta)^2;
+end;
+
+initval;
+a1 = 1;
+a2 = 1;
+k1 = 1;
+k2 = 1;
+c1 = 0.028058361;
+c2 = 0.028058361;
+i1 =      0.025;
+i2 =      0.025;
+l1 = 1;
+l2 = 1;
+lambda = 1;
+end;
+
+vcov = [1 0 0; 0 1 0; 0 0 1];
+
+order = 4;

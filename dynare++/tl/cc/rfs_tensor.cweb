@@ -1,0 +1,205 @@
+@q $Id: rfs_tensor.cweb 148 2005-04-19 15:12:26Z kamenik $ @>
+@q Copyright 2004, Ondra Kamenik @>
+
+@ Start of {\tt rfs\_tensor.cpp} file.
+
+@c
+#include "rfs_tensor.h"
+#include "kron_prod.h"
+#include "tl_exception.h"
+
+@<|FRTensor| conversion from unfolded@>;
+@<|FRTensor::unfold| code@>;
+@<|FRTensor::increment| code@>;
+@<|FRTensor::decrement| code@>;
+@<|URTensor| conversion from folded@>;
+@<|URTensor::fold| code@>;
+@<|URTensor| increment and decrement@>;
+@<|URTensor::getOffset| code@>;
+@<|URSingleTensor| constructor 1 code@>;
+@<|URSingleTensor| constructor 2 code@>;
+@<|URSingleTensor::fold| code@>;
+@<|FRSingleTensor| conversion from unfolded@>;
+
+@ The conversion from unfolded to folded sums up all data from
+unfolded corresponding to one folded index. So we go through all the
+rows in the unfolded tensor |ut|, make an index of the folded tensor
+by sorting the coordinates, and add the row.
+ 
+@<|FRTensor| conversion from unfolded@>=
+FRTensor::FRTensor(const URTensor& ut)
+	: FTensor(along_row, IntSequence(ut.dimen(), ut.nvar()),
+			  FFSTensor::calcMaxOffset(ut.nvar(), ut.dimen()), ut.ncols(),
+			  ut.dimen()),
+	  nv(ut.nvar())
+{
+	zeros();
+	for (index in = ut.begin(); in != ut.end(); ++in) {
+		IntSequence vtmp(in.getCoor());
+		vtmp.sort();
+		index tar(this, vtmp);
+		addRow(ut, *in, *tar);
+	}
+}
+
+@ Here just make a new instance and return the reference.
+@<|FRTensor::unfold| code@>=
+UTensor& FRTensor::unfold() const
+{
+	return *(new URTensor(*this));
+}
+
+@ Incrementing is easy. The same as for |FFSTensor|.
+
+@<|FRTensor::increment| code@>=
+void FRTensor::increment(IntSequence& v) const
+{
+	TL_RAISE_IF(v.size() != dimen(),
+				"Wrong input/output vector size in FRTensor::increment");
+
+	UTensor::increment(v, nv);
+	v.monotone();
+}
+
+@ Decrement calls static |FTensor::decrement|.
+
+@<|FRTensor::decrement| code@>=
+void FRTensor::decrement(IntSequence& v) const
+{
+	TL_RAISE_IF(v.size() != dimen(),
+				"Wrong input/output vector size in FRTensor::decrement");
+
+	FTensor::decrement(v, nv);
+}
+
+
+@ Here we convert folded full symmetry tensor to unfolded. We copy all
+columns of folded tensor to unfolded and leave other columns
+(duplicates) zero. In this way, if the unfolded tensor is folded back,
+we should get the same data.
+
+@<|URTensor| conversion from folded@>=
+URTensor::URTensor(const FRTensor& ft)
+	: UTensor(along_row, IntSequence(ft.dimen(), ft.nvar()),
+			  UFSTensor::calcMaxOffset(ft.nvar(), ft.dimen()), ft.ncols(),
+			  ft.dimen()),
+	  nv(ft.nvar())
+{
+	zeros();
+	for (index src = ft.begin(); src != ft.end(); ++src) {
+		index in(this, src.getCoor());
+		copyRow(ft, *src, *in);
+	}
+}
+
+@ Here we just return a reference to new instance of folded tensor.
+@<|URTensor::fold| code@>=
+FTensor& URTensor::fold() const
+{
+	return *(new FRTensor(*this));
+}
+
+@ Here we just call |UTensor| respective static methods.
+@<|URTensor| increment and decrement@>=
+void URTensor::increment(IntSequence& v) const
+{
+	TL_RAISE_IF(v.size() != dimen(),
+				"Wrong input/output vector size in URTensor::increment");
+
+	UTensor::increment(v, nv);
+}
+
+void URTensor::decrement(IntSequence& v) const
+{
+	TL_RAISE_IF(v.size() != dimen(),
+				"Wrong input/output vector size in URTensor::decrement");
+
+	UTensor::decrement(v, nv);
+}
+
+@ 
+@<|URTensor::getOffset| code@>=
+int URTensor::getOffset(const IntSequence& v) const
+{
+	TL_RAISE_IF(v.size() != dimen(),
+				"Wrong input vector size in URTensor::getOffset");
+
+	return UTensor::getOffset(v, nv);
+}
+
+@ Here we construct $v_1\otimes v_2\otimes\ldots\otimes v_n$, where
+$v_1,v_2,\ldots,v_n$ are stored in |vector<ConstVector>|.
+
+@<|URSingleTensor| constructor 1 code@>=
+URSingleTensor::URSingleTensor(const vector<ConstVector>& cols)
+	: URTensor(1, cols[0].length(), cols.size())
+{
+	if (dimen() == 1) {
+		getData() = cols[0];
+		return;
+	}
+
+	Vector* last = new Vector(cols[cols.size()-1]);
+	for (int i = cols.size()-2; i > 0; i--) {
+		Vector* newlast = new Vector(Tensor::power(nvar(), cols.size()-i));
+		KronProd::kronMult(cols[i], ConstVector(*last), *newlast);
+		delete last;
+		last = newlast;
+	}
+	KronProd::kronMult(cols[0], ConstVector(*last), getData());
+	delete last;
+}
+
+@ Here we construct $v\otimes\ldots\otimes v$, where the number of $v$
+copies is |d|.
+
+@<|URSingleTensor| constructor 2 code@>=
+URSingleTensor::URSingleTensor(const ConstVector& v, int d)
+	: URTensor(1, v.length(), d)
+{
+	if (d == 1) {
+		getData() = v;
+		return;
+	}
+
+	Vector* last = new Vector(v);
+	for (int i = d-2; i > 0; i--) {
+		Vector* newlast = new Vector(last->length()*v.length());
+		KronProd::kronMult(v, ConstVector(*last), *newlast);
+		delete last;
+		last = newlast;
+	}
+	KronProd::kronMult(v, ConstVector(*last), getData());
+	delete last;
+}
+
+@ Here we construct |FRSingleTensor| from |URSingleTensor| and return
+its reference.
+
+@<|URSingleTensor::fold| code@>=
+FTensor& URSingleTensor::fold() const
+{
+	return *(new FRSingleTensor(*this));
+}
+
+
+
+@ The conversion from unfolded |URSingleTensor| to folded
+|FRSingleTensor| is completely the same as conversion from |URTensor|
+to |FRTensor|, only we do not copy rows but elements.
+ 
+@<|FRSingleTensor| conversion from unfolded@>=
+FRSingleTensor::FRSingleTensor(const URSingleTensor& ut)
+	: FRTensor(1, ut.nvar(), ut.dimen())
+{
+	zeros();
+	for (index in = ut.begin(); in != ut.end(); ++in) {
+		IntSequence vtmp(in.getCoor());
+		vtmp.sort();
+		index tar(this, vtmp);
+		get(*tar, 0) += ut.get(*in, 0);
+	}
+}
+
+
+@ End of {\tt rfs\_tensor.cpp} file.

@@ -1,0 +1,129 @@
+@q $Id: pyramid_prod2.cweb 332 2005-07-15 13:41:48Z kamenik $ @>
+@q Copyright 2004, Ondra Kamenik @>
+
+@ Start of {\tt pyramid\_prod2.cpp} file.
+
+@c
+#include "pyramid_prod2.h"
+#include "rfs_tensor.h"
+
+@<|IrregTensorHeader| constructor code@>;
+@<|IrregTensorHeader::increment| code@>;
+@<|IrregTensorHeader| destructor code@>;
+@<|IrregTensorHeader::calcMaxOffset| code@>;
+@<|IrregTensor| constructor code@>;
+@<|IrregTensor::addTo| code@>;
+
+@ Here we only call |sp.createPackedColumns(c, cols, unit_flag)| which
+fills |cols| and |unit_flag| for the given column |c|. Then we set
+|end_seq| according to |unit_flag| and columns lengths.
+
+@<|IrregTensorHeader| constructor code@>=
+IrregTensorHeader::IrregTensorHeader(const StackProduct<FGSTensor>& sp,
+									 const IntSequence& c)
+	: nv(sp.getAllSize()),
+	  unit_flag(sp.dimen()),
+	  cols(new Vector*[sp.dimen()]),
+	  end_seq(sp.dimen())
+{
+	sp.createPackedColumns(c, cols, unit_flag);
+	for (int i = 0; i < sp.dimen(); i++) {
+		end_seq[i] = cols[i]->length();
+		if (unit_flag[i] != -1)
+			end_seq[i] = unit_flag[i]+1;
+	}
+}
+
+
+@ Here we have to increment the given integer sequence. We do it by
+the following code, whose pattern is valid for all tensor. The only
+difference is how we increment item of coordinates.
+
+@<|IrregTensorHeader::increment| code@>=
+void IrregTensorHeader::increment(IntSequence& v) const
+{
+	TL_RAISE_IF(v.size() != dimen(),
+				"Wrong size of coordinates in IrregTensorHeader::increment");
+
+	if (v.size() == 0)
+		return;
+	int i = v.size()-1;
+	@<increment |i|-th item in coordinate |v|@>;
+	while (i > 0 && v[i] == end_seq[i]) {
+		v[i] = 0;
+		i--;
+		@<increment |i|-th item in coordinate |v|@>;
+	}
+}
+
+@ Here we increment item of coordinates. Whenever we reached end of
+column coming from matrices, and |unit_flag| is not $-1$, we have to
+jump to that |unit_flag|.
+
+@<increment |i|-th item in coordinate |v|@>=
+	v[i]++;
+	if (unit_flag[i] != -1 && v[i] == cols[i]->length()-1)
+		v[i] = unit_flag[i];
+
+
+@ 
+@<|IrregTensorHeader| destructor code@>=
+IrregTensorHeader::~IrregTensorHeader()
+{
+  for (int i = 0; i < dimen(); i++)
+	  delete cols[i];
+  delete [] cols;
+}
+
+@ It is a product of all column lengths.
+@<|IrregTensorHeader::calcMaxOffset| code@>=
+int IrregTensorHeader::calcMaxOffset() const
+{
+	int res = 1;
+	for (int i = 0; i < dimen(); i++)
+		res *= cols[i]->length();
+	return res;
+}
+
+
+@ Everything is done in |IrregTensorHeader|, only we have to Kronecker
+multiply all columns of the header.
+
+@<|IrregTensor| constructor code@>=
+IrregTensor::IrregTensor(const IrregTensorHeader& h)
+	: Tensor(along_row, IntSequence(h.dimen(), 0), h.end_seq,
+			 h.calcMaxOffset(), 1, h.dimen()),
+	  header(h)
+{
+	if (header.dimen() == 1) {
+		getData() = *(header.cols[0]);
+		return;
+	}
+
+	Vector* last = new Vector(*(header.cols[header.dimen()-1]));
+	for (int i = header.dimen()-2; i > 0; i--) {
+		Vector* newlast = new Vector(last->length()*header.cols[i]->length());
+		KronProd::kronMult(ConstVector(*(header.cols[i])),
+						   ConstVector(*last), *newlast);
+		delete last;
+		last = newlast;
+	}
+	KronProd::kronMult(ConstVector(*(header.cols[0])),
+					   ConstVector(*last), getData());
+	delete last;
+}
+
+@ Clear.
+@<|IrregTensor::addTo| code@>=
+void IrregTensor::addTo(FRSingleTensor& out) const
+{
+	for (index it = begin(); it != end(); ++it) {
+		IntSequence tmp(it.getCoor());
+		tmp.sort();
+		Tensor::index ind(&out, tmp);
+		out.get(*ind, 0) += get(*it, 0);
+	}
+}
+
+
+@ End of {\tt pyramid\_prod2.cpp} file.

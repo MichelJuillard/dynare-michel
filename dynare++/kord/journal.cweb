@@ -1,0 +1,333 @@
+@q $Id: journal.cweb 413 2005-08-16 14:39:55Z kamenik $ @>
+@q Copyright 2004, Ondra Kamenik @>
+
+@ Start of {\tt journal.cpp} file.
+
+@c
+#include "journal.h"
+#include "kord_exception.h"
+
+#ifndef __MINGW32__
+# include <sys/resource.h>
+# include <sys/utsname.h>
+#endif
+#include <stdlib.h>
+#include <unistd.h>
+#include <time.h>
+
+SystemResources _sysres;
+#ifdef __MINGW32__
+@<|gettimeofday| Win32 implementation@>;
+@<|sysconf| Win32 implementation@>;
+#endif
+
+@<|SystemResources| constructor code@>;
+@<|SystemResources::pageSize| code@>;
+@<|SystemResources::physicalPages| code@>;
+@<|SystemResources::onlineProcessors| code@>;
+@<|SystemResources::availableMemory| code@>;
+@<|SystemResources::getRUS| code@>;
+@<|SystemResourcesFlash| constructor code@>;
+@<|SystemResourcesFlash::diff| code@>;
+@<|JournalRecord::operator<<| symmetry code@>;
+@<|JournalRecord::writePrefix| code@>;
+@<|JournalRecord::writePrefixForEnd| code@>;
+@<|JournalRecordPair| destructor code@>;
+@<|endrec| code@>;
+@<|Journal::printHeader| code@>;
+
+@ 
+@<|SystemResources| constructor code@>=
+SystemResources::SystemResources()
+{
+	gettimeofday(&start, NULL);
+}
+
+
+@ 
+@<|SystemResources::pageSize| code@>=
+long int SystemResources::pageSize()
+{
+	return sysconf(_SC_PAGESIZE);
+}
+
+@ 
+@<|SystemResources::physicalPages| code@>=
+long int SystemResources::physicalPages()
+{
+	return sysconf(_SC_PHYS_PAGES);
+}
+
+@ 
+@<|SystemResources::onlineProcessors| code@>=
+long int SystemResources::onlineProcessors()
+{
+	return sysconf(_SC_NPROCESSORS_ONLN);
+}
+
+@ 
+@<|SystemResources::availableMemory| code@>=
+long int SystemResources::availableMemory()
+{
+	return pageSize()*sysconf(_SC_AVPHYS_PAGES);
+}
+
+@ Here we read the current values of resource usage. For MinGW, we
+implement only a number of available physical memory pages.
+
+@<|SystemResources::getRUS| code@>=
+void SystemResources::getRUS(double& load_avg, long int& pg_avail,
+							 double& utime, double& stime, double& elapsed,
+							 long int& idrss, long int& majflt)
+{
+	struct timeval now;
+	gettimeofday(&now, NULL);
+	elapsed = now.tv_sec-start.tv_sec + (now.tv_usec-start.tv_usec)*1.0e-6;
+
+#ifndef __MINGW32__
+	struct rusage rus;
+	getrusage(RUSAGE_SELF, &rus);
+	utime = rus.ru_utime.tv_sec+rus.ru_utime.tv_usec*1.0e-6;
+	stime = rus.ru_stime.tv_sec+rus.ru_stime.tv_usec*1.0e-6;
+	idrss = rus.ru_idrss;
+	majflt = rus.ru_majflt;
+
+	getloadavg(&load_avg, 1);
+#else
+	utime = -1.0;
+	stime = -1.0;
+	idrss = -1;
+	majflt = -1;
+	load_avg = -1.0;
+#endif
+	pg_avail = sysconf(_SC_AVPHYS_PAGES);
+}
+
+@ 
+@<|SystemResourcesFlash| constructor code@>=
+SystemResourcesFlash::SystemResourcesFlash()
+{
+	_sysres.getRUS(load_avg, pg_avail, utime, stime,
+				   elapsed, idrss, majflt);
+}
+
+@ 
+@<|SystemResourcesFlash::diff| code@>=
+void SystemResourcesFlash::diff(const SystemResourcesFlash& pre)
+{
+	utime -= pre.utime;
+	stime -= pre.stime;
+	elapsed -= pre.elapsed;
+	idrss -= pre.idrss;
+	majflt -= pre.majflt;
+}
+
+@ 
+@<|JournalRecord::operator<<| symmetry code@>=
+JournalRecord& JournalRecord::operator<<(const IntSequence& s)
+{
+	operator<<("[");
+	for (int i = 0; i < s.size(); i++) {
+		operator<<(s[i]);
+		if (i < s.size()-1)
+			operator<<(",");
+	}
+	operator<<("]");
+	return *this;
+}
+
+@ 
+@<|JournalRecord::writePrefix| code@>=
+void JournalRecord::writePrefix(const SystemResourcesFlash& f)
+{
+	for (int i = 0; i < MAXLEN; i++)
+		prefix[i] = ' ';
+	double mb = 1024*1024;
+	sprintf(prefix, "%07.6g", f.elapsed);
+	sprintf(prefix+7, ":%c%05d", recChar, ord);
+	sprintf(prefix+14, ":%1.1f", f.load_avg);
+	sprintf(prefix+18, ":%05.4g", f.pg_avail*_sysres.pageSize()/mb);
+	sprintf(prefix+24, "%s", ":      : ");
+	for (int i = 0; i < 2*journal.getDepth(); i++)
+		prefix[i+33]=' ';
+	prefix[2*journal.getDepth()+33]='\0';
+}
+
+@ 
+@<|JournalRecord::writePrefixForEnd| code@>=
+void JournalRecordPair::writePrefixForEnd(const SystemResourcesFlash& f)
+{
+	for (int i = 0; i < MAXLEN; i++)
+		prefix_end[i] = ' ';
+	double mb = 1024*1024;
+	SystemResourcesFlash difnow;
+	difnow.diff(f);
+	sprintf(prefix_end, "%07.6g", f.elapsed+difnow.elapsed);
+	sprintf(prefix_end+7, ":E%05d", ord);
+	sprintf(prefix_end+14, ":%1.1f", difnow.load_avg);
+	sprintf(prefix_end+18, ":%05.4g", difnow.pg_avail*_sysres.pageSize()/mb);
+	sprintf(prefix_end+24, ":%06.5g", difnow.majflt*_sysres.pageSize()/mb);
+	sprintf(prefix_end+31, "%s", ": ");
+	for (int i = 0; i < 2*journal.getDepth(); i++)
+		prefix_end[i+33]=' ';
+	prefix_end[2*journal.getDepth()+33]='\0';
+}
+
+@ 
+@<|JournalRecordPair| destructor code@>=
+JournalRecordPair::~JournalRecordPair()
+{
+	journal.decrementDepth();
+	writePrefixForEnd(flash);
+	journal << prefix_end;
+	journal << mes;
+	journal << endl;
+	journal.flush();
+}
+
+@ 
+@<|endrec| code@>=
+JournalRecord& endrec(JournalRecord& rec)
+{
+	rec.journal << rec.prefix;
+	rec.journal << rec.mes;
+	rec.journal << endl;
+	rec.journal.flush();
+	rec.journal.incrementOrd();
+	return rec;
+}
+
+@ 
+@<|Journal::printHeader| code@>=
+void Journal::printHeader()
+{
+	(*this)<< "This is Dynare++, Copyright (C) 2004,2005 Michel Juillard, Ondra Kamenik\n";
+	(*this)<< "Dynare++ comes with ABSOLUTELY NO WARRANTY and is distributed under\n";
+	(*this)<< "General Public License, see http://www.gnu.org/license/gpl.html\n";
+	(*this)<< "\n\n";
+
+#ifndef __MINGW32__
+	utsname info;
+	uname(&info);
+	(*this)<< "System info: ";
+	(*this)<< info.sysname << " " << info.release << " " << info.version << " ";
+	(*this)<< info.machine << ", processors online: " << _sysres.onlineProcessors();
+
+	(*this)<< "\n\nStart time: ";
+	char ts[100];
+	time_t curtime = time(NULL);
+	tm loctime;
+	localtime_r(&curtime, &loctime);
+	asctime_r(&loctime, ts);
+	(*this)<< ts << "\n";
+#else
+	(*this) << "System info: (not implemented for MINGW)\n";
+	(*this) << "Start time:  (not implemented for MINGW)\n\n";
+#endif
+	
+	(*this)<< "  ------ elapsed time (seconds)                     \n";
+	(*this)<< "  |       ------ record unique identifier           \n";
+	(*this)<< "  |       |     ------ load average                 \n";
+	(*this)<< "  |       |     |    ------ available memory (MB)   \n";
+	(*this)<< "  |       |     |    |     ------  major faults (MB)\n";
+	(*this)<< "  |       |     |    |     |                        \n";
+	(*this)<< "  V       V     V    V     V                        \n";
+	(*this)<< "\n";
+}
+
+
+@ Taken from list {\tt gdb@@sources.redhat.com}, the author is Danny Smith.
+
+|_W32_FT_OFFSET| is a time from 1 Jan 1601 to 1 Jan 1970 in 100ns
+units, and the the |filetime| is taken from {\tt windows.h} file.
+
+@s filetime int
+@s __stdcall int
+@d _W32_FT_OFFSET (116444736000000000LL) 
+@s w32_ftv int
+
+@<|gettimeofday| Win32 implementation@>=
+typedef struct _filetime {
+	unsigned long dwLowDateTime;
+	unsigned long dwHighDateTime;
+} filetime;
+@#
+extern "C" {
+	void __stdcall GetSystemTimeAsFileTime(filetime*);
+};
+@#
+typedef union {
+	long long ns100; // time since 1 Jan 1601 in 100ns units
+	filetime ft;
+} w32_ftv;
+@#
+void gettimeofday(struct timeval* p, struct timezone* tz)
+{
+	w32_ftv _now;
+	GetSystemTimeAsFileTime( &(_now.ft) );
+	p->tv_usec=(long)((_now.ns100 / 10LL) % 1000000LL );
+	p->tv_sec= (long)((_now.ns100-_W32_FT_OFFSET)/10000000LL);
+	return;
+}
+
+@ Here we implement |sysconf| for MinGW. We implement only page size,
+number of physial pages, and a number of available physical pages. The
+pagesize is set to 1024 bytes, real pagesize can differ but it is not
+important. We can do this since Windows kernel32 |GlobalMemoryStatus|
+call returns number of bytes.
+
+Number of online processors is not implemented and returns -1, since
+Windows kernel32 |GetSystemInfo| call is too complicated.
+
+@<|sysconf| Win32 implementation@>=
+#define _SC_PAGESIZE 1
+#define _SC_PHYS_PAGES 2
+#define _SC_AVPHYS_PAGES 3
+#define _SC_NPROCESSORS_ONLN 4
+@#
+struct Win32MemoryStatus {
+	unsigned long dwLength;
+	unsigned long dwMemoryLoad;
+	unsigned int dwTotalPhys;
+	unsigned int dwAvailPhys;
+	unsigned int dwTotalPageFile;
+	unsigned int dwAvailPageFile;
+	unsigned int dwTotalVirtual;
+	unsigned int dwAvailVirtual;
+	Win32MemoryStatus();
+};
+@#
+extern "C" {
+	void __stdcall GlobalMemoryStatus(Win32MemoryStatus *);
+};
+@#
+Win32MemoryStatus::Win32MemoryStatus()
+{
+	dwLength = sizeof(Win32MemoryStatus);
+	GlobalMemoryStatus(this);
+}
+@#
+long sysconf(int name)
+{
+	switch (name) {
+	case _SC_PAGESIZE:@;
+		return 1024;
+	case _SC_PHYS_PAGES:@;
+		{
+			Win32MemoryStatus memstat;
+			return memstat.dwTotalPhys/1024;
+		}
+	case _SC_AVPHYS_PAGES:@;
+		{
+			Win32MemoryStatus memstat;
+			return memstat.dwAvailPhys/1024;
+		}
+	case _SC_NPROCESSORS_ONLN:@;
+		return -1;
+	default:@; 
+		KORD_RAISE("Not implemented in Win32 sysconf.");
+		return -1;
+	}
+}
+
+@ End of {\tt journal.cpp} file.

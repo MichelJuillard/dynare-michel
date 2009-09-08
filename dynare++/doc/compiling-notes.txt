@@ -1,0 +1,23 @@
+It is suggested that you compile Dynare++ with gcc version 3.4.  If you have
+other versions of gcc installed on your system, you need to select version
+3.4, for example,
+
+$ make "CC=gcc-3.4"
+
+For linking, you need to compile the required linear algebra libraries
+(blas, atlas, etc).  Alternatively, you can install precompiled versions of
+these -- make sure that you select the version that matches your CPU.
+
+For example, if you have an SSE2 capable CPU, then on Debian GNU/Linux
+(etch) you need to install the following packages to get the precompiled
+linear algebra libraries:
+
+lapack3-dev
+atlas3-sse2-dev
+
+Then set the environment variable LD_LIBRARY_PATH, eg
+
+$ export LD_LIBRARY_PATH /usr/lib/sse2
+
+before calling make.  This will include the shared libraries in the search
+path for ld.

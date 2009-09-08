@@ -1,0 +1,17 @@
+COMPILING
+
+The makefile for this interface is still preliminary, I will write a decent
+one when I have the time.  It needs all the compiled files from dynare++,
+but doesn't know how to make them.  So first you need to run make in the
+src/ directory, then run make in extern/R.
+
+You need Rinternals.h to make this file.  If you are not using prepackaged R
+on Unix/Linux, you need to modify the variable RINCLUDE in the Makefile
+accordingly.
+
+To compile dynare++, read doc/compiling-notes.txt.
+
+INSTALLATION
+
+Copy the dynareR.r and dynareR.so files to your working directory so that R
+can find them.

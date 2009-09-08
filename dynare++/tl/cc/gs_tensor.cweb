@@ -1,0 +1,501 @@
+@q $Id: gs_tensor.cweb 425 2005-08-16 15:18:01Z kamenik $ @>
+@q Copyright 2004, Ondra Kamenik @>
+
+@ Start of {\tt gs\_tensor.cpp} file.
+
+@c
+#include "gs_tensor.h"
+#include "sparse_tensor.h"
+#include "tl_exception.h"
+#include "kron_prod.h"
+
+@<|TensorDimens| constructor code@>;
+@<|TensorDimens::calcUnfoldMaxOffset| code@>;
+@<|TensorDimens::calcFoldMaxOffset| code@>;
+@<|TensorDimens::calcFoldOffset| code@>;
+@<|TensorDimens::decrement| code@>;
+@<|FGSTensor| conversion from |UGSTensor|@>;
+@<|FGSTensor| slicing from |FSSparseTensor|@>;
+@<|FGSTensor| slicing from |FFSTensor|@>;
+@<|FGSTensor| conversion from |GSSparseTensor|@>;
+@<|FGSTensor::increment| code@>;
+@<|FGSTensor::unfold| code@>;
+@<|FGSTensor::contractAndAdd| code@>;
+@<|UGSTensor| conversion from |FGSTensor|@>;
+@<|UGSTensor| slicing from |FSSparseTensor|@>;
+@<|UGSTensor| slicing from |UFSTensor|@>;
+@<|UGSTensor| increment and decrement codes@>;
+@<|UGSTensor::fold| code@>;
+@<|UGSTensor::getOffset| code@>;
+@<|UGSTensor::unfoldData| code@>;
+@<|UGSTensor::getFirstIndexOf| code@>;
+@<|UGSTensor::contractAndAdd| code@>;
+
+@ This constructs the tensor dimensions for slicing. See
+|@<|TensorDimens| class declaration@>| for details.
+@<|TensorDimens| constructor code@>=
+TensorDimens::TensorDimens(const IntSequence& ss, const IntSequence& coor)
+	: nvs(ss),
+	  sym(ss.size(), ""),
+	  nvmax(coor.size(), 0)
+{
+	TL_RAISE_IF(! coor.isSorted(),
+				"Coordinates not sorted in TensorDimens slicing constructor");
+	TL_RAISE_IF(coor[0] < 0 || coor[coor.size()-1] >= ss.size(),
+				"A coordinate out of stack range in TensorDimens slicing constructor");
+
+	for (int i = 0; i < coor.size(); i++) {
+		sym[coor[i]]++;
+		nvmax[i] = ss[coor[i]];
+	}
+}
+
+
+@ Number of unfold offsets is a product of all members of |nvmax|.
+@<|TensorDimens::calcUnfoldMaxOffset| code@>=
+int TensorDimens::calcUnfoldMaxOffset() const
+{
+	return nvmax.mult();
+}
+
+@ Number of folded offsets is a product of all unfold offsets within
+each equivalence class of the symmetry.
+
+@<|TensorDimens::calcFoldMaxOffset| code@>=
+int TensorDimens::calcFoldMaxOffset() const
+{
+	int res = 1;
+	for (int i = 0; i < nvs.size(); i++) {
+		if (nvs[i] == 0 && sym[i] > 0)
+			return 0;
+		if (sym[i] > 0)
+			res *= Tensor::noverk(nvs[i]+sym[i]-1, sym[i]);
+	}
+	return res;
+}
+
+@ Here we implement offset calculation for folded general symmetry
+tensor. The offset of a given sequence is calculated by breaking the
+sequence to subsequences according to the symmetry. The offset is
+orthogonal with respect to the blocks, this means that indexing within
+the blocks is independent. If there are two blocks, for instance, then
+the offset will be an offset within the outer block (the first)
+multiplied with all offsets of the inner block (last) plus an offset
+within the second block.
+
+Generally, the resulting offset $r$ will be
+$$\sum_{i=1}^s r_i\cdot\left(\prod_{j=i+1}^sn_j\right),$$
+where $s$ is a number of blocks (|getSym().num()|), $r_i$ is an offset
+within $i$-th block, and $n_j$ is a number of all offsets in $j$-th
+block.
+
+In the code, we go from the innermost to the outermost, maintaining the
+product in |pow|.
+
+@<|TensorDimens::calcFoldOffset| code@>=
+int TensorDimens::calcFoldOffset(const IntSequence& v) const
+{
+	TL_RAISE_IF(v.size() != dimen(),
+				"Wrong input vector size in TensorDimens::getFoldOffset");
+
+	int res = 0;
+	int pow = 1;
+	int blstart = v.size();
+	for (int ibl = getSym().num()-1; ibl >= 0; ibl--) {
+		int bldim = getSym()[ibl];
+		if (bldim > 0) {
+			blstart -= bldim;
+			int blnvar = getNVX()[blstart];
+			IntSequence subv(v, blstart, blstart+bldim);
+			res += FTensor::getOffset(subv, blnvar)*pow;
+			pow *= FFSTensor::calcMaxOffset(blnvar, bldim);
+		}
+	}
+	TL_RAISE_IF(blstart != 0,
+				"Error in tracing symmetry in TensorDimens::getFoldOffset");
+	return res;
+}
+
+@ In order to find the predecessor of index within folded generally
+symmetric tensor, note, that a decrease action in $i$-th partition of
+symmetric indices can happen only if all indices in all subsequent
+partitions are zero. Then the decrease action of whole the index
+consists of decrease action of the first nonzero partition from the
+right, and setting these trailing zero partitions to their maximum
+indices.
+
+So we set |iblock| to the number of last partitions. During the
+execution, |block_first|, and |block_last| will point to the first
+element of |iblock| and, first element of following block.
+
+Then we check for all trailing zero partitions, set them to their
+maximums and return |iblock| to point to the first non-zero partition
+(or the first partition). Then for this partition, we decrease the
+index (fully symmetric within that partition).
+  
+@<|TensorDimens::decrement| code@>=
+void TensorDimens::decrement(IntSequence& v) const
+{
+	TL_RAISE_IF(getNVX().size() != v.size(),
+				"Wrong size of input/output sequence in TensorDimens::decrement");
+
+	int iblock = getSym().num()-1;
+	int block_last = v.size();
+	int block_first = block_last-getSym()[iblock];
+	@<check for zero trailing blocks@>;
+	@<decrease the non-zero block@>;
+}
+
+@ 
+@<check for zero trailing blocks@>=
+	while (iblock > 0 && v[block_last-1] == 0) {
+		for (int i = block_first; i < block_last; i++)
+			v[i] = getNVX(i); // equivalent to |nvs[iblock]|
+		iblock--;
+		block_last = block_first;
+		block_first -= getSym()[iblock];
+	}
+
+@ 
+@<decrease the non-zero block@>=
+	IntSequence vtmp(v, block_first, block_last);
+	FTensor::decrement(vtmp, getNVX(block_first));
+
+
+
+@ Here we go through columns of folded, calculate column of unfolded,
+and copy data.
+
+@<|FGSTensor| conversion from |UGSTensor|@>=
+FGSTensor::FGSTensor(const UGSTensor& ut)
+	: FTensor(along_col, ut.tdims.getNVX(), ut.nrows(),
+			  ut.tdims.calcFoldMaxOffset(), ut.dimen()),
+	  tdims(ut.tdims)
+{
+	for (index ti = begin(); ti != end(); ++ti) {
+		index ui(&ut, ti.getCoor());
+		copyColumn(ut, *ui, *ti);
+	}
+}
+
+@ Here is the code of slicing constructor from the sparse tensor. We
+first calculate coordinates of first and last index of the slice
+within the sparse tensor (these are |lb| and |ub|), and then we
+iterate through all items between them (in lexicographical ordering of
+sparse tensor), and check whether an item is between the |lb| and |ub|
+in Cartesian ordering (this corresponds to belonging to the
+slices). If it belongs, then we subtract the lower bound |lb| to
+obtain coordinates in the |this| tensor and we copy the item.
+
+@<|FGSTensor| slicing from |FSSparseTensor|@>=
+FGSTensor::FGSTensor(const FSSparseTensor& t, const IntSequence& ss,
+					 const IntSequence& coor, const TensorDimens& td)
+	: FTensor(along_col, td.getNVX(), t.nrows(),
+			  td.calcFoldMaxOffset(), td.dimen()),
+	  tdims(td)
+{
+	@<set |lb| and |ub| to lower and upper bounds of indices@>;
+
+	zeros();
+	FSSparseTensor::const_iterator lbi = t.getMap().lower_bound(lb);
+	FSSparseTensor::const_iterator ubi = t.getMap().upper_bound(ub);
+	for (FSSparseTensor::const_iterator run = lbi; run != ubi; ++run) {
+		if (lb.lessEq((*run).first) && (*run).first.lessEq(ub)) {
+			IntSequence c((*run).first);
+			c.add(-1, lb);
+			Tensor::index ind(this, c);
+			TL_RAISE_IF(*ind < 0 || *ind >= ncols(),
+						"Internal error in slicing constructor of FGSTensor");
+			get((*run).second.first, *ind) = (*run).second.second;
+		}
+	}
+}
+
+@ Here we first set |s_offsets| to offsets of partitions whose lengths
+are given by |ss|. So |s_offsets| is a cumulative sum of |ss|.
+
+Then we create |lb| to be coordinates of the possibly first index from
+the slice, and |ub| to be coordinates of possibly last index of the
+slice.
+
+@<set |lb| and |ub| to lower and upper bounds of indices@>=
+	IntSequence s_offsets(ss.size(), 0);
+	for (int i = 1; i < ss.size(); i++)
+		s_offsets[i] = s_offsets[i-1] + ss[i-1];
+
+	IntSequence lb(coor.size());
+	IntSequence ub(coor.size());
+	for (int i = 0; i < coor.size(); i++) {
+		lb[i] = s_offsets[coor[i]];
+		ub[i] = s_offsets[coor[i]] + ss[coor[i]] - 1;
+	}
+
+
+@ The code is similar to |@<|FGSTensor| slicing from |FSSparseTensor|@>|.
+@<|FGSTensor| slicing from |FFSTensor|@>=
+FGSTensor::FGSTensor(const FFSTensor& t, const IntSequence& ss,
+					 const IntSequence& coor, const TensorDimens& td)
+	: FTensor(along_col, td.getNVX(), t.nrows(),
+			  td.calcFoldMaxOffset(), td.dimen()),
+	  tdims(td)
+{
+	if (ncols() == 0)
+		return;
+
+	@<set |lb| and |ub| to lower and upper bounds of indices@>;
+
+	zeros();
+	Tensor::index lbi(&t, lb);
+	Tensor::index ubi(&t, ub);
+	++ubi;
+	for (Tensor::index run = lbi; run != ubi; ++run) {
+		if (lb.lessEq(run.getCoor()) && run.getCoor().lessEq(ub)) {
+			IntSequence c(run.getCoor());
+			c.add(-1, lb);
+			Tensor::index ind(this, c);
+			TL_RAISE_IF(*ind < 0 || *ind >= ncols(),
+						"Internal error in slicing constructor of FGSTensor");
+			copyColumn(t, *run, *ind);
+		}
+	}
+}
+
+@ 
+@<|FGSTensor| conversion from |GSSparseTensor|@>=
+FGSTensor::FGSTensor(const GSSparseTensor& t)
+	: FTensor(along_col, t.getDims().getNVX(), t.nrows(),
+			  t.getDims().calcFoldMaxOffset(), t.dimen()), tdims(t.getDims())
+{
+	zeros();
+	for (FSSparseTensor::const_iterator it = t.getMap().begin();
+		 it != t.getMap().end(); ++it) {
+		index ind(this, (*it).first);
+		get((*it).second.first, *ind) = (*it).second.second;
+	}
+}
+
+@ First we increment as unfolded, then we must monotonize within
+partitions defined by the symmetry. This is done by
+|IntSequence::pmonotone|.
+
+@<|FGSTensor::increment| code@>=
+void FGSTensor::increment(IntSequence& v) const
+{
+	TL_RAISE_IF(v.size() != dimen(),
+				"Wrong input/output vector size in FGSTensor::increment");
+
+	UTensor::increment(v, tdims.getNVX());
+	v.pmonotone(tdims.getSym());
+}
+
+
+
+
+@ Return unfolded version of the tensor.
+@<|FGSTensor::unfold| code@>=
+UTensor& FGSTensor::unfold() const
+{
+	return *(new UGSTensor(*this));
+}
+
+
+@ Here we implement the contraction
+$$\left[r_{x^iz^k}\right]_{\alpha_1\ldots\alpha_i\gamma_1\ldots\gamma_k}=
+\left[t_{x^iy^jz^k}\right]_{\alpha_1\ldots\alpha_i\beta_1\ldots\beta_j\gamma_1\ldots\gamma_k}
+\left[c\right]^{\beta_1\ldots\beta_j}
+$$
+More generally, $x^i$ and $z^k$ can represent also general symmetries. 
+
+The operation can be rewritten as a matrix product
+$$\left[t_{x^iy^jz^k}\right]\cdot\left(I_l\otimes c\otimes I_r\right)$$
+where $l$ is a number of columns in tensor with symmetry on the left
+(i.e. $x^i$), and $r$ is a number of columns in tensor with a symmetry
+on the right (i.e. $z^k$). The code proceeds accordingly. We first
+form two symmetries |sym_left| and |sym_right|, then calculate the
+number of columns |dleft|$=l$ and |dright|$=r$, form the Kronecker
+product and multiply and add.
+
+The input parameter |i| is the order of a variable being contracted
+starting from 0.
+
+@<|FGSTensor::contractAndAdd| code@>=
+void FGSTensor::contractAndAdd(int i, FGSTensor& out,
+							   const FRSingleTensor& col) const
+{
+	TL_RAISE_IF(i < 0 || i >= getSym().num(),
+				"Wrong index for FGSTensor::contractAndAdd");
+
+	TL_RAISE_IF(getSym()[i] != col.dimen() || tdims.getNVS()[i] != col.nvar(),
+				"Wrong dimensions for FGSTensor::contractAndAdd");
+
+	@<set |sym_left| and |sym_right| to symmetries around |i|@>;
+	int dleft = TensorDimens(sym_left, tdims.getNVS()).calcFoldMaxOffset();
+	int dright = TensorDimens(sym_right, tdims.getNVS()).calcFoldMaxOffset();
+	KronProdAll kp(3);
+	kp.setUnit(0, dleft);
+	kp.setMat(1, col);
+	kp.setUnit(2, dright);
+	FGSTensor tmp(out.nrows(), out.getDims());
+	kp.mult(*this, tmp);
+	out.add(1.0, tmp);
+}
+
+@ Here we have a symmetry of |this| tensor and we have to set
+|sym_left| to the subsymmetry left from the |i|-th variable and
+|sym_right| to the subsymmetry right from the |i|-th variable. So we
+copy first all the symmetry and then put zeros to the left for
+|sym_right| and to the right for |sym_left|.
+
+@<set |sym_left| and |sym_right| to symmetries around |i|@>=
+	Symmetry sym_left(getSym());
+	Symmetry sym_right(getSym());
+	for (int j = 0; j < getSym().num(); j++) {
+		if (j <= i)
+			sym_right[j] = 0;
+		if (j >= i)
+			sym_left[j] = 0;
+	}
+
+
+@ Here we go through folded tensor, and each index we convert to index
+of the unfolded tensor and copy the data to the unfolded. Then we
+unfold data within the unfolded tensor.
+
+@<|UGSTensor| conversion from |FGSTensor|@>=
+UGSTensor::UGSTensor(const FGSTensor& ft)
+	: UTensor(along_col, ft.tdims.getNVX(), ft.nrows(),
+			  ft.tdims.calcUnfoldMaxOffset(), ft.dimen()),
+	  tdims(ft.tdims)
+{
+	for (index fi = ft.begin(); fi != ft.end(); ++fi) {
+		index ui(this, fi.getCoor());
+		copyColumn(ft, *fi, *ui);
+	}
+	unfoldData();
+}
+
+@ This makes a folded slice from the sparse tensor and unfolds it.
+@<|UGSTensor| slicing from |FSSparseTensor|@>=
+UGSTensor::UGSTensor(const FSSparseTensor& t, const IntSequence& ss,
+					 const IntSequence& coor, const TensorDimens& td)
+	: UTensor(along_col, td.getNVX(), t.nrows(),
+			  td.calcUnfoldMaxOffset(), td.dimen()),
+	  tdims(td)
+{
+	if (ncols() == 0)
+		return;
+
+	FGSTensor ft(t, ss, coor, td);
+	for (index fi = ft.begin(); fi != ft.end(); ++fi) {
+		index ui(this, fi.getCoor());
+		copyColumn(ft, *fi, *ui);
+	}
+	unfoldData();
+}
+
+@ This makes a folded slice from dense and unfolds it. 
+@<|UGSTensor| slicing from |UFSTensor|@>=
+UGSTensor::UGSTensor(const UFSTensor& t, const IntSequence& ss,
+					 const IntSequence& coor, const TensorDimens& td)
+	: UTensor(along_col, td.getNVX(), t.nrows(),
+			  td.calcUnfoldMaxOffset(), td.dimen()),
+	  tdims(td)
+{
+	FFSTensor folded(t);
+	FGSTensor ft(folded, ss, coor, td);
+	for (index fi = ft.begin(); fi != ft.end(); ++fi) {
+		index ui(this, fi.getCoor());
+		copyColumn(ft, *fi, *ui);
+	}
+	unfoldData();
+}
+
+
+@ Clear, just call |UTensor| static methods.
+@<|UGSTensor| increment and decrement codes@>=
+void UGSTensor::increment(IntSequence& v) const
+{
+	TL_RAISE_IF(v.size() != dimen(),
+				"Wrong input/output vector size in UGSTensor::increment");
+
+	UTensor::increment(v, tdims.getNVX());
+}
+
+void UGSTensor::decrement(IntSequence& v) const
+{
+	TL_RAISE_IF(v.size() != dimen(),
+				"Wrong input/output vector size in UGSTensor::decrement");
+
+	UTensor::decrement(v, tdims.getNVX());
+}
+
+
+@ Return a new instance of folded version.
+@<|UGSTensor::fold| code@>=
+FTensor& UGSTensor::fold() const
+{
+	return *(new FGSTensor(*this));
+}
+
+@ Return an offset of a given index.
+@<|UGSTensor::getOffset| code@>=
+int UGSTensor::getOffset(const IntSequence& v) const
+{
+	TL_RAISE_IF(v.size() != dimen(),
+				"Wrong input vector size in UGSTensor::getOffset");
+
+	return UTensor::getOffset(v, tdims.getNVX());
+}
+
+@ Unfold all data. We go through all the columns and for each we
+obtain an index of the first equivalent, and copy the data.
+
+@<|UGSTensor::unfoldData| code@>=
+void UGSTensor::unfoldData()
+{
+	for (index in = begin(); in != end(); ++in)
+		copyColumn(*(getFirstIndexOf(in)), *in);
+}
+
+@ Here we return the first index which is equivalent in the symmetry
+to the given index. It is a matter of sorting all the symmetry
+partitions of the index.
+
+@<|UGSTensor::getFirstIndexOf| code@>=
+Tensor::index UGSTensor::getFirstIndexOf(const index& in) const
+{
+	IntSequence v(in.getCoor());
+	int last = 0;
+	for (int i = 0; i < tdims.getSym().num(); i++) {
+		IntSequence vtmp(v, last, last+tdims.getSym()[i]);
+		vtmp.sort();
+		last += tdims.getSym()[i];
+	}
+	return index(this, v);
+}
+
+@ Here is perfectly same code with the same semantics as in 
+|@<|FGSTensor::contractAndAdd| code@>|.
+
+@<|UGSTensor::contractAndAdd| code@>=
+void UGSTensor::contractAndAdd(int i, UGSTensor& out,
+							   const URSingleTensor& col) const
+{
+	TL_RAISE_IF(i < 0 || i >= getSym().num(),
+				"Wrong index for UGSTensor::contractAndAdd");
+	TL_RAISE_IF(getSym()[i] != col.dimen() || tdims.getNVS()[i] != col.nvar(),
+				"Wrong dimensions for UGSTensor::contractAndAdd");
+
+	@<set |sym_left| and |sym_right| to symmetries around |i|@>;
+	int dleft = TensorDimens(sym_left, tdims.getNVS()).calcUnfoldMaxOffset();
+	int dright = TensorDimens(sym_right, tdims.getNVS()).calcUnfoldMaxOffset();
+	KronProdAll kp(3);
+	kp.setUnit(0, dleft);
+	kp.setMat(1, col);
+	kp.setUnit(2, dright);
+	UGSTensor tmp(out.nrows(), out.getDims());
+	kp.mult(*this, tmp);
+	out.add(1.0, tmp);
+}
+
+@ End of {\tt gs\_tensor.cpp} file.

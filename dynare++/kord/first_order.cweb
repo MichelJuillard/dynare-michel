@@ -1,0 +1,302 @@
+@q $Id: first_order.cweb 2351 2009-09-03 14:58:03Z kamenik $ @>
+@q Copyright 2004, Ondra Kamenik @>
+
+@ Start of {\tt first\_order.cpp} file.
+
+@c
+
+#include "kord_exception.h"
+#include "first_order.h"
+#include "cpplapack.h"
+
+double qz_criterium = 1.000001;
+@<|order_eigs| function code@>;
+@<|FirstOrder::solve| code@>;
+@<|FirstOrder::journalEigs| code@>;
+
+@ This is a function which selects the eigenvalues pair used by
+|LAPACK_dgges|. See documentation to DGGES for details. Here we want
+to select (return true) the pairs for which $\alpha<\beta$.
+
+@<|order_eigs| function code@>=
+int order_eigs(const double* alphar, const double* alphai, const double* beta)
+{
+	return (*alphar * *alphar + *alphai * *alphai < *beta * *beta * qz_criterium);
+}
+
+
+@ Here we solve the linear approximation. The result are the matrices
+$g_{y^*}$ and $g_u$. The method solves the first derivatives of $g$ so
+that the following equation would be true:
+$$E_t[F(y^*_{t-1},u_t,u_{t+1},\sigma)] =
+E_t[f(g^{**}(g^*(y_{t-1}^*,u_t,\sigma), u_{t+1}, \sigma), g(y_{t-1}^*,u_t,\sigma),
+y^*_{t-1},u_t)]=0$$
+where $f$ is a given system of equations.
+
+It is known that $g_{y^*}$ is given by $F_{y^*}=0$, $g_u$ is given by
+$F_u=0$, and $g_\sigma$ is zero. The only input to the method are the
+derivatives |fd| of the system $f$, and partitioning of the vector $y$
+(from object).
+
+@<|FirstOrder::solve| code@>=
+void FirstOrder::solve(const TwoDMatrix& fd)
+{
+	JournalRecordPair pa(journal);
+	pa << "Recovering first order derivatives " << endrec;
+
+	::qz_criterium = FirstOrder::qz_criterium;
+
+	@<solve derivatives |gy|@>;
+	@<solve derivatives |gu|@>;
+	journalEigs();
+
+	if (! gy.isFinite() || ! gu.isFinite()) {
+		throw KordException(__FILE__, __LINE__,
+						  "NaN or Inf asserted in first order derivatives in FirstOrder::solve");
+	}
+}
+
+@ The derivatives $g_{y^*}$ are retrieved from the equation
+$F_{y^*}=0$. The calculation proceeds as follows:
+
+\orderedlist
+
+\li For each variable appearing at both $t-1$ and $t-1$ we add a dummy
+variable, so that the predetermined variables and forward looking would
+be disjoint. This is, the matrix of the first derivatives of the
+system written as:
+$$\left[\matrix{f_{y^{**}_+}&f_{ys}&f_{yp}&f_{yb}&f_{yf}&f_{y^*_-}}\right],$$
+where $f_{ys}$, $f_{yp}$, $f_{yb}$, and $f_{yf}$ are derivatives wrt
+static, predetermined, both, forward looking at time $t$, is rewritten
+to the matrix:
+$$\left[
+\matrix{f_{y^{**}_+}&f_{ys}&f_{yp}&f_{yb}&0&f_{yf}&f_{y^*_-}\cr
+        0           &0     &0     &I   &-I&0    &0}
+ \right],$$
+where the second line has number of rows equal to the number of both variables.
+
+\li Next, provided that forward looking and predetermined are
+disjoint, the equation $F_{y^*}=0$ is written as:
+$$\left[f_+{y^{**}_+}\right]\left[g_{y^*}^{**}\right]\left[g_{y^*}^*\right]
++\left[f_{ys}\right]\left[g^s_{y^*}\right]
++\left[f_{y^*}\right]\left[g^*_{y^*}\right]
++\left[f_{y^{**}}\right]\left[g^{**}_{y^*}\right]+\left[f_{y^*_-}\right]=0$$
+This is rewritten as
+$$\left[\matrix{f_{y^*}&0&f_{y^{**}_+}}\right]
+\left[\matrix{I\cr g^s_{y^*}\cr g^{**}_{y^*}}\right]\left[g_{y^*}^*\right]+ 
+\left[\matrix{f_{y^*_-}&f_{ys}&f_{y^{**}}}\right]
+\left[\matrix{I\cr g^s_{y^*}\cr g^{**}_{y^*}}\right]=0
+$$
+Now, in the above equation, there are the auxiliary variables standing
+for copies of both variables at time $t+1$. This equation is then
+rewritten as:
+$$
+\left[\matrix{f_{yp}&f_{yb}&0&f_{y^{**}_+}\cr 0&I&0&0}\right]
+\left[\matrix{I\cr g^s_{y^*}\cr g^{**}_{y^*}}\right]\left[g_{y^*}^*\right]+ 
+\left[\matrix{f_{y^*_-}&f_{ys}&0&f_{yf}\cr 0&0&-I&0}\right]
+\left[\matrix{I\cr g^s_{y^*}\cr g^{**}_{y^*}}\right]=0
+$$
+The two matrices are denoted as $D$ and $-E$, so the equation takes the form:
+$$D\left[\matrix{I\cr g^s_{y^*}\cr g^{**}_{y^*}}\right]\left[g_{y^*}^*\right]=
+E\left[\matrix{I\cr g^s_{y^*}\cr g^{**}_{y^*}}\right]$$
+
+\li Next we solve the equation by Generalized Schur decomposition:
+$$
+\left[\matrix{T_{11}&T_{12}\cr 0&T_{22}}\right]
+\left[\matrix{Z_{11}^T&Z_{21}^T\cr Z_{12}^T&Z_{22}^T}\right]
+\left[\matrix{I\cr X}\right]\left[g_{y^*}^*\right]=
+\left[\matrix{S_{11}&S_{12}\cr 0&S_{22}}\right]
+\left[\matrix{Z_{11}^T&Z_{21}^T\cr Z_{12}^T&Z_{22}^T}\right]
+\left[\matrix{I\cr X}\right]
+$$
+We reorder the eigenvalue pair so that $S_{ii}/T_{ii}$ with modulus
+less than one would be in the left-upper part.
+
+\li The Blachard--Kahn stability argument implies that the pairs
+with modulus less that one will be in and only int $S_{11}/T_{11}$.
+The exploding paths will be then eliminated when
+$$
+\left[\matrix{Z_{11}^T&Z_{21}^T\cr Z_{12}^T&Z_{22}^T}\right]
+\left[\matrix{I\cr X}\right]\left[g_{y^*}^*\right]=
+\left[\matrix{Y\cr 0}\right]
+$$
+From this we have, $Y=Z_{11}^{-1}$, and $X=Z_{21}Y$, or equivalently
+$X=-Z_{22}^{-T}Z_{12}^T$.  From the equation, we get
+$\left[g_{y^*}^*\right]=Y^{-1}T_{11}^{-1}S_{11}Y$, which is
+$Z_{11}T_{11}^{-1}S_{11}Z_{11}^{-1}$.
+
+\li We then copy the derivatives to storage |gy|. Note that the
+derivatives of both variables are in $X$ and in
+$\left[g_{y^*}^*\right]$, so we check whether the two submatrices are
+the same. The difference is only numerical error.
+
+\endorderedlist
+
+@<solve derivatives |gy|@>=
+	@<setup submatrices of |f|@>;
+	@<form matrix $D$@>;
+	@<form matrix $E$@>;
+	@<solve generalized Schur@>;
+	@<make submatrices of right space@>;
+	@<calculate derivatives of static and forward@>;
+	@<calculate derivatives of predetermined@>;
+	@<copy derivatives to |gy|@>;
+	@<check difference for derivatives of both@>;
+
+
+@ Here we setup submatrices of the derivatives |fd|.
+@<setup submatrices of |f|@>=
+	int off = 0;
+	ConstTwoDMatrix fyplus(fd, off, ypart.nyss());
+	off += ypart.nyss();
+	ConstTwoDMatrix fyszero(fd, off, ypart.nstat);
+	off += ypart.nstat;
+	ConstTwoDMatrix fypzero(fd, off, ypart.npred);
+	off += ypart.npred;
+	ConstTwoDMatrix fybzero(fd, off, ypart.nboth);
+	off += ypart.nboth;
+	ConstTwoDMatrix fyfzero(fd, off, ypart.nforw);
+	off += ypart.nforw;
+	ConstTwoDMatrix fymins(fd, off, ypart.nys());
+	off += ypart.nys();
+	ConstTwoDMatrix fuzero(fd, off, nu);
+	off += nu;
+
+@ 
+@<form matrix $D$@>=
+	int n = ypart.ny()+ypart.nboth;
+	TwoDMatrix matD(n, n);
+	matD.zeros();
+	matD.place(fypzero, 0, 0);
+	matD.place(fybzero, 0, ypart.npred);
+	matD.place(fyplus, 0, ypart.nys()+ypart.nstat);
+	for (int i = 0; i < ypart.nboth; i++)
+		matD.get(ypart.ny()+i, ypart.npred+i) = 1.0;
+
+@ 
+@<form matrix $E$@>=
+	TwoDMatrix matE(n, n);
+	matE.zeros();
+	matE.place(fymins, 0, 0);
+	matE.place(fyszero, 0, ypart.nys());
+	matE.place(fyfzero, 0, ypart.nys()+ypart.nstat+ypart.nboth);
+	for (int i = 0; i < ypart.nboth; i++)
+		matE.get(ypart.ny()+i, ypart.nys()+ypart.nstat+i) = -1.0;
+	matE.mult(-1.0);
+
+@ 
+@<solve generalized Schur@>=
+	TwoDMatrix vsl(n, n);
+	TwoDMatrix vsr(n, n);
+	int lwork = 100*n+16;
+	Vector work(lwork);
+	IntSequence bwork(n);
+	int info;
+	LAPACK_dgges("N", "V", "S", order_eigs, &n, matE.getData().base(), &n,
+				 matD.getData().base(), &n, &sdim, alphar.base(), alphai.base(),
+				 beta.base(), vsl.getData().base(), &n, vsr.getData().base(), &n,
+				 work.base(), &lwork, &(bwork[0]), &info);
+	bk_cond = (sdim == ypart.nys());
+
+
+@ Here we setup submatrices of the matrix $Z$.
+@<make submatrices of right space@>=
+	ConstGeneralMatrix z11(vsr, 0, 0, ypart.nys(), ypart.nys());
+	ConstGeneralMatrix z12(vsr, 0, ypart.nys(), ypart.nys(), n-ypart.nys());
+	ConstGeneralMatrix z21(vsr, ypart.nys(), 0, n-ypart.nys(), ypart.nys());
+	ConstGeneralMatrix z22(vsr, ypart.nys(), ypart.nys(), n-ypart.nys(), n-ypart.nys());
+	
+@ Here we calculate $X=-Z_{22}^{-T}Z_{12}^T$, where $X$ is |sfder| in the code.
+@<calculate derivatives of static and forward@>=
+	GeneralMatrix sfder(z12, "transpose");
+	z22.multInvLeftTrans(sfder);
+	sfder.mult(-1);
+
+@ Here we calculate
+$g_{y^*}^*=Z_{11}T^{-1}_{11}S_{11}Z_{11}^{-1}
+=Z_{11}T^{-1}_{11}(Z_{11}^{-T}S^T_{11})^T$.
+
+@<calculate derivatives of predetermined@>=
+    ConstGeneralMatrix s11(matE, 0, 0, ypart.nys(), ypart.nys());
+	ConstGeneralMatrix t11(matD, 0, 0, ypart.nys(), ypart.nys());
+	GeneralMatrix dumm(s11, "transpose");
+	z11.multInvLeftTrans(dumm);
+	GeneralMatrix preder(dumm, "transpose");
+	t11.multInvLeft(preder);
+	preder.multLeft(z11);
+
+@ 
+@<copy derivatives to |gy|@>=
+	gy.place(preder, ypart.nstat, 0);
+	GeneralMatrix sder(sfder, 0, 0, ypart.nstat, ypart.nys());
+	gy.place(sder, 0, 0);
+	GeneralMatrix fder(sfder, ypart.nstat+ypart.nboth, 0, ypart.nforw, ypart.nys());
+	gy.place(fder, ypart.nstat+ypart.nys(), 0);
+
+@ 
+@<check difference for derivatives of both@>=
+	GeneralMatrix bder((const GeneralMatrix&)sfder, ypart.nstat, 0, ypart.nboth, ypart.nys());
+	GeneralMatrix bder2(preder, ypart.npred, 0, ypart.nboth, ypart.nys());
+	bder.add(-1, bder2);
+	b_error = bder.getData().getMax();
+
+@ The equation $F_u=0$ can be written as
+$$
+\left[f_{y^{**}_+}\right]\left[g^{**}_{y^*}\right]\left[g_u^*\right]+
+\left[f_y\right]\left[g_u\right]+\left[f_u\right]=0
+$$
+and rewritten as
+$$
+\left[f_y +
+\left[\matrix{0&f_{y^{**}_+}g^{**}_{y^*}&0}\right]\right]g_u=f_u
+$$
+This is exactly done here. The matrix
+$\left[f_y +\left[\matrix{0&f_{y^{**}_+}g^{**}_{y^*}&0}\right]\right]$ is |matA|
+in the code.
+
+@<solve derivatives |gu|@>=
+	GeneralMatrix matA(ypart.ny(), ypart.ny());
+	matA.zeros();
+	ConstGeneralMatrix gss(gy, ypart.nstat+ypart.npred, 0, ypart.nyss(), ypart.nys());
+	GeneralMatrix aux(fyplus, gss);
+	matA.place(aux, 0, ypart.nstat);
+	ConstGeneralMatrix fyzero(fd, 0, ypart.nyss(), ypart.ny(), ypart.ny());
+	matA.add(1.0, fyzero);
+	gu.zeros();
+	gu.add(-1.0, fuzero);
+	ConstGeneralMatrix(matA).multInvLeft(gu);
+
+@ 
+@<|FirstOrder::journalEigs| code@>=
+void FirstOrder::journalEigs()
+{
+	if (bk_cond) {
+		JournalRecord jr(journal);
+		jr << "Blanchard-Kahn conditition satisfied, model stable" << endrec;
+	} else {
+		JournalRecord jr(journal);
+		jr << "Blanchard-Kahn condition not satisfied, model not stable: sdim=" << sdim 
+		   << " " << "npred=" << ypart.nys() << endrec;
+	}
+	if (!bk_cond) {
+		for (int i = 0; i < alphar.length(); i++) {
+			if (i == sdim || i == ypart.nys()) {
+				JournalRecord jr(journal);
+				jr << "---------------------------------------------------- ";
+				if (i == sdim)
+					jr << "sdim";
+				else
+					jr << "npred";
+				jr << endrec;
+			}
+			JournalRecord jr(journal);
+			double mod = sqrt(alphar[i]*alphar[i]+alphai[i]*alphai[i]);
+			mod = mod/round(100000*std::abs(beta[i]))*100000;
+			jr << i << "\t(" << alphar[i] << "," << alphai[i] << ") / " << beta[i]
+			   << "  \t" << mod << endrec; 
+		}
+	}
+}
+
+
+@ End of {\tt first\_order.cpp} file.

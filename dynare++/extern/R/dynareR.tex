@@ -1,0 +1,201 @@
+%% $Id: dynareR.tex 863 2006-08-04 17:35:21Z tamas $
+%% Copyright Tamas K Papp, 2006
+%% should compile with any reasonable TeX distribution, I am using tetex
+\documentclass[12pt,a4paper]{article}
+
+\usepackage{amsmath}
+\usepackage{amsfonts}
+%\usepackage[letterpaper,vmargin=1.7in]{geometry}
+%\usepackage[letterpaper,left=2cm,right=8cm,bottom=3cm,top=3cm,marginparwidth=4cm]{geometry}
+%\usepackage{natbib}
+\usepackage{graphicx}
+\usepackage{url}
+\usepackage{natbib}
+\usepackage{color}
+\usepackage{paralist}           % compactitem
+\DeclareMathOperator{\Var}{Var}
+\DeclareMathOperator{\Cov}{Cov}
+\DeclareMathOperator{\argmin}{argmin}
+\DeclareMathOperator{\argmax}{argmax}
+\DeclareMathSymbol{\ueps}{\mathord}{letters}{"0F} % ugly epsilon
+\renewcommand{\epsilon}{\varepsilon}
+\newcommand{\aseq}{\overset{as}=} % almost surely equals
+
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+\lhead{Tam\'as K Papp} \chead{} \rhead{DynareR}
+\cfoot{\thepage}
+
+\renewcommand\floatpagefraction{.9}
+\renewcommand\topfraction{.9}
+\renewcommand\bottomfraction{.9}
+\renewcommand\textfraction{.1}
+
+\usepackage{listings}
+\lstset{
+  language=R,
+  extendedchars=true,
+  basicstyle=\footnotesize,
+  stringstyle=\ttfamily,
+  commentstyle=\slshape,
+%  numbers=left,
+%  stepnumber=5,
+%  numbersep=6pt,
+%  numberstyle=\footnotesize,
+  breaklines=true,
+  frame=single,
+  columns=fullflexible,
+}
+
+\begin{document}
+
+\title{DynareR}
+\author{Tam\'as K Papp (\url{tpapp@princeton.edu})}
+\date{\today}
+\maketitle
+
+DynareR is an R interface for Ondra Kamen\'ik's Dynare++ program.  The
+interface is still under development, and the functions might change.
+However, I thought that some documentation would help to get users
+started.
+
+The purpose of DynareR is to return the transition rule (the
+steady state and a list of tensors) for a given model.  DynareR
+does not simulate, and currently does no checking of the
+approximation.  Primarily, the interface is to be intended to be used
+in Bayesian estimation of DSGE models (via MCMC).
+
+Before you read on, make sure that
+\begin{compactitem}
+  \item you understand what Dynare++ is and how it works,
+  \item you have compiled Dynare++ and DynareR (see \verb!README! in
+    \verb!extern/R!), and placed \verb!dynareR.so! and
+    \verb!dynareR.r! in your load path for R.
+\end{compactitem}
+
+The function that performs all the work is called
+\lstinline{calldynare}.  Its is defined like this:
+\begin{lstlisting}
+  calldynare <- function(modeleq, endo, exo, parameters, expandorder,
+                       parval, vcovmatrix, initval=rep(1,length(endo)),
+                       numsteps=0, jnlfile="/dev/null") {
+                         ...
+                       }
+\end{lstlisting}
+\lstinline{modeleq} is a character vector for the model equations, and
+it may have a length longer than one.  First, \lstinline{calldynare}
+checks if each string in the vector has a terminating semicolon (may
+be followed by whitespace), if it doesn't, then it appends one.  Then
+it concatenates all equations into a single string.  Thus, the
+following versions of \lstinline{modeleq} give equivalent results:
+\begin{lstlisting}
+  modeleq1 <- c("(c/c(1))^gamma*beta*(alpha*exp(a(1))*k^(alpha-1)+1-delta)=1",
+              "a=rho*a(-1)+eps",
+              "k+c=exp(a)*k(-1)^alpha+(1-delta)*k(-1)")
+  modeleq2 <- c("(c/c(1))^gamma*beta*(alpha*exp(a(1))*k^(alpha-1)+1-delta)=1;",
+              "a=rho*a(-1)+eps ;    ",
+              "k+c=exp(a)*k(-1)^alpha+(1-delta)*k(-1)  \t;\t  ")
+  modeleq3 <- paste(modeleq1, collapse=" ")
+\end{lstlisting}
+The next three arguments name the endo- and exogenous variables and
+the parameters.  The names should be character vectors, for example,
+\begin{lstlisting}
+  parameters <- c("beta","gamma","rho","alpha","delta")
+  varendo <- c("k","c","a")
+  varexo <- "eps"
+\end{lstlisting}
+\lstinline{calldynare} also needs the order of the approximation
+\lstinline{expandorder} (a nonnegative integer), the parameter values
+\lstinline{parval} (should be the same length as
+\lstinline{parameters}), a variance-covariance matrix \lstinline{vcov}
+(dimensions should match the length of \lstinline{exo}) and initial
+values for finding the deterministic steady state
+(\lstinline{initval}).  If you don't provide initial values,
+\lstinline{calldynare} will use a sequence of $1$s, on the assumption
+that most variables in economics are positive --- you should always
+try to provide a reasonable initial guess for the nonlinear solver if
+possible (if you are doing MCMC, chances are that you only have to do
+it once, see \lstinline{newinitval} below).
+
+You can also provide the number of steps for calculating the
+stochastic steady state (\lstinline{numsteps}, the default is zero,
+see the dynare++ tutorial for more information) and the name of the
+journal file \lstinline{jnlfile}.  If you don't provide a journal
+file, the default is \verb!/dev/null!.
+
+Below, you see an example of using dynareR.
+\lstinputlisting{test.r}
+
+\lstinline{calldynare} returns the results in a list, variables below
+refer to elements of this list.  First, you should always check
+\lstinline{kordcode}, which tells whether dynare++ could calculate an
+approximation.  It can have the following values:
+\begin{description}
+\item[0] the calculation was successful
+\item[1] the system is not stable (Blanchard-Kahn)
+\item[2] failed to calculate fixed point (infinite values)
+\item[3] failed to calculate fixed point (NaN values)
+\end{description}
+If \lstinline{kordcode} is nonzero, then the list has only this
+element.
+
+If \lstinline{kordcode} equals zero, then the list has the following
+elements:
+\begin{description}
+\item[ss] the steady state (ordered by \lstinline{orderendo}), which
+  is a vector
+\item[rule] the transition rule (ordered by \lstinline{orderendo},
+  \lstinline{orderstate} and \lstinline{orderexo}), a list of arrays
+\item[newinitval] the deterministic steady state, you can use this to
+  initialize the nonlinear solver for a nearby point in the parameter
+  space (ordered by \lstinline{orderendo})
+\item[orderstate] the index of endogenous variables that ended up in
+  the state
+\item[orderendo] the ordering of endogenous variables
+\item[orderexo] the ordering of exogenous variables
+\item[kordcode] discussed above
+\end{description}
+
+An example will illustrate the ordering.  To continue the example above,
+\begin{lstlisting}
+> dd$orderstate
+[1] 1 3
+> dd$orderendo
+[1] 1 3 2
+> dd$orderexo
+[1] 1
+> dd$rule[[1]]
+          [,1] [,2]       [,3]
+[1,] 0.9669374  0.0 0.02071077
+[2,] 2.4230073  0.9 0.45309125
+[3,] 2.6922303  1.0 0.50343473
+\end{lstlisting}
+Recall that the original ordering of endogenous variables was
+\lstinline{k, c, a}.  The vectors and matrices of the result are
+ordered as \lstinline{varendo[dd$orderendo]}, that is, as
+\lstinline{k, a, c}.  This is the ordering for the steady state and
+the first dimension of the tensors in \lstinline{rule}.  The other
+dimensions are ordered as
+\lstinline{c(varendo[dd$orderstate],varexo[dd$orderexo])}, that is to
+say, as \lstinline{k, a, eps}.  Use these orderings when calculating
+with the tensors and the steady state.  Also, remember that the $i$th
+tensor is already divided by $i!$.
+
+\lstinline{calldynare} also handles exceptions from dynare.  All
+exceptions (except KordException, which sets \lstinline{kordcode})
+generate an error in the R interface.  Normally, when solving a
+well-formed model (no typos in the equations, etc), users should not
+encounter these exceptions.  Having a journal file is useful for
+debugging.  If you are making long calculations, it is reasonable to
+catch errors with \lstinline{try} so that they won't abort the
+calculation.
+
+% \bibliographystyle{apalike}
+% \bibliography{/home/tpapp/doc/general.bib}
+
+\end{document}
+
+%%% Local Variables: 
+%%% mode: latex
+%%% TeX-master: t
+%%% End: 

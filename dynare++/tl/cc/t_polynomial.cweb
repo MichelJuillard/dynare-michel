@@ -1,0 +1,80 @@
+@q $Id: t_polynomial.cweb 1210 2007-03-19 21:38:49Z kamenik $ @>
+@q Copyright 2004, Ondra Kamenik @>
+
+@ Start of {\tt t\_polynomial.cpp} file.
+
+@c
+#include "t_polynomial.h"
+#include "kron_prod.h"
+
+@<|PowerProvider::getNext| unfolded code@>;
+@<|PowerProvider::getNext| folded code@>;
+@<|PowerProvider| destructor code@>;
+@<|UTensorPolynomial| constructor conversion code@>;
+@<|FTensorPolynomial| constructor conversion code@>;
+
+
+@ This method constructs unfolded |ut| of higher dimension, deleting
+the previous.
+
+@<|PowerProvider::getNext| unfolded code@>=
+const URSingleTensor& PowerProvider::getNext(const URSingleTensor* dummy)
+{
+	if (ut) {
+		URSingleTensor* ut_new = new URSingleTensor(nv, ut->dimen()+1);
+		KronProd::kronMult(ConstVector(origv), ConstVector(ut->getData()), ut_new->getData());
+		delete ut;
+		ut = ut_new;
+	} else {
+		ut = new URSingleTensor(nv, 1);
+		ut->getData() = origv;
+	}
+	return *ut;
+}
+
+@ This method just constructs next unfolded |ut| and creates folded
+|ft|.
+ 
+@<|PowerProvider::getNext| folded code@>=
+const FRSingleTensor& PowerProvider::getNext(const FRSingleTensor* dummy)
+{
+	getNext(ut);
+	if (ft)
+		delete ft;
+	ft = new FRSingleTensor(*ut);
+	return *ft;
+}
+
+@ 
+@<|PowerProvider| destructor code@>=
+PowerProvider::~PowerProvider()
+{
+	if (ut)
+		delete ut;
+	if (ft)
+		delete ft;
+}
+
+@ Clear.
+@<|UTensorPolynomial| constructor conversion code@>=
+UTensorPolynomial::UTensorPolynomial(const FTensorPolynomial& fp)
+	: TensorPolynomial<UFSTensor, UGSTensor, URSingleTensor>(fp.nrows(), fp.nvars())
+{
+	for (FTensorPolynomial::const_iterator it = fp.begin();
+		 it != fp.end(); ++it) {
+		insert(new UFSTensor(*((*it).second)));
+	}
+}
+
+@ Clear.
+@<|FTensorPolynomial| constructor conversion code@>=
+FTensorPolynomial::FTensorPolynomial(const UTensorPolynomial& up)
+	: TensorPolynomial<FFSTensor, FGSTensor, FRSingleTensor>(up.nrows(), up.nvars())
+{
+	for (UTensorPolynomial::const_iterator it = up.begin();
+		 it != up.end(); ++it) {
+		insert(new FFSTensor(*((*it).second)));
+	}
+}
+
+@ End of {\tt t\_polynomial.cpp} file.

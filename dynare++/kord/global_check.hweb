@@ -1,0 +1,167 @@
+@q $Id: global_check.hweb 431 2005-08-16 15:41:01Z kamenik $ @>
+@q Copyright 2005, Ondra Kamenik @>
+
+@*2 Global check. Start of {\tt global\_check.h} file.
+
+The purpose of this file is to provide classes for checking error of
+approximation. If $y_t=g(y^*_{t-1},u)$ is an approximate solution,
+then we check for the error of residuals of the system equations. Let
+$F(y^*,u,u')=f(g^{**}(g^*(y^*,u'),u),g(y^*,u),y^*,u)$, then we
+calculate integral
+$$E[F(y^*,u,u')]$$@q'@>
+which we want to be zero for all $y^*$, and $u$.
+
+There are a few possibilities how and where the integral is
+evaluated. Currently we offer the following:
+
+\numberedlist
+\li Along shocks. The $y^*$ is set to steady state, and $u$ is set to
+zero but one element is going from minus through plus shocks in few
+steps. The user gives the scaling factor, for instance interval
+$\langle<-3\sigma,3\sigma\rangle$ (where $sigma$ is a standard error
+of the shock), and a number of steps. This is repeated for each shock
+(element of the $u$ vector).
+\li Along simulation. Some random simulation is run, and for each
+realization of $y^*$ and $u$ along the path we evaluate the residual.
+\li On ellipse. Let $V=AA^T$ be a covariance matrix of the
+predetermined variables $y^*$ based on linear approximation, then we
+calculate integral for points on the ellipse $\{Ax\vert\, \Vert
+x\Vert_2=1\}$. The points are selected by means of low discrepancy
+method and polar transformation. The shock $u$ are zeros.
+
+\li Unconditional distribution. 
+
+\endnumberedlist
+
+
+@s ResidFunction int
+@s GResidFunction int
+@s GlobalChecker int
+@s VectorFunction int
+@s ResidFunctionSig int
+@s GaussHermite int
+@s SmolyakQuadrature int
+@s ProductQuadrature int
+@s ParameterSignal int
+@s Quadrature int
+@s QMCarloCubeQuadrature int
+
+@c
+#ifndef GLOBAL_CHECK_H
+#define GLOBAL_CHECK_H
+
+#include "vector_function.h"
+#include "quadrature.h"
+
+#include "dynamic_model.h"
+#include "journal.h"
+#include "approximation.h"
+
+@<|ResidFunction| class declaration@>;
+@<|GResidFunction| class declaration@>;
+@<|GlobalChecker| class declaration@>;
+@<|ResidFunctionSig| class declaration@>;
+
+#endif
+
+@ This is a class for implementing |VectorFunction| interface
+evaluating the residual of equations, this is
+$$F(y^*,u,u')=f(g^{**}(g^*(y^*,u),u'),y^*,u)$$
+is written as a function of $u'$.
+
+When the object is constructed, one has to specify $(y^*,u)$, this is
+done by |setYU| method. The object has basically two states. One is
+after construction and before call to |setYU|. The second is after
+call |setYU|. We distinguish between the two states, an object in the
+second state contains |yplus|, |ystar|, |u|, and |hss|.
+
+The vector |yplus| is $g^*(y^*,u)$. |ystar| is $y^*$, and polynomial
+|hss| is partially evaluated $g^**(yplus, u)$.
+
+The pointer to |DynamicModel| is important, since the |DynamicModel|
+evaluates the function $f$. When copying the object, we have to make
+also a copy of |DynamicModel|.
+
+@<|ResidFunction| class declaration@>=
+class ResidFunction : public VectorFunction {
+protected:@;
+	const Approximation& approx;
+	DynamicModel* model;
+	Vector* yplus;
+	Vector* ystar;
+	Vector* u;
+	FTensorPolynomial* hss;
+public:@;
+	ResidFunction(const Approximation& app);
+	ResidFunction(const ResidFunction& rf);
+	virtual ~ResidFunction();
+	virtual VectorFunction* clone() const
+		{@+ return new ResidFunction(*this);@+}
+	virtual void eval(const Vector& point, const ParameterSignal& sig, Vector& out);
+	void setYU(const Vector& ys, const Vector& xx);
+};
+
+@ This is a |ResidFunction| wrapped with |GaussConverterFunction|.
+
+@<|GResidFunction| class declaration@>=
+class GResidFunction : public GaussConverterFunction {
+public:@;
+	GResidFunction(const Approximation& app)
+		: GaussConverterFunction(new ResidFunction(app), app.getModel().getVcov())@+ {}
+	GResidFunction(const GResidFunction& rf)
+		: GaussConverterFunction(rf)@+ {}
+	virtual ~GResidFunction()@+ {}
+	virtual VectorFunction* clone() const
+		{@+ return new GResidFunction(*this);@+}
+	void setYU(const Vector& ys, const Vector& xx)
+		{@+ ((ResidFunction*)func)->setYU(ys, xx);}
+};
+
+
+@ This is a class encapsulating checking algorithms. Its core routine
+is |check|, which calculates integral $E[F(y^*,u,u')\vert y^*,u]$ for
+given realizations of $y^*$ and $u$. The both are given in
+matrices. The methods checking along shocks, on ellipse and anlong a
+simulation path, just fill the matrices and call the core |check|.
+
+The method |checkUnconditionalAndSave| evaluates unconditional
+$E[F(y,u,u')]$.
+
+The object also maintains a set of |GResidFunction| functions |vfs| in
+order to save (possibly expensive) copying of |DynamicModel|s.
+
+@<|GlobalChecker| class declaration@>=
+class GlobalChecker {
+	const Approximation& approx;
+	const DynamicModel& model;
+	Journal& journal;
+	GResidFunction rf;
+	VectorFunctionSet vfs;
+public:@;
+	GlobalChecker(const Approximation& app, int n, Journal& jr)
+		: approx(app), model(approx.getModel()), journal(jr),
+		  rf(approx), vfs(rf, n)@+ {}
+	void check(int max_evals, const ConstTwoDMatrix& y,
+			   const ConstTwoDMatrix& x, TwoDMatrix& out);
+	void checkAlongShocksAndSave(FILE* fd, const char* prefix,
+								 int m, double mult, int max_evals);
+	void checkOnEllipseAndSave(FILE* fd, const char* prefix,
+							   int m, double mult, int max_evals);
+	void checkAlongSimulationAndSave(FILE* fd, const char* prefix,
+									 int m, int max_evals);
+	void checkUnconditionalAndSave(FILE* fd, const char* prefix,
+								   int m, int max_evals);
+protected:@;
+	void check(const Quadrature& quad, int level,
+			   const ConstVector& y, const ConstVector& x, Vector& out);
+};
+
+
+@ Signalled resid function. Not implemented yet. todo:
+@<|ResidFunctionSig| class declaration@>=
+class ResidFunctionSig : public ResidFunction {
+public:@;
+	ResidFunctionSig(const Approximation& app, const Vector& ys, const Vector& xx);
+};
+
+@ End of {\tt global\_check.h} file.

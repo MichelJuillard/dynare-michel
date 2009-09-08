@@ -1,0 +1,380 @@
+@q $Id: main.web 2338 2009-01-14 10:40:30Z kamenik $ @>
+@q Copyright 2004, Ondra Kamenik @>
+
+\let\ifpdf\relax
+\input eplain
+\def\title{{\mainfont Tensor Library}}
+
+
+@i c++lib.w
+@s const_reverse_iterator int
+@s value_type int
+
+\titletrue
+\null\vfill
+\centerline{\titlefont Multidimensional Tensor Library}
+\vskip\baselineskip
+\centerline{\vtop{\hsize=10cm\leftskip=0pt plus 1fil
+  \rightskip=0pt plus 1fil\noindent
+	primary use in perturbation methods for Stochastic
+	Dynamic General Equilibrium (SDGE) models}}
+\vfill\vfill
+Copyright \copyright\ 2004 by Ondra Kamenik
+
+@*1 Library overview.
+
+The design of the library was driven by the needs of perturbation
+methods for solving Stochastic Dynamic General Equilibrium models. The
+aim of the library is not to provide an exhaustive interface to
+multidimensional linear algebra. The tensor library's main purposes
+include:
+\unorderedlist
+
+\li Define types for tensors, for a multidimensional index of a
+tensor, and types for folded and unfolded tensors. The tensors defined
+here have only one multidimensional index and one reserved
+one-dimensional index. The tensors should allow modelling of higher
+order derivatives with respect to a few vectors with different sizes
+(for example $\left[g_{y^2u^3}\right]$). The tensors should allow
+folded and unfolded storage modes and conversion between them. A
+folded tensor stores symmetric elements only once, while an unfolded
+stores data as a whole multidimensional cube.
+
+\li Define both sparse and dense tensors. We need only one particular
+type of sparse tensor. This in contrast to dense tensors, where we
+need much wider family of types.
+
+\li Implement the Faa Di Bruno multidimensional formula. So, the main
+purpose of the library is to implement the following step of Faa Di Bruno:
+$$\left[B_{s^k}\right]_{\alpha_1\ldots\alpha_k}
+=\left[h_{y^l}\right]_{\gamma_1\ldots\gamma_l}
+\left(\sum_{c\in M_{l,k}}
+\prod_{m=1}^l\left[g_{c_m}\right]^{\gamma_m}_{c_m(\alpha)}\right)$$
+where $s$ can be a compound vector of variables, $M_{l,k}$ is a set of
+all equivalences of $k$ element set having $l$ classes, $c_m$ is
+$m$-th class of equivalence $c$, and $c_m(\alpha)$ is a tuple of
+picked indices from $\alpha$ by class $c_m$.
+
+Note that the sparse tensors play a role of $h$ in the Faa Di Bruno, not
+of $B$ nor $g$.
+
+\endunorderedlist
+
+The following table is a road-map to various abstractions in the library.
+
+\def\defloc#1#2{#1\hfill\break{\tt #2}}
+
+\noindent
+\halign to\hsize{%
+\vtop{\hsize=6.6cm\rightskip=0pt plus 1fil\noindent #}&
+\vtop{\advance\hsize by-6.6cm%
+      \raggedright\noindent\vrule width 0pt height 14pt #}\cr
+Class defined in & Purpose\cr
+\noalign{\hrule}\cr
+\defloc{|@<|Tensor| class declaration@>|}{tensor.hweb}&
+Virtual base class for all dense tensors, defines |index| as the
+multidimensonal iterator
+\cr
+\defloc{|@<|FTensor| class declaration@>|}{tensor.hweb}&
+Virtual base class for all folded tensors
+\cr
+\defloc{|@<|UTensor| class declaration@>|}{tensor.hweb}&
+Virtual base class for all unfolded tensors
+\cr
+\defloc{|@<|FFSTensor| class declaration@>|}{fs\_tensor.hweb}&
+Class representing folded full symmetry dense tensor,
+for instance $\left[g_{y^3}\right]$
+\cr
+\defloc{|@<|FGSTensor| class declaration@>|}{gs\_tensor.hweb}&
+Class representing folded general symmetry dense tensor,
+for instance $\left[g_{y^2u^3}\right]$
+\cr
+\defloc{|@<|UFSTensor| class declaration@>|}{fs\_tensor.hweb}&
+Class representing unfolded full symmetry dense tensor,
+for instance $\left[g_{y^3}\right]$
+\cr
+\defloc{|@<|UGSTensor| class declaration@>|}{gs\_tensor.hweb}&
+Class representing unfolded general symmetry dense tensor,
+for instance $\left[g_{y^2u^3}\right]$
+\cr
+|@<|URTensor| class declaration@>|\hfill\break
+\defloc{|@<|FRTensor| class declaration@>|}{rfs\_tensor.hweb}&
+Class representing unfolded/folded full symmetry, row-orient\-ed,
+dense tensor. Row-oriented tensors are used in the Faa Di Bruno
+above as some part (few or one column) of a product of $g$'s. Their
+fold/unfold conversions are special in such a way, that they must
+yield equivalent results if multiplied with folded/unfolded
+column-oriented counterparts.
+\cr
+|@<|URSingleTensor| class declaration@>|\hfill\break
+\defloc{|@<|FRSingleTensor| class declaration@>|}{rfs\_tensor.hweb}&
+Class representing unfolded/folded full symmetry, row-orient\-ed,
+single column, dense tensor. Besides use in the Faa Di Bruno, the
+single column row oriented tensor models also higher moments of normal
+distribution.
+\cr
+\defloc{|@<|UPSTensor| class declaration@>|}{ps\_tensor.hweb}&
+Class representing unfolded, column-orient\-ed tensor whose symmetry
+is not that of the $\left[B_{y^2u^3}\right]$ but rather of something
+as $\left[B_{yuuyu}\right]$. This tensor evolves during the product
+operation for unfolded tensors and its basic operation is to add
+itself to a tensor with nicer symmetry, here $\left[B_{y^2u^3}\right]$.
+\cr
+\defloc{|@<|FPSTensor| class declaration@>|}{ps\_tensor.hweb}&
+Class representing partially folded, column-orient\-ed tensor who\-se
+symmetry is not that of the $\left[B_{y^3u^4}\right]$ but rather
+something as $\left[B_{yu\vert y^3u\vert u^4}\right]$, where the
+portions of symmetries represent folded dimensions which are combined
+in unfolded manner. This tensor evolves during the Faa Di Bruno
+for folded tensors and its basic operation is to add itself to a
+tensor with nicer symmetry, here folded $\left[B_{y^3u^4}\right]$.
+\cr
+\defloc{|@<|USubTensor| class declaration@>|}{pyramid\_prod.hweb}&
+Class representing unfolded full symmetry, row-orient\-ed tensor which
+contains a few columns of huge product
+$\prod_{m=1}^l\left[g_{c_m}\right]^{\gamma_m}_{c_m(\alpha)}$. This is
+needed during the Faa Di Bruno for folded matrices.
+\cr
+\defloc{|@<|IrregTensor| class declaration@>|}{pyramid2\_prod.hweb}&
+Class representing a product of columns of derivatives
+$\left[z_{y^ku^l}\right]$, where $z=[y^T,v^T,w^T]^T$. Since the first
+part of $z$ is $y$, the derivatives contain many zeros, which are not
+stored, hence the tensor's irregularity. The tensor is used when
+calculating one step of Faa Di Bruno formula, i.e.
+$\left[f_{z^l}\right]\sum\prod_{m=1}^l\left[z_{c_m}\right]^{\gamma_m}_{c_m(\alpha)}$.
+\cr
+\defloc{|@<|FSSparseTensor| class declaration@>|}{sparse\_tensor.hweb}&
+Class representing full symmetry, column-oriented, sparse tensor. It
+is able to store elements keyed by the multidimensional index, and
+multiply itself with one column of row-oriented tensor.
+\cr
+\defloc{|@<|FGSContainer| class declaration@>|}{t\_container.hweb}&
+Container of |FGSTensor|s. It implements the Faa Di Bruno with
+unfolded or folded tensor $h$ yielding folded $B$. The methods are
+|FGSContainer::multAndAdd|.
+\cr
+\defloc{|@<|UGSContainer| class declaration@>|}{t\_container.hweb}&
+Container of |FGSTensor|s. It implements the Faa Di Bruno with
+unfolded tensor $h$ yielding unfolded $B$. The method is
+|UGSContainer::multAndAdd|.
+\cr
+\defloc{|@<|StackContainerInterface| class declaration@>|}
+{stack\_container.hweb}&Virtual pure interface describing all logic
+of stacked containers for which we will do the Faa Di Bruno operation. 
+\cr
+\defloc{|@<|UnfoldedStackContainer| class declaration@>|}
+{stack\_container.hweb}&Implements the Faa Di Bruno operation for stack of
+containers of unfolded tensors.
+\cr
+\defloc{|@<|FoldedStackContainer| class declaration@>|}{stack\_container.hweb}
+&Implements the Faa Di Bruno for stack of
+containers of fold\-ed tensors.
+\cr
+\defloc{|@<|ZContainer| class declaration@>|}{stack\_container.hweb}&
+The class implements the interface |StackContainerInterface| according
+to $z$ appearing in context of SDGE models. By a simple inheritance,
+we obtain |@<|UnfoldedZContainer| class declaration@>| and also
+|@<|FoldedZContainer| class declaration@>|.
+\cr
+\defloc{|@<|GContainer| class declaration@>|}{stack\_container.hweb}&
+The class implements the interface |StackContainerInterface| according
+to $G$ appearing in context of SDGE models. By a simple inheritance,
+we obtain |@<|UnfoldedGContainer| class declaration@>| and also
+|@<|FoldedGContainer| class declaration@>|.
+\cr
+\defloc{|@<|Equivalence| class declaration@>|}{equivalence.hweb}&
+The class represents an equivalence on $n$-element set. Useful in the
+Faa Di Bruno.
+\cr
+\defloc{|@<|EquivalenceSet| class declaration@>|}{equivalence.hweb}&
+The class representing all equivalences on $n$-element set. Useful in the
+Faa Di Bruno.
+\cr
+\defloc{|@<|Symmetry| class declaration@>|}{symmetry.hweb}&
+The class defines a symmetry of general symmetry tensor. This is it
+defines a basic shape of the tensor. For $\left[B_{y^2u^3}\right]$,
+the symmetry is $y^2u^3$.
+\cr
+\defloc{|@<|Permutation| class declaration@>|}{permutation.hweb}&
+The class represents a permutation of $n$ indices. Useful in the
+Faa Di Bruno.
+\cr
+\defloc{|@<|IntSequence| class declaration@>|}{int\_sequence.hweb}&
+The class represents a sequence of integers. Useful everywhere.
+\cr
+|@<|TwoDMatrix| class declaration@>|\hfill\break
+\defloc{|@<|ConstTwoDMatrix| class declaration@>|}{twod\_matrix.hweb}&
+The class provides an interface to a code handling two-di\-men\-si\-onal
+matrices. The code resides in Sylvester module, in directory {\tt
+sylv/cc}. The object files from that directory need to be linked: {\tt
+GeneralMatrix.o}, {\tt Vector.o} and {\tt SylvException.o}. There is
+no similar interface to |Vector| and |ConstVector| classes from the
+Sylvester module and they are used directly.
+\cr
+\defloc{|@<|KronProdAll| class declaration@>|}{kron\_prod.hweb}&
+The class represents a Kronecker product of a sequence of arbitrary
+matrices and is able to multiply a matrix from the right without
+storing the Kronecker product in memory.
+\cr
+\defloc{|@<|KronProdAllOptim| class declaration@>|}{kron\_prod.hweb}&
+The same as |KronProdAll| but it optimizes the order of matrices in
+the product to minimize the used memory during the Faa Di Bruno
+operation. Note that it is close to optimal flops.
+\cr
+|@<|FTensorPolynomial| class declaration@>|\hfill\break
+\defloc{|@<|UTensorPolynomial| class declaration@>|}{t\_polynomial.hweb}&
+Abstractions representing a polynomial whose coefficients are
+folded/unfolded tensors and variable is a column vector. The classes
+provide methods for traditional and horner-like polynomial
+evaluation. This is useful in simulation code.
+\cr
+|@<|FNormalMoments| class declaration@>|\hfill\break
+\defloc{|@<|UNormalMoments| class declaration@>|}{normal\_moments.hweb}&
+These are containers for folded/unfolded single column tensors for
+higher moments of normal distribution. The code contains an algorithm
+for generating the moments for arbitrary covariance matrix.
+\cr
+\defloc{|@<|TLStatic| class declaration@>|}{tl\_static.hweb}&
+The class encapsulates all static information needed for the
+library. It includes a Pascal triangle (for quick computation of
+binomial coefficients), and precalculated equivalence sets.
+\cr
+\defloc{|@<|TLException| class definition@>|}{tl\_exception.hweb}&
+Simple class thrown as an exception.
+\cr
+}
+
+@s Tensor int
+@s FTensor int
+@s UTensor int
+@s FFSTensor int
+@s UFSTensor int
+@s FGSTensor int
+@s UGSTensor int
+@s FRTensor int
+@s URTensor int
+@s FRSingleTensor int
+@s URSingleTensor int
+@s UPSTensor int
+@s UGSContainer int
+@s ZContainer int
+@s GContainer int
+@s StackContainerInterface int
+@s FoldedStackContainer int
+@s UnfoldedStackContainer int
+@s FoldedZContainer int
+@s UnfoldedZContainer int
+@s FoldedGContainer int
+@s UnfoldedGContainer int
+@s Permutation int
+@s KronProdAll int
+@s KronProdAllOptim int
+@s FTensorPolynomial int
+@s UTensorPolynomial int
+@s FNormalMoments int
+@s UNormalMoments int
+@s TLStatic int
+@s FSSparseTensor int
+@ The tensor library is multi-threaded. This means, if appropriate
+compilation options were set, some codes are launched
+concurrently. This boosts the performance on SMP machines or single
+processors with hyper-threading support. The basic property of the
+thread implementation in the library is that we do not allow running
+more concurrent threads than the preset limit. This prevents threads
+from competing for memory in such a way that the OS constantly switches
+among threads with frequent I/O for swaps. This may occur since one
+thread might need much own memory. The threading support allows for
+detached threads, the synchronization points during the Faa Di Bruno
+operation are relatively short, so the resulting load is close to the
+preset maximum number parallel threads.
+
+@ A few words to the library's test suite. The suite resides in
+directory {\tt tl/testing}. There is a file {\tt tests.cpp} which
+contains all tests and {\tt main()} function. Also there are files
+{\tt factory.h} and {\tt factory.cpp} implementing random generation
+of various objects. The important property of these random objects is
+that they are the same for all object's invocations. This is very
+important in testing and debugging. Further, one can find files {\tt
+monoms.h} and {\tt monoms.cpp}. See below for their explanation.
+
+There are a few types of tests:
+\orderedlist
+\li We test for tensor indices. We go through various tensors with
+various symmetries, convert indices from folded to unfolded and
+vice-versa. We test whether their coordinates are as expected.
+\li We test the Faa Di Bruno by comparison of the results of
+|FGSContainer::multAndAdd| against the results of |UGSContainer::multAndAdd|. The two
+ implementations are pretty different, so this is a good test.
+\li We use a code in {\tt monoms.h} and {\tt monoms.cpp} to generate a
+ random vector function $f(x(y,u))$ along with derivatives of
+ $\left[f_x\right]$, $\left[x_{y^ku^l}\right]$, and
+ $\left[f_{y^ku^l}\right]$. Then we calculate the resulting derivatives
+ $\left[f_{y^ku^l}\right]$ using |multAndAdd| method of |UGSContainer|
+ or |FGSContainer| and compare the derivatives provided by {\tt
+ monoms}. The functions generated in {\tt monoms} are monomials with
+ integer exponents, so the implementation of {\tt monoms} is quite
+ easy.
+\li We do a similar thing for sparse tensors. In this case the {\tt monoms}
+ generate a function $f(y,v(y,u),w(y,u))$, provide all the derivatives
+ and the result $\left[f_{y^ku^l}\right]$. Then we calculate the
+ derivatives with |multAndAdd| of |ZContainer| and compare.
+\li We test the polynomial evaluation by evaluating a folded and
+ unfolded polynomial in traditional and horner-like fashion. This gives
+ four methods in total. The four results are compared.
+\endorderedlist
+
+
+@*1 Utilities.
+@i sthread.hweb
+@i sthread.cweb
+@i tl_exception.hweb
+@i int_sequence.hweb
+@i int_sequence.cweb
+@i twod_matrix.hweb
+@i twod_matrix.cweb
+@i kron_prod.hweb
+@i kron_prod.cweb
+
+@*1 Combinatorics.
+@i symmetry.hweb
+@i symmetry.cweb
+@i equivalence.hweb
+@i equivalence.cweb
+@i permutation.hweb
+@i permutation.cweb
+
+@*1 Tensors.
+@i tensor.hweb
+@i tensor.cweb
+@i fs_tensor.hweb
+@i fs_tensor.cweb
+@i gs_tensor.hweb
+@i gs_tensor.cweb
+@i rfs_tensor.hweb
+@i rfs_tensor.cweb
+@i ps_tensor.hweb
+@i ps_tensor.cweb
+@i sparse_tensor.hweb
+@i sparse_tensor.cweb
+
+@*1 The Faa Di Bruno formula.
+@i t_container.hweb
+@i t_container.cweb
+@i stack_container.hweb
+@i stack_container.cweb
+@i fine_container.hweb
+@i fine_container.cweb
+@i pyramid_prod.hweb
+@i pyramid_prod.cweb
+@i pyramid_prod2.hweb
+@i pyramid_prod2.cweb
+
+@*1 Miscellany.
+@i t_polynomial.hweb
+@i t_polynomial.cweb
+@i normal_moments.hweb
+@i normal_moments.cweb
+@i tl_static.hweb
+@i tl_static.cweb
+
+@*1 Index.

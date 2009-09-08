@@ -1,0 +1,280 @@
+<HTML>
+<TITLE>
+Dynare++ Change Log
+</TITLE>
+<!-- $Header$ -->
+<BODY>
+<TABLE CELLSPACING=2 ALIGN="CENTER" BORDER=1>
+<TR>
+<TD BGCOLOR="#d0d0d0" WIDTH="85"> <b>Revision</b>    </TD>
+<TD BGCOLOR="#d0d0d0" WIDTH="85"> <b>Version</b></TD>
+<TD BGCOLOR="#d0d0d0" WIDTH="80"> <b>Date</b>   </TD>
+<TD BGCOLOR="#d0d0d0" WIDTH="600"> <b>Description of changes</b></TD>
+</TR>
+
+<TR>
+<TD>
+<TD>1.3.7
+<TD>2008/01/15
+<TD>
+
+<TR><TD><TD><TD> <TD> Corrected a serious bug in centralizing a
+decision rule. This bug implies that all results based on simulations
+of the decision rule were wrong. However results based on stochastic
+fix points were correct. Thanks to Wouter J. den Haan and Joris de Wind!
+
+<TR><TD><TD><TD> <TD> Added options --centralize and --no-centralize.
+
+<TR><TD><TD><TD> <TD> Corrected an error of a wrong
+variance-covariance matrix in real-time simulations (thanks to Pawel
+Zabzcyk).
+
+<TR><TD><TD><TD> <TD> Corrected a bug of integer overflow in refined
+faa Di Bruno formula if one of refinements is empty. This bug appeared
+when solving models without forward looking variables.
+
+<TR><TD><TD><TD> <TD> Corrected a bug in the Sylvester equation
+formerly working only for models with forward looking variables.
+
+<TR><TD><TD><TD> <TD> Corrected a bug in global check printout.
+
+<TR><TD><TD><TD> <TD> Added generating a dump file.
+
+<TR><TD><TD><TD> <TD> Fixed a bug of forgetting repeated assignments
+(for example in parameter settings and initval).
+
+<TR><TD><TD><TD> <TD> Added a diff operator to the parser.
+
+<TR>
+<TD>1539
+<TD>1.3.6
+<TD>2008/01/03
+<TD>
+
+<TR><TD><TD><TD> <TD> Corrected a bug of segmentation faults for long
+names and path names. 
+
+<TR><TD><TD><TD> <TD> Changed a way how random numbers are
+generated. Dynare++ uses a separate instance of Mersenne twister for
+each simulation, this corrects a flaw of additional randomness caused
+by operating system scheduler. This also corrects a strange behaviour
+of random generator on Windows, where each simulation was getting the
+same sequence of random numbers.
+
+<TR><TD><TD><TD> <TD> Added calculation of conditional distributions
+controlled by --condper and --condsim.
+
+<TR><TD><TD><TD> <TD> Dropped creating unfoled version of decision
+rule at the end. This might consume a lot of memory. However,
+simulations might be slower for some models.
+
+<TR>
+<TD>1368
+<TD>1.3.5
+<TD>2007/07/11
+<TD>
+
+<TR><TD><TD><TD> <TD> Corrected a bug of useless storing all derivative
+indices in a parser. This consumed a lot of memory for large models.
+
+<TR><TD><TD><TD> <TD> Added an option <tt>--ss-tol</tt> controlling a
+tolerance used for convergence of a non-linear solver.
+
+<TR><TD><TD><TD> <TD> Corrected buggy interaction of optimal policy
+and forward looking variables with more than one period.
+
+<TR><TD><TD><TD> <TD> Variance matrices can be positive
+semidefinite. This corrects a bug of throwing an error if estimating
+approximation errors on ellipse of the state space with a
+deterministic variable.
+
+<TR><TD><TD><TD> <TD> Implemented simulations with statistics
+calculated in real-time. Options <tt>--rtsim</tt> and <tt>--rtper</tt>.
+
+<TR>
+<TD>1282
+<TD>1.3.4
+<TD>2007/05/15
+<TD>
+
+<TR><TD><TD><TD> <TD>Corrected a bug of wrong representation of NaN in generated M-files.
+
+<TR><TD><TD><TD> <TD>Corrected a bug of occassionaly wrong evaluation of higher order derivatives of integer powers.
+
+<TR><TD><TD><TD> <TD>Implemented automatic handling of terms involving multiple leads.
+
+<TR><TD><TD><TD> <TD>Corrected a bug in the numerical integration, i.e. checking of the precision of the solution.
+
+<TR>
+<TD>1090
+<TD>1.3.3
+<TD>2006/11/20
+<TD>
+
+<TR><TD><TD><TD> <TD>Corrected a bug of non-registering an auxiliary variable in initval assignments.
+
+<TR>
+<TD>988
+<TD>1.3.2
+<TD>2006/10/11
+<TD>
+
+<TR><TD><TD><TD> <TD>Corrected a few not-serious bugs: segfault on
+some exception, error in parsing large files, error in parsing
+matrices with comments, a bug in dynare_simul.m
+
+<TR><TD><TD><TD> <TD>Added posibility to specify a list of shocks for
+which IRFs are calculated
+
+<TR><TD><TD><TD> <TD>Added --order command line switch
+
+<TR><TD><TD><TD> <TD>Added writing two Matlab files for steady state
+calcs
+
+<TR><TD><TD><TD> <TD>Implemented optimal policy using keyword
+planner_objective and planner_discount
+
+<TR><TD><TD><TD> <TD>Implemented an R interface to Dynare++ algorithms
+(Tamas Papp)
+
+<TR><TD><TD><TD> <TD>Highlevel code reengineered to allow for
+different model inputs
+
+<TR>
+<TD>799
+<TD>1.3.1
+<TD>2006/06/13
+<TD>
+
+<TR><TD><TD><TD> <TD>Corrected few bugs: in error functions, in linear algebra module.
+
+<TR><TD><TD><TD> <TD>Updated dynare_simul.
+
+<TR><TD><TD><TD> <TD>Updated the tutorial.
+
+<TR><TD><TD><TD> <TD>Corrected an error in summing up tensors where
+setting up the decision rule derivatives. Thanks to Michel
+Juillard. The previous version was making deterministic effects of
+future volatility smaller than they should be.
+
+<TR>
+<TD>766
+<TD>1.3.0
+<TD>2006/05/22
+<TD>
+
+<TR><TD><TD><TD> <TD>The non-linear solver replaced with a new one.
+
+<TR><TD><TD><TD> <TD>The parser and derivator replaced with a new
+code. Now it is possible to put expressions in parameters and initval
+sections.
+
+<TR>
+<TD>752
+<TD>1.2.2
+<TD>2006/05/22
+<TD>
+
+<TR><TD><TD><TD> <TD>Added an option triggering/suppressing IRF calcs..
+
+<TR><TD><TD><TD> <TD>Newton algortihm is now used for fix-point calculations.
+
+<TR><TD><TD><TD> <TD> Vertical narrowing of tensors in Faa Di Bruno
+formula to avoid multiplication with zeros..
+
+<TR>
+<TD>436
+<TD>1.2.1
+<TD>2005/08/17
+<TD>
+
+<TR><TD><TD><TD> <TD>Faa Di Bruno for sparse matrices optimized. The
+implementation now accommodates vertical refinement of function stack
+in order to fit a corresponding slice to available memory. In
+addition, zero slices are identified. For some problems, this implies
+significant speedup.
+
+<TR><TD><TD><TD> <TD>Analytic derivator speedup.
+
+<TR><TD><TD><TD> <TD>Corrected a bug in the threading code. The bug
+stayed concealed in Linux 2.4.* kernels, and exhibited in Linux 2.6.*,
+which has a different scheduling. This correction also allows using
+detached threads on Windows.
+
+<TR>
+<TD>410
+<TD>1.2
+<TD>2005/07/29
+<TD>
+
+<TR><TD><TD><TD> <TD>Added Dynare++ tutorial.
+
+<TR><TD><TD><TD> <TD>Changed and enriched contents of MAT-4 output
+file.
+
+<TR><TD><TD><TD> <TD>Corrected a bug of wrong variable indexation
+resulting in an exception. The error occurred if a variable appeared
+at time t-1 or t+1 and not at t.
+
+<TR><TD><TD><TD> <TD>Added Matlab interface, which allows simulation
+of a decision rule in Matlab.
+
+<TR><TD><TD><TD> <TD>Got rid of Matrix Template Library.
+
+<TR><TD><TD><TD> <TD>Added checking of model residuals by the
+numerical integration. Three methods: checking along simulation path,
+checking along shocks, and on ellipse of states.
+
+<TR><TD><TD><TD> <TD>Corrected a bug in calculation of higher moments
+of Normal dist.
+
+<TR><TD><TD><TD> <TD>Corrected a bug of wrong drawing from Normal dist
+with non-zero covariances.
+
+<TR><TD><TD><TD>
+<TD>Added numerical integration module. Product and Smolyak
+quadratures over Gauss-Hermite and Gauss-Legendre, and quasi Monte
+Carlo.
+
+<TR>
+<TD>152
+<TD>1.1
+<TD>2005/04/22
+<TD>
+
+<TR><TD><TD><TD>
+<TD>Added a calculation of approximation at a stochastic steady state
+(still experimental).
+
+<TR><TD><TD><TD>
+<TD>Corrected a bug in Cholesky decomposition of variance-covariance
+matrix with off-diagonal elements.
+
+<TR>
+<TD>89
+<TD>1.01
+<TD>2005/02/23
+<TD>
+
+<TR><TD><TD><TD>
+<TD>Added version printout.
+
+<TR><TD><TD><TD>
+<TD>Corrected the bug of multithreading support for P4 HT processors running on Win32.
+
+<TR><TD><TD><TD>
+<TD>Enhanced Kronecker product code resulting in approx. 20% speedup.
+
+<TR><TD><TD><TD>
+<TD>Implemented vertical stack container refinement, and another
+method for sparse folded Faa Di Bruno (both not used yet).
+
+<TR>
+<TD>5
+<TD>1.0
+<TD>2005/02/23
+<TD>The first released version.
+
+</TABLE>
+</BODY>
+</HTML>

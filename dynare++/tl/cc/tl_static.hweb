@@ -1,0 +1,62 @@
+@q $Id: tl_static.hweb 148 2005-04-19 15:12:26Z kamenik $ @>
+@q Copyright 2004, Ondra Kamenik @>
+
+@*2 Tensor library static data. Start of {\tt tl\_static.h} file.
+
+The purpose of this file is to make a unique static variable which
+would contain all other static variables and be responsible for their
+correct initialization and destruction. The variables include an
+equivalence bundle and a Pascal triangle for binomial
+coefficients. Both depend on dimension of the problem, and maximum
+number of variables.
+
+So we declare static |tls| variable of type |TLStatic| encapsulating
+the variables. The |tls| must be initialized at the beginning of
+the program, as dimension and number of variables is known. 
+
+Also we define a class for Pascal triangle.
+
+@c
+#ifndef TL_STATIC_H
+#define TL_STATIC_H
+
+#include "equivalence.h"
+#include "permutation.h"
+
+@<|PascalTriangle| class declaration@>;
+@<|TLStatic| class declaration@>;
+extern TLStatic tls;
+
+#endif
+
+@ Pascal triangle is a storage for binomial coefficients. We store in
+|data| array the coefficients of rectangle starting at $\pmatrix{0\cr
+0}$, and ending $\pmatrix{nmax+kmax\cr kmax}$.
+
+@<|PascalTriangle| class declaration@>=
+class PascalTriangle {
+	int* data;
+	int kmax;
+	int nmax;
+public:@;
+	PascalTriangle(int n, int k);
+	~PascalTriangle()
+		{@+ delete [] data;@+}
+	int noverk(int n, int k) const;
+};
+
+
+@  
+@<|TLStatic| class declaration@>=
+struct TLStatic {
+	EquivalenceBundle* ebundle;
+	PermutationBundle* pbundle;
+	PascalTriangle* ptriang;
+
+	TLStatic();
+	~TLStatic();
+	void init(int dim, int nvar);
+};
+
+
+@ End of {\tt tl\_static.h} file.

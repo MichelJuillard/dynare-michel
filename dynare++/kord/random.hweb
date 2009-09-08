@@ -1,0 +1,39 @@
+@q $Id: random.hweb 2335 2009-01-14 10:35:21Z kamenik $ @>
+@q Copyright 2007, Ondra Kamenik @>
+
+@*2 Random number generation. Start of {\tt random.h} file.
+
+@s RandomGenerator int
+@s SystemRandomGenerator int
+
+@c
+#ifndef RANDOM_H
+#define RANDOM_H
+
+@<|RandomGenerator| class declaration@>;
+@<|SystemRandomGenerator| class declaration@>;
+extern SystemRandomGenerator system_random_generator;
+
+#endif
+
+@ This is a general interface to an object able to generate random
+numbers. Subclass needs to implement |uniform| method, other is, by
+default, implemented here.
+@<|RandomGenerator| class declaration@>=
+class RandomGenerator {
+public:@;
+	virtual double uniform() = 0;
+	int int_uniform();
+	double normal();
+};
+
+@ This implements |RandomGenerator| interface with system |drand| or
+|rand|. It is not thread aware.
+@<|SystemRandomGenerator| class declaration@>=
+class SystemRandomGenerator : public RandomGenerator {
+public:@;
+	double uniform();
+	void initSeed(int seed);
+};
+
+@ End of {\tt random.h} file.

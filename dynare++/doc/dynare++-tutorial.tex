@@ -1,0 +1,1512 @@
+\documentclass[10pt]{article} 
+\usepackage{array,natbib}
+\usepackage{amsmath, amsthm, amssymb}
+
+\usepackage[pdftex,colorlinks]{hyperref}
+
+\begin{document}
+
+\title{DSGE Models with Dynare++. A Tutorial.}
+
+\author{Ondra Kamen\'\i k}
+
+\date{Jan 2009 (describes v. 1.3.7)}
+\maketitle
+
+\tableofcontents
+
+\section{Installation}
+
+Dynare++ installation procedure is pretty straightforward. Take the
+following steps:
+\begin{enumerate}
+\item Grab Dynare++ package from Dynare site either for Windows or for
+  Linux according to your operating system.\footnote{If unsure,
+  download the one for Windows.}
+\item Unzip or untar the package to a directory of your choice.
+\item Set operating system path to point to {\tt
+  dynare++-*.*}\footnote{Stars stand for a version number.}
+  subdirectory of the directory you have chosen. In Windows, this step
+  ensures that libraries distributed along Dynare++ are on the
+  path. This step is not really necessary in Linux.
+\item If you have Matlab and want to run custom simulations (see
+  \ref{custom}), then set the Matlab path to the path from the
+  previous step.
+\end{enumerate}
+
+Dynare++ uninstall procedure is even more simple. Just remove the directory {\tt
+  dynare++-*.*}.
+
+If you want (or need) to compile Dynare++ from sources, grab Dynare++
+source package and do your best.\footnote{Feel free to contact me if
+setting up the sources takes more time than solving your model by
+hand.}
+
+\section{Sample Session}
+
+As an example, let us take a simple DSGE model whose dynamic
+equilibrium is described by the following first order conditions:
+
+\begin{align*}
+&c_t\theta h_t^{1+\psi} = (1-\alpha)y_t\cr
+&\beta E_t\left[\frac{\exp(b_t)c_t}{\exp(b_{t+1})c_{t+1}}
+\left(\exp(b_{t+1})\alpha\frac{y_{t+1}}{k_{t+1}}+1-\delta\right)\right]=1\cr
+&y_t=\exp(a_t)k_t^\alpha h_t^{1-\alpha}\cr
+&k_{t}=\exp(b_{t-1})(y_{t-1}-c_{t-1})+(1-\delta)k_{t-1}\cr
+&a_t=\rho a_{t-1}+\tau b_{t-1}+\epsilon_t\cr
+&b_t=\tau a_{t-1}+\rho b_{t-1}+\nu_t
+\end{align*}
+
+\label{timing}
+The timing of this model is that the exogenous shocks $\epsilon_t$,
+and $\nu_t$ are observed by agents in the beginning of period $t$ and
+before the end of period $t$ all endogenous variables with index $t$
+are decided. The expectation operator $E_t$ works over the information
+accumulated just before the end of the period $t$ (this includes
+$\epsilon_t$, $\nu_t$ and all endogenous variables with index $t$).
+
+The exogenous shocks $\epsilon_t$ and $\nu_t$ are supposed to be
+serially uncorrelated with zero means and time-invariant
+variance-covariance matrix. In Dynare++, these variables are called
+exogenous; all other variables are endogenous. Now we are prepared to
+start writing a model file for Dynare++, which is an ordinary text
+file and could be created with any text editor.
+
+The model file starts with a preamble declaring endogenous and
+exogenous variables, parameters, and setting values of the
+parameters. Note that one can put expression on right hand sides. The
+preamble follows:
+
+{\small
+\begin{verbatim}
+var Y, C, K, A, H, B;
+varexo EPS, NU;
+
+parameters beta, rho, beta, alpha, delta, theta, psi, tau;
+alpha = 0.36;
+rho   = 0.95;
+tau   = 0.025;
+beta  = 1/(1.03^0.25);
+delta = 0.025;
+psi   = 0;
+theta = 2.95;
+\end{verbatim}
+}
+
+The section setting values of the parameters is terminated by a
+beginning of the {\tt model} section, which states all the dynamic
+equations. A timing convention of a Dynare++ model is the same as the
+timing of our example model, so we may proceed with writing the model
+equations. The time indexes of $c_{t-1}$, $c_t$, and $c_{t+1}$ are
+written as {\tt C(-1)}, {\tt C}, and {\tt C(1)} resp. The {\tt model}
+section looks as follows:
+
+{\small
+\begin{verbatim}
+model;
+C*theta*H^(1+psi) = (1-alpha)*Y;
+beta*exp(B)*C/exp(B(1))/C(1)*
+  (exp(B(1))*alpha*Y(1)/K(1)+1-delta) = 1;
+Y = exp(A)*K^alpha*H^(1-alpha);
+K = exp(B(-1))*(Y(-1)-C(-1)) + (1-delta)*K(-1);
+A = rho*A(-1) + tau*B(-1) + EPS;
+B = tau*A(-1) + rho*B(-1) + NU;
+end;
+\end{verbatim}
+}
+
+At this point, almost all information that Dynare++ needs has been
+provided. Only three things remain to be specified: initial values of
+endogenous variables for non-linear solver, variance-covariance matrix
+of the exogenous shocks and order of the Taylor approximation. Since
+the model is very simple, there is a closed form solution for the
+deterministic steady state. We use it as initial values for the
+non-linear solver. Note that the expressions on the right hand-sides in
+{\tt initval} section can reference values previously calculated. The
+remaining portion of the model file looks as follows:
+
+{\small
+\begin{verbatim}
+initval;
+A = 0;
+B = 0;
+H = ((1-alpha)/(theta*(1-(delta*alpha)
+     /(1/beta-1+delta))))^(1/(1+psi));
+Y = (alpha/(1/beta-1+delta))^(alpha/(1-alpha))*H;
+K = alpha/(1/beta-1+delta)*Y;
+C = Y - delta*K;
+end;
+
+vcov = [
+  0.0002  0.00005;
+  0.00005 0.0001
+];
+
+order = 7;
+\end{verbatim}
+}
+
+Note that the order of rows/columns of the variance-covariance matrix
+corresponds to the ordering of exogenous variables in the {\tt varexo}
+declaration. Since the {\tt EPS} was declared first, its variance is
+$0.0002$, and the variance of {\tt NU} is $0.0001$.
+
+Let the model file be saved as {\tt example1.mod}. Now we are prepared
+to solve the model. At the operating system command
+prompt\footnote{Under Windows it is a {\tt cmd} program, under Unix it
+is any shell} we issue a command:
+
+{\small
+\begin{verbatim}
+dynare++ example1.mod
+\end{verbatim}
+}
+
+When the program is finished, it produces two output files: a journal
+file {\tt example1.jnl} and a Matlab MAT-4 {\tt example1.mat}. The
+journal file contains information about time, memory and processor
+resources needed for all steps of solution. The output file is more
+interesting. It contains various simulation results. It can be loaded
+into Matlab or Scilab and examined.%
+\footnote{For Matlab {\tt load example1.mat}, for Scilab {\tt
+mtlb\_load example1.mat}} The following examples are done in Matlab,
+everything would be very similar in Scilab.
+
+Let us first examine the contents of the MAT file:
+{\small
+\begin{verbatim}
+>> load example1.mat
+>> who
+
+Your variables are:
+
+dyn_g_1            dyn_i_Y            dyn_npred          
+dyn_g_2            dyn_irfm_EPS_mean  dyn_nstat          
+dyn_g_3            dyn_irfm_EPS_var   dyn_shocks         
+dyn_g_4            dyn_irfm_NU_mean   dyn_ss             
+dyn_g_5            dyn_irfm_NU_var    dyn_state_vars     
+dyn_i_A            dyn_irfp_EPS_mean  dyn_steady_states  
+dyn_i_B            dyn_irfp_EPS_var   dyn_vars           
+dyn_i_C            dyn_irfp_NU_mean   dyn_vcov           
+dyn_i_EPS          dyn_irfp_NU_var    dyn_vcov_exo       
+dyn_i_H            dyn_mean           
+dyn_i_K            dyn_nboth          
+dyn_i_NU           dyn_nforw          
+\end{verbatim}
+}
+
+All the variables coming from one MAT file have a common prefix. In
+this case it is {\tt dyn}, which is Dynare++ default. The prefix can
+be changed, so that the multiple results could be loaded into one Matlab
+session.
+
+In the default setup, Dynare++ solves the Taylor approximation to the
+decision rule and calculates unconditional mean and covariance of the
+endogenous variables, and generates impulse response functions. The
+mean and covariance are stored in {\tt dyn\_mean} and {\tt
+dyn\_vcov}. The ordering of the endogenous variables is given by {\tt
+dyn\_vars}.
+
+In our example, the ordering is
+
+{\small
+\begin{verbatim}
+>> dyn_vars
+dyn_vars =
+H
+A
+Y
+C
+K
+B
+\end{verbatim}
+}
+
+and unconditional mean and covariance are
+
+{\small
+\begin{verbatim}
+>> dyn_mean
+dyn_mean =
+    0.2924
+    0.0019
+    1.0930
+    0.8095
+   11.2549
+    0.0011
+>> dyn_vcov
+dyn_vcov =
+    0.0003    0.0006    0.0016    0.0004    0.0060    0.0004
+    0.0006    0.0024    0.0059    0.0026    0.0504    0.0012
+    0.0016    0.0059    0.0155    0.0069    0.1438    0.0037
+    0.0004    0.0026    0.0069    0.0040    0.0896    0.0016
+    0.0060    0.0504    0.1438    0.0896    2.1209    0.0405
+    0.0004    0.0012    0.0037    0.0016    0.0405    0.0014
+\end{verbatim}
+}
+
+The ordering of the variables is also given by indexes starting with
+{\tt dyn\_i\_}. Thus the mean of capital can be retrieved as
+
+{\small
+\begin{verbatim}
+>> dyn_mean(dyn_i_K)
+ans =
+   11.2549
+\end{verbatim}
+}
+
+\noindent and covariance of labor and capital by
+
+{\small
+\begin{verbatim}
+>> dyn_vcov(dyn_i_K,dyn_i_H)
+ans =
+    0.0060
+\end{verbatim}
+}
+
+The impulse response functions are stored in matrices as follows
+\begin{center}
+\begin{tabular}{|l|l|}
+\hline
+matrix& response to\\
+\hline
+{\tt dyn\_irfp\_EPS\_mean}& positive impulse to {\tt EPS}\\
+{\tt dyn\_irfm\_EPS\_mean}& negative impulse to {\tt EPS}\\
+{\tt dyn\_irfp\_NU\_mean}& positive impulse to {\tt NU}\\
+{\tt dyn\_irfm\_NU\_mean}& negative impulse to {\tt NU}\\
+\hline
+\end{tabular}
+\end{center}
+All shocks sizes are one standard error. Rows of the matrices
+correspond to endogenous variables, columns correspond to
+periods. Thus capital response to a positive shock to {\tt EPS} can be
+plotted as
+
+{\small
+\begin{verbatim}
+plot(dyn_irfp_EPS_mean(dyn_i_K,:));
+\end{verbatim}
+}
+
+The data is in units of the respective variables, so in order to plot
+the capital response in percentage changes from the decision rule's
+fix point (which is a vector {\tt dyn\_ss}), one has to issue the
+commands:
+
+{\small
+\begin{verbatim}
+Kss=dyn_ss(dyn_i_K);
+plot(100*dyn_irfp_EPS_mean(dyn_i_K,:)/Kss);
+\end{verbatim}
+}
+
+The plotted impulse response shows that the model is pretty persistent
+and that the Dynare++ default for a number of simulated periods is not
+sufficient. In addition, the model persistence puts in doubt also a
+number of simulations. The Dynare++ defaults can be changed when
+calling Dynare++, in operating system's command prompt, we issue a
+command:
+
+{\small
+\begin{verbatim}
+dynare++ --per 300 --sim 150 example1.mod
+\end{verbatim}
+}
+
+\noindent This sets the number of simulations to $150$ and the number
+of periods to $300$ for each simulation giving $45000$ total simulated
+periods.
+
+\section{Sample Optimal Policy Session}
+\label{optim_tut}
+
+Suppose that one wants to solve the following optimal policy problem
+with timeless perspective.\footnote{See \ref{ramsey} on how to solve
+Ramsey optimality problem within this framework} The following
+optimization problem is how to choose capital taxes financing public
+good to maximize agent's utility from consumption good and public
+good. The problem takes the form:
+\begin{align*}
+\max_{\{\tau_t\}_{t_0}^\infty} 
+E_{t_0}\sum_{t=t_0}^\infty &\beta^{t-t_0}\left(u(c_t)+av(g_t)\right)\\
+\hbox{subject\ to}&\\
+u'(c_t) &=
+\beta E_t\left[u'(c_{t+1})\left(1-\delta+f'(k_{t+1})(1-\alpha\tau_{t+1})\right)\right]\\
+K_t &= (1-\delta)K_{t-1} + (f(K_{t-1}) - c_{t-1} - g_{t-1})\\
+g_t &= \tau_t\alpha f(K_t),\\
+\hbox{where\ } t & = \ldots,t_0-1,t_0,t_0+1,\ldots
+\end{align*}
+$u(c_t)$ is utility from consuming the consumption good, $v(g_t)$ is
+utility from consuming the public good, $f(K_t)$ is a production
+function $f(K_t) = Z_tK_t^\alpha$. $Z_t$ is a technology shock modeled
+as AR(1) process. The three constraints come from the first order
+conditions of a representative agent. We suppose that it pursues a
+different objective, namely lifetime utility involving only
+consumption $c_t$. The representative agents chooses between
+consumption and investment. It rents the capital to firms and supplies
+constant amount of labour. All output is paid back to consumer in form
+of wage and capital rent. Only the latter is taxed. We suppose that
+the optimal choice has been taking place from infinite past and will
+be taking place for ever. Further we suppose the same about the
+constraints.
+
+Let us choose the following functional forms:
+\begin{eqnarray*}
+u(c_t) &=& \frac{c_t^{1-\eta}}{1-\eta}\\
+v(g_t) &=& \frac{g_t^{1-\phi}}{1-\phi}\\
+f(K_t) &=& K_t^\alpha
+\end{eqnarray*}
+
+Then the problem can be coded into Dynare++ as follows. We start with
+a preamble which states all the variables, shocks and parameters:
+{\small
+\begin{verbatim}
+var C G K TAU Z;
+
+varexo EPS;
+
+parameters eta beta alpha delta phi a rho; 
+
+eta = 2;
+beta = 0.99;
+alpha = 0.3;
+delta = 0.10;
+phi = 2.5;
+a = 0.1;
+rho = 0.7;
+\end{verbatim}
+}
+
+Then we specify the planner's objective and the discount factor in the
+objective. The objective is an expression (possibly including also
+variable leads and lags), and the discount factor must be one single
+declared parameter:
+{\small
+\begin{verbatim}
+planner_objective C^(1-eta)/(1-eta) + a*G^(1-phi)/(1-phi);
+
+planner_discount beta;
+\end{verbatim}
+}
+
+The model section will contain only the constraints of the social
+planner. These are capital accumulation, identity for the public
+product, AR(1) process for $Z_t$ and the first order condition of the
+representative agent (with different objective).
+{\small
+\begin{verbatim}
+model;
+K = (1-delta)*K(-1) + (exp(Z(-1))*K(-1)^alpha - C(-1) - G(-1));
+G = TAU*alpha*K^alpha;
+Z = rho*Z(-1) + EPS;
+C^(-eta) = beta*C(+1)^(-eta)*(1-delta +
+           exp(Z(+1))*alpha*K(+1)^(alpha-1)*(1-alpha*TAU(+1)));
+end;
+\end{verbatim}
+}
+
+Now we have to provide a good guess for non-linear solver calculating
+the deterministic steady state. The model's steady state has a closed
+form solution if the taxes are known. So we provide a guess for
+taxation {\tt TAU} and then use the closed form solution for capital,
+public good and consumption:\footnote{Initial guess for Lagrange
+multipliers and some auxiliary variables is calculated automatically. See
+\ref{opt_init} for more details.}
+{\small
+\begin{verbatim}
+initval;
+TAU = 0.70;
+K = ((delta+1/beta-1)/(alpha*(1-alpha*TAU)))^(1/(alpha-1));
+G = TAU*alpha*K^alpha;
+C =  K^alpha - delta*K - G;
+Z = 0;
+\end{verbatim}
+}
+
+Finally, we have to provide the order of approximation, and the
+variance-covariance matrix of the shocks (in our case we have only one
+shock):
+{\small
+\begin{verbatim}
+order = 4;
+
+vcov = [
+	0.01
+];
+\end{verbatim}
+}
+
+After this model file has been run, we can load the resulting MAT-file
+into the Matlab (or Scilab) and examine its contents:
+{\small
+\begin{verbatim}
+>> load kp1980_2.mat
+>> who
+
+Your variables are:
+
+dyn_g_1            dyn_i_MULT1        dyn_nforw          
+dyn_g_2            dyn_i_MULT2        dyn_npred          
+dyn_g_3            dyn_i_MULT3        dyn_nstat          
+dyn_g_4            dyn_i_TAU          dyn_shocks         
+dyn_i_AUX_3_0_1    dyn_i_Z            dyn_ss             
+dyn_i_AUX_4_0_1    dyn_irfm_EPS_mean  dyn_state_vars     
+dyn_i_C            dyn_irfm_EPS_var   dyn_steady_states  
+dyn_i_EPS          dyn_irfp_EPS_mean  dyn_vars           
+dyn_i_G            dyn_irfp_EPS_var   dyn_vcov           
+dyn_i_K            dyn_mean           dyn_vcov_exo       
+dyn_i_MULT0        dyn_nboth          
+\end{verbatim}
+}
+
+The data dumped into the MAT-file have the same structure as in the
+previous example of this tutorial. The only difference is that
+Dynare++ added a few more variables. Indeed:
+{\small
+\begin{verbatim}
+>> dyn_vars
+dyn_vars =
+MULT1    
+G        
+MULT3    
+C        
+K        
+Z        
+TAU      
+AUX_3_0_1
+AUX_4_0_1
+MULT0    
+MULT2    
+\end{verbatim}
+}
+Besides the five variables declared in the model ({\tt C}, {\tt G},
+{\tt K}, {\tt TAU}, and {\tt Z}), Dy\-na\-re++ added 6 more, four as Lagrange
+multipliers of the four constraints, two as auxiliary variables for
+shifting in time. See \ref{aux_var} for more details.
+
+The structure and the logic of the MAT-file is the same as these new 6
+variables were declared in the model file and the file is examined in
+the same way.
+
+For instance, let us examine the Lagrange multiplier of the optimal
+policy associated with the consumption first order condition. Recall
+that the consumers' objective is different from the policy
+objective. Therefore, the constraint will be binding and the
+multiplier will be non-zero. Indeed, its deterministic steady state,
+fix point and mean are as follows:
+{\small
+\begin{verbatim}
+>> dyn_steady_states(dyn_i_MULT3,1)
+ans =
+   -1.3400
+>> dyn_ss(dyn_i_MULT3)
+ans =
+   -1.3035
+>> dyn_mean(dyn_i_MULT3)
+ans =
+   -1.3422
+\end{verbatim}
+}
+
+\section{What Dynare++ Calculates}
+\label{dynpp_calc}
+
+Dynare++ solves first order conditions of a DSGE model in the recursive form:
+\begin{equation}\label{focs}
+E_t[f(y^{**}_{t+1},y_t,y^*_{t-1},u_t)]=0,
+\end{equation}
+where $y$ is a vector of endogenous variables, and $u$ a vector of
+exogenous variables. Some of elements of $y$ can occur at time $t+1$,
+these are $y^{**}$. Elements of $y$ occurring at time $t-1$ are denoted
+$y^*$. The exogenous shocks are supposed to be serially independent
+and normally distributed $u_t\sim N(0,\Sigma)$.
+
+The solution of this dynamic system is a decision rule
+\[
+y_t=g(y^*_{t-1},u_t)
+\]
+Dynare++ calculates a Taylor approximation of this decision rule of a
+given order. The approximation takes into account deterministic
+effects of future volatility, so a point about which the Taylor
+approximation is done will be different from the fix point $y$ of the rule
+yielding $y=g(y^*,0)$.
+
+The fix point of a rule corresponding to a model with $\Sigma=0$ is
+called {\it deterministic steady state} denoted as $\bar y$. In
+contrast to deterministic steady state, there is no consensus in
+literature how to call a fix point of the rule corresponding to a
+model with non-zero $\Sigma$. I am tempted to call it {\it stochastic
+  steady state}, however, it might be confused with unconditional mean
+or with steady distribution. So I will use a term {\it fix point} to
+avoid a confusion.
+
+By default, Dynare++ solves the Taylor approximation about the
+deterministic steady state. Alternatively, Dynare++ can split the
+uncertainty to a few steps and take smaller steps when calculating the
+fix points. This is controlled by an option {\tt --steps}. For the
+brief description of the second method, see \ref{multistep_alg}.
+
+\subsection{Decision Rule Form}
+\label{dr_form}
+
+In case of default solution algorithm (approximation about the
+deterministic steady state $\bar y$), Dynare++ calculates the higher
+order derivatives of the equilibrium rule to get a decision rule of
+the following form. In Einstein notation, it is:
+\[
+y_t-\bar y = \sum_{i=0}^k\frac{1}{i!}\left[g_{(y^*u)^i}\right]
+_{\alpha_1\ldots\alpha_i}
+\prod_{j=1}^i\left[\begin{array}{c} y^*_{t-1}-\bar y^*\\ u_t \end{array}\right]
+^{\alpha_j}
+\]
+
+Note that the ergodic mean will be different from the deterministic
+steady state $\bar y$ and thus deviations $y^*_{t-1}-\bar y^*$ will
+not be zero in average. This implies that in average we will commit
+larger round off errors than if we used the decision rule expressed in
+deviations from a point closer to the ergodic mean. Therefore, by
+default, Dynare++ recalculates this rule and expresses it in
+deviations from the stochastic fix point $y$.
+\[
+y_t-y = \sum_{i=1}^k\frac{1}{i!}\left[\tilde g_{(y^*u)^i}\right]
+_{\alpha_1\ldots\alpha_i}
+\prod_{j=1}^i\left[\begin{array}{c} y^*_{t-1}-y^*\\ u_t \end{array}\right]
+^{\alpha_j}
+\]
+Note that since the rule is centralized around its fix point, the
+first term (for $i=0$) drops out.
+
+Also note, that this rule mathematically equivalent to the rule
+expressed in deviations from the deterministic steady state, and still
+it is an approximation about the deterministic steady state. The fact
+that it is expressed in deviations from a different point should not
+be confused with the algorithm in \ref{multistep_alg}.
+
+This centralization can be avoided by invoking {\tt --no-centralize}
+command line option.
+
+\subsection{Taking Steps in Volatility Dimension}
+\label{multistep_alg}
+
+For models, where volatility of the exogenous shocks plays a big
+role, the approximation about deterministic steady state can be poor,
+since the equilibrium dynamics can be very different from the dynamics
+in the vicinity of the perfect foresight (deterministic steady state).
+
+Therefore, Dynare++ has on option {\tt --steps} triggering a multistep
+algorithm. The algorithm splits the volatility to a given number of
+steps. Dynare++ attempts to calculate approximations about fix points
+corresponding to these levels of volatility. The problem is that if we
+want to calculate higher order approximations about fix points
+corresponding to volatilities different from zero (as in the case of
+deterministic steady state), then the derivatives of lower orders
+depend on derivatives of higher orders with respect to forward looking
+variables. The multistep algorithm in each step approximates the
+missing higher order derivatives with extrapolations based on the
+previous step.
+
+In this way, the approximation of the stochastic fix point and the
+derivatives about this fix point are obtained. It is difficult to a
+priori decide whether this algorithm yields a better decision
+rule. Nothing is guaranteed, and the resulted decision rule should be
+checked with a numerical integration. See \ref{checks}.
+
+\subsection{Simulating the Decision Rule}
+
+After some form of a decision rule is calculated, it is simulated to
+obtain draws from ergodic (unconditional) distribution of endogenous
+variables. The mean and the covariance are reported. There are two
+ways how to calculate the mean and the covariance. The first one is to
+store all simulated samples and calculate the sample mean and
+covariance. The second one is to calculate mean and the covariance in
+the real-time not storing the simulated sample. The latter case is
+described below (see \ref{rt_simul}).
+
+The stored simulated samples are then used for impulse response
+function calculations. For each shock, the realized shocks in these
+simulated samples (control simulations) are taken and an impulse is
+added and the new realization of shocks is simulated. Then the control
+simulation is subtracted from the simulation with the impulse. This is
+done for all control simulations and the results are averaged. As the
+result, we get an expectation of difference between paths with impulse
+and without impulse. In addition, the sample variances are
+reported. They might be useful for confidence interval calculations.
+
+For each shock, Dynare++ calculates IRF for two impulses, positive and
+negative. Size of an impulse is one standard error of a respective
+shock.
+
+The rest of this subsection is divided to three parts giving account
+on real-time simulations, conditional simulations, and on the way how
+random numbers are generated resp.
+
+\subsubsection{Simulations With Real-Time Statistics}
+\label{rt_simul}
+
+When one needs to simulate large samples to get a good estimate of
+unconditional mean, simulating the decision rule with statistics
+calculated in real-time comes handy. The main reason is that the
+storing of all simulated samples may not fit into the available
+memory.
+
+The real-time statistics proceed as follows: We model the ergodic
+distribution as having normal distribution $y\sim N(\mu,\Sigma)$. Further,
+the parameters $\mu$ and $\Sigma$ are modelled as:
+\begin{eqnarray*}
+  \Sigma &\sim& {\rm InvWishart}_\nu(\Lambda)\\
+  \mu|\Sigma &\sim& N(\bar\mu,\Sigma/\kappa) \\ 
+\end{eqnarray*}
+This model of $p(\mu,\Sigma)$ has an advantage of conjugacy, i.e. a
+prior distribution has the same form as posterior. This property is
+used in the calculation of real-time estimates of $\mu$ and $\Sigma$,
+since it suffices to maintain only the parameters of $p(\mu,\Sigma)$
+conditional observed draws so far. The parameters are: $\nu$,
+$\Lambda$, $\kappa$, and $\bar\mu$.
+
+The mean of $\mu,\Sigma|Y$, where $Y$ are all the draws (simulated
+periods) is reported.
+
+\subsubsection{Conditional Distributions}
+\label{cond_dist}
+
+Starting with version 1.3.6, Dynare++ calculates variable
+distributions $y_t$ conditional on $y_0=\bar y$, where $\bar y$ is the
+deterministic steady state. If triggered, Dynare++ simulates a given
+number of samples with a given number of periods all starting at
+the deterministic steady state. Then for each time $t$, mean
+$E[y_t|y_0=\bar y]$ and variances $E[(y_t-E[y_t|y_0=\bar
+y])(y_t-E[y_t|y_0=\bar y])^T|y_0=\bar y]$ are reported.
+
+\subsubsection{Random Numbers}
+\label{random_numbers}
+
+For generating of the pseudo random numbers, Dynare++ uses Mersenne
+twister by Makoto Matsumoto and Takuji Nishimura. Because of the
+parallel nature of Dynare++ simulations, each simulated sample gets
+its own instance of the twister. Each such instance is seeded before
+the simulations are started. This is to prevent additional randomness
+implied by the operating system's thread scheduler to interfere with
+the pseudo random numbers.
+
+For seeding the individual instances of the Mersenne twister assigned
+to each simulated sample the system (C library) random generator is
+used. These random generators do not have usually very good
+properties, but we use them only to seed the Mersenne twister
+instances. The user can set the initial seed of the system random
+generator and in this way deterministically choose the seeds of all
+instances of the Mersenne twister.
+
+In this way, it is guaranteed that two runs of Dynare++
+with the same seed will yield the same results regardless the
+operating system's scheduler. The only difference may be caused by a
+different round-off errors committed when the same set of samples are
+summed in the different order (due to the operating system's scheduler).
+
+\subsection{Numerical Approximation Checks}
+\label{checks}
+
+Optionally, Dynare++ can run three kinds of checks for Taylor
+approximation errors. All three methods numerically calculate
+the residual of the DSGE equations
+\[
+E[f(g^{**}(g^*(y^*,u),u'),g(y^*,u),y^*,u)|y^*,u]
+\]
+which must be ideally zero for all $y^*$ and $u$. This integral is
+evaluated by either product or Smolyak rule applied to one dimensional
+Gauss--Hermite quadrature. The user does not need to care about the
+decision. An algorithm yielding higher quadrature level and less
+number of evaluations less than a user given maximum is selected.
+
+The three methods differ only by a set of $y^*$ and $u$ where the
+residuals are evaluated. These are:
+\begin{itemize}
+\item The first method calculates the residuals along the shocks for
+fixed $y^*$ equal to the fix point. We let all elements of $u$ be
+fixed at $0$ but one element, which varies from $-\mu\sigma$ to
+$\mu\sigma$, where $\sigma$ is a standard error of the element and
+$\mu$ is the user given multiplier. In this way we can see how the
+approximation error grows if the fix point is disturbed by a shock of
+varying size.
+\item The second method calculates the residuals along a simulation
+path. A random simulation is run, and at each point the residuals are
+reported.
+\item The third method calculates the errors on an ellipse of the
+state variables $y^*$. The shocks $u$ are always zero. The ellipse is
+defined as
+\[\{Ax|\; \Vert x\Vert_2=\mu\},\]
+where $\mu$ is a user given multiplier, and $AA^T=V$ for $V$ being a
+covariance of endogenous variables based on the first order
+approximation. The method calculates the residuals at low discrepancy
+sequence of points on the ellipse. Both the residuals and the points
+are reported.
+\end{itemize}
+
+\section{Optimal Policy with Dynare++}
+\label{optim}
+
+Starting with version 1.3.2, Dynare++ is able to automatically
+generate and then solve the first order conditions for a given
+objective and (possibly) forward looking constraints. Since the
+constraints can be forward looking, the use of this feature will
+mainly be in optimal policy or control.
+
+The only extra thing which needs to be added to the model file is a
+specification of the policy's objective. This is done by two keywords,
+placed not before parameter settings. If the objective is to maximize
+$$E_{t_0}\sum_{t=t_0}^\infty\beta^{t-t_0}\left[\frac{c_t^{1-\eta}}{1-\eta}+
+a\frac{g_t^{1-\phi}}{1-\phi}\right],$$
+then the keywords will be:
+{\small
+\begin{verbatim}
+planner_objective C^(1-eta)/(1-eta) + a*G^(1-phi)/(1-phi);
+
+planner_discount beta;
+\end{verbatim}
+}
+
+Dynare++ parses the file and if the two keywords are present, it
+automatically derives the first order conditions for the problem. The
+first order conditions are put to the form \eqref{focs} and solved. In
+this case, the equations in the {\tt model} section are understood as
+the constraints (they might come as the first order conditions from
+optimizations of other agents) and their number must be less than the
+number of endogenous variables.
+
+This section further describes how the optimal policy first order
+conditions look like, then discusses some issues with the initial
+guess for deterministic steady state, and finally describes how to
+simulate Ramsey policy within this framework.
+
+\subsection{First Order Conditions}
+
+Mathematically, the optimization problem looks as follows:
+\begin{align}
+\max_{\left\{y_\tau\right\}^\infty_t}&E_t
+\left[\sum_{\tau=t}^\infty\beta^{\tau-t}b(y_{\tau-1},y_\tau,y_{\tau+1},u_\tau)\right]\notag\\
+&\rm{s.t.}\label{planner_optim}\\
+&\hskip1cm E^I_\tau\left[f(y_{\tau-1},y_\tau,y_{\tau+1},u_\tau)\right]=0\quad\rm{for\ }
+\tau=\ldots,t-1,t,t+1,\ldots\notag
+\end{align}
+where $E^I$ is an expectation operator over an information set including,
+besides all the past, all future realizations of policy's control
+variables and distributions of future shocks $u_t\sim
+N(0,\Sigma)$. The expectation operator $E$ integrates over an
+information including only distributions of $u_t$ (besides the past).
+
+Note that the constraints $f$ take place at all times, and they are
+conditioned at the running $\tau$ since the policy knows that the
+agents at time $\tau$ will use all the information available at
+$\tau$.
+
+The maximization problem can be rewritten using Lagrange multipliers as:
+\begin{align}
+\max_{y_t}E_t&\left[\sum_{\tau=t}^\infty\beta^{\tau-t}b(y_{\tau-1},y_\tau,y_{\tau+1},u_\tau)\right.\notag\\
+&\left.+\sum_{\tau=-\infty}^{\infty}\beta^{\tau-t}\lambda^T_\tau E_\tau^I\left[f(y_{\tau-1},y_\tau,y_{\tau+1},u_\tau)\right]\right],
+\label{planner_optim_l}
+\end{align}
+where $\lambda_t$ is a column vector of Lagrange multipliers.
+
+After some manipulations with compounded expectations over different
+information sets, one gets the following first order conditions:
+\begin{align}
+E_t\left[\vphantom{\frac{\int^(_)}{\int^(\_)}}\right.&\frac{\partial}{\partial y_t}b(y_{t-1},y_t,y_{t+1},u_t)+
+\beta L^{+1}\frac{\partial}{\partial y_{t-1}}b(y_{t-1},y_t,y_{t+1},u_t)\notag\\
+&+\beta^{-1}\lambda_{t-1}^TL^{-1}\frac{\partial}{\partial y_{t+1}}f(y_{t-1},y_t,y_{t+1},u_t)\notag\\
+&+\lambda_t^T\frac{\partial}{\partial y_{t}}f(y_{t-1},y_t,y_{t+1},u_t)\notag\\
+&+\beta\lambda_{t+1}^TE_{t+1}\left[L^{+1}\frac{\partial}{\partial y_{t-1}}f(y_{t-1},y_t,y_{t+1},u_t)\right]
+\left.\vphantom{\frac{\int^(_)}{\int^(\_)}}\right]
+ = 0,\label{planner_optim_foc2}
+\end{align}
+where $L^{+1}$ is one period lead operator, and $L^{-1}$ is one period lag operator.
+
+Dynare++ takes input corresponding to \eqref{planner_optim},
+introduces the Lagrange multipliers according to
+\eqref{planner_optim_l}, and using its symbolic derivator it compiles
+\eqref{planner_optim_foc2}. The system \eqref{planner_optim_foc2} with
+the constraints from \eqref{planner_optim_l} is then solved in the
+same way as the normal input \eqref{focs}.
+
+\subsection{Initial Guess for Deterministic Steady State}
+\label{opt_init}
+
+Solving deterministic steady state of non-linear dynamic systems is
+not trivial and the first order conditions for optimal policy add
+significant complexity. The {\tt initval} section allows to input the
+initial guess of the non-linear solver. It requires that all user
+declared endogenous variables be initialized. However, in most cases,
+we have no idea what are good initial guesses for the Lagrange
+multipliers.
+
+For this reason, Dynare++ calculates an initial guess of Lagrange
+multipliers using user provided initial guesses of all other
+endogenous variables. It uses the linearity of the Lagrange
+multipliers in the \eqref{planner_optim_foc2}. In its static form,
+\eqref{planner_optim_foc2} looks as follows:
+\begin{align}
+&\frac{\partial}{\partial y_t}b(y,y,y,0)+
+\beta\frac{\partial}{\partial y_{t-1}}b(y,y,y,0)\notag\\
+&+\lambda^T\left[\beta^{-1}\frac{\partial}{\partial y_{t+1}}f(y,y,y,0)
+ +\frac{\partial}{\partial y_{t}}f(y,y,y,0)
+ +\beta\frac{\partial}{\partial y_{t-1}}f(y,y,y,0)\right]
+ = 0\label{planner_optim_static}
+\end{align}
+
+The user is required to provide an initial guess of all declared
+variables (all $y$). Then \eqref{planner_optim_static} becomes an
+overdetermined linear system in $\lambda$, which is solved by means of
+the least squares. The closer the initial guess of $y$ is to the exact
+solution, the closer are the Lagrange multipliers $\lambda$.
+
+The calculated Lagrange multipliers by the least squares are not used,
+if they are set in the {\tt initval} section. In other words, if a
+multiplier has been given a value in the {\tt initval} section, then
+the value is used, otherwise the calculated value is taken.
+
+For even more difficult problems, Dynare++ generates two Matlab files
+calculating a residual of the static system and its derivative. These
+can be used in Matlab's {\tt fsolve} or other algorithm to get an
+exact solution of the deterministic steady state. See
+\ref{output_matlab_scripts} for more details.
+
+Finally, Dynare++ might generate a few auxiliary variables. These are
+simple transformations of other variables. They are initialized
+automatically and the user usually does not need to care about it.
+
+\subsection{Optimal Ramsey Policy}
+\label{ramsey}
+
+Dynare++ solves the optimal policy problem with timeless
+perspective. This means that it assumes that the constraints in
+\eqref{planner_optim} are valid from the infinite past to infinite
+future. Dynare++ calculation of ergodic distribution then assumes that
+the policy has been taking place from infinite past.
+
+If some constraints in \eqref{planner_optim} are forward looking, this
+will result in some backward looking Lagrange multipliers. Such
+multipliers imply possibly time inconsistent policy in the states of
+the ``original'' economy, since these backward looking multipliers add
+new states to the ``optimized'' economy. In this respect, the timeless
+perspective means that there is no fixed initial distribution of such
+multipliers, instead, their ergodic distribution is taken.
+
+In contrast, Ramsey optimal policy is started at $t=0$. This means
+that the first order conditions at $t=0$ are different than the first
+order conditions at $t\geq 1$, which are
+\eqref{planner_optim_foc2}. However, it is not difficult to assert
+that the first order conditions at $t=0$ are in the form of
+\eqref{planner_optim_foc2} if all the backward looking Lagrange
+multipliers are set to zeros at period $-1$, i.e. $\lambda_{-1}=0$.
+
+All in all, the solution of \eqref{planner_optim_foc2} calculated by
+Dynare++ can be used as a Ramsey optimal policy solution provided that
+all the backward looking Lagrange multipliers were set to zeros prior
+to the first simulation period. This can be done by setting the
+initial state of a simulation path in {\tt dynare\_simul.m}. If this
+is applied on the example from \ref{optim_tut}, then we may do the
+following in the command prompt:
+{\small
+\begin{verbatim}
+>> load kp1980_2.mat
+>> shocks = zeros(1,100);
+>> ystart = dyn_ss;
+>> ystart(dyn_i_MULT3) = 0;
+>> r=dynare_simul('kp1980_2.mat',shocks,ystart);
+\end{verbatim}
+}
+This will simulate the economy if the policy was introduced in the
+beginning and no shocks happened.
+
+More information on custom simulations can be obtained by typing:
+{\small
+\begin{verbatim}
+help dynare_simul
+\end{verbatim}
+}
+
+
+\section{Running Dynare++}
+
+This section deals with Dynare++ input. The first subsection
+\ref{dynpp_opts} provides a list of command line options, next
+subsection \ref{dynpp_mod} deals with a format of Dynare++ model file,
+and the last subsection discusses incompatibilities between Dynare
+Matlab and Dynare++.
+
+\subsection{Command Line Options}
+\label{dynpp_opts}
+
+The calling syntax of the Dynare++ is
+
+{\small
+\begin{verbatim}
+dynare++ [--help] [--version] [options] <model file>
+\end{verbatim}
+}
+
+\noindent where the model file must be given as the last token and
+must include its extension. The model file may include path, in this
+case, the path is taken relative to the current directory. Note that
+the current directory can be different from the location of {\tt
+dynare++} binary.
+
+The options are as follows:
+
+\def\desc#1{\rlap{#1}\kern4cm}
+
+\begin{description}
+\item[\desc{\tt --help}] This prints a help message and exits.
+
+\item[\desc{\tt --version}] This prints a version information and
+exits.
+
+\item[\desc{\tt --per \it num}] This sets a number of simulated
+periods to {\it num}. This number is used when calculating
+unconditional mean and covariance and for IRFs. Default is 100.
+
+\item[\desc{\tt --sim \it num}] This sets a number of stochastic
+simulations. This number is used when calculating unconditional mean
+and covariance and for IRFs. The total sample size for unconditional
+mean and covariance is the number of periods times the number of
+successful simulations. Note that if a simulation results in {\tt NaN}
+or {\tt +-Inf}, then it is thrown away and is not considered for the
+mean nor the variance. The same is valid for IRF. Default is 80.
+
+\item[\desc{\tt --rtsim \it num}] This sets a number of stochastic
+simulations whose statistics are calculated in the real-time. See
+\ref{rt_simul} for more details. Default is 0, no simulations.
+
+\item[\desc{\tt --rtper \it num}] This sets a number of simulated
+periods per one simulation with real-time statistics to {\it num}. See
+\ref{rt_simul} for more details. Default is 0, no simulations.
+
+\item[\desc{\tt --condsim \it num}] This sets a number of stochastic
+conditional simulations. See \ref{cond_dist} for more details. Default
+is 0, no simulations.
+
+\item[\desc{\tt --condper \it num}] This sets a number of simulated
+periods per one conditional simulation. See \ref{cond_dist} for more
+details. Default is 0, no simulations.
+
+\item[\desc{\tt --steps \it num}] If the number {\it num} is greater
+than 0, this option invokes a multi-step algorithm (see section
+\ref{dynpp_calc}), which in the given number of steps calculates fix
+points and approximations of the decision rule for increasing
+uncertainty. Default is 0, which invokes a standard algorithm for
+approximation about deterministic steady state. For more details,
+see \ref{multistep_alg}.
+
+\item[\desc{\tt --centralize}] This option causes that the resulting
+decision rule is centralized about (in other words: expressed in the
+deviations from) the stochastic fix point. The centralized decision
+rule is mathematically equivalent but has an advantage of yielding
+less numerical errors in average than not centralized decision
+rule. By default, the rule is centralized. For more details, see
+\ref{dr_form}.
+
+\item[\desc{\tt --no-centralize}] This option causes that the
+resulting decision rule is not centralized about (in other words:
+expressed in the deviations from) the stochastic fix point. By
+default, the rule is centralized. For more details, see
+\ref{dr_form}.
+
+This option has no effect if the number of steps given by {\tt
+--steps} is greater than 0. In this case, the rule is always
+centralized.
+
+\item[\desc{\tt --prefix \it string}] This sets a common prefix of
+variables in the output MAT file. Default is {\tt dyn}.
+
+\item[\desc{\tt --seed \it num}] This sets an initial seed for the
+random generator providing seed to generators for each sample. See
+\ref{random_numbers} for more details. Default is 934098.
+
+\item[\desc{\tt --order \it num}] This sets the order of approximation
+and overrides the {\tt order} statement in the model file. There is no
+default.
+
+\item[\desc{\tt --threads \it num}] This sets a number of parallel
+threads. Complex evaluations of Faa Di Bruno formulas, simulations and
+numerical integration can be parallelized, Dynare++ exploits this
+advantage. You have to have a hardware support for this, otherwise
+there is no gain from the parallelization. As a rule of thumb, set the
+number of threads to the number of processors. An exception is a
+machine with Pentium 4 with Hyper Threading (abbreviated by HT). This
+processor can run two threads concurrently. The same applies to
+Dual-Core processors. Since these processors are present in most new
+PC desktops/laptops, the default is 2.
+
+\item[\desc{\tt --ss-tol \it float}] This sets the tolerance of the
+non-linear solver of deterministic steady state to {\it float}. It is
+in $\Vert\cdot\Vert_\infty$ norm, i.e. the algorithm is considered as
+converged when a maximum absolute residual is less than the
+tolerance. Default is $10^{-13}$.
+
+\item[\desc{\tt --check \it pPeEsS}] This selects types of residual
+checking to be performed. See section \ref{checks} for details. The
+string consisting of the letters ``pPeEsS'' governs the selection. The
+upper-case letters switch a check on, the lower-case letters
+off. ``P'' stands for checking along a simulation path, ``E'' stands
+for checking on ellipse, and finally ``S'' stands for checking along
+the shocks. It is possible to choose more than one type of check. The
+default behavior is that no checking is performed.
+
+\item[\desc{\tt --check-evals \it num}] This sets a maximum number of
+evaluations per one re\-sidual. The actual value depends on the selected
+algorithm for the integral evaluation. The algorithm can be either
+product or Smolyak quadrature and is chosen so that the actual number
+of evaluations would be minimal with maximal level of
+quadrature. Default is 1000.
+
+\item[\desc{\tt --check-num \it num}] This sets a number of checked
+points in a residual check. One input value $num$ is used for all
+three types of checks in the following way:
+\begin{itemize}
+\item For checks along the simulation, the number of simulated periods
+is $10\cdot num$
+\item For checks on ellipse, the number of points on ellipse is $10\cdot num$
+\item For checks along the shocks, the number of checked points
+corresponding to shocks from $0$ to $\mu\sigma$ (see \ref{checks}) is
+$num$.
+\end{itemize}
+Default is 10.
+
+\item[\desc{\tt --check-scale \it float}] This sets the scaling factor
+$\mu$ for checking on ellipse to $0.5\cdot float$ and scaling factor
+$\mu$ for checking along shocks to $float$. See section
+\ref{checks}. Default is 2.0.
+
+\item[\desc{\tt --no-irfs}] This suppresses IRF calculations. Default
+is to calculate IRFs for all shocks.
+
+\item[\desc{\tt --irfs}] This triggers IRF calculations. If there are
+no shock names following the {\tt --irfs} option, then IRFs for all
+shocks are calculated, otherwise see below. Default is to calculate
+IRFs for all shocks.
+
+\item[\desc{\tt --irfs \it shocklist}] This triggers IRF calculations
+only for the listed shocks. The {\it shocklist} is a space separated
+list of exogenous variables for which the IRFs will be
+calculated. Default is to calculate IRFs for all shocks.
+\end{description}
+
+The following are a few examples:
+{\small
+\begin{verbatim}
+dynare++ --sim 300 --per 50 blah.mod
+dynare++ --check PE --check-num 15 --check-evals 500 blah.dyn
+dynare++ --steps 5 --check S --check-scale 3 blahblah.mod
+\end{verbatim}
+}
+The first one sets the number of periods for IRF to 50, and sets a sample
+size for unconditional mean and covariance calculations to 6000. The
+second one checks the decision rule along a simulation path having 150
+periods and on ellipse at 150 points performing at most 500 evaluations
+per one residual. The third one solves the model in five steps and
+checks the rule along all the shocks from $-3\sigma$ to $3\sigma$ in
+$2*10+1$ steps (10 for negative, 10 for positive and 1 for at zero).
+
+\subsection{Dynare++ Model File}
+\label{dynpp_mod}
+
+In its strictest form, Dynare++ solves the following mathematical problem:
+\begin{equation}\label{basic_form}
+E_t[f(y^{**}_{t+1},y_t,y^*_{t-1},u_t)]=0
+\end{equation}
+This problem is input either directly, or it is an output of Dynare++
+routines calculating first order conditions of the optimal policy
+problem. In either case, Dynare++ performs necessary and
+mathematically correct substitutions to put the user specified problem
+to the \eqref{basic_form} form, which goes to Dynare++ solver. The
+following discusses a few timing issues:
+\begin{itemize}
+\item Endogenous variables can occur, starting from version 1.3.4, at
+times after $t+1$. If so, an equation containing such occurrence is
+broken to non-linear parts, and new equations and new auxiliary
+variables are automatically generated only for the non-linear terms
+containing the occurrence. Note that shifting such terms to time $t+1$
+may add occurrences of some other variables (involved in the terms) at
+times before $t-1$ implying addition of auxiliary variables to bring
+those variables to $t-1$.
+\item Variables declared as shocks may occur also at arbitrary
+times. If before $t$, additional endogenous variables are used to
+bring them to time $t$. If after $t$, then similar method is used as
+for endogenous variables occurring after $t+1$.
+\item There is no constraint on variables occurring at both times
+$t+1$ (or later) and $t-1$ (or earlier). Virtually, all variables can
+occur at arbitrary times.
+\item Endogenous variables can occur at times before $t-1$. If so,
+additional endogenous variables are added for all lags between the
+variable and $t-1$.
+\item Dynare++ applies the operator $E_t$ to all occurrences at time
+$t+1$. The realization of $u_t$ is included in the information set of
+$E_t$. See an explanation of Dynare++ timing on page \pageref{timing}.
+\end{itemize}
+
+The model equations are formulated in the same way as in Matlab
+Dynare. The time indexes different from $t$ are put to round
+parenthesis in this way: {\tt C(-1)}, {\tt C}, {\tt C(+1)}.
+
+The mathematical expressions can use the following functions and operators:
+\begin{itemize}
+\item binary {\tt + - * / \verb|^|}
+\item unary plus and minus minus as in {\tt a = -3;} and {\tt a = +3;} resp.
+\item unary mathematical functions: {\tt log exp sin cos tan
+sqrt}, whe\-re the logarithm has a natural base
+\item symbolic differentiation operator {\tt diff(expr,symbol)}, where
+{\tt expr} is a mathematical expression and {\tt symbol} is a unary
+symbol (a variable or a parameter); for example {\tt
+  diff(A*K(-1)\verb|^|alpha*L\verb|^|(1-alpha),K(-1))} is internally expanded as
+{\tt A*alpha*K(-1)\verb|^|(alpha-1)*L\verb|^|(1-alpha)}
+\item unary error function and complementary error function: {\tt erf}
+and {\tt erfc} defined as
+\begin{eqnarray*}
+erf(x) &= \frac{2}{\sqrt{\pi}}\int_0^x e^{-t^2}{\rm d}t\\
+erfc(x)&= \frac{2}{\sqrt{\pi}}\int_x^\infty e^{-t^2}{\rm d}t
+\end{eqnarray*}
+\end{itemize}
+
+The model file can contain user comments. Their usage can be
+understood from the following piece of the model file:
+
+{\small
+\begin{verbatim}
+P*C^(-gamma) = // line continues until semicolon
+  beta*C(+1)^(-gamma)*(P(+1)+Y(+1)); // asset price
+// choose dividend process: (un)comment what you want
+Y/Y_SS = (Y(-1)/Y_SS)^rho*exp(EPS);
+/*
+Y-Y_SS = rho*(Y(-1)-Y_SS)+EPS;
+*/
+\end{verbatim}
+}
+
+\subsection{Incompatibilities with Matlab Dynare}
+
+This section provides a list of incompatibilities between a model file
+for Dy\-na\-re++ and Matlab Dynare. These must be considered when a model
+file for Matlab Dynare is being migrated to Dynare++. The list is the
+following:
+\begin{itemize}
+\item There is no {\tt periods} keyword.
+\item The parameters cannot be lagged or leaded, I think that Dynare
+Matlab allows it, but the semantics is the same (parameter is a
+constant).
+\item There are no commands like {\tt steady}, {\tt check}, {\tt
+simul}, {\tt stoch\_simul}, etc.
+\item There are no sections like {\tt estimated\_params}, {\tt
+var\_obs}, etc.
+\item The variance-covariance matrix of endogenous shocks is given by
+{\tt vcov} matrix in Dynare++. An example follows. Starting from
+version 1.3.5, it is possible for vcov to be positive semi-definite
+matrix.
+{\small
+\begin{verbatim}
+vcov = [
+0.05 0 0 0;
+0 0.025 0 0;
+0 0 0.05 0;
+0 0 0 0.025
+];
+\end{verbatim}
+}
+
+\end{itemize}
+
+\section{Dynare++ Output}
+
+There are three output files; a data file in MAT-4 format containing
+the output data (\ref{matfile}), a journal text file containing an
+information about the Dynare++ run (\ref{journalfile}), and a dump
+file (\ref{dumpfile}). Further, Dynare++ generates two Matlab script
+files, which calculate a residual and the first derivative of the
+residual of the static system (\ref{output_matlab_scripts}). These are
+useful when calculating the deterministic steady state outside
+Dynare++.
+
+Note that all output files are created in the current directory of
+the Dynare++ process. This can be different from the directory where
+the Dynare++ binary is located and different from the directory where
+the model file is located.
+
+Before all, we need to understand what variables are automatically
+generated in Dynare++.
+
+\subsection{Auxiliary Variables}
+\label{aux_var}
+
+Besides the endogenous variables declared in {\tt var} section,
+Dynare++ might automatically add the following endogenous variables:
+
+\halign{\vrule width0pt height14pt{\tt #}\hfil & \kern 3mm%
+\vtop{\rightskip=0pt plus 5mm\noindent\hsize=9.5cm #}\cr
+MULT{\it n}& A Lagrange multiplier of the optimal policy problem
+associated with a constraint number {\it n} starting from zero.\cr
+AUX\_{\it n1}\_{\it n2}\_{\it n3}& An auxiliary variable associated
+with the last term in equation \eqref{planner_optim_foc2}. Since the
+term is under $E_{t+k}$, we need the auxiliary variable be put back
+in time. {\it n1} is a variable number starting from 0 in the declared
+order with respect to which the term was differentiated, {\it n2} is a
+number of constraint starting from 0, and finally {\it n3} is $k$
+(time shift of the term).\cr
+{\it endovar}\_p{\it K}& An auxiliary variable for bringing an
+endogenous variable {\it endovar} back in time by $K$ periods. The
+semantics of this variables is {\tt {\it endovar}\_p{\it K} = {\it
+endovar}(+{\it K})}.\cr
+{\it endovar}\_m{\it K}& An auxiliary variable for bringing an
+endogenous variable {\it endovar} forward in time by $K$ periods. The
+semantics of this variables is {\tt {\it endovar}\_m{\it K} = {\it
+endovar}(-{\it K})}.\cr
+{\it exovar}\_e& An auxiliary endogenous variable made equal to the
+exogenous variable to allow for a semantical occurrence of the
+exogenous variable at time other than $t$. The semantics of this
+variables is {\tt {\it exovar}\_e = {\it exovar}}.\cr
+AUXLD\_{\it n1}\_{\it n2}\_{\it n3}& An auxiliary variable for
+bringing a non-linear term containing an occurrence of a variable
+after $t+1$ to time $t+1$. {\it n1} is an equation number starting
+from 0, {\it n2} is the non-linear sub-term number in the equation
+starting from 0. {\it n3} is a time shift. For example, if the first
+equation is the following:
+\begin{verbatim}
+X - Y*W(+1) + W(+2)*Z(+4) = 0;
+\end{verbatim}
+then it will be expanded as:
+\begin{verbatim}
+X - Y*W(+1) + AUXLD_0_2_3(+1) = 0;
+AUXLD_0_2_1 = W(-1)*Z(+1);
+AUXLD_0_2_2 = AUXLD_0_2_1(+1);
+AUXLD_0_2_3 = AUXLD_0_2_2(+1);
+\end{verbatim}
+\cr
+}
+
+\subsection{MAT File}
+\label{matfile}
+
+The contents of the data file is depicted below. We
+assume that the prefix is {\tt dyn}.
+
+\halign{\vrule width0pt height14pt{\tt #}\hfil & \kern 3mm%
+\vtop{\rightskip=0pt plus 5mm\noindent\hsize=7.5cm #}\cr
+dyn\_nstat& Scalar. A number of static variables
+(those occurring only at time $t$).\cr
+dyn\_npred & Scalar. A number of variables occurring
+at time $t-1$ and not at $t+1$.\cr
+dyn\_nboth & Scalar. A number of variables occurring
+at $t+1$ and $t-1$.\cr
+dyn\_nforw & Scalar. A number of variables occurring
+at $t+1$ and not at $t-1$.\cr
+dyn\_vars & Column vector of endogenous variable
+names in Dy\-na\-re++ internal ordering.\cr
+dyn\_i\_{\it endovar} & Scalar. Index of a variable
+named {\it endovar} in the {\tt dyn\_vars}.\cr
+dyn\_shocks & Column vector of exogenous variable
+names.\cr
+dyn\_i\_{\it exovar} & Scalar. Index of a shock
+named {\it exovar} in the {\tt dyn\_shocks}.\cr
+dyn\_state\_vars & Column vector of state variables,
+these are stacked variables counted by {\tt dyn\_\-npred}, {\tt
+dyn\_\-nboth} and shocks.\cr
+dyn\_vcov\_exo & Matrix $nexo\times nexo$. The
+variance-covariance matrix of exogenous shocks as input in the model
+file. The ordering is given by {\tt dyn\_shocks}.\cr
+dyn\_mean & Column vector $nendo\times 1$. The
+unconditional mean of endogenous variables. The ordering is given by
+{\tt dyn\_vars}.\cr
+dyn\_vcov & Matrix $nendo\times nendo$. The
+unconditional covariance of endogenous variables. The ordering is given
+by {\tt dyn\_vars}.\cr
+dyn\_rt\_mean & Column vector $nendo\times 1$. The unconditional mean
+of endogenous variables estimated in real-time. See
+\ref{rt_simul}. The ordering is given by {\tt dyn\_vars}.\cr
+dyn\_rt\_vcov & Matrix $nendo\times nendo$. The unconditional
+covariance of endogenous variables estimated in real-time. See \ref{rt_simul}. The
+ordering is given by {\tt dyn\_vars}.\cr
+dyn\_cond\_mean & Matrix $nendo\times nper$. The rows correspond to
+endogenous variables in the ordering of {\tt dyn\_vars}, the columns
+to periods. If $t$ is a period (starting with 1), then $t$-th column
+is $E[y_t|y_0=\bar y]$. See \ref{cond_dist}.\cr
+dyn\_cond\_variance & Matrix $nendo\times nper$. The rows correspond
+to endogenous variables in the ordering of {\tt dyn\_vars}, the
+columns to periods. If $t$ is a period (starting with 1), then $t$-th
+column are the variances of $y_t|y_0=\bar y$. See \ref{cond_dist}.\cr
+dyn\_ss & Column vector $nendo\times 1$. The fix
+point of the resulting approximation of the decision rule.\cr
+dyn\_g\_{\it order} & Matrix $nendo\times ?$. A
+derivative of the decision rule of the {\it order} multiplied by
+$1/order!$. The rows correspond to endogenous variables in the
+ordering of {\tt dyn\_vars}. The columns correspond to a
+multidimensional index going through {\tt dyn\_state\_vars}. The data
+is folded (all symmetrical derivatives are stored only once).\cr
+dyn\_steady\_states & Matrix $nendo\times
+nsteps+1$. A list of fix points at which the multi-step algorithm
+calculated approximations. The rows correspond to endogenous variables
+and are ordered by {\tt dyn\_vars}, the columns correspond to the
+steps. The first column is always the deterministic steady state.\cr
+dyn\_irfp\_{\it exovar}\_mean & Matrix
+$nendo\times nper$. Positive impulse response to a shock named {\it
+exovar}. The row ordering is given by {\tt dyn\_vars}. The columns
+correspond to periods.\cr
+dyn\_irfp\_{\it exovar}\_var & Matrix
+$nendo\times nper$. The variances of positive impulse response
+functions.\cr
+dyn\_irfm\_{\it exovar}\_mean & Same as {\tt
+dyn\_irfp\_}{\it exovar}{\tt \_mean} but for negative impulse.\cr
+dyn\_irfp\_{\it exovar}\_var & Same as {\tt
+dyn\_irfp\_}{\it exovar}{\tt \_var} but for negative impulse.\cr
+dyn\_simul\_points & A simulation path along which the check was
+done. Rows correspond to endogenous variables, columns to
+periods. Appears only if {\tt --check P}.\cr
+dyn\_simul\_errors & Errors along {\tt
+dyn\_simul\_points}. The rows correspond to equations as stated in the
+model file, the columns to the periods. Appears only if {\tt --check
+P}\cr
+dyn\_ellipse\_points & A set of points on the ellipse at which the
+approximation was checked. Rows correspond to state endogenous
+variables (the upper part of {\tt dyn\_state\_vars}, this means
+without shocks), and columns correspond to periods. Appears only if
+{\tt --check E}.\cr
+dyn\_ellipse\_errors & Errors on the ellipse points {\tt
+dyn\_ellipse\_points}. The rows correspond to the equations as stated
+in the model file, columns to periods. Appears only if {\tt --check
+E}.\cr
+dyn\_shock\_{\it exovar}\_errors& Errors along a shock named {\it
+exovar}. The rows correspond to the equations as stated in the model
+file. There are $2m+1$ columns, the middle column is the error at zero
+shock. The columns to the left correspond to negative values, columns
+to the right to positive. Appears only if {\tt --check S}.\cr
+}
+
+\subsection{Journal File}
+\label{journalfile}
+
+The journal file provides information on resources usage during the
+run and gives some informative messages. The journal file is a text
+file, it is organized in single line records. The format of records is
+documented in a header of the journal file.
+
+The journal file should be consulted in the following circumstances:
+\begin{itemize}
+\item Something goes wrong. For example, if a model is not
+Blanchard--Kahn stable, then the eigenvalues are dumped to the journal
+file.
+
+If the unconditional covariance matrix {\tt dyn\_vcov} is NaN, then
+from the journal file you will know that all the simulations had to be
+thrown away due to occurrence of NaN or Inf. This is caused by
+non-stationarity of the resulting decision rule.
+
+If Dynare++ crashes, the journal file can be helpful for guessing a
+point where it crashed.
+
+\item You are impatient. You might be looking at the journal file
+during the run in order to have a better estimate about the time when
+the calculations are finished. In Unix, I use a command {\tt tail -f
+blah.jnl}.\footnote{This helps to develop one of the three
+programmer's virtues: {\it impatience}. The other two are {\it
+laziness} and {\it hubris}; according to Larry Wall.}
+
+\item Heavy swapping. If the physical memory is not
+sufficient, an operating system starts swapping memory pages with a
+disk. If this is the case, the journal file can be consulted for
+information on memory consumption and swapping activity.
+
+\item Not sure what Dynare++ is doing. If so, read the journal file,
+which contains a detailed record on what was calculated, simulated
+etc.
+\end{itemize}
+
+\subsection{Dump File}
+\label{dumpfile}
+
+The dump file is always created with the suffix {\tt .dump}. It is a
+text file which takes a form of a model file. It sets the parameter
+values which were used, it has the initval section setting the values
+which were finally used, and mainly it has a model section of all
+equations with all substitutions and formed the first order conditions
+of the planner.
+
+The dump file serves for debugging purposes, since it contains the
+mathematical problem which is being solved by dynare++.
+
+\subsection{Matlab Scripts for Steady State Calculations}
+\label{output_matlab_scripts}
+
+This section describes two Matlab scripts, which are useful when
+calculating the deterministic steady state outside Dynare++. The
+scripts are created by Dynare++ as soon as an input file is parsed,
+that is before any calculations.
+
+The first Matlab script having a name {\tt {\it modname}\_f.m} for
+given parameters values and given all endogenous variables $y$
+calculates a residual of the static system. Supposing the model is in
+the form of \eqref{focs}, the script calculates a vector:
+\[
+f(y,y,y,0)
+\]
+
+The second script having a name {\tt {\it modname}\_ff.m} calculates a matrix:
+\[
+\frac{\partial}{\partial y}f(y,y,y,0)
+\]
+
+Both scripts take two arguments. The first is a vector of parameter
+values ordered in the same ordering as declared in the model file. The
+second is a vector of all endogenous variables at which the evaluation
+is performed. These endogenous variables also include auxiliary
+variables automatically added by Dynare++ and Lagrange multipliers if
+an optimal policy problem is solved. If no endogenous variable has not
+been added by Dynare++, then the ordering is the same as the ordering
+in declaration in the model file. If some endogenous variables have
+been added, then the ordering can be read from comments close to the
+top of either two files.
+
+For example, if we want to calculate the deterministic steady state of
+the {\tt kp1980.dyn} model, we need to do the following:
+\begin{enumerate}
+\item Run Dynare++ with {\tt kp1980.dyn}, no matter if the calculation
+has not been finished, important output are the two Matlab scripts
+created just in the beginning.
+\item Consult file {\tt kp1980\_f.m}\ to get the ordering of parameters
+and all endogenous variables.
+\item Create a vector {\tt p} with the parameter values in the ordering
+\item Create a vector {\tt init\_y} with the initial guess for the
+Matlab solver {\tt fsolve}
+\item Create a simple Matlab function called {\tt kp1980\_fsolve.m}\ 
+returning the residual and Jacobian:
+{\small
+\begin{verbatim}
+function [r, J] = kp1980_fsolve(p, y)
+  r = kp1980_f(p, y);
+  J = kp1980_ff(p, y);
+\end{verbatim}
+}
+\item In the Matlab prompt, run the following:
+{\small
+\begin{verbatim}
+opt=optimset('Jacobian','on','Display','iter');
+y=fsolve(@(y) kp1980_fsolve(p,y), init_y, opt);
+\end{verbatim}
+}
+\end{enumerate}
+ 
+
+\subsection{Custom Simulations}
+\label{custom}
+
+When Dynare++ run is finished it dumps the derivatives of the
+calculated decision rule to the MAT file. The derivatives can be used
+for a construction of the decision rule and custom simulations can be
+run. This is done by {\tt dynare\_simul.m} M-file in Matlab. It reads
+the derivatives and simulates the decision rule with provided
+realization of shocks.
+
+All the necessary documentation can be viewed by the command:
+{\small
+\begin{verbatim}
+help dynare_simul
+\end{verbatim}
+}
+
+\end{document}
