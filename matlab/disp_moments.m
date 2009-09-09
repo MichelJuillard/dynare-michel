@@ -42,7 +42,7 @@ function disp_moments(y,var_list)
   y = y - repmat(m,size(y,1),1);
   s2 = mean(y.*y);
   s = sqrt(s2);
-  oo_.mean = m;
+  oo_.mean = transpose(m);
   oo_.var = y'*y/size(y,1);
 
   labels = deblank(M_.endo_names(ivar,:));
