@@ -11,12 +11,12 @@ yy0=oo_.steady_state(I);
 % for j=1:size(M_.lead_lag_incidence,1);
 %     yy0 = [ yy0; oo_.steady_state(find(M_.lead_lag_incidence(j,:)))];
 % end
-gp = feval([M_.fname,'_params_derivs'],yy0, oo_.exo_steady_state', M_.params, 1);
+[df, gp] = feval([M_.fname,'_params_derivs'],yy0, oo_.exo_steady_state', M_.params, 1);
 [residual, g1 ] = feval([M_.fname,'_dynamic'],yy0, oo_.exo_steady_state', M_.params,1);
 
 [residual, g1, g2 ] = feval([M_.fname,'_dynamic'],yy0, oo_.exo_steady_state', M_.params,1);
 [residual, gg1] = feval([M_.fname,'_static'],oo_.steady_state, oo_.exo_steady_state', M_.params);
-df = feval([M_.fname,'_model_derivs'],yy0, oo_.exo_steady_state', M_.params, 1);
+% df = feval([M_.fname,'_model_derivs'],yy0, oo_.exo_steady_state', M_.params, 1);
 dyssdtheta = -gg1\df;
 dyssdtheta = dyssdtheta(I,:);
 [nr, nc]=size(g2);
