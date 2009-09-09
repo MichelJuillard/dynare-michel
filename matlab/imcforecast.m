@@ -37,7 +37,7 @@ end
 
 set_parameters(xparam);
 
-[atT,innov,measurement_error,filtered_state_vector,ys,trend_coeff] = DsgeSmoother(xparam,gend,data);
+[atT,innov,measurement_error,filtered_state_vector,ys,trend_coeff] = DsgeSmoother(xparam,gend,data,[],0);
 
 InitState(:,1) = atT(:,end);
 [T,R,ys,info] = dynare_resolve;
