@@ -20,7 +20,9 @@ dnl along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 AC_PREREQ([2.63])
 AC_INIT([dynare], [4.1-unstable])
 AC_CONFIG_SRCDIR([preprocessor/DynareMain.cc])
+AM_INIT_AUTOMAKE([-Wall -Werror foreign])
 
+AC_PROG_CC
 AC_PROG_CXX
 
 # Use C++ for testing headers
@@ -41,17 +43,15 @@ case $host_os in
     ;;
 esac
 
-AC_CHECK_PROGS([FLEX], [flex])
-if test -z "$FLEX"; then
-  AC_MSG_ERROR([No suitable flex found.])
-fi
+AC_PROG_RANLIB
+
+AM_PROG_LEX
+AX_PROG_FLEX([], AC_MSG_ERROR([No suitable flex found.]))
 
 AC_CHECK_HEADERS([FlexLexer.h], [], [AC_MSG_ERROR([Can't find FlexLexer.h])])
 
-AC_CHECK_PROGS([BISON], [bison])
-if test -z "$BISON"; then
-  AC_MSG_ERROR([No suitable bison found.])
-fi
+AC_PROG_YACC
+AX_PROG_BISON([], AC_MSG_ERROR([No suitable bison found.]))
 
 AC_CHECK_HEADERS([boost/graph/adjacency_list.hpp], [], [AC_MSG_ERROR([Can't find Boost Graph Library])])
 AC_CHECK_HEADERS([boost/graph/max_cardinality_matching.hpp], [], [AC_MSG_ERROR([Your Boost version is too old. Please install a newer one.])])
@@ -89,9 +89,8 @@ then
   AX_MATLAB_ARCH
 fi
 
-AX_DYNAREPP
-
 AC_CONFIG_FILES([Makefile
+                 preprocessor/macro/Makefile
                  preprocessor/Makefile
                  doc/Makefile
                  doc/preprocessor/Makefile
@@ -99,6 +98,7 @@ AC_CONFIG_FILES([Makefile
                  doc/userguide/Makefile
                  tests/Makefile
                  matlab/dynare_version.m
-                 windows/dynare-version.nsi])
+                 windows/dynare-version.nsi
+])
 
 AC_OUTPUT
