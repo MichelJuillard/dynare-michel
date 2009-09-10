@@ -22,7 +22,6 @@ AC_INIT([dynare], [4.1-unstable])
 AC_CONFIG_SRCDIR([preprocessor/DynareMain.cc])
 AM_INIT_AUTOMAKE([-Wall -Werror foreign])
 
-AC_PROG_CC
 AC_PROG_CXX
 
 # Use C++ for testing headers
@@ -53,32 +52,29 @@ AC_CHECK_HEADERS([FlexLexer.h], [], [AC_MSG_ERROR([Can't find FlexLexer.h])])
 AC_PROG_YACC
 AX_PROG_BISON([], AC_MSG_ERROR([No suitable bison found.]))
 
+AX_BOOST_BASE([1.34])
 AC_CHECK_HEADERS([boost/graph/adjacency_list.hpp], [], [AC_MSG_ERROR([Can't find Boost Graph Library])])
-AC_CHECK_HEADERS([boost/graph/max_cardinality_matching.hpp], [], [AC_MSG_ERROR([Your Boost version is too old. Please install a newer one.])])
 
 # Don't use deprecated hash structures
 AC_DEFINE([BOOST_NO_HASH])
 
 AC_CHECK_PROG([PDFLATEX], [pdflatex], [pdflatex])
-AC_CHECK_PROG([BIBTEX], [bibtex], [bibtex])
-AC_CHECK_PROG([DBLATEX], [dblatex], [dblatex])
-AC_CHECK_PROG([XSLTPROC], [xsltproc], [xsltproc])
+AM_CONDITIONAL([HAVE_PDFLATEX], [test "x$PDFLATEX" != "x"])
 
-if test -n "${XSLTPROC}" -a -f /etc/xml/catalog
-then
-  AC_PROG_GREP
-  AC_MSG_CHECKING([for DocBook XSL files in XML catalog])
-  cat /etc/xml/catalog | ${GREP} -q http://docbook.sourceforge.net/release/xsl/
-  if test $? -eq 0
-  then
-      AC_MSG_RESULT([yes])
-  else
-      AC_MSG_RESULT([no])
-      AC_MSG_WARN([The creation of the HTML version will be very slow! You should install the docbook-xsl package.])
-  fi
-fi
+AC_CHECK_PROG([BIBTEX], [bibtex], [bibtex])
+AM_CONDITIONAL([HAVE_BIBTEX], [test "x$BIBTEX" != "x"])
+
+AC_CHECK_PROG([DBLATEX], [dblatex], [dblatex])
+AM_CONDITIONAL([HAVE_DBLATEX], [test "x$DBLATEX" != "x"])
+
+AX_PROG_XSLTPROC
+AM_CONDITIONAL([HAVE_XSLT], [test "x$XSLTPROC" != "x"])
+
+AX_CHECK_DOCBOOK_XSLT_MIN(1.73.0)
+AM_CONDITIONAL([HAVE_XSLT], [test "x$DOCBOOK_XSLT_CURRENT_VERSION" != "xno"])
 
 AC_CHECK_PROG([OCTAVE], [octave], [octave])
+AM_CONDITIONAL([HAVE_OCTAVE], [test "x$OCTAVE" != "x"])
 
 AX_MATLAB
 
