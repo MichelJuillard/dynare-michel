@@ -1,20 +1,20 @@
 SUBDIRS = preprocessor macroprocessor userguide
 
-TARGETS =
+PDF_TARGETS =
 
 if HAVE_PDFLATEX
-TARGETS += guide.pdf bvar-a-la-sims.pdf
+PDF_TARGETS += guide.pdf bvar-a-la-sims.pdf
 endif
 
-if HAVE_BIBTEX
-TARGETS += manual.pdf
+if HAVE_DBLATEX
+PDF_TARGETS += manual.pdf
 endif
+
+pdf-local: $(PDF_TARGETS)
 
 if HAVE_XSLT
-TARGETS += manual-html/index.html
+html-local: manual-html/index.html
 endif
-
-all-local: $(TARGETS)
 
 EXTRA_DIST = guide.tex guide.bbl bibmad.sty bvar-a-la-sims.tex manual.xml dynare_html.xsl manual.xml
 
