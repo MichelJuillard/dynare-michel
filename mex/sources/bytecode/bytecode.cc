@@ -46,12 +46,21 @@ max(int a, int b)
 using namespace std;
 #include <sstream>
 #include "mex_interface.hh"
+string
+Get_Argument(const char *argv)
+{
+  //mexPrintf("number=%d\n",number);
+  string f(argv);
+  return f;
+}
+
 
 int
 main( int argc, const char* argv[] )
 {
   FILE *fid;
   bool steady_state = false;
+  bool evaluate = false;
   printf("argc=%d\n",argc);
   if(argc<2)
     {
@@ -70,11 +79,23 @@ main( int argc, const char* argv[] )
 
   string file_name(argv[1]);
 
-  if(argc>2)
+  for(i=2;i<argc; i++)
     {
-      string f(argv[1]);
-      if(f == "steady_state")
+      if(Get_Argument(argv[i])=="steady_state")
         steady_state = true;
+      else if(Get_Argument(argv[i])=="dynamic")
+        steady_state = false;
+      else if(Get_Argument(argv[i])=="evaluate")
+        evaluate = true;
+      else
+        {
+          mexPrintf("Unknown argument : ");
+          mexEvalString("st=fclose('all');clear all;");
+          string f;
+          f = Get_Argument(argv[i]);
+          f.append("\n");
+          mexErrMsgTxt(f.c_str());
+        }
     }
   fid = fopen(tmp_out.str().c_str(),"r");
   int periods;
@@ -147,9 +168,10 @@ main( int argc, const char* argv[] )
   clock_t t0= clock();
   Interpreter interprete(params, y, ya, x, direction, y_size, nb_row_x, nb_row_xd, periods, y_kmin, y_kmax, maxit_, solve_tolf, size_of_direction, slowc, y_decal, markowitz_c, file_name);
   string f(file_name);
-  interprete.compute_blocks(f, f, steady_state);
+  interprete.compute_blocks(f, f, steady_state, evaluate);
   clock_t t1= clock();
-  mexPrintf("Simulation Time=%f milliseconds\n",1000.0*(double(t1)-double(t0))/double(CLOCKS_PER_SEC));
+  if(!evaluate)
+    mexPrintf("Simulation Time=%f milliseconds\n",1000.0*(double(t1)-double(t0))/double(CLOCKS_PER_SEC));
   if(x)
     mxFree(x);
   if(y)
@@ -162,28 +184,51 @@ main( int argc, const char* argv[] )
 }
 
 #else
+
+string
+Get_Argument(const mxArray *prhs)
+{
+  //mexPrintf("number=%d\n",number);
+  const mxArray *mxa = prhs;
+  int buflen=mxGetM(mxa) * mxGetN(mxa) + 1;
+  char *first_argument;
+  first_argument=(char*)mxCalloc(buflen, sizeof(char));
+  int status = mxGetString(mxa, first_argument, buflen);
+  if (status != 0)
+    mexWarnMsgTxt("Not enough space. The first argument is truncated.");
+  string f(first_argument);
+  mxFree(first_argument);
+  return f;
+}
 /* The gateway routine */
 void
 mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 {
   mxArray *M_, *oo_, *options_;
   int i, row_y, col_y, row_x, col_x, nb_row_xd;
+  int steady_row_y, steady_col_y, steady_row_x, steady_col_x, steady_nb_row_xd;
   int y_kmin=0, y_kmax=0, y_decal=0, periods=1;
   double * pind ;
   double *direction;
   bool steady_state = false;
-  if(nrhs>0)
+  bool evaluate = false;
+  for(i=0;i<nrhs; i++)
     {
-    	const mxArray *mxa = prhs[0];
-      int buflen=mxGetM(mxa) * mxGetN(mxa) + 1;
-      char *first_argument;
-      first_argument=(char*)mxCalloc(buflen, sizeof(char));
-      int status = mxGetString(mxa, first_argument, buflen);
-      if (status != 0)
-        mexWarnMsgTxt("Not enough space. The first argument is truncated.");
-      string f(first_argument);
-      if(f == "steady_state")
+      if(Get_Argument(prhs[i])=="steady_state")
         steady_state = true;
+      else if(Get_Argument(prhs[i])=="dynamic")
+        steady_state = false;
+      else if(Get_Argument(prhs[i])=="evaluate")
+        evaluate = true;
+      else
+        {
+          mexPrintf("Unknown argument : ");
+          mexEvalString("st=fclose('all');clear all;");
+          string f;
+          f = Get_Argument(prhs[i]);
+          f.append("\n");
+          mexErrMsgTxt(f.c_str());
+        }
     }
   M_ = mexGetVariable("global","M_");
   if (M_ == NULL )
@@ -209,7 +254,7 @@ mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
     }
   //mexPrintf("ok0\n");
   double * params = mxGetPr(mxGetFieldByNumber(M_, 0, mxGetFieldNumber(M_,"params")));
-  double *yd, *xd;
+  double *yd, *xd, *steady_yd, *steady_xd ;
   if(!steady_state)
     {
       yd= mxGetPr(mxGetFieldByNumber(oo_, 0, mxGetFieldNumber(oo_,"endo_simul")));
@@ -224,6 +269,14 @@ mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
       y_kmax=int(floor(*(mxGetPr(mxGetFieldByNumber(M_, 0, mxGetFieldNumber(M_,"maximum_lead"))))));
       y_decal=max(0,y_kmin-int(floor(*(mxGetPr(mxGetFieldByNumber(M_, 0, mxGetFieldNumber(M_,"maximum_endo_lag")))))));
       periods=int(floor(*(mxGetPr(mxGetFieldByNumber(options_, 0, mxGetFieldNumber(options_,"periods"))))));
+
+      steady_yd= mxGetPr(mxGetFieldByNumber(oo_, 0, mxGetFieldNumber(oo_,"steady_state")));
+      steady_row_y=mxGetM(mxGetFieldByNumber(oo_, 0, mxGetFieldNumber(oo_,"steady_state")));
+      steady_col_y=mxGetN(mxGetFieldByNumber(oo_, 0, mxGetFieldNumber(oo_,"steady_state")));;
+      steady_xd= mxGetPr(mxGetFieldByNumber(oo_, 0, mxGetFieldNumber(oo_,"exo_steady_state")));
+      steady_row_x=mxGetM(mxGetFieldByNumber(oo_, 0, mxGetFieldNumber(oo_,"exo_steady_state")));
+      steady_col_x=mxGetN(mxGetFieldByNumber(oo_, 0, mxGetFieldNumber(oo_,"exo_steady_state")));
+      steady_nb_row_xd=int(floor(*(mxGetPr(mxGetFieldByNumber(M_, 0, mxGetFieldNumber(M_,"exo_det_nbr"))))));
     }
 	else
 	  {
@@ -262,27 +315,33 @@ mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
   for (i=0;i<row_x*col_x;i++)
      x[i]=double(xd[i]);
   for (i=0;i<row_y*col_y;i++)
-    y[i]=double(yd[i]);
+    {
+      y[i]  = double(yd[i]);
+      ya[i] = double(yd[i]);
+    }
   int y_size=row_y;
   int nb_row_x=row_x;
 
   /*int it_ = y_kmin;
   for (int j = 0; j < y_size; j++)
 		mexPrintf("   variable %d at time %d and %d = %f\n", j+1, it_, it_+1, y[j+it_*y_size]);*/
-
   clock_t t0= clock();
   Interpreter interprete(params, y, ya, x, direction, y_size, nb_row_x, nb_row_xd, periods, y_kmin, y_kmax, maxit_, solve_tolf, size_of_direction, slowc, y_decal, markowitz_c, file_name);
   string f(fname);
-  bool result = interprete.compute_blocks(f, f, steady_state);
+  bool result = interprete.compute_blocks(f, f, steady_state, evaluate);
   clock_t t1= clock();
-  if(!steady_state)
+  if(!steady_state && !evaluate)
     mexPrintf("Simulation Time=%f milliseconds\n",1000.0*(double(t1)-double(t0))/double(CLOCKS_PER_SEC));
   if (nlhs>0)
     {
       plhs[0] = mxCreateDoubleMatrix(row_y, col_y, mxREAL);
       pind = mxGetPr(plhs[0]);
-      for (i=0;i<row_y*col_y;i++)
-        pind[i]=y[i];
+      if(evaluate)
+        for (i=0;i<row_y*col_y;i++)
+          pind[i]=y[i]-ya[i];
+      else
+        for (i=0;i<row_y*col_y;i++)
+          pind[i]=y[i];
 			if(nlhs>1)
 			  {
 			    plhs[1] = mxCreateDoubleMatrix(1, 1, mxREAL);
