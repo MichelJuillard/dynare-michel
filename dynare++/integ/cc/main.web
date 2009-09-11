@@ -6,7 +6,7 @@
 \def\title{{\mainfont Numerical Integration Module}}
 
 
-@i c++lib.w
+@i ../../c++lib.w
 @s Vector int
 @s ConstVector int
 @s IntSequence int

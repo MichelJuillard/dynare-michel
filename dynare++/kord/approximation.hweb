@@ -112,9 +112,9 @@ the following step in |rule_ders| and |rule_ders_ss| (see
 |calcStochShift| (called from |check|) calculates a shift of the
 system equations due to uncertainity.
 
-dr_centralize is a new option. dynare++ was automatically expressing 
+dr\_centralize is a new option. dynare++ was automatically expressing 
 results around the fixed point instead of the deterministic steady 
-state. dr_centralize controls this behavior. 
+state. dr\_centralize controls this behavior. 
 
 
 @<|Approximation| class declaration@>=

@@ -6,7 +6,7 @@
 \def\title{{\mainfont Tensor Library}}
 
 
-@i c++lib.w
+@i ../../c++lib.w
 @s const_reverse_iterator int
 @s value_type int
 
