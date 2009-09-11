@@ -1,6 +1,7 @@
 /* $Id: tests.cpp 148 2005-04-19 15:12:26Z kamenik $ */
 /* Copyright 2004, Ondra Kamenik */
 
+#include <cstdlib>
 #include "korder.h"
 #include "SylvException.h"
 

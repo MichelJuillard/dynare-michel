@@ -3,6 +3,7 @@
 
 #include "factory.h"
 
+#include <cstdlib>
 #include <math.h>
 
 void Factory::init(const Symmetry& s, const IntSequence& nvs)

@@ -5,6 +5,7 @@
 #include "tl_exception.h"
 #include "fs_tensor.h"
 
+#include <cstdlib>
 #include <math.h>
 #include <stdio.h>
 
@@ -81,7 +82,7 @@ void Monom::print() const
 }
 
 Monom1Vector::Monom1Vector(int nxx, int l)
-	: nx(nxx), len(l), x(new (Monom*)[len])
+	: nx(nxx), len(l), x(new Monom*[len])
 {
 	for (int i = 0; i < len; i++) {
 		x[i] = new Monom(nx);
@@ -130,7 +131,7 @@ void Monom1Vector::print() const
 }
 
 Monom2Vector::Monom2Vector(int nyy, int nuu, int l)
-	: ny(nyy), nu(nuu), len(l), y(new (Monom*)[len]), u(new (Monom*)[len])
+	: ny(nyy), nu(nuu), len(l), y(new Monom*[len]), u(new Monom*[len])
 {
 	for (int i = 0; i < len; i++) {
 		y[i] = new Monom(ny);
@@ -140,7 +141,7 @@ Monom2Vector::Monom2Vector(int nyy, int nuu, int l)
 
 Monom2Vector::Monom2Vector(const Monom1Vector& g, const Monom2Vector& xmon)
 	: ny(xmon.ny), nu(xmon.nu), len(g.len),
-	  y(new (Monom*)[len]), u(new (Monom*)[len])	
+	  y(new Monom*[len]), u(new Monom*[len])	
 {
 	TL_RAISE_IF(xmon.len != g.nx,
 				"Wrong number of x's in Monom2Vector constructor");
@@ -249,30 +250,30 @@ void Monom4Vector::init_random()
 
 Monom4Vector::Monom4Vector(int l, int ny, int nu)
 	: len(l), nx1(ny), nx2(nu), nx3(0), nx4(1),
-	  x1(new (Monom*)[len]),
-	  x2(new (Monom*)[len]),
-	  x3(new (Monom*)[len]),
-	  x4(new (Monom*)[len])	  
+	  x1(new Monom*[len]),
+	  x2(new Monom*[len]),
+	  x3(new Monom*[len]),
+	  x4(new Monom*[len])	  
 {
 	init_random();
 }
 
 Monom4Vector::Monom4Vector(int l, int ny, int nu, int nup)
 	: len(l), nx1(ny), nx2(nu), nx3(nup), nx4(1),
-	  x1(new (Monom*)[len]),
-	  x2(new (Monom*)[len]),
-	  x3(new (Monom*)[len]),
-	  x4(new (Monom*)[len])
+	  x1(new Monom*[len]),
+	  x2(new Monom*[len]),
+	  x3(new Monom*[len]),
+	  x4(new Monom*[len])
 {
 	init_random();
 }
 
 Monom4Vector::Monom4Vector(int l, int nbigg, int ng, int ny, int nu)
 	: len(l), nx1(nbigg), nx2(ng), nx3(ny), nx4(nu),
-	  x1(new (Monom*)[len]),
-	  x2(new (Monom*)[len]),
-	  x3(new (Monom*)[len]),
-	  x4(new (Monom*)[len])
+	  x1(new Monom*[len]),
+	  x2(new Monom*[len]),
+	  x3(new Monom*[len]),
+	  x4(new Monom*[len])
 {
 	init_random();
 }
@@ -280,10 +281,10 @@ Monom4Vector::Monom4Vector(int l, int nbigg, int ng, int ny, int nu)
 Monom4Vector::Monom4Vector(const Monom4Vector& f, const Monom4Vector& bigg,
 						   const Monom4Vector& g)
 	: len(f.len), nx1(bigg.nx1), nx2(bigg.nx2), nx3(bigg.nx3), nx4(1),
-	  x1(new (Monom*)[len]),
-	  x2(new (Monom*)[len]),
-	  x3(new (Monom*)[len]),
-	  x4(new (Monom*)[len])
+	  x1(new Monom*[len]),
+	  x2(new Monom*[len]),
+	  x3(new Monom*[len]),
+	  x4(new Monom*[len])
 {
 	TL_RAISE_IF(!(bigg.nx1 == g.nx1 && bigg.nx2 == g.nx2 && g.nx3 == 0 &&
 				  bigg.nx4 == 1 && g.nx4 == 1),
@@ -410,7 +411,7 @@ void Monom4Vector::print() const
 SparseDerivGenerator::SparseDerivGenerator(
 	int nf, int ny, int nu, int nup, int nbigg, int ng,
 	int mx, double prob, int maxdim)
-	: maxdimen(maxdim), ts(new (FSSparseTensor*)[maxdimen])
+	: maxdimen(maxdim), ts(new FSSparseTensor*[maxdimen])
 {
 	intgen.init(nf, ny, nu, nup, nbigg, mx, prob);
 
@@ -448,8 +449,8 @@ SparseDerivGenerator::~SparseDerivGenerator()
 
 DenseDerivGenerator::DenseDerivGenerator(int ng, int nx, int ny, int nu,
 										 int mx, double prob, int maxdim)
-	: maxdimen(maxdim), ts(new (FGSTensor*)[maxdimen]),
-	  uts(new (UGSTensor*)[maxdimen])
+	: maxdimen(maxdim), ts(new FGSTensor*[maxdimen]),
+	  uts(new UGSTensor*[maxdimen])
 {
 	intgen.init(ng, nx, ny, nu, nu, mx, prob);
 	Monom1Vector g(nx, ng);
