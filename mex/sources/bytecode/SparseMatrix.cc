@@ -1335,11 +1335,11 @@ SparseMatrix::simulate_NG(int blck, int y_size, int it_, int y_kmin, int y_kmax,
       int nb_var_piva = At_Row(pivj, &first_piva);
       int nb_eq_todo = 0;
       for (j = 0; j < nb_eq && first; j++)
-		{
+        {
           if (!line_done[first->r_index])
             bc[nb_eq_todo++] = first;
           first = first->NZE_C_N;
-		}
+        }
       //#pragma omp parallel for num_threads(atoi(getenv("DYNARE_NUM_THREADS")))
       for (j = 0; j < nb_eq_todo; j++)
 				{
@@ -1418,7 +1418,6 @@ SparseMatrix::simulate_NG(int blck, int y_size, int it_, int y_kmin, int y_kmax,
                 }
             }
           u[b[row]] -= u[b[pivj]]*first_elem;
-          first = first->NZE_C_N;
         }
     }
   double slowc_lbx = slowc, res1bx;
