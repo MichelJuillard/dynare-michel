@@ -58,6 +58,9 @@ AC_CHECK_HEADERS([boost/graph/adjacency_list.hpp], [], [AC_MSG_ERROR([Can't find
 # Don't use deprecated hash structures
 AC_DEFINE([BOOST_NO_HASH])
 
+AC_CHECK_PROG([PDFTEX], [pdftex], [pdftex])
+AM_CONDITIONAL([HAVE_PDFTEX], [test "x$PDFTEX" != "x"])
+
 AC_CHECK_PROG([PDFLATEX], [pdflatex], [pdflatex])
 AM_CONDITIONAL([HAVE_PDFLATEX], [test "x$PDFLATEX" != "x"])
 
@@ -75,6 +78,21 @@ AM_CONDITIONAL([HAVE_XSLT], [test "x$DOCBOOK_XSLT_CURRENT_VERSION" != "xno"])
 
 AC_CHECK_PROG([OCTAVE], [octave], [octave])
 AM_CONDITIONAL([HAVE_OCTAVE], [test "x$OCTAVE" != "x"])
+
+AC_CHECK_PROG([CTANGLE], [ctangle], [ctangle])
+AM_CONDITIONAL([HAVE_CTANGLE], [test "x$CTANGLE" != "x"])
+
+AC_CHECK_PROG([CWEAVE], [cweave], [cweave])
+AM_CONDITIONAL([HAVE_CWEAVE], [test "x$CWEAVE" != "x"])
+
+AX_BLAS
+AM_CONDITIONAL([HAVE_BLAS], [test x"$ax_blas_ok" = "xyes"])
+
+AX_LAPACK
+AM_CONDITIONAL([HAVE_LAPACK], [test x"$ax_lapack_ok" = "xyes"])
+
+AX_PTHREAD
+AM_CONDITIONAL([HAVE_PTHREAD], [test x"$ax_pthread_ok" = "xyes"])
 
 AX_MATLAB
 
@@ -95,6 +113,22 @@ AC_CONFIG_FILES([Makefile
                  tests/Makefile
                  matlab/dynare_version.m
                  windows/dynare-version.nsi
+                 dynare++/Makefile
+                 dynare++/parser/cc/Makefile
+                 dynare++/sylv/Makefile
+                 dynare++/sylv/cc/Makefile
+                 dynare++/sylv/testing/Makefile
+                 dynare++/tl/Makefile
+                 dynare++/tl/cc/Makefile
+                 dynare++/tl/testing/Makefile
+                 dynare++/doc/Makefile
+                 dynare++/utils/cc/Makefile
+                 dynare++/integ/Makefile
+                 dynare++/integ/cc/Makefile
+                 dynare++/integ/src/Makefile
+                 dynare++/integ/testing/Makefile
+                 dynare++/kord/Makefile
+                 dynare++/src/Makefile
 ])
 
 AC_OUTPUT
