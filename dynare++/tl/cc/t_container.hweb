@@ -60,6 +60,7 @@ is multiplied by unfolded tensors $g$ yielding unfolded tensor $B$.
 
 #include <map>
 #include <string>
+#include <sstream>
 
 @<|ltsym| predicate@>;
 @<|TensorContainer| class definition@>;
@@ -295,22 +296,18 @@ void writeMat4(FILE* fd, const char* prefix) const
 
 @ Output to the Memory Map.
 @<|TensorContainer::writeMMap| code@>=
-void writeMMap(map<string,ConstTwoDMatrix>* mm) const
+void writeMMap(map<string,ConstTwoDMatrix> &mm, const string &prefix) const
 {
-	for (const_iterator it = begin(); it != end(); ++it) {
-		char lname[100];
-		sprintf(lname, "g");
-		const Symmetry& sym = (*it).first;
-		for (int i = 0; i < sym.num(); i++) {
-			char tmp[10];
-			sprintf(tmp, "_%d", sym[i]);
-			strcat(lname, tmp);
-		}
-		ConstTwoDMatrix mx(*((*it).second));
-		mm->insert(make_pair(string(lname),mx));
-	}
+  ostringstream lname;
+  for (const_iterator it = begin(); it != end(); ++it) {
+    lname.str(prefix);
+    lname << "_g";
+    const Symmetry& sym = (*it).first;
+    for (int i = 0; i < sym.num(); i++)
+      lname << "_" << sym[i];
+    mm.insert(make_pair(lname.str(), ConstTwoDMatrix(*((*it).second))));
+  }
 }
-
 
 @ Here we fetch all tensors given by symmetry and equivalence. We go
 through all equivalence classes, calculate implied symmetry, and
