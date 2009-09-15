@@ -7,7 +7,7 @@
 #include "journal.h"
 #include "kord_exception.h"
 
-#ifndef __MINGW32__
+#if !defined(__MINGW32__) && !defined(__CYGWIN32__)
 # include <sys/resource.h>
 # include <sys/utsname.h>
 #endif
@@ -16,7 +16,7 @@
 #include <time.h>
 
 SystemResources _sysres;
-#ifdef __MINGW32__
+#if !defined(__MINGW32__) && !defined(__CYGWIN32__)
 @<|gettimeofday| Win32 implementation@>;
 @<|sysconf| Win32 implementation@>;
 #endif
@@ -84,7 +84,7 @@ void SystemResources::getRUS(double& load_avg, long int& pg_avail,
 	gettimeofday(&now, NULL);
 	elapsed = now.tv_sec-start.tv_sec + (now.tv_usec-start.tv_usec)*1.0e-6;
 
-#ifndef __MINGW32__
+#if !defined(__MINGW32__) && !defined(__CYGWIN32__)
 	struct rusage rus;
 	getrusage(RUSAGE_SELF, &rus);
 	utime = rus.ru_utime.tv_sec+rus.ru_utime.tv_usec*1.0e-6;
@@ -206,7 +206,7 @@ void Journal::printHeader()
 	(*this)<< "General Public License, see http://www.gnu.org/license/gpl.html\n";
 	(*this)<< "\n\n";
 
-#ifndef __MINGW32__
+#if !defined(__MINGW32__) && !defined(__CYGWIN32__)
 	utsname info;
 	uname(&info);
 	(*this)<< "System info: ";
