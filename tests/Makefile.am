@@ -41,7 +41,7 @@ check-local: $(TARGETS)
 check-octave: $(OCTAVE_MODS)
 	@set -e; \
 		for modfile in $(OCTAVE_MODS); do \
-			GNUTERM=dumb $(OCTAVE) --norc --silent --no-history run_test_octave.m $$modfile $(DYNARE_ROOT) $(PACKAGE_VERSION); \
+			$(OCTAVE) --norc --silent --no-history run_test_octave.m $$modfile $(DYNARE_ROOT) $(PACKAGE_VERSION); \
 		done
 .PHONY: check-octave
 
