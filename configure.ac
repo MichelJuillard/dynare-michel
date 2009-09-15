@@ -29,19 +29,6 @@ AC_LANG([C++])
 
 CXXFLAGS="$CXXFLAGS -Wall"
 
-AC_CANONICAL_HOST
-
-case $host_os in
-  cygwin*)
-    # Create standalone binaries on Cygwin and eliminate spurious warnings
-    CXXFLAGS="$CXXFLAGS -mno-cygwin -Wno-uninitialized"
-    ;;
-  mingw32*)
-    # Suppress spurious warnings with old versions of MinGW
-    CXXFLAGS="$CXXFLAGS -Wno-uninitialized"
-    ;;
-esac
-
 AC_PROG_RANLIB
 
 AM_PROG_LEX
