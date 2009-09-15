@@ -16,7 +16,7 @@
 #include <time.h>
 
 SystemResources _sysres;
-#if !defined(__MINGW32__) && !defined(__CYGWIN32__)
+#if defined(__MINGW32__) || defined(__CYGWIN32__)
 @<|gettimeofday| Win32 implementation@>;
 @<|sysconf| Win32 implementation@>;
 #endif
