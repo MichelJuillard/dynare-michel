@@ -71,10 +71,11 @@ AC_CHECK_PROG([DBLATEX], [dblatex], [dblatex])
 AM_CONDITIONAL([HAVE_DBLATEX], [test "x$DBLATEX" != "x"])
 
 AX_PROG_XSLTPROC
-AM_CONDITIONAL([HAVE_XSLT], [test "x$XSLTPROC" != "x"])
-
 AX_CHECK_DOCBOOK_XSLT_MIN(1.73.0)
-AM_CONDITIONAL([HAVE_XSLT], [test "x$DOCBOOK_XSLT_CURRENT_VERSION" != "xno"])
+AM_CONDITIONAL([HAVE_XSLT], [test "x$XSLTPROC" != "x" -a "x$DOCBOOK_XSLT_CURRENT_VERSION" != "xno"])
+
+AC_CHECK_PROG([DOXYGEN], [doxygen], [doxygen])
+AM_CONDITIONAL([HAVE_DOXYGEN], [test "x$DOXYGEN" != "x"])
 
 AC_CHECK_PROG([OCTAVE], [octave], [octave])
 AM_CONDITIONAL([HAVE_OCTAVE], [test "x$OCTAVE" != "x"])
@@ -129,6 +130,87 @@ AC_CONFIG_FILES([Makefile
                  dynare++/integ/testing/Makefile
                  dynare++/kord/Makefile
                  dynare++/src/Makefile
+])
+
+# Construct final output message
+
+BUILD_PREPROCESSOR="yes"
+
+if test "x$CTANGLE" != "x" -a x"$ax_blas_ok" = "xyes" -a x"$ax_lapack_ok" = "xyes" -a x"$ax_pthread_ok" = "xyes"; then
+  BUILD_DYNAREPLUSPLUS="yes"
+else
+  BUILD_DYNAREPLUSPLUS="no (missing one of: ctangle, BLAS, LAPACK, POSIX Threads)"
+fi
+
+if test "x$CWEAVE" != "x" -a x"$PDFTEX" != "x"; then
+  BUILD_DYNAREPLUSPLUS_SRCDOC="yes"
+else
+  BUILD_DYNAREPLUSPLUS_SRCDOC="no (missing one of: cweave, pdftex)"
+fi
+
+if test "x$XSLTPROC" != "x" -a "x$DOCBOOK_XSLT_CURRENT_VERSION" != "xno"; then
+  BUILD_DYNARE_HTML_MANUAL="yes"
+else
+  BUILD_DYNARE_HTML_MANUAL="no (missing one of: xsltproc, DocBook stylesheets)"
+fi
+
+if test "x$PDFLATEX" != "x" -a "x$DBLATEX" != "x"; then
+  BUILD_DYNARE_PDF_MANUAL="yes"
+else
+  BUILD_DYNARE_PDF_MANUAL="no (missing one of: pdflatex, dblatex)"
+fi
+
+if test "x$PDFLATEX" != "x" -a "x$BIBTEX" != "x"; then
+  BUILD_DYNARE_USERGUIDE="yes"
+else
+  BUILD_DYNARE_USERGUIDE="no (missing one of: pdflatex, bibtex)"
+fi
+
+if test "x$PDFLATEX" != "x"; then
+  BUILD_OTHER_PDF_DOC="yes"
+else
+  BUILD_OTHER_PDF_DOC="no (missing pdflatex)"
+fi
+
+if test "x$DOXYGEN" != "x"; then
+  BUILD_DYNARE_PREPROC_DOC="yes"
+else
+  BUILD_DYNARE_PREPROC_DOC="no (missing doxygen)"
+fi
+
+if test "x$OCTAVE" != "x"; then
+  TESTSUITE_OCTAVE="yes"
+else
+  TESTSUITE_OCTAVE="no"
+fi
+
+if test "$BUILD_DYNAREPLUSPLUS" = "yes"; then
+  TESTSUITE_DYNAREPLUSPLUS="yes"
+else
+  TESTSUITE_DYNAREPLUSPLUS="no"
+fi
+
+AC_MSG_NOTICE([
+
+Dynare is now configured for building the following components...
+
+Binaries (with "make"):
+ Dynare preprocessor:                   $BUILD_PREPROCESSOR
+ Dynare++:                              $BUILD_DYNAREPLUSPLUS
+
+PDF documentation (with "make pdf"):
+ Dynare reference manual:               $BUILD_DYNARE_PDF_MANUAL
+ Dynare user guide:                     $BUILD_DYNARE_USERGUIDE
+ Dynare++ developer documentation:      $BUILD_DYNAREPLUSPLUS_SRCDOC
+ Various other documents:               $BUILD_OTHER_PDF_DOC
+
+HTML documentation (with "make html"):
+ Dynare reference manual:               $BUILD_DYNARE_HTML_MANUAL
+ Dynare preprocessor developer doc:     $BUILD_DYNARE_PREPROC_DOC
+
+Testsuites (run with "make check"):
+ Dynare for Octave:                     $TESTSUITE_OCTAVE
+ Dynare++:                              $TESTSUITE_DYNAREPLUSPLUS
 ])
 
 AC_OUTPUT
