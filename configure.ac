@@ -206,7 +206,7 @@ fi
 if test "x$ax_matlab_version_ok" = "xyes" -a "x$ax_mexopts_ok" = "xyes"; then
   BUILD_MEX_MATLAB="yes"
 else
-  BUILD_MEX_MATLAB="no"
+  BUILD_MEX_MATLAB="no (missing MATLAB, or unknown version, or unknown architecture)"
 fi
 
 if test "x$OCTAVE" != "x"; then
@@ -218,7 +218,7 @@ fi
 if test "$BUILD_DYNAREPLUSPLUS" = "yes"; then
   TESTSUITE_DYNAREPLUSPLUS="yes"
 else
-  TESTSUITE_DYNAREPLUSPLUS="no (no MATLAB, or unknown version, or unknown architecture)"
+  TESTSUITE_DYNAREPLUSPLUS="no"
 fi
 
 AC_MSG_NOTICE([
