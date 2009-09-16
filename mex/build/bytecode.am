@@ -1,0 +1,16 @@
+VPATH = $(top_srcdir)/mex/sources/bytecode
+
+noinst_PROGRAMS = bytecode
+
+# bytecode_CPPFLAGS interacts badly with VPATH
+CPPFLAGS += -I$(top_srcdir)/mex/sources/bytecode -I$(top_srcdir)/preprocessor
+
+bytecode_SOURCES = \
+	bytecode.cc \
+	Interpreter.cc \
+	Mem_Mngr.cc \
+	SparseMatrix.cc \
+	bytecode.hh \
+	Interpreter.hh \
+	Mem_Mngr.hh \
+	SparseMatrix.hh

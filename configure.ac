@@ -30,6 +30,7 @@ AC_LANG([C++])
 CXXFLAGS="$CXXFLAGS -Wall"
 
 AC_PROG_RANLIB
+AC_PROG_LN_S
 
 AM_PROG_LEX
 AX_PROG_FLEX([], AC_MSG_ERROR([No suitable flex found.]))
@@ -70,6 +71,9 @@ AM_CONDITIONAL([HAVE_DOXYGEN], [test "x$DOXYGEN" != "x"])
 
 AC_CHECK_PROG([OCTAVE], [octave], [octave])
 AM_CONDITIONAL([HAVE_OCTAVE], [test "x$OCTAVE" != "x"])
+
+AC_CHECK_PROG([MKOCTFILE], [mkoctfile], [mkoctfile])
+AM_CONDITIONAL([HAVE_MKOCTFILE], [test "x$MKOCTFILE" != "x"])
 
 AC_CHECK_PROG([CTANGLE], [ctangle], [ctangle])
 AM_CONDITIONAL([HAVE_CTANGLE], [test "x$CTANGLE" != "x"])
@@ -121,6 +125,11 @@ AC_CONFIG_FILES([Makefile
                  dynare++/integ/testing/Makefile
                  dynare++/kord/Makefile
                  dynare++/src/Makefile
+                 mex/build/Makefile
+                 mex/build/mjdgges/octave/Makefile
+                 mex/build/kronecker/octave/Makefile
+                 mex/build/gensylv/octave/Makefile
+                 mex/build/bytecode/octave/Makefile
 ])
 
 # Construct final output message
@@ -169,6 +178,12 @@ else
   BUILD_DYNARE_PREPROC_DOC="no (missing doxygen)"
 fi
 
+if test "x$MKOCTFILE" != "x"; then
+  BUILD_MEX_OCTAVE="yes"
+else
+  BUILD_MEX_OCTAVE="no (missing mkoctfile)"
+fi
+
 if test "x$OCTAVE" != "x"; then
   TESTSUITE_OCTAVE="yes"
 else
@@ -187,6 +202,7 @@ Dynare is now configured for building the following components...
 
 Binaries (with "make"):
  Dynare preprocessor:                   $BUILD_PREPROCESSOR
+ MEX files for Octave:                  $BUILD_MEX_OCTAVE
  Dynare++:                              $BUILD_DYNAREPLUSPLUS
 
 PDF documentation (with "make pdf"):

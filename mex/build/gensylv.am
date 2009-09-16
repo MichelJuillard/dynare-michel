@@ -1,0 +1,47 @@
+VPATH = $(top_srcdir)/mex/sources/gensylv/cc:$(top_srcdir)/mex/sources/gensylv/matlab
+
+noinst_PROGRAMS = gensylv
+
+# Can't use gensylv_CPPFLAGS, because it interacts badly with VPATH
+CPPFLAGS += -DMATLAB -I$(top_srcdir)/mex/sources/gensylv/cc
+
+gensylv_SOURCES = \
+	gensylv.cpp \
+	BlockDiagonal.cpp \
+	GeneralMatrix.cpp \
+	GeneralSylvester.cpp \
+	IterativeSylvester.cpp \
+	KronUtils.cpp \
+	KronVector.cpp \
+	QuasiTriangular.cpp \
+	QuasiTriangularZero.cpp \
+	SchurDecomp.cpp \
+	SchurDecompEig.cpp \
+	SimilarityDecomp.cpp \
+	SylvException.cpp \
+	SylvMatrix.cpp \
+	SylvMemory.cpp \
+	SylvParams.cpp \
+	TriangularSylvester.cpp \
+	Vector.cpp \
+	BlockDiagonal.h \
+	GeneralMatrix.h \
+	GeneralSylvester.h \
+	IterativeSylvester.h \
+	KronUtils.h \
+	KronVector.h \
+	QuasiTriangular.h \
+	QuasiTriangularZero.h \
+	SchurDecomp.h \
+	SchurDecompEig.h \
+	SimilarityDecomp.h \
+	SylvException.h \
+	SylvMatrix.h \
+	SylvMemory.h \
+	SylvParams.h \
+	TriangularSylvester.h \
+	Vector.h \
+	cppblas.h \
+	cpplapack.h \
+	SylvesterSolver.h
+

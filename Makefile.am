@@ -1,4 +1,4 @@
-SUBDIRS = preprocessor doc tests
+SUBDIRS = preprocessor doc tests mex/build
 
 if HAVE_CTANGLE
 if HAVE_BLAS
