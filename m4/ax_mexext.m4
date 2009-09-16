@@ -1,6 +1,7 @@
-dnl mex.m4 --- check for mex(1) command.
+dnl ax_mexext.m4 --- check for MEX-file suffix.
 dnl
 dnl Copyright (C) 2000--2003 Ralph Schleicher
+dnl Copyright (C) 2009 Dynare Team
 dnl
 dnl This program is free software; you can redistribute it and/or
 dnl modify it under the terms of the GNU General Public License as
@@ -25,38 +26,51 @@ dnl of that program.
 dnl
 dnl Code:
 
-# AX_PATH_MEX
-# -----------
-# Check for mex(1) command.
-AC_DEFUN([AX_PATH_MEX],
+# AX_MEXEXT
+# ---------
+# Check for MEX-file suffix.
+AC_DEFUN([AX_MEXEXT],
 [dnl
 AC_PREREQ([2.50])
 AC_REQUIRE([AX_MATLAB])
-AC_REQUIRE([AX_MEX_OPTIONS])
 AC_REQUIRE([AC_CANONICAL_HOST])
-if test "${MEX+set}" != set ; then
+AC_CACHE_CHECK([for MEX-file suffix], [ax_cv_mexext],
+[if test "${MEXEXT+set}" = set ; then
+    ax_cv_mexext="$MEXEXT"
+else
     case $host_os in
       *cygwin* | *mingw32*)
-	ax_list='mextool mex mex.bat'
-	;;
+        ax_cv_mexext=`$MATLAB/bin/mexext.bat | sed 's/\r//'`
+        ;;
       *)
-	ax_list='mex'
-	;;
+        ax_cv_mexext=`$MATLAB/bin/mexext`
+        ;;
     esac
-    AC_PATH_PROGS([MEX], $ax_list, mex, $MATLAB/bin:$PATH)
-fi
-AC_SUBST([MEX])
-if test "${MEXFLAGS+set}" != set ; then
-    MEXFLAGS=-O
-fi
-AC_SUBST([MEXFLAGS])
-if test "${MEXLDADD+set}" != set ; then
-    MEXLDADD=
-fi
-AC_SUBST([MEXLDADD])
+fi])
+MEXEXT="$ax_cv_mexext"
+AC_SUBST([MEXEXT])
 ])
 
-dnl mex.m4 ends here
+# AX_DOT_MEXEXT
+# -------------
+# Check for MEX-file suffix with leading dot.
+AC_DEFUN([AX_DOT_MEXEXT],
+[dnl
+AC_REQUIRE([AX_MEXEXT])
+case $MEXEXT in
+  .*)
+    ;;
+  *)
+    if test -n "$MEXEXT" ; then
+	MEXEXT=.$MEXEXT
+	AC_MSG_RESULT([setting MEX-file suffix to $MEXEXT])
+	AC_SUBST([MEXEXT])
+    fi
+    ;;
+esac
+])
+
+dnl ax_mexext.m4 ends here
 
 dnl Local variables:
 dnl tab-width: 8

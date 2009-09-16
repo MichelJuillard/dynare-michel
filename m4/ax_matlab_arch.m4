@@ -1,6 +1,6 @@
-dnl mexext.m4 --- check for MEX-file suffix.
+dnl matlabarch.m4 --- check for MATLAB machine architecture.
 dnl
-dnl Copyright (C) 2000--2003 Ralph Schleicher
+dnl Copyright (C) 2002, 2003 Ralph Schleicher
 dnl Copyright (C) 2009 Dynare Team
 dnl
 dnl This program is free software; you can redistribute it and/or
@@ -26,51 +26,49 @@ dnl of that program.
 dnl
 dnl Code:
 
-# AX_MEXEXT
-# ---------
-# Check for MEX-file suffix.
-AC_DEFUN([AX_MEXEXT],
+# AX_MATLAB_ARCH
+# --------------
+# Check for MATLAB machine architecture.
+AC_DEFUN([AX_MATLAB_ARCH],
 [dnl
 AC_PREREQ([2.50])
-AC_REQUIRE([AX_MATLAB])
-AC_REQUIRE([AC_CANONICAL_HOST])
-AC_CACHE_CHECK([for MEX-file suffix], [ax_cv_mexext],
-[if test "${MEXEXT+set}" = set ; then
-    ax_cv_mexext="$MEXEXT"
+AC_REQUIRE([AX_MEXEXT])
+AC_CACHE_CHECK([for MATLAB machine architecture], [ax_cv_matlab_arch],
+[if test "${MATLAB_ARCH+set}" = set ; then
+    ax_cv_matlab_arch="$MATLAB_ARCH"
 else
-    case $host_os in
-      *cygwin* | *mingw32*)
-        ax_cv_mexext=`$MATLAB/bin/mexext.bat | sed 's/\r//'`
-        ;;
+    case $MEXEXT in
+      *dll | *mexw32)
+	ax_cv_matlab_arch=win32
+	;;
+      *mexw64)
+	ax_cv_matlab_arch=win64
+	;;
+      *mexglx)
+	ax_cv_matlab_arch=glnx86
+	;;
+      *mexa64)
+	ax_cv_matlab_arch=glnxa64
+	;;
+      *mexs64)
+	ax_cv_matlab_arch=sol64
+	;;
+      *mexmaci)
+	ax_cv_matlab_arch=maci
+	;;
+      *mexmaci64)
+	ax_cv_matlab_arch=maci64
+	;;
       *)
-        ax_cv_mexext=`$MATLAB/bin/mexext`
-        ;;
+	ax_cv_matlab_arch=unknown
+	;;
     esac
 fi])
-MEXEXT="$ax_cv_mexext"
-AC_SUBST([MEXEXT])
+MATLAB_ARCH="$ax_cv_matlab_arch"
+AC_SUBST([MATLAB_ARCH])
 ])
 
-# AX_DOT_MEXEXT
-# -------------
-# Check for MEX-file suffix with leading dot.
-AC_DEFUN([AX_DOT_MEXEXT],
-[dnl
-AC_REQUIRE([AX_MEXEXT])
-case $MEXEXT in
-  .*)
-    ;;
-  *)
-    if test -n "$MEXEXT" ; then
-	MEXEXT=.$MEXEXT
-	AC_MSG_RESULT([setting MEX-file suffix to $MEXEXT])
-	AC_SUBST([MEXEXT])
-    fi
-    ;;
-esac
-])
-
-dnl mexext.m4 ends here
+dnl matlabarch.m4 ends here
 
 dnl Local variables:
 dnl tab-width: 8

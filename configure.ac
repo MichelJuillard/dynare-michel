@@ -92,11 +92,26 @@ AM_CONDITIONAL([HAVE_PTHREAD], [test x"$ax_pthread_ok" = "xyes"])
 
 AX_MATLAB
 
-if test "$ax_enable_matlab" = "yes"
-then
-  AX_PATH_MEX
-  AX_MEXEXT
+if test "$ax_enable_matlab" = "yes"; then
+  AX_DOT_MEXEXT
   AX_MATLAB_ARCH
+  AX_MATLAB_VERSION
+
+  if test "x$ax_matlab_version_ok" = "xyes"; then
+    AX_MEXOPTS
+  else
+    ax_mexopts_ok="no"
+  fi
+  AM_CONDITIONAL([HAVE_MEXOPTS], [test "x$ax_matlab_version_ok" = "xyes" -a "x$ax_mexopts_ok" = "xyes" ])
+
+  # Determine subdirectory of mex/ to be used
+  AX_COMPARE_VERSION([$MATLAB_VERSION], [le], [7.4], [DYNARE_MEXDIR="2007a"], [
+    DYNARE_MEXDIR="2007b"
+    if test ${MATLAB_ARCH%64} != ${MATLAB_ARCH}; then
+       AX_COMPARE_VERSION([$MATLAB_VERSION], [ge], [7.8], [DYNARE_MEXDIR="2009a-64bit"])
+    fi
+  ])
+  AC_SUBST([DYNARE_MEXDIR])
 fi
 
 AC_CONFIG_FILES([Makefile
@@ -127,9 +142,13 @@ AC_CONFIG_FILES([Makefile
                  dynare++/src/Makefile
                  mex/build/Makefile
                  mex/build/mjdgges/octave/Makefile
+                 mex/build/mjdgges/matlab/Makefile
                  mex/build/kronecker/octave/Makefile
+                 mex/build/kronecker/matlab/Makefile
                  mex/build/gensylv/octave/Makefile
+                 mex/build/gensylv/matlab/Makefile
                  mex/build/bytecode/octave/Makefile
+                 mex/build/bytecode/matlab/Makefile
 ])
 
 # Construct final output message
@@ -184,6 +203,12 @@ else
   BUILD_MEX_OCTAVE="no (missing mkoctfile)"
 fi
 
+if test "x$ax_matlab_version_ok" = "xyes" -a "x$ax_mexopts_ok" = "xyes"; then
+  BUILD_MEX_MATLAB="yes"
+else
+  BUILD_MEX_MATLAB="no"
+fi
+
 if test "x$OCTAVE" != "x"; then
   TESTSUITE_OCTAVE="yes"
 else
@@ -193,7 +218,7 @@ fi
 if test "$BUILD_DYNAREPLUSPLUS" = "yes"; then
   TESTSUITE_DYNAREPLUSPLUS="yes"
 else
-  TESTSUITE_DYNAREPLUSPLUS="no"
+  TESTSUITE_DYNAREPLUSPLUS="no (no MATLAB, or unknown version, or unknown architecture)"
 fi
 
 AC_MSG_NOTICE([
@@ -203,6 +228,7 @@ Dynare is now configured for building the following components...
 Binaries (with "make"):
  Dynare preprocessor:                   $BUILD_PREPROCESSOR
  MEX files for Octave:                  $BUILD_MEX_OCTAVE
+ MEX files for MATLAB:                  $BUILD_MEX_MATLAB
  Dynare++:                              $BUILD_DYNAREPLUSPLUS
 
 PDF documentation (with "make pdf"):
