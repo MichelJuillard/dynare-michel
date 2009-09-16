@@ -27,8 +27,8 @@ MODS = $(OCTAVE_MODS) \
 
 EXTRA_DIST = $(MODS) \
 	run_test_octave.m \
-	fs2000\fsdat.m \
-	bvar_a_la_sims\bvar_sample.m
+	fs2000/fsdat.m \
+	bvar_a_la_sims/bvar_sample.m
 
 TARGETS = check-matlab
 
