@@ -40,7 +40,11 @@ AC_PROG_YACC
 AX_PROG_BISON([], AC_MSG_ERROR([No suitable bison found.]))
 
 AX_BOOST_BASE([1.34])
+
+CPPFLAGS_SAVED="$CPPFLAGS"
+CPPFLAGS="$CPPFLAGS $BOOST_CPPFLAGS"
 AC_CHECK_HEADERS([boost/graph/adjacency_list.hpp], [], [AC_MSG_ERROR([Can't find Boost Graph Library])])
+CPPFLAGS="$CPPFLAGS_SAVED"
 
 # Don't use deprecated hash structures
 AC_DEFINE([BOOST_NO_HASH])
