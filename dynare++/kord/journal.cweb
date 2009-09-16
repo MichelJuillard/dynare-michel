@@ -7,7 +7,7 @@
 #include "journal.h"
 #include "kord_exception.h"
 
-#if !defined(__MINGW32__) && !defined(__CYGWIN32__)
+#ifndef __MINGW32__
 # include <sys/resource.h>
 # include <sys/utsname.h>
 #endif
@@ -16,7 +16,7 @@
 #include <time.h>
 
 SystemResources _sysres;
-#if defined(__MINGW32__) || defined(__CYGWIN32__)
+#ifdef __MINGW32__
 @<|gettimeofday| Win32 implementation@>;
 @<|sysconf| Win32 implementation@>;
 #endif
@@ -84,22 +84,26 @@ void SystemResources::getRUS(double& load_avg, long int& pg_avail,
 	gettimeofday(&now, NULL);
 	elapsed = now.tv_sec-start.tv_sec + (now.tv_usec-start.tv_usec)*1.0e-6;
 
-#if !defined(__MINGW32__) && !defined(__CYGWIN32__)
+#ifndef __MINGW32__
 	struct rusage rus;
 	getrusage(RUSAGE_SELF, &rus);
 	utime = rus.ru_utime.tv_sec+rus.ru_utime.tv_usec*1.0e-6;
 	stime = rus.ru_stime.tv_sec+rus.ru_stime.tv_usec*1.0e-6;
 	idrss = rus.ru_idrss;
 	majflt = rus.ru_majflt;
-
-	getloadavg(&load_avg, 1);
 #else
 	utime = -1.0;
 	stime = -1.0;
 	idrss = -1;
 	majflt = -1;
+#endif
+
+#if !defined(__MINGW32__) && !defined(__CYGWIN32__)
+	getloadavg(&load_avg, 1);
+#else
 	load_avg = -1.0;
 #endif
+
 	pg_avail = sysconf(_SC_AVPHYS_PAGES);
 }
 
@@ -206,7 +210,7 @@ void Journal::printHeader()
 	(*this)<< "General Public License, see http://www.gnu.org/license/gpl.html\n";
 	(*this)<< "\n\n";
 
-#if !defined(__MINGW32__) && !defined(__CYGWIN32__)
+#if !defined(__MINGW32__)
 	utsname info;
 	uname(&info);
 	(*this)<< "System info: ";
