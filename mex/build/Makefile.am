@@ -7,3 +7,5 @@ endif
 if HAVE_MEXOPTS
 SUBDIRS += mjdgges/matlab kronecker/matlab gensylv/matlab bytecode/matlab
 endif
+
+EXTRA_DIST = mex.def

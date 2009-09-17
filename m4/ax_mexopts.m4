@@ -20,22 +20,41 @@ AC_DEFUN([AX_MEXOPTS],
 AC_REQUIRE([AX_MEXEXT])
 AC_REQUIRE([AX_MATLAB_ARCH])
 AC_REQUIRE([AX_MATLAB_VERSION])
+AC_REQUIRE([AC_CANONICAL_HOST])
 
 AC_MSG_CHECKING([for options to compile MEX for MATLAB])
 
 MATLAB_CPPFLAGS="-I$MATLAB/extern/include"
+MATLAB_CC="gcc"
+MATLAB_CXX="g++"
+MATLAB_DEFS="-DNO_OPENMP" # Don't use OpenMP (flag used by S. Adjemian in some DLLs)
 
 case ${MATLAB_ARCH} in
   glnx86 | glnxa64)
     MATLAB_DEFS="-D_GNU_SOURCE -DNDEBUG"
-    MATLAB_CC="gcc"
     MATLAB_CFLAGS="-ansi -fexceptions -fPIC -pthread -g -O2"
-    MATLAB_CXX="g++"
     MATLAB_CXXFLAGS="-ansi -fPIC -pthread -g -O2"
     MATLAB_LDFLAGS="-shared -Wl,--version-script,$MATLAB/extern/lib/${MATLAB_ARCH}/mexFunction.map -Wl,--no-undefined -Wl,-rpath-link,$MATLAB/bin/${MATLAB_ARCH} -L$MATLAB/bin/${MATLAB_ARCH}"
     MATLAB_LIBS="-lmx -lmex -lmat -lm -lstdc++ -lmwlapack"
     # Starting from MATLAB 7.5, BLAS and LAPACK are in distinct libraries
     AX_COMPARE_VERSION([$MATLAB_VERSION], [ge], [7.5], [MATLAB_LIBS="${MATLAB_LIBS} -lmwblas"])
+    ax_mexopts_ok="yes"
+    ;;
+  win32 | win64)
+    MATLAB_CFLAGS="-fexceptions -g -O2"
+    MATLAB_CXXFLAGS="-g -O2"
+    LIBLOC="$MATLAB/extern/lib/${MATLAB_ARCH}/microsoft"
+    MATLAB_LDFLAGS="-shared \$(top_srcdir)/mex/build/mex.def"
+    MATLAB_LIBS="$LIBLOC/libmex.lib $LIBLOC/libmx.lib $LIBLOC/libmwlapack.lib -lstdc++"
+    # Starting from MATLAB 7.5, BLAS and LAPACK are in distinct libraries
+    AX_COMPARE_VERSION([$MATLAB_VERSION], [ge], [7.5], [MATLAB_LIBS="${MATLAB_LIBS} $LIBLOC/libmwblas.lib"])
+    case ${host_os} in
+      *cygwin*)
+        # MATLAB can't use native Cygwin DLLs
+	MATLAB_CFLAGS="$MATLAB_CFLAGS -mno-cygwin"
+	MATLAB_CXXFLAGS="$MATLAB_CXXFLAGS -mno-cygwin"
+        ;;
+    esac
     ax_mexopts_ok="yes"
     ;;
   *)
