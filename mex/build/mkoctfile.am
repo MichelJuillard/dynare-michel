@@ -2,7 +2,7 @@ EXEEXT = .mex
 
 CPPFLAGS = $(shell $(MKOCTFILE) -p CPPFLAGS)
 
-DEFS = -DNO_BLAS_H -DNO_LAPACK_H -DOCTAVE
+DEFS = -DNO_BLAS_H -DNO_LAPACK_H -DOCTAVE -DNO_OPENMP
 
 CC = $(shell $(MKOCTFILE) -p CC)
 CFLAGS = $(shell $(MKOCTFILE) -p CPICFLAG)
@@ -21,6 +21,7 @@ LIBS += $(shell $(MKOCTFILE) -p BLAS_LIBS)
 LIBS += $(shell $(MKOCTFILE) -p FFTW_LIBS)
 LIBS += $(shell $(MKOCTFILE) -p LIBS)
 LIBS += $(shell $(MKOCTFILE) -p FLIBS)
+LIBS += $(shell $(MKOCTFILE) -p CXXLIBS) # Only used for Octave/MinGW
 
 all-local:
 	cd $(top_srcdir)/mex/octave && \

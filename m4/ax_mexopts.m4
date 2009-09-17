@@ -31,7 +31,7 @@ MATLAB_DEFS="-DNO_OPENMP" # Don't use OpenMP (flag used by S. Adjemian in some D
 
 case ${MATLAB_ARCH} in
   glnx86 | glnxa64)
-    MATLAB_DEFS="-D_GNU_SOURCE -DNDEBUG"
+    MATLAB_DEFS="$MATLAB_DEFS -D_GNU_SOURCE -DNDEBUG"
     MATLAB_CFLAGS="-ansi -fexceptions -fPIC -pthread -g -O2"
     MATLAB_CXXFLAGS="-ansi -fPIC -pthread -g -O2"
     MATLAB_LDFLAGS="-shared -Wl,--version-script,$MATLAB/extern/lib/${MATLAB_ARCH}/mexFunction.map -Wl,--no-undefined -Wl,-rpath-link,$MATLAB/bin/${MATLAB_ARCH} -L$MATLAB/bin/${MATLAB_ARCH}"
@@ -51,8 +51,8 @@ case ${MATLAB_ARCH} in
     case ${host_os} in
       *cygwin*)
         # MATLAB can't use native Cygwin DLLs
-	MATLAB_CFLAGS="$MATLAB_CFLAGS -mno-cygwin"
-	MATLAB_CXXFLAGS="$MATLAB_CXXFLAGS -mno-cygwin"
+        MATLAB_CFLAGS="$MATLAB_CFLAGS -mno-cygwin"
+        MATLAB_CXXFLAGS="$MATLAB_CXXFLAGS -mno-cygwin"
         ;;
     esac
     ax_mexopts_ok="yes"

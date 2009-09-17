@@ -1,6 +1,6 @@
 % Build file for Dynare MEX Librairies for Octave
 
-% Copyright (C) 2008 Dynare Team
+% Copyright (C) 2008-2009 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -17,7 +17,7 @@
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-COMPILE_OPTIONS = '-DNO_BLAS_H -DNO_LAPACK_H -DOCTAVE';
+COMPILE_OPTIONS = '-DNO_BLAS_H -DNO_LAPACK_H -DOCTAVE -DNO_OPENMP';
 
 % Comment next line to suppress compilation debugging info
 COMPILE_OPTIONS = [ COMPILE_OPTIONS ' -v' ];
