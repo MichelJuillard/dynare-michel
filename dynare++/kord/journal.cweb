@@ -17,7 +17,6 @@
 
 SystemResources _sysres;
 #ifdef __MINGW32__
-@<|gettimeofday| Win32 implementation@>;
 @<|sysconf| Win32 implementation@>;
 #endif
 
@@ -239,40 +238,6 @@ void Journal::printHeader()
 	(*this)<< "\n";
 }
 
-
-@ Taken from list {\tt gdb@@sources.redhat.com}, the author is Danny Smith.
-
-|_W32_FT_OFFSET| is a time from 1 Jan 1601 to 1 Jan 1970 in 100ns
-units, and the the |filetime| is taken from {\tt windows.h} file.
-
-@s filetime int
-@s __stdcall int
-@d _W32_FT_OFFSET (116444736000000000LL) 
-@s w32_ftv int
-
-@<|gettimeofday| Win32 implementation@>=
-typedef struct _filetime {
-	unsigned long dwLowDateTime;
-	unsigned long dwHighDateTime;
-} filetime;
-@#
-extern "C" {
-	void __stdcall GetSystemTimeAsFileTime(filetime*);
-};
-@#
-typedef union {
-	long long ns100; // time since 1 Jan 1601 in 100ns units
-	filetime ft;
-} w32_ftv;
-@#
-void gettimeofday(struct timeval* p, struct timezone* tz)
-{
-	w32_ftv _now;
-	GetSystemTimeAsFileTime( &(_now.ft) );
-	p->tv_usec=(long)((_now.ns100 / 10LL) % 1000000LL );
-	p->tv_sec= (long)((_now.ns100-_W32_FT_OFFSET)/10000000LL);
-	return;
-}
 
 @ Here we implement |sysconf| for MinGW. We implement only page size,
 number of physial pages, and a number of available physical pages. The
