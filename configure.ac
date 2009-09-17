@@ -30,7 +30,15 @@ AC_LANG([C++])
 CXXFLAGS="$CXXFLAGS -Wall"
 
 AC_PROG_RANLIB
+
 AC_PROG_LN_S
+AC_CANONICAL_HOST
+case ${host_os} in
+  *cygwin*)
+    LN_S="cp -p" # Cygwin symbolic links are not understood by MATLAB
+    ;;
+esac
+
 AC_PROG_MKDIR_P
 
 AM_PROG_LEX
