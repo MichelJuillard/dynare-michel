@@ -5,7 +5,7 @@ noinst_PROGRAMS = gensylv
 # Can't use gensylv_CPPFLAGS, because it interacts badly with VPATH
 CPPFLAGS += -DMATLAB -I$(top_srcdir)/mex/sources/gensylv/cc
 
-gensylv_SOURCES = \
+nodist_gensylv_SOURCES = \
 	gensylv.cpp \
 	BlockDiagonal.cpp \
 	GeneralMatrix.cpp \

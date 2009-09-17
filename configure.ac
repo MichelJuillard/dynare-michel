@@ -31,6 +31,7 @@ CXXFLAGS="$CXXFLAGS -Wall"
 
 AC_PROG_RANLIB
 AC_PROG_LN_S
+AC_PROG_MKDIR_P
 
 AM_PROG_LEX
 AX_PROG_FLEX([], AC_MSG_ERROR([No suitable flex found.]))
@@ -92,27 +93,25 @@ AM_CONDITIONAL([HAVE_PTHREAD], [test x"$ax_pthread_ok" = "xyes"])
 
 AX_MATLAB
 
-if test "$ax_enable_matlab" = "yes"; then
+if test "x$ax_enable_matlab" = "xyes"; then
   AX_DOT_MEXEXT
   AX_MATLAB_ARCH
   AX_MATLAB_VERSION
 
   if test "x$ax_matlab_version_ok" = "xyes"; then
     AX_MEXOPTS
-  else
-    ax_mexopts_ok="no"
-  fi
-  AM_CONDITIONAL([HAVE_MEXOPTS], [test "x$ax_matlab_version_ok" = "xyes" -a "x$ax_mexopts_ok" = "xyes" ])
 
-  # Determine subdirectory of mex/ to be used
-  AX_COMPARE_VERSION([$MATLAB_VERSION], [le], [7.4], [DYNARE_MEXDIR="2007a"], [
-    DYNARE_MEXDIR="2007b"
-    if test ${MATLAB_ARCH%64} != ${MATLAB_ARCH}; then
-       AX_COMPARE_VERSION([$MATLAB_VERSION], [ge], [7.8], [DYNARE_MEXDIR="2009a-64bit"])
-    fi
-  ])
-  AC_SUBST([DYNARE_MEXDIR])
+    # Determine subdirectory of mex/ to be used for storing MATLAB MEX binaries
+    AX_COMPARE_VERSION([$MATLAB_VERSION], [le], [7.4], [DYNARE_MEXDIR="2007a"], [
+      DYNARE_MEXDIR="2007b"
+      if test ${MATLAB_ARCH%64} != ${MATLAB_ARCH}; then
+         AX_COMPARE_VERSION([$MATLAB_VERSION], [ge], [7.8], [DYNARE_MEXDIR="2009a-64bit"])
+      fi])
+    AC_SUBST([DYNARE_MEXDIR])
+  fi
 fi
+AM_CONDITIONAL([HAVE_MEXOPTS], [test "x$ax_enable_matlab" = "xyes" -a "x$ax_matlab_version_ok" = "xyes" -a "x$ax_mexopts_ok" = "xyes" ])
+
 
 AC_CONFIG_FILES([Makefile
                  preprocessor/macro/Makefile
@@ -203,7 +202,7 @@ else
   BUILD_MEX_OCTAVE="no (missing mkoctfile)"
 fi
 
-if test "x$ax_matlab_version_ok" = "xyes" -a "x$ax_mexopts_ok" = "xyes"; then
+if test "x$ax_enable_matlab" = "xyes" -a "x$ax_matlab_version_ok" = "xyes" -a "x$ax_mexopts_ok" = "xyes"; then
   BUILD_MEX_MATLAB="yes"
 else
   BUILD_MEX_MATLAB="no (missing MATLAB, or unknown version, or unknown architecture)"

@@ -16,7 +16,7 @@ if HAVE_XSLT
 html-local: manual-html/index.html
 endif
 
-EXTRA_DIST = guide.tex guide.bbl bibmad.sty bvar-a-la-sims.tex manual.xml dynare_html.xsl manual.xml
+EXTRA_DIST = guide.tex guide.bbl bibmad.sty bvar-a-la-sims.tex manual.xml dynare_html.xsl dynare.xsl
 
 guide.pdf: guide.tex guide.bbl bibmad.sty
 	$(PDFLATEX) guide
@@ -26,7 +26,7 @@ bvar-a-la-sims.pdf: bvar-a-la-sims.tex
 	$(PDFLATEX) bvar-a-la-sims
 	$(PDFLATEX) bvar-a-la-sims
 
-manual-html/index.html: manual.xml dynare_html.xsl
+manual-html/index.html: manual.xml dynare_html.xsl dynare.xsl
 	$(XSLTPROC) -stringparam base.dir ./manual-html/ dynare_html.xsl manual.xml
 
 manual.pdf: manual.xml

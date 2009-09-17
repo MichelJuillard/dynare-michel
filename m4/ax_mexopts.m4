@@ -21,6 +21,8 @@ AC_REQUIRE([AX_MEXEXT])
 AC_REQUIRE([AX_MATLAB_ARCH])
 AC_REQUIRE([AX_MATLAB_VERSION])
 
+AC_MSG_CHECKING([for options to compile MEX for MATLAB])
+
 MATLAB_CPPFLAGS="-I$MATLAB/extern/include"
 
 case ${MATLAB_ARCH} in
@@ -63,6 +65,12 @@ AX_COMPARE_VERSION([$MATLAB_VERSION], [ge], [7.8], [MATLAB_DEFS="$MATLAB_DEFS -D
 
 # blas.h and lapack.h appeared in MATLAB 7.5
 AX_COMPARE_VERSION([$MATLAB_VERSION], [lt], [7.5], [MATLAB_DEFS="$MATLAB_DEFS -DNO_BLAS_H -DNO_LAPACK_H"])
+
+if test "$ax_mexopts_ok" = "yes"; then
+  AC_MSG_RESULT([ok])
+else
+  AC_MSG_RESULT([unknown])
+fi
 
 AC_SUBST([MATLAB_CPPFLAGS])
 AC_SUBST([MATLAB_DEFS])

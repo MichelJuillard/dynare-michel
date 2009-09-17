@@ -2,4 +2,4 @@ VPATH = $(top_srcdir)/mex/sources/mjdgges
 
 noinst_PROGRAMS = mjdgges
 
-mjdgges_SOURCES = mjdgges.c
+nodist_mjdgges_SOURCES = mjdgges.c
