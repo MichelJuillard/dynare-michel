@@ -42,12 +42,14 @@ esac
 AC_PROG_MKDIR_P
 
 AM_PROG_LEX
-AX_PROG_FLEX([], AC_MSG_ERROR([No suitable flex found.]))
 
 AC_CHECK_HEADERS([FlexLexer.h], [], [AC_MSG_ERROR([Can't find FlexLexer.h])])
 
-AC_PROG_YACC
-AX_PROG_BISON([], AC_MSG_ERROR([No suitable bison found.]))
+AC_CHECK_PROG([YACC], [bison], [bison])
+if test "x$YACC" = "x"; then
+  unset YACC # AM_MISSING_PROG needs an unset variable: an empty variable won't do
+  AM_MISSING_PROG([YACC], [bison])
+fi
 
 AX_BOOST_BASE([1.34])
 
@@ -86,6 +88,10 @@ AM_CONDITIONAL([HAVE_MKOCTFILE], [test "x$MKOCTFILE" != "x"])
 
 AC_CHECK_PROG([CTANGLE], [ctangle], [ctangle])
 AM_CONDITIONAL([HAVE_CTANGLE], [test "x$CTANGLE" != "x"])
+if test "x$CTANGLE" = "x"; then
+  unset CTANGLE # AM_MISSING_PROG needs an unset variable: an empty variable won't do
+  AM_MISSING_PROG([CTANGLE], [ctangle])
+fi
 
 AC_CHECK_PROG([CWEAVE], [cweave], [cweave])
 AM_CONDITIONAL([HAVE_CWEAVE], [test "x$CWEAVE" != "x"])
@@ -162,10 +168,10 @@ AC_CONFIG_FILES([Makefile
 
 BUILD_PREPROCESSOR="yes"
 
-if test "x$CTANGLE" != "x" -a x"$ax_blas_ok" = "xyes" -a x"$ax_lapack_ok" = "xyes" -a x"$ax_pthread_ok" = "xyes"; then
+if test "x$ax_blas_ok" = "xyes" -a "x$ax_lapack_ok" = "xyes" -a "x$ax_pthread_ok" = "xyes"; then
   BUILD_DYNAREPLUSPLUS="yes"
 else
-  BUILD_DYNAREPLUSPLUS="no (missing one of: ctangle, BLAS, LAPACK, POSIX Threads)"
+  BUILD_DYNAREPLUSPLUS="no (missing one of: BLAS, LAPACK, POSIX Threads)"
 fi
 
 if test "x$CWEAVE" != "x" -a x"$PDFTEX" != "x"; then

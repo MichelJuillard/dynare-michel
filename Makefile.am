@@ -1,11 +1,9 @@
 SUBDIRS = preprocessor doc tests mex/build
 
-if HAVE_CTANGLE
 if HAVE_BLAS
 if HAVE_LAPACK
 if HAVE_PTHREAD
 SUBDIRS += dynare++
-endif
 endif
 endif
 endif
