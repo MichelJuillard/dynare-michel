@@ -43,8 +43,6 @@ AC_PROG_MKDIR_P
 
 AM_PROG_LEX
 
-AC_CHECK_HEADERS([FlexLexer.h], [], [AC_MSG_ERROR([Can't find FlexLexer.h])])
-
 AC_CHECK_PROG([YACC], [bison], [bison])
 if test "x$YACC" = "x"; then
   unset YACC # AM_MISSING_PROG needs an unset variable: an empty variable won't do
