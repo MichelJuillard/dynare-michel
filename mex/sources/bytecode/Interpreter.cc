@@ -24,7 +24,8 @@
 //#define DEBUG
 
 
-Interpreter::Interpreter(double *params_arg, double *y_arg, double *ya_arg, double *x_arg, double *direction_arg, int y_size_arg,
+Interpreter::Interpreter(double *params_arg, double *y_arg, double *ya_arg, double *x_arg, double *steady_y_arg, double *steady_x_arg,
+                         double *direction_arg, int y_size_arg,
                          int nb_row_x_arg, int nb_row_xd_arg, int periods_arg, int y_kmin_arg, int y_kmax_arg,
                          int maxit_arg_, double solve_tolf_arg, int size_of_direction_arg, double slowc_arg, int y_decal_arg, double markowitz_c_arg,
                          string &filename_arg)
@@ -33,6 +34,8 @@ Interpreter::Interpreter(double *params_arg, double *y_arg, double *ya_arg, doub
   y=y_arg;
   ya=ya_arg;
   x=x_arg;
+  steady_y = steady_y_arg;
+  steady_x = steady_x_arg;
   direction=direction_arg;
   y_size=y_size_arg;
   nb_row_x=nb_row_x_arg;
@@ -209,6 +212,42 @@ Interpreter::compute_block_time(int Per_u_, bool evaluate) /*throw(EvalException
                   break;
                 case eExogenousDet :
                   var=get_code_int;
+                  Stack.push(x[var]);
+                  break;
+                default:
+                  mexPrintf("Unknown variable type\n");
+              }
+            break;
+          case FLDVS :
+            //load a variable in the processor
+            switch (get_code_char)
+              {
+                case eParameter :
+                  var=get_code_int;
+#ifdef DEBUG
+                  mexPrintf("params[%d]=%f\n", var, params[var]);
+#endif
+                  Stack.push(params[var]);
+                  break;
+                case eEndogenous :
+                  var=get_code_int;
+#ifdef DEBUG
+                  mexPrintf(" steady_y[%d]=%f\n", var, steady_y[var]);
+#endif
+                  Stack.push(steady_y[var]);
+                  break;
+                case eExogenous :
+                  var=get_code_int;
+#ifdef DEBUG
+                  mexPrintf(" x[%d] = %f\n", var, x[var]);
+#endif
+                  Stack.push(x[var]);
+                  break;
+                case eExogenousDet :
+                  var=get_code_int;
+#ifdef DEBUG
+                  mexPrintf(" xd[%d] = %f\n", var, x[var]);
+#endif
                   Stack.push(x[var]);
                   break;
                 default:
@@ -832,7 +871,6 @@ Interpreter::simulate_a_block(int size,int type, string file_name, string bin_ba
   int u_count_int;
   bool result = true;
   double *y_save;
-
   switch (type)
     {
       case EVALUATE_FORWARD :

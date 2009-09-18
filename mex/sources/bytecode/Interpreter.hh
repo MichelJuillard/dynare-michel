@@ -83,6 +83,7 @@ class Interpreter : SparseMatrix
     double solve_tolf;
     bool GaussSeidel;
     double *x, *params;
+    double *steady_y, *steady_x;
     //double *y, *ya, *x, *direction;
     map<pair<pair<int, int> ,int>, int> IM_i;
     int equation, derivative_equation, derivative_variable;
@@ -90,7 +91,8 @@ class Interpreter : SparseMatrix
   public :
     //ReadBinFile read_bin_file;
 
-    Interpreter(double *params_arg, double *y_arg, double *ya_arg, double *x_arg, double *direction_arg, int y_size_arg, int nb_row_x_arg,
+    Interpreter(double *params_arg, double *y_arg, double *ya_arg, double *x_arg, double *steady_y_arg, double *steady_x_arg,
+                double *direction_arg, int y_size_arg, int nb_row_x_arg,
                 int nb_row_xd_arg, int periods_arg, int y_kmin_arg, int y_kmax_arg, int maxit_arg_, double solve_tolf_arg, int size_o_direction_arg,
                 double slowc_arg, int y_decal_arg, double markowitz_c_arg, string &filename_arg);
     bool compute_blocks(string file_name, string bin_basename, bool steady_state, bool evaluate);
