@@ -77,6 +77,26 @@ AM_CONDITIONAL([HAVE_PDFLATEX], [test "x$PDFLATEX" != "x"])
 AC_CHECK_PROG([BIBTEX], [bibtex], [bibtex])
 AM_CONDITIONAL([HAVE_BIBTEX], [test "x$BIBTEX" != "x"])
 
+if test "x$PDFLATEX" != "x" -a "x$BIBTEX" != "x"; then
+  AC_MSG_CHECKING([for econometrica BST])
+  AX_LATEX_BIBTEX_TEST([\documentclass{article}
+\begin{document}
+\cite{Juillard1996}
+\bibliography{conftest}
+\bibliographystyle{econometrica}
+\end{document}
+], [@techreport{Juillard1996,
+	Author = {Juillard, Michel},
+	Institution = {CEPREMAP},
+	Number = {9602},
+	Title = {Dynare : a program for the resolution and simulation of dynamic models with forward variables through the use of a relaxation algorithm},
+	Type = {CEPREMAP working papers},
+	Year = {1996}}
+], [ax_latex_have_econometrica])
+  AC_MSG_RESULT([$ax_latex_have_econometrica])
+fi
+AM_CONDITIONAL([HAVE_ECONOMETRICA], [test "x$ax_latex_have_econometrica" = "xyes"])
+
 AC_CHECK_PROG([DBLATEX], [dblatex], [dblatex])
 AM_CONDITIONAL([HAVE_DBLATEX], [test "x$DBLATEX" != "x"])
 
@@ -199,10 +219,10 @@ else
   BUILD_DYNARE_PDF_MANUAL="no (missing one of: pdflatex, dblatex)"
 fi
 
-if test "x$PDFLATEX" != "x" -a "x$BIBTEX" != "x"; then
+if test "x$PDFLATEX" != "x" -a "x$BIBTEX" != "x" -a "x$ax_latex_have_econometrica" = "xyes"; then
   BUILD_DYNARE_USERGUIDE="yes"
 else
-  BUILD_DYNARE_USERGUIDE="no (missing one of: pdflatex, bibtex)"
+  BUILD_DYNARE_USERGUIDE="no (missing one of: pdflatex, bibtex, econometrica BST)"
 fi
 
 if test "x$PDFLATEX" != "x"; then

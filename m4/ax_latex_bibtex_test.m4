@@ -10,15 +10,17 @@
 #
 # SYNOPSIS
 #
-#   AX_TEX_TEST(FILEDATA,VARIABLETOSET,[NOCLEAN])
+#   AX_LATEX_BIBTEX_TEST(FILEDATA,BIBDATA,VARIABLETOSET,[NOCLEAN])
 #
 # DESCRIPTION
 #
-#   This macros execute the pdftex application with FILEDATA as input and set
-#   VARIABLETOSET to yes or no depending on the result. If NOCLEAN is set,
-#   the folder used for the test is not delete after testing.
+#   This macros creates a bib file called contest.bib with BIBDATA,
+#   executes the latex application with FILEDATA as input, then runs
+#   bibtex on the resulting aux file, and finally sets VARIABLETOSET
+#   to yes or no depending on the result. If NOCLEAN is set, the folder
+#   used for the test is not deleted after testing.
 #
-#   The macro assumes that the variable PDFTEX is set.
+#   The macro assumes that the variables PDFLATEX and BIBTEX are set.
 #
 #   Adapted from the macro AX_LATEX_TEST by Sébastien Villemot.
 #
@@ -40,19 +42,25 @@
 #   You should have received a copy of the GNU Lesser General Public License
 #   along with this library. If not, see <http://www.gnu.org/licenses/>.
 
-AC_DEFUN([AX_TEX_TEST],[
+AC_DEFUN([AX_LATEX_BIBTEX_TEST],[
 rm -rf conftest.dir/.acltx
 AS_MKDIR_P([conftest.dir/.acltx])
 cd conftest.dir/.acltx
-m4_ifval([$2],[$2="no"; export $2;])
+m4_ifval([$3],[$3="no"; export $3;])
 cat > conftest.tex << ACLEOF
 $1
 ACLEOF
-cat conftest.tex | $PDFTEX 2>&1 1>output m4_ifval([$2],[&& $2=yes])
+cat > conftest.bib << ACLEOF
+$2
+ACLEOF
+$PDFLATEX conftest 2>&1 1>output
+$BIBTEX conftest 2>&1 1>output2 m4_ifval([$3],[&& $3=yes])
 cd ..
 cd ..
 sed 's/^/| /' conftest.dir/.acltx/conftest.tex >&5
-echo "$as_me:$LINENO: executing cat conftest.tex | $PDFTEX" >&5
+echo "$as_me:$LINENO: executing $PDFLATEX conftest" >&5
 sed 's/^/| /' conftest.dir/.acltx/output >&5
-m4_ifval([$3],,[rm -rf conftest.dir/.acltx])
+echo "$as_me:$LINENO: executing $BIBTEX conftest" >&5
+sed 's/^/| /' conftest.dir/.acltx/output2 >&5
+m4_ifval([$4],,[rm -rf conftest.dir/.acltx])
 ])
