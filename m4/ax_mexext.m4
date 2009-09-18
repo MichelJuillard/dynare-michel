@@ -39,8 +39,11 @@ AC_CACHE_CHECK([for MEX-file suffix], [ax_cv_mexext],
     ax_cv_mexext="$MEXEXT"
 else
     case $host_os in
-      *cygwin* | *mingw32*)
+      *cygwin*)
         ax_cv_mexext=`$MATLAB/bin/mexext.bat | sed 's/\r//'`
+        ;;
+      *mingw*)
+        ax_cv_mexext=`cd $MATLAB && cmd /c mexext.bat | sed 's/\r//'`
         ;;
       *)
         ax_cv_mexext=`$MATLAB/bin/mexext`
