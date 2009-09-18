@@ -62,6 +62,15 @@ AC_DEFINE([BOOST_NO_HASH])
 AC_CHECK_PROG([PDFTEX], [pdftex], [pdftex])
 AM_CONDITIONAL([HAVE_PDFTEX], [test "x$PDFTEX" != "x"])
 
+if test "x$PDFTEX" != "x"; then
+  AC_MSG_CHECKING([for eplain])
+  AX_TEX_TEST([\input eplain
+\end
+], [ax_tex_have_eplain])
+  AC_MSG_RESULT([$ax_tex_have_eplain])
+fi
+AM_CONDITIONAL([HAVE_EPLAIN], [test "x$ax_tex_have_eplain" = "xyes"])
+
 AC_CHECK_PROG([PDFLATEX], [pdflatex], [pdflatex])
 AM_CONDITIONAL([HAVE_PDFLATEX], [test "x$PDFLATEX" != "x"])
 
@@ -172,10 +181,10 @@ else
   BUILD_DYNAREPLUSPLUS="no (missing one of: BLAS, LAPACK, POSIX Threads)"
 fi
 
-if test "x$CWEAVE" != "x" -a x"$PDFTEX" != "x"; then
+if test "x$CWEAVE" != "x" -a x"$PDFTEX" != "x" -a "x$ax_tex_have_eplain" = "xyes"; then
   BUILD_DYNAREPLUSPLUS_SRCDOC="yes"
 else
-  BUILD_DYNAREPLUSPLUS_SRCDOC="no (missing one of: cweave, pdftex)"
+  BUILD_DYNAREPLUSPLUS_SRCDOC="no (missing one of: cweave, pdftex, eplain)"
 fi
 
 if test "x$XSLTPROC" != "x" -a "x$DOCBOOK_XSLT_CURRENT_VERSION" != "xno"; then

@@ -43,10 +43,12 @@ dummy.ch:
 
 if HAVE_CWEAVE
 if HAVE_PDFTEX
+if HAVE_EPLAIN
 pdf: main.web $(CWEBSRC)
 	$(CWEAVE) -bhp main.web
 	$(PDFTEX) main
 	mv main.pdf integ.pdf
+endif
 endif
 endif
 
