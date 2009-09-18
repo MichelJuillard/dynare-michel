@@ -19,7 +19,10 @@
 ## Second argument is path to Dynare installation to be checked
 ## Third argument is Dynare version to be checked
 
-setenv("GNUTERM", "dumb") # Ask gnuplot to create graphics in text mode
+## Ask gnuplot to create graphics in text mode
+## Note that setenv() was introduced in Octave 3.0.2, for compatibility
+## with MATLAB
+putenv("GNUTERM", "dumb")
 
 [directory, name, ext] = fileparts(argv(){1});
 
