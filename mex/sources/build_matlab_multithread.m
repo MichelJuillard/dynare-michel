@@ -1,6 +1,7 @@
-% Build file for Dynare MEX Librairies under Matlab
+% Build file for Dynare MEX Librairies under Matlab with multithreading
+% Read http://www.dynare.org/DynareWiki/UsingMultithreadedDlls
 
-% Copyright (C) 2007-2008 Dynare Team
+% Copyright (C) 2007-2009 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -110,16 +111,15 @@ LDFLAGS  = ' LDFLAGS="\$LDFLAGS -fopenmp" ';
 
 disp('Compiling isopenmp...')
 try
-    eval([ 'mex ' COMPILE_OPTIONS  CFLAGS CXXFLAGS LDFLAGS  ' -outdir ' OUTPUT_DIR ' threads/isopenmp.cc ' ]);
+    eval([ 'mex ' COMPILE_OPTIONS ' -DUSE_OMP ' CFLAGS CXXFLAGS LDFLAGS  ' -outdir ' OUTPUT_DIR ' threads/isopenmp.cc ' ]);
     disp(' ')
     disp('|------------------------------------------------|')
     disp('|  OpenMp is used (multithreaded mex files) for: |')
     disp('|   * sparse_hessian_times_B_kronecker_C.cc      |')
     disp('|   * A_times_B_kronecker_C.cc                   |')
-    disp('|   * bytecode (SparseMatrix.cc)                 |')
     disp('|------------------------------------------------|')
     disp(' ')
-    COMPILE_OPTIONS_OMP = [ COMPILE_OPTIONS  CFLAGS CXXFLAGS LDFLAGS ];
+    COMPILE_OPTIONS_OMP = [ COMPILE_OPTIONS ' -DUSE_OMP ' CFLAGS CXXFLAGS LDFLAGS ];
 catch
     disp(' ')
     disp('|------------------------------------------------|')
@@ -127,7 +127,7 @@ catch
     disp('|------------------------------------------------|')
     disp(' ')
     CFLAGS = []; CXXFLAGS = []; LDFLAGS = [];
-    COMPILE_OPTIONS_OMP = [ COMPILE_OPTIONS ' -DNO_OPENMP' ];
+    COMPILE_OPTIONS_OMP = COMPILE_OPTIONS;
 end
 
 COMPILE_COMMAND_OMP = [ 'mex ' COMPILE_OPTIONS_OMP ' -outdir ' OUTPUT_DIR ];

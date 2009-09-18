@@ -26,9 +26,6 @@
 #include "mex.h"
 #include "../matlab_versions_compatibility.h"
 
-#ifdef NO_OPENMP
-  #define USE_OMP 0
-  #define DEBUG_OMP 0
   #ifdef NO_BLAS_H
     #if defined(__linux__) || defined(OCTAVE)
       #define dgemm dgemm_
@@ -39,9 +36,8 @@
   #else /* NO_BLAS_H */
     #include "blas.h"
   #endif /* NO_BLAS_H */
-#else
-  #define USE_OMP 1
-  #define DEBUG_OMP 0
+
+#ifdef USE_OMP
   #include <omp.h>
 #endif
 

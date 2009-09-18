@@ -27,7 +27,6 @@ AC_MSG_CHECKING([for options to compile MEX for MATLAB])
 MATLAB_CPPFLAGS="-I$MATLAB/extern/include"
 MATLAB_CC="$CC"
 MATLAB_CXX="$CXX"
-MATLAB_DEFS="-DNO_OPENMP" # Don't use OpenMP (flag used by S. Adjemian in some DLLs)
 
 case ${MATLAB_ARCH} in
   glnx86 | glnxa64)

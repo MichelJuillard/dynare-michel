@@ -1,6 +1,6 @@
 % Build file for Dynare MEX Librairies under Matlab
 
-% Copyright (C) 2007-2008 Dynare Team
+% Copyright (C) 2007-2009 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -89,9 +89,6 @@ else
 end
 disp(' ')
 
-COMPILE_OPTIONS = [ COMPILE_OPTIONS ' -DNO_OPENMP' ]; % Single thread version. To compile multithreaded versions of the mex file 
-                                                      % use build_matlab_multithread.m instead.
-                                                      % Read http://www.dynare.org/DynareWiki/UsingMultithreadedDlls. 
 % Set Optimization and Debug flags
 CXXOPTIMFLAGS = ' CXXOPTIMFLAGS=-O3 ';
 COPTIMFLAGS = ' COPTIMFLAGS=-O3 ';

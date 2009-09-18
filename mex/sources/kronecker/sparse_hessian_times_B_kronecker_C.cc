@@ -26,13 +26,8 @@
 #include <string.h>
 #include "mex.h"
 
-#ifdef NO_OPENMP
-  #define USE_OMP 0
-  #define DEBUG_OMP 0
-#else
-  #define USE_OMP 1
-  #define DEBUG_OMP 0
-  #include <omp.h>
+#ifdef USE_OMP
+# include <omp.h>
 #endif
 
 #ifdef MWTYPES_NOT_DEFINED

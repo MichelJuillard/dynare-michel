@@ -17,7 +17,7 @@
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-COMPILE_OPTIONS = '-DNO_BLAS_H -DNO_LAPACK_H -DOCTAVE -DNO_OPENMP';
+COMPILE_OPTIONS = '-DNO_BLAS_H -DNO_LAPACK_H -DOCTAVE';
 
 % Comment next line to suppress compilation debugging info
 COMPILE_OPTIONS = [ COMPILE_OPTIONS ' -v' ];
