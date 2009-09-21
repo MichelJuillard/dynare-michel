@@ -26,6 +26,7 @@
 # LICENSE
 #
 #   Copyright (c) 2008 Thomas Porschberg <thomas@randspringer.de>
+#   Copyright (c) 2009 Dynare Team
 #
 #   Copying and distribution of this file, with or without modification, are
 #   permitted in any medium without royalty provided the copyright notice
@@ -83,13 +84,16 @@ if test "x$want_boost" = "xyes"; then
 		BOOST_LDFLAGS="-L$ac_boost_path/lib"
 		BOOST_CPPFLAGS="-I$ac_boost_path/include"
 	else
-		for ac_boost_path_tmp in /usr /usr/local /opt /opt/local ; do
-			if test -d "$ac_boost_path_tmp/include/boost" && test -r "$ac_boost_path_tmp/include/boost"; then
-				BOOST_LDFLAGS="-L$ac_boost_path_tmp/lib"
-				BOOST_CPPFLAGS="-I$ac_boost_path_tmp/include"
-				break;
-			fi
-		done
+		# If cross-compiling, adding /usr/include can confuse the compiler
+		if test "x$cross_compiling" != "xyes"; then
+			for ac_boost_path_tmp in /usr /usr/local /opt /opt/local ; do
+				if test -d "$ac_boost_path_tmp/include/boost" && test -r "$ac_boost_path_tmp/include/boost"; then
+					BOOST_LDFLAGS="-L$ac_boost_path_tmp/lib"
+					BOOST_CPPFLAGS="-I$ac_boost_path_tmp/include"
+					break;
+				fi
+			done
+		fi
 	fi
 
     dnl overwrite ld flags if we have required special directory with

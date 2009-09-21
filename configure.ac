@@ -22,6 +22,7 @@ AC_INIT([dynare], [4.1-unstable])
 AC_CONFIG_SRCDIR([preprocessor/DynareMain.cc])
 AM_INIT_AUTOMAKE([-Wall -Werror foreign])
 
+AC_PROG_CC
 AC_PROG_CXX
 
 # Use C++ for testing headers
@@ -123,10 +124,12 @@ fi
 AC_CHECK_PROG([CWEAVE], [cweave], [cweave])
 AM_CONDITIONAL([HAVE_CWEAVE], [test "x$CWEAVE" != "x"])
 
-AX_BLAS
+AC_PROG_F77
+if test "x$F77" != "x"; then
+   AX_BLAS
+   AX_LAPACK
+fi
 AM_CONDITIONAL([HAVE_BLAS], [test x"$ax_blas_ok" = "xyes"])
-
-AX_LAPACK
 AM_CONDITIONAL([HAVE_LAPACK], [test x"$ax_lapack_ok" = "xyes"])
 
 AX_PTHREAD
