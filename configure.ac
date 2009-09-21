@@ -95,8 +95,11 @@ if test "x$PDFLATEX" != "x" -a "x$BIBTEX" != "x"; then
 	Year = {1996}}
 ], [ax_latex_have_econometrica])
   AC_MSG_RESULT([$ax_latex_have_econometrica])
+
+  AX_LATEX_CLASS([beamer], [ax_latex_have_beamer])
 fi
 AM_CONDITIONAL([HAVE_ECONOMETRICA], [test "x$ax_latex_have_econometrica" = "xyes"])
+AM_CONDITIONAL([HAVE_BEAMER], [test "x$ax_latex_have_beamer" = "xyes"])
 
 AC_CHECK_PROG([DBLATEX], [dblatex], [dblatex])
 AM_CONDITIONAL([HAVE_DBLATEX], [test "x$DBLATEX" != "x"])
@@ -228,6 +231,12 @@ else
   BUILD_DYNARE_USERGUIDE="no (missing one of: pdflatex, bibtex, econometrica BST)"
 fi
 
+if test "x$PDFLATEX" != "x" -a "x$ax_latex_have_beamer" = "xyes"; then
+  BUILD_BEAMER_DOC="yes"
+else
+  BUILD_BEAMER_DOC="no (missing one of: pdflatex, beamer)"
+fi
+
 if test "x$PDFLATEX" != "x"; then
   BUILD_OTHER_PDF_DOC="yes"
 else
@@ -278,6 +287,7 @@ PDF documentation (with "make pdf"):
  Dynare reference manual:               $BUILD_DYNARE_PDF_MANUAL
  Dynare user guide:                     $BUILD_DYNARE_USERGUIDE
  Dynare++ developer documentation:      $BUILD_DYNAREPLUSPLUS_SRCDOC
+ Beamer presentations:                  $BUILD_BEAMER_DOC
  Various other documents:               $BUILD_OTHER_PDF_DOC
 
 HTML documentation (with "make html"):
