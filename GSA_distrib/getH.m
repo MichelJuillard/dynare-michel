@@ -1,8 +1,9 @@
-function [H, A, B, dA, dOm] = getH(M_,oo_,kronflag,indx)
+function [H, A, B, dA, dOm] = getH(M_,oo_,kronflag,indx,indexo)
 % computes derivative of reduced form linear model w.r.t. deep params
 
 if nargin<3 | isempty(kronflag), kronflag = 0; end
 if nargin<4 | isempty(indx), indx = [1:M_.param_nbr];, end,
+if nargin<5 | isempty(indexo), indexo = [];, end,
     
 
 [I,J]=find(M_.lead_lag_incidence');
@@ -223,7 +224,7 @@ if kronflag==1, % kronecker products
 elseif kronflag==-1, % perturbation
     fun = 'thet2tau';
     params0 = M_.params;
-    H = fdjac(fun,M_.params(indx),indx);
+    H = fdjac(fun,[sqrt(diag(M_.Sigma_e(indexo,indexo))); M_.params(indx)],indx,indexo);
     assignin('base','M_', M_);
     assignin('base','oo_', oo_);
 
@@ -241,17 +242,29 @@ else % generalized sylvester equation
         d(:,:,j) = Dg2(:,:,j)-elem(:,:,j)*A;
     end
         xx=sylvester3mr(a,b,c,d);
+    if ~isempty(indexo),
+      dSig = zeros(M_.exo_nbr,M_.exo_nbr);
+      for j=1:length(indexo)
+        dSig(indexo(j),indexo(j)) = 2*sqrt(M_.Sigma_e(indexo(j),indexo(j)));
+        y = B*dSig*B';
+        H(:,j) = [zeros((m-nauxe)^2,1); vech(y)];
+        if nargout>3,
+          dOm(:,:,j) = y;
+        end
+        dSig(indexo(j),indexo(j)) = 0;
+      end
+    end
     for j=1:param_nbr,
         x = xx(:,:,j);
         y = inva * (Dg3(:,:,j)-(elem(:,:,j)-GAM1*x)*B);
-        y = y*B'+B*y';
+        y = y*M_.Sigma_e*B'+B*M_.Sigma_e*y';
         if nargout>3,
-          dA(:,:,j) = x;
-          dOm(:,:,j) = y;
+          dA(:,:,j+length(indexo)) = x;
+          dOm(:,:,j+length(indexo)) = y;
         end
         x = x(nauxe+1:end,nauxe+1:end);
         y = y(nauxe+1:end,nauxe+1:end);
-        H(:,j) = [x(:); vech(y)];
+        H(:,j+length(indexo)) = [x(:); vech(y)];
     end
 %     for j=1:param_nbr,
 %         disp(['Derivatives w.r.t. ',M_.param_names(indx(j),:),', ',int2str(j),'/',int2str(param_nbr)])
