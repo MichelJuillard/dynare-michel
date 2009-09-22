@@ -19,7 +19,7 @@ function fjac = fdjac(f,x,varargin)
 
 tol    = optget(mfilename,'tol',eps.^(1/3));
 
-h = 0.001; %tol.*max(abs(x),1);
+h = tol.*max(abs(x),1);
 xh1=x+h; xh0=x-h;
 h=xh1-xh0;
 for j=1:length(x);
