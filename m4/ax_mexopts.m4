@@ -37,6 +37,14 @@ case ${MATLAB_ARCH} in
     MATLAB_LIBS="-lmx -lmex -lmat -lm -lstdc++ -lmwlapack"
     # Starting from MATLAB 7.5, BLAS and LAPACK are in distinct libraries
     AX_COMPARE_VERSION([$MATLAB_VERSION], [ge], [7.5], [MATLAB_LIBS="${MATLAB_LIBS} -lmwblas"])
+    if test "${MATLAB_ARCH}" = "glnx86"; then
+      MATLAB_DEFS="$MATLAB_DEFS -D_FILE_OFFSET_BITS=64"
+      MATLAB_CFLAGS="$MATLAB_CFLAGS -m32"
+      MATLAB_CXXFLAGS="$MATLAB_CXXFLAGS -m32"
+    else # glnxa64
+      MATLAB_CFLAGS="$MATLAB_CFLAGS -fno-omit-frame-pointer"
+      MATLAB_CXXFLAGS="$MATLAB_CXXFLAGS -fno-omit-frame-pointer"
+    fi
     ax_mexopts_ok="yes"
     ;;
   win32 | win64)
@@ -56,22 +64,27 @@ case ${MATLAB_ARCH} in
     esac
     ax_mexopts_ok="yes"
     ;;
+  maci | maci64)
+    MATLAB_CC="gcc-4.0"
+    SDKROOT='/Developer/SDKs/MacOSX10.5.sdk'
+    MACOSX_DEPLOYMENT_TARGET='10.5'
+    if test "${MATLAB_ARCH}" = "maci"; then
+        ARCHS='i386'
+    else
+        ARCHS='x86_64'
+    fi
+    MATLAB_DEFS="$MATLAB_DEFS -DNDEBUG"
+    MATLAB_CFLAGS="-fno-common -no-cpp-precomp -arch $ARCHS -isysroot $SDKROOT -mmacosx-version-min=$MACOSX_DEPLOYMENT_TARGET -fexceptions -O2"
+    MATLAB_LDFLAGS="-L$MATLAB/bin/${MATLAB_ARCH} -Wl,-twolevel_namespace -undefined error -arch $ARCHS -Wl,-syslibroot,$SDKROOT -mmacosx-version-min=$MACOSX_DEPLOYMENT_TARGET -bundle -Wl,-exported_symbols_list,$MATLAB/extern/lib/${MATLAB_ARCH}/mexFunction.map"
+    MATLAB_LIBS="-lmx -lmex -lmat -lsdtc++ -lmwlapack"
+    MATLAB_CXX="g++-4.0"
+    MATLAB_CXXFLAGS="-fno-common -no-cpp-precomp -fexceptions -arch $ARCHS -isysroot $SDKROOT -mmacosx-version-min=$MACOSX_DEPLOYMENT_TARGET -O2"
+    # Starting from MATLAB 7.5, BLAS and LAPACK are in distinct libraries
+    AX_COMPARE_VERSION([$MATLAB_VERSION], [ge], [7.5], [MATLAB_LIBS="${MATLAB_LIBS} -lmwblas"])
+    ax_mexopts_ok="yes"
+    ;;
   *)
     ax_mexopts_ok="no"
-    ;;
-esac
-
-case ${MATLAB_ARCH} in
-  glnx86)
-    MATLAB_DEFS="$MATLAB_DEFS -D_FILE_OFFSET_BITS=64"
-    MATLAB_CFLAGS="$MATLAB_CFLAGS -m32"
-    MATLAB_CXXFLAGS="$MATLAB_CXXFLAGS -m32"
-    ;;
-  glnxa64)
-    MATLAB_CFLAGS="$MATLAB_CFLAGS -fno-omit-frame-pointer"
-    MATLAB_CXXFLAGS="$MATLAB_CXXFLAGS -fno-omit-frame-pointer"
-    ;;
-  *)
     ;;
 esac
 
