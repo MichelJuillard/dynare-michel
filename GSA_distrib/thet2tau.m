@@ -1,4 +1,4 @@
-function tau = thet2tau(params, indx, flagmoments,mf)
+function tau = thet2tau(params, indx, flagmoments,mf,nlags)
 global M_ oo_ options_
 
 if nargin==1,
@@ -17,4 +17,8 @@ tau = [A(:); vech(B*B')];
 else
 GAM =  lyapunov_symm(A,B*M_.Sigma_e*B',options_.qz_criterium,options_.lyapunov_complex_threshold);
 tau = vech(GAM(mf,mf));
+for ii = 1:nlags
+  dum = A^(ii)*GAM;
+    tau = [tau;vec(dum(mf,mf))];
+end
 end
