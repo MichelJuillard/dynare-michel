@@ -19,7 +19,7 @@ function fjac = fdjac(f,x,varargin)
 
 tol    = optget(mfilename,'tol',eps.^(1/3));
 
-h = tol.*max(abs(x),1);
+h = 0.001; %tol.*max(abs(x),1);
 xh1=x+h; xh0=x-h;
 h=xh1-xh0;
 for j=1:length(x);
@@ -27,6 +27,11 @@ for j=1:length(x);
    xx(j) = xh1(j); f1=feval(f,xx,varargin{:});
    xx(j) = xh0(j); f0=feval(f,xx,varargin{:});
    fjac(:,j) = (f1-f0)/h(j);
+%    v = (f1-f0);
+%         k = find(abs(v) < 1e-8);
+%         v(k) = 0;
+%    
+%    fjac(:,j) = v/h(j);
 end
 
 feval(f,x,varargin{:});

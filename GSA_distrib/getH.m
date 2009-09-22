@@ -1,4 +1,4 @@
-function H = getH(M_,oo_,kronflag,indx)
+function [H, A, B] = getH(M_,oo_,kronflag,indx)
 % computes derivative of reduced form linear model w.r.t. deep params
 
 if nargin<3 | isempty(kronflag), kronflag = 0; end
@@ -224,7 +224,8 @@ elseif kronflag==-1, % perturbation
     fun = 'thet2tau';
     params0 = M_.params;
     H = fdjac(fun,M_.params(indx),indx);
-    M_.params = params0;
+    assignin('base','M_', M_);
+    assignin('base','oo_', oo_);
 
 else % generalized sylvester equation
 
