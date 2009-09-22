@@ -1,8 +1,8 @@
-function [H, A, B] = getH(M_,oo_,kronflag,indx)
+function [H, A, B, dA, dOm] = getH(M_,oo_,kronflag,indx)
 % computes derivative of reduced form linear model w.r.t. deep params
 
 if nargin<3 | isempty(kronflag), kronflag = 0; end
-if nargin<4, indx = [1:M_.param_nbr];, end,
+if nargin<4 | isempty(indx), indx = [1:M_.param_nbr];, end,
     
 
 [I,J]=find(M_.lead_lag_incidence');
@@ -245,6 +245,10 @@ else % generalized sylvester equation
         x = xx(:,:,j);
         y = inva * (Dg3(:,:,j)-(elem(:,:,j)-GAM1*x)*B);
         y = y*B'+B*y';
+        if nargout>3,
+          dA(:,:,j) = x;
+          dOm(:,:,j) = y;
+        end
         x = x(nauxe+1:end,nauxe+1:end);
         y = y(nauxe+1:end,nauxe+1:end);
         H(:,j) = [x(:); vech(y)];
