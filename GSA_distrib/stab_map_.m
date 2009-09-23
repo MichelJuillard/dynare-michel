@@ -104,7 +104,7 @@ if fload==0,
   end
   yys=zeros(length(dr_.ys),Nsam);
   
-  if opt_gsa.morris
+  if opt_gsa.morris>0
     if opt_gsa.morris == 1
       [lpmat, OutFact] = Sampling_Function_2(nliv, np+nshock, ntra, ones(np+nshock, 1), zeros(np+nshock,1), []);
       lpmat = lpmat.*(nliv-1)/nliv+1/nliv/2;
