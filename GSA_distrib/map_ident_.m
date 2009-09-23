@@ -32,8 +32,13 @@ fname_ = M_.fname;
 if opt_gsa.load_ident==0,
 % th moments
 [vdec, cc, ac] = mc_moments(T, lpmatx, oo_.dr);
+indx = estim_params_.param_vals(:,1);
+indexo = estim_params_.var_exo(:,1);
+useautocorr = 0;
+nlags = 3;
+[JJ,HH] = mc_getJ([lpmat(istable,:),lpmatx], M_,oo_,options_,0,indx,indexo,bayestopt_.mf2,nlags,useautocorr);
 clear lpmatx;
-if opt_gsa.morris==0,
+if opt_gsa.morris<=0,
   ifig=0;
   for j=1:M_.exo_nbr,
     if mod(j,6)==1
@@ -66,14 +71,19 @@ end
 [cc, j0, ir_cc, ic_cc] = teff(cc,Nsam,istable);
 [ac, j0, ir_ac, ic_ac] = teff(ac,Nsam,istable);
 
-[Aa,Bb] = ghx2transition(squeeze(T(:,:,1)), ...
+  [nr1, nc1, nnn] = size(T);
+  dr.ghx = T(:, [1:(nc1-M_.exo_nbr)],1);
+  dr.ghu = T(:, [(nc1-M_.exo_nbr+1):end], 1);
+[Aa,Bb] = kalman_transition_matrix(dr, ...
   bayestopt_.restrict_var_list, ...
   bayestopt_.restrict_columns, ...
   bayestopt_.restrict_aux);
 A = zeros(size(Aa,1),size(Aa,2)+size(Bb,2),length(istable));
 A(:,:,1)=[Aa, Bb];
 for j=2:length(istable),
-  [Aa,Bb] = ghx2transition(squeeze(T(:,:,j)), ...
+  dr.ghx = T(:, [1:(nc1-M_.exo_nbr)],j);
+  dr.ghu = T(:, [(nc1-M_.exo_nbr+1):end], j);
+  [Aa,Bb] = kalman_transition_matrix(dr, ...
     bayestopt_.restrict_var_list, ...
     bayestopt_.restrict_columns, ...
     bayestopt_.restrict_aux);
@@ -694,7 +704,11 @@ elseif opt_gsa.morris==2,
   end,
   figure, bar((idex_pcr.*ys_pcr)./opt_gsa.Nsam), title('Relationships rank PCA')
   figure, bar((idex_pcr.*ys_pcr)'./opt_gsa.Nsam), title('Parameters rank PCA')
-else,
+  
+elseif opt_gsa.morris==-1,   % ISKREV staff
+
+  
+else,  % main effects analysis
   
   if itrans==0,
     fsuffix = '';
