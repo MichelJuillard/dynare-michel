@@ -16,7 +16,12 @@ if kronflag == -1,
   assignin('base','M_', M_);
   assignin('base','oo_', oo_);
 else
-  [H, A, B, dA, dOm] = getH(M_,oo_,kronflag,indx,indexo);
+  [H, A, B, dA, dOm, info] = getH(M_,oo_,kronflag,indx,indexo);
+  if info(1) > 0
+    JJ = [];
+    GAM = [];
+    return
+  end
   m = length(A);
 
   GAM =  lyapunov_symm(A,B*M_.Sigma_e*B',options_.qz_criterium,options_.lyapunov_complex_threshold,1);
