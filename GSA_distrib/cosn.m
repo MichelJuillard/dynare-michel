@@ -16,8 +16,5 @@ X = H(:,2:end);
 yhat =  X*(X\y);
 co = y'*yhat/sqrt((y'*y)*(yhat'*yhat));
 
-yhat =  X*(X\y);
-co = y'*yhat/sqrt((y'*y)*(yhat'*yhat));
-
 
 
