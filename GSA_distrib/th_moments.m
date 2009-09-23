@@ -43,6 +43,7 @@ vdec = 100*gamma_y{options_.ar+2}(i1,:);
   
 %'MATRIX OF CORRELATIONS';
     corr = gamma_y{1}(i1,i1)./(sd(i1)*sd(i1)');
+    corr = corr-diag(diag(corr))+diag(diag(gamma_y{1}(i1,i1)));
   
   if options_.ar > 0
 %'COEFFICIENTS OF AUTOCORRELATION';
