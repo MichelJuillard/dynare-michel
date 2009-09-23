@@ -1,4 +1,4 @@
-function tau = thet2tau(params, indx, indexo, flagmoments,mf,nlags)
+function tau = thet2tau(params, indx, indexo, flagmoments,mf,nlags,useautocorr)
 global M_ oo_ options_
 
 if nargin==1,
@@ -8,6 +8,9 @@ end
 
 if nargin<4,
   flagmoments=0;
+end
+if nargin<7 | isempty(useautocorr),
+  useautocorr=0;
 end
 
 M_.params(indx) = params(length(indexo)+1:end);
@@ -22,9 +25,20 @@ else
 GAM =  lyapunov_symm(A,B*M_.Sigma_e*B',options_.qz_criterium,options_.lyapunov_complex_threshold);
 k = find(abs(GAM) < 1e-12);
 GAM(k) = 0;
-tau = vech(GAM(mf,mf));
+if useautocorr,
+  sy = sqrt(diag(GAM));
+  sy = sy*sy';
+  sy0 = sy-diag(diag(sy))+eye(length(sy));
+  dum = GAM./sy0;
+  tau = vech(dum(mf,mf));
+else
+  tau = vech(GAM(mf,mf));
+end
 for ii = 1:nlags
   dum = A^(ii)*GAM;
-    tau = [tau;vec(dum(mf,mf))];
+  if useautocorr,
+    dum = dum./sy;
+  end
+  tau = [tau;vec(dum(mf,mf))];
 end
 end
