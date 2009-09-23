@@ -20,11 +20,24 @@ function [A,B] = ghx2transition(mm,iv,ic,aux)
 % M. Ratto, Global Sensitivity Analysis for Macroeconomic models, MIMEO, 2006.
 %
 
-global M_
+global oo_ M_
 
   [nr1, nc1] = size(mm);
   ghx = mm(:, [1:(nc1-M_.exo_nbr)]);
   ghu = mm(:, [(nc1-M_.exo_nbr+1):end] );
+  if nargin == 1
+    oo_.dr.ghx = ghx;
+    oo_.dr.ghu = ghu;
+    endo_nbr = M_.endo_nbr;
+    nstatic = oo_.dr.nstatic;
+    npred = oo_.dr.npred;
+    iv = (1:endo_nbr)';
+    ic = [ nstatic+(1:npred) endo_nbr+(1:size(oo_.dr.ghx,2)-npred) ]';
+    aux = oo_.dr.transition_auxiliary_variables;
+    k = find(aux(:,2) > npred);
+    aux(:,2) = aux(:,2) + nstatic;
+    aux(k,2) = aux(k,2) + oo_.dr.nfwrd;
+  end
   n_iv = length(iv);
   n_ir1 = size(aux,1);
   nr = n_iv + n_ir1;
