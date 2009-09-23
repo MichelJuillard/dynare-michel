@@ -1,0 +1,30 @@
+VPATH = $(top_srcdir)/mex/sources/korderpert
+
+noinst_PROGRAMS = korderpert
+
+#check_PROGRAMS = ramst1_dynamic fs2000k_dynamic
+
+# Can't use korderpert_CPPFLAGS, because it interacts badly with VPATH
+CPPFLAGS += -DMATLAB_MEX_FILE -DPOSIX_THREADS -I$(top_srcdir)/dynare++/src -I$(top_srcdir)/dynare++/kord -I$(top_srcdir)/dynare++/tl/cc -I$(top_srcdir)/dynare++/utils/cc -I$(top_srcdir)/dynare++/sylv/cc
+
+CXXFLAGS += $(PTHREAD_CFLAGS)
+
+LIBS += $(LIBADD_DLOPEN) $(PTHREAD_LIBS) $(top_srcdir)/dynare++/kord/libkord.a $(top_srcdir)/dynare++/tl/cc/libtl.a $(top_srcdir)/dynare++/sylv/cc/libsylv.a $(top_srcdir)/dynare++/src/libnsolve.a
+
+nodist_korderpert_SOURCES = \
+	k_order_perturbation.cpp \
+	k_ord_dynare.cpp \
+	k_ord_dynare.h \
+	dynamic_dll.cpp \
+	dynamic_dll.h
+
+#BUILT_SOURCES = ramst1_dynamic.c fs2000k_dynamic.c
+
+#nodist_ramst1_dynamic_SOURCES = ramst1_dynamic.c
+#nodist_fs2000k_dynamic_SOURCES = fs2000k_dynamic.c
+
+#ramst1_dynamic.c: tests/ramst1.mod
+#	$(top_srcdir)/preprocessor/dynare_m $(top_srcdir)/mex/sources/korderpert/tests/ramst1.mod
+
+#fs2000k_dynamic.c: tests/fs2000k.mod
+#	$(top_srcdir)/preprocessor/dynare_m $(top_srcdir)/mex/sources/korderpert/tests/fs2000k.mod
