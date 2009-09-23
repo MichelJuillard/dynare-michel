@@ -103,7 +103,7 @@ public:
 /*********************************************/
 // The following only implements DynamicModel with help of ogdyn::DynareModel
 // instantiation of pure abstract DynamicModel decl. in dynamic_model.h
-//class DynamicModelDLL;
+class DynamicModelDLL;
 class KordpJacobian;
 class KordpDynare : public DynamicModel
 {

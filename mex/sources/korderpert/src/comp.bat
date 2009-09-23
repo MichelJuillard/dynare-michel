@@ -1,1 +1,0 @@
-gcc -DMATLAB_MEX_FILE -mthreads -g -DWINDOWS -DPOSIX_THREADS -DDEBUG -shared -I"c:/Program Files"/MATLAB_SV71/extern/include -I Dyn_pp/src -I Dyn_pp/kord -I Dyn_pp/tl/cc -I Dyn_pp/utils/cc/ -I Dyn_pp/sylv/cc/ -I"f:/Pthreads/Pre-built.2/include" -I"f:/mingw/include" -c k_order_test_main.cpp -c k_ord_dynare.cpp -c k_order_perturbation.cpp -c Dyn_pp/src/nlsolve.cpp

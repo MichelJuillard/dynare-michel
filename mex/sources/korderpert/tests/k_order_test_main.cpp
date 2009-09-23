@@ -257,7 +257,7 @@ main(int argc, char *argv[])
       fclose(matfd);
 
       map<string, ConstTwoDMatrix> mm;
-      app.getFoldDecisionRule().writeMMap(&mm);
+      app.getFoldDecisionRule().writeMMap(mm, string());
 #ifdef DEBUG
       app.getFoldDecisionRule().print();
       mexPrintf("k_order_perturbation: Map print: \n");

@@ -167,6 +167,15 @@ else
 end
 disp([ message 'Bytecode evaluation.' ])
 
+% Test if k-order perturbation DLL is present
+if exist('korderpert') == 3
+  remove_path_to_mex = 0;
+  message = '[mex] ';
+else
+  message = '[no]  ';
+end
+disp([ message 'k-order perturbation.' ])
+
 if remove_path_to_mex
   rmpath(path_to_mex_files);
 end

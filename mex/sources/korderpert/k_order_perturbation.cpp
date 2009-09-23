@@ -347,7 +347,7 @@ extern "C" {
 
         /* Write derivative outputs into memory map */
         map<string, ConstTwoDMatrix> mm;
-        app.getFoldDecisionRule().writeMMap(&mm);
+        app.getFoldDecisionRule().writeMMap(mm, string());
 
 #ifdef DEBUG
         app.getFoldDecisionRule().print();

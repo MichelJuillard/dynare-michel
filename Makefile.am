@@ -1,4 +1,4 @@
-SUBDIRS = preprocessor doc tests mex/build
+SUBDIRS = preprocessor doc tests
 
 if HAVE_BLAS
 if HAVE_LAPACK
@@ -7,6 +7,9 @@ SUBDIRS += dynare++
 endif
 endif
 endif
+
+# MEX must be built after dynare++ (because of kordepert)
+SUBDIRS += mex/build
 
 ACLOCAL_AMFLAGS = -I m4
 

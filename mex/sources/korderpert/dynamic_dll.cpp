@@ -90,8 +90,9 @@ DynamicModelDLL::DynamicModelDLL(const char *modName, const int y_length, const 
 
   try
     {
+      if (sExt == NULL)
+        sExt = MEXEXT;
 #ifdef WINDOWS
-      if (sExt == NULL) sExt = (".dll");
       HINSTANCE dynamicHinstance;
       //		dynamicHinstance=::LoadLibraryEx(strcat(fNname,"_.dll"),NULL,DONT_RESOLVE_DLL_REFERENCES);//sExt); //"_.dll");
       dynamicHinstance = ::LoadLibrary(strcat(fName, sExt)); //.dll); //"_.dll");
@@ -104,7 +105,6 @@ DynamicModelDLL::DynamicModelDLL(const char *modName, const int y_length, const 
       Dynamic = (DynamicFn *) ::GetProcAddress(dynamicHinstance, "Dynamic");
 
 #else // __linux__
-      if (sExt == NULL) sExt = (".so");
       dynamicHinstance = dlopen(strcat(fName, sExt), RTLD_NOW);
       if ((dynamicHinstance == NULL) || dlerror())
         {

@@ -1,4 +1,5 @@
 function [gy]=first_order(M_, dr, jacobia)
+% Emulation of Dynare++ c++ first_order.cpp for testing pruposes
 
 % Copyright (C) 2009 Dynare Team
 %

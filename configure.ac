@@ -25,6 +25,8 @@ AM_INIT_AUTOMAKE([-Wall -Werror foreign])
 AC_PROG_CC
 AC_PROG_CXX
 
+AC_CANONICAL_HOST
+
 # Use C++ for testing headers
 AC_LANG([C++])
 
@@ -32,8 +34,19 @@ CXXFLAGS="$CXXFLAGS -Wall"
 
 AC_PROG_RANLIB
 
+AC_MSG_CHECKING([for compiler flag to generate position independent code])
+case ${host_os} in
+  *cygwin* | *mingw*)
+    PICFLAG=""
+    ;;
+  *)
+    PICFLAG="-fPIC"
+    ;;
+esac
+AC_MSG_RESULT($PICFLAG)
+AC_SUBST(PICFLAG)
+
 AC_PROG_LN_S
-AC_CANONICAL_HOST
 case ${host_os} in
   *cygwin*)
     LN_S="cp -p" # Cygwin symbolic links are not understood by MATLAB
@@ -59,6 +72,8 @@ CPPFLAGS="$CPPFLAGS_SAVED"
 
 # Don't use deprecated hash structures
 AC_DEFINE([BOOST_NO_HASH])
+
+LT_LIB_DLLOAD
 
 AC_CHECK_PROG([PDFTEX], [pdftex], [pdftex])
 AM_CONDITIONAL([HAVE_PDFTEX], [test "x$PDFTEX" != "x"])
@@ -195,6 +210,9 @@ AC_CONFIG_FILES([Makefile
                  mex/build/gensylv/matlab/Makefile
                  mex/build/bytecode/octave/Makefile
                  mex/build/bytecode/matlab/Makefile
+                 mex/build/korderpert/octave/Makefile
+                 mex/build/korderpert/matlab/Makefile
+                 mex/build/korderpert/tests/Makefile
 ])
 
 # Construct final output message

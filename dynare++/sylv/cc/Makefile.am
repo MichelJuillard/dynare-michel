@@ -40,3 +40,6 @@ libsylv_a_SOURCES = \
 	SchurDecomp.cpp \
 	KronVector.h \
 	KronUtils.cpp
+
+# Generate position independent code for k-order DLL
+libsylv_a_CXXFLAGS = $(PICFLAG)
