@@ -1,4 +1,4 @@
-function [H, A0, B0, dA, dOm] = getH(M_,oo_,kronflag,indx,indexo)
+function [H, A0, B0, dA, dOm, info] = getH(M_,oo_,kronflag,indx,indexo)
 % computes derivative of reduced form linear model w.r.t. deep params
 
 if nargin<3 | isempty(kronflag), kronflag = 0; end
@@ -44,7 +44,15 @@ param_nbr = length(indx);
 % order_var = [oo_.dr.order_var; ...
 %     [size(oo_dr.ghx,2)+1:size(oo_dr.ghx,2)+size(oo_.dr.transition_auxiliary_variables,1)]' ];
 % [A(order_var,order_var),B(order_var,:)]=dynare_resolve;
-[A,B]=dynare_resolve;
+[A,B,ys,info]=dynare_resolve;
+  if info(1) > 0
+    H = [];
+    A0 = [];
+    B0 = [];
+    dA = [];
+    dOm = [];
+    return
+  end
 
 m = size(A,1);
 n = size(B,2);
