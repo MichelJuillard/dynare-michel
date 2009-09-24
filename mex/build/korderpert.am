@@ -1,11 +1,21 @@
-VPATH = $(top_srcdir)/mex/sources/korderpert
+vpath %.cpp $(top_srcdir)/mex/sources/korderpert
+vpath %.cpp $(top_srcdir)/mex/sources/gensylv
 
 noinst_PROGRAMS = korderpert
 
 #check_PROGRAMS = ramst1_dynamic fs2000k_dynamic
 
 # Can't use korderpert_CPPFLAGS, because it interacts badly with VPATH
-CPPFLAGS += -DMATLAB_MEX_FILE -DPOSIX_THREADS -I$(top_srcdir)/dynare++/src -I$(top_srcdir)/dynare++/kord -I$(top_srcdir)/dynare++/tl/cc -I$(top_srcdir)/dynare++/utils/cc -I$(top_srcdir)/dynare++/sylv/cc
+CPPFLAGS += -I$(top_srcdir)/dynare++/src -I$(top_srcdir)/dynare++/kord -I$(top_srcdir)/dynare++/tl/cc -I$(top_srcdir)/dynare++/utils/cc -I$(top_srcdir)/dynare++/sylv/cc
+
+# For Dynare++ thread implementation in tensor library
+CPPFLAGS += -DPOSIX_THREADS
+
+# For Dynare++ gensylv (so that it uses the right prototypes for BLAS/LAPACK)
+CPPFLAGS += -DMATLAB
+
+# So that we have mexFunction() in the library
+CPPFLAGS += -DMATLAB_MEX_FILE
 
 CXXFLAGS += $(PTHREAD_CFLAGS)
 

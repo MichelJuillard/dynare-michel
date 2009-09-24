@@ -34,18 +34,6 @@ CXXFLAGS="$CXXFLAGS -Wall"
 
 AC_PROG_RANLIB
 
-AC_MSG_CHECKING([for compiler flag to generate position independent code])
-case ${host_os} in
-  *cygwin* | *mingw*)
-    PICFLAG=""
-    ;;
-  *)
-    PICFLAG="-fPIC"
-    ;;
-esac
-AC_MSG_RESULT($PICFLAG)
-AC_SUBST(PICFLAG)
-
 AC_PROG_LN_S
 case ${host_os} in
   *cygwin*)
@@ -73,7 +61,8 @@ CPPFLAGS="$CPPFLAGS_SAVED"
 # Don't use deprecated hash structures
 AC_DEFINE([BOOST_NO_HASH])
 
-LT_LIB_DLLOAD
+# Libtool test for dlopen, disabled for the moment
+#LT_LIB_DLLOAD
 
 AC_CHECK_PROG([PDFTEX], [pdftex], [pdftex])
 AM_CONDITIONAL([HAVE_PDFTEX], [test "x$PDFTEX" != "x"])

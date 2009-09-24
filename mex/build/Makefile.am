@@ -12,10 +12,10 @@ if HAVE_BLAS
 if HAVE_LAPACK
 if HAVE_PTHREAD
 if HAVE_MEXOPTS
-SUBDIRS += korderpert/matlab korderpert/tests
+#SUBDIRS += korderpert/matlab korderpert/tests
 endif
 if HAVE_MKOCTFILE
-SUBDIRS += korderpert/octave
+#SUBDIRS += korderpert/octave
 endif
 endif
 endif

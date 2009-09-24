@@ -56,9 +56,6 @@ libkord_a_SOURCES = $(CWEBSRC) $(GENERATED_FILES)
 libkord_a_CPPFLAGS = -I../sylv/cc -I../tl/cc -I../integ/cc -DPOSIX_THREADS
 libkord_a_CXXFLAGS = $(PTHREAD_CFLAGS)
 
-# Generate position independent code for k-order DLL
-libkord_a_CXXFLAGS += $(PICFLAG)
-
 BUILT_SOURCES = $(GENERATED_FILES)
 
 EXTRA_DIST = main.web
