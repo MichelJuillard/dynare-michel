@@ -23,14 +23,18 @@ function dynare_MC(var_list_,OutDir)
 global M_ options_ oo_ estim_params_ 
 global bayestopt_
 
-if options_.filtered_vars ~= 0 & options_.filter_step_ahead == 0
-  options_.filter_step_ahead = 1;
-end
-if options_.filter_step_ahead ~= 0
-  options_.nk = max(options_.filter_step_ahead);
-else
-  options_.nk = 0;
-end
+% if options_.filtered_vars ~= 0 & options_.filter_step_ahead == 0
+%   options_.filter_step_ahead = 1;
+% end
+% if options_.filter_step_ahead ~= 0
+%   options_.nk = max(options_.filter_step_ahead);
+% else
+%   options_.nk = 0;
+% end
+% 
+options_.filter_step_ahead=1;
+options_.nk = 1;
+
 
 
 nvx = estim_params_.nvx;
@@ -105,7 +109,7 @@ delete([OutDir,'/',namfile,'_*.mat'])
 ib=0;
 ifil=0;
 opt_gsa=options_.opt_gsa;
-options_.filter_step_ahead=1;
+
 for b=1:B
   ib=ib+1;
   deep = x(b,:)';
