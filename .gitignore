@@ -1,3 +1,9 @@
+*.in
+*.eps
+*.pdf
+*.fig
+*.output
+*~
 
 # /
 /configure
@@ -56,6 +62,23 @@
 /doc/userguide/*.out
 /doc/userguide/UserGuide.pdf
 /doc/userguide/Makefile
+doc/userguide/models/H.dat
+doc/userguide/models/RBC_DataGen.log
+doc/userguide/models/RBC_DataGen.m
+doc/userguide/models/RBC_DataGen_dynamic.m
+doc/userguide/models/RBC_DataGen_simul
+doc/userguide/models/RBC_DataGen_static.m
+doc/userguide/models/RBC_Est.log
+doc/userguide/models/RBC_Est.m
+doc/userguide/models/RBC_Est/
+doc/userguide/models/RBC_Est_dynamic.m
+doc/userguide/models/RBC_Est_mode.mat
+doc/userguide/models/RBC_Est_params.mat
+doc/userguide/models/RBC_Est_static.m
+doc/userguide/models/g1.mat
+doc/userguide/models/g3.mat
+doc/userguide/models/simuldataRBC.m
+
 
 # /matlab/
 /matlab/dynare_m
