@@ -47,18 +47,18 @@ if nargin==0,
 end
 
 if pprior
-  load([dirname,'\',M_.fname,'_prior']);
-  adir=[dirname '\redform_stab'];
+  load([dirname,'/',M_.fname,'_prior']);
+  adir=[dirname '/redform_stab'];
 else
-  load([dirname,'\',M_.fname,'_mc']);
-  adir=[dirname '\redform_mc'];
+  load([dirname,'/',M_.fname,'_mc']);
+  adir=[dirname '/redform_mc'];
 end
 if ~exist('T')
   stab_map_(dirname);
 if pprior
-  load([dirname,'\',M_.fname,'_prior'],'T');
+  load([dirname,'/',M_.fname,'_prior'],'T');
 else
-  load([dirname,'\',M_.fname,'_mc'],'T');
+  load([dirname,'/',M_.fname,'_mc'],'T');
 end
 end
 if isempty(dir(adir))
@@ -97,12 +97,12 @@ for j=1:size(anamendo,1)
       if (max(y0)-min(y0))>1.e-10,
         if mod(iplo,9)==0,
           ifig=ifig+1;
-          figure('name',[namendo,' vs. shocks ',int2str(ifig)]),
+          hfig = figure('name',[namendo,' vs. shocks ',int2str(ifig)]),
           iplo=0;
         end
         iplo=iplo+1;
         js=js+1;
-        xdir0 = [adir,'\',namendo,'_vs_', namexo];
+        xdir0 = [adir,'/',namendo,'_vs_', namexo];
         if ilog==0,
           if isempty(threshold)
             si(:,js) = redform_private(x0, y0, pshape, pd, iload, pnames, namendo, namexo, xdir0);
@@ -114,7 +114,7 @@ for j=1:size(anamendo,1)
               si(:,js) = redform_private(x0(iy,:), y0(iy), pshape, pd, iload, pnames, namendo, namexo, xdir);
             end
             if ~isempty(iy) & ~isempty(iyc)
-            delete([xdir, '\*cut*.*'])
+            delete([xdir, '/*cut*.*'])
             [proba, dproba] = stab_map_1(x0, iy, iyc, 'cut',0);
             indsmirnov = find(dproba>ksstat);
             stab_map_1(x0, iy, iyc, 'cut',1,indsmirnov,xdir);
@@ -127,6 +127,7 @@ for j=1:size(anamendo,1)
           silog(:,js) = redform_private(x0, yy, pshape, pd, iload, pnames, namendo, namexo, xdir);
         end
 
+        figure(hfig)
         subplot(3,3,iplo),
         if ilog,
           [saso, iso] = sort(-silog(:,js));
@@ -145,9 +146,9 @@ for j=1:size(anamendo,1)
         end
         title([logflag,' ',namendo,' vs. ',namexo],'interpreter','none')
         if iplo==9,
-          saveas(gcf,[dirname,'\',M_.fname,'_redform_', namendo,'_vs_shocks_',logflag,num2str(ifig)])
-          eval(['print -depsc2 ' dirname,'\',M_.fname,'_redform_', namendo,'_vs_shocks_',logflag,num2str(ifig)]);
-          eval(['print -dpdf ' dirname,'\',M_.fname,'_redform_', namendo,'_vs_shocks_',logflag,num2str(ifig)]);
+          saveas(gcf,[dirname,'/',M_.fname,'_redform_', namendo,'_vs_shocks_',logflag,num2str(ifig)])
+          eval(['print -depsc2 ' dirname,'/',M_.fname,'_redform_', namendo,'_vs_shocks_',logflag,num2str(ifig)]);
+          eval(['print -dpdf ' dirname,'/',M_.fname,'_redform_', namendo,'_vs_shocks_',logflag,num2str(ifig)]);
           close(gcf)
         end
       
@@ -155,9 +156,9 @@ for j=1:size(anamendo,1)
     end
   end
   if iplo<9 & iplo>0 & ifig,
-    saveas(gcf,[dirname,'\',M_.fname,'_redform_', namendo,'_vs_shocks_',logflag,num2str(ifig)])
-    eval(['print -depsc2 ' dirname,'\',M_.fname,'_redform_', namendo,'_vs_shocks_',logflag,num2str(ifig)]);
-    eval(['print -dpdf ' dirname,'\',M_.fname,'_redform_', namendo,'_vs_shocks_',logflag,num2str(ifig)]);
+    saveas(gcf,[dirname,'/',M_.fname,'_redform_', namendo,'_vs_shocks_',logflag,num2str(ifig)])
+    eval(['print -depsc2 ' dirname,'/',M_.fname,'_redform_', namendo,'_vs_shocks_',logflag,num2str(ifig)]);
+    eval(['print -dpdf ' dirname,'/',M_.fname,'_redform_', namendo,'_vs_shocks_',logflag,num2str(ifig)]);
     close(gcf)
   end
   ifig=0;
@@ -172,12 +173,12 @@ for j=1:size(anamendo,1)
       if (max(y0)-min(y0))>1.e-10,
         if mod(iplo,9)==0,
           ifig=ifig+1;
-          figure('name',[namendo,' vs. lags ',int2str(ifig)]),
+          hfig = figure('name',[namendo,' vs. lags ',int2str(ifig)]),
           iplo=0;
         end
         iplo=iplo+1;
         js=js+1;
-        xdir0 = [adir,'\',namendo,'_vs_', namlagendo];
+        xdir0 = [adir,'/',namendo,'_vs_', namlagendo];
         if ilog==0,
         if isempty(threshold)
           si(:,js) = redform_private(x0, y0, pshape, pd, iload, pnames, namendo, namlagendo, xdir0);
@@ -189,7 +190,7 @@ for j=1:size(anamendo,1)
           si(:,js) = redform_private(x0(iy,:), y0(iy), pshape, pd, iload, pnames, namendo, namlagendo, xdir);
           end
           if ~isempty(iy) & ~isempty(iyc),
-          delete([xdir, '\*cut*.*'])
+          delete([xdir, '/*cut*.*'])
           [proba, dproba] = stab_map_1(x0, iy, iyc, 'cut',0);
           indsmirnov = find(dproba>ksstat);
           stab_map_1(x0, iy, iyc, 'cut',1,indsmirnov,xdir);
@@ -202,6 +203,7 @@ for j=1:size(anamendo,1)
           silog(:,js) = redform_private(x0, yy, pshape, pd, iload, pnames, namendo, namlagendo, xdir);
         end
 
+        figure(hfig),
         subplot(3,3,iplo),
         if ilog,
           [saso, iso] = sort(-silog(:,js));
@@ -220,9 +222,9 @@ for j=1:size(anamendo,1)
         end
         title([logflag,' ',namendo,' vs. ',namlagendo,'(-1)'],'interpreter','none')
         if iplo==9,
-          saveas(gcf,[dirname,'\',M_.fname,'_redform_', namendo,'_vs_lags_',logflag,num2str(ifig)])
-          eval(['print -depsc2 ' dirname,'\',M_.fname,'_redform_', namendo,'_vs_lags_',logflag,num2str(ifig)]);
-          eval(['print -dpdf ' dirname,'\',M_.fname,'_redform_', namendo,'_vs_lags_',logflag,num2str(ifig)]);
+          saveas(gcf,[dirname,'/',M_.fname,'_redform_', namendo,'_vs_lags_',logflag,num2str(ifig)])
+          eval(['print -depsc2 ' dirname,'/',M_.fname,'_redform_', namendo,'_vs_lags_',logflag,num2str(ifig)]);
+          eval(['print -dpdf ' dirname,'/',M_.fname,'_redform_', namendo,'_vs_lags_',logflag,num2str(ifig)]);
           close(gcf)
         end
       
@@ -230,9 +232,9 @@ for j=1:size(anamendo,1)
     end
   end
   if iplo<9 & iplo>0 & ifig,
-    saveas(gcf,[dirname,'\',M_.fname,'_redform_', namendo,'_vs_lags_',logflag,num2str(ifig)])
-    eval(['print -depsc2 ' dirname,'\',M_.fname,'_redform_', namendo,'_vs_lags_',logflag,num2str(ifig)]);
-    eval(['print -dpdf ' dirname,'\',M_.fname,'_redform_', namendo,'_vs_lags_',logflag,num2str(ifig)]);
+    saveas(gcf,[dirname,'/',M_.fname,'_redform_', namendo,'_vs_lags_',logflag,num2str(ifig)])
+    eval(['print -depsc2 ' dirname,'/',M_.fname,'_redform_', namendo,'_vs_lags_',logflag,num2str(ifig)]);
+    eval(['print -dpdf ' dirname,'/',M_.fname,'_redform_', namendo,'_vs_lags_',logflag,num2str(ifig)]);
     close(gcf)
   end
 end
@@ -251,9 +253,9 @@ for ip=1:np,
 end
 title('Reduced form GSA')
 
-saveas(gcf,[dirname,'\',M_.fname,'_redform_gsa'])
-eval(['print -depsc2 ' dirname,'\',M_.fname,'_redform_gsa']);
-eval(['print -dpdf ' dirname,'\',M_.fname,'_redform_gsa']);
+saveas(gcf,[dirname,'/',M_.fname,'_redform_gsa'])
+eval(['print -depsc2 ' dirname,'/',M_.fname,'_redform_gsa']);
+eval(['print -dpdf ' dirname,'/',M_.fname,'_redform_gsa']);
 
 else
 figure, %bar(silog)
@@ -269,9 +271,9 @@ for ip=1:np,
 end
 title('Reduced form GSA - Log-transformed elements')
 
-saveas(gcf,[dirname,'\',M_.fname,'_redform_gsa_log'])
-eval(['print -depsc2 ' dirname,'\',M_.fname,'_redform_gsa_log']);
-eval(['print -dpdf ' dirname,'\',M_.fname,'_redform_gsa_log']);
+saveas(gcf,[dirname,'/',M_.fname,'_redform_gsa_log'])
+eval(['print -depsc2 ' dirname,'/',M_.fname,'_redform_gsa_log']);
+eval(['print -dpdf ' dirname,'/',M_.fname,'_redform_gsa_log']);
 
 end
 function si  = redform_private(x0, y0, pshape, pd, iload, pnames, namy, namx, xdir)
@@ -287,15 +289,15 @@ np=size(x0,2);
     x0=priorcdf(x0,pshape, pd(:,1), pd(:,2), pd(:,3), pd(:,4));
   end
 
-fname=[xdir,'\map'];
+fname=[xdir,'/map'];
 if iload==0,
   figure, hist(y0,30), title([namy,' vs. ', namx])
   if isempty(dir(xdir))
     mkdir(xdir)
   end
-  saveas(gcf,[xdir,'\', namy,'_vs_', namx])
-  eval(['print -depsc2 ' xdir,'\', namy,'_vs_', namx]);
-  eval(['print -dpdf ' xdir,'\', namy,'_vs_', namx]);
+  saveas(gcf,[xdir,'/', namy,'_vs_', namx])
+  eval(['print -depsc2 ' xdir,'/', namy,'_vs_', namx]);
+  eval(['print -dpdf ' xdir,'/', namy,'_vs_', namx]);
   close(gcf)
 %   gsa_ = gsa_sdp_dyn(y0, x0, -2, [],[],[],1,fname, pnames);
   nrun=length(y0);
@@ -310,9 +312,9 @@ if iload==0,
   figure, 
   plot(y0(1:nfit),[gsa_.fit y0(1:nfit)],'.'), 
   title([namy,' vs. ', namx,' fit'])
-  saveas(gcf,[xdir,'\', namy,'_vs_', namx,'_fit'])
-  eval(['print -depsc2 ' xdir,'\', namy,'_vs_', namx,'_fit']);
-  eval(['print -dpdf ' xdir,'\', namy,'_vs_', namx,'_fit']);
+  saveas(gcf,[xdir,'/', namy,'_vs_', namx,'_fit'])
+  eval(['print -depsc2 ' xdir,'/', namy,'_vs_', namx,'_fit']);
+  eval(['print -dpdf ' xdir,'/', namy,'_vs_', namx,'_fit']);
   close(gcf)
   if nfit<nrun,
     npred=[nfit+1:nrun];
@@ -320,9 +322,9 @@ if iload==0,
   figure, 
   plot(y0(npred),[yf y0(npred)],'.'), 
   title([namy,' vs. ', namx,' pred'])
-  saveas(gcf,[xdir,'\', namy,'_vs_', namx,'_pred'])
-  eval(['print -depsc2 ' xdir,'\', namy,'_vs_', namx,'_pred']);
-  eval(['print -dpdf ' xdir,'\', namy,'_vs_', namx,'_pred']);
+  saveas(gcf,[xdir,'/', namy,'_vs_', namx,'_pred'])
+  eval(['print -depsc2 ' xdir,'/', namy,'_vs_', namx,'_pred']);
+  eval(['print -dpdf ' xdir,'/', namy,'_vs_', namx,'_pred']);
   close(gcf)
   end
 else
@@ -332,9 +334,9 @@ else
   figure, 
   plot(y0,[yf y0],'.'), 
   title([namy,' vs. ', namx,' pred'])
-  saveas(gcf,[xdir,'\', namy,'_vs_', namx,'_pred'])
-  eval(['print -depsc2 ' xdir,'\', namy,'_vs_', namx,'_pred']);
-  eval(['print -dpdf ' xdir,'\', namy,'_vs_', namx,'_pred']);
+  saveas(gcf,[xdir,'/', namy,'_vs_', namx,'_pred'])
+  eval(['print -depsc2 ' xdir,'/', namy,'_vs_', namx,'_pred']);
+  eval(['print -dpdf ' xdir,'/', namy,'_vs_', namx,'_pred']);
   close(gcf)
 end
 % si = gsa_.multivariate.si;
