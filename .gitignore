@@ -1,0 +1,139 @@
+
+# /
+/configure
+/config.log
+/config.status
+/aclocal.m4
+/autom4te.cache
+/Makefile
+/Makefile.in
+/config.guess
+/config.sub
+/depcomp
+/install-sh
+/missing
+/ylwrap
+
+# /doc/
+/doc/guide.log
+/doc/guide.aux
+/doc/guide.pdf
+/doc/bvar-a-la-sims.log
+/doc/bvar-a-la-sims.aux
+/doc/bvar-a-la-sims.pdf
+/doc/manual-html
+/doc/manual.pdf
+/doc/Makefile
+
+# /doc/macroprocessor/
+/doc/macroprocessor/macroprocessor.log
+/doc/macroprocessor/macroprocessor.nav
+/doc/macroprocessor/macroprocessor.toc
+/doc/macroprocessor/macroprocessor.out
+/doc/macroprocessor/macroprocessor.aux
+/doc/macroprocessor/macroprocessor.snm
+/doc/macroprocessor/macroprocessor.pdf
+/doc/macroprocessor/Makefile
+
+# /doc/preprocessor/
+/doc/preprocessor/preprocessor.aux
+/doc/preprocessor/preprocessor.snm
+/doc/preprocessor/preprocessor.out
+/doc/preprocessor/preprocessor.log
+/doc/preprocessor/preprocessor.nav
+/doc/preprocessor/preprocessor.toc
+/doc/preprocessor/preprocessor.vrb
+/doc/preprocessor/preprocessor.pdf
+/doc/preprocessor/Makefile
+
+# /doc/userguide/
+/doc/userguide/*.log
+/doc/userguide/*.aux
+/doc/userguide/*.toc
+/doc/userguide/*.lof
+/doc/userguide/*.blg
+/doc/userguide/*.bbl
+/doc/userguide/*.out
+/doc/userguide/UserGuide.pdf
+/doc/userguide/Makefile
+
+# /matlab/
+/matlab/dynare_m
+/matlab/dynare_m.exe
+/matlab/dynare_version.m
+
+# /mex/2007a/
+/mex/2007a/*.dll
+/mex/2007a/*.mexw32
+/mex/2007a/*.mexw64
+/mex/2007a/*.mexglx
+/mex/2007a/*.mexa64
+/mex/2007a/*.mexmac
+/mex/2007a/*.mexmaci
+/mex/2007a/*.mexs64
+
+# /mex/2007b/
+/mex/2007b/*.dll
+/mex/2007b/*.mexw32
+/mex/2007b/*.mexw64
+/mex/2007b/*.mexglx
+/mex/2007b/*.mexa64
+/mex/2007b/*.mexmac
+/mex/2007b/*.mexmaci
+/mex/2007b/*.mexs64
+
+# /mex/2009a-64bit/
+/mex/2009a-64bit/*.mexw64
+/mex/2009a-64bit/*.mexa64
+/mex/2009a-64bit/*.mexmaci64
+/mex/2009a-64bit/*.mexs64
+
+# /mex/octave/
+/mex/octave/*.mex
+
+# /mex/sources/korderpert/src/
+/mex/sources/korderpert/src/k_ord_dynare.cpp.r2336
+/mex/sources/korderpert/src/k_ord_dynare.cpp.r2344
+/mex/sources/korderpert/src/k_ord_dynare.cpp.mine
+
+# /preprocessor/
+/preprocessor/DynareBison.cc
+/preprocessor/DynareBison.hh
+/preprocessor/location.hh
+/preprocessor/position.hh
+/preprocessor/stack.hh
+/preprocessor/DynareFlex.cc
+/preprocessor/dynare_m.exe
+/preprocessor/dynare_m
+/preprocessor/Makefile
+/preprocessor/Makefile.in
+/preprocessor/.deps
+
+# /preprocessor/doc/
+/preprocessor/doc/html
+
+# /preprocessor/macro/
+/preprocessor/macro/MacroBison.cc
+/preprocessor/macro/MacroBison.hh
+/preprocessor/macro/MacroFlex.cc
+/preprocessor/macro/location.hh
+/preprocessor/macro/position.hh
+/preprocessor/macro/stack.hh
+/preprocessor/macro/.deps
+/preprocessor/macro/Makefile
+/preprocessor/macro/Makefile.in
+
+# /tests/
+/tests/Makefile
+
+# /tests/arima/
+/tests/arima/data1.m
+/tests/arima/data2.m
+
+# /tests/homotopy/
+/tests/homotopy/*.log
+/tests/homotopy/*.m
+/tests/homotopy/*.mat
+
+# /windows/
+/windows/dynare-version.nsi
