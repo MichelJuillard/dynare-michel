@@ -83,7 +83,7 @@ if options_gsa_.pprior,
 else
   namfile=[fname_,'_mc'];
 end
-load([OutDir,'\',namfile],'lpmat', 'lpmat0', 'istable')
+load([OutDir,'/',namfile],'lpmat', 'lpmat0', 'istable')
 % load(options_.mode_file)
 %%
 %%
@@ -101,7 +101,7 @@ stock_ys = zeros(40, M_.endo_nbr);
 logpo2=zeros(B,1);
 %%
 h = waitbar(0,'MC smoother ...');
-delete([OutDir,'\',namfile,'_*.mat'])
+delete([OutDir,'/',namfile,'_*.mat'])
 ib=0;
 ifil=0;
 opt_gsa=options_.opt_gsa;
@@ -114,7 +114,7 @@ for b=1:B
   %deep(1:offset) = xparam1(1:offset);
   logpo2(b,1) = DsgeLikelihood(deep,gend,data,data_index,number_of_observations,no_more_missing_observations);
   if opt_gsa.lik_only==0,
-  [atT,innov,measurement_error,filtered_state_vector,ys,trend_coeff, aK] = DsgeSmoother(deep,gend,data,{},0);
+  [atT,innov,measurement_error,filtered_state_vector,ys,trend_coeff, aK] = DsgeSmoother(deep,gend,data,data_index,0);
   stock_smooth(:,:,ib)=atT(1:M_.endo_nbr,:);
 %   stock_filter(:,:,ib)=filtered_state_vector(1:M_.endo_nbr,:);
   stock_filter(:,:,ib)=aK(1,1:M_.endo_nbr,:);
@@ -122,7 +122,7 @@ for b=1:B
   if ib==40,
     ib=0;
     ifil=ifil+1;
-    save([OutDir,'\',namfile,'_',num2str(ifil)],'stock_smooth','stock_filter','stock_ys')
+    save([OutDir,'/',namfile,'_',num2str(ifil)],'stock_smooth','stock_filter','stock_ys')
     stock_smooth = zeros(M_.endo_nbr,gend,40);
     stock_filter = zeros(M_.endo_nbr,gend+1,40);
     stock_ys = zeros(40, M_.endo_nbr);
@@ -137,9 +137,9 @@ if ib>0,
     stock_smooth = stock_smooth(:,:,1:ib);
     stock_filter = stock_filter(:,:,1:ib);
     stock_ys = stock_ys(1:ib,:);
-    save([OutDir,'\',namfile,'_',num2str(ifil)],'stock_smooth','stock_filter','stock_ys')
+    save([OutDir,'/',namfile,'_',num2str(ifil)],'stock_smooth','stock_filter','stock_ys')
 end
 end
 stock_gend=gend;
 stock_data=data;
-save([OutDir,'\',namfile],'x','logpo2','stock_gend','stock_data','-append')
+save([OutDir,'/',namfile],'x','logpo2','stock_gend','stock_data','-append')
