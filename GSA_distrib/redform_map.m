@@ -97,7 +97,7 @@ for j=1:size(anamendo,1)
       if (max(y0)-min(y0))>1.e-10,
         if mod(iplo,9)==0,
           ifig=ifig+1;
-          hfig = figure('name',[namendo,' vs. shocks ',int2str(ifig)]),
+          hfig = figure('name',[namendo,' vs. shocks ',int2str(ifig)]);
           iplo=0;
         end
         iplo=iplo+1;
@@ -173,7 +173,7 @@ for j=1:size(anamendo,1)
       if (max(y0)-min(y0))>1.e-10,
         if mod(iplo,9)==0,
           ifig=ifig+1;
-          hfig = figure('name',[namendo,' vs. lags ',int2str(ifig)]),
+          hfig = figure('name',[namendo,' vs. lags ',int2str(ifig)]);
           iplo=0;
         end
         iplo=iplo+1;
