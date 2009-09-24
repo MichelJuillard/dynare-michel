@@ -22,4 +22,4 @@ endif
 endif
 
 
-EXTRA_DIST = mex.def
+EXTRA_DIST = mex.def mexFunction-MacOSX.map

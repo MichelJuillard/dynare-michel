@@ -75,7 +75,7 @@ case ${MATLAB_ARCH} in
     fi
     MATLAB_DEFS="$MATLAB_DEFS -DNDEBUG"
     MATLAB_CFLAGS="-fno-common -no-cpp-precomp -arch $ARCHS -isysroot $SDKROOT -mmacosx-version-min=$MACOSX_DEPLOYMENT_TARGET -fexceptions -O2"
-    MATLAB_LDFLAGS="-L$MATLAB/bin/${MATLAB_ARCH} -Wl,-twolevel_namespace -undefined error -arch $ARCHS -Wl,-syslibroot,$SDKROOT -mmacosx-version-min=$MACOSX_DEPLOYMENT_TARGET -bundle -Wl,-exported_symbols_list,$MATLAB/extern/lib/${MATLAB_ARCH}/mexFunction.map"
+    MATLAB_LDFLAGS="-L$MATLAB/bin/${MATLAB_ARCH} -Wl,-twolevel_namespace -undefined error -arch $ARCHS -Wl,-syslibroot,$SDKROOT -mmacosx-version-min=$MACOSX_DEPLOYMENT_TARGET -bundle -Wl,-exported_symbols_list,\$(top_srcdir)/mex/build/mexFunction-MacOSX.map"
     MATLAB_LIBS="-lmx -lmex -lmat -lstdc++ -lmwlapack"
     MATLAB_CXX="g++-4.0"
     MATLAB_CXXFLAGS="-fno-common -no-cpp-precomp -fexceptions -arch $ARCHS -isysroot $SDKROOT -mmacosx-version-min=$MACOSX_DEPLOYMENT_TARGET -O2"
