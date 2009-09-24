@@ -104,10 +104,12 @@ EXTRA_DIST = main.web
 dummy.ch:
 	touch dummy.ch
 
-%.cpp: %.cweb dummy.ch
+# Don't depend on dummy.ch in the following rules, otherwise make will want to rebuild from CWEB even in a tarball, since dummy.ch has a recent timestamp
+
+%.cpp: %.cweb
 	$(CTANGLE) -bhp $< dummy.ch $@
 
-%.h: %.hweb dummy.ch
+%.h: %.hweb
 	$(CTANGLE) -bhp $< dummy.ch $@
 
 if HAVE_CWEAVE
