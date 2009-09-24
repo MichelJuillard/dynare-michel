@@ -85,7 +85,11 @@ for plt = 1:nbplt,
         for i=1:length(z)
             xx(kk) = z(i);
             if isempty(strmatch('dsge_prior_weight',M_.param_names))
-                [fval,cost_flag] = DsgeLikelihood(xx,gend,data,data_index,number_of_observations,no_more_missing_observations); 
+                try
+                  [fval,cost_flag] = DsgeLikelihood(xx,gend,data,data_index,number_of_observations,no_more_missing_observations); 
+                catch
+                  cost_flag = 0;
+                end
                 if cost_flag
                     y(i,1) = fval;
                 else
