@@ -32,11 +32,11 @@ fname_ = M_.fname;
 if opt_gsa.load_ident==0,
 % th moments
 [vdec, cc, ac] = mc_moments(T, lpmatx, oo_.dr);
-indx = estim_params_.param_vals(:,1);
-indexo = estim_params_.var_exo(:,1);
-useautocorr = 0;
-nlags = 3;
-[JJ,HH] = mc_getJ([lpmat(istable,:),lpmatx], M_,oo_,options_,0,indx,indexo,bayestopt_.mf2,nlags,useautocorr);
+% indx = estim_params_.param_vals(:,1);
+% indexo = estim_params_.var_exo(:,1);
+% useautocorr = 0;
+% nlags = 3;
+% [JJ,HH] = mc_getJ([lpmat(istable,:),lpmatx], M_,oo_,options_,0,indx,indexo,bayestopt_.mf2,nlags,useautocorr);
 clear lpmatx;
 if opt_gsa.morris<=0,
   ifig=0;
@@ -77,7 +77,7 @@ end
 [Aa,Bb] = kalman_transition_matrix(dr, ...
   bayestopt_.restrict_var_list, ...
   bayestopt_.restrict_columns, ...
-  bayestopt_.restrict_aux);
+  bayestopt_.restrict_aux, M_.exo_nbr);
 A = zeros(size(Aa,1),size(Aa,2)+size(Bb,2),length(istable));
 A(:,:,1)=[Aa, Bb];
 for j=2:length(istable),
@@ -86,7 +86,7 @@ for j=2:length(istable),
   [Aa,Bb] = kalman_transition_matrix(dr, ...
     bayestopt_.restrict_var_list, ...
     bayestopt_.restrict_columns, ...
-    bayestopt_.restrict_aux);
+    bayestopt_.restrict_aux, M_.exo_nbr);
   A(:,:,j)=[Aa, Bb];
 end
 clear T;
