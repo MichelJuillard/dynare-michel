@@ -48,6 +48,8 @@ addpath([dynareroot '/AIM/'])
 if ~exist('OCTAVE_VERSION')
     % Replacements for rows() and columns() (inexistent under MATLAB)
     addpath([dynareroot '/missing/rows_columns'])
+    % Replacement for vec() (inexistent under MATLAB)
+    addpath([dynareroot '/missing/vec'])
     if isempty(ver('stats'))
         % Replacements for functions of the stats toolbox
         addpath([dynareroot '/missing/stats/'])
