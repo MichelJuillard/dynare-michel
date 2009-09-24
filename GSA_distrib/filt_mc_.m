@@ -47,7 +47,7 @@ disp('Starting sensitivity analysis')
 disp('for the fit of EACH observed series ...')
 disp(' ')
 disp('Deleting old SA figures...')
-a=dir([OutDir,'\*.*']);
+a=dir([OutDir,'/*.*']);
 tmp1='0';
 if options_.opt_gsa.ppost,
   tmp=['_rmse_post'];
@@ -65,11 +65,11 @@ end
 for j=1:length(a), 
   if strmatch([fname_,tmp],a(j).name), 
     disp(a(j).name)
-    delete([OutDir,'\',a(j).name])
+    delete([OutDir,'/',a(j).name])
   end, 
   if strmatch([fname_,tmp1],a(j).name), 
     disp(a(j).name)
-    delete([OutDir,'\',a(j).name])
+    delete([OutDir,'/',a(j).name])
   end, 
 end
 disp('done !')
@@ -114,7 +114,7 @@ if ~loadSA,
 %   eval(options_.datafile)
   obs = dat_fil_(options_.datafile);
   if ~options_.opt_gsa.ppost
-    load([OutDir,'\',fnamtmp],'x','logpo2','stock_gend','stock_data');
+    load([OutDir,'/',fnamtmp],'x','logpo2','stock_gend','stock_data');
     logpo2=-logpo2;
   else
     %load([DirectoryName '/' M_.fname '_data.mat']);
@@ -181,10 +181,10 @@ if ~loadSA,
         clear stock;
       end
     else
-      filfilt=ls([OutDir,'\',fnamtmp,'_*.mat']);
+      filfilt=dir([OutDir,'/',fnamtmp,'_*.mat']);
       nbb=0;
       for j=1:size(filfilt,1),
-        load([OutDir,'\',fnamtmp,'_',num2str(j),'.mat'],'stock_filter','stock_ys');
+        load([OutDir,'/',fnamtmp,'_',num2str(j),'.mat'],'stock_filter','stock_ys');
         nb = size(stock_filter,3);
         y0(:,nbb+1:nbb+nb) = squeeze(stock_filter(jxj,:,:)) + ...
           kron(stock_ys(:,js)',ones(nobs+1,1));
@@ -213,31 +213,31 @@ if ~loadSA,
   clear stock_filter;
   end
   for j=1:nruns,
-    lnprior(j,1) = priordens(x(j,:),bayestopt_.pshape,bayestopt_.p1,bayestopt_.p2,bayestopt_.p3,bayestopt_.p4);
+    lnprior(j,1) = priordens(x(j,:)',bayestopt_.pshape,bayestopt_.p1,bayestopt_.p2,bayestopt_.p3,bayestopt_.p4);
   end
   likelihood=logpo2(:)-lnprior(:);
   disp('... done!')
   
   if options_.opt_gsa.ppost
-    save([OutDir,'\',fnamtmp], 'x', 'logpo2', 'likelihood', 'rmse_MC', 'rmse_mode','rmse_pmean')    
+    save([OutDir,'/',fnamtmp], 'x', 'logpo2', 'likelihood', 'rmse_MC', 'rmse_mode','rmse_pmean')    
   else
     if options_.opt_gsa.lik_only
-      save([OutDir,'\',fnamtmp], 'likelihood', '-append')    
+      save([OutDir,'/',fnamtmp], 'likelihood', '-append')    
     else
-      save([OutDir,'\',fnamtmp], 'likelihood', 'rmse_MC','-append')    
+      save([OutDir,'/',fnamtmp], 'likelihood', 'rmse_MC','-append')    
       if exist('xparam1_mean','var')
-        save([OutDir,'\',fnamtmp], 'rmse_pmean','-append')    
+        save([OutDir,'/',fnamtmp], 'rmse_pmean','-append')    
       end
       if exist('xparam1','var')
-        save([OutDir,'\',fnamtmp], 'rmse_mode','-append')    
+        save([OutDir,'/',fnamtmp], 'rmse_mode','-append')    
       end
     end
   end
 else
   if options_.opt_gsa.lik_only & options_.opt_gsa.ppost==0
-    load([OutDir,'\',fnamtmp],'x','logpo2','likelihood');
+    load([OutDir,'/',fnamtmp],'x','logpo2','likelihood');
   else
-    load([OutDir,'\',fnamtmp],'x','logpo2','likelihood','rmse_MC','rmse_mode','rmse_pmean');
+    load([OutDir,'/',fnamtmp],'x','logpo2','likelihood','rmse_MC','rmse_mode','rmse_pmean');
   end
   lnprior=logpo2(:)-likelihood(:);
   nruns=size(x,1);
@@ -312,18 +312,18 @@ for i=1:size(vvarvecm,1),
   title(vvarvecm(i,:))
   if mod(i,9)==0 | i==size(vvarvecm,1)
     if options_.opt_gsa.ppost
-      saveas(gcf,[OutDir,'\',fname_,'_rmse_post_lnprior',int2str(ifig)])
-      eval(['print -depsc2 ' OutDir '\' fname_ '_rmse_post_lnprior',int2str(ifig)]);
-      eval(['print -dpdf ' OutDir '\' fname_ '_rmse_post_lnprior',int2str(ifig)]);
+      saveas(gcf,[OutDir,'/',fname_,'_rmse_post_lnprior',int2str(ifig)])
+      eval(['print -depsc2 ' OutDir '/' fname_ '_rmse_post_lnprior',int2str(ifig)]);
+      eval(['print -dpdf ' OutDir '/' fname_ '_rmse_post_lnprior',int2str(ifig)]);
     else
       if options_.opt_gsa.pprior
-        saveas(gcf,[OutDir,'\',fname_,'_rmse_prior_lnprior',int2str(ifig)])
-        eval(['print -depsc2 ' OutDir '\' fname_ '_rmse_prior_lnprior',int2str(ifig)]);
-        eval(['print -dpdf ' OutDir '\' fname_ '_rmse_prior_lnprior',int2str(ifig)]);
+        saveas(gcf,[OutDir,'/',fname_,'_rmse_prior_lnprior',int2str(ifig)])
+        eval(['print -depsc2 ' OutDir '/' fname_ '_rmse_prior_lnprior',int2str(ifig)]);
+        eval(['print -dpdf ' OutDir '/' fname_ '_rmse_prior_lnprior',int2str(ifig)]);
       else
-        saveas(gcf,[OutDir,'\',fname_,'_rmse_mc_lnprior',int2str(ifig)])
-        eval(['print -depsc2 ' OutDir '\' fname_ '_rmse_mc_lnprior',int2str(ifig)]);
-        eval(['print -dpdf ' OutDir '\' fname_ '_rmse_mc_lnprior',int2str(ifig)]);
+        saveas(gcf,[OutDir,'/',fname_,'_rmse_mc_lnprior',int2str(ifig)])
+        eval(['print -depsc2 ' OutDir '/' fname_ '_rmse_mc_lnprior',int2str(ifig)]);
+        eval(['print -dpdf ' OutDir '/' fname_ '_rmse_mc_lnprior',int2str(ifig)]);
       end
     end
     close(gcf)
@@ -347,18 +347,18 @@ for i=1:size(vvarvecm,1),
   end
   if mod(i,9)==0 | i==size(vvarvecm,1)
     if options_.opt_gsa.ppost
-      saveas(gcf,[OutDir,'\',fname_,'_rmse_post_lnlik',int2str(ifig)])
-      eval(['print -depsc2 ' OutDir '\' fname_ '_rmse_post_lnlik',int2str(ifig)]);
-      eval(['print -dpdf ' OutDir '\' fname_ '_rmse_post_lnlik',int2str(ifig)]);
+      saveas(gcf,[OutDir,'/',fname_,'_rmse_post_lnlik',int2str(ifig)])
+      eval(['print -depsc2 ' OutDir '/' fname_ '_rmse_post_lnlik',int2str(ifig)]);
+      eval(['print -dpdf ' OutDir '/' fname_ '_rmse_post_lnlik',int2str(ifig)]);
     else
       if options_.opt_gsa.pprior
-        saveas(gcf,[OutDir,'\',fname_,'_rmse_prior_lnlik',int2str(ifig)])
-        eval(['print -depsc2 ' OutDir '\' fname_ '_rmse_prior_lnlik',int2str(ifig)]);
-        eval(['print -dpdf ' OutDir '\' fname_ '_rmse_prior_lnlik',int2str(ifig)]);
+        saveas(gcf,[OutDir,'/',fname_,'_rmse_prior_lnlik',int2str(ifig)])
+        eval(['print -depsc2 ' OutDir '/' fname_ '_rmse_prior_lnlik',int2str(ifig)]);
+        eval(['print -dpdf ' OutDir '/' fname_ '_rmse_prior_lnlik',int2str(ifig)]);
       else
-        saveas(gcf,[OutDir,'\',fname_,'_rmse_mc_lnlik',int2str(ifig)])
-        eval(['print -depsc2 ' OutDir '\' fname_ '_rmse_mc_lnlik',int2str(ifig)]);
-        eval(['print -dpdf ' OutDir '\' fname_ '_rmse_mc_lnlik',int2str(ifig)]);
+        saveas(gcf,[OutDir,'/',fname_,'_rmse_mc_lnlik',int2str(ifig)])
+        eval(['print -depsc2 ' OutDir '/' fname_ '_rmse_mc_lnlik',int2str(ifig)]);
+        eval(['print -dpdf ' OutDir '/' fname_ '_rmse_mc_lnlik',int2str(ifig)]);
       end
     end
     close(gcf)
@@ -382,18 +382,18 @@ for i=1:size(vvarvecm,1),
   end
   if mod(i,9)==0 | i==size(vvarvecm,1)
     if options_.opt_gsa.ppost
-      saveas(gcf,[OutDir,'\',fname_,'_rmse_post_lnpost',int2str(ifig)])
-      eval(['print -depsc2 ' OutDir '\' fname_ '_rmse_post_lnpost',int2str(ifig)]);
-      eval(['print -dpdf ' OutDir '\' fname_ '_rmse_post_lnpost',int2str(ifig)]);
+      saveas(gcf,[OutDir,'/',fname_,'_rmse_post_lnpost',int2str(ifig)])
+      eval(['print -depsc2 ' OutDir '/' fname_ '_rmse_post_lnpost',int2str(ifig)]);
+      eval(['print -dpdf ' OutDir '/' fname_ '_rmse_post_lnpost',int2str(ifig)]);
     else
       if options_.opt_gsa.pprior
-        saveas(gcf,[OutDir,'\',fname_,'_rmse_prior_lnpost',int2str(ifig)])
-        eval(['print -depsc2 ' OutDir '\' fname_ '_rmse_prior_lnpost',int2str(ifig)]);
-        eval(['print -dpdf ' OutDir '\' fname_ '_rmse_prior_lnpost',int2str(ifig)]);
+        saveas(gcf,[OutDir,'/',fname_,'_rmse_prior_lnpost',int2str(ifig)])
+        eval(['print -depsc2 ' OutDir '/' fname_ '_rmse_prior_lnpost',int2str(ifig)]);
+        eval(['print -dpdf ' OutDir '/' fname_ '_rmse_prior_lnpost',int2str(ifig)]);
       else
-        saveas(gcf,[OutDir,'\',fname_,'_rmse_mc_lnpost',int2str(ifig)])
-        eval(['print -depsc2 ' OutDir '\' fname_ '_rmse_mc_lnpost',int2str(ifig)]);
-        eval(['print -dpdf ' OutDir '\' fname_ '_rmse_mc_lnpost',int2str(ifig)]);
+        saveas(gcf,[OutDir,'/',fname_,'_rmse_mc_lnpost',int2str(ifig)])
+        eval(['print -depsc2 ' OutDir '/' fname_ '_rmse_mc_lnpost',int2str(ifig)]);
+        eval(['print -dpdf ' OutDir '/' fname_ '_rmse_mc_lnpost',int2str(ifig)]);
       end
     end
     close(gcf)
@@ -526,18 +526,18 @@ for ix=1:ceil(length(nsnam)/5),
     %h0=legend({'base',vnam{np}}',0); 
     %set(findobj(get(h0,'children'),'type','text'),'interpreter','none')
     if options_.opt_gsa.ppost
-      saveas(gcf,[OutDir,'\',fname_,'_rmse_post_',num2str(ix)])
-      eval(['print -depsc2 ' OutDir '\' fname_ '_rmse_post_' int2str(ix)]);
-      eval(['print -dpdf ' OutDir '\' fname_ '_rmse_post_' int2str(ix)]);
+      saveas(gcf,[OutDir,'/',fname_,'_rmse_post_',num2str(ix)])
+      eval(['print -depsc2 ' OutDir '/' fname_ '_rmse_post_' int2str(ix)]);
+      eval(['print -dpdf ' OutDir '/' fname_ '_rmse_post_' int2str(ix)]);
     else
       if options_.opt_gsa.pprior
-        saveas(gcf,[OutDir,'\',fname_,'_rmse_prior_',num2str(ix)])
-        eval(['print -depsc2 ' OutDir '\' fname_ '_rmse_prior_' int2str(ix)]);
-        eval(['print -dpdf ' OutDir '\' fname_ '_rmse_prior_' int2str(ix)]);
+        saveas(gcf,[OutDir,'/',fname_,'_rmse_prior_',num2str(ix)])
+        eval(['print -depsc2 ' OutDir '/' fname_ '_rmse_prior_' int2str(ix)]);
+        eval(['print -dpdf ' OutDir '/' fname_ '_rmse_prior_' int2str(ix)]);
       else
-        saveas(gcf,[OutDir,'\',fname_,'_rmse_mc_',num2str(ix)])
-        eval(['print -depsc2 ' OutDir '\' fname_ '_rmse_mc_' int2str(ix)]);
-        eval(['print -dpdf ' OutDir '\' fname_ '_rmse_mc_' int2str(ix)]);
+        saveas(gcf,[OutDir,'/',fname_,'_rmse_mc_',num2str(ix)])
+        eval(['print -depsc2 ' OutDir '/' fname_ '_rmse_mc_' int2str(ix)]);
+        eval(['print -dpdf ' OutDir '/' fname_ '_rmse_mc_' int2str(ix)]);
       end
     end
 end
@@ -587,18 +587,18 @@ for ix=1:ceil(length(nsnam)/5),
     %h0=legend({'base',vnam{np}}',0); 
     %set(findobj(get(h0,'children'),'type','text'),'interpreter','none')
     if options_.opt_gsa.ppost
-      saveas(gcf,[OutDir,'\',fname_,'_rmse_post_dens_',num2str(ix)])
-      eval(['print -depsc2 ' OutDir '\' fname_ '_rmse_post_dens_' int2str(ix)]);
-      eval(['print -dpdf ' OutDir '\' fname_ '_rmse_post_dens_' int2str(ix)]);
+      saveas(gcf,[OutDir,'/',fname_,'_rmse_post_dens_',num2str(ix)])
+      eval(['print -depsc2 ' OutDir '/' fname_ '_rmse_post_dens_' int2str(ix)]);
+      eval(['print -dpdf ' OutDir '/' fname_ '_rmse_post_dens_' int2str(ix)]);
     else
       if options_.opt_gsa.pprior
-        saveas(gcf,[OutDir,'\',fname_,'_rmse_prior_dens_',num2str(ix)])
-        eval(['print -depsc2 ' OutDir '\' fname_ '_rmse_prior_dens_' int2str(ix)]);
-        eval(['print -dpdf ' OutDir '\' fname_ '_rmse_prior_dens_' int2str(ix)]);
+        saveas(gcf,[OutDir,'/',fname_,'_rmse_prior_dens_',num2str(ix)])
+        eval(['print -depsc2 ' OutDir '/' fname_ '_rmse_prior_dens_' int2str(ix)]);
+        eval(['print -dpdf ' OutDir '/' fname_ '_rmse_prior_dens_' int2str(ix)]);
       else
-        saveas(gcf,[OutDir,'\',fname_,'_rmse_mc_dens_',num2str(ix)])
-        eval(['print -depsc2 ' OutDir '\' fname_ '_rmse_mc_dens_' int2str(ix)]);
-        eval(['print -dpdf ' OutDir '\' fname_ '_rmse_mc_dens_' int2str(ix)]);
+        saveas(gcf,[OutDir,'/',fname_,'_rmse_mc_dens_',num2str(ix)])
+        eval(['print -depsc2 ' OutDir '/' fname_ '_rmse_mc_dens_' int2str(ix)]);
+        eval(['print -dpdf ' OutDir '/' fname_ '_rmse_mc_dens_' int2str(ix)]);
       end
     end
 end
