@@ -16,7 +16,7 @@ end
 
 pnames = M_.param_names(estim_params_.param_vals(:,1),:);
 
-filetoload=[OutputDirectoryName '\' fname_ '_prior'];
+filetoload=[OutputDirectoryName '/' fname_ '_prior'];
 load(filetoload,'lpmat','lpmat0','istable','T','nspred','nboth','nfwrd')
 if ~isempty(lpmat0),
   lpmatx=lpmat0(istable,:);
@@ -60,9 +60,9 @@ if opt_gsa.morris<=0,
     ylabel(' ')
     title(M_.exo_names(j,:),'interpreter','none')
     if mod(j,6)==0 | j==M_.exo_nbr,
-      saveas(gcf,[OutputDirectoryName,'\',fname_,'_vdec_exo_',int2str(ifig)])
-      eval(['print -depsc2 ' OutputDirectoryName '\' fname_ '_vdec_exo_',int2str(ifig)]);
-      eval(['print -dpdf ' OutputDirectoryName '\' fname_ '_vdec_exo_',int2str(ifig)]);
+      saveas(gcf,[OutputDirectoryName,'/',fname_,'_vdec_exo_',int2str(ifig)])
+      eval(['print -depsc2 ' OutputDirectoryName '/' fname_ '_vdec_exo_',int2str(ifig)]);
+      eval(['print -dpdf ' OutputDirectoryName '/' fname_ '_vdec_exo_',int2str(ifig)]);
       close(gcf),
     end
   end
@@ -124,16 +124,16 @@ end
 %   yt = yt(:,j0);
 
 if opt_gsa.morris==1,
-  %OutputDir = CheckPath('GSA\SCREEN');
+  %OutputDir = CheckPath('GSA/SCREEN');
   if opt_gsa.load_ident==0,
   SAMorris = [];
   for i=1:size(vdec,2),
     [SAmeas, SAMorris(:,:,i)] = Morris_Measure_Groups(npT, [lpmat0 lpmat], vdec(:,i),nliv);
   end
   SAvdec = squeeze(SAMorris(:,1,:))';
-  save([OutputDirectoryName,'\',fname_,'_morris_IDE'],'SAvdec','vdec','ir_vdec','ic_vdec')
+  save([OutputDirectoryName,'/',fname_,'_morris_IDE'],'SAvdec','vdec','ir_vdec','ic_vdec')
   else
-    load([OutputDirectoryName,'\',fname_,'_morris_IDE'],'SAvdec','vdec','ir_vdec','ic_vdec')
+    load([OutputDirectoryName,'/',fname_,'_morris_IDE'],'SAvdec','vdec','ir_vdec','ic_vdec')
   end
   
   figure,
@@ -149,9 +149,9 @@ if opt_gsa.morris==1,
   end
   xlabel(' ')
   title('All variance decomposition')
-  saveas(gcf,[OutputDirectoryName,'\',fname_,'_morris_vdec'])
-  eval(['print -depsc2 ' OutputDirectoryName '\' fname_ '_morris_vdec']);
-  eval(['print -dpdf ' OutputDirectoryName '\' fname_ '_morris_vdec']);
+  saveas(gcf,[OutputDirectoryName,'/',fname_,'_morris_vdec'])
+  eval(['print -depsc2 ' OutputDirectoryName '/' fname_ '_morris_vdec']);
+  eval(['print -dpdf ' OutputDirectoryName '/' fname_ '_morris_vdec']);
   close(gcf)
 
   ifig = 0;
@@ -182,9 +182,9 @@ if opt_gsa.morris==1,
     end
     title(options_.varobs(j,:),'interpreter','none')
     if mod(j,6)==0 | j==size(options_.varobs,1)
-      saveas(gcf,[OutputDirectoryName,'\',fname_,'_morris_vdec_varobs_',int2str(ifig)])
-      eval(['print -depsc2 ' OutputDirectoryName '\' fname_ '_morris_vdec_varobs_',int2str(ifig)]);
-      eval(['print -dpdf ' OutputDirectoryName '\' fname_ '_morris_vdec_varobs_',int2str(ifig)]);
+      saveas(gcf,[OutputDirectoryName,'/',fname_,'_morris_vdec_varobs_',int2str(ifig)])
+      eval(['print -depsc2 ' OutputDirectoryName '/' fname_ '_morris_vdec_varobs_',int2str(ifig)]);
+      eval(['print -dpdf ' OutputDirectoryName '/' fname_ '_morris_vdec_varobs_',int2str(ifig)]);
       close(gcf)
     end
   end
@@ -217,9 +217,9 @@ if opt_gsa.morris==1,
     end
     title(M_.exo_names(j,:),'interpreter','none')
     if mod(j,6)==0 | j==M_.exo_nbr,
-      saveas(gcf,[OutputDirectoryName,'\',fname_,'_morris_vdec_exo_',int2str(ifig)])
-      eval(['print -depsc2 ' OutputDirectoryName '\' fname_ '_morris_vdec_exo_',int2str(ifig)]);
-      eval(['print -dpdf ' OutputDirectoryName '\' fname_ '_morris_vdec_exo_',int2str(ifig)]);
+      saveas(gcf,[OutputDirectoryName,'/',fname_,'_morris_vdec_exo_',int2str(ifig)])
+      eval(['print -depsc2 ' OutputDirectoryName '/' fname_ '_morris_vdec_exo_',int2str(ifig)]);
+      eval(['print -dpdf ' OutputDirectoryName '/' fname_ '_morris_vdec_exo_',int2str(ifig)]);
       close(gcf),
     end
   end
@@ -231,9 +231,9 @@ if opt_gsa.morris==1,
     [SAmeas, SAMorris(:,:,i)] = Morris_Measure_Groups(npT, [lpmat0 lpmat], cc(:,i),nliv);
   end
   SAcc = squeeze(SAMorris(:,1,:))';
-  save([OutputDirectoryName,'\',fname_,'_morris_IDE'],'SAcc','cc','ir_cc','ic_cc','-append')
+  save([OutputDirectoryName,'/',fname_,'_morris_IDE'],'SAcc','cc','ir_cc','ic_cc','-append')
   else
-    load([OutputDirectoryName,'\',fname_,'_morris_IDE'],'SAcc','cc','ir_cc','ic_cc')
+    load([OutputDirectoryName,'/',fname_,'_morris_IDE'],'SAcc','cc','ir_cc','ic_cc')
   end
   
   figure,
@@ -249,9 +249,9 @@ if opt_gsa.morris==1,
   end
   xlabel(' ')
   title('EET All cross-correlation matrix')
-  saveas(gcf,[OutputDirectoryName,'\',fname_,'_morris_cc'])
-  eval(['print -depsc2 ' OutputDirectoryName '\' fname_ '_morris_cc']);
-  eval(['print -dpdf ' OutputDirectoryName '\' fname_ '_morris_cc']);
+  saveas(gcf,[OutputDirectoryName,'/',fname_,'_morris_cc'])
+  eval(['print -depsc2 ' OutputDirectoryName '/' fname_ '_morris_cc']);
+  eval(['print -dpdf ' OutputDirectoryName '/' fname_ '_morris_cc']);
   close(gcf),
 
   ifig = 0;
@@ -283,9 +283,9 @@ if opt_gsa.morris==1,
     end
     title(options_.varobs(j,:),'interpreter','none')
     if mod(j,6)==0 | j==size(options_.varobs,1)
-      saveas(gcf,[OutputDirectoryName,'\',fname_,'_morris_cc_',int2str(ifig)])
-      eval(['print -depsc2 ' OutputDirectoryName '\' fname_ '_morris_cc_',int2str(ifig)]);
-      eval(['print -dpdf ' OutputDirectoryName '\' fname_ '_morris_cc_',int2str(ifig)]);
+      saveas(gcf,[OutputDirectoryName,'/',fname_,'_morris_cc_',int2str(ifig)])
+      eval(['print -depsc2 ' OutputDirectoryName '/' fname_ '_morris_cc_',int2str(ifig)]);
+      eval(['print -dpdf ' OutputDirectoryName '/' fname_ '_morris_cc_',int2str(ifig)]);
       close(gcf),
     end
   end
@@ -298,9 +298,9 @@ if opt_gsa.morris==1,
   end
   %end
   SAac = squeeze(SAMorris(:,1,:))';
-  save([OutputDirectoryName,'\',fname_,'_morris_IDE'],'SAac','ac','ir_ac','ic_ac','-append')
+  save([OutputDirectoryName,'/',fname_,'_morris_IDE'],'SAac','ac','ir_ac','ic_ac','-append')
   else
-    load([OutputDirectoryName,'\',fname_,'_morris_IDE'],'SAac','ac','ir_ac','ic_ac')
+    load([OutputDirectoryName,'/',fname_,'_morris_IDE'],'SAac','ac','ir_ac','ic_ac')
   end
   figure,
 %   boxplot(SAac,'whis',10,'symbol','r.')
@@ -315,9 +315,9 @@ if opt_gsa.morris==1,
   end
   xlabel(' ')
   title('EET All auto-correlations')
-  saveas(gcf,[OutputDirectoryName,'\',fname_,'_morris_ac'])
-  eval(['print -depsc2 ' OutputDirectoryName '\' fname_ '_morris_ac']);
-  eval(['print -dpdf ' OutputDirectoryName '\' fname_ '_morris_ac']);
+  saveas(gcf,[OutputDirectoryName,'/',fname_,'_morris_ac'])
+  eval(['print -depsc2 ' OutputDirectoryName '/' fname_ '_morris_ac']);
+  eval(['print -dpdf ' OutputDirectoryName '/' fname_ '_morris_ac']);
   close(gcf),
 
   ifig = 0;
@@ -348,9 +348,9 @@ if opt_gsa.morris==1,
     end
     title(options_.varobs(j,:),'interpreter','none')
     if mod(j,6)==0 | j==size(options_.varobs,1)
-      saveas(gcf,[OutputDirectoryName,'\',fname_,'_morris_ac_',int2str(ifig)])
-      eval(['print -depsc2 ' OutputDirectoryName '\' fname_ '_morris_ac_',int2str(ifig)]);
-      eval(['print -dpdf ' OutputDirectoryName '\' fname_ '_morris_ac_',int2str(ifig)]);
+      saveas(gcf,[OutputDirectoryName,'/',fname_,'_morris_ac_',int2str(ifig)])
+      eval(['print -depsc2 ' OutputDirectoryName '/' fname_ '_morris_ac_',int2str(ifig)]);
+      eval(['print -dpdf ' OutputDirectoryName '/' fname_ '_morris_ac_',int2str(ifig)]);
       close(gcf),
     end
   end
@@ -369,9 +369,9 @@ if opt_gsa.morris==1,
     SAtadj(:,j)=SAM(:,j)./(max(SAM(:,j))+eps);
   end
   SAtadj = SAtadj';
-  save([OutputDirectoryName,'\',fname_,'_morris_IDE'],'SAtadj','tadj','ir_tadj','ic_tadj','-append')
+  save([OutputDirectoryName,'/',fname_,'_morris_IDE'],'SAtadj','tadj','ir_tadj','ic_tadj','-append')
   else
-    load([OutputDirectoryName,'\',fname_,'_morris_IDE'],'SAtadj','tadj','ir_tadj','ic_tadj')
+    load([OutputDirectoryName,'/',fname_,'_morris_IDE'],'SAtadj','tadj','ir_tadj','ic_tadj')
   end
   if opt_gsa.load_ident==0,
   js=0;
@@ -385,9 +385,9 @@ if opt_gsa.morris==1,
     SAIF(:,j)=SAM(:,j)./(max(SAM(:,j))+eps);
   end
   SAIF = SAIF';
-  save([OutputDirectoryName,'\',fname_,'_morris_IDE'],'SAIF','iff','ir_if','ic_if','-append')
+  save([OutputDirectoryName,'/',fname_,'_morris_IDE'],'SAIF','iff','ir_if','ic_if','-append')
   else
-    load([OutputDirectoryName,'\',fname_,'_morris_IDE'],'SAIF','iff','ir_if','ic_if')
+    load([OutputDirectoryName,'/',fname_,'_morris_IDE'],'SAIF','iff','ir_if','ic_if')
   end
   figure,
   %bar(SAtadj),
@@ -402,9 +402,9 @@ if opt_gsa.morris==1,
   end
   xlabel(' ')
   title('All half-life')
-  saveas(gcf,[OutputDirectoryName,'\',fname_,'_morris_tadj'])
-  eval(['print -depsc2 ' OutputDirectoryName '\' fname_ '_morris_tadj']);
-  eval(['print -dpdf ' OutputDirectoryName '\' fname_ '_morris_tadj']);
+  saveas(gcf,[OutputDirectoryName,'/',fname_,'_morris_tadj'])
+  eval(['print -depsc2 ' OutputDirectoryName '/' fname_ '_morris_tadj']);
+  eval(['print -dpdf ' OutputDirectoryName '/' fname_ '_morris_tadj']);
   close(gcf),
 
   ifig = 0;
@@ -435,9 +435,9 @@ if opt_gsa.morris==1,
     end
     title(options_.varobs(j,:),'interpreter','none')
     if mod(j,6)==0 | j==size(options_.varobs,1)
-      saveas(gcf,[OutputDirectoryName,'\',fname_,'_morris_tadj_varobs_',int2str(ifig)])
-      eval(['print -depsc2 ' OutputDirectoryName '\' fname_ '_morris_tadj_varobs_',int2str(ifig)]);
-      eval(['print -dpdf ' OutputDirectoryName '\' fname_ '_morris_tadj_varobs_',int2str(ifig)]);
+      saveas(gcf,[OutputDirectoryName,'/',fname_,'_morris_tadj_varobs_',int2str(ifig)])
+      eval(['print -depsc2 ' OutputDirectoryName '/' fname_ '_morris_tadj_varobs_',int2str(ifig)]);
+      eval(['print -dpdf ' OutputDirectoryName '/' fname_ '_morris_tadj_varobs_',int2str(ifig)]);
       close(gcf),
     end
   end
@@ -470,9 +470,9 @@ if opt_gsa.morris==1,
     end
     title(M_.exo_names(j,:),'interpreter','none')
     if mod(j,6)==0 | j==M_.exo_nbr,
-      saveas(gcf,[OutputDirectoryName,'\',fname_,'_morris_tadj_exo_',int2str(ifig)])
-      eval(['print -depsc2 ' OutputDirectoryName '\' fname_ '_morris_tadj_exo_',int2str(ifig)]);
-      eval(['print -dpdf ' OutputDirectoryName '\' fname_ '_morris_tadj_exo_',int2str(ifig)]);
+      saveas(gcf,[OutputDirectoryName,'/',fname_,'_morris_tadj_exo_',int2str(ifig)])
+      eval(['print -depsc2 ' OutputDirectoryName '/' fname_ '_morris_tadj_exo_',int2str(ifig)]);
+      eval(['print -dpdf ' OutputDirectoryName '/' fname_ '_morris_tadj_exo_',int2str(ifig)]);
       close(gcf),
     end
   end
@@ -491,9 +491,9 @@ if opt_gsa.morris==1,
   xlabel(' ')
   ylabel('Elementary Effects')
   title('Steady state gains (impact factors)')
-  saveas(gcf,[OutputDirectoryName,'\',fname_,'_morris_gain'])
-  eval(['print -depsc2 ' OutputDirectoryName '\' fname_ '_morris_gain']);
-  eval(['print -dpdf ' OutputDirectoryName '\' fname_ '_morris_gain']);
+  saveas(gcf,[OutputDirectoryName,'/',fname_,'_morris_gain'])
+  eval(['print -depsc2 ' OutputDirectoryName '/' fname_ '_morris_gain']);
+  eval(['print -dpdf ' OutputDirectoryName '/' fname_ '_morris_gain']);
   close(gcf),
   %figure, bar(SAIF'), title('All Gain Relationships')
   ifig = 0;
@@ -524,9 +524,9 @@ if opt_gsa.morris==1,
     end
     title(options_.varobs(j,:),'interpreter','none')
     if mod(j,6)==0 | j==size(options_.varobs,1)
-      saveas(gcf,[OutputDirectoryName,'\',fname_,'_morris_gain_varobs_',int2str(ifig)])
-      eval(['print -depsc2 ' OutputDirectoryName '\' fname_ '_morris_gain_varobs_',int2str(ifig)]);
-      eval(['print -dpdf ' OutputDirectoryName '\' fname_ '_morris_gain_varobs_',int2str(ifig)]);
+      saveas(gcf,[OutputDirectoryName,'/',fname_,'_morris_gain_varobs_',int2str(ifig)])
+      eval(['print -depsc2 ' OutputDirectoryName '/' fname_ '_morris_gain_varobs_',int2str(ifig)]);
+      eval(['print -dpdf ' OutputDirectoryName '/' fname_ '_morris_gain_varobs_',int2str(ifig)]);
       close(gcf),
     end
   end
@@ -559,9 +559,9 @@ if opt_gsa.morris==1,
     end
     title(M_.exo_names(j,:),'interpreter','none')
     if mod(j,6)==0 | j==M_.exo_nbr,
-      saveas(gcf,[OutputDirectoryName,'\',fname_,'_morris_gain_exo_',int2str(ifig)])
-      eval(['print -depsc2 ' OutputDirectoryName '\' fname_ '_morris_gain_exo_',int2str(ifig)]);
-      eval(['print -dpdf ' OutputDirectoryName '\' fname_ '_morris_gain_exo_',int2str(ifig)]);
+      saveas(gcf,[OutputDirectoryName,'/',fname_,'_morris_gain_exo_',int2str(ifig)])
+      eval(['print -depsc2 ' OutputDirectoryName '/' fname_ '_morris_gain_exo_',int2str(ifig)]);
+      eval(['print -dpdf ' OutputDirectoryName '/' fname_ '_morris_gain_exo_',int2str(ifig)]);
       close(gcf),
     end
   end
@@ -588,9 +588,9 @@ if opt_gsa.morris==1,
   for j=1:j0
     SAsignorm(:,j)=SAMsig(:,j)./max(SAMsig(:,j));
   end
-    save([OutputDirectoryName,'\',fname_,'_morris_IDE'],'SAnorm','SAmunorm','SAsignorm','-append')
+    save([OutputDirectoryName,'/',fname_,'_morris_IDE'],'SAnorm','SAmunorm','SAsignorm','-append')
   else
-    load([OutputDirectoryName,'\',fname_,'_morris_IDE'],'SAnorm','SAmunorm','SAsignorm')
+    load([OutputDirectoryName,'/',fname_,'_morris_IDE'],'SAnorm','SAmunorm','SAsignorm')
   end
   figure, %bar(SAnorm(:,irel))
 %   boxplot(SAnorm','whis',10,'symbol','r.')
@@ -605,9 +605,9 @@ if opt_gsa.morris==1,
   end
   xlabel(' ')
   title('Elementary effects parameters')
-  saveas(gcf,[OutputDirectoryName,'\',fname_,'_morris_par'])
-  eval(['print -depsc2 ' OutputDirectoryName '\' fname_ '_morris_par']);
-  eval(['print -dpdf ' OutputDirectoryName '\' fname_ '_morris_par']);
+  saveas(gcf,[OutputDirectoryName,'/',fname_,'_morris_par'])
+  eval(['print -depsc2 ' OutputDirectoryName '/' fname_ '_morris_par']);
+  eval(['print -dpdf ' OutputDirectoryName '/' fname_ '_morris_par']);
 
   figure, %bar(SAmunorm(:,irel))
 %   boxplot(SAmunorm','whis',10,'symbol','r.')
@@ -622,9 +622,9 @@ if opt_gsa.morris==1,
   end
   xlabel(' ')
   title('\mu parameters')
-  saveas(gcf,[OutputDirectoryName,'\',fname_,'_morrismu_par'])
-  eval(['print -depsc2 ' OutputDirectoryName '\' fname_ '_morrismu_par']);
-  eval(['print -dpdf ' OutputDirectoryName '\' fname_ '_morrismu_par']);
+  saveas(gcf,[OutputDirectoryName,'/',fname_,'_morrismu_par'])
+  eval(['print -depsc2 ' OutputDirectoryName '/' fname_ '_morrismu_par']);
+  eval(['print -dpdf ' OutputDirectoryName '/' fname_ '_morrismu_par']);
   figure, %bar(SAsignorm(:,irel))
 %   boxplot(SAsignorm','whis',10,'symbol','r.')
   myboxplot(SAsignorm',[],'.',[],10)
@@ -638,17 +638,17 @@ if opt_gsa.morris==1,
   end
   xlabel(' ')
   title('\sigma parameters')
-  saveas(gcf,[OutputDirectoryName,'\',fname_,'_morrissig_par'])
-  eval(['print -depsc2 ' OutputDirectoryName '\' fname_ '_morrissig_par']);
-  eval(['print -dpdf ' OutputDirectoryName '\' fname_ '_morrissig_par']);
+  saveas(gcf,[OutputDirectoryName,'/',fname_,'_morrissig_par'])
+  eval(['print -depsc2 ' OutputDirectoryName '/' fname_ '_morrissig_par']);
+  eval(['print -dpdf ' OutputDirectoryName '/' fname_ '_morrissig_par']);
 
   %     figure, bar(SAnorm(:,irel)')
   %     set(gca,'xtick',[1:j0])
   %     set(gca,'xlim',[0.5 j0+0.5])
   %     title('Elementary effects relationships')
-  %     saveas(gcf,[OutputDirectoryName,'\',fname_,'_morris_redform'])
-  %     eval(['print -depsc2 ' OutputDirectoryName '\' fname_ '_morris_redform']);
-  %     eval(['print -dpdf ' OutputDirectoryName '\' fname_ '_morris_redform']);
+  %     saveas(gcf,[OutputDirectoryName,'/',fname_,'_morris_redform'])
+  %     eval(['print -depsc2 ' OutputDirectoryName '/' fname_ '_morris_redform']);
+  %     eval(['print -dpdf ' OutputDirectoryName '/' fname_ '_morris_redform']);
 
 elseif opt_gsa.morris==2,
   np=estim_params_.np;
@@ -726,7 +726,7 @@ else,  % main effects analysis
   nfit=min(1000,nrun);
   if opt_gsa.load_ident==0,
   try 
-    EET=load([OutputDirectoryName,'\SCREEN\',fname_,'_morris_IDE'],'SAvdec','vdec','ir_vdec','ic_vdec');
+    EET=load([OutputDirectoryName,'/SCREEN/',fname_,'_morris_IDE'],'SAvdec','vdec','ir_vdec','ic_vdec');
   catch
     EET=[];
   end
@@ -755,9 +755,9 @@ else,  % main effects analysis
     SAvdec(j,imap)=gsa_(j).si;
     imap_vdec{j}=imap;
   end
-  save([OutputDirectoryName,'\',fname_,'_main_eff'],'imap_vdec','SAvdec','vdec','ir_vdec','ic_vdec','-append')
+  save([OutputDirectoryName,'/',fname_,'_main_eff'],'imap_vdec','SAvdec','vdec','ir_vdec','ic_vdec','-append')
   else
-  load([OutputDirectoryName,'\',fname_,'_main_eff'],'imap_vdec','SAvdec','vdec','ir_vdec','ic_vdec')
+  load([OutputDirectoryName,'/',fname_,'_main_eff'],'imap_vdec','SAvdec','vdec','ir_vdec','ic_vdec')
   end
   figure,
 %   boxplot(SAvdec,'whis',10,'symbol','r.')
@@ -773,9 +773,9 @@ else,  % main effects analysis
   end
   xlabel(' ')
   title(['Main effects variance decomposition ',fsuffix],'interpreter','none')
-  saveas(gcf,[OutputDirectoryName,'\',fname_,'_map_vdec',fsuffix])
-  eval(['print -depsc2 ' OutputDirectoryName '\' fname_ '_map_vdec',fsuffix]);
-  eval(['print -dpdf ' OutputDirectoryName '\' fname_ '_map_vdec',fsuffix]);
+  saveas(gcf,[OutputDirectoryName,'/',fname_,'_map_vdec',fsuffix])
+  eval(['print -depsc2 ' OutputDirectoryName '/' fname_ '_map_vdec',fsuffix]);
+  eval(['print -dpdf ' OutputDirectoryName '/' fname_ '_map_vdec',fsuffix]);
   close(gcf),
 
   ifig = 0;
@@ -807,9 +807,9 @@ else,  % main effects analysis
     end
     title(options_.varobs(j,:),'interpreter','none')
     if mod(j,6)==0 | j==size(options_.varobs,1)
-      saveas(gcf,[OutputDirectoryName,'\',fname_,'_map_vdec',fsuffix,'_varobs_',int2str(ifig)])
-      eval(['print -depsc2 ' OutputDirectoryName '\' fname_ '_map_vdec',fsuffix,'_varobs_',int2str(ifig)]);
-      eval(['print -dpdf ' OutputDirectoryName '\' fname_ '_map_vdec',fsuffix,'_varobs_',int2str(ifig)]);
+      saveas(gcf,[OutputDirectoryName,'/',fname_,'_map_vdec',fsuffix,'_varobs_',int2str(ifig)])
+      eval(['print -depsc2 ' OutputDirectoryName '/' fname_ '_map_vdec',fsuffix,'_varobs_',int2str(ifig)]);
+      eval(['print -dpdf ' OutputDirectoryName '/' fname_ '_map_vdec',fsuffix,'_varobs_',int2str(ifig)]);
       close(gcf),
     end
   end
@@ -844,16 +844,16 @@ else,  % main effects analysis
     end
     title(M_.exo_names(j,:),'interpreter','none','fontsize',10)
     if mod(j,6)==0 | j==M_.exo_nbr
-      saveas(gcf,[OutputDirectoryName,'\',fname_,'_map_vdec',fsuffix,'_exo_',int2str(ifig)])
-      eval(['print -depsc2 ' OutputDirectoryName '\' fname_ '_map_vdec',fsuffix,'_exo_',int2str(ifig)]);
-      eval(['print -dpdf ' OutputDirectoryName '\' fname_ '_map_vdec',fsuffix,'_exo_',int2str(ifig)]);
+      saveas(gcf,[OutputDirectoryName,'/',fname_,'_map_vdec',fsuffix,'_exo_',int2str(ifig)])
+      eval(['print -depsc2 ' OutputDirectoryName '/' fname_ '_map_vdec',fsuffix,'_exo_',int2str(ifig)]);
+      eval(['print -dpdf ' OutputDirectoryName '/' fname_ '_map_vdec',fsuffix,'_exo_',int2str(ifig)]);
       close(gcf),
     end
   end
 
   if opt_gsa.load_ident==0,
   try 
-    EET=load([OutputDirectoryName,'\SCREEN\',fname_,'_morris_IDE'],'SAcc','ir_cc','ic_cc');
+    EET=load([OutputDirectoryName,'/SCREEN/',fname_,'_morris_IDE'],'SAcc','ir_cc','ic_cc');
   catch
     EET=[];
   end
@@ -881,9 +881,9 @@ else,  % main effects analysis
     imap_cc{j}=imap;
 
   end
-  save([OutputDirectoryName,'\',fname_,'_main_eff'],'imap_cc','SAcc','cc','ir_cc','ic_cc','-append')
+  save([OutputDirectoryName,'/',fname_,'_main_eff'],'imap_cc','SAcc','cc','ir_cc','ic_cc','-append')
   else
-    load([OutputDirectoryName,'\',fname_,'_main_eff'],'imap_cc','SAcc','cc','ir_cc','ic_cc')
+    load([OutputDirectoryName,'/',fname_,'_main_eff'],'imap_cc','SAcc','cc','ir_cc','ic_cc')
     
   end
   figure,
@@ -901,9 +901,9 @@ else,  % main effects analysis
   xlabel(' ')
   ylabel(' ')
   title(['Main effects cross-covariances ',fsuffix],'interpreter','none')
-  saveas(gcf,[OutputDirectoryName,'\',fname_,'_map_cc',fsuffix])
-  eval(['print -depsc2 ' OutputDirectoryName '\' fname_ '_map_cc',fsuffix]);
-  eval(['print -dpdf ' OutputDirectoryName '\' fname_ '_map_cc',fsuffix]);
+  saveas(gcf,[OutputDirectoryName,'/',fname_,'_map_cc',fsuffix])
+  eval(['print -depsc2 ' OutputDirectoryName '/' fname_ '_map_cc',fsuffix]);
+  eval(['print -dpdf ' OutputDirectoryName '/' fname_ '_map_cc',fsuffix]);
   close(gcf),
 
   ifig = 0;
@@ -937,16 +937,16 @@ else,  % main effects analysis
     end
     title(options_.varobs(j,:),'interpreter','none','fontsize',10)
     if mod(j,6)==0 | j==size(options_.varobs,1)
-      saveas(gcf,[OutputDirectoryName,'\',fname_,'_map_cc',fsuffix,'_',int2str(ifig)])
-      eval(['print -depsc2 ' OutputDirectoryName '\' fname_ '_map_cc',fsuffix,'_',int2str(ifig)]);
-      eval(['print -dpdf ' OutputDirectoryName '\' fname_ '_map_cc',fsuffix,'_',int2str(ifig)]);
+      saveas(gcf,[OutputDirectoryName,'/',fname_,'_map_cc',fsuffix,'_',int2str(ifig)])
+      eval(['print -depsc2 ' OutputDirectoryName '/' fname_ '_map_cc',fsuffix,'_',int2str(ifig)]);
+      eval(['print -dpdf ' OutputDirectoryName '/' fname_ '_map_cc',fsuffix,'_',int2str(ifig)]);
       close(gcf),
     end
   end
 
   if opt_gsa.load_ident==0,
   try 
-    EET=load([OutputDirectoryName,'\SCREEN\',fname_,'_morris_IDE'],'SAac','ir_ac','ic_ac');
+    EET=load([OutputDirectoryName,'/SCREEN/',fname_,'_morris_IDE'],'SAac','ir_ac','ic_ac');
   catch
     EET=[];
   end
@@ -974,9 +974,9 @@ else,  % main effects analysis
     imap_ac{j}=imap;
 
   end
-  save([OutputDirectoryName,'\',fname_,'_main_eff'],'imap_ac','SAac','ac','ir_ac','ic_ac','-append')
+  save([OutputDirectoryName,'/',fname_,'_main_eff'],'imap_ac','SAac','ac','ir_ac','ic_ac','-append')
   else
-  load([OutputDirectoryName,'\',fname_,'_main_eff'],'imap_ac','SAac','ac','ir_ac','ic_ac')
+  load([OutputDirectoryName,'/',fname_,'_main_eff'],'imap_ac','SAac','ac','ir_ac','ic_ac')
   end
 
   figure,
@@ -992,9 +992,9 @@ else,  % main effects analysis
   end
   xlabel(' ')
   title(['Main effects 1 lag auto-covariances ',fsuffix],'interpreter','none')
-  saveas(gcf,[OutputDirectoryName,'\',fname_,'_map_ac',fsuffix])
-  eval(['print -depsc2 ' OutputDirectoryName '\' fname_ '_map_ac',fsuffix]);
-  eval(['print -dpdf ' OutputDirectoryName '\' fname_ '_map_ac',fsuffix]);
+  saveas(gcf,[OutputDirectoryName,'/',fname_,'_map_ac',fsuffix])
+  eval(['print -depsc2 ' OutputDirectoryName '/' fname_ '_map_ac',fsuffix]);
+  eval(['print -dpdf ' OutputDirectoryName '/' fname_ '_map_ac',fsuffix]);
   close(gcf),
 
   ifig = 0;
@@ -1028,9 +1028,9 @@ else,  % main effects analysis
     end
     title(options_.varobs(j,:),'interpreter','none','fontsize',10)
     if mod(j,6)==0 | j==size(options_.varobs,1)
-      saveas(gcf,[OutputDirectoryName,'\',fname_,'_map_ac',fsuffix,'_',int2str(ifig)])
-      eval(['print -depsc2 ' OutputDirectoryName '\' fname_ '_map_ac',fsuffix,'_',int2str(ifig)]);
-      eval(['print -dpdf ' OutputDirectoryName '\' fname_ '_map_ac',fsuffix,'_',int2str(ifig)]);
+      saveas(gcf,[OutputDirectoryName,'/',fname_,'_map_ac',fsuffix,'_',int2str(ifig)])
+      eval(['print -depsc2 ' OutputDirectoryName '/' fname_ '_map_ac',fsuffix,'_',int2str(ifig)]);
+      eval(['print -dpdf ' OutputDirectoryName '/' fname_ '_map_ac',fsuffix,'_',int2str(ifig)]);
       close(gcf),
     end
   end
@@ -1040,7 +1040,7 @@ else,  % main effects analysis
 
   if opt_gsa.load_ident==0,
   try 
-    EET=load([OutputDirectoryName,'\SCREEN\',fname_,'_morris_IDE'],'SAtadj','ir_tadj','ic_tadj');
+    EET=load([OutputDirectoryName,'/SCREEN/',fname_,'_morris_IDE'],'SAtadj','ir_tadj','ic_tadj');
     ny=size(EET.SAtadj,1);
   catch
     EET=[];
@@ -1079,9 +1079,9 @@ else,  % main effects analysis
     imap_tadj{j}=imap;
 
   end
-  save([OutputDirectoryName,'\',fname_,'_main_eff'],'imap_tadj','SAtadj','tadj','ir_tadj','ic_tadj','-append')
+  save([OutputDirectoryName,'/',fname_,'_main_eff'],'imap_tadj','SAtadj','tadj','ir_tadj','ic_tadj','-append')
   else
-  load([OutputDirectoryName,'\',fname_,'_main_eff'],'imap_tadj','SAtadj','tadj','ir_tadj','ic_tadj')
+  load([OutputDirectoryName,'/',fname_,'_main_eff'],'imap_tadj','SAtadj','tadj','ir_tadj','ic_tadj')
   end
 
   figure,
@@ -1097,9 +1097,9 @@ else,  % main effects analysis
   end
   xlabel(' ')
   title(['Main effects speed of adjustment ',fsuffix],'interpreter','none')
-  saveas(gcf,[OutputDirectoryName,'\',fname_,'_map_tadj',fsuffix])
-  eval(['print -depsc2 ' OutputDirectoryName '\' fname_ '_map_tadj',fsuffix]);
-  eval(['print -dpdf ' OutputDirectoryName '\' fname_ '_map_tadj',fsuffix]);
+  saveas(gcf,[OutputDirectoryName,'/',fname_,'_map_tadj',fsuffix])
+  eval(['print -depsc2 ' OutputDirectoryName '/' fname_ '_map_tadj',fsuffix]);
+  eval(['print -dpdf ' OutputDirectoryName '/' fname_ '_map_tadj',fsuffix]);
   close(gcf),
 
   ifig = 0;
@@ -1130,9 +1130,9 @@ else,  % main effects analysis
     end
     title(options_.varobs(j,:),'interpreter','none')
     if mod(j,6)==0 | j==size(options_.varobs,1)
-      saveas(gcf,[OutputDirectoryName,'\',fname_,'_map_tadj',fsuffix,'_varobs_',int2str(ifig)])
-      eval(['print -depsc2 ' OutputDirectoryName '\' fname_ '_map_tadj',fsuffix,'_varobs_',int2str(ifig)]);
-      eval(['print -dpdf ' OutputDirectoryName '\' fname_ '_map_tadj',fsuffix,'_varobs_',int2str(ifig)]);
+      saveas(gcf,[OutputDirectoryName,'/',fname_,'_map_tadj',fsuffix,'_varobs_',int2str(ifig)])
+      eval(['print -depsc2 ' OutputDirectoryName '/' fname_ '_map_tadj',fsuffix,'_varobs_',int2str(ifig)]);
+      eval(['print -dpdf ' OutputDirectoryName '/' fname_ '_map_tadj',fsuffix,'_varobs_',int2str(ifig)]);
       close(gcf),
     end
   end
@@ -1165,9 +1165,9 @@ else,  % main effects analysis
     end
     title(M_.exo_names(j,:),'interpreter','none')
     if mod(j,6)==0 | j==M_.exo_nbr,
-      saveas(gcf,[OutputDirectoryName,'\',fname_,'_map_tadj',fsuffix,'_exo_',int2str(ifig)])
-      eval(['print -depsc2 ' OutputDirectoryName '\' fname_ '_map_tadj',fsuffix,'_exo_',int2str(ifig)]);
-      eval(['print -dpdf ' OutputDirectoryName '\' fname_ '_map_tadj',fsuffix,'_exo_',int2str(ifig)]);
+      saveas(gcf,[OutputDirectoryName,'/',fname_,'_map_tadj',fsuffix,'_exo_',int2str(ifig)])
+      eval(['print -depsc2 ' OutputDirectoryName '/' fname_ '_map_tadj',fsuffix,'_exo_',int2str(ifig)]);
+      eval(['print -dpdf ' OutputDirectoryName '/' fname_ '_map_tadj',fsuffix,'_exo_',int2str(ifig)]);
       close(gcf),
     end
   end
@@ -1175,7 +1175,7 @@ else,  % main effects analysis
 
   if opt_gsa.load_ident==0,
   try 
-    EET=load([OutputDirectoryName,'\SCREEN\',fname_,'_morris_IDE'],'SAIF','ir_if','ic_if');
+    EET=load([OutputDirectoryName,'/SCREEN/',fname_,'_morris_IDE'],'SAIF','ir_if','ic_if');
   catch
     EET=[];
   end
@@ -1203,9 +1203,9 @@ else,  % main effects analysis
     imap_if{j}=imap;
     
   end
-  save([OutputDirectoryName,'\',fname_,'_main_eff'],'imap_if','SAif','iff','ir_if','ic_if','-append')
+  save([OutputDirectoryName,'/',fname_,'_main_eff'],'imap_if','SAif','iff','ir_if','ic_if','-append')
   else
-  load([OutputDirectoryName,'\',fname_,'_main_eff'],'imap_if','SAif','iff','ir_if','ic_if')
+  load([OutputDirectoryName,'/',fname_,'_main_eff'],'imap_if','SAif','iff','ir_if','ic_if')
   end
 
   figure,
@@ -1221,9 +1221,9 @@ else,  % main effects analysis
   end
   xlabel(' ')
   title(['Main effects impact factors ',fsuffix],'interpreter','none')
-  saveas(gcf,[OutputDirectoryName,'\',fname_,'_map_if',fsuffix])
-  eval(['print -depsc2 ' OutputDirectoryName '\' fname_ '_map_if',fsuffix]);
-  eval(['print -dpdf ' OutputDirectoryName '\' fname_ '_map_if',fsuffix]);
+  saveas(gcf,[OutputDirectoryName,'/',fname_,'_map_if',fsuffix])
+  eval(['print -depsc2 ' OutputDirectoryName '/' fname_ '_map_if',fsuffix]);
+  eval(['print -dpdf ' OutputDirectoryName '/' fname_ '_map_if',fsuffix]);
   close(gcf),
 
   ifig = 0;
@@ -1254,9 +1254,9 @@ else,  % main effects analysis
     end
     title(options_.varobs(j,:),'interpreter','none')
     if mod(j,6)==0 | j==size(options_.varobs,1)
-      saveas(gcf,[OutputDirectoryName,'\',fname_,'_map_if',fsuffix,'_varobs_',int2str(ifig)])
-      eval(['print -depsc2 ' OutputDirectoryName '\' fname_ '_map_if',fsuffix,'_varobs_',int2str(ifig)]);
-      eval(['print -dpdf ' OutputDirectoryName '\' fname_ '_map_if',fsuffix,'_varobs_',int2str(ifig)]);
+      saveas(gcf,[OutputDirectoryName,'/',fname_,'_map_if',fsuffix,'_varobs_',int2str(ifig)])
+      eval(['print -depsc2 ' OutputDirectoryName '/' fname_ '_map_if',fsuffix,'_varobs_',int2str(ifig)]);
+      eval(['print -dpdf ' OutputDirectoryName '/' fname_ '_map_if',fsuffix,'_varobs_',int2str(ifig)]);
       close(gcf),
     end
   end
@@ -1289,9 +1289,9 @@ else,  % main effects analysis
     end
     title(M_.exo_names(j,:),'interpreter','none')
     if mod(j,6)==0 | j==M_.exo_nbr
-      saveas(gcf,[OutputDirectoryName,'\',fname_,'_map_if',fsuffix,'_exo_',int2str(ifig)])
-      eval(['print -depsc2 ' OutputDirectoryName '\' fname_ '_map_if',fsuffix,'_exo_',int2str(ifig)]);
-      eval(['print -dpdf ' OutputDirectoryName '\' fname_ '_map_if',fsuffix,'_exo_',int2str(ifig)]);
+      saveas(gcf,[OutputDirectoryName,'/',fname_,'_map_if',fsuffix,'_exo_',int2str(ifig)])
+      eval(['print -depsc2 ' OutputDirectoryName '/' fname_ '_map_if',fsuffix,'_exo_',int2str(ifig)]);
+      eval(['print -dpdf ' OutputDirectoryName '/' fname_ '_map_if',fsuffix,'_exo_',int2str(ifig)]);
       close(gcf),
     end
   end
@@ -1313,9 +1313,9 @@ else,  % main effects analysis
   end
   xlabel(' ')
   title(['Main effects theoretical moments ',fsuffix],'interpreter','none')
-  saveas(gcf,[OutputDirectoryName,'\',fname_,'_map_moments',fsuffix])
-  eval(['print -depsc2 ' OutputDirectoryName '\' fname_ '_map_moments',fsuffix]);
-  eval(['print -dpdf ' OutputDirectoryName '\' fname_ '_map_moments',fsuffix]);
+  saveas(gcf,[OutputDirectoryName,'/',fname_,'_map_moments',fsuffix])
+  eval(['print -depsc2 ' OutputDirectoryName '/' fname_ '_map_moments',fsuffix]);
+  eval(['print -dpdf ' OutputDirectoryName '/' fname_ '_map_moments',fsuffix]);
 %   close(gcf),
   
   figure,
@@ -1332,9 +1332,9 @@ else,  % main effects analysis
   end
   xlabel(' ')
   title(['Main effects short-long term dynamics ',fsuffix],'interpreter','none')
-  saveas(gcf,[OutputDirectoryName,'\',fname_,'_map_dynamics',fsuffix])
-  eval(['print -depsc2 ' OutputDirectoryName '\' fname_ '_map_dynamics',fsuffix]);
-  eval(['print -dpdf ' OutputDirectoryName '\' fname_ '_map_dynamics',fsuffix]);
+  saveas(gcf,[OutputDirectoryName,'/',fname_,'_map_dynamics',fsuffix])
+  eval(['print -depsc2 ' OutputDirectoryName '/' fname_ '_map_dynamics',fsuffix]);
+  eval(['print -dpdf ' OutputDirectoryName '/' fname_ '_map_dynamics',fsuffix]);
 %   close(gcf),
 
   figure,
@@ -1351,9 +1351,9 @@ else,  % main effects analysis
   end
   xlabel(' ')
   title(['Main effects all ',fsuffix],'interpreter','none')
-  saveas(gcf,[OutputDirectoryName,'\',fname_,'_map_ALL',fsuffix])
-  eval(['print -depsc2 ' OutputDirectoryName '\' fname_ '_map_ALL',fsuffix]);
-  eval(['print -dpdf ' OutputDirectoryName '\' fname_ '_map_ALL',fsuffix]);
+  saveas(gcf,[OutputDirectoryName,'/',fname_,'_map_ALL',fsuffix])
+  eval(['print -depsc2 ' OutputDirectoryName '/' fname_ '_map_ALL',fsuffix]);
+  eval(['print -dpdf ' OutputDirectoryName '/' fname_ '_map_ALL',fsuffix]);
 %   close(gcf),
 
   for j=1:size(SAall,1),
@@ -1378,9 +1378,9 @@ else,  % main effects analysis
   end
   xlabel(' ')
   title(['Identifiability indices ',fsuffix],'interpreter','none')
-  saveas(gcf,[OutputDirectoryName,'\',fname_,'_ident_ALL',fsuffix])
-  eval(['print -depsc2 ' OutputDirectoryName '\' fname_ '_ident_ALL',fsuffix]);
-  eval(['print -dpdf ' OutputDirectoryName '\' fname_ '_ident_ALL',fsuffix]);
+  saveas(gcf,[OutputDirectoryName,'/',fname_,'_ident_ALL',fsuffix])
+  eval(['print -depsc2 ' OutputDirectoryName '/' fname_ '_ident_ALL',fsuffix]);
+  eval(['print -dpdf ' OutputDirectoryName '/' fname_ '_ident_ALL',fsuffix]);
 
   figure, bar(SAmeanexo),
   set(gca,'xticklabel',' ','fontsize',10,'xtick',[1:nshock])
@@ -1394,7 +1394,7 @@ else,  % main effects analysis
   end
   xlabel(' ')
   title(['Identifiability indices for shocks',fsuffix],'interpreter','none')
-  saveas(gcf,[OutputDirectoryName,'\',fname_,'_ident_SHOCKS',fsuffix])
-  eval(['print -depsc2 ' OutputDirectoryName '\' fname_ '_ident_SHOCKS',fsuffix]);
-  eval(['print -dpdf ' OutputDirectoryName '\' fname_ '_ident_SHOCKS',fsuffix]);
+  saveas(gcf,[OutputDirectoryName,'/',fname_,'_ident_SHOCKS',fsuffix])
+  eval(['print -depsc2 ' OutputDirectoryName '/' fname_ '_ident_SHOCKS',fsuffix]);
+  eval(['print -dpdf ' OutputDirectoryName '/' fname_ '_ident_SHOCKS',fsuffix]);
 end

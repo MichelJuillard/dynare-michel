@@ -79,9 +79,9 @@ for i=1:ceil(nparplot/12),
     end
     title([ftit{j},'. D-stat ', num2str(dproba(ipar(j)),2)],'interpreter','none')
   end
-  saveas(gcf,[dirname,'\',fname_,'_',aname,'_SA_',int2str(i)])
-  eval(['print -depsc2 ' dirname '\' fname_ '_' aname '_SA_' int2str(i)]);
-  eval(['print -dpdf ' dirname '\' fname_ '_' aname '_SA_' int2str(i)]);
+  saveas(gcf,[dirname,'/',fname_,'_',aname,'_SA_',int2str(i)])
+  eval(['print -depsc2 ' dirname '/' fname_ '_' aname '_SA_' int2str(i)]);
+  eval(['print -dpdf ' dirname '/' fname_ '_' aname '_SA_' int2str(i)]);
   if options_.nograph, close(gcf), end
 end
 end

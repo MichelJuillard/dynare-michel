@@ -340,31 +340,31 @@ if fload==0,
   bkpprior.p4=bayestopt_.p4;
   if pprior,
     if ~prepSA
-      save([OutputDirectoryName '\' fname_ '_prior'], ...
+      save([OutputDirectoryName '/' fname_ '_prior'], ...
         'bkpprior','lpmat','lpmat0','iunstable','istable','iindeterm','iwrong', ...
         'egg','yys','nspred','nboth','nfwrd')
     else
-      save([OutputDirectoryName '\' fname_ '_prior'], ...
+      save([OutputDirectoryName '/' fname_ '_prior'], ...
         'bkpprior','lpmat','lpmat0','iunstable','istable','iindeterm','iwrong', ...
         'egg','yys','T','nspred','nboth','nfwrd')
     end
     
   else
     if ~prepSA
-      save([OutputDirectoryName '\' fname_ '_mc'], ...
+      save([OutputDirectoryName '/' fname_ '_mc'], ...
         'lpmat','lpmat0','iunstable','istable','iindeterm','iwrong', ...
         'egg','yys','nspred','nboth','nfwrd')
     else
-      save([OutputDirectoryName '\' fname_ '_mc'], ...
+      save([OutputDirectoryName '/' fname_ '_mc'], ...
         'lpmat','lpmat0','iunstable','istable','iindeterm','iwrong', ...
         'egg','yys','T','nspred','nboth','nfwrd')
     end
   end
 else
   if pprior,
-    filetoload=[OutputDirectoryName '\' fname_ '_prior'];
+    filetoload=[OutputDirectoryName '/' fname_ '_prior'];
   else
-    filetoload=[OutputDirectoryName '\' fname_ '_mc'];
+    filetoload=[OutputDirectoryName '/' fname_ '_mc'];
   end
   load(filetoload,'lpmat','lpmat0','iunstable','istable','iindeterm','iwrong','egg','yys','nspred','nboth','nfwrd')
   Nsam = size(lpmat,1);    
@@ -420,12 +420,12 @@ else
   aindname='mc_indeterm';
   asname='mc_stable';
 end
-delete([OutputDirectoryName,'\',fname_,'_',aname,'_*.*']);
-%delete([OutputDirectoryName,'\',fname_,'_',aname,'_SA_*.*']);
-delete([OutputDirectoryName,'\',fname_,'_',asname,'_corr_*.*']);
-delete([OutputDirectoryName,'\',fname_,'_',auname,'_corr_*.*']);
-delete([OutputDirectoryName,'\',fname_,'_',aunstname,'_corr_*.*']);
-delete([OutputDirectoryName,'\',fname_,'_',aindname,'_corr_*.*']);
+delete([OutputDirectoryName,'/',fname_,'_',aname,'_*.*']);
+%delete([OutputDirectoryName,'/',fname_,'_',aname,'_SA_*.*']);
+delete([OutputDirectoryName,'/',fname_,'_',asname,'_corr_*.*']);
+delete([OutputDirectoryName,'/',fname_,'_',auname,'_corr_*.*']);
+delete([OutputDirectoryName,'/',fname_,'_',aunstname,'_corr_*.*']);
+delete([OutputDirectoryName,'/',fname_,'_',aindname,'_corr_*.*']);
 
 if length(iunstable)>0 & length(iunstable)<Nsam,
   disp([num2str(length(istable)/Nsam*100,3),'\% of the prior support is stable.'])

@@ -76,17 +76,17 @@ for j=1:npar,
       end
       title(['cc = ',num2str(c0(i2(jx),j))])
       if (mod(j2,12)==0) & j2>0,
-        saveas(gcf,[dirname,'\',fig_nam_,int2str(ifig)])
-        eval(['print -depsc2 ' dirname '\' fig_nam_ int2str(ifig)]);
-        eval(['print -dpdf ' dirname '\' fig_nam_ int2str(ifig)]);
+        saveas(gcf,[dirname,'/',fig_nam_,int2str(ifig)])
+        eval(['print -depsc2 ' dirname '/' fig_nam_ int2str(ifig)]);
+        eval(['print -dpdf ' dirname '/' fig_nam_ int2str(ifig)]);
         if options_.nograph, close(gcf), end
       end
     end
   end
   if (j==(npar)) & j2>0,
-    saveas(gcf,[dirname,'\',fig_nam_,int2str(ifig)])
-    eval(['print -depsc2 ' dirname '\' fig_nam_ int2str(ifig)]);
-    eval(['print -dpdf ' dirname '\' fig_nam_ int2str(ifig)]);
+    saveas(gcf,[dirname,'/',fig_nam_,int2str(ifig)])
+    eval(['print -depsc2 ' dirname '/' fig_nam_ int2str(ifig)]);
+    eval(['print -dpdf ' dirname '/' fig_nam_ int2str(ifig)]);
     if options_.nograph, close(gcf), end
   end
   

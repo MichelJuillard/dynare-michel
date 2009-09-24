@@ -37,7 +37,7 @@ if nargin==0,
   dirname='';
 end
 
-load([dirname,'\',M_.fname,'_prior'],'lpmat','lpmat0','istable','T');
+load([dirname,'/',M_.fname,'_prior'],'lpmat','lpmat0','istable','T');
 
 nspred=oo_.dr.nspred;
 
@@ -81,9 +81,9 @@ for j=1:size(anamendo,1),
         end
         title([namendo,' vs. ',namexo],'interpreter','none')
         if iplo==9,
-          saveas(gcf,[dirname,'\',M_.fname,'_', namendo,'_vs_shock_',num2str(ifig)])
-          eval(['print -depsc2 ' dirname,'\',M_.fname,'_', namendo,'_vs_shock_',num2str(ifig)]);
-          eval(['print -dpdf ' dirname,'\',M_.fname,'_', namendo,'_vs_shock_',num2str(ifig)]);
+          saveas(gcf,[dirname,'/',M_.fname,'_', namendo,'_vs_shock_',num2str(ifig)])
+          eval(['print -depsc2 ' dirname,'/',M_.fname,'_', namendo,'_vs_shock_',num2str(ifig)]);
+          eval(['print -dpdf ' dirname,'/',M_.fname,'_', namendo,'_vs_shock_',num2str(ifig)]);
           close(gcf)
         end
 
@@ -91,9 +91,9 @@ for j=1:size(anamendo,1),
     end
   end
   if iplo<9 & iplo>0 & ifig,
-    saveas(gcf,[dirname,'\',M_.fname,'_', namendo,'_vs_shocks_',num2str(ifig)])
-    eval(['print -depsc2 ' dirname,'\',M_.fname,'_', namendo,'_vs_shocks_',num2str(ifig)]);
-    eval(['print -dpdf ' dirname,'\',M_.fname,'_', namendo,'_vs_shocks_',num2str(ifig)]);
+    saveas(gcf,[dirname,'/',M_.fname,'_', namendo,'_vs_shocks_',num2str(ifig)])
+    eval(['print -depsc2 ' dirname,'/',M_.fname,'_', namendo,'_vs_shocks_',num2str(ifig)]);
+    eval(['print -dpdf ' dirname,'/',M_.fname,'_', namendo,'_vs_shocks_',num2str(ifig)]);
     close(gcf)
   end
 
@@ -128,18 +128,18 @@ for j=1:size(anamendo,1),
 
         title([namendo,' vs. ',namlagendo,'(-1)'],'interpreter','none')
         if iplo==9,
-          saveas(gcf,[dirname,'\',M_.fname,'_', namendo,'_vs_lags_',num2str(ifig)])
-          eval(['print -depsc2 ' dirname,'\',M_.fname,'_', namendo,'_vs_lags_',num2str(ifig)]);
-          eval(['print -dpdf ' dirname,'\',M_.fname,'_', namendo,'_vs_lags_',num2str(ifig)]);
+          saveas(gcf,[dirname,'/',M_.fname,'_', namendo,'_vs_lags_',num2str(ifig)])
+          eval(['print -depsc2 ' dirname,'/',M_.fname,'_', namendo,'_vs_lags_',num2str(ifig)]);
+          eval(['print -dpdf ' dirname,'/',M_.fname,'_', namendo,'_vs_lags_',num2str(ifig)]);
           close(gcf)
         end
       end
     end
   end
   if iplo<9 & iplo>0 & ifig,
-    saveas(gcf,[dirname,'\',M_.fname,'_', namendo,'_vs_lags_',num2str(ifig)])
-    eval(['print -depsc2 ' dirname,'\',M_.fname,'_', namendo,'_vs_lags_',num2str(ifig)]);
-    eval(['print -dpdf ' dirname,'\',M_.fname,'_', namendo,'_vs_lags_',num2str(ifig)]);
+    saveas(gcf,[dirname,'/',M_.fname,'_', namendo,'_vs_lags_',num2str(ifig)])
+    eval(['print -depsc2 ' dirname,'/',M_.fname,'_', namendo,'_vs_lags_',num2str(ifig)]);
+    eval(['print -dpdf ' dirname,'/',M_.fname,'_', namendo,'_vs_lags_',num2str(ifig)]);
     close(gcf)
   end
 end
@@ -159,7 +159,7 @@ xlabel(' ')
 ylabel('Elementary Effects')
 title('Reduced form screening')
 
-saveas(gcf,[dirname,'\',M_.fname,'_redform_screen'])
-eval(['print -depsc2 ' dirname,'\',M_.fname,'_redform_screen']);
-eval(['print -dpdf ' dirname,'\',M_.fname,'_redform_screen']);
+saveas(gcf,[dirname,'/',M_.fname,'_redform_screen'])
+eval(['print -depsc2 ' dirname,'/',M_.fname,'_redform_screen']);
+eval(['print -dpdf ' dirname,'/',M_.fname,'_redform_screen']);
 
