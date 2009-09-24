@@ -22,7 +22,8 @@ function [McoH, McoJ, PcoH, PcoJ, condH, condJ, eH, eJ, ind01, ind02, indnoH, in
 
 % 1. check rank of H at theta
 npar = size(H,2);
-indno = {};
+indnoH = {};
+indnoJ = {};
 ind1 = find(vnorm(H)~=0);
 H1 = H(:,ind1);
 [e1,e2] = eig(H1'*H1);
