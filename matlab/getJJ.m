@@ -1,4 +1,4 @@
-function [JJ, H, A, B, GAM] = getJJ(M_,oo_,options_,kronflag,indx,indexo,mf,nlags,useautocorr)
+function [JJ, H, gam] = getJJ(A, B, M_,oo_,options_,kronflag,indx,indexo,mf,nlags,useautocorr)
 
 % Copyright (C) 2009 Dynare Team
 %
@@ -17,10 +17,10 @@ function [JJ, H, A, B, GAM] = getJJ(M_,oo_,options_,kronflag,indx,indexo,mf,nlag
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-if nargin<5 | isempty(indx), indx = [1:M_.param_nbr];, end,
-if nargin<6 | isempty(indexo), indexo = [];, end,
-if nargin<8 | isempty(nlags), nlags=3; end,
-if nargin<9 | isempty(useautocorr), useautocorr=0; end,
+if nargin<7 | isempty(indx), indx = [1:M_.param_nbr];, end,
+if nargin<8 | isempty(indexo), indexo = [];, end,
+if nargin<10 | isempty(nlags), nlags=3; end,
+if nargin<11 | isempty(useautocorr), useautocorr=0; end,
 
   if useautocorr,
     warning('off','MATLAB:divideByZero')
@@ -33,12 +33,12 @@ if kronflag == -1,
   assignin('base','M_', M_);
   assignin('base','oo_', oo_);
 else
-  [H, A, B, dA, dOm, info] = getH(M_,oo_,kronflag,indx,indexo);
-  if info(1) > 0
-    JJ = [];
-    GAM = [];
-    return
-  end
+  [H, dA, dOm] = getH(A, B, M_,oo_,kronflag,indx,indexo);
+%   if isempty(H),
+%     JJ = [];
+%     GAM = [];
+%     return
+%   end
   m = length(A);
 
   GAM =  lyapunov_symm(A,B*M_.Sigma_e*B',options_.qz_criterium,options_.lyapunov_complex_threshold,1);
@@ -107,8 +107,16 @@ else
     JJ(:,j+nexo) = dumm;
   end
   
-  if nargout >4,
+  if nargout >2,
+    sy=sy(mf,mf);
+    sy=sy-diag(diag(sy))+eye(length(mf));
+    options_.ar=nlags;
     [GAM,stationary_vars] = th_autocovariances(oo_.dr,oo_.dr.order_var(mf),M_,options_);
+    GAM{1}=GAM{1}./sy;
+    gam = vech(GAM{1});
+    for j=1:nlags,
+      gam = [gam; vec(GAM{j+1})];
+    end
   end
 end
 

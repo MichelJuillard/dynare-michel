@@ -1,4 +1,4 @@
-function [H, A0, B0, dA, dOm, info] = getH(M_,oo_,kronflag,indx,indexo)
+function [H, dA, dOm, info] = getH(A, B, M_,oo_,kronflag,indx,indexo)
 
 % computes derivative of reduced form linear model w.r.t. deep params
 %
@@ -62,15 +62,15 @@ param_nbr = length(indx);
 % order_var = [oo_.dr.order_var; ...
 %     [size(oo_dr.ghx,2)+1:size(oo_dr.ghx,2)+size(oo_.dr.transition_auxiliary_variables,1)]' ];
 % [A(order_var,order_var),B(order_var,:)]=dynare_resolve;
-[A,B,ys,info]=dynare_resolve;
-  if info(1) > 0
-    H = [];
-    A0 = [];
-    B0 = [];
-    dA = [];
-    dOm = [];
-    return
-  end
+% [A,B,ys,info]=dynare_resolve;
+%   if info(1) > 0
+%     H = [];
+%     A0 = [];
+%     B0 = [];
+%     dA = [];
+%     dOm = [];
+%     return
+%   end
 
 m = size(A,1);
 n = size(B,2);
@@ -277,7 +277,7 @@ else % generalized sylvester equation
         y = B*dSig*B';
         y = y(nauxe+1:end,nauxe+1:end);
         H(:,j) = [zeros((m-nauxe)^2,1); vech(y)];
-        if nargout>3,
+        if nargout>1,
           dOm(:,:,j) = y;
         end
         dSig(indexo(j),indexo(j)) = 0;
@@ -289,7 +289,7 @@ else % generalized sylvester equation
         y = y*M_.Sigma_e*B'+B*M_.Sigma_e*y';
         x = x(nauxe+1:end,nauxe+1:end);
         y = y(nauxe+1:end,nauxe+1:end);
-        if nargout>3,
+        if nargout>1,
           dA(:,:,j+length(indexo)) = x;
           dOm(:,:,j+length(indexo)) = y;
         end
