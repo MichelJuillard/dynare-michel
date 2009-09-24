@@ -190,7 +190,7 @@ function [dr,info,M_,options_,oo_] = dr1(dr,task,M_,options_,oo_)
             [junk,jacobia_] = feval([M_.fname '_dynamic'],z,[oo_.exo_simul ...
                                 oo_.exo_det_simul], M_.params, it_);
         elseif options_.order == 2
-            [junk,jacobia_,hessian] = feval([M_.fname '_dynamic'],z,...
+            [junk,jacobia_,hessian1] = feval([M_.fname '_dynamic'],z,...
                                             [oo_.exo_simul ...
                                 oo_.exo_det_simul], M_.params, it_);
         end
@@ -505,7 +505,8 @@ function [dr,info,M_,options_,oo_] = dr1(dr,task,M_,options_,oo_)
     kk = reshape([1:nk^2],nk,nk);
     kk1 = kk(kk1,kk1);
     %[junk,junk,hessian] = feval([M_.fname '_dynamic'],z, oo_.exo_steady_state);
-    hessian(:,kk1(:)) = hessian;
+    hessian(:,kk1(:)) = hessian1;
+    clear hessian1
     
     %oo_.exo_simul = tempex ;
     %clear tempex
