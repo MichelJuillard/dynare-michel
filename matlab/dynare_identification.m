@@ -1,4 +1,4 @@
-function [pdraws, idemodel, idemoments] = dynare_identification()
+function [pdraws, idemodel, idemoments] = dynare_identification(iload)
 
 % main 
 %
@@ -21,6 +21,9 @@ function [pdraws, idemodel, idemoments] = dynare_identification()
 
 global M_ options_ oo_ bayestopt_ estim_params_
 
+if nargin==0 | isempty(iload),
+  iload=0;
+end
 
 options_ = set_default_option(options_,'datafile',[]);
 options_.mode_compute = 0;
@@ -42,9 +45,11 @@ indexo=[];
 if ~isempty(estim_params_.var_exo)
   indexo = estim_params_.var_exo(:,1);
 end
-useautocorr = 0;
+useautocorr = 1;
 nlags = 3;
 
+if iload ==0, 
+  
 iteration = 0;
 loop_indx = 0;
 
@@ -54,11 +59,22 @@ while iteration < SampleSize,
   loop_indx = loop_indx+1;
   params = prior_draw();
   set_all_parameters(params);
+  [A,B,ys,info]=dynare_resolve;
 
-  [JJ, H] = getJJ(M_,oo_,options_,0,indx,indexo,bayestopt_.mf2,nlags,useautocorr);  
   
-  if ~isempty(JJ),
+  if info(1)==0,
     iteration = iteration + 1;
+    tau=[vec(A); vech(B*M_.Sigma_e*B')];
+    [JJ, H, GAM] = getJJ(A, B, M_,oo_,options_,0,indx,indexo,bayestopt_.mf2,nlags,useautocorr);  
+    siJ = abs(JJ(find(GAM),:).*(1./GAM(find(GAM))*params));
+    siH = abs(H(find(abs(tau)>1.e-10),:).*(1./tau(find(abs(tau)>1.e-10))*params));
+    if iteration ==1,
+      siJmean = siJ./SampleSize;
+      siHmean = siH./SampleSize;
+    else
+      siJmean = siJ./SampleSize+siJmean;
+      siHmean = siH./SampleSize+siHmean;
+    end
     pdraws(iteration,:) = params';
     [idemodel.Mco(:,iteration), idemoments.Mco(:,iteration), ...
       idemodel.Pco(:,:,iteration), idemoments.Pco(:,:,iteration), ...
@@ -71,12 +87,51 @@ while iteration < SampleSize,
       waitbar(iteration/SampleSize,h)
   end
 end
+siHmean = siHmean./(max(siHmean')'*ones(size(params)));
+siJmean = siJmean./(max(siJmean')'*ones(size(params)));
 
 close(h)
 
 
-save([IdentifDirectoryName '/' M_.fname '_identif'], 'pdraws', 'idemodel', 'idemoments')
-
+save([IdentifDirectoryName '/' M_.fname '_identif'], 'pdraws', 'idemodel', 'idemoments', 'siHmean', 'siJmean')
+else
+load([IdentifDirectoryName '/' M_.fname '_identif'], 'pdraws', 'idemodel', 'idemoments', 'siHmean', 'siJmean')
+end  
 
 disp_identification(pdraws, idemodel, idemoments)
 
+figure,
+myboxplot(siHmean)
+set(gca,'ylim',[0 1])
+set(gca,'xticklabel','')
+for ip=1:length(params),
+  text(ip,-0.02,bayestopt_.name{ip},'rotation',90,'HorizontalAlignment','right','interpreter','none')
+end
+title('Sensitivity in the model')
+
+figure,
+myboxplot(siJmean)
+set(gca,'ylim',[0 1])
+set(gca,'xticklabel','')
+for ip=1:length(params),
+  text(ip,-0.02,bayestopt_.name{ip},'rotation',90,'HorizontalAlignment','right','interpreter','none')
+end
+title('Sensitivity in the moments')
+
+figure,
+myboxplot(idemodel.Mco')
+set(gca,'ylim',[0 1])
+set(gca,'xticklabel','')
+for ip=1:length(params),
+  text(ip,-0.02,bayestopt_.name{ip},'rotation',90,'HorizontalAlignment','right','interpreter','none')
+end
+title('Multicollinearity in the model')
+
+figure,
+myboxplot(idemoments.Mco')
+set(gca,'ylim',[0 1])
+set(gca,'xticklabel','')
+for ip=1:length(params),
+  text(ip,-0.02,bayestopt_.name{ip},'rotation',90,'HorizontalAlignment','right','interpreter','none')
+end
+title('Multicollinearity in the moments')
