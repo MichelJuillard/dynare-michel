@@ -47,6 +47,7 @@ if ~isempty(estim_params_.var_exo)
 end
 useautocorr = 1;
 nlags = 3;
+nparam = length(bayestopt_.name);
 
 if iload ==0, 
   
@@ -68,6 +69,7 @@ while iteration < SampleSize,
     [JJ, H, GAM] = getJJ(A, B, M_,oo_,options_,0,indx,indexo,bayestopt_.mf2,nlags,useautocorr);  
     siJ = abs(JJ(find(GAM),:).*(1./GAM(find(GAM))*params));
     siH = abs(H(find(abs(tau)>1.e-10),:).*(1./tau(find(abs(tau)>1.e-10))*params));
+    stock_params(iteration,:) = params;
     if iteration ==1,
       siJmean = siJ./SampleSize;
       siHmean = siH./SampleSize;
@@ -93,9 +95,11 @@ siJmean = siJmean./(max(siJmean')'*ones(size(params)));
 close(h)
 
 
-save([IdentifDirectoryName '/' M_.fname '_identif'], 'pdraws', 'idemodel', 'idemoments', 'siHmean', 'siJmean')
+save([IdentifDirectoryName '/' M_.fname '_identif'], 'pdraws', 'idemodel', 'idemoments', ...
+  'siHmean', 'siJmean', 'stock_params')
 else
-load([IdentifDirectoryName '/' M_.fname '_identif'], 'pdraws', 'idemodel', 'idemoments', 'siHmean', 'siJmean')
+load([IdentifDirectoryName '/' M_.fname '_identif'], 'pdraws', 'idemodel', 'idemoments', ...
+  'siHmean', 'siJmean', 'stock_params')
 end  
 
 disp_identification(pdraws, idemodel, idemoments)
@@ -104,7 +108,7 @@ figure,
 myboxplot(siHmean)
 set(gca,'ylim',[0 1])
 set(gca,'xticklabel','')
-for ip=1:length(params),
+for ip=1:nparam,
   text(ip,-0.02,bayestopt_.name{ip},'rotation',90,'HorizontalAlignment','right','interpreter','none')
 end
 title('Sensitivity in the model')
@@ -113,7 +117,7 @@ figure,
 myboxplot(siJmean)
 set(gca,'ylim',[0 1])
 set(gca,'xticklabel','')
-for ip=1:length(params),
+for ip=1:nparam,
   text(ip,-0.02,bayestopt_.name{ip},'rotation',90,'HorizontalAlignment','right','interpreter','none')
 end
 title('Sensitivity in the moments')
@@ -122,7 +126,7 @@ figure,
 myboxplot(idemodel.Mco')
 set(gca,'ylim',[0 1])
 set(gca,'xticklabel','')
-for ip=1:length(params),
+for ip=1:nparam,
   text(ip,-0.02,bayestopt_.name{ip},'rotation',90,'HorizontalAlignment','right','interpreter','none')
 end
 title('Multicollinearity in the model')
@@ -131,7 +135,7 @@ figure,
 myboxplot(idemoments.Mco')
 set(gca,'ylim',[0 1])
 set(gca,'xticklabel','')
-for ip=1:length(params),
+for ip=1:nparam,
   text(ip,-0.02,bayestopt_.name{ip},'rotation',90,'HorizontalAlignment','right','interpreter','none')
 end
 title('Multicollinearity in the moments')
