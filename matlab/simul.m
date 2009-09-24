@@ -111,12 +111,3 @@ dyn2vec;
 % 01/16/03 MJ use dyn2vec whatever the number of variables
 % 02/18/03 MJ added oo_.steady_state for calling simult
 % 05/24/03 MJ added options_ and options_.periods
-
-
-
-
-
-
-
-
-
