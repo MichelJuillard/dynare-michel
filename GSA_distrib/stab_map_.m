@@ -151,27 +151,27 @@ if fload==0,
       end
     end
     if opt_gsa.prior_range
-      if opt_gsa.identification,
-        deltx=min(0.001, 1/Nsam/2);
-        for j=1:np,
-          xdelt(:,:,j)=prior_draw_gsa(0,[lpmat0 lpmat]+deltx);
-        end
-      end
+%       if opt_gsa.identification,
+%         deltx=min(0.001, 1/Nsam/2);
+%         for j=1:np,
+%           xdelt(:,:,j)=prior_draw_gsa(0,[lpmat0 lpmat]+deltx);
+%         end
+%       end
       for j=1:np,
         lpmat(:,j)=lpmat(:,j).*(bayestopt_.ub(j+nshock)-bayestopt_.lb(j+nshock))+bayestopt_.lb(j+nshock);
       end
     else
       xx=prior_draw_gsa(0,[lpmat0 lpmat]);
-      if opt_gsa.identification,
-        deltx=min(0.001, 1/Nsam/2);
-        ldum=[lpmat0 lpmat];
-        ldum = prior_draw_gsa(0,ldum+deltx);
-        for j=1:nshock+np,
-          xdelt(:,:,j)=xx;
-          xdelt(:,j,j)=ldum(:,j);
-        end
-        clear ldum
-      end
+%       if opt_gsa.identification,
+%         deltx=min(0.001, 1/Nsam/2);
+%         ldum=[lpmat0 lpmat];
+%         ldum = prior_draw_gsa(0,ldum+deltx);
+%         for j=1:nshock+np,
+%           xdelt(:,:,j)=xx;
+%           xdelt(:,j,j)=ldum(:,j);
+%         end
+%         clear ldum
+%       end
       lpmat0=xx(:,1:nshock);
       lpmat=xx(:,nshock+1:end);
       clear xx;
