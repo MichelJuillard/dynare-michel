@@ -130,7 +130,7 @@ options_.opt_gsa = options_gsa;
 
 if (options_gsa.load_stab | options_gsa.load_rmse | options_gsa.load_redform) ...
     & options_gsa.pprior,
-  filetoload=[OutputDirectoryName '\' fname_ '_prior.mat'];
+  filetoload=[OutputDirectoryName '/' fname_ '_prior.mat'];
   if isempty(ls(filetoload)),
     disp([filetoload,' not found!'])
     disp(['You asked to load a non existent analysis'])
@@ -215,9 +215,9 @@ options_.opt_gsa = options_gsa;
 if options_gsa.rmse,
   if ~options_gsa.ppost
   if options_gsa.pprior
-    a=whos('-file',[OutputDirectoryName,'\',fname_,'_prior'],'logpo2');
+    a=whos('-file',[OutputDirectoryName,'/',fname_,'_prior'],'logpo2');
   else
-    a=whos('-file',[OutputDirectoryName,'\',fname_,'_mc'],'logpo2');
+    a=whos('-file',[OutputDirectoryName,'/',fname_,'_mc'],'logpo2');
   end
   if isempty(a),
     dynare_MC([],OutputDirectoryName);
@@ -228,9 +228,9 @@ if options_gsa.rmse,
 %       disp('Do you want to overwrite ?')
 %       pause;
 %       if options_gsa.pprior
-%         delete([OutputDirectoryName,'\',fname_,'_prior_*.mat'])
+%         delete([OutputDirectoryName,'/',fname_,'_prior_*.mat'])
 %       else
-%         delete([OutputDirectoryName,'\',fname_,'_mc_*.mat'])
+%         delete([OutputDirectoryName,'/',fname_,'_mc_*.mat'])
 %       end
 %       dynare_MC([],OutputDirectoryName);
 %       options_gsa.load_rmse=0;
@@ -246,13 +246,13 @@ end
 if options_gsa.glue,
   dr_ = oo_.dr;
   if options_gsa.ppost
-    load([OutputDirectoryName,'\',fname_,'_post']);
+    load([OutputDirectoryName,'/',fname_,'_post']);
     DirectoryName = CheckPath('metropolis');
   else
     if options_gsa.pprior
-      load([OutputDirectoryName,'\',fname_,'_prior']);
+      load([OutputDirectoryName,'/',fname_,'_prior']);
     else
-      load([OutputDirectoryName,'\',fname_,'_mc']);
+      load([OutputDirectoryName,'/',fname_,'_mc']);
     end
   end
   if ~exist('x'),
@@ -291,10 +291,10 @@ if options_gsa.glue,
 %       Out(j).data = y0';
 %       Out(j).time = [1:size(y0,1)];
       Out(j).data = jxj;
-      Out(j).time = [pwd,'\',OutputDirectoryName];
+      Out(j).time = [pwd,'/',OutputDirectoryName];
     else
       Out(j).data = jxj;
-      Out(j).time = [pwd,'\',DirectoryName];
+      Out(j).time = [pwd,'/',DirectoryName];
     end
     Out(j).name = vj;
     Out(j).ini  = 'yes';
@@ -328,10 +328,10 @@ if options_gsa.glue,
 %         Out1(jsmoo).time = [1:size(y0,1)];
 %         Out1(jsmoo).data = y0';
         Out1(jsmoo).data = j;
-        Out1(jsmoo).time = [pwd,'\',OutputDirectoryName];
+        Out1(jsmoo).time = [pwd,'/',OutputDirectoryName];
       else
         Out1(jsmoo).data = j;
-        Out1(jsmoo).time = [pwd,'\',DirectoryName];
+        Out1(jsmoo).time = [pwd,'/',DirectoryName];
       end
       Out1(jsmoo).name = vj;
       Out1(jsmoo).ini  = 'yes';
@@ -362,22 +362,22 @@ if options_gsa.glue,
 %     Info.order_var=dr_.order_var;
 %     Out=Out1;
     Info.TypeofSample='post';
-    save([OutputDirectoryName,'\',fname_,'_glue_post'], 'Out', 'Sam', 'Lik', 'Obs', 'Rem','Info', 'Exo')
+    save([OutputDirectoryName,'/',fname_,'_glue_post'], 'Out', 'Sam', 'Lik', 'Obs', 'Rem','Info', 'Exo')
     %save([fname_,'_post_glue_smooth'], 'Out', 'Sam', 'Lik', 'Obs', 'Rem','Info')
     
   else
     if options_gsa.pprior
       Info.TypeofSample='prior';
-      save([OutputDirectoryName,'\',fname_,'_glue_prior'], 'Out', 'Sam', 'Lik', 'Obs', 'Rem','Info', 'Exo')
-%       save([OutputDirectoryName,'\',fname_,'_prior_glue'], 'Out', 'Sam', 'Lik', 'Obs', 'Rem')
+      save([OutputDirectoryName,'/',fname_,'_glue_prior'], 'Out', 'Sam', 'Lik', 'Obs', 'Rem','Info', 'Exo')
+%       save([OutputDirectoryName,'/',fname_,'_prior_glue'], 'Out', 'Sam', 'Lik', 'Obs', 'Rem')
 %       Out=Out1;
-%       save([OutputDirectoryName,'\',fname_,'_prior_glue_smooth'], 'Out', 'Sam', 'Lik', 'Obs', 'Rem')
+%       save([OutputDirectoryName,'/',fname_,'_prior_glue_smooth'], 'Out', 'Sam', 'Lik', 'Obs', 'Rem')
     else
       Info.TypeofSample='mc';
-      save([OutputDirectoryName,'\',fname_,'_glue_mc'], 'Out', 'Sam', 'Lik', 'Obs', 'Rem','Info', 'Exo')
-%       save([OutputDirectoryName,'\',fname_,'_mc_glue'], 'Out', 'Sam', 'Lik', 'Obs', 'Rem')
+      save([OutputDirectoryName,'/',fname_,'_glue_mc'], 'Out', 'Sam', 'Lik', 'Obs', 'Rem','Info', 'Exo')
+%       save([OutputDirectoryName,'/',fname_,'_mc_glue'], 'Out', 'Sam', 'Lik', 'Obs', 'Rem')
 %       Out=Out1;
-%       save([OutputDirectoryName,'\',fname_,'_mc_glue_smooth'], 'Out', 'Sam', 'Lik', 'Obs', 'Rem')
+%       save([OutputDirectoryName,'/',fname_,'_mc_glue_smooth'], 'Out', 'Sam', 'Lik', 'Obs', 'Rem')
     end
   end
   
