@@ -84,7 +84,9 @@ dummy.ch:
 if HAVE_CWEAVE
 if HAVE_PDFTEX
 if HAVE_EPLAIN
-pdf: main.web $(CWEBSRC)
+pdf-local: kord.pdf
+
+kord.pdf: main.web $(CWEBSRC)
 	$(CWEAVE) -bhp main.web
 	$(PDFTEX) main
 	mv main.pdf kord.pdf
