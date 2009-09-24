@@ -1,4 +1,4 @@
-function disp_identification(pdraws, idemodel, idemoments)
+function disp_identification(pdraws, idemodel, idemoments, disp_pcorr)
 
 % Copyright (C) 2008 Dynare Team
 %
@@ -18,6 +18,10 @@ function disp_identification(pdraws, idemodel, idemoments)
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
 global bayestopt_
+
+if nargin<4 | isempty(disp_pcorr),
+  disp_pcorr=0;
+end
 
 [SampleSize, npar] = size(pdraws);
 jok = 0;
@@ -83,6 +87,7 @@ dyntable('Multi collinearity in the model:',strvcat('param','min','mean','max'),
 dyntable('Multi collinearity for moments in J:',strvcat('param','min','mean','max'), ...
   strvcat(bayestopt_.name(kokJ)),[mminJ, mmeanJ, mmaxJ],10,10,6);
 
+if disp_pcorr,
 for j=1:length(kokP),
 dyntable([bayestopt_.name{kokP(j)},' pairwise correlations in the model'],strvcat(' ','min','mean','max'), ...
   strvcat(bayestopt_.name{jpM{j}}),[pminM{j}' pmeanM{j}' pmaxM{j}'],10,10,3);  
@@ -91,4 +96,5 @@ end
 for j=1:length(kokPJ),
 dyntable([bayestopt_.name{kokPJ(j)},' pairwise correlations in J moments'],strvcat(' ','min','mean','max'), ...
   strvcat(bayestopt_.name{jpJ{j}}),[pminJ{j}' pmeanJ{j}' pmaxJ{j}'],10,10,3);  
+end
 end
