@@ -28,7 +28,7 @@ function steady_()
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
   global M_ oo_ it_ options_
-
+    
   if options_.bytecode && options_.solve_algo ~= 5
       error('STEADY: for the moment, you must use solve_algo=5 with bytecode option')
   end
@@ -38,24 +38,47 @@ function steady_()
   
   if options_.steadystate_flag
     [oo_.steady_state,check] = feval([M_.fname '_steadystate'],...
-				     oo_.steady_state,...
-				     [oo_.exo_steady_state; ...
-		                      oo_.exo_det_steady_state]);
-    % Check if the steady state obtained from the _steadystate file is a 
-    % steady state.
+                                       oo_.steady_state,...
+                                       [oo_.exo_steady_state; ...
+                                        oo_.exo_det_steady_state]);
+    % Check if the steady state obtained from the _steadystate file is a steady state.
     check1 = 0;
-    if isfield(options_,'unit_root_vars')
-      if isempty(options_.unit_root_vars)
-	check1 = max(abs(feval([M_.fname '_static'],...
-			       oo_.steady_state,...
-			       [oo_.exo_steady_state; ...
-		    oo_.exo_det_steady_state], M_.params))) > options_.dynatol ;
-	if check1
+    if isempty(options_.unit_root_vars)
+        if options_.block && ~options_.bytecode 
+            check2 = zeros(size(M_.blocksMFS,1),1);
+            for b = 1:size(M_.blocksMFS,1)
+                n = size(M_.blocksMFS{b}, 1);
+                ss = oo_.steady_state;
+                if n
+                    check2(b) = max(abs(feval([M_.fname '_static'], b, ss, ...
+                                              [oo_.exo_steady_state; oo_.exo_det_steady_state], M_.params))) > options_.dynatol;
+                else
+                    [r, g1, ssss] = feval([M_.fname '_static'], b, ss, ...
+                                          [oo_.exo_steady_state; oo_.exo_det_steady_state], M_.params);
+                end
+            end
+            check1 = any(check2);
+            idx = find(abs(ssss-oo_.steady_state)>10*options_.dynatol);
+            if ~isempty(idx)
+                check1 = 1;
+            end
+        elseif options_.block && options_.bytecode
+            residuals = bytecode('evaluate','static');
+            check1 = 1;
+        else
+            check1 = 0;
+            check1 = max(abs(feval([M_.fname '_static'],...
+                                   oo_.steady_state,...
+                                   [oo_.exo_steady_state; ...
+                                oo_.exo_det_steady_state], M_.params))) > options_.dynatol ;
+        end
+    end
+    if check1
+        if ~options_.block && ~options_.bytecode
             resid(1);
-            error(['The seadystate values returned by ' M_.fname ...
-                   '_steadystate.m don''t solve the static model!' ])
-	end
-      end
+        end
+        error(['The seadystate values returned by ' M_.fname ...
+               '_steadystate.m don''t solve the static model!' ])
     end
     if ~isempty(options_.steadystate_partial)
       ssvar = options_.steadystate_partial.ssvar;
