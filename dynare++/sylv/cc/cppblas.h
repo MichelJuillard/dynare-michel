@@ -29,8 +29,12 @@
 #define BLAS_ddot  ddot_
 #endif /* defined(MATLAB) && !defined(__linux__) */
 
+#if defined(MATLAB)
+#include ../../../mex/sources/matlab_versions_compatibility.h
+#endif
+
 #define BLCHAR const char*
-#define CONST_BLINT const int*
+#define CONST_BLINT const blas_int*
 #define CONST_BLDOU const double*
 #define BLDOU double*
 
