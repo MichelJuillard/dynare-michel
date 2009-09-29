@@ -31,7 +31,11 @@ X = H(:,2:end);
 % X = H(:,2:end);
 
 yhat =  X*(X\y);
-co = y'*yhat/sqrt((y'*y)*(yhat'*yhat));
+if rank(yhat),
+  co = y'*yhat/sqrt((y'*y)*(yhat'*yhat));
+else
+  co=0;
+end
 
 
 
