@@ -44,10 +44,10 @@ else
   GAM =  lyapunov_symm(A,B*M_.Sigma_e*B',options_.qz_criterium,options_.lyapunov_complex_threshold,1);
   k = find(abs(GAM) < 1e-12);
   GAM(k) = 0;
-  if useautocorr,
+%   if useautocorr,
   sdy = sqrt(diag(GAM));
   sy = sdy*sdy';
-  end
+%   end
   
 %   BB = dOm*0;
 %   for j=1:length(indx),
@@ -109,10 +109,16 @@ else
   
   if nargout >2,
     sy=sy(mf,mf);
-    sy=sy-diag(diag(sy))+eye(length(mf));
     options_.ar=nlags;
     [GAM,stationary_vars] = th_autocovariances(oo_.dr,oo_.dr.order_var(mf),M_,options_);
-    GAM{1}=GAM{1}./sy;
+    if useautocorr,
+      sy=sy-diag(diag(sy))+eye(length(mf));
+      GAM{1}=GAM{1}./sy;
+    else
+      for j=1:nlags,
+        GAM{j+1}=GAM{j+1}.*sy;
+      end
+    end
     gam = vech(GAM{1});
     for j=1:nlags,
       gam = [gam; vec(GAM{j+1})];
