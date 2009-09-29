@@ -34,7 +34,7 @@ if opt_gsa.load_ident==0,
   [vdec, cc, ac] = mc_moments(T, lpmatx, oo_.dr);
 
 
-  if opt_gsa.morris<=0,
+  if opt_gsa.morris~=1,
     [pdraws, TAU, GAM, H, JJ] = dynare_identification(-[1:npT],[lpmatx lpmat(istable,:)]);
     if max(max(abs(pdraws-[lpmatx lpmat(istable,:)])))==0,
       disp('Sample check OK'),
@@ -128,7 +128,7 @@ if opt_gsa.load_ident==0,
 
 
   [yt, j0]=teff(A,Nsam,istable);
-  if opt_gsa.morris<=0,
+  if opt_gsa.morris~=1,
   if max(max(abs(TAU-yt(istable,:)')))<= 1.e-10,
     disp('Model check OK'),
     clear TAU A
@@ -736,7 +736,7 @@ if opt_gsa.morris==1,
   %     eval(['print -depsc2 ' OutputDirectoryName '/' fname_ '_morris_redform']);
   %     eval(['print -dpdf ' OutputDirectoryName '/' fname_ '_morris_redform']);
 
-elseif opt_gsa.morris==2,
+elseif opt_gsa.morris==3,
   np=estim_params_.np;
   na=(4*np+1)*opt_gsa.Nsam;
   for j=1:j0,
@@ -791,7 +791,7 @@ elseif opt_gsa.morris==2,
   figure, bar((idex_pcr.*ys_pcr)./opt_gsa.Nsam), title('Relationships rank PCA')
   figure, bar((idex_pcr.*ys_pcr)'./opt_gsa.Nsam), title('Parameters rank PCA')
   
-elseif opt_gsa.morris==-1,   % ISKREV staff
+elseif opt_gsa.morris==2,   % ISKREV staff
 
   
 else,  % main effects analysis
