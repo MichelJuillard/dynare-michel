@@ -36,28 +36,28 @@ if isfield(options_gsa,'mode_file'),
   options_.mode_file=options_gsa.mode_file;
 end
 
+dynare_resolve;
 
 if ~isempty(options_gsa.datafile) | isempty(bayestopt_),
-options_.datafile = options_gsa.datafile;
-if isfield(options_gsa,'first_obs'),
-  options_.first_obs=options_gsa.first_obs;
-end
-if isfield(options_gsa,'nobs'),
-  options_.nobs=options_gsa.nobs;
-end
-if isfield(options_gsa,'presample'),
-  options_.presample=options_gsa.presample;
-end
-if isfield(options_gsa,'prefilter'),
-  options_.prefilter=options_gsa.prefilter;
-end
-if isfield(options_gsa,'loglinear'),
-  options_.loglinear=options_gsa.loglinear;
-end
-options_.mode_compute = 0;
-[data,rawdata]=dynare_estimation_init([],1);
-% computes a first linear solution to set up various variables
-dynare_resolve;
+  options_.datafile = options_gsa.datafile;
+  if isfield(options_gsa,'first_obs'),
+    options_.first_obs=options_gsa.first_obs;
+  end
+  if isfield(options_gsa,'nobs'),
+    options_.nobs=options_gsa.nobs;
+  end
+  if isfield(options_gsa,'presample'),
+    options_.presample=options_gsa.presample;
+  end
+  if isfield(options_gsa,'prefilter'),
+    options_.prefilter=options_gsa.prefilter;
+  end
+  if isfield(options_gsa,'loglinear'),
+    options_.loglinear=options_gsa.loglinear;
+  end
+  options_.mode_compute = 0;
+  [data,rawdata]=dynare_estimation_init([],1);
+  % computes a first linear solution to set up various variables
 end
 
 options_gsa = set_default_option(options_gsa,'identification',0);
