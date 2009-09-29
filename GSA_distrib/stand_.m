@@ -17,9 +17,9 @@ if nargin==0,
     return;
 end
 
-meany=mean(x);
-stdy=std(x);
 for j=1:size(x,2);
+meany(j)=mean(x(find(~isnan(x(:,j))),j));
+stdy(j)=std(x(find(~isnan(x(:,j))),j));
     y(:,j)=(x(:,j)-meany(j))./stdy(j);
 end
 % end of m-file
