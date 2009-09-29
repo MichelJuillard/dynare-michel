@@ -86,6 +86,11 @@ while iteration < SampleSize,
   
   if info(1)==0,
     oo0=oo_;
+%     [Aa,Bb] = kalman_transition_matrix(oo0.dr, ...
+%        bayestopt_.restrict_var_list, ...
+%        bayestopt_.restrict_columns, ...
+%        bayestopt_.restrict_aux, M_.exo_nbr);
+%     tau=[vec(Aa); vech(Bb*M_.Sigma_e*Bb')];
     tau=[vec(A); vech(B*M_.Sigma_e*B')];
     if burnin_iteration<50,
       burnin_iteration = burnin_iteration + 1;
@@ -118,6 +123,7 @@ while iteration < SampleSize,
         MAX_gam   = min(SampleSize,ceil(MaxNumberOfBytes/(length(indJJ)*nparam)/8));
         stoH = zeros([length(indH),nparam,MAX_tau]);
         stoJJ = zeros([length(indJJ),nparam,MAX_tau]);
+        delete([IdentifDirectoryName '/' M_.fname '_identif_*.mat'])
       end
     end
 
@@ -183,6 +189,8 @@ save([IdentifDirectoryName '/' M_.fname '_identif'], 'pdraws', 'idemodel', 'idem
 else
 load([IdentifDirectoryName '/' M_.fname '_identif'], 'pdraws', 'idemodel', 'idemoments', ...
   'siHmean', 'siJmean', 'TAU', 'GAM')
+options_.prior_mc=size(pdraws,1);
+SampleSize = options_.prior_mc;
 
 end  
 
@@ -216,7 +224,7 @@ end
 [latent, isort] = sort(-diag(dd));
 latent = -latent;
 pcc=pcc(:,isort);
-siPCA = (siJmean'*pcc').^2';
+siPCA = (siJmean'*abs(pcc')).^2';
 siPCA = siPCA./(max(siPCA')'*ones(1,nparam)).*(latent*ones(1,nparam));
 siPCA = sum(siPCA,1);
 siPCA = siPCA./max(siPCA);
@@ -225,7 +233,7 @@ siPCA = siPCA./max(siPCA);
 [latent, isort] = sort(-diag(dd));
 latent = -latent;
 pcc=pcc(:,isort);
-siPCA2 = (siJmean'*pcc').^2';
+siPCA2 = (siJmean'*abs(pcc')).^2';
 siPCA2 = siPCA2./(max(siPCA2')'*ones(1,nparam)).*(latent*ones(1,nparam));
 siPCA2 = sum(siPCA2,1);
 siPCA2 = siPCA2./max(siPCA2);
@@ -234,7 +242,7 @@ siPCA2 = siPCA2./max(siPCA2);
 [latent, isort] = sort(-diag(dd));
 latent = -latent;
 pcc=pcc(:,isort);
-siHPCA = (siHmean'*pcc').^2';
+siHPCA = (siHmean'*abs(pcc')).^2';
 siHPCA = siHPCA./(max(siHPCA')'*ones(1,nparam)).*(latent*ones(1,nparam));
 siHPCA = sum(siHPCA,1);
 siHPCA = siHPCA./max(siHPCA);
@@ -243,7 +251,7 @@ siHPCA = siHPCA./max(siHPCA);
 [latent, isort] = sort(-diag(dd));
 latent = -latent;
 pcc=pcc(:,isort);
-siHPCA2 = (siHmean'*pcc').^2';
+siHPCA2 = (siHmean'*abs(pcc')).^2';
 siHPCA2 = siHPCA2./(max(siHPCA2')'*ones(1,nparam)).*(latent*ones(1,nparam));
 siHPCA2 = sum(siHPCA2,1);
 siHPCA2 = siHPCA2./max(siHPCA2);
@@ -251,51 +259,51 @@ siHPCA2 = siHPCA2./max(siHPCA2);
 
 disp_identification(pdraws, idemodel, idemoments)
 
-figure,
-% myboxplot(siPCA(1:(max(find(cumsum(latent)./length(indJJ)<0.99))+1),:))
-subplot(221)
-bar(siHPCA)
-% set(gca,'ylim',[0 1])
-set(gca,'xticklabel','')
-set(gca,'xlim',[0.5 nparam+0.5])
-for ip=1:nparam,
-  text(ip,-0.02,bayestopt_.name{ip},'rotation',90,'HorizontalAlignment','right','interpreter','none')
-end
-title('Sensitivity in TAU''s PCA')
-
-subplot(222)
-% myboxplot(siPCA(1:(max(find(cumsum(latent)./length(indJJ)<0.99))+1),:))
-bar(siHPCA2)
-% set(gca,'ylim',[0 1])
-set(gca,'xticklabel','')
-set(gca,'xlim',[0.5 nparam+0.5])
-for ip=1:nparam,
-  text(ip,-0.02,bayestopt_.name{ip},'rotation',90,'HorizontalAlignment','right','interpreter','none')
-end
-title('Sensitivity in standardized TAU''s PCA')
-
-
-subplot(223)
-% myboxplot(siPCA(1:(max(find(cumsum(latent)./length(indJJ)<0.99))+1),:))
-bar(siPCA)
-% set(gca,'ylim',[0 1])
-set(gca,'xticklabel','')
-set(gca,'xlim',[0.5 nparam+0.5])
-for ip=1:nparam,
-  text(ip,-0.02,bayestopt_.name{ip},'rotation',90,'HorizontalAlignment','right','interpreter','none')
-end
-title('Sensitivity in moments'' PCA')
-
-subplot(224)
-% myboxplot(siPCA(1:(max(find(cumsum(latent)./length(indJJ)<0.99))+1),:))
-bar(siPCA2)
-% set(gca,'ylim',[0 1])
-set(gca,'xticklabel','')
-set(gca,'xlim',[0.5 nparam+0.5])
-for ip=1:nparam,
-  text(ip,-0.02,bayestopt_.name{ip},'rotation',90,'HorizontalAlignment','right','interpreter','none')
-end
-title('Sensitivity in standardized moments'' PCA')
+% figure,
+% % myboxplot(siPCA(1:(max(find(cumsum(latent)./length(indJJ)<0.99))+1),:))
+% subplot(221)
+% bar(siHPCA)
+% % set(gca,'ylim',[0 1])
+% set(gca,'xticklabel','')
+% set(gca,'xlim',[0.5 nparam+0.5])
+% for ip=1:nparam,
+%   text(ip,-0.02,bayestopt_.name{ip},'rotation',90,'HorizontalAlignment','right','interpreter','none')
+% end
+% title('Sensitivity in TAU''s PCA')
+% 
+% subplot(222)
+% % myboxplot(siPCA(1:(max(find(cumsum(latent)./length(indJJ)<0.99))+1),:))
+% bar(siHPCA2)
+% % set(gca,'ylim',[0 1])
+% set(gca,'xticklabel','')
+% set(gca,'xlim',[0.5 nparam+0.5])
+% for ip=1:nparam,
+%   text(ip,-0.02,bayestopt_.name{ip},'rotation',90,'HorizontalAlignment','right','interpreter','none')
+% end
+% title('Sensitivity in standardized TAU''s PCA')
+% 
+% 
+% subplot(223)
+% % myboxplot(siPCA(1:(max(find(cumsum(latent)./length(indJJ)<0.99))+1),:))
+% bar(siPCA)
+% % set(gca,'ylim',[0 1])
+% set(gca,'xticklabel','')
+% set(gca,'xlim',[0.5 nparam+0.5])
+% for ip=1:nparam,
+%   text(ip,-0.02,bayestopt_.name{ip},'rotation',90,'HorizontalAlignment','right','interpreter','none')
+% end
+% title('Sensitivity in moments'' PCA')
+% 
+% subplot(224)
+% % myboxplot(siPCA(1:(max(find(cumsum(latent)./length(indJJ)<0.99))+1),:))
+% bar(siPCA2)
+% % set(gca,'ylim',[0 1])
+% set(gca,'xticklabel','')
+% set(gca,'xlim',[0.5 nparam+0.5])
+% for ip=1:nparam,
+%   text(ip,-0.02,bayestopt_.name{ip},'rotation',90,'HorizontalAlignment','right','interpreter','none')
+% end
+% title('Sensitivity in standardized moments'' PCA')
 
 figure,
 subplot(221)
