@@ -1,6 +1,7 @@
 function [vdec, cc, ac] = mc_moments(mm, ss, dr)
 global options_ M_
 
+  options_.ar = 3;
   [nr1, nc1, nsam] = size(mm);
   disp('Computing theoretical moments ...')
   h = waitbar(0,'Theoretical moments ...');
@@ -13,7 +14,11 @@ global options_ M_
     end
     [vdec(:,:,j), corr, autocorr, z, zz] = th_moments(dr,options_.varobs);
     cc(:,:,j)=tril(corr);
-    ac(:,:,j)=autocorr{1};
+    dum=[];
+    for i=1:options_.ar
+    dum=[dum, autocorr{i}];
+    end
+    ac(:,:,j)=dum;
     waitbar(j/nsam,h)
   end
   close(h)
