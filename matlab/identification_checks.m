@@ -26,15 +26,22 @@ indnoH = {};
 indnoJ = {};
 ind1 = find(vnorm(H)~=0);
 H1 = H(:,ind1);
-[e1,e2] = eig(H1'*H1);
-eH = NaN(npar,1);
-eH(ind1) = e1(:,1);
+covH = H1'*H1;
+sdH = sqrt(diag(covH));
+sdH = sdH*sdH';
+[e1,e2] = eig( (H1'*H1)./sdH );
+eH = NaN(npar,length(ind1));
+eH(ind1,:) = e1;
 condH = cond(H1'*H1);
+
 ind2 = find(vnorm(JJ)~=0);
 JJ1 = JJ(:,ind2);
-[ee1,ee2] = eig(JJ1'*JJ1);
-eJ = NaN(npar,1);
-eJ(ind2) = ee1(:,1);
+covJJ = JJ1'*JJ1;
+sdJJ = sqrt(diag(covJJ));
+sdJJ = sdJJ*sdJJ';
+[ee1,ee2] = eig( (JJ1'*JJ1)./sdJJ );
+eJ = NaN(npar,length(ind2));
+eJ(ind2,:) = ee1;
 condJ = cond(JJ1'*JJ1);
 
 if rank(H)<npar
