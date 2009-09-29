@@ -107,7 +107,9 @@ end
 
 
 if options_gsa.morris,
-  options_gsa.redform=1;
+  if ~options_gsa.identification,
+    options_gsa.redform=1;
+  end
   options_gsa.pprior=1;
   options_gsa.ppost=0;
   %options_gsa.stab=1;
@@ -116,7 +118,7 @@ if options_gsa.morris,
   options_gsa.load_rmse=0;
   options_gsa.alpha2_stab=1;
   options_gsa.ksstat=1;
-  if options_gsa.morris==2,
+  if options_gsa.morris==3,
     options_gsa = set_default_option(options_gsa,'Nsam',256);
     OutputDirectoryName = CheckPath('GSA/IDENTIF');
   else
