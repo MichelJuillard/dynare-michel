@@ -567,7 +567,12 @@ www.nusap.net
   note  =        {http://www.ipcc-nggip.iges.or.jp/public/gp/gpgaum.htm},
 }
 
-
+@TECHREPORT{Iskrev2009,
+AUTHOR={Iskrev, Nikolay},
+TITLE={Local Identification in DSGE Models},
+YEAR=2009,
+TYPE={mimeo},
+}
 
 @ARTICLE{Kalm60,
   author =       {Kalman, R.E.},
@@ -1202,6 +1207,15 @@ and sensitivity analysis},
   volume =       {177},
   pages =        {863--876},
   pages = {doi:10.1016/j.cpc.2007.07.011 },
+}
+
+@ARTICLE{Ratto_CompEcon_2008,
+  author =       {Ratto, M.},
+  title =        {Analysing DSGE Models with Global Sensitivity Analysis},
+  journal =      {Computational Economics},
+  year =         {2008},
+  volume =       {31},
+  pages =        {115--139},
 }
 
 

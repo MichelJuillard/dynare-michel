@@ -1,4 +1,4 @@
-This is pdfeTeX, Version 3.141592-1.30.6-2.2 (MiKTeX 2.5) (preloaded format=latex 2006.9.25)  18 APR 2008 11:26
+This is pdfeTeX, Version 3.141592-1.30.6-2.2 (MiKTeX 2.5) (preloaded format=latex 2006.9.25)  29 SEP 2009 16:45
 entering extended mode
 **C:/SVN/dyn_util/latex/dyn_tbx.tex
 (C:\SVN\dyn_util\latex\dyn_tbx.tex
@@ -165,120 +165,120 @@ File: umsb.fd 2002/01/19 v2.2g AMS font definitions
 ) [1
 
 ]
-Overfull \hbox (4.3pt too wide) in paragraph at lines 81--82
+Overfull \hbox (4.3pt too wide) in paragraph at lines 80--81
 [][][]\OT1/cmtt/m/n/12 dynare_sensitivity(option1=<opt1_val>,option2=<opt2_val>
 ,...) 
  []
 
 [2]
-Overfull \hbox (7.07413pt too wide) in paragraph at lines 123--135
+Overfull \hbox (7.07413pt too wide) in paragraph at lines 122--134
 [][] 
  []
 
 [3]
-Underfull \hbox (badness 10000) in paragraph at lines 138--143
+Underfull \hbox (badness 10000) in paragraph at lines 137--142
 
  []
 
 
-Overfull \hbox (26.50142pt too wide) in paragraph at lines 149--179
+Overfull \hbox (26.50142pt too wide) in paragraph at lines 148--178
 [][][]
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 149--179
+Underfull \hbox (badness 10000) in paragraph at lines 148--178
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 180--182
+Underfull \hbox (badness 10000) in paragraph at lines 179--181
 
  []
 
 [4]
-LaTeX Font Info:    Try loading font information for OMS+cmr on input line 206.
+LaTeX Font Info:    Try loading font information for OMS+cmr on input line 205.
 
  ("C:\Program Files\MiKTeX 2.5\tex\latex\base\omscmr.fd"
 File: omscmr.fd 1999/05/25 v2.5h Standard LaTeX font definitions
 )
 LaTeX Font Info:    Font shape `OMS/cmr/m/n' in size <12> not available
-(Font)              Font shape `OMS/cmsy/m/n' tried instead on input line 206.
+(Font)              Font shape `OMS/cmsy/m/n' tried instead on input line 205.
 
-Overfull \hbox (26.51085pt too wide) in paragraph at lines 218--238
+Overfull \hbox (26.51085pt too wide) in paragraph at lines 217--237
 [][][] 
  []
 
 [5]
-Overfull \hbox (14.23553pt too wide) in paragraph at lines 253--267
+Overfull \hbox (102.93791pt too wide) in paragraph at lines 256--271
 [][][] 
  []
 
 [6] [7]
-Underfull \hbox (badness 10000) in paragraph at lines 271--279
+Underfull \hbox (badness 10000) in paragraph at lines 284--292
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 271--279
+Underfull \hbox (badness 10000) in paragraph at lines 284--292
 
  []
 
 [8]
-Overfull \hbox (12.08382pt too wide) in paragraph at lines 343--345
+Overfull \hbox (12.08382pt too wide) in paragraph at lines 356--358
 [][][]\OT1/cmtt/m/n/12 <DYNARE_file>_rmse_post*.fig\OT1/cmr/m/n/12 : save re-su
 lts for the anal-y-sis us-ing Metropo-
  []
 
 
-Overfull \hbox (8.24295pt too wide) in paragraph at lines 355--358
+Overfull \hbox (8.24295pt too wide) in paragraph at lines 368--371
 [][][]\OT1/cmtt/m/n/12 <DYNARE_file>_rmse_prior_<name of observedseries>_corr_*
 .fig\OT1/cmr/m/n/12 : for
  []
 
 [9]
-Overfull \hbox (5.72563pt too wide) in paragraph at lines 364--369
+Overfull \hbox (5.72563pt too wide) in paragraph at lines 377--382
 \OT1/cmr/m/it/12 in red \OT1/cmr/m/n/12 the cdf of the log-posterior cor-re-spo
 nd-ing to the best 10% RMSE's,
  []
 
 
-Overfull \hbox (0.88243pt too wide) in paragraph at lines 374--377
+Overfull \hbox (0.88243pt too wide) in paragraph at lines 387--390
 [][][]\OT1/cmtt/m/n/12 <DYNARE_file>_rmse_prior_lik_SA_*.fig\OT1/cmr/m/n/12 : w
 hen []\OT1/cmtt/m/n/12 lik_only=1\OT1/cmr/m/n/12 , this shows
  []
 
 
-Overfull \hbox (7.05743pt too wide) in paragraph at lines 377--380
+Overfull \hbox (7.05743pt too wide) in paragraph at lines 390--393
 [][][]\OT1/cmtt/m/n/12 <DYNARE_file>_rmse_prior_post_SA_*.fig\OT1/cmr/m/n/12 : 
 when []\OT1/cmtt/m/n/12 lik_only=1\OT1/cmr/m/n/12 , this shows
  []
 
 
-Overfull \hbox (9.38109pt too wide) in paragraph at lines 393--399
+Overfull \hbox (9.38109pt too wide) in paragraph at lines 406--412
 [][][]\OT1/cmtt/m/n/12 <DYNARE_file>_redform_<endo name>_vs_shocks_*.fig\OT1/cm
 r/m/n/12 : shows bar charts
  []
 
 
-Overfull \hbox (26.57321pt too wide) in paragraph at lines 405--410
+Overfull \hbox (26.57321pt too wide) in paragraph at lines 418--423
 [][]\OT1/cmr/m/n/12 Detailed re-sults of the anal-y-ses are shown in the sub-fo
 lder []\OT1/cmtt/m/n/12 \GSA\redform_stab\OT1/cmr/m/n/12 ,
  []
 
 [10]
-Overfull \hbox (9.38109pt too wide) in paragraph at lines 443--448
+Overfull \hbox (9.38109pt too wide) in paragraph at lines 456--461
 [][][]\OT1/cmtt/m/n/12 <DYNARE_file>_redform_<endo name>_vs_shocks_*.fig\OT1/cm
 r/m/n/12 : shows bar charts
  []
 
 (dyn_tbx.bbl [11]) [12] (dyn_tbx.aux) ) 
 Here is how much of TeX's memory you used:
- 1986 strings out of 95420
- 21387 string characters out of 1187324
- 73908 words of memory out of 1073000
- 5049 multiletter control sequences out of 60000
- 14350 words of font info for 56 fonts, out of 1000000 for 2000
+ 1989 strings out of 95420
+ 21421 string characters out of 1187324
+ 74420 words of memory out of 1073000
+ 5051 multiletter control sequences out of 60000
+ 14651 words of font info for 57 fonts, out of 1000000 for 2000
  14 hyphenation exceptions out of 8191
- 29i,13n,24p,253b,294s stack positions out of 5000i,500n,10000p,200000b,32768s
+ 29i,13n,24p,337b,294s stack positions out of 5000i,500n,10000p,200000b,32768s
 
-Output written on dyn_tbx.dvi (12 pages, 30192 bytes).
+Output written on dyn_tbx.dvi (12 pages, 31224 bytes).

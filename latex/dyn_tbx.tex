@@ -29,8 +29,8 @@ TP361, IPSC, via E. Fermi 1\\21020 Ispra
 \texttt{marco.ratto@jrc.it}
 \thanks{The author gratefully thanks Christophe Planas, Kenneth Judd, Michel Juillard,
 Alessandro Rossi, Frank Schorfheide and the participants to the
-First Course on Global Sensitivity Analysis for Macroeconomic
-Models (Ispra, 16-17 March 2006) for interesting discussions and
+Courses on Global Sensitivity Analysis for Macroeconomic
+Models (Ispra, 2006-2007-2008) for interesting discussions and
 helpful suggestions.}}
 
 %%% To have the current date inserted, use \date{\today}:
@@ -52,8 +52,7 @@ the DYNARE v4 environment.
 
 \begin{description}
   \item \textbf{Keywords}: Stability Mapping , Reduced form solution, DSGE models,
-  Monte Carlo filtering,
-  Global Sensitivity Analysis, High Dimensional Model Representation.
+  Monte Carlo filtering,   Global Sensitivity Analysis.
 \end{description}
 \end{abstract}
 \newpage
@@ -245,10 +244,14 @@ performs all the analyses required and displays results.
 
 \subsection{Identification analysis (under development)}
 Setting the option \verb"identification=1", an identification
-analysis based on theoretical moments, steady state gains and time
-of adjustment is performed. Sensitivity plots are provided that
+analysis based on theoretical moments is performed. Sensitivity plots are provided that
 allow to infer which parameters are most likely to be less
-identifiable. \vspace{1cm}
+identifiable. 
+
+Prerequisite for properly running all the identification routines, is the keyword
+\verb"identification;" in the DYNARE model file. This keyword triggers the computation of analytic derivatives of the model with respect to estimated parameters and shocks. This is required for options \verb"morris=0,2" below, which implement \cite{Iskrev2009} identification analysis.
+\vspace{1cm}
+
 
 \begin{tabular}{r|l|l}
                 option name & default & description  \\ \hline
@@ -256,7 +259,8 @@ identifiable. \vspace{1cm}
                             &   & 1 = performs identification analysis:\\
                             &   & this forces \verb"redform"=0 and default\verb"morris"=1\\
                \verb"morris"& 1 & 1 = Screening analysis (Type II error)\\
-                            &   & 0 = ANOVA Mapping (Type I error)\\
+                            &   & 0 = ANOVA Mapping (Type I error) and analytic derivatives\\
+                            &   & 2 = Analytic derivatives (similar to Type II error)\\
           \verb"morris_nliv"& 6 & number of levels in Morris design\\
           \verb"morris_ntra"& 20& number of trajectories in Morris design\\
           \verb"trans_ident"& 0 & data transformation for ANOVA Mapping\\
@@ -265,6 +269,15 @@ identifiable. \vspace{1cm}
                             &   & 2 = rank-transformation\\\hline
 \end{tabular}
 
+\vspace{1cm}
+\noindent For example, the following commands in the DYNARE model file
+
+\vspace{1cm}
+\noindent\verb"identification;"\\
+\verb"dynare_sensitivity(identification=1, morris=2);"
+
+\vspace{1cm}
+\noindent trigger the identification analysis using analytic derivatives \citep{Iskrev2009}.
 
 \newpage
 \section{Directory structure}
