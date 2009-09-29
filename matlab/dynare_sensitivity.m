@@ -106,7 +106,7 @@ if ~(exist('stab_map_','file')==6 | exist('stab_map_','file')==2),
 end
 
 
-if options_gsa.morris,
+if options_gsa.morris==1 | options_gsa.morris==3,
   if ~options_gsa.identification,
     options_gsa.redform=1;
   end
@@ -190,7 +190,7 @@ if options_gsa.redform & ~isempty(options_gsa.namendo) ...
     options_gsa.namlagendo=M_.endo_names;
   end
   options_.opt_gsa = options_gsa;
-  if options_gsa.morris,
+  if options_gsa.morris==1,
     redform_screen(OutputDirectoryName);
   else
     % check existence of the SS_ANOVA toolbox
