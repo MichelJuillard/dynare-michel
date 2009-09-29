@@ -69,4 +69,4 @@ pause;
 dynare_sensitivity(morris=1, morris_nliv=6, morris_ntra=20, redform=1, 
   namendo=(:), namexo=(:), namlagendo=(:));
 
-
+stoch_simul(order=1,irf=40);
