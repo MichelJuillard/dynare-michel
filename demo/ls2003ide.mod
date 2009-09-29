@@ -76,6 +76,6 @@ disp(' ')
 disp('PRESS ENTER TO CONTUNUE');
 pause;
 identification;
-dynare_sensitivity(identification=1, morris=0, load_stab=1);
+dynare_sensitivity(identification=1, morris=0);
 
 stoch_simul(order=1,irf=40);
