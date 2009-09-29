@@ -30,89 +30,121 @@ npT = np+nshock;
 fname_ = M_.fname;
 
 if opt_gsa.load_ident==0,
-% th moments
-[vdec, cc, ac] = mc_moments(T, lpmatx, oo_.dr);
-for j=1:size(cc,1)
-  cc(j,j,:)=stand_(squeeze(log(cc(j,j,:))))./2;
-end
-
-[pdraws, TAU, GAM, H, JJ] = dynare_identification(-[1:npT],[lpmatx lpmat(istable,:)]);
+  % th moments
+  [vdec, cc, ac] = mc_moments(T, lpmatx, oo_.dr);
 
 
-if opt_gsa.morris<=0,
-  ifig=0;
-  for j=1:M_.exo_nbr,
-    if mod(j,6)==1
-      figure('name',['Variance decomposition shocks']);
-      ifig=ifig+1;
-      iplo=0;
+  if opt_gsa.morris<=0,
+    [pdraws, TAU, GAM, H, JJ] = dynare_identification(-[1:npT],[lpmatx lpmat(istable,:)]);
+    if max(max(abs(pdraws-[lpmatx lpmat(istable,:)])))==0,
+      disp('Sample check OK'),
+      clear pdraws;
     end
-    iplo=iplo+1;
-    subplot(2,3,iplo)
-    myboxplot(squeeze(vdec(:,j,:))',[],'.',[],10)
-%     boxplot(squeeze(vdec(:,j,:))','whis',10,'symbol','.r')
-    set(gca,'xticklabel',' ','fontsize',10,'xtick',[1:size(options_.varobs,1)])
-    set(gca,'xlim',[0.5 size(options_.varobs,1)+0.5])
-    set(gca,'ylim',[-2 102])
-    for ip=1:size(options_.varobs,1),
-      text(ip,-4,deblank(options_.varobs(ip,:)),'rotation',90,'HorizontalAlignment','right','interpreter','none')
+    for j=1:length(istable), gas(:,j)=[vech(cc(:,:,j)); vec(ac(:,:,j))];  end
+    if max(max(abs(GAM-gas)))<=1.e-10,
+      disp('Moments check OK'),
+      clear GAM gas
     end
-    xlabel(' ')
-    ylabel(' ')
-    title(M_.exo_names(j,:),'interpreter','none')
-    if mod(j,6)==0 | j==M_.exo_nbr,
-      saveas(gcf,[OutputDirectoryName,'/',fname_,'_vdec_exo_',int2str(ifig)])
-      eval(['print -depsc2 ' OutputDirectoryName '/' fname_ '_vdec_exo_',int2str(ifig)]);
-      eval(['print -dpdf ' OutputDirectoryName '/' fname_ '_vdec_exo_',int2str(ifig)]);
-      close(gcf),
+    ifig=0;
+    for j=1:M_.exo_nbr,
+      if mod(j,6)==1
+        figure('name',['Variance decomposition shocks']);
+        ifig=ifig+1;
+        iplo=0;
+      end
+      iplo=iplo+1;
+      subplot(2,3,iplo)
+      myboxplot(squeeze(vdec(:,j,:))',[],'.',[],10)
+      %     boxplot(squeeze(vdec(:,j,:))','whis',10,'symbol','.r')
+      set(gca,'xticklabel',' ','fontsize',10,'xtick',[1:size(options_.varobs,1)])
+      set(gca,'xlim',[0.5 size(options_.varobs,1)+0.5])
+      set(gca,'ylim',[-2 102])
+      for ip=1:size(options_.varobs,1),
+        text(ip,-4,deblank(options_.varobs(ip,:)),'rotation',90,'HorizontalAlignment','right','interpreter','none')
+      end
+      xlabel(' ')
+      ylabel(' ')
+      title(M_.exo_names(j,:),'interpreter','none')
+      if mod(j,6)==0 | j==M_.exo_nbr,
+        saveas(gcf,[OutputDirectoryName,'/',fname_,'_vdec_exo_',int2str(ifig)])
+        eval(['print -depsc2 ' OutputDirectoryName '/' fname_ '_vdec_exo_',int2str(ifig)]);
+        eval(['print -dpdf ' OutputDirectoryName '/' fname_ '_vdec_exo_',int2str(ifig)]);
+        close(gcf),
+      end
     end
   end
-end
-[vdec, j0, ir_vdec, ic_vdec] = teff(vdec,Nsam,istable);
-[cc, j0, ir_cc, ic_cc] = teff(cc,Nsam,istable);
-[ac, j0, ir_ac, ic_ac] = teff(ac,Nsam,istable);
+  for j=1:size(cc,1)
+    cc(j,j,:)=stand_(squeeze(log(cc(j,j,:))))./2;
+  end
+  [vdec, j0, ir_vdec, ic_vdec] = teff(vdec,Nsam,istable);
+  [cc, j0, ir_cc, ic_cc] = teff(cc,Nsam,istable);
+  [ac, j0, ir_ac, ic_ac] = teff(ac,Nsam,istable);
 
   [nr1, nc1, nnn] = size(T);
+    endo_nbr = M_.endo_nbr;
+    nstatic = oo_.dr.nstatic;
+    npred = oo_.dr.npred;
+    iv = (1:endo_nbr)';
+    ic = [ nstatic+(1:npred) endo_nbr+(1:size(oo_.dr.ghx,2)-npred) ]';
+    aux = oo_.dr.transition_auxiliary_variables;
+    k = find(aux(:,2) > npred);
+    aux(:,2) = aux(:,2) + nstatic;
+    aux(k,2) = aux(k,2) + oo_.dr.nfwrd;
+  
   dr.ghx = T(:, [1:(nc1-M_.exo_nbr)],1);
   dr.ghu = T(:, [(nc1-M_.exo_nbr+1):end], 1);
-[Aa,Bb] = kalman_transition_matrix(dr, ...
-  bayestopt_.restrict_var_list, ...
-  bayestopt_.restrict_columns, ...
-  bayestopt_.restrict_aux, M_.exo_nbr);
-A = zeros(size(Aa,1),size(Aa,2)+size(Aa,1),length(istable));
-% Sig(estim_params_.var_exo(:,1))=lpmatx(1,:).^2;
-set_shocks_param(lpmatx(1,:));
-A(:,:,1)=[Aa, triu(Bb*M_.Sigma_e*Bb')];
-for j=2:length(istable),
-  dr.ghx = T(:, [1:(nc1-M_.exo_nbr)],j);
-  dr.ghu = T(:, [(nc1-M_.exo_nbr+1):end], j);
   [Aa,Bb] = kalman_transition_matrix(dr, ...
-    bayestopt_.restrict_var_list, ...
-    bayestopt_.restrict_columns, ...
-    bayestopt_.restrict_aux, M_.exo_nbr);
-  set_shocks_param(lpmatx(j,:));
-  A(:,:,j)=[Aa, triu(Bb*M_.Sigma_e*Bb')];
-end
-clear T;
-clear lpmatx;
+    iv, ic, aux, M_.exo_nbr);
+%     bayestopt_.restrict_var_list, ...
+%     bayestopt_.restrict_columns, ...
+%     bayestopt_.restrict_aux, M_.exo_nbr);
+  A = zeros(size(Aa,1),size(Aa,2)+size(Aa,1),length(istable));
+  % Sig(estim_params_.var_exo(:,1))=lpmatx(1,:).^2;
+  set_shocks_param(lpmatx(1,:));
+  A(:,:,1)=[Aa, triu(Bb*M_.Sigma_e*Bb')];
+  for j=2:length(istable),
+    dr.ghx = T(:, [1:(nc1-M_.exo_nbr)],j);
+    dr.ghu = T(:, [(nc1-M_.exo_nbr+1):end], j);
+    [Aa,Bb] = kalman_transition_matrix(dr, ...
+    iv, ic, aux, M_.exo_nbr);
+%       bayestopt_.restrict_var_list, ...
+%       bayestopt_.restrict_columns, ...
+%       bayestopt_.restrict_aux, M_.exo_nbr);
+    set_shocks_param(lpmatx(j,:));
+    A(:,:,j)=[Aa, triu(Bb*M_.Sigma_e*Bb')];
+  end
+  clear T;
+  clear lpmatx;
 
-[nr,nc,nn]=size(A);
-io=bayestopt_.mf1;
-T1=A(io,1:nr,:);
-ino=find(~ismember([1:nr],io));
-T2=A(ino,1:nr,:);
-R=A(:,nr+1:nc,:);
-[tadj, iff] = speed(A(1:nr,1:nr,:),R,io,0.5);
-[tadj, j0, ir_tadj, ic_tadj] = teff(tadj,Nsam,istable);
-[iff, j0, ir_if, ic_if] = teff(iff,Nsam,istable);
+  [nr,nc,nn]=size(A);
+  io=bayestopt_.mf2;
+  % T1=A(io,1:nr,:);
+  % ino=find(~ismember([1:nr],io));
+  % T2=A(ino,1:nr,:);
+  R=A(:,nr+1:nc,:);
+  [tadj, iff] = speed(A(1:nr,1:nr,:),R,io,0.5);
+  [tadj, j0, ir_tadj, ic_tadj] = teff(tadj,Nsam,istable);
+  [iff, j0, ir_if, ic_if] = teff(iff,Nsam,istable);
 
 
-[yt, j0]=teff(A,Nsam,istable);
-[yt1, j01]=teff(T1,Nsam,istable);
-[yt2, j02]=teff(T2,Nsam,istable);
-[ytr, j0r]=teff(R,Nsam,istable);
-
-yt=[yt1 yt2 ytr];
+  [yt, j0]=teff(A,Nsam,istable);
+  if opt_gsa.morris<=0,
+  if max(max(abs(TAU-yt(istable,:)')))<= 1.e-10,
+    disp('Model check OK'),
+    clear TAU A
+  end
+  else
+    clear A
+  end
+  % [yt1, j01]=teff(T1,Nsam,istable);
+  % [yt2, j02]=teff(T2,Nsam,istable);
+  % [ytr, j0r]=teff(R,Nsam,istable);
+  %
+  % yt=[yt1 yt2 ytr];
+  save([OutputDirectoryName,'/',fname_,'_main_eff'],'ac','cc','vdec','yt','tadj','iff')
+else
+   [pdraws, TAU, GAM, H, JJ] = dynare_identification([1:npT]); %,[lpmatx lpmat(istable,:)]);
+  load([OutputDirectoryName,'/',fname_,'_main_eff'],'ac','cc','vdec','yt','tadj','iff')
 end
 
 %   for j=1:nr,
@@ -237,6 +269,7 @@ if opt_gsa.morris==1,
     [SAmeas, SAMorris(:,:,i)] = Morris_Measure_Groups(npT, [lpmat0 lpmat], [ccac(:,i)],nliv);
   end
   SAcc = squeeze(SAMorris(:,1,:))';
+  SAcc = SAcc./(max(SAcc')'*ones(1,npT));
   save([OutputDirectoryName,'/',fname_,'_morris_IDE'],'SAcc','cc','ir_cc','ic_cc','-append')
   save([OutputDirectoryName,'/',fname_,'_morris_IDE'],'ac','ir_ac','ic_ac','-append')
   else
@@ -262,34 +295,44 @@ if opt_gsa.morris==1,
   eval(['print -dpdf ' OutputDirectoryName '/' fname_ '_morris_moments']);
 %   close(gcf),
 
-  if opt_gsa.load_ident==0,
-    for j=1:npT,
-  SAMorris = [];
-  ddd=NaN(size(lpmat,1),size(JJ,1));
-  ddd(istable,:) = squeeze(JJ(:,j,:))';
-  for i=1:size(ddd,2),
-    [SAmeas, SAMorris(:,:,i)] = Morris_Measure_Groups(npT, [lpmat0 lpmat], [ddd(:,i)],nliv);
-  end
-  SAddd(:,:,j) = squeeze(SAMorris(:,1,:))';
-  SAddd(:,:,j) = SAddd(:,:,j)./(max(SAddd(:,:,j)')'*ones(1,npT));
-  sad(:,j) = median(SAddd(find(~isnan(squeeze(SAddd(:,1,j)))),:,j))'; 
-    end
-  save([OutputDirectoryName,'/',fname_,'_morris_IDE'],'SAddd','sad','-append')
-  else
-    load([OutputDirectoryName,'/',fname_,'_morris_IDE'],'SAddd','sad')
-  end
-  figure,
-  contourf(sad,10), colorbar
-  set(gca,'xticklabel',' ','fontsize',10,'xtick',[1:npT])
-  set(gca,'yticklabel',' ','fontsize',10,'ytick',[1:npT])
-  for ip=1:npT,
-    text(ip,0.9,['D(',bayestopt_.name{ip},')'],'rotation',90,'HorizontalAlignment','right','interpreter','none')
-    text(0.9,ip,[bayestopt_.name{ip}],'rotation',0,'HorizontalAlignment','right','interpreter','none')
-  end
-  [m,im]=max(sad);
-  iii = find((im-[1:npT])==0);
-  disp('Most identified params')
-  disp(bayestopt_.name(iii))
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% MORRIS FOR DERIVATIVES  
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% if opt_gsa.load_ident==0,
+%     for j=1:npT,
+%   SAMorris = [];
+%   ddd=NaN(size(lpmat,1),size(JJ,1));
+%   ddd(istable,:) = squeeze(JJ(:,j,:))';
+%   for i=1:size(ddd,2),
+%     [SAmeas, SAMorris(:,:,i)] = Morris_Measure_Groups(npT, [lpmat0 lpmat], [ddd(:,i)],nliv);
+%   end
+%   SAddd(:,:,j) = squeeze(SAMorris(:,1,:))';
+%   SAddd(:,:,j) = SAddd(:,:,j)./(max(SAddd(:,:,j)')'*ones(1,npT));
+%   sad(:,j) = median(SAddd(find(~isnan(squeeze(SAddd(:,1,j)))),:,j))'; 
+%     end
+%   save([OutputDirectoryName,'/',fname_,'_morris_IDE'],'SAddd','sad','-append')
+%   else
+%     load([OutputDirectoryName,'/',fname_,'_morris_IDE'],'SAddd','sad')
+%   end
+%   figure,
+%   contourf(sad,10), colorbar
+%   set(gca,'xticklabel',' ','fontsize',10,'xtick',[1:npT])
+%   set(gca,'yticklabel',' ','fontsize',10,'ytick',[1:npT])
+%   for ip=1:npT,
+%     text(ip,0.9,['D(',bayestopt_.name{ip},')'],'rotation',90,'HorizontalAlignment','right','interpreter','none')
+%     text(0.9,ip,[bayestopt_.name{ip}],'rotation',0,'HorizontalAlignment','right','interpreter','none')
+%   end
+%   [m,im]=max(sad);
+%   iii = find((im-[1:npT])==0);
+%   disp('Most identified params')
+%   disp(bayestopt_.name(iii))
+  
+  
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% END OF MORRIS FOR DERIVATIVES  
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+  
 %   ifig = 0;
 %   for j=1:size(options_.varobs,1)
 %     if mod(j,6)==1
@@ -767,132 +810,135 @@ else,  % main effects analysis
   nrun=length(istable);
   nest=min(250,nrun);
   nfit=min(1000,nrun);
-  if opt_gsa.load_ident==0,
-  try 
-    EET=load([OutputDirectoryName,'/SCREEN/',fname_,'_morris_IDE'],'SAvdec','vdec','ir_vdec','ic_vdec');
-  catch
-    EET=[];
-  end
-  SAvdec=zeros(size(vdec,2),npT);
-
-  for j=1:size(vdec,2),
-    if itrans==0,
-      y0 = vdec(istable,j);
-    elseif itrans==1,
-      y0 = log_trans_(vdec(istable,j));
-    else
-      y0 = trank(vdec(istable,j));
-    end
-    if ~isempty(EET),
-%       imap=find(EET.SAvdec(j,:));
-%       [dum, isort]=sort(-EET.SAvdec(j,:));
-      imap=find(EET.SAvdec(j,:) >= (0.1.*max(EET.SAvdec(j,:))) );
-    end
-  gsa_(j) = gsa_sdp(y0(1:nest), x0(1:nest,imap), ...
-      2, [],[],[],0,[OutputDirectoryName,'/map_vdec',fsuffix,int2str(j)], pnames);
-  if nfit>nest,
-    gsa_(j) = gsa_sdp(y0(1:nfit), x0(1:nfit,imap), ...
-        -2, gsa_(j).nvr*nest^3/nfit^3,[],[],0,[OutputDirectoryName,'/map_vdec',fsuffix,int2str(j)], pnames);
-  end
-    
-    SAvdec(j,imap)=gsa_(j).si;
-    imap_vdec{j}=imap;
-  end
-  save([OutputDirectoryName,'/',fname_,'_main_eff'],'imap_vdec','SAvdec','vdec','ir_vdec','ic_vdec','-append')
-  else
-  load([OutputDirectoryName,'/',fname_,'_main_eff'],'imap_vdec','SAvdec','vdec','ir_vdec','ic_vdec')
-  end
-  figure,
-%   boxplot(SAvdec,'whis',10,'symbol','r.')
-  myboxplot(SAvdec,[],'.',[],10)
-  set(gca,'xticklabel',' ','fontsize',10,'xtick',[1:np])
-  set(gca,'xlim',[0.5 npT+0.5])
-  ydum = get(gca,'ylim');
-  set(gca,'ylim',[0 ydum(2)])
-  set(gca,'position',[0.13 0.2 0.775 0.7])
-  for ip=1:npT,
-    text(ip,-0.02,bayestopt_.name{ip},'rotation',90,'HorizontalAlignment','right','interpreter','none')
-%     text(ip,-0.02,deblank(pnames(ip,:)),'rotation',90,'HorizontalAlignment','right','interpreter','none')
-  end
-  xlabel(' ')
-  title(['Main effects variance decomposition ',fsuffix],'interpreter','none')
-  saveas(gcf,[OutputDirectoryName,'/',fname_,'_map_vdec',fsuffix])
-  eval(['print -depsc2 ' OutputDirectoryName '/' fname_ '_map_vdec',fsuffix]);
-  eval(['print -dpdf ' OutputDirectoryName '/' fname_ '_map_vdec',fsuffix]);
-  close(gcf),
-
-  ifig = 0;
-  for j=1:size(options_.varobs,1)
-    if mod(j,6)==1
-      figure('name',['Main effects observed variance decomposition ',fsuffix]);
-      ifig=ifig+1;
-      iplo=0;
-    end
-    iplo=iplo+1;
-    subplot(3,2,iplo)
-    iv = find(ir_vdec==j);
-    if ~isempty(iv)
-      if length(iv)>1
-%         boxplot(SAvdec(iv,:),'whis',10,'symbol','r.');
-        myboxplot(SAvdec(iv,:),[],'.',[],10)
-      else
-        plot(SAvdec(iv,:),'r.');
-      end
-      set(gca,'xticklabel',' ','fontsize',10,'xtick',[1:np])
-      set(gca,'xlim',[0.5 npT+0.5])
-      ydum = get(gca,'ylim');
-      set(gca,'ylim',[0 ydum(2)])
-      for ip=1:npT,
-        text(ip,-0.02,bayestopt_.name{ip},'rotation',90,'HorizontalAlignment','right','interpreter','none')
-%         text(ip,-0.02,deblank(pnames(ip,:)),'rotation',90,'HorizontalAlignment','right','interpreter','none')
-      end
-      xlabel(' ')
-    end
-    title(options_.varobs(j,:),'interpreter','none')
-    if mod(j,6)==0 | j==size(options_.varobs,1)
-      saveas(gcf,[OutputDirectoryName,'/',fname_,'_map_vdec',fsuffix,'_varobs_',int2str(ifig)])
-      eval(['print -depsc2 ' OutputDirectoryName '/' fname_ '_map_vdec',fsuffix,'_varobs_',int2str(ifig)]);
-      eval(['print -dpdf ' OutputDirectoryName '/' fname_ '_map_vdec',fsuffix,'_varobs_',int2str(ifig)]);
-      close(gcf),
-    end
-  end
-
-  ifig = 0;
-  for j=1:M_.exo_nbr,
-    if mod(j,6)==1
-      figure('name',['Main effects shocks variance decomposition ',fsuffix]);
-      ifig=ifig+1;
-      iplo=0;
-    end
-    iplo=iplo+1;
-    subplot(3,2,iplo)
-    iv = find(ic_vdec==j);
-    if ~isempty(iv)
-      if length(iv)>1
-%         boxplot(SAvdec(iv,:),'whis',3,'symbol','r.');
-        myboxplot(SAvdec(iv,:),[],'.',[],10)
-      else
-        plot(SAvdec(iv,:),'r.');
-      end
-      set(gca,'xticklabel',' ','fontsize',3,'xtick',[1:np])
-      set(gca,'xlim',[0.5 npT+0.5])
-      ydum = get(gca,'ylim');
-      set(gca,'ylim',[0 ydum(2)])
-      for ip=1:npT,
-        text(ip,-0.02,bayestopt_.name{ip},'rotation',90,'HorizontalAlignment','right','interpreter','none')
-%         text(ip,-0.02,deblank(pnames(ip,:)),'rotation',90,'HorizontalAlignment','right','interpreter','none')
-      end
-      xlabel(' ')
-      set(gca,'fontsize',10)
-    end
-    title(M_.exo_names(j,:),'interpreter','none','fontsize',10)
-    if mod(j,6)==0 | j==M_.exo_nbr
-      saveas(gcf,[OutputDirectoryName,'/',fname_,'_map_vdec',fsuffix,'_exo_',int2str(ifig)])
-      eval(['print -depsc2 ' OutputDirectoryName '/' fname_ '_map_vdec',fsuffix,'_exo_',int2str(ifig)]);
-      eval(['print -dpdf ' OutputDirectoryName '/' fname_ '_map_vdec',fsuffix,'_exo_',int2str(ifig)]);
-      close(gcf),
-    end
-  end
+  
+  opt_gsa.load_ident=0;
+  
+%   if opt_gsa.load_ident==0,
+%   try 
+%     EET=load([OutputDirectoryName,'/SCREEN/',fname_,'_morris_IDE'],'SAvdec','vdec','ir_vdec','ic_vdec');
+%   catch
+%     EET=[];
+%   end
+%   SAvdec=zeros(size(vdec,2),npT);
+% 
+%   for j=1:size(vdec,2),
+%     if itrans==0,
+%       y0 = vdec(istable,j);
+%     elseif itrans==1,
+%       y0 = log_trans_(vdec(istable,j));
+%     else
+%       y0 = trank(vdec(istable,j));
+%     end
+%     if ~isempty(EET),
+% %       imap=find(EET.SAvdec(j,:));
+% %       [dum, isort]=sort(-EET.SAvdec(j,:));
+%       imap=find(EET.SAvdec(j,:) >= (0.1.*max(EET.SAvdec(j,:))) );
+%     end
+%   gsa_(j) = gsa_sdp(y0(1:nest), x0(1:nest,imap), ...
+%       2, [],[],[],0,[OutputDirectoryName,'/map_vdec',fsuffix,int2str(j)], pnames);
+%   if nfit>nest,
+%     gsa_(j) = gsa_sdp(y0(1:nfit), x0(1:nfit,imap), ...
+%         -2, gsa_(j).nvr*nest^3/nfit^3,[],[],0,[OutputDirectoryName,'/map_vdec',fsuffix,int2str(j)], pnames);
+%   end
+%     
+%     SAvdec(j,imap)=gsa_(j).si;
+%     imap_vdec{j}=imap;
+%   end
+%   save([OutputDirectoryName,'/',fname_,'_main_eff'],'imap_vdec','SAvdec','vdec','ir_vdec','ic_vdec','-append')
+%   else
+%   load([OutputDirectoryName,'/',fname_,'_main_eff'],'imap_vdec','SAvdec','vdec','ir_vdec','ic_vdec')
+%   end
+%   figure,
+% %   boxplot(SAvdec,'whis',10,'symbol','r.')
+%   myboxplot(SAvdec,[],'.',[],10)
+%   set(gca,'xticklabel',' ','fontsize',10,'xtick',[1:np])
+%   set(gca,'xlim',[0.5 npT+0.5])
+%   ydum = get(gca,'ylim');
+%   set(gca,'ylim',[0 ydum(2)])
+%   set(gca,'position',[0.13 0.2 0.775 0.7])
+%   for ip=1:npT,
+%     text(ip,-0.02,bayestopt_.name{ip},'rotation',90,'HorizontalAlignment','right','interpreter','none')
+% %     text(ip,-0.02,deblank(pnames(ip,:)),'rotation',90,'HorizontalAlignment','right','interpreter','none')
+%   end
+%   xlabel(' ')
+%   title(['Main effects variance decomposition ',fsuffix],'interpreter','none')
+%   saveas(gcf,[OutputDirectoryName,'/',fname_,'_map_vdec',fsuffix])
+%   eval(['print -depsc2 ' OutputDirectoryName '/' fname_ '_map_vdec',fsuffix]);
+%   eval(['print -dpdf ' OutputDirectoryName '/' fname_ '_map_vdec',fsuffix]);
+%   close(gcf),
+% 
+%   ifig = 0;
+%   for j=1:size(options_.varobs,1)
+%     if mod(j,6)==1
+%       figure('name',['Main effects observed variance decomposition ',fsuffix]);
+%       ifig=ifig+1;
+%       iplo=0;
+%     end
+%     iplo=iplo+1;
+%     subplot(3,2,iplo)
+%     iv = find(ir_vdec==j);
+%     if ~isempty(iv)
+%       if length(iv)>1
+% %         boxplot(SAvdec(iv,:),'whis',10,'symbol','r.');
+%         myboxplot(SAvdec(iv,:),[],'.',[],10)
+%       else
+%         plot(SAvdec(iv,:),'r.');
+%       end
+%       set(gca,'xticklabel',' ','fontsize',10,'xtick',[1:np])
+%       set(gca,'xlim',[0.5 npT+0.5])
+%       ydum = get(gca,'ylim');
+%       set(gca,'ylim',[0 ydum(2)])
+%       for ip=1:npT,
+%         text(ip,-0.02,bayestopt_.name{ip},'rotation',90,'HorizontalAlignment','right','interpreter','none')
+% %         text(ip,-0.02,deblank(pnames(ip,:)),'rotation',90,'HorizontalAlignment','right','interpreter','none')
+%       end
+%       xlabel(' ')
+%     end
+%     title(options_.varobs(j,:),'interpreter','none')
+%     if mod(j,6)==0 | j==size(options_.varobs,1)
+%       saveas(gcf,[OutputDirectoryName,'/',fname_,'_map_vdec',fsuffix,'_varobs_',int2str(ifig)])
+%       eval(['print -depsc2 ' OutputDirectoryName '/' fname_ '_map_vdec',fsuffix,'_varobs_',int2str(ifig)]);
+%       eval(['print -dpdf ' OutputDirectoryName '/' fname_ '_map_vdec',fsuffix,'_varobs_',int2str(ifig)]);
+%       close(gcf),
+%     end
+%   end
+% 
+%   ifig = 0;
+%   for j=1:M_.exo_nbr,
+%     if mod(j,6)==1
+%       figure('name',['Main effects shocks variance decomposition ',fsuffix]);
+%       ifig=ifig+1;
+%       iplo=0;
+%     end
+%     iplo=iplo+1;
+%     subplot(3,2,iplo)
+%     iv = find(ic_vdec==j);
+%     if ~isempty(iv)
+%       if length(iv)>1
+% %         boxplot(SAvdec(iv,:),'whis',3,'symbol','r.');
+%         myboxplot(SAvdec(iv,:),[],'.',[],10)
+%       else
+%         plot(SAvdec(iv,:),'r.');
+%       end
+%       set(gca,'xticklabel',' ','fontsize',3,'xtick',[1:np])
+%       set(gca,'xlim',[0.5 npT+0.5])
+%       ydum = get(gca,'ylim');
+%       set(gca,'ylim',[0 ydum(2)])
+%       for ip=1:npT,
+%         text(ip,-0.02,bayestopt_.name{ip},'rotation',90,'HorizontalAlignment','right','interpreter','none')
+% %         text(ip,-0.02,deblank(pnames(ip,:)),'rotation',90,'HorizontalAlignment','right','interpreter','none')
+%       end
+%       xlabel(' ')
+%       set(gca,'fontsize',10)
+%     end
+%     title(M_.exo_names(j,:),'interpreter','none','fontsize',10)
+%     if mod(j,6)==0 | j==M_.exo_nbr
+%       saveas(gcf,[OutputDirectoryName,'/',fname_,'_map_vdec',fsuffix,'_exo_',int2str(ifig)])
+%       eval(['print -depsc2 ' OutputDirectoryName '/' fname_ '_map_vdec',fsuffix,'_exo_',int2str(ifig)]);
+%       eval(['print -dpdf ' OutputDirectoryName '/' fname_ '_map_vdec',fsuffix,'_exo_',int2str(ifig)]);
+%       close(gcf),
+%     end
+%   end
 
   if opt_gsa.load_ident==0,
   try 
@@ -900,544 +946,556 @@ else,  % main effects analysis
   catch
     EET=[];
   end
-  SAcc=zeros(size(cc,2),npT);
-  for j=1:size(cc,2),
+  ccac = stand_([cc ac]);
+  [pcc, dd] = eig(cov(ccac(istable,:)));
+  [latent, isort] = sort(-diag(dd));
+  latent = -latent;
+  pcc=pcc(:,isort);
+  ccac = ccac*pcc;
+  npca = max(find(cumsum(latent)./length(latent)<0.99))+1;
+  siPCA = (EET.SAcc'*abs(pcc'))';
+  siPCA = siPCA./(max(siPCA')'*ones(1,npT)).*(latent*ones(1,npT));
+%   siPCA = sum(siPCA,1);
+%   siPCA = siPCA./max(siPCA);
+  SAcc=zeros(size(ccac,2),npT);
+  for j=1:npca, %size(ccac,2),
     if itrans==0,
-      y0 = cc(istable,j);
+      y0 = ccac(istable,j);
     elseif itrans==1,
-      y0 = log_trans_(cc(istable,j));
+      y0 = log_trans_(ccac(istable,j));
     else
-      y0 = trank(cc(istable,j));
+      y0 = trank(ccac(istable,j));
     end
     if ~isempty(EET),
 %       imap=find(EET.SAvdec(j,:));
 %       [dum, isort]=sort(-EET.SAvdec(j,:));
-      imap=find(EET.SAcc(j,:) >= (0.1.*max(EET.SAcc(j,:))) );
+      imap=find(siPCA(j,:) >= (0.1.*max(siPCA(j,:))) );
+%       imap=find(EET.SAcc(j,:) >= (0.1.*max(EET.SAcc(j,:))) );
     end
   gsa_(j) = gsa_sdp(y0(1:nest), x0(1:nest,imap), ...
       2, [],[],[],0,[OutputDirectoryName,'/map_cc',fsuffix,int2str(j)], pnames);
-  if nfit>nest,
-    gsa_(j) = gsa_sdp(y0(1:nfit), x0(1:nfit,imap), ...
-        -2, gsa_(j).nvr*nest^3/nfit^3,[],[],0,[OutputDirectoryName,'/map_cc',fsuffix,int2str(j)], pnames);
-  end
+%   if nfit>nest,
+%     gsa_(j) = gsa_sdp(y0(1:nfit), x0(1:nfit,imap), ...
+%         -2, gsa_(j).nvr*nest^3/nfit^3,[],[],0,[OutputDirectoryName,'/map_cc',fsuffix,int2str(j)], pnames);
+%   end
     SAcc(j,imap)=gsa_(j).si;
     imap_cc{j}=imap;
 
   end
-  save([OutputDirectoryName,'/',fname_,'_main_eff'],'imap_cc','SAcc','cc','ir_cc','ic_cc','-append')
+  save([OutputDirectoryName,'/',fname_,'_main_eff'],'imap_cc','SAcc','ccac','-append')
   else
-    load([OutputDirectoryName,'/',fname_,'_main_eff'],'imap_cc','SAcc','cc','ir_cc','ic_cc')
+    load([OutputDirectoryName,'/',fname_,'_main_eff'],'imap_cc','SAcc','ccac')
     
   end
-  figure,
-%   boxplot(SAcc,'whis',10,'symbol','r.')
-  myboxplot(SAcc,[],'.',[],10)
-  set(gca,'xticklabel',' ','fontsize',10,'xtick',[1:np])
-  set(gca,'xlim',[0.5 npT+0.5])
-  ydum = get(gca,'ylim');
-  set(gca,'ylim',[0 ydum(2)])
-  set(gca,'position',[0.13 0.2 0.775 0.7])
-  for ip=1:npT,
-    text(ip,-0.02,bayestopt_.name{ip},'rotation',90,'HorizontalAlignment','right','interpreter','none')
+%   figure,
+% %   boxplot(SAcc,'whis',10,'symbol','r.')
+%   myboxplot(SAcc,[],'.',[],10)
+%   set(gca,'xticklabel',' ','fontsize',10,'xtick',[1:np])
+%   set(gca,'xlim',[0.5 npT+0.5])
+%   ydum = get(gca,'ylim');
+%   set(gca,'ylim',[0 ydum(2)])
+%   set(gca,'position',[0.13 0.2 0.775 0.7])
+%   for ip=1:npT,
+%     text(ip,-0.02,bayestopt_.name{ip},'rotation',90,'HorizontalAlignment','right','interpreter','none')
+% %     text(ip,-0.02,deblank(pnames(ip,:)),'rotation',90,'HorizontalAlignment','right','interpreter','none')
+%   end
+%   xlabel(' ')
+%   ylabel(' ')
+%   title(['Main effects moments''s PCA ',fsuffix],'interpreter','none')
+%   saveas(gcf,[OutputDirectoryName,'/',fname_,'_map_cc',fsuffix])
+%   eval(['print -depsc2 ' OutputDirectoryName '/' fname_ '_map_moments',fsuffix]);
+%   eval(['print -dpdf ' OutputDirectoryName '/' fname_ '_map_moments',fsuffix]);
+%   close(gcf),
+
+%   ifig = 0;
+%   for j=1:size(options_.varobs,1)
+%     if mod(j,6)==1
+%       figure('name',['Main effects cross-covariances ',fsuffix]);
+%       ifig=ifig+1;
+%       iplo=0;
+%     end
+%     iplo=iplo+1;
+%     subplot(3,2,iplo)
+%     iv = find(ir_cc==j);
+%     iv = [iv; find(ic_cc==j)];
+%     if ~isempty(iv)
+%       if length(iv)>1
+% %         boxplot(SAcc(iv,:),'whis',10,'symbol','r.');
+%         myboxplot(SAcc(iv,:),[],'.',[],10)
+%       else
+%         plot(SAcc(iv,:),'r.');
+%       end
+%       set(gca,'xticklabel',' ','fontsize',10,'xtick',[1:np])
+%       set(gca,'xlim',[0.5 npT+0.5])
+%       ydum = get(gca,'ylim');
+%       set(gca,'ylim',[0 ydum(2)])
+%       for ip=1:npT,
+%         text(ip,-0.02,bayestopt_.name{ip},'rotation',90,'HorizontalAlignment','right','interpreter','none')
+% %         text(ip,-0.02,deblank(pnames(ip,:)),'rotation',90,'HorizontalAlignment','right','interpreter','none')
+%       end
+%       xlabel(' ')
+%       set(gca,'fontsize',10)
+%     end
+%     title(options_.varobs(j,:),'interpreter','none','fontsize',10)
+%     if mod(j,6)==0 | j==size(options_.varobs,1)
+%       saveas(gcf,[OutputDirectoryName,'/',fname_,'_map_cc',fsuffix,'_',int2str(ifig)])
+%       eval(['print -depsc2 ' OutputDirectoryName '/' fname_ '_map_cc',fsuffix,'_',int2str(ifig)]);
+%       eval(['print -dpdf ' OutputDirectoryName '/' fname_ '_map_cc',fsuffix,'_',int2str(ifig)]);
+%       close(gcf),
+%     end
+%   end
+% 
+%   if opt_gsa.load_ident==0,
+%   try 
+%     EET=load([OutputDirectoryName,'/SCREEN/',fname_,'_morris_IDE'],'SAac','ir_ac','ic_ac');
+%   catch
+%     EET=[];
+%   end
+%   SAac=zeros(size(ac,2),npT);
+%   for j=1:size(ac,2),
+%     if itrans==0,
+%       y0 = ac(istable,j);
+%     elseif itrans==1,
+%       y0 = log_trans_(ac(istable,j));
+%     else
+%       y0 = trank(ac(istable,j));
+%     end
+%     if ~isempty(EET),
+%       imap=find(EET.SAac(j,:) >= (0.1.*max(EET.SAac(j,:))) );
+%     end
+% %     gsa_(j) = gsa_sdp_dyn( y0, lpmat(istable,:), ...
+% %       gsa_flag, [],[],[],0,[OutputDirectoryName,'/map_ac',fsuffix,int2str(j)], pnames);
+%   gsa_(j) = gsa_sdp(y0(1:nest), x0(1:nest,imap), ...
+%       2, [],[],[],0,[OutputDirectoryName,'/map_ac',fsuffix,int2str(j)], pnames);
+%   if nfit>nest,
+%     gsa_(j) = gsa_sdp(y0(1:nfit), x0(1:nfit,imap), ...
+%         -2, gsa_(j).nvr*nest^3/nfit^3,[],[],0,[OutputDirectoryName,'/map_ac',fsuffix,int2str(j)], pnames);
+%   end
+%     SAac(j,imap)=gsa_(j).si;
+%     imap_ac{j}=imap;
+% 
+%   end
+%   save([OutputDirectoryName,'/',fname_,'_main_eff'],'imap_ac','SAac','ac','ir_ac','ic_ac','-append')
+%   else
+%   load([OutputDirectoryName,'/',fname_,'_main_eff'],'imap_ac','SAac','ac','ir_ac','ic_ac')
+%   end
+% 
+%   figure,
+% %   boxplot(SAac,'whis',10,'symbol','r.')
+%   myboxplot(SAac,[],'.',[],10)
+%   set(gca,'xticklabel',' ','fontsize',10,'xtick',[1:np])
+%   set(gca,'xlim',[0.5 npT+0.5])
+%   ydum = get(gca,'ylim');
+%   set(gca,'ylim',[0 ydum(2)])
+%   set(gca,'position',[0.13 0.2 0.775 0.7])
+%   for ip=1:np,
 %     text(ip,-0.02,deblank(pnames(ip,:)),'rotation',90,'HorizontalAlignment','right','interpreter','none')
-  end
-  xlabel(' ')
-  ylabel(' ')
-  title(['Main effects cross-covariances ',fsuffix],'interpreter','none')
-  saveas(gcf,[OutputDirectoryName,'/',fname_,'_map_cc',fsuffix])
-  eval(['print -depsc2 ' OutputDirectoryName '/' fname_ '_map_cc',fsuffix]);
-  eval(['print -dpdf ' OutputDirectoryName '/' fname_ '_map_cc',fsuffix]);
-  close(gcf),
-
-  ifig = 0;
-  for j=1:size(options_.varobs,1)
-    if mod(j,6)==1
-      figure('name',['Main effects cross-covariances ',fsuffix]);
-      ifig=ifig+1;
-      iplo=0;
-    end
-    iplo=iplo+1;
-    subplot(3,2,iplo)
-    iv = find(ir_cc==j);
-    iv = [iv; find(ic_cc==j)];
-    if ~isempty(iv)
-      if length(iv)>1
-%         boxplot(SAcc(iv,:),'whis',10,'symbol','r.');
-        myboxplot(SAcc(iv,:),[],'.',[],10)
-      else
-        plot(SAcc(iv,:),'r.');
-      end
-      set(gca,'xticklabel',' ','fontsize',10,'xtick',[1:np])
-      set(gca,'xlim',[0.5 npT+0.5])
-      ydum = get(gca,'ylim');
-      set(gca,'ylim',[0 ydum(2)])
-      for ip=1:npT,
-        text(ip,-0.02,bayestopt_.name{ip},'rotation',90,'HorizontalAlignment','right','interpreter','none')
-%         text(ip,-0.02,deblank(pnames(ip,:)),'rotation',90,'HorizontalAlignment','right','interpreter','none')
-      end
-      xlabel(' ')
-      set(gca,'fontsize',10)
-    end
-    title(options_.varobs(j,:),'interpreter','none','fontsize',10)
-    if mod(j,6)==0 | j==size(options_.varobs,1)
-      saveas(gcf,[OutputDirectoryName,'/',fname_,'_map_cc',fsuffix,'_',int2str(ifig)])
-      eval(['print -depsc2 ' OutputDirectoryName '/' fname_ '_map_cc',fsuffix,'_',int2str(ifig)]);
-      eval(['print -dpdf ' OutputDirectoryName '/' fname_ '_map_cc',fsuffix,'_',int2str(ifig)]);
-      close(gcf),
-    end
-  end
-
-  if opt_gsa.load_ident==0,
-  try 
-    EET=load([OutputDirectoryName,'/SCREEN/',fname_,'_morris_IDE'],'SAac','ir_ac','ic_ac');
-  catch
-    EET=[];
-  end
-  SAac=zeros(size(ac,2),npT);
-  for j=1:size(ac,2),
-    if itrans==0,
-      y0 = ac(istable,j);
-    elseif itrans==1,
-      y0 = log_trans_(ac(istable,j));
-    else
-      y0 = trank(ac(istable,j));
-    end
-    if ~isempty(EET),
-      imap=find(EET.SAac(j,:) >= (0.1.*max(EET.SAac(j,:))) );
-    end
-%     gsa_(j) = gsa_sdp_dyn( y0, lpmat(istable,:), ...
-%       gsa_flag, [],[],[],0,[OutputDirectoryName,'/map_ac',fsuffix,int2str(j)], pnames);
-  gsa_(j) = gsa_sdp(y0(1:nest), x0(1:nest,imap), ...
-      2, [],[],[],0,[OutputDirectoryName,'/map_ac',fsuffix,int2str(j)], pnames);
-  if nfit>nest,
-    gsa_(j) = gsa_sdp(y0(1:nfit), x0(1:nfit,imap), ...
-        -2, gsa_(j).nvr*nest^3/nfit^3,[],[],0,[OutputDirectoryName,'/map_ac',fsuffix,int2str(j)], pnames);
-  end
-    SAac(j,imap)=gsa_(j).si;
-    imap_ac{j}=imap;
-
-  end
-  save([OutputDirectoryName,'/',fname_,'_main_eff'],'imap_ac','SAac','ac','ir_ac','ic_ac','-append')
-  else
-  load([OutputDirectoryName,'/',fname_,'_main_eff'],'imap_ac','SAac','ac','ir_ac','ic_ac')
-  end
-
-  figure,
-%   boxplot(SAac,'whis',10,'symbol','r.')
-  myboxplot(SAac,[],'.',[],10)
-  set(gca,'xticklabel',' ','fontsize',10,'xtick',[1:np])
-  set(gca,'xlim',[0.5 npT+0.5])
-  ydum = get(gca,'ylim');
-  set(gca,'ylim',[0 ydum(2)])
-  set(gca,'position',[0.13 0.2 0.775 0.7])
-  for ip=1:np,
-    text(ip,-0.02,deblank(pnames(ip,:)),'rotation',90,'HorizontalAlignment','right','interpreter','none')
-  end
-  xlabel(' ')
-  title(['Main effects 1 lag auto-covariances ',fsuffix],'interpreter','none')
-  saveas(gcf,[OutputDirectoryName,'/',fname_,'_map_ac',fsuffix])
-  eval(['print -depsc2 ' OutputDirectoryName '/' fname_ '_map_ac',fsuffix]);
-  eval(['print -dpdf ' OutputDirectoryName '/' fname_ '_map_ac',fsuffix]);
-  close(gcf),
-
-  ifig = 0;
-  for j=1:size(options_.varobs,1)
-    if mod(j,6)==1
-      figure('name',['Main effects auto-covariances ',fsuffix]);
-      ifig=ifig+1;
-      iplo = 0;
-    end
-    iplo=iplo+1;
-    subplot(3,2,iplo)
-    iv = find(ir_ac==j);
-    %iv = [iv; find(ic_ac==j)];
-    if ~isempty(iv)
-      if length(iv)>1
-%         boxplot(SAac(iv,:),'whis',10,'symbol','r.');
-        myboxplot(SAac(iv,:),[],'.',[],10)
-      else
-        plot(SAac(iv,:),'r.');
-      end
-      set(gca,'xticklabel',' ','fontsize',10,'xtick',[1:np])
-      set(gca,'xlim',[0.5 npT+0.5])
-      ydum = get(gca,'ylim');
-      set(gca,'ylim',[0 ydum(2)])
-      for ip=1:npT,
-        text(ip,-0.02,bayestopt_.name{ip},'rotation',90,'HorizontalAlignment','right','interpreter','none')
-%         text(ip,-0.02,deblank(pnames(ip,:)),'rotation',90,'HorizontalAlignment','right','interpreter','none')
-      end
-      xlabel(' ')
-      set(gca,'fontsize',10)
-    end
-    title(options_.varobs(j,:),'interpreter','none','fontsize',10)
-    if mod(j,6)==0 | j==size(options_.varobs,1)
-      saveas(gcf,[OutputDirectoryName,'/',fname_,'_map_ac',fsuffix,'_',int2str(ifig)])
-      eval(['print -depsc2 ' OutputDirectoryName '/' fname_ '_map_ac',fsuffix,'_',int2str(ifig)]);
-      eval(['print -dpdf ' OutputDirectoryName '/' fname_ '_map_ac',fsuffix,'_',int2str(ifig)]);
-      close(gcf),
-    end
-  end
+%   end
+%   xlabel(' ')
+%   title(['Main effects 1 lag auto-covariances ',fsuffix],'interpreter','none')
+%   saveas(gcf,[OutputDirectoryName,'/',fname_,'_map_ac',fsuffix])
+%   eval(['print -depsc2 ' OutputDirectoryName '/' fname_ '_map_ac',fsuffix]);
+%   eval(['print -dpdf ' OutputDirectoryName '/' fname_ '_map_ac',fsuffix]);
+%   close(gcf),
+% 
+%   ifig = 0;
+%   for j=1:size(options_.varobs,1)
+%     if mod(j,6)==1
+%       figure('name',['Main effects auto-covariances ',fsuffix]);
+%       ifig=ifig+1;
+%       iplo = 0;
+%     end
+%     iplo=iplo+1;
+%     subplot(3,2,iplo)
+%     iv = find(ir_ac==j);
+%     %iv = [iv; find(ic_ac==j)];
+%     if ~isempty(iv)
+%       if length(iv)>1
+% %         boxplot(SAac(iv,:),'whis',10,'symbol','r.');
+%         myboxplot(SAac(iv,:),[],'.',[],10)
+%       else
+%         plot(SAac(iv,:),'r.');
+%       end
+%       set(gca,'xticklabel',' ','fontsize',10,'xtick',[1:np])
+%       set(gca,'xlim',[0.5 npT+0.5])
+%       ydum = get(gca,'ylim');
+%       set(gca,'ylim',[0 ydum(2)])
+%       for ip=1:npT,
+%         text(ip,-0.02,bayestopt_.name{ip},'rotation',90,'HorizontalAlignment','right','interpreter','none')
+% %         text(ip,-0.02,deblank(pnames(ip,:)),'rotation',90,'HorizontalAlignment','right','interpreter','none')
+%       end
+%       xlabel(' ')
+%       set(gca,'fontsize',10)
+%     end
+%     title(options_.varobs(j,:),'interpreter','none','fontsize',10)
+%     if mod(j,6)==0 | j==size(options_.varobs,1)
+%       saveas(gcf,[OutputDirectoryName,'/',fname_,'_map_ac',fsuffix,'_',int2str(ifig)])
+%       eval(['print -depsc2 ' OutputDirectoryName '/' fname_ '_map_ac',fsuffix,'_',int2str(ifig)]);
+%       eval(['print -dpdf ' OutputDirectoryName '/' fname_ '_map_ac',fsuffix,'_',int2str(ifig)]);
+%       close(gcf),
+%     end
+%   end
   
-  x0=x0(:,nshock+1:end);
-  imap=[1:np];
+%   x0=x0(:,nshock+1:end);
+  imap=[1:npT];
 
-  if opt_gsa.load_ident==0,
-  try 
-    EET=load([OutputDirectoryName,'/SCREEN/',fname_,'_morris_IDE'],'SAtadj','ir_tadj','ic_tadj');
-    ny=size(EET.SAtadj,1);
-  catch
-    EET=[];
-  end
-  SAtadj=zeros(size(tadj,2),np);
-  for j=1:size(tadj,2),
-    if itrans==0,
-      y0 = tadj(istable,j);
-    elseif itrans==1,
-      y0 = log_trans_(tadj(istable,j));
-    else
-      y0 = trank(tadj(istable,j));
-    end
-    if ~isempty(EET),
-      if size(tadj,2)~=ny,
-        jj=find(EET.ir_tadj==ir_tadj(j));
-        jj=jj(find(EET.ic_tadj(jj)==ic_tadj(j)));
-        if ~isempty(jj),
-          imap=find(EET.SAtadj(jj,:) >= (0.1.*max(EET.SAtadj(jj,:))) );
-        else
-          imap=[1:np];
-        end
-      else
-        imap=find(EET.SAtadj(j,:) >= (0.1.*max(EET.SAtadj(j,:))) );
-      end
-    end
-%     gsa_(j) = gsa_sdp_dyn( y0, lpmat(istable,:), ...
-%       gsa_flag, [],[],[],0,[OutputDirectoryName,'/map_tadj',fsuffix,int2str(j)], pnames);
-  gsa_(j) = gsa_sdp(y0(1:nest), x0(1:nest,imap), ...
-      2, [],[],[],0,[OutputDirectoryName,'/map_tadj',fsuffix,int2str(j)], pnames);
-  if nfit>nest,
-    gsa_(j) = gsa_sdp(y0(1:nfit), x0(1:nfit,imap), ...
-        -2, gsa_(j).nvr*nest^3/nfit^3,[],[],0,[OutputDirectoryName,'/map_tadj',fsuffix,int2str(j)], pnames);
-  end
-    SAtadj(j,imap)=gsa_(j).si;
-    imap_tadj{j}=imap;
+%   if opt_gsa.load_ident==0,
+%   try 
+%     EET=load([OutputDirectoryName,'/SCREEN/',fname_,'_morris_IDE'],'SAtadj','ir_tadj','ic_tadj');
+%     ny=size(EET.SAtadj,1);
+%   catch
+%     EET=[];
+%   end
+%   SAtadj=zeros(size(tadj,2),np);
+%   for j=1:size(tadj,2),
+%     if itrans==0,
+%       y0 = tadj(istable,j);
+%     elseif itrans==1,
+%       y0 = log_trans_(tadj(istable,j));
+%     else
+%       y0 = trank(tadj(istable,j));
+%     end
+%     if ~isempty(EET),
+%       if size(tadj,2)~=ny,
+%         jj=find(EET.ir_tadj==ir_tadj(j));
+%         jj=jj(find(EET.ic_tadj(jj)==ic_tadj(j)));
+%         if ~isempty(jj),
+%           imap=find(EET.SAtadj(jj,:) >= (0.1.*max(EET.SAtadj(jj,:))) );
+%         else
+%           imap=[1:np];
+%         end
+%       else
+%         imap=find(EET.SAtadj(j,:) >= (0.1.*max(EET.SAtadj(j,:))) );
+%       end
+%     end
+% %     gsa_(j) = gsa_sdp_dyn( y0, lpmat(istable,:), ...
+% %       gsa_flag, [],[],[],0,[OutputDirectoryName,'/map_tadj',fsuffix,int2str(j)], pnames);
+%   gsa_(j) = gsa_sdp(y0(1:nest), x0(1:nest,imap), ...
+%       2, [],[],[],0,[OutputDirectoryName,'/map_tadj',fsuffix,int2str(j)], pnames);
+%   if nfit>nest,
+%     gsa_(j) = gsa_sdp(y0(1:nfit), x0(1:nfit,imap), ...
+%         -2, gsa_(j).nvr*nest^3/nfit^3,[],[],0,[OutputDirectoryName,'/map_tadj',fsuffix,int2str(j)], pnames);
+%   end
+%     SAtadj(j,imap)=gsa_(j).si;
+%     imap_tadj{j}=imap;
+% 
+%   end
+%   save([OutputDirectoryName,'/',fname_,'_main_eff'],'imap_tadj','SAtadj','tadj','ir_tadj','ic_tadj','-append')
+%   else
+%   load([OutputDirectoryName,'/',fname_,'_main_eff'],'imap_tadj','SAtadj','tadj','ir_tadj','ic_tadj')
+%   end
+% 
+%   figure,
+% %   boxplot(SAtadj,'whis',10,'symbol','r.')
+%   myboxplot(SAtadj,[],'.',[],10)
+%   set(gca,'xticklabel',' ','fontsize',10,'xtick',[1:np])
+%   set(gca,'xlim',[0.5 np+0.5])
+%   ydum = get(gca,'ylim');
+%   set(gca,'ylim',[0 ydum(2)])
+%   set(gca,'position',[0.13 0.2 0.775 0.7])
+%   for ip=1:np,
+%     text(ip,-0.02,deblank(pnames(ip,:)),'rotation',90,'HorizontalAlignment','right','interpreter','none')
+%   end
+%   xlabel(' ')
+%   title(['Main effects speed of adjustment ',fsuffix],'interpreter','none')
+%   saveas(gcf,[OutputDirectoryName,'/',fname_,'_map_tadj',fsuffix])
+%   eval(['print -depsc2 ' OutputDirectoryName '/' fname_ '_map_tadj',fsuffix]);
+%   eval(['print -dpdf ' OutputDirectoryName '/' fname_ '_map_tadj',fsuffix]);
+%   close(gcf),
+% 
+%   ifig = 0;
+%   for j=1:size(options_.varobs,1)
+%     if mod(j,6)==1
+%       figure('name',['Main effects observed speed adjustment ',fsuffix]);
+%       ifig=ifig+1;
+%       iplo = 0;
+%     end
+%     iplo=iplo+1;
+%     subplot(3,2,iplo)
+%     iv = find(ir_tadj==j);
+%     if ~isempty(iv)
+%       if length(iv)>1
+% %         boxplot(SAtadj(iv,:),'whis',3,'symbol','r.');
+%         myboxplot(SAtadj(iv,:),[],'.',[],10)
+%       else
+%         plot(SAtadj(iv,:),'r.');
+%       end
+%       set(gca,'xticklabel',' ','fontsize',10,'xtick',[1:np])
+%       set(gca,'xlim',[0.5 np+0.5])
+%       ydum = get(gca,'ylim');
+%       set(gca,'ylim',[0 ydum(2)])
+%       for ip=1:np,
+%         text(ip,-0.02,deblank(pnames(ip,:)),'rotation',90,'HorizontalAlignment','right','interpreter','none')
+%       end
+%       xlabel(' ')
+%     end
+%     title(options_.varobs(j,:),'interpreter','none')
+%     if mod(j,6)==0 | j==size(options_.varobs,1)
+%       saveas(gcf,[OutputDirectoryName,'/',fname_,'_map_tadj',fsuffix,'_varobs_',int2str(ifig)])
+%       eval(['print -depsc2 ' OutputDirectoryName '/' fname_ '_map_tadj',fsuffix,'_varobs_',int2str(ifig)]);
+%       eval(['print -dpdf ' OutputDirectoryName '/' fname_ '_map_tadj',fsuffix,'_varobs_',int2str(ifig)]);
+%       close(gcf),
+%     end
+%   end
+% 
+%   ifig = 0;
+%   for j=1:M_.exo_nbr,
+%     if mod(j,6)==1
+%       figure('name',['Main effects shocks speed of adjustment ',fsuffix]);
+%       ifig=ifig+1;
+%       iplo=0;
+%     end
+%     iplo=iplo+1;
+%     subplot(3,2,iplo)
+%     iv = find(ic_tadj==j);
+%     if ~isempty(iv)
+%       if length(iv)>1
+% %         boxplot(SAtadj(iv,:),'whis',3,'symbol','r.');
+%         myboxplot(SAtadj(iv,:),[],'.',[],10)
+%       else
+%         plot(SAtadj(iv,:),'r.');
+%       end
+%       set(gca,'xticklabel',' ','fontsize',10,'xtick',[1:np])
+%       set(gca,'xlim',[0.5 np+0.5])
+%       ydum = get(gca,'ylim');
+%       set(gca,'ylim',[0 ydum(2)])
+%       for ip=1:np,
+%         text(ip,-0.02,deblank(pnames(ip,:)),'rotation',90,'HorizontalAlignment','right','interpreter','none')
+%       end
+%       xlabel(' ')
+%     end
+%     title(M_.exo_names(j,:),'interpreter','none')
+%     if mod(j,6)==0 | j==M_.exo_nbr,
+%       saveas(gcf,[OutputDirectoryName,'/',fname_,'_map_tadj',fsuffix,'_exo_',int2str(ifig)])
+%       eval(['print -depsc2 ' OutputDirectoryName '/' fname_ '_map_tadj',fsuffix,'_exo_',int2str(ifig)]);
+%       eval(['print -dpdf ' OutputDirectoryName '/' fname_ '_map_tadj',fsuffix,'_exo_',int2str(ifig)]);
+%       close(gcf),
+%     end
+%   end
+% 
+% 
+%   if opt_gsa.load_ident==0,
+%   try 
+%     EET=load([OutputDirectoryName,'/SCREEN/',fname_,'_morris_IDE'],'SAIF','ir_if','ic_if');
+%   catch
+%     EET=[];
+%   end
+%   SAif=zeros(size(iff,2),np);
+%   for j=1:size(iff,2),
+%     if itrans==0,
+%       y0 = iff(istable,j);
+%     elseif itrans==1,
+%       y0 = log_trans_(iff(istable,j));
+%     else
+%       y0 = trank(iff(istable,j));
+%     end
+%     if ~isempty(EET),
+%       imap=find(EET.SAIF(j,:) >= (0.1.*max(EET.SAIF(j,:))) );
+%     end
+% %     gsa_(j) = gsa_sdp_dyn( y0, lpmat(istable,:), ...
+% %       gsa_flag, [],[],[],0,[OutputDirectoryName,'/map_if',fsuffix,int2str(j)], pnames);
+%   gsa_(j) = gsa_sdp(y0(1:nest), x0(1:nest,imap), ...
+%       2, [],[],[],0,[OutputDirectoryName,'/map_if',fsuffix,int2str(j)], pnames);
+%   if nfit>nest,
+%     gsa_(j) = gsa_sdp(y0(1:nfit), x0(1:nfit,imap), ...
+%         -2, gsa_(j).nvr*nest^3/nfit^3,[],[],0,[OutputDirectoryName,'/map_if',fsuffix,int2str(j)], pnames);
+%   end
+%     SAif(j,imap)=gsa_(j).si;
+%     imap_if{j}=imap;
+%     
+%   end
+%   save([OutputDirectoryName,'/',fname_,'_main_eff'],'imap_if','SAif','iff','ir_if','ic_if','-append')
+%   else
+%   load([OutputDirectoryName,'/',fname_,'_main_eff'],'imap_if','SAif','iff','ir_if','ic_if')
+%   end
+% 
+%   figure,
+% %   boxplot(SAif,'whis',10,'symbol','r.')
+%   myboxplot(SAif,[],'.',[],10)
+%   set(gca,'xticklabel',' ','fontsize',10,'xtick',[1:np])
+%   set(gca,'xlim',[0.5 np+0.5])
+%   ydum = get(gca,'ylim');
+%   set(gca,'ylim',[0 ydum(2)])
+%   set(gca,'position',[0.13 0.2 0.775 0.7])
+%   for ip=1:np,
+%     text(ip,-0.02,deblank(pnames(ip,:)),'rotation',90,'HorizontalAlignment','right','interpreter','none')
+%   end
+%   xlabel(' ')
+%   title(['Main effects impact factors ',fsuffix],'interpreter','none')
+%   saveas(gcf,[OutputDirectoryName,'/',fname_,'_map_if',fsuffix])
+%   eval(['print -depsc2 ' OutputDirectoryName '/' fname_ '_map_if',fsuffix]);
+%   eval(['print -dpdf ' OutputDirectoryName '/' fname_ '_map_if',fsuffix]);
+%   close(gcf),
+% 
+%   ifig = 0;
+%   for j=1:size(options_.varobs,1)
+%     if mod(j,6)==1
+%       figure('name',['Main effects observed impact factors ',fsuffix]);
+%       ifig=ifig+1;
+%       iplo = 0;
+%     end
+%     iplo=iplo+1;
+%     subplot(3,2,iplo)
+%     iv = find(ir_if==j);
+%     if ~isempty(iv)
+%       if length(iv)>1
+% %         boxplot(SAif(iv,:),'whis',3,'symbol','r.');
+%         myboxplot(SAif(iv,:),[],'.',[],10)
+%       else
+%         plot(SAif(iv,:),'r.');
+%       end
+%       set(gca,'xticklabel',' ','fontsize',10,'xtick',[1:np])
+%       set(gca,'xlim',[0.5 np+0.5])
+%       ydum = get(gca,'ylim');
+%       set(gca,'ylim',[0 ydum(2)])
+%       for ip=1:np,
+%         text(ip,-0.02,deblank(pnames(ip,:)),'rotation',90,'HorizontalAlignment','right','interpreter','none')
+%       end
+%       xlabel(' ')
+%     end
+%     title(options_.varobs(j,:),'interpreter','none')
+%     if mod(j,6)==0 | j==size(options_.varobs,1)
+%       saveas(gcf,[OutputDirectoryName,'/',fname_,'_map_if',fsuffix,'_varobs_',int2str(ifig)])
+%       eval(['print -depsc2 ' OutputDirectoryName '/' fname_ '_map_if',fsuffix,'_varobs_',int2str(ifig)]);
+%       eval(['print -dpdf ' OutputDirectoryName '/' fname_ '_map_if',fsuffix,'_varobs_',int2str(ifig)]);
+%       close(gcf),
+%     end
+%   end
+% 
+%   ifig = 0;
+%   for j=1:M_.exo_nbr,
+%     if mod(j,6)==1
+%       figure('name',['Main effects shocks impact factors ',fsuffix]);
+%       ifig=ifig+1;
+%       iplo=0;
+%     end
+%     iplo=iplo+1;
+%     subplot(3,2,iplo)
+%     iv = find(ic_if==j);
+%     if ~isempty(iv)
+%       if length(iv)>1
+% %         boxplot(SAif(iv,:),'whis',3,'symbol','r.');
+%         myboxplot(SAif(iv,:),[],'.',[],10)
+%       else
+%         plot(SAif(iv,:),'r.');
+%       end
+%       set(gca,'xticklabel',' ','fontsize',10,'xtick',[1:np])
+%       set(gca,'xlim',[0.5 np+0.5])
+%       ydum = get(gca,'ylim');
+%       set(gca,'ylim',[0 ydum(2)])
+%       for ip=1:np,
+%         text(ip,-0.02,deblank(pnames(ip,:)),'rotation',90,'HorizontalAlignment','right','interpreter','none')
+%       end
+%       xlabel(' ')
+%     end
+%     title(M_.exo_names(j,:),'interpreter','none')
+%     if mod(j,6)==0 | j==M_.exo_nbr
+%       saveas(gcf,[OutputDirectoryName,'/',fname_,'_map_if',fsuffix,'_exo_',int2str(ifig)])
+%       eval(['print -depsc2 ' OutputDirectoryName '/' fname_ '_map_if',fsuffix,'_exo_',int2str(ifig)]);
+%       eval(['print -dpdf ' OutputDirectoryName '/' fname_ '_map_if',fsuffix,'_exo_',int2str(ifig)]);
+%       close(gcf),
+%     end
+%   end
+%   SAmom = [SAvdec' SAcc' SAac']';
+%   SAdyn = [SAtadj' SAif']';
+%   SAall = [SAmom(:,nshock+1:end)' SAdyn']';
+%   
+%   figure,
+%   %   boxplot(SAtadj,'whis',10,'symbol','r.')
+%   myboxplot(SAmom,[],'.',[],10)
+%   set(gca,'xticklabel',' ','fontsize',10,'xtick',[1:npT])
+%   set(gca,'xlim',[0.5 npT+0.5])
+%   ydum = get(gca,'ylim');
+%   set(gca,'ylim',[0 ydum(2)])
+%   set(gca,'position',[0.13 0.2 0.775 0.7])
+%   for ip=1:npT,
+%     %     text(ip,-0.02,deblank(pnames(ip,:)),'rotation',90,'HorizontalAlignment','right','interpreter','none')
+%     text(ip,-0.02,bayestopt_.name{ip},'rotation',90,'HorizontalAlignment','right','interpreter','none')
+%   end
+%   xlabel(' ')
+%   title(['Main effects theoretical moments ',fsuffix],'interpreter','none')
+%   saveas(gcf,[OutputDirectoryName,'/',fname_,'_map_moments',fsuffix])
+%   eval(['print -depsc2 ' OutputDirectoryName '/' fname_ '_map_moments',fsuffix]);
+%   eval(['print -dpdf ' OutputDirectoryName '/' fname_ '_map_moments',fsuffix]);
+% %   close(gcf),
+%   
+%   figure,
+%   %   boxplot(SAtadj,'whis',10,'symbol','r.')
+%   myboxplot(SAdyn,[],'.',[],10)
+%   set(gca,'xticklabel',' ','fontsize',10,'xtick',[1:np])
+%   set(gca,'xlim',[0.5 np+0.5])
+%   ydum = get(gca,'ylim');
+%   set(gca,'ylim',[0 ydum(2)])
+%   set(gca,'position',[0.13 0.2 0.775 0.7])
+%   for ip=1:np,
+%     text(ip,-0.02,deblank(pnames(ip,:)),'rotation',90,'HorizontalAlignment','right','interpreter','none')
+% %     text(ip,-0.02,bayestopt_.name{ip},'rotation',90,'HorizontalAlignment','right','interpreter','none')
+%   end
+%   xlabel(' ')
+%   title(['Main effects short-long term dynamics ',fsuffix],'interpreter','none')
+%   saveas(gcf,[OutputDirectoryName,'/',fname_,'_map_dynamics',fsuffix])
+%   eval(['print -depsc2 ' OutputDirectoryName '/' fname_ '_map_dynamics',fsuffix]);
+%   eval(['print -dpdf ' OutputDirectoryName '/' fname_ '_map_dynamics',fsuffix]);
+% %   close(gcf),
+% 
+%   figure,
+%   %   boxplot(SAtadj,'whis',10,'symbol','r.')
+%   myboxplot(SAall,[],'.',[],10)
+%   set(gca,'xticklabel',' ','fontsize',10,'xtick',[1:np])
+%   set(gca,'xlim',[0.5 np+0.5])
+%   ydum = get(gca,'ylim');
+%   set(gca,'ylim',[0 ydum(2)])
+%   set(gca,'position',[0.13 0.2 0.775 0.7])
+%   for ip=1:np,
+%     text(ip,-0.02,deblank(pnames(ip,:)),'rotation',90,'HorizontalAlignment','right','interpreter','none')
+% %     text(ip,-0.02,bayestopt_.name{ip},'rotation',90,'HorizontalAlignment','right','interpreter','none')
+%   end
+%   xlabel(' ')
+%   title(['Main effects all ',fsuffix],'interpreter','none')
+%   saveas(gcf,[OutputDirectoryName,'/',fname_,'_map_ALL',fsuffix])
+%   eval(['print -depsc2 ' OutputDirectoryName '/' fname_ '_map_ALL',fsuffix]);
+%   eval(['print -dpdf ' OutputDirectoryName '/' fname_ '_map_ALL',fsuffix]);
+% %   close(gcf),
 
-  end
-  save([OutputDirectoryName,'/',fname_,'_main_eff'],'imap_tadj','SAtadj','tadj','ir_tadj','ic_tadj','-append')
-  else
-  load([OutputDirectoryName,'/',fname_,'_main_eff'],'imap_tadj','SAtadj','tadj','ir_tadj','ic_tadj')
-  end
+%   for j=1:size(SAall,1),
+%     SAallN(j,:)=SAall(j,:)./max(SAall(j,:));
+%   end
+%   SAmean=mean(SAallN);
+%   for j=1:size(SAmom,1),
+%     SAmomN(j,:)=SAmom(j,1:nshock)./max(SAmom(j,1:nshock));
+%   end
+%   SAmomN(find(isnan(SAmomN)))=0;
+%   SAmeanexo=mean(SAmomN(:,1:nshock));
 
-  figure,
-%   boxplot(SAtadj,'whis',10,'symbol','r.')
-  myboxplot(SAtadj,[],'.',[],10)
-  set(gca,'xticklabel',' ','fontsize',10,'xtick',[1:np])
-  set(gca,'xlim',[0.5 np+0.5])
-  ydum = get(gca,'ylim');
-  set(gca,'ylim',[0 ydum(2)])
-  set(gca,'position',[0.13 0.2 0.775 0.7])
-  for ip=1:np,
-    text(ip,-0.02,deblank(pnames(ip,:)),'rotation',90,'HorizontalAlignment','right','interpreter','none')
-  end
-  xlabel(' ')
-  title(['Main effects speed of adjustment ',fsuffix],'interpreter','none')
-  saveas(gcf,[OutputDirectoryName,'/',fname_,'_map_tadj',fsuffix])
-  eval(['print -depsc2 ' OutputDirectoryName '/' fname_ '_map_tadj',fsuffix]);
-  eval(['print -dpdf ' OutputDirectoryName '/' fname_ '_map_tadj',fsuffix]);
-  close(gcf),
-
-  ifig = 0;
-  for j=1:size(options_.varobs,1)
-    if mod(j,6)==1
-      figure('name',['Main effects observed speed adjustment ',fsuffix]);
-      ifig=ifig+1;
-      iplo = 0;
-    end
-    iplo=iplo+1;
-    subplot(3,2,iplo)
-    iv = find(ir_tadj==j);
-    if ~isempty(iv)
-      if length(iv)>1
-%         boxplot(SAtadj(iv,:),'whis',3,'symbol','r.');
-        myboxplot(SAtadj(iv,:),[],'.',[],10)
-      else
-        plot(SAtadj(iv,:),'r.');
-      end
-      set(gca,'xticklabel',' ','fontsize',10,'xtick',[1:np])
-      set(gca,'xlim',[0.5 np+0.5])
-      ydum = get(gca,'ylim');
-      set(gca,'ylim',[0 ydum(2)])
-      for ip=1:np,
-        text(ip,-0.02,deblank(pnames(ip,:)),'rotation',90,'HorizontalAlignment','right','interpreter','none')
-      end
-      xlabel(' ')
-    end
-    title(options_.varobs(j,:),'interpreter','none')
-    if mod(j,6)==0 | j==size(options_.varobs,1)
-      saveas(gcf,[OutputDirectoryName,'/',fname_,'_map_tadj',fsuffix,'_varobs_',int2str(ifig)])
-      eval(['print -depsc2 ' OutputDirectoryName '/' fname_ '_map_tadj',fsuffix,'_varobs_',int2str(ifig)]);
-      eval(['print -dpdf ' OutputDirectoryName '/' fname_ '_map_tadj',fsuffix,'_varobs_',int2str(ifig)]);
-      close(gcf),
-    end
-  end
-
-  ifig = 0;
-  for j=1:M_.exo_nbr,
-    if mod(j,6)==1
-      figure('name',['Main effects shocks speed of adjustment ',fsuffix]);
-      ifig=ifig+1;
-      iplo=0;
-    end
-    iplo=iplo+1;
-    subplot(3,2,iplo)
-    iv = find(ic_tadj==j);
-    if ~isempty(iv)
-      if length(iv)>1
-%         boxplot(SAtadj(iv,:),'whis',3,'symbol','r.');
-        myboxplot(SAtadj(iv,:),[],'.',[],10)
-      else
-        plot(SAtadj(iv,:),'r.');
-      end
-      set(gca,'xticklabel',' ','fontsize',10,'xtick',[1:np])
-      set(gca,'xlim',[0.5 np+0.5])
-      ydum = get(gca,'ylim');
-      set(gca,'ylim',[0 ydum(2)])
-      for ip=1:np,
-        text(ip,-0.02,deblank(pnames(ip,:)),'rotation',90,'HorizontalAlignment','right','interpreter','none')
-      end
-      xlabel(' ')
-    end
-    title(M_.exo_names(j,:),'interpreter','none')
-    if mod(j,6)==0 | j==M_.exo_nbr,
-      saveas(gcf,[OutputDirectoryName,'/',fname_,'_map_tadj',fsuffix,'_exo_',int2str(ifig)])
-      eval(['print -depsc2 ' OutputDirectoryName '/' fname_ '_map_tadj',fsuffix,'_exo_',int2str(ifig)]);
-      eval(['print -dpdf ' OutputDirectoryName '/' fname_ '_map_tadj',fsuffix,'_exo_',int2str(ifig)]);
-      close(gcf),
-    end
-  end
-
-
-  if opt_gsa.load_ident==0,
-  try 
-    EET=load([OutputDirectoryName,'/SCREEN/',fname_,'_morris_IDE'],'SAIF','ir_if','ic_if');
-  catch
-    EET=[];
-  end
-  SAif=zeros(size(iff,2),np);
-  for j=1:size(iff,2),
-    if itrans==0,
-      y0 = iff(istable,j);
-    elseif itrans==1,
-      y0 = log_trans_(iff(istable,j));
-    else
-      y0 = trank(iff(istable,j));
-    end
-    if ~isempty(EET),
-      imap=find(EET.SAIF(j,:) >= (0.1.*max(EET.SAIF(j,:))) );
-    end
-%     gsa_(j) = gsa_sdp_dyn( y0, lpmat(istable,:), ...
-%       gsa_flag, [],[],[],0,[OutputDirectoryName,'/map_if',fsuffix,int2str(j)], pnames);
-  gsa_(j) = gsa_sdp(y0(1:nest), x0(1:nest,imap), ...
-      2, [],[],[],0,[OutputDirectoryName,'/map_if',fsuffix,int2str(j)], pnames);
-  if nfit>nest,
-    gsa_(j) = gsa_sdp(y0(1:nfit), x0(1:nfit,imap), ...
-        -2, gsa_(j).nvr*nest^3/nfit^3,[],[],0,[OutputDirectoryName,'/map_if',fsuffix,int2str(j)], pnames);
-  end
-    SAif(j,imap)=gsa_(j).si;
-    imap_if{j}=imap;
-    
-  end
-  save([OutputDirectoryName,'/',fname_,'_main_eff'],'imap_if','SAif','iff','ir_if','ic_if','-append')
-  else
-  load([OutputDirectoryName,'/',fname_,'_main_eff'],'imap_if','SAif','iff','ir_if','ic_if')
-  end
-
-  figure,
-%   boxplot(SAif,'whis',10,'symbol','r.')
-  myboxplot(SAif,[],'.',[],10)
-  set(gca,'xticklabel',' ','fontsize',10,'xtick',[1:np])
-  set(gca,'xlim',[0.5 np+0.5])
-  ydum = get(gca,'ylim');
-  set(gca,'ylim',[0 ydum(2)])
-  set(gca,'position',[0.13 0.2 0.775 0.7])
-  for ip=1:np,
-    text(ip,-0.02,deblank(pnames(ip,:)),'rotation',90,'HorizontalAlignment','right','interpreter','none')
-  end
-  xlabel(' ')
-  title(['Main effects impact factors ',fsuffix],'interpreter','none')
-  saveas(gcf,[OutputDirectoryName,'/',fname_,'_map_if',fsuffix])
-  eval(['print -depsc2 ' OutputDirectoryName '/' fname_ '_map_if',fsuffix]);
-  eval(['print -dpdf ' OutputDirectoryName '/' fname_ '_map_if',fsuffix]);
-  close(gcf),
-
-  ifig = 0;
-  for j=1:size(options_.varobs,1)
-    if mod(j,6)==1
-      figure('name',['Main effects observed impact factors ',fsuffix]);
-      ifig=ifig+1;
-      iplo = 0;
-    end
-    iplo=iplo+1;
-    subplot(3,2,iplo)
-    iv = find(ir_if==j);
-    if ~isempty(iv)
-      if length(iv)>1
-%         boxplot(SAif(iv,:),'whis',3,'symbol','r.');
-        myboxplot(SAif(iv,:),[],'.',[],10)
-      else
-        plot(SAif(iv,:),'r.');
-      end
-      set(gca,'xticklabel',' ','fontsize',10,'xtick',[1:np])
-      set(gca,'xlim',[0.5 np+0.5])
-      ydum = get(gca,'ylim');
-      set(gca,'ylim',[0 ydum(2)])
-      for ip=1:np,
-        text(ip,-0.02,deblank(pnames(ip,:)),'rotation',90,'HorizontalAlignment','right','interpreter','none')
-      end
-      xlabel(' ')
-    end
-    title(options_.varobs(j,:),'interpreter','none')
-    if mod(j,6)==0 | j==size(options_.varobs,1)
-      saveas(gcf,[OutputDirectoryName,'/',fname_,'_map_if',fsuffix,'_varobs_',int2str(ifig)])
-      eval(['print -depsc2 ' OutputDirectoryName '/' fname_ '_map_if',fsuffix,'_varobs_',int2str(ifig)]);
-      eval(['print -dpdf ' OutputDirectoryName '/' fname_ '_map_if',fsuffix,'_varobs_',int2str(ifig)]);
-      close(gcf),
-    end
-  end
-
-  ifig = 0;
-  for j=1:M_.exo_nbr,
-    if mod(j,6)==1
-      figure('name',['Main effects shocks impact factors ',fsuffix]);
-      ifig=ifig+1;
-      iplo=0;
-    end
-    iplo=iplo+1;
-    subplot(3,2,iplo)
-    iv = find(ic_if==j);
-    if ~isempty(iv)
-      if length(iv)>1
-%         boxplot(SAif(iv,:),'whis',3,'symbol','r.');
-        myboxplot(SAif(iv,:),[],'.',[],10)
-      else
-        plot(SAif(iv,:),'r.');
-      end
-      set(gca,'xticklabel',' ','fontsize',10,'xtick',[1:np])
-      set(gca,'xlim',[0.5 np+0.5])
-      ydum = get(gca,'ylim');
-      set(gca,'ylim',[0 ydum(2)])
-      for ip=1:np,
-        text(ip,-0.02,deblank(pnames(ip,:)),'rotation',90,'HorizontalAlignment','right','interpreter','none')
-      end
-      xlabel(' ')
-    end
-    title(M_.exo_names(j,:),'interpreter','none')
-    if mod(j,6)==0 | j==M_.exo_nbr
-      saveas(gcf,[OutputDirectoryName,'/',fname_,'_map_if',fsuffix,'_exo_',int2str(ifig)])
-      eval(['print -depsc2 ' OutputDirectoryName '/' fname_ '_map_if',fsuffix,'_exo_',int2str(ifig)]);
-      eval(['print -dpdf ' OutputDirectoryName '/' fname_ '_map_if',fsuffix,'_exo_',int2str(ifig)]);
-      close(gcf),
-    end
-  end
-  SAmom = [SAvdec' SAcc' SAac']';
-  SAdyn = [SAtadj' SAif']';
-  SAall = [SAmom(:,nshock+1:end)' SAdyn']';
-  
-  figure,
-  %   boxplot(SAtadj,'whis',10,'symbol','r.')
-  myboxplot(SAmom,[],'.',[],10)
+  figure, bar(latent'*SAcc),
   set(gca,'xticklabel',' ','fontsize',10,'xtick',[1:npT])
   set(gca,'xlim',[0.5 npT+0.5])
   ydum = get(gca,'ylim');
   set(gca,'ylim',[0 ydum(2)])
   set(gca,'position',[0.13 0.2 0.775 0.7])
   for ip=1:npT,
-    %     text(ip,-0.02,deblank(pnames(ip,:)),'rotation',90,'HorizontalAlignment','right','interpreter','none')
-    text(ip,-0.02,bayestopt_.name{ip},'rotation',90,'HorizontalAlignment','right','interpreter','none')
-  end
-  xlabel(' ')
-  title(['Main effects theoretical moments ',fsuffix],'interpreter','none')
-  saveas(gcf,[OutputDirectoryName,'/',fname_,'_map_moments',fsuffix])
-  eval(['print -depsc2 ' OutputDirectoryName '/' fname_ '_map_moments',fsuffix]);
-  eval(['print -dpdf ' OutputDirectoryName '/' fname_ '_map_moments',fsuffix]);
-%   close(gcf),
-  
-  figure,
-  %   boxplot(SAtadj,'whis',10,'symbol','r.')
-  myboxplot(SAdyn,[],'.',[],10)
-  set(gca,'xticklabel',' ','fontsize',10,'xtick',[1:np])
-  set(gca,'xlim',[0.5 np+0.5])
-  ydum = get(gca,'ylim');
-  set(gca,'ylim',[0 ydum(2)])
-  set(gca,'position',[0.13 0.2 0.775 0.7])
-  for ip=1:np,
-    text(ip,-0.02,deblank(pnames(ip,:)),'rotation',90,'HorizontalAlignment','right','interpreter','none')
-%     text(ip,-0.02,bayestopt_.name{ip},'rotation',90,'HorizontalAlignment','right','interpreter','none')
-  end
-  xlabel(' ')
-  title(['Main effects short-long term dynamics ',fsuffix],'interpreter','none')
-  saveas(gcf,[OutputDirectoryName,'/',fname_,'_map_dynamics',fsuffix])
-  eval(['print -depsc2 ' OutputDirectoryName '/' fname_ '_map_dynamics',fsuffix]);
-  eval(['print -dpdf ' OutputDirectoryName '/' fname_ '_map_dynamics',fsuffix]);
-%   close(gcf),
-
-  figure,
-  %   boxplot(SAtadj,'whis',10,'symbol','r.')
-  myboxplot(SAall,[],'.',[],10)
-  set(gca,'xticklabel',' ','fontsize',10,'xtick',[1:np])
-  set(gca,'xlim',[0.5 np+0.5])
-  ydum = get(gca,'ylim');
-  set(gca,'ylim',[0 ydum(2)])
-  set(gca,'position',[0.13 0.2 0.775 0.7])
-  for ip=1:np,
-    text(ip,-0.02,deblank(pnames(ip,:)),'rotation',90,'HorizontalAlignment','right','interpreter','none')
-%     text(ip,-0.02,bayestopt_.name{ip},'rotation',90,'HorizontalAlignment','right','interpreter','none')
-  end
-  xlabel(' ')
-  title(['Main effects all ',fsuffix],'interpreter','none')
-  saveas(gcf,[OutputDirectoryName,'/',fname_,'_map_ALL',fsuffix])
-  eval(['print -depsc2 ' OutputDirectoryName '/' fname_ '_map_ALL',fsuffix]);
-  eval(['print -dpdf ' OutputDirectoryName '/' fname_ '_map_ALL',fsuffix]);
-%   close(gcf),
-
-  for j=1:size(SAall,1),
-    SAallN(j,:)=SAall(j,:)./max(SAall(j,:));
-  end
-  SAmean=mean(SAallN);
-  for j=1:size(SAmom,1),
-    SAmomN(j,:)=SAmom(j,1:nshock)./max(SAmom(j,1:nshock));
-  end
-  SAmomN(find(isnan(SAmomN)))=0;
-  SAmeanexo=mean(SAmomN(:,1:nshock));
-
-  figure, bar(SAmean),
-  set(gca,'xticklabel',' ','fontsize',10,'xtick',[1:np])
-  set(gca,'xlim',[0.5 np+0.5])
-  ydum = get(gca,'ylim');
-  set(gca,'ylim',[0 ydum(2)])
-  set(gca,'position',[0.13 0.2 0.775 0.7])
-  for ip=1:np,
-    text(ip,-0.02*(ydum(2)),deblank(pnames(ip,:)),'rotation',90,'HorizontalAlignment','right','interpreter','none')
+    text(ip,-0.02*(ydum(2)),bayestopt_.name{ip},'rotation',90,'HorizontalAlignment','right','interpreter','none')
     %     text(ip,-0.02,bayestopt_.name{ip},'rotation',90,'HorizontalAlignment','right','interpreter','none')
   end
   xlabel(' ')
-  title(['Identifiability indices ',fsuffix],'interpreter','none')
+  title(['Identifiability indices in the ',fsuffix,' moments.'],'interpreter','none')
   saveas(gcf,[OutputDirectoryName,'/',fname_,'_ident_ALL',fsuffix])
   eval(['print -depsc2 ' OutputDirectoryName '/' fname_ '_ident_ALL',fsuffix]);
   eval(['print -dpdf ' OutputDirectoryName '/' fname_ '_ident_ALL',fsuffix]);
 
-  figure, bar(SAmeanexo),
-  set(gca,'xticklabel',' ','fontsize',10,'xtick',[1:nshock])
-  set(gca,'xlim',[0.5 nshock+0.5])
-  ydum = get(gca,'ylim');
-  set(gca,'ylim',[0 ydum(2)])
-  set(gca,'position',[0.13 0.2 0.775 0.7])
-  for ip=1:nshock,
-    %     text(ip,-0.02*(ydum(2)),deblank(pnames(ip,:)),'rotation',90,'HorizontalAlignment','right','interpreter','none')
-    text(ip,-0.02*(ydum(2)),bayestopt_.name{ip},'rotation',90,'HorizontalAlignment','right','interpreter','none')
-  end
-  xlabel(' ')
-  title(['Identifiability indices for shocks',fsuffix],'interpreter','none')
-  saveas(gcf,[OutputDirectoryName,'/',fname_,'_ident_SHOCKS',fsuffix])
-  eval(['print -depsc2 ' OutputDirectoryName '/' fname_ '_ident_SHOCKS',fsuffix]);
-  eval(['print -dpdf ' OutputDirectoryName '/' fname_ '_ident_SHOCKS',fsuffix]);
+%   figure, bar(SAmeanexo),
+%   set(gca,'xticklabel',' ','fontsize',10,'xtick',[1:nshock])
+%   set(gca,'xlim',[0.5 nshock+0.5])
+%   ydum = get(gca,'ylim');
+%   set(gca,'ylim',[0 ydum(2)])
+%   set(gca,'position',[0.13 0.2 0.775 0.7])
+%   for ip=1:nshock,
+%     %     text(ip,-0.02*(ydum(2)),deblank(pnames(ip,:)),'rotation',90,'HorizontalAlignment','right','interpreter','none')
+%     text(ip,-0.02*(ydum(2)),bayestopt_.name{ip},'rotation',90,'HorizontalAlignment','right','interpreter','none')
+%   end
+%   xlabel(' ')
+%   title(['Identifiability indices for shocks',fsuffix],'interpreter','none')
+%   saveas(gcf,[OutputDirectoryName,'/',fname_,'_ident_SHOCKS',fsuffix])
+%   eval(['print -depsc2 ' OutputDirectoryName '/' fname_ '_ident_SHOCKS',fsuffix]);
+%   eval(['print -dpdf ' OutputDirectoryName '/' fname_ '_ident_SHOCKS',fsuffix]);
 end
