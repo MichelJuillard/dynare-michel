@@ -13,7 +13,7 @@ global options_ M_
       set_shocks_param(ss(j,:));
     end
     [vdec(:,:,j), corr, autocorr, z, zz] = th_moments(dr,options_.varobs);
-    cc(:,:,j)=tril(corr);
+    cc(:,:,j)=triu(corr);
     dum=[];
     for i=1:options_.ar
     dum=[dum, autocorr{i}];
