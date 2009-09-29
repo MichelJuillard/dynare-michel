@@ -283,7 +283,7 @@ if opt_gsa.morris==1,
   set(gca,'xticklabel',' ','fontsize',10,'xtick',[1:npT])
   set(gca,'xlim',[0.5 npT+0.5])
   ydum = get(gca,'ylim');
-  set(gca,'ylim',[0 ydum(2)])
+  set(gca,'ylim',[0 1])
   set(gca,'position',[0.13 0.2 0.775 0.7])
   for ip=1:npT,
     text(ip,-0.02,bayestopt_.name{ip},'rotation',90,'HorizontalAlignment','right','interpreter','none')
