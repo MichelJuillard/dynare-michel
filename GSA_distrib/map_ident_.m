@@ -32,12 +32,13 @@ fname_ = M_.fname;
 if opt_gsa.load_ident==0,
 % th moments
 [vdec, cc, ac] = mc_moments(T, lpmatx, oo_.dr);
-% indx = estim_params_.param_vals(:,1);
-% indexo = estim_params_.var_exo(:,1);
-% useautocorr = 0;
-% nlags = 3;
-% [JJ,HH] = mc_getJ([lpmat(istable,:),lpmatx], M_,oo_,options_,0,indx,indexo,bayestopt_.mf2,nlags,useautocorr);
-clear lpmatx;
+for j=1:size(cc,1)
+  cc(j,j,:)=stand_(squeeze(log(cc(j,j,:))))./2;
+end
+
+[pdraws, TAU, GAM, H, JJ] = dynare_identification(-[1:npT],[lpmatx lpmat(istable,:)]);
+
+
 if opt_gsa.morris<=0,
   ifig=0;
   for j=1:M_.exo_nbr,
@@ -78,8 +79,10 @@ end
   bayestopt_.restrict_var_list, ...
   bayestopt_.restrict_columns, ...
   bayestopt_.restrict_aux, M_.exo_nbr);
-A = zeros(size(Aa,1),size(Aa,2)+size(Bb,2),length(istable));
-A(:,:,1)=[Aa, Bb];
+A = zeros(size(Aa,1),size(Aa,2)+size(Aa,1),length(istable));
+% Sig(estim_params_.var_exo(:,1))=lpmatx(1,:).^2;
+set_shocks_param(lpmatx(1,:));
+A(:,:,1)=[Aa, triu(Bb*M_.Sigma_e*Bb')];
 for j=2:length(istable),
   dr.ghx = T(:, [1:(nc1-M_.exo_nbr)],j);
   dr.ghu = T(:, [(nc1-M_.exo_nbr+1):end], j);
@@ -87,9 +90,11 @@ for j=2:length(istable),
     bayestopt_.restrict_var_list, ...
     bayestopt_.restrict_columns, ...
     bayestopt_.restrict_aux, M_.exo_nbr);
-  A(:,:,j)=[Aa, Bb];
+  set_shocks_param(lpmatx(j,:));
+  A(:,:,j)=[Aa, triu(Bb*M_.Sigma_e*Bb')];
 end
 clear T;
+clear lpmatx;
 
 [nr,nc,nn]=size(A);
 io=bayestopt_.mf1;
@@ -154,86 +159,89 @@ if opt_gsa.morris==1,
   eval(['print -dpdf ' OutputDirectoryName '/' fname_ '_morris_vdec']);
   close(gcf)
 
-  ifig = 0;
-  for j=1:size(options_.varobs,1)
-    if mod(j,6)==1
-      figure('name',['EET variance decomposition observed variables']);
-      ifig=ifig+1;
-      iplo=0;
-    end
-    iplo=iplo+1;
-    subplot(3,2,iplo)
-    iv = find(ir_vdec==j);
-    if ~isempty(iv)
-      if length(iv)>1
-%         boxplot(SAvdec(iv,:),'whis',3,'symbol','r.');
-        myboxplot(SAvdec(iv,:),[],'.',[],3)
-      else
-        plot(SAvdec(iv,:),'r.');
-      end
-      set(gca,'xticklabel',' ','fontsize',10,'xtick',[1:npT])
-      set(gca,'xlim',[0.5 npT+0.5])
-      ydum = get(gca,'ylim');
-      set(gca,'ylim',[0 ydum(2)])
-      for ip=1:npT,
-        text(ip,-2,bayestopt_.name{ip},'rotation',90,'HorizontalAlignment','right','interpreter','none')
-      end
-      xlabel(' ')
-    end
-    title(options_.varobs(j,:),'interpreter','none')
-    if mod(j,6)==0 | j==size(options_.varobs,1)
-      saveas(gcf,[OutputDirectoryName,'/',fname_,'_morris_vdec_varobs_',int2str(ifig)])
-      eval(['print -depsc2 ' OutputDirectoryName '/' fname_ '_morris_vdec_varobs_',int2str(ifig)]);
-      eval(['print -dpdf ' OutputDirectoryName '/' fname_ '_morris_vdec_varobs_',int2str(ifig)]);
-      close(gcf)
-    end
-  end
-
-  ifig = 0;
-  for j=1:M_.exo_nbr,
-    if mod(j,6)==1
-      figure('name',['EET variance decomposition shocks']);
-      ifig=ifig+1;
-      iplo=0;
-    end
-    iplo=iplo+1;
-    subplot(3,2,iplo)
-    iv = find(ic_vdec==j);
-    if ~isempty(iv)
-      if length(iv)>1
-%         boxplot(SAvdec(iv,:),'whis',3,'symbol','r.');
-        myboxplot(SAvdec(iv,:),[],'.',[],3)
-      else
-        plot(SAvdec(iv,:),'r.');
-      end
-      set(gca,'xticklabel',' ','fontsize',10,'xtick',[1:npT])
-      set(gca,'xlim',[0.5 npT+0.5])
-      ydum = get(gca,'ylim');
-      set(gca,'ylim',[0 ydum(2)])
-      for ip=1:npT,
-        text(ip,-2,bayestopt_.name{ip},'rotation',90,'HorizontalAlignment','right','interpreter','none')
-      end
-      xlabel(' ')
-    end
-    title(M_.exo_names(j,:),'interpreter','none')
-    if mod(j,6)==0 | j==M_.exo_nbr,
-      saveas(gcf,[OutputDirectoryName,'/',fname_,'_morris_vdec_exo_',int2str(ifig)])
-      eval(['print -depsc2 ' OutputDirectoryName '/' fname_ '_morris_vdec_exo_',int2str(ifig)]);
-      eval(['print -dpdf ' OutputDirectoryName '/' fname_ '_morris_vdec_exo_',int2str(ifig)]);
-      close(gcf),
-    end
-  end
+%   ifig = 0;
+%   for j=1:size(options_.varobs,1)
+%     if mod(j,6)==1
+%       figure('name',['EET variance decomposition observed variables']);
+%       ifig=ifig+1;
+%       iplo=0;
+%     end
+%     iplo=iplo+1;
+%     subplot(3,2,iplo)
+%     iv = find(ir_vdec==j);
+%     if ~isempty(iv)
+%       if length(iv)>1
+% %         boxplot(SAvdec(iv,:),'whis',3,'symbol','r.');
+%         myboxplot(SAvdec(iv,:),[],'.',[],3)
+%       else
+%         plot(SAvdec(iv,:),'r.');
+%       end
+%       set(gca,'xticklabel',' ','fontsize',10,'xtick',[1:npT])
+%       set(gca,'xlim',[0.5 npT+0.5])
+%       ydum = get(gca,'ylim');
+%       set(gca,'ylim',[0 ydum(2)])
+%       for ip=1:npT,
+%         text(ip,-2,bayestopt_.name{ip},'rotation',90,'HorizontalAlignment','right','interpreter','none')
+%       end
+%       xlabel(' ')
+%     end
+%     title(options_.varobs(j,:),'interpreter','none')
+%     if mod(j,6)==0 | j==size(options_.varobs,1)
+%       saveas(gcf,[OutputDirectoryName,'/',fname_,'_morris_vdec_varobs_',int2str(ifig)])
+%       eval(['print -depsc2 ' OutputDirectoryName '/' fname_ '_morris_vdec_varobs_',int2str(ifig)]);
+%       eval(['print -dpdf ' OutputDirectoryName '/' fname_ '_morris_vdec_varobs_',int2str(ifig)]);
+%       close(gcf)
+%     end
+%   end
+% 
+%   ifig = 0;
+%   for j=1:M_.exo_nbr,
+%     if mod(j,6)==1
+%       figure('name',['EET variance decomposition shocks']);
+%       ifig=ifig+1;
+%       iplo=0;
+%     end
+%     iplo=iplo+1;
+%     subplot(3,2,iplo)
+%     iv = find(ic_vdec==j);
+%     if ~isempty(iv)
+%       if length(iv)>1
+% %         boxplot(SAvdec(iv,:),'whis',3,'symbol','r.');
+%         myboxplot(SAvdec(iv,:),[],'.',[],3)
+%       else
+%         plot(SAvdec(iv,:),'r.');
+%       end
+%       set(gca,'xticklabel',' ','fontsize',10,'xtick',[1:npT])
+%       set(gca,'xlim',[0.5 npT+0.5])
+%       ydum = get(gca,'ylim');
+%       set(gca,'ylim',[0 ydum(2)])
+%       for ip=1:npT,
+%         text(ip,-2,bayestopt_.name{ip},'rotation',90,'HorizontalAlignment','right','interpreter','none')
+%       end
+%       xlabel(' ')
+%     end
+%     title(M_.exo_names(j,:),'interpreter','none')
+%     if mod(j,6)==0 | j==M_.exo_nbr,
+%       saveas(gcf,[OutputDirectoryName,'/',fname_,'_morris_vdec_exo_',int2str(ifig)])
+%       eval(['print -depsc2 ' OutputDirectoryName '/' fname_ '_morris_vdec_exo_',int2str(ifig)]);
+%       eval(['print -dpdf ' OutputDirectoryName '/' fname_ '_morris_vdec_exo_',int2str(ifig)]);
+%       close(gcf),
+%     end
+%   end
 
 
   if opt_gsa.load_ident==0,
   SAMorris = [];
-  for i=1:size(cc,2),
-    [SAmeas, SAMorris(:,:,i)] = Morris_Measure_Groups(npT, [lpmat0 lpmat], cc(:,i),nliv);
+  ccac = [cc ac];
+  for i=1:size(ccac,2),
+    [SAmeas, SAMorris(:,:,i)] = Morris_Measure_Groups(npT, [lpmat0 lpmat], [ccac(:,i)],nliv);
   end
   SAcc = squeeze(SAMorris(:,1,:))';
   save([OutputDirectoryName,'/',fname_,'_morris_IDE'],'SAcc','cc','ir_cc','ic_cc','-append')
+  save([OutputDirectoryName,'/',fname_,'_morris_IDE'],'ac','ir_ac','ic_ac','-append')
   else
     load([OutputDirectoryName,'/',fname_,'_morris_IDE'],'SAcc','cc','ir_cc','ic_cc')
+    load([OutputDirectoryName,'/',fname_,'_morris_IDE'],'ac','ir_ac','ic_ac')
   end
   
   figure,
@@ -248,112 +256,140 @@ if opt_gsa.morris==1,
     text(ip,-0.02,bayestopt_.name{ip},'rotation',90,'HorizontalAlignment','right','interpreter','none')
   end
   xlabel(' ')
-  title('EET All cross-correlation matrix')
-  saveas(gcf,[OutputDirectoryName,'/',fname_,'_morris_cc'])
-  eval(['print -depsc2 ' OutputDirectoryName '/' fname_ '_morris_cc']);
-  eval(['print -dpdf ' OutputDirectoryName '/' fname_ '_morris_cc']);
-  close(gcf),
-
-  ifig = 0;
-  for j=1:size(options_.varobs,1)
-    if mod(j,6)==1
-      figure('name',['EET cross-correlations']);
-      ifig=ifig+1;
-      iplo=0;
-    end
-    iplo=iplo+1;
-    subplot(3,2,iplo)
-    iv = find(ir_cc==j);
-    iv = [iv; find(ic_cc==j)];
-    if ~isempty(iv)
-      if length(iv)>1
-%         boxplot(SAcc(iv,:),'whis',3,'symbol','r.');
-        myboxplot(SAcc(iv,:),[],'.',[],3)
-      else
-        plot(SAcc(iv,:),'r.');
-      end
-      set(gca,'xticklabel',' ','fontsize',10,'xtick',[1:npT])
-      set(gca,'xlim',[0.5 npT+0.5])
-      ydum = get(gca,'ylim');
-      set(gca,'ylim',[0 ydum(2)])
-      for ip=1:npT,
-        text(ip,-0.02,bayestopt_.name{ip},'rotation',90,'HorizontalAlignment','right','interpreter','none')
-      end
-      xlabel(' ')
-    end
-    title(options_.varobs(j,:),'interpreter','none')
-    if mod(j,6)==0 | j==size(options_.varobs,1)
-      saveas(gcf,[OutputDirectoryName,'/',fname_,'_morris_cc_',int2str(ifig)])
-      eval(['print -depsc2 ' OutputDirectoryName '/' fname_ '_morris_cc_',int2str(ifig)]);
-      eval(['print -dpdf ' OutputDirectoryName '/' fname_ '_morris_cc_',int2str(ifig)]);
-      close(gcf),
-    end
-  end
-
+  title('EET All moments')
+  saveas(gcf,[OutputDirectoryName,'/',fname_,'_morris_moments'])
+  eval(['print -depsc2 ' OutputDirectoryName '/' fname_ '_morris_moments']);
+  eval(['print -dpdf ' OutputDirectoryName '/' fname_ '_morris_moments']);
+%   close(gcf),
 
   if opt_gsa.load_ident==0,
+    for j=1:npT,
   SAMorris = [];
-  for i=1:size(ac,2),
-    [SAmeas, SAMorris(:,:,i)] = Morris_Measure_Groups(npT, [lpmat0 lpmat], ac(:,i),nliv);
+  ddd=NaN(size(lpmat,1),size(JJ,1));
+  ddd(istable,:) = squeeze(JJ(:,j,:))';
+  for i=1:size(ddd,2),
+    [SAmeas, SAMorris(:,:,i)] = Morris_Measure_Groups(npT, [lpmat0 lpmat], [ddd(:,i)],nliv);
   end
-  %end
-  SAac = squeeze(SAMorris(:,1,:))';
-  save([OutputDirectoryName,'/',fname_,'_morris_IDE'],'SAac','ac','ir_ac','ic_ac','-append')
+  SAddd(:,:,j) = squeeze(SAMorris(:,1,:))';
+  SAddd(:,:,j) = SAddd(:,:,j)./(max(SAddd(:,:,j)')'*ones(1,npT));
+  sad(:,j) = median(SAddd(find(~isnan(squeeze(SAddd(:,1,j)))),:,j))'; 
+    end
+  save([OutputDirectoryName,'/',fname_,'_morris_IDE'],'SAddd','sad','-append')
   else
-    load([OutputDirectoryName,'/',fname_,'_morris_IDE'],'SAac','ac','ir_ac','ic_ac')
+    load([OutputDirectoryName,'/',fname_,'_morris_IDE'],'SAddd','sad')
   end
   figure,
-%   boxplot(SAac,'whis',10,'symbol','r.')
-  myboxplot(SAac,[],'.',[],10)
+  contourf(sad,10), colorbar
   set(gca,'xticklabel',' ','fontsize',10,'xtick',[1:npT])
-  set(gca,'xlim',[0.5 npT+0.5])
-  ydum = get(gca,'ylim');
-  set(gca,'ylim',[0 ydum(2)])
-  set(gca,'position',[0.13 0.2 0.775 0.7])
+  set(gca,'yticklabel',' ','fontsize',10,'ytick',[1:npT])
   for ip=1:npT,
-    text(ip,-0.02,bayestopt_.name{ip},'rotation',90,'HorizontalAlignment','right','interpreter','none')
+    text(ip,0.9,['D(',bayestopt_.name{ip},')'],'rotation',90,'HorizontalAlignment','right','interpreter','none')
+    text(0.9,ip,[bayestopt_.name{ip}],'rotation',0,'HorizontalAlignment','right','interpreter','none')
   end
-  xlabel(' ')
-  title('EET All auto-correlations')
-  saveas(gcf,[OutputDirectoryName,'/',fname_,'_morris_ac'])
-  eval(['print -depsc2 ' OutputDirectoryName '/' fname_ '_morris_ac']);
-  eval(['print -dpdf ' OutputDirectoryName '/' fname_ '_morris_ac']);
-  close(gcf),
+  [m,im]=max(sad);
+  iii = find((im-[1:npT])==0);
+  disp('Most identified params')
+  disp(bayestopt_.name(iii))
+%   ifig = 0;
+%   for j=1:size(options_.varobs,1)
+%     if mod(j,6)==1
+%       figure('name',['EET cross-correlations']);
+%       ifig=ifig+1;
+%       iplo=0;
+%     end
+%     iplo=iplo+1;
+%     subplot(3,2,iplo)
+%     iv = find(ir_cc==j);
+%     iv = [iv; find(ic_cc==j)];
+%     if ~isempty(iv)
+%       if length(iv)>1
+% %         boxplot(SAcc(iv,:),'whis',3,'symbol','r.');
+%         myboxplot(SAcc(iv,:),[],'.',[],3)
+%       else
+%         plot(SAcc(iv,:),'r.');
+%       end
+%       set(gca,'xticklabel',' ','fontsize',10,'xtick',[1:npT])
+%       set(gca,'xlim',[0.5 npT+0.5])
+%       ydum = get(gca,'ylim');
+%       set(gca,'ylim',[0 ydum(2)])
+%       for ip=1:npT,
+%         text(ip,-0.02,bayestopt_.name{ip},'rotation',90,'HorizontalAlignment','right','interpreter','none')
+%       end
+%       xlabel(' ')
+%     end
+%     title(options_.varobs(j,:),'interpreter','none')
+%     if mod(j,6)==0 | j==size(options_.varobs,1)
+%       saveas(gcf,[OutputDirectoryName,'/',fname_,'_morris_cc_',int2str(ifig)])
+%       eval(['print -depsc2 ' OutputDirectoryName '/' fname_ '_morris_cc_',int2str(ifig)]);
+%       eval(['print -dpdf ' OutputDirectoryName '/' fname_ '_morris_cc_',int2str(ifig)]);
+%       close(gcf),
+%     end
+%   end
 
-  ifig = 0;
-  for j=1:size(options_.varobs,1)
-    if mod(j,6)==1
-      figure('name',['EET auto-correlations']);
-      ifig=ifig+1;
-      iplo=0;
-    end
-    iplo=iplo+1;
-    subplot(3,2,iplo)
-    iv = find(ir_ac==j);
-    if ~isempty(iv)
-      if length(iv)>1
-%         boxplot(SAac(iv,:),'whis',3,'symbol','r.');
-        myboxplot(SAac(iv,:),[],'.',[],3)
-      else
-        plot(SAac(iv,:),'r.');
-      end
-      set(gca,'xticklabel',' ','fontsize',10,'xtick',[1:npT])
-      set(gca,'xlim',[0.5 npT+0.5])
-      ydum = get(gca,'ylim');
-      set(gca,'ylim',[0 ydum(2)])
-      for ip=1:npT,
-        text(ip,-0.02,bayestopt_.name{ip},'rotation',90,'HorizontalAlignment','right','interpreter','none')
-      end
-      xlabel(' ')
-    end
-    title(options_.varobs(j,:),'interpreter','none')
-    if mod(j,6)==0 | j==size(options_.varobs,1)
-      saveas(gcf,[OutputDirectoryName,'/',fname_,'_morris_ac_',int2str(ifig)])
-      eval(['print -depsc2 ' OutputDirectoryName '/' fname_ '_morris_ac_',int2str(ifig)]);
-      eval(['print -dpdf ' OutputDirectoryName '/' fname_ '_morris_ac_',int2str(ifig)]);
-      close(gcf),
-    end
-  end
+
+%   if opt_gsa.load_ident==0,
+%   SAMorris = [];
+%   for i=1:size(ac,2),
+%     [SAmeas, SAMorris(:,:,i)] = Morris_Measure_Groups(npT, [lpmat0 lpmat], ac(:,i),nliv);
+%   end
+%   %end
+%   SAac = squeeze(SAMorris(:,1,:))';
+%   save([OutputDirectoryName,'/',fname_,'_morris_IDE'],'SAac','ac','ir_ac','ic_ac','-append')
+%   else
+%     load([OutputDirectoryName,'/',fname_,'_morris_IDE'],'SAac','ac','ir_ac','ic_ac')
+%   end
+%   figure,
+% %   boxplot(SAac,'whis',10,'symbol','r.')
+%   myboxplot(SAac,[],'.',[],10)
+%   set(gca,'xticklabel',' ','fontsize',10,'xtick',[1:npT])
+%   set(gca,'xlim',[0.5 npT+0.5])
+%   ydum = get(gca,'ylim');
+%   set(gca,'ylim',[0 ydum(2)])
+%   set(gca,'position',[0.13 0.2 0.775 0.7])
+%   for ip=1:npT,
+%     text(ip,-0.02,bayestopt_.name{ip},'rotation',90,'HorizontalAlignment','right','interpreter','none')
+%   end
+%   xlabel(' ')
+%   title('EET All auto-correlations')
+%   saveas(gcf,[OutputDirectoryName,'/',fname_,'_morris_ac'])
+%   eval(['print -depsc2 ' OutputDirectoryName '/' fname_ '_morris_ac']);
+%   eval(['print -dpdf ' OutputDirectoryName '/' fname_ '_morris_ac']);
+%   close(gcf),
+
+%   ifig = 0;
+%   for j=1:size(options_.varobs,1)
+%     if mod(j,6)==1
+%       figure('name',['EET auto-correlations']);
+%       ifig=ifig+1;
+%       iplo=0;
+%     end
+%     iplo=iplo+1;
+%     subplot(3,2,iplo)
+%     iv = find(ir_ac==j);
+%     if ~isempty(iv)
+%       if length(iv)>1
+% %         boxplot(SAac(iv,:),'whis',3,'symbol','r.');
+%         myboxplot(SAac(iv,:),[],'.',[],3)
+%       else
+%         plot(SAac(iv,:),'r.');
+%       end
+%       set(gca,'xticklabel',' ','fontsize',10,'xtick',[1:npT])
+%       set(gca,'xlim',[0.5 npT+0.5])
+%       ydum = get(gca,'ylim');
+%       set(gca,'ylim',[0 ydum(2)])
+%       for ip=1:npT,
+%         text(ip,-0.02,bayestopt_.name{ip},'rotation',90,'HorizontalAlignment','right','interpreter','none')
+%       end
+%       xlabel(' ')
+%     end
+%     title(options_.varobs(j,:),'interpreter','none')
+%     if mod(j,6)==0 | j==size(options_.varobs,1)
+%       saveas(gcf,[OutputDirectoryName,'/',fname_,'_morris_ac_',int2str(ifig)])
+%       eval(['print -depsc2 ' OutputDirectoryName '/' fname_ '_morris_ac_',int2str(ifig)]);
+%       eval(['print -dpdf ' OutputDirectoryName '/' fname_ '_morris_ac_',int2str(ifig)]);
+%       close(gcf),
+%     end
+%   end
 
   if opt_gsa.load_ident==0,
   js=0;
@@ -407,75 +443,75 @@ if opt_gsa.morris==1,
   eval(['print -dpdf ' OutputDirectoryName '/' fname_ '_morris_tadj']);
   close(gcf),
 
-  ifig = 0;
-  for j=1:size(options_.varobs,1)
-    if mod(j,6)==1
-      figure('name',['EET speed of adjustment observed variables']);
-      ifig=ifig+1;
-      iplo=0;
-    end
-    iplo=iplo+1;
-    subplot(3,2,iplo)
-    iv = find(ir_tadj==j);
-    if ~isempty(iv)
-      if length(iv)>1
-%         boxplot(SAtadj(iv,:),'whis',3,'symbol','r.');
-        myboxplot(SAtadj(iv,:),[],'.',[],3)
-      else
-        plot(SAtadj(iv,:),'r.');
-      end
-      set(gca,'xticklabel',' ','fontsize',10,'xtick',[1:np])
-      set(gca,'xlim',[0.5 np+0.5])
-      ydum = get(gca,'ylim');
-      set(gca,'ylim',[0 ydum(2)])
-      for ip=1:np,
-        text(ip,-0.02,deblank(pnames(ip,:)),'rotation',90,'HorizontalAlignment','right','interpreter','none')
-      end
-      xlabel(' ')
-    end
-    title(options_.varobs(j,:),'interpreter','none')
-    if mod(j,6)==0 | j==size(options_.varobs,1)
-      saveas(gcf,[OutputDirectoryName,'/',fname_,'_morris_tadj_varobs_',int2str(ifig)])
-      eval(['print -depsc2 ' OutputDirectoryName '/' fname_ '_morris_tadj_varobs_',int2str(ifig)]);
-      eval(['print -dpdf ' OutputDirectoryName '/' fname_ '_morris_tadj_varobs_',int2str(ifig)]);
-      close(gcf),
-    end
-  end
+%   ifig = 0;
+%   for j=1:size(options_.varobs,1)
+%     if mod(j,6)==1
+%       figure('name',['EET speed of adjustment observed variables']);
+%       ifig=ifig+1;
+%       iplo=0;
+%     end
+%     iplo=iplo+1;
+%     subplot(3,2,iplo)
+%     iv = find(ir_tadj==j);
+%     if ~isempty(iv)
+%       if length(iv)>1
+% %         boxplot(SAtadj(iv,:),'whis',3,'symbol','r.');
+%         myboxplot(SAtadj(iv,:),[],'.',[],3)
+%       else
+%         plot(SAtadj(iv,:),'r.');
+%       end
+%       set(gca,'xticklabel',' ','fontsize',10,'xtick',[1:np])
+%       set(gca,'xlim',[0.5 np+0.5])
+%       ydum = get(gca,'ylim');
+%       set(gca,'ylim',[0 ydum(2)])
+%       for ip=1:np,
+%         text(ip,-0.02,deblank(pnames(ip,:)),'rotation',90,'HorizontalAlignment','right','interpreter','none')
+%       end
+%       xlabel(' ')
+%     end
+%     title(options_.varobs(j,:),'interpreter','none')
+%     if mod(j,6)==0 | j==size(options_.varobs,1)
+%       saveas(gcf,[OutputDirectoryName,'/',fname_,'_morris_tadj_varobs_',int2str(ifig)])
+%       eval(['print -depsc2 ' OutputDirectoryName '/' fname_ '_morris_tadj_varobs_',int2str(ifig)]);
+%       eval(['print -dpdf ' OutputDirectoryName '/' fname_ '_morris_tadj_varobs_',int2str(ifig)]);
+%       close(gcf),
+%     end
+%   end
 
-  ifig = 0;
-  for j=1:M_.exo_nbr,
-    if mod(j,6)==1
-      figure('name',['EET speed of adjustment shocks']);
-      ifig=ifig+1;
-      iplo=0;
-    end
-    iplo=iplo+1;
-    subplot(3,2,iplo)
-    iv = find(ic_tadj==j);
-    if ~isempty(iv)
-      if length(iv)>1
-%         boxplot(SAtadj(iv,:),'whis',3,'symbol','r.');
-        myboxplot(SAtadj(iv,:),[],'.',[],3)
-      else
-        plot(SAtadj(iv,:),'r.');
-      end
-      set(gca,'xticklabel',' ','fontsize',10,'xtick',[1:np])
-      set(gca,'xlim',[0.5 np+0.5])
-      ydum = get(gca,'ylim');
-      set(gca,'ylim',[0 ydum(2)])
-      for ip=1:np,
-        text(ip,-0.02,deblank(pnames(ip,:)),'rotation',90,'HorizontalAlignment','right','interpreter','none')
-      end
-      xlabel(' ')
-    end
-    title(M_.exo_names(j,:),'interpreter','none')
-    if mod(j,6)==0 | j==M_.exo_nbr,
-      saveas(gcf,[OutputDirectoryName,'/',fname_,'_morris_tadj_exo_',int2str(ifig)])
-      eval(['print -depsc2 ' OutputDirectoryName '/' fname_ '_morris_tadj_exo_',int2str(ifig)]);
-      eval(['print -dpdf ' OutputDirectoryName '/' fname_ '_morris_tadj_exo_',int2str(ifig)]);
-      close(gcf),
-    end
-  end
+%   ifig = 0;
+%   for j=1:M_.exo_nbr,
+%     if mod(j,6)==1
+%       figure('name',['EET speed of adjustment shocks']);
+%       ifig=ifig+1;
+%       iplo=0;
+%     end
+%     iplo=iplo+1;
+%     subplot(3,2,iplo)
+%     iv = find(ic_tadj==j);
+%     if ~isempty(iv)
+%       if length(iv)>1
+% %         boxplot(SAtadj(iv,:),'whis',3,'symbol','r.');
+%         myboxplot(SAtadj(iv,:),[],'.',[],3)
+%       else
+%         plot(SAtadj(iv,:),'r.');
+%       end
+%       set(gca,'xticklabel',' ','fontsize',10,'xtick',[1:np])
+%       set(gca,'xlim',[0.5 np+0.5])
+%       ydum = get(gca,'ylim');
+%       set(gca,'ylim',[0 ydum(2)])
+%       for ip=1:np,
+%         text(ip,-0.02,deblank(pnames(ip,:)),'rotation',90,'HorizontalAlignment','right','interpreter','none')
+%       end
+%       xlabel(' ')
+%     end
+%     title(M_.exo_names(j,:),'interpreter','none')
+%     if mod(j,6)==0 | j==M_.exo_nbr,
+%       saveas(gcf,[OutputDirectoryName,'/',fname_,'_morris_tadj_exo_',int2str(ifig)])
+%       eval(['print -depsc2 ' OutputDirectoryName '/' fname_ '_morris_tadj_exo_',int2str(ifig)]);
+%       eval(['print -dpdf ' OutputDirectoryName '/' fname_ '_morris_tadj_exo_',int2str(ifig)]);
+%       close(gcf),
+%     end
+%   end
 
   figure,
   %bar(SAIF),
@@ -496,75 +532,75 @@ if opt_gsa.morris==1,
   eval(['print -dpdf ' OutputDirectoryName '/' fname_ '_morris_gain']);
   close(gcf),
   %figure, bar(SAIF'), title('All Gain Relationships')
-  ifig = 0;
-  for j=1:size(options_.varobs,1)
-    if mod(j,6)==1
-      figure('name',['EET steady state gain observed series']);
-      ifig=ifig+1;
-      iplo=0;
-    end
-    iplo=iplo+1;
-    subplot(3,2,iplo)
-    iv = find(ir_if==j);
-    if ~isempty(iv)
-      if length(iv)>1
-%         boxplot(SAIF(iv,:),'whis',10,'symbol','r.');
-        myboxplot(SAIF(iv,:),[],'.',[],10)
-      else
-        plot(SAIF(iv,:),'r.');
-      end
-      set(gca,'xticklabel',' ','fontsize',10,'xtick',[1:np])
-      set(gca,'xlim',[0.5 np+0.5])
-      ydum = get(gca,'ylim');
-      set(gca,'ylim',[0 ydum(2)])
-      for ip=1:np,
-        text(ip,-0.02,deblank(pnames(ip,:)),'rotation',90,'HorizontalAlignment','right','interpreter','none')
-      end
-      xlabel(' ')
-    end
-    title(options_.varobs(j,:),'interpreter','none')
-    if mod(j,6)==0 | j==size(options_.varobs,1)
-      saveas(gcf,[OutputDirectoryName,'/',fname_,'_morris_gain_varobs_',int2str(ifig)])
-      eval(['print -depsc2 ' OutputDirectoryName '/' fname_ '_morris_gain_varobs_',int2str(ifig)]);
-      eval(['print -dpdf ' OutputDirectoryName '/' fname_ '_morris_gain_varobs_',int2str(ifig)]);
-      close(gcf),
-    end
-  end
-
-  ifig = 0;
-  for j=1:M_.exo_nbr,
-    if mod(j,6)==1
-      figure('name',['EET steady state gain shocks']);
-      ifig=ifig+1;
-      iplo=0;
-    end
-    iplo=iplo+1;
-    subplot(3,2,iplo)
-    iv = find(ic_if==j);
-    if ~isempty(iv)
-      if length(iv)>1
-%         boxplot(SAIF(iv,:),'whis',3,'symbol','r.');
-        myboxplot(SAIF(iv,:),[],'.',[],3)
-      else
-        plot(SAIF(iv,:),'r.');
-      end
-      set(gca,'xticklabel',' ','fontsize',10,'xtick',[1:np])
-      set(gca,'xlim',[0.5 np+0.5])
-      ydum = get(gca,'ylim');
-      set(gca,'ylim',[0 ydum(2)])
-      for ip=1:np,
-        text(ip,-0.02,deblank(pnames(ip,:)),'rotation',90,'HorizontalAlignment','right','interpreter','none')
-      end
-      xlabel(' ')
-    end
-    title(M_.exo_names(j,:),'interpreter','none')
-    if mod(j,6)==0 | j==M_.exo_nbr,
-      saveas(gcf,[OutputDirectoryName,'/',fname_,'_morris_gain_exo_',int2str(ifig)])
-      eval(['print -depsc2 ' OutputDirectoryName '/' fname_ '_morris_gain_exo_',int2str(ifig)]);
-      eval(['print -dpdf ' OutputDirectoryName '/' fname_ '_morris_gain_exo_',int2str(ifig)]);
-      close(gcf),
-    end
-  end
+%   ifig = 0;
+%   for j=1:size(options_.varobs,1)
+%     if mod(j,6)==1
+%       figure('name',['EET steady state gain observed series']);
+%       ifig=ifig+1;
+%       iplo=0;
+%     end
+%     iplo=iplo+1;
+%     subplot(3,2,iplo)
+%     iv = find(ir_if==j);
+%     if ~isempty(iv)
+%       if length(iv)>1
+% %         boxplot(SAIF(iv,:),'whis',10,'symbol','r.');
+%         myboxplot(SAIF(iv,:),[],'.',[],10)
+%       else
+%         plot(SAIF(iv,:),'r.');
+%       end
+%       set(gca,'xticklabel',' ','fontsize',10,'xtick',[1:np])
+%       set(gca,'xlim',[0.5 np+0.5])
+%       ydum = get(gca,'ylim');
+%       set(gca,'ylim',[0 ydum(2)])
+%       for ip=1:np,
+%         text(ip,-0.02,deblank(pnames(ip,:)),'rotation',90,'HorizontalAlignment','right','interpreter','none')
+%       end
+%       xlabel(' ')
+%     end
+%     title(options_.varobs(j,:),'interpreter','none')
+%     if mod(j,6)==0 | j==size(options_.varobs,1)
+%       saveas(gcf,[OutputDirectoryName,'/',fname_,'_morris_gain_varobs_',int2str(ifig)])
+%       eval(['print -depsc2 ' OutputDirectoryName '/' fname_ '_morris_gain_varobs_',int2str(ifig)]);
+%       eval(['print -dpdf ' OutputDirectoryName '/' fname_ '_morris_gain_varobs_',int2str(ifig)]);
+%       close(gcf),
+%     end
+%   end
+% 
+%   ifig = 0;
+%   for j=1:M_.exo_nbr,
+%     if mod(j,6)==1
+%       figure('name',['EET steady state gain shocks']);
+%       ifig=ifig+1;
+%       iplo=0;
+%     end
+%     iplo=iplo+1;
+%     subplot(3,2,iplo)
+%     iv = find(ic_if==j);
+%     if ~isempty(iv)
+%       if length(iv)>1
+% %         boxplot(SAIF(iv,:),'whis',3,'symbol','r.');
+%         myboxplot(SAIF(iv,:),[],'.',[],3)
+%       else
+%         plot(SAIF(iv,:),'r.');
+%       end
+%       set(gca,'xticklabel',' ','fontsize',10,'xtick',[1:np])
+%       set(gca,'xlim',[0.5 np+0.5])
+%       ydum = get(gca,'ylim');
+%       set(gca,'ylim',[0 ydum(2)])
+%       for ip=1:np,
+%         text(ip,-0.02,deblank(pnames(ip,:)),'rotation',90,'HorizontalAlignment','right','interpreter','none')
+%       end
+%       xlabel(' ')
+%     end
+%     title(M_.exo_names(j,:),'interpreter','none')
+%     if mod(j,6)==0 | j==M_.exo_nbr,
+%       saveas(gcf,[OutputDirectoryName,'/',fname_,'_morris_gain_exo_',int2str(ifig)])
+%       eval(['print -depsc2 ' OutputDirectoryName '/' fname_ '_morris_gain_exo_',int2str(ifig)]);
+%       eval(['print -dpdf ' OutputDirectoryName '/' fname_ '_morris_gain_exo_',int2str(ifig)]);
+%       close(gcf),
+%     end
+%   end
 
 
   if opt_gsa.load_ident==0,
@@ -573,18 +609,21 @@ if opt_gsa.morris==1,
     [SAmeas, SAMorris(:,:,j)] = Morris_Measure_Groups(npT, [lpmat0 lpmat], yt(:,j),nliv);
   end
 
-  SAM = squeeze(SAMorris(nshock+1:end,1,:));
+%   SAM = squeeze(SAMorris(nshock+1:end,1,:));
+  SAM = squeeze(SAMorris(1:end,1,:));
   for j=1:j0
     SAnorm(:,j)=SAM(:,j)./max(SAM(:,j));
     irex(j)=length(find(SAnorm(:,j)>0.01));
   end
   [dum, irel]=sort(irex);
 
-  SAMmu = squeeze(SAMorris(nshock+1:end,2,:));
+%   SAMmu = squeeze(SAMorris(nshock+1:end,2,:));
+  SAMmu = squeeze(SAMorris(1:end,2,:));
   for j=1:j0
     SAmunorm(:,j)=SAMmu(:,j)./max(SAM(:,j));  % normalised w.r.t. mu*
   end
-  SAMsig = squeeze(SAMorris(nshock+1:end,3,:));
+%   SAMsig = squeeze(SAMorris(nshock+1:end,3,:));
+  SAMsig = squeeze(SAMorris(1:end,3,:));
   for j=1:j0
     SAsignorm(:,j)=SAMsig(:,j)./max(SAMsig(:,j));
   end
@@ -595,16 +634,17 @@ if opt_gsa.morris==1,
   figure, %bar(SAnorm(:,irel))
 %   boxplot(SAnorm','whis',10,'symbol','r.')
   myboxplot(SAnorm',[],'.',[],10)
-  set(gca,'xticklabel',' ','fontsize',10,'xtick',[1:np])
-  set(gca,'xlim',[0.5 np+0.5])
+  set(gca,'xticklabel',' ','fontsize',10,'xtick',[1:npT])
+  set(gca,'xlim',[0.5 npT+0.5])
   set(gca,'ylim',[0 1])
   set(gca,'position',[0.13 0.2 0.775 0.7])
   xlabel(' ')
-  for ip=1:np,
-    text(ip,-0.02,deblank(pnames(ip,:)),'rotation',90,'HorizontalAlignment','right','interpreter','none')
+  for ip=1:npT,
+%     text(ip,-0.02,deblank(pnames(ip,:)),'rotation',90,'HorizontalAlignment','right','interpreter','none')
+    text(ip,-0.02,bayestopt_.name{ip},'rotation',90,'HorizontalAlignment','right','interpreter','none')
   end
   xlabel(' ')
-  title('Elementary effects parameters')
+  title('Elementary effects in the model')
   saveas(gcf,[OutputDirectoryName,'/',fname_,'_morris_par'])
   eval(['print -depsc2 ' OutputDirectoryName '/' fname_ '_morris_par']);
   eval(['print -dpdf ' OutputDirectoryName '/' fname_ '_morris_par']);
@@ -612,35 +652,38 @@ if opt_gsa.morris==1,
   figure, %bar(SAmunorm(:,irel))
 %   boxplot(SAmunorm','whis',10,'symbol','r.')
   myboxplot(SAmunorm',[],'.',[],10)
-  set(gca,'xticklabel',' ','fontsize',10,'xtick',[1:np])
-  set(gca,'xlim',[0.5 np+0.5])
+  set(gca,'xticklabel',' ','fontsize',10,'xtick',[1:npT])
+  set(gca,'xlim',[0.5 npT+0.5])
   set(gca,'ylim',[-1 1])
   set(gca,'position',[0.13 0.2 0.775 0.7])
   xlabel(' ')
-  for ip=1:np,
-    text(ip,-0.02,deblank(pnames(ip,:)),'rotation',90,'HorizontalAlignment','right','interpreter','none')
+  for ip=1:npT,
+    text(ip,-0.02,bayestopt_.name{ip},'rotation',90,'HorizontalAlignment','right','interpreter','none')
   end
   xlabel(' ')
-  title('\mu parameters')
+  title('\mu in the model')
   saveas(gcf,[OutputDirectoryName,'/',fname_,'_morrismu_par'])
   eval(['print -depsc2 ' OutputDirectoryName '/' fname_ '_morrismu_par']);
   eval(['print -dpdf ' OutputDirectoryName '/' fname_ '_morrismu_par']);
+  close(gcf),
+  
   figure, %bar(SAsignorm(:,irel))
 %   boxplot(SAsignorm','whis',10,'symbol','r.')
   myboxplot(SAsignorm',[],'.',[],10)
-  set(gca,'xticklabel',' ','fontsize',10,'xtick',[1:np])
-  set(gca,'xlim',[0.5 np+0.5])
+  set(gca,'xticklabel',' ','fontsize',10,'xtick',[1:npT])
+  set(gca,'xlim',[0.5 npT+0.5])
   set(gca,'ylim',[0 1])
   set(gca,'position',[0.13 0.2 0.775 0.7])
   xlabel(' ')
-  for ip=1:np,
-    text(ip,-0.02,deblank(pnames(ip,:)),'rotation',90,'HorizontalAlignment','right','interpreter','none')
+  for ip=1:npT,
+    text(ip,-0.02,bayestopt_.name{ip},'rotation',90,'HorizontalAlignment','right','interpreter','none')
   end
   xlabel(' ')
-  title('\sigma parameters')
+  title('\sigma in the model')
   saveas(gcf,[OutputDirectoryName,'/',fname_,'_morrissig_par'])
   eval(['print -depsc2 ' OutputDirectoryName '/' fname_ '_morrissig_par']);
   eval(['print -dpdf ' OutputDirectoryName '/' fname_ '_morrissig_par']);
+  close(gcf),
 
   %     figure, bar(SAnorm(:,irel)')
   %     set(gca,'xtick',[1:j0])
