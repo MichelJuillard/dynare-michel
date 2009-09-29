@@ -62,7 +62,7 @@ stderr e_pies,inv_gamma_pdf,1.88,0.9827;
 end;
 
   
-disp('CREATE SCREENING SAMPLE, CHECK FOR STABILITY AND PERFORM IDENTIFICATION ANALYSIS');
+disp('CREATE SCREENING SAMPLE, CHECK FOR STABILITY AND PERFORM A SCREENING FOR IDENTIFICATION ANALYSIS');
 disp('TYPE II ERRORS')
 disp(' ')
 disp('PRESS ENTER TO CONTUNUE');
@@ -70,4 +70,12 @@ pause;
 
 dynare_sensitivity(identification=1, morris_nliv=6, morris_ntra=50);
 
+disp('CREATE MC SAMPLE, CHECK FOR STABILITY AND PERFORM IDENTIFICATION ANALYSIS');
+disp('TYPE I (main effects) and II ERRORS (analytic derivatives)')
+disp(' ')
+disp('PRESS ENTER TO CONTUNUE');
+pause;
+identification;
+dynare_sensitivity(identification=1, morris=0, load_stab=1);
 
+stoch_simul(order=1,irf=40);
