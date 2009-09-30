@@ -34,7 +34,7 @@ if opt_gsa.load_ident==0,
   [vdec, cc, ac] = mc_moments(T, lpmatx, oo_.dr);
 
 
-  if opt_gsa.morris~=1,
+  if opt_gsa.morris==2,
    [pdraws, TAU, GAM] = dynare_identification(-[1:npT],[lpmatx lpmat(istable,:)]);
     if max(max(abs(pdraws-[lpmatx lpmat(istable,:)])))==0,
       disp('Sample check OK'),
@@ -45,6 +45,8 @@ if opt_gsa.load_ident==0,
       disp('Moments check OK'),
       clear GAM gas
     end
+  end
+  if opt_gsa.morris~=1,
     ifig=0;
     for j=1:M_.exo_nbr,
       if mod(j,6)==1
@@ -128,7 +130,7 @@ if opt_gsa.load_ident==0,
 
 
   [yt, j0]=teff(A,Nsam,istable);
-  if opt_gsa.morris~=1,
+  if opt_gsa.morris==2,
     iii=find(std(yt(istable,:))>1.e-8);
   if max(max(abs(TAU-yt(istable,iii)')))<= 1.e-10,
     disp('Model check OK'),
@@ -144,7 +146,9 @@ if opt_gsa.load_ident==0,
   % yt=[yt1 yt2 ytr];
   save([OutputDirectoryName,'/',fname_,'_main_eff'],'ac','cc','vdec','yt')
 else
+  if opt_gsa.morris==2,
    [pdraws, TAU, GAM] = dynare_identification([1:npT]); %,[lpmatx lpmat(istable,:)]);
+  end
   load([OutputDirectoryName,'/',fname_,'_main_eff'],'ac','cc','vdec','yt')
 end
 
@@ -951,9 +955,11 @@ else,  % main effects analysis
   [pcc, dd] = eig(cov(ccac(istable,:)));
   [latent, isort] = sort(-diag(dd));
   latent = -latent;
+  figure, bar(latent)
+  title('Eigenvalues in PCA')
   pcc=pcc(:,isort);
   ccac = ccac*pcc;
-  npca = max(find(cumsum(latent)./length(latent)<0.99))+1;
+  npca = min(40, max(find(cumsum(latent)./length(latent)<0.99))+1);
   siPCA = (EET.SAcc'*abs(pcc'))';
   siPCA = siPCA./(max(siPCA')'*ones(1,npT)).*(latent*ones(1,npT));
 %   siPCA = sum(siPCA,1);
