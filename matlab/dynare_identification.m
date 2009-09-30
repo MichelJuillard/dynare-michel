@@ -1,4 +1,4 @@
-function [pdraws, TAU, GAM0, H, JJ] = dynare_identification(iload, pdraws0)
+function [pdraws, TAU, GAM, H, JJ] = dynare_identification(iload, pdraws0)
 
 % main 
 %
@@ -206,55 +206,55 @@ if nargout>3 & iload,
   end
 end
 
-mTAU = mean(TAU');
-mGAM = mean(GAM');
-sTAU = std(TAU');
-sGAM = std(GAM');
-if nargout>=3,
-  GAM0=GAM;
-end
-if useautocorr,
-  idiag = find(vech(eye(size(options_.varobs,1))));
-  GAM(idiag,:) = GAM(idiag,:)./(sGAM(idiag)'*ones(1,SampleSize));
-%   siJmean(idiag,:) = siJmean(idiag,:)./(sGAM(idiag)'*ones(1,nparam));
-%   siJmean = siJmean./(max(siJmean')'*ones(size(params)));
-end
-
-[pcc, dd] = eig(cov(GAM'));
-[latent, isort] = sort(-diag(dd));
-latent = -latent;
-pcc=pcc(:,isort);
-siPCA = (siJmean'*abs(pcc')).^2';
-siPCA = siPCA./(max(siPCA')'*ones(1,nparam)).*(latent*ones(1,nparam));
-siPCA = sum(siPCA,1);
-siPCA = siPCA./max(siPCA);
-
-[pcc, dd] = eig(corrcoef(GAM'));
-[latent, isort] = sort(-diag(dd));
-latent = -latent;
-pcc=pcc(:,isort);
-siPCA2 = (siJmean'*abs(pcc')).^2';
-siPCA2 = siPCA2./(max(siPCA2')'*ones(1,nparam)).*(latent*ones(1,nparam));
-siPCA2 = sum(siPCA2,1);
-siPCA2 = siPCA2./max(siPCA2);
-
-[pcc, dd] = eig(cov(TAU'));
-[latent, isort] = sort(-diag(dd));
-latent = -latent;
-pcc=pcc(:,isort);
-siHPCA = (siHmean'*abs(pcc')).^2';
-siHPCA = siHPCA./(max(siHPCA')'*ones(1,nparam)).*(latent*ones(1,nparam));
-siHPCA = sum(siHPCA,1);
-siHPCA = siHPCA./max(siHPCA);
-
-[pcc, dd] = eig(corrcoef(TAU'));
-[latent, isort] = sort(-diag(dd));
-latent = -latent;
-pcc=pcc(:,isort);
-siHPCA2 = (siHmean'*abs(pcc')).^2';
-siHPCA2 = siHPCA2./(max(siHPCA2')'*ones(1,nparam)).*(latent*ones(1,nparam));
-siHPCA2 = sum(siHPCA2,1);
-siHPCA2 = siHPCA2./max(siHPCA2);
+% mTAU = mean(TAU');
+% mGAM = mean(GAM');
+% sTAU = std(TAU');
+% sGAM = std(GAM');
+% if nargout>=3,
+%   GAM0=GAM;
+% end
+% if useautocorr,
+%   idiag = find(vech(eye(size(options_.varobs,1))));
+%   GAM(idiag,:) = GAM(idiag,:)./(sGAM(idiag)'*ones(1,SampleSize));
+% %   siJmean(idiag,:) = siJmean(idiag,:)./(sGAM(idiag)'*ones(1,nparam));
+% %   siJmean = siJmean./(max(siJmean')'*ones(size(params)));
+% end
+% 
+% [pcc, dd] = eig(cov(GAM'));
+% [latent, isort] = sort(-diag(dd));
+% latent = -latent;
+% pcc=pcc(:,isort);
+% siPCA = (siJmean'*abs(pcc')).^2';
+% siPCA = siPCA./(max(siPCA')'*ones(1,nparam)).*(latent*ones(1,nparam));
+% siPCA = sum(siPCA,1);
+% siPCA = siPCA./max(siPCA);
+% 
+% [pcc, dd] = eig(corrcoef(GAM'));
+% [latent, isort] = sort(-diag(dd));
+% latent = -latent;
+% pcc=pcc(:,isort);
+% siPCA2 = (siJmean'*abs(pcc')).^2';
+% siPCA2 = siPCA2./(max(siPCA2')'*ones(1,nparam)).*(latent*ones(1,nparam));
+% siPCA2 = sum(siPCA2,1);
+% siPCA2 = siPCA2./max(siPCA2);
+% 
+% [pcc, dd] = eig(cov(TAU'));
+% [latent, isort] = sort(-diag(dd));
+% latent = -latent;
+% pcc=pcc(:,isort);
+% siHPCA = (siHmean'*abs(pcc')).^2';
+% siHPCA = siHPCA./(max(siHPCA')'*ones(1,nparam)).*(latent*ones(1,nparam));
+% siHPCA = sum(siHPCA,1);
+% siHPCA = siHPCA./max(siHPCA);
+% 
+% [pcc, dd] = eig(corrcoef(TAU'));
+% [latent, isort] = sort(-diag(dd));
+% latent = -latent;
+% pcc=pcc(:,isort);
+% siHPCA2 = (siHmean'*abs(pcc')).^2';
+% siHPCA2 = siHPCA2./(max(siHPCA2')'*ones(1,nparam)).*(latent*ones(1,nparam));
+% siHPCA2 = sum(siHPCA2,1);
+% siHPCA2 = siHPCA2./max(siHPCA2);
 
 
 disp_identification(pdraws, idemodel, idemoments)
@@ -341,3 +341,12 @@ for ip=1:nparam,
   text(ip,-0.02,bayestopt_.name{ip},'rotation',90,'HorizontalAlignment','right','interpreter','none')
 end
 title('Multicollinearity in the moments')
+
+
+figure,
+subplot(221)
+hist(log10(idemodel.cond))
+title('log10 of Condition number in the model')
+subplot(222)
+hist(log10(idemoments.cond))
+title('log10 of Condition number in the moments')
