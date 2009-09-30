@@ -964,7 +964,8 @@ else,  % main effects analysis
 %   npca = min(40, max(find(cumsum(latent)./length(latent)<0.99))+1);
   npca = max(find(cumsum(latent)./length(latent)<0.99))+1;
   siPCA = (EET.SAcc'*abs(pcc'))';
-  siPCA = siPCA./(max(siPCA')'*ones(1,npT)).*(latent*ones(1,npT));
+%   siPCA = siPCA./(max(siPCA')'*ones(1,npT)).*(latent*ones(1,npT));
+  siPCA = siPCA./(max(siPCA')'*ones(1,npT));
 %   siPCA = sum(siPCA,1);
 %   siPCA = siPCA./max(siPCA);
   SAcc=zeros(size(ccac,2),npT);
