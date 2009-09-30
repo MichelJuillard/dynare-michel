@@ -303,12 +303,13 @@ if iload==0,
   nrun=length(y0);
   nest=min(250,nrun);
   nfit=min(1000,nrun);
-  gsa_ = gsa_sdp(y0(1:nest), x0(1:nest,:), 2, [],[],[],0,[fname,'_est'], pnames);
+  dotheplots = (nfit<=nest);
+  gsa_ = gsa_sdp(y0(1:nest), x0(1:nest,:), 2, [],[],[],dotheplots,[fname,'_est'], pnames);
   if nfit>nest,
     gsa_ = gsa_sdp(y0(1:nfit), x0(1:nfit,:), -2, gsa_.nvr*nest^3/nfit^3,[],[],1,fname, pnames);
-  else
-    copyfile([fname,'_est.mat'],[fname,'.mat'])
   end
+  save([fname,'.mat'],'gsa_')
+%   copyfile([fname,'_est.mat'],[fname,'.mat'])
   figure, 
   plot(y0(1:nfit),[gsa_.fit y0(1:nfit)],'.'), 
   title([namy,' vs. ', namx,' fit'])
