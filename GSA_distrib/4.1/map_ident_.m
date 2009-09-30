@@ -993,6 +993,7 @@ else,  % main effects analysis
     imap_cc{j}=imap;
 
   end
+  save([OutputDirectoryName,'/map_cc',fsuffix],'gsa_')
   save([OutputDirectoryName,'/',fname_,'_main_eff'],'imap_cc','SAcc','ccac','-append')
   else
     load([OutputDirectoryName,'/',fname_,'_main_eff'],'imap_cc','SAcc','ccac')
