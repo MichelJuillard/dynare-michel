@@ -1,7 +1,6 @@
 function [vdec, cc, ac] = mc_moments(mm, ss, dr)
 global options_ M_
 
-  options_.ar = 3;
   [nr1, nc1, nsam] = size(mm);
   disp('Computing theoretical moments ...')
   h = waitbar(0,'Theoretical moments ...');
