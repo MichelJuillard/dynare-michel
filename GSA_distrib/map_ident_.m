@@ -35,13 +35,13 @@ if opt_gsa.load_ident==0,
 
 
   if opt_gsa.morris~=1,
-    [pdraws, TAU, GAM, H, JJ] = dynare_identification(-[1:npT],[lpmatx lpmat(istable,:)]);
+   [pdraws, TAU, GAM] = dynare_identification(-[1:npT],[lpmatx lpmat(istable,:)]);
     if max(max(abs(pdraws-[lpmatx lpmat(istable,:)])))==0,
       disp('Sample check OK'),
       clear pdraws;
     end
     for j=1:length(istable), gas(:,j)=[vech(cc(:,:,j)); vec(ac(:,:,j))];  end
-    if max(max(abs(GAM-gas)))<=1.e-10,
+    if max(max(abs(GAM-gas)))<=1.e-8,
       disp('Moments check OK'),
       clear GAM gas
     end
@@ -122,14 +122,15 @@ if opt_gsa.load_ident==0,
   % ino=find(~ismember([1:nr],io));
   % T2=A(ino,1:nr,:);
   R=A(:,nr+1:nc,:);
-  [tadj, iff] = speed(A(1:nr,1:nr,:),R,io,0.5);
-  [tadj, j0, ir_tadj, ic_tadj] = teff(tadj,Nsam,istable);
-  [iff, j0, ir_if, ic_if] = teff(iff,Nsam,istable);
+%   [tadj, iff] = speed(A(1:nr,1:nr,:),R,io,0.5);
+%   [tadj, j0, ir_tadj, ic_tadj] = teff(tadj,Nsam,istable);
+%   [iff, j0, ir_if, ic_if] = teff(iff,Nsam,istable);
 
 
   [yt, j0]=teff(A,Nsam,istable);
   if opt_gsa.morris~=1,
-  if max(max(abs(TAU-yt(istable,:)')))<= 1.e-10,
+    iii=find(std(yt(istable,:))>1.e-8);
+  if max(max(abs(TAU-yt(istable,iii)')))<= 1.e-10,
     disp('Model check OK'),
     clear TAU A
   end
@@ -141,10 +142,10 @@ if opt_gsa.load_ident==0,
   % [ytr, j0r]=teff(R,Nsam,istable);
   %
   % yt=[yt1 yt2 ytr];
-  save([OutputDirectoryName,'/',fname_,'_main_eff'],'ac','cc','vdec','yt','tadj','iff')
+  save([OutputDirectoryName,'/',fname_,'_main_eff'],'ac','cc','vdec','yt')
 else
-   [pdraws, TAU, GAM, H, JJ] = dynare_identification([1:npT]); %,[lpmatx lpmat(istable,:)]);
-  load([OutputDirectoryName,'/',fname_,'_main_eff'],'ac','cc','vdec','yt','tadj','iff')
+   [pdraws, TAU, GAM] = dynare_identification([1:npT]); %,[lpmatx lpmat(istable,:)]);
+  load([OutputDirectoryName,'/',fname_,'_main_eff'],'ac','cc','vdec','yt')
 end
 
 %   for j=1:nr,
@@ -434,57 +435,57 @@ if opt_gsa.morris==1,
 %     end
 %   end
 
-  if opt_gsa.load_ident==0,
-  js=0;
-  %for j=1:size(tadj,1),
-  SAMorris = [];
-  for i=1:size(tadj,2),
-    js=js+1;
-    [SAmeas, SAMorris(:,:,js)] = Morris_Measure_Groups(npT, [lpmat0 lpmat], tadj(:,i),nliv);
-  end
-  %end
-  SAM = squeeze(SAMorris(nshock+1:end,1,:));
-  for j=1:js,
-    SAtadj(:,j)=SAM(:,j)./(max(SAM(:,j))+eps);
-  end
-  SAtadj = SAtadj';
-  save([OutputDirectoryName,'/',fname_,'_morris_IDE'],'SAtadj','tadj','ir_tadj','ic_tadj','-append')
-  else
-    load([OutputDirectoryName,'/',fname_,'_morris_IDE'],'SAtadj','tadj','ir_tadj','ic_tadj')
-  end
-  if opt_gsa.load_ident==0,
-  js=0;
-  SAMorris = [];
-  for i=1:size(iff,2),
-    js=js+1;
-    [SAmeas, SAMorriss(:,:,js)] = Morris_Measure_Groups(npT, [lpmat0 lpmat], iff(:,i),nliv);
-  end
-  SAM = squeeze(SAMorriss(nshock+1:end,1,:));
-  for j=1:js,
-    SAIF(:,j)=SAM(:,j)./(max(SAM(:,j))+eps);
-  end
-  SAIF = SAIF';
-  save([OutputDirectoryName,'/',fname_,'_morris_IDE'],'SAIF','iff','ir_if','ic_if','-append')
-  else
-    load([OutputDirectoryName,'/',fname_,'_morris_IDE'],'SAIF','iff','ir_if','ic_if')
-  end
-  figure,
-  %bar(SAtadj),
-%   boxplot(SAtadj,'whis',10,'symbol','r.')
-  myboxplot(SAtadj,[],'.',[],10)
-  set(gca,'xticklabel',' ','fontsize',10,'xtick',[1:np])
-  set(gca,'xlim',[0.5 np+0.5])
-  set(gca,'ylim',[0 1])
-  set(gca,'position',[0.13 0.2 0.775 0.7])
-  for ip=1:np,
-    text(ip,-0.02,deblank(pnames(ip,:)),'rotation',90,'HorizontalAlignment','right','interpreter','none')
-  end
-  xlabel(' ')
-  title('All half-life')
-  saveas(gcf,[OutputDirectoryName,'/',fname_,'_morris_tadj'])
-  eval(['print -depsc2 ' OutputDirectoryName '/' fname_ '_morris_tadj']);
-  eval(['print -dpdf ' OutputDirectoryName '/' fname_ '_morris_tadj']);
-  close(gcf),
+%   if opt_gsa.load_ident==0,
+%   js=0;
+%   %for j=1:size(tadj,1),
+%   SAMorris = [];
+%   for i=1:size(tadj,2),
+%     js=js+1;
+%     [SAmeas, SAMorris(:,:,js)] = Morris_Measure_Groups(npT, [lpmat0 lpmat], tadj(:,i),nliv);
+%   end
+%   %end
+%   SAM = squeeze(SAMorris(nshock+1:end,1,:));
+%   for j=1:js,
+%     SAtadj(:,j)=SAM(:,j)./(max(SAM(:,j))+eps);
+%   end
+%   SAtadj = SAtadj';
+%   save([OutputDirectoryName,'/',fname_,'_morris_IDE'],'SAtadj','tadj','ir_tadj','ic_tadj','-append')
+%   else
+%     load([OutputDirectoryName,'/',fname_,'_morris_IDE'],'SAtadj','tadj','ir_tadj','ic_tadj')
+%   end
+%   if opt_gsa.load_ident==0,
+%   js=0;
+%   SAMorris = [];
+%   for i=1:size(iff,2),
+%     js=js+1;
+%     [SAmeas, SAMorriss(:,:,js)] = Morris_Measure_Groups(npT, [lpmat0 lpmat], iff(:,i),nliv);
+%   end
+%   SAM = squeeze(SAMorriss(nshock+1:end,1,:));
+%   for j=1:js,
+%     SAIF(:,j)=SAM(:,j)./(max(SAM(:,j))+eps);
+%   end
+%   SAIF = SAIF';
+%   save([OutputDirectoryName,'/',fname_,'_morris_IDE'],'SAIF','iff','ir_if','ic_if','-append')
+%   else
+%     load([OutputDirectoryName,'/',fname_,'_morris_IDE'],'SAIF','iff','ir_if','ic_if')
+%   end
+%   figure,
+%   %bar(SAtadj),
+% %   boxplot(SAtadj,'whis',10,'symbol','r.')
+%   myboxplot(SAtadj,[],'.',[],10)
+%   set(gca,'xticklabel',' ','fontsize',10,'xtick',[1:np])
+%   set(gca,'xlim',[0.5 np+0.5])
+%   set(gca,'ylim',[0 1])
+%   set(gca,'position',[0.13 0.2 0.775 0.7])
+%   for ip=1:np,
+%     text(ip,-0.02,deblank(pnames(ip,:)),'rotation',90,'HorizontalAlignment','right','interpreter','none')
+%   end
+%   xlabel(' ')
+%   title('All half-life')
+%   saveas(gcf,[OutputDirectoryName,'/',fname_,'_morris_tadj'])
+%   eval(['print -depsc2 ' OutputDirectoryName '/' fname_ '_morris_tadj']);
+%   eval(['print -dpdf ' OutputDirectoryName '/' fname_ '_morris_tadj']);
+%   close(gcf),
 
 %   ifig = 0;
 %   for j=1:size(options_.varobs,1)
@@ -556,24 +557,24 @@ if opt_gsa.morris==1,
 %     end
 %   end
 
-  figure,
-  %bar(SAIF),
-%   boxplot(SAIF,'whis',10,'symbol','r.')
-  myboxplot(SAIF,[],'.',[],10)
-  set(gca,'xticklabel',' ','fontsize',10,'xtick',[1:np])
-  set(gca,'xlim',[0.5 np+0.5])
-  set(gca,'ylim',[0 1])
-  set(gca,'position',[0.13 0.2 0.775 0.7])
-  for ip=1:np,
-    text(ip,-0.02,deblank(pnames(ip,:)),'rotation',90,'HorizontalAlignment','right','interpreter','none')
-  end
-  xlabel(' ')
-  ylabel('Elementary Effects')
-  title('Steady state gains (impact factors)')
-  saveas(gcf,[OutputDirectoryName,'/',fname_,'_morris_gain'])
-  eval(['print -depsc2 ' OutputDirectoryName '/' fname_ '_morris_gain']);
-  eval(['print -dpdf ' OutputDirectoryName '/' fname_ '_morris_gain']);
-  close(gcf),
+%   figure,
+%   %bar(SAIF),
+% %   boxplot(SAIF,'whis',10,'symbol','r.')
+%   myboxplot(SAIF,[],'.',[],10)
+%   set(gca,'xticklabel',' ','fontsize',10,'xtick',[1:np])
+%   set(gca,'xlim',[0.5 np+0.5])
+%   set(gca,'ylim',[0 1])
+%   set(gca,'position',[0.13 0.2 0.775 0.7])
+%   for ip=1:np,
+%     text(ip,-0.02,deblank(pnames(ip,:)),'rotation',90,'HorizontalAlignment','right','interpreter','none')
+%   end
+%   xlabel(' ')
+%   ylabel('Elementary Effects')
+%   title('Steady state gains (impact factors)')
+%   saveas(gcf,[OutputDirectoryName,'/',fname_,'_morris_gain'])
+%   eval(['print -depsc2 ' OutputDirectoryName '/' fname_ '_morris_gain']);
+%   eval(['print -dpdf ' OutputDirectoryName '/' fname_ '_morris_gain']);
+%   close(gcf),
   %figure, bar(SAIF'), title('All Gain Relationships')
 %   ifig = 0;
 %   for j=1:size(options_.varobs,1)
