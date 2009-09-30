@@ -31,6 +31,8 @@ fname_ = M_.fname;
 
 if opt_gsa.load_ident==0,
   % th moments
+    options_.ar = min(3,options_.ar);
+
   [vdec, cc, ac] = mc_moments(T, lpmatx, oo_.dr);
 
 
@@ -816,7 +818,7 @@ else,  % main effects analysis
   nest=min(250,nrun);
   nfit=min(1000,nrun);
   
-  opt_gsa.load_ident=0;
+%   opt_gsa.load_ident=0;
   
 %   if opt_gsa.load_ident==0,
 %   try 
@@ -959,7 +961,8 @@ else,  % main effects analysis
   title('Eigenvalues in PCA')
   pcc=pcc(:,isort);
   ccac = ccac*pcc;
-  npca = min(40, max(find(cumsum(latent)./length(latent)<0.99))+1);
+%   npca = min(40, max(find(cumsum(latent)./length(latent)<0.99))+1);
+  npca = max(find(cumsum(latent)./length(latent)<0.99))+1;
   siPCA = (EET.SAcc'*abs(pcc'))';
   siPCA = siPCA./(max(siPCA')'*ones(1,npT)).*(latent*ones(1,npT));
 %   siPCA = sum(siPCA,1);
@@ -1474,7 +1477,8 @@ else,  % main effects analysis
 %   SAmomN(find(isnan(SAmomN)))=0;
 %   SAmeanexo=mean(SAmomN(:,1:nshock));
 
-  figure, bar(latent'*SAcc),
+%   figure, bar(latent'*SAcc),
+  figure, bar(sum(SAcc)),
   set(gca,'xticklabel',' ','fontsize',10,'xtick',[1:npT])
   set(gca,'xlim',[0.5 npT+0.5])
   ydum = get(gca,'ylim');
