@@ -58,7 +58,7 @@ libkord_a_CXXFLAGS = $(PTHREAD_CFLAGS)
 
 BUILT_SOURCES = $(GENERATED_FILES)
 
-EXTRA_DIST = main.web
+EXTRA_DIST = main.web dummy.ch
 
 check_PROGRAMS = tests
 
@@ -70,15 +70,10 @@ tests_LDADD = libkord.a ../tl/cc/libtl.a ../sylv/cc/libsylv.a $(LAPACK_LIBS) $(B
 check-local:
 	./tests
 
-dummy.ch:
-	touch dummy.ch
-
-# Don't depend on dummy.ch in the following rules, otherwise make will want to rebuild from CWEB even in a tarball, since dummy.ch has a recent timestamp
-
-%.cpp: %.cweb
+%.cpp: %.cweb dummy.ch
 	$(CTANGLE) -bhp $< dummy.ch $@
 
-%.h: %.hweb
+%.h: %.hweb dummy.ch
 	$(CTANGLE) -bhp $< dummy.ch $@
 
 if HAVE_CWEAVE
@@ -94,4 +89,4 @@ endif
 endif
 endif
 
-CLEANFILES = dummy.ch kord.pdf main.idx main.log main.scn main.tex main.toc out.txt
+CLEANFILES = kord.pdf main.idx main.log main.scn main.tex main.toc out.txt
