@@ -1,6 +1,7 @@
 #include "SchurDecompEig.h"
 #include "SylvException.h"
-#include "cpplapack.h"
+
+#include <dynlapack.h>
 
 /* bubble diagonal 1-1, or 2-2 block from position 'from' to position
  * 'to'. If an eigenvalue cannot be swapped with its neighbour, the
@@ -45,16 +46,16 @@ bool SchurDecompEig::tryToSwap(diag_iter& it, diag_iter& itadd)
 	itadd = it;
 	--itadd;
 
-	int n = getDim();
-	int ifst = (*it).getIndex() + 1;
-	int ilst = (*itadd).getIndex() + 1;
+	lapack_int n = getDim();
+	lapack_int ifst = (*it).getIndex() + 1;
+	lapack_int ilst = (*itadd).getIndex() + 1;
 	double* work = new double[n];
-	int info;
-	LAPACK_dtrexc("V", &n, getT().base(), &n, getQ().base(), &n, &ifst, &ilst, work,
+	lapack_int info;
+	dtrexc("V", &n, getT().base(), &n, getQ().base(), &n, &ifst, &ilst, work,
 				  &info);
 	delete [] work;
 	if (info < 0) {
-		throw SYLV_MES_EXCEPTION("Wrong argument to LAPACK_dtrexc.");
+		throw SYLV_MES_EXCEPTION("Wrong argument to dtrexc.");
 	}
 
 	if (info == 0) {

@@ -9,7 +9,8 @@
 #include "dynamic_model.h"
 
 #include "SymSchurDecomp.h"
-#include "cpplapack.h"
+
+#include <dynlapack.h>
 
 #include <limits>
 
@@ -609,7 +610,7 @@ void RandomShockRealization::choleskyFactor(const TwoDMatrix& v)
 			factor.get(i,j) = 0.0;
 	int info;
 
-	LAPACK_dpotrf("L", &rows, factor.base(), &rows, &info);
+	dpotrf("L", &rows, factor.base(), &rows, &info);
 	KORD_RAISE_IF(info != 0,
 				  "Info!=0 in RandomShockRealization::choleskyFactor");
 }

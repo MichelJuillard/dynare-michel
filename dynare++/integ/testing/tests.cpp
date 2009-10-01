@@ -2,7 +2,7 @@
 /* Copyright 2005, Ondra Kamenik */
 
 #include "GeneralMatrix.h"
-#include "cpplapack.h"
+#include <dynlapack.h>
 #include "SylvException.h"
 
 #include "rfs_tensor.h"
@@ -260,7 +260,7 @@ bool TestRunnable::qmc_normal_moments(const GeneralMatrix& m, int imom, int leve
 		for (int j = i+1; j < rows; j++)
 			mchol.get(i,j) = 0.0;
 	int info;
-	LAPACK_dpotrf("L", &rows, mchol.base(), &rows, &info);
+	dpotrf("L", &rows, mchol.base(), &rows, &info);
 
 	// make vector function
 	MomentFunction func(mchol, imom);

@@ -17,15 +17,19 @@
  * along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#if !defined(MATLAB_VERSIONS_COMPATIBILITY_H)
-#define MATLAB_VERSIONS_COMPATIBILITY_H
+#ifndef _DYNMEX_H
+#define _DYNMEX_H
 
-#if !defined(LAPACK_USE_MWSIGNEDINDEX) || defined(OCTAVE)
-typedef int lapack_int;
-typedef int blas_int;
-#else
-typedef mwSignedIndex lapack_int;
-typedef mwSignedIndex blas_int;
-#endif
+# if !defined(MATLAB_MEX_FILE) && !defined(OCTAVE_MEX_FILE)
+#  error You must define either MATLAB_MEX_FILE or OCTAVE_MEX_FILE
+# endif
+
+# include <mex.h>
+
+/* mwSize, mwIndex and mwSignedIndex appeared in MATLAB 7.3 */
+# if defined(MATLAB_MEX_FILE) && MATLAB_VERSION < 0x0703
+typedef int mwIndex;
+typedef int mwSize;
+# endif
 
 #endif

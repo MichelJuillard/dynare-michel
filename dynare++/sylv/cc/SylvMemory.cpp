@@ -6,8 +6,8 @@
 #include "SylvException.h"
 #include "KronVector.h"
 
-#ifdef MATLAB
-#include "mex.h"
+#if defined(MATLAB_MEX_FILE) || defined(OCTAVE_MEX_FILE)
+# include <dynmex.h>
 #endif
 
 #include <math.h> 
@@ -30,7 +30,7 @@ void SylvMemoryPool::init(size_t size)
 #ifdef USE_MEMORY_POOL
 	length = size;
 
-#ifdef MATLAB
+#if defined(MATLAB_MEX_FILE) || defined(OCTAVE_MEX_FILE)
 	if (base)
 		throw SYLV_MES_EXCEPTION("Attempt to use matlab memory pool twice.");
 	base = (char*) mxMalloc(length);
@@ -90,7 +90,7 @@ SylvMemoryPool::~SylvMemoryPool()
 
 void SylvMemoryPool::reset()
 {
-#ifndef MATLAB
+#if !defined(MATLAB_MEX_FILE) && !defined(OCTAVE_MEX_FILE)
 	delete [] base;
 	base = 0;
 	allocated = 0;
@@ -134,7 +134,7 @@ void operator delete[](void* p)
 #ifdef USE_MEMORY_POOL
 void* MallocAllocator::operator new(size_t size)
 {
-#ifdef MATLAB
+#if defined(MATLAB_MEX_FILE) || defined(OCTAVE_MEX_FILE)
 	throw SYLV_MES_EXCEPTION("Attempt to call wrong memory allocator.");
 #else
 	void* res = malloc(size);
@@ -146,7 +146,7 @@ void* MallocAllocator::operator new(size_t size)
 
 void* MallocAllocator::operator new[](size_t size)
 {
-#ifdef MATLAB
+#if defined(MATLAB_MEX_FILE) || defined(OCTAVE_MEX_FILE)
 	throw SYLV_MES_EXCEPTION("Attempt to call wrong memory allocator.");
 #else
 	void* res = malloc(size);
@@ -158,7 +158,7 @@ void* MallocAllocator::operator new[](size_t size)
 
 void MallocAllocator::operator delete(void* p)
 {
-#ifdef MATLAB
+#if defined(MATLAB_MEX_FILE) || defined(OCTAVE_MEX_FILE)
 	throw SYLV_MES_EXCEPTION("Attempt to call wrong memory destructor.");
 #else
 	free(p);
@@ -167,7 +167,7 @@ void MallocAllocator::operator delete(void* p)
 
 void MallocAllocator::operator delete[](void* p)
 {
-#ifdef MATLAB
+#if defined(MATLAB_MEX_FILE) || defined(OCTAVE_MEX_FILE)
 	throw SYLV_MES_EXCEPTION("Attempt to call wrong memory destructor.");
 #else
 	free(p);

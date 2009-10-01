@@ -6,7 +6,8 @@
 @c
 
 #include "vector_function.h"
-#include "cpplapack.h"
+
+#include <dynlapack.h>
 
 #include <math.h>
 
@@ -169,7 +170,7 @@ void GaussConverterFunction::calcCholeskyFactor(const GeneralMatrix& vcov)
 			A.get(i,j) = 0.0;
 
 	int info;
-	LAPACK_dpotrf("L", &rows, A.base(), &rows, &info);
+	dpotrf("L", &rows, A.base(), &rows, &info);
 	// todo: raise if |info!=1|
 }
 

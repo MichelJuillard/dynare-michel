@@ -18,22 +18,14 @@
  */
 
 #include <string.h>
-#include "mex.h"
-#include "../matlab_versions_compatibility.h"
 
-#ifdef NO_LAPACK_H
-# if defined(__linux__) || defined(OCTAVE)
-#  define dgges dgges_
-# endif
-void dgges(char *, char *, char *, int (*)(), int *, double *, int *, double *, int *, int *, double *, double *, double *,
-           double *, int *, double *, int *, double *, int *, int *, int *);
-#else /* NO_LAPACK_H */
-# include "lapack.h"
-#endif /* NO_LAPACK_H */
+#include <dynmex.h>
+#include <dynlapack.h>
 
 double criterium;
 
-lapack_int my_criteria(double *alphar, double *alphai, double *beta)
+lapack_int
+my_criteria(const double *alphar, const double *alphai, const double *beta)
 {
   return( (*alphar * *alphar + *alphai * *alphai) < criterium * *beta * *beta);
 }

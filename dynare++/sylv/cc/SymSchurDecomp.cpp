@@ -5,7 +5,7 @@
 #include "SymSchurDecomp.h"
 #include "SylvException.h"
 
-#include "cpplapack.h"
+#include <dynlapack.h>
 
 #include <algorithm>
 #include <cmath>
@@ -44,7 +44,7 @@ SymSchurDecomp::SymSchurDecomp(const GeneralMatrix& mata)
 	int info;
 
 	// query for lwork and liwork
-	LAPACK_dsyevr(jobz, range, uplo, &n, a, &lda, vl, vu, il, iu, &abstol,
+	dsyevr(jobz, range, uplo, &n, a, &lda, vl, vu, il, iu, &abstol,
 				  &m, w, z, &ldz, isuppz, &tmpwork, &lwork, &tmpiwork, &liwork, &info);
 	lwork = (int)tmpwork;
 	liwork = tmpiwork;
@@ -53,7 +53,7 @@ SymSchurDecomp::SymSchurDecomp(const GeneralMatrix& mata)
 	int* iwork = new int[liwork];
 	
 	// do the calculation
-	LAPACK_dsyevr(jobz, range, uplo, &n, a, &lda, vl, vu, il, iu, &abstol,
+	dsyevr(jobz, range, uplo, &n, a, &lda, vl, vu, il, iu, &abstol,
 				  &m, w, z, &ldz, isuppz, work, &lwork, iwork, &liwork, &info);
 
 	if (info < 0)

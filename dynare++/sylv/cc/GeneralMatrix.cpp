@@ -6,8 +6,8 @@
 #include "SylvException.h"
 #include "GeneralMatrix.h"
 
-#include "cppblas.h"
-#include "cpplapack.h"
+#include <dynblas.h>
+#include <dynlapack.h>
 
 #include <stdio.h>
 #include <string.h>
@@ -270,14 +270,14 @@ void GeneralMatrix::gemm(const char* transa, const ConstGeneralMatrix& a,
 		throw SYLV_MES_EXCEPTION("Wrong dimensions for matrix multiplication.");
 	}
 
-	int m = opa_rows;
-	int n = opb_cols;
-	int k = opa_cols;
-	int lda = a.ld;
-	int ldb = b.ld;
-	int ldc = ld;
+	blas_int m = opa_rows;
+	blas_int n = opb_cols;
+	blas_int k = opa_cols;
+	blas_int lda = a.ld;
+	blas_int ldb = b.ld;
+	blas_int ldc = ld;
 	if (lda > 0 && ldb > 0 && ldc > 0) {
-		BLAS_dgemm(transa, transb, &m, &n, &k, &alpha, a.data.base(), &lda,
+		dgemm(transa, transb, &m, &n, &k, &alpha, a.data.base(), &lda,
 				   b.data.base(), &ldb, &beta, data.base(), &ldc); 
 	} else if (numRows()*numCols() > 0) {
 		if (beta == 0.0)
@@ -365,14 +365,14 @@ void ConstGeneralMatrix::multVec(double a, Vector& x, double b, const ConstVecto
 		throw SYLV_MES_EXCEPTION("Wrong dimensions for vector multiply.");
 	}
 	if (rows > 0) {
-		int mm = rows;
-		int nn = cols;
+		blas_int mm = rows;
+		blas_int nn = cols;
 		double alpha = b;
-		int lda = ld;
-		int incx = d.skip();
+		blas_int lda = ld;
+		blas_int incx = d.skip();
 		double beta = a;
-		int incy = x.skip();
-		BLAS_dgemv("N", &mm, &nn, &alpha, data.base(), &lda, d.base(), &incx,
+		blas_int incy = x.skip();
+		dgemv("N", &mm, &nn, &alpha, data.base(), &lda, d.base(), &incx,
 				   &beta, x.base(), &incy);
 	}
 	
@@ -385,14 +385,14 @@ void ConstGeneralMatrix::multVecTrans(double a, Vector& x, double b,
 		throw SYLV_MES_EXCEPTION("Wrong dimensions for vector multiply.");
 	}
 	if (rows > 0) {
-		int mm = rows;
-		int nn = cols;
+		blas_int mm = rows;
+		blas_int nn = cols;
 		double alpha = b;
-		int lda = rows;
-		int incx = d.skip();
+		blas_int lda = rows;
+		blas_int incx = d.skip();
 		double beta = a;
-		int incy = x.skip();
-		BLAS_dgemv("T", &mm, &nn, &alpha, data.base(), &lda, d.base(), &incx,
+		blas_int incy = x.skip();
+		dgemv("T", &mm, &nn, &alpha, data.base(), &lda, d.base(), &incx,
 				   &beta, x.base(), &incy);
 	}
 }
@@ -409,11 +409,12 @@ void ConstGeneralMatrix::multInvLeft(const char* trans, int mrows, int mcols, in
 
 	if (rows > 0) {
 		GeneralMatrix inv(*this);
-		int* ipiv = new int[rows];
-		int info;
-		LAPACK_dgetrf(&rows, &rows, inv.getData().base(), &rows, ipiv, &info);
-		LAPACK_dgetrs(trans, &rows, &mcols, inv.base(), &rows, ipiv, d,
-					  &mld, &info);
+		lapack_int* ipiv = new lapack_int[rows];
+		lapack_int info;
+		lapack_int rows2 = rows, mrows2 = mrows, mcols2 = mcols, mld2 = mld;
+		dgetrf(&rows2, &rows2, inv.getData().base(), &rows2, ipiv, &info);
+		dgetrs(trans, &rows2, &mcols2, inv.base(), &rows2, ipiv, d,
+					  &mld2, &info);
 		delete [] ipiv;
 	}
 }

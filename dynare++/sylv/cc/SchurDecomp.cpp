@@ -4,21 +4,21 @@
 
 #include "SchurDecomp.h"
 
-#include "cpplapack.h"
+#include <dynlapack.h>
 
 SchurDecomp::SchurDecomp(const SqSylvMatrix& m)
 	: q_destroy(true), t_destroy(true)
 {
-	int rows = m.numRows();
+	lapack_int rows = m.numRows();
 	q = new SqSylvMatrix(rows);
 	SqSylvMatrix auxt(m);
-	int sdim;
+	lapack_int sdim;
 	double* const wr = new double[rows];
 	double* const wi = new double[rows];
-	int lwork = 6*rows;
+	lapack_int lwork = 6*rows;
 	double* const work = new double[lwork];
-	int info;
-	LAPACK_dgees("V", "N", 0, &rows, auxt.base(), &rows, &sdim,
+	lapack_int info;
+	dgees("V", "N", 0, &rows, auxt.base(), &rows, &sdim,
 				 wr, wi, q->base(), &rows,
 				 work, &lwork, 0, &info);
 	delete [] work;

@@ -1,8 +1,9 @@
 EXEEXT = .mex
 
 CPPFLAGS = $(shell $(MKOCTFILE) -p CPPFLAGS)
+CPPFLAGS += -I$(top_srcdir)/mex/sources
 
-DEFS = -DNO_BLAS_H -DNO_LAPACK_H -DOCTAVE
+DEFS = -DOCTAVE_MEX_FILE
 
 CC = $(shell $(MKOCTFILE) -p CC)
 CFLAGS = $(shell $(MKOCTFILE) -p CPICFLAG)

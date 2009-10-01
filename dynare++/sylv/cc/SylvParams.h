@@ -8,8 +8,8 @@
 #include <stdio.h>
 #include <string.h>
 
-#ifdef MATLAB
-#include "mex.h"
+#if defined(MATLAB_MEX_FILE) || defined(OCTAVE_MEX_FILE)
+# include <dynmex.h>
 #endif
 
 typedef enum {def, changed, undef} status;
@@ -63,7 +63,7 @@ protected:
 		DoubleParamItem(const DoubleParamItem& item) : ParamItem<double>(item) {}
 		const DoubleParamItem& operator=(const double& val)
 			{ParamItem<double>::operator=(val); return *this;}
-#ifdef MATLAB
+#if defined(MATLAB_MEX_FILE) || defined(OCTAVE_MEX_FILE)
 		mxArray* createMatlabArray() const;
 #endif
 	};
@@ -75,7 +75,7 @@ protected:
 		IntParamItem(const IntParamItem& item) : ParamItem<int>(item) {}
 		const IntParamItem& operator=(const int& val)
 			{ParamItem<int>::operator=(val); return *this;}
-#ifdef MATLAB
+#if defined(MATLAB_MEX_FILE) || defined(OCTAVE_MEX_FILE)
 		mxArray* createMatlabArray() const;
 #endif
 	};
@@ -87,7 +87,7 @@ protected:
 		BoolParamItem(const BoolParamItem& item) : ParamItem<bool>(item) {}
 		const BoolParamItem& operator=(const bool& val)
 			{ParamItem<bool>::operator=(val); return *this;}
-#ifdef MATLAB
+#if defined(MATLAB_MEX_FILE) || defined(OCTAVE_MEX_FILE)
 		mxArray* createMatlabArray() const;
 #endif
 	};
@@ -99,7 +99,7 @@ protected:
 		MethodParamItem(const MethodParamItem& item) : ParamItem<solve_method>(item) {}
 		const MethodParamItem operator=(const solve_method& val)
 			{ParamItem<solve_method>::operator=(val); return *this;}
-#ifdef MATLAB
+#if defined(MATLAB_MEX_FILE) || defined(OCTAVE_MEX_FILE)
 		mxArray* createMatlabArray() const;
 #endif
 	};
@@ -147,7 +147,7 @@ public:
 	void print(const char* prefix) const;
 	void print(FILE* fdesc, const char* prefix) const;
 	void setArrayNames(int& num, const char** names) const;
-#ifdef MATLAB
+#if defined(MATLAB_MEX_FILE) || defined(OCTAVE_MEX_FILE)
 	mxArray* createStructArray() const;
 #endif
 private:

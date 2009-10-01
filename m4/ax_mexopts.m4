@@ -21,6 +21,7 @@ AC_REQUIRE([AX_MEXEXT])
 AC_REQUIRE([AX_MATLAB_ARCH])
 AC_REQUIRE([AX_MATLAB_VERSION])
 AC_REQUIRE([AC_CANONICAL_HOST])
+AC_REQUIRE([AC_PROG_SED])
 
 AC_MSG_CHECKING([for options to compile MEX for MATLAB])
 
@@ -88,14 +89,13 @@ case ${MATLAB_ARCH} in
     ;;
 esac
 
-# mwSize, mwIndex and mwSignedIndex appeared in MATLAB 7.3
-AX_COMPARE_VERSION([$MATLAB_VERSION], [lt], [7.3], [MATLAB_DEFS="$MATLAB_DEFS -DMWTYPES_NOT_DEFINED"])
+# Converts the MATLAB version number into comparable integers with only major and minor version numbers
+# For example, 7.4.2 will become 0704
+ax_matlab_ver=`echo "$MATLAB_VERSION" | $SED -e 's/\([[0-9]]*\)\.\([[0-9]]*\).*/Z\1ZZ\2Z/' \
+                                             -e 's/Z\([[0-9]]\)Z/Z0\1Z/g' \
+                                             -e 's/[[^0-9]]//g'`
 
-# MATLAB Lapack expects mwSignedIndex arguments only starting with MATLAB 7.8
-AX_COMPARE_VERSION([$MATLAB_VERSION], [ge], [7.8], [MATLAB_DEFS="$MATLAB_DEFS -DLAPACK_USE_MWSIGNEDINDEX"])
-
-# blas.h and lapack.h appeared in MATLAB 7.5
-AX_COMPARE_VERSION([$MATLAB_VERSION], [lt], [7.5], [MATLAB_DEFS="$MATLAB_DEFS -DNO_BLAS_H -DNO_LAPACK_H"])
+MATLAB_DEFS="$MATLAB_DEFS -DMATLAB_VERSION=0x${ax_matlab_ver}"
 
 if test "$ax_mexopts_ok" = "yes"; then
   AC_MSG_RESULT([ok])

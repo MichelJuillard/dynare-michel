@@ -130,7 +130,7 @@ void SylvParams::setArrayNames(int& num, const char** names) const
 		names[num++] = "cpu_time";
 }
 
-#ifdef MATLAB
+#if defined(MATLAB_MEX_FILE) || defined(OCTAVE_MEX_FILE)
 mxArray* SylvParams::DoubleParamItem::createMatlabArray() const
 {
     return mxCreateScalarDouble(value);
@@ -164,7 +164,7 @@ mxArray* SylvParams::createStructArray() const
 	const char* names[50];
 	int num;
 	setArrayNames(num, names);
-	const int dims[] = {1, 1};
+	const mwSize dims[] = {1, 1};
 	mxArray* const res = mxCreateStructArray(2, dims, num, names);
 
 	int i = 0;

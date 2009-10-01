@@ -6,7 +6,8 @@
 #include "Vector.h"
 #include "GeneralMatrix.h"
 #include "SylvException.h"
-#include "cppblas.h"
+
+#include <dynblas.h>
 
 #include <stdio.h>
 #include <string.h>
@@ -67,9 +68,10 @@ const Vector& Vector::operator=(const ConstVector& v)
 
 void Vector::copy(const double* d, int inc)
 {
-	int n = length();
-	int incy = skip();
-	BLAS_dcopy(&n, d, &inc, base(), &incy);
+	blas_int n = length();
+	blas_int incy = skip();
+	blas_int inc2 = inc;
+	dcopy(&n, d, &inc2, base(), &incy);
 }
 
 Vector::Vector(Vector& v, int off, int l)
@@ -175,10 +177,10 @@ void Vector::add(double r, const Vector& v)
 
 void Vector::add(double r, const ConstVector& v)
 {
-	int n = length();
-	int incx = v.skip();
-	int incy = skip();
-	BLAS_daxpy(&n, &r, v.base(), &incx, base(), &incy);
+	blas_int n = length();
+	blas_int incx = v.skip();
+	blas_int incy = skip();
+	daxpy(&n, &r, v.base(), &incx, base(), &incy);
 }
 
 void Vector::add(const double* z, const Vector& v)
@@ -188,17 +190,17 @@ void Vector::add(const double* z, const Vector& v)
 
 void Vector::add(const double* z, const ConstVector& v)
 {
-	int n = length()/2;
-	int incx = v.skip();
-	int incy = skip();
-	BLAS_zaxpy(&n, z, v.base(), &incx, base(), &incy);
+	blas_int n = length()/2;
+	blas_int incx = v.skip();
+	blas_int incy = skip();
+	zaxpy(&n, z, v.base(), &incx, base(), &incy);
 }
 
 void Vector::mult(double r)
 {
-	int n = length();
-	int incx = skip();
-	BLAS_dscal(&n, &r, base(), &incx);
+	blas_int n = length();
+	blas_int incx = skip();
+	dscal(&n, &r, base(), &incx);
 }
 
 void Vector::mult2(double alpha, double beta1, double beta2,
@@ -343,10 +345,10 @@ double ConstVector::dot(const ConstVector& y) const
 {
 	if (length() != y.length())
 		throw SYLV_MES_EXCEPTION("Vector has different length in ConstVector::dot.");
-	int n = length();
-	int incx = skip();
-	int incy = y.skip();
-	return BLAS_ddot(&n, base(), &incx, y.base(), &incy);
+	blas_int n = length();
+	blas_int incx = skip();
+	blas_int incy = y.skip();
+	return ddot(&n, base(), &incx, y.base(), &incy);
 }
 
 bool ConstVector::isFinite() const

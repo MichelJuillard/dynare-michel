@@ -1,9 +1,10 @@
-VPATH = $(top_srcdir)/mex/sources/gensylv/cc:$(top_srcdir)/mex/sources/gensylv/matlab
+vpath %.cpp $(top_srcdir)/dynare++/sylv/cc $(top_srcdir)/dynare++/sylv/matlab
+vpath %.h $(top_srcdir)/dynare++/sylv/cc
 
 noinst_PROGRAMS = gensylv
 
 # Can't use gensylv_CPPFLAGS, because it interacts badly with VPATH
-CPPFLAGS += -DMATLAB -I$(top_srcdir)/mex/sources/gensylv/cc
+CPPFLAGS += -I$(top_srcdir)/dynare++/sylv/cc -I$(top_srcdir)/mex/sources
 
 nodist_gensylv_SOURCES = \
 	gensylv.cpp \
@@ -41,7 +42,4 @@ nodist_gensylv_SOURCES = \
 	SylvParams.h \
 	TriangularSylvester.h \
 	Vector.h \
-	cppblas.h \
-	cpplapack.h \
 	SylvesterSolver.h
-

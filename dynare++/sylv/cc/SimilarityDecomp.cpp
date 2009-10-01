@@ -7,7 +7,7 @@
 #include "SchurDecompEig.h"
 #include "SylvException.h"
 
-#include "cpplapack.h"
+#include <dynlapack.h>
 
 #include <cmath>
 
@@ -53,12 +53,12 @@ bool SimilarityDecomp::solveX(diag_iter start, diag_iter end,
 	SqSylvMatrix B((const GeneralMatrix&)*b, ei, ei, X.numCols());
 	GeneralMatrix C((const GeneralMatrix&)*b, si, ei, X.numRows(), X.numCols());
 
-	int isgn = -1;
-	int m = A.numRows();
-	int n = B.numRows();
+	lapack_int isgn = -1;
+	lapack_int m = A.numRows();
+	lapack_int n = B.numRows();
 	double scale;
-	int info;
-	LAPACK_dtrsyl("N", "N", &isgn, &m, &n, A.base(), &m, B.base(), &n,
+	lapack_int info;
+	dtrsyl("N", "N", &isgn, &m, &n, A.base(), &m, B.base(), &n,
 				  C.base(), &m, &scale, &info);
 	if (info < -1)
 		throw SYLV_MES_EXCEPTION("Wrong parameter to LAPACK dtrsyl.");

@@ -12,8 +12,6 @@
 #include "product.h"
 #include "quasi_mcarlo.h"
 
-#include "cpplapack.h"
-
 @<|ResidFunction| constructor code@>;
 @<|ResidFunction| copy constructor code@>;
 @<|ResidFunction| destructor code@>;

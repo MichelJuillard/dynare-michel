@@ -7,7 +7,8 @@
 
 #include "kord_exception.h"
 #include "first_order.h"
-#include "cpplapack.h"
+
+#include <dynlapack.h>
 
 double qz_criterium = 1.000001;
 @<|order_eigs| function code@>;
@@ -15,7 +16,7 @@ double qz_criterium = 1.000001;
 @<|FirstOrder::journalEigs| code@>;
 
 @ This is a function which selects the eigenvalues pair used by
-|LAPACK_dgges|. See documentation to DGGES for details. Here we want
+|dgges|. See documentation to DGGES for details. Here we want
 to select (return true) the pairs for which $\alpha<\beta$.
 
 @<|order_eigs| function code@>=
@@ -192,7 +193,7 @@ the same. The difference is only numerical error.
 	Vector work(lwork);
 	IntSequence bwork(n);
 	int info;
-	LAPACK_dgges("N", "V", "S", order_eigs, &n, matE.getData().base(), &n,
+	dgges("N", "V", "S", order_eigs, &n, matE.getData().base(), &n,
 				 matD.getData().base(), &n, &sdim, alphar.base(), alphai.base(),
 				 beta.base(), vsl.getData().base(), &n, vsr.getData().base(), &n,
 				 work.base(), &lwork, &(bwork[0]), &info);

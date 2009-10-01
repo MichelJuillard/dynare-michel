@@ -6,7 +6,7 @@
 #include "SylvException.h"
 #include "SchurDecomp.h"
 
-#include "cppblas.h"
+#include <dynblas.h>
 
 #include <stdio.h>
 #include <cmath>
@@ -396,10 +396,10 @@ QuasiTriangular::QuasiTriangular(int p, const QuasiTriangular& t)
 	: SqSylvMatrix(t.numRows()), diagonal(getData().base(), t.diagonal)
 {
 	Vector aux(t.getData());
-	int d_size = diagonal.getSize();
+	blas_int d_size = diagonal.getSize();
 	double alpha = 1.0;
 	double beta = 0.0;
-	BLAS_dgemm("N", "N", &d_size, &d_size, &d_size, &alpha, aux.base(),
+	dgemm("N", "N", &d_size, &d_size, &d_size, &alpha, aux.base(),
 			   &d_size, t.getData().base(), &d_size, &beta, getData().base(), &d_size);
 }
 
@@ -529,10 +529,10 @@ void QuasiTriangular::solvePre(Vector& x, double& eig_min)
 			eig_min = eig_size;
 	}
 
-	int nn = diagonal.getSize();
-	int lda = diagonal.getSize();
-	int incx = x.skip();
-	BLAS_dtrsv("U", "N", "N", &nn, getData().base(), &lda, x.base(), &incx);
+	blas_int nn = diagonal.getSize();
+	blas_int lda = diagonal.getSize();
+	blas_int incx = x.skip();
+	dtrsv("U", "N", "N", &nn, getData().base(), &lda, x.base(), &incx);
 }
 
 void QuasiTriangular::solvePreTrans(Vector& x, double& eig_min)
@@ -550,10 +550,10 @@ void QuasiTriangular::solvePreTrans(Vector& x, double& eig_min)
 			eig_min = eig_size;
 	}
 	
-	int nn = diagonal.getSize();
-	int lda = diagonal.getSize();
-	int incx = x.skip();
-	BLAS_dtrsv("U", "T", "N", &nn, getData().base(), &lda, x.base(), &incx);
+	blas_int nn = diagonal.getSize();
+	blas_int lda = diagonal.getSize();
+	blas_int incx = x.skip();
+	dtrsv("U", "T", "N", &nn, getData().base(), &lda, x.base(), &incx);
 }
 
 
@@ -561,10 +561,10 @@ void QuasiTriangular::solvePreTrans(Vector& x, double& eig_min)
 void QuasiTriangular::multVec(Vector& x, const ConstVector& b) const
 {
 	x = b;
-	int nn = diagonal.getSize();
-	int lda = diagonal.getSize();
-	int incx = x.skip();
-	BLAS_dtrmv("U", "N", "N", &nn, getData().base(), &lda, x.base(), &incx);
+	blas_int nn = diagonal.getSize();
+	blas_int lda = diagonal.getSize();
+	blas_int incx = x.skip();
+	dtrmv("U", "N", "N", &nn, getData().base(), &lda, x.base(), &incx);
 	for (const_diag_iter di = diag_begin(); di != diag_end(); ++di) {
 		if (!(*di).isReal()) {
 			int jbar = (*di).getIndex();
@@ -577,10 +577,10 @@ void QuasiTriangular::multVec(Vector& x, const ConstVector& b) const
 void QuasiTriangular::multVecTrans(Vector& x, const ConstVector& b) const
 {
 	x = b;
-	int nn = diagonal.getSize();
-	int lda = diagonal.getSize();
-	int incx = x.skip();
-	BLAS_dtrmv("U", "T", "N", &nn, getData().base(), &lda, x.base(), &incx);
+	blas_int nn = diagonal.getSize();
+	blas_int lda = diagonal.getSize();
+	blas_int incx = x.skip();
+	dtrmv("U", "T", "N", &nn, getData().base(), &lda, x.base(), &incx);
 	for (const_diag_iter di = diag_begin(); di != diag_end(); ++di) {
 		if (!(*di).isReal()) {
 			int jbar = (*di).getIndex();

@@ -23,31 +23,16 @@
  */
 
 #include <string.h>
-#include "mex.h"
-#include "../matlab_versions_compatibility.h"
 
-  #ifdef NO_BLAS_H
-    #if defined(__linux__) || defined(OCTAVE)
-      #define dgemm dgemm_
-    #endif
-    extern "C" {
-    lapack_int dgemm(char*, char*, lapack_int*, lapack_int*, lapack_int*, double*, double*, lapack_int*, double*, lapack_int*, double*, double*, lapack_int*);
-    }
-  #else /* NO_BLAS_H */
-    #include "blas.h"
-  #endif /* NO_BLAS_H */
+#include <dynmex.h>
+#include <dynblas.h>
 
 #ifdef USE_OMP
   #include <omp.h>
 #endif
 
-#ifdef MWTYPES_NOT_DEFINED
-typedef int mwIndex;
-typedef int mwSize;
-#endif
-
 void full_A_times_kronecker_B_C(double *A, double *B, double *C, double *D,
-				lapack_int mA, lapack_int nA, lapack_int mB, lapack_int nB, lapack_int mC, lapack_int nC)
+				blas_int mA, blas_int nA, blas_int mB, blas_int nB, blas_int mC, blas_int nC)
 {
   #if USE_OMP
     #pragma omp parallel for num_threads(atoi(getenv("DYNARE_NUM_THREADS")))
@@ -91,7 +76,7 @@ void full_A_times_kronecker_B_C(double *A, double *B, double *C, double *D,
 }
 
 
-void full_A_times_kronecker_B_B(double *A, double *B, double *D, lapack_int mA, lapack_int nA, lapack_int mB, lapack_int nB)
+void full_A_times_kronecker_B_B(double *A, double *B, double *D, blas_int mA, blas_int nA, blas_int mB, blas_int nB)
 {
   #if USE_OMP
     #pragma omp parallel for num_threads(atoi(getenv("DYNARE_NUM_THREADS")))

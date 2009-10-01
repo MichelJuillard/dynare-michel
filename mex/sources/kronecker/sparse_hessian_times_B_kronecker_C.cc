@@ -24,15 +24,11 @@
  */
 
 #include <string.h>
-#include "mex.h"
+
+#include <dynmex.h>
 
 #ifdef USE_OMP
 # include <omp.h>
-#endif
-
-#ifdef MWTYPES_NOT_DEFINED
-  typedef int mwIndex;
-  typedef int mwSize;
 #endif
 
 void sparse_hessian_times_B_kronecker_B(mwIndex *isparseA, mwIndex *jsparseA, double *vsparseA, 
