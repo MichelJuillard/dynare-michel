@@ -131,7 +131,7 @@ Interpreter::log1(double a)
 
 
 void
-Interpreter::compute_block_time(int Per_u_, bool evaluate) /*throw(EvalException)*/
+Interpreter::compute_block_time(int Per_u_, bool evaluate, int block_num) /*throw(EvalException)*/
 {
   int var, lag, op;
   ostringstream tmp_out;
@@ -179,7 +179,7 @@ Interpreter::compute_block_time(int Per_u_, bool evaluate) /*throw(EvalException
                   Stack.push(x[it_+lag+var*nb_row_xd]);
                   break;
                 default:
-                  mexPrintf("Unknown variable type\n");
+                  mexPrintf("FLDV: Unknown variable type\n");
               }
             break;
           case FLDSV :
@@ -214,8 +214,12 @@ Interpreter::compute_block_time(int Per_u_, bool evaluate) /*throw(EvalException
                   var=get_code_int;
                   Stack.push(x[var]);
                   break;
+                case eModelLocalVariable:
+                  /*mexPrintf("FLDSV a local variable in Block %d Stack.size()=%d",block_num, Stack.size());
+                  mexPrintf(" value=%f\n",Stack.top());*/
+                  break;
                 default:
-                  mexPrintf("Unknown variable type\n");
+                  mexPrintf("FLDSV: Unknown variable type\n");
               }
             break;
           case FLDVS :
@@ -251,7 +255,7 @@ Interpreter::compute_block_time(int Per_u_, bool evaluate) /*throw(EvalException
                   Stack.push(x[var]);
                   break;
                 default:
-                  mexPrintf("Unknown variable type\n");
+                  mexPrintf("FLDVS: Unknown variable type\n");
               }
             break;
           case FLDT :
@@ -343,7 +347,7 @@ Interpreter::compute_block_time(int Per_u_, bool evaluate) /*throw(EvalException
                   Stack.pop();
                   break;
                 default:
-                  mexPrintf("Unknown vraibale type\n");
+                  mexPrintf("FSTPV: Unknown vraibale type\n");
               }
             break;
 					case FSTPSV :
@@ -376,7 +380,7 @@ Interpreter::compute_block_time(int Per_u_, bool evaluate) /*throw(EvalException
                   Stack.pop();
                   break;
                 default:
-                  mexPrintf("Unknown vraibale type\n");
+                  mexPrintf("FSTPSV: Unknown vraibale type\n");
               }
             break;
           case FSTPT :
@@ -711,7 +715,7 @@ Interpreter::evaluate_a_block(int size, int type, string bin_basename, bool stea
     {
       case EVALUATE_FORWARD :
         if(steady_state)
-					compute_block_time(0, true);
+					compute_block_time(0, true, block_num);
 				else
 				  {
             begining=get_code_pointer;
@@ -720,7 +724,7 @@ Interpreter::evaluate_a_block(int size, int type, string bin_basename, bool stea
                 //mexPrintf("it_=%d, y_size=%d\n",it_, y_size);
                 set_code_pointer(begining);
                 Per_y_=it_*y_size;
-                compute_block_time(0, true);
+                compute_block_time(0, true, block_num);
               }
 				  }
         break;
@@ -729,7 +733,7 @@ Interpreter::evaluate_a_block(int size, int type, string bin_basename, bool stea
 				r=(double*)mxMalloc(size*sizeof(double));
 				if(steady_state)
 				  {
-					  compute_block_time(0, true);
+					  compute_block_time(0, true, block_num);
 					  for(int j=0; j<size; j++)
               y[Block_Contain[j].Variable] += r[j];
 				  }
@@ -741,7 +745,7 @@ Interpreter::evaluate_a_block(int size, int type, string bin_basename, bool stea
                 //mexPrintf("it_=%d, y_size=%d\n",it_, y_size);
                 set_code_pointer(begining);
                 Per_y_=it_*y_size;
-                compute_block_time(0, true);
+                compute_block_time(0, true, block_num);
                 for(int j=0; j<size; j++)
                   y[it_*y_size+Block_Contain[j].Variable] += r[j];
               }
@@ -755,7 +759,7 @@ Interpreter::evaluate_a_block(int size, int type, string bin_basename, bool stea
         r=(double*)mxMalloc(size*sizeof(double));
 				if(steady_state)
 				  {
-					  compute_block_time(0, true);
+					  compute_block_time(0, true, block_num);
 					  for(int j=0; j<size; j++)
               y[Block_Contain[j].Variable] += r[j];
 				  }
@@ -767,7 +771,7 @@ Interpreter::evaluate_a_block(int size, int type, string bin_basename, bool stea
                 //mexPrintf("it_=%d, y_size=%d\n",it_, y_size);
                 set_code_pointer(begining);
                 Per_y_=it_*y_size;
-                compute_block_time(0, true);
+                compute_block_time(0, true, block_num);
                 for(int j=0; j<size; j++)
                   y[it_*y_size+Block_Contain[j].Variable] += r[j];
               }
@@ -776,7 +780,7 @@ Interpreter::evaluate_a_block(int size, int type, string bin_basename, bool stea
         break;
       case EVALUATE_BACKWARD :
         if(steady_state)
-          compute_block_time(0, true);
+          compute_block_time(0, true, block_num);
 				else
 				  {
             begining=get_code_pointer;
@@ -784,7 +788,7 @@ Interpreter::evaluate_a_block(int size, int type, string bin_basename, bool stea
               {
                 set_code_pointer(begining);
                 Per_y_=it_*y_size;
-                compute_block_time(0, true);
+                compute_block_time(0, true, block_num);
               }
 				  }
         break;
@@ -793,7 +797,7 @@ Interpreter::evaluate_a_block(int size, int type, string bin_basename, bool stea
 				r=(double*)mxMalloc(size*sizeof(double));
         if(steady_state)
           {
-            compute_block_time(0, true);
+            compute_block_time(0, true, block_num);
             for(int j=0; j<size; j++)
               y[Block_Contain[j].Variable] += r[j];
           }
@@ -804,7 +808,7 @@ Interpreter::evaluate_a_block(int size, int type, string bin_basename, bool stea
               {
                 set_code_pointer(begining);
                 Per_y_=it_*y_size;
-                compute_block_time(0,true);
+                compute_block_time(0,true, block_num);
                 for(int j=0; j<size; j++)
                   y[it_*y_size+Block_Contain[j].Variable] += r[j];
               }
@@ -818,7 +822,7 @@ Interpreter::evaluate_a_block(int size, int type, string bin_basename, bool stea
         r=(double*)mxMalloc(size*sizeof(double));
         if(steady_state)
           {
-            compute_block_time(0, true);
+            compute_block_time(0, true, block_num);
             for(int j=0; j<size; j++)
               y[Block_Contain[j].Variable] += r[j];
           }
@@ -829,7 +833,7 @@ Interpreter::evaluate_a_block(int size, int type, string bin_basename, bool stea
               {
                 set_code_pointer(begining);
                 Per_y_=it_*y_size;
-                compute_block_time(0,true);
+                compute_block_time(0,true, block_num);
                 for(int j=0; j<size; j++)
                   y[it_*y_size+Block_Contain[j].Variable] += r[j];
               }
@@ -848,7 +852,7 @@ Interpreter::evaluate_a_block(int size, int type, string bin_basename, bool stea
             Per_u_=(it_-y_kmin)*u_count_int;
             Per_y_=it_*y_size;
             set_code_pointer(begining);
-            compute_block_time(Per_u_, true);
+            compute_block_time(Per_u_, true, block_num);
             for(int j=0; j<size; j++)
               y[it_*y_size+Block_Contain[j].Variable] += r[j];
           }
@@ -875,7 +879,7 @@ Interpreter::simulate_a_block(int size,int type, string file_name, string bin_ba
     {
       case EVALUATE_FORWARD :
         if(steady_state)
-					compute_block_time(0, false);
+					compute_block_time(0, false, block_num);
 				else
 				  {
             begining=get_code_pointer;
@@ -883,13 +887,13 @@ Interpreter::simulate_a_block(int size,int type, string file_name, string bin_ba
               {
                 set_code_pointer(begining);
                 Per_y_=it_*y_size;
-                compute_block_time(0, false);
+                compute_block_time(0, false, block_num);
               }
 				  }
         break;
       case EVALUATE_BACKWARD :
         if(steady_state)
-          compute_block_time(0, false);
+          compute_block_time(0, false, block_num);
 				else
 				  {
             begining=get_code_pointer;
@@ -897,7 +901,7 @@ Interpreter::simulate_a_block(int size,int type, string file_name, string bin_ba
               {
                 set_code_pointer(begining);
                 Per_y_=it_*y_size;
-                compute_block_time(0, false);
+                compute_block_time(0, false, block_num);
               }
 				  }
         break;
@@ -913,7 +917,7 @@ Interpreter::simulate_a_block(int size,int type, string file_name, string bin_ba
               {
                 set_code_pointer(begining);
                 Per_y_=it_*y_size;
-                compute_block_time(0, false);
+                compute_block_time(0, false, block_num);
                 y[Block_Contain[0].Variable] += -r[0]/g1[0];
                 double rr;
 							  rr=r[0];
@@ -923,6 +927,7 @@ Interpreter::simulate_a_block(int size,int type, string file_name, string bin_ba
             if (!cvg)
               {
                 mexPrintf("Convergence not achieved in block %d, after %d iterations\n",Block_Count,iter);
+                mexPrintf("r[0]= %f\n",r[0]);
                 /*mexEvalString("st=fclose('all');clear all;");
                 mexErrMsgTxt("End of simulate");*/
                 return false;
@@ -939,7 +944,7 @@ Interpreter::simulate_a_block(int size,int type, string file_name, string bin_ba
                   {
                     set_code_pointer(begining);
                     Per_y_=it_*y_size;
-                    compute_block_time(0, false);
+                    compute_block_time(0, false, block_num);
                     y[Per_y_+Block_Contain[0].Variable] += -r[0]/g1[0];
                     double rr;
                     if(fabs(1+y[Per_y_+Block_Contain[0].Variable])>eps)
@@ -972,7 +977,7 @@ Interpreter::simulate_a_block(int size,int type, string file_name, string bin_ba
               {
                 set_code_pointer(begining);
                 Per_y_=it_*y_size;
-                    compute_block_time(0, false);
+                    compute_block_time(0, false, block_num);
                     y[Block_Contain[0].Variable] += -r[0]/g1[0];
                     double rr;
     					    	rr=r[0];
@@ -998,7 +1003,7 @@ Interpreter::simulate_a_block(int size,int type, string file_name, string bin_ba
                       {
                         set_code_pointer(begining);
                         Per_y_=it_*y_size;
-                        compute_block_time(0, false);
+                        compute_block_time(0, false, block_num);
                         y[Per_y_+Block_Contain[0].Variable] += -r[0]/g1[0];
                         double rr;
                         if(fabs(1+y[Per_y_+Block_Contain[0].Variable])>eps)
@@ -1049,7 +1054,7 @@ Interpreter::simulate_a_block(int size,int type, string file_name, string bin_ba
                     res2=0;
 						    		res1=0;
                     max_res=0;
-                    compute_block_time(0, false);
+                    compute_block_time(0, false, block_num);
                     /*if (isnan(res1)||isinf(res1))
                     {
                     memcpy(y, y_save, y_size*sizeof(double)*(periods+y_kmax+y_kmin));
@@ -1091,7 +1096,7 @@ Interpreter::simulate_a_block(int size,int type, string file_name, string bin_ba
                 iter = 0;
                 res1=res2=max_res=0;max_res_idx=0;
                 error_not_printed = true;
-                compute_block_time(0, false);
+                compute_block_time(0, false, block_num);
                 cvg=false;
                 result = simulate_NG(Block_Count, symbol_table_endo_nbr, 0, 0, 0, size, false, cvg, iter, true);
               }
@@ -1115,7 +1120,7 @@ Interpreter::simulate_a_block(int size,int type, string file_name, string bin_ba
                         res2=0;
 						    				res1=0;
                         max_res=0;
-                        compute_block_time(0, false);
+                        compute_block_time(0, false, block_num);
                         /*if (isnan(res1)||isinf(res1))
                           {
                             memcpy(y, y_save, y_size*sizeof(double)*(periods+y_kmax+y_kmin));
@@ -1161,7 +1166,7 @@ Interpreter::simulate_a_block(int size,int type, string file_name, string bin_ba
                     iter = 0;
                     res1=res2=max_res=0;max_res_idx=0;
                     error_not_printed = true;
-                    compute_block_time(0, false);
+                    compute_block_time(0, false, block_num);
                     cvg=false;
                     result = simulate_NG(Block_Count, symbol_table_endo_nbr, it_, y_kmin, y_kmax, size, false, cvg, iter, false);
                   }
@@ -1203,7 +1208,7 @@ Interpreter::simulate_a_block(int size,int type, string file_name, string bin_ba
                     res2=0;
 						    		res1=0;
                     max_res=0;
-                    compute_block_time(0, false);
+                    compute_block_time(0, false, block_num);
                     /*if (isnan(res1)||isinf(res1))
                     {
                     memcpy(y, y_save, y_size*sizeof(double)*(periods+y_kmax+y_kmin));
@@ -1244,7 +1249,7 @@ Interpreter::simulate_a_block(int size,int type, string file_name, string bin_ba
                 iter = 0;
                 res1=res2=max_res=0;max_res_idx=0;
                 error_not_printed = true;
-                compute_block_time(0, false);
+                compute_block_time(0, false, block_num);
                 cvg=false;
                 result = simulate_NG(Block_Count, symbol_table_endo_nbr, 0, 0, 0, size, false, cvg, iter, true);
               }
@@ -1266,7 +1271,7 @@ Interpreter::simulate_a_block(int size,int type, string file_name, string bin_ba
                         res2=0;
                         res1=0;
                         max_res=0;
-                        compute_block_time(0, false);
+                        compute_block_time(0, false, block_num);
                         /*if (isnan(res1)||isinf(res1))
                           {
                             memcpy(y, y_save, y_size*sizeof(double)*(periods+y_kmax+y_kmin));
@@ -1310,7 +1315,7 @@ Interpreter::simulate_a_block(int size,int type, string file_name, string bin_ba
                     set_code_pointer(begining);
                     Per_y_=it_*y_size;
                     error_not_printed = true;
-                    compute_block_time(0, false);
+                    compute_block_time(0, false, block_num);
                     cvg=false;
                     result = simulate_NG(Block_Count, symbol_table_endo_nbr, it_, y_kmin, y_kmax, size, false, cvg, iter, false);
                   }
@@ -1363,7 +1368,7 @@ Interpreter::simulate_a_block(int size,int type, string file_name, string bin_ba
                     Per_u_=(it_-y_kmin)*u_count_int;
                     Per_y_=it_*y_size;
                     set_code_pointer(begining);
-                    compute_block_time(Per_u_, false);
+                    compute_block_time(Per_u_, false, block_num);
                     if (isnan(res1)||isinf(res1))
                       {
                         memcpy(y, y_save, y_size*sizeof(double)*(periods+y_kmax+y_kmin));
@@ -1408,7 +1413,7 @@ Interpreter::simulate_a_block(int size,int type, string file_name, string bin_ba
                 Per_u_=(it_-y_kmin)*u_count_int;
                 Per_y_=it_*y_size;
                 set_code_pointer(begining);
-                compute_block_time(Per_u_, false);
+                compute_block_time(Per_u_, false, block_num);
                 for (i=0; i< size; i++)
                   {
                     double rr;
