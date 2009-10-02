@@ -235,7 +235,9 @@ if fload==0,
 					  bayestopt_.restrict_aux);
           
       if ~exist('T')
+        dr_=oo_.dr;
         T=zeros(size(dr_.ghx,1),size(dr_.ghx,2)+size(dr_.ghu,2),Nsam);
+        egg=zeros(length(dr_.eigval),Nsam);
       end
     catch 
       if isfield(oo_.dr,'eigval'),
