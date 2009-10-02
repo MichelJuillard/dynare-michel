@@ -30,9 +30,6 @@
 # else
 #  define K_ORDER_PERTURBATION_API __declspec(dllimport)
 # endif
-
-# include "stdafx.h"
-
 #else
 # include <dlfcn.h> // unix/linux DLL (.so) handling routines
 #endif

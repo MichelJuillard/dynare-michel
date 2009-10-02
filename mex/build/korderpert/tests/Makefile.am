@@ -16,4 +16,4 @@ LDFLAGS += -Wl,-rpath,$(MATLAB)/bin/$(MATLAB_ARCH)
 
 nodist_k_order_test_main_SOURCES = k_order_test_main.cpp
 
-k_order_test_main_LDADD = ../matlab/libkorderpert.a $(MATLAB_LIBS) $(LIBADD_DLOPEN)
+k_order_test_main_LDADD = ../matlab/libkorderpert.a $(MATLAB_LIBS) $(PTHREAD_LIBS) $(LIBADD_DLOPEN)
