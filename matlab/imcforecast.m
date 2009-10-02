@@ -51,8 +51,8 @@ for b=1:B
     FORCS1(:,1,b) = InitState;
 end
 
-EndoSize = size(M_.endo_names,1);
-ExoSize = size(M_.exo_names,1);
+EndoSize = M_.endo_nbr;
+ExoSize = M_.exo_nbr;
 
 n1 = size(cV,1);
 n2 = size(cS,1);
@@ -89,7 +89,7 @@ randn('state',0);
 for b=1:B
     shocks = sQ*randn(ExoSize,H);
     shocks(jdx,:) = zeros(length(jdx),H);
-    FORCS1(:,:,b) = mcforecast3(cL,H,mcValue,shocks,FORCS1(:,:,b),T,R,mv, mu);
+    FORCS1(:,:,b) = mcforecast3(cL,H,mcValue,shocks,FORCS1(:,:,b),T,R,mv, mu)+repmat(ys(oo_.dr.order_var),1,H+1);
 end
 
 mFORCS1 = mean(FORCS1,3);
@@ -120,7 +120,7 @@ randn('state',0);
 for b=1:B
     shocks = sQ*randn(ExoSize,H);
     shocks(jdx,:) = zeros(length(jdx),H);
-    FORCS2(:,:,b) = mcforecast3(0,H,mcValue,shocks,FORCS2(:,:,b),T,R,mv, mu);
+    FORCS2(:,:,b) = mcforecast3(0,H,mcValue,shocks,FORCS2(:,:,b),T,R,mv, mu)+repmat(ys(oo_.dr.order_var),1,H+1);
 end
 
 mFORCS2 = mean(FORCS2,3);
