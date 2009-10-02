@@ -40,7 +40,7 @@ associated condition.
 \endunorderedlist
 
 What implementation is selected is governed (at present) by
-|POSIX_THREADS|. If it is defined, then POSIX threads are linked. If
+|HAVE_PTHREAD|. If it is defined, then POSIX threads are linked. If
 it is not defined, then serial implementation is taken. In accordance
 with this, the header file defines macros |THREAD|, |THREAD_GROUP|,
 and |SYNCHRO| as the picked specialization of |thread| (or |detach_thread|),
@@ -78,8 +78,15 @@ member of |thread_group| and |detach_thread_group| classes.
 #ifndef STHREAD_H
 #define STHREAD_H
 
-#ifdef POSIX_THREADS
+#ifdef HAVE_PTHREAD
 # include <pthread.h>
+#else
+/* Give valid types for POSIX thread types, otherwise the templates fail in empty mode.
+   Don't use typedefs because on some systems pthread_t and friends are typedefs even
+   without the include. */
+# define pthread_t void *
+# define pthread_mutex_t void *
+# define pthread_cond_t void *
 #endif
 
 #include <stdio.h>
@@ -104,7 +111,7 @@ namespace sthread {
 	@<|condition_counter| template class declaration@>;
 	@<|detach_thread| template class declaration@>;
 	@<|detach_thread_group| template class declaration@>;
-#ifdef POSIX_THREADS
+#ifdef HAVE_PTHREAD
 	@<POSIX thread specializations@>;
 #else
 	@<No threading specializations@>;

@@ -10,7 +10,7 @@ uniprocessor machine with hyper-threading, this is 2.
 #include <cstring>
 #include "sthread.h"
 
-#ifdef POSIX_THREADS
+#ifdef HAVE_PTHREAD
 namespace sthread {
 	template<>
 	int thread_group<posix>::max_parallel_threads = 2;
