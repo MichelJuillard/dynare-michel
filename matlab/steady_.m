@@ -37,10 +37,18 @@ function steady_()
   end
   
   if options_.steadystate_flag
-    [oo_.steady_state,check] = feval([M_.fname '_steadystate'],...
+    [ys,check] = feval([M_.fname '_steadystate'],...
                                        oo_.steady_state,...
                                        [oo_.exo_steady_state; ...
                                         oo_.exo_det_steady_state]);
+    if size(ys,1) < M_.endo_nbr 
+        if isfield(M_,'aux_vars')
+            ys = add_auxiliary_variables_to_steadystate(ys,M_.aux_vars);
+        else
+            error([M_.fname '_steadystate.m doesn''t match the model']);
+        end
+    end
+    oo_.steady_state = ys;
     % Check if the steady state obtained from the _steadystate file is a steady state.
     check1 = 0;
     if isempty(options_.unit_root_vars)

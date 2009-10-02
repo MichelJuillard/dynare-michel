@@ -281,7 +281,15 @@ if ~isempty(estim_params_)
     set_parameters(xparam1);
 end
 if options_.steadystate_flag% if the *_steadystate.m file is provided.
-    [oo_.steady_state,tchek] = feval([M_.fname '_steadystate'],[],[]);
+    [ys,tchek] = feval([M_.fname '_steadystate'],[],[]);
+    if size(ys,1) < M_.endo_nbr 
+        if isfield(M_,'aux_vars')
+            ys = add_auxiliary_variables_to_steadystate(ys,M_.aux_vars);
+        else
+            error([M_.fname '_steadystate.m doesn''t match the model']);
+        end
+    end
+    oo_.steady_state = ys;
 else% if the steady state file is not provided.
    [dd,info] = resol(oo_.steady_state,0);
    oo_.steady_state = dd.ys; clear('dd');

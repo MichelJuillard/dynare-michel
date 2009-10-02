@@ -76,8 +76,16 @@ function model_diagnostics(M_,options_,oo_)
     % testing for steadystate file
     fh = str2func([M_.fname '_static']);
     if options_.steadystate_flag
-        [dr.ys,check1] = feval([M_.fname '_steadystate'],dr.ys,...
+        [ys,check1] = feval([M_.fname '_steadystate'],dr.ys,...
                                [oo_.exo_steady_state; oo_.exo_det_steady_state]);
+        if size(ys,1) < M_.endo_nbr 
+            if isfield(M_,'aux_vars')
+                ys = add_auxiliary_variables_to_steadystate(ys,M_.aux_vars);
+            else
+                error([M_.fname '_steadystate.m doesn''t match the model']);
+            end
+        end
+        dr.ys = ys;
     else
         % testing if ys isn't a steady state or if we aren't computing Ramsey policy
         if  options_.ramsey_policy == 0
