@@ -1,12 +1,9 @@
-vpath %.cpp $(top_srcdir)/mex/sources/korderpert $(top_srcdir)/dynare++/sylv/cc $(top_srcdir)/dynare++/tl/cc $(top_srcdir)/dynare++/kord $(top_srcdir)/dynare++/integ/cc $(top_srcdir)/dynare++/src
+vpath %.cpp $(top_srcdir)/../../sources/korderpert $(top_srcdir)/../../../dynare++/sylv/cc $(top_srcdir)/../../../dynare++/tl/cc $(top_srcdir)/../../../dynare++/kord $(top_srcdir)/../../../dynare++/integ/cc $(top_srcdir)/../../../dynare++/src
 
 noinst_PROGRAMS = korderpert
 
 # Can't use korderpert_CPPFLAGS, because it interacts badly with VPATH
-CPPFLAGS += -I$(top_srcdir)/dynare++/src -I$(top_srcdir)/dynare++/kord -I$(top_srcdir)/dynare++/tl/cc -I$(top_srcdir)/dynare++/utils/cc -I$(top_srcdir)/dynare++/sylv/cc -I$(top_srcdir)/dynare++/integ/cc -I$(top_srcdir)/mex/sources
-
-# For Dynare++ thread implementation in tensor library
-DEFS += -DPOSIX_THREADS
+CPPFLAGS += -I$(top_srcdir)/../../../dynare++/src -I$(top_srcdir)/../../../dynare++/kord -I$(top_srcdir)/../../../dynare++/tl/cc -I$(top_srcdir)/../../../dynare++/utils/cc -I$(top_srcdir)/../../../dynare++/sylv/cc -I$(top_srcdir)/../../../dynare++/integ/cc -I$(top_srcdir)/../../sources
 
 CXXFLAGS += $(PTHREAD_CFLAGS)
 
@@ -86,6 +83,3 @@ nodist_korderpert_SOURCES = \
 	$(SYLV_SRCS) \
 	$(INTEG_SRCS) \
 	nlsolve.cpp
-
-noinst_LIBRARIES = libkorderpert.a
-nodist_libkorderpert_a_SOURCES = $(nodist_korderpert_SOURCES)

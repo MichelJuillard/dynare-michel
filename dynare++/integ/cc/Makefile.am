@@ -25,7 +25,7 @@ GENERATED_FILES = \
 noinst_LIBRARIES = libinteg.a
 
 libinteg_a_SOURCES = $(CWEBSRC) $(GENERATED_FILES) precalc_quadrature.dat
-libinteg_a_CPPFLAGS = -I../../sylv/cc -I../../tl/cc -I$(top_srcdir)/mex/sources -DPOSIX_THREADS
+libinteg_a_CPPFLAGS = -I../../sylv/cc -I../../tl/cc -I$(top_srcdir)/mex/sources
 libinteg_a_CXXFLAGS = $(PTHREAD_CFLAGS)
 
 BUILT_SOURCES = $(GENERATED_FILES)

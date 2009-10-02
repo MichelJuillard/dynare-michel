@@ -1,10 +1,10 @@
-vpath %.cc $(top_srcdir)/mex/sources/bytecode
-vpath %.hh $(top_srcdir)/mex/sources/bytecode
+vpath %.cc $(top_srcdir)/../../sources/bytecode
+vpath %.hh $(top_srcdir)/../../sources/bytecode
 
 noinst_PROGRAMS = bytecode
 
 # bytecode_CPPFLAGS interacts badly with VPATH
-CPPFLAGS += -I$(top_srcdir)/mex/sources/bytecode -I$(top_srcdir)/preprocessor
+CPPFLAGS += -I$(top_srcdir)/../../sources/bytecode -I$(top_srcdir)/../../../preprocessor
 
 nodist_bytecode_SOURCES = \
 	bytecode.cc \

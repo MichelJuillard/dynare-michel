@@ -1,0 +1,19 @@
+EXEEXT = $(MEXEXT)
+
+CPPFLAGS += $(MATLAB_CPPFLAGS)
+CPPFLAGS += -I$(top_srcdir)/../../sources
+
+DEFS += $(MATLAB_DEFS)
+DEFS += -DMATLAB_MEX_FILE
+
+LDFLAGS += $(MATLAB_LDFLAGS)
+LIBS += $(MATLAB_LIBS)
+
+all-local:
+	cd $(top_srcdir)/../../$(DYNARE_MEXDIR) && \
+	for p in $(PROGRAMS); do \
+		$(LN_S) -f $(abs_srcdir)/$$p $$p; \
+	done
+
+clean-local:
+	cd $(top_srcdir)/../../$(DYNARE_MEXDIR) && rm -f $(PROGRAMS)

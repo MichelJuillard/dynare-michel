@@ -1,4 +1,4 @@
-vpath %.c $(top_srcdir)/mex/sources/mjdgges
+vpath %.c $(top_srcdir)/../../sources/mjdgges
 
 noinst_PROGRAMS = mjdgges
 

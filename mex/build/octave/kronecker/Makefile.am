@@ -1,2 +1,2 @@
-include ../../mkoctfile.am
+include ../mex.am
 include ../../kronecker.am

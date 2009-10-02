@@ -26,8 +26,6 @@ AC_REQUIRE([AC_PROG_SED])
 AC_MSG_CHECKING([for options to compile MEX for MATLAB])
 
 MATLAB_CPPFLAGS="-I$MATLAB/extern/include"
-MATLAB_CC="$CC"
-MATLAB_CXX="$CXX"
 
 case ${MATLAB_ARCH} in
   glnx86 | glnxa64)
@@ -52,7 +50,7 @@ case ${MATLAB_ARCH} in
     MATLAB_CFLAGS="-fexceptions -g -O2"
     MATLAB_CXXFLAGS="-g -O2"
     LIBLOC="$MATLAB/extern/lib/${MATLAB_ARCH}/microsoft"
-    MATLAB_LDFLAGS="-shared \$(top_srcdir)/mex/build/mex.def"
+    MATLAB_LDFLAGS="-shared \$(top_srcdir)/mex.def"
     MATLAB_LIBS="$LIBLOC/libmex.lib $LIBLOC/libmx.lib $LIBLOC/libmwlapack.lib -lstdc++"
     # Starting from MATLAB 7.5, BLAS and LAPACK are in distinct libraries
     AX_COMPARE_VERSION([$MATLAB_VERSION], [ge], [7.5], [MATLAB_LIBS="${MATLAB_LIBS} $LIBLOC/libmwblas.lib"])
@@ -66,7 +64,6 @@ case ${MATLAB_ARCH} in
     ax_mexopts_ok="yes"
     ;;
   maci | maci64)
-    MATLAB_CC="gcc-4.0"
     SDKROOT='/Developer/SDKs/MacOSX10.5.sdk'
     MACOSX_DEPLOYMENT_TARGET='10.5'
     if test "${MATLAB_ARCH}" = "maci"; then
@@ -76,9 +73,8 @@ case ${MATLAB_ARCH} in
     fi
     MATLAB_DEFS="$MATLAB_DEFS -DNDEBUG"
     MATLAB_CFLAGS="-fno-common -no-cpp-precomp -arch $ARCHS -isysroot $SDKROOT -mmacosx-version-min=$MACOSX_DEPLOYMENT_TARGET -fexceptions -O2"
-    MATLAB_LDFLAGS="-L$MATLAB/bin/${MATLAB_ARCH} -Wl,-twolevel_namespace -undefined error -arch $ARCHS -Wl,-syslibroot,$SDKROOT -mmacosx-version-min=$MACOSX_DEPLOYMENT_TARGET -bundle -Wl,-exported_symbols_list,\$(top_srcdir)/mex/build/mexFunction-MacOSX.map"
+    MATLAB_LDFLAGS="-L$MATLAB/bin/${MATLAB_ARCH} -Wl,-twolevel_namespace -undefined error -arch $ARCHS -Wl,-syslibroot,$SDKROOT -mmacosx-version-min=$MACOSX_DEPLOYMENT_TARGET -bundle -Wl,-exported_symbols_list,\$(top_srcdir)/mexFunction-MacOSX.map"
     MATLAB_LIBS="-lmx -lmex -lmat -lstdc++ -lmwlapack"
-    MATLAB_CXX="g++-4.0"
     MATLAB_CXXFLAGS="-fno-common -no-cpp-precomp -fexceptions -arch $ARCHS -isysroot $SDKROOT -mmacosx-version-min=$MACOSX_DEPLOYMENT_TARGET -O2"
     # Starting from MATLAB 7.5, BLAS and LAPACK are in distinct libraries
     AX_COMPARE_VERSION([$MATLAB_VERSION], [ge], [7.5], [MATLAB_LIBS="${MATLAB_LIBS} -lmwblas"])
@@ -105,9 +101,7 @@ fi
 
 AC_SUBST([MATLAB_CPPFLAGS])
 AC_SUBST([MATLAB_DEFS])
-AC_SUBST([MATLAB_CC])
 AC_SUBST([MATLAB_CFLAGS])
-AC_SUBST([MATLAB_CXX])
 AC_SUBST([MATLAB_CXXFLAGS])
 AC_SUBST([MATLAB_LDFLAGS])
 AC_SUBST([MATLAB_LIBS])

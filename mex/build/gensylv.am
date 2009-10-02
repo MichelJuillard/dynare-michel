@@ -1,10 +1,10 @@
-vpath %.cpp $(top_srcdir)/dynare++/sylv/cc $(top_srcdir)/dynare++/sylv/matlab
-vpath %.h $(top_srcdir)/dynare++/sylv/cc
+vpath %.cpp $(top_srcdir)/../../../dynare++/sylv/cc $(top_srcdir)/../../../dynare++/sylv/matlab
+vpath %.h $(top_srcdir)/../../../dynare++/sylv/cc
 
 noinst_PROGRAMS = gensylv
 
 # Can't use gensylv_CPPFLAGS, because it interacts badly with VPATH
-CPPFLAGS += -I$(top_srcdir)/dynare++/sylv/cc -I$(top_srcdir)/mex/sources
+CPPFLAGS += -I$(top_srcdir)/../../../dynare++/sylv/cc -I$(top_srcdir)/../../sources
 
 nodist_gensylv_SOURCES = \
 	gensylv.cpp \

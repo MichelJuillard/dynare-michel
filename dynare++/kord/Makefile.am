@@ -53,7 +53,7 @@ GENERATED_FILES = \
 noinst_LIBRARIES = libkord.a
 
 libkord_a_SOURCES = $(CWEBSRC) $(GENERATED_FILES)
-libkord_a_CPPFLAGS = -I../sylv/cc -I../tl/cc -I../integ/cc -I$(top_srcdir)/mex/sources -DPOSIX_THREADS
+libkord_a_CPPFLAGS = -I../sylv/cc -I../tl/cc -I../integ/cc -I$(top_srcdir)/mex/sources
 libkord_a_CXXFLAGS = $(PTHREAD_CFLAGS)
 
 BUILT_SOURCES = $(GENERATED_FILES)
@@ -63,7 +63,7 @@ EXTRA_DIST = main.web dummy.ch
 check_PROGRAMS = tests
 
 tests_SOURCES = tests.cpp
-tests_CPPFLAGS = -I../sylv/cc -I../tl/cc -I../integ/cc
+tests_CPPFLAGS = -I../sylv/cc -I../tl/cc -I../integ/cc -I$(top_srcdir)/mex/sources
 tests_CXXFLAGS = $(PTHREAD_CFLAGS)
 tests_LDADD = libkord.a ../tl/cc/libtl.a ../sylv/cc/libsylv.a $(LAPACK_LIBS) $(BLAS_LIBS) $(LIBS) $(FLIBS) $(PTHREAD_LIBS)
 

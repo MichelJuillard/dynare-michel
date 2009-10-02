@@ -25,8 +25,6 @@ AM_INIT_AUTOMAKE([-Wall -Werror foreign])
 AC_PROG_CC
 AC_PROG_CXX
 
-AC_CANONICAL_HOST
-
 # Use C++ for testing headers
 AC_LANG([C++])
 
@@ -34,12 +32,7 @@ CXXFLAGS="$CXXFLAGS -Wall"
 
 AC_PROG_RANLIB
 
-AC_PROG_LN_S
-case ${host_os} in
-  *cygwin*)
-    LN_S="cp -p" # Cygwin symbolic links are not understood by MATLAB
-    ;;
-esac
+AX_PROG_LN_S
 
 AC_PROG_MKDIR_P
 
@@ -60,10 +53,6 @@ CPPFLAGS="$CPPFLAGS_SAVED"
 
 # Don't use deprecated hash structures
 AC_DEFINE([BOOST_NO_HASH], [], [Don't use deprecated STL hash structures])
-
-# Check for dlopen(), needed by korderpert DLL
-AC_CHECK_LIB([dl], [dlopen], [LIBADD_DLOPEN="-ldl"], [])
-AC_SUBST([LIBADD_DLOPEN])
 
 AC_CHECK_PROG([PDFTEX], [pdftex], [pdftex])
 AM_CONDITIONAL([HAVE_PDFTEX], [test "x$PDFTEX" != "x"])
@@ -122,9 +111,6 @@ AM_CONDITIONAL([HAVE_DOXYGEN], [test "x$DOXYGEN" != "x"])
 AC_CHECK_PROG([OCTAVE], [octave], [octave])
 AM_CONDITIONAL([HAVE_OCTAVE], [test "x$OCTAVE" != "x"])
 
-AC_CHECK_PROG([MKOCTFILE], [mkoctfile], [mkoctfile])
-AM_CONDITIONAL([HAVE_MKOCTFILE], [test "x$MKOCTFILE" != "x"])
-
 AC_CHECK_PROG([CTANGLE], [ctangle], [ctangle])
 AM_CONDITIONAL([HAVE_CTANGLE], [test "x$CTANGLE" != "x"])
 if test "x$CTANGLE" = "x"; then
@@ -144,29 +130,6 @@ AM_CONDITIONAL([HAVE_BLAS], [test x"$ax_blas_ok" = "xyes"])
 AM_CONDITIONAL([HAVE_LAPACK], [test x"$ax_lapack_ok" = "xyes"])
 
 AX_PTHREAD
-AM_CONDITIONAL([HAVE_PTHREAD], [test x"$ax_pthread_ok" = "xyes"])
-
-AX_MATLAB
-
-if test "x$ax_enable_matlab" = "xyes"; then
-  AX_DOT_MEXEXT
-  AX_MATLAB_ARCH
-  AX_MATLAB_VERSION
-
-  if test "x$ax_matlab_version_ok" = "xyes"; then
-    AX_MEXOPTS
-
-    # Determine subdirectory of mex/ to be used for storing MATLAB MEX binaries
-    AX_COMPARE_VERSION([$MATLAB_VERSION], [le], [7.4], [DYNARE_MEXDIR="2007a"], [
-      DYNARE_MEXDIR="2007b"
-      if test ${MATLAB_ARCH%64} != ${MATLAB_ARCH}; then
-         AX_COMPARE_VERSION([$MATLAB_VERSION], [ge], [7.8], [DYNARE_MEXDIR="2009a-64bit"])
-      fi])
-    AC_SUBST([DYNARE_MEXDIR])
-  fi
-fi
-AM_CONDITIONAL([HAVE_MEXOPTS], [test "x$ax_enable_matlab" = "xyes" -a "x$ax_matlab_version_ok" = "xyes" -a "x$ax_mexopts_ok" = "xyes" ])
-
 
 AC_CONFIG_FILES([Makefile
                  preprocessor/macro/Makefile
@@ -194,28 +157,22 @@ AC_CONFIG_FILES([Makefile
                  dynare++/integ/testing/Makefile
                  dynare++/kord/Makefile
                  dynare++/src/Makefile
-                 mex/build/Makefile
-                 mex/build/mjdgges/octave/Makefile
-                 mex/build/mjdgges/matlab/Makefile
-                 mex/build/kronecker/octave/Makefile
-                 mex/build/kronecker/matlab/Makefile
-                 mex/build/gensylv/octave/Makefile
-                 mex/build/gensylv/matlab/Makefile
-                 mex/build/bytecode/octave/Makefile
-                 mex/build/bytecode/matlab/Makefile
-                 mex/build/korderpert/octave/Makefile
-                 mex/build/korderpert/matlab/Makefile
-                 mex/build/korderpert/tests/Makefile
 ])
+
+AC_CONFIG_SUBDIRS([mex/build/matlab mex/build/octave])
 
 # Construct final output message
 
 BUILD_PREPROCESSOR="yes"
 
-if test "x$ax_blas_ok" = "xyes" -a "x$ax_lapack_ok" = "xyes" -a "x$ax_pthread_ok" = "xyes"; then
-  BUILD_DYNAREPLUSPLUS="yes"
+if test "x$ax_blas_ok" = "xyes" -a "x$ax_lapack_ok" = "xyes"; then
+  if test x"$ax_pthread_ok" = "xyes"; then
+     BUILD_DYNAREPLUSPLUS="yes"
+  else
+     BUILD_DYNAREPLUSPLUS="yes (without POSIX threads)"
+  fi
 else
-  BUILD_DYNAREPLUSPLUS="no (missing one of: BLAS, LAPACK, POSIX Threads)"
+  BUILD_DYNAREPLUSPLUS="no (missing one of: BLAS, LAPACK)"
 fi
 
 if test "x$CWEAVE" != "x" -a x"$PDFTEX" != "x" -a "x$ax_tex_have_eplain" = "xyes"; then
@@ -260,18 +217,6 @@ else
   BUILD_DYNARE_PREPROC_DOC="no (missing doxygen)"
 fi
 
-if test "x$MKOCTFILE" != "x"; then
-  BUILD_MEX_OCTAVE="yes"
-else
-  BUILD_MEX_OCTAVE="no (missing mkoctfile)"
-fi
-
-if test "x$ax_enable_matlab" = "xyes" -a "x$ax_matlab_version_ok" = "xyes" -a "x$ax_mexopts_ok" = "xyes"; then
-  BUILD_MEX_MATLAB="yes"
-else
-  BUILD_MEX_MATLAB="no (missing MATLAB, or unknown version, or unknown architecture)"
-fi
-
 if test "x$OCTAVE" != "x"; then
   TESTSUITE_OCTAVE="yes"
 else
@@ -290,8 +235,6 @@ Dynare is now configured for building the following components...
 
 Binaries (with "make"):
  Dynare preprocessor:                   $BUILD_PREPROCESSOR
- MEX files for Octave:                  $BUILD_MEX_OCTAVE
- MEX files for MATLAB:                  $BUILD_MEX_MATLAB
  Dynare++:                              $BUILD_DYNAREPLUSPLUS
 
 PDF documentation (with "make pdf"):

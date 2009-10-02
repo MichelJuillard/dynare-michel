@@ -2,14 +2,12 @@ SUBDIRS = preprocessor doc tests
 
 if HAVE_BLAS
 if HAVE_LAPACK
-if HAVE_PTHREAD
 SUBDIRS += dynare++
-endif
 endif
 endif
 
 # MEX must be built after dynare++ (because of kordepert)
-SUBDIRS += mex/build
+SUBDIRS += mex/build/octave mex/build/matlab
 
 ACLOCAL_AMFLAGS = -I m4
 
