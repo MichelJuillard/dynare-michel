@@ -1,4 +1,5 @@
-VPATH = $(top_srcdir)/mex/sources/bytecode
+vpath %.cc $(top_srcdir)/mex/sources/bytecode
+vpath %.hh $(top_srcdir)/mex/sources/bytecode
 
 noinst_PROGRAMS = bytecode
 

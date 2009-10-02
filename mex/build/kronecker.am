@@ -1,4 +1,4 @@
-VPATH = $(top_srcdir)/mex/sources/kronecker
+vpath %.cc $(top_srcdir)/mex/sources/kronecker
 
 noinst_PROGRAMS = sparse_hessian_times_B_kronecker_C A_times_B_kronecker_C
 

@@ -59,7 +59,7 @@ AC_CHECK_HEADERS([boost/graph/adjacency_list.hpp], [], [AC_MSG_ERROR([Can't find
 CPPFLAGS="$CPPFLAGS_SAVED"
 
 # Don't use deprecated hash structures
-AC_DEFINE([BOOST_NO_HASH])
+AC_DEFINE([BOOST_NO_HASH], [], [Don't use deprecated STL hash structures])
 
 # Check for dlopen(), needed by korderpert DLL
 AC_CHECK_LIB([dl], [dlopen], [LIBADD_DLOPEN="-ldl"], [])
@@ -67,6 +67,9 @@ AC_SUBST([LIBADD_DLOPEN])
 
 AC_CHECK_PROG([PDFTEX], [pdftex], [pdftex])
 AM_CONDITIONAL([HAVE_PDFTEX], [test "x$PDFTEX" != "x"])
+
+AC_CHECK_PROG([PDFETEX], [pdfetex], [pdfetex])
+AM_CONDITIONAL([HAVE_PDFETEX], [test "x$PDFETEX" != "x"])
 
 if test "x$PDFTEX" != "x"; then
   AC_MSG_CHECKING([for eplain])
