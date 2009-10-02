@@ -76,6 +76,8 @@ classes, which are defined here. These include: |PartitionY|,
 #include "kord_exception.h"
 #include "GeneralSylvester.h"
 
+#include <dynlapack.h>
+
 #include <cmath>
 
 #define TYPENAME typename
@@ -186,14 +188,14 @@ public:@;
 	PLUMatrix(int n)
 		: TwoDMatrix(n,n),
 		  inv(nrows()*ncols()),
-		  ipiv(new int[nrows()]) {}
+		  ipiv(new lapack_int[nrows()]) {}
 	PLUMatrix(const PLUMatrix& plu);
 	virtual ~PLUMatrix()
 		{delete [] ipiv;}
 	void multInv(TwoDMatrix& m) const;
 private:@;
 	Vector inv;
-	int* ipiv;
+	lapack_int* ipiv;
 protected:@;
 	void calcPLU();
 };

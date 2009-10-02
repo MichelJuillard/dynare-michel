@@ -604,11 +604,11 @@ not work for semidefinite matrices.
 void RandomShockRealization::choleskyFactor(const TwoDMatrix& v)
 {
 	factor = v;
-	int rows = factor.nrows();
+	lapack_int rows = factor.nrows();
 	for (int i = 0; i < rows; i++)
 		for (int j = i+1; j < rows; j++)
 			factor.get(i,j) = 0.0;
-	int info;
+	lapack_int info;
 
 	dpotrf("L", &rows, factor.base(), &rows, &info);
 	KORD_RAISE_IF(info != 0,

@@ -411,7 +411,7 @@ void ConstGeneralMatrix::multInvLeft(const char* trans, int mrows, int mcols, in
 		GeneralMatrix inv(*this);
 		lapack_int* ipiv = new lapack_int[rows];
 		lapack_int info;
-		lapack_int rows2 = rows, mrows2 = mrows, mcols2 = mcols, mld2 = mld;
+		lapack_int rows2 = rows, mcols2 = mcols, mld2 = mld;
 		dgetrf(&rows2, &rows2, inv.getData().base(), &rows2, ipiv, &info);
 		dgetrs(trans, &rows2, &mcols2, inv.base(), &rows2, ipiv, d,
 					  &mld2, &info);

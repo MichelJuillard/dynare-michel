@@ -8,8 +8,6 @@
 #include "kord_exception.h"
 #include "korder.h"
 
-#include <dynlapack.h>
-
 @<|PLUMatrix| copy constructor@>;
 @<|PLUMatrix::calcPLU| code@>;
 @<|PLUMatrix::multInv| code@>;
@@ -24,9 +22,9 @@
 @ 
 @<|PLUMatrix| copy constructor@>=
 PLUMatrix::PLUMatrix(const PLUMatrix& plu)
-	: TwoDMatrix(plu), inv(plu.inv), ipiv(new int[nrows()])
+	: TwoDMatrix(plu), inv(plu.inv), ipiv(new lapack_int[nrows()])
 {
-	memcpy(ipiv, plu.ipiv, nrows()*sizeof(int));
+	memcpy(ipiv, plu.ipiv, nrows()*sizeof(lapack_int));
 }
 
 
@@ -37,8 +35,8 @@ the end of their constructors.
 @<|PLUMatrix::calcPLU| code@>=
 void PLUMatrix::calcPLU()
 {
-	int info;
-	int rows = nrows();
+	lapack_int info;
+	lapack_int rows = nrows();
 	inv = (const Vector&)getData();
 	dgetrf(&rows, &rows, inv.base(), &rows, ipiv, &info);
 }
@@ -50,9 +48,9 @@ void PLUMatrix::multInv(TwoDMatrix& m) const
 {
 	KORD_RAISE_IF(m.nrows() != ncols(),
 				  "The matrix is not square in PLUMatrix::multInv");
-	int info;
-	int mcols = m.ncols();
-	int mrows = m.nrows();
+	lapack_int info;
+	lapack_int mcols = m.ncols();
+	lapack_int mrows = m.nrows();
 	double* mbase = m.getData().base();
 	dgetrs("N", &mrows, &mcols, inv.base(), &mrows, ipiv,
 				  mbase, &mrows, &info);

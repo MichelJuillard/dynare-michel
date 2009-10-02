@@ -24,7 +24,7 @@
 // K_ORDER_PERTURBATION_API functions as being imported from a DLL, wheras this DLL sees symbols
 // defined with this macro as being exported.
 
-#ifdef WINDOWS
+#ifdef _WIN32
 # ifdef K_ORDER_PERTURBATION_EXPORTS
 #  define K_ORDER_PERTURBATION_API __declspec(dllexport)
 # else
@@ -38,10 +38,10 @@
 #endif
 
 #include <string>
-#include "mex.h"
+#include <dynmex.h>
 
 // <model>_Dynamic DLL pointer
-#ifdef WINDOWS
+#ifdef _WIN32
 typedef void  *(DynamicFn)
 #else // linux
 typedef void  (*DynamicFn)
@@ -62,7 +62,7 @@ const int MAX_MODEL_NAME = 100;
 class DynamicModelDLL
 {
 private:
-#ifdef WINDOWS
+#ifdef _WIN32
   DynamicFn  *Dynamic; // pointer to the Dynamic function in DLL
 #else
   DynamicFn  Dynamic; // pointer to the Dynamic function in DLL
@@ -72,7 +72,7 @@ private:
   const int nMax_lag; // no of lags
   const int nExog; // no of exogenous
   //	const char * sExt; // dynamic file extension: dll, mexw32, ...
-#ifdef WINDOWS
+#ifdef _WIN32
   HINSTANCE dynamicHinstance;  // DLL instance pointer in Windows
 #else // linux
   void *dynamicHinstance;    // and in Linux

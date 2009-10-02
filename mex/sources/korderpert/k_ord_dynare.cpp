@@ -24,7 +24,7 @@
 #include "k_ord_dynare.h"
 #include "dynamic_dll.h"
 
-#include "mex.h"
+#include <dynmex.h>
 
 #include "memory_file.h"
 

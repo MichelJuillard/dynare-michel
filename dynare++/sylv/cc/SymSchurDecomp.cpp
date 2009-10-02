@@ -21,27 +21,27 @@ SymSchurDecomp::SymSchurDecomp(const GeneralMatrix& mata)
 	const char* jobz = "V";
 	const char* range = "A";
 	const char* uplo = "U";
-	int n = mata.numRows();
+	lapack_int n = mata.numRows();
 	GeneralMatrix tmpa(mata);
 	double* a = tmpa.base();
-	int lda = tmpa.getLD();
+	lapack_int lda = tmpa.getLD();
 	double dum;
 	double* vl = &dum;
 	double* vu = &dum;
-	int idum;
-	int* il = &idum;
-	int* iu = &idum;
+	lapack_int idum;
+	lapack_int* il = &idum;
+	lapack_int* iu = &idum;
 	double abstol = 0.0;
-	int m = n;
+	lapack_int m = n;
 	double* w = lambda.base();
 	double* z = q.base();
-	int ldz = q.getLD();
-	int* isuppz = new int[2*std::max(1,m)];
+	lapack_int ldz = q.getLD();
+	lapack_int* isuppz = new lapack_int[2*std::max(1,(int) m)];
 	double tmpwork;
-	int lwork = -1;
-	int tmpiwork;
-	int liwork = -1;
-	int info;
+	lapack_int lwork = -1;
+	lapack_int tmpiwork;
+	lapack_int liwork = -1;
+	lapack_int info;
 
 	// query for lwork and liwork
 	dsyevr(jobz, range, uplo, &n, a, &lda, vl, vu, il, iu, &abstol,
@@ -50,7 +50,7 @@ SymSchurDecomp::SymSchurDecomp(const GeneralMatrix& mata)
 	liwork = tmpiwork;
 	// allocate work arrays
 	double* work = new double[lwork];
-	int* iwork = new int[liwork];
+	lapack_int* iwork = new lapack_int[liwork];
 	
 	// do the calculation
 	dsyevr(jobz, range, uplo, &n, a, &lda, vl, vu, il, iu, &abstol,

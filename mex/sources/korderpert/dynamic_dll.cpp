@@ -92,7 +92,7 @@ DynamicModelDLL::DynamicModelDLL(const char *modName, const int y_length, const 
     {
       if (sExt == NULL)
         sExt = MEXEXT;
-#ifdef WINDOWS
+#ifdef _WIN32
       HINSTANCE dynamicHinstance;
       //		dynamicHinstance=::LoadLibraryEx(strcat(fNname,"_.dll"),NULL,DONT_RESOLVE_DLL_REFERENCES);//sExt); //"_.dll");
       dynamicHinstance = ::LoadLibrary(strcat(fName, sExt)); //.dll); //"_.dll");
@@ -109,14 +109,14 @@ DynamicModelDLL::DynamicModelDLL(const char *modName, const int y_length, const 
       if ((dynamicHinstance == NULL) || dlerror())
         {
           cerr << dlerror() << endl;
-          mexPrintf("MexPrintf:Error loading DLL: %s", dlerror);
+          mexPrintf("MexPrintf:Error loading DLL");
           throw 1;
         }
       Dynamic = (DynamicFn) dlsym(dynamicHinstance, "Dynamic");
       if ((Dynamic  == NULL) || dlerror())
         {
           cerr << dlerror() << endl;
-          mexPrintf("MexPrintf:Error finding DLL function: %s", dlerror);
+          mexPrintf("MexPrintf:Error finding DLL function");
           throw 2;
         }
 #endif
@@ -142,7 +142,7 @@ DynamicModelDLL::DynamicModelDLL(const char *modName, const int y_length, const 
 int
 DynamicModelDLL::close()
 {
-#ifdef WINDOWS
+#ifdef _WIN32
   // MS FreeLibrary returns non 0 if OK, 0 if fails.
   bool rb = FreeLibrary(dynamicHinstance);
   if (rb)

@@ -83,7 +83,7 @@ CK_order_perturbation::CK_order_perturbation()
 
 #endif // _MSC_VER && WINDOWS
 
-#ifdef MATLAB_MEX_FILE  // exclude mexFunction for other applications
+#if defined(MATLAB_MEX_FILE) || defined(OCTAVE_MEX_FILE)  // exclude mexFunction for other applications
 extern "C" {
 
   // mexFunction: Matlab Inerface point and the main application driver

@@ -20,7 +20,7 @@ double qz_criterium = 1.000001;
 to select (return true) the pairs for which $\alpha<\beta$.
 
 @<|order_eigs| function code@>=
-int order_eigs(const double* alphar, const double* alphai, const double* beta)
+lapack_int order_eigs(const double* alphar, const double* alphai, const double* beta)
 {
 	return (*alphar * *alphar + *alphai * *alphai < *beta * *beta * qz_criterium);
 }
@@ -165,7 +165,7 @@ the same. The difference is only numerical error.
 
 @ 
 @<form matrix $D$@>=
-	int n = ypart.ny()+ypart.nboth;
+	lapack_int n = ypart.ny()+ypart.nboth;
 	TwoDMatrix matD(n, n);
 	matD.zeros();
 	matD.place(fypzero, 0, 0);
@@ -189,15 +189,18 @@ the same. The difference is only numerical error.
 @<solve generalized Schur@>=
 	TwoDMatrix vsl(n, n);
 	TwoDMatrix vsr(n, n);
-	int lwork = 100*n+16;
+	lapack_int lwork = 100*n+16;
 	Vector work(lwork);
-	IntSequence bwork(n);
-	int info;
+	lapack_int *bwork = new lapack_int[n];
+	lapack_int info;
+	lapack_int sdim2 = sdim;
 	dgges("N", "V", "S", order_eigs, &n, matE.getData().base(), &n,
-				 matD.getData().base(), &n, &sdim, alphar.base(), alphai.base(),
+				 matD.getData().base(), &n, &sdim2, alphar.base(), alphai.base(),
 				 beta.base(), vsl.getData().base(), &n, vsr.getData().base(), &n,
-				 work.base(), &lwork, &(bwork[0]), &info);
+				 work.base(), &lwork, bwork, &info);
+	sdim = sdim2;
 	bk_cond = (sdim == ypart.nys());
+	delete[] bwork;
 
 
 @ Here we setup submatrices of the matrix $Z$.
