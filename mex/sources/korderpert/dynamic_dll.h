@@ -25,6 +25,7 @@
 // defined with this macro as being exported.
 
 #ifdef _WIN32
+# include <windows.h>
 # ifdef K_ORDER_PERTURBATION_EXPORTS
 #  define K_ORDER_PERTURBATION_API __declspec(dllexport)
 # else
