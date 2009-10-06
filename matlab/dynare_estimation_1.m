@@ -579,8 +579,17 @@ if options_.mode_compute > 0 & options_.posterior_mode_estimation
                                                               ,neps,maxevl,LB,UB,c,idisp ,t,vm,gend);
         end
       otherwise
-        error(['ESTIMATION: mode_compute=' int2str(options_.mode_compute) ...
-               ' option is unknown!'])
+        if ischar(options_.mode_compute)
+            if options_.bvar_dsge
+                [xparam1, fval, retcode ] = feval(options_.mode_compute,fh,xparam1,gend,data);
+            else
+                [xparam1, fval, retcode ] = feval(options_.mode_compute, ...
+                                                  fh,xparam1,gend,data,data_index,number_of_observations,no_more_missing_observations);
+            end
+        else
+            error(['ESTIMATION: mode_compute=' int2str(options_.mode_compute) ...
+                   ' option is unknown!'])
+        end
     end
     if options_.mode_compute ~= 5
         if options_.mode_compute ~= 6
