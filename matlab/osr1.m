@@ -48,7 +48,10 @@ function osr1(i_params,i_var,weights)
                              [oo_.exo_steady_state; oo_.exo_det_steady_state]);
       if size(ys,1) < M_.endo_nbr 
           if isfield(M_,'aux_vars')
-              ys = add_auxiliary_variables_to_steadystate(ys,M_.aux_vars);
+              ys = add_auxiliary_variables_to_steadystate(ys,M_.aux_vars,...
+                                                          M_.fname,...
+                                                          oo_.exo_steady_state,...
+                                                          oo_.exo_det_steady_state);
           else
               error([M_.fname '_steadystate.m doesn''t match the model']);
           end

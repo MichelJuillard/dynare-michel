@@ -281,10 +281,16 @@ if ~isempty(estim_params_)
     set_parameters(xparam1);
 end
 if options_.steadystate_flag% if the *_steadystate.m file is provided.
-    [ys,tchek] = feval([M_.fname '_steadystate'],[],[]);
+    [ys,tchek] = feval([M_.fname '_steadystate'],...
+                       [zeros(M_.exo_nbr,1);...
+                        oo_.exo_det_steady_state]);
     if size(ys,1) < M_.endo_nbr 
         if isfield(M_,'aux_vars')
-            ys = add_auxiliary_variables_to_steadystate(ys,M_.aux_vars);
+            ys = add_auxiliary_variables_to_steadystate(ys,M_.aux_vars,...
+                                                        M_.fname,...
+                                                        zeros(M_.exo_nbr,1),...
+                                                        oo_.exo_det_steady_state,...
+                                                        M_.params);
         else
             error([M_.fname '_steadystate.m doesn''t match the model']);
         end
@@ -521,14 +527,15 @@ if options_.mode_compute > 0 & options_.posterior_mode_estimation
         else
             [xparam1,fval,exitflag] = fminsearch(fh,xparam1,optim_options,gend);
         end
-    case 101
+      
+      case 101
         myoptions=soptions;
         myoptions(2)=1e-6; %accuracy of argument
         myoptions(3)=1e-6; %accuracy of function (see Solvopt p.29)
         myoptions(5)= 1.0;
         
         [xparam1,fval]=solvopt(xparam1,fh,[],myoptions,gend,data);
-    case 102
+      case 102
         %simulating annealing
         %        LB=zeros(size(xparam1))-20;
         % UB=zeros(size(xparam1))+20;
@@ -572,7 +579,8 @@ if options_.mode_compute > 0 & options_.posterior_mode_estimation
                                                               ,neps,maxevl,LB,UB,c,idisp ,t,vm,gend);
         end
       otherwise
-        error(['ESTIMATION: mode_compute=' int2str(options_.mode_compute) ' option is unknown!'])
+        error(['ESTIMATION: mode_compute=' int2str(options_.mode_compute) ...
+               ' option is unknown!'])
     end
     if options_.mode_compute ~= 5
         if options_.mode_compute ~= 6
