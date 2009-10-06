@@ -39,6 +39,15 @@ set_parameters(xparam);
 
 [atT,innov,measurement_error,filtered_state_vector,ys,trend_coeff] = DsgeSmoother(xparam,gend,data,[],0);
 
+trend = repmat(ys,1,H+1);
+for i=1:M_.endo_nbr
+    j = strmatch(deblank(M_.endo_names(i,:)),options_.varobs,'exact');
+    if ~isempty(j)
+        trend(i,:) = trend(i,:)+trend_coeff(j)*(gend+(0:H));
+    end
+end
+trend = trend(oo_.dr.order_var,:);
+
 InitState(:,1) = atT(:,end);
 [T,R,ys,info] = dynare_resolve;
 
@@ -89,7 +98,7 @@ randn('state',0);
 for b=1:B
     shocks = sQ*randn(ExoSize,H);
     shocks(jdx,:) = zeros(length(jdx),H);
-    FORCS1(:,:,b) = mcforecast3(cL,H,mcValue,shocks,FORCS1(:,:,b),T,R,mv, mu)+repmat(ys(oo_.dr.order_var),1,H+1);
+    FORCS1(:,:,b) = mcforecast3(cL,H,mcValue,shocks,FORCS1(:,:,b),T,R,mv, mu)+trend;
 end
 
 mFORCS1 = mean(FORCS1,3);
@@ -120,7 +129,7 @@ randn('state',0);
 for b=1:B
     shocks = sQ*randn(ExoSize,H);
     shocks(jdx,:) = zeros(length(jdx),H);
-    FORCS2(:,:,b) = mcforecast3(0,H,mcValue,shocks,FORCS2(:,:,b),T,R,mv, mu)+repmat(ys(oo_.dr.order_var),1,H+1);
+    FORCS2(:,:,b) = mcforecast3(0,H,mcValue,shocks,FORCS2(:,:,b),T,R,mv, mu)+trend;
 end
 
 mFORCS2 = mean(FORCS2,3);
