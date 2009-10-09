@@ -60,8 +60,9 @@ function x=sylvester3mr(a,b,c,d)
 	c(:,:,j) = bb*(x(:,1:i-1,j)*t(1:i-1,i));
         end
       end
-      aabbtinv = inv(aa+bb*t(i,i));
-      x(:,i,:)=aabbtinv*squeeze(d(:,i,:)-c);
+%       aabbtinv = inv(aa+bb*t(i,i));
+%       x(:,i,:)=aabbtinv*squeeze(d(:,i,:)-c);
+      x(:,i,:)=(aa+bb*t(i,i))\squeeze(d(:,i,:)-c);
       i = i+1;
     else
       if i == n
@@ -73,8 +74,10 @@ function x=sylvester3mr(a,b,c,d)
 	c1(:,:,j) = bb*(x(:,1:i-1,j)*t(1:i-1,i+1));
         end
       end
-      bigmatinv = inv([aa+bb*t(i,i) bb*t(i+1,i); bb*t(i,i+1) aa+bb*t(i+1,i+1)]);
-      z = bigmatinv * squeeze([d(:,i,:)-c;d(:,i+1,:)-c1]);
+%       bigmatinv = inv([aa+bb*t(i,i) bb*t(i+1,i); bb*t(i,i+1) aa+bb*t(i+1,i+1)]);
+%       z = bigmatinv * squeeze([d(:,i,:)-c;d(:,i+1,:)-c1]);
+      bigmat = ([aa+bb*t(i,i) bb*t(i+1,i); bb*t(i,i+1) aa+bb*t(i+1,i+1)]);
+      z = bigmat\squeeze([d(:,i,:)-c;d(:,i+1,:)-c1]);
       x(:,i,:) = z(1:n,:);
       x(:,i+1,:) = z(n+1:end,:);
       i = i + 2;
@@ -84,8 +87,10 @@ function x=sylvester3mr(a,b,c,d)
         for j=1:p,
     c(:,:,j) = bb*(x(:,1:m-1,j)*t(1:m-1,m));
         end
-      aabbtinv = inv(aa+bb*t(m,m));
-    x(:,m,:)=aabbtinv*squeeze(d(:,m,:)-c);
+%       aabbtinv = inv(aa+bb*t(m,m));
+%     x(:,m,:)=aabbtinv*squeeze(d(:,m,:)-c);
+      aabbt = (aa+bb*t(m,m));
+    x(:,m,:)=aabbt\squeeze(d(:,m,:)-c);
   end
   for j=1:p,
     x(:,:,j)=zz*x(:,:,j)*u';
