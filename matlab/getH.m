@@ -1,4 +1,4 @@
-function [H, dA, dOm, info] = getH(A, B, M_,oo_,kronflag,indx,indexo)
+function [H, dA, dOm, Hss, info] = getH(A, B, M_,oo_,kronflag,indx,indexo)
 
 % computes derivative of reduced form linear model w.r.t. deep params
 %
@@ -25,18 +25,19 @@ if nargin<5 | isempty(indexo), indexo = [];, end,
     
 
 [I,J]=find(M_.lead_lag_incidence');
-yy0=oo_.steady_state(I);
+yy0=oo_.dr.ys(I);
 % yy0=[];
 % for j=1:size(M_.lead_lag_incidence,1);
-%     yy0 = [ yy0; oo_.steady_state(find(M_.lead_lag_incidence(j,:)))];
+%     yy0 = [ yy0; oo_.dr.ys(find(M_.lead_lag_incidence(j,:)))];
 % end
 [df, gp] = feval([M_.fname,'_params_derivs'],yy0, oo_.exo_steady_state', M_.params, 1);
 [residual, g1 ] = feval([M_.fname,'_dynamic'],yy0, oo_.exo_steady_state', M_.params,1);
 
 [residual, g1, g2 ] = feval([M_.fname,'_dynamic'],yy0, oo_.exo_steady_state', M_.params,1);
-[residual, gg1] = feval([M_.fname,'_static'],oo_.steady_state, oo_.exo_steady_state', M_.params);
+[residual, gg1] = feval([M_.fname,'_static'],oo_.dr.ys, oo_.exo_steady_state', M_.params);
 % df = feval([M_.fname,'_model_derivs'],yy0, oo_.exo_steady_state', M_.params, 1);
 dyssdtheta = -gg1\df;
+Hss = dyssdtheta(oo_.dr.order_var,indx);
 dyssdtheta = dyssdtheta(I,:);
 [nr, nc]=size(g2);
 nc = sqrt(nc);
@@ -248,6 +249,8 @@ if kronflag==1, % kronecker products
     DmPl = inv(Dm'*Dm)*Dm';
     y = DmPl*reshape(y,m*m,param_nbr);
     H = [x;y];
+    
+    H = [ [zeros(M_.endo_nbr,length(indexo)) Hss]; H];
 
 elseif kronflag==-1, % perturbation
     fun = 'thet2tau';
@@ -307,6 +310,7 @@ else % generalized sylvester equation
 %         y = y(nauxe+1:end,nauxe+1:end);
 %         H(:,j) = [x(:); vech(y)];
 %     end
+    H = [[zeros(M_.endo_nbr,length(indexo)) Hss]; H];
 
 end
 
