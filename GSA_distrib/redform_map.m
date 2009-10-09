@@ -76,7 +76,7 @@ if options_gsa_.prior_range,
   pd =  [NaN(np,1) NaN(np,1) bayestopt_.lb(offset+1:end) bayestopt_.ub(offset+1:end)];
 else
   pshape = bayestopt_.pshape(offset+1:end);
-  pd =  [bayestopt_.p1(offset+1:end) bayestopt_.p2(offset+1:end) bayestopt_.p3(offset+1:end) bayestopt_.p4(offset+1:end)];
+  pd =  [bayestopt_.p6(offset+1:end) bayestopt_.p7(offset+1:end) bayestopt_.p3(offset+1:end) bayestopt_.p4(offset+1:end)];
 end
 
 nsok = length(find(M_.lead_lag_incidence(M_.maximum_lag,:)));
