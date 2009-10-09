@@ -28,7 +28,7 @@ while i <=  nprio;
 % 		a = (p1(i)-p3(i))/b;
 		%lnprior = lnprior + lpdfgam(para(i)-p3(i),a,b);
 % 		xcum(:,i) = gamcdf(para(:,i)-p3(i),a,b);
-    xcum(:,i) = gamm_cdf((para(:,i)-p3(i))/p7(i),p6(i));
+    xcum(:,i) = gamm_cdf((para(:,i)-p3(i))./p7(i),p6(i));
 	elseif pshape(i) == 3; % GAUSSIAN PRIOR 
      %lnprior = lnprior + lpdfnorm(para(i),p1(i),p2(i));
 %      xcum(:,i) = normcdf(para(:,i),p1(i),p2(i));
@@ -36,14 +36,14 @@ while i <=  nprio;
 	elseif pshape(i) == 4; % INVGAMMA1 PRIOR 
      	%lnprior = lnprior + lpdfig1(para(i),p1(i),p2(i));
 %   		xcum(:,i) = gamcdf(1/para(:,i).^2,p2(i)/2,2/p1(i));
-      xcum(:,i) = gamm_cdf((1/(para(:,i)-p3(i))^2)/(2/p6(i)),p7(i)/2);
+      xcum(:,i) = gamm_cdf((1./(para(:,i)-p3(i)).^2)/(2/p6(i)),p7(i)/2);
 	elseif pshape(i) == 5; % UNIFORM PRIOR 
      	%lnprior = lnprior + log(1/(p2(i)-p1(i)));
   		xcum(:,i) = (para(:,i)-p3(i))./(p4(i)-p3(i));
  	elseif pshape(i) == 6; % INVGAMMA2 PRIOR 
 %     	lnprior = lnprior + lpdfig2(para(i),p1(i),p2(i));
 %   		xcum(:,i) = gamcdf(1/para(:,i),p2(i)/2,2/p1(i));
-      xcum(:,i) = gamm_cdf((1/(para(:,i)-p3(i)))/(2/p6(i)),p7(i)/2);
+      xcum(:,i) = gamm_cdf((1./(para(:,i)-p3(i)))./(2/p6(i)),p7(i)/2);
 	end;
 	i = i+1;
 end;
