@@ -94,3 +94,5 @@ binf = abscissa(k(1));
 bsup = abscissa(k(length(k)));
 x = abscissa(k);
 f = dens(k);
+f(find(x<bayestopt_.lb(indx)))=0;
+f(find(x>bayestopt_.ub(indx)))=0;
