@@ -75,8 +75,12 @@ h = waitbar(0,'Monte Carlo identification checks ...');
 
 while iteration < SampleSize,
   loop_indx = loop_indx+1;
-  if nargin==2 & burnin_iteration>=50,
-    params = pdraws0(iteration+1,:);
+  if nargin==2,
+    if burnin_iteration>=50,
+      params = pdraws0(iteration+1,:);
+    else
+      params = pdraws0(burnin_iteration+1,:);
+    end
   else
     params = prior_draw();
   end
@@ -91,9 +95,10 @@ while iteration < SampleSize,
 %        bayestopt_.restrict_columns, ...
 %        bayestopt_.restrict_aux, M_.exo_nbr);
 %     tau=[vec(Aa); vech(Bb*M_.Sigma_e*Bb')];
-    tau=[vec(A); vech(B*M_.Sigma_e*B')];
+    tau=[oo_.dr.ys(oo_.dr.order_var); vec(A); vech(B*M_.Sigma_e*B')];
     if burnin_iteration<50,
       burnin_iteration = burnin_iteration + 1;
+      pdraws(burnin_iteration,:) = params;
       TAU(:,burnin_iteration)=tau;
       [gam,stationary_vars] = th_autocovariances(oo0.dr,bayestopt_.mfys,M_,options_);
       sdy = sqrt(diag(gam{1}));
@@ -110,13 +115,13 @@ while iteration < SampleSize,
       for j=1:nlags,
         dum = [dum; vec(gam{j+1})];
       end
-      GAM(:,burnin_iteration)=dum;
+      GAM(:,burnin_iteration)=[oo_.dr.ys(bayestopt_.mfys); dum];
     else
       iteration = iteration + 1;
       run_index = run_index + 1;
       if iteration==1,
-        indJJ = (find(std(GAM')>1.e-10));
-        indH = (find(std(TAU')>1.e-10));
+        indJJ = (find(std(GAM')>1.e-8));
+        indH = (find(std(TAU')>1.e-8));
         TAU = zeros(length(indH),SampleSize);
         GAM = zeros(length(indJJ),SampleSize);
         MAX_tau   = min(SampleSize,ceil(MaxNumberOfBytes/(length(indH)*nparam)/8));
@@ -134,8 +139,8 @@ while iteration < SampleSize,
       stoH(:,:,run_index) = H(indH,:);
       stoJJ(:,:,run_index) = JJ(indJJ,:);
       % use relative changes
-      siJ = abs(JJ(indJJ,:).*(1./gam(indJJ)*params));
-      siH = abs(H(indH,:).*(1./tau(indH)*params));
+%       siJ = abs(JJ(indJJ,:).*(1./gam(indJJ)*params));
+%       siH = abs(H(indH,:).*(1./tau(indH)*params));
       % use prior uncertainty
       siJ = abs(JJ(indJJ,:));
       siH = abs(H(indH,:));
@@ -308,7 +313,7 @@ disp_identification(pdraws, idemodel, idemoments)
 figure,
 subplot(221)
 myboxplot(siHmean)
-set(gca,'ylim',[0 1])
+set(gca,'ylim',[0 1.05])
 set(gca,'xticklabel','')
 for ip=1:nparam,
   text(ip,-0.02,bayestopt_.name{ip},'rotation',90,'HorizontalAlignment','right','interpreter','none')
@@ -317,7 +322,7 @@ title('Sensitivity in the model')
 
 subplot(222)
 myboxplot(siJmean)
-set(gca,'ylim',[0 1])
+set(gca,'ylim',[0 1.05])
 set(gca,'xticklabel','')
 for ip=1:nparam,
   text(ip,-0.02,bayestopt_.name{ip},'rotation',90,'HorizontalAlignment','right','interpreter','none')
@@ -341,6 +346,9 @@ for ip=1:nparam,
   text(ip,-0.02,bayestopt_.name{ip},'rotation',90,'HorizontalAlignment','right','interpreter','none')
 end
 title('Multicollinearity in the moments')
+  saveas(gcf,[IdentifDirectoryName,'/',M_.fname,'_ident'])
+  eval(['print -depsc2 ' IdentifDirectoryName '/' M_.fname '_ident']);
+  eval(['print -dpdf ' IdentifDirectoryName '/' M_.fname '_ident']);
 
 
 figure,
@@ -350,3 +358,6 @@ title('log10 of Condition number in the model')
 subplot(222)
 hist(log10(idemoments.cond))
 title('log10 of Condition number in the moments')
+  saveas(gcf,[IdentifDirectoryName,'/',M_.fname,'_ident_COND'])
+  eval(['print -depsc2 ' IdentifDirectoryName '/' M_.fname '_ident_COND']);
+  eval(['print -dpdf ' IdentifDirectoryName '/' M_.fname '_ident_COND']);
