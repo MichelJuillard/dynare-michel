@@ -34,7 +34,8 @@ eH = zeros(npar,npar);
 % eH(ind1,:) = e1;
 eH(ind1,length(find(vnorm(H)==0))+1:end) = e1;
 eH(find(vnorm(H)==0),1:length(find(vnorm(H)==0)))=eye(length(find(vnorm(H)==0)));
-condH = cond(H1'*H1);
+condH = cond(H1);
+% condH = cond(H1'*H1);
 
 ind2 = find(vnorm(JJ)~=0);
 JJ1 = JJ(:,ind2);
@@ -46,7 +47,8 @@ sdJJ = sdJJ*sdJJ';
 eJ = zeros(npar,npar);
 eJ(ind2,length(find(vnorm(JJ)==0))+1:end) = ee1;
 eJ(find(vnorm(JJ)==0),1:length(find(vnorm(JJ)==0)))=eye(length(find(vnorm(JJ)==0)));
-condJ = cond(JJ1'*JJ1);
+% condJ = cond(JJ1'*JJ1);
+condJ = cond(JJ1);
 
 if rank(H)<npar
   ixno = 0;
