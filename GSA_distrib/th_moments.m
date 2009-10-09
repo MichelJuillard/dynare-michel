@@ -38,9 +38,11 @@ function [vdec, corr, autocorr, z, zz] = th_moments(dr,var_list)
 z;
 
 %'VARIANCE DECOMPOSITION (in percent)';
-
+if M_.exo_nbr>1,
 vdec = 100*gamma_y{options_.ar+2}(i1,:);
-  
+else
+vdec = 100*ones(size(gamma_y{1}(i1,1)));
+end  
 %'MATRIX OF CORRELATIONS';
     corr = gamma_y{1}(i1,i1)./(sd(i1)*sd(i1)');
     corr = corr-diag(diag(corr))+diag(diag(gamma_y{1}(i1,i1)));
