@@ -28,6 +28,13 @@ jok = 0;
 jokP = 0;
 jokJ = 0;
 jokPJ = 0;
+if ~any(any(idemodel.ind==0))
+  disp(['All parameters are identified in the model in the MC sample (rank of H).' ]),
+    disp(' ')
+end
+if ~any(any(idemoments.ind==0))
+  disp(['All parameters are identified by J moments in the MC sample (rank of J)' ]),
+end
 for j=1:npar,
   if any(idemodel.ind(j,:)==0),
     pno = 100*length(find(idemodel.ind(j,:)==0))/SampleSize;
