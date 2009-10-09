@@ -30,10 +30,13 @@ if kronflag == -1,
   params0 = M_.params;
   JJ = fdjac(fun,[sqrt(diag(M_.Sigma_e(indexo,indexo))); M_.params(indx)],indx,indexo,1,mf,nlags,useautocorr);
   M_.params = params0;
+  params0 = M_.params;
+  H = fdjac(fun,[sqrt(diag(M_.Sigma_e(indexo,indexo))); M_.params(indx)],indx,indexo,0,mf,nlags,useautocorr);
+  M_.params = params0;
   assignin('base','M_', M_);
   assignin('base','oo_', oo_);
 else
-  [H, dA, dOm] = getH(A, B, M_,oo_,kronflag,indx,indexo);
+  [H, dA, dOm, dYss] = getH(A, B, M_,oo_,kronflag,indx,indexo);
 %   if isempty(H),
 %     JJ = [];
 %     GAM = [];
@@ -107,10 +110,14 @@ else
     JJ(:,j+nexo) = dumm;
   end
   
+  JJ = [ [zeros(length(mf),nexo) dYss(mf,:)]; JJ];
+  
   if nargout >2,
-    sy=sy(mf,mf);
+%     sy=sy(mf,mf);
     options_.ar=nlags;
     [GAM,stationary_vars] = th_autocovariances(oo_.dr,oo_.dr.order_var(mf),M_,options_);
+    sy=sqrt(diag(GAM{1}));
+    sy=sy*sy';
     if useautocorr,
       sy=sy-diag(diag(sy))+eye(length(mf));
       GAM{1}=GAM{1}./sy;
@@ -124,6 +131,7 @@ else
       gam = [gam; vec(GAM{j+1})];
     end
   end
+  gam = [oo_.dr.ys(oo_.dr.order_var(mf)); gam];
 end
 
   if useautocorr,
