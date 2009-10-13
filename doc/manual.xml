@@ -85,8 +85,8 @@ A copy of the license can be found at:
 <para>
 Dynare is a pre-processor and a collection of <ulink url="http://www.mathworks.com/products/matlab/"><trademark class="registered">Matlab</trademark></ulink> and <ulink url="http://www.octave.org">GNU Octave</ulink> routines which solve, simulate and estimate non-linear
 models with forward looking variables. It is the result of research carried at
-<ulink url="http://www.cepremap.ens.fr/">CEPREMAP</ulink> by several people (see <xref linkend="laffargue:1990"/>,
-<xref linkend="boucekkine:1995"/>, <xref linkend="juillard:1996"/>, <xref linkend="collard-juillard:2001a" /> and <xref linkend="collard-juillard:2001b"/>).
+<ulink url="http://www.cepremap.ens.fr/">CEPREMAP</ulink> by several people (see <xref linkend="laffargue_1990"/>,
+<xref linkend="boucekkine_1995"/>, <xref linkend="juillard_1996"/>, <xref linkend="collard-juillard_2001a" /> and <xref linkend="collard-juillard_2001b"/>).
 </para>
 <para>
 When the framework is deterministic, Dynare can be used for models with the assumption of perfect
@@ -103,17 +103,17 @@ transition path to a new equilibrium following a permanent shock.
 </para>
 <para>
 For deterministic simulations, Dynare uses a Newton-type algorithm, first
-proposed by <xref linkend="laffargue:1990"/>, instead of a first order technique like
-the one proposed by <xref linkend="fair-taylor:1983"/>, and used in earlier generation simulation programs. We believe
+proposed by <xref linkend="laffargue_1990"/>, instead of a first order technique like
+the one proposed by <xref linkend="fair-taylor_1983"/>, and used in earlier generation simulation programs. We believe
 this approach to be in general both faster and more robust. The
-details of the algorithm used in Dynare can be found in <xref linkend="juillard:1996"/>.
+details of the algorithm used in Dynare can be found in <xref linkend="juillard_1996"/>.
 </para>
 <para>
-In a stochastic context, Dynare computes one or several simulations corresponding to a random draw of the shocks. Starting with version 2.3, Dynare uses a second order Taylor approximation of the expectation functions (see <xref linkend="judd:1996"/>, 
-<xref linkend="collard-juillard:2001a" />, <xref linkend="collard-juillard:2001b"/>, and <xref linkend="schmitt-grohe-uribe:2002"/>).
+In a stochastic context, Dynare computes one or several simulations corresponding to a random draw of the shocks. Starting with version 2.3, Dynare uses a second order Taylor approximation of the expectation functions (see <xref linkend="judd_1996"/>, 
+<xref linkend="collard-juillard_2001a" />, <xref linkend="collard-juillard_2001b"/>, and <xref linkend="schmitt-grohe-uribe_2002"/>).
 </para>
 <para>
-Starting with version 3.0, it is possible to use Dynare to estimate model parameters either by maximum likelihood as in <xref linkend="ireland:2004"/> or using a Bayesian approach as in <xref linkend="rabanal-rubio-ramirez:2003"/>, <xref linkend="schorfheide:2000"/> or <xref linkend="smets-wouters:2003"/>.
+Starting with version 3.0, it is possible to use Dynare to estimate model parameters either by maximum likelihood as in <xref linkend="ireland_2004"/> or using a Bayesian approach as in <xref linkend="rabanal-rubio-ramirez_2003"/>, <xref linkend="schorfheide_2000"/> or <xref linkend="smets-wouters_2003"/>.
 </para>
 
 <para>
@@ -415,7 +415,7 @@ In the description of Dynare commands, the following conventions are observed:
       <arg rep="repeat"><arg>,</arg>
 	      <replaceable>VARIABLE_NAME</replaceable>
       </arg>
-      ;
+      <arg choice="plain">;</arg>
     </cmdsynopsis>
   </refsynopsisdiv>
 
@@ -454,7 +454,7 @@ var c gnp q1 q2;
       <arg rep="repeat"><arg>,</arg>
 	      <replaceable>VARIABLE_NAME</replaceable>
       </arg>
-      ;
+      <arg choice="plain">;</arg>
     </cmdsynopsis>
   </refsynopsisdiv>
 
@@ -496,7 +496,7 @@ varexo m gov;
       <arg rep="repeat"><arg>,</arg>
 	      <replaceable>VARIABLE_NAME</replaceable>
       </arg>
-      ;
+      <arg choice="plain">;</arg>
     </cmdsynopsis>
   </refsynopsisdiv>
 
@@ -538,7 +538,7 @@ varexo_det tau;
       <arg rep="repeat"><arg>,</arg>
 	      <replaceable>PARAMETER_NAME</replaceable>
       </arg>
-      ;
+      <arg choice="plain">;</arg>
     </cmdsynopsis>
   </refsynopsisdiv>
 
@@ -581,7 +581,7 @@ parameters alpha, bet;
 
       <para>Variables used in a <replaceable>MODEL_EXPRESSION</replaceable> denote <emphasis>current period</emphasis> values when neither a lead or a lag is given. A lead or a lag can be given by enclosing an integer between parenthesis just after the variable name: a positive integer means a lead, a negative one means a lag. Leads or lags of more than one period are allowed. For example, if <literal>c</literal> is an endogenous variable, then <literal>c(+1)</literal> is the variable one period ahead, and <literal>c(-2)</literal> is the variable two periods before.</para>
 
-      <para>When specifying the leads and lags of endogenous variables, it is important to respect the following convention: in Dynare, the timing of a variable reflects when that variable is decided. A control variable - which by definition is decided in the current period - must have no lead. A predetermined variable - which by definition has been decided in a previous period - must have a lag. A consequence of this is that all stock variables must use the "stock at the end of the period" convention. Please refer to <xref linkend="bib:userguide"/> for more details and concrete examples.</para>
+      <para>When specifying the leads and lags of endogenous variables, it is important to respect the following convention: in Dynare, the timing of a variable reflects when that variable is decided. A control variable - which by definition is decided in the current period - must have no lead. A predetermined variable - which by definition has been decided in a previous period - must have a lag. A consequence of this is that all stock variables must use the "stock at the end of the period" convention. Please refer to <xref linkend="bib_userguide"/> for more details and concrete examples.</para>
 
       <para>Leads and lags are primarily used for endogenous variables. They can be used for exogenous variables under some conditions (TO BE EXPLICITED). They are forbidden for parameters and for local model variables (see <xref linkend="model"/>).</para>
 
@@ -627,13 +627,16 @@ parameters alpha, bet;
 <para>When using Dynare for computing simulations, it is necessary to calibrate the parameters of the model. This is done through parameter initialization.</para>
 
 <formalpara><title>Syntax</title>
-<cmdsynopsis>
+<para>
+  <programlisting>
   <replaceable>PARAMETER_NAME</replaceable> = <replaceable>EXPRESSION</replaceable> ;
-</cmdsynopsis>
+  </programlisting>
+</para>
 </formalpara>
 
 <formalpara><title>Example</title>
 
+<para>
 <informalexample>
 <programlisting>
 parameters alpha, bet;
@@ -643,6 +646,7 @@ alpha = 0.36;
 A = 1-alpha*beta;
 </programlisting>
 </informalexample>
+</para>
 </formalpara>
 
 </sect1>
@@ -665,7 +669,7 @@ A = 1-alpha*beta;
     <cmdsynopsis>
       <command>model</command>
       <arg>(<replaceable>OPTION</replaceable><arg rep="repeat">, <replaceable>OPTION</replaceable></arg>)</arg>
-      ;
+      <arg choice="plain">;</arg>
       <sbr/>
       <arg choice="plain" rep="repeat">
         <group>
@@ -674,7 +678,7 @@ A = 1-alpha*beta;
           <arg choice="plain"># <replaceable>VARIABLE_NAME</replaceable> = <replaceable>MODEL_EXPRESSION</replaceable> ;</arg>
         </group>
       </arg><sbr/>
-      <command>end</command>;
+      <command>end</command><arg choice="plain">;</arg>
     </cmdsynopsis>
   </refsynopsisdiv>
 
@@ -696,7 +700,7 @@ Inside the model block, Dynare allows the creation of <emphasis>model-local vari
 </refsect1>
 
 <refsect1><title>Options</title>
-  <variablelist spacing='compact'>
+  <variablelist>
     <varlistentry>
       <term><option>linear</option></term>
       <listitem><para>Declares the model as being linear. It spares oneself from having to declare initial values for computing the steady state, and it sets automatically <option>order</option><literal>=1</literal> in <xref linkend="stoch_simul" />.</para></listitem>
@@ -727,7 +731,7 @@ end;
 <refsect2><title>Example 2: use of model local variables</title>
 
 <informalexample>
-The following program:
+<para>The following program:
 <programlisting>
 model;
 # gamma = 1 - 1/sigma;
@@ -743,6 +747,7 @@ u1 = c1^(1-1/sigma)/(1-1/sigma);
 u2 = c2^(1-1/sigma)/(1-1/sigma);
 end;
 </programlisting>
+</para>
 </informalexample>
 </refsect2>
 
@@ -776,7 +781,7 @@ end;
 Used in perfect foresight mode, the types of forward-loking models for which Dynare was designed require both initial and terminal conditions. Most often these initial and terminal conditions are static equilibria, but not necessarily. 
 </para>
 <para>
-One typical application is to consider an economy at the equilibrium, trigger a shock in first period, and study the trajectory of return at the initial equilbrium. To do that, one needs <xref linkend='initval'/> and <xref linkend='shocks'/> (see <xref linkend="sec:shocks"/>.
+One typical application is to consider an economy at the equilibrium, trigger a shock in first period, and study the trajectory of return at the initial equilbrium. To do that, one needs <xref linkend='initval'/> and <xref linkend='shocks'/> (see <xref linkend="sec_shocks"/>.
 </para>
 <para>
 Another one is to study, how an economy, starting from arbitrary initial conditions converges toward equilibrium. To do that, one needs <xref linkend='initval'/> and <xref linkend='endval'/>; 
@@ -797,11 +802,11 @@ For models with lags on more than one period, the command <xref linkend='histval
 
   <refsynopsisdiv>
     <cmdsynopsis>
-      <command>initval</command>;<sbr/>
+      <command>initval</command><arg choice="plain">;</arg><sbr/>
       <arg rep="repeat" choice="plain">
 	      <replaceable>VARIABLE_NAME</replaceable> = <replaceable>EXPRESSION</replaceable> ;
       </arg><sbr/>
-      <command>end</command>;
+      <command>end</command><arg choice="plain">;</arg><sbr/>
     </cmdsynopsis>
   </refsynopsisdiv>
 
@@ -864,9 +869,13 @@ steady;
 
   <refsynopsisdiv>
     <cmdsynopsis>
-      <command>initval_file</command>(<option>filename</option> = <replaceable>FILENAME</replaceable>);
+      <command>initval_file</command><arg choice="plain">(<option>filename</option> = <replaceable>FILENAME</replaceable>)</arg><arg choice="plain">;</arg>
     </cmdsynopsis>
   </refsynopsisdiv>
+
+  <refsect1><title>Description</title>
+  <para>...</para>
+  </refsect1>
 
 </refentry>
 
@@ -882,11 +891,11 @@ steady;
 
   <refsynopsisdiv>
     <cmdsynopsis>
-      <command>endval</command>;<sbr/>
+      <command>endval</command><arg choice="plain">;</arg><sbr/>
       <arg rep="repeat" choice="plain">
 	      <replaceable>VARIABLE_NAME</replaceable> = <replaceable>EXPRESSION</replaceable> ;
       </arg><sbr/>
-      <command>end</command>;
+      <command>end</command><arg choice="plain">;</arg>
     </cmdsynopsis>
   </refsynopsisdiv>
 
@@ -944,11 +953,11 @@ The initial equilibrium is computed by <xref linkend='steady'/> for <literal>x=1
 
   <refsynopsisdiv>
     <cmdsynopsis>
-      <command>histval</command>;<sbr/>
+      <command>histval</command><arg choice="plain">;</arg><sbr/>
       <arg rep="repeat" choice="plain">
 	      <replaceable>VARIABLE_NAME</replaceable> = <replaceable>EXPRESSION</replaceable> ;
       </arg><sbr/>
-      <command>end</command>;
+      <command>end</command><arg choice="plain">;</arg>
     </cmdsynopsis>
   </refsynopsisdiv>
 
@@ -997,7 +1006,7 @@ end;
 </refentry>
 </sect1>
 
-<sect1 id="sec:shocks"><title>Shocks on exogenous variables</title>
+<sect1 id="sec_shocks"><title>Shocks on exogenous variables</title>
 <para>
 In a deterministic context, when one wants to study the transition of one equilibrium position to another, it is equivalent to analyze the consequences of a permanent shock and this in done in Dynare through the proper use of <xref linkend='initval'/> and <xref linkend='endval'/>.
 </para>
@@ -1028,7 +1037,7 @@ If the variance of an exogenous variable is set to zero, this variable will appe
 
   <refsynopsisdiv>
     <cmdsynopsis>
-      <command>shocks</command>;<sbr/>
+      <command>shocks</command><arg choice="plain">;</arg><sbr/>
       <arg rep="repeat">
         <group>
 	        <arg choice="plain">
@@ -1039,13 +1048,12 @@ If the variance of an exogenous variable is set to zero, this variable will appe
 	        </arg>
         </group>
       </arg><sbr/>
-      <command>end</command>;
+      <command>end</command><arg choice="plain">;</arg>
 
       <synopfragment id="det_shock">
-	      var <replaceable>VARIABLE_NAME</replaceable>;
-	      periods <replaceable>INTEGER</replaceable><arg>:<replaceable>INTEGER</replaceable></arg>
-          <arg rep="repeat"><arg>,</arg> <replaceable>INTEGER</replaceable><arg>:<replaceable>INTEGER</replaceable></arg></arg>;
-	          values <replaceable>EXPRESSION</replaceable> <arg rep="repeat"><arg>,</arg> <replaceable>EXPRESSION</replaceable></arg>;
+	      <arg choice="plain">var <replaceable>VARIABLE_NAME</replaceable>;</arg>
+	      <arg choice="plain">periods <replaceable>INTEGER</replaceable><arg>:<replaceable>INTEGER</replaceable></arg><arg rep="repeat"><arg>,</arg> <replaceable>INTEGER</replaceable><arg>:<replaceable>INTEGER</replaceable></arg></arg>;</arg>
+        <arg choice="plain">values <replaceable>EXPRESSION</replaceable> <arg rep="repeat"><arg>,</arg> <replaceable>EXPRESSION</replaceable></arg>;</arg>
       </synopfragment>
 
       <synopfragment id="sto_shock">
@@ -1154,7 +1162,7 @@ forecast;
 
   <refsynopsisdiv>
     <cmdsynopsis>
-      <command>mshocks</command>;<sbr/>
+      <command>mshocks</command><arg choice="plain">;</arg><sbr/>
       <arg rep="repeat">
         <group>
 	        <arg choice="plain">
@@ -1165,13 +1173,13 @@ forecast;
 	        </arg>
         </group>
       </arg><sbr/>
-      <command>end</command>;
+      <command>end</command><arg choice="plain">;</arg>
 
       <synopfragment id="det_mshock">
-	      var <replaceable>VARIABLE_NAME</replaceable>;
-	      periods <replaceable>INTEGER</replaceable><arg>:<replaceable>INTEGER</replaceable></arg>
-          <arg rep="repeat"><arg>,</arg> <replaceable>INTEGER</replaceable><arg>:<replaceable>INTEGER</replaceable></arg></arg>;
-	          values <replaceable>EXPRESSION</replaceable> <arg rep="repeat"><arg>,</arg> <replaceable>EXPRESSION</replaceable></arg>;
+	      <arg choice="plain">var <replaceable>VARIABLE_NAME</replaceable>;</arg>
+	      <arg choice="plain">periods <replaceable>INTEGER</replaceable><arg>:<replaceable>INTEGER</replaceable></arg>
+          <arg rep="repeat"><arg>,</arg> <replaceable>INTEGER</replaceable><arg>:<replaceable>INTEGER</replaceable></arg></arg>;</arg>
+	      <arg choice="plain">values <replaceable>EXPRESSION</replaceable> <arg rep="repeat"><arg>,</arg> <replaceable>EXPRESSION</replaceable></arg>;</arg>
       </synopfragment>
 
       <synopfragment id="sto_mshock">
@@ -1185,6 +1193,9 @@ forecast;
     </cmdsynopsis>
   </refsynopsisdiv>
 
+  <refsect1><title>Description</title>
+  <para>...</para>
+  </refsect1>
 </refentry>
 
 <refentry id="Sigma_e">
@@ -1200,8 +1211,8 @@ forecast;
   <refsynopsisdiv>
     <cmdsynopsis>
       <command>Sigma_e</command>
-	= [ <replaceable>EXPRESSION</replaceable> <arg rep="repeat"><arg>,</arg> <replaceable>EXPRESSION</replaceable></arg>
-      <arg rep="repeat">; <replaceable>EXPRESSION</replaceable> <arg rep="repeat"><arg>,</arg> <replaceable>EXPRESSION</replaceable></arg></arg> ];
+<arg choice="plain">	= [ <replaceable>EXPRESSION</replaceable> <arg rep="repeat"><arg>,</arg> <replaceable>EXPRESSION</replaceable></arg>
+      <arg rep="repeat">; <replaceable>EXPRESSION</replaceable> <arg rep="repeat"><arg>,</arg> <replaceable>EXPRESSION</replaceable></arg></arg> ];</arg>
     </cmdsynopsis>
     <warning>
       <para>The matrix elements are actually written between square brackets (<literal>[]</literal>). Here, the initial <literal>[</literal> and final <literal>]</literal> don't have the meaning of <quote>optional element</quote> as elsewhere.</para>
@@ -1251,10 +1262,14 @@ where the variance of <varname>u</varname> is 0.81, the variance of <varname>e</
   <refsynopsisdiv>
     <cmdsynopsis>
       <command>dsample</command>
-      <replaceable>INTEGER</replaceable>
-      <arg><replaceable>INTEGER</replaceable></arg>;
+      <arg choice="plain"><replaceable>INTEGER</replaceable></arg>
+      <arg><replaceable>INTEGER</replaceable></arg><arg choice="plain">;</arg>
     </cmdsynopsis>
   </refsynopsisdiv>
+
+  <refsect1><title>Description</title>
+  <para>...</para>
+  </refsect1>
 </refentry>
 
 <refentry id="periods">
@@ -1321,12 +1336,12 @@ Dynare has special commands for the computation of the static equilibrium of the
   <refsynopsisdiv>
     <cmdsynopsis>
       <command>steady</command>
-      <arg>(<replaceable>OPTION</replaceable><arg rep="repeat">, <replaceable>OPTION</replaceable></arg>)</arg>;
+      <arg>(<replaceable>OPTION</replaceable><arg rep="repeat">, <replaceable>OPTION</replaceable></arg>)</arg><arg choice="plain">;</arg>
     </cmdsynopsis>
   </refsynopsisdiv>
 
 <refsect1><title>Options</title>
-<variablelist spacing='compact'>
+<variablelist>
   <varlistentry id="solve_algo" xreflabel="solve_algo">
     <term><option>solve_algo</option> = <replaceable>INTEGER</replaceable></term>
     <listitem><para>Determines the non-linear solver to use. Possible values for the option are:
@@ -1393,11 +1408,15 @@ See <xref linkend='initval'/> and <xref linkend='endval'/>.
 
   <refsynopsisdiv>
     <cmdsynopsis>
-      <command>homotopy_setup</command>;<sbr/>
+      <command>homotopy_setup</command><arg choice="plain">;</arg><sbr/>
       <arg choice="plain" rep="repeat"><replaceable>VARIABLE_NAME</replaceable>, <replaceable>EXPRESSION</replaceable><arg>, <replaceable>EXPRESSION</replaceable></arg>;</arg><sbr/>
-      <command>end</command>;
+      <command>end</command><arg choice="plain">;</arg>
     </cmdsynopsis>
   </refsynopsisdiv>
+
+  <refsect1><title>Description</title>
+  <para>...</para>
+  </refsect1>
 </refentry>
 
 <refentry id="check">
@@ -1413,12 +1432,12 @@ See <xref linkend='initval'/> and <xref linkend='endval'/>.
   <refsynopsisdiv>
     <cmdsynopsis>
       <command>check</command>
-      <arg>(<option>solve_algo</option> = <replaceable>INTEGER</replaceable>)</arg>;
+      <arg>(<option>solve_algo</option> = <replaceable>INTEGER</replaceable>)</arg><arg choice="plain">;</arg>
     </cmdsynopsis>
   </refsynopsisdiv>
 
 <refsect1><title>Options</title>
-<variablelist spacing='compact'>
+<variablelist>
   <varlistentry>
     <term><option>solve_algo</option> = <replaceable>INTEGER</replaceable></term>
     <listitem><para>See <link linkend="solve_algo">there</link> for the possible values and their meaning</para></listitem>
@@ -1457,12 +1476,12 @@ A necessary condition for the uniqueness of a stable equilibrium in the neighbor
       <command>forecast</command>
       <arg>(<replaceable>OPTION</replaceable><arg rep="repeat">, <replaceable>OPTION</replaceable></arg>)</arg>
       <arg><replaceable>VARIABLE_NAME</replaceable></arg>
-      <arg rep="repeat"><arg>,</arg> <replaceable>VARIABLE_NAME</replaceable></arg>;
+      <arg rep="repeat"><arg>,</arg> <replaceable>VARIABLE_NAME</replaceable></arg><arg choice="plain">;</arg>
     </cmdsynopsis>
   </refsynopsisdiv>
 
 <refsect1><title>Options</title>
-<variablelist spacing='compact'>
+<variablelist>
   <varlistentry>
     <term><option>periods</option> = <replaceable>INTEGER</replaceable></term>
     <listitem><para>Number of periods of the forecast. Default: <literal>40</literal></para></listitem>
@@ -1532,13 +1551,13 @@ forecast;
     <cmdsynopsis>
       <command>simul</command>
       <arg>(<option>periods</option>=<replaceable>INTEGER</replaceable>)
-      </arg>;
+      </arg><arg choice="plain">;</arg>
     </cmdsynopsis>
   </refsynopsisdiv>
 
   <refsect1><title>Description</title>
   <para>
-    Triggers the computation of a deterministic simulation of the model for the number of periods set in the option <option>periods</option>. <command>simul</command> uses a Newton method to solve simultaneously all the equations for every period (see <xref linkend="juillard:1996"/>).
+    Triggers the computation of a deterministic simulation of the model for the number of periods set in the option <option>periods</option>. <command>simul</command> uses a Newton method to solve simultaneously all the equations for every period (see <xref linkend="juillard_1996"/>).
   </para>
   </refsect1>
 <refsect1><title>Output variables</title>
@@ -1563,12 +1582,12 @@ The simulated endogenous variables are available in global matrix <varname>oo_.e
     <cmdsynopsis>
       <command>stoch_simul</command>
       <arg>(<replaceable>OPTION</replaceable><arg rep="repeat">, <replaceable>OPTION</replaceable></arg>)</arg>
-      <arg rep="repeat"><replaceable>VARIABLE_NAME</replaceable></arg>;
+      <arg rep="repeat"><replaceable>VARIABLE_NAME</replaceable></arg><arg choice="plain">;</arg>
     </cmdsynopsis>
   </refsynopsisdiv>
 
 <refsect1><title>Options</title>
-<variablelist spacing='compact'>
+<variablelist>
   <varlistentry>
     <term><anchor id="ar" xreflabel="ar"/><option>ar</option> = <replaceable>INTEGER</replaceable></term>
     <listitem><para>Order of autocorrelation coefficients to compute and to print. Default: <literal>5</literal></para></listitem>
@@ -1821,7 +1840,7 @@ Note that in order to avoid stochastic singularity, you must have at least as ma
       <arg choice="plain" rep="repeat">
 	      <replaceable>VARIABLE_NAME</replaceable>
       </arg>
-      ;
+      <arg choice="plain">;</arg>
     </cmdsynopsis>
   </refsynopsisdiv>
 
@@ -1853,11 +1872,11 @@ varobs C y rr;
 
   <refsynopsisdiv>
     <cmdsynopsis>
-      <command>observation_trends</command>;<sbr/>
+      <command>observation_trends</command><arg choice="plain">;</arg><sbr/>
       <arg choice="plain" rep="repeat">
 	      <replaceable>VARIABLE_NAME</replaceable>(<replaceable>EXPRESSION</replaceable>);
       </arg><sbr/>
-	    <command>end</command>;
+	    <command>end</command><arg choice="plain">;</arg>
     </cmdsynopsis>
   </refsynopsisdiv>
 
@@ -1893,7 +1912,7 @@ end;
   <refsynopsisdiv>
     <refsect2><title>Syntax I (Maximum likelihood estimation)</title>
       <cmdsynopsis>
-        <command>estimated_params</command>;<sbr/>
+        <command>estimated_params</command><arg choice="plain">;</arg><sbr/>
         <arg choice="plain" rep="repeat">
           <group choice="req">
             <arg choice="plain">
@@ -1916,13 +1935,13 @@ end;
 	        </arg>
           ;
         </arg><sbr/>
-	      <command>end</command>;
+	      <command>end</command><arg choice="plain">;</arg>
       </cmdsynopsis>
     </refsect2>
     <refsect2>
       <title>Syntax II (Bayesian estimation)</title>
       <cmdsynopsis>
-        <command>estimated_params</command>;<sbr/>
+        <command>estimated_params</command><arg choice="plain">;</arg><sbr/>
         <arg choice="plain" rep="repeat">
           <group choice="req">
             <arg choice="plain">
@@ -1944,7 +1963,7 @@ end;
 	        </arg>
 
           <arg choice="plain">
-	          , <synopfragmentref linkend="prior_shape"><replaceable>PRIOR_SHAPE</replaceable></synopfragmentref>
+	          , <synopfragmentref linkend="prior_shape">PRIOR_SHAPE</synopfragmentref>
           </arg>
           <arg choice="plain">
 	          , <replaceable>PRIOR_MEAN</replaceable>
@@ -1963,7 +1982,7 @@ end;
           </arg>
           ;
         </arg><sbr/>
-	      <command>end</command>;
+	      <command>end</command><arg choice="plain">;</arg>
 
         <synopfragment id="prior_shape">
           <group choice="plain">
@@ -2095,7 +2114,7 @@ end;
 
   <refsynopsisdiv>
     <cmdsynopsis>
-      <command>estimated_params_init</command>;<sbr/>
+      <command>estimated_params_init</command><arg choice="plain">;</arg><sbr/>
         <arg choice="plain" rep="repeat">
           <group choice="req">
             <arg choice="plain">
@@ -2114,7 +2133,7 @@ end;
 	        </arg>
           ;
         </arg><sbr/>
-	      <command>end</command>;
+	      <command>end</command><arg choice="plain">;</arg>
     </cmdsynopsis>
   </refsynopsisdiv>
 
@@ -2141,7 +2160,7 @@ end;
 
   <refsynopsisdiv>
     <cmdsynopsis>
-      <command>estimated_params_bounds</command>;<sbr/>
+      <command>estimated_params_bounds</command><arg choice="plain">;</arg><sbr/>
       <arg choice="plain" rep="repeat">
         <group choice="req">
           <arg choice="plain">
@@ -2164,7 +2183,7 @@ end;
 	      </arg>
         ;
       </arg><sbr/>
-	    <command>end</command>;
+	    <command>end</command><arg choice="plain">;</arg>
     </cmdsynopsis>
   </refsynopsisdiv>
 
@@ -2192,7 +2211,7 @@ end;
     <cmdsynopsis>
       <command>estimation</command>
       <arg>(<replaceable>OPTION</replaceable><arg rep="repeat">, <replaceable>OPTION</replaceable></arg>)</arg>
-      <arg rep="repeat"><replaceable>VARIABLE_NAME</replaceable></arg>;
+      <arg rep="repeat"><replaceable>VARIABLE_NAME</replaceable></arg><arg choice="plain">;</arg>
     </cmdsynopsis>
   </refsynopsisdiv>
 
@@ -2534,7 +2553,7 @@ oo_.posterior_hpdsup.measurement_errors_corr.gdp_conso
   <refsynopsisdiv>
     <cmdsynopsis>
       <command>prior_analysis</command>
-      <arg>(<replaceable>OPTION</replaceable><arg rep="repeat">, <replaceable>OPTION</replaceable></arg>)</arg>;
+      <arg>(<replaceable>OPTION</replaceable><arg rep="repeat">, <replaceable>OPTION</replaceable></arg>)</arg><arg choice="plain">;</arg>
     </cmdsynopsis>
   </refsynopsisdiv>
 
@@ -2610,7 +2629,7 @@ oo_.posterior_hpdsup.measurement_errors_corr.gdp_conso
   <refsynopsisdiv>
     <cmdsynopsis>
       <command>posterior_analysis</command>
-      <arg>(<replaceable>OPTION</replaceable><arg rep="repeat">, <replaceable>OPTION</replaceable></arg>)</arg>;
+      <arg>(<replaceable>OPTION</replaceable><arg rep="repeat">, <replaceable>OPTION</replaceable></arg>)</arg><arg choice="plain">;</arg>
     </cmdsynopsis>
   </refsynopsisdiv>
 
@@ -2638,13 +2657,13 @@ oo_.posterior_hpdsup.measurement_errors_corr.gdp_conso
       <arg rep="repeat"><arg>,</arg>
 	      <replaceable>VARIABLE_NAME</replaceable>
       </arg>
-      ;
+      <arg choice="plain">;</arg>
     </cmdsynopsis>
   </refsynopsisdiv>
 
 <refsect1><title>Description</title>
 <para>
-<command>unit_root_vars</command> is now deprecated and will result in no action, It was used to declare unit-root variables of a model so that a diffuse prior can be used in the initialization of the Kalman filter for these variables only. For stationary variables, the unconditional covariance matrix of these variables is used for initialization. The algorithm to compute a true diffuse prior is taken from <xref linkend="durbin-koopman:2001"/> and <xref linkend="koopman-durbin:2003"/>.
+<command>unit_root_vars</command> is now deprecated and will result in no action, It was used to declare unit-root variables of a model so that a diffuse prior can be used in the initialization of the Kalman filter for these variables only. For stationary variables, the unconditional covariance matrix of these variables is used for initialization. The algorithm to compute a true diffuse prior is taken from <xref linkend="durbin-koopman_2001"/> and <xref linkend="koopman-durbin_2003"/>.
 </para>
 
 <para>When <command>unit_root_vars</command> is used the <link linkend="lik_init">lik_init</link> option of <xref linkend="estimation"/> has no effect.
@@ -2682,14 +2701,14 @@ oo_.posterior_hpdsup.measurement_errors_corr.gdp_conso
 
   <refsynopsisdiv>
     <cmdsynopsis>
-      <command>optim_weights</command>;<sbr/>
+      <command>optim_weights</command><arg choice="plain">;</arg><sbr/>
       <arg rep="repeat">
 	      <group choice="plain">
           <arg choice="plain"><replaceable>VARIABLE_NAME</replaceable> <replaceable>EXPRESSION</replaceable>;</arg>
           <arg choice="plain"><replaceable>VARIABLE_NAME</replaceable>, <replaceable>VARIABLE_NAME</replaceable> <replaceable>EXPRESSION</replaceable>;</arg>
         </group>
       </arg>
-      <command>end</command>;
+      <command>end</command><arg choice="plain">;</arg>
     </cmdsynopsis>
   </refsynopsisdiv>
 
@@ -2715,7 +2734,7 @@ oo_.posterior_hpdsup.measurement_errors_corr.gdp_conso
     <cmdsynopsis>
       <command>osr</command>
       <arg>(<replaceable>OPTION</replaceable><arg rep="repeat">, <replaceable>OPTION</replaceable></arg>)</arg>
-      <arg rep="repeat"><replaceable>VARIABLE_NAME</replaceable></arg>;
+      <arg rep="repeat"><replaceable>VARIABLE_NAME</replaceable></arg><arg choice="plain">;</arg>
     </cmdsynopsis>
   </refsynopsisdiv>
 
@@ -2766,7 +2785,7 @@ This problem is solved using a numerical optimizer.
       <command>osr_params</command>
       <arg choice="plain"><replaceable>PARAMETER_NAME</replaceable></arg>
       <arg rep="repeat"><replaceable>PARAMETER_NAME</replaceable></arg>
-      ;
+      <arg choice="plain">;</arg>
     </cmdsynopsis>
   </refsynopsisdiv>
 
@@ -2792,9 +2811,13 @@ This problem is solved using a numerical optimizer.
     <cmdsynopsis>
       <command>planner_objective</command>
       <arg choice="plain"><replaceable>MODEL_EXPRESSION</replaceable></arg>
-      ;
+      <arg choice="plain">;</arg>
     </cmdsynopsis>
   </refsynopsisdiv>
+
+  <refsect1><title>Description</title>
+  <para>...</para>
+  </refsect1>
 
 </refentry>
 
@@ -2812,7 +2835,7 @@ This problem is solved using a numerical optimizer.
     <cmdsynopsis>
       <command>ramsey_policy</command>
       <arg>(<replaceable>OPTION</replaceable><arg rep="repeat">, <replaceable>OPTION</replaceable></arg>)</arg>
-      <arg rep="repeat"><replaceable>VARIABLE_NAME</replaceable></arg>;
+      <arg rep="repeat"><replaceable>VARIABLE_NAME</replaceable></arg><arg choice="plain">;</arg>
     </cmdsynopsis>
   </refsynopsisdiv>
 
@@ -2847,7 +2870,7 @@ This problem is solved using a numerical optimizer.
     <cmdsynopsis>
       <command>dynare_sensitivity</command>
       <arg>(<replaceable>OPTION</replaceable><arg rep="repeat">, <replaceable>OPTION</replaceable></arg>)</arg>
-      ;
+      <arg choice="plain">;</arg>
     </cmdsynopsis>
   </refsynopsisdiv>
 
@@ -2888,7 +2911,7 @@ Dynare has comments to plot the results of a simulation and to save the results.
       <command>rplot</command>
       <arg choice="plain"><replaceable>VARIABLE_NAME</replaceable></arg>
       <arg rep="repeat"><replaceable>VARIABLE_NAME</replaceable></arg>
-      ;
+      <arg choice="plain">;</arg>
     </cmdsynopsis>
   </refsynopsisdiv>
 <refsect1><title>Description</title>
@@ -2913,7 +2936,7 @@ Plots the simulated path of one or several variables.
       <command>dynatype</command>
       <arg choice="plain">(<replaceable>FILENAME</replaceable>)</arg>
       <arg rep="repeat"><replaceable>VARIABLE_NAME</replaceable></arg>
-      ;
+      <arg choice="plain">;</arg>
     </cmdsynopsis>
   </refsynopsisdiv>
 
@@ -2940,7 +2963,7 @@ Plots the simulated path of one or several variables.
       <command>dynasave</command>
       <arg choice="plain">(<replaceable>FILENAME</replaceable>)</arg>
       <arg rep="repeat"><replaceable>VARIABLE_NAME</replaceable></arg>
-      ;
+      <arg choice="plain">;</arg>
     </cmdsynopsis>
   </refsynopsisdiv>
 
@@ -2978,6 +3001,11 @@ In <trademark class="registered">Matlab</trademark>, variables saved with the <c
     <refname>@#include</refname>
     <refpurpose>includes another file</refpurpose>
   </refnamediv>
+
+  <refsect1><title>Description</title>
+  <para>...</para>
+  </refsect1>
+
 </refentry>
 
 <refentry id="define">
@@ -2989,6 +3017,11 @@ In <trademark class="registered">Matlab</trademark>, variables saved with the <c
     <refname>@#define</refname>
     <refpurpose>defines a macro-variable</refpurpose>
   </refnamediv>
+
+  <refsect1><title>Description</title>
+  <para>...</para>
+  </refsect1>
+
 </refentry>
 
 <refentry id="if_else_endif">
@@ -3000,6 +3033,11 @@ In <trademark class="registered">Matlab</trademark>, variables saved with the <c
     <refname>@#if ... @#else ... @#endif</refname>
     <refpurpose>conditional inclusion of some part of the <filename class="extension">.mod</filename> file</refpurpose>
   </refnamediv>
+
+  <refsect1><title>Description</title>
+  <para>...</para>
+  </refsect1>
+
 </refentry>
 
 <refentry id="for_endfor">
@@ -3011,6 +3049,10 @@ In <trademark class="registered">Matlab</trademark>, variables saved with the <c
     <refname>@#for ... @#endfor</refname>
     <refpurpose>loop for replications of portions of the <filename class="extension">.mod</filename> file</refpurpose>
   </refnamediv>
+
+  <refsect1><title>Description</title>
+  <para>...</para>
+  </refsect1>
 </refentry>
 
 <refentry id="echo">
@@ -3022,6 +3064,11 @@ In <trademark class="registered">Matlab</trademark>, variables saved with the <c
     <refname>@#echo</refname>
     <refpurpose>asks the preprocessor to display some message on standard output</refpurpose>
   </refnamediv>
+
+  <refsect1><title>Description</title>
+  <para>...</para>
+  </refsect1>
+
 </refentry>
 
 <refentry id="error">
@@ -3033,6 +3080,11 @@ In <trademark class="registered">Matlab</trademark>, variables saved with the <c
     <refname>@#error</refname>
     <refpurpose>asks the preprocessor to display some error message on standard output and to abort</refpurpose>
   </refnamediv>
+
+  <refsect1><title>Description</title>
+  <para>...</para>
+  </refsect1>
+
 </refentry>
 
 </sect1>
@@ -3135,6 +3187,11 @@ In <trademark class="registered">Matlab</trademark>, variables saved with the <c
     <refname>bvar_density</refname>
     <refpurpose>computes the marginal density of an estimated BVAR model, using Minnesota priors</refpurpose>
   </refnamediv>
+
+  <refsect1><title>Description</title>
+  <para>...</para>
+  </refsect1>
+
 </refentry>
 
 <refentry id="bvar_forecast">
@@ -3146,6 +3203,11 @@ In <trademark class="registered">Matlab</trademark>, variables saved with the <c
     <refname>bvar_forecast</refname>
     <refpurpose>computes in-sample or out-sample forecasts for an estimated BVAR model, using Minnesota priors</refpurpose>
   </refnamediv>
+
+  <refsect1><title>Description</title>
+  <para>...</para>
+  </refsect1>
+
 </refentry>
 
 </sect1>
@@ -3160,7 +3222,7 @@ Fabrice Collard (GREMAQ, University of Toulouse) has written a guide to stochast
 
 <bibliography>
 
-<biblioentry id="boucekkine:1995" xreflabel="Boucekkine (1995)">
+<biblioentry id="boucekkine_1995" xreflabel="Boucekkine (1995)">
   <biblioset relation="article">
     <author>
       <surname>Boucekkine</surname>
@@ -3176,7 +3238,7 @@ Fabrice Collard (GREMAQ, University of Toulouse) has written a guide to stochast
   </biblioset>
 </biblioentry>
 
-<biblioentry id="collard-juillard:2001a" xreflabel="Collard and Juillard (2001a)">
+<biblioentry id="collard-juillard_2001a" xreflabel="Collard and Juillard (2001a)">
   <biblioset relation="article">
     <authorgroup>
       <author>
@@ -3198,7 +3260,7 @@ Fabrice Collard (GREMAQ, University of Toulouse) has written a guide to stochast
   </biblioset>
 </biblioentry>
 
-<biblioentry id="collard-juillard:2001b" xreflabel="Collard and Juillard (2001b)">
+<biblioentry id="collard-juillard_2001b" xreflabel="Collard and Juillard (2001b)">
   <biblioset relation="article">
     <authorgroup>
       <author>
@@ -3220,7 +3282,7 @@ Fabrice Collard (GREMAQ, University of Toulouse) has written a guide to stochast
   </biblioset>
 </biblioentry>
 
-<biblioentry id="durbin-koopman:2001" xreflabel="Durbin and Koopman (2001)">
+<biblioentry id="durbin-koopman_2001" xreflabel="Durbin and Koopman (2001)">
   <biblioset relation="book">
     <authorgroup>
       <author>
@@ -3238,7 +3300,7 @@ Fabrice Collard (GREMAQ, University of Toulouse) has written a guide to stochast
   </biblioset>
 </biblioentry>
 
-<biblioentry id="fair-taylor:1983" xreflabel="Fair and Taylor (1983)">
+<biblioentry id="fair-taylor_1983" xreflabel="Fair and Taylor (1983)">
   <biblioset relation="article">
     <authorgroup>
       <author>
@@ -3282,7 +3344,7 @@ Fabrice Collard (GREMAQ, University of Toulouse) has written a guide to stochast
   </biblioset>
 </biblioentry>
 
-<biblioentry id="ireland:2004" xreflabel="Ireland (2004)">   
+<biblioentry id="ireland_2004" xreflabel="Ireland (2004)">   
   <biblioset relation="article">
     <author>
       <surname>Ireland</surname>
@@ -3298,7 +3360,7 @@ Fabrice Collard (GREMAQ, University of Toulouse) has written a guide to stochast
   </biblioset>
 </biblioentry>
 
-<biblioentry id="judd:1996" xreflabel="Judd (1996)">  
+<biblioentry id="judd_1996" xreflabel="Judd (1996)">  
   <biblioset relation="article">
     <author>
       <surname>Judd</surname>
@@ -3330,7 +3392,7 @@ Fabrice Collard (GREMAQ, University of Toulouse) has written a guide to stochast
   </biblioset>
 </biblioentry>
 
-<biblioentry id="juillard:1996" xreflabel="Juillard (1996)">
+<biblioentry id="juillard_1996" xreflabel="Juillard (1996)">
   <biblioset relation="article">
     <author>
       <surname>Juillard</surname>
@@ -3346,7 +3408,7 @@ Fabrice Collard (GREMAQ, University of Toulouse) has written a guide to stochast
   </biblioset>
 </biblioentry>
 
-<biblioentry id="koopman-durbin:2003" xreflabel="Koopman and Durbin (2003)">
+<biblioentry id="koopman-durbin_2003" xreflabel="Koopman and Durbin (2003)">
   <biblioset relation="article">
     <authorgroup>
       <author>
@@ -3369,7 +3431,7 @@ Fabrice Collard (GREMAQ, University of Toulouse) has written a guide to stochast
   </biblioset>
 </biblioentry>
 
-<biblioentry id="laffargue:1990" xreflabel="Laffargue (1990)">
+<biblioentry id="laffargue_1990" xreflabel="Laffargue (1990)">
   <biblioset relation="article">
     <author>
       <surname>Laffargue</surname>
@@ -3408,7 +3470,7 @@ Fabrice Collard (GREMAQ, University of Toulouse) has written a guide to stochast
   </biblioset>
 </biblioentry>
 
-<biblioentry id="bib:userguide" xreflabel="Mancini-Griffoli (2007)">
+<biblioentry id="bib_userguide" xreflabel="Mancini-Griffoli (2007)">
   <author>
     <surname>Mancini-Griffoli</surname>
     <firstname>Tommaso</firstname>
@@ -3418,7 +3480,7 @@ Fabrice Collard (GREMAQ, University of Toulouse) has written a guide to stochast
   <subtitle>An introduction to the solution and estimation of DSGE models</subtitle>
 </biblioentry>
 
-<biblioentry id="rabanal-rubio-ramirez:2003" xreflabel="Rabanal and Rubio-Ramirez (2003)"> 
+<biblioentry id="rabanal-rubio-ramirez_2003" xreflabel="Rabanal and Rubio-Ramirez (2003)"> 
   <biblioset relation="article">
     <authorgroup>
       <author>
@@ -3440,7 +3502,7 @@ Fabrice Collard (GREMAQ, University of Toulouse) has written a guide to stochast
   </biblioset>
 </biblioentry>
 
-<biblioentry id="schorfheide:2000" xreflabel="Schorfheide (2000)"> 
+<biblioentry id="schorfheide_2000" xreflabel="Schorfheide (2000)"> 
   <biblioset relation="article">
     <author>
       <surname>Schorfheide</surname>
@@ -3456,7 +3518,7 @@ Fabrice Collard (GREMAQ, University of Toulouse) has written a guide to stochast
   </biblioset>
 </biblioentry>
 
-<biblioentry id="schmitt-grohe-uribe:2002" xreflabel="Schmitt-Grohe and Uribe (2002)">
+<biblioentry id="schmitt-grohe-uribe_2002" xreflabel="Schmitt-Grohe and Uribe (2002)">
   <biblioset relation="article">
     <authorgroup>
       <author>
@@ -3477,7 +3539,7 @@ Fabrice Collard (GREMAQ, University of Toulouse) has written a guide to stochast
   </biblioset>
 </biblioentry>
 
-<biblioentry id="smets-wouters:2003" xreflabel="Smets and Wouters (2003)">
+<biblioentry id="smets-wouters_2003" xreflabel="Smets and Wouters (2003)">
   <biblioset relation="article">
     <authorgroup>
       <author>
