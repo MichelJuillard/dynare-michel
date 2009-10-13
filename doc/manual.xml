@@ -1116,7 +1116,7 @@ end;
 </informalexample>
 </refsect3>
 <refsect3><title>See also</title>
-<para><link linkend="Sigma_e">Sigma_e</link></para>
+<para><xref linkend="Sigma_e"/></para>
 </refsect3>
 </refsect2>
 
@@ -2297,7 +2297,7 @@ end;
   </varlistentry>
   <varlistentry id="mh_recover" xreflabel="mh_recover">
     <term><option>mh_recover</option></term>
-    <listitem><para>Attempts to recover a Metropolis-Hastings simulation that crashed prematurely. Shouldn't be used together with <link linkend="load_mh_file"><option>load_mh_file</option></link></para></listitem>
+    <listitem><para>Attempts to recover a Metropolis-Hastings simulation that crashed prematurely. Shouldn't be used together with <xref linkend="load_mh_file"/></para></listitem>
   </varlistentry>
   <varlistentry>
     <term><option>mh_mode</option> = <replaceable>INTEGER</replaceable></term>
@@ -2333,7 +2333,7 @@ end;
   </varlistentry>
   <varlistentry id="load_mh_file" xreflabel="load_mh_file">
     <term><option>load_mh_file</option></term>
-    <listitem><para>Tells Dynare to add to previous Metropolis-Hastings simulations instead of starting from scratch. Shouldn't be used together with <link linkend="mh_recover">mh_recover</link></para></listitem>
+    <listitem><para>Tells Dynare to add to previous Metropolis-Hastings simulations instead of starting from scratch. Shouldn't be used together with <xref linkend="mh_recover"/></para></listitem>
   </varlistentry>
   <varlistentry>
     <term><option>optim</option> = (<replaceable>fmincon options</replaceable>)</term>
@@ -2434,19 +2434,19 @@ end;
 <tbody>
 <row><entry><varname>Forecast</varname></entry><entry>See <xref linkend="ForecastsMoments"/></entry><entry><replaceable>Variable name</replaceable></entry><entry></entry><entry></entry><entry><xref linkend="forecast_opt"/></entry></row>
 <row><entry morerows='1'><varname>MarginalDensity</varname></entry><entry><varname>LaplaceApproximation</varname></entry><entry/><entry></entry><entry></entry><entry>Always provided</entry></row>
-<row><entry><varname>ModifiedHarmonicMean</varname></entry><entry></entry><entry></entry><entry></entry><entry><para><link linkend="mh_replic">mh_replic</link>&gt; 0 or <link linkend="load_mh_file">load_mh_file</link></para></entry></row>
-<row><entry><varname>PosteriorFilteredVariables</varname></entry><entry>See <xref linkend="MomentsNames"/></entry><entry><replaceable>Variable name</replaceable></entry><entry></entry><entry></entry><entry><para><link linkend="filtered_vars">filtered_vars</link></para></entry></row>
-<row><entry><varname>PosteriorIRF</varname></entry><entry><varname>Dsge</varname></entry><entry>See <xref linkend="MomentsNames"/></entry><entry><para>IRF name: name of endogenous variable '_' name of shock</para></entry><entry></entry><entry><link linkend="bayesian_irf">bayesian_irf</link></entry></row>
+<row><entry><varname>ModifiedHarmonicMean</varname></entry><entry></entry><entry></entry><entry></entry><entry><para><xref linkend="mh_replic"/>&gt; 0 or <xref linkend="load_mh_file"/></para></entry></row>
+<row><entry><varname>PosteriorFilteredVariables</varname></entry><entry>See <xref linkend="MomentsNames"/></entry><entry><replaceable>Variable name</replaceable></entry><entry></entry><entry></entry><entry><para><xref linkend="filtered_vars"/></para></entry></row>
+<row><entry><varname>PosteriorIRF</varname></entry><entry><varname>Dsge</varname></entry><entry>See <xref linkend="MomentsNames"/></entry><entry><para>IRF name: name of endogenous variable '_' name of shock</para></entry><entry></entry><entry><xref linkend="bayesian_irf"/></entry></row>
 <row><entry><varname>PosteriorSmoothedObservationErrors</varname></entry><entry>See <xref linkend="MomentsNames"/></entry><entry><replaceable>Variable name</replaceable></entry><entry></entry><entry></entry><entry><para><xref linkend="smoother"/></para></entry></row>
 <row><entry><varname>PosteriorSmoothedShocks</varname></entry><entry>See <xref linkend="MomentsNames"/></entry><entry><replaceable>Variable name</replaceable></entry><entry></entry><entry></entry><entry><para><xref linkend="smoother"/></para></entry></row>
 <row><entry><varname>PosteriorSmoothedVariables</varname></entry><entry>See <xref linkend="MomentsNames"/></entry><entry><replaceable>Variable name</replaceable></entry><entry></entry><entry></entry><entry><para><xref linkend="smoother"/></para></entry></row>
-<row><entry><varname>PosteriorTheoreticalMoments</varname></entry><entry>See <xref linkend="TheoreticalMoments"/></entry><entry>See <xref linkend="EstimatedObjects"/></entry><entry>See <xref linkend="MomentsNames"/></entry><entry><replaceable>Variable name</replaceable></entry><entry><link linkend="moments_varendo">moments_varendo</link></entry></row>
-<row><entry><varname>posterior_density</varname></entry><entry><replaceable>Parameter name</replaceable></entry><entry></entry><entry></entry><entry></entry><entry><para><link linkend="mh_replic">mh_replic</link>&gt; 0 or <link linkend="load_mh_file">load_mh_file</link></para></entry></row>
-<row><entry><varname>posterior_hpdinf</varname></entry><entry>See <xref linkend="EstimatedObjects"/></entry><entry><replaceable>Variable name</replaceable></entry><entry></entry><entry></entry><entry><para><link linkend="mh_replic">mh_replic</link>&gt; 0 or <link linkend="load_mh_file">load_mh_file</link></para></entry></row>
-<row><entry><varname>posterior_hpdsup</varname></entry><entry>See <xref linkend="EstimatedObjects"/></entry><entry><replaceable>Variable name</replaceable></entry><entry></entry><entry></entry><entry><para><link linkend="mh_replic">mh_replic</link>&gt; 0 or <link linkend="load_mh_file">load_mh_file</link></para></entry></row>
-<row><entry><varname>posterior_mean</varname></entry><entry>See <xref linkend="EstimatedObjects"/></entry><entry><replaceable>Variable name</replaceable></entry><entry></entry><entry></entry><entry><para><link linkend="mh_replic">mh_replic</link>&gt; 0 or <link linkend="load_mh_file">load_mh_file</link></para></entry></row>
-<row><entry><varname>posterior_mode</varname></entry><entry>See <xref linkend="EstimatedObjects"/></entry><entry><replaceable>Variable name</replaceable></entry><entry></entry><entry></entry><entry><para><link linkend="mh_replic">mh_replic</link>&gt; 0 or <link linkend="load_mh_file">load_mh_file</link></para></entry></row>
-<row><entry><varname>posterior_std</varname></entry><entry>See <xref linkend="EstimatedObjects"/></entry><entry><replaceable>Variable name</replaceable></entry><entry></entry><entry></entry><entry><para><link linkend="mh_replic">mh_replic</link>&gt; 0 or <link linkend="load_mh_file">load_mh_file</link></para></entry></row>
+<row><entry><varname>PosteriorTheoreticalMoments</varname></entry><entry>See <xref linkend="TheoreticalMoments"/></entry><entry>See <xref linkend="EstimatedObjects"/></entry><entry>See <xref linkend="MomentsNames"/></entry><entry><replaceable>Variable name</replaceable></entry><entry><xref linkend="moments_varendo"/></entry></row>
+<row><entry><varname>posterior_density</varname></entry><entry><replaceable>Parameter name</replaceable></entry><entry></entry><entry></entry><entry></entry><entry><para><xref linkend="mh_replic"/>&gt; 0 or <xref linkend="load_mh_file"/></para></entry></row>
+<row><entry><varname>posterior_hpdinf</varname></entry><entry>See <xref linkend="EstimatedObjects"/></entry><entry><replaceable>Variable name</replaceable></entry><entry></entry><entry></entry><entry><para><xref linkend="mh_replic"/>&gt; 0 or <xref linkend="load_mh_file"/></para></entry></row>
+<row><entry><varname>posterior_hpdsup</varname></entry><entry>See <xref linkend="EstimatedObjects"/></entry><entry><replaceable>Variable name</replaceable></entry><entry></entry><entry></entry><entry><para><xref linkend="mh_replic"/>&gt; 0 or <xref linkend="load_mh_file"/></para></entry></row>
+<row><entry><varname>posterior_mean</varname></entry><entry>See <xref linkend="EstimatedObjects"/></entry><entry><replaceable>Variable name</replaceable></entry><entry></entry><entry></entry><entry><para><xref linkend="mh_replic"/>&gt; 0 or <xref linkend="load_mh_file"/></para></entry></row>
+<row><entry><varname>posterior_mode</varname></entry><entry>See <xref linkend="EstimatedObjects"/></entry><entry><replaceable>Variable name</replaceable></entry><entry></entry><entry></entry><entry><para><xref linkend="mh_replic"/>&gt; 0 or <xref linkend="load_mh_file"/></para></entry></row>
+<row><entry><varname>posterior_std</varname></entry><entry>See <xref linkend="EstimatedObjects"/></entry><entry><replaceable>Variable name</replaceable></entry><entry></entry><entry></entry><entry><para><xref linkend="mh_replic"/>&gt; 0 or <xref linkend="load_mh_file"/></para></entry></row>
 </tbody>
 </tgroup>
 </table>
@@ -2459,7 +2459,7 @@ end;
 <row><entry>Field name</entry><entry>Description</entry></row>
 </thead>
 <tbody>
-<row><entry><varname>HPDinf</varname></entry><entry>Lower bound of a 90% HPD interval<footnote id="see_conf_sig"><para>See option <link linkend="conf_sig">conf_sig</link> to change the size of the HPD interval</para></footnote> of forecast  due to parameter uncertainty</entry></row> 
+<row><entry><varname>HPDinf</varname></entry><entry>Lower bound of a 90% HPD interval<footnote id="see_conf_sig"><para>See option <xref linkend="conf_sig"/> to change the size of the HPD interval</para></footnote> of forecast  due to parameter uncertainty</entry></row> 
 <row><entry><varname>HPDsup</varname></entry><entry>Lower bound of a 90% HPD interval <footnoteref linkend="see_conf_sig"/> due to parameter uncertainty</entry></row> 
 <row><entry><varname>HPDTotalinf</varname></entry><entry>Lower bound of a 90% HPD interval of forecast <footnoteref linkend="see_conf_sig"/> due to parameter uncertainty and future shocks</entry></row> 
 <row><entry><varname>HPDTotalsup</varname></entry><entry>Lower bound of a 90% HPD interval <footnoteref linkend="see_conf_sig"/> due to parameter uncertainty and future shocks</entry></row>
@@ -2477,7 +2477,7 @@ end;
 <row><entry>Field name</entry><entry>Description</entry></row>
 </thead>
 <tbody>
-<row><entry><varname>HPDinf</varname></entry><entry>Lower bound of a 90% HPD interval<footnote id="see_conf_sig1"><para>See option <link linkend="conf_sig">conf_sig</link> to change the size of the HPD interval</para></footnote></entry></row> 
+<row><entry><varname>HPDinf</varname></entry><entry>Lower bound of a 90% HPD interval<footnote id="see_conf_sig1"><para>See option <xref linkend="conf_sig"/> to change the size of the HPD interval</para></footnote></entry></row> 
 <row><entry><varname>HPDsup</varname></entry><entry>Upper bound of a 90% HPD interval <footnoteref linkend="see_conf_sig1"/> </entry></row> 
 <row><entry><varname>Mean</varname></entry><entry>Mean of the posterior distribution</entry></row> 
 <row><entry><varname>Median</varname></entry><entry>Median of the posterior distribution</entry></row>  
@@ -2666,7 +2666,7 @@ oo_.posterior_hpdsup.measurement_errors_corr.gdp_conso
 <command>unit_root_vars</command> is now deprecated and will result in no action, It was used to declare unit-root variables of a model so that a diffuse prior can be used in the initialization of the Kalman filter for these variables only. For stationary variables, the unconditional covariance matrix of these variables is used for initialization. The algorithm to compute a true diffuse prior is taken from <xref linkend="durbin-koopman_2001"/> and <xref linkend="koopman-durbin_2003"/>.
 </para>
 
-<para>When <command>unit_root_vars</command> is used the <link linkend="lik_init">lik_init</link> option of <xref linkend="estimation"/> has no effect.
+<para>When <command>unit_root_vars</command> is used the <xref linkend="lik_init"/> option of <xref linkend="estimation"/> has no effect.
 </para>
 
 <para>When there are nonstationary variables in a model, there is no unique deterministic steady state. The user must supply a <trademark class="registered">Matlab</trademark> function that computes the steady state values of the stationary variables in the model and returns dummy values for the nonstationary ones. The function should be called with the name of the <filename>.mod</filename> file followed by <filename>_steadystate</filename>. See <filename>fs2000a_steadystate.m</filename> in <filename>examples/fs2000</filename> directory.
