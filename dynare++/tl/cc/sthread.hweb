@@ -82,7 +82,7 @@ member of |thread_group| and |detach_thread_group| classes.
 # include <pthread.h>
 #else
 /* Give valid types for POSIX thread types, otherwise the templates fail in empty mode.
-   Don't use typedefs because on some systems pthread_t and friends are typedefs even
+   Don't use typedefs because on some systems |pthread_t| and friends are typedefs even
    without the include. */
 # define pthread_t void *
 # define pthread_mutex_t void *
