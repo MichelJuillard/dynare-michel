@@ -702,6 +702,8 @@ A = 1-alpha*beta;
 
 <para>The model is declared inside a <xref linkend="model"/> block.</para>
 
+<para>Note that it is possible to output the list of model equations to a LaTeX file, using the <xref linkend="write_latex_dynamic_model"/> command, or the <xref linkend="write_latex_static_model"/> (for the steady state model).</para>
+
 <refentry id="model">
   <refmeta>
     <refentrytitle>model</refentrytitle>
@@ -810,6 +812,54 @@ end;
 </refsect2>
 </refsect1>
 </refentry>
+
+<refentry id="write_latex_dynamic_model">
+  <refmeta>
+    <refentrytitle>write_latex_dynamic_model</refentrytitle>
+  </refmeta>
+
+  <refnamediv>
+    <refname>write_latex_dynamic_model</refname>
+    <refpurpose>create a LaTeX file containing the (dynamic) model</refpurpose>
+  </refnamediv>
+
+  <refsynopsisdiv>
+    <cmdsynopsis>
+      <command>write_latex_dynamic_model</command><arg choice="plain">;</arg>
+    </cmdsynopsis>
+  </refsynopsisdiv>
+
+<refsect1><title>Description</title>
+<para>If your <filename class="extension">.mod</filename> file is <filename><replaceable>FILENAME</replaceable>.mod</filename>, then Dynare will create a file called <filename><replaceable>FILENAME</replaceable>_dynamic.tex</filename>, containing the list of all the dynamic model equations. 
+</para>
+<para>If LaTeX names were given for variables and parameters (see <xref linkend="var"/>, <xref linkend="varexo"/>, <xref linkend="varexo_det"/>, <xref linkend="parameters"/>), then those will be used; otherwise, the plain text names will be used.</para>
+<para>Time subscripts (<literal>t</literal>, <literal>t+1</literal>, <literal>t-1</literal>, ...) will be appended to the variable names, as LaTeX subscripts.</para>
+</refsect1>
+</refentry>
+
+<refentry id="write_latex_static_model">
+  <refmeta>
+    <refentrytitle>write_latex_static_model</refentrytitle>
+  </refmeta>
+
+  <refnamediv>
+    <refname>write_latex_static_model</refname>
+    <refpurpose>create a LaTeX file containing the (static) model</refpurpose>
+  </refnamediv>
+
+  <refsynopsisdiv>
+    <cmdsynopsis>
+      <command>write_latex_static_model</command><arg choice="plain">;</arg>
+    </cmdsynopsis>
+  </refsynopsisdiv>
+
+<refsect1><title>Description</title>
+<para>If your <filename class="extension">.mod</filename> file is <filename><replaceable>FILENAME</replaceable>.mod</filename>, then Dynare will create a file called <filename><replaceable>FILENAME</replaceable>_static.tex</filename>, containing the list of all the equations of the steady state model.
+</para>
+<para>If LaTeX names were given for variables and parameters (see <xref linkend="var"/>, <xref linkend="varexo"/>, <xref linkend="varexo_det"/>, <xref linkend="parameters"/>), then those will be used; otherwise, the plain text names will be used.</para>
+</refsect1>
+</refentry>
+
 </sect1>
 
 <sect1><title>Initial and terminal conditions</title>
@@ -1869,6 +1919,7 @@ Note that in order to avoid stochastic singularity, you must have at least as ma
 <listitem><para><xref linkend='prior_analysis'/></para></listitem>
 <listitem><para><xref linkend='posterior_analysis'/></para></listitem>
 <listitem><para><xref linkend='model_comparison'/></para></listitem>
+<listitem><para><xref linkend='shock_decomposition'/></para></listitem>
 <listitem><para><xref linkend='unit_root_vars'/> (deprecated)</para></listitem>
 </itemizedlist>
 
@@ -2713,6 +2764,46 @@ oo_.posterior_hpdsup.measurement_errors_corr.gdp_conso
   </refsect1>
 </refentry>
 
+<refentry id="shock_decomposition">
+  <refmeta>
+    <refentrytitle>shock_decomposition</refentrytitle>
+  </refmeta>
+
+  <refnamediv>
+    <refname>shock_decomposition</refname>
+    <refpurpose>computes and displays shock decomposition according to the model for a given sample</refpurpose>
+  </refnamediv>
+
+  <refsynopsisdiv>
+    <cmdsynopsis>
+      <command>shock_decomposition</command>
+      <arg>(<replaceable>OPTION</replaceable><arg rep="repeat">, <replaceable>OPTION</replaceable></arg>)</arg><arg choice="plain">;</arg>
+    </cmdsynopsis>
+  </refsynopsisdiv>
+
+<refsect1><title>Options</title>
+<variablelist>
+  <varlistentry>
+    <term><option>parameters</option> = <replaceable>PARAMETER_NAME</replaceable></term>
+    <listitem><para>...</para></listitem>
+  </varlistentry>
+  <varlistentry>
+    <term><option>shocks</option> = [ [<replaceable>VARIABLE_NAME</replaceable> ...] ; ...]</term>
+    <listitem><para>...</para></listitem>
+  </varlistentry>
+  <varlistentry>
+    <term><option>labels</option> = [<replaceable>VARIABLE_NAME</replaceable> ...]</term>
+    <listitem><para>...</para></listitem>
+  </varlistentry>
+</variablelist>
+</refsect1>
+
+<refsect1><title>Description</title>
+<para>...</para>
+</refsect1>
+
+</refentry>
+
 <refentry id="unit_root_vars">
   <refmeta>
     <refentrytitle>unit_root_vars</refentrytitle>
@@ -2929,7 +3020,7 @@ This problem is solved using a numerical optimizer.
 
 </sect1>
 
-<sect1><title>Sensitivity analysis</title>
+<sect1><title>Sensitivity and identification analysis</title>
 
 <refentry id="dynare_sensitivity">
   <refmeta>
@@ -2955,6 +3046,48 @@ This problem is solved using a numerical optimizer.
 
 <refsect1><title>Options</title>
 <para>Please refer to the documentation of the GSA toolbox on the official website.</para>
+</refsect1>
+
+</refentry>
+
+<refentry id="identification">
+  <refmeta>
+    <refentrytitle>identification</refentrytitle>
+  </refmeta>
+
+  <refnamediv>
+    <refname>identification</refname>
+    <refpurpose>triggers identification analysis</refpurpose>
+  </refnamediv>
+
+  <refsynopsisdiv>
+    <cmdsynopsis>
+      <command>identification</command>
+      <arg>(<replaceable>OPTION</replaceable><arg rep="repeat">, <replaceable>OPTION</replaceable></arg>)</arg>
+      <arg choice="plain">;</arg>
+    </cmdsynopsis>
+  </refsynopsisdiv>
+
+<refsect1><title>Options</title>
+<variablelist>
+  <varlistentry>
+    <term><option>ar</option> = <replaceable>INTEGER</replaceable></term>
+    <listitem><para>Number of lags of computed autocorrelations (theoretical moments). Default: <literal>3</literal></para></listitem>
+  </varlistentry>
+  <varlistentry>
+    <term><option>useautocorr</option> = <replaceable>INTEGER</replaceable></term>
+    <listitem><para>If equal to <literal>1</literal>, compute derivatives of autocorrelation. If equal to <literal>0</literal>, compute derivatives of autocovariances. Default: <literal>1</literal></para></listitem>
+  </varlistentry>
+  <varlistentry>
+    <term><option>load_ident_files</option> = <replaceable>INTEGER</replaceable></term>
+    <listitem><para>If equal to <literal>1</literal>, allow Dynare to load previously 
+computed analyzes. Default: <literal>0</literal></para></listitem>
+  </varlistentry>
+  <varlistentry>
+    <term><option>prior_mc</option> = <replaceable>INTEGER</replaceable></term>
+    <listitem><para>Size of Monte Carlo sample. Default: <literal>2000</literal></para></listitem>
+  </varlistentry>
+</variablelist>
 </refsect1>
 
 </refentry>
@@ -3194,7 +3327,7 @@ In <trademark class="registered">MATLAB</trademark>, variables saved with the <c
   <refsect1>
     <title>Description</title>
     <para>For all parameters, endogenous and exogenous variables, stores
-      their value in a file, using a simple name/value associative array.</para>
+      their value in a text file, using a simple name/value associative table.</para>
     <itemizedlist>
       <listitem><para>for parameters, the value is taken from the last parameter
           initialization</para></listitem>
@@ -3208,13 +3341,13 @@ In <trademark class="registered">MATLAB</trademark>, variables saved with the <c
     <para>The typical usage of this function is to compute the steady-state of a
       model by calibrating the steady-state value of some endogenous variables (which implies that some parameters must be endogeneized
       during the steady-state computation).</para>
-    <para>You would then write a first .mod file which computes the steady-state and saves the result of the
+    <para>You would then write a first <filename class="extension">.mod</filename> file which computes the steady state and saves the result of the
       computation at the end of the file, using <command>save_params_and_steady_state</command>.</para>
     <para>In a second file designed to perform the actual simulations, you would use <xref linkend="load_params_and_steady_state"/> just after
-      your variable declarations, in order to load the steady-state previously computed (including the parameters which had been
-      endogeneized during the steady-state computation).</para>
-    <para>The need for two separate .mod files arises from the fact that the variable declarations differ between the files for
-      steady-state calibration and for simulation (the set of endogenous and parameters differ between the two); this leads
+      your variable declarations, in order to load the steady state previously computed (including the parameters which had been
+      endogeneized during the steady state computation).</para>
+    <para>The need for two separate <filename class="extension">.mod</filename> files arises from the fact that the variable declarations differ between the files for
+      steady state calibration and for simulation (the set of endogenous and parameters differ between the two); this leads
       to different <xref linkend="var"/> and <xref linkend="parameters"/> statements.</para>
     <para>Also note that you can take advantage of the <xref linkend="include"/> directive to share the model equations between the two files.</para>
   </refsect1>
@@ -3241,10 +3374,10 @@ In <trademark class="registered">MATLAB</trademark>, variables saved with the <c
   <refsect1>
     <title>Description</title>
     <para>For all parameters, endogenous and exogenous variables, loads
-      their value from a file created with save_params_and_steady_state.</para>
+      their value from a file created with <command>save_params_and_steady_state</command>.</para>
     <itemizedlist>
       <listitem><para>for parameters, their value will be initialized as if they
-          had been calibrated in the .mod file</para></listitem>
+          had been calibrated in the <filename class="extension">.mod</filename> file</para></listitem>
       <listitem><para>for endogenous and exogenous, their value will be initialized
           as they would have been from an initval block</para></listitem>
     </itemizedlist>
