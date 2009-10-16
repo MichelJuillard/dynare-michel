@@ -1409,13 +1409,12 @@ periods 100;
 
 <sect1><title>Solving and simulating</title>
 <para>
-Dynare has special commands for the computation of the static equilibrium of the model (<xref linkend='steady'/>, of the eigenvalues of the linearized model (<xref linkend='check'/>) for dynamics local analysis, of a deterministic simulation (<xref linkend='simul'/>) and for solving and/or simulating a stochastic model (<xref linkend='stoch_simul'/>).
+Dynare has special commands for the computation of the static equilibrium of the model (<xref linkend='steady'/>), of the eigenvalues of the linearized model (<xref linkend='check'/>) for dynamics local analysis, of a deterministic simulation (<xref linkend='simul'/>) and for solving and/or simulating a stochastic model (<xref linkend='stoch_simul'/>).
 </para>
 <itemizedlist>
 <listitem><para><xref linkend='steady'/></para></listitem>
 <listitem><para><xref linkend='homotopy_setup'/></para></listitem>
 <listitem><para><xref linkend='check'/></para></listitem>
-<listitem><para><xref linkend='forecast'/></para></listitem>
 <listitem><para><xref linkend='simul'/></para></listitem>
 <listitem><para><xref linkend='stoch_simul'/></para></listitem>
 </itemizedlist>
@@ -1555,82 +1554,6 @@ A necessary condition for the uniqueness of a stable equilibrium in the neighbor
 <para>
 <command>check</command> returns the eigenvalues in the global variable <varname>oo_.dr.eigval</varname>.
 </para>
-</refsect1>
-</refentry>
-
-<refentry id="forecast">
-  <refmeta>
-    <refentrytitle>forecast</refentrytitle>
-  </refmeta>
-
-  <refnamediv>
-    <refname>forecast</refname>
-    <refpurpose>computes a simulation of a stochastic model from a given state</refpurpose>
-  </refnamediv>
-
-  <refsynopsisdiv>
-    <cmdsynopsis>
-      <command>forecast</command>
-      <arg>(<replaceable>OPTION</replaceable><arg rep="repeat">, <replaceable>OPTION</replaceable></arg>)</arg>
-      <arg><replaceable>VARIABLE_NAME</replaceable></arg>
-      <arg rep="repeat"><arg>,</arg> <replaceable>VARIABLE_NAME</replaceable></arg><arg choice="plain">;</arg>
-    </cmdsynopsis>
-  </refsynopsisdiv>
-
-<refsect1><title>Options</title>
-<variablelist>
-  <varlistentry>
-    <term><option>periods</option> = <replaceable>INTEGER</replaceable></term>
-    <listitem><para>Number of periods of the forecast. Default: <literal>40</literal></para></listitem>
-  </varlistentry>
-  <varlistentry id="conf_sig" xreflabel="conf_sig">
-    <term><option>conf_sig</option> = <replaceable>DOUBLE</replaceable></term>
-    <listitem><para>Level of significance for confidence interval. Default: <literal>0.90</literal></para></listitem>
-  </varlistentry>
-</variablelist>
-</refsect1>
-
-<refsect1><title>Description</title>
-<para><command>forecast</command> computes a simulation of a stochastic model from an arbitrary initial point.</para>
-<para>When the model also contains deterministic exogenous shocks, the simulation is computed conditionaly to the agents knowing the future values of the deterministic exogenous variables.</para>
-
-<para><command>forecast</command> must be called after <xref linkend="stoch_simul"/>.</para>
-
-<para><command>forecast</command> plots the trajectory of endogenous variables. When a list of variable names follows the command, only those variables are plotted. A 90% confidence interval is plotted around the mean trajectory. Use option <option>conf_sig</option> to change the level of the confidence interval.</para>
-</refsect1>
-
-<refsect1><title>Output variables</title>
-<para>The following variables are set in structure <varname>oo_</varname>:
-<itemizedlist spacing="compact">
-<listitem><para><varname>oo_.forecast.Mean.<replaceable>VARIABLE_NAME</replaceable></varname>: mean forecast of endogenous variables</para></listitem>
-<listitem><para><varname>oo_.forecast.HPDinf.<replaceable>VARIABLE_NAME</replaceable></varname>: lower bound of a confidence interval around the forecast</para></listitem>
-<listitem><para><varname>oo_.forecast.HPDsup.<replaceable>VARIABLE_NAME</replaceable></varname>: upper bound of a confidence interval around the forecast</para></listitem>
-<listitem><para><varname>oo_.forecast.Exogenous.<replaceable>VARIABLE_NAME</replaceable></varname>: trajectory of the deterministic exogenous variables</para></listitem>
-</itemizedlist>
-</para>
-</refsect1>
-
-
-<refsect1><title>Example</title>
-<informalexample>
-  <programlisting>
-varexo_det tau;
-varexo e;
-
-...
-
-shocks;
-var e; stderr 0.01;
-var tau;
-periods 1:9;
-values -0.15;
-end;
-
-stoch_simul(irf=0);
-
-forecast;
-  </programlisting>
-</informalexample>
 </refsect1>
 </refentry>
 
@@ -2839,6 +2762,228 @@ oo_.posterior_hpdsup.measurement_errors_corr.gdp_conso
 </para>
 
 <para>Note that the nonstationary variables in the model must be integrated processes(their first difference or k-difference must be stationary).</para>
+</refsect1>
+</refentry>
+</sect1>
+
+<sect1><title>Forecasting</title>
+<para>On a calibrated model, forecasting is done using the <xref linkend="forecast"/> command. On an estimated command, use the <xref linkend="forecast_opt"/> option of <xref linkend="estimation"/> command.</para>
+
+<para>It is also possible to compute forecasts on a calibrated or estimated model for a given constrained path of the future endogenous variables. This is done, from the reduced form representation of the DSGE model, by finding the structural shocks that are needed to match the restricted paths. Use <xref linkend="conditional_forecast" />, <xref linkend="conditional_forecast_paths" /> and <xref linkend="plot_conditional_forecast" /> for that purpose.</para>
+
+<refentry id="forecast">
+  <refmeta>
+    <refentrytitle>forecast</refentrytitle>
+  </refmeta>
+
+  <refnamediv>
+    <refname>forecast</refname>
+    <refpurpose>computes a simulation of a stochastic model from a given state</refpurpose>
+  </refnamediv>
+
+  <refsynopsisdiv>
+    <cmdsynopsis>
+      <command>forecast</command>
+      <arg>(<replaceable>OPTION</replaceable><arg rep="repeat">, <replaceable>OPTION</replaceable></arg>)</arg>
+      <arg><replaceable>VARIABLE_NAME</replaceable></arg>
+      <arg rep="repeat"><arg>,</arg> <replaceable>VARIABLE_NAME</replaceable></arg><arg choice="plain">;</arg>
+    </cmdsynopsis>
+  </refsynopsisdiv>
+
+<refsect1><title>Options</title>
+<variablelist>
+  <varlistentry>
+    <term><option>periods</option> = <replaceable>INTEGER</replaceable></term>
+    <listitem><para>Number of periods of the forecast. Default: <literal>40</literal></para></listitem>
+  </varlistentry>
+  <varlistentry id="conf_sig" xreflabel="conf_sig">
+    <term><option>conf_sig</option> = <replaceable>DOUBLE</replaceable></term>
+    <listitem><para>Level of significance for confidence interval. Default: <literal>0.90</literal></para></listitem>
+  </varlistentry>
+</variablelist>
+</refsect1>
+
+<refsect1><title>Description</title>
+<para><command>forecast</command> computes a simulation of a stochastic model from an arbitrary initial point.</para>
+<para>When the model also contains deterministic exogenous shocks, the simulation is computed conditionaly to the agents knowing the future values of the deterministic exogenous variables.</para>
+
+<para><command>forecast</command> must be called after <xref linkend="stoch_simul"/>.</para>
+
+<para><command>forecast</command> plots the trajectory of endogenous variables. When a list of variable names follows the command, only those variables are plotted. A 90% confidence interval is plotted around the mean trajectory. Use option <option>conf_sig</option> to change the level of the confidence interval.</para>
+</refsect1>
+
+<refsect1><title>Output variables</title>
+<para>The following variables are set in structure <varname>oo_</varname>:
+<itemizedlist spacing="compact">
+<listitem><para><varname>oo_.forecast.Mean.<replaceable>VARIABLE_NAME</replaceable></varname>: mean forecast of endogenous variables</para></listitem>
+<listitem><para><varname>oo_.forecast.HPDinf.<replaceable>VARIABLE_NAME</replaceable></varname>: lower bound of a confidence interval around the forecast</para></listitem>
+<listitem><para><varname>oo_.forecast.HPDsup.<replaceable>VARIABLE_NAME</replaceable></varname>: upper bound of a confidence interval around the forecast</para></listitem>
+<listitem><para><varname>oo_.forecast.Exogenous.<replaceable>VARIABLE_NAME</replaceable></varname>: trajectory of the deterministic exogenous variables</para></listitem>
+</itemizedlist>
+</para>
+</refsect1>
+
+
+<refsect1><title>Example</title>
+<informalexample>
+  <programlisting>
+varexo_det tau;
+varexo e;
+
+...
+
+shocks;
+var e; stderr 0.01;
+var tau;
+periods 1:9;
+values -0.15;
+end;
+
+stoch_simul(irf=0);
+
+forecast;
+  </programlisting>
+</informalexample>
+</refsect1>
+</refentry>
+
+<refentry id="conditional_forecast">
+  <refmeta>
+    <refentrytitle>conditional_forecast</refentrytitle>
+  </refmeta>
+
+  <refnamediv>
+    <refname>conditional_forecast</refname>
+    <refpurpose>computes a simulation of a stochastic model conditionally to a specified future path for some endogenous</refpurpose>
+  </refnamediv>
+
+  <refsynopsisdiv>
+    <cmdsynopsis>
+      <command>conditional_forecast</command>
+      <arg>(<replaceable>OPTION</replaceable><arg rep="repeat">, <replaceable>OPTION</replaceable></arg>)</arg>
+      <arg choice="plain"><replaceable>VARIABLE_NAME</replaceable></arg>
+      <arg rep="repeat"><arg>,</arg> <replaceable>VARIABLE_NAME</replaceable></arg><arg choice="plain">;</arg>
+    </cmdsynopsis>
+  </refsynopsisdiv>
+
+<refsect1><title>Options</title>
+<variablelist>
+  <varlistentry>
+    <term><option>parameter_set</option> = <option>calibration</option> | <option>prior_mode</option> | <option>prior_mean</option> | <option>posterior_mode</option> | <option>posterior_mean</option> | <option>posterior_median</option></term>
+    <listitem><para>Specify the parameter set to use for the forecasting. Use <option>calibration</option> if you calibrated your model instead of estimating it. No default value, mandatory option</para></listitem>
+  </varlistentry>
+  <varlistentry>
+    <term><option>controlled_varexo</option> = (<replaceable>VARIABLE_NAME</replaceable> [ [,] <replaceable>VARIABLE_NAME</replaceable> ... ] )</term>
+    <listitem><para>Specify the exogenous variables to use as control variables. No default value, mandatory option</para></listitem>
+  </varlistentry>
+  <varlistentry>
+    <term><option>periods</option> = <replaceable>INTEGER</replaceable></term>
+    <listitem><para>Number of periods of the forecast. Default: as many as the length of the constrained path</para></listitem>
+  </varlistentry>
+  <varlistentry>
+    <term><option>replic</option> = <replaceable>INTEGER</replaceable></term>
+    <listitem><para>Number of simulations. Default: ????</para></listitem>
+  </varlistentry>
+  <varlistentry>
+    <term><option>conf_sig</option> = <replaceable>DOUBLE</replaceable></term>
+    <listitem><para>Level of significance for confidence interval. Default: <literal>0.90</literal></para></listitem>
+  </varlistentry>
+</variablelist>
+</refsect1>
+
+<refsect1><title>Description</title>
+<para><command>conditional_forecast</command> computes forecasts on a calibrated or estimated model for a given constrained path of some future endogenous variables. This is done, from the reduced form representation of the DSGE model, by finding the structural shocks that are needed to match the restricted paths.</para>
+
+<para>Use <xref linkend="conditional_forecast_paths" /> to give the list of constrained endogenous, and their constrained future path. Option <option>controlled_varexo</option> is used to specify the structural shocks which will be matched to generate the constrained path.</para>
+
+<para>Use <xref linkend="plot_conditional_forecast" /> to graph the results.</para>
+
+</refsect1>
+
+<refsect1><title>Example</title>
+<informalexample>
+  <programlisting>
+var y a
+varexo e u;
+
+...
+
+stoch_simul(irf=0);
+
+conditional_forecast_paths;
+var y;
+periods 1:3, 4:5;
+values 2, 5;
+var a;
+periods 1:5;
+values 3;
+end;
+
+conditional_forecast(parameter_set = calibration, controlled_varexo = (e, u), replic = 3000);
+
+plot_conditional_forecast(periods = 10) e u;
+  </programlisting>
+</informalexample>
+</refsect1>
+</refentry>
+
+<refentry id="conditional_forecast_paths">
+  <refmeta>
+    <refentrytitle>conditional_forecast_paths</refentrytitle>
+  </refmeta>
+
+  <refnamediv>
+    <refname>conditional_forecast_paths</refname>
+    <refpurpose>in a conditional forecast, gives the list of constrained endogenous and their path</refpurpose>
+  </refnamediv>
+
+  <refsynopsisdiv>
+    <cmdsynopsis>
+      <command>conditional_forecast_paths</command><arg choice="plain">;</arg><sbr/>
+      <arg rep="repeat">
+	      <arg choice="plain">var <replaceable>VARIABLE_NAME</replaceable>;</arg>
+	      <arg choice="plain">periods <replaceable>INTEGER</replaceable><arg>:<replaceable>INTEGER</replaceable></arg><arg rep="repeat"><arg>,</arg> <replaceable>INTEGER</replaceable><arg>:<replaceable>INTEGER</replaceable></arg></arg>;</arg>
+        <arg choice="plain">values <replaceable>EXPRESSION</replaceable> <arg rep="repeat"><arg>,</arg> <replaceable>EXPRESSION</replaceable></arg>;</arg>
+      </arg><sbr/>
+      <command>end</command><arg choice="plain">;</arg>
+    </cmdsynopsis>
+  </refsynopsisdiv>
+
+<refsect1><title>Description</title>
+<para>Describes the path of constrained endogenous, before calling <xref linkend="conditional_forecast"/>. The syntax is similar to deterministic shocks in <xref linkend="shocks"/>, see <xref linkend="conditional_forecast"/> for an example.</para>
+</refsect1>
+</refentry>
+
+<refentry id="plot_conditional_forecast">
+  <refmeta>
+    <refentrytitle>plot_conditional_forecast</refentrytitle>
+  </refmeta>
+
+  <refnamediv>
+    <refname>plot_conditional_forecast</refname>
+    <refpurpose>plots the conditional forecasts</refpurpose>
+  </refnamediv>
+
+  <refsynopsisdiv>
+    <cmdsynopsis>
+      <command>plot_conditional_forecast</command>
+      <arg>(<option>periods</option> = <replaceable>INTEGER</replaceable>)</arg><arg choice="plain">;</arg>
+    </cmdsynopsis>
+  </refsynopsisdiv>
+
+<refsect1><title>Options</title>
+<variablelist>
+  <varlistentry>
+    <term><option>periods</option> = <replaceable>INTEGER</replaceable></term>
+    <listitem><para>Number of periods to be plotted. Default: as many as the length of the forecast</para></listitem>
+  </varlistentry>
+</variablelist>
+</refsect1>
+
+<refsect1><title>Description</title>
+<para>
+To be used after <xref linkend="conditional_forecast"/>.
+</para>
 </refsect1>
 </refentry>
 </sect1>
