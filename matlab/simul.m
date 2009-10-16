@@ -55,7 +55,7 @@ end
 options_.periods = options_.periods;
 ct_=0;
 
-if options_.simul_algo == 0
+%if options_.simul_algo == 0
   if ~ options_.initval_file
       if ~isfield(options_,'datafile')
         make_ex_;
@@ -63,7 +63,7 @@ if options_.simul_algo == 0
       else
           read_data_;
       end
-  end
+  %end
   
   if isempty(options_.scalv) | options_.scalv == 0
     options_.scalv = oo_.steady_state ;

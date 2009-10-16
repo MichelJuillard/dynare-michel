@@ -24,10 +24,8 @@
 #include <vector>
 #include <string>
 #include <cmath>
+#define BYTE_CODE
 #include "CodeInterpreter.hh"
-//#include "SymbolTable.hh"
-//#include "ExprNode.hh"
-//#include "Mem_Mngr.hh"
 #include "SparseMatrix.hh"
 #ifdef LINBCG
 # include "linbcg.hh"
@@ -42,26 +40,10 @@
 
 using namespace std;
 
-struct Block_contain_type
-{
-  int Equation, Variable, Own_Derivative;
-};
-
-struct Block_type
-{
-  long int begin, end, size, type;
-};
 
 #define pow_ pow
-#define get_code_int          *((int*)Code); Code+=sizeof(int);
-#define get_code_double       *((double*)Code); Code+=sizeof(double);
-#define get_code_pdouble      (double*)Code; Code+=sizeof(double);
-#define get_code_bool         *((bool*)(Code++))
-#define get_code_char         *((char*)(Code++))
-#define get_code_pos          (long int*)Code
-#define get_code_pointer      Code
-#define set_code_pointer(pos) Code=pos
 
+typedef vector<pair<Tags, void* > >::const_iterator it_code_type;
 
 class Interpreter : SparseMatrix
 {
@@ -69,27 +51,26 @@ class Interpreter : SparseMatrix
     double pow1(double a, double b);
     double log1(double a);
     void compute_block_time(int Per_u_, bool evaluate, int block_num);
-    void evaluate_a_block(int size, int type, string bin_basename, bool steady_state, int block_num);
-    bool simulate_a_block(int size, int type, string file_name, string bin_basename, bool Gaussian_Elimination, bool steady_state, int block_num);
+    void evaluate_a_block(const int size, const int type, string bin_basename, bool steady_state, int block_num,
+                          const bool is_linear=false, const int symbol_table_endo_nbr=0, const int Block_List_Max_Lag=0, const int Block_List_Max_Lead=0, const int u_count_int=0);
+    bool simulate_a_block(const int size, const int type, string file_name, string bin_basename, bool Gaussian_Elimination, bool steady_state, int block_num,
+                          const bool is_linear=false, const int symbol_table_endo_nbr=0, const int Block_List_Max_Lag=0, const int Block_List_Max_Lead=0, const int u_count_int=0);
     double *T;
     vector<Block_contain_type> Block_Contain;
-    vector<Block_type> Block;
-    char *Code;
+    vector<pair<Tags, void* > > code_liste;
+    it_code_type it_code;
     stack<double> Stack;
     int Block_Count, Per_u_, Per_y_;
     int it_, nb_row_x, nb_row_xd, maxit_, size_of_direction;
     double *g1, *r;
-    //double max_res, res1, res2, slowc, markowitz_c;
     double solve_tolf;
     bool GaussSeidel;
     double *x, *params;
     double *steady_y, *steady_x;
-    //double *y, *ya, *x, *direction;
     map<pair<pair<int, int> ,int>, int> IM_i;
     int equation, derivative_equation, derivative_variable;
     string filename;
   public :
-    //ReadBinFile read_bin_file;
 
     Interpreter(double *params_arg, double *y_arg, double *ya_arg, double *x_arg, double *steady_y_arg, double *steady_x_arg,
                 double *direction_arg, int y_size_arg, int nb_row_x_arg,

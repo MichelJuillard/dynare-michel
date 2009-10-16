@@ -64,7 +64,7 @@ class SparseMatrix
     bool simulate_NG(int blck, int y_size, int it_, int y_kmin, int y_kmax, int Size, bool print_it, bool cvg, int &iter, bool steady_state);
     void Direct_Simulate(int blck, int y_size, int it_, int y_kmin, int y_kmax, int Size, int periods, bool print_it, int iter);
     void fixe_u(double **u, int u_count_int, int max_lag_plus_max_lead_plus_1);
-    void Read_SparseMatrix(string file_name, int Size, int periods, int y_kmin, int y_kmax, bool steady_state, bool two_boundaries);
+    void Read_SparseMatrix(string file_name, const int Size, int periods, int y_kmin, int y_kmax, bool steady_state, bool two_boundaries);
     void Read_file(string file_name, int periods, int u_size1, int y_size, int y_kmin, int y_kmax, int &nb_endo, int &u_count, int &u_count_init, double* u);
 
 #ifdef _MSC_VER

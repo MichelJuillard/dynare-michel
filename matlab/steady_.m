@@ -122,7 +122,7 @@ function steady_()
                           oo_.exo_det_steady_state], M_.params);
     end
   elseif options_.block && options_.bytecode
-      [oo_.steady_state,check] = bytecode('steady_state');
+      [oo_.steady_state,check] = bytecode('static');
   else
     [oo_.steady_state,check] = dynare_solve([M_.fname '_static'],...
 				     oo_.steady_state,...

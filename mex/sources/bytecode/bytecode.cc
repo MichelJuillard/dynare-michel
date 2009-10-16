@@ -81,7 +81,7 @@ main( int argc, const char* argv[] )
 
   for(i=2;i<argc; i++)
     {
-      if(Get_Argument(argv[i])=="steady_state")
+      if(Get_Argument(argv[i])=="static")
         steady_state = true;
       else if(Get_Argument(argv[i])=="dynamic")
         steady_state = false;
@@ -214,7 +214,7 @@ mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
   bool evaluate = false;
   for(i=0;i<nrhs; i++)
     {
-      if(Get_Argument(prhs[i])=="steady_state")
+      if(Get_Argument(prhs[i])=="static")
         steady_state = true;
       else if(Get_Argument(prhs[i])=="dynamic")
         steady_state = false;
@@ -254,7 +254,7 @@ mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
     }
   //mexPrintf("ok0\n");
   double * params = mxGetPr(mxGetFieldByNumber(M_, 0, mxGetFieldNumber(M_,"params")));
-  double *yd, *xd, *steady_yd, *steady_xd ;
+  double *yd, *xd , *steady_yd = NULL, *steady_xd = NULL;
   if(!steady_state)
     {
       yd= mxGetPr(mxGetFieldByNumber(oo_, 0, mxGetFieldNumber(oo_,"endo_simul")));

@@ -344,7 +344,7 @@ SparseMatrix::Insert(const int r, const int c, const int u_index, const int lag_
 }
 
 void
-SparseMatrix::Read_SparseMatrix(string file_name, int Size, int periods, int y_kmin, int y_kmax, bool steady_state, bool two_boundaries)
+SparseMatrix::Read_SparseMatrix(string file_name, const int Size, int periods, int y_kmin, int y_kmax, bool steady_state, bool two_boundaries)
 {
   int i, j, eq, var, lag;
   filename = file_name;
