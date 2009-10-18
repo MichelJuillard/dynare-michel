@@ -1,5 +1,5 @@
 options_.maxit_ = 100;
-var c k /*s*/;
+var c k;
 varexo x;
 
 parameters alph gam delt bet aa;
@@ -10,12 +10,8 @@ bet=0.05;
 aa=0.5;
 
 
-//model(block, mfs=3);
-model(block, bytecode, mfs=3);
-//model;
-//s = aa*x*k(-1)^alph - c;
-c + k - aa*x*k(-1)^alph - (1-delt)*k(-1);// + 0.00000001*s;
-//k = s - (1-delt)*k(-1);
+model(block, bytecode);
+c + k - aa*x*k(-1)^alph - (1-delt)*k(-1);
 c^(-gam) - (1+bet)^(-1)*(aa*alph*x(+1)*k^(alph-1) + 1 - delt)*c(+1)^(-gam);
 end;
 
@@ -25,7 +21,7 @@ k = ((delt+bet)/(1.0*aa*alph))^(1/(alph-1));
 c = aa*k^alph-delt*k;
 end;
 
-steady;
+steady(solve_algo = 5);
 
 //check;
 model_info;
@@ -35,7 +31,7 @@ periods 1;
 values 1.02;
 end;
 
-simul(periods=200, METHOD=LU);
+simul(periods = 200, stack_solve_algo = 5, markowitz = 2);
 
 rplot c;
 rplot k;

@@ -1546,7 +1546,7 @@ SparseMatrix::Check_the_Solution(int periods, int y_kmin, int y_kmax, int Size, 
 }
 
 int
-SparseMatrix::simulate_NG1(int blck, int y_size, int it_, int y_kmin, int y_kmax, int Size, int periods, bool print_it, bool cvg, int &iter)
+SparseMatrix::simulate_NG1(int blck, int y_size, int it_, int y_kmin, int y_kmax, int Size, int periods, bool print_it, bool cvg, int &iter, int minimal_solving_periods)
 {
   /*Triangularisation at each period of a block using a simple gaussian Elimination*/
   t_save_op_s *save_op_s;
@@ -1634,7 +1634,7 @@ SparseMatrix::simulate_NG1(int blck, int y_size, int it_, int y_kmin, int y_kmax
     }
   else
     {
-      start_compare = y_kmin;
+      start_compare = max( y_kmin, minimal_solving_periods);
       restart = 0;
     }
   res1a = res1;

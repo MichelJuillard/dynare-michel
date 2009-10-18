@@ -108,6 +108,8 @@ function global_initialization()
 
   % Deterministic simulation
   options_.stack_solve_algo = 0;
+  options_.markowitz = 0.5;
+  options_.minimal_solving_periods = 1;
   
   % Solution
   options_.order = 2;
@@ -153,7 +155,6 @@ function global_initialization()
   options_.load_mh_file = 0;
   options_.logdata = 0;
   options_.loglinear = 0;
-  options_.markowitz = 0.5;
   options_.mh_conf_sig = 0.90;
   options_.prior_interval = 0.90;
   options_.mh_drop = 0.5;

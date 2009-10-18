@@ -75,8 +75,7 @@ function steady_()
                 check1 = 1;
             end
         elseif options_.block && options_.bytecode
-            residuals = bytecode('evaluate','static');
-            check1 = 1;
+            [residuals, check1] = bytecode('evaluate','static');
         else
             check1 = 0;
             check1 = max(abs(feval([M_.fname '_static'],...
@@ -86,9 +85,7 @@ function steady_()
         end
     end
     if check1
-        if ~options_.block && ~options_.bytecode
-            resid(1);
-        end
+        resid(1);
         error(['The seadystate values returned by ' M_.fname ...
                '_steadystate.m don''t solve the static model!' ])
     end

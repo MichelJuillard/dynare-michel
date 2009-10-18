@@ -28,7 +28,7 @@ Interpreter::Interpreter(double *params_arg, double *y_arg, double *ya_arg, doub
                          double *direction_arg, int y_size_arg,
                          int nb_row_x_arg, int nb_row_xd_arg, int periods_arg, int y_kmin_arg, int y_kmax_arg,
                          int maxit_arg_, double solve_tolf_arg, int size_of_direction_arg, double slowc_arg, int y_decal_arg, double markowitz_c_arg,
-                         string &filename_arg)
+                         string &filename_arg, int minimal_solving_periods_arg)
 {
   params=params_arg;
   y=y_arg;
@@ -53,6 +53,7 @@ Interpreter::Interpreter(double *params_arg, double *y_arg, double *ya_arg, doub
   filename=filename_arg;
   T=NULL;
   error_not_printed = true;
+  minimal_solving_periods = minimal_solving_periods_arg;
 }
 
 double
@@ -1359,10 +1360,10 @@ Interpreter::simulate_a_block(const int size, const int type, string file_name, 
 								  cvg = false;
 								else
                   cvg=(max_res<solve_tolf);
-                if(cvg)
-                  continue;
+                /*if(cvg)
+                  continue;*/
                 u_count=u_count_saved;
-                simulate_NG1(Block_Count, symbol_table_endo_nbr, it_, y_kmin, y_kmax, size, periods, true, cvg, iter);
+                simulate_NG1(Block_Count, symbol_table_endo_nbr, it_, y_kmin, y_kmax, size, periods, true, cvg, iter, minimal_solving_periods);
                 iter++;
               }
             if (!cvg)
@@ -1395,7 +1396,7 @@ Interpreter::simulate_a_block(const int size, const int type, string file_name, 
                   }
               }
             cvg = false;
-            simulate_NG1(Block_Count, symbol_table_endo_nbr, it_, y_kmin, y_kmax, size, periods, true, cvg, iter);
+            simulate_NG1(Block_Count, symbol_table_endo_nbr, it_, y_kmin, y_kmax, size, periods, true, cvg, iter, minimal_solving_periods);
           }
         mxFree(r);
         mxFree(y_save);
