@@ -75,7 +75,6 @@ disp('TYPE I (main effects)')
 disp(' ')
 disp('PRESS ENTER TO CONTUNUE');
 pause;
-identification;
 dynare_sensitivity(identification=1, morris=0);
 
 disp('USE PREVIOUS MC SAMPLE AND PERFORM IDENTIFICATION ANALYSIS');
@@ -84,5 +83,6 @@ disp(' ')
 disp('PRESS ENTER TO CONTUNUE');
 pause;
 dynare_sensitivity(identification=1, load_stab=1, stab=0, morris=2);
+
 
 stoch_simul(order=1,irf=40);
