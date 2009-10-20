@@ -65,7 +65,17 @@ if options_gsa.identification,
   options_gsa.redform=0;
   options_gsa = set_default_option(options_gsa,'morris',1);
   options_gsa = set_default_option(options_gsa,'trans_ident',0);
-  options_gsa = set_default_option(options_gsa,'load_ident',0);
+  options_gsa = set_default_option(options_gsa,'load_ident_files',0);
+  options_gsa = set_default_option(options_gsa,'ar',3);
+  options_gsa = set_default_option(options_gsa,'useautocorr',1);
+  options_.ar = options_gsa.ar;
+  if options_gsa.morris==2,
+    options_ident=[];
+    options_ident = set_default_option(options_ident,'load_ident_files',options_gsa.load_ident_files);
+    options_ident = set_default_option(options_ident,'useautocorr',options_gsa.useautocorr);
+    options_ident = set_default_option(options_ident,'ar',options_gsa.ar);
+    options_.options_ident = options_ident;
+  end
 end
 
 % map stability
