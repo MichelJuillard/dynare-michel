@@ -1692,6 +1692,11 @@ The simulated endogenous variables are available in global matrix <varname>oo_.e
     <term><option>solve_algo</option> = <replaceable>INTEGER</replaceable></term>
     <listitem><para>See <link linkend="solve_algo">there</link> for the possible values and their meaning</para></listitem>
   </varlistentry>
+  <varlistentry id="aim_solver">
+    <term><option>aim_solver</option></term>
+    <listitem><para>Use the Anderson-Moore Algorithm (AIM) to compute the decision rules, instead of using Dynare's default method based on a generalized Schur decomposition. This option is only valid for first order approximation. See <ulink url="http://www.federalreserve.gov/Pubs/oss/oss4/aimindex.html">AIM website</ulink> for more details on the algorithm.</para>
+    </listitem>
+  </varlistentry>
 </variablelist>
 
 </refsect1>
@@ -2424,6 +2429,10 @@ end;
   <varlistentry>
     <term><option>irf</option> = <replaceable>INTEGER</replaceable></term>
     <listitem><para>See <link linkend="irf">there</link></para></listitem>
+  </varlistentry>
+  <varlistentry>
+    <term><option>aim_solver</option></term>
+    <listitem><para>See <link linkend="aim_solver">there</link></para></listitem>
   </varlistentry>
 </variablelist>
 
@@ -3186,7 +3195,7 @@ This problem is solved using a numerical optimizer.
   </refsynopsisdiv>
 
 <refsect1><title>Description</title>
-<para>This function is an interface to the global sensitivity analysis (GSA) toolbox developed by the Joint Research Center (JRC) of the European Commission. The GSA toolbox needs to be downloaded separately from the JRC web site (<ulink url="http://eemc.jrc.ec.europa.eu/Software-DYNARE.htm">http://eemc.jrc.ec.europa.eu/Software-DYNARE.htm</ulink>).</para>
+<para>This function is an interface to the global sensitivity analysis (GSA) toolbox developed by the Joint Research Center (JRC) of the European Commission. The GSA toolbox needs to be downloaded separately from the <ulink url="http://eemc.jrc.ec.europa.eu/Software-DYNARE.htm">JRC web site</ulink>.</para>
 </refsect1>
 
 <refsect1><title>Options</title>

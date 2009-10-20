@@ -43,6 +43,5 @@ var e_ys = 1.89;
 var e_pies = 1.89;
 end;
 
-options_.useAIM = 0;
 stoch_simul(order=1,irf=0);
  

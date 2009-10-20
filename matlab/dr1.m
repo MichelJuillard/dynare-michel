@@ -230,9 +230,11 @@ function [dr,info,M_,options_,oo_] = dr1(dr,task,M_,options_,oo_)
     b(:,cols_b) = jacobia_(:,cols_j);
     
     if M_.maximum_endo_lead == 0;  % backward models
-        % If required, try Gary Anderson and G Moore AIM solver if not
-        % check only and if 1st order (added by GP July'08)
-        if (options_.useAIM == 1) && (task == 0) && (options_.order == 1) 
+        % If required, use AIM solver if not check only
+        if (options_.aim_solver == 1) && (task == 0)
+            if options_.order > 1
+                error('Option "aim_solver" is incompatible with order >= 2')
+            end
             try
                 [dr,aimcode]=dynAIMsolver1(jacobia_,M_,dr);
                 if aimcode ~=1
@@ -241,13 +243,10 @@ function [dr,info,M_,options_,oo_] = dr1(dr,task,M_,options_,oo_)
                     return
                 end
             catch
-                %warning('Problem with using AIM solver - Using Dynare solver instead');
-                disp('Problem with using AIM solver - Using Dynare solver instead');
-                options_.useAIM = 0; % and try mjdgges instead
+                disp(lasterror.message)
+                error('Problem with AIM solver - Try to remove the "aim_solver" option');
             end
-        end % end if useAIM and...
-        %else use original Dynare solver
-        if ~((options_.useAIM == 1) && (task == 0) && (options_.order == 1))
+        else % use original Dynare solver
             [k1,junk,k2] = find(kstate(:,4));
             dr.ghx(:,k1) = -b\jacobia_(:,k2); 
             if M_.exo_nbr
@@ -274,9 +273,11 @@ function [dr,info,M_,options_,oo_] = dr1(dr,task,M_,options_,oo_)
         aa = jacobia_;
     end
 
-    % If required, try Gary Anderson and G Moore AIM solver, that is, if not check
-    % only and if 1st order (added by GP July'08)
-    if (options_.useAIM == 1) && (task == 0) && (options_.order == 1) 
+    % If required, use AIM solver if not check only
+    if (options_.aim_solver == 1) && (task == 0)
+        if options_.order > 1
+            error('Option "aim_solver" is incompatible with order >= 2')
+        end
         try
             [dr,aimcode]=dynAIMsolver1(aa,M_,dr);
 
@@ -289,14 +290,6 @@ function [dr,info,M_,options_,oo_] = dr1(dr,task,M_,options_,oo_)
             end
             [A,B] =transition_matrix(dr);
             dr.eigval = eig(A);
-%            if any(abs(dr.eigval) > options_.qz_criterium)
-%                temp = sort(abs(dr.eigval));
-%                nba = nnz(abs(dr.eigval) > options_.qz_criterium);
-%                temp = temp(nd-nba+1:nd)-1-options_.qz_criterium;
-%                info(1) = 3;
-%                info(2) = temp'*temp;
-%                return
-%            end
             sdim = sum( abs(dr.eigval) < options_.qz_criterium );
             nba = nd-sdim;
 
@@ -314,13 +307,10 @@ function [dr,info,M_,options_,oo_] = dr1(dr,task,M_,options_,oo_)
                 return
             end
         catch
-            %warning('Problem with using AIM solver - Using Dynare solver instead');
-            disp('Problem with using AIM solver - Using Dynare solver instead');
-            options_.useAIM = 0; % and then try mjdgges instead
+            disp(lasterror.message)
+            error('Problem with AIM solver - Try to remove the "aim_solver" option')
         end
-    end % end if useAIM and...
-    %else  % use original Dynare solver
-    if  ~((options_.useAIM == 1)&& (task == 0) && (options_.order == 1)) % || isempty(options_.useAIM)  
+    else  % use original Dynare solver
         k1 = M_.lead_lag_incidence(find([1:klen] ~= M_.maximum_endo_lag+1),:);
         a = aa(:,nonzeros(k1'));
         b(:,cols_b) = aa(:,cols_j);
@@ -456,15 +446,13 @@ function [dr,info,M_,options_,oo_] = dr1(dr,task,M_,options_,oo_)
         dr.ghu = repmat(1./dr.ys(k1),1,size(dr.ghu,2)).*dr.ghu;
     end
     
-    if  ~((options_.useAIM == 1) && (options_.order == 1)) % if not use AIM ...
+    if options_.aim_solver ~= 1 && options_.use_qzdiv
         %% Necessary when using Sims' routines for QZ
-        if options_.use_qzdiv
-            gx = real(gx);
-            hx = real(hx);
-            dr.ghx = real(dr.ghx);
-            dr.ghu = real(dr.ghu);
-        end
-    end % if not use AIM 
+        gx = real(gx);
+        hx = real(hx);
+        dr.ghx = real(dr.ghx);
+        dr.ghu = real(dr.ghu);
+    end
     
     %exogenous deterministic variables
     if M_.exo_det_nbr > 0

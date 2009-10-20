@@ -7,12 +7,12 @@ A subset of routines from Gary Anderson AIM package starting with SP... needed t
 
 The path to the AIM directory,if exists, is added by dynare_config.m using addpath.
 
-DR1 tries to invoke AIM if options_.useAIM == 1 is set and, if not check only, and if 1st order only: 
-    if (options_.useAIM == 1) && (task == 0) && (options_.order == 1) 
+DR1 tries to invoke AIM if options_.aim_solver == 1 is set and, if not check only, and if 1st order only: 
+    if (options_.aim_solver == 1) && (task == 0) && (options_.order == 1) 
 
-for start, options_.useAIM = 0 is set by default in global_initialization.m so that system uses mjdgges by default. 
+for start, options_.aim_solver = 0 is set by default in global_initialization.m so that system uses mjdgges by default. 
 
-If AIM is to be used, options_.useAIM = 1 needs to be set either in the model <>.mod file, before invoking, estimate and/or stoch_simul, or by issuing appropriate command for estimate and/or stoch_simul. 
+If AIM is to be used, options_.aim_solver = 1 needs to be set either in the model <>.mod file, before invoking, estimate and/or stoch_simul, or by issuing appropriate command for estimate and/or stoch_simul. 
 
 NOTE: in the current implementation, as of July 2008, handling of exceptions is rather fundamental and, in particular, when Blanchard and Kahn conditions are not met, only a large penalty value 1.0e+8 is being set.
 
@@ -22,7 +22,7 @@ or
 Error in AIM: aimcode=3 : Aim: too many big roots
 especially close to the point of convergence.
 
-However, if other exceptions occur and aimcode (see codes below) is higher than 5, the system resets options_.useAIM = 0 and tries to use mjdgges instead.
+However, if other exceptions occur and aimcode (see codes below) is higher than 5, the system resets options_.aim_solver = 0 and tries to use mjdgges instead.
 
 
 APPENDIX

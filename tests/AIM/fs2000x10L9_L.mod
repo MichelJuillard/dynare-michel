@@ -74,6 +74,5 @@ steady;
 
 check;
 
-options_.useAIM = 0;
 stoch_simul(order=1,irf=0);
  

@@ -16,14 +16,24 @@ OCTAVE_MODS = \
 	homotopy/homotopy2_test.mod \
 	homotopy/homotopy3_test.mod \
 	bvar_a_la_sims/bvar_standalone.mod \
-	bvar_a_la_sims/bvar_and_dsge.mod
+	bvar_a_la_sims/bvar_and_dsge.mod \
+	AIM/fs2000x10L9_L.mod \
+	AIM/fs2000x10L9_L_AIM.mod \
+	AIM/fs2000x10_L9_L.mod \
+	AIM/fs2000x10_L9_L_AIM.mod
 
 MODS = $(OCTAVE_MODS) \
 	arima/mod1b.mod \
 	arima/mod1c.mod \
 	arima/mod2a.mod \
 	arima/mod2b.mod \
-	fs2000/fs2000a.mod
+	fs2000/fs2000a.mod \
+	AIM/fs2000_b1L1L.mod \
+	AIM/fs2000_b1L1L_AIM.mod \
+	AIM/ls2003_2L0L.mod \
+	AIM/ls2003_2L0L_AIM.mod \
+	AIM/ls2003_2L2L.mod \
+	AIM/ls2003_2L2L_AIM.mod
 
 EXTRA_DIST = $(MODS) \
 	run_test_octave.m \

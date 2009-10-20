@@ -78,6 +78,5 @@ unit_root_vars P_obs Y_obs;
 
 steady;
  
-options_.useAIM = 0;
 stoch_simul(order=1,irf=0);
  
