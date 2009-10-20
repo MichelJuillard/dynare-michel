@@ -230,9 +230,20 @@ if fload==0,
     M_.params(estim_params_.param_vals(:,1)) = lpmat(j,:)';
     %try stoch_simul([]);
     try 
-      [Tt,Rr,SteadyState,info] = dynare_resolve(bayestopt_.restrict_var_list,...
+      [Tt,Rr,SteadyState,infox{j}] = dynare_resolve(bayestopt_.restrict_var_list,...
 					  bayestopt_.restrict_columns,...
 					  bayestopt_.restrict_aux);
+                              if infox{j}==0,
+            check1 = max(abs(feval([M_.fname '_static'],...
+                                   SteadyState,...
+                                   [oo_.exo_steady_state; ...
+                                oo_.exo_det_steady_state], M_.params))) > options_.dynatol ;
+                              if check1,
+        error(['The seadystate values returned by ' M_.fname ...
+               '_steadystate.m don''t solve the static model!' ])
+                              end
+                              end
+          
           
       if ~exist('T')
         dr_=oo_.dr;
@@ -412,12 +423,14 @@ if pprior
   auname='prior_unacceptable';
   aunstname='prior_unstable';
   aindname='prior_indeterm';
+  awrongname='prior_wrong';
   asname='prior_stable';
 else
   aname='mc_stab';
   auname='mc_unacceptable';
   aunstname='mc_unstable';
   aindname='mc_indeterm';
+  awrongname='mc_wrong';
   asname='mc_stable';
 end
 delete([OutputDirectoryName,'/',fname_,'_',aname,'_*.*']);
@@ -459,7 +472,7 @@ if length(iunstable)>0 & length(iunstable)<Nsam,
     end
     disp(' ');
     if ~isempty(indindet)
-    stab_map_1(lpmat, istable, iindeterm, [aname, '_indet'], 1, indindet, OutputDirectoryName);
+    stab_map_1(lpmat, [1:Nsam], iindeterm, [aname, '_indet'], 1, indindet, OutputDirectoryName);
     end
   end
   
@@ -472,7 +485,20 @@ if length(iunstable)>0 & length(iunstable)<Nsam,
     end
     disp(' ');
     if ~isempty(indunst)
-      stab_map_1(lpmat, istable, ixun, [aname, '_unst'], 1, indunst, OutputDirectoryName);
+      stab_map_1(lpmat, [1:Nsam], ixun, [aname, '_unst'], 1, indunst, OutputDirectoryName);
+    end
+  end
+
+  if ~isempty(iwrong),
+    [proba, dproba] = stab_map_1(lpmat, [1:Nsam], iwrong, [aname, '_wrong'],0);
+    indwrong=find(dproba>ksstat);
+    disp('Smirnov statistics in driving no solution')
+    for j=1:np,
+      disp([M_.param_names(estim_params_.param_vals(j,1),:),'   d-stat = ', num2str(dproba(j),3)])
+    end
+    disp(' ');
+    if ~isempty(indwrong)
+      stab_map_1(lpmat, [1:Nsam], iwrong, [aname, '_wrong'], 1, indwrong, OutputDirectoryName);
     end
   end
 
@@ -483,14 +509,17 @@ if length(iunstable)>0 & length(iunstable)<Nsam,
   c00=tril(c0,-1);
   
   stab_map_2(lpmat(istable,:),alpha2, asname, OutputDirectoryName);
-  if length(iunstable)>3,
+  if length(iunstable)>10,
     stab_map_2(lpmat(iunstable,:),alpha2, auname, OutputDirectoryName);
   end
-  if length(iindeterm)>3,
+  if length(iindeterm)>10,
     stab_map_2(lpmat(iindeterm,:),alpha2, aindname, OutputDirectoryName);
   end
-  if length(ixun)>3,
+  if length(ixun)>10,
     stab_map_2(lpmat(ixun,:),alpha2, aunstname, OutputDirectoryName);
+  end
+  if length(iwrong)>10,
+    stab_map_2(lpmat(iwrong,:),alpha2, awrongname, OutputDirectoryName);
   end
 
   x0=0.5.*(bayestopt_.ub(1:nshock)-bayestopt_.lb(1:nshock))+bayestopt_.lb(1:nshock);

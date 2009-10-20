@@ -8,7 +8,7 @@ ntra   = opt_gsa.morris_ntra;
 itrans = opt_gsa.trans_ident;
 
 np = estim_params_.np;
-if opt_gsa.load_ident,
+if opt_gsa.load_ident_files,
   gsa_flag=0;
 else
   gsa_flag=-2;
@@ -17,7 +17,7 @@ end
 pnames = M_.param_names(estim_params_.param_vals(:,1),:);
 
 filetoload=[OutputDirectoryName '/' fname_ '_prior'];
-load(filetoload,'lpmat','lpmat0','istable','T','nspred','nboth','nfwrd')
+load(filetoload,'lpmat','lpmat0','istable','T','yys','nspred','nboth','nfwrd')
 if ~isempty(lpmat0),
   lpmatx=lpmat0(istable,:);
 else
@@ -29,26 +29,32 @@ npT = np+nshock;
 
 fname_ = M_.fname;
 
-if opt_gsa.load_ident==0,
+if opt_gsa.load_ident_files==0,
   % th moments
-    options_.ar = min(3,options_.ar);
+%     options_.ar = min(3,options_.ar);
 
+  mss = yys(bayestopt_.mfys,:);
+  mss = teff(mss(:,istable),Nsam,istable);
+  yys = teff(yys(oo_.dr.order_var,istable),Nsam,istable);
   [vdec, cc, ac] = mc_moments(T, lpmatx, oo_.dr);
 
 
   if opt_gsa.morris==2,
-   [pdraws, TAU, GAM] = dynare_identification(-[1:npT],[lpmatx lpmat(istable,:)]);
+   [pdraws, TAU, GAM] = dynare_identification(options_.options_ident,[lpmatx lpmat(istable,:)]);
     if max(max(abs(pdraws-[lpmatx lpmat(istable,:)])))==0,
-      disp('Sample check OK'),
+      disp(['Sample check OK ', num2str(max(max(abs(pdraws-[lpmatx lpmat(istable,:)]))))]),
       clear pdraws;
     end
-    for j=1:length(istable), gas(:,j)=[vech(cc(:,:,j)); vec(ac(:,:,j))];  end
-    if max(max(abs(GAM-gas)))<=1.e-8,
-      disp('Moments check OK'),
+%     for j=1:length(istable), gas(:,j)=[vech(cc(:,:,j)); vec(ac(:,:,j))];  end
+%     if ~isempty(mss),
+%     gas = [mss(istable,:)'; gas];
+%     end
+%     if max(max(abs(GAM-gas)))<=1.e-8,
+%       disp(['Moments check OK ',num2str(max(max(abs(GAM-gas))))]),
       clear GAM gas
-    end
+%     end
   end
-  if opt_gsa.morris~=1,
+  if opt_gsa.morris~=1 & M_.exo_nbr>1,
     ifig=0;
     for j=1:M_.exo_nbr,
       if mod(j,6)==1
@@ -132,26 +138,29 @@ if opt_gsa.load_ident==0,
 
 
   [yt, j0]=teff(A,Nsam,istable);
+  yt = [yys yt];
   if opt_gsa.morris==2,
-    iii=find(std(yt(istable,:))>1.e-8);
-  if max(max(abs(TAU-yt(istable,iii)')))<= 1.e-10,
-    disp('Model check OK'),
-    clear TAU A
-  end
+%     iii=find(std(yt(istable,:))>1.e-8);
+%     if max(max(abs(TAU-yt(istable,iii)')))<= 1.e-8,
+%       err = max(max(abs(TAU-yt(istable,iii)')));
+%       disp(['Model check OK ',num2str(err)]),
+      clear TAU A
+%     end
   else
-    clear A
+    clear A,
   end
   % [yt1, j01]=teff(T1,Nsam,istable);
   % [yt2, j02]=teff(T2,Nsam,istable);
   % [ytr, j0r]=teff(R,Nsam,istable);
   %
   % yt=[yt1 yt2 ytr];
-  save([OutputDirectoryName,'/',fname_,'_main_eff'],'ac','cc','vdec','yt')
+  save([OutputDirectoryName,'/',fname_,'_main_eff'],'ac','cc','vdec','yt','mss')
 else
   if opt_gsa.morris==2,
-   [pdraws, TAU, GAM] = dynare_identification([1:npT]); %,[lpmatx lpmat(istable,:)]);
+%    [pdraws, TAU, GAM] = dynare_identification([1:npT]); %,[lpmatx lpmat(istable,:)]);
+   [pdraws, TAU, GAM] = dynare_identification(options_.options_ident);
   end
-  load([OutputDirectoryName,'/',fname_,'_main_eff'],'ac','cc','vdec','yt')
+  load([OutputDirectoryName,'/',fname_,'_main_eff'],'ac','cc','vdec','yt','mss')
 end
 
 %   for j=1:nr,
@@ -169,7 +178,8 @@ end
 
 if opt_gsa.morris==1,
   %OutputDir = CheckPath('GSA/SCREEN');
-  if opt_gsa.load_ident==0,
+  if ~isempty(vdec),
+  if opt_gsa.load_ident_files==0,
   SAMorris = [];
   for i=1:size(vdec,2),
     [SAmeas, SAMorris(:,:,i)] = Morris_Measure_Groups(npT, [lpmat0 lpmat], vdec(:,i),nliv);
@@ -197,6 +207,10 @@ if opt_gsa.morris==1,
   eval(['print -depsc2 ' OutputDirectoryName '/' fname_ '_morris_vdec']);
   eval(['print -dpdf ' OutputDirectoryName '/' fname_ '_morris_vdec']);
   close(gcf)
+  else
+  save([OutputDirectoryName,'/',fname_,'_morris_IDE'],'vdec')
+    
+  end
 
 %   ifig = 0;
 %   for j=1:size(options_.varobs,1)
@@ -269,9 +283,9 @@ if opt_gsa.morris==1,
 %   end
 
 
-  if opt_gsa.load_ident==0,
+  if opt_gsa.load_ident_files==0,
   SAMorris = [];
-  ccac = [cc ac];
+  ccac = [mss cc ac];
   for i=1:size(ccac,2),
     [SAmeas, SAMorris(:,:,i)] = Morris_Measure_Groups(npT, [lpmat0 lpmat], [ccac(:,i)],nliv);
   end
@@ -306,7 +320,7 @@ if opt_gsa.morris==1,
 % MORRIS FOR DERIVATIVES  
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-% if opt_gsa.load_ident==0,
+% if opt_gsa.load_ident_files==0,
 %     for j=1:npT,
 %   SAMorris = [];
 %   ddd=NaN(size(lpmat,1),size(JJ,1));
@@ -377,7 +391,7 @@ if opt_gsa.morris==1,
 %   end
 
 
-%   if opt_gsa.load_ident==0,
+%   if opt_gsa.load_ident_files==0,
 %   SAMorris = [];
 %   for i=1:size(ac,2),
 %     [SAmeas, SAMorris(:,:,i)] = Morris_Measure_Groups(npT, [lpmat0 lpmat], ac(:,i),nliv);
@@ -441,7 +455,7 @@ if opt_gsa.morris==1,
 %     end
 %   end
 
-%   if opt_gsa.load_ident==0,
+%   if opt_gsa.load_ident_files==0,
 %   js=0;
 %   %for j=1:size(tadj,1),
 %   SAMorris = [];
@@ -459,7 +473,7 @@ if opt_gsa.morris==1,
 %   else
 %     load([OutputDirectoryName,'/',fname_,'_morris_IDE'],'SAtadj','tadj','ir_tadj','ic_tadj')
 %   end
-%   if opt_gsa.load_ident==0,
+%   if opt_gsa.load_ident_files==0,
 %   js=0;
 %   SAMorris = [];
 %   for i=1:size(iff,2),
@@ -653,7 +667,7 @@ if opt_gsa.morris==1,
 %   end
 
 
-  if opt_gsa.load_ident==0,
+  if opt_gsa.load_ident_files==0,
   SAMorris = [];
   for j=1:j0,
     [SAmeas, SAMorris(:,:,j)] = Morris_Measure_Groups(npT, [lpmat0 lpmat], yt(:,j),nliv);
@@ -799,6 +813,7 @@ elseif opt_gsa.morris==3,
   figure, bar((idex_pcr.*ys_pcr)'./opt_gsa.Nsam), title('Parameters rank PCA')
   
 elseif opt_gsa.morris==2,   % ISKREV staff
+  return,
 
   
 else,  % main effects analysis
@@ -818,9 +833,9 @@ else,  % main effects analysis
   nest=min(250,nrun);
   nfit=min(1000,nrun);
   
-%   opt_gsa.load_ident=0;
+%   opt_gsa.load_ident_files=0;
   
-%   if opt_gsa.load_ident==0,
+%   if opt_gsa.load_ident_files==0,
 %   try 
 %     EET=load([OutputDirectoryName,'/SCREEN/',fname_,'_morris_IDE'],'SAvdec','vdec','ir_vdec','ic_vdec');
 %   catch
@@ -947,13 +962,13 @@ else,  % main effects analysis
 %     end
 %   end
 
-  if opt_gsa.load_ident==0,
+  if opt_gsa.load_ident_files==0,
   try 
     EET=load([OutputDirectoryName,'/SCREEN/',fname_,'_morris_IDE'],'SAcc','ir_cc','ic_cc');
   catch
     EET=[];
   end
-  ccac = stand_([cc ac]);
+  ccac = stand_([mss cc ac]);
   [pcc, dd] = eig(cov(ccac(istable,:)));
   [latent, isort] = sort(-diag(dd));
   latent = -latent;
@@ -1057,7 +1072,7 @@ else,  % main effects analysis
 %     end
 %   end
 % 
-%   if opt_gsa.load_ident==0,
+%   if opt_gsa.load_ident_files==0,
 %   try 
 %     EET=load([OutputDirectoryName,'/SCREEN/',fname_,'_morris_IDE'],'SAac','ir_ac','ic_ac');
 %   catch
@@ -1151,7 +1166,7 @@ else,  % main effects analysis
 %   x0=x0(:,nshock+1:end);
   imap=[1:npT];
 
-%   if opt_gsa.load_ident==0,
+%   if opt_gsa.load_ident_files==0,
 %   try 
 %     EET=load([OutputDirectoryName,'/SCREEN/',fname_,'_morris_IDE'],'SAtadj','ir_tadj','ic_tadj');
 %     ny=size(EET.SAtadj,1);
@@ -1286,7 +1301,7 @@ else,  % main effects analysis
 %   end
 % 
 % 
-%   if opt_gsa.load_ident==0,
+%   if opt_gsa.load_ident_files==0,
 %   try 
 %     EET=load([OutputDirectoryName,'/SCREEN/',fname_,'_morris_IDE'],'SAIF','ir_if','ic_if');
 %   catch
@@ -1512,3 +1527,5 @@ else,  % main effects analysis
 %   eval(['print -depsc2 ' OutputDirectoryName '/' fname_ '_ident_SHOCKS',fsuffix]);
 %   eval(['print -dpdf ' OutputDirectoryName '/' fname_ '_ident_SHOCKS',fsuffix]);
 end
+
+return

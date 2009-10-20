@@ -76,7 +76,7 @@ if options_gsa_.prior_range,
   pd =  [NaN(np,1) NaN(np,1) bayestopt_.lb(offset+1:end) bayestopt_.ub(offset+1:end)];
 else
   pshape = bayestopt_.pshape(offset+1:end);
-  pd =  [bayestopt_.p1(offset+1:end) bayestopt_.p2(offset+1:end) bayestopt_.p3(offset+1:end) bayestopt_.p4(offset+1:end)];
+  pd =  [bayestopt_.p6(offset+1:end) bayestopt_.p7(offset+1:end) bayestopt_.p3(offset+1:end) bayestopt_.p4(offset+1:end)];
 end
 
 nsok = length(find(M_.lead_lag_incidence(M_.maximum_lag,:)));
@@ -281,6 +281,7 @@ global bayestopt_ options_
 
 opt_gsa=options_.opt_gsa;
 np=size(x0,2);
+x00=x0;
   if opt_gsa.prior_range,
     for j=1:np,
       x0(:,j)=(x0(:,j)-pd(j,3))./(pd(j,4)-pd(j,3));
@@ -303,12 +304,17 @@ if iload==0,
   nrun=length(y0);
   nest=min(250,nrun);
   nfit=min(1000,nrun);
-  dotheplots = (nfit<=nest);
-  gsa_ = gsa_sdp(y0(1:nest), x0(1:nest,:), 2, [],[],[],dotheplots,[fname,'_est'], pnames);
+%   dotheplots = (nfit<=nest);
+  gsa_ = gsa_sdp(y0(1:nest), x0(1:nest,:), 2, [],[-1 -1 -1 -1 -1 0],[],0,[fname,'_est'], pnames);
   if nfit>nest,
-    gsa_ = gsa_sdp(y0(1:nfit), x0(1:nfit,:), -2, gsa_.nvr*nest^3/nfit^3,[],[],1,fname, pnames);
+    gsa_ = gsa_sdp(y0(1:nfit), x0(1:nfit,:), -2, gsa_.nvr*nest^3/nfit^3,[-1 -1 -1 -1 -1 0],[],0,fname, pnames);
   end
   save([fname,'.mat'],'gsa_')
+  [sidum, iii]=sort(-gsa_.si);
+  gsa_.x0=x00;
+  hfig=gsa_sdp_plot(gsa_,fname,pnames,iii(1:min(12,np)));
+  close(hfig);
+  gsa_.x0=x0;
 %   copyfile([fname,'_est.mat'],[fname,'.mat'])
   figure, 
   plot(y0(1:nfit),[gsa_.fit y0(1:nfit)],'.'), 

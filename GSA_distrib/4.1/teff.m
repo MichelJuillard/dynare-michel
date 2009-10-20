@@ -18,6 +18,8 @@ function [yt, j0, ir, ic]=teff(T,Nsam,istable)
 % M. Ratto, Global Sensitivity Analysis for Macroeconomic models, MIMEO, 2006.
 %
 
+ndim = (length(size(T)));
+if ndim==3,
 if nargin==1,
   Nsam=size(T,3);
   istable = [1:Nsam]';
@@ -34,5 +36,16 @@ for j=1:j0,
   y1=ones(Nsam,1)*NaN;
   y1(istable,1)=y0;
   yt(:,j)=y1;
+end
+
+else
+tmax=max(T,[],2);
+tmin=min(T,[],2);
+ir=(find( (tmax-tmin)>1.e-8));
+j0 = length(ir);
+yt=NaN(Nsam, j0);
+yt(istable,:)=T(ir,:)';
+
+  
 end
 %clear y0 y1;

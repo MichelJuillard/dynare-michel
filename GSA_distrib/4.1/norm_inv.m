@@ -29,7 +29,12 @@ function invp = norm_inv(x, m, sd)
   end
 
 
-
+ if length(m)==1,
+   m = repmat(m,1,s);
+ end
+ if length(sd)==1,
+   sd = repmat(sd,1,s);
+ end
   x = reshape(x,1,s);
   m = reshape(m,1,s);
   sd = reshape(sd,1,s);
