@@ -32,13 +32,13 @@ global M_
 DirectoryName = [ M_.dname '/' type ];
 
 if ~isdir(M_.dname)
-    % Make sure there isn't a file with the same name
+    % Make sure there isn't a file with the same name, see trac ticket #47
     delete(M_.dname)
     mkdir('.', M_.dname);
 end
 
 if ~isdir(DirectoryName)
-    % Make sure there isn't a file with the same name
-    delete(M_.dname)
+    % Make sure there isn't a file with the same name, see trac ticket #47
+    delete(DirectoryName)
     mkdir('.',DirectoryName);
 end
