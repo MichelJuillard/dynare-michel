@@ -1,4 +1,4 @@
-function [pdraws, TAU, GAM, H, JJ] = dynare_identification(iload, pdraws0)
+function [pdraws, TAU, GAM, H, JJ] = dynare_identification(options_ident, pdraws0)
 
 % main 
 %
@@ -21,9 +21,21 @@ function [pdraws, TAU, GAM, H, JJ] = dynare_identification(iload, pdraws0)
 
 global M_ options_ oo_ bayestopt_ estim_params_
 
-if nargin==0 | isempty(iload),
-  iload=0;
-end
+  options_ident = set_default_option(options_ident,'load_ident_files',0);
+  options_ident = set_default_option(options_ident,'useautocorr',1);
+  options_ident = set_default_option(options_ident,'ar',3);
+  options_ident = set_default_option(options_ident,'prior_mc',2000);
+  if nargin==2,
+    options_ident.prior_mc=size(pdraws0,1);
+  end
+
+  iload = options_ident.load_ident_files;
+  nlags = options_ident.ar;
+  useautocorr = options_ident.useautocorr;
+  options_.ar=nlags;
+  options_.prior_mc = options_ident.prior_mc;
+  options_.options_ident = options_ident;
+
 
 options_ = set_default_option(options_,'datafile',[]);
 options_.mode_compute = 0;
@@ -31,13 +43,8 @@ options_.mode_compute = 0;
 % computes a first linear solution to set up various variables
 
 
-if nargin==2,
-options_.prior_mc=size(pdraws0,1);
-else
-options_.prior_mc=2000;
-end
 
-SampleSize = options_.prior_mc;
+SampleSize = options_ident.prior_mc;
 
 % results = prior_sampler(0,M_,bayestopt_,options_,oo_);
 
@@ -55,10 +62,8 @@ indexo=[];
 if ~isempty(estim_params_.var_exo)
   indexo = estim_params_.var_exo(:,1);
 end
-useautocorr = 1;
-nlags = 3;
+
 nparam = length(bayestopt_.name);
-    options_.ar=nlags;
 
 MaxNumberOfBytes=options_.MaxNumberOfBytes;
            
@@ -194,8 +199,9 @@ save([IdentifDirectoryName '/' M_.fname '_identif'], 'pdraws', 'idemodel', 'idem
 else
 load([IdentifDirectoryName '/' M_.fname '_identif'], 'pdraws', 'idemodel', 'idemoments', ...
   'siHmean', 'siJmean', 'TAU', 'GAM')
-options_.prior_mc=size(pdraws,1);
-SampleSize = options_.prior_mc;
+options_ident.prior_mc=size(pdraws,1);
+SampleSize = options_ident.prior_mc;
+  options_.options_ident = options_ident;
 
 end  
 
