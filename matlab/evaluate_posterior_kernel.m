@@ -36,7 +36,6 @@ function lpkern = evaluate_posterior_kernel(parameters,llik)
   
     [ldens,parameters] = evaluate_prior(parameters);
     if nargin==1
-        clear('priordens')% Persistent variables in priordens have to be cleared!
         llik = evaluate_likelihood(parameters);
     end
     lpkern = ldens+llik;
