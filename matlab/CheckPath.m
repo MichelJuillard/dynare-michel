@@ -32,15 +32,13 @@ global M_
 DirectoryName = [ M_.dname '/' type ];
 
 if ~isdir(M_.dname)
-    if exist(M_.dname, 'file')
-        error(['Can''t create subdirectory. You should erase the following file: ' M_.dname])
-    end
+    % Make sure there isn't a file with the same name
+    delete(M_.dname)
     mkdir('.', M_.dname);
 end
 
 if ~isdir(DirectoryName)
-    if exist(DirectoryName, 'file')
-        error(['Can''t create subdirectory. You should erase the following file: ' DirectoryName])
-    end
+    % Make sure there isn't a file with the same name
+    delete(M_.dname)
     mkdir('.',DirectoryName);
 end
