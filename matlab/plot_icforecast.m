@@ -1,4 +1,4 @@
-function plot_icforecast(Variables)
+function plot_icforecast(Variables,periods)
 % Build plots for the conditional forecasts.
 %
 % INPUTS 
@@ -29,27 +29,31 @@ function plot_icforecast(Variables)
 
 load conditional_forecasts;
 
+if nargin==1% Set default number of periods.
+    eval(['periods = length(forecasts.cond.mean.' Variables(1,:) ');']);
+end
+
 for i=1:size(Variables,1)
     eval(['ci1 = forecasts.cond.ci.' Variables(i,:) ';'])
     eval(['m1 = forecasts.cond.mean.' Variables(i,:) ';'])
     eval(['ci2 = forecasts.uncond.ci.' Variables(i,:) ';'])
     eval(['m2 = forecasts.uncond.mean.' Variables(i,:) ';'])
-    build_figure(Variables(i,:),ci1,ci2,m1,m2);
+    build_figure(Variables(i,:),ci1(:,1:periods),ci2(:,1:periods),m1(1:periods),m2(1:periods));
 end
 
-function build_figure(name,ci1,ci2,m1,m2)
+function build_figure(name,cci1,cci2,mm1,mm2)
     figure('Name',['Conditional forecast: ' name '.']);
-    H = length(m1);
-    h1 = area(1:H,ci1(2,1:H));
-    set(h1,'BaseValue',min([min(ci1(1,:)),min(ci2(1,:))]))
+    H = length(mm1);
+    h1 = area(1:H,cci1(2,1:H));
+    set(h1,'BaseValue',min([min(cci1(1,:)),min(cci2(1,:))]))
     set(h1,'FaceColor',[.9 .9 .9])
     hold on
-    h2 = area(1:H,ci1(1,1:H));
-    set(h2,'BaseValue',min([min(ci1(1,:)),min(ci2(1,:))]))
+    h2 = area(1:H,cci1(1,1:H));
+    set(h2,'BaseValue',min([min(cci1(1,:)),min(cci2(1,:))]))
     set(h2,'FaceColor',[1 1 1])
-    plot(1:H,m1,'-k','linewidth',3)
-    plot(1:H,m2,'--k','linewidth',3)
-    plot(1:H,ci2(1,:),'--k','linewidth',1)
-    plot(1:H,ci2(2,:),'--k','linewidth',1)
+    plot(1:H,mm1,'-k','linewidth',3)
+    plot(1:H,mm2,'--k','linewidth',3)
+    plot(1:H,cci2(1,:),'--k','linewidth',1)
+    plot(1:H,cci2(2,:),'--k','linewidth',1)
     axis tight
     hold off

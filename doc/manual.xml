@@ -2860,10 +2860,10 @@ forecast;
   <refmeta>
     <refentrytitle>conditional_forecast</refentrytitle>
   </refmeta>
-
+  
   <refnamediv>
     <refname>conditional_forecast</refname>
-    <refpurpose>computes a simulation of a stochastic model conditionally to a specified future path for some endogenous</refpurpose>
+    <refpurpose>computes a simulation of a stochastic model conditionally to a specified future path for some endogenous variables.</refpurpose>
   </refnamediv>
 
   <refsynopsisdiv>
@@ -2878,30 +2878,34 @@ forecast;
 <refsect1><title>Options</title>
 <variablelist>
   <varlistentry>
-    <term><option>parameter_set</option> = <option>calibration</option> | <option>prior_mode</option> | <option>prior_mean</option> | <option>posterior_mode</option> | <option>posterior_mean</option> | <option>posterior_median</option></term>
-    <listitem><para>Specify the parameter set to use for the forecasting. Use <option>calibration</option> if you calibrated your model instead of estimating it. No default value, mandatory option</para></listitem>
+    <term><option>parameter_set</option> = <option>prior_mode</option> | <option>prior_mean</option> | <option>posterior_mode</option> | 
+    <option>posterior_mean</option> | <option>posterior_median</option></term>
+    <listitem><para>Specify the parameter set to use for the forecasting. No default value,  mandatory option.</para></listitem>
   </varlistentry>
   <varlistentry>
     <term><option>controlled_varexo</option> = (<replaceable>VARIABLE_NAME</replaceable> [ [,] <replaceable>VARIABLE_NAME</replaceable> ... ] )</term>
-    <listitem><para>Specify the exogenous variables to use as control variables. No default value, mandatory option</para></listitem>
+    <listitem><para>Specify the exogenous variables to use as control variables. No default value, mandatory option.</para></listitem>
   </varlistentry>
   <varlistentry>
     <term><option>periods</option> = <replaceable>INTEGER</replaceable></term>
-    <listitem><para>Number of periods of the forecast. Default: as many as the length of the constrained path</para></listitem>
+    <listitem><para>Number of periods of the forecast. Default: <literal>40</literal>. 
+    <option>periods</option> cannot be less than the number of constrained periods. </para></listitem>
   </varlistentry>
   <varlistentry>
     <term><option>replic</option> = <replaceable>INTEGER</replaceable></term>
-    <listitem><para>Number of simulations. Default: ????</para></listitem>
+    <listitem><para>Number of simulations. Default: <literal>5000</literal>.</para></listitem>
   </varlistentry>
   <varlistentry>
     <term><option>conf_sig</option> = <replaceable>DOUBLE</replaceable></term>
-    <listitem><para>Level of significance for confidence interval. Default: <literal>0.90</literal></para></listitem>
+    <listitem><para>Level of significance for confidence interval. Default: <literal>0.80</literal></para></listitem>
   </varlistentry>
 </variablelist>
 </refsect1>
 
 <refsect1><title>Description</title>
-<para><command>conditional_forecast</command> computes forecasts on a calibrated or estimated model for a given constrained path of some future endogenous variables. This is done, from the reduced form representation of the DSGE model, by finding the structural shocks that are needed to match the restricted paths.</para>
+<para><command>conditional_forecast</command> computes forecasts on an estimated model for a given constrained path of some 
+future endogenous variables. This is done, from the reduced form representation of the DSGE model, by finding the structural shocks that 
+are needed to match the restricted paths. This command has to be called after estimation.</para>
 
 <para>Use <xref linkend="conditional_forecast_paths" /> to give the list of constrained endogenous, and their constrained future path. Option <option>controlled_varexo</option> is used to specify the structural shocks which will be matched to generate the constrained path.</para>
 
@@ -2917,7 +2921,7 @@ varexo e u;
 
 ...
 
-stoch_simul(irf=0);
+estimation(...);
 
 conditional_forecast_paths;
 var y;
@@ -2984,7 +2988,8 @@ plot_conditional_forecast(periods = 10) e u;
 <variablelist>
   <varlistentry>
     <term><option>periods</option> = <replaceable>INTEGER</replaceable></term>
-    <listitem><para>Number of periods to be plotted. Default: as many as the length of the forecast</para></listitem>
+    <listitem><para>Number of periods to be plotted. Default: equal to <option>periods</option> in <command>conditional_forecast</command>. The number of periods 
+    declared in <command>plot_conditional_forecast</command> cannot be greater than the one declared in <command>conditional_forecast</command>.</para></listitem>
   </varlistentry>
 </variablelist>
 </refsect1>

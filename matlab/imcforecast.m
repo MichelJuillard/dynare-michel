@@ -77,15 +77,15 @@ else
     end
 end
 
-if isfield(options_cond_fcst,'replic') || isempty(options_cond_fcst.replic)
+if ~isfield(options_cond_fcst,'replic') || isempty(options_cond_fcst.replic)
     options_cond_fcst.replic = 5000;
 end
 
-if isfield(options_cond_fcst,'periods') || isempty(options_cond_fcst.periods)
-    options_cond_fcst.replic = 40;
+if ~isfield(options_cond_fcst,'periods') || isempty(options_cond_fcst.periods)
+    options_cond_fcst.periods = 40;
 end
 
-if isfield(options_cond_fcst,'conf_sig') || isempty(options_cond_fcst.conf_sig)
+if ~isfield(options_cond_fcst,'conf_sig') || isempty(options_cond_fcst.conf_sig)
     options_cond_fcst.conf_sig = .8;
 end
 
