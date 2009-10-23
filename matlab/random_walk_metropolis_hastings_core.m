@@ -82,7 +82,11 @@ for b = fblck:nblck,
     while j <= nruns(b)
     par = feval(ProposalFun, ix2(b,:), d * jscale, n);
         if all( par(:) > mh_bounds(:,1) ) & all( par(:) < mh_bounds(:,2) )
+            try
                 logpost = - feval(TargetFun, par(:),varargin{:});               
+            catch
+                logpost = -inf;
+            end
         else
             logpost = -inf;
         end
