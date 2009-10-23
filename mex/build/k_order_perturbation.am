@@ -1,8 +1,8 @@
-vpath %.cpp $(top_srcdir)/../../sources/korderpert $(top_srcdir)/../../../dynare++/sylv/cc $(top_srcdir)/../../../dynare++/tl/cc $(top_srcdir)/../../../dynare++/kord $(top_srcdir)/../../../dynare++/integ/cc $(top_srcdir)/../../../dynare++/src
+vpath %.cpp $(top_srcdir)/../../sources/k_order_perturbation $(top_srcdir)/../../../dynare++/sylv/cc $(top_srcdir)/../../../dynare++/tl/cc $(top_srcdir)/../../../dynare++/kord $(top_srcdir)/../../../dynare++/integ/cc $(top_srcdir)/../../../dynare++/src
 
-noinst_PROGRAMS = korderpert
+noinst_PROGRAMS = k_order_perturbation
 
-# Can't use korderpert_CPPFLAGS, because it interacts badly with VPATH
+# Can't use k_order_perturbation_CPPFLAGS, because it interacts badly with VPATH
 CPPFLAGS += -I$(top_srcdir)/../../../dynare++/src -I$(top_srcdir)/../../../dynare++/kord -I$(top_srcdir)/../../../dynare++/tl/cc -I$(top_srcdir)/../../../dynare++/utils/cc -I$(top_srcdir)/../../../dynare++/sylv/cc -I$(top_srcdir)/../../../dynare++/integ/cc -I$(top_srcdir)/../../sources
 
 CXXFLAGS += $(PTHREAD_CFLAGS)
@@ -72,7 +72,7 @@ INTEG_SRCS = \
 	smolyak.cpp \
 	vector_function.cpp
 
-nodist_korderpert_SOURCES = \
+nodist_k_order_perturbation_SOURCES = \
 	k_order_perturbation.cpp \
 	k_ord_dynare.cpp \
 	k_ord_dynare.h \

@@ -35,7 +35,7 @@ AC_PROG_CC
 AC_PROG_CXX
 AX_PROG_LN_S
 AX_PTHREAD
-# Check for dlopen(), needed by korderpert DLL
+# Check for dlopen(), needed by k_order_perturbation DLL
 AC_CHECK_LIB([dl], [dlopen], [LIBADD_DLOPEN="-ldl"], [])
 AC_SUBST([LIBADD_DLOPEN])
 
@@ -65,6 +65,6 @@ AC_CONFIG_FILES([Makefile
                  kronecker/Makefile
                  gensylv/Makefile
                  bytecode/Makefile
-                 korderpert/Makefile])
+                 k_order_perturbation/Makefile])
 
 AC_OUTPUT
