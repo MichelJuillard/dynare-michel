@@ -39,6 +39,7 @@ function global_initialization()
   options_.slowc = 1;
   options_.timing = 0;
   options_.gstep = 1e-2;
+  options_.scalv = 1;
   options_.debug = 0;
   options_.initval_file = 0;
   options_.Schur_vec_tol = 1e-11; % used to find nonstationary variables

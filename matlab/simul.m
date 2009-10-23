@@ -38,13 +38,6 @@ if size(M_.lead_lag_incidence,2)-nnz(M_.lead_lag_incidence(M_.maximum_endo_lag+1
   error (mess) ;
 end
 
-options_ = set_default_option(options_,'simul_algo',0);
-options_ = set_default_option(options_,'dynatol',0.00001);
-options_ = set_default_option(options_,'maxit',10);
-options_ = set_default_option(options_,'slowc',1);
-options_ = set_default_option(options_,'timing',0);
-options_ = set_default_option(options_,'gstep',1e-2);
-options_ = set_default_option(options_,'scalv',1);
 if ~isfield(options_,'periods') & ~isempty(options_.periods)
   options_.periods = options_.periods
 end
