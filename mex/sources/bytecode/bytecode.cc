@@ -1,4 +1,4 @@
-/*
+ /*
  * Copyright (C) 2007-2008 Dynare Team
  *
  * This file is part of Dynare.
@@ -76,6 +76,7 @@ main( int argc, const char* argv[] )
   int i, row_y, col_y, row_x, col_x;
   double *yd, *xd;
   double *direction;
+  int minimal_solving_periods;
 
   string file_name(argv[1]);
 
@@ -108,6 +109,7 @@ main( int argc, const char* argv[] )
   double markowitz_c = f_tmp;
   fscanf(fid,"%f",&f_tmp);
   double solve_tolf = f_tmp;
+  fscanf(fid,"%d",&minimal_solving_periods);
   fclose(fid);
 
   tmp_out.str("");
@@ -124,6 +126,12 @@ main( int argc, const char* argv[] )
   fscanf(fid,"%d",&col_x);
   fscanf(fid,"%d",&row_y);
   fscanf(fid,"%d",&col_y);
+  int steady_row_y, steady_col_y;
+  int steady_row_x, steady_col_x;
+  fscanf(fid,"%d",&steady_row_y);
+  fscanf(fid,"%d",&steady_col_y);
+  fscanf(fid,"%d",&steady_row_x);
+  fscanf(fid,"%d",&steady_col_x);
   int nb_row_xd;
   fscanf(fid,"%d",&nb_row_xd);
   double * params = (double*)malloc(nb_params*sizeof(params[0]));
@@ -148,6 +156,19 @@ main( int argc, const char* argv[] )
       fscanf(fid,"%f",&f_tmp);
       xd[i] = f_tmp;
     }
+  double *steady_yd, *steady_xd;
+  steady_yd = (double*)malloc(steady_row_y*steady_col_y*sizeof(steady_yd[0]));
+  steady_xd = (double*)malloc(steady_row_x*steady_col_x*sizeof(steady_xd[0]));
+  for(i=0; i < steady_row_y*steady_col_y; i++)
+    {
+      fscanf(fid,"%f",&f_tmp);
+      steady_yd[i] = f_tmp;
+    }
+  for(i=0; i < steady_row_x*steady_col_x; i++)
+    {
+      fscanf(fid,"%f",&f_tmp);
+      steady_xd[i] = f_tmp;
+    }
   fclose(fid);
 
   int size_of_direction=col_y*row_y*sizeof(double);
@@ -166,7 +187,9 @@ main( int argc, const char* argv[] )
   int y_size=row_y;
   int nb_row_x=row_x;
   clock_t t0= clock();
-  Interpreter interprete(params, y, ya, x, direction, y_size, nb_row_x, nb_row_xd, periods, y_kmin, y_kmax, maxit_, solve_tolf, size_of_direction, slowc, y_decal, markowitz_c, file_name);
+
+  Interpreter interprete(  params, y, ya, x, steady_yd, steady_xd, direction, y_size, nb_row_x, nb_row_xd, periods, y_kmin, y_kmax, maxit_, solve_tolf, size_of_direction, slowc, y_decal, markowitz_c, file_name, minimal_solving_periods);
+
   string f(file_name);
   interprete.compute_blocks(f, f, steady_state, evaluate);
   clock_t t1= clock();

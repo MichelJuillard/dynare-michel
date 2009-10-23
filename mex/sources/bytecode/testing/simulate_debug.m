@@ -6,6 +6,7 @@ global M_ oo_ options_;
      fprintf(fid,'%6.20f\n',options_.slowc);
      fprintf(fid,'%6.20f\n',options_.markowitz);
      fprintf(fid,'%6.20f\n',options_.dynatol);
+     fprintf(fid,'%d\n',options_.minimal_solving_periods);
      fclose(fid);
      
      fid = fopen([M_.fname '_M.txt'],'wt');
@@ -18,11 +19,19 @@ global M_ oo_ options_;
      fprintf(fid,'%d\n',M_.endo_nbr);
      fprintf(fid,'%d\n',size(oo_.endo_simul, 2));
      fprintf(fid,'%d\n',M_.exo_det_nbr);
+     
+     fprintf(fid,'%d\n',size(oo_.steady_state,1));
+     fprintf(fid,'%d\n',size(oo_.steady_state,2));
+     fprintf(fid,'%d\n',size(oo_.exo_steady_state,1));
+     fprintf(fid,'%d\n',size(oo_.exo_steady_state,2));
+     
      fprintf(fid,'%6.20f\n',M_.params);
 
      fclose(fid);
      fid = fopen([M_.fname '_oo.txt'],'wt');
      fprintf(fid,'%6.20f\n',oo_.endo_simul);
      fprintf(fid,'%6.20f\n',oo_.exo_simul);
+     fprintf(fid,'%6.20f\n',oo_.steady_state);
+     fprintf(fid,'%6.20f\n',oo_.exo_steady_state);
      fclose(fid);
      

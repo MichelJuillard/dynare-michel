@@ -160,7 +160,11 @@ Interpreter::compute_block_time(int Per_u_, bool evaluate, int block_num) /*thro
                   if(evaluate)
                     Stack.push(ya[(it_+lag)*y_size+var]);
                   else
+                    {
+                    /*mexPrintf(" y[%d, %d]=",(it_+lag)*y_size, var );
+                    mexPrintf("%f\n",y[(it_+lag)*y_size+var]);*/
                     Stack.push(y[(it_+lag)*y_size+var]);
+                    }
 #ifdef DEBUG
                   tmp_out << " y[" << it_+lag << ", " << var << "](" << y[(it_+lag)*y_size+var] << ")";
 #endif
@@ -1462,7 +1466,7 @@ Interpreter::compute_blocks(string file_name, string bin_basename, bool steady_s
               else
                 result = simulate_a_block(fb->get_size(), fb->get_type(), file_name, bin_basename,true, steady_state, Block_Count,
                                         fb->get_is_linear(), fb->get_endo_nbr(), fb->get_Max_Lag(), fb->get_Max_Lead(), fb->get_u_count_int());
-              mxFree(fb);
+              delete fb;
             }
             if(!result)
               go_on = false;
