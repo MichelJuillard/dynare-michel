@@ -58,7 +58,8 @@ function make_y_
           y0 = oo_.endo_simul(:,1:M_.maximum_lag);
           oo_.endo_simul=simult_(y0,dr,exogenous_variables,1);
           options_ = oldopt;
-        case 2% Homotopic mod
-              % Leave endo_simul as it is.
+        case 2% Homotopic mod: Leave endo_simul as it is.
+       otherwise
+          error('Unknown method.')
       end
   end
