@@ -6,6 +6,9 @@
 #define GENERAL_MATRIX_H
 
 #include "Vector.h"
+#include <vector>
+using namespace std;
+vector<int>nullVec(0);
 
 class GeneralMatrix;
 
@@ -98,7 +101,16 @@ public:
     /* this = a'*b */
     GeneralMatrix(const GeneralMatrix& a, const char* dum1,
 				  const GeneralMatrix& b, const char* dum2);
-    
+
+    /* generate new matrix b as subset or whole of matrix a but 
+    reordered by vrows and vcols as Matlab b=a(vrows,vcols) 
+    ignores non-positive elements and passing zero length vector is equivalent to 
+    Matlab operator ":" = all elements of that dimension in its order */
+
+    GeneralMatrix(const GeneralMatrix& a, const vector<int>& vrows, const vector<int>& vcols);
+    GeneralMatrix(const ConstGeneralMatrix& a, const vector<int> &vrows, const vector<int> &vcols)
+      {GeneralMatrix(GeneralMatrix(a), vrows, vcols);};
+
     virtual ~GeneralMatrix();
     const GeneralMatrix& operator=(const GeneralMatrix& m)
      { 
@@ -114,6 +126,9 @@ public:
       return *this;
       }
    
+    /* emulate Matlab repmat: new matrix = multv*multh*this */
+    GeneralMatrix& repmat(int multv, int multh);
+
     const double& get(int i, int j) const
       {return data[j*ld+i];}
     double& get(int i, int j)
@@ -194,6 +209,12 @@ public:
     void multLeftTrans(const GeneralMatrix& m)
       {multLeftTrans(ConstGeneralMatrix(m));}
 
+    /* Matlab element product: this = this .*m */
+    void multElements(const GeneralMatrix& m);
+    void multElements(const ConstGeneralMatrix& m)
+      {multElements(GeneralMatrix(m));}
+
+
     /* this = this * m^(-1)  */
     void multInvRight(GeneralMatrix&m);
     
@@ -260,6 +281,34 @@ public:
     
     virtual void print() const
       {ConstGeneralMatrix(*this).print();}
+
+    void copyColumns(const GeneralMatrix& m, int istart, int iend, int ito);
+    void copyColumns(const ConstGeneralMatrix& m, int istart, int iend, int ito)
+      {copyColumns(GeneralMatrix( m), istart, iend, ito);};
+
+
+    /* emulates Matlab command A(a,b)=B(c,d) where a,b,c,d are Matlab index vectors starting from 1 or ":") */
+    static void AssignByVectors(GeneralMatrix& a, const vector<int>& vToRows, const vector<int>& vToCols
+      , const GeneralMatrix& b, const vector<int>& vrows, const vector<int>& vcols);
+    static void AssignByVectors(GeneralMatrix& a, const vector<int>& vToRows, const vector<int>& vToCols
+      , const ConstGeneralMatrix& b, const vector<int> &vrows, const vector<int> &vcols)
+      {AssignByVectors(a, vToRows, vToCols, GeneralMatrix(b), vrows, vcols);};
+    void AssignByVectors(const vector<int>& vToRows, const vector<int>& vToCols
+      , const GeneralMatrix& b, const vector<int>& vrows, const vector<int>& vcols)
+      {AssignByVectors( *this, vToRows, vToCols, b, vrows, vcols);};
+    void AssignByVectors( const vector<int>& vToRows, const vector<int>& vToCols
+      , const ConstGeneralMatrix& b, const vector<int> &vrows, const vector<int> &vcols)
+      {AssignByVectors(*this, vToRows, vToCols, GeneralMatrix(b), vrows, vcols);};
+    void AssignByVectors( const GeneralMatrix& b, const vector<int>& vrows, const vector<int>& vcols)
+      {AssignByVectors( *this, nullVec, nullVec, b, vrows, vcols);};
+    void AssignByVectors( const ConstGeneralMatrix& b, const vector<int> &vrows, const vector<int> &vcols)
+      {AssignByVectors(*this, nullVec, nullVec, GeneralMatrix(b), vrows, vcols);};
+    void AssignByVectors(const vector<int>& vToRows, const vector<int>& vToCols, const GeneralMatrix& b)
+      {AssignByVectors( *this, vToRows, vToCols, b, nullVec, nullVec);};
+    void AssignByVectors( const vector<int>& vToRows, const vector<int>& vToCols, const ConstGeneralMatrix& b)
+      {AssignByVectors(*this, vToRows, vToCols, GeneralMatrix(b), nullVec, nullVec);};
+
+
 private:
   void copy(const ConstGeneralMatrix& m, int ioff , int joff );
   void copy(const GeneralMatrix& m, int ioff , int joff )

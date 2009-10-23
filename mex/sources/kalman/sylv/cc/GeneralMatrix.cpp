@@ -81,12 +81,106 @@ GeneralMatrix::GeneralMatrix(const GeneralMatrix& a, const char* dum1,
   gemm("T", a, "T", b, 1.0, 0.0);
   }
 
+/* generate new matrix b as subset or whole of matrix a but reordered by 
+vrows and vcols as Matlab b=a(vrows,vcols) where vectors vrows and vcols start from 1.
+It ignores non-positive elements passing zero length vector is equivalent 
+to Matlab operator ":" = all elements of that dimension in its order */
+GeneralMatrix::GeneralMatrix(const GeneralMatrix& a, const vector<int>&vrows, const vector<int>&vcols)
+  {
+  int nrows, ncols;
+  if (vrows.size()==0 && vcols.size()==0)
+    {
+    *this=a;
+    return;
+    }
+  else
+    {
+    if (vrows.size()==0)
+      nrows=a.numRows();
+    else
+      {
+      for (int i=0;i<vrows.size();++i)
+        {
+        if (vrows[i]>0) 
+          nrows++;
+        else 
+          throw SYLV_MES_EXCEPTION("Non-positive indices in construction by vector.");
+        }
+      }
+    if (nrows>a.numRows())
+      throw SYLV_MES_EXCEPTION("Wrong dimensions for construction by vector.");
+
+    if (vcols.size()==0)
+      ncols=a.numCols();
+    else
+      {
+      for (int i=0;i<vcols.size();++i)
+        {
+        if (vcols[i]>0) 
+          ncols++;
+        else 
+          throw SYLV_MES_EXCEPTION("Non-positive indices in construction by vector.");
+        }
+      }
+    if (ncols>a.numCols())
+      throw SYLV_MES_EXCEPTION("Wrong dimensions for construction by vector.");
+
+    data= *(new Vector(nrows*ncols));
+    rows=nrows; 
+    cols=ncols;
+    if(nrows*ncols==0) return;
+
+    for (int i=0;i<nrows;++i)
+      {
+      for (int j=0;j<nrows;++j)
+        if (vrows.size()!=0 && vcols.size()!=0)
+          {
+          if (vrows[i]>0 && vcols[j]  >0)
+            get(i,j)=a.get(vrows[i]-1, vcols[j]-1);
+          }
+        else if (vrows.size()!=0 && vcols.size()==0)
+          {
+          if (vrows[i]>0 )
+            get(i,j)=a.get(vrows[i]-1, j);
+          }
+        else if (vrows.size()==0 && vcols.size()!=0)
+          {
+          if (vcols[j] >0)
+            get(i,j)=a.get(i, vcols[j]-1);
+          }
+      }
+    }
+  }
+
 
 
 GeneralMatrix::~GeneralMatrix()
   {
   }
 
+
+/* Matlab element product: this = this .*m */
+void 
+GeneralMatrix::multElements(const GeneralMatrix& m)
+  {
+  if(cols!=m.numCols() || rows!=m.numRows())
+     throw SYLV_MES_EXCEPTION("multiply Element porduct: matrices must be same dimension.");
+  for (int i=0;i<cols;++i)
+    for (int j=0;j<rows;++j)
+      get(i,j)*=m.get(i,j);
+  };
+
+
+/* emulates Matlab repmat: new matrix = multv*multh*this */
+GeneralMatrix& 
+GeneralMatrix::repmat(int multv, int multh)
+  {
+  GeneralMatrix repMat=*(new GeneralMatrix ( multv*rows,  multh*cols));
+  for (int i=0;i<multv;++i)
+    for (int j=0;j<multh;++j)
+      repMat.place(*this, multv*i,  multh*j);
+    return repMat;
+  };
 
 
 void GeneralMatrix::place(const ConstGeneralMatrix& m, int i, int j)
@@ -357,6 +451,141 @@ GeneralMatrix::copy(const GeneralMatrix& m)
   {
   memcpy(data.base(),m.getData().base(),m.numCols()*m.numRows()*sizeof(double));
   };
+
+void 
+GeneralMatrix::copyColumns(const GeneralMatrix& m, int istart, int iend, int ito)
+  {
+  if ((rows!=m.numRows())|| istart<iend|| istart> m.numCols()-1 || iend> m.numCols()-1
+    || ito> cols-1 )
+    throw SYLV_MES_EXCEPTION("Wrong dimensions for copying matrix columns.");
+
+  memcpy(data.base()+ito*rows*sizeof(double)
+    ,m.getData().base()+istart*rows*sizeof(double)
+    ,(iend-istart+1)*rows*sizeof(double));
+  };
+
+
+
+/* emulates Matlab command A(a,b)=B(c,d) where a,b,c,d are vectors or ":")*/
+void 
+GeneralMatrix::AssignByVectors(GeneralMatrix& a, const vector<int>& vToRows, const vector<int>& vToCols
+      , const GeneralMatrix& b, const vector<int>& vrows, const vector<int>& vcols)
+  {
+  int nrows, ncols,  tonrows, toncols;
+  const vector<int> *vpToCols, *vpToRows, *vpRows, *vpCols;
+  vector<int> *tmpvpToCols, *tmpvpToRows, *tmpvpRows, *tmpvpCols;
+
+  if (vToRows.size()==0 && vToCols.size()==0 &&vrows.size()==0 && vcols.size()==0)
+    a=b;
+  else
+    {
+    if (vToRows.size()==0)
+      {
+      tonrows=a.numRows();
+//      vpToRows=new vector<int>(tonrows);
+      tmpvpToRows=new vector<int>(tonrows);
+      for (int i=0;i<tonrows;++i)
+        (*tmpvpToRows)[i]=i+1;
+      vpToRows=(const vector<int>*)tmpvpToRows;
+      }
+    else
+      {
+      for (int i=0;i<vToRows.size();++i)
+        {
+        if (vToRows[i]>0) 
+          tonrows++;
+        else 
+          throw SYLV_MES_EXCEPTION("Non-positive indices in assignment by vector.");
+        }
+      vpToRows=&vToRows;
+      }
+    if (tonrows>a.numRows())
+      throw SYLV_MES_EXCEPTION("Wrong dimensions for assignment by vector.");
+
+    if (vToCols.size()==0)
+      {
+      toncols=a.numCols();
+      tmpvpToCols=new vector<int>(toncols);
+      for (int i=0;i<toncols;++i)
+        (*tmpvpToCols)[i]=i+1;
+      vpToCols=(const vector<int>*)tmpvpToCols;
+      }
+    else
+      {
+      for (int i=0;i<vToCols.size();++i)
+        {
+        if (vToCols[i]>0) 
+          toncols++;
+        else 
+          throw SYLV_MES_EXCEPTION("Non-positive indices in assignment by vector.");
+        }
+      vpToCols=&vToCols;
+      }
+    if (toncols>a.numCols())
+      throw SYLV_MES_EXCEPTION("Wrong dimensions for assignment by vector.");
+
+    if (vrows.size()==0)
+      {
+      nrows=b.numRows();
+      tmpvpRows=new vector<int>(nrows);
+      for (int i=0;i<nrows;++i)
+        (*tmpvpToRows)[i]=i+1;
+      vpRows=(const vector<int>*)tmpvpRows;
+      }
+    else
+      {
+      for (int i=0;i<vrows.size();++i)
+        {
+        if (vrows[i]>0) 
+          nrows++;
+        else 
+          throw SYLV_MES_EXCEPTION("Non-positive indices in assignment by vector.");
+        }
+      vpRows=&vrows;
+      }
+    if (nrows>b.numRows())
+      throw SYLV_MES_EXCEPTION("Wrong dimensions for assignment by vector.");
+
+    if (vcols.size()==0)
+      {
+      ncols=b.numCols();
+      tmpvpCols=new vector<int>(ncols);
+      for (int i=0;i<ncols;++i)
+        (*tmpvpCols)[i]=i+1;
+      vpCols=(const vector<int>*)tmpvpCols;
+      }
+    else
+      {
+      for (int i=0;i<vcols.size();++i)
+        {
+        if (vcols[i]>0) 
+          ncols++;
+        else 
+          throw SYLV_MES_EXCEPTION("Non-positive indices in assignment by vector.");
+        }
+      vpCols=&vcols;
+      }
+    if (ncols>b.numCols())
+      throw SYLV_MES_EXCEPTION("Wrong dimensions for assignment by vector.");
+
+    if (tonrows!=nrows || toncols!=ncols)
+      throw SYLV_MES_EXCEPTION("Wrong indices dimensions for assignment by vector.");
+
+    if(!(nrows*ncols==0 || tonrows*toncols==0))
+      {
+      for (int i=0;i<nrows;++i)
+        {
+        for (int j=0;j<nrows;++j)
+              a.get((*vpToRows)[i]-1,(*vpToCols)[j]-1)=b.get((*vpRows)[i]-1, (*vpCols)[j]-1);
+        }
+      }
+    delete(tmpvpToCols); 
+    delete(tmpvpToRows);
+    delete(tmpvpRows);
+    delete(tmpvpCols);
+    }
+  }
+
 
 void GeneralMatrix::gemm(const char* transa, const ConstGeneralMatrix& a,
                          const char* transb, const ConstGeneralMatrix& b,
