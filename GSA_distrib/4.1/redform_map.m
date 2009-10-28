@@ -311,10 +311,10 @@ if iload==0,
   end
   save([fname,'.mat'],'gsa_')
   [sidum, iii]=sort(-gsa_.si);
-  gsa_.x0=x00;
+  gsa_.x0=x00(1:nfit,:);
   hfig=gsa_sdp_plot(gsa_,fname,pnames,iii(1:min(12,np)));
   close(hfig);
-  gsa_.x0=x0;
+  gsa_.x0=x0(1:nfit,:);
 %   copyfile([fname,'_est.mat'],[fname,'.mat'])
   figure, 
   plot(y0(1:nfit),[gsa_.fit y0(1:nfit)],'.'), 
