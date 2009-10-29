@@ -1,12 +1,13 @@
-function resid(period)
-% function resid(period)
-% Computes residuals associated with the guess values
+function z = resid(junk)
+% function z = resid(junk)
+%
+% Computes static residuals associated with the guess values.
 % 
 % INPUTS
-%    period
+%    junk:   dummy value for backward compatibility
 %    
 % OUTPUTS
-%    none
+%    z:      residuals
 %        
 % SPECIAL REQUIREMENTS
 %    none
@@ -28,48 +29,59 @@ function resid(period)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-  global M_ options_ oo_ it_ z
+  global M_ options_ oo_
 
+  steady_state_old = oo_.steady_state;
+
+  % If using a steady state file, initialize oo_.steady_state with that file
+  if options_.steadystate_flag
+    [ys,check] = feval([M_.fname '_steadystate'], ...
+                       oo_.steady_state, ...
+                       [oo_.exo_steady_state; ...
+                        oo_.exo_det_steady_state]);
+    if size(ys, 1) < M_.endo_nbr 
+        if isfield(M_, 'aux_vars')
+            ys = add_auxiliary_variables_to_steadystate(ys,M_.aux_vars, ...
+                                                        M_.fname, ...
+                                                        oo_.exo_steady_state, ...
+                                                        oo_.exo_det_steady_state, ...
+                                                        M_.params);
+        else
+            error([M_.fname '_steadystate.m doesn''t match the model']);
+        end
+    end
+    oo_.steady_state = ys;
+  end
+
+  % Compute the residuals
   if options_.block && ~options_.bytecode
-      error('CHECK: incompatibility with "block" without "bytecode" option')
+      error('RESID: incompatibility with "block" without "bytecode" option')
   elseif options_.block && options_.bytecode
       [z,check] = bytecode('evaluate','static');
   else
-      if M_.exo_nbr > 0
-          oo_.exo_simul = ones(M_.maximum_lag+M_.maximum_lead+period,1)* ...
-              oo_.exo_steady_state';
+      z = feval([M_.fname '_static'],...
+                oo_.steady_state,...
+                [oo_.exo_steady_state; ...
+                 oo_.exo_det_steady_state], M_.params);
+  end
+  
+  % Display the non-zero residuals if no return value
+  if nargout == 0
+      for i = 1:4
+          disp(' ')
       end
-      n = size(M_.lead_lag_incidence,2);
-      %  if ~ options_.initval_file | size(oo_.endo_simul,2) ~= period+M_.maximum_lag+M_.maximum_lead
-      if ~ options_.initval_file 
-          if size(oo_.steady_state,1) == 1 & oo_.steady_state == 0
-              oo_.steady_state = zeros(size(oo_.steady_state,1),1) ;
+  
+      for i=1:length(z)
+          if abs(z(i)) < options_.dynatol/100
+              tmp = 0;
+          else
+              tmp = z(i);
           end
-          oo_.endo_simul = oo_.steady_state*ones(1,period+M_.maximum_lag+M_.maximum_lead) ;
-      end      
-      i = M_.lead_lag_incidence';
-      iyr0 = find(i(:));      
-      y =oo_.endo_simul(:);
-      z = zeros(n,period);
-      fh = str2func([M_.fname '_dynamic']);
-      for it_=M_.maximum_lag+1:period+M_.maximum_lag
-          z(:,it_-M_.maximum_lag) = feval(fh,y(iyr0),oo_.exo_simul, M_.params, it_);
-          iyr0 = iyr0 + n;
+          disp(['Residual for equation number ' int2str(i) ' is equal to ' num2str(tmp)])
+      end
+      for i = 1:2
+          disp(' ')
       end
   end
   
-  for i = 1:4
-      disp(' ')
-  end
-  
-  for i=1:length(z)
-      if abs(z(i)) < options_.dynatol/100
-          tmp = 0;
-      else
-          tmp = z(i);
-      end
-      disp(['Residual for equation number ' int2str(i) ' is equal to ' num2str(tmp)])
-  end
-  for i = 1:2
-      disp(' ')
-  end
+  oo_.steady_state = steady_state_old;

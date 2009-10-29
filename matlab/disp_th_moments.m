@@ -76,6 +76,13 @@ function disp_th_moments(dr,var_list)
       dyntable(title,headers,deblank(M_.endo_names(ivar(stationary_vars), ...
                                                    :)),100*oo_.gamma_y{options_.ar+2}(stationary_vars,:),lh,8,2);
     end
+    
+    conditional_variance_steps = options_.conditional_variance_decomposition;
+    if length(conditional_variance_steps)
+        oo_ = display_conditional_variance_decomposition(conditional_variance_steps,...
+                                                         ivar,dr,M_, ...
+                                                         options_,oo_);
+    end
   end
   
   if options_.nocorr == 0

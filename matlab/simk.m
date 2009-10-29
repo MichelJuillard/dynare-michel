@@ -126,7 +126,7 @@ disp (['-----------------------------------------------------']) ;
 disp ('MODEL SIMULATION') ;
 fprintf ('\n') ;
 
-for iter = 1:options_.maxit
+for iter = 1:options_.maxit_
   h2 = clock ;
   oo_.endo_simul = oo_.endo_simul(:);
   err_f = 0;

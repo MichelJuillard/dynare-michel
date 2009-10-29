@@ -55,7 +55,7 @@ function oo_ = compute_moments_varendo(type,options_,M_,oo_,var_list_)
     NumberOfExogenousVariables = M_.exo_nbr;
     list_of_exogenous_variables = M_.exo_names;
     NumberOfLags = options_.ar;
-    Steps = options_.conditional_variance_decomposition_dates;
+    Steps = options_.conditional_variance_decomposition;
 
     % COVARIANCE MATRIX.
     if posterior

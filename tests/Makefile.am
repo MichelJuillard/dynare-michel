@@ -7,6 +7,8 @@ OCTAVE_MODS = \
 	example1.mod \
 	t_sgu_ex1.mod \
 	ramsey.mod \
+	ramst_initval_file.mod \
+	example1_varexo_det.mod \
 	arima/mod1.mod \
 	arima/mod1a.mod \
 	arima/mod2.mod \

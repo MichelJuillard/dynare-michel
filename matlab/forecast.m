@@ -106,14 +106,13 @@ function info = forecast(var_list,task)
     if M_.exo_det_nbr == 0
         [yf,int_width] = forcst(oo_.dr,y0,horizon,var_list);
     else
-        exo_det_length = size(oo_.exo_det_simul,1);
+        exo_det_length = size(oo_.exo_det_simul,1)-M_.maximum_lag;
         if horizon > exo_det_length
             ex = zeros(horizon,M_.exo_nbr);
             oo_.exo_det_simul = [ oo_.exo_det_simul;...
                                 repmat(oo_.exo_det_steady_state',...
                                        horizon- ... 
                                        exo_det_length,1)];
-            %ex_det_length,1),1)];
         elseif horizon < exo_det_length 
             ex = zeros(exo_det_length,M_.exo_nbr); 
         end

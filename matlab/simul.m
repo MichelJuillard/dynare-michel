@@ -48,7 +48,6 @@ end
 options_.periods = options_.periods;
 ct_=0;
 
-%if options_.simul_algo == 0
   if ~ options_.initval_file
       if ~isfield(options_,'datafile')
         make_ex_;
@@ -56,7 +55,7 @@ ct_=0;
       else
           read_data_;
       end
-  %end
+  end
   
   if isempty(options_.scalv) | options_.scalv == 0
     options_.scalv = oo_.steady_state ;
@@ -87,16 +86,6 @@ ct_=0;
          simk ;
       end
   end;
-else
-  set_default_option('replic',1);
-  set_default_option('simul_seed',1);
-  if isfield(dr,'ghxx')
-    set_default_option('order',2);
-  else
-    set_defaut_option('order',1);
-  end
-  oo_.endo_simul=simult(oo_.steady_state,dr,options_);
-end
 
 dyn2vec;
 

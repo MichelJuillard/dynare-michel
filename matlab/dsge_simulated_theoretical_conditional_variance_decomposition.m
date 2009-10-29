@@ -117,6 +117,7 @@ for file = 1:NumberOfDrawsFiles
             aux(k,2) = aux(k,2) + dr.nfwrd;
             StateSpaceModel.number_of_state_equations = M_.endo_nbr+rows(aux);
             StateSpaceModel.number_of_state_innovations = M_.exo_nbr;
+            StateSpaceModel.sigma_e_is_diagonal = M_.sigma_e_is_diagonal;
             first_call = 0;
             clear('endo_nbr','nstatic','npred','k');
         end

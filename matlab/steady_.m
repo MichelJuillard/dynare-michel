@@ -11,7 +11,7 @@ function steady_()
 % SPECIAL REQUIREMENTS
 %   none
 
-% Copyright (C) 2001-2007 Dynare Team
+% Copyright (C) 2001-2009 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -85,8 +85,8 @@ function steady_()
         end
     end
     if check1
-        resid(1);
-        error(['The seadystate values returned by ' M_.fname ...
+        resid;
+        error(['The steadystate values returned by ' M_.fname ...
                '_steadystate.m don''t solve the static model!' ])
     end
     if ~isempty(options_.steadystate_partial)

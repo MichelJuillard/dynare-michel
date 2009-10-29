@@ -1,7 +1,20 @@
 function [y_,int_width]=simultxdet(y0,ex,ex_det, iorder,var_list,M_,oo_,options_)
 %function [y_,int_width]=simultxdet(y0,ex,ex_det, iorder,var_list,M_,oo_,options_)
+%
+% Simulates a stochastic model in the presence of deterministic exogenous shocks
+%
+% INPUTS:
+%    y0:        initial values, of length M_.maximum_lag
+%    ex:        matrix of stochastic exogenous shocks, starting at period 1
+%    ex_det:    matrix of deterministic exogenous shocks, starting at period 1-M_.maximum_lag
+%    iorder:    order of approximation
+%    var_list:  list of endogenous variables to simulate
+%
+% The forecast horizon is equal to size(ex, 1).
+% The condition size(ex,1)+M_.maximum_lag=size(ex_det,1) must be verified
+%  for consistency.
 
-% Copyright (C) 2008 Dynare Team
+% Copyright (C) 2008-2009 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -18,8 +31,6 @@ function [y_,int_width]=simultxdet(y0,ex,ex_det, iorder,var_list,M_,oo_,options_
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-%  global endo_nbr ykmin_ xkmin_ it_ options_ iy_ M_ exe_det_ Sigma_e_ lgy_
-
   dr = oo_.dr;
   ykmin = M_.maximum_lag;
   endo_nbr = M_.endo_nbr;
@@ -28,6 +39,9 @@ function [y_,int_width]=simultxdet(y0,ex,ex_det, iorder,var_list,M_,oo_,options_
   npred =dr.npred;
   nc = size(dr.ghx,2);
   iter = size(ex,1);
+  if size(ex_det, 1) ~= iter+ykmin
+      error('Size mismatch: number of forecasting periods for stochastic exogenous and deterministic exogenous don''t match')
+  end
   nx = size(dr.ghu,2);
   y_ = zeros(size(y0,1),iter+ykmin);
   y_(:,1:ykmin) = y0;
@@ -38,14 +52,6 @@ function [y_,int_width]=simultxdet(y0,ex,ex_det, iorder,var_list,M_,oo_,options_
   k3 = find(k3(:));
   k4 = dr.kstate(find(dr.kstate(:,2) < ykmin+1),[1 2]);
   k4 = k4(:,1)+(ykmin+1-k4(:,2))*endo_nbr;
-  
-  if options_.simul_algo == 1
-    o1 = dr.nstatic+1;
-    o2 = dr.nstatic+dr.npred;
-    o3 = o2-dr.nboth+1;
-    [junk, k5] = sort(dr.order_var(o1:o2));
-    [junk, k6] = sort(dr.order_var(o3:end));
-  end
   
   nvar = size(var_list,1);
   if nvar == 0
@@ -69,18 +75,11 @@ function [y_,int_width]=simultxdet(y0,ex,ex_det, iorder,var_list,M_,oo_,options_
       tempx1 = y_(dr.order_var,k1);
       tempx2 = tempx1-repmat(dr.ys(dr.order_var),1,ykmin);
       tempx = tempx2(k2);
-      if options_.simul_algo == 0
 	y_(dr.order_var,i) = dr.ys(dr.order_var)+dr.ghx*tempx+dr.ghu* ...
-	    ex(i,:)';
+	    ex(i-ykmin,:)';
 	for j=1:min(ykmin+M_.exo_det_length+1-i,M_.exo_det_length)
-	  y_(dr.order_var,i) = y_(dr.order_var,i) + dr.ghud{j}*(ex_det(i+j-1,:)'-exo_det_steady_state');
+            y_(dr.order_var,i) = y_(dr.order_var,i) + dr.ghud{j}*(ex_det(i+j-1,:)'-exo_det_steady_state);
 	end
-      elseif options_.simul_algo == 1
-	it_ = i;
-	m = dr.ys(dr.order_var);
-	[y_(:,i), check] = dynare_solve('ff_simul1',y_(:,i-1),tempx1(k3), ...
-					m(o3:end),tempx(k4),o1,o2,o3,k6);
-      end
 	
       k1 = k1+1;
     end
@@ -91,7 +90,6 @@ function [y_,int_width]=simultxdet(y0,ex,ex_det, iorder,var_list,M_,oo_,options_
       tempx = tempx2(k2);
       tempu = ex(i-ykmin,:)';
       tempuu = kron(tempu,tempu);
-      if options_.simul_algo == 0
 	tempxx = kron(tempx,tempx);
 	tempxu = kron(tempx,tempu);
 	y_(dr.order_var,i) = dr.ys(dr.order_var)+dr.ghs2/2+dr.ghx*tempx+ ...
@@ -112,13 +110,6 @@ function [y_,int_width]=simultxdet(y0,ex,ex_det, iorder,var_list,M_,oo_,options_
 		dr.ghudud{k,j}*tempududk;
 	  end
 	end
-      elseif options_.simul_algo == 1
-	it_ = i;
-	m = dr.ys(dr.order_var)+dr.ghs2/2;
-	tempx1 = y_(:,k1);
-	[y_(:,i), check] = dynare_solve('ff_simul2',y_(:,i-1),tempx1(k3), ...
-					m(o3:end),tempx(k4),o1,o2,o3,k6);
-      end
       k1 = k1+1;
     end
   end

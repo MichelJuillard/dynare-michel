@@ -32,14 +32,14 @@ function ys1 = add_auxiliary_variables_to_steadystate(ys,aux_vars,fname, ...
         k = k+1;
     end
     
-    for i=1:aux_lead_nbr + 1;
+    for i=1:aux_lead_nbr+1;
         res = feval([fname '_static'],ys1,...
 			 [exo_steady_state; ...
                       exo_det_steady_state],params);
         for j=1:n
             if aux_vars(j).type == 0
                 el = aux_vars(j).endo_index;
-                ys1(el) == res(el);
+                ys1(el) = ys1(el)-res(el);
             end
         end
     end

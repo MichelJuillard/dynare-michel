@@ -58,7 +58,7 @@ fprintf('\n') ;
 it_init = M_.maximum_lag+1 ;
 
 h1 = clock ;
-for iter = 1:options_.maxit
+for iter = 1:options_.maxit_
     h2 = clock ;
     
     if ct_ == 0
@@ -120,12 +120,12 @@ if ~stop
     fprintf('\n') ;
     disp(['	Total time of simulation 	:' num2str(etime(clock,h1))]) ;
     fprintf('\n') ;
-    disp(['WARNING : maximum number of iterations is reached (modify options_.maxit).']) ;
+    disp(['WARNING : maximum number of iterations is reached (modify options_.maxit_).']) ;
     fprintf('\n') ;
     oo_.deterministic_simulation.status = 0;% more iterations are needed.
     oo_.deterministic_simulation.error = err;
     oo_.deterministic_simulation.errors = c/abs(err);    
-    oo_.deterministic_simulation.iterations = options_.maxit;
+    oo_.deterministic_simulation.iterations = options_.maxit_;
 end
 disp (['-----------------------------------------------------']) ;
 return ;
