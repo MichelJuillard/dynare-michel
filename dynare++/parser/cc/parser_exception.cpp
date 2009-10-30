@@ -4,6 +4,7 @@
 
 #include "parser_exception.h"
 #include <cstring>
+#include <cstdio>
 
 using namespace ogp;
 

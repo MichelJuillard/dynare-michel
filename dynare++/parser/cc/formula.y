@@ -3,6 +3,8 @@
 
 /* $Id: formula.y 1749 2008-03-28 11:59:29Z kamenik $ */
 
+#include <cstdio>
+
 #include "location.h"
 #include "formula_parser.h" 
 #include "formula_tab.hh"

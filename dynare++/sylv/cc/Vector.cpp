@@ -354,7 +354,11 @@ double ConstVector::dot(const ConstVector& y) const
 bool ConstVector::isFinite() const
 {
 	int i = 0;
+#ifndef _MSC_VER
 	while (i < length() && isfinite(operator[](i)))
+#else
+	while (i < length() && _finite(operator[](i)))
+#endif
 		i++;
 	return i == length();
 }

@@ -22,7 +22,10 @@
 #include <sstream>
 #include "SparseMatrix.hh"
 
-using namespace std;
+#ifdef _MSC_VER
+unsigned long _nan[2] = { 0xffffffff, 0x7fffffff };
+double NAN = *((double *) _nan);
+#endif
 
 SparseMatrix::SparseMatrix()
 {
@@ -40,11 +43,6 @@ SparseMatrix::SparseMatrix()
   start_compare = 0;
   restart = 0;
   IM_i.clear();
-#ifdef _MSC_VER
-  nan__[0] = 0xffffffff;
-  nan__[1] = 0x7fffffff;
-  NAN = *( double* )nan__;
-#endif
 }
 
 int
