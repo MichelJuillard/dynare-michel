@@ -33,12 +33,12 @@ AC_DEFUN([AX_MEXEXT],
 [dnl
 AC_PREREQ([2.50])
 AC_REQUIRE([AX_MATLAB])
-AC_REQUIRE([AC_CANONICAL_HOST])
+AC_REQUIRE([AC_CANONICAL_BUILD])
 AC_CACHE_CHECK([for MEX-file suffix], [ax_cv_mexext],
 [if test "${MEXEXT+set}" = set ; then
     ax_cv_mexext="$MEXEXT"
 else
-    case $host_os in
+    case $build_os in
       *cygwin*)
         ax_cv_mexext=`$MATLAB/bin/mexext.bat | sed 's/\r//'`
         ;;
