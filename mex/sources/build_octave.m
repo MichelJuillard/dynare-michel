@@ -1,4 +1,7 @@
 % Build file for Dynare MEX Librairies for Octave
+%
+% This script is now obsolete and is no longer maintained.
+% Please use the autoconf/automake build system instead.
 
 % Copyright (C) 2008-2009 Dynare Team
 %

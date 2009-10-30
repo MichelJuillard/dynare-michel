@@ -90,8 +90,9 @@ DynamicModelDLL::DynamicModelDLL(const char *modName, const int y_length, const 
 
   try
     {
+#define QUOTEME(x) #x
       if (sExt == NULL)
-        sExt = MEXEXT;
+        sExt = QUOTEME(MEXEXT);
 #ifdef _WIN32
       HINSTANCE dynamicHinstance;
       //		dynamicHinstance=::LoadLibraryEx(strcat(fNname,"_.dll"),NULL,DONT_RESOLVE_DLL_REFERENCES);//sExt); //"_.dll");
