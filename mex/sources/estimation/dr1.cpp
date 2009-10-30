@@ -28,22 +28,13 @@
 ********************************************************************/
 #include "mexutils.h"
 #include "DsgeLikelihood.h"
-#include "dynamic_dll.h"
-
 
 int 
 DsgeLikelihood::SolveDRModel(const int endo_nbr, const int exo_nbr, const int nstatic, const int npred, int nfwrd)//dr1()
   {
   int  info = 0;
   int i;
-  
-  /*    
-  int  xlen = (int)dynareParams.getDoubleField(string("maximum_endo_lead")) + 
-  (int)dynareParams.getDoubleField(string("M_.maximum_endo_lag)) + 1;
-  int  klen = (int)dynareParams.getDoubleField(string("maximum_endo_lag")) + 
-  (int)dynareParams.getDoubleField(string("M_.maximum_endo_lead")) + 1;
-  */
-  
+ 
   //    % expanding system for Optimal Linear Regulator
   if ((int)dynareParams.getDoubleField(string("ramsey_policy")))
     throw SYLV_MES_EXCEPTION("K-order-perturbation can not soleve for Ramsey policy");
@@ -59,11 +50,11 @@ DsgeLikelihood::SolveDRModel(const int endo_nbr, const int exo_nbr, const int ns
         vector<int>span2nx(sss-exo_nbr); 
         for (i=0;i<sss-exo_nbr;++i)
           span2nx[i]=i+1;
-        ghx= *(new GeneralMatrix(ghx_u, nullVec,span2nx));//ghx_u(:,1:sss-M_.exo_nbr);  
+        ghx= ( GeneralMatrix(ghx_u, nullVec,span2nx));//ghx_u(:,1:sss-M_.exo_nbr);  
         vector<int>spannx2end(exo_nbr); 
         for (i=0;i<exo_nbr;++i)
           spannx2end[i]=sss-exo_nbr+i+1;
-        ghu= *(new GeneralMatrix(ghx_u, nullVec,spannx2end)); //ghx_u(:,sss-M_.exo_nbr+1:end); 
+        ghu= ( GeneralMatrix(ghx_u, nullVec,spannx2end)); //ghx_u(:,sss-M_.exo_nbr+1:end); 
         }
       catch(int e)
         {

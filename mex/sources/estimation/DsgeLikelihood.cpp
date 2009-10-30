@@ -37,7 +37,7 @@ DsgeLikelihood::DsgeLikelihood( Vector& inA_init, GeneralMatrix& inQ,  GeneralMa
                                const Vector&INp6, const Vector&INp7, const Vector&INp3, const Vector&INp4,
                                Vector& INSteadyState,   Vector& INconstant,  GeneralParams& INdynareParams, //GeneralParams& parameterDescription, 
                                GeneralParams& INdr, GeneralMatrix& INkstate, GeneralMatrix& INghx,  GeneralMatrix& INghu
-                               ,char *dfExt)//, KordpDynare& kOrdModel, Approximation& INapprox ) 
+                               ,const int jcols, const char *dfExt)//, KordpDynare& kOrdModel, Approximation& INapprox ) 
                                :a_init(inA_init), Q(inQ), R(inR), T(inT), Z(inZ), Pstar(inPstar), Pinf(inPinf), H(inH), data(inData), Y(inY), 
                                numPeriods(INnumPeriods),   numVarobs(inData.numRows()),  numTimeObs(inData.numCols()),
                                order(INorder),  endo_nbr(INendo_nbr ),  exo_nbr(INexo_nbr),  nstatic(INnstatic),  npred(INnpred),
@@ -59,10 +59,11 @@ DsgeLikelihood::DsgeLikelihood( Vector& inA_init, GeneralMatrix& inQ,  GeneralMa
   oo_("caller","oo_");
   *********/
   // setting some frequently used common variables that do not need updating
-  // bayestopt_.mf = bayestopt_.mf1 
   //std::vector<double>* vll=new std::vector<double> (nper);
   vll=new std::vector<double> (numTimeObs);// vector of likelihoods
-
+  kalman_algo=(int)dynareParams.getDoubleField(string("kalman_algo"));
+  presampleStart=1+(int)dynareParams.getDoubleField(string("presample"));
+  mode_compute=(int)dr.getDoubleField(string("mode_compute"));
 
   // Pepare data for Constructing k-order-perturbation classes
   //const char *
@@ -71,20 +72,11 @@ DsgeLikelihood::DsgeLikelihood( Vector& inA_init, GeneralMatrix& inQ,  GeneralMa
   double qz_criterium = dynareParams.getDoubleField(string("qz_criterium"));//qz_criterium = 1+1e-6;
   int nMax_lag =(int)dynareParams.getDoubleField(string("maximum_lag"));
   const int nBoth=(int)dr.getDoubleField(string("nboth"));
-  const int nPred = endo_nbr-nBoth; // correct nPred for nBoth.
+  const int nPred = npred-nBoth; // correct nPred for nBoth.
   //vector<int> *var_order_vp = &order_var;
-  TwoDMatrix *vCov =  new TwoDMatrix(Q);
+  vCov =  new TwoDMatrix(Q);
   // the lag, current and lead blocks of the jacobian respectively
-  TwoDMatrix *llincidence  // = new TwoDMatrix(nrows, npar, dparams);
-    =(TwoDMatrix *)&(dynareParams.getMatrixField(string("lead_lag_incidence")));
-
-
-  //const int jcols = nExog+nEndo+nsPred+nsForw; // Num of Jacobian columns
-  int nsPred=(int)dr.getDoubleField(string("nspred"));
-  int nsForw=(int)dr.getDoubleField(string("nsfwrd"));
-  const int jcols = exo_nbr+endo_nbr+nsPred+nsForw;
-  mexPrintf("k_order_perturbation: jcols= %d .\n", jcols);
-
+  llincidence = new TwoDMatrix (dynareParams.getMatrixField(string("lead_lag_incidence")));
   charArraySt * casOrdEndoNames=dynareParams.getCharArrayField(string("var_order_endo_names"));
   const char **endoNamesMX=(const char ** )casOrdEndoNames->charArrayPtr;
 
@@ -113,14 +105,11 @@ DsgeLikelihood::DsgeLikelihood( Vector& inA_init, GeneralMatrix& inQ,  GeneralMa
         // make journal name and journal
         std::string jName(fName); //params.basename);
         jName += ".jnl";
-        Journal *journal= new Journal(jName.c_str());
+        journal= new Journal(jName.c_str());
 #ifdef DEBUG
         mexPrintf("k_order_perturbation: Calling dynamicDLL constructor.\n");
 #endif
-        //			DynamicFn * pDynamicFn = loadModelDynamicDLL (fname);
-        //   DynamicModelDLL dynamicDLL(fName, nEndo, jcols, nMax_lag, nExog, dfExt);
-        //DynamicModelDLL* dynamicDLLp=new DynamicModelDLL (fName, endo_nbr, jcols, nMax_lag, exo_nbr, dfExt);
-        DynamicModelDLL dynamicDLLp(fName, endo_nbr, jcols, nMax_lag, exo_nbr, dfExt);
+        dynamicDLLp=new DynamicModelDLL (fName, endo_nbr, jcols, nMax_lag, exo_nbr, dfExt);
 
         // intiate tensor library
 #ifdef DEBUG
@@ -134,7 +123,7 @@ DsgeLikelihood::DsgeLikelihood( Vector& inA_init, GeneralMatrix& inQ,  GeneralMa
         // make KordpDynare object
         model=new KordpDynare (endoNamesMX,  endo_nbr, exoNamesMX,  exo_nbr, num_dp,//nPar, // paramNames,
                            &SteadyState, vCov, &deepParams /*modParams*/, nstatic, nPred, nfwrd, nBoth,
-                           jcols, &NNZD, nSteps, order, *journal, dynamicDLLp, 
+                           jcols, &NNZD, nSteps, order, *journal, *dynamicDLLp, 
                            sstol, &order_var /*var_order_vp*/, llincidence, qz_criterium);
 
         // construct main K-order approximation class
@@ -211,6 +200,32 @@ DsgeLikelihood::DsgeLikelihood( Vector& inA_init, GeneralMatrix& inQ,  GeneralMa
       }  //catch
   };
 
+
+DsgeLikelihood::~DsgeLikelihood()
+  {
+  delete approx;
+  delete model;
+  delete dynamicDLLp;
+  delete journal;
+  delete llincidence;
+  delete vCov;
+  delete vll;
+  delete &H;
+  delete &Q;
+  delete &SteadyState;
+  delete &kstate;
+  delete &param_ub;
+  delete &param_lb;
+  delete &pshape;
+  delete &p6;
+  delete &p7;
+  delete &p3;
+  delete &p4;
+  delete &xparam1;
+  delete &deepParams;
+  delete &ghx;
+  delete &ghu;
+  }
 
 double 
 DsgeLikelihood::CalcLikelihood(Vector& xparams)
@@ -542,7 +557,7 @@ DsgeLikelihood::InitiateKalmanMatrices()
   disclyap_fast(T,RQRt,Ptmp, lyapunov_tol, 1); // 1 to check chol 
   Pstar=Ptmp;
   //Pinf=[]
-  Pinf  = *(new GeneralMatrix(np,np));
+  //Pinf  = *(new GeneralMatrix(np,np));
   Pinf.zeros();
   
   //Z= zeros(size(data,1), size(T,2))
@@ -563,7 +578,7 @@ DsgeLikelihood::InitiateKalmanMatrices()
   for (int i = 0;i<numVarobs;++i)
     Ztmp.get(i,mf[i])=1.0;
   Z=Ztmp;
-  
+  delete &Ztmp;
   }  
 
 

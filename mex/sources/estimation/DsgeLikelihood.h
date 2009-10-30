@@ -31,13 +31,7 @@ class DsgeLikelihood
   {
   double likelihood; // sum of vector of KF step log likelihoods
   vector<double>* vll; // vector of KF step log likelihoods
-                       /*******
-                       MexStruct &options_;
-                       MexStruct &M_;
-                       MexStruct &bayestOptions_;
-                       MexStruct &dr_;
-                       MexStruct &oo_;
-  ***************/
+
   Vector& a_init;//initial value of the state, usually set to 0.
   GeneralMatrix& Q;// Kalman Matrices
   GeneralMatrix& R;
@@ -91,9 +85,12 @@ class DsgeLikelihood
   GeneralMatrix& ghx;
   GeneralMatrix& ghu;
 
-  //DynamicModelDLL* dynamicDLLp;
+  DynamicModelDLL* dynamicDLLp;
+  Journal *journal;
   KordpDynare* model;// to be initialised by high level calling function
   Approximation* approx;
+  TwoDMatrix *llincidence;
+  TwoDMatrix *vCov;
   //friend class BasicKalmanTask;
   //BasicKalmanTask bkt;
   //friend class KalmanUniTask;
@@ -110,7 +107,7 @@ class DsgeLikelihood
   double KalmanFilter(double riccatiTol,bool uni);// calls Kalman
   
   public:
-    DsgeLikelihood( Vector& inA_init, GeneralMatrix& inQ,  GeneralMatrix& R,
+    DsgeLikelihood( Vector& inA_init, GeneralMatrix& inQ,  GeneralMatrix& inR,
       GeneralMatrix& inT,  GeneralMatrix& inZ,  GeneralMatrix& inPstar,  GeneralMatrix& inPinf,
       GeneralMatrix& inH,  const GeneralMatrix&inData,  GeneralMatrix&inY,  
       const int INnumPeriods, //  const int INnumVarobs, //  const int INnumTimeObs,
@@ -123,7 +120,7 @@ class DsgeLikelihood
       Vector& INSteadyState,   Vector& INconstant,  GeneralParams& INdynareParams,
       //GeneralParams& parameterDescription, 
       GeneralParams& INdr, GeneralMatrix& INkstate, GeneralMatrix& INghx,  GeneralMatrix& INghu 
-      ,char *dfExt); //, KordpDynare& inModel, Approximation& INapprox );
+      ,const int jcols, const char *dfExt); //, KordpDynare& inModel, Approximation& INapprox );
     DsgeLikelihood( const Vector&params,const GeneralMatrix&data, const vector<int>& data_index, const int gend,
       const int number_of_observations, const bool no_more_missing_observations);//, KordpDynare& model ); // constructor, and
     DsgeLikelihood( GeneralParams& options_,GeneralParams& M_,GeneralParams& bayestopt_, GeneralMatrix& inData,
@@ -132,6 +129,9 @@ class DsgeLikelihood
     double CalcLikelihood(Vector& xparams);// runs all routines needed to calculate likelihood
     double getLik(){return likelihood;}
     int getInfo(){return info;}
+    int getCostFlag(){return cost_flag;}
+    Vector& getSteadyState(){ return SteadyState;}
+
     vector<double>& getLikVector() {return *vll;}  // vector of log likelihoods for each Kalman step
     //GeneralMatrix&lyapunov_symm(const GeneralMatrix &G, const GeneralMatrix & V);
   };
