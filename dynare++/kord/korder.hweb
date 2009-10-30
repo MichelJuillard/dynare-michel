@@ -308,7 +308,7 @@ macros.
 @s _TGstack int
 @s _TZXstack int
 @s _TGXstack int
-@s _Tm int
+@s __Tm int
 @s _Tpol int
 @d _Ttensor TYPENAME ctraits<t>::Ttensor 
 @d _Ttensym TYPENAME ctraits<t>::Ttensym 
@@ -320,7 +320,7 @@ macros.
 @d _TGstack TYPENAME ctraits<t>::TGstack
 @d _TZXstack TYPENAME ctraits<t>::TZXstack
 @d _TGXstack TYPENAME ctraits<t>::TGXstack
-@d _Tm TYPENAME ctraits<t>::Tm
+@d __Tm TYPENAME ctraits<t>::Tm
 @d _Tpol TYPENAME ctraits<t>::Tpol
 
 
@@ -951,8 +951,8 @@ containers.
 	template<int t> const _TZstack& Zstack() const;
 	template<int t> _TGstack& Gstack();
 	template<int t> const _TGstack& Gstack() const;
-	template<int t> _Tm& m();
-	template<int t> const _Tm& m() const;
+	template<int t> __Tm& m();
+	template<int t> const __Tm& m() const;
 
 
 @ End of {\tt korder.h} file.

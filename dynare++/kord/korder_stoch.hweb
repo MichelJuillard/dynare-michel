@@ -104,7 +104,7 @@ $$h_{y^i\sigma^p}=\sum_{\lims}\pmatrix{p\cr n,k}{1\over m!}
 and this is exactly what the code does.
 
 @<|IntegDerivs| constructor code@>=
-IntegDerivs(int r, const IntSequence& nvs, const _Tgss& g, const _Tm& mom,
+IntegDerivs(int r, const IntSequence& nvs, const _Tgss& g, const __Tm& mom,
 			double at_sigma)
 	: ctraits<t>::Tgss(4)
 {
@@ -179,7 +179,7 @@ $\left[\matrix{y^*\cr\sigma}\right]$
 
 @<|StochForwardDerivs| constructor code@>=
 StochForwardDerivs(const PartitionY& ypart, int nu,
-				   const _Tgss& g, const _Tm& m,
+				   const _Tgss& g, const __Tm& m,
 				   const Vector& ydelta, double sdelta,
 				   double at_sigma)
 	: ctraits<t>::Tgss(4)
