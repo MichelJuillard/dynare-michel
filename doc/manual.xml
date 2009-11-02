@@ -1769,6 +1769,14 @@ The simulated endogenous variables are available in global matrix <varname>oo_.e
     <listitem><para>Use the Anderson-Moore Algorithm (AIM) to compute the decision rules, instead of using Dynare's default method based on a generalized Schur decomposition. This option is only valid for first order approximation. See <ulink url="http://www.federalreserve.gov/Pubs/oss/oss4/aimindex.html">AIM website</ulink> for more details on the algorithm.</para>
     </listitem>
   </varlistentry>
+  <varlistentry id="conditional_variance_decomposition">
+    <term><option>conditional_variance_decomposition</option> = <replaceable>INTEGER</replaceable></term></varlistentry>
+ <varlistentry>
+    <term><option>conditional_variance_decomposition</option> = [<replaceable>INTEGER1</replaceable>:<replaceable>INTEGER2</replaceable>]</term></varlistentry>
+ <varlistentry>
+    <term><option>conditional_variance_decomposition</option> = [<replaceable>INTEGER1</replaceable> <replaceable>INTEGER2</replaceable> ...]</term>
+<listitem><para>Computes a conditional variance decomposition for the specified period(s). Conditional variances are given by var(y<subscript>t+k</subscript>|t). For period 1, the conditional variance decomposition provides the decomposition of the effects of shocks upon impact.</para></listitem>
+</varlistentry>    
 </variablelist>
 
 </refsect1>
