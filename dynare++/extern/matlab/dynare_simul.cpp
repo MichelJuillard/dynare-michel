@@ -53,10 +53,10 @@ extern "C" {
 		const mxArray* const vcov = prhs[8];
 		int seed = (int)mxGetScalar(prhs[9]);
 		const mxArray* const ysteady = prhs[10];
-		const int* const ystart_dim = mxGetDimensions(ystart);
-		const int* const shocks_dim = mxGetDimensions(shocks);
-		const int* const vcov_dim = mxGetDimensions(vcov);
-		const int* const ysteady_dim = mxGetDimensions(ysteady);
+		const mwSize* const ystart_dim = mxGetDimensions(ystart);
+		const mwSize* const shocks_dim = mxGetDimensions(shocks);
+		const mwSize* const vcov_dim = mxGetDimensions(vcov);
+		const mwSize* const ysteady_dim = mxGetDimensions(ysteady);
 
 		int ny = nstat + npred + nboth + nforw;
 		if (ny != ystart_dim[0])
@@ -85,7 +85,7 @@ extern "C" {
 			UTensorPolynomial pol(ny, npred+nboth+nexog);
 			for (int dim = 0; dim <= order; dim++) {
 				const mxArray* gk = prhs[11+dim];
-				const int* const gk_dim = mxGetDimensions(gk);
+				const mwSize* const gk_dim = mxGetDimensions(gk);
 				FFSTensor ft(ny, npred+nboth+nexog, dim);
 				if (ft.ncols() != gk_dim[1]) {
 					char buf[1000];
