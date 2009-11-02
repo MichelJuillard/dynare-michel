@@ -1,45 +1,10 @@
-vpath %.cpp $(top_srcdir)/../../../dynare++/sylv/cc $(top_srcdir)/../../../dynare++/sylv/matlab
-vpath %.h $(top_srcdir)/../../../dynare++/sylv/cc
+vpath %.cpp $(top_srcdir)/../../../dynare++/sylv/matlab
 
 noinst_PROGRAMS = gensylv
 
 # Can't use gensylv_CPPFLAGS, because it interacts badly with VPATH
 CPPFLAGS += -I$(top_srcdir)/../../../dynare++/sylv/cc -I$(top_srcdir)/../../sources
 
-nodist_gensylv_SOURCES = \
-	gensylv.cpp \
-	BlockDiagonal.cpp \
-	GeneralMatrix.cpp \
-	GeneralSylvester.cpp \
-	IterativeSylvester.cpp \
-	KronUtils.cpp \
-	KronVector.cpp \
-	QuasiTriangular.cpp \
-	QuasiTriangularZero.cpp \
-	SchurDecomp.cpp \
-	SchurDecompEig.cpp \
-	SimilarityDecomp.cpp \
-	SylvException.cpp \
-	SylvMatrix.cpp \
-	SylvMemory.cpp \
-	SylvParams.cpp \
-	TriangularSylvester.cpp \
-	Vector.cpp \
-	BlockDiagonal.h \
-	GeneralMatrix.h \
-	GeneralSylvester.h \
-	IterativeSylvester.h \
-	KronUtils.h \
-	KronVector.h \
-	QuasiTriangular.h \
-	QuasiTriangularZero.h \
-	SchurDecomp.h \
-	SchurDecompEig.h \
-	SimilarityDecomp.h \
-	SylvException.h \
-	SylvMatrix.h \
-	SylvMemory.h \
-	SylvParams.h \
-	TriangularSylvester.h \
-	Vector.h \
-	SylvesterSolver.h
+gensylv_LDADD = ../libdynare++/libdynare++.a
+
+nodist_gensylv_SOURCES = gensylv.cpp

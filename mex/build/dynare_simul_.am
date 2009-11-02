@@ -1,0 +1,10 @@
+vpath %.cpp $(top_srcdir)/../../../dynare++/extern/matlab
+
+noinst_PROGRAMS = dynare_simul_
+
+# Can't use gensylv_CPPFLAGS, because it interacts badly with VPATH
+CPPFLAGS += -I$(top_srcdir)/../../../dynare++/sylv/cc -I$(top_srcdir)/../../../dynare++/tl/cc -I$(top_srcdir)/../../../dynare++/kord -I$(top_srcdir)/../../sources
+
+dynare_simul__LDADD = ../libdynare++/libdynare++.a
+
+nodist_dynare_simul__SOURCES = dynare_simul.cpp

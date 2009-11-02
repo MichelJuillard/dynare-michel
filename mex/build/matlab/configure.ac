@@ -47,6 +47,7 @@ fi
 
 AC_PROG_CC
 AC_PROG_CXX
+AC_PROG_RANLIB
 AX_PROG_LN_S
 AX_PTHREAD
 # Check for dlopen(), needed by k_order_perturbation DLL
@@ -59,8 +60,10 @@ AC_CONFIG_FILES([Makefile
                  mjdgges/Makefile
                  kronecker/Makefile
                  gensylv/Makefile
+                 libdynare++/Makefile
                  bytecode/Makefile
-                 k_order_perturbation/Makefile])
+                 k_order_perturbation/Makefile
+                 dynare_simul_/Makefile])
 
 if test "x$ax_enable_matlab" = "xyes" -a "x$ax_matlab_version_ok" = "xyes" -a "x$ax_mexopts_ok" = "xyes"; then
   if test x"$ax_pthread_ok" = "xyes"; then

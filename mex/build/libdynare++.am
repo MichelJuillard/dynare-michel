@@ -1,0 +1,78 @@
+vpath %.cpp $(top_srcdir)/../../../dynare++/sylv/cc $(top_srcdir)/../../../dynare++/tl/cc $(top_srcdir)/../../../dynare++/kord $(top_srcdir)/../../../dynare++/integ/cc $(top_srcdir)/../../../dynare++/src
+
+noinst_LIBRARIES = libdynare++.a
+
+# Can't use k_order_perturbation_CPPFLAGS, because it interacts badly with VPATH
+CPPFLAGS += -I$(top_srcdir)/../../../dynare++/src -I$(top_srcdir)/../../../dynare++/kord -I$(top_srcdir)/../../../dynare++/tl/cc -I$(top_srcdir)/../../../dynare++/utils/cc -I$(top_srcdir)/../../../dynare++/sylv/cc -I$(top_srcdir)/../../../dynare++/integ/cc -I$(top_srcdir)/../../sources
+
+CXXFLAGS += $(PTHREAD_CFLAGS)
+
+KORD_SRCS = \
+	faa_di_bruno.cpp \
+	korder_stoch.cpp \
+	journal.cpp \
+	decision_rule.cpp \
+	dynamic_model.cpp \
+	random.cpp \
+	first_order.cpp \
+	normal_conjugate.cpp \
+	approximation.cpp \
+	global_check.cpp \
+	korder.cpp
+
+SYLV_SRCS = \
+	IterativeSylvester.cpp \
+	QuasiTriangular.cpp \
+	QuasiTriangularZero.cpp \
+	GeneralMatrix.cpp \
+	GeneralSylvester.cpp \
+	SimilarityDecomp.cpp \
+	SylvException.cpp \
+	SchurDecompEig.cpp \
+	Vector.cpp \
+	TriangularSylvester.cpp \
+	SylvParams.cpp \
+	BlockDiagonal.cpp \
+	KronVector.cpp \
+	SylvMemory.cpp \
+	SymSchurDecomp.cpp \
+	SylvMatrix.cpp \
+	SchurDecomp.cpp \
+	KronUtils.cpp
+
+TL_SRCS = \
+	normal_moments.cpp \
+	int_sequence.cpp \
+	tensor.cpp \
+	ps_tensor.cpp \
+	pyramid_prod2.cpp \
+	equivalence.cpp \
+	fine_container.cpp \
+	kron_prod.cpp \
+	t_polynomial.cpp \
+	symmetry.cpp \
+	stack_container.cpp \
+	twod_matrix.cpp \
+	sparse_tensor.cpp \
+	sthread.cpp \
+	gs_tensor.cpp \
+	pyramid_prod.cpp \
+	fs_tensor.cpp \
+	permutation.cpp \
+	rfs_tensor.cpp \
+	t_container.cpp \
+	tl_static.cpp
+
+INTEG_SRCS = \
+	product.cpp \
+	quadrature.cpp \
+	quasi_mcarlo.cpp \
+	smolyak.cpp \
+	vector_function.cpp
+
+nodist_libdynare___a_SOURCES = \
+	$(KORD_SRCS) \
+	$(TL_SRCS) \
+	$(SYLV_SRCS) \
+	$(INTEG_SRCS) \
+	nlsolve.cpp
