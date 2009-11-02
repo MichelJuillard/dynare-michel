@@ -159,7 +159,17 @@ AC_CONFIG_FILES([Makefile
                  dynare++/src/Makefile
 ])
 
-AC_CONFIG_SUBDIRS([mex/build/matlab mex/build/octave])
+AC_ARG_ENABLE([matlab], AS_HELP_STRING([--disable-matlab], [disable compilation of MEX files for MATLAB]), [], [enable_matlab=yes])
+if test "x$enable_matlab" = "xyes"; then
+  AC_CONFIG_SUBDIRS([mex/build/matlab])
+fi
+AM_CONDITIONAL([ENABLE_MATLAB], [test "x$enable_matlab" = "xyes"])
+
+AC_ARG_ENABLE([octave], AS_HELP_STRING([--disable-octave], [disable compilation of MEX files for Octave]), [], [enable_octave=yes])
+if test "x$enable_octave" = "xyes"; then
+  AC_CONFIG_SUBDIRS([mex/build/octave])
+fi
+AM_CONDITIONAL([ENABLE_OCTAVE], [test "x$enable_octave" = "xyes"])
 
 # Construct final output message
 

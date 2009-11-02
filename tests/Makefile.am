@@ -22,7 +22,8 @@ OCTAVE_MODS = \
 	AIM/fs2000x10L9_L.mod \
 	AIM/fs2000x10L9_L_AIM.mod \
 	AIM/fs2000x10_L9_L.mod \
-	AIM/fs2000x10_L9_L_AIM.mod
+	AIM/fs2000x10_L9_L_AIM.mod \
+	conditional_variance_decomposition/example1.mod
 
 MODS = $(OCTAVE_MODS) \
 	arima/mod1b.mod \

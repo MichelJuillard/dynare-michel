@@ -7,7 +7,12 @@ endif
 endif
 
 # MEX must be built after dynare++ (because of kordepert)
-SUBDIRS += mex/build/octave mex/build/matlab
+if ENABLE_MATLAB
+SUBDIRS += mex/build/matlab
+endif
+if ENABLE_OCTAVE
+SUBDIRS += mex/build/octave
+endif
 
 ACLOCAL_AMFLAGS = -I m4
 
