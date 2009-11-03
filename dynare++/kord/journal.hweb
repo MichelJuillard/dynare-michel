@@ -17,8 +17,12 @@
 
 #include "int_sequence.h"
 
-#include <sys/time.h>
-#include <stdio.h>
+#ifdef _MSC_VER
+# include <Winsock2.h>
+#else
+# include <sys/time.h>
+#endif
+#include <cstdio>
 #include <iostream>
 #include <fstream>
 

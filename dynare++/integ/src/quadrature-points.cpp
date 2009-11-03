@@ -12,7 +12,7 @@
 #include "integ/cc/product.h"
 
 #include <getopt.h>
-#include <stdio.h>
+#include <cstdio>
 
 #include <cmath>
 

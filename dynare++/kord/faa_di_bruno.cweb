@@ -10,7 +10,7 @@
 #include "faa_di_bruno.h"
 #include "fine_container.h"
 
-#include <math.h>
+#include <cmath>
 
 double FaaDiBruno::magic_mult = 1.5;
 @<|FaaDiBruno::calculate| folded sparse code@>;

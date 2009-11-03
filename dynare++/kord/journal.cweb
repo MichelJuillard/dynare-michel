@@ -7,17 +7,63 @@
 #include "journal.h"
 #include "kord_exception.h"
 
-#ifndef __MINGW32__
+#if !defined(__MINGW32__) && !defined(_MSC_VER)
 # include <sys/resource.h>
 # include <sys/utsname.h>
 #endif
-#include <stdlib.h>
-#include <unistd.h>
-#include <time.h>
+#include <cstdlib>
+#ifndef _MSC_VER
+# include <unistd.h>
+#endif
+#include <ctime>
 
 SystemResources _sysres;
-#ifdef __MINGW32__
+#if defined(__MINGW32__) || defined(_MSC_VER)
 @<|sysconf| Win32 implementation@>;
+#endif
+
+#ifdef _MSC_VER
+
+struct timezone 
+{
+  int  tz_minuteswest; /* minutes W of Greenwich */
+  int  tz_dsttime;     /* type of dst correction */
+};
+
+int gettimeofday(struct timeval *tv, struct timezone *tz)
+{
+  FILETIME ft;
+  unsigned __int64 tmpres = 0;
+  static int tzflag = 0;
+
+  if (NULL != tv)
+  {
+    GetSystemTimeAsFileTime(&ft);
+
+    tmpres |= ft.dwHighDateTime;
+    tmpres <<= 32;
+    tmpres |= ft.dwLowDateTime;
+
+    tmpres /= 10;  /*convert into microseconds*/
+    /*converting file time to unix epoch*/
+    tmpres -= 11644473600000000ULL; 
+    tv->tv_sec = (long)(tmpres / 1000000UL);
+    tv->tv_usec = (long)(tmpres % 1000000UL);
+  }
+
+  if (NULL != tz)
+  {
+    if (!tzflag)
+    {
+      _tzset();
+      tzflag++;
+    }
+    tz->tz_minuteswest = _timezone / 60;
+    tz->tz_dsttime = _daylight;
+  }
+
+  return 0;
+}
 #endif
 
 @<|SystemResources| constructor code@>;
@@ -83,7 +129,7 @@ void SystemResources::getRUS(double& load_avg, long int& pg_avail,
 	gettimeofday(&now, NULL);
 	elapsed = now.tv_sec-start.tv_sec + (now.tv_usec-start.tv_usec)*1.0e-6;
 
-#ifndef __MINGW32__
+#if !defined(__MINGW32__) && !defined(_MSC_VER)
 	struct rusage rus;
 	getrusage(RUSAGE_SELF, &rus);
 	utime = rus.ru_utime.tv_sec+rus.ru_utime.tv_usec*1.0e-6;
@@ -97,7 +143,7 @@ void SystemResources::getRUS(double& load_avg, long int& pg_avail,
 	majflt = -1;
 #endif
 
-#if !defined(__MINGW32__) && !defined(__CYGWIN32__)
+#if !defined(__MINGW32__) && !defined(_MSC_VER) && !defined(__CYGWIN32__)
 	getloadavg(&load_avg, 1);
 #else
 	load_avg = -1.0;
@@ -209,7 +255,7 @@ void Journal::printHeader()
 	(*this)<< "General Public License, see http://www.gnu.org/license/gpl.html\n";
 	(*this)<< "\n\n";
 
-#if !defined(__MINGW32__)
+#if !defined(__MINGW32__) && !defined(_MSC_VER)
 	utsname info;
 	uname(&info);
 	(*this)<< "System info: ";
@@ -249,32 +295,12 @@ Number of online processors is not implemented and returns -1, since
 Windows kernel32 |GetSystemInfo| call is too complicated.
 
 @<|sysconf| Win32 implementation@>=
+#include <Windows.h>
+
 #define _SC_PAGESIZE 1
 #define _SC_PHYS_PAGES 2
 #define _SC_AVPHYS_PAGES 3
 #define _SC_NPROCESSORS_ONLN 4
-@#
-struct Win32MemoryStatus {
-	unsigned long dwLength;
-	unsigned long dwMemoryLoad;
-	unsigned int dwTotalPhys;
-	unsigned int dwAvailPhys;
-	unsigned int dwTotalPageFile;
-	unsigned int dwAvailPageFile;
-	unsigned int dwTotalVirtual;
-	unsigned int dwAvailVirtual;
-	Win32MemoryStatus();
-};
-@#
-extern "C" {
-	void __stdcall GlobalMemoryStatus(Win32MemoryStatus *);
-};
-@#
-Win32MemoryStatus::Win32MemoryStatus()
-{
-	dwLength = sizeof(Win32MemoryStatus);
-	GlobalMemoryStatus(this);
-}
 @#
 long sysconf(int name)
 {
@@ -283,12 +309,14 @@ long sysconf(int name)
 		return 1024;
 	case _SC_PHYS_PAGES:@;
 		{
-			Win32MemoryStatus memstat;
+			MEMORYSTATUS memstat;
+			GlobalMemoryStatus(&memstat);
 			return memstat.dwTotalPhys/1024;
 		}
 	case _SC_AVPHYS_PAGES:@;
 		{
-			Win32MemoryStatus memstat;
+			MEMORYSTATUS memstat;
+			GlobalMemoryStatus(&memstat);
 			return memstat.dwAvailPhys/1024;
 		}
 	case _SC_NPROCESSORS_ONLN:@;

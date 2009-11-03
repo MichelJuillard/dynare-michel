@@ -24,14 +24,11 @@
 #include "k_ord_dynare.h"
 #include "dynamic_dll.h"
 
+#include <cmath>
+
 #include <dynmex.h>
 
 #include "memory_file.h"
-
-//#include "k_order_perturbation.h"
-#ifndef DYNVERSION
-# define DYNVERSION "unknown"
-#endif
 
 /**************************************************************************************/
 /*       Dynare DynamicModel class                                                                 */
@@ -345,7 +342,7 @@ KordpDynare::populateDerivativesContainer(TwoDMatrix *g, int ord, const vector<i
     	{
 	    int j = (int)g->get(i,0)-1; // hessian indices start with 1
 	    int i1 = (int)g->get(i,1) -1;
-	    int s0 = (int)floor(i1/nJcols);
+	    int s0 = (int)floor(((double) i1)/((double) nJcols));
       int s1 = i1- (nJcols*s0);
 	    if (s0 < nJcols1)
 	      s[0] = revOrder[s0];
@@ -609,7 +606,7 @@ KordpDynare::ReorderBlocks(TwoDMatrix *tdx, const vector<int> *vOrder)
 {
   // determine order of the matrix
 
-  double dbOrder = log(tdx->ncols())/log(nJcols);
+  double dbOrder = log((double) tdx->ncols())/log((double) nJcols);
   int ibOrder = (int) dbOrder;
   if ((double) ibOrder != dbOrder || ibOrder > nOrder)
     {

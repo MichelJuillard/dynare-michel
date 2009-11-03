@@ -7,7 +7,7 @@
 #include "KronUtils.h"
 #include "BlockDiagonal.h"
 
-#include <stdio.h>
+#include <cstdio>
 #include <cmath>
 
 double TriangularSylvester::diag_zero = 1.e-15;

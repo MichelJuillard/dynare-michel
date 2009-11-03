@@ -16,7 +16,7 @@ and Geoff Kuenning.
 #define MERSENNE_TWISTER_H
 
 #include "random.h"
-#include <string.h>
+#include <cstring>
 
 @<|MersenneTwister| class declaration@>;
 @<|MersenneTwister| inline method definitions@>;

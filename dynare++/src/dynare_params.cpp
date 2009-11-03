@@ -4,8 +4,8 @@
 #include "dynare_params.h"
 
 #include <getopt.h>
-#include <stdio.h>
-#include <string.h>
+#include <cstdio>
+#include <cstring>
 
 const char* help_str = 
 "usage: dynare++ [--help] [--version] [options] <model file>\n"

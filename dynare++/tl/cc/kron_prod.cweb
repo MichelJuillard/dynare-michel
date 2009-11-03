@@ -6,7 +6,7 @@
 #include "kron_prod.h"
 #include "tl_exception.h"
 
-#include <stdio.h>
+#include <cstdio>
 
 @<|KronProdDimens| constructor code@>;
 @<|KronProd::checkDimForMult| code@>;

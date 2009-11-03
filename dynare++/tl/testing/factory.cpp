@@ -4,7 +4,7 @@
 #include "factory.h"
 
 #include <cstdlib>
-#include <math.h>
+#include <cmath>
 
 void Factory::init(const Symmetry& s, const IntSequence& nvs)
 {

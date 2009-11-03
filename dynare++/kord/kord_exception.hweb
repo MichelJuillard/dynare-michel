@@ -10,8 +10,8 @@ This is a simple code defining an exception and two convenience macros.
 #ifndef KORD_EXCEPTION_H
 #define KORD_EXCEPTION_H
 
-#include <string.h>
-#include <stdio.h>
+#include <cstring>
+#include <cstdio>
 
 #define KORD_RAISE(mes) \
 throw KordException(__FILE__, __LINE__, mes);

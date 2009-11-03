@@ -10,7 +10,7 @@
 #include "planner_builder.h"
 #include "forw_subst_builder.h"
 
-#include <stdlib.h>
+#include <cstdlib>
 
 #include <string>
 #include <cmath>

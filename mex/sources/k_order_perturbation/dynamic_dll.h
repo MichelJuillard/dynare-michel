@@ -26,10 +26,8 @@
 
 #ifdef _WIN32
 # include <windows.h>
-# ifdef K_ORDER_PERTURBATION_EXPORTS
+# ifdef _MSC_VER
 #  define K_ORDER_PERTURBATION_API __declspec(dllexport)
-# else
-#  define K_ORDER_PERTURBATION_API __declspec(dllimport)
 # endif
 #else
 # include <dlfcn.h> // unix/linux DLL (.so) handling routines

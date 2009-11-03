@@ -6,7 +6,7 @@
 @c
 #include "fine_container.h"
 
-#include <math.h>
+#include <cmath>
 
 @<|SizeRefinement| constructor code@>;
 
@@ -21,7 +21,11 @@ SizeRefinement::SizeRefinement(const IntSequence& s, int nc, int max)
 		int nr = s[i]/max;
 		if (s[i] % max != 0)
 			nr++;
+#ifndef _MSC_VER
 		int ss = (nr>0) ? (int)round(((double)s[i])/nr) : 0;
+#else // MSVC doesn't respect C99 standard and doesn't define round(); use floor(x+0.5) instead
+		int ss = (nr>0) ? (int)floor((((double)s[i])/nr) + 0.5) : 0;
+#endif
 		for (int j = 0; j < nr - 1; j++) {
 			rsizes.push_back(ss);
 			ind_map.push_back(i);

@@ -8,8 +8,8 @@
 #include "symmetry.h"
 #include "tl_exception.h"
 
-#include <stdio.h>
-#include <limits.h>
+#include <cstdio>
+#include <climits>
 
 @<|IntSequence| constructor code 1@>;
 @<|IntSequence| constructor code 2@>;

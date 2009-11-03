@@ -9,7 +9,7 @@
  * to avoid running virtual method invokation mechanism. Some
  * members, and methods are thus duplicated */ 
 
-#include <stdio.h>
+#include <cstdio>
 
 class GeneralMatrix;
 class ConstVector;

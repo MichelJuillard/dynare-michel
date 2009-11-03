@@ -8,8 +8,8 @@
 #include <dynblas.h>
 #include <dynlapack.h>
 
-#include <stdio.h>
-#include <string.h>
+#include <cstdio>
+#include <cstring>
 #include <cmath>
 
 void SylvMatrix::multLeftI(const SqSylvMatrix& m)

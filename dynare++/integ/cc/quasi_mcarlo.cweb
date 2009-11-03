@@ -6,7 +6,7 @@
 @c
 #include "quasi_mcarlo.h"
 
-#include <math.h>
+#include <cmath>
 
 @<|RadicalInverse| constructor code@>;
 @<|RadicalInverse::eval| code@>;

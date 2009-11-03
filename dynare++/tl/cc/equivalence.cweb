@@ -8,7 +8,7 @@
 #include "permutation.h"
 #include "tl_exception.h"
 
-#include <string.h>
+#include <cstring>
 
 @<|OrdSequence| method codes@>;
 @<|Equivalence| method codes@>;

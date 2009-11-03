@@ -4,8 +4,8 @@
 
 #include "SylvException.h"
 
-#include <string.h>
-#include <stdio.h>
+#include <cstring>
+#include <cstdio>
 
 SylvException::SylvException(const char* f, int l, const SylvException* s)
 {

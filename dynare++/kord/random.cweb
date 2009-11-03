@@ -6,7 +6,7 @@
 
 #include "random.h"
 
-#include <stdlib.h>
+#include <cstdlib>
 #include <limits>
 #include <cmath>
 
@@ -42,7 +42,7 @@ double RandomGenerator::normal()
 @<|SystemRandomGenerator::uniform| code@>=
 double SystemRandomGenerator::uniform()
 {
-#ifndef __MINGW32__
+#if !defined(__MINGW32__) && !defined(_MSC_VER)
 	return drand48();
 #else
 	return ((double)rand())/RAND_MAX;
@@ -53,7 +53,7 @@ double SystemRandomGenerator::uniform()
 @<|SystemRandomGenerator::initSeed| code@>=
 void SystemRandomGenerator::initSeed(int seed)
 {
-#ifndef __MINGW32__
+#if !defined(__MINGW32__) && !defined(_MSC_VER)
 	srand48(seed);
 #else
 	srand(seed);

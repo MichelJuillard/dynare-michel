@@ -683,7 +683,11 @@ void GenShockRealization::get(int n, Vector& out)
 	Vector r(numShocks());
 	RandomShockRealization::get(n, r);
 	for (int j = 0; j < numShocks(); j++)
+#ifndef _MSC_VER
 		if (! isfinite(out[j]))
+#else
+		if (!_finite(out[j]))
+#endif
 			out[j] = r[j];
 }
 

@@ -89,7 +89,7 @@ member of |thread_group| and |detach_thread_group| classes.
 # define pthread_cond_t void *
 #endif
 
-#include <stdio.h>
+#include <cstdio>
 #include <list>
 #include <map>
 

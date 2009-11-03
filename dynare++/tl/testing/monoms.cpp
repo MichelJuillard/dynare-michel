@@ -6,8 +6,8 @@
 #include "fs_tensor.h"
 
 #include <cstdlib>
-#include <math.h>
-#include <stdio.h>
+#include <cmath>
+#include <cstdio>
 
 IntGenerator intgen;
 

@@ -39,7 +39,11 @@ DynareMxArrayToString(const mxArray *mxFldp, const int len, const int width)
 const char **
 DynareMxArrayToString(const char *cNamesCharStr, const int len, const int width)
 {
-  char cNamesMX[len][width+1]; //
+  char **cNamesMX;
+  cNamesMX = (char **) mxCalloc(len, sizeof(char *));
+  for(int i = 0; i < len; i++)
+    cNamesMX[i] = (char *) mxCalloc(width+1, sizeof(char));
+
 #ifdef DEBUG
   mexPrintf("loop DynareMxArrayToString cNamesCharStr = %s \n", cNamesCharStr);
 #endif
@@ -69,6 +73,7 @@ DynareMxArrayToString(const char *cNamesCharStr, const int len, const int width)
       mexPrintf("ret [%d]= %s \n", j, ret[j]);
 #endif
     }
+  mxFree(cNamesMX);
   return ret;
 }
 

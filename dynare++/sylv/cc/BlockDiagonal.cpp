@@ -4,8 +4,8 @@
 
 #include "BlockDiagonal.h"
 
-#include <stdio.h>
-#include <string.h>
+#include <cstdio>
+#include <cstring>
 
 BlockDiagonal::BlockDiagonal(const double* d, int d_size)
 	: QuasiTriangular(d, d_size),

@@ -7,6 +7,11 @@
 
 #include <cmath>
 
+#ifdef _MSC_VER
+// For _finite()
+# include <cfloat>
+#endif
+
 using namespace ogu;
 
 /** This should not be greater than DBL_EPSILON^(1/2). */
@@ -32,7 +37,11 @@ double GoldenSectionSearch::search(OneDFunction& f, double x1, double x2)
 			else
 				x = b + dx;
 			double fx = f.eval(x);
+#ifndef _MSC_VER
 			if (! std::isfinite(fx))
+#else
+			if (! _finite(fx))
+#endif
 				return x1;
 			if (b-x1 > x2-b) {
 				// x is on the left from b
@@ -69,7 +78,11 @@ double GoldenSectionSearch::search(OneDFunction& f, double x1, double x2)
 bool GoldenSectionSearch::init_bracket(OneDFunction& f, double x1, double& x2, double& b)
 {
 	double f1 = f.eval(x1);
+#ifndef _MSC_VER
 	if (! std::isfinite(f1))
+#else
+	if (! _finite(f1))
+#endif
 		throw DynareException(__FILE__, __LINE__,
 							  "Safer point not finite in GoldenSectionSearch::init_bracket");
 
@@ -86,7 +99,11 @@ bool GoldenSectionSearch::init_bracket(OneDFunction& f, double x1, double& x2, d
 		double bsym = 2*x2 - b;
 		double fbsym = f.eval(bsym);
 		// now we know that f1, f2, and fb are finite
+#ifndef _MSC_VER
 		if (std::isfinite(fbsym)) {
+#else
+		if (_finite(fbsym)) {
+#endif
 			// we have four numbers f1, fb, f2, fbsym, we test for the
 			// following combinations to find the bracket:
 			// [f1,f2,fbsym], [f1,fb,fbsym] and [f1,fb,fbsym]
@@ -145,7 +162,11 @@ bool GoldenSectionSearch::search_for_finite(OneDFunction& f, double x1, double& 
 		double f2 = f.eval(x2);
 		b = (1-golden)*x1 + golden*x2;
 		double fb = f.eval(b);
+#ifndef _MSC_VER
 		found = std::isfinite(f2) && std::isfinite(fb);
+#else
+		found = _finite(f2) && _finite(fb);
+#endif
 		if (! found)
 			x2 = b;
 		cnt++;

@@ -4,7 +4,7 @@
 
 #include "namelist.h"
 
-#include <string.h>
+#include <cstring>
 
 using namespace ogp;
 

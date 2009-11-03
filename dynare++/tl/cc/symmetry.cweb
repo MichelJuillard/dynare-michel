@@ -7,7 +7,7 @@
 #include "symmetry.h"
 #include "permutation.h"
 
-#include <stdio.h>
+#include <cstdio>
 
 @<|Symmetry| constructor code@>;
 @<|Symmetry::findClass| code@>;

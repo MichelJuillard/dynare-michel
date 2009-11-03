@@ -5,8 +5,8 @@
 #ifndef SYLV_PARAMS_H
 #define SYLV_PARAMS_H
 
-#include <stdio.h>
-#include <string.h>
+#include <cstdio>
+#include <cstring>
 
 #if defined(MATLAB_MEX_FILE) || defined(OCTAVE_MEX_FILE)
 # include <dynmex.h>

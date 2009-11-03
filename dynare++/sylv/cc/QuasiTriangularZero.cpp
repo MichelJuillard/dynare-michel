@@ -7,7 +7,7 @@
 #include "SylvMatrix.h"
 #include "SylvException.h"
 
-#include <stdio.h>
+#include <cstdio>
 
 QuasiTriangularZero::QuasiTriangularZero(int num_zeros, const double* d,
 										 int d_size)

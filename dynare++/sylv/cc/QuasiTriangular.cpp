@@ -8,7 +8,7 @@
 
 #include <dynblas.h>
 
-#include <stdio.h>
+#include <cstdio>
 #include <cmath>
 
 using namespace std;

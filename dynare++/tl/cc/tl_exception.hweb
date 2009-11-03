@@ -15,8 +15,8 @@ for this.
 #ifndef TL_EXCEPTION_H
 #define TL_EXCEPTION_H
 
-#include <string.h>
-#include <stdio.h>
+#include <cstring>
+#include <cstdio>
 
 @<body of tl\_exception header@>;
 

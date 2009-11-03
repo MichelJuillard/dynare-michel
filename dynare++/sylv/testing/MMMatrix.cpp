@@ -4,8 +4,8 @@
 
 #include "MMMatrix.h"
 
-#include <stdio.h>
-#include <string.h>
+#include <cstdio>
+#include <cstring>
 
 MMMatrixIn::MMMatrixIn(const char* fname)
 {

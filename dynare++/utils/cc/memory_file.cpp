@@ -4,7 +4,7 @@
 
 #include "memory_file.h"
 
-#include <stdio.h>
+#include <cstdio>
 
 using namespace ogu;
 

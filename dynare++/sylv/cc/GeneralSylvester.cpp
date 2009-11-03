@@ -8,7 +8,7 @@
 #include "TriangularSylvester.h"
 #include "IterativeSylvester.h"
 
-#include <time.h>
+#include <ctime>
 
 GeneralSylvester::GeneralSylvester(int ord, int n, int m, int zero_cols,
 								   const double* da, const double* db,

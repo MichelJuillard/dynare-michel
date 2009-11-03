@@ -9,9 +9,9 @@
 
 #include <dynlapack.h>
 
-#include <math.h>
+#include <cmath>
 
-#include <string.h>
+#include <cstring>
 #include <algorithm>
 
 @<|ParameterSignal| constructor code@>;
@@ -155,7 +155,11 @@ void GaussConverterFunction::eval(const Vector& point, const ParameterSignal& si
 @<|GaussConverterFunction::multiplier| code@>=
 double GaussConverterFunction::calcMultiplier() const
 {
+#ifndef _MSC_VER
 	return sqrt(pow(M_PI, -1*indim()));
+#else
+	return sqrt(pow(3.14159265358979323846, -1*indim()));
+#endif
 }
 
 @ 

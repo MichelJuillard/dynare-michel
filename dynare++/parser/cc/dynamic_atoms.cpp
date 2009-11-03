@@ -5,8 +5,8 @@
 #include "utils/cc/exception.h"
 #include "dynamic_atoms.h"
 
-#include <string.h>
-#include <limits.h>
+#include <cstring>
+#include <climits>
 
 using namespace ogp;
 

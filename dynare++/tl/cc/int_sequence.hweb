@@ -30,7 +30,7 @@ some instances do destroy the underlying data, and some not.
 #define INT_SEQUENCE_H
 
 
-#include <string.h>
+#include <cstring>
 #include <vector>
 
 using namespace std;

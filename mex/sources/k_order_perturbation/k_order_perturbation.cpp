@@ -45,7 +45,7 @@
 
 #include <cctype>
 
-#ifdef  _MSC_VER  //&&WINDOWS
+#ifdef _MSC_VER
 
 BOOL APIENTRY
 DllMain(HANDLE hModule,
@@ -74,14 +74,8 @@ fnK_order_perturbation(void)
 {
   return 42;
 }
-// This is the constructor of a class that has been exported.
-// see k_order_perturbation.h for the class definition
-CK_order_perturbation::CK_order_perturbation()
-{
-  return;
-}
 
-#endif // _MSC_VER && WINDOWS
+#endif // _MSC_VER
 
 #if defined(MATLAB_MEX_FILE) || defined(OCTAVE_MEX_FILE)  // exclude mexFunction for other applications
 extern "C" {
