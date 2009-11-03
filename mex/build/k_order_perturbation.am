@@ -7,7 +7,8 @@ CPPFLAGS += -I$(top_srcdir)/../../../dynare++/src -I$(top_srcdir)/../../../dynar
 
 CXXFLAGS += $(PTHREAD_CFLAGS)
 
-k_order_perturbation_LDADD = $(PTHREAD_LIBS) $(LIBADD_DLOPEN) ../libdynare++/libdynare++.a
+# libdynare++ must come before pthread
+k_order_perturbation_LDADD = ../libdynare++/libdynare++.a $(PTHREAD_LIBS) $(LIBADD_DLOPEN)
 
 nodist_k_order_perturbation_SOURCES = \
 	k_order_perturbation.cpp \
