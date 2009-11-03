@@ -86,8 +86,8 @@ sqrtP = V*sqrt(D)*V';
 dim_var = qq + mm ;
 switch method
     case 'mc' 
-      seed  = [ 362436069 ; 521288629 ];
-      randn('state',seed);
+      %seed  = [ 362436069 ; 521288629 ];
+      %randn('state',seed);
       nodes = randn(number_of_particles,dim_var) ;
       weights = 1/number_of_particles ;
       nb_grid = number_of_particles ;
