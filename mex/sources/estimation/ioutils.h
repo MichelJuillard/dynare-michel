@@ -22,7 +22,7 @@
 #include "SylvException.h"
 #include <map>
 #include <string>
-using namespace std;
+//using namespace std;
 
 
 struct charArraySt
@@ -36,9 +36,8 @@ class GeneralParams
 //  map <string, int> params;
 //  const char *structName;
 public:
-  GeneralParams();
-  GeneralParams( const string& parStructName, const string& base);
-  virtual ~GeneralParams();
+  GeneralParams(){};
+  virtual ~GeneralParams(){};
   virtual string& name()=0;
   virtual void * 
     getField(const string& field)=0;

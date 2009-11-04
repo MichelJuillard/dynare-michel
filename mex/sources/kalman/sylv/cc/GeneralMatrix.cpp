@@ -15,6 +15,7 @@
 #include <cmath>
 #include <limits>
 
+//vector<int>nullVec(0);
 int GeneralMatrix::md_length = 32;
 
 GeneralMatrix::GeneralMatrix(const GeneralMatrix& m)
@@ -87,7 +88,7 @@ It ignores non-positive elements passing zero length vector is equivalent
 to Matlab operator ":" = all elements of that dimension in its order */
 GeneralMatrix::GeneralMatrix(const GeneralMatrix& a, const vector<int>&vrows, const vector<int>&vcols)
   {
-  int nrows, ncols;
+  int nrows=0, ncols=0;
   if (vrows.size()==0 && vcols.size()==0)
     {
     *this=a;
@@ -175,11 +176,11 @@ GeneralMatrix::multElements(const GeneralMatrix& m)
 GeneralMatrix& 
 GeneralMatrix::repmat(int multv, int multh)
   {
-  GeneralMatrix repMat=*(new GeneralMatrix ( multv*rows,  multh*cols));
+  GeneralMatrix* repMat=(new GeneralMatrix ( multv*rows,  multh*cols));
   for (int i=0;i<multv;++i)
     for (int j=0;j<multh;++j)
-      repMat.place(*this, multv*i,  multh*j);
-    return repMat;
+      (*repMat).place(*this, multv*i,  multh*j);
+    return *repMat;
   };
 
 
@@ -471,9 +472,9 @@ void
 GeneralMatrix::AssignByVectors(GeneralMatrix& a, const vector<int>& vToRows, const vector<int>& vToCols
       , const GeneralMatrix& b, const vector<int>& vrows, const vector<int>& vcols)
   {
-  int nrows, ncols,  tonrows, toncols;
-  const vector<int> *vpToCols, *vpToRows, *vpRows, *vpCols;
-  vector<int> *tmpvpToCols, *tmpvpToRows, *tmpvpRows, *tmpvpCols;
+  int nrows=0, ncols=0,  tonrows=0, toncols=0;
+  const vector<int> *vpToCols=0, *vpToRows=0, *vpRows=0, *vpCols=0;
+  vector<int> *tmpvpToCols=0, *tmpvpToRows=0, *tmpvpRows=0, *tmpvpCols=0;
 
   if (vToRows.size()==0 && vToCols.size()==0 &&vrows.size()==0 && vcols.size()==0)
     a=b;
@@ -579,10 +580,10 @@ GeneralMatrix::AssignByVectors(GeneralMatrix& a, const vector<int>& vToRows, con
               a.get((*vpToRows)[i]-1,(*vpToCols)[j]-1)=b.get((*vpRows)[i]-1, (*vpCols)[j]-1);
         }
       }
-    delete(tmpvpToCols); 
-    delete(tmpvpToRows);
-    delete(tmpvpRows);
-    delete(tmpvpCols);
+    if (tmpvpToCols) delete(tmpvpToCols); 
+    if (tmpvpToRows) delete(tmpvpToRows);
+    if (tmpvpRows) delete(tmpvpRows);
+    if (tmpvpCols) delete(tmpvpCols);
     }
   }
 

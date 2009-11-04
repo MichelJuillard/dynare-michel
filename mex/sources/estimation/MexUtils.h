@@ -23,7 +23,7 @@
 #include "ioutils.h"
 #include "mex.h"
 #include "matrix.h"
-#include "SylvException.h"
+//#include "SylvException.h"
 #define MIN(X,Y) ((X) < (Y) ? (X) : (Y))
 #define MAX(X,Y) ((X) > (Y) ? (X) : (Y))
 
@@ -31,13 +31,13 @@
 //#include "k_ord_dynare.h"
 //using namespace std;
 enum {base, caller, global};
-char* mexBase[]={"base", "caller", "global"};
+enum  {M_,  oo_, options_,bayestopt_, estim_params_, dr};
+extern const char *DynareParamStructsNm [];
+extern const char* mexBase[];
 
 const int numParStructs=5;
-#define numParStructsM 7
+//#define numParStructsM 6
 
-enum  {M_, dr_, oo_, options_,bayestopt_, estim_params_, trend_coeff_};
-char *DynareParamStructsNm [numParStructsM]={"M_", "dr_", "oo_", "options_", "bayestopt_", "estim_params_",  "trend_coeff_"};
 
 /**
 struct DynareParamsStructMap
@@ -61,7 +61,7 @@ char* structName;
 
 class MexStructParam;
 
-class MexStruct :public GeneralParams 
+class MexStruct :public  virtual GeneralParams 
   {
   vector <int> parStructBase;
   vector <const mxArray*> parStruct;  // array of struct pointers
@@ -69,7 +69,7 @@ class MexStruct :public GeneralParams
   const int numParStruct;
   const string structName;
   
-  mxArray* getMxField( const string& field) //throw (SYLV_MES_EXCEPTION)
+  mxArray* getMxField( const string& field) 
     {
     map<string, int>::iterator it=parNamStructMap.find(field);
     if (it==parNamStructMap.end())
@@ -77,14 +77,14 @@ class MexStruct :public GeneralParams
     return mxGetField(parStruct[it->second], 0, field.c_str() );
     }
   
-  StructBaseNameMap* getMxFieldStruct( const string& field) //throw (SYLV_MES_EXCEPTION)
+  StructBaseNameMap* getMxFieldStruct( const string& field) 
     {
     map<string, int>::iterator it=parNamStructMap.find(field);
     if (it==parNamStructMap.end())
       throw(SYLV_MES_EXCEPTION("no parameter with such name"));
     StructBaseNameMap* dpsm=new StructBaseNameMap;
-    dpsm->baseName=mexBase[parStructBase[it->second]];
-    dpsm->structName=DynareParamStructsNm[it->second];
+    dpsm->baseName=(char*)mexBase[parStructBase[it->second]];
+    dpsm->structName=(char*)DynareParamStructsNm[it->second];
     
     return dpsm;
     }
@@ -103,7 +103,7 @@ class MexStruct :public GeneralParams
       mexStruct=mexGetVariable(base, structName);
       }
     **/
-    ~MexStruct();
+    ~MexStruct(){};
     void * 
       getMxArrayField(const string& field)
       {
@@ -138,7 +138,7 @@ class MexStruct :public GeneralParams
 * holds single Matlab structure passed as parameter
 ***********************************************/
 
-class MexStructParam :public GeneralParams 
+class MexStructParam :public virtual GeneralParams 
   {
   const mxArray* parStruct; // struct pointer
   const GeneralParams* parStructParent; // if any
@@ -159,7 +159,7 @@ class MexStructParam :public GeneralParams
         parStruct(paramStruct), parStructParent(parent), structName(string("")){};
     MexStructParam(const mxArray* paramStruct, const string& name):
         parStruct(paramStruct), parStructParent(NULL), structName(name){};
-    ~MexStructParam();
+    ~MexStructParam(){};
     void * 
       getMxArrayField(const string& field)
       {

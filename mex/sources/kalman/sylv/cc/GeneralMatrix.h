@@ -8,7 +8,8 @@
 #include "Vector.h"
 #include <vector>
 using namespace std;
-vector<int>nullVec(0);
+//#define nullVec (const vector<int>(0))
+const vector<int>nullVec(0);
 
 class GeneralMatrix;
 

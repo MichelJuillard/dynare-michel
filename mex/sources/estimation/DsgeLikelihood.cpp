@@ -225,6 +225,9 @@ DsgeLikelihood::~DsgeLikelihood()
   delete &deepParams;
   delete &ghx;
   delete &ghu;
+  delete &dynareParams;
+  delete &dr;
+
   }
 
 double 
