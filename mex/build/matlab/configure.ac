@@ -31,14 +31,6 @@ if test "x$ax_enable_matlab" = "xyes"; then
 
   if test "x$ax_matlab_version_ok" = "xyes"; then
     AX_MEXOPTS
-
-    # Determine subdirectory of mex/ to be used for storing MATLAB MEX binaries
-    AX_COMPARE_VERSION([$MATLAB_VERSION], [le], [7.4], [DYNARE_MEXDIR="2007a"], [
-      DYNARE_MEXDIR="2007b"
-      if test ${MATLAB_ARCH%64} != ${MATLAB_ARCH}; then
-         AX_COMPARE_VERSION([$MATLAB_VERSION], [ge], [7.8], [DYNARE_MEXDIR="2009a-64bit"])
-      fi])
-    AC_SUBST([DYNARE_MEXDIR])
   fi
 
   CFLAGS="$MATLAB_CFLAGS"

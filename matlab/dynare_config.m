@@ -74,17 +74,46 @@ end
 
 % Add path to MEX files
 if exist('OCTAVE_VERSION')
-    path_to_mex_files = [dynareroot '../mex/octave/'] ;
+    addpath([dynareroot '../mex/octave/']);
 else
-    if matlab_ver_less_than('7.5')
-        path_to_mex_files = [dynareroot '../mex/2007a/'] ;
-    elseif matlab_ver_less_than('7.8') || isempty(regexp(computer, '.*64', 'ONCE'))
-        path_to_mex_files = [dynareroot '../mex/2007b/'] ;
-    else
-        path_to_mex_files = [dynareroot '../mex/2009a-64bit/'] ;
+    % Add win32 specific paths for Dynare Windows package
+    if strcmp(computer, 'PCWIN')
+        if matlab_ver_less_than('7.5')
+            mexpath = [dynareroot '../mex/matlab/win32-6.5.1-7.4'];
+            if exist(mexpath, 'dir')
+                addpath(mexpath)
+            end
+        else
+            mexpath = [dynareroot '../mex/matlab/win32-7.5-7.9'];
+            if exist(mexpath, 'dir')
+                addpath(mexpath)
+            end
+        end
     end
+
+    % Add win64 specific paths for Dynare Windows package
+    if strcmp(computer, 'PCWIN64')
+        if matlab_ver_less_than('7.5')
+            mexpath = [dynareroot '../mex/matlab/win64-7.2-7.4'];
+            if exist(mexpath, 'dir')
+                addpath(mexpath)
+            end
+        elseif matlab_ver_less_than('7.8')
+            mexpath = [dynareroot '../mex/matlab/win64-7.5-7.7'];
+            if exist(mexpath, 'dir')
+                addpath(mexpath)
+            end
+        else
+            mexpath = [dynareroot '../mex/matlab/win64-7.8-7.9'];
+            if exist(mexpath, 'dir')
+                addpath(mexpath)
+            end
+        end
+    end
+
+    % Add generic MATLAB path (with higher priority than the previous ones)
+    addpath([dynareroot '../mex/matlab/']);
 end
-addpath(path_to_mex_files);
 
 %% Set mex routine names
 mex_status = cell(1,3);
@@ -137,8 +166,6 @@ end
 disp(' ')
 disp('Configuring Dynare ...')
 
-remove_path_to_mex = 1;
-
 for i=1:number_of_mex_files
     test = (exist(mex_status{i,1},'file') == 3);
     if ~test
@@ -151,14 +178,12 @@ for i=1:number_of_mex_files
         else
             message = '[mex] ';
         end
-        remove_path_to_mex = 0;
     end
     disp([ message mex_status{i,3} '.' ])
 end
 
 % Test if bytecode DLL is present
 if exist('bytecode') == 3
-  remove_path_to_mex = 0;
   if ~multithread_flag
       message = '[mex] ';
   else
@@ -171,15 +196,10 @@ disp([ message 'Bytecode evaluation.' ])
 
 % Test if k-order perturbation DLL is present
 if exist('k_order_perturbation') == 3
-  remove_path_to_mex = 0;
   message = '[mex] ';
 else
   message = '[no]  ';
 end
 disp([ message 'k-order perturbation.' ])
-
-if remove_path_to_mex
-  rmpath(path_to_mex_files);
-end
 
 disp(' ')

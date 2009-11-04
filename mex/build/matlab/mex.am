@@ -10,10 +10,10 @@ LDFLAGS += $(MATLAB_LDFLAGS)
 LIBS += $(MATLAB_LIBS)
 
 all-local:
-	cd $(top_srcdir)/../../$(DYNARE_MEXDIR) && \
+	cd $(top_srcdir)/../../matlab && \
 	for p in $(PROGRAMS); do \
 		$(LN_S) -f $(abs_srcdir)/$$p $$p; \
 	done
 
 clean-local:
-	cd $(top_srcdir)/../../$(DYNARE_MEXDIR) && rm -f $(PROGRAMS)
+	cd $(top_srcdir)/../../matlab && rm -f $(PROGRAMS)

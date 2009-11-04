@@ -63,13 +63,7 @@ if (strcmpi('GLNXA64', computer) || strcmpi('PCWIN64', computer)) ...
     COMPILE_OPTIONS = [ COMPILE_OPTIONS ' -largeArrayDims' ];
 end
 
-if matlab_ver_less_than('7.5')
-    OUTPUT_DIR = '../2007a';
-elseif matlab_ver_less_than('7.8') || isempty(regexp(computer, '.*64','ONCE'))
-    OUTPUT_DIR = '../2007b';
-else
-    OUTPUT_DIR = '../2009a-64bit';
-end
+OUTPUT_DIR = '../matlab';
 
 disp(' ')
 if exist(OUTPUT_DIR,'dir')
