@@ -19,8 +19,8 @@
 
 addpath '../../matlab'; % For matlab_ver_less_than
 
-%MATLAB_PATH = matlabroot;
-MATLAB_PATH = regexprep(matlabroot,'\\','/');
+MATLAB_PATH = matlabroot;
+
 COMPILE_OPTIONS = '';
 
 if strcmpi('GLNX86', computer) || strcmpi('GLNXA64', computer) ...
