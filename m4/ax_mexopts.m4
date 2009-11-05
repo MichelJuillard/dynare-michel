@@ -50,7 +50,7 @@ case ${MATLAB_ARCH} in
     MATLAB_CFLAGS="-fexceptions -g -O2"
     MATLAB_CXXFLAGS="-g -O2"
     LIBLOC="$MATLAB/extern/lib/${MATLAB_ARCH}/microsoft"
-    MATLAB_LDFLAGS="-shared \$(top_srcdir)/mex.def"
+    MATLAB_LDFLAGS="-static-libgcc -shared \$(top_srcdir)/mex.def"
     MATLAB_LIBS="$LIBLOC/libmex.lib $LIBLOC/libmx.lib $LIBLOC/libmwlapack.lib -lstdc++"
     # Starting from MATLAB 7.5, BLAS and LAPACK are in distinct libraries
     AX_COMPARE_VERSION([$MATLAB_VERSION], [ge], [7.5], [MATLAB_LIBS="${MATLAB_LIBS} $LIBLOC/libmwblas.lib"])

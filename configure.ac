@@ -25,6 +25,13 @@ AM_INIT_AUTOMAKE([-Wall -Werror foreign])
 AC_PROG_CC
 AC_PROG_CXX
 
+AC_CANONICAL_HOST
+case ${host_os} in
+  *mingw32*)
+    LDFLAGS="$LDFLAGS -static-libgcc" # On mingw32, we don't want dynamic libgcc
+    ;;
+esac
+
 # Use C++ for testing headers
 AC_LANG([C++])
 

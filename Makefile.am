@@ -32,4 +32,4 @@ dist-hook: clean-local
 	rm -rf `find $(distdir) -name .svn`
 	rm -rf `find $(distdir)/mex/sources -name *.o`
 	rm -f $(distdir)/matlab/dynare_m$(EXEEXT)
-	$(MKDIR_P) $(distdir)/mex/2007a $(distdir)/mex/2007b $(distdir)/mex/2009a-64bit $(distdir)/mex/octave
+	$(MKDIR_P) $(distdir)/mex/matlab $(distdir)/mex/octave
