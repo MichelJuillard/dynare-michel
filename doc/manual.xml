@@ -253,6 +253,7 @@ second step, the program actually runs the computations. Boths steps are trigger
       <arg><option>savemacro</option><arg>=<replaceable>FILENAME</replaceable></arg></arg>
       <arg><option>onlymacro</option></arg>
       <arg><option>nolinemacro</option></arg>
+      <arg><option>warn_uninit</option></arg>
     </cmdsynopsis>
   </refsynopsisdiv>
 
@@ -313,6 +314,10 @@ These files may be looked at to understand errors reported at the simulation sta
     <varlistentry>
       <term><option>nolinemacro</option></term>
       <listitem><para>Instructs the macro-preprocessor to omit line numbering information in the intermediary <filename class="extension">.mod</filename> file created after the maco-processing step. Useful in conjunction with <option>savemacro</option> when one wants that to reuse the intermediary <filename class="extension">.mod</filename> file, without having it cluttered by line numbering directives.</para></listitem>
+    </varlistentry>
+    <varlistentry>
+      <term><option>warn_uninit</option></term>
+      <listitem><para>Display a warning for each variable or parameter which is not initialized. Initialization should be done through <xref linkend="param_init"/> or <xref linkend="load_params_and_steady_state"/> for parameters, or through <xref linkend="initval"/>, <xref linkend="endval"/> or <xref linkend="load_params_and_steady_state"/> for endogenous and exogenous.</para></listitem>
     </varlistentry>
   </variablelist>
 
@@ -1770,9 +1775,13 @@ The simulated endogenous variables are available in global matrix <varname>oo_.e
     </listitem>
   </varlistentry>
   <varlistentry id="conditional_variance_decomposition">
-    <term><option>conditional_variance_decomposition</option> = <replaceable>INTEGER</replaceable></term></varlistentry>
+    <term><option>conditional_variance_decomposition</option> = <replaceable>INTEGER</replaceable></term>
+    <listitem><para>See below</para></listitem>
+  </varlistentry>
  <varlistentry>
-    <term><option>conditional_variance_decomposition</option> = [<replaceable>INTEGER1</replaceable>:<replaceable>INTEGER2</replaceable>]</term></varlistentry>
+    <term><option>conditional_variance_decomposition</option> = [<replaceable>INTEGER1</replaceable>:<replaceable>INTEGER2</replaceable>]</term>
+    <listitem><para>See below</para></listitem>
+ </varlistentry>
  <varlistentry>
     <term><option>conditional_variance_decomposition</option> = [<replaceable>INTEGER1</replaceable> <replaceable>INTEGER2</replaceable> ...]</term>
 <listitem><para>Computes a conditional variance decomposition for the specified period(s). Conditional variances are given by var(y<subscript>t+k</subscript>|t). For period 1, the conditional variance decomposition provides the decomposition of the effects of shocks upon impact.</para></listitem>
