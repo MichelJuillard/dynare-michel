@@ -141,7 +141,7 @@ if vertical
         outliers2_x, outliers2_y, [symbol(2),'r']);
         set(gca,'XTick',1:nc);
         set(gca, 'XLim', [0.5, nc+0.5]);
-        set(gca, 'YLim', [mm-(MM-mm)*0.05, MM+(MM-mm)*0.05]);
+        set(gca, 'YLim', [mm-(MM-mm)*0.05-eps, MM+(MM-mm)*0.05+eps]);
 
 else
 % % % % %     plot (quartile_y, quartile_x, "b;;",
