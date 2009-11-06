@@ -200,6 +200,14 @@ if exist('k_order_perturbation') == 3
 else
   message = '[no]  ';
 end
-disp([ message 'k-order perturbation.' ])
+disp([ message 'k-order perturbation solver.' ])
+
+% Test if dynare_simul_ DLL is present
+if exist('dynare_simul_') == 3
+  message = '[mex] ';
+else
+  message = '[no]  ';
+end
+disp([ message 'k-order solution simulation.' ])
 
 disp(' ')
