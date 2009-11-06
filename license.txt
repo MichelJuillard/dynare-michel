@@ -57,7 +57,7 @@ License: GFDL-1.3+
  Invariant Sections, no Front-Cover Texts, and no Back-Cover Texts.
 
 Files: doc/userguide/*.tex, doc/userguide/*.bib, doc/userguide/*.pdf
-Copyright: 2007-2008, Tommaso Mancini Griffoli
+Copyright: 2007-2009, Tommaso Mancini Griffoli
 License: GFDL-1.3+
  Permission is granted to copy, distribute and/or modify this document
  under the terms of the GNU Free Documentation License, Version 1.3 or

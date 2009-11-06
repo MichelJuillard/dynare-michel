@@ -135,7 +135,6 @@ After installation, Dynare can be used in any directory on your computer. It is 
 
 <para>You can have several versions of Dynare coexisting (for example in <filename>c:\dynare</filename>), as long as you correctly adjust your path settings (see <xref linkend="path_warning" />).</para>
 
-<para>Note that no installer is currently avaible for <trademark class="registered">Windows</trademark> on 64 bits platforms. For the time being, please follow the instructions given in <xref linkend="install_other_systems"/> if you have such a system.</para>
 </sect2>
 
 <sect2><title>On Debian GNU/Linux and Ubuntu</title>
@@ -207,7 +206,7 @@ you can put it in a file called <filename>.octaverc</filename> in your home dire
 
 <para>You should be very careful about the content of you <trademark class="registered">MATLAB</trademark> or Octave path. You can display its content by simply typing <command>path</command> in the command window.</para>
 
-<para>The path should normally contain system directories of <trademark class="registered">MATLAB</trademark> or Octave, and the <filename>matlab</filename> subdirectory of your Dynare installation. It should not contain any other Dynare-related directory, from another Dynare version of from the version you are using. However, note that Dynare will automatically add one (and only one) of the <filename>mex/2007a</filename>, <filename>mex/2007b</filename>, <filename>mex/2009a-64bit</filename> and <filename>mex/octave</filename> subdirectories, depending on your installation.</para>
+<para>The path should normally contain system directories of <trademark class="registered">MATLAB</trademark> or Octave, and some subdirectories of your Dynare installation. You have to manually add the <filename>matlab</filename> subdirectory, and Dynare will automatically add a few other subdirectories at runtime (depending on your configuration). You must verify that there is no directory coming from another version of Dynare than the one you are planning to use.</para>
 
 <para>You have to be aware that adding other directories to your path can potentially create problems, if some of your M-files have the same names than Dynare files. Your files would then override Dynare files, and make Dynare unusable.</para>
 </sect2>
