@@ -255,7 +255,7 @@ function [fval,cost_flag,ys,trend_coeff,info] = DsgeLikelihood(xparam1,gend,data
   rfm.measurement.H = H;
   number_of_particles = 10;
   
-  LIK = gaussian_particle_filter(rfm,Y,start,mf,number_of_particles);
+  LIK = gaussian_particle_filter(rfm,Y);
   
 
   % ------------------------------------------------------------------------------
