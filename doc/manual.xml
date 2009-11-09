@@ -378,6 +378,7 @@ In the description of Dynare commands, the following conventions are observed:
 <listitem><para><xref linkend='varexo_det'/></para></listitem>
 <listitem><para><xref linkend='parameters'/></para></listitem>
 <listitem><para><xref linkend='change_type'/></para></listitem>
+<listitem><para><xref linkend='predetermined_variables'/></para></listitem>
 </itemizedlist>
 
 <refentry id="var">
@@ -606,6 +607,81 @@ change_type(var) alpha, bet;
 change_type(parameters) y, w;
 </programlisting>
 <para>Here, in the whole model file, <varname>alpha</varname> and <varname>beta</varname> will be endogenous and <varname>y</varname> and <varname>w</varname> will be parameters.</para>
+</informalexample>
+</refsect1>
+</refentry>
+
+<refentry id="predetermined_variables">
+  <refmeta>
+    <refentrytitle>predetermined_variables</refentrytitle>
+  </refmeta>
+
+  <refnamediv>
+    <refname>predetermined_variables</refname>
+    <refpurpose>declare some endogenous variables as predetermined</refpurpose>
+  </refnamediv>
+
+  <refsynopsisdiv>
+    <cmdsynopsis>
+      <command>predetermined_variables</command>
+      <arg choice="plain"><replaceable>VARIABLE_NAME</replaceable></arg>
+      <arg rep="repeat"><replaceable>VARIABLE_NAME</replaceable></arg>
+      <arg choice="plain">;</arg>
+    </cmdsynopsis>
+  </refsynopsisdiv>
+
+<refsect1><title>Description</title>
+<para>
+In Dynare, the default convention is that the timing of a variable reflects when this variable is decided. The typical example is for capital stock: since the capital stock used at current period is actually decided at the previous period, then the capital stock entering the production function is <literal>k(-1)</literal>, and the law of motion of capital must be written:
+<programlisting>
+k = i + (1-delta)*k(-1)
+</programlisting>
+</para>
+
+<para>Put another way, for stock variables, the default in Dynare is to use a
+“stock at the end of the period” concept, instead of a “stock at the beginning of the period”
+convention.</para>
+
+
+<para>The <command>predetermined_variables</command> is used to change that convention. The endogenous variables declared as predetermined variables are supposed to be decided one period ahead of all other endogenous variables. For stock variables, they are supposed
+to follow a “stock at the beginning of the period”
+convention.</para>
+
+</refsect1>
+
+<refsect1><title>Example</title>
+<informalexample>
+
+<para>The following two program snippets are strictly equivalent.</para>
+
+<formalpara><title>Using default Dynare timing convention:</title>
+<para>
+<programlisting>
+var y, k, i;
+...
+model;
+y = k(-1)^alpha;
+k = i + (1-delta)*k(-1);
+...
+end;
+</programlisting>
+</para>
+</formalpara>
+
+<formalpara><title>Using the alternative timing convention:</title>
+<para>
+<programlisting>
+var y, k, i;
+predetermined_variables k;
+...
+model;
+y = k^alpha;
+k(+1) = i + (1-delta)*k;
+...
+end;
+</programlisting>
+</para>
+</formalpara>
 </informalexample>
 </refsect1>
 </refentry>

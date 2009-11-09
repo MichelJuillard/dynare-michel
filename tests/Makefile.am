@@ -9,6 +9,7 @@ OCTAVE_MODS = \
 	ramsey.mod \
 	ramst_initval_file.mod \
 	example1_varexo_det.mod \
+	predetermined_variables.mod \
 	arima/mod1.mod \
 	arima/mod1a.mod \
 	arima/mod2.mod \
