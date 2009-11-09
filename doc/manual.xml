@@ -729,6 +729,12 @@ end;
         <listitem><para>binary comparison operators (which evaluate to either <literal>0</literal> or <literal>1</literal>): <literal>&lt;</literal>, <literal>&gt;</literal>, <literal>&lt;=</literal>, <literal>&gt;=</literal>, <literal>==</literal>, <literal>!=</literal></para></listitem>
       </itemizedlist>
     </para>
+    <para>The following operators are allowed in <replaceable>MODEL_EXPRESSION</replaceable>:
+    <itemizedlist>
+      <listitem><para>steady state operator: <literal>STEADY_STATE(</literal><replaceable>MODEL_EXPRESSION</replaceable><literal>)</literal>. This operator is used to take the value of the enclosed expression at the steady state. A typical usage is in the Taylor rule, where you may want to use the value of GDP at steady state to compute the output gap.</para></listitem>
+      <listitem id="expectation_operator"><para>expectation operator: <literal>EXPECTATION(</literal><replaceable>INTEGER</replaceable><literal>)(</literal><replaceable>MODEL_EXPRESSION</replaceable><literal>)</literal>. This operator is used to take the expectation of some expression using a different information set than the information available at current period. For example, <literal>EXPECTATION(-1)(x(+1))</literal> is equal to the expected value of variable <literal>x</literal> at next period, using the information set available at the previous period. In practice, Dynare solves this by creating an auxiliary variable equal to <literal>AUX = x(+2)</literal>, and by replacing the expectation operator by <literal>AUX(-1)</literal>. Note that a value of <literal>0</literal> for the time shift component is reserved for partial information models (not yet fully implemented).</para></listitem>
+    </itemizedlist>
+    </para>
   </sect2>
 
   <sect2><title>Functions</title>
@@ -914,6 +920,16 @@ end;
 </para>
 <para>If LaTeX names were given for variables and parameters (see <xref linkend="var"/>, <xref linkend="varexo"/>, <xref linkend="varexo_det"/>, <xref linkend="parameters"/>), then those will be used; otherwise, the plain text names will be used.</para>
 <para>Time subscripts (<literal>t</literal>, <literal>t+1</literal>, <literal>t-1</literal>, ...) will be appended to the variable names, as LaTeX subscripts.</para>
+
+<para>
+Note that the model written in the TeX file will differ from the model declared by the user in the following dimensions:
+<itemizedlist>
+<listitem><para>the timing convention of <xref linkend="predetermined_variables"/> will have been changed to the default Dynare timing convention; in other words, variables declared as predetermined will be lagged on period back,</para></listitem>
+<listitem><para>the <link linkend="expectation_operator">expectation operators</link> will have been removed, replaced by auxiliary variables and new equations as explained in the documentation of the operator,</para></listitem>
+<listitem><para>for stochastic models, variables with leads or lags greater or equal than two will have been removed, replaced by new auxiliary variables and equations.</para></listitem>
+</itemizedlist>
+</para>
+
 </refsect1>
 </refentry>
 
@@ -937,6 +953,9 @@ end;
 <para>If your <filename class="extension">.mod</filename> file is <filename><replaceable>FILENAME</replaceable>.mod</filename>, then Dynare will create a file called <filename><replaceable>FILENAME</replaceable>_static.tex</filename>, containing the list of all the equations of the steady state model.
 </para>
 <para>If LaTeX names were given for variables and parameters (see <xref linkend="var"/>, <xref linkend="varexo"/>, <xref linkend="varexo_det"/>, <xref linkend="parameters"/>), then those will be used; otherwise, the plain text names will be used.</para>
+<para>
+Note that the model written in the TeX file will differ from the model declared by the user in the some dimensions, see <xref linkend="write_latex_dynamic_model"/>.
+</para>
 </refsect1>
 </refentry>
 
