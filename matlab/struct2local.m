@@ -1,4 +1,8 @@
 function struct2local(S),
+% The argument is a structure possibly containing several fields.
+% This function will create, in the workspace of the calling function,
+% as many variables as there are fields in the structure, assigning
+% them the value of the fields.
 
 % Copyright (C) 2009 Dynare Team
 %

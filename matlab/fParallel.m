@@ -1,4 +1,18 @@
-function fParallel(fblck,nblck,whoiam,ThisMatlab,fname);
+function fParallel(fblck,nblck,whoiam,ThisMatlab,fname)
+% In a parallelization context, this function is launched on slave
+% machines, and acts as a wrapper around the function containing the
+% computing task itself.
+%
+% INPUTS
+%  fblck [int]          index number of the first thread to run in this
+%                       MATLAB instance
+%  nblck [int]          index number of the first thread to run in this
+%                       MATLAB instance
+%  whoiam [int]         index number of this CPU among all CPUs in the
+%                       cluster
+%  ThisMatlab [int]     index number of this slave machine in the cluster
+%                       (entry in options_.parallel)
+%  fname [string]       function to be run, containing the computing task
 
 % Copyright (C) 2009 Dynare Team
 %
@@ -32,8 +46,9 @@ diary( [fname,'_',int2str(whoiam),'.log']);
 % configure dynare environment
 dynareroot = dynare_config();
 
+% Load input data
 load( [fname,'_input']) 
-% keyboard;
+
 if exist('fGlobalVar'),
   globalVars = fieldnames(fGlobalVar);
   for j=1:length(globalVars),
@@ -42,11 +57,13 @@ if exist('fGlobalVar'),
   struct2local(fGlobalVar);
 end
 
+% On UNIX, mount the master working directory through SSH FS
 if isunix & Parallel(ThisMatlab).Local==0,
     system(['mkdir ~/MasterRemoteMirror_',fname,'_',int2str(whoiam)]);
     system(['sshfs ',Parallel(ThisMatlab).user,'@',fInputVar.MasterName,':/',fInputVar.DyMo,' ~/MasterRemoteMirror_',fname,'_',int2str(whoiam)]);
 end
 
+% Special hack for MH directory
 if isfield(fInputVar,'MhDirectoryName') & Parallel(ThisMatlab).Local==0,
     if isunix,
         fInputVar.MhDirectoryName = ['~/MasterRemoteMirror_',fname,'_',int2str(whoiam),'/',fInputVar.MhDirectoryName];
@@ -56,27 +73,24 @@ if isfield(fInputVar,'MhDirectoryName') & Parallel(ThisMatlab).Local==0,
 end
 
 fInputVar.Parallel = Parallel;
-% lounch the routine to be run in parallel
+% Launch the routine to be run in parallel
 tic,
 fOutputVar = feval(fname, fInputVar ,fblck, nblck, whoiam, ThisMatlab);
 toc,
 if isfield(fOutputVar,'OutputFileName'),
     OutputFileName = fOutputVar.OutputFileName;
-%     rmfield(fOutputVar,'OutputFileName');
 else
     OutputFileName = '';
 end
 
-%%% Sincronismo "Esterno" %%%%%%%%%%%%%
-%%% Ogni Processo quando ha finito lo notifica cancellando un file ... 
-% keyboard;
 if(whoiam)
+    
+  % Save the output result
   save([ fname,'_output_',int2str(whoiam),'.mat'],'fOutputVar' )
   
-  
+  % Inform the master that the job is finished, and transfer the output data
   if Parallel(ThisMatlab).Local
     delete(['P_',fname,'_',int2str(whoiam),'End.txt']);
-
   else
     if isunix,            
       for j=1:size(OutputFileName,1),

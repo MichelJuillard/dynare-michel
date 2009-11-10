@@ -30,12 +30,9 @@ end
 ALPHA = 0.2;				    % increase too much with the number of simulations. 
 tmp = zeros(NumberOfDraws*nblck,3);
 UDIAG = zeros(NumberOfLines,6,npar-fpar+1);
-% keyboard;
 
 if whoiam
-    % keyboard;
     waitbarString = ['Please wait... McMCDiagnostics (' int2str(fpar) 'of' int2str(npar) ')...'];
-    % waitbarTitle=['McMCDiagnostics ',Parallel(ThisMatlab).PcName];
     if Parallel(ThisMatlab).Local,
         waitbarTitle=['Local '];
     else
@@ -89,7 +86,6 @@ for j=fpar:npar,
     end
     fprintf('Done! \n');
     if whoiam,  
-        %             keyboard;
         waitbarString = [ 'Parameter ' int2str(j) '/' int2str(npar) ' done.'];
         fMessageStatus((j-fpar+1)/(npar-fpar+1),whoiam,waitbarString, waitbarTitle, Parallel(ThisMatlab), MasterName, DyMo)
     end

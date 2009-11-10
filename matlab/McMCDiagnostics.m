@@ -96,7 +96,7 @@ localVars.NumberOfLines = NumberOfLines;
 localVars.time = time;
 localVars.M_ = M_;
 
-if isnumeric(options_.parallel),% | isunix, % for the moment exclude unix platform from parallel implementation
+if isnumeric(options_.parallel),
     fout = McMCDiagnostics_core(localVars,1,npar,0);
     UDIAG = fout.UDIAG;
     clear fout
@@ -108,52 +108,6 @@ else
     end
 end
 
-% for j=1:npar
-%   fprintf('    Parameter %d...  ',j);
-%   for b = 1:nblck
-%     startline = 0;
-%     for n = 1:NumberOfMcFilesPerBlock
-%       %load([MhDirectoryName '/' mcfiles(n,1,b).name],'x2');
-%       load([MhDirectoryName '/' M_.fname '_mh',int2str(n),'_blck' int2str(b) ...
-% 	    '.mat'],'x2');
-%       nx2 = size(x2,1);
-%       tmp((b-1)*NumberOfDraws+startline+(1:nx2),1) = x2(:,j);
-% %      clear x2;
-%       startline = startline + nx2;
-%     end
-% % $$$     %load([MhDirectoryName '/' mcfiles(NumberOfMcFilesPerBlock,1,b).name],'x2');
-% % $$$     load([MhDirectoryName '/' M_.fname '_mh',int2str(NumberOfMcFilesPerBlock),'_blck' int2str(b) '.mat'],'x2');
-% % $$$     tmp((b-1)*NumberOfDraws+startline+1:(b-1)*NumberOfDraws+MAX_nruns*(LastFileNumber-1)+LastLineNumber,1) = x2(:,j);
-% % $$$     clear x2;
-% % $$$     startline = startline + LastLineNumber;
-%   end
-%   tmp(:,2) = kron(transpose(1:nblck),ones(NumberOfDraws,1));
-%   tmp(:,3) = kron(ones(nblck,1),time'); 
-%   tmp = sortrows(tmp,1);
-%   ligne   = 0;
-%   for iter  = Origin:StepSize:NumberOfDraws
-%     ligne = ligne+1;
-%     linea = ceil(0.5*iter);
-%     n     = iter-linea+1;
-%     cinf  = round(n*ALPHA/2);
-%     csup  = round(n*(1-ALPHA/2));
-%     CINF  = round(nblck*n*ALPHA/2);
-%     CSUP  = round(nblck*n*(1-ALPHA/2));
-%     temp  = tmp(find((tmp(:,3)>=linea) & (tmp(:,3)<=iter)),1:2);
-%     UDIAG(ligne,1,j) = temp(CSUP,1)-temp(CINF,1);
-%     moyenne = mean(temp(:,1));%% Pooled mean.
-%     UDIAG(ligne,3,j) = sum((temp(:,1)-moyenne).^2)/(nblck*n-1);
-%     UDIAG(ligne,5,j) = sum(abs(temp(:,1)-moyenne).^3)/(nblck*n-1);
-%     for i=1:nblck
-%       pmet = temp(find(temp(:,2)==i));
-%       UDIAG(ligne,2,j) = UDIAG(ligne,2,j) + pmet(csup,1)-pmet(cinf,1);
-%       moyenne = mean(pmet,1); %% Within mean. 
-%       UDIAG(ligne,4,j) = UDIAG(ligne,4,j) + sum((pmet(:,1)-moyenne).^2)/(n-1);
-%       UDIAG(ligne,6,j) = UDIAG(ligne,6,j) + sum(abs(pmet(:,1)-moyenne).^3)/(n-1);
-%     end
-%   end
-%   fprintf('Done! \n');
-% end
 UDIAG(:,[2 4 6],:) = UDIAG(:,[2 4 6],:)/nblck;
 disp(' ')
 clear pmet temp moyenne CSUP CINF csup cinf n linea iter tmp;    

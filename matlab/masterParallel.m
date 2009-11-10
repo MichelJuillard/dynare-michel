@@ -1,4 +1,33 @@
 function [fOutVar,nBlockPerCPU, totCPU] = masterParallel(Parallel,fBlock,nBlock,NamFileInput,fname,fInputVar,fGlobalVar)
+% Top-level function called on the master computer when parallelizing a task.
+%
+% The number of parallelized threads will be equal to (nBlock-fBlock+1).
+%
+% INPUTS
+%   Parallel [struct vector]   copy of options_.parallel
+%   fBlock [int]               index number of the first thread
+%                              (between 1 and nBlock)
+%   nBlock [int]               index number of the last thread
+%   NamFileInput [cell array]  containins the list of input files to be
+%                              copied in the working directory of remote slaves
+%                              2 columns, as many lines as there are files
+%                              - first column contains directory paths
+%                              - second column contains filenames
+%   fname [string]             name of the function to be parallelized, and
+%                              which will be run on the slaves
+%   fInputVar [struct]         structure containing local variables to be used
+%                              by fName on the slaves
+%   fGlobalVar [struct]        structure containing global variables to be used
+%                              by fName on the slaves
+%
+% OUTPUT
+%   fOutVar [struct vector]    result of the parallel computation, one
+%                              struct per thread
+%   nBlockPerCPU [int vector]  for each CPU used, indicates the number of
+%                              threads run on that CPU
+%   totCPU [int]               total number of CPU used (can be lower than
+%                              the number of CPU declared in "Parallel", if
+%                              the number of required threads is lower)
 
 % Copyright (C) 2009 Dynare Team
 %
@@ -17,9 +46,9 @@ function [fOutVar,nBlockPerCPU, totCPU] = masterParallel(Parallel,fBlock,nBlock,
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-global options_
-
 totCPU=0;
+
+% Determine my hostname and my working directory
 DyMo=pwd;
 fInputVar.DyMo=DyMo;
 if isunix,
@@ -30,17 +59,20 @@ end
 MasterName=deblank(MasterName);
 fInputVar.MasterName = MasterName;
 
+% Save input data for use by the slaves
 if exist('fGlobalVar'),
 save([fname,'_input.mat'],'fInputVar','fGlobalVar') 
 else
 save([fname,'_input.mat'],'fInputVar') 
 end
 save([fname,'_input.mat'],'Parallel','-append') 
+
+% Determine the total number of available CPUs, and the number of threads to run on each CPU
 for j=1:length(Parallel),
     nCPU(j)=length(Parallel(j).NumCPU);
     totCPU=totCPU+nCPU(j);
 end
-% keyboard;
+
 nCPU=cumsum(nCPU);
 offset0 = fBlock-1;
 if (nBlock-offset0)>totCPU,
@@ -52,37 +84,11 @@ else
     totCPU = nBlock-offset0;
 end
 
-% if totCPU==1,
-%     if Parallel.Local == 1
-%         State= system (['psexec -W ',DyMo, ' -a ',int2str(Parallel.NumCPU(1)),' -realtime  matlab -nosplash -nodesktop -minimize -r fParallel(',int2str(fBlock),',',int2str(nBlock),',1,1,''',fname,''')']);
-%         
-%     else
-%         if ~strcmp(Parallel.PcName,MasterName),
-%             delete(['\\',Parallel(1).PcName,'\',Parallel(1).RemoteDrive,'$\',Parallel(1).RemoteFolder,'\*.*']);
-%             adir=ls(['\\',Parallel(1).PcName,'\',Parallel(1).RemoteDrive,'$\',Parallel(1).RemoteFolder,'\']);
-%             for j=3:size(adir,1)
-%                 rmdir(['\\',Parallel(1).PcName,'\',Parallel(1).RemoteDrive,'$\',Parallel(1).RemoteFolder,'\',adir(j,:)],'s')
-%             end
-%         end
-%         
-%         system (['xcopy ',fname,'_input.mat "\\',Parallel.PcName,'\',Parallel.RemoteDrive,'$\',Parallel.RemoteFolder,'" /Y']);
-%         for j=1:size(NamFileInput,1)
-%             copyfile([NamFileInput{j,1},NamFileInput{j,2}],['\\',Parallel(1).PcName,'\',Parallel(1).RemoteDrive,'$\',Parallel(1).RemoteFolder,'\',NamFileInput{j,1}])
-%         end
-%         
-%               
-%         State= system (['psexec \\',Parallel.PcName,' -e -u ',Parallel.user,' -p ',Parallel.passwd,' -W ',Parallel.RemoteDrive,':\',Parallel.RemoteFolder,'\ -a ',int2str(Parallel.NumCPU(1)),' -realtime  matlab -nosplash -nodesktop -minimize -r fParallel(',int2str(fBlock),',',int2str(nBlock),',1,1,''',fname,''')']);
-%         
-%         system (['xcopy "\\',Parallel.PcName,'\',Parallel.RemoteDrive,'$\',Parallel.RemoteFolder,'\',fname,'_output_1.mat" /Y']);
-%         for j=1:size(NamFileOutput,1)
-%             copyfile(['\\',Parallel(1).PcName,'\',Parallel(1).RemoteDrive,'$\',Parallel(1).RemoteFolder,'\',NamFileOutput{j,1},NamFileOutput{j,2}],NamFileOutput{j,1})
-%         end
-%     end
-%     load([fname,'_output_1.mat'],'fOutputVar');
-%     
-% else
+    % Clean up remnants of previous runs
     mydelete(['comp_status_',fname,'*.mat'])
     mydelete(['P_',fname,'*End.txt']);
+    
+    % Create a shell script containing the commands to launch the required tasks on the slaves
     fid = fopen('ConcurrentCommand1.bat','w+');
     for j=1:totCPU,
         
@@ -102,7 +108,6 @@ end
           if isunix,
             if exist('OCTAVE_VERSION')
             command1=['octave --eval fParallel\(',int2str(offset+1),',',int2str(sum(nBlockPerCPU(1:j))),',',int2str(j),',',int2str(indPC),',\''',fname,'\''\) &'];
-%             command1=['ssh localhost "cd ',DyMo, '; ',matlabroot,'/bin/matlab -nosplash -nodesktop -minimize -r fParallel\(',int2str(offset+1),',',int2str(sum(nBlockPerCPU(1:j))),',',int2str(j),',',int2str(indPC),',\''',fname,'\''\);" &'];
             else
             command1=['matlab -nosplash -nodesktop -minimize -r fParallel\(',int2str(offset+1),',',int2str(sum(nBlockPerCPU(1:j))),',',int2str(j),',',int2str(indPC),',\''',fname,'\''\) &'];
             end
@@ -114,7 +119,6 @@ end
             end
           end
         else
-%           keyboard;
             if isunix,
               [tempo, RemoteName]=system(['ssh ',Parallel(indPC).user,'@',Parallel(indPC).PcName,' "ifconfig  | grep \''inet addr:\''| grep -v \''127.0.0.1\'' | cut -d: -f2 | awk \''{ print $1}\''"']);
               RemoteName=RemoteName(1:end-1);
@@ -136,7 +140,6 @@ end
                     if isunix,
                       system(['ssh ',Parallel(indPC).user,'@',Parallel(indPC).PcName,' rm -fr ',Parallel(indPC).RemoteFolder,'/*']);
                     else
-%                       delete(['\\',Parallel(indPC).PcName,'\',Parallel(indPC).RemoteDrive,'$\',Parallel(indPC).RemoteFolder,'\*.*']);
                       mydelete('*.*',['\\',Parallel(indPC).PcName,'\',Parallel(indPC).RemoteDrive,'$\',Parallel(indPC).RemoteFolder,'\']);
                       adir=dir(['\\',Parallel(indPC).PcName,'\',Parallel(indPC).RemoteDrive,'$\',Parallel(indPC).RemoteFolder,'\']);
                       for jdir=3:length(adir)
@@ -189,32 +192,26 @@ end
               end
               end
             end
-
-            
-            
-            
         end
         fprintf(fid,'%s\n',command1);
     end
     
     fclose(fid);
     
+    % Run the slaves
     if isunix,
     system('sh ConcurrentCommand1.bat &');
     pause(1)
     else
     system('ConcurrentCommand1.bat');
     end
-    
+
+    % Wait for the slaves to finish their job, and display some progress information meanwhile
     t0=cputime;
     t00=cputime;
     hh=NaN(1,nBlock);
     if exist('OCTAVE_VERSION'),
         diary off;
-%         frmt_done = '';
-%         for j=1:totCPU,
-%           frmt_done = [frmt_done,' %3.f%% '];
-%         end
     else
         hfigstatus = figure('name',['Parallel ',fname],...
             'MenuBar', 'none', ...
@@ -235,8 +232,6 @@ end
         waitbarString = '';
         statusString = '';
         pause(1)
-%         keyboard;
-        %             if (cputime-t0)>10,
         stax = dir(['comp_status_',fname,'*.mat']);
         for j=1:length(stax),
             
@@ -249,23 +244,11 @@ end
                 status_String{j} = waitbarString;  
                 status_Title{j} = waitbarTitle;  
                 idCPU(j) = njob;
-%                 idThisMatlab(j) = ThisMatlab;
-%                 idCPU(j) = min((find(cumBlockPerCPU>=njob)));
               end
                 if prtfrc==1, delete(stax(j).name), end
             catch
                 
             end
-%             if ~exist('OCTAVE_VERSION'),
-%                 if ishandle(hh(njob)),
-%                     waitbar(prtfrc,hh(njob),waitbarString);
-%                     if prtfrc==1, close(hh(njob));  end
-%                 else
-%                     hh(njob) = waitbar(0,waitbarString);
-%                     set(hh(njob),'Name',['Parallel ',waitbarTitle]);
-%                 end
-%             end
-
         end
             if exist('OCTAVE_VERSION'),
               printf([statusString,'\r'], 100 .* pcerdone);
@@ -273,55 +256,34 @@ end
                   figure(hfigstatus),
               for j=1:length(stax),
                   axes(hstatus(idCPU(j))),
-%                   delete(get(gca,'children'))
                   hpat = findobj(hstatus(idCPU(j)),'Type','patch');
                   if ~isempty(hpat),
                     set(hpat,'XData',[0 0 pcerdone(j) pcerdone(j)])
                   else
                     patch([0 0 pcerdone(j) pcerdone(j)],[0 1 1 0],'r','EdgeColor','r')
                   end
-%                   xlabel(status_String{j});
                   title([status_Title{j},' - ',status_String{j}]);
               end
             end
-        %                 disp(' ')
-        %                 t0=cputime;
-        %             end
         if isempty(dir(['P_',fname,'_*End.txt'])) 
             mydelete(['comp_status_',fname,'*.mat'])
             if ~exist('OCTAVE_VERSION'),
-%                 for j=1:length(hh),
-%                     if ishandle(hh(j)),
-%                         close(hh(j))
-%                     end
-%                 end
                 close(hfigstatus),
             else
                 printf('\n');
                 diary on;
             end
-
-%             for j=1:indPC,
-%                 if Parallel(j).Local==0 & ~strcmp(Parallel(indPC).PcName,MasterName),
-%                     for jfil = 1:size(NamFileOutput,1)
-%                     system (['xcopy "\\',Parallel(j).PcName,'\',Parallel(j).RemoteDrive,'$\',Parallel(j).RemoteFolder,'\',NamFileOutput{jfil,1},NamFileOutput{jfil,2},'" ' ,NamFileOutput{jfil,1},' /Y']);
-%                     end
-%                     system (['xcopy "\\',Parallel(j).PcName,'\',Parallel(j).RemoteDrive,'$\',Parallel(j).RemoteFolder,'\',fname,'_output_*.mat" /Y']);
-%                     
-%                 end
-%             end
             break
         end
     end
-    delete([fname,'_input.mat'])
+    
+    % Create return value
     for j=1:totCPU,
       load([fname,'_output_',int2str(j),'.mat'],'fOutputVar');
       delete([fname,'_output_',int2str(j),'.mat']);
       fOutVar(j)=fOutputVar;
-
-      
     end
-      
-delete ConcurrentCommand1.bat
 
-% end
+% Cleanup
+delete([fname,'_input.mat'])
+delete ConcurrentCommand1.bat
