@@ -57,19 +57,33 @@ function time_series = extended_path(initial_conditions,sample_size,init)
  covariance_matrix_upper_cholesky = chol(covariance_matrix); 
  
  tdx = M_.maximum_lag+1; 
+ norme = 0;
+
+ % Set verbose option
+ verbose = 1;
+ 
  
  for t=1:sample_size
      shocks = exp(randn(1,number_of_structural_innovations)*covariance_matrix_upper_cholesky-.5*variances(positive_var_indx)');
-     oo_.exo_simul(tdx,positive_var_indx) = shocks; 
+     oo_.exo_simul(tdx,positive_var_indx) = shocks;
      info = perfect_foresight_simulation;
-     if ~info.convergence
-         disp('homotopy')
-         info = homotopic_steps(tdx,positive_var_indx,shocks,0,.5);
+     if verbose
+         t
+         info
      end
      if ~info.convergence
-         disp('merdre!')
+         norme
+         info = homotopic_steps(tdx,positive_var_indx,shocks,norme,.5);
+         if verbose
+             info
+         end
+     else
+         norme = sqrt(sum((shocks-1).^2,2));
      end
-     time_series(:,t+1) = oo_.endo_simul(:,tdx); 
+     if ~info.convergence
+         error('I am not able to simulate this model!')
+     end
+     time_series(:,t+1) = oo_.endo_simul(:,tdx);
      oo_.endo_simul(:,1:end-1) = oo_.endo_simul(:,2:end); 
      oo_.endo_simul(:,end) = oo_.steady_state;
  end
