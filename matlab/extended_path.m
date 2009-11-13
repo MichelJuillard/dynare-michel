@@ -1,4 +1,4 @@
-function time_series = extended_path(initial_conditions,sample_size)
+function time_series = extended_path(initial_conditions,sample_size,init)
 % Stochastic simulation of a non linear DSGE model using the Extended Path method (Fair and Taylor 1983). A time
  % series of size T  is obtained by solving T perfect foresight models. 
  %    
@@ -44,7 +44,7 @@ function time_series = extended_path(initial_conditions,sample_size)
  make_ex_; 
  
  % Initialize the endogenous variables.
- make_y_; 
+ make_y_;
  
  % Initialize the output array.
  time_series = NaN(M_.endo_nbr,sample_size+1); 
@@ -58,10 +58,44 @@ function time_series = extended_path(initial_conditions,sample_size)
  
  tdx = M_.maximum_lag+1; 
  
- for t=1:sample_size 
-     oo_.exo_simul(tdx,positive_var_indx) = exp(randn(1,number_of_structural_innovations)*covariance_matrix_upper_cholesky-.5*variances(positive_var_indx)'); 
-     perfect_foresight_simulation; 
+ for t=1:sample_size
+     shocks = exp(randn(1,number_of_structural_innovations)*covariance_matrix_upper_cholesky-.5*variances(positive_var_indx)');
+     oo_.exo_simul(tdx,positive_var_indx) = shocks; 
+     info = perfect_foresight_simulation;
+     if ~info.convergence
+         disp('homotopy')
+         info = homotopic_steps(tdx,positive_var_indx,shocks,0,.5);
+     end
+     if ~info.convergence
+         disp('merdre!')
+     end
      time_series(:,t+1) = oo_.endo_simul(:,tdx); 
      oo_.endo_simul(:,1:end-1) = oo_.endo_simul(:,2:end); 
-     oo_.endo_simul(:,end) = oo_.steady_state; 
- end 
+     oo_.endo_simul(:,end) = oo_.steady_state;
+ end
+ 
+ 
+function info = homotopic_steps(tdx,positive_var_indx,shocks,init_weight,step)
+    global oo_
+    weight   = init_weight;
+    max_iter = 100;
+    iter     = 0;
+    reduce_step = 0;
+    while iter<=100 &&  weight<=1
+        iter = iter+1;
+        old_weight = weight;
+        weight = weight+step;
+        oo_.exo_simul(tdx,positive_var_indx) = weight*shocks+(1-weight);
+        info = perfect_foresight_simulation;
+        if ~info.convergence
+            reduce_step = 1;
+            break
+        end
+    end
+    if reduce_step
+        step=step/1.5;
+        info = homotopic_steps(tdx,positive_var_indx,shocks,old_weight,step);
+    elseif weight<1 && iter<100
+        oo_.exo_simul(tdx,positive_var_indx) = shocks;
+        info = perfect_foresight_simulation;
+    end
