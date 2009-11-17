@@ -23,6 +23,8 @@ AC_REQUIRE([AX_MATLAB_VERSION])
 AC_REQUIRE([AC_CANONICAL_HOST])
 AC_REQUIRE([AC_PROG_SED])
 
+AX_COMPARE_VERSION([$MATLAB_VERSION], [lt], [6.5], [AC_MSG_ERROR([Your MATLAB is too old, please upgrade to 6.5 (R13) at least.])])
+
 AC_MSG_CHECKING([for options to compile MEX for MATLAB])
 
 MATLAB_CPPFLAGS="-I$MATLAB/extern/include"
@@ -49,7 +51,17 @@ case ${MATLAB_ARCH} in
   win32 | win64)
     MATLAB_CFLAGS="-fexceptions -g -O2"
     MATLAB_CXXFLAGS="-g -O2"
-    LIBLOC="$MATLAB/extern/lib/${MATLAB_ARCH}/microsoft"
+    case $MATLAB_VERSION in
+      6.5*|7.0|7.0.0|7.0.4)
+        LIBLOC="$MATLAB/extern/lib/${MATLAB_ARCH}/microsoft/msvc60"
+        ;;
+      7.0.1)
+        AC_MSG_ERROR([MATLAB version 7.0.1 (R14SP1) is buggy (LAPACK library missing for MSVC), and can't be used for compiling MEX files])
+        ;;
+      *)
+        LIBLOC="$MATLAB/extern/lib/${MATLAB_ARCH}/microsoft"
+        ;;
+    esac
     MATLAB_LDFLAGS="-static-libgcc -shared \$(top_srcdir)/mex.def"
     MATLAB_LIBS="$LIBLOC/libmex.lib $LIBLOC/libmx.lib $LIBLOC/libmwlapack.lib -lstdc++"
     # Starting from MATLAB 7.5, BLAS and LAPACK are in distinct libraries
