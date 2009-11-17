@@ -77,6 +77,9 @@ function info = perfect_foresight_simulation(init)
  info.iterations.time  = zeros(options_.maxit_,1); 
  info.iterations.error = info.iterations.time; 
  
+ last_line = options_.maxit_;
+ error_growth = 0;
+ 
  h1 = clock; 
  for iter = 1:options_.maxit_ 
      h2 = clock; 
@@ -114,9 +117,16 @@ function info = perfect_foresight_simulation(init)
          c = reshape(c,ny,periods); 
          endo_simul(:,it_init+(0:periods-1)) = endo_simul(:,it_init+(0:periods-1))+options_.slowc*c; 
      end 
-     err = max(max(abs(c./options_.scalv'))); 
+     err = max(max(abs(c))); 
      info.iterations.time(iter)  = etime(clock,h2); 
-     info.iterations.error(iter) = err;   
+     info.iterations.error(iter) = err;
+     if iter>1
+         error_growth = error_growth + (info.iterations.error(iter)>info.iterations.error(iter-1));
+     end
+     if isnan(err) || error_growth>3
+         last_line = iter;
+         break
+     end
      if err < options_.dynatol 
          stop = 1; 
          info.time  = etime(clock,h1); 
@@ -128,8 +138,10 @@ function info = perfect_foresight_simulation(init)
      end
  end 
  
- if ~stop 
+ if ~stop
      info.time  = etime(clock,h1);
      info.error = err;
      info.convergence = 0;
+     info.iterations.time  = info.iterations.time(1:last_line);
+     info.iterations.error = info.iterations.error(1:last_line);
  end

@@ -60,21 +60,21 @@ function time_series = extended_path(initial_conditions,sample_size,init)
  norme = 0;
 
  % Set verbose option
- verbose = 1;
- 
+ verbose = 0;
  
  for t=1:sample_size
      shocks = exp(randn(1,number_of_structural_innovations)*covariance_matrix_upper_cholesky-.5*variances(positive_var_indx)');
      oo_.exo_simul(tdx,positive_var_indx) = shocks;
      info = perfect_foresight_simulation;
+     time = info.time;
      if verbose
          t
          info
      end
      if ~info.convergence
-         norme
-         info = homotopic_steps(tdx,positive_var_indx,shocks,norme,.5);
+         info = homotopic_steps(tdx,positive_var_indx,shocks,norme,.2);
          if verbose
+             norme
              info
          end
      else
@@ -83,6 +83,7 @@ function time_series = extended_path(initial_conditions,sample_size,init)
      if ~info.convergence
          error('I am not able to simulate this model!')
      end
+     info.time = info.time+time;
      time_series(:,t+1) = oo_.endo_simul(:,tdx);
      oo_.endo_simul(:,1:end-1) = oo_.endo_simul(:,2:end); 
      oo_.endo_simul(:,end) = oo_.steady_state;
@@ -92,8 +93,9 @@ function time_series = extended_path(initial_conditions,sample_size,init)
 function info = homotopic_steps(tdx,positive_var_indx,shocks,init_weight,step)
     global oo_
     weight   = init_weight;
-    max_iter = 100;
+    verbose  = 0;
     iter     = 0;
+    time     = 0;
     reduce_step = 0;
     while iter<=100 &&  weight<=1
         iter = iter+1;
@@ -101,15 +103,34 @@ function info = homotopic_steps(tdx,positive_var_indx,shocks,init_weight,step)
         weight = weight+step;
         oo_.exo_simul(tdx,positive_var_indx) = weight*shocks+(1-weight);
         info = perfect_foresight_simulation;
+        time = time+info.time;
+        if verbose
+            [iter,step]
+            [info.iterations.time,info.iterations.error]
+        end
         if ~info.convergence
+            if verbose
+                disp('Reduce step size!')
+            end
             reduce_step = 1;
             break
+        else
+            if length(info.iterations.error)<5
+                if verbose
+                    disp('Increase step size!')
+                end
+                step = step*1.5;
+            end
         end
     end
     if reduce_step
         step=step/1.5;
         info = homotopic_steps(tdx,positive_var_indx,shocks,old_weight,step);
+        time = time+info.time;
     elseif weight<1 && iter<100
         oo_.exo_simul(tdx,positive_var_indx) = shocks;
         info = perfect_foresight_simulation;
+        info.time = info.time+time;
+    else
+        info.time = time;
     end
