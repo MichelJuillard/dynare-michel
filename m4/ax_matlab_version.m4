@@ -59,6 +59,15 @@ if test "x$MATLAB_VERSION" != "x"; then
     R14 | r14)
       MATLAB_VERSION="7.0.0"
       ;;
+    *13SP2 | *13sp2)
+      MATLAB_VERSION="6.5.2"
+      ;;
+    *13SP1 | *13sp1)
+      MATLAB_VERSION="6.5.1"
+      ;;
+    R13 | r13)
+      MATLAB_VERSION="6.5"
+      ;;
   esac
   AC_MSG_RESULT([${MATLAB_VERSION}])
   ax_matlab_version_ok="yes"
