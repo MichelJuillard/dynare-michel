@@ -22,6 +22,11 @@ SystemResources _sysres;
 @<|sysconf| Win32 implementation@>;
 #endif
 
+#if defined(__APPLE__)
+#define _SC_PHYS_PAGES 2
+#define _SC_AVPHYS_PAGES 3
+#endif
+
 #ifdef _MSC_VER
 
 struct timezone 
