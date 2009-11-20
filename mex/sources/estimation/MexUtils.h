@@ -73,7 +73,10 @@ class MexStruct :public  virtual GeneralParams
     {
     map<string, int>::iterator it=parNamStructMap.find(field);
     if (it==parNamStructMap.end())
-      throw(SYLV_MES_EXCEPTION("no parameter with such name"));
+      {
+      mexPrintf("getMxField:no parameter with such name");
+      throw(SYLV_MES_EXCEPTION("getMxField:no parameter with such name"));
+      }
     return mxGetField(parStruct[it->second], 0, field.c_str() );
     }
   

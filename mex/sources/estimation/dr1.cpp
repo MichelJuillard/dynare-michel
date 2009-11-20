@@ -111,6 +111,9 @@ DsgeLikelihood::SolveDRModel(const int endo_nbr, const int exo_nbr, const int ns
       //dr.ghu = repmat(1./dr.ys(k1),1,size(dr.ghu,2)).*dr.ghu;
       GeneralMatrix&repInvSSu=mInvOrdSS.repmat(1,ghu.numCols());
       ghu.multElements(repInvSSu);
+      delete &repk1klagSSt;
+      delete &repInvSSu;
+      delete &repInvSSx;
       };//end if
     }
   }

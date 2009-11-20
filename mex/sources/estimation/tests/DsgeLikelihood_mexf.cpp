@@ -24,8 +24,9 @@
 /******************************************
 * mexFunction: Matlab Inerface point and the main application driver 
 * for DsgeLikelihood
-*****************************************************************%function [fval,cost_flag,ys,trend_coeff,info] = DsgeLikelihood(xparam1,gend,data,data_index,number_of_observations,no_more_missing_observations)
-% function [fval,cost_flag,ys,trend_coeff,info] = DsgeLikelihood(xparam1,gend,data,data_index,number_of_observations,no_more_missing_observations)
+*****************************************************************
+% function [fval,cost_flag,ys,trend_coeff,info] = DsgeLikelihood(xparam1,gend,data,data_index,
+%                        number_of_observations,no_more_missing_observations)
 % Evaluates the posterior kernel of a dsge model. 
 % 
 % INPUTS 
@@ -49,9 +50,10 @@
 *****************************************************************/
 #include "DsgeLikelihood.h"
 
-#ifdef MATLAB
 #include "mexutils.h"
-#endif
+
+extern const char *DynareParamStructsNm []={"M_", "oo_", "options_", "bayestopt_", "estim_params_", "dr"};
+extern const char* mexBase[]={"base", "caller", "global"};
 
 extern "C" {
 
@@ -83,24 +85,39 @@ mexFunction(int nlhs, mxArray *plhs[],
       }
 
 #ifdef DEBUG
-    mexPrintf("k_order_perturbation: mexExt=%s.\n", dfExt);
+    mexPrintf("estimation: mexExt=%s.\n", dfExt);
 #endif
 /***********
 ***************/
   int numPeriods=1;
 
   //MexStruct dynareParams();
-  GeneralParams& dynareParams=*(new MexStruct());
-  //MexStructParam& dr=dynareParams.getStructField("dr");
-  GeneralParams& dr=dynareParams.getStructField("dr");
-  
+  MexStruct& dynareParams=*(new MexStruct(numParStructs));
+#ifdef DEBUG
+        mexPrintf("getting dr\n");
+#endif
+  MexStructParam& dr=dynareParams.getMexStructField("dr");
   vector<int>&mfys=dynareParams.getIntVectorField("mfys");
   vector<int>&mf=dynareParams.getIntVectorField("mf1");
-  int numVarobs=data.numRows();
+#ifdef DEBUG
+        mexPrintf("getting SS\n");
+#endif
   Vector& SteadyState=dr.getDoubleVectorField(string("ys"));
+#ifdef DEBUG
+  int gg;
+  for ( gg=0;gg<SteadyState.length();++gg)
+        mexPrintf("SteadyState %d = %f\n", gg, SteadyState[gg]);
+#endif
+
+  int numVarobs=data.numRows();
+
   Vector constant(numVarobs);//=*(new Vector(numVarobs));//   = *(new Vector(nobs));
   GeneralMatrix&kstate = dr.getMatrixField(string("kstate"));
   vector<int>&order_var = dr.getIntVectorField(string("order_var"));
+#ifdef DEBUG
+  for ( gg=0;gg<order_var.size();++gg)
+        mexPrintf("order_var %d = %d\n", gg, order_var[gg]);
+#endif
   int order=(int)dynareParams.getDoubleField(string("order"));
   int endo_nbr = (int)dynareParams.getDoubleField(string("endo_nbr"));
   int exo_nbr = (int)dynareParams.getDoubleField(string("exo_nbr"));
@@ -109,6 +126,10 @@ mexFunction(int nlhs, mxArray *plhs[],
   int nfwrd = (int)dr.getDoubleField(string("nfwrd"));
   Vector& ub=dynareParams.getDoubleVectorField(string("ub"));
   Vector& lb=dynareParams.getDoubleVectorField(string("lb"));
+#ifdef DEBUG
+  for ( gg=0;gg<lb.length();++gg)
+        mexPrintf("lb %d = %f\n", gg, lb[gg]);
+#endif
   int num_dp=(int)dynareParams.getDoubleField(string("np"));// no of deep params
   Vector& deepParams=*(new Vector(num_dp));
   vector<int>&pshape=dynareParams.getIntVectorField(string("pshape"));
@@ -121,36 +142,69 @@ mexFunction(int nlhs, mxArray *plhs[],
   int nsPred=(int)dr.getDoubleField(string("nspred"));
   int nsForw=(int)dr.getDoubleField(string("nsfwrd"));
   const int jcols = exo_nbr+endo_nbr+nsPred+nsForw;
+#ifdef DEBUG
+        mexPrintf("jcols = %d, exo_nbr=%d\n", jcols, exo_nbr);
+#endif
 
-  GeneralMatrix& aux= dr.getMatrixField(string("transition_auxiliary_variables"));
-  int nr=endo_nbr+aux.numRows();
-  Vector& a_init=*(new Vector(numVarobs));
+  GeneralMatrix& aux = dynareParams.getMatrixField(string("restrict_aux"));
+  vector<int>&iv= dynareParams.getIntVectorField(string("restrict_var_list"));
+  vector<int>&ic= dynareParams.getIntVectorField(string("restrict_columns"));
+
+  int nr=nsPred+aux.numRows();
+  Vector& a_init=*(new Vector(nr));
+  a_init.zeros();
 
   GeneralMatrix& Q = dynareParams.getMatrixField(string("Sigma_e"));
-  GeneralMatrix& H = dynareParams.getMatrixField(string("H"));
+#ifdef DEBUG
+  Q.print();
+#endif
+  GeneralMatrix& Hrtmp = dynareParams.getMatrixField(string("H"));
+  GeneralMatrix * Hp;
+  if (Hrtmp.numCols()==0 || Hrtmp.numRows()==0)
+    {
+    delete &Hrtmp;
+    Hp = new GeneralMatrix(numVarobs,numVarobs);
+    Hp->zeros();
+#ifdef DEBUG
+    mexPrintf("finished local initialising of H \n");
+#endif
+    }
+  else
+    Hp=&Hrtmp;
+
+  GeneralMatrix& H=*Hp;
   GeneralMatrix Y(data.numRows(),data.numCols());
   GeneralMatrix T(nr,nr);
   GeneralMatrix Z(numVarobs,nr);
+  Z.zeros();
+  for (int i = 0;i<numVarobs;++i)
+    Z.get(i,mf[i]-1)=1;
   GeneralMatrix Pstar(nr,nr);
   GeneralMatrix R(nr,exo_nbr);
-  GeneralMatrix ghx(endo_nbr,jcols-exo_nbr);
+  GeneralMatrix ghx(endo_nbr,nsPred);
   GeneralMatrix ghu(endo_nbr,exo_nbr);
 
 //Pinf=[]
   GeneralMatrix Pinf (nr,nr);
   Pinf.zeros();
-
+double loglikelihood;
   try
     {
 
+#ifdef DEBUG
+        mexPrintf("Try construction of DsgeLikelihood\n");
+#endif
     DsgeLikelihood dl( a_init, Q, R,T, Z, Pstar, Pinf, H,data,Y,  
           numPeriods, //  const int INnumVarobs, //  const int INnumTimeObs,
           order, endo_nbr, exo_nbr, nstatic, npred,nfwrd, num_of_observations, 
           no_more_missing_observations, order_var, mfys, mf, xparam1,
           num_dp, deepParams, ub, lb, pshape, p6, p7, p3, p4, SteadyState, constant, 
-          dynareParams, dr, kstate, ghx, ghu, jcols, dfExt);
+          dynareParams, dr, kstate, ghx, ghu, aux, iv, ic, jcols, dfExt);
 
-    double loglikelihood=dl.CalcLikelihood(xparam1);
+#ifdef DEBUG
+        mexPrintf("Try CalcLikelihood\n");
+#endif
+    loglikelihood=dl.CalcLikelihood(xparam1);
 
 /*****************************************************************
 % OUTPUTS 
@@ -161,6 +215,9 @@ mexFunction(int nlhs, mxArray *plhs[],
 %   info        :     vector of informations about the penalty:
 %   vll         :     vector of time-step log-likelihoods at xparam1.
 *****************************************************************/
+#ifdef DEBUG
+        mexPrintf("Try Outputs with nper=%d, loglikelihood = %f\n",nper,loglikelihood);
+#endif
     if (nlhs >= 1)
       plhs[0] = mxCreateDoubleScalar(loglikelihood);
     if (nlhs >= 2)
@@ -169,23 +226,36 @@ mexFunction(int nlhs, mxArray *plhs[],
       {
         plhs[2] = mxCreateDoubleMatrix(endo_nbr, 1, mxREAL);
         Vector vss(mxGetPr(plhs[2]),endo_nbr);
+
+#ifdef DEBUG
+        mexPrintf("SteadyState  size %d \n", dl.getSteadyState().length());
+       dl.getSteadyState().print() ;
+        mexPrintf("Try getSteadyState into vss size %d \n", vss.length());
+#endif
         vss= dl.getSteadyState();
       }
+/*********************
     if (nlhs >= 4)
-         plhs[3] = mxCreateDoubleScalar((double)dl.getCostFlag());
+      plhs[3] = mxCreateDoubleScalar((double)dl.getCostFlag());
     if (nlhs >= 5)
-        plhs[4] = mxCreateDoubleMatrix(numVarobs,1, mxREAL);//dummy trend_coeff
+      plhs[4] = mxCreateDoubleMatrix(numVarobs,1, mxREAL);//dummy trend_coeff
     if (nlhs >= 6)
       {
       // output full log-likelihood array
-      /* Set the output pointer to the  array of log likelihood. */
+      // Set the output pointer to the  array of log likelihood. 
       std::vector<double>& vll=dl.getLikVector();
       plhs[5] = mxCreateDoubleMatrix(nper,1, mxREAL);
       double * mxll= mxGetPr(plhs[5]);
       // assign likelihood array
       for (int j=0;j<nper;++j)
+        {
         mxll[j]=vll[j];
+#ifdef DEBUG
+        mexPrintf("mxll[%d]=%f  vll[%d]=%f\n",j, mxll[j], i, vll[j]);
+#endif
+        }
       }
+*********************/
     }
   catch (const KordException &e)
     {

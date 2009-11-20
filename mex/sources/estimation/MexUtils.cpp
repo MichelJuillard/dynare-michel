@@ -24,24 +24,38 @@ MexStruct::MexStruct( const int numparstruct):
 numParStruct(numparstruct), structName(string(""))
   { 
   // get Dynare mexSturcture pointers and store them locally
+#ifdef DEBUG
+    mexPrintf("MexStruct reserve=%d \n", numParStruct);
+#endif
   parStruct.reserve(numParStruct);
-  parStructBase.reserve(numParStructs);
-  for (int i=0;i<numParStructs;++i)
+  parStructBase.reserve(numParStruct);
+  for (int i=0;i<numParStruct;++i)
     {
     parStruct[i]=mexGetVariablePtr("caller", DynareParamStructsNm[i]);
     parStructBase[i]=caller;
+#ifdef DEBUG
+    mexPrintf("MexStruct to insert i=%d parStructNm[i]=%s using base[i]=%d  %s\n", i, DynareParamStructsNm[i], parStructBase[i], mexBase[parStructBase[i]]);
+#endif
     // get field names into the map:
     pair <map<string, int>::iterator, bool> ret;
     int j=0;
     const char* field;
     while ((field=mxGetFieldNameByNumber(parStruct[i],j))!=NULL)
       {
+#ifdef DEBUG
+        mexPrintf("MexStruct insert field= %s\n", field);
+#endif
       ret=parNamStructMap.insert(make_pair(string(field),i));
       if (!ret.second)
-        mexErrMsgTxt("MexStruct: Failed to insert param \n");
+            mexPrintf("MexStruct failed to insert field %s from struct %d %s using base %d %s\n"
+            , field, i, DynareParamStructsNm[i], parStructBase[i], mexBase[parStructBase[i]]);
+//        mexErrMsgTxt("MexStruct: Failed to insert param \n");
       j++;
       }
     }
+#ifdef DEBUG
+        mexPrintf("MexStruct insert finished \n");
+#endif
   }
 
 MexStructParam& 
@@ -119,7 +133,7 @@ MexStruct::getIntVectorField(const string& field)
     {
     (*vars)[v] = (int)(*(dparams++)); //[v];
 #ifdef DEBUG
-    mexPrintf("vars)[%d] = %d .\n", v, (*vars)[v]);
+    mexPrintf("%s[%d]=%d.\n", field.c_str() , v, (*vars)[v]);
 #endif
     }
   
@@ -285,7 +299,7 @@ MexStructParam::getIntVectorField(const string& field)
     {
     (*vars)[v] = (int)(*(dparams++)); //[v];
 #ifdef DEBUG
-    mexPrintf("vars)[%d] = %d .\n", v, (*vars)[v]);
+    mexPrintf("%s[%d]=%d.\n", field.c_str(), v, (*vars)[v]);
 #endif
     }
   

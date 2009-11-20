@@ -36,7 +36,8 @@ DsgeLikelihood::DsgeLikelihood( Vector& inA_init, GeneralMatrix& inQ,  GeneralMa
                                const Vector& INub, const Vector& INlb, const vector<int>&INpshape,
                                const Vector&INp6, const Vector&INp7, const Vector&INp3, const Vector&INp4,
                                Vector& INSteadyState,   Vector& INconstant,  GeneralParams& INdynareParams, //GeneralParams& parameterDescription, 
-                               GeneralParams& INdr, GeneralMatrix& INkstate, GeneralMatrix& INghx,  GeneralMatrix& INghu
+                               GeneralParams& INdr, GeneralMatrix& INkstate, GeneralMatrix& INghx,  GeneralMatrix& INghu,
+                               GeneralMatrix& INaux, vector<int>&INiv,  vector<int>&INic
                                ,const int jcols, const char *dfExt)//, KordpDynare& kOrdModel, Approximation& INapprox ) 
                                :a_init(inA_init), Q(inQ), R(inR), T(inT), Z(inZ), Pstar(inPstar), Pinf(inPinf), H(inH), data(inData), Y(inY), 
                                numPeriods(INnumPeriods),   numVarobs(inData.numRows()),  numTimeObs(inData.numCols()),
@@ -47,7 +48,8 @@ DsgeLikelihood::DsgeLikelihood( Vector& inA_init, GeneralMatrix& inQ,  GeneralMa
                                param_ub(INub), param_lb(INlb),pshape(INpshape), //pshape(dynareParams.getIntVectorField(string("pshape),
                                p6(INp6), p7(INp7), p3(INp3), p4(INp4), SteadyState(INSteadyState),
                                constant(INconstant), dynareParams(INdynareParams), 
-                               dr(INdr), kstate(INkstate), ghx(INghx),ghu(INghu)   
+                               dr(INdr), kstate(INkstate), ghx(INghx),ghu(INghu),
+                               aux(INaux), iv(INiv), ic(INic)
                                //, model(kOrdModel), approx(INapprox )
   {
  
@@ -60,24 +62,37 @@ DsgeLikelihood::DsgeLikelihood( Vector& inA_init, GeneralMatrix& inQ,  GeneralMa
   *********/
   // setting some frequently used common variables that do not need updating
   //std::vector<double>* vll=new std::vector<double> (nper);
-  vll=new std::vector<double> (numTimeObs);// vector of likelihoods
+//  vll=new std::vector<double> (numTimeObs);// vector of likelihoods
+  vll=new vector<double>(numTimeObs);// vector of likelihoods
   kalman_algo=(int)dynareParams.getDoubleField(string("kalman_algo"));
   presampleStart=1+(int)dynareParams.getDoubleField(string("presample"));
-  mode_compute=(int)dr.getDoubleField(string("mode_compute"));
+  mode_compute=(int)dynareParams.getDoubleField(string("mode_compute"));
+#ifdef DEBUG
+        mexPrintf("mode_compute=%d presampleStart=%d \n", mode_compute,presampleStart);
+#endif  
 
   // Pepare data for Constructing k-order-perturbation classes
   //const char *
-  string fname=dynareParams.getStringField(string("fname"));
+  string& fname=dynareParams.getStringField(string("fname"));
   fName = (char *)fname.c_str(); 
   double qz_criterium = dynareParams.getDoubleField(string("qz_criterium"));//qz_criterium = 1+1e-6;
   int nMax_lag =(int)dynareParams.getDoubleField(string("maximum_lag"));
   const int nBoth=(int)dr.getDoubleField(string("nboth"));
   const int nPred = npred-nBoth; // correct nPred for nBoth.
   //vector<int> *var_order_vp = &order_var;
-  vCov =  new TwoDMatrix(Q);
+#ifdef DEBUG
+        mexPrintf("fName %s qz_criterium=%f nMax_lag=%d nPred=%d :Construction of vCov\n", fName,qz_criterium,nMax_lag,nPred);
+#endif  
+        vCov =  new TwoDMatrix(Q);
   // the lag, current and lead blocks of the jacobian respectively
   llincidence = new TwoDMatrix (dynareParams.getMatrixField(string("lead_lag_incidence")));
+#ifdef DEBUG
+        mexPrintf("Construction of casOrdEndoNames\n");
+#endif
   charArraySt * casOrdEndoNames=dynareParams.getCharArrayField(string("var_order_endo_names"));
+#ifdef DEBUG
+        mexPrintf("Construction of endoNamesMX\n");
+#endif
   const char **endoNamesMX=(const char ** )casOrdEndoNames->charArrayPtr;
 
 #ifdef DEBUG
@@ -113,7 +128,7 @@ DsgeLikelihood::DsgeLikelihood( Vector& inA_init, GeneralMatrix& inQ,  GeneralMa
 
         // intiate tensor library
 #ifdef DEBUG
-        mexPrintf("k_order_perturbation: Call tls init\n");
+        mexPrintf("k_order_perturbation: Call tls init order:%d, size: %d\n", order, nstatic+2*nPred+3*nBoth+2*nfwrd+exo_nbr);
 #endif
         tls.init(order, nstatic+2*nPred+3*nBoth+2*nfwrd+exo_nbr);
 
@@ -203,31 +218,47 @@ DsgeLikelihood::DsgeLikelihood( Vector& inA_init, GeneralMatrix& inQ,  GeneralMa
 
 DsgeLikelihood::~DsgeLikelihood()
   {
+
   delete approx;
   delete model;
   delete dynamicDLLp;
   delete journal;
-  delete llincidence;
-  delete vCov;
+//  delete llincidence;
+//  delete vCov;
   delete vll;
+/********
   delete &H;
   delete &Q;
-  delete &SteadyState;
   delete &kstate;
+  delete &pshape;
+******** delete Vectors *********
+#ifdef DEBUG
+        mexPrintf("delete SS.\n");
+#endif
+  delete &SteadyState;
   delete &param_ub;
   delete &param_lb;
-  delete &pshape;
   delete &p6;
   delete &p7;
   delete &p3;
   delete &p4;
+#ifdef DEBUG
+        mexPrintf("delete params Vectors.\n");
+#endif
   delete &xparam1;
   delete &deepParams;
+#ifdef DEBUG
+        mexPrintf("delete ghx.\n");
+#endif
+**********
   delete &ghx;
   delete &ghu;
   delete &dynareParams;
   delete &dr;
-
+  delete &aux;
+  delete &iv;
+  delete &ic;
+**********/
   }
 
 double 
@@ -235,6 +266,7 @@ DsgeLikelihood::CalcLikelihood(Vector& xparams)
 // runs all routines needed to calculate likelihood
   {
   likelihood=0.0;
+  info=0;
   xparam1=xparams;
   /*******************************
   * loop for each sub-sample period
@@ -280,18 +312,18 @@ DsgeLikelihood::CalcLikelihood(Vector& xparams)
         return likelihood;
         }
       } // mode compute
-    
+#ifdef DEBUG
+        mexPrintf("Calling of updataeHQparams\n");
+#endif    
     if(info=updateQHparams()) // updates Q and H matrices and deep parameters
+      {
+#ifdef DEBUG
+        mexPrintf("Failing of updataeHQparams info =%d\n", info);
+#endif    
       return likelihood;
-    
-      /*****************************************************************************--
+      }
+    /*****************************************************************************--
       % 2. call model setup & reduction program and pre-filter data
-    ******************************************************************************-*/
-    GeneralMatrix& aux = dynareParams.getMatrixField(string("bayestopt_.restrict_aux"));
-    vector<int>&iv= dynareParams.getIntVectorField(string("restrict_var_list"));
-    vector<int>&ic= dynareParams.getIntVectorField(string("bayestopt_.restrict_columns"));
-    
-    /*************************************************************
     // dynare_resolve(()  // ... comes here doing:
     //	resol: 
     //    check if ys is steady state and calculate one i not
@@ -299,36 +331,52 @@ DsgeLikelihood::CalcLikelihood(Vector& xparams)
     //  kalman_transition_matrix(out: A,B, in dr)
     // IN: bayestopt_.restrict_var_list, bayestopt_.restrict_columns, bayestopt_.restrict_aux, )
     ***************************************************************/
+#ifdef DEBUG
+        mexPrintf(" *********** Calling dynareResolveDR *********** \n");
+#endif    
     if (info = dynareResolveDR (iv,ic, aux)) //OUT: [T,R,SteadyState], 
+      {
+#ifdef DEBUG
+       mexPrintf("Failing of dynareResolveDR info =%d\n", info);
+#endif    
       return likelihood=penalty;
+      }
     
       /*****************************************************************************--
       % 2.b   pre-filter and detrend data
     ******************************************************************************-*/
+#ifdef DEBUG
+        mexPrintf("*********** pre-filter and detrend data *********** \n");
+#endif    
     
     //if options_.noconstant
-    if (dynareParams.getCharField(string("noconstant")))
+    if ((int)dynareParams.getDoubleField(string("noconstant")))
       constant.zeros();
     else
       {
       //if options_.loglinear
-      if (dynareParams.getCharField(string("loglinear")))
+      if ((int)dynareParams.getDoubleField(string("loglinear")))
         {
         for (i =0;i<numVarobs;++i)
-          constant[i] = log(SteadyState[mfys[i]]);
+          constant[i] = log(SteadyState[mfys[i]-1]);
         }
       else
         {
         for (i =0;i<numVarobs;++i)
-          constant[i] = SteadyState[mfys[i]];
+          constant[i] = SteadyState[mfys[i]-1];
         }
       }
     Vector trend_coeff(numVarobs);
     //trend = repmat(constant,1,gend);
     GeneralMatrix constMx(constant.base(),numVarobs,1);
+#ifdef DEBUG
+        mexPrintf("Calling constMx.repmat numTimeObs=%d\n",numTimeObs);
+#endif     
     GeneralMatrix&trend = constMx.repmat(1,numTimeObs);
+
     //if bayestopt_.with_trend
-    if (dynareParams.getCharField(string("with_trend")))
+    /************************************
+    if ((int)dynareParams.getDoubleField(string("with_trend")))
       {
       trend_coeff.zeros();
       //      GeneralMatrix& mt = dynareParams.getMatrixField(string("trend_coeffs"));
@@ -347,15 +395,22 @@ DsgeLikelihood::CalcLikelihood(Vector& xparams)
         
         trend.add(1,trend_coefMx);
       }
+    *************************************/
     presampleStart =(int) dynareParams.getDoubleField(string("presample"))+1;
     int no_missing_data_flag = (number_of_observations==numTimeObs*numVarobs);
     //Y =data-trend;
     Y=data;
+#ifdef DEBUG
+        mexPrintf("Calling Y.add( trend) in GeneralMatrices\n");
+#endif     
     Y.add(-1,trend);
     
     /*****************************************************************************
     % 3. Initial condition of the Kalman filter
     *******************************************************************************/
+#ifdef DEBUG
+        mexPrintf("Calling InitiateKalmanMatrices\n");
+#endif    
     if( InitiateKalmanMatrices())
       return likelihood=penalty;
     
@@ -364,14 +419,16 @@ DsgeLikelihood::CalcLikelihood(Vector& xparams)
     // choose and run KF to get likelihood fval
     *****************************************************************************/
     likelihood+=KalmanFilter(0.000001, false);// calls Kalman
-    
-    
     /****************************************************************************
     // Adds prior if necessary
     ****************************************************************************/
     //likelihood-= priordens(xparam1,pshape,p6,p7,p3,p4);//fval    = (likelihood-lnprior);
     //options_.kalman_algo = kalman_algo;
     } // end sub-sample loop
+#ifdef DEBUG
+        mexPrintf("End of CallcLlikelihood returning likelihood=%f\n", likelihood);
+#endif    
+    return likelihood;
   }
   
 /**************************************************
@@ -386,11 +443,23 @@ int
 DsgeLikelihood::updateQHparams()// updates Q and H matrices and deep parameters
   {
   int i=0,  offset=0, nv=0, k, k1, k2, info=0;
+#ifdef DEBUG
+        mexPrintf("Setting of Q \n");
+#endif    
+  delete &Q;
   Q =  dynareParams.getMatrixField(string("Sigma_e"));
+#ifdef DEBUG
+        mexPrintf("Setting of H \n");
+#endif    
+  delete &H;
   H =  dynareParams.getMatrixField(string("H"));
   nv=(int)dynareParams.getDoubleField(string("nvx"));
   if(nv)
     {
+#ifdef DEBUG
+        mexPrintf("Setting of Q var_exo\n");
+#endif    
+//    if(&estvx) delete &estvx;
     GeneralMatrix&estvx=dynareParams.getMatrixField(string("var_exo"));
     for (i=0;i<nv;++i)
       {
@@ -398,11 +467,14 @@ DsgeLikelihood::updateQHparams()// updates Q and H matrices and deep parameters
       Q.get(k,k) = xparam1[i]*xparam1[i];
       }
     offset = nv;
+    delete &estvx;
     }
-  
   nv=(int)dynareParams.getDoubleField(string("nvn"));
   if(nv)
     {
+#ifdef DEBUG
+        mexPrintf("Setting of H var_endo\n");
+#endif    
     GeneralMatrix&estvn=dynareParams.getMatrixField(string("var_endo"));
     for (i=0;i<nv;++i)
       {
@@ -410,13 +482,16 @@ DsgeLikelihood::updateQHparams()// updates Q and H matrices and deep parameters
       H.get(k,k) = xparam1[i+offset]*xparam1[i+offset];
       }
     offset += nv;
+    delete &estvn;
     }
-  
   //if estim_params_.ncx
   //for i=1:estim_params_.ncx
   nv=(int)dynareParams.getDoubleField(string("ncx"));
   if(nv)
     {
+#ifdef DEBUG
+        mexPrintf("Setting of Q corrx\n");
+#endif    
     GeneralMatrix&corrx=dynareParams.getMatrixField(string("corrx"));
     for (i=0;i<nv;++i)
       {
@@ -426,6 +501,7 @@ DsgeLikelihood::updateQHparams()// updates Q and H matrices and deep parameters
       Q.get(k2,k1) = Q.get(k1,k2);
       }
     //   [CholQ,testQ] = chol(Q);
+    delete &corrx;
     int testQ=0;
     try
       {
@@ -472,6 +548,9 @@ DsgeLikelihood::updateQHparams()// updates Q and H matrices and deep parameters
   nv=(int)dynareParams.getDoubleField(string("ncn"));
   if(nv)
     {
+#ifdef DEBUG
+        mexPrintf("Setting of H corrn\n");
+#endif    
     GeneralMatrix&corrn=dynareParams.getMatrixField(string("corrn"));
     vector<int>&lgyidx2varobs= dynareParams.getIntVectorField(string("lgyidx2varobs"));
     for (i=0;i<nv;++i)
@@ -485,7 +564,8 @@ DsgeLikelihood::updateQHparams()// updates Q and H matrices and deep parameters
       H.get(k1,k2) = xparam1[i+offset]*sqrt(H.get(k1,k1)*H.get(k2,k2));
       H.get(k2,k1) = H.get(k1,k2);
       }
-    
+    delete &corrn;
+
     //[CholH,testH] = chol(H);
     int testH=0;
     try
@@ -535,6 +615,9 @@ DsgeLikelihood::updateQHparams()// updates Q and H matrices and deep parameters
     else
       TS_RAISE("Inssuficient length of the xparam1 parameters vector");
     }
+#ifdef DEBUG
+        mexPrintf("End of Setting of HQ params\n");
+#endif    
   
     /**********
     M_.Sigma_e = Q;
@@ -551,37 +634,67 @@ DsgeLikelihood::InitiateKalmanMatrices()
   {
   int np = T.numRows();// size(T,1);
   double lyapunov_tol=dynareParams.getDoubleField(string("lyapunov_tol"));
-  int lik_init=(int)dynareParams.getDoubleField(string("lik_init"));
+//  int lik_init=(int)dynareParams.getDoubleField(string("lik_init"));
   //if options_.lik_init == 1     % Kalman filter
-  GeneralMatrix RQRt(R,Q); // R*Q
-  RQRt.multRightTrans(R); // R*Q*Rt
+//  GeneralMatrix RQRt(R,Q); // R*Q
+  GeneralMatrix RQ(R,Q); // R*Q
+#ifdef DEBUG
+  mexPrintf("Calling RQRt.multRightTrans(R)\n");
+#endif 
+//  GeneralMatrix::md_length=RQRt.numRows();
+ //RQRt.md_length=RQRt.numRows();
+
+//  RQRt.multRightTrans(R); // R*Q*Rt
+//    GeneralMatrix RQRt(np,np);
+//    RQRt.zeros();
+//    RQRt.multAndAdd(RQ,R, "T", 1.0); 
+  GeneralMatrix RQRt(RQ,R, "T");
+#ifdef DEBUG
+  for (int i=0;i<RQRt.numRows();++i)
+    {
+    for (int j=0;j<RQRt.numCols();++j)
+      mexPrintf(" %f  ", RQRt.get(i,j));
+    mexPrintf("\n");
+    }
+#endif 
   GeneralMatrix Ptmp(np,np);
   //Pstar = lyapunov_symm (T,R*Q*R',options_.qz_criterium,options_.lyapunov_complex_threshold)
+#ifdef DEBUG
+        mexPrintf("Calling disclyap_fast to initialise Pstar:\n");
+#endif   
   disclyap_fast(T,RQRt,Ptmp, lyapunov_tol, 1); // 1 to check chol 
   Pstar=Ptmp;
   //Pinf=[]
   //Pinf  = *(new GeneralMatrix(np,np));
+#ifdef DEBUG
+    Pstar.print();
+        mexPrintf("Initialise Pinf\n");
+#endif   
   Pinf.zeros();
   
-  //Z= zeros(size(data,1), size(T,2))
-  GeneralMatrix Ztmp=*(new GeneralMatrix(numVarobs,np));
-  Ztmp.zeros();
-  
   //a=zeros(size(T,1),1);
-  Vector atmp(np);
-  atmp.zeros();
-  a_init=atmp;
-  
+  //Vector atmp(np);
+  //atmp.zeros();
+  //a_init=atmp;
+  a_init.zeros();
   //if (lik_init == 2)// Old Diffuse Kalman filter
   //  Pstar = options_.Harvey_scale_factor*eye(np);
   //Pinf = [];
   //else if (lik_init == 3) // Diffuse Kalman filter
   // else ...
   
-  for (int i = 0;i<numVarobs;++i)
-    Ztmp.get(i,mf[i])=1.0;
-  Z=Ztmp;
-  delete &Ztmp;
+#ifdef DEBUG
+        mexPrintf("Initialise Z\n");
+#endif   
+  //Z= zeros(size(data,1), size(T,2))
+  //Z.zeros();
+  //GeneralMatrix Ztmp=*(new GeneralMatrix(numVarobs,np));
+  //for (int i = 0;i<numVarobs;++i)
+  //  Ztmp.get(i,mf[i]-1)=1.0;
+  //Z=Ztmp;
+  //delete &Ztmp;
+  //for (int i = 0;i<numVarobs;++i)
+  //  Z.get(i,mf[i]-1)=1.0;
   }  
 
 
@@ -593,15 +706,16 @@ double
 DsgeLikelihood::KalmanFilter(double riccatiTol=0.000001,bool uni = false)
   {
   bool diffuse=false;
+  double loglik;
   
   try 
     {
     // make input matrices
     int start = presampleStart;
-    
     int nper=Y.numCols();
 #ifdef DEBUG		
     mexPrintf("kalman_filter: periods=%d start=%d, a.length=%d, uni=%d diffuse=%d\n", nper, start,a_init.length(), uni, diffuse);
+    Pstar.print(); Z.print(); H.print(); T.print(); R.print(); Q.print(); Y.print();
 #endif		
     
     // make storage for output
@@ -625,20 +739,21 @@ DsgeLikelihood::KalmanFilter(double riccatiTol=0.000001,bool uni = false)
       if (uni) 
         {
         KalmanUniTask kut(kt);
-        likelihood = kut.filter(per, d, (start-1), vll);
+        loglik = kut.filter(per, d, (start-1), vll);
         per = per / Y.numRows();
         d = d / Y.numRows();
         } 
       else 
         {
 #ifdef TIMING_LOOP
+        mexPrintf("kalman_filter: starting 1000 loops\n");
         for (int tt=0;tt<1000;++tt)
           {
 #endif
-          likelihood = kt.filter(per, d, (start-1), vll);
+          loglik = kt.filter(per, d, (start-1), vll);
 #ifdef TIMING_LOOP
           }
-        mexPrintf("kalman_filter: finished 1000 loops");
+        mexPrintf("kalman_filter: finished 1000 loops\n");
 #endif
         }
       }
@@ -647,16 +762,17 @@ DsgeLikelihood::KalmanFilter(double riccatiTol=0.000001,bool uni = false)
       init = new StateInit(Pstar, a_init);
       BasicKalmanTask bkt(Y, Z, H, T, R, Q, *init, riccatiTol);
 #ifdef TIMING_LOOP
+      mexPrintf("kalman_filter: starting 1000 loops\n");
       for (int tt=0;tt<1000;++tt)
         {
 #endif
-        likelihood = bkt.filter( per, d, (start-1), vll);
+        loglik = bkt.filter( per, d, (start-1), vll);
 #ifdef DEBUG		
-        mexPrintf("Basickalman_filter: likelihood=%f \n", likelihood);
+        mexPrintf("Basickalman_filter: loglik=%f \n", loglik);
 #endif		
 #ifdef TIMING_LOOP
         }
-      mexPrintf("Basickalman_filter: finished 1000 loops");
+      mexPrintf("Basickalman_filter: finished 1000 loops\n");
 #endif
       
       }
@@ -673,6 +789,6 @@ DsgeLikelihood::KalmanFilter(double riccatiTol=0.000001,bool uni = false)
     e.printMessage(mes, 299);
     mexErrMsgTxt(mes);
     }
-  return likelihood;
+  return loglik;
   }
 

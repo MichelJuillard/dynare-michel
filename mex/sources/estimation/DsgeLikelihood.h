@@ -80,7 +80,11 @@ class DsgeLikelihood
   GeneralParams& dynareParams;
   //GeneralParams& parameterDescription;
   GeneralParams& dr;
-  
+
+  GeneralMatrix& aux; //= dynareParams.getMatrixField(string("restrict_aux"));
+  vector<int>&iv; //= dynareParams.getIntVectorField(string("restrict_var_list"));
+  vector<int>&ic; //= dynareParams.getIntVectorField(string("restrict_columns"));
+
   GeneralMatrix& kstate;
   GeneralMatrix& ghx;
   GeneralMatrix& ghu;
@@ -97,7 +101,7 @@ class DsgeLikelihood
   //KalmanUniTask ukt;// univariate
   // member functions
   MexStructParam& SetDRModel(MexStructParam&params);
-  void disclyap_fast(const GeneralMatrix &G, const GeneralMatrix & V, GeneralMatrix &X, double tol = 1e-16, int flag_ch=0);
+ // void disclyap_fast(const GeneralMatrix &G, const GeneralMatrix & V, GeneralMatrix &X, double tol = 1e-16, int flag_ch=0);
   GeneralMatrix& SolveDRkOrderPert();//calls k-order pert or whatever;
   int dynareResolveDR(vector<int>&iv,vector<int>&ic,GeneralMatrix& aux);  // returns int info, ys, and TT and RR Decision Rule
   int SolveDRModel(const int endo_nbr, const int exo_nbr, const int nstatic, const int npred, int nfwrd);//int dr1();  // returns int info and updated dr 
@@ -119,7 +123,8 @@ class DsgeLikelihood
       const Vector&INp6, const Vector&INp7, const Vector&INp3, const Vector&INp4,
       Vector& INSteadyState,   Vector& INconstant,  GeneralParams& INdynareParams,
       //GeneralParams& parameterDescription, 
-      GeneralParams& INdr, GeneralMatrix& INkstate, GeneralMatrix& INghx,  GeneralMatrix& INghu 
+      GeneralParams& INdr, GeneralMatrix& INkstate, GeneralMatrix& INghx,  GeneralMatrix& INghu, 
+      GeneralMatrix& aux, vector<int>&iv,  vector<int>&ic
       ,const int jcols, const char *dfExt); //, KordpDynare& inModel, Approximation& INapprox );
     DsgeLikelihood( const Vector&params,const GeneralMatrix&data, const vector<int>& data_index, const int gend,
       const int number_of_observations, const bool no_more_missing_observations);//, KordpDynare& model ); // constructor, and
