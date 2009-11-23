@@ -93,8 +93,13 @@ else
 
     % Add win64 specific paths for Dynare Windows package
     if strcmp(computer, 'PCWIN64')
-        if matlab_ver_less_than('7.5')
-            mexpath = [dynareroot '../mex/matlab/win64-7.2-7.4'];
+        if matlab_ver_less_than('7.3')
+            mexpath = [dynareroot '../mex/matlab/win64-7.2'];
+            if exist(mexpath, 'dir')
+                addpath(mexpath)
+            end
+        elseif matlab_ver_less_than('7.5')
+            mexpath = [dynareroot '../mex/matlab/win64-7.3-7.4'];
             if exist(mexpath, 'dir')
                 addpath(mexpath)
             end
