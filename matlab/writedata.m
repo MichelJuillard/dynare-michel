@@ -28,6 +28,12 @@ function writedata(fname)
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
   global M_ oo_
+
+  % xlswrite doesn't exist on Octave, and appeared in MATLAB 7.0
+  if exist('OCTAVE_VERSION') || matlab_ver_less_than('7.0')
+      error('Function not supported on your version of MATLAB or Octave')
+  end
+
   S=[fname '_endo.xls'];
   n=size(oo_.endo_simul,2);
   delete(S);
@@ -44,4 +50,3 @@ function writedata(fname)
   xlswrite([fname '_exo'], S','exogenous', 'B1');
   xlswrite([fname '_exo'], S1, 'exogenous', 'A2');
   xlswrite([fname '_exo'], oo_.exo_simul,'exogenous', 'B2');
-return;
