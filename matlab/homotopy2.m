@@ -98,7 +98,7 @@ function homotopy2(values, step_nbr)
         M_.params(values(i,2)) = v;
       end
 
-      disp([ 'HOMOTOPY mode 2: lauching solver with ' strtrim(varname) ' = ' num2str(v) ' ...'])
+      disp([ 'HOMOTOPY mode 2: lauching solver with ' deblank(varname) ' = ' num2str(v) ' ...'])
       
       steady_;
     end
