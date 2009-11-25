@@ -1,6 +1,7 @@
 function disp_moments(y,var_list)
+% Displays moments of simulated variables
 
-% Copyright (C) 2001-2008 Dynare Team
+% Copyright (C) 2001-2009 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -21,11 +22,12 @@ function disp_moments(y,var_list)
   
   warning_old_state = warning;
   warning off
-  nvar = size(var_list,1);
-  if nvar == 0
-    nvar = M_.endo_nbr;
-    ivar = [1:nvar]';
-  else
+
+  if size(var_list,1) == 0
+      var_list = M_.endo_names(1:M_.orig_endo_nbr, :);
+  end
+      
+    nvar = size(var_list,1);
     ivar=zeros(nvar,1);
     for i=1:nvar
       i_tmp = strmatch(var_list(i,:),M_.endo_names,'exact');
@@ -35,7 +37,7 @@ function disp_moments(y,var_list)
 	ivar(i) = i_tmp;
       end
     end
-  end
+
   y = y(ivar,options_.drop+M_.maximum_lag+1:end)';
   
   m = mean(y);
@@ -90,10 +92,3 @@ function disp_moments(y,var_list)
   end
   
   warning(warning_old_state);
-% 10/03/02 MJ corrected order std. dev var in printed report.
-% 01/02/03 MJ added correlation and autocorrelation
-% 01/19/03 MJ corrected variable name truncation
-% 02/18/03 MJ added subtitle for HP filter
-% 03/02/03 MJ added M_.maximum_lag to the number of entries of y
-% 04/28/03 MJ modified handling of options_
-% 06/23/03 MJ added warning off

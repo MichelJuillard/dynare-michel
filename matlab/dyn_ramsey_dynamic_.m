@@ -1,5 +1,4 @@
 function [J,M_] = dyn_ramsey_dynamic_(ys,lbar,M_,options_,oo_,it_)
-
 % function J = dyn_ramsey_dynamic_(ys,lbar)
 % dyn_ramsey_dynamic_ sets up the Jacobian of the expanded model for optimal
 % policies. It modifies several fields of M_
@@ -14,7 +13,7 @@ function [J,M_] = dyn_ramsey_dynamic_(ys,lbar,M_,options_,oo_,it_)
 % SPECIAL REQUIREMENTS
 %     none
 
-% Copyright (C) 2003-2008 Dynare Team
+% Copyright (C) 2003-2009 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -54,6 +53,8 @@ function [J,M_] = dyn_ramsey_dynamic_(ys,lbar,M_,options_,oo_,it_)
   
   % storing original values
   orig_model.endo_nbr = endo_nbr;
+  orig_model.orig_endo_nbr = M_.orig_endo_nbr;
+  orig_model.aux_vars = M_.aux_vars;
   orig_model.endo_names = endo_names;
   orig_model.lead_lag_incidence = i_leadlag;
   orig_model.maximum_lead = max_lead;
@@ -225,6 +226,10 @@ function [J,M_] = dyn_ramsey_dynamic_(ys,lbar,M_,options_,oo_,it_)
   % setting expanded model parameters
   % storing original values
   M_.endo_nbr = endo_nbr1;
+  % Consider that there is no auxiliary variable, because otherwise it
+  % interacts badly with the auxiliary variables from the preprocessor.
+  M_.orig_endo_nbr = endo_nbr1;
+  M_.aux_vars = [];
   M_.endo_names = endo_names1;
   M_.lead_lag_incidence = i_leadlag1;
   M_.maximum_lead = max_lead1;

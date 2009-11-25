@@ -67,6 +67,8 @@ function [dr,info,M_,options_,oo_] = dr1(dr,task,M_,options_,oo_)
         if isfield(M_,'orig_model')
             orig_model = M_.orig_model;
             M_.endo_nbr = orig_model.endo_nbr;
+            M_.orig_endo_nbr = orig_model.orig_endo_nbr;
+            M_.aux_vars = orig_model.aux_vars;
             M_.endo_names = orig_model.endo_names;
             M_.lead_lag_incidence = orig_model.lead_lag_incidence;
             M_.maximum_lead = orig_model.maximum_lead;

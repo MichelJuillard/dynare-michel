@@ -1,5 +1,4 @@
 function prior_posterior_statistics(type,Y,gend,data_index,missing_value)
-
 % function PosteriorFilterSmootherAndForecast(Y,gend, type)
 % Computes posterior filter smoother and forecasts
 %
@@ -18,7 +17,7 @@ function prior_posterior_statistics(type,Y,gend,data_index,missing_value)
 % SPECIAL REQUIREMENTS
 %    none
 
-% Copyright (C) 2005-2008 Dynare Team
+% Copyright (C) 2005-2009 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -96,10 +95,8 @@ MAX_momentsno = min(B,ceil(MaxNumberOfBytes/(get_moments_size(options_)*8)));
 %%
 varlist = options_.varlist;
 if isempty(varlist)
-  varlist = M_.endo_names;
-  SelecVariables = transpose(1:M_.endo_nbr);
-  nvar = M_.endo_nbr;
-else
+  varlist = M_.endo_names(1:M_.orig_endo_nbr, :);
+end
   nvar = size(varlist,1);
   SelecVariables = [];
   for i=1:nvar
@@ -107,7 +104,6 @@ else
       SelecVariables = [SelecVariables;strmatch(varlist(i,:),M_.endo_names,'exact')];
     end
   end
-end
 
 irun = ones(7,1);
 ifil = zeros(7,1);

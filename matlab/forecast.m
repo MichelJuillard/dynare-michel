@@ -1,5 +1,4 @@
 function info = forecast(var_list,task)
-
 % function forecast(var_list,task)
 %   computes mean forecast for a given value of the parameters
 %   computes also confidence band for the forecast    
@@ -45,9 +44,8 @@ function info = forecast(var_list,task)
 
     endo_names = M_.endo_names;
     if isempty(var_list)
-        var_list = endo_names;
-        i_var = 1:M_.endo_nbr;
-    else
+        var_list = endo_names(1:M_.orig_endo_nbr, :);
+    end
         i_var = [];
         for i = 1:size(var_list)
             tmp = strmatch(var_list(i,:),endo_names,'exact');
@@ -56,7 +54,7 @@ function info = forecast(var_list,task)
             end
             i_var = [i_var; tmp];
         end
-    end
+
     n_var = length(i_var);
     
     trend = 0;

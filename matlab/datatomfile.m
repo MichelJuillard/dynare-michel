@@ -1,5 +1,4 @@
 function datatomfile (s,var_list)
-
 % function datatomfile (s,var_list)
 % This optional command saves the simulation results in a text file. The name of each
 % variable preceeds the corresponding results. This command must follow SIMUL.
@@ -14,7 +13,7 @@ function datatomfile (s,var_list)
 % SPECIAL REQUIREMENTS
 %    none
 
-% Copyright (C) 2001-2007 Dynare Team
+% Copyright (C) 2001-2009 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -33,16 +32,13 @@ function datatomfile (s,var_list)
 
 global M_ oo_
 
-%fid=fopen([s,'.m'],'w') ;
 sm=[s,'.m'];
 fid=fopen(sm,'w') ;
 
+if size(var_list,1) == 0
+  var_list = M_.endo_names(1:M_.orig_endo_nbr,:);
+end
 n = size(var_list,1);
-if n == 0
-  n = M_.endo_nbr;
-  ivar = [1:n]';
-  var_list = M_.endo_names;
-else
   ivar=zeros(n,1);
   for i=1:n
     i_tmp = strmatch(var_list(i,:),M_.endo_names,'exact');
@@ -52,7 +48,7 @@ else
       ivar(i) = i_tmp;
     end
   end
-end
+
 
 
 for i = 1:n

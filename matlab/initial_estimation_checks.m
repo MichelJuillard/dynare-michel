@@ -1,6 +1,5 @@
 function initial_estimation_checks(xparam1,gend,data,data_index,number_of_observations,no_more_missing_observations)
-
-% function initial_estimation_checks(xparam1,gend,data)
+% function initial_estimation_checks(xparam1,gend,data,data_index,number_of_observations,no_more_missing_observations)
 % Checks data (complex values, ML evaluation, initial values, BK conditions,..)
 % 
 % INPUTS
@@ -14,7 +13,7 @@ function initial_estimation_checks(xparam1,gend,data,data_index,number_of_observ
 % SPECIAL REQUIREMENTS
 %    none
 
-% Copyright (C) 2003-2008 Dynare Team
+% Copyright (C) 2003-2009 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -69,7 +68,7 @@ function initial_estimation_checks(xparam1,gend,data,data_index,number_of_observ
 				     [oo_.exo_steady_state; ...
 		    oo_.exo_det_steady_state]);
     if size(ys,1) < M_.endo_nbr 
-        if isfield(M_,'aux_vars')
+        if length(M_.aux_vars) > 0
             ys = add_auxiliary_variables_to_steadystate(ys,M_.aux_vars,...
                                                         M_.fname,...
                                                         oo_.exo_steady_state,...

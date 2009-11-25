@@ -1,6 +1,7 @@
 function disp_th_moments(dr,var_list)
-
-% Copyright (C) 2001-2008 Dynare Team
+% Display theoretical moments of variables
+    
+% Copyright (C) 2001-2009 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -19,11 +20,10 @@ function disp_th_moments(dr,var_list)
 
   global M_ oo_ options_
   
+  if size(var_list,1) == 0
+      var_list = M_.endo_names(1:M_.orig_endo_nbr, :);
+  end
   nvar = size(var_list,1);
-  if nvar == 0
-    nvar = length(dr.order_var);
-    ivar = [1:nvar]';
-  else
     ivar=zeros(nvar,1);
     for i=1:nvar
       i_tmp = strmatch(var_list(i,:),M_.endo_names,'exact');
@@ -33,7 +33,6 @@ function disp_th_moments(dr,var_list)
 	ivar(i) = i_tmp;
       end
     end
-  end
   
   [oo_.gamma_y,stationary_vars] = th_autocovariances(dr,ivar,M_,options_);
   m = dr.ys(ivar);
@@ -114,13 +113,3 @@ function disp_th_moments(dr,var_list)
     lh = size(labels,2)+2;
     dyntable(title,headers,labels,z,lh,8,4);
   end
-  
-% 10/09/02 MJ 
-% 10/18/02 MJ added th_autocovariances() and provided for lags on several
-% periods
-% 10/30/02 MJ added correlations and autocorrelations, uses table()
-%             oo_.gamma_y is now a cell array.
-% 02/18/03 MJ added subtitles for HP filter
-% 05/01/03 MJ corrected options_.hp_filter
-% 05/21/03 MJ variance decomposition: test M_.exo_nbr > 1
-% 05/21/03 MJ displays only variables with positive variance

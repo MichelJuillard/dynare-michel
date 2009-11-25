@@ -15,7 +15,7 @@ function forcst_unc(y0,var_list)
 % SPECIAL REQUIREMENTS
 %   None.
 
-% Copyright (C) 2006-2008 Dynare Team
+% Copyright (C) 2006-2009 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -43,11 +43,10 @@ function forcst_unc(y0,var_list)
   
   % workspace initialization
   if isempty(var_list)
-    var_list = M_.endo_names;
-    n = M_.endo_nbr;
-  else
-    n = size(var_list,1);
+    var_list = M_.endo_names(1:M_.orig_endo_nbr,:);
   end
+    n = size(var_list,1);
+
   periods = options_.forecast;
   exo_nbr = M_.exo_nbr;
   replic = options_.replic;

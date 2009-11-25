@@ -11,7 +11,7 @@ function steady()
 % SPECIAL REQUIREMENTS
 %   none
 
-% Copyright (C) 2001-2008 Dynare Team
+% Copyright (C) 2001-2009 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -56,7 +56,7 @@ function steady()
   disp(' ')
   endo_names = M_.endo_names;
   steady_state = oo_.steady_state;
-  for i=1:size(oo_.steady_state,1)
+  for i=1:M_.orig_endo_nbr
     disp(sprintf('%s \t\t %g',endo_names(i,:),steady_state(i)));
   end
   

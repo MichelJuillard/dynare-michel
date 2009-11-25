@@ -1,6 +1,6 @@
 function osr1(i_params,i_var,weights)
 
-% Copyright (C) 2005-2008 Dynare Team
+% Copyright (C) 2005-2009 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -47,7 +47,7 @@ function osr1(i_params,i_var,weights)
       [ys,check1] = feval([M_.fname '_steadystate'],oo_.steady_state,...
                              [oo_.exo_steady_state; oo_.exo_det_steady_state]);
       if size(ys,1) < M_.endo_nbr 
-          if isfield(M_,'aux_vars')
+          if length(M_.aux_vars) > 0
               ys = add_auxiliary_variables_to_steadystate(ys,M_.aux_vars,...
                                                           M_.fname,...
                                                           oo_.exo_steady_state,...

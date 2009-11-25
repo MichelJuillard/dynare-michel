@@ -25,7 +25,7 @@ function ys1 = add_auxiliary_variables_to_steadystate(ys,aux_vars,fname, ...
     aux_lead_nbr = 0;
     for i=1:n
         if aux_vars(i).type == 1
-            ys1(k) = ys(aux_vars(i).orig_endo_index);
+            ys1(k) = ys(aux_vars(i).orig_index);
         elseif aux_vars(i).type == 0
             aux_lead_nbr = aux_lead_nbr + 1;
         end

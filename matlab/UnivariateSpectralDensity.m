@@ -5,7 +5,7 @@ function [omega,f] = UnivariateSpectralDensity(dr,var_list)
 % 
 % Adapted from th_autocovariances.m.  
 
-% Copyright (C) 2006-2008 Dynare Team
+% Copyright (C) 2006-2009 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -48,11 +48,10 @@ end
 if nargin<2
   var_list = [];
 end
+if size(var_list,1) == 0
+    var_list = M_.endo_names(1:M_.orig_endo_nbr, :);
+end
 nvar = size(var_list,1);
-if nvar == 0
-  nvar = length(dr.order_var);
-  ivar = [1:nvar]';
-else
     ivar=zeros(nvar,1);
     for i=1:nvar
       i_tmp = strmatch(var_list(i,:),M_.endo_names,'exact');
@@ -62,7 +61,6 @@ else
 	ivar(i) = i_tmp;
       end
     end
-end
 f = zeros(nvar,GridSize);
 ghx = dr.ghx;
 ghu = dr.ghu;

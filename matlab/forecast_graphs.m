@@ -32,9 +32,8 @@ function forecast_graphs(var_list)
     hpdinf = oo_.forecast.HPDinf;
     hpdsup = oo_.forecast.HPDsup;
     if isempty(var_list)
-	varlist = endo_names;
-	i_var = 1:M_.endo_nbr;
-    else
+	varlist = endo_names(1:M_.orig_endo_nbr,:);
+    end
 	i_var = [];
 	for i = 1:size(var_list)
 	    tmp = strmatch(var_list(i,:),endo_names,'exact');
@@ -43,7 +42,6 @@ function forecast_graphs(var_list)
 	    end
 	    i_var = [i_var; tmp];
 	end
-    end
     nvar = length(i_var);
     
 % $$$     % build trend for smoothed variables if necessary

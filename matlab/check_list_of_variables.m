@@ -115,7 +115,7 @@ function varlist = check_list_of_variables(options_, M_, varlist)
                     choice=1;
                 end
                 if choice==1
-                    varlist = M_.endo_names;
+                    varlist = M_.endo_names(1:M_.orig_endo_nbr, :);
                 elseif choice==2
                     varlist = options_.varobs;
                 elseif choice==3

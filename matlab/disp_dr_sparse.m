@@ -1,6 +1,14 @@
 function disp_dr_sparse(dr,order,var_list)
+% Display the decision rules in sparse mode
+% This file is a modified version of disp_dr.m: the common parts should be factorized!
+%
+% INPUTS
+%    dr [struct]:            decision rules
+%    order [int]:            order of approximation
+%    var_list [char array]:  list of endogenous variables for which the
+%                            decision rules should be printed
 
-% Copyright (C) 2001 Dynare Team
+% Copyright (C) 2001-2009 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -44,11 +52,13 @@ function disp_dr_sparse(dr,order,var_list)
       klag = [klag ; M_.block_structure.block(i).dr.kstate(k_tmp,[1 2])];
       k1 = [k1 ; M_.block_structure.block(i).variable(M_.block_structure.block(i).dr.order_var)'];
   end
+
+  if size(var_list,1) == 0
+      var_list = M_.endo_names(1:M_.orig_endo_nbr, :);
+  end
+
   nvar = size(var_list,1);
-  if nvar == 0
-    nvar = length(k1);
-    ivar = [1:nvar];
-  else
+
     ivar=zeros(nvar,1);
     for i=1:nvar
       i_tmp = strmatch(var_list(i,:),M_.endo_names(k1,:),'exact');
@@ -59,7 +69,7 @@ function disp_dr_sparse(dr,order,var_list)
 	ivar(i) = i_tmp;
       end
     end
-  end
+
   disp('POLICY AND TRANSITION FUNCTIONS')
   % variable names
   str = '                        ';
@@ -108,7 +118,7 @@ function disp_dr_sparse(dr,order,var_list)
   %
   for k=1:nx
     flag = 0;
-    str1 = sprintf('%s(%d)',M_.endo_names(k1(klag(k,1)),:),klag(k,2)-M_.maximum_lag-2);
+    str1 = subst_auxvar(k1(klag(k,1)),klag(k,2)-M_.maximum_lag-2);
     str = sprintf('%-20s',str1);
     for i=1:nvar
       x = ghx(ivar(i),k);
@@ -148,8 +158,8 @@ function disp_dr_sparse(dr,order,var_list)
     for k = 1:nx
       for j = 1:k
 	flag = 0;
-	str1 = sprintf('%s(%d),%s(%d)',M_.endo_names(k1(klag(k,1)),:),klag(k,2)-M_.maximum_lag-2, ...
-		       M_.endo_names(k1(klag(j,1)),:),klag(j,2)-M_.maximum_lag-2);
+	str1 = sprintf('%s,%s',subst_auxvar(k1(klag(k,1)),klag(k,2)-M_.maximum_lag-2), ...
+		       subst_auxvar(k1(klag(j,1)),klag(j,2)-M_.maximum_lag-2));
 	str = sprintf('%-20s',str1);
 	for i=1:nvar
 	  if k == j
@@ -200,7 +210,7 @@ function disp_dr_sparse(dr,order,var_list)
     for k = 1:nx
       for j = 1:nu
 	flag = 0;
-	str1 = sprintf('%s(%d),%s',M_.endo_names(k1(klag(k,1)),:),klag(k,2)-M_.maximum_lag-2, ...
+	str1 = sprintf('%s,%s',subst_auxvar(k1(klag(k,1)),klag(k,2)-M_.maximum_lag-2), ...
 		       M_.exo_names(j,:));
 	str = sprintf('%-20s',str1);
 	for i=1:nvar
@@ -218,17 +228,32 @@ function disp_dr_sparse(dr,order,var_list)
       end
     end
   end
+end
 
-% $$$   dr.ghx
-% $$$   dr.ghu
-% $$$   dr.ghxx
-% $$$   dr.ghuu
-% $$$   dr.ghxu
-
-% 01/08/2001 MJ  added test for order in printing quadratic terms
-% 02/21/2001 MJ pass all variable names through deblank()
-% 02/21/2001 MJ changed from f to g format to write numbers
-% 10/09/2002 MJ corrected error on constant whith subset of variables 
-
-
-
+% Given the index of an endogenous (possibly an auxiliary var), and a
+% lead/lag, creates a string of the form "x(lag)".
+% In the case of auxiliary vars for lags, replace by the original variable
+% name, and compute the lead/lag accordingly.
+function str = subst_auxvar(aux_index, aux_lead_lag)
+    global M_
+    
+    if aux_index <= M_.orig_endo_nbr
+        str = sprintf('%s(%d)', deblank(M_.endo_names(aux_index,:)), aux_lead_lag);
+        return
+    end
+    for i = 1:length(M_.aux_vars)
+        if M_.aux_vars(i).endo_index == aux_index
+            switch M_.aux_vars(i).type
+              case 1
+                orig_name = deblank(M_.endo_names(M_.aux_vars(i).orig_index, :));
+              case 3
+                orig_name = deblank(M_.exo_names(M_.aux_vars(i).orig_index, :));
+              otherwise
+                error(sprintf('Invalid auxiliary type: %s', M_.endo_names(aux_index, :)))
+            end
+            str = sprintf('%s(%d)', orig_name, M_.aux_vars(i).orig_lead_lag+aux_lead_lag);
+            return
+        end
+    end
+    error(sprintf('Could not find aux var: %s', M_.endo_names(aux_index, :)))
+end

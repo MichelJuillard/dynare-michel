@@ -1,5 +1,4 @@
 function [yf,int_width]=forcst(dr,y0,horizon,var_list)
-
 % function [yf,int_width]=forecst(dr,y0,horizon,var_list)
 %   computes mean forecast for a given value of the parameters
 %   computes also confidence band for the forecast    
@@ -18,7 +17,7 @@ function [yf,int_width]=forcst(dr,y0,horizon,var_list)
 % SPECIAL REQUIREMENTS
 %    none
 
-% Copyright (C) 2003-2008 Dynare Team
+% Copyright (C) 2003-2009 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -46,11 +45,10 @@ function [yf,int_width]=forcst(dr,y0,horizon,var_list)
     inv_order_var = dr.inv_order_var;
     [A,B] = kalman_transition_matrix(dr,nstatic+(1:npred),1:nc,dr.transition_auxiliary_variables,M_.exo_nbr);
     
+    if size(var_list,1) == 0
+        var_list = M_.endo_names(1:M_.orig_endo_nbr,:);
+    end
     nvar = size(var_list,1);
-    if nvar == 0
-	nvar = M_.endo_nbr;
-	ivar = [1:nvar];
-    else
 	ivar=zeros(nvar,1);
 	for i=1:nvar
 	    i_tmp = strmatch(var_list(i,:),M_.endo_names,'exact');
@@ -61,7 +59,6 @@ function [yf,int_width]=forcst(dr,y0,horizon,var_list)
 		ivar(i) = i_tmp;
 	    end
 	end
-    end
 
     ghx1 = dr.ghx(inv_order_var(ivar),:);
     ghu1 = dr.ghu(inv_order_var(ivar),:);

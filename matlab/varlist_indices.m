@@ -34,9 +34,8 @@ function [i_var,nvar] = varlist_indices(varlist)
     endo_nbr = M_.endo_nbr;
     
     if isempty(varlist)
-        i_var = (1:endo_nbr)';
-        nvar = endo_nbr;
-    else
+        varlist = M_.endo_names(1:M_.orig_endo_nbr,:);
+    end
         i_var = [];
         for i=1:size(varlist,1)
             tmp = strmatch(varlist(i,:),M_.endo_names,'exact');
@@ -46,5 +45,3 @@ function [i_var,nvar] = varlist_indices(varlist)
             i_var = [i_var; tmp];
         end
         nvar = length(i_var);
-    end
-    
