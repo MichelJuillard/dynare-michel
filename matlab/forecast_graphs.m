@@ -1,6 +1,6 @@
 function forecast_graphs(var_list)
 
-% Copyright (C) 2008 Dynare Team
+% Copyright (C) 2008-2009 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -54,6 +54,9 @@ function forecast_graphs(var_list)
 % $$$     end
 
     % create subdirectory <fname>/graphs if id doesn't exist
+    if ~exist(fname, 'dir')
+	mkdir('.',fname);
+    end
     if ~exist([fname '/graphs'])
 	mkdir(fname,'graphs');
     end
