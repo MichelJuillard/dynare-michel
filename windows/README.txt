@@ -1,13 +1,13 @@
-Dynare version 4
-================
+Dynare version 4.1
+==================
 
 For information about how to use Dynare, you should have a look at the
 documentation located in the 'doc' subdirectory of your Dynare installation (you
 should have a shortcut in your Start Menu to access it directly).
 
-Beginners should start with the Dynare user guide. There is also a complete
-reference manual documenting all Dynare functions in 'manual\index.html' (however
-note that it is a bit outdated).
+Beginners should start with the Dynare user guide. There is also a
+complete reference manual documenting all Dynare functions (under HTML
+format in 'manual\index.html', under PDF format in 'manual.pdf').
 
 You can also get more information on the web, on Dynare homepage:
 
@@ -21,14 +21,14 @@ NOTE: Dynare comes with an automated uninstaller, which you can run from the
 "Add/Remove Programs" menu of the Control Panel.
 
 
-Using Dynare with Matlab (R)
+Using Dynare with MATLAB (R)
 ----------------------------
 
-Dynare requires Matlab (R) version 6.5 or above. With older versions of Matlab (R),
+Dynare requires MATLAB (R) version 6.5 or above. With older versions of MATLAB (R),
 it may fail or give unexpected results.
 
 To use Dynare, you just have to add the 'matlab' subdirectory of your Dynare
-installation to Matlab (R) path. You have two options for doing that:
+installation to MATLAB (R) path. You have two options for doing that:
 
 * Use the addpath command, by typing the following (assuming that you have
   installed Dynare at the standard location, and replacing '4.x.y' by correct
@@ -36,16 +36,16 @@ installation to Matlab (R) path. You have two options for doing that:
 
     addpath c:\dynare\4.x.y\matlab
 
-  Matlab (R) will not remember this setting next time you run it, and you will
+  MATLAB (R) will not remember this setting next time you run it, and you will
   have to do it again.
 
 * Select the "Set Path" entry in the "File" menu, then click on "Add
   Folder...", and select the 'matlab' subdirectory of your Dynare
   installation. Note that you SHOULD NOT use "Add with Subfolders...". Apply
-  the settings by clicking on "Save". Note that Matlab (R) will remember this
+  the settings by clicking on "Save". Note that MATLAB (R) will remember this
   setting next time you run it.
 
-You can test your installation by typing 'dynare' at the Matlab (R)
+You can test your installation by typing 'dynare' at the MATLAB (R)
 prompt. This should give you an error message complaining that you did not
 specify a MOD file.
 
@@ -53,40 +53,24 @@ specify a MOD file.
 Using Dynare with Octave
 ------------------------
 
-Dynare is now available for GNU Octave, a free clone of Matlab (R) (see
+Dynare is now available for GNU Octave, a free clone of MATLAB (R) (see
 <http://www.octave.org>).
 
-The recommended Octave distribution is the Octave/Windows VC++ 3.0.3
+The recommended Octave distribution is the Octave/MinGW 3.2.3
 precompiled binaries from Octave Forge, available at:
 
- http://sourceforge.net/project/showfiles.php?group_id=2888&package_id=40078&release_id=642199
-
-During installation, you will be asked which graphical backend to use. Neither
-of them works perfectly with Dynare at this time:
-
- * GNUplot gives better-looking results when several graphics are plotted in the
-   same window, but window titles will not show up
- * JHandles properly displays windows titles, but gives ugly results when several
-   plots are displayed in the same window 
-
-WARNING: the Octave binary distribution has a bug which makes Octave crash
-everytime one types 'clear all' (and therefore everytime one runs Dynare!). A
-simple workaround is to type the following command the first time you run
-Octave:
-
-  pkg rebuild -noauto ftp ann database
+ http://sourceforge.net/projects/octave/files/Octave_Windows%20-%20MinGW/Octave%203.2.3%20for%20Windows%20MinGW32%20Installer/Octave-3.2.3-2_i686-pc-mingw32_gcc-4.4.0_setup.exe/download
 
 Every time you run Octave, you should type the two following commands (assuming
 that you have installed Dynare at the standard location, and replacing '4.x.y'
 by correct version number):
 
   addpath c:\dynare\4.x.y\matlab
-  mark_as_command dynare
 
-NOTE: if you don't want to type these two commands every time you run Octave,
-you can put them in a file called '.octaverc' in your home directory (generally
-'c:\Documents and Settings\USERNAME\'). This file is run by Octave at every
-startup.
+NOTE: if you don't want to type this command every time you run
+Octave, you can put it in a file called '.octaverc' in your home
+directory (generally 'c:\Documents and Settings\USERNAME\'). This file
+is run by Octave at every startup.
 
 You can test your installation by typing 'dynare' at the Octave prompt. This
 should give you an error message complaining that you did not specify a MOD
@@ -105,7 +89,7 @@ which is faster than standard M-files. These parts are compiled and distributed
 as dynamic loadable libraries (DLL), located in the 'mex' subdirectory of your
 Dynare installation.
 
-If the DLL are correctly detected by Matlab (R) or Octave, the following should
+If the DLL are correctly detected by MATLAB (R) or Octave, the following should
 be displayed when you launch Dynare:
 
   Configuring Dynare ...
@@ -113,24 +97,33 @@ be displayed when you launch Dynare:
   [mex] Sylvester equation solution.
   [mex] Kronecker products.
   [mex] Sparse kronecker products.
+  [mex] Bytecode evaluation.
+  [mex] k-order perturbation solver.
+  [mex] k-order solution simulation.
 
-On the contrary, if DLL are not detected, Dynare will fallback on slower
-alternatives written in M-files, and display the following:
+On the contrary, if DLL are not detected, Dynare will fallback on
+slower alternatives written in M-files (only for some of the DLLs),
+and display the following:
 
   Configuring Dynare ...
-  [m] Generalized QZ.
-  [m] Sylvester equation solution.
-  [m] Kronecker products.
-  [m] Sparse kronecker products.
+  [m]   Generalized QZ.
+  [m]   Sylvester equation solution.
+  [m]   Kronecker products.
+  [m]   Sparse kronecker products.
+  [no]  Bytecode evaluation.
+  [no]  k-order perturbation solver.
+  [no]  k-order solution simulation.
 
-In this last case, Dynare will run correctly, but with suboptimal speed. There
-could be several reasons for Matlab (R) or Octave failing to detect the DLL:
+In this last case, Dynare will run correctly on the basic features,
+but with suboptimal speed, and some features will be missing. There
+could be several reasons for MATLAB (R) or Octave failing to detect
+the DLL:
 
 * Your path settings may be wrong. Make sure that the 'matlab' subdirectory of
   your Dynare installation is the only Dynare directory present in the path
   variable.
 
-* Your Matlab (R) or Octave version may be incompatible with the provided
+* Your MATLAB (R) or Octave version may be incompatible with the provided
   binaries.
 
 * You may have a custom M-file in your search path with the same name than a
@@ -140,9 +133,8 @@ could be several reasons for Matlab (R) or Octave failing to detect the DLL:
 Copyright notice for software
 -----------------------------
 
-Most Dynare source files are Copyright (C) 1996-2008 Dynare Team. There are
-some exceptions to this, which are described in source file headers when
-relevant.
+Most Dynare source files are Copyright (C) 1996-2009 Dynare Team. There are
+some exceptions to this, see the license.txt file that comes with Dynare.
 
 Dynare is free software: you can redistribute it and/or modify it under the
 terms of the GNU General Public License as published by the Free Software
@@ -153,8 +145,7 @@ This program is distributed in the hope that it will be useful, but WITHOUT ANY
 WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
 PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License along with
-this program (see 'gpl.txt'). If not, see <http://www.gnu.org/licenses/>.
+See <http://www.gnu.org/licenses/> for the full text of the license.
 
 
 Copyright notice for documentation
@@ -165,10 +156,10 @@ files under the terms of the GNU Free Documentation License, Version 1.2 or any
 later version published by the Free Software Foundation; with no Invariant
 Sections, no Front-Cover Texts, and no Back-Cover Texts.
 
-A copy of the license can be found in the 'fdl.txt' file.
+See <http://www.gnu.org/licenses/> for the full text of the license.
 
 
 Credits
 -------
 
-Matlab (R) is a registered trademark of The Mathworks, Inc.
+MATLAB (R) is a registered trademark of The Mathworks, Inc.

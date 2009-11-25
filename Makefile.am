@@ -21,8 +21,6 @@ EXTRA_DIST = \
 	mex/sources \
 	uncrustify.cfg \
 	windows/dynare.nsi \
-	windows/fdl.txt \
-	windows/gpl.txt \
 	windows/README.txt
 
 clean-local:
