@@ -1,5 +1,4 @@
 function [A,B,ys,info] = dynare_resolve(iv,ic,aux)
-
 % function [A,B,ys,info] = dynare_resolve(iv,ic,aux)
 % Computes the linear approximation and the matrices A and B of the
 % transition equation
@@ -46,22 +45,31 @@ function [A,B,ys,info] = dynare_resolve(iv,ic,aux)
   [oo_.dr,info] = resol(oo_.steady_state,0);
 
   if info(1) > 0
-    A = [];
-    B = [];
-    ys = [];
-    return
+      A = [];
+      if nargout>1
+          B = [];
+          if nargout>2
+              ys = [];
+          end
+      end
+      return
   end
   
   if nargin == 0
-    endo_nbr = M_.endo_nbr;
-    nstatic = oo_.dr.nstatic;
-    npred = oo_.dr.npred;
-    iv = (1:endo_nbr)';
-    ic = [ nstatic+(1:npred) endo_nbr+(1:size(oo_.dr.ghx,2)-npred) ]';
-    aux = oo_.dr.transition_auxiliary_variables;
-    k = find(aux(:,2) > npred);
-    aux(:,2) = aux(:,2) + nstatic;
-    aux(k,2) = aux(k,2) + oo_.dr.nfwrd;
+      endo_nbr = M_.endo_nbr;
+      nstatic = oo_.dr.nstatic;
+      npred = oo_.dr.npred;
+      iv = (1:endo_nbr)';
+      ic = [ nstatic+(1:npred) endo_nbr+(1:size(oo_.dr.ghx,2)-npred) ]';
+      aux = oo_.dr.transition_auxiliary_variables;
+      k = find(aux(:,2) > npred);
+      aux(:,2) = aux(:,2) + nstatic;
+      aux(k,2) = aux(k,2) + oo_.dr.nfwrd;
+  end
+  
+  if nargout==1
+      A = kalman_transition_matrix(oo_.dr,iv,ic,aux,M_.exo_nbr);
+      return
   end
   
   [A,B] = kalman_transition_matrix(oo_.dr,iv,ic,aux,M_.exo_nbr);

@@ -37,16 +37,17 @@ function [A,B] = kalman_transition_matrix(dr,iv,ic,aux,exo_nbr)
   nr = n_iv + n_ir1;
   
   A = zeros(nr,nr);
-  B = zeros(nr,exo_nbr);
-  
+
   i_n_iv = 1:n_iv;
   A(i_n_iv,ic) = dr.ghx(iv,:);
   if n_ir1 > 0
     A(n_iv+1:end,:) = sparse(aux(:,1),aux(:,2),ones(n_ir1,1),n_ir1,nr);
   end
-  
-  B(i_n_iv,:) = dr.ghu(iv,:);
 
+  if nargout>1
+      B = zeros(nr,exo_nbr);
+      B(i_n_iv,:) = dr.ghu(iv,:);
+  end
 
 % $$$ function [A,B] = kalman_transition_matrix(dr)
 % $$$   global M_
