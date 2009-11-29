@@ -51,6 +51,13 @@ function [dr,info,M_,options_,oo_] = dr1(dr,task,M_,options_,oo_)
 
     info = 0;
     
+    if options_.use_k_order;
+        dr = set_state_space(dr,M_);
+        [dr,info] = k_order_pert(dr,M_,options_,oo_);
+        oo_.dr = dr;
+        return;
+    end
+    
     xlen = M_.maximum_endo_lead + M_.maximum_endo_lag + 1;
     klen = M_.maximum_endo_lag + M_.maximum_endo_lead + 1;
     iyv = M_.lead_lag_incidence';
