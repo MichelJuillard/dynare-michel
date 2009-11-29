@@ -43,7 +43,7 @@ typedef void  *(DynamicFn)
 typedef void  (*DynamicFn)
 #endif
 (double *y, double *x, int nb_row_x, double *params,
- int it_, double *residual, double *g1, double *g2);
+ int it_, double *residual, double *g1, double *g2, double *g3);
 
 //DynamicFn Dynamic;
 
@@ -86,18 +86,17 @@ public:
   // evaluate Dynamic model DLL
   void
   eval(double *y, double *x, int nb_row_x, double *params,
-       int it_, double *residual, double *g1, double *g2)
+       int it_, double *residual, double *g1, double *g2, double *g3)
   {
-    Dynamic(y, x, nb_row_x, params, it_, residual, g1, g2);
+    Dynamic(y, x, nb_row_x, params, it_, residual, g1, g2, g3);
   };
   void eval(const Vector &y, const Vector &x,  const Vector *params,
-            Vector &residual, TwoDMatrix *g1, TwoDMatrix *g2);
+            Vector &residual, TwoDMatrix *g1, TwoDMatrix *g2, TwoDMatrix *g3);
   void eval(const Vector &y, const TwoDMatrix &x,  const Vector *params,
-            int it_, Vector &residual, TwoDMatrix *g1, TwoDMatrix *g2);
+            int it_, Vector &residual, TwoDMatrix *g1, TwoDMatrix *g2, TwoDMatrix *g3);
   void eval(const Vector &y, const TwoDMatrix &x,  const Vector *params,
-            Vector &residual, TwoDMatrix *g1, TwoDMatrix *g2);
-  //	void eval(const Vector&y, const TwoDMatrix&x,  const Vector* params,
-  //		Vector& residual, double *g1, double *g2);
+            Vector &residual, TwoDMatrix *g1, TwoDMatrix *g2, TwoDMatrix *g3);
+
   // close DLL: If the referenced object was successfully closed,
   // close() returns 0, non 0 otherwise
   int close();

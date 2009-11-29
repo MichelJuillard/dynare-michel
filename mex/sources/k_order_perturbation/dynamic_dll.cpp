@@ -23,60 +23,6 @@
 #include "math.h"
 #include <cstring>
 
-//////////////////////////////////////////////////////
-// Convert Matlab Dynare endo and exo names array to C type array of string pointers
-// Poblem is that Matlab mx function returns a long string concatenated by columns rather than rows
-// hence a rather low level approach is needed
-///////////////////////////////////////////////////////
-const char **
-DynareMxArrayToString(const mxArray *mxFldp, const int len, const int width)
-{
-  char *cNamesCharStr = mxArrayToString(mxFldp);
-  const char **ret = DynareMxArrayToString(cNamesCharStr, len, width);
-  return ret;
-}
-
-const char **
-DynareMxArrayToString(const char *cNamesCharStr, const int len, const int width)
-{
-  char **cNamesMX;
-  cNamesMX = (char **) mxCalloc(len, sizeof(char *));
-  for(int i = 0; i < len; i++)
-    cNamesMX[i] = (char *) mxCalloc(width+1, sizeof(char));
-
-#ifdef DEBUG
-  mexPrintf("loop DynareMxArrayToString cNamesCharStr = %s \n", cNamesCharStr);
-#endif
-  for (int i = 0; i < width; i++)
-    {
-      for (int j = 0; j < len; j++)
-        {
-          // Allow alphanumeric and underscores "_" only:
-          if (isalnum(cNamesCharStr[j+i*len]) || ('_' == cNamesCharStr[j+i*len]))
-            {
-              cNamesMX[j][i] = cNamesCharStr[j+i*len];
-            }
-          else cNamesMX[j][i] = '\0';
-        }
-    }
-  const char **ret = (const char **) mxCalloc(len, sizeof(char *));
-  for (int j = 0; j < len; j++)
-    {
-      cNamesMX[j][width] = '\0';
-#ifdef DEBUG
-      //				mexPrintf("String [%d]= %s \n", j, cNamesMX[j]);
-#endif
-      char *token = (char *) mxCalloc(strlen(cNamesMX[j])+1, sizeof(char));
-      strcpy(token, cNamesMX[j]);
-      ret[j] = token;
-#ifdef DEBUG
-      mexPrintf("ret [%d]= %s \n", j, ret[j]);
-#endif
-    }
-  mxFree(cNamesMX);
-  return ret;
-}
-
 /***********************************
  * Members of DynamicModelDLL for handling loading and calling
  * <model>_dynamic () function
@@ -86,7 +32,12 @@ DynamicModelDLL::DynamicModelDLL(const char *modName, const int y_length, const 
   : length(y_length), jcols(j_cols), nMax_lag(n_max_lag), nExog(n_exog)
 {
   char fName[MAX_MODEL_NAME];
+#if defined _WIN32
   strcpy(fName, modName);
+#else
+  strcpy(fName, "./");
+  strcat(fName, modName);
+#endif
   using namespace std;
   strcat(fName, "_dynamic");
 #ifdef DEBUG
@@ -115,14 +66,14 @@ DynamicModelDLL::DynamicModelDLL(const char *modName, const int y_length, const 
       if ((dynamicHinstance == NULL) || dlerror())
         {
           cerr << dlerror() << endl;
-          mexPrintf("MexPrintf:Error loading DLL");
+          // mexPrintf("MexPrintf:Error loading DLL");
           throw 1;
         }
       Dynamic = (DynamicFn) dlsym(dynamicHinstance, "Dynamic");
       if ((Dynamic  == NULL) || dlerror())
         {
           cerr << dlerror() << endl;
-          mexPrintf("MexPrintf:Error finding DLL function");
+          // mexPrintf("MexPrintf:Error finding DLL function");
           throw 2;
         }
 #endif
@@ -130,15 +81,15 @@ DynamicModelDLL::DynamicModelDLL(const char *modName, const int y_length, const 
     }
   catch (int i)
     {
-      mexPrintf("MexPrintf: error in Load and run DLL %s , %d.\n", fName, i);
-      mexErrMsgTxt("Err: An error in Load and run DLL  .\n");
+      // mexPrintf("MexPrintf: error in Load and run DLL %s , %d.\n", fName, i);
+      // mexErrMsgTxt("Err: An error in Load and run DLL  .\n");
       return;
 
     }
   catch (...)
     {
-      mexPrintf("MexPrintf: Unknown error in Call MATLAB function %s.\n", fName);
-      mexErrMsgTxt("Err: Unknown error in Load and run DLL  .\n");
+      // mexPrintf("MexPrintf: Unknown error in Call MATLAB function %s.\n", fName);
+      // mexErrMsgTxt("Err: Unknown error in Load and run DLL  .\n");
       return;
     }
 }
@@ -163,15 +114,16 @@ DynamicModelDLL::close()
 
 void
 DynamicModelDLL::eval(const Vector &y, const TwoDMatrix &x, const  Vector *modParams,
-                      int it_, Vector &residual, TwoDMatrix *g1, TwoDMatrix *g2)
+                      int it_, Vector &residual, TwoDMatrix *g1, TwoDMatrix *g2, TwoDMatrix *g3)
 {
 
-  double  *dresidual, *dg1 = NULL, *dg2 = NULL;
+  double  *dresidual, *dg1 = NULL, *dg2 = NULL, *dg3 = NULL;
   //int length=y.length(); // not!
+  //mexPrintf("y.length() = %d\n",y.length()); 
   if ((jcols-nExog) != y.length())
     {
       // throw DLL Error
-      mexPrintf(" DLL Error: (jcols-nExog)!=ys.length() \n");
+      //      mexPrintf(" DLL Error: (jcols-nExog)!=ys.length() \n");
       return;
     }
   if (residual.length() < length)  // dummy or insufficient
@@ -196,6 +148,11 @@ DynamicModelDLL::eval(const Vector &y, const TwoDMatrix &x, const  Vector *modPa
       dg2 = const_cast<double *>(g2->base());
     }
   dresidual = const_cast<double *>(residual.base());
+  if (g3 != NULL)
+    {
+      dg3 = const_cast<double *>(g3->base());
+    }
+  dresidual = const_cast<double *>(residual.base());
   double *dy = const_cast<double *>(y.base());
   double *dx = const_cast<double *>(x.base());
   double *dbParams = const_cast<double *>(modParams->base());
@@ -216,25 +173,25 @@ DynamicModelDLL::eval(const Vector &y, const TwoDMatrix &x, const  Vector *modPa
 #endif
   try
     {
-      Dynamic(dy, dx, nExog, dbParams, it_, dresidual, dg1, dg2);
+      Dynamic(dy, dx, nExog, dbParams, it_, dresidual, dg1, dg2, dg3);
     }
   catch (...)
     {
-      mexPrintf("MexPrintf: error in run Dynamic DLL \n");
+      //      mexPrintf("MexPrintf: error in run Dynamic DLL \n");
     }
 };
 
 void
 DynamicModelDLL::eval(const Vector &y, const TwoDMatrix &x, const Vector *modParams,
-                      Vector &residual, TwoDMatrix *g1, TwoDMatrix *g2)
+                      Vector &residual, TwoDMatrix *g1, TwoDMatrix *g2, TwoDMatrix *g3)
 {
 
-  eval(y, x, modParams, nMax_lag, residual, g1, g2);
+  eval(y, x, modParams, nMax_lag, residual, g1, g2, g3);
 };
 
 void
 DynamicModelDLL::eval(const Vector &y, const Vector &x, const Vector *modParams,
-                      Vector &residual, TwoDMatrix *g1, TwoDMatrix *g2)
+                      Vector &residual, TwoDMatrix *g1, TwoDMatrix *g2, TwoDMatrix *g3)
 {
 
   /** ignore given exogens and create new 2D x matrix since
@@ -244,7 +201,7 @@ DynamicModelDLL::eval(const Vector &y, const Vector &x, const Vector *modParams,
   TwoDMatrix &mx = *(new TwoDMatrix(nMax_lag+1, nExog));
   mx.zeros(); // initialise shocks to 0s
 
-  eval(y, mx, modParams, nMax_lag, residual, g1, g2);
+  eval(y, mx, modParams, nMax_lag, residual, g1, g2, g3);
 };
 
 
