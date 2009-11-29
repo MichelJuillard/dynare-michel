@@ -23,8 +23,11 @@ function info=stoch_simul(var_list)
   if options_.linear
       options_.order = 1;
   end
-  if (options_.order == 1)
+  if options_.order == 1
       options_.replic = 1;
+  elseif options_.order == 3
+      options_.simul = 1;
+      options_.use_k_order = 1;
   end
   
 
@@ -62,7 +65,9 @@ function info=stoch_simul(var_list)
     lh = size(labels,2)+2;
     dyntable(my_title,headers,labels,M_.Sigma_e,lh,10,6);
     disp(' ')
-    disp_dr(oo_.dr,options_.order,var_list);
+    if options_.order <= 2
+        disp_dr(oo_.dr,options_.order,var_list);
+    end
   end
 
   if options_.simul == 0 & options_.nomoments == 0

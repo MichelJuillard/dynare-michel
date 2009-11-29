@@ -82,6 +82,13 @@ global M_ options_ it_
 	    dr.ghu*tempu+0.5*(dr.ghxx*tempxx+dr.ghuu*tempuu)+dr.ghxu*tempxu;
       k1 = k1+1;
     end
+  elseif iorder == 3
+      options_.seed = 77;
+      ex_ = [zeros(1,M_.exo_nbr); ex_];
+      y_ = dynare_simul_(3,dr.nstatic,dr.npred-dr.nboth,dr.nboth,dr.nfwrd,M_.exo_nbr, ...
+                    y_(dr.order_var,1),ex_',M_.Sigma_e,options_.seed,dr.ys(dr.order_var),dr.g_0, ...
+                         dr.g_1,dr.g_2,dr.g_3);
+      y_(dr.order_var,:) = y_;
   end
 
 % MJ 08/30/02 corrected bug at order 2
