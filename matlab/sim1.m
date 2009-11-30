@@ -33,7 +33,7 @@ function sim1
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
 global M_ options_ oo_
-global  iyp iyf ct_ M_ it_ c
+global  iyp iyf M_ it_ c
 
 lead_lag_incidence = M_.lead_lag_incidence;
 
@@ -61,7 +61,7 @@ h1 = clock ;
 for iter = 1:options_.maxit_
     h2 = clock ;
     
-    if ct_ == 0
+    if options_.terminal_condition == 0
         c = zeros(ny*options_.periods,nrc) ;
     else
         c = zeros(ny*(options_.periods+1),nrc) ;
@@ -84,7 +84,7 @@ for iter = 1:options_.maxit_
         c (ic,:) = jacobian(:,is)\jacobian(:,isf1) ;
     end
     
-    if ct_ == 1
+    if options_.terminal_condition == 1
         s = eye(ny) ;
         s(:,isf) = s(:,isf)+c(ic,1:nyf) ;
         ic = ic + ny ;

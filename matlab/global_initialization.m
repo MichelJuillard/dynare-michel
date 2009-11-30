@@ -30,8 +30,7 @@ function global_initialization()
 
   global oo_ M_ options_ ct_
 
-  ct_=0;
-
+  options_.terminal_condition = 0;
   options_.rplottype = 0;
   options_.smpl = 0;
   options_.dynatol = 0.00001;

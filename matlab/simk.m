@@ -35,7 +35,7 @@ function simk
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
 global M_ options_ oo_
-global it_ iyr0 ct_ broyden_
+global it_ iyr0 broyden_
 
 %func_name = [M_.fname '_static'];
 nk = M_.maximum_endo_lag + M_.maximum_endo_lead + 1 ;
@@ -283,7 +283,7 @@ for iter = 1:options_.maxit_
     iyr = iyr + ny ;
     icr0 = icr0 + ny ;
   end
-  if ct_ == 1
+  if options_.terminal_condition == 1
 
     ofs = (((it_-M_.maximum_lag-2)*ny+1)-1)*ncc*8 ;
     junk = fseek(fid,ofs,-1) ;
@@ -303,7 +303,7 @@ for iter = 1:options_.maxit_
     end
   end
   oo_.endo_simul = reshape(oo_.endo_simul,ny,options_.periods+M_.maximum_lag+M_.maximum_endo_lead) ;
-  if ct_ == 1
+  if options_.terminal_condition == 1
     hbacsup = clock ;
     c = bksupk(ny,fid,ncc,icc1) ;
     hbacsup = etime(clock,hbacsup) ;
