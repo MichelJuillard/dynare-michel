@@ -115,21 +115,17 @@ KordpDynare::solveDeterministicSteady()
   pa << "Non-linear solver for deterministic steady state By-passed " << endrec;
 }
 
-// evaluate system at given y_t=y_{t+1}=y_{t-1}, and given shocks x_t
 void
 KordpDynare::evaluateSystem(Vector &out, const Vector &yy, const Vector &xx) throw (DynareException)
 {
-  //  dynamicDLL.eval(yy,  xx, params, out, NULL, NULL, NULL);
+  // Nothing to do, this method is only implemented to complete the interface of DynamicModel
 }
 
-// evaluate system at given y^*_{t-1}, y_t, y^{**}_{t+1} and at
-// exogenous x_t, all three vectors yym, yy, and yyp have the
-// respective lengths of y^*_{t-1}, y_t, y^{**}_{t+1}
 void
 KordpDynare::evaluateSystem(Vector &out, const Vector &yym, const Vector &yy,
                             const Vector &yyp, const Vector &xx) throw (DynareException)
 {
-  //  dynamicDLL.eval(yy,  xx, params, out, NULL, NULL, NULL);
+  // Nothing to do, this method is only implemented to complete the interface of DynamicModel
 }
 
 /************************************************
