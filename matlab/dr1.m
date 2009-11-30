@@ -51,7 +51,7 @@ function [dr,info,M_,options_,oo_] = dr1(dr,task,M_,options_,oo_)
 
     info = 0;
     
-    if options_.use_k_order;
+    if options_.k_order_solver;
         dr = set_state_space(dr,M_);
         [dr,info] = k_order_pert(dr,M_,options_,oo_);
         oo_.dr = dr;

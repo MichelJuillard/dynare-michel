@@ -27,7 +27,7 @@ function info=stoch_simul(var_list)
       options_.replic = 1;
   elseif options_.order == 3
       options_.simul = 1;
-      options_.use_k_order = 1;
+      options_.k_order_solver = 1;
   end
   
 

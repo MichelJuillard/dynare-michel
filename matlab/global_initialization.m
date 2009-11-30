@@ -127,7 +127,7 @@ function global_initialization()
       options_.use_qzdiv = 0;
   end
   options_.aim_solver = 0; % i.e. by default do not use G.Anderson's AIM solver, use mjdgges instead
-  options_.use_k_order=0; % by default do not use k_order_perturbation but mjdgges
+  options_.k_order_solver=0; % by default do not use k_order_perturbation but mjdgges
   options_.partial_information = 0;
   options_.conditional_variance_decomposition = [];
   

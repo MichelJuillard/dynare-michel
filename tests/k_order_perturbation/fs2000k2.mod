@@ -55,7 +55,7 @@ end;
 
 steady;
 
-stoch_simul(order=2,use_k_order,periods=1000);
+stoch_simul(order=2,k_order_solver,periods=1000);
 
 oo1 = load('fs2000k2a_results','oo_');
 

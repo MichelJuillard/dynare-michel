@@ -10,12 +10,20 @@ function [dr,info] = k_order_pert(dr,M,options,oo)
       case 1
         g_1 = k_order_perturbation(dr,0,M,options, oo , ['.' ...
                             mexext]);
+        dr.g_1 = g_1;
       case 2
         [g_0, g_1, g_2] = k_order_perturbation(dr,0,M,options, oo , ['.' ...
                             mexext]);
+        dr.g_0 = g_0;
+        dr.g_1 = g_1;
+        dr.g_2 = g_2;
       case 3
         [g_0, g_1, g_2, g_3] = k_order_perturbation(dr,0,M,options, oo , ['.' ...
                             mexext]);
+        dr.g_0 = g_0;
+        dr.g_1 = g_1;
+        dr.g_2 = g_2;
+        dr.g_3 = g_3;
       otherwise
         error('order > 3 isn''t implemented')
     end
@@ -61,9 +69,3 @@ function [dr,info] = k_order_pert(dr,M,options,oo)
         dr.ghuu = ghuu;
     end
     
-    if order > 2
-        dr.g_0 = g_0;
-        dr.g_1 = g_1;
-        dr.g_2 = g_2;
-        dr.g_3 = g_3;
-    end
