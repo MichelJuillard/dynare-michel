@@ -35,7 +35,7 @@ main(int argc, char *argv[])
   double qz_criterium = 1+1e-6;
   const int check_flag = 0;
   const char *fName = "./fs2000k"; //mxArrayToString(mFname);
-  const char *dfExt = NULL; //Dyanamic file extension, e.g.".dll";
+  const char *dfExt = ".mexa64"; //Dynamic file extension, e.g.".dll";
 
 #ifdef DEBUG
   mexPrintf("k_order_perturbation: check_flag = %d ,  fName = %s .\n", check_flag, fName);

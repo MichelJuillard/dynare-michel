@@ -40,9 +40,9 @@
 
 #include "k_ord_dynare.h"
 #include "dynamic_dll.h"
-#include "math.h"
-#include <cstring>
 
+#include <cmath>
+#include <cstring>
 #include <cctype>
 
 #ifdef _MSC_VER
@@ -78,41 +78,77 @@ fnK_order_perturbation(void)
 #endif // _MSC_VER
 
 #if defined(MATLAB_MEX_FILE) || defined(OCTAVE_MEX_FILE)  // exclude mexFunction for other applications
+
+const char **
+DynareMxArrayToString(const char *cNamesCharStr, const int len, const int width)
+{
+  char **cNamesMX;
+  cNamesMX = (char **) calloc(len, sizeof(char *));
+  for(int i = 0; i < len; i++)
+    cNamesMX[i] = (char *) calloc(width+1, sizeof(char));
+
+  for (int i = 0; i < width; i++)
+    {
+      for (int j = 0; j < len; j++)
+        {
+          // Allow alphanumeric and underscores "_" only:
+          if (isalnum(cNamesCharStr[j+i*len]) || ('_' == cNamesCharStr[j+i*len]))
+            {
+              cNamesMX[j][i] = cNamesCharStr[j+i*len];
+            }
+          else cNamesMX[j][i] = '\0';
+        }
+    }
+  const char **ret = (const char **) calloc(len, sizeof(char *));
+  for (int j = 0; j < len; j++)
+    {
+      cNamesMX[j][width] = '\0';
+      char *token = (char *) calloc(strlen(cNamesMX[j])+1, sizeof(char));
+      strcpy(token, cNamesMX[j]);
+      ret[j] = token;
+    }
+  mxFree(cNamesMX);
+  return ret;
+}
+
+//////////////////////////////////////////////////////
+// Convert Matlab Dynare endo and exo names array to C type array of string pointers
+// Poblem is that Matlab mx function returns a long string concatenated by columns rather than rows
+// hence a rather low level approach is needed
+///////////////////////////////////////////////////////
+const char **
+DynareMxArrayToString(const mxArray *mxFldp, const int len, const int width)
+{
+  char *cNamesCharStr = mxArrayToString(mxFldp);
+  const char **ret = DynareMxArrayToString(cNamesCharStr, len, width);
+  return ret;
+}
+
 extern "C" {
 
   // mexFunction: Matlab Inerface point and the main application driver
-
   void
   mexFunction(int nlhs, mxArray *plhs[],
               int nrhs, const mxArray *prhs[])
   {
-    //    if (nrhs < 5)
-    //  mexErrMsgTxt("Must have at least 5 input parameters.\n");
-    //if (nlhs == 0)
-    //  mexErrMsgTxt("Must have at least 1 output parameter.\n");
+    if (nrhs < 5)
+      mexErrMsgTxt("Must have at least 5 input parameters.");
+    if (nlhs == 0)
+      mexErrMsgTxt("Must have at least 1 output parameter.");
 
     const mxArray *dr = prhs[0];
     const int check_flag = (int) mxGetScalar(prhs[1]);
     const mxArray *M_ = prhs[2];
-    const mxArray *options_ =  (prhs[3]);
-    const mxArray *oo_ =  (prhs[4]);
+    const mxArray *options_ = prhs[3];
+    const mxArray *oo_ = prhs[4];
 
     mxArray *mFname = mxGetField(M_, 0, "fname");
     if (!mxIsChar(mFname))
-      {
         mexErrMsgTxt("Input must be of type char.");
-      }
-    const char *fName = mxArrayToString(mFname);
-    const char *dfExt = NULL; //Dyanamic file extension, e.g.".dll" or .mexw32;
-    if (prhs[5] != NULL)
-      {
-        const mxArray *mexExt = prhs[5];
-        dfExt = mxArrayToString(mexExt);
-      }
+    string fName = mxArrayToString(mFname);
+    const mxArray *mexExt = prhs[5];
+    string dfExt = mxArrayToString(mexExt); //Dynamic file extension, e.g.".dll" or .mexw32;
 
-#ifdef DEBUG
-    mexPrintf("k_order_perturbation: check_flag = %d ,  fName = %s , mexExt=%s.\n", check_flag, fName, dfExt);
-#endif
     int kOrder;
     mxArray *mxFldp = mxGetField(options_, 0, "order");
     if (mxIsNumeric(mxFldp))
@@ -120,12 +156,10 @@ extern "C" {
     else
       kOrder = 1;
     
-
-//     if (kOrder == 1 && nlhs != 1)
-//       mexErrMsgTxt("k_order_perturbation at order 1 requires exactly 1 argument in output\'n");
-//     else if (kOrder > 1 && nlhs != kOrder+1)
-//       mexErrMsgTxt("k_order_perturbation at order > 1 requires exactly order + 1 argument in output\'n");
-    
+    if (kOrder == 1 && nlhs != 1)
+      mexErrMsgTxt("k_order_perturbation at order 1 requires exactly 1 argument in output");
+    else if (kOrder > 1 && nlhs != kOrder+1)
+      mexErrMsgTxt("k_order_perturbation at order > 1 requires exactly order + 1 argument in output");
     
     double qz_criterium = 1+1e-6;
     mxFldp = mxGetField(options_, 0, "qz_criterium");
@@ -136,28 +170,15 @@ extern "C" {
     double *dparams = (double *) mxGetData(mxFldp);
     int npar = (int) mxGetM(mxFldp);
     Vector *modParams =  new Vector(dparams, npar);
-#ifdef DEBUG
-    mexPrintf("k_ord_perturbation: qz_criterium=%g, nParams=%d .\n", qz_criterium, npar);
-    for (int i = 0; i < npar; i++)
-      {
-        mexPrintf("k_ord_perturbation: Params[%d]= %g.\n", i, (*modParams)[i]);
-      }
-    //	for (int i = 0; i < npar; i++) {
-    //        mexPrintf("k_ord_perturbation: params_vec[%d]= %g.\n", i, params_vec[i] );   }
-#endif
 
     mxFldp      = mxGetField(M_, 0, "Sigma_e");
     dparams = (double *) mxGetData(mxFldp);
     npar = (int) mxGetN(mxFldp);
     TwoDMatrix *vCov =  new TwoDMatrix(npar, npar, dparams);
 
-    //		mxFldp  = mxGetField(oo_, 0,"steady_state" ); // use in order of declaration
     mxFldp      = mxGetField(dr, 0, "ys");  // and not in order of dr.order_var
-    //mexPrintf("mxFldp %x",mxFldp);
-    //		mxFldp  = mxGetField(oo_, 0,"dyn_ys" );  // and NOT extended ys
     dparams = (double *) mxGetData(mxFldp);
     const int nSteady = (int) mxGetM(mxFldp);
-    //    mexPrintf("nSteady %d\n",nSteady);
     Vector *ySteady =  new Vector(dparams, nSteady);
 
     mxFldp = mxGetField(dr, 0, "nstatic");
@@ -189,18 +210,10 @@ extern "C" {
     dparams = (double *) mxGetData(mxFldp);
     npar = (int) mxGetM(mxFldp);
     if (npar != nEndo)    //(nPar != npar)
-      {
-        mexErrMsgTxt("Incorrect number of input var_order vars.\n");
-        //return;
-      }
-    vector<int> *var_order_vp = (new vector<int>(nEndo)); //nEndo));
+        mexErrMsgTxt("Incorrect number of input var_order vars.");
+    vector<int> *var_order_vp = (new vector<int>(nEndo));
     for (int v = 0; v < nEndo; v++)
-      {
-        (*var_order_vp)[v] = (int)(*(dparams++)); //[v];
-#ifdef DEBUG
-        mexPrintf("var_order_vp)[%d] = %d .\n", v, (*var_order_vp)[v]);
-#endif
-      }
+        (*var_order_vp)[v] = (int)(*(dparams++));
 
     // the lag, current and lead blocks of the jacobian respectively
     mxFldp      = mxGetField(M_, 0, "lead_lag_incidence");
@@ -209,81 +222,31 @@ extern "C" {
     int nrows = (int) mxGetM(mxFldp);
 
 
-#ifdef DEBUG
-    mexPrintf("ll_Incidence nrows=%d, ncols = %d .\n", nrows, npar);
-#endif
     TwoDMatrix *llincidence =  new TwoDMatrix(nrows, npar, dparams);
     if (npar != nEndo)
-      {
-        mexPrintf("Incorrect length of lead lag incidences: ncol=%d != nEndo =%d .\n", npar, nEndo);
-        return;
-      }
-#ifdef DEBUG
-    for (int j = 0; j < nrows; j++)
-      {
-        for (int i = 0; i < nEndo; i++)
-          {
-            mexPrintf("llincidence->get(%d,%d) =%d .\n",
-                      j, i, (int) llincidence->get(j, i));
-          }
-      }
-#endif
+      mexErrMsgIdAndTxt("dynare:k_order_perturbation", "Incorrect length of lead lag incidences: ncol=%d != nEndo=%d.", npar, nEndo);
 
     //get NNZH =NNZD(2) = the total number of non-zero Hessian elements 
     mxFldp = mxGetField(M_, 0, "NNZDerivatives");
     dparams = (double *) mxGetData(mxFldp);
     Vector *NNZD =  new Vector (dparams, (int) mxGetM(mxFldp));
-#ifdef DEBUG
-    mexPrintf("NNZH=%d, \n", (int) (*NNZD)[1]);
-#endif
 
     const int jcols = nExog+nEndo+nsPred+nsForw; // Num of Jacobian columns
 
     mxFldp = mxGetField(M_, 0, "var_order_endo_names");
-    //    mexPrintf("k_order_perturbation: Get nendo .\n");
     const int nendo = (int) mxGetM(mxFldp);
     const int widthEndo = (int) mxGetN(mxFldp);
     const char **endoNamesMX = DynareMxArrayToString(mxFldp, nendo, widthEndo);
 
-#ifdef DEBUG
-    for (int i = 0; i < nEndo; i++)
-      {
-        mexPrintf("k_ord_perturbation: EndoNameList[%d][0]= %s.\n", i, endoNamesMX[i]);
-      }
-#endif
     mxFldp      = mxGetField(M_, 0, "exo_names");
     const int nexo = (int) mxGetM(mxFldp);
     const int widthExog = (int) mxGetN(mxFldp);
     const char **exoNamesMX = DynareMxArrayToString(mxFldp, nexo, widthExog);
 
-#ifdef DEBUG
-    for (int i = 0; i < nexo; i++)
-      {
-        mexPrintf("k_ord_perturbation: ExoNameList[%d][0]= %s.\n", i, exoNamesMX[i]);
-      }
-#endif
     if ((nEndo != nendo) || (nExog != nexo))    //(nPar != npar)
-      {
-        mexErrMsgTxt("Incorrect number of input parameters.\n");
-        return;
-      }
+      mexErrMsgTxt("Incorrect number of input parameters.");
 
-#ifdef DEBUG
-    for (int i = 0; i < nEndo; i++)
-      {
-        mexPrintf("k_ord_perturbation: EndoNameList[%d]= %s.\n", i, endoNamesMX[i]);
-      }
-    //    for (int i = 0; i < nPar; i++) {
-    //        mexPrintf("k_ord_perturbation: Params[%d]= %g.\n", i, (*modParams)[i]);  }
-    for (int i = 0; i < nSteady; i++)
-      {
-        mexPrintf("k_ord_perturbation: ysteady[%d]= %g.\n", i, (*ySteady)[i]);
-      }
-
-    mexPrintf("k_order_perturbation: nEndo = %d ,  nExo = %d .\n", nEndo, nExog);
-#endif
     /* Fetch time index */
-    //		int it_ = (int) mxGetScalar(prhs[3]) - 1;
 
     const int nSteps = 0; // Dynare++ solving steps, for time being default to 0 = deterministic steady state
     const double sstol = 1.e-13; //NL solver tolerance from
@@ -296,21 +259,10 @@ extern "C" {
         std::string jName(fName); //params.basename);
         jName += ".jnl";
         Journal journal(jName.c_str());
-#ifdef DEBUG
-        mexPrintf("k_order_perturbation: Calling dynamicDLL constructor.\n");
-#endif
-        //			DynamicFn * pDynamicFn = loadModelDynamicDLL (fname);
         DynamicModelDLL dynamicDLL(fName, nEndo, jcols, nMax_lag, nExog, dfExt);
 
         // intiate tensor library
-#ifdef DEBUG
-        mexPrintf("k_order_perturbation: Call tls init\n");
-#endif
         tls.init(kOrder, nStat+2*nPred+3*nBoth+2*nForw+nExog);
-
-#ifdef DEBUG
-        mexPrintf("k_order_perturbation: Calling dynare constructor .\n");
-#endif
 
         // make KordpDynare object
         KordpDynare dynare(endoNamesMX,  nEndo, exoNamesMX,  nExog, nPar, // paramNames,
@@ -319,15 +271,9 @@ extern "C" {
                            sstol, var_order_vp, llincidence, qz_criterium);
 
         // construct main K-order approximation class
-#ifdef DEBUG
-        mexPrintf("k_order_perturbation: Call Approximation constructor with qz_criterium=%f \n", qz_criterium);
-#endif
 
         Approximation app(dynare, journal,  nSteps, false, qz_criterium);
         // run stochastic steady
-#ifdef DEBUG
-        mexPrintf("k_order_perturbation: Calling walkStochSteady.\n");
-#endif
         app.walkStochSteady();
 
         ConstTwoDMatrix ss(app.getSS());
@@ -336,18 +282,14 @@ extern "C" {
         matfile += ".mat";
         FILE *matfd = NULL;
         if (NULL == (matfd = fopen(matfile.c_str(), "wb")))
-          {
-            fprintf(stderr, "Couldn't open %s for writing.\n", matfile.c_str());
-            exit(1);
-          }
+          mexErrMsgIdAndTxt("dynare:k_order_perturbation", "Couldn't open %s for writing.", matfile.c_str());
 
-        std::string ss_matrix_name(fName); //params.prefix);
+        std::string ss_matrix_name(fName);
         ss_matrix_name += "_steady_states";
-        //			ConstTwoDMatrix(app.getSS()).writeMat4(matfd, ss_matrix_name.c_str());
         ss.writeMat4(matfd, ss_matrix_name.c_str());
 
         // write the folded decision rule to the Mat-4 file
-        app.getFoldDecisionRule().writeMat4(matfd, fName); //params.prefix);
+        app.getFoldDecisionRule().writeMat4(matfd, fName.c_str()); //params.prefix);
 
         fclose(matfd);
 
@@ -355,26 +297,11 @@ extern "C" {
         map<string, ConstTwoDMatrix> mm;
         app.getFoldDecisionRule().writeMMap(mm, string());
 
-#ifdef DEBUG
-        app.getFoldDecisionRule().print();
-        mexPrintf("k_order_perturbation: Map print: \n");
-        for (map<string, ConstTwoDMatrix>::const_iterator cit = mm.begin();
-             cit != mm.end(); ++cit)
-          {
-            mexPrintf("k_order_perturbation: Map print: string: %s , g:\n", (*cit).first.c_str());
-            (*cit).second.print();
-          }
-#endif
-
         // get latest ysteady
         double *dYsteady = (dynare.getSteady().base());
         ySteady = (Vector *)(&dynare.getSteady());
 
         // developement of the output.
-#ifdef DEBUG
-        mexPrintf("k_order_perturbation: Filling outputs.\n");
-#endif
-
         double  *dgy, *dgu, *ysteady;
         int nb_row_x;
 
@@ -387,12 +314,6 @@ extern "C" {
             plhs[0] = mxCreateDoubleMatrix((*cit).second.numRows(), (*cit).second.numCols(), mxREAL);
 	    TwoDMatrix g((*cit).second.numRows(), (*cit).second.numCols(), mxGetPr(plhs[0]));
 	    g = (const TwoDMatrix &)(*cit).second;
-	    //            /* Create a C pointer to a copy of the output ysteady. */
-	    //            TwoDMatrix tmp_ss(nEndo, 1, mxGetPr(plhs[0]));
-	    //            tmp_ss = (const TwoDMatrix &)ss;
-#ifdef DEBUG
-            //				tmp_ss.print();  !! This print Crashes???
-#endif
           }
         if (kOrder >= 2)
           {
@@ -404,12 +325,6 @@ extern "C" {
                   plhs[ii] = mxCreateDoubleMatrix((*cit).second.numRows(), (*cit).second.numCols(), mxREAL);
                   TwoDMatrix g_ii((*cit).second.numRows(), (*cit).second.numCols(), mxGetPr(plhs[ii]));
                   g_ii = (const TwoDMatrix &)(*cit).second;
-#ifdef DEBUG
-                  mexPrintf("k_order_perturbation: cit %d print: \n", ii);
-                  (*cit).second.print();
-                  mexPrintf("k_order_perturbation: dguy %d print: \n", ii);
-                  //                      dgyu.print(); !! This print Crashes???
-#endif
                   ++ii;
                 }
               }
@@ -417,127 +332,28 @@ extern "C" {
       }
     catch (const KordException &e)
       {
-        printf("Caugth Kord exception: ");
         e.print();
-        mexPrintf("Caugth Kord exception: %s", e.get_message());
-        std::string errfile(fName); //(params.basename);
-        errfile += "_error.log";
-        FILE *errfd = NULL;
-        if (NULL == (errfd = fopen(errfile.c_str(), "wb")))
-          {
-            fprintf(stderr, "Couldn't open %s for writing.\n", errfile.c_str());
-            return; // e.code();
-          }
-        fprintf(errfd, "Caugth Kord exception: %s", e.get_message());
-        fclose(errfd);
-        return; // e.code();
+        mexErrMsgIdAndTxt("dynare:k_order_perturbation", "Caught Kord exception: %s", e.get_message());
       }
     catch (const TLException &e)
       {
-        printf("Caugth TL exception: ");
         e.print();
-        return; // 255;
+        mexErrMsgIdAndTxt("dynare:k_order_perturbation", "Caught TL exception");
       }
     catch (SylvException &e)
       {
-        printf("Caught Sylv exception: ");
         e.printMessage();
-        return; // 255;
+        mexErrMsgIdAndTxt("dynare:k_order_perturbation", "Caught Sylv exception");
       }
     catch (const DynareException &e)
       {
-        printf("Caught KordpDynare exception: %s\n", e.message());
-        mexPrintf("Caugth Dynare exception: %s", e.message());
-        std::string errfile(fName); //(params.basename);
-        errfile += "_error.log";
-        FILE *errfd = NULL;
-        if (NULL == (errfd = fopen(errfile.c_str(), "wb")))
-          {
-            fprintf(stderr, "Couldn't open %s for writing.\n", errfile.c_str());
-            return; // e.code();
-          }
-        fprintf(errfd, "Caugth KordDynare  exception: %s", e.message());
-        fclose(errfd);
-        return; // 255;
+        mexErrMsgIdAndTxt("dynare:k_order_perturbation", "Caught KordDynare exception: %s", e.message());
       }
     catch (const ogu::Exception &e)
       {
-        printf("Caught ogu::Exception: ");
-        e.print();
-        mexPrintf("Caugth general exception: %s", e.message());
-        std::string errfile(fName); //(params.basename);
-        errfile += "_error.log";
-        FILE *errfd = NULL;
-        if (NULL == (errfd = fopen(errfile.c_str(), "wb")))
-          {
-            fprintf(stderr, "Couldn't open %s for writing.\n", errfile.c_str());
-            return; // e.code();
-          }
-        e.print(errfd);
-        fclose(errfd);
-        return; // 255;
-     }  //catch
-  }; // end of mexFunction()
-}; // end of extern C
-
-//////////////////////////////////////////////////////
-// Convert Matlab Dynare endo and exo names array to C type array of string pointers
-// Poblem is that Matlab mx function returns a long string concatenated by columns rather than rows
-// hence a rather low level approach is needed
-///////////////////////////////////////////////////////
-const char **
-DynareMxArrayToString(const mxArray *mxFldp, const int len, const int width)
-{
-  char *cNamesCharStr = mxArrayToString(mxFldp);
-  const char **ret = DynareMxArrayToString(cNamesCharStr, len, width);
-  return ret;
-}
-
-const char **
-DynareMxArrayToString(const char *cNamesCharStr, const int len, const int width)
-{
-  char **cNamesMX;
-  cNamesMX = (char **) calloc(len, sizeof(char *));
-  for(int i = 0; i < len; i++)
-    cNamesMX[i] = (char *) calloc(width+1, sizeof(char));
-
-#ifdef DEBUG
-  mexPrintf("loop DynareMxArrayToString cNamesCharStr = %s \n", cNamesCharStr);
-#endif
-  for (int i = 0; i < width; i++)
-    {
-      for (int j = 0; j < len; j++)
-        {
-          // Allow alphanumeric and underscores "_" only:
-          if (isalnum(cNamesCharStr[j+i*len]) || ('_' == cNamesCharStr[j+i*len]))
-            {
-              cNamesMX[j][i] = cNamesCharStr[j+i*len];
-            }
-          else cNamesMX[j][i] = '\0';
-        }
-    }
-  const char **ret = (const char **) calloc(len, sizeof(char *));
-  for (int j = 0; j < len; j++)
-    {
-      cNamesMX[j][width] = '\0';
-#ifdef DEBUG
-      //				mexPrintf("String [%d]= %s \n", j, cNamesMX[j]);
-#endif
-      char *token = (char *) calloc(strlen(cNamesMX[j])+1, sizeof(char));
-      strcpy(token, cNamesMX[j]);
-      ret[j] = token;
-#ifdef DEBUG
-      mexPrintf("ret [%d]= %s \n", j, ret[j]);
-#endif
-    }
-  mxFree(cNamesMX);
-  return ret;
-}
+        mexErrMsgIdAndTxt("dynare:k_order_perturbation", "Caught general exception: %s", e.message());
+      }
+  } // end of mexFunction()
+} // end of extern C
 
 #endif // ifdef MATLAB_MEX_FILE  to exclude mexFunction for other applications
-
-
-
-
-
-

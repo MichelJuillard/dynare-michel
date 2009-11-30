@@ -36,20 +36,18 @@
 #include <string>
 #include <dynmex.h>
 
+#include "dynare_exception.h"
+
 // <model>_Dynamic DLL pointer
 #ifdef _WIN32
 typedef void  *(DynamicFn)
-#else // linux
+#else // Linux or Mac
 typedef void  (*DynamicFn)
 #endif
 (double *y, double *x, int nb_row_x, double *params,
  int it_, double *residual, double *g1, double *g2, double *g3);
 
-//DynamicFn Dynamic;
-
 typedef void *(mexFunctionPtr)(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]);
-
-const int MAX_MODEL_NAME = 100;
 
 /**
  * creates pointer to Dynamic function inside <model>_dynamic.dll
@@ -67,41 +65,25 @@ private:
   const int jcols;  // tot num var t-1, t and t+1 instances + exogs = Num of Jacobian columns
   const int nMax_lag; // no of lags
   const int nExog; // no of exogenous
-  //	const char * sExt; // dynamic file extension: dll, mexw32, ...
 #ifdef _WIN32
   HINSTANCE dynamicHinstance;  // DLL instance pointer in Windows
-#else // linux
-  void *dynamicHinstance;    // and in Linux
+#else
+  void *dynamicHinstance; // and in Linux or Mac
 #endif
 
 public:
   // construct and load Dynamic model DLL
-  DynamicModelDLL(const char *fname, const int length, const int jcols,
-                  const int nMax_lag, const int nExog, const char *sExt);
-  virtual ~DynamicModelDLL()
-  {
-    close();
-  };
+  DynamicModelDLL(const string &fname, const int length, const int jcols,
+                  const int nMax_lag, const int nExog, const string &sExt) throw (DynareException);
+  virtual ~DynamicModelDLL();
 
   // evaluate Dynamic model DLL
-  void
-  eval(double *y, double *x, int nb_row_x, double *params,
-       int it_, double *residual, double *g1, double *g2, double *g3)
-  {
-    Dynamic(y, x, nb_row_x, params, it_, residual, g1, g2, g3);
-  };
+  void eval(double *y, double *x, int nb_row_x, double *params,
+            int it_, double *residual, double *g1, double *g2, double *g3);
   void eval(const Vector &y, const Vector &x,  const Vector *params,
-            Vector &residual, TwoDMatrix *g1, TwoDMatrix *g2, TwoDMatrix *g3);
+            Vector &residual, TwoDMatrix *g1, TwoDMatrix *g2, TwoDMatrix *g3) throw (DynareException);
   void eval(const Vector &y, const TwoDMatrix &x,  const Vector *params,
-            int it_, Vector &residual, TwoDMatrix *g1, TwoDMatrix *g2, TwoDMatrix *g3);
+            int it_, Vector &residual, TwoDMatrix *g1, TwoDMatrix *g2, TwoDMatrix *g3) throw (DynareException);
   void eval(const Vector &y, const TwoDMatrix &x,  const Vector *params,
-            Vector &residual, TwoDMatrix *g1, TwoDMatrix *g2, TwoDMatrix *g3);
-
-  // close DLL: If the referenced object was successfully closed,
-  // close() returns 0, non 0 otherwise
-  int close();
-
+            Vector &residual, TwoDMatrix *g1, TwoDMatrix *g2, TwoDMatrix *g3) throw (DynareException);
 };
-// convert Matlab endo and exo names array to C type array of strings
-const char **DynareMxArrayToString(const mxArray *mxFldp, const int len, const int width);
-const char **DynareMxArrayToString(const char *cArray, const int len, const int width);
