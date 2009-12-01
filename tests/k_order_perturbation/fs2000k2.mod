@@ -1,5 +1,5 @@
-// checks for order = 2 that use_k_order = 0 (fs2000k2a) and use_k_order = 1 (this file)
-// give the same results
+/* Checks that, for order = 2, k_order_solver = 0 (fs2000k2a)
+   and k_order_solver = 1 (this file) give the same results */
 
 var m P c e W R k d n l gy_obs gp_obs y dA ;
 varexo e_a e_m;
@@ -56,6 +56,10 @@ end;
 steady;
 
 stoch_simul(order=2,k_order_solver,periods=1000);
+
+if ~exist('fs2000k2a_results.mat','file');
+   error('fs2000k2a must be run first');
+end;
 
 oo1 = load('fs2000k2a_results','oo_');
 

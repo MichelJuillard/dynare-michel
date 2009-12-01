@@ -1,5 +1,5 @@
-// checks for order = 2 that use_k_order = 0 (this file) and use_k_order = 1 (fs2000k2)
-// give the same results
+/* Checks that, for order = 2, k_order_solver = 0 (this file)
+   and k_order_solver = 1 (fs2000k2) give the same results */
 
 var m P c e W R k d n l gy_obs gp_obs y dA ;
 varexo e_a e_m;

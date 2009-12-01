@@ -1,3 +1,6 @@
+/* Checks that, for order = 2 and k_order_solver = 1, a model with 2 leads
+   and the same model with one lead (using auxiliary vars) give the same result */
+
 var m m_1 P P_1 c e W R k d n l gy_obs gp_obs y dA AUXv;
 varexo e_a e_m;
 

@@ -10,6 +10,10 @@ OCTAVE_MODS = \
 	ramst_initval_file.mod \
 	example1_varexo_det.mod \
 	predetermined_variables.mod \
+	k_order_perturbation/fs2000k2a.mod \
+	k_order_perturbation/fs2000k2.mod \
+	k_order_perturbation/fs2000k_1.mod \
+	k_order_perturbation/fs2000k3.mod \
 	arima/mod1.mod \
 	arima/mod1a.mod \
 	arima/mod2.mod \

@@ -1,3 +1,5 @@
+/* Used to check that Dynare++ and Dynare with k_order_solver=1 give the same result */
+
 var m m_1 P P_1 c e W R k d n l gy_obs gp_obs y dA P2 c2;
 varexo e_a e_m;
 
