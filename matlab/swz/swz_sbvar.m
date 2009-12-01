@@ -19,5 +19,5 @@ options.ms.output_file_tag = M.fname;
 if ms_flag == 1
     sz_prd(options)
 else
-    swz_sbvar1(options);
+    swz_mardd(options);
 end

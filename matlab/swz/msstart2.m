@@ -274,7 +274,7 @@ if options_.ms.indxestima
    ye = [dateswd y];
 
    %* Obtain linear restrictions
-   eval(['[Uiconst,Viconst,n0,np,ixmC0Pres] = ' options_.ms.restriction_fname '(options_.ms.nlags ,nvar,nexo,options_.ms.cross_restrictions );'])
+   [Uiconst,Viconst,n0,np,ixmC0Pres] = feval(options_.ms.restriction_fname,options_.ms.nlags ,nvar,nexo,options_.ms.cross_restrictions );
    if min(n0)==0
       disp(' ')
       warning('A0: restrictions in dlrprior.m give no free parameter in one of equations')

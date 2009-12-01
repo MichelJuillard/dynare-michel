@@ -2,11 +2,9 @@ function sz_prd(options_)
 %==========================================================================
 %== Directory structure
 %==========================================================================
-% path for Zha's .m file library
-%addpath './cstz';
 
-% path for restriction .m files
-%addpath './identification';
+%generation of mhm file
+generateMHM_input(options_);
 
 swz_root = strrep(which('swz_sbvar'),'/swz_sbvar.m','');
 
@@ -53,7 +51,9 @@ markov_file = [options_.ms.markov_file '.dat'];
 %== Markov Process Specification File
 %==========================================================================
 %options_.ms.mhm_file = 'MHM_input.dat';
-mhm_file = [options_.ms.mhm_file '.dat'];
+
+
+mhm_file = [mhm_spec_path '/MHM_input.dat'];
 %options_.ms.proposal_draws = 100000;
 
 %==========================================================================
