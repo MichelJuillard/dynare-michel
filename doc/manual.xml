@@ -1130,7 +1130,7 @@ The initial equilibrium is computed by <xref linkend='steady'/> for <literal>x=1
     <cmdsynopsis>
       <command>histval</command><arg choice="plain">;</arg><sbr/>
       <arg rep="repeat" choice="plain">
-	      <replaceable>VARIABLE_NAME</replaceable> = <replaceable>EXPRESSION</replaceable> ;
+	      <replaceable>VARIABLE_NAME</replaceable>(<replaceable>INTEGER</replaceable>) = <replaceable>EXPRESSION</replaceable> ;
       </arg><sbr/>
       <command>end</command><arg choice="plain">;</arg>
     </cmdsynopsis>
