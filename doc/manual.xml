@@ -98,7 +98,7 @@ Currently the development team of Dynare is composed of S. Adjemian, H. Bastani,
 <chapter><title>Installation and configuration</title>
 
 
-<sect1><title>Software requirements</title>
+<sect1 id="software-requirements"><title>Software requirements</title>
 <para>
 Packaged versions of Dynare are available for <trademark class="registered">Windows</trademark> XP/Vista, <ulink url="http://www.debian.org">Debian GNU/Linux</ulink> and <ulink url="http://www.ubuntu.com/">Ubuntu</ulink>.
 Dynare should work on other systems, but some compilation steps are necessary in that case.
@@ -109,13 +109,10 @@ Dynare should work on other systems, but some compilation steps are necessary in
 <listitem><para>GNU Octave version 3.0.0 or above.</para></listitem>
 </itemizedlist>
 </para>
-</sect1>
 
-<sect1><title>Installation of GNU Octave</title>
+<para>Some installation instructions for GNU Octave can be found on <ulink url="http://www.dynare.org/DynareWiki/DynareOctave">Dynare Wiki</ulink>.</para>
 
-<para>You can skip this step if you are planning to use only <trademark class="registered">MATLAB</trademark> with Dynare.</para>
-
-<para>Please refer to <ulink url="http://www.dynare.org/DynareWiki/DynareOctave">Dynare Wiki</ulink> for detailed instructions.</para>
+<para>If you are using MATLAB for Windows, and if you plan to use options <xref linkend="use_dll"/> or <xref linkend="k_order_solver"/>, you will need to install a C++ compiler on your machine. The easiest solution is to install <ulink url="http://www.microsoft.com/Express/VC/"><trademark class="registered">Microsoft</trademark> Visual C++ 2008 Express Edition</ulink>, and then to type <literal>mex -setup</literal> on the MATLAB prompt (it should autodetect the compiler). For users of MATLAB 64-bit, please refer to <ulink url="http://www.mathworks.fr/support/solutions/en/data/1-6IJJ3L/index.html?solution=1-6IJJ3L">these instructions</ulink>. Users of MATLAB under Linux and MacOS, and users of GNU Octave normally need to do nothing, since a working compilation environment is available by default.</para>
 
 </sect1>
 
@@ -840,9 +837,9 @@ Inside the model block, Dynare allows the creation of <emphasis>model-local vari
       <term><option>linear</option></term>
       <listitem><para>Declares the model as being linear. It spares oneself from having to declare initial values for computing the steady state, and it sets automatically <option>order</option><literal>=1</literal> in <xref linkend="stoch_simul" />.</para></listitem>
     </varlistentry>
-    <varlistentry>
+    <varlistentry id="use_dll">
       <term><option>use_dll</option></term>
-      <listitem><para>Instructs the preprocessor to create dynamic loadable libraries (DLL) containing the model equations and derivatives, instead of writing those in <filename class="extension">M</filename>-files. You need to having a working compilation environment (<foreignphrase>i.e.</foreignphrase> the <command>mex</command> command of <trademark class="registered">MATLAB</trademark> or Octave must be operational). Using this option can result in faster simulations or estimations, at the expense of some initial compilation time.<footnote><para>In particular, for big models, the compilation step can be very time-consuming, and use of this option may be counter-productive in those cases.</para></footnote></para></listitem>
+      <listitem><para>Instructs the preprocessor to create dynamic loadable libraries (DLL) containing the model equations and derivatives, instead of writing those in <filename class="extension">M</filename>-files. You need a working compilation environment, <foreignphrase>i.e.</foreignphrase> a working <literal>mex</literal> command (see <xref linkend="software-requirements"/> for more details). Using this option can result in faster simulations or estimations, at the expense of some initial compilation time.<footnote><para>In particular, for big models, the compilation step can be very time-consuming, and use of this option may be counter-productive in those cases.</para></footnote></para></listitem>
     </varlistentry>
   </variablelist>
 </refsect1>
@@ -1032,7 +1029,7 @@ For models with lags on more than one period, the command <xref linkend='histval
 
 <para>This steady state will be used as the initial condition at all the periods preceeding the first simulation period for the two possible types of simulations in stochastic mode:</para>
 <itemizedlist>
-  <listitem><para>in <xref linkend="stoch_simul"/>, if the <option>simul</option> or <option>periods</option> options are specified</para></listitem>
+  <listitem><para>in <xref linkend="stoch_simul"/>, if the <option>periods</option> options is specified</para></listitem>
   <listitem><para>in <xref linkend="forecast"/> (in this case, note that it is still possible to modify some of these initial values with <xref linkend="histval"/>)</para></listitem>
 </itemizedlist>
 
@@ -1789,7 +1786,7 @@ The simulated endogenous variables are available in global matrix <varname>oo_.e
   </varlistentry>
   <varlistentry>
     <term><option>hp_filter</option> = <replaceable>INTEGER</replaceable></term>
-    <listitem><para>Uses HP filter with &lambda; = <replaceable>INTEGER</replaceable> before computing moments. Default: no filter</para></listitem>
+    <listitem><para>Uses HP filter with &lambda; = <replaceable>INTEGER</replaceable> before computing moments. Note that this option is currently not available when computing empirical moments (see <option>periods</option> option). Default: no filter</para></listitem>
   </varlistentry>
   <varlistentry>
     <term><option>hp_ngrid</option> = <replaceable>INTEGER</replaceable></term>
@@ -1833,11 +1830,15 @@ The simulated endogenous variables are available in global matrix <varname>oo_.e
   </varlistentry>
   <varlistentry id="order" xreflabel="order">
     <term><option>order = <replaceable>INTEGER</replaceable></option></term>
-    <listitem><para>Order of Taylor approximation. Acceptable values are <literal>1</literal> and <literal>2</literal>. Default: <literal>2</literal></para></listitem>
+    <listitem><para>Order of Taylor approximation. Acceptable values are <literal>1</literal>, <literal>2</literal> and <literal>3</literal>. Note that for third order, <option>k_order_solver</option> option is implied, and only empirical moments are available (you must provide a value for <option>periods</option> option). Default: <literal>2</literal></para></listitem>
   </varlistentry>
+    <varlistentry id="k_order_solver">
+      <term><option>k_order_solver</option></term>
+      <listitem><para>Use a k-order solver, implemented in C++, instead of the default Dynare solver. You need a working compilation environment, <foreignphrase>i.e.</foreignphrase> a working <literal>mex</literal> command (see <xref linkend="software-requirements"/> for more details). Default: disabled for order 1 and 2, enabled otherwise</para></listitem>
+    </varlistentry>
   <varlistentry>
     <term><option>periods</option> = <replaceable>INTEGER</replaceable></term>
-    <listitem><para>Specifies the number of periods to use in simulations. If <option>order</option>=<literal>1</literal>, no simulation is necessary to compute theoretical moments and IRFs. A number of periods larger than one triggers automatically option <option>simul</option>. Default: <literal>0</literal></para></listitem>
+    <listitem><para>If different from zero, empirical moments will be computed instead of theoretical moments. The value of the option specifies the number of periods to use in the simulations. Values of the <xref linkend='initval'/> block, possibly recomputed by <xref linkend='steady'/>, will be used as starting point for the simulation. The simulated endogenous variables are made available to the user in a vector for each variable and in the global matrix <varname>oo_.endo_simul</varname>. The variables in the <varname>oo_.endo_simul</varname> matrix, in their order of declaration (as in <varname>M_.endo_names</varname>) Default: <literal>0</literal></para></listitem>
   </varlistentry>
   <varlistentry>
     <term><option>qz_criterium</option> = <replaceable>DOUBLE</replaceable></term>
@@ -1846,10 +1847,6 @@ The simulated endogenous variables are available in global matrix <varname>oo_.e
   <varlistentry>
     <term><option>replic</option> = <replaceable>INTEGER</replaceable></term>
     <listitem><para>Number of simulated series used to compute the IRFs. Default: <literal>1</literal> if <option>order</option>=<literal>1</literal>, and <literal>50</literal> otherwise</para></listitem>
-  </varlistentry>
-  <varlistentry>
-    <term><option>simul</option></term>
-    <listitem><para>Computes a stochastic simulation of the model for the number of periods specified in the <option>periods</option> option. Uses <xref linkend='initval'/> values, possibly recomputed by <xref linkend='steady'/>, as initial values for the simulation. The simulated endogenous variables are made available to the user in a vector for each variable and in the global matrix <varname>oo_.endo_simul</varname>. The variables in the <varname>oo_.endo_simul</varname> matrix, in their order of declaration (as in <varname>M_.endo_names</varname>). Default: no simulation</para></listitem>
   </varlistentry>
   <varlistentry>
     <term><option>simul_seed</option> = <replaceable>INTEGER</replaceable></term>

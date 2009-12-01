@@ -32,12 +32,6 @@ function osr(var_list,params,i_var,W)
   options_ = set_default_option(options_,'hp_ngrid',512);
   options_ = set_default_option(options_,'simul',0);
   options_ = set_default_option(options_,'periods',1);
-  if options_.simul & ~isempty(options_.periods) & options_.periods == 0
-    options_.periods = options_.periods;
-  end
-
-  options_.periods = max(options_.periods,1);
-  options_.periods = options_.periods;
   
   make_ex_;
 

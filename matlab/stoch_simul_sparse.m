@@ -73,12 +73,9 @@ function info=stoch_simul_sparse(var_list)
     disp_dr_sparse(oo_.dr,options_.order,var_list);
   end
 
-  if options_.simul == 0 & options_.nomoments == 0
+  if options_.periods == 0 && options_.nomoments == 0
     disp_th_moments(oo_.dr,var_list); 
-  elseif options_.simul == 1
-    if options_.periods == 0
-      error('STOCH_SIMUL error: number of periods for the simulation isn''t specified')
-    end
+  elseif options_.periods ~= 0
     if options_.periods < options_.drop
       disp(['STOCH_SIMUL error: The horizon of simulation is shorter' ...
 	    ' than the number of observations to be DROPed'])

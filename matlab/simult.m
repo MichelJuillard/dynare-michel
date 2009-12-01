@@ -39,7 +39,6 @@ if replic == 0
   replic = 1;
 end
 seed = options_.simul_seed;
-options_.periods = options_.periods;
 
 it_ = M_.maximum_lag + 1 ;
 

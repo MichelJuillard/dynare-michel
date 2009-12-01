@@ -90,7 +90,6 @@ function global_initialization()
   options_.nocorr = 0;
   options_.periods = 0;
   options_.noprint = 0;
-  options_.simul = 0;
   options_.SpectralDensity = 0;
 
   % TeX output

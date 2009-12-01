@@ -23,6 +23,10 @@ function disp_moments(y,var_list)
   warning_old_state = warning;
   warning off
 
+  if options_.hp_filter
+      error('STOCH_SIMUL: HP filter is not yet implemented for empirical moments')
+  end
+  
   if size(var_list,1) == 0
       var_list = M_.endo_names(1:M_.orig_endo_nbr, :);
   end

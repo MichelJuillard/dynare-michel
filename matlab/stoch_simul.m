@@ -26,7 +26,6 @@ function info=stoch_simul(var_list)
   if options_.order == 1
       options_.replic = 1;
   elseif options_.order == 3
-      options_.simul = 1;
       options_.k_order_solver = 1;
   end
   
@@ -70,12 +69,9 @@ function info=stoch_simul(var_list)
     end
   end
 
-  if options_.simul == 0 & options_.nomoments == 0
+  if options_.periods == 0 && options_.nomoments == 0
     disp_th_moments(oo_.dr,var_list); 
-  elseif options_.simul == 1
-    if options_.periods == 0
-      error('STOCH_SIMUL error: number of periods for the simulation isn''t specified')
-    end
+  elseif options_.periods ~= 0
     if options_.periods < options_.drop
       disp(['STOCH_SIMUL error: The horizon of simulation is shorter' ...
 	    ' than the number of observations to be DROPed'])

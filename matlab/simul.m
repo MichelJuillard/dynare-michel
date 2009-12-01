@@ -37,14 +37,10 @@ if size(M_.lead_lag_incidence,2)-nnz(M_.lead_lag_incidence(M_.maximum_endo_lag+1
   error (mess) ;
 end
 
-if ~isfield(options_,'periods') & ~isempty(options_.periods)
-  options_.periods = options_.periods
-end
 options_ = set_default_option(options_,'periods',0);
 if options_.periods == 0
   error('SIMUL: number of periods for the simulation isn''t specified')
 end
-options_.periods = options_.periods;
 
   if ~ options_.initval_file
       if ~isfield(options_,'datafile')
