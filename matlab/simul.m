@@ -29,8 +29,7 @@ function simul(dr)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-global M_ options_ oo_ 
-global ys0_ ct_
+global M_ options_ oo_ ys0_
 
 if size(M_.lead_lag_incidence,2)-nnz(M_.lead_lag_incidence(M_.maximum_endo_lag+1,:)) > 0
   mess = ['DYNARE: error in model specification : variable ' M_.endo_names(find(M_.lead_lag_incidence(M_.maximum_lag+1,:)==0),:)] ;
@@ -46,7 +45,6 @@ if options_.periods == 0
   error('SIMUL: number of periods for the simulation isn''t specified')
 end
 options_.periods = options_.periods;
-ct_=0;
 
   if ~ options_.initval_file
       if ~isfield(options_,'datafile')

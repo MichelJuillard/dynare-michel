@@ -28,7 +28,7 @@ function global_initialization()
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-  global oo_ M_ options_ ct_
+  global oo_ M_ options_
 
   options_.terminal_condition = 0;
   options_.rplottype = 0;
