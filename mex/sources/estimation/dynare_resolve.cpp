@@ -60,23 +60,27 @@ DsgeLikelihood::dynareResolveDR(vector<int>&iv,vector<int>&ic,GeneralMatrix& aux
   // testing for steadystate file: To Be Icluded at a later stage
   
 #ifdef DEBUG
-        mexPrintf("Calling SolveDRModel\n");
+  mexPrintf("Calling SolveDRModel\n");
 #endif 
   // [dr,info,M_,options_,oo_] = dr1(dr,check_flag,M_,options_,oo_);
   int DRinfo = SolveDRModel(endo_nbr,exo_nbr,nstatic, npred, nfwrd); //formerly known as dr1 in Matalb Dynare, i.e.
-  if (DRinfo) return DRinfo;
-
+  if (DRinfo)
+    {
+    info = DRinfo;
+    return DRinfo;
+    }
+  
   // End of resol: now rest of dynare_resolve:  
   
   // if nargin == 0
   //  if (iv.size()==0)
 #ifdef DEBUG
-        mexPrintf(" if iv==NULL\n");
+  mexPrintf(" if iv==NULL\n");
 #endif  
   if (&iv==NULL)
     {
 #ifdef DEBUG
-        mexPrintf(" construct iv\n");
+    mexPrintf(" construct iv\n");
 #endif  
     //iv = (1:endo_nbr)';
     for (int i=1;i<=endo_nbr;++i) 
@@ -84,12 +88,12 @@ DsgeLikelihood::dynareResolveDR(vector<int>&iv,vector<int>&ic,GeneralMatrix& aux
     }
   //  if (ic.size()==0)
 #ifdef DEBUG
-        mexPrintf(" if ic==NULL\n");
+  mexPrintf(" if ic==NULL\n");
 #endif  
   if (&ic==NULL)
     {
 #ifdef DEBUG
-        mexPrintf(" construct ic\n");
+    mexPrintf(" construct ic\n");
 #endif  
     //ic = [ nstatic+(1:npred) endo_nbr+(1:size(oo_.dr.ghx,2)-npred) ]';
     //ic(npred+ghx.numCols());
@@ -102,12 +106,12 @@ DsgeLikelihood::dynareResolveDR(vector<int>&iv,vector<int>&ic,GeneralMatrix& aux
     }
   
 #ifdef DEBUG
-        mexPrintf(" if aux==NULL\n");
+  mexPrintf(" if aux==NULL\n");
 #endif  
   if (&aux==NULL)
     {
 #ifdef DEBUG
-        mexPrintf(" construct aux\n");
+    mexPrintf(" construct aux\n");
 #endif  
     int i;
     aux =dr.getMatrixField(string("transition_auxiliary_variables"));
@@ -127,19 +131,19 @@ DsgeLikelihood::dynareResolveDR(vector<int>&iv,vector<int>&ic,GeneralMatrix& aux
     }//end if
   
 #ifdef DEBUG
-        mexPrintf("[A,B] = kalman_transition_matrix\n");
+  mexPrintf("[A,B] = kalman_transition_matrix\n");
 #endif  
   
-// here is the content of [T R]=[A,B] = kalman_transition_matrix(oo_.dr,iv,ic,aux,M_.exo_nbr);
-
+  // here is the content of [T R]=[A,B] = kalman_transition_matrix(oo_.dr,iv,ic,aux,M_.exo_nbr);
+  
   int n_iv = iv.size();//length(iv);
   int n_ir1 = aux.numRows();// size(aux,1);
   int nr = n_iv + n_ir1;
-    
-//    GeneralMatrix A=*(new GeneralMatrix (nr,nr));
-//    A.zeros();
-//    GeneralMatrix B=*(new GeneralMatrix(nr,exo_nbr));
-//    B.zeros();
+  
+  //    GeneralMatrix A=*(new GeneralMatrix (nr,nr));
+  //    A.zeros();
+  //    GeneralMatrix B=*(new GeneralMatrix(nr,exo_nbr));
+  //    B.zeros();
   T.zeros();
   R.zeros();
   vector<int>i_n_iv(n_iv);
@@ -153,9 +157,10 @@ DsgeLikelihood::dynareResolveDR(vector<int>&iv,vector<int>&ic,GeneralMatrix& aux
   //A.AssignByVectors (i_n_iv,ic, ghx, iv, nullVec);//dr.ghx(iv,:);
   T.AssignByVectors (i_n_iv,ic, ghx, iv, nullVec);//dr.ghx(iv,:);
 #ifdef DEBUG
-      mexPrintf("Completed T=A assign by vec\n");
+  mexPrintf("Completed T=A assign by vec\n");
+  T.print();
 #endif    
-    if (n_ir1 > 0)
+  if (n_ir1 > 0)
     {
     //A(n_iv+1:end,:) = sparse(aux(:,1),aux(:,2),ones(n_ir1,1),n_ir1,nr);
     
@@ -166,10 +171,10 @@ DsgeLikelihood::dynareResolveDR(vector<int>&iv,vector<int>&ic,GeneralMatrix& aux
     for (int i=0;i<n_ir1;++i)
       sparse.get((int)aux.get(i,0)-1,(int)aux.get(i,1)-1)=1;
     
-   /* vector<int>span2end(A.numRows()-n_iv);
+      /* vector<int>span2end(A.numRows()-n_iv);
       for (int i=0;i<A.numRows()-n_iv;++i)
-        span2end[i]=i+n_iv+1;
-    A.place(sparse,n_iv,0); and T=A;
+      span2end[i]=i+n_iv+1;
+      A.place(sparse,n_iv,0); and T=A;
     */
 #ifdef DEBUG
     mexPrintf("T.place (sparse,n_iv,0)\n");
@@ -178,16 +183,17 @@ DsgeLikelihood::dynareResolveDR(vector<int>&iv,vector<int>&ic,GeneralMatrix& aux
     }
   
 #ifdef DEBUG
-      mexPrintf("R=B assign by vec R rows %d  cols %d  \n", R.numRows(), R.numCols());
+  mexPrintf("R=B assign by vec R rows %d  cols %d  \n", R.numRows(), R.numCols());
 #endif  
   //B(i_n_iv,:) = dr.ghu(iv,:); and R=B;
-   R.AssignByVectors(i_n_iv, nullVec, ghu, iv, nullVec);
+  R.AssignByVectors(i_n_iv, nullVec, ghu, iv, nullVec);
 #ifdef DEBUG
-      mexPrintf("Completed R=B assign by vec\n");
+  mexPrintf("Completed R=B assign by vec\n");
+  R.print();
 #endif
-
-    //  ys = oo_.dr.ys;
-//    GeneralMatrix&ysmx = dr.getMatrixField(string("ys"));
-//    SteadyState=ysmx.getData();
-      return DRinfo;
+  
+  //  ys = oo_.dr.ys;
+  //    GeneralMatrix&ysmx = dr.getMatrixField(string("ys"));
+  //    SteadyState=ysmx.getData();
+  return DRinfo;
   }

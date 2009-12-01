@@ -219,38 +219,17 @@ DsgeLikelihood::DsgeLikelihood( Vector& inA_init, GeneralMatrix& inQ,  GeneralMa
 DsgeLikelihood::~DsgeLikelihood()
   {
 
+//  delete llincidence;
+//  delete vCov;
   delete approx;
   delete model;
   delete dynamicDLLp;
   delete journal;
-//  delete llincidence;
-//  delete vCov;
   delete vll;
-/********
   delete &H;
   delete &Q;
   delete &kstate;
   delete &pshape;
-******** delete Vectors *********
-#ifdef DEBUG
-        mexPrintf("delete SS.\n");
-#endif
-  delete &SteadyState;
-  delete &param_ub;
-  delete &param_lb;
-  delete &p6;
-  delete &p7;
-  delete &p3;
-  delete &p4;
-#ifdef DEBUG
-        mexPrintf("delete params Vectors.\n");
-#endif
-  delete &xparam1;
-  delete &deepParams;
-#ifdef DEBUG
-        mexPrintf("delete ghx.\n");
-#endif
-**********
   delete &ghx;
   delete &ghu;
   delete &dynareParams;
@@ -258,6 +237,16 @@ DsgeLikelihood::~DsgeLikelihood()
   delete &aux;
   delete &iv;
   delete &ic;
+/******** deleting Vectors Crashes !************
+  delete &SteadyState;
+  delete &param_ub;
+  delete &param_lb;
+  delete &p6;
+  delete &p7;
+  delete &p3;
+  delete &p4;
+  delete &xparam1;
+  delete &deepParams;
 **********/
   }
 
@@ -610,8 +599,10 @@ DsgeLikelihood::updateQHparams()// updates Q and H matrices and deep parameters
   //   M_.params(estim_params_.param_vals(:,1)) = xparam1(offset+1:end);
   if(num_dp > 0)
     {
+//    if(xparam1.length()>=offset+num_dp) 
+//      memcpy(deepParams.base(), xparam1.base()+offset*sizeof(double),num_dp*sizeof(double));
     if(xparam1.length()>=offset+num_dp) 
-      memcpy(deepParams.base(), xparam1.base()+offset*sizeof(double),num_dp*sizeof(double));
+      deepParams=Vector(xparam1,offset,num_dp);
     else
       TS_RAISE("Inssuficient length of the xparam1 parameters vector");
     }
@@ -658,43 +649,55 @@ DsgeLikelihood::InitiateKalmanMatrices()
     }
 #endif 
   GeneralMatrix Ptmp(np,np);
+  Ptmp.zeros();
   //Pstar = lyapunov_symm (T,R*Q*R',options_.qz_criterium,options_.lyapunov_complex_threshold)
 #ifdef DEBUG
         mexPrintf("Calling disclyap_fast to initialise Pstar:\n");
 #endif   
-  disclyap_fast(T,RQRt,Ptmp, lyapunov_tol, 1); // 1 to check chol 
-  Pstar=Ptmp;
-  //Pinf=[]
-  //Pinf  = *(new GeneralMatrix(np,np));
+
+  try 
+    {
+    disclyap_fast(T,RQRt,Ptmp, lyapunov_tol, 0); // 1 to check chol 
+    Pstar=Ptmp;
 #ifdef DEBUG
     Pstar.print();
-        mexPrintf("Initialise Pinf\n");
+    mexPrintf("Initialise Pinf\n");
 #endif   
-  Pinf.zeros();
+    //Pinf=[]
+    Pinf.zeros();
+    }
+  catch(const TSException &e)
+    {
+    if (0==strncmp(e.getMessage(),"The matrix is not positive definite in NormCholesky constructor",35))
+      {
+      printf(e.getMessage());
+#ifdef MATLAB
+      mexPrintf(e.getMessage());
+#endif
+      likelihood=penalty;
+      return 1;
+      }
+    else
+      {
+      printf("Caugth unhandled TS exception with H matrix: ");
+#ifdef MATLAB
+      mexPrintf("Caugth unhandled TS exception with H matrix: ");
+#endif
+      likelihood=penalty;
+      TS_RAISE((const char*)e.getMessage());
+      }
+    }
   
   //a=zeros(size(T,1),1);
-  //Vector atmp(np);
-  //atmp.zeros();
-  //a_init=atmp;
   a_init.zeros();
+
   //if (lik_init == 2)// Old Diffuse Kalman filter
   //  Pstar = options_.Harvey_scale_factor*eye(np);
   //Pinf = [];
   //else if (lik_init == 3) // Diffuse Kalman filter
   // else ...
-  
-#ifdef DEBUG
-        mexPrintf("Initialise Z\n");
-#endif   
-  //Z= zeros(size(data,1), size(T,2))
-  //Z.zeros();
-  //GeneralMatrix Ztmp=*(new GeneralMatrix(numVarobs,np));
-  //for (int i = 0;i<numVarobs;++i)
-  //  Ztmp.get(i,mf[i]-1)=1.0;
-  //Z=Ztmp;
-  //delete &Ztmp;
-  //for (int i = 0;i<numVarobs;++i)
-  //  Z.get(i,mf[i]-1)=1.0;
+ 
+  return 0;
   }  
 
 
@@ -745,13 +748,13 @@ DsgeLikelihood::KalmanFilter(double riccatiTol=0.000001,bool uni = false)
         } 
       else 
         {
-#ifdef TIMING_LOOP
+#ifdef KF_TIMING_LOOP
         mexPrintf("kalman_filter: starting 1000 loops\n");
         for (int tt=0;tt<1000;++tt)
           {
 #endif
           loglik = kt.filter(per, d, (start-1), vll);
-#ifdef TIMING_LOOP
+#ifdef KF_TIMING_LOOP
           }
         mexPrintf("kalman_filter: finished 1000 loops\n");
 #endif
@@ -761,7 +764,7 @@ DsgeLikelihood::KalmanFilter(double riccatiTol=0.000001,bool uni = false)
       {
       init = new StateInit(Pstar, a_init);
       BasicKalmanTask bkt(Y, Z, H, T, R, Q, *init, riccatiTol);
-#ifdef TIMING_LOOP
+#ifdef KF_TIMING_LOOP
       mexPrintf("kalman_filter: starting 1000 loops\n");
       for (int tt=0;tt<1000;++tt)
         {
@@ -770,7 +773,7 @@ DsgeLikelihood::KalmanFilter(double riccatiTol=0.000001,bool uni = false)
 #ifdef DEBUG		
         mexPrintf("Basickalman_filter: loglik=%f \n", loglik);
 #endif		
-#ifdef TIMING_LOOP
+#ifdef KF_TIMING_LOOP
         }
       mexPrintf("Basickalman_filter: finished 1000 loops\n");
 #endif

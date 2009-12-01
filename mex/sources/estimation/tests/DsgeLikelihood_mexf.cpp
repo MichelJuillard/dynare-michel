@@ -150,7 +150,7 @@ mexFunction(int nlhs, mxArray *plhs[],
   vector<int>&iv= dynareParams.getIntVectorField(string("restrict_var_list"));
   vector<int>&ic= dynareParams.getIntVectorField(string("restrict_columns"));
 
-  int nr=nsPred+aux.numRows();
+  int nr=iv.size()+aux.numRows(); // Size of T matrix
   Vector& a_init=*(new Vector(nr));
   a_init.zeros();
 
@@ -204,8 +204,17 @@ double loglikelihood;
 #ifdef DEBUG
         mexPrintf("Try CalcLikelihood\n");
 #endif
-    loglikelihood=dl.CalcLikelihood(xparam1);
+#ifdef LL_TIMING_LOOP
+        mexPrintf("DsgeLikelihood::CalcLikelihood: starting 1000 loops\n");
+        for (int tt=0;tt<1000;++tt)
+          {
+#endif
 
+    loglikelihood=dl.CalcLikelihood(xparam1);
+#ifdef LL_TIMING_LOOP
+          }
+        mexPrintf("DsgeLikelihood::CalcLikelihood: finished 1000 loops\n");
+#endif
 /*****************************************************************
 % OUTPUTS 
 %   fval        :     value of the posterior kernel at xparam1.
