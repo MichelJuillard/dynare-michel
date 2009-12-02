@@ -25,9 +25,9 @@ AM_INIT_AUTOMAKE([-Wall -Werror foreign])
 AX_MATLAB
 
 if test "x$ax_enable_matlab" = "xyes"; then
+  AX_MATLAB_VERSION
   AX_DOT_MEXEXT
   AX_MATLAB_ARCH
-  AX_MATLAB_VERSION
 
   if test "x$ax_matlab_version_ok" = "xyes"; then
     AX_MEXOPTS

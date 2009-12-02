@@ -18,7 +18,6 @@ dnl along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 AC_DEFUN([AX_MATLAB_VERSION],
 [dnl
 AC_REQUIRE([AX_MATLAB])
-AC_REQUIRE([AX_MATLAB_ARCH])
 
 AC_MSG_CHECKING([for MATLAB version])
 if test "x$MATLAB_VERSION" != "x"; then
