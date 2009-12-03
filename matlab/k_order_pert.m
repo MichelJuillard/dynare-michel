@@ -8,11 +8,11 @@ function [dr,info] = k_order_pert(dr,M,options,oo)
     
     switch(order)
       case 1
-        g_1 = k_order_perturbation(dr,0,M,options, oo , ['.' ...
+        [yss,g_0, g_1] = k_order_perturbation_opt(dr,0,M,options, oo , ['.' ...
                             mexext]);
         dr.g_1 = g_1;
       case 2
-        [g_0, g_1, g_2] = k_order_perturbation(dr,0,M,options, oo , ['.' ...
+        [yss,g_0, g_1, g_2] = k_order_perturbation_opt(dr,0,M,options, oo , ['.' ...
                             mexext]);
         dr.g_0 = g_0;
         dr.g_1 = g_1;
@@ -33,6 +33,16 @@ function [dr,info] = k_order_pert(dr,M,options,oo)
     dr.ghx = g_1(:,1:npred);
     dr.ghu = g_1(:,npred+1:end);
     
+    if options.loglinear == 1
+        k = find(dr.kstate(:,2) <= M.maximum_endo_lag+1);
+        klag = dr.kstate(k,[1 2]);
+        k1 = dr.order_var;
+        
+        dr.ghx = repmat(1./dr.ys(k1),1,size(dr.ghx,2)).*dr.ghx.* ...
+                 repmat(dr.ys(k1(klag(:,1)))',size(dr.ghx,1),1);
+        dr.ghu = repmat(1./dr.ys(k1),1,size(dr.ghu,2)).*dr.ghu;
+    end
+
     if order > 1
         dr.ghs2 = 2*g_0;
         endo_nbr = M.endo_nbr;
