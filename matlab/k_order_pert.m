@@ -8,11 +8,11 @@ function [dr,info] = k_order_pert(dr,M,options,oo)
     
     switch(order)
       case 1
-        [g_0, g_1] = k_order_perturbation_opt(dr,0,M,options, oo , ['.' ...
+        [g_0, g_1] = k_order_perturbation(dr,0,M,options, oo , ['.' ...
                             mexext]);
         dr.g_1 = g_1;
       case 2
-        [g_0, g_1, g_2] = k_order_perturbation_opt(dr,0,M,options, oo , ['.' ...
+        [g_0, g_1, g_2] = k_order_perturbation(dr,0,M,options, oo , ['.' ...
                             mexext]);
         dr.g_0 = g_0;
         dr.g_1 = g_1;
