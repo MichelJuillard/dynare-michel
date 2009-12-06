@@ -43,8 +43,9 @@ DynamicModelDLL::DynamicModelDLL(const string &modName, const int y_length, cons
       dynamicHinstance = ::LoadLibrary(fName.c_str());
       if (dynamicHinstance == NULL)
         throw 1;
-      Dynamic = (DynamicFn *) ::GetProcAddress(dynamicHinstance, "Dynamic");
-
+      Dynamic = (DynamicFn) ::GetProcAddress(dynamicHinstance, "Dynamic");
+      if (Dynamic == NULL)
+	throw 2;
 #else // Linux or Mac
       dynamicHinstance = dlopen(fName.c_str(), RTLD_NOW);
       if ((dynamicHinstance == NULL) || dlerror())
@@ -69,14 +70,16 @@ DynamicModelDLL::DynamicModelDLL(const string &modName, const int y_length, cons
     }
   catch (...)
     {
-      throw DynareException(__FILE__, __LINE__, string("Can't load ") + fName);
+      throw DynareException(__FILE__, __LINE__, string("Can't find Dynamic function in ") + fName);
     }
 }
 
 DynamicModelDLL::~DynamicModelDLL()
 {
 #if defined(__CYGWIN32__) || defined(_WIN32)
-  FreeLibrary(dynamicHinstance);
+  bool result = FreeLibrary(dynamicHinstance);
+  if (result == 0)
+    throw DynareException(__FILE__, __LINE__, string("Can't free the *_dynamic DLL"));
 #else
   dlclose(dynamicHinstance);
 #endif

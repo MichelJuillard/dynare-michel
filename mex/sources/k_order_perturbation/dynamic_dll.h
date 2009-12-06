@@ -39,15 +39,9 @@
 #include "dynare_exception.h"
 
 // <model>_Dynamic DLL pointer
-#if defined(_WIN32) || defined(__CYGWIN32__)
-typedef void  *(DynamicFn)
-#else // Linux or Mac
 typedef void  (*DynamicFn)
-#endif
 (double *y, double *x, int nb_row_x, double *params,
  int it_, double *residual, double *g1, double *g2, double *g3);
-
-typedef void *(mexFunctionPtr)(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]);
 
 /**
  * creates pointer to Dynamic function inside <model>_dynamic.dll
@@ -56,16 +50,13 @@ typedef void *(mexFunctionPtr)(int nlhs, mxArray *plhs[], int nrhs, const mxArra
 class DynamicModelDLL
 {
 private:
-#if defined(_WIN32) || defined(__CYGWIN32__)
-  DynamicFn  *Dynamic; // pointer to the Dynamic function in DLL
-#else
   DynamicFn  Dynamic; // pointer to the Dynamic function in DLL
-#endif
+
   const int length;  // tot num vars = Num of Jacobian rows
   const int jcols;  // tot num var t-1, t and t+1 instances + exogs = Num of Jacobian columns
   const int nMax_lag; // no of lags
   const int nExog; // no of exogenous
-#if (defined _WIN32) || (defined __CYGWIN32__)
+#if defined(_WIN32) || defined(__CYGWIN32__)
   HINSTANCE dynamicHinstance;  // DLL instance pointer in Windows
 #else
   void *dynamicHinstance; // and in Linux or Mac
