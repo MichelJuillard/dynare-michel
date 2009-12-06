@@ -39,11 +39,10 @@ DynamicModelDLL::DynamicModelDLL(const string &modName, const int y_length, cons
   try
     {
 #if defined(__CYGWIN32__) || defined(_WIN32)
-      HINSTANCE dynamicHinstance;
-      dynamicHinstance = ::LoadLibrary(fName.c_str());
+      dynamicHinstance = LoadLibrary(fName.c_str());
       if (dynamicHinstance == NULL)
         throw 1;
-      Dynamic = (DynamicFn) ::GetProcAddress(dynamicHinstance, "Dynamic");
+      Dynamic = (DynamicFn)GetProcAddress(dynamicHinstance, "Dynamic");
       if (Dynamic == NULL)
 	throw 2;
 #else // Linux or Mac
