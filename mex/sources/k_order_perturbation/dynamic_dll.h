@@ -24,7 +24,7 @@
 // K_ORDER_PERTURBATION_API functions as being imported from a DLL, wheras this DLL sees symbols
 // defined with this macro as being exported.
 
-#ifdef _WIN32
+#if (defined _WIN32) || (defined __CYGWIN32__)
 # include <windows.h>
 # ifdef _MSC_VER
 #  define K_ORDER_PERTURBATION_API __declspec(dllexport)
@@ -39,7 +39,7 @@
 #include "dynare_exception.h"
 
 // <model>_Dynamic DLL pointer
-#ifdef _WIN32
+#if (defined _WIN32) || (defined __CYGWIN32__)
 typedef void  *(DynamicFn)
 #else // Linux or Mac
 typedef void  (*DynamicFn)
@@ -56,7 +56,7 @@ typedef void *(mexFunctionPtr)(int nlhs, mxArray *plhs[], int nrhs, const mxArra
 class DynamicModelDLL
 {
 private:
-#ifdef _WIN32
+#if (defined _WIN32) || (defined __CYGWIN32__)
   DynamicFn  *Dynamic; // pointer to the Dynamic function in DLL
 #else
   DynamicFn  Dynamic; // pointer to the Dynamic function in DLL
@@ -65,7 +65,7 @@ private:
   const int jcols;  // tot num var t-1, t and t+1 instances + exogs = Num of Jacobian columns
   const int nMax_lag; // no of lags
   const int nExog; // no of exogenous
-#ifdef _WIN32
+#if (defined _WIN32) || (defined __CYGWIN32__)
   HINSTANCE dynamicHinstance;  // DLL instance pointer in Windows
 #else
   void *dynamicHinstance; // and in Linux or Mac
