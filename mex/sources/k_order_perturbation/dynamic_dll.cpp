@@ -75,7 +75,7 @@ DynamicModelDLL::DynamicModelDLL(const string &modName, const int y_length, cons
 
 DynamicModelDLL::~DynamicModelDLL()
 {
-#ifdef _WIN32
+#if !defined(__CYGWIN32__) && !defined(_WIN32)
   FreeLibrary(dynamicHinstance);
 #else
   dlclose(dynamicHinstance);
