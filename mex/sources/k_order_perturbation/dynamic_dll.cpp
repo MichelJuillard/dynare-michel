@@ -31,14 +31,14 @@ DynamicModelDLL::DynamicModelDLL(const string &modName, const int y_length, cons
   : length(y_length), jcols(j_cols), nMax_lag(n_max_lag), nExog(n_exog)
 {
   string fName;
-#ifndef _WIN32
+#if !defined(__CYGWIN32__) && !defined(_WIN32)
   fName = "./";
 #endif
   fName += modName + "_dynamic" + sExt;
 
   try
     {
-#ifdef _WIN32
+#if defined(__CYGWIN32__) || defined(_WIN32)
       HINSTANCE dynamicHinstance;
       dynamicHinstance = ::LoadLibrary(fName.c_str());
       if (dynamicHinstance == NULL)

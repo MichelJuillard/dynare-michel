@@ -99,16 +99,7 @@ DynareMxArrayToString(const char *cNamesCharStr, const int len, const int width)
           else cNamesMX[j][i] = '\0';
         }
     }
-  const char **ret = (const char **) calloc(len, sizeof(char *));
-  for (int j = 0; j < len; j++)
-    {
-      cNamesMX[j][width] = '\0';
-      char *token = (char *) calloc(strlen(cNamesMX[j])+1, sizeof(char));
-      strcpy(token, cNamesMX[j]);
-      ret[j] = token;
-    }
-  mxFree(cNamesMX);
-  return ret;
+  return (const char **)cNamesMX;
 }
 
 //////////////////////////////////////////////////////
@@ -121,6 +112,7 @@ DynareMxArrayToString(const mxArray *mxFldp, const int len, const int width)
 {
   char *cNamesCharStr = mxArrayToString(mxFldp);
   const char **ret = DynareMxArrayToString(cNamesCharStr, len, width);
+  
   return ret;
 }
 
@@ -135,7 +127,7 @@ extern "C" {
       mexErrMsgTxt("Must have at least 5 input parameters.");
     if (nlhs == 0)
       mexErrMsgTxt("Must have at least 1 output parameter.");
-
+ 
     const mxArray *dr = prhs[0];
     const int check_flag = (int) mxGetScalar(prhs[1]);
     const mxArray *M_ = prhs[2];
@@ -271,7 +263,7 @@ extern "C" {
                            sstol, var_order_vp, llincidence, qz_criterium);
 
         // construct main K-order approximation class
-
+ 
         Approximation app(dynare, journal,  nSteps, false, qz_criterium);
         // run stochastic steady
         app.walkStochSteady();
