@@ -93,6 +93,8 @@ KordpDynare::~KordpDynare()
     delete dsnl;
   if (denl)
     delete denl;
+  if (JacobianIndices)
+      delete JacobianIndices;
 }
 
 /** This clears the container of model derivatives and initializes it
@@ -180,6 +182,7 @@ KordpDynare::calcDerivatives(const Vector &yy, const Vector &xx) throw (DynareEx
     populateDerivativesContainer(g3, 3, JacobianIndices);
     delete g3;
     }
+  delete llxYYp;
 }
 
 void
