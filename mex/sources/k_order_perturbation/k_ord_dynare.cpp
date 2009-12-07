@@ -135,8 +135,8 @@ KordpDynare::evaluateSystem(Vector &out, const Vector &yym, const Vector &yy,
 void
 KordpDynare::calcDerivatives(const Vector &yy, const Vector &xx) throw (DynareException)
 {
-  TwoDMatrix *g2 = NULL;
-  TwoDMatrix *g3 = NULL;
+  TwoDMatrix *g2 = 0;// NULL;
+  TwoDMatrix *g3 = 0;// NULL;
   TwoDMatrix *g1 = new TwoDMatrix(nY, nJcols); // generate g1 for jacobian
   g1->zeros();
 
@@ -169,10 +169,17 @@ KordpDynare::calcDerivatives(const Vector &yy, const Vector &xx) throw (DynareEx
     throw DynareException(__FILE__, __LINE__, "Error in calcDerivatives: dynamicDLL.eval returned wrong jacobian");
 
   populateDerivativesContainer(g1, 1, JacobianIndices);
+  delete g1;
   if (nOrder > 1)
-      populateDerivativesContainer(g2, 2, JacobianIndices);
+    {
+    populateDerivativesContainer(g2, 2, JacobianIndices);
+    delete g2;
+    }
   if (nOrder > 2)
-      populateDerivativesContainer(g3, 3, JacobianIndices);
+    {
+    populateDerivativesContainer(g3, 3, JacobianIndices);
+    delete g3;
+    }
 }
 
 void
