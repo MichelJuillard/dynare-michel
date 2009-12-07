@@ -21,7 +21,7 @@ function [ss,tt,w,sdim,eigval,info] = mjdgges(e,d,qz_criterium)
 % SPECIAL REQUIREMENTS
 %   none.
 
-% Copyright (C) 1996-2008 Dynare Team
+% Copyright (C) 1996-2009 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -38,6 +38,14 @@ function [ss,tt,w,sdim,eigval,info] = mjdgges(e,d,qz_criterium)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
     
+if exist('OCTAVE_VERSION')
+    % Octave can only compute a real QZ with the function qz()
+    % while by default MATLAB computes a complex QZ
+    % Here we need a complex QZ (so that ss and tt are uppeer
+    % triangular), so fail under Octave
+    error('You must compile the MEX file "mjddges", I can''t solve the model without that.')
+end
+
 % Chek number of inputs and outputs.
 if nargin>3 | nargin<2
     error('Three or two input arguments required!')
@@ -66,9 +74,6 @@ info   = 0;
 % Computational part.
 try
     [ss,tt,qq,w] = qz(e,d);
-    if exist('OCTAVE_VERSION')
-      qq = qq';
-    end
     [tt,ss,qq,w] = qzdiv(qz_criterium,tt,ss,qq,w);
     warning_old_state = warning;
     warning off;
