@@ -94,7 +94,13 @@ KordpDynare::~KordpDynare()
   if (denl)
     delete denl;
   if (JacobianIndices)
-      delete JacobianIndices;
+    delete JacobianIndices;
+  if (varOrder)
+    delete varOrder;
+  if (ll_Incidence)
+    delete ll_Incidence;
+  if (NNZD)
+      delete NNZD;
 }
 
 /** This clears the container of model derivatives and initializes it
