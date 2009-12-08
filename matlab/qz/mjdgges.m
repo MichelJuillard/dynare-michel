@@ -38,11 +38,6 @@ function [ss,tt,w,sdim,eigval,info] = mjdgges(e,d,qz_criterium)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
     
-if exist('OCTAVE_VERSION')
-    [ss,tt,w,eigval]=qz(e,d,'S');
-    sdim =sum(abs(eigval) < qz_criterium);
-end
-
 % Chek number of inputs and outputs.
 if nargin>3 | nargin<2
     error('Three or two input arguments required!')
@@ -57,26 +52,42 @@ if ( ~isreal(e) | ~isreal(d) | me~=ne | md~=nd | me~=nd)
     % info should be negative in this case, see dgges.f.
     error('MJDGGES requires two square real matrices of the same dimension.')
 end
+
 % Set default value of qz_criterium.
 if nargin <3
     qz_criterium = 1 + 1e-6; 
 end
-% Initialization of the output arguments.
-ss = zeros(ne,ne);
-tt = zeros(ne,ne);
-w  = zeros(ne,ne);
-sdim   = 0;
-eigval = zeros(ne,1);
-info   = 0;
-% Computational part.
-try
-    [ss,tt,qq,w] = qz(e,d);
-    [tt,ss,qq,w] = qzdiv(qz_criterium,tt,ss,qq,w);
-    warning_old_state = warning;
-    warning off;
-    eigval = diag(ss)./diag(tt);
-    warning(warning_old_state);
-    sdim = sum( abs(eigval) < qz_criterium );
-catch
-    info = 1;% Not as precise as lapack's info!
+
+info = 0;
+
+% qz() function doesn't behave the same way under Octave and MATLAB:
+% - under MATLAB, complex decomposition by default, real is also available
+%   as an option
+% - under Octave, only real decomposition available, but grouping of
+%   eigenvalues <= 1 is implemented as an option (criterium can't be changed)
+if exist('OCTAVE_VERSION')
+    [ss,tt,w,eigval] = qz(e,d,'S');
+    sdim = sum(abs(eigval) <= 1.0);
+    if any(abs(eigval) > 1.0 & abs(eigval) <= qz_criterium)
+        warning('Some eigenvalues are > 1.0 but <= qz_criterium in modulus. They have nevertheless been considered as explosive, because of a limitation of Octave.')
+    end
+else
+    % Initialization of the output arguments.
+    ss = zeros(ne,ne);
+    tt = zeros(ne,ne);
+    w  = zeros(ne,ne);
+    sdim   = 0;
+    eigval = zeros(ne,1);
+    % Computational part.
+    try
+        [ss,tt,qq,w] = qz(e,d);
+        [tt,ss,qq,w] = qzdiv(qz_criterium,tt,ss,qq,w);
+        warning_old_state = warning;
+        warning off;
+        eigval = diag(ss)./diag(tt);
+        warning(warning_old_state);
+        sdim = sum(abs(eigval) < qz_criterium);
+    catch
+        info = 1;% Not as precise as lapack's info!
+    end
 end
