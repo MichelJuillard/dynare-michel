@@ -64,7 +64,12 @@ DynamicModelDLL::DynamicModelDLL(const string &modName, const int y_length, cons
   catch (int i)
     {
       ostringstream msg;
-      msg << "Can't load " << fName << " (error code: " << i;
+      msg << "Error when loading " << fName << " (";
+      if (i == 1)
+        msg << "can't dynamically load the file";
+      if (i == 2)
+        msg << "can't locate the 'Dynamic' symbol";
+      msg << ")";
       throw DynareException(__FILE__, __LINE__, msg.str());
     }
   catch (...)
