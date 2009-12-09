@@ -69,7 +69,7 @@ if exist('OCTAVE_VERSION')
     [ss,tt,w,eigval] = qz(e,d,'S');
     sdim = sum(abs(eigval) <= 1.0);
     if any(abs(eigval) > 1.0 & abs(eigval) <= qz_criterium)
-        warning('Some eigenvalues are > 1.0 but <= qz_criterium in modulus. They have nevertheless been considered as explosive, because of a limitation of Octave.')
+        warning('Some eigenvalues are > 1.0 but <= qz_criterium in modulus. They have nevertheless been considered as explosive, because of a limitation of Octave. To solve this, you should compile the MEX files for Octave.')
     end
 else
     % Initialization of the output arguments.
