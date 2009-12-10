@@ -113,12 +113,12 @@ $$
 We reorder the eigenvalue pair so that $S_{ii}/T_{ii}$ with modulus
 less than one would be in the left-upper part.
 
-\li The Blachard--Kahn stability argument implies that the pairs
-with modulus less that one will be in and only int $S_{11}/T_{11}$.
+\li The Blanchard--Kahn stability argument implies that the pairs
+with modulus less that one will be in and only in $S_{11}/T_{11}$.
 The exploding paths will be then eliminated when
 $$
 \left[\matrix{Z_{11}^T&Z_{21}^T\cr Z_{12}^T&Z_{22}^T}\right]
-\left[\matrix{I\cr X}\right]\left[g_{y^*}^*\right]=
+\left[\matrix{I\cr X}\right]=
 \left[\matrix{Y\cr 0}\right]
 $$
 From this we have, $Y=Z_{11}^{-1}$, and $X=Z_{21}Y$, or equivalently
