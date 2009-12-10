@@ -83,11 +83,49 @@ function [dr,info,M_,options_,oo_] = dr1(dr,task,M_,options_,oo_)
             M_.maximum_lag = orig_model.maximum_lag;
             M_.maximum_endo_lag = orig_model.maximum_endo_lag;
         end
-        old_solve_algo = options_.solve_algo;
-        %  options_.solve_algo = 1;
-        oo_.steady_state = dynare_solve('dyn_ramsey_static_',oo_.steady_state,0,M_,options_,oo_,it_);
-        options_.solve_algo = old_solve_algo;
-        [junk,junk,multbar] = dyn_ramsey_static_(oo_.steady_state,M_,options_,oo_,it_);
+
+        if options_.steadystate_flag
+            k_inst = [];
+            instruments = options_.instruments;
+            for i = 1:size(instruments,1)
+                k_inst = [k_inst; strmatch(options_.instruments(i,:), ...
+                                           M_.endo_names,'exact')];
+            end
+            ys = oo_.steady_state;
+            inst_val = dynare_solve('dyn_ramsey_static_', ...
+                                            oo_.steady_state(k_inst),0, ...
+                                    M_,options_,oo_,it_);
+            ys(k_inst) = inst_val;
+            [x,check] = feval([M_.fname '_steadystate'],...
+                              ys,[oo_.exo_steady_state; ...
+                               oo_.exo_det_steady_state]);
+            if size(x,1) < M_.endo_nbr 
+                if length(M_.aux_vars) > 0
+                    x = add_auxiliary_variables_to_steadystate(x,M_.aux_vars,...
+                                                               M_.fname,...
+                                                               oo_.exo_steady_state,...
+                                                               oo_.exo_det_steady_state,...
+                                                               M_.params);
+                else
+                    error([M_.fname '_steadystate.m doesn''t match the model']);
+                end
+            end
+            oo_.steady_state = x;
+            [junk,junk,multbar] = dyn_ramsey_static_(oo_.steady_state(k_inst),M_,options_,oo_,it_);
+        else
+            oo_.steady_state = dynare_solve('dyn_ramsey_static_', ...
+                                            oo_.steady_state,0,M_,options_,oo_,it_);
+            [junk,junk,multbar] = dyn_ramsey_static_(oo_.steady_state,M_,options_,oo_,it_);
+        end
+        check1 = max(abs(feval([M_.fname '_static'],...
+                               oo_.steady_state,...
+                               [oo_.exo_steady_state; ...
+                            oo_.exo_det_steady_state], M_.params))) > options_.dynatol ;
+        if check1
+            error(['The steadystate values returned by ' M_.fname ...
+                   '_steadystate.m don''t solve the static model!' ])
+        end
+
         [jacobia_,M_] = dyn_ramsey_dynamic_(oo_.steady_state,multbar,M_,options_,oo_,it_);
         klen = M_.maximum_lag + M_.maximum_lead + 1;
         dr.ys = [oo_.steady_state;zeros(M_.exo_nbr,1);multbar];

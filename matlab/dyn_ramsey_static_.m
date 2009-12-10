@@ -49,14 +49,39 @@ function [resids, rJ,mult] = dyn_ramsey_static_(x,M_,options_,oo_,it_)
   % lead_lag incidence matrix for endogenous variables
   i_lag = M_.lead_lag_incidence;
   
+  if options_.steadystate_flag
+      k_inst = [];
+      instruments = options_.instruments;
+      for i = 1:size(instruments,1)
+          k_inst = [k_inst; strmatch(options_.instruments(i,:), ...
+                                     M_.endo_names,'exact')];
+      end
+      oo_.steady_state(k_inst) = x;
+      [x,check] = feval([M_.fname '_steadystate'],...
+                        oo_.steady_state,...
+                        [oo_.exo_steady_state; ...
+                         oo_.exo_det_steady_state]);
+      if size(x,1) < M_.endo_nbr 
+          if length(M_.aux_vars) > 0
+              x = add_auxiliary_variables_to_steadystate(x,M_.aux_vars,...
+                                                          M_.fname,...
+                                                          oo_.exo_steady_state,...
+                                                          oo_.exo_det_steady_state,...
+                                                          M_.params);
+          else
+              error([M_.fname '_steadystate.m doesn''t match the model']);
+          end
+      end
+  end
+
   % value and Jacobian of objective function
   ex = zeros(1,M_.exo_nbr);
   [U,Uy,Uyy] = feval([fname '_objective_static'],x(i_endo),ex, M_.params);
   Uy = Uy';
   Uyy = reshape(Uyy,endo_nbr,endo_nbr);
   
-  % value and Jacobian of dynamic function
   y = repmat(x(i_endo),1,max_lag+max_lead+1);
+  % value and Jacobian of dynamic function
   k = find(i_lag');
   it_ = 1;
 %  [f,fJ,fH] = feval([fname '_dynamic'],y(k),ex);
@@ -83,7 +108,11 @@ function [resids, rJ,mult] = dyn_ramsey_static_(x,M_,options_,oo_,it_)
   resids1 = Uy+A*mult;
 %  resids = [f; sqrt(resids1'*resids1/endo_nbr)]; 
   [q,r,e] = qr([A Uy]');
-  resids = [f; r(end,(endo_nbr-inst_nbr+1:end))'];
+  if options_.steadystate_flag
+      resids = [r(end,(endo_nbr-inst_nbr+1:end))'];
+  else
+      resids = [f; r(end,(endo_nbr-inst_nbr+1:end))'];
+  end
   rJ = [];
   return;
   
