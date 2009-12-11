@@ -20,6 +20,7 @@ EXTRA_DIST = \
 	matlab \
 	mex/sources \
 	uncrustify.cfg \
+	license.txt \
 	windows/dynare.nsi \
 	windows/mexopts.bat \
 	windows/README.txt
