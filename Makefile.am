@@ -21,6 +21,7 @@ EXTRA_DIST = \
 	mex/sources \
 	uncrustify.cfg \
 	windows/dynare.nsi \
+	windows/mexopts.bat \
 	windows/README.txt
 
 clean-local:
