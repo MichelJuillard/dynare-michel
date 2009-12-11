@@ -46,7 +46,7 @@ else
         ax_cv_mexext=`$MATLAB/bin/mexext.bat | sed 's/\r//'`
         ;;
       *mingw*)
-        ax_cv_mexext=`cd $MATLAB && cmd /c mexext.bat | sed 's/\r//'`
+        ax_cv_mexext=`cd $MATLAB/bin && cmd /c mexext.bat | sed 's/\r//'`
         ;;
       *)
         ax_cv_mexext=`$MATLAB/bin/mexext`
