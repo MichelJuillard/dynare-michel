@@ -39,7 +39,7 @@ function [LIK,lik] = monte_carlo_gaussian_particle_filter(reduced_form_model,Y,s
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-global M_ bayestopt_
+global M_ bayestopt_ oo_
 persistent init_flag
 persistent restrict_variables_idx observed_variables_idx state_variables_idx mf0 mf1
 persistent sample_size number_of_state_variables number_of_observed_variables number_of_structural_innovations
@@ -63,7 +63,7 @@ if isempty(init_flag)
     restrict_variables_idx  = bayestopt_.restrict_var_list;
     observed_variables_idx  = restrict_variables_idx(mf1);
     state_variables_idx     = restrict_variables_idx(mf0);
-     sample_size = size(Y,2);
+    sample_size = size(Y,2);
     number_of_state_variables = length(mf0);
     number_of_observed_variables = length(mf1);
     number_of_structural_innovations = length(Q); 
@@ -85,11 +85,7 @@ StateVectorVariance = lyapunov_symm(ghx(mf0,:),ghu(mf0,:)*Q*ghu(mf0,:)',1e-12,1e
 StateVectorVarianceSquareRoot = reduced_rank_cholesky(StateVectorVariance)';
 state_variance_rank = size(StateVectorVarianceSquareRoot,2);
 
-%state_idx = 1:state_variance_rank;
-%innovation_idx = 1+state_variance_rank:state_variance_rank+number_of_structural_innovations;
-
 Q_lower_triangular_cholesky = chol(Q)';
-
 
 % Set seed for randn().
 seed  = [ 362436069 ; 521288629 ];
@@ -97,7 +93,6 @@ randn('state',seed);
  
 const_lik = log(2*pi)*number_of_observed_variables; 
 lik  = NaN(sample_size,1);
-
 
 for t=1:sample_size
     PredictedStateMean = zeros(number_of_state_variables,1);

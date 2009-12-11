@@ -16,8 +16,7 @@ function y = local_state_space_iteration_2(yhat,epsilon,ghx,ghu,constant,half_gh
 %    constant      [double]     m*1 vector (steady state + second order correction).
 %    half_ghxx     [double]     m*n² matrix, subset of .5*dr.ghxx. 
 %    half_ghuu     [double]     m*q² matrix, subset of .5*dr.ghuu.
-%    ghxu          [double]     m*nq matrix, subset of dr.ghxu.
-%    index         [integer]    
+%    ghxu          [double]     m*nq matrix, subset of dr.ghxu.    
 %
 % OUTPUTS
 %    y             [double]     stochastic simulations results
