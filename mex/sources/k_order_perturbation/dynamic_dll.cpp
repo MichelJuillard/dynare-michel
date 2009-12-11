@@ -44,7 +44,10 @@ DynamicModelDLL::DynamicModelDLL(const string &modName, const int y_length, cons
         throw 1;
       Dynamic = (DynamicFn)GetProcAddress(dynamicHinstance, "Dynamic");
       if (Dynamic == NULL)
-	throw 2;
+	{
+	  FreeLibrary(dynamicHinstance); // Free the library
+	  throw 2;
+	}
 #else // Linux or Mac
       dynamicHinstance = dlopen(fName.c_str(), RTLD_NOW);
       if ((dynamicHinstance == NULL) || dlerror())
@@ -55,6 +58,7 @@ DynamicModelDLL::DynamicModelDLL(const string &modName, const int y_length, cons
       Dynamic = (DynamicFn) dlsym(dynamicHinstance, "Dynamic");
       if ((Dynamic  == NULL) || dlerror())
         {
+	  dlclose(dynamicHinstance); // Free the library
           cerr << dlerror() << endl;
           throw 2;
         }
