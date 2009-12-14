@@ -240,6 +240,11 @@ function [dr,info,M_,options_,oo_] = dr1(dr,task,M_,options_,oo_)
             [junk,jacobia_,hessian1] = feval([M_.fname '_dynamic'],z,...
                                             [oo_.exo_simul ...
                                 oo_.exo_det_simul], M_.params, it_);
+            if options_.use_dll
+                % In USE_DLL mode, the hessian is in the 3-column sparse representation
+                hessian1 = sparse(hessian1(:,1), hessian1(:,2), hessian1(:,3), ...
+                                  size(jacobia_, 1), size(jacobia_, 2)*size(jacobia_, 2));
+            end
         end
     end
     

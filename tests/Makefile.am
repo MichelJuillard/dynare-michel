@@ -5,6 +5,7 @@ OCTAVE_MODS = \
 	ramst.mod \
 	ramst_a.mod \
 	example1.mod \
+	example1_use_dll.mod \
 	t_sgu_ex1.mod \
 	ramsey.mod \
 	ramst_initval_file.mod \
