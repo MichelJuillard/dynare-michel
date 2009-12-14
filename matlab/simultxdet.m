@@ -137,7 +137,7 @@ function [y_,int_width]=simultxdet(y0,ex,ex_det, iorder,var_list,M_,oo_,options_
   fact = norminv((1-options_.conf_sig)/2,0,1);
 
   int_width = zeros(iter,endo_nbr);
-  for i=1:endo_nbr
+  for i=1:nvar
     int_width(:,i) = fact*sqrt(var_yf(:,i));
   end
   
