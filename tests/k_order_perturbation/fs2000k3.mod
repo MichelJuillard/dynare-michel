@@ -66,15 +66,15 @@ dr0 = oo1.oo_.dr;
 dr = oo_.dr;
 
 if max(max(abs(dr0.ghxx - dr.ghxx))) > 1e-12;
-   disp('error in ghxx');
+   error('error in ghxx');
 end;
 if max(max(abs(dr0.ghuu - dr.ghuu))) > 1e-12;
-   disp('error in ghuu');
+   error('error in ghuu');
 end;
 if max(max(abs(dr0.ghxu - dr.ghxu))) > 1e-12;
-   disp('error in ghxu');
+   error('error in ghxu');
 end;
 if max(max(abs(dr0.ghs2 - dr.ghs2))) > 1e-12;
-   disp('error in ghs2');
+   error('error in ghs2');
 end;
 
