@@ -1,0 +1,359 @@
+\documentclass[11pt,a4paper]{article}
+
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage{hyperref}
+\hypersetup{breaklinks=true,pagecolor=white,colorlinks=true,linkcolor=blue,citecolor=blue,urlcolor=blue}
+
+\begin{document}
+
+\author{S\'ebastien Villemot}
+\title{Computation of first-order decision rules}
+\date{December 2009}
+\maketitle
+
+This page documents the computation of first-order decision rules, as it is done in Dynare\footnote{More specifically in \texttt{matlab/dr1.m} file, although the notations do not match.}.
+
+\section{Variable types and indices}
+
+There are $n$ endogenous variables, and the model has at most only one lead and one lag on endogenous variables, and no lead/lag on exogenous variables\footnote{Leads and lags of 2 or more on endogenous variables, and all leads and lags on exogenous variables are removed by creating auxiliary variables, see the documentation of \texttt{stoch\_simul} in the Dynare reference manual.}. All variables are required to appear at least at one period (it is not required that all variables appear at current period, but a weaker condition is required, see assumption (\ref{eq:identification})). A partition of these variables can be constructed:
+\begin{description}
+\item[Static variables]: those that appear only at the current period. Their number is $n^s \leq n$, and their indices $\zeta^s_j, j=1\ldots n^s$
+\item[Purely forward variables]: those that appear only at future period, possibly at current period, but not at previous period. Their number is $n^{++} \leq n$, and their indices $\zeta^{++}_j, j=1\ldots n^{++}$
+\item[Purely backward variables]: those that appear only at previous period, possibly at current period, but not at future period.  Their number is $n^{--} \leq n$, and their indices $\zeta^{--}_j, j=1\ldots n^{--}$
+\item[Mixed variables]: those that appear both at future and previous period, and possibly at current period.  Their number is $n^m \leq n$, and their indices $\zeta^m_j, j=1\ldots n^m$
+\end{description}
+
+These four types of variables form a partition of the endogenous variables, and we therefore have:
+\begin{equation*}
+  n^m + n^{++} + n^{--} + n^s = n
+\end{equation*}
+
+We also define:
+\begin{description}
+\item[Forward variables]: the union of mixed and purely forward variables. Their number is $n^+ = n^{++} + n^m$, and their indices $\zeta^+_j, j=1\ldots n^+$. 
+\item[Backward variables]: the union of mixed and purely backward variables. Their number is $n^- = n^{--} + n^m$, and their indices $\zeta^-_j, j=1\ldots n^-$
+\item[Dynamic variables]: all the variables except static variables. Their number is $n^d = n - n^s$, and their indices $\zeta^d_j, j=1\ldots n^d$
+\end{description}
+
+The seven indices are such that $1 \leq \zeta^k_1 < \zeta^k_2 < \ldots < \zeta^k_{n^k} \leq n$, where $k \in \{ s, +, ++, -, --, m, d \}$.
+
+We denote by $y_t = (y_{1,t}, \ldots, y_{n,t})'$ the vector of endogenous variables at date $t$. We denote by $y^k_t = (y_{\zeta^k_1, t}, \ldots, y_{\zeta^k_{n^k}, t})'$ the subvector of endogenous variables, where $k \in \{ s, +, ++, -, --, m, d \}$.
+
+Finally, we denote $\beta^+_j, j=1\ldots n^m$ the indices of mixed variables inside the $\zeta^+_j$ sequence, \textit{i.e.} $\beta^+_j$ is such that $\zeta^+_{\beta^+_j}$ is a mixed variable. We similarly define $\beta^-_j$ for mixed variables inside the $\zeta^-_j$ sequence. We similarly define $\pi^+_j$ (resp. $\pi^-_j$) for purely forward (resp. purely backward) variables insize $\zeta^+_j$ (resp $\zeta^-_j$).
+
+\section{Model setup}
+
+The model is written as:
+\begin{equation*}
+  \mathbb{E}_t f(y^+_{t+1}, y_t, y^-_{t-1}, u_t) = 0
+\end{equation*}
+
+Exogenous variables $u_t$ of dimension $p$ follow an autoregressive process:
+\begin{equation*}
+  u_t = P(u_{t-1}, \sigma \varepsilon_t)
+\end{equation*}
+where $\varepsilon_t$ is i.i.d. with zero mean and variance-covariance matrix $\Sigma$, and $\sigma \geq 0$ is a stochastic scale factor ($\sigma=0$ means a deterministic model).
+
+The deterministic steady state $\bar{u}$, $\bar{y}$ satisfies:
+\begin{equation*}
+  \bar{u} = P(\bar{u}, 0)
+\end{equation*}
+\begin{equation*}
+  f(\bar{y}^+, \bar{y}, \bar{y}^-, \bar{u}) = 0
+\end{equation*}
+
+The solution function $g$ is such that:
+\begin{equation*}
+  y_t = g(y^-_{t-1}, u_t, \sigma)
+\end{equation*}
+In particular, $\bar{y} = g(\bar{y}^-, \bar{u}, 0)$.
+
+\section{First order approximation}
+
+The function $g$ satisfies:
+\begin{equation}
+  \label{eq:g-definition}
+  \mathbb{E}_t f\left[g^+(g^-(y^-_{t-1}, u_t,\sigma), u_{t+1}, \sigma), g(y^-_{t-1}, u_t, \sigma), y^-_{t-1}, u_t\right] = 0
+\end{equation}
+where $g^+$ (resp. $g^-$) is the restriction of $g$ to forward (resp. backward) variables.
+
+Let:
+\begin{equation*}
+  f_{y^+} = \frac{\partial f}{\partial y^+_{t+1}}, \; f_{y^0} = \frac{\partial f}{\partial y_t}, \;  f_{y^-} = \frac{\partial f}{\partial y^-_{t-1}}, \;
+  f_u   = \frac{\partial f}{\partial u_t}
+\end{equation*}
+\begin{equation*}
+  g_y = \frac{\partial g}{\partial y^-_{t-1}},\;
+  g_u = \frac{\partial g}{\partial u_t}, \:
+  P_u = \frac{\partial P}{\partial u_t}
+\end{equation*}
+where the derivatives are taken at $\bar{y}$ and $\bar{u}$.
+
+A first order approximation of (\ref{eq:g-definition}) around $\bar{y}$ and $\bar{u}$ gives:
+\begin{multline*}
+  f(\bar{y}^+, \bar{y}, \bar{y}^-, \bar{u}) + f_{y^+} [g^+_y(g^-_y \hat{y}^-_{t-1} + g^-_u \hat{u}_t) + g^+_u \mathbb{E}_t [P_u \hat{u}_t + \sigma \varepsilon_{t+1}] ] \\ + f_{y^0} (g_y \hat{y}^-_{t-1} + g_u \hat{u}_t) + f_{y^-}\hat{y}^-_{t-1} + f_u \hat{u}_t = 0
+\end{multline*}
+where $g^+_y$, $g^-_y$, $g^-_u$, $g^+_u$ are the derivatives of the restrictions of $g$ with obvious notations.
+
+Computing the expectancy term, taking into account the property of the deterministic steady state, and reorganizing the terms, we obtain:
+\begin{equation}
+  \label{eq:first-order}
+  (f_{y^+} g^+_y g^-_y + f_{y^0}  g_y + f_{y^-}) \hat{y}^-_{t-1} + (f_{y^+} g^+_yg^-_u+ f_{y^+}g^+_u P_u + f_y g_u + f_u) \hat{u}_t = 0
+\end{equation}
+
+\section{Recovering $g_y$}
+
+Taking into account the term multiplying $\hat{y}^-_{t-1}$, equation (\ref{eq:first-order}) imposes:
+\begin{equation*}
+  f_{y^+} g^+_y g^-_y + f_{y^0}  g_y + f_{y^-} = 0
+\end{equation*}
+
+This amounts to:
+\begin{equation}
+  \label{eq:gy}
+  f_{y^+} \hat{y}^+_{t+1} + f_{y^0} \hat{y}_t + f_{y^-} \hat{y}^-_{t-1} = 0
+\end{equation}
+
+Let $S$ be the $n\times n^s$ submatrix of $f_{y^0}$ where only the columns for static variables are kept, \textit{i.e.} $S_{i,j} = f_{y^0, i, \zeta^s_j}$. A QR decomposition gives $S = QR$ where $Q$ is an $n\times n$ orthogonal matrix, and $R$ an $n\times n^s$ upper triangular matrix.
+
+For the model to be identified, we assume that:
+\begin{equation}
+  \label{eq:identification}
+  \mathop{rank}(R) = n^s
+\end{equation}
+
+Equation (\ref{eq:gy}) can be rewritten as:
+\begin{equation}
+  \label{eq:gy-qr}
+  A^+ \hat{y}^+_{t+1} + A^0 \hat{y}_t + A^- \hat{y}^-_{t-1} = 0
+\end{equation}
+where $A^+ = Q'f_{y^+}$, $A^0 = Q'f_{y^0}$ and $A^- = Q'f_{y^-}$. By construction, columns of static variables in $A^0$ are zero in their lower part: $\forall i > n^s,\forall j\leq n^s, \: A^0_{i,\zeta^s_j} = 0$.
+
+\subsection{Non-static variables}
+
+Taking only the $n^d$ lower rows of system (\ref{eq:gy-qr}), we get:
+\begin{equation}
+  \label{eq:gy-no-static}
+  \tilde{A}^+ \hat{y}^+_{t+1} + \tilde{A}^{0+} \hat{y}^+_t + \tilde{A}^{0-} \hat{y}^-_t + \tilde{A}^- \hat{y}^-_{t-1} = 0
+\end{equation}
+where $\tilde{A}^+$ (resp. $\tilde{A}^-$) contains the last $n^d$ rows of $A^+$ (resp. $A^-$). Matrices $\tilde{A}^{0+}$ and $\tilde{A}^{0-}$ can be defined in two ways, depending on where we deal with mixed variables:
+
+\begin{itemize}
+\item $\tilde{A}^{0+}$ is a submatrix of $A^0$ where only the last $n^d$ rows and the columns for forward variables are kept ($\tilde{A}^{0+}_{i,j} = A^0_{n^s+i, \zeta^+_j}$), and $\tilde{A}^{0-}$ is such that purely backward columns are taken from $A^0$ ($\tilde{A}^{0-}_{i,\pi^-_j} = A^0_{n^s+i,\zeta^{--}_j}$), and the rest is zero
+\item $\tilde{A}^{0-}$ is a submatrix of $A^0$ where only the last $n^d$ rows and the columns for backward variables are kept ($\tilde{A}^{0-}_{i,j} = A^0_{n^s+i, \zeta^-_j}$), and $\tilde{A}^{0+}$ is such that purely forward columns are taken from $A^0$ ($\tilde{A}^{0+}_{i,\pi^+_j} = A^0_{n^s+i,\zeta^{++}_j}$), and the rest is zero
+\end{itemize}
+
+Note that in equation (\ref{eq:gy-no-static}), static variables no longer appear.
+
+The structural state space representation of (\ref{eq:gy-no-static}) is:
+
+\begin{equation*}
+\underbrace{
+  \left(
+    \begin{matrix}
+      \tilde{A}^{0-} & \tilde{A}^+ \\
+      I^- & 0
+    \end{matrix}
+  \right)
+}_D
+\left(
+  \begin{matrix}
+    \hat{y}^-_t \\
+    \hat{y}^+_{t+1}
+  \end{matrix}
+\right)
+=
+\underbrace{
+  \left(
+    \begin{matrix}
+      -\tilde{A}^- & -\tilde{A}^{0+} \\
+      0 & I^+
+    \end{matrix}
+  \right)
+}_E
+\left(
+  \begin{matrix}
+    \hat{y}^-_{t-1} \\
+    \hat{y}^+_t
+  \end{matrix}
+\right)
+\end{equation*}
+where $I^-$ is an $n^m \times n^-$ selection matrix for mixed variables, such that $I^-_{i,\beta^-_i}=1$, and zero otherwise. Similarly, $I^+$ is an $n^m \times n^+$ matrix, such that $I^+_{i,\beta^+_i}=1$, and zero otherwise. Therefore, $D$ and $E$ are square matrices of size $n^{++}+n^{--}+2n^m$.
+
+Using the fact that $\hat{y}^+_{t+1} = g^+_y \hat{y}^-_t$, This can be rewritten as:
+\begin{equation}
+\label{eq:state-space}
+  D
+  \left(
+    \begin{matrix}
+      I_{n^-} \\
+      g^+_y
+    \end{matrix}
+  \right)
+  \hat{y}^-_t
+  =
+  E
+  \left(
+    \begin{matrix}
+      I_{n^-} \\
+      g^+_y
+    \end{matrix}
+  \right)
+  \hat{y}^-_{t-1}
+\end{equation}
+where $I_{n^-}$ is the identity matrix of size $n^-$.
+
+A generalized Schur decomposition of the pencil $(D,E)$ is performed:
+\begin{equation*}
+  D = QTZ, \; E=QSZ
+\end{equation*}
+where $T$ is upper triangular, $S$ quasi upper triangular, and $Q,Z$ are orthogonal matrices. The decomposition is done is such a way that stable generalized eigenvalues (modulus less than 1) are in the upper left corner of $T$ and $S$.
+
+Matrices $T$ and $S$ are block decomposed so that the upper left block of both matrices is square and contains generalized eigenvalues of modulus less than 1, and lower right block is square and contains generalized eigenvalues of modulus strictly greater than 1.
+
+Equation (\ref{eq:state-space}) can be rewritten as:
+\begin{equation}
+  \label{eq:state-space-qz}
+  \left(
+    \begin{matrix}
+      T_{11} & T_{12} \\
+      0 & T_{22}
+    \end{matrix}
+  \right)
+  \left(
+    \begin{matrix}
+      Z_{11} & Z_{12} \\
+      Z_{21} & Z_{22}
+    \end{matrix}
+  \right)
+  \left(
+    \begin{matrix}
+      I_{n^-} \\
+      g^+_y
+    \end{matrix}
+  \right)
+  \hat{y}^-_t
+  =
+  \left(
+    \begin{matrix}
+      S_{11} & S_{12} \\
+      0 & S_{22}
+    \end{matrix}
+  \right)
+  \left(
+    \begin{matrix}
+      Z_{11} & Z_{12} \\
+      Z_{21} & Z_{22}
+    \end{matrix}
+  \right)
+  \left(
+    \begin{matrix}
+      I_{n^-} \\
+      g^+_y
+    \end{matrix}
+  \right)
+  \hat{y}^-_{t-1}
+\end{equation}
+where $T_{11}$ and $S_{11}$ are square and contain stable generalized eigenvalues, while $T_{22}$ and $S_{22}$ are square and contain explosive generalized eigenvalues.
+
+To exclude explosive trajectories, we impose:
+\begin{equation}
+  \label{eq:non-explosive}
+  \left(
+    \begin{matrix}
+      Z_{11} & Z_{12} \\
+      Z_{21} & Z_{22}
+    \end{matrix}
+  \right)
+  \left(
+    \begin{matrix}
+      I_{n^-} \\
+      g^+_y
+    \end{matrix}
+  \right)
+  =
+  \left(
+    \begin{matrix}
+      X \\
+      0
+    \end{matrix}
+  \right)
+\end{equation}
+which implies:
+\begin{equation*}
+  g^+_y = -(Z_{22})^{-1} Z_{21}
+\end{equation*}
+
+Note that $Z_{22}$ is square if the Blanchard-Kahn order condition is verified (as many explosive eigenvalues as forward or mixed variables), and its non-singularity is the Blanchard-Kahn rank condition.
+
+Using equation (\ref{eq:non-explosive}) and the fact that $\hat{y}^-_t = g^-_y \hat{y}^-_{t-1}$, equation (\ref{eq:state-space-qz}) implies:
+\begin{equation*}
+  \left(
+    \begin{matrix}
+      T_{11} & T_{12} \\
+      0 & T_{22}
+    \end{matrix}
+  \right)
+  \left(
+    \begin{matrix}
+      X \\
+      0
+    \end{matrix}
+  \right)
+  g^-_y
+  =
+  \left(
+    \begin{matrix}
+      S_{11} & S_{12} \\
+      0 & S_{22}
+    \end{matrix}
+  \right)
+  \left(
+    \begin{matrix}
+      X \\
+      0
+    \end{matrix}
+  \right)
+\end{equation*}
+
+Then, using the fact that solving equation (\ref{eq:non-explosive}) for $X$ gives $X = (Z'_{11})^{-1}$, the upper part of this system gives the solution for $g^-_y$:
+\begin{equation*}
+  g^-_y = X^{-1} T_{11}^{-1}S_{11}X = Z'_{11}T_{11}^{-1}S_{11}(Z'_{11})^{-1}
+\end{equation*}
+
+\subsection{Static variables}
+
+The $n^s$ upper lines of equation (\ref{eq:gy-qr}) can be written as:
+\begin{equation*}
+  \breve{A}^+ \hat{y}^+_{t+1} + \breve{A}^{0d} \hat{y}^d_t + \breve{A}^{0s} \hat{y}^{s}_t + \breve{A}^- \hat{y}^-_{t-1} = 0
+\end{equation*}
+where $\breve{A}^+$ (resp. $\breve{A}^-$) contains the first $n^s$ rows of $A^+$ (resp. $A^-$). Matrix $\breve{A}^{0s}$ (resp. $\breve{A}^{0d}$) contains the first $n^s$ rows and only the static (resp. non-static) columns of $A^0$. Recall that $\breve{A}^{0s}$ is a square upper triangular matrix by construction, and it is invertible because of assumption (\ref{eq:identification}).
+
+This can be rewritten as:
+\begin{equation*}
+  \breve{A}^+ g^+_y g^-_y \hat{y}^-_{t-1} + \breve{A}^{0d} g^d_y \hat{y}^-_{t-1} + \breve{A}^{0s} \hat{y}^{s}_t + \breve{A}^- \hat{y}^-_{t-1} = 0
+\end{equation*}
+where $g^d_y$, the restriction of $g_y$ to non-static variables, is obtained by combining $g^+_y$ and $g^-_y$.
+
+We therefore have:
+\begin{equation*}
+  g^s_y = -\left[\breve{A}^{0s}\right]^{-1} \left(\breve{A}^+ g^+_y g^-_y + \breve{A}^{0d} g^d_y + \breve{A}^-\right)
+\end{equation*}
+
+\section{Recovering $g_u$}
+
+Equation (\ref{eq:first-order}) restricted to $\hat{u}_t$ imposes:
+\begin{equation*}
+  f_{y^+} g^+_yg^-_u+ f_{y^+}g^+_u P_u + f_y g_u + f_u = 0
+\end{equation*}
+
+It can be rewritten as:
+\begin{equation*}
+  (f_{y^+} g^+_y J^- + f_y) g_u+ f_{y^+}J^+ g_u P_u + f_u = 0
+\end{equation*}
+where $J^-$ (resp $J^+$) is an $n^-\times n$ matrix (resp. $n^+\times n$ matrix) selecting only the backward (resp. forward) endogenous variables.
+
+This equation in $g_u$ is a specialized Sylvester equation, which can be solved using the algorithm proposed by Ondra Kamenik\footnote{See \texttt{sylvester.pdf}, included in Dynare distribution.}.
+
+\end{document}

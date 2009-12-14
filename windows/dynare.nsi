@@ -130,13 +130,13 @@ SectionEnd
 
 Section "Documentation (Dynare and Dynare++)"
  SetOutPath $INSTDIR\doc
- File ..\doc\manual.pdf ..\doc\guide.pdf ..\doc\userguide\UserGuide.pdf ..\doc\bvar-a-la-sims.pdf ..\doc\macroprocessor\macroprocessor.pdf ..\doc\preprocessor\preprocessor.pdf
+ File ..\doc\manual.pdf ..\doc\guide.pdf ..\doc\userguide\UserGuide.pdf ..\doc\bvar-a-la-sims.pdf ..\doc\dr.pdf ..\doc\macroprocessor\macroprocessor.pdf ..\doc\preprocessor\preprocessor.pdf
 
  SetOutPath $INSTDIR\doc\manual-html
  File ..\doc\manual-html\*.html
 
  SetOutPath $INSTDIR\doc\dynare++
- File ..\dynare++\doc\dynare++-tutorial.pdf ..\dynare++\doc\dynare++-tutorial.pdf
+ File ..\dynare++\doc\dynare++-tutorial.pdf ..\dynare++\doc\dynare++-tutorial.pdf ..\dynare++\sylv\sylvester.pdf
 
  CreateShortcut "${SMLOC}\Documentation.lnk" "$INSTDIR\doc"
 SectionEnd
