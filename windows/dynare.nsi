@@ -39,9 +39,12 @@ InstallDir "c:\dynare\${VERSION}"
 !define REGLOC "Software\Microsoft\Windows\CurrentVersion\Uninstall\Dynare ${VERSION}"
 !define SMLOC "$SMPROGRAMS\Dynare ${VERSION}"
 
-# Strip preprocessor and dynare++ binaries
+# Strip preprocessor, dynare++ and 32-bit DLL binaries
+# (64-bit DLL are compiled with MSVC and therefore are small)
 !system 'strip ..\matlab\dynare_m.exe'
 !system 'strip ..\dynare++\src\dynare++.exe'
+!system 'strip ..\mex\matlab\win32-6.5-7.4\*'
+!system 'strip ..\mex\matlab\win32-7.5-7.9\*'
 
 !macro DETERMINE_CONTEXT
  # Determine if we are admin or not
