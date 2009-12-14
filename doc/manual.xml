@@ -130,7 +130,9 @@ After installation, Dynare can be used in any directory on your computer. It is 
 
 <para>The installer will also add an entry in your Start Menu with a shortcut to documentation files and to the uninstaller.</para>
 
-<para>You can have several versions of Dynare coexisting (for example in <filename>c:\dynare</filename>), as long as you correctly adjust your path settings (see <xref linkend="path_warning" />).</para>
+<para>Users of MATLAB 64-bit also need to install <ulink url="http://www.microsoft.com/downloads/details.aspx?familyid=bd2a6171-e2d6-4230-b809-9a8d7548c1b6&amp;displaylang=en">Microsoft Visual C++ runtime libraries</ulink> in order to have functional MEX files.</para>
+
+<para>Note that you can have several versions of Dynare coexisting (for example in <filename>c:\dynare</filename>), as long as you correctly adjust your path settings (see <xref linkend="path_warning" />).</para>
 
 </sect2>
 
@@ -372,6 +374,7 @@ In the description of Dynare commands, the following conventions are observed:
 <listitem><para><replaceable>VARIABLE_NAME</replaceable> indicates a variable name starting with an alphabetical character and can't contain <literal>()+-*/^=!;:@#.</literal> or accentuated characters</para></listitem>
 <listitem><para><replaceable>PARAMETER_NAME</replaceable> indicates a parameter name starting with an alphabetical character and can't contain <literal>()+-*/^=!;:@#.</literal> or accentuated characters</para></listitem>
 <listitem><para><replaceable>LATEX_NAME</replaceable> indicates a valid LaTeX expression in math mode (not including the dollar signs)</para></listitem>
+<listitem><para><replaceable>FUNCTION_NAME</replaceable> indicates a valid <trademark class="registered">MATLAB</trademark> function name</para></listitem>
 <listitem><para><replaceable>FILENAME</replaceable> indicates a filename valid in the underlying operating system; it is necessary to put it between double quotes when specifying the extension or if the filename contains a non-alphanumeric character</para></listitem>
 </itemizedlist>
 </para>
@@ -739,7 +742,7 @@ end;
     <para>The following operators are allowed in <replaceable>MODEL_EXPRESSION</replaceable>:
     <itemizedlist>
       <listitem><para>steady state operator: <literal>STEADY_STATE(</literal><replaceable>MODEL_EXPRESSION</replaceable><literal>)</literal>. This operator is used to take the value of the enclosed expression at the steady state. A typical usage is in the Taylor rule, where you may want to use the value of GDP at steady state to compute the output gap.</para></listitem>
-      <listitem id="expectation_operator"><para>expectation operator: <literal>EXPECTATION(</literal><replaceable>INTEGER</replaceable><literal>)(</literal><replaceable>MODEL_EXPRESSION</replaceable><literal>)</literal>. This operator is used to take the expectation of some expression using a different information set than the information available at current period. For example, <literal>EXPECTATION(-1)(x(+1))</literal> is equal to the expected value of variable <literal>x</literal> at next period, using the information set available at the previous period. In practice, Dynare solves this by creating an auxiliary variable equal to <literal>AUX = x(+2)</literal>, and by replacing the expectation operator by <literal>AUX(-1)</literal>. Note that a value of <literal>0</literal> for the time shift component is reserved for partial information models (not yet fully implemented).</para></listitem>
+      <listitem id="expectation_operator"><para>expectation operator: <literal>EXPECTATION(</literal><replaceable>INTEGER</replaceable><literal>)(</literal><replaceable>MODEL_EXPRESSION</replaceable><literal>)</literal>. This operator is used to take the expectation of some expression using a different information set than the information available at current period. For example, <literal>EXPECTATION(-1)(x(+1))</literal> is equal to the expected value of variable <literal>x</literal> at next period, using the information set available at the previous period. In practice, Dynare solves this by creating an auxiliary variable equal to <literal>AUX_EXPECT_LAG_1 = x(+2)</literal>, and by replacing the expectation operator by <literal>AUX_EXPECT_LAG_1(-1)</literal>. Note that a value of <literal>0</literal> for the time shift component is reserved for partial information models (not yet fully implemented).</para></listitem>
     </itemizedlist>
     </para>
   </sect2>
@@ -1917,6 +1920,14 @@ When a list of <replaceable>VARIABLE_NAME</replaceable> is specified, results ar
 </para>
 </refsect1>
 
+<refsect1>
+  <title>Auxiliary variables for leads and lags</title>
+  <para>For a stochastic model, Dynare will perform a transformation of the model so that there is only one lead and one lag on endogenous, and no lead/lag on exogenous.</para>
+  <para>This transformation is achieved by the creation of auxiliary variables, and corresponding equations. For example, if <literal>x(+2)</literal> exists in the model, Dynare will create one auxiliary variable <literal>AUX_ENDO_LEAD = x(+1)</literal>, and replace <literal>x(+1)</literal> by <literal>AUX_ENDO_LEAD(+1)</literal>.</para>
+  <para>A similar transformation is done for lags greater than 2 on endogenous (auxiliary variables will have a name beginning with <literal>AUX_ENDO_LAG</literal>), and for exogenous with leads and lags (auxiliary variables will have a name beginning with <literal>AUX_EXO_LEAG</literal> or <literal>AUX_EXO_LAG</literal> respectively).</para>
+  <para>Once created, all auxiliary variables are included in the set of endogenous variables. The output of decision rules (see below) is such that auxiliary variable names are replaced by the original variables they refer to.</para>
+</refsect1>
+
 <refsect1><title>Decision rules</title>
 <para>
 The approximated solution of a model takes the form of a set of decision rules or transition equations expressing the current value of the endogenous variables of the model as function of the previous state of the model and shocks oberved at the beginning of the period.
@@ -2525,17 +2536,19 @@ end;
     <listitem><para>Name of the file containing previous value for the mode. When computing the mode, Dynare stores the mode (<varname>xparam1</varname>) and the hessian (<varname>hh</varname>) in a file called <filename><replaceable>MODEL_FILENAME</replaceable>_mode.mat</filename></para></listitem>
   </varlistentry>
   <varlistentry>
-    <term><option>mode_compute</option> = <replaceable>INTEGER</replaceable></term>
+    <term><option>mode_compute</option> = <replaceable>INTEGER</replaceable> | <replaceable>FUNCTION_NAME</replaceable></term>
     <listitem><para>Specifies the optimizer for the mode computation:
         <itemizedlist>
-          <listitem><para><literal>0</literal>: the mode isn't computed. mode_file must be specified</para></listitem>
+          <listitem><para><literal>0</literal>: the mode isn't computed. <option>mode_file</option> option must be specified</para></listitem>
           <listitem><para><literal>1</literal>: uses <trademark class="registered">MATLAB</trademark>'s <command>fmincon</command></para></listitem>
           <listitem><para><literal>2</literal>: value no longer used</para></listitem>
           <listitem><para><literal>3</literal>: uses <trademark class="registered">MATLAB</trademark>'s <command>fminunc</command></para></listitem>
-          <listitem><para><literal>4</literal>: uses Chris Sim's <command>csminwel</command></para></listitem>
-          <listitem><para><literal>5</literal>: uses a routine by Marco Ratto</para></listitem> 
-          <listitem><para><literal>6</literal>: uses a simulated annealing-like algorithm</para></listitem>
+          <listitem><para><literal>4</literal>: uses Chris Sims' <command>csminwel</command></para></listitem>
+          <listitem><para><literal>5</literal>: uses Marco Ratto's <command>newrat</command></para></listitem> 
+          <listitem><para><literal>6</literal>: uses a Monte-Carlo based optimization routine (see <ulink url="http://www.dynare.org/DynareWiki/MonteCarloOptimization">Dynare wiki</ulink> for more details)</para></listitem>
           <listitem><para><literal>7</literal>: uses <trademark class="registered">MATLAB</trademark>'s <command>fminsearch</command> (a simplex based routine)</para></listitem>
+          <listitem><para>It is also possible to give a <replaceable>FUNCTION_NAME</replaceable> to this option, instead of an <replaceable>INTEGER</replaceable>. In that case, Dynare takes the return value of that function as the posterior mode.</para>
+          </listitem>
         </itemizedlist>
         Default value is <literal>4</literal>.
     </para></listitem>
@@ -3363,6 +3376,8 @@ This problem is solved using a numerical optimizer.
     <listitem><para>Declares the discount factor of the central planner. Default: <literal>1.0</literal></para></listitem>
   </varlistentry>
 </variablelist>
+
+<para>Note that only first order approximation is available (<foreignphrase>i.e.</foreignphrase> <literal>order=1</literal> must be specified).</para>
 </refsect1>
 
 </refentry>
