@@ -191,7 +191,8 @@ function [dr,info,M_,options_,oo_] = dr1(dr,task,M_,options_,oo_)
     b = zeros(M_.endo_nbr,M_.endo_nbr);
     b(:,cols_b) = jacobia_(:,cols_j);
     
-    if M_.maximum_endo_lead == 0;  % backward models
+    if M_.maximum_endo_lead == 0 && options_.order == 1  
+        % backward models: simplified code exist only at order == 1
         % If required, use AIM solver if not check only
         if (options_.aim_solver == 1) && (task == 0)
             if options_.order > 1
