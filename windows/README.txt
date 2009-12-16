@@ -27,6 +27,11 @@ Using Dynare with MATLAB (R)
 Dynare requires MATLAB (R) version 6.5 or above. With older versions of MATLAB (R),
 it may fail or give unexpected results.
 
+In order to have functional MEX files, users of the 64-bit version of MATLAB
+should install Microsoft Visual C++ runtime libraries, available at:
+
+  http://www.microsoft.com/downloads/details.aspx?familyid=bd2a6171-e2d6-4230-b809-9a8d7548c1b6&displaylang=en
+
 To use Dynare, you just have to add the 'matlab' subdirectory of your Dynare
 installation to MATLAB (R) path. You have two options for doing that:
 
@@ -59,7 +64,7 @@ Dynare is now available for GNU Octave, a free clone of MATLAB (R) (see
 The recommended Octave distribution is the Octave/MinGW 3.2.3
 precompiled binaries from Octave Forge, available at:
 
- http://sourceforge.net/projects/octave/files/Octave_Windows%20-%20MinGW/Octave%203.2.3%20for%20Windows%20MinGW32%20Installer/Octave-3.2.3-2_i686-pc-mingw32_gcc-4.4.0_setup.exe/download
+  http://sourceforge.net/projects/octave/files/Octave_Windows%20-%20MinGW/Octave%203.2.3%20for%20Windows%20MinGW32%20Installer/Octave-3.2.3-2_i686-pc-mingw32_gcc-4.4.0_setup.exe/download
 
 Every time you run Octave, you should type the two following commands (assuming
 that you have installed Dynare at the standard location, and replacing '4.x.y'
@@ -128,35 +133,6 @@ the DLL:
 
 * You may have a custom M-file in your search path with the same name than a
   DLL, therefore overriding it.
-
-
-Copyright notice for software
------------------------------
-
-Most Dynare source files are Copyright (C) 1996-2009 Dynare Team. There are
-some exceptions to this, see the license.txt file that comes with Dynare.
-
-Dynare is free software: you can redistribute it and/or modify it under the
-terms of the GNU General Public License as published by the Free Software
-Foundation, either version 3 of the License, or (at your option) any later
-version.
-
-This program is distributed in the hope that it will be useful, but WITHOUT ANY
-WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
-PARTICULAR PURPOSE.  See the GNU General Public License for more details.
-
-See <http://www.gnu.org/licenses/> for the full text of the license.
-
-
-Copyright notice for documentation
-----------------------------------
-
-Permission is granted to copy, distribute and/or modify Dynare documentation
-files under the terms of the GNU Free Documentation License, Version 1.2 or any
-later version published by the Free Software Foundation; with no Invariant
-Sections, no Front-Cover Texts, and no Back-Cover Texts.
-
-See <http://www.gnu.org/licenses/> for the full text of the license.
 
 
 Credits
