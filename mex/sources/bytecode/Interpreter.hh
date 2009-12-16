@@ -31,54 +31,52 @@
 # include "linbcg.hh"
 #endif
 #ifndef DEBUG_EX
-  #include "mex.h"
+# include "mex.h"
 #else
-  #include "mex_interface.hh"
+# include "mex_interface.hh"
 #endif
 
 //#define DEBUGC
 
 using namespace std;
 
-
 #define pow_ pow
 
-typedef vector<pair<Tags, void* > >::const_iterator it_code_type;
+typedef vector<pair<Tags, void * > >::const_iterator it_code_type;
 
 class Interpreter : SparseMatrix
 {
-  protected :
-    double pow1(double a, double b);
-    double log1(double a);
-    void compute_block_time(int Per_u_, bool evaluate, int block_num);
-    void evaluate_a_block(const int size, const int type, string bin_basename, bool steady_state, int block_num,
-                          const bool is_linear=false, const int symbol_table_endo_nbr=0, const int Block_List_Max_Lag=0, const int Block_List_Max_Lead=0, const int u_count_int=0);
-    bool simulate_a_block(const int size, const int type, string file_name, string bin_basename, bool Gaussian_Elimination, bool steady_state, int block_num,
-                          const bool is_linear=false, const int symbol_table_endo_nbr=0, const int Block_List_Max_Lag=0, const int Block_List_Max_Lead=0, const int u_count_int=0);
-    double *T;
-    vector<Block_contain_type> Block_Contain;
-    vector<pair<Tags, void* > > code_liste;
-    it_code_type it_code;
-    stack<double> Stack;
-    int Block_Count, Per_u_, Per_y_;
-    int it_, nb_row_x, nb_row_xd, maxit_, size_of_direction;
-    double *g1, *r;
-    double solve_tolf;
-    bool GaussSeidel;
-    double *x, *params;
-    double *steady_y, *steady_x;
-    map<pair<pair<int, int> ,int>, int> IM_i;
-    int equation, derivative_equation, derivative_variable;
-    string filename;
-    int minimal_solving_periods;
-  public :
+protected:
+  double pow1(double a, double b);
+  double log1(double a);
+  void compute_block_time(int Per_u_, bool evaluate, int block_num);
+  void evaluate_a_block(const int size, const int type, string bin_basename, bool steady_state, int block_num,
+                        const bool is_linear = false, const int symbol_table_endo_nbr = 0, const int Block_List_Max_Lag = 0, const int Block_List_Max_Lead = 0, const int u_count_int = 0);
+  bool simulate_a_block(const int size, const int type, string file_name, string bin_basename, bool Gaussian_Elimination, bool steady_state, int block_num,
+                        const bool is_linear = false, const int symbol_table_endo_nbr = 0, const int Block_List_Max_Lag = 0, const int Block_List_Max_Lead = 0, const int u_count_int = 0);
+  double *T;
+  vector<Block_contain_type> Block_Contain;
+  vector<pair<Tags, void * > > code_liste;
+  it_code_type it_code;
+  stack<double> Stack;
+  int Block_Count, Per_u_, Per_y_;
+  int it_, nb_row_x, nb_row_xd, maxit_, size_of_direction;
+  double *g1, *r;
+  double solve_tolf;
+  bool GaussSeidel;
+  double *x, *params;
+  double *steady_y, *steady_x;
+  map<pair<pair<int, int>, int>, int> IM_i;
+  int equation, derivative_equation, derivative_variable;
+  string filename;
+  int minimal_solving_periods;
+public:
 
-    Interpreter(double *params_arg, double *y_arg, double *ya_arg, double *x_arg, double *steady_y_arg, double *steady_x_arg,
-                double *direction_arg, int y_size_arg, int nb_row_x_arg,
-                int nb_row_xd_arg, int periods_arg, int y_kmin_arg, int y_kmax_arg, int maxit_arg_, double solve_tolf_arg, int size_o_direction_arg,
-                double slowc_arg, int y_decal_arg, double markowitz_c_arg, string &filename_arg, int minimal_solving_periods_arg);
-    bool compute_blocks(string file_name, string bin_basename, bool steady_state, bool evaluate);
+  Interpreter(double *params_arg, double *y_arg, double *ya_arg, double *x_arg, double *steady_y_arg, double *steady_x_arg,
+              double *direction_arg, int y_size_arg, int nb_row_x_arg,
+              int nb_row_xd_arg, int periods_arg, int y_kmin_arg, int y_kmax_arg, int maxit_arg_, double solve_tolf_arg, int size_o_direction_arg,
+              double slowc_arg, int y_decal_arg, double markowitz_c_arg, string &filename_arg, int minimal_solving_periods_arg);
+  bool compute_blocks(string file_name, string bin_basename, bool steady_state, bool evaluate);
 };
-
 
 #endif

@@ -30,77 +30,77 @@
 #define _DYNBLAS_H
 
 /* Starting from version 7.8, MATLAB BLAS expects ptrdiff_t arguments for integers */
-# if defined(MATLAB_MEX_FILE) && MATLAB_VERSION >= 0x0708
-#  ifdef __cplusplus
-#   include <cstdlib>
-#  else
-#   include <stdlib.h>
-#  endif
-typedef ptrdiff_t blas_int;
-# else
-typedef int blas_int;
-# endif
-
-# if defined(MATLAB_MEX_FILE) && defined(_WIN32)
-#  define FORTRAN_WRAPPER(x) x
-# else
-#  define FORTRAN_WRAPPER(x) x ## _
-# endif
-
+#if defined(MATLAB_MEX_FILE) && MATLAB_VERSION >= 0x0708
 # ifdef __cplusplus
-extern "C" {
+#  include <cstdlib>
+# else
+#  include <stdlib.h>
 # endif
+typedef ptrdiff_t blas_int;
+#else
+typedef int blas_int;
+#endif
+
+#if defined(MATLAB_MEX_FILE) && defined(_WIN32)
+# define FORTRAN_WRAPPER(x) x
+#else
+# define FORTRAN_WRAPPER(x) x ## _
+#endif
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
   typedef const char *BLCHAR;
   typedef const blas_int *CONST_BLINT;
   typedef const double *CONST_BLDOU;
   typedef double *BLDOU;
 
-# define dgemm FORTRAN_WRAPPER(dgemm)
+#define dgemm FORTRAN_WRAPPER(dgemm)
   void dgemm(BLCHAR transa, BLCHAR transb, CONST_BLINT m, CONST_BLINT n,
              CONST_BLINT k, CONST_BLDOU alpha, CONST_BLDOU a, CONST_BLINT lda,
              CONST_BLDOU b, CONST_BLINT ldb, CONST_BLDOU beta,
              BLDOU c, CONST_BLINT ldc);
 
-# define dgemv FORTRAN_WRAPPER(dgemv)
+#define dgemv FORTRAN_WRAPPER(dgemv)
   void dgemv(BLCHAR trans, CONST_BLINT m, CONST_BLINT n, CONST_BLDOU alpha,
              CONST_BLDOU a, CONST_BLINT lda, CONST_BLDOU x, CONST_BLINT incx,
              CONST_BLDOU beta, BLDOU y, CONST_BLINT incy);
 
-# define dtrsv FORTRAN_WRAPPER(dtrsv)
+#define dtrsv FORTRAN_WRAPPER(dtrsv)
   void dtrsv(BLCHAR uplo, BLCHAR trans, BLCHAR diag, CONST_BLINT n,
              CONST_BLDOU a, CONST_BLINT lda, BLDOU x, CONST_BLINT incx);
 
-# define dtrmv FORTRAN_WRAPPER(dtrmv)
+#define dtrmv FORTRAN_WRAPPER(dtrmv)
   void dtrmv(BLCHAR uplo, BLCHAR trans, BLCHAR diag, CONST_BLINT n,
              CONST_BLDOU a, CONST_BLINT lda, BLDOU x, CONST_BLINT incx);
 
-# define daxpy FORTRAN_WRAPPER(daxpy)
+#define daxpy FORTRAN_WRAPPER(daxpy)
   void daxpy(CONST_BLINT n, CONST_BLDOU a, CONST_BLDOU x, CONST_BLINT incx,
              BLDOU y, CONST_BLINT incy);
 
-# define dcopy FORTRAN_WRAPPER(dcopy)
+#define dcopy FORTRAN_WRAPPER(dcopy)
   void dcopy(CONST_BLINT n, CONST_BLDOU x, CONST_BLINT incx,
              BLDOU y, CONST_BLINT incy);
 
-# define zaxpy FORTRAN_WRAPPER(zaxpy)
+#define zaxpy FORTRAN_WRAPPER(zaxpy)
   void zaxpy(CONST_BLINT n, CONST_BLDOU a, CONST_BLDOU x, CONST_BLINT incx,
              BLDOU y, CONST_BLINT incy);
 
-# define dscal FORTRAN_WRAPPER(dscal)
+#define dscal FORTRAN_WRAPPER(dscal)
   void dscal(CONST_BLINT n, CONST_BLDOU a, BLDOU x, CONST_BLINT incx);
 
-# define dtrsm FORTRAN_WRAPPER(dtrsm)
+#define dtrsm FORTRAN_WRAPPER(dtrsm)
   void dtrsm(BLCHAR side, BLCHAR uplo, BLCHAR transa, BLCHAR diag, CONST_BLINT m,
              CONST_BLINT n, CONST_BLDOU alpha, CONST_BLDOU a, CONST_BLINT lda,
              BLDOU b, CONST_BLINT ldb);
 
-# define ddot FORTRAN_WRAPPER(ddot)
+#define ddot FORTRAN_WRAPPER(ddot)
   double ddot(CONST_BLINT n, CONST_BLDOU x, CONST_BLINT incx, CONST_BLDOU y,
               CONST_BLINT incy);
 
-# ifdef __cplusplus
+#ifdef __cplusplus
 } /* extern "C" */
-# endif
+#endif
 
 #endif /* _DYNBLAS_H */

@@ -16,82 +16,82 @@ function test_kron(test)
 %
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
+
+if ~nargin
+    test = 3;
+end
+
+
+if test == 1
     
-    if ~nargin
-        test = 3;
+    percentage_of_non_zero_elements = 10e-4;
+    NumberOfVariables = 549;%100;
+    NumberOfEquations = 256;%50
+    NumberOfColsInB   = 50 ; 
+    A = zeros(NumberOfEquations,NumberOfVariables^2);
+    for i = 1:NumberOfEquations
+        for j = 1:NumberOfVariables
+            for k = j:NumberOfVariables
+                if rand<percentage_of_non_zero_elements
+                    A(i,(j-1)*NumberOfVariables+k) = randn;
+                end
+            end
+            for h = j+1:NumberOfVariables
+                A(i,(h-1)*NumberOfVariables+j) = A(i,(j-1)*NumberOfVariables+h); 
+            end
+        end
     end
+    A = sparse(A);
+    B = randn(NumberOfVariables,NumberOfColsInB);
+    disp('')
+    disp('Computation of A*kron(B,B) with the mex file (v1):')
+    tic 
+    D1 = sparse_hessian_times_B_kronecker_C(A,B);
+    toc
     
+    disp('')
+    disp('Computation of A*kron(B,B) with the mex file (v2):')
+    tic 
+    D2 = sparse_hessian_times_B_kronecker_C(A,B,B);
+    toc
     
-    if test == 1
+    size(D1)
     
-        percentage_of_non_zero_elements = 10e-4;
-        NumberOfVariables = 549;%100;
-        NumberOfEquations = 256;%50
-        NumberOfColsInB   = 50 ; 
-        A = zeros(NumberOfEquations,NumberOfVariables^2);
-        for i = 1:NumberOfEquations
-            for j = 1:NumberOfVariables
-                for k = j:NumberOfVariables
-                    if rand<percentage_of_non_zero_elements
-                        A(i,(j-1)*NumberOfVariables+k) = randn;
-                    end
-                end
-                for h = j+1:NumberOfVariables
-                    A(i,(h-1)*NumberOfVariables+j) = A(i,(j-1)*NumberOfVariables+h); 
-                end
-            end
+    disp('');
+    disp(['Difference between D1 and D2 = ' num2str(max(max(abs(D1-D2))))]);
+    
+    return
+    disp(' ')
+    disp('Computation of A*kron(B,B) with two nested loops:')
+    tic
+    D3 = zeros(NumberOfEquations,NumberOfColsInB*NumberOfColsInB);
+    k = 1;
+    for i1 = 1:NumberOfColsInB
+        for i2 = 1:NumberOfColsInB
+            D3(:,k) = A*kron(B(:,i1),B(:,i2)); 
+            k = k+1;
         end
-        A = sparse(A);
-        B = randn(NumberOfVariables,NumberOfColsInB);
-        disp('')
-        disp('Computation of A*kron(B,B) with the mex file (v1):')
-        tic 
-            D1 = sparse_hessian_times_B_kronecker_C(A,B);
-        toc
-        
-        disp('')
-        disp('Computation of A*kron(B,B) with the mex file (v2):')
-        tic 
-            D2 = sparse_hessian_times_B_kronecker_C(A,B,B);
-        toc
-        
-        size(D1)
-        
-        disp('');
-        disp(['Difference between D1 and D2 = ' num2str(max(max(abs(D1-D2))))]);
-        
-        return
-        disp(' ')
-        disp('Computation of A*kron(B,B) with two nested loops:')
-        tic
-            D3 = zeros(NumberOfEquations,NumberOfColsInB*NumberOfColsInB);
-            k = 1;
-            for i1 = 1:NumberOfColsInB
-                for i2 = 1:NumberOfColsInB
-                    D3(:,k) = A*kron(B(:,i1),B(:,i2)); 
-                    k = k+1;
-                end
-            end
-        toc
-        disp('');
-        disp(['Difference between D1 and D3 = ' num2str(max(max(abs(D1-D3))))]);
+    end
+    toc
+    disp('');
+    disp(['Difference between D1 and D3 = ' num2str(max(max(abs(D1-D3))))]);
 
 
-        disp(' ')
-        disp('Direct computation of A*kron(B,B):')
-        tic
-            try
-                D4 = A*kron(B,B);
-                notest = 0;
-            catch
-                notest = 1;
-                disp('Out of memory')
-            end
-        toc
-        if ~notest
-            disp('');
-            disp(['Difference between D1 and D4 = ' num2str(max(max(abs(D1-D4))))]);        
-        end
+    disp(' ')
+    disp('Direct computation of A*kron(B,B):')
+    tic
+    try
+        D4 = A*kron(B,B);
+        notest = 0;
+    catch
+        notest = 1;
+        disp('Out of memory')
+    end
+    toc
+    if ~notest
+        disp('');
+        disp(['Difference between D1 and D4 = ' num2str(max(max(abs(D1-D4))))]);        
+    end
 end
 
 
@@ -113,13 +113,13 @@ if test > 1
     disp('')
     disp('Computation of A*kron(B,B) with the mex file (v1):')
     tic 
-        D1 = sparse_hessian_times_B_kronecker_C(hessian,zx);
+    D1 = sparse_hessian_times_B_kronecker_C(hessian,zx);
     toc
- 
+    
     disp('')
     disp('Computation of A*kron(B,B) with the mex file (v2):')
     tic 
-        D2 = sparse_hessian_times_B_kronecker_C(hessian,zx,zx);
+    D2 = sparse_hessian_times_B_kronecker_C(hessian,zx,zx);
     toc
     
     disp('');

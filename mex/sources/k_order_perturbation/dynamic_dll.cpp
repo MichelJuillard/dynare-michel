@@ -27,8 +27,8 @@
  * <model>_dynamic () function
  **************************************/
 DynamicModelDLL::DynamicModelDLL(const string &modName, const int y_length, const int j_cols,
-                                 const int n_max_lag, const int n_exog, const string &sExt) throw (DynareException)
-  : length(y_length), jcols(j_cols), nMax_lag(n_max_lag), nExog(n_exog)
+                                 const int n_max_lag, const int n_exog, const string &sExt) throw (DynareException) :
+  length(y_length), jcols(j_cols), nMax_lag(n_max_lag), nExog(n_exog)
 {
   string fName;
 #if !defined(__CYGWIN32__) && !defined(_WIN32)
@@ -42,12 +42,12 @@ DynamicModelDLL::DynamicModelDLL(const string &modName, const int y_length, cons
       dynamicHinstance = LoadLibrary(fName.c_str());
       if (dynamicHinstance == NULL)
         throw 1;
-      Dynamic = (DynamicFn)GetProcAddress(dynamicHinstance, "Dynamic");
+      Dynamic = (DynamicFn) GetProcAddress(dynamicHinstance, "Dynamic");
       if (Dynamic == NULL)
-	{
-	  FreeLibrary(dynamicHinstance); // Free the library
-	  throw 2;
-	}
+        {
+          FreeLibrary(dynamicHinstance); // Free the library
+          throw 2;
+        }
 #else // Linux or Mac
       dynamicHinstance = dlopen(fName.c_str(), RTLD_NOW);
       if ((dynamicHinstance == NULL) || dlerror())
@@ -58,7 +58,7 @@ DynamicModelDLL::DynamicModelDLL(const string &modName, const int y_length, cons
       Dynamic = (DynamicFn) dlsym(dynamicHinstance, "Dynamic");
       if ((Dynamic  == NULL) || dlerror())
         {
-	  dlclose(dynamicHinstance); // Free the library
+          dlclose(dynamicHinstance); // Free the library
           cerr << dlerror() << endl;
           throw 2;
         }
@@ -120,16 +120,16 @@ DynamicModelDLL::eval(const Vector &y, const TwoDMatrix &x, const  Vector *modPa
       dg1 = const_cast<double *>(g1->base());
     }
   if (g2 != NULL)
-      dg2 = const_cast<double *>(g2->base());
+    dg2 = const_cast<double *>(g2->base());
   dresidual = const_cast<double *>(residual.base());
   if (g3 != NULL)
-      dg3 = const_cast<double *>(g3->base());
+    dg3 = const_cast<double *>(g3->base());
   dresidual = const_cast<double *>(residual.base());
   double *dy = const_cast<double *>(y.base());
   double *dx = const_cast<double *>(x.base());
   double *dbParams = const_cast<double *>(modParams->base());
 
-      Dynamic(dy, dx, nExog, dbParams, it_, dresidual, dg1, dg2, dg3);
+  Dynamic(dy, dx, nExog, dbParams, it_, dresidual, dg1, dg2, dg3);
 }
 
 void

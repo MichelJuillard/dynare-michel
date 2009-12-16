@@ -36,9 +36,9 @@ if strcmpi('GLNX86', computer) || strcmpi('GLNXA64', computer) ...
 elseif strcmpi('PCWIN', computer) || strcmpi('PCWIN64', computer)
     % Windows (x86-32 or x86-64) with Microsoft or gcc compiler
     if strcmpi('PCWIN', computer)
-      LIBRARY_PATH = [MATLAB_PATH '/extern/lib/win32/microsoft/'];
+        LIBRARY_PATH = [MATLAB_PATH '/extern/lib/win32/microsoft/'];
     else
-      LIBRARY_PATH = [MATLAB_PATH '/extern/lib/win64/microsoft/'];
+        LIBRARY_PATH = [MATLAB_PATH '/extern/lib/win64/microsoft/'];
     end
     LAPACK_PATH = ['"' LIBRARY_PATH 'libmwlapack.lib"'];
     if matlab_ver_less_than('7.5')
@@ -59,7 +59,7 @@ COMPILE_OPTIONS = [ COMPILE_OPTIONS ' -DMATLAB_MEX_FILE -DMATLAB_VERSION=0x' spr
 
 % Large array dims for 64 bits platforms appeared in Matlab 7.3
 if (strcmpi('GLNXA64', computer) || strcmpi('PCWIN64', computer)) ...
-      && ~matlab_ver_less_than('7.3')
+        && ~matlab_ver_less_than('7.3')
     COMPILE_OPTIONS = [ COMPILE_OPTIONS ' -largeArrayDims' ];
 end
 

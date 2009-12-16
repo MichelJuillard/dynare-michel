@@ -20,16 +20,16 @@
 #ifndef _DYNMEX_H
 #define _DYNMEX_H
 
-# if !defined(MATLAB_MEX_FILE) && !defined(OCTAVE_MEX_FILE)
-#  error You must define either MATLAB_MEX_FILE or OCTAVE_MEX_FILE
-# endif
+#if !defined(MATLAB_MEX_FILE) && !defined(OCTAVE_MEX_FILE)
+# error You must define either MATLAB_MEX_FILE or OCTAVE_MEX_FILE
+#endif
 
-# include <mex.h>
+#include <mex.h>
 
 /* mwSize, mwIndex and mwSignedIndex appeared in MATLAB 7.3 */
-# if defined(MATLAB_MEX_FILE) && MATLAB_VERSION < 0x0703
+#if defined(MATLAB_MEX_FILE) && MATLAB_VERSION < 0x0703
 typedef int mwIndex;
 typedef int mwSize;
-# endif
+#endif
 
 #endif

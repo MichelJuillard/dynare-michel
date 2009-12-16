@@ -21,16 +21,16 @@
 
 Mem_Mngr::Mem_Mngr()
 {
-  swp_f=false;
-  swp_f_b=0;
+  swp_f = false;
+  swp_f_b = 0;
 }
 void
 Mem_Mngr::Print_heap()
 {
   int i;
   mexPrintf("i   :");
-  for (i=0;i<CHUNK_SIZE;i++)
-    mexPrintf("%3d ",i);
+  for (i = 0; i < CHUNK_SIZE; i++)
+    mexPrintf("%3d ", i);
   mexPrintf("\n");
 }
 
@@ -38,90 +38,89 @@ void
 Mem_Mngr::init_Mem()
 {
   Chunk_Stack.clear();
-  CHUNK_SIZE=0;
-  Nb_CHUNK=0;
-  NZE_Mem=NULL;
-  NZE_Mem_add=NULL;
-  CHUNK_heap_pos=0;
+  CHUNK_SIZE = 0;
+  Nb_CHUNK = 0;
+  NZE_Mem = NULL;
+  NZE_Mem_add = NULL;
+  CHUNK_heap_pos = 0;
   NZE_Mem_Allocated.clear();
 }
 
-void Mem_Mngr::fixe_file_name(string filename_arg)
+void
+Mem_Mngr::fixe_file_name(string filename_arg)
 {
-  filename=filename_arg;
+  filename = filename_arg;
 }
 
 void
 Mem_Mngr::init_CHUNK_BLCK_SIZE(int u_count)
 {
-  CHUNK_BLCK_SIZE=u_count;
+  CHUNK_BLCK_SIZE = u_count;
 }
 
-NonZeroElem*
+NonZeroElem *
 Mem_Mngr::mxMalloc_NZE()
 {
   long int i;
   if (!Chunk_Stack.empty())           /*An unused block of memory available inside the heap*/
     {
-      NonZeroElem* p1 = Chunk_Stack.back();
+      NonZeroElem *p1 = Chunk_Stack.back();
       Chunk_Stack.pop_back();
-      return(p1);
+      return (p1);
     }
-  else if (CHUNK_heap_pos<CHUNK_SIZE) /*there is enough allocated memory space available we keep it at the top of the heap*/
+  else if (CHUNK_heap_pos < CHUNK_SIZE) /*there is enough allocated memory space available we keep it at the top of the heap*/
     {
-      i=CHUNK_heap_pos++;
-      return(NZE_Mem_add[i]);
+      i = CHUNK_heap_pos++;
+      return (NZE_Mem_add[i]);
     }
   else                                /*We have to allocate extra memory space*/
     {
-      CHUNK_SIZE+=CHUNK_BLCK_SIZE;
+      CHUNK_SIZE += CHUNK_BLCK_SIZE;
       Nb_CHUNK++;
-      NZE_Mem=(NonZeroElem*)mxMalloc(CHUNK_BLCK_SIZE*sizeof(NonZeroElem));      /*The block of memory allocated*/
+      NZE_Mem = (NonZeroElem *) mxMalloc(CHUNK_BLCK_SIZE*sizeof(NonZeroElem));      /*The block of memory allocated*/
       NZE_Mem_Allocated.push_back(NZE_Mem);
-      if(!NZE_Mem)
+      if (!NZE_Mem)
         {
           mexPrintf("Not enough memory available\n");
           mexEvalString("drawnow;");
         }
-      NZE_Mem_add=(NonZeroElem**)mxRealloc(NZE_Mem_add, CHUNK_SIZE*sizeof(NonZeroElem*));   /*We have to redefine the size of pointer on the memory*/
-      if(!NZE_Mem_add)
+      NZE_Mem_add = (NonZeroElem **) mxRealloc(NZE_Mem_add, CHUNK_SIZE*sizeof(NonZeroElem *));   /*We have to redefine the size of pointer on the memory*/
+      if (!NZE_Mem_add)
         {
           mexPrintf("Not enough memory available\n");
           mexEvalString("drawnow;");
         }
-      for (i=CHUNK_heap_pos;i<CHUNK_SIZE;i++)
+      for (i = CHUNK_heap_pos; i < CHUNK_SIZE; i++)
         {
-          NZE_Mem_add[i]=(NonZeroElem*)(NZE_Mem+(i-CHUNK_heap_pos));
+          NZE_Mem_add[i] = (NonZeroElem *)(NZE_Mem+(i-CHUNK_heap_pos));
         }
-      i=CHUNK_heap_pos++;
-      return(NZE_Mem_add[i]);
+      i = CHUNK_heap_pos++;
+      return (NZE_Mem_add[i]);
     }
 }
 
-
 void
-Mem_Mngr::mxFree_NZE(void* pos)
+Mem_Mngr::mxFree_NZE(void *pos)
 {
   int i;
   size_t gap;
-  for (i=0;i<Nb_CHUNK;i++)
+  for (i = 0; i < Nb_CHUNK; i++)
     {
-      gap=((size_t)(pos)-(size_t)(NZE_Mem_add[i*CHUNK_BLCK_SIZE]))/sizeof(NonZeroElem);
-      if ((gap<CHUNK_BLCK_SIZE) && (gap>=0))
+      gap = ((size_t)(pos)-(size_t)(NZE_Mem_add[i*CHUNK_BLCK_SIZE]))/sizeof(NonZeroElem);
+      if ((gap < CHUNK_BLCK_SIZE) && (gap >= 0))
         break;
     }
-  Chunk_Stack.push_back((NonZeroElem*)pos);
+  Chunk_Stack.push_back((NonZeroElem *) pos);
 }
-
 
 void
 Mem_Mngr::Free_All()
 {
-	while(NZE_Mem_Allocated.size())
-	  {
-	  	mxFree(NZE_Mem_Allocated.back());
-	  	NZE_Mem_Allocated.pop_back();
-	  }
+  while (NZE_Mem_Allocated.size())
+    {
+      mxFree(NZE_Mem_Allocated.back());
+      NZE_Mem_Allocated.pop_back();
+    }
   mxFree(NZE_Mem_add);
   init_Mem();
 }

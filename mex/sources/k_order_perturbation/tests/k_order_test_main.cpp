@@ -81,7 +81,7 @@ main(int argc, char *argv[])
   const int nSteady = 16; //27 //31;//29, 16 (int)mxGetM(mxFldp);
   Vector *ySteady =  new Vector(dYSparams, nSteady);
 
-  double nnzd[3]={ 77,217,0};
+  double nnzd[3] = { 77, 217, 0};
   const Vector *NNZD =  new Vector(nnzd, 3);
 
   //mxFldp = mxGetField(dr, 0,"nstatic" );
@@ -111,7 +111,7 @@ main(int argc, char *argv[])
     = {
     5,   6,   8,  10,  11,  12,  14,   7,  13,   1,   2,   3,   4,   9,   15,  16
     //			 5,  6,  8, 10, 11, 12, 16,  7, 13, 14, 15,  1,  2,  3, 4,  9, 17, 18
-    };
+  };
   //Vector * varOrder =  new Vector(var_order, nEndo);
   vector<int> *var_order_vp = new vector<int>(nEndo); //nEndo));
   for (int v = 0; v < nEndo; v++)
@@ -135,7 +135,7 @@ main(int argc, char *argv[])
     0,  18,   0,
     0,  19,  26,
     0,  20,  27
-    };
+  };
   TwoDMatrix *llincidence = new TwoDMatrix(3, nEndo, ll_incidence);
 
   const int jcols = nExog+nEndo+nsPred+nsForw; // Num of Jacobian columns

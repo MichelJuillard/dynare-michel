@@ -18,24 +18,24 @@
  */
 
 /******************************************************
-   // k_order_perturbation.cpp : Defines the entry point for the k-order perturbation application DLL.
-   //
-   // called from Dynare dr1_k_order.m, (itself called form resol.m instead of regular dr1.m)
-   //            if options_.order < 2 % 1st order only
-   //                [ysteady, ghx_u]=k_order_perturbation(dr,task,M_,options_, oo_ , ['.' mexext]);
-   //            else % 2nd order
-   //                [ysteady, ghx_u, g_2]=k_order_perturbation(dr,task,M_,options_, oo_ , ['.' mexext]);
-   // inputs:
-   //			dr,		- Dynare structure
-   //			task,  - check or not, not used
-   //			M_		- Dynare structure
-   //			options_ - Dynare structure
-   //			oo_		- Dynare structure
-   //			['.' mexext] Matlab dll extension
-   // returns:
-   //			 ysteady steady state
-   //			ghx_u - first order rules packed in one matrix
-   //			g_2 - 2nd order rules packed in one matrix
+ // k_order_perturbation.cpp : Defines the entry point for the k-order perturbation application DLL.
+ //
+ // called from Dynare dr1_k_order.m, (itself called form resol.m instead of regular dr1.m)
+ //            if options_.order < 2 % 1st order only
+ //                [ysteady, ghx_u]=k_order_perturbation(dr,task,M_,options_, oo_ , ['.' mexext]);
+ //            else % 2nd order
+ //                [ysteady, ghx_u, g_2]=k_order_perturbation(dr,task,M_,options_, oo_ , ['.' mexext]);
+ // inputs:
+ //			dr,		- Dynare structure
+ //			task,  - check or not, not used
+ //			M_		- Dynare structure
+ //			options_ - Dynare structure
+ //			oo_		- Dynare structure
+ //			['.' mexext] Matlab dll extension
+ // returns:
+ //			 ysteady steady state
+ //			ghx_u - first order rules packed in one matrix
+ //			g_2 - 2nd order rules packed in one matrix
  **********************************************************/
 
 #include "k_ord_dynare.h"
@@ -84,7 +84,7 @@ DynareMxArrayToString(const char *cNamesCharStr, const int len, const int width)
 {
   char **cNamesMX;
   cNamesMX = (char **) calloc(len, sizeof(char *));
-  for(int i = 0; i < len; i++)
+  for (int i = 0; i < len; i++)
     cNamesMX[i] = (char *) calloc(width+1, sizeof(char));
 
   for (int i = 0; i < width; i++)
@@ -99,7 +99,7 @@ DynareMxArrayToString(const char *cNamesCharStr, const int len, const int width)
           else cNamesMX[j][i] = '\0';
         }
     }
-  return (const char **)cNamesMX;
+  return (const char **) cNamesMX;
 }
 
 //////////////////////////////////////////////////////
@@ -112,7 +112,7 @@ DynareMxArrayToString(const mxArray *mxFldp, const int len, const int width)
 {
   char *cNamesCharStr = mxArrayToString(mxFldp);
   const char **ret = DynareMxArrayToString(cNamesCharStr, len, width);
-  
+
   return ret;
 }
 
@@ -127,7 +127,7 @@ extern "C" {
       mexErrMsgTxt("Must have at least 5 input parameters.");
     if (nlhs == 0)
       mexErrMsgTxt("Must have at least 1 output parameter.");
- 
+
     const mxArray *dr = prhs[0];
     const int check_flag = (int) mxGetScalar(prhs[1]);
     const mxArray *M_ = prhs[2];
@@ -136,7 +136,7 @@ extern "C" {
 
     mxArray *mFname = mxGetField(M_, 0, "fname");
     if (!mxIsChar(mFname))
-        mexErrMsgTxt("Input must be of type char.");
+      mexErrMsgTxt("Input must be of type char.");
     string fName = mxArrayToString(mFname);
     const mxArray *mexExt = prhs[5];
     string dfExt = mxArrayToString(mexExt); //Dynamic file extension, e.g.".dll" or .mexw32;
@@ -147,12 +147,12 @@ extern "C" {
       kOrder = (int) mxGetScalar(mxFldp);
     else
       kOrder = 1;
-    
+
     if (kOrder == 1 && nlhs != 1)
       mexErrMsgTxt("k_order_perturbation at order 1 requires exactly 1 argument in output");
     else if (kOrder > 1 && nlhs != kOrder+1)
       mexErrMsgTxt("k_order_perturbation at order > 1 requires exactly order + 1 argument in output");
-    
+
     double qz_criterium = 1+1e-6;
     mxFldp = mxGetField(options_, 0, "qz_criterium");
     if (mxIsNumeric(mxFldp))
@@ -201,11 +201,11 @@ extern "C" {
     mxFldp      = mxGetField(dr, 0, "order_var");
     dparams = (double *) mxGetData(mxFldp);
     npar = (int) mxGetM(mxFldp);
-    if (npar != nEndo)    //(nPar != npar)
-        mexErrMsgTxt("Incorrect number of input var_order vars.");
+    if (npar != nEndo)                           //(nPar != npar)
+      mexErrMsgTxt("Incorrect number of input var_order vars.");
     vector<int> *var_order_vp = (new vector<int>(nEndo));
     for (int v = 0; v < nEndo; v++)
-        (*var_order_vp)[v] = (int)(*(dparams++));
+      (*var_order_vp)[v] = (int)(*(dparams++));
 
     // the lag, current and lead blocks of the jacobian respectively
     mxFldp      = mxGetField(M_, 0, "lead_lag_incidence");
@@ -213,15 +213,14 @@ extern "C" {
     npar = (int) mxGetN(mxFldp);
     int nrows = (int) mxGetM(mxFldp);
 
-
     TwoDMatrix *llincidence =  new TwoDMatrix(nrows, npar, dparams);
     if (npar != nEndo)
       mexErrMsgIdAndTxt("dynare:k_order_perturbation", "Incorrect length of lead lag incidences: ncol=%d != nEndo=%d.", npar, nEndo);
 
-    //get NNZH =NNZD(2) = the total number of non-zero Hessian elements 
+    //get NNZH =NNZD(2) = the total number of non-zero Hessian elements
     mxFldp = mxGetField(M_, 0, "NNZDerivatives");
     dparams = (double *) mxGetData(mxFldp);
-    Vector *NNZD =  new Vector (dparams, (int) mxGetM(mxFldp));
+    Vector *NNZD =  new Vector(dparams, (int) mxGetM(mxFldp));
 
     const int jcols = nExog+nEndo+nsPred+nsForw; // Num of Jacobian columns
 
@@ -235,7 +234,7 @@ extern "C" {
     const int widthExog = (int) mxGetN(mxFldp);
     const char **exoNamesMX = DynareMxArrayToString(mxFldp, nexo, widthExog);
 
-    if ((nEndo != nendo) || (nExog != nexo))    //(nPar != npar)
+    if ((nEndo != nendo) || (nExog != nexo))                                                 //(nPar != npar)
       mexErrMsgTxt("Incorrect number of input parameters.");
 
     /* Fetch time index */
@@ -259,11 +258,11 @@ extern "C" {
         // make KordpDynare object
         KordpDynare dynare(endoNamesMX,  nEndo, exoNamesMX,  nExog, nPar, // paramNames,
                            ySteady, vCov, modParams, nStat, nPred, nForw, nBoth,
-                           jcols, NNZD, nSteps, kOrder, journal, dynamicDLL, 
+                           jcols, NNZD, nSteps, kOrder, journal, dynamicDLL,
                            sstol, var_order_vp, llincidence, qz_criterium);
 
         // construct main K-order approximation class
- 
+
         Approximation app(dynare, journal,  nSteps, false, qz_criterium);
         // run stochastic steady
         app.walkStochSteady();
@@ -301,11 +300,11 @@ extern "C" {
         if (kOrder == 1)
           {
             /* Set the output pointer to the output matrix ysteady. */
-	    map<string, ConstTwoDMatrix>::const_iterator cit = mm.begin();
-	    ++cit;
+            map<string, ConstTwoDMatrix>::const_iterator cit = mm.begin();
+            ++cit;
             plhs[0] = mxCreateDoubleMatrix((*cit).second.numRows(), (*cit).second.numCols(), mxREAL);
-	    TwoDMatrix g((*cit).second.numRows(), (*cit).second.numCols(), mxGetPr(plhs[0]));
-	    g = (const TwoDMatrix &)(*cit).second;
+            TwoDMatrix g((*cit).second.numRows(), (*cit).second.numCols(), mxGetPr(plhs[0]));
+            g = (const TwoDMatrix &)(*cit).second;
           }
         if (kOrder >= 2)
           {

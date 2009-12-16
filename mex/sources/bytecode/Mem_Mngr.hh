@@ -20,47 +20,46 @@
 #ifndef MEM_MNGR_HH_INCLUDED
 #define MEM_MNGR_HH_INCLUDED
 
-
 #include <vector>
 #include <fstream>
 #ifndef DEBUG_EX
-  #include "mex.h"
+# include "mex.h"
 #else
-  #include "mex_interface.hh"
+# include "mex_interface.hh"
 #endif
 using namespace std;
 
 struct NonZeroElem
-  {
-    int u_index;
-    int r_index, c_index, lag_index;
-    NonZeroElem *NZE_R_N, *NZE_C_N;
-  };
+{
+  int u_index;
+  int r_index, c_index, lag_index;
+  NonZeroElem *NZE_R_N, *NZE_C_N;
+};
 
-typedef vector<NonZeroElem*> v_NonZeroElem;
+typedef vector<NonZeroElem *> v_NonZeroElem;
 
 class Mem_Mngr
 {
 public:
-    void Print_heap();
-    void init_Mem();
-    void mxFree_NZE(void* pos);
-    NonZeroElem* mxMalloc_NZE();
-    void init_CHUNK_BLCK_SIZE(int u_count);
-    void Free_All();
-    Mem_Mngr();
-    void fixe_file_name(string filename_arg);
-    bool swp_f;
+  void Print_heap();
+  void init_Mem();
+  void mxFree_NZE(void *pos);
+  NonZeroElem *mxMalloc_NZE();
+  void init_CHUNK_BLCK_SIZE(int u_count);
+  void Free_All();
+  Mem_Mngr();
+  void fixe_file_name(string filename_arg);
+  bool swp_f;
 private:
-    v_NonZeroElem Chunk_Stack;
-    int CHUNK_SIZE, CHUNK_BLCK_SIZE, Nb_CHUNK;
-    int CHUNK_heap_pos;
-    NonZeroElem** NZE_Mem_add;
-    NonZeroElem* NZE_Mem;
-    vector<NonZeroElem*> NZE_Mem_Allocated;
-    int swp_f_b;
-    fstream  SaveCode_swp;
-    string filename;
+  v_NonZeroElem Chunk_Stack;
+  int CHUNK_SIZE, CHUNK_BLCK_SIZE, Nb_CHUNK;
+  int CHUNK_heap_pos;
+  NonZeroElem **NZE_Mem_add;
+  NonZeroElem *NZE_Mem;
+  vector<NonZeroElem *> NZE_Mem_Allocated;
+  int swp_f_b;
+  fstream  SaveCode_swp;
+  string filename;
 };
 
 #endif

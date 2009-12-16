@@ -144,10 +144,10 @@ public:
   KordpDynare(const char **endo, int num_endo,
               const char **exo, int num_exo, int num_par,
               Vector *ySteady, TwoDMatrix *vCov, Vector *params, int nstat, int nPred,
-              int nforw, int nboth, const int nJcols, const Vector *NNZD, 
+              int nforw, int nboth, const int nJcols, const Vector *NNZD,
               const int nSteps, const int ord,
               Journal &jr, DynamicModelDLL &dynamicDLL, double sstol,
-              const vector<int> *varOrder, const TwoDMatrix *ll_Incidence, 
+              const vector<int> *varOrder, const TwoDMatrix *ll_Incidence,
               double qz_criterium) throw (TLException);
 
   /** Makes a deep copy of the object. */
@@ -291,8 +291,8 @@ class KordpVectorFunction : public ogu::VectorFunction
 protected:
   KordpDynare &d;
 public:
-  KordpVectorFunction(KordpDynare &dyn)
-    : d(dyn)
+  KordpVectorFunction(KordpDynare &dyn) :
+    d(dyn)
   {
   }
   virtual ~KordpVectorFunction()
