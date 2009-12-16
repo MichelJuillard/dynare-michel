@@ -11,7 +11,6 @@ nodist_bytecode_SOURCES = \
 	Interpreter.cc \
 	Mem_Mngr.cc \
 	SparseMatrix.cc \
-	bytecode.hh \
 	Interpreter.hh \
 	Mem_Mngr.hh \
 	SparseMatrix.hh

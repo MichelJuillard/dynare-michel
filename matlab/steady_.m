@@ -110,7 +110,7 @@ function steady_()
                                   ss(M_.blocksMFS{b}), ...
                                   options_.jacobian_flag, b);
         if check ~= 0
-          error('STEADY: convergence problems')
+          error(['STEADY: convergence problems in block ' int2str(b)])
         end
         ss(M_.blocksMFS{b}) = y;
       end

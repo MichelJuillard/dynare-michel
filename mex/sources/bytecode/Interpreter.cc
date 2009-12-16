@@ -21,8 +21,6 @@
 #include "Interpreter.hh"
 #define BIG 1.0e+8;
 #define SMALL 1.0e-5;
-//#define DEBUG
-
 
 Interpreter::Interpreter(double *params_arg, double *y_arg, double *ya_arg, double *x_arg, double *steady_y_arg, double *steady_x_arg,
                          double *direction_arg, int y_size_arg,
@@ -59,30 +57,12 @@ Interpreter::Interpreter(double *params_arg, double *y_arg, double *ya_arg, doub
 double
 Interpreter::pow1(double a, double b)
 {
-	/*double r;
-	if(a>=0)
-    r=pow_(a,b);
-	else
-	  {
-	     //r=0;
-	     //max_res=res1=res2=BIG;
-	     if(error_not_printed)
-	       {
-	         mexPrintf("Error: X^a with X<0\n");
-	         error_not_printed = false;
-	       }
-	     //r = BIG;
-	     //r = -pow_(-a, b);
-	     //r = 0;
-	     //r = SMALL;
-	     //r = pow_(-a, b);
-	  }*/
 	double r = pow_(a, b);
   if (isnan(r) || isinf(r))
     {
     	if(a<0 && error_not_printed)
 	       {
-	         mexPrintf("Error: X^a with X=%5.25f\n",a);
+	         mexPrintf("Error: X^a with X=%5.15f\n",a);
 	         error_not_printed = false;
 	         r = 0.0000000000000000000000001;
 	       }
@@ -96,30 +76,12 @@ Interpreter::pow1(double a, double b)
 double
 Interpreter::log1(double a)
 {
-	/*double r;
-	if(a>=0)
-    r=pow_(a,b);
-	else
-	  {
-	     //r=0;
-	     //max_res=res1=res2=BIG;
-	     if(error_not_printed)
-	       {
-	         mexPrintf("Error: X^a with X<0\n");
-	         error_not_printed = false;
-	       }
-	     //r = BIG;
-	     //r = -pow_(-a, b);
-	     //r = 0;
-	     //r = SMALL;
-	     //r = pow_(-a, b);
-	  }*/
 	double r = log(a);
   if (isnan(r) || isinf(r))
     {
     	if(a<=0 && error_not_printed)
 	       {
-	         mexPrintf("Error: log(X) with X<=0\n");
+	         mexPrintf("Error: log(X) with X=%5.15f\n",a);
 	         error_not_printed = false;
 	       }
       res1=NAN;
@@ -129,10 +91,8 @@ Interpreter::log1(double a)
     return r;
 }
 
-
-
 void
-Interpreter::compute_block_time(int Per_u_, bool evaluate, int block_num) /*throw(EvalException)*/
+Interpreter::compute_block_time(int Per_u_, bool evaluate, int block_num)
 {
   int var, lag = 0, op;
   ostringstream tmp_out;
@@ -161,9 +121,7 @@ Interpreter::compute_block_time(int Per_u_, bool evaluate, int block_num) /*thro
                     Stack.push(ya[(it_+lag)*y_size+var]);
                   else
                     {
-                    /*mexPrintf(" y[%d, %d]=",(it_+lag)*y_size, var );
-                    mexPrintf("%f\n",y[(it_+lag)*y_size+var]);*/
-                    Stack.push(y[(it_+lag)*y_size+var]);
+                      Stack.push(y[(it_+lag)*y_size+var]);
                     }
 #ifdef DEBUG
                   tmp_out << " y[" << it_+lag << ", " << var << "](" << y[(it_+lag)*y_size+var] << ")";
@@ -175,7 +133,6 @@ Interpreter::compute_block_time(int Per_u_, bool evaluate, int block_num) /*thro
                   Stack.push(x[it_+lag+var*nb_row_x]);
 #ifdef DEBUG
                   tmp_out << " x[" << it_+lag << ", " << var << "](" << x[it_+lag+var*nb_row_x] << ")";
-                  //mexPrintf(" x[%d, %d](%f)\n", it_+lag, var, x[it_+lag+var*nb_row_x]);
 #endif
                   break;
                 case eExogenousDet :
@@ -681,7 +638,6 @@ Interpreter::compute_block_time(int Per_u_, bool evaluate, int block_num) /*thro
 #endif
                   break;
                 default:
-                  /*throw EvalException();*/
                   ;
               }
             break;
@@ -703,14 +659,12 @@ Interpreter::compute_block_time(int Per_u_, bool evaluate, int block_num) /*thro
             if (Stack.size()>0)
               {
                 mexPrintf("error: Stack not empty!\n");
-                mexEvalString("st=fclose('all');clear all;");
-                mexErrMsgTxt("End of simulate");
+                mexErrMsgTxt("End of bytecode");
               }
             break;
           default :
             mexPrintf("Unknown opcode %d!! FENDEQU=%d\n",it_code->first,FENDEQU);
-            mexEvalString("st=fclose('all');clear all;");
-            mexErrMsgTxt("End of simulate");
+            mexErrMsgTxt("End of bytecode");
             break;
         }
       it_code++;
@@ -964,8 +918,7 @@ Interpreter::simulate_a_block(const int size, const int type, string file_name, 
                 if (!cvg)
                   {
                     mexPrintf("Convergence not achieved in block %d, at time %d after %d iterations\n",Block_Count,it_,iter);
-                    mexEvalString("st=fclose('all');clear all;");
-                    mexErrMsgTxt("End of simulate");
+                    mexErrMsgTxt("End of bytecode");
                   }
 							}
           }
@@ -1025,8 +978,7 @@ Interpreter::simulate_a_block(const int size, const int type, string file_name, 
                 if (!cvg)
                   {
                     mexPrintf("Convergence not achieved in block %d, at time %d after %d iterations\n",Block_Count,it_,iter);
-                    mexEvalString("st=fclose('all');clear all;");
-                    mexErrMsgTxt("End of simulate");
+                    mexErrMsgTxt("End of bytecode");
                  }
               }
 				  }
@@ -1080,7 +1032,7 @@ Interpreter::simulate_a_block(const int size, const int type, string file_name, 
                   }
                 if (!cvg)
                   {
-                    mexPrintf("Convergence not achieved in block %d, at time %d after %d iterations\n", Block_Count, it_, iter);
+                    mexPrintf("Convergence not achieved in block %d, after %d iterations\n", Block_Count, iter);
                     return false;
                   }
               }
@@ -1143,8 +1095,7 @@ Interpreter::simulate_a_block(const int size, const int type, string file_name, 
                     if (!cvg)
                       {
                         mexPrintf("Convergence not achieved in block %d, at time %d after %d iterations\n", Block_Count, it_, iter);
-                        mexEvalString("st=fclose('all');clear all;");
-                        mexErrMsgTxt("End of simulate");
+                        mexErrMsgTxt("End of bytecode");
                       }
                   }
               }
@@ -1216,7 +1167,7 @@ Interpreter::simulate_a_block(const int size, const int type, string file_name, 
                   }
                 if (!cvg)
                   {
-                    mexPrintf("Convergence not achieved in block %d, at time %d after %d iterations\n", Block_Count, it_, iter);
+                    mexPrintf("Convergence not achieved in block %d, after %d iterations\n", Block_Count, iter);
                     return false;
                   }
               }
@@ -1279,8 +1230,7 @@ Interpreter::simulate_a_block(const int size, const int type, string file_name, 
                     if (!cvg)
                       {
                         mexPrintf("Convergence not achieved in block %d, at time %d after %d iterations\n", Block_Count, it_, iter);
-                        mexEvalString("st=fclose('all');clear all;");
-                        mexErrMsgTxt("End of simulate");
+                        mexErrMsgTxt("End of bytecode");
                       }
                   }
               }
@@ -1364,8 +1314,6 @@ Interpreter::simulate_a_block(const int size, const int type, string file_name, 
 								  cvg = false;
 								else
                   cvg=(max_res<solve_tolf);
-                /*if(cvg)
-                  continue;*/
                 u_count=u_count_saved;
                 simulate_NG1(Block_Count, symbol_table_endo_nbr, it_, y_kmin, y_kmax, size, periods, true, cvg, iter, minimal_solving_periods);
                 iter++;
@@ -1373,8 +1321,7 @@ Interpreter::simulate_a_block(const int size, const int type, string file_name, 
             if (!cvg)
               {
                 mexPrintf("Convergence not achieved in block %d, after %d iterations\n",Block_Count, iter);
-                mexEvalString("st=fclose('all');clear all;");
-                mexErrMsgTxt("End of simulate");
+                mexErrMsgTxt("End of bytecode");
               }
           }
         else
@@ -1411,9 +1358,8 @@ Interpreter::simulate_a_block(const int size, const int type, string file_name, 
         break;
       default:
         mexPrintf("Unknown type =%d\n",type);
-        mexEvalString("st=fclose('all');clear all;");
         mexEvalString("drawnow;");
-        mexErrMsgTxt("End of simulate");
+        mexErrMsgTxt("End of bytecode");
     }
 	return true;
 }
@@ -1436,7 +1382,6 @@ Interpreter::compute_blocks(string file_name, string bin_basename, bool steady_s
     {
       mexPrintf("%s.cod Cannot be opened\n",file_name.c_str());
       mexEvalString("drawnow;");
-      mexEvalString("st=fclose('all');clear all;");
       filename+=" stopped";
       mexEvalString("drawnow;");
       mexErrMsgTxt(filename.c_str());
@@ -1500,9 +1445,8 @@ Interpreter::compute_blocks(string file_name, string bin_basename, bool steady_s
             break;
           default :
             mexPrintf("Unknown command \n");
-            mexEvalString("st=fclose('all');clear all;");
             mexEvalString("drawnow;");
-            mexErrMsgTxt("End of simulate");
+            mexErrMsgTxt("End of bytecode");
             break;
         }
     }

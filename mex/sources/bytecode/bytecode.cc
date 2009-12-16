@@ -1,5 +1,5 @@
- /*
- * Copyright (C) 2007-2008 Dynare Team
+/*
+ * Copyright (C) 2007-2009 Dynare Team
  *
  * This file is part of Dynare.
  *
@@ -20,36 +20,27 @@
 ////////////////////////////////////////////////////////////////////////
 //                           simulate.cc                              //
 //              simulate file designed for GNU GCC C++ compiler       //
-//                 use NO_COMPILER option in MODEL command            //
 ////////////////////////////////////////////////////////////////////////
 
 #include <cstring>
-#include "bytecode.hh"
+
 #include "Interpreter.hh"
+#ifndef DEBUG_EX
+  #include "mex.h"
+#else
+  #include "mex_interface.hh"
+#endif
+
 #include "Mem_Mngr.hh"
-
-
-
-int
-max(int a, int b)
-{
-  if (a>b)
-    return(a);
-  else
-    return(b);
-}
-
 
 
 #ifdef DEBUG_EX
 
 using namespace std;
 #include <sstream>
-#include "mex_interface.hh"
 string
 Get_Argument(const char *argv)
 {
-  //mexPrintf("number=%d\n",number);
   string f(argv);
   return f;
 }
@@ -211,7 +202,6 @@ main( int argc, const char* argv[] )
 string
 Get_Argument(const mxArray *prhs)
 {
-  //mexPrintf("number=%d\n",number);
   const mxArray *mxa = prhs;
   int buflen=mxGetM(mxa) * mxGetN(mxa) + 1;
   char *first_argument;
@@ -223,6 +213,7 @@ Get_Argument(const mxArray *prhs)
   mxFree(first_argument);
   return f;
 }
+
 /* The gateway routine */
 void
 mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
@@ -246,7 +237,6 @@ mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
       else
         {
           mexPrintf("Unknown argument : ");
-          mexEvalString("st=fclose('all');clear all;");
           string f;
           f = Get_Argument(prhs[i]);
           f.append("\n");
@@ -257,7 +247,6 @@ mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
   if (M_ == NULL )
     {
       mexPrintf("Global variable not found : ");
-      mexEvalString("st=fclose('all');clear all;");
       mexErrMsgTxt("M_ \n");
     }
   /* Gets variables and parameters from global workspace of Matlab */
@@ -265,17 +254,14 @@ mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
   if (oo_ == NULL )
     {
       mexPrintf("Global variable not found : ");
-      mexEvalString("st=fclose('all');clear all;");
       mexErrMsgTxt("oo_ \n");
     }
   options_ = mexGetVariable("global","options_");
   if (options_ == NULL )
     {
       mexPrintf("Global variable not found : ");
-      mexEvalString("st=fclose('all');clear all;");
       mexErrMsgTxt("options_ \n");
     }
-  //mexPrintf("ok0\n");
   double * params = mxGetPr(mxGetFieldByNumber(M_, 0, mxGetFieldNumber(M_,"params")));
   double *yd, *xd , *steady_yd = NULL, *steady_xd = NULL;
   if(!steady_state)
@@ -346,9 +332,7 @@ mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
   int y_size=row_y;
   int nb_row_x=row_x;
 
-  /*int it_ = y_kmin;
-  for (int j = 0; j < y_size; j++)
-		mexPrintf("   variable %d at time %d and %d = %f\n", j+1, it_, it_+1, y[j+it_*y_size]);*/
+
   clock_t t0= clock();
   Interpreter interprete(params, y, ya, x, steady_yd, steady_xd, direction, y_size, nb_row_x, nb_row_xd, periods, y_kmin, y_kmax, maxit_, solve_tolf, size_of_direction, slowc, y_decal, markowitz_c, file_name, minimal_solving_periods);
   string f(fname);

@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
  */
-//#include "stdint.h"
+
 #include "Mem_Mngr.hh"
 
 Mem_Mngr::Mem_Mngr()
@@ -74,7 +74,6 @@ Mem_Mngr::mxMalloc_NZE()
     }
   else                                /*We have to allocate extra memory space*/
     {
-    	//mexPrintf("CHUNK_SIZE=%d CHUNK_BLCK_SIZE=%d Nb_CHUNK=%d\n",CHUNK_SIZE,CHUNK_BLCK_SIZE,Nb_CHUNK);
       CHUNK_SIZE+=CHUNK_BLCK_SIZE;
       Nb_CHUNK++;
       NZE_Mem=(NonZeroElem*)mxMalloc(CHUNK_BLCK_SIZE*sizeof(NonZeroElem));      /*The block of memory allocated*/

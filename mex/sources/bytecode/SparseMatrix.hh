@@ -135,7 +135,6 @@ class SparseMatrix
 #endif
     );
     double simple_bksub(int it_, int Size, double slowc_l);
-    /*void close_swp_file();*/
     stack<double> Stack;
     int nb_prologue_table_u, nb_first_table_u, nb_middle_table_u, nb_last_table_u;
     int nb_prologue_table_y, nb_first_table_y, nb_middle_table_y, nb_last_table_y;
@@ -172,7 +171,6 @@ protected:
     double res1, res2, max_res, max_res_idx;
     double slowc, slowc_save, markowitz_c;
     int y_kmin, y_kmax, y_size, periods, y_decal;
-//public:
     int  *index_vara, *index_equa;
     int u_count, tbreak_g;
     int iter;

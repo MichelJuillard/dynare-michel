@@ -25,7 +25,7 @@ function model_info;
    nb_blocks=length(M_.block_structure.block);
    fprintf('The model has %d equations and is decomposed in %d blocks as follow:\n',M_.endo_nbr,nb_blocks);
    fprintf('===============================================================================================================\n');
-   fprintf('| %10s | %10s | %30s | %14s | %31s |\n','Block n°','Size','Block Type','E   quation','Dependent variable');
+   fprintf('| %10s | %10s | %30s | %14s | %31s |\n','Block no','Size','Block Type','   Equation','Dependent variable');
    fprintf('|============|============|================================|================|=================================|\n');
    for i=1:nb_blocks
        size_block=length(M_.block_structure.block(i).equation);
@@ -44,7 +44,7 @@ function model_info;
    fprintf('\n');
    for k=1:M_.maximum_endo_lag+M_.maximum_endo_lead+1
        if(k==M_.maximum_endo_lag+1)
-         fprintf('%-30s %s','the variable','is used in equations contemporously');
+         fprintf('%-30s %s','the variable','is used in equations ontemporaneously');
        elseif(k<M_.maximum_endo_lag+1)
          fprintf('%-30s %s %d','the variable','is used in equations with lag ',M_.maximum_endo_lag+1-k);
        else
