@@ -854,6 +854,29 @@ Inside the model block, Dynare allows the creation of <emphasis>model-local vari
       <term><option>use_dll</option></term>
       <listitem><para>Instructs the preprocessor to create dynamic loadable libraries (DLL) containing the model equations and derivatives, instead of writing those in <filename class="extension">M</filename>-files. You need a working compilation environment, <foreignphrase>i.e.</foreignphrase> a working <literal>mex</literal> command (see <xref linkend="software-requirements"/> for more details). Using this option can result in faster simulations or estimations, at the expense of some initial compilation time.<footnote><para>In particular, for big models, the compilation step can be very time-consuming, and use of this option may be counter-productive in those cases.</para></footnote></para></listitem>
     </varlistentry>
+    <varlistentry id="block">
+      <term><option>block</option></term>
+      <listitem><para>Perform the block decomposition of the model, and exploit it in computations. See <ulink url="http://www.dynare.org/DynareWiki/FastDeterministicSimulationAndSteadyStateComputation">Dynare wiki</ulink> for details on the algorithm.</para></listitem>
+    </varlistentry>
+    <varlistentry id="bytecode">
+      <term><option>bytecode</option></term>
+      <listitem><para>Instead of M-files, use a bytecode representation of the model, <foreignphrase>i.e.</foreignphrase> a binary file containing a compact representation of all the equations.</para></listitem>
+    </varlistentry>
+    <varlistentry>
+      <term><option>cutoff</option> = <replaceable>DOUBLE</replaceable></term>
+      <listitem><para>Threshold under which a jacobian element is considered as null during the model normalization. Only available with option <option>block</option>. Default: <literal>1e-15</literal></para></listitem>
+    </varlistentry>
+    <varlistentry>
+      <term><option>mfs</option> = <replaceable>INTEGER</replaceable></term>
+      <listitem><para>Controls the handling of minimum feedback set of endogenous variables. Only available with option <option>block</option>. Possible values:
+      <itemizedlist>
+        <listitem><para><literal>0</literal>: all the endogenous variables are considered as feedback variables (Default).</para></listitem>
+        <listitem><para><literal>1</literal>: the endogenous variables assigned to equation naturally normalized (<foreignphrase>i.e.</foreignphrase> of the form <literal>x=f(Y)</literal> where <literal>x</literal> does not appear in <literal>Y</literal>) are potentially recursive variables. All the other variables are forced to belong to the set of feedback variables.</para></listitem>
+        <listitem><para><literal>2</literal>: in addition of variables with <literal>mfs = 1</literal> the endogenous variables related to linear equations which could be normalized are potential recursive variables. All the other variables are forced to belong to the set of feedback variables.</para></listitem>
+        <listitem><para><literal>3</literal>: in addition of variables with <literal>mfs = 2</literal> the endogenous variables related to non-linear equations which could be normalized are potential recursive variables. All the other variables are forced to belong to the set of feedback variables.</para></listitem>
+      </itemizedlist>
+</para></listitem>
+    </varlistentry>
   </variablelist>
 </refsect1>
 
@@ -1549,6 +1572,7 @@ Dynare has special commands for the computation of the static equilibrium of the
 <listitem><para><xref linkend='steady'/></para></listitem>
 <listitem><para><xref linkend='homotopy_setup'/></para></listitem>
 <listitem><para><xref linkend='check'/></para></listitem>
+<listitem><para><xref linkend='model_info'/></para></listitem>
 <listitem><para><xref linkend='simul'/></para></listitem>
 <listitem><para><xref linkend='stoch_simul'/></para></listitem>
 </itemizedlist>
@@ -1581,6 +1605,7 @@ Dynare has special commands for the computation of the static equilibrium of the
         <listitem><para><literal>2</literal>: splits the model into recursive blocks and solves each block in turn</para></listitem>
         <listitem><para><literal>3</literal>: Chris Sims' solver</para></listitem>
         <listitem><para><literal>4</literal>: similar to value <literal>2</literal>, except that it deals differently with nearly singular Jacobian</para></listitem>
+        <listitem><para><literal>5</literal>: Newton algorithm with a sparse Gaussian elimination (SPE)</para></listitem>
       </itemizedlist>
       Default value is <literal>2</literal>.
     </para></listitem>
@@ -1738,6 +1763,43 @@ A necessary condition for the uniqueness of a stable equilibrium in the neighbor
 </refsect1>
 </refentry>
 
+<refentry id="model_info">
+  <refmeta>
+    <refentrytitle>model_info</refentrytitle>
+  </refmeta>
+
+  <refnamediv>
+    <refname>model_info</refname>
+    <refpurpose>Display the block structure of the model</refpurpose>
+  </refnamediv>
+
+  <refsynopsisdiv>
+    <cmdsynopsis>
+      <command>model_info</command>
+      <arg choice="plain">;</arg>
+    </cmdsynopsis>
+  </refsynopsisdiv>
+
+<refsect1><title>Description</title>
+<para>The <command>model_info</command> command provides information about:
+<itemizedlist>
+<listitem><para>the normalization of the model: an endogenous variable is attributed to each equation of the model;</para></listitem>
+<listitem><para>the block structure of the model: for each block model_info indicates its type, the equations number and endogenous variables belonging to this block.</para></listitem>
+</itemizedlist>
+</para>
+
+<para>There are five different types of blocks depending on the simulation method used:
+<itemizedlist>
+  <listitem><para>EVALUATE FORWARD: in this case the block contains only equations where endogenous variable attributed to the equation appears currently on the left hand side and where no forward looking endogenous variables appear. y<subscript>j,t</subscript> = f<subscript>j</subscript>(y<subscript>t</subscript>, y<subscript>t-1</subscript>, ..., y<subscript>t-k</subscript>)</para></listitem>
+  <listitem><para>EVALUATE BACKWARD: the block contains only equations where endogenous variable attributed to the equation appears currently on the left hand side and where no backward looking endogenous variables appear. y<subscript>j,t</subscript> = f<subscript>j</subscript>(y<subscript>t</subscript>, y<subscript>t+1</subscript>, ..., y<subscript>t+k</subscript>)</para></listitem>
+  <listitem><para>SOLVE FORWARD <replaceable>x</replaceable>: the block contains only equations where endogenous variable attributed to the equation does not appear currently on the left hand side and where no forward looking endogenous variables appear. g<subscript>j</subscript>(y<subscript>j,t</subscript>, y<subscript>t</subscript>, y<subscript>t-1</subscript>, ..., y<subscript>t-k</subscript>) =0. <replaceable>x</replaceable> is equal to SIMPLE if the block has only one equation. If several equation appears in the block, <replaceable>x</replaceable> is equal to COMPLETE.</para></listitem>
+  <listitem><para>SOLVE FORWARD <replaceable>x</replaceable>: the block contains only equations where endogenous variable attributed to the equation does not appear currently on the left hand side and where no backward looking endogenous variables appear. g<subscript>j</subscript>(y<subscript>j,t</subscript>, y<subscript>t</subscript>, y<subscript>t+1</subscript>, ..., y<subscript>t+k</subscript>) =0. <replaceable>x</replaceable> is equal to SIMPLE if the block has only one equation. If several equation appears in the block, <replaceable>x</replaceable> is equal to COMPLETE.</para></listitem>
+  <listitem><para>SOLVE TWO BOUNDARIES <replaceable>x</replaceable>: the block contains equations depending on both forward and backward variables. g<subscript>j</subscript>(y<subscript>j,t</subscript>, y<subscript>t</subscript>, y<subscript>t-1</subscript>, ..., y<subscript>t-k</subscript> ,y<subscript>t</subscript>, y<subscript>t+1</subscript>, ..., y<subscript>t+k</subscript>) =0. <replaceable>x</replaceable> is equal to SIMPLE if the block has only one equation. If several equation appears in the block, <replaceable>x</replaceable> is equal to COMPLETE.</para></listitem>
+</itemizedlist>
+</para>
+</refsect1>
+</refentry>
+
 <refentry id="simul">
   <refmeta>
     <refentrytitle>simul</refentrytitle>
@@ -1751,16 +1813,51 @@ A necessary condition for the uniqueness of a stable equilibrium in the neighbor
   <refsynopsisdiv>
     <cmdsynopsis>
       <command>simul</command>
-      <arg>(<option>periods</option>=<replaceable>INTEGER</replaceable>)
-      </arg><arg choice="plain">;</arg>
+      <arg>(<replaceable>OPTION</replaceable><arg rep="repeat">, <replaceable>OPTION</replaceable></arg>)</arg>
+      <arg choice="plain">;</arg>
     </cmdsynopsis>
   </refsynopsisdiv>
 
   <refsect1><title>Description</title>
   <para>
-    Triggers the computation of a deterministic simulation of the model for the number of periods set in the option <option>periods</option>. <command>simul</command> uses a Newton method to solve simultaneously all the equations for every period (see <xref linkend="juillard_1996"/>).
+    Triggers the computation of a deterministic simulation of the model for the number of periods set in the option <option>periods</option>. <command>simul</command> uses a 
   </para>
   </refsect1>
+
+<refsect1><title>Options</title>
+<variablelist>
+  <varlistentry>
+    <term><option>periods</option> = <replaceable>INTEGER</replaceable></term>
+    <listitem><para>Number of periods of the simulation</para></listitem>
+  </varlistentry>
+  <varlistentry>
+    <term><option>stack_solve_algo</option> = <replaceable>INTEGER</replaceable></term>
+    <listitem><para>Algorithm used for computing the solution. Possible values are:
+    <itemizedlist>
+      <listitem><para><literal>0</literal>: Newton method to solve simultaneously all the equations for every period, see <xref linkend="juillard_1996"/>. (Default)</para></listitem>
+      <listitem><para><literal>1</literal>: use a Newton algorithm with a sparse LU solver at each iteration.</para></listitem>
+      <listitem><para><literal>2</literal>: use a Newton algorithm with a Generalized Minimal Residual (GMRES) solver at each iteration.</para></listitem>
+      <listitem><para><literal>3</literal>: use a Newton algorithm with a Stabilized Bi-Conjugate Gradient (BICGSTAB) solver at each iteration.</para></listitem>
+      <listitem><para><literal>4</literal>: use a Newton algorithm with a optimal path length at each iteration.</para></listitem>
+      <listitem><para><literal>5</literal>: use a Newton algorithm with a sparse Gaussian elimination (SPE) solver at each iteration.</para></listitem>
+    </itemizedlist>
+    </para></listitem>
+  </varlistentry>
+  <varlistentry>
+    <term><option>markowitz</option> = <replaceable>DOUBLE</replaceable></term>
+    <listitem><para>Value of the Markowitz criterion, used to select the pivot. Only used when <option>stack_solve_algo</option> = 5. Default: <literal>0.5</literal></para></listitem>
+  </varlistentry>
+  <varlistentry>
+    <term><option>minimal_solving_periods</option> = <replaceable>INTEGER</replaceable></term>
+    <listitem><para>Specify the minimal number of periods where the model has to be solved, before using a constant set of operations for the remaining periods. Only used when <option>stack_solve_algo</option> = 5. Default: <literal>1</literal></para></listitem>
+  </varlistentry>
+  <varlistentry>
+    <term><option>datafile</option> = <replaceable>FILENAME</replaceable></term>
+    <listitem><para>If the variables of the model are not constant over time, their initial values, stored in a text file, could be loaded, using that option, as initial values before a deteministic simulation.</para></listitem>
+  </varlistentry>
+</variablelist>
+</refsect1>
+
 <refsect1><title>Output variables</title>
 <para>
 The simulated endogenous variables are available in global matrix <varname>oo_.endo_simul</varname>. The variables are arranged row by row, in order of declaration (as in <varname>M_.endo_names</varname>). Note that this variable also contains initial and terminal conditions, so it has more columns than the value of <option>periods</option> option.
