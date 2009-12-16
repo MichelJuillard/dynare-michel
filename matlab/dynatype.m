@@ -35,24 +35,24 @@ global M_ oo_
 fid=fopen(s,'w') ;
 
 if size(var_list,1) == 0
-  var_list = M_.endo_names(1:M_.orig_endo_nbr,:);
+    var_list = M_.endo_names(1:M_.orig_endo_nbr,:);
 end
 
 n = size(var_list,1);
-  ivar=zeros(n,1);
-  for i=1:n
+ivar=zeros(n,1);
+for i=1:n
     i_tmp = strmatch(var_list(i,:),M_.endo_names,'exact');
     if isempty(i_tmp)
-      error (['One of the specified variables does not exist']) ;
+        error (['One of the specified variables does not exist']) ;
     else
-      ivar(i) = i_tmp;
+        ivar(i) = i_tmp;
     end
-  end
+end
 
 for i = 1:n
-	fprintf(fid,M_.endo_names(ivar(i),:),'\n') ;
-	fprintf(fid,'\n') ;
-	fprintf(fid,'%15.8g\n',oo_.endo_simul(ivar(i),:)') ;
+    fprintf(fid,M_.endo_names(ivar(i),:),'\n') ;
+    fprintf(fid,'\n') ;
+    fprintf(fid,'%15.8g\n',oo_.endo_simul(ivar(i),:)') ;
 end
 fclose(fid) ;
 

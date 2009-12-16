@@ -21,20 +21,20 @@ function [pdraws, TAU, GAM, H, JJ] = dynare_identification(options_ident, pdraws
 
 global M_ options_ oo_ bayestopt_ estim_params_
 
-  options_ident = set_default_option(options_ident,'load_ident_files',0);
-  options_ident = set_default_option(options_ident,'useautocorr',1);
-  options_ident = set_default_option(options_ident,'ar',3);
-  options_ident = set_default_option(options_ident,'prior_mc',2000);
-  if nargin==2,
+options_ident = set_default_option(options_ident,'load_ident_files',0);
+options_ident = set_default_option(options_ident,'useautocorr',1);
+options_ident = set_default_option(options_ident,'ar',3);
+options_ident = set_default_option(options_ident,'prior_mc',2000);
+if nargin==2,
     options_ident.prior_mc=size(pdraws0,1);
-  end
+end
 
-  iload = options_ident.load_ident_files;
-  nlags = options_ident.ar;
-  useautocorr = options_ident.useautocorr;
-  options_.ar=nlags;
-  options_.prior_mc = options_ident.prior_mc;
-  options_.options_ident = options_ident;
+iload = options_ident.load_ident_files;
+nlags = options_ident.ar;
+useautocorr = options_ident.useautocorr;
+options_.ar=nlags;
+options_.prior_mc = options_ident.prior_mc;
+options_.options_ident = options_ident;
 
 
 options_ = set_default_option(options_,'datafile',[]);
@@ -51,8 +51,8 @@ SampleSize = options_ident.prior_mc;
 prior_draw(1,bayestopt_);
 if ~(exist('sylvester3mr','file')==2),
 
-dynareroot = strrep(which('dynare'),'dynare.m','');
-addpath([dynareroot 'gensylv'])
+    dynareroot = strrep(which('dynare'),'dynare.m','');
+    addpath([dynareroot 'gensylv'])
 end
 
 IdentifDirectoryName = CheckPath('identification');
@@ -60,161 +60,161 @@ IdentifDirectoryName = CheckPath('identification');
 indx = estim_params_.param_vals(:,1);
 indexo=[];
 if ~isempty(estim_params_.var_exo)
-  indexo = estim_params_.var_exo(:,1);
+    indexo = estim_params_.var_exo(:,1);
 end
 
 nparam = length(bayestopt_.name);
 
 MaxNumberOfBytes=options_.MaxNumberOfBytes;
-           
-             
+
+
 if iload <=0, 
-  
-iteration = 0;
-burnin_iteration = 0;
-loop_indx = 0;
-file_index = 0;
-run_index = 0;
+    
+    iteration = 0;
+    burnin_iteration = 0;
+    loop_indx = 0;
+    file_index = 0;
+    run_index = 0;
 
-h = waitbar(0,'Monte Carlo identification checks ...');
+    h = waitbar(0,'Monte Carlo identification checks ...');
 
-while iteration < SampleSize,
-  loop_indx = loop_indx+1;
-  if nargin==2,
-    if burnin_iteration>=50,
-      params = pdraws0(iteration+1,:);
-    else
-      params = pdraws0(burnin_iteration+1,:);
-    end
-  else
-    params = prior_draw();
-  end
-  set_all_parameters(params);
-  [A,B,ys,info]=dynare_resolve;
-
-  
-  if info(1)==0,
-    oo0=oo_;
-%     [Aa,Bb] = kalman_transition_matrix(oo0.dr, ...
-%        bayestopt_.restrict_var_list, ...
-%        bayestopt_.restrict_columns, ...
-%        bayestopt_.restrict_aux, M_.exo_nbr);
-%     tau=[vec(Aa); vech(Bb*M_.Sigma_e*Bb')];
-    tau=[oo_.dr.ys(oo_.dr.order_var); vec(A); vech(B*M_.Sigma_e*B')];
-    if burnin_iteration<50,
-      burnin_iteration = burnin_iteration + 1;
-      pdraws(burnin_iteration,:) = params;
-      TAU(:,burnin_iteration)=tau;
-      [gam,stationary_vars] = th_autocovariances(oo0.dr,bayestopt_.mfys,M_,options_);
-      sdy = sqrt(diag(gam{1}));
-      sy = sdy*sdy';
-      if useautocorr,
-        sy=sy-diag(diag(sy))+eye(length(sy));
-        gam{1}=gam{1}./sy;
-      else
-        for j=1:nlags,
-          gam{j+1}=gam{j+1}.*sy;
+    while iteration < SampleSize,
+        loop_indx = loop_indx+1;
+        if nargin==2,
+            if burnin_iteration>=50,
+                params = pdraws0(iteration+1,:);
+            else
+                params = pdraws0(burnin_iteration+1,:);
+            end
+        else
+            params = prior_draw();
         end
-      end
-      dum = vech(gam{1});
-      for j=1:nlags,
-        dum = [dum; vec(gam{j+1})];
-      end
-      GAM(:,burnin_iteration)=[oo_.dr.ys(bayestopt_.mfys); dum];
-    else
-      iteration = iteration + 1;
-      run_index = run_index + 1;
-      if iteration==1,
-        indJJ = (find(std(GAM')>1.e-8));
-        indH = (find(std(TAU')>1.e-8));
-        TAU = zeros(length(indH),SampleSize);
-        GAM = zeros(length(indJJ),SampleSize);
-        MAX_tau   = min(SampleSize,ceil(MaxNumberOfBytes/(length(indH)*nparam)/8));
-        MAX_gam   = min(SampleSize,ceil(MaxNumberOfBytes/(length(indJJ)*nparam)/8));
-        stoH = zeros([length(indH),nparam,MAX_tau]);
-        stoJJ = zeros([length(indJJ),nparam,MAX_tau]);
-        delete([IdentifDirectoryName '/' M_.fname '_identif_*.mat'])
-      end
-    end
+        set_all_parameters(params);
+        [A,B,ys,info]=dynare_resolve;
 
-    if iteration,
-      TAU(:,iteration)=tau(indH);
-      [JJ, H, gam] = getJJ(A, B, M_,oo0,options_,0,indx,indexo,bayestopt_.mf2,nlags,useautocorr);
-      GAM(:,iteration)=gam(indJJ);
-      stoH(:,:,run_index) = H(indH,:);
-      stoJJ(:,:,run_index) = JJ(indJJ,:);
-      % use relative changes
-%       siJ = abs(JJ(indJJ,:).*(1./gam(indJJ)*params));
-%       siH = abs(H(indH,:).*(1./tau(indH)*params));
-      % use prior uncertainty
-      siJ = abs(JJ(indJJ,:));
-      siH = abs(H(indH,:));
-%       siJ = abs(JJ(indJJ,:).*(ones(length(indJJ),1)*bayestopt_.p2'));
-%       siH = abs(H(indH,:).*(ones(length(indH),1)*bayestopt_.p2'));
-%       siJ = abs(JJ(indJJ,:).*(1./mGAM'*bayestopt_.p2'));
-%       siH = abs(H(indH,:).*(1./mTAU'*bayestopt_.p2'));
-
-      if iteration ==1,
-        siJmean = siJ./SampleSize;
-        siHmean = siH./SampleSize;
-      else
-        siJmean = siJ./SampleSize+siJmean;
-        siHmean = siH./SampleSize+siHmean;
-      end
-      pdraws(iteration,:) = params;
-      [idemodel.Mco(:,iteration), idemoments.Mco(:,iteration), ...
-        idemodel.Pco(:,:,iteration), idemoments.Pco(:,:,iteration), ...
-        idemodel.cond(iteration), idemoments.cond(iteration), ...
-        idemodel.ee(:,:,iteration), idemoments.ee(:,:,iteration), ...
-        idemodel.ind(:,iteration), idemoments.ind(:,iteration), ...
-        idemodel.indno{iteration}, idemoments.indno{iteration}] = ...
-        identification_checks(H(indH,:),JJ(indJJ,:), bayestopt_);
-      if run_index==MAX_tau | iteration==SampleSize,
-        file_index = file_index + 1;
-        if run_index<MAX_tau,
-      stoH = stoH(:,:,1:run_index);
-      stoJJ = stoJJ(:,:,1:run_index);
-        end          
-      save([IdentifDirectoryName '/' M_.fname '_identif_' int2str(file_index)], 'stoH', 'stoJJ')
-      run_index = 0;
         
-      end
+        if info(1)==0,
+            oo0=oo_;
+            %     [Aa,Bb] = kalman_transition_matrix(oo0.dr, ...
+            %        bayestopt_.restrict_var_list, ...
+            %        bayestopt_.restrict_columns, ...
+            %        bayestopt_.restrict_aux, M_.exo_nbr);
+            %     tau=[vec(Aa); vech(Bb*M_.Sigma_e*Bb')];
+            tau=[oo_.dr.ys(oo_.dr.order_var); vec(A); vech(B*M_.Sigma_e*B')];
+            if burnin_iteration<50,
+                burnin_iteration = burnin_iteration + 1;
+                pdraws(burnin_iteration,:) = params;
+                TAU(:,burnin_iteration)=tau;
+                [gam,stationary_vars] = th_autocovariances(oo0.dr,bayestopt_.mfys,M_,options_);
+                sdy = sqrt(diag(gam{1}));
+                sy = sdy*sdy';
+                if useautocorr,
+                    sy=sy-diag(diag(sy))+eye(length(sy));
+                    gam{1}=gam{1}./sy;
+                else
+                    for j=1:nlags,
+                        gam{j+1}=gam{j+1}.*sy;
+                    end
+                end
+                dum = vech(gam{1});
+                for j=1:nlags,
+                    dum = [dum; vec(gam{j+1})];
+                end
+                GAM(:,burnin_iteration)=[oo_.dr.ys(bayestopt_.mfys); dum];
+            else
+                iteration = iteration + 1;
+                run_index = run_index + 1;
+                if iteration==1,
+                    indJJ = (find(std(GAM')>1.e-8));
+                    indH = (find(std(TAU')>1.e-8));
+                    TAU = zeros(length(indH),SampleSize);
+                    GAM = zeros(length(indJJ),SampleSize);
+                    MAX_tau   = min(SampleSize,ceil(MaxNumberOfBytes/(length(indH)*nparam)/8));
+                    MAX_gam   = min(SampleSize,ceil(MaxNumberOfBytes/(length(indJJ)*nparam)/8));
+                    stoH = zeros([length(indH),nparam,MAX_tau]);
+                    stoJJ = zeros([length(indJJ),nparam,MAX_tau]);
+                    delete([IdentifDirectoryName '/' M_.fname '_identif_*.mat'])
+                end
+            end
 
-      waitbar(iteration/SampleSize,h)
+            if iteration,
+                TAU(:,iteration)=tau(indH);
+                [JJ, H, gam] = getJJ(A, B, M_,oo0,options_,0,indx,indexo,bayestopt_.mf2,nlags,useautocorr);
+                GAM(:,iteration)=gam(indJJ);
+                stoH(:,:,run_index) = H(indH,:);
+                stoJJ(:,:,run_index) = JJ(indJJ,:);
+                % use relative changes
+                %       siJ = abs(JJ(indJJ,:).*(1./gam(indJJ)*params));
+                %       siH = abs(H(indH,:).*(1./tau(indH)*params));
+                % use prior uncertainty
+                siJ = abs(JJ(indJJ,:));
+                siH = abs(H(indH,:));
+                %       siJ = abs(JJ(indJJ,:).*(ones(length(indJJ),1)*bayestopt_.p2'));
+                %       siH = abs(H(indH,:).*(ones(length(indH),1)*bayestopt_.p2'));
+                %       siJ = abs(JJ(indJJ,:).*(1./mGAM'*bayestopt_.p2'));
+                %       siH = abs(H(indH,:).*(1./mTAU'*bayestopt_.p2'));
+
+                if iteration ==1,
+                    siJmean = siJ./SampleSize;
+                    siHmean = siH./SampleSize;
+                else
+                    siJmean = siJ./SampleSize+siJmean;
+                    siHmean = siH./SampleSize+siHmean;
+                end
+                pdraws(iteration,:) = params;
+                [idemodel.Mco(:,iteration), idemoments.Mco(:,iteration), ...
+                 idemodel.Pco(:,:,iteration), idemoments.Pco(:,:,iteration), ...
+                 idemodel.cond(iteration), idemoments.cond(iteration), ...
+                 idemodel.ee(:,:,iteration), idemoments.ee(:,:,iteration), ...
+                 idemodel.ind(:,iteration), idemoments.ind(:,iteration), ...
+                 idemodel.indno{iteration}, idemoments.indno{iteration}] = ...
+                    identification_checks(H(indH,:),JJ(indJJ,:), bayestopt_);
+                if run_index==MAX_tau | iteration==SampleSize,
+                    file_index = file_index + 1;
+                    if run_index<MAX_tau,
+                        stoH = stoH(:,:,1:run_index);
+                        stoJJ = stoJJ(:,:,1:run_index);
+                    end          
+                    save([IdentifDirectoryName '/' M_.fname '_identif_' int2str(file_index)], 'stoH', 'stoJJ')
+                    run_index = 0;
+                    
+                end
+
+                waitbar(iteration/SampleSize,h)
+            end
+        end
     end
-  end
-end
 
-siJmean = siJmean.*(ones(length(indJJ),1)*std(pdraws));
-siHmean = siHmean.*(ones(length(indH),1)*std(pdraws));
+    siJmean = siJmean.*(ones(length(indJJ),1)*std(pdraws));
+    siHmean = siHmean.*(ones(length(indH),1)*std(pdraws));
 
-siHmean = siHmean./(max(siHmean')'*ones(size(params)));
-siJmean = siJmean./(max(siJmean')'*ones(size(params)));
+    siHmean = siHmean./(max(siHmean')'*ones(size(params)));
+    siJmean = siJmean./(max(siJmean')'*ones(size(params)));
 
-close(h)
+    close(h)
 
 
-save([IdentifDirectoryName '/' M_.fname '_identif'], 'pdraws', 'idemodel', 'idemoments', ...
-  'siHmean', 'siJmean', 'TAU', 'GAM')
+    save([IdentifDirectoryName '/' M_.fname '_identif'], 'pdraws', 'idemodel', 'idemoments', ...
+         'siHmean', 'siJmean', 'TAU', 'GAM')
 else
-load([IdentifDirectoryName '/' M_.fname '_identif'], 'pdraws', 'idemodel', 'idemoments', ...
-  'siHmean', 'siJmean', 'TAU', 'GAM')
-options_ident.prior_mc=size(pdraws,1);
-SampleSize = options_ident.prior_mc;
-  options_.options_ident = options_ident;
+    load([IdentifDirectoryName '/' M_.fname '_identif'], 'pdraws', 'idemodel', 'idemoments', ...
+         'siHmean', 'siJmean', 'TAU', 'GAM')
+    options_ident.prior_mc=size(pdraws,1);
+    SampleSize = options_ident.prior_mc;
+    options_.options_ident = options_ident;
 
 end  
 
 if nargout>3 & iload,
-  filnam = dir([IdentifDirectoryName '/' M_.fname '_identif_*.mat']);
-  H=[];
-  JJ = [];
-  for j=1:length(filnam),
-    load([IdentifDirectoryName '/' M_.fname '_identif_',int2str(j),'.mat']);
-    H = cat(3,H, stoH(:,abs(iload),:));
-    JJ = cat(3,JJ, stoJJ(:,abs(iload),:));
+    filnam = dir([IdentifDirectoryName '/' M_.fname '_identif_*.mat']);
+    H=[];
+    JJ = [];
+    for j=1:length(filnam),
+        load([IdentifDirectoryName '/' M_.fname '_identif_',int2str(j),'.mat']);
+        H = cat(3,H, stoH(:,abs(iload),:));
+        JJ = cat(3,JJ, stoJJ(:,abs(iload),:));
 
-  end
+    end
 end
 
 % mTAU = mean(TAU');
@@ -322,7 +322,7 @@ myboxplot(siHmean)
 set(gca,'ylim',[0 1.05])
 set(gca,'xticklabel','')
 for ip=1:nparam,
-  text(ip,-0.02,bayestopt_.name{ip},'rotation',90,'HorizontalAlignment','right','interpreter','none')
+    text(ip,-0.02,bayestopt_.name{ip},'rotation',90,'HorizontalAlignment','right','interpreter','none')
 end
 title('Sensitivity in the model')
 
@@ -331,7 +331,7 @@ myboxplot(siJmean)
 set(gca,'ylim',[0 1.05])
 set(gca,'xticklabel','')
 for ip=1:nparam,
-  text(ip,-0.02,bayestopt_.name{ip},'rotation',90,'HorizontalAlignment','right','interpreter','none')
+    text(ip,-0.02,bayestopt_.name{ip},'rotation',90,'HorizontalAlignment','right','interpreter','none')
 end
 title('Sensitivity in the moments')
 
@@ -340,7 +340,7 @@ myboxplot(idemodel.Mco')
 set(gca,'ylim',[0 1])
 set(gca,'xticklabel','')
 for ip=1:nparam,
-  text(ip,-0.02,bayestopt_.name{ip},'rotation',90,'HorizontalAlignment','right','interpreter','none')
+    text(ip,-0.02,bayestopt_.name{ip},'rotation',90,'HorizontalAlignment','right','interpreter','none')
 end
 title('Multicollinearity in the model')
 
@@ -349,12 +349,12 @@ myboxplot(idemoments.Mco')
 set(gca,'ylim',[0 1])
 set(gca,'xticklabel','')
 for ip=1:nparam,
-  text(ip,-0.02,bayestopt_.name{ip},'rotation',90,'HorizontalAlignment','right','interpreter','none')
+    text(ip,-0.02,bayestopt_.name{ip},'rotation',90,'HorizontalAlignment','right','interpreter','none')
 end
 title('Multicollinearity in the moments')
-  saveas(gcf,[IdentifDirectoryName,'/',M_.fname,'_ident'])
-  eval(['print -depsc2 ' IdentifDirectoryName '/' M_.fname '_ident']);
-  eval(['print -dpdf ' IdentifDirectoryName '/' M_.fname '_ident']);
+saveas(gcf,[IdentifDirectoryName,'/',M_.fname,'_ident'])
+eval(['print -depsc2 ' IdentifDirectoryName '/' M_.fname '_ident']);
+eval(['print -dpdf ' IdentifDirectoryName '/' M_.fname '_ident']);
 
 
 figure,
@@ -364,6 +364,6 @@ title('log10 of Condition number in the model')
 subplot(222)
 hist(log10(idemoments.cond))
 title('log10 of Condition number in the moments')
-  saveas(gcf,[IdentifDirectoryName,'/',M_.fname,'_ident_COND'])
-  eval(['print -depsc2 ' IdentifDirectoryName '/' M_.fname '_ident_COND']);
-  eval(['print -dpdf ' IdentifDirectoryName '/' M_.fname '_ident_COND']);
+saveas(gcf,[IdentifDirectoryName,'/',M_.fname,'_ident_COND'])
+eval(['print -depsc2 ' IdentifDirectoryName '/' M_.fname '_ident_COND']);
+eval(['print -dpdf ' IdentifDirectoryName '/' M_.fname '_ident_COND']);

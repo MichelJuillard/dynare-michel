@@ -20,13 +20,13 @@ function ftest (s1,s2)
 global nvx nvy x y lag1
 
 if size(s1,1) ~= 2
-	error ('Spécifiez deux fichiers pour la comparaison.') ;
+    error ('Spécifiez deux fichiers pour la comparaison.') ;
 end
 
 for i = 1:2
-	if ~ isempty(find(abs(s1(i,:)) == 46))
-		error ('Entrez les noms de fichiers sans extensions.') ;
-	end
+    if ~ isempty(find(abs(s1(i,:)) == 46))
+        error ('Entrez les noms de fichiers sans extensions.') ;
+    end
 end
 
 s1 = [s1 [' ';' ']] ;
@@ -54,28 +54,28 @@ fclose(fid) ;
 nvy = setstr(nvy) ;
 
 if size(x,1) ~= size(y,1)
-	error ('FTEST: The two files don''t have the same number of variables.');
+    error ('FTEST: The two files don''t have the same number of variables.');
 end
 
 for i = 1:size(x,1)
-	if ~ strcmp(nvx(i,:),nvy(i,:))
-		error ('FTEST: The two files don''t have the same  variables.') ;	
-	end
+    if ~ strcmp(nvx(i,:),nvy(i,:))
+        error ('FTEST: The two files don''t have the same  variables.') ;	
+    end
 end
 
 if nnz(lag1 - lag2) > 0
-	error ('FTEST: Leads and lags aren''t the same in both files.') ;
+    error ('FTEST: Leads and lags aren''t the same in both files.') ;
 end
 
 j = zeros(size(s2,1),1);
 for i=1:size(s2,1)
-	k = strmatch(s2(i,:),nvx,'exact') ;
-	if isempty(k)
-	  t = ['FTEST: Variable ' s2(i) 'doesn''t exist'] ;
-	  error (t) ;
-	else
-	  j(i) =k;
-	end
+    k = strmatch(s2(i,:),nvx,'exact') ;
+    if isempty(k)
+        t = ['FTEST: Variable ' s2(i) 'doesn''t exist'] ;
+        error (t) ;
+    else
+        j(i) =k;
+    end
 end
 
 y = y(j,:) ;

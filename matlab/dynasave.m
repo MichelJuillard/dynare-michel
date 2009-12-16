@@ -29,22 +29,22 @@ function dynasave(s,var_list)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-  global M_ oo_
+global M_ oo_
 
-  if size(var_list,1) == 0
+if size(var_list,1) == 0
     var_list = M_.endo_names(1:M_.orig_endo_nbr, :);
-  end
+end
 
-  n = size(var_list,1);
-    ivar=zeros(n,1);
-    for i=1:n
-      i_tmp = strmatch(var_list(i,:),M_.endo_names,'exact');
-      if isempty(i_tmp)
+n = size(var_list,1);
+ivar=zeros(n,1);
+for i=1:n
+    i_tmp = strmatch(var_list(i,:),M_.endo_names,'exact');
+    if isempty(i_tmp)
 	error (['One of the specified variables does not exist']) ;
-      else
+    else
 	ivar(i) = i_tmp;
-      end
     end
+end
 
 %  dyn2vec(var_list(1),var_list(1));
 eval([var_list(1) '=oo_.endo_simul(ivar(1),:)'';'])

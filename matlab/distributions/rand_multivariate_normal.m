@@ -31,4 +31,4 @@ function draw = rand_multivariate_normal(Mean,Sigma_upper_chol,n)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-    draw = Mean + randn(1,n) * Sigma_upper_chol;
+draw = Mean + randn(1,n) * Sigma_upper_chol;

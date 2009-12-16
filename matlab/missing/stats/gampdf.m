@@ -27,45 +27,45 @@ function pdf = gampdf (x, a, b)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-  if (nargin ~= 3)
+if (nargin ~= 3)
     error ('gampdf: you must give three arguments');
-  end
+end
 
-  if (~isscalar (a) || ~isscalar(b))
+if (~isscalar (a) || ~isscalar(b))
     [retval, x, a, b] = common_size (x, a, b);
     if (retval > 0)
-      error ('gampdf: x, a and b must be of common size or scalars');
+        error ('gampdf: x, a and b must be of common size or scalars');
     end
-  end
+end
 
-  sz = size(x);
-  pdf = zeros (sz);
+sz = size(x);
+pdf = zeros (sz);
 
-  k = find (~(a > 0) | ~(b > 0) | isnan (x));
-  if (any (k))
+k = find (~(a > 0) | ~(b > 0) | isnan (x));
+if (any (k))
     pdf (k) = NaN;
-  end
+end
 
-  k = find ((x > 0) & (a > 0) & (a <= 1) & (b > 0));
-  if (any (k))
+k = find ((x > 0) & (a > 0) & (a <= 1) & (b > 0));
+if (any (k))
     if (isscalar(a) && isscalar(b))
-      pdf(k) = (x(k) .^ (a - 1)) ...
-		.* exp(- x(k) ./ b) ./ gamma (a) ./ (b .^ a);
+        pdf(k) = (x(k) .^ (a - 1)) ...
+                 .* exp(- x(k) ./ b) ./ gamma (a) ./ (b .^ a);
     else
-      pdf(k) = (x(k) .^ (a(k) - 1)) ...
-		.* exp(- x(k) ./ b(k)) ./ gamma (a(k)) ./ (b(k) .^ a(k));
+        pdf(k) = (x(k) .^ (a(k) - 1)) ...
+                 .* exp(- x(k) ./ b(k)) ./ gamma (a(k)) ./ (b(k) .^ a(k));
     end
-  end
+end
 
-  k = find ((x > 0) & (a > 1) & (b > 0));
-  if (any (k))
+k = find ((x > 0) & (a > 1) & (b > 0));
+if (any (k))
     if (isscalar(a) && isscalar(b))
-      pdf(k) = exp (- a .* log (b) + (a-1) .* log (x(k)) ...
-		    - x(k) ./ b - gammaln (a));
+        pdf(k) = exp (- a .* log (b) + (a-1) .* log (x(k)) ...
+                      - x(k) ./ b - gammaln (a));
     else
-      pdf(k) = exp (- a(k) .* log (b(k)) + (a(k)-1) .* log (x(k)) ...
-		    - x(k) ./ b(k) - gammaln (a(k)));
+        pdf(k) = exp (- a(k) .* log (b(k)) + (a(k)-1) .* log (x(k)) ...
+                      - x(k) ./ b(k) - gammaln (a(k)));
     end
-  end
+end
 
 end

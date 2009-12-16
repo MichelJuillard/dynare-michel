@@ -20,14 +20,14 @@ function fMessageStatus(prtfrc, njob, waitbarString, waitbarTitle, Parallel, Mas
 global funcName
 
 if nargin<5,
-  Parallel.Local=1;
+    Parallel.Local=1;
 end
 
 save(['comp_status_',funcName,int2str(njob),'.mat'],'prtfrc','njob','waitbarString','waitbarTitle');
 if Parallel.Local==0,
-  if isunix,
-    system(['scp comp_status_',funcName,int2str(njob),'.mat ',Parallel.user,'@',MasterName,':',DyMo]);
-  else
-    copyfile(['comp_status_',funcName,int2str(njob),'.mat'],['\\',MasterName,'\',DyMo(1),'$\',DyMo(4:end),'\']);
-  end
+    if isunix,
+        system(['scp comp_status_',funcName,int2str(njob),'.mat ',Parallel.user,'@',MasterName,':',DyMo]);
+    else
+        copyfile(['comp_status_',funcName,int2str(njob),'.mat'],['\\',MasterName,'\',DyMo(1),'$\',DyMo(4:end),'\']);
+    end
 end

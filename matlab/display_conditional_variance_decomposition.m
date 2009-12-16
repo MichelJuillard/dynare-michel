@@ -32,45 +32,45 @@ function oo_ = display_conditional_variance_decomposition(Steps, SubsetOfVariabl
 %
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
-  
-    endo_nbr = M_.endo_nbr;
-    exo_nbr = M_.exo_nbr;
-    StateSpaceModel.number_of_state_equations = M_.endo_nbr;
-    StateSpaceModel.number_of_state_innovations = exo_nbr;
-    StateSpaceModel.sigma_e_is_diagonal = M_.sigma_e_is_diagonal;
-    
-    iv = (1:endo_nbr)';
-    ic = dr.nstatic+(1:dr.npred)';
-    
-    [StateSpaceModel.transition_matrix,StateSpaceModel.impulse_matrix] = kalman_transition_matrix(dr,iv,ic,[],exo_nbr);
-    StateSpaceModel.state_innovations_covariance_matrix = M_.Sigma_e;
 
-    conditional_decomposition_array = conditional_variance_decomposition(StateSpaceModel,Steps,dr.inv_order_var(SubsetOfVariables ));
+endo_nbr = M_.endo_nbr;
+exo_nbr = M_.exo_nbr;
+StateSpaceModel.number_of_state_equations = M_.endo_nbr;
+StateSpaceModel.number_of_state_innovations = exo_nbr;
+StateSpaceModel.sigma_e_is_diagonal = M_.sigma_e_is_diagonal;
 
+iv = (1:endo_nbr)';
+ic = dr.nstatic+(1:dr.npred)';
+
+[StateSpaceModel.transition_matrix,StateSpaceModel.impulse_matrix] = kalman_transition_matrix(dr,iv,ic,[],exo_nbr);
+StateSpaceModel.state_innovations_covariance_matrix = M_.Sigma_e;
+
+conditional_decomposition_array = conditional_variance_decomposition(StateSpaceModel,Steps,dr.inv_order_var(SubsetOfVariables ));
+
+if options_.noprint == 0
+    disp(' ')
+    disp('CONDITIONAL VARIANCE DECOMPOSITION (in percent)')
+end
+
+vardec_i = zeros(length(SubsetOfVariables),exo_nbr);
+
+for i=1:length(Steps)
+    disp(['Period ' int2str(Steps(i)) ':'])
+    
+    for j=1:exo_nbr
+        vardec_i(:,j) = diag_vech(conditional_decomposition_array(:, ...
+                                                          i,j));
+    end
+    vardec_i = 100*vardec_i./repmat(sum(vardec_i,2),1,exo_nbr);
     if options_.noprint == 0
-        disp(' ')
-        disp('CONDITIONAL VARIANCE DECOMPOSITION (in percent)')
+        headers = M_.exo_names;
+        headers(M_.exo_names_orig_ord,:) = headers;
+        headers = strvcat(' ',headers);
+        lh = size(deblank(M_.endo_names(SubsetOfVariables,:)),2)+2;
+        dyntable('',headers,...
+                 deblank(M_.endo_names(SubsetOfVariables,:)),...
+                 vardec_i,lh,8,2);
     end
-    
-    vardec_i = zeros(length(SubsetOfVariables),exo_nbr);
-    
-    for i=1:length(Steps)
-        disp(['Period ' int2str(Steps(i)) ':'])
-        
-        for j=1:exo_nbr
-            vardec_i(:,j) = diag_vech(conditional_decomposition_array(:, ...
-                                                              i,j));
-        end
-        vardec_i = 100*vardec_i./repmat(sum(vardec_i,2),1,exo_nbr);
-        if options_.noprint == 0
-            headers = M_.exo_names;
-            headers(M_.exo_names_orig_ord,:) = headers;
-            headers = strvcat(' ',headers);
-            lh = size(deblank(M_.endo_names(SubsetOfVariables,:)),2)+2;
-            dyntable('',headers,...
-                     deblank(M_.endo_names(SubsetOfVariables,:)),...
-                     vardec_i,lh,8,2);
-        end
-    end
-    
-    oo_.conditional_variance_decomposition = conditional_decomposition_array;
+end
+
+oo_.conditional_variance_decomposition = conditional_decomposition_array;

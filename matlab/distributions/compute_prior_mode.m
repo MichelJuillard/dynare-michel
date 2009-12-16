@@ -38,50 +38,50 @@ function m = compute_prior_mode(hyperparameters,shape)
 %
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
-    m = NaN ;
-    switch shape
-      case 1
-        if (hyperparameters(1)>1 && hyperparameters(2)>1)
-            m = (hyperparameters(1)-1)/(hyperparameters(1)+hyperparameters(2)-2) ;
-        elseif (hyperparameters(1)<1 && hyperparameters(2)<1)
-            m = [ 0 ; 1 ] ;
-        elseif ( hyperparameters(1)<1 && hyperparameters(2)>1-eps ) || ( abs(hyperparameters(1)-1)<2*eps && hyperparameters(2)>1 )
-            m = 0;
-        elseif ( hyperparameters(1)>1 && hyperparameters(2)<1+eps ) || ( abs(hyperparameters(1)-1)<2*eps && hyperparameters(2)<1 )
-            m = 1;
-        elseif ( abs(hyperparameters(1)-1)<2*eps && abs(hyperparameters(2)-1)<2*eps )% Uniform distribution!
-            m = .5 ;
-        end
-        if length(hyperparameters)==4
-            m = m*(hyperparameters(4)-hyperparameters(3)) + hyperparameters(3) ;
-        end
-      case 2
-        if hyperparameters(1)<1
-            m = 0;
-        else
-            m = (hyperparameters(1)-1)*hyperparameters(2);
-        end
-        if length(hyperparameters)>2
-            m = m + hyperparameters(3);
-        end
-      case 3
-        m = hyperparameters(1);
-      case 4
-        % s  = hyperparameters(1)
-        % nu = hyperparameters(2)
-        m = 1/sqrt((hyperparameters(2)+1)/hyperparameters(1));%sqrt((hyperparameters(2)-1)/hyperparameters(1))
-        if length(hyperparameters)>2
-            m = m + hyperparameters(3);
-        end
-      case 5
-        m = .5*(hyperparameters(2)-hyperparameters(1)) ;
-      case 6
-        % s  = hyperparameters(1)
-        % nu = hyperparameters(2)
-        m = hyperparameters(1)/(hyperparameters(2)+2) ;
-        if length(hyperparameters)>2
-            m = m + hyperparameters(3) ;
-        end
-      otherwise
-        error('Unknown prior shape!')
+m = NaN ;
+switch shape
+  case 1
+    if (hyperparameters(1)>1 && hyperparameters(2)>1)
+        m = (hyperparameters(1)-1)/(hyperparameters(1)+hyperparameters(2)-2) ;
+    elseif (hyperparameters(1)<1 && hyperparameters(2)<1)
+        m = [ 0 ; 1 ] ;
+    elseif ( hyperparameters(1)<1 && hyperparameters(2)>1-eps ) || ( abs(hyperparameters(1)-1)<2*eps && hyperparameters(2)>1 )
+        m = 0;
+    elseif ( hyperparameters(1)>1 && hyperparameters(2)<1+eps ) || ( abs(hyperparameters(1)-1)<2*eps && hyperparameters(2)<1 )
+        m = 1;
+    elseif ( abs(hyperparameters(1)-1)<2*eps && abs(hyperparameters(2)-1)<2*eps )% Uniform distribution!
+        m = .5 ;
     end
+    if length(hyperparameters)==4
+        m = m*(hyperparameters(4)-hyperparameters(3)) + hyperparameters(3) ;
+    end
+  case 2
+    if hyperparameters(1)<1
+        m = 0;
+    else
+        m = (hyperparameters(1)-1)*hyperparameters(2);
+    end
+    if length(hyperparameters)>2
+        m = m + hyperparameters(3);
+    end
+  case 3
+    m = hyperparameters(1);
+  case 4
+    % s  = hyperparameters(1)
+    % nu = hyperparameters(2)
+    m = 1/sqrt((hyperparameters(2)+1)/hyperparameters(1));%sqrt((hyperparameters(2)-1)/hyperparameters(1))
+    if length(hyperparameters)>2
+        m = m + hyperparameters(3);
+    end
+  case 5
+    m = .5*(hyperparameters(2)-hyperparameters(1)) ;
+  case 6
+    % s  = hyperparameters(1)
+    % nu = hyperparameters(2)
+    m = hyperparameters(1)/(hyperparameters(2)+2) ;
+    if length(hyperparameters)>2
+        m = m + hyperparameters(3) ;
+    end
+  otherwise
+    error('Unknown prior shape!')
+end

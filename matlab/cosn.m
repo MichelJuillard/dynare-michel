@@ -32,9 +32,9 @@ X = H(:,2:end);
 
 yhat =  X*(X\y);
 if rank(yhat),
-  co = y'*yhat/sqrt((y'*y)*(yhat'*yhat));
+    co = y'*yhat/sqrt((y'*y)*(yhat'*yhat));
 else
-  co=0;
+    co=0;
 end
 
 

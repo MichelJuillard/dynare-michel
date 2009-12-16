@@ -31,23 +31,23 @@ function [A,B] = kalman_transition_matrix(dr,iv,ic,aux,exo_nbr)
 %
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
-  
-  n_iv = length(iv);
-  n_ir1 = size(aux,1);
-  nr = n_iv + n_ir1;
-  
-  A = zeros(nr,nr);
 
-  i_n_iv = 1:n_iv;
-  A(i_n_iv,ic) = dr.ghx(iv,:);
-  if n_ir1 > 0
+n_iv = length(iv);
+n_ir1 = size(aux,1);
+nr = n_iv + n_ir1;
+
+A = zeros(nr,nr);
+
+i_n_iv = 1:n_iv;
+A(i_n_iv,ic) = dr.ghx(iv,:);
+if n_ir1 > 0
     A(n_iv+1:end,:) = sparse(aux(:,1),aux(:,2),ones(n_ir1,1),n_ir1,nr);
-  end
+end
 
-  if nargout>1
-      B = zeros(nr,exo_nbr);
-      B(i_n_iv,:) = dr.ghu(iv,:);
-  end
+if nargout>1
+    B = zeros(nr,exo_nbr);
+    B(i_n_iv,:) = dr.ghu(iv,:);
+end
 
 % $$$ function [A,B] = kalman_transition_matrix(dr)
 % $$$   global M_

@@ -33,10 +33,10 @@ function rnd = exprnd(a)
 %
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
-    if any(a(:)<0)
-        disp('exprnd:: The parameter of the exponential distribution has to be positive!')
-        error;
-    end
-    [m,n] = size(a);
-    uniform_variates = rand(m,n);
-    rnd = -log(uniform_variates).*a;
+if any(a(:)<0)
+    disp('exprnd:: The parameter of the exponential distribution has to be positive!')
+    error;
+end
+[m,n] = size(a);
+uniform_variates = rand(m,n);
+rnd = -log(uniform_variates).*a;

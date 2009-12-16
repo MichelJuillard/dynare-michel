@@ -17,15 +17,15 @@ function [sR,sG] = restricted_steadystate(y,x,indx)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-  global options_ M_ oo_
-  
-  inde  = options_.steadystate_partial.sseqn;
-  
-  ss = oo_.steady_state;
-  
-  ss(indx) = y;
- 
-  eval(['[R,G] = ' M_.fname '_static(ss, x, M_.params);']);
+global options_ M_ oo_
 
-  sR = R(inde);
-  sG = G(inde,indx);
+inde  = options_.steadystate_partial.sseqn;
+
+ss = oo_.steady_state;
+
+ss(indx) = y;
+
+eval(['[R,G] = ' M_.fname '_static(ss, x, M_.params);']);
+
+sR = R(inde);
+sG = G(inde,indx);

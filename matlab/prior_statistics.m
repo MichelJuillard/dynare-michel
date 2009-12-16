@@ -30,7 +30,7 @@ function pstat = prior_statistics(info,M_,bayestopt_,options_)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-    if ~info(0)
-        results = prior_sampler(1,M_,bayestopt_,options_);
-        results.prior.mass
-    end
+if ~info(0)
+    results = prior_sampler(1,M_,bayestopt_,options_);
+    results.prior.mass
+end

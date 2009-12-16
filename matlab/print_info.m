@@ -27,7 +27,7 @@ function print_info(info,noprint)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-  if ~noprint
+if ~noprint
     switch info(1)
       case 1
         error(['The model doesn''t determine the current variables' ...
@@ -59,4 +59,4 @@ function print_info(info,noprint)
       otherwise
         error('This case shouldn''t happen. Contact the authors of Dynare')
     end
-  end
+end

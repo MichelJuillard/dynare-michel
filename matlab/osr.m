@@ -17,33 +17,33 @@ function osr(var_list,params,i_var,W)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-  global M_ options_ oo_  
+global M_ options_ oo_  
 
-  options_.order = 1;
-  options_ = set_default_option(options_,'linear',0);
-  options_ = set_default_option(options_,'ar',5);
-  options_ = set_default_option(options_,'irf',40);
-  options_ = set_default_option(options_,'drop',100);
-  options_ = set_default_option(options_,'replic',1);
-  options_ = set_default_option(options_,'nomoments',0);
-  options_ = set_default_option(options_,'nocorr',0);
-  options_ = set_default_option(options_,'simul_seed',[]);
-  options_ = set_default_option(options_,'hp_filter',0);
-  options_ = set_default_option(options_,'hp_ngrid',512);
-  options_ = set_default_option(options_,'simul',0);
-  options_ = set_default_option(options_,'periods',1);
-  
-  make_ex_;
+options_.order = 1;
+options_ = set_default_option(options_,'linear',0);
+options_ = set_default_option(options_,'ar',5);
+options_ = set_default_option(options_,'irf',40);
+options_ = set_default_option(options_,'drop',100);
+options_ = set_default_option(options_,'replic',1);
+options_ = set_default_option(options_,'nomoments',0);
+options_ = set_default_option(options_,'nocorr',0);
+options_ = set_default_option(options_,'simul_seed',[]);
+options_ = set_default_option(options_,'hp_filter',0);
+options_ = set_default_option(options_,'hp_ngrid',512);
+options_ = set_default_option(options_,'simul',0);
+options_ = set_default_option(options_,'periods',1);
 
-  np = size(params,1);
-  i_params = zeros(np,1);
-  for i=1:np
+make_ex_;
+
+np = size(params,1);
+i_params = zeros(np,1);
+for i=1:np
     i_params(i) = strmatch(deblank(params(i,:)),M_.param_names,'exact');
-  end
-    
-  disp(' ')
-  disp('OPTIMAL SIMPLE RULE')
-  disp(' ')
-  osr1(i_params,i_var,W);
+end
 
-  stoch_simul(var_list);
+disp(' ')
+disp('OPTIMAL SIMPLE RULE')
+disp(' ')
+osr1(i_params,i_var,W);
+
+stoch_simul(var_list);

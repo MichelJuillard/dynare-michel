@@ -36,9 +36,9 @@ irf = iyf+(options_.periods-1)*ny ;
 icf = [1:size(iyf,2)] ;
 
 for i = 2:options_.periods
-	c(ir,jcf) = c(ir,jcf)-c(ir,icf)*c(irf,jcf) ;
-	ir = ir-ny ;
-	irf = irf-ny ;
+    c(ir,jcf) = c(ir,jcf)-c(ir,icf)*c(irf,jcf) ;
+    ir = ir-ny ;
+    irf = irf-ny ;
 end
 
 d = c(:,jcf) ;

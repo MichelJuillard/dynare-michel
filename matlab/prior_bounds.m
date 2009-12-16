@@ -40,58 +40,58 @@ prior_trunc = options_.prior_trunc;
 bounds = zeros(length(p6),2);
 
 for i=1:length(p6)
-  switch pshape(i)
-    case 1
-      if prior_trunc == 0
-          bounds(i,1) = p3(i);
-          bounds(i,2) = p4(i);
-      else
-          bounds(i,1) = betainv(prior_trunc,p6(i),p7(i))*(p4(i)-p3(i))+p3(i);
-          bounds(i,2) = betainv(1-prior_trunc,p6(i),p7(i))* ...
-              (p4(i)-p3(i))+p3(i);
-      end
-    case 2
-      if prior_trunc == 0
-          bounds(i,1) = p3(i);
-          bounds(i,2) = Inf;
-      else
-          bounds(i,1) = gaminv(prior_trunc,p6(i),p7(i))+p3(i);
-          bounds(i,2) = gaminv(1-prior_trunc,p6(i),p7(i))+p3(i);
-      end
-    case 3
-      if prior_trunc == 0
-          bounds(i,1) = -Inf;
-          bounds(i,2) = Inf;
-      else
-          bounds(i,1) = norminv(prior_trunc,p6(i),p7(i));
-          bounds(i,2) = norminv(1-prior_trunc,p6(i),p7(i));
-      end
-    case 4
-      if prior_trunc == 0
-          bounds(i,1) = p3(i);
-          bounds(i,2) = Inf;
-      else
-          bounds(i,1) = 1/sqrt(gaminv(1-prior_trunc, p7(i)/2, 2/p6(i)))+p3(i);
-          bounds(i,2) = 1/sqrt(gaminv(prior_trunc, p7(i)/2, ...
-                                      2/p6(i)))+p3(i);
-      end
-    case 5
-      if prior_trunc == 0
-          bounds(i,1) = p6(i);
-          bounds(i,2) = p7(i);
-      else
-          bounds(i,1) = p6(i)+(p7(i)-p6(i))*prior_trunc;
-          bounds(i,2) = p7(i)-(p7(i)-p6(i))*prior_trunc;
-      end
-    case 6
-      if prior_trunc == 0
-          bounds(i,1) = p3(i);
-          bounds(i,2) = Inf;
-      else
-          bounds(i,1) = 1/gaminv(1-prior_trunc, p7(i)/2, 2/p6(i))+p3(i);
-          bounds(i,2) = 1/gaminv(prior_trunc, p7(i)/2, 2/p6(i))+ p3(i);
-      end
-    otherwise
-      error(sprintf('prior_bounds: unknown distribution shape (index %d, type %d)', i, pshape(i)));
-  end
+    switch pshape(i)
+      case 1
+        if prior_trunc == 0
+            bounds(i,1) = p3(i);
+            bounds(i,2) = p4(i);
+        else
+            bounds(i,1) = betainv(prior_trunc,p6(i),p7(i))*(p4(i)-p3(i))+p3(i);
+            bounds(i,2) = betainv(1-prior_trunc,p6(i),p7(i))* ...
+                (p4(i)-p3(i))+p3(i);
+        end
+      case 2
+        if prior_trunc == 0
+            bounds(i,1) = p3(i);
+            bounds(i,2) = Inf;
+        else
+            bounds(i,1) = gaminv(prior_trunc,p6(i),p7(i))+p3(i);
+            bounds(i,2) = gaminv(1-prior_trunc,p6(i),p7(i))+p3(i);
+        end
+      case 3
+        if prior_trunc == 0
+            bounds(i,1) = -Inf;
+            bounds(i,2) = Inf;
+        else
+            bounds(i,1) = norminv(prior_trunc,p6(i),p7(i));
+            bounds(i,2) = norminv(1-prior_trunc,p6(i),p7(i));
+        end
+      case 4
+        if prior_trunc == 0
+            bounds(i,1) = p3(i);
+            bounds(i,2) = Inf;
+        else
+            bounds(i,1) = 1/sqrt(gaminv(1-prior_trunc, p7(i)/2, 2/p6(i)))+p3(i);
+            bounds(i,2) = 1/sqrt(gaminv(prior_trunc, p7(i)/2, ...
+                                        2/p6(i)))+p3(i);
+        end
+      case 5
+        if prior_trunc == 0
+            bounds(i,1) = p6(i);
+            bounds(i,2) = p7(i);
+        else
+            bounds(i,1) = p6(i)+(p7(i)-p6(i))*prior_trunc;
+            bounds(i,2) = p7(i)-(p7(i)-p6(i))*prior_trunc;
+        end
+      case 6
+        if prior_trunc == 0
+            bounds(i,1) = p3(i);
+            bounds(i,2) = Inf;
+        else
+            bounds(i,1) = 1/gaminv(1-prior_trunc, p7(i)/2, 2/p6(i))+p3(i);
+            bounds(i,2) = 1/gaminv(prior_trunc, p7(i)/2, 2/p6(i))+ p3(i);
+        end
+      otherwise
+        error(sprintf('prior_bounds: unknown distribution shape (index %d, type %d)', i, pshape(i)));
+    end
 end

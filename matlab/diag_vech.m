@@ -25,7 +25,7 @@ function d = diag_vech(Vector)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-    m = length(Vector);
-    n = (sqrt(1+8*m)-1)/2;
-    k = cumsum(1:n);
-    d = Vector(k);
+m = length(Vector);
+n = (sqrt(1+8*m)-1)/2;
+k = cumsum(1:n);
+d = Vector(k);

@@ -79,16 +79,16 @@ for plt = 1:nbplt,
         l2 = min(ub(kk),1.5*x(kk));
         z = [l1:(l2-l1)/20:l2];
         if options_.mode_check_nolik==0,
-          y = zeros(length(z),2);
-          dy = priordens(xx,bayestopt_.pshape,bayestopt_.p6,bayestopt_.p7,bayestopt_.p3,bayestopt_.p4);
+            y = zeros(length(z),2);
+            dy = priordens(xx,bayestopt_.pshape,bayestopt_.p6,bayestopt_.p7,bayestopt_.p3,bayestopt_.p4);
         end
         for i=1:length(z)
             xx(kk) = z(i);
             if isempty(strmatch('dsge_prior_weight',M_.param_names))
                 try
-                  [fval,cost_flag] = DsgeLikelihood(xx,gend,data,data_index,number_of_observations,no_more_missing_observations); 
+                    [fval,cost_flag] = DsgeLikelihood(xx,gend,data,data_index,number_of_observations,no_more_missing_observations); 
                 catch
-                  cost_flag = 0;
+                    cost_flag = 0;
                 end
                 if cost_flag
                     y(i,1) = fval;

@@ -32,34 +32,34 @@ function [ldens,parameters] = evaluate_prior(parameters)
 %
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
-  
-    global bayestopt_
-    
-    if nargin==0
-        parameters = 'posterior mode';
+
+global bayestopt_
+
+if nargin==0
+    parameters = 'posterior mode';
+end
+
+if ischar(parameters)
+    switch parameters
+      case 'posterior mode'
+        parameters = get_posterior_parameters('mode');
+      case 'posterior mean'
+        parameters = get_posterior_parameters('mean');
+      case 'posterior median'
+        parameters = get_posterior_parameters('median');
+      case 'prior mode'
+        parameters = bayestopt_.p5(:);
+      case 'prior mean'
+        parameters = bayestopt_.p1;
+      otherwise
+        disp('eval_prior:: If the input argument is a string, then it has to be equal to:')
+        disp('                ''posterior mode'', ')
+        disp('                ''posterior mean'', ')
+        disp('                ''posterior median'', ')
+        disp('                ''prior mode'' or')
+        disp('                ''prior mean''.')
+        error
     end
-    
-    if ischar(parameters)
-        switch parameters
-          case 'posterior mode'
-            parameters = get_posterior_parameters('mode');
-          case 'posterior mean'
-            parameters = get_posterior_parameters('mean');
-          case 'posterior median'
-            parameters = get_posterior_parameters('median');
-          case 'prior mode'
-            parameters = bayestopt_.p5(:);
-          case 'prior mean'
-            parameters = bayestopt_.p1;
-          otherwise
-            disp('eval_prior:: If the input argument is a string, then it has to be equal to:')
-            disp('                ''posterior mode'', ')
-            disp('                ''posterior mean'', ')
-            disp('                ''posterior median'', ')
-            disp('                ''prior mode'' or')
-            disp('                ''prior mean''.')
-            error
-        end
-    end
-    clear('priordens');
-    ldens = priordens(parameters, bayestopt_.pshape, bayestopt_.p6, bayestopt_.p7, bayestopt_.p3, bayestopt_.p4);
+end
+clear('priordens');
+ldens = priordens(parameters, bayestopt_.pshape, bayestopt_.p6, bayestopt_.p7, bayestopt_.p3, bayestopt_.p4);

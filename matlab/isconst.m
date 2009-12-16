@@ -26,7 +26,7 @@ function aa = isconst(y)
 %
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>
-    aa = 0;
-    if all(abs(y(2:end)-y(1:end-1))<1e-10)
-        aa = 1;
-    end
+aa = 0;
+if all(abs(y(2:end)-y(1:end-1))<1e-10)
+    aa = 1;
+end

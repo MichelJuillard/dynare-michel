@@ -31,11 +31,11 @@ function ldens = lpdfgbeta(x,a,b,aa,bb);
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-    ldens = -Inf( size(x) ) ;
-    idx = find( (x-aa)>0 & (x-bb)<0 ) ;
-    
-    if length(a)==1
-        ldens(idx) = -betaln(a,b) + (a-1)*log(x(idx)-aa) + (b-1)*log(bb-x(idx)) - (a+b-1)*log(bb-aa) ;
-    else
-        ldens(idx) = -betaln(a(idx),b(idx)) + (a(idx)-1).*log(x(idx)-aa(idx)) + (b(idx)-1).*log(bb(idx)-x(idx)) - (a(idx)+b(idx)-1).*log(bb(idx)-aa(idx));
-    end
+ldens = -Inf( size(x) ) ;
+idx = find( (x-aa)>0 & (x-bb)<0 ) ;
+
+if length(a)==1
+    ldens(idx) = -betaln(a,b) + (a-1)*log(x(idx)-aa) + (b-1)*log(bb-x(idx)) - (a+b-1)*log(bb-aa) ;
+else
+    ldens(idx) = -betaln(a(idx),b(idx)) + (a(idx)-1).*log(x(idx)-aa(idx)) + (b(idx)-1).*log(bb(idx)-x(idx)) - (a(idx)+b(idx)-1).*log(bb(idx)-aa(idx));
+end

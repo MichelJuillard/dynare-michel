@@ -39,106 +39,106 @@ function [LIK, lik] = diffuse_kalman_filter(T,R,Q,H,Pinf,Pstar,Y,start,Z,kalman_
 %
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
- 
-  [pp,smpl] = size(Y);
-  mm   = size(T,2);
-  a    = zeros(mm,1);
-  dF   = 1;
-  QQ   = R*Q*transpose(R);
-  t    = 0;
-  oldK = 0;
-  lik  = zeros(smpl,1);
-  LIK  = Inf;
+
+[pp,smpl] = size(Y);
+mm   = size(T,2);
+a    = zeros(mm,1);
+dF   = 1;
+QQ   = R*Q*transpose(R);
+t    = 0;
+oldK = 0;
+lik  = zeros(smpl,1);
+LIK  = Inf;
 %   lik(smpl+1) = smpl*pp*log(2*pi);
-  notsteady   = 1;
-  reste       = 0;
-  
-  while rank(Pinf,kalman_tol) && (t<smpl)
-      t = t+1;
-      v = Y(:,t)-Z*a;
-      Finf  = Z*Pinf*Z' ;
-      if rcond(Finf) < kalman_tol
-          if ~all(abs(Finf(:)) < kalman_tol)
-              % The univariate diffuse kalman filter should be used.
-              return
-          else
-              Fstar  = Z*Pstar*Z' + H;
-              if rcond(Fstar) < kalman_tol
-                  if ~all(abs(Fstar(:))<kalman_tol)
-                      % The univariate diffuse kalman filter should be used.
-                      return
-                  else
-                      a = T*a;
-                      Pstar = T*Pstar*transpose(T)+QQ;
-                      Pinf  = T*Pinf*transpose(T);
-                  end
-              else
-                  iFstar = inv(Fstar);
-                  dFstar = det(Fstar);
-                  Kstar  = Pstar*Z'*iFstar;
-                  lik(t) = log(dFstar) + v'*iFstar*v;
-                  Pinf   = T*Pinf*transpose(T);
-                  Pstar  = T*(Pstar-Pstar*Z'*Kstar')*T'+QQ;
-                  a	 = T*(a+Kstar*v);
-              end
-          end
-      else
-          lik(t) = log(det(Finf));
-          iFinf	 = inv(Finf);
-          Kinf	 = Pinf*Z'*iFinf;
-          Fstar	 = Z*Pstar*Z' + H;
-          Kstar	 = (Pstar*Z'-Kinf*Fstar)*iFinf;
-          Pstar	 = T*(Pstar-Pstar*Z'*Kinf'-Pinf*Z'*Kstar')*T'+QQ;
-          Pinf	 = T*(Pinf-Pinf*Z'*Kinf')*T';
-          a	 = T*(a+Kinf*v);
-      end
-  end
-  
-  if t == smpl
-      error(['There isn''t enough information to estimate the initial conditions of the nonstationary variables']);                   
-  end
-  
-  F_singular = 1;
-  while notsteady && (t<smpl)
-      t = t+1;
-      v = Y(:,t)-Z*a;
-      F = Z*Pstar*Z' + H;
-      oldPstar  = Pstar;
-      dF = det(F);
-      if rcond(F) < kalman_tol
-          if ~all(abs(F(:))<kalman_tol)
-              return
-          else
-              a     = T*a;
-              Pstar = T*Pstar*T'+QQ;
-          end
-      else
-          F_singular = 0;
-          iF     = inv(F);
-          lik(t) = log(dF)+v'*iF*v;
-          K      = Pstar*Z'*iF;
-          a      = T*(a+K*v);
-          Pstar  = T*(Pstar-K*Z*Pstar)*T'+QQ;
-      end
-      notsteady = ~(max(max(abs(K-oldK)))<riccati_tol);
-      oldK = K;
-  end
-  
-  if F_singular == 1
-      error(['The variance of the forecast error remains singular until the end of the sample'])
-  end
-  
-  if t < smpl
-      t0 = t;
-      while t<smpl
-          t = t+1;
-          v = Y(:,t)-Z*a;
-          a = T*(a+K*v);
-          lik(t) = v'*iF*v;
-      end
-      lik(t0:smpl) = lik(t0:smpl) + log(dF);
-  end
-    
-  lik = (lik + pp*log(2*pi))/2;
-  
-  LIK = sum(lik(start:end)); % Minus the log-likelihood.
+notsteady   = 1;
+reste       = 0;
+
+while rank(Pinf,kalman_tol) && (t<smpl)
+    t = t+1;
+    v = Y(:,t)-Z*a;
+    Finf  = Z*Pinf*Z' ;
+    if rcond(Finf) < kalman_tol
+        if ~all(abs(Finf(:)) < kalman_tol)
+            % The univariate diffuse kalman filter should be used.
+            return
+        else
+            Fstar  = Z*Pstar*Z' + H;
+            if rcond(Fstar) < kalman_tol
+                if ~all(abs(Fstar(:))<kalman_tol)
+                    % The univariate diffuse kalman filter should be used.
+                    return
+                else
+                    a = T*a;
+                    Pstar = T*Pstar*transpose(T)+QQ;
+                    Pinf  = T*Pinf*transpose(T);
+                end
+            else
+                iFstar = inv(Fstar);
+                dFstar = det(Fstar);
+                Kstar  = Pstar*Z'*iFstar;
+                lik(t) = log(dFstar) + v'*iFstar*v;
+                Pinf   = T*Pinf*transpose(T);
+                Pstar  = T*(Pstar-Pstar*Z'*Kstar')*T'+QQ;
+                a	 = T*(a+Kstar*v);
+            end
+        end
+    else
+        lik(t) = log(det(Finf));
+        iFinf	 = inv(Finf);
+        Kinf	 = Pinf*Z'*iFinf;
+        Fstar	 = Z*Pstar*Z' + H;
+        Kstar	 = (Pstar*Z'-Kinf*Fstar)*iFinf;
+        Pstar	 = T*(Pstar-Pstar*Z'*Kinf'-Pinf*Z'*Kstar')*T'+QQ;
+        Pinf	 = T*(Pinf-Pinf*Z'*Kinf')*T';
+        a	 = T*(a+Kinf*v);
+    end
+end
+
+if t == smpl
+    error(['There isn''t enough information to estimate the initial conditions of the nonstationary variables']);                   
+end
+
+F_singular = 1;
+while notsteady && (t<smpl)
+    t = t+1;
+    v = Y(:,t)-Z*a;
+    F = Z*Pstar*Z' + H;
+    oldPstar  = Pstar;
+    dF = det(F);
+    if rcond(F) < kalman_tol
+        if ~all(abs(F(:))<kalman_tol)
+            return
+        else
+            a     = T*a;
+            Pstar = T*Pstar*T'+QQ;
+        end
+    else
+        F_singular = 0;
+        iF     = inv(F);
+        lik(t) = log(dF)+v'*iF*v;
+        K      = Pstar*Z'*iF;
+        a      = T*(a+K*v);
+        Pstar  = T*(Pstar-K*Z*Pstar)*T'+QQ;
+    end
+    notsteady = ~(max(max(abs(K-oldK)))<riccati_tol);
+    oldK = K;
+end
+
+if F_singular == 1
+    error(['The variance of the forecast error remains singular until the end of the sample'])
+end
+
+if t < smpl
+    t0 = t;
+    while t<smpl
+        t = t+1;
+        v = Y(:,t)-Z*a;
+        a = T*(a+K*v);
+        lik(t) = v'*iF*v;
+    end
+    lik(t0:smpl) = lik(t0:smpl) + log(dF);
+end
+
+lik = (lik + pp*log(2*pi))/2;
+
+LIK = sum(lik(start:end)); % Minus the log-likelihood.

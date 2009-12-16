@@ -78,26 +78,26 @@ while i<n,
     dx=[];
     xh1(i)=x(i)+h1(i);
     try
-      [fx, ffx]=feval(func,xh1,varargin{:});
+        [fx, ffx]=feval(func,xh1,varargin{:});
     catch
-      fx=1.e8;
+        fx=1.e8;
     end
     it=1;
     dx=(fx-f0);
     ic=0;
-%     if abs(dx)>(2*htol),
-%         c=mr_nlincon(xh1,varargin{:});
-%         while c
-%             h1(i)=h1(i)*0.9;
-%             xh1(i)=x(i)+h1(i);
-%             c=mr_nlincon(xh1,varargin{:});        
-%             ic=1;
-%         end   
-%         if ic,
-%             [fx, ffx]=feval(func,xh1,varargin{:});
-%             dx=(fx-f0);
-%         end
-%     end
+    %     if abs(dx)>(2*htol),
+    %         c=mr_nlincon(xh1,varargin{:});
+    %         while c
+    %             h1(i)=h1(i)*0.9;
+    %             xh1(i)=x(i)+h1(i);
+    %             c=mr_nlincon(xh1,varargin{:});        
+    %             ic=1;
+    %         end   
+    %         if ic,
+    %             [fx, ffx]=feval(func,xh1,varargin{:});
+    %             dx=(fx-f0);
+    %         end
+    %     end
     
     icount = 0;
     h0=h1(i);
@@ -113,26 +113,26 @@ while i<n,
             end
             h1(i) = min(h1(i),0.5*hmax(i));
             xh1(i)=x(i)+h1(i);
-%             c=mr_nlincon(xh1,varargin{:});
-%             while c
-%                 h1(i)=h1(i)*0.9;
-%                 xh1(i)=x(i)+h1(i);
-%                 c=mr_nlincon(xh1,varargin{:});        
-%                 ic=1;
-%             end  
+            %             c=mr_nlincon(xh1,varargin{:});
+            %             while c
+            %                 h1(i)=h1(i)*0.9;
+            %                 xh1(i)=x(i)+h1(i);
+            %                 c=mr_nlincon(xh1,varargin{:});        
+            %                 ic=1;
+            %             end  
             try 
-            [fx, ffx]=feval(func,xh1,varargin{:});
+                [fx, ffx]=feval(func,xh1,varargin{:});
             catch
-              fx=1.e8;
+                fx=1.e8;
             end
         end
         if abs(dx(it))>(2*htol),
             h1(i)= htol/abs(dx(it))*h1(i);
             xh1(i)=x(i)+h1(i);
             try
-              [fx, ffx]=feval(func,xh1,varargin{:});
+                [fx, ffx]=feval(func,xh1,varargin{:});
             catch
-              fx=1.e8;
+                fx=1.e8;
             end
             while (fx-f0)==0,
                 h1(i)= h1(i)*2;
@@ -166,31 +166,31 @@ while i<n,
     %     end
     f1(:,i)=fx;
     if any(isnan(ffx)),
-      ff1=ones(size(ff0)).*fx/length(ff0);
+        ff1=ones(size(ff0)).*fx/length(ff0);
     else
-      ff1=ffx;
+        ff1=ffx;
     end
     if hflag,  % two point based derivatives
         xh1(i)=x(i)-h1(i);
-%         c=mr_nlincon(xh1,varargin{:});
-%        ic=0;
-%         while c
-%             h1(i)=h1(i)*0.9;
-%             xh1(i)=x(i)-h1(i);
-%             c=mr_nlincon(xh1,varargin{:});  
-%             ic = 1;
-%         end    
+        %         c=mr_nlincon(xh1,varargin{:});
+        %        ic=0;
+        %         while c
+        %             h1(i)=h1(i)*0.9;
+        %             xh1(i)=x(i)-h1(i);
+        %             c=mr_nlincon(xh1,varargin{:});  
+        %             ic = 1;
+        %         end    
         [fx, ffx]=feval(func,xh1,varargin{:});
         f_1(:,i)=fx;
         if any(isnan(ffx)),
-          ff_1=ones(size(ff0)).*fx/length(ff0);
+            ff_1=ones(size(ff0)).*fx/length(ff0);
         else
-          ff_1=ffx;
+            ff_1=ffx;
         end
-%         if ic,
-%             xh1(i)=x(i)+h1(i);
-%             [f1(:,i), ff1]=feval(func,xh1,varargin{:});
-%         end
+        %         if ic,
+        %             xh1(i)=x(i)+h1(i);
+        %             [f1(:,i), ff1]=feval(func,xh1,varargin{:});
+        %         end
         ggh(:,i)=(ff1-ff_1)./(2.*h1(i));
     else
         ggh(:,i)=(ff1-ff0)./h1(i);
@@ -231,27 +231,27 @@ if hflag==2,
             xh_1(j)=x(j)-h_1(j);
             %hessian_mat(:,(i-1)*n+j)=-(-feval(func,xh1,varargin{:})-feval(func,xh_1,varargin{:})+temp(:,i)+temp(:,j))./(2*h1(i)*h_1(j));
             %temp1 = feval(func,xh1,varargin{:});
-%             c=mr_nlincon(xh1,varargin{:});
-%             lam=1;
-%             while c, 
-%                 lam=lam*0.9;
-%                 xh1(i)=x(i)+h1(i)*lam;
-%                 xh1(j)=x(j)+h_1(j)*lam;
-%                 %disp( ['hessian warning cross ', num2str(c) ]), 
-%                 c=mr_nlincon(xh1,varargin{:});
-%             end
-%             temp1 = f0+(feval(func,xh1,varargin{:})-f0)/lam;
+            %             c=mr_nlincon(xh1,varargin{:});
+            %             lam=1;
+            %             while c, 
+            %                 lam=lam*0.9;
+            %                 xh1(i)=x(i)+h1(i)*lam;
+            %                 xh1(j)=x(j)+h_1(j)*lam;
+            %                 %disp( ['hessian warning cross ', num2str(c) ]), 
+            %                 c=mr_nlincon(xh1,varargin{:});
+            %             end
+            %             temp1 = f0+(feval(func,xh1,varargin{:})-f0)/lam;
             temp1 = feval(func,xh1,varargin{:});
             
-%             c=mr_nlincon(xh_1,varargin{:});
-%             while c, 
-%                 lam=lam*0.9;
-%                 xh_1(i)=x(i)-h1(i)*lam;
-%                 xh_1(j)=x(j)-h_1(j)*lam;
-%                 %disp( ['hessian warning cross ', num2str(c) ]), 
-%                 c=mr_nlincon(xh_1,varargin{:});
-%             end
-%             temp2 = f0+(feval(func,xh_1,varargin{:})-f0)/lam;
+            %             c=mr_nlincon(xh_1,varargin{:});
+            %             while c, 
+            %                 lam=lam*0.9;
+            %                 xh_1(i)=x(i)-h1(i)*lam;
+            %                 xh_1(j)=x(j)-h_1(j)*lam;
+            %                 %disp( ['hessian warning cross ', num2str(c) ]), 
+            %                 c=mr_nlincon(xh_1,varargin{:});
+            %             end
+            %             temp2 = f0+(feval(func,xh_1,varargin{:})-f0)/lam;
             temp2 = feval(func,xh_1,varargin{:});
             
             hessian_mat(:,(i-1)*n+j)=-(-temp1 -temp2+temp(:,i)+temp(:,j))./(2*h1(i)*h_1(j));
@@ -304,12 +304,12 @@ if hflag>0 & min(eig(reshape(hessian_mat,n,n)))>0,
     igg=inv(A)'*ihh*inv(A);  % inverted rescaled outer product hessian with modified std's
     hh_mat=inv(igg);   % outer product rescaled hessian with modified std's
     hh_mat0=inv(A)'*hh_mat*inv(A);  % outer product hessian with modified std's
-%     sd0=sqrt(1./diag(hh0));   %rescaled 'standard errors' using second order derivatives
-%     sd=sqrt(diag(igg));  %rescaled 'standard errors' using outer product
-%     igg=igg./(sd*sd').*(sd0*sd0');  %rescaled inverse outer product with 'true' std's
-%     hh_mat=inv(igg);   % rescaled outer product hessian with 'true' std's
-%     ihh=A'*igg*A;  % inverted outer product hessian
-%     hh_mat0=inv(A)'*hh_mat*inv(A);  % outer product hessian with 'true' std's
+                                    %     sd0=sqrt(1./diag(hh0));   %rescaled 'standard errors' using second order derivatives
+                                    %     sd=sqrt(diag(igg));  %rescaled 'standard errors' using outer product
+                                    %     igg=igg./(sd*sd').*(sd0*sd0');  %rescaled inverse outer product with 'true' std's
+                                    %     hh_mat=inv(igg);   % rescaled outer product hessian with 'true' std's
+                                    %     ihh=A'*igg*A;  % inverted outer product hessian
+                                    %     hh_mat0=inv(A)'*hh_mat*inv(A);  % outer product hessian with 'true' std's
 end
 if hflag<2,
     hessian_mat=hh_mat0(:);

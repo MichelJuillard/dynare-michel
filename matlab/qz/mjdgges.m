@@ -37,7 +37,7 @@ function [ss,tt,w,sdim,eigval,info] = mjdgges(e,d,qz_criterium)
 %
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
-    
+
 % Chek number of inputs and outputs.
 if nargin>3 | nargin<2
     error('Three or two input arguments required!')

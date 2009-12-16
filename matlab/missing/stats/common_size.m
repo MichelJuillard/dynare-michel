@@ -36,38 +36,38 @@ function [errorcode, varargout] = common_size (varargin)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-  if (nargin < 2)
+if (nargin < 2)
     error ('common_size: only makes sense if nargin >= 2');
-  end
+end
 
-  len = 2;
-  for i = 1 : nargin
+len = 2;
+for i = 1 : nargin
     sz =  size (varargin{i});
     if (length (sz) < len)
-      s(i,:) = [sz, ones(1,len - length(sz))];
+        s(i,:) = [sz, ones(1,len - length(sz))];
     else
-      if (length (sz) > len)
-        if (i > 1)
-          s = [s, ones(size(s,1), length(sz) - len)];
+        if (length (sz) > len)
+            if (i > 1)
+                s = [s, ones(size(s,1), length(sz) - len)];
+            end
+            len = length (sz);
         end
-        len = length (sz);
-      end
-      s(i,:) = sz;
+        s(i,:) = sz;
     end
-  end
+end
 
-  m = max (s);
-  if (any (any ((s ~= 1)') & any ((s ~= ones (nargin, 1) * m)')))
+m = max (s);
+if (any (any ((s ~= 1)') & any ((s ~= ones (nargin, 1) * m)')))
     errorcode = 1;
     varargout = varargin;
-  else
+else
     errorcode = 0;
     for i = 1 : nargin
-      varargout{i} = varargin{i};
-      if (prod (s(i,:)) == 1)
-        varargout{i} = varargout{i} * ones (m);
-      end
+        varargout{i} = varargin{i};
+        if (prod (s(i,:)) == 1)
+            varargout{i} = varargout{i} * ones (m);
+        end
     end
-  end
+end
 
 end

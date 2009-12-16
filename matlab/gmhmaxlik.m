@@ -1,5 +1,5 @@
 function [PostMod,PostVar,Scale,PostMean] = ...
-  gmhmaxlik(ObjFun,xparam1,mh_bounds,num,iScale,info,MeanPar,VarCov,varargin)  
+    gmhmaxlik(ObjFun,xparam1,mh_bounds,num,iScale,info,MeanPar,VarCov,varargin)  
 
 %function [PostMod,PostVar,Scale,PostMean] = ...
 %gmhmaxlik(ObjFun,xparam1,mh_bounds,num,iScale,info,MeanPar,VarCov,varargin)  
@@ -103,43 +103,43 @@ catch
     dd = eye(length(CovJump));
 end
 while j<=MaxNumberOfTuningSimulations
-  proposal = iScale*dd*randn(npar,1) + ix2;
-  if all(proposal > mh_bounds(:,1)) & all(proposal < mh_bounds(:,2))
-    logpo2 = - feval(ObjFun,proposal,varargin{:});
-  else
-    logpo2 = -inf;
-  end
-  % I move if the proposal is enough likely...
-  if logpo2 > -inf & log(rand) < logpo2 - ilogpo2
-    ix2 = proposal; 
-    if logpo2 > mlogpo2
-      ModePar = proposal;
-      mlogpo2 = logpo2;
-    end
-    ilogpo2 = logpo2;
-    isux = isux + 1;
-    jsux = jsux + 1;
-  end% ... otherwise I don't move.
-  prtfrc = j/MaxNumberOfTuningSimulations;
-  waitbar(prtfrc,hh,sprintf('Acceptation rates: %f [%f]',isux/j,jsux/jj));
-  if  j/500 == round(j/500)
-    test1 = jsux/jj;
-    cfactor = test1/AcceptanceTarget;
-    if cfactor>0
-        iScale = iScale*cfactor;
+    proposal = iScale*dd*randn(npar,1) + ix2;
+    if all(proposal > mh_bounds(:,1)) & all(proposal < mh_bounds(:,2))
+        logpo2 = - feval(ObjFun,proposal,varargin{:});
     else
-        iScale = iScale/10;
+        logpo2 = -inf;
     end
-    jsux = 0; jj = 0;
-    if cfactor>0.90 && cfactor<1.10
-      test = test+1;
+    % I move if the proposal is enough likely...
+    if logpo2 > -inf & log(rand) < logpo2 - ilogpo2
+        ix2 = proposal; 
+        if logpo2 > mlogpo2
+            ModePar = proposal;
+            mlogpo2 = logpo2;
+        end
+        ilogpo2 = logpo2;
+        isux = isux + 1;
+        jsux = jsux + 1;
+    end% ... otherwise I don't move.
+    prtfrc = j/MaxNumberOfTuningSimulations;
+    waitbar(prtfrc,hh,sprintf('Acceptation rates: %f [%f]',isux/j,jsux/jj));
+    if  j/500 == round(j/500)
+        test1 = jsux/jj;
+        cfactor = test1/AcceptanceTarget;
+        if cfactor>0
+            iScale = iScale*cfactor;
+        else
+            iScale = iScale/10;
+        end
+        jsux = 0; jj = 0;
+        if cfactor>0.90 && cfactor<1.10
+            test = test+1;
+        end
+        if test>4
+            break
+        end
     end
-    if test>4
-      break
-    end
-  end
-  j = j+1;
-  jj = jj + 1;
+    j = j+1;
+    jj = jj + 1;
 end
 close(hh);
 iScale
@@ -150,31 +150,31 @@ j = 1;
 isux = 0;
 ilogpo2 = - feval(ObjFun,ix2,varargin{:});
 while j<= NumberOfIterations
-  proposal = iScale*dd*randn(npar,1) + ix2;
-  if all(proposal > mh_bounds(:,1)) & all(proposal < mh_bounds(:,2))
-    logpo2 = - feval(ObjFun,proposal,varargin{:});
-  else
-    logpo2 = -inf;
-  end
-  % I move if the proposal is enough likely...
-  if logpo2 > -inf & log(rand) < logpo2 - ilogpo2
-    ix2 = proposal;
-    if logpo2 > mlogpo2
-      ModePar = proposal;
-      mlogpo2 = logpo2;
+    proposal = iScale*dd*randn(npar,1) + ix2;
+    if all(proposal > mh_bounds(:,1)) & all(proposal < mh_bounds(:,2))
+        logpo2 = - feval(ObjFun,proposal,varargin{:});
+    else
+        logpo2 = -inf;
     end
-    ilogpo2 = logpo2;
-    isux = isux + 1;
-    jsux = jsux + 1;
-  end% ... otherwise I don't move.	
-  prtfrc = j/NumberOfIterations;
-  waitbar(prtfrc,hh,sprintf('%f done, acceptation rate %f',prtfrc,isux/j));
-  % I update the covariance matrix and the mean:
-  oldMeanPar = MeanPar;
-  MeanPar = oldMeanPar + (1/j)*(ix2-oldMeanPar);
-  CovJump = CovJump + oldMeanPar*oldMeanPar' - MeanPar*MeanPar' + ...
-                 (1/j)*(ix2*ix2' - CovJump - oldMeanPar*oldMeanPar');
-  j = j+1;
+    % I move if the proposal is enough likely...
+    if logpo2 > -inf & log(rand) < logpo2 - ilogpo2
+        ix2 = proposal;
+        if logpo2 > mlogpo2
+            ModePar = proposal;
+            mlogpo2 = logpo2;
+        end
+        ilogpo2 = logpo2;
+        isux = isux + 1;
+        jsux = jsux + 1;
+    end% ... otherwise I don't move.	
+    prtfrc = j/NumberOfIterations;
+    waitbar(prtfrc,hh,sprintf('%f done, acceptation rate %f',prtfrc,isux/j));
+    % I update the covariance matrix and the mean:
+    oldMeanPar = MeanPar;
+    MeanPar = oldMeanPar + (1/j)*(ix2-oldMeanPar);
+    CovJump = CovJump + oldMeanPar*oldMeanPar' - MeanPar*MeanPar' + ...
+              (1/j)*(ix2*ix2' - CovJump - oldMeanPar*oldMeanPar');
+    j = j+1;
 end
 close(hh);
 PostVar = CovJump;
@@ -183,97 +183,97 @@ PostMean = MeanPar;
 %% this is the last call to the routine, and I climb the hill (without
 %% updating the covariance matrix)...
 if strcmpi(info,'LastCall')
-  hh = waitbar(0,'Tuning of the scale parameter...');
-  set(hh,'Name','Tuning of the scale parameter.')
-  j = 1; jj  = 1;
-  isux = 0; jsux = 0;
-  test = 0;
-  ilogpo2 = - feval(ObjFun,ix2,varargin{:});% initial posterior density
-  dd = transpose(chol(CovJump));
-  while j<=MaxNumberOfTuningSimulations
-    proposal = iScale*dd*randn(npar,1) + ix2;
-    if all(proposal > mh_bounds(:,1)) & all(proposal < mh_bounds(:,2))
-      logpo2 = - feval(ObjFun,proposal,varargin{:});
-    else
-      logpo2 = -inf;
+    hh = waitbar(0,'Tuning of the scale parameter...');
+    set(hh,'Name','Tuning of the scale parameter.')
+    j = 1; jj  = 1;
+    isux = 0; jsux = 0;
+    test = 0;
+    ilogpo2 = - feval(ObjFun,ix2,varargin{:});% initial posterior density
+    dd = transpose(chol(CovJump));
+    while j<=MaxNumberOfTuningSimulations
+        proposal = iScale*dd*randn(npar,1) + ix2;
+        if all(proposal > mh_bounds(:,1)) & all(proposal < mh_bounds(:,2))
+            logpo2 = - feval(ObjFun,proposal,varargin{:});
+        else
+            logpo2 = -inf;
+        end
+        % I move if the proposal is enough likely...
+        if logpo2 > -inf & log(rand) < logpo2 - ilogpo2
+            ix2 = proposal;
+            if logpo2 > mlogpo2
+                ModePar = proposal;
+                mlogpo2 = logpo2;
+            end
+            ilogpo2 = logpo2;
+            isux = isux + 1;
+            jsux = jsux + 1;
+        end% ... otherwise I don't move.
+        prtfrc = j/MaxNumberOfTuningSimulations;
+        waitbar(prtfrc,hh,sprintf('Acceptation rates: %f [%f]',isux/j,jsux/jj));
+        if j/1000 == round(j/1000) 
+            test1 = jsux/jj;  
+            cfactor = test1/AcceptanceTarget;
+            iScale = iScale*cfactor;
+            jsux = 0; jj = 0;
+            if cfactor>0.90 && cfactor<1.10
+                test = test+1;
+            end
+            if test>4
+                break
+            end
+        end
+        j = j+1;
+        jj = jj + 1;
     end
-    % I move if the proposal is enough likely...
-    if logpo2 > -inf & log(rand) < logpo2 - ilogpo2
-      ix2 = proposal;
-      if logpo2 > mlogpo2
-	ModePar = proposal;
-	mlogpo2 = logpo2;
-      end
-      ilogpo2 = logpo2;
-      isux = isux + 1;
-      jsux = jsux + 1;
-    end% ... otherwise I don't move.
-    prtfrc = j/MaxNumberOfTuningSimulations;
-    waitbar(prtfrc,hh,sprintf('Acceptation rates: %f [%f]',isux/j,jsux/jj));
-    if j/1000 == round(j/1000) 
-      test1 = jsux/jj;  
-      cfactor = test1/AcceptanceTarget;
-      iScale = iScale*cfactor;
-      jsux = 0; jj = 0;
-      if cfactor>0.90 && cfactor<1.10
-	test = test+1;
-      end
-      if test>4
-	break
-      end
-    end
-    j = j+1;
-    jj = jj + 1;
-  end
-  close(hh);
-  Scale = iScale;
-  iScale
-  %%
-  %% Now I climb the hill
-  %%
-  climb = 1;
-  if climb
-  hh = waitbar(0,' ');
-  set(hh,'Name','Now I am climbing the hill...')
-  j = 1; jj  = 1;
-  jsux = 0;
-  test = 0;
-  while j<=MaxNumberOfClimbingSimulations
-    proposal = iScale*dd*randn(npar,1) + ModePar;
-    if all(proposal > mh_bounds(:,1)) & all(proposal < mh_bounds(:,2))
-      logpo2 = - feval(ObjFun,proposal,varargin{:});
-    else
-      logpo2 = -inf;
-    end
-    if logpo2 > mlogpo2% I move if the proposal is higher...
-      ModePar = proposal;
-      mlogpo2 = logpo2;
-      jsux = jsux + 1;
-    end% otherwise I don't move...
-    prtfrc = j/MaxNumberOfClimbingSimulations;
-    waitbar(prtfrc,hh,sprintf('%f Jumps / MaxStepSize %f',jsux,sqrt(max(diag(iScale*CovJump)))));  
-    if  j/200 == round(j/200)
-      if jsux<=1
-	test = test+1;
-      else
+    close(hh);
+    Scale = iScale;
+    iScale
+    %%
+    %% Now I climb the hill
+    %%
+    climb = 1;
+    if climb
+        hh = waitbar(0,' ');
+        set(hh,'Name','Now I am climbing the hill...')
+        j = 1; jj  = 1;
+        jsux = 0;
         test = 0;
-      end
-      jsux = 0;
-      jj = 0;
-      if test>4% If I do not progress enough I reduce the scale parameter
-               % of the jumping distribution (cooling down the system).
-        iScale = iScale/1.10;
-      end
-      if sqrt(max(diag(iScale*CovJump)))<10^(-4)
-        break% Steps are too small!
-      end
-    end
-    j = j+1;
-    jj = jj + 1;
-  end
-  close(hh);
-  end%climb
+        while j<=MaxNumberOfClimbingSimulations
+            proposal = iScale*dd*randn(npar,1) + ModePar;
+            if all(proposal > mh_bounds(:,1)) & all(proposal < mh_bounds(:,2))
+                logpo2 = - feval(ObjFun,proposal,varargin{:});
+            else
+                logpo2 = -inf;
+            end
+            if logpo2 > mlogpo2% I move if the proposal is higher...
+                ModePar = proposal;
+                mlogpo2 = logpo2;
+                jsux = jsux + 1;
+            end% otherwise I don't move...
+            prtfrc = j/MaxNumberOfClimbingSimulations;
+            waitbar(prtfrc,hh,sprintf('%f Jumps / MaxStepSize %f',jsux,sqrt(max(diag(iScale*CovJump)))));  
+            if  j/200 == round(j/200)
+                if jsux<=1
+                    test = test+1;
+                else
+                    test = 0;
+                end
+                jsux = 0;
+                jj = 0;
+                if test>4% If I do not progress enough I reduce the scale parameter
+                         % of the jumping distribution (cooling down the system).
+                    iScale = iScale/1.10;
+                end
+                if sqrt(max(diag(iScale*CovJump)))<10^(-4)
+                    break% Steps are too small!
+                end
+            end
+            j = j+1;
+            jj = jj + 1;
+        end
+        close(hh);
+    end%climb
 else
-  Scale = iScale;
+    Scale = iScale;
 end
 PostMod = ModePar;

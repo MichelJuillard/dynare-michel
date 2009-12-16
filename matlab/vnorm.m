@@ -57,8 +57,8 @@ ntype = [];
 if nargin>1
     dim = varargin{1};
     if isempty(dim)
-       idx = find(size(A)~=1);
-       dim = idx(1);
+        idx = find(size(A)~=1);
+        dim = idx(1);
     elseif dim~=floor(dim) || dim<1
         error('Dimension must be positive integer');
     end

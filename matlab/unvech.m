@@ -23,13 +23,13 @@ function Matrix = unvech(Vector)
 %
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
-    m = length(Vector);
-    n = (sqrt(1+8*m)-1)/2;
-    b = 0;
-    Matrix = NaN(n,n);
-    for col = 1:n
-        idx = 1:col;
-        Matrix(1:col,col) = Vector(b+idx);
-        Matrix(col,1:col) = transpose(Matrix(1:col,col));
-        b = b+length(idx);
-    end
+m = length(Vector);
+n = (sqrt(1+8*m)-1)/2;
+b = 0;
+Matrix = NaN(n,n);
+for col = 1:n
+    idx = 1:col;
+    Matrix(1:col,col) = Vector(b+idx);
+    Matrix(col,1:col) = transpose(Matrix(1:col,col));
+    b = b+length(idx);
+end

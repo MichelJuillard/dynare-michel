@@ -31,8 +31,8 @@ function save_results(x,s_name,names)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-  global oo_
-  
-  for i=1:size(x,2)
+global oo_
+
+for i=1:size(x,2)
     eval([s_name deblank(names(i,:)) '= x(:,i);']);
-  end
+end

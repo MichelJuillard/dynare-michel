@@ -17,4 +17,4 @@ function k = symmetric_matrix_index(i,j,n)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-    k = (i-1)*n+j-i*(i-1)/2;
+k = (i-1)*n+j-i*(i-1)/2;

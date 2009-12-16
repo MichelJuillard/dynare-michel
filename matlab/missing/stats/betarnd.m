@@ -31,7 +31,7 @@ function rnd = betarnd(a, b)
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
 if (nargin ~= 2)
-  error('betarnd: you must give two arguments');
+    error('betarnd: you must give two arguments');
 end
 
 if (any(a<0)) || (any(b<0)) || (any(a==Inf)) || (any(b==Inf))

@@ -19,4 +19,4 @@ function r = rows(x)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-  r = size(x,1);
+r = size(x,1);

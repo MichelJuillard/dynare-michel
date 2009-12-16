@@ -35,16 +35,16 @@ global M_ options_ oo_ estim_params_
 global bayestopt_
 
 if nargin<2 | isempty(igsa),
-  igsa=0;
+    igsa=0;
 end
 
 options_.varlist = var_list_;
 options_.lgyidx2varobs = zeros(size(M_.endo_names,1),1);
 for i = 1:size(M_.endo_names,1)
-  tmp = strmatch(deblank(M_.endo_names(i,:)),options_.varobs,'exact');
-  if ~isempty(tmp)
-    options_.lgyidx2varobs(i,1) = tmp;
-  end
+    tmp = strmatch(deblank(M_.endo_names(i,:)),options_.varobs,'exact');
+    if ~isempty(tmp)
+        options_.lgyidx2varobs(i,1) = tmp;
+    end
 end
 
 if ~isempty(strmatch('dsge_prior_weight',M_.param_names))
@@ -82,7 +82,7 @@ if ~isempty(estim_params_)
     if any(bayestopt_.pshape > 0)
 	if options_.mode_compute
 	    plot_priors
-	end
+ end
     else
 	options_.mh_replic = 0;
     end
@@ -125,19 +125,19 @@ np  = estim_params_.np ;
 nx  = nvx+nvn+ncx+ncn+np;
 
 if ~isfield(options_,'trend_coeffs')
-  bayestopt_.with_trend = 0;
+    bayestopt_.with_trend = 0;
 else
-  bayestopt_.with_trend = 1;
-  bayestopt_.trend_coeff = {};
-  trend_coeffs = options_.trend_coeffs;
-  nt = length(trend_coeffs);
-  for i=1:n_varobs
-    if i > length(trend_coeffs)
-      bayestopt_.trend_coeff{i} = '0';
-    else
-      bayestopt_.trend_coeff{i} = trend_coeffs{i};
+    bayestopt_.with_trend = 1;
+    bayestopt_.trend_coeff = {};
+    trend_coeffs = options_.trend_coeffs;
+    nt = length(trend_coeffs);
+    for i=1:n_varobs
+        if i > length(trend_coeffs)
+            bayestopt_.trend_coeff{i} = '0';
+        else
+            bayestopt_.trend_coeff{i} = trend_coeffs{i};
+        end
     end
-  end
 end
 
 bayestopt_.penalty = 1e8;	% penalty 
@@ -148,7 +148,7 @@ npred = dr.npred;
 nspred = dr.nspred;
 
 if isempty(options_.varobs)
-  error('ESTIMATION: VAROBS is missing')
+    error('ESTIMATION: VAROBS is missing')
 end
 
 %% Setting resticted state space (observed + predetermined variables)
@@ -156,8 +156,8 @@ end
 k = [];
 k1 = [];
 for i=1:n_varobs
-  k = [k strmatch(deblank(options_.varobs(i,:)),M_.endo_names(dr.order_var,:),'exact')];
-  k1 = [k1 strmatch(deblank(options_.varobs(i,:)),M_.endo_names, 'exact')];
+    k = [k strmatch(deblank(options_.varobs(i,:)),M_.endo_names(dr.order_var,:),'exact')];
+    k1 = [k1 strmatch(deblank(options_.varobs(i,:)),M_.endo_names, 'exact')];
 end
 % union of observed and state variables
 k2 = union(k',[dr.nstatic+1:dr.nstatic+dr.npred]');
@@ -187,42 +187,42 @@ bayestopt_.restrict_aux = aux;
 
 %% Initialization with unit-root variables
 if ~isempty(options_.unit_root_vars)
-  n_ur = size(options_.unit_root_vars,1);
-  i_ur = zeros(n_ur,1);
-  for i=1:n_ur
-    i1 = strmatch(deblank(options_.unit_root_vars(i,:)),M_.endo_names(dr.order_var,:),'exact');
-    if isempty(i1)
-      error('Undeclared variable in unit_root_vars statement')
+    n_ur = size(options_.unit_root_vars,1);
+    i_ur = zeros(n_ur,1);
+    for i=1:n_ur
+        i1 = strmatch(deblank(options_.unit_root_vars(i,:)),M_.endo_names(dr.order_var,:),'exact');
+        if isempty(i1)
+            error('Undeclared variable in unit_root_vars statement')
+        end
+        i_ur(i) = i1;
     end
-    i_ur(i) = i1;
-  end
-  bayestopt_.var_list_stationary = setdiff((1:M_.endo_nbr)',i_ur);
-  [junk,bayestopt_.restrict_var_list_nonstationary] = ...
-      intersect(bayestopt_.restrict_var_list,i_ur);
-  bayestopt_.restrict_var_list_stationary = ...
-      setdiff((1:length(bayestopt_.restrict_var_list))', ...
-              bayestopt_.restrict_var_list_nonstationary);
-  if M_.maximum_lag > 1
-    l1 = flipud([cumsum(M_.lead_lag_incidence(1:M_.maximum_lag-1,dr.order_var),1);ones(1,M_.endo_nbr)]);
-    l2 = l1(:,bayestopt_.restrict_var_list);
-    il2 = find(l2' > 0);
-    l2(il2) = (1:length(il2))';
+    bayestopt_.var_list_stationary = setdiff((1:M_.endo_nbr)',i_ur);
+    [junk,bayestopt_.restrict_var_list_nonstationary] = ...
+        intersect(bayestopt_.restrict_var_list,i_ur);
     bayestopt_.restrict_var_list_stationary = ...
-	nonzeros(l2(:,bayestopt_.restrict_var_list_stationary)); 
-    bayestopt_.restrict_var_list_nonstationary = ...
-	nonzeros(l2(:,bayestopt_.restrict_var_list_nonstationary)); 
-  end
-  options_.lik_init = 3;
+        setdiff((1:length(bayestopt_.restrict_var_list))', ...
+                bayestopt_.restrict_var_list_nonstationary);
+    if M_.maximum_lag > 1
+        l1 = flipud([cumsum(M_.lead_lag_incidence(1:M_.maximum_lag-1,dr.order_var),1);ones(1,M_.endo_nbr)]);
+        l2 = l1(:,bayestopt_.restrict_var_list);
+        il2 = find(l2' > 0);
+        l2(il2) = (1:length(il2))';
+        bayestopt_.restrict_var_list_stationary = ...
+            nonzeros(l2(:,bayestopt_.restrict_var_list_stationary)); 
+        bayestopt_.restrict_var_list_nonstationary = ...
+            nonzeros(l2(:,bayestopt_.restrict_var_list_nonstationary)); 
+    end
+    options_.lik_init = 3;
 end % if ~isempty(options_.unit_root_vars)
 
 if isempty(options_.datafile),
-  if igsa,
-    data=[];
-    rawdata=[];
-    return,
-  else
-    error('ESTIMATION: datafile option is missing'),
-  end
+    if igsa,
+        data=[];
+        rawdata=[];
+        return,
+    else
+        error('ESTIMATION: datafile option is missing'),
+    end
 end
 
 %% If jscale isn't specified for an estimated parameter, use
@@ -238,17 +238,17 @@ gend = options_.nobs;
 
 rawdata = rawdata(options_.first_obs:options_.first_obs+gend-1,:);
 if options_.loglinear == 1 & ~options_.logdata
-  rawdata = log(rawdata);
+    rawdata = log(rawdata);
 end
 if options_.prefilter == 1
-  bayestopt_.mean_varobs = mean(rawdata,1)';
-  data = transpose(rawdata-repmat(bayestopt_.mean_varobs',gend,1));
+    bayestopt_.mean_varobs = mean(rawdata,1)';
+    data = transpose(rawdata-repmat(bayestopt_.mean_varobs',gend,1));
 else
-  data = transpose(rawdata);
+    data = transpose(rawdata);
 end
 
 if ~isreal(rawdata)
-  error(['There are complex values in the data. Probably  a wrong' ...
-	 ' transformation'])
+    error(['There are complex values in the data. Probably  a wrong' ...
+           ' transformation'])
 end
 

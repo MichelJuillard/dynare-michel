@@ -36,15 +36,15 @@ global  it_ means_
 order = options_.order;
 replic = options_.replic;
 if replic == 0
-  replic = 1;
+    replic = 1;
 end
 seed = options_.simul_seed;
 
 it_ = M_.maximum_lag + 1 ;
 
 if replic > 1
-  fname = [M_.fname,'_simul'];
-  fh = fopen(fname,'w+');
+    fname = [M_.fname,'_simul'];
+    fh = fopen(fname,'w+');
 end
 
 % eliminate shocks with 0 variance
@@ -54,22 +54,22 @@ oo_.exo_simul = zeros(M_.maximum_lag+M_.maximum_lead+options_.periods,M_.exo_nbr
 chol_S = chol(M_.Sigma_e(i_exo_var,i_exo_var));
 
 for i=1:replic
-  if isempty(seed)
-    randn('state',sum(100*clock));
-  else
-    randn('state',seed+i-1);
-  end
-  if ~isempty(M_.Sigma_e)
-    oo_.exo_simul(:,i_exo_var) = randn(M_.maximum_lag+M_.maximum_lead+options_.periods,nxs)*chol_S;
-  end
-  y_ = simult_(ys,dr,oo_.exo_simul,order);
-  if replic > 1
-    fwrite(fh,y_(:,M_.maximum_lag+1:end),'float64');
-  end
+    if isempty(seed)
+        randn('state',sum(100*clock));
+    else
+        randn('state',seed+i-1);
+    end
+    if ~isempty(M_.Sigma_e)
+        oo_.exo_simul(:,i_exo_var) = randn(M_.maximum_lag+M_.maximum_lead+options_.periods,nxs)*chol_S;
+    end
+    y_ = simult_(ys,dr,oo_.exo_simul,order);
+    if replic > 1
+        fwrite(fh,y_(:,M_.maximum_lag+1:end),'float64');
+    end
 end
 
 if replic > 1
-  fclose(fh);
+    fclose(fh);
 end
 
 

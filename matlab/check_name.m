@@ -17,4 +17,4 @@ function n = check_name(vartan,varname)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-    n = strmatch(varname,vartan,'exact');
+n = strmatch(varname,vartan,'exact');

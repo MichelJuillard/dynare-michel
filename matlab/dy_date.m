@@ -17,8 +17,7 @@ function y=dy_date(year,period)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-  global M_
-  
-  y = M_.freq*(year-M_.start_date(1))+period-M_.start_date(2)+1;
-  
-  
+global M_
+
+y = M_.freq*(year-M_.start_date(1))+period-M_.start_date(2)+1;
+

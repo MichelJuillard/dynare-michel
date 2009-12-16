@@ -27,21 +27,21 @@ function pdf = stdnormal_pdf (x)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-  if (nargin ~= 1)
+if (nargin ~= 1)
     error('stdnormal_pdf: you should provide one argument');
-  end
+end
 
-  sz = size(x);
-  pdf = zeros (sz);
+sz = size(x);
+pdf = zeros (sz);
 
-  k = find (isnan (x));
-  if (any (k))
+k = find (isnan (x));
+if (any (k))
     pdf(k) = NaN;
-  end
+end
 
-  k = find (~isinf (x));
-  if (any (k))
+k = find (~isinf (x));
+if (any (k))
     pdf (k) = (2 * pi)^(- 1/2) * exp (- x(k) .^ 2 / 2);
-  end
+end
 
 end

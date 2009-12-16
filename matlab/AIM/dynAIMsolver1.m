@@ -73,7 +73,7 @@ lli=M_.lead_lag_incidence';
 theAIM_H(:,find(lli(:)))=jacobia_(:,nonzeros(lli(:)));
 condn  = 1.e-10;%SPAmalg uses this in zero tests
 uprbnd = 1 + 1.e-6;%allow unit roots
-% forward only models - AIM must have at least 1 lead and 1 lag.
+                   % forward only models - AIM must have at least 1 lead and 1 lag.
 if lags ==0
     theAIM_H =[zeros(neq) theAIM_H];
     lags=1;
@@ -110,17 +110,17 @@ if aimcode==1 %if OK
     dr.ghx= bb_ord(:,find(i_lagged_vars(:))); % get columns reported in
                                               % Dynare solution
     if M_.exo_nbr % if there are exogenous shocks then derive gu for the shocks:
-    %   get H0 and H+1=HM
-    %    theH0= theAIM_H (:,M_.maximum_endo_lag*neq+1: (M_.maximum_endo_lag+1)*neq);
-        %theH0= theAIM_H (:,lags*neq+1: (lags+1)*neq);
-    %    theHP= theAIM_H (:,(M_.maximum_endo_lag+1)*neq+1: (M_.maximum_endo_lag+2)*neq);
-        %theHP= theAIM_H (:,(lags+1)*neq+1: (lags+2)*neq);
+                  %   get H0 and H+1=HM
+                  %    theH0= theAIM_H (:,M_.maximum_endo_lag*neq+1: (M_.maximum_endo_lag+1)*neq);
+                  %theH0= theAIM_H (:,lags*neq+1: (lags+1)*neq);
+                  %    theHP= theAIM_H (:,(M_.maximum_endo_lag+1)*neq+1: (M_.maximum_endo_lag+2)*neq);
+                  %theHP= theAIM_H (:,(lags+1)*neq+1: (lags+2)*neq);
         theAIM_Psi= - jacobia_(:, size(nonzeros(lli(:)))+1:end);% 
-        %? = inv(H0 + H1B1)
-        %phi= (theH0+theHP*sparse(bb(:,(lags-1)*neq+1:end)))\eye( neq);
-        %AIM_ghu=phi*theAIM_Psi;
-        %dr.ghu =AIM_ghu(dr.order_var,:); % order gu
-        % Using AIM SPObstruct
+                                                                %? = inv(H0 + H1B1)
+                                                                %phi= (theH0+theHP*sparse(bb(:,(lags-1)*neq+1:end)))\eye( neq);
+                                                                %AIM_ghu=phi*theAIM_Psi;
+                                                                %dr.ghu =AIM_ghu(dr.order_var,:); % order gu
+                                                                % Using AIM SPObstruct
         scof = SPObstruct(theAIM_H,bb,neq,lags,leads);
         scof1= scof(:,(lags)*neq+1:end);
         scof1= scof1(:,dr.order_var);
@@ -135,8 +135,8 @@ else
     if aimcode < 1 || aimcode > 5  % too big exception, use mjdgges
         error('Error in AIM: aimcode=%d ; %s', aimcode, err);
     end
-%    if aimcode > 5 
-%        disp(['Error in AIM: aimcode=' sprintf('%d : %s',aimcode, err)]);
-%        aimcode=5;
-%    end  
+    %    if aimcode > 5 
+    %        disp(['Error in AIM: aimcode=' sprintf('%d : %s',aimcode, err)]);
+    %        aimcode=5;
+    %    end  
 end

@@ -19,4 +19,4 @@ function c = columns(M)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-    c = size(M,2);
+c = size(M,2);

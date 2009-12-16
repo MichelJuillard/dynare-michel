@@ -189,29 +189,29 @@ end
 
 % Test if bytecode DLL is present
 if exist('bytecode') == 3
-  if ~multithread_flag
-      message = '[mex] ';
-  else
-      message = [ '[mex][multithread version, ' int2str(multithread_flag+1) ' threads are used] ' ];
-  end
+    if ~multithread_flag
+        message = '[mex] ';
+    else
+        message = [ '[mex][multithread version, ' int2str(multithread_flag+1) ' threads are used] ' ];
+    end
 else
-  message = '[no]  ';
+    message = '[no]  ';
 end
 disp([ message 'Bytecode evaluation.' ])
 
 % Test if k-order perturbation DLL is present
 if exist('k_order_perturbation') == 3
-  message = '[mex] ';
+    message = '[mex] ';
 else
-  message = '[no]  ';
+    message = '[no]  ';
 end
 disp([ message 'k-order perturbation solver.' ])
 
 % Test if dynare_simul_ DLL is present
 if exist('dynare_simul_') == 3
-  message = '[mex] ';
+    message = '[mex] ';
 else
-  message = '[no]  ';
+    message = '[no]  ';
 end
 disp([ message 'k-order solution simulation.' ])
 

@@ -26,17 +26,17 @@ function inv = chi2inv (x, n)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-  if (nargin ~= 2)
+if (nargin ~= 2)
     error ('chi2inv: you must give two arguments');
-  end
+end
 
-  if (~isscalar (n))
+if (~isscalar (n))
     [retval, x, n] = common_size (x, n);
     if (retval > 0)
-      error ('chi2inv: x and n must be of common size or scalar');
+        error ('chi2inv: x and n must be of common size or scalar');
     end
-  end
+end
 
-  inv = gaminv (x, n / 2, 2);
+inv = gaminv (x, n / 2, 2);
 
 end

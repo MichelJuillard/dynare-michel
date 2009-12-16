@@ -27,15 +27,15 @@ function cdf = stdnormal_cdf (x)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-  if (nargin ~= 1)
+if (nargin ~= 1)
     error('stdnormal_cdf: you should provide one argument');
-  end
+end
 
-  sz = size (x);
-  if (numel(x) == 0)
+sz = size (x);
+if (numel(x) == 0)
     error ('stdnormal_cdf: x must not be empty');
-  end
+end
 
-  cdf = (ones (sz) + erf (x / sqrt (2))) / 2;
+cdf = (ones (sz) + erf (x / sqrt (2))) / 2;
 
 end

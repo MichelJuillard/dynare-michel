@@ -1,5 +1,5 @@
 function [LIK, lik] = missing_observations_diffuse_kalman_filter(T,R,Q,H,Pinf,Pstar,Y,start,Z,kalman_tol,riccati_tol,...
-                                                      data_index,number_of_observations,no_more_missing_observations)
+                                                  data_index,number_of_observations,no_more_missing_observations)
 % Computes the diffuse likelihood of a state space model.
 %
 % INPUTS
@@ -44,131 +44,131 @@ function [LIK, lik] = missing_observations_diffuse_kalman_filter(T,R,Q,H,Pinf,Ps
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-  [pp,smpl] = size(Y);
-  mm   = size(T,2);
-  a    = zeros(mm,1);
-  dF   = 1;
-  QQ   = R*Q*transpose(R);
-  t    = 0;
-  oldK = 0;
-  lik  = zeros(smpl,1);
-  LIK  = Inf;
-  notsteady   = 1;
-  
-  while rank(Pinf,kalman_tol) && (t<smpl)
-      t  = t+1;
-      d_index = data_index{t};
-      if isempty(d_index)
-          a = T*a;
-          Pstar = T*Pstar*transpose(T)+QQ;
-          Pinf  = T*Pinf*transpose(T);     
-      else
-          ZZ = Z(d_index,:);
-          v  = Y(d_index,t)-ZZ*a;
-          Finf  = ZZ*Pinf*ZZ';
-          if rcond(Finf) < kalman_tol 
-              if ~all(abs(Finf(:)) < kalman_tol)
-                  % The univariate diffuse kalman filter shoudl be used.
-                  return
-              else
-                  if ~isscalar(H)                        % => Errors in the measurement equation.
-                      Fstar = ZZ*Pstar*ZZ' + H(d_index,d_index); 
-                  else% => 
-                      % case 1. No errors in the measurement (H=0) and more than one variable is observed in this state space model. 
-                      % case 2. Errors in the measurement equation, but only one variable is observed in this state-space model.
-                      Fstar = ZZ*Pstar*ZZ' + H;
-                  end
-                  if rcond(Fstar) < kalman_tol
-                      if ~all(abs(Fstar(:))<kalman_tol)
-                          % The univariate diffuse kalman filter should be used.
-                          return
-                      else
-                          a = T*a;
-                          Pstar = T*Pstar*transpose(T)+QQ;
-                          Pinf  = T*Pinf*transpose(T);
-                      end
-                  else
-                      iFstar = inv(Fstar);
-                      dFstar = det(Fstar);
-                      Kstar  = Pstar*ZZ'*iFstar;
-                      lik(t) = log(dFstar) + v'*iFstar*v + length(d_index)*log(2*pi);
-                      Pinf   = T*Pinf*transpose(T);
-                      Pstar  = T*(Pstar-Pstar*ZZ'*Kstar')*T'+QQ;
-                      a	     = T*(a+Kstar*v);
-                  end
-              end
-          else
-              lik(t) = log(det(Finf));
-              iFinf  = inv(Finf);
-              Kinf   = Pinf*ZZ'*iFinf;
-              Fstar  = ZZ*Pstar*ZZ' + H;
-              Kstar  = (Pstar*ZZ'-Kinf*Fstar)*iFinf;
-              Pstar  = T*(Pstar-Pstar*ZZ'*Kinf'-Pinf*ZZ'*Kstar')*T'+QQ;
-              Pinf   = T*(Pinf-Pinf*ZZ'*Kinf')*T';
-              a	     = T*(a+Kinf*v);
-          end
-      end
-  end
-  
-  if t == smpl
-      error(['There isn''t enough information to estimate the initial conditions of the nonstationary variables']);                   
-  end
-  
-  F_singular = 1;
-  while notsteady && (t<smpl)
-      t = t+1;
-      d_index = data_index{t};
-      if isempty(d_index)
-          a = T*a;
-          Pstar = T*Pstar*transpose(T)+QQ;      
-      else
-          ZZ = Z(d_index,:);
-          v = Y(d_index,t)-ZZ*a;
-          if ~isscalar(H)                        % => Errors in the measurement equation.
-              F = ZZ*Pstar*ZZ' + H(d_index,d_index); 
-          else% => 
-              % case 1. No errors in the measurement (H=0) and more than one variable is observed in this state space model. 
-              % case 2. Errors in the measurement equation, but only one variable is observed in this state-space model.
-              F = ZZ*Pstar*ZZ' + H;
-          end
-          dF = det(F);
-          if rcond(F) < kalman_tol
-              if ~all(abs(F(:))<kalman_tol)
-                  return
-              else
-                  a     = T*a;
-                  Pstar = T*Pstar*T'+QQ;
-              end
-          else
-              F_singular = 0;
-              iF     = inv(F);
-              lik(t) = log(dF) + v'*iF*v  + length(d_index)*log(2*pi);
-              K      = Pstar*ZZ'*iF;
-              a      = T*(a+K*v);	
-              Pstar  = T*(Pstar-K*ZZ*Pstar)*T'+QQ;
-          end
-          if t>no_more_missing_observations
-              notsteady = max(max(abs(K-oldK)))>riccati_tol;
-              oldK = K;
-          end
-      end
-  end
-  
-  if F_singular == 1
-      error(['The variance of the forecast error remains singular until the end of the sample'])
-  end
-  
-  if t < smpl
-      t0 = t;
-      while t<smpl
-          t = t+1;
-          v = Y(:,t)-Z*a;
-          a = T*(a+K*v);
-          lik(t) = v'*iF*v;
-      end
-      lik(t0:smpl) = lik(t0:smpl) + log(dF) + pp*log(2*pi);
-  end
-  
-  lik = lik/2;
-  
-  LIK    = sum(lik(start:end));% Minus the log-likelihood.
+[pp,smpl] = size(Y);
+mm   = size(T,2);
+a    = zeros(mm,1);
+dF   = 1;
+QQ   = R*Q*transpose(R);
+t    = 0;
+oldK = 0;
+lik  = zeros(smpl,1);
+LIK  = Inf;
+notsteady   = 1;
+
+while rank(Pinf,kalman_tol) && (t<smpl)
+    t  = t+1;
+    d_index = data_index{t};
+    if isempty(d_index)
+        a = T*a;
+        Pstar = T*Pstar*transpose(T)+QQ;
+        Pinf  = T*Pinf*transpose(T);     
+    else
+        ZZ = Z(d_index,:);
+        v  = Y(d_index,t)-ZZ*a;
+        Finf  = ZZ*Pinf*ZZ';
+        if rcond(Finf) < kalman_tol 
+            if ~all(abs(Finf(:)) < kalman_tol)
+                % The univariate diffuse kalman filter shoudl be used.
+                return
+            else
+                if ~isscalar(H)                        % => Errors in the measurement equation.
+                    Fstar = ZZ*Pstar*ZZ' + H(d_index,d_index); 
+                else% => 
+                    % case 1. No errors in the measurement (H=0) and more than one variable is observed in this state space model. 
+                    % case 2. Errors in the measurement equation, but only one variable is observed in this state-space model.
+                    Fstar = ZZ*Pstar*ZZ' + H;
+                end
+                if rcond(Fstar) < kalman_tol
+                    if ~all(abs(Fstar(:))<kalman_tol)
+                        % The univariate diffuse kalman filter should be used.
+                        return
+                    else
+                        a = T*a;
+                        Pstar = T*Pstar*transpose(T)+QQ;
+                        Pinf  = T*Pinf*transpose(T);
+                    end
+                else
+                    iFstar = inv(Fstar);
+                    dFstar = det(Fstar);
+                    Kstar  = Pstar*ZZ'*iFstar;
+                    lik(t) = log(dFstar) + v'*iFstar*v + length(d_index)*log(2*pi);
+                    Pinf   = T*Pinf*transpose(T);
+                    Pstar  = T*(Pstar-Pstar*ZZ'*Kstar')*T'+QQ;
+                    a	     = T*(a+Kstar*v);
+                end
+            end
+        else
+            lik(t) = log(det(Finf));
+            iFinf  = inv(Finf);
+            Kinf   = Pinf*ZZ'*iFinf;
+            Fstar  = ZZ*Pstar*ZZ' + H;
+            Kstar  = (Pstar*ZZ'-Kinf*Fstar)*iFinf;
+            Pstar  = T*(Pstar-Pstar*ZZ'*Kinf'-Pinf*ZZ'*Kstar')*T'+QQ;
+            Pinf   = T*(Pinf-Pinf*ZZ'*Kinf')*T';
+            a	     = T*(a+Kinf*v);
+        end
+    end
+end
+
+if t == smpl
+    error(['There isn''t enough information to estimate the initial conditions of the nonstationary variables']);                   
+end
+
+F_singular = 1;
+while notsteady && (t<smpl)
+    t = t+1;
+    d_index = data_index{t};
+    if isempty(d_index)
+        a = T*a;
+        Pstar = T*Pstar*transpose(T)+QQ;      
+    else
+        ZZ = Z(d_index,:);
+        v = Y(d_index,t)-ZZ*a;
+        if ~isscalar(H)                        % => Errors in the measurement equation.
+            F = ZZ*Pstar*ZZ' + H(d_index,d_index); 
+        else% => 
+            % case 1. No errors in the measurement (H=0) and more than one variable is observed in this state space model. 
+            % case 2. Errors in the measurement equation, but only one variable is observed in this state-space model.
+            F = ZZ*Pstar*ZZ' + H;
+        end
+        dF = det(F);
+        if rcond(F) < kalman_tol
+            if ~all(abs(F(:))<kalman_tol)
+                return
+            else
+                a     = T*a;
+                Pstar = T*Pstar*T'+QQ;
+            end
+        else
+            F_singular = 0;
+            iF     = inv(F);
+            lik(t) = log(dF) + v'*iF*v  + length(d_index)*log(2*pi);
+            K      = Pstar*ZZ'*iF;
+            a      = T*(a+K*v);	
+            Pstar  = T*(Pstar-K*ZZ*Pstar)*T'+QQ;
+        end
+        if t>no_more_missing_observations
+            notsteady = max(max(abs(K-oldK)))>riccati_tol;
+            oldK = K;
+        end
+    end
+end
+
+if F_singular == 1
+    error(['The variance of the forecast error remains singular until the end of the sample'])
+end
+
+if t < smpl
+    t0 = t;
+    while t<smpl
+        t = t+1;
+        v = Y(:,t)-Z*a;
+        a = T*(a+K*v);
+        lik(t) = v'*iF*v;
+    end
+    lik(t0:smpl) = lik(t0:smpl) + log(dF) + pp*log(2*pi);
+end
+
+lik = lik/2;
+
+LIK    = sum(lik(start:end));% Minus the log-likelihood.

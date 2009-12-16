@@ -33,7 +33,7 @@ function [K,iF,P] = steady_state_kalman_gain(T,R,Q,H,mf)
 %
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
-    
+
 m = length(T);
 p = length(mf);
 Z = build_selection_matrix(mf,m,p);

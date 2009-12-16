@@ -28,12 +28,12 @@ function x = get_param_by_name(pname)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-  global M_
-  
-  i = strmatch(pname,M_.param_names,'exact');
-  
-  if isempty(i)
-  error(sprintf('Can''t find parameter %s', pname))
-  end
-  
-  x = M_.params(i);
+global M_
+
+i = strmatch(pname,M_.param_names,'exact');
+
+if isempty(i)
+    error(sprintf('Can''t find parameter %s', pname))
+end
+
+x = M_.params(i);

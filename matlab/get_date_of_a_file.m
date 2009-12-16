@@ -18,11 +18,11 @@ function [d1,d2] = get_date_of_a_file(filename)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-    info = dir(filename);
-    if isempty(info)
-        error(['get_date_of_a_file:: I''m not able to find ' filename '!'])
-    end
-    d1 = info.datenum;
-    if nargout>1
-        d2 = info.date;
-    end
+info = dir(filename);
+if isempty(info)
+    error(['get_date_of_a_file:: I''m not able to find ' filename '!'])
+end
+d1 = info.datenum;
+if nargout>1
+    d2 = info.date;
+end

@@ -42,59 +42,59 @@ function [LIK, lik] = kalman_filter(T,R,Q,H,P,Y,start,mf,kalman_tol,riccati_tol)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-    smpl = size(Y,2);                               % Sample size.
-    mm   = size(T,2);                               % Number of state variables.
-    pp   = size(Y,1);                               % Maximum number of observed variables.
-    a    = zeros(mm,1);                             % State vector.
-    dF   = 1;                                       % det(F).
-    QQ   = R*Q*transpose(R);                        % Variance of R times the vector of structural innovations.
-    t    = 0;                                       % Initialization of the time index.
-    lik  = zeros(smpl,1);                         % Initialization of the vector gathering the densities.
-    LIK  = Inf;                                     % Default value of the log likelihood.
-    oldK = 0;
-    notsteady   = 1;                                % Steady state flag.
-    F_singular  = 1;
+smpl = size(Y,2);                               % Sample size.
+mm   = size(T,2);                               % Number of state variables.
+pp   = size(Y,1);                               % Maximum number of observed variables.
+a    = zeros(mm,1);                             % State vector.
+dF   = 1;                                       % det(F).
+QQ   = R*Q*transpose(R);                        % Variance of R times the vector of structural innovations.
+t    = 0;                                       % Initialization of the time index.
+lik  = zeros(smpl,1);                         % Initialization of the vector gathering the densities.
+LIK  = Inf;                                     % Default value of the log likelihood.
+oldK = 0;
+notsteady   = 1;                                % Steady state flag.
+F_singular  = 1;
 
-    while notsteady & t<smpl
-        t  = t+1;
-        v  = Y(:,t)-a(mf);
-        F  = P(mf,mf) + H;
-        if rcond(F) < kalman_tol
-            if ~all(abs(F(:))<kalman_tol)
-                return
-            else
-                a = T*a;
-                P = T*P*transpose(T)+QQ;
-            end
+while notsteady & t<smpl
+    t  = t+1;
+    v  = Y(:,t)-a(mf);
+    F  = P(mf,mf) + H;
+    if rcond(F) < kalman_tol
+        if ~all(abs(F(:))<kalman_tol)
+            return
         else
-            F_singular = 0;
-            dF     = det(F);
-            iF     = inv(F);
-            lik(t) = log(dF)+transpose(v)*iF*v;
-            K      = P(:,mf)*iF;
-            a      = T*(a+K*v);
-            P      = T*(P-K*P(mf,:))*transpose(T)+QQ;
+            a = T*a;
+            P = T*P*transpose(T)+QQ;
         end
-        notsteady = max(max(abs(K-oldK))) > riccati_tol;
-        oldK = K;
+    else
+        F_singular = 0;
+        dF     = det(F);
+        iF     = inv(F);
+        lik(t) = log(dF)+transpose(v)*iF*v;
+        K      = P(:,mf)*iF;
+        a      = T*(a+K*v);
+        P      = T*(P-K*P(mf,:))*transpose(T)+QQ;
     end
+    notsteady = max(max(abs(K-oldK))) > riccati_tol;
+    oldK = K;
+end
 
-    if F_singular
-        error('The variance of the forecast error remains singular until the end of the sample')
+if F_singular
+    error('The variance of the forecast error remains singular until the end of the sample')
+end
+
+if t < smpl
+    t0 = t+1;
+    while t < smpl
+        t = t+1;
+        v = Y(:,t)-a(mf);
+        a = T*(a+K*v);
+        lik(t) = transpose(v)*iF*v;
     end
+    lik(t0:smpl) = lik(t0:smpl) + log(dF);
+end    
 
-    if t < smpl
-        t0 = t+1;
-        while t < smpl
-            t = t+1;
-            v = Y(:,t)-a(mf);
-            a = T*(a+K*v);
-            lik(t) = transpose(v)*iF*v;
-        end
-        lik(t0:smpl) = lik(t0:smpl) + log(dF);
-    end    
-    
-    % adding log-likelihhod constants
-    lik = (lik + pp*log(2*pi))/2;
+% adding log-likelihhod constants
+lik = (lik + pp*log(2*pi))/2;
 
-    LIK = sum(lik(start:end)); % Minus the log-likelihood.
+LIK = sum(lik(start:end)); % Minus the log-likelihood.

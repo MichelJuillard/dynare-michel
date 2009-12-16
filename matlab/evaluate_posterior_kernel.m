@@ -33,9 +33,9 @@ function lpkern = evaluate_posterior_kernel(parameters,llik)
 %
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
-  
-    [ldens,parameters] = evaluate_prior(parameters);
-    if nargin==1
-        llik = evaluate_likelihood(parameters);
-    end
-    lpkern = ldens+llik;
+
+[ldens,parameters] = evaluate_prior(parameters);
+if nargin==1
+    llik = evaluate_likelihood(parameters);
+end
+lpkern = ldens+llik;

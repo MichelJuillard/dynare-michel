@@ -43,29 +43,29 @@ badg=0;
 goog=1;
 scale=1;
 for i=1:n
-   if size(x,1)>size(x,2)
-      tvecv=tvec(i,:);
-   else
-      tvecv=tvec(:,i);
-   end
-   [f1,cost_flag1] = feval(fcn, x+scale*transpose(tvecv), varargin{:});
-   [f2,cost_flag2] = feval(fcn, x-scale*transpose(tvecv), varargin{:});
-   if cost_flag1 && cost_flag2
-       g0 = (f1 - f2) / (2*scale*delta);
-   else
-       if cost_flag1
-           g0 = (f1-f0) / (scale*delta);
-       elseif cost_flag2
-           g0 = (f0-f2) / (scale*delta);
-       else
-           goog=0;
-       end
-   end
-   if goog && abs(g0)< 1e15 
-      g(i)=g0;
-   else
-       disp('bad gradient ------------------------')
-       g(i)=0;
-       badg=1;
-   end
+    if size(x,1)>size(x,2)
+        tvecv=tvec(i,:);
+    else
+        tvecv=tvec(:,i);
+    end
+    [f1,cost_flag1] = feval(fcn, x+scale*transpose(tvecv), varargin{:});
+    [f2,cost_flag2] = feval(fcn, x-scale*transpose(tvecv), varargin{:});
+    if cost_flag1 && cost_flag2
+        g0 = (f1 - f2) / (2*scale*delta);
+    else
+        if cost_flag1
+            g0 = (f1-f0) / (scale*delta);
+        elseif cost_flag2
+            g0 = (f0-f2) / (scale*delta);
+        else
+            goog=0;
+        end
+    end
+    if goog && abs(g0)< 1e15 
+        g(i)=g0;
+    else
+        disp('bad gradient ------------------------')
+        g(i)=0;
+        badg=1;
+    end
 end

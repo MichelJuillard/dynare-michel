@@ -28,18 +28,18 @@ function s=get_moments_size(options)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-    global M_
-    
-    n = size(options.varlist,1);
-    
-    if n == 0
-        n = M_.endo_nbr;
-    end
-    
-    n2 = n*n;
+global M_
 
-    s = n; % mean
-    s = s + n;  % std errors
-    s = s + n2; % variance
-    s = s + n2; % correlations
-    s = s + options.ar*n2; % auto-correlations
+n = size(options.varlist,1);
+
+if n == 0
+    n = M_.endo_nbr;
+end
+
+n2 = n*n;
+
+s = n; % mean
+s = s + n;  % std errors
+s = s + n2; % variance
+s = s + n2; % correlations
+s = s + options.ar*n2; % auto-correlations

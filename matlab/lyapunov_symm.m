@@ -38,79 +38,79 @@ function [x,u] = lyapunov_symm(a,b,qz_criterium,lyapunov_complex_threshold,metho
 %
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
-    
-    if nargin<5
-        method = 0;
+
+if nargin<5
+    method = 0;
+end
+if method
+    persistent U T k n
+else
+    if exist('U','var')
+        clear('U','T','k','n')
     end
-    if method
-        persistent U T k n
-    else
-        if exist('U','var')
-            clear('U','T','k','n')
-        end
+end
+
+u = [];
+
+if size(a,1) == 1
+    x=b/(1-a*a);
+    return
+end
+
+if method<2
+    [U,T] = schur(a);
+    e1 = abs(ordeig(T)) > 2-qz_criterium;
+    k = sum(e1);       % Number of unit roots. 
+    n = length(e1)-k;  % Number of stationary variables.
+    if k > 0
+        % Selects stable roots
+        [U,T] = ordschur(U,T,e1);
+        T = T(k+1:end,k+1:end);
     end
-    
-    u = [];
-  
-    if size(a,1) == 1
-        x=b/(1-a*a);
-        return
-    end
-    
-    if method<2
-        [U,T] = schur(a);
-        e1 = abs(ordeig(T)) > 2-qz_criterium;
-        k = sum(e1);       % Number of unit roots. 
-        n = length(e1)-k;  % Number of stationary variables.
-        if k > 0
-            % Selects stable roots
-            [U,T] = ordschur(U,T,e1);
-            T = T(k+1:end,k+1:end);
-        end
-    end
-    
-    B = U(:,k+1:end)'*b*U(:,k+1:end);
-    
-    x = zeros(n,n);
-    i = n;
-    
-    while i >= 2
-        if abs(T(i,i-1))<lyapunov_complex_threshold
-            if i == n
-                c = zeros(n,1);
-            else
-                c = T(1:i,:)*(x(:,i+1:end)*T(i,i+1:end)') + ...
-                    T(i,i)*T(1:i,i+1:end)*x(i+1:end,i);
-            end
-            q = eye(i)-T(1:i,1:i)*T(i,i);
-            x(1:i,i) = q\(B(1:i,i)+c);
-            x(i,1:i-1) = x(1:i-1,i)';
-            i = i - 1;
+end
+
+B = U(:,k+1:end)'*b*U(:,k+1:end);
+
+x = zeros(n,n);
+i = n;
+
+while i >= 2
+    if abs(T(i,i-1))<lyapunov_complex_threshold
+        if i == n
+            c = zeros(n,1);
         else
-            if i == n
-                c = zeros(n,1);
-                c1 = zeros(n,1);
-            else
-                c = T(1:i,:)*(x(:,i+1:end)*T(i,i+1:end)') + ...
-                    T(i,i)*T(1:i,i+1:end)*x(i+1:end,i) + ...
-                    T(i,i-1)*T(1:i,i+1:end)*x(i+1:end,i-1);
-                c1 = T(1:i,:)*(x(:,i+1:end)*T(i-1,i+1:end)') + ...
-                     T(i-1,i-1)*T(1:i,i+1:end)*x(i+1:end,i-1) + ...
-                     T(i-1,i)*T(1:i,i+1:end)*x(i+1:end,i);
-            end
-            q = [  eye(i)-T(1:i,1:i)*T(i,i) ,  -T(1:i,1:i)*T(i,i-1) ; ...
-                   -T(1:i,1:i)*T(i-1,i)     ,   eye(i)-T(1:i,1:i)*T(i-1,i-1) ];
-            z =  q\[ B(1:i,i)+c ; B(1:i,i-1) + c1 ];
-            x(1:i,i) = z(1:i);
-            x(1:i,i-1) = z(i+1:end);
-            x(i,1:i-1) = x(1:i-1,i)';
-            x(i-1,1:i-2) = x(1:i-2,i-1)';
-            i = i - 2;
+            c = T(1:i,:)*(x(:,i+1:end)*T(i,i+1:end)') + ...
+                T(i,i)*T(1:i,i+1:end)*x(i+1:end,i);
         end
+        q = eye(i)-T(1:i,1:i)*T(i,i);
+        x(1:i,i) = q\(B(1:i,i)+c);
+        x(i,1:i-1) = x(1:i-1,i)';
+        i = i - 1;
+    else
+        if i == n
+            c = zeros(n,1);
+            c1 = zeros(n,1);
+        else
+            c = T(1:i,:)*(x(:,i+1:end)*T(i,i+1:end)') + ...
+                T(i,i)*T(1:i,i+1:end)*x(i+1:end,i) + ...
+                T(i,i-1)*T(1:i,i+1:end)*x(i+1:end,i-1);
+            c1 = T(1:i,:)*(x(:,i+1:end)*T(i-1,i+1:end)') + ...
+                 T(i-1,i-1)*T(1:i,i+1:end)*x(i+1:end,i-1) + ...
+                 T(i-1,i)*T(1:i,i+1:end)*x(i+1:end,i);
+        end
+        q = [  eye(i)-T(1:i,1:i)*T(i,i) ,  -T(1:i,1:i)*T(i,i-1) ; ...
+               -T(1:i,1:i)*T(i-1,i)     ,   eye(i)-T(1:i,1:i)*T(i-1,i-1) ];
+        z =  q\[ B(1:i,i)+c ; B(1:i,i-1) + c1 ];
+        x(1:i,i) = z(1:i);
+        x(1:i,i-1) = z(i+1:end);
+        x(i,1:i-1) = x(1:i-1,i)';
+        x(i-1,1:i-2) = x(1:i-2,i-1)';
+        i = i - 2;
     end
-    if i == 1
-        c = T(1,:)*(x(:,2:end)*T(1,2:end)') + T(1,1)*T(1,2:end)*x(2:end,1);
-        x(1,1) = (B(1,1)+c)/(1-T(1,1)*T(1,1));
-    end
-    x = U(:,k+1:end)*x*U(:,k+1:end)';
-    u = U(:,1:k);
+end
+if i == 1
+    c = T(1,:)*(x(:,2:end)*T(1,2:end)') + T(1,1)*T(1,2:end)*x(2:end,1);
+    x(1,1) = (B(1,1)+c)/(1-T(1,1)*T(1,1));
+end
+x = U(:,k+1:end)*x*U(:,k+1:end)';
+u = U(:,1:k);

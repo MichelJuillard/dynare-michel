@@ -37,20 +37,20 @@ global options_
 options_.smpl = zeros(2,1) ;
 
 if nargin == 0
-	options_.smpl(1) = 1 ;
-	options_.smpl(2) = options_.periods ;
+    options_.smpl(1) = 1 ;
+    options_.smpl(2) = options_.periods ;
 elseif nargin == 1
-  if s1 > options_.periods
-    error('DSAMPLE: argument greater than number of periods');
-  end
-	options_.smpl(1) = 1 ;
-	options_.smpl(2) = s1 ;
+    if s1 > options_.periods
+        error('DSAMPLE: argument greater than number of periods');
+    end
+    options_.smpl(1) = 1 ;
+    options_.smpl(2) = s1 ;
 else
-  if s1 > options_.periods || s2 > options_.periods
-    error('DSAMPLE: one of the arguments is greater than number of periods');
-  end
-	options_.smpl(1) = s1 ;
-	options_.smpl(2) = s2 ;
+    if s1 > options_.periods || s2 > options_.periods
+        error('DSAMPLE: one of the arguments is greater than number of periods');
+    end
+    options_.smpl(1) = s1 ;
+    options_.smpl(2) = s2 ;
 end
 
 % 02/23/01 MJ added error checking

@@ -17,13 +17,13 @@ function set_param_value(pname,value)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-  global M_
-  
-  i = strmatch(pname,M_.param_names,'exact');
-  
-  if isempty(i)
+global M_
+
+i = strmatch(pname,M_.param_names,'exact');
+
+if isempty(i)
     error(['Parameter name ' pname ' doesn''t exist'])
-  end
-  
-  M_.params(i) = value;
-  assignin('base',pname,value);
+end
+
+M_.params(i) = value;
+assignin('base',pname,value);

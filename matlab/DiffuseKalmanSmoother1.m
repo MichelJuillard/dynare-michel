@@ -82,7 +82,7 @@ r	   	= zeros(mm,smpl+1);
 
 Z = zeros(pp,mm);
 for i=1:pp;
-	Z(i,mf(i)) = 1;
+    Z(i,mf(i)) = 1;
 end
 
 t = 0;

@@ -17,20 +17,20 @@ function [x,status]=bicgstab_(func,b,x,tole,kmax,varargin)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-  status = 0;
-  r=b-feval(func,x,varargin{:});
-  rh_0 = r;
-  rh = r;
-  rho_0 = 1;
-  alpha = 1;
-  w = 1;
-  v = 0;
-  p = 0;
-  k = 0;
-  rho_1 = rh_0'*r;
-  tolr = tole*norm(b);
-  
-  while norm(r) > tolr & k < kmax
+status = 0;
+r=b-feval(func,x,varargin{:});
+rh_0 = r;
+rh = r;
+rho_0 = 1;
+alpha = 1;
+w = 1;
+v = 0;
+p = 0;
+k = 0;
+rho_1 = rh_0'*r;
+tolr = tole*norm(b);
+
+while norm(r) > tolr & k < kmax
     k = k+1;
     beta = (rho_1/rho_0)*(alpha/w);
     p = r+beta*(p-w*v);
@@ -43,8 +43,8 @@ function [x,status]=bicgstab_(func,b,x,tole,kmax,varargin)
     rho_1 = -w*(rh_0'*t);
     x = x+alpha*p+w*r;
     r = r-w*t;
-  end
+end
 if k == kmax
-  status = 1;
-  warning(sprintf('BICSTABN didn''t converge after %d iterations: norm(r) = %g',kmax,norm(r)));
+    status = 1;
+    warning(sprintf('BICSTABN didn''t converge after %d iterations: norm(r) = %g',kmax,norm(r)));
 end

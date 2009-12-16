@@ -1,4 +1,4 @@
-function [alphahat,etahat,atilde,P,aK,PK,d,decomp] = DiffuseKalmanSmoother1_Z(T,Z,R,Q,Pinf1,Pstar1,Y,pp,mm,smpl,data_index)
+function [alphahat,etahat,atilde,P,aK,PK,d,decomp] = missing_DiffuseKalmanSmoother1_Z(T,Z,R,Q,Pinf1,Pstar1,Y,pp,mm,smpl,data_index)
 
 % function [alphahat,etahat,a, aK] = DiffuseKalmanSmoother1(T,Z,R,Q,Pinf1,Pstar1,Y,pp,mm,smpl)
 % Computes the diffuse kalman smoother without measurement error, in the case of a non-singular var-cov matrix 
@@ -162,7 +162,7 @@ while notsteady & t<smpl
         aK(jnk,:,t+jnk) = T^jnk*atilde(:,t);
 	PK(jnk,:,:,t+jnk) = Pf;
     end
-%    notsteady   = ~(max(max(abs(P(:,:,t+1)-P(:,:,t))))<crit);
+    %    notsteady   = ~(max(max(abs(P(:,:,t+1)-P(:,:,t))))<crit);
 end
 % $$$ if t<smpl
 % $$$     PZI_s = PZI;
@@ -188,23 +188,23 @@ end
 % $$$ end
 t = smpl+1;
 while t>d+1
-  t = t-1;
-  di = data_index{t};
-  if isempty(di)
-      r(:,t) = L(:,:,t)'*r(:,t+1);
-  else
-      ZZ = Z(di,:);
-      r(:,t) = ZZ'*iF(di,di,t)*v(di,t) + L(:,:,t)'*r(:,t+1);
-  end
-  alphahat(:,t)	= a(:,t) + P(:,:,t)*r(:,t);
-  etahat(:,t)	= QRt*r(:,t);
+    t = t-1;
+    di = data_index{t};
+    if isempty(di)
+        r(:,t) = L(:,:,t)'*r(:,t+1);
+    else
+        ZZ = Z(di,:);
+        r(:,t) = ZZ'*iF(di,di,t)*v(di,t) + L(:,:,t)'*r(:,t+1);
+    end
+    alphahat(:,t)	= a(:,t) + P(:,:,t)*r(:,t);
+    etahat(:,t)	= QRt*r(:,t);
 end
 if d
-  r0 = zeros(mm,d+1); 
-  r0(:,d+1) = r(:,d+1);
-  r1 = zeros(mm,d+1);
-  for t = d:-1:1
-    r0(:,t) = Linf(:,:,t)'*r0(:,t+1);
+    r0 = zeros(mm,d+1); 
+    r0(:,d+1) = r(:,d+1);
+    r1 = zeros(mm,d+1);
+    for t = d:-1:1
+        r0(:,t) = Linf(:,:,t)'*r0(:,t+1);
         di = data_index{t};
         if isempty(di)
             r1(:,t) = Linf(:,:,t)'*r1(:,t+1);
@@ -212,9 +212,9 @@ if d
             r1(:,t) = Z(di,:)'*(iFinf(di,di,t)*v(di,t)-Kstar(:,di,t)'*r0(:,t+1)) ...
                       + Linf(:,:,t)'*r1(:,t+1);
         end
-    alphahat(:,t)	= a(:,t) + Pstar(:,:,t)*r0(:,t) + Pinf(:,:,t)*r1(:,t);
-    etahat(:,t)		= QRt*r0(:,t);
-  end
+        alphahat(:,t)	= a(:,t) + Pstar(:,:,t)*r0(:,t) + Pinf(:,:,t)*r1(:,t);
+        etahat(:,t)		= QRt*r0(:,t);
+    end
 end
 
 if nargout > 7

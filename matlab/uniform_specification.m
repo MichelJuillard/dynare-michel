@@ -33,12 +33,12 @@ function [m,s,p6,p7] = uniform_specification(m,s,p3,p4)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-    if ~(isnan(p3) | isnan(p4))
-      p6 = p3;
-      p7 = p4;
-      m  = (p3+p4)/2;
-      s  = (p4-p3)/(sqrt(12));
-    else
-      p6 = m-s*sqrt(3);
-      p7 = m+s*sqrt(3);
-    end
+if ~(isnan(p3) | isnan(p4))
+    p6 = p3;
+    p7 = p4;
+    m  = (p3+p4)/2;
+    s  = (p4-p3)/(sqrt(12));
+else
+    p6 = m-s*sqrt(3);
+    p7 = m+s*sqrt(3);
+end

@@ -10,7 +10,7 @@ function [mhname,info] = get_name_of_the_last_mh_file(M_)
 %                          metropolis hastings matches the name of the name of the last mh 
 %                          file. Otherwise info is equal to zero (a likely reason for this is 
 %                          that the mcmc simulations were not completed).      
-    
+
 % Copyright (C) 2008-2009 Dynare Team
 %
 % This file is part of Dynare.
@@ -28,26 +28,26 @@ function [mhname,info] = get_name_of_the_last_mh_file(M_)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-    mhname = [];
-    info = 1;
-    
-    MhDirectoryName = CheckPath('metropolis');
-    
-    load([ MhDirectoryName '/' M_.fname '_mh_history.mat']) ;
-    mh_number = record.LastFileNumber ;
-    bk_number = record.Nblck ;
-    clear('record') ;
-    predicted_mhname = [ MhDirectoryName  '/' M_.fname '_mh' int2str(mh_number) '_blck' int2str(bk_number) '.mat' ] ;
-    
-    AllMhFiles = dir([MhDirectoryName  '/' M_.fname '_mh*_blck*' ]);
-    idx = 1;
-    for i=2:size(AllMhFiles)
-        if AllMhFiles(i).datenum>AllMhFiles(i-1).datenum
-            idx = i;
-        end
+mhname = [];
+info = 1;
+
+MhDirectoryName = CheckPath('metropolis');
+
+load([ MhDirectoryName '/' M_.fname '_mh_history.mat']) ;
+mh_number = record.LastFileNumber ;
+bk_number = record.Nblck ;
+clear('record') ;
+predicted_mhname = [ MhDirectoryName  '/' M_.fname '_mh' int2str(mh_number) '_blck' int2str(bk_number) '.mat' ] ;
+
+AllMhFiles = dir([MhDirectoryName  '/' M_.fname '_mh*_blck*' ]);
+idx = 1;
+for i=2:size(AllMhFiles)
+    if AllMhFiles(i).datenum>AllMhFiles(i-1).datenum
+        idx = i;
     end
-    mhname = [ MhDirectoryName  '/'  AllMhFiles(idx).name];
-    
-    if ~strcmpi(mhname,predicted_mhname)
-        info = 0;
-    end
+end
+mhname = [ MhDirectoryName  '/'  AllMhFiles(idx).name];
+
+if ~strcmpi(mhname,predicted_mhname)
+    info = 0;
+end

@@ -48,7 +48,7 @@ global options_ oo_ M_ bayestopt_
 if isfield(options_cond_fcst,'parameter_set') || isempty(options_cond_fcst.parameter_set)
     options_cond_fcst.parameter_set = 'posterior_mode';
 end
-    
+
 if ischar(options_cond_fcst.parameter_set)
     switch options_cond_fcst.parameter_set
       case 'posterior_mode'

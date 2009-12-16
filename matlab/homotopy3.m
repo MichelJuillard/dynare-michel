@@ -42,47 +42,47 @@ function homotopy3(values, step_nbr)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-  global M_ oo_ options_
-  
-  tol = 1e-8;
-  
-  nv = size(values,1);
+global M_ oo_ options_
 
-  ip = find(values(:,1) == 4); % Parameters
-  ix = find(values(:,1) == 1); % Exogenous
-  ixd = find(values(:,1) == 2); % Exogenous deterministic
+tol = 1e-8;
 
-  if length([ip; ix; ixd]) ~= nv
+nv = size(values,1);
+
+ip = find(values(:,1) == 4); % Parameters
+ix = find(values(:,1) == 1); % Exogenous
+ixd = find(values(:,1) == 2); % Exogenous deterministic
+
+if length([ip; ix; ixd]) ~= nv
     error('HOMOTOPY mode 3: incorrect variable types specified')
-  end
+end
 
-  % Construct vector of starting values, using previously initialized values
-  % when initial value has not been given in homotopy_setup block
-  oldvalues = values(:,3);
-  ipn = find(values(:,1) == 4 & isnan(oldvalues));
-  oldvalues(ipn) = M_.params(values(ipn, 2));
-  ixn = find(values(:,1) == 1 & isnan(oldvalues));
-  oldvalues(ixn) = oo_.exo_steady_state(values(ixn, 2));
-  ixdn = find(values(:,1) == 2 & isnan(oldvalues));
-  oldvalues(ixdn) = oo_.exo_det_steady_state(values(ixdn, 2));
+% Construct vector of starting values, using previously initialized values
+% when initial value has not been given in homotopy_setup block
+oldvalues = values(:,3);
+ipn = find(values(:,1) == 4 & isnan(oldvalues));
+oldvalues(ipn) = M_.params(values(ipn, 2));
+ixn = find(values(:,1) == 1 & isnan(oldvalues));
+oldvalues(ixn) = oo_.exo_steady_state(values(ixn, 2));
+ixdn = find(values(:,1) == 2 & isnan(oldvalues));
+oldvalues(ixdn) = oo_.exo_det_steady_state(values(ixdn, 2));
 
-  targetvalues = values(:,4);
+targetvalues = values(:,4);
 
-  if min(abs(targetvalues - oldvalues)) < tol
+if min(abs(targetvalues - oldvalues)) < tol
     error('HOMOTOPY mode 3: distance between initial and final values should be at least %e for all variables', tol)
-  end
-  iplus = find(targetvalues > oldvalues);
-  iminus = find(targetvalues < oldvalues);
-  
-  curvalues = oldvalues;
-  inc = (targetvalues-oldvalues)/2;
-  kplus = [];
-  kminus = [];
+end
+iplus = find(targetvalues > oldvalues);
+iminus = find(targetvalues < oldvalues);
 
-  disp('HOMOTOPY mode 3: launching solver at initial point...')
+curvalues = oldvalues;
+inc = (targetvalues-oldvalues)/2;
+kplus = [];
+kminus = [];
 
-  iter = 1;
-  while iter < step_nbr
+disp('HOMOTOPY mode 3: launching solver at initial point...')
+
+iter = 1;
+while iter < step_nbr
     
     M_.params(values(ip,2)) = curvalues(ip);
     oo_.exo_steady_state(values(ix,2)) = curvalues(ix);
@@ -91,25 +91,25 @@ function homotopy3(values, step_nbr)
     old_ss = oo_.steady_state;
 
     try
-      steady_;
-      
-      if length([kplus; kminus]) == nv
-        return
-      end
-      if iter == 1
-        disp('HOMOTOPY mode 3: successful step, now jumping to final point...')
-      else
-        disp('HOMOTOPY mode 3: successful step, now multiplying increment by 2...')
-      end
-      oldvalues = curvalues;
-      inc = 2*inc;
+        steady_;
+        
+        if length([kplus; kminus]) == nv
+            return
+        end
+        if iter == 1
+            disp('HOMOTOPY mode 3: successful step, now jumping to final point...')
+        else
+            disp('HOMOTOPY mode 3: successful step, now multiplying increment by 2...')
+        end
+        oldvalues = curvalues;
+        inc = 2*inc;
     catch E
-      disp(E.message)
-      disp('HOMOTOPY mode 3: failed step, now dividing increment by 2...')
-      inc = inc/2;
-      oo_.steady_state = old_ss;
+        disp(E.message)
+        disp('HOMOTOPY mode 3: failed step, now dividing increment by 2...')
+        inc = inc/2;
+        oo_.steady_state = old_ss;
     end      
-      
+    
     curvalues = oldvalues + inc;
     kplus = find(curvalues(iplus) >= targetvalues(iplus));
     curvalues(iplus(kplus)) = targetvalues(iplus(kplus));
@@ -121,5 +121,5 @@ function homotopy3(values, step_nbr)
     end
     
     iter = iter + 1;
-  end
-  error('HOMOTOPY mode 3: failed, maximum iterations reached')
+end
+error('HOMOTOPY mode 3: failed, maximum iterations reached')

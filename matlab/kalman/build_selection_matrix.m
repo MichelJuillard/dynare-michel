@@ -18,7 +18,7 @@ function Z = build_selection_matrix(mf,m,p)
 %
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.    
-    Z = zeros(p,m);
-    for i=1:p
-        Z(i,mf(i)) = 1;
-    end
+Z = zeros(p,m);
+for i=1:p
+    Z(i,mf(i)) = 1;
+end

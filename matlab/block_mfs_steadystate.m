@@ -19,12 +19,12 @@ function [r, g1] = block_mfs_steadystate(y, b)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-  global M_ oo_
-  
-  ss = oo_.steady_state;
-  indx = M_.blocksMFS{b};
-  
-  ss(indx) = y;
-  x = [oo_.exo_steady_state; oo_.exo_det_steady_state];
+global M_ oo_
 
-  eval(['[r,g1] = ' M_.fname '_static(b, ss, x, M_.params);']);
+ss = oo_.steady_state;
+indx = M_.blocksMFS{b};
+
+ss(indx) = y;
+x = [oo_.exo_steady_state; oo_.exo_det_steady_state];
+
+eval(['[r,g1] = ' M_.fname '_static(b, ss, x, M_.params);']);

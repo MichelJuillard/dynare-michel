@@ -22,7 +22,7 @@ function [H, dA, dOm, Hss, info] = getH(A, B, M_,oo_,kronflag,indx,indexo)
 if nargin<3 | isempty(kronflag), kronflag = 0; end
 if nargin<4 | isempty(indx), indx = [1:M_.param_nbr];, end,
 if nargin<5 | isempty(indexo), indexo = [];, end,
-    
+
 
 [I,J]=find(M_.lead_lag_incidence');
 yy0=oo_.dr.ys(I);
@@ -44,15 +44,15 @@ nc = sqrt(nc);
 ns = max(max(M_.lead_lag_incidence));
 gp2 = gp*0;
 for j=1:nr,
-  [I J]=ind2sub([nc nc],find(g2(j,:)));
-  for i=1:nc,
-    is = find(I==i);
-    is = is(find(J(is)<=ns));
-    if ~isempty(is),
-      g20=full(g2(j,find(g2(j,:))));
-      gp2(j,i,:)=g20(is)*dyssdtheta(J(is),:);
+    [I J]=ind2sub([nc nc],find(g2(j,:)));
+    for i=1:nc,
+        is = find(I==i);
+        is = is(find(J(is)<=ns));
+        if ~isempty(is),
+            g20=full(g2(j,find(g2(j,:))));
+            gp2(j,i,:)=g20(is)*dyssdtheta(J(is),:);
+        end
     end
-  end
 end
 
 
@@ -96,16 +96,16 @@ k = find(kstate(:,2) > M_.maximum_endo_lag+2 & kstate(:,3));
 kk = find(kstate(:,2) > M_.maximum_endo_lag+2 & ~kstate(:,3));
 nauxe = 0;
 if ~isempty(k),
-ax(:,k)= -a(:,kstate(k,3));
-ax(:,kk)= 0;
-dax(:,k,:)= -da(:,kstate(k,3),:);
-dax(:,kk,:)= 0;
-nauxe=size(ax,2);
-GAM1 = [ax GAM1];
-Dg1 = cat(2,dax,Dg1);
-clear ax
+    ax(:,k)= -a(:,kstate(k,3));
+    ax(:,kk)= 0;
+    dax(:,k,:)= -da(:,kstate(k,3),:);
+    dax(:,kk,:)= 0;
+    nauxe=size(ax,2);
+    GAM1 = [ax GAM1];
+    Dg1 = cat(2,dax,Dg1);
+    clear ax
 end
-    
+
 
 [junk,cols_b,cols_j] = find(M_.lead_lag_incidence(M_.maximum_endo_lag+1, ...
                                                   oo_.dr.order_var));
@@ -127,13 +127,13 @@ naux = 0;
 k = find(kstate(:,2) < M_.maximum_endo_lag+1 & kstate(:,4));
 kk = find(kstate(:,2) < M_.maximum_endo_lag+1 );
 if ~isempty(k),
-ax(:,k)= -a(:,kstate(k,4));
-ax = ax(:,kk);
-dax(:,k,:)= -da(:,kstate(k,4),:);
-dax = dax(:,kk,:);
-naux = size(ax,2);
-GAM2 = [GAM2 ax];
-Dg2 = cat(2,Dg2,dax);
+    ax(:,k)= -a(:,kstate(k,4));
+    ax = ax(:,kk);
+    dax(:,k,:)= -da(:,kstate(k,4),:);
+    dax = dax(:,kk,:);
+    naux = size(ax,2);
+    GAM2 = [GAM2 ax];
+    Dg2 = cat(2,Dg2,dax);
 end
 
 GAM0 = blkdiag(GAM0,eye(naux));
@@ -158,14 +158,14 @@ auxe = zeros(0,1);
 k0 = kstate(find(kstate(:,2) >= M_.maximum_endo_lag+2),:);;
 i0 = find(k0(:,2) == M_.maximum_endo_lag+2);
 for i=M_.maximum_endo_lag+3:M_.maximum_endo_lag+2+M_.maximum_endo_lead,
-  i1 = find(k0(:,2) == i);
-  n1 = size(i1,1);
-  j = zeros(n1,1);
-  for j1 = 1:n1
-    j(j1) = find(k0(i0,1)==k0(i1(j1),1));
-  end
-  auxe = [auxe; i0(j)];
-  i0 = i1;
+    i1 = find(k0(:,2) == i);
+    n1 = size(i1,1);
+    j = zeros(n1,1);
+    for j1 = 1:n1
+        j(j1) = find(k0(i0,1)==k0(i1(j1),1));
+    end
+    auxe = [auxe; i0(j)];
+    i0 = i1;
 end
 auxe = [(1:size(auxe,1))' auxe(end:-1:1)];
 n_ir1 = size(auxe,1);
@@ -227,7 +227,7 @@ if kronflag==1, % kronecker products
     Df1Dthet = kron(A',Im)*Dg0 - kron( (A')^2,Im)*Dg1 - Dg2;
 
     Df2Dtau = DmPl*( kron(GAM0,GAM0) - kron(GAM0,GAM1*A) - kron(GAM1*A,GAM0) + kron(GAM1*A,GAM1*A) )*Dm*Dom - ...
-        DmPl*( kron(GAM0*Om,GAM1) + kron(GAM1,GAM0*Om)*Kmm - kron(GAM1*A*Om,GAM1) - kron(GAM1,GAM1*A*Om)*Kmm )*Da;
+              DmPl*( kron(GAM0*Om,GAM1) + kron(GAM1,GAM0*Om)*Kmm - kron(GAM1*A*Om,GAM1) - kron(GAM1,GAM1*A*Om)*Kmm )*Da;
 
 
     Df2Dthet = DmPl*( kron(GAM0*Om,Im) + kron(Im,GAM0*Om)*Kmm - kron(Im,GAM1*A*Om)*Kmm - kron(GAM1*A*Om,Im) )*Dg0 - ...
@@ -272,19 +272,19 @@ else % generalized sylvester equation
         elem(:,:,j) = (Dg0(:,:,j)-Dg1(:,:,j)*A);
         d(:,:,j) = Dg2(:,:,j)-elem(:,:,j)*A;
     end
-        xx=sylvester3mr(a,b,c,d);
+    xx=sylvester3mr(a,b,c,d);
     if ~isempty(indexo),
-      dSig = zeros(M_.exo_nbr,M_.exo_nbr);
-      for j=1:length(indexo)
-        dSig(indexo(j),indexo(j)) = 2*sqrt(M_.Sigma_e(indexo(j),indexo(j)));
-        y = B*dSig*B';
-        y = y(nauxe+1:end,nauxe+1:end);
-        H(:,j) = [zeros((m-nauxe)^2,1); vech(y)];
-        if nargout>1,
-          dOm(:,:,j) = y;
+        dSig = zeros(M_.exo_nbr,M_.exo_nbr);
+        for j=1:length(indexo)
+            dSig(indexo(j),indexo(j)) = 2*sqrt(M_.Sigma_e(indexo(j),indexo(j)));
+            y = B*dSig*B';
+            y = y(nauxe+1:end,nauxe+1:end);
+            H(:,j) = [zeros((m-nauxe)^2,1); vech(y)];
+            if nargout>1,
+                dOm(:,:,j) = y;
+            end
+            dSig(indexo(j),indexo(j)) = 0;
         end
-        dSig(indexo(j),indexo(j)) = 0;
-      end
     end
     for j=1:param_nbr,
         x = xx(:,:,j);
@@ -293,23 +293,23 @@ else % generalized sylvester equation
         x = x(nauxe+1:end,nauxe+1:end);
         y = y(nauxe+1:end,nauxe+1:end);
         if nargout>1,
-          dA(:,:,j+length(indexo)) = x;
-          dOm(:,:,j+length(indexo)) = y;
+            dA(:,:,j+length(indexo)) = x;
+            dOm(:,:,j+length(indexo)) = y;
         end
         H(:,j+length(indexo)) = [x(:); vech(y)];
     end
-%     for j=1:param_nbr,
-%         disp(['Derivatives w.r.t. ',M_.param_names(indx(j),:),', ',int2str(j),'/',int2str(param_nbr)])
-%         elem = (Dg0(:,:,j)-Dg1(:,:,j)*A);
-%         d = Dg2(:,:,j)-elem*A;
-%         x=sylvester3(a,b,c,d);
-% %         x=sylvester3a(x,a,b,c,d);
-%         y = inva * (Dg3(:,:,j)-(elem-GAM1*x)*B);
-%         y = y*B'+B*y';
-%         x = x(nauxe+1:end,nauxe+1:end);
-%         y = y(nauxe+1:end,nauxe+1:end);
-%         H(:,j) = [x(:); vech(y)];
-%     end
+    %     for j=1:param_nbr,
+    %         disp(['Derivatives w.r.t. ',M_.param_names(indx(j),:),', ',int2str(j),'/',int2str(param_nbr)])
+    %         elem = (Dg0(:,:,j)-Dg1(:,:,j)*A);
+    %         d = Dg2(:,:,j)-elem*A;
+    %         x=sylvester3(a,b,c,d);
+    % %         x=sylvester3a(x,a,b,c,d);
+    %         y = inva * (Dg3(:,:,j)-(elem-GAM1*x)*B);
+    %         y = y*B'+B*y';
+    %         x = x(nauxe+1:end,nauxe+1:end);
+    %         y = y(nauxe+1:end,nauxe+1:end);
+    %         H(:,j) = [x(:); vech(y)];
+    %     end
     H = [[zeros(M_.endo_nbr,length(indexo)) Hss]; H];
 
 end

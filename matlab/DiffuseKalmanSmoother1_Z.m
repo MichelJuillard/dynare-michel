@@ -170,21 +170,21 @@ while t<smpl
 end
 t = smpl+1;
 while t>d+1
-  t = t-1;
-  r(:,t) = Z'*iF(:,:,t)*v(:,t) + L(:,:,t)'*r(:,t+1);
-  alphahat(:,t)	= a(:,t) + P(:,:,t)*r(:,t);
-  etahat(:,t)	= QRt*r(:,t);
+    t = t-1;
+    r(:,t) = Z'*iF(:,:,t)*v(:,t) + L(:,:,t)'*r(:,t+1);
+    alphahat(:,t)	= a(:,t) + P(:,:,t)*r(:,t);
+    etahat(:,t)	= QRt*r(:,t);
 end
 if d
-  r0 = zeros(mm,d+1); 
-  r0(:,d+1) = r(:,d+1);
-  r1 = zeros(mm,d+1);
-  for t = d:-1:1
-    r0(:,t) = Linf(:,:,t)'*r0(:,t+1);
-    r1(:,t) = Z'*(iFinf(:,:,t)*v(:,t)-Kstar(:,:,t)'*r0(:,t+1)) + Linf(:,:,t)'*r1(:,t+1);
-    alphahat(:,t)	= a(:,t) + Pstar(:,:,t)*r0(:,t) + Pinf(:,:,t)*r1(:,t);
-    etahat(:,t)		= QRt*r0(:,t);
-  end
+    r0 = zeros(mm,d+1); 
+    r0(:,d+1) = r(:,d+1);
+    r1 = zeros(mm,d+1);
+    for t = d:-1:1
+        r0(:,t) = Linf(:,:,t)'*r0(:,t+1);
+        r1(:,t) = Z'*(iFinf(:,:,t)*v(:,t)-Kstar(:,:,t)'*r0(:,t+1)) + Linf(:,:,t)'*r1(:,t+1);
+        alphahat(:,t)	= a(:,t) + Pstar(:,:,t)*r0(:,t) + Pinf(:,:,t)*r1(:,t);
+        etahat(:,t)		= QRt*r0(:,t);
+    end
 end
 
 if nargout > 7

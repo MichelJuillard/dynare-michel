@@ -28,44 +28,44 @@ function pdf = normpdf (x, m, s)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-  if (nargin ~= 1 && nargin ~= 3)
+if (nargin ~= 1 && nargin ~= 3)
     error('normpdf: you must give one or three arguments');
-  end
+end
 
-  if (nargin == 1)
+if (nargin == 1)
     m = 0;
     s = 1;
-  end
+end
 
-  if (~isscalar (m) || ~isscalar (s))
+if (~isscalar (m) || ~isscalar (s))
     [retval, x, m, s] = common_size (x, m, s);
     if (retval > 0)
-      error ('normpdf: x, m and s must be of common size or scalars');
+        error ('normpdf: x, m and s must be of common size or scalars');
     end
-  end
+end
 
-  sz = size (x);
-  pdf = zeros (sz);
+sz = size (x);
+pdf = zeros (sz);
 
-  if (isscalar (m) && isscalar (s))
+if (isscalar (m) && isscalar (s))
     if (find (isinf (m) | isnan (m) | ~(s >= 0) | ~(s < Inf)))
-      pdf = NaN * ones (sz);
+        pdf = NaN * ones (sz);
     else
-      pdf = stdnormal_pdf ((x - m) ./ s) ./ s;
+        pdf = stdnormal_pdf ((x - m) ./ s) ./ s;
     end
-  else
+else
     k = find (isinf (m) | isnan (m) | ~(s >= 0) | ~(s < Inf));
     if (any (k))
-      pdf(k) = NaN;
+        pdf(k) = NaN;
     end
 
     k = find (~isinf (m) & ~isnan (m) & (s >= 0) & (s < Inf));
     if (any (k))
-      pdf(k) = stdnormal_pdf ((x(k) - m(k)) ./ s(k)) ./ s(k);
+        pdf(k) = stdnormal_pdf ((x(k) - m(k)) ./ s(k)) ./ s(k);
     end
-  end
+end
 
-  pdf((s == 0) & (x == m)) = Inf;
-  pdf((s == 0) & ((x < m) | (x > m))) = 0;
+pdf((s == 0) & (x == m)) = Inf;
+pdf((s == 0) & ((x < m) | (x > m))) = 0;
 
 end

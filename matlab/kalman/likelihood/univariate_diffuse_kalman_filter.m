@@ -99,7 +99,7 @@ while newRank && (t<smpl)
 end
 
 if (t==smpl)
-  error(['univariate_diffuse_kalman_filter:: There isn''t enough information to estimate the initial conditions of the nonstationary variables']);
+    error(['univariate_diffuse_kalman_filter:: There isn''t enough information to estimate the initial conditions of the nonstationary variables']);
 end
 
 while notsteady && (t<smpl)
@@ -137,7 +137,7 @@ while t < smpl
             a 	   = a + Ki*prediction_error/Fi;
             Pstar  = Pstar - Ki*Ki'/Fi;
             lik(t) = lik(t) + log(Fi) + prediction_error*prediction_error/Fi ...
-                + l2pi;
+                     + l2pi;
         end
     end	
     a = T*a;

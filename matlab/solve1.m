@@ -37,64 +37,64 @@ function [x,check] = solve1(func,x,j1,j2,jacobian_flag,bad_cond_flag,varargin)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-  global M_ options_ fjac  
+global M_ options_ fjac  
 
-  nn = length(j1);
-  fjac = zeros(nn,nn) ;
-  g = zeros(nn,1) ;
+nn = length(j1);
+fjac = zeros(nn,nn) ;
+g = zeros(nn,1) ;
 
-  tolf = options_.solve_tolf ;
-  tolx = options_.solve_tolx;
-  tolmin = tolx ;
+tolf = options_.solve_tolf ;
+tolx = options_.solve_tolx;
+tolmin = tolx ;
 
-  stpmx = 100 ;
-  maxit = options_.solve_maxit ;
+stpmx = 100 ;
+maxit = options_.solve_maxit ;
 
-  check = 0 ;
+check = 0 ;
 
-  fvec = feval(func,x,varargin{:});
-  fvec = fvec(j1);
-  
-  i = find(~isfinite(fvec));
-  
-  if ~isempty(i)
+fvec = feval(func,x,varargin{:});
+fvec = fvec(j1);
+
+i = find(~isfinite(fvec));
+
+if ~isempty(i)
     disp(['STEADY:  numerical initial values incompatible with the following' ...
 	  ' equations'])
     disp(j1(i)')
-  end
-  
-  f = 0.5*fvec'*fvec ;
+end
 
-  if max(abs(fvec)) < tolf
+f = 0.5*fvec'*fvec ;
+
+if max(abs(fvec)) < tolf
     return ;
-  end
+end
 
-  stpmax = stpmx*max([sqrt(x'*x);nn]) ;
-  first_time = 1;
-  for its = 1:maxit
+stpmax = stpmx*max([sqrt(x'*x);nn]) ;
+first_time = 1;
+for its = 1:maxit
     if jacobian_flag
-      [fvec,fjac] = feval(func,x,varargin{:});
-      fvec = fvec(j1);
-      fjac = fjac(j1,j2);
+        [fvec,fjac] = feval(func,x,varargin{:});
+        fvec = fvec(j1);
+        fjac = fjac(j1,j2);
     else
-      dh = max(abs(x(j2)),options_.gstep*ones(nn,1))*eps^(1/3);
-      
-      for j = 1:nn
-	xdh = x ;
-	xdh(j2(j)) = xdh(j2(j))+dh(j) ;
-	t = feval(func,xdh,varargin{:});
-	fjac(:,j) = (t(j1) - fvec)./dh(j) ;
-	g(j) = fvec'*fjac(:,j) ;
-      end
+        dh = max(abs(x(j2)),options_.gstep*ones(nn,1))*eps^(1/3);
+        
+        for j = 1:nn
+            xdh = x ;
+            xdh(j2(j)) = xdh(j2(j))+dh(j) ;
+            t = feval(func,xdh,varargin{:});
+            fjac(:,j) = (t(j1) - fvec)./dh(j) ;
+            g(j) = fvec'*fjac(:,j) ;
+        end
     end
 
     g = (fvec'*fjac)';
     if options_.debug
-      disp(['cond(fjac) ' num2str(cond(fjac))])
+        disp(['cond(fjac) ' num2str(cond(fjac))])
     end
     M_.unit_root = 0;
     if M_.unit_root
-      if first_time
+        if first_time
 	    first_time = 0;
 	    [q,r,e]=qr(fjac);
 	    n = sum(abs(diag(r)) < 1e-12);
@@ -104,22 +104,22 @@ function [x,check] = solve1(func,x,j1,j2,jacobian_flag,bad_cond_flag,varargin)
 	    disp('STEADY with unit roots:')
 	    disp(' ')
 	    if n > 0
-	      disp(['   The following variable(s) kept their value given in INITVAL' ...
-		    ' or ENDVAL'])
-	      disp(char(e(:,end-n+1:end)'*M_.endo_names))
+                disp(['   The following variable(s) kept their value given in INITVAL' ...
+                      ' or ENDVAL'])
+                disp(char(e(:,end-n+1:end)'*M_.endo_names))
+            else
+                disp('   STEADY can''t find any unit root!')
+     end
         else
-	      disp('   STEADY can''t find any unit root!')
-	    end
-      else
 	    [q,r]=qr(fjac*e);
 	    fvec = q'*fvec;
 	    p = e*[-r(1:end-n,1:end-n)\fvec(1:end-n);zeros(n,1)];
-      end	
+        end	
     elseif bad_cond_flag && cond(fjac) > 1/sqrt(eps)
-	  fjac2=fjac'*fjac;
-	  p=-(fjac2+sqrt(nn*eps)*max(sum(abs(fjac2)))*eye(nn))\(fjac'*fvec);
+        fjac2=fjac'*fjac;
+        p=-(fjac2+sqrt(nn*eps)*max(sum(abs(fjac2)))*eye(nn))\(fjac'*fvec);
     else
-      p = -fjac\fvec ;
+        p = -fjac\fvec ;
     end
     xold = x ;
     fold = f ;
@@ -127,37 +127,37 @@ function [x,check] = solve1(func,x,j1,j2,jacobian_flag,bad_cond_flag,varargin)
     [x,f,fvec,check]=lnsrch1(xold,fold,g,p,stpmax,func,j1,j2,varargin{:});
 
     if options_.debug
-      disp([its f])
-      disp([xold x])
+        disp([its f])
+        disp([xold x])
     end
-      
+    
     if check > 0
-      den = max([f;0.5*nn]) ;
-      if max(abs(g).*max([abs(x(j2)') ones(1,nn)])')/den < tolmin
+        den = max([f;0.5*nn]) ;
+        if max(abs(g).*max([abs(x(j2)') ones(1,nn)])')/den < tolmin
 	    return
-      else
+        else
 	    disp (' ')
 	    disp (['SOLVE: Iteration ' num2str(its)])
 	    disp (['Spurious convergence.'])
 	    disp (x)
 	    return
-      end
+        end
 
-      if max(abs(x(j2)-xold(j2))./max([abs(x(j2)') ones(1,nn)])') < tolx
-	disp (' ')
-	disp (['SOLVE: Iteration ' num2str(its)])
-	disp (['Convergence on dX.'])
-	disp (x)
-	return
-      end
+        if max(abs(x(j2)-xold(j2))./max([abs(x(j2)') ones(1,nn)])') < tolx
+            disp (' ')
+            disp (['SOLVE: Iteration ' num2str(its)])
+            disp (['Convergence on dX.'])
+            disp (x)
+            return
+        end
     elseif max(abs(fvec)) < tolf
-      return
+        return
     end
-  end
-  
-  check = 1;
-  disp(' ')
-  disp('SOLVE: maxit has been reached')
+end
+
+check = 1;
+disp(' ')
+disp('SOLVE: maxit has been reached')
 
 % 01/14/01 MJ lnsearch is now a separate function
 % 01/16/01 MJ added varargin to function evaluation

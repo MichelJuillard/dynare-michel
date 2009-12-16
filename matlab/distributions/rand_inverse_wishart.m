@@ -41,13 +41,13 @@ function G = rand_inverse_wishart(m, v, H_inv_upper_chol)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-    X = randn(v, m) * H_inv_upper_chol; 
-    
-    
-    % At this point, X'*X is Wishart distributed
-    % G = inv(X'*X);
+X = randn(v, m) * H_inv_upper_chol; 
 
-    % Rather compute inv(X'*X) using the SVD
-    [U,S,V] = svd(X, 0);
-    SSi = 1 ./ (diag(S) .^ 2);
-    G = (V .* repmat(SSi', m, 1)) * V';
+
+% At this point, X'*X is Wishart distributed
+% G = inv(X'*X);
+
+% Rather compute inv(X'*X) using the SVD
+[U,S,V] = svd(X, 0);
+SSi = 1 ./ (diag(S) .^ 2);
+G = (V .* repmat(SSi', m, 1)) * V';

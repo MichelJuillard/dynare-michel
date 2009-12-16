@@ -14,7 +14,7 @@ function [b,c,d] = isint(a)
 %    
 %  NOTES 
 %    p+q is equal to the product of m by n.
-    
+
 % Copyright (C) 2009 Dynare Team
 %
 % This file is part of Dynare.
@@ -32,10 +32,10 @@ function [b,c,d] = isint(a)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-    [m,n] = size(a);
-    b = abs(fix(a)-a)<1e-15;
-    
-    if nargout>1
-        c = find(b==1);
-        d = find(b==0);
-    end
+[m,n] = size(a);
+b = abs(fix(a)-a)<1e-15;
+
+if nargout>1
+    c = find(b==1);
+    d = find(b==0);
+end

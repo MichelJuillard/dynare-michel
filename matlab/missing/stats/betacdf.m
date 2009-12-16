@@ -27,38 +27,38 @@ function cdf = betacdf (x, a, b)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-  if (nargin ~= 3)
+if (nargin ~= 3)
     error ('betacdf: you should provide three arguments');
-  end
+end
 
-  if (~isscalar (a) || ~isscalar(b))
+if (~isscalar (a) || ~isscalar(b))
     [retval, x, a, b] = common_size (x, a, b);
     if (retval > 0)
-      error ('betacdf: x, a and b must be of common size or scalar');
+        error ('betacdf: x, a and b must be of common size or scalar');
     end
-  end
+end
 
-  sz = size(x);
-  cdf = zeros (sz);
+sz = size(x);
+cdf = zeros (sz);
 
-  k = find (~(a > 0) | ~(b > 0) | isnan (x));
-  if (any (k))
+k = find (~(a > 0) | ~(b > 0) | isnan (x));
+if (any (k))
     cdf (k) = NaN;
-  end
+end
 
-  k = find ((x >= 1) & (a > 0) & (b > 0));
-  if (any (k))
+k = find ((x >= 1) & (a > 0) & (b > 0));
+if (any (k))
     cdf (k) = 1;
-  end
+end
 
-  k = find ((x > 0) & (x < 1) & (a > 0) & (b > 0));
-  if (any (k))
+k = find ((x > 0) & (x < 1) & (a > 0) & (b > 0));
+if (any (k))
     if (isscalar (a) && isscalar(b))
-      cdf (k) = betainc (x(k), a, b);
+        cdf (k) = betainc (x(k), a, b);
     else
-      cdf (k) = betainc (x(k), a(k), b(k));
+        cdf (k) = betainc (x(k), a(k), b(k));
     end
-  end
+end
 
 end
 

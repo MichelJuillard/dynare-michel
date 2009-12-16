@@ -18,8 +18,8 @@ function hms = dynsec2hms(secs)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-    secs = round(secs);
-    s = rem(secs, 60);
-    m = rem(floor(secs / 60), 60);
-    h = floor(secs / 3600);
-    hms = sprintf('%dh%02dm%02ds', h, m, s);
+secs = round(secs);
+s = rem(secs, 60);
+m = rem(floor(secs / 60), 60);
+h = floor(secs / 3600);
+hms = sprintf('%dh%02dm%02ds', h, m, s);

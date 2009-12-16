@@ -27,26 +27,26 @@ function writedata(fname)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-  global M_ oo_
+global M_ oo_
 
-  % xlswrite doesn't exist on Octave, and appeared in MATLAB 7.0
-  if exist('OCTAVE_VERSION') || matlab_ver_less_than('7.0')
-      error('Function not supported on your version of MATLAB or Octave')
-  end
+% xlswrite doesn't exist on Octave, and appeared in MATLAB 7.0
+if exist('OCTAVE_VERSION') || matlab_ver_less_than('7.0')
+    error('Function not supported on your version of MATLAB or Octave')
+end
 
-  S=[fname '_endo.xls'];
-  n=size(oo_.endo_simul,2);
-  delete(S);
-  S=upper(cellstr(M_.endo_names));
-  S1=cellstr([num2str((1:n)')  char(65*ones(1,n))']);
-  xlswrite([fname '_endo'], S', 'endogenous', 'B1');
-  xlswrite([fname '_endo'], S1, 'endogenous', 'A2');
-  xlswrite([fname '_endo'], oo_.endo_simul', 'endogenous', 'B2');
-  S=[fname '_exo.xls'];
-  n=size(oo_.exo_simul,1);
-  delete(S);
-  S=upper(cellstr(M_.exo_names));
-  S1=cellstr([num2str((1:n)')  char(65*ones(1,n))']);
-  xlswrite([fname '_exo'], S','exogenous', 'B1');
-  xlswrite([fname '_exo'], S1, 'exogenous', 'A2');
-  xlswrite([fname '_exo'], oo_.exo_simul,'exogenous', 'B2');
+S=[fname '_endo.xls'];
+n=size(oo_.endo_simul,2);
+delete(S);
+S=upper(cellstr(M_.endo_names));
+S1=cellstr([num2str((1:n)')  char(65*ones(1,n))']);
+xlswrite([fname '_endo'], S', 'endogenous', 'B1');
+xlswrite([fname '_endo'], S1, 'endogenous', 'A2');
+xlswrite([fname '_endo'], oo_.endo_simul', 'endogenous', 'B2');
+S=[fname '_exo.xls'];
+n=size(oo_.exo_simul,1);
+delete(S);
+S=upper(cellstr(M_.exo_names));
+S1=cellstr([num2str((1:n)')  char(65*ones(1,n))']);
+xlswrite([fname '_exo'], S','exogenous', 'B1');
+xlswrite([fname '_exo'], S1, 'exogenous', 'A2');
+xlswrite([fname '_exo'], oo_.exo_simul,'exogenous', 'B2');

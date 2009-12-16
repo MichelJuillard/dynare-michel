@@ -32,14 +32,14 @@ function r = octave_ver_less_than(verstr)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-  cur_verstr = version();
-  
-  r = get_ver_numeric(cur_verstr) < get_ver_numeric(verstr);
+cur_verstr = version();
+
+r = get_ver_numeric(cur_verstr) < get_ver_numeric(verstr);
 
 
 function x = get_ver_numeric(verstr)
-  nums = sscanf(verstr, '%d.%d.%d')';
-  if length(nums) < 3
+nums = sscanf(verstr, '%d.%d.%d')';
+if length(nums) < 3
     nums(3) = 0;
-  end
-  x = nums * [1; 0.01; 0.0001 ];
+end
+x = nums * [1; 0.01; 0.0001 ];

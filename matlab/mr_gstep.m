@@ -54,19 +54,19 @@ while i<n,
     it=1;
     dx=(fx-f0);
     ic=0;
-%     if abs(dx)>(2*htol),
-%         c=mr_nlincon(xh1,varargin{:});
-%         while c
-%             h1(i)=h1(i)*0.9;
-%             xh1(i)=x(i)+h1(i);
-%             c=mr_nlincon(xh1,varargin{:});        
-%             ic=1;
-%         end   
-%         if ic,
-%             fx = feval(func,xh1,varargin{:});
-%             dx=(fx-f0);
-%         end
-%     end
+    %     if abs(dx)>(2*htol),
+    %         c=mr_nlincon(xh1,varargin{:});
+    %         while c
+    %             h1(i)=h1(i)*0.9;
+    %             xh1(i)=x(i)+h1(i);
+    %             c=mr_nlincon(xh1,varargin{:});        
+    %             ic=1;
+    %         end   
+    %         if ic,
+    %             fx = feval(func,xh1,varargin{:});
+    %             dx=(fx-f0);
+    %         end
+    %     end
     
     icount = 0;
     h0=h1(i);
@@ -77,22 +77,22 @@ while i<n,
             if abs(dx(it))<0.5*htol
                 h1(i)=min(0.3*abs(x(i)), 0.9*htol/abs(dx(it))*h1(i));
                 xh1(i)=x(i)+h1(i);
-%                 c=mr_nlincon(xh1,varargin{:});
-%                 while c
-%                     h1(i)=h1(i)*0.9;
-%                     xh1(i)=x(i)+h1(i);
-%                     c=mr_nlincon(xh1,varargin{:});        
-%                     ic=1;
-%                 end  
+                %                 c=mr_nlincon(xh1,varargin{:});
+                %                 while c
+                %                     h1(i)=h1(i)*0.9;
+                %                     xh1(i)=x(i)+h1(i);
+                %                     c=mr_nlincon(xh1,varargin{:});        
+                %                     ic=1;
+                %                 end  
             end
             if abs(dx(it))>(2*htol),
                 h1(i)= htol/abs(dx(it))*h1(i);
                 xh1(i)=x(i)+h1(i);
             end
             try
-            fx = feval(func,xh1,varargin{:});
+                fx = feval(func,xh1,varargin{:});
             catch
-              fx=1.e8;
+                fx=1.e8;
             end
             it=it+1;
             dx(it)=(fx-f0);
@@ -108,20 +108,20 @@ while i<n,
     end
     f1(:,i)=fx;
     xh1(i)=x(i)-h1(i);
-%     c=mr_nlincon(xh1,varargin{:});
-%    ic=0;
-%     while c
-%         h1(i)=h1(i)*0.9;
-%         xh1(i)=x(i)-h1(i);
-%         c=mr_nlincon(xh1,varargin{:});  
-%         ic = 1;
-%     end    
+    %     c=mr_nlincon(xh1,varargin{:});
+    %    ic=0;
+    %     while c
+    %         h1(i)=h1(i)*0.9;
+    %         xh1(i)=x(i)-h1(i);
+    %         c=mr_nlincon(xh1,varargin{:});  
+    %         ic = 1;
+    %     end    
     fx = feval(func,xh1,varargin{:});
     f_1(:,i)=fx;
-%     if ic,
-%         xh1(i)=x(i)+h1(i);
-%         f1(:,i)=feval(func,xh1,varargin{:});
-%     end
+    %     if ic,
+    %         xh1(i)=x(i)+h1(i);
+    %         f1(:,i)=feval(func,xh1,varargin{:});
+    %     end
     if hcheck & htol<1,
         htol=min(1,max(min(abs(dx))*2,htol*10));
         h1(i)=h10;
@@ -136,7 +136,7 @@ while i<n,
         else
             hh(i) = 1;
         end
-            
+        
         if gg(i)*(hh(i)*gg(i))/2 > htol,
             [f0 x fc retcode] = csminit(func0,x,f0,gg,0,diag(hh),varargin{:});
             ig(i)=1;

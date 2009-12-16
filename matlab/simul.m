@@ -32,54 +32,54 @@ function simul(dr)
 global M_ options_ oo_ ys0_
 
 if size(M_.lead_lag_incidence,2)-nnz(M_.lead_lag_incidence(M_.maximum_endo_lag+1,:)) > 0
-  mess = ['DYNARE: error in model specification : variable ' M_.endo_names(find(M_.lead_lag_incidence(M_.maximum_lag+1,:)==0),:)] ;
-  mess = [mess ' doesn''t appear as current variable.'] ; 
-  error (mess) ;
+    mess = ['DYNARE: error in model specification : variable ' M_.endo_names(find(M_.lead_lag_incidence(M_.maximum_lag+1,:)==0),:)] ;
+    mess = [mess ' doesn''t appear as current variable.'] ; 
+    error (mess) ;
 end
 
 options_ = set_default_option(options_,'periods',0);
 if options_.periods == 0
-  error('SIMUL: number of periods for the simulation isn''t specified')
+    error('SIMUL: number of periods for the simulation isn''t specified')
 end
 
-  if ~ options_.initval_file
-      if ~isfield(options_,'datafile')
+if ~ options_.initval_file
+    if ~isfield(options_,'datafile')
         make_ex_;
         make_y_;
-      else
-          read_data_;
-      end
-  end
-  
-  if isempty(options_.scalv) | options_.scalv == 0
+    else
+        read_data_;
+    end
+end
+
+if isempty(options_.scalv) | options_.scalv == 0
     options_.scalv = oo_.steady_state ;
-  end
+end
 
-  options_.scalv= 1 ;
+options_.scalv= 1 ;
 
-  if ~options_.block && ~options_.bytecode && options_.stack_solve_algo ~= 0
-      error('SIMUL: for the moment, you must use stack_solve_algo=0 when not using block nor bytecode option')
-  end
-  if options_.block && ~options_.bytecode && (options_.stack_solve_algo == 0 || options_.stack_solve_algo == 5)
-      error('SIMUL: for the moment, you must use stack_solve_algo={1,2,3,4} when using block without bytecode option')
-  end
-  if options_.block && options_.bytecode && options_.stack_solve_algo ~= 5
-      error('SIMUL: for the moment, you must use stack_solve_algo=5 with block and bytecode option')
-  end
-  
-  if(options_.block)
-      if(options_.bytecode)
-          oo_.endo_simul=bytecode('dynamic');
-      else
-          eval([M_.fname '_dynamic']);
-      end;
-  else
-      if M_.maximum_endo_lag ==1 & M_.maximum_endo_lead <= 1
-         sim1 ;
-      else
-         simk ;
-      end
-  end;
+if ~options_.block && ~options_.bytecode && options_.stack_solve_algo ~= 0
+    error('SIMUL: for the moment, you must use stack_solve_algo=0 when not using block nor bytecode option')
+end
+if options_.block && ~options_.bytecode && (options_.stack_solve_algo == 0 || options_.stack_solve_algo == 5)
+    error('SIMUL: for the moment, you must use stack_solve_algo={1,2,3,4} when using block without bytecode option')
+end
+if options_.block && options_.bytecode && options_.stack_solve_algo ~= 5
+    error('SIMUL: for the moment, you must use stack_solve_algo=5 with block and bytecode option')
+end
+
+if(options_.block)
+    if(options_.bytecode)
+        oo_.endo_simul=bytecode('dynamic');
+    else
+        eval([M_.fname '_dynamic']);
+    end;
+else
+    if M_.maximum_endo_lag ==1 & M_.maximum_endo_lead <= 1
+        sim1 ;
+    else
+        simk ;
+    end
+end;
 
 dyn2vec;
 

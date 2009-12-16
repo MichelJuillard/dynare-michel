@@ -54,7 +54,7 @@ T  = cat(1,cat(2,T,zeros(mm,pp)),zeros(pp,mm+pp));
 R  = cat(1,cat(2,R,zeros(mm,pp)),cat(2,zeros(pp,rr),eye(pp)));
 Q  = cat(1,cat(2,Q,zeros(rr,pp)),cat(2,zeros(pp,rr),H));
 if size(Pinf1,1) % Otherwise Pinf = 0 (no unit root) 
-	Pinf1 = cat(1,cat(2,Pinf1,zeros(mm,pp)),zeros(pp,mm+pp));
+    Pinf1 = cat(1,cat(2,Pinf1,zeros(mm,pp)),zeros(pp,mm+pp));
 end
 Pstar1   = cat(1,cat(2,Pstar1,zeros(mm,pp)),cat(2,zeros(pp,mm),H));
 spinf    = size(Pinf1);
@@ -88,8 +88,8 @@ epsilonhat 	= zeros(pp,smpl);
 r 		 	= zeros(mm+pp,smpl+1);
 Z = zeros(pp,mm+pp);
 for i=1:pp;
-	Z(i,mf(i)) = 1;
-	Z(i,mm+i)  = 1;
+    Z(i,mf(i)) = 1;
+    Z(i,mm+i)  = 1;
 end
 %% [1] Kalman filter...
 t = 0;
@@ -99,28 +99,28 @@ while newRank & t < smpl
     a(:,t) = a1(:,t);
     Pstar1(:,:,t) = Pstar(:,:,t);
     Pinf1(:,:,t) = Pinf(:,:,t);
-	for i=1:pp
-		v(i,t) 	= Y(i,t)-a(mf(i),t)-a(mm+i,t)-trend(i,t);
-		Fstar(i,t) 	 = Pstar(mf(i),mf(i),t)+Pstar(mm+i,mm+i,t);
-		Finf(i,t)	 = Pinf(mf(i),mf(i),t);
-		Kstar(:,i,t) = Pstar(:,mf(i),t)+Pstar(:,mm+i,t);
-		if Finf(i,t) > crit
-			Kinf(:,i,t)	= Pinf(:,mf(i),t);
+    for i=1:pp
+        v(i,t) 	= Y(i,t)-a(mf(i),t)-a(mm+i,t)-trend(i,t);
+        Fstar(i,t) 	 = Pstar(mf(i),mf(i),t)+Pstar(mm+i,mm+i,t);
+        Finf(i,t)	 = Pinf(mf(i),mf(i),t);
+        Kstar(:,i,t) = Pstar(:,mf(i),t)+Pstar(:,mm+i,t);
+        if Finf(i,t) > crit
+            Kinf(:,i,t)	= Pinf(:,mf(i),t);
             Linf(:,:,i,t)  	= eye(mm+pp) - Kinf(:,i,t)*Z(i,:)/Finf(i,t);
             L0(:,:,i,t)  	= (Kinf(:,i,t)*Fstar(i,t)/Finf(i,t) - Kstar(:,i,t))*Z(i,:)/Finf(i,t);
-			a(:,t)		= a(:,t) + Kinf(:,i,t)*v(i,t)/Finf(i,t);
-			Pstar(:,:,t)	= Pstar(:,:,t) + ...
+            a(:,t)		= a(:,t) + Kinf(:,i,t)*v(i,t)/Finf(i,t);
+            Pstar(:,:,t)	= Pstar(:,:,t) + ...
                 Kinf(:,i,t)*transpose(Kinf(:,i,t))*Fstar(i,t)/(Finf(i,t)*Finf(i,t)) - ...
-				(Kstar(:,i,t)*transpose(Kinf(:,i,t)) +...
-                Kinf(:,i,t)*transpose(Kstar(:,i,t)))/Finf(i,t);
-			Pinf(:,:,t)	= Pinf(:,:,t) - Kinf(:,i,t)*transpose(Kinf(:,i,t))/Finf(i,t);
-		else %% Note that : (1) rank(Pinf)=0 implies that Finf = 0, (2) outside this loop (when for some i and t the condition
-			 %% rank(Pinf)=0 is satisfied we have P = Pstar and F = Fstar and (3) Finf = 0 does not imply that
-			 %% rank(Pinf)=0. [stéphane,11-03-2004].	  
-			a(:,t) 		= a(:,t) + Kstar(:,i,t)*v(i,t)/Fstar(i,t);
-			Pstar(:,:,t)	= Pstar(:,:,t) - Kstar(:,i,t)*transpose(Kstar(:,i,t))/Fstar(i,t);
+                (Kstar(:,i,t)*transpose(Kinf(:,i,t)) +...
+                 Kinf(:,i,t)*transpose(Kstar(:,i,t)))/Finf(i,t);
+            Pinf(:,:,t)	= Pinf(:,:,t) - Kinf(:,i,t)*transpose(Kinf(:,i,t))/Finf(i,t);
+        else %% Note that : (1) rank(Pinf)=0 implies that Finf = 0, (2) outside this loop (when for some i and t the condition
+            %% rank(Pinf)=0 is satisfied we have P = Pstar and F = Fstar and (3) Finf = 0 does not imply that
+            %% rank(Pinf)=0. [stéphane,11-03-2004].	  
+            a(:,t) 		= a(:,t) + Kstar(:,i,t)*v(i,t)/Fstar(i,t);
+            Pstar(:,:,t)	= Pstar(:,:,t) - Kstar(:,i,t)*transpose(Kstar(:,i,t))/Fstar(i,t);
     	end
-	end
+    end
     a1(:,t+1) 	 	= T*a(:,t);
     for jnk=1:nk,
         aK(jnk,:,t+jnk) 	 	= T^jnk*a(:,t);
@@ -147,11 +147,11 @@ while notsteady & t<smpl
     a(:,t) = a1(:,t);
     P(:,:,t)=tril(P(:,:,t))+transpose(tril(P(:,:,t),-1));
     P1(:,:,t) = P(:,:,t);
-	for i=1:pp
+    for i=1:pp
         v(i,t)    = Y(i,t) - a(mf(i),t) - a(mm+i,t) - trend(i,t);
-		Fi(i,t)   = P(mf(i),mf(i),t)+P(mm+i,mm+i,t);
+        Fi(i,t)   = P(mf(i),mf(i),t)+P(mm+i,mm+i,t);
         Ki(:,i,t) = P(:,mf(i),t)+P(:,mm+i,t);
-		if Fi(i,t) > crit
+        if Fi(i,t) > crit
             Li(:,:,i,t)    = eye(mm+pp)-Ki(:,i,t)*Z(i,:)/Fi(i,t);
             a(:,t) = a(:,t) + Ki(:,i,t)*v(i,t)/Fi(i,t);
             P(:,:,t) = P(:,:,t) - Ki(:,i,t)*transpose(Ki(:,i,t))/Fi(i,t);
@@ -170,11 +170,11 @@ Fi_s = Fi(:,t);
 Ki_s = Ki(:,:,t);
 L_s  =Li(:,:,:,t);
 if t<smpl
-	t_steady = t+1;
-	P  = cat(3,P(:,:,1:t),repmat(P(:,:,t),[1 1 smpl-t_steady+1]));
-	Fi = cat(2,Fi(:,1:t),repmat(Fi_s,[1 1 smpl-t_steady+1]));
-	Li  = cat(4,Li(:,:,:,1:t),repmat(L_s,[1 1 smpl-t_steady+1]));
-	Ki  = cat(3,Ki(:,:,1:t),repmat(Ki_s,[1 1 smpl-t_steady+1]));
+    t_steady = t+1;
+    P  = cat(3,P(:,:,1:t),repmat(P(:,:,t),[1 1 smpl-t_steady+1]));
+    Fi = cat(2,Fi(:,1:t),repmat(Fi_s,[1 1 smpl-t_steady+1]));
+    Li  = cat(4,Li(:,:,:,1:t),repmat(L_s,[1 1 smpl-t_steady+1]));
+    Ki  = cat(3,Ki(:,:,1:t),repmat(Ki_s,[1 1 smpl-t_steady+1]));
 end
 while t<smpl
     t=t+1;
@@ -219,16 +219,16 @@ if d
                           L0(:,:,i,t)'*r0(:,t) + Linf(:,:,i,t)'*r1(:,t);
                 r0(:,t) = transpose(Linf(:,:,i,t))*r0(:,t);
             end
-        end
-        alphahat(:,t) = a1(:,t) + Pstar1(:,:,t)*r0(:,t) + Pinf1(:,:,t)*r1(:,t);
-        r(:,t-1)      = r0(:,t);
-        tmp	      = QRt*r(:,t);
-        etahat(:,t)   = tmp(1:rr);
-        epsilonhat(:,t)	= tmp(rr+(1:pp));
-        if t > 1
-            r0(:,t-1) = T'*r0(:,t);
-            r1(:,t-1) = T'*r1(:,t);
-        end
+     end
+     alphahat(:,t) = a1(:,t) + Pstar1(:,:,t)*r0(:,t) + Pinf1(:,:,t)*r1(:,t);
+     r(:,t-1)      = r0(:,t);
+     tmp	      = QRt*r(:,t);
+     etahat(:,t)   = tmp(1:rr);
+     epsilonhat(:,t)	= tmp(rr+(1:pp));
+     if t > 1
+         r0(:,t-1) = T'*r0(:,t);
+         r1(:,t-1) = T'*r1(:,t);
+     end
     end
 end
 alphahat = alphahat(1:mm,:);

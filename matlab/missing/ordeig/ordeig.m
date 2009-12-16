@@ -28,19 +28,19 @@ function eigs = ordeig(t)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-  n = size(t,2);
-  eigs = zeros(n,1);
-  i = 1;
-  while i <= n
-      if i == n
-          eigs(n) = t(n,n);
-          break;
-      elseif t(i+1,i) == 0
-          eigs(i) = t(i,i);
-          i = i+1;
-      else
-          k = i:i+1;
-          eigs(k) = eig(t(k,k));
-          i = i+2;
-      end
-  end
+n = size(t,2);
+eigs = zeros(n,1);
+i = 1;
+while i <= n
+    if i == n
+        eigs(n) = t(n,n);
+        break;
+    elseif t(i+1,i) == 0
+        eigs(i) = t(i,i);
+        i = i+1;
+    else
+        k = i:i+1;
+        eigs(k) = eig(t(k,k));
+        i = i+2;
+    end
+end

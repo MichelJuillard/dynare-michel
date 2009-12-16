@@ -1,5 +1,5 @@
 function [nvar,vartan,NumberOfDecompFiles] = ...
-        dsge_simulated_theoretical_variance_decomposition(SampleSize,M_,options_,oo_,type)
+    dsge_simulated_theoretical_variance_decomposition(SampleSize,M_,options_,oo_,type)
 % This function computes the posterior or prior distribution of the variance
 % decomposition of the observed endogenous variables.
 % 

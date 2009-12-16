@@ -1,5 +1,5 @@
 function [nvar,vartan,NumberOfConditionalDecompFiles] = ...
-        dsge_simulated_theoretical_conditional_variance_decomposition(SampleSize,Steps,M_,options_,oo_,type)
+    dsge_simulated_theoretical_conditional_variance_decomposition(SampleSize,Steps,M_,options_,oo_,type)
 % This function computes the posterior or prior distribution of the conditional variance
 % decomposition of the endogenous variables (or a subset of the endogenous variables).
 % 

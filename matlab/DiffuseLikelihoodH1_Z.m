@@ -43,90 +43,90 @@ function [LIK, lik] = DiffuseLikelihoodH1_Z(T,Z,R,Q,H,Pinf,Pstar,Y,start)
 
 % M. Ratto added lik in output
 
-  global bayestopt_ options_
-  
-  smpl = size(Y,2);
-  mm   = size(T,2);
-  pp   = size(Y,1);
-  a    = zeros(mm,1);
-  dF   = 1;
-  QQ   = R*Q*transpose(R);
-  t    = 0;
-  lik  = zeros(smpl,1);
-  LIK  = Inf;
-  notsteady   = 1;
-  crit        = options_.kalman_tol;
-  while rank(Pinf,crit) & t < smpl
+global bayestopt_ options_
+
+smpl = size(Y,2);
+mm   = size(T,2);
+pp   = size(Y,1);
+a    = zeros(mm,1);
+dF   = 1;
+QQ   = R*Q*transpose(R);
+t    = 0;
+lik  = zeros(smpl,1);
+LIK  = Inf;
+notsteady   = 1;
+crit        = options_.kalman_tol;
+while rank(Pinf,crit) & t < smpl
     t     = t+1;
     v  	  = Y(:,t)-Z*a;
     Finf  = Z*Pinf*Z';
     if rcond(Finf) < crit 
-      if ~all(abs(Finf(:)) < crit)
-	return
-      else
-	Fstar   = Z*Pstar*Z'+H;
-	iFstar	= inv(Fstar);
-	dFstar	= det(Fstar);
-	Kstar	= Pstar*Z'*iFstar;
-	lik(t)	= log(dFstar) + v'*iFstar*v;
-	Pinf	= T*Pinf*transpose(T);
-	Pstar	= T*(Pstar-Pstar*Z'*Kstar')*T'+QQ;
-	a	= T*(a+Kstar*v);
-      end
+        if ~all(abs(Finf(:)) < crit)
+            return
+        else
+            Fstar   = Z*Pstar*Z'+H;
+            iFstar	= inv(Fstar);
+            dFstar	= det(Fstar);
+            Kstar	= Pstar*Z'*iFstar;
+            lik(t)	= log(dFstar) + v'*iFstar*v;
+            Pinf	= T*Pinf*transpose(T);
+            Pstar	= T*(Pstar-Pstar*Z'*Kstar')*T'+QQ;
+            a	= T*(a+Kstar*v);
+        end
     else
-      lik(t)	= log(det(Finf));
-      iFinf	= inv(Finf);
-      Kinf	= Pinf*Z'*iFinf;		
-      Fstar	= Z*Pstar*Z'+H;
-      Kstar	= (Pstar*Z'-Kinf*Fstar)*iFinf; 	
-      Pstar	= T*(Pstar-Pstar*Z'*Kinf'-Pinf*Z'*Kstar')*T'+QQ;
-      Pinf	= T*(Pinf-Pinf*Z'*Kinf')*T';
-      a		= T*(a+Kinf*v);					
+        lik(t)	= log(det(Finf));
+        iFinf	= inv(Finf);
+        Kinf	= Pinf*Z'*iFinf;		
+        Fstar	= Z*Pstar*Z'+H;
+        Kstar	= (Pstar*Z'-Kinf*Fstar)*iFinf; 	
+        Pstar	= T*(Pstar-Pstar*Z'*Kinf'-Pinf*Z'*Kstar')*T'+QQ;
+        Pinf	= T*(Pinf-Pinf*Z'*Kinf')*T';
+        a		= T*(a+Kinf*v);					
     end  
-  end
-  if t == smpl                                                           
+end
+if t == smpl                                                           
     error(['There isn''t enough information to estimate the initial' ... 
 	   ' conditions of the nonstationary variables']);                   
-  end                                                                    
-  F_singular = 1;
-  while notsteady & t < smpl
+end                                                                    
+F_singular = 1;
+while notsteady & t < smpl
     t  = t+1;
     v  	  = Y(:,t)-Z*a;
     F  = Z*Pstar*Z'+H;
     oldPstar  = Pstar;
     dF = det(F);
     if rcond(F) < crit 
-      if ~all(abs(F(:))<crit)
-	return
-      else
-	a         = T*a;
-	Pstar     = T*Pstar*T'+QQ;
-      end
+        if ~all(abs(F(:))<crit)
+            return
+        else
+            a         = T*a;
+            Pstar     = T*Pstar*T'+QQ;
+        end
     else
-      F_singular = 0;
-      iF        = inv(F);
-      lik(t)    = log(dF)+v'*iF*v;
-      K         = Pstar*Z'*iF;
-      a         = T*(a+K*v);	
-      Pstar     = T*(Pstar-K*Z*Pstar)*T'+QQ;
+        F_singular = 0;
+        iF        = inv(F);
+        lik(t)    = log(dF)+v'*iF*v;
+        K         = Pstar*Z'*iF;
+        a         = T*(a+K*v);	
+        Pstar     = T*(Pstar-K*Z*Pstar)*T'+QQ;
     end
     notsteady = ~(max(max(abs(Pstar-oldPstar)))<crit);
-  end
-  if F_singular == 1
+end
+if F_singular == 1
     error(['The variance of the forecast error remains singular until the' ...
-	  'end of the sample'])
-  end
-  if t < smpl
+           'end of the sample'])
+end
+if t < smpl
     t0 = t+1;
     while t < smpl
-      t = t+1;
-      v = Y(:,t)-Z*a;
-      a = T*(a+K*v);
-      lik(t) = v'*iF*v;
+        t = t+1;
+        v = Y(:,t)-Z*a;
+        a = T*(a+K*v);
+        lik(t) = v'*iF*v;
     end
     lik(t0:smpl) = lik(t0:smpl) + log(dF);
-  end
-  % adding log-likelihhod constants
-  lik = (lik + pp*log(2*pi))/2;
+end
+% adding log-likelihhod constants
+lik = (lik + pp*log(2*pi))/2;
 
-  LIK = sum(lik(start:end)); % Minus the log-likelihood.
+LIK = sum(lik(start:end)); % Minus the log-likelihood.

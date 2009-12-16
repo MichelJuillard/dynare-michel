@@ -28,10 +28,10 @@ global options_ oo_ M_
 omega = []; f = [];
 
 if options_.order > 1
-  disp('UnivariateSpectralDensity :: I Cannot compute the theoretical spectral density') 
-  disp('with a second order approximation of the DSGE model!')
-  disp('Set order = 1.')
-  return
+    disp('UnivariateSpectralDensity :: I Cannot compute the theoretical spectral density') 
+    disp('with a second order approximation of the DSGE model!')
+    disp('Set order = 1.')
+    return
 end
 
 pltinfo  = 1;%options_.SpectralDensity.Th.plot;
@@ -41,26 +41,26 @@ omega    = (0:sdl:pi)';
 GridSize = length(omega);
 exo_names_orig_ord  = M_.exo_names_orig_ord;
 if exist('OCTAVE_VERSION')
-  warning('off', 'Octave:divide-by-zero')
+    warning('off', 'Octave:divide-by-zero')
 else
-  warning off MATLAB:dividebyzero
+    warning off MATLAB:dividebyzero
 end
 if nargin<2
-  var_list = [];
+    var_list = [];
 end
 if size(var_list,1) == 0
     var_list = M_.endo_names(1:M_.orig_endo_nbr, :);
 end
 nvar = size(var_list,1);
-    ivar=zeros(nvar,1);
-    for i=1:nvar
-      i_tmp = strmatch(var_list(i,:),M_.endo_names,'exact');
-      if isempty(i_tmp)
+ivar=zeros(nvar,1);
+for i=1:nvar
+    i_tmp = strmatch(var_list(i,:),M_.endo_names,'exact');
+    if isempty(i_tmp)
       	error (['One of the variable specified does not exist']) ;
-      else
+    else
 	ivar(i) = i_tmp;
-      end
     end
+end
 f = zeros(nvar,GridSize);
 ghx = dr.ghx;
 ghu = dr.ghu;
@@ -81,16 +81,16 @@ AS = ghx(:,i0);
 ghu1 = zeros(nx,M_.exo_nbr);
 ghu1(i0,:) = ghu(ikx,:);
 for i=M_.maximum_lag:-1:2
-  i1 = find(k0(:,2) == i);
-  n1 = size(i1,1);
-  j1 = zeros(n1,1);
-  j2 = j1;
-  for k1 = 1:n1
-    j1(k1) = find(k0(i00,1)==k0(i1(k1),1));
-    j2(k1) = find(k0(i0,1)==k0(i1(k1),1));
-  end
-  AS(:,j1) = AS(:,j1)+ghx(:,i1);
-  i0 = i1;
+    i1 = find(k0(:,2) == i);
+    n1 = size(i1,1);
+    j1 = zeros(n1,1);
+    j2 = j1;
+    for k1 = 1:n1
+        j1(k1) = find(k0(i00,1)==k0(i1(k1),1));
+        j2(k1) = find(k0(i0,1)==k0(i1(k1),1));
+    end
+    AS(:,j1) = AS(:,j1)+ghx(:,i1);
+    i0 = i1;
 end
 Gamma = zeros(nvar,cutoff+1);
 [A,B] = kalman_transition_matrix(dr,ikx',1:nx,dr.transition_auxiliary_variables,M_.exo_nbr);
@@ -158,22 +158,22 @@ end
 
 H = 1:cutoff;
 for i=1:nvar
-  f(i,:) = Gamma(i,1)/(2*pi) + Gamma(i,H+1)*cos(H'*omega')/pi;
+    f(i,:) = Gamma(i,1)/(2*pi) + Gamma(i,H+1)*cos(H'*omega')/pi;
 end  
 
 if exist('OCTAVE_VERSION')
-  warning('on', 'Octave:divide-by-zero')
+    warning('on', 'Octave:divide-by-zero')
 else
-  warning on MATLAB:dividebyzero
+    warning on MATLAB:dividebyzero
 end
 
 if pltinfo
-  for i= 1:nvar
-    figure('Name',['Spectral Density of ' deblank(M_.endo_names(ivar(i),:)) '.'])
-    plot(omega,f(i,:),'-k','linewidth',2)
-    xlabel('0 \leq \omega \leq \pi')
-    ylabel('f(\omega)')
-    box on
-    axis tight
-  end
+    for i= 1:nvar
+        figure('Name',['Spectral Density of ' deblank(M_.endo_names(ivar(i),:)) '.'])
+        plot(omega,f(i,:),'-k','linewidth',2)
+        xlabel('0 \leq \omega \leq \pi')
+        ylabel('f(\omega)')
+        box on
+        axis tight
+    end
 end

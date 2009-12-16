@@ -39,27 +39,27 @@ function save_params_and_steady_state(filename)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-  global M_ oo_
+global M_ oo_
 
-  fid = fopen(filename, 'w');
-  if fid < 0
-      error([ 'SAVE_PARAMS_AND_STEADY_STATE: Can''t open ' filename ]);
-  end
+fid = fopen(filename, 'w');
+if fid < 0
+    error([ 'SAVE_PARAMS_AND_STEADY_STATE: Can''t open ' filename ]);
+end
 
-  for i = 1:M_.param_nbr
-      fprintf(fid, '%s %.16g\n', M_.param_names(i,:), M_.params(i));
-  end
-  
-  for i = 1:M_.endo_nbr
-      fprintf(fid, '%s %.16g\n', M_.endo_names(i,:), oo_.steady_state(i));
-  end
+for i = 1:M_.param_nbr
+    fprintf(fid, '%s %.16g\n', M_.param_names(i,:), M_.params(i));
+end
 
-  for i = 1:M_.exo_nbr
-      fprintf(fid, '%s %.16g\n', M_.exo_names(i,:), oo_.exo_steady_state(i));
-  end
+for i = 1:M_.endo_nbr
+    fprintf(fid, '%s %.16g\n', M_.endo_names(i,:), oo_.steady_state(i));
+end
 
-  for i = 1:M_.exo_det_nbr
-      fprintf(fid, '%s %.16g\n', M_.exo_det_names(i,:), oo_.exo_det_steady_state(i));
-  end
+for i = 1:M_.exo_nbr
+    fprintf(fid, '%s %.16g\n', M_.exo_names(i,:), oo_.exo_steady_state(i));
+end
 
-  fclose(fid);
+for i = 1:M_.exo_det_nbr
+    fprintf(fid, '%s %.16g\n', M_.exo_det_names(i,:), oo_.exo_det_steady_state(i));
+end
+
+fclose(fid);

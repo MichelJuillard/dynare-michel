@@ -27,34 +27,34 @@ function pdf = betapdf (x, a, b)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-  if (nargin ~= 3)
+if (nargin ~= 3)
     error ('betapdf: you must give three arguments');
-  end
-  
-  if (~isscalar (a) || ~isscalar(b))
+end
+
+if (~isscalar (a) || ~isscalar(b))
     [retval, x, a, b] = common_size (x, a, b);
     if (retval > 0)
-      error ('betapdf: x, a and b must be of common size or scalar');
+        error ('betapdf: x, a and b must be of common size or scalar');
     end
-  end
+end
 
-  sz = size (x);
-  pdf = zeros (sz);
+sz = size (x);
+pdf = zeros (sz);
 
-  k = find (~(a > 0) | ~(b > 0) | isnan (x));
-  if (any (k))
+k = find (~(a > 0) | ~(b > 0) | isnan (x));
+if (any (k))
     pdf (k) = NaN;
-  end
+end
 
-  k = find ((x > 0) & (x < 1) & (a > 0) & (b > 0));
-  if (any (k))
+k = find ((x > 0) & (x < 1) & (a > 0) & (b > 0));
+if (any (k))
     if (isscalar(a) && isscalar(b))
-      pdf(k) = exp ((a - 1) .* log (x(k)) ...
-		    + (b - 1) .* log (1 - x(k))) ./ beta (a, b);
+        pdf(k) = exp ((a - 1) .* log (x(k)) ...
+                      + (b - 1) .* log (1 - x(k))) ./ beta (a, b);
     else
-      pdf(k) = exp ((a(k) - 1) .* log (x(k)) ...
-		    + (b(k) - 1) .* log (1 - x(k))) ./ beta (a(k), b(k));
+        pdf(k) = exp ((a(k) - 1) .* log (x(k)) ...
+                      + (b(k) - 1) .* log (1 - x(k))) ./ beta (a(k), b(k));
     end
-  end
+end
 
 end

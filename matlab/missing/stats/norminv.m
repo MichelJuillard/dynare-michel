@@ -28,49 +28,49 @@ function inv = norminv (x, m, s)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-  if (nargin ~= 1 && nargin ~= 3)
+if (nargin ~= 1 && nargin ~= 3)
     error ('norminv: you must give one or three arguments');
-  end
+end
 
-  if (nargin == 1)
+if (nargin == 1)
     m = 0;
     s = 1;
-  end
+end
 
-  if (~isscalar (m) || ~isscalar (s))
+if (~isscalar (m) || ~isscalar (s))
     [retval, x, m, s] = common_size (x, m, s);
     if (retval > 0)
-      error ('norminv: x, m and s must be of common size or scalars');
+        error ('norminv: x, m and s must be of common size or scalars');
     end
-  end
+end
 
-  sz = size (x);
-  inv = zeros (sz);
+sz = size (x);
+inv = zeros (sz);
 
-  if (isscalar (m) && isscalar (s))
+if (isscalar (m) && isscalar (s))
     if (find (isinf (m) | isnan (m) | ~(s > 0) | ~(s < Inf)))
-      inv = NaN * ones (sz);
+        inv = NaN * ones (sz);
     else
-      inv =  m + s .* stdnormal_inv (x);
+        inv =  m + s .* stdnormal_inv (x);
     end
-  else
+else
     k = find (isinf (m) | isnan (m) | ~(s > 0) | ~(s < Inf));
     if (any (k))
-      inv(k) = NaN;
+        inv(k) = NaN;
     end
 
     k = find (~isinf (m) & ~isnan (m) & (s > 0) & (s < Inf));
     if (any (k))
-      inv(k) = m(k) + s(k) .* stdnormal_inv (x(k));
+        inv(k) = m(k) + s(k) .* stdnormal_inv (x(k));
     end
-  end
+end
 
-  k = find ((s == 0) & (x > 0) & (x < 1));
-  if (any (k))
+k = find ((s == 0) & (x > 0) & (x < 1));
+if (any (k))
     inv(k) = m(k);
-  end
+end
 
-  inv((s == 0) & (x == 0)) = -Inf;
-  inv((s == 0) & (x == 1)) = Inf;
+inv((s == 0) & (x == 0)) = -Inf;
+inv((s == 0) & (x == 1)) = Inf;
 
 end

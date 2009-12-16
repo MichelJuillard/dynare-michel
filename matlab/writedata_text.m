@@ -27,28 +27,28 @@ function writedata_text(fname)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-  global M_ oo_
-  S=[fname '_endo.dat'];
-  fid = fopen(S,'w');
-  for i = 1:size(M_.endo_names,1)
+global M_ oo_
+S=[fname '_endo.dat'];
+fid = fopen(S,'w');
+for i = 1:size(M_.endo_names,1)
     fprintf(fid,'%s ',M_.endo_names(i,:)');
-  end;
-  fprintf(fid,'\n');
-  for i = 1:size(oo_.endo_simul,2)
+end;
+fprintf(fid,'\n');
+for i = 1:size(oo_.endo_simul,2)
     fprintf(fid,'%15.7f ',oo_.endo_simul(:,i));
     fprintf(fid,'\n');
-  end
-  fclose(fid);
-  
-  S=[fname '_exo.dat'];
-  fid = fopen(S,'w');
-  for i = 1:size(M_.exo_names,1)
+end
+fclose(fid);
+
+S=[fname '_exo.dat'];
+fid = fopen(S,'w');
+for i = 1:size(M_.exo_names,1)
     fprintf(fid,'%s ',M_.exo_names(i,:));
-  end;
-  fprintf(fid,'\n');
-  for i = 1:size(oo_.exo_simul,1)
+end;
+fprintf(fid,'\n');
+for i = 1:size(oo_.exo_simul,1)
     fprintf(fid,'%15.7f ',oo_.exo_simul(i,:));
     fprintf(fid,'\n');
-  end
-  fclose(fid);
+end
+fclose(fid);
 return;

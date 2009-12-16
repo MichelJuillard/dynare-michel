@@ -33,56 +33,55 @@ function [yf,int_width]=forcst(dr,y0,horizon,var_list)
 %
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
-    
-    global M_  oo_ options_ 
-    
-    make_ex_;
-    yf = simult_(y0,dr,zeros(horizon,M_.exo_nbr),1);
-    nstatic = dr.nstatic;
-    npred = dr.npred;
-    nc = size(dr.ghx,2);
-    endo_nbr = M_.endo_nbr;
-    inv_order_var = dr.inv_order_var;
-    [A,B] = kalman_transition_matrix(dr,nstatic+(1:npred),1:nc,dr.transition_auxiliary_variables,M_.exo_nbr);
-    
-    if size(var_list,1) == 0
-        var_list = M_.endo_names(1:M_.orig_endo_nbr,:);
+
+global M_  oo_ options_ 
+
+make_ex_;
+yf = simult_(y0,dr,zeros(horizon,M_.exo_nbr),1);
+nstatic = dr.nstatic;
+npred = dr.npred;
+nc = size(dr.ghx,2);
+endo_nbr = M_.endo_nbr;
+inv_order_var = dr.inv_order_var;
+[A,B] = kalman_transition_matrix(dr,nstatic+(1:npred),1:nc,dr.transition_auxiliary_variables,M_.exo_nbr);
+
+if size(var_list,1) == 0
+    var_list = M_.endo_names(1:M_.orig_endo_nbr,:);
+end
+nvar = size(var_list,1);
+ivar=zeros(nvar,1);
+for i=1:nvar
+    i_tmp = strmatch(var_list(i,:),M_.endo_names,'exact');
+    if isempty(i_tmp)
+        disp(var_list(i,:));
+        error (['One of the variable specified does not exist']) ;
+    else
+        ivar(i) = i_tmp;
     end
-    nvar = size(var_list,1);
-	ivar=zeros(nvar,1);
-	for i=1:nvar
-	    i_tmp = strmatch(var_list(i,:),M_.endo_names,'exact');
-	    if isempty(i_tmp)
-		disp(var_list(i,:));
-		error (['One of the variable specified does not exist']) ;
-	    else
-		ivar(i) = i_tmp;
-	    end
-	end
+end
 
-    ghx1 = dr.ghx(inv_order_var(ivar),:);
-    ghu1 = dr.ghu(inv_order_var(ivar),:);
+ghx1 = dr.ghx(inv_order_var(ivar),:);
+ghu1 = dr.ghu(inv_order_var(ivar),:);
 
-    sigma_u = B*M_.Sigma_e*B';
-    sigma_u1 = ghu1*M_.Sigma_e*ghu1';
-    sigma_y = 0;
-    
-    for i=1:horizon
-	sigma_y1 = ghx1*sigma_y*ghx1'+sigma_u1;
-	var_yf(i,:) = diag(sigma_y1)';
-	if i == horizon
-	    break
-	end
-	sigma_u = A*sigma_u*A';
-	sigma_y = sigma_y+sigma_u;
+sigma_u = B*M_.Sigma_e*B';
+sigma_u1 = ghu1*M_.Sigma_e*ghu1';
+sigma_y = 0;
+
+for i=1:horizon
+    sigma_y1 = ghx1*sigma_y*ghx1'+sigma_u1;
+    var_yf(i,:) = diag(sigma_y1)';
+    if i == horizon
+        break
     end
+    sigma_u = A*sigma_u*A';
+    sigma_y = sigma_y+sigma_u;
+end
 
-    fact = norminv((1-options_.conf_sig)/2,0,1);
-    
-    int_width = zeros(horizon,M_.endo_nbr);
-    for i=1:nvar
-	int_width(:,i) = fact*sqrt(var_yf(:,i));
-    end
+fact = norminv((1-options_.conf_sig)/2,0,1);
 
-    yf = yf(ivar,:);
-    
+int_width = zeros(horizon,M_.endo_nbr);
+for i=1:nvar
+    int_width(:,i) = fact*sqrt(var_yf(:,i));
+end
+
+yf = yf(ivar,:);

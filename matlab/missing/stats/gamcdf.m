@@ -27,32 +27,32 @@ function cdf = gamcdf (x, a, b)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-  if (nargin ~= 3)
+if (nargin ~= 3)
     error ('gamcdf: you must give three arguments');
-  end
+end
 
-  if (~isscalar (a) || ~isscalar(b))
+if (~isscalar (a) || ~isscalar(b))
     [retval, x, a, b] = common_size (x, a, b);
     if (retval > 0)
-      error ('gamcdf: x, a and b must be of common size or scalars');
+        error ('gamcdf: x, a and b must be of common size or scalars');
     end
-  end
+end
 
-  sz = size (x);
-  cdf = zeros (sz);
+sz = size (x);
+cdf = zeros (sz);
 
-  k = find (~(a > 0) | ~(b > 0) | isnan (x));
-  if (any (k))
+k = find (~(a > 0) | ~(b > 0) | isnan (x));
+if (any (k))
     cdf (k) = NaN;
-  end
+end
 
-  k = find ((x > 0) & (a > 0) & (b > 0));
-  if (any (k))
+k = find ((x > 0) & (a > 0) & (b > 0));
+if (any (k))
     if (isscalar (a) && isscalar(b))
-      cdf (k) = gammainc (x(k) ./ b, a);
+        cdf (k) = gammainc (x(k) ./ b, a);
     else
-      cdf (k) = gammainc (x(k) ./ b(k), a(k));
+        cdf (k) = gammainc (x(k) ./ b(k), a(k));
     end
-  end
+end
 
 end

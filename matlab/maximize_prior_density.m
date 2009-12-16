@@ -1,5 +1,5 @@
 function [xparams,lpd,hessian] = ...
-        maximize_prior_density(iparams, prior_shape, prior_hyperparameter_1, prior_hyperparameter_2, prior_inf_bound, prior_sup_bound)
+    maximize_prior_density(iparams, prior_shape, prior_hyperparameter_1, prior_hyperparameter_2, prior_inf_bound, prior_sup_bound)
 % Maximizes the logged prior density using Chris Sims' optimization routine.
 % 
 % INPUTS 
@@ -31,17 +31,16 @@ function [xparams,lpd,hessian] = ...
 %
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
-    
-    number_of_estimated_parameters = length(iparams);
-    H0 = 1e-4*eye(number_of_estimated_parameters);
-    crit = 1e-7;
-    nit = 1000;
-    verbose = 2;
-    gradient_method = 2;
-    
-    [lpd,xparams,grad,hessian,itct,fcount,retcodehat] = ...
-                csminwel('minus_logged_prior_density',iparams,H0,[],crit,nit,gradient_method, ... 
-                         prior_shape, prior_hyperparameter_1, prior_hyperparameter_2, prior_inf_bound, prior_sup_bound);
 
-    lpd = -lpd;
-    
+number_of_estimated_parameters = length(iparams);
+H0 = 1e-4*eye(number_of_estimated_parameters);
+crit = 1e-7;
+nit = 1000;
+verbose = 2;
+gradient_method = 2;
+
+[lpd,xparams,grad,hessian,itct,fcount,retcodehat] = ...
+    csminwel('minus_logged_prior_density',iparams,H0,[],crit,nit,gradient_method, ... 
+             prior_shape, prior_hyperparameter_1, prior_hyperparameter_2, prior_inf_bound, prior_sup_bound);
+
+lpd = -lpd;

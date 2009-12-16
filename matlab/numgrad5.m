@@ -48,41 +48,41 @@ goog=1;
 scale=1;
 
 for i=1:n
-   if size(x,1)>size(x,2)
-      tvecv=tvec(i,:);
-   else
-      tvecv=tvec(:,i);
-   end
-   [f1,cost_flag1] = feval(fcn, x+scale*transpose(tvecv), varargin{:});
-   [f2,cost_flag2] = feval(fcn, x-scale*transpose(tvecv), varargin{:});
-   if cost_flag1==0 || cost_flag2==0
-       cost_flag3 = 0;
-       cost_flag4 = 0;
-       disp('numgrad:: I cannot use the five points formula!!')
-   else
-       [f3,cost_flag3] = feval(fcn, x+2*scale*transpose(tvecv), varargin{:});
-       [f4,cost_flag4] = feval(fcn, x-2*scale*transpose(tvecv), varargin{:});
-   end
-   if cost_flag1 && cost_flag2 && cost_flag3 && cost_flag4% Five Points formula
-       g0 = (8*(f1 - f2)+ f4-f3) / (12*scale*delta);
-   elseif cost_flag3==0 || cost_flag4==0
-       if cost_flag1 && cost_flag2% Three points formula
-           g0 = (f1-f2)/(2*scale*delta);
-       else
-           if cost_flag1% Two points formula
-               g0 = (f1-f0) / (scale*delta);
-           elseif cost_flag2% Two points formula
-               g0 = (f0-f2) / (scale*delta);
-           else% Bad gradient!
-               goog=0;
-           end
-       end       
-   end
-   if goog && abs(g0)< 1e15 
-      g(i)=g0;
-   else
-       disp('bad gradient ------------------------')
-       g(i)=0;
-       badg=1;
-   end
+    if size(x,1)>size(x,2)
+        tvecv=tvec(i,:);
+    else
+        tvecv=tvec(:,i);
+    end
+    [f1,cost_flag1] = feval(fcn, x+scale*transpose(tvecv), varargin{:});
+    [f2,cost_flag2] = feval(fcn, x-scale*transpose(tvecv), varargin{:});
+    if cost_flag1==0 || cost_flag2==0
+        cost_flag3 = 0;
+        cost_flag4 = 0;
+        disp('numgrad:: I cannot use the five points formula!!')
+    else
+        [f3,cost_flag3] = feval(fcn, x+2*scale*transpose(tvecv), varargin{:});
+        [f4,cost_flag4] = feval(fcn, x-2*scale*transpose(tvecv), varargin{:});
+    end
+    if cost_flag1 && cost_flag2 && cost_flag3 && cost_flag4% Five Points formula
+        g0 = (8*(f1 - f2)+ f4-f3) / (12*scale*delta);
+    elseif cost_flag3==0 || cost_flag4==0
+        if cost_flag1 && cost_flag2% Three points formula
+            g0 = (f1-f2)/(2*scale*delta);
+        else
+            if cost_flag1% Two points formula
+                g0 = (f1-f0) / (scale*delta);
+            elseif cost_flag2% Two points formula
+                g0 = (f0-f2) / (scale*delta);
+            else% Bad gradient!
+                goog=0;
+            end
+        end       
+    end
+    if goog && abs(g0)< 1e15 
+        g(i)=g0;
+    else
+        disp('bad gradient ------------------------')
+        g(i)=0;
+        badg=1;
+    end
 end

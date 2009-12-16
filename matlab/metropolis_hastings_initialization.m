@@ -1,5 +1,5 @@
 function [ ix2, ilogpo2, ModelName, MhDirectoryName, fblck, fline, npar, nblck, nruns, NewFile, MAX_nruns, d ] = ...
-        metropolis_hastings_initialization(TargetFun, xparam1, vv, mh_bounds, varargin)
+    metropolis_hastings_initialization(TargetFun, xparam1, vv, mh_bounds, varargin)
 % Metropolis-Hastings initialization.
 % 
 % INPUTS 
@@ -163,11 +163,11 @@ if ~options_.load_mh_file & ~options_.mh_recover
     % separate initializaton for each chain
     JSUM = 0;
     for j=1:nblck,
-      JSUM  = JSUM + sum(100*clock);
-      randn('state',JSUM);
-      rand('state',JSUM);
-      record.Seeds(j).Normal = randn('state');
-      record.Seeds(j).Unifor = rand('state');
+        JSUM  = JSUM + sum(100*clock);
+        randn('state',JSUM);
+        rand('state',JSUM);
+        record.Seeds(j).Normal = randn('state');
+        record.Seeds(j).Unifor = rand('state');
     end
     record.InitialParameters = ix2;
     record.InitialLogLiK = ilogpo2;
@@ -182,14 +182,14 @@ if ~options_.load_mh_file & ~options_.mh_recover
                     int2str(AnticipatedNumberOfLinesInTheLastFile) '.\n']);
     fprintf(fidlog,['\n']);
     for j = 1:nblck,
-    fprintf(fidlog,['    Initial seed (randn) for chain number ',int2str(j),':\n']);
-    for i=1:length(record.Seeds(j).Normal)
-        fprintf(fidlog,['      ' num2str(record.Seeds(j).Normal(i)') '\n']);
-    end
-    fprintf(fidlog,['    Initial seed (rand) for chain number ',int2str(j),':\n']);
-    for i=1:length(record.Seeds(j).Unifor)
-        fprintf(fidlog,['      ' num2str(record.Seeds(j).Unifor(i)') '\n']);
-    end
+        fprintf(fidlog,['    Initial seed (randn) for chain number ',int2str(j),':\n']);
+        for i=1:length(record.Seeds(j).Normal)
+            fprintf(fidlog,['      ' num2str(record.Seeds(j).Normal(i)') '\n']);
+        end
+        fprintf(fidlog,['    Initial seed (rand) for chain number ',int2str(j),':\n']);
+        for i=1:length(record.Seeds(j).Unifor)
+            fprintf(fidlog,['      ' num2str(record.Seeds(j).Unifor(i)') '\n']);
+        end
     end,
     fprintf(fidlog,' \n');
     fclose(fidlog);

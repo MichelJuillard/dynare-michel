@@ -18,81 +18,81 @@ function disp_moments(y,var_list)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-  global M_ options_ oo_
-  
-  warning_old_state = warning;
-  warning off
+global M_ options_ oo_
 
-  if options_.hp_filter
-      error('STOCH_SIMUL: HP filter is not yet implemented for empirical moments')
-  end
-  
-  if size(var_list,1) == 0
-      var_list = M_.endo_names(1:M_.orig_endo_nbr, :);
-  end
-      
-    nvar = size(var_list,1);
-    ivar=zeros(nvar,1);
-    for i=1:nvar
-      i_tmp = strmatch(var_list(i,:),M_.endo_names,'exact');
-      if isempty(i_tmp)
+warning_old_state = warning;
+warning off
+
+if options_.hp_filter
+    error('STOCH_SIMUL: HP filter is not yet implemented for empirical moments')
+end
+
+if size(var_list,1) == 0
+    var_list = M_.endo_names(1:M_.orig_endo_nbr, :);
+end
+
+nvar = size(var_list,1);
+ivar=zeros(nvar,1);
+for i=1:nvar
+    i_tmp = strmatch(var_list(i,:),M_.endo_names,'exact');
+    if isempty(i_tmp)
       	error (['One of the variable specified does not exist']) ;
-      else
+    else
 	ivar(i) = i_tmp;
-      end
     end
+end
 
-  y = y(ivar,options_.drop+M_.maximum_lag+1:end)';
-  
-  m = mean(y);
-  y = y - repmat(m,size(y,1),1);
-  s2 = mean(y.*y);
-  s = sqrt(s2);
-  oo_.mean = transpose(m);
-  oo_.var = y'*y/size(y,1);
+y = y(ivar,options_.drop+M_.maximum_lag+1:end)';
 
-  labels = deblank(M_.endo_names(ivar,:));
-  
-  if options_.nomoments == 0
+m = mean(y);
+y = y - repmat(m,size(y,1),1);
+s2 = mean(y.*y);
+s = sqrt(s2);
+oo_.mean = transpose(m);
+oo_.var = y'*y/size(y,1);
+
+labels = deblank(M_.endo_names(ivar,:));
+
+if options_.nomoments == 0
     z = [ m' s' s2' (mean(y.^3)./s2.^1.5)' (mean(y.^4)./(s2.*s2)-3)' ];
-  
+    
     title='MOMENTS OF SIMULATED VARIABLES';
     if options_.hp_filter
-      title = [title ' (HP filter, lambda = ' ...
-	       int2str(options_.hp_filter) ')'];
+        title = [title ' (HP filter, lambda = ' ...
+                 int2str(options_.hp_filter) ')'];
     end
     headers=strvcat('VARIABLE','MEAN','STD. DEV.','VARIANCE','SKEWNESS', ...
 		    'KURTOSIS');
     dyntable(title,headers,labels,z,size(labels,2)+2,16,6);
-  end
-  
-  if options_.nocorr == 0
+end
+
+if options_.nocorr == 0
     corr = (y'*y/size(y,1))./(s'*s);
     title = 'CORRELATION OF SIMULATED VARIABLES';
     if options_.hp_filter
-      title = [title ' (HP filter, lambda = ' ...
-	       int2str(options_.hp_filter) ')'];
+        title = [title ' (HP filter, lambda = ' ...
+                 int2str(options_.hp_filter) ')'];
     end
     headers = strvcat('VARIABLE',M_.endo_names(ivar,:));
     dyntable(title,headers,labels,corr,size(labels,2)+2,8,4);
-  end
-  
-  ar = options_.ar;
-  options_ = set_default_option(options_,'ar',5);
-  ar = options_.ar;
-  if ar > 0
+end
+
+ar = options_.ar;
+options_ = set_default_option(options_,'ar',5);
+ar = options_.ar;
+if ar > 0
     autocorr = [];
     for i=1:ar
-      oo_.autocorr{i} = y(ar+1:end,:)'*y(ar+1-i:end-i,:)./((size(y,1)-ar)*s'*s);
-      autocorr = [ autocorr diag(oo_.autocorr{i}) ];
+        oo_.autocorr{i} = y(ar+1:end,:)'*y(ar+1-i:end-i,:)./((size(y,1)-ar)*s'*s);
+        autocorr = [ autocorr diag(oo_.autocorr{i}) ];
     end
     title = 'AUTOCORRELATION OF SIMULATED VARIABLES';
     if options_.hp_filter
-      title = [title ' (HP filter, lambda = ' ...
-	       int2str(options_.hp_filter) ')'];
+        title = [title ' (HP filter, lambda = ' ...
+                 int2str(options_.hp_filter) ')'];
     end
     headers = strvcat('VARIABLE',int2str([1:ar]'));
     dyntable(title,headers,labels,autocorr,size(labels,2)+2,8,4);
-  end
-  
-  warning(warning_old_state);
+end
+
+warning(warning_old_state);

@@ -28,43 +28,43 @@ function cdf = normcdf (x, m, s)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-  if (~ ((nargin == 1) || (nargin == 3)))
+if (~ ((nargin == 1) || (nargin == 3)))
     error ('normcdf: you must give one or three arguments');
-  end
+end
 
-  if (nargin == 1)
+if (nargin == 1)
     m = 0;
     s = 1;
-  end
+end
 
-  if (~isscalar (m) || ~isscalar (s))
+if (~isscalar (m) || ~isscalar (s))
     [retval, x, m, s] = common_size (x, m, s);
     if (retval > 0)
-      error ('normcdf: x, m and s must be of common size or scalar');
+        error ('normcdf: x, m and s must be of common size or scalar');
     end
-  end
+end
 
-  sz = size (x);
-  cdf = zeros (sz);
+sz = size (x);
+cdf = zeros (sz);
 
-  if (isscalar (m) && isscalar(s))
+if (isscalar (m) && isscalar(s))
     if (find (isinf (m) | isnan (m) | ~(s >= 0) | ~(s < Inf)))
-      cdf = NaN * ones (sz);
+        cdf = NaN * ones (sz);
     else
-      cdf =  stdnormal_cdf ((x - m) ./ s);
+        cdf =  stdnormal_cdf ((x - m) ./ s);
     end
-  else
+else
     k = find (isinf (m) | isnan (m) | ~(s >= 0) | ~(s < Inf));
     if (any (k))
-      cdf(k) = NaN;
+        cdf(k) = NaN;
     end
 
     k = find (~isinf (m) & ~isnan (m) & (s >= 0) & (s < Inf));
     if (any (k))
-      cdf(k) = stdnormal_cdf ((x(k) - m(k)) ./ s(k));
+        cdf(k) = stdnormal_cdf ((x(k) - m(k)) ./ s(k));
     end
-  end
+end
 
-  cdf((s == 0) & (x == m)) = 0.5;
+cdf((s == 0) & (x == m)) = 0.5;
 
 end

@@ -31,8 +31,8 @@ function options=set_default_option(options,field,default)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-  if ~isfield(options,field)
+if ~isfield(options,field)
     options.(field) = default;
-  end
-  
-  % 06/07/03 MJ added ; to eval expression
+end
+
+% 06/07/03 MJ added ; to eval expression

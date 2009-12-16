@@ -34,11 +34,11 @@ function ldens = lpdfig1(x,s,nu)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-    ldens = -Inf( size(x) ) ;
-    idx = find( x>0 ) ;    
-    
-    if length(s)==1
-        ldens(idx) = log(2) - gammaln(.5*nu) - .5*nu*(log(2)-log(s)) - (nu+1)*log(x(idx)) - .5*s./(x(idx).*x(idx)) ;
-    else
-        ldens(idx) = log(2) - gammaln(.5*nu(idx)) - .5*nu(idx).*(log(2)-log(s(idx))) - (nu(idx)+1).*log(x(idx)) - .5*s(idx)./(x(idx).*x(idx)) ;
-    end
+ldens = -Inf( size(x) ) ;
+idx = find( x>0 ) ;    
+
+if length(s)==1
+    ldens(idx) = log(2) - gammaln(.5*nu) - .5*nu*(log(2)-log(s)) - (nu+1)*log(x(idx)) - .5*s./(x(idx).*x(idx)) ;
+else
+    ldens(idx) = log(2) - gammaln(.5*nu(idx)) - .5*nu(idx).*(log(2)-log(s(idx))) - (nu(idx)+1).*log(x(idx)) - .5*s(idx)./(x(idx).*x(idx)) ;
+end

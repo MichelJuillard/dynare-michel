@@ -42,7 +42,7 @@ function [xparam1, hh, gg, fval, igg] = newrat(func0, x, hh, gg, igg, ftol0, nit
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-  global bayestopt_
+global bayestopt_
 icount=0;
 nx=length(x);
 xparam1=x;
@@ -123,10 +123,10 @@ while norm(gg)>gtol & check==0 & jit<nit,
         end
         [fvala, x0, ig] = mr_gstep(func0,x0,htol,varargin{:});
         nig=[nig ig];
-         if (fval-fvala)<gibbstol*(fval0(icount)-fval),
-             igibbs=0;
-             disp('Last sequence of univariate step, gain too small!!')
-         else
+        if (fval-fvala)<gibbstol*(fval0(icount)-fval),
+            igibbs=0;
+            disp('Last sequence of univariate step, gain too small!!')
+        else
             disp('Sequence of univariate steps!!')
         end
         fval=fvala;
@@ -135,22 +135,22 @@ while norm(gg)>gtol & check==0 & jit<nit,
         disp('Try diagonal Hessian')
         ihh=diag(1./(diag(hhg)));        
         [fval2 x0 fc retcode2] = csminit(func2str(func),x0,fval,gg,0,ihh,varargin{:});
-            if (fval-fval2)>=ftol ,
-                %hh=diag(diag(hh));
-                disp('Diagonal Hessian successful')            
-            end
+        if (fval-fval2)>=ftol ,
+            %hh=diag(diag(hh));
+            disp('Diagonal Hessian successful')            
+        end
         fval=fval2;
     end        
     if (fval0(icount)-fval)<ftol & flagit==0,
         disp('Try gradient direction')
         ihh0=inx.*1.e-4;        
         [fval3 x0 fc retcode3] = csminit(func2str(func),x0,fval,gg,0,ihh0,varargin{:});
-            if (fval-fval3)>=ftol ,
-                %hh=hh0;
-                %ihh=ihh0;
-                disp('Gradient direction successful')            
-            end
-            fval=fval3;
+        if (fval-fval3)>=ftol ,
+            %hh=hh0;
+            %ihh=ihh0;
+            disp('Gradient direction successful')            
+        end
+        fval=fval3;
     end        
     xparam1=x0;
     x(:,icount+1)=xparam1;
@@ -182,7 +182,7 @@ while norm(gg)>gtol & check==0 & jit<nit,
         ee=eig(hh);
         disp(['Minimum Hessian eigenvalue ',num2str(min(ee))])
         disp(['Maximum Hessian eigenvalue ',num2str(max(ee))])
-         g(:,icount+1)=gg;
+        g(:,icount+1)=gg;
     else
         
         df = fval0(icount)-fval;
@@ -197,21 +197,21 @@ while norm(gg)>gtol & check==0 & jit<nit,
         end
         
         if norm(x(:,icount)-xparam1)>1.e-12,
-          try 
-            save m1 x fval0 nig -append
-          catch
-            save m1 x fval0 nig 
-          end
+            try 
+                save m1 x fval0 nig -append
+            catch
+                save m1 x fval0 nig 
+            end
             [dum, gg, htol0, igg, hhg]=mr_hessian(func_hh,xparam1,flagit,htol,varargin{:});
             if htol0>htol, %ftol,
-                %ftol=htol0;
+                           %ftol=htol0;
                 htol=htol0;
                 disp(' ')
                 disp('Numerical noise in the likelihood')
                 disp('Tolerance has to be relaxed')
                 disp(' ')
-%             elseif htol0<ftol,
-%                 ftol=max(htol0, ftol0);
+                %             elseif htol0<ftol,
+                %                 ftol=max(htol0, ftol0);
             end
             hh0 = reshape(dum,nx,nx);
             hh=hhg;
@@ -232,7 +232,7 @@ while norm(gg)>gtol & check==0 & jit<nit,
         t=toc;
         disp(['Elapsed time for iteration ',num2str(t),' s.'])
         
-         g(:,icount+1)=gg;
+        g(:,icount+1)=gg;
         save m1 x hh g hhg igg fval0 nig
     end
 end

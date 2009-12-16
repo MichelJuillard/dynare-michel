@@ -37,7 +37,7 @@ function B = rand_matrix_normal(n, p, M, Omega_lower_chol, Sigma_lower_chol)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-    B1 = randn(n * p, 1);
-    B2 = kron(Omega_lower_chol, Sigma_lower_chol) * B1;
-    B3 = reshape(B2, n, p);
-    B = B3 + M;
+B1 = randn(n * p, 1);
+B2 = kron(Omega_lower_chol, Sigma_lower_chol) * B1;
+B3 = reshape(B2, n, p);
+B = B3 + M;

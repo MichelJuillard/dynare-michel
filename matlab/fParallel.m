@@ -42,7 +42,7 @@ delete( [fname,'_',int2str(whoiam),'.log']);
 
 diary( [fname,'_',int2str(whoiam),'.log']);
 
-    
+
 % configure dynare environment
 dynareroot = dynare_config();
 
@@ -50,11 +50,11 @@ dynareroot = dynare_config();
 load( [fname,'_input']) 
 
 if exist('fGlobalVar'),
-  globalVars = fieldnames(fGlobalVar);
-  for j=1:length(globalVars),
-    eval(['global ',globalVars{j},';'])
-  end
-  struct2local(fGlobalVar);
+    globalVars = fieldnames(fGlobalVar);
+    for j=1:length(globalVars),
+        eval(['global ',globalVars{j},';'])
+    end
+    struct2local(fGlobalVar);
 end
 
 % On UNIX, mount the master working directory through SSH FS
@@ -85,29 +85,29 @@ end
 
 if(whoiam)
     
-  % Save the output result
-  save([ fname,'_output_',int2str(whoiam),'.mat'],'fOutputVar' )
-  
-  % Inform the master that the job is finished, and transfer the output data
-  if Parallel(ThisMatlab).Local
-    delete(['P_',fname,'_',int2str(whoiam),'End.txt']);
-  else
-    if isunix,            
-      for j=1:size(OutputFileName,1),
-        system(['scp ',OutputFileName{j,1},OutputFileName{j,2},' ',Parallel(ThisMatlab).user,'@',fInputVar.MasterName,':',fInputVar.DyMo,'/',OutputFileName{j,1}]);
-      end
-      system(['scp ',fname,'_output_',int2str(whoiam),'.mat ',Parallel(ThisMatlab).user,'@',fInputVar.MasterName,':',fInputVar.DyMo]);
-      system(['ssh ',Parallel(ThisMatlab).user,'@',fInputVar.MasterName,' rm -f ',fInputVar.DyMo,'/P_',fname,'_',int2str(whoiam),'End.txt']);
-      system(['fusermount -u ~/MasterRemoteMirror_',fname,'_',int2str(whoiam)]);
-      system(['rm -r ~/MasterRemoteMirror_',fname,'_',int2str(whoiam)]);      
+    % Save the output result
+    save([ fname,'_output_',int2str(whoiam),'.mat'],'fOutputVar' )
+    
+    % Inform the master that the job is finished, and transfer the output data
+    if Parallel(ThisMatlab).Local
+        delete(['P_',fname,'_',int2str(whoiam),'End.txt']);
     else
-      for j=1:size(OutputFileName,1),
-        copyfile([OutputFileName{j,1},OutputFileName{j,2}],['\\',fInputVar.MasterName,'\',fInputVar.DyMo(1),'$\',fInputVar.DyMo(4:end),'\',OutputFileName{j,1}])
-      end
-      copyfile([fname,'_output_',int2str(whoiam),'.mat'],['\\',fInputVar.MasterName,'\',fInputVar.DyMo(1),'$\',fInputVar.DyMo(4:end)]);
-      delete(['\\',fInputVar.MasterName,'\',fInputVar.DyMo(1),'$\',fInputVar.DyMo(4:end),'\P_',fname,'_',int2str(whoiam),'End.txt']);
+        if isunix,            
+            for j=1:size(OutputFileName,1),
+                system(['scp ',OutputFileName{j,1},OutputFileName{j,2},' ',Parallel(ThisMatlab).user,'@',fInputVar.MasterName,':',fInputVar.DyMo,'/',OutputFileName{j,1}]);
+            end
+            system(['scp ',fname,'_output_',int2str(whoiam),'.mat ',Parallel(ThisMatlab).user,'@',fInputVar.MasterName,':',fInputVar.DyMo]);
+            system(['ssh ',Parallel(ThisMatlab).user,'@',fInputVar.MasterName,' rm -f ',fInputVar.DyMo,'/P_',fname,'_',int2str(whoiam),'End.txt']);
+            system(['fusermount -u ~/MasterRemoteMirror_',fname,'_',int2str(whoiam)]);
+            system(['rm -r ~/MasterRemoteMirror_',fname,'_',int2str(whoiam)]);      
+        else
+            for j=1:size(OutputFileName,1),
+                copyfile([OutputFileName{j,1},OutputFileName{j,2}],['\\',fInputVar.MasterName,'\',fInputVar.DyMo(1),'$\',fInputVar.DyMo(4:end),'\',OutputFileName{j,1}])
+            end
+            copyfile([fname,'_output_',int2str(whoiam),'.mat'],['\\',fInputVar.MasterName,'\',fInputVar.DyMo(1),'$\',fInputVar.DyMo(4:end)]);
+            delete(['\\',fInputVar.MasterName,'\',fInputVar.DyMo(1),'$\',fInputVar.DyMo(4:end),'\P_',fname,'_',int2str(whoiam),'End.txt']);
+        end
     end
-  end
 end
 
 disp(['fParallel ',int2str(whoiam),' completed.'])

@@ -146,15 +146,15 @@ TheoreticalAutoCovarianceOfTheObservedVariables = ...
     zeros(NumberOfObservedVariables,NumberOfObservedVariables,NumberOfLags+1);
 TheoreticalAutoCovarianceOfTheObservedVariables(:,:,1) = tmp0(mf,mf)+constant'*constant;
 for lag = 1:NumberOfLags
-  tmp0 = T*tmp0;
-  TheoreticalAutoCovarianceOfTheObservedVariables(:,:,lag+1) = tmp0(mf,mf) ...
-      + constant'*constant;
+    tmp0 = T*tmp0;
+    TheoreticalAutoCovarianceOfTheObservedVariables(:,:,lag+1) = tmp0(mf,mf) ...
+        + constant'*constant;
 end
 % Build the theoretical "covariance" between Y and X
 GYX = zeros(NumberOfObservedVariables,NumberOfParameters);
 for i=1:NumberOfLags
-  GYX(:,(i-1)*NumberOfObservedVariables+1:i*NumberOfObservedVariables) = ...
-      TheoreticalAutoCovarianceOfTheObservedVariables(:,:,i+1);
+    GYX(:,(i-1)*NumberOfObservedVariables+1:i*NumberOfObservedVariables) = ...
+        TheoreticalAutoCovarianceOfTheObservedVariables(:,:,i+1);
 end
 if ~options_.noconstant
     GYX(:,end) = constant';
@@ -181,41 +181,41 @@ assignin('base','GXX',GXX);
 assignin('base','GYX',GYX);
 
 if ~isinf(dsge_prior_weight)
-  tmp0 = dsge_prior_weight*gend*TheoreticalAutoCovarianceOfTheObservedVariables(:,:,1) + mYY ;
-  tmp1 = dsge_prior_weight*gend*GYX + mYX;
-  tmp2 = inv(dsge_prior_weight*gend*GXX+mXX);
-  SIGMAu = tmp0 - tmp1*tmp2*tmp1'; clear('tmp0');
-  if ~ispd(SIGMAu)
-      v = diag(SIGMAu);
-      k = find(v<0);
-      fval = bayestopt_.penalty + sum(v(k).^2);
-      info = 52;
-      cost_flag = 0;
-    return;
-  end
-  SIGMAu = SIGMAu / (gend*(1+dsge_prior_weight));
-  PHI = tmp2*tmp1'; clear('tmp1');
-  prodlng1 = sum(gammaln(.5*((1+dsge_prior_weight)*gend- ...
-			     NumberOfObservedVariables*NumberOfLags ...
-			     +1-(1:NumberOfObservedVariables)')));
-  prodlng2 = sum(gammaln(.5*(dsge_prior_weight*gend- ...
-			     NumberOfObservedVariables*NumberOfLags ...
-			     +1-(1:NumberOfObservedVariables)')));  
-  lik = .5*NumberOfObservedVariables*log(det(dsge_prior_weight*gend*GXX+mXX)) ...
-	+ .5*((dsge_prior_weight+1)*gend-NumberOfParameters)*log(det((dsge_prior_weight+1)*gend*SIGMAu)) ...
-	- .5*NumberOfObservedVariables*log(det(dsge_prior_weight*gend*GXX)) ...
-	- .5*(dsge_prior_weight*gend-NumberOfParameters)*log(det(dsge_prior_weight*gend*(GYY-GYX*inv(GXX)*GYX'))) ...
-	+ .5*NumberOfObservedVariables*gend*log(2*pi)  ...
-	- .5*log(2)*NumberOfObservedVariables*((dsge_prior_weight+1)*gend-NumberOfParameters) ...
-	+ .5*log(2)*NumberOfObservedVariables*(dsge_prior_weight*gend-NumberOfParameters) ...
-	- prodlng1 + prodlng2;
+    tmp0 = dsge_prior_weight*gend*TheoreticalAutoCovarianceOfTheObservedVariables(:,:,1) + mYY ;
+    tmp1 = dsge_prior_weight*gend*GYX + mYX;
+    tmp2 = inv(dsge_prior_weight*gend*GXX+mXX);
+    SIGMAu = tmp0 - tmp1*tmp2*tmp1'; clear('tmp0');
+    if ~ispd(SIGMAu)
+        v = diag(SIGMAu);
+        k = find(v<0);
+        fval = bayestopt_.penalty + sum(v(k).^2);
+        info = 52;
+        cost_flag = 0;
+        return;
+    end
+    SIGMAu = SIGMAu / (gend*(1+dsge_prior_weight));
+    PHI = tmp2*tmp1'; clear('tmp1');
+    prodlng1 = sum(gammaln(.5*((1+dsge_prior_weight)*gend- ...
+                               NumberOfObservedVariables*NumberOfLags ...
+                               +1-(1:NumberOfObservedVariables)')));
+    prodlng2 = sum(gammaln(.5*(dsge_prior_weight*gend- ...
+                               NumberOfObservedVariables*NumberOfLags ...
+                               +1-(1:NumberOfObservedVariables)')));  
+    lik = .5*NumberOfObservedVariables*log(det(dsge_prior_weight*gend*GXX+mXX)) ...
+          + .5*((dsge_prior_weight+1)*gend-NumberOfParameters)*log(det((dsge_prior_weight+1)*gend*SIGMAu)) ...
+          - .5*NumberOfObservedVariables*log(det(dsge_prior_weight*gend*GXX)) ...
+          - .5*(dsge_prior_weight*gend-NumberOfParameters)*log(det(dsge_prior_weight*gend*(GYY-GYX*inv(GXX)*GYX'))) ...
+          + .5*NumberOfObservedVariables*gend*log(2*pi)  ...
+          - .5*log(2)*NumberOfObservedVariables*((dsge_prior_weight+1)*gend-NumberOfParameters) ...
+          + .5*log(2)*NumberOfObservedVariables*(dsge_prior_weight*gend-NumberOfParameters) ...
+          - prodlng1 + prodlng2;
 else
-  iGXX = inv(GXX);
-  SIGMAu = GYY - GYX*iGXX*transpose(GYX);
-  PHI = iGXX*transpose(GYX);
-  lik = gend * ( log(det(SIGMAu)) + NumberOfObservedVariables*log(2*pi) +  ...
-        trace(inv(SIGMAu)*(mYY - transpose(mYX*PHI) - mYX*PHI + transpose(PHI)*mXX*PHI)/gend));
-  lik = .5*lik;% Minus likelihood
+    iGXX = inv(GXX);
+    SIGMAu = GYY - GYX*iGXX*transpose(GYX);
+    PHI = iGXX*transpose(GYX);
+    lik = gend * ( log(det(SIGMAu)) + NumberOfObservedVariables*log(2*pi) +  ...
+                   trace(inv(SIGMAu)*(mYY - transpose(mYX*PHI) - mYX*PHI + transpose(PHI)*mXX*PHI)/gend));
+    lik = .5*lik;% Minus likelihood
 end      
 
 lnprior = priordens(xparam1,bayestopt_.pshape,bayestopt_.p6,bayestopt_.p7,bayestopt_.p3,bayestopt_.p4);

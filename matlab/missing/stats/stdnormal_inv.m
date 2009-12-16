@@ -27,11 +27,11 @@ function inv = stdnormal_inv (x)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-  if (nargin ~= 1)
+if (nargin ~= 1)
     error('stdnormal_inv: you should provide one argument');
-  end
+end
 
-  inv = sqrt (2) * erfinv (2 * x - 1);
+inv = sqrt (2) * erfinv (2 * x - 1);
 
 end
 

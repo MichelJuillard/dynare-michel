@@ -30,7 +30,7 @@ function xparam = get_posterior_parameters(type)
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
 global estim_params_ oo_ options_ M_ 
-  
+
 nvx = estim_params_.nvx;
 nvn = estim_params_.nvn;
 ncx = estim_params_.ncx;
@@ -54,7 +54,7 @@ for i=1:nvn
     xparam(m) = eval(['oo_.posterior_' type '.measurement_errors_std.' name1]);
     m = m+1;
 end
-  
+
 for i=1:ncx
     k1 = estim_params_.corrx(i,1);
     k2 = estim_params_.corrx(i,2);
@@ -65,7 +65,7 @@ for i=1:ncx
     M_.Sigma_e(k2,k1) = xparam(m);
     m = m+1;
 end
-  
+
 for i=1:ncn
     k1 = estim_params_.corrn(i,1);
     k2 = estim_params_.corrn(i,2);

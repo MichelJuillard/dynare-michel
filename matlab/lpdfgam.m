@@ -30,11 +30,11 @@ function  ldens = lpdfgam(x,a,b);
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-    ldens = -Inf( size(x) ) ;
-    idx = find( x>0 );
-    
-    if length(a)==1
-        ldens(idx) = -gammaln(a) - a*log(b) + (a-1)*log(x(idx)) - x(idx)/b ;
-    else
-        ldens(idx) = -gammaln(a(idx)) - a(idx).*log(b(idx)) + (a(idx)-1).*log(x(idx)) - x(idx)./b(idx) ;
-    end
+ldens = -Inf( size(x) ) ;
+idx = find( x>0 );
+
+if length(a)==1
+    ldens(idx) = -gammaln(a) - a*log(b) + (a-1)*log(x(idx)) - x(idx)/b ;
+else
+    ldens(idx) = -gammaln(a(idx)) - a(idx).*log(b(idx)) + (a(idx)-1).*log(x(idx)) - x(idx)./b(idx) ;
+end

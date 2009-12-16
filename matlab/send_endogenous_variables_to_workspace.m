@@ -1,6 +1,6 @@
 function send_endogenous_variables_to_workspace()
 % Saves all the endogenous variables in matlab's workspace.
-    
+
 % Copyright (C) 2009 Dynare Team
 %
 % This file is part of Dynare.
@@ -17,7 +17,7 @@ function send_endogenous_variables_to_workspace()
 %
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
-    global M_ oo_
-    for idx = 1:M_.endo_nbr
-        assignin('base',deblank(M_.endo_names(idx,:)),oo_.endo_simul(idx,:))
-    end
+global M_ oo_
+for idx = 1:M_.endo_nbr
+    assignin('base',deblank(M_.endo_names(idx,:)),oo_.endo_simul(idx,:))
+end

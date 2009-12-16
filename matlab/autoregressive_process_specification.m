@@ -59,28 +59,28 @@ function [InnovationVariance,AutoregressiveParameters] = autoregressive_process_
 %
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
-    AutoregressiveParameters = NaN(p,1);
-    InnovationVariance = NaN;
-    switch p
-      case 1
-        AutoregressiveParameters = Rho(1);
-      case 2
-        tmp = (Rho(2)-1)/(Rho(1)*Rho(1)-1);
-        AutoregressiveParameters(1) = Rho(1)*tmp;
-        AutoregressiveParameters(2) = 1-tmp;
-      case 3
-        t1 = 1/(Rho(2)-2*Rho(1)*Rho(1)+1);
-        t2 = (1.5*Rho(1)-2*Rho(1)*Rho(1)*Rho(1)+.5*Rho(3))*t1;
-        t3 = .5*(Rho(1)- Rho(3))/(Rho(2)-1);
-        AutoregressiveParameters(1) = t2-t3-Rho(1);
-        AutoregressiveParameters(2) = (Rho(2)*Rho(2)-Rho(3)*Rho(1)-Rho(1)*Rho(1)+Rho(2))*t1 ;
-        AutoregressiveParameters(3) = t3-Rho(1)+t2;
-      otherwise
-        AutocorrelationMatrix = eye(p);
-        for i=1:p-1
-            AutocorrelationMatrix = AutocorrelationMatrix + diag(Rho(i)*ones(p-i,1),i);
-            AutocorrelationMatrix = AutocorrelationMatrix + diag(Rho(i)*ones(p-i,1),-i);
-        end
-        AutoregressiveParameters = AutocorrelationMatrix\Rho;
+AutoregressiveParameters = NaN(p,1);
+InnovationVariance = NaN;
+switch p
+  case 1
+    AutoregressiveParameters = Rho(1);
+  case 2
+    tmp = (Rho(2)-1)/(Rho(1)*Rho(1)-1);
+    AutoregressiveParameters(1) = Rho(1)*tmp;
+    AutoregressiveParameters(2) = 1-tmp;
+  case 3
+    t1 = 1/(Rho(2)-2*Rho(1)*Rho(1)+1);
+    t2 = (1.5*Rho(1)-2*Rho(1)*Rho(1)*Rho(1)+.5*Rho(3))*t1;
+    t3 = .5*(Rho(1)- Rho(3))/(Rho(2)-1);
+    AutoregressiveParameters(1) = t2-t3-Rho(1);
+    AutoregressiveParameters(2) = (Rho(2)*Rho(2)-Rho(3)*Rho(1)-Rho(1)*Rho(1)+Rho(2))*t1 ;
+    AutoregressiveParameters(3) = t3-Rho(1)+t2;
+  otherwise
+    AutocorrelationMatrix = eye(p);
+    for i=1:p-1
+        AutocorrelationMatrix = AutocorrelationMatrix + diag(Rho(i)*ones(p-i,1),i);
+        AutocorrelationMatrix = AutocorrelationMatrix + diag(Rho(i)*ones(p-i,1),-i);
     end
-    InnovationVariance = Variance * (1-AutoregressiveParameters'*Rho);
+    AutoregressiveParameters = AutocorrelationMatrix\Rho;
+end
+InnovationVariance = Variance * (1-AutoregressiveParameters'*Rho);

@@ -18,7 +18,7 @@ function x = selif(a,b)
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
 if size(b,2) ~= 1
-	error ('The second argument in SELIF must be à column vector') ;
+    error ('The second argument in SELIF must be à column vector') ;
 end
 
 x = a(find(b == 1),:) ;

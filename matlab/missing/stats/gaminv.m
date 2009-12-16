@@ -29,59 +29,59 @@ function inv = gaminv (x, a, b)
 
 if (nargin ~= 3)
     error ('gaminv: you must give three arguments');
-  end
+end
 
-  if (~isscalar (a) || ~isscalar(b))
+if (~isscalar (a) || ~isscalar(b))
     [retval, x, a, b] = common_size (x, a, b);
     if (retval > 0)
-      error ('gaminv: x, a and b must be of common size or scalars');
+        error ('gaminv: x, a and b must be of common size or scalars');
     end
-  end
+end
 
-  sz = size (x);
-  inv = zeros (sz);
+sz = size (x);
+inv = zeros (sz);
 
-  k = find ((x < 0) | (x > 1) | isnan (x) | ~(a > 0) | ~(b > 0));
-  if (any (k))
+k = find ((x < 0) | (x > 1) | isnan (x) | ~(a > 0) | ~(b > 0));
+if (any (k))
     inv (k) = NaN;
-  end
+end
 
-  k = find ((x == 1) & (a > 0) & (b > 0));
-  if (any (k))
+k = find ((x == 1) & (a > 0) & (b > 0));
+if (any (k))
     inv (k) = Inf;
-  end
+end
 
-  k = find ((x > 0) & (x < 1) & (a > 0) & (b > 0));
-  if (any (k))
+k = find ((x > 0) & (x < 1) & (a > 0) & (b > 0));
+if (any (k))
     if (~isscalar(a) || ~isscalar(b))
-      a = a (k);
-      b = b (k);
-      y = a .* b;
+        a = a (k);
+        b = b (k);
+        y = a .* b;
     else
-      y = a * b * ones (size (k));
+        y = a * b * ones (size (k));
     end
     x = x (k);
     l = find (x < eps);
     if (any (l))
-      y(l) = sqrt (eps) * ones (length (l), 1);
+        y(l) = sqrt (eps) * ones (length (l), 1);
     end
 
     y_old = y;
     for i = 1 : 100
-      h     = (gamcdf (y_old, a, b) - x) ./ gampdf (y_old, a, b);
-      y_new = y_old - h;
-      ind   = find (y_new <= eps);
-      if (any (ind))
-        y_new (ind) = y_old (ind) / 10;
-        h = y_old - y_new;
-      end
-      if (max (abs (h)) < sqrt (eps))
-        break;
-      end
-      y_old = y_new;
+        h     = (gamcdf (y_old, a, b) - x) ./ gampdf (y_old, a, b);
+        y_new = y_old - h;
+        ind   = find (y_new <= eps);
+        if (any (ind))
+            y_new (ind) = y_old (ind) / 10;
+            h = y_old - y_new;
+        end
+        if (max (abs (h)) < sqrt (eps))
+            break;
+        end
+        y_old = y_new;
     end
 
     inv (k) = y_new;
-  end
+end
 
 end

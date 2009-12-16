@@ -30,7 +30,7 @@ function density = multivariate_student_pdf(X,Mean,Sigma_upper_chol,df);
 %
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
-    nn = length(X);
-    t1 = gamma( .5*(nn+df) ) / ( gamma( .5*nn ) * (df*pi)^(.5*nn) ) ;
-    t2 = t1 / prod(diag(Sigma_upper_chol)) ;
-    density = t2 / ( 1 + (X-Mean)*(Sigma_upper_chol\(transpose(Sigma_upper_chol)\transpose(X-Mean)))/df )^(.5*(nn+df));
+nn = length(X);
+t1 = gamma( .5*(nn+df) ) / ( gamma( .5*nn ) * (df*pi)^(.5*nn) ) ;
+t2 = t1 / prod(diag(Sigma_upper_chol)) ;
+density = t2 / ( 1 + (X-Mean)*(Sigma_upper_chol\(transpose(Sigma_upper_chol)\transpose(X-Mean)))/df )^(.5*(nn+df));

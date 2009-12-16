@@ -1,4 +1,4 @@
-function [alphahat,etahat,atilde, aK] = DiffuseKalmanSmoother1(T,R,Q,Pinf1,Pstar1,Y,trend,pp,mm,smpl,mf,data_index)
+function [alphahat,etahat,atilde, aK] = missing_DiffuseKalmanSmoother1(T,R,Q,Pinf1,Pstar1,Y,trend,pp,mm,smpl,mf,data_index)
 
 % function [alphahat,etahat,a, aK] = DiffuseKalmanSmoother1(T,R,Q,Pinf1,Pstar1,Y,trend,pp,mm,smpl,mf)
 % Computes the diffuse kalman smoother without measurement error, in the case of a non-singular var-cov matrix 
@@ -83,7 +83,7 @@ r	   	= zeros(mm,smpl+1);
 
 Z = zeros(pp,mm);
 for i=1:pp;
-	Z(i,mf(i)) = 1;
+    Z(i,mf(i)) = 1;
 end
 
 t = 0;
@@ -153,7 +153,7 @@ while notsteady & t<smpl
         aK(jnk,:,t+jnk) = T^(jnk-1)*a(:,t+1);
     end
     P(:,:,t+1)  = T*P(:,:,t)*transpose(T)-T*P(:,mf,t)*transpose(K(:,:,t)) + QQ;
-%    notsteady   = ~(max(max(abs(P(:,:,t+1)-P(:,:,t))))<crit);
+    %    notsteady   = ~(max(max(abs(P(:,:,t+1)-P(:,:,t))))<crit);
 end
 % $$$ if t<smpl
 % $$$     PZI_s = PZI;

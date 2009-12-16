@@ -29,10 +29,10 @@ function [xparams, logpost]=metropolis_draw(init)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-  global options_ estim_params_ M_
-  persistent mh_nblck NumberOfDraws fname FirstLine FirstMhFile MAX_nruns
-  
-  if init
+global options_ estim_params_ M_
+persistent mh_nblck NumberOfDraws fname FirstLine FirstMhFile MAX_nruns
+
+if init
     nvx  = estim_params_.nvx;
     nvn  = estim_params_.nvn;
     ncx  = estim_params_.ncx;
@@ -51,20 +51,20 @@ function [xparams, logpost]=metropolis_draw(init)
     MAX_nruns = ceil(options_.MaxNumberOfBytes/(npar+2)/8);
     mh_nblck = options_.mh_nblck;
     return
-  end
-  
-  ChainNumber = ceil(rand*mh_nblck);
-  DrawNumber  = ceil(rand*NumberOfDraws);
+end
 
-  if DrawNumber <= MAX_nruns-FirstLine+1
+ChainNumber = ceil(rand*mh_nblck);
+DrawNumber  = ceil(rand*NumberOfDraws);
+
+if DrawNumber <= MAX_nruns-FirstLine+1
     MhFilNumber = FirstMhFile;
     MhLine = FirstLine+DrawNumber-1;
-  else
+else
     DrawNumber  = DrawNumber-(MAX_nruns-FirstLine+1);
     MhFilNumber = FirstMhFile+ceil(DrawNumber/MAX_nruns); 
     MhLine = DrawNumber-(MhFilNumber-FirstMhFile-1)*MAX_nruns;
-  end
+end
 
-  load( [ fname '_mh' int2str(MhFilNumber) '_blck' int2str(ChainNumber) '.mat' ],'x2','logpo2');
-  xparams = x2(MhLine,:);
-  logpost= logpo2(MhLine);
+load( [ fname '_mh' int2str(MhFilNumber) '_blck' int2str(ChainNumber) '.mat' ],'x2','logpo2');
+xparams = x2(MhLine,:);
+logpost= logpo2(MhLine);

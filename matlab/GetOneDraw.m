@@ -31,9 +31,9 @@ function [xparams, logpost] = GetOneDraw(type)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-  switch type
-   case 'posterior'
+switch type
+  case 'posterior'
     [xparams, logpost] = metropolis_draw(0);
-   case 'prior'
+  case 'prior'
     xparams = prior_draw(0);
-  end
+end

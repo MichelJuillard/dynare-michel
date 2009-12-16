@@ -24,19 +24,19 @@ function disp_model_summary(M,dr)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-    disp(' ')
-    disp('MODEL SUMMARY')
-    disp(' ')
-    disp(['  Number of variables:         ' int2str(M.endo_nbr)])
-    disp(['  Number of stochastic shocks: ' int2str(M.exo_nbr)])
-    disp(['  Number of state variables:   ' ...
-	  int2str(length(find(dr.kstate(:,2) <= M.maximum_lag+1)))])
-    disp(['  Number of jumpers:           ' ...
-	  int2str(length(find(dr.kstate(:,2) == M.maximum_lag+2)))])
-    disp(['  Number of static variables:  ' int2str(dr.nstatic)])
-    my_title='MATRIX OF COVARIANCE OF EXOGENOUS SHOCKS';
-    labels = deblank(M.exo_names);
-    headers = strvcat('Variables',labels);
-    lh = size(labels,2)+2;
-    dyntable(my_title,headers,labels,M.Sigma_e,lh,10,6);
+disp(' ')
+disp('MODEL SUMMARY')
+disp(' ')
+disp(['  Number of variables:         ' int2str(M.endo_nbr)])
+disp(['  Number of stochastic shocks: ' int2str(M.exo_nbr)])
+disp(['  Number of state variables:   ' ...
+      int2str(length(find(dr.kstate(:,2) <= M.maximum_lag+1)))])
+disp(['  Number of jumpers:           ' ...
+      int2str(length(find(dr.kstate(:,2) == M.maximum_lag+2)))])
+disp(['  Number of static variables:  ' int2str(dr.nstatic)])
+my_title='MATRIX OF COVARIANCE OF EXOGENOUS SHOCKS';
+labels = deblank(M.exo_names);
+headers = strvcat('Variables',labels);
+lh = size(labels,2)+2;
+dyntable(my_title,headers,labels,M.Sigma_e,lh,10,6);
 

@@ -28,5 +28,5 @@ function [f,fake] = minus_logged_prior_density(xparams,pshape,p6,p7,p3,p4)
 %
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
-    fake = 1;
-    f = - priordens(xparams,pshape,p6,p7,p3,p4);
+fake = 1;
+f = - priordens(xparams,pshape,p6,p7,p3,p4);

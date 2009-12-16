@@ -34,23 +34,23 @@ function my_subplot(i,imax,irow,icol,fig_title)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-  nfig_max = irow*icol;
-  if imax < nfig_max
+nfig_max = irow*icol;
+if imax < nfig_max
     icol = ceil(sqrt(imax));
     irow=icol;
     if (icol-1)*(icol-2) >= imax
-      irow = icol-2;
-      icol = icol-1;
+        irow = icol-2;
+        icol = icol-1;
     elseif (icol)*(icol-2) >= imax
-      irow = icol-2;
+        irow = icol-2;
     elseif icol*(icol-1) >= imax
-      irow = icol-1;
+        irow = icol-1;
     end
-  end
+end
 
-  i1 = mod(i-1,nfig_max);
-  if i1 == 0
+i1 = mod(i-1,nfig_max);
+if i1 == 0
     figure('Name',fig_title);
-  end
-  
-  subplot(irow,icol,i1+1);
+end
+
+subplot(irow,icol,i1+1);

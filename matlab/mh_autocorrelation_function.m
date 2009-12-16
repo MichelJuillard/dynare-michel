@@ -34,7 +34,7 @@ function mh_autocorrelation_function(options_,M_,estim_params_,type,blck,name1,n
 %
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
-    
+
 % Cet the column index:
 if nargin<7    
     column = name2index(options_, M_, estim_params_, type, name1);

@@ -47,7 +47,7 @@ else
     error()
 end
 NumberOfDrawsFiles = length(DrawsFiles);
-    
+
 % Set varlist (vartan)
 if ~posterior
     if isfield(options_,'varlist')

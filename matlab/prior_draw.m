@@ -88,8 +88,8 @@ if gaussian_draws
     pdraw(gaussian_index) = randn(length(gaussian_index),1).*p7(gaussian_index) + p6(gaussian_index);
     out_of_bound = find( (pdraw(gaussian_index)'>ub(gaussian_index)) | (pdraw(gaussian_index)'<lb(gaussian_index)));
     while ~isempty(out_of_bound),
-      pdraw(gaussian_index(out_of_bound)) = randn(length(gaussian_index(out_of_bound)),1).*p7(gaussian_index(out_of_bound)) + p6(gaussian_index(out_of_bound));
-      out_of_bound = find( (pdraw(gaussian_index)'>ub(gaussian_index)) | (pdraw(gaussian_index)'<lb(gaussian_index)));
+        pdraw(gaussian_index(out_of_bound)) = randn(length(gaussian_index(out_of_bound)),1).*p7(gaussian_index(out_of_bound)) + p6(gaussian_index(out_of_bound));
+        out_of_bound = find( (pdraw(gaussian_index)'>ub(gaussian_index)) | (pdraw(gaussian_index)'<lb(gaussian_index)));
     end
 end
 
@@ -97,8 +97,8 @@ if gamma_draws
     pdraw(gamma_index) = gamrnd(p6(gamma_index),p7(gamma_index))+p3(gamma_index);
     out_of_bound = find( (pdraw(gamma_index)'>ub(gamma_index)) | (pdraw(gamma_index)'<lb(gamma_index)));
     while ~isempty(out_of_bound),
-      pdraw(gamma_index(out_of_bound)) = gamrnd(p6(gamma_index(out_of_bound)),p7(gamma_index(out_of_bound)))+p3(gamma_index(out_of_bound));
-      out_of_bound = find( (pdraw(gamma_index)'>ub(gamma_index)) | (pdraw(gamma_index)'<lb(gamma_index)));
+        pdraw(gamma_index(out_of_bound)) = gamrnd(p6(gamma_index(out_of_bound)),p7(gamma_index(out_of_bound)))+p3(gamma_index(out_of_bound));
+        out_of_bound = find( (pdraw(gamma_index)'>ub(gamma_index)) | (pdraw(gamma_index)'<lb(gamma_index)));
     end
 end
 
@@ -106,8 +106,8 @@ if beta_draws
     pdraw(beta_index) = (p4(beta_index)-p3(beta_index)).*betarnd(p6(beta_index),p7(beta_index))+p3(beta_index);
     out_of_bound = find( (pdraw(beta_index)'>ub(beta_index)) | (pdraw(beta_index)'<lb(beta_index)));
     while ~isempty(out_of_bound),
-      pdraw(beta_index(out_of_bound)) = (p4(beta_index(out_of_bound))-p3(beta_index(out_of_bound))).*betarnd(p6(beta_index(out_of_bound)),p7(beta_index(out_of_bound)))+p3(beta_index(out_of_bound));
-      out_of_bound = find( (pdraw(beta_index)'>ub(beta_index)) | (pdraw(beta_index)'<lb(beta_index)));
+        pdraw(beta_index(out_of_bound)) = (p4(beta_index(out_of_bound))-p3(beta_index(out_of_bound))).*betarnd(p6(beta_index(out_of_bound)),p7(beta_index(out_of_bound)))+p3(beta_index(out_of_bound));
+        out_of_bound = find( (pdraw(beta_index)'>ub(beta_index)) | (pdraw(beta_index)'<lb(beta_index)));
     end
 end
 
@@ -116,9 +116,9 @@ if inverse_gamma_1_draws
         sqrt(1./gamrnd(p7(inverse_gamma_1_index)/2,2./p6(inverse_gamma_1_index)))+p3(inverse_gamma_1_index);
     out_of_bound = find( (pdraw(inverse_gamma_1_index)'>ub(inverse_gamma_1_index)) | (pdraw(inverse_gamma_1_index)'<lb(inverse_gamma_1_index)));
     while ~isempty(out_of_bound),
-      pdraw(inverse_gamma_1_index(out_of_bound)) = ...
-          sqrt(1./gamrnd(p7(inverse_gamma_1_index(out_of_bound))/2,2./p6(inverse_gamma_1_index(out_of_bound))))+p3(inverse_gamma_1_index(out_of_bound));
-      out_of_bound = find( (pdraw(inverse_gamma_1_index)'>ub(inverse_gamma_1_index)) | (pdraw(inverse_gamma_1_index)'<lb(inverse_gamma_1_index)));
+        pdraw(inverse_gamma_1_index(out_of_bound)) = ...
+            sqrt(1./gamrnd(p7(inverse_gamma_1_index(out_of_bound))/2,2./p6(inverse_gamma_1_index(out_of_bound))))+p3(inverse_gamma_1_index(out_of_bound));
+        out_of_bound = find( (pdraw(inverse_gamma_1_index)'>ub(inverse_gamma_1_index)) | (pdraw(inverse_gamma_1_index)'<lb(inverse_gamma_1_index)));
     end
 end
 
@@ -127,8 +127,8 @@ if inverse_gamma_2_draws
         1./gamrnd(p7(inverse_gamma_2_index)/2,2./p6(inverse_gamma_2_index))+p3(inverse_gamma_2_index);
     out_of_bound = find( (pdraw(inverse_gamma_2_index)'>ub(inverse_gamma_2_index)) | (pdraw(inverse_gamma_2_index)'<lb(inverse_gamma_2_index)));
     while ~isempty(out_of_bound),
-      pdraw(inverse_gamma_2_index(out_of_bound)) = ...
-          sqrt(1./gamrnd(p7(inverse_gamma_2_index(out_of_bound))/2,2./p6(inverse_gamma_2_index(out_of_bound))))+p3(inverse_gamma_2_index(out_of_bound));
-    out_of_bound = find( (pdraw(inverse_gamma_2_index)'>ub(inverse_gamma_2_index)) | (pdraw(inverse_gamma_2_index)'<lb(inverse_gamma_2_index)));
-end
+        pdraw(inverse_gamma_2_index(out_of_bound)) = ...
+            sqrt(1./gamrnd(p7(inverse_gamma_2_index(out_of_bound))/2,2./p6(inverse_gamma_2_index(out_of_bound))))+p3(inverse_gamma_2_index(out_of_bound));
+        out_of_bound = find( (pdraw(inverse_gamma_2_index)'>ub(inverse_gamma_2_index)) | (pdraw(inverse_gamma_2_index)'<lb(inverse_gamma_2_index)));
+    end
 end

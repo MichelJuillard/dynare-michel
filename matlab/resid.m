@@ -29,12 +29,12 @@ function z = resid(junk)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-  global M_ options_ oo_
+global M_ options_ oo_
 
-  steady_state_old = oo_.steady_state;
+steady_state_old = oo_.steady_state;
 
-  % If using a steady state file, initialize oo_.steady_state with that file
-  if options_.steadystate_flag
+% If using a steady state file, initialize oo_.steady_state with that file
+if options_.steadystate_flag
     [ys,check] = feval([M_.fname '_steadystate'], ...
                        oo_.steady_state, ...
                        [oo_.exo_steady_state; ...
@@ -51,37 +51,37 @@ function z = resid(junk)
         end
     end
     oo_.steady_state = ys;
-  end
+end
 
-  % Compute the residuals
-  if options_.block && ~options_.bytecode
-      error('RESID: incompatibility with "block" without "bytecode" option')
-  elseif options_.block && options_.bytecode
-      [z,check] = bytecode('evaluate','static');
-  else
-      z = feval([M_.fname '_static'],...
-                oo_.steady_state,...
-                [oo_.exo_steady_state; ...
-                 oo_.exo_det_steady_state], M_.params);
-  end
-  
-  % Display the non-zero residuals if no return value
-  if nargout == 0
-      for i = 1:4
-          disp(' ')
-      end
-  
-      for i=1:length(z)
-          if abs(z(i)) < options_.dynatol/100
-              tmp = 0;
-          else
-              tmp = z(i);
-          end
-          disp(['Residual for equation number ' int2str(i) ' is equal to ' num2str(tmp)])
-      end
-      for i = 1:2
-          disp(' ')
-      end
-  end
-  
-  oo_.steady_state = steady_state_old;
+% Compute the residuals
+if options_.block && ~options_.bytecode
+    error('RESID: incompatibility with "block" without "bytecode" option')
+elseif options_.block && options_.bytecode
+    [z,check] = bytecode('evaluate','static');
+else
+    z = feval([M_.fname '_static'],...
+              oo_.steady_state,...
+              [oo_.exo_steady_state; ...
+               oo_.exo_det_steady_state], M_.params);
+end
+
+% Display the non-zero residuals if no return value
+if nargout == 0
+    for i = 1:4
+        disp(' ')
+    end
+    
+    for i=1:length(z)
+        if abs(z(i)) < options_.dynatol/100
+            tmp = 0;
+        else
+            tmp = z(i);
+        end
+        disp(['Residual for equation number ' int2str(i) ' is equal to ' num2str(tmp)])
+    end
+    for i = 1:2
+        disp(' ')
+    end
+end
+
+oo_.steady_state = steady_state_old;

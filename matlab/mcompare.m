@@ -36,34 +36,34 @@ ix = [1-lag1(1):size(x,2)-lag1(1)]' ;
 i = [lag1(1):size(ix,1)-lag1(2)+1]' ;
 
 if size(options_.smpl,1) == 1
-	error(['DSAMPLE not specified.']) ;
+    error(['DSAMPLE not specified.']) ;
 end
 
 if options_.smpl(3) > 0
-	if options_.smpl(3) == 2
-		if options_.smpl(1)<0 | options_.smpl(2)>size(x,2)-lag1(2)
-			error ('Wrong sample.') ;
-		end
-		i = [options_.smpl(1)+lag1(1):options_.smpl(2)+lag1(1)]' ;
-	elseif options_.smpl(3) == 1
-		if options_.smpl(1)>size(x,2)-lag1(2)
-			error ('Wrong sample.') ;
-		end
-		i = [lag1(1):options_.smpl(1)+lag1(1)]' ;
-	end
+    if options_.smpl(3) == 2
+        if options_.smpl(1)<0 | options_.smpl(2)>size(x,2)-lag1(2)
+            error ('Wrong sample.') ;
+        end
+        i = [options_.smpl(1)+lag1(1):options_.smpl(2)+lag1(1)]' ;
+    elseif options_.smpl(3) == 1
+        if options_.smpl(1)>size(x,2)-lag1(2)
+            error ('Wrong sample.') ;
+        end
+        i = [lag1(1):options_.smpl(1)+lag1(1)]' ;
+    end
 end
 
 for k = 1:size(x,1)
-	figure ;
-	x1 = x(k,i) ;
-	y1 = y(k,i) ;
-	if nnz(x1) < length(x1)
-		plot(ix(i),(y1-x1)) ;
-	else
-		plot(ix(i),(y1-x1)./x1) ;
-	end
-	xlabel(['Periods']) ;
-	title(['Variable ' s2(k)]) ;
+    figure ;
+    x1 = x(k,i) ;
+    y1 = y(k,i) ;
+    if nnz(x1) < length(x1)
+        plot(ix(i),(y1-x1)) ;
+    else
+        plot(ix(i),(y1-x1)./x1) ;
+    end
+    xlabel(['Periods']) ;
+    title(['Variable ' s2(k)]) ;
 end
 
 return ;

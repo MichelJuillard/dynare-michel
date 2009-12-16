@@ -33,110 +33,110 @@ function info = forecast(var_list,task)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-    global options_ dr_ oo_ M_
-    
-    info = 0;
-    
-    old_options = options_;
+global options_ dr_ oo_ M_
 
-    maximum_lag = M_.maximum_lag;
+info = 0;
+
+old_options = options_;
+
+maximum_lag = M_.maximum_lag;
 
 
-    endo_names = M_.endo_names;
-    if isempty(var_list)
-        var_list = endo_names(1:M_.orig_endo_nbr, :);
+endo_names = M_.endo_names;
+if isempty(var_list)
+    var_list = endo_names(1:M_.orig_endo_nbr, :);
+end
+i_var = [];
+for i = 1:size(var_list)
+    tmp = strmatch(var_list(i,:),endo_names,'exact');
+    if isempty(tmp)
+        error([var_list(i,:) ' isn''t and endogenous variable'])
     end
-        i_var = [];
-        for i = 1:size(var_list)
-            tmp = strmatch(var_list(i,:),endo_names,'exact');
-            if isempty(tmp)
-                error([var_list(i,:) ' isn''t and endogenous variable'])
-            end
-            i_var = [i_var; tmp];
-        end
+    i_var = [i_var; tmp];
+end
 
-    n_var = length(i_var);
-    
-    trend = 0;
-    switch task
-      case 'simul'
-        horizon = options_.periods;
-        if horizon == 0
-            horizon = 5;
-        end
-        if size(oo_.endo_simul,2) < maximum_lag
-            y0 = repmat(oo_.steady_state,1,maximum_lag);
-        else
-            y0 = oo_.endo_simul(:,1:maximum_lag);
-        end
-      case 'smoother'
-        horizon = options_.forecast;
-        y_smoothed = oo_.SmoothedVariables;
-        y0 = zeros(M_.endo_nbr,maximum_lag);
-        for i = 1:M_.endo_nbr
-            v_name = deblank(M_.endo_names(i,:));
-            y0(i,:) = y_smoothed.(v_name)(end-maximum_lag+1:end)+oo_.dr.ys(i);
-        end
-        gend = options_.nobs;
-        if isfield(oo_.Smoother,'TrendCoeffs')
-            var_obs = options_.varobs;
-            endo_names = M_.endo_names;
-            order_var = oo_.dr.order_var;
-            i_var_obs = [];
-            trend_coeffs = [];
-            for i=1:size(var_obs,1)
-                tmp = strmatch(var_obs(i,:),endo_names(i_var,:),'exact');
-                if ~isempty(tmp)
-                    i_var_obs = [ i_var_obs; tmp];
-                    trend_coeffs = [trend_coeffs; oo_.Smoother.TrendCoeffs(i)];
-                end
-            end         
-            trend = trend_coeffs*(gend+(1-M_.maximum_lag:horizon));
-        end
-        global bayestopt_
-        if isfield(bayestopt_,'mean_varobs')
-            trend = trend + repmat(bayestopt_.mean_varobs,1,horizon+M_.maximum_lag);
-        end
-      otherwise
-        error('Wrong flag value')
-    end 
-    
-    if M_.exo_det_nbr == 0
-        [yf,int_width] = forcst(oo_.dr,y0,horizon,var_list);
+n_var = length(i_var);
+
+trend = 0;
+switch task
+  case 'simul'
+    horizon = options_.periods;
+    if horizon == 0
+        horizon = 5;
+    end
+    if size(oo_.endo_simul,2) < maximum_lag
+        y0 = repmat(oo_.steady_state,1,maximum_lag);
     else
-        exo_det_length = size(oo_.exo_det_simul,1)-M_.maximum_lag;
-        if horizon > exo_det_length
-            ex = zeros(horizon,M_.exo_nbr);
-            oo_.exo_det_simul = [ oo_.exo_det_simul;...
-                                repmat(oo_.exo_det_steady_state',...
-                                       horizon- ... 
-                                       exo_det_length,1)];
-        elseif horizon < exo_det_length 
-            ex = zeros(exo_det_length,M_.exo_nbr); 
-        end
-        [yf,int_width] = simultxdet(y0,ex,oo_.exo_det_simul,...
-                                    options_.order,var_list,M_,oo_,options_);
+        y0 = oo_.endo_simul(:,1:maximum_lag);
     end
+  case 'smoother'
+    horizon = options_.forecast;
+    y_smoothed = oo_.SmoothedVariables;
+    y0 = zeros(M_.endo_nbr,maximum_lag);
+    for i = 1:M_.endo_nbr
+        v_name = deblank(M_.endo_names(i,:));
+        y0(i,:) = y_smoothed.(v_name)(end-maximum_lag+1:end)+oo_.dr.ys(i);
+    end
+    gend = options_.nobs;
+    if isfield(oo_.Smoother,'TrendCoeffs')
+        var_obs = options_.varobs;
+        endo_names = M_.endo_names;
+        order_var = oo_.dr.order_var;
+        i_var_obs = [];
+        trend_coeffs = [];
+        for i=1:size(var_obs,1)
+            tmp = strmatch(var_obs(i,:),endo_names(i_var,:),'exact');
+            if ~isempty(tmp)
+                i_var_obs = [ i_var_obs; tmp];
+                trend_coeffs = [trend_coeffs; oo_.Smoother.TrendCoeffs(i)];
+            end
+        end         
+        trend = trend_coeffs*(gend+(1-M_.maximum_lag:horizon));
+    end
+    global bayestopt_
+    if isfield(bayestopt_,'mean_varobs')
+        trend = trend + repmat(bayestopt_.mean_varobs,1,horizon+M_.maximum_lag);
+    end
+  otherwise
+    error('Wrong flag value')
+end 
 
-    if ~isscalar(trend)
-        yf(i_var_obs,:) = yf(i_var_obs,:) + trend;
+if M_.exo_det_nbr == 0
+    [yf,int_width] = forcst(oo_.dr,y0,horizon,var_list);
+else
+    exo_det_length = size(oo_.exo_det_simul,1)-M_.maximum_lag;
+    if horizon > exo_det_length
+        ex = zeros(horizon,M_.exo_nbr);
+        oo_.exo_det_simul = [ oo_.exo_det_simul;...
+                            repmat(oo_.exo_det_steady_state',...
+                                   horizon- ... 
+                                   exo_det_length,1)];
+    elseif horizon < exo_det_length 
+        ex = zeros(exo_det_length,M_.exo_nbr); 
     end
-    
-    for i=1:n_var
-        eval(['oo_.forecast.Mean.' var_list(i,:) '= yf(' int2str(i) ',maximum_lag+1:end)'';']);
-        eval(['oo_.forecast.HPDinf.' var_list(i,:) '= yf(' int2str(i) ',maximum_lag+1:end)''-' ...
-              ' int_width(:,' int2str(i) ');']);
-        eval(['oo_.forecast.HPDsup.' var_list(i,:) '= yf(' int2str(i) ',maximum_lag+1:end)''+' ...
-              ' int_width(:,' int2str(i) ');']);
-    end
+    [yf,int_width] = simultxdet(y0,ex,oo_.exo_det_simul,...
+                                options_.order,var_list,M_,oo_,options_);
+end
 
-    for i=1:M_.exo_det_nbr
-        eval(['oo_.forecast.Exogenous.' M_.exo_det_names(i,:) '= oo_.exo_det_simul(:,' int2str(i) ');']);
-    end
-    
-    if options_.nograph == 0
-        forecast_graphs(var_list);
-    end
-    
-    options_ = old_options;
-    
+if ~isscalar(trend)
+    yf(i_var_obs,:) = yf(i_var_obs,:) + trend;
+end
+
+for i=1:n_var
+    eval(['oo_.forecast.Mean.' var_list(i,:) '= yf(' int2str(i) ',maximum_lag+1:end)'';']);
+    eval(['oo_.forecast.HPDinf.' var_list(i,:) '= yf(' int2str(i) ',maximum_lag+1:end)''-' ...
+          ' int_width(:,' int2str(i) ');']);
+    eval(['oo_.forecast.HPDsup.' var_list(i,:) '= yf(' int2str(i) ',maximum_lag+1:end)''+' ...
+          ' int_width(:,' int2str(i) ');']);
+end
+
+for i=1:M_.exo_det_nbr
+    eval(['oo_.forecast.Exogenous.' M_.exo_det_names(i,:) '= oo_.exo_det_simul(:,' int2str(i) ');']);
+end
+
+if options_.nograph == 0
+    forecast_graphs(var_list);
+end
+
+options_ = old_options;
+

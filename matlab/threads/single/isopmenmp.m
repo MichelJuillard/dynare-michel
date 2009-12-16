@@ -1,6 +1,6 @@
-function i = isopenmp()
+function i = isopmenmp()
 % This file is called only if the mex files are not compiled with the openmp flag (mutithreaded computations).  
- 
+
 % Copyright (C) 2009 Dynare Team
 %
 % This file is part of Dynare.
@@ -17,4 +17,4 @@ function i = isopenmp()
 %
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
-    i = 0;
+i = 0;

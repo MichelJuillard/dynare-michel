@@ -33,8 +33,8 @@ m = length(A);% I do not test for a square matrix...
 test = 1;
 
 for i=1:m
-  if ( det( A(1:i, 1:i) ) < 2.0*eps )
-    test = 0;
-    break
-  end
+    if ( det( A(1:i, 1:i) ) < 2.0*eps )
+        test = 0;
+        break
+    end
 end

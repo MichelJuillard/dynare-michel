@@ -46,41 +46,41 @@ badg=0;
 goog=1;% stepan 07/07/2008
 scale=1; % stepan 07/07/2008
 for i=1:n
-   % i,tveci=tvec(:,i)% ,plus=x+scale*tvec(:,i) % Jinill Kim on 9/6/95
-   if size(x,1)>size(x,2)
-      tvecv=tvec(i,:);
-   else
-      tvecv=tvec(:,i);
-   end
-   [fh,cost_flag] = feval(fcn, x+scale*transpose(tvecv), varargin{:});% stepan 07/07/2008
-   if cost_flag% stepan 07/07/2008
-       g0 = (fh - f0) / (scale*delta);
-   else
-       [fh,cost_flag] = feval(fcn, x-scale*transpose(tvecv), varargin{:});
-       if cost_flag
-           g0 = (f0-fh) / (scale*delta);
-       else
-           goog=0;
-       end
-   end
-   % disp(' fcn in the i=1:n loop of numgrad.m ------------------')% Jinill 9/6/95
-   % disp('          and i is')               % Jinill
-   % i                         % Jinill
-   % fprintf('Gradient w.r.t. %3d: %10g\n',i,g0) %see below Jinill 9/6/95
-% -------------------------- special code to essentially quit here
-   % absg0=abs(g0) % Jinill on 9/6/95
-   if goog && abs(g0)< 1e15 % stepan 07/07/2008
-      g(i)=g0;
-      % disp('good gradient') % Jinill Kim
-   else
-      disp('bad gradient ------------------------') % Jinill Kim
-      % fprintf('Gradient w.r.t. %3d: %10g\n',i,g0) %see above
-      g(i)=0;
-      badg=1;
-      % return
-      % can return here to save time if the gradient will never be
-      % used when badg returns as true.
-   end
+    % i,tveci=tvec(:,i)% ,plus=x+scale*tvec(:,i) % Jinill Kim on 9/6/95
+    if size(x,1)>size(x,2)
+        tvecv=tvec(i,:);
+    else
+        tvecv=tvec(:,i);
+    end
+    [fh,cost_flag] = feval(fcn, x+scale*transpose(tvecv), varargin{:});% stepan 07/07/2008
+    if cost_flag% stepan 07/07/2008
+        g0 = (fh - f0) / (scale*delta);
+    else
+        [fh,cost_flag] = feval(fcn, x-scale*transpose(tvecv), varargin{:});
+        if cost_flag
+            g0 = (f0-fh) / (scale*delta);
+        else
+            goog=0;
+        end
+    end
+    % disp(' fcn in the i=1:n loop of numgrad.m ------------------')% Jinill 9/6/95
+    % disp('          and i is')               % Jinill
+    % i                         % Jinill
+    % fprintf('Gradient w.r.t. %3d: %10g\n',i,g0) %see below Jinill 9/6/95
+    % -------------------------- special code to essentially quit here
+    % absg0=abs(g0) % Jinill on 9/6/95
+    if goog && abs(g0)< 1e15 % stepan 07/07/2008
+        g(i)=g0;
+        % disp('good gradient') % Jinill Kim
+    else
+        disp('bad gradient ------------------------') % Jinill Kim
+                                                      % fprintf('Gradient w.r.t. %3d: %10g\n',i,g0) %see above
+        g(i)=0;
+        badg=1;
+        % return
+        % can return here to save time if the gradient will never be
+        % used when badg returns as true.
+    end
 end
 %-------------------------------------------------------------
 %     if g0 > 0

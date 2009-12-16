@@ -32,88 +32,88 @@ function oo_ = compute_moments_varendo(type,options_,M_,oo_,var_list_)
 %
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.    
-    
-    if strcmpi(type,'posterior')
-        posterior = 1;
-        if nargin==4
-            var_list_ = options_.varobs;
-        end
-    elseif strcmpi(type,'prior')
-        posterior = 0;
-        if nargin==4
-            var_list_ = options_.prior_analysis_endo_var_list;
-            if isempty(var_list_)
-                options_.prior_analysis_var_list = options_.varobs;
-            end
-        end
-    else
-        disp('compute_moments_varendo:: Unknown type!')
-        error()
-    end
 
-    NumberOfEndogenousVariables = rows(var_list_);
-    NumberOfExogenousVariables = M_.exo_nbr;
-    list_of_exogenous_variables = M_.exo_names;
-    NumberOfLags = options_.ar;
-    Steps = options_.conditional_variance_decomposition;
+if strcmpi(type,'posterior')
+    posterior = 1;
+    if nargin==4
+        var_list_ = options_.varobs;
+    end
+elseif strcmpi(type,'prior')
+    posterior = 0;
+    if nargin==4
+        var_list_ = options_.prior_analysis_endo_var_list;
+        if isempty(var_list_)
+            options_.prior_analysis_var_list = options_.varobs;
+        end
+    end
+else
+    disp('compute_moments_varendo:: Unknown type!')
+    error()
+end
 
-    % COVARIANCE MATRIX.
-    if posterior
-        for i=1:NumberOfEndogenousVariables
-            for j=i:NumberOfEndogenousVariables
-                oo_ = posterior_analysis('variance',var_list_(i,:),var_list_(j,:),[],options_,M_,oo_);
-            end
+NumberOfEndogenousVariables = rows(var_list_);
+NumberOfExogenousVariables = M_.exo_nbr;
+list_of_exogenous_variables = M_.exo_names;
+NumberOfLags = options_.ar;
+Steps = options_.conditional_variance_decomposition;
+
+% COVARIANCE MATRIX.
+if posterior
+    for i=1:NumberOfEndogenousVariables
+        for j=i:NumberOfEndogenousVariables
+            oo_ = posterior_analysis('variance',var_list_(i,:),var_list_(j,:),[],options_,M_,oo_);
         end
-    else
+    end
+else
+    for i=1:NumberOfEndogenousVariables
+        for j=i:NumberOfEndogenousVariables
+            oo_ = prior_analysis('variance',var_list_(i,:),var_list_(j,:),[],options_,M_,oo_);
+        end
+    end
+end
+% CORRELATION FUNCTION.
+if posterior
+    for h=NumberOfLags:-1:1
         for i=1:NumberOfEndogenousVariables
-            for j=i:NumberOfEndogenousVariables
-                oo_ = prior_analysis('variance',var_list_(i,:),var_list_(j,:),[],options_,M_,oo_);
+            for j=1:NumberOfEndogenousVariables
+                oo_ = posterior_analysis('correlation',var_list_(i,:),var_list_(j,:),h,options_,M_,oo_);
             end
         end
     end
-    % CORRELATION FUNCTION.
-    if posterior
-        for h=NumberOfLags:-1:1
-            for i=1:NumberOfEndogenousVariables
-                for j=1:NumberOfEndogenousVariables
-                    oo_ = posterior_analysis('correlation',var_list_(i,:),var_list_(j,:),h,options_,M_,oo_);
-                end
-            end
-        end
-    else
-        for h=NumberOfLags:-1:1
-            for i=1:NumberOfEndogenousVariables
-                for j=1:NumberOfEndogenousVariables
-                    oo_ = prior_analysis('correlation',var_list_(i,:),var_list_(j,:),h,options_,M_,oo_);
-                end
+else
+    for h=NumberOfLags:-1:1
+        for i=1:NumberOfEndogenousVariables
+            for j=1:NumberOfEndogenousVariables
+                oo_ = prior_analysis('correlation',var_list_(i,:),var_list_(j,:),h,options_,M_,oo_);
             end
         end
     end
-    % VARIANCE DECOMPOSITION.
-    if posterior
-        for i=1:NumberOfEndogenousVariables
-            for j=1:NumberOfExogenousVariables
-                oo_ = posterior_analysis('decomposition',var_list_(i,:),M_.exo_names(j,:),[],options_,M_,oo_);
-            end
-        end
-    else
-        for i=1:NumberOfEndogenousVariables
-            for j=1:NumberOfExogenousVariables
-                oo_ = prior_analysis('decomposition',var_list_(i,:),M_.exo_names(j,:),[],options_,M_,oo_);
-            end
-        end        
-    end
-    % CONDITIONAL VARIANCE DECOMPOSITION.
-    if posterior
-        for i=1:NumberOfEndogenousVariables
-            for j=1:NumberOfExogenousVariables
-                oo_ = posterior_analysis('conditional decomposition',var_list_(i,:),M_.exo_names(j,:),Steps,options_,M_,oo_);
-            end
-        end
-    else
-        for i=1:NumberOfEndogenousVariables
-            for j=1:NumberOfExogenousVariables
-                oo_ = prior_analysis('conditional decomposition',var_list_(i,:),M_.exo_names(j,:),Steps,options_,M_,oo_);
-            end
+end
+% VARIANCE DECOMPOSITION.
+if posterior
+    for i=1:NumberOfEndogenousVariables
+        for j=1:NumberOfExogenousVariables
+            oo_ = posterior_analysis('decomposition',var_list_(i,:),M_.exo_names(j,:),[],options_,M_,oo_);
         end
     end
+else
+    for i=1:NumberOfEndogenousVariables
+        for j=1:NumberOfExogenousVariables
+            oo_ = prior_analysis('decomposition',var_list_(i,:),M_.exo_names(j,:),[],options_,M_,oo_);
+        end
+    end        
+end
+% CONDITIONAL VARIANCE DECOMPOSITION.
+if posterior
+    for i=1:NumberOfEndogenousVariables
+        for j=1:NumberOfExogenousVariables
+            oo_ = posterior_analysis('conditional decomposition',var_list_(i,:),M_.exo_names(j,:),Steps,options_,M_,oo_);
+        end
+    end
+else
+    for i=1:NumberOfEndogenousVariables
+        for j=1:NumberOfExogenousVariables
+            oo_ = prior_analysis('conditional decomposition',var_list_(i,:),M_.exo_names(j,:),Steps,options_,M_,oo_);
+        end
+    end
+end

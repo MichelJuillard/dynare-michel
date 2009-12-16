@@ -47,47 +47,47 @@ function [dr,info,M_,options_,oo_] = dr1_sparse(dr,task,M_,options_,oo_)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-    info = 0;
-  
-    options_ = set_default_option(options_,'loglinear',0);
-    options_ = set_default_option(options_,'noprint',0);
-    options_ = set_default_option(options_,'olr',0);
-    options_ = set_default_option(options_,'olr_beta',1);
-    options_ = set_default_option(options_,'qz_criterium',1.000001);
-    
-    xlen = M_.maximum_endo_lead + M_.maximum_endo_lag + 1;
-    klen = M_.maximum_endo_lag + M_.maximum_endo_lead + 1;
-    iyv = M_.lead_lag_incidence';
-    iyv = iyv(:);
-    iyr0 = find(iyv) ;
-    it_ = M_.maximum_lag + 1 ;
-    
-    if M_.exo_nbr == 0
-        oo_.exo_steady_state = [] ;
+info = 0;
+
+options_ = set_default_option(options_,'loglinear',0);
+options_ = set_default_option(options_,'noprint',0);
+options_ = set_default_option(options_,'olr',0);
+options_ = set_default_option(options_,'olr_beta',1);
+options_ = set_default_option(options_,'qz_criterium',1.000001);
+
+xlen = M_.maximum_endo_lead + M_.maximum_endo_lag + 1;
+klen = M_.maximum_endo_lag + M_.maximum_endo_lead + 1;
+iyv = M_.lead_lag_incidence';
+iyv = iyv(:);
+iyr0 = find(iyv) ;
+it_ = M_.maximum_lag + 1 ;
+
+if M_.exo_nbr == 0
+    oo_.exo_steady_state = [] ;
+end
+
+% expanding system for Optimal Linear Regulator
+if options_.ramsey_policy
+    if isfield(M_,'orig_model')
+        orig_model = M_.orig_model;
+        M_.endo_nbr = orig_model.endo_nbr;
+        M_.orig_endo_nbr = orig_model.orig_endo_nbr;
+        M_.aux_vars = orig_model.aux_vars;
+        M_.endo_names = orig_model.endo_names;
+        M_.lead_lag_incidence = orig_model.lead_lag_incidence;
+        M_.maximum_lead = orig_model.maximum_lead;
+        M_.maximum_endo_lead = orig_model.maximum_endo_lead;
+        M_.maximum_lag = orig_model.maximum_lag;
+        M_.maximum_endo_lag = orig_model.maximum_endo_lag;
     end
-    
-    % expanding system for Optimal Linear Regulator
-    if options_.ramsey_policy
-        if isfield(M_,'orig_model')
-            orig_model = M_.orig_model;
-            M_.endo_nbr = orig_model.endo_nbr;
-            M_.orig_endo_nbr = orig_model.orig_endo_nbr;
-            M_.aux_vars = orig_model.aux_vars;
-            M_.endo_names = orig_model.endo_names;
-            M_.lead_lag_incidence = orig_model.lead_lag_incidence;
-            M_.maximum_lead = orig_model.maximum_lead;
-            M_.maximum_endo_lead = orig_model.maximum_endo_lead;
-            M_.maximum_lag = orig_model.maximum_lag;
-            M_.maximum_endo_lag = orig_model.maximum_endo_lag;
-        end
-        old_solve_algo = options_.solve_algo;
-        %  options_.solve_algo = 1;
-        oo_.steady_state = dynare_solve('dyn_ramsey_static_',oo_.steady_state,0,M_,options_,oo_,it_);
-        options_.solve_algo = old_solve_algo;
-        [junk,junk,multbar] = dyn_ramsey_static_(oo_.steady_state,M_,options_,oo_,it_);
-        [jacobia_,M_] = dyn_ramsey_dynamic_(oo_.steady_state,multbar,M_,options_,oo_,it_);
-        klen = M_.maximum_lag + M_.maximum_lead + 1;
-        dr.ys = [oo_.steady_state;zeros(M_.exo_nbr,1);multbar];
+    old_solve_algo = options_.solve_algo;
+    %  options_.solve_algo = 1;
+    oo_.steady_state = dynare_solve('dyn_ramsey_static_',oo_.steady_state,0,M_,options_,oo_,it_);
+    options_.solve_algo = old_solve_algo;
+    [junk,junk,multbar] = dyn_ramsey_static_(oo_.steady_state,M_,options_,oo_,it_);
+    [jacobia_,M_] = dyn_ramsey_dynamic_(oo_.steady_state,multbar,M_,options_,oo_,it_);
+    klen = M_.maximum_lag + M_.maximum_lead + 1;
+    dr.ys = [oo_.steady_state;zeros(M_.exo_nbr,1);multbar];
 % $$$         if options_.ramsey_policy == 2
 % $$$             mask = M_.orig_model.lead_lag_incidence ~= 0;
 % $$$             incidence_submatrix = M_.lead_lag_incidence(M_.orig_model.maximum_lead+(1:size(mask,1)),1:M_.orig_model.endo_nbr); 
@@ -178,91 +178,91 @@ function [dr,info,M_,options_,oo_] = dr1_sparse(dr,task,M_,options_,oo_)
 % $$$             M_.endo_names = strvcat(M_.orig_model.endo_names, M_.endo_names(endo_nbr1+k,:));
 % $$$             M_.endo_nbr = endo_nbr1+length(k);  
 % $$$         end
-    else
-        klen = M_.maximum_lag + M_.maximum_lead + 1;
-        iyv = M_.lead_lag_incidence';
-        iyv = iyv(:);
-        iyr0 = find(iyv) ;
-        it_ = M_.maximum_lag + 1 ;
-        
-        if M_.exo_nbr == 0
-            oo_.exo_steady_state = [] ;
-        end
-        
-        it_ = M_.maximum_lag + 1;
-        z = repmat(dr.ys,1,klen);
-        z = z(iyr0) ;
-        if options_.model_mode==0 || options_.model_mode == 2
-          if options_.order == 1
-              [junk,jacobia_] = feval([M_.fname '_dynamic'],z,[oo_.exo_simul ...
-                                  oo_.exo_det_simul], M_.params, it_);
-              hessian = 0;
-            elseif options_.order == 2
-              [junk,jacobia_,hessian] = feval([M_.fname '_dynamic'],z,...
-                                              [oo_.exo_simul ...
-                                  oo_.exo_det_simul], M_.params, it_);
-          end
-          dr=set_state_space(dr,M_);
-          if options_.debug
-            save([M_.fname '_debug.mat'],'jacobia_')
-          end
-          [dr,info,M_,options_,oo_] = dr11_sparse(dr,task,M_,options_,oo_, jacobia_, hessian);
-          dr.nyf = nnz(dr.kstate(:,2)>M_.maximum_lag+1);
-        elseif options_.model_mode==1
-            if options_.order == 1
-                
-                [junk,derivate] = feval([M_.fname '_dynamic'],ones(M_.maximum_lag+M_.maximum_lead+1,1)*dr.ys',[oo_.exo_simul ...
-                    oo_.exo_det_simul], M_.params, it_);
-                 %full(jacobia_)
-                 dr.eigval = [];
-                 dr.nyf = 0;
-                 dr.rank = 0;
-                 first_col_exo = M_.endo_nbr * (M_.maximum_endo_lag + M_.maximum_endo_lead + 1);
-                 for i=1:length(M_.block_structure.block)
-                     %disp(['block = ' int2str(i)]);
-                     M_.block_structure.block(i).dr.Null=0;
-                     M_.block_structure.block(i).dr=set_state_space(M_.block_structure.block(i).dr,M_.block_structure.block(i));
-                     col_selector=repmat(M_.block_structure.block(i).variable,1,M_.block_structure.block(i).maximum_endo_lag+M_.block_structure.block(i).maximum_endo_lead+1)+kron([M_.maximum_endo_lag-M_.block_structure.block(i).maximum_endo_lag:M_.maximum_endo_lag+M_.block_structure.block(i).maximum_endo_lead],M_.endo_nbr*ones(1,M_.block_structure.block(i).endo_nbr));
-                     row_selector = M_.block_structure.block(i).equation;
-                     %jcb_=jacobia_(row_selector,col_selector);
-                     jcb_=derivate(i).g1;
-                     %disp('jcb_');
-                     %full(jcb_)
-                     %M_.block_structure.block(i).lead_lag_incidence'
-                     jcb_ = jcb_(:,find(M_.block_structure.block(i).lead_lag_incidence')) ;
-                     if M_.block_structure.block(i).exo_nbr>0
-                       col_selector = [ first_col_exo + ...
-                             repmat(M_.block_structure.block(i).exogenous,1,M_.block_structure.block(i).maximum_exo_lag+M_.block_structure.block(i).maximum_exo_lead+1)+kron([M_.maximum_exo_lag-M_.block_structure.block(i).maximum_exo_lag:M_.maximum_exo_lag+M_.block_structure.block(i).maximum_exo_lead],M_.exo_nbr*ones(1,M_.block_structure.block(i).exo_nbr))];
-                     end
-                     %derivate(i).g1
-                     %derivate(i).g1_x
-                     %col_selector
-                     %jcb_ = [ jcb_ jacobia_(row_selector,col_selector)];
-                     jcb_ = [ jcb_ derivate(i).g1_x];
-                     %full(jcb_)
-                     
-                     hss_=0; %hessian(M_.block_structure.block(i).equation,M_.block_structure.block(i).variable);
-                     dra = M_.block_structure.block(i).dr;
-                     %M_.block_structure.block(i).exo_nbr=M_.exo_nbr;
-                     [dra ,info,M_.block_structure.block(i),options_,oo_] = dr11_sparse(dra ,task,M_.block_structure.block(i),options_,oo_, jcb_, hss_);
-                     M_.block_structure.block(i).dr = dra;
-                     dr.eigval = [dr.eigval; dra.eigval];
-                     nyf = nnz(dra.kstate(:,2)>M_.block_structure.block(i).maximum_endo_lag+1);
-                     n_explod = nnz(abs(dra.eigval) > options_.qz_criterium);
-                     if nyf ~= n_explod
-                         disp(['EIGENVALUES in block ' int2str(i) ':']);
-                         [m_lambda,ii]=sort(abs(dra.eigval));
-                         disp(sprintf('%16s %16s %16s\n','Modulus','Real','Imaginary'))
-                         z=[m_lambda real(dra.eigval(ii)) imag(dra.eigval(ii))]';
-                         disp(sprintf('%16.4g %16.4g %16.4g\n',z))
-                         disp(['The rank condition is not satisfy in block ' int2str(i) ' :']);
-                         disp(['  ' int2str(nyf) ' forward-looking variable(s) for ' ...
-                             int2str(n_explod) ' eigenvalue(s) larger than 1 in modulus']);
-                     end
-                     dr.nyf = dr.nyf + nyf;
-                     dr.rank = dr.rank + dra.rank;
-                 end;
-            end
-        end
+else
+    klen = M_.maximum_lag + M_.maximum_lead + 1;
+    iyv = M_.lead_lag_incidence';
+    iyv = iyv(:);
+    iyr0 = find(iyv) ;
+    it_ = M_.maximum_lag + 1 ;
+    
+    if M_.exo_nbr == 0
+        oo_.exo_steady_state = [] ;
     end
     
+    it_ = M_.maximum_lag + 1;
+    z = repmat(dr.ys,1,klen);
+    z = z(iyr0) ;
+    if options_.model_mode==0 || options_.model_mode == 2
+        if options_.order == 1
+            [junk,jacobia_] = feval([M_.fname '_dynamic'],z,[oo_.exo_simul ...
+                                oo_.exo_det_simul], M_.params, it_);
+            hessian = 0;
+        elseif options_.order == 2
+            [junk,jacobia_,hessian] = feval([M_.fname '_dynamic'],z,...
+                                            [oo_.exo_simul ...
+                                oo_.exo_det_simul], M_.params, it_);
+        end
+        dr=set_state_space(dr,M_);
+        if options_.debug
+            save([M_.fname '_debug.mat'],'jacobia_')
+        end
+        [dr,info,M_,options_,oo_] = dr11_sparse(dr,task,M_,options_,oo_, jacobia_, hessian);
+        dr.nyf = nnz(dr.kstate(:,2)>M_.maximum_lag+1);
+    elseif options_.model_mode==1
+        if options_.order == 1
+            
+            [junk,derivate] = feval([M_.fname '_dynamic'],ones(M_.maximum_lag+M_.maximum_lead+1,1)*dr.ys',[oo_.exo_simul ...
+                                oo_.exo_det_simul], M_.params, it_);
+            %full(jacobia_)
+            dr.eigval = [];
+            dr.nyf = 0;
+            dr.rank = 0;
+            first_col_exo = M_.endo_nbr * (M_.maximum_endo_lag + M_.maximum_endo_lead + 1);
+            for i=1:length(M_.block_structure.block)
+                %disp(['block = ' int2str(i)]);
+                M_.block_structure.block(i).dr.Null=0;
+                M_.block_structure.block(i).dr=set_state_space(M_.block_structure.block(i).dr,M_.block_structure.block(i));
+                col_selector=repmat(M_.block_structure.block(i).variable,1,M_.block_structure.block(i).maximum_endo_lag+M_.block_structure.block(i).maximum_endo_lead+1)+kron([M_.maximum_endo_lag-M_.block_structure.block(i).maximum_endo_lag:M_.maximum_endo_lag+M_.block_structure.block(i).maximum_endo_lead],M_.endo_nbr*ones(1,M_.block_structure.block(i).endo_nbr));
+                row_selector = M_.block_structure.block(i).equation;
+                %jcb_=jacobia_(row_selector,col_selector);
+                jcb_=derivate(i).g1;
+                %disp('jcb_');
+                %full(jcb_)
+                %M_.block_structure.block(i).lead_lag_incidence'
+                jcb_ = jcb_(:,find(M_.block_structure.block(i).lead_lag_incidence')) ;
+                if M_.block_structure.block(i).exo_nbr>0
+                    col_selector = [ first_col_exo + ...
+                                     repmat(M_.block_structure.block(i).exogenous,1,M_.block_structure.block(i).maximum_exo_lag+M_.block_structure.block(i).maximum_exo_lead+1)+kron([M_.maximum_exo_lag-M_.block_structure.block(i).maximum_exo_lag:M_.maximum_exo_lag+M_.block_structure.block(i).maximum_exo_lead],M_.exo_nbr*ones(1,M_.block_structure.block(i).exo_nbr))];
+                end
+                %derivate(i).g1
+                %derivate(i).g1_x
+                %col_selector
+                %jcb_ = [ jcb_ jacobia_(row_selector,col_selector)];
+                jcb_ = [ jcb_ derivate(i).g1_x];
+                %full(jcb_)
+                
+                hss_=0; %hessian(M_.block_structure.block(i).equation,M_.block_structure.block(i).variable);
+                dra = M_.block_structure.block(i).dr;
+                %M_.block_structure.block(i).exo_nbr=M_.exo_nbr;
+                [dra ,info,M_.block_structure.block(i),options_,oo_] = dr11_sparse(dra ,task,M_.block_structure.block(i),options_,oo_, jcb_, hss_);
+                M_.block_structure.block(i).dr = dra;
+                dr.eigval = [dr.eigval; dra.eigval];
+                nyf = nnz(dra.kstate(:,2)>M_.block_structure.block(i).maximum_endo_lag+1);
+                n_explod = nnz(abs(dra.eigval) > options_.qz_criterium);
+                if nyf ~= n_explod
+                    disp(['EIGENVALUES in block ' int2str(i) ':']);
+                    [m_lambda,ii]=sort(abs(dra.eigval));
+                    disp(sprintf('%16s %16s %16s\n','Modulus','Real','Imaginary'))
+                    z=[m_lambda real(dra.eigval(ii)) imag(dra.eigval(ii))]';
+                    disp(sprintf('%16.4g %16.4g %16.4g\n',z))
+                    disp(['The rank condition is not satisfy in block ' int2str(i) ' :']);
+                    disp(['  ' int2str(nyf) ' forward-looking variable(s) for ' ...
+                          int2str(n_explod) ' eigenvalue(s) larger than 1 in modulus']);
+                end
+                dr.nyf = dr.nyf + nyf;
+                dr.rank = dr.rank + dra.rank;
+            end;
+        end
+    end
+end
+

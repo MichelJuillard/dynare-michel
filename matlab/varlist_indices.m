@@ -29,19 +29,19 @@ function [i_var,nvar] = varlist_indices(varlist)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-    global M_
-    
-    endo_nbr = M_.endo_nbr;
-    
-    if isempty(varlist)
-        varlist = M_.endo_names(1:M_.orig_endo_nbr,:);
+global M_
+
+endo_nbr = M_.endo_nbr;
+
+if isempty(varlist)
+    varlist = M_.endo_names(1:M_.orig_endo_nbr,:);
+end
+i_var = [];
+for i=1:size(varlist,1)
+    tmp = strmatch(varlist(i,:),M_.endo_names,'exact');
+    if isempty(tmp)
+        error([tmp ' isn''t an endogenous variable'])
     end
-        i_var = [];
-        for i=1:size(varlist,1)
-            tmp = strmatch(varlist(i,:),M_.endo_names,'exact');
-            if isempty(tmp)
-                error([tmp ' isn''t an endogenous variable'])
-            end
-            i_var = [i_var; tmp];
-        end
-        nvar = length(i_var);
+    i_var = [i_var; tmp];
+end
+nvar = length(i_var);

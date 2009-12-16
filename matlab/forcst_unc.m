@@ -32,40 +32,40 @@ function forcst_unc(y0,var_list)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-  global M_ options_ oo_ estim_params_ bayestopt_
-  
-  % setting up estim_params_
-  [xparam1,estim_params_,bayestopt_,lb,ub] = set_prior(estim_params_,M_);
+global M_ options_ oo_ estim_params_ bayestopt_
 
-  options_.TeX = 0;
-  options_.nograph = 0;
-  plot_priors(bayestopt_,M_,options_);
-  
-  % workspace initialization
-  if isempty(var_list)
+% setting up estim_params_
+[xparam1,estim_params_,bayestopt_,lb,ub] = set_prior(estim_params_,M_);
+
+options_.TeX = 0;
+options_.nograph = 0;
+plot_priors(bayestopt_,M_,options_);
+
+% workspace initialization
+if isempty(var_list)
     var_list = M_.endo_names(1:M_.orig_endo_nbr,:);
-  end
-    n = size(var_list,1);
+end
+n = size(var_list,1);
 
-  periods = options_.forecast;
-  exo_nbr = M_.exo_nbr;
-  replic = options_.replic;
-  order = options_.order;
-  maximum_lag = M_.maximum_lag;
-  %  params = prior_draw(1);
-  params = rndprior(bayestopt_);
-  set_parameters(params);
-  % eliminate shocks with 0 variance
-  i_exo_var = setdiff([1:exo_nbr],find(diag(M_.Sigma_e) == 0));
-  nx = length(i_exo_var);
-  
-  ex0 = zeros(periods,exo_nbr);
-  yf1 = zeros(periods+M_.maximum_lag,n,replic);
+periods = options_.forecast;
+exo_nbr = M_.exo_nbr;
+replic = options_.replic;
+order = options_.order;
+maximum_lag = M_.maximum_lag;
+%  params = prior_draw(1);
+params = rndprior(bayestopt_);
+set_parameters(params);
+% eliminate shocks with 0 variance
+i_exo_var = setdiff([1:exo_nbr],find(diag(M_.Sigma_e) == 0));
+nx = length(i_exo_var);
 
-  % loops on parameter values
-  m1 = 0;
-  m2 = 0;
-  for i=1:replic
+ex0 = zeros(periods,exo_nbr);
+yf1 = zeros(periods+M_.maximum_lag,n,replic);
+
+% loops on parameter values
+m1 = 0;
+m2 = 0;
+for i=1:replic
     % draw parameter values from the prior
     % params = prior_draw(0);
     params = rndprior(bayestopt_);
@@ -74,7 +74,7 @@ function forcst_unc(y0,var_list)
     [dr,info] = resol(oo_.steady_state,0);
     % discard problematic cases
     if info
-      continue
+        continue
     end
     % compute forecast with zero shocks
     m1 = m1+1;
@@ -86,11 +86,11 @@ function forcst_unc(y0,var_list)
     yf2(:,:,m2) = simult_(y0,dr,ex,order)';
     m2 = m2+1;
     yf2(:,:,m2) = simult_(y0,dr,-ex,order)';
-  end
+end
 
-  oo_.forecast.accept_rate = (replic-m1)/replic;
-  
-  if options_.noprint == 0 & m1 < replic
+oo_.forecast.accept_rate = (replic-m1)/replic;
+
+if options_.noprint == 0 & m1 < replic
     disp(' ')
     disp(' ')
     disp('FORECASTING WITH PARAMETER UNCERTAINTY:')
@@ -98,56 +98,56 @@ function forcst_unc(y0,var_list)
 		  ' values'],100*oo_.forecast.accept_rate))
     disp(' ')
     disp(' ')
-  end
-  
-  % compute moments
-  yf1 = yf1(:,:,1:m1);
-  yf2 = yf2(:,:,1:m2);
+end
 
-  yf_mean = mean(yf1,3);
-  
-  yf1 = sort(yf1,3);
-  yf2 = sort(yf2,3);
-  
-  sig_lev = options_.conf_sig;
-  k1 = round((0.5+[-sig_lev, sig_lev]/2)*replic);
-  % make sure that lower bound is at least the first element
-  if k1(2) == 0
+% compute moments
+yf1 = yf1(:,:,1:m1);
+yf2 = yf2(:,:,1:m2);
+
+yf_mean = mean(yf1,3);
+
+yf1 = sort(yf1,3);
+yf2 = sort(yf2,3);
+
+sig_lev = options_.conf_sig;
+k1 = round((0.5+[-sig_lev, sig_lev]/2)*replic);
+% make sure that lower bound is at least the first element
+if k1(2) == 0
     k1(2) = 1;
-  end
-  k2 = round((1+[-sig_lev, sig_lev])*replic);
-  % make sure that lower bound is at least the first element
-  if k2(2) == 0
+end
+k2 = round((1+[-sig_lev, sig_lev])*replic);
+% make sure that lower bound is at least the first element
+if k2(2) == 0
     k2(2) = 1;
-  end
+end
 
-  % compute shock uncertainty around forecast with mean prior
-  set_parameters(bayestopt_.p1);
-  [dr,info] = resol(oo_.steady_state,0);
-  [yf3,yf3_intv] = forcst(dr,y0,periods,var_list);
-  yf3_1 = yf3'-[zeros(maximum_lag,n); yf3_intv];
-  yf3_2 = yf3'+[zeros(maximum_lag,n); yf3_intv];
-  
-  % graphs
-  
-  dynare_graph_init('Forecasts type I',n,{'b-' 'g-' 'g-' 'r-' 'r-'});
-  for i=1:n
+% compute shock uncertainty around forecast with mean prior
+set_parameters(bayestopt_.p1);
+[dr,info] = resol(oo_.steady_state,0);
+[yf3,yf3_intv] = forcst(dr,y0,periods,var_list);
+yf3_1 = yf3'-[zeros(maximum_lag,n); yf3_intv];
+yf3_2 = yf3'+[zeros(maximum_lag,n); yf3_intv];
+
+% graphs
+
+dynare_graph_init('Forecasts type I',n,{'b-' 'g-' 'g-' 'r-' 'r-'});
+for i=1:n
     dynare_graph([yf_mean(:,i) squeeze(yf1(:,i,k1)) squeeze(yf2(:,i,k2))],...
 		 var_list(i,:));
-  end
-  dynare_graph_close;
-  
-  dynare_graph_init('Forecasts type II',n,{'b-' 'k-' 'k-' 'r-' 'r-'});
-  for i=1:n
+end
+dynare_graph_close;
+
+dynare_graph_init('Forecasts type II',n,{'b-' 'k-' 'k-' 'r-' 'r-'});
+for i=1:n
     dynare_graph([yf_mean(:,i) yf3_1(:,i) yf3_2(:,i) squeeze(yf2(:,i,k2))],...
 		 var_list(i,:));
-  end
-  dynare_graph_close;
-  
-  
-  % saving results
-  save_results(yf_mean,'oo_.forecast.mean.',var_list);
-  save_results(yf1(:,:,k1(1)),'oo_.forecast.HPDinf.',var_list); 
-  save_results(yf1(:,:,k1(2)),'oo_.forecast.HPDsup.',var_list);  
-  save_results(yf2(:,:,k2(1)),'oo_.forecast.HPDTotalinf.',var_list);
-  save_results(yf2(:,:,k2(2)),'oo_.forecast.HPDTotalsup.',var_list);
+end
+dynare_graph_close;
+
+
+% saving results
+save_results(yf_mean,'oo_.forecast.mean.',var_list);
+save_results(yf1(:,:,k1(1)),'oo_.forecast.HPDinf.',var_list); 
+save_results(yf1(:,:,k1(2)),'oo_.forecast.HPDsup.',var_list);  
+save_results(yf2(:,:,k2(1)),'oo_.forecast.HPDTotalinf.',var_list);
+save_results(yf2(:,:,k2(2)),'oo_.forecast.HPDTotalsup.',var_list);

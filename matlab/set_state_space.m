@@ -36,20 +36,20 @@ xlen = M_.maximum_endo_lead + M_.maximum_endo_lag + 1;
 klen = M_.maximum_endo_lag + M_.maximum_endo_lead + 1;
 
 if ~ M_.lead_lag_incidence(M_.maximum_endo_lag+1,:) > 0
-  error ('Error in model specification: some variables don"t appear as current') ;
+    error ('Error in model specification: some variables don"t appear as current') ;
 end
 
 fwrd_var = find(any(M_.lead_lag_incidence(M_.maximum_endo_lag+2:end,:),1))';
 if M_.maximum_endo_lag > 0
-  pred_var = find(any(M_.lead_lag_incidence(1:M_.maximum_endo_lag,:),1))';
-  both_var = intersect(pred_var,fwrd_var);
-  pred_var = setdiff(pred_var,both_var);
-  fwrd_var = setdiff(fwrd_var,both_var);
-  stat_var = setdiff([1:M_.endo_nbr]',union(union(pred_var,both_var),fwrd_var));  % static variables
+    pred_var = find(any(M_.lead_lag_incidence(1:M_.maximum_endo_lag,:),1))';
+    both_var = intersect(pred_var,fwrd_var);
+    pred_var = setdiff(pred_var,both_var);
+    fwrd_var = setdiff(fwrd_var,both_var);
+    stat_var = setdiff([1:M_.endo_nbr]',union(union(pred_var,both_var),fwrd_var));  % static variables
 else
-  pred_var = [];
-  both_var = [];
-  stat_var = setdiff([1:M_.endo_nbr]',fwrd_var);
+    pred_var = [];
+    both_var = [];
+    stat_var = setdiff([1:M_.endo_nbr]',fwrd_var);
 end
 nboth = length(both_var);
 npred = length(pred_var);
@@ -60,13 +60,13 @@ inv_order_var(order_var) = (1:M_.endo_nbr);
 
 % building kmask for z state vector in t+1
 if M_.maximum_endo_lag > 0
-  kmask = [];
-  if M_.maximum_endo_lead > 0 
-    kmask = [cumsum(flipud(M_.lead_lag_incidence(M_.maximum_endo_lag+2:end,order_var)),1)] ;
-  end
-  kmask = [kmask; flipud(cumsum(M_.lead_lag_incidence(1:M_.maximum_endo_lag,order_var),1))] ;
+    kmask = [];
+    if M_.maximum_endo_lead > 0 
+        kmask = [cumsum(flipud(M_.lead_lag_incidence(M_.maximum_endo_lag+2:end,order_var)),1)] ;
+    end
+    kmask = [kmask; flipud(cumsum(M_.lead_lag_incidence(1:M_.maximum_endo_lag,order_var),1))] ;
 else
-  kmask = cumsum(flipud(M_.lead_lag_incidence(M_.maximum_endo_lag+2:klen,order_var)),1) ;
+    kmask = cumsum(flipud(M_.lead_lag_incidence(M_.maximum_endo_lag+2:klen,order_var)),1) ;
 end
 
 kmask = kmask';
@@ -82,8 +82,8 @@ k1 = find([kmask(1:end-M_.endo_nbr) & kmask(M_.endo_nbr+1:end)] );
 kad = [];
 kae = [];
 if ~isempty(k1)
-  kad = kmask(k1+M_.endo_nbr);
-  kae = kmask(k1);
+    kad = kmask(k1+M_.endo_nbr);
+    kae = kmask(k1);
 end
 
 % composition of state vector
@@ -119,13 +119,13 @@ aux = zeros(0,1);
 k0 = kstate(find(kstate(:,2) <= M_.maximum_endo_lag+1),:);;
 i0 = find(k0(:,2) == M_.maximum_endo_lag+1);
 for i=M_.maximum_endo_lag:-1:2
-  i1 = find(k0(:,2) == i);
-  n1 = size(i1,1);
-  j = zeros(n1,1);
-  for j1 = 1:n1
-    j(j1) = find(k0(i0,1)==k0(i1(j1),1));
-  end
-  aux = [aux; i0(j)];
-  i0 = i1;
+    i1 = find(k0(:,2) == i);
+    n1 = size(i1,1);
+    j = zeros(n1,1);
+    for j1 = 1:n1
+        j(j1) = find(k0(i0,1)==k0(i1(j1),1));
+    end
+    aux = [aux; i0(j)];
+    i0 = i1;
 end
 dr.transition_auxiliary_variables = [(1:size(aux,1))' aux];

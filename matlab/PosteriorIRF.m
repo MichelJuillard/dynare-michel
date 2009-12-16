@@ -71,27 +71,27 @@ else
 end
 DirectoryName = CheckPath('Output');
 if strcmpi(type,'posterior')
-  MhDirectoryName = CheckPath('metropolis');
+    MhDirectoryName = CheckPath('metropolis');
 elseif strcmpi(type,'gsa')
-  MhDirectoryName = CheckPath('GSA');
+    MhDirectoryName = CheckPath('GSA');
 else
-  MhDirectoryName = CheckPath('prior');
+    MhDirectoryName = CheckPath('prior');
 end
 if strcmpi(type,'posterior')
-  load([ MhDirectoryName '/'  M_.fname '_mh_history.mat'])
-  TotalNumberOfMhDraws = sum(record.MhDraws(:,1));
-  NumberOfDraws = TotalNumberOfMhDraws-floor(options_.mh_drop*TotalNumberOfMhDraws);
+    load([ MhDirectoryName '/'  M_.fname '_mh_history.mat'])
+    TotalNumberOfMhDraws = sum(record.MhDraws(:,1));
+    NumberOfDraws = TotalNumberOfMhDraws-floor(options_.mh_drop*TotalNumberOfMhDraws);
 elseif strcmpi(type,'gsa')
-  load([ MhDirectoryName '/'  M_.fname '_prior.mat'],'lpmat0','lpmat','istable')
-  x=[lpmat0(istable,:) lpmat(istable,:)];
-  clear lpmat istable
-  NumberOfDraws=size(x,1);
-  B=NumberOfDraws; options_.B = B;
+    load([ MhDirectoryName '/'  M_.fname '_prior.mat'],'lpmat0','lpmat','istable')
+    x=[lpmat0(istable,:) lpmat(istable,:)];
+    clear lpmat istable
+    NumberOfDraws=size(x,1);
+    B=NumberOfDraws; options_.B = B;
 else% type = 'prior'
-  NumberOfDraws = 500;
+    NumberOfDraws = 500;
 end
 if ~strcmpi(type,'gsa')
-  B = min([round(.5*NumberOfDraws),500]); options_.B = B;
+    B = min([round(.5*NumberOfDraws),500]); options_.B = B;
 end
 try delete([MhDirectoryName '/' M_.fname '_irf_dsge*.mat'])
 catch disp('No _IRFs (dsge) files to be deleted!')
@@ -106,22 +106,22 @@ NumberOfIRFfiles_dsge = 1;
 NumberOfIRFfiles_dsgevar = 1;
 ifil2 = 1;
 if strcmpi(type,'posterior')
-  h = waitbar(0,'Bayesian (posterior) IRFs...');
+    h = waitbar(0,'Bayesian (posterior) IRFs...');
 elseif strcmpi(type,'gsa')
-  h = waitbar(0,'GSA (prior) IRFs...');
+    h = waitbar(0,'GSA (prior) IRFs...');
 else
-  h = waitbar(0,'Bayesian (prior) IRFs...');
+    h = waitbar(0,'Bayesian (prior) IRFs...');
 end
 % Create arrays
 if B <= MAX_nruns
-  stock_param = zeros(B, npar);
+    stock_param = zeros(B, npar);
 else
-  stock_param = zeros(MAX_nruns, npar);
+    stock_param = zeros(MAX_nruns, npar);
 end
 if B >= MAX_nirfs_dsge
-  stock_irf_dsge = zeros(options_.irf,nvar,M_.exo_nbr,MAX_nirfs_dsge);
+    stock_irf_dsge = zeros(options_.irf,nvar,M_.exo_nbr,MAX_nirfs_dsge);
 else
-  stock_irf_dsge = zeros(options_.irf,nvar,M_.exo_nbr,B);
+    stock_irf_dsge = zeros(options_.irf,nvar,M_.exo_nbr,B);
 end
 if MAX_nirfs_dsgevar
     if B >= MAX_nirfs_dsgevar
@@ -204,14 +204,14 @@ while b<=B
                                                SIGMA_inv_upper_chol);
             % draw from the conditional posterior of PHI
             PHI_draw = rand_matrix_normal(NumberOfParametersPerEquation,nvobs, PHI, ...
-                                           chol(SIGMAu_draw)', chol(iXX)');
+                                          chol(SIGMAu_draw)', chol(iXX)');
             Companion_matrix(1:nvobs,:) = transpose(PHI_draw(1:NumberOfLagsTimesNvobs,:));
             % Check for stationarity
             explosive_var = any(abs(eig(Companion_matrix))>1.000000001);
         end
         % Get the mean 
 % $$$         if options_.noconstant
-            mu = zeros(1,nvobs); 
+        mu = zeros(1,nvobs); 
 % $$$         else
 % $$$             AA = eye(nvobs);
 % $$$             for lag=1:NumberOfLags
@@ -219,7 +219,7 @@ while b<=B
 % $$$             end
 % $$$             mu = transpose(AA\transpose(PHI_draw(end,:)));
 % $$$         end
-        % Get rotation
+% Get rotation
         if dsge_prior_weight > 0
             Atheta(oo_.dr.order_var,M_.exo_names_orig_ord) = oo_.dr.ghu*sqrt(M_.Sigma_e);
             A0 = Atheta(bayestopt_.mfys,:);
@@ -282,7 +282,7 @@ while b<=B
     waitbar(b/B,h);
 end
 if nosaddle
-   disp(['PosteriorIRF :: Percentage of discarded posterior draws = ' num2str(nosaddle/(B+nosaddle))]) 
+    disp(['PosteriorIRF :: Percentage of discarded posterior draws = ' num2str(nosaddle/(B+nosaddle))]) 
 end    
 close(h);
 
@@ -292,7 +292,7 @@ if MAX_nirfs_dsgevar
 end
 
 if strcmpi(type,'gsa')
-  return
+    return
 end
 
 IRF_DSGEs = dir([MhDirectoryName '/' M_.fname '_IRF_DSGEs*.mat']);
@@ -310,10 +310,10 @@ DistribIRF = zeros(options_.irf,9,nvar,M_.exo_nbr);
 HPDIRF = zeros(options_.irf,2,nvar,M_.exo_nbr);
 
 if options_.TeX
-  varlist_TeX = [];
-  for i=1:nvar
-    varlist_TeX = strvcat(varlist_TeX,M_.endo_names_tex(IndxVariables(i),:));
-  end
+    varlist_TeX = [];
+    for i=1:nvar
+        varlist_TeX = strvcat(varlist_TeX,M_.endo_names_tex(IndxVariables(i),:));
+    end
 end
 
 fprintf('MH: Posterior (dsge) IRFs...\n');
@@ -321,31 +321,31 @@ tit(M_.exo_names_orig_ord,:) = M_.exo_names;
 kdx = 0;
 
 for file = 1:NumberOfIRFfiles_dsge
-  load([MhDirectoryName '/' M_.fname '_IRF_DSGEs' int2str(file) '.mat']);
-  for i = 1:M_.exo_nbr
-    for j = 1:nvar
-        for k = 1:size(STOCK_IRF_DSGE,1)
-            kk = k+kdx;
-            [MeanIRF(kk,j,i),MedianIRF(kk,j,i),VarIRF(kk,j,i),HPDIRF(kk,:,j,i),...
-             DistribIRF(kk,:,j,i)] = posterior_moments(squeeze(STOCK_IRF_DSGE(k,j,i,:)),0,options_.mh_conf_sig);
+    load([MhDirectoryName '/' M_.fname '_IRF_DSGEs' int2str(file) '.mat']);
+    for i = 1:M_.exo_nbr
+        for j = 1:nvar
+            for k = 1:size(STOCK_IRF_DSGE,1)
+                kk = k+kdx;
+                [MeanIRF(kk,j,i),MedianIRF(kk,j,i),VarIRF(kk,j,i),HPDIRF(kk,:,j,i),...
+                 DistribIRF(kk,:,j,i)] = posterior_moments(squeeze(STOCK_IRF_DSGE(k,j,i,:)),0,options_.mh_conf_sig);
+            end
         end
     end
-  end
-  kdx = kdx + size(STOCK_IRF_DSGE,1);
+    kdx = kdx + size(STOCK_IRF_DSGE,1);
 end
 
 clear STOCK_IRF_DSGE;
 
 for i = 1:M_.exo_nbr
-  for j = 1:nvar
-    name = [deblank(M_.endo_names(IndxVariables(j),:)) '_' deblank(tit(i,:))];
-    eval(['oo_.PosteriorIRF.dsge.Mean.' name ' = MeanIRF(:,j,i);']);
-    eval(['oo_.PosteriorIRF.dsge.Median.' name ' = MedianIRF(:,j,i);']);
-    eval(['oo_.PosteriorIRF.dsge.Var.' name ' = VarIRF(:,j,i);']);
-    eval(['oo_.PosteriorIRF.dsge.Distribution.' name ' = DistribIRF(:,:,j,i);']);
-    eval(['oo_.PosteriorIRF.dsge.HPDinf.' name ' = HPDIRF(:,1,j,i);']);
-    eval(['oo_.PosteriorIRF.dsge.HPDsup.' name ' = HPDIRF(:,2,j,i);']);
-  end
+    for j = 1:nvar
+        name = [deblank(M_.endo_names(IndxVariables(j),:)) '_' deblank(tit(i,:))];
+        eval(['oo_.PosteriorIRF.dsge.Mean.' name ' = MeanIRF(:,j,i);']);
+        eval(['oo_.PosteriorIRF.dsge.Median.' name ' = MedianIRF(:,j,i);']);
+        eval(['oo_.PosteriorIRF.dsge.Var.' name ' = VarIRF(:,j,i);']);
+        eval(['oo_.PosteriorIRF.dsge.Distribution.' name ' = DistribIRF(:,:,j,i);']);
+        eval(['oo_.PosteriorIRF.dsge.HPDinf.' name ' = HPDIRF(:,1,j,i);']);
+        eval(['oo_.PosteriorIRF.dsge.HPDsup.' name ' = HPDIRF(:,2,j,i);']);
+    end
 end
 
 
@@ -389,111 +389,111 @@ end
 %% 	Finally I build the plots.
 %%
 if options_.TeX
-  fidTeX = fopen([DirectoryName '/' M_.fname '_BayesianIRF.TeX'],'w');
-  fprintf(fidTeX,'%% TeX eps-loader file generated by PosteriorIRF.m (Dynare).\n');
-  fprintf(fidTeX,['%% ' datestr(now,0) '\n']);
-  fprintf(fidTeX,' \n');
-  titTeX(M_.exo_names_orig_ord,:) = M_.exo_names_tex;
+    fidTeX = fopen([DirectoryName '/' M_.fname '_BayesianIRF.TeX'],'w');
+    fprintf(fidTeX,'%% TeX eps-loader file generated by PosteriorIRF.m (Dynare).\n');
+    fprintf(fidTeX,['%% ' datestr(now,0) '\n']);
+    fprintf(fidTeX,' \n');
+    titTeX(M_.exo_names_orig_ord,:) = M_.exo_names_tex;
 end
 %%
 subplotnum = 0;
 for i=1:M_.exo_nbr
-  NAMES = [];
-  if options_.TeX
-    TEXNAMES = [];
-  end
-  figunumber = 0;
-  for j=1:nvar
-    if max(abs(MeanIRF(:,j,i))) > 10^(-6)
-      subplotnum = subplotnum+1;
-      if options_.nograph
-        if subplotnum == 1 & options_.relative_irf
-          hh = figure('Name',['Relative response to orthogonalized shock to ' tit(i,:)],'Visible','off');
-        elseif subplotnum == 1 & ~options_.relative_irf
-          hh = figure('Name',['Orthogonalized shock to ' tit(i,:)],'Visible','off');
-        end
-      else
-        if subplotnum == 1 & options_.relative_irf
-          hh = figure('Name',['Relative response to orthogonalized shock to ' tit(i,:)]);
-        elseif subplotnum == 1 & ~options_.relative_irf
-          hh = figure('Name',['Orthogonalized shock to ' tit(i,:)]);
-        end
-      end
-      set(0,'CurrentFigure',hh)
-      subplot(nn,nn,subplotnum);
-      if ~MAX_nirfs_dsgevar
-          h1 = area(1:options_.irf,HPDIRF(:,2,j,i));
-          set(h1,'FaceColor',[.9 .9 .9]);
-          set(h1,'BaseValue',min(HPDIRF(:,1,j,i)));
-          hold on
-          h2 = area(1:options_.irf,HPDIRF(:,1,j,i),'FaceColor',[1 1 1],'BaseValue',min(HPDIRF(:,1,j,i)));
-          set(h2,'FaceColor',[1 1 1]);
-          set(h2,'BaseValue',min(HPDIRF(:,1,j,i)));
-          plot(1:options_.irf,MeanIRF(:,j,i),'-k','linewidth',3)
-          % plot([1 options_.irf],[0 0],'-r','linewidth',0.5);          
-          box on
-          axis tight
-          xlim([1 options_.irf]);
-          hold off
-      else    
-          h1 = area(1:options_.irf,HPDIRF(:,2,j,i));
-          set(h1,'FaceColor',[.9 .9 .9]);
-          set(h1,'BaseValue',min([min(HPDIRF(:,1,j,i)),min(HPDIRFdsgevar(:,1,j,i))]));
-          hold on;
-          h2 = area(1:options_.irf,HPDIRF(:,1,j,i));
-          set(h2,'FaceColor',[1 1 1]);
-          set(h2,'BaseValue',min([min(HPDIRF(:,1,j,i)),min(HPDIRFdsgevar(:,1,j,i))]));
-          plot(1:options_.irf,MeanIRF(:,j,i),'-k','linewidth',3)
-          % plot([1 options_.irf],[0 0],'-r','linewidth',0.5);
-          plot(1:options_.irf,MeanIRFdsgevar(:,j,i),'--k','linewidth',2)
-          plot(1:options_.irf,HPDIRFdsgevar(:,1,j,i),'--k','linewidth',1)
-          plot(1:options_.irf,HPDIRFdsgevar(:,2,j,i),'--k','linewidth',1)
-          box on
-          axis tight
-          xlim([1 options_.irf]);
-          hold off
-      end
-      name = deblank(varlist(j,:));
-      NAMES = strvcat(NAMES,name);
-      if options_.TeX
-        texname = deblank(varlist_TeX(j,:));
-        TEXNAMES = strvcat(TEXNAMES,['$' texname '$']);
-      end
-      title(name,'Interpreter','none')
+    NAMES = [];
+    if options_.TeX
+        TEXNAMES = [];
     end
-    if subplotnum == MaxNumberOfPlotPerFigure | (j == nvar  & subplotnum> 0)
-      figunumber = figunumber+1;
-      set(hh,'visible','on')
-      eval(['print -depsc2 ' DirectoryName '/'  M_.fname '_Bayesian_IRF_' deblank(tit(i,:)) '_' int2str(figunumber) '.eps']);
-      if ~exist('OCTAVE_VERSION')
-          eval(['print -dpdf ' DirectoryName '/' M_.fname  '_Bayesian_IRF_' deblank(tit(i,:)) '_' int2str(figunumber)]);
-          saveas(hh,[DirectoryName '/' M_.fname  '_Bayesian_IRF_' deblank(tit(i,:))  '_' int2str(figunumber) '.fig']);
-      end
-      set(hh,'visible','off')
-      if options_.nograph, close(hh), end
-      if options_.TeX
-        fprintf(fidTeX,'\\begin{figure}[H]\n');
-        for jj = 1:size(TEXNAMES,1)
-          fprintf(fidTeX,['\\psfrag{%s}[1][][0.5][0]{%s}\n'],deblank(NAMES(jj,:)),deblank(TEXNAMES(jj,:)));
-        end    
-        fprintf(fidTeX,'\\centering \n');
-        fprintf(fidTeX,'\\includegraphics[scale=0.5]{%s_Bayesian_IRF_%s}\n',M_.fname,deblank(tit(i,:)));
-        if options_.relative_irf
-          fprintf(fidTeX,['\\caption{Bayesian relative IRF.}']);
-        else
-          fprintf(fidTeX,'\\caption{Bayesian IRF.}');
+    figunumber = 0;
+    for j=1:nvar
+        if max(abs(MeanIRF(:,j,i))) > 10^(-6)
+            subplotnum = subplotnum+1;
+            if options_.nograph
+                if subplotnum == 1 & options_.relative_irf
+                    hh = figure('Name',['Relative response to orthogonalized shock to ' tit(i,:)],'Visible','off');
+                elseif subplotnum == 1 & ~options_.relative_irf
+                    hh = figure('Name',['Orthogonalized shock to ' tit(i,:)],'Visible','off');
+                end
+            else
+                if subplotnum == 1 & options_.relative_irf
+                    hh = figure('Name',['Relative response to orthogonalized shock to ' tit(i,:)]);
+                elseif subplotnum == 1 & ~options_.relative_irf
+                    hh = figure('Name',['Orthogonalized shock to ' tit(i,:)]);
+                end
+            end
+            set(0,'CurrentFigure',hh)
+            subplot(nn,nn,subplotnum);
+            if ~MAX_nirfs_dsgevar
+                h1 = area(1:options_.irf,HPDIRF(:,2,j,i));
+                set(h1,'FaceColor',[.9 .9 .9]);
+                set(h1,'BaseValue',min(HPDIRF(:,1,j,i)));
+                hold on
+                h2 = area(1:options_.irf,HPDIRF(:,1,j,i),'FaceColor',[1 1 1],'BaseValue',min(HPDIRF(:,1,j,i)));
+                set(h2,'FaceColor',[1 1 1]);
+                set(h2,'BaseValue',min(HPDIRF(:,1,j,i)));
+                plot(1:options_.irf,MeanIRF(:,j,i),'-k','linewidth',3)
+                % plot([1 options_.irf],[0 0],'-r','linewidth',0.5);          
+                box on
+                axis tight
+                xlim([1 options_.irf]);
+                hold off
+            else    
+                h1 = area(1:options_.irf,HPDIRF(:,2,j,i));
+                set(h1,'FaceColor',[.9 .9 .9]);
+                set(h1,'BaseValue',min([min(HPDIRF(:,1,j,i)),min(HPDIRFdsgevar(:,1,j,i))]));
+                hold on;
+                h2 = area(1:options_.irf,HPDIRF(:,1,j,i));
+                set(h2,'FaceColor',[1 1 1]);
+                set(h2,'BaseValue',min([min(HPDIRF(:,1,j,i)),min(HPDIRFdsgevar(:,1,j,i))]));
+                plot(1:options_.irf,MeanIRF(:,j,i),'-k','linewidth',3)
+                % plot([1 options_.irf],[0 0],'-r','linewidth',0.5);
+                plot(1:options_.irf,MeanIRFdsgevar(:,j,i),'--k','linewidth',2)
+                plot(1:options_.irf,HPDIRFdsgevar(:,1,j,i),'--k','linewidth',1)
+                plot(1:options_.irf,HPDIRFdsgevar(:,2,j,i),'--k','linewidth',1)
+                box on
+                axis tight
+                xlim([1 options_.irf]);
+                hold off
+            end
+            name = deblank(varlist(j,:));
+            NAMES = strvcat(NAMES,name);
+            if options_.TeX
+                texname = deblank(varlist_TeX(j,:));
+                TEXNAMES = strvcat(TEXNAMES,['$' texname '$']);
+            end
+            title(name,'Interpreter','none')
         end
-        fprintf(fidTeX,'\\label{Fig:BayesianIRF:%s}\n',deblank(tit(i,:)));
-        fprintf(fidTeX,'\\end{figure}\n');
-        fprintf(fidTeX,' \n');
-      end
-      subplotnum = 0;
-    end
-  end% loop over selected endo_var
+        if subplotnum == MaxNumberOfPlotPerFigure | (j == nvar  & subplotnum> 0)
+            figunumber = figunumber+1;
+            set(hh,'visible','on')
+            eval(['print -depsc2 ' DirectoryName '/'  M_.fname '_Bayesian_IRF_' deblank(tit(i,:)) '_' int2str(figunumber) '.eps']);
+            if ~exist('OCTAVE_VERSION')
+                eval(['print -dpdf ' DirectoryName '/' M_.fname  '_Bayesian_IRF_' deblank(tit(i,:)) '_' int2str(figunumber)]);
+                saveas(hh,[DirectoryName '/' M_.fname  '_Bayesian_IRF_' deblank(tit(i,:))  '_' int2str(figunumber) '.fig']);
+            end
+            set(hh,'visible','off')
+            if options_.nograph, close(hh), end
+            if options_.TeX
+                fprintf(fidTeX,'\\begin{figure}[H]\n');
+                for jj = 1:size(TEXNAMES,1)
+                    fprintf(fidTeX,['\\psfrag{%s}[1][][0.5][0]{%s}\n'],deblank(NAMES(jj,:)),deblank(TEXNAMES(jj,:)));
+                end    
+                fprintf(fidTeX,'\\centering \n');
+                fprintf(fidTeX,'\\includegraphics[scale=0.5]{%s_Bayesian_IRF_%s}\n',M_.fname,deblank(tit(i,:)));
+                if options_.relative_irf
+                    fprintf(fidTeX,['\\caption{Bayesian relative IRF.}']);
+                else
+                    fprintf(fidTeX,'\\caption{Bayesian IRF.}');
+                end
+                fprintf(fidTeX,'\\label{Fig:BayesianIRF:%s}\n',deblank(tit(i,:)));
+                fprintf(fidTeX,'\\end{figure}\n');
+                fprintf(fidTeX,' \n');
+            end
+            subplotnum = 0;
+        end
+    end% loop over selected endo_var
 end% loop over exo_var  
 %%
 if options_.TeX
-  fprintf(fidTeX,'%% End of TeX file.\n');
-  fclose(fidTeX);
+    fprintf(fidTeX,'%% End of TeX file.\n');
+    fclose(fidTeX);
 end
 fprintf('MH: Posterior IRFs, done!\n');
