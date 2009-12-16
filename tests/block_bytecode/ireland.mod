@@ -23,10 +23,7 @@ scy = 0.0040;
 shy = 0.0015;
 shc = 0.0010;
 
-//model(block, bytecode, cutoff=0);
 model(block,cutoff=0);
-//model(block);
-//model;
 exp(y) = exp(a)*exp(k(-1))^theta*exp(h)^(1-theta);
 a = (1-rho)*aa+rho*a(-1)+e;
 exp(y) = exp(c) + exp(i);
@@ -42,19 +39,6 @@ oh = h + eoh;
 end;
 
 initval;
-/*a = 1.7;
-y = 8;
-c = 8;
-k = 10;
-i = 5;
-h = 4;
-eoy = 0;
-eoc = 0;
-eoh = 0;
-oy = y;
-oc = c;
-oh = h;
-*/
 e=0;
 eeoy=0;
 eeoc=0;
@@ -79,55 +63,18 @@ options_.dynatol=1e-12;
 options_.maxit_=5;
 options_.slowc=1;
 steady(solve_algo=2);
-//steady;
+
 options_.dynatol=4e-5;
-
-//check;
-
 
 shocks;
 var e;
 periods 1;
 values 0.02;
 end;
+
 options_.maxit_=20;
 model_info;
 
-simul(periods=2000, method=LU/*GMRES*//*bicgstab*/);
+simul(periods=2000, stack_solve_algo = 1);
 rplot y;
 rplot k;
-
-
-/*estimated_params;
-theta , 0.22, 0.1, 0.5;
-rho , 0.99, 0.7, 0.9999;
-eta , 1.0051, 1, 1.03;
-gam , 0.0045, 0.001, 0.01;
-aa , 1.8, 0.1, 4;
-r11 , 1.4187, -2, 2;
-r12 , 0.2251, -2, 2;
-r13 , -0.4441, -2, 2;
-r21 , 0.0935, -2, 2;
-r22 , 1.0236, -2, 2;
-r23 , -0.0908, -2, 2;
-r31 , 0.7775, -2, 2;
-r32 , 0.3706, -2, 2;
-r33 , 0.2398, -2, 2;
-scy , 0.0040, -2, 2;
-shy , 0.0015, -2, 2;
-shc , 0.0010, -2, 2;
-stderr e , 0.0056, 0, 0.2;
-stderr eeoy , 0.0070, 0, 0.1;
-stderr eeoc , 0.0069, 0, 0.1;
-stderr eeoh , 0.0018, 0, 0.1;
-end;
-
-varobs oy oc oh;
-
-observation_trends;
-oy (log(eta));
-oc (log(eta));
-end;
-
-estimation(datafile=idata,mode_compute=1,nograph);
-*/

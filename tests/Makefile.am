@@ -11,6 +11,12 @@ OCTAVE_MODS = \
 	ramst_initval_file.mod \
 	example1_varexo_det.mod \
 	predetermined_variables.mod \
+	block_bytecode/fs2000_simk.mod \
+	block_bytecode/fs2000_lu.mod \
+	block_bytecode/fs2000_bytecode.mod \
+	block_bytecode/ramst.mod \
+	block_bytecode/ireland.mod \
+	block_bytecode/ls2003.mod \
 	k_order_perturbation/fs2000k2a.mod \
 	k_order_perturbation/fs2000k2.mod \
 	k_order_perturbation/fs2000k_1.mod \
