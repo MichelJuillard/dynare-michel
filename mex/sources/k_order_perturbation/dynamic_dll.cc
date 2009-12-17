@@ -17,8 +17,8 @@
  * along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "k_ord_dynare.h"
-#include "dynamic_dll.h"
+#include "k_ord_dynare.hh"
+#include "dynamic_dll.hh"
 
 #include <sstream>
 

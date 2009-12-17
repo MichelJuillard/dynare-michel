@@ -21,8 +21,8 @@
 
 #include <vector>
 #include "first_order.h"
-#include "k_ord_dynare.h"
-#include "dynamic_dll.h"
+#include "k_ord_dynare.hh"
+#include "dynamic_dll.hh"
 
 #include <cmath>
 #include <sstream>

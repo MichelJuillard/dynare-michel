@@ -1,4 +1,4 @@
-vpath %.cpp $(top_srcdir)/../../sources/k_order_perturbation
+vpath %.cc $(top_srcdir)/../../sources/k_order_perturbation
 
 noinst_PROGRAMS = k_order_perturbation
 
@@ -11,8 +11,8 @@ CXXFLAGS += $(PTHREAD_CFLAGS)
 k_order_perturbation_LDADD = ../libdynare++/libdynare++.a $(PTHREAD_LIBS) $(LIBADD_DLOPEN)
 
 nodist_k_order_perturbation_SOURCES = \
-	k_order_perturbation.cpp \
-	k_ord_dynare.cpp \
-	k_ord_dynare.h \
-	dynamic_dll.cpp \
-	dynamic_dll.h
+	k_order_perturbation.cc \
+	k_ord_dynare.cc \
+	k_ord_dynare.hh \
+	dynamic_dll.cc \
+	dynamic_dll.hh

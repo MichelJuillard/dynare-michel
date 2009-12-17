@@ -38,8 +38,8 @@
  //			g_2 - 2nd order rules packed in one matrix
  **********************************************************/
 
-#include "k_ord_dynare.h"
-#include "dynamic_dll.h"
+#include "k_ord_dynare.hh"
+#include "dynamic_dll.hh"
 
 #include <cmath>
 #include <cstring>
