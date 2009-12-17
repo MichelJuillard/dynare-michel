@@ -188,7 +188,7 @@ for i=1:number_of_mex_files
 end
 
 % Test if bytecode DLL is present
-if exist('bytecode') == 3
+if exist('bytecode', 'file') == 3
     if ~multithread_flag
         message = '[mex] ';
     else
@@ -200,7 +200,7 @@ end
 disp([ message 'Bytecode evaluation.' ])
 
 % Test if k-order perturbation DLL is present
-if exist('k_order_perturbation') == 3
+if exist('k_order_perturbation', 'file') == 3
     message = '[mex] ';
 else
     message = '[no]  ';
@@ -208,7 +208,7 @@ end
 disp([ message 'k-order perturbation solver.' ])
 
 % Test if dynare_simul_ DLL is present
-if exist('dynare_simul_') == 3
+if exist('dynare_simul_', 'file') == 3
     message = '[mex] ';
 else
     message = '[no]  ';
