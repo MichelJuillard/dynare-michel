@@ -48,7 +48,7 @@ for k=1:size(s1,1)
 end
 
 if options_.smpl == 0
-    i = [M_.maximum_lag:size(oo_.endo_simul,2)]' ;
+    i = [max(1, M_.maximum_lag):size(oo_.endo_simul,2)]' ;
 else
     i = [options_.smpl(1)+M_.maximum_lag:options_.smpl(2)+M_.maximum_lag]' ;
 end
