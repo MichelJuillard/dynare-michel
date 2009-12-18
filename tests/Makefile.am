@@ -76,9 +76,9 @@ check-matlab: $(MODS)
 
 clean-local:
 	rm -f $(patsubst %.mod, %.m, $(MODS)) \
-		$(patsubst %.mod, %_static.m, $(MODS)) \
+		$(patsubst %.mod, %_static.*, $(MODS)) \
 		$(patsubst %.mod, %_objective_static.m, $(MODS)) \
-		$(patsubst %.mod, %_dynamic.m, $(MODS))
+		$(patsubst %.mod, %_dynamic.*, $(MODS))
 
 	rm -f $(patsubst %.mod, %_results.mat, $(MODS)) \
 		$(patsubst %.mod, %_mode.mat, $(MODS)) \
@@ -87,6 +87,7 @@ clean-local:
 		$(patsubst %.mod, %_pindx.mat, $(MODS)) \
 		$(patsubst %.mod, %_params.mat, $(MODS)) \
 		$(patsubst %.mod, %.log, $(MODS))
+
 	rm -rf $(patsubst %.mod, %, $(MODS))
 
 	rm -f $(patsubst %.mod, %*.pdf, $(MODS)) \
@@ -98,6 +99,12 @@ clean-local:
 		$(shell find -name g3.mat) \
 		$(shell find -name H.dat)
 
-	rm -f arima/data1.m arima/data2.m
+	rm -f arima/data1.m arima/data2.m \
+		k_order_perturbation/*_simul \
+		k_order_perturbation/*.jnl \
+    k_order_perturbation/*.mat \
+		block_bytecode/fs2000_simk.swp
+
+	rm -rf ramsey_objective
 
 	rm -f $(shell find -name '*~')
