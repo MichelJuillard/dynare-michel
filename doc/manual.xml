@@ -6,7 +6,7 @@
     <subtitle>Version 4.1.0</subtitle>
     <author>
       <firstname>Stéphane</firstname><surname>Adjemian</surname>
-      <affiliation><orgname>Université du Mans et CEPREMAP</orgname></affiliation>
+      <affiliation><orgname>Université du Mans and CEPREMAP</orgname></affiliation>
       <email>stephane.adjemian@ens.fr</email>
       <address><street>142 rue du Chevaleret</street><postcode>75013</postcode><city>Paris</city><country>France</country></address>
     </author>
@@ -30,7 +30,7 @@
     </author>
     <author>
       <firstname>Sébastien</firstname><surname>Villemot</surname>
-      <affiliation><orgname>Banque de France and CEPREMAP</orgname></affiliation>
+      <affiliation><orgname>CEPREMAP</orgname></affiliation>
       <email>sebastien.villemot@ens.fr</email>
       <address><street>142 rue du Chevaleret</street><postcode>75013</postcode><city>Paris</city><country>France</country></address>
     </author>
@@ -3108,6 +3108,10 @@ oo_.posterior_hpdsup.measurement_errors_corr.gdp_conso
     <varlistentry id="conf_sig" xreflabel="conf_sig">
       <term><option>conf_sig</option> = <replaceable>DOUBLE</replaceable></term>
       <listitem><para>Level of significance for confidence interval. Default: <literal>0.90</literal></para></listitem>
+    </varlistentry>
+    <varlistentry>
+      <term><option>nograph</option></term>
+      <listitem><para>Don't display graphics.</para></listitem>
     </varlistentry>
   </variablelist>
   </refsect1>
