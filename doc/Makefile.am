@@ -37,5 +37,5 @@ manual.pdf: manual.xml
 	$(DBLATEX) manual.xml
 
 clean-local:
-	rm -f *~ *.pdf *.log *.aux
+	rm -f *~ *.pdf *.log *.aux *.out
 	rm -rf manual-html

@@ -53,6 +53,11 @@ MODS = $(OCTAVE_MODS) \
 EXTRA_DIST = $(MODS) \
 	run_test_octave.m \
 	fs2000/fsdat.m \
+	test.m \
+	objectives \
+	ramst_initval_file_data.m \
+	homotopy/common.mod \
+	block_bytecode/fs2000_common.mod \
 	bvar_a_la_sims/bvar_sample.m
 
 TARGETS = check-matlab
