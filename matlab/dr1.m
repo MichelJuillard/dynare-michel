@@ -191,9 +191,13 @@ sdyn = M_.endo_nbr - nstatic;
 b = zeros(M_.endo_nbr,M_.endo_nbr);
 b(:,cols_b) = jacobia_(:,cols_j);
 
-if M_.maximum_endo_lead == 0 && options_.order == 1  
+if M_.maximum_endo_lead == 0
     % backward models: simplified code exist only at order == 1
     % If required, use AIM solver if not check only
+    if options_.order > 1
+        error(['2nd and 3rd order approximation not implemented for purely ' ...
+               'backward models'])
+    end
     if (options_.aim_solver == 1) && (task == 0)
         if options_.order > 1
             error('Option "aim_solver" is incompatible with order >= 2')
