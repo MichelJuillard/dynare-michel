@@ -13,6 +13,8 @@ OCTAVE_MODS = \
 	predetermined_variables.mod \
 	block_bytecode/fs2000_simk.mod \
 	block_bytecode/fs2000_lu.mod \
+	block_bytecode/fs2000_bicgstab.mod \
+	block_bytecode/fs2000_optpath.mod \
 	block_bytecode/fs2000_bytecode.mod \
 	block_bytecode/ramst.mod \
 	block_bytecode/ireland.mod \
@@ -48,7 +50,9 @@ MODS = $(OCTAVE_MODS) \
 	AIM/ls2003_2L0L.mod \
 	AIM/ls2003_2L0L_AIM.mod \
 	AIM/ls2003_2L2L.mod \
-	AIM/ls2003_2L2L_AIM.mod
+	AIM/ls2003_2L2L_AIM.mod \
+	block_bytecode/fs2000_gmres.mod \
+	block_bytecode/ramst_a.mod
 
 EXTRA_DIST = $(MODS) \
 	run_test_octave.m \

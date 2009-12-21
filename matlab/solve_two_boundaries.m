@@ -213,14 +213,6 @@ while ~(cvg==1 | iter>maxit_),
             dx = g1a\b- ya;
             ya = ya + lambda*dx;
             y(1+y_kmin:periods+y_kmin,y_index)=reshape(ya',length(y_index),periods)';
-            %         v = '';
-            %         for i=1:(size(y_index,2))
-            %           v = [v ' %1.6f'];
-            %         end;
-            %         v = [v '\n'];
-            %         v
-            %         sprintf(v,y(:,y_index)')
-            %         return;
         elseif(stack_solve_algo==2),
             flag1=1;
             while(flag1>0)
@@ -264,11 +256,20 @@ while ~(cvg==1 | iter>maxit_),
                 end;
             end;
         elseif(stack_solve_algo==4),
-            error('SOLVE_TWO_BOUNDARIES: stack_solve_algo=4 not implemented')
-        end;
+            ra = reshape(r(:, y_kmin+1:periods+y_kmin),periods*Blck_size, 1);
+            stpmx = 100 ;
+            stpmax = stpmx*max([sqrt(ya'*ya);size(y_index,2)]);
+            nn=1:size(ra,1);
+            g = (ra'*g1a)';
+            f = 0.5*ra'*ra;
+            p = -g1a\ra;
+            [yn,f,ra,check]=lnsrch1(ya,f,g,p,stpmax,'lnsrch1_wrapper_two_boundaries',nn,nn,  fname, y, y_index, x, params, periods, y_kmin, Blck_size);
+            dx = ya - yn;
+            y(1+y_kmin:periods+y_kmin,y_index)=reshape(yn',length(y_index),periods)';
+        end
     end
     iter=iter+1;
-    disp(['iteration: ' num2str(iter,'%d') ' error: ' num2str(max_res,'%e')]);
+    disp(['iteration: ' num2str(iter,'%d') ' error: ' num2str(max_res,'%e') ' stack_solve_algo=' num2str(stack_solve_algo)]);
 end;
 if (iter>maxit_)
     disp(['No convergence after ' num2str(iter,'%4d') ' iterations in Block ' num2str(Block_Num,'%d')]);

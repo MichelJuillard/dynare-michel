@@ -67,6 +67,10 @@ if options_.block && options_.bytecode && options_.stack_solve_algo ~= 5
     error('SIMUL: for the moment, you must use stack_solve_algo=5 with block and bytecode option')
 end
 
+if exist('OCTAVE_VERSION') && options_.stack_solve_algo == 2
+    error('SIMUL: stack_solve_algo=2 is not available for Octave. Choose another value.')
+end
+
 if(options_.block)
     if(options_.bytecode)
         oo_.endo_simul=bytecode('dynamic');

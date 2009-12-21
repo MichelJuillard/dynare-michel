@@ -237,20 +237,25 @@ for it_=start:incr:finish
                 lambda=1;
                 stpmx = 100 ;
                 if (is_dynamic)
-                    stpmax = stpmx*max([sqrt(y*y');size(y_index_eq,2)]);
+                    stpmax = stpmx*max([sqrt(ya'*ya);size(y_index_eq,2)]);
                 else
-                    stpmax = stpmx*max([sqrt(y'*y);size(y_index_eq,2)]);
+                    stpmax = stpmx*max([sqrt(ya'*ya);size(y_index_eq,2)]);
                 end;
                 nn=1:size(y_index_eq,2);
                 g = (r'*g1)';
                 f = 0.5*r'*r;
                 p = -g1\r ;
                 if (is_dynamic)
-                    [y,f,r,check]=lnsrch1(y,f,g,p,stpmax,fname,nn,y_index_eq,x, params, it_, 0);
+                    [ya,f,r,check]=lnsrch1(y(it_,:),f,g,p,stpmax,'lnsrch1_wrapper_one_boundary',nn,  y_index_eq, y_index_eq, fname, y, x, params, it_);
                 else
-                    [y,f,r,check]=lnsrch1(y,f,g,p,stpmax,fname,nn,y_index_eq,x, params, 0);
+                    [ya,f,r,check]=lnsrch1(y,f,g,p,stpmax,fname,nn,y_index_eq,x, params, 0);
                 end;
                 dx = ya - y(y_index_eq);
+                if(is_dynamic)
+                    y(it_,:) = ya';
+                else
+                    y = ya';
+                end;
             elseif(~is_dynamic & options_.solve_algo==3)
                 [yn,info] = csolve(@local_fname, y(y_index_eq),@local_fname,1e-6,500, x, params, y, y_index_eq, fname, 1);
                 dx = ya - yn;
@@ -267,8 +272,7 @@ for it_=start:incr:finish
                 flag1=1;
                 while(flag1>0)
                     [L1, U1]=luinc(g1,luinc_tol);
-                    [za,flag1] = gmres(g1,-r,Blck_size,1e-6,Blck_size,L1,U1);
-                    %[za,flag1] = gmres(-g1,b',Blck_size,1e-6,Blck_size,L1,U1);
+                    [dx,flag1] = gmres(g1,-r,Blck_size,1e-6,Blck_size,L1,U1);
                     if (flag1>0 | reduced)
                         if(flag1==1)
                             disp(['Error in simul: No convergence inside GMRES after ' num2str(iter,'%6d') ' iterations, in block' num2str(Block_Num,'%3d')]);
@@ -280,7 +284,6 @@ for it_=start:incr:finish
                         luinc_tol = luinc_tol/10;
                         reduced = 0;
                     else
-                        dx = za - ya;
                         ya = ya + lambda*dx;
                         if(is_dynamic)
                             y(it_,y_index_eq) = ya';
@@ -293,8 +296,7 @@ for it_=start:incr:finish
                 flag1=1;
                 while(flag1>0)
                     [L1, U1]=luinc(g1,luinc_tol);
-                    [za,flag1] = bicgstab(g1,-r,1e-7,Blck_size,L1,U1);
-                    %[za,flag1] = bicgstab(-g1,b',1e-7,Blck_size,L1,U1);
+                    [dx,flag1] = bicgstab(g1,-r,1e-7,Blck_size,L1,U1);
                     if (flag1>0 | reduced)
                         if(flag1==1)
                             disp(['Error in simul: No convergence inside BICGSTAB after ' num2str(iter,'%6d') ' iterations, in block' num2str(Block_Num,'%3d')]);
@@ -306,7 +308,6 @@ for it_=start:incr:finish
                         luinc_tol = luinc_tol/10;
                         reduced = 0;
                     else
-                        dx = za - ya;
                         ya = ya + lambda*dx;
                         if(is_dynamic)
                             y(it_,y_index_eq) = ya';

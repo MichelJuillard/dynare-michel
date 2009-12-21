@@ -1836,7 +1836,7 @@ steady(homotopy_mode = 1, homotopy_steps = 50);
       <itemizedlist>
         <listitem><para><literal>0</literal>: Newton method to solve simultaneously all the equations for every period, see <xref linkend="juillard_1996"/>. (Default)</para></listitem>
         <listitem><para><literal>1</literal>: use a Newton algorithm with a sparse LU solver at each iteration.</para></listitem>
-        <listitem><para><literal>2</literal>: use a Newton algorithm with a Generalized Minimal Residual (GMRES) solver at each iteration.</para></listitem>
+        <listitem><para><literal>2</literal>: use a Newton algorithm with a Generalized Minimal Residual (GMRES) solver at each iteration. This option is not available under Octave.</para></listitem>
         <listitem><para><literal>3</literal>: use a Newton algorithm with a Stabilized Bi-Conjugate Gradient (BICGSTAB) solver at each iteration.</para></listitem>
         <listitem><para><literal>4</literal>: use a Newton algorithm with a optimal path length at each iteration.</para></listitem>
         <listitem><para><literal>5</literal>: use a Newton algorithm with a sparse Gaussian elimination (SPE) solver at each iteration.</para></listitem>
