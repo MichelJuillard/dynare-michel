@@ -8,7 +8,7 @@ function rnd = gamrnd(a,b,method)
 %
 %  OUTPUT 
 %    rnd     [double]    n*1 vector of independent variates from the gamma(a,b) distribution.
-%                        rnd(i) is gamma distributed with variance a(i)b(i) and variance a(i)b(i)^2.    
+%                        rnd(i) is gamma distributed with mean a(i)b(i) and variance a(i)b(i)^2.
 %  
 %  ALGORITHMS     
 %    Described in Bauwens, Lubrano and Richard (1999, page 316) and Devroye (1986, chapter 9).
@@ -85,7 +85,7 @@ if number_of_integer_a
     end
     if number_of_big_a
         % Gaussian approximation.
-        rnd(integer_idx(big_idx)) = .25*( randn(number_of_big_a,1) + sqrt(4*a(integer_idx(big_idx))-1) ).^2 ;
+        rnd(integer_idx(big_idx)) = sqrt(a(integer_idx(big_idx))).* b(integer_idx(big_idx)) .* randn(number_of_big_a, 1) + a(integer_idx(big_idx)) .* b(integer_idx(big_idx));
     end
 end
 
@@ -128,8 +128,6 @@ if number_of_double_a
         end
     end
 end
-
-
 
 
 function gamma_variates = weibull_rejection_algorithm(a,b)
@@ -402,5 +400,3 @@ while mm
     mm = length(index);
 end
 gamma_variates = X.*b;
-
-
