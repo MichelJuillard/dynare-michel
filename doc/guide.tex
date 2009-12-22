@@ -3,11 +3,11 @@
 \usepackage[cp850]{inputenc}
 
 \begin{document}
-\title{Stochastic simulations with {\sc Dynare}. A practical guide.}
-\author{Fabrice Collard (GREMAQ, University of Toulouse)\\Adapted for Dynare 2.5.2\\ by Michel Juillard (CEPREMAP and University Paris 8)}
-\date{First draft: February 2001\hspace{10mm}This draft: January 2003.}
+\title{Stochastic simulations with {\sc Dynare}. \\ A practical guide.}
+\author{Fabrice Collard (GREMAQ, University of Toulouse)\\Adapted for Dynare 4.1\\ by Michel Juillard and S\'ebastien Villemot (CEPREMAP)}
+\date{First draft: February 2001\hspace{10mm}This draft: December 2009.}
 \maketitle
-This document describes a model involving both endogenous and exogenous state variable. We first describe the theoretical model, before showing how the perturbation method is implemented in {\sc Dynare} (MATLAB version). 
+This document describes a model involving both endogenous and exogenous state variable. We first describe the theoretical model, before showing how the perturbation method is implemented in {\sc Dynare}.
 
 \section{A theoretical model} 
 We consider an economy that consists of a large number of dynastic households and a large number of firms. Firms are producing a homogeneous final product that can be either consumed or invested by means of capital and labor services. Firms own their capital stock and hire labor supplied by the households. Households own the firms. In each and every period three perfectly competitive markets open --- the markets for consumption goods, labor services, and financial capital in the form of firms' shares. 
@@ -90,16 +90,15 @@ The dynamic equilibrium of this economy follows from the first order conditions 
 &&b_t=\tau a_{t-1}+\rho b_{t-1}+\nu_t 
 \end{eqnarray*}
 \section{The {\sc dynare} code}
-The dynare code is straightforward to write, as the equilibrium is written in the natural way. The whole code is reported at the end of the section. Before that we proceed step by step.
+The {\sc dynare} code is straightforward to write, as the equilibrium is written in the natural way. The whole code is reported at the end of the section. Before that we proceed step by step.
 \paragraph{Preamble}
-The preamble consists of the some declarations to setup the number of periods the model should be simulated, the endogenous and exogenous variables, the parameters and assign values to these parameters. 
+The preamble consists of the some declarations to setup the endogenous and exogenous variables, the parameters and assign values to these parameters. 
 \begin{enumerate}
-\item {\tt periods 20100}; specifies that the model will be simulated over 20100 periods in order to compute the moments of the simulated variables.
 \item {\tt var y, c, k, h, a, b;} specifies the endogenous variables in the model since we have output ({\tt y}), consumption ({\tt c}), capital ({\tt k}), hours ({\tt h}) and the two shocks ({\tt a, b}).
-\item {\tt varexo e, u}; specifies the exogenous variables in the model --- namely the innovations of the shocks, since we have the innovation of the non--incorporated shock ({\tt e}), and the innovation of the incorporated shock ({\tt u}).
+\item {\tt varexo e, u;} specifies the exogenous variables in the model --- namely the innovations of the shocks, since we have the innovation of the non--incorporated shock ({\tt e}), and the innovation of the incorporated shock ({\tt u}).
 \item {\tt parameters list;} specifies the list of parameters of the model. In the case we are studying:
 
-{\tt parameters beta, alpha, delta, theta, psi, rho, tau}
+{\tt parameters beta, alpha, delta, theta, psi, rho, tau;}
 
 \begin{tabular}{ll}
 \hline
@@ -137,7 +136,7 @@ theta = 2.95;
 This step is done in a straightforward way. It starts with the instruction {\tt model;} and ends with {\tt end;}, in between all equilibrium conditions are written exactly the way we write it ``by hand''. However, there is a simple rule that should be kept in mind when the model is written. Let us consider a variable $x$: 
 \begin{itemize}
 \item If $x$ is decided in period $t$ then we simply write ${\tt x}$. 
-\item When the variable is decided in $t-1$, such as the capital stock in our simple model, we write $x(-1)$. \item Finally, when a variable is decided in the next period, $t+1$, such as consumption in the Euler equation, we write $x(+1)$. 
+\item When the variable is decided in $t-1$, such as the capital stock in our simple model, we write ${\tt x(-1)}$. \item Finally, when a variable is decided in the next period, $t+1$, such as consumption in the Euler equation, we write ${\tt x(+1)}$.
 \end{itemize}
 Hence the required code to declare our model in {\sc Dynare} will be:
 \begin{verbatim}
@@ -182,72 +181,60 @@ end;
 
 Alternatively, we could provide only approximated values. {\sc Dynare} would then automatically compute the exact values.
 
-\item We then specify the innovations and their matrix of variance--covariance. This is done using the {\tt Sigma\_e} command. As the matrix is symmetrical, one enters onlys the upper (or lower) triangular part:
-\begin{verbatim}
-Sigma_e = [ 0.000081, (phi*0.009*0.009); ...
-             0.000081];
-\end{verbatim}
-where the variance of both innovations is set to {\tt 0.000081} and the correlation between them is equal to $\varphi$. Note that if an element is computed as an expression, this expression must be put in parenthese. In the {\tt Sigma\_e} command, the shock variables are ordered as in the {\tt varexo} declaration.
- 
-Alternatively, it is possible to use a {\tt shock;} and {\tt end;} block and declare only the nonzero elements of the covariance matrix:
+\item We then specify the innovations and their matrix of variance--covariance. This is done using a {\tt shocks;} and {\tt end;} block and declare only the nonzero elements of the covariance matrix:
 \begin{verbatim}
 shocks;
-var e = 0.009^2;
-var u = 0.009^2;
-var e,u =  phi*0.009*0.009;
-end; 
+var e; stderr 0.009;
+var u; stderr 0.009;
+var e, u = phi*0.009*0.009;
+end;
 \end{verbatim}
-Note that in the current version of {\sc Dynare}, it isn't possible to shut down of shock by assigning it a zero variance. To shut down a shock the variable must be removed from the {\tt varexo} and {\tt initval} list, added to the {\tt parameters} list and assigned a value of zero.
+Note that it is possible to shut down a shock by assigning it a zero variance.
 
-\item The model is then solved and simulated using the {\tt stoch\_simul;} command. By default, the coefficients of the approximated decision rules are reported as well as the moments of the simulated variables and impulse response functions for each exogenous shocks are ploted. In addition, the following options are aavailable:
+\item The model is then solved and simulated using the {\tt stoch\_simul;} command. By default, the coefficients of the approximated decision rules are reported as well as the moments of the variables and impulse response functions for each exogenous shocks are ploted. In addition, the following options are available (out of many others):
 \begin{itemize}
-\item {\tt DR\_ALG0 = [0,1]}: Specify the algorithm used to compute the quadratic approximation of the decision rules. [0] (default) uses a ``pure'' perturbation method as in \cite{SGU/02}; [1] moves the point around which the Taylor approximation is computed toward the mean of the distribution as in  \cite{COLL/JUIL/01a}.  
-\item AR = Integer
+\item {\tt ar} = Integer:
 Order of autocorrelation coefficients to compute and to print (default = 5)
-\item NOCORR
+\item {\tt periods} = Integer:
+If different from zero, the model will be simulated and empirical moments will be computed instead of theoretical moments. The value of the option specifies the number of periods to use in the simulations (default = 0)
+\item {\tt nocorr}:
 Doesn't print the correlation matrix (default = PRINT)
-\item DROP = Integer
+\item {\tt drop} = Integer:
 Number of points dropped at the beginning of simulation before computing the summary statistics (default = 100)
-\item IRF = Integer
+\item {\tt irf} = Integer:
 Number of periods on which to compute the IRFs (default = 40)
-\item NOFUNCTIONS
+\item {\tt nofunctions}:
 Doesn't print the coefficients of the approximated solution
-\item LINEAR
-Indicates that the original model is linear
-\item NOMOMENTS
+\item {\tt nomoments}:
 Doesn't print moments of the endogenous variables 
-\item ORDER = [1,2]
+\item {\tt order} = [1,2,3]:
 Order of Taylor approximation (default = 2)
-\item REPLIC = Integer
+\item {\tt replic} = Integer:
 Number of simulated series used to compute the IRFs (default = 1, if order = 1, and 50 otherwise)
 \end{itemize} 
-The simulated trajectories are returned in MATLAB vectors named as the variables (be careful not to use MATLAB reserved names such as INV for your variables \ldots). Note that the specification of the variance--covariance matrix of the shocks is enough to compute a second order approximation of the policy function. In addition, for the simulation and the computation of moments, {\sc Dynare} assumes that the shocks follow a normal distribution.
 
-In our example, we use simply 
+In our first example, we use simply:
 \begin{verbatim}
 stoch_simul;
 \end{verbatim}
+{\sc Dynare} will compute theoretical moments of variables.
 
-If one wants to use the algorithm in \cite{COLL/JUIL/01a} and to drop 200 initial values instead of 100, one would write
+In our second example, we use:
 \begin{verbatim}
-simul_stoch(dr_algo=1,drop=200);
+stoch_simul(periods=2000, drop=200);
 \end{verbatim}
+{\sc Dynare} will compute simulated moments of variables. The simulated trajectories are returned in MATLAB vectors named as the variables (be careful not to use MATLAB reserved names such as INV for your variables \ldots).
 \end{enumerate}
 
-\clearpage
-
-\begin{center}
-{\sc Dynare code for the model in level}
-\end{center}
-Here is the model file for the model in level. The last instructions are regular MATLAB commands for graphics. It can be found in file {\tt example1.mod}.
+\appendix
+\section{{\sc Dynare} code for the model in level}
+Here is the model file for the model in level. It can be found in file {\tt example1.mod}.
 
 \begin{verbatim}
-periods 20100;
-
 var y, c, k, a, h, b;
-varexo e,u;
+varexo e, u;
 
-parameters beta, rho, beta, alpha, delta, theta, psi, tau;
+parameters beta, rho, alpha, delta, theta, psi, tau;
 
 alpha = 0.36;
 rho   = 0.95;
@@ -256,6 +243,7 @@ beta  = 0.99;
 delta = 0.025;
 psi   = 0;
 theta = 2.95;
+
 phi   = 0.1;
 
 model;
@@ -279,23 +267,24 @@ e = 0;
 u = 0;
 end;
 
-Sigma_e = [ 0.000081, phi*0.009*0.009; 0.000081 ];
+shocks;
+var e; stderr 0.009;
+var u; stderr 0.009;
+var e, u = phi*0.009*0.009;
+end;
+
 stoch_simul;
 \end{verbatim}
-\newpage
 
-\begin{center}
-{\sc Dynare code for the model in logs}
-\end{center}
-Here is the model file for the model in logs. In this case, {\tt initval} only contains guessed values and {\tt steady} is used to compute and display the exact value of the deterministic equilibrium. The shocks are supposed to be uncorrelated. Also, Collard \& Juillard (2001) algorithm is used. The model file can be found in {\tt example2.mod}.
+\section{{\sc Dynare} code for the model in logs}
+
+Here is the model file for the model in logs. In this case, {\tt initval} only contains guessed values and {\tt steady} is used to compute and display the exact value of the deterministic equilibrium. The shocks are supposed to be uncorrelated. The model file can be found in {\tt example2.mod}.
 
 \begin{verbatim}
-periods 20100;
-
 var y, c, k, a, h, b;
-varexo e,u;
+varexo e, u;
 
-parameters beta, rho, beta, alpha, delta, theta, psi, tau;
+parameters beta, rho, alpha, delta, theta, psi, tau;
 
 alpha = 0.36;
 rho   = 0.95;
@@ -333,7 +322,7 @@ var e = 0.009^2;
 var u = 0.009^2;
 end;
 
-stoch_simul(dr_algo=1,drop=200);
+stoch_simul(periods=2000, drop=200);
 \end{verbatim}
 \bibliographystyle{Usmad}
 \bibliography{/papers/biblio/michel}

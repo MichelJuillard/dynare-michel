@@ -1,8 +1,8 @@
-// example 2 from Collard's guide to Dynare
+// Example 2 from Collard's guide to Dynare
 var y, c, k, a, h, b;
-varexo e,u;
+varexo e, u;
 
-parameters beta, rho, beta, alpha, delta, theta, psi, tau ;
+parameters beta, rho, alpha, delta, theta, psi, tau;
 
 alpha = 0.36;
 rho   = 0.95;
@@ -40,5 +40,4 @@ var e = 0.009^2;
 var u = 0.009^2;
 end;
 
-stoch_simul(dr_algo=1,drop=200);
-
+stoch_simul(periods=2000, drop=200);

@@ -1,9 +1,9 @@
 // Test USE_DLL option at order 2
 
 var y, c, k, a, h, b;
-varexo e,u;
+varexo e, u;
 
-parameters beta, rho, alpha, delta, theta, psi, tau, phi;
+parameters beta, rho, alpha, delta, theta, psi, tau;
 
 alpha = 0.36;
 rho   = 0.95;
@@ -29,7 +29,7 @@ initval;
 y = 1.08068253095672;
 c = 0.80359242014163;
 h = 0.29175631001732;
-k = 5;
+k = 11.08360443260358;
 a = 0;
 b = 0;
 e = 0;
