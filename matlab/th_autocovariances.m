@@ -94,6 +94,9 @@ b = ghu1*M_.Sigma_e*ghu1';
 ipred = nstatic+(1:npred)';
 % state space representation for state variables only
 [A,B] = kalman_transition_matrix(dr,ipred,1:nx,dr.transition_auxiliary_variables,M_.exo_nbr);
+% Compute stationary variables (before HP filtering),
+% and compute 2nd order mean correction on stationary variables (in case of
+% HP filtering, this mean correction is computed *before* filtering)
 if options_.order == 2 | options_.hp_filter == 0
     [vx, u] =  lyapunov_symm(A,B*M_.Sigma_e*B',options_.qz_criterium,options_.lyapunov_complex_threshold);
     iky = inv_order_var(ivar);
@@ -108,8 +111,9 @@ if options_.order == 2 | options_.hp_filter == 0
     if options_.order == 2         % mean correction for 2nd order
         Ex = (dr.ghs2(ikx)+dr.ghxx(ikx,:)*vx(:)+dr.ghuu(ikx,:)*M_.Sigma_e(:))/2;
         Ex = (eye(n0)-AS(ikx,:))\Ex;
-        Gamma_y{nar+3} = AS(iky,:)*Ex+(dr.ghs2(iky)+dr.ghxx(iky,:)*vx(:)+...
-                                       dr.ghuu(iky,:)*M_.Sigma_e(:))/2;
+        Gamma_y{nar+3} = NaN*ones(nvar, 1);
+        Gamma_y{nar+3}(stationary_vars) = AS(iky,:)*Ex+(dr.ghs2(iky)+dr.ghxx(iky,:)*vx(:)+...
+                                                        dr.ghuu(iky,:)*M_.Sigma_e(:))/2;
     end
 end
 if options_.hp_filter == 0
@@ -149,11 +153,12 @@ if options_.hp_filter == 0
         end
     end
 else% ==> Theoretical HP filter.
-    if options_.order < 2
-        iky = inv_order_var(ivar);  
-        aa = ghx(iky,:);
-        bb = ghu(iky,:);
-    end
+    % By construction, all variables are stationary when HP filtered
+    iky = inv_order_var(ivar);  
+    stationary_vars = (1:length(ivar))';
+    aa = ghx(iky,:);
+    bb = ghu(iky,:);
+
     lambda = options_.hp_filter;
     ngrid = options_.hp_ngrid;
     freqs = 0 : ((2*pi)/ngrid) : (2*pi*(1 - .5/ngrid)); 
