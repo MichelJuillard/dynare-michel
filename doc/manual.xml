@@ -72,20 +72,18 @@
     approximate by an horizon of simulation far enough in the future.
     Another exercise for which Dynare is well suited is to study the
     transition path to a new equilibrium following a permanent shock.
-  </para>
-  <para>
     For deterministic simulations, Dynare uses a Newton-type algorithm, first
     proposed by <xref linkend="laffargue_1990"/>, instead of a first order technique like
     the one proposed by <xref linkend="fair-taylor_1983"/>, and used in earlier generation simulation programs. We believe
     this approach to be in general both faster and more robust. The
-    details of the algorithm used in Dynare can be found in <xref linkend="juillard_1996"/>.
+    details of the algorithm can be found in <xref linkend="juillard_1996"/>.
   </para>
   <para>
-    In a stochastic context, Dynare computes one or several simulations corresponding to a random draw of the shocks. Starting with version 2.3, Dynare uses a second order Taylor approximation of the expectation functions (see <xref linkend="judd_1996"/>, 
+    In a stochastic context, Dynare computes one or several simulations corresponding to a random draw of the shocks. Dynare uses a Taylor approximation, up to third order, of the expectation functions (see <xref linkend="judd_1996"/>, 
     <xref linkend="collard-juillard_2001a" />, <xref linkend="collard-juillard_2001b"/>, and <xref linkend="schmitt-grohe-uribe_2002"/>).
   </para>
   <para>
-    Starting with version 3.0, it is possible to use Dynare to estimate model parameters either by maximum likelihood as in <xref linkend="ireland_2004"/> or using a Bayesian approach as in <xref linkend="rabanal-rubio-ramirez_2003"/>, <xref linkend="schorfheide_2000"/> or <xref linkend="smets-wouters_2003"/>.
+    It is also possible to use Dynare to estimate model parameters either by maximum likelihood as in <xref linkend="ireland_2004"/> or using a Bayesian approach as in <xref linkend="rabanal-rubio-ramirez_2003"/>, <xref linkend="schorfheide_2000"/> or <xref linkend="smets-wouters_2003"/>.
   </para>
 
   <para>
