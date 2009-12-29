@@ -5,7 +5,11 @@ function time_series = extended_path(initial_conditions,sample_size,init)
 % INPUTS
 %  o initial_conditions     [double]    m*nlags array, where m is the number of endogenous variables in the model and
 %                                       nlags is the maximum number of lags.
-%  o sample_size            [integer]   scalar, size of the sample to be simulated. 
+%  o sample_size            [integer]   scalar, size of the sample to be simulated.
+%  o init                   [integer]   scalar, method of initialization of the perfect foresight equilibrium paths
+%                                                    init=0  previous solution is used,
+%                                                    init=1  a path generated with the first order reduced form is used.
+%                                                    init=2  mix of cases 0 and 1. 
 %   
 % OUTPUTS
 %  o time_series            [double]    m*sample_size array, the simulations.
@@ -35,16 +39,32 @@ global M_ oo_ options_
 % Set default initial conditions.
 if isempty(initial_conditions) 
     initial_conditions = repmat(oo_.steady_state,1,M_.maximum_lag); 
-end 
+end
+
+% Set default value for the last input argument
+if nargin<3
+    init = 0;
+end
  
 % Set the number of periods for the deterministic solver.
-options_.periods = 100;
+%options_.periods = 40;
 
 % Initialize the exogenous variables.
 make_ex_; 
 
 % Initialize the endogenous variables.
 make_y_;
+
+% Compute the first order reduced form if needed.
+if init
+    oldopt = options_;
+    options_.order = 1;
+    [dr,info]=resol(oo_.steady_state,0);
+    options_ = oldopt;
+    if init==2
+        lambda = .8;
+    end
+end
 
 % Initialize the output array.
 time_series = NaN(M_.endo_nbr,sample_size+1); 
@@ -61,10 +81,21 @@ norme = 0;
 
 % Set verbose option
 verbose = 1;
-  
+
 for t=1:sample_size
     shocks = exp(randn(1,number_of_structural_innovations)*covariance_matrix_upper_cholesky-.5*variances(positive_var_indx)');
     oo_.exo_simul(tdx,positive_var_indx) = shocks;
+    if init
+        % Compute first order solution.
+        exogenous_variables = zeros(size(oo_.exo_simul));
+        exogenous_variables(tdx,positive_var_indx) = log(shocks);
+        initial_path = simult_(oo_.steady_state,dr,exogenous_variables,1);
+        if init==1
+            oo_.endo_simul = initial_path(:,1:end-1);
+        else
+            oo_.endo_simul = initial_path(:,1:end-1)*lambda + oo_.endo_simul*(1-lambda);  
+        end
+    end
     info = perfect_foresight_simulation;
     time = info.time;
     if verbose
