@@ -70,8 +70,14 @@ else
     end
 end
 
-if compute_linear_solution
+if ~isstruct(compute_linear_solution) && compute_linear_solution 
     [dr,info]=resol(steady_state,0);
+elseif isstruct(compute_linear_solution)
+    dr = compute_linear_solution;
+    compute_linear_solution = 1;
+end
+
+if compute_linear_solution
     ghx = dr.ghx(end-dr.nfwrd+1:end,:);
 end
 
@@ -104,7 +110,7 @@ for iter = 1:options_.maxit_
     ic = 1:ny;
     icp = iyp;
     c(ic,:) = jacobian(:,is)\jacobian(:,isf1) ; 
-    for it_ = it_init+(1:periods-1)
+    for it_ = it_init+(1:periods-1-(options_.terminal_condition==2))
         z = [ oo_.endo_simul(iyp,it_-1) ; oo_.endo_simul(:,it_) ; oo_.endo_simul(iyf,it_+1)]; 
         [d1,jacobian] = feval(dynamic_model,z,oo_.exo_simul, M_.params, it_); 
         jacobian = [jacobian(:,iz) , -d1];
@@ -120,6 +126,7 @@ for iter = 1:options_.maxit_
             ic = ic + ny;
             c(ic,nrc) = s\c(ic,nrc);
         else% Terminal condition is Y_{T+1}-Y^{\star} = TransitionMatrix*(Y_{T}-Y^{\star})
+            it_ = it_+1;
             z = [ oo_.endo_simul(iyp,it_-1) ; oo_.endo_simul(:,it_) ; oo_.endo_simul(iyf,it_+1) ] ;
             [d1,jacobian] = feval(dynamic_model,z,oo_.exo_simul, M_.params, it_);
             jacobian = [jacobian(:,iz) -d1];
@@ -127,16 +134,12 @@ for iter = 1:options_.maxit_
             ic = ic + ny;
             icp = icp + ny;
             s = jacobian(:,is);
-            iyp
-            nyp
-            isf
-            iyp-nyp
             s(:,iyp-nyp) = s(:,iyp-nyp)+jacobian(:,isf)*ghx;
             c (ic,:) = s\jacobian(:,isf1);
         end
         c = bksup0(c,ny,nrc,iyf,icf,periods);
         c = reshape(c,ny,periods+1);
-        endo_simul(:,it_init+(0:periods)) = endo_simul(:,it_init+(0:periods))+options_.slowc*c;
+        oo_.endo_simul(:,it_init+(0:periods)) = oo_.endo_simul(:,it_init+(0:periods))+options_.slowc*c;
     else% Terminal condition is Y_{T}=Y^{\star}
         c = bksup0(c,ny,nrc,iyf,icf,periods);
         c = reshape(c,ny,periods);

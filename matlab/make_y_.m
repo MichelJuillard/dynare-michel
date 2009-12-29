@@ -48,7 +48,7 @@ elseif size(oo_.endo_simul,2) < M_.maximum_lag+M_.maximum_lead+options_.periods
       case 0
         oo_.endo_simul = [oo_.endo_simul ...
                           oo_.steady_state*ones(1,M_.maximum_lag+options_.periods+M_.maximum_lead-size(oo_.endo_simul,2),1)];
-      case 1% A linear approximation is used to initiate the solution.
+      case 1% A linear approximation is used to initialize the solution.
         oldopt = options_;
         options_.order = 1;
         dr = oo_.dr;

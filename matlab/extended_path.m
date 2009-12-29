@@ -60,6 +60,7 @@ if init
     oldopt = options_;
     options_.order = 1;
     [dr,info]=resol(oo_.steady_state,0);
+    oo_.dr = dr;
     options_ = oldopt;
     if init==2
         lambda = .8;
@@ -96,14 +97,18 @@ for t=1:sample_size
             oo_.endo_simul = initial_path(:,1:end-1)*lambda + oo_.endo_simul*(1-lambda);  
         end
     end
-    info = perfect_foresight_simulation;
+    if init  
+        info = perfect_foresight_simulation(dr,oo_.steady_state);
+    else
+        info = perfect_foresight_simulation;
+    end
     time = info.time;
     if verbose
         t
         info
     end
     if ~info.convergence
-        info = homotopic_steps(tdx,positive_var_indx,shocks,norme,.5);
+        info = homotopic_steps(tdx,positive_var_indx,shocks,norme,.5,init);
         if verbose
             norme
             info
@@ -122,7 +127,7 @@ end
  
  
 
-function info = homotopic_steps(tdx,positive_var_indx,shocks,init_weight,step)
+function info = homotopic_steps(tdx,positive_var_indx,shocks,init_weight,step,init)
     global oo_
     weight   = init_weight;
     verbose  = 1;
@@ -134,7 +139,11 @@ function info = homotopic_steps(tdx,positive_var_indx,shocks,init_weight,step)
         old_weight = weight;
         weight = weight+step;
         oo_.exo_simul(tdx,positive_var_indx) = weight*shocks+(1-weight);
-        info = perfect_foresight_simulation;
+        if init  
+            info = perfect_foresight_simulation(oo_.dr,oo_.steady_state);
+        else
+            info = perfect_foresight_simulation;
+        end
         time = time+info.time;
         if verbose
             [iter,step]
@@ -157,11 +166,15 @@ function info = homotopic_steps(tdx,positive_var_indx,shocks,init_weight,step)
     end
     if reduce_step
         step=step/1.5;
-        info = homotopic_steps(tdx,positive_var_indx,shocks,old_weight,step);
+        info = homotopic_steps(tdx,positive_var_indx,shocks,old_weight,step,init);
         time = time+info.time;
     elseif weight<1 && iter<100
         oo_.exo_simul(tdx,positive_var_indx) = shocks;
-        info = perfect_foresight_simulation;
+        if init  
+            info = perfect_foresight_simulation(oo_.dr,oo_.steady_state);
+        else
+            info = perfect_foresight_simulation;
+        end
         info.time = info.time+time;
     else
         info.time = time;
