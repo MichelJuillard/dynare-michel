@@ -78,7 +78,8 @@ elseif isstruct(compute_linear_solution)
 end
 
 if compute_linear_solution
-    ghx = dr.ghx(end-dr.nfwrd+1:end,:);
+    ghx(dr.order_var,:) = dr.ghx;
+    ghx = ghx(iyf,:);
 end
 
 periods = options_.periods; 
@@ -134,7 +135,7 @@ for iter = 1:options_.maxit_
             ic = ic + ny;
             icp = icp + ny;
             s = jacobian(:,is);
-            s(:,iyp-nyp) = s(:,iyp-nyp)+jacobian(:,isf)*ghx;
+            s(:,iyp) = s(:,iyp)+jacobian(:,isf)*ghx;
             c (ic,:) = s\jacobian(:,isf1);
         end
         c = bksup0(c,ny,nrc,iyf,icf,periods);
