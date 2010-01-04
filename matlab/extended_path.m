@@ -104,8 +104,9 @@ for t=1:sample_size
     end
     time = info.time;
     if verbose
-        t
+        [t,options_.periods]
         info
+        info.iterations
     end
     if ~info.convergence
         info = homotopic_steps(tdx,positive_var_indx,shocks,norme,.5,init);

@@ -166,10 +166,12 @@ for iter = 1:options_.maxit_
     end
 end
 
-if options_.terminal_condition==2
-    distance_to_steady_state = abs(((oo_.endo_simul(:,end-1)-oo_.endo_simul(:,end))./oo_.endo_simul(:,end)))*100;
-    disp('Distance to steady state at the end is (in percentage):')
-    distance_to_steady_state
+if stop && options_.terminal_condition==2
+    % Compute the distance to the deterministic steady state (for the subset of endogenous variables with a non zero 
+    % steady state) at the last perdiod.
+    idx = find(abs(oo_.steady_state)>0);
+    distance_to_steady_state = abs(((oo_.endo_simul(idx,end)-oo_.steady_state(idx))./oo_.steady_state(idx)))*100;
+    disp(['(max) Distance to steady state at the end is (in percentage):' num2str(max(distance_to_steady_state))])
 end
 
 if ~stop
