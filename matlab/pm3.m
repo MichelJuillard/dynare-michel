@@ -77,7 +77,7 @@ for i = 1:nvar
     eval(['oo_.' name3 '.HPDsup.' name ' = HPD(2,:,i);']);
 end
 %%
-%% 	Finally I build the plots.
+%%      Finally I build the plots.
 %%
 if options_.TeX
     fidTeX = fopen([M_.dname '/Output/' M_.fname '_' name3 '.TeX'],'w');

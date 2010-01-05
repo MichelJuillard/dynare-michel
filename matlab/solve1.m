@@ -59,7 +59,7 @@ i = find(~isfinite(fvec));
 
 if ~isempty(i)
     disp(['STEADY:  numerical initial values incompatible with the following' ...
-	  ' equations'])
+          ' equations'])
     disp(j1(i)')
 end
 
@@ -95,26 +95,26 @@ for its = 1:maxit
     M_.unit_root = 0;
     if M_.unit_root
         if first_time
-	    first_time = 0;
-	    [q,r,e]=qr(fjac);
-	    n = sum(abs(diag(r)) < 1e-12);
-	    fvec = q'*fvec;
-	    p = e*[-r(1:end-n,1:end-n)\fvec(1:end-n);zeros(n,1)];
-	    disp(' ')
-	    disp('STEADY with unit roots:')
-	    disp(' ')
-	    if n > 0
+            first_time = 0;
+            [q,r,e]=qr(fjac);
+            n = sum(abs(diag(r)) < 1e-12);
+            fvec = q'*fvec;
+            p = e*[-r(1:end-n,1:end-n)\fvec(1:end-n);zeros(n,1)];
+            disp(' ')
+            disp('STEADY with unit roots:')
+            disp(' ')
+            if n > 0
                 disp(['   The following variable(s) kept their value given in INITVAL' ...
                       ' or ENDVAL'])
                 disp(char(e(:,end-n+1:end)'*M_.endo_names))
             else
                 disp('   STEADY can''t find any unit root!')
-     end
+            end
         else
-	    [q,r]=qr(fjac*e);
-	    fvec = q'*fvec;
-	    p = e*[-r(1:end-n,1:end-n)\fvec(1:end-n);zeros(n,1)];
-        end	
+            [q,r]=qr(fjac*e);
+            fvec = q'*fvec;
+            p = e*[-r(1:end-n,1:end-n)\fvec(1:end-n);zeros(n,1)];
+        end     
     elseif bad_cond_flag && cond(fjac) > 1/sqrt(eps)
         fjac2=fjac'*fjac;
         p=-(fjac2+sqrt(nn*eps)*max(sum(abs(fjac2)))*eye(nn))\(fjac'*fvec);
@@ -134,13 +134,13 @@ for its = 1:maxit
     if check > 0
         den = max([f;0.5*nn]) ;
         if max(abs(g).*max([abs(x(j2)') ones(1,nn)])')/den < tolmin
-	    return
+            return
         else
-	    disp (' ')
-	    disp (['SOLVE: Iteration ' num2str(its)])
-	    disp (['Spurious convergence.'])
-	    disp (x)
-	    return
+            disp (' ')
+            disp (['SOLVE: Iteration ' num2str(its)])
+            disp (['Spurious convergence.'])
+            disp (x)
+            return
         end
 
         if max(abs(x(j2)-xold(j2))./max([abs(x(j2)') ones(1,nn)])') < tolx

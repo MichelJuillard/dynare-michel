@@ -53,7 +53,7 @@ rr = size(R,2);                            % Number of structural innovations.
 smpl   = size(Y,2);                        % Number of periods in the dataset.
 a      = zeros(mm+pp,1);                      % Initial condition of the state vector.
 t      = 0;
-lik    = zeros(smpl,1);	
+lik    = zeros(smpl,1); 
 notsteady   = 1;
 
 TT = zeros(mm+pp);
@@ -84,9 +84,9 @@ while notsteady && t<smpl
         if Fi > kalman_tol
             lik(t) = lik(t) + log(Fi) + prediction_error*prediction_error/Fi ...
                      + l2pi;
-            Ki	   = sum(PP(:,[MF(i) mm+i]),2)/Fi;
+            Ki     = sum(PP(:,[MF(i) mm+i]),2)/Fi;
             a      = a + Ki*prediction_error;
-            PP 	   = PP - (Ki*Fi)*transpose(Ki);
+            PP     = PP - (Ki*Fi)*transpose(Ki);
         end
     end
     a(1:mm) = T*a(1:mm);

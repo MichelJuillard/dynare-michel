@@ -39,11 +39,11 @@ function [fval,cost_flag,ys,trend_coeff,info] = dsge_posterior_kernel(xparam1,ge
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
 global bayestopt_ estim_params_ options_ trend_coeff_ M_ oo_
-fval		= [];
-ys		= [];
-trend_coeff	= [];
-cost_flag  	= 1;
-nobs 		= size(options_.varobs,1);
+fval            = [];
+ys              = [];
+trend_coeff     = [];
+cost_flag       = 1;
+nobs            = size(options_.varobs,1);
 %------------------------------------------------------------------------------
 % 1. Get the structural parameters & define penalties
 %------------------------------------------------------------------------------
@@ -74,7 +74,7 @@ if estim_params_.nvn
         H(k,k) = xparam1(i+offset)*xparam1(i+offset);
     end
     offset = offset+estim_params_.nvn;
-end	
+end     
 if estim_params_.ncx
     for i=1:estim_params_.ncx
         k1 =estim_params_.corrx(i,1);
@@ -83,7 +83,7 @@ if estim_params_.ncx
         Q(k2,k1) = Q(k1,k2);
     end
     [CholQ,testQ] = chol(Q);
-    if testQ 	%% The variance-covariance matrix of the structural innovations is not definite positive.
+    if testQ    %% The variance-covariance matrix of the structural innovations is not definite positive.
         %% We have to compute the eigenvalues of this matrix in order to build the penalty.
         a = diag(eig(Q));
         k = find(a < 0);
@@ -166,19 +166,19 @@ no_missing_data_flag = (number_of_observations==gend*nobs);
 % 3. Initial condition of the Kalman filter
 %------------------------------------------------------------------------------
 kalman_algo = options_.kalman_algo;
-if options_.lik_init == 1		% Kalman filter
+if options_.lik_init == 1               % Kalman filter
     if kalman_algo ~= 2
         kalman_algo = 1;
     end
     Pstar = lyapunov_symm(T,R*Q*R',options_.qz_criterium,options_.lyapunov_complex_threshold);
-    Pinf	= [];
-elseif options_.lik_init == 2	% Old Diffuse Kalman filter
+    Pinf        = [];
+elseif options_.lik_init == 2   % Old Diffuse Kalman filter
     if kalman_algo ~= 2
         kalman_algo = 1;
     end
     Pstar = 10*eye(np);
     Pinf = [];
-elseif options_.lik_init == 3	% Diffuse Kalman filter
+elseif options_.lik_init == 3   % Diffuse Kalman filter
     if kalman_algo ~= 4
         kalman_algo = 3;
     end

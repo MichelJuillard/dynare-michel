@@ -51,7 +51,7 @@ nn = length(j2);
 summ = sqrt(sum(p.*p)) ;
 if ~isfinite(summ)
     error(['Some element of Newton direction isn''t finite. Jacobian maybe' ...
-	   ' singular or there is a problem with initial values'])
+           ' singular or there is a problem with initial values'])
 end
 
 if summ > stpmax

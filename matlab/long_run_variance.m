@@ -37,7 +37,7 @@ if nargin<2
         disp(['Bandwidth parameter is equal to ' num2str(band) '.'])
     end
 end
-    
+
 gamma = multivariate_sample_autocovariance(data,band);
 sigma = gamma(:,:,1);
 for i=1:band
@@ -45,4 +45,4 @@ for i=1:band
 end
 
 function w = bartlett(i,n)
-    w = 1 - i / (n+1);
+w = 1 - i / (n+1);

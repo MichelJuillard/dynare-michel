@@ -87,8 +87,8 @@ if ~options_.load_mh_file & ~options_.mh_recover
         ix2 = zeros(nblck,npar);
         ilogpo2 = zeros(nblck,1);
         for j=1:nblck
-            validate	= 0;
-            init_iter	= 0;
+            validate    = 0;
+            init_iter   = 0;
             trial = 1;
             while validate == 0 & trial <= 10
                 candidate = rand_multivariate_normal( transpose(xparam1), d * options_.mh_init_scale, npar);

@@ -94,7 +94,7 @@ while rank(Pinf,kalman_tol) && (t<smpl)
                     lik(t) = log(dFstar) + v'*iFstar*v + length(d_index)*log(2*pi);
                     Pinf   = T*Pinf*transpose(T);
                     Pstar  = T*(Pstar-Pstar*ZZ'*Kstar')*T'+QQ;
-                    a	     = T*(a+Kstar*v);
+                    a        = T*(a+Kstar*v);
                 end
             end
         else
@@ -105,7 +105,7 @@ while rank(Pinf,kalman_tol) && (t<smpl)
             Kstar  = (Pstar*ZZ'-Kinf*Fstar)*iFinf;
             Pstar  = T*(Pstar-Pstar*ZZ'*Kinf'-Pinf*ZZ'*Kstar')*T'+QQ;
             Pinf   = T*(Pinf-Pinf*ZZ'*Kinf')*T';
-            a	     = T*(a+Kinf*v);
+            a        = T*(a+Kinf*v);
         end
     end
 end
@@ -144,7 +144,7 @@ while notsteady && (t<smpl)
             iF     = inv(F);
             lik(t) = log(dF) + v'*iF*v  + length(d_index)*log(2*pi);
             K      = Pstar*ZZ'*iF;
-            a      = T*(a+K*v);	
+            a      = T*(a+K*v); 
             Pstar  = T*(Pstar-K*ZZ*Pstar)*T'+QQ;
         end
         if t>no_more_missing_observations

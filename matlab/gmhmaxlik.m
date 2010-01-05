@@ -166,7 +166,7 @@ while j<= NumberOfIterations
         ilogpo2 = logpo2;
         isux = isux + 1;
         jsux = jsux + 1;
-    end% ... otherwise I don't move.	
+    end% ... otherwise I don't move.    
     prtfrc = j/NumberOfIterations;
     waitbar(prtfrc,hh,sprintf('%f done, acceptation rate %f',prtfrc,isux/j));
     % I update the covariance matrix and the mean:

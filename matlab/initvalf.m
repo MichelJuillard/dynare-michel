@@ -1,7 +1,7 @@
 function initvalf(fname_)
 % function initvalf(fname_)
 %
-% Reads an initial path from the 'fname_' file for exogenous and endogenous variables	
+% Reads an initial path from the 'fname_' file for exogenous and endogenous variables   
 %
 % INPUTS
 %    fname_:         name of the function or file containing the data

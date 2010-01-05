@@ -64,32 +64,32 @@ global options_
 d = 0;
 decomp = [];
 nk = options_.nk;
-spinf   	= size(Pinf1);
-spstar  	= size(Pstar1);
-v       	= zeros(pp,smpl);
-a       	= zeros(mm,smpl+1);
-atilde       	= zeros(mm,smpl);
+spinf           = size(Pinf1);
+spstar          = size(Pstar1);
+v               = zeros(pp,smpl);
+a               = zeros(mm,smpl+1);
+atilde          = zeros(mm,smpl);
 aK              = zeros(nk,mm,smpl+nk);
 PK              = zeros(nk,mm,mm,smpl+nk);
-iF      	= zeros(pp,pp,smpl);
-Fstar   	= zeros(pp,pp,smpl);
-iFinf   	= zeros(pp,pp,smpl);
-K       	= zeros(mm,pp,smpl);
-L       	= zeros(mm,mm,smpl);
-Linf    	= zeros(mm,mm,smpl);
-Kstar   	= zeros(mm,pp,smpl);
-P       	= zeros(mm,mm,smpl+1);
-Pstar   	= zeros(spstar(1),spstar(2),smpl+1); Pstar(:,:,1) = Pstar1;
-Pinf    	= zeros(spinf(1),spinf(2),smpl+1); Pinf(:,:,1) = Pinf1;
-crit    	= options_.kalman_tol;
+iF              = zeros(pp,pp,smpl);
+Fstar           = zeros(pp,pp,smpl);
+iFinf           = zeros(pp,pp,smpl);
+K               = zeros(mm,pp,smpl);
+L               = zeros(mm,mm,smpl);
+Linf            = zeros(mm,mm,smpl);
+Kstar           = zeros(mm,pp,smpl);
+P               = zeros(mm,mm,smpl+1);
+Pstar           = zeros(spstar(1),spstar(2),smpl+1); Pstar(:,:,1) = Pstar1;
+Pinf            = zeros(spinf(1),spinf(2),smpl+1); Pinf(:,:,1) = Pinf1;
+crit            = options_.kalman_tol;
 crit1       = 1.e-8;
-steady  	= smpl;
-rr      	= size(Q,1);
-QQ      	= R*Q*transpose(R);
-QRt		= Q*transpose(R);
-alphahat   	= zeros(mm,smpl);
-etahat	   	= zeros(rr,smpl);
-r 		= zeros(mm,smpl+1);
+steady          = smpl;
+rr              = size(Q,1);
+QQ              = R*Q*transpose(R);
+QRt             = Q*transpose(R);
+alphahat        = zeros(mm,smpl);
+etahat          = zeros(rr,smpl);
+r               = zeros(mm,smpl+1);
 
 t = 0;
 while rank(Pinf(:,:,t+1),crit1) & t<smpl
@@ -97,31 +97,31 @@ while rank(Pinf(:,:,t+1),crit1) & t<smpl
     di = data_index{t};
     if isempty(di)
         atilde(:,t) = a(:,t);
-        Linf(:,:,t)  	= T;
-        Pstar(:,:,t+1)	= T*Pstar(:,:,t)*T' + QQ;
-        Pinf(:,:,t+1)	= T*Pinf(:,:,t)*T';
+        Linf(:,:,t)     = T;
+        Pstar(:,:,t+1)  = T*Pstar(:,:,t)*T' + QQ;
+        Pinf(:,:,t+1)   = T*Pinf(:,:,t)*T';
     else
         ZZ = Z(di,:);
         v(di,t)= Y(di,t) - ZZ*a(:,t);
         F = ZZ*Pinf(:,:,t)*ZZ';
         if rcond(F) < crit
-            return		
+            return              
         end
-        iFinf(di,di,t) 	= inv(F);
+        iFinf(di,di,t)  = inv(F);
         PZI             = Pinf(:,:,t)*ZZ'*iFinf(di,di,t);
         atilde(:,t)     = a(:,t) + PZI*v(di,t);
-        Kinf(:,di,t)	= T*PZI;
-        Linf(:,:,t)  	= T - Kinf(:,di,t)*ZZ;
-        Fstar(di,di,t) 	= ZZ*Pstar(:,:,t)*ZZ';
-        Kstar(:,di,t) 	= (T*Pstar(:,:,t)*ZZ'-Kinf(:,di,t)*Fstar(di,di,t))*iFinf(di,di,t);
-        Pstar(:,:,t+1)	= T*Pstar(:,:,t)*T'-T*Pstar(:,:,t)*ZZ'*Kinf(:,di,t)'-Kinf(:,di,t)*F*Kstar(:,di,t)' + QQ;
-        Pinf(:,:,t+1)	= T*Pinf(:,:,t)*T'-T*Pinf(:,:,t)*ZZ'*Kinf(:,di,t)';
+        Kinf(:,di,t)    = T*PZI;
+        Linf(:,:,t)     = T - Kinf(:,di,t)*ZZ;
+        Fstar(di,di,t)  = ZZ*Pstar(:,:,t)*ZZ';
+        Kstar(:,di,t)   = (T*Pstar(:,:,t)*ZZ'-Kinf(:,di,t)*Fstar(di,di,t))*iFinf(di,di,t);
+        Pstar(:,:,t+1)  = T*Pstar(:,:,t)*T'-T*Pstar(:,:,t)*ZZ'*Kinf(:,di,t)'-Kinf(:,di,t)*F*Kstar(:,di,t)' + QQ;
+        Pinf(:,:,t+1)   = T*Pinf(:,:,t)*T'-T*Pinf(:,:,t)*ZZ'*Kinf(:,di,t)';
     end
-    a(:,t+1) 	= T*atilde(:,t);
-    aK(1,:,t+1) 	= a(:,t+1);
+    a(:,t+1)    = T*atilde(:,t);
+    aK(1,:,t+1)         = a(:,t+1);
     % isn't a meaningless as long as we are in the diffuse part? MJ
     for jnk=2:nk,
-        aK(jnk,:,t+jnk) 	 	= T^(jnk-1)*a(:,t+1);
+        aK(jnk,:,t+jnk)                 = T^(jnk-1)*a(:,t+1);
     end
 end
 d = t;
@@ -139,14 +139,14 @@ while notsteady & t<smpl
     di = data_index{t};
     if isempty(di)
         atilde(:,t) = a(:,t);
-        L(:,:,t)  	= T;
-        P(:,:,t+1)	= T*P(:,:,t)*T' + QQ;
+        L(:,:,t)        = T;
+        P(:,:,t+1)      = T*P(:,:,t)*T' + QQ;
     else
         ZZ = Z(di,:);
         v(di,t)      = Y(di,t) - ZZ*a(:,t);
         F = ZZ*P(:,:,t)*ZZ';
         if rcond(F) < crit
-            return		
+            return              
         end    
         iF(di,di,t)   = inv(F);
         PZI         = P(:,:,t)*ZZ'*iF(di,di,t);
@@ -158,9 +158,9 @@ while notsteady & t<smpl
     a(:,t+1)    = T*atilde(:,t);
     Pf          = P(:,:,t);
     for jnk=1:nk,
-	Pf = T*Pf*T' + QQ;
+        Pf = T*Pf*T' + QQ;
         aK(jnk,:,t+jnk) = T^jnk*atilde(:,t);
-	PK(jnk,:,:,t+jnk) = Pf;
+        PK(jnk,:,:,t+jnk) = Pf;
     end
     %    notsteady   = ~(max(max(abs(P(:,:,t+1)-P(:,:,t))))<crit);
 end
@@ -181,9 +181,9 @@ end
 % $$$     a(:,t+1) = T*atilde(:,t);
 % $$$     Pf          = P(:,:,t);
 % $$$     for jnk=1:nk,
-% $$$ 	Pf = T*Pf*T' + QQ;
+% $$$   Pf = T*Pf*T' + QQ;
 % $$$         aK(jnk,:,t+jnk) = T^jnk*atilde(:,t);
-% $$$ 	PK(jnk,:,:,t+jnk) = Pf;
+% $$$   PK(jnk,:,:,t+jnk) = Pf;
 % $$$     end
 % $$$ end
 t = smpl+1;
@@ -196,8 +196,8 @@ while t>d+1
         ZZ = Z(di,:);
         r(:,t) = ZZ'*iF(di,di,t)*v(di,t) + L(:,:,t)'*r(:,t+1);
     end
-    alphahat(:,t)	= a(:,t) + P(:,:,t)*r(:,t);
-    etahat(:,t)	= QRt*r(:,t);
+    alphahat(:,t)       = a(:,t) + P(:,:,t)*r(:,t);
+    etahat(:,t) = QRt*r(:,t);
 end
 if d
     r0 = zeros(mm,d+1); 
@@ -212,8 +212,8 @@ if d
             r1(:,t) = Z(di,:)'*(iFinf(di,di,t)*v(di,t)-Kstar(:,di,t)'*r0(:,t+1)) ...
                       + Linf(:,:,t)'*r1(:,t+1);
         end
-        alphahat(:,t)	= a(:,t) + Pstar(:,:,t)*r0(:,t) + Pinf(:,:,t)*r1(:,t);
-        etahat(:,t)		= QRt*r0(:,t);
+        alphahat(:,t)   = a(:,t) + Pstar(:,:,t)*r0(:,t) + Pinf(:,:,t)*r1(:,t);
+        etahat(:,t)             = QRt*r0(:,t);
     end
 end
 

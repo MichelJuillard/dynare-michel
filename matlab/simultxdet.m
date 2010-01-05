@@ -75,13 +75,13 @@ if iorder == 1
         tempx1 = y_(dr.order_var,k1);
         tempx2 = tempx1-repmat(dr.ys(dr.order_var),1,ykmin);
         tempx = tempx2(k2);
-	y_(dr.order_var,i) = dr.ys(dr.order_var)+dr.ghx*tempx+dr.ghu* ...
-	    ex(i-ykmin,:)';
-	for j=1:min(ykmin+M_.exo_det_length+1-i,M_.exo_det_length)
+        y_(dr.order_var,i) = dr.ys(dr.order_var)+dr.ghx*tempx+dr.ghu* ...
+            ex(i-ykmin,:)';
+        for j=1:min(ykmin+M_.exo_det_length+1-i,M_.exo_det_length)
             y_(dr.order_var,i) = y_(dr.order_var,i) + dr.ghud{j}*(ex_det(i+j-1,:)'-exo_det_steady_state);
- end
- 
- k1 = k1+1;
+        end
+        
+        k1 = k1+1;
     end
 elseif iorder == 2
     for i = ykmin+1: iter+ykmin
@@ -90,12 +90,12 @@ elseif iorder == 2
         tempx = tempx2(k2);
         tempu = ex(i-ykmin,:)';
         tempuu = kron(tempu,tempu);
-	tempxx = kron(tempx,tempx);
-	tempxu = kron(tempx,tempu);
-	y_(dr.order_var,i) = dr.ys(dr.order_var)+dr.ghs2/2+dr.ghx*tempx+ ...
-	    dr.ghu*tempu+0.5*(dr.ghxx*tempxx+dr.ghuu*tempuu)+dr.ghxu* ...
-	    tempxu;
-	for j=1:min(ykmin+M_.exo_det_length+1-i,M_.exo_det_length)
+        tempxx = kron(tempx,tempx);
+        tempxu = kron(tempx,tempu);
+        y_(dr.order_var,i) = dr.ys(dr.order_var)+dr.ghs2/2+dr.ghx*tempx+ ...
+            dr.ghu*tempu+0.5*(dr.ghxx*tempxx+dr.ghuu*tempuu)+dr.ghxu* ...
+            tempxu;
+        for j=1:min(ykmin+M_.exo_det_length+1-i,M_.exo_det_length)
             tempud = ex_det(i+j-1,:)'-exo_det_steady_state;
             tempudud = kron(tempud,tempud);
             tempxud = kron(tempx,tempud);
@@ -109,8 +109,8 @@ elseif iorder == 2
                 y_(dr.order_var,i) = y_(dr.order_var,i) + ...
                     dr.ghudud{k,j}*tempududk;
             end
- end
- k1 = k1+1;
+        end
+        k1 = k1+1;
     end
 end
 
@@ -145,10 +145,10 @@ for i=1:nvar
     my_subplot(i,nvar,2,3,'Forecasts');
     
     plot([-ykmin+1:0],y0(ivar(i),1:ykmin),'b-',...
-	 [1:iter],y_(ivar(i),ykmin+1:end),'g-',...
-	 [1:iter],y_(ivar(i),ykmin+1:end)'+int_width(:,ivar(i)),'g:',...
-	 [1:iter],y_(ivar(i),ykmin+1:end)'-int_width(:,ivar(i)),'g:',...
-	 [1 iter],repmat(dr.ys(ivar(i)),1,2),'r-');
+         [1:iter],y_(ivar(i),ykmin+1:end),'g-',...
+         [1:iter],y_(ivar(i),ykmin+1:end)'+int_width(:,ivar(i)),'g:',...
+         [1:iter],y_(ivar(i),ykmin+1:end)'-int_width(:,ivar(i)),'g:',...
+         [1 iter],repmat(dr.ys(ivar(i)),1,2),'r-');
     title(M_.endo_names(ivar(i),:));
 end
 

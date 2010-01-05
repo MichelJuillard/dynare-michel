@@ -49,9 +49,9 @@ function [alphahat,etahat,epsilonhat,ahat,SteadyState,trend_coeff,aK,T,R,P,PK,d,
 
 global bayestopt_ M_ oo_ estim_params_ options_
 
-alphahat 	= [];
-etahat	= [];
-epsilonhat	= [];
+alphahat        = [];
+etahat  = [];
+epsilonhat      = [];
 ahat          = [];
 SteadyState   = [];
 trend_coeff   = [];
@@ -62,7 +62,7 @@ P             = [];
 PK            = [];
 d             = [];
 decomp        = [];
-nobs 		= size(options_.varobs,1);
+nobs            = size(options_.varobs,1);
 smpl          = size(Y,2);
 
 set_all_parameters(xparam1);
@@ -109,18 +109,18 @@ Q = M_.Sigma_e;
 H = M_.H;
 
 kalman_algo = options_.kalman_algo;
-if options_.lik_init == 1		% Kalman filter
+if options_.lik_init == 1               % Kalman filter
     if kalman_algo ~= 2
         kalman_algo = 1;
     end
     Pstar = lyapunov_symm(T,R*Q*transpose(R),options_.qz_criterium,options_.lyapunov_complex_threshold);
-    Pinf	= [];
+    Pinf        = [];
 elseif options_.lik_init == 2 % Old Diffuse Kalman filter
     if kalman_algo ~= 2
         kalman_algo = 1;
     end
     Pstar = options_.Harvey_scale_factor*eye(np);
-    Pinf	= [];
+    Pinf        = [];
 elseif options_.lik_init == 3 % Diffuse Kalman filter
     if kalman_algo ~= 4
         kalman_algo = 3;

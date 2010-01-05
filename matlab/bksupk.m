@@ -68,7 +68,7 @@ while i <= options_.periods
     c = fread(fid,[jcf,ny],'float64')' ;
 
     d1(ir) = c(:,jcf)-c(:,icf)*d1(irf) ;
-    ir = ir-ny ;			
+    ir = ir-ny ;                        
     irf = irf-ny ;
     i = i+1;
 end

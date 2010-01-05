@@ -74,12 +74,12 @@ for j= 1:nvar
     vn = deblank(endo_names(i_var(j),:));
     obs = 0;
 % $$$         k = strmatch(vn,varobs,'exact'); 
-% $$$ 	if ~isempty(k)
-% $$$ 	    yy = y.(vn)(end-9:end) + repmat(ys(i_var(j)),10,1)+trend(k,:)';
-% $$$ 	    plot(yy);
-% $$$ 	    hold on
-% $$$ 	    obs = 10;
-% $$$ 	end
+% $$$   if ~isempty(k)
+% $$$       yy = y.(vn)(end-9:end) + repmat(ys(i_var(j)),10,1)+trend(k,:)';
+% $$$       plot(yy);
+% $$$       hold on
+% $$$       obs = 10;
+% $$$   end
     plot([NaN(obs,1); yf.(vn)]);
     hold on
     plot([NaN(obs,1); hpdinf.(vn)]);

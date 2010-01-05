@@ -59,7 +59,7 @@ end
 
 for i = 1:size(x,1)
     if ~ strcmp(nvx(i,:),nvy(i,:))
-        error ('FTEST: The two files don''t have the same  variables.') ;	
+        error ('FTEST: The two files don''t have the same  variables.') ;       
     end
 end
 

@@ -32,7 +32,7 @@ for j = 1:n
     theta_j = 0;
     for i=1:n
         somme = 0;
-        for k=1:i-1	
+        for k=1:i-1     
             somme = somme + R(k,i)*R(k,j);
         end
         R(i,j) = (A(i,j) - somme)/R(i,i);
@@ -44,7 +44,7 @@ for j = 1:n
         end
     end
     somme = 0;
-    for k=1:j-1	
+    for k=1:j-1 
         somme = somme + R(k,j)^2;
     end
     phi_j = A(j,j) - somme;

@@ -101,7 +101,7 @@ verbose = 2;
 %  options = optimset('fminunc');
 %  options = optimset('display','iter');
 %  [p,f]=fminunc(@osr_obj,t0,options,i_params,...
-%		inv_order_var(i_var),weights(i_var,i_var));
+%               inv_order_var(i_var),weights(i_var,i_var));
 
 
 

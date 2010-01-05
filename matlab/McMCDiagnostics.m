@@ -65,7 +65,7 @@ NumberOfDraws  = PastDraws(1);
 
 Origin = 1000;
 StepSize = ceil((NumberOfDraws-Origin)/100);% So that the computational time does not 
-ALPHA = 0.2;				    % increase too much with the number of simulations. 
+ALPHA = 0.2;                                % increase too much with the number of simulations. 
 time = 1:NumberOfDraws;
 xx = Origin:StepSize:NumberOfDraws;
 NumberOfLines = length(xx);
@@ -220,9 +220,9 @@ if reste
                 TEXNAMES = strvcat(TEXNAMES,deblank(namtex));
             end
             subplot(nr,nc,boxplot);
-            plot(xx,plt1,'-b');					% Pooled
+            plot(xx,plt1,'-b');                                 % Pooled
             hold on;
-            plot(xx,plt2,'-r');					% Within (mean)
+            plot(xx,plt2,'-r');                                 % Within (mean)
             hold off;
             xlim([xx(1) xx(NumberOfLines)]);
             title(namnam,'Interpreter','none');
@@ -313,7 +313,7 @@ for iter  = Origin:StepSize:NumberOfDraws
         MDIAG(ligne,6) = MDIAG(ligne,6) + sum(abs(pmet(:,1)-moyenne).^3)/(n-1);
     end
 end
-MDIAG(:,[2 4 6],:) = MDIAG(:,[2 4 6],:)/nblck;	
+MDIAG(:,[2 4 6],:) = MDIAG(:,[2 4 6],:)/nblck;  
 if options_.nograph
     h = figure('Name','Multivatiate diagnostic','Visible','off');
 else

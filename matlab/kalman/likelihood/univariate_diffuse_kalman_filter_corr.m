@@ -54,7 +54,7 @@ t  = 0;
 lik = zeros(smpl,1);
 notsteady = 1;
 crit = 1.e-6;
-newRank	= rank(Pinf,crit);
+newRank = rank(Pinf,crit);
 icc=0;
 
 TT = zeros(mm+pp);
@@ -101,7 +101,7 @@ while newRank && (t<smpl)
         if Finf>kalman_tol && newRank
             icc=icc+1;
             Kinf   = Pinf*Zi';
-            a	   = a + Kinf*(prediction_error/Finf);
+            a      = a + Kinf*(prediction_error/Finf);
             Pstar  = Pstar + Kinf*(Kinf'*(Fstar/(Finf*Finf))) - (Kstar*Kinf'+Kinf*Kstar')/Finf;
             Pinf   = Pinf - Kinf*(Kinf'/Finf);
             lik(t) = lik(t) + log(Finf) + l2pi;
@@ -117,7 +117,7 @@ while newRank && (t<smpl)
             else
                 newRank = (any(diag(Za*Pinf*Za')>kalman_tol) | rank(Pinf,crit));  
                 if newRank==0
-                    P0=	T*Pinf*T';
+                    P0= T*Pinf*T';
                     newRank = (any(diag(Za*P0*Za')>kalman_tol) | rank(P0,crit));
                     if newRank==0
                         options_.diffuse_d = icc;
@@ -136,14 +136,14 @@ while newRank && (t<smpl)
     else
         oldRank = 0;
     end
-    a 	  = T*a;
+    a     = T*a;
     Pstar = T*Pstar*T'+QQ;
     Pinf  = T*Pinf*T';
     if newRank
         newRank = rank(Pinf,crit);
     end
     if oldRank ~= newRank
-        disp('univariate_diffuse_kalman_filter:: T does influence the rank of Pinf!')	
+        disp('univariate_diffuse_kalman_filter:: T does influence the rank of Pinf!')   
     end
 end
 
@@ -160,14 +160,14 @@ while notsteady && (t<smpl)
         prediction_error = Y(d_index(i),t) - Zi*a;
         Fi   = Zi*Pstar*Zi' + H(i);
         if Fi > kalman_tol
-            Ki	= Pstar*Zi';
-            a	   = a + Ki*prediction_error/Fi;
+            Ki  = Pstar*Zi';
+            a      = a + Ki*prediction_error/Fi;
             Pstar  = Pstar - Ki*Ki'/Fi;
             lik(t) = lik(t) + log(Fi) + prediction_error*prediction_error/Fi ...
                      + l2pi;
         end
-    end	
-    a 	  = T*a;
+    end 
+    a     = T*a;
     Pstar = T*Pstar*T' + QQ;
     if t>no_more_missing_observations
         notsteady = max(max(abs(P-oldP)))>riccati_tol;
@@ -182,13 +182,13 @@ while t < smpl
         prediction_error = Y(i,t) - Zi*a;
         Fi   = Zi*Pstar*Zi'+H(i);
         if Fi > crit
-            Ki 	   = Pstar*Zi';
-            a 	   = a + Ki*prediction_error/Fi;
+            Ki     = Pstar*Zi';
+            a      = a + Ki*prediction_error/Fi;
             Pstar  = Pstar - Ki*Ki'/Fi;
             lik(t) = lik(t) + log(Fi) + prediction_error*prediction_error/Fi ...
                      + l2pi;
         end
-    end	
+    end 
     a = T*a;
 end
 

@@ -77,7 +77,7 @@ for i=1:maximum_lag-1
                         lead_lag_incidence(i+1,:)];
 end
 lead_lag_incidence1 = [lead_lag_incidence1; ...
-		    lead_lag_incidence(M_.maximum_lag,:) > 0];
+                    lead_lag_incidence(M_.maximum_lag,:) > 0];
 k = find(lead_lag_incidence1');
 lead_lag_incidence1 = zeros(size(lead_lag_incidence1'));
 lead_lag_incidence1(k) = 1:length(k);

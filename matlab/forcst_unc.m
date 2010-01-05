@@ -95,7 +95,7 @@ if options_.noprint == 0 & m1 < replic
     disp(' ')
     disp('FORECASTING WITH PARAMETER UNCERTAINTY:')
     disp(sprintf(['The model  couldn''t be solved for %f%% of the parameter' ...
-		  ' values'],100*oo_.forecast.accept_rate))
+                  ' values'],100*oo_.forecast.accept_rate))
     disp(' ')
     disp(' ')
 end
@@ -133,14 +133,14 @@ yf3_2 = yf3'+[zeros(maximum_lag,n); yf3_intv];
 dynare_graph_init('Forecasts type I',n,{'b-' 'g-' 'g-' 'r-' 'r-'});
 for i=1:n
     dynare_graph([yf_mean(:,i) squeeze(yf1(:,i,k1)) squeeze(yf2(:,i,k2))],...
-		 var_list(i,:));
+                 var_list(i,:));
 end
 dynare_graph_close;
 
 dynare_graph_init('Forecasts type II',n,{'b-' 'k-' 'k-' 'r-' 'r-'});
 for i=1:n
     dynare_graph([yf_mean(:,i) yf3_1(:,i) yf3_2(:,i) squeeze(yf2(:,i,k2))],...
-		 var_list(i,:));
+                 var_list(i,:));
 end
 dynare_graph_close;
 

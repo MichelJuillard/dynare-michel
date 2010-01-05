@@ -39,11 +39,11 @@ if nv-size(options_.varobs,1)
     disp(['Number of variables in the database   = ' int2str(nv)])
     disp(' ')
     error(['Estimation can''t take place because the declared number of observed' ...
-	   'variables doesn''t match the number of variables in the database.'])
+           'variables doesn''t match the number of variables in the database.'])
 end
 if nv > M_.exo_nbr+estim_params_.nvn
     error(['Estimation can''t take place because there are less shocks than' ...
-	   'observed variables'])
+           'observed variables'])
 end
 if (number_of_observations==gend*nv)% No missing observations...
     k = find(all(~isnan(data),2));

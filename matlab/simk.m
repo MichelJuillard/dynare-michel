@@ -209,8 +209,8 @@ for iter = 1:options_.maxit_
                     if lky(j+M_.maximum_endo_lead) ~= 0
                         jwci = [ jwci; ky(1: lky(j+M_.maximum_endo_lead),j+M_.maximum_endo_lead)+(M_.maximum_endo_lead-1)*ny] ;
                         w = [w jacobian(:,isc(j+M_.maximum_endo_lead-1)+1:isc(j+M_.maximum_endo_lead))] ;
-                        %	  else
-                        %	    jwci = [] ;
+                        %         else
+                        %           jwci = [] ;
                     end
                 end
             end
@@ -324,18 +324,18 @@ for iter = 1:options_.maxit_
     [junk,i2] = max(junk);
     disp(['variable ' M_.endo_names(i2,:) ' period ' num2str(i1(i2))])
     err = max(max(abs(c./options_.scalv'))) ;
-    disp ([num2str(iter) '-	err = ' num2str(err)]) ;
+    disp ([num2str(iter) '-     err = ' num2str(err)]) ;
     disp (['err_f = ' num2str(err_f)])
-    disp (['	Time of this iteration	: ' num2str(h2)]) ;
+    disp (['    Time of this iteration  : ' num2str(h2)]) ;
     if options_.timing
-        disp (['	Back substitution		: ' num2str(hbacsup)]) ;
+        disp (['        Back substitution               : ' num2str(hbacsup)]) ;
     end
     if err < options_.dynatol
         h1 = etime(clock,h1) ;
         fprintf ('\n') ;
-        disp (['	Total time of simulation	: ' num2str(h1)]) ;
+        disp (['        Total time of simulation        : ' num2str(h1)]) ;
         fprintf ('\n') ;
-        disp (['	Convergence achieved.']) ;
+        disp (['        Convergence achieved.']) ;
         disp (['-----------------------------------------------------']) ;
         fprintf ('\n') ;
         return ;

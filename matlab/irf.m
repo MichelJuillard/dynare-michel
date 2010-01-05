@@ -38,7 +38,7 @@ global M_ oo_ options_
 
 
 temps = repmat(dr.ys,1,M_.maximum_lag);
-y	= 0;
+y       = 0;
 
 if iorder == 1
     y1 = repmat(dr.ys,1,long);

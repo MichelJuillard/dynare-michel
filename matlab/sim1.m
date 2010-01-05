@@ -99,15 +99,15 @@ for iter = 1:options_.maxit_
     end
     
     err = max(max(abs(c./options_.scalv')));
-    disp([num2str(iter) ' -	err = ' num2str(err)]) ;
-    disp(['	Time of iteration 	:' num2str(etime(clock,h2))]) ;
+    disp([num2str(iter) ' -     err = ' num2str(err)]) ;
+    disp(['     Time of iteration       :' num2str(etime(clock,h2))]) ;
     
     if err < options_.dynatol
         stop = 1 ;
         fprintf('\n') ;
-        disp(['	Total time of simulation 	:' num2str(etime(clock,h1))]) ;
+        disp([' Total time of simulation        :' num2str(etime(clock,h1))]) ;
         fprintf('\n') ;
-        disp(['	Convergency obtained.']) ;
+        disp([' Convergency obtained.']) ;
         fprintf('\n') ;
         oo_.deterministic_simulation.status = 1;% Convergency obtained.
         oo_.deterministic_simulation.error = err;
@@ -118,7 +118,7 @@ end
 
 if ~stop
     fprintf('\n') ;
-    disp(['	Total time of simulation 	:' num2str(etime(clock,h1))]) ;
+    disp(['     Total time of simulation        :' num2str(etime(clock,h1))]) ;
     fprintf('\n') ;
     disp(['WARNING : maximum number of iterations is reached (modify options_.maxit_).']) ;
     fprintf('\n') ;

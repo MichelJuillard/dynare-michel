@@ -61,27 +61,27 @@ smpl   = size(Y,2);
 a      = zeros(mm,1);
 QQ     = R*Q*transpose(R);
 t      = 0;
-lik	   = zeros(smpl,1);	
-notsteady 	= 1;
-crit      	= options_.kalman_tol;
-crit1      	= 1.e-6;
-newRank	 	= rank(Pinf,crit1);
+lik        = zeros(smpl,1);     
+notsteady       = 1;
+crit            = options_.kalman_tol;
+crit1           = 1.e-6;
+newRank         = rank(Pinf,crit1);
 icc=0;
 while newRank & t < smpl
     t = t+1;
     for i=1:pp
-        v(i) 	= Y(i,t)-a(mf(i))-trend(i,t);
-        Fstar 	= Pstar(mf(i),mf(i));
-        Finf	= Pinf(mf(i),mf(i));
-        Kstar 	= Pstar(:,mf(i));
+        v(i)    = Y(i,t)-a(mf(i))-trend(i,t);
+        Fstar   = Pstar(mf(i),mf(i));
+        Finf    = Pinf(mf(i),mf(i));
+        Kstar   = Pstar(:,mf(i));
         if Finf > crit & newRank,  %added newRank criterion 
             icc=icc+1;
-            Kinf	= Pinf(:,mf(i));
-            a		= a + Kinf*v(i)/Finf;
-            Pstar	= Pstar + Kinf*transpose(Kinf)*Fstar/(Finf*Finf) - ...
+            Kinf        = Pinf(:,mf(i));
+            a           = a + Kinf*v(i)/Finf;
+            Pstar       = Pstar + Kinf*transpose(Kinf)*Fstar/(Finf*Finf) - ...
                 (Kstar*transpose(Kinf)+Kinf*transpose(Kstar))/Finf;
-            Pinf	= Pinf - Kinf*transpose(Kinf)/Finf;
-            lik(t) 	= lik(t) + log(Finf);
+            Pinf        = Pinf - Kinf*transpose(Kinf)/Finf;
+            lik(t)      = lik(t) + log(Finf);
             % start new termination criterion for DKF
             if ~isempty(options_.diffuse_d),  
                 newRank = (icc<options_.diffuse_d);  
@@ -97,7 +97,7 @@ while newRank & t < smpl
                 %newRank = any(diag(Pinf(mf,mf))>crit);     % M. Ratto this line is BUGGY 
                 newRank = (any(diag(Pinf(mf,mf))>crit) | rank(Pinf,crit1));                 
                 if newRank==0, 
-                    P0=	T*Pinf*transpose(T);
+                    P0= T*Pinf*transpose(T);
                     %newRank = any(diag(P0(mf,mf))>crit);   % M. Ratto this line is BUGGY
                     newRank = (any(diag(P0(mf,mf))>crit) | rank(P0,crit1));   % M. Ratto 11/10/2005
                     if newRank==0, 
@@ -109,7 +109,7 @@ while newRank & t < smpl
         elseif Fstar > crit 
             %% Note that : (1) rank(Pinf)=0 implies that Finf = 0, (2) outside this loop (when for some i and t the condition
             %% rank(Pinf)=0 is satisfied we have P = Pstar and F = Fstar and (3) Finf = 0 does not imply that
-            %% rank(Pinf)=0. [stéphane,11-03-2004].	  
+            %% rank(Pinf)=0. [stéphane,11-03-2004].       
             %if rank(Pinf,crit) == 0
             % the likelihood terms should alwasy be cumulated, not only
             % when Pinf=0, otherwise the lik would depend on the ordering
@@ -117,7 +117,7 @@ while newRank & t < smpl
             % presample options can be used to ignore initial time points
             lik(t) = lik(t) + log(Fstar) + v(i)*v(i)/Fstar;
             %end
-            a	= a + Kstar*v(i)/Fstar;
+            a   = a + Kstar*v(i)/Fstar;
             Pstar = Pstar - Kstar*transpose(Kstar)/Fstar;
         else
             %disp(['zero F term in DKF for observed ',int2str(i),' ',num2str(Fstar)])
@@ -133,19 +133,19 @@ while newRank & t < smpl
     else
         oldRank = 0;
     end
-    a 		= T*a;
-    Pstar 	= T*Pstar*transpose(T)+QQ;
-    Pinf	= T*Pinf*transpose(T);
+    a           = T*a;
+    Pstar       = T*Pstar*transpose(T)+QQ;
+    Pinf        = T*Pinf*transpose(T);
     %     if all(abs(Pinf(:))<crit),
     %         newRank = 0;
     %     else
-    %     	newRank = rank(Pinf,crit);
+    %           newRank = rank(Pinf,crit);
     %     end
     if newRank,
         newRank = rank(Pinf,crit1);  % new crit1 is used 
     end
     if oldRank ~= newRank
-        disp('DiffuseLiklihood3 :: T does influence the rank of Pinf!')	
+        disp('DiffuseLiklihood3 :: T does influence the rank of Pinf!') 
     end  
 end
 if t == smpl                                                           
@@ -159,17 +159,17 @@ while notsteady & t < smpl
         v(i) = Y(i,t) - a(mf(i)) - trend(i,t);
         Fi   = Pstar(mf(i),mf(i));
         if Fi > crit
-            Ki		= Pstar(:,mf(i));
-            a		= a + Ki*v(i)/Fi;
-            Pstar 	= Pstar - Ki*transpose(Ki)/Fi;
-            lik(t) 	= lik(t) + log(Fi) + v(i)*v(i)/Fi;
+            Ki          = Pstar(:,mf(i));
+            a           = a + Ki*v(i)/Fi;
+            Pstar       = Pstar - Ki*transpose(Ki)/Fi;
+            lik(t)      = lik(t) + log(Fi) + v(i)*v(i)/Fi;
         else
             %disp(['zero F term for observed ',int2str(i),' ',num2str(Fi)])
         end
-    end	
-    a 			= T*a;
-    Pstar 		= T*Pstar*transpose(T) + QQ;
-    notsteady 	= ~(max(max(abs(Pstar-oldP)))<crit);
+    end 
+    a                   = T*a;
+    Pstar               = T*Pstar*transpose(T) + QQ;
+    notsteady   = ~(max(max(abs(Pstar-oldP)))<crit);
 end
 while t < smpl
     t = t+1;
@@ -178,14 +178,14 @@ while t < smpl
         v(i) = Y(i,t) - a(mf(i)) - trend(i,t);
         Fi   = Pstar(mf(i),mf(i));
         if Fi > crit
-            Ki 		= Pstar(:,mf(i));
-            a 		= a + Ki*v(i)/Fi;
-            Pstar 	= Pstar - Ki*transpose(Ki)/Fi;
-            lik(t)    	= lik(t) + log(Fi) + v(i)*v(i)/Fi;
+            Ki          = Pstar(:,mf(i));
+            a           = a + Ki*v(i)/Fi;
+            Pstar       = Pstar - Ki*transpose(Ki)/Fi;
+            lik(t)      = lik(t) + log(Fi) + v(i)*v(i)/Fi;
         else
             %disp(['zero F term for observed ',int2str(i),' ',num2str(Fi)])
         end
-    end	
+    end 
     a = T*a;
 end
 

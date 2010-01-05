@@ -79,18 +79,18 @@ while rank(Pinf,kalman_tol) && (t<smpl)
                 lik(t) = log(dFstar) + v'*iFstar*v;
                 Pinf   = T*Pinf*transpose(T);
                 Pstar  = T*(Pstar-Pstar*Z'*Kstar')*T'+QQ;
-                a	 = T*(a+Kstar*v);
+                a        = T*(a+Kstar*v);
             end
         end
     else
         lik(t) = log(det(Finf));
-        iFinf	 = inv(Finf);
-        Kinf	 = Pinf*Z'*iFinf;
-        Fstar	 = Z*Pstar*Z' + H;
-        Kstar	 = (Pstar*Z'-Kinf*Fstar)*iFinf;
-        Pstar	 = T*(Pstar-Pstar*Z'*Kinf'-Pinf*Z'*Kstar')*T'+QQ;
-        Pinf	 = T*(Pinf-Pinf*Z'*Kinf')*T';
-        a	 = T*(a+Kinf*v);
+        iFinf    = inv(Finf);
+        Kinf     = Pinf*Z'*iFinf;
+        Fstar    = Z*Pstar*Z' + H;
+        Kstar    = (Pstar*Z'-Kinf*Fstar)*iFinf;
+        Pstar    = T*(Pstar-Pstar*Z'*Kinf'-Pinf*Z'*Kstar')*T'+QQ;
+        Pinf     = T*(Pinf-Pinf*Z'*Kinf')*T';
+        a        = T*(a+Kinf*v);
     end
 end
 

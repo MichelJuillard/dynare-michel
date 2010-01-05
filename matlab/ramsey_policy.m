@@ -88,6 +88,6 @@ oo_.welfare.ws2 = ws2;
 disp(' ')
 disp(' ')
 disp(['Welfare at the deterministic steady state is ' num2str(wbar+0.5* ...
-						  ws2)]);
+                                                  ws2)]);
 
 options_ = oldoptions;

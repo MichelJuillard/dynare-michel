@@ -43,10 +43,10 @@ ivar=zeros(nvar,1);
 for i=1:nvar
     i_tmp = strmatch(var_list(i,:),M_.endo_names(k1,:),'exact');
     if isempty(i_tmp)
-	disp(var_list(i,:));
-      	error (['One of the variable specified does not exist']) ;
+        disp(var_list(i,:));
+        error (['One of the variable specified does not exist']) ;
     else
-	ivar(i) = i_tmp;
+        ivar(i) = i_tmp;
     end
 end
 

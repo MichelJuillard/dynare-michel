@@ -82,7 +82,7 @@ while ~(cvg==1 | iter>maxit_),
     %     i = y_kmin+1;
     %       i
     %       for j = 1:Blck_size
-    %     	  ydh = y ;
+    %             ydh = y ;
     %           ydh(i, y_index(j)) = ydh(i, y_index(j)) + dh(i, j)  ;
     %           if(j==11 && i==2)
     %               disp(['y(i,y_index(11)=' int2str(y_index(11)) ')= ' num2str(y(i,y_index(11))) ' ydh(i, y_index(j))=' num2str(ydh(i, y_index(j))) ' dh(i,j)= ' num2str(dh(i,j))]);

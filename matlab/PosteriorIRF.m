@@ -386,7 +386,7 @@ if MAX_nirfs_dsgevar
     end
 end
 %%
-%% 	Finally I build the plots.
+%%      Finally I build the plots.
 %%
 if options_.TeX
     fidTeX = fopen([DirectoryName '/' M_.fname '_BayesianIRF.TeX'],'w');

@@ -36,9 +36,9 @@ ivar=zeros(nvar,1);
 for i=1:nvar
     i_tmp = strmatch(var_list(i,:),M_.endo_names,'exact');
     if isempty(i_tmp)
-      	error (['One of the variable specified does not exist']) ;
+        error (['One of the variable specified does not exist']) ;
     else
-	ivar(i) = i_tmp;
+        ivar(i) = i_tmp;
     end
 end
 
@@ -62,7 +62,7 @@ if options_.nomoments == 0
                  int2str(options_.hp_filter) ')'];
     end
     headers=strvcat('VARIABLE','MEAN','STD. DEV.','VARIANCE','SKEWNESS', ...
-		    'KURTOSIS');
+                    'KURTOSIS');
     dyntable(title,headers,labels,z,size(labels,2)+2,16,6);
 end
 

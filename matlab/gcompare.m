@@ -1,10 +1,10 @@
 function gcompare(s1,s2)
-% GCOMPARE :	GCOMPARE ( [ 'file1' ; 'file2' ] , [ 'var1' ; 'var2' ...] )	
-%		This optional command plots the trajectories of a list of
-%		variables in two different simulations. One plot is drawn
-%		for each variable. The trajectories must have been previously
-%		saved by the instruction DYNASAVE. The simulation in file1
-%		is refered to as the base simulation.
+% GCOMPARE :    GCOMPARE ( [ 'file1' ; 'file2' ] , [ 'var1' ; 'var2' ...] )     
+%               This optional command plots the trajectories of a list of
+%               variables in two different simulations. One plot is drawn
+%               for each variable. The trajectories must have been previously
+%               saved by the instruction DYNASAVE. The simulation in file1
+%               is refered to as the base simulation.
 
 % Copyright (C) 2001 Dynare Team
 %

@@ -27,7 +27,7 @@ if ~exist('MhDirectoryName'),
     MhDirectoryName = CheckPath('metropolis');
 end
 
-ALPHA = 0.2;				    % increase too much with the number of simulations. 
+ALPHA = 0.2;                                % increase too much with the number of simulations. 
 tmp = zeros(NumberOfDraws*nblck,3);
 UDIAG = zeros(NumberOfLines,6,npar-fpar+1);
 

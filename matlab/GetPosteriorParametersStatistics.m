@@ -36,14 +36,14 @@ function oo_ = GetPosteriorParametersStatistics(estim_params_, M_, options_, bay
 %   load([M_.fname '_results.mat'],'oo_'); 
 %end
 
-TeX   	= options_.TeX;
-nblck 	= options_.mh_nblck;
-nvx   	= estim_params_.nvx;
-nvn   	= estim_params_.nvn;
-ncx   	= estim_params_.ncx;
-ncn   	= estim_params_.ncn;
-np    	= estim_params_.np ;
-nx    	= nvx+nvn+ncx+ncn+np;
+TeX     = options_.TeX;
+nblck   = options_.mh_nblck;
+nvx     = estim_params_.nvx;
+nvn     = estim_params_.nvn;
+ncx     = estim_params_.ncx;
+ncn     = estim_params_.ncn;
+np      = estim_params_.np ;
+nx      = nvx+nvn+ncx+ncn+np;
 
 DirectoryName = CheckPath('metropolis');
 OutputDirectoryName = CheckPath('Output');

@@ -73,18 +73,18 @@ end
 % for the directory...
 M_.dname = M_.fname; 
 
-pnames 		= ['     ';'beta ';'gamm ';'norm ';'invg ';'unif ';'invg2'];
-n_varobs 	= size(options_.varobs,1);
+pnames          = ['     ';'beta ';'gamm ';'norm ';'invg ';'unif ';'invg2'];
+n_varobs        = size(options_.varobs,1);
 
 if ~isempty(estim_params_)
     [xparam1,estim_params_,bayestopt_,lb,ub, M_] = set_prior(estim_params_, M_, options_);
 
     if any(bayestopt_.pshape > 0)
-	if options_.mode_compute
-	    plot_priors
- end
+        if options_.mode_compute
+            plot_priors
+        end
     else
-	options_.mh_replic = 0;
+        options_.mh_replic = 0;
     end
 
     % set prior bounds and check initial value of the parameters
@@ -93,9 +93,9 @@ if ~isempty(estim_params_)
     bounds(:,2)=min(bounds(:,2),ub);
 
     if any(xparam1 < bounds(:,1)) | any(xparam1 > bounds(:,2))
-	find(xparam1 < bounds(:,1))
-	find(xparam1 > bounds(:,2))
-	error('Initial parameter values are outside parameter bounds')
+        find(xparam1 < bounds(:,1))
+        find(xparam1 > bounds(:,2))
+        error('Initial parameter values are outside parameter bounds')
     end
     lb = bounds(:,1);
     ub = bounds(:,2);
@@ -140,7 +140,7 @@ else
     end
 end
 
-bayestopt_.penalty = 1e8;	% penalty 
+bayestopt_.penalty = 1e8;       % penalty 
 
 dr = set_state_space([],M_);
 nstatic = dr.nstatic;
@@ -173,7 +173,7 @@ bayestopt_.restrict_var_list = k2;
 [junk,bayestopt_.mf1] = ismember(k,k2);
 % set mf2 to positions of observed variables in expanded state vector
 % for filtering and smoothing
-bayestopt_.mf2 	= k;
+bayestopt_.mf2  = k;
 bayestopt_.mfys = k1;
 
 [junk,ic] = intersect(k2,nstatic+(1:npred)');

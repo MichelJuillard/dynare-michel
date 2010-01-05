@@ -69,7 +69,7 @@ if nbplt == 1
     end
     if options_.nograph, close(h1), end
     if TeX
-    	fprintf(fidTeX,'\\begin{figure}[H]\n');
+        fprintf(fidTeX,'\\begin{figure}[H]\n');
         for jj = 1:npar
             fprintf(fidTeX,'\\psfrag{%s}[1][][0.5][0]{%s}\n',deblank(NAMES(jj,:)),deblank(TeXNAMES(jj,:)));
         end    
@@ -110,7 +110,7 @@ else
             eval(['print -dpdf ' M_.fname '_Priors' int2str(plt)]);
             saveas(hplt,[M_.fname '_Priors' int2str(plt) '.fig']);
         end
-    	if options_.nograph, close(hplt), end
+        if options_.nograph, close(hplt), end
         if TeX
             fprintf(fidTeX,'\\begin{figure}[H]\n');
             for jj = 1:nstar

@@ -54,7 +54,7 @@ t  = 0;
 lik = zeros(smpl,1);
 notsteady = 1;
 crit = 1.e-6;
-newRank	= rank(Pinf,crit);
+newRank = rank(Pinf,crit);
 l2pi = log(2*pi);
 
 while newRank && (t<smpl)
@@ -70,7 +70,7 @@ while newRank && (t<smpl)
         if Finf>kalman_tol && newRank
             Kinf   = Pinf*Zi';
             Kinf_Finf = Kinf/Finf;
-            a	   = a + Kinf_Finf*prediction_error;
+            a      = a + Kinf_Finf*prediction_error;
             Pstar  = Pstar + Kinf*(Kinf_Finf'*(Fstar/Finf)) - Kstar*Kinf_Finf' ...
                      - Kinf_Finf*Kstar';
             Pinf   = Pinf - Kinf*Kinf_Finf';
@@ -87,14 +87,14 @@ while newRank && (t<smpl)
     else
         oldRank = 0;
     end
-    a 	  = T*a;
+    a     = T*a;
     Pstar = T*Pstar*T'+QQ;
     Pinf  = T*Pinf*T';
     if newRank
         newRank = rank(Pinf,crit);
     end
     if oldRank ~= newRank
-        disp('univariate_diffuse_kalman_filter:: T does influence the rank of Pinf!')	
+        disp('univariate_diffuse_kalman_filter:: T does influence the rank of Pinf!')   
     end
 end
 
@@ -112,13 +112,13 @@ while notsteady && (t<smpl)
         Ki   = Pstar*Zi';
         Fi   = Zi*Ki + H(i);
         if Fi > kalman_tol
-            a	   = a + Ki*(prediction_error/Fi);
+            a      = a + Ki*(prediction_error/Fi);
             Pstar  = Pstar - Ki*(Ki'/Fi);
             lik(t) = lik(t) + log(Fi) + prediction_error*prediction_error/Fi ...
                      + l2pi;
         end
-    end	
-    a 	  = T*a;
+    end 
+    a     = T*a;
     Pstar = T*Pstar*T' + QQ;
     if t>no_more_missing_observations
         notsteady = max(max(abs(Pstar-oldP)))>riccati_tol;
@@ -133,13 +133,13 @@ while t < smpl
         prediction_error = Y(i,t) - Zi*a;
         Fi   = Zi*Pstar*Zi'+H(i);
         if Fi > crit
-            Ki 	   = Pstar*Zi';
-            a 	   = a + Ki*prediction_error/Fi;
+            Ki     = Pstar*Zi';
+            a      = a + Ki*prediction_error/Fi;
             Pstar  = Pstar - Ki*Ki'/Fi;
             lik(t) = lik(t) + log(Fi) + prediction_error*prediction_error/Fi ...
                      + l2pi;
         end
-    end	
+    end 
     a = T*a;
 end
 

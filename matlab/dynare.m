@@ -1,10 +1,10 @@
 function dynare(fname, varargin)
-%	This command runs dynare with specified model file in argument
-% 	Filename.
-%	The name of model file begins with an alphabetic character, 
-%	and has a filename extension of .mod or .dyn.
-%	When extension is omitted, a model file with .mod extension
-%	is processed.
+%       This command runs dynare with specified model file in argument
+%       Filename.
+%       The name of model file begins with an alphabetic character, 
+%       and has a filename extension of .mod or .dyn.
+%       When extension is omitted, a model file with .mod extension
+%       is processed.
 %
 % INPUTS
 %   fname:      file name

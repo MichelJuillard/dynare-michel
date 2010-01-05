@@ -56,40 +56,40 @@ notsteady   = 1;
 crit        = options_.kalman_tol;
 while rank(Pinf,crit) & t < smpl
     t     = t+1;
-    v  	  = Y(:,t)-Z*a;
+    v     = Y(:,t)-Z*a;
     Finf  = Z*Pinf*Z';
     if rcond(Finf) < crit 
         if ~all(abs(Finf(:)) < crit)
             return
         else
             Fstar   = Z*Pstar*Z';
-            iFstar	= inv(Fstar);
-            dFstar	= det(Fstar);
-            Kstar	= Pstar*Z'*iFstar;
-            lik(t)	= log(dFstar) + v'*iFstar*v;
-            Pinf	= T*Pinf*transpose(T);
-            Pstar	= T*(Pstar-Pstar*Z'*Kstar')*T'+QQ;
-            a	= T*(a+Kstar*v);
+            iFstar      = inv(Fstar);
+            dFstar      = det(Fstar);
+            Kstar       = Pstar*Z'*iFstar;
+            lik(t)      = log(dFstar) + v'*iFstar*v;
+            Pinf        = T*Pinf*transpose(T);
+            Pstar       = T*(Pstar-Pstar*Z'*Kstar')*T'+QQ;
+            a   = T*(a+Kstar*v);
         end
     else
-        lik(t)	= log(det(Finf));
-        iFinf	= inv(Finf);
-        Kinf	= Pinf*Z'*iFinf;		
-        Fstar	= Z*Pstar*Z';
-        Kstar	= (Pstar*Z'-Kinf*Fstar)*iFinf; 	
-        Pstar	= T*(Pstar-Pstar*Z'*Kinf'-Pinf*Z'*Kstar')*T'+QQ;
-        Pinf	= T*(Pinf-Pinf*Z'*Kinf')*T';
-        a		= T*(a+Kinf*v);					
+        lik(t)  = log(det(Finf));
+        iFinf   = inv(Finf);
+        Kinf    = Pinf*Z'*iFinf;                
+        Fstar   = Z*Pstar*Z';
+        Kstar   = (Pstar*Z'-Kinf*Fstar)*iFinf;  
+        Pstar   = T*(Pstar-Pstar*Z'*Kinf'-Pinf*Z'*Kstar')*T'+QQ;
+        Pinf    = T*(Pinf-Pinf*Z'*Kinf')*T';
+        a               = T*(a+Kinf*v);                                 
     end  
 end
 if t == smpl                                                           
     error(['There isn''t enough information to estimate the initial' ... 
-	   ' conditions of the nonstationary variables']);                   
+           ' conditions of the nonstationary variables']);                   
 end                                                                    
 F_singular = 1;
 while notsteady & t < smpl
     t  = t+1;
-    v  	  = Y(:,t)-Z*a;
+    v     = Y(:,t)-Z*a;
     F  = Z*Pstar*Z';
     oldPstar  = Pstar;
     dF = det(F);
@@ -105,7 +105,7 @@ while notsteady & t < smpl
         iF        = inv(F);
         lik(t)    = log(dF)+v'*iF*v;
         K         = Pstar*Z'*iF;
-        a         = T*(a+K*v);	
+        a         = T*(a+K*v);  
         Pstar     = T*(Pstar-K*Z*Pstar)*T'+QQ;
     end
     notsteady = ~(max(max(abs(Pstar-oldPstar)))<crit);

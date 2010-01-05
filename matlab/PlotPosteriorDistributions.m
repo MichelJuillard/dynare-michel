@@ -35,14 +35,14 @@ function oo_ = PlotPosteriorDistributions(estim_params_, M_, options_, bayestopt
 
 OutputDirectoryName = CheckPath('Output');
 
-TeX   	= options_.TeX;
-nblck 	= options_.mh_nblck;
-nvx   	= estim_params_.nvx;
-nvn   	= estim_params_.nvn;
-ncx   	= estim_params_.ncx;
-ncn   	= estim_params_.ncn;
-np    	= estim_params_.np ;
-npar   	= nvx+nvn+ncx+ncn+np;
+TeX     = options_.TeX;
+nblck   = options_.mh_nblck;
+nvx     = estim_params_.nvx;
+nvn     = estim_params_.nvn;
+ncx     = estim_params_.ncx;
+ncn     = estim_params_.ncn;
+np      = estim_params_.np ;
+npar    = nvx+nvn+ncx+ncn+np;
 
 MaxNumberOfPlotPerFigure = 9;% The square root must be an integer!
 nn = sqrt(MaxNumberOfPlotPerFigure);

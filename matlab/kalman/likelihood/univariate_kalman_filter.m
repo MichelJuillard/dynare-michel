@@ -51,7 +51,7 @@ smpl   = size(Y,2);                            % Number of periods in the datase
 a      = zeros(mm,1);                          % Initial condition of the state vector.
 QQ     = R*Q*transpose(R);
 t      = 0;
-lik    = zeros(smpl,1);	
+lik    = zeros(smpl,1); 
 notsteady   = 1;
 l2pi = log(2*pi);
 
@@ -64,9 +64,9 @@ while notsteady && t<smpl
         prediction_error = Y(d_index(i),t) - a(MF(i));
         Fi = P(MF(i),MF(i)) + H(d_index(i));
         if Fi > kalman_tol
-            Ki	   = P(:,MF(i))/Fi;
-            a	   = a + Ki*prediction_error;
-            P 	   = P - (Fi*Ki)*transpose(Ki);
+            Ki     = P(:,MF(i))/Fi;
+            a      = a + Ki*prediction_error;
+            P      = P - (Fi*Ki)*transpose(Ki);
             lik(t) = lik(t) + log(Fi) + prediction_error*prediction_error/Fi ...
                      + l2pi;
         end

@@ -126,7 +126,7 @@ if ~options_.noconstant
         constant = transpose(log(SteadyState(bayestopt_.mfys)));
     else
         constant = transpose(SteadyState(bayestopt_.mfys));
-    end	
+    end 
 else
     constant = zeros(1,NumberOfObservedVariables);
 end

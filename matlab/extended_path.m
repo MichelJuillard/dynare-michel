@@ -35,7 +35,7 @@ function time_series = extended_path(initial_conditions,sample_size,init)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 global M_ oo_ options_ 
- 
+
 % Set default initial conditions.
 if isempty(initial_conditions) 
     initial_conditions = repmat(oo_.steady_state,1,M_.maximum_lag); 
@@ -45,7 +45,7 @@ end
 if nargin<3
     init = 0;
 end
- 
+
 % Set the number of periods for the deterministic solver.
 %options_.periods = 40;
 
@@ -125,58 +125,58 @@ for t=1:sample_size
     oo_.endo_simul(:,1:end-1) = oo_.endo_simul(:,2:end); 
     oo_.endo_simul(:,end) = oo_.steady_state;
 end
- 
- 
+
+
 
 function info = homotopic_steps(tdx,positive_var_indx,shocks,init_weight,step,init)
-    global oo_
-    weight   = init_weight;
-    verbose  = 1;
-    iter     = 0;
-    time     = 0;
-    reduce_step = 0;
-    while iter<=100 &&  weight<=1
-        iter = iter+1;
-        old_weight = weight;
-        weight = weight+step;
-        oo_.exo_simul(tdx,positive_var_indx) = weight*shocks+(1-weight);
-        if init  
-            info = perfect_foresight_simulation(oo_.dr,oo_.steady_state);
-        else
-            info = perfect_foresight_simulation;
-        end
-        time = time+info.time;
-        if verbose
-            [iter,step]
-            [info.iterations.time,info.iterations.error]
-        end
-        if ~info.convergence
-            if verbose
-                disp('Reduce step size!')
-            end
-            reduce_step = 1;
-            break
-        else
-            if length(info.iterations.error)<5
-                if verbose
-                    disp('Increase step size!')
-                end
-                step = step*1.5;
-            end
-        end
-    end
-    if reduce_step
-        step=step/1.5;
-        info = homotopic_steps(tdx,positive_var_indx,shocks,old_weight,step,init);
-        time = time+info.time;
-    elseif weight<1 && iter<100
-        oo_.exo_simul(tdx,positive_var_indx) = shocks;
-        if init  
-            info = perfect_foresight_simulation(oo_.dr,oo_.steady_state);
-        else
-            info = perfect_foresight_simulation;
-        end
-        info.time = info.time+time;
+global oo_
+weight   = init_weight;
+verbose  = 1;
+iter     = 0;
+time     = 0;
+reduce_step = 0;
+while iter<=100 &&  weight<=1
+    iter = iter+1;
+    old_weight = weight;
+    weight = weight+step;
+    oo_.exo_simul(tdx,positive_var_indx) = weight*shocks+(1-weight);
+    if init  
+        info = perfect_foresight_simulation(oo_.dr,oo_.steady_state);
     else
-        info.time = time;
+        info = perfect_foresight_simulation;
     end
+    time = time+info.time;
+    if verbose
+        [iter,step]
+        [info.iterations.time,info.iterations.error]
+    end
+    if ~info.convergence
+        if verbose
+            disp('Reduce step size!')
+        end
+        reduce_step = 1;
+        break
+    else
+        if length(info.iterations.error)<5
+            if verbose
+                disp('Increase step size!')
+            end
+            step = step*1.5;
+        end
+    end
+end
+if reduce_step
+    step=step/1.5;
+    info = homotopic_steps(tdx,positive_var_indx,shocks,old_weight,step,init);
+    time = time+info.time;
+elseif weight<1 && iter<100
+    oo_.exo_simul(tdx,positive_var_indx) = shocks;
+    if init  
+        info = perfect_foresight_simulation(oo_.dr,oo_.steady_state);
+    else
+        info = perfect_foresight_simulation;
+    end
+    info.time = info.time+time;
+else
+    info.time = time;
+end

@@ -73,4 +73,4 @@ end;
 
 % 01/18/2004 MJ replaced fsolve with secant
 %               suppressed chck
-%	        changed order of output parameters
+%               changed order of output parameters

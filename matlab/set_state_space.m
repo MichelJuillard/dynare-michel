@@ -90,7 +90,7 @@ end
 % col 1: variable;           col 2: lead/lag in z(t+1); 
 % col 3: A cols for t+1 (D); col 4: A cols for t (E)
 kstate = [ repmat([1:M_.endo_nbr]',klen-1,1) kron([klen:-1:2]',ones(M_.endo_nbr,1)) ...
-	   zeros((klen-1)*M_.endo_nbr,2)];
+           zeros((klen-1)*M_.endo_nbr,2)];
 kiy = flipud(M_.lead_lag_incidence(:,order_var))';
 kiy = kiy(:);
 kstate(1:M_.maximum_endo_lead*M_.endo_nbr,3) = kiy(1:M_.maximum_endo_lead*M_.endo_nbr)-M_.endo_nbr;  

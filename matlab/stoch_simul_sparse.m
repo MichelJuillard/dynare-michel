@@ -60,7 +60,7 @@ if ~options_.noprint
     disp(['  Number of variables:         ' int2str(M_.endo_nbr)])
     disp(['  Number of stochastic shocks: ' int2str(M_.exo_nbr)])
     disp(['  Number of state variables:   ' ...
-	  int2str(length(find(oo_dr_kstate(:,2) <= M_.maximum_lag+1)))])
+          int2str(length(find(oo_dr_kstate(:,2) <= M_.maximum_lag+1)))])
     disp(['  Number of jumpers:           ' ...
           int2str(length(find(oo_dr_kstate(:,2) == M_.maximum_lag+2)))])
     disp(['  Number of static variables:  ' int2str(oo_dr_nstatic)])
@@ -102,18 +102,18 @@ if options_.irf
     n = size(var_list,1);
     ivar=zeros(n,1);
     if TeX
-	var_listTeX = [];
+        var_listTeX = [];
     end
     for i=1:n
-	i_tmp = strmatch(var_list(i,:),M_.endo_names,'exact');
-	if isempty(i_tmp)
+        i_tmp = strmatch(var_list(i,:),M_.endo_names,'exact');
+        if isempty(i_tmp)
             error (['One of the specified variables does not exist']) ;
-	else
+        else
             ivar(i) = i_tmp;
             if TeX
                 var_listTeX = strvcat(var_listTeX,deblank(M_.endo_names_tex(i_tmp,:)));
             end
- end
+        end
     end
 
     if TeX
@@ -192,7 +192,7 @@ if options_.irf
                         fprintf(fidTeX,'\\end{figure}\n');
                         fprintf(fidTeX,' \n');
                     end
-                    %	close(hh)
+                    %   close(hh)
                 else
                     for fig = 1:nbplt-1
                         if options_.relative_irf == 1
@@ -234,7 +234,7 @@ if options_.irf
                             fprintf(fidTeX,'\\end{figure}\n');
                             fprintf(fidTeX,' \n');
                         end
-                        %					close(hh);
+                        %                                       close(hh);
                     end
                     hh = figure('Name',['Orthogonalized shock to ' tit(i,:) ' figure ' int2str(nbplt) '.']);
                     m = 0; 
@@ -271,7 +271,7 @@ if options_.irf
                         fprintf(fidTeX,'\\end{figure}\n');
                         fprintf(fidTeX,' \n');
                     end
-                    %				close(hh);
+                    %                           close(hh);
                 end
             end
         end
