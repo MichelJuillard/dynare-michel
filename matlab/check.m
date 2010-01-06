@@ -1,4 +1,4 @@
-function result = check
+function [result,info] = check
 % function result = check
 % checks determinacy conditions by computing the eigenvalues
 %
