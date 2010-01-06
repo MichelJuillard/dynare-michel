@@ -33,6 +33,7 @@ if strcmpi('GLNX86', computer) || strcmpi('GLNXA64', computer) ...
         BLAS_PATH = '-lmwblas';
     end
     DL_PATH = '-ldl';
+    COMPILE_OPTIONS = [ COMPILE_OPTIONS ' -DHAVE_PTHREAD' ];
 elseif strcmpi('PCWIN', computer) || strcmpi('PCWIN64', computer)
     % Windows (x86-32 or x86-64) with Microsoft or gcc compiler
     if strcmpi('PCWIN', computer)
