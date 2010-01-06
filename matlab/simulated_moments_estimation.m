@@ -72,4 +72,4 @@ vb = 2;
             
 % Call csminwel.
 [fval,param,grad,hessian_csminwel,itct,fcount,retcodehat] = ...
-                csminwel('smm_objective',xparam,H0,[],ct,it,2,sample_moments,weighting_matrix,dataset,options);
+                csminwel('smm_objective',xparam,H0,[],ct,it,2,sample_moments,weighting_matrix,options);
