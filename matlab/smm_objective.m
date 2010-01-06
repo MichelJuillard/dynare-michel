@@ -1,11 +1,10 @@
-function [r,junk] = smm_objective(xparams,sample_moments,weighting_matrix,dataset,options)
+function [r,junk] = smm_objective(xparams,sample_moments,weighting_matrix,options)
 % Evaluates the objective of the Simulated Moments Method.
 %
 % INPUTS:
 %  xparams          [double]  p*1 vector of estimated parameters. 
 %  sample_moments   [double]  n*1 vector of sample moments (n>=p).
 %  weighting_matrix [double]  n*n symetric, positive definite matrix.
-%  dataset          [      ]  Structure describing the data set.
 %  options          [      ]  Structure defining options for SMM.
 %
 % OUTPUTS: 
@@ -63,7 +62,7 @@ simulated_moments = zeros(size(sample_moments));
     
 for s = 1:options.number_of_simulated_sample
     time_series = extended_path([],options.simulated_sample_size,1);
-    data = time_series(options.observed_variables_idx,options.burn_in_periods+1:options.burn_in_periods+dataset.number_of_observations);
+    data = time_series(options.observed_variables_idx,options.burn_in_periods+1:options.simulated_sample_size);
     eval(['tmp = ' options.moments_file_name '(data);'])
     simulated_moments = simulated_moments + tmp;
 end
