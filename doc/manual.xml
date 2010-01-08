@@ -3,7 +3,7 @@
 <book>
   <bookinfo>
     <title>Dynare Manual</title>
-    <subtitle>Version 4.1.0</subtitle>
+    <subtitle>Version 4.2.0</subtitle>
     <author>
       <firstname>Stéphane</firstname><surname>Adjemian</surname>
       <affiliation><orgname>Université du Mans and CEPREMAP</orgname></affiliation>
@@ -35,7 +35,7 @@
       <address><street>142 rue du Chevaleret</street><postcode>75013</postcode><city>Paris</city><country>France</country></address>
     </author>
 
-    <copyright><year>1996-2009</year><holder>Dynare Team</holder></copyright>
+    <copyright><year>1996-2010</year><holder>Dynare Team</holder></copyright>
 
     <legalnotice>
       <para>
@@ -874,6 +874,10 @@ A = 1-alpha*beta;
         <listitem><para><literal>3</literal>: in addition of variables with <literal>mfs = 2</literal> the endogenous variables related to non-linear equations which could be normalized are potential recursive variables. All the other variables are forced to belong to the set of feedback variables.</para></listitem>
       </itemizedlist>
       </para></listitem>
+    </varlistentry>
+    <varlistentry>
+      <term><option>no_static</option></term>
+      <listitem><para>Don't create the static model file. This can be useful for models which don't have a steady state.</para></listitem>
     </varlistentry>
   </variablelist>
   </refsect1>
