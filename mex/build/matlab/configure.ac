@@ -1,6 +1,6 @@
 dnl Process this file with autoconf to produce a configure script.
 
-dnl Copyright (C) 2009 Dynare Team
+dnl Copyright (C) 2009-2010 Dynare Team
 dnl
 dnl This file is part of Dynare.
 dnl
@@ -36,6 +36,17 @@ if test "x$ax_enable_matlab" = "xyes"; then
   CFLAGS="$MATLAB_CFLAGS"
   CXXFLAGS="$MATLAB_CXXFLAGS"
 fi
+
+AC_CANONICAL_HOST
+case ${host_os} in
+  *cygwin*)
+    # MATLAB can't use native Cygwin DLL, so using MinGW 3 shipped with Cygwin
+    CC=gcc-3
+    CXX=g++-3
+    CFLAGS="$CFLAGS -mno-cygwin"
+    CXXFLAGS="$CFLAGS -mno-cygwin"
+    ;;
+esac
 
 AC_PROG_CC
 AC_PROG_CXX

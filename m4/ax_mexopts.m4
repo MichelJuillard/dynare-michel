@@ -1,4 +1,4 @@
-dnl Copyright (C) 2009 Dynare Team
+dnl Copyright (C) 2009-2010 Dynare Team
 dnl
 dnl This file is part of Dynare.
 dnl
@@ -20,7 +20,6 @@ AC_DEFUN([AX_MEXOPTS],
 AC_REQUIRE([AX_MEXEXT])
 AC_REQUIRE([AX_MATLAB_ARCH])
 AC_REQUIRE([AX_MATLAB_VERSION])
-AC_REQUIRE([AC_CANONICAL_HOST])
 AC_REQUIRE([AC_PROG_SED])
 
 AX_COMPARE_VERSION([$MATLAB_VERSION], [lt], [6.5], [AC_MSG_ERROR([Your MATLAB is too old, please upgrade to 6.5 (R13) at least.])])
@@ -66,13 +65,6 @@ case ${MATLAB_ARCH} in
     MATLAB_LIBS="$LIBLOC/libmex.lib $LIBLOC/libmx.lib $LIBLOC/libmwlapack.lib -lstdc++"
     # Starting from MATLAB 7.5, BLAS and LAPACK are in distinct libraries
     AX_COMPARE_VERSION([$MATLAB_VERSION], [ge], [7.5], [MATLAB_LIBS="${MATLAB_LIBS} $LIBLOC/libmwblas.lib"])
-    case ${host_os} in
-      *cygwin*)
-        # MATLAB can't use native Cygwin DLLs
-        MATLAB_CFLAGS="$MATLAB_CFLAGS -mno-cygwin"
-        MATLAB_CXXFLAGS="$MATLAB_CXXFLAGS -mno-cygwin"
-        ;;
-    esac
     ax_mexopts_ok="yes"
     ;;
   maci | maci64)

@@ -1,6 +1,6 @@
 dnl Process this file with autoconf to produce a configure script.
 
-dnl Copyright (C) 2009 Dynare Team
+dnl Copyright (C) 2009-2010 Dynare Team
 dnl
 dnl This file is part of Dynare.
 dnl
@@ -29,6 +29,13 @@ AC_CANONICAL_HOST
 case ${host_os} in
   *mingw32*)
     LDFLAGS="$LDFLAGS -static-libgcc" # On mingw32, we don't want dynamic libgcc
+    ;;
+  *cygwin*)
+    if test "x$F77" = "x"; then
+      # On Cygwin 1.7, g77 comes has version 3, and is not compatible with default gcc/g++ which has version 4
+      # And by default, the AC_PROG_F77 will pick up g77 if it is present (even if gfortran is also here)
+      F77=gfortran
+    fi
     ;;
 esac
 
