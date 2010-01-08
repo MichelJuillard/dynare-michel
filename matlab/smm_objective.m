@@ -72,6 +72,7 @@ if nargin<5
         simulated_moments = simulated_moments / options.number_of_simulated_sample;
     end
 else% parallel mode.
+    [junk,hostname] = unix('hostname --fqdn');
     job_number = 0;
     job_master = [];
     for i=1:length(parallel)
@@ -79,7 +80,7 @@ else% parallel mode.
         for j=1:parallel(i).number_of_jobs
             job_remote = job_remote + 1; 
             job_number = job_number + 1;
-            if strcmpi(hostname,remotename) && (job_number==1)
+            if strcmpi(hostname,parallel(i).machine) && (job_number==1)
                 master_job = [ job_number , i , job_remote ];
             else
                 unix(['ssh -A ' parallel(i).login '@' parallel(i).machine './call_matlab_session.sh job' int2str(job_number) '&']);    
