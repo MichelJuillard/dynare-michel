@@ -1,10 +1,11 @@
-function [param,sigma] = simulated_moments_estimation(xparam,dataset,options)
+function [param,sigma] = simulated_moments_estimation(xparam,dataset,options,parallel)
 % Performs estimation by Simulated Moments Method.
 %
 % INPUTS:
 %  xparam          [double]  p*1 vector of initial values for the estimated parameters. 
 %  dataset         [      ]  Structure describing the data set.
 %  options         [      ]  Structure defining options for SMM.
+%  parallel        [      ]  Structure defining the parallel mode settings (optional). 
 %
 % OUTPUTS: 
 %  param           [double]  p*1 vector of point estimates for the parameters.
@@ -30,7 +31,7 @@ function [param,sigma] = simulated_moments_estimation(xparam,dataset,options)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-global M_
+global M_ options_ oo_
     
 % Load the dataset.
 eval(dataset.name);
@@ -53,7 +54,142 @@ H0 = 1e-4*eye(options.estimated_parameters.nb);
 ct = 1e-4;
 it = 1000;
 vb = 2;
-            
-% Call csminwel.
-[fval,param,grad,hessian_csminwel,itct,fcount,retcodehat] = ...
-                csminwel('smm_objective',xparam,H0,[],ct,it,2,sample_moments,weighting_matrix,options);
+
+% Set up parallel mode if needed.
+if nargin>3
+    [junk,hostname] = unix('hostname --fqdn'); 
+    hostname = deblank(hostname);
+    % Save the workspace.
+    save('master_variables.mat','options_','M_','oo_');
+    % Send the workspace to each remote computer.
+    for i = 1:length(parallel)
+        if ~strcmpi(hostname,parallel(i).machine)
+            unix(['scp master_variables.mat ' , parallel(i).login , '@' , parallel(i).machine , ':' parallel(i).folder]);
+        end
+    end
+    for i=1:length(parallel)
+        % Write a bash script file to execute matlab scripts in the background
+        fid = fopen('call_matlab_session.sh','w');
+        fprintf(fid,'#!/bin/sh\n');
+        fprintf(fid,'unset DISPLAY\n');
+        fprintf(fid,['cd ' parallel(i).folder '\n']);
+        fprintf(fid,['nohup ' parallel(i).matlab '/matlab -nodesktop -nodisplay -nojvm < $1 > /dev/null 2>&1\n']);
+        fprintf(fid,'exit');
+        fclose(fid);
+        % Set the permission for this file (has to be executable)
+        %fileattrib('call_matlab_session.sh','+x','u');
+        unix(['chmod u+x call_matlab_session.sh']);
+        % Send the script file on each remote computer
+        if ~strcmpi(hostname,parallel(i).machine)
+            unix(['scp call_matlab_session.sh ' , parallel(i).login , '@' , parallel(i).machine , ':~/' ]);
+        end
+    end
+    % Send the files to each remote computer.
+    for i = 1:length(parallel)
+        if ~strcmpi(hostname,parallel(i).machine)
+            unix(['scp ' M_.fname '_steadystate.m ' , parallel(i).login , '@' , parallel(i).machine , ':' parallel(i).folder]);
+            unix(['scp ' M_.fname '_moments.m ' , parallel(i).login , '@' , parallel(i).machine , ':' parallel(i).folder]);
+            unix(['scp ' M_.fname '_static.m ' , parallel(i).login , '@' , parallel(i).machine , ':' parallel(i).folder]);
+            if exist([M_.fname '_dynamic.c'])
+                use_dll_flag = 1;
+                unix(['scp ' M_.fname '_dynamic.c ' , parallel(i).login , '@' , parallel(i).machine , ':' parallel(i).folder]);
+            else
+                use_dll_flag = 0;
+                unix(['scp ' M_.fname '_dynamic.m ' , parallel(i).login , '@' , parallel(i).machine , ':' parallel(i).folder]);
+            end
+        end
+    end
+    % If needed, compile dynamic model mex file on each remote computer
+    if use_dll_flag
+        % Write a matlab script that will trigger the compilation of the mex file.
+        fid = fopen('compile_model.m', 'w');
+        fprintf(fid,[' eval(''mex -O LDFLAGS=''''-pthread -shared -Wl,--no-undefined'''' ' M_.fname '_dynamic.c'')  ']);
+        fprintf(fid, '\n exit');
+        fclose(fid);
+        for i = 1:length(parallel)
+            if ~strcmpi(hostname,parallel(i).machine)
+                % Send the generated matlab script to the remote computer.
+                unix(['scp compile_model.m ' , parallel(i).login , '@' , parallel(i).machine , ':' parallel(i).folder]);
+                % Compile the mex file on the remote computer.
+                unix(['ssh ' parallel(i).login , '@' , parallel(i).machine ' ./call_matlab_session.sh  compile_model.m']);
+            end
+        end
+    end
+    % Write the matlab script files for the evaluation of the simulated moment conditions
+    job = 0;
+    for i=1:length(parallel)
+        for j=1:parallel(i).number_of_jobs
+            job = job+1;
+            % Create random number streams
+            write_job(hostname, parallel(i).machine, parallel(i).dynare, ...
+                      options.simulated_sample_size, length(sample_moments), ...
+                      dataset.observed_variables_idx, options.burn_in_periods, [M_.fname '_moments'], parallel(i).number_of_simulations, ...
+                      job, j);
+            if ~strcmpi(hostname,parallel(i).machine)
+                unix(['scp ' , 'job' , int2str(job) , '.m ' , parallel(i).login , '@' , parallel(i).machine , ':' parallel(i).folder ]);
+            end
+        end
+    end
+end
+
+if exist('intermediary_results_from_master_and_slaves','dir')
+    rmdir('intermediary_results_from_master_and_slaves','s');
+else
+    mkdir('intermediary_results_from_master_and_slaves');
+end
+
+
+% Minimization of the objective function.
+if nargin==3
+    [fval,param,grad,hessian_csminwel,itct,fcount,retcodehat] = ...
+        csminwel('smm_objective',xparam,H0,[],ct,it,2,sample_moments,weighting_matrix,options);
+
+elseif nargin>3
+    [fval,param,grad,hessian_csminwel,itct,fcount,retcodehat] = ...
+        csminwel('smm_objective',xparam,H0,[],ct,it,2,sample_moments,weighting_matrix,options,parallel);
+end
+    
+
+
+
+function write_job(hostname, remotename, dynare_path, sample_size, number_of_moments, observed_variables_idx, burn_in_periods, moments_file_name, number_of_simulations, slave_number, job_number)
+ 
+fid = fopen(['job' int2str(slave_number) '.m'],'w');
+
+fprintf(fid,['% Generated by ' hostname '.\n\n']);
+
+if ( strcmpi(hostname,remotename) && (job_number>1) )  || ~strcmpi(hostname,remotename) 
+    fprintf(fid,'load(master_variables);\n');
+    fprintf(fid,'assignin(''base'',''M_'',M_);\n');
+    fprintf(fid,'assignin(''base'',''oo_'',oo_);\n');
+    fprintf(fid,'assignin(''base'',''options_'',options_);\n\n');
+end
+
+fprintf(fid,['addpath ' dynare_path '\n\n']);
+
+fprintf(fid,['simulated_moments = zeros(' int2str(number_of_moments) ',1);\n\n']);
+
+fprintf(fid,['stream=RandStream(''mt19937ar'',''Seed'',' int2str(job) ');\n']);
+fprintf(fid,['RandStream.setDefaultStream(stream);\n\n']);
+
+fprintf(fid,'maxNumCompThreads(2)\n\n');
+
+fprintf(fid,['for s = 1:' int2str(number_of_simulations) '\n'] );
+fprintf(fid,['    time_series = extended_path([],' int2str(sample_size) ',1);\n']);
+fprintf(fid,['    data = time_series([' int2str(observed_variables_idx) '],' int2str(burn_in_periods) '+1:' int2str(sample_size) ');\n']);
+fprintf(fid,['    eval(''tmp = ' moments_file_name '(data);'');\n']);
+fprintf(fid,['    simulated_moments = simulated_moments + tmp;\n']);
+fprintf(fid,['end;\n\n']);
+
+fprintf(fid,['simulated_moments = simulated_moments/' int2str(number_of_simulations) ';\n']);
+fprintf(fid,['save(''simulated_moments_slave_' int2str(slave_number) '.mat'',''simulated_moments'');\n']);
+
+if ~strcmpi(hostname,remotename)
+    fprintf(fid,['unix(''scp simulated_moments_slave_' int2str(slave_number) '.mat ' hostname ':' pwd '/intermediary_results_from_master_and_slaves '');\n']);
+end
+
+if (job_number>1) && ~strcmpi(hostname,remotename)
+    fprintf(fid,'exit');
+end
+
+fclose(fid);
