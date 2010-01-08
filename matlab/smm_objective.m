@@ -76,7 +76,7 @@ else% parallel mode.
     job_master = [];
     for i=1:length(parallel)
         job_remote = 0;
-        for j=1:parallel(i)
+        for j=1:parallel(i).number_of_jobs
             job_remote = job_remote + 1; 
             job_number = job_number + 1;
             if strcmpi(hostname,remotename) && (job_number==1)
