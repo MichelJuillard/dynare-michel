@@ -11,7 +11,7 @@ function bvar_forecast(nlags)
 % SPECIAL REQUIREMENTS
 %    none
 
-% Copyright (C) 2007-2008 Dynare Team
+% Copyright (C) 2007-2008, 2010 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -142,7 +142,7 @@ if ~isempty(forecast_data.realized_val)
         sq_err_cumul = sq_err_cumul + (y - forecast_data.realized_val(t, :)) .^ 2;
     end
     
-    rmse = sqrt(sq_err_cumul / size(sq_err_cumul, 1));
+    rmse = sqrt(sq_err_cumul / size(forecast_data.realized_val, 1));
     
     fprintf('RMSE of BVAR(%d):\n', nlags);
     
