@@ -81,15 +81,15 @@ else% parallel mode.
             job_remote = job_remote + 1; 
             job_number = job_number + 1;
             if strcmpi(hostname,parallel(i).machine) && (job_number==1)
-                master_job = [ job_number , i , job_remote ];
+                job_master = [ job_number , i , job_remote ];
             else
                 unix(['ssh -A ' parallel(i).login '@' parallel(i).machine './call_matlab_session.sh job' int2str(job_number) '&']);    
             end
         end
     end
-    if ~isempty(master_job)
+    if ~isempty(job_master)
         tStartMasterJob = clock;
-        eval(['job' int2str(master_job(1)) ';'])
+        eval(['job' int2str(job_master(1)) ';'])
         tElapsedMasterJob= etime(clock, tStartMasterJob);
     end
     tStart = clock;
