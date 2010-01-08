@@ -82,7 +82,7 @@ else% parallel mode.
             if strcmpi(hostname,remotename) && (job_number==1)
                 master_job = [ job_number , i , job_remote ];
             else
-                unix(['ssh ' parallel(i).login '@' parallel(i).machine './call_matlab_session.sh job' int2str(job_number) '&']);    
+                unix(['ssh -A ' parallel(i).login '@' parallel(i).machine './call_matlab_session.sh job' int2str(job_number) '&']);    
             end
         end
     end
