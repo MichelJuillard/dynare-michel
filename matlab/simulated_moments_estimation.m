@@ -169,7 +169,7 @@ fprintf(fid,['addpath ' dynare_path '\n\n']);
 
 fprintf(fid,['simulated_moments = zeros(' int2str(number_of_moments) ',1);\n\n']);
 
-fprintf(fid,['stream=RandStream(''mt19937ar'',''Seed'',' int2str(job) ');\n']);
+fprintf(fid,['stream=RandStream(''mt19937ar'',''Seed'',' int2str(slave_number) ');\n']);
 fprintf(fid,['RandStream.setDefaultStream(stream);\n\n']);
 
 fprintf(fid,'maxNumCompThreads(2)\n\n');
