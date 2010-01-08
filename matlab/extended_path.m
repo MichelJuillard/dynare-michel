@@ -18,7 +18,7 @@ function time_series = extended_path(initial_conditions,sample_size,init)
 %  
 % SPECIAL REQUIREMENTS
 
-% Copyright (C) 2009 Dynare Team
+% Copyright (C) 2009-2010 Dynare Team
 %
 % This file is part of Dynare.
 %

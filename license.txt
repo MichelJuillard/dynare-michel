@@ -11,7 +11,7 @@ Maintainer: Dynare Team, whose members in 2009 where:
 Source: http://www.dynare.org
 
 Files: *
-Copyright: 1996-2009, Dynare Team
+Copyright: 1996-2010, Dynare Team
 License: GPL-3+
  Dynare is free software: you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
