@@ -38,17 +38,17 @@ function [LIK,lik] = monte_carlo_SIS_particle_filter(reduced_form_model,Y,start,
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-global M_ bayestopt_
+global M_ bayestopt_ oo_
 persistent init_flag
 persistent restrict_variables_idx observed_variables_idx state_variables_idx mf0 mf1
 persistent sample_size number_of_state_variables number_of_observed_variables number_of_structural_innovations
 
 % Set defaults.
 if (nargin<4) || (nargin==4 && isempty(number_of_particles))
-  number_of_particles = 10 ;
+    number_of_particles = 10 ;
 end
 if nargin==2 || isempty(start)
-  start = 1; 
+   start = 1; 
 end
 
 dr = reduced_form_model.state.dr;% Decision rules and transition equations.
@@ -84,9 +84,6 @@ StateVectorVariance = lyapunov_symm(ghx(mf0,:),ghu(mf0,:)*Q*ghu(mf0,:)',1e-12,1e
 StateVectorVarianceSquareRoot = reduced_rank_cholesky(StateVectorVariance)';
 state_variance_rank = size(StateVectorVarianceSquareRoot,2);
 
-%state_idx = 1:state_variance_rank;
-%innovation_idx = 1+state_variance_rank:state_variance_rank+number_of_structural_innovations;
-
 Q_lower_triangular_cholesky = chol(Q)';
 
 % Set seed for randn().
@@ -117,7 +114,6 @@ for t=1:sample_size
         % stockage des particules et des erreurs de prévisions
         PredictedState(i,:) = tmp(mf0)' ;
         PredictionError(i,:) = (Y(:,t) - tmp(mf1))' ; 
-        % calcul des moyennes et des matrices de variances covariances 
         %PredictedStateMean_old = PredictedStateMean;
         PredictedObservedMean_old = PredictedObservedMean;
         %PredictedStateMean = PredictedStateMean + (tmp(mf0)-PredictedStateMean)/i;

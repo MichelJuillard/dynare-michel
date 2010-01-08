@@ -104,21 +104,15 @@ for t=1:sample_size
         yhat = StateVector-state_variables_steady_state;
         epsilon = Q_lower_triangular_cholesky*randn(number_of_structural_innovations,1);
         tmp = local_state_space_iteration_2(yhat,epsilon,ghx,ghu,constant,half_ghxx,half_ghuu,ghxu);
-        PredictedStateMean_old = PredictedStateMean;
-        PredictedObservedMean_old = PredictedObservedMean;
-        PredictedStateMean = PredictedStateMean + (tmp(mf0)-PredictedStateMean)/i;
-        PredictedObservedMean = PredictedObservedMean + (tmp(mf1)-PredictedObservedMean)/i;
-        psm = PredictedStateMean*PredictedStateMean';
-        pom = PredictedObservedMean*PredictedObservedMean';
-        pcm = PredictedStateMean*PredictedObservedMean';
-        PredictedStateVariance = PredictedStateVariance ...
-            + ( (tmp(mf0)*tmp(mf0)'-psm-PredictedStateVariance)+(i-1)*(PredictedStateMean_old*PredictedStateMean_old'-psm) )/i;
-        PredictedObservedVariance = PredictedObservedVariance ...
-            + ( (tmp(mf1)*tmp(mf1)'-pom-PredictedObservedVariance)+(i-1)*(PredictedObservedMean_old*PredictedObservedMean_old'-pom) )/i;
-        PredictedStateAndObservedCovariance = PredictedStateAndObservedCovariance ...
-            + ( (tmp(mf0)*tmp(mf1)'-pcm-PredictedStateAndObservedCovariance)+(i-1)*(PredictedStateMean_old*PredictedObservedMean_old'-pcm) )/i;
+        PredictedStateMean = PredictedStateMean + (tmp(mf0))/number_of_particles ;
+        PredictedObservedMean = PredictedObservedMean + (tmp(mf1))/number_of_particles;
+        PredictedStateVariance = PredictedStateVariance + (tmp(mf0)*tmp(mf0)')/(number_of_particles) ;
+        PredictedObservedVariance = PredictedObservedVariance + (tmp(mf1)*tmp(mf1)')/(number_of_particles);
+        PredictedStateAndObservedCovariance = PredictedStateAndObservedCovariance + (tmp(mf0)*tmp(mf1)')/(number_of_particles) ;
     end
-    PredictedObservedVariance = PredictedObservedVariance + H;
+    PredictedObservedVariance = PredictedObservedVariance + H - PredictedObservedMean*(PredictedObservedMean');
+    PredictedStateVariance = PredictedStateVariance - PredictedStateMean*(PredictedStateMean') ;
+    PredictedStateAndObservedCovariance = PredictedStateAndObservedCovariance - PredictedStateMean*(PredictedObservedMean');
     iPredictedObservedVariance = inv(PredictedObservedVariance);
     prediction_error = Y(:,t) - PredictedObservedMean;
     filter_gain = PredictedStateAndObservedCovariance*iPredictedObservedVariance;

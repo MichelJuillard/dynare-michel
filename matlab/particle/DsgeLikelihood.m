@@ -253,10 +253,12 @@ function [fval,cost_flag,ys,trend_coeff,info] = DsgeLikelihood(xparam1,gend,data
   rfm.state.dr = oo_.dr;
   rfm.state.Q  = Q;
   rfm.measurement.H = H;
-  number_of_particles = 10;
+  number_of_particles = 100;
   
   LIK = monte_carlo_gaussian_particle_filter(rfm,Y,[],number_of_particles);
-  
+  %LIK = monte_carlo_gaussian_particle_filter2(rfm,Y,[],number_of_particles);
+  %LIK = monte_carlo_SIS_particle_filter(rfm,Y,[],number_of_particles);
+  %LIK = monte_carlo_SIS_particle_filter2(rfm,Y,[],number_of_particles);
 
   % ------------------------------------------------------------------------------
   % Adds prior if necessary
