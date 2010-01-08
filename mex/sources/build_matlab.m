@@ -1,6 +1,6 @@
 % Build file for Dynare MEX Librairies under Matlab
 
-% Copyright (C) 2007-2009 Dynare Team
+% Copyright (C) 2007-2010 Dynare Team
 %
 % This file is part of Dynare.
 %
