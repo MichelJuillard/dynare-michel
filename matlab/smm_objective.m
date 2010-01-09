@@ -73,24 +73,27 @@ if nargin<5
     end
 else% parallel mode.
     [junk,hostname] = unix('hostname --fqdn');
+    hostname = deblank(hostname);
     job_number = 0;
-    job_master = [];
+    job_master = 0;
     for i=1:length(parallel)
         job_remote = 0;
         for j=1:parallel(i).number_of_jobs
             job_remote = job_remote + 1; 
             job_number = job_number + 1;
-            if strcmpi(hostname,parallel(i).machine) && (job_number==1)
-                job_master = [ job_number , i , job_remote ];
+            if strcmpi(hostname,parallel(i).machine) && (job_remote==1)
+                job_master = job_number;
             else
-                unix(['ssh -A ' parallel(i).login '@' parallel(i).machine './call_matlab_session.sh job' int2str(job_number) '&']);    
+                unix(['ssh -A ' parallel(i).login '@' parallel(i).machine ' ./call_matlab_session.sh job' int2str(job_number) '.m &']);    
             end
         end
     end
-    if ~isempty(job_master)
+    if job_master
         tStartMasterJob = clock;
         eval(['job' int2str(job_master(1)) ';'])
-        tElapsedMasterJob= etime(clock, tStartMasterJob);
+        tElapsedMasterJob = etime(clock, tStartMasterJob);
+    else
+        tElapsedMasterJob = 30*100;
     end
     tStart = clock;
     missing_jobs = 1;
