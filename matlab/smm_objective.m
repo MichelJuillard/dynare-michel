@@ -72,7 +72,7 @@ if nargin<5
         simulated_moments = simulated_moments / options.number_of_simulated_sample;
     end
 else% parallel mode.
-    [junk,hostname] = unix('hostname --fqdn');
+    [Junk,hostname] = unix('hostname --fqdn');
     hostname = deblank(hostname);
     job_number = 0;
     job_master = 0;
@@ -97,21 +97,19 @@ else% parallel mode.
     end
     tStart = clock;
     missing_jobs = 1;
-    success_flag = 1;
     while missing_jobs
         tElapsed = etime(clock, tStart);
-        if tElapsed>tElapsedMasterJob
+        if tElapsed>tElapsedMasterJob;
             break
         end
         if ( length(dir('./intermediary_results_from_master_and_slaves/simulated_moments_slave_*.mat'))==job_number )
             missing_jobs = 0;
-            success_flag = 0;
         end
-    end
-    if success_flag
+    end    
+    if ~missing_jobs
         tmp = 0;
         for i=1:job_number
-            load(['simulated_moments_slave_' int2str(i)]);
+            load(['./intermediary_results_from_master_and_slaves/simulated_moments_slave_' int2str(i) '.mat'],'-mat');
             tmp = tmp + simulated_moments;
         end
         simulated_moments = tmp/job_number;

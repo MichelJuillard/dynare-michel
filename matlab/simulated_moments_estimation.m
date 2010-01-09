@@ -49,11 +49,6 @@ weighting_matrix = inv(weighting_matrix);
 sigma = [];
 param = [];
 
-% Set options for csminwel. 
-H0 = 1e-4*eye(options.estimated_parameters.nb);
-ct = 1e-4;
-it = 1000;
-vb = 2;
 
 % Set up parallel mode if needed.
 if nargin>3
@@ -129,7 +124,7 @@ if nargin>3
             write_job(hostname, parallel(i).machine, parallel(i).dynare, ...
                       options.simulated_sample_size, length(sample_moments), ...
                       dataset.observed_variables_idx, options.burn_in_periods, [M_.fname '_moments'], parallel(i).number_of_simulations, ...
-                      job, j);
+                      parallel(i).number_of_threads_per_job, job, j);
             if ~strcmpi(hostname,parallel(i).machine)
                 unix(['scp ' , 'job' , int2str(job) , '.m ' , parallel(i).login , '@' , parallel(i).machine , ':' parallel(i).folder ]);
             end
@@ -143,6 +138,12 @@ end
 unix('mkdir intermediary_results_from_master_and_slaves');
 unix('chmod -R u+x intermediary_results_from_master_and_slaves');
 
+
+% Set options for csminwel. 
+H0 = 1e-4*eye(options.estimated_parameters.nb);
+ct = 1e-4;
+it = 1000;
+vb = 2;
 
 
 % Minimization of the objective function.
@@ -158,7 +159,7 @@ end
 
 
 
-function write_job(hostname, remotename, dynare_path, sample_size, number_of_moments, observed_variables_idx, burn_in_periods, moments_file_name, number_of_simulations, slave_number, job_number)
+function write_job(hostname, remotename, dynare_path, sample_size, number_of_moments, observed_variables_idx, burn_in_periods, moments_file_name, number_of_simulations,threads_per_job, slave_number, job_number)
  
 fid = fopen(['job' int2str(slave_number) '.m'],'w');
 
@@ -181,7 +182,7 @@ fprintf(fid,['simulated_moments = zeros(' int2str(number_of_moments) ',1);\n\n']
 fprintf(fid,['stream=RandStream(''mt19937ar'',''Seed'',' int2str(slave_number) ');\n']);
 fprintf(fid,['RandStream.setDefaultStream(stream);\n\n']);
 
-fprintf(fid,'maxNumCompThreads(2);\n\n');
+fprintf(fid,['maxNumCompThreads(' int2str(threads_per_job) ');\n\n']);
 
 fprintf(fid,['for s = 1:' int2str(number_of_simulations) '\n'] );
 fprintf(fid,['    time_series = extended_path([],' int2str(sample_size) ',1);\n']);
@@ -195,11 +196,13 @@ fprintf(fid,['save(''simulated_moments_slave_' int2str(slave_number) '.mat'',''s
 
 if ~strcmpi(hostname,remotename)
     fprintf(fid,['unix(''scp simulated_moments_slave_' int2str(slave_number) '.mat ' hostname ':' pwd '/intermediary_results_from_master_and_slaves '');\n']);
+    fprintf(fid,['unix(''rm simulated_moments_slave_' int2str(slave_number) '.mat'');\n']);
 else
     fprintf(fid,['unix(''cp simulated_moments_slave_' int2str(slave_number) '.mat '  'intermediary_results_from_master_and_slaves '');\n']);
+    fprintf(fid,['unix(''rm simulated_moments_slave_' int2str(slave_number) '.mat'');\n']);
 end
 
-if (job_number>1) && ~strcmpi(hostname,remotename)
+if ((job_number>1) && strcmpi(hostname,remotename)) || ~strcmpi(hostname,remotename) 
     fprintf(fid,'exit');
 end
 

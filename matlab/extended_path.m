@@ -81,7 +81,7 @@ tdx = M_.maximum_lag+1;
 norme = 0;
 
 % Set verbose option
-verbose = 1;
+verbose = 0;
 
 for t=1:sample_size
     shocks = exp(randn(1,number_of_structural_innovations)*covariance_matrix_upper_cholesky-.5*variances(positive_var_indx)');
@@ -131,7 +131,7 @@ end
 function info = homotopic_steps(tdx,positive_var_indx,shocks,init_weight,step,init)
 global oo_
 weight   = init_weight;
-verbose  = 1;
+verbose  = 0;
 iter     = 0;
 time     = 0;
 reduce_step = 0;
