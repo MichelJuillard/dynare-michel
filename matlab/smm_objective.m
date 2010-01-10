@@ -1,4 +1,4 @@
-function [r,junk] = smm_objective(xparams,sample_moments,weighting_matrix,options,parallel)
+function [r,flag] = smm_objective(xparams,sample_moments,weighting_matrix,options,parallel)
 % Evaluates the objective of the Simulated Moments Method.
 %
 % INPUTS:
@@ -35,7 +35,9 @@ function [r,junk] = smm_objective(xparams,sample_moments,weighting_matrix,option
 global M_ options_
 persistent mainStream mainState
 persistent priorObjectiveValue
-    
+
+flag = 1;
+
 if nargin<5
     if isempty(mainStream)
         mainStream = RandStream.getDefaultStream;
@@ -49,10 +51,6 @@ if isempty(priorObjectiveValue)
     priorObjectiveValue = Inf;
 end
 
-junk = [];
-
-xparams
-
 save('estimated_parameters.mat','xparams');
 
 % Check for local determinacy of the deterministic steady state.
@@ -60,10 +58,14 @@ noprint = options_.noprint; options_.noprint = 1;
 [local_determinacy_and_stability,info] = check; options_.noprint = noprint;
 if ~local_determinacy_and_stability
     r = priorObjectiveValue * (1+info(2));
+    flag = 0;
     return
 end
 
 simulated_moments = zeros(size(sample_moments));
+
+% Just to be sure that things don't mess up with persistent variables...
+clear perfect_foresight_simulation;
 
 if nargin<5
     for s = 1:options.number_of_simulated_sample
@@ -128,6 +130,7 @@ else% parallel mode.
         simulated_moments = tmp/job_number;
     else
         r = priorObjectiveValue*1.1;
+        flag = 0;
         return
     end
 end
