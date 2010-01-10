@@ -1,4 +1,4 @@
-function [g, badg, f0, f1, f2, f3, f4] = numgrad5(fcn,x,varargin)
+function [g, badg, f0, f1, f2, f3, f4] = numgrad5(fcn,f0,x,varargin)
 % Computes the gradient of the objective function fcn using a five points
 % formula if possible.
 %
@@ -13,7 +13,7 @@ function [g, badg, f0, f1, f2, f3, f4] = numgrad5(fcn,x,varargin)
 % http://sims.princeton.edu/yftp/optimize/mfiles/numgrad.m
 
 % Copyright (C) 1993-2007 Christopher Sims
-% Copyright (C) 2008 Dynare Team
+% Copyright (C) 2008, 2010 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -30,7 +30,6 @@ function [g, badg, f0, f1, f2, f3, f4] = numgrad5(fcn,x,varargin)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-f0 = NaN;
 f1 = NaN;
 f2 = NaN;
 f3 = NaN;
@@ -40,8 +39,6 @@ delta = 1e-6;
 n=length(x);
 tvec=delta*eye(n);
 g=zeros(n,1);
-
-[f0,cost_flag] = feval(fcn, x, varargin{:});
 
 badg=0;
 goog=1;

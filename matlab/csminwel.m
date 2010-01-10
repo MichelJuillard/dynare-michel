@@ -23,7 +23,7 @@ function [fh,xh,gh,H,itct,fcount,retcodeh] = csminwel(fcn,x0,H0,grad,crit,nit,me
 % http://sims.princeton.edu/yftp/optimize/mfiles/csminwel.m
 
 % Copyright (C) 1993-2007 Christopher Sims
-% Copyright (C) 2006-2008 Dynare Team
+% Copyright (C) 2006-2008, 2010 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -63,6 +63,7 @@ snit=100;
 %end
 
 [f0,cost_flag] = feval(fcn,x0,varargin{:});
+
 if ~cost_flag
     disp('Bad initial parameter.') 
     return 
@@ -71,11 +72,13 @@ end
 if NumGrad
     switch method
       case 2
-        [g,badg] = numgrad(fcn,x0, varargin{:});
+        [g,badg] = numgrad(fcn, f0, x0, varargin{:});
+        badg
+        g
       case 3
-        [g,badg] = numgrad3(fcn,x0, varargin{:});
+        [g,badg] = numgrad3(fcn, f0, x0, varargin{:});
       case 5
-        [g,badg] = numgrad5(fcn,x0, varargin{:});    
+        [g,badg] = numgrad5(fcn, f0, x0, varargin{:});    
     end
 else
     [g,badg] = feval(grad,x0,varargin{:});
@@ -118,11 +121,11 @@ while ~done
             if NumGrad
                 switch method 
                   case 2
-                    [g1 badg1] = numgrad(fcn, x1,varargin{:});
+                    [g1 badg1] = numgrad(fcn, f1, x1, varargin{:});
                   case 3
-                    [g1 badg1] = numgrad3(fcn, x1,varargin{:});
+                    [g1 badg1] = numgrad3(fcn, f1, x1, varargin{:});
                   case 5
-                    [g1,badg1] = numgrad5(fcn,x0, varargin{:});             
+                    [g1,badg1] = numgrad5(fcn, f1, x1, varargin{:});             
                 end
             else
                 [g1 badg1] = feval(grad,x1,varargin{:});
@@ -152,11 +155,11 @@ while ~done
                     if NumGrad
                         switch method
                           case 2
-                            [g2 badg2] = numgrad(fcn, x2,varargin{:});
+                            [g2 badg2] = numgrad(fcn, f2, x2, varargin{:});
                           case 3
-                            [g2 badg2] = numgrad3(fcn, x2,varargin{:});
+                            [g2 badg2] = numgrad3(fcn, f2, x2, varargin{:});
                           case 5
-                            [g2,badg2] = numgrad5(fcn,x0, varargin{:});                   
+                            [g2,badg2] = numgrad5(fcn, f2, x2, varargin{:});                   
                         end
                     else
                         [g2 badg2] = feval(grad,x2,varargin{:});
@@ -187,11 +190,11 @@ while ~done
                             if NumGrad
                                 switch method
                                   case 2
-                                    [g3 badg3] = numgrad(fcn, x3,varargin{:});
+                                    [g3 badg3] = numgrad(fcn, f3, x3, varargin{:});
                                   case 3
-                                    [g3 badg3] = numgrad3(fcn, x3,varargin{:});
+                                    [g3 badg3] = numgrad3(fcn, f3, x3, varargin{:});
                                   case 5
-                                    [g3,badg3] = numgrad5(fcn,x0, varargin{:});                         
+                                    [g3,badg3] = numgrad5(fcn, f3, x3, varargin{:});                         
                                 end
                             else
                                 [g3 badg3] = feval(grad,x3,varargin{:});
@@ -251,11 +254,11 @@ while ~done
             if NumGrad
                 switch method
                   case 2
-                    [gh,badgh] = numgrad(fcn,xh,varargin{:});
+                    [gh,badgh] = numgrad(fcn, fh, xh, varargin{:});
                   case 3
-                    [gh,badgh] = numgrad3(fcn,xh,varargin{:});
+                    [gh,badgh] = numgrad3(fcn, fh, xh, varargin{:});
                   case 5
-                    [gh,badgh] = numgrad5(fcn,xh,varargin{:});
+                    [gh,badgh] = numgrad5(fcn, fh, xh, varargin{:});
                 end
             else
                 [gh badgh] = feval(grad, xh,varargin{:});
