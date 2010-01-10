@@ -31,7 +31,7 @@
 f1 = NaN;
 f2 = NaN;
 
-delta = 1e-6;
+delta = epsilon;
 n=length(x);
 tvec=delta*eye(n);
 g=zeros(n,1);

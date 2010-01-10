@@ -24,7 +24,7 @@ function [g, badg] = numgrad(fcn,f0,x,epsilon,varargin)
 
 fh = NaN;
 
-delta = 1e-6;
+delta = epsilon;
 n=length(x);
 tvec=delta*eye(n);
 g=zeros(n,1);
