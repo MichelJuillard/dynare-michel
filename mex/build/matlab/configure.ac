@@ -22,6 +22,9 @@ AC_INIT([dynare], [4.1-unstable])
 AC_CONFIG_SRCDIR([configure.ac])
 AM_INIT_AUTOMAKE([-Wall -Werror foreign])
 
+dnl The following must occur before we modify CFLAGS/CXXFLAGS
+AC_CANONICAL_HOST
+
 AX_MATLAB
 
 if test "x$ax_enable_matlab" = "xyes"; then
@@ -37,7 +40,6 @@ if test "x$ax_enable_matlab" = "xyes"; then
   CXXFLAGS="$MATLAB_CXXFLAGS"
 fi
 
-AC_CANONICAL_HOST
 case ${host_os} in
   *cygwin*)
     # MATLAB can't use native Cygwin DLL, so using MinGW 3 shipped with Cygwin
