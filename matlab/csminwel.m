@@ -73,8 +73,6 @@ if NumGrad
     switch method
       case 2
         [g,badg] = numgrad(fcn, f0, x0, epsilon, varargin{:});
-        badg
-        g
       case 3
         [g,badg] = numgrad3(fcn, f0, x0, epsilon, varargin{:});
       case 5
