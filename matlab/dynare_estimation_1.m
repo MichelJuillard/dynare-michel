@@ -12,7 +12,7 @@ function dynare_estimation_1(var_list_,dname)
 % SPECIAL REQUIREMENTS
 %   none
 
-% Copyright (C) 2003-2009 Dynare Team
+% Copyright (C) 2003-2009, 2010 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -400,12 +400,12 @@ if options_.mode_compute > 0 & options_.posterior_mode_estimation
         verbose = 2;
         if ~options_.bvar_dsge
             [fval,xparam1,grad,hessian_csminwel,itct,fcount,retcodehat] = ...
-                csminwel('DsgeLikelihood',xparam1,H0,[],crit,nit,options_.gradient_method,gend,data,data_index,number_of_observations,no_more_missing_observations);
+                csminwel('DsgeLikelihood',xparam1,H0,[],crit,nit,options_.gradient_method,options_.gradient_epsilon,gend,data,data_index,number_of_observations,no_more_missing_observations);
             disp(sprintf('Objective function at mode: %f',fval))
             disp(sprintf('Objective function at mode: %f',DsgeLikelihood(xparam1,gend,data,data_index,number_of_observations,no_more_missing_observations)))
         else
             [fval,xparam1,grad,hessian_csminwel,itct,fcount,retcodehat] = ...
-                csminwel('DsgeVarLikelihood',xparam1,H0,[],crit,nit,options_.gradient_method,gend);
+                csminwel('DsgeVarLikelihood',xparam1,H0,[],crit,nit,options_.gradient_method,options_.gradient_epsilon,gend);
             disp(sprintf('Objective function at mode: %f',fval))
             disp(sprintf('Objective function at mode: %f',DsgeVarLikelihood(xparam1,gend)))
         end

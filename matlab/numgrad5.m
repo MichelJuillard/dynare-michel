@@ -1,4 +1,4 @@
-function [g, badg, f0, f1, f2, f3, f4] = numgrad5(fcn,f0,x,varargin)
+function [g, badg, f0, f1, f2, f3, f4] = numgrad5(fcn,f0,x,epsilon,varargin)
 % Computes the gradient of the objective function fcn using a five points
 % formula if possible.
 %

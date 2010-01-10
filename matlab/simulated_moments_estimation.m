@@ -149,11 +149,11 @@ vb = 2;
 % Minimization of the objective function.
 if nargin==3
     [fval,param,grad,hessian_csminwel,itct,fcount,retcodehat] = ...
-        csminwel('smm_objective',xparam,H0,[],ct,it,2,sample_moments,weighting_matrix,options);
+        csminwel('smm_objective',xparam,H0,[],ct,it,2,options_.gradient_epsilon,sample_moments,weighting_matrix,options);
 
 elseif nargin>3
     [fval,param,grad,hessian_csminwel,itct,fcount,retcodehat] = ...
-        csminwel('smm_objective',xparam,H0,[],ct,it,2,sample_moments,weighting_matrix,options,parallel);
+        csminwel('smm_objective',xparam,H0,[],ct,it,2,options_.gradient_epsilon,sample_moments,weighting_matrix,options,parallel);
 end
     
 

@@ -1,6 +1,6 @@
 function osr1(i_params,i_var,weights)
 
-% Copyright (C) 2005-2009 Dynare Team
+% Copyright (C) 2005-2009, 2010 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -95,7 +95,7 @@ crit = 1e-7;
 nit = 1000;
 verbose = 2;
 
-[f,p]=csminwel('osr_obj',t0,H0,[],crit,nit,options_.gradient_method,i_params,...
+[f,p]=csminwel('osr_obj',t0,H0,[],crit,nit,options_.gradient_method,options_.gradient_epsilon,i_params,...
                inv_order_var(i_var),weights(i_var,i_var));
 
 %  options = optimset('fminunc');

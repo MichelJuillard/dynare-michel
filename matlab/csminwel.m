@@ -1,4 +1,4 @@
-function [fh,xh,gh,H,itct,fcount,retcodeh] = csminwel(fcn,x0,H0,grad,crit,nit,method,varargin)
+function [fh,xh,gh,H,itct,fcount,retcodeh] = csminwel(fcn,x0,H0,grad,crit,nit,method,epsilon,varargin)
 %[fhat,xhat,ghat,Hhat,itct,fcount,retcodehat] = csminwel(fcn,x0,H0,grad,crit,nit,method,varargin)
 % fcn:   string naming the objective function to be minimized
 % x0:    initial value of the parameter vector
@@ -72,13 +72,13 @@ end
 if NumGrad
     switch method
       case 2
-        [g,badg] = numgrad(fcn, f0, x0, varargin{:});
+        [g,badg] = numgrad(fcn, f0, x0, epsilon, varargin{:});
         badg
         g
       case 3
-        [g,badg] = numgrad3(fcn, f0, x0, varargin{:});
+        [g,badg] = numgrad3(fcn, f0, x0, epsilon, varargin{:});
       case 5
-        [g,badg] = numgrad5(fcn, f0, x0, varargin{:});    
+        [g,badg] = numgrad5(fcn, f0, x0, epsilon, varargin{:});    
     end
 else
     [g,badg] = feval(grad,x0,varargin{:});
@@ -121,11 +121,11 @@ while ~done
             if NumGrad
                 switch method 
                   case 2
-                    [g1 badg1] = numgrad(fcn, f1, x1, varargin{:});
+                    [g1 badg1] = numgrad(fcn, f1, x1, epsilon, varargin{:});
                   case 3
-                    [g1 badg1] = numgrad3(fcn, f1, x1, varargin{:});
+                    [g1 badg1] = numgrad3(fcn, f1, x1, epsilon, varargin{:});
                   case 5
-                    [g1,badg1] = numgrad5(fcn, f1, x1, varargin{:});             
+                    [g1,badg1] = numgrad5(fcn, f1, x1, epsilon, varargin{:});             
                 end
             else
                 [g1 badg1] = feval(grad,x1,varargin{:});
@@ -155,11 +155,11 @@ while ~done
                     if NumGrad
                         switch method
                           case 2
-                            [g2 badg2] = numgrad(fcn, f2, x2, varargin{:});
+                            [g2 badg2] = numgrad(fcn, f2, x2, epsilon, varargin{:});
                           case 3
-                            [g2 badg2] = numgrad3(fcn, f2, x2, varargin{:});
+                            [g2 badg2] = numgrad3(fcn, f2, x2, epsilon, varargin{:});
                           case 5
-                            [g2,badg2] = numgrad5(fcn, f2, x2, varargin{:});                   
+                            [g2,badg2] = numgrad5(fcn, f2, x2, epsilon, varargin{:});                   
                         end
                     else
                         [g2 badg2] = feval(grad,x2,varargin{:});
@@ -190,11 +190,11 @@ while ~done
                             if NumGrad
                                 switch method
                                   case 2
-                                    [g3 badg3] = numgrad(fcn, f3, x3, varargin{:});
+                                    [g3 badg3] = numgrad(fcn, f3, x3, epsilon, varargin{:});
                                   case 3
-                                    [g3 badg3] = numgrad3(fcn, f3, x3, varargin{:});
+                                    [g3 badg3] = numgrad3(fcn, f3, x3, epsilon, varargin{:});
                                   case 5
-                                    [g3,badg3] = numgrad5(fcn, f3, x3, varargin{:});                         
+                                    [g3,badg3] = numgrad5(fcn, f3, x3, epsilon, varargin{:});                         
                                 end
                             else
                                 [g3 badg3] = feval(grad,x3,varargin{:});
@@ -254,11 +254,11 @@ while ~done
             if NumGrad
                 switch method
                   case 2
-                    [gh,badgh] = numgrad(fcn, fh, xh, varargin{:});
+                    [gh,badgh] = numgrad(fcn, fh, xh, epsilon, varargin{:});
                   case 3
-                    [gh,badgh] = numgrad3(fcn, fh, xh, varargin{:});
+                    [gh,badgh] = numgrad3(fcn, fh, xh, epsilon, varargin{:});
                   case 5
-                    [gh,badgh] = numgrad5(fcn, fh, xh, varargin{:});
+                    [gh,badgh] = numgrad5(fcn, fh, xh, epsilon, varargin{:});
                 end
             else
                 [gh badgh] = feval(grad, xh,varargin{:});

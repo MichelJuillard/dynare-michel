@@ -1,4 +1,4 @@
-function [g, badg] = numgrad(fcn,f0,x,varargin)
+function [g, badg] = numgrad(fcn,f0,x,epsilon,varargin)
 % function [g badg] = numgrad(fcn,xvarargin)
 
 % Original file downloaded from:

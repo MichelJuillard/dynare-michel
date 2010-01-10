@@ -182,6 +182,7 @@ options_.subdraws = [];
 options_.unit_root_vars = [];
 options_.use_mh_covariance_matrix = 0;
 options_.gradient_method = 2;
+options_.gradient_epsilon = 1e-6;
 options_.posterior_sampling_method = 'random_walk_metropolis_hastings';
 options_.proposal_distribution = 'rand_multivariate_normal';
 options_.student_degrees_of_freedom = 3;
