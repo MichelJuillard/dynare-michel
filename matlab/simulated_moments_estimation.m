@@ -123,7 +123,7 @@ if nargin>3
             % Create random number streams
             write_job(hostname, parallel(i).machine, parallel(i).dynare, ...
                       options.simulated_sample_size, length(sample_moments), ...
-                      dataset.observed_variables_idx, options.burn_in_periods, [M_.fname '_moments'], parallel(i).number_of_simulations, ...
+                      dataset.observed_variables_idx, options.estimated_parameters.idx, options.burn_in_periods, [M_.fname '_moments'], parallel(i).number_of_simulations, ...
                       parallel(i).number_of_threads_per_job, job, j);
             if ~strcmpi(hostname,parallel(i).machine)
                 unix(['scp ' , 'job' , int2str(job) , '.m ' , parallel(i).login , '@' , parallel(i).machine , ':' parallel(i).folder ]);
@@ -159,7 +159,7 @@ end
 
 
 
-function write_job(hostname, remotename, dynare_path, sample_size, number_of_moments, observed_variables_idx, burn_in_periods, moments_file_name, number_of_simulations,threads_per_job, slave_number, job_number)
+function write_job(hostname, remotename, dynare_path, sample_size, number_of_moments, observed_variables_idx, parameters_idx, burn_in_periods, moments_file_name, number_of_simulations,threads_per_job, slave_number, job_number)
  
 fid = fopen(['job' int2str(slave_number) '.m'],'w');
 
@@ -179,6 +179,9 @@ end
 
 fprintf(fid,['simulated_moments = zeros(' int2str(number_of_moments) ',1);\n\n']);
 
+fprintf(fid,'load(''estimated_parameters.mat'');\n');
+fprintf(fid,['M_.params([' num2str(parameters_idx)  ']) = xparams;\n\n']);
+
 fprintf(fid,['stream=RandStream(''mt19937ar'',''Seed'',' int2str(slave_number) ');\n']);
 fprintf(fid,['RandStream.setDefaultStream(stream);\n\n']);
 
@@ -192,14 +195,14 @@ fprintf(fid,['    simulated_moments = simulated_moments + tmp;\n']);
 fprintf(fid,['end;\n\n']);
 
 fprintf(fid,['simulated_moments = simulated_moments/' int2str(number_of_simulations) ';\n']);
-fprintf(fid,['save(''simulated_moments_slave_' int2str(slave_number) '.mat'',''simulated_moments'');\n']);
+fprintf(fid,['save(''simulated_moments_slave_' int2str(slave_number) '.dat'',''simulated_moments'',''-ascii'');\n']);
 
 if ~strcmpi(hostname,remotename)
-    fprintf(fid,['unix(''scp simulated_moments_slave_' int2str(slave_number) '.mat ' hostname ':' pwd '/intermediary_results_from_master_and_slaves '');\n']);
-    fprintf(fid,['unix(''rm simulated_moments_slave_' int2str(slave_number) '.mat'');\n']);
+    fprintf(fid,['unix(''scp simulated_moments_slave_' int2str(slave_number) '.dat ' hostname ':' pwd '/intermediary_results_from_master_and_slaves '');\n']);
+    fprintf(fid,['unix(''rm simulated_moments_slave_' int2str(slave_number) '.dat'');\n']);
 else
-    fprintf(fid,['unix(''cp simulated_moments_slave_' int2str(slave_number) '.mat '  'intermediary_results_from_master_and_slaves '');\n']);
-    fprintf(fid,['unix(''rm simulated_moments_slave_' int2str(slave_number) '.mat'');\n']);
+    fprintf(fid,['unix(''cp simulated_moments_slave_' int2str(slave_number) '.dat '  'intermediary_results_from_master_and_slaves '');\n']);
+    fprintf(fid,['unix(''rm simulated_moments_slave_' int2str(slave_number) '.dat'');\n']);
 end
 
 if ((job_number>1) && strcmpi(hostname,remotename)) || ~strcmpi(hostname,remotename) 

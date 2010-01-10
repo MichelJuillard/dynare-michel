@@ -51,7 +51,9 @@ end
 
 junk = [];
 
-M_.params(options.estimated_parameters.idx) = xparams;
+xparams
+
+save('estimated_parameters.mat','xparams');
 
 % Check for local determinacy of the deterministic steady state.
 noprint = options_.noprint; options_.noprint = 1;
@@ -84,6 +86,17 @@ else% parallel mode.
             if strcmpi(hostname,parallel(i).machine) && (job_remote==1)
                 job_master = job_number;
             else
+                % Send the new values of the estimated parameters to the slave.
+                if j==1 && ~strcmpi(hostname,parallel(i).machine)
+                    % The slave is on a remote computer.
+                    unix(['scp estimated_parameters.mat ' , parallel(i).login , '@' , parallel(i).machine , ':' parallel(i).folder]);
+                elseif j==2 && strcmpi(hostname,parallel(i).machine) && ~strcmpi(pwd,parallel(i).folder)
+                    % The slave is on this computer but not in the same directory as the master.
+                    unix(['cp estimated_parameters.mat ' , parallel(i).folder]);
+                else
+                    % There is nothing to do in this case. The slave is on the same computer and lives in the same directory as the master.
+                end
+                % Launch the job
                 unix(['ssh -A ' parallel(i).login '@' parallel(i).machine ' ./call_matlab_session.sh job' int2str(job_number) '.m &']);    
             end
         end
@@ -102,14 +115,14 @@ else% parallel mode.
         if tElapsed>tElapsedMasterJob;
             break
         end
-        if ( length(dir('./intermediary_results_from_master_and_slaves/simulated_moments_slave_*.mat'))==job_number )
+        if ( length(dir('./intermediary_results_from_master_and_slaves/simulated_moments_slave_*.dat'))==job_number )
             missing_jobs = 0;
         end
     end    
     if ~missing_jobs
         tmp = 0;
         for i=1:job_number
-            load(['./intermediary_results_from_master_and_slaves/simulated_moments_slave_' int2str(i) '.mat'],'-mat');
+            simulated_moments = load(['./intermediary_results_from_master_and_slaves/simulated_moments_slave_' int2str(i) '.dat'],'-ascii');
             tmp = tmp + simulated_moments;
         end
         simulated_moments = tmp/job_number;
