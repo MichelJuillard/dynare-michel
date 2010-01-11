@@ -110,7 +110,7 @@
 
   <para>Some installation instructions for GNU Octave can be found on <ulink url="http://www.dynare.org/DynareWiki/DynareOctave">Dynare Wiki</ulink>.</para>
 
-  <para>If you are using MATLAB for Windows, and if you plan to use options <xref linkend="use_dll"/> (in particular when computing third order approximations with <xref linkend="k_order_solver"/>), you will need to install a C++ compiler on your machine, and configure it with MATLAB: see <ulink url="http://www.dynare.org/DynareWiki/ConfigureMatlabWindowsForMexCompilation">instructions on the Dynare wiki</ulink>. Users of MATLAB under Linux and MacOS, and users of GNU Octave normally need to do nothing, since a working compilation environment is available by default.</para>
+  <para>If you plan to use options <xref linkend="use_dll"/> (in particular when computing third order approximations with <xref linkend="k_order_solver"/>), you will need to install the necessary requirements for compiling MEX files on your machine. If you are using MATLAB under Windows, install a C++ compiler on your machine, and configure it with MATLAB: see <ulink url="http://www.dynare.org/DynareWiki/ConfigureMatlabWindowsForMexCompilation">instructions on the Dynare wiki</ulink>. Users of Octave under Linux should install the package for MEX file compilation (under Debian or Ubuntu, it is called <filename>octave3.2-headers</filename> or <filename>octave3.0-headers</filename>). Users of MATLAB under Linux and MacOS, and users of Octave under Windows, normally need to do nothing, since a working compilation environment is available by default.</para>
 
   </sect1>
 
