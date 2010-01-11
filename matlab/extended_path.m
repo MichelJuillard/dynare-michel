@@ -83,8 +83,18 @@ norme = 0;
 % Set verbose option
 verbose = 0;
 
-for t=1:sample_size
-    shocks = exp(randn(1,number_of_structural_innovations)*covariance_matrix_upper_cholesky-.5*variances(positive_var_indx)');
+t = 0; 
+new_draw = 1;
+
+while (t<=sample_size)
+    t = t+1;
+    if new_draw
+        gaussian_draw = randn(1,number_of_structural_innovations);
+    else
+        gaussian_draw = .5*gaussian_draw ;
+        new_draw = 1;
+    end
+    shocks = exp(gaussian_draw*covariance_matrix_upper_cholesky-.5*variances(positive_var_indx)');
     oo_.exo_simul(tdx,positive_var_indx) = shocks;
     if init
         % Compute first order solution.
@@ -97,7 +107,7 @@ for t=1:sample_size
             oo_.endo_simul = initial_path(:,1:end-1)*lambda + oo_.endo_simul*(1-lambda);  
         end
     end
-    if init  
+    if init
         info = perfect_foresight_simulation(dr,oo_.steady_state);
     else
         info = perfect_foresight_simulation;
@@ -109,33 +119,50 @@ for t=1:sample_size
         info.iterations
     end
     if ~info.convergence
-        info = homotopic_steps(tdx,positive_var_indx,shocks,norme,.5,init);
+        clear homotopic_steps;
+        INFO = homotopic_steps(tdx,positive_var_indx,shocks,norme,.5,init);
         if verbose
             norme
             info
         end
+        if isnan(INFO)
+            t = t-1;
+            new_draw = 0;
+        else
+            info = INFO;
+        end
     else
         norme = sqrt(sum((shocks-1).^2,2));
     end
-    if ~info.convergence
-        error('I am not able to simulate this model!')
+    %if ~info.convergence
+    %    error('I am not able to simulate this model!')
+    %end
+    if new_draw
+        info.time = info.time+time;
+        time_series(:,t+1) = oo_.endo_simul(:,tdx);
+        oo_.endo_simul(:,1:end-1) = oo_.endo_simul(:,2:end); 
+        oo_.endo_simul(:,end) = oo_.steady_state;
     end
-    info.time = info.time+time;
-    time_series(:,t+1) = oo_.endo_simul(:,tdx);
-    oo_.endo_simul(:,1:end-1) = oo_.endo_simul(:,2:end); 
-    oo_.endo_simul(:,end) = oo_.steady_state;
 end
 
 
 
 function info = homotopic_steps(tdx,positive_var_indx,shocks,init_weight,step,init)
 global oo_
+persistent number_of_calls
+if isempty(number_of_calls)
+    number_of_calls = 1;
+else
+    number_of_calls = number_of_calls + 1;
+end
+max_number_of_calls = 50;
+max_iter = 100;
 weight   = init_weight;
 verbose  = 0;
 iter     = 0;
 time     = 0;
 reduce_step = 0;
-while iter<=100 &&  weight<=1
+while iter<=max_iter &&  weight<=1
     iter = iter+1;
     old_weight = weight;
     weight = weight+step;
@@ -169,9 +196,15 @@ if reduce_step
     step=step/1.5;
     info = homotopic_steps(tdx,positive_var_indx,shocks,old_weight,step,init);
     time = time+info.time;
-elseif weight<1 && iter<100
+    return
+end
+if number_of_calls>max_number_of_calls
+    info = NaN;
+    return
+end
+if weight<1 && iter<max_iter
     oo_.exo_simul(tdx,positive_var_indx) = shocks;
-    if init  
+    if init
         info = perfect_foresight_simulation(oo_.dr,oo_.steady_state);
     else
         info = perfect_foresight_simulation;
