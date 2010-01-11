@@ -55,11 +55,23 @@ if nargin>3
     if ~isunix
         error('The parallel version of SMM estimation is not implemented for non unix platforms!')
     end
+    [junk,hostname] = unix('hostname --fqdn');    
+    hostname = deblank(hostname);
+    master_is_running_a_job = 0;
+    for i=1:length(parallel)
+        if strcmpi(hostname,parallel(i).machine)
+            master_is_running_a_job = 0;
+            break
+        end
+    end
+    if ~master_is_running_a_job
+        disp(' ')
+        disp('Master has to run one job!')
+        disp(' ')
+    end
     disp(' ')
     disp('Master talks to its slaves...')
     disp(' ')
-    [junk,hostname] = unix('hostname --fqdn');    
-    hostname = deblank(hostname);
     % Save the workspace.
     save('master_variables.mat','options_','M_','oo_');
     % Send the workspace to each remote computer.
