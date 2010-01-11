@@ -127,7 +127,7 @@ else% parallel mode.
         eval(['job' int2str(job_master(1)) ';'])
         tElapsedMasterJob = etime(clock, tStartMasterJob);
     else
-        tElapsedMasterJob = 30*100;
+        % tElapsedMasterJob = 30*100;
     end
     tStart = clock;
     missing_jobs = 1;
@@ -155,5 +155,11 @@ else% parallel mode.
 end
 
 r = transpose(simulated_moments-sample_moments)*weighting_matrix*(simulated_moments-sample_moments);
-
 priorObjectiveValue = r;
+
+if exist('optimization_path.mat')
+    load('optimization_path.mat');
+    new_state = [ r; xparams];
+    estimated_parameters_optimization_path = [ estimated_parameters_optimization_path , new_state ];
+    save('optimization_path.mat','estimated_parameters_optimization_path');
+end

@@ -66,7 +66,9 @@ if nargin>3
     end
     if ~master_is_running_a_job
         error('Master has to run one job!');
-    end
+    end 
+    estimated_parameters_optimization_path = [NaN;xparam];
+    save('optimization_path.mat','estimated_parameters_optimization_path');
     disp(' ')
     disp('Master talks to its slaves...')
     disp(' ')
