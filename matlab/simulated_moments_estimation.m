@@ -60,7 +60,7 @@ if nargin>3
     master_is_running_a_job = 0;
     for i=1:length(parallel)
         if strcmpi(hostname,parallel(i).machine)
-            master_is_running_a_job = 0;
+            master_is_running_a_job = 1;
             break
         end
     end
