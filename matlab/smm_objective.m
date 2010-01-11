@@ -51,6 +51,22 @@ if isempty(priorObjectiveValue)
     priorObjectiveValue = Inf;
 end
 
+penalty = 0;
+for i=1:options.estimated_parameters.nb
+    if ~isnan(options.estimated_parameters.upper_bound(i)) && xparams(i)>options.estimated_parameters.upper_bound(i)
+        penalty = penalty + (xparams(i)-options.estimated_parameters.upper_bound(i))^2;
+    end
+    if ~isnan(options.estimated_parameters.lower_bound(i)) && xparams(i)<options.estimated_parameters.lower_bound(i)
+        penalty = penalty + (xparams(i)-options.estimated_parameters.lower_bound(i))^2;
+    end
+end
+
+if penalty>0
+    flag = 0;
+    r = priorObjectiveValue + penalty; 
+    return;
+end
+
 save('estimated_parameters.mat','xparams');
 
 % Check for local determinacy of the deterministic steady state.
@@ -76,6 +92,9 @@ if nargin<5
         simulated_moments = simulated_moments / options.number_of_simulated_sample;
     end
 else% parallel mode.
+    if ~isunix
+        error('The parallel version of SMM estimation is not implemented for non unix platforms!')
+    end
     [Junk,hostname] = unix('hostname --fqdn');
     hostname = deblank(hostname);
     job_number = 0;
@@ -91,7 +110,7 @@ else% parallel mode.
                 % Send the new values of the estimated parameters to the slave.
                 if j==1 && ~strcmpi(hostname,parallel(i).machine)
                     % The slave is on a remote computer.
-                    unix(['scp estimated_parameters.mat ' , parallel(i).login , '@' , parallel(i).machine , ':' parallel(i).folder]);
+                    unix(['scp estimated_parameters.mat ' , parallel(i).login , '@' , parallel(i).machine , ':' parallel(i).folder ' > /dev/null']);
                 elseif j==2 && strcmpi(hostname,parallel(i).machine) && ~strcmpi(pwd,parallel(i).folder)
                     % The slave is on this computer but not in the same directory as the master.
                     unix(['cp estimated_parameters.mat ' , parallel(i).folder]);

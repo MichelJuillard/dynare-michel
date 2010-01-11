@@ -52,14 +52,18 @@ param = [];
 
 % Set up parallel mode if needed.
 if nargin>3
-    [junk,hostname] = unix('hostname --fqdn'); 
+    if ~isunix
+        error('The parallel version of SMM estimation is not implemented for non unix platforms!')
+    end
+    disp(' ')
+    disp('Master talks to its slaves...')
+    disp(' ')
+    [junk,hostname] = unix('hostname --fqdn');    
     hostname = deblank(hostname);
     % Save the workspace.
     save('master_variables.mat','options_','M_','oo_');
     % Send the workspace to each remote computer.
-    for i=1:3
-        disp(' ')
-    end
+    disp('')
     for i = 1:length(parallel)
         if ~strcmpi(hostname,parallel(i).machine)
             unix(['scp master_variables.mat ' , parallel(i).login , '@' , parallel(i).machine , ':' parallel(i).folder]);
@@ -130,33 +134,43 @@ if nargin>3
             end
         end
     end
+    disp(' ')
+    disp('... And slaves do as ordered.')
+    disp(' ')
+    if exist('intermediary_results_from_master_and_slaves','dir')
+        unix('rm -rf intermediary_results_from_master_and_slaves');
+    end
+    unix('mkdir intermediary_results_from_master_and_slaves');
+    unix('chmod -R u+x intermediary_results_from_master_and_slaves');
 end
 
-if exist('intermediary_results_from_master_and_slaves','dir')
-    unix('rm -rf intermediary_results_from_master_and_slaves');
+disp('');
+
+if options.optimization_routine==1
+    % Set options for csminwel. 
+    H0 = 1e-4*eye(options.estimated_parameters.nb);
+    ct = 1e-4;
+    it = 1000;
+    vb = 2;
+    % Minimization of the objective function.
+    if nargin==3
+        [fval,param,grad,hessian_csminwel,itct,fcount,retcodehat] = ...
+            csminwel('smm_objective',xparam,H0,[],ct,it,2,options_.gradient_epsilon,sample_moments,weighting_matrix,options);    
+    elseif nargin>3
+        [fval,param,grad,hessian_csminwel,itct,fcount,retcodehat] = ...
+            csminwel('smm_objective',xparam,H0,[],ct,it,2,options_.gradient_epsilon,sample_moments,weighting_matrix,options,parallel);
+    end
+elseif options.optimization_routine==2
+    optim_options = optimset('display','iter','MaxFunEvals',1000000,'MaxIter',6000,'TolFun',1e-4,'TolX',1e-4);
+    if isfield(options_,'optim_opt')
+        eval(['optim_options = optimset(optim_options,' options_.optim_opt ');']);
+    end
+    if nargin==3
+        [param,fval,exitflag] = fminsearch('smm_objective',xparam,optim_options,sample_moments,weighting_matrix,options);
+    else
+        [param,fval,exitflag] = fminsearch('smm_objective',xparam,optim_options,sample_moments,weighting_matrix,options,parallel);
+    end
 end
-unix('mkdir intermediary_results_from_master_and_slaves');
-unix('chmod -R u+x intermediary_results_from_master_and_slaves');
-
-
-% Set options for csminwel. 
-H0 = 1e-4*eye(options.estimated_parameters.nb);
-ct = 1e-4;
-it = 1000;
-vb = 2;
-
-
-% Minimization of the objective function.
-if nargin==3
-    [fval,param,grad,hessian_csminwel,itct,fcount,retcodehat] = ...
-        csminwel('smm_objective',xparam,H0,[],ct,it,2,options_.gradient_epsilon,sample_moments,weighting_matrix,options);
-
-elseif nargin>3
-    [fval,param,grad,hessian_csminwel,itct,fcount,retcodehat] = ...
-        csminwel('smm_objective',xparam,H0,[],ct,it,2,options_.gradient_epsilon,sample_moments,weighting_matrix,options,parallel);
-end
-    
-
 
 
 function write_job(hostname, remotename, dynare_path, sample_size, number_of_moments, observed_variables_idx, parameters_idx, burn_in_periods, moments_file_name, number_of_simulations,threads_per_job, slave_number, job_number)
