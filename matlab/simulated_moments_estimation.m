@@ -65,9 +65,7 @@ if nargin>3
         end
     end
     if ~master_is_running_a_job
-        disp(' ')
-        disp('Master has to run one job!')
-        disp(' ')
+        error('Master has to run one job!');
     end
     disp(' ')
     disp('Master talks to its slaves...')
