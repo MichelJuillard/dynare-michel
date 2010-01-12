@@ -1,4 +1,4 @@
-Format-Specification: http://svn.debian.org/wsvn/dep/web/deps/dep5.mdwn?op=file&rev=59
+Format-Specification: http://svn.debian.org/wsvn/dep/web/deps/dep5.mdwn?op=file&rev=135
 Name: Dynare
 Maintainer: Dynare Team, whose members in 2010 are:
  Stéphane Adjemian <stephane.adjemian@ens.fr>
@@ -24,6 +24,7 @@ License: GPL-3+
  GNU General Public License for more details.
 
 Files: matlab/AIM/SP*
+Copyright: Public domain
 License: Public domain
 
 Files: matlab/bfgsi.m, matlab/qz/qzswitch.m, matlab/qz/qzdiv.m
