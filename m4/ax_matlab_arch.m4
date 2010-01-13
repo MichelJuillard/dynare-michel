@@ -13,10 +13,8 @@ dnl but WITHOUT ANY WARRANTY; without even the implied warranty of
 dnl MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 dnl GNU General Public License for more details.
 dnl
-dnl You should have received a copy of the GNU General Public License
-dnl along with this program; see the file COPYING.  If not, write to
-dnl the Free Software Foundation, Inc., 59 Temple Place, Suite 330,
-dnl Boston, MA 02111-1307, USA.
+dnl You should have received a copy of the GNU General Public License along
+dnl with this program. If not, see <http://www.gnu.org/licenses/>.
 dnl
 dnl As a special exception to the GNU General Public License, if
 dnl you distribute this file as part of a program that contains a

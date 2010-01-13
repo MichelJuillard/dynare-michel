@@ -96,6 +96,7 @@ clean-local:
 		$(patsubst %.mod, %_mean.mat, $(MODS)) \
 		$(patsubst %.mod, %_pindx.mat, $(MODS)) \
 		$(patsubst %.mod, %_params.mat, $(MODS)) \
+		$(patsubst %.mod, %_simul, $(MODS)) \
 		$(patsubst %.mod, %.log, $(MODS))
 
 	rm -rf $(patsubst %.mod, %, $(MODS))
@@ -110,9 +111,8 @@ clean-local:
 		$(shell find -name H.dat)
 
 	rm -f arima/data1.m arima/data2.m \
-		k_order_perturbation/*_simul \
 		k_order_perturbation/*.jnl \
-    k_order_perturbation/*.mat \
+		k_order_perturbation/*.mat \
 		block_bytecode/fs2000_simk.swp
 
 	rm -rf ramsey_objective
