@@ -119,8 +119,7 @@ while (t<=sample_size)
         info.iterations
     end
     if ~info.convergence
-        clear homotopic_steps;
-        INFO = homotopic_steps(tdx,positive_var_indx,shocks,norme,.5,init);
+        INFO = homotopic_steps(tdx,positive_var_indx,shocks,norme,.5,init,0);
         if verbose
             norme
             info
@@ -147,15 +146,14 @@ end
 
 
 
-function info = homotopic_steps(tdx,positive_var_indx,shocks,init_weight,step,init)
+function [info,number_of_calls] = homotopic_steps(tdx,positive_var_indx,shocks,init_weight,step,init,number_of_calls)
 global oo_
-persistent number_of_calls
-if isempty(number_of_calls)
-    number_of_calls = 1;
-else
-    number_of_calls = number_of_calls + 1;
-end
+number_of_calls = number_of_calls + 1;
 max_number_of_calls = 50;
+if number_of_calls>max_number_of_calls
+    info = NaN;
+    return
+end
 max_iter = 100;
 weight   = init_weight;
 verbose  = 0;
@@ -167,7 +165,7 @@ while iter<=max_iter &&  weight<=1
     old_weight = weight;
     weight = weight+step;
     oo_.exo_simul(tdx,positive_var_indx) = weight*shocks+(1-weight);
-    if init  
+    if init
         info = perfect_foresight_simulation(oo_.dr,oo_.steady_state);
     else
         info = perfect_foresight_simulation;
@@ -194,12 +192,8 @@ while iter<=max_iter &&  weight<=1
 end
 if reduce_step
     step=step/1.5;
-    info = homotopic_steps(tdx,positive_var_indx,shocks,old_weight,step,init);
+    [info,number_of_calls] = homotopic_steps(tdx,positive_var_indx,shocks,old_weight,step,init,number_of_calls);
     time = time+info.time;
-    return
-end
-if number_of_calls>max_number_of_calls
-    info = NaN;
     return
 end
 if weight<1 && iter<max_iter
