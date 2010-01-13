@@ -23,8 +23,8 @@ varobs dx dy;
 check;
 
 estimation(datafile = bvar_sample, mh_replic = 1200, mh_jscale = 1.3,
-           first_obs = 9);
+           first_obs = 20);
 
-bvar_density 8;
+bvar_density(bvar_prior_train = 10) 8;
 
 bvar_forecast(forecast = 10, bvar_replic = 2000, nobs = 200) 8;
