@@ -70,7 +70,7 @@ localVars.varargin=varargin;
 % tic,
 
 
-if isnumeric(options_.parallel),% | isunix, % for the moment exclude unix platform from parallel implementation
+if isnumeric(options_.parallel),
     fout = independent_metropolis_hastings_core(localVars, fblck, nblck, 0);
     record = fout.record;
     
