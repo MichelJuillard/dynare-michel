@@ -122,7 +122,7 @@ while (t<=sample_size)
         INFO = homotopic_steps(tdx,positive_var_indx,shocks,norme,.5,init,0);
         if verbose
             norme
-            info
+            INFO
         end
         if isnan(INFO)
             t = t-1;
@@ -193,8 +193,12 @@ end
 if reduce_step
     step=step/1.5;
     [info,number_of_calls] = homotopic_steps(tdx,positive_var_indx,shocks,old_weight,step,init,number_of_calls);
-    time = time+info.time;
-    return
+    if ~isnan(info)
+        time = time+info.time;
+        return
+    else
+        return
+    end
 end
 if weight<1 && iter<max_iter
     oo_.exo_simul(tdx,positive_var_indx) = shocks;

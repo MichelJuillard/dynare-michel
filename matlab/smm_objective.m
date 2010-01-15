@@ -95,59 +95,49 @@ else% parallel mode.
     if ~isunix
         error('The parallel version of SMM estimation is not implemented for non unix platforms!')
     end
+    job_number = 1;% Remark. First job is for the master.
     [Junk,hostname] = unix('hostname --fqdn');
     hostname = deblank(hostname);
-    job_number = 0;
-    job_master = 0;
     for i=1:length(parallel)
-        job_remote = 0;
+        machine = deblank(parallel(i).machine);
+        if ~strcmpi(hostname,machine)
+            % For the slaves on a remote computer.
+            unix(['scp estimated_parameters.mat ' , parallel(i).login , '@' , machine , ':' parallel(i).folder ' > /dev/null']);
+        else
+            if ~strcmpi(pwd,parallel(i).folder)
+                % For the slaves on this computer but not in the same directory as the master.
+                unix(['cp estimated_parameters.mat ' , parallel(i).folder]);
+            end
+        end
         for j=1:parallel(i).number_of_jobs
-            job_remote = job_remote + 1; 
-            job_number = job_number + 1;
-            if strcmpi(hostname,parallel(i).machine) && (job_remote==1)
-                job_master = job_number;
-            else
-                % Send the new values of the estimated parameters to the slave.
-                if j==1 && ~strcmpi(hostname,parallel(i).machine)
-                    % The slave is on a remote computer.
-                    unix(['scp estimated_parameters.mat ' , parallel(i).login , '@' , parallel(i).machine , ':' parallel(i).folder ' > /dev/null']);
-                elseif j==2 && strcmpi(hostname,parallel(i).machine) && ~strcmpi(pwd,parallel(i).folder)
-                    % The slave is on this computer but not in the same directory as the master.
-                    unix(['cp estimated_parameters.mat ' , parallel(i).folder]);
-                else
-                    % There is nothing to do in this case. The slave is on the same computer and lives in the same directory as the master.
-                end
-                % Launch the job
-                unix(['ssh -A ' parallel(i).login '@' parallel(i).machine ' ./call_matlab_session.sh job' int2str(job_number) '.m &']);    
+            if (strcmpi(hostname,machine) && j>1) || ~strcmpi(hostname,machine)  
+                job_number = job_number + 1;
+                unix(['ssh -A ' parallel(i).login '@' machine ' ./call_matlab_session.sh job' int2str(job_number) '.m &']);
             end
         end
     end
-    if job_master
-        tStartMasterJob = clock;
-        eval(['job' int2str(job_master(1)) ';'])
-        tElapsedMasterJob = etime(clock, tStartMasterJob);
-    else
-        % tElapsedMasterJob = 30*100;
-    end
+    % Finally the Master do its job
+    tStartMasterJob = clock;
+    eval('job1;')
+    tElapsedMasterJob = etime(clock, tStartMasterJob);
+    TimeLimit = tElapsedMasterJob*1.2;
+    % Master waits for the  slaves' output... 
     tStart = clock;
-    missing_jobs = 1;
-    while missing_jobs
-        tElapsed = etime(clock, tStart);
-        if tElapsed>tElapsedMasterJob;
+    tElapsed = 0;
+    while tElapsed<TimeLimit
+        if ( length(dir('./intermediary_results_from_master_and_slaves/simulated_moments_slave_*.dat'))==job_number )
             break
         end
-        if ( length(dir('./intermediary_results_from_master_and_slaves/simulated_moments_slave_*.dat'))==job_number )
-            missing_jobs = 0;
-        end
-    end    
-    if ~missing_jobs
-        tmp = 0;
+        tElapsed = etime(clock, tStart);
+    end
+    try
+        tmp = zeros(length(sample_moments),1);
         for i=1:job_number
             simulated_moments = load(['./intermediary_results_from_master_and_slaves/simulated_moments_slave_' int2str(i) '.dat'],'-ascii');
             tmp = tmp + simulated_moments;
         end
-        simulated_moments = tmp/job_number;
-    else
+        simulated_moments = tmp / job_number;        
+    catch
         r = priorObjectiveValue*1.1;
         flag = 0;
         return
