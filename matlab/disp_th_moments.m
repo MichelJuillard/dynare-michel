@@ -52,7 +52,7 @@ z = [ m sd s2 ];
 oo_.mean = m;
 oo_.var = oo_.gamma_y{1};
 
-if options_.nomoments == 0
+if ~options_.noprint %options_.nomoments == 0
     title='THEORETICAL MOMENTS';
     if options_.hp_filter
         title = [title ' (HP filter, lambda = ' int2str(options_.hp_filter) ')'];
@@ -85,6 +85,8 @@ if options_.nomoments == 0
 end
 
 if options_.nocorr == 0
+    corr = oo_.gamma_y{1}(i1,i1)./(sd(i1)*sd(i1)');
+    if ~options_.noprint,
     disp(' ')
     title='MATRIX OF CORRELATIONS';
     if options_.hp_filter
@@ -92,24 +94,25 @@ if options_.nocorr == 0
     end
     labels = deblank(M_.endo_names(ivar(i1),:));
     headers = strvcat('Variables',labels);
-    corr = oo_.gamma_y{1}(i1,i1)./(sd(i1)*sd(i1)');
     lh = size(labels,2)+2;
     dyntable(title,headers,labels,corr,lh,8,4);
-end
-
-if options_.ar > 0
-    disp(' ')
-    title='COEFFICIENTS OF AUTOCORRELATION';
-    if options_.hp_filter
-        title = [title ' (HP filter, lambda = ' int2str(options_.hp_filter) ')'];
     end
-    labels = deblank(M_.endo_names(ivar(i1),:));
-    headers = strvcat('Order ',int2str([1:options_.ar]'));
+  end
+    if options_.ar > 0
     z=[];
     for i=1:options_.ar
         oo_.autocorr{i} = oo_.gamma_y{i+1};
         z(:,i) = diag(oo_.gamma_y{i+1}(i1,i1));
     end
-    lh = size(labels,2)+2;
-    dyntable(title,headers,labels,z,lh,8,4);
+    if ~options_.noprint,      
+        disp(' ')    
+      title='COEFFICIENTS OF AUTOCORRELATION';      
+      if options_.hp_filter        
+          title = [title ' (HP filter, lambda = ' int2str(options_.hp_filter) ')'];      
+      end      
+      labels = deblank(M_.endo_names(ivar(i1),:));      
+      headers = strvcat('Order ',int2str([1:options_.ar]'));      
+      lh = size(labels,2)+2;
+      dyntable(title,headers,labels,z,lh,8,4);
+  end  
 end
