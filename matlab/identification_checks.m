@@ -1,4 +1,4 @@
-function [McoH, McoJ, PcoH, PcoJ, condH, condJ, eH, eJ, ind01, ind02, indnoH, indnoJ] = identification_checks(H,JJ, bayestopt_)
+function [McoH, McoJ, McoGP, PcoH, PcoJ, PcoGP, condH, condJ, condGP, eH, eJ, eGP, ind01, ind02, indnoH, indnoJ] = identification_checks(H,JJ, gp, bayestopt_)
 
 % Copyright (C) 2008 Dynare Team
 %
@@ -22,8 +22,10 @@ function [McoH, McoJ, PcoH, PcoJ, condH, condJ, eH, eJ, ind01, ind02, indnoH, in
 
 % 1. check rank of H at theta
 npar = size(H,2);
+npar0 = size(gp,2);
 indnoH = {};
 indnoJ = {};
+indnoLRE = {};
 ind1 = find(vnorm(H)~=0);
 H1 = H(:,ind1);
 covH = H1'*H1;
@@ -49,6 +51,19 @@ eJ(ind2,length(find(vnorm(JJ)==0))+1:end) = ee1;
 eJ(find(vnorm(JJ)==0),1:length(find(vnorm(JJ)==0)))=eye(length(find(vnorm(JJ)==0)));
 % condJ = cond(JJ1'*JJ1);
 condJ = cond(JJ1);
+
+ind3 = find(vnorm(gp)~=0);
+gp1 = gp(:,ind3);
+covgp = gp1'*gp1;
+sdgp = sqrt(diag(covgp));
+sdgp = sdgp*sdgp';
+[ex1,ex2] = eig( (gp1'*gp1)./sdgp );
+% eJ = NaN(npar,length(ind2));
+eGP = zeros(npar0,npar0);
+eGP(ind3,length(find(vnorm(gp)==0))+1:end) = ex1;
+eGP(find(vnorm(gp)==0),1:length(find(vnorm(gp)==0)))=eye(length(find(vnorm(gp)==0)));
+% condJ = cond(JJ1'*JJ1);
+condGP = cond(gp1);
 
 if rank(H)<npar
     ixno = 0;
@@ -106,11 +121,15 @@ end
 
 McoH = NaN(npar,1);
 McoJ = NaN(npar,1);
+McoGP = NaN(npar0,1);
 for ii = 1:size(H1,2);
     McoH(ind1(ii),:) = [cosn([H1(:,ii),H1(:,find([1:1:size(H1,2)]~=ii))])];
 end
 for ii = 1:size(JJ1,2);
     McoJ(ind2(ii),:) = [cosn([JJ1(:,ii),JJ1(:,find([1:1:size(JJ1,2)]~=ii))])];
+end
+for ii = 1:size(gp1,2);
+  McoGP(ind3(ii),:) = [cosn([gp1(:,ii),gp1(:,find([1:1:size(gp1,2)]~=ii))])];
 end
 
 % format long  % some are nearly 1
@@ -123,6 +142,7 @@ end
 
 PcoH = NaN(npar,npar);
 PcoJ = NaN(npar,npar);
+PcoGP = NaN(npar0,npar0);
 for ii = 1:size(H1,2);
     for jj = 1:size(H1,2);
         PcoH(ind1(ii),ind1(jj)) = [cosn([H1(:,ii),H1(:,jj)])];
@@ -134,6 +154,13 @@ for ii = 1:size(JJ1,2);
         PcoJ(ind2(ii),ind2(jj)) = [cosn([JJ1(:,ii),JJ1(:,jj)])];
     end
 end
+
+for ii = 1:size(gp1,2);
+  for jj = 1:size(gp1,2);
+    PcoGP(ind3(ii),ind3(jj)) = [cosn([gp1(:,ii),gp1(:,jj)])];
+  end
+end
+
 
 ind01 = zeros(npar,1);
 ind02 = zeros(npar,1);

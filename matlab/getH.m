@@ -1,4 +1,4 @@
-function [H, dA, dOm, Hss, info] = getH(A, B, M_,oo_,kronflag,indx,indexo)
+function [H, dA, dOm, Hss, gp, info] = getH(A, B, M_,oo_,kronflag,indx,indexo)
 
 % computes derivative of reduced form linear model w.r.t. deep params
 %
