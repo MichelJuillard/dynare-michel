@@ -36,6 +36,7 @@ if isfield(options_gsa,'mode_file'),
     options_.mode_file=options_gsa.mode_file;
 end
 
+options_.order = 1;
 dynare_resolve;
 
 if ~isempty(options_gsa.datafile) | isempty(bayestopt_),
