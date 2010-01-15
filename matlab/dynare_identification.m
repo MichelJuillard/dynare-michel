@@ -1,4 +1,4 @@
-function [pdraws, TAU, GAM, H, JJ] = dynare_identification(options_ident, pdraws0)
+function [pdraws, TAU, GAM, LRE, gp, H, JJ] = dynare_identification(options_ident, pdraws0)
 
 % main 
 %
@@ -77,6 +77,7 @@ if iload <=0,
     run_index = 0;
 
     h = waitbar(0,'Monte Carlo identification checks ...');
+    [I,J]=find(M_.lead_lag_incidence');
 
     while iteration < SampleSize,
         loop_indx = loop_indx+1;
@@ -101,10 +102,14 @@ if iload <=0,
             %        bayestopt_.restrict_aux, M_.exo_nbr);
             %     tau=[vec(Aa); vech(Bb*M_.Sigma_e*Bb')];
             tau=[oo_.dr.ys(oo_.dr.order_var); vec(A); vech(B*M_.Sigma_e*B')];
+            yy0=oo_.dr.ys(I);    
+            [residual, g1 ] = feval([M_.fname,'_dynamic'],yy0, oo_.exo_steady_state', M_.params,1);    
+
             if burnin_iteration<50,
                 burnin_iteration = burnin_iteration + 1;
                 pdraws(burnin_iteration,:) = params;
                 TAU(:,burnin_iteration)=tau;
+                LRE(:,burnin_iteration)=vec(g1);      
                 [gam,stationary_vars] = th_autocovariances(oo0.dr,bayestopt_.mfys,M_,options_);
                 sdy = sqrt(diag(gam{1}));
                 sy = sdy*sdy';
@@ -127,8 +132,10 @@ if iload <=0,
                 if iteration==1,
                     indJJ = (find(std(GAM')>1.e-8));
                     indH = (find(std(TAU')>1.e-8));
+                    indLRE = (find(std(LRE')>1.e-8));
                     TAU = zeros(length(indH),SampleSize);
                     GAM = zeros(length(indJJ),SampleSize);
+                    LRE = zeros(length(indLRE),SampleSize);
                     MAX_tau   = min(SampleSize,ceil(MaxNumberOfBytes/(length(indH)*nparam)/8));
                     MAX_gam   = min(SampleSize,ceil(MaxNumberOfBytes/(length(indJJ)*nparam)/8));
                     stoH = zeros([length(indH),nparam,MAX_tau]);
@@ -139,43 +146,56 @@ if iload <=0,
 
             if iteration,
                 TAU(:,iteration)=tau(indH);
-                [JJ, H, gam] = getJJ(A, B, M_,oo0,options_,0,indx,indexo,bayestopt_.mf2,nlags,useautocorr);
+                vg1 = vec(g1);
+                LRE(:,iteration)=vg1(indLRE);
+                [JJ, H, gam, gp] = getJJ(A, B, M_,oo0,options_,0,indx,indexo,bayestopt_.mf2,nlags,useautocorr);      
                 GAM(:,iteration)=gam(indJJ);
+                stoLRE(:,:,run_index) = gp(indLRE,:);
                 stoH(:,:,run_index) = H(indH,:);
                 stoJJ(:,:,run_index) = JJ(indJJ,:);
                 % use relative changes
                 %       siJ = abs(JJ(indJJ,:).*(1./gam(indJJ)*params));
                 %       siH = abs(H(indH,:).*(1./tau(indH)*params));
                 % use prior uncertainty
-                siJ = abs(JJ(indJJ,:));
-                siH = abs(H(indH,:));
+                siJ = (JJ(indJJ,:));
+                siH = (H(indH,:));
+                siLRE = (gp(indLRE,:));
                 %       siJ = abs(JJ(indJJ,:).*(ones(length(indJJ),1)*bayestopt_.p2'));
                 %       siH = abs(H(indH,:).*(ones(length(indH),1)*bayestopt_.p2'));
                 %       siJ = abs(JJ(indJJ,:).*(1./mGAM'*bayestopt_.p2'));
                 %       siH = abs(H(indH,:).*(1./mTAU'*bayestopt_.p2'));
 
                 if iteration ==1,
-                    siJmean = siJ./SampleSize;
-                    siHmean = siH./SampleSize;
+                    siJmean = abs(siJ)./SampleSize;        
+                    siHmean = abs(siH)./SampleSize;        
+                    siLREmean = abs(siLRE)./SampleSize;        
+                    derJmean = (siJ)./SampleSize;        
+                    derHmean = (siH)./SampleSize;        
+                    derLREmean = (siLRE)./SampleSize;      
                 else
-                    siJmean = siJ./SampleSize+siJmean;
-                    siHmean = siH./SampleSize+siHmean;
+                    siJmean = abs(siJ)./SampleSize+siJmean;        
+                    siHmean = abs(siH)./SampleSize+siHmean;        
+                    siLREmean = abs(siLRE)./SampleSize+siLREmean;        
+                    derJmean = (siJ)./SampleSize+derJmean;        
+                    derHmean = (siH)./SampleSize+derHmean;        
+                    derLREmean = (siLRE)./SampleSize+derLREmean;      
                 end
                 pdraws(iteration,:) = params;
-                [idemodel.Mco(:,iteration), idemoments.Mco(:,iteration), ...
-                 idemodel.Pco(:,:,iteration), idemoments.Pco(:,:,iteration), ...
-                 idemodel.cond(iteration), idemoments.cond(iteration), ...
-                 idemodel.ee(:,:,iteration), idemoments.ee(:,:,iteration), ...
+                [idemodel.Mco(:,iteration), idemoments.Mco(:,iteration), idelre.Mco(:,iteration), ...        
+                 idemodel.Pco(:,:,iteration), idemoments.Pco(:,:,iteration), idelre.Pco(:,:,iteration), ...        
+                 idemodel.cond(iteration), idemoments.cond(iteration), idelre.cond(iteration), ...        
+                 idemodel.ee(:,:,iteration), idemoments.ee(:,:,iteration), idelre.ee(:,:,iteration), ...        
                  idemodel.ind(:,iteration), idemoments.ind(:,iteration), ...
                  idemodel.indno{iteration}, idemoments.indno{iteration}] = ...
-                    identification_checks(H(indH,:),JJ(indJJ,:), bayestopt_);
+                 identification_checks(H(indH,:),JJ(indJJ,:), gp(indLRE,:), bayestopt_);      
                 if run_index==MAX_tau | iteration==SampleSize,
                     file_index = file_index + 1;
                     if run_index<MAX_tau,
                         stoH = stoH(:,:,1:run_index);
                         stoJJ = stoJJ(:,:,1:run_index);
+                        stoLRE = stoLRE(:,:,1:run_index);        
                     end          
-                    save([IdentifDirectoryName '/' M_.fname '_identif_' int2str(file_index)], 'stoH', 'stoJJ')
+                    save([IdentifDirectoryName '/' M_.fname '_identif_' int2str(file_index)], 'stoH', 'stoJJ', 'stoLRE')      
                     run_index = 0;
                     
                 end
@@ -185,34 +205,66 @@ if iload <=0,
         end
     end
 
-    siJmean = siJmean.*(ones(length(indJJ),1)*std(pdraws));
-    siHmean = siHmean.*(ones(length(indH),1)*std(pdraws));
 
-    siHmean = siHmean./(max(siHmean')'*ones(size(params)));
-    siJmean = siJmean./(max(siJmean')'*ones(size(params)));
 
     close(h)
 
 
-    save([IdentifDirectoryName '/' M_.fname '_identif'], 'pdraws', 'idemodel', 'idemoments', ...
-         'siHmean', 'siJmean', 'TAU', 'GAM')
+    save([IdentifDirectoryName '/' M_.fname '_identif'], 'pdraws', 'idemodel', 'idemoments', 'idelre', 'indJJ', 'indH', 'indLRE', ...  
+        'siHmean', 'siJmean', 'siLREmean', 'derHmean', 'derJmean', 'derLREmean', 'TAU', 'GAM', 'LRE')
 else
-    load([IdentifDirectoryName '/' M_.fname '_identif'], 'pdraws', 'idemodel', 'idemoments', ...
-         'siHmean', 'siJmean', 'TAU', 'GAM')
-    options_ident.prior_mc=size(pdraws,1);
-    SampleSize = options_ident.prior_mc;
-    options_.options_ident = options_ident;
-
+    load([IdentifDirectoryName '/' M_.fname '_identif'], 'pdraws', 'idemodel', 'idemoments', 'idelre', 'indJJ', 'indH', 'indLRE', ...  
+        'siHmean', 'siJmean', 'siLREmean', 'derHmean', 'derJmean', 'derLREmean', 'TAU', 'GAM', 'LRE')
+        options_ident.prior_mc=size(pdraws,1);
+        SampleSize = options_ident.prior_mc;  
+        options_.options_ident = options_ident;
 end  
+
+offset = estim_params_.nvx;
+offset = offset + estim_params_.nvn;
+offset = offset + estim_params_.ncx;
+offset = offset + estim_params_.ncn;
+
+siJmean = siJmean.*(ones(length(indJJ),1)*std(pdraws));
+siHmean = siHmean.*(ones(length(indH),1)*std(pdraws));
+siLREmean = siLREmean.*(ones(length(indLRE),1)*std(pdraws(:, offset+1:end )));
+
+derJmean = derJmean.*(ones(length(indJJ),1)*std(pdraws));
+derHmean = derHmean.*(ones(length(indH),1)*std(pdraws));
+derLREmean = derLREmean.*(ones(length(indLRE),1)*std(pdraws(:, offset+1:end )));
+
+derHmean = abs(derHmean./(max(siHmean')'*ones(1,size(pdraws,2))));
+derJmean = abs(derJmean./(max(siJmean')'*ones(1,size(pdraws,2))));
+derLREmean = abs(derLREmean./(max(siLREmean')'*ones(1,estim_params_.np)));
+
+siHmean = siHmean./(max(siHmean')'*ones(1,size(pdraws,2)));
+siJmean = siJmean./(max(siJmean')'*ones(1,size(pdraws,2)));
+siLREmean = siLREmean./(max(siLREmean')'*ones(1,estim_params_.np));
+
+tstJmean = derJmean*0;
+tstHmean = derHmean*0;
+tstLREmean = derLREmean*0;
+for j=1:nparam,
+  indd = 1:length(siJmean(:,j));
+tstJmean(indd,j) = abs(derJmean(indd,j))./siJmean(indd,j);
+  indd = 1:length(siHmean(:,j));
+tstHmean(indd,j) = abs(derHmean(indd,j))./siHmean(indd,j);
+if j>offset
+  indd = 1:length(siLREmean(:,j-offset));
+tstLREmean(indd,j-offset) = abs(derLREmean(indd,j-offset))./siLREmean(indd,j-offset);
+end  
+end
 
 if nargout>3 & iload,
     filnam = dir([IdentifDirectoryName '/' M_.fname '_identif_*.mat']);
     H=[];
     JJ = [];
+    gp = [];  
     for j=1:length(filnam),
         load([IdentifDirectoryName '/' M_.fname '_identif_',int2str(j),'.mat']);
         H = cat(3,H, stoH(:,abs(iload),:));
         JJ = cat(3,JJ, stoJJ(:,abs(iload),:));
+        gp = cat(3,gp, stoLRE(:,abs(iload),:));
 
     end
 end
@@ -317,7 +369,16 @@ disp_identification(pdraws, idemodel, idemoments)
 % title('Sensitivity in standardized moments'' PCA')
 
 figure,
-subplot(221)
+subplot(231)
+myboxplot(siLREmean)
+set(gca,'ylim',[0 1.05])
+set(gca,'xticklabel','')
+for ip=1:estim_params_.np,
+  text(ip,-0.02,deblank(M_.param_names(estim_params_.param_vals(ip,1),:)),'rotation',90,'HorizontalAlignment','right','interpreter','none')
+end
+title('Sensitivity in the LRE model')
+
+subplot(232)
 myboxplot(siHmean)
 set(gca,'ylim',[0 1.05])
 set(gca,'xticklabel','')
@@ -326,7 +387,7 @@ for ip=1:nparam,
 end
 title('Sensitivity in the model')
 
-subplot(222)
+subplot(233)
 myboxplot(siJmean)
 set(gca,'ylim',[0 1.05])
 set(gca,'xticklabel','')
@@ -335,7 +396,16 @@ for ip=1:nparam,
 end
 title('Sensitivity in the moments')
 
-subplot(223)
+subplot(234)
+myboxplot(idelre.Mco')
+set(gca,'ylim',[0 1])
+set(gca,'xticklabel','')
+for ip=1:estim_params_.np,
+  text(ip,-0.02,deblank(M_.param_names(estim_params_.param_vals(ip,1),:)),'rotation',90,'HorizontalAlignment','right','interpreter','none')
+end
+title('Multicollinearity in the LRE model')
+
+subplot(235)
 myboxplot(idemodel.Mco')
 set(gca,'ylim',[0 1])
 set(gca,'xticklabel','')
@@ -344,7 +414,7 @@ for ip=1:nparam,
 end
 title('Multicollinearity in the model')
 
-subplot(224)
+subplot(236)
 myboxplot(idemoments.Mco')
 set(gca,'ylim',[0 1])
 set(gca,'xticklabel','')
@@ -364,6 +434,34 @@ title('log10 of Condition number in the model')
 subplot(222)
 hist(log10(idemoments.cond))
 title('log10 of Condition number in the moments')
+subplot(223)
+hist(log10(idelre.cond))
+title('log10 of Condition number in the LRE model')
 saveas(gcf,[IdentifDirectoryName,'/',M_.fname,'_ident_COND'])
 eval(['print -depsc2 ' IdentifDirectoryName '/' M_.fname '_ident_COND']);
 eval(['print -dpdf ' IdentifDirectoryName '/' M_.fname '_ident_COND']);
+ifig=0;
+nbox = min(estim_params_.np-1,12);
+for j=1:estim_params_.np,  
+    if mod(j,12)==1,    
+        ifig = ifig+1;    
+        figure('name','Partial correlations in the LRE model'),    
+        iplo=0;  
+    end
+    iplo=iplo+1;    
+    mmm = mean(squeeze(idelre.Pco(:,j,:))');    
+    [sss, immm] = sort(-mmm);    
+    subplot(3,4,iplo), 
+    myboxplot(squeeze(idelre.Pco(immm(2:nbox+1),j,:))'),
+    set(gca,'ylim',[0 1])
+    set(gca,'xticklabel','')
+    for ip=1:nbox, %estim_params_.np,  
+        text(ip,-0.02,deblank(M_.param_names(estim_params_.param_vals(immm(ip+1),1),:)),'rotation',90,'HorizontalAlignment','right','interpreter','none')
+    end
+    title(deblank(M_.param_names(estim_params_.param_vals(j,1),:))),
+    if j==estim_params_.np | mod(j,12)==0  
+        saveas(gcf,[IdentifDirectoryName,'/',M_.fname,'_ident_PCORR_LRE',int2str(ifig)])
+        eval(['print -depsc2 ' IdentifDirectoryName '/' M_.fname '_ident_PCORR_LRE',int2str(ifig)]);
+        eval(['print -dpdf ' IdentifDirectoryName '/' M_.fname '_ident_PCORR_LRE',int2str(ifig)]);
+    end
+end
