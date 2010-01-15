@@ -1,4 +1,14 @@
 function fMessageStatus(prtfrc, njob, waitbarString, waitbarTitle, Parallel, MasterName, DyMo)
+% In a parallelization context, this function is launched on slave
+% machines, and acts as a message passing device for the master machine.
+% prtfrc [double], fraction of iteration performed
+% njob [int], index number of this CPU among all CPUs in the
+%                       cluster
+% waitbarString [char], running message string to be displayed in the monitor window on master machine 
+% waitbarTitle [char], title to be displayed in the monitor window on master machine
+% Parallel [struct], options_.parallel(ThisMatlab), i.e. the paralle settings for this slave machine in the cluster 
+% MasterName [char], IP address or PC name of the master 
+% DyMo [char], working directory of the master machine
 
 % Copyright (C) 2009 Dynare Team
 %
@@ -25,7 +35,7 @@ end
 
 save(['comp_status_',funcName,int2str(njob),'.mat'],'prtfrc','njob','waitbarString','waitbarTitle');
 if Parallel.Local==0,
-    if isunix,
+    if isunix || (~matlab_ver_less_than('7.4') && ismac),
         system(['scp comp_status_',funcName,int2str(njob),'.mat ',Parallel.user,'@',MasterName,':',DyMo]);
     else
         copyfile(['comp_status_',funcName,int2str(njob),'.mat'],['\\',MasterName,'\',DyMo(1),'$\',DyMo(4:end),'\']);

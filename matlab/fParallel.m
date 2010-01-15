@@ -6,7 +6,7 @@ function fParallel(fblck,nblck,whoiam,ThisMatlab,fname)
 % INPUTS
 %  fblck [int]          index number of the first thread to run in this
 %                       MATLAB instance
-%  nblck [int]          index number of the first thread to run in this
+%  nblck [int]          number of threads to run in this
 %                       MATLAB instance
 %  whoiam [int]         index number of this CPU among all CPUs in the
 %                       cluster
@@ -58,19 +58,20 @@ if exist('fGlobalVar'),
 end
 
 % On UNIX, mount the master working directory through SSH FS
-if isunix & Parallel(ThisMatlab).Local==0,
-    system(['mkdir ~/MasterRemoteMirror_',fname,'_',int2str(whoiam)]);
-    system(['sshfs ',Parallel(ThisMatlab).user,'@',fInputVar.MasterName,':/',fInputVar.DyMo,' ~/MasterRemoteMirror_',fname,'_',int2str(whoiam)]);
-end
+% if (isunix | (~matlab_ver_less_than('7.4') & ismac) ) & Parallel(ThisMatlab).Local==0,
+%     system(['mkdir ~/MasterRemoteMirror_',fname,'_',int2str(whoiam)]);
+%     system(['sshfs ',Parallel(ThisMatlab).user,'@',fInputVar.MasterName,':/',fInputVar.DyMo,' ~/MasterRemoteMirror_',fname,'_',int2str(whoiam)]);
+% end
 
-% Special hack for MH directory
-if isfield(fInputVar,'MhDirectoryName') & Parallel(ThisMatlab).Local==0,
-    if isunix,
-        fInputVar.MhDirectoryName = ['~/MasterRemoteMirror_',fname,'_',int2str(whoiam),'/',fInputVar.MhDirectoryName];
-    else
-        fInputVar.MhDirectoryName = ['\\',fInputVar.MasterName,'\',fInputVar.DyMo(1),'$\',fInputVar.DyMo(4:end),'\',fInputVar.MhDirectoryName];
-    end
-end
+% Special hack for MH directory: possibly no longer needed ?????? now all
+% files are managed locally and sent backwards later on in this routine!
+% if isfield(fInputVar,'MhDirectoryName') & Parallel(ThisMatlab).Local==0,
+%     if isunix | (~matlab_ver_less_than('7.4') & ismac),
+%         fInputVar.MhDirectoryName = ['~/MasterRemoteMirror_',fname,'_',int2str(whoiam),'/',fInputVar.MhDirectoryName];
+%     else
+%         fInputVar.MhDirectoryName = ['\\',fInputVar.MasterName,'\',fInputVar.DyMo(1),'$\',fInputVar.DyMo(4:end),'\',fInputVar.MhDirectoryName];
+%     end
+% end
 
 fInputVar.Parallel = Parallel;
 % Launch the routine to be run in parallel
@@ -92,7 +93,7 @@ if(whoiam)
     if Parallel(ThisMatlab).Local
         delete(['P_',fname,'_',int2str(whoiam),'End.txt']);
     else
-        if isunix,            
+        if isunix || (~matlab_ver_less_than('7.4') && ismac),            
             for j=1:size(OutputFileName,1),
                 system(['scp ',OutputFileName{j,1},OutputFileName{j,2},' ',Parallel(ThisMatlab).user,'@',fInputVar.MasterName,':',fInputVar.DyMo,'/',OutputFileName{j,1}]);
             end

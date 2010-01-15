@@ -51,8 +51,9 @@ totCPU=0;
 % Determine my hostname and my working directory
 DyMo=pwd;
 fInputVar.DyMo=DyMo;
-if isunix,
-    [tempo, MasterName]=system(['ifconfig  | grep ''inet addr:''| grep -v ''127.0.0.1'' | cut -d: -f2 | awk ''{ print $1}''']);
+if isunix || (~matlab_ver_less_than('7.4') && ismac) ,
+%     [tempo, MasterName]=system(['ifconfig  | grep ''inet addr:''| grep -v ''127.0.0.1'' | cut -d: -f2 | awk ''{ print $1}''']);
+    [tempo, MasterName]=system('hostname --fqdn');
 else    
     [tempo, MasterName]=system('hostname');
 end
@@ -105,7 +106,7 @@ for j=1:totCPU,
     fclose(fid1);
     
     if Parallel(indPC).Local == 1, % run on the local machine
-        if isunix,
+        if isunix || (~matlab_ver_less_than('7.4') && ismac),
             if exist('OCTAVE_VERSION')
                 command1=['octave --eval fParallel\(',int2str(offset+1),',',int2str(sum(nBlockPerCPU(1:j))),',',int2str(j),',',int2str(indPC),',\''',fname,'\''\) &'];
             else
@@ -119,8 +120,9 @@ for j=1:totCPU,
             end
         end
     else
-        if isunix,
-            [tempo, RemoteName]=system(['ssh ',Parallel(indPC).user,'@',Parallel(indPC).PcName,' "ifconfig  | grep \''inet addr:\''| grep -v \''127.0.0.1\'' | cut -d: -f2 | awk \''{ print $1}\''"']);
+        if isunix || (~matlab_ver_less_than('7.4') && ismac),
+%             [tempo, RemoteName]=system(['ssh ',Parallel(indPC).user,'@',Parallel(indPC).PcName,' "ifconfig  | grep \''inet addr:\''| grep -v \''127.0.0.1\'' | cut -d: -f2 | awk \''{ print $1}\''"']);
+            [tempo, RemoteName]=system(['ssh ',Parallel(indPC).user,'@',Parallel(indPC).PcName,' "hostname --fqdn"']);
             RemoteName=RemoteName(1:end-1);
             RemoteFolder = Parallel(indPC).RemoteFolder;
         else    
@@ -137,7 +139,7 @@ for j=1:totCPU,
         end
         if remoteFlag,
             if j==nCPU0+1,
-                if isunix,
+                if isunix || (~matlab_ver_less_than('7.4') && ismac),
                     system(['ssh ',Parallel(indPC).user,'@',Parallel(indPC).PcName,' rm -fr ',Parallel(indPC).RemoteFolder,'/*']);
                 else
                     mydelete('*.*',['\\',Parallel(indPC).PcName,'\',Parallel(indPC).RemoteDrive,'$\',Parallel(indPC).RemoteFolder,'\']);
@@ -150,7 +152,7 @@ for j=1:totCPU,
                     end
                 end
                 
-                if isunix,
+                if isunix || (~matlab_ver_less_than('7.4') && ismac),
                     system(['scp ',fname,'_input.mat ',Parallel(indPC).user,'@',Parallel(indPC).PcName,':',Parallel(indPC).RemoteFolder]);
                     for jfil=1:size(NamFileInput,1)
                         if ~isempty(NamFileInput{jfil,1})
@@ -167,7 +169,7 @@ for j=1:totCPU,
             end
         end
         
-        if isunix,
+        if isunix || (~matlab_ver_less_than('7.4') && ismac),
             if exist('OCTAVE_VERSION'),
                 command1=['ssh ',Parallel(indPC).user,'@',Parallel(indPC).PcName,' "cd ',Parallel(indPC).RemoteFolder, '; octave --eval fParallel\(',int2str(offset+1),',',int2str(sum(nBlockPerCPU(1:j))),',',int2str(j),',',int2str(indPC),',\''',fname,'\''\);" &'];              
             else
@@ -199,7 +201,7 @@ end
 fclose(fid);
 
 % Run the slaves
-if isunix,
+if isunix || (~matlab_ver_less_than('7.4') && ismac),
     system('sh ConcurrentCommand1.bat &');
     pause(1)
 else
