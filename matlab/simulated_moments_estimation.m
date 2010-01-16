@@ -116,7 +116,7 @@ if nargin>3
         end
     end
     % If needed, compile dynamic model mex file on each remote computer
-    if use_dll_flag
+    if ~strcmpi(hostname,parallel(i).machine) && use_dll_flag
         % Write a matlab script that will trigger the compilation of the mex file.
         fid = fopen('compile_model.m', 'w');
         fprintf(fid,[' eval(''mex -O LDFLAGS=''''-pthread -shared -Wl,--no-undefined'''' ' M_.fname '_dynamic.c'')  ']);
