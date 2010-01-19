@@ -24,7 +24,8 @@ MATLAB_PATH = matlabroot;
 COMPILE_OPTIONS = '';
 
 if strcmpi('GLNX86', computer) || strcmpi('GLNXA64', computer) ...
-        || strcmpi('MACI', computer) || strcmpi('MAC', computer)
+        || strcmpi('MACI', computer) || strcmpi('MAC', computer) ...
+        || strcmpi('MACI64', computer)
     % GNU/Linux (x86-32 or x86-64) or MacOS (Intel or PPC)
     LAPACK_PATH = '-lmwlapack';
     if matlab_ver_less_than('7.5')
