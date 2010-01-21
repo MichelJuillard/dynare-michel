@@ -139,8 +139,9 @@ if nargin>3
             % Create random number streams
             write_job(hostname, parallel(i).machine, parallel(i).dynare, ...
                       options.simulated_sample_size, length(sample_moments), ...
-                      dataset.observed_variables_idx, options.estimated_parameters.idx, options.burn_in_periods, [M_.fname '_moments'], parallel(i).number_of_simulations, ...
-                      parallel(i).number_of_threads_per_job, job, j);
+                      dataset.observed_variables_idx, options.estimated_variances.idx, options.estimated_parameters.idx, options.burn_in_periods, [M_.fname '_moments'], parallel(i).number_of_simulations, ...
+                      parallel(i).number_of_threads_per_job, job, j, options.estimated_parameters.nb, options.estimated_parameters.nv, ...
+                      options.estimated_parameters.np);
             if ~strcmpi(hostname,parallel(i).machine)
                 unix(['scp ' , 'job' , int2str(job) , '.m ' , parallel(i).login , '@' , parallel(i).machine , ':' parallel(i).folder ]);
             end
@@ -185,7 +186,7 @@ elseif options.optimization_routine==2
 end
 
 
-function write_job(hostname, remotename, dynare_path, sample_size, number_of_moments, observed_variables_idx, parameters_idx, burn_in_periods, moments_file_name, number_of_simulations,threads_per_job, slave_number, job_number)
+function write_job(hostname, remotename, dynare_path, sample_size, number_of_moments, observed_variables_idx, variance_idx, parameters_idx, burn_in_periods, moments_file_name, number_of_simulations,threads_per_job, slave_number, job_number,nb,nv,np)
  
 fid = fopen(['job' int2str(slave_number) '.m'],'w');
 
@@ -206,7 +207,10 @@ end
 fprintf(fid,['simulated_moments = zeros(' int2str(number_of_moments) ',1);\n\n']);
 
 fprintf(fid,'load(''estimated_parameters.mat'');\n');
-fprintf(fid,['M_.params([' num2str(parameters_idx)  ']) = xparams;\n\n']);
+fprintf(fid,['M_.params([' num2str(parameters_idx)  ']) = xparams(' int2str(nv) '+1:' int2str(nb) ');\n\n']);
+fprintf(fid,'tmp = diag(M_.Sigma_e);')
+fprintf(fid,['tmp([' num2str(variance_idx)  ']) = xparams(1:' int2str(nv) ').^2;\n\n']);
+fprintf(fid,'M_.Sigma_e = diag(tmp);')
 
 fprintf(fid,['stream=RandStream(''mt19937ar'',''Seed'',' int2str(slave_number) ');\n']);
 fprintf(fid,['RandStream.setDefaultStream(stream);\n\n']);
