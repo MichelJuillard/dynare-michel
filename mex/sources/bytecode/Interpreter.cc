@@ -21,6 +21,7 @@
 #include "Interpreter.hh"
 #define BIG 1.0e+8;
 #define SMALL 1.0e-5;
+//#define DEBUG
 
 Interpreter::Interpreter(double *params_arg, double *y_arg, double *ya_arg, double *x_arg, double *steady_y_arg, double *steady_x_arg,
                          double *direction_arg, int y_size_arg,
@@ -169,6 +170,11 @@ Interpreter::compute_block_time(int Per_u_, bool evaluate, int block_num)
                 Stack.push(y[var]);
 #ifdef DEBUG
               tmp_out << " y[" << var << "](" << y[var] << ")";
+              if(var<0 || var>= y_size)
+                {
+                  mexPrintf("y[%d]=",var);
+                  mexErrMsgTxt("End of bytecode");
+                }
 #endif
               break;
             case eExogenous:
@@ -238,6 +244,7 @@ Interpreter::compute_block_time(int Per_u_, bool evaluate, int block_num)
           //load a temporary variable in the processor
           var = ((FLDT_ *) it_code->second)->get_pos();
 #ifdef DEBUG
+          mexPrintf("T[it_=%d var=%d, y_kmin=%d, y_kmax=%d == %d]=>%f\n", it_, var, y_kmin, y_kmax, var*(periods+y_kmin+y_kmax)+it_, var);
           tmp_out << " T[" << it_ << ", " << var << "](" << T[var*(periods+y_kmin+y_kmax)+it_] << ")";
 #endif
           Stack.push(T[var*(periods+y_kmin+y_kmax)+it_]);
@@ -274,7 +281,7 @@ Interpreter::compute_block_time(int Per_u_, bool evaluate, int block_num)
           break;
         case FLDZ:
           //load 0 in the processor
-          Stack.push(0);
+          Stack.push(0.0);
 #ifdef DEBUG
           tmp_out << " 0";
 #endif
@@ -397,6 +404,7 @@ Interpreter::compute_block_time(int Per_u_, bool evaluate, int block_num)
           var += Per_u_;
           u[var] = Stack.top();
 #ifdef DEBUG
+          mexPrintf("FSTPU\n");
           tmp_out << "=>";
           mexPrintf(" u[%d](%f)=%s\n", var, u[var], tmp_out.str().c_str());
           tmp_out.str("");
@@ -406,6 +414,10 @@ Interpreter::compute_block_time(int Per_u_, bool evaluate, int block_num)
         case FSTPSU:
           //store in u variable from the processor
           var = ((FSTPSU_ *) it_code->second)->get_pos();
+#ifdef DEBUG
+          if(var>=u_count_alloc || var<0)
+            mexPrintf("Erreur var=%d\n",var);
+#endif
           u[var] = Stack.top();
 #ifdef DEBUG
           tmp_out << "=>";
@@ -1288,6 +1300,7 @@ Interpreter::simulate_a_block(const int size, const int type, string file_name, 
                   Per_u_ = (it_-y_kmin)*u_count_int;
                   Per_y_ = it_*y_size;
                   it_code = begining;
+                  error_not_printed = true;
                   compute_block_time(Per_u_, false, block_num);
                   if (isnan(res1) || isinf(res1))
                     {

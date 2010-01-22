@@ -326,20 +326,12 @@ SparseMatrix::Read_SparseMatrix(string file_name, const int Size, int periods, i
   for (j = 0; j < Size; j++)
     SaveCode.read(reinterpret_cast<char *>(&index_vara[j]), sizeof(*index_vara));
   if (periods+y_kmin+y_kmax > 1)
-    {
-      for (i = 1; i < periods+y_kmin+y_kmax; i++)
-        {
-          for (j = 0; j < Size; j++)
-            {
-              index_vara[j+Size*i] = index_vara[j+Size*(i-1)]+y_size;
-            }
-        }
-    }
+    for (i = 1; i < periods+y_kmin+y_kmax; i++)
+      for (j = 0; j < Size; j++)
+        index_vara[j+Size*i] = index_vara[j+Size*(i-1)]+y_size;
   index_equa = (int *) mxMalloc(Size*sizeof(int));
   for (j = 0; j < Size; j++)
-    {
-      SaveCode.read(reinterpret_cast<char *>(&index_equa[j]), sizeof(*index_equa));
-    }
+    SaveCode.read(reinterpret_cast<char *>(&index_equa[j]), sizeof(*index_equa));
 }
 
 void
@@ -367,13 +359,11 @@ SparseMatrix::Simple_Init(int it_, int y_kmin, int y_kmax, int Size, map<pair<pa
   i = Size*sizeof(int);
   NbNZRow = (int *) mxMalloc(i);
   NbNZCol = (int *) mxMalloc(i);
-  i = Size*sizeof(*b);
   it4 = IM.begin();
   eq = -1;
   //#pragma omp parallel for num_threads(atoi(getenv("DYNARE_NUM_THREADS")))
   for (i = 0; i < Size; i++)
     {
-      b[i] = 0;
       line_done[i] = 0;
       FNZE_C[i] = 0;
       FNZE_R[i] = 0;
@@ -961,12 +951,9 @@ SparseMatrix::bksub(int tbreak, int last_period, int Size, double slowc_l)
           nb_var--;
           int eq = index_vara[j]+y_size;
           yy = 0;
-          ostringstream tmp_out;
-          tmp_out.clear();
           for (k = 0; k < nb_var; k++)
             {
               yy += y[index_vara[first->c_index]+cal_y]*u[first->u_index];
-              tmp_out << "y[" << index_vara[first->c_index]+cal_y << "]" << "(" << y[index_vara[first->c_index]+cal_y] << ")*u[" << first->u_index << "](" << u[first->u_index] << ")+";
               first = first->NZE_R_N;
             }
           yy = -(yy+y[eq]+u[b[pos]]);
@@ -994,13 +981,9 @@ SparseMatrix::simple_bksub(int it_, int Size, double slowc_l)
       nb_var--;
       int eq = index_vara[i];
       yy = 0;
-      ostringstream tmp_out;
-      tmp_out.clear();
-      tmp_out << "|";
       for (k = 0; k < nb_var; k++)
         {
           yy += y[index_vara[first->c_index]+it_*y_size]*u[first->u_index];
-          tmp_out << "y[" << index_vara[first->c_index]+it_*y_size << "](" << y[index_vara[first->c_index]+it_*y_size] << ")*u[" << first->u_index << "](" << u[first->u_index] << ")+";
           first = first->NZE_R_N;
         }
       yy = -(yy+y[eq+it_*y_size]+u[b[pos]]);
@@ -1046,7 +1029,7 @@ SparseMatrix::simulate_NG(int blck, int y_size, int it_, int y_kmin, int y_kmax,
               else
                 mexPrintf("   variable %d at time %d = %f direction = %f\n", j+1, it_, y[j+it_*y_size], direction[j+it_*y_size]);
             }
-          mexPrintf("res1=%5.25\n", res1);
+          mexPrintf("res1=%5.10f\n", res1);
           mexPrintf("The initial values of endogenous variables are too far from the solution.\n");
           mexPrintf("Change them!\n");
           mexEvalString("drawnow;");
@@ -1063,35 +1046,40 @@ SparseMatrix::simulate_NG(int blck, int y_size, int it_, int y_kmin, int y_kmax,
               mexErrMsgTxt(filename.c_str());
             }
         }
-      if (slowc_save < 1e-8)
+      if (fabs(slowc_save) < 1e-8)
         {
-          for (j = 0; j < y_size; j++)
-            {
-              bool select = false;
-              for (int i = 0; i < Size; i++)
-                if (j == index_vara[i])
-                  {
-                    select = true;
-                    break;
-                  }
-              if (select)
-                mexPrintf("-> variable %d at time %d = %f direction = %f\n", j+1, it_, y[j+it_*y_size], direction[j+it_*y_size]);
-              else
-                mexPrintf("   variable %d at time %d = %f direction = %f\n", j+1, it_, y[j+it_*y_size], direction[j+it_*y_size]);
-            }
-          mexPrintf("Dynare cannot improve the simulation in block %d at time %d (variable %d)\n", blck+1, it_+1, max_res_idx);
-          mexEvalString("drawnow;");
-          mxFree(piv_v);
-          mxFree(pivj_v);
-          mxFree(pivk_v);
-          mxFree(NR);
-          if (steady_state)
-            return false;
+          if (slowc_save>0)
+            slowc_save = -slowc;
           else
             {
-              mexEvalString("st=fclose('all');clear all;");
-              filename += " stopped";
-              mexErrMsgTxt(filename.c_str());
+              for (j = 0; j < y_size; j++)
+                {
+                  bool select = false;
+                  for (int i = 0; i < Size; i++)
+                    if (j == index_vara[i])
+                      {
+                        select = true;
+                        break;
+                      }
+                  if (select)
+                    mexPrintf("-> variable %d at time %d = %f direction = %f\n", j+1, it_, y[j+it_*y_size], direction[j+it_*y_size]);
+                  else
+                    mexPrintf("   variable %d at time %d = %f direction = %f\n", j+1, it_, y[j+it_*y_size], direction[j+it_*y_size]);
+                }
+              mexPrintf("Dynare cannot improve the simulation in block %d at time %d (variable %d)\n", blck+1, it_+1, max_res_idx);
+              mexEvalString("drawnow;");
+              mxFree(piv_v);
+              mxFree(pivj_v);
+              mxFree(pivk_v);
+              mxFree(NR);
+              if (steady_state)
+                return false;
+              else
+                {
+                  mexEvalString("st=fclose('all');clear all;");
+                  filename += " stopped";
+                  mexErrMsgTxt(filename.c_str());
+                }
             }
         }
       slowc_save /= 2;
@@ -1484,8 +1472,8 @@ SparseMatrix::simulate_NG1(int blck, int y_size, int it_, int y_kmin, int y_kmax
         {
           mexPrintf("slowc_save=%g\n", slowc_save);
           for (j = 0; j < y_size; j++)
-            mexPrintf("variable %d at time %d = %f\n", j+1, it_, y[j+it_*y_size]);
-          mexPrintf("Dynare cannot improve the simulation in block %d at time %d (variable %d)\n", blck+1, it_+1, max_res_idx);
+            mexPrintf("variable %d at time %d = %f direction = %f variable at last step = %f b = %f\n", j+1, it_+1, y[j+it_*y_size], direction[j+it_*y_size], ya[j+it_*y_size], u[pivot[j+it_*y_size]]);
+          mexPrintf("Dynare cannot improve the simulation in block %d at time %d (variable %d max_res = %f, res1 = %f)\n", blck+1, it_+1, max_res_idx, max_res, res1);
           mexEvalString("drawnow;");
           mexEvalString("st=fclose('all');clear all;");
           filename += " stopped";

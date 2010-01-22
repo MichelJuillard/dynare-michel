@@ -88,8 +88,9 @@ main(int argc, const char *argv[])
         }
     }
   fid = fopen(tmp_out.str().c_str(), "r");
-  int periods;
-  fscanf(fid, "%d", &periods);
+  int periods = 1;
+  if (!steady_state)
+    fscanf(fid, "%d", &periods);
   int maxit_;
   fscanf(fid, "%d", &maxit_);
   fscanf(fid, "%f", &f_tmp);

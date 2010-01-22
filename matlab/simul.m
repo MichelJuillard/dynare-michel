@@ -78,11 +78,15 @@ if(options_.block)
         eval([M_.fname '_dynamic']);
     end;
 else
-    if M_.maximum_endo_lag ==1 & M_.maximum_endo_lead <= 1
-        sim1 ;
+    if(options_.bytecode)
+        oo_.endo_simul=bytecode('dynamic');
     else
-        simk ;
-    end
+        if M_.maximum_endo_lag ==1 & M_.maximum_endo_lead <= 1
+            sim1 ;
+        else
+            simk ;
+        end;
+    end;
 end;
 
 dyn2vec;

@@ -165,12 +165,12 @@ private:
   int *g_save_op;
   int first_count_loop;
   int g_nop_all;
-  int u_count_alloc, u_count_alloc_save;
   double markowitz_c_s;
   double res1a;
   long int nop_all, nop1, nop2;
   map<pair<pair<int, int>, int>, int> IM_i;
 protected:
+  int u_count_alloc, u_count_alloc_save;
   double *u, *y, *ya;
   double res1, res2, max_res, max_res_idx;
   double slowc, slowc_save, markowitz_c;
