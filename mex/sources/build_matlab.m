@@ -60,7 +60,8 @@ matver = sscanf(verstruct.Version, '%d.%d.%d')';
 COMPILE_OPTIONS = [ COMPILE_OPTIONS ' -DMATLAB_MEX_FILE -DMATLAB_VERSION=0x' sprintf('%02d%02d', matver(1), matver(2)) ];
 
 % Large array dims for 64 bits platforms appeared in Matlab 7.3
-if (strcmpi('GLNXA64', computer) || strcmpi('PCWIN64', computer)) ...
+if (strcmpi('GLNXA64', computer) || strcmpi('PCWIN64', computer) ...
+    || strcmpi('MACI64', computer)) ...
         && ~matlab_ver_less_than('7.3')
     COMPILE_OPTIONS = [ COMPILE_OPTIONS ' -largeArrayDims' ];
 end
