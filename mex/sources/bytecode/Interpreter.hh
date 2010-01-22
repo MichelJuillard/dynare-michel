@@ -46,9 +46,15 @@ typedef vector<pair<Tags, void * > >::const_iterator it_code_type;
 
 class Interpreter : SparseMatrix
 {
-protected:
+private:
+  ExpressionType EQN_type;
+  unsigned int EQN_equation, EQN_block, EQN_block_number;
+  unsigned int EQN_dvar1, EQN_dvar2, EQN_dvar3;
+  int EQN_lag1, EQN_lag2, EQN_lag3;
+  protected:
   double pow1(double a, double b);
   double log1(double a);
+  string error_location();
   void compute_block_time(int Per_u_, bool evaluate, int block_num);
   void evaluate_a_block(const int size, const int type, string bin_basename, bool steady_state, int block_num,
                         const bool is_linear = false, const int symbol_table_endo_nbr = 0, const int Block_List_Max_Lag = 0, const int Block_List_Max_Lead = 0, const int u_count_int = 0);

@@ -55,6 +55,49 @@ Interpreter::Interpreter(double *params_arg, double *y_arg, double *ya_arg, doub
   minimal_solving_periods = minimal_solving_periods_arg;
 }
 
+string
+Interpreter::error_location()
+{
+  string tmp;
+  mxArray *M_;
+  double * P;
+  int R, C;
+  M_ = mexGetVariable("global", "M_");
+  stringstream Error_loc("in ");
+  switch(EQN_type)
+    {
+      case TemporaryTerm:
+        if (EQN_block_number>1)
+          Error_loc << "temporary term " << EQN_equation+1 << " in block " << EQN_block+1;
+        else
+          Error_loc << "temporary term " << EQN_equation+1;
+        break;
+      case ModelEquation:
+        if (EQN_block_number>1)
+          Error_loc << "equation " << EQN_equation+1 << " in block " << EQN_block+1;
+        else
+          Error_loc << "equation " << EQN_equation+1;
+        break;
+      case FirstEndoDerivative:
+        if (EQN_block_number>1)
+          Error_loc << "first order derivative " << EQN_equation+1 << " in block " << EQN_block+1 << " with respect to endogenous variable ";
+        else
+          Error_loc << "first order derivative " << EQN_equation+1 << " with respect to endogenous variable ";
+        R = mxGetN(mxGetFieldByNumber(M_, 0, mxGetFieldNumber(M_, "endo_names")));
+        C = mxGetM(mxGetFieldByNumber(M_, 0, mxGetFieldNumber(M_, "endo_names")));
+        P = (double*)mxGetPr(mxGetFieldByNumber(M_, 0, mxGetFieldNumber(M_, "endo_names")));
+        if(EQN_dvar1<R)
+          {
+            for(int i = 0; i < C; i++)
+              Error_loc << (char*)int(floor(P[EQN_dvar1*C+i]));
+          }
+        break;
+      default:
+        break;
+    }
+  return(Error_loc.str());
+}
+
 double
 Interpreter::pow1(double a, double b)
 {
@@ -63,7 +106,7 @@ Interpreter::pow1(double a, double b)
     {
       if (a < 0 && error_not_printed)
         {
-          mexPrintf("Error: X^a with X=%5.15f\n", a);
+          mexPrintf("--------------------------------------\n  Error: X^a with X=%5.15f\n  in %s\n--------------------------------------\n", a,error_location().c_str());
           error_not_printed = false;
           r = 0.0000000000000000000000001;
         }
@@ -82,7 +125,7 @@ Interpreter::log1(double a)
     {
       if (a <= 0 && error_not_printed)
         {
-          mexPrintf("Error: log(X) with X=%5.15f\n", a);
+          mexPrintf("--------------------------------------\n  Error: log(X) with X=%5.15f\n  in %s\n--------------------------------------\n", a,error_location().c_str());
           error_not_printed = false;
         }
       res1 = NAN;
@@ -100,10 +143,114 @@ Interpreter::compute_block_time(int Per_u_, bool evaluate, int block_num)
   double v1, v2;
   bool go_on = true;
   double ll;
+  EQN_block = block_num;
   while (go_on)
     {
       switch (it_code->first)
         {
+        case FNUMEXPR:
+          switch (((FNUMEXPR_ *) it_code->second)->get_expression_type())
+            {
+            case TemporaryTerm:
+              EQN_type = TemporaryTerm;
+              EQN_equation = ((FNUMEXPR_ *) it_code->second)->get_equation();
+              break;
+            case ModelEquation:
+              EQN_type = ModelEquation;
+              EQN_equation = ((FNUMEXPR_ *) it_code->second)->get_equation();
+              break;
+            case FirstEndoDerivative:
+              EQN_type = FirstEndoDerivative;
+              EQN_equation = ((FNUMEXPR_ *) it_code->second)->get_equation();
+              EQN_dvar1 = ((FNUMEXPR_ *) it_code->second)->get_dvariable1();
+              EQN_lag1 = ((FNUMEXPR_ *) it_code->second)->get_lag1();
+              break;
+            case FirstExoDerivative:
+              EQN_type = FirstExoDerivative;
+              EQN_equation = ((FNUMEXPR_ *) it_code->second)->get_equation();
+              EQN_dvar1 = ((FNUMEXPR_ *) it_code->second)->get_dvariable1();
+              EQN_lag1 = ((FNUMEXPR_ *) it_code->second)->get_lag1();
+              break;
+            case FirstExodetDerivative:
+              EQN_type = FirstExodetDerivative;
+              EQN_equation = ((FNUMEXPR_ *) it_code->second)->get_equation();
+              EQN_dvar1 = ((FNUMEXPR_ *) it_code->second)->get_dvariable1();
+              EQN_lag1 = ((FNUMEXPR_ *) it_code->second)->get_lag1();
+              break;
+            case FirstParamDerivative:
+              EQN_type = FirstParamDerivative;
+              EQN_equation = ((FNUMEXPR_ *) it_code->second)->get_equation();
+              EQN_dvar1 = ((FNUMEXPR_ *) it_code->second)->get_dvariable1();
+              break;
+            case SecondEndoDerivative:
+              EQN_type = FirstEndoDerivative;
+              EQN_equation = ((FNUMEXPR_ *) it_code->second)->get_equation();
+              EQN_dvar1 = ((FNUMEXPR_ *) it_code->second)->get_dvariable1();
+              EQN_lag1 = ((FNUMEXPR_ *) it_code->second)->get_lag1();
+              EQN_dvar2 = ((FNUMEXPR_ *) it_code->second)->get_dvariable2();
+              EQN_lag2 = ((FNUMEXPR_ *) it_code->second)->get_lag2();
+              break;
+            case SecondExoDerivative:
+              EQN_type = FirstExoDerivative;
+              EQN_equation = ((FNUMEXPR_ *) it_code->second)->get_equation();
+              EQN_dvar1 = ((FNUMEXPR_ *) it_code->second)->get_dvariable1();
+              EQN_lag1 = ((FNUMEXPR_ *) it_code->second)->get_lag1();
+              EQN_dvar2 = ((FNUMEXPR_ *) it_code->second)->get_dvariable2();
+              EQN_lag2 = ((FNUMEXPR_ *) it_code->second)->get_lag2();
+              break;
+            case SecondExodetDerivative:
+              EQN_type = FirstExodetDerivative;
+              EQN_equation = ((FNUMEXPR_ *) it_code->second)->get_equation();
+              EQN_dvar1 = ((FNUMEXPR_ *) it_code->second)->get_dvariable1();
+              EQN_lag1 = ((FNUMEXPR_ *) it_code->second)->get_lag1();
+              EQN_dvar2 = ((FNUMEXPR_ *) it_code->second)->get_dvariable2();
+              EQN_lag2 = ((FNUMEXPR_ *) it_code->second)->get_lag2();
+              break;
+            case SecondParamDerivative:
+              EQN_type = FirstParamDerivative;
+              EQN_equation = ((FNUMEXPR_ *) it_code->second)->get_equation();
+              EQN_dvar1 = ((FNUMEXPR_ *) it_code->second)->get_dvariable1();
+              EQN_dvar2 = ((FNUMEXPR_ *) it_code->second)->get_dvariable2();
+              break;
+            case ThirdEndoDerivative:
+              EQN_type = FirstEndoDerivative;
+              EQN_equation = ((FNUMEXPR_ *) it_code->second)->get_equation();
+              EQN_dvar1 = ((FNUMEXPR_ *) it_code->second)->get_dvariable1();
+              EQN_lag1 = ((FNUMEXPR_ *) it_code->second)->get_lag1();
+              EQN_dvar2 = ((FNUMEXPR_ *) it_code->second)->get_dvariable2();
+              EQN_lag2 = ((FNUMEXPR_ *) it_code->second)->get_lag2();
+              EQN_dvar3 = ((FNUMEXPR_ *) it_code->second)->get_dvariable3();
+              EQN_lag3 = ((FNUMEXPR_ *) it_code->second)->get_lag3();
+              break;
+            case ThirdExoDerivative:
+              EQN_type = FirstExoDerivative;
+              EQN_equation = ((FNUMEXPR_ *) it_code->second)->get_equation();
+              EQN_dvar1 = ((FNUMEXPR_ *) it_code->second)->get_dvariable1();
+              EQN_lag1 = ((FNUMEXPR_ *) it_code->second)->get_lag1();
+              EQN_dvar2 = ((FNUMEXPR_ *) it_code->second)->get_dvariable2();
+              EQN_lag2 = ((FNUMEXPR_ *) it_code->second)->get_lag2();
+              EQN_dvar3 = ((FNUMEXPR_ *) it_code->second)->get_dvariable3();
+              EQN_lag3 = ((FNUMEXPR_ *) it_code->second)->get_lag3();
+              break;
+            case ThirdExodetDerivative:
+              EQN_type = FirstExodetDerivative;
+              EQN_equation = ((FNUMEXPR_ *) it_code->second)->get_equation();
+              EQN_dvar1 = ((FNUMEXPR_ *) it_code->second)->get_dvariable1();
+              EQN_lag1 = ((FNUMEXPR_ *) it_code->second)->get_lag1();
+              EQN_dvar2 = ((FNUMEXPR_ *) it_code->second)->get_dvariable2();
+              EQN_lag2 = ((FNUMEXPR_ *) it_code->second)->get_lag2();
+              EQN_dvar3 = ((FNUMEXPR_ *) it_code->second)->get_dvariable3();
+              EQN_lag3 = ((FNUMEXPR_ *) it_code->second)->get_lag3();
+              break;
+            case ThirdParamDerivative:
+              EQN_type = FirstParamDerivative;
+              EQN_equation = ((FNUMEXPR_ *) it_code->second)->get_equation();
+              EQN_dvar1 = ((FNUMEXPR_ *) it_code->second)->get_dvariable1();
+              EQN_dvar2 = ((FNUMEXPR_ *) it_code->second)->get_dvariable2();
+              EQN_dvar3 = ((FNUMEXPR_ *) it_code->second)->get_dvariable3();
+              break;
+            }
+          break;
         case FLDV:
           //load a variable in the processor
           switch (((FLDV_ *) it_code->second)->get_type())
@@ -1391,6 +1538,7 @@ Interpreter::compute_blocks(string file_name, string bin_basename, bool steady_s
   CodeLoad code;
   //First read and store in memory the code
   code_liste = code.get_op_code(file_name);
+  EQN_block_number = code.get_block_number();
   if (!code_liste.size())
     {
       mexPrintf("%s.cod Cannot be opened\n", file_name.c_str());
