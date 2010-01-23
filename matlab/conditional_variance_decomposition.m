@@ -15,7 +15,7 @@ function PackedConditionalVarianceDecomposition = conditional_variance_decomposi
 %
 % [1] In this version, absence of measurement errors is assumed...
 
-% Copyright (C) 2009 Dynare Team
+% Copyright (C) 2010 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -31,6 +31,7 @@ function PackedConditionalVarianceDecomposition = conditional_variance_decomposi
 %
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
+
 number_of_state_innovations = ...
     StateSpaceModel.number_of_state_innovations;
 transition_matrix = StateSpaceModel.transition_matrix;
@@ -68,6 +69,6 @@ NumberOfVariables = length(SubsetOfVariables);
 PackedConditionalVarianceDecomposition = zeros(NumberOfVariables*(NumberOfVariables+1)/2,length(Steps),StateSpaceModel.number_of_state_innovations); 
 for i=1:number_of_state_innovations
     for h = 1:length(Steps)
-        PackedConditionalVarianceDecomposition(:,h,i) = vech(ConditionalVariance(:,:,h,i));
+        PackedConditionalVarianceDecomposition(:,h,i) = dyn_vech(ConditionalVariance(:,:,h,i));
     end
 end

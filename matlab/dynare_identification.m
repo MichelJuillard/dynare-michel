@@ -2,7 +2,7 @@ function [pdraws, TAU, GAM, LRE, gp, H, JJ] = dynare_identification(options_iden
 
 % main 
 %
-% Copyright (C) 2008 Dynare Team
+% Copyright (C) 2010 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -100,8 +100,8 @@ if iload <=0,
             %        bayestopt_.restrict_var_list, ...
             %        bayestopt_.restrict_columns, ...
             %        bayestopt_.restrict_aux, M_.exo_nbr);
-            %     tau=[vec(Aa); vech(Bb*M_.Sigma_e*Bb')];
-            tau=[oo_.dr.ys(oo_.dr.order_var); vec(A); vech(B*M_.Sigma_e*B')];
+            %     tau=[vec(Aa); dyn_vech(Bb*M_.Sigma_e*Bb')];
+            tau=[oo_.dr.ys(oo_.dr.order_var); vec(A); dyn_vech(B*M_.Sigma_e*B')];
             yy0=oo_.dr.ys(I);    
             [residual, g1 ] = feval([M_.fname,'_dynamic'],yy0, oo_.exo_steady_state', M_.params,1);    
 
@@ -121,7 +121,7 @@ if iload <=0,
                         gam{j+1}=gam{j+1}.*sy;
                     end
                 end
-                dum = vech(gam{1});
+                dum = dyn_vech(gam{1});
                 for j=1:nlags,
                     dum = [dum; vec(gam{j+1})];
                 end
@@ -277,7 +277,7 @@ end
 %   GAM0=GAM;
 % end
 % if useautocorr,
-%   idiag = find(vech(eye(size(options_.varobs,1))));
+%   idiag = find(dyn_vech(eye(size(options_.varobs,1))));
 %   GAM(idiag,:) = GAM(idiag,:)./(sGAM(idiag)'*ones(1,SampleSize));
 % %   siJmean(idiag,:) = siJmean(idiag,:)./(sGAM(idiag)'*ones(1,nparam));
 % %   siJmean = siJmean./(max(siJmean')'*ones(size(params)));

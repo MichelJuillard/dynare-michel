@@ -1,4 +1,4 @@
-function Vector = vech(Matrix)
+function Vector = dyn_vech(Matrix)
 % This function implements the vech operator.
 % 
 % INPUTS 
@@ -7,7 +7,7 @@ function Vector = vech(Matrix)
 % OUTPUTS 
 %   Vector             [double]   a n*(n+1)/2 vector.
 
-% Copyright (C) 2009 Dynare Team
+% Copyright (C) 2010 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -23,6 +23,7 @@ function Vector = vech(Matrix)
 %
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
+
 n = length(Matrix);
 b = 0;
 Vector = NaN(n*(n+1)/2,1);

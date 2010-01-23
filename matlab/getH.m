@@ -2,7 +2,7 @@ function [H, dA, dOm, Hss, gp, info] = getH(A, B, M_,oo_,kronflag,indx,indexo)
 
 % computes derivative of reduced form linear model w.r.t. deep params
 %
-% Copyright (C) 2008 Dynare Team
+% Copyright (C) 2010 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -279,7 +279,7 @@ else % generalized sylvester equation
             dSig(indexo(j),indexo(j)) = 2*sqrt(M_.Sigma_e(indexo(j),indexo(j)));
             y = B*dSig*B';
             y = y(nauxe+1:end,nauxe+1:end);
-            H(:,j) = [zeros((m-nauxe)^2,1); vech(y)];
+            H(:,j) = [zeros((m-nauxe)^2,1); dyn_vech(y)];
             if nargout>1,
                 dOm(:,:,j) = y;
             end
@@ -296,7 +296,7 @@ else % generalized sylvester equation
             dA(:,:,j+length(indexo)) = x;
             dOm(:,:,j+length(indexo)) = y;
         end
-        H(:,j+length(indexo)) = [x(:); vech(y)];
+        H(:,j+length(indexo)) = [x(:); dyn_vech(y)];
     end
     %     for j=1:param_nbr,
     %         disp(['Derivatives w.r.t. ',M_.param_names(indx(j),:),', ',int2str(j),'/',int2str(param_nbr)])
@@ -308,7 +308,7 @@ else % generalized sylvester equation
     %         y = y*B'+B*y';
     %         x = x(nauxe+1:end,nauxe+1:end);
     %         y = y(nauxe+1:end,nauxe+1:end);
-    %         H(:,j) = [x(:); vech(y)];
+    %         H(:,j) = [x(:); dyn_vech(y)];
     %     end
     H = [[zeros(M_.endo_nbr,length(indexo)) Hss]; H];
 
