@@ -8,7 +8,7 @@ order = options.order;
 
 switch(order)
   case 1
-    [g_0, g_1] = k_order_perturbation(dr,0,M,options, oo , ['.' ...
+    g_1 = k_order_perturbation(dr,0,M,options, oo , ['.' ...
                         mexext]);
     dr.g_1 = g_1;
   case 2
