@@ -38,6 +38,7 @@ if kronflag == -1,
 else
   [H, dA, dOm, dYss, gp] = getH(A, B, M_,oo_,kronflag,indx,indexo);  
   gp = reshape(gp,size(gp,1)*size(gp,2),size(gp,3));
+  gp = [dYss; gp];
   %   if isempty(H),
   %     JJ = [];
   %     GAM = [];

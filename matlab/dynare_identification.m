@@ -109,7 +109,7 @@ if iload <=0,
                 burnin_iteration = burnin_iteration + 1;
                 pdraws(burnin_iteration,:) = params;
                 TAU(:,burnin_iteration)=tau;
-                LRE(:,burnin_iteration)=vec(g1);      
+                LRE(:,burnin_iteration)=[oo_.dr.ys(oo_.dr.order_var); vec(g1)];      
                 [gam,stationary_vars] = th_autocovariances(oo0.dr,bayestopt_.mfys,M_,options_);
                 sdy = sqrt(diag(gam{1}));
                 sy = sdy*sdy';
@@ -146,7 +146,7 @@ if iload <=0,
 
             if iteration,
                 TAU(:,iteration)=tau(indH);
-                vg1 = vec(g1);
+                vg1 = [oo_.dr.ys(oo_.dr.order_var); vec(g1)];
                 LRE(:,iteration)=vg1(indLRE);
                 [JJ, H, gam, gp] = getJJ(A, B, M_,oo0,options_,0,indx,indexo,bayestopt_.mf2,nlags,useautocorr);      
                 GAM(:,iteration)=gam(indJJ);
@@ -200,7 +200,7 @@ if iload <=0,
                     
                 end
 
-                waitbar(iteration/SampleSize,h)
+                waitbar(iteration/SampleSize,h,['MC Identification, iteration ',int2str(iteration),'/',int2str(SampleSize)])
             end
         end
     end
