@@ -99,8 +99,8 @@ if(whoiam)
             end
             system(['scp ',fname,'_output_',int2str(whoiam),'.mat ',Parallel(ThisMatlab).user,'@',fInputVar.MasterName,':',fInputVar.DyMo]);
             system(['ssh ',Parallel(ThisMatlab).user,'@',fInputVar.MasterName,' rm -f ',fInputVar.DyMo,'/P_',fname,'_',int2str(whoiam),'End.txt']);
-            system(['fusermount -u ~/MasterRemoteMirror_',fname,'_',int2str(whoiam)]);
-            system(['rm -r ~/MasterRemoteMirror_',fname,'_',int2str(whoiam)]);      
+%             system(['fusermount -u ~/MasterRemoteMirror_',fname,'_',int2str(whoiam)]);
+%             system(['rm -r ~/MasterRemoteMirror_',fname,'_',int2str(whoiam)]);      
         else
             for j=1:size(OutputFileName,1),
                 copyfile([OutputFileName{j,1},OutputFileName{j,2}],['\\',fInputVar.MasterName,'\',fInputVar.DyMo(1),'$\',fInputVar.DyMo(4:end),'\',OutputFileName{j,1}])
