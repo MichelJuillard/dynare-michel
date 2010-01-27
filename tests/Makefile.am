@@ -17,6 +17,7 @@ OCTAVE_MODS = \
 	block_bytecode/fs2000_bicgstab.mod \
 	block_bytecode/fs2000_optpath.mod \
 	block_bytecode/fs2000_bytecode.mod \
+	block_bytecode/fs2000_block_bytecode.mod \
 	block_bytecode/ramst.mod \
 	block_bytecode/ireland.mod \
 	block_bytecode/ls2003.mod \

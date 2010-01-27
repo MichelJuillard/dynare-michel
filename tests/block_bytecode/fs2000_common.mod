@@ -11,13 +11,17 @@ rho = 0.7;
 psi = 0.787;
 del = 0.02;
 
-@#if block_bytecode == 2
+@#if block && bytecode
 model(block, bytecode);
 @#else
-@# if block_bytecode == 1
+@# if block && !bytecode
 model(block);
 @# else
+@#  if !block && bytecode
+model(bytecode);
+@#  else
 model;
+@#  endif
 @# endif
 @#endif
 
@@ -64,7 +68,7 @@ end;
 options_.maxit_=10;
 steady(solve_algo = @{solve_algo});
 
-@#if block_bytecode > 0
+@#if block
 model_info;
 @#endif
 
@@ -76,7 +80,7 @@ end;
 
 simul(periods=200, stack_solve_algo = @{stack_solve_algo});
 
-@#if block_bytecode > 0
+@#if block || bytecode
 if ~exist('fs2000_simk_results.mat','file');
    error('fs2000_simk must be run first');
 end;

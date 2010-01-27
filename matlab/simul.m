@@ -63,8 +63,8 @@ end
 if options_.block && ~options_.bytecode && (options_.stack_solve_algo == 0 || options_.stack_solve_algo == 5)
     error('SIMUL: for the moment, you must use stack_solve_algo={1,2,3,4} when using block without bytecode option')
 end
-if options_.block && options_.bytecode && options_.stack_solve_algo ~= 5
-    error('SIMUL: for the moment, you must use stack_solve_algo=5 with block and bytecode option')
+if options_.bytecode && options_.stack_solve_algo ~= 5
+    error('SIMUL: for the moment, you must use stack_solve_algo=5 with bytecode option')
 end
 
 if exist('OCTAVE_VERSION') && options_.stack_solve_algo == 2
