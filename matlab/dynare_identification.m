@@ -244,6 +244,9 @@ siLREmean = siLREmean./(max(siLREmean')'*ones(1,estim_params_.np));
 tstJmean = derJmean*0;
 tstHmean = derHmean*0;
 tstLREmean = derLREmean*0;
+warning_old_state = warning;
+warning off;
+
 for j=1:nparam,
   indd = 1:length(siJmean(:,j));
 tstJmean(indd,j) = abs(derJmean(indd,j))./siJmean(indd,j);
@@ -254,6 +257,8 @@ if j>offset
 tstLREmean(indd,j-offset) = abs(derLREmean(indd,j-offset))./siLREmean(indd,j-offset);
 end  
 end
+
+warning warning_old_state
 
 if nargout>3 & iload,
     filnam = dir([IdentifDirectoryName '/' M_.fname '_identif_*.mat']);
@@ -425,6 +430,7 @@ title('Multicollinearity in the moments')
 saveas(gcf,[IdentifDirectoryName,'/',M_.fname,'_ident'])
 eval(['print -depsc2 ' IdentifDirectoryName '/' M_.fname '_ident']);
 eval(['print -dpdf ' IdentifDirectoryName '/' M_.fname '_ident']);
+if options_.nograph, close(gcf); end
 
 
 figure,
@@ -440,6 +446,7 @@ title('log10 of Condition number in the LRE model')
 saveas(gcf,[IdentifDirectoryName,'/',M_.fname,'_ident_COND'])
 eval(['print -depsc2 ' IdentifDirectoryName '/' M_.fname '_ident_COND']);
 eval(['print -dpdf ' IdentifDirectoryName '/' M_.fname '_ident_COND']);
+if options_.nograph, close(gcf); end
 ifig=0;
 nbox = min(estim_params_.np-1,12);
 for j=1:estim_params_.np,  
@@ -463,5 +470,60 @@ for j=1:estim_params_.np,
         saveas(gcf,[IdentifDirectoryName,'/',M_.fname,'_ident_PCORR_LRE',int2str(ifig)])
         eval(['print -depsc2 ' IdentifDirectoryName '/' M_.fname '_ident_PCORR_LRE',int2str(ifig)]);
         eval(['print -dpdf ' IdentifDirectoryName '/' M_.fname '_ident_PCORR_LRE',int2str(ifig)]);
+        if options_.nograph, close(gcf); end
+    end
+end
+
+ifig=0;
+nbox = min(nparam-1,12);
+for j=1:nparam,  
+    if mod(j,12)==1,    
+        ifig = ifig+1;    
+        figure('name','Partial correlations in the model'),    
+        iplo=0;  
+    end
+    iplo=iplo+1;    
+    mmm = mean(squeeze(idemodel.Pco(:,j,:))');    
+    [sss, immm] = sort(-mmm);    
+    subplot(3,4,iplo), 
+    myboxplot(squeeze(idemodel.Pco(immm(2:nbox+1),j,:))'),
+    set(gca,'ylim',[0 1])
+    set(gca,'xticklabel','')
+    for ip=1:nbox, %estim_params_.np,  
+        text(ip,-0.02,bayestopt_.name{immm(ip+1)},'rotation',90,'HorizontalAlignment','right','interpreter','none')
+    end
+    title(bayestopt_.name{j}),
+    if j==nparam | mod(j,12)==0  
+        saveas(gcf,[IdentifDirectoryName,'/',M_.fname,'_ident_PCORR_model',int2str(ifig)])
+        eval(['print -depsc2 ' IdentifDirectoryName '/' M_.fname '_ident_PCORR_model',int2str(ifig)]);
+        eval(['print -dpdf ' IdentifDirectoryName '/' M_.fname '_ident_PCORR_model',int2str(ifig)]);
+        if options_.nograph, close(gcf); end
+    end
+end
+
+ifig=0;
+nbox = min(nparam-1,12);
+for j=1:nparam,  
+    if mod(j,12)==1,    
+        ifig = ifig+1;    
+        figure('name','Partial correlations in the 1st and 2nd moments'),    
+        iplo=0;  
+    end
+    iplo=iplo+1;    
+    mmm = mean(squeeze(idemoments.Pco(:,j,:))');    
+    [sss, immm] = sort(-mmm);    
+    subplot(3,4,iplo), 
+    myboxplot(squeeze(idemoments.Pco(immm(2:nbox+1),j,:))'),
+    set(gca,'ylim',[0 1])
+    set(gca,'xticklabel','')
+    for ip=1:nbox, %estim_params_.np,  
+        text(ip,-0.02,bayestopt_.name{immm(ip+1)},'rotation',90,'HorizontalAlignment','right','interpreter','none')
+    end
+    title(bayestopt_.name{j}),
+    if j==nparam | mod(j,12)==0  
+        saveas(gcf,[IdentifDirectoryName,'/',M_.fname,'_ident_PCORR_moments',int2str(ifig)])
+        eval(['print -depsc2 ' IdentifDirectoryName '/' M_.fname '_ident_PCORR_moments',int2str(ifig)]);
+        eval(['print -dpdf ' IdentifDirectoryName '/' M_.fname '_ident_PCORR_moments',int2str(ifig)]);
+        if options_.nograph, close(gcf); end
     end
 end
