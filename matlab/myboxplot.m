@@ -149,6 +149,7 @@ cap_y = whisker_y([1,1],:);
 
 mm=min(min(data));
 MM=max(max(data));
+if isnan(mm), mm=0; MM=0; end,
 
 if vertical
     plot (quartile_x, quartile_y, 'b',  ...
