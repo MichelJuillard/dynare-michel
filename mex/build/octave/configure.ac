@@ -35,6 +35,7 @@ AC_PROG_CC
 AC_PROG_CXX
 AC_PROG_RANLIB
 AX_PROG_LN_S
+AC_PROG_MKDIR_P
 AX_PTHREAD
 # Check for dlopen(), needed by k_order_perturbation DLL
 AC_CHECK_LIB([dl], [dlopen], [LIBADD_DLOPEN="-ldl"], [])

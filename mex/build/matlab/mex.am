@@ -10,6 +10,7 @@ LDFLAGS += $(MATLAB_LDFLAGS)
 LIBS += $(MATLAB_LIBS)
 
 all-local:
+	$(MKDIR_P) $(top_srcdir)/../../matlab
 	cd $(top_srcdir)/../../matlab && \
 	for p in $(PROGRAMS); do \
 		$(LN_S) -f $(abs_srcdir)/$$p $$p; \
