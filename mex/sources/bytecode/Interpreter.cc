@@ -1189,7 +1189,7 @@ Interpreter::simulate_a_block(const int size, const int type, string file_name, 
                   result = simulate_NG(Block_Count, symbol_table_endo_nbr, 0, 0, 0, size, false, cvg, iter, true);
                   iter++;
                 }
-              if (!cvg)
+              if (!cvg or !result)
                 {
                   mexPrintf("Convergence not achieved in block %d, after %d iterations\n", Block_Count, iter);
                   return false;
@@ -1205,6 +1205,11 @@ Interpreter::simulate_a_block(const int size, const int type, string file_name, 
               compute_block_time(0, false, block_num);
               cvg = false;
               result = simulate_NG(Block_Count, symbol_table_endo_nbr, 0, 0, 0, size, false, cvg, iter, true);
+              if (!result)
+                {
+                  mexPrintf("Convergence not achieved in block %d\n", Block_Count);
+                  return false;
+                }
             }
         }
       else
@@ -1324,7 +1329,7 @@ Interpreter::simulate_a_block(const int size, const int type, string file_name, 
                   result = simulate_NG(Block_Count, symbol_table_endo_nbr, 0, 0, 0, size, false, cvg, iter, true);
                   iter++;
                 }
-              if (!cvg)
+              if (!cvg or !result)
                 {
                   mexPrintf("Convergence not achieved in block %d, after %d iterations\n", Block_Count, iter);
                   return false;
@@ -1340,6 +1345,11 @@ Interpreter::simulate_a_block(const int size, const int type, string file_name, 
               compute_block_time(0, false, block_num);
               cvg = false;
               result = simulate_NG(Block_Count, symbol_table_endo_nbr, 0, 0, 0, size, false, cvg, iter, true);
+              if (!result)
+                {
+                  mexPrintf("Convergence not achieved in block %d\n", Block_Count);
+                  return false;
+                }
             }
         }
       else
