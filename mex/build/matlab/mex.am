@@ -17,4 +17,6 @@ all-local:
 	done
 
 clean-local:
-	cd $(top_srcdir)/../../matlab && rm -f $(PROGRAMS)
+	if test -d $(top_srcdir)/../../matlab; then \
+		cd $(top_srcdir)/../../matlab && rm -f $(PROGRAMS); \
+	fi

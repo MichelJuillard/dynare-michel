@@ -29,4 +29,6 @@ all-local:
 	done
 
 clean-local:
-	cd $(top_srcdir)/../../octave && rm -f $(PROGRAMS)
+	if test -d $(top_srcdir)/../../octave; then \
+		cd $(top_srcdir)/../../octave && rm -f $(PROGRAMS); \
+	fi
