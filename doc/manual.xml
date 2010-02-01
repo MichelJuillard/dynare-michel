@@ -2175,6 +2175,9 @@ stoch_simul(linear,irf=60) y k;
   <para>
     <command>varobs</command> lists the name of observed endogenous variables for the estimation procedure. These variables must be available in the data file (see <xref linkend='estimation'/>).
   </para>
+  <para>
+    Successive instances of <command>varobs</command> overwrite the list of observed variables. They don't add to the list.
+  </para>
   </refsect1>
 
   <refsect1><title>Example</title>
