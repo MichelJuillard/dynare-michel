@@ -1,162 +1,130 @@
-*.in
-*.eps
-*.pdf
-*.fig
-*.output
+# For checking that no file has been unduly ignored, run:
+# $ git ls-files -i --exclude-per-directory=.gitignore
+# Any file that is displayed should be removed from the ignore list
+# (possibly by an exclusion rule beginning with an exclamation mark)
+
+# Generic ignore rules
 *~
+*.o
+*.a
 
-# /
-/configure
-/config.log
-/config.status
-/aclocal.m4
-/autom4te.cache
-/Makefile
-/Makefile.in
-/config.guess
-/config.sub
-/depcomp
-/install-sh
-/missing
-/ylwrap
+# Build system rules
+.deps
+Makefile
+Makefile.in
+configure
+config.log
+config.status
+aclocal.m4
+autom4te.cache
+config.guess
+config.sub
+depcomp
+install-sh
+missing
+ylwrap
 
-# /doc/
-/doc/guide.log
-/doc/guide.aux
-/doc/guide.pdf
-/doc/bvar-a-la-sims.log
-/doc/bvar-a-la-sims.aux
-/doc/bvar-a-la-sims.pdf
-/doc/manual-html
-/doc/manual.pdf
-/doc/Makefile
+# Doc rules
+*.pdf
+*.aux
+*.log
+*.out
+*.toc
+*.idx
+*.scn
+*.nav
+*.snm
+*.vrb
+*.bbl
+*.blg
+*.lof
+/doc/manual-html/
+!/doc/guide.bbl
+!/doc/macroprocessor/new-design.pdf
+!/doc/macroprocessor/old-design.pdf
+!/doc/userguide/P_ModStruct3.pdf
+!/doc/userguide/P_MH2.pdf
+!/doc/userguide/P_flowest.pdf
+!/doc/userguide/P_ModStruct4.pdf
+!/doc/userguide/Graphics/DynareFigures.key/droppedImage-2.pdf
+!/doc/userguide/Graphics/DynareFigures.key/droppedImage.pdf
+!/doc/userguide/Graphics/DynareFigures.key/droppedImage-1.pdf
+!/doc/userguide/Graphics/DynareTitle.pdf
+!/doc/userguide/P_ModStruct5.pdf
+!/doc/userguide/P_DynareStruct2.pdf
+!/doc/userguide/P_SchorfMod.pdf
+!/doc/userguide/P_ModStruct2.pdf
+!/doc/userguide/P_ShockModel2.pdf
 
-# /doc/macroprocessor/
-/doc/macroprocessor/macroprocessor.log
-/doc/macroprocessor/macroprocessor.nav
-/doc/macroprocessor/macroprocessor.toc
-/doc/macroprocessor/macroprocessor.out
-/doc/macroprocessor/macroprocessor.aux
-/doc/macroprocessor/macroprocessor.snm
-/doc/macroprocessor/macroprocessor.pdf
-/doc/macroprocessor/Makefile
-
-# /doc/preprocessor/
-/doc/preprocessor/preprocessor.aux
-/doc/preprocessor/preprocessor.snm
-/doc/preprocessor/preprocessor.out
-/doc/preprocessor/preprocessor.log
-/doc/preprocessor/preprocessor.nav
-/doc/preprocessor/preprocessor.toc
-/doc/preprocessor/preprocessor.vrb
-/doc/preprocessor/preprocessor.pdf
-/doc/preprocessor/Makefile
-
-# /doc/userguide/
-/doc/userguide/*.log
-/doc/userguide/*.aux
-/doc/userguide/*.toc
-/doc/userguide/*.lof
-/doc/userguide/*.blg
-/doc/userguide/*.bbl
-/doc/userguide/*.out
-/doc/userguide/UserGuide.pdf
-/doc/userguide/Makefile
-doc/userguide/models/H.dat
-doc/userguide/models/RBC_DataGen.log
-doc/userguide/models/RBC_DataGen.m
-doc/userguide/models/RBC_DataGen_dynamic.m
-doc/userguide/models/RBC_DataGen_simul
-doc/userguide/models/RBC_DataGen_static.m
-doc/userguide/models/RBC_Est.log
-doc/userguide/models/RBC_Est.m
-doc/userguide/models/RBC_Est/
-doc/userguide/models/RBC_Est_dynamic.m
-doc/userguide/models/RBC_Est_mode.mat
-doc/userguide/models/RBC_Est_params.mat
-doc/userguide/models/RBC_Est_static.m
-doc/userguide/models/g1.mat
-doc/userguide/models/g3.mat
-doc/userguide/models/simuldataRBC.m
-
-
-# /matlab/
-/matlab/dynare_m
-/matlab/dynare_m.exe
-/matlab/dynare_version.m
-
-# /mex/2007a/
-/mex/2007a/*.dll
-/mex/2007a/*.mexw32
-/mex/2007a/*.mexw64
-/mex/2007a/*.mexglx
-/mex/2007a/*.mexa64
-/mex/2007a/*.mexmac
-/mex/2007a/*.mexmaci
-/mex/2007a/*.mexs64
-
-# /mex/2007b/
-/mex/2007b/*.dll
-/mex/2007b/*.mexw32
-/mex/2007b/*.mexw64
-/mex/2007b/*.mexglx
-/mex/2007b/*.mexa64
-/mex/2007b/*.mexmac
-/mex/2007b/*.mexmaci
-/mex/2007b/*.mexs64
-
-# /mex/2009a-64bit/
-/mex/2009a-64bit/*.mexw64
-/mex/2009a-64bit/*.mexa64
-/mex/2009a-64bit/*.mexmaci64
-/mex/2009a-64bit/*.mexs64
-
-# /mex/octave/
-/mex/octave/*.mex
-
-# /mex/sources/korderpert/src/
-/mex/sources/korderpert/src/k_ord_dynare.cpp.r2336
-/mex/sources/korderpert/src/k_ord_dynare.cpp.r2344
-/mex/sources/korderpert/src/k_ord_dynare.cpp.mine
-
-# /preprocessor/
+# Preprocessor
+/preprocessor/dynare_m
+/preprocessor/dynare_m.exe
 /preprocessor/DynareBison.cc
 /preprocessor/DynareBison.hh
+/preprocessor/DynareFlex.cc
 /preprocessor/location.hh
 /preprocessor/position.hh
 /preprocessor/stack.hh
-/preprocessor/DynareFlex.cc
-/preprocessor/dynare_m.exe
-/preprocessor/dynare_m
-/preprocessor/Makefile
-/preprocessor/Makefile.in
-/preprocessor/.deps
-
-# /preprocessor/doc/
-/preprocessor/doc/html
-
-# /preprocessor/macro/
 /preprocessor/macro/MacroBison.cc
 /preprocessor/macro/MacroBison.hh
 /preprocessor/macro/MacroFlex.cc
 /preprocessor/macro/location.hh
 /preprocessor/macro/position.hh
 /preprocessor/macro/stack.hh
-/preprocessor/macro/.deps
-/preprocessor/macro/Makefile
-/preprocessor/macro/Makefile.in
+/preprocessor/doc/
 
-# /tests/
-/tests/Makefile
+# MATLAB dir
+/matlab/dynare_m
+/matlab/dynare_m.exe
+/matlab/dynare_version.m
 
-# /tests/arima/
-/tests/arima/data1.m
-/tests/arima/data2.m
+# DLL rules
+*.mex
+*.dll
+*.mexglx
+*.mexa64
+*.mexw32
+*.mexw64
+*.mexmaci
+*.mexmaci64
+/mex/matlab/
+/mex/octave/
 
-# /tests/homotopy/
-/tests/homotopy/*.log
-/tests/homotopy/*.m
-/tests/homotopy/*.mat
+# Dynare++
+/dynare++/integ/cc/*.cpp
+/dynare++/integ/cc/*.h
+/dynare++/integ/cc/main.tex
+/dynare++/integ/src/quadrature-points
+/dynare++/integ/testing/tests
+/dynare++/kord/*.cpp
+!/dynare++/kord/tests.cpp
+/dynare++/kord/*.h
+/dynare++/kord/main.tex
+/dynare++/kord/tests
+/dynare++/kord/out.txt
+/dynare++/sylv/testing/*.mm
+/dynare++/sylv/testing/tests
+/dynare++/parser/cc/*_ll.cc
+/dynare++/parser/cc/*_tab.cc
+/dynare++/parser/cc/*_tab.hh
+/dynare++/src/dynare++
+/dynare++/src/dynglob_ll.cc
+/dynare++/src/dynglob_tab.cc
+/dynare++/src/dynglob_tab.hh
+/dynare++/tl/cc/*.cpp
+/dynare++/tl/cc/*.h
+/dynare++/tl/cc/main.tex
+/dynare++/tl/testing/tests
+!/dynare++/extern/R/Makefile
 
-# /windows/
+# Windows
 /windows/dynare-version.nsi
+
+# Misc
+!/matlab/swz/c-code/Makefile
+!/mex/sources/kalman/cc/Makefile
+!/mex/sources/kalman/matlab/Makefile
+!/mex/sources/kalman/qt/f90/Makefile
+!/mex/sources/kalman/qt/test/Makefile
+!/mex/sources/kalman/sylv/cc/Makefile
+!/mex/sources/kalman/testing/Makefile
