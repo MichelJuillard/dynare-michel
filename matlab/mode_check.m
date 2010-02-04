@@ -142,7 +142,7 @@ for plt = 1:nbplt,
     if TeX
         % TeX eps loader file
         fprintf(fidTeX,'\\begin{figure}[H]\n');
-        for jj = 1:nstar
+        for jj = 1:min(nstar,length(x)-(plt-1)*nstar)
             fprintf(fidTeX,'\\psfrag{%s}[1][][0.5][0]{%s}\n',deblank(NAMES(jj,:)),deblank(TeXNAMES(jj,:)));
         end
         fprintf(fidTeX,'\\centering \n');
