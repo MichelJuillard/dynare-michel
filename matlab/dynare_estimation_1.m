@@ -41,7 +41,12 @@ end
 
 %% Set the order of approximation to one (if needed).
 if options_.order > 1
-    options_.order = 1;
+    if ~exist('particle','dir')
+        disp('This version of Dynare cannot estimate non linearized models!')
+        disp('Set "order" equal to 1.')
+        disp(' ')
+        options_.order = 1;
+    end
 end
 
 %% Set options_.lik_init equal to 3 if diffuse filter is used.
