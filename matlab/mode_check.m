@@ -39,7 +39,11 @@ global bayestopt_ M_ options_
 
 TeX = options_.TeX;
 [ s_min, k ] = min(diag(hessian)) ;
-fval = DsgeLikelihood(x,gend,data,data_index,number_of_observations,no_more_missing_observations);
+if options_.bvar_dsge
+    fval = DsgeVarLikelihood(x,gend);
+else
+    fval = DsgeLikelihood(x,gend,data,data_index,number_of_observations,no_more_missing_observations);    
+end    
 bayestopt_.penalty=fval;  
 disp(' ')
 disp('MODE CHECK')
@@ -58,7 +62,6 @@ if TeX
     fprintf(fidTeX,['%% ' datestr(now,0) '\n']);
     fprintf(fidTeX,' \n');
 end
-
 
 for plt = 1:nbplt,
     if TeX
@@ -84,24 +87,20 @@ for plt = 1:nbplt,
         end
         for i=1:length(z)
             xx(kk) = z(i);
-            if isempty(strmatch('dsge_prior_weight',M_.param_names))
-                try
-                    [fval,cost_flag] = DsgeLikelihood(xx,gend,data,data_index,number_of_observations,no_more_missing_observations); 
-                catch
-                    cost_flag = 0;
-                end
-                if cost_flag
-                    y(i,1) = fval;
-                else
-                    y(i,1) = NaN;
-                end
-            else
+            if options_.bvar_dsge
                 [fval,cost_flag] = DsgeVarLikelihood(xx,gend);
                 if cost_flag
                     y(i,1) = fval;
                 else
                     y(i,1) = NaN;
-                end
+                end               
+            else
+                [fval,cost_flag] = DsgeLikelihood(xx,gend,data,data_index,number_of_observations,no_more_missing_observations);
+                if cost_flag
+                    y(i,1) = fval;
+                else
+                    y(i,1) = NaN;
+                end               
             end
             if options_.mode_check_nolik==0
                 lnprior = priordens(xx,bayestopt_.pshape,bayestopt_.p6,bayestopt_.p7,bayestopt_.p3,bayestopt_.p4);
