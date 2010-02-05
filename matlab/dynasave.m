@@ -12,7 +12,7 @@ function dynasave(s,var_list)
 % SPECIAL REQUIREMENTS
 %    none
 
-% Copyright (C) 2001-2009 Dynare Team
+% Copyright (C) 2001-2010 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -46,12 +46,9 @@ for i=1:n
     end
 end
 
-%  dyn2vec(var_list(1),var_list(1));
-eval([var_list(1) '=oo_.endo_simul(ivar(1),:)'';'])
-eval(['save ' s ' ' var_list(1) ' -mat'])
+eval([var_list(1,:) '=oo_.endo_simul(ivar(1),:)'';'])
+eval(['save ' s ' ' var_list(1,:) ' -mat'])
 for dynare__i_ = 2:n
-    eval([var_list(dynare__i_) '=oo_.endo_simul(ivar(dynare__i_),:)'';'])
-    eval(['save ' s ' ' var_list(dynare__i_) ' -append -mat'])
+    eval([var_list(dynare__i_,:) '=oo_.endo_simul(ivar(dynare__i_),:)'';'])
+    eval(['save ' s ' ' var_list(dynare__i_,:) ' -append -mat'])
 end
-
-
