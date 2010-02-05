@@ -17,8 +17,8 @@
  * along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#define _GLIBCXX_USE_C99_FENV_TR1 1
-#include <cfenv>
+//#define _GLIBCXX_USE_C99_FENV_TR1 1
+//#include <cfenv>
 
 #include <cstring>
 #include <ctime>
@@ -1718,7 +1718,7 @@ SparseMatrix::simulate_NG1(int blck, int y_size, int it_, int y_kmin, int y_kmax
                             }
                           else
                             markovitz = fabs(piv_v[j])/piv_abs;
-                          if (fetestexcept(FE_DIVBYZERO))
+                          /*if (fetestexcept(FE_DIVBYZERO))
                             {
                               if (error_not_printed)
                                 {
@@ -1728,7 +1728,7 @@ SparseMatrix::simulate_NG1(int blck, int y_size, int it_, int y_kmin, int y_kmax
                                 }
                               feclearexcept (FE_ALL_EXCEPT);
                               res1 = NAN;
-                            }
+                            }*/
                           //mexPrintf("piv_v[j]=%f NR[j]=%d markovitz=%f markovitz_max=%f\n", piv_v[j], NR[j], markovitz, markovitz_max);
                           if (markovitz > markovitz_max)
                             {
@@ -1758,7 +1758,7 @@ SparseMatrix::simulate_NG1(int blck, int y_size, int it_, int y_kmin, int y_kmax
                             }
                           else
                             markovitz = fabs(piv_v[j])/piv_abs;
-                          if (fetestexcept(FE_DIVBYZERO))
+                          /*if (fetestexcept(FE_DIVBYZERO))
                             {
                               if (error_not_printed)
                                 {
@@ -1768,7 +1768,7 @@ SparseMatrix::simulate_NG1(int blck, int y_size, int it_, int y_kmin, int y_kmax
                                 }
                               feclearexcept (FE_ALL_EXCEPT);
                               res1 = NAN;
-                            }
+                            }*/
                           if (/*markovitz > markovitz_max &&*/ NR[j] == 1)
                             {
                               piv = piv_v[j];

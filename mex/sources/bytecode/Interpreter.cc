@@ -16,8 +16,8 @@
  * You should have received a copy of the GNU General Public License
  * along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
  */
-#define _GLIBCXX_USE_C99_FENV_TR1 1
-#include <cfenv>
+//#define _GLIBCXX_USE_C99_FENV_TR1 1
+//#include <cfenv>
 
 #include <cstring>
 #include <sstream>
@@ -112,7 +112,7 @@ double
 Interpreter::pow1(double a, double b)
 {
   double r = pow_(a, b);
-  if (fetestexcept(FE_INVALID))
+  if (isnan(r) || isinf(r))
     {
       if (error_not_printed)
         {
@@ -120,7 +120,6 @@ Interpreter::pow1(double a, double b)
           error_not_printed = false;
           r = 0.0000000000000000000000001;
         }
-      feclearexcept (FE_ALL_EXCEPT);
       res1 = NAN;
       return r;
     }
@@ -131,7 +130,7 @@ double
 Interpreter::log1(double a)
 {
   double r = log(a);
-  if (fetestexcept(FE_INVALID | FE_DIVBYZERO))
+  if (isnan(r) || isinf(r))
     {
       if (error_not_printed)
         {
@@ -139,7 +138,6 @@ Interpreter::log1(double a)
           error_not_printed = false;
           r = 0.0000000000000000000000001;
         }
-      feclearexcept (FE_ALL_EXCEPT);
       res1 = NAN;
       return r;
     }
@@ -150,7 +148,7 @@ double
 Interpreter::log10_1(double a)
 {
   double r = log(a);
-  if (fetestexcept(FE_INVALID | FE_DIVBYZERO))
+  if (isnan(r) || isinf(r))
     {
       if (error_not_printed)
         {
@@ -158,7 +156,6 @@ Interpreter::log10_1(double a)
           error_not_printed = false;
           r = 0.0000000000000000000000001;
         }
-      feclearexcept (FE_ALL_EXCEPT);
       res1 = NAN;
       return r;
     }
@@ -655,7 +652,7 @@ Interpreter::compute_block_time(int Per_u_, bool evaluate, int block_num)
             case oDivide:
               double r;
               r = v1 / v2;
-              if (fetestexcept(FE_DIVBYZERO))
+              if (isinf(r))
                 {
                   if (error_not_printed)
                     {
@@ -663,7 +660,6 @@ Interpreter::compute_block_time(int Per_u_, bool evaluate, int block_num)
                       error_not_printed = false;
                       r = 1e70;
                     }
-                  feclearexcept (FE_ALL_EXCEPT);
                   res1 = NAN;
                 }
               Stack.push(r);
@@ -1086,14 +1082,13 @@ Interpreter::simulate_a_block(const int size, const int type, string file_name, 
               if (cvg)
                 continue;
               y[Block_Contain[0].Variable] += -r[0]/g1[0];
-              if (fetestexcept(FE_DIVBYZERO))
+              if (isinf(y[Block_Contain[0].Variable]))
                 {
                   if (error_not_printed)
                     {
                       mexPrintf("--------------------------------------\n  Error: Divide by zero with %5.15f/%5.15f\nSingularity in block %d\n--------------------------------------\n", r[0], g1[0], block_num);
                       error_not_printed = false;
                     }
-                  feclearexcept (FE_ALL_EXCEPT);
                   res1 = NAN;
                 }
               iter++;
@@ -1126,14 +1121,13 @@ Interpreter::simulate_a_block(const int size, const int type, string file_name, 
                   if (cvg)
                     continue;
                   y[Per_y_+Block_Contain[0].Variable] += -r[0]/g1[0];
-                  if (fetestexcept(FE_DIVBYZERO))
+                  if (isinf(y[Per_y_+Block_Contain[0].Variable]))
                     {
                       if (error_not_printed)
                         {
                           mexPrintf("--------------------------------------\n  Error: Divide by zero with %5.15f/%5.15f\nSingularity in block %d\n--------------------------------------\n", r[0], g1[0], block_num);
                           error_not_printed = false;
                         }
-                      feclearexcept (FE_ALL_EXCEPT);
                       res1 = NAN;
                     }
                   iter++;
@@ -1167,14 +1161,13 @@ Interpreter::simulate_a_block(const int size, const int type, string file_name, 
               if (cvg)
                 continue;
               y[Block_Contain[0].Variable] += -r[0]/g1[0];
-              if (fetestexcept(FE_DIVBYZERO))
+              if (isinf(y[Block_Contain[0].Variable]))
                 {
                   if (error_not_printed)
                     {
                       mexPrintf("--------------------------------------\n  Error: Divide by zero with %5.15f/%5.15f\nSingularity in block %d\n--------------------------------------\n", r[0], g1[0], block_num);
                       error_not_printed = false;
                     }
-                  feclearexcept (FE_ALL_EXCEPT);
                   res1 = NAN;
                 }
               iter++;
@@ -1206,14 +1199,13 @@ Interpreter::simulate_a_block(const int size, const int type, string file_name, 
                   if (cvg)
                     continue;
                   y[Per_y_+Block_Contain[0].Variable] += -r[0]/g1[0];
-                  if (fetestexcept(FE_DIVBYZERO))
+                  if (isinf(y[Per_y_+Block_Contain[0].Variable]))
                     {
                       if (error_not_printed)
                         {
                           mexPrintf("--------------------------------------\n  Error: Divide by zero with %5.15f/%5.15f\nSingularity in block %d\n--------------------------------------\n", r[0], g1[0], block_num);
                           error_not_printed = false;
                         }
-                      feclearexcept (FE_ALL_EXCEPT);
                       res1 = NAN;
                     }
                   iter++;
@@ -1273,7 +1265,7 @@ Interpreter::simulate_a_block(const int size, const int type, string file_name, 
                   if (cvg)
                     continue;
                   int prev_iter = iter;
-                  result = simulate_NG(Block_Count, symbol_table_endo_nbr, 0, 0, 0, size, true/*false*/, cvg, iter, true, EQN_block_number);
+                  result = simulate_NG(Block_Count, symbol_table_endo_nbr, 0, 0, 0, size, false, cvg, iter, true, EQN_block_number);
                   iter++;
                   if (iter > prev_iter)
                     {
