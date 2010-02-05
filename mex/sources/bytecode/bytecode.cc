@@ -21,9 +21,11 @@
 //                           simulate.cc                              //
 //              simulate file designed for GNU GCC C++ compiler       //
 ////////////////////////////////////////////////////////////////////////
+//#define _GLIBCXX_USE_C99_FENV_TR1 1
+//#include <cfenv>
+
 
 #include <cstring>
-
 #include "Interpreter.hh"
 #ifndef DEBUG_EX
 # include "mex.h"
@@ -33,10 +35,12 @@
 
 #include "Mem_Mngr.hh"
 
+
 #ifdef DEBUG_EX
 
 using namespace std;
 # include <sstream>
+
 string
 Get_Argument(const char *argv)
 {
@@ -51,6 +55,14 @@ main(int argc, const char *argv[])
   bool steady_state = false;
   bool evaluate = false;
   printf("argc=%d\n", argc);
+  /*fexcept_t *flagp;
+  flagp = (fexcept_t*) mxMalloc(sizeof(fexcept_t));
+  if (fegetexceptflag(flagp, FE_ALL_EXCEPT))
+    mexPrintf("fegetexceptflag failed\n");
+  if (fesetexceptflag(flagp,FE_INVALID | FE_DIVBYZERO))
+    mexPrintf("fesetexceptflag failed\n");
+  mxFree(flagp);
+  feclearexcept (FE_ALL_EXCEPT);*/
   if (argc < 2)
     {
       mexPrintf("model filename expected\n");
@@ -193,6 +205,10 @@ main(int argc, const char *argv[])
     mxFree(ya);
   if (direction)
     mxFree(direction);
+  if (steady_yd)
+    mxFree(steady_yd);
+  if (steady_xd)
+    mxFree(steady_xd);
   free(params);
 }
 
@@ -213,6 +229,7 @@ Get_Argument(const mxArray *prhs)
   return f;
 }
 
+
 /* The gateway routine */
 void
 mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
@@ -225,6 +242,14 @@ mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
   double *direction;
   bool steady_state = false;
   bool evaluate = false;
+  /*fexcept_t *flagp;
+  flagp = (fexcept_t*) mxMalloc(sizeof(fexcept_t));
+  if(fegetexceptflag(flagp, FE_ALL_EXCEPT))
+    mexPrintf("fegetexceptflag failed\n");
+  if(fesetexceptflag(flagp,FE_INVALID | FE_DIVBYZERO))
+    mexPrintf("fesetexceptflag failed\n");
+  mxFree(flagp);
+  feclearexcept (FE_ALL_EXCEPT);*/
   for (i = 0; i < nrhs; i++)
     {
       if (Get_Argument(prhs[i]) == "static")

@@ -17,6 +17,9 @@
  * along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+//#define _GLIBCXX_USE_C99_FENV_TR1 1
+//#include <cfenv>
+
 #include <cstring>
 #include <ctime>
 #include <sstream>
@@ -930,7 +933,6 @@ SparseMatrix::bksub(int tbreak, int last_period, int Size, double slowc_l)
   NonZeroElem *first;
   int i, j, k;
   double yy;
-  res1 = res2 = max_res = 0;
   for (i = 0; i < y_size*(periods+y_kmin); i++)
     y[i] = ya[i];
   if (symbolic && tbreak)
@@ -970,7 +972,6 @@ SparseMatrix::simple_bksub(int it_, int Size, double slowc_l)
   int i, k;
   double yy;
   NonZeroElem *first;
-  res1 = res2 = max_res = 0;
   for (i = 0; i < y_size; i++)
     y[i+it_*y_size] = ya[i+it_*y_size];
   for (i = Size-1; i >= 0; i--)
@@ -994,7 +995,7 @@ SparseMatrix::simple_bksub(int it_, int Size, double slowc_l)
 }
 
 bool
-SparseMatrix::simulate_NG(int blck, int y_size, int it_, int y_kmin, int y_kmax, int Size, bool print_it, bool cvg, int &iter, bool steady_state)
+SparseMatrix::simulate_NG(int blck, int y_size, int it_, int y_kmin, int y_kmax, int Size, bool print_it, bool cvg, int &iter, bool steady_state, int Block_number)
 {
   int i, j, k;
   int pivj = 0, pivk = 0;
@@ -1011,7 +1012,7 @@ SparseMatrix::simulate_NG(int blck, int y_size, int it_, int y_kmin, int y_kmax,
   NR = (int *) mxMalloc(Size*sizeof(int));
   error_not_printed = true;
   u_count_alloc_save = u_count_alloc;
-  if (isnan(res1) || isinf(res1))
+  if (isnan(res1) || isinf(res1) || (res2 > 8*g0 && iter>0))
     {
       if (iter == 0)
         {
@@ -1048,42 +1049,61 @@ SparseMatrix::simulate_NG(int blck, int y_size, int it_, int y_kmin, int y_kmax,
         }
       if (fabs(slowc_save) < 1e-8)
         {
-          if (slowc_save>0)
-            slowc_save = -slowc;
+          for (j = 0; j < y_size; j++)
+            {
+              bool select = false;
+              for (int i = 0; i < Size; i++)
+                if (j == index_vara[i])
+                  {
+                    select = true;
+                    break;
+                  }
+              if (select)
+                mexPrintf("-> variable %d at time %d = %f direction = %f\n", j+1, it_, y[j+it_*y_size], direction[j+it_*y_size]);
+              else
+                mexPrintf("   variable %d at time %d = %f direction = %f\n", j+1, it_, y[j+it_*y_size], direction[j+it_*y_size]);
+            }
+          mexPrintf("Dynare cannot improve the simulation in block %d at time %d (variable %d)\n", blck+1, it_+1, max_res_idx);
+          mexEvalString("drawnow;");
+          mxFree(piv_v);
+          mxFree(pivj_v);
+          mxFree(pivk_v);
+          mxFree(NR);
+          if (steady_state)
+            return false;
           else
             {
-              for (j = 0; j < y_size; j++)
-                {
-                  bool select = false;
-                  for (int i = 0; i < Size; i++)
-                    if (j == index_vara[i])
-                      {
-                        select = true;
-                        break;
-                      }
-                  if (select)
-                    mexPrintf("-> variable %d at time %d = %f direction = %f\n", j+1, it_, y[j+it_*y_size], direction[j+it_*y_size]);
-                  else
-                    mexPrintf("   variable %d at time %d = %f direction = %f\n", j+1, it_, y[j+it_*y_size], direction[j+it_*y_size]);
-                }
-              mexPrintf("Dynare cannot improve the simulation in block %d at time %d (variable %d)\n", blck+1, it_+1, max_res_idx);
-              mexEvalString("drawnow;");
-              mxFree(piv_v);
-              mxFree(pivj_v);
-              mxFree(pivk_v);
-              mxFree(NR);
-              if (steady_state)
-                return false;
-              else
-                {
-                  mexEvalString("st=fclose('all');clear all;");
-                  filename += " stopped";
-                  mexErrMsgTxt(filename.c_str());
-                }
+              mexEvalString("st=fclose('all');clear all;");
+              filename += " stopped";
+              mexErrMsgTxt(filename.c_str());
             }
         }
-      slowc_save /= 2;
-      mexPrintf("Error: Simulation diverging, trying to correct it using slowc=%f\n", slowc_save);
+      if(!(isnan(res1) || isinf(res1)) && !(isnan(g0) || isinf(g0)))
+        {
+          if (try_at_iteration == 0)
+            {
+              prev_slowc_save = slowc_save;
+              slowc_save = max( - gp0 / (2 * (res2 - g0 - gp0)) , 0.1);
+            }
+          else
+            {
+              double t1 = res2 - gp0 * slowc_save - g0;
+              double t2 = glambda2 - gp0 * prev_slowc_save - g0;
+              double a = (1/(slowc_save * slowc_save) * t1 - 1/(prev_slowc_save * prev_slowc_save) * t2) / (slowc_save - prev_slowc_save);
+              double b = (-prev_slowc_save/(slowc_save * slowc_save) * t1 + slowc_save/(prev_slowc_save * prev_slowc_save) * t2) / (slowc_save - prev_slowc_save);
+              prev_slowc_save = slowc_save;
+              slowc_save = max(min( -b + sqrt(b*b - 3 * a * gp0) / (3 * a), 0.5 * slowc_save), 0.1 * slowc_save);
+            }
+          glambda2 = res2;
+          try_at_iteration ++;
+        }
+      else
+        {
+          prev_slowc_save = slowc_save;
+          slowc_save /= 1.1;
+        }
+      if (print_it)
+        mexPrintf("Error: Simulation diverging, trying to correct it using slowc=%f\n", slowc_save);
       for (i = 0; i < y_size; i++)
         y[i+it_*y_size] = ya[i+it_*y_size] + slowc_save*direction[i+it_*y_size];
       mxFree(piv_v);
@@ -1100,6 +1120,16 @@ SparseMatrix::simulate_NG(int blck, int y_size, int it_, int y_kmin, int y_kmax,
       mxFree(pivk_v);
       mxFree(NR);
       return (true);
+    }
+  if (print_it )
+    {
+      mexPrintf("solwc=%f g0=%f res2=%f glambda2=%f\n",slowc_save,g0, res2, glambda2);
+      mexPrintf("-----------------------------------\n");
+      mexPrintf("      Simulate iteration no %d     \n", iter+1);
+      mexPrintf("      max. error=%.10e       \n", double (max_res));
+      mexPrintf("      sqr. error=%.10e       \n", double (res2));
+      mexPrintf("      abs. error=%.10e       \n", double (res1));
+      mexPrintf("-----------------------------------\n");
     }
   Simple_Init(it_, y_kmin, y_kmax, Size, IM_i);
   NonZeroElem **bc;
@@ -1152,42 +1182,12 @@ SparseMatrix::simulate_NG(int blck, int y_size, int it_, int y_kmin, int y_kmax,
             }
           first = first->NZE_C_N;
         }
-      double markovitz = 0, markovitz_max = -9e70;
-      if (!one)
-        {
-          for (j = 0; j < l; j++)
-            {
-              markovitz = exp(log(fabs(piv_v[j])/piv_abs)-markowitz_c*log(double (NR[j])/double (N_max)));
-              if (markovitz > markovitz_max)
-                {
-                  piv = piv_v[j];
-                  pivj = pivj_v[j];   //Line number
-                  pivk = pivk_v[j];   //positi
-                  markovitz_max = markovitz;
-                }
-            }
-        }
-      else
-        {
-          for (j = 0; j < l; j++)
-            {
-              markovitz = exp(log(fabs(piv_v[j])/piv_abs)-markowitz_c*log(double (NR[j])/double (N_max)));
-              if (markovitz > markovitz_max && NR[j] == 1)
-                {
-                  piv = piv_v[j];
-                  pivj = pivj_v[j];   //Line number
-                  pivk = pivk_v[j];   //positi
-                  markovitz_max = markovitz;
-                }
-            }
-        }
-      pivot[i] = pivj;
-      pivotk[i] = pivk;
-      pivotv[i] = piv;
-      line_done[pivj] = true;
       if (piv_abs < eps)
         {
-          mexPrintf("Error: singular system in Simulate_NG in block %d\n", blck+1);
+          if (Block_number > 1)
+            mexPrintf("Error: singular system in Simulate_NG in block %d\n", blck+1);
+          else
+            mexPrintf("Error: singular system in Simulate_NG\n");
           mexEvalString("drawnow;");
           mxFree(piv_v);
           mxFree(pivj_v);
@@ -1203,6 +1203,98 @@ SparseMatrix::simulate_NG(int blck, int y_size, int it_, int y_kmin, int y_kmax,
               mexErrMsgTxt(filename.c_str());
             }
         }
+      double markovitz = 0, markovitz_max = -9e70;
+      int NR_max = 0;
+      //mexPrintf("l=%d\n",l);
+      if (!one)
+        {
+          for (j = 0; j < l; j++)
+            {
+              if (N_max > 0 && NR[j] > 0)
+                {
+                  if (fabs(piv_v[j]) > 0)
+                    {
+                      if (markowitz_c > 0)
+                        markovitz = exp(log(fabs(piv_v[j])/piv_abs)-markowitz_c*log(double (NR[j])/double (N_max)));
+                      else
+                        markovitz = fabs(piv_v[j])/piv_abs;
+                    }
+                  else
+                    markovitz = 0;
+                }
+              else
+                markovitz = fabs(piv_v[j])/piv_abs;
+              /*if (fetestexcept(FE_DIVBYZERO))
+                {
+                  if (error_not_printed)
+                    {
+                      mexPrintf("--------------------------------------\n  Error: Divide by zero in simul_NG(1) piv_abs=%f and N_max=%d \n--------------------------------------\n", piv_abs, N_max);
+                      error_not_printed = false;
+                      markovitz = 1e70;
+                    }
+                  feclearexcept (FE_ALL_EXCEPT);
+                  res1 = NAN;
+                }*/
+              //mexPrintf("piv_v[j]=%f NR[j]=%d markovitz=%f markovitz_max=%f\n", piv_v[j], NR[j], markovitz, markovitz_max);
+              if (markovitz > markovitz_max)
+                {
+                  piv = piv_v[j];
+                  pivj = pivj_v[j];   //Line number
+                  pivk = pivk_v[j];   //positi
+                  markovitz_max = markovitz;
+                  NR_max = NR[j];
+                }
+            }
+        }
+      else
+        {
+          for (j = 0; j < l; j++)
+            {
+              if (N_max > 0 && NR[j] > 0)
+                {
+                  if (fabs(piv_v[j]) > 0)
+                    {
+                      if (markowitz_c > 0)
+                        markovitz = exp(log(fabs(piv_v[j])/piv_abs)-markowitz_c*log(double (NR[j])/double (N_max)));
+                      else
+                        markovitz = fabs(piv_v[j])/piv_abs;
+                    }
+                  else
+                    markovitz = 0;
+                }
+              else
+                markovitz = fabs(piv_v[j])/piv_abs;
+              /*if (fetestexcept(FE_DIVBYZERO))
+                {
+                  if (error_not_printed)
+                    {
+                      mexPrintf("--------------------------------------\n  Error: Divide by zero in simul_NG(2) piv_abs=%f and N_max=%d \n--------------------------------------\n", piv_abs, N_max);
+                      error_not_printed = false;
+                      markovitz = 1e70;
+                    }
+                  feclearexcept (FE_ALL_EXCEPT);
+                  res1 = NAN;
+                }*/
+              if (/*markovitz > markovitz_max &&*/ NR[j] == 1)
+                {
+                  piv = piv_v[j];
+                  pivj = pivj_v[j];   //Line number
+                  pivk = pivk_v[j];   //positi
+                  markovitz_max = markovitz;
+                  NR_max = NR[j];
+                  //mexPrintf("forced piv = %f NR_max =%d\n",piv, NR_max);
+                }
+            }
+        }
+      if (fabs(piv) < eps)
+        mexPrintf("==> Error NR_max=%d, N_max=%d and piv=%f, piv_abs=%f, markovitz_max=%f\n",NR_max, N_max, piv, piv_abs, markovitz_max);
+      if (NR_max == 0)
+        mexPrintf("==> Error NR_max=0 and piv=%f, markovitz_max=%f\n",piv, markovitz_max);
+      pivot[i] = pivj;
+      pivotk[i] = pivk;
+      pivotv[i] = piv;
+      line_done[pivj] = true;
+
       /*divide all the non zeros elements of the line pivj by the max_pivot*/
       int nb_var = At_Row(pivj, &first);
       for (j = 0; j < nb_var; j++)
@@ -1426,7 +1518,7 @@ SparseMatrix::Check_the_Solution(int periods, int y_kmin, int y_kmax, int Size, 
 }
 
 int
-SparseMatrix::simulate_NG1(int blck, int y_size, int it_, int y_kmin, int y_kmax, int Size, int periods, bool print_it, bool cvg, int &iter, int minimal_solving_periods)
+SparseMatrix::simulate_NG1(int blck, int y_size, int it_, int y_kmin, int y_kmax, int Size, int periods, bool print_it, bool cvg, int &iter, int minimal_solving_periods, int Block_number)
 {
   /*Triangularisation at each period of a block using a simple gaussian Elimination*/
   t_save_op_s *save_op_s;
@@ -1606,17 +1698,45 @@ SparseMatrix::simulate_NG1(int blck, int y_size, int it_, int y_kmin, int y_kmax
                       first = first->NZE_C_N;
                     }
                   double markovitz = 0, markovitz_max = -9e70;
+                  int NR_max = 0;
+                  //mexPrintf("l=%d\n",l);
                   if (!one)
                     {
                       for (j = 0; j < l; j++)
                         {
-                          markovitz = exp(log(fabs(piv_v[j])/piv_abs)-markowitz_c*log(double (NR[j])/double (N_max)));
+                          if (N_max > 0 && NR[j] > 0)
+                            {
+                              if (fabs(piv_v[j]) > 0)
+                                {
+                                  if (markowitz_c > 0)
+                                    markovitz = exp(log(fabs(piv_v[j])/piv_abs)-markowitz_c*log(double (NR[j])/double (N_max)));
+                                  else
+                                    markovitz = fabs(piv_v[j])/piv_abs;
+                                }
+                              else
+                                markovitz = 0;
+                            }
+                          else
+                            markovitz = fabs(piv_v[j])/piv_abs;
+                          /*if (fetestexcept(FE_DIVBYZERO))
+                            {
+                              if (error_not_printed)
+                                {
+                                  mexPrintf("--------------------------------------\n  Error: Divide by zero in simul_NG(1) piv_abs=%f and N_max=%d \n--------------------------------------\n", piv_abs, N_max);
+                                  error_not_printed = false;
+                                  markovitz = 1e70;
+                                }
+                              feclearexcept (FE_ALL_EXCEPT);
+                              res1 = NAN;
+                            }*/
+                          //mexPrintf("piv_v[j]=%f NR[j]=%d markovitz=%f markovitz_max=%f\n", piv_v[j], NR[j], markovitz, markovitz_max);
                           if (markovitz > markovitz_max)
                             {
                               piv = piv_v[j];
                               pivj = pivj_v[j];   //Line number
                               pivk = pivk_v[j];   //positi
                               markovitz_max = markovitz;
+                              NR_max = NR[j];
                             }
                         }
                     }
@@ -1624,16 +1744,46 @@ SparseMatrix::simulate_NG1(int blck, int y_size, int it_, int y_kmin, int y_kmax
                     {
                       for (j = 0; j < l; j++)
                         {
-                          markovitz = exp(log(fabs(piv_v[j])/piv_abs)-markowitz_c*log((double)(NR[j]/N_max)));
-                          if (markovitz > markovitz_max && NR[j] == 1)
+                          if (N_max > 0 && NR[j] > 0)
+                            {
+                              if (fabs(piv_v[j]) > 0)
+                                {
+                                  if (markowitz_c > 0)
+                                    markovitz = exp(log(fabs(piv_v[j])/piv_abs)-markowitz_c*log(double (NR[j])/double (N_max)));
+                                  else
+                                    markovitz = fabs(piv_v[j])/piv_abs;
+                                }
+                              else
+                                markovitz = 0;
+                            }
+                          else
+                            markovitz = fabs(piv_v[j])/piv_abs;
+                          /*if (fetestexcept(FE_DIVBYZERO))
+                            {
+                              if (error_not_printed)
+                                {
+                                  mexPrintf("--------------------------------------\n  Error: Divide by zero in simul_NG(2) piv_abs=%f and N_max=%d \n--------------------------------------\n", piv_abs, N_max);
+                                  error_not_printed = false;
+                                  markovitz = 1e70;
+                                }
+                              feclearexcept (FE_ALL_EXCEPT);
+                              res1 = NAN;
+                            }*/
+                          if (/*markovitz > markovitz_max &&*/ NR[j] == 1)
                             {
                               piv = piv_v[j];
                               pivj = pivj_v[j];   //Line number
-                              pivk = pivk_v[j];   //position
+                              pivk = pivk_v[j];   //positi
                               markovitz_max = markovitz;
+                              NR_max = NR[j];
+                              //mexPrintf("forced piv = %f NR_max =%d\n",piv, NR_max);
                             }
                         }
                     }
+                  if (fabs(piv) < eps)
+                    mexPrintf("==> Error NR_max=%d, N_max=%d and piv=%f, piv_abs=%f, markovitz_max=%f\n",NR_max, N_max, piv, piv_abs, markovitz_max);
+                  if (NR_max == 0)
+                    mexPrintf("==> Error NR_max=0 and piv=%f, markovitz_max=%f\n",piv, markovitz_max);
                   pivot[i] = pivj;
                   pivot_save[i] = pivj;
                   pivotk[i] = pivk;
@@ -1667,7 +1817,10 @@ SparseMatrix::simulate_NG1(int blck, int y_size, int it_, int y_kmin, int y_kmax
                 }
               if (piv_abs < eps)
                 {
-                  mexPrintf("Error: singular system in Simulate_NG1\n");
+                  if (Block_number>1)
+                    mexPrintf("Error: singular system in Simulate_NG1 in block %d\n", blck);
+                  else
+                    mexPrintf("Error: singular system in Simulate_NG1\n");
                   mexEvalString("drawnow;");
                   filename += " stopped";
                   mexErrMsgTxt(filename.c_str());
