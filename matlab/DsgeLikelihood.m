@@ -21,7 +21,7 @@ function [fval,cost_flag,ys,trend_coeff,info] = DsgeLikelihood(xparam1,gend,data
 % SPECIAL REQUIREMENTS
 %
 
-% Copyright (C) 2004-2009 Dynare Team
+% Copyright (C) 2004-2009, 2010 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -314,7 +314,11 @@ if (kalman_algo==4)% Univariate Diffuse Kalman Filter
                                                     no_more_missing_observations);
     end
 end
-if imag(LIK) ~= 0
+if isnan(LIK)
+    cost_flag = 0;
+    return
+end
+if imag(LIK)~=0
     likelihood = bayestopt_.penalty;
 else
     likelihood = LIK;

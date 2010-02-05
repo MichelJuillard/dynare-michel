@@ -23,7 +23,7 @@ function [LIK, lik] = diffuse_kalman_filter(T,R,Q,H,Pinf,Pstar,Y,start,Z,kalman_
 %   Models", S.J. Koopman and J. Durbin (2003, in Journal of Time Series 
 %   Analysis, vol. 24(1), pp. 85-98). 
 
-% Copyright (C) 2004-2008 Dynare Team
+% Copyright (C) 2004-2008, 2010 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -95,7 +95,9 @@ while rank(Pinf,kalman_tol) && (t<smpl)
 end
 
 if t == smpl
-    error(['There isn''t enough information to estimate the initial conditions of the nonstationary variables']);                   
+    warning(['There isn''t enough information to estimate the initial conditions of the nonstationary variables']);                   
+    LIK = NaN;
+    return
 end
 
 F_singular = 1;
@@ -125,7 +127,9 @@ while notsteady && (t<smpl)
 end
 
 if F_singular == 1
-    error(['The variance of the forecast error remains singular until the end of the sample'])
+    warning(['The variance of the forecast error remains singular until the end of the sample'])
+    LIK = NaN;
+    return
 end
 
 if t < smpl

@@ -28,7 +28,7 @@ function [LIK, lik] = univariate_diffuse_kalman_filter(T,R,Q,H,Pinf,Pstar,Y,star
 % NOTES
 %   The vector "lik" is used to evaluate the jacobian of the likelihood.
 
-% Copyright (C) 2004-2009 Dynare Team
+% Copyright (C) 2004-2009, 2010 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -100,6 +100,8 @@ end
 
 if (t==smpl)
     error(['univariate_diffuse_kalman_filter:: There isn''t enough information to estimate the initial conditions of the nonstationary variables']);
+    LIK = NaN;
+    return
 end
 
 while notsteady && (t<smpl)
