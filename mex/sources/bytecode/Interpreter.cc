@@ -16,12 +16,19 @@
  * You should have received a copy of the GNU General Public License
  * along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
  */
+#define _GLIBCXX_USE_C99_FENV_TR1 1
+#include <cfenv>
+
 #include <cstring>
 #include <sstream>
 #include "Interpreter.hh"
 #define BIG 1.0e+8;
 #define SMALL 1.0e-5;
 //#define DEBUG
+
+Interpreter::~Interpreter()
+{
+}
 
 Interpreter::Interpreter(double *params_arg, double *y_arg, double *ya_arg, double *x_arg, double *steady_y_arg, double *steady_x_arg,
                          double *direction_arg, int y_size_arg,
@@ -60,37 +67,35 @@ Interpreter::error_location()
 {
   string tmp;
   mxArray *M_;
-  double * P;
-  int R, C;
-  M_ = mexGetVariable("global", "M_");
+  char * P;
+  unsigned int R, C;
   stringstream Error_loc("in ");
   switch(EQN_type)
     {
       case TemporaryTerm:
-        if (EQN_block_number>1)
+        if (EQN_block_number > 1)
           Error_loc << "temporary term " << EQN_equation+1 << " in block " << EQN_block+1;
         else
           Error_loc << "temporary term " << EQN_equation+1;
         break;
       case ModelEquation:
-        if (EQN_block_number>1)
+        if (EQN_block_number > 1)
           Error_loc << "equation " << EQN_equation+1 << " in block " << EQN_block+1;
         else
           Error_loc << "equation " << EQN_equation+1;
         break;
       case FirstEndoDerivative:
-        if (EQN_block_number>1)
-          Error_loc << "first order derivative " << EQN_equation+1 << " in block " << EQN_block+1 << " with respect to endogenous variable ";
+        M_ = mexGetVariable("global", "M_");
+        if (EQN_block_number > 1)
+          Error_loc << "first order derivative of equation " << EQN_equation+1 << " in block " << EQN_block+1 << " with respect to endogenous variable ";
         else
-          Error_loc << "first order derivative " << EQN_equation+1 << " with respect to endogenous variable ";
-        R = mxGetN(mxGetFieldByNumber(M_, 0, mxGetFieldNumber(M_, "endo_names")));
-        C = mxGetM(mxGetFieldByNumber(M_, 0, mxGetFieldNumber(M_, "endo_names")));
-        P = (double*)mxGetPr(mxGetFieldByNumber(M_, 0, mxGetFieldNumber(M_, "endo_names")));
-        if(EQN_dvar1<R)
-          {
-            for(int i = 0; i < C; i++)
-              Error_loc << (char*)int(floor(P[EQN_dvar1*C+i]));
-          }
+          Error_loc << "first order derivative of equation " << EQN_equation+1 << " with respect to endogenous variable ";
+        C = mxGetN(mxGetFieldByNumber(M_, 0, mxGetFieldNumber(M_, "endo_names")));
+        R = mxGetM(mxGetFieldByNumber(M_, 0, mxGetFieldNumber(M_, "endo_names")));
+        P = (char*) mxGetPr(mxGetFieldByNumber(M_, 0, mxGetFieldNumber(M_, "endo_names")));
+        if (EQN_dvar1 < R)
+          for (unsigned int i = 0; i < C; i++)
+            Error_loc << P[2*(EQN_dvar1+i*R)];
         break;
       default:
         break;
@@ -102,37 +107,57 @@ double
 Interpreter::pow1(double a, double b)
 {
   double r = pow_(a, b);
-  if (isnan(r) || isinf(r))
+  if (fetestexcept(FE_INVALID))
     {
-      if (a < 0 && error_not_printed)
+      if (error_not_printed)
         {
-          mexPrintf("--------------------------------------\n  Error: X^a with X=%5.15f\n  in %s\n--------------------------------------\n", a,error_location().c_str());
+          mexPrintf("--------------------------------------\n  Error: X^a with X=%5.15f\n in %s \n--------------------------------------\n", a,error_location().c_str());
           error_not_printed = false;
           r = 0.0000000000000000000000001;
         }
+      feclearexcept (FE_ALL_EXCEPT);
       res1 = NAN;
-      return (r);
+      return r;
     }
-  else
-    return r;
+  return r;
 }
 
 double
 Interpreter::log1(double a)
 {
   double r = log(a);
-  if (isnan(r) || isinf(r))
+  if (fetestexcept(FE_INVALID | FE_DIVBYZERO))
     {
-      if (a <= 0 && error_not_printed)
+      if (error_not_printed)
         {
-          mexPrintf("--------------------------------------\n  Error: log(X) with X=%5.15f\n  in %s\n--------------------------------------\n", a,error_location().c_str());
+          mexPrintf("--------------------------------------\n  Error: log(X) with X=%5.15f\n in %s \n--------------------------------------\n", a,error_location().c_str());
           error_not_printed = false;
+          r = 0.0000000000000000000000001;
         }
+      feclearexcept (FE_ALL_EXCEPT);
       res1 = NAN;
-      return (r);
+      return r;
     }
-  else
-    return r;
+  return r;
+}
+
+double
+Interpreter::log10_1(double a)
+{
+  double r = log(a);
+  if (fetestexcept(FE_INVALID))
+    {
+      if (error_not_printed)
+        {
+          mexPrintf("--------------------------------------\n  Error: log(X) with X=%5.15f\n in %s \n--------------------------------------\n", a,error_location().c_str());
+          error_not_printed = false;
+          r = 0.0000000000000000000000001;
+        }
+      feclearexcept (FE_ALL_EXCEPT);
+      res1 = NAN;
+      return r;
+    }
+  return r;
 }
 
 void
@@ -144,6 +169,7 @@ Interpreter::compute_block_time(int Per_u_, bool evaluate, int block_num)
   bool go_on = true;
   double ll;
   EQN_block = block_num;
+  //feclearexcept (FE_ALL_EXCEPT);
   while (go_on)
     {
       switch (it_code->first)
@@ -622,7 +648,20 @@ Interpreter::compute_block_time(int Per_u_, bool evaluate, int block_num)
 #endif
               break;
             case oDivide:
-              Stack.push(v1 / v2);
+              double r;
+              r = v1 / v2;
+              if (fetestexcept(FE_DIVBYZERO))
+                {
+                  if (error_not_printed)
+                    {
+                      mexPrintf("--------------------------------------\n  Error: Divide by zero with %5.15f/%5.15f\n in %s \n--------------------------------------\n", v1, v2,error_location().c_str());
+                      error_not_printed = false;
+                      r = 1e70;
+                    }
+                  feclearexcept (FE_ALL_EXCEPT);
+                  res1 = NAN;
+                }
+              Stack.push(r);
 #ifdef DEBUG
               tmp_out << " |" << v1 << "/" << v2 << "|";
 #endif
@@ -713,7 +752,7 @@ Interpreter::compute_block_time(int Per_u_, bool evaluate, int block_num)
 #endif
               break;
             case oLog10:
-              Stack.push(log10(v1));
+              Stack.push(log10_1(v1));
 #ifdef DEBUG
               tmp_out << " |log10(" << v1 << ")|";
 #endif
@@ -1042,6 +1081,16 @@ Interpreter::simulate_a_block(const int size, const int type, string file_name, 
               if (cvg)
                 continue;
               y[Block_Contain[0].Variable] += -r[0]/g1[0];
+              if (fetestexcept(FE_DIVBYZERO))
+                {
+                  if (error_not_printed)
+                    {
+                      mexPrintf("--------------------------------------\n  Error: Divide by zero with %5.15f/%5.15f\nSingularity in block %d\n--------------------------------------\n", r[0], g1[0], block_num);
+                      error_not_printed = false;
+                    }
+                  feclearexcept (FE_ALL_EXCEPT);
+                  res1 = NAN;
+                }
               iter++;
             }
           if (!cvg)
@@ -1072,6 +1121,16 @@ Interpreter::simulate_a_block(const int size, const int type, string file_name, 
                   if (cvg)
                     continue;
                   y[Per_y_+Block_Contain[0].Variable] += -r[0]/g1[0];
+                  if (fetestexcept(FE_DIVBYZERO))
+                    {
+                      if (error_not_printed)
+                        {
+                          mexPrintf("--------------------------------------\n  Error: Divide by zero with %5.15f/%5.15f\nSingularity in block %d\n--------------------------------------\n", r[0], g1[0], block_num);
+                          error_not_printed = false;
+                        }
+                      feclearexcept (FE_ALL_EXCEPT);
+                      res1 = NAN;
+                    }
                   iter++;
                 }
               if (!cvg)
@@ -1103,6 +1162,16 @@ Interpreter::simulate_a_block(const int size, const int type, string file_name, 
               if (cvg)
                 continue;
               y[Block_Contain[0].Variable] += -r[0]/g1[0];
+              if (fetestexcept(FE_DIVBYZERO))
+                {
+                  if (error_not_printed)
+                    {
+                      mexPrintf("--------------------------------------\n  Error: Divide by zero with %5.15f/%5.15f\nSingularity in block %d\n--------------------------------------\n", r[0], g1[0], block_num);
+                      error_not_printed = false;
+                    }
+                  feclearexcept (FE_ALL_EXCEPT);
+                  res1 = NAN;
+                }
               iter++;
             }
           if (!cvg)
@@ -1132,6 +1201,16 @@ Interpreter::simulate_a_block(const int size, const int type, string file_name, 
                   if (cvg)
                     continue;
                   y[Per_y_+Block_Contain[0].Variable] += -r[0]/g1[0];
+                  if (fetestexcept(FE_DIVBYZERO))
+                    {
+                      if (error_not_printed)
+                        {
+                          mexPrintf("--------------------------------------\n  Error: Divide by zero with %5.15f/%5.15f\nSingularity in block %d\n--------------------------------------\n", r[0], g1[0], block_num);
+                          error_not_printed = false;
+                        }
+                      feclearexcept (FE_ALL_EXCEPT);
+                      res1 = NAN;
+                    }
                   iter++;
                 }
               if (!cvg)
@@ -1186,8 +1265,13 @@ Interpreter::simulate_a_block(const int size, const int type, string file_name, 
                     cvg = false;
                   if (cvg)
                     continue;
-                  result = simulate_NG(Block_Count, symbol_table_endo_nbr, 0, 0, 0, size, false, cvg, iter, true);
+                  int prev_iter = iter;
+                  result = simulate_NG(Block_Count, symbol_table_endo_nbr, 0, 0, 0, size, false, cvg, iter, true, EQN_block_number);
                   iter++;
+                  if (iter > prev_iter)
+                    {
+
+                    }
                 }
               if (!cvg or !result)
                 {
@@ -1204,7 +1288,7 @@ Interpreter::simulate_a_block(const int size, const int type, string file_name, 
               error_not_printed = true;
               compute_block_time(0, false, block_num);
               cvg = false;
-              result = simulate_NG(Block_Count, symbol_table_endo_nbr, 0, 0, 0, size, false, cvg, iter, true);
+              result = simulate_NG(Block_Count, symbol_table_endo_nbr, 0, 0, 0, size, false, cvg, iter, true, EQN_block_number);
               if (!result)
                 {
                   mexPrintf("Convergence not achieved in block %d\n", Block_Count);
@@ -1253,7 +1337,8 @@ Interpreter::simulate_a_block(const int size, const int type, string file_name, 
                         cvg = false;
                       if (cvg)
                         continue;
-                      result = simulate_NG(Block_Count, symbol_table_endo_nbr, it_, y_kmin, y_kmax, size, false, cvg, iter, false);
+                      int prev_iter = iter;
+                      result = simulate_NG(Block_Count, symbol_table_endo_nbr, it_, y_kmin, y_kmax, size, false, cvg, iter, false, EQN_block_number);
                       iter++;
                     }
                   if (!cvg)
@@ -1274,7 +1359,7 @@ Interpreter::simulate_a_block(const int size, const int type, string file_name, 
                   error_not_printed = true;
                   compute_block_time(0, false, block_num);
                   cvg = false;
-                  result = simulate_NG(Block_Count, symbol_table_endo_nbr, it_, y_kmin, y_kmax, size, false, cvg, iter, false);
+                  result = simulate_NG(Block_Count, symbol_table_endo_nbr, it_, y_kmin, y_kmax, size, false, cvg, iter, false, EQN_block_number);
                 }
             }
         }
@@ -1326,7 +1411,7 @@ Interpreter::simulate_a_block(const int size, const int type, string file_name, 
                     cvg = false;
                   if (cvg)
                     continue;
-                  result = simulate_NG(Block_Count, symbol_table_endo_nbr, 0, 0, 0, size, false, cvg, iter, true);
+                  result = simulate_NG(Block_Count, symbol_table_endo_nbr, 0, 0, 0, size, false, cvg, iter, true, EQN_block_number);
                   iter++;
                 }
               if (!cvg or !result)
@@ -1344,7 +1429,7 @@ Interpreter::simulate_a_block(const int size, const int type, string file_name, 
               error_not_printed = true;
               compute_block_time(0, false, block_num);
               cvg = false;
-              result = simulate_NG(Block_Count, symbol_table_endo_nbr, 0, 0, 0, size, false, cvg, iter, true);
+              result = simulate_NG(Block_Count, symbol_table_endo_nbr, 0, 0, 0, size, false, cvg, iter, true, EQN_block_number);
               if (!result)
                 {
                   mexPrintf("Convergence not achieved in block %d\n", Block_Count);
@@ -1393,7 +1478,7 @@ Interpreter::simulate_a_block(const int size, const int type, string file_name, 
                         cvg = false;
                       if (cvg)
                         continue;
-                      result = simulate_NG(Block_Count, symbol_table_endo_nbr, it_, y_kmin, y_kmax, size, false, cvg, iter, false);
+                      result = simulate_NG(Block_Count, symbol_table_endo_nbr, it_, y_kmin, y_kmax, size, false, cvg, iter, false, EQN_block_number);
                       iter++;
                     }
                   if (!cvg)
@@ -1412,7 +1497,7 @@ Interpreter::simulate_a_block(const int size, const int type, string file_name, 
                   error_not_printed = true;
                   compute_block_time(0, false, block_num);
                   cvg = false;
-                  result = simulate_NG(Block_Count, symbol_table_endo_nbr, it_, y_kmin, y_kmax, size, false, cvg, iter, false);
+                  result = simulate_NG(Block_Count, symbol_table_endo_nbr, it_, y_kmin, y_kmax, size, false, cvg, iter, false, EQN_block_number);
                 }
             }
         }
@@ -1485,7 +1570,7 @@ Interpreter::simulate_a_block(const int size, const int type, string file_name, 
               else
                 cvg = (max_res < solve_tolf);
               u_count = u_count_saved;
-              simulate_NG1(Block_Count, symbol_table_endo_nbr, it_, y_kmin, y_kmax, size, periods, true, cvg, iter, minimal_solving_periods);
+              simulate_NG1(Block_Count, symbol_table_endo_nbr, it_, y_kmin, y_kmax, size, periods, true, cvg, iter, minimal_solving_periods, EQN_block_number);
               iter++;
             }
           if (!cvg)
@@ -1517,7 +1602,7 @@ Interpreter::simulate_a_block(const int size, const int type, string file_name, 
                 }
             }
           cvg = false;
-          simulate_NG1(Block_Count, symbol_table_endo_nbr, it_, y_kmin, y_kmax, size, periods, true, cvg, iter, minimal_solving_periods);
+          simulate_NG1(Block_Count, symbol_table_endo_nbr, it_, y_kmin, y_kmax, size, periods, true, cvg, iter, minimal_solving_periods, EQN_block_number);
         }
       mxFree(r);
       mxFree(y_save);

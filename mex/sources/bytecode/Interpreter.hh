@@ -54,6 +54,7 @@ private:
   protected:
   double pow1(double a, double b);
   double log1(double a);
+  double log10_1(double a);
   string error_location();
   void compute_block_time(int Per_u_, bool evaluate, int block_num);
   void evaluate_a_block(const int size, const int type, string bin_basename, bool steady_state, int block_num,
@@ -77,7 +78,7 @@ private:
   string filename;
   int minimal_solving_periods;
 public:
-
+  ~Interpreter();
   Interpreter(double *params_arg, double *y_arg, double *ya_arg, double *x_arg, double *steady_y_arg, double *steady_x_arg,
               double *direction_arg, int y_size_arg, int nb_row_x_arg,
               int nb_row_xd_arg, int periods_arg, int y_kmin_arg, int y_kmax_arg, int maxit_arg_, double solve_tolf_arg, int size_o_direction_arg,
