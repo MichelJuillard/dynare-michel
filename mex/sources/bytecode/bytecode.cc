@@ -55,6 +55,14 @@ main(int argc, const char *argv[])
   bool steady_state = false;
   bool evaluate = false;
   printf("argc=%d\n", argc);
+  fexcept_t *flagp;
+  flagp = (fexcept_t*) mxMalloc(sizeof(fexcept_t));
+  if (fegetexceptflag(flagp, FE_ALL_EXCEPT))
+    mexPrintf("fegetexceptflag failed\n");
+  if (fesetexceptflag(flagp,FE_INVALID | FE_DIVBYZERO))
+    mexPrintf("fesetexceptflag failed\n");
+  mxFree(flagp);
+  feclearexcept (FE_ALL_EXCEPT);
   if (argc < 2)
     {
       mexPrintf("model filename expected\n");
@@ -197,6 +205,10 @@ main(int argc, const char *argv[])
     mxFree(ya);
   if (direction)
     mxFree(direction);
+  if (steady_yd)
+    mxFree(steady_yd);
+  if (steady_xd)
+    mxFree(steady_xd);
   free(params);
 }
 

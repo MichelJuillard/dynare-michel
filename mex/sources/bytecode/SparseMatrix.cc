@@ -933,7 +933,6 @@ SparseMatrix::bksub(int tbreak, int last_period, int Size, double slowc_l)
   NonZeroElem *first;
   int i, j, k;
   double yy;
-  res1 = res2 = max_res = 0;
   for (i = 0; i < y_size*(periods+y_kmin); i++)
     y[i] = ya[i];
   if (symbolic && tbreak)
@@ -973,7 +972,6 @@ SparseMatrix::simple_bksub(int it_, int Size, double slowc_l)
   int i, k;
   double yy;
   NonZeroElem *first;
-  res1 = res2 = max_res = 0;
   for (i = 0; i < y_size; i++)
     y[i+it_*y_size] = ya[i+it_*y_size];
   for (i = Size-1; i >= 0; i--)
@@ -1014,7 +1012,7 @@ SparseMatrix::simulate_NG(int blck, int y_size, int it_, int y_kmin, int y_kmax,
   NR = (int *) mxMalloc(Size*sizeof(int));
   error_not_printed = true;
   u_count_alloc_save = u_count_alloc;
-  if (isnan(res1) || isinf(res1))
+  if (isnan(res1) || isinf(res1) || (res2 > 8*g0 && iter>0))
     {
       if (iter == 0)
         {
@@ -1051,47 +1049,61 @@ SparseMatrix::simulate_NG(int blck, int y_size, int it_, int y_kmin, int y_kmax,
         }
       if (fabs(slowc_save) < 1e-8)
         {
-          if (slowc_save>0)
-            slowc_save = -slowc;
+          for (j = 0; j < y_size; j++)
+            {
+              bool select = false;
+              for (int i = 0; i < Size; i++)
+                if (j == index_vara[i])
+                  {
+                    select = true;
+                    break;
+                  }
+              if (select)
+                mexPrintf("-> variable %d at time %d = %f direction = %f\n", j+1, it_, y[j+it_*y_size], direction[j+it_*y_size]);
+              else
+                mexPrintf("   variable %d at time %d = %f direction = %f\n", j+1, it_, y[j+it_*y_size], direction[j+it_*y_size]);
+            }
+          mexPrintf("Dynare cannot improve the simulation in block %d at time %d (variable %d)\n", blck+1, it_+1, max_res_idx);
+          mexEvalString("drawnow;");
+          mxFree(piv_v);
+          mxFree(pivj_v);
+          mxFree(pivk_v);
+          mxFree(NR);
+          if (steady_state)
+            return false;
           else
             {
-              for (j = 0; j < y_size; j++)
-                {
-                  bool select = false;
-                  for (int i = 0; i < Size; i++)
-                    if (j == index_vara[i])
-                      {
-                        select = true;
-                        break;
-                      }
-                  if (select)
-                    mexPrintf("-> variable %d at time %d = %f direction = %f\n", j+1, it_, y[j+it_*y_size], direction[j+it_*y_size]);
-                  else
-                    mexPrintf("   variable %d at time %d = %f direction = %f\n", j+1, it_, y[j+it_*y_size], direction[j+it_*y_size]);
-                }
-              mexPrintf("Dynare cannot improve the simulation in block %d at time %d (variable %d)\n", blck+1, it_+1, max_res_idx);
-              mexEvalString("drawnow;");
-              mxFree(piv_v);
-              mxFree(pivj_v);
-              mxFree(pivk_v);
-              mxFree(NR);
-              if (steady_state)
-                return false;
-              else
-                {
-                  mexEvalString("st=fclose('all');clear all;");
-                  filename += " stopped";
-                  mexErrMsgTxt(filename.c_str());
-                }
+              mexEvalString("st=fclose('all');clear all;");
+              filename += " stopped";
+              mexErrMsgTxt(filename.c_str());
             }
         }
-#ifdef GLOBAL_CONVERGENCE
-      if (iter == 1)
-
-#else
-      slowc_save /= 2;
-#endif
-      mexPrintf("Error: Simulation diverging, trying to correct it using slowc=%f\n", slowc_save);
+      if(!(isnan(res1) || isinf(res1)) && !(isnan(g0) || isinf(g0)))
+        {
+          if (try_at_iteration == 0)
+            {
+              prev_slowc_save = slowc_save;
+              slowc_save = max( - gp0 / (2 * (res2 - g0 - gp0)) , 0.1);
+            }
+          else
+            {
+              double t1 = res2 - gp0 * slowc_save - g0;
+              double t2 = glambda2 - gp0 * prev_slowc_save - g0;
+              double a = (1/(slowc_save * slowc_save) * t1 - 1/(prev_slowc_save * prev_slowc_save) * t2) / (slowc_save - prev_slowc_save);
+              double b = (-prev_slowc_save/(slowc_save * slowc_save) * t1 + slowc_save/(prev_slowc_save * prev_slowc_save) * t2) / (slowc_save - prev_slowc_save);
+              prev_slowc_save = slowc_save;
+              slowc_save = max(min( -b + sqrt(b*b - 3 * a * gp0) / (3 * a), 0.5 * slowc_save), 0.1 * slowc_save);
+            }
+          glambda2 = res2;
+          try_at_iteration ++;
+        }
+      else
+        {
+          prev_slowc_save = slowc_save;
+          slowc_save /= 1.1;
+        }
+      if (print_it)
+        mexPrintf("Error: Simulation diverging, trying to correct it using slowc=%f\n", slowc_save);
       for (i = 0; i < y_size; i++)
         y[i+it_*y_size] = ya[i+it_*y_size] + slowc_save*direction[i+it_*y_size];
       mxFree(piv_v);
@@ -1108,6 +1120,16 @@ SparseMatrix::simulate_NG(int blck, int y_size, int it_, int y_kmin, int y_kmax,
       mxFree(pivk_v);
       mxFree(NR);
       return (true);
+    }
+  if (print_it )
+    {
+      mexPrintf("solwc=%f g0=%f res2=%f glambda2=%f\n",slowc_save,g0, res2, glambda2);
+      mexPrintf("-----------------------------------\n");
+      mexPrintf("      Simulate iteration no %d     \n", iter+1);
+      mexPrintf("      max. error=%.10e       \n", double (max_res));
+      mexPrintf("      sqr. error=%.10e       \n", double (res2));
+      mexPrintf("      abs. error=%.10e       \n", double (res1));
+      mexPrintf("-----------------------------------\n");
     }
   Simple_Init(it_, y_kmin, y_kmax, Size, IM_i);
   NonZeroElem **bc;
@@ -1202,7 +1224,7 @@ SparseMatrix::simulate_NG(int blck, int y_size, int it_, int y_kmin, int y_kmax,
                 }
               else
                 markovitz = fabs(piv_v[j])/piv_abs;
-              if (fetestexcept(FE_DIVBYZERO))
+              /*if (fetestexcept(FE_DIVBYZERO))
                 {
                   if (error_not_printed)
                     {
@@ -1212,7 +1234,7 @@ SparseMatrix::simulate_NG(int blck, int y_size, int it_, int y_kmin, int y_kmax,
                     }
                   feclearexcept (FE_ALL_EXCEPT);
                   res1 = NAN;
-                }
+                }*/
               //mexPrintf("piv_v[j]=%f NR[j]=%d markovitz=%f markovitz_max=%f\n", piv_v[j], NR[j], markovitz, markovitz_max);
               if (markovitz > markovitz_max)
                 {
@@ -1242,7 +1264,7 @@ SparseMatrix::simulate_NG(int blck, int y_size, int it_, int y_kmin, int y_kmax,
                 }
               else
                 markovitz = fabs(piv_v[j])/piv_abs;
-              if (fetestexcept(FE_DIVBYZERO))
+              /*if (fetestexcept(FE_DIVBYZERO))
                 {
                   if (error_not_printed)
                     {
@@ -1252,7 +1274,7 @@ SparseMatrix::simulate_NG(int blck, int y_size, int it_, int y_kmin, int y_kmax,
                     }
                   feclearexcept (FE_ALL_EXCEPT);
                   res1 = NAN;
-                }
+                }*/
               if (/*markovitz > markovitz_max &&*/ NR[j] == 1)
                 {
                   piv = piv_v[j];

@@ -105,7 +105,7 @@ public:
   void fixe_u(double **u, int u_count_int, int max_lag_plus_max_lead_plus_1);
   void Read_SparseMatrix(string file_name, const int Size, int periods, int y_kmin, int y_kmax, bool steady_state, bool two_boundaries);
   void Read_file(string file_name, int periods, int u_size1, int y_size, int y_kmin, int y_kmax, int &nb_endo, int &u_count, int &u_count_init, double *u);
-
+  double g0, gp0, glambda2, try_at_iteration;
 private:
   void Init(int periods, int y_kmin, int y_kmax, int Size, map<pair<pair<int, int>, int>, int> &IM);
   void ShortInit(int periods, int y_kmin, int y_kmax, int Size, map<pair<pair<int, int>, int>, int> &IM);
@@ -173,7 +173,7 @@ protected:
   int u_count_alloc, u_count_alloc_save;
   double *u, *y, *ya;
   double res1, res2, max_res, max_res_idx;
-  double slowc, slowc_save, markowitz_c;
+  double slowc, slowc_save, prev_slowc_save, markowitz_c;
   int y_kmin, y_kmax, y_size, periods, y_decal;
   int  *index_vara, *index_equa;
   int u_count, tbreak_g;

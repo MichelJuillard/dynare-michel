@@ -62,11 +62,14 @@ Interpreter::Interpreter(double *params_arg, double *y_arg, double *ya_arg, doub
   minimal_solving_periods = minimal_solving_periods_arg;
 }
 
+
 string
 Interpreter::error_location()
 {
   string tmp;
+#ifndef DEBUG_EX
   mxArray *M_;
+#endif
   char * P;
   unsigned int R, C;
   stringstream Error_loc("in ");
@@ -85,17 +88,19 @@ Interpreter::error_location()
           Error_loc << "equation " << EQN_equation+1;
         break;
       case FirstEndoDerivative:
-        M_ = mexGetVariable("global", "M_");
         if (EQN_block_number > 1)
           Error_loc << "first order derivative of equation " << EQN_equation+1 << " in block " << EQN_block+1 << " with respect to endogenous variable ";
         else
           Error_loc << "first order derivative of equation " << EQN_equation+1 << " with respect to endogenous variable ";
+#ifndef DEBUG_EX
+        M_ = mexGetVariable("global", "M_");
         C = mxGetN(mxGetFieldByNumber(M_, 0, mxGetFieldNumber(M_, "endo_names")));
         R = mxGetM(mxGetFieldByNumber(M_, 0, mxGetFieldNumber(M_, "endo_names")));
         P = (char*) mxGetPr(mxGetFieldByNumber(M_, 0, mxGetFieldNumber(M_, "endo_names")));
         if (EQN_dvar1 < R)
           for (unsigned int i = 0; i < C; i++)
             Error_loc << P[2*(EQN_dvar1+i*R)];
+#endif
         break;
       default:
         break;
@@ -145,11 +150,11 @@ double
 Interpreter::log10_1(double a)
 {
   double r = log(a);
-  if (fetestexcept(FE_INVALID))
+  if (fetestexcept(FE_INVALID | FE_DIVBYZERO))
     {
       if (error_not_printed)
         {
-          mexPrintf("--------------------------------------\n  Error: log(X) with X=%5.15f\n in %s \n--------------------------------------\n", a,error_location().c_str());
+          mexPrintf("--------------------------------------\n  Error: log10(X) with X=%5.15f\n in %s \n--------------------------------------\n", a,error_location().c_str());
           error_not_printed = false;
           r = 0.0000000000000000000000001;
         }
@@ -170,7 +175,7 @@ Interpreter::compute_block_time(int Per_u_, bool evaluate, int block_num)
   double ll;
   EQN_block = block_num;
   //feclearexcept (FE_ALL_EXCEPT);
-  while (go_on)
+  while (go_on && error_not_printed)
     {
       switch (it_code->first)
         {
@@ -1237,6 +1242,8 @@ Interpreter::simulate_a_block(const int size, const int type, string file_name, 
               max_res_idx = 0;
               cvg = false;
               iter = 0;
+              glambda2 = g0 = very_big;
+              try_at_iteration = 0;
               while (!(cvg || (iter > maxit_)))
                 {
                   it_code = begining;
@@ -1266,11 +1273,13 @@ Interpreter::simulate_a_block(const int size, const int type, string file_name, 
                   if (cvg)
                     continue;
                   int prev_iter = iter;
-                  result = simulate_NG(Block_Count, symbol_table_endo_nbr, 0, 0, 0, size, false, cvg, iter, true, EQN_block_number);
+                  result = simulate_NG(Block_Count, symbol_table_endo_nbr, 0, 0, 0, size, true/*false*/, cvg, iter, true, EQN_block_number);
                   iter++;
                   if (iter > prev_iter)
                     {
-
+                      g0 = res2;
+                      gp0 = -res2;
+                      try_at_iteration = 0;
                     }
                 }
               if (!cvg or !result)

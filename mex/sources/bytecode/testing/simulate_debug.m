@@ -1,7 +1,9 @@
 function simulate_debug(steady_state)
 global M_ oo_ options_;
 fid = fopen([M_.fname '_options.txt'],'wt');
-fprintf(fid,'%d\n',options_.periods);
+if steady_state~=1
+  fprintf(fid,'%d\n',options_.periods);
+end;
 fprintf(fid,'%d\n',options_.maxit_);
 fprintf(fid,'%6.20f\n',options_.slowc);
 fprintf(fid,'%6.20f\n',options_.markowitz);
