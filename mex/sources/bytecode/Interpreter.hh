@@ -51,12 +51,17 @@ private:
   unsigned int EQN_equation, EQN_block, EQN_block_number;
   unsigned int EQN_dvar1, EQN_dvar2, EQN_dvar3;
   int EQN_lag1, EQN_lag2, EQN_lag3;
+  it_code_type it_code_expr;
   protected:
-  double pow1(double a, double b);
-  double log1(double a);
-  double log10_1(double a);
-  string error_location();
+  double pow1(double a, double b, bool evaluate);
+  double log1(double a, bool evaluate);
+  double log10_1(double a, bool evaluate);
+  string remove_white(string str);
+  string add_underscore_to_fpe(string str);
+  string get_variable(SymbolType variable_type, int variable_num);
+  string error_location(bool evaluate);
   void compute_block_time(int Per_u_, bool evaluate, int block_num);
+  string print_expression(it_code_type it_code, bool evaluate);
   void evaluate_a_block(const int size, const int type, string bin_basename, bool steady_state, int block_num,
                         const bool is_linear = false, const int symbol_table_endo_nbr = 0, const int Block_List_Max_Lag = 0, const int Block_List_Max_Lead = 0, const int u_count_int = 0);
   bool simulate_a_block(const int size, const int type, string file_name, string bin_basename, bool Gaussian_Elimination, bool steady_state, int block_num,

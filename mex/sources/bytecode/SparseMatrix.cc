@@ -1012,7 +1012,7 @@ SparseMatrix::simulate_NG(int blck, int y_size, int it_, int y_kmin, int y_kmax,
   NR = (int *) mxMalloc(Size*sizeof(int));
   error_not_printed = true;
   u_count_alloc_save = u_count_alloc;
-  if (isnan(res1) || isinf(res1) || (res2 > 8*g0 && iter>0))
+  if (isnan(res1) || isinf(res1) || (res2 > 12*g0 && iter>0))
     {
       if (iter == 0)
         {
@@ -1205,7 +1205,6 @@ SparseMatrix::simulate_NG(int blck, int y_size, int it_, int y_kmin, int y_kmax,
         }
       double markovitz = 0, markovitz_max = -9e70;
       int NR_max = 0;
-      //mexPrintf("l=%d\n",l);
       if (!one)
         {
           for (j = 0; j < l; j++)
@@ -1224,18 +1223,6 @@ SparseMatrix::simulate_NG(int blck, int y_size, int it_, int y_kmin, int y_kmax,
                 }
               else
                 markovitz = fabs(piv_v[j])/piv_abs;
-              /*if (fetestexcept(FE_DIVBYZERO))
-                {
-                  if (error_not_printed)
-                    {
-                      mexPrintf("--------------------------------------\n  Error: Divide by zero in simul_NG(1) piv_abs=%f and N_max=%d \n--------------------------------------\n", piv_abs, N_max);
-                      error_not_printed = false;
-                      markovitz = 1e70;
-                    }
-                  feclearexcept (FE_ALL_EXCEPT);
-                  res1 = NAN;
-                }*/
-              //mexPrintf("piv_v[j]=%f NR[j]=%d markovitz=%f markovitz_max=%f\n", piv_v[j], NR[j], markovitz, markovitz_max);
               if (markovitz > markovitz_max)
                 {
                   piv = piv_v[j];
@@ -1264,32 +1251,20 @@ SparseMatrix::simulate_NG(int blck, int y_size, int it_, int y_kmin, int y_kmax,
                 }
               else
                 markovitz = fabs(piv_v[j])/piv_abs;
-              /*if (fetestexcept(FE_DIVBYZERO))
-                {
-                  if (error_not_printed)
-                    {
-                      mexPrintf("--------------------------------------\n  Error: Divide by zero in simul_NG(2) piv_abs=%f and N_max=%d \n--------------------------------------\n", piv_abs, N_max);
-                      error_not_printed = false;
-                      markovitz = 1e70;
-                    }
-                  feclearexcept (FE_ALL_EXCEPT);
-                  res1 = NAN;
-                }*/
-              if (/*markovitz > markovitz_max &&*/ NR[j] == 1)
+              if (NR[j] == 1)
                 {
                   piv = piv_v[j];
                   pivj = pivj_v[j];   //Line number
                   pivk = pivk_v[j];   //positi
                   markovitz_max = markovitz;
                   NR_max = NR[j];
-                  //mexPrintf("forced piv = %f NR_max =%d\n",piv, NR_max);
                 }
             }
         }
-      if (fabs(piv) < eps)
+      /*if (fabs(piv) < eps)
         mexPrintf("==> Error NR_max=%d, N_max=%d and piv=%f, piv_abs=%f, markovitz_max=%f\n",NR_max, N_max, piv, piv_abs, markovitz_max);
       if (NR_max == 0)
-        mexPrintf("==> Error NR_max=0 and piv=%f, markovitz_max=%f\n",piv, markovitz_max);
+        mexPrintf("==> Error NR_max=0 and piv=%f, markovitz_max=%f\n",piv, markovitz_max);*/
       pivot[i] = pivj;
       pivotk[i] = pivk;
       pivotv[i] = piv;
@@ -1544,7 +1519,84 @@ SparseMatrix::simulate_NG1(int blck, int y_size, int it_, int y_kmin, int y_kmax
       mexEvalString("drawnow;");
       time00 = clock();
     }
-  if (isnan(res1) || isinf(res1))
+  if (isnan(res1) || isinf(res1) || (res2 > 12*g0 && iter>0))
+    {
+      if (iter == 0)
+        {
+          for (j = 0; j < y_size; j++)
+            {
+              bool select = false;
+              for (int i = 0; i < Size; i++)
+                if (j == index_vara[i])
+                  {
+                    select = true;
+                    break;
+                  }
+              if (select)
+                mexPrintf("-> variable %d at time %d = %f direction = %f\n", j+1, it_, y[j+it_*y_size], direction[j+it_*y_size]);
+              else
+                mexPrintf("   variable %d at time %d = %f direction = %f\n", j+1, it_, y[j+it_*y_size], direction[j+it_*y_size]);
+            }
+          mexPrintf("res1=%5.10f\n", res1);
+          mexPrintf("The initial values of endogenous variables are too far from the solution.\n");
+          mexPrintf("Change them!\n");
+          mexEvalString("drawnow;");
+          filename += " stopped";
+          mexErrMsgTxt(filename.c_str());
+        }
+      if (fabs(slowc_save) < 1e-8)
+        {
+          for (j = 0; j < y_size; j++)
+            {
+              bool select = false;
+              for (int i = 0; i < Size; i++)
+                if (j == index_vara[i])
+                  {
+                    select = true;
+                    break;
+                  }
+              if (select)
+                mexPrintf("-> variable %d at time %d = %f direction = %f\n", j+1, it_, y[j+it_*y_size], direction[j+it_*y_size]);
+              else
+                mexPrintf("   variable %d at time %d = %f direction = %f\n", j+1, it_, y[j+it_*y_size], direction[j+it_*y_size]);
+            }
+          mexPrintf("Dynare cannot improve the simulation in block %d at time %d (variable %d)\n", blck+1, it_+1, max_res_idx);
+          mexEvalString("drawnow;");
+          filename += " stopped";
+          mexErrMsgTxt(filename.c_str());
+        }
+      if(!(isnan(res1) || isinf(res1)) && !(isnan(g0) || isinf(g0)))
+        {
+          if (try_at_iteration == 0)
+            {
+              prev_slowc_save = slowc_save;
+              slowc_save = max( - gp0 / (2 * (res2 - g0 - gp0)) , 0.1);
+            }
+          else
+            {
+              double t1 = res2 - gp0 * slowc_save - g0;
+              double t2 = glambda2 - gp0 * prev_slowc_save - g0;
+              double a = (1/(slowc_save * slowc_save) * t1 - 1/(prev_slowc_save * prev_slowc_save) * t2) / (slowc_save - prev_slowc_save);
+              double b = (-prev_slowc_save/(slowc_save * slowc_save) * t1 + slowc_save/(prev_slowc_save * prev_slowc_save) * t2) / (slowc_save - prev_slowc_save);
+              prev_slowc_save = slowc_save;
+              slowc_save = max(min( -b + sqrt(b*b - 3 * a * gp0) / (3 * a), 0.5 * slowc_save), 0.1 * slowc_save);
+            }
+          glambda2 = res2;
+          try_at_iteration ++;
+        }
+      else
+        {
+          prev_slowc_save = slowc_save;
+          slowc_save /= 1.1;
+        }
+      if (print_it)
+        mexPrintf("Error: Simulation diverging, trying to correct it using slowc=%f\n", slowc_save);
+      for (i = 0; i < y_size*(periods+y_kmin); i++)
+        y[i] = ya[i]+slowc_save*direction[i];
+      iter--;
+      return 0;
+    }
+  /*if (isnan(res1) || isinf(res1))
     {
       if (iter == 0)
         {
@@ -1577,7 +1629,7 @@ SparseMatrix::simulate_NG1(int blck, int y_size, int it_, int y_kmin, int y_kmax
         y[i] = ya[i]+slowc_save*direction[i];
       iter--;
       return (0);
-    }
+    }*/
   u_count += u_count_init;
   if (alt_symbolic && alt_symbolic_count < alt_symbolic_count_max)
     {
@@ -1699,7 +1751,6 @@ SparseMatrix::simulate_NG1(int blck, int y_size, int it_, int y_kmin, int y_kmax
                     }
                   double markovitz = 0, markovitz_max = -9e70;
                   int NR_max = 0;
-                  //mexPrintf("l=%d\n",l);
                   if (!one)
                     {
                       for (j = 0; j < l; j++)
@@ -1718,18 +1769,6 @@ SparseMatrix::simulate_NG1(int blck, int y_size, int it_, int y_kmin, int y_kmax
                             }
                           else
                             markovitz = fabs(piv_v[j])/piv_abs;
-                          /*if (fetestexcept(FE_DIVBYZERO))
-                            {
-                              if (error_not_printed)
-                                {
-                                  mexPrintf("--------------------------------------\n  Error: Divide by zero in simul_NG(1) piv_abs=%f and N_max=%d \n--------------------------------------\n", piv_abs, N_max);
-                                  error_not_printed = false;
-                                  markovitz = 1e70;
-                                }
-                              feclearexcept (FE_ALL_EXCEPT);
-                              res1 = NAN;
-                            }*/
-                          //mexPrintf("piv_v[j]=%f NR[j]=%d markovitz=%f markovitz_max=%f\n", piv_v[j], NR[j], markovitz, markovitz_max);
                           if (markovitz > markovitz_max)
                             {
                               piv = piv_v[j];
@@ -1758,25 +1797,13 @@ SparseMatrix::simulate_NG1(int blck, int y_size, int it_, int y_kmin, int y_kmax
                             }
                           else
                             markovitz = fabs(piv_v[j])/piv_abs;
-                          /*if (fetestexcept(FE_DIVBYZERO))
-                            {
-                              if (error_not_printed)
-                                {
-                                  mexPrintf("--------------------------------------\n  Error: Divide by zero in simul_NG(2) piv_abs=%f and N_max=%d \n--------------------------------------\n", piv_abs, N_max);
-                                  error_not_printed = false;
-                                  markovitz = 1e70;
-                                }
-                              feclearexcept (FE_ALL_EXCEPT);
-                              res1 = NAN;
-                            }*/
-                          if (/*markovitz > markovitz_max &&*/ NR[j] == 1)
+                          if (NR[j] == 1)
                             {
                               piv = piv_v[j];
                               pivj = pivj_v[j];   //Line number
                               pivk = pivk_v[j];   //positi
                               markovitz_max = markovitz;
                               NR_max = NR[j];
-                              //mexPrintf("forced piv = %f NR_max =%d\n",piv, NR_max);
                             }
                         }
                     }
