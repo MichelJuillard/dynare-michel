@@ -1,19 +1,20 @@
-function logged_prior_density = priordens(x, pshape, p6, p7, p3, p4)
+function logged_prior_density = priordens(x, pshape, p6, p7, p3, p4,initialization)
 % Computes a prior density for the structural parameters of DSGE models
 %
 % INPUTS 
-%    x         [double]      vector with n elements.
-%    pshape    [integer]     vector with n elements (bayestopt_.pshape).
-%    p6:       [double]      vector with n elements, first  parameter of the prior distribution (bayestopt_.p6).
-%    p7:       [double]      vector with n elements, second parameter of the prior distribution (bayestopt_.p7).
-%    p3:       [double]      vector with n elements, lower bounds.
-%    p4:       [double]      vector with n elements, upper bound.
+%    x              [double]      vector with n elements.
+%    pshape         [integer]     vector with n elements (bayestopt_.pshape).
+%    p6:            [double]      vector with n elements, first  parameter of the prior distribution (bayestopt_.p6).
+%    p7:            [double]      vector with n elements, second parameter of the prior distribution (bayestopt_.p7).
+%    p3:            [double]      vector with n elements, lower bounds.
+%    p4:            [double]      vector with n elements, upper bound.
+%    initialization [integer]     if 1: initialize persistent variables
 %    
 % OUTPUTS 
 %    logged_prior_density  [double]  scalar, log of the prior density evaluated at x.
 %
 
-% Copyright (C) 2003-2009 Dynare Team
+% Copyright (C) 2003-2010 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -30,12 +31,10 @@ function logged_prior_density = priordens(x, pshape, p6, p7, p3, p4)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-persistent pflag
 persistent id1 id2 id3 id4 id5 id6
 persistent tt1 tt2 tt3 tt4 tt5 tt6
 
-if isempty(pflag)
-    Number0fParameters = length(pshape); 
+if nargin > 6  && initialization == 1
     % Beta indices.
     tt1 = 1;
     id1 = find(pshape==1);
