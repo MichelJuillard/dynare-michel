@@ -282,3 +282,6 @@ options_.ms.print_draws = 1;
 options_.ms.n_draws=1000;
 options_.ms.thinning_factor=1;
 options_.ms.proposal_draws = 100000;
+
+% initialize persistent variables in priordens()
+priordens([],[],[],[],[],[],1);
