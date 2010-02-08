@@ -44,6 +44,7 @@
 #include <cmath>
 #include <cstring>
 #include <cctype>
+#include <cassert>
 
 #ifdef _MSC_VER
 
@@ -303,8 +304,11 @@ extern "C" {
             map<string, ConstTwoDMatrix>::const_iterator cit = mm.begin();
             ++cit;
             plhs[0] = mxCreateDoubleMatrix((*cit).second.numRows(), (*cit).second.numCols(), mxREAL);
-            TwoDMatrix g((*cit).second.numRows(), (*cit).second.numCols(), mxGetPr(plhs[0]));
-            g = (const TwoDMatrix &)(*cit).second;
+
+            // Copy Dynare++ matrix into MATLAB matrix
+            const ConstVector &vec = (*cit).second.getData();
+            assert(vec.skip() == 1);
+            memcpy(mxGetPr(plhs[0]), vec.base(), vec.length() * sizeof(double));
           }
         if (kOrder >= 2)
           {
@@ -314,8 +318,12 @@ extern "C" {
               {
                 {
                   plhs[ii] = mxCreateDoubleMatrix((*cit).second.numRows(), (*cit).second.numCols(), mxREAL);
-                  TwoDMatrix g_ii((*cit).second.numRows(), (*cit).second.numCols(), mxGetPr(plhs[ii]));
-                  g_ii = (const TwoDMatrix &)(*cit).second;
+
+                  // Copy Dynare++ matrix into MATLAB matrix
+                  const ConstVector &vec = (*cit).second.getData();
+                  assert(vec.skip() == 1);
+                  memcpy(mxGetPr(plhs[ii]), vec.base(), vec.length() * sizeof(double));
+
                   ++ii;
                 }
               }
