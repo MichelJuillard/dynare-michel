@@ -18,7 +18,7 @@ function [xparam1, estim_params_, bayestopt_, lb, ub, M_]=set_prior(estim_params
 % SPECIAL REQUIREMENTS
 %    None
 
-% Copyright (C) 2003-2009 Dynare Team
+% Copyright (C) 2003-2010 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -262,3 +262,7 @@ if exist([ M_.dname '/prior/definition.mat'])
 else
     save([M_.dname '/prior/definition.mat'],'bayestopt_');
 end
+
+% initialize persistent variables in priordens()
+priordens(xparam1,bayestopt_.pshape,bayestopt_.p6,bayestopt_.p7, ...
+          bayestopt_.p3,bayestopt_.p4,1);
