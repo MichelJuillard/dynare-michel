@@ -126,14 +126,16 @@ KordpDynare::solveDeterministicSteady()
 void
 KordpDynare::evaluateSystem(Vector &out, const Vector &yy, const Vector &xx) throw (DynareException)
 {
-  // Nothing to do, this method is only implemented to complete the interface of DynamicModel
+  // This method is only called when checking the residuals at steady state (Approximation::check), so return zero residuals
+  out.zeros();
 }
 
 void
 KordpDynare::evaluateSystem(Vector &out, const Vector &yym, const Vector &yy,
                             const Vector &yyp, const Vector &xx) throw (DynareException)
 {
-  // Nothing to do, this method is only implemented to complete the interface of DynamicModel
+  // This method is only called when checking the residuals at steady state (Approximation::check), so return zero residuals
+  out.zeros();
 }
 
 /************************************************
