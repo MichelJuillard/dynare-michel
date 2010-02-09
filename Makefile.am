@@ -2,7 +2,7 @@ SUBDIRS = preprocessor doc tests
 
 if HAVE_BLAS
 if HAVE_LAPACK
-SUBDIRS += dynare++
+SUBDIRS += dynare++ mex/sources/estimation/tests mex/sources/estimation/libmat/tests
 endif
 endif
 

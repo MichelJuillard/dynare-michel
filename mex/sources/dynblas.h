@@ -8,7 +8,7 @@
  * and MATLAB_VERSION (for version 7.4, define it to 0x0704).
  *
  *
- * Copyright (C) 2009 Dynare Team
+ * Copyright (C) 2009-2010 Dynare Team
  *
  * This file is part of Dynare.
  *
@@ -62,6 +62,12 @@ extern "C" {
              CONST_BLDOU b, CONST_BLINT ldb, CONST_BLDOU beta,
              BLDOU c, CONST_BLINT ldc);
 
+#define dsymm FORTRAN_WRAPPER(dsymm)
+  void dsymm(BLCHAR side, BLCHAR uplo, CONST_BLINT m, CONST_BLINT n,
+             CONST_BLDOU alpha, CONST_BLDOU a, CONST_BLINT lda,
+             CONST_BLDOU b, CONST_BLINT ldb, CONST_BLDOU beta,
+             BLDOU c, CONST_BLINT ldc);
+
 #define dgemv FORTRAN_WRAPPER(dgemv)
   void dgemv(BLCHAR trans, CONST_BLINT m, CONST_BLINT n, CONST_BLDOU alpha,
              CONST_BLDOU a, CONST_BLINT lda, CONST_BLDOU x, CONST_BLINT incx,
@@ -98,6 +104,10 @@ extern "C" {
 #define ddot FORTRAN_WRAPPER(ddot)
   double ddot(CONST_BLINT n, CONST_BLDOU x, CONST_BLINT incx, CONST_BLDOU y,
               CONST_BLINT incy);
+
+#define dsyr FORTRAN_WRAPPER(dsyr)
+  void dsyr(BLCHAR uplo, CONST_BLINT n, CONST_BLDOU alpha, CONST_BLDOU x,
+            CONST_BLINT incx, BLDOU a, CONST_BLINT lda);
 
 #ifdef __cplusplus
 } /* extern "C" */

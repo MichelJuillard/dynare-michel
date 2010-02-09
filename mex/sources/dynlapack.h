@@ -8,7 +8,7 @@
  * and MATLAB_VERSION (for version 7.4, define it to 0x0704).
  *
  *
- * Copyright (C) 2009 Dynare Team
+ * Copyright (C) 2009-2010 Dynare Team
  *
  * This file is part of Dynare.
  *
@@ -109,6 +109,15 @@ extern "C" {
               CONST_LADOU abstol, LAINT m, LADOU w, LADOU z, CONST_LAINT ldz,
               LAINT isuppz, LADOU work, CONST_LAINT lwork, LAINT iwork, CONST_LAINT liwork,
               LAINT info);
+
+#define dgeqrf FORTRAN_WRAPPER(dgeqrf)
+  void dgeqrf(CONST_LAINT m, CONST_LAINT n, LADOU a, CONST_LAINT lda,
+              LADOU tau, LADOU work, CONST_LAINT lwork, LAINT info);
+
+#define dormqr FORTRAN_WRAPPER(dormqr)
+  void dormqr(LACHAR side, LACHAR trans, CONST_LAINT m, CONST_LAINT n, CONST_LAINT k,
+              CONST_LADOU a, CONST_LAINT lda, CONST_LADOU tau, LADOU c, CONST_LAINT ldc,
+              LADOU work, CONST_LAINT lwork, LAINT info);
 
 #ifdef __cplusplus
 } /* extern "C" */

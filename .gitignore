@@ -122,6 +122,11 @@ ylwrap
 # Windows
 /windows/dynare-version.nsi
 
+# Estimation DLL tests
+/mex/sources/estimation/tests/test-dr
+/mex/sources/estimation/libmat/tests/test-qr
+/mex/sources/estimation/libmat/tests/test-gsd
+
 # Misc
 !/matlab/swz/c-code/Makefile
 !/mex/sources/kalman/cc/Makefile
