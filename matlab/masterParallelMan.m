@@ -52,6 +52,7 @@ persistent initialize
 if isempty(initialize),
   mydelete(['P_slave_*End.txt']);
   mydelete(['slaveParallel_input*.mat']); 
+  initialize = 0;
   pause(1),
 end
 
@@ -101,6 +102,7 @@ mydelete(['P_',fname,'*End.txt']);
 % Create a shell script containing the commands to launch the required tasks on the slaves
 fid = fopen('ConcurrentCommand1.bat','w+');
 for j=1:totCPU,
+    command1 = ' ';
     
     indPC=min(find(nCPU>=j));
     
@@ -156,7 +158,7 @@ for j=1:totCPU,
                 command1=['start /B psexec -W ',DyMo, ' -a ',int2str(Parallel(indPC).NumCPU(j-nCPU0)),' -low  matlab -nosplash -nodesktop -minimize -r slaveParallel(',int2str(j),',',int2str(indPC),')'];
             end
         end
-    else
+    elseif Parallel(indPC).Local==0,
         if isunix || (~matlab_ver_less_than('7.4') && ismac),
 %             [tempo, RemoteName]=system(['ssh ',Parallel(indPC).user,'@',Parallel(indPC).PcName,' "ifconfig  | grep \''inet addr:\''| grep -v \''127.0.0.1\'' | cut -d: -f2 | awk \''{ print $1}\''"']);
             [tempo, RemoteName]=system(['ssh ',Parallel(indPC).user,'@',Parallel(indPC).PcName,' "hostname --fqdn"']);
