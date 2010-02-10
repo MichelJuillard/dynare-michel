@@ -23,10 +23,6 @@ global M_ options_ oo_
 warning_old_state = warning;
 warning off
 
-if options_.hp_filter
-    error('STOCH_SIMUL: HP filter is not yet implemented for empirical moments')
-end
-
 if size(var_list,1) == 0
     var_list = M_.endo_names(1:M_.orig_endo_nbr, :);
 end
@@ -45,7 +41,13 @@ end
 y = y(ivar,options_.drop+M_.maximum_lag+1:end)';
 
 m = mean(y);
-y = y - repmat(m,size(y,1),1);
+
+if options_.hp_filter
+    [hptrend,y] = sample_hp_filter(y,options_.hp_filter);
+else
+    y = bsxfun(@minus, y, m);
+end
+
 s2 = mean(y.*y);
 s = sqrt(s2);
 oo_.mean = transpose(m);
@@ -54,8 +56,7 @@ oo_.var = y'*y/size(y,1);
 labels = deblank(M_.endo_names(ivar,:));
 
 if options_.nomoments == 0
-    z = [ m' s' s2' (mean(y.^3)./s2.^1.5)' (mean(y.^4)./(s2.*s2)-3)' ];
-    
+    z = [ m' s' s2' (mean(y.^3)./s2.^1.5)' (mean(y.^4)./(s2.*s2)-3)' ];    
     title='MOMENTS OF SIMULATED VARIABLES';
     if options_.hp_filter
         title = [title ' (HP filter, lambda = ' ...
