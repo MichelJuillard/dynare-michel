@@ -1,4 +1,5 @@
 function prior_posterior_statistics(type,Y,gend,data_index,missing_value)
+
 % function PosteriorFilterSmootherAndForecast(Y,gend, type)
 % Computes posterior filter smoother and forecasts
 %
@@ -7,13 +8,13 @@ function prior_posterior_statistics(type,Y,gend,data_index,missing_value)
 %                  prior
 %                  gsa
 %    Y:            data
-%    gend:         number of observations 
+%    gend:         number of observations
 %    data_index    [cell]      1*smpl cell of column vectors of indices.
 %    missing_value 1 if missing values, 0 otherwise
-%    
+%
 % OUTPUTS
 %    none
-%        
+%
 % SPECIAL REQUIREMENTS
 %    none
 
@@ -35,6 +36,8 @@ function prior_posterior_statistics(type,Y,gend,data_index,missing_value)
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
 global options_ estim_params_ oo_ M_ bayestopt_
+
+localVars=[];
 
 nvx  = estim_params_.nvx;
 nvn  = estim_params_.nvn;
@@ -61,8 +64,8 @@ maxlag = M_.maximum_endo_lag;
 DirectoryName = CheckPath('metropolis');
 load([ DirectoryName '/'  M_.fname '_mh_history'])
 FirstMhFile = record.KeepedDraws.FirstMhFile;
-FirstLine = record.KeepedDraws.FirstLine; 
-TotalNumberOfMhFiles = sum(record.MhDraws(:,2)); LastMhFile = TotalNumberOfMhFiles; 
+FirstLine = record.KeepedDraws.FirstLine;
+TotalNumberOfMhFiles = sum(record.MhDraws(:,2)); LastMhFile = TotalNumberOfMhFiles;
 TotalNumberOfMhDraws = sum(record.MhDraws(:,1));
 NumberOfDraws = TotalNumberOfMhDraws-floor(options_.mh_drop*TotalNumberOfMhDraws);
 clear record;
@@ -82,14 +85,14 @@ MAX_ninno = min(B,ceil(MaxNumberOfBytes/(exo_nbr*gend)/8));
 MAX_nerro = min(B,ceil(MaxNumberOfBytes/(size(options_.varobs,1)*gend)/8));
 if naK
     MAX_naK   = min(B,ceil(MaxNumberOfBytes/(size(options_.varobs,1)* ...
-                                             length(options_.filter_step_ahead)*gend)/8));
+        length(options_.filter_step_ahead)*gend)/8));
 end
 if horizon
     MAX_nforc1 = min(B,ceil(MaxNumberOfBytes/((endo_nbr)*(horizon+maxlag))/8));
     MAX_nforc2 = min(B,ceil(MaxNumberOfBytes/((endo_nbr)*(horizon+maxlag))/ ...
-                            8));
+        8));
     IdObs    = bayestopt_.mfys;
-
+    
 end
 MAX_momentsno = min(B,ceil(MaxNumberOfBytes/(get_moments_size(options_)*8)));
 %%
@@ -111,7 +114,9 @@ ifil = zeros(7,1);
 if exist('OCTAVE_VERSION')
     diary off;
 else
-    h = waitbar(0,'Taking subdraws...');
+    if isnumeric(options_.parallel)
+        h = waitbar(0,'Taking subdraws...');
+    end
 end
 
 stock_param = zeros(MAX_nruns, npar);
@@ -128,7 +133,7 @@ end
 
 if options_.filter_step_ahead
     stock_filter_step_ahead = zeros(naK,endo_nbr,gend+ ...
-                                    options_.filter_step_ahead(end),MAX_naK);
+        options_.filter_step_ahead(end),MAX_naK);
     run_smoother = 1;
 end
 if options_.forecast
@@ -139,144 +144,116 @@ end
 %if moments_varendo
 %    stock_moments = cell(MAX_momentsno,1);
 %end
-for b=1:B
-    [deep, logpo] = GetOneDraw(type);
-    set_all_parameters(deep);
-    dr = resol(oo_.steady_state,0);
 
-    %if moments_varendo
-    %    stock_moments{irun(8)} = compute_model_moments(dr,M_,options_);
-    %end
 
-    if run_smoother
-        [alphahat,etahat,epsilonhat,alphatilde,SteadyState,trend_coeff,aK] = ...
-            DsgeSmoother(deep,gend,Y,data_index,missing_value);
-        if options_.loglinear
-            stock_smooth(dr.order_var,:,irun(1)) = alphahat(1:endo_nbr,:)+ ...
-                repmat(log(dr.ys(dr.order_var)),1,gend);
-            stock_update(dr.order_var,:,irun(1)) = alphatilde(1:endo_nbr,:)+ ...
-                repmat(log(dr.ys(dr.order_var)),1,gend);
-        else
-            stock_smooth(dr.order_var,:,irun(1)) = alphahat(1:endo_nbr,:)+ ...
-                repmat(dr.ys(dr.order_var),1,gend);
-            stock_update(dr.order_var,:,irun(1)) = alphatilde(1:endo_nbr,:)+ ...
-                repmat(dr.ys(dr.order_var),1,gend);
-        end    
-        stock_innov(:,:,irun(2))  = etahat;
-        if nvn
-            stock_error(:,:,irun(3))  = epsilonhat;
-        end
-        if naK
-            stock_filter_step_ahead(:,dr.order_var,:,irun(4)) = aK(options_.filter_step_ahead,1:endo_nbr,:);
-        end
 
-        if horizon
-            yyyy = alphahat(iendo,i_last_obs);
-            yf = forcst2a(yyyy,dr,zeros(horizon,exo_nbr));
-            if options_.prefilter == 1
-                yf(:,IdObs) = yf(:,IdObs)+repmat(bayestopt_.mean_varobs', ...
-                                                 horizon+maxlag,1);
-            end
-            yf(:,IdObs) = yf(:,IdObs)+(gend+[1-maxlag:horizon]')*trend_coeff';
-            if options_.loglinear == 1
-                yf = yf+repmat(log(SteadyState'),horizon+maxlag,1);
-            else
-                yf = yf+repmat(SteadyState',horizon+maxlag,1);
-            end
-            yf1 = forcst2(yyyy,horizon,dr,1);
-            if options_.prefilter == 1
-                yf1(:,IdObs,:) = yf1(:,IdObs,:)+ ...
-                    repmat(bayestopt_.mean_varobs',[horizon+maxlag,1,1]);
-            end
-            yf1(:,IdObs,:) = yf1(:,IdObs,:)+repmat((gend+[1-maxlag:horizon]')* ...
-                                                   trend_coeff',[1,1,1]);
-            if options_.loglinear == 1
-                yf1 = yf1 + repmat(log(SteadyState'),[horizon+maxlag,1,1]);
-            else
-                yf1 = yf1 + repmat(SteadyState',[horizon+maxlag,1,1]);
-            end
+% Store the variable mandatory for local/remote parallel computing.
 
-            stock_forcst_mean(:,:,irun(6)) = yf';
-            stock_forcst_point(:,:,irun(7)) = yf1';
-        end
-        
-    end
-    stock_param(irun(5),:) = deep;
-    stock_logpo(irun(5),1) = logpo;
-    stock_ys(irun(5),:) = SteadyState';
+localVars.typee=type;
+localVars.run_smoother=run_smoother;
+localVars.gend=gend;
+localVars.Y=Y;
+localVars.data_index=data_index;
+localVars.missing_value=missing_value;
+localVars.options_.varobs=options_.varobs;
+localVars.irun=irun;
+localVars.endo_nbr=endo_nbr;
+localVars.nvn=nvn;
+localVars.naK=naK;
+localVars.horizon=horizon;
+localVars.iendo=iendo;
+if horizon
+    localVars.i_last_obs=i_last_obs;
+    localVars.IdObs=IdObs;
+end
+localVars.exo_nbr=exo_nbr;
+localVars.maxlag=maxlag;
+localVars.MAX_nsmoo=MAX_nsmoo;
+localVars.MAX_ninno=MAX_ninno;
+localVars.MAX_nerro = MAX_nerro;
+if naK
+    localVars.MAX_naK=MAX_naK;
+end
+localVars.MAX_nruns=MAX_nruns;
+if horizon
+    localVars.MAX_nforc1=MAX_nforc1;
+    localVars.MAX_nforc2=MAX_nforc2;
+end
+localVars.MAX_momentsno = MAX_momentsno;
+localVars.ifil=ifil;
 
-    irun = irun +  ones(7,1);
+if isnumeric(options_.parallel)
+    localVars.h=h;
+end
 
-    if irun(1) > MAX_nsmoo || b == B
-        stock = stock_smooth(:,:,1:irun(1)-1);
-        ifil(1) = ifil(1) + 1;
-        save([DirectoryName '/' M_.fname '_smooth' int2str(ifil(1)) '.mat'],'stock');
-        stock = stock_update(:,:,1:irun(1)-1);
-        save([DirectoryName '/' M_.fname '_update' int2str(ifil(1)) '.mat'],'stock');
-        irun(1) = 1;
-    end
-    
-    if irun(2) > MAX_ninno || b == B
-        stock = stock_innov(:,:,1:irun(2)-1);
-        ifil(2) = ifil(2) + 1;
-        save([DirectoryName '/' M_.fname '_inno' int2str(ifil(2)) '.mat'],'stock');
-        irun(2) = 1;
-    end
-    
-    if nvn && (irun(3) > MAX_nerro || b == B)
-        stock = stock_error(:,:,1:irun(3)-1);
-        ifil(3) = ifil(3) + 1;
-        save([DirectoryName '/' M_.fname '_error' int2str(ifil(3)) '.mat'],'stock');
-        irun(3) = 1;
-    end
-    
-    if naK && (irun(4) > MAX_naK || b == B)
-        stock = stock_filter_step_ahead(:,:,:,1:irun(4)-1);
-        ifil(4) = ifil(4) + 1;
-        save([DirectoryName '/' M_.fname '_filter_step_ahead' int2str(ifil(4)) '.mat'],'stock');
-        irun(4) = 1;
-    end
-    
-    if irun(5) > MAX_nruns || b == B
-        stock = stock_param(1:irun(5)-1,:);
-        ifil(5) = ifil(5) + 1;
-        save([DirectoryName '/' M_.fname '_param' int2str(ifil(5)) '.mat'],'stock','stock_logpo','stock_ys');
-        irun(5) = 1;
-    end
 
-    if horizon && (irun(6) > MAX_nforc1 || b == B)
-        stock = stock_forcst_mean(:,:,1:irun(6)-1);
-        ifil(6) = ifil(6) + 1;
-        save([DirectoryName '/' M_.fname '_forc_mean' int2str(ifil(6)) '.mat'],'stock');
-        irun(6) = 1;
-    end
-
-    if horizon && (irun(7) > MAX_nforc2 ||  b == B)
-        stock = stock_forcst_point(:,:,1:irun(7)-1);
-        ifil(7) = ifil(7) + 1;
-        save([DirectoryName '/' M_.fname '_forc_point' int2str(ifil(7)) '.mat'],'stock');
-        irun(7) = 1;
-    end
-
-    % if moments_varendo && (irun(8) > MAX_momentsno || b == B)
-    %    stock = stock_moments(1:irun(8)-1);
-    %    ifil(8) = ifil(8) + 1;
-    %    save([DirectoryName '/' M_.fname '_moments' int2str(ifil(8)) '.mat'],'stock');
-    %    irun(8) = 1;
-    % end
-    
-    if exist('OCTAVE_VERSION')
-        printf('Taking subdraws: %3.f%% done\r', b/B);
-    else
-        waitbar(b/B,h);
+if strcmpi(type,'posterior'),
+    b=0;
+    while b<=B
+        b = b + 1;
+        [x(b,:), logpost(b,1)] = GetOneDraw(type);
     end
 end
+
+if ~strcmpi(type,'prior'),
+    localVars.x=x;
+    localVars.logpost=logpost;
+end
+
+b=0;
+
+
+
+if isnumeric(options_.parallel),% | isunix, % for the moment exclude unix platform from parallel implementation
+    [fout] = prior_posterior_statistics_core(localVars,1,B,0);
+else
+    [nCPU, totCPU, nBlockPerCPU] = distributeJobs(options_.parallel, 1, B);
+    for j=1:totCPU-1,
+        nfiles = ceil(nBlockPerCPU(j)/MAX_nsmoo);
+        ifil(1,j+1) =ifil(1,j)+nfiles;
+        nfiles = ceil(nBlockPerCPU(j)/MAX_ninno);
+        ifil(2,j+1) =ifil(2,j)+nfiles;
+        nfiles = ceil(nBlockPerCPU(j)/MAX_nerro);
+        ifil(3,j+1) =ifil(3,j)+nfiles;
+        nfiles = ceil(nBlockPerCPU(j)/MAX_naK);
+        ifil(4,j+1) =ifil(4,j)+nfiles;
+        nfiles = ceil(nBlockPerCPU(j)/MAX_nruns);
+        ifil(5,j+1) =ifil(5,j)+nfiles;
+        nfiles = ceil(nBlockPerCPU(j)/MAX_nforc1);
+        ifil(6,j+1) =ifil(6,j)+nfiles;
+        nfiles = ceil(nBlockPerCPU(j)/MAX_nforc2);
+        ifil(7,j+1) =ifil(7,j)+nfiles;
+%       nfiles = ceil(nBlockPerCPU(j)/MAX_momentsno);
+%       ifil(8,j+1) =ifil(8,j)+nfiles;
+    end
+    localVars.ifil = ifil;
+    globalVars = struct('M_',M_, ...
+        'options_', options_, ...
+        'bayestopt_', bayestopt_, ...
+        'estim_params_', estim_params_, ...
+        'oo_', oo_);
+    
+    % which files have to be copied to run remotely
+    NamFileInput(1,:) = {'',[M_.fname '_static.m']};
+    NamFileInput(2,:) = {'',[M_.fname '_dynamic.m']};
+    if options_.steadystate_flag,
+        NamFileInput(length(NamFileInput)+1,:)={'',[M_.fname '_steadystate.m']};
+    end
+    [fout] = masterParallel(options_.parallel, 1, B,NamFileInput,'prior_posterior_statistics_core', localVars,globalVars);
+    
+end
+ifil = fout(end).ifil;
+
+
 
 if exist('OCTAVE_VERSION')
     printf('\n');
     diary on;
 else
-    close(h)
+    if exist('h')
+        close(h)
+    end
+    
 end
 
 stock_gend=gend;
@@ -285,7 +262,7 @@ save([DirectoryName '/' M_.fname '_data.mat'],'stock_gend','stock_data');
 
 if options_.smoother
     pm3(endo_nbr,gend,ifil(1),B,'Smoothed variables',...
-        '',varlist,'tit_tex',M_.endo_names,...
+        '',M_.endo_names(1:M_.orig_endo_nbr, :),'tit_tex',M_.endo_names,...
         varlist,'SmoothedVariables',[M_.dname '/metropolis'],'_smooth');
     pm3(exo_nbr,gend,ifil(2),B,'Smoothed shocks',...
         '',M_.exo_names,'tit_tex',M_.exo_names,...
