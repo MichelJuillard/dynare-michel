@@ -1064,9 +1064,11 @@ if (any(bayestopt_.pshape  >0 ) & options_.mh_replic) | ...
     %% Estimation of the marginal density from the Mh draws:
     if options_.mh_replic
         [marginal,oo_] = marginal_density(M_, options_, estim_params_, oo_);
+        oo_ = GetPosteriorParametersStatistics(estim_params_, M_, options_, bayestopt_, oo_);
+        oo_ = PlotPosteriorDistributions(estim_params_, M_, options_, bayestopt_, oo_);
+    else
+        load([M_.fname '_results'],'oo_');
     end
-    oo_ = GetPosteriorParametersStatistics(estim_params_, M_, options_, bayestopt_, oo_);
-    oo_ = PlotPosteriorDistributions(estim_params_, M_, options_, bayestopt_, oo_);
     metropolis_draw(1);
     if options_.bayesian_irf
         PosteriorIRF('posterior');
