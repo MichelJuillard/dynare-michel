@@ -125,7 +125,6 @@ end
 
 localVars=[];
 
-localVars.nvar=nvar;
 localVars.tit1=tit1;
 localVars.nn=nn;
 localVars.n2=n2;
@@ -143,7 +142,7 @@ localVars.Mean=Mean;
     globalVars = struct('M_',M_, ...
       'options_', options_, ...
       'oo_', oo_);
-     [fout, nBlockPerCPU, totCPU] = masterParallel(options_.parallel, 1, nvar, [],'pm3_core', localVars,globalVars);
+     [fout, nBlockPerCPU, totCPU] = masterParallel(options_.parallel, 1, nvar, [],'pm3_core', localVars,globalVars, options_.parallel_info);
  end
 
 %%%%%%%%%  END PARALLEL BLOCK %% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
