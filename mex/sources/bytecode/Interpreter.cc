@@ -112,26 +112,32 @@ Interpreter::get_variable(SymbolType variable_type, int variable_num)
       C = mxGetN(mxGetFieldByNumber(M_, 0, mxGetFieldNumber(M_, "endo_names")));
       R = mxGetM(mxGetFieldByNumber(M_, 0, mxGetFieldNumber(M_, "endo_names")));
       P = (char*) mxGetPr(mxGetFieldByNumber(M_, 0, mxGetFieldNumber(M_, "endo_names")));
-      if (EQN_dvar1 < R)
+      if (variable_num < R)
         for (unsigned int i = 0; i < C; i++)
-          res << P[2*(EQN_dvar1+i*R)];
+          res << P[2*(variable_num+i*R)];
+      else
+        mexPrintf("=> Unknown endogenous variable n° %d",EQN_dvar1);
       break;
     case eExogenous:
     case eExogenousDet:
       C = mxGetN(mxGetFieldByNumber(M_, 0, mxGetFieldNumber(M_, "exo_names")));
       R = mxGetM(mxGetFieldByNumber(M_, 0, mxGetFieldNumber(M_, "exo_names")));
       P = (char*) mxGetPr(mxGetFieldByNumber(M_, 0, mxGetFieldNumber(M_, "exo_names")));
-      if (EQN_dvar1 < R)
+      if (variable_num < R)
         for (unsigned int i = 0; i < C; i++)
-          res << P[2*(EQN_dvar1+i*R)];
+          res << P[2*(variable_num+i*R)];
+      else
+        mexPrintf("=> Unknown exogenous variable n° %d",EQN_dvar1);
       break;
     case eParameter:
       C = mxGetN(mxGetFieldByNumber(M_, 0, mxGetFieldNumber(M_, "param_names")));
       R = mxGetM(mxGetFieldByNumber(M_, 0, mxGetFieldNumber(M_, "param_names")));
       P = (char*) mxGetPr(mxGetFieldByNumber(M_, 0, mxGetFieldNumber(M_, "param_names")));
-      if (EQN_dvar1 < R)
+      if (variable_num < R)
         for (unsigned int i = 0; i < C; i++)
-          res << P[2*(EQN_dvar1+i*R)];
+          res << P[2*(variable_num+i*R)];
+      else
+        mexPrintf("=> Unknown parameter n° %d",EQN_dvar1);
       break;
     default:
       break;

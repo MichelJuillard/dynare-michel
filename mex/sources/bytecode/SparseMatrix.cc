@@ -1832,7 +1832,7 @@ SparseMatrix::simulate_NG1(int blck, int y_size, int it_, int y_kmin, int y_kmax
                     {
                       if (nop+1 >= nopa)
                         {
-                          nopa = int (1.5*nopa);
+                          nopa = long (mem_increasing_factor*(double)nopa);
                           save_op = (int *) mxRealloc(save_op, nopa*sizeof(int));
                         }
                       save_op_s = (t_save_op_s *)(&(save_op[nop]));
@@ -1872,7 +1872,7 @@ SparseMatrix::simulate_NG1(int blck, int y_size, int it_, int y_kmin, int y_kmax
                         {
                           if (nop+j*2+1 >= nopa)
                             {
-                              nopa = int (1.5*nopa);
+                              nopa = long (mem_increasing_factor*(double)nopa);
                               save_op = (int *) mxRealloc(save_op, nopa*sizeof(int));
                             }
                           save_op_s = (t_save_op_s *)(&(save_op[nop+j*2]));
@@ -1891,7 +1891,7 @@ SparseMatrix::simulate_NG1(int blck, int y_size, int it_, int y_kmin, int y_kmax
                     {
                       if (nop+1 >= nopa)
                         {
-                          nopa = int (1.5*nopa);
+                          nopa = long (mem_increasing_factor*(double)nopa);
                           save_op = (int *) mxRealloc(save_op, nopa*sizeof(int));
                         }
                       save_op_s = (t_save_op_s *)(&(save_op[nop]));
@@ -1926,13 +1926,10 @@ SparseMatrix::simulate_NG1(int blck, int y_size, int it_, int y_kmin, int y_kmax
                     {
                       if (record)
                         {
-                          if (nop+2 >= nopa)
+                          if (nop+1 >= nopa)
                             {
-                              //#pragma omp critical
-                              {
-                                nopa = int (1.5*nopa);
-                                save_op = (int *) mxRealloc(save_op, nopa*sizeof(int));
-                              }
+                              nopa = long (mem_increasing_factor*(double)nopa);
+                              save_op = (int *) mxRealloc(save_op, nopa*sizeof(int));
                             }
                           save_op_s_l = (t_save_op_s *)(&(save_op[nop]));
                           save_op_s_l->operat = IFLD;
@@ -1979,11 +1976,8 @@ SparseMatrix::simulate_NG1(int blck, int y_size, int it_, int y_kmin, int y_kmax
                                 {
                                   if (nop+2 >= nopa)
                                     {
-                                      //#pragma omp critical
-                                      {
-                                        nopa = int (1.5*nopa);
-                                        save_op = (int *) mxRealloc(save_op, nopa*sizeof(int));
-                                      }
+                                      nopa = long (mem_increasing_factor*(double)nopa);
+                                      save_op = (int *) mxRealloc(save_op, nopa*sizeof(int));
                                     }
                                   save_op_s_l = (t_save_op_s *)(&(save_op[nop]));
                                   save_op_s_l->operat = IFLESS;
@@ -2037,11 +2031,8 @@ SparseMatrix::simulate_NG1(int blck, int y_size, int it_, int y_kmin, int y_kmax
                                     {
                                       if (nop+3 >= nopa)
                                         {
-                                          //#pragma omp critical
-                                          {
-                                            nopa = int (1.5*nopa);
-                                            save_op = (int *) mxRealloc(save_op, nopa*sizeof(int));
-                                          }
+                                          nopa = long (mem_increasing_factor*(double)nopa);
+                                          save_op = (int *) mxRealloc(save_op, nopa*sizeof(int));
                                         }
                                       save_op_s_l = (t_save_op_s *)(&(save_op[nop]));
                                       save_op_s_l->operat = IFSUB;
@@ -2074,11 +2065,8 @@ SparseMatrix::simulate_NG1(int blck, int y_size, int it_, int y_kmin, int y_kmax
                         {
                           if (nop+3 >= nopa)
                             {
-                              //#pragma omp critical
-                              {
-                                nopa = int (1.5*nopa);
-                                save_op = (int *) mxRealloc(save_op, nopa*sizeof(int));
-                              }
+                              nopa = long (mem_increasing_factor*(double)nopa);
+                              save_op = (int *) mxRealloc(save_op, nopa*sizeof(int));
                             }
                           save_op_s_l = (t_save_op_s *)(&(save_op[nop]));
                           save_op_s_l->operat = IFSUB;

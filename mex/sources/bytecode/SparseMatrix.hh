@@ -94,6 +94,7 @@ const int IFADD = 7;
 const double eps = 1e-10;
 const double very_big = 1e24;
 const int alt_symbolic_count_max = 1;
+const double mem_increasing_factor = 1.1;
 
 class SparseMatrix
 {
