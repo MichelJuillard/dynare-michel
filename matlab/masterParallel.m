@@ -46,8 +46,6 @@ function [fOutVar,nBlockPerCPU, totCPU] = masterParallel(Parallel,fBlock,nBlock,
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-totCPU=0;
-
 % Determine my hostname and my working directory
 DyMo=pwd;
 fInputVar.DyMo=DyMo;
@@ -69,21 +67,24 @@ end
 save([fname,'_input.mat'],'Parallel','-append') 
 
 % Determine the total number of available CPUs, and the number of threads to run on each CPU
-for j=1:length(Parallel),
-    nCPU(j)=length(Parallel(j).NumCPU);
-    totCPU=totCPU+nCPU(j);
-end
-
-nCPU=cumsum(nCPU);
+[nCPU, totCPU, nBlockPerCPU] = distributeJobs(Parallel, fBlock, nBlock);
 offset0 = fBlock-1;
-if (nBlock-offset0)>totCPU,
-    diff = mod((nBlock-offset0),totCPU);
-    nBlockPerCPU(1:diff) = ceil((nBlock-offset0)/totCPU);
-    nBlockPerCPU(diff+1:totCPU) = floor((nBlock-offset0)/totCPU);
-else
-    nBlockPerCPU(1:nBlock-offset0)=1;
-    totCPU = nBlock-offset0;
-end
+
+% for j=1:length(Parallel),
+%     nCPU(j)=length(Parallel(j).NumCPU);
+%     totCPU=totCPU+nCPU(j);
+% end
+% 
+% nCPU=cumsum(nCPU);
+% offset0 = fBlock-1;
+% if (nBlock-offset0)>totCPU,
+%     diff = mod((nBlock-offset0),totCPU);
+%     nBlockPerCPU(1:diff) = ceil((nBlock-offset0)/totCPU);
+%     nBlockPerCPU(diff+1:totCPU) = floor((nBlock-offset0)/totCPU);
+% else
+%     nBlockPerCPU(1:nBlock-offset0)=1;
+%     totCPU = nBlock-offset0;
+% end
 
 % Clean up remnants of previous runs
 mydelete(['comp_status_',fname,'*.mat'])
@@ -257,6 +258,7 @@ while (1)
     else
         figure(hfigstatus),
         for j=1:length(stax),
+            try
             axes(hstatus(idCPU(j))),
             hpat = findobj(hstatus(idCPU(j)),'Type','patch');
             if ~isempty(hpat),
@@ -265,6 +267,9 @@ while (1)
                 patch([0 0 pcerdone(j) pcerdone(j)],[0 1 1 0],'r','EdgeColor','r')
             end
             title([status_Title{j},' - ',status_String{j}]);
+            catch
+                
+            end
         end
     end
     if isempty(dir(['P_',fname,'_*End.txt'])) 

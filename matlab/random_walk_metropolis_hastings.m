@@ -69,7 +69,7 @@ localVars.varargin=varargin;
 % tic,
 
 
-if isnumeric(options_.parallel),
+if isnumeric(options_.parallel) || (nblck-fblck)==0,
     fout = random_walk_metropolis_hastings_core(localVars, fblck, nblck, 0);
     record = fout.record;
     
