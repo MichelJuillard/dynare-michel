@@ -106,21 +106,6 @@ irun2 = 0;
 NumberOfIRFfiles_dsge = 1;
 NumberOfIRFfiles_dsgevar = 1;
 ifil2 = 1;
-if strcmpi(type,'posterior')
-    if isnumeric(options_.parallel)
-        h = waitbar(0,'Bayesian (posterior) IRFs...');
-      % h = waitbar(0,'Please Wait ...');
-        set(h,'Name','Bayesian (posterior) IRFs.');
-    end
-elseif strcmpi(type,'gsa')
-    if isnumeric(options_.parallel)
-  h = waitbar(0,'GSA (prior) IRFs...');
-    end
-else
-    if isnumeric(options_.parallel)
-  h = waitbar(0,'Bayesian (prior) IRFs...');
-    end
-end
 % Create arrays
 if B <= MAX_nruns
   stock_param = zeros(B, npar);
@@ -164,6 +149,7 @@ localVars=[];
 
 % Save the local variables.
 
+localVars.IRUN = IRUN;
 localVars.irun = irun;
 localVars.irun2=irun2;
 localVars.nosaddle=nosaddle;
@@ -191,10 +177,6 @@ localVars.IndxVariables=IndxVariables;
 localVars.MAX_nirfs_dsgevar=MAX_nirfs_dsgevar;
 localVars.MAX_nirfs_dsge=MAX_nirfs_dsge;
 localVars.MAX_nruns=MAX_nruns;
-
-if isnumeric(options_.parallel)
-    localVars.h=h;
-end
 
 localVars.NumberOfIRFfiles_dsge=NumberOfIRFfiles_dsge;
 localVars.NumberOfIRFfiles_dsgevar=NumberOfIRFfiles_dsgevar;
@@ -231,7 +213,7 @@ else
     if options_.steadystate_flag,
         NamFileInput(length(NamFileInput)+1,:)={'',[M_.fname '_steadystate.m']};
     end
-   [fout] = masterParallel(options_.parallel, 1, B,NamFileInput,'PosteriorIRF_core1', localVars, globalVars);
+   [fout] = masterParallel(options_.parallel, 1, B,NamFileInput,'PosteriorIRF_core1', localVars, globalVars, options_.parallel_info);
     
 end
 
@@ -362,29 +344,20 @@ end
 % Save the local variables.
 localVars=[];
 
-localVars.options_.TeX=options_.TeX;
-
  Check=options_.TeX
  if (Check)
    localVars.varlist_TeX=varlist_TeX;
  end
  
-localVars.M_.exo_names_tex=M_.exo_names_tex;
-localVars.M_.exo_names_orig_ord=M_.exo_names_orig_ord;
-
 
 localVars.nvar=nvar;
 localVars.MeanIRF=MeanIRF;
-localVars.options_.nograph=options_.nograph;
-localVars.options_.relative_irf=options_.relative_irf;
 localVars.tit=tit;
 localVars.nn=nn;
 localVars.MAX_nirfs_dsgevar=MAX_nirfs_dsgevar;
-localVars.options_.irf=options_.irf;
 localVars.HPDIRF=HPDIRF;
 localVars.varlist=varlist;
 localVars.MaxNumberOfPlotPerFigure=MaxNumberOfPlotPerFigure;
-localVars.M_.fname=M_.fname;
 
 
 %%% The files .TeX are genereted in sequential way!
@@ -438,8 +411,10 @@ end
 if isnumeric(options_.parallel) || (M_.exo_nbr*ceil(size(varlist,1)/MaxNumberOfPlotPerFigure))<8,% | isunix, % for the moment exclude unix platform from parallel implementation
     [fout] = PosteriorIRF_core2(localVars,1,M_.exo_nbr,0);
 else
+    globalVars = struct('M_',M_, ...
+      'options_', options_);
     
-   [fout] = masterParallel(options_.parallel, 1, M_.exo_nbr,NamFileInput,'PosteriorIRF_core2', localVars, globalVars);
+   [fout] = masterParallel(options_.parallel, 1, M_.exo_nbr,NamFileInput,'PosteriorIRF_core2', localVars, globalVars, options_.parallel_info);
     
 end
 
