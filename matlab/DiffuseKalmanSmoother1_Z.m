@@ -105,8 +105,8 @@ while rank(Pinf(:,:,t+1),crit1) & t<smpl
     a(:,t+1)            = T*atilde(:,t);
     aK(1,:,t+1)         = a(:,t+1);
     % isn't a meaningless as long as we are in the diffuse part? MJ
-    for jnk=2:nk,
-        aK(jnk,:,t+jnk)                 = T^(jnk-1)*a(:,t+1);
+    for jnk=2:nk
+        aK(jnk,:,t+jnk) = T*squeeze(aK(jnk-1,:,t+jnk-1));
     end
     Linf(:,:,t)         = T - Kinf(:,:,t)*Z;
     Fstar(:,:,t)        = Z*Pstar(:,:,t)*Z';
@@ -138,10 +138,13 @@ while notsteady & t<smpl
     L(:,:,t)    = T-K(:,:,t)*Z;
     a(:,t+1)    = T*atilde(:,t);
     Pf          = P(:,:,t);
+    aK(1,:,t+1) = a(:,t+1);
     for jnk=1:nk,
         Pf = T*Pf*T' + QQ;
-        aK(jnk,:,t+jnk) = T^jnk*atilde(:,t);
         PK(jnk,:,:,t+jnk) = Pf;
+        if jnk>1
+            aK(jnk,:,t+jnk) = T*squeeze(aK(jnk-1,:,t+jnk-1));
+        end
     end
     P(:,:,t+1)  = T*P(:,:,t)*T'-T*P(:,:,t)*Z'*K(:,:,t)' + QQ;
     notsteady   = ~(max(max(abs(P(:,:,t+1)-P(:,:,t))))<crit);
@@ -162,10 +165,13 @@ while t<smpl
     atilde(:,t) = a(:,t) + PZI*v(:,t);
     a(:,t+1) = T*atilde(:,t);
     Pf          = P(:,:,t);
-    for jnk=1:nk,
+    aK(1,:,t+1) = a(:,t+1);
+    for jnk=1:nk
         Pf = T*Pf*T' + QQ;
-        aK(jnk,:,t+jnk) = T^jnk*atilde(:,t);
         PK(jnk,:,:,t+jnk) = Pf;
+        if jnk>1
+            aK(jnk,:,t+jnk) = T*squeeze(aK(jnk-1,:,t+jnk-1));
+        end
     end
 end
 t = smpl+1;

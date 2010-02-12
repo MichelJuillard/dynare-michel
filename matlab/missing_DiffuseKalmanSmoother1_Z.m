@@ -121,7 +121,7 @@ while rank(Pinf(:,:,t+1),crit1) & t<smpl
     aK(1,:,t+1)         = a(:,t+1);
     % isn't a meaningless as long as we are in the diffuse part? MJ
     for jnk=2:nk,
-        aK(jnk,:,t+jnk)                 = T^(jnk-1)*a(:,t+1);
+        aK(jnk,:,t+jnk) = T*squeeze(aK(jnk-1,:,t+jnk-1));
     end
 end
 d = t;
@@ -157,10 +157,13 @@ while notsteady & t<smpl
     end
     a(:,t+1)    = T*atilde(:,t);
     Pf          = P(:,:,t);
-    for jnk=1:nk,
+    aK(1,:,t+1) = a(:,t+1);
+    for jnk=1:nk
         Pf = T*Pf*T' + QQ;
-        aK(jnk,:,t+jnk) = T^jnk*atilde(:,t);
         PK(jnk,:,:,t+jnk) = Pf;
+        if jnk>1
+            aK(jnk,:,t+jnk) = T*squeeze(aK(jnk-1,:,t+jnk-1));
+        end
     end
     %    notsteady   = ~(max(max(abs(P(:,:,t+1)-P(:,:,t))))<crit);
 end

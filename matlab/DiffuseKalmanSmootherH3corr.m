@@ -122,8 +122,9 @@ while newRank & t < smpl
         end
     end
     a1(:,t+1)           = T*a(:,t);
-    for jnk=1:nk,
-        aK(jnk,:,t+jnk)                 = T^jnk*a(:,t);
+    aK(1,:,t+1)         = a1(:,t+1) 
+    for jnk=2:nk
+        aK(jnk,:,t+jnk) = T*squeeze(aK(jnk-1,:,t+jnk-1));
     end
     Pstar(:,:,t+1)      = T*Pstar(:,:,t)*transpose(T)+ QQ;
     Pinf(:,:,t+1)       = T*Pinf(:,:,t)*transpose(T);
@@ -159,8 +160,9 @@ while notsteady & t<smpl
         end
     end
     a1(:,t+1) = T*a(:,t);
-    for jnk=1:nk,
-        aK(jnk,:,t+jnk)                 = T^jnk*a(:,t);
+    aK(1,:,t+1) = a1(:,t+1);
+    for jnk=2:nk
+        aK(jnk,:,t+jnk) = T*squeeze(aK(jnk-1,:,t+jnk-1));
     end
     P(:,:,t+1) = T*P(:,:,t)*transpose(T) + QQ;
     notsteady   = ~(max(max(abs(P(:,:,t+1)-P(:,:,t))))<crit);
@@ -186,8 +188,9 @@ while t<smpl
         end
     end
     a1(:,t+1) = T*a(:,t);
-    for jnk=1:nk,
-        aK(jnk,:,t+jnk)                 = T^jnk*a(:,t);
+    aK(1,:,t+1) = a1(:,t+1);
+    for jnk=2:nk
+        aK(jnk,:,t+jnk) = T*squeeze(aK(jnk-1,:,t+jnk-1));
     end
 end
 

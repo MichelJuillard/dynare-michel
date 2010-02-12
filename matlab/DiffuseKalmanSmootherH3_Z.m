@@ -91,7 +91,6 @@ L0              = zeros(mm,mm,pp,smpl_diff);
 Kstar           = zeros(mm,pp,smpl_diff);
 P               = zeros(mm,mm,smpl+1);
 P1              = P;
-aK              = zeros(nk,mm,smpl+nk);
 PK              = zeros(nk,mm,mm,smpl+nk);
 Pstar           = zeros(spstar(1),spstar(2),smpl_diff+1); Pstar(:,:,1) = Pstar1;
 Pinf            = zeros(spinf(1),spinf(2),smpl_diff+1); Pinf(:,:,1) = Pinf1;
@@ -163,9 +162,10 @@ while newRank & t < smpl
             Pstar(:,:,t)=tril(Pstar(:,:,t))+tril(Pstar(:,:,t),-1)';
         end
     end
-    a1(:,t+1)              = T*a(:,t);
-    for jnk=1:nk,
-        aK(jnk,:,t+jnk)             = T^jnk*a(:,t);
+    a1(:,t+1)   = T*a(:,t);
+    aK(1,:,t+1) = a1(:,t+1); 
+    for jnk=2:nk
+        aK(jnk,:,t+jnk) = T*squeeze(aK(jnk-1,:,t+jnk-1));
     end
     Pstar(:,:,t+1)        = T*Pstar(:,:,t)*T'+ QQ;
     Pinf(:,:,t+1) = T*Pinf(:,:,t)*T';
@@ -207,10 +207,13 @@ while notsteady & t<smpl
     end
     a1(:,t+1) = T*a(:,t);
     Pf          = P(:,:,t);
+    aK(1,:,t+1) = a1(:,t+1); 
     for jnk=1:nk,
         Pf = T*Pf*T' + QQ;
-        aK(jnk,:,t+jnk) = T^jnk*a(:,t);
         PK(jnk,:,:,t+jnk) = Pf;
+        if jnk>1
+            aK(jnk,:,t+jnk) = T*squeeze(aK(jnk-1,:,t+jnk-1)) ;
+        end
     end
     P(:,:,t+1) = T*P(:,:,t)*T' + QQ;
     notsteady   = ~(max(max(abs(P(:,:,t+1)-P(:,:,t))))<crit);
@@ -238,11 +241,14 @@ while t<smpl
         end
     end
     a1(:,t+1) = T*a(:,t);
-    Pf          = P(:,:,t);
+    Pf        = P(:,:,t);
+    aK(1,:,t+1) = a1(:,t+1); 
     for jnk=1:nk,
         Pf = T*Pf*T' + QQ;
-        aK(jnk,:,t+jnk) = T^jnk*a(:,t);
         PK(jnk,:,:,t+jnk) = Pf;
+        if jnk>1
+            aK(jnk,:,t+jnk) = T*squeeze(aK(jnk-1,:,t+jnk-1));
+        end
     end
 end
 ri=zeros(mm,1);

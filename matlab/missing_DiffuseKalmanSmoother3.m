@@ -91,11 +91,11 @@ Pinf            = zeros(spinf(1),spinf(2),smpl_diff+1); Pinf(:,:,1) = Pinf1;
 Pstar1          = Pstar;
 Pinf1           = Pinf;
 crit            = options_.kalman_tol;
-crit1       = 1.e-6;
+crit1           = 1.e-6;
 steady          = smpl;
 rr              = size(Q,1);
 QQ              = R*Q*transpose(R);
-QRt                     = Q*transpose(R);
+QRt             = Q*transpose(R);
 alphahat        = zeros(mm,smpl);
 etahat          = zeros(rr,smpl);
 r               = zeros(mm,smpl+1);
@@ -167,16 +167,17 @@ while newRank & t < smpl
             Pstar(:,:,t)=tril(Pstar(:,:,t))+transpose(tril(Pstar(:,:,t),-1));
         end
     end
-    a1(:,t+1)           = T*a(:,t);
-    for jnk=1:nk,
-        aK(jnk,:,t+jnk)                 = T^jnk*a(:,t);
+    a1(:,t+1)       = T*a(:,t);
+    aK(1,:,t+1)     = a1(:,t+1);
+    for jnk=2:nk
+        aK(jnk,:,t+jnk) = T*squeeze(aK(jnk-1,:,t+jnk-1));
     end
     Pstar(:,:,t+1)      = T*Pstar(:,:,t)*transpose(T)+ QQ;
     Pinf(:,:,t+1)       = T*Pinf(:,:,t)*transpose(T);
     P0=Pinf(:,:,t+1);
     if newRank,
         %newRank = any(diag(P0(mf,mf))>crit);
-        newRank   = rank(P0,crit1);
+        newRank  = rank(P0,crit1);
     end
 end
 
@@ -212,10 +213,13 @@ while notsteady & t<smpl
     end
     a1(:,t+1) = T*a(:,t);
     Pf          = P(:,:,t);
+    aK(1,:,t+1) = a1(:,t+1);
     for jnk=1:nk,
         Pf = T*Pf*T' + QQ;
-        aK(jnk,:,t+jnk) = T^jnk*a1(:,t);
         PK(jnk,:,:,t+jnk) = Pf;
+        if jnk>1
+            aK(jnk,:,t+jnk) = T*squeeze(aK(jnk-1,:,t+jnk-1));
+        end
     end
     P(:,:,t+1) = T*P(:,:,t)*transpose(T) + QQ;
     %  notsteady   = ~(max(max(abs(P(:,:,t+1)-P(:,:,t))))<crit);

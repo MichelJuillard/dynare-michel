@@ -98,8 +98,9 @@ while rank(Pinf(:,:,t+1),crit1) & t<smpl
     atilde(:,t)         = a(:,t) + PZI*v(:,t);
     Kinf(:,:,t)         = T*PZI;
     a(:,t+1)            = T*atilde(:,t);
-    for jnk=1:nk,
-        aK(jnk,:,t+jnk) = T^(jnk-1)*a(:,t+1);
+    aK(1,:,t+1)         = a(:,t+1);
+    for jnk=1:nk
+        aK(jnk,:,t+jnk) = T*squeeze(aK(jnk-1,:,t+jnk-1));
     end
     Linf(:,:,t)         = T - Kinf(:,:,t)*Z;
     Fstar(:,:,t)        = Pstar(mf,mf,t) + H;
@@ -118,25 +119,26 @@ Pinf  = Pinf(:,:,1:d);
 notsteady = 1;
 while notsteady & t<smpl
     t = t+1;
-    v(:,t)      = Y(:,t) - a(mf,t) - trend(:,t);
+    v(:,t) = Y(:,t) - a(mf,t) - trend(:,t);
     P(:,:,t)=tril(P(:,:,t))+transpose(tril(P(:,:,t),-1));
     if rcond(P(mf,mf,t) + H) < crit
-        return          
-    end    
+        return
+    end
     iF(:,:,t)   = inv(P(mf,mf,t) + H);
     PZI         = P(:,mf,t)*iF(:,:,t);
     atilde(:,t) = a(:,t) + PZI*v(:,t);
     K(:,:,t)    = T*PZI;
     L(:,:,t)    = T-K(:,:,t)*Z;
     a(:,t+1)    = T*atilde(:,t);
-    for jnk=1:nk,
-        aK(jnk,:,t+jnk) = T^(jnk-1)*a(:,t+1);
+    aK(1,:,t+1) = a(:,t+1);
+    for jnk=2:nk
+        aK(jnk,:,t+jnk) = T*squeeze(aK(jnk-1,:,t+jnk-1));
     end
     P(:,:,t+1)  = T*P(:,:,t)*transpose(T)-T*P(:,mf,t)*transpose(K(:,:,t)) + QQ;
     notsteady   = ~(max(max(abs(P(:,:,t+1)-P(:,:,t))))<crit);
 end
 if t<smpl
-    PZI_s = PZI; 
+    PZI_s = PZI;
     K_s = K(:,:,t);
     iF_s = iF(:,:,t);
     P_s = P(:,:,t+1);
@@ -151,8 +153,9 @@ while t<smpl
     v(:,t) = Y(:,t) - a(mf,t) - trend(:,t);
     atilde(:,t) = a(:,t) + PZI_s*v(:,t);
     a(:,t+1) = T*atilde(:,t);
-    for jnk=1:nk,
-        aK(jnk,:,t+jnk) = T^(jnk-1)*a(:,t+1);
+    aK(1,:,t+1) = a(:,t+1); 
+    for jnk=2:nk
+        aK(jnk,:,t+jnk) = T*squeeze(aK(jnk-1,:,t+jnk-1));
     end
 end
 t = smpl+1;

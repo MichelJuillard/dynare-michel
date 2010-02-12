@@ -59,7 +59,7 @@ spstar          = size(Pstar1);
 v               = zeros(pp,smpl);
 a               = zeros(mm,smpl+1);
 atilde          = zeros(mm,smpl);
-aK              = zeros(nk,mm,smpl+1);
+aK              = zeros(nk,mm,smpl+nk);
 iF              = zeros(pp,pp,smpl);
 Fstar           = zeros(pp,pp,smpl);
 iFinf           = zeros(pp,pp,smpl);
@@ -71,11 +71,11 @@ P               = zeros(mm,mm,smpl+1);
 Pstar           = zeros(spstar(1),spstar(2),smpl+1); Pstar(:,:,1) = Pstar1;
 Pinf            = zeros(spinf(1),spinf(2),smpl+1); Pinf(:,:,1) = Pinf1;
 crit            = options_.kalman_tol;
-crit1       = 1.e-8;
+crit1           = 1.e-8;
 steady          = smpl;
 rr              = size(Q,1);
 QQ              = R*Q*transpose(R);
-QRt                     = Q*transpose(R);
+QRt             = Q*transpose(R);
 alphahat        = zeros(mm,smpl);
 etahat          = zeros(rr,smpl);
 r               = zeros(mm,smpl+1);
@@ -99,7 +99,7 @@ while rank(Pinf(:,:,t+1),crit1) & t<smpl
     a(:,t+1)            = T*atilde(:,t);
     aK(1,:,t+1)         = a(:,t+1);
     for jnk=2:nk,
-        aK(jnk,:,t+jnk) = T^(jnk-1)*a(:,t+1);
+        aK(jnk,:,t+jnk) = T*squeeze(aK(jnk-1,:,t+jnk-1));
     end
     Linf(:,:,t)         = T - Kinf(:,:,t)*Z;
     Fstar(:,:,t)        = Pstar(mf,mf,t);
@@ -129,9 +129,9 @@ while notsteady & t<smpl
     K(:,:,t)    = T*PZI;
     L(:,:,t)    = T-K(:,:,t)*Z;
     a(:,t+1)    = T*atilde(:,t);
-    aK(1,:,t+1)                 = a(:,t+1);
+    aK(1,:,t+1) = a(:,t+1);
     for jnk=2:nk,
-        aK(jnk,:,t+jnk)                 = T^(jnk-1)*a(:,t+1);
+        aK(jnk,:,t+jnk) = T*squeeze(aK(jnk-1,:,t+jnk-1));
     end
     P(:,:,t+1)  = T*P(:,:,t)*transpose(T)-T*P(:,mf,t)*transpose(K(:,:,t)) + QQ;
     notsteady   = ~(max(max(abs(P(:,:,t+1)-P(:,:,t))))<crit);
@@ -154,7 +154,7 @@ while t<smpl
     a(:,t+1) = T*a(:,t) + K_s*v(:,t);
     aK(1,:,t+1) = a(:,t+1);
     for jnk=2:nk,
-        aK(jnk,:,t+jnk) = T^(jnk-1)*a(:,t+1);
+        aK(jnk,:,t+jnk) = T*squeeze(aK(jnk-1,:,t+jnk-1));
     end
 end
 t = smpl+1;

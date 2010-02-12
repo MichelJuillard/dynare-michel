@@ -60,7 +60,7 @@ spstar          = size(Pstar1);
 v               = zeros(pp,smpl);
 a               = zeros(mm,smpl+1);
 atilde          = zeros(mm,smpl);
-aK              = zeros(nk,mm,smpl+1);
+aK              = zeros(nk,mm,smpl+nk);
 iF              = zeros(pp,pp,smpl);
 Fstar           = zeros(pp,pp,smpl);
 iFinf           = zeros(pp,pp,smpl);
@@ -113,9 +113,9 @@ while rank(Pinf(:,:,t+1),crit1) & t<smpl
         Pinf(:,:,t+1)   = T*Pinf(:,:,t)*transpose(T)-T*Pinf(:,mf1,t)* ...
             transpose(Kinf(:,di,t));
     end
-    aK(1,:,t+1)         = a(:,t+1);
-    for jnk=2:nk,
-        aK(jnk,:,t+jnk) = T^(jnk-1)*a(:,t+1);
+    aK(1,:,t+1) = a(:,t+1);
+    for jnk=2:nk
+        aK(jnk,:,t+jnk) = T*squeeze(aK(jnk-1,:,t+jnk-1));
     end
 end
 d = t;
@@ -150,7 +150,7 @@ while notsteady & t<smpl
     end
     aK(1,:,t+1)     = a(:,t+1);
     for jnk=2:nk,
-        aK(jnk,:,t+jnk) = T^(jnk-1)*a(:,t+1);
+        aK(jnk,:,t+jnk) = T*squeeze(aK(jnk-1,:,t+jnk-1));
     end
     P(:,:,t+1)  = T*P(:,:,t)*transpose(T)-T*P(:,mf,t)*transpose(K(:,:,t)) + QQ;
     %    notsteady   = ~(max(max(abs(P(:,:,t+1)-P(:,:,t))))<crit);
