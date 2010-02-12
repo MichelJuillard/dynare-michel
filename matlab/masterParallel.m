@@ -1,4 +1,4 @@
-function [fOutVar,nBlockPerCPU, totCPU] = masterParallel(Parallel,fBlock,nBlock,NamFileInput,fname,fInputVar,fGlobalVar)
+function [fOutVar,nBlockPerCPU, totCPU] = masterParallel(Parallel,fBlock,nBlock,NamFileInput,fname,fInputVar,fGlobalVar,Parallel_info)
 % Top-level function called on the master computer when parallelizing a task.
 %
 % The number of parallelized threads will be equal to (nBlock-fBlock+1).
@@ -47,6 +47,12 @@ function [fOutVar,nBlockPerCPU, totCPU] = masterParallel(Parallel,fBlock,nBlock,
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
 % Determine my hostname and my working directory
+if ~isempty(Parallel_info)
+    if Parallel_info.leaveSlaveOpen,
+        [fOutVar,nBlockPerCPU, totCPU] = masterParallelMan(Parallel,fBlock,nBlock,NamFileInput,fname,fInputVar,fGlobalVar);
+        return
+    end        
+end
 DyMo=pwd;
 fInputVar.DyMo=DyMo;
 if isunix || (~matlab_ver_less_than('7.4') && ismac) ,
