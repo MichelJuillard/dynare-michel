@@ -1,4 +1,4 @@
-function myoutput=pm3_core(myinputs,fpar,B,whoiam, ThisMatlab)
+function myoutput=pm3_core(myinputs,fpar,nvar,whoiam, ThisMatlab)
 
 
 if nargin<4,
@@ -8,6 +8,18 @@ struct2local(myinputs);
 
 
 global options_ M_ oo_
+
+
+if whoiam
+      waitbarString = ['Parallel plots pm3 ...'];
+      if Parallel(ThisMatlab).Local,
+        waitbarTitle=['Local '];
+      else
+        waitbarTitle=[Parallel(ThisMatlab).PcName];
+      end        
+        fMessageStatus(0,whoiam,waitbarString, waitbarTitle, Parallel(ThisMatlab), MasterName, DyMo);   
+ end
+
 
 
 figunumber = 0;
@@ -22,7 +34,7 @@ end
 
 OutputFileName = {};
 
-for i=1:nvar
+for i=fpar:nvar
     NAMES = [];
     if max(abs(Mean(:,i))) > 10^(-6)
         subplotnum = subplotnum+1;
@@ -56,6 +68,12 @@ for i=1:nvar
             hh = figure('Name',[name3 ' ' int2str(figunumber+1)]);
         end
     end
+    
+    if whoiam,
+        waitbarString = [ 'Variable ' int2str(i) '/' int2str(nvar) ' done.'];
+        fMessageStatus((i-fpar+1)/(nvar-fpar+1),whoiam,waitbarString, waitbarTitle, Parallel(ThisMatlab), MasterName, DyMo)
+    end
+    
     
 end
 
