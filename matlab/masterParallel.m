@@ -221,6 +221,7 @@ t00=cputime;
 hh=NaN(1,nBlock);
 if exist('OCTAVE_VERSION'),
     diary off;
+    printf('\n');
 else
     hfigstatus = figure('name',['Parallel ',fname],...
                         'MenuBar', 'none', ...
@@ -248,7 +249,7 @@ while (1)
             load(stax(j).name)
             pcerdone(j) = prtfrc;
             if exist('OCTAVE_VERSION'),
-                statusString = [statusString, waitbarString, ', %3.f%% done! '];
+                statusString = [statusString, int2str(j), ' %3.f%% done! '];
             else
                 status_String{j} = waitbarString;  
                 status_Title{j} = waitbarTitle;  
