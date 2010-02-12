@@ -22,6 +22,13 @@ if whoiam
         RemoteFlag = 1;
     end
     fMessageStatus(0,whoiam,waitbarString, waitbarTitle, Parallel(ThisMatlab), MasterName, DyMo);
+else
+    if exist('OCTAVE_VERSION')
+        diary off;
+    else
+        h = waitbar(0,'Taking subdraws...');
+    end
+    
 end
 
 if RemoteFlag==1,
@@ -206,15 +213,14 @@ for b=fpar:B
     
     
     if exist('OCTAVE_VERSION')
-        printf('Taking subdraws: %3.f%% done\r', b/B);
-    else
-        if ~whoiam,
-            waitbar(b/B,h);
-        elseif mod(b,10)==0,
-            fprintf('Done! \n');
-            waitbarString = [ 'Subdraw ' int2str(b) '/' int2str(B) ' done.'];
-            fMessageStatus((b-fpar+1)/(B-fpar+1),whoiam,waitbarString, waitbarTitle, Parallel(ThisMatlab), MasterName, DyMo)
-        end
+        printf('Taking subdraws: %3.f%% done\r', b/B*100);
+    elseif ~whoiam,
+        waitbar(b/B,h);
+    end
+    if mod(b,10)==0 & whoiam,
+        fprintf('Done! \n');
+        waitbarString = [ 'Subdraw ' int2str(b) '/' int2str(B) ' done.'];
+        fMessageStatus((b-fpar+1)/(B-fpar+1),whoiam,waitbarString, waitbarTitle, Parallel(ThisMatlab), MasterName, DyMo)
     end
 end
 
