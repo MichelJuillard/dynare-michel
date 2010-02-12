@@ -31,33 +31,38 @@ function read_data_
 
 global options_ M_ oo_;
 dname= options_.datafile;
-fid = fopen([dname '_endo.dat'],'r');
-names_line = fgetl(fid);
-allVariables = '';
-positions = ones(0);
-while (any(names_line))
-    [chopped,names_line] = strtok(names_line);
-    allVariables = strvcat(allVariables, chopped);
-    positions = [positions ; strmatch(chopped,M_.endo_names,'exact')];
-end
-Values=fscanf(fid,'%f',inf);
-Values=reshape(Values,M_.endo_nbr,size(Values,1)/M_.endo_nbr);
-oo_.endo_simul=Values(positions,:);
-fclose(fid);
 
-fid = fopen([dname '_exo.dat'],'r');
-names_line = fgetl(fid);
-allVariables = '';
-positions = ones(0);
-while (any(names_line))
-    [chopped,names_line] = strtok(names_line);
-    allVariables = strvcat(allVariables, chopped);
-    positions = [positions ; strmatch(chopped,M_.exo_names,'exact')];
+if size(oo_.endo_simul,2) < M_.maximum_lag+M_.maximum_lead+options_.periods
+    fid = fopen([dname '_endo.dat'],'r');
+    names_line = fgetl(fid);
+    allVariables = '';
+    positions = ones(0);
+    while (any(names_line))
+        [chopped,names_line] = strtok(names_line);
+        allVariables = strvcat(allVariables, chopped);
+        positions = [positions ; strmatch(chopped,M_.endo_names,'exact')];
+    end
+    Values=fscanf(fid,'%f',inf);
+    Values=reshape(Values,M_.endo_nbr,size(Values,1)/M_.endo_nbr);
+    oo_.endo_simul=Values(positions,:);
+    fclose(fid);
 end
-Values=fscanf(fid,'%f',inf);
-Values=reshape(Values,M_.exo_nbr,size(Values,1)/M_.exo_nbr);
-oo_.exo_simul=(Values(positions,:))';
-fclose(fid);
+
+if size(oo_.exo_simul,1) < M_.maximum_lag+M_.maximum_lead+options_.periods
+    fid = fopen([dname '_exo.dat'],'r');
+    names_line = fgetl(fid);
+    allVariables = '';
+    positions = ones(0);
+    while (any(names_line))
+        [chopped,names_line] = strtok(names_line);
+        allVariables = strvcat(allVariables, chopped);
+        positions = [positions ; strmatch(chopped,M_.exo_names,'exact')];
+    end
+    Values=fscanf(fid,'%f',inf);
+    Values=reshape(Values,M_.exo_nbr,size(Values,1)/M_.exo_nbr);
+    oo_.exo_simul=(Values(positions,:))';
+    fclose(fid);
+end
 %disp([allVariables M_.endo_names]);
 %disp(positions);
 
