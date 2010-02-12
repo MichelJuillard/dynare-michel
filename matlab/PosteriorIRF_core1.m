@@ -43,16 +43,31 @@ MhDirectoryName = CheckPath('metropolis');
 
 RemoteFlag = 0;
 
- if whoiam
-      waitbarString = ['Please wait... Bayesian (posterior) IRFs computing. (' int2str(fpar) 'of' int2str(npar) ')...'];
-      if Parallel(ThisMatlab).Local,
+if whoiam
+    waitbarString = ['Please wait... Bayesian (posterior) IRFs computing. (' int2str(fpar) 'of' int2str(npar) ')...'];
+    if Parallel(ThisMatlab).Local,
         waitbarTitle=['Local '];
-      else
+    else
         waitbarTitle=[Parallel(ThisMatlab).PcName];
         RemoteFlag =1;
-      end        
-        fMessageStatus(0,whoiam,waitbarString, waitbarTitle, Parallel(ThisMatlab), MasterName, DyMo);   
- end
+    end
+    fMessageStatus(0,whoiam,waitbarString, waitbarTitle, Parallel(ThisMatlab), MasterName, DyMo);
+else
+    if exist('OCTAVE_VERSION')
+        diary off;
+        printf('\n')
+    else
+        if strcmpi(typee,'posterior')
+            h = waitbar(0,'Bayesian (posterior) IRFs...');
+            set(h,'Name','Bayesian (posterior) IRFs.');
+        elseif strcmpi(typee,'gsa')
+            h = waitbar(0,'GSA (prior) IRFs...');
+        else
+            h = waitbar(0,'Bayesian (prior) IRFs...');
+        end
+    end
+    
+end
 
 OutputFileName_bvardsge = {}; 
 OutputFileName_dsge = {};
@@ -220,16 +235,17 @@ end
         ifil2 = ifil2 + 1;
         irun2 = 0;
     end
-    if ~whoiam 
-         waitbar(fpar/npar,h);
-        
-    elseif mod(fpar,10)==0,
-         fprintf('Done! \n');
-         waitbarString = [ 'Subdraw ' int2str(fpar) '/' int2str(npar) ' done.'];
-         fMessageStatus((fpar-fpar0)/(npar-fpar0),whoiam,waitbarString, waitbarTitle, Parallel(ThisMatlab), MasterName, DyMo)
+    if exist('OCTAVE_VERSION')
+        printf(['Posterior IRF  %3.f%% done\r'],(fpar/npar*100));
+    elseif ~whoiam 
+        waitbar(fpar/npar,h);  
     end
-    
-    
+    if mod(fpar,10)==0 & whoiam,
+        fprintf('Done! \n');
+        waitbarString = [ 'Subdraw ' int2str(fpar) '/' int2str(npar) ' done.'];
+        fMessageStatus((fpar-fpar0)/(npar-fpar0),whoiam,waitbarString, waitbarTitle, Parallel(ThisMatlab), MasterName, DyMo)
+    end
+  
  end
 
 if whoiam==0
@@ -238,6 +254,10 @@ if whoiam==0
     end
     if exist('h')
         close(h);
+    end
+    if exist('OCTAVE_VERSION')
+        printf('\n');
+        diary on;
     end
 end
 
