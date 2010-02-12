@@ -1,5 +1,6 @@
 function myoutput=PosteriorIRF_core2(myinputs,fpar,npar,whoiam, ThisMatlab)
 
+global options_  M_ 
 
 if nargin<4,
     whoiam=0;
@@ -11,21 +12,21 @@ struct2local(myinputs);
 DirectoryName = CheckPath('Output');
 
 RemoteFlag = 0;
-if whoiam
-      waitbarString = ['Please wait... PosteriorIRF Plots (exog. shocks ' int2str(fpar) 'of' int2str(npar) ')...'];
-      if Parallel(ThisMatlab).Local,
+if whoiam,
+    waitbarString = ['Please wait... PosteriorIRF Plots (exog. shocks ' int2str(fpar) 'of' int2str(npar) ')...'];
+    if Parallel(ThisMatlab).Local,
         waitbarTitle=['Local '];
-      else
+    else
         waitbarTitle=[Parallel(ThisMatlab).PcName];
         RemoteFlag = 1;
-      end        
-        fMessageStatus(0,whoiam,waitbarString, waitbarTitle, Parallel(ThisMatlab), MasterName, DyMo);   
- end
+    end
+    fMessageStatus(0,whoiam,waitbarString, waitbarTitle, Parallel(ThisMatlab), MasterName, DyMo);
+end
 
 OutputFileName={};
 
 subplotnum = 0;
-for i=fpar:npar
+for i=fpar:npar,
   NAMES = [];
   figunumber = 0;
   
