@@ -111,13 +111,6 @@ end
 irun = ones(7,1);
 ifil = zeros(7,1);
 
-if exist('OCTAVE_VERSION')
-    diary off;
-else
-    if isnumeric(options_.parallel)
-        h = waitbar(0,'Taking subdraws...');
-    end
-end
 
 stock_param = zeros(MAX_nruns, npar);
 stock_logpo = zeros(MAX_nruns,1);
@@ -182,10 +175,6 @@ end
 localVars.MAX_momentsno = MAX_momentsno;
 localVars.ifil=ifil;
 
-if isnumeric(options_.parallel)
-    localVars.h=h;
-end
-
 
 if strcmpi(type,'posterior'),
     b=0;
@@ -239,7 +228,7 @@ else
     if options_.steadystate_flag,
         NamFileInput(length(NamFileInput)+1,:)={'',[M_.fname '_steadystate.m']};
     end
-    [fout] = masterParallel(options_.parallel, 1, B,NamFileInput,'prior_posterior_statistics_core', localVars,globalVars);
+    [fout] = masterParallel(options_.parallel, 1, B,NamFileInput,'prior_posterior_statistics_core', localVars,globalVars, options_.parallel_info);
     
 end
 ifil = fout(end).ifil;
@@ -259,6 +248,13 @@ end
 stock_gend=gend;
 stock_data=Y;
 save([DirectoryName '/' M_.fname '_data.mat'],'stock_gend','stock_data');
+
+if ~isnumeric(options_.parallel),
+    leaveSlaveOpen = options_.parallel_info.leaveSlaveOpen;
+    if options_.parallel_info.leaveSlaveOpen == 0,
+        options_.parallel_info.leaveSlaveOpen = 1; % force locally to leave open remote matlab sessions (repeated pm3 calls)
+    end
+end
 
 if options_.smoother
     pm3(endo_nbr,gend,ifil(1),B,'Smoothed variables',...
@@ -292,4 +288,12 @@ if options_.forecast
     pm3(endo_nbr,horizon+maxlag,ifil(6),B,'Forecasted variables (point)',...
         '',varlist,'tit_tex',M_.endo_names,...
         varlist,'PointForecast',[M_.dname '/metropolis'],'_forc_point');
+end
+
+
+if ~isnumeric(options_.parallel),
+    options_.parallel_info.leaveSlaveOpen = leaveSlaveOpen;
+    if leaveSlaveOpen == 0,
+        closeSlave(options_.parallel),
+    end
 end
