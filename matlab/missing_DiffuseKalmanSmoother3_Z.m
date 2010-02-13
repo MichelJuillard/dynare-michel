@@ -166,7 +166,7 @@ while newRank & t < smpl
     a1(:,t+1) = T*a(:,t);
     aK(1,:,t+1) = a1(:,t+1); 
     for jnk=2:nk
-        aK(jnk,:,t+jnk) = T*squeeze(aK(jnk-1,:,t+jnk-1));
+        aK(jnk,:,t+jnk) = T*dynare_squeeze(aK(jnk-1,:,t+jnk-1));
     end
     Pstar(:,:,t+1)        = T*Pstar(:,:,t)*T'+ QQ;
     Pinf(:,:,t+1) = T*Pinf(:,:,t)*T';
@@ -214,7 +214,7 @@ while notsteady & t<smpl
         Pf = T*Pf*T' + QQ;
         PK(jnk,:,:,t+jnk) = Pf;
         if jnk>1
-            aK(jnk,:,t+jnk) = T*squeeze(aK(jnk-1,:,t+jnk-1));    
+            aK(jnk,:,t+jnk) = T*dynare_squeeze(aK(jnk-1,:,t+jnk-1));    
         end
     end
     P(:,:,t+1) = T*P(:,:,t)*T' + QQ;

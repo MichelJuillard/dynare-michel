@@ -211,7 +211,7 @@ while notsteady & t<smpl
         Pf = T*Pf*T' + QQ;
         PK(jnk,:,:,t+jnk) = Pf;
         if jnk>1
-            aK(jnk,:,t+jnk) = T*squeeze(aK(jnk-1,:,t+jnk-1));
+            aK(jnk,:,t+jnk) = T*dynare_squeeze(aK(jnk-1,:,t+jnk-1));
         end
     end
     P(:,:,t+1) = T*P(:,:,t)*T' + QQ;

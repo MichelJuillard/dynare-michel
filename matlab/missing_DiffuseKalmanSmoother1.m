@@ -115,7 +115,7 @@ while rank(Pinf(:,:,t+1),crit1) & t<smpl
     end
     aK(1,:,t+1) = a(:,t+1);
     for jnk=2:nk
-        aK(jnk,:,t+jnk) = T*squeeze(aK(jnk-1,:,t+jnk-1));
+        aK(jnk,:,t+jnk) = T*dynare_squeeze(aK(jnk-1,:,t+jnk-1));
     end
 end
 d = t;
@@ -150,7 +150,7 @@ while notsteady & t<smpl
     end
     aK(1,:,t+1)     = a(:,t+1);
     for jnk=2:nk,
-        aK(jnk,:,t+jnk) = T*squeeze(aK(jnk-1,:,t+jnk-1));
+        aK(jnk,:,t+jnk) = T*dynare_squeeze(aK(jnk-1,:,t+jnk-1));
     end
     P(:,:,t+1)  = T*P(:,:,t)*transpose(T)-T*P(:,mf,t)*transpose(K(:,:,t)) + QQ;
     %    notsteady   = ~(max(max(abs(P(:,:,t+1)-P(:,:,t))))<crit);
