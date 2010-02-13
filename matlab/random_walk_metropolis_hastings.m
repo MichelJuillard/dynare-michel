@@ -69,7 +69,7 @@ localVars.varargin=varargin;
 % tic,
 
 
-if isnumeric(options_.parallel),
+if isnumeric(options_.parallel) || (nblck-fblck)==0,
     fout = random_walk_metropolis_hastings_core(localVars, fblck, nblck, 0);
     record = fout.record;
     
@@ -94,7 +94,7 @@ else
     % from where to get back results
     %     NamFileOutput(1,:) = {[M_.dname,'/metropolis/'],'*.*'};
     
-    [fout, nBlockPerCPU, totCPU] = masterParallel(options_.parallel, fblck, nblck,NamFileInput,'random_walk_metropolis_hastings_core', localVars, globalVars);
+    [fout, nBlockPerCPU, totCPU] = masterParallel(options_.parallel, fblck, nblck,NamFileInput,'random_walk_metropolis_hastings_core', localVars, globalVars, options_.parallel_info);
     for j=1:totCPU,
         offset = sum(nBlockPerCPU(1:j-1))+fblck-1;
         record.LastLogLiK(offset+1:sum(nBlockPerCPU(1:j)))=fout(j).record.LastLogLiK(offset+1:sum(nBlockPerCPU(1:j)));

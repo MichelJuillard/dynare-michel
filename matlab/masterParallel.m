@@ -1,4 +1,4 @@
-function [fOutVar,nBlockPerCPU, totCPU] = masterParallel(Parallel,fBlock,nBlock,NamFileInput,fname,fInputVar,fGlobalVar)
+function [fOutVar,nBlockPerCPU, totCPU] = masterParallel(Parallel,fBlock,nBlock,NamFileInput,fname,fInputVar,fGlobalVar,Parallel_info)
 % Top-level function called on the master computer when parallelizing a task.
 %
 % The number of parallelized threads will be equal to (nBlock-fBlock+1).
@@ -46,9 +46,13 @@ function [fOutVar,nBlockPerCPU, totCPU] = masterParallel(Parallel,fBlock,nBlock,
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-totCPU=0;
-
 % Determine my hostname and my working directory
+if ~isempty(Parallel_info)
+    if Parallel_info.leaveSlaveOpen,
+        [fOutVar,nBlockPerCPU, totCPU] = masterParallelMan(Parallel,fBlock,nBlock,NamFileInput,fname,fInputVar,fGlobalVar);
+        return
+    end        
+end
 DyMo=pwd;
 fInputVar.DyMo=DyMo;
 if isunix || (~matlab_ver_less_than('7.4') && ismac) ,
@@ -69,21 +73,24 @@ end
 save([fname,'_input.mat'],'Parallel','-append') 
 
 % Determine the total number of available CPUs, and the number of threads to run on each CPU
-for j=1:length(Parallel),
-    nCPU(j)=length(Parallel(j).NumCPU);
-    totCPU=totCPU+nCPU(j);
-end
-
-nCPU=cumsum(nCPU);
+[nCPU, totCPU, nBlockPerCPU] = distributeJobs(Parallel, fBlock, nBlock);
 offset0 = fBlock-1;
-if (nBlock-offset0)>totCPU,
-    diff = mod((nBlock-offset0),totCPU);
-    nBlockPerCPU(1:diff) = ceil((nBlock-offset0)/totCPU);
-    nBlockPerCPU(diff+1:totCPU) = floor((nBlock-offset0)/totCPU);
-else
-    nBlockPerCPU(1:nBlock-offset0)=1;
-    totCPU = nBlock-offset0;
-end
+
+% for j=1:length(Parallel),
+%     nCPU(j)=length(Parallel(j).NumCPU);
+%     totCPU=totCPU+nCPU(j);
+% end
+% 
+% nCPU=cumsum(nCPU);
+% offset0 = fBlock-1;
+% if (nBlock-offset0)>totCPU,
+%     diff = mod((nBlock-offset0),totCPU);
+%     nBlockPerCPU(1:diff) = ceil((nBlock-offset0)/totCPU);
+%     nBlockPerCPU(diff+1:totCPU) = floor((nBlock-offset0)/totCPU);
+% else
+%     nBlockPerCPU(1:nBlock-offset0)=1;
+%     totCPU = nBlock-offset0;
+% end
 
 % Clean up remnants of previous runs
 mydelete(['comp_status_',fname,'*.mat'])
@@ -214,6 +221,7 @@ t00=cputime;
 hh=NaN(1,nBlock);
 if exist('OCTAVE_VERSION'),
     diary off;
+    printf('\n');
 else
     hfigstatus = figure('name',['Parallel ',fname],...
                         'MenuBar', 'none', ...
@@ -241,7 +249,7 @@ while (1)
             load(stax(j).name)
             pcerdone(j) = prtfrc;
             if exist('OCTAVE_VERSION'),
-                statusString = [statusString, waitbarString, ', %3.f%% done! '];
+                statusString = [statusString, int2str(j), ' %3.f%% done! '];
             else
                 status_String{j} = waitbarString;  
                 status_Title{j} = waitbarTitle;  
@@ -257,6 +265,7 @@ while (1)
     else
         figure(hfigstatus),
         for j=1:length(stax),
+            try
             axes(hstatus(idCPU(j))),
             hpat = findobj(hstatus(idCPU(j)),'Type','patch');
             if ~isempty(hpat),
@@ -265,6 +274,9 @@ while (1)
                 patch([0 0 pcerdone(j) pcerdone(j)],[0 1 1 0],'r','EdgeColor','r')
             end
             title([status_Title{j},' - ',status_String{j}]);
+            catch
+                
+            end
         end
     end
     if isempty(dir(['P_',fname,'_*End.txt'])) 

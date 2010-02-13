@@ -101,7 +101,7 @@ if isnumeric(options_.parallel),
     UDIAG = fout.UDIAG;
     clear fout
 else
-    [fout, nBlockPerCPU, totCPU] = masterParallel(options_.parallel, 1, npar,{},'McMCDiagnostics_core', localVars);
+    [fout, nBlockPerCPU, totCPU] = masterParallel(options_.parallel, 1, npar,{},'McMCDiagnostics_core', localVars, [], options_.parallel_info);
     UDIAG = fout(1).UDIAG;
     for j=2:totCPU,
         UDIAG = cat(3,UDIAG ,fout(j).UDIAG);
