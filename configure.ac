@@ -171,7 +171,10 @@ AC_CONFIG_FILES([Makefile
                  dynare++/integ/testing/Makefile
                  dynare++/kord/Makefile
                  dynare++/src/Makefile
+                 mex/sources/Makefile
+                 mex/sources/estimation/Makefile
                  mex/sources/estimation/tests/Makefile
+                 mex/sources/estimation/libmat/Makefile
                  mex/sources/estimation/libmat/tests/Makefile
 ])
 
