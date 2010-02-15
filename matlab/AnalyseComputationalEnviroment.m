@@ -59,7 +59,7 @@ function [ErrorCode] = AnalyseComputationalEnviroment(DataInput)
 % Then at the point call of this function it is possible react in a best way, in accord
 % with the ErrorCode.
 
-% Copyright (C) 2009 Dynare Team
+% Copyright (C) 2009-2010 Dynare Team
 %
 % This file is part of Dynare.
 %

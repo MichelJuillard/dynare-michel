@@ -1,8 +1,7 @@
 function [nCPU, totCPU, nBlockPerCPU] = distributeJobs(Parallel, fBlock, nBlock)
-
 % Determine the total number of available CPUs, and the number of threads to run on each CPU
 
-% Copyright (C) 2009 Dynare Team
+% Copyright (C) 2010 Dynare Team
 %
 % This file is part of Dynare.
 %

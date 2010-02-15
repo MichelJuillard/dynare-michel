@@ -18,7 +18,7 @@ function prior_posterior_statistics(type,Y,gend,data_index,missing_value)
 % SPECIAL REQUIREMENTS
 %    none
 
-% Copyright (C) 2005-2009 Dynare Team
+% Copyright (C) 2005-2010 Dynare Team
 %
 % This file is part of Dynare.
 %

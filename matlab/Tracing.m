@@ -1,11 +1,10 @@
 function [] = Tracing()
-
 % DESCRIPTION
 % This function is used to test the correct execution of a matlab section
 % on remote machine.
 % 
 % If no error happen the function simply create a file.
-
+%
 % INPUTS
 % ...
 % 
@@ -15,7 +14,7 @@ function [] = Tracing()
 % SPECIAL REQUIREMENTS
 %    none
 
-% Copyright (C) 2005-2009 Dynare Team
+% Copyright (C) 2010 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -31,10 +30,8 @@ function [] = Tracing()
 %
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
-   
 
-    fid = fopen('Tracing.txt','w+');
-    fclose (fid);
+fid = fopen('Tracing.txt','w+');
+fclose (fid);
 
 exit
-

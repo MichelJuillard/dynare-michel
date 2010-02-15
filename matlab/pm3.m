@@ -1,6 +1,6 @@
 function pm3(n1,n2,ifil,B,tit1,tit2,tit3,tit_tex,names1,names2,name3,DirectoryName,var_type)
 
-% Copyright (C) 2007-2009 Dynare Team
+% Copyright (C) 2007-2010 Dynare Team
 %
 % This file is part of Dynare.
 %

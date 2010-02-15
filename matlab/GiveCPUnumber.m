@@ -1,9 +1,8 @@
 function [nCPU]= GiveCPUnumber (ComputerInformations)
-
 % DESCRIPTION
 % This function return the CPUs or cores numer avaiable
 % on the computer used for run parallel code.
-
+%
 % INPUTS
 % an array contained several fields that describe the hardaware 
 % software enviroments of a generic computer.
@@ -14,7 +13,7 @@ function [nCPU]= GiveCPUnumber (ComputerInformations)
 % SPECIAL REQUIREMENTS
 %    none
 
-% Copyright (C) 2005-2009 Dynare Team
+% Copyright (C) 2010 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -35,24 +34,23 @@ function [nCPU]= GiveCPUnumber (ComputerInformations)
 nCPU=-1;
 
 OffSet=27;
-    
+
 SringPosition=strfind(ComputerInformations, 'Processors:');
 nCPU=ComputerInformations(SringPosition+OffSet);
 
 % We check if there are Processors/Cores more than 9.
-  
- 
-   t0=ComputerInformations(SringPosition+OffSet+1);
-   t1=str2num(t0);
-   t1=isempty(t1);
-   
-   % if t1 is 0 the machine have more than 9 CPU.
-   
-   if t1==0
-       nCPU=strcat(nCPU,t0);    
-   end
-   
-   nCPU=str2num(nCPU);
-   
-   return
-   
+
+
+t0=ComputerInformations(SringPosition+OffSet+1);
+t1=str2num(t0);
+t1=isempty(t1);
+
+% if t1 is 0 the machine have more than 9 CPU.
+
+if t1==0
+    nCPU=strcat(nCPU,t0);    
+end
+
+nCPU=str2num(nCPU);
+
+return
