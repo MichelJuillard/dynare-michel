@@ -61,9 +61,10 @@ if exist('OCTAVE_VERSION') || matlab_ver_less_than('7.0.1')
     addpath([dynareroot '/missing/ordeig'])
 end
 
-% rcond() was introduced in Octave 3.2.0
+% rcond() and bicgstable() were introduced in Octave 3.2.0
 if exist('OCTAVE_VERSION') && octave_ver_less_than('3.2.0')
     addpath([dynareroot '/missing/rcond'])
+    addpath([dynareroot '/missing/bicgstab'])
 end
 
 % orschur() is missing in Octave; we don't have a real replacement;
