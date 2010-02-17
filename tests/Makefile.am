@@ -8,6 +8,7 @@ OCTAVE_MODS = \
 	example2.mod \
 	example1_use_dll.mod \
 	t_sgu_ex1.mod \
+	osr_example.mod \
 	ramsey.mod \
 	ramst_initval_file.mod \
 	example1_varexo_det.mod \
