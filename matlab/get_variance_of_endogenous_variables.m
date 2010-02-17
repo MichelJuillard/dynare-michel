@@ -54,6 +54,7 @@ if size(u,2) > 0
     ghx = ghx(i_stat,:);
     ghu = ghu(i_stat,:);
 else
+    i_stat_0 = 1:size(ghx,2);
     i_stat = (1:n)';
     i_stat_0 = i_stat;
 end
