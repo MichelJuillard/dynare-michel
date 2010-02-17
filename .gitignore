@@ -97,19 +97,23 @@ ylwrap
 /dynare++/integ/cc/*.h
 /dynare++/integ/cc/main.tex
 /dynare++/integ/src/quadrature-points
+/dynare++/integ/src/quadrature-points.exe
 /dynare++/integ/testing/tests
 /dynare++/kord/*.cpp
 !/dynare++/kord/tests.cpp
 /dynare++/kord/*.h
 /dynare++/kord/main.tex
 /dynare++/kord/tests
+/dynare++/kord/tests.exe
 /dynare++/kord/out.txt
 /dynare++/sylv/testing/*.mm
 /dynare++/sylv/testing/tests
+/dynare++/sylv/testing/tests.exe
 /dynare++/parser/cc/*_ll.cc
 /dynare++/parser/cc/*_tab.cc
 /dynare++/parser/cc/*_tab.hh
 /dynare++/src/dynare++
+/dynare++/src/dynare++.exe
 /dynare++/src/dynglob_ll.cc
 /dynare++/src/dynglob_tab.cc
 /dynare++/src/dynglob_tab.hh
@@ -117,6 +121,7 @@ ylwrap
 /dynare++/tl/cc/*.h
 /dynare++/tl/cc/main.tex
 /dynare++/tl/testing/tests
+/dynare++/tl/testing/tests.exe
 !/dynare++/extern/R/Makefile
 
 # Windows
@@ -124,8 +129,11 @@ ylwrap
 
 # Estimation DLL tests
 /mex/sources/estimation/tests/test-dr
+/mex/sources/estimation/tests/test-dr.exe
 /mex/sources/estimation/libmat/tests/test-qr
+/mex/sources/estimation/libmat/tests/test-qr.exe
 /mex/sources/estimation/libmat/tests/test-gsd
+/mex/sources/estimation/libmat/tests/test-gsd.exe
 
 # Misc
 !/matlab/swz/c-code/Makefile
