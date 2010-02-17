@@ -36,7 +36,7 @@ DecisionRules::DecisionRules(size_t n_arg, size_t p_arg,
   n_back_mixed(n_back+n_mixed), n_fwrd_mixed(n_fwrd+n_mixed),
   n_dynamic(n-n_static),
   S(n, n_static),
-  A(n_back_mixed + n + n_fwrd_mixed),
+  A(n, n_back_mixed + n + n_fwrd_mixed),
   D(n_fwrd + n_back + 2*n_mixed),
   E(n_fwrd + n_back + 2*n_mixed),
   Z(n_fwrd + n_back + 2*n_mixed),
@@ -87,7 +87,7 @@ DecisionRules::compute(const Matrix &jacobian, Matrix &g_y, Matrix &g_u) throw (
 {
   assert(jacobian.getRows() == n
          && jacobian.getCols() == (n_back_mixed + n + n_fwrd_mixed + p));
-  assert(g_y.getRows() == n && g_y.getCols() == n);
+  assert(g_y.getRows() == n && g_y.getCols() == n_back_mixed);
   assert(g_u.getRows() == n && g_u.getCols() == p);
 
   // Construct S, perform QR decomposition and get A = Q*jacobian
