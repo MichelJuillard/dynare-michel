@@ -1,11 +1,10 @@
-function [g,flag] = moment_function(xparams,sample_moments,weighting_matrix,options,parallel)
+function [g,flag] = moment_function(xparams,sample_moments,dataset,options,parallel)
 % Evaluates the moment function of the Simulated Moments Method (discrepancy between sample and
 % ).
 %
 % INPUTS:
 %  xparams          [double]  p*1 vector of estimated parameters. 
 %  sample_moments   [double]  n*1 vector of sample moments (n>=p).
-%  weighting_matrix [double]  n*n symetric, positive definite matrix.
 %  options          [      ]  Structure defining options for SMM.
 %  parallel         [      ]  Structure defining the parallel mode settings (optional).
 %
@@ -81,7 +80,7 @@ clear perfect_foresight_simulation;
 if nargin<5
     for s = 1:options.number_of_simulated_sample
         time_series = extended_path([],options.simulated_sample_size,1);
-        data = time_series(options.observed_variables_idx,options.burn_in_periods+1:options.simulated_sample_size);
+        data = time_series(dataset.observed_variables_idx,options.burn_in_periods+1:options.simulated_sample_size);
         eval(['tmp = ' options.moments_file_name '(data);'])
         simulated_moments = simulated_moments + tmp;
         simulated_moments = simulated_moments / options.number_of_simulated_sample;

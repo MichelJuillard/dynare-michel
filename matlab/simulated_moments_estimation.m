@@ -190,7 +190,7 @@ elseif options.optimization_routine==0% Compute the variance of the SMM estimato
     tmp = sortrows(estimated_parameters_optimization_path',1);
     param = tmp(1,2:end)';
     % Compute gradient of the moment function (distance between sample and simulated moments).
-    [F,G] = dynare_gradient('moment_function',param,options_.gradient_epsilon,dataset,options,parallel);
+    [F,G] = dynare_gradient('moment_function',param,options_.gradient_epsilon,sample_moments,dataset,options,parallel);
     V = (1+1/options.number_of_simulated_sample)*G'*long_run_covariance*G;
     [param,diag(V)]		
 end
