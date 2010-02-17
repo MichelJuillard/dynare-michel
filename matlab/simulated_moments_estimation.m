@@ -42,8 +42,8 @@ end
 data = dataset.data(dataset.first_observation:dataset.first_observation+dataset.number_of_observations,:);
 
 % Compute sample moments and the weighting matrix.
-eval(['[sample_moments,weighting_matrix] = ' M_.fname '_moments;'])
-weighting_matrix = inv(weighting_matrix);
+eval(['[sample_moments,long_run_covariance] = ' M_.fname '_moments;'])
+weighting_matrix = inv(long_run_covariance);
 
 % Initialize output.
 sigma = [];
@@ -188,8 +188,11 @@ elseif options.optimization_routine==2
 elseif options.optimization_routine==0% Compute the variance of the SMM estimator
     load('optimization_path.mat');
     tmp = sortrows(estimated_parameters_optimization_path',1);
-    param = tmp(1,2:end);
-param
+    param = tmp(1,2:end)';
+    % Compute gradient of the moment function (distance between sample and simulated moments).
+    [F,G] = dynare_gradient('moment_function',param,options_.gradient_epsilon,dataset,options,parallel);
+    V = (1+1/options.number_of_simulated_sample)*G'*long_run_covariance*G;
+    [param,diag(V)]		
 end
 
 
