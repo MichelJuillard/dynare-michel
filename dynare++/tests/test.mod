@@ -1,7 +1,7 @@
 var a, b, c, h, k, y;
 varexo e,u;
 
-parameters beta, rho, beta, alpha, delta, theta, psi, tau, phi;
+parameters beta, rho, alpha, delta, theta, psi, tau, phi;
 
 alpha = 0.36;
 rho   = 0.95;
