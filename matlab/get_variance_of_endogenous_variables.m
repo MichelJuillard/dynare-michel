@@ -1,6 +1,6 @@
-function [vx1,i_ns] = get_variance_of_endogenous_variables(dr,i_var)
+function vx1 = get_variance_of_endogenous_variables(dr,i_var)
 
-% function [vx1,i_ns] = get_variance_of_endogenous_variables(dr,i_var)
+% function vx1 = get_variance_of_endogenous_variables(dr,i_var)
 % Gets the variance of a variables subset
 %
 % INPUTS
@@ -9,13 +9,11 @@ function [vx1,i_ns] = get_variance_of_endogenous_variables(dr,i_var)
 %        
 % OUTPUTS
 %    vx1:       variance-covariance matrix
-%    i_ns:      non-stationary variables indices for which the variance has
-%               been calculated
 %        
 % SPECIAL REQUIREMENTS
 %    none
 
-% Copyright (C) 2003-2008 Dynare Team
+% Copyright (C) 2003-2008,2010 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -57,6 +55,7 @@ if size(u,2) > 0
     ghu = ghu(i_stat,:);
 else
     i_stat = (1:n)';
+    i_stat_0 = i_stat;
 end
 
 vx1 = Inf*ones(n,n);
