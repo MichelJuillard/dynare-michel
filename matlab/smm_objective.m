@@ -147,7 +147,7 @@ end
 r = transpose(simulated_moments-sample_moments)*weighting_matrix*(simulated_moments-sample_moments);
 priorObjectiveValue = r;
 
-if exist('optimization_path.mat')
+if (options.optimization_routine>0) && exist('optimization_path.mat')
     load('optimization_path.mat');
     new_state = [ r; xparams];
     estimated_parameters_optimization_path = [ estimated_parameters_optimization_path , new_state ];

@@ -66,9 +66,11 @@ if nargin>3
     end
     if ~master_is_running_a_job
         error('Master has to run one job!');
-    end 
-    estimated_parameters_optimization_path = [NaN;xparam];
-    save('optimization_path.mat','estimated_parameters_optimization_path');
+    end
+    if options.optimization_routine>0
+        estimated_parameters_optimization_path = [NaN;xparam];
+	save('optimization_path.mat','estimated_parameters_optimization_path');
+    end
     disp(' ')
     disp('Master talks to its slaves...')
     disp(' ')
@@ -183,6 +185,11 @@ elseif options.optimization_routine==2
     else
         [param,fval,exitflag] = fminsearch('smm_objective',xparam,optim_options,sample_moments,weighting_matrix,options,parallel);
     end
+elseif options.optimization_routine==0% Compute the variance of the SMM estimator
+    load('optimization_path.mat');
+    tmp = sortrows(estimated_parameters_optimization_path',1);
+    param = tmp(1,2:end);
+param
 end
 
 
