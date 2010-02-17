@@ -208,8 +208,7 @@ namespace mat
   col_copy(const Mat1 &src, size_t col_src, size_t row_offset_src, size_t row_nb,
            Mat2 &dest, size_t col_dest, size_t row_offset_dest)
   {
-    assert(src.getRows() == dest.getRows()
-           && col_src < src.getCols() && col_dest < dest.getCols()
+    assert(col_src < src.getCols() && col_dest < dest.getCols()
            && row_offset_src < src.getRows() && row_offset_src+row_nb <= src.getRows()
            && row_offset_dest < dest.getRows() && row_offset_dest+row_nb <= dest.getRows());
     memcpy(dest.getData() + row_offset_dest + col_dest*dest.getLd(),
