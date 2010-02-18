@@ -51,7 +51,7 @@ DecisionRules::DecisionRules(size_t n_arg, size_t p_arg,
   A0s(n_static),
   A0d(n_static, n_dynamic),
   g_y_dynamic(n_dynamic, n_back_mixed),
-  g_y_static_tmp(n_static, n_back_mixed)
+  g_y_static_tmp(n_fwrd_mixed, n_back_mixed)
 {
   assert(n == n_back + n_fwrd + n_mixed + n_static);
 
@@ -69,17 +69,17 @@ DecisionRules::DecisionRules(size_t n_arg, size_t p_arg,
   for(size_t i = 0; i < n_back_mixed; i++)
     if (find(zeta_mixed.begin(), zeta_mixed.end(), zeta_back_mixed[i])
         == zeta_mixed.end())
-      beta_back.push_back(i);
-    else
       pi_back.push_back(i);
+    else
+      beta_back.push_back(i);
 
   // Compute beta_fwrd and pi_fwrd
   for(size_t i = 0; i < n_fwrd_mixed; i++)
     if (find(zeta_mixed.begin(), zeta_mixed.end(), zeta_fwrd_mixed[i])
         == zeta_mixed.end())
-      beta_fwrd.push_back(i);
-    else
       pi_fwrd.push_back(i);
+    else
+      beta_fwrd.push_back(i);
 }
 
 void
@@ -95,7 +95,7 @@ DecisionRules::compute(const Matrix &jacobian, Matrix &g_y, Matrix &g_u) throw (
     mat::col_copy(jacobian, n_back_mixed+zeta_static[i], S, i);
 
   A = MatrixConstView(jacobian, 0, 0, n, n_back_mixed + n + n_fwrd_mixed);
-  QR.computeAndLeftMultByQ(S, "N", A);
+  QR.computeAndLeftMultByQ(S, "T", A);
 
   // Construct matrix D
   for (size_t j = 0; j < n_back_mixed; j++)
@@ -108,9 +108,11 @@ DecisionRules::compute(const Matrix &jacobian, Matrix &g_y, Matrix &g_u) throw (
 
   // Construct matrix E
   MatrixView(E, 0, 0, n - n_static, n_back_mixed) = MatrixView(A, n_static, 0, n - n_static, n_back_mixed);
-  for (size_t j = 0; j < n_fwrd_mixed; j++)
-    mat::col_copy(A, n_back_mixed + zeta_fwrd_mixed[j], n_static, n - n_static,
-                  E, n_back_mixed + j, 0);
+  for (size_t j = 0; j < n_fwrd; j++)
+    mat::col_copy(A, n_back_mixed + zeta_fwrd_mixed[pi_fwrd[j]], n_static, n - n_static,
+                  E, n_back_mixed + pi_fwrd[j], 0);
+  for (size_t j = 0; j < n_mixed; j++)
+    MatrixView(E, 0, n_back_mixed + beta_fwrd[j], n - n_static, 1).setAll(0.0);
   mat::negate(MatrixView(E, 0, 0, n - n_static, n_fwrd + n_back + 2*n_mixed));
   MatrixView(E, n - n_static, 0, n_mixed, n_fwrd + n_back + 2*n_mixed).setAll(0.0);
   for (size_t i = 0; i < n_mixed; i++)
@@ -118,7 +120,7 @@ DecisionRules::compute(const Matrix &jacobian, Matrix &g_y, Matrix &g_u) throw (
 
   // Perform the generalized Schur
   size_t sdim;
-  GSD.compute(D, E, Z, sdim);
+  GSD.compute(E, D, Z, sdim);
 
   if (n_back_mixed != sdim)
     throw BlanchardKahnException(true, n_fwrd_mixed, n_fwrd + n_back + 2*n_mixed - sdim);
@@ -164,14 +166,14 @@ DecisionRules::compute(const Matrix &jacobian, Matrix &g_y, Matrix &g_u) throw (
   for (size_t i = 0; i < n_dynamic; i++)
     {
       mat::row_copy(g_y, zeta_dynamic[i], g_y_dynamic, i);
-      mat::col_copy(A, n_back_mixed + zeta_dynamic[i], A0d, i);
+      mat::col_copy(A, n_back_mixed + zeta_dynamic[i], 0, n_static, A0d, i, 0);
     }
   blas::gemm("N", "N", 1.0, A0d, g_y_dynamic, 1.0, g_y_static);
   blas::gemm("N", "N", 1.0, g_y_fwrd, g_y_back, 0.0, g_y_static_tmp);
   blas::gemm("N", "N", 1.0, MatrixView(A, 0, n_back_mixed + n, n_static, n_fwrd_mixed),
              g_y_static_tmp, 1.0, g_y_static);
   for (size_t i = 0; i < n_static; i++)
-    mat::col_copy(A, n_back_mixed + zeta_static[i], A0s, i);
+    mat::col_copy(A, n_back_mixed + zeta_static[i], 0, n_static, A0s, i, 0);
   LU3.invMult("N", A0s, g_y_static);
   mat::negate(g_y_static);
 

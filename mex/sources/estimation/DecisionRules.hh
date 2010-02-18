@@ -59,6 +59,15 @@ public:
     \param jacobian First columns are backetermined vars at t-1 (in the order of zeta_back_mixed), then all vars at t (in the orig order), then forward vars at t+1 (in the order of zeta_fwrd_mixed), then exogenous vars.
   */
   void compute(const Matrix &jacobian, Matrix &g_y, Matrix &g_u) throw (BlanchardKahnException, GeneralizedSchurDecomposition::GSDException);
+  template<class Vec1, class Vec2>
+  void getGeneralizedEigenvalues(Vec1 &eig_real, Vec2 &eig_cmplx);
 };
 
 std::ostream &operator<<(std::ostream &out, const DecisionRules::BlanchardKahnException &e);
+
+template<class Vec1, class Vec2>
+void
+DecisionRules::getGeneralizedEigenvalues(Vec1 &eig_real, Vec2 &eig_cmplx)
+{
+  GSD.getGeneralizedEigenvalues(eig_real, eig_cmplx);
+}
