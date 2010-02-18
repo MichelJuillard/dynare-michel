@@ -293,10 +293,10 @@ namespace mat
     assert(m1.getRows() == m2.getRows() && m1.getCols() == m2.getCols());
     double *p1 = m1.getData();
     const double *p2 = m2.getData();
-    while (p1 < m1.getData() + m1.getRows() * m1.getLd())
+    while (p1 < m1.getData() + m1.getCols() * m1.getLd())
       {
-        double *pp1, *pp2;
-        while (pp1 < p1 + m1.getCols())
+        double *pp1 = p1, *pp2 = p2;
+        while (pp1 < p1 + m1.getRows())
           *pp1++ += *pp2++;
 
         p1 += m1.getLd();
@@ -312,10 +312,10 @@ namespace mat
     assert(m1.getRows() == m2.getRows() && m1.getCols() == m2.getCols());
     double *p1 = m1.getData();
     const double *p2 = m2.getData();
-    while (p1 < m1.getData() + m1.getRows() * m1.getLd())
+    while (p1 < m1.getData() + m1.getCols() * m1.getLd())
       {
-        double *pp1, *pp2;
-        while (pp1 < p1 + m1.getCols())
+        double *pp1 = p1, *pp2 = p2;
+        while (pp1 < p1 + m1.getRows())
           *pp1++ -= *pp2++;
 
         p1 += m1.getLd();
@@ -329,10 +329,10 @@ namespace mat
   negate(Mat m)
   {
     double *p = m.getData();
-    while (p < m.getData() + m.getRows() * m.getLd())
+    while (p < m.getData() + m.getCols() * m.getLd())
       {
-        double *pp;
-        while (pp < p + m.getCols())
+        double *pp = p;
+        while (pp < p + m.getRows())
           {
             *pp = -*pp;
             pp++;
