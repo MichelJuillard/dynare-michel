@@ -73,6 +73,12 @@ if exist('OCTAVE_VERSION')
     addpath([dynareroot '/missing/ordschur'])
 end
 
+% bsxfun is missing in old versions of matlab (octave?)
+if ~exist('OCTAVE_VERSION') && matlab_ver_less_than('7.4')
+    addpath([dynareroot '/missing/bsxfun'])
+end
+
+
 % Add path to MEX files
 if exist('OCTAVE_VERSION')
     addpath([dynareroot '../mex/octave/']);
