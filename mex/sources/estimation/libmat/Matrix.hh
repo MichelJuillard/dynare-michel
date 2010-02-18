@@ -109,8 +109,8 @@ class MatrixView
   inline const double *getData() const { return data; }
   inline void setAll(double val)
   {
-    for (double *p = data; p < data + rows*ld; p += ld)
-      std::fill_n(p, cols, val);
+    for (double *p = data; p < data + cols*ld; p += ld)
+      std::fill_n(p, rows, val);
   }
   inline double &operator() (size_t i, size_t j) { return data[i+j*ld]; }
   inline const double &operator() (size_t i, size_t j) const { return data[i+j*ld]; }
