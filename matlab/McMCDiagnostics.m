@@ -91,6 +91,7 @@ localVars.nblck = nblck;
 localVars.NumberOfMcFilesPerBlock = NumberOfMcFilesPerBlock;
 localVars.Origin = Origin;
 localVars.StepSize = StepSize;
+localVars.mh_drop = options_.mh_drop;
 localVars.NumberOfDraws = NumberOfDraws;
 localVars.NumberOfLines = NumberOfLines;
 localVars.time = time;
