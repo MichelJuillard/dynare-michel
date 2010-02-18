@@ -68,6 +68,5 @@ operator<<(std::ostream &out, const GeneralizedSchurDecomposition::GSDException 
     out << "after reordering, roundoff changed values of some complex eigenvalues so that leading eigenvalues in the Generalized Schur form no longer satisfy SELCTG=TRUE. This could also be caused due to scaling";
   else if (e.info == e.n + 3)
     out << "reordering failed in DTGSEN";
-  out << std::endl;
   return out;
 }

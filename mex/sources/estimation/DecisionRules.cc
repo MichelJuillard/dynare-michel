@@ -189,7 +189,6 @@ operator<<(std::ostream &out, const DecisionRules::BlanchardKahnException &e)
     out << "The Blanchard-Kahn order condition is not satisfied: you have " << e.n_fwrd_vars << " forward variables for " << e.n_explosive_eigenvals << " explosive eigenvalues";
   else
     out << "The Blanchard Kahn rank condition is not satisfied";
-  out << std::endl;
   return out;
 }
 
