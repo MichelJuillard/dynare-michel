@@ -285,6 +285,17 @@ namespace mat
         std::swap(M(i,j), M(j,i));
   }
 
+  //! Computes M2 = M1' (even for rectangular matrices)
+  template<class Mat1, class Mat2>
+  inline void
+  transpose(Mat1 &M1, Mat2 &M2)
+  {
+    assert(M1.getRows() == M2.getCols() && M1.getCols() == M2.getRows());
+    for (size_t i = 0; i < M1.getRows(); i++)
+      for (size_t j = 0; j < M1.getCols(); j++)
+        M2(j, i) = M1(i, j);
+  }
+
   //! Computes m1 = m1 + m2
   template<class Mat1, class Mat2>
   void
