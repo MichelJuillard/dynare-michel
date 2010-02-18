@@ -40,7 +40,7 @@ DecisionRules::DecisionRules(size_t n_arg, size_t p_arg,
   D(n_fwrd + n_back + 2*n_mixed),
   E(n_fwrd + n_back + 2*n_mixed),
   Z(n_fwrd + n_back + 2*n_mixed),
-  QR(n, n_static),
+  QR(n, n_static, n_back_mixed + n + n_fwrd_mixed),
   GSD(n_fwrd + n_back + 2*n_mixed, qz_criterium),
   LU1(n_fwrd_mixed),
   LU2(n_back_mixed),
@@ -95,7 +95,7 @@ DecisionRules::compute(const Matrix &jacobian, Matrix &g_y, Matrix &g_u) throw (
     mat::col_copy(jacobian, n_back_mixed+zeta_static[i], S, i);
 
   A = MatrixConstView(jacobian, 0, 0, n, n_back_mixed + n + n_fwrd_mixed);
-  QR.computeAndMultByQ(S, "L", "N", A);
+  QR.computeAndLeftMultByQ(S, "N", A);
 
   // Construct matrix D
   for (size_t j = 0; j < n_back_mixed; j++)

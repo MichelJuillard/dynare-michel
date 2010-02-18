@@ -29,42 +29,46 @@ class QRDecomposition
 {
 private:
   const size_t rows, cols, mind;
-  lapack_int lwork;
-  double *work, *tau;
+  //! Number of columns of the matrix to be left-multiplied by Q
+  const size_t cols2;
+  lapack_int lwork, lwork2;
+  double *work, *work2, *tau;
   Matrix H, Q2;
   Vector v;
 public:
   /*!
     \todo Replace heuristic choice for workspace size by a query to determine the optimal size
+    \param[in] rows_arg Number of rows of the matrix to decompose
+    \param[in] cols_arg Number of columns of the matrix to decompose
+    \param[in] cols2_arg Number of columns of the matrix to be multiplied by Q
    */
-  QRDecomposition(size_t rows_arg, size_t cols_arg);
+  QRDecomposition(size_t rows_arg, size_t cols_arg, size_t cols2_arg);
   ~QRDecomposition();
-  //! Performs the QR decomposition of a matrix, and multiplies another matrix by Q
+  //! Performs the QR decomposition of a matrix, and left-multiplies another matrix by Q
   /*!
     \param[in,out] A On input, the matrix to be decomposed. On output, equals to the output of dgeqrf
-    \param[in] side Specifies on which side is Q in the multiplication, either "L" or "R"
     \param[in] trans Specifies whether Q should be transposed before the multiplication, either "T" or "N"
-    \param[in,out] C The matrix to be multiplied by Q, modified in place
+    \param[in,out] C The matrix to be left-multiplied by Q, modified in place
   */
   template<class Mat1, class Mat2>
-  void computeAndMultByQ(Mat1 &A, const char *side, const char *trans, Mat2 &C);
+  void computeAndLeftMultByQ(Mat1 &A, const char *trans, Mat2 &C);
 };
 
 template<class Mat1, class Mat2>
 void
-QRDecomposition::computeAndMultByQ(Mat1 &A, const char *side, const char *trans, Mat2 &C)
+QRDecomposition::computeAndLeftMultByQ(Mat1 &A, const char *trans, Mat2 &C)
 {
   assert(A.getRows() == rows && A.getCols() == cols);
-  assert(C.getRows() == rows);
+  assert(C.getRows() == rows && C.getCols() == cols2);
 
   lapack_int m = rows, n = cols, lda = A.getLd();
   lapack_int info;
   dgeqrf(&m, &n, A.getData(), &lda, tau, work, &lwork, &info);
   assert(info == 0);
 
-  n = C.getCols();
+  n = cols2;
   lapack_int k = mind, ldc = C.getLd();
-  dormqr(side, trans, &m, &n, &k, A.getData(), &lda, tau, C.getData(), &ldc,
-         work, &lwork, &info);
+  dormqr("L", trans, &m, &n, &k, A.getData(), &lda, tau, C.getData(), &ldc,
+         work2, &lwork2, &info);
   assert(info == 0);
 }

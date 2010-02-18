@@ -21,11 +21,13 @@
 
 #include "QRDecomposition.hh"
 
-QRDecomposition::QRDecomposition(size_t rows_arg, size_t cols_arg) :
-  rows(rows_arg), cols(cols_arg), mind(std::min(rows, cols)), lwork(rows*cols),
-  H(rows), Q2(rows), v(rows)
+QRDecomposition::QRDecomposition(size_t rows_arg, size_t cols_arg, size_t cols2_arg) :
+  rows(rows_arg), cols(cols_arg), mind(std::min(rows, cols)), cols2(cols2_arg),
+  lwork(rows*cols), lwork2(cols2), H(rows), Q2(rows), v(rows)
 {
   work = new double[lwork];
+  work2 = new double[lwork2];
+
   tau = new double[mind];
 }
 

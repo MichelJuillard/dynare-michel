@@ -27,7 +27,7 @@ main(int argc, char **argv)
 {
   size_t m = 4, n = 3;
   Matrix S(m, n), Q(m), A(m, n), B(m);
-  QRDecomposition QRD(m, n);
+  QRDecomposition QRD(m, n, m);
 
   for (size_t i = 0; i < m; i++)
     for (size_t j = 0; j < n; j++)
@@ -37,7 +37,7 @@ main(int argc, char **argv)
 
   mat::set_identity(Q);
 
-  QRD.computeAndMultByQ(S, "L", "N", Q);
+  QRD.computeAndLeftMultByQ(S, "N", Q);
 
   std::cout << "Matrix Q:" << std::endl << Q << std::endl;
 
