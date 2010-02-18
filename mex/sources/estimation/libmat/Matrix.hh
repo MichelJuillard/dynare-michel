@@ -224,7 +224,7 @@ namespace mat
            && row_src < src.getRows() && row_dest < dest.getRows());
     const double *p1 = src.getData() + row_src;
     double *p2 = dest.getData() + row_dest;
-    while (p1 < src.getData() + src.getRows() * src.getLd())
+    while (p1 < src.getData() + src.getCols() * src.getLd())
       {
         *p2 = *p1;
         p1 += src.getLd();
