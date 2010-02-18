@@ -21,10 +21,11 @@ function C = bsxfun(fun,A,B)
 dA = size(A);
 dB = size(B);
 
-if length(dB)~=length(dA)
-    % Note that this function crashes if A and B are k-dimensional with k>2 and if the size of the last dimension is one.
-    % It is a bug, but we don't need this feature, so I do not investigate further... 
-    error(['A is a ' int2str(length(dA)) '-dimensional array whereas B is a ' int2str(length(dB)) '-dimensional array!'])
+dim_correction = length(dA)-length(dB);
+if dim_correction>0
+    dB = [dB,ones(1,dim_correction)];
+elseif dim_correction<0
+    dA = [dA,ones(1,-dim_correction)];
 end
 
 if all(dA==dB)
