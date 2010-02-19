@@ -37,8 +37,8 @@ main(int argc, char **argv)
   mat::transpose(D);
   mat::transpose(E);
 
-  std::cout << "Matrix D: " << std::endl << D << std::endl;
-  std::cout << "Matrix E: " << std::endl << E << std::endl;
+  std::cout << "D =" << std::endl << D << std::endl;
+  std::cout << "E =" << std::endl << E << std::endl;
 
   GeneralizedSchurDecomposition GSD(n, 1.00001);
 
@@ -47,9 +47,9 @@ main(int argc, char **argv)
 
   GSD.compute(D, E, S, T, Z, sdim);
 
-  std::cout << "Matrix S: " << std::endl << S << std::endl;
-  std::cout << "Matrix T: " << std::endl << T << std::endl;
-  std::cout << "Matrix Z: " << std::endl << Z << std::endl;
+  std::cout << "S =" << std::endl << S << std::endl;
+  std::cout << "T =" << std::endl << T << std::endl;
+  std::cout << "Z =" << std::endl << Z << std::endl;
 
   Vector eig_real(n), eig_cmplx(n);
   GSD.getGeneralizedEigenvalues(eig_real, eig_cmplx);

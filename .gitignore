@@ -134,6 +134,8 @@ ylwrap
 /mex/sources/estimation/libmat/tests/test-qr.exe
 /mex/sources/estimation/libmat/tests/test-gsd
 /mex/sources/estimation/libmat/tests/test-gsd.exe
+/mex/sources/estimation/libmat/tests/test-lu
+/mex/sources/estimation/libmat/tests/test-lu.exe
 
 # Misc
 !/matlab/swz/c-code/Makefile

@@ -26,7 +26,7 @@ int
 main(int argc, char **argv)
 {
   size_t m = 4, n = 3;
-  Matrix S(m, n), Q(m), A(m, n), B(m);
+  Matrix S(m, n), Q(m), A(m, n), B(m), S2(m, n);
   QRDecomposition QRD(m, n, m);
 
   for (size_t i = 0; i < m; i++)
@@ -37,20 +37,30 @@ main(int argc, char **argv)
 
   mat::set_identity(Q);
 
-  QRD.computeAndLeftMultByQ(S, "N", Q);
+  S2 = S;
+  QRD.computeAndLeftMultByQ(S2, "N", Q);
 
-  std::cout << "Matrix Q:" << std::endl << Q << std::endl;
+  std::cout << "Q =" << std::endl << Q << std::endl;
 
   blas::gemm("T", "N", 1.0, Q, Q, 0.0, B);
 
-  std::cout << "Matrix Q'*Q:" << std::endl << B << std::endl;
+  std::cout << "Q'*Q =" << std::endl << B << std::endl;
 
   for (size_t j = 0; j < n; j++)
-    mat::col_set(S, j, j+1, m-j-1, 0);
+    mat::col_set(S2, j, j+1, m-j-1, 0);
 
-  std::cout << "Matrix R:" << std::endl << S << std::endl;
+  std::cout << "R =" << std::endl << S2 << std::endl;
 
-  blas::gemm("N", "N", 1.0, Q, S, 0.0, A);
+  blas::gemm("N", "N", 1.0, Q, S2, 0.0, A);
 
-  std::cout << "Product Q*R:" << std::endl << A << std::endl;
+  std::cout << "Q*R =" << std::endl << A << std::endl;
+
+  // Check values
+  Matrix B2(m);
+  mat::set_identity(B2);
+  mat::sub(B2, B);
+  assert(mat::nrminf(B2) < 1e-4);
+
+  mat::sub(A, S);
+  assert(mat::nrminf(A) < 1e-4);
 }
