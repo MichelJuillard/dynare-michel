@@ -52,7 +52,10 @@ DecisionRules::DecisionRules(size_t n_arg, size_t p_arg,
   A0s(n_static),
   A0d(n_static, n_dynamic),
   g_y_dynamic(n_dynamic, n_back_mixed),
-  g_y_static_tmp(n_fwrd_mixed, n_back_mixed)
+  g_y_static_tmp(n_fwrd_mixed, n_back_mixed),
+  g_u_tmp1(n, n_back_mixed),
+  g_u_tmp2(n),
+  LU4(n)
 {
   assert(n == n_back + n_fwrd + n_mixed + n_static);
 
@@ -184,7 +187,17 @@ DecisionRules::compute(const Matrix &jacobian, Matrix &g_y, Matrix &g_u) throw (
     mat::row_copy(g_y_static, i, g_y, zeta_static[i]);
 
   // Compute DR for all endogenous w.r. to shocks
-
+  blas::gemm("N", "N", 1.0, MatrixConstView(jacobian, 0, n_back_mixed + n, n, n_fwrd_mixed), g_y_fwrd, 0.0, g_u_tmp1);
+  g_u_tmp2 = MatrixConstView(jacobian, 0, n_back_mixed, n, n);
+  for (size_t i = 0; i < n_back_mixed; i++)
+    {
+      VectorView c1 = mat::get_col(g_u_tmp2, zeta_back_mixed[i]),
+        c2 = mat::get_col(g_u_tmp1, i);
+      vec::add(c1, c2);
+    }
+  g_u = MatrixConstView(jacobian, 0, n_back_mixed + n + n_fwrd_mixed, n, p);
+  LU4.invMult("N", g_u_tmp2, g_u);
+  mat::negate(g_u);
 }
 
 std::ostream &

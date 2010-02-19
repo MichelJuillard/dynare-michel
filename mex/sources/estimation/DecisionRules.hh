@@ -40,6 +40,8 @@ private:
   LUSolver LU1, LU2, LU3;
   Matrix Z21, g_y_back, g_y_back_tmp;
   Matrix g_y_static, A0s, A0d, g_y_dynamic, g_y_static_tmp;
+  Matrix g_u_tmp1, g_u_tmp2;
+  LUSolver LU4;
 public:
   class BlanchardKahnException
   {
