@@ -46,7 +46,7 @@ case ${host_os} in
     CC=gcc-3
     CXX=g++-3
     CFLAGS="$CFLAGS -mno-cygwin"
-    CXXFLAGS="$CFLAGS -mno-cygwin"
+    CXXFLAGS="$CXXFLAGS -mno-cygwin"
     ;;
 esac
 
