@@ -39,12 +39,13 @@ DecisionRules::DecisionRules(size_t n_arg, size_t p_arg,
   A(n, n_back_mixed + n + n_fwrd_mixed),
   D(n_fwrd + n_back + 2*n_mixed),
   E(n_fwrd + n_back + 2*n_mixed),
-  Z(n_fwrd + n_back + 2*n_mixed),
+  Z_prime(n_fwrd + n_back + 2*n_mixed),
   QR(n, n_static, n_back_mixed + n + n_fwrd_mixed),
   GSD(n_fwrd + n_back + 2*n_mixed, qz_criterium),
   LU1(n_fwrd_mixed),
   LU2(n_back_mixed),
   LU3(n_static),
+  Z21(n_fwrd_mixed, n_back_mixed),
   g_y_back(n_back_mixed),
   g_y_back_tmp(n_back_mixed),
   g_y_static(n_static, n_back_mixed),
@@ -121,42 +122,43 @@ DecisionRules::compute(const Matrix &jacobian, Matrix &g_y, Matrix &g_u) throw (
 
   // Perform the generalized Schur
   size_t sdim;
-  GSD.compute(E, D, Z, sdim);
+  GSD.compute(E, D, Z_prime, sdim);
 
   if (n_back_mixed != sdim)
     throw BlanchardKahnException(true, n_fwrd_mixed, n_fwrd + n_back + 2*n_mixed - sdim);
 
   // Compute DR for forward variables w.r. to endogenous
-  MatrixView Z21(Z, n_back_mixed, 0, n_fwrd_mixed, n_back_mixed),
-    Z22(Z, n_back_mixed, n_back_mixed, n_fwrd_mixed, n_fwrd_mixed);
+  MatrixView Z21_prime(Z_prime, 0, n_back_mixed, n_back_mixed, n_fwrd_mixed),
+    Z22_prime(Z_prime, n_back_mixed, n_back_mixed, n_fwrd_mixed, n_fwrd_mixed);
+
+  mat::transpose(Z21, Z21_prime);
 
   try
     {
-      LU1.invMult("N", Z22, Z21);
+      LU1.invMult("T", Z22_prime, Z21);
     }
   catch (LUSolver::LUException &e)
     {
       throw BlanchardKahnException(false, n_fwrd_mixed, n_fwrd + n_back + 2*n_mixed - sdim);
     }
   mat::negate(Z21);
-  const MatrixView &g_y_fwrd = Z21;
+  const Matrix &g_y_fwrd = Z21;
 
   for (size_t i = 0; i < n_fwrd_mixed; i++)
     mat::row_copy(g_y_fwrd, i, g_y, zeta_fwrd_mixed[i]);
 
   // Compute DR for backward variables w.r. to endogenous
-  MatrixView Z11(Z, 0, 0, n_back_mixed, n_back_mixed),
+  MatrixView Z11_prime(Z_prime, 0, 0, n_back_mixed, n_back_mixed),
     T11(D, 0, 0, n_back_mixed, n_back_mixed),
     S11(E, 0, 0, n_back_mixed, n_back_mixed);
   mat::set_identity(g_y_back);
-  mat::transpose(Z11);
-  g_y_back_tmp = Z11;
+  g_y_back_tmp = Z11_prime;
   LU2.invMult("N", g_y_back_tmp, g_y_back);
   g_y_back_tmp = g_y_back;
   blas::gemm("N", "N", 1.0, S11, g_y_back_tmp, 0.0, g_y_back);
   LU2.invMult("N", T11, g_y_back);
   g_y_back_tmp = g_y_back;
-  blas::gemm("N", "N", 1.0, Z11, g_y_back_tmp, 0.0, g_y_back);
+  blas::gemm("N", "N", 1.0, Z11_prime, g_y_back_tmp, 0.0, g_y_back);
 
   // TODO: avoid to copy mixed variables again, rather test it...
   for (size_t i = 0; i < n_back_mixed; i++)

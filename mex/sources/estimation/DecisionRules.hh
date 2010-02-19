@@ -34,11 +34,11 @@ private:
   const size_t n_fwrd, n_back, n_mixed, n_static, n_back_mixed, n_fwrd_mixed, n_dynamic;
   std::vector<size_t> zeta_fwrd_mixed, zeta_back_mixed, zeta_dynamic,
     beta_back, beta_fwrd, pi_back, pi_fwrd;
-  Matrix S, A, D, E, Z;
+  Matrix S, A, D, E, Z_prime;
   QRDecomposition QR;
   GeneralizedSchurDecomposition GSD;
   LUSolver LU1, LU2, LU3;
-  Matrix g_y_back, g_y_back_tmp;
+  Matrix Z21, g_y_back, g_y_back_tmp;
   Matrix g_y_static, A0s, A0d, g_y_dynamic, g_y_static_tmp;
 public:
   class BlanchardKahnException
