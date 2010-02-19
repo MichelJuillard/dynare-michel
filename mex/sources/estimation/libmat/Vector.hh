@@ -25,6 +25,7 @@
 
 #include <cstdlib>
 #include <cassert>
+#include <cmath>
 
 /*
   This header defines three vector classes, which implement a "vector concept"
@@ -159,7 +160,7 @@ namespace vec
   //! Computes v1 = v1 + v2
   template<class Vec1, class Vec2>
   void
-  add(Vec1 v1, const Vec2 v2)
+  add(Vec1 &v1, const Vec2 &v2)
   {
     assert(v1.getSize() == v2.getSize());
     double *p1 = v1.getData();
@@ -175,7 +176,7 @@ namespace vec
   //! Computes v1 = v1 - v2
   template<class Vec1, class Vec2>
   void
-  sub(Vec1 v1, const Vec2 v2)
+  sub(Vec1 &v1, const Vec2 &v2)
   {
     assert(v1.getSize() == v2.getSize());
     double *p1 = v1.getData();
@@ -191,7 +192,7 @@ namespace vec
   //! Does v = -v
   template<class Vec>
   void
-  negate(Vec v)
+  negate(Vec &v)
   {
     double *p = v.getData();
     while (p < v.getData() + v.getSize() * v.getStride())
@@ -201,6 +202,21 @@ namespace vec
       }
   }
 
+  // Computes the infinite norm of a vector
+  template<class Vec>
+  double
+  nrminf(const Vec &v)
+  {
+    double nrm = 0;
+    const double *p = v.getData();
+    while (p < v.getData() + v.getSize() * v.getStride())
+      {
+        if (fabs(*p) > nrm)
+          nrm = fabs(*p);
+        p += v.getStride();
+      }
+    return nrm;
+  }
 } // End of namespace
 
 #endif

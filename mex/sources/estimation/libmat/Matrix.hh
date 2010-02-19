@@ -27,6 +27,7 @@
 #include <cstdlib>
 #include <cassert>
 #include <cstring>
+#include <cmath>
 
 #include "Vector.hh"
 
@@ -285,28 +286,29 @@ namespace mat
         std::swap(M(i,j), M(j,i));
   }
 
-  //! Computes M2 = M1' (even for rectangular matrices)
+  //! Computes M1 = M2' (even for rectangular matrices)
   template<class Mat1, class Mat2>
   inline void
-  transpose(Mat1 &M1, Mat2 &M2)
+  transpose(Mat1 &M1, const Mat2 &M2)
   {
     assert(M1.getRows() == M2.getCols() && M1.getCols() == M2.getRows());
     for (size_t i = 0; i < M1.getRows(); i++)
       for (size_t j = 0; j < M1.getCols(); j++)
-        M2(j, i) = M1(i, j);
+        M1(i, j) = M2(j, i);
   }
 
   //! Computes m1 = m1 + m2
   template<class Mat1, class Mat2>
   void
-  add(Mat1 m1, const Mat2 m2)
+  add(Mat1 &m1, const Mat2 &m2)
   {
     assert(m1.getRows() == m2.getRows() && m1.getCols() == m2.getCols());
     double *p1 = m1.getData();
     const double *p2 = m2.getData();
     while (p1 < m1.getData() + m1.getCols() * m1.getLd())
       {
-        double *pp1 = p1, *pp2 = p2;
+        double *pp1 = p1;
+        const double *pp2 = p2;
         while (pp1 < p1 + m1.getRows())
           *pp1++ += *pp2++;
 
@@ -315,17 +317,18 @@ namespace mat
       }
   }
 
-  //! Computes m1 = m1  m2
+  //! Computes m1 = m1 - m2
   template<class Mat1, class Mat2>
   void
-  sub(Mat1 m1, const Mat2 m2)
+  sub(Mat1 &m1, const Mat2 &m2)
   {
     assert(m1.getRows() == m2.getRows() && m1.getCols() == m2.getCols());
     double *p1 = m1.getData();
     const double *p2 = m2.getData();
     while (p1 < m1.getData() + m1.getCols() * m1.getLd())
       {
-        double *pp1 = p1, *pp2 = p2;
+        double *pp1 = p1;
+        const double *pp2 = p2;
         while (pp1 < p1 + m1.getRows())
           *pp1++ -= *pp2++;
 
@@ -337,7 +340,7 @@ namespace mat
   //! Does m = -m
   template<class Mat>
   void
-  negate(Mat m)
+  negate(Mat &m)
   {
     double *p = m.getData();
     while (p < m.getData() + m.getCols() * m.getLd())
@@ -353,6 +356,27 @@ namespace mat
       }
   }
 
+  // Computes the infinite norm of a matrix
+  template<class Mat>
+  double
+  nrminf(const Mat &m)
+  {
+    double nrm = 0;
+    const double *p = m.getData();
+    while (p < m.getData() + m.getCols() * m.getLd())
+      {
+        const double *pp = p;
+        while (pp < p + m.getRows())
+          {
+            if (fabs(*pp) > nrm)
+              nrm = fabs(*pp);
+            pp++;
+          }
+
+        p += m.getLd();
+      }
+    return nrm;
+  }
 } // End of namespace
 
 #endif

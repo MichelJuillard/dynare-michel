@@ -116,7 +116,8 @@ DecisionRules::compute(const Matrix &jacobian, Matrix &g_y, Matrix &g_u) throw (
   for (size_t j = 0; j < n_fwrd; j++)
     mat::col_copy(A, n_back_mixed + zeta_fwrd_mixed[pi_fwrd[j]], n_static, n - n_static,
                   E, n_back_mixed + pi_fwrd[j], 0);
-  mat::negate(MatrixView(E, 0, 0, n - n_static, n_fwrd + n_back + 2*n_mixed)); // Here we take the opposite of some of the zeros initialized in the constructor, but it is not a problem
+  MatrixView E_tmp(E, 0, 0, n - n_static, n_fwrd + n_back + 2*n_mixed);
+  mat::negate(E_tmp); // Here we take the opposite of some of the zeros initialized in the constructor, but it is not a problem
 
   // Perform the generalized Schur
   size_t sdim;
