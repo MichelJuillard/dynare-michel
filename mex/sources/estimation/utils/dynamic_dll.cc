@@ -22,6 +22,7 @@
 
 #include <sstream>
 
+using namespace std;
 
 /***********************************
 * Members of DynamicModelDLL for handling loading and calling

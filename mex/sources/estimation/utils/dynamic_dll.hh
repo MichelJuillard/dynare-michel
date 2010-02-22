@@ -34,7 +34,6 @@
 #endif
 
 #include <string>
-#include <dynmex.h>
 #include "Matrix.hh"
 
 #include "ts_exception.h"
