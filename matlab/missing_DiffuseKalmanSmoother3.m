@@ -296,19 +296,25 @@ if nargout > 7
     decomp = zeros(nk,mm,rr,smpl+nk);
     ZRQinv = inv(Z*QQ*Z');
     for t = max(d,1):smpl
-        ri_d = Z'*iF(:,:,t)*v(:,t);
+        ri_d = zeros(mm,1);
+        di = flipud(data_index{t})';
+        for i = di
+            if Fi(i,t) > crit
+                ri_d = Z(i,:)'/Fi(i,t)*v(i,t)+ri_d-Ki(:,i,t)'*ri_d/Fi(i,t)*Z(i,:)';
+            end
+        end
         
         % calculate eta_tm1t
         eta_tm1t = QRt*ri_d;
         % calculate decomposition
         Ttok = eye(mm,mm); 
+        AAA = P1(:,:,t)*Z'*ZRQinv*Z*R;
         for h = 1:nk
+            BBB = Ttok*AAA;
             for j=1:rr
-                eta=zeros(rr,1);
-                eta(j) = eta_tm1t(j);
-                decomp(h,:,j,t+h) = T^(h-1)*P(:,:,t)*Z'*ZRQinv*Z*R*eta;
+                decomp(h,:,j,t+h) = eta_tm1t(j)*BBB(:,j);
             end
+            Ttok = T*Ttok;
         end
     end
 end
-
