@@ -34,7 +34,7 @@ main (int argc, char** argv)
   std::vector<size_t> zeta_mixed_arg;
   std::vector<size_t> zeta_static_arg;
   //std::vector<size_t> 
-  double qz_criterium=1.0e-9;  
+  double qz_criterium=1.0+1.0e-9;  
   Vector steadyState(n_endo), deepParams(npar);
 
   double dYSparams [] = { // 27 mxGetData(mxFldp);
@@ -95,19 +95,20 @@ main (int argc, char** argv)
   std::cout << "Matrix ll_incidence: " << std::endl << ll_incidence << std::endl;
   std::cout << "Vector steadyState: " << std::endl << steadyState << std::endl;
 
+  // Set zeta vectors [0:(n-1)] from Matlab indices [1:n]
   //order_var = [ stat_var(:); pred_var(:); both_var(:); fwrd_var(:)];
   size_t statc[]={ 4, 5, 6, 8, 9, 10, 11, 12, 14};
   size_t back[]={1,7,13};
   size_t both[]={2};
   size_t fwd[]={ 3,15};
   for (int i=0;i<9;++i)
-    zeta_static_arg.push_back(statc[i]);
+    zeta_static_arg.push_back(statc[i]-1);
   for (int i=0;i<3;++i)
-    zeta_back_arg.push_back(back[i]);
+    zeta_back_arg.push_back(back[i]-1);
   for (int i=0;i<1;++i)
-    zeta_mixed_arg.push_back(both[i]);
+    zeta_mixed_arg.push_back(both[i]-1);
   for (int i=0;i<2;++i)
-    zeta_fwrd_arg.push_back(fwd[i]);
+    zeta_fwrd_arg.push_back(fwd[i]-1);
 
   Matrix ghx(n_endo, zeta_back_arg.size() + zeta_mixed_arg.size());
   Matrix ghu(n_endo,n_exo);
