@@ -23,6 +23,8 @@
 //  Created on:      02-Feb-2010 13:06:35
 ///////////////////////////////////////////////////////////
 
+#include <string>
+
 #include "ModelSolution.hh"
 
 /**
@@ -34,21 +36,15 @@ ModelSolution::ModelSolution(const std::string& modName,  size_t n_endo_arg, siz
                              : n_endo(n_endo_arg), n_exo(n_exo_arg),  // n_jcols = Num of Jacobian columns = nStat+2*nPred+3*nBoth+2*nForw+nExog
                              n_jcols (n_exo+n_endo+ zeta_back_arg.size() /*nsPred*/ + zeta_fwrd_arg.size() /*nsForw*/ +2*zeta_mixed_arg.size()), 
                              ll_incidence(llincidence), jacobian (n_endo,n_jcols), residual(n_endo), Mx(2,n_exo),
-                             decisionRules ( n_endo_arg, n_exo_arg, zeta_fwrd_arg, zeta_back_arg, zeta_mixed_arg, zeta_static_arg, INqz_criterium)
-
+                               decisionRules ( n_endo_arg, n_exo_arg, zeta_fwrd_arg, zeta_back_arg, zeta_mixed_arg, zeta_static_arg, INqz_criterium),
+                               dynamicDLLp(modName, n_endo,  n_jcols,  /* nMax_lag= */ 1,  n_exo, std::string(""))
 {
-  std::string sExt(""); // use a pre-constructed model_dynamic.ext file name
-  dynamicDLLp = new DynamicModelDLL(modName, n_endo,  n_jcols,  /* nMax_lag= */ 1,  n_exo, sExt) ;
-
-}
-
-ModelSolution::~ModelSolution()
-{
-  delete dynamicDLLp;
+  Mx.setAll(0.0);
+  jacobian.setAll(0.0);
 }
 
 void 
-ModelSolution::compute(Vector& steadyState, const Vector& deepParams, Matrix& ghx, Matrix& ghu)
+ModelSolution::compute(Vector& steadyState, const Vector& deepParams, Matrix& ghx, Matrix& ghu) throw (DecisionRules::BlanchardKahnException, GeneralizedSchurDecomposition::GSDException)
 {
   // compute Steady State
   ComputeSteadyState(steadyState, deepParams);
@@ -60,14 +56,13 @@ ModelSolution::compute(Vector& steadyState, const Vector& deepParams, Matrix& gh
 }
 
 void 
-ModelSolution::ComputeModelSolution(Vector& steadyState, const Vector& deepParams, Matrix& ghx, Matrix& ghu)
+ModelSolution::ComputeModelSolution(Vector& steadyState, const Vector& deepParams, Matrix& ghx, Matrix& ghu) throw (DecisionRules::BlanchardKahnException, GeneralizedSchurDecomposition::GSDException)
 {
   // set extended Steady State
 
   Vector llXsteadyState(n_jcols-n_exo);
-  try
-  {
-    for (int ll_row = 0; ll_row < ll_incidence.getRows(); ll_row++)
+
+  for (int ll_row = 0; ll_row < ll_incidence.getRows(); ll_row++)
     {
       // populate (non-sparse) vector with ysteady values
       for (int i = 0; i < n_endo; i++)
@@ -81,25 +76,14 @@ ModelSolution::ComputeModelSolution(Vector& steadyState, const Vector& deepParam
     mexPrintf(" get jacobian \n");
 #endif
     //get jacobian 
-    dynamicDLLp->eval(llXsteadyState, Mx, &deepParams,  1,  residual, &jacobian, NULL, NULL);
+    dynamicDLLp.eval(llXsteadyState, Mx, &deepParams,  1,  residual, &jacobian, NULL, NULL);
 
-#ifdef DEBUG
     std::cout << "jacobian: " << std::endl << jacobian << std::endl;
+#ifdef DEBUG
     mexPrintf(" compute rules \n");
 #endif
     //compute rules
     decisionRules.compute(jacobian,ghx, ghu);
-  }
-  catch (const ModelSolutionException &e)
-  {
-    mexPrintf("Caught ModelSolution exception in LLxSteady: ");
-    e.print();
-  }
-  catch (...)
-  {
-    mexPrintf("Caught unknown error in ModelSolution::ComputeModelSolution\n");
-  }
-
 }
 void 
 ModelSolution::ComputeSteadyState(Vector& steadyState, const Vector& deepParams)

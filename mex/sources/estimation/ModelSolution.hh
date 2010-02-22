@@ -38,19 +38,10 @@
 class ModelSolution{
 
 public:
-  class ModelSolutionException: public TSException
-  {
-  public:
-    const lapack_int info, n;
-    ModelSolutionException(lapack_int info_arg, lapack_int n_arg, std::string& mes) 
-      : TSException(__FILE__, __LINE__, mes), info(info_arg), n(n_arg) {};
-  };
-
-  virtual ~ModelSolution();
   ModelSolution(const std::string& modName,  size_t n_endo, size_t n_exo, const std::vector<size_t>& zeta_fwrd_arg, 
     const std::vector<size_t>& zeta_back_arg, const std::vector<size_t>& zeta_mixed_arg, 
     const std::vector<size_t>& zeta_static_arg, const Matrix& llincidence, double qz_criterium);
-  void compute( Vector& steadyState, const Vector& deepParams, 	Matrix& ghx, Matrix& ghu );
+  void compute( Vector& steadyState, const Vector& deepParams, 	Matrix& ghx, Matrix& ghu ) throw (DecisionRules::BlanchardKahnException, GeneralizedSchurDecomposition::GSDException);
 
 private:
   const int n_endo;
@@ -61,9 +52,9 @@ private:
   Vector residual;
   Matrix Mx;
   DecisionRules decisionRules;
-  DynamicModelDLL*  dynamicDLLp;
+  DynamicModelDLL dynamicDLLp;
   //Matrix jacobian;
-  void ComputeModelSolution( Vector& steadyState, const Vector& deepParams, 	Matrix& ghx, Matrix& ghu );
+  void ComputeModelSolution( Vector& steadyState, const Vector& deepParams, 	Matrix& ghx, Matrix& ghu ) throw (DecisionRules::BlanchardKahnException, GeneralizedSchurDecomposition::GSDException);
   void ComputeSteadyState( Vector& steadyState, const Vector& deepParams);
 
 };
