@@ -37,6 +37,18 @@ yy0=oo_.dr.ys(I);
 [residual, gg1] = feval([M_.fname,'_static'],oo_.dr.ys, oo_.exo_steady_state', M_.params);
 % df = feval([M_.fname,'_model_derivs'],yy0, oo_.exo_steady_state', M_.params, 1);
 dyssdtheta = -gg1\df;
+if any(any(isnan(dyssdtheta))),    
+    [U,T] = schur(gg1);
+    global options_
+    qz_criterium=options_.qz_criterium;
+    e1 = abs(ordeig(T)) < qz_criterium-1;
+    k = sum(e1);       % Number non stationary variables.
+    n = length(e1)-k;  % Number of stationary variables.
+    [U,T] = ordschur(U,T,e1);
+    T = T(k+1:end,k+1:end);
+    dyssdtheta = -U(:,k+1:end)*(T\U(:,k+1:end)')*df;
+end
+
 Hss = dyssdtheta(oo_.dr.order_var,indx);
 dyssdtheta = dyssdtheta(I,:);
 [nr, nc]=size(g2);
@@ -108,7 +120,7 @@ end
 
 
 [junk,cols_b,cols_j] = find(M_.lead_lag_incidence(M_.maximum_endo_lag+1, ...
-                                                  oo_.dr.order_var));
+    oo_.dr.order_var));
 GAM0 = zeros(M_.endo_nbr,M_.endo_nbr);
 Dg0 = zeros(M_.endo_nbr,M_.endo_nbr,param_nbr);
 GAM0(:,cols_b) = g1(:,cols_j);
@@ -209,8 +221,11 @@ if kronflag==1, % kronecker products
     Dg0=reshape(Dg0,m^2,param_nbr);
     Dg1=reshape(Dg1,m^2,param_nbr);
     Dg2=reshape(Dg2,m^2,param_nbr);
+    for j=1:param_nbr,
+        Dg3(:,:,j)=Dg3(:,:,j)*M_.Sigma_e;
+    end
     Dg3=reshape(Dg3,m*n,param_nbr);
-    Om = B*B';
+    Om = B*M_.Sigma_e*B';
     Im = eye(m);
     Dm = duplication(m);
     DmPl = inv(Dm'*Dm)*Dm';
@@ -227,7 +242,7 @@ if kronflag==1, % kronecker products
     Df1Dthet = kron(A',Im)*Dg0 - kron( (A')^2,Im)*Dg1 - Dg2;
 
     Df2Dtau = DmPl*( kron(GAM0,GAM0) - kron(GAM0,GAM1*A) - kron(GAM1*A,GAM0) + kron(GAM1*A,GAM1*A) )*Dm*Dom - ...
-              DmPl*( kron(GAM0*Om,GAM1) + kron(GAM1,GAM0*Om)*Kmm - kron(GAM1*A*Om,GAM1) - kron(GAM1,GAM1*A*Om)*Kmm )*Da;
+        DmPl*( kron(GAM0*Om,GAM1) + kron(GAM1,GAM0*Om)*Kmm - kron(GAM1*A*Om,GAM1) - kron(GAM1,GAM1*A*Om)*Kmm )*Da;
 
 
     Df2Dthet = DmPl*( kron(GAM0*Om,Im) + kron(Im,GAM0*Om)*Kmm - kron(Im,GAM1*A*Om)*Kmm - kron(GAM1*A*Om,Im) )*Dg0 - ...
@@ -241,16 +256,37 @@ if kronflag==1, % kronecker products
     H = -DfDtau\DfDthet;
     x = reshape(H(1:m*m,:),m,m,param_nbr);
     y = reshape(Dm*H(m*m+1:end,:),m,m,param_nbr);
-    x = x(nauxe+1:end,nauxe+1:end,:);
-    y = y(nauxe+1:end,nauxe+1:end,:);
-    m = size(y,1);
-    x = reshape(x,m*m,param_nbr);
-    Dm = duplication(m);
-    DmPl = inv(Dm'*Dm)*Dm';
-    y = DmPl*reshape(y,m*m,param_nbr);
-    H = [x;y];
-    
-    H = [ [zeros(M_.endo_nbr,length(indexo)) Hss]; H];
+    if nauxe,
+        x = x(nauxe+1:end,nauxe+1:end,:);
+        y = y(nauxe+1:end,nauxe+1:end,:);
+        dA = x;
+        dOm = y;
+        m = size(y,1);
+        x = reshape(x,m*m,param_nbr);
+        Dm = duplication(m);
+        DmPl = inv(Dm'*Dm)*Dm';
+        y = DmPl*reshape(y,m*m,param_nbr);
+        H = [x;y];
+    else
+        dA = x;
+        dOm = y;
+    end
+
+    if ~isempty(indexo),
+        dSig = zeros(M_.exo_nbr,M_.exo_nbr);
+        dOm = cat(3,zeros(size(dOm,1),size(dOm,1),length(indexo)),dOm);
+        for j=1:length(indexo)
+            dSig(indexo(j),indexo(j)) = 2*sqrt(M_.Sigma_e(indexo(j),indexo(j)));
+            y = B*dSig*B';
+            y = y(nauxe+1:end,nauxe+1:end);
+            Hx(:,j) = [zeros((m-nauxe)^2,1); dyn_vech(y)];
+            if nargout>1,
+                dOm(:,:,j) = y;
+            end
+            dSig(indexo(j),indexo(j)) = 0;
+        end
+    end
+    H = [ [zeros(M_.endo_nbr,length(indexo)) Hss]; [Hx H]];
 
 elseif kronflag==-1, % perturbation
     fun = 'thet2tau';
