@@ -20,7 +20,7 @@ end
 % [A(oo_.dr.order_var,oo_.dr.order_var),B(oo_.dr.order_var,:)]=dynare_resolve;
 [A,B]=dynare_resolve;
 if flagmoments==0,
-tau = [oo_.dr.ys(oo_.dr.order_var); A(:); vech(B*M_.Sigma_e*B')];
+tau = [oo_.dr.ys(oo_.dr.order_var); A(:); dyn_vech(B*M_.Sigma_e*B')];
 else
 GAM =  lyapunov_symm(A,B*M_.Sigma_e*B',options_.qz_criterium,options_.lyapunov_complex_threshold);
 k = find(abs(GAM) < 1e-12);
@@ -30,9 +30,9 @@ if useautocorr,
   sy = sy*sy';
   sy0 = sy-diag(diag(sy))+eye(length(sy));
   dum = GAM./sy0;
-  tau = vech(dum(mf,mf));
+  tau = dyn_vech(dum(mf,mf));
 else
-  tau = vech(GAM(mf,mf));
+  tau = dyn_vech(GAM(mf,mf));
 end
 for ii = 1:nlags
   dum = A^(ii)*GAM;
