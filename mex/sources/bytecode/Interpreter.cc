@@ -2167,7 +2167,7 @@ Interpreter::simulate_a_block(const int size, const int type, string file_name, 
                       try_at_iteration = 0;
                     }
                 }
-              if (!cvg or !result)
+              if (!cvg || !result)
                 {
                   mexPrintf("Convergence not achieved in block %d, after %d iterations\n", Block_Count, iter);
                   return false;
@@ -2325,7 +2325,7 @@ Interpreter::simulate_a_block(const int size, const int type, string file_name, 
                       try_at_iteration = 0;
                     }
                 }
-              if (!cvg or !result)
+              if (!cvg || !result)
                 {
                   mexPrintf("Convergence not achieved in block %d, after %d iterations\n", Block_Count, iter);
                   return false;
