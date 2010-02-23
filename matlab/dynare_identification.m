@@ -21,6 +21,12 @@ function [pdraws, TAU, GAM, LRE, gp, H, JJ] = dynare_identification(options_iden
 
 global M_ options_ oo_ bayestopt_ estim_params_
 
+if exist('OCTAVE_VERSION')
+    warning('off', 'Octave:divide-by-zero')
+else
+    warning off MATLAB:dividebyzero
+end
+
 options_ident = set_default_option(options_ident,'load_ident_files',0);
 options_ident = set_default_option(options_ident,'useautocorr',1);
 options_ident = set_default_option(options_ident,'ar',3);
@@ -35,7 +41,7 @@ useautocorr = options_ident.useautocorr;
 options_.ar=nlags;
 options_.prior_mc = options_ident.prior_mc;
 options_.options_ident = options_ident;
-
+options_.Schur_vec_tol = 1.e-8;
 
 options_ = set_default_option(options_,'datafile',[]);
 options_.mode_compute = 0;
@@ -111,6 +117,11 @@ if iload <=0,
                 TAU(:,burnin_iteration)=tau;
                 LRE(:,burnin_iteration)=[oo_.dr.ys(oo_.dr.order_var); vec(g1)];      
                 [gam,stationary_vars] = th_autocovariances(oo0.dr,bayestopt_.mfys,M_,options_);
+                if exist('OCTAVE_VERSION')
+                    warning('off', 'Octave:divide-by-zero')
+                else
+                    warning off MATLAB:dividebyzero
+                end
                 sdy = sqrt(diag(gam{1}));
                 sy = sdy*sdy';
                 if useautocorr,
@@ -126,6 +137,7 @@ if iload <=0,
                     dum = [dum; vec(gam{j+1})];
                 end
                 GAM(:,burnin_iteration)=[oo_.dr.ys(bayestopt_.mfys); dum];
+                warning warning_old_state;
             else
                 iteration = iteration + 1;
                 run_index = run_index + 1;
@@ -206,7 +218,6 @@ if iload <=0,
     end
 
 
-
     close(h)
 
 
@@ -244,8 +255,11 @@ siLREmean = siLREmean./(max(siLREmean')'*ones(1,estim_params_.np));
 tstJmean = derJmean*0;
 tstHmean = derHmean*0;
 tstLREmean = derLREmean*0;
-warning_old_state = warning;
-warning off;
+if exist('OCTAVE_VERSION')
+    warning('off', 'Octave:divide-by-zero')
+else
+    warning off MATLAB:dividebyzero
+end
 
 for j=1:nparam,
   indd = 1:length(siJmean(:,j));
@@ -258,7 +272,6 @@ tstLREmean(indd,j-offset) = abs(derLREmean(indd,j-offset))./siLREmean(indd,j-off
 end  
 end
 
-warning warning_old_state
 
 if nargout>3 & iload,
     filnam = dir([IdentifDirectoryName '/' M_.fname '_identif_*.mat']);
@@ -373,67 +386,89 @@ disp_identification(pdraws, idemodel, idemoments)
 % end
 % title('Sensitivity in standardized moments'' PCA')
 
-figure,
-subplot(231)
-myboxplot(siLREmean)
+figure('Name','Identification LRE model form'),
+subplot(211)
+mmm = mean(siLREmean);
+[ss, is] = sort(mmm);
+myboxplot(siLREmean(:,is))
 set(gca,'ylim',[0 1.05])
 set(gca,'xticklabel','')
 for ip=1:estim_params_.np,
-  text(ip,-0.02,deblank(M_.param_names(estim_params_.param_vals(ip,1),:)),'rotation',90,'HorizontalAlignment','right','interpreter','none')
+  text(ip,-0.02,deblank(M_.param_names(estim_params_.param_vals(is(ip),1),:)),'rotation',90,'HorizontalAlignment','right','interpreter','none')
 end
 title('Sensitivity in the LRE model')
 
-subplot(232)
-myboxplot(siHmean)
-set(gca,'ylim',[0 1.05])
-set(gca,'xticklabel','')
-for ip=1:nparam,
-    text(ip,-0.02,bayestopt_.name{ip},'rotation',90,'HorizontalAlignment','right','interpreter','none')
-end
-title('Sensitivity in the model')
-
-subplot(233)
-myboxplot(siJmean)
-set(gca,'ylim',[0 1.05])
-set(gca,'xticklabel','')
-for ip=1:nparam,
-    text(ip,-0.02,bayestopt_.name{ip},'rotation',90,'HorizontalAlignment','right','interpreter','none')
-end
-title('Sensitivity in the moments')
-
-subplot(234)
-myboxplot(idelre.Mco')
+subplot(212)
+mmm = mean(-idelre.Mco');
+[ss, is] = sort(mmm);
+myboxplot(idelre.Mco(is,:)')
 set(gca,'ylim',[0 1])
 set(gca,'xticklabel','')
 for ip=1:estim_params_.np,
-  text(ip,-0.02,deblank(M_.param_names(estim_params_.param_vals(ip,1),:)),'rotation',90,'HorizontalAlignment','right','interpreter','none')
+  text(ip,-0.02,deblank(M_.param_names(estim_params_.param_vals(is(ip),1),:)),'rotation',90,'HorizontalAlignment','right','interpreter','none')
 end
 title('Multicollinearity in the LRE model')
+saveas(gcf,[IdentifDirectoryName,'/',M_.fname,'_ident_LRE'])
+eval(['print -depsc2 ' IdentifDirectoryName '/' M_.fname '_ident_LRE']);
+eval(['print -dpdf ' IdentifDirectoryName '/' M_.fname '_ident_LRE']);
+if options_.nograph, close(gcf); end
 
-subplot(235)
-myboxplot(idemodel.Mco')
+figure('Name','Identification in the model'),
+subplot(211)
+mmm = mean(siHmean);
+[ss, is] = sort(mmm);
+myboxplot(siHmean(:,is))
+set(gca,'ylim',[0 1.05])
+set(gca,'xticklabel','')
+for ip=1:nparam,
+    text(ip,-0.02,bayestopt_.name{is(ip)},'rotation',90,'HorizontalAlignment','right','interpreter','none')
+end
+title('Sensitivity in the model')
+
+subplot(212)
+mmm = mean(-idemodel.Mco');
+[ss, is] = sort(mmm);
+myboxplot(idemodel.Mco(is,:)')
 set(gca,'ylim',[0 1])
 set(gca,'xticklabel','')
 for ip=1:nparam,
-    text(ip,-0.02,bayestopt_.name{ip},'rotation',90,'HorizontalAlignment','right','interpreter','none')
+    text(ip,-0.02,bayestopt_.name{is(ip)},'rotation',90,'HorizontalAlignment','right','interpreter','none')
 end
 title('Multicollinearity in the model')
+saveas(gcf,[IdentifDirectoryName,'/',M_.fname,'_ident_model'])
+eval(['print -depsc2 ' IdentifDirectoryName '/' M_.fname '_ident_model']);
+eval(['print -dpdf ' IdentifDirectoryName '/' M_.fname '_ident_model']);
+if options_.nograph, close(gcf); end
 
-subplot(236)
-myboxplot(idemoments.Mco')
+figure('Name','Identification in the moments'),
+subplot(211)
+mmm = mean(siJmean);
+[ss, is] = sort(mmm);
+myboxplot(siJmean(:,is))
+set(gca,'ylim',[0 1.05])
+set(gca,'xticklabel','')
+for ip=1:nparam,
+    text(ip,-0.02,bayestopt_.name{is(ip)},'rotation',90,'HorizontalAlignment','right','interpreter','none')
+end
+title('Sensitivity in the moments')
+
+subplot(212)
+mmm = mean(-idemoments.Mco');
+[ss, is] = sort(mmm);
+myboxplot(idemoments.Mco(is,:)')
 set(gca,'ylim',[0 1])
 set(gca,'xticklabel','')
 for ip=1:nparam,
-    text(ip,-0.02,bayestopt_.name{ip},'rotation',90,'HorizontalAlignment','right','interpreter','none')
+    text(ip,-0.02,bayestopt_.name{is(ip)},'rotation',90,'HorizontalAlignment','right','interpreter','none')
 end
 title('Multicollinearity in the moments')
-saveas(gcf,[IdentifDirectoryName,'/',M_.fname,'_ident'])
-eval(['print -depsc2 ' IdentifDirectoryName '/' M_.fname '_ident']);
-eval(['print -dpdf ' IdentifDirectoryName '/' M_.fname '_ident']);
+saveas(gcf,[IdentifDirectoryName,'/',M_.fname,'_ident_moments'])
+eval(['print -depsc2 ' IdentifDirectoryName '/' M_.fname '_ident_moments']);
+eval(['print -dpdf ' IdentifDirectoryName '/' M_.fname '_ident_moments']);
 if options_.nograph, close(gcf); end
 
 
-figure,
+figure('Name','Condition Number'),
 subplot(221)
 hist(log10(idemodel.cond))
 title('log10 of Condition number in the model')
@@ -526,4 +561,11 @@ for j=1:nparam,
         eval(['print -dpdf ' IdentifDirectoryName '/' M_.fname '_ident_PCORR_moments',int2str(ifig)]);
         if options_.nograph, close(gcf); end
     end
+end
+
+
+if exist('OCTAVE_VERSION')
+    warning('on', 'Octave:divide-by-zero')
+else
+    warning on MATLAB:dividebyzero
 end
