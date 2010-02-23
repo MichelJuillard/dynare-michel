@@ -11,6 +11,7 @@ OCTAVE_MODS = \
 	osr_example.mod \
 	ramsey.mod \
 	ramst_initval_file.mod \
+	ramst_normcdf.mod \
 	example1_varexo_det.mod \
 	predetermined_variables.mod \
 	block_bytecode/fs2000_simk.mod \
