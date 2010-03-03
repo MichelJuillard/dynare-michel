@@ -1,4 +1,4 @@
-function [param,sigma] = simulated_moments_estimation(xparam,dataset,options,parallel)
+function [param,sigma] = simulated_moments_estimation(dataset,options,parallel)
 % Performs estimation by Simulated Moments Method.
 %
 % INPUTS:
@@ -31,7 +31,7 @@ function [param,sigma] = simulated_moments_estimation(xparam,dataset,options,par
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-global M_ options_ oo_
+global M_ options_ oo_ estim_params_
     
 % Load the dataset.
 eval(dataset.name);
@@ -49,9 +49,48 @@ weighting_matrix = inv(long_run_covariance);
 sigma = [];
 param = [];
 
+% Set options and initial condition.
+options.estimated_parameters.list = [];
+xparam = [];
+if ~isempty(estim_params_.var_exo)
+    options.estimated_variances.idx = estim_params_.var_exo(:,1);
+    options.estimated_parameters.list = strvcat(options.estimated_parameters.list,...
+                                                M_.exo_names(options.estimated_variances.idx,:));
+    options.estimated_parameters.nv = rows(estim_params_.var_exo);
+    xparam = [xparam; estim_params_.var_exo(:,2)];
+end
+if ~isempty(estim_params_.param_vals)
+    options.estimated_parameters.idx = estim_params_.param_vals(:,1);
+    options.estimated_parameters.list = strvcat(options.estimated_parameters.list,...
+                                                M_.param_names(options.estimated_parameters.idx,:));
+    options.estimated_parameters.np = rows(estim_params_.param_vals);
+    xparam = [xparam; estim_params_.param_vals(:,2)];
+end
+
+options.estimated_parameters.nb = rows(options.estimated_parameters.list);
+
+options.estimated_parameters.lower_bound = NaN(options.estimated_parameters.nb,1);
+options.estimated_parameters.upper_bound = NaN(options.estimated_parameters.nb,1);
+
+
+options.estimated_parameters.lower_bound = [];
+options.estimated_parameters.lower_bound = [options.estimated_parameters.lower_bound; ...
+                   estim_params_.var_exo(:,3); ...
+                   estim_params_.param_vals(:,3) ];
+options.estimated_parameters.upper_bound = [];
+options.estimated_parameters.upper_bound = [options.estimated_parameters.upper_bound; ...
+                   estim_params_.var_exo(:,4); ...
+                   estim_params_.param_vals(:,4) ];
+
+options.number_of_simulated_sample = 0;
+for i=1:length(parallel)
+    options.number_of_simulated_sample = options.number_of_simulated_sample + parallel(i).number_of_jobs*parallel(i).number_of_simulations; 
+end
+
+options.observed_variables_idx = dataset.observed_variables_idx;
 
 % Set up parallel mode if needed.
-if nargin>3
+if nargin>2
     if ~isunix
         error('The parallel version of SMM estimation is not implemented for non unix platforms!')
     end
@@ -141,7 +180,7 @@ if nargin>3
             % Create random number streams
             write_job(hostname, parallel(i).machine, parallel(i).dynare, ...
                       options.simulated_sample_size, length(sample_moments), ...
-                      dataset.observed_variables_idx, options.estimated_variances.idx, options.estimated_parameters.idx, options.burn_in_periods, [M_.fname '_moments'], parallel(i).number_of_simulations, ...
+                      dataset.observed_variables_idx, options.estimated_variances.idx', options.estimated_parameters.idx', options.burn_in_periods, [M_.fname '_moments'], parallel(i).number_of_simulations, ...
                       parallel(i).number_of_threads_per_job, job, j, options.estimated_parameters.nb, options.estimated_parameters.nv, ...
                       options.estimated_parameters.np);
             if ~strcmpi(hostname,parallel(i).machine)
@@ -168,10 +207,10 @@ if options.optimization_routine==1
     it = 1000;
     vb = 2;
     % Minimization of the objective function.
-    if nargin==3
+    if nargin==2
         [fval,param,grad,hessian_csminwel,itct,fcount,retcodehat] = ...
             csminwel('smm_objective',xparam,H0,[],ct,it,2,options_.gradient_epsilon,sample_moments,weighting_matrix,options);    
-    elseif nargin>3
+    elseif nargin>2
         [fval,param,grad,hessian_csminwel,itct,fcount,retcodehat] = ...
             csminwel('smm_objective',xparam,H0,[],ct,it,2,options_.gradient_epsilon,sample_moments,weighting_matrix,options,parallel);
     end
@@ -180,7 +219,7 @@ elseif options.optimization_routine==2
     if isfield(options_,'optim_opt')
         eval(['optim_options = optimset(optim_options,' options_.optim_opt ');']);
     end
-    if nargin==3
+    if nargin==2
         [param,fval,exitflag] = fminsearch('smm_objective',xparam,optim_options,sample_moments,weighting_matrix,options);
     else
         [param,fval,exitflag] = fminsearch('smm_objective',xparam,optim_options,sample_moments,weighting_matrix,options,parallel);
@@ -192,7 +231,11 @@ elseif options.optimization_routine==0% Compute the variance of the SMM estimato
     % Compute gradient of the moment function (distance between sample and simulated moments).
     [F,G] = dynare_gradient('moment_function',param,options_.gradient_epsilon,sample_moments,dataset,options,parallel);
     V = (1+1/options.number_of_simulated_sample)*G'*long_run_covariance*G;
-    [param,diag(V)]		
+    [param,diag(V)]
+elseif options.optimization_routine<0
+    T = -options.optimization_routine;% length of the simulated time series.		
+    time_series = extended_path(oo_.steady_state,T,1);
+    save time_series;		
 end
 
 
