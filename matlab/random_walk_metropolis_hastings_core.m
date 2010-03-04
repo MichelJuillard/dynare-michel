@@ -26,6 +26,8 @@ global bayestopt_ estim_params_ options_  M_ oo_
 
 struct2local(myinputs);
 
+% (re)Set the penalty
+bayestopt_.penalty = -Inf;
 
 MhDirectoryName = CheckPath('metropolis');
 
@@ -90,7 +92,7 @@ for b = fblck:nblck,
         else
             logpost = -inf;
         end
-        if (logpost > -inf) & (log(rand) < logpost-ilogpo2(b))
+        if (logpost > -inf) && (log(rand) < logpost-ilogpo2(b))
             x2(irun,:) = par;
             ix2(b,:) = par;
             logpo2(irun) = logpost; 

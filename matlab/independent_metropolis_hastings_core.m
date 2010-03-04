@@ -26,6 +26,8 @@ global bayestopt_ estim_params_ options_  M_ oo_
 
 struct2local(myinputs);
 
+% (re)Set the penalty
+bayestopt_.penalty = -Inf;
 
 MhDirectoryName = CheckPath('metropolis');
 
