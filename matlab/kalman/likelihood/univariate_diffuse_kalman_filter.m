@@ -134,7 +134,7 @@ while t < smpl
         Zi = Z(i,:);
         prediction_error = Y(i,t) - Zi*a;
         Fi   = Zi*Pstar*Zi'+H(i);
-        if Fi > crit
+        if Fi > kalman_tol
             Ki     = Pstar*Zi';
             a      = a + Ki*prediction_error/Fi;
             Pstar  = Pstar - Ki*Ki'/Fi;

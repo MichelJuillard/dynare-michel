@@ -206,7 +206,7 @@ while notsteady & t<smpl
     end
     a1(:,t+1) = T*a(:,t);
     Pf = P(:,:,t);
-    aK(1,:,t+1) = a1(:,t+1) 
+    aK(1,:,t+1) = a1(:,t+1); 
     for jnk=1:nk,
         Pf = T*Pf*T' + QQ;
         PK(jnk,:,:,t+jnk) = Pf;
