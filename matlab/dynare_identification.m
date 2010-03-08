@@ -28,9 +28,10 @@ else
 end
 
 options_ident = set_default_option(options_ident,'load_ident_files',0);
-options_ident = set_default_option(options_ident,'useautocorr',1);
+options_ident = set_default_option(options_ident,'useautocorr',0);
 options_ident = set_default_option(options_ident,'ar',3);
 options_ident = set_default_option(options_ident,'prior_mc',2000);
+options_ident = set_default_option(options_ident,'prior_range',0);
 if nargin==2,
     options_ident.prior_mc=size(pdraws0,1);
 end
@@ -54,7 +55,13 @@ SampleSize = options_ident.prior_mc;
 
 % results = prior_sampler(0,M_,bayestopt_,options_,oo_);
 
-prior_draw(1,bayestopt_);
+bbb=bayestopt_;
+if options_ident.prior_range
+    bbb.pshape = ones(size(bbb.pshape))*5;
+    bbb.p3=bbb.lb;
+    bbb.p4=bbb.ub;
+end
+prior_draw(1,bbb);
 if ~(exist('sylvester3mr','file')==2),
 
     dynareroot = strrep(which('dynare'),'dynare.m','');
@@ -193,13 +200,19 @@ if iload <=0,
                     derLREmean = (siLRE)./SampleSize+derLREmean;      
                 end
                 pdraws(iteration,:) = params;
+                normH = max(abs(stoH(:,:,run_index))')';
+                normJ = max(abs(stoJJ(:,:,run_index))')';
+                normLRE = max(abs(stoLRE(:,:,run_index))')';
+%               normH = TAU(:,iteration);
+%               normJ = GAM(:,iteration);
+%               normLRE = LRE(:,iteration);
                 [idemodel.Mco(:,iteration), idemoments.Mco(:,iteration), idelre.Mco(:,iteration), ...        
                  idemodel.Pco(:,:,iteration), idemoments.Pco(:,:,iteration), idelre.Pco(:,:,iteration), ...        
                  idemodel.cond(iteration), idemoments.cond(iteration), idelre.cond(iteration), ...        
                  idemodel.ee(:,:,iteration), idemoments.ee(:,:,iteration), idelre.ee(:,:,iteration), ...        
                  idemodel.ind(:,iteration), idemoments.ind(:,iteration), ...
                  idemodel.indno{iteration}, idemoments.indno{iteration}] = ...
-                 identification_checks(H(indH,:),JJ(indJJ,:), gp(indLRE,:), bayestopt_);      
+                 identification_checks(H(indH,:)./normH(:,ones(nparam,1)),JJ(indJJ,:)./normJ(:,ones(nparam,1)), gp(indLRE,:)./normLRE(:,ones(size(gp,2),1)), bayestopt_);      
                 if run_index==MAX_tau | iteration==SampleSize,
                     file_index = file_index + 1;
                     if run_index<MAX_tau,
@@ -212,7 +225,7 @@ if iload <=0,
                     
                 end
 
-                waitbar(iteration/SampleSize,h,['MC Identification, iteration ',int2str(iteration),'/',int2str(SampleSize)])
+                waitbar(iteration/SampleSize,h,['MC Identification checks ',int2str(iteration),'/',int2str(SampleSize)])
             end
         end
     end
@@ -226,9 +239,41 @@ if iload <=0,
 else
     load([IdentifDirectoryName '/' M_.fname '_identif'], 'pdraws', 'idemodel', 'idemoments', 'idelre', 'indJJ', 'indH', 'indLRE', ...  
         'siHmean', 'siJmean', 'siLREmean', 'derHmean', 'derJmean', 'derLREmean', 'TAU', 'GAM', 'LRE')
-        options_ident.prior_mc=size(pdraws,1);
-        SampleSize = options_ident.prior_mc;  
-        options_.options_ident = options_ident;
+    identFiles = dir([IdentifDirectoryName '/' M_.fname '_identif_*']);
+    options_ident.prior_mc=size(pdraws,1);
+    SampleSize = options_ident.prior_mc;  
+    options_.options_ident = options_ident;
+    if iload>1,
+    idemodel0=idemodel;
+    idemoments0=idemoments;
+    idelre0 = idelre;
+    iteration = 0;
+    h = waitbar(0,'Monte Carlo identification checks ...');
+    for file_index=1:length(identFiles)
+        load([IdentifDirectoryName '/' M_.fname '_identif_' int2str(file_index)], 'stoH', 'stoJJ', 'stoLRE')      
+        for index=1:size(stoH,3),
+            iteration = iteration+1;
+            normH = max(abs(stoH(:,:,index))')';
+            normJ = max(abs(stoJJ(:,:,index))')';
+            normLRE = max(abs(stoLRE(:,:,index))')';
+%             normH = TAU(:,iteration);
+%             normJ = GAM(:,iteration);
+%             normLRE = LRE(:,iteration);
+            [idemodel.Mco(:,iteration), idemoments.Mco(:,iteration), idelre.Mco(:,iteration), ...        
+                idemodel.Pco(:,:,iteration), idemoments.Pco(:,:,iteration), idelre.Pco(:,:,iteration), ...        
+                idemodel.cond(iteration), idemoments.cond(iteration), idelre.cond(iteration), ...        
+                idemodel.ee(:,:,iteration), idemoments.ee(:,:,iteration), idelre.ee(:,:,iteration), ...        
+                idemodel.ind(:,iteration), idemoments.ind(:,iteration), ...
+                idemodel.indno{iteration}, idemoments.indno{iteration}] = ...
+                identification_checks(stoH(:,:,index)./normH(:,ones(nparam,1)), ...
+                stoJJ(:,:,index)./normJ(:,ones(nparam,1)), ...
+                stoLRE(:,:,index)./normLRE(:,ones(size(stoLRE,2),1)), bayestopt_);      
+                waitbar(iteration/SampleSize,h,['MC Identification checks ',int2str(iteration),'/',int2str(SampleSize)])
+        end
+    end
+    close(h);
+    save([IdentifDirectoryName '/' M_.fname '_identif'], 'idemodel', 'idemoments', 'idelre', '-append')
+    end
 end  
 
 offset = estim_params_.nvx;
@@ -494,7 +539,11 @@ for j=1:estim_params_.np,
     mmm = mean(squeeze(idelre.Pco(:,j,:))');    
     [sss, immm] = sort(-mmm);    
     subplot(3,4,iplo), 
-    myboxplot(squeeze(idelre.Pco(immm(2:nbox+1),j,:))'),
+    if nbox==1,
+        myboxplot(squeeze(idelre.Pco(immm(2:nbox+1),j,:))),
+    else
+        myboxplot(squeeze(idelre.Pco(immm(2:nbox+1),j,:))'),
+    end
     set(gca,'ylim',[0 1])
     set(gca,'xticklabel','')
     for ip=1:nbox, %estim_params_.np,  
@@ -521,7 +570,11 @@ for j=1:nparam,
     mmm = mean(squeeze(idemodel.Pco(:,j,:))');    
     [sss, immm] = sort(-mmm);    
     subplot(3,4,iplo), 
-    myboxplot(squeeze(idemodel.Pco(immm(2:nbox+1),j,:))'),
+    if nbox==1,
+        myboxplot(squeeze(idemodel.Pco(immm(2:nbox+1),j,:))),
+    else
+        myboxplot(squeeze(idemodel.Pco(immm(2:nbox+1),j,:))'),
+    end
     set(gca,'ylim',[0 1])
     set(gca,'xticklabel','')
     for ip=1:nbox, %estim_params_.np,  
@@ -548,7 +601,11 @@ for j=1:nparam,
     mmm = mean(squeeze(idemoments.Pco(:,j,:))');    
     [sss, immm] = sort(-mmm);    
     subplot(3,4,iplo), 
-    myboxplot(squeeze(idemoments.Pco(immm(2:nbox+1),j,:))'),
+    if nbox==1,
+        myboxplot(squeeze(idemoments.Pco(immm(2:nbox+1),j,:))),
+    else
+        myboxplot(squeeze(idemoments.Pco(immm(2:nbox+1),j,:))'),
+    end
     set(gca,'ylim',[0 1])
     set(gca,'xticklabel','')
     for ip=1:nbox, %estim_params_.np,  
