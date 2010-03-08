@@ -144,21 +144,27 @@ PcoH = NaN(npar,npar);
 PcoJ = NaN(npar,npar);
 PcoGP = NaN(npar0,npar0);
 for ii = 1:size(H1,2);
-    for jj = 1:size(H1,2);
+    PcoH(ind1(ii),ind1(ii)) = 1;
+    for jj = ii+1:size(H1,2);
         PcoH(ind1(ii),ind1(jj)) = [cosn([H1(:,ii),H1(:,jj)])];
+        PcoH(ind1(jj),ind1(ii)) = PcoH(ind1(ii),ind1(jj));
     end
 end
 
 for ii = 1:size(JJ1,2);
-    for jj = 1:size(JJ1,2);
+    PcoJ(ind2(ii),ind2(ii)) = 1;
+    for jj = ii+1:size(JJ1,2);
         PcoJ(ind2(ii),ind2(jj)) = [cosn([JJ1(:,ii),JJ1(:,jj)])];
+        PcoJ(ind2(jj),ind2(ii)) = PcoJ(ind2(ii),ind2(jj));
     end
 end
 
 for ii = 1:size(gp1,2);
-  for jj = 1:size(gp1,2);
-    PcoGP(ind3(ii),ind3(jj)) = [cosn([gp1(:,ii),gp1(:,jj)])];
-  end
+    PcoGP(ind3(ii),ind3(ii)) = 1;
+    for jj = ii+1:size(gp1,2);
+        PcoGP(ind3(ii),ind3(jj)) = [cosn([gp1(:,ii),gp1(:,jj)])];
+        PcoGP(ind3(jj),ind3(ii)) = PcoGP(ind3(ii),ind3(jj));
+    end
 end
 
 
