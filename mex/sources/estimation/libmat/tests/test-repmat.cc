@@ -34,10 +34,10 @@ main(int argc, char **argv)
 
   Matrix   S1(m, 2 *n), S2(2*m, n);
   std::vector<size_t>  toC(n), toR(m);
-  for (int i = 0; i < n; i++)
+  for (size_t i = 0; i < n; i++)
     toC[i] = 2*i;
 
-  for (int j = 0; j < m; j++)
+  for (size_t j = 0; j < m; j++)
     toR[j] = m-j-1;
 
   mat::assignByVectors(S1, mat::nullVec, toC, S, mat::nullVec, mat::nullVec);

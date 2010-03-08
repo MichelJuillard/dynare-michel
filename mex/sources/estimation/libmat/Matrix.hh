@@ -519,7 +519,7 @@ namespace mat
   reorderColumnsByVectors(Mat1 &a, const std::vector<size_t> &vToCols,
                           const Mat2 &b, const std::vector<size_t> &vcols)
   {
-    size_t nrows = a.getRows(), ncols = 0, toncols = 0;
+    size_t ncols = 0, toncols = 0;
     const std::vector<size_t> *vpToCols = 0, *vpCols = 0;
     std::vector<size_t> tmpvpToCols(0), tmpvpCols(0);
     assert(b.getRows() ==  a.getRows());
@@ -579,7 +579,7 @@ namespace mat
   reorderRowsByVectors(Mat1 &a, const std::vector<size_t> &vToRows,
                        const Mat2 &b, const std::vector<size_t> &vrows)
   {
-    size_t nrows = 0, tonrows = 0, ncols = a.getCols();
+    size_t nrows = 0, tonrows = 0;
     const std::vector<size_t>  *vpToRows = 0, *vpRows = 0;
     std::vector<size_t>  tmpvpToRows(0), tmpvpRows(0);
 
