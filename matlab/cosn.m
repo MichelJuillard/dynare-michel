@@ -1,4 +1,4 @@
-function co = cosn(H);
+function [co, b, yhat] = cosn(H);
 
 % function co = cosn(H);
 % computes the cosine of the angle between the H(:,1) and its
@@ -30,9 +30,14 @@ X = H(:,2:end);
 % y = H(:,1);
 % X = H(:,2:end);
 
-yhat =  X*(X\y);
+if size(X,2)==1;
+    b=1;
+else
+    b=(X\y);
+end
+yhat =  X*b;
 if rank(yhat),
-    co = y'*yhat/sqrt((y'*y)*(yhat'*yhat));
+    co = abs(y'*yhat/sqrt((y'*y)*(yhat'*yhat)));
 else
     co=0;
 end
