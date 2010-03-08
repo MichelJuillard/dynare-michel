@@ -88,11 +88,56 @@ for j=1:npar,
     end
 end
 
+
 dyntable('Multi collinearity in the model:',strvcat('param','min','mean','max'), ...
          strvcat(bayestopt_.name(kok)),[mmin, mmean, mmax],10,10,6);
+disp(' ')
+for j=1:npar,
+    iweak = length(find(idemodel.Mco(j,:)'>(1-1.e-10)));
+    if iweak, 
+        disp('WARNING !!!')
+        disp(['Model derivatives of parameter ',bayestopt_.name{j},' are multi-collinear (with tol = 1.e-10) for ',num2str(iweak/SampleSize*100),'% of MC runs!' ])
+        if npar>(j+1),
+            [ipair, jpair] = find(squeeze(idemodel.Pco(j,j+1:end,:))'>(1-1.e-10));
+        else
+            [ipair, jpair] = find(squeeze(idemodel.Pco(j,j+1:end,:))>(1-1.e-10));
+        end
+        if ~isempty(jpair),
+            for jx=j+1:npar,
+                ixp = find(jx==(jpair+j));
+                if ~isempty(ixp)
+                    disp(['Model derivatives of parameters [',bayestopt_.name{j},',',bayestopt_.name{jx},'] are collinear (with tol = 1.e-10) for ',num2str(length(ixp)/SampleSize*100),'% of MC runs!' ])            
+                end
+            end
+        end
+    end
+end
+disp(' ')
 
 dyntable('Multi collinearity for moments in J:',strvcat('param','min','mean','max'), ...
          strvcat(bayestopt_.name(kokJ)),[mminJ, mmeanJ, mmaxJ],10,10,6);
+disp(' ')
+for j=1:npar,
+    iweak = length(find(idemoments.Mco(j,:)'>(1-1.e-10)));
+    if iweak, 
+        disp('WARNING !!!')
+        disp(['Moment derivatives of parameter ',bayestopt_.name{j},' are multi-collinear (with tol = 1.e-10) for ',num2str(iweak/SampleSize*100),'% of MC runs!' ])
+        if npar>(j+1),
+            [ipair, jpair] = find(squeeze(idemoments.Pco(j,j+1:end,:))'>(1-1.e-10));
+        else
+            [ipair, jpair] = find(squeeze(idemoments.Pco(j,j+1:end,:))>(1-1.e-10));
+        end
+        if ~isempty(jpair),
+            for jx=j+1:npar,
+                ixp = find(jx==(jpair+j));
+                if ~isempty(ixp)
+                    disp(['Moment derivatives of parameters [',bayestopt_.name{j},',',bayestopt_.name{jx},'] are collinear (with tol = 1.e-10) for ',num2str(length(ixp)/SampleSize*100),'% of MC runs!' ])            
+                end
+            end
+        end
+    end
+end
+disp(' ')
 
 if disp_pcorr,
     for j=1:length(kokP),
