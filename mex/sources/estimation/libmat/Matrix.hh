@@ -28,6 +28,7 @@
 #include <cassert>
 #include <cstring>
 #include <cmath>
+#include <vector>
 
 #include "Vector.hh"
 
@@ -155,6 +156,11 @@ std::ostream &operator<<(std::ostream &out, const MatrixConstView &M);
 
 namespace mat
 {
+  //define nullVec (const vector<int>(0)) for assign and order by vector
+  // It is used as a proxy for the ":" matlab operator:
+  // i.e. zero sized int vector, nullVec, is interpreted as if one supplied ":"
+  const std::vector<size_t> nullVec(0);
+
   template<class Mat>
   void
   print(std::ostream &out, const Mat &M)
@@ -319,6 +325,23 @@ namespace mat
       }
   }
 
+  //! Computes m1 = m1 + number
+  template<class Mat1>
+  void
+  add(Mat1 &m1, double d)
+  {
+    double *p1 = m1.getData();
+
+    while (p1 < m1.getData() + m1.getCols() * m1.getLd())
+      {
+        double *pp1 = p1;
+        while (pp1 < p1 + m1.getRows())
+          *pp1++ += d;
+
+        p1 += m1.getLd();
+      }
+  }
+
   //! Computes m1 = m1 - m2
   template<class Mat1, class Mat2>
   void
@@ -337,6 +360,14 @@ namespace mat
         p1 += m1.getLd();
         p2 += m2.getLd();
       }
+  }
+
+  //! Computes m1 = m1 - number
+  template<class Mat1>
+  void
+  sub(Mat1 &m1, double d)
+  {
+    add(m1, -1.0*d);
   }
 
   //! Does m = -m
@@ -379,6 +410,276 @@ namespace mat
       }
     return nrm;
   }
+  // emulates Matlab command A(a,b)=B(c,d) where a,b,c,d are size_t vectors or nullVec as a proxy for ":")
+  // i.e. zero sized vector (or mat::nullVec) is interpreted as if one supplied ":" in matlab
+  template<class Mat1, class Mat2>
+  void
+  assignByVectors(Mat1 &a, const std::vector<size_t> &vToRows, const std::vector<size_t> &vToCols,
+                  const Mat2 &b, const std::vector<size_t> &vrows, const std::vector<size_t> &vcols)
+  {
+    size_t nrows = 0, ncols = 0, tonrows = 0, toncols = 0;
+    const std::vector<size_t> *vpToCols = 0, *vpToRows = 0, *vpRows = 0, *vpCols = 0;
+    std::vector<size_t> tmpvpToCols(0), tmpvpToRows(0), tmpvpRows(0), tmpvpCols(0);
+
+    if (vToRows.size() == 0 && vToCols.size() == 0 && vrows.size() == 0 && vcols.size() == 0)
+      a = b;
+    else if (vToRows.size() == 0 && vrows.size() == 0)                                                                                                                                                                                                                                                                                     // just reorder columns
+      reorderColumnsByVectors(a, vToCols, b, vcols);
+    else if (vToCols.size() == 0 && vcols.size() == 0)                                                                                                                                                                                                                                                                                     // just reorder rows
+      reorderRowsByVectors(a, vToRows, b, vrows);
+    else
+      {
+        if (vToRows.size() == 0)
+          {
+            tonrows = a.getRows();
+            tmpvpToRows.reserve(tonrows);
+            for (size_t i = 0; i < tonrows; ++i)
+              tmpvpToRows[i] = i;
+            vpToRows = (const std::vector<size_t> *)&tmpvpToRows;
+          }
+        else
+          {
+            for (size_t i = 0; i < vToRows.size(); ++i)
+              {
+                assert(vToRows[i] < a.getRows()); //Negative or too large indices
+                tonrows++;
+              }
+            assert(tonrows <= a.getRows()); // check wrong dimensions for assignment by vector
+            vpToRows = &vToRows;
+          }
+
+        if (vToCols.size() == 0)
+          {
+            toncols = a.getCols();
+            tmpvpToCols.reserve(toncols);
+            for (size_t i = 0; i < toncols; ++i)
+              tmpvpToCols[i] = i;
+            vpToCols = (const std::vector<size_t> *)&tmpvpToCols;
+          }
+        else
+          {
+            for (size_t i = 0; i < vToCols.size(); ++i)
+              {
+                assert(vToCols[i] < a.getCols()); //Negative or too large indices
+                toncols++;
+              }
+            assert(toncols <= a.getCols()); // check wrong dimensions for assignment by vector
+            vpToCols = &vToCols;
+          }
+
+        if (vrows.size() == 0)
+          {
+            nrows = b.getRows();
+            tmpvpRows.reserve(nrows);
+            for (size_t i = 0; i < nrows; ++i)
+              tmpvpRows[i] = i;
+            vpRows = (const std::vector<size_t> *)&tmpvpRows;
+          }
+        else
+          {
+            for (size_t i = 0; i < vrows.size(); ++i)
+              {
+                assert(vrows[i] < b.getRows()); //Negative or too large indices
+                nrows++;
+              }
+            assert(nrows <= b.getRows()); // check wrong dimensions for assignment by vector
+            vpRows = &vrows;
+          }
+
+        if (vcols.size() == 0)
+          {
+            ncols = b.getCols();
+            tmpvpCols.reserve(ncols);
+            for (size_t i = 0; i < ncols; ++i)
+              tmpvpCols[i] = i;
+            vpCols = (const std::vector<size_t> *)&tmpvpCols;
+          }
+        else
+          {
+            for (size_t i = 0; i < vcols.size(); ++i)
+              {
+                assert(vcols[i] < b.getCols()); //Negative or too large indices
+                ncols++;
+              }
+            assert(ncols <= b.getCols()); // check wrong dimensions for assignment by vector
+            vpCols = &vcols;
+          }
+
+        assert(tonrows == nrows && toncols == ncols && nrows * ncols > 0);
+        for (size_t i = 0; i < nrows; ++i)
+          for (size_t j = 0; j < ncols; ++j)
+            a((*vpToRows)[i], (*vpToCols)[j]) = b((*vpRows)[i], (*vpCols)[j]);
+      }
+  }
+
+  // emulates Matlab command A(:,b)=B(:,d) where b,d are size_t vectors or nullVec as a proxy for ":")
+  // i.e. zero sized vector (or mat::nullVec) is interpreted as if one supplied ":" in matlab
+  template<class Mat1, class Mat2>
+  void
+  reorderColumnsByVectors(Mat1 &a, const std::vector<size_t> &vToCols,
+                          const Mat2 &b, const std::vector<size_t> &vcols)
+  {
+    size_t nrows = a.getRows(), ncols = 0, toncols = 0;
+    const std::vector<size_t> *vpToCols = 0, *vpCols = 0;
+    std::vector<size_t> tmpvpToCols(0), tmpvpCols(0);
+    assert(b.getRows() ==  a.getRows());
+
+    if (vToCols.size() == 0  && vcols.size() == 0)
+      a = b;
+    else
+      {
+        if (vToCols.size() == 0)
+          {
+            toncols = a.getCols();
+            tmpvpToCols.reserve(toncols);
+            for (size_t i = 0; i < toncols; ++i)
+              tmpvpToCols[i] = i;
+            vpToCols = (const std::vector<size_t> *)&tmpvpToCols;
+          }
+        else
+          {
+            for (size_t i = 0; i < vToCols.size(); ++i)
+              {
+                assert(vToCols[i] < a.getCols()); //Negative or too large indices
+                toncols++;
+              }
+            assert(toncols <= a.getCols()); // check wrong dimensions for assignment by vector
+            vpToCols = &vToCols;
+          }
+
+        if (vcols.size() == 0)
+          {
+            ncols = b.getCols();
+            tmpvpCols.reserve(ncols);
+            for (size_t i = 0; i < ncols; ++i)
+              tmpvpCols[i] = i;
+            vpCols = (const std::vector<size_t> *)&tmpvpCols;
+          }
+        else
+          {
+            for (size_t i = 0; i < vcols.size(); ++i)
+              {
+                assert(vcols[i] < b.getCols()); //Negative or too large indices
+                ncols++;
+              }
+            assert(ncols <= b.getCols()); // check wrong dimensions for assignment by vector
+            vpCols = &vcols;
+          }
+
+        assert(toncols == ncols && ncols > 0);
+        for (size_t j = 0; j < ncols; ++j)
+          col_copy(b,  (*vpCols)[j], a,  (*vpToCols)[j]);
+      }
+  }
+
+  // emulates Matlab command A(a,:)=B(c,:) where a,c are size_t vectors or nullVec as a proxy for ":")
+  // i.e. zero sized vector (or mat::nullVec) is interpreted as if one supplied ":" in matlab
+  template<class Mat1, class Mat2>
+  void
+  reorderRowsByVectors(Mat1 &a, const std::vector<size_t> &vToRows,
+                       const Mat2 &b, const std::vector<size_t> &vrows)
+  {
+    size_t nrows = 0, tonrows = 0, ncols = a.getCols();
+    const std::vector<size_t>  *vpToRows = 0, *vpRows = 0;
+    std::vector<size_t>  tmpvpToRows(0), tmpvpRows(0);
+
+    //assert(b.getRows() >=  a.getRows() && b.getCols() ==  a.getCols());
+    assert(b.getCols() ==  a.getCols());
+    if (vToRows.size() == 0  && vrows.size() == 0)
+      a = b;
+    else
+      {
+        if (vToRows.size() == 0)
+          {
+            tonrows = a.getRows();
+            tmpvpToRows.reserve(tonrows);
+            for (size_t i = 0; i < tonrows; ++i)
+              tmpvpToRows[i] = i;
+            vpToRows = (const std::vector<size_t> *)&tmpvpToRows;
+          }
+        else
+          {
+            for (size_t i = 0; i < vToRows.size(); ++i)
+              {
+                assert(vToRows[i] < a.getRows()); //Negative or too large indices
+                tonrows++;
+              }
+            assert(tonrows <= a.getRows()); // check wrong dimensions for assignment by vector
+            vpToRows = &vToRows;
+          }
+
+        if (vrows.size() == 0)
+          {
+            nrows = b.getRows();
+            tmpvpRows.reserve(nrows);
+            for (size_t i = 0; i < nrows; ++i)
+              tmpvpRows[i] = i;
+            vpRows = (const std::vector<size_t> *)&tmpvpRows;
+          }
+        else
+          {
+            for (size_t i = 0; i < vrows.size(); ++i)
+              {
+                assert(vrows[i] < b.getRows()); //Negative or too large indices
+                nrows++;
+              }
+            assert(nrows <= b.getRows()); // check wrong dimensions for assignment by vector
+            vpRows = &vrows;
+          }
+
+        assert(tonrows == nrows && nrows > 0);
+        for (size_t i = 0; i < nrows; ++i)
+          row_copy(b, (*vpRows)[i], a, (*vpToRows)[i]);
+      }
+  }
+
+  //emulates Matlab repmat: Mat2 = multv*multh tiled [Mat1]
+  template<class Mat1, class Mat2 >
+  void
+  repmat(Mat1 &a, size_t multv, size_t multh, Mat2 &repMat)   // vertical and horisontal replicators
+  {
+    assert(repMat.getRows() == multv * a.getRows() && repMat.getCols() == multh * a.getCols());
+    for (size_t i = 0; i < multv; ++i)
+      for (size_t j = 0; j < multh; ++j)
+        for (size_t k = 0; k < a.getCols(); ++k)
+          col_copy(a, k, 0, a.getRows(), repMat, a.getCols() * j + k, a.getRows() * i);
+  };
+
+  template<class Mat1, class Mat2>
+  bool
+  isDiff(const Mat1 &m1, const Mat2 &m2, const double tol = 0.0)
+  {
+    assert(m2.getRows() == m1.getRows() && m2.getCols() == m1.getCols());
+    const double *p1 = m1.getData();
+    const double *p2 = m2.getData();
+    while (p1 < m1.getData() + m1.getCols() * m1.getLd())
+      {
+        const double *pp1 = p1;
+        const double *pp2 = p2;
+        while (pp1 < p1 + m1.getRows())
+          if (fabs(*pp1++ - *pp2++) > tol)
+            return true;
+
+        p1 += m1.getLd();
+        p2 += m2.getLd();
+      }
+    return false;
+  }
+
+  //traverse the upper triangle only along diagonals where higher changes occur
+  template<class Mat1, class Mat2>
+  bool
+  isDiffSym(const Mat1 &m1, const Mat2 &m2, const double tol = 0.0)
+  {
+    assert(m2.getRows() == m1.getRows() && m2.getCols() == m1.getCols()
+           && m2.getRows() == m1.getCols() && m2.getCols() == m1.getRows());
+    for (size_t i = 0; i < m1.getCols(); i++)
+      for (size_t j = 0; i + j < m1.getCols(); j++)
+        if (fabs(m1(j, j + i) - m2(j, j + i)) > tol)
+          return true;
+    return false;
+  }
+
 } // End of namespace
 
 #endif
