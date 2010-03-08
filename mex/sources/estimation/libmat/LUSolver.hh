@@ -35,7 +35,7 @@ public:
     LUException(lapack_int info_arg) : info(info_arg) {};
   };
   LUSolver(size_t dim_arg);
-  ~LUSolver();
+  virtual ~LUSolver();
   /*!
     Computes A^(-1)*B (possibly transposing A).
     The output is stored in B.

@@ -43,7 +43,7 @@ public:
     \param[in] cols2_arg Number of columns of the matrix to be multiplied by Q
    */
   QRDecomposition(size_t rows_arg, size_t cols_arg, size_t cols2_arg);
-  ~QRDecomposition();
+  virtual ~QRDecomposition();
   //! Performs the QR decomposition of a matrix, and left-multiplies another matrix by Q
   /*!
     \param[in,out] A On input, the matrix to be decomposed. On output, equals to the output of dgeqrf

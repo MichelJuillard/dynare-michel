@@ -57,6 +57,8 @@ public:
   DecisionRules(size_t n_arg, size_t p_arg, const std::vector<size_t> &zeta_fwrd_arg,
                 const std::vector<size_t> &zeta_back_arg, const std::vector<size_t> &zeta_mixed_arg,
                 const std::vector<size_t> &zeta_static_arg, double qz_criterium);
+  virtual ~DecisionRules(){};
+
   /*!
     \param jacobian First columns are backetermined vars at t-1 (in the order of zeta_back_mixed), then all vars at t (in the orig order), then forward vars at t+1 (in the order of zeta_fwrd_mixed), then exogenous vars.
   */

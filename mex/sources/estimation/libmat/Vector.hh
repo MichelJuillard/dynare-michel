@@ -63,7 +63,7 @@ class Vector
  public:
   Vector(size_t size_arg);
   Vector(const Vector &arg);
-  ~Vector();
+  virtual ~Vector();
   inline size_t getSize() const { return size; }
   inline size_t getStride() const { return 1; }
   inline double *getData() { return data; }
@@ -99,6 +99,7 @@ private:
 public:
   VectorView(Vector &arg, size_t offset, size_t size_arg);
   VectorView(double *data_arg, size_t size_arg, size_t stride_arg);
+  virtual ~VectorView(){};
   inline size_t getSize() const { return size; }
   inline size_t getStride() const { return stride; }
   inline double *getData() { return data; }
@@ -136,6 +137,7 @@ private:
 public:
   VectorConstView(const Vector &arg, size_t offset, size_t size_arg);
   VectorConstView(const double *data_arg, size_t size_arg, size_t stride_arg);
+  virtual ~VectorConstView(){};
   inline size_t getSize() const { return size; }
   inline size_t getStride() const { return stride; }
   inline const double *getData() const { return data; }

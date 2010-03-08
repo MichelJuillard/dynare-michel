@@ -68,7 +68,7 @@ class Matrix
   Matrix(size_t rows_arg, size_t cols_arg);
   Matrix(size_t size_arg);
   Matrix(const Matrix &arg);
-  ~Matrix();
+  virtual ~Matrix();
   inline size_t getRows() const { return rows; }
   inline size_t getCols() const { return cols; }
   inline size_t getLd() const { return rows; }
@@ -103,6 +103,7 @@ class MatrixView
   MatrixView(double *data_arg, size_t rows_arg, size_t cols_arg, size_t ld_arg);
   MatrixView(Matrix &arg, size_t row_offset, size_t col_offset,
              size_t rows_arg, size_t cols_arg);
+  virtual ~MatrixView(){};
   inline size_t getRows() const { return rows; }
   inline size_t getCols() const { return cols; }
   inline size_t getLd() const { return ld; }
@@ -140,6 +141,7 @@ class MatrixConstView
   MatrixConstView(const double *data_arg, size_t rows_arg, size_t cols_arg, size_t ld_arg);
   MatrixConstView(const Matrix &arg, size_t row_offset, size_t col_offset,
                   size_t rows_arg, size_t cols_arg);
+  virtual ~MatrixConstView(){};
   inline size_t getRows() const { return rows; }
   inline size_t getCols() const { return cols; }
   inline size_t getLd() const { return ld; }
