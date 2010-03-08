@@ -272,6 +272,7 @@ if kronflag==1, % kronecker products
         dOm = y;
     end
 
+    Hx = [];
     if ~isempty(indexo),
         dSig = zeros(M_.exo_nbr,M_.exo_nbr);
         dOm = cat(3,zeros(size(dOm,1),size(dOm,1),length(indexo)),dOm);
