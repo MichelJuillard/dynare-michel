@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2009 Dynare Team
+ * Copyright (C) 2008-2010 Dynare Team
  *
  * This file is part of Dynare.
  *
@@ -35,54 +35,27 @@
 
 KordpDynare::KordpDynare(const char **endo,  int num_endo,
                          const char **exo, int nexog, int npar,
-                         Vector *ysteady, TwoDMatrix *vcov, Vector *inParams, int nstat,
-                         int npred, int nforw, int nboth, const int jcols, const Vector *nnzd,
+                         Vector &ysteady, TwoDMatrix &vcov, Vector &inParams, int nstat,
+                         int npred, int nforw, int nboth, const int jcols, const Vector &nnzd,
                          const int nsteps, int norder,
                          Journal &jr, DynamicModelDLL &dynamicDLL, double sstol,
-                         const vector<int> *var_order, const TwoDMatrix *llincidence, double criterium) throw (TLException) :
+                         const vector<int> &var_order, const TwoDMatrix &llincidence, double criterium) throw (TLException) :
   nStat(nstat), nBoth(nboth), nPred(npred), nForw(nforw), nExog(nexog), nPar(npar),
   nYs(npred + nboth), nYss(nboth + nforw), nY(num_endo), nJcols(jcols), NNZD(nnzd), nSteps(nsteps),
   nOrder(norder), journal(jr),  dynamicDLL(dynamicDLL), ySteady(ysteady), vCov(vcov), params(inParams),
-  md(1), dnl(NULL), denl(NULL), dsnl(NULL), ss_tol(sstol), varOrder(var_order),
+  md(1), dnl(*this, endo), denl(*this, exo), dsnl(*this, dnl, denl), ss_tol(sstol), varOrder(var_order),
   ll_Incidence(llincidence), qz_criterium(criterium)
 {
-  dnl = new DynareNameList(*this, endo);
-  denl = new DynareExogNameList(*this, exo);
-  dsnl = new DynareStateNameList(*this, *dnl, *denl);
-
-  JacobianIndices = ReorderDynareJacobianIndices(varOrder);
+  ReorderDynareJacobianIndices();
 
   //	Initialise ModelDerivativeContainer(*this, this->md, nOrder);
   for (int iord = 1; iord <= nOrder; iord++)
-    {
-      FSSparseTensor *t = new FSSparseTensor(iord, nY+nYs+nYss+nExog, nY);
-      md.insert(t);
-    }
-
+    md.insert(new FSSparseTensor(iord, nY+nYs+nYss+nExog, nY));
 }
 
 KordpDynare::~KordpDynare()
 {
-  if (ySteady)
-    delete ySteady;
-  if (params)
-    delete params;
-  if (vCov)
-    delete vCov;
-  if (dnl)
-    delete dnl;
-  if (dsnl)
-    delete dsnl;
-  if (denl)
-    delete denl;
-  if (JacobianIndices)
-    delete JacobianIndices;
-  if (varOrder)
-    delete varOrder;
-  if (ll_Incidence)
-    delete ll_Incidence;
-  if (NNZD)
-    delete NNZD;
+  // No need to manually delete tensors in "md", they are deleted by the TensorContainer destructor
 }
 
 void
@@ -112,69 +85,55 @@ KordpDynare::evaluateSystem(Vector &out, const Vector &yym, const Vector &yy,
  * which performs actual calculation and reorders
  ***************************************************/
 void
-KordpDynare::calcDerivatives(const Vector &yy, const Vector &xx) throw (DynareException)
-{
-  TwoDMatrix *g2 = 0; // NULL;
-  TwoDMatrix *g3 = 0; // NULL;
-  TwoDMatrix *g1 = new TwoDMatrix(nY, nJcols); // generate g1 for jacobian
-  g1->zeros();
-
-  if ((nJcols != g1->ncols()) || (nY != g1->nrows()))
-    throw DynareException(__FILE__, __LINE__, "Error in calcDerivatives: Created wrong jacobian");
-
-  if (nOrder > 1)
-    {
-      // generate g2 space for sparse Hessian 3x NNZH = 3x NNZD[1]
-      g2 = new TwoDMatrix((int)(*NNZD)[1], 3);
-      g2->zeros();
-    }
-  if (nOrder > 2)
-    {
-      g3 = new TwoDMatrix((int)(*NNZD)[2], 3);
-      g3->zeros();
-    }
-  Vector out(nY);
-  out.zeros();
-  const Vector *llxYYp; // getting around the constantness
-  if ((nJcols - nExog) > yy.length())
-    llxYYp =  (LLxSteady(yy));
-  else
-    llxYYp = &yy;
-  const Vector &llxYY = *(llxYYp);
-
-  dynamicDLL.eval(llxYY,  xx, params, out, g1, g2, g3);
-
-  if ((nJcols != g1->ncols()) || (nY != g1->nrows()))
-    throw DynareException(__FILE__, __LINE__, "Error in calcDerivatives: dynamicDLL.eval returned wrong jacobian");
-
-  populateDerivativesContainer(g1, 1, JacobianIndices);
-  delete g1;
-  if (nOrder > 1)
-    {
-      populateDerivativesContainer(g2, 2, JacobianIndices);
-      delete g2;
-    }
-  if (nOrder > 2)
-    {
-      populateDerivativesContainer(g3, 3, JacobianIndices);
-      delete g3;
-    }
-  delete llxYYp;
-}
-
-void
 KordpDynare::calcDerivativesAtSteady() throw (DynareException)
 {
+  TwoDMatrix g1(nY, nJcols);
+  g1.zeros();
+
+  TwoDMatrix *g2p = NULL, *g3p = NULL;
+
+  if (nOrder > 1)
+    {
+      // allocate space for sparse Hessian
+      g2p = new TwoDMatrix((int) NNZD[1], 3);
+      g2p->zeros();
+    }
+
+  if (nOrder > 2)
+    {
+      g3p = new TwoDMatrix((int) NNZD[2], 3);
+      g3p->zeros();
+    }
+
   Vector xx(nexog());
   xx.zeros();
-  calcDerivatives(*ySteady, xx);
+
+  Vector out(nY);
+  out.zeros();
+  Vector llxSteady(nJcols-nExog);
+  LLxSteady(ySteady, llxSteady);
+
+  dynamicDLL.eval(llxSteady, xx, &params, out, &g1, g2p, g3p);
+
+  populateDerivativesContainer(g1, 1, JacobianIndices);
+
+  if (nOrder > 1)
+    {
+      populateDerivativesContainer(*g2p, 2, JacobianIndices);
+      delete g2p;
+    }
+  if (nOrder > 2)
+    {
+      populateDerivativesContainer(*g3p, 3, JacobianIndices);
+      delete g3p;
+    }
 }
 
 /*******************************************************************************
  * populateDerivatives to sparse Tensor and fit it in the Derivatives Container
  *******************************************************************************/
 void
-KordpDynare::populateDerivativesContainer(TwoDMatrix *g, int ord, const vector<int> *vOrder)
+KordpDynare::populateDerivativesContainer(const TwoDMatrix &g, int ord, const vector<int> &vOrder)
 {
   // model derivatives FSSparseTensor instance
   FSSparseTensor *mdTi = (new FSSparseTensor(ord, nJcols, nY));
@@ -183,15 +142,15 @@ KordpDynare::populateDerivativesContainer(TwoDMatrix *g, int ord, const vector<i
 
   if (ord == 1)
     {
-      for (int i = 0; i < g->ncols(); i++)
+      for (int i = 0; i < g.ncols(); i++)
         {
-          for (int j = 0; j < g->nrows(); j++)
+          for (int j = 0; j < g.nrows(); j++)
             {
               double x;
               if (s[0] < nJcols-nExog)
-                x = g->get(j, (*vOrder)[s[0]]);
+                x = g.get(j, vOrder[s[0]]);
               else
-                x = g->get(j, s[0]);
+                x = g.get(j, s[0]);
               if (x != 0.0)
                 mdTi->insert(s, j, x);
             }
@@ -203,11 +162,11 @@ KordpDynare::populateDerivativesContainer(TwoDMatrix *g, int ord, const vector<i
       int nJcols1 = nJcols-nExog;
       vector<int> revOrder(nJcols1);
       for (int i = 0; i < nJcols1; i++)
-        revOrder[(*vOrder)[i]] = i;
-      for (int i = 0; i < g->nrows(); i++)
+        revOrder[vOrder[i]] = i;
+      for (int i = 0; i < g.nrows(); i++)
         {
-          int j = (int) g->get(i, 0)-1; // hessian indices start with 1
-          int i1 = (int) g->get(i, 1) -1;
+          int j = (int) g.get(i, 0)-1; // hessian indices start with 1
+          int i1 = (int) g.get(i, 1) -1;
           int s0 = (int) floor(((double) i1)/((double) nJcols));
           int s1 = i1- (nJcols*s0);
           if (s0 < nJcols1)
@@ -220,7 +179,7 @@ KordpDynare::populateDerivativesContainer(TwoDMatrix *g, int ord, const vector<i
             s[1] = s1;
           if (s[1] >= s[0])
             {
-              double x = g->get(i, 2);
+              double x = g.get(i, 2);
               mdTi->insert(s, j, x);
             }
         }
@@ -231,11 +190,11 @@ KordpDynare::populateDerivativesContainer(TwoDMatrix *g, int ord, const vector<i
       int nJcols2 = nJcols*nJcols;
       vector<int> revOrder(nJcols1);
       for (int i = 0; i < nJcols1; i++)
-        revOrder[(*vOrder)[i]] = i;
-      for (int i = 0; i < g->nrows(); i++)
+        revOrder[vOrder[i]] = i;
+      for (int i = 0; i < g.nrows(); i++)
         {
-          int j = (int) g->get(i, 0)-1;
-          int i1 = (int) g->get(i, 1) -1;
+          int j = (int) g.get(i, 0)-1;
+          int i1 = (int) g.get(i, 1) -1;
           int s0 = (int) floor(((double) i1)/((double) nJcols2));
           int i2 = i1 - nJcols2*s0;
           int s1 = (int) floor(((double) i2)/((double) nJcols));
@@ -254,7 +213,7 @@ KordpDynare::populateDerivativesContainer(TwoDMatrix *g, int ord, const vector<i
             s[2] = s2;
           if ((s[2] >= s[1]) && (s[1] >= s[0]))
             {
-              double x = g->get(i, 2);
+              double x = g.get(i, 2);
               mdTi->insert(s, j, x);
             }
         }
@@ -263,6 +222,7 @@ KordpDynare::populateDerivativesContainer(TwoDMatrix *g, int ord, const vector<i
   // md container
   md.remove(Symmetry(ord));
   md.insert(mdTi);
+  // No need to delete mdTi, it will be deleted by TensorContainer destructor
 }
 
 /*********************************************************
@@ -270,26 +230,26 @@ KordpDynare::populateDerivativesContainer(TwoDMatrix *g, int ord, const vector<i
  * returns ySteady extended with leads and lags suitable for
  * passing to <model>_dynamic DLL
  *************************************************************/
-Vector *
-KordpDynare::LLxSteady(const Vector &yS) throw (DynareException, TLException)
+void
+KordpDynare::LLxSteady(const Vector &yS, Vector &llxSteady) throw (DynareException, TLException)
 {
   if ((nJcols-nExog) == yS.length())
     throw DynareException(__FILE__, __LINE__, "ySteady already of right size");
 
   // create temporary square 2D matrix size nEndo x nEndo (sparse)
   // for the lag, current and lead blocks of the jacobian
-  Vector *llxSteady = new Vector(nJcols-nExog);
-  for (int ll_row = 0; ll_row < ll_Incidence->nrows(); ll_row++)
+  if (llxSteady.length() != nJcols-nExog)
+    throw DynareException(__FILE__, __LINE__, "llxSteady has wrong size");
+
+  for (int ll_row = 0; ll_row < ll_Incidence.nrows(); ll_row++)
     {
       // populate (non-sparse) vector with ysteady values
       for (int i = 0; i < nY; i++)
         {
-          if (ll_Incidence->get(ll_row, i))
-            (*llxSteady)[((int) ll_Incidence->get(ll_row, i))-1] = yS[i];
+          if (ll_Incidence.get(ll_row, i))
+            llxSteady[((int) ll_Incidence.get(ll_row, i))-1] = yS[i];
         }
     }
-
-  return llxSteady;
 }
 
 /************************************
@@ -317,27 +277,27 @@ KordpDynare::LLxSteady(const Vector &yS) throw (DynareException, TLException)
       exogen
 ************************************/
 
-vector<int> *
-KordpDynare::ReorderDynareJacobianIndices(const vector<int> *varOrder) throw (TLException)
+void
+KordpDynare::ReorderDynareJacobianIndices() throw (TLException)
 {
   // create temporary square 2D matrix size nEndo x nEndo (sparse)
   // for the lag, current and lead blocks of the jacobian
-  vector<int> *JacobianIndices = new vector<int>(nJcols);
+  JacobianIndices.resize(nJcols);
   vector <int> tmp(nY);
   int i, j, rjoff = nJcols-nExog-1;
 
-  for (int ll_row = 0; ll_row < ll_Incidence->nrows(); ll_row++)
+  for (int ll_row = 0; ll_row < ll_Incidence.nrows(); ll_row++)
     {
       // reorder in orde-var order & populate temporary nEndo (sparse) vector with
       // the lag, current and lead blocks of the jacobian respectively
       for (i = 0; i < nY; i++)
-        tmp[i] = ((int) ll_Incidence->get(ll_row, (*varOrder)[i]-1));
+        tmp[i] = ((int) ll_Incidence.get(ll_row, varOrder[i]-1));
       // write the reordered blocks back to the jacobian
       // in reverse order
       for (j = nY-1; j >= 0; j--)
         if (tmp[j])
           {
-            (*JacobianIndices)[rjoff] = tmp[j] -1;
+            JacobianIndices[rjoff] = tmp[j] -1;
             rjoff--;
             if (rjoff < 0)
               break;
@@ -346,9 +306,7 @@ KordpDynare::ReorderDynareJacobianIndices(const vector<int> *varOrder) throw (TL
 
   //add the indices for the nExog exogenous jacobians
   for (j = nJcols-nExog; j < nJcols; j++)
-    (*JacobianIndices)[j] = j;
-
-  return JacobianIndices;
+    JacobianIndices[j] = j;
 }
 
 /**************************************************************************************/
@@ -375,7 +333,7 @@ DynareNameList::selectIndices(const vector<const char *> &ns) const throw (Dynar
 DynareNameList::DynareNameList(const  KordpDynare &dynare)
 {
   for (int i = 0; i < dynare.ny(); i++)
-    names.push_back(dynare.dnl->getName(i));
+    names.push_back(dynare.dnl.getName(i));
 }
 DynareNameList::DynareNameList(const KordpDynare &dynare, const char **namesp)
 {
@@ -386,7 +344,7 @@ DynareNameList::DynareNameList(const KordpDynare &dynare, const char **namesp)
 DynareExogNameList::DynareExogNameList(const KordpDynare &dynare)
 {
   for (int i = 0; i < dynare.nexog(); i++)
-    names.push_back(dynare.denl->getName(i));
+    names.push_back(dynare.denl.getName(i));
 }
 
 DynareExogNameList::DynareExogNameList(const KordpDynare &dynare, const char **namesp)

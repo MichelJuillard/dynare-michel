@@ -122,31 +122,31 @@ class KordpDynare : public DynamicModel
   const int nYss; // nyss ={ nboth + nforw ; }
   const int nY;  // = num_endo={ nstat + npred + nboth + nforw ; }
   const int nJcols; // no of jacobian columns= nExog+nEndo+nsPred+nsForw
-  const Vector *NNZD;  /* the total number of non-zero derivative elements
+  const Vector &NNZD;  /* the total number of non-zero derivative elements
                           where hessian is 2nd : NZZD(order=2) */
   const int nSteps;
   const int nOrder;
   Journal &journal;
-  Vector *ySteady;
-  Vector *params;
-  TwoDMatrix *vCov;
+  Vector &ySteady;
+  Vector &params;
+  TwoDMatrix &vCov;
   TensorContainer<FSSparseTensor> md; // ModelDerivatives
-  DynareNameList *dnl;
-  DynareExogNameList *denl;
-  DynareStateNameList *dsnl;
+  DynareNameList dnl;
+  DynareExogNameList denl;
+  DynareStateNameList dsnl;
   const double ss_tol;
-  const vector<int> *varOrder;
-  const TwoDMatrix *ll_Incidence;
+  const vector<int> &varOrder;
+  const TwoDMatrix &ll_Incidence;
   double qz_criterium;
-  vector<int> *JacobianIndices;
+  vector<int> JacobianIndices;
 public:
   KordpDynare(const char **endo, int num_endo,
               const char **exo, int num_exo, int num_par,
-              Vector *ySteady, TwoDMatrix *vCov, Vector *params, int nstat, int nPred,
-              int nforw, int nboth, const int nJcols, const Vector *NNZD,
+              Vector &ySteady, TwoDMatrix &vCov, Vector &params, int nstat, int nPred,
+              int nforw, int nboth, const int nJcols, const Vector &NNZD,
               const int nSteps, const int ord,
               Journal &jr, DynamicModelDLL &dynamicDLL, double sstol,
-              const vector<int> *varOrder, const TwoDMatrix *ll_Incidence,
+              const vector<int> &varOrder, const TwoDMatrix &ll_Incidence,
               double qz_criterium) throw (TLException);
 
   virtual ~KordpDynare();
@@ -203,27 +203,27 @@ public:
   const NameList &
   getAllEndoNames() const
   {
-    return *dnl;
+    return dnl;
   }
   const NameList &
   getStateNames() const
   {
-    return *dsnl;
+    return dsnl;
   }
   const NameList &
   getExogNames() const
   {
-    return *denl;
+    return denl;
   }
   const TwoDMatrix &
   getVcov() const
   {
-    return *vCov;
+    return vCov;
   }
   Vector &
   getParams()
   {
-    return *params;
+    return params;
   }
 
   const TensorContainer<FSSparseTensor> &
@@ -234,31 +234,31 @@ public:
   const Vector &
   getSteady() const
   {
-    return *ySteady;
+    return ySteady;
   }
   Vector &
   getSteady()
   {
-    return *ySteady;
+    return ySteady;
   }
 
   void solveDeterministicSteady();
   void evaluateSystem(Vector &out, const Vector &yy, const Vector &xx) throw (DynareException);
   void evaluateSystem(Vector &out, const Vector &yym, const Vector &yy,
                       const Vector &yyp, const Vector &xx) throw (DynareException);
-  void calcDerivatives(const Vector &yy, const Vector &xx) throw (DynareException);
   void calcDerivativesAtSteady() throw (DynareException);
   DynamicModelDLL &dynamicDLL;
   DynamicModel *
   clone() const
   {
-    return new KordpDynare(*this);
+    std::cerr << "KordpDynare::clone() not implemented" << std::endl;
+    exit(EXIT_FAILURE);
   }
-  Vector *LLxSteady(const Vector &yS) throw (DynareException, TLException); // returns ySteady extended with leads and lags
+  void LLxSteady(const Vector &yS, Vector &llxSteady) throw (DynareException, TLException); // Given the steady state in yS, returns in llxSteady the steady state extended with leads and lags
 
 private:
-  vector<int> *ReorderDynareJacobianIndices(const vector<int> *varOrder) throw (TLException);
-  void populateDerivativesContainer(TwoDMatrix *g, int ord, const vector<int> *vOrder);
+  void ReorderDynareJacobianIndices() throw (TLException);
+  void populateDerivativesContainer(const TwoDMatrix &g, int ord, const vector<int> &vOrder);
 };
 
 #endif

@@ -130,17 +130,17 @@ extern "C" {
     mxFldp      = mxGetField(M_, 0, "params");
     double *dparams = (double *) mxGetData(mxFldp);
     int npar = (int) mxGetM(mxFldp);
-    Vector *modParams =  new Vector(dparams, npar);
+    Vector modParams(dparams, npar);
 
     mxFldp      = mxGetField(M_, 0, "Sigma_e");
     dparams = (double *) mxGetData(mxFldp);
     npar = (int) mxGetN(mxFldp);
-    TwoDMatrix *vCov =  new TwoDMatrix(npar, npar, dparams);
+    TwoDMatrix vCov(npar, npar, dparams);
 
     mxFldp      = mxGetField(dr, 0, "ys");  // and not in order of dr.order_var
     dparams = (double *) mxGetData(mxFldp);
     const int nSteady = (int) mxGetM(mxFldp);
-    Vector *ySteady =  new Vector(dparams, nSteady);
+    Vector ySteady(dparams, nSteady);
 
     mxFldp = mxGetField(dr, 0, "nstatic");
     const int nStat = (int) mxGetScalar(mxFldp);
@@ -172,9 +172,9 @@ extern "C" {
     npar = (int) mxGetM(mxFldp);
     if (npar != nEndo)                           //(nPar != npar)
       mexErrMsgTxt("Incorrect number of input var_order vars.");
-    vector<int> *var_order_vp = (new vector<int>(nEndo));
+    vector<int> var_order_vp(nEndo);
     for (int v = 0; v < nEndo; v++)
-      (*var_order_vp)[v] = (int)(*(dparams++));
+      var_order_vp[v] = (int)(*(dparams++));
 
     // the lag, current and lead blocks of the jacobian respectively
     mxFldp      = mxGetField(M_, 0, "lead_lag_incidence");
@@ -182,14 +182,14 @@ extern "C" {
     npar = (int) mxGetN(mxFldp);
     int nrows = (int) mxGetM(mxFldp);
 
-    TwoDMatrix *llincidence =  new TwoDMatrix(nrows, npar, dparams);
+    TwoDMatrix llincidence(nrows, npar, dparams);
     if (npar != nEndo)
       mexErrMsgIdAndTxt("dynare:k_order_perturbation", "Incorrect length of lead lag incidences: ncol=%d != nEndo=%d.", npar, nEndo);
 
     //get NNZH =NNZD(2) = the total number of non-zero Hessian elements
     mxFldp = mxGetField(M_, 0, "NNZDerivatives");
     dparams = (double *) mxGetData(mxFldp);
-    Vector *NNZD =  new Vector(dparams, (int) mxGetM(mxFldp));
+    Vector NNZD(dparams, (int) mxGetM(mxFldp));
 
     const int jcols = nExog+nEndo+nsPred+nsForw; // Num of Jacobian columns
 
@@ -258,7 +258,7 @@ extern "C" {
         app.getFoldDecisionRule().writeMMap(mm, string());
 
         // get latest ysteady
-        ySteady = (Vector *)(&dynare.getSteady());
+        ySteady = dynare.getSteady();
 
         if (kOrder == 1)
           {
