@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2005 Ondra Kamenik
- * Copyright (C) 2008-2009 Dynare Team
+ * Copyright (C) 2008-2010 Dynare Team
  *
  * This file is part of Dynare.
  *
@@ -110,7 +110,6 @@ class KordpDynare : public DynamicModel
   friend class DynareNameList;
   friend class DynareExogNameList;
   friend class DynareStateNameList;
-  friend class KordpDynareJacobian;
   friend class DynamicModelDLL;
 
   const int nStat;
@@ -150,8 +149,6 @@ public:
               const vector<int> *varOrder, const TwoDMatrix *ll_Incidence,
               double qz_criterium) throw (TLException);
 
-  /** Makes a deep copy of the object. */
-  KordpDynare(const KordpDynare &dyn);
   virtual ~KordpDynare();
   int
   nstat() const
@@ -257,58 +254,11 @@ public:
   {
     return new KordpDynare(*this);
   }
-  void ReorderCols(TwoDMatrix *tdx, const int *varOrder) throw (TLException);
-  void ReorderCols(TwoDMatrix *tdx, const vector<int> *varOrder) throw (DynareException, TLException);
   Vector *LLxSteady(const Vector &yS) throw (DynareException, TLException); // returns ySteady extended with leads and lags
 
 private:
-  void writeModelInfo(Journal &jr) const;
   vector<int> *ReorderDynareJacobianIndices(const vector<int> *varOrder) throw (TLException);
-  void ReorderBlocks(TwoDMatrix *tdx, const vector<int> *vOrder) throw (DynareException, TLException);
   void populateDerivativesContainer(TwoDMatrix *g, int ord, const vector<int> *vOrder);
-};
-
-/****************************
- * ModelDerivativeContainer manages derivatives container
- ************************************/
-
-class ModelDerivativeContainer
-{
-protected:
-  TensorContainer<FSSparseTensor> &md;
-public:
-  ModelDerivativeContainer(const KordpDynare &model, TensorContainer<FSSparseTensor> &mod_ders,
-                           int order);
-  void load(int i, int iord, const int *vars, double res);
-};
-
-/****************************
- *  K-Order Perturbation instance of VectorFunction:
- ************************************/
-
-class KordpVectorFunction : public ogu::VectorFunction
-{
-protected:
-  KordpDynare &d;
-public:
-  KordpVectorFunction(KordpDynare &dyn) :
-    d(dyn)
-  {
-  }
-  virtual ~KordpVectorFunction()
-  {
-  }
-  int
-  inDim() const
-  {
-    return d.ny();
-  }
-  int
-  outDim() const
-  {
-    return d.ny();
-  }
-  void eval(const ConstVector &in, Vector &out) throw (DynareException);
 };
 
 #endif

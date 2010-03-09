@@ -34,10 +34,10 @@
 /**************************************************************************************/
 
 KordpDynare::KordpDynare(const char **endo,  int num_endo,
-                         const char **exo, int nexog, int npar, //const char** par,
+                         const char **exo, int nexog, int npar,
                          Vector *ysteady, TwoDMatrix *vcov, Vector *inParams, int nstat,
                          int npred, int nforw, int nboth, const int jcols, const Vector *nnzd,
-                         const int nsteps, int norder, //const char* modName,
+                         const int nsteps, int norder,
                          Journal &jr, DynamicModelDLL &dynamicDLL, double sstol,
                          const vector<int> *var_order, const TwoDMatrix *llincidence, double criterium) throw (TLException) :
   nStat(nstat), nBoth(nboth), nPred(npred), nForw(nforw), nExog(nexog), nPar(npar),
@@ -58,25 +58,7 @@ KordpDynare::KordpDynare(const char **endo,  int num_endo,
       FSSparseTensor *t = new FSSparseTensor(iord, nY+nYs+nYss+nExog, nY);
       md.insert(t);
     }
-}
 
-KordpDynare::KordpDynare(const KordpDynare &dynare) :
-  nStat(dynare.nStat), nBoth(dynare.nBoth),       nPred(dynare.nPred),
-  nForw(dynare.nForw), nExog(dynare.nExog),  nPar(dynare.nPar),
-  nYs(dynare.nYs), nYss(dynare.nYss), nY(dynare.nY), nJcols(dynare.nJcols),
-  NNZD(dynare.NNZD), nSteps(dynare.nSteps), nOrder(dynare.nOrder),
-  journal(dynare.journal), dynamicDLL(dynare.dynamicDLL),
-  ySteady(NULL), params(NULL), vCov(NULL), md(dynare.md),
-  dnl(NULL), denl(NULL), dsnl(NULL), ss_tol(dynare.ss_tol),
-  varOrder(dynare.varOrder), ll_Incidence(dynare.ll_Incidence),
-  JacobianIndices(dynare.JacobianIndices), qz_criterium(dynare.qz_criterium)
-{
-  ySteady = new Vector(*(dynare.ySteady));
-  params = new Vector(*(dynare.params));
-  vCov = new TwoDMatrix(*(dynare.vCov));
-  dnl = new DynareNameList(dynare);
-  denl = new DynareExogNameList(dynare);
-  dsnl = new DynareStateNameList(*this, *dnl, *denl);
 }
 
 KordpDynare::~KordpDynare()
@@ -101,19 +83,6 @@ KordpDynare::~KordpDynare()
     delete ll_Incidence;
   if (NNZD)
     delete NNZD;
-}
-
-/** This clears the container of model derivatives and initializes it
- * inserting empty sparse tensors up to the given order. */
-ModelDerivativeContainer::ModelDerivativeContainer(const KordpDynare &model,
-                                                   TensorContainer<FSSparseTensor> &mod_ders, int order) : md(mod_ders)
-{
-  md.clear();
-  for (int iord = 1; iord <= order; iord++)
-    {
-      FSSparseTensor *t = new FSSparseTensor(iord, model.ny()+model.nys()+model.nyss()+model.nexog(), model.ny());
-      md.insert(t);
-    }
 }
 
 void
@@ -296,26 +265,6 @@ KordpDynare::populateDerivativesContainer(TwoDMatrix *g, int ord, const vector<i
   md.insert(mdTi);
 }
 
-void
-KordpDynare::writeModelInfo(Journal &jr) const
-{
-  // write info on variables
-  JournalRecordPair rp(journal);
-  rp << "Information on variables" << endrec;
-  JournalRecord rec1(journal);
-  rec1 << "Number of endogenous:            " << ny() << endrec;
-  JournalRecord rec2(journal);
-  rec2 << "Number of exogenous:             " << nexog() << endrec;
-  JournalRecord rec3(journal);
-  rec3 << "Number of static:                " << nstat() << endrec;
-  JournalRecord rec4(journal);
-  rec4 << "Number of predetermined:         " << npred()+nboth() << endrec;
-  JournalRecord rec5(journal);
-  rec5 << "Number of forward looking:       " << nforw()+nboth() << endrec;
-  JournalRecord rec6(journal);
-  rec6 << "Number of both:                  " << nboth() << endrec;
-}
-
 /*********************************************************
  * LLxSteady()
  * returns ySteady extended with leads and lags suitable for
@@ -400,96 +349,6 @@ KordpDynare::ReorderDynareJacobianIndices(const vector<int> *varOrder) throw (TL
     (*JacobianIndices)[j] = j;
 
   return JacobianIndices;
-}
-
-/************************************
- * Reorder first set of columns of variables in a (jacobian) matrix
- * according to order given in  varsOrder together with the extras
- * assuming tdx ncols() - nExog is eaqual or less than length of varOrder and
- * of any of its elements too.
- ************************************/
-
-void
-KordpDynare::ReorderCols(TwoDMatrix *tdx, const vector<int> *vOrder) throw (DynareException, TLException)
-{
-
-  if (tdx->ncols() > vOrder->size())
-    throw DynareException(__FILE__, __LINE__, "Size of order var is too small");
-
-  TwoDMatrix tmp(*tdx); // temporary 2D matrix
-  TwoDMatrix &tmpR = tmp;
-  tdx->zeros(); // empty original matrix
-  // reorder the columns
-
-  for (int i = 0; i < tdx->ncols(); i++)
-    tdx->copyColumn(tmpR, (*vOrder)[i], i);
-}
-
-void
-KordpDynare::ReorderCols(TwoDMatrix *tdx, const int *vOrder) throw (TLException)
-{
-
-  TwoDMatrix tmp(*tdx); // temporary 2D matrix
-  TwoDMatrix &tmpR = tmp;
-  tdx->zeros(); // empty original matrix
-  // reorder the columns
-  for (int i = 0; i < tdx->ncols(); i++)
-    tdx->copyColumn(tmpR, vOrder[i], i);
-}
-
-/***********************************************************************
- * Recursive hierarchical block reordering of the higher order, input model
- *	derivatives inc. Hessian
- * This is now obsolete but kept in in case it is needed
- ***********************************************************************/
-
-void
-KordpDynare::ReorderBlocks(TwoDMatrix *tdx, const vector<int> *vOrder) throw (DynareException, TLException)
-{
-  // determine order of the matrix
-
-  double dbOrder = log((double) tdx->ncols())/log((double) nJcols);
-  int ibOrder = (int) dbOrder;
-  if ((double) ibOrder != dbOrder || ibOrder > nOrder)
-    {
-      ostringstream msg;
-      msg << "Wrong order " << dbOrder;
-      throw DynareException(__FILE__, __LINE__, msg.str());
-    }
-
-  TwoDMatrix tmp(*tdx); // temporary 2D matrix
-  TwoDMatrix &tmpR = tmp;
-  tdx->zeros(); // empty original matrix
-
-  if (ibOrder > 1)
-    {
-      int nBlocks = tmp.ncols()/ nJcols;
-      int bSize = tmp.ncols()/nBlocks;
-      for (int j = 0; j < nBlocks;  ++j)
-        {
-          TwoDMatrix subtdx(tmpR, bSize*((*vOrder)[j]), bSize);
-          ReorderBlocks(&subtdx, vOrder);
-          tdx->place(subtdx, 0, bSize*j);
-        }
-    }
-  else
-    {
-      if (tdx->ncols() > vOrder->size())
-        throw DynareException(__FILE__, __LINE__, "Size of order var is too small");
-
-      // reorder the columns
-      for (int i = 0; i < tdx->ncols(); i++)
-        tdx->copyColumn(tmpR, (*vOrder)[i], i);
-    }
-}
-
-void
-KordpVectorFunction::eval(const ConstVector &in, Vector &out) throw (DynareException)
-{
-  check_for_eval(in, out);
-  Vector xx(d.nexog());
-  xx.zeros();
-  d.evaluateSystem(out, in, xx);
 }
 
 /**************************************************************************************/

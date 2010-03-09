@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2009 Dynare Team
+ * Copyright (C) 2008-2010 Dynare Team
  *
  * This file is part of Dynare.
  *
@@ -45,38 +45,6 @@
 #include <cstring>
 #include <cctype>
 #include <cassert>
-
-#ifdef _MSC_VER
-
-BOOL APIENTRY
-DllMain(HANDLE hModule,
-        DWORD  ul_reason_for_call,
-        LPVOID lpReserved
-        )
-{
-  switch (ul_reason_for_call)
-    {
-    case DLL_PROCESS_ATTACH:
-    case DLL_THREAD_ATTACH:
-    case DLL_THREAD_DETACH:
-    case DLL_PROCESS_DETACH:
-      break;
-    }
-  return TRUE;
-}
-
-// Some MS Windows preambles
-// This is an example of an exported variable
-K_ORDER_PERTURBATION_API int nK_order_perturbation = 0;
-
-// This is an example of an exported function.
-K_ORDER_PERTURBATION_API int
-fnK_order_perturbation(void)
-{
-  return 42;
-}
-
-#endif // _MSC_VER
 
 #if defined(MATLAB_MEX_FILE) || defined(OCTAVE_MEX_FILE)  // exclude mexFunction for other applications
 
@@ -235,7 +203,7 @@ extern "C" {
     const int widthExog = (int) mxGetN(mxFldp);
     const char **exoNamesMX = DynareMxArrayToString(mxFldp, nexo, widthExog);
 
-    if ((nEndo != nendo) || (nExog != nexo))                                                 //(nPar != npar)
+    if ((nEndo != nendo) || (nExog != nexo))
       mexErrMsgTxt("Incorrect number of input parameters.");
 
     /* Fetch time index */
@@ -290,14 +258,8 @@ extern "C" {
         app.getFoldDecisionRule().writeMMap(mm, string());
 
         // get latest ysteady
-        double *dYsteady = (dynare.getSteady().base());
         ySteady = (Vector *)(&dynare.getSteady());
 
-        // developement of the output.
-        double  *dgy, *dgu, *ysteady;
-        int nb_row_x;
-
-        ysteady = NULL;
         if (kOrder == 1)
           {
             /* Set the output pointer to the output matrix ysteady. */

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2009 Dynare Team
+ * Copyright (C) 2008-2010 Dynare Team
  *
  * This file is part of Dynare.
  *
@@ -17,18 +17,8 @@
  * along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-// The following ifdef block is the standard way of creating macros which make exporting
-// from a DLL simpler. All files within this DLL are compiled with the K_ORDER_PERTURBATION_EXPORTS
-// symbol defined on the command line. this symbol should not be defined on any project
-// that uses this DLL. This way any other project whose source files include this file see
-// K_ORDER_PERTURBATION_API functions as being imported from a DLL, wheras this DLL sees symbols
-// defined with this macro as being exported.
-
 #if defined(_WIN32) || defined(__CYGWIN32__)
 # include <windows.h>
-# ifdef _MSC_VER
-#  define K_ORDER_PERTURBATION_API __declspec(dllexport)
-# endif
 #else
 # include <dlfcn.h> // unix/linux DLL (.so) handling routines
 #endif
