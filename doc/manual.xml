@@ -746,7 +746,8 @@ end;
 </sect2>
 
 <sect2><title>Functions</title>
-<para>The following standard functions are allowed in both <replaceable>MODEL_EXPRESSION</replaceable> and <replaceable>EXPRESSION</replaceable>:
+<sect3><title>Internal</title>
+<para>The following standard functions are supported internally for both <replaceable>MODEL_EXPRESSION</replaceable> and <replaceable>EXPRESSION</replaceable>:
 <itemizedlist>
   <listitem><para>exponential: <literal>exp(<replaceable>x</replaceable>)</literal></para></listitem>
   <listitem><para>natural logarithm: <literal>log(<replaceable>x</replaceable>)</literal> (or equivalently <literal>ln(<replaceable>x</replaceable>)</literal>)</para></listitem>
@@ -757,10 +758,79 @@ end;
   <listitem><para>gaussian cumulative distribution function: <literal>normcdf(<replaceable>x</replaceable>, <replaceable>&mu;</replaceable>, <replaceable>&sigma;</replaceable>)</literal> (note that <literal>normcdf(<replaceable>x</replaceable>)</literal> is equivalent to <literal>normcdf(<replaceable>x</replaceable>, 0, 1)</literal>)</para></listitem>
 </itemizedlist>
 </para>
-<para>In a <replaceable>MODEL_EXPRESSION</replaceable>, no other function is allowed.<footnote><para>This is due to the fact that the Dynare preprocessor performs a symbolical derivation of all model equations, and therefore needs to know the analytical derivatives of all the equations in the model equations. In the future, we should add support for other usual functions, and implement an interface to let the user define custom functions, for which he would provide the analytical derivatives.</para></footnote></para>
-<para>In an <replaceable>EXPRESSION</replaceable>, it is possible to use any arbitrary <trademark class="registered">MATLAB</trademark> or Octave function, provided that this function has scalar arguments and return value.</para>
-</sect2>
+</sect3>
+<sect3><title>External</title>
+<para>Any other user-defined (or built-in) <trademark class="registered">MATLAB</trademark> or Octave function may be used in both a <replaceable>MODEL_EXPRESSION</replaceable> and an <replaceable>EXPRESSION</replaceable>, provided that this function has a scalar argument as a return value.</para>
+<para>To use an external function in a <replaceable>MODEL_EXPRESSION</replaceable>, one must declare the function using the <xref linkend='external_function'/> statement. This is not necessary for external functions used in an <replaceable>EXPRESSION</replaceable>.</para>
 
+<refentry id="external_function">
+  <refmeta>
+    <refentrytitle>external_function</refentrytitle>
+  </refmeta>
+
+  <refnamediv>
+    <refname>external_function</refname>
+    <refpurpose>declares external functions</refpurpose>
+  </refnamediv>
+
+  <refsynopsisdiv>
+    <cmdsynopsis>
+      <command>external_function</command>
+      <arg choice="plain">(</arg>
+      <arg choice="req"><option>name</option> = <replaceable>NAME</replaceable></arg>
+      <arg choice="opt">,
+      <replaceable>OPTION</replaceable> = <replaceable>INTEGER</replaceable>
+      </arg>
+      <arg choice="opt" rep="repeat">,
+      <replaceable>OPTION</replaceable><arg choice="opt"> = <replaceable>NAME</replaceable></arg>
+      </arg>
+      <arg choice="plain">);</arg>
+    </cmdsynopsis>
+  </refsynopsisdiv>
+
+  <refsect1><title>Options</title>
+  <variablelist>
+    <varlistentry>
+      <term><option>name</option> = <replaceable>NAME</replaceable></term>
+      <listitem><para>The name of the function, which must also be the name of the M-/MEX file implementing it.</para></listitem>
+    </varlistentry>
+    <varlistentry>
+      <term><option>nargs</option> = <replaceable>INTEGER</replaceable></term>
+      <listitem><para>The number of arguments of the function. If this option is not provided, Dynare assumes <literal><option>nargs</option> = 1</literal>.</para></listitem>
+    </varlistentry>
+    <varlistentry>
+      <term><option>first_deriv_provided</option> [= <replaceable>NAME</replaceable>]</term>
+      <listitem><para>If <replaceable>NAME</replaceable> is provided, this tells Dynare that the Jacobian is provided as the only output of the M-/MEX file given as the option argument. If <replaceable>NAME</replaceable> is not provided, this tells Dynare that the M-/MEX file specified by the argument passed to <option>name</option> returns the Jacobian as its second output argument.</para></listitem>
+    </varlistentry>
+    <varlistentry>
+      <term><option>second_deriv_provided</option> [= <replaceable>NAME</replaceable>]</term>
+      <listitem><para>If <replaceable>NAME</replaceable> is provided, this tells Dynare that the Hessian is provided as the only output of the M-/MEX file given as the option argument. If <replaceable>NAME</replaceable> is not provided, this tells Dynare that the M-/MEX file specified by the argument passed to <option>name</option> returns the Hessian as its third output argument. NB: This option can only be used if the <option>first_deriv_provided</option> option is used in the same <command>external_function</command> command.</para></listitem>
+    </varlistentry>
+  </variablelist>
+  </refsect1>
+
+  <refsect1><title>Description</title>
+  <para>
+    This command declares the external functions used in the model block. It is required for every unique function used in the model block.
+  </para>
+  <para><command>external_function</command> commands can appear several times in the file and must come before the model block.</para>
+  </refsect1>
+
+  <refsect1><title>Example</title>
+  <informalexample>
+    <para>
+      <programlisting>
+        external_function(name = funcname);
+        external_function(name = funcname, nargs = 2, first_deriv_provided, second_deriv_provided);
+        external_function(name = funcname, nargs = 3, first_deriv_provided = funcname_deriv);
+      </programlisting>
+    </para>
+  </informalexample>
+  </refsect1>
+</refentry>
+
+</sect3>
+</sect2>
 </sect1>
 
 <sect1 id="param_init"><title>Parameter initialization</title>
