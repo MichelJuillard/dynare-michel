@@ -48,41 +48,23 @@
 
 #if defined(MATLAB_MEX_FILE) || defined(OCTAVE_MEX_FILE)  // exclude mexFunction for other applications
 
-const char **
-DynareMxArrayToString(const char *cNamesCharStr, const int len, const int width)
-{
-  char **cNamesMX;
-  cNamesMX = (char **) calloc(len, sizeof(char *));
-  for (int i = 0; i < len; i++)
-    cNamesMX[i] = (char *) calloc(width+1, sizeof(char));
-
-  for (int i = 0; i < width; i++)
-    {
-      for (int j = 0; j < len; j++)
-        {
-          // Allow alphanumeric and underscores "_" only:
-          if (isalnum(cNamesCharStr[j+i*len]) || ('_' == cNamesCharStr[j+i*len]))
-            {
-              cNamesMX[j][i] = cNamesCharStr[j+i*len];
-            }
-          else cNamesMX[j][i] = '\0';
-        }
-    }
-  return (const char **) cNamesMX;
-}
-
 //////////////////////////////////////////////////////
-// Convert Matlab Dynare endo and exo names array to C type array of string pointers
+// Convert MATLAB Dynare endo and exo names array to a vector<string> array of string pointers
 // Poblem is that Matlab mx function returns a long string concatenated by columns rather than rows
 // hence a rather low level approach is needed
 ///////////////////////////////////////////////////////
-const char **
-DynareMxArrayToString(const mxArray *mxFldp, const int len, const int width)
+void
+DynareMxArrayToString(const mxArray *mxFldp, const int len, const int width, vector<string> &out)
 {
   char *cNamesCharStr = mxArrayToString(mxFldp);
-  const char **ret = DynareMxArrayToString(cNamesCharStr, len, width);
 
-  return ret;
+  out.resize(len);
+
+  for (int i = 0; i < width; i++)
+    for (int j = 0; j < len; j++)
+      // Allow alphanumeric and underscores "_" only:
+      if (isalnum(cNamesCharStr[j+i*len]) || (cNamesCharStr[j+i*len] == '_'))
+        out[j] += cNamesCharStr[j+i*len];
 }
 
 extern "C" {
@@ -196,12 +178,14 @@ extern "C" {
     mxFldp = mxGetField(M_, 0, "var_order_endo_names");
     const int nendo = (int) mxGetM(mxFldp);
     const int widthEndo = (int) mxGetN(mxFldp);
-    const char **endoNamesMX = DynareMxArrayToString(mxFldp, nendo, widthEndo);
+    vector<string> endoNames;
+    DynareMxArrayToString(mxFldp, nendo, widthEndo, endoNames);
 
     mxFldp      = mxGetField(M_, 0, "exo_names");
     const int nexo = (int) mxGetM(mxFldp);
     const int widthExog = (int) mxGetN(mxFldp);
-    const char **exoNamesMX = DynareMxArrayToString(mxFldp, nexo, widthExog);
+    vector<string> exoNames;
+    DynareMxArrayToString(mxFldp, nexo, widthExog, exoNames);
 
     if ((nEndo != nendo) || (nExog != nexo))
       mexErrMsgTxt("Incorrect number of input parameters.");
@@ -225,7 +209,7 @@ extern "C" {
         tls.init(kOrder, nStat+2*nPred+3*nBoth+2*nForw+nExog);
 
         // make KordpDynare object
-        KordpDynare dynare(endoNamesMX,  nEndo, exoNamesMX,  nExog, nPar, // paramNames,
+        KordpDynare dynare(endoNames, nEndo, exoNames, nExog, nPar,
                            ySteady, vCov, modParams, nStat, nPred, nForw, nBoth,
                            jcols, NNZD, nSteps, kOrder, journal, dynamicDLL,
                            sstol, var_order_vp, llincidence, qz_criterium);

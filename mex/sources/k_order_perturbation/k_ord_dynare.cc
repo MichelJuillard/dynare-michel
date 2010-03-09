@@ -33,8 +33,8 @@
 /*       Dynare DynamicModel class                                                                 */
 /**************************************************************************************/
 
-KordpDynare::KordpDynare(const char **endo,  int num_endo,
-                         const char **exo, int nexog, int npar,
+KordpDynare::KordpDynare(const vector<string> &endo, int num_endo,
+                         const vector<string> &exo, int nexog, int npar,
                          Vector &ysteady, TwoDMatrix &vcov, Vector &inParams, int nstat,
                          int npred, int nforw, int nboth, const int jcols, const Vector &nnzd,
                          const int nsteps, int norder,
@@ -312,52 +312,16 @@ KordpDynare::ReorderDynareJacobianIndices() throw (TLException)
 /**************************************************************************************/
 /*       DynareNameList class                                                         */
 /**************************************************************************************/
-vector<int>
-DynareNameList::selectIndices(const vector<const char *> &ns) const throw (DynareException)
-{
-  vector<int> res;
-  for (unsigned int i = 0; i < ns.size(); i++)
-    {
-      int j = 0;
-      while (j < getNum() && strcmp(getName(j), ns[i]) != 0)
-        j++;
-      if (j == getNum())
-        throw DynareException(__FILE__, __LINE__,
-                              string("Couldn't find name for ") + ns[i]
-                              +" in DynareNameList::selectIndices");
-      res.push_back(j);
-    }
-  return res;
-}
 
-DynareNameList::DynareNameList(const  KordpDynare &dynare)
+DynareNameList::DynareNameList(const KordpDynare &dynare, const vector<string> &names_arg) : names(names_arg)
 {
-  for (int i = 0; i < dynare.ny(); i++)
-    names.push_back(dynare.dnl.getName(i));
-}
-DynareNameList::DynareNameList(const KordpDynare &dynare, const char **namesp)
-{
-  for (int i = 0; i < dynare.ny(); i++)
-    names.push_back(namesp[i]);
-}
-
-DynareExogNameList::DynareExogNameList(const KordpDynare &dynare)
-{
-  for (int i = 0; i < dynare.nexog(); i++)
-    names.push_back(dynare.denl.getName(i));
-}
-
-DynareExogNameList::DynareExogNameList(const KordpDynare &dynare, const char **namesp)
-{
-  for (int i = 0; i < dynare.nexog(); i++)
-    names.push_back(namesp[i]);
 }
 
 DynareStateNameList::DynareStateNameList(const KordpDynare &dynare, const DynareNameList &dnl,
-                                         const DynareExogNameList &denl)
+                                         const DynareNameList &denl)
 {
   for (int i = 0; i < dynare.nys(); i++)
-    names.push_back(dnl.getName(i+dynare.nstat()));
+    names.push_back(string(dnl.getName(i+dynare.nstat())));
   for (int i = 0; i < dynare.nexog(); i++)
-    names.push_back(denl.getName(i));
+    names.push_back(string(denl.getName(i)));
 }

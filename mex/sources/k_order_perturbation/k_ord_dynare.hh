@@ -45,10 +45,9 @@ class KordpDynare;
 /*////////////////////////////////////////////*/
 class DynareNameList : public NameList
 {
-  vector<const char *> names;
+  vector<string> names;
 public:
-  DynareNameList(const KordpDynare &dynare);
-  DynareNameList(const KordpDynare &dynare, const char **names);
+  DynareNameList(const KordpDynare &dynare, const vector<string> &names_arg);
   int
   getNum() const
   {
@@ -57,38 +56,16 @@ public:
   const char *
   getName(int i) const
   {
-    return names[i];
-  }
-  /** This for each string of the input vector calculates its index
-   * in the names. And returns the resulting vector of indices. If
-   * the name cannot be found, then an exception is raised. */
-  vector<int> selectIndices(const vector<const char *> &ns) const throw (DynareException);
-};
-
-class DynareExogNameList : public NameList
-{
-  vector<const char *> names;
-public:
-  DynareExogNameList(const  KordpDynare &dynare);
-  DynareExogNameList(const KordpDynare &dynare, const char **names);
-  int
-  getNum() const
-  {
-    return (int) names.size();
-  }
-  const char *
-  getName(int i) const
-  {
-    return names[i];
+    return names[i].c_str();
   }
 };
 
 class DynareStateNameList : public NameList
 {
-  vector<const char *> names;
+  vector<string> names;
 public:
   DynareStateNameList(const KordpDynare &dynare, const DynareNameList &dnl,
-                      const DynareExogNameList &denl);
+                      const DynareNameList &denl);
   int
   getNum() const
   {
@@ -97,7 +74,7 @@ public:
   const char *
   getName(int i) const
   {
-    return names[i];
+    return names[i].c_str();
   }
 };
 /*********************************************/
@@ -108,7 +85,6 @@ class DynamicModelDLL;
 class KordpDynare : public DynamicModel
 {
   friend class DynareNameList;
-  friend class DynareExogNameList;
   friend class DynareStateNameList;
   friend class DynamicModelDLL;
 
@@ -131,8 +107,7 @@ class KordpDynare : public DynamicModel
   Vector &params;
   TwoDMatrix &vCov;
   TensorContainer<FSSparseTensor> md; // ModelDerivatives
-  DynareNameList dnl;
-  DynareExogNameList denl;
+  DynareNameList dnl, denl;
   DynareStateNameList dsnl;
   const double ss_tol;
   const vector<int> &varOrder;
@@ -140,8 +115,8 @@ class KordpDynare : public DynamicModel
   double qz_criterium;
   vector<int> JacobianIndices;
 public:
-  KordpDynare(const char **endo, int num_endo,
-              const char **exo, int num_exo, int num_par,
+  KordpDynare(const vector<string> &endo, int num_endo,
+              const vector<string> &exo, int num_exo, int num_par,
               Vector &ySteady, TwoDMatrix &vCov, Vector &params, int nstat, int nPred,
               int nforw, int nboth, const int nJcols, const Vector &NNZD,
               const int nSteps, const int ord,
