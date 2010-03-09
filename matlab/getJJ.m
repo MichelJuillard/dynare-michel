@@ -22,16 +22,16 @@ if nargin<8 | isempty(indexo), indexo = [];, end,
 if nargin<10 | isempty(nlags), nlags=3; end,
 if nargin<11 | isempty(useautocorr), useautocorr=0; end,
 
-  if useautocorr,
+%   if useautocorr,
     warning('off','MATLAB:divideByZero')
-  end
+%   end
 if kronflag == -1,
   fun = 'thet2tau';
   params0 = M_.params;
-  JJ = fdjac(fun,[sqrt(diag(M_.Sigma_e(indexo,indexo))); M_.params(indx)],indx,indexo,1,mf,nlags,useautocorr);
+  JJ = fjaco(fun,[sqrt(diag(M_.Sigma_e(indexo,indexo))); M_.params(indx)],indx,indexo,1,mf,nlags,useautocorr);
   M_.params = params0;
   params0 = M_.params;
-  H = fdjac(fun,[sqrt(diag(M_.Sigma_e(indexo,indexo))); M_.params(indx)],indx,indexo,0,mf,nlags,useautocorr);
+  H = fjaco(fun,[sqrt(diag(M_.Sigma_e(indexo,indexo))); M_.params(indx)],indx,indexo,0,mf,nlags,useautocorr);
   M_.params = params0;
   assignin('base','M_', M_);
   assignin('base','oo_', oo_);
@@ -135,6 +135,6 @@ else
   gam = [oo_.dr.ys(oo_.dr.order_var(mf)); gam];
 end
 
-  if useautocorr,
+%   if useautocorr,
     warning('on','MATLAB:divideByZero')
-  end
+%   end

@@ -292,7 +292,7 @@ if kronflag==1, % kronecker products
 elseif kronflag==-1, % perturbation
     fun = 'thet2tau';
     params0 = M_.params;
-    H = fdjac(fun,[sqrt(diag(M_.Sigma_e(indexo,indexo))); M_.params(indx)],indx,indexo);
+    H = fjaco(fun,[sqrt(diag(M_.Sigma_e(indexo,indexo))); M_.params(indx)],indx,indexo);
     assignin('base','M_', M_);
     assignin('base','oo_', oo_);
 
