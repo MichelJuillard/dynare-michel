@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2009 Dynare Team
+ * Copyright (C) 2008-2010 Dynare Team
  *
  * This file is part of Dynare.
  *
@@ -111,12 +111,8 @@ DynamicModelDLL::eval(const Vector &y, const TwoDMatrix &x, const  Vector *modPa
 
   if (g1 != NULL)
     {
-      if (g1->nrows() != length)  // dummy
-        {
-          delete g1;
-          g1 =     new TwoDMatrix(length, jcols); // and get a new one
-          g1->zeros();
-        }
+      if (g1->nrows() != length)
+        throw DynareException(__FILE__, __LINE__, "DLL Error: g1 has wrong size");
       dg1 = const_cast<double *>(g1->base());
     }
   if (g2 != NULL)
@@ -147,7 +143,7 @@ DynamicModelDLL::eval(const Vector &y, const Vector &x, const Vector *modParams,
    * when calling <model>_dynamic(z,x,params,it_) x must be equal to
    * zeros(M_.maximum_lag+1,M_.exo_nbr)
    **/
-  TwoDMatrix &mx = *(new TwoDMatrix(nMax_lag+1, nExog));
+  TwoDMatrix mx(nMax_lag+1, nExog);
   mx.zeros(); // initialise shocks to 0s
 
   eval(y, mx, modParams, nMax_lag, residual, g1, g2, g3);
