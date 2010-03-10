@@ -69,8 +69,8 @@ yrStart=options_.ms.initial_year;
 qmStart=options_.ms.initial_subperiod;
 yrEnd=options_.ms.final_year;
 qmEnd=options_.ms.final_subperiod;
-%options_.ms.forecast = 4;   % number of years for forecasting
-if options_.ms.forecast<1
+%options_.forecast = 4;   % number of years for forecasting
+if options_.forecast<1
    error('To be safe, the number of forecast years should be at least 1')
 end
 ystr=num2str(yrEnd);
@@ -82,7 +82,7 @@ if qmEnd==options_.ms.freq
 else
    E1yrqm = [yrEnd qmEnd+1];  % first year and quarter (month) after the sample
 end
-E2yrqm = [yrEnd+options_.ms.forecast qmEnd];   % end at the last month (quarter) of a calendar year after the sample
+E2yrqm = [yrEnd+options_.forecast qmEnd];   % end at the last month (quarter) of a calendar year after the sample
 [fdates,nfqm]=fn_calyrqm(options_.ms.freq,E1yrqm,E2yrqm);   % forecast dates and number of forecast dates
 [sdates,nsqm] = fn_calyrqm(options_.ms.freq,[yrStart qmStart],[yrEnd qmEnd]);
    % sdates: dates for the whole sample (including options_.ms.nlags)
@@ -92,7 +92,7 @@ if nSample~=nsqm
    pause
 end
 imstp = 4*options_.ms.freq;    % <<>>  impulse responses (4 years)
-nayr = 4; %options_.ms.forecast;  % number of years before forecasting for plotting.
+nayr = 4; %options_.forecast;  % number of years before forecasting for plotting.
 
 
 %------- Prior, etc. -------
@@ -132,7 +132,7 @@ indxmsmdeqn = [0; 0; 0; 0];  %This option disenable using this in fn_rnrprior_co
 
 
 tdf = 3;          % degrees of freedom for t-dist for initial draw of the MC loop
-nbuffer = 100;        % a block or buffer of draws (buffer) that is saved to the disk (not memory)
+nbuffer = 1000;        % a block or buffer of draws (buffer) that is saved to the disk (not memory)
 ndraws1=1*nbuffer;         % 1st part of Monte Carlo draws
 ndraws2=10*ndraws1         % 2nd part of Monte Carlo draws
 seednumber = 0; %7910;    %472534;   % if 0, random state at each clock time

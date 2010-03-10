@@ -71,7 +71,7 @@ IndxNmlr = [1 0 0 0 0 0];  % imported by nmlzvar.m
 %
 %options_.ms.indxgdls = 1;  % 1: graph point forecast on variables; 0: disable
 nconstr1=nfqm;      % number of the 1st set of constraints
-nconstr2=options_.ms.forecast ;     % number of the 2nd set of constraints
+nconstr2=options_.forecast ;     % number of the 2nd set of constraints
 nconstr=nconstr1+nconstr2;   % q: 4 years -- 4*12 months.
                          % When 0, no conditions directly on variables <<>>
 nconstr=0   %6*nconstr1;
@@ -274,7 +274,7 @@ if options_.ms.indxestima
    ye = [dateswd y];
 
    %* Obtain linear restrictions
-   [Uiconst,Viconst,n0,np,ixmC0Pres] = feval(options_.ms.restriction_fname,options_.ms.nlags ,nvar,nexo,options_.ms.cross_restrictions );
+   [Uiconst,Viconst,n0,np,ixmC0Pres] = feval(options_.ms.restriction_fname,nvar,nexo,options_.ms );
    if min(n0)==0
       disp(' ')
       warning('A0: restrictions in dlrprior.m give no free parameter in one of equations')
@@ -574,7 +574,7 @@ if options_.ms.indxestima
 
          %*** conditions in every period
          vpntM = fn_dataext(E1yrqm, E2yrqm,xdatae); % point value matrix with dates
-         %     vaveM = fn_dataext([yrEnd+1 0],[yrEnd+options_.ms.forecast  0],yact2yre); % average value matrix with dates
+         %     vaveM = fn_dataext([yrEnd+1 0],[yrEnd+options_.forecast  0],yact2yre); % average value matrix with dates
          for i=1:nconstr
             if i<=nconstr1
                valuecon(i) = vpntM(i,2+varcon(i)); % 2: first 2 elements are dates
@@ -593,10 +593,10 @@ if options_.ms.indxestima
 
 %         %*** average condtions over,say, options_.ms.freq periods.
 %         if qmEnd==options_.ms.freq
-%            vaveM = fn_dataext([yrEnd+1 0],[yrEnd+options_.ms.forecast  0],yact2yre); % average value matrix with dates
+%            vaveM = fn_dataext([yrEnd+1 0],[yrEnd+options_.forecast  0],yact2yre); % average value matrix with dates
 %            valuecon(1) = vaveM(1,2+varcon(1));  % 2: first 2 elements are dates
 %         else
-%            vaveM = fn_dataext([yrEnd 0],[yrEnd+options_.ms.forecast  0],yact2yre); % average value matrix with dates
+%            vaveM = fn_dataext([yrEnd 0],[yrEnd+options_.forecast  0],yact2yre); % average value matrix with dates
 %            yactrem = fn_dataext([yrEnd qmEnd+1],[yrEnd options_.ms.freq],xdatae);
 %            valuecon(1) = sum(yactrem(:,2+varcon(1)),1)/length(stepcon{1});
 %                                    % 2: first 2 elements are dates

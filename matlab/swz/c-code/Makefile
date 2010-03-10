@@ -50,10 +50,11 @@ endif
 
 ifdef USE_MICHEL_LAPTOP
 
-#CC = gcc
-CC = /opt/intel/Compiler/11.0/074/bin/intel64/icc -no-multibyte-chars
+CC = gcc
+#CC = /opt/intel/Compiler/11.0/074/bin/intel64/icc -no-multibyte-chars
 FC = gfortran
 CFLAGS = -g -static
+#CFLAGS = -g
 
 TAO_DIR = $(WORK_DIR)/utilities/TZCcode
 
@@ -65,6 +66,7 @@ INTEL_LIBS = -lguide
 MKL_BASE_DIR = /opt/intel/Compiler/11.0/074/mkl
 MKL_LIBS_DIR = $(MKL_BASE_DIR)/lib/em64t
 MKL_LIBS = -lmkl_lapack -lmkl_em64t 
+
 endif
 
 
@@ -173,15 +175,16 @@ ERROR_DIR = $(WORK_DIR)/utilities/DWCcode/error
 ARRAY_DIR = $(WORK_DIR)/utilities/DWCcode/arrays
 ASCII_DIR = $(WORK_DIR)/utilities/DWCcode/ascii 
 STAT_DIR = $(WORK_DIR)/utilities/DWCcode/stat
+SPHERICAL_DIR = $(WORK_DIR)/utilities/DWCcode/spherical
 SORT_DIR = $(WORK_DIR)/utilities/DWCcode/sort
 SWITCH_DIR = $(WORK_DIR)/sbvar/switching
 VAR_DIR = $(WORK_DIR)/sbvar/var
 #################################################################################
 
 # DW  FILES
-INCLUDE_DIR := $(INCLUDE_DIR) -I$(MATRIX_DIR) -I$(ERROR_DIR) -I$(ARRAY_DIR) -I$(ASCII_DIR) -I$(STAT_DIR) -I$(SWITCH_DIR) -I$(VAR_DIR)
-VPATH := $(VPATH) $(MATRIX_DIR) $(ERROR_DIR) $(ARRAY_DIR) $(ASCII_DIR) $(STAT_DIR) $(SWITCH_DIR) $(VAR_DIR)
-OBJS := $(OBJS) bmatrix.o matrix.o dw_error.o dw_rand.o dw_matrix_rand.o dw_array.o dw_matrix_array.o dw_ascii.o dw_parse_cmd.o 
+INCLUDE_DIR := -I$(MATRIX_DIR) -I$(ERROR_DIR) -I$(ARRAY_DIR) -I$(ASCII_DIR) -I$(STAT_DIR) -I$(SPHERICAL_DIR) -I$(SORT_DIR) -I$(SWITCH_DIR) -I$(VAR_DIR) $(INCLUDE_DIR) 
+VPATH := $(VPATH) $(MATRIX_DIR) $(ERROR_DIR) $(ARRAY_DIR) $(ASCII_DIR) $(STAT_DIR) $(SPHERICAL_DIR) $(SORT_DIR) $(SWITCH_DIR) $(VAR_DIR)
+OBJS := $(OBJS) bmatrix.o matrix.o dw_error.o dw_rand.o dw_matrix_rand.o dw_array.o dw_matrix_array.o dw_matrix_sort.o dw_ascii.o dw_parse_cmd.o
 
 # TAO FILES
 OBJS := $(OBJS)
@@ -189,29 +192,38 @@ OBJS := $(OBJS)
 # PROJECT FILE
 INCLUDE_DIR := $(INCLUDE_DIR)
 VPATH := $(VPATH)
-OBJS := $(OBJS) PrintDraws.o switch.o switchio.o VARbase.o VARio.o command_line_VAR.o
+OBJS_DRAWS := $(OBJS) PrintDraws.o switch.o switchio.o VARbase.o VARio.o command_line_VAR.o
+OBJS_TAO := tzmatlab.o mathlib.o cstz_dw.o
+OBJS_ESTIM := $(OBJS) $(OBJS_TAO) estimate.o VARbase.o VARio.o command_line_VAR.o switch.o switchio.o switch_opt.o csminwel.o
+OBJS_INIT := $(OBJS) create_init_file.o switch.o switchio.o VARbase.o VARio.o VARio_matlab.o 
+OBJS_MHM_1 := $(OBJS)  mhm_VAR_main_1.o mhm_VAR.o VARbase.o VARio.o command_line_VAR.o switch.o switchio.o 
+OBJS_MHM_2 := $(OBJS) mhm_VAR_main_2.o spherical.o VARbase.o VARio.o switch.o switchio.o mhm_VAR.o
+OBJS_PROBA := $(OBJS) probabilities.o switch.o switchio.o VARbase.o VARio.o command_line_VAR.o
+
+
 
 #################################################################################
 # OUTPUT
 
-all: $(OUT_DIR)/sbvar_draws $(OUT_DIR)/sbvar_estimation $(OUT_DIR)/sbvar_init_file $(OUT_DIR)/sbvar_mhm_1 $(OUT_DIR)/sbvar_mhm_2 $(OUT_DIR)/sbvar_probabilities
+#all: $(OUT_DIR)/sbvar_draws $(OUT_DIR)/sbvar_estimation $(OUT_DIR)/sbvar_init_file $(OUT_DIR)/sbvar_mhm_1 $(OUT_DIR)/sbvar_mhm_2 $(OUT_DIR)/sbvar_probabilities
+all: $(OUT_DIR)/sbvar_draws $(OUT_DIR)/sbvar_init_file $(OUT_DIR)/sbvar_mhm_1 $(OUT_DIR)/sbvar_mhm_2 $(OUT_DIR)/sbvar_probabilities
 
-$(OUT_DIR)/sbvar_draws: $(OBJS)
+$(OUT_DIR)/sbvar_draws: $(OBJS_DRAWS)
 	$(CC) $(CFLAGS) $^ $(LIBS_DIR) $(LIBS) -o $(OUT_DIR)/sbvar_draws
 
-$(OUT_DIR)/sbvar_estimation: $(OBJS)
+$(OUT_DIR)/sbvar_estimation: $(OBJS_ESTIM)
 	$(CC) $(CFLAGS) $^ $(LIBS_DIR) $(LIBS) -o $(OUT_DIR)/sbvar_estimation
 
-$(OUT_DIR)/sbvar_init_file: $(OBJS)
+$(OUT_DIR)/sbvar_init_file: $(OBJS_INIT)
 	$(CC) $(CFLAGS) $^ $(LIBS_DIR) $(LIBS) -o $(OUT_DIR)/sbvar_init_file
 
-$(OUT_DIR)/sbvar_mhm_1: $(OBJS)
+$(OUT_DIR)/sbvar_mhm_1: $(OBJS_MHM_1)
 	$(CC) $(CFLAGS) $^ $(LIBS_DIR) $(LIBS) -o $(OUT_DIR)/sbvar_mhm_1
 
-$(OUT_DIR)/sbvar_mhm_2: $(OBJS)
+$(OUT_DIR)/sbvar_mhm_2: $(OBJS_MHM_2)
 	$(CC) $(CFLAGS) $^ $(LIBS_DIR) $(LIBS) -o $(OUT_DIR)/sbvar_mhm_2
 
-$(OUT_DIR)/sbvar_probabilities: $(OBJS)
+$(OUT_DIR)/sbvar_probabilities: $(OBJS_PROBA)
 	$(CC) $(CFLAGS) $^ $(LIBS_DIR) $(LIBS) -o $(OUT_DIR)/sbvar_probabilities
 
 

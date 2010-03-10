@@ -1,4 +1,4 @@
-function sz_prd(options_)
+function sz_prd(M,options_)
 %==========================================================================
 %== Directory structure
 %==========================================================================
@@ -53,7 +53,7 @@ markov_file = [options_.ms.markov_file '.dat'];
 %options_.ms.mhm_file = 'MHM_input.dat';
 
 
-mhm_file = [mhm_spec_path '/MHM_input.dat'];
+mhm_file = '/MHM_input.dat';
 %options_.ms.proposal_draws = 100000;
 
 %==========================================================================
@@ -277,7 +277,7 @@ if options_.ms.create_initialization_file == 1
             Ui{kj} = eye(nvar);  Vi{kj} = eye(ncoef);
         end
     else
-        eval(['[Ui,Vi,n0,np,ixmC0Pres] = ' options_.ms.restriction_fname '(options_.ms.nlags,nvar,nexo,indxC0Pres);'])
+        [Ui,Vi,n0,np,ixmC0Pres] = feval(options_.ms.restriction_fname,nvar,nexo,options_.ms);
         if min(n0)==0
             disp('A0: restrictions give no free parameters in one of equations')
             return
@@ -326,7 +326,7 @@ if options_.ms.create_initialization_file == 1
         %
         tic
         [fhat,xhat,grad,Hhat,itct,fcount,retcodehat] = csminwel('fn_a0freefun',x,H0,'fn_a0freegrad',crit,nit,Ui,nvar,n0,fss,H0inv);
-        endtime = toc
+        endtime = toc;
 
         A0hat = fn_tran_b2a(xhat,Ui,nvar,n0);
 
@@ -480,9 +480,11 @@ if options_.ms.create_initialization_file == 1
     %======================================================================
     %== Create C initialization filename
     %======================================================================
+    swz_write_markov_file(markov_file,M,options_)
     if use_linux == 1
-        create_init_file=[c_path,'/sbvar_init_file ',matlab_filename,' ',m_spec_path,'/',markov_file,' ',options_.ms.output_file_tag];
-        system(create_init_file) %Run operating system command and return result
+        create_init_file=[c_path,'/sbvar_init_file ',matlab_filename,' ',markov_file,' ',options_.ms.output_file_tag];
+        system(create_init_file); %Run operating system command and return
+                                 %result
     else
         create_init_file=[c_path,'\sbvar_init.exe ',matlab_filename,' ',m_spec_path,'\',markov_file,' ',options_.ms.output_file_tag];
         dos(create_init_file)
@@ -495,10 +497,10 @@ end
 %==========================================================================
 if options_.ms.estimate_msmodel == 1
     if use_linux == 1
-        perform_estimation=[c_path,'/sbvar_estimate -ft ',options_.ms.output_file_tag];
-        system(perform_estimation)
+        perform_estimation=[c_path,'/sbvar_estimation -ft ',options_.ms.output_file_tag];
+        %        system(perform_estimation);
     else
-        perform_estimation=[c_path,'\sbvar_estimate.exe -ft ',options_.ms.output_file_tag];
+        perform_estimation=[c_path,'\sbvar_estimation.exe -ft ',options_.ms.output_file_tag];
         dos(perform_estimation)
     end
 end
@@ -508,13 +510,15 @@ end
 %== Compute marginal data density
 %==========================================================================
 if options_.ms.compute_mdd == 1
+    mhm_file = ['mhm_input_' M.fname '.dat'];
+    swz_write_mhm_input(mhm_file,options_.ms);
     if use_linux == 1
-        compute_mdd1=[c_path,'/sbvar_mhm_1 -ft ',options_.ms.output_file_tag,' -fi ',mhm_spec_path,'/',mhm_file];
+        compute_mdd1=[c_path,'/sbvar_mhm_1 -ft ',options_.ms.output_file_tag,' -fi ',mhm_file];
         system(compute_mdd1);
         compute_mdd2=[c_path,'/sbvar_mhm_2 -ft ',options_.ms.output_file_tag,' -d ',int2str(options_.ms.proposal_draws),' -t 3'];
         system(compute_mdd2);
     else
-        compute_mdd1=[c_path,'\sbvar_mhm_1.exe -ft ',options_.ms.output_file_tag,' -fi ',mhm_spec_path,'/',mhm_file];
+        compute_mdd1=[c_path,'\sbvar_mhm_1.exe -ft ',options_.ms.output_file_tag,' -fi ',mhm_file];
         system(compute_mdd1);
         compute_mdd2=[c_path,'\sbvar_mhm_2.exe -ft ',options_.ms.output_file_tag,' -d ',int2str(options_.ms.proposal_draws),' -t 3'];
         system(compute_mdd2);

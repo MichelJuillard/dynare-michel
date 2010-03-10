@@ -283,6 +283,15 @@ options_.ms.print_draws = 1;
 options_.ms.n_draws=1000;
 options_.ms.thinning_factor=1;
 options_.ms.proposal_draws = 100000;
-
+options_.ms.lower_cholesky = 0;
+options_.ms.upper_cholesky = 0;
+options_.ms.Qi = [];
+options_.ms.Ri = [];
+options_.ms.draws_nbr_burn_in_1 = 30000;
+options_.ms.draws_nbr_burn_in_2 = 10000;
+options_.ms.draws_nbr_mean_var_estimate = 200000;
+options_.ms.draws_nbr_modified_harmonic_mean = 1000000;
+options_.ms.thinning_factor = 1;
+options_.ms.dirichlet_scale = 1;
 % initialize persistent variables in priordens()
 priordens([],[],[],[],[],[],1);
