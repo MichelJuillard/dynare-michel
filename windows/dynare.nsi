@@ -43,8 +43,9 @@ InstallDir "c:\dynare\${VERSION}"
 # (64-bit DLL are compiled with MSVC and therefore are small)
 !system 'strip ..\matlab\dynare_m.exe'
 !system 'strip ..\dynare++\src\dynare++.exe'
+!system 'strip ..\mex\octave\*.mex'
 !system 'strip ..\mex\matlab\win32-6.5-7.4\*'
-!system 'strip ..\mex\matlab\win32-7.5-7.9\*'
+!system 'strip ..\mex\matlab\win32-7.5-7.10\*'
 
 !macro DETERMINE_CONTEXT
  # Determine if we are admin or not
@@ -125,7 +126,7 @@ Section "Dynare++ (standalone executable)"
  SetOutPath $INSTDIR\dynare++
  File ..\dynare++\src\dynare++.exe
  # The list of DLLs given here is used when building with Octave/MinGW build 3.2.3 (disabling POSIX threads)
- File ..\dynare++\src\atlas.dll ..\dynare++\src\blas.dll ..\dynare++\src\cblas.dll ..\dynare++\src\lapack.dll ..\dynare++\src\libgcc_s_dw2-1.dll ..\dynare++\src\libgfortran-3.dll
+ File ..\dynare++\src\atlas.dll ..\dynare++\src\blas.dll ..\dynare++\src\cblas.dll ..\dynare++\src\lapack.dll ..\dynare++\src\libgcc_s_dw2-1.dll ..\dynare++\src\libgfortran-3.dll ..\dynare++\src\pthreadGC2.dll
 SectionEnd
 
 Section "Documentation (Dynare and Dynare++)"
