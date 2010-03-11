@@ -769,6 +769,7 @@ end;
   <listitem><para>maximum and minimum: <literal>max(<replaceable>a</replaceable>, <replaceable>b</replaceable>)</literal>, <literal>min(<replaceable>a</replaceable>, <replaceable>b</replaceable>)</literal></para></listitem>
   <listitem><para>gaussian cumulative distribution function: <literal>normcdf(<replaceable>x</replaceable>, <replaceable>&mu;</replaceable>, <replaceable>&sigma;</replaceable>)</literal> (note that <literal>normcdf(<replaceable>x</replaceable>)</literal> is equivalent to <literal>normcdf(<replaceable>x</replaceable>, 0, 1)</literal>)</para></listitem>
   <listitem><para>gaussian probability density function: <literal>normpdf(<replaceable>x</replaceable>, <replaceable>&mu;</replaceable>, <replaceable>&sigma;</replaceable>)</literal> (note that <literal>normpdf(<replaceable>x</replaceable>)</literal> is equivalent to <literal>normpdf(<replaceable>x</replaceable>, 0, 1)</literal>)</para></listitem>
+  <listitem><para>gauss error function: <literal>erf(<replaceable>x</replaceable>)</literal></para></listitem>
 </itemizedlist>
 </para>
 </sect3>
