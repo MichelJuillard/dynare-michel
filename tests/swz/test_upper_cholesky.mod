@@ -1,4 +1,4 @@
-addpath '/home/michel/dynare/svn/dynare/trunk/matlab/swz';
+addpath '../../matlab/swz';
 var Y Pie R;
 
 model;

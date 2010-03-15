@@ -34,5 +34,6 @@ function swz_write_mhm_input(fname,options_ms)
     fprintf(fh,'//------- It seems that Dan''s code only use the first element of the following scales.  The scale applies to the Dirichlet''s hyperparameter alpha for the diagonal of the transition matrix in the weighting function.  Note that the weighting function for the transition matrix parameters is Dirichlet. ---------\n');
             
     fprintf(fh,'//== scale values for Dirichlet distribution ==//\n');
-    fprintf(fh,'1\n\n');
-    fprintf(fh,'%d\n',options_ms.dirichlet_scale);
+    fprintf(fh,'3\n\n');
+    fprintf(fh,'%f ',options_ms.dirichlet_scale);
+    fprintf(fh,'\n');
