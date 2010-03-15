@@ -50,10 +50,41 @@ namespace blas
        double alpha, const Mat1 &A, const Mat2 &B,
        double beta, Mat3 &C)
   {
-    assert(A.getRows() == C.getRows());
-    assert(A.getCols() == B.getRows());
-    assert(B.getCols() == C.getCols());
     blas_int m = A.getRows(), n = B.getCols(), k = A.getCols();
+    if (*transa == 'N')
+      {
+        if (*transb == 'N')
+          {
+            assert(A.getRows() == C.getRows());
+            assert(A.getCols() == B.getRows());
+            assert(B.getCols() == C.getCols());
+          }
+        else if (*transb == 'T')
+          {
+            assert(A.getRows() == C.getRows());
+            assert(A.getCols() == B.getCols());
+            assert(B.getRows() == C.getCols());
+            n = B.getRows();
+          }
+      }
+    else if (*transa == 'T')
+      {
+        m = A.getCols();
+        k = A.getRows();
+        if (*transb == 'N')
+          {
+            assert(A.getCols() == C.getRows());
+            assert(A.getRows() == B.getRows());
+            assert(B.getCols() == C.getCols());
+          }
+        else if (*transb == 'T')
+          {
+            assert(A.getCols() == C.getRows());
+            assert(A.getRows() == B.getCols());
+            assert(B.getRows() == C.getCols());
+            n = B.getRows();
+          }
+      }
     blas_int lda = A.getLd(), ldb = B.getLd(), ldc = C.getLd();
     dgemm(transa, transb, &m, &n, &k, &alpha, A.getData(), &lda,
           B.getData(), &ldb, &beta, C.getData(), &ldc);
