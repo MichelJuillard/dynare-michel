@@ -118,11 +118,7 @@ DynamicModelDLL::eval(const Vector &y, const Matrix &x, const  Vector *modParams
   if (g1 != NULL)
   {
     if (g1->getRows() != length)  // dummy
-    {
-      delete g1;
-      g1 =     new Matrix(length, jcols); // and get a new one
-      g1->setAll(0.0); //zero
-    }
+      throw TSException(__FILE__, __LINE__, "DLL Error: g1 has wrong size");
     dg1 = const_cast<double *>(g1->getData());
   }
   if (g2 != NULL)
@@ -153,7 +149,7 @@ DynamicModelDLL::eval(const Vector &y, const Vector &x, const Vector *modParams,
   * when calling <model>_dynamic(z,x,params,it_) x must be equal to
   * zeros(M_.maximum_lag+1,M_.exo_nbr)
   **/
-  Matrix &mx = *(new Matrix(nMax_lag+1, nExog));
+  Matrix mx(nMax_lag+1, nExog);
   mx.setAll(0); // initialise shocks to 0s
 
   eval(y, mx, modParams, nMax_lag, residual, g1, g2, g3);
