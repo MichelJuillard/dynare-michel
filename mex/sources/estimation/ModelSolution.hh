@@ -41,12 +41,13 @@ public:
   ModelSolution(const std::string& modName,  size_t n_endo, size_t n_exo, const std::vector<size_t>& zeta_fwrd_arg, 
     const std::vector<size_t>& zeta_back_arg, const std::vector<size_t>& zeta_mixed_arg, 
     const std::vector<size_t>& zeta_static_arg, const Matrix& llincidence, double qz_criterium);
+  virtual ~ModelSolution(){};
   void compute( Vector& steadyState, const Vector& deepParams, 	Matrix& ghx, Matrix& ghu ) throw (DecisionRules::BlanchardKahnException, GeneralizedSchurDecomposition::GSDException);
 
 private:
-  const int n_endo;
-  const int n_exo;
-  const int n_jcols; // Num of Jacobian columns
+  const size_t n_endo;
+  const size_t n_exo;
+  const size_t n_jcols; // Num of Jacobian columns
   const Matrix ll_incidence; // leads and lags indices
   Matrix jacobian;
   Vector residual;
