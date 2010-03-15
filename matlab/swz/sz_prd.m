@@ -4,7 +4,7 @@ function sz_prd(M,options_)
 %==========================================================================
 
 %generation of mhm file
-generateMHM_input(options_);
+%generateMHM_input(options_);
 
 swz_root = strrep(which('swz_sbvar'),'/swz_sbvar.m','');
 
