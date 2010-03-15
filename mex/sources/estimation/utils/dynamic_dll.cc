@@ -34,7 +34,8 @@ length(y_length), jcols(j_cols), nMax_lag(n_max_lag), nExog(n_exog)
 {
   std::string fName;
 #if !defined(__CYGWIN32__) && !defined(_WIN32)
-  fName = "./";
+  if (modName[0] != '/')
+    fName = "./";
 #endif
   if (sExt.size()>0) //construct modelNmae_dynamic file name with the given extension
     fName += modName + "_dynamic" + sExt;

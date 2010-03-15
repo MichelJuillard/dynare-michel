@@ -25,38 +25,39 @@
 int
 main (int argc, char** argv)
 {
+  if (argc < 2)
+    {
+      std::cerr << argv[0] << ": please provide as argument the name of the dynamic DLL generated from fs2000k2.mod (typically fs2000k2_dynamic.mex*)" << std::endl;
+      exit(EXIT_FAILURE);
+    }
 
-  std::string modName("fs2000k2_dynamic.mexw32"); 
-  const int npar = 7; //(int)mxGetM(mxFldp);
+  std::string modName = argv[1];
+  const int npar = 7;
   const size_t n_endo=15, n_exo=2; 
   std::vector<size_t> zeta_fwrd_arg; 
   std::vector<size_t> zeta_back_arg; 
   std::vector<size_t> zeta_mixed_arg;
   std::vector<size_t> zeta_static_arg;
-  //std::vector<size_t> 
   double qz_criterium=1.0+1.0e-9;  
   Vector steadyState(n_endo), deepParams(npar);
 
-  double dYSparams [] = { // 27 mxGetData(mxFldp);
+  double dYSparams [] = {
     1.0110,  2.2582,  0.4477,  1.0000,
     4.5959,  1.0212,  5.8012,  0.8494,
     0.1872,  0.8604,  1.0030,  1.0080,
-    0.5808,  1.0030,  2.2093   //2.2582,  0.4477
+    0.5808,  1.0030,  2.2093
   };
-  double vcov[] = { //(double *) mxGetData(mxFldp);
+  double vcov[] = {
     0.1960e-3, 0.0,
     0.0, 0.0250e-3
   };
-  int nVCVpar = 2; //(int)mxGetN(mxFldp);
+  int nVCVpar = 2;
   MatrixView vCovVW(vcov,nVCVpar,nVCVpar,nVCVpar);
   Matrix vCov (nVCVpar, nVCVpar);
   vCov = vCovVW;
 
   Matrix ll_incidence(3,n_endo); // leads and lags indices
   double inllincidence[]={
-    //    1, 2,  0,  0,  0,  0,  3,  0,  0,  0,  0,  0,  4,  0,  0,
-    //    5,  6,  7,  8,  9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19,
-    //    0, 20, 21,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0, 22
     1,   5,  0,
     2,   6,  20,
     0,   7,  21,
@@ -88,7 +89,6 @@ main (int argc, char** argv)
   deepParams=modParamsVW;
   VectorView steadyStateVW(dYSparams,n_endo,1);
   steadyState=steadyStateVW;
-  //std::cout << "VectorView deepParamsVW: " << std::endl << modParamsVW << std::endl;
   std::cout << "Vector deepParams: " << std::endl << deepParams << std::endl;
   std::cout << "Matrix vCov: " << std::endl << vCov << std::endl;
   std::cout << "MatrixVw llincidence: " << std::endl << llincidence << std::endl;
@@ -113,17 +113,11 @@ main (int argc, char** argv)
   Matrix ghx(n_endo, zeta_back_arg.size() + zeta_mixed_arg.size());
   Matrix ghu(n_endo,n_exo);
 
-  //  exit(0);
   ModelSolution modelSolution( modName, n_endo, n_exo
     , zeta_fwrd_arg, zeta_back_arg, zeta_mixed_arg, zeta_static_arg, ll_incidence, qz_criterium);
-
-  // exit(0);
 
   modelSolution.compute(steadyState, deepParams, ghx,  ghu);
 
   std::cout << "Matrix ghx: " << std::endl << ghx << std::endl;
   std::cout << "Matrix ghu: " << std::endl << ghu << std::endl;
-
-
 }
-
