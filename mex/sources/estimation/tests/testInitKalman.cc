@@ -25,9 +25,13 @@
 int
 main(int argc, char **argv)
 {
+  if (argc < 2)
+    {
+      std::cerr << argv[0] << ": please provide as argument the name of the dynamic DLL generated from fs2000k2.mod (typically fs2000k2_dynamic.mex*)" << std::endl;
+      exit(EXIT_FAILURE);
+    }
 
-  std::string
-  modName("fs2000k2_dynamic.mexw32");
+  std::string modName = argv[1];
   const int npar = 7; //(int)mxGetM(mxFldp);
   const size_t n_endo = 15, n_exo = 2;
   std::vector<size_t> zeta_fwrd_arg;

@@ -130,6 +130,10 @@ ylwrap
 # Estimation DLL tests
 /mex/sources/estimation/tests/test-dr
 /mex/sources/estimation/tests/test-dr.exe
+/mex/sources/estimation/tests/testModelSolution
+/mex/sources/estimation/tests/testModelSolution.exe
+/mex/sources/estimation/tests/testInitKalman
+/mex/sources/estimation/tests/testInitKalman.exe
 /mex/sources/estimation/libmat/tests/test-qr
 /mex/sources/estimation/libmat/tests/test-qr.exe
 /mex/sources/estimation/libmat/tests/test-gsd
