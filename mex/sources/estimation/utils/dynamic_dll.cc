@@ -28,8 +28,8 @@ using namespace std;
 * Members of DynamicModelDLL for handling loading and calling
 * <model>_dynamic () function
 **************************************/
-DynamicModelDLL::DynamicModelDLL(const std::string &modName, const int y_length, const int j_cols,
-                                 const int n_max_lag, const int n_exog, const std::string &sExt) throw (TSException) :
+DynamicModelDLL::DynamicModelDLL(const std::string &modName, const size_t y_length, const size_t j_cols,
+                                 const int n_max_lag, const size_t n_exog, const std::string &sExt) throw (TSException) :
 length(y_length), jcols(j_cols), nMax_lag(n_max_lag), nExog(n_exog)
 {
   std::string fName;

@@ -34,6 +34,7 @@
 #endif
 
 #include <string>
+#include <dynmex.h>
 #include "Matrix.hh"
 
 #include "ts_exception.h"
@@ -52,10 +53,10 @@ class DynamicModelDLL
 private:
   DynamicFn  Dynamic; // pointer to the Dynamic function in DLL
 
-  const int length;  // tot num vars = Num of Jacobian rows
-  const int jcols;  // tot num var t-1, t and t+1 instances + exogs = Num of Jacobian columns
+  const size_t length;  // tot num vars = Num of Jacobian rows
+  const size_t jcols;  // tot num var t-1, t and t+1 instances + exogs = Num of Jacobian columns
   const int nMax_lag; // no of lags
-  const int nExog; // no of exogenous
+  const size_t nExog; // no of exogenous
 #if defined(_WIN32) || defined(__CYGWIN32__)
   HINSTANCE dynamicHinstance;  // DLL instance pointer in Windows
 #else
@@ -64,8 +65,8 @@ private:
 
 public:
   // construct and load Dynamic model DLL
-  DynamicModelDLL(const std::string &modName, const int length, const int jcols,
-    const int nMax_lag, const int nExog, const std::string &sExt) throw (TSException);
+  DynamicModelDLL(const std::string &modName, const size_t length, const size_t jcols,
+    const int nMax_lag, const size_t nExog, const std::string &sExt) throw (TSException);
   virtual ~DynamicModelDLL();
 
   // evaluate Dynamic model DLL
