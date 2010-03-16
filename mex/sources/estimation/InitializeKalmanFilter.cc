@@ -25,7 +25,6 @@
 
 #include "InitializeKalmanFilter.hh"
 #include "BlasBindings.hh"
-#include "disclyap_fast.hh"
 
 InitializeKalmanFilter::~InitializeKalmanFilter()
 {
