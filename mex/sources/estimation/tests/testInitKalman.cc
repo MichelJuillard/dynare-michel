@@ -130,7 +130,7 @@ main(int argc, char **argv)
     ric.push_back(sric[i]-1);
 
   size_t nobs = 2;
-  size_t svarobs[] = {8, 7};
+  size_t svarobs[] = {2, 1};
   std::vector<size_t> varobs;
   for (size_t i = 0; i < nobs; ++i)
     varobs.push_back(svarobs[i]-1);
