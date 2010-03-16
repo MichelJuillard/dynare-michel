@@ -68,6 +68,10 @@ CPPFLAGS="$CPPFLAGS_SAVED"
 # Don't use deprecated hash structures
 AC_DEFINE([BOOST_NO_HASH], [], [Don't use deprecated STL hash structures])
 
+# Check for dlopen(), needed by tests for estimation DLL
+AC_CHECK_LIB([dl], [dlopen], [LIBADD_DLOPEN="-ldl"], [])
+AC_SUBST([LIBADD_DLOPEN])
+
 AC_CHECK_PROG([PDFTEX], [pdftex], [pdftex])
 AM_CONDITIONAL([HAVE_PDFTEX], [test "x$PDFTEX" != "x"])
 
