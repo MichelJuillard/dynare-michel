@@ -2228,8 +2228,6 @@ stoch_simul(linear,irf=60) y k;
   <listitem><para><xref linkend='estimated_params_init'/></para></listitem>
   <listitem><para><xref linkend='estimated_params_bounds'/></para></listitem>
   <listitem><para><xref linkend='estimation'/></para></listitem>
-  <listitem><para><xref linkend='prior_analysis'/></para></listitem>
-  <listitem><para><xref linkend='posterior_analysis'/></para></listitem>
   <listitem><para><xref linkend='model_comparison'/></para></listitem>
   <listitem><para><xref linkend='shock_decomposition'/></para></listitem>
   <listitem><para><xref linkend='unit_root_vars'/> (deprecated)</para></listitem>
@@ -2958,104 +2956,6 @@ oo_.posterior_hpdsup.measurement_errors_corr.gdp_conso
 <para>If you know how to compute the steady state for your model, you can provide a <trademark class="registered">MATLAB</trademark> function doing the computation instead of using <command>steady</command>. The function should be called with the name of the <filename class="extension">.mod</filename> file followed by <filename>_steadystate</filename>. See <filename>fs2000a_steadystate.m</filename> in <filename>examples/fs2000</filename> directory.
 </para>
 </refsect1>
-</refentry>
-
-<refentry id="prior_analysis">
-  <refmeta>
-    <refentrytitle>prior_analysis</refentrytitle>
-  </refmeta>
-
-  <refnamediv>
-    <refname>prior_analysis</refname>
-    <refpurpose>Prior distribution analysis</refpurpose>
-  </refnamediv>
-
-  <refsynopsisdiv>
-    <cmdsynopsis>
-      <command>prior_analysis</command>
-      <arg>(<replaceable>OPTION</replaceable><arg rep="repeat">, <replaceable>OPTION</replaceable></arg>)</arg><arg choice="plain">;</arg>
-    </cmdsynopsis>
-  </refsynopsisdiv>
-
-  <refsect1><title>Options</title>
-  <variablelist>
-    <varlistentry>
-      <term><option>nograph</option></term>
-      <listitem><para>See <link linkend="nograph">there</link></para></listitem>
-    </varlistentry>
-    <varlistentry>
-      <term><option>conf_sig</option> = <replaceable>DOUBLE</replaceable></term>
-      <listitem><para>See <link linkend="conf_sig">there</link></para></listitem>
-    </varlistentry>
-    <varlistentry>
-      <term><option>prior_trunc</option> = <replaceable>DOUBLE</replaceable></term>
-      <listitem><para>See <link linkend="prior_trunc">there</link></para></listitem>
-    </varlistentry>
-    <varlistentry>
-      <term><option>bayesian_irf</option></term>
-      <listitem><para>See <link linkend="bayesian_irf">there</link></para></listitem>
-    </varlistentry>
-    <varlistentry>
-      <term><option>irf</option> = <replaceable>INTEGER</replaceable></term>
-      <listitem><para>See <link linkend="irf">there</link></para></listitem>
-    </varlistentry>
-    <varlistentry>
-      <term><option>tex</option></term>
-      <listitem><para>See <link linkend="tex">there</link></para></listitem>
-    </varlistentry>
-    <varlistentry>
-      <term><option>forecast</option> = <replaceable>INTEGER</replaceable></term>
-      <listitem><para>See <link linkend="forecast_opt">there</link></para></listitem>
-    </varlistentry>
-    <varlistentry>
-      <term><option>smoother</option></term>
-      <listitem><para>See <link linkend="smoother">there</link></para></listitem>
-    </varlistentry>
-    <varlistentry>
-      <term><option>moments_varendo</option></term>
-      <listitem><para>See <link linkend="moments_varendo">there</link></para></listitem>
-    </varlistentry>
-    <varlistentry>
-      <term><option>filtered_vars</option></term>
-      <listitem><para>See <link linkend="filtered_vars">there</link></para></listitem>
-    </varlistentry>
-    <varlistentry>
-      <term><option>xls_sheet</option> = <replaceable>NAME</replaceable></term>
-      <listitem><para>See <link linkend="xls_sheet">there</link></para></listitem>
-    </varlistentry>
-    <varlistentry>
-      <term><option>xls_range</option> = <replaceable>RANGE</replaceable></term>
-      <listitem><para>See <link linkend="xls_range">there</link></para></listitem>
-    </varlistentry>
-    <varlistentry>
-      <term><option>filter_step_ahead</option> = [<replaceable>INTEGER_1</replaceable>:<replaceable>INTEGER_2</replaceable>]</term>
-      <listitem><para>See <link linkend="filter_step_ahead">there</link></para></listitem>
-    </varlistentry>
-  </variablelist>
-  </refsect1>
-
-</refentry>
-
-<refentry id="posterior_analysis">
-  <refmeta>
-    <refentrytitle>posterior_analysis</refentrytitle>
-  </refmeta>
-
-  <refnamediv>
-    <refname>posterior_analysis</refname>
-    <refpurpose>Posterior distribution analysis</refpurpose>
-  </refnamediv>
-
-  <refsynopsisdiv>
-    <cmdsynopsis>
-      <command>posterior_analysis</command>
-      <arg>(<replaceable>OPTION</replaceable><arg rep="repeat">, <replaceable>OPTION</replaceable></arg>)</arg><arg choice="plain">;</arg>
-    </cmdsynopsis>
-  </refsynopsisdiv>
-
-  <refsect1><title>Options</title>
-  <para>This command accepts exactly the same options than <xref linkend="prior_analysis"/></para>
-  </refsect1>
 </refentry>
 
 <refentry id="model_comparison">
