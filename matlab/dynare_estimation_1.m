@@ -1085,7 +1085,7 @@ end
 
 if (~((any(bayestopt_.pshape > 0) & options_.mh_replic) | (any(bayestopt_.pshape ...
                                                       > 0) & options_.load_mh_file)) ...
-    | ~options_.smoother ) & M_.endo_nbr^2*gend < 1e7 % to be fixed   
+    | ~options_.smoother ) & M_.endo_nbr^2*gend < 1e7 & options_.partial_information == 0  % to be fixed   
     %% ML estimation, or posterior mode without metropolis-hastings or metropolis without bayesian smooth variable
     [atT,innov,measurement_error,updated_variables,ys,trend_coeff,aK,T,R,P,PK,d,decomp] = DsgeSmoother(xparam1,gend,data,data_index,missing_value);
     oo_.Smoother.SteadyState = ys;
