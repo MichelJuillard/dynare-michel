@@ -173,22 +173,22 @@ if isempty(options_.varobs)
 end
 
 %% Setting resticted state space (observed + predetermined variables)
-k = [];
+var_obs_index = [];
 k1 = [];
 for i=1:n_varobs
-    k = [k strmatch(deblank(options_.varobs(i,:)),M_.endo_names(dr.order_var,:),'exact')];
+    var_obs_index = [var_obs_index strmatch(deblank(options_.varobs(i,:)),M_.endo_names(dr.order_var,:),'exact')];
     k1 = [k1 strmatch(deblank(options_.varobs(i,:)),M_.endo_names, 'exact')];
 end
 % Define union of observed and state variables
-k2 = union(k',[dr.nstatic+1:dr.nstatic+dr.npred]');
+k2 = union(var_obs_index',[dr.nstatic+1:dr.nstatic+dr.npred]');
 % Set restrict_state to postion of observed + state variables in expanded state vector.
 bayestopt_.restrict_var_list = k2;
 % set mf0 to positions of state variables in restricted state vector for likelihood computation.
 [junk,bayestopt_.mf0] = ismember([dr.nstatic+1:dr.nstatic+dr.npred]',k2);
 % Set mf1 to positions of observed variables in restricted state vector for likelihood computation.
-[junk,bayestopt_.mf1] = ismember(k,k2); 
+[junk,bayestopt_.mf1] = ismember(var_obs_index,k2); 
 % Set mf2 to positions of observed variables in expanded state vector for filtering and smoothing.
-bayestopt_.mf2  = k;
+bayestopt_.mf2  = var_obs_index;
 bayestopt_.mfys = k1;
 
 [junk,ic] = intersect(k2,nstatic+(1:npred)');
@@ -198,6 +198,18 @@ aux(:,2) = aux(:,2) + sum(k2 <= nstatic);
 k = find(aux(:,2) > npred);
 aux(k,2) = aux(k,2) + sum(k2 > nstatic+npred);
 bayestopt_.restrict_aux = aux;
+
+k3 = [];
+for i=1:size(var_list_,1)
+    k3 = [k3; strmatch(var_list_(i,:),M_.endo_names(dr.order_var,:), ...
+                       'exact')];
+end
+bayestopt_.smoother_var_list = union(k2,k3);
+[junk,bayestopt_.smoother_saved_var_list] = intersect(k3,bayestopt_.smoother_var_list);
+[junk,ic] = intersect(bayestopt_.smoother_var_list,nstatic+(1:npred)');
+bayestopt_.smoother_restrict_columns = ic;
+[junk,bayestopt_.smoother_mf] = ismember(var_obs_index, ...
+                                         bayestopt_.smoother_var_list);
 
 %% Initialization with unit-root variables.
 if ~isempty(options_.unit_root_vars)
@@ -345,16 +357,17 @@ if options_.mode_compute == 0
         oo_.Smoother.TrendCoeffs = trend_coeff;
         oo_.Smoother.integration_order = d;
         oo_.Smoother.variance = P;
-        i_endo_nbr = 1:M_.endo_nbr;
+        i_endo = bayestopt_.smoother_saved_var_list;
         if options_.nk ~= 0
-            oo_.FilteredVariablesKStepAhead = aK(options_.filter_step_ahead,i_endo_nbr,:);
-            oo_.FilteredVariablesKStepAheadVariances = PK(options_.filter_step_ahead,i_endo_nbr,i_endo_nbr,:);
-            oo_.FilteredVariablesShockDecomposition = decomp(options_.filter_step_ahead,i_endo_nbr,:,:);
+            oo_.FilteredVariablesKStepAhead = aK(options_.filter_step_ahead,i_endo,:);
+            oo_.FilteredVariablesKStepAheadVariances = PK(options_.filter_step_ahead,i_endo,i_endo,:);
+            oo_.FilteredVariablesShockDecomposition = decomp(options_.filter_step_ahead,i_endo,:,:);
         end
-        for i=1:M_.endo_nbr
-            eval(['oo_.SmoothedVariables.' deblank(M_.endo_names(dr.order_var(i),:)) ' = atT(i,:)'';']);
-            eval(['oo_.FilteredVariables.' deblank(M_.endo_names(dr.order_var(i),:)) ' = squeeze(aK(1,i,:));']);
-            eval(['oo_.UpdatedVariables.' deblank(M_.endo_names(dr.order_var(i),:)) ' = updated_variables(i,:)'';']);
+        for i=bayestopt_.smoother_saved_var_list
+            i1 = bayestop_.smoother_var_list(i);
+            eval(['oo_.SmoothedVariables.' deblank(M_.endo_names(dr.order_var(i1),:)) ' = atT(i,:)'';']);
+            eval(['oo_.FilteredVariables.' deblank(M_.endo_names(dr.order_var(i1),:)) ' = squeeze(aK(1,i,:));']);
+            eval(['oo_.UpdatedVariables.' deblank(M_.endo_names(dr.order_var(i1),:)) ' = updated_variables(i,:)'';']);
         end
         for i=1:M_.exo_nbr
             eval(['oo_.SmoothedShocks.' deblank(M_.exo_names(i,:)) ' = innov(i,:)'';']);
