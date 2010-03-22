@@ -200,6 +200,8 @@ for i=1:length(years)
     options_.conditional_variance_decomposition_dates(i) = ...
         (years(i)-1)*4+quarter;
 end
+options_.filter_covariance = 0;
+options_.filter_decomposition = 0;
 % Misc
 options_.conf_sig = 0.6;
 oo_.exo_simul = [];
