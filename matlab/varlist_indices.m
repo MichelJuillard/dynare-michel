@@ -1,9 +1,10 @@
-function [i_var,nvar] = varlist_indices(varlist)
-% function [i_var,nvar] = varlist_indices(varlist)
+function [i_var,nvar] = varlist_indices(sublist,list)
+% function [i_var,nvar] = varlist_indices(sublist,list)
 % returns the indices of a list of endogenous variables
 %
 % INPUT
-%   varlist:    (character area) list of variables
+%   sublist:    sublist of variables
+%   list:       list of variables 
 %
 % OUTPUT
 %   i_var:      variable indices in M_.endo_names
@@ -12,7 +13,7 @@ function [i_var,nvar] = varlist_indices(varlist)
 % SPECIAL REQUIREMENTS
 %    none
 
-% Copyright (C) 2009 Dynare Team
+% Copyright (C) 2010 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -29,19 +30,13 @@ function [i_var,nvar] = varlist_indices(varlist)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-global M_
 
-endo_nbr = M_.endo_nbr;
+[check,i_var] = ismember(sublist,list,'rows');
 
-if isempty(varlist)
-    varlist = M_.endo_names(1:M_.orig_endo_nbr,:);
-end
-i_var = [];
-for i=1:size(varlist,1)
-    tmp = strmatch(varlist(i,:),M_.endo_names,'exact');
-    if isempty(tmp)
-        error([tmp ' isn''t an endogenous variable'])
-    end
-    i_var = [i_var; tmp];
-end
 nvar = length(i_var);
+
+if ~all(check)
+    k =find(check);
+    error(strcat(sublist(k,:),' hasn''t been declared'))
+end
+

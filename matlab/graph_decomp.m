@@ -1,7 +1,7 @@
-function []=graph_decomp(z,shock_names,varlist,initial_date)
+function []=graph_decomp(z,shock_names,endo_names,i_var,initial_date)
 %function []=graph_decomp(z,varlist,initial_period,freq)
 
-% Copyright (C) 2009 Dynare Team
+% Copyright (C) 2010 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -18,7 +18,6 @@ function []=graph_decomp(z,shock_names,varlist,initial_date)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-global M_ 
 % number of components equals number of shocks + 1 (initial conditions)
 comp_nbr = size(z,2)-1;
 
@@ -27,7 +26,8 @@ freq = initial_date.freq;
 initial_period = initial_date.period + initial_date.sub_period/freq;
 x = initial_period-1/freq:(1/freq):initial_period+(gend-1)/freq;
 
-[i_var,nvar] = varlist_indices(varlist);
+nvar = length(i_var);
+
 for j=1:nvar
     z1 = squeeze(z(i_var(j),:,:));
     xmin = x(1);
@@ -39,7 +39,7 @@ for j=1:nvar
     if ymax-ymin < 1e-6
         continue
     end
-    figure('Name',M_.endo_names(i_var(j),:));
+    figure('Name',endo_names(i_var(j),:));
     ax=axes('Position',[0.1 0.1 0.6 0.8]);
     axis(ax,[xmin xmax ymin ymax]);
     plot(ax,x(2:end),z1(end,:),'k-','LineWidth',2)
