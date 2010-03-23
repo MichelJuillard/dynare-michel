@@ -1,4 +1,4 @@
-function  [irfmat,irfst]=PCL_Part_info_irf( H, OBS, dr,ivar, var_list)
+function  [irfmat,irfst]=PCL_Part_info_irf( H, varobs, dr,ivar)
 % sets up parameters and calls part-info kalman filter
 % developed by G Perendia, July 2006 for implementation from notes by Prof. Joe Pearlman to 
 % suit partial information RE solution in accordance with, and based on, the 
@@ -30,6 +30,9 @@ function  [irfmat,irfst]=PCL_Part_info_irf( H, OBS, dr,ivar, var_list)
     global M_ options_ oo_
     warning_old_state = warning;
     warning off
+    
+    OBS = ismember(varobs,M_.endo_names);
+    
     G1=dr.PI_ghx;
     impact=dr.PI_ghu;
     nmat=dr.PI_nmat;

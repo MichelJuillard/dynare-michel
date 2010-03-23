@@ -41,6 +41,7 @@ addpath([dynareroot '/distributions/'])
 addpath([dynareroot '/kalman/'])
 addpath([dynareroot '/kalman/likelihood'])
 addpath([dynareroot '/AIM/'])
+addpath([dynareroot '/partial_information/'])
 
 % For functions that exist only under some Octave versions
 % or some MATLAB versions, and for which we provide some replacement functions

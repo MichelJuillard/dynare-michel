@@ -1,4 +1,4 @@
-function  [irfmat,irfst]=PCL_Part_info_irf( H, OBS, M_, dr, irfpers,ii)
+function  [irfmat,irfst]=PCL_Part_info_irf( H, varobs, M_, dr, irfpers,ii)
 % sets up parameters and calls part-info kalman filter
 % developed by G Perendia, July 2006 for implementation from notes by Prof. Joe Pearlman to 
 % suit partial information RE solution in accordance with, and based on, the 
@@ -23,12 +23,14 @@ function  [irfmat,irfst]=PCL_Part_info_irf( H, OBS, M_, dr, irfpers,ii)
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
 
-        % Recall that the state space is given by the 
-        % predetermined variables s(t-1), x(t-1) 
-        % and the jump variables x(t).
-        % The jump variables have dimension NETA
+% Recall that the state space is given by the 
+% predetermined variables s(t-1), x(t-1) 
+% and the jump variables x(t).
+% The jump variables have dimension NETA
         
         
+    OBS = ismember(varobs,M_.endo_names);
+    
         G1=dr.PI_ghx;
         impact=dr.PI_ghu;
         nmat=dr.PI_nmat;
@@ -149,10 +151,10 @@ function  [irfmat,irfst]=PCL_Part_info_irf( H, OBS, M_, dr, irfpers,ii)
         %OVV = [ zeros( size(dr.PI_TT1,1), NX ) dr.PI_TT1 dr.PI_TT2];
         VV = [  dr.PI_TT1 dr.PI_TT2];
         stderr=diag(M_.Sigma_e^0.5);        
-            irfmat=zeros(size(dr.PI_TT1 ,1),irfpers+1);
-            irfst=zeros(size(GG,1),irfpers+1); 
+            irfmat=zeros(size(dr.PI_TT1 ,1),irfpers);
+            irfst=zeros(size(GG,1),irfpers); 
             irfst(:,1)=stderr(ii)*imp(:,ii);
-            for jj=2:irfpers+1;
+            for jj=2:irfpers;
                 irfst(:,jj)=GG*irfst(:,jj-1); % xjj=f irfstjj-2
                 irfmat(:,jj-1)=VV*irfst(NX+1:ss-FL_RANK,jj);
                 %irfmat(:,jj)=LL0*irfst(:,jj);  

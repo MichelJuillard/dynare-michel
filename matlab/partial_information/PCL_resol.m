@@ -1,5 +1,5 @@
-function [dr,info]=resol(ys,check_flag)
-% function [dr,info]=resol(ys,check_flag)
+function [dr,info]=PCL_resol(ys,check_flag)
+% function [dr,info]=PCL_resol(ys,check_flag)
 % Computes first and second order approximations
 %
 % INPUTS

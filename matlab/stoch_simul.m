@@ -29,8 +29,19 @@ elseif options_.order == 3
     options_.k_order_solver = 1;
 end
 
+if options_.partial_information == 1 || options_.ACES_solver == 1
+    ACES_solver = 1;
+else
+    ACES_solver = 0;
+end
 
 TeX = options_.TeX;
+
+if size(var_list,1) == 0
+    var_list = M_.endo_names(1:M_.orig_endo_nbr);
+end
+
+[i_var,nvar] = varlist_indices(var_list,M_.endo_names);
 
 iter_ = max(options_.periods,1);
 if M_.exo_nbr > 0
@@ -39,7 +50,11 @@ end
 
 check_model;
 
-[oo_.dr, info] = resol(oo_.steady_state,0);
+if ACES_solver
+    [oo_.dr, info] = PCL_resol(oo_.steady_state,0);
+else
+    [oo_.dr, info] = resol(oo_.steady_state,0);
+end
 
 if info(1)
     options_ = options_old;
@@ -63,15 +78,22 @@ if ~options_.noprint
     headers = strvcat('Variables',labels);
     lh = size(labels,2)+2;
     dyntable(my_title,headers,labels,M_.Sigma_e,lh,10,6);
+    if options_.partial_information
+        disp(' ')
+        disp(' SOLUTION UNDER PARTIAL INFORMATION')
+        disp(' ')
+        disp(' OBSERVED VARIABLES')
+        for i=1:size(options_.varobs,1)
+            disp(['    ' options_.varobs(i,:)])
+        end
+    end
     disp(' ')
-    if options_.order <= 2
+    if options_.order <= 2 && ~ACES_solver
         disp_dr(oo_.dr,options_.order,var_list);
     end
 end
 
-if options_.periods == 0 && options_.nomoments == 0
-    disp_th_moments(oo_.dr,var_list); 
-elseif options_.periods ~= 0
+if options_.periods > 0 && ~ACES_solver
     if options_.periods < options_.drop
         disp(['STOCH_SIMUL error: The horizon of simulation is shorter' ...
               ' than the number of observations to be DROPed'])
@@ -80,37 +102,21 @@ elseif options_.periods ~= 0
     end
     oo_.endo_simul = simult(repmat(oo_.dr.ys,1,M_.maximum_lag),oo_.dr);
     dyn2vec;
-    if options_.nomoments == 0
+end
+
+if options_.nomoments == 0
+    if ACES_solver
+        PCL_Part_info_moments (0, options_.varobs, oo_.dr, i_var);
+    elseif options_.periods == 0
+        disp_th_moments(oo_.dr,var_list); 
+    else
         disp_moments(oo_.endo_simul,var_list);
     end
 end
 
 
-
 if options_.irf 
-    if size(var_list,1) == 0
-        var_list = M_.endo_names(1:M_.orig_endo_nbr, :);
-        if TeX
-            var_listTeX = M_.endo_names_tex(1:M_.orig_endo_nbr, :);
-        end
-    end
-
-    n = size(var_list,1);
-    ivar=zeros(n,1);
-    if TeX
-        var_listTeX = [];
-    end
-    for i=1:n
-        i_tmp = strmatch(var_list(i,:),M_.endo_names,'exact');
-        if isempty(i_tmp)
-            error (['One of the specified variables does not exist']) ;
-        else
-            ivar(i) = i_tmp;
-            if TeX
-                var_listTeX = strvcat(var_listTeX,deblank(M_.endo_names_tex(i_tmp,:)));
-            end
-        end
-    end
+    var_listTeX = M_.endo_names_tex(i_var,:);
 
     if TeX
         fidTeX = fopen([M_.fname '_IRF.TeX'],'w');
@@ -127,8 +133,12 @@ if options_.irf
     end
     for i=1:M_.exo_nbr
         if SS(i,i) > 1e-13
-            y=irf(oo_.dr,cs(M_.exo_names_orig_ord,i), options_.irf, options_.drop, ...
-                  options_.replic, options_.order);
+            if ACES_solver
+                y=PCL_Part_info_irf (0, options_.varobs, M_, oo_.dr, options_.irf, i);
+            else
+                y=irf(oo_.dr,cs(M_.exo_names_orig_ord,i), options_.irf, options_.drop, ...
+                      options_.replic, options_.order);
+            end
             if options_.relative_irf
                 y = 100*y/cs(i,i); 
             end
@@ -137,13 +147,13 @@ if options_.irf
             if TeX
                 mylistTeX = [];
             end
-            for j = 1:n
-                assignin('base',[deblank(M_.endo_names(ivar(j),:)) '_' deblank(M_.exo_names(i,:))],...
-                         y(ivar(j),:)');
-                eval(['oo_.irfs.' deblank(M_.endo_names(ivar(j),:)) '_' ...
-                      deblank(M_.exo_names(i,:)) ' = y(ivar(j),:);']); 
-                if max(y(ivar(j),:)) - min(y(ivar(j),:)) > 1e-10
-                    irfs  = cat(1,irfs,y(ivar(j),:));
+            for j = 1:nvar
+                assignin('base',[deblank(M_.endo_names(i_var(j),:)) '_' deblank(M_.exo_names(i,:))],...
+                         y(i_var(j),:)');
+                eval(['oo_.irfs.' deblank(M_.endo_names(i_var(j),:)) '_' ...
+                      deblank(M_.exo_names(i,:)) ' = y(i_var(j),:);']); 
+                if max(y(i_var(j),:)) - min(y(i_var(j),:)) > 1e-10
+                    irfs  = cat(1,irfs,y(i_var(j),:));
                     mylist = strvcat(mylist,deblank(var_list(j,:)));
                     if TeX
                         mylistTeX = strvcat(mylistTeX,deblank(var_listTeX(j,:)));
