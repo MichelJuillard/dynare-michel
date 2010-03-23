@@ -350,32 +350,40 @@ missing_value = ~(number_of_observations == gend*n_varobs);
 
 initial_estimation_checks(xparam1,gend,data,data_index,number_of_observations,no_more_missing_observations);
 
-if options_.mode_compute == 0 
+if options_.mode_compute == 0 && length(options_.mode_file) == 0
     if options_.smoother == 1
         [atT,innov,measurement_error,updated_variables,ys,trend_coeff,aK,T,R,P,PK,d,decomp] = DsgeSmoother(xparam1,gend,data,data_index,missing_value);
         oo_.Smoother.SteadyState = ys;
         oo_.Smoother.TrendCoeffs = trend_coeff;
         oo_.Smoother.integration_order = d;
-        oo_.Smoother.variance = P;
+        if options_.filter_covariance
+            oo_.Smoother.variance = P;
+        end
         i_endo = bayestopt_.smoother_saved_var_list;
         if options_.nk ~= 0
-            oo_.FilteredVariablesKStepAhead = aK(options_.filter_step_ahead,i_endo,:);
-            oo_.FilteredVariablesKStepAheadVariances = PK(options_.filter_step_ahead,i_endo,i_endo,:);
-            oo_.FilteredVariablesShockDecomposition = decomp(options_.filter_step_ahead,i_endo,:,:);
+            oo_.FilteredVariablesKStepAhead = ...
+                aK(options_.filter_step_ahead,i_endo,:);
+            if ~isempty(PK)
+                oo_.FilteredVariablesKStepAheadVariances = ...
+                    PK(options_.filter_step_ahead,i_endo,i_endo,:);
+            end
+            if ~isempty(decomp)
+                oo_.FilteredVariablesShockDecomposition = ...
+                    decomp(options_.filter_step_ahead,i_endo,:,:);
+            end
         end
-        for i=bayestopt_.smoother_saved_var_list
-            i1 = bayestop_.smoother_var_list(i);
-            eval(['oo_.SmoothedVariables.' deblank(M_.endo_names(dr.order_var(i1),:)) ' = atT(i,:)'';']);
-            eval(['oo_.FilteredVariables.' deblank(M_.endo_names(dr.order_var(i1),:)) ' = squeeze(aK(1,i,:));']);
-            eval(['oo_.UpdatedVariables.' deblank(M_.endo_names(dr.order_var(i1),:)) ' = updated_variables(i,:)'';']);
+        for i=bayestopt_.smoother_saved_var_list'
+            i1 = dr.order_var(bayestopt_.smoother_var_list(i));
+            eval(['oo_.SmoothedVariables.' deblank(M_.endo_names(i1,:)) ' = atT(i,:)'';']);
+            eval(['oo_.FilteredVariables.' deblank(M_.endo_names(i1,:)) ' = squeeze(aK(1,i,:));']);
+            eval(['oo_.UpdatedVariables.' deblank(M_.endo_names(i1,:)) ' = updated_variables(i,:)'';']);
         end
         for i=1:M_.exo_nbr
             eval(['oo_.SmoothedShocks.' deblank(M_.exo_names(i,:)) ' = innov(i,:)'';']);
         end
     end
-    if length(options_.mode_file) == 0
-        return;
-    end
+
+    return;
 end
 
 %% Estimation of the posterior mode or likelihood mode
@@ -1105,22 +1113,26 @@ if (~((any(bayestopt_.pshape > 0) & options_.mh_replic) | (any(bayestopt_.pshape
     oo_.Smoother.TrendCoeffs = trend_coeff;
     oo_.Smoother.integration_order = d;
     oo_.Smoother.variance = P;
-    i_endo_nbr = 1:M_.endo_nbr;
+    i_endo = bayestopt_.smoother_saved_var_list;
     if options_.nk ~= 0
         oo_.FilteredVariablesKStepAhead = aK(options_.filter_step_ahead, ...
-                                             i_endo_nbr,:);
+                                             i_endo,:);
         if isfield(options_,'kalman_algo')
-            if options_.kalman_algo > 2
-                oo_.FilteredVariablesKStepAheadVariances = PK(options_.filter_step_ahead,i_endo_nbr,i_endo_nbr,:);
+            if ~isempty(PK)
+                oo_.FilteredVariablesKStepAheadVariances = ...
+                    PK(options_.filter_step_ahead,i_endo,i_endo_nbr,:);
+            end
+            if ~isempty(decomp)
                 oo_.FilteredVariablesShockDecomposition = ...
-                    decomp(options_.filter_step_ahead,i_endo_nbr,:,:);
+                    decomp(options_.filter_step_ahead,i_endo,:,:);
             end
         end
     end
-    for i=1:M_.endo_nbr
-        eval(['oo_.SmoothedVariables.' deblank(M_.endo_names(dr.order_var(i),:)) ' = atT(i,:)'';']);
-        eval(['oo_.FilteredVariables.' deblank(M_.endo_names(dr.order_var(i),:)) ' = squeeze(aK(1,i,:));']);
-        eval(['oo_.UpdatedVariables.' deblank(M_.endo_names(dr.order_var(i),:)) ...
+    for i=bayestopt_.smoother_saved_var_list'
+        i1 = dr.order_var(bayestopt_.smoother_var_list(i));
+        eval(['oo_.SmoothedVariables.' deblank(M_.endo_names(i1,:)) ' = atT(i,:)'';']);
+        eval(['oo_.FilteredVariables.' deblank(M_.endo_names(i1,:)) ' = squeeze(aK(1,i,:));']);
+        eval(['oo_.UpdatedVariables.' deblank(M_.endo_names(i1,:)) ...
               ' = updated_variables(i,:)'';']);
     end
     [nbplt,nr,nc,lr,lc,nstar] = pltorg(M_.exo_nbr);

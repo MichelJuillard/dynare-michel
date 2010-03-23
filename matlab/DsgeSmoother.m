@@ -30,7 +30,7 @@ function [alphahat,etahat,epsilonhat,ahat,SteadyState,trend_coeff,aK,T,R,P,PK,d,
 % SPECIAL REQUIREMENTS
 %   None
 
-% Copyright (C) 2006-2009 Dynare Team
+% Copyright (C) 2006-2010 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -70,8 +70,9 @@ set_all_parameters(xparam1);
 %------------------------------------------------------------------------------
 % 2. call model setup & reduction program
 %------------------------------------------------------------------------------
-[T,R,SteadyState] = dynare_resolve;
-bayestopt_.mf = bayestopt_.mf2;
+[T,R,SteadyState] = dynare_resolve(bayestopt_.smoother_var_list,...
+                                        bayestopt_.smoother_restrict_columns,[]);
+bayestopt_.mf = bayestopt_.smoother_mf;
 if options_.noconstant
     constant = zeros(nobs,1);
 else
@@ -96,7 +97,7 @@ else
 end
 start = options_.presample+1;
 np    = size(T,1);
-mf    = bayestopt_.mf;
+mf    = bayestopt_.smoother_mf;
 % ------------------------------------------------------------------------------
 %  3. Initial condition of the Kalman filter
 % ------------------------------------------------------------------------------
@@ -184,13 +185,16 @@ elseif options_.lik_init == 3 % Diffuse Kalman filter
         Pinf(1:nk,1:nk) = diag(dd);
     end
 end
+kalman_tol = options_.kalman_tol;
+riccati_tol = options_.riccati_tol;
+data1 = Y-trend;
 % -----------------------------------------------------------------------------
 %  4. Kalman smoother
 % -----------------------------------------------------------------------------
 if any(any(H ~= 0))   % should be replaced by a flag
     if kalman_algo == 1
-        [alphahat,epsilonhat,etahat,ahat,aK] = ...
-            DiffuseKalmanSmootherH1(T,R,Q,H,Pinf,Pstar,Y,trend,nobs,np,smpl,mf);
+        [alphahat,epsilonhat,etahat,ahat,P,aK,PK,decomp] = ...
+            kalman_smoother(ST,Z,R1,Q,H,Pinf,Pstar,data1,nobs,np,smpl);
         if all(alphahat(:)==0)
             kalman_algo = 2;
             if ~estim_params_.ncn
@@ -255,13 +259,14 @@ if any(any(H ~= 0))   % should be replaced by a flag
         end
     end
 else
+    H = 0;
     if kalman_algo == 1
         if missing_value
             [alphahat,etahat,ahat,aK] = missing_DiffuseKalmanSmoother1(T,R,Q, ...
                                                               Pinf,Pstar,Y,trend,nobs,np,smpl,mf,data_index);
         else
-            [alphahat,etahat,ahat,aK] = DiffuseKalmanSmoother1(T,R,Q, ...
-                                                              Pinf,Pstar,Y,trend,nobs,np,smpl,mf);
+            [alphahat,epsilonhat,etahat,ahat,P,aK,PK,decomp] = ...
+                kalman_smoother(T,R,Q,H,Pstar,data1,start,mf,kalman_tol,riccati_tol);
         end
         if all(alphahat(:)==0)
             kalman_algo = 2;

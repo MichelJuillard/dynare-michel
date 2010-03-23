@@ -40,6 +40,7 @@ dynareroot = strrep(which('dynare'),'dynare.m','');
 addpath([dynareroot '/distributions/'])
 addpath([dynareroot '/kalman/'])
 addpath([dynareroot '/kalman/likelihood'])
+addpath([dynareroot '/kalman/smoother'])
 addpath([dynareroot '/AIM/'])
 addpath([dynareroot '/partial_information/'])
 
