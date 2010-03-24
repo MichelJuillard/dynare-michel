@@ -15,7 +15,8 @@ function [G1pi,C,impact,nmat,TT1,TT2,gev,eu, DD, E3, E5]=PI_gensys(a0,a1,a2,a3,c
 % Christopher A. Sims
 % Corrected 10/28/96 by CAS
 
-% Copyright (C) 1996-2010 Dynare Team
+% Copyright (C) 1996-2009 Christopher Sims
+% Copyright (C) 2010 Dynare Team
 %
 % This file is part of Dynare.
 %

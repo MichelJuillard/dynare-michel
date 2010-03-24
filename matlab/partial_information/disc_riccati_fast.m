@@ -11,7 +11,7 @@
 % V.2 22/10/06
 % =================================================================
 
-% Copyright (C) 1996-2010 Dynare Team
+% Copyright (C) 2006-2010 Dynare Team
 %
 % This file is part of Dynare.
 %
