@@ -2772,6 +2772,7 @@ end;
     <varlistentry id="smoother" xreflabel="smoother">
       <term><option>smoother</option></term>
       <listitem><para>Triggers the computation of the posterior distribution of smoothered endogenous variables and shocks</para></listitem>
+    </varlistentry>
     <varlistentry id="forecast_opt" xreflabel="forecast">
       <term><option>forecast</option> = <replaceable>INTEGER</replaceable></term>
       <listitem><para>Computes the posterior distribution of a forecast on <replaceable>INTEGER</replaceable> periods after the end of the sample used in estimation</para></listitem>
@@ -2798,7 +2799,7 @@ end;
     </varlistentry>
     <varlistentry id="filter_decomposition" xreflabel="filter_decomposition">
       <term><option>filter_decomposition</option></term>
-      <listitem><para>Triggers the computation of the shock decomposition of the above k-step ahead filtered values.
+      <listitem><para>Triggers the computation of the shock decomposition of the above k-step ahead filtered values.</para></listitem>
     </varlistentry>
     <varlistentry>
       <term><option>constant</option></term>
