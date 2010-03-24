@@ -30,8 +30,22 @@ function [i_var,nvar] = varlist_indices(sublist,list)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-
-[check,i_var] = ismember(sublist,list,'rows');
+% In Octave, ismember() doesn't operate on character arrays
+if ~exist('OCTAVE_VERSION')
+    [check,i_var] = ismember(sublist,list,'rows');
+else
+    check = [];
+    i_var = [];
+    for i = 1:rows(sublist)
+        tmp = strmatch(sublist(i,:), list, 'exact');
+        if isempty(tmp)
+            check = [ check; 0 ];
+        else
+            check = [ check; 1 ];
+            i_var = [ i_var; tmp ];
+        end
+    end
+end
 
 nvar = length(i_var);
 
