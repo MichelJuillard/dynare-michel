@@ -38,7 +38,7 @@ end
 TeX = options_.TeX;
 
 if size(var_list,1) == 0
-    var_list = M_.endo_names(1:M_.orig_endo_nbr);
+    var_list = M_.endo_names(1:M_.orig_endo_nbr, :);
 end
 
 [i_var,nvar] = varlist_indices(var_list,M_.endo_names);
