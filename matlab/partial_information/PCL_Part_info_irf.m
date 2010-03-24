@@ -29,7 +29,7 @@ function  [irfmat,irfst]=PCL_Part_info_irf( H, varobs, M_, dr, irfpers,ii)
 % The jump variables have dimension NETA
         
         
-    OBS = ismember(varobs,M_.endo_names);
+    [junk,OBS] = ismember(varobs,M_.endo_names,'rows');
     
         G1=dr.PI_ghx;
         impact=dr.PI_ghu;
@@ -42,7 +42,7 @@ function  [irfmat,irfst]=PCL_Part_info_irf( H, varobs, M_, dr, irfpers,ii)
             NOBS=NY;
             LL=eye(NY,NY);
         else %and if no obsevations specify OBS=[0] but this is not going to work properly
-           NOBS=size(find(OBS),2);
+           NOBS=length(OBS);
            LL=zeros(NOBS,NY);
            for i=1:NOBS
                LL(i,OBS(i))=1;
