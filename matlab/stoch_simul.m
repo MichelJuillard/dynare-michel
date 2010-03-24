@@ -30,9 +30,9 @@ elseif options_.order == 3
 end
 
 if options_.partial_information == 1 || options_.ACES_solver == 1
-    ACES_solver = 1;
+    PI_PCL_solver = 1;
 else
-    ACES_solver = 0;
+    PI_PCL_solver = 0;
 end
 
 TeX = options_.TeX;
@@ -50,7 +50,7 @@ end
 
 check_model;
 
-if ACES_solver
+if PI_PCL_solver
     [oo_.dr, info] = PCL_resol(oo_.steady_state,0);
 else
     [oo_.dr, info] = resol(oo_.steady_state,0);
@@ -82,18 +82,26 @@ if ~options_.noprint
         disp(' ')
         disp(' SOLUTION UNDER PARTIAL INFORMATION')
         disp(' ')
-        disp(' OBSERVED VARIABLES')
-        for i=1:size(options_.varobs,1)
-            disp(['    ' options_.varobs(i,:)])
+
+        if isfield(options_,'varobs')&& ~isempty(options_.varobs)
+          PCL_varobs=options_.varobs;
+          disp(' OBSERVED VARIABLES')
+        else
+          PCL_varobs=var_list;
+          disp(' VAROBS LIST NOT SPECIFIED')
+          disp(' ASSUMED OBSERVED VARIABLES')
+        end
+        for i=1:size(PCL_varobs,1)
+          disp(['    ' PCL_varobs(i,:)])
         end
     end
     disp(' ')
-    if options_.order <= 2 && ~ACES_solver
+    if options_.order <= 2 && ~PI_PCL_solver
         disp_dr(oo_.dr,options_.order,var_list);
     end
 end
 
-if options_.periods > 0 && ~ACES_solver
+if options_.periods > 0 && ~PI_PCL_solver
     if options_.periods < options_.drop
         disp(['STOCH_SIMUL error: The horizon of simulation is shorter' ...
               ' than the number of observations to be DROPed'])
@@ -105,8 +113,8 @@ if options_.periods > 0 && ~ACES_solver
 end
 
 if options_.nomoments == 0
-    if ACES_solver
-        PCL_Part_info_moments (0, options_.varobs, oo_.dr, i_var);
+    if PI_PCL_solver
+        PCL_Part_info_moments (0, PCL_varobs, oo_.dr, i_var);
     elseif options_.periods == 0
         disp_th_moments(oo_.dr,var_list); 
     else
@@ -133,8 +141,8 @@ if options_.irf
     end
     for i=1:M_.exo_nbr
         if SS(i,i) > 1e-13
-            if ACES_solver
-                y=PCL_Part_info_irf (0, options_.varobs, M_, oo_.dr, options_.irf, i);
+            if PI_PCL_solver
+                y=PCL_Part_info_irf (0, PCL_varobs, i_var, M_, oo_.dr, options_.irf, i);
             else
                 y=irf(oo_.dr,cs(M_.exo_names_orig_ord,i), options_.irf, options_.drop, ...
                       options_.replic, options_.order);

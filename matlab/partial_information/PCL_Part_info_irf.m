@@ -1,11 +1,11 @@
-function  [irfmat,irfst]=PCL_Part_info_irf( H, varobs, M_, dr, irfpers,ii)
+function  y=PCL_Part_info_irf( H, varobs, ivar, M_, dr, irfpers,ii)
 % sets up parameters and calls part-info kalman filter
 % developed by G Perendia, July 2006 for implementation from notes by Prof. Joe Pearlman to 
 % suit partial information RE solution in accordance with, and based on, the 
 % Pearlman, Currie and Levine 1986 solution.
 % 22/10/06 - Version 2 for new Riccati with 4 params instead 5 
 
-% Copyright (C) 2006-2010 Dynare Team
+% Copyright (C) 2001-20010 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -49,16 +49,6 @@ function  [irfmat,irfst]=PCL_Part_info_irf( H, varobs, M_, dr, irfpers,ii)
            end
         end
 
-        if exist( 'irfpers')==1
-            if ~isempty(irfpers)
-                if irfpers<=0, irfpers=20, end;
-            else
-                irfpers=20;
-            end
-         else
-            irfpers=20;
-        end      
-            
         ss=size(G1,1);
         pd=ss-size(nmat,1);
         SDX=M_.Sigma_e^0.5; % =SD,not V-COV, of Exog shocks or M_.Sigma_e^0.5 num_exog x num_exog matrix
@@ -86,8 +76,8 @@ function  [irfmat,irfst]=PCL_Part_info_irf( H, varobs, M_, dr, irfpers,ii)
         % o(t)=K1*[eps(t)' s(t-1)' x(t-1)']' + K2*x(t) where
         % K1=[L1*H1 L1*G11 L1*G12] K2=L1*G13+L2
         
-		G12=G1(NX+1:ss-2*FL_RANK,:);
-		KK1=L1*G12;
+        G12=G1(NX+1:ss-2*FL_RANK,:);
+        KK1=L1*G12;
         K1=KK1(:,1:ss-FL_RANK);
         K2=KK1(:,ss-FL_RANK+1:ss)+L2;
 
@@ -97,13 +87,11 @@ function  [irfmat,irfst]=PCL_Part_info_irf( H, varobs, M_, dr, irfpers,ii)
         A12=G1(1:pd, pd+1:end);
         A21=G1(pd+1:end,1:pd);
         Lambda= nmat*A12+A22;
-        %A11_A12Nmat= A11-A12*nmat % test 
         I_L=inv(Lambda);
         BB=A12*inv(A22);
         FF=K2*inv(A22);       
         QQ=BB*U22*BB' + U11;        
         UFT=U22*FF';
-        % kf_param structure:
         AA=A11-BB*A21;
         CCCC=A11-A12*nmat; % F in new notation
         DD=K1-FF*A21; % H in new notation
@@ -138,25 +126,22 @@ function  [irfmat,irfst]=PCL_Part_info_irf( H, varobs, M_, dr, irfpers,ii)
         DPDR=DD*PP*DD'+RR;
         I_DPDR=inv(DPDR);
         PDIDPDRD=PP*DD'*I_DPDR*DD;
-        %GG=[CCCC (AA-CCCC)*(eye(ss-FL_RANK)-PP*DD'*I_DQDR*DD); zeros(ss-FL_RANK) AA*(eye(ss-FL_RANK)-PP*DD'*I_DQDR*DD)];
         GG=[CCCC (AA-CCCC)*(eye(ss-FL_RANK)-PDIDPDRD); zeros(ss-FL_RANK) AA*(eye(ss-FL_RANK)-PDIDPDRD)];
         imp=[impact(1:ss-FL_RANK,:); impact(1:ss-FL_RANK,:)];
+
         % Calculate IRFs of observable series
-        %The extra term in leads to
-        %LL0=[EE  (H-EE)(I-PH^T(HPH^T+V)^{-1}H)].
-        %Then in the case of observing all variables without noise (V=0), this 
-        % leads to LL0=[EE  0]. 
         I_PD=(eye(ss-FL_RANK)-PDIDPDRD);
         LL0=[ EE (DD-EE)*I_PD];
-        %OVV = [ zeros( size(dr.PI_TT1,1), NX ) dr.PI_TT1 dr.PI_TT2];
         VV = [  dr.PI_TT1 dr.PI_TT2];
         stderr=diag(M_.Sigma_e^0.5);        
-            irfmat=zeros(size(dr.PI_TT1 ,1),irfpers);
-            irfst=zeros(size(GG,1),irfpers); 
-            irfst(:,1)=stderr(ii)*imp(:,ii);
-            for jj=2:irfpers;
-                irfst(:,jj)=GG*irfst(:,jj-1); % xjj=f irfstjj-2
+        irfmat=zeros(size(dr.PI_TT1 ,1),irfpers+1);
+        irfst=zeros(size(GG,1),irfpers+1); 
+        irfst(:,1)=stderr(ii)*imp(:,ii);
+        for jj=2:irfpers+1;
+                irfst(:,jj)=GG*irfst(:,jj-1);
                 irfmat(:,jj-1)=VV*irfst(NX+1:ss-FL_RANK,jj);
-                %irfmat(:,jj)=LL0*irfst(:,jj);  
-            end   
-            save ([M_.fname '_PCL_PtInfoIRFs_' num2str(ii) '_' deblank(exo_names(ii,:))], 'irfmat','irfst');
+        end   
+        y=zeros(M_.endo_nbr,irfpers);
+        y(:,:)=irfmat(:,1:irfpers);
+
+        save ([M_.fname '_PCL_PtInfoIRFs_' num2str(ii) '_' deblank(exo_names(ii,:))], 'irfmat','irfst');

@@ -1,11 +1,11 @@
-function  [irfmat,irfst]=PCL_Part_info_moments( H, varobs, dr,ivar)
+function  AutoCOR_YRk=PCL_Part_info_irmoments( H, varobs, dr,ivar)
 % sets up parameters and calls part-info kalman filter
 % developed by G Perendia, July 2006 for implementation from notes by Prof. Joe Pearlman to 
 % suit partial information RE solution in accordance with, and based on, the 
 % Pearlman, Currie and Levine 1986 solution.
 % 22/10/06 - Version 2 for new Riccati with 4 params instead 5 
 
-% Copyright (C) 2006-2010 Dynare Team
+% Copyright (C) 2001-20010 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -30,7 +30,7 @@ function  [irfmat,irfst]=PCL_Part_info_moments( H, varobs, dr,ivar)
     global M_ options_ oo_
     warning_old_state = warning;
     warning off
-    
+
     [junk,OBS] = ismember(varobs,M_.endo_names,'rows');
     
     G1=dr.PI_ghx;
@@ -38,7 +38,6 @@ function  [irfmat,irfst]=PCL_Part_info_moments( H, varobs, dr,ivar)
     nmat=dr.PI_nmat;
     CC=dr.PI_CC;
     NX=M_.exo_nbr; % no of exogenous varexo shock variables.
-%        NETA=dr.nfwrd+dr.nboth; % total no of exp. errors  set to no of forward looking equations
     FL_RANK=dr.PI_FL_RANK;
     NY=M_.endo_nbr;
     if isempty(OBS) 
@@ -80,7 +79,6 @@ function  [irfmat,irfst]=PCL_Part_info_moments( H, varobs, dr,ivar)
     MM1=MM(1:ss-FL_RANK,:);
     U11=MM1*MM1';
     % SDX
-
     U22=0;
     % determine K1 and K2 observation mapping matrices
     % This uses the fact that measurements are given by L1*s(t)+L2*x(t)
@@ -101,7 +99,6 @@ function  [irfmat,irfst]=PCL_Part_info_moments( H, varobs, dr,ivar)
     A12=G1(1:pd, pd+1:end);
     A21=G1(pd+1:end,1:pd);
     Lambda= nmat*A12+A22;
-    %A11_A12Nmat= A11-A12*nmat % test 
     I_L=inv(Lambda);
     BB=A12*inv(A22);
     FF=K2*inv(A22);       
@@ -141,7 +138,6 @@ function  [irfmat,irfst]=PCL_Part_info_moments( H, varobs, dr,ivar)
 
     DPDR=DD*PP*DD'+RR;
     I_DPDR=inv(DPDR);
-    %GG=[ CCCC, zeros(pd,NETA); -nmat*CCCC,  zeros(NETA,NETA)];
     PDIDPDRD=PP*DD'*I_DPDR*DD;
     MSIG=disclyap_fast(CCCC, CCCC*PDIDPDRD*PP*CCCC');
 
@@ -166,7 +162,6 @@ function  [irfmat,irfst]=PCL_Part_info_moments( H, varobs, dr,ivar)
     end
     if options_.nocorr == 0
         diagSqrtCovYR0=sqrt(diagCovYR0);
-        %COR_Y= diag(diagSqrtCovYR0)*COV_YR0*diag(diagSqrtCovYR0);
         DELTA=inv(diag(diagSqrtCovYR0));
         COR_Y= DELTA*COV_YR0*DELTA;
         title = 'CORRELATION OF SIMULATED VARIABLES';
