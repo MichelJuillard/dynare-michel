@@ -5,7 +5,7 @@ function  AutoCOR_YRk=PCL_Part_info_irmoments( H, varobs, dr,ivar)
 % Pearlman, Currie and Levine 1986 solution.
 % 22/10/06 - Version 2 for new Riccati with 4 params instead 5 
 
-% Copyright (C) 2001-20010 Dynare Team
+% Copyright (C) 2006-2010 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -32,6 +32,7 @@ function  AutoCOR_YRk=PCL_Part_info_irmoments( H, varobs, dr,ivar)
     warning off
 
     [junk,OBS] = ismember(varobs,M_.endo_names,'rows');
+    NOBS = length(OBS);
     
     G1=dr.PI_ghx;
     impact=dr.PI_ghu;
@@ -40,16 +41,7 @@ function  AutoCOR_YRk=PCL_Part_info_irmoments( H, varobs, dr,ivar)
     NX=M_.exo_nbr; % no of exogenous varexo shock variables.
     FL_RANK=dr.PI_FL_RANK;
     NY=M_.endo_nbr;
-    if isempty(OBS) 
-        NOBS=NY;
-        LL=eye(NY,NY);
-    else %and if no obsevations specify OBS=[0] but this is not going to work properly
-       NOBS=length(OBS);
-       LL=zeros(NOBS,NY);
-       for i=1:NOBS
-           LL(i,OBS(i))=1;
-       end
-    end
+    LL = sparse(1:NOBS,OBS,ones(NOBS,1),NY,NY);
 
     if exist( 'irfpers')==1
         if ~isempty(irfpers)
@@ -156,7 +148,7 @@ function  AutoCOR_YRk=PCL_Part_info_irmoments( H, varobs, dr,ivar)
     
     if options_.nomoments == 0
         z = [ sqrt(diagCovYR0(ivar)) diagCovYR0(ivar) ]; 
-        title='MOMENTS OF SIMULATED VARIABLES';
+        title='THEORETICAL MOMENTS';
         headers=strvcat('VARIABLE','STD. DEV.','VARIANCE');
         dyntable(title,headers,labels,z,size(labels,2)+2,16,10);
     end
@@ -164,7 +156,7 @@ function  AutoCOR_YRk=PCL_Part_info_irmoments( H, varobs, dr,ivar)
         diagSqrtCovYR0=sqrt(diagCovYR0);
         DELTA=inv(diag(diagSqrtCovYR0));
         COR_Y= DELTA*COV_YR0*DELTA;
-        title = 'CORRELATION OF SIMULATED VARIABLES';
+        title = 'MATRIX OF CORRELATION';
         headers = strvcat('VARIABLE',M_.endo_names(ivar,:));
         dyntable(title,headers,labels,COR_Y(ivar,ivar),size(labels,2)+2,8,4);
     else
@@ -185,7 +177,7 @@ function  AutoCOR_YRk=PCL_Part_info_irmoments( H, varobs, dr,ivar)
             oo_.autocorr{k}=AutoCOR_YRkMAT(ivar,ivar);
             AutoCOR_YRk(:,k)= diag(COV_YRk)./diagCovYR0;
         end
-        title = 'AUTOCORRELATION OF SIMULATED VARIABLES';
+        title = 'COEFFICIENTS OF AUTOCORRELATION';
         headers = strvcat('VARIABLE',int2str([1:ar]'));
         dyntable(title,headers,labels,AutoCOR_YRk(ivar,:),size(labels,2)+2,8,4);
     else

@@ -5,7 +5,7 @@ function  y=PCL_Part_info_irf( H, varobs, ivar, M_, dr, irfpers,ii)
 % Pearlman, Currie and Levine 1986 solution.
 % 22/10/06 - Version 2 for new Riccati with 4 params instead 5 
 
-% Copyright (C) 2001-20010 Dynare Team
+% Copyright (C) 2006-2010 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -30,6 +30,7 @@ function  y=PCL_Part_info_irf( H, varobs, ivar, M_, dr, irfpers,ii)
         
         
     [junk,OBS] = ismember(varobs,M_.endo_names,'rows');
+    NOBS = length(OBS);
     
         G1=dr.PI_ghx;
         impact=dr.PI_ghu;
@@ -38,17 +39,8 @@ function  y=PCL_Part_info_irf( H, varobs, ivar, M_, dr, irfpers,ii)
         NX=M_.exo_nbr; % no of exogenous varexo shock variables.
         FL_RANK=dr.PI_FL_RANK;
         NY=M_.endo_nbr;
-        if isempty(OBS) 
-            NOBS=NY;
-            LL=eye(NY,NY);
-        else %and if no obsevations specify OBS=[0] but this is not going to work properly
-           NOBS=length(OBS);
-           LL=zeros(NOBS,NY);
-           for i=1:NOBS
-               LL(i,OBS(i))=1;
-           end
-        end
-
+        LL = sparse(1:NOBS,OBS,ones(NOBS,1),NY,NY);
+        
         ss=size(G1,1);
         pd=ss-size(nmat,1);
         SDX=M_.Sigma_e^0.5; % =SD,not V-COV, of Exog shocks or M_.Sigma_e^0.5 num_exog x num_exog matrix
@@ -141,7 +133,6 @@ function  y=PCL_Part_info_irf( H, varobs, ivar, M_, dr, irfpers,ii)
                 irfst(:,jj)=GG*irfst(:,jj-1);
                 irfmat(:,jj-1)=VV*irfst(NX+1:ss-FL_RANK,jj);
         end   
-        y=zeros(M_.endo_nbr,irfpers);
-        y(:,:)=irfmat(:,1:irfpers);
+        y = irfmat(:,1:irfpers);
 
         save ([M_.fname '_PCL_PtInfoIRFs_' num2str(ii) '_' deblank(exo_names(ii,:))], 'irfmat','irfst');

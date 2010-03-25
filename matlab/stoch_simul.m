@@ -1,6 +1,6 @@
 function info=stoch_simul(var_list)
 
-% Copyright (C) 2001-2009 Dynare Team
+% Copyright (C) 2001-2010 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -80,14 +80,14 @@ if ~options_.noprint
     dyntable(my_title,headers,labels,M_.Sigma_e,lh,10,6);
     if options_.partial_information
         disp(' ')
-        disp(' SOLUTION UNDER PARTIAL INFORMATION')
+        disp('SOLUTION UNDER PARTIAL INFORMATION')
         disp(' ')
 
         if isfield(options_,'varobs')&& ~isempty(options_.varobs)
           PCL_varobs=options_.varobs;
-          disp(' OBSERVED VARIABLES')
+          disp('OBSERVED VARIABLES')
         else
-          PCL_varobs=var_list;
+          PCL_varobs=M_.endo_names;
           disp(' VAROBS LIST NOT SPECIFIED')
           disp(' ASSUMED OBSERVED VARIABLES')
         end
@@ -304,3 +304,5 @@ end
 
 
 options_ = options_old;
+% temporary fix waiting for local options
+options_.partial_information = 0; 
