@@ -3478,6 +3478,11 @@ plot_conditional_forecast(periods = 10) e u;
   <para>Note that only first order approximation is available (<foreignphrase>i.e.</foreignphrase> <literal>order=1</literal> must be specified).</para>
   </refsect1>
 
+  <refsect1><title>Output variables</title>
+  <para>This command generates all the output variables of <xref linkend="stoch_simul"/>.</para>
+  <para>In addition, it stores the value of planner objective function under Ramsey policy in <varname>oo_.planner_objective_value</varname>.</para>
+  </refsect1>
+
 </refentry>
 
 </sect1>
