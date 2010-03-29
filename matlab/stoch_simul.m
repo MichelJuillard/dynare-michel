@@ -31,6 +31,10 @@ end
 
 if options_.partial_information == 1 || options_.ACES_solver == 1
     PI_PCL_solver = 1;
+    if options_.order ~= 1
+        warning('STOCH_SIMUL: forcing order=1 since you are using partial_information or ACES solver')
+        options_.order = 1;
+    end
 else
     PI_PCL_solver = 0;
 end
