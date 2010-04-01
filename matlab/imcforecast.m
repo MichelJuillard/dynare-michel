@@ -180,6 +180,8 @@ else
     cL = size(constrained_paths,2);
 end
 
+constrained_paths = bsxfun(@minus,constrained_paths,trend(idx,1:cL));
+
 randn('state',0);
 
 for b=1:options_cond_fcst.replic
