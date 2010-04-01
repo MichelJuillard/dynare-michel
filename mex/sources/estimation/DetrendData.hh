@@ -33,7 +33,7 @@ class DetrendData
 public:
   virtual ~DetrendData(){};
   DetrendData(const bool logLinear); // add later Vector& trendCoeff);
-  void detrend(const Vector &SteadyState, const MatrixView &dataView, Matrix &Yiew);
+  void detrend(const Vector &SteadyState, const MatrixView &dataView, Matrix &Y);
 
 private:
   const bool logLinear;
