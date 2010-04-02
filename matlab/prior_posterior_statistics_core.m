@@ -17,13 +17,58 @@ function myoutput=prior_posterior_statistics_core(myinputs,fpar,B,whoiam, ThisMa
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
+global options_ oo_ M_ bayestopt_ estim_params_
+
 if nargin<4,
     whoiam=0;
 end
-struct2local(myinputs);
+
+typee=myinputs.typee;
+run_smoother=myinputs.run_smoother;
+gend=myinputs.gend;
+Y=myinputs.Y;
+data_index=myinputs.data_index;
+missing_value=myinputs.missing_value;
+varobs=myinputs.varobs;
+irun=myinputs.irun;
+endo_nbr=myinputs.endo_nbr;
+nvn=myinputs.nvn;
+naK=myinputs.naK;
+horizon=myinputs.horizon;
+iendo=myinputs.iendo;
+if horizon
+    i_last_obs=myinputs.i_last_obs;
+    IdObs=myinputs.IdObs;
+end
+exo_nbr=myinputs.exo_nbr;
+maxlag=myinputs.maxlag;
+MAX_nsmoo=myinputs.MAX_nsmoo;
+MAX_ninno=myinputs.MAX_ninno;
+MAX_nerro =myinputs. MAX_nerro;
+if naK
+    MAX_naK=myinputs.MAX_naK;
+end
+MAX_nruns=myinputs.MAX_nruns;
+if horizon
+    MAX_nforc1=myinputs.MAX_nforc1;
+    MAX_nforc2=myinputs.MAX_nforc2;
+end
+MAX_momentsno =myinputs. MAX_momentsno;
+ifil=myinputs.ifil;
 
 
-global options_ oo_ M_ bayestopt_ estim_params_
+if strcmpi(typee,'posterior'),
+    b=0;
+    while b<=B
+        b = b + 1;
+        [x(b,:), logpost(b,1)] = GetOneDraw(typee);
+    end
+end
+
+if ~strcmpi(typee,'prior'),
+    x=myinputs.x;
+    logpost=myinputs.logpost;
+end
 
 DirectoryName = CheckPath('metropolis');
 
@@ -78,16 +123,17 @@ for b=fpar:B
     if run_smoother
         [alphahat,etahat,epsilonhat,alphatilde,SteadyState,trend_coeff,aK] = ...
             DsgeSmoother(deep,gend,Y,data_index,missing_value);
+
         if options_.loglinear
             stock_smooth(dr.order_var,:,irun(1)) = alphahat(1:endo_nbr,:)+ ...
-                repmat(log(dr.ys(dr.order_var)),1,gend);
+                repmat(log(SteadyState(dr.order_var)),1,gend);
             stock_update(dr.order_var,:,irun(1)) = alphatilde(1:endo_nbr,:)+ ...
-                repmat(log(dr.ys(dr.order_var)),1,gend);
+                repmat(log(SteadyState(dr.order_var)),1,gend);
         else
             stock_smooth(dr.order_var,:,irun(1)) = alphahat(1:endo_nbr,:)+ ...
-                repmat(dr.ys(dr.order_var),1,gend);
+                repmat(SteadyState(dr.order_var),1,gend);
             stock_update(dr.order_var,:,irun(1)) = alphatilde(1:endo_nbr,:)+ ...
-                repmat(dr.ys(dr.order_var),1,gend);
+                repmat(SteadyState(dr.order_var),1,gend);
         end
         stock_innov(:,:,irun(2))  = etahat;
         if nvn
