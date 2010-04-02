@@ -150,9 +150,9 @@ if t < smpl
         end
     end
     
-    K= cat(3,K(:,:,1:t),repmat(K(:,:,t0),[1 1 smpl-t0+1]));
-    P  = cat(3,P(:,:,1:t),repmat(P(:,:,t0),[1 1 smpl-t0+1]));
-    iF = cat(3,iF(:,:,1:t),repmat(iF(:,:,t0),[1 1 smpl-t0+1]));
+    K= cat(3,K(:,:,1:t0),repmat(K(:,:,t0),[1 1 smpl-t0+1]));
+    P  = cat(3,P(:,:,1:t0),repmat(P(:,:,t0),[1 1 smpl-t0+1]));
+    iF = cat(3,iF(:,:,1:t0),repmat(iF(:,:,t0),[1 1 smpl-t0+1]));
 end    
 
 t = smpl+1;
