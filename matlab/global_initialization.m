@@ -203,6 +203,7 @@ for i=1:length(years)
 end
 options_.filter_covariance = 0;
 options_.filter_decomposition = 0;
+options_.selected_variables_only = 0;
 % Misc
 options_.conf_sig = 0.6;
 oo_.exo_simul = [];

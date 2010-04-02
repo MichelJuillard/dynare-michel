@@ -200,9 +200,13 @@ aux(k,2) = aux(k,2) + sum(k2 > nstatic+npred);
 bayestopt_.restrict_aux = aux;
 
 k3 = [];
-for i=1:size(var_list_,1)
-    k3 = [k3; strmatch(var_list_(i,:),M_.endo_names(dr.order_var,:), ...
-                       'exact')];
+if options_.selected_variables_only
+    for i=1:size(var_list_,1)
+        k3 = [k3; strmatch(var_list_(i,:),M_.endo_names(dr.order_var,:), ...
+                           'exact')];
+    end
+else
+    k3 = (1:M_.endo_nbr)';
 end
 bayestopt_.smoother_var_list = union(k2,k3);
 [junk,bayestopt_.smoother_saved_var_list] = intersect(k3,bayestopt_.smoother_var_list);
