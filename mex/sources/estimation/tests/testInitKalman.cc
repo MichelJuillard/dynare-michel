@@ -136,7 +136,8 @@ main(int argc, char **argv)
     varobs.push_back(svarobs[i]-1);
 
   Matrix
-  T(riv.size(), riv.size()), R(riv.size(), n_exo), Pstar(riv.size(), riv.size()),
+  T(riv.size(), riv.size()), R(riv.size(), n_exo), 
+  RQRt(riv.size(), riv.size()), Pstar(riv.size(), riv.size()),
   Pinf(riv.size(), riv.size()), Z(varobs.size(), riv.size()), Q(n_exo);
   Z.setAll(0.0);
   for (size_t i = 0; i < varobs.size(); ++i)
@@ -160,10 +161,10 @@ main(int argc, char **argv)
 
   double lyapunov_tol = 1e-16;
   int info = 0;
-  const MatrixView
+  const MatrixView 
   dataView(&lyapunov_tol, 1, 1, 1); // dummy
-  MatrixView
-  yView(&lyapunov_tol, 1, 1, 1); // dummy
+  Matrix 
+  yView(dataView.getRows(),dataView.getCols()); // dummy
   const Vector
   xparams1(0); // dummy
   double penalty = 1e8;
@@ -176,11 +177,12 @@ main(int argc, char **argv)
   std::cout << "Initilise KF with Q: " << std::endl << Q << std::endl;
   std::cout << "and Z" << std::endl << Z << std::endl;
 
-  initializeKalmanFilter.initialize(steadyState, deepParams, xparams1, R, Z, Q, T, Pstar, Pinf,
+  initializeKalmanFilter.initialize(steadyState, deepParams, R, Z, Q, RQRt, T, Pstar, Pinf,
                                     penalty, dataView, yView, info);
 
   std::cout << "Matrix T: " << std::endl << T << std::endl;
   std::cout << "Matrix R: " << std::endl << R << std::endl;
+  std::cout << "Matrix RQRt: " << std::endl << RQRt << std::endl;
   std::cout << "Matrix Pstar: " << std::endl << Pstar << std::endl;
   std::cout << "Matrix Pinf: " << std::endl << Pinf << std::endl;
 
