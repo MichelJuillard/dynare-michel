@@ -70,7 +70,7 @@ extern "C" {
   void dgees(LACHAR jobvs, LACHAR sort, const void *select,
              CONST_LAINT n, LADOU a, CONST_LAINT lda, LAINT sdim,
              LADOU wr, LADOU wi, LADOU vs, CONST_LAINT ldvs,
-             LADOU work, CONST_LAINT lwork, const void *bwork, LAINT info);
+             LADOU work, CONST_LAINT lwork, LAINT bwork, LAINT info);
 
 #define dgecon FORTRAN_WRAPPER(dgecon)
   void dgecon(LACHAR norm, CONST_LAINT n, CONST_LADOU a, CONST_LAINT lda,
