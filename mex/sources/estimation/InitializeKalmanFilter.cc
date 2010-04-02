@@ -41,7 +41,7 @@ InitializeKalmanFilter::InitializeKalmanFilter(const std::string &modName, size_
   ghx(n_endo_arg, zeta_back_arg.size() + zeta_mixed_arg.size()),
   ghx_raw(n_endo_arg, zeta_back_arg.size() + zeta_mixed_arg.size()),
   ghu(n_endo_arg, n_exo_arg),  ghu_raw(n_endo_arg, n_exo_arg),
-  Rt(n_exo_arg, riv.size()), RQ(riv.size(), n_exo_arg), RQR(riv.size(), riv.size())
+  Rt(n_exo_arg, riv.size()), RQ(riv.size(), n_exo_arg) 
 {
   size_t n_pred = ghx.getCols();
   size_t n_static = zeta_static_arg.size();
@@ -52,18 +52,19 @@ InitializeKalmanFilter::InitializeKalmanFilter(const std::string &modName, size_
 }
 
 void
-InitializeKalmanFilter::initialize(Vector &steadyState, Vector &deepParams, const Vector &xparams1,
-                                   Matrix &R, Matrix &Z, Matrix &Q, Matrix &T, Matrix &Pstar, Matrix &Pinf,
-                                   double &penalty, const MatrixView &dataView, MatrixView &yView, int &info)
+InitializeKalmanFilter::initialize(Vector &steadyState, const Vector &deepParams, Matrix &R, const Matrix &Z,  
+                                   const Matrix &Q, Matrix &RQRt, Matrix &T, Matrix &Pstar, Matrix &Pinf,
+                                   double &penalty, const MatrixView &dataView, Matrix &Y, int &info)
 {
   modelSolution.compute(steadyState, deepParams, ghx_raw, ghu_raw);
+  detrendData.detrend(steadyState, dataView, Y);
 
   mat::reorderRowsByVectors(ghx, mat::nullVec, ghx_raw, order_var);
   mat::reorderRowsByVectors(ghu, mat::nullVec, ghu_raw, order_var);
 
   setT(T, info);
   setR(R, info);
-  setPstar(Pstar, Pinf, T, R, Q, info);
+  setPstar(Pstar, Pinf, T, R, Q, RQRt, info);
 }
 
 void
@@ -86,21 +87,21 @@ InitializeKalmanFilter::setR(Matrix &R, int &info)
 }
 
 void
-InitializeKalmanFilter::setPstar(Matrix &Pstar, Matrix &Pinf, Matrix &T, Matrix &R, Matrix &Q, int &info)
+InitializeKalmanFilter::setPstar(Matrix &Pstar, Matrix &Pinf, Matrix &T, Matrix &R, const Matrix &Q, Matrix &RQRt, int &info)
 {
 
-  //  Matrix RQR=R*Q*R'
+  //  Matrix RQRt=R*Q*R'
   RQ.setAll(0.0);
   blas::gemm("N", "N", 1.0, R, Q, 0.0, RQ); // R*Q
-  RQR.setAll(0.0);
+  RQRt.setAll(0.0);
   //mat::transpose(Rt, R);
-  blas::gemm("N", "T", 1.0, RQ, R, 0.0, RQR); // R*Q*R'
+  blas::gemm("N", "T", 1.0, RQ, R, 0.0, RQRt); // R*Q*R'
   //mat::transpose(RQR);
 
   try
   {
-    // disclyap_fast(T, RQR, Pstar, lyapunov_tol, 0); // 1 to check chol
-    discLyapFast.solve_lyap(T, RQR, Pstar, lyapunov_tol, 0); // 1 to check chol
+    // disclyap_fast(T, RQR, Pstar, lyapunov_tol, 0 or 1 to check chol)
+    discLyapFast.solve_lyap(T, RQRt, Pstar, lyapunov_tol, 0); 
 
     Pinf.setAll(0.0);
   }

@@ -45,8 +45,8 @@ public:
                          const Matrix &llincidence, double qz_criterium, const std::vector<size_t> &order_var_arg, const std::vector<size_t> &inv_order_var_arg,
                          const std::vector<size_t> &riv, const std::vector<size_t> &ric, double lyapunov_tol, int &info);
   virtual ~InitializeKalmanFilter();
-  void initialize(Vector &steadyState, Vector &deepParams, const Vector &xparams1, Matrix &R, Matrix &Z,  Matrix &Q,
-                  Matrix &T, Matrix &Pstar, Matrix &Pinf, double &penalty, const MatrixView &dataView, MatrixView &yView, int &info);
+  void initialize(Vector &steadyState, const Vector &deepParams, Matrix &R, const Matrix &Z, const Matrix &Q, Matrix &RQRt,
+                  Matrix &T, Matrix &Pstar, Matrix &Pinf, double &penalty, const MatrixView &dataView, Matrix &Y, int &info);
 
 private:
   const std::vector<size_t> riv; // restrict_var_list
@@ -59,10 +59,10 @@ private:
   DiscLyapFast discLyapFast; //Lyapunov solver
   Matrix ghx, ghx_raw;
   Matrix ghu, ghu_raw;
-  Matrix Rt, RQ, RQR;
+  Matrix Rt, RQ;
   void setT(Matrix &T, int &info);
   void setR(Matrix &R, int &info);
-  void setPstar(Matrix &Pstar, Matrix &Pinf, Matrix &T, Matrix &R, Matrix &Q, int &info);
+  void setPstar(Matrix &Pstar, Matrix &Pinf, Matrix &T, Matrix &R,  const Matrix &Q, Matrix &RQRt, int &info);
 
 };
 
