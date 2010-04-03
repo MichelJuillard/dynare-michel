@@ -205,8 +205,8 @@ OBJS_PROBA := $(OBJS) probabilities.o switch.o switchio.o VARbase.o VARio.o comm
 #################################################################################
 # OUTPUT
 
-#all: $(OUT_DIR)/sbvar_draws $(OUT_DIR)/sbvar_estimation $(OUT_DIR)/sbvar_init_file $(OUT_DIR)/sbvar_mhm_1 $(OUT_DIR)/sbvar_mhm_2 $(OUT_DIR)/sbvar_probabilities
-all: $(OUT_DIR)/sbvar_draws $(OUT_DIR)/sbvar_init_file $(OUT_DIR)/sbvar_mhm_1 $(OUT_DIR)/sbvar_mhm_2 $(OUT_DIR)/sbvar_probabilities
+all: $(OUT_DIR)/sbvar_draws $(OUT_DIR)/sbvar_estimation $(OUT_DIR)/sbvar_init_file $(OUT_DIR)/sbvar_mhm_1 $(OUT_DIR)/sbvar_mhm_2 $(OUT_DIR)/sbvar_probabilities
+
 
 $(OUT_DIR)/sbvar_draws: $(OBJS_DRAWS)
 	$(CC) $(CFLAGS) $^ $(LIBS_DIR) $(LIBS) -o $(OUT_DIR)/sbvar_draws
