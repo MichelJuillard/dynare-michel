@@ -147,9 +147,20 @@ if options_.hp_filter == 0
         b2 = b2*cs;
         vx  = lyapunov_symm(A,b1*b1',options_.qz_criterium,options_.lyapunov_complex_threshold,1);
         vv = diag(aa*vx*aa'+b2*b2');
+        vv2 = 0;
         for i=1:M_.exo_nbr
             vx1 = lyapunov_symm(A,b1(:,i)*b1(:,i)',options_.qz_criterium,options_.lyapunov_complex_threshold,2);
-            Gamma_y{nar+2}(stationary_vars,i) = abs(diag(aa*vx1*aa'+b2(:,i)*b2(:,i)'))./vv;
+            vx2 = abs(diag(aa*vx1*aa'+b2(:,i)*b2(:,i)'));
+            Gamma_y{nar+2}(stationary_vars,i) = vx2;
+            vv2 = vv2 +vx2;
+        end
+        if max(abs(vv2-vv)./vv) > 1e-4
+            warning(['Aggregate variance and sum of variances by shocks ' ...
+                     'differ by more than 0.01 %'])
+        end
+        for i=1:M_.exo_nbr
+            Gamma_y{nar+2}(stationary_vars,i) = Gamma_y{nar+ ...
+                                2}(stationary_vars,i)./vv2;
         end
     end
 else% ==> Theoretical HP filter.

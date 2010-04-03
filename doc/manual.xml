@@ -2091,6 +2091,9 @@ steady(homotopy_mode = 1, homotopy_steps = 50);
   Variance decomposition, correlation, autocorrelation are only displayed for variables with positive variance. Impulse response functions are only plotted for variables with response larger than 10<superscript>-10</superscript>.
 </para>
 <para>
+  Variance decomposition is computed relative to the sum of the contribution of each shock. Normally, this is of course equal to aggregate variance, but if a model generates very large variances, it may happen that, due to numerical error, the two differ by a significant amount. Dynare issues a warning if the maximum relative difference between the sum of the contribution of each shock and aggregate variance is larger than 0.01 %.
+</para>
+<para>
   Currently, the IRFs are only plotted for 12 variables. Select the ones you want to see, if your model contains more than 12 endogenous variables.
 </para>
 <para>Currently, the HP filter is only available when computing theoretical moments, not for for moments of simulated variables.
