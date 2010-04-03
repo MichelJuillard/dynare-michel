@@ -1,4 +1,4 @@
-function [alphahat,etahat,epsilonhat,ahat,SteadyState,trend_coeff,aK,T,R,P,PK,d,decomp] = DsgeSmoother(xparam1,gend,Y,data_index,missing_value)
+function [alphahat,etahat,epsilonhat,ahat,SteadyState,trend_coeff,aK,T,R,P,PK,decomp] = DsgeSmoother(xparam1,gend,Y,data_index,missing_value)
 % Estimation of the smoothed variables and innovations. 
 % 
 % INPUTS 
@@ -21,8 +21,6 @@ function [alphahat,etahat,epsilonhat,ahat,SteadyState,trend_coeff,aK,T,R,P,PK,d,
 %                   matrices
 %    PK:            4D array of k-step ahead forecast error variance
 %                   matrices (meaningless for periods 1:d)
-%    d:             number of periods where filter remains in diffuse part
-%                  (should be equal to the order of integration of the model)
 %    
 % ALGORITHM 
 %   Diffuse Kalman filter (Durbin and Koopman)       
@@ -60,7 +58,6 @@ T             = [];
 R             = [];
 P             = [];
 PK            = [];
-d             = [];
 decomp        = [];
 nobs            = size(options_.varobs,1);
 smpl          = size(Y,2);
