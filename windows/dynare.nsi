@@ -90,15 +90,16 @@ Section "MEX files for MATLAB 32-bit, version 6.5 to 7.4 (R13 to R2007a)"
  File ..\mex\matlab\win32-6.5-7.4\*.dll
 SectionEnd
 
-Section "MEX files for MATLAB 32-bit, version 7.5 to 7.9 (R2007b to R2009b)"
- SetOutPath $INSTDIR\mex\matlab\win32-7.5-7.9
- File ..\mex\matlab\win32-7.5-7.9\*.mexw32
+Section "MEX files for MATLAB 32-bit, version 7.5 to 7.10 (R2007b to R2010a)"
+ SetOutPath $INSTDIR\mex\matlab\win32-7.5-7.10
+ File ..\mex\matlab\win32-7.5-7.10\*.mexw32
 SectionEnd
 
-Section "MEX files for MATLAB 64-bit, version 7.2 (R2006a)"
- SetOutPath $INSTDIR\mex\matlab\win64-7.2
- File ..\mex\matlab\win64-7.2\*.mexw64
-SectionEnd
+# Currently we don't have that version of MATLAB
+#Section "MEX files for MATLAB 64-bit, version 7.2 (R2006a)"
+# SetOutPath $INSTDIR\mex\matlab\win64-7.2
+# File ..\mex\matlab\win64-7.2\*.mexw64
+#SectionEnd
 
 Section "MEX files for MATLAB 64-bit, version 7.3 to 7.4 (R2006b to R2007a)"
  SetOutPath $INSTDIR\mex\matlab\win64-7.3-7.4
@@ -110,14 +111,14 @@ Section "MEX files for MATLAB 64-bit, version 7.5 to 7.7 (R2007b to R2008b)"
  File ..\mex\matlab\win64-7.5-7.7\*.mexw64
 SectionEnd
 
-Section "MEX files for MATLAB 64-bit, version 7.8 to 7.9 (R2009a to R2009b)"
- SetOutPath $INSTDIR\mex\matlab\win64-7.8-7.9
- File ..\mex\matlab\win64-7.8-7.9\*.mexw64
+Section "MEX files for MATLAB 64-bit, version 7.8 to 7.10 (R2009a to R2010a)"
+ SetOutPath $INSTDIR\mex\matlab\win64-7.8-7.10
+ File ..\mex\matlab\win64-7.8-7.10\*.mexw64
 SectionEnd
 
 SectionGroupEnd
 
-Section "MEX files for Octave 3.2.3 (MinGW build)"
+Section "MEX files for Octave 3.2.4 (MinGW build)"
  SetOutPath $INSTDIR\mex\octave
  File ..\mex\octave\*.mex
 SectionEnd
@@ -125,8 +126,8 @@ SectionEnd
 Section "Dynare++ (standalone executable)"
  SetOutPath $INSTDIR\dynare++
  File ..\dynare++\src\dynare++.exe
- # The list of DLLs given here is used when building with Octave/MinGW build 3.2.3 (disabling POSIX threads)
- File ..\dynare++\src\atlas.dll ..\dynare++\src\blas.dll ..\dynare++\src\cblas.dll ..\dynare++\src\lapack.dll ..\dynare++\src\libgcc_s_dw2-1.dll ..\dynare++\src\libgfortran-3.dll ..\dynare++\src\pthreadGC2.dll
+ # The list of DLLs given here is used when building with Octave/MinGW build 3.2.4 (disabling POSIX threads)
+ File ..\dynare++\src\atlas.dll ..\dynare++\src\blas.dll ..\dynare++\src\cblas.dll ..\dynare++\src\lapack.dll ..\dynare++\src\libgcc_s_dw2-1.dll ..\dynare++\src\libgfortran-3.dll
 SectionEnd
 
 Section "Documentation (Dynare and Dynare++)"
@@ -149,6 +150,7 @@ Section "Uninstall"
  Delete $INSTDIR\uninstall.exe
  Delete $INSTDIR\README.txt
  Delete $INSTDIR\license.txt
+ Delete $INSTDIR\mexopts.bat
  Rmdir /r $INSTDIR\matlab
  Rmdir /r $INSTDIR\mex
  Rmdir /r $INSTDIR\dynare++
