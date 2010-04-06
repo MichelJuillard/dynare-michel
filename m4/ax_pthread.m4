@@ -48,6 +48,7 @@
 # LICENSE
 #
 #   Copyright (c) 2008 Steven G. Johnson <stevenj@alum.mit.edu>
+#   Copyright (c) 2010 Dynare Team
 #
 #   This program is free software: you can redistribute it and/or modify it
 #   under the terms of the GNU General Public License as published by the
@@ -82,14 +83,18 @@ AC_LANG_SAVE
 AC_LANG_C
 ax_pthread_ok=no
 
-# We used to check for pthread.h first, but this fails if pthread.h
-# requires special compiler flags (e.g. on True64 or Sequent).
-# It gets checked for in the link test anyway.
+AC_ARG_WITH([pthread], [AS_HELP_STRING([--without-pthread], [don't use POSIX threads])], [], [with_readline=check])
 
-# First of all, check if the user has set any of the PTHREAD_LIBS,
-# etcetera environment variables, and if threads linking works using
-# them:
-if test x"$PTHREAD_LIBS$PTHREAD_CFLAGS" != x; then
+if test "x$with_pthread" != "xno"; then
+
+  # We used to check for pthread.h first, but this fails if pthread.h
+  # requires special compiler flags (e.g. on True64 or Sequent).
+  # It gets checked for in the link test anyway.
+
+  # First of all, check if the user has set any of the PTHREAD_LIBS,
+  # etcetera environment variables, and if threads linking works using
+  # them:
+  if test x"$PTHREAD_LIBS$PTHREAD_CFLAGS" != x; then
         save_CFLAGS="$CFLAGS"
         CFLAGS="$CFLAGS $PTHREAD_CFLAGS"
         save_LIBS="$LIBS"
@@ -103,41 +108,41 @@ if test x"$PTHREAD_LIBS$PTHREAD_CFLAGS" != x; then
         fi
         LIBS="$save_LIBS"
         CFLAGS="$save_CFLAGS"
-fi
+  fi
 
-# We must check for the threads library under a number of different
-# names; the ordering is very important because some systems
-# (e.g. DEC) have both -lpthread and -lpthreads, where one of the
-# libraries is broken (non-POSIX).
+  # We must check for the threads library under a number of different
+  # names; the ordering is very important because some systems
+  # (e.g. DEC) have both -lpthread and -lpthreads, where one of the
+  # libraries is broken (non-POSIX).
 
-# Create a list of thread flags to try.  Items starting with a "-" are
-# C compiler flags, and other items are library names, except for "none"
-# which indicates that we try without any flags at all, and "pthread-config"
-# which is a program returning the flags for the Pth emulation library.
+  # Create a list of thread flags to try.  Items starting with a "-" are
+  # C compiler flags, and other items are library names, except for "none"
+  # which indicates that we try without any flags at all, and "pthread-config"
+  # which is a program returning the flags for the Pth emulation library.
 
-ax_pthread_flags="pthreads none -Kthread -kthread lthread -pthread -pthreads -mthreads pthread --thread-safe -mt pthread-config"
+  ax_pthread_flags="pthreads none -Kthread -kthread lthread -pthread -pthreads -mthreads pthread --thread-safe -mt pthread-config"
 
-# The ordering *is* (sometimes) important.  Some notes on the
-# individual items follow:
+  # The ordering *is* (sometimes) important.  Some notes on the
+  # individual items follow:
 
-# pthreads: AIX (must check this before -lpthread)
-# none: in case threads are in libc; should be tried before -Kthread and
-#       other compiler flags to prevent continual compiler warnings
-# -Kthread: Sequent (threads in libc, but -Kthread needed for pthread.h)
-# -kthread: FreeBSD kernel threads (preferred to -pthread since SMP-able)
-# lthread: LinuxThreads port on FreeBSD (also preferred to -pthread)
-# -pthread: Linux/gcc (kernel threads), BSD/gcc (userland threads)
-# -pthreads: Solaris/gcc
-# -mthreads: Mingw32/gcc, Lynx/gcc
-# -mt: Sun Workshop C (may only link SunOS threads [-lthread], but it
-#      doesn't hurt to check since this sometimes defines pthreads too;
-#      also defines -D_REENTRANT)
-#      ... -mt is also the pthreads flag for HP/aCC
-# pthread: Linux, etcetera
-# --thread-safe: KAI C++
-# pthread-config: use pthread-config program (for GNU Pth library)
+  # pthreads: AIX (must check this before -lpthread)
+  # none: in case threads are in libc; should be tried before -Kthread and
+  #       other compiler flags to prevent continual compiler warnings
+  # -Kthread: Sequent (threads in libc, but -Kthread needed for pthread.h)
+  # -kthread: FreeBSD kernel threads (preferred to -pthread since SMP-able)
+  # lthread: LinuxThreads port on FreeBSD (also preferred to -pthread)
+  # -pthread: Linux/gcc (kernel threads), BSD/gcc (userland threads)
+  # -pthreads: Solaris/gcc
+  # -mthreads: Mingw32/gcc, Lynx/gcc
+  # -mt: Sun Workshop C (may only link SunOS threads [-lthread], but it
+  #      doesn't hurt to check since this sometimes defines pthreads too;
+  #      also defines -D_REENTRANT)
+  #      ... -mt is also the pthreads flag for HP/aCC
+  # pthread: Linux, etcetera
+  # --thread-safe: KAI C++
+  # pthread-config: use pthread-config program (for GNU Pth library)
 
-case "${host_cpu}-${host_os}" in
+  case "${host_cpu}-${host_os}" in
         *solaris*)
 
         # On Solaris (at least, for some versions), libc contains stubbed
@@ -150,10 +155,10 @@ case "${host_cpu}-${host_os}" in
 
         ax_pthread_flags="-pthreads pthread -mt -pthread $ax_pthread_flags"
         ;;
-esac
+  esac
 
-if test x"$ax_pthread_ok" = xno; then
-for flag in $ax_pthread_flags; do
+  if test x"$ax_pthread_ok" = xno; then
+  for flag in $ax_pthread_flags; do
 
         case $flag in
                 none)
@@ -208,11 +213,11 @@ for flag in $ax_pthread_flags; do
 
         PTHREAD_LIBS=""
         PTHREAD_CFLAGS=""
-done
-fi
+  done
+  fi
 
-# Various other checks:
-if test "x$ax_pthread_ok" = xyes; then
+  # Various other checks:
+  if test "x$ax_pthread_ok" = xyes; then
         save_LIBS="$LIBS"
         LIBS="$PTHREAD_LIBS $LIBS"
         save_CFLAGS="$CFLAGS"
@@ -252,13 +257,15 @@ if test "x$ax_pthread_ok" = xyes; then
         else
           PTHREAD_CC=$CC
 	fi
-else
+  else
         PTHREAD_CC="$CC"
-fi
+  fi
 
-AC_SUBST(PTHREAD_LIBS)
-AC_SUBST(PTHREAD_CFLAGS)
-AC_SUBST(PTHREAD_CC)
+  AC_SUBST(PTHREAD_LIBS)
+  AC_SUBST(PTHREAD_CFLAGS)
+  AC_SUBST(PTHREAD_CC)
+
+fi
 
 # Finally, execute ACTION-IF-FOUND/ACTION-IF-NOT-FOUND:
 if test x"$ax_pthread_ok" = xyes; then
