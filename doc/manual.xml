@@ -2817,6 +2817,10 @@ end;
       <listitem><para>...</para></listitem>
     </varlistentry>
     <varlistentry>
+      <term><option>selected_variables_only</option></term>
+      <listitem><para>Only run the smoother on the variables listed just after the <command>estimation</command> command. Default: run the smoother on all the declared endogenous variables.</para></listitem>
+    </varlistentry>
+    <varlistentry>
       <term><option>solve_algo</option> = <replaceable>INTEGER</replaceable></term>
       <listitem><para>See <link linkend="solve_algo">there</link></para></listitem>
     </varlistentry>
