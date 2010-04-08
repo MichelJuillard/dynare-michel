@@ -622,7 +622,7 @@ if options_.mode_compute > 0 & options_.posterior_mode_estimation
                    ' option is unknown!'])
         end
     end
-    if options_.mode_compute ~= 5
+%     if options_.mode_compute ~= 5
         if options_.mode_compute ~= 6
             if options_.cova_compute == 1
                 if ~options_.bvar_dsge
@@ -642,7 +642,7 @@ if options_.mode_compute > 0 & options_.posterior_mode_estimation
         else
             save([M_.fname '_mode.mat'],'xparam1','parameter_names');
         end
-    end
+%     end
 end
 
 if options_.cova_compute == 0
@@ -1122,7 +1122,7 @@ if (~((any(bayestopt_.pshape > 0) & options_.mh_replic) | (any(bayestopt_.pshape
         if isfield(options_,'kalman_algo')
             if ~isempty(PK)
                 oo_.FilteredVariablesKStepAheadVariances = ...
-                    PK(options_.filter_step_ahead,i_endo,i_endo_nbr,:);
+                    PK(options_.filter_step_ahead,i_endo,i_endo,:);
             end
             if ~isempty(decomp)
                 oo_.FilteredVariablesShockDecomposition = ...
