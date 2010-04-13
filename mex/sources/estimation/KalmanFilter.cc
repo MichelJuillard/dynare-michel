@@ -74,7 +74,7 @@ KalmanFilter::compute(const MatrixView &dataView, Vector &steadyState,
 double
 KalmanFilter::filter(const Matrix &dataView,  const Matrix &H, Vector &vll, size_t start, int &info)
 {
-  double loglik, ll, logFdet;
+  double loglik=0.0, ll, logFdet, Fdet;
   int p = Finv.getRows();
 
   bool nonstationary = true;
@@ -98,9 +98,12 @@ KalmanFilter::filter(const Matrix &dataView,  const Matrix &H, Vector &vll, size
           KFinv.setAll(0.0);
           blas::gemm("N", "N", 1.0, K, Finv, 1.0, KFinv);
           // deteminant of F:
-          logFdet = 1;
+          Fdet = 1;
           for (int d = 0; d < p; ++d)
-            logFdet *= (-F(d, d));
+            Fdet *= (-F(d, d));
+
+          logFdet=log(fabs(Fdet));
+
           Pold = Pstar;
           Ptmp = Pstar;
           // Pt+1= T(Pt - KFinvK')T' +RQR'
@@ -114,9 +117,6 @@ KalmanFilter::filter(const Matrix &dataView,  const Matrix &H, Vector &vll, size
           Pstar = RQRt;
           blas::gemm("N", "T", 1.0, Ptmp, T, 1.0, Pstar);
           nonstationary = mat::isDiffSym(Pstar, Pold, riccati_tol);
-        }
-      else
-        {
         }
 
       // err= Yt - Za
@@ -135,20 +135,13 @@ KalmanFilter::filter(const Matrix &dataView,  const Matrix &H, Vector &vll, size
       blas::gemm("T", "N", 1.0, vt, Finv, 0.0, vtFinv);
       blas::gemm("N", "N", 1.0, vtFinv, vt, 0.0, vtFinvVt);
 
-      ll = -0.5*(p*log(2*M_PI)+logFdet+*(vtFinvVt.getData()));
+      ll = -0.5*(p*log(2*M_PI)+logFdet+(*(vtFinvVt.getData())));
 
       vll(t) = ll;
-      if (t > start) loglik += ll;
+      if (t >= start) loglik += ll;
 
     }
 
   return loglik;
 }
-
-/**
- * 89:*
-   double KalmanFilter::calcStepLogLik(const PLUFact &Finv, const Vector &v){
-
-   }
- */
 

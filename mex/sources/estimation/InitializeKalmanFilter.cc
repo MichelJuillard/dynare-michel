@@ -92,11 +92,9 @@ InitializeKalmanFilter::setPstar(Matrix &Pstar, Matrix &Pinf, Matrix &T, Matrix 
 
   //  Matrix RQRt=R*Q*R'
   RQ.setAll(0.0);
-  blas::gemm("N", "N", 1.0, R, Q, 0.0, RQ); // R*Q
+  blas::gemm("N", "N", 1.0, R, Q, 1.0, RQ); // R*Q
   RQRt.setAll(0.0);
-  //mat::transpose(Rt, R);
-  blas::gemm("N", "T", 1.0, RQ, R, 0.0, RQRt); // R*Q*R'
-  //mat::transpose(RQR);
+  blas::gemm("N", "T", 1.0, RQ, R, 1.0, RQRt); // R*Q*R'
 
   try
   {

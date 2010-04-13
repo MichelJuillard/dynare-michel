@@ -62,13 +62,13 @@ ModelSolution::ComputeModelSolution(Vector& steadyState, const Vector& deepParam
 
   Vector llXsteadyState(n_jcols-n_exo);
 
-  for (int ll_row = 0; ll_row < ll_incidence.getRows(); ll_row++)
+  for (size_t ll_row = 0; ll_row < ll_incidence.getRows(); ll_row++)
     {
       // populate (non-sparse) vector with ysteady values
-      for (int i = 0; i < n_endo; i++)
+      for (size_t i = 0; i < n_endo; i++)
       {
         if (ll_incidence(ll_row, i))
-          llXsteadyState(((int) ll_incidence(ll_row, i))-1) = steadyState(i);
+          llXsteadyState(((size_t) ll_incidence(ll_row, i))-1) = steadyState(i);
       }
     }
 #ifdef DEBUG
@@ -78,8 +78,8 @@ ModelSolution::ComputeModelSolution(Vector& steadyState, const Vector& deepParam
     //get jacobian 
     dynamicDLLp.eval(llXsteadyState, Mx, &deepParams,  1,  residual, &jacobian, NULL, NULL);
 
-    std::cout << "jacobian: " << std::endl << jacobian << std::endl;
 #ifdef DEBUG
+    std::cout << "jacobian: " << std::endl << jacobian << std::endl;
     mexPrintf(" compute rules \n");
 #endif
     //compute rules
