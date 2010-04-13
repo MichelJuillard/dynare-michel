@@ -498,7 +498,7 @@ end
 if options_.ms.estimate_msmodel == 1
     if use_linux == 1
         perform_estimation=[c_path,'/sbvar_estimation -ft ',options_.ms.output_file_tag];
-        %        system(perform_estimation);
+        system(perform_estimation);
     else
         perform_estimation=[c_path,'\sbvar_estimation.exe -ft ',options_.ms.output_file_tag];
         dos(perform_estimation)

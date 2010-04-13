@@ -63,7 +63,7 @@
 //#define USE_IMSL_MATH_LIBRARY
 //#define USE_IMSL_STAT_LIBRARY
 #define USE_GSL_LIBRARY
-#define USE_MKL_LIBRARY
+//#define USE_MKL_LIBRARY
 /*******************************************************************************/
 
 // #define NEWVERSIONofDW_SWITCH //If defined, using DW's new switch program (implemented in 2008),
@@ -75,7 +75,7 @@
    #define SWITCHTOIMSLCMATH             // define: use IMSL special functions like gammlog; undef: use my own default code if it exists.
 
    //-------Only one of the following for math library.--------
-   #define INTELCMATHLIBRARY             // define: use Intel MKL LAPACK library; undef: use others.
+//   #define INTELCMATHLIBRARY             // define: use Intel MKL LAPACK library; undef: use others.
    //#define IMSLCMATHLIBRARY         // define: use IMSL C Math library; undef: use others.
    //#define MATLABCMATHLIBRARY            // define: use Matlab C math library; undef: use others.
 
@@ -107,7 +107,7 @@
    #endif       
    #include "blas_lapack.h"  
    #undef  SWITCHTOINTELCMATH
-   #undef  INTELCMATHLIBRARY 
+//   #undef  INTELCMATHLIBRARY 
 #endif
 
 #if defined(USE_GSL_LIBRARY)

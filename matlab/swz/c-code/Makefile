@@ -5,22 +5,24 @@
 # All output is to OUT_DIR
 
 # MACHINE
-USE_MICHEL_LAPTOP=USE_MICHEL_LAPTOP 
-
+STANDALONE_HB = STANDALONE_HB
+MACOSX = MACOSX
 
 # LIBRARIES
 USE_TAO = USE_TAO
-USE_MKL = USE_MKL
+#USE_MKL = USE_MKL
 #USE_IMSL = USE_IMSL
 USE_LAPACK = USE_LAPACK
 USE_FORTRAN = USE_FORTRAN
 USE_MATH = USE_MATH
-USE_GSL = USE_GLS
+USE_GSL = USE_GSL
 #USE_GSL_CBLAS = USE_GSL_CBLAS
 
 
 WORK_DIR = .
 OUT_DIR = ../bin
+
+CFLAGS = -g -DINTELCMATHLIBRARY
 
 # MACHINE DEPENDENT DIRECTORIES 
 
@@ -31,7 +33,7 @@ OUT_DIR = /home/kalagman/Documents/InternshipJob/Dynare/work/
 
 CC = /usr/bin/gcc-4.3.2
 FC = gfortran
-CFLAGS = -g -static
+CFLAGS := $(CFLAGS) -static
 
 TAO_DIR = $(WORK_DIR)/utilities/TZCcode
 IMSL_BASE_DIR = /opt/vni/CTT6.0
@@ -53,8 +55,7 @@ ifdef USE_MICHEL_LAPTOP
 CC = gcc
 #CC = /opt/intel/Compiler/11.0/074/bin/intel64/icc -no-multibyte-chars
 FC = gfortran
-CFLAGS = -g -static
-#CFLAGS = -g
+CFLAGS := $(CFLAGS) -static
 
 TAO_DIR = $(WORK_DIR)/utilities/TZCcode
 
@@ -65,16 +66,32 @@ INTEL_LIBS_DIR = /opt/intel/Compiler/11.0/074/lib/intel64
 INTEL_LIBS = -lguide
 MKL_BASE_DIR = /opt/intel/Compiler/11.0/074/mkl
 MKL_LIBS_DIR = $(MKL_BASE_DIR)/lib/em64t
-MKL_LIBS = -lmkl_lapack -lmkl_em64t 
+MKL_LIBS = -lmkl_lapack -lmkl_em64t
 
+endif
+
+
+ifdef STANDALONE_HB
+CC = gcc
+FC = gfortran
+
+GSL_INCLUDE_DIR = /usr/local/include/gsl
+GSL_LIBS_DIR = /usr/local/lib
+
+TAO_DIR = $(WORK_DIR)/utilities/TZCcode
+endif
+
+ifdef MACOSX
+MAC_LIBS = -framework Accelerate
+CFLAGS := $(CFLAGS) -DMACOSX
 endif
 
 
 #################################################################################
 VPATH = 
-INCLUDE_DIR = 
+INCLUDE_DIR = -I/Applications/MatlabR2010a/MATLAB_R2010a.app/extern/include/
 LIBS_DIR = 
-LIBS = 
+LIBS = $(MAC_LIBS)
 OBJS =
 #################################################################################
 
@@ -233,6 +250,6 @@ $(OUT_DIR)/sbvar_probabilities: $(OBJS_PROBA)
 #
 #################################################################################
 clean:
-	rm -f $(OUT_DIR)/*.o 
+	rm -f $(OUT_DIR)/*.o *.o
 #
 #################################################################################

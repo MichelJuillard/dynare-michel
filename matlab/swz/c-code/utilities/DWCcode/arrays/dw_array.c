@@ -4,7 +4,12 @@
 
 #include <stdlib.h>
 #include <string.h>
+
+#if defined(MACOSX)
+#include <sys/malloc.h>
+#else
 #include <malloc.h>
+#endif
 #include <stdarg.h>
 
 //================================== Macros ===================================//
