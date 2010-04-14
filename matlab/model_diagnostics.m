@@ -96,9 +96,13 @@ else
             % nonlinear models
             if max(abs(feval(fh,dr.ys,[oo_.exo_steady_state; ...
                                     oo_.exo_det_steady_state], M_.params))) > options_.dynatol
-                [dr.ys,check1] = dynare_solve(fh,dr.ys,1,...
+                [ys,check1] = dynare_solve(fh,dr.ys,1,...
                                               [oo_.exo_steady_state; ...
-                                    oo_.exo_det_steady_state], M_.params);
+                                    oo_.exo_det_steady_state], ...
+                                           M_.params);
+                if ~check1
+                    dr.ys = ys;
+                end
             end
         else
             % linear models
@@ -113,7 +117,6 @@ end
 % testing for problem
 if check1
     disp('model diagnostic can''t obtain the steady state')
-    return
 end
 
 if ~isreal(dr.ys)
