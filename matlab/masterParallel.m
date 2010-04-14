@@ -169,7 +169,10 @@ for j=1:totCPU,
                     end
                 else
                     copyfile([fname,'_input.mat'], ['\\',Parallel(indPC).PcName,'\',Parallel(indPC).RemoteDrive,'$\',Parallel(indPC).RemoteFolder]);
-                    for jfil=1:size(NamFileInput,1)
+                    for jfil=1:size(NamFileInput,1),
+                        if ~isempty(NamFileInput{jfil,1})
+                            mkdir(['\\',Parallel(indPC).PcName,'\',Parallel(indPC).RemoteDrive,'$\',Parallel(indPC).RemoteFolder,'\',NamFileInput{jfil,1}]);
+                        end
                         copyfile([NamFileInput{jfil,1},NamFileInput{jfil,2}],['\\',Parallel(indPC).PcName,'\',Parallel(indPC).RemoteDrive,'$\',Parallel(indPC).RemoteFolder,'\',NamFileInput{jfil,1}])
                     end
                 end
