@@ -68,7 +68,7 @@ while (etime(clock,t0)<1200 && ~isempty(fslave)) || ~isempty(dir(['stayalive',in
         % loads values for fblck nblck fname fGlobalVar fInputVar
         delete(['slaveJob',int2str(whoiam),'.mat']);
 
-        if exist('fGlobalVar'),
+        if exist('fGlobalVar') && ~isempty (fGlobalVar)
             globalVars = fieldnames(fGlobalVar);
             %         for j=1:length(globalVars),
             %             eval(['global ',globalVars{j},';'])
