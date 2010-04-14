@@ -1453,7 +1453,10 @@ end;
 
   <refsect2><title>In stochastic context</title>
   <para>
-    For stochastic simulations, the <command>shocks</command> block specifies the non zero elements of the covariance matrix of the shocks.
+    For stochastic simulations, the <command>shocks</command> block specifies the non zero elements of the covariance matrix of the shocks of exogenous variables.
+  </para>
+  <para>
+    In an estimation context, it is also possible to specify variances and covariances on endogenous variables: in that case, these values are interpreted as the calibration of the measurement errors on these variables.
   </para>
 
   <refsect3><title>Example</title> 
@@ -2261,16 +2264,29 @@ stoch_simul(linear,irf=60) y k;
     <command>varobs</command> lists the name of observed endogenous variables for the estimation procedure. These variables must be available in the data file (see <xref linkend='estimation'/>).
   </para>
   <para>
-    Successive instances of <command>varobs</command> overwrite the list of observed variables. They don't add to the list.
+    Only one instance of <command>varobs</command> is allowed in a model file. If one needs to declare observed variables in a loop, the macroprocessor can be used as shown in the second example below.
   </para>
   </refsect1>
 
-  <refsect1><title>Example</title>
-  <informalexample>
-    <programlisting>
+  <refsect1><title>Examples</title>
+    <refsect2><title>Simple example</title>
+      <informalexample>
+        <programlisting>
 varobs C y rr;
-    </programlisting>
-  </informalexample>
+        </programlisting>
+      </informalexample>
+    </refsect2>
+    <refsect2><title>In a loop</title>
+      <informalexample>
+        <programlisting>
+varobs
+@#for co in countries
+  GDP_@{co}
+@#endfor
+;
+        </programlisting>
+      </informalexample>
+    </refsect2>
   </refsect1>
 
 </refentry>

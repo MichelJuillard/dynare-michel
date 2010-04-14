@@ -215,9 +215,6 @@ oo_.exo_det_simul = [];
 
 M_.params = [];
 
-% Variance matrix for measurement errors
-M_.H = 0;
-
 % BVAR
 M_.bvar = [];
 
