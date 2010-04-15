@@ -240,7 +240,8 @@ end
     elseif ~whoiam 
         waitbar(fpar/npar,h);  
     end
-    if mod(fpar,10)==0 & whoiam,
+   % if mod(fpar,10)==0 & whoiam,
+   if whoiam,
         fprintf('Done! \n');
         waitbarString = [ 'Subdraw ' int2str(fpar) '/' int2str(npar) ' done.'];
         fMessageStatus((fpar-fpar0)/(npar-fpar0),whoiam,waitbarString, waitbarTitle, Parallel(ThisMatlab), MasterName, DyMo)

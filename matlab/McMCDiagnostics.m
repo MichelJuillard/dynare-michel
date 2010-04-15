@@ -102,7 +102,13 @@ if isnumeric(options_.parallel),
     UDIAG = fout.UDIAG;
     clear fout
 else
-    [fout, nBlockPerCPU, totCPU] = masterParallel(options_.parallel, 1, npar,{},'McMCDiagnostics_core', localVars, [], options_.parallel_info);
+    ModelName = M_.fname;
+    if ~isempty(M_.bvar)
+        ModelName = [M_.fname '_bvar'];
+    end
+    NamFileInput={[M_.dname '/metropolis/'],[ModelName '_mh*_blck*.mat']};
+    
+    [fout, nBlockPerCPU, totCPU] = masterParallel(options_.parallel, 1, npar,NamFileInput,'McMCDiagnostics_core', localVars, [], options_.parallel_info);
     UDIAG = fout(1).UDIAG;
     for j=2:totCPU,
         UDIAG = cat(3,UDIAG ,fout(j).UDIAG);
@@ -295,7 +301,7 @@ tmp = sortrows(tmp,1);
 ligne   = 0;
 for iter  = Origin:StepSize:NumberOfDraws
     ligne = ligne+1;
-    linea = ceil(0.5*iter);
+    linea = ceil(options_.mh_drop*iter);
     n     = iter-linea+1;
     cinf  = round(n*ALPHA/2);
     csup  = round(n*(1-ALPHA/2));

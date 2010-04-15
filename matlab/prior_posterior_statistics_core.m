@@ -56,15 +56,6 @@ end
 MAX_momentsno =myinputs. MAX_momentsno;
 ifil=myinputs.ifil;
 
-
-if strcmpi(typee,'posterior'),
-    b=0;
-    while b<=B
-        b = b + 1;
-        [x(b,:), logpost(b,1)] = GetOneDraw(typee);
-    end
-end
-
 if ~strcmpi(typee,'prior'),
     x=myinputs.x;
     logpost=myinputs.logpost;
@@ -279,7 +270,8 @@ for b=fpar:B
     elseif ~whoiam,
         waitbar(b/B,h);
     end
-    if mod(b,10)==0 & whoiam,
+    % if mod(b,10)==0 & whoiam,
+    if  whoiam,
         fprintf('Done! \n');
         waitbarString = [ 'Subdraw ' int2str(b) '/' int2str(B) ' done.'];
         fMessageStatus((b-fpar+1)/(B-fpar+1),whoiam,waitbarString, waitbarTitle, Parallel(ThisMatlab), MasterName, DyMo)
