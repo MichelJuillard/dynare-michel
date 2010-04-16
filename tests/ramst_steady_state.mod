@@ -1,4 +1,4 @@
-// Tests the steady_state, in the static M-file, and in a dynamic C file
+// Tests the steady_state, in static and dynamic M-files
 
 var c k w;
 varexo x;
