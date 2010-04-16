@@ -242,8 +242,8 @@ Interpreter::print_expression(it_code_type it_code, bool evaluate)
   stack<string> Stack;
   stack<double> Stackf;
   ostringstream tmp_out, tmp_out2;
-  string v1, v2;
-  double v1f, v2f;
+  string v1, v2, v3;
+  double v1f, v2f, v3f;
   bool go_on = true;
   double ll;
   ExpressionType equation_type;
@@ -1024,8 +1024,44 @@ Interpreter::print_expression(it_code_type it_code, bool evaluate)
               tmp_out << "sqrt(" << v1 << ")";
               Stack.push(tmp_out.str());
               break;
+            case oErf:
+              Stackf.push(sqrt(v1f));
+              tmp_out.str("");
+              tmp_out << "erf(" << v1 << ")";
+              Stack.push(tmp_out.str());
+              break;
             default:
               ;
+            }
+          break;
+        case FTRINARY:
+          op = ((FTRINARY_ *) it_code->second)->get_op_type();
+          v3 = Stack.top();
+          Stack.pop();
+          v2 = Stack.top();
+          Stack.pop();
+          v1 = Stack.top();
+          Stack.pop();
+          v3f = Stackf.top();
+          Stackf.pop();
+          v2f = Stackf.top();
+          Stackf.pop();
+          v1f = Stackf.top();
+          Stackf.pop();
+          switch (op)
+            {
+              case oNormcdf:
+                Stackf.push(0.5*(1+erf((v1f-v2f)/v3f/M_SQRT2)));
+                tmp_out.str("");
+                tmp_out << "normcdf(" << v1 << ", " << v2 << ", " << v3 << ")";
+                Stack.push(tmp_out.str());
+                break;
+              case oNormpdf:
+                Stackf.push(1/(v3f*sqrt(2*M_PI)*exp(pow((v1f-v2f)/v3f,2)/2)));
+                tmp_out.str("");
+                tmp_out << "normpdf(" << v1 << ", " << v2 << ", " << v3 << ")";
+                Stack.push(tmp_out.str());
+                break;
             }
           break;
         case FCUML:
@@ -1049,7 +1085,7 @@ Interpreter::compute_block_time(int Per_u_, bool evaluate, int block_num)
 {
   int var, lag = 0, op;
   ostringstream tmp_out;
-  double v1, v2;
+  double v1, v2, v3;
   bool go_on = true;
   double ll;
 
@@ -1729,10 +1765,42 @@ Interpreter::compute_block_time(int Per_u_, bool evaluate, int block_num)
               tmp_out << " |sqrt(" << v1 << ")|";
 #endif
               break;
+            case oErf:
+              Stack.push(erf(v1));
+#ifdef DEBUG
+              tmp_out << " |erf(" << v1 << ")|";
+#endif
+              break;
             default:
               ;
             }
           break;
+        case FTRINARY:
+          op = ((FTRINARY_ *) it_code->second)->get_op_type();
+          v3 = Stack.top();
+          Stack.pop();
+          v2 = Stack.top();
+          Stack.pop();
+          v1 = Stack.top();
+          Stack.pop();
+          switch (op)
+            {
+              case oNormcdf:
+                //mexPrintf("normcdf(v1=%f, v2=%f, v3=%f)=%f\n", v1, v2, v3, 0.5*(1+erf((v1-v2)/v3/M_SQRT2)));
+                Stack.push(0.5*(1+erf((v1-v2)/v3/M_SQRT2)));
+#ifdef DEBUG
+                tmp_out << " |normcdf(" << v1 << ", " << v2 << ", " << v3 << ")|";
+#endif
+                break;
+              case oNormpdf:
+                Stack.push(1/(v3*sqrt(2*M_PI)*exp(pow((v1-v2)/v3,2)/2)));
+#ifdef DEBUG
+                tmp_out << " |normpdf(" << v1 << ", " << v2 << ", " << v3 << ")|";
+#endif
+                break;
+            }
+          break;
+
         case FCUML:
           v1 = Stack.top();
           Stack.pop();
