@@ -1,6 +1,6 @@
-// Tests the normcdf() function, in the static M-file, and in a dynamic C file
+// Tests the steady_state, in the static M-file, and in a dynamic C file
 
-var c k t u v w;
+var c k w;
 varexo x;
 
 parameters alph gam delt bet aa c_steady_state;
@@ -13,9 +13,6 @@ aa=0.5;
 model;
 c + k - aa*x*k(-1)^alph - (1-delt)*k(-1);
 c^(-gam) - (1+bet)^(-1)*(aa*alph*x(+1)*k^(alph-1) + 1 - delt)*c(+1)^(-gam);
-t = normcdf(x, 2, 3);
-u = normpdf(x, 1, 0.5);
-v = erf(x);
 w = steady_state(k);
 end;
 
@@ -23,15 +20,12 @@ initval;
 x = 1;
 k = ((delt+bet)/(1.0*aa*alph))^(1/(alph-1));
 c = aa*k^alph-delt*k;
-t = 0;
-u = 0;
-v = 0;
 w = 0;
 end;
 
 steady;
 
-//check;
+check;
 
 shocks;
 var x;
@@ -41,7 +35,11 @@ end;
 
 simul(periods=20);
 
-if(abs(oo_.steady_state(2) - oo_.endo_simul(6,2)) > 1e-10)
-   error('Test failed in bytecode for steady_state')
+if(abs(oo_.steady_state(2) - oo_.steady_state(3)) > 1e-10)
+   error('Test failed in static M-file for steady_state')
+end
+
+if(abs(oo_.steady_state(2) - oo_.endo_simul(3,2)) > 1e-10)
+   error('Test failed in dynamic M-file for steady_state')
 end
 

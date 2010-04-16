@@ -1,9 +1,9 @@
-// Tests the normcdf() function, in the static M-file, and in a dynamic C file
+// Tests the normcdf(), normpdf() and erf() functions, in the static and the dynamic byecode file
 
-var c k t u v w;
+var c k t u v;
 varexo x;
 
-parameters alph gam delt bet aa c_steady_state;
+parameters alph gam delt bet aa;
 alph=0.5;
 gam=0.5;
 delt=0.02;
@@ -16,7 +16,6 @@ c^(-gam) - (1+bet)^(-1)*(aa*alph*x(+1)*k^(alph-1) + 1 - delt)*c(+1)^(-gam);
 t = normcdf(x, 2, 3);
 u = normpdf(x, 1, 0.5);
 v = erf(x);
-w = steady_state(k);
 end;
 
 initval;
@@ -26,7 +25,6 @@ c = aa*k^alph-delt*k;
 t = 0;
 u = 0;
 v = 0;
-w = 0;
 end;
 
 steady(solve_algo=5);
