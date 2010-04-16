@@ -71,17 +71,10 @@ ModelSolution::ComputeModelSolution(Vector& steadyState, const Vector& deepParam
           llXsteadyState(((size_t) ll_incidence(ll_row, i))-1) = steadyState(i);
       }
     }
-#ifdef DEBUG
-    //    std::cout << "Vector llXsteadyState: " << std::endl << llXsteadyState << std::endl;
-    mexPrintf(" get jacobian \n");
-#endif
+
     //get jacobian 
     dynamicDLLp.eval(llXsteadyState, Mx, &deepParams,  1,  residual, &jacobian, NULL, NULL);
 
-#ifdef DEBUG
-    std::cout << "jacobian: " << std::endl << jacobian << std::endl;
-    mexPrintf(" compute rules \n");
-#endif
     //compute rules
     decisionRules.compute(jacobian,ghx, ghu);
 }

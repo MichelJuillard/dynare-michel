@@ -68,9 +68,9 @@ private:
   Matrix Pstar; //mm*mm variance-covariance matrix of stationary variables
   Matrix Pinf;  //mm*mm variance-covariance matrix of diffuse variables
   // allocate space for intermediary matrices
-  Matrix RQRt, Pold, Ptmp;  //mm*mm variance-covariance matrix of variable disturbances
+  Matrix RQRt, Ptmp;  //mm*mm variance-covariance matrix of variable disturbances
   Matrix F, Finv;  // nob*nob F=ZPZt +H an inv(F)
-  Matrix K, KFinv; // mm*nobs K=PZt and nm*nm K*Finv
+  Matrix K,  KFinv, oldKFinv; // mm*nobs K=PZt and K*Finv gain matrices
   LUSolver Finverter; // matrix inversion algorithm
   Matrix a_init, a_new; // state vector
   Matrix vt; // current observation error vectors
