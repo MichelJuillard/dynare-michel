@@ -55,7 +55,7 @@ QQ   = R*Q*transpose(R);                        % Variance of R times the vector
 t    = 0;                                       % Initialization of the time index.
 lik  = zeros(smpl,1);                         % Initialization of the vector gathering the densities.
 LIK  = Inf;                                     % Default value of the log likelihood.
-oldK = 0;
+oldK = Inf;
 notsteady   = 1;                                % Steady state flag.
 F_singular  = 1;
 
