@@ -39,9 +39,9 @@ KalmanFilter::KalmanFilter(const std::string &modName, size_t n_endo, size_t n_e
                            double riccati_tol_in, double lyapunov_tol, int &info) :
   Z(varobs_arg.size(), riv.size()), T(riv.size()), R(riv.size(), n_exo),
   Pstar(riv.size(), riv.size()), Pinf(riv.size(), riv.size()), RQRt(riv.size(), riv.size()),
-  Pold(riv.size(), riv.size()), Ptmp(riv.size(), riv.size()), F(varobs_arg.size(), varobs_arg.size()),
-  Finv(varobs_arg.size(), varobs_arg.size()), K(riv.size(), varobs_arg.size()),
-  KFinv(riv.size(), varobs_arg.size()), Finverter(varobs_arg.size()), a_init(riv.size(), 1),
+  Ptmp(riv.size(), riv.size()), F(varobs_arg.size(), varobs_arg.size()),
+  Finv(varobs_arg.size(), varobs_arg.size()), K(riv.size(), varobs_arg.size()), KFinv(riv.size(), varobs_arg.size()),
+  oldKFinv(riv.size(), varobs_arg.size()), Finverter(varobs_arg.size()), a_init(riv.size(), 1),
   a_new(riv.size(), 1), vt(varobs_arg.size(), 1), vtFinv(1, varobs_arg.size()), vtFinvVt(1), riccati_tol(riccati_tol_in),
   initKalmanFilter(modName, n_endo, n_exo, zeta_fwrd_arg, zeta_back_arg, zeta_mixed_arg,
                    zeta_static_arg, ll_incidence, qz_criterium, order_var, inv_order_var, riv, ric, lyapunov_tol, info)
@@ -94,7 +94,7 @@ KalmanFilter::filter(const Matrix &dataView,  const Matrix &H, Vector &vll, size
           // Finv=inv(F)
           mat::set_identity(Finv);
           Finverter.invMult("N", F, Finv); // F now contains its LU decomposition!
-          // KFinv
+          // KFinv gain matrix
           KFinv.setAll(0.0);
           blas::gemm("N", "N", 1.0, K, Finv, 1.0, KFinv);
           // deteminant of F:
@@ -104,7 +104,6 @@ KalmanFilter::filter(const Matrix &dataView,  const Matrix &H, Vector &vll, size
 
           logFdet=log(fabs(Fdet));
 
-          Pold = Pstar;
           Ptmp = Pstar;
           // Pt+1= T(Pt - KFinvK')T' +RQR'
           // 1) Ptmp= Pt - K*FinvK'
@@ -116,7 +115,9 @@ KalmanFilter::filter(const Matrix &dataView,  const Matrix &H, Vector &vll, size
           // 3) Pt+1= Ptmp*T' +RQR'
           Pstar = RQRt;
           blas::gemm("N", "T", 1.0, Ptmp, T, 1.0, Pstar);
-          nonstationary = mat::isDiffSym(Pstar, Pold, riccati_tol);
+          if (t>0)
+            nonstationary = mat::isDiff(KFinv, oldKFinv, riccati_tol);
+          oldKFinv=KFinv;
         }
 
       // err= Yt - Za
