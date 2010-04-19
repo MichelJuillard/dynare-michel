@@ -1,5 +1,5 @@
-function [f0, x, ig] = mr_gstep(func0,x,htol0,varargin)
-% function [f0, x] = mr_gstep(func0,x,htol0,varargin)
+function [f0, x, ig] = mr_gstep(init,x,func0,htol0,varargin)
+% function [f0, x] = mr_gstep(init,x,func0,htol0,varargin)
 % 
 % Gibbs type step in optimisation
 
@@ -23,20 +23,21 @@ function [f0, x, ig] = mr_gstep(func0,x,htol0,varargin)
 global bayestopt_ options_
 persistent h1 
 
-gstep_ = options_.gstep;
-if nargin<3, 
+n=size(x,1);
+
+if init,
+    gstep_ = options_.gstep;
+    h1=max(abs(x),sqrt(gstep_)*ones(n,1))*eps^(1/4);
+    return
+end
+if nargin<4, 
     htol = 1.e-6;
 else
     htol = htol0;
 end
 func = str2func(func0);
 f0=feval(func,x,varargin{:});
-n=size(x,1);
 h2=bayestopt_.ub-bayestopt_.lb;
-
-if isempty(h1),
-    h1=max(abs(x),sqrt(gstep_)*ones(n,1))*eps^(1/4);
-end
 
 xh1=x;
 f1=zeros(size(f0,1),n);

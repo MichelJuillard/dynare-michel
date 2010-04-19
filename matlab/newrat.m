@@ -59,8 +59,12 @@ func_hh = [func0,'_hh'];
 func = str2func(func0);
 fval0=feval(func,x,varargin{:});
 fval=fval0;
+% initialize mr_gstep and mr_hessian
+mr_gstep(1,x);
+mr_hessian(1,x);
+
 if isempty(hh)
-    [dum, gg, htol0, igg, hhg]=mr_hessian(func_hh,x,flagit,htol,varargin{:});
+    [dum, gg, htol0, igg, hhg]=mr_hessian(0,x,func_hh,flagit,htol,varargin{:});
     hh0 = reshape(dum,nx,nx);
     hh=hhg;
     if min(eig(hh0))<0,
@@ -121,7 +125,7 @@ while norm(gg)>gtol & check==0 & jit<nit,
             iggx(find(ig),find(ig)) = inv( hhx(find(ig),find(ig)) );
             [fvala x0 fc retcode] = csminit(func0,x0,fval,ggx,0,iggx,varargin{:});
         end
-        [fvala, x0, ig] = mr_gstep(func0,x0,htol,varargin{:});
+        [fvala, x0, ig] = mr_gstep(0,x0,func0,htol,varargin{:});
         nig=[nig ig];
         if (fval-fvala)<gibbstol*(fval0(icount)-fval),
             igibbs=0;
@@ -162,7 +166,7 @@ while norm(gg)>gtol & check==0 & jit<nit,
         if flagit==2,
             hh=hh0;
         elseif flagg>0,
-            [dum, gg, htol0, igg, hhg]=mr_hessian(func_hh,xparam1,flagg,ftol0,varargin{:});   
+            [dum, gg, htol0, igg, hhg]=mr_hessian(0,xparam1,func_hh,flagg,ftol0,varargin{:});   
             if flagg==2,
                 hh = reshape(dum,nx,nx);
                 ee=eig(hh);
@@ -202,7 +206,7 @@ while norm(gg)>gtol & check==0 & jit<nit,
             catch
                 save m1 x fval0 nig 
             end
-            [dum, gg, htol0, igg, hhg]=mr_hessian(func_hh,xparam1,flagit,htol,varargin{:});
+            [dum, gg, htol0, igg, hhg]=mr_hessian(0,xparam1,func_hh,flagit,htol,varargin{:});
             if htol0>htol, %ftol,
                            %ftol=htol0;
                 htol=htol0;

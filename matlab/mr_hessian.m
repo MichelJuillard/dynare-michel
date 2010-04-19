@@ -1,5 +1,5 @@
-function [hessian_mat, gg, htol1, ihh, hh_mat0] = mr_hessian(func,x,hflag,htol0,varargin)
-%  [hessian_mat, gg, htol1, ihh, hh_mat0] = mr_hessian(func,x,hflag,htol0,varargin)
+function [hessian_mat, gg, htol1, ihh, hh_mat0] = mr_hessian(init,x,func,hflag,htol0,varargin)
+%  [hessian_mat, gg, htol1, ihh, hh_mat0] = mr_hessian(init,x,func,hflag,htol0,varargin)
 %
 %  numerical gradient and Hessian, with 'automatic' check of numerical
 %  error 
@@ -44,19 +44,20 @@ function [hessian_mat, gg, htol1, ihh, hh_mat0] = mr_hessian(func,x,hflag,htol0,
 global options_ bayestopt_
 persistent h1 htol
 
-gstep_=options_.gstep;
-if isempty(htol), htol = 1.e-4; end
+n=size(x,1);
+if init,
+    gstep_=options_.gstep;
+    htol = 1.e-4; 
+%h1=max(abs(x),gstep_*ones(n,1))*eps^(1/3);
+%h1=max(abs(x),sqrt(gstep_)*ones(n,1))*eps^(1/6);
+    h1=max(abs(x),sqrt(gstep_)*ones(n,1))*eps^(1/4);
+    return,
+end
 func = str2func(func);
 [f0, ff0]=feval(func,x,varargin{:});
-n=size(x,1);
 h2=bayestopt_.ub-bayestopt_.lb;
 hmax=bayestopt_.ub-x;
 hmax=min(hmax,x-bayestopt_.lb);
-%h1=max(abs(x),gstep_*ones(n,1))*eps^(1/3);
-%h1=max(abs(x),sqrt(gstep_)*ones(n,1))*eps^(1/6);
-if isempty(h1),
-    h1=max(abs(x),sqrt(gstep_)*ones(n,1))*eps^(1/4);
-end
 
 h1 = min(h1,0.5.*hmax);
 
