@@ -15,6 +15,7 @@ OCTAVE_MODS = \
 	ramst_steady_state.mod \
 	example1_varexo_det.mod \
 	predetermined_variables.mod \
+	fs2000_ssfile.mod \
 	block_bytecode/fs2000_simk.mod \
 	block_bytecode/fs2000_lu.mod \
 	block_bytecode/fs2000_bicgstab.mod \
@@ -122,5 +123,7 @@ clean-local:
 		block_bytecode/fs2000_simk.swp
 
 	rm -rf ramsey_objective
+
+	rm -f fs2000_ssfile_steadystate.m
 
 	rm -f $(shell find -name '*~')

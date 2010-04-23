@@ -1075,6 +1075,9 @@ end;
   <para>
     Note that the model written in the TeX file will differ from the model declared by the user in the some dimensions, see <xref linkend="write_latex_dynamic_model"/>.
   </para>
+  <para>
+    Also note that this command will not output the contents of the optional <xref linkend="steady_state_model"/> block; it will rather output a static version (<foreignphrase>i.e.</foreignphrase> without leads and lags) of the dynamic model declared in the <xref linkend="model"/> block.
+  </para>
   </refsect1>
 </refentry>
 
@@ -1660,6 +1663,7 @@ periods 100;
 <itemizedlist>
   <listitem><para><xref linkend='steady'/></para></listitem>
   <listitem><para><xref linkend='homotopy_setup'/></para></listitem>
+  <listitem><para><xref linkend='steady_state_model'/></para></listitem>
   <listitem><para><xref linkend='check'/></para></listitem>
   <listitem><para><xref linkend='model_info'/></para></listitem>
   <listitem><para><xref linkend='simul'/></para></listitem>
@@ -1808,6 +1812,85 @@ steady(homotopy_mode = 1, homotopy_steps = 50);
   </informalexample>
   </refsect1>
 
+</refentry>
+
+<refentry id="steady_state_model">
+  <refmeta>
+    <refentrytitle>steady_state_model</refentrytitle>
+  </refmeta>
+
+  <refnamediv>
+    <refname>steady_state_model</refname>
+    <refpurpose>declares the solution of the static model, when analytically known</refpurpose>
+  </refnamediv>
+
+  <refsynopsisdiv>
+    <cmdsynopsis>
+      <command>steady_state_model</command>
+      <arg choice="plain">;</arg>
+      <sbr/>
+      <arg choice="plain" rep="repeat">
+        <replaceable>VARIABLE_NAME</replaceable> = <replaceable>EXPRESSION</replaceable> ;
+      </arg>
+      <sbr/>
+      <command>end</command><arg choice="plain">;</arg>
+    </cmdsynopsis>
+  </refsynopsisdiv>
+
+  <refsect1><title>Description</title>
+  <para>
+    When the analytical solution of the model is known, this command can be used to help Dynare find the steady state in a more efficient and reliable way, especially during estimation where the steady state has to be recomputed for every point in the parameter space.
+  </para>
+  <para>
+    Each line of this block consists of a variable (either an endogenous or a temporary variable) which is assigned an expression (which can contain parameters, exogenous at the steady state, or any endogenous or temporary variable already declared above).
+  </para>
+  <para>
+    Internally, Dynare will create a steady state file called <filename><replaceable>FILENAME</replaceable>_steadystate.m</filename>, using the information provided in this block.
+  </para>
+  </refsect1>
+
+  <refsect1><title>Example</title>
+  <informalexample>
+    <programlisting>
+var m P c e W R k d n l gy_obs gp_obs y dA;
+varexo e_a e_m;
+
+parameters alp bet gam mst rho psi del;
+
+...
+// parameter calibration, (dynamic) model declaration, shock calibration...
+...
+
+steady_state_model;
+  dA = exp(gam);
+  gst = 1/dA; // A temporary variable
+  m = mst;
+  
+  // Three other temporary variables
+  khst = ( (1-gst*bet*(1-del)) / (alp*gst^alp*bet) )^(1/(alp-1));
+  xist = ( ((khst*gst)^alp - (1-gst*(1-del))*khst)/mst )^(-1);
+  nust = psi*mst^2/( (1-alp)*(1-psi)*bet*gst^alp*khst^alp );
+
+  n  = xist/(nust+xist);
+  P  = xist + nust;
+  k  = khst*n;
+
+  l  = psi*mst*n/( (1-psi)*(1-n) );
+  c  = mst/P;
+  d  = l - mst + 1;
+  y  = k^alp*n^(1-alp)*gst^alp;
+  R  = mst/bet;
+  W  = l/n;
+  e = 1;
+  
+  gp_obs = m/dA;
+  gy_obs = dA;
+end;
+
+steady;
+    </programlisting>
+  </informalexample>
+  </refsect1>
 </refentry>
 
 <refentry id="check">
