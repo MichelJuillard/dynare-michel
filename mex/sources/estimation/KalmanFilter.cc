@@ -56,12 +56,16 @@ KalmanFilter::KalmanFilter(const std::string &modName, size_t n_endo, size_t n_e
 double
 KalmanFilter::compute(const MatrixView &dataView, Vector &steadyState,
                       const Matrix &Q, const Matrix &H, const Vector &deepParams,
-                      Vector &vll, size_t start, double &penalty, int &info)
+                      VectorView &vll, size_t start, size_t period, double &penalty, int &info)
 {
   double ll;
   Matrix Y(dataView.getRows(), dataView.getCols());    // data
 
-  initKalmanFilter.initialize(steadyState, deepParams, R, Z, Q, RQRt, T, Pstar, Pinf,
+  if(period==0) // initialise all KF matrices
+    initKalmanFilter.initialize(steadyState, deepParams, R, Z, Q, RQRt, T, Pstar, Pinf,
+                              penalty, dataView, Y, info);
+  else  // initialise parameter dependent KF matrices only but not Ps
+    initKalmanFilter.initialize(steadyState, deepParams, R, Z, Q, RQRt, T, 
                               penalty, dataView, Y, info);
 
   return ll = filter(Y, H, vll, start, info);
@@ -72,7 +76,7 @@ KalmanFilter::compute(const MatrixView &dataView, Vector &steadyState,
  * 30:*
  */
 double
-KalmanFilter::filter(const Matrix &dataView,  const Matrix &H, Vector &vll, size_t start, int &info)
+KalmanFilter::filter(const Matrix &dataView,  const Matrix &H, VectorView &vll, size_t start, int &info)
 {
   double loglik=0.0, ll, logFdet, Fdet;
   int p = Finv.getRows();
