@@ -44,15 +44,26 @@ main(int argc, char **argv)
   steadyState(n_endo), deepParams(npar);
 
   double dYSparams [] = {
-    1.0002, 0.9933, 1.0070, 1.0000,
-    2.7186, 1.0073, 18.9822, 0.8608,
-    0.3167, 0.8610, 1.0085, 0.9917,
-    1.3559, 1.0085, 0.9929
+    1.000199998312523,
+    0.993250551764778,
+    1.006996670195112,
+    1,
+    2.718562165733039,
+    1.007250753636589,
+    18.982191739915155,
+    0.860847884886309,
+    0.316729149714572,
+    0.861047883198832,
+    1.00853622757204,
+    0.991734328394345,
+    1.355876776121869,
+    1.00853622757204,
+    0.992853374047708
   };
 
   double vcov[] = {
-    0.0013,         0,
-    0,    0.0001
+    0.001256631601,	0.0,
+    0.0,	0.000078535044
   };
 
   Matrix
@@ -162,12 +173,11 @@ main(int argc, char **argv)
   double lyapunov_tol = 1e-16;
   double riccati_tol = 1e-16;
   int info = 0;
-  //const MatrixView dataView(&lyapunov_tol, 1, 1, 1); // dummy
-  //Matrix yView(dataView.getRows(),dataView.getCols());
   Matrix yView(nobs,192); // dummy
   yView.setAll(0.2);
   const MatrixView dataView(yView, 0,  0, nobs, yView.getCols() ); // dummy
   Vector vll(yView.getCols());
+  VectorView vwll(vll,0,vll.getSize());
  
   double penalty = 1e8;
 
@@ -177,18 +187,10 @@ main(int argc, char **argv)
 
   std::cout << "Initilise KF with Q: " << std::endl << Q << std::endl;
   // std::cout << "and Z" << std::endl << Z << std::endl;
-  size_t start=0;
+  size_t start=0, period=0;
   double ll=kalman.compute(dataView, steadyState,  Q, H, deepParams,
-                                   vll, start , penalty,  info);
+                                   vwll, start, period, penalty, info);
 
-  /*
-  std::cout << "Matrix T: " << std::endl << T << std::endl;
-  std::cout << "Matrix R: " << std::endl << R << std::endl;
-  std::cout << "Matrix RQRt: " << std::endl << RQRt << std::endl;
-  std::cout << "Matrix Pstar: " << std::endl << Pstar << std::endl;
-  std::cout << "Matrix Pinf: " << std::endl << Pinf << std::endl;
-  */
   std::cout << "ll: " << std::endl << ll << std::endl;
-
 }
 

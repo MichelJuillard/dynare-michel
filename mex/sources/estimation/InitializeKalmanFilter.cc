@@ -50,10 +50,10 @@ InitializeKalmanFilter::InitializeKalmanFilter(const std::string &modName, size_
     if (inv_order_var_arg[i]-n_static < n_pred && inv_order_var_arg[i]-n_static >= 0)
       inv_ric[j++] = ricIN[inv_order_var_arg[i]-n_static];
 }
-
+// initialise parameter dependent KF matrices only but not Ps
 void
 InitializeKalmanFilter::initialize(Vector &steadyState, const Vector &deepParams, Matrix &R, const Matrix &Z,  
-                                   const Matrix &Q, Matrix &RQRt, Matrix &T, Matrix &Pstar, Matrix &Pinf,
+                                   const Matrix &Q, Matrix &RQRt, Matrix &T, 
                                    double &penalty, const MatrixView &dataView, Matrix &Y, int &info)
 {
   modelSolution.compute(steadyState, deepParams, ghx_raw, ghu_raw);
@@ -63,9 +63,19 @@ InitializeKalmanFilter::initialize(Vector &steadyState, const Vector &deepParams
   mat::reorderRowsByVectors(ghu, mat::nullVec, ghu_raw, order_var);
 
   setT(T, info);
-  setR(R, info);
-  setPstar(Pstar, Pinf, T, R, Q, RQRt, info);
+  setRQR(R, Q, RQRt, info);
 }
+
+// initialise all KF matrices
+void
+InitializeKalmanFilter::initialize(Vector &steadyState, const Vector &deepParams, Matrix &R, const Matrix &Z,  
+                                   const Matrix &Q, Matrix &RQRt, Matrix &T, Matrix &Pstar, Matrix &Pinf,
+                                   double &penalty, const MatrixView &dataView, Matrix &Y, int &info)
+{
+  initialize(steadyState, deepParams, R, Z, Q, RQRt, T, penalty, dataView, Y, info);
+  setPstar(Pstar, Pinf, T, RQRt, info);
+}
+
 
 void
 InitializeKalmanFilter::setT(Matrix &T, int &info)
@@ -79,22 +89,22 @@ InitializeKalmanFilter::setT(Matrix &T, int &info)
 }
 
 void
-InitializeKalmanFilter::setR(Matrix &R, int &info)
+InitializeKalmanFilter::setRQR(Matrix &R, const Matrix &Q, Matrix &RQRt, int &info)
 {
   R.setAll(0.0);
   //B(i_n_iv,:) = dr.ghu(iv,:); and R=B;
   mat::assignByVectors(R, mat::nullVec, mat::nullVec, ghu, riv, mat::nullVec);
-}
-
-void
-InitializeKalmanFilter::setPstar(Matrix &Pstar, Matrix &Pinf, Matrix &T, Matrix &R, const Matrix &Q, Matrix &RQRt, int &info)
-{
 
   //  Matrix RQRt=R*Q*R'
   RQ.setAll(0.0);
   blas::gemm("N", "N", 1.0, R, Q, 1.0, RQ); // R*Q
   RQRt.setAll(0.0);
   blas::gemm("N", "T", 1.0, RQ, R, 1.0, RQRt); // R*Q*R'
+}
+
+void
+InitializeKalmanFilter::setPstar(Matrix &Pstar, Matrix &Pinf, const Matrix &T, const Matrix &RQRt, int &info)
+{
 
   try
   {

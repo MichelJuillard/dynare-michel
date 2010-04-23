@@ -56,7 +56,7 @@ public:
 
   double compute(const MatrixView &dataView, Vector &steadyState,
                  const Matrix &Q, const Matrix &H, const Vector &deepParams,
-                 Vector &vll, size_t start, double &penalty, int &info);
+                 VectorView &vll, size_t start, size_t period, double &penalty, int &info);
 
 protected:
 //	static double calcStepLogLik(const PLUFact &Finv, const Vector &v);
@@ -77,7 +77,7 @@ private:
   Matrix vtFinv, vtFinvVt; // intermeiate observation error *Finv vector
   double riccati_tol;
   InitializeKalmanFilter initKalmanFilter; //Initialise KF matrices
-  double filter(const Matrix &dataView,  const Matrix &H, Vector &vll, size_t start, int &info);
+  double filter(const Matrix &dataView,  const Matrix &H, VectorView &vll, size_t start, int &info);
 
 };
 

@@ -45,8 +45,12 @@ public:
                          const Matrix &llincidence, double qz_criterium, const std::vector<size_t> &order_var_arg, const std::vector<size_t> &inv_order_var_arg,
                          const std::vector<size_t> &riv, const std::vector<size_t> &ric, double lyapunov_tol, int &info);
   virtual ~InitializeKalmanFilter();
+  // initialise all KF matrices
   void initialize(Vector &steadyState, const Vector &deepParams, Matrix &R, const Matrix &Z, const Matrix &Q, Matrix &RQRt,
                   Matrix &T, Matrix &Pstar, Matrix &Pinf, double &penalty, const MatrixView &dataView, Matrix &Y, int &info);
+  // initialise parameter dependent KF matrices only but not Ps
+  void initialize(Vector &steadyState, const Vector &deepParams, Matrix &R, const Matrix &Z, const Matrix &Q, Matrix &RQRt,
+                  Matrix &T, double &penalty, const MatrixView &dataView, Matrix &Y, int &info);
 
 private:
   const std::vector<size_t> riv; // restrict_var_list
@@ -61,8 +65,8 @@ private:
   Matrix ghu, ghu_raw;
   Matrix Rt, RQ;
   void setT(Matrix &T, int &info);
-  void setR(Matrix &R, int &info);
-  void setPstar(Matrix &Pstar, Matrix &Pinf, Matrix &T, Matrix &R,  const Matrix &Q, Matrix &RQRt, int &info);
+  void setRQR(Matrix &R, const Matrix &Q, Matrix &RQRt, int &info);
+  void setPstar(Matrix &Pstar, Matrix &Pinf, const Matrix &T, const Matrix &RQRt, int &info);
 
 };
 
