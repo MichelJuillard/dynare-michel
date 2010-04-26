@@ -4,7 +4,7 @@
 #include "switch.h"
 #include "switchio.h"
 #include "dw_error.h"
-#include "matrix.h"
+#include "swzmatrix.h"
 #include "bmatrix.h"
 #include "dw_array.h"
 #include "dw_matrix_array.h"

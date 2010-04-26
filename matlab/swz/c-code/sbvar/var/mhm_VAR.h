@@ -2,7 +2,7 @@
 #ifndef __MODIFIED_HARMONIC_MEAN_
 #define __MODIFIED_HARMONIC_MEAN_
 
-#include "matrix.h"
+#include "swzmatrix.h"
 #include "switch.h"
 #include "VARbase.h"
 

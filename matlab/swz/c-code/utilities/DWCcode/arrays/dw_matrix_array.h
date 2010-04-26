@@ -2,7 +2,7 @@
 #ifndef __MATRIX_ARRAY__
 #define __MATRIX_ARRAY__
 
-#include "matrix.h"
+#include "swzmatrix.h"
 #include "dw_array.h"
 
 extern TElementSpecification dw_VectorSpecs;

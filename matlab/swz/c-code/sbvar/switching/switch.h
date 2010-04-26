@@ -5,7 +5,7 @@
 
 #define __SWITCHING_VER_100__
 
-#include "matrix.h"
+#include "swzmatrix.h"
 
 //=== Declaring structures so pointers can be defined ===
 struct TStateModel_tag;

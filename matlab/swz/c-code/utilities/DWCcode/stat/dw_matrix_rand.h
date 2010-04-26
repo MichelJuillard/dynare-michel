@@ -2,7 +2,7 @@
 #ifndef __RANDOM_MATRIX__
 #define __RANDOM_MATRIX__
 
-#include "matrix.h"
+#include "swzmatrix.h"
 
 /* Random Matrices and Vectors */
 TVector dw_UniformVector(TVector x);

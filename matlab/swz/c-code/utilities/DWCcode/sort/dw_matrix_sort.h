@@ -2,7 +2,7 @@
 #ifndef __SORT_MATRICES__
 #define __SORT_MATRICES__
 
-#include "matrix.h"
+#include "swzmatrix.h"
 
 TVector SortVectorAscending(TVector x, TVector y);
 TVector SortVectorDescending(TVector x, TVector y);

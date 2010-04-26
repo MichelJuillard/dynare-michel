@@ -1,5 +1,5 @@
 
-#include "matrix.h"
+#include "swzmatrix.h"
 #include "dw_rand.h"
 #include "dw_parse_cmd.h"
 #include "dw_ascii.h"

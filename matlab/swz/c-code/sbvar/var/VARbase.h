@@ -3,7 +3,7 @@
 #define __VAR_BASE_MODEL__
 
 #include "switch.h"
-#include "matrix.h"
+#include "swzmatrix.h"
 #include "dw_matrix_array.h"
 
 #define standard_ordering 1  // for future implementation

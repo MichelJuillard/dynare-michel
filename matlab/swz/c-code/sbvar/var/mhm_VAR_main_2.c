@@ -1,6 +1,6 @@
 
 
-#include "matrix.h"
+#include "swzmatrix.h"
 #include "dw_ascii.h"
 #include "dw_rand.h"
 #include "dw_matrix_rand.h"

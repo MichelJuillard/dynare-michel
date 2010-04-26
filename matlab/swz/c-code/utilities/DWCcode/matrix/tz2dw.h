@@ -2,7 +2,7 @@
 #ifndef __TZ2DW__
 #define __TZ2DW__
 
-#include "matrix.h"
+#include "swzmatrix.h"
 
 // flags and defines
 #define NEARINFINITY 1.0E+300

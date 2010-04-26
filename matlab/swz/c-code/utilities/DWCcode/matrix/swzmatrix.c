@@ -1,5 +1,5 @@
 
-#include "matrix.h"
+#include "swzmatrix.h"
 #include "bmatrix.h"
 #include "dw_error.h"
 

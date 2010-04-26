@@ -201,7 +201,7 @@ VAR_DIR = $(WORK_DIR)/sbvar/var
 # DW  FILES
 INCLUDE_DIR := -I$(MATRIX_DIR) -I$(ERROR_DIR) -I$(ARRAY_DIR) -I$(ASCII_DIR) -I$(STAT_DIR) -I$(SPHERICAL_DIR) -I$(SORT_DIR) -I$(SWITCH_DIR) -I$(VAR_DIR) $(INCLUDE_DIR) 
 VPATH := $(VPATH) $(MATRIX_DIR) $(ERROR_DIR) $(ARRAY_DIR) $(ASCII_DIR) $(STAT_DIR) $(SPHERICAL_DIR) $(SORT_DIR) $(SWITCH_DIR) $(VAR_DIR)
-OBJS := $(OBJS) bmatrix.o matrix.o dw_error.o dw_rand.o dw_matrix_rand.o dw_array.o dw_matrix_array.o dw_matrix_sort.o dw_ascii.o dw_parse_cmd.o
+OBJS := $(OBJS) bmatrix.o swzmatrix.o dw_error.o dw_rand.o dw_matrix_rand.o dw_array.o dw_matrix_array.o dw_matrix_sort.o dw_ascii.o dw_parse_cmd.o
 
 # TAO FILES
 OBJS := $(OBJS)
