@@ -38,7 +38,7 @@ nshocks = M_.exo_nbr;
 
 % indices of endogenous variables
 if size(varlist,1) == 0
-    varlist = M_.endo_names(M_.orig_endo_nbr);
+    varlist = M_.endo_names(1:M_.orig_endo_nbr,:);
 end
 
 [i_var,nvar] = varlist_indices(varlist,M_.endo_names);
@@ -95,4 +95,4 @@ options_.initial_date.freq = 1;
 options_.initial_date.period = 1;
 options_.initial_date.sub_period = 0;
 
-graph_decomp(z,M_.exo_names,i_var,options_.initial_date)
+graph_decomp(z,M_.exo_names,M_.endo_names,i_var,options_.initial_date)

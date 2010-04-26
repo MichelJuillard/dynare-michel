@@ -235,6 +235,11 @@ options_.use_dll = 0;
 % model evaluated using bytecode.dll
 options_.bytecode = 0;
 
+% dates for historical time series
+options_.initial_date.freq = 1;
+options_.initial_date.period = 1;
+options_.initial_date.subperiod = 0;
+
 % SWZ SBVAR
 options_.ms.freq = 1;
 options_.ms.initial_subperiod = 1;
