@@ -61,3 +61,6 @@ steady_state_model;
 end;
 
 steady;
+
+// Launch stoch_simul in order to have auxiliary variables created for leads of 2
+stoch_simul(nograph);
