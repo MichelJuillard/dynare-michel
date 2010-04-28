@@ -777,7 +777,7 @@ double tz_kalfiltv(struct TSkalfiltv_tag *kalfiltv_ps)
       }
       else
       {
-         fprintf(stdout, "Fatal error: tz_kalfiltv() in kalman.c: the system is non-stationary solutions\n"
+         printf("Fatal error: tz_kalfiltv() in kalman.c: the system is non-stationary solutions\n"
                          "    and the initial conditions must be supplied by, say, input arguments");
          fflush(stdout);
          exit( EXIT_FAILURE );
@@ -1311,9 +1311,9 @@ int InitializeKalman_z10_P10(struct TSkalfilmsinputs_1stapp_tag *kalfilmsinputs_
                      fprintf(FPTR_DEBUG, ".../kalman.c/InitializeKalman_z10_P10(): the system is non-stationary solutions\n"
                                          "    and see p.003 in LWZ Model II");
                      #else
-                     fprintf(stdout, "\n-----------------\n");
-                     fprintf(stdout, "\nIn grand regime sti=%d\n", sti);
-                     fprintf(stdout, ".../kalman.c/InitializeKalman_z10_P10(): the system is non-stationary solutions\n"
+                     printf("\n-----------------\n");
+                     printf("\nIn grand regime sti=%d\n", sti);
+                     printf(".../kalman.c/InitializeKalman_z10_P10(): the system is non-stationary solutions\n"
                                      "    and see p.003 in LWZ Model II");
                      #endif
                   }
@@ -1836,8 +1836,8 @@ double tz_logTimetCondLH_kalfilms_1st_approx(int st, int inpt, struct TSkalfilms
             }
             else
             {
-               fprintf(stdout, "\n-----------------\n");
-               fprintf(stdout, "\nIn regime comsti_c=%d and sti_v=%d and at time=%d\n", comsti_c, sti_v, 0);
+               printf("\n-----------------\n");
+               printf("\nIn regime comsti_c=%d and sti_v=%d and at time=%d\n", comsti_c, sti_v, 0);
                fn_DisplayError("kalman.c/tz_Refresh_z_T7P_T_in_kalfilms_1st_approx(): the system is non-stationary solutions\n"
                              "    and the initial conditions must be supplied by, say, input arguments");
                fflush(stdout);
@@ -2464,8 +2464,8 @@ void tz_Refresh_z_T7P_T_in_kalfilms_1st_approx(struct TSkalfilmsinputs_tag *kalf
          }
          else
          {
-            fprintf(stdout, "\n-----------------\n");
-            fprintf(stdout, "\nIn regime sti_c=%d and sti_v=%d and at time=%d\n", sti_c, sti_v, 0);
+            printf("\n-----------------\n");
+            printf("\nIn regime sti_c=%d and sti_v=%d and at time=%d\n", sti_c, sti_v, 0);
             fn_DisplayError("kalman.c/tz_Refresh_z_T7P_T_in_kalfilms_1st_approx(): the system is non-stationary solutions\n"
                           "    and the initial conditions must be supplied by, say, input arguments");
             fflush(stdout);

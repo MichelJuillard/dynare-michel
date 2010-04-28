@@ -636,7 +636,7 @@ int **ExpandTranslationTable(int **table, TMarkovStateVariable *sv, TMarkovState
   free(idx);
 
   // verbose
-  //dw_PrintArray(stdout,rtable,(char*)NULL); fprintf(stdout,"\n"); dw_PrintArray(stdout,table,(char*)NULL); getchar();
+  //dw_PrintArray(stdout,rtable,(char*)NULL); printf("\n"); dw_PrintArray(stdout,table,(char*)NULL); getchar();
   //dw_PrintArray(stdout,sv->Index,(char*)NULL); getchar();
 
   return rtable;
@@ -1479,7 +1479,7 @@ static void GetProposedJump_A0(TVector b, int j, int k, T_VAR_Parameters *p)
       FreeMatrix(M0);
     }
   S=MatrixInnerProductSymmetric((TMatrix)NULL,p->U[j],YY);
-  //dw_PrintMatrix(stdout,S,"%.17le "); fprintf(stdout,"\n");
+  //dw_PrintMatrix(stdout,S,"%.17le "); printf("\n");
   AddMM(S,S,p->inverse_b0_prior[j]);
 
   //dw_PrintMatrix(stdout,S,"%.17le "); fgetc(stdin);
@@ -1489,20 +1489,20 @@ static void GetProposedJump_A0(TVector b, int j, int k, T_VAR_Parameters *p)
   dw_NormalVector(b);
   if (!InverseProductUV(b,CholeskyUT(S,S),b))
     {
-      fprintf(stdout,"Error in GetProposedJump_A0()\n");
-      fprintf(stdout,"j = %d, k = %d\n,Prior =\n",j,k);
+      printf("Error in GetProposedJump_A0()\n");
+      printf("j = %d, k = %d\n,Prior =\n",j,k);
       dw_PrintMatrix(stdout,p->inverse_b0_prior[j],"%lg ");
-      fprintf(stdout,"S =\n");
+      printf("S =\n");
       dw_PrintMatrix(stdout,S,"%lg ");
       exit(1);
     }
   dw_SetTerminalErrors(terminal_errors);
 /*   else */
 /*     { */
-/*       fprintf(stdout,"GetProposedJump_A0()\n"); */
-/*       fprintf(stdout,"j = %d, k = %d\n,Prior =\n",j,k); */
+/*       printf("GetProposedJump_A0()\n"); */
+/*       printf("j = %d, k = %d\n,Prior =\n",j,k); */
 /*       dw_PrintMatrix(stdout,p->inverse_b0_prior[j],"%lg "); */
-/*       fprintf(stdout,"S =\n"); */
+/*       printf("S =\n"); */
 /*       dw_PrintMatrix(stdout,S,"%lg "); */
 /*       getchar(); */
 /*     } */
@@ -2730,7 +2730,7 @@ void SetLogPriorConstant_VAR(T_VAR_Parameters *p)
       p->log_prior_constant+=p->nvars*log(2);
       break;
     default:
-      fprintf(stdout,"Unknown normalization type\n");
+      printf("Unknown normalization type\n");
       exit(1);
     }
 }
@@ -3037,7 +3037,7 @@ int Normalize_VAR(T_VAR_Parameters *p)
     case VAR_NORMALIZATION_WZ: return WZ_Normalize(p);
     case VAR_NORMALIZATION_NONE: return 0;
     default:
-      fprintf(stdout,"Unknown normalization type\n");
+      printf("Unknown normalization type\n");
       exit(1);
     }
 }

@@ -289,7 +289,7 @@ int GetLastIteration(FILE *f_in, TStateModel *model, TEstimateInfo *estimate)
 	      sprintf(header=(char*)malloc(strlen(fmt) + i - 1),fmt,k);
 	      if (ReadTransitionMatrices(f_in,(char*)NULL,header,model) && Read_VAR_Parameters(f_in,(char*)NULL,header,model))
 		{
-		  fprintf(stdout,"Using intermediate output - %s\n",header);
+		  printf("Using intermediate output - %s\n",header);
 		  estimate->initialization_header=header;
 		  dw_SetTerminalErrors(terminal_errors);
 		  return 1;
@@ -375,7 +375,7 @@ TStateModel* GetModelFromCommandLine(int nargs, char **args, TEstimateInfo *esti
 	  ReadTransitionMatrices(f_in,(char*)NULL,header,model);
 	  Read_VAR_Parameters(f_in,(char*)NULL,header,model);
 	  fclose(f_in);
-	  fprintf(stdout,"Using final output\n");
+	  printf("Using final output\n");
 	  estimate->specification_filename=filename;
 	  estimate->initialization_filename=filename;
 	  estimate->initialization_header=header;	  
@@ -415,7 +415,7 @@ TStateModel* GetModelFromCommandLine(int nargs, char **args, TEstimateInfo *esti
 	      ReadTransitionMatrices(f_in,(char*)NULL,header,model);
 	      Read_VAR_Parameters(f_in,(char*)NULL,header,model);
 	      fclose(f_in);
-	      fprintf(stdout,"Using initial data\n");
+	      printf("Using initial data\n");
 	      estimate->initialization_filename=filename;
 	      estimate->initialization_header=header;
 	      if (d2) free(d2);	    
@@ -614,7 +614,7 @@ int main(int nargs, char **args)
   //=== Help Screen ===
   if (dw_FindArgument_String(nargs,args,"h") != -1)
     {
-      fprintf(stdout,"print_draws <options>\n");
+      printf("print_draws <options>\n");
       PrintHelpMessages(stdout,include_help,additional_help);
       return 0;
     }
@@ -623,11 +623,11 @@ int main(int nargs, char **args)
   seed=dw_ParseInteger_String(nargs,args,"gs",0);
   dw_initialize_generator(seed);
 
-  fprintf(stdout,"Reading initial data...\n");
+  printf("Reading initial data...\n");
   if (model=SetupFromCommandLine(nargs,args,&estimate))
     {
       // Estimation
-      fprintf(stdout,"Beginning estimation...\n");
+      printf("Beginning estimation...\n");
       begin_time=time((time_t*)NULL);
       FindMode_VAR_csminwel(model,estimate);
       end_time=time((time_t*)NULL);

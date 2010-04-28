@@ -417,7 +417,7 @@ int main(int nargs, char **args)
 	  initial_time=begin_time=time((time_t*)NULL);
 	  BurnIn_AdaptiveMetropolisScale(mhm,mhm->n_burn1,1000);
 	  end_time=time((time_t*)NULL);
-	  fprintf(stdout,"Elapsed Time: %d seconds\n",end_time - begin_time);
+	  printf("Elapsed Time: %d seconds\n",end_time - begin_time);
 	}
 
       // After first burn-in
@@ -438,10 +438,10 @@ int main(int nargs, char **args)
 	  initial_time=begin_time=time((time_t*)NULL);
 	  BurnIn(mhm,mhm->n_burn2,1000);
 	  end_time=time((time_t*)NULL);
-	  fprintf(stdout,"Elapsed Time: %d seconds\n",end_time - begin_time);
+	  printf("Elapsed Time: %d seconds\n",end_time - begin_time);
 
-	  fprintf(stdout,"Number inconsistent normalizations: %d\n",((T_VAR_Parameters*)mhm->model->theta)->WZ_inconsistancies);
-	  fprintf(stdout,"Number singular inverse variances: %d\n\n",Get_VAR_Improper_Distribution_Counter());
+	  printf("Number inconsistent normalizations: %d\n",((T_VAR_Parameters*)mhm->model->theta)->WZ_inconsistancies);
+	  printf("Number singular inverse variances: %d\n\n",Get_VAR_Improper_Distribution_Counter());
 	}
 
       fclose(f_out_intermediate_draws);
@@ -463,20 +463,20 @@ int main(int nargs, char **args)
 	  begin_time=time((time_t*)NULL);
 	  ComputeMeanVariance_MHM(mhm,mhm->n_mean_variance,10000);
 	  end_time=time((time_t*)NULL);
-	  fprintf(stdout,"Elapsed Time: %d seconds\n",end_time - begin_time);
+	  printf("Elapsed Time: %d seconds\n",end_time - begin_time);
 
-	  fprintf(stdout,"Number inconsistent normalizations: %d\n",((T_VAR_Parameters*)mhm->model->theta)->WZ_inconsistancies);
-	  fprintf(stdout,"Number singular inverse variances: %d\n\n",Get_VAR_Improper_Distribution_Counter());
+	  printf("Number inconsistent normalizations: %d\n",((T_VAR_Parameters*)mhm->model->theta)->WZ_inconsistancies);
+	  printf("Number singular inverse variances: %d\n\n",Get_VAR_Improper_Distribution_Counter());
 	}
 
       // Set center to mean if necessary
       if (dw_FindArgument_String(nargs,args,"cm") >= 0)
 	{
-	  fprintf(stdout,"Using mean for center\n");
+	  printf("Using mean for center\n");
 	  mhm->center=mhm->mean;
 	}
       else
-	fprintf(stdout,"Using posterior mode for center\n");
+	printf("Using posterior mode for center\n");
 
 
       // After mean-variance estimation
@@ -507,9 +507,9 @@ int main(int nargs, char **args)
       begin_time=time((time_t*)NULL);
       ComputeModifiedHarmonicMean(mhm,10000);
       end_time=time((time_t*)NULL);
-      fprintf(stdout,"Elapsed Time: %d seconds\n",end_time - begin_time);
-      fprintf(stdout,"Number inconsistent normalizations: %d\n",((T_VAR_Parameters*)mhm->model->theta)->WZ_inconsistancies);
-      fprintf(stdout,"Number singular inverse variances: %d\n\n",Get_VAR_Improper_Distribution_Counter());
+      printf("Elapsed Time: %d seconds\n",end_time - begin_time);
+      printf("Number inconsistent normalizations: %d\n",((T_VAR_Parameters*)mhm->model->theta)->WZ_inconsistancies);
+      printf("Number singular inverse variances: %d\n\n",Get_VAR_Improper_Distribution_Counter());
 
       fclose(mhm->f_out);
 

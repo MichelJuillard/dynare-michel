@@ -173,7 +173,7 @@ void BurnIn(T_MHM *mhm, int iterations, int period)
 	    }
 
 	  printf("Total Elapsed Time: %d seconds\n",(int)time((time_t*)NULL) - begin_time);
-	  fprintf(stdout,"%d iterations completed out of %d\n",count,iterations);
+	  printf("%d iterations completed out of %d\n",count,iterations);
 	  PrintJumps(stdout,(T_VAR_Parameters*)(mhm->model->theta));
 	}
     }
@@ -204,7 +204,7 @@ void ComputeMeanVariance_MHM(T_MHM *mhm, int iterations, int period)
   InitializeMatrix(mhm->variance,0.0);
 
   // loop and accumulate 1st and 2nd non-central moments
-  fprintf(stdout,"Beginning mean and variance estimation -- %d iterations.\n",iterations);
+  printf("Beginning mean and variance estimation -- %d iterations.\n",iterations);
   begin_time=time((time_t*)NULL);
   for (count=1; count <= iterations; count++)
     {
@@ -227,8 +227,8 @@ void ComputeMeanVariance_MHM(T_MHM *mhm, int iterations, int period)
       if (count == check)
 	{
 	  check+=period;
-	  fprintf(stdout,"Total Elapsed Time: %d seconds\n",(int)time((time_t*)NULL) - begin_time);
-	  fprintf(stdout,"%d iterations completed out of %d\n",count,iterations);
+	  printf("Total Elapsed Time: %d seconds\n",(int)time((time_t*)NULL) - begin_time);
+	  printf("%d iterations completed out of %d\n",count,iterations);
 	  PrintJumps(stdout,(T_VAR_Parameters*)(mhm->model->theta));
 	}
     }

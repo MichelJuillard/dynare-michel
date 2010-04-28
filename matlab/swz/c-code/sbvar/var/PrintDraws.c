@@ -49,7 +49,7 @@ int main(int nargs, char **args)
   //=== Help Screen ===
   if (dw_FindArgument_String(nargs,args,"h") != -1)
     {
-      fprintf(stdout,"print_draws <options>\n");
+      printf("print_draws <options>\n");
       PrintHelpMessages(stdout,include_help,additional_help);
       return 0;
     }
@@ -66,7 +66,7 @@ int main(int nargs, char **args)
   dw_initialize_generator(seed);
 
   //=== Setup model and initial parameters
-  fprintf(stdout,"Reading data...\n");
+  printf("Reading data...\n");
   if (!(model=CreateTStateModelFromEstimateFinal(nargs,args,&cmd)))
     {
       fprintf(stderr,"Unable to read model or parameters\n");
@@ -89,19 +89,19 @@ int main(int nargs, char **args)
   free(filename);
 
   // Burn-in period with calibration of jumping parameters
-  fprintf(stdout,"Calibrating jumping parameters - %d draws\n",tuning);
+  printf("Calibrating jumping parameters - %d draws\n",tuning);
   begin_time=(int)time((time_t*)NULL);
   AdaptiveMetropolisScale(model,tuning,1000,1,(FILE*)NULL);      // tuning iterations - 1000 iterations before updating - verbose
   end_time=(int)time((time_t*)NULL);
-  fprintf(stdout,"Elapsed Time: %d seconds\n",end_time - begin_time);
+  printf("Elapsed Time: %d seconds\n",end_time - begin_time);
 
   // Reset parametrers
   if (!ReadTransitionMatrices((FILE*)NULL,cmd->parameters_filename_actual,cmd->parameters_header_actual,model) 
       || !Read_VAR_Parameters((FILE*)NULL,cmd->parameters_filename_actual,cmd->parameters_header_actual,model))
-    fprintf(stdout,"Unable to reset parameters after tuning\n");
+    printf("Unable to reset parameters after tuning\n");
 
   // Burn-in period
-  fprintf(stdout,"Burn-in period - %d draws\n",burn_in);
+  printf("Burn-in period - %d draws\n",burn_in);
   for (check=period, count=1; count <= burn_in; count++)
     {
       DrawAll(model);
@@ -109,15 +109,15 @@ int main(int nargs, char **args)
       if (count == check)
 	{
 	  check+=period;
-	  fprintf(stdout,"%d iterations completed out of %d\n",count,burn_in);
+	  printf("%d iterations completed out of %d\n",count,burn_in);
 	}
     }
   end_time=(int)time((time_t*)NULL);
-  fprintf(stdout,"Elapsed Time: %d seconds\n",end_time - begin_time);
+  printf("Elapsed Time: %d seconds\n",end_time - begin_time);
   ResetMetropolisInformation(p);
  
   // Simulation
-  fprintf(stdout,"Simulating - %d draws\n",iterations);
+  printf("Simulating - %d draws\n",iterations);
   for (check=period, output=thinning, count=1; count <= iterations; count++)
     {
       DrawAll(model);
@@ -136,11 +136,11 @@ int main(int nargs, char **args)
       if (count == check)
 	{
 	  check+=period;
-	  fprintf(stdout,"%d(%d) iterations completed out of %d(%d)\n",count,thinning,iterations,thinning);
+	  printf("%d(%d) iterations completed out of %d(%d)\n",count,thinning,iterations,thinning);
 	}
     }
   end_time=(int)time((time_t*)NULL);
-  fprintf(stdout,"Elapsed Time: %d seconds\n",end_time - begin_time);
+  printf("Elapsed Time: %d seconds\n",end_time - begin_time);
 
   // clean up
   fclose(f_out);

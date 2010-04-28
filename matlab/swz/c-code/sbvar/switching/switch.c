@@ -1286,7 +1286,7 @@ int* CreateStateIndex(TMarkovStateVariable* sv, TMarkovStateVariable** list, int
   int* index;
   if (!(index=dw_CreateArray_int(sv->nstates)))
     {
-      fprintf(stdout,"CreateStateIndex():  Out of memory.\n");
+      printf("CreateStateIndex():  Out of memory.\n");
       exit(0);
     }
   for (i=sv->nstates-1; i >= 0; i--)
@@ -1294,7 +1294,7 @@ int* CreateStateIndex(TMarkovStateVariable* sv, TMarkovStateVariable** list, int
       for (k=j=0; j < n; j++)
 	if ((k=IncrementIndex(k,i,sv,list[j])) == -1)
 	  {
-	    fprintf(stdout,"CreateStateIndex():  Unable to find required state variable.\n");
+	    printf("CreateStateIndex():  Unable to find required state variable.\n");
 	    exit(0);
 	  }
      index[i]=k;

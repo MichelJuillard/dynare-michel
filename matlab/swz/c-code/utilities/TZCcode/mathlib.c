@@ -4304,7 +4304,7 @@ void TransposeSquare(TSdmatrix *B_dm, TSdmatrix *A_dm) {
       fprintf(FPTR_DEBUG, "\nWARNING: .../mathlib.c/TransposeSquare():  the matrix is already both SU and SL, so there is no need to transpose.\n");
       fflush(FPTR_DEBUG);
       #else
-      fprintf(stdout, "\nWARNING: .../mathlib.c/TransposeSquare():  the matrix is already both SU and SL, so there is no need to transpose.\n");
+      printf("\nWARNING: .../mathlib.c/TransposeSquare():  the matrix is already both SU and SL, so there is no need to transpose.\n");
       fflush(stdout);
       #endif
 

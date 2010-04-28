@@ -3,7 +3,7 @@
    fprintf(FPTR_DEBUG, "\nWARNING: .../mathlib.c/TransposeSquare():  the matrix is already both SU and SL, so there is no need to transpose.\n");
    fflush(FPTR_DEBUG);
    #else
-   fprintf(stdout, "\nWARNING: .../mathlib.c/TransposeSquare():  the matrix is already both SU and SL, so there is no need to transpose.\n");
+   printf("\nWARNING: .../mathlib.c/TransposeSquare():  the matrix is already both SU and SL, so there is no need to transpose.\n");
    fflush(stdout);
    #endif
 /**/
@@ -48,7 +48,7 @@ void fn_DisplayError(char *msg_s)
              "  %s!\n", msg_s);
       fflush(FPTR_DEBUG);
    #else
-      fprintf(stdout, "\nFatal Error:\n"
+      printf("\nFatal Error:\n"
              "\t %s!\n", msg_s);
       fflush(stdout);
    #endif

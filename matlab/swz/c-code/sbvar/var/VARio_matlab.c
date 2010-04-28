@@ -430,13 +430,13 @@ TStateModel* CreateStateModel_VAR_matlab(char *filename)
 /*       YY=TransposeProductMM((TMatrix)NULL,Ui[j],Sigma); */
 /*       ZZ=ProductMM((TMatrix)NULL,YY,Ui[j]); */
 
-/*       fprintf(stdout,"Computed[%d]\n",j); dw_PrintMatrix(stdout,ZZ,"%le "); fprintf(stdout,"\n"); */
-/*       fprintf(stdout,"File[%d]\n",j); dw_PrintMatrix(stdout,H0[j],"%le "); fprintf(stdout,"\n"); */
+/*       printf("Computed[%d]\n",j); dw_PrintMatrix(stdout,ZZ,"%le "); printf("\n"); */
+/*       printf("File[%d]\n",j); dw_PrintMatrix(stdout,H0[j],"%le "); printf("\n"); */
 /*       max=0.0; */
 /*       for (ii=0; ii < RowM(ZZ); ii++) */
 /* 	  for (jj=0; jj < ColM(ZZ); jj++) */
 /* 	    if (max < fabs(ElementM(H0[j],ii,jj) - ElementM(ZZ,ii,jj))) max=fabs(ElementM(H0[j],ii,jj) - ElementM(ZZ,ii,jj)); */
-/*       fprintf(stdout,"H0: max[%d] = %le\n",j,max); */
+/*       printf("H0: max[%d] = %le\n",j,max); */
 
 /*       FreeMatrix(ZZ); */
 /*       FreeMatrix(YY); */
@@ -476,7 +476,7 @@ TStateModel* CreateStateModel_VAR_matlab(char *filename)
 /*       for (ii=0; ii < RowM(ZZ); ii++) */
 /* 	  for (jj=0; jj < ColM(ZZ); jj++) */
 /* 	    if (max < fabs(ElementM(H0[j],ii,jj) - ElementM(ZZ,ii,jj))) max=fabs(ElementM(H0[j],ii,jj) - ElementM(ZZ,ii,jj)); */
-/*       fprintf(stdout,"max[%d] = %le\n",j,max); */
+/*       printf("max[%d] = %le\n",j,max); */
 
 /*       FreeMatrix(ZZ); */
 /*       FreeMatrix(YY); */

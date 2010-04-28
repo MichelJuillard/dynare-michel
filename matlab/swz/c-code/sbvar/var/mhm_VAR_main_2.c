@@ -696,7 +696,7 @@ TVector Create_q(int ndraws, TVector center, TMatrix scale, TStateModel* model, 
 
   // timings
   end_time=time((time_t*)NULL);
-  fprintf(stdout,"Elapsed Time: %d seconds\n",end_time - begin_time);
+  printf("Elapsed Time: %d seconds\n",end_time - begin_time);
 
   FreeVector(free_parameters);
 
@@ -779,7 +779,7 @@ TMatrix CreateProposal(int ndraws, TVector center, TMatrix scale, TStateModel* m
 
   // timings
   end_time=time((time_t*)NULL);
-  fprintf(stdout,"Elapsed Time: %d seconds\n",end_time - begin_time);
+  printf("Elapsed Time: %d seconds\n",end_time - begin_time);
 
   FreeVector(free_parameters);
 
@@ -859,7 +859,7 @@ TMatrix CreateProposal_Radius(int ndraws, TVector center, TMatrix scale, TStateM
 
   // timings
   end_time=time((time_t*)NULL);
-  fprintf(stdout,"Elapsed Time: %d seconds\n",end_time - begin_time);
+  printf("Elapsed Time: %d seconds\n",end_time - begin_time);
 
   FreeVector(free_parameters);
 
