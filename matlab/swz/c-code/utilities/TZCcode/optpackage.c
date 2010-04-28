@@ -4,6 +4,8 @@
 =========================================================*/
 #include "optpackage.h"
 
+#include "modify_for_mex.h"
+
 #define STRLEN 256
 static char filename_sp_vec_minproj[STRLEN];
 

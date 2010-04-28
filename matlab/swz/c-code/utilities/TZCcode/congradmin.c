@@ -8,6 +8,8 @@
 
 #include "congradmin.h"
 
+#include "modify_for_mex.h"
+
 static void linmin(double p[], double xi[], int n, double *fret, double tol_brent, int itmax_brent, double (*func)(double [], int));
 static double brent(double ax, double bx, double cx, double (*f)(double), double tol_brent, double itmax_brent, double *xmin);
 //

@@ -7,6 +7,8 @@
 
 #include <stdlib.h>
 
+#include "modify_for_mex.h"
+
 /*
    Attempt to set up model from command line.  Command line options are the 
    following

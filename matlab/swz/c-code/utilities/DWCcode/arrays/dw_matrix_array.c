@@ -5,6 +5,8 @@
 
 #include <stdlib.h>
 
+#include "modify_for_mex.h"
+
 TElementSpecification dw_VectorSpecs =
   { 
     dw_ARRAY_POINTER,

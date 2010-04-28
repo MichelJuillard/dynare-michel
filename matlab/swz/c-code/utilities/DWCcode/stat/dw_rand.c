@@ -8,6 +8,8 @@
 #include "dw_rand.h"
 #include "dw_error.h"
 
+#include "modify_for_mex.h"
+
 //=== Static routines ===
 static void gser(PRECISION *gamser, PRECISION a, PRECISION x, PRECISION *gln);
 static void gcf(PRECISION *gammcf, PRECISION a, PRECISION x, PRECISION *gln);

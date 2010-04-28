@@ -8,6 +8,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "modify_for_mex.h"
+
 static int ReadError_VARio_matlab(char *id)
 {
   char *errmsg, *fmt="Error after line identifier ""%s""";

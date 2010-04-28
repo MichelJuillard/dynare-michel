@@ -1,6 +1,8 @@
 #include "mathlib.h"
 #include "math.h"
 
+#include "modify_for_mex.h"
+
 //=======================================================
 // LAPACK routines -- all based on Intel MKL (or IMSL C Math library)
 //=======================================================

@@ -4,6 +4,8 @@
 
 #include "swzmatrix.h"
 
+#include "modify_for_mex.h"
+
 // flags and defines
 #define NEARINFINITY 1.0E+300
 #define M_UNDEF  0        //0 or NULL: No attribute will be given when memory is allocated but no values are initialized.

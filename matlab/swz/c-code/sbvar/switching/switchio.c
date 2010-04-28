@@ -9,6 +9,8 @@
 #include <stdlib.h>
 #include <math.h>
 
+#include "modify_for_mex.h"
+
 static void ReadError(char *idformat, char *trailer, int error);
 static int SetFilePosition(FILE *f_in, char *format, char *str);
 static int ReadInteger(FILE *f_in, char *idformat, char *trailer, int *i);

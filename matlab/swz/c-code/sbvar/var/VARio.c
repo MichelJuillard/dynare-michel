@@ -8,6 +8,8 @@
 #include <string.h>
 #include <math.h>
 
+#include "modify_for_mex.h"
+
 static int strlen_int(int n)
 {
   int i, j;

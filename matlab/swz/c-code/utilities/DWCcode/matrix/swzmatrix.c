@@ -7,6 +7,8 @@
 #include <memory.h>
 #include <math.h>
 
+#include "modify_for_mex.h"
+
 /*******************************************************************************/
 /********************** Allocation/Deallocation Routines ***********************/
 /*******************************************************************************/
@@ -2549,7 +2551,7 @@ TMatrix Inverse_LU(TMatrix X, TMatrix Y)
            memcpy(LU,pElementM(Y),RowM(Y)*RowM(Y)*sizeof(PRECISION));
            if (bLU(p,LU,RowM(Y),RowM(Y),MajorForm(Y)))
              dw_Error(SING_ERR);
-            else
+           else
              if (rtrn=IdentityMatrix(X,RowM(Y)))
               {
                bPermutationMultiply(p,pElementM(rtrn),RowM(rtrn),ColM(rtrn),RowM(Y),1,MajorForm(rtrn));

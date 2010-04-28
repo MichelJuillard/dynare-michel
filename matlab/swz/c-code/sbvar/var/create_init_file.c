@@ -10,6 +10,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "modify_for_mex.h"
 
 /*
    Creates a standard initialization file from the matlab and specification file.  

@@ -14,6 +14,8 @@
 #include <math.h>
 #include <time.h>
 
+#include "modify_for_mex.h"
+
 int main(int nargs, char **args)
 {
   TStateModel *model;

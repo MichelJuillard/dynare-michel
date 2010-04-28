@@ -5,6 +5,8 @@
 #include <string.h>
 #include <math.h>
 
+#include "modify_for_mex.h"
+
 //====== Static Global Variables ======
 static TStateModel *Model=(TStateModel*)NULL;
 static PRECISION *buffer=(PRECISION*)NULL;

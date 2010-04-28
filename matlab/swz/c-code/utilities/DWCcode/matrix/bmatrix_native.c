@@ -11,6 +11,8 @@
 #define USE_BLAS_LAPACK
 /********************/
 
+#include "modify_for_mex.h"
+
 /********************
 #include "mkl.h"
 #define USE_BLAS_LAPACK

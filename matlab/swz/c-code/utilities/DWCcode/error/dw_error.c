@@ -3,6 +3,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "modify_for_mex.h"
+
 #define ERROR_MESSAGE_BUFFER_LENGTH 256
 static int ERROR=NO_ERR;
 static char ERROR_MESSAGE[ERROR_MESSAGE_BUFFER_LENGTH]="";

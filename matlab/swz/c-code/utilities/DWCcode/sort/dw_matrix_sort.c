@@ -4,6 +4,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "modify_for_mex.h"
+
 static void b_qsort_array_ascending_real(PRECISION *x, int m);
 static void b_qsort_array_descending_real(PRECISION *x, int m);
 static void b_qsort_matrix_columns_ascending_real(PRECISION *x, int m, int n, int idx);

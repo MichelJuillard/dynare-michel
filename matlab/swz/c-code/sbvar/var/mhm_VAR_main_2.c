@@ -21,6 +21,8 @@
 #include <string.h>
 #include <time.h>
 
+#include "modify_for_mex.h"
+
 /*
    Returns ln(exp(a) + exp(b)) computed to avoid overflow.  If
    a = ln(c) and b = ln(d), as is usually the case, then the

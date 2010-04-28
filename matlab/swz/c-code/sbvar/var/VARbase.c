@@ -17,6 +17,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "modify_for_mex.h"
+
 //=== Private counter for improper normal distribution ===
 static int _VAR_IMPROPER_DISTRIBUTION_COUNTER = 0;
 int Reset_VAR_Improper_Distribution_Counter(void)

@@ -71,6 +71,8 @@
 //#include "csminwel.h"
 #include "optpackage.h"
 
+#include "modify_for_mex.h"
+
 #define VERBOSE_WARNINGS    //Display warnings.
 #define VERBOSE_DETOUTPUT   //Display detailed output.
 #define STRLEN 192

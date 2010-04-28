@@ -11,6 +11,7 @@
 
 #include "tzmatlab.h"
 
+#include "modify_for_mex.h"
 
 FILE *FPTR_DEBUG = (FILE *)NULL;  //Debug output file, to be opened by main.c.
 FILE *FPTR_OPT = (FILE *)NULL;  //Optimization output file, to be opened by main.c.

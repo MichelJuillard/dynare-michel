@@ -47,6 +47,7 @@
    #include <float.h>              //For DBL_MIN, etc.
    #include <time.h>               //For time(), etc.
 
+   #include "modify_for_mex.h"
 
    #define USE_DEBUG_FILE  //When defined, one must use tzFopen to give the file name in the main .c file.
    extern FILE *FPTR_DEBUG;    //For debugging.  Applied to all functions and all .c files that call tzmatlab.h.

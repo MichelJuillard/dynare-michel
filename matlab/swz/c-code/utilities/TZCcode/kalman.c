@@ -41,6 +41,7 @@ if (1)
 
 #include "kalman.h"
 
+#include "modify_for_mex.h"
 
 static int Update_et_Dt_1stapp(int t_1, struct TSkalfilmsinputs_1stapp_tag *kalfilmsinputs_1stapp_ps);
 static int Updatekalfilms_1stapp(int inpt, struct TSkalfilmsinputs_1stapp_tag *kalfilmsinputs_1stapp_ps, struct TStateModel_tag *smodel_ps);

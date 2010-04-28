@@ -9,6 +9,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "modify_for_mex.h"
+
 #define SPHERICAL_GAUSSIAN           1
 #define SPHERICAL_UNIFORM            2
 #define SPHERICAL_POWER              3

@@ -7,6 +7,8 @@
 #include <ctype.h>
 #include <stdarg.h>
 
+#include "modify_for_mex.h"
+
 /*
    Attempts to open filename for reading.  Returns pointer to file upon success 
    and prints error message and exits upon failure.  The file must exist.

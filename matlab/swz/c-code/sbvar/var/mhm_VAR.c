@@ -12,6 +12,8 @@
 #include <time.h>
 #include <string.h>
 
+#include "modify_for_mex.h"
+
   // Compute psudo-inverse of mhm->variance
 static void PsudoInverse(TMatrix X, TMatrix Y)
 {

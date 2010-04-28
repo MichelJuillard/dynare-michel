@@ -5,6 +5,8 @@
 #include <string.h>
 #include <ctype.h>
 
+#include "modify_for_mex.h"
+
 #define ARGUMENT_ID '-'
 
 /*

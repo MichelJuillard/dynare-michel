@@ -9,6 +9,8 @@
 #include <string.h>
 #include <ctype.h>
 
+#include "modify_for_mex.h"
+
 /*
   Allocates memory for filename.  Assumes that fmt is of the form
 

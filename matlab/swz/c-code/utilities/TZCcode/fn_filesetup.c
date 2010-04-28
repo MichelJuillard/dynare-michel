@@ -5,6 +5,7 @@
 
 #include "fn_filesetup.h"
 
+#include "modify_for_mex.h"
 
 //-----------------
 // For command line.

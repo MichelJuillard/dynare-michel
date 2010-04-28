@@ -14,6 +14,8 @@
 #include <ctype.h>
 #include <stdlib.h>
 
+#include "modify_for_mex.h"
+
 static void ReadError_MHMio(char *id)
 {
   char *errmsg, *fmt="Error after line identifier ""%s""";

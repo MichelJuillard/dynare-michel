@@ -4,6 +4,7 @@
 #include <string.h>   //For memmove, etc.
 #include "mathlib.h"
 
+#include "modify_for_mex.h"
 
 //????????
 //------- For computing inverse Hessian only. -------

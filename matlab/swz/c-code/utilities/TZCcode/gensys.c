@@ -43,6 +43,7 @@
 ********************************************************************/
 #include "gensys.h"
 
+#include "modify_for_mex.h"
 
 //----- NOTE: We can't replace MKL_Complex16 with a different name because the Intel Lapack uses MKL_Complex16.
 //-----       The only way to do this is to overhaul the code and put a wrapper function on each Intel Lapack function.

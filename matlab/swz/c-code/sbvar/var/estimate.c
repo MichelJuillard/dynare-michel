@@ -19,6 +19,8 @@
 #include <stdlib.h>
 #include <math.h>
 
+#include "modify_for_mex.h"
+
 #define FIND_POSTERIOR_MODE  1
 #define FIND_LIKELIHOOD_MODE 2
 
