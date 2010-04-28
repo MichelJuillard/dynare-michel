@@ -1595,7 +1595,7 @@ void ComputeMarginal_TruncatedGaussianProposal(int ndraws_proposal, TMatrix X, T
 /*     case TYPE_TABLE: */
 /*       return SetupSphericalFromPosterior_Table(X,n); */
 /*     default: */
-/*       fprintf(stderr,"Unknown proposal type\n"); */
+/*       swz_fprintf_err("Unknown proposal type\n"); */
 /*       exit(0); */
 /*     } */
 /* } */
@@ -1621,7 +1621,7 @@ void ComputeMarginal_TruncatedGaussianProposal(int ndraws_proposal, TMatrix X, T
 /*       sprintf(filename,"table_md_%s.dat",tag); */
 /*       break; */
 /*     default: */
-/*       fprintf(stderr,"Unknown proposal type\n"); */
+/*       swz_fprintf_err("Unknown proposal type\n"); */
 /*       exit(0); */
 /*     } */
 /*   f_out=dw_CreateTextFile(filename); */

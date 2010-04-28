@@ -69,7 +69,7 @@ int main(int nargs, char **args)
   printf("Reading data...\n");
   if (!(model=CreateTStateModelFromEstimateFinal(nargs,args,&cmd)))
     {
-      fprintf(stderr,"Unable to read model or parameters\n");
+      swz_fprintf_err("Unable to read model or parameters\n");
       exit(1);
     }
   p=(T_VAR_Parameters*)(model->theta);

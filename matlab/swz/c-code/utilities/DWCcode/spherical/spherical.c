@@ -163,7 +163,7 @@ PRECISION DrawSpherical(TVector x)
       while ((r < SPHERICAL_LOWER_TRUNCATE) || (SPHERICAL_UPPER_TRUNCATE < r));
       return r;
     default:
-      fprintf(stderr,"Unknown spherical type\n");
+      swz_fprintf_err("Unknown spherical type\n");
       exit(0);
     }
 }
@@ -186,7 +186,7 @@ PRECISION LogSphericalDensity(PRECISION r)
     case SPHERICAL_TRUNCATED_GAUSSIAN:
       return ((r < SPHERICAL_LOWER_TRUNCATE) || (r > SPHERICAL_UPPER_TRUNCATE)) ? MINUS_INFINITY : -0.5*r*r + SPHERICAL_CONSTANT;
     default:
-      fprintf(stderr,"Unknown spherical type\n");
+      swz_fprintf_err("Unknown spherical type\n");
       exit(0);
     }
 }

@@ -311,7 +311,7 @@ TStateModel* CreateStateModel_VAR_matlab(char *filename)
   for (j=nvars-1; j >= 0; j--) 
     if (IV[j] != npre) 
       {
-	fprintf(stderr,"V[%d] not %d x %d\n",j,npre,npre);
+	swz_fprintf_err("V[%d] not %d x %d\n",j,npre,npre);
 	exit(0);
       }
   V=dw_CreateArray_matrix(nvars);
@@ -362,10 +362,10 @@ TStateModel* CreateStateModel_VAR_matlab(char *filename)
 	  }
 	break;
       case 4:
-	fprintf(stderr,"Case %d not implimented.\n",4);
+	swz_fprintf_err("Case %d not implimented.\n",4);
 	exit(0);
       default:
-	fprintf(stderr,"Unknown type.\n");
+	swz_fprintf_err("Unknown type.\n");
 	exit(0);
       }
   dw_FreeArray(IM);

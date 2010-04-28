@@ -427,7 +427,7 @@ TStateModel* GetModelFromCommandLine(int nargs, char **args, TEstimateInfo *esti
       free(filename);
 
       //if (d2) free(d2);
-      //fprintf(stderr,"GetModelFromCommandLine():  Unable to create model.\n");
+      //swz_fprintf_err("GetModelFromCommandLine():  Unable to create model.\n");
       goto ERROR;
     }
 
@@ -452,7 +452,7 @@ TStateModel* GetModelFromCommandLine(int nargs, char **args, TEstimateInfo *esti
 
  ERROR:
   if (d2) free(d2);
-  //fprintf(stderr,"GetModelFromCommandLine():  No specification file defined.\n");
+  //swz_fprintf_err("GetModelFromCommandLine():  No specification file defined.\n");
   return (TStateModel*)NULL;
 }
 

@@ -186,14 +186,14 @@ T_VAR_Parameters* CreateTheta_VAR(int flag, int nvars, int nlags, int nexg, int 
 
   if ((nvars <= 0) || (nlags < 0) || (nexg < 0))
     {
-      fprintf(stderr,"CreateTheta_VAR():  Invalid arguments passed.\n");
+      swz_fprintf_err("CreateTheta_VAR():  Invalid arguments passed.\n");
       exit(0);
     }
 
   //=== Allocate memory for T_VAR_Parameters ===
   if (!(p=(T_VAR_Parameters*)malloc(sizeof(T_VAR_Parameters))))
     {
-      fprintf(stderr,"Out of memory\n");
+      swz_fprintf_err("Out of memory\n");
       exit(0);
     }
 
@@ -2259,7 +2259,7 @@ void Update_bplus_from_lambda_psi(T_VAR_Parameters *p)
   PRECISION *p_bplus, *p_lambda, *p_psi;
   if (!(p->Specification & SPEC_SIMS_ZHA))
     {
-      fprintf(stderr,"Update_bplus_from_lambda_psi() called without Sims-Zha specification\n");
+      swz_fprintf_err("Update_bplus_from_lambda_psi() called without Sims-Zha specification\n");
       exit(0);
     }
   for (j=p->nvars-1; j >= 0; j--)

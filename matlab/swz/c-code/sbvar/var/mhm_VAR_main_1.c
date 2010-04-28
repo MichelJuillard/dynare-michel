@@ -271,7 +271,7 @@ T_MHM* CreateMHM_CommandLine(int nargs, char **args)
 	      sprintf(spec_filename=(char*)malloc(strlen(d_in) + strlen(fmt) + strlen(tag) - 3),fmt,d_in,tag);
 	      if (!(f_in=fopen(spec_filename,"rt")))
 		{
-		  fprintf(stderr,"CreateMHM_CommandLine:  Unable to create model from %s tag.\n",tag);
+		  swz_fprintf_err("CreateMHM_CommandLine:  Unable to create model from %s tag.\n",tag);
 		  if (mhm) FreeMHM(mhm);
 		}
 	      else
@@ -307,14 +307,14 @@ T_MHM* CreateMHM_CommandLine(int nargs, char **args)
       }
     else
       {
-	fprintf(stderr,"CreateMHM_CommandLine():  No specification file given.\n");
+	swz_fprintf_err("CreateMHM_CommandLine():  No specification file given.\n");
 	if (mhm) FreeMHM(mhm);
 	exit(0);
       }
 
   if (!mhm)
     {
-      fprintf(stderr,"CreateMHM_CommandLine:  No mhm input data file specified.\n");
+      swz_fprintf_err("CreateMHM_CommandLine:  No mhm input data file specified.\n");
       exit(0);
     }
 

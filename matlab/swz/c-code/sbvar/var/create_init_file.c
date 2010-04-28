@@ -26,7 +26,7 @@ int main(int nargs, char **args)
 
   if (nargs != 4)
     {
-      fprintf(stderr,"Syntax:\n  create_init_file <matlab filename> <specs filename> <file tag>\n");
+      swz_fprintf_err("Syntax:\n  create_init_file <matlab filename> <specs filename> <file tag>\n");
       exit(0);
     }
 

@@ -122,13 +122,13 @@ TMarkovStateVariable* CreateMarkovStateVariable_Single(int nstates, int nobs, TM
 
   if (!CheckRestrictions(FreeDim,NonZeroIndex,MQ,nstates))
     {
-      fprintf(stderr,"CreateMarkovStateVariable_Single(): Error in restrictions\n");
+      swz_fprintf_err("CreateMarkovStateVariable_Single(): Error in restrictions\n");
       exit(0);
     }
 
   if (!CheckPrior(Prior,nstates) || !CheckPriorOnFreeParameters(Prior,NonZeroIndex,nstates))
     {
-      fprintf(stderr,"CreateMarkovStateVariable_Single(): Error in priors\n");
+      swz_fprintf_err("CreateMarkovStateVariable_Single(): Error in priors\n");
       exit(0);
     }
 
@@ -137,13 +137,13 @@ TMarkovStateVariable* CreateMarkovStateVariable_Single(int nstates, int nobs, TM
 
   if ((nstates <= 0) || (nobs <= 0))
     {
-      fprintf(stderr,"CreateMarkovStateVariable(): improper argument values\n");
+      swz_fprintf_err("CreateMarkovStateVariable(): improper argument values\n");
       exit(0);
     }
 
   if (!(sv=(TMarkovStateVariable*)malloc(sizeof(TMarkovStateVariable))))
     {
-      fprintf(stderr,"CreateMarkovStateVariable(): out of memory\n");
+      swz_fprintf_err("CreateMarkovStateVariable(): out of memory\n");
       exit(0);
     }
 
@@ -696,7 +696,7 @@ TMarkovStateVariable* CreateMarkovStateVariable_Lags(int nlags, TMarkovStateVari
 
   if (base->n_state_variables > 1)
     {
-      fprintf(stderr,"CreateMarkovStateVariable_Lags():  multiple state variable for base.");
+      swz_fprintf_err("CreateMarkovStateVariable_Lags():  multiple state variable for base.");
       exit(0);
     }
 
@@ -801,13 +801,13 @@ void Swap_SV(TMarkovStateVariable *sv, int i, int j)
   TPermutation X;
   if (sv->n_state_variables > 1)
     {
-      fprintf(stderr,"Swap(): Can only swap indices for terminal state variables.\n");
+      swz_fprintf_err("Swap(): Can only swap indices for terminal state variables.\n");
       exit(0);
     }
 
   if ((i < 0) || (j < 0) || (i >= sv->nbasestates) || (j >= sv->nbasestates))
     {
-      fprintf(stderr,"Swap(): Indicies out of range.\n");
+      swz_fprintf_err("Swap(): Indicies out of range.\n");
       exit(0);
     }
 
@@ -829,7 +829,7 @@ void Swap_SV(TMarkovStateVariable *sv, int i, int j)
   FreePermutation(X);
   if (!Update_B_from_Q_SV(sv)) 
     {
-      fprintf(stderr,"Swap(): Restrictions violated.\n");
+      swz_fprintf_err("Swap(): Restrictions violated.\n");
       exit(0);
     }
   PropagateSwap_SV(sv);
@@ -907,7 +907,7 @@ void DrawTransitionMatrix_SV(TMarkovStateVariable *sv)
       for (k=dw_DimA(sv->FreeDim)-1; k >= 0; k--)
 	if (!DrawDirichletVector(sv->b[k],sv->b[k]))
 	  {
-	    fprintf(stderr,"Error drawing Dirichlet vector\n");
+	    swz_fprintf_err("Error drawing Dirichlet vector\n");
 	    exit(0);
 	  }
 
@@ -950,7 +950,7 @@ void DrawTransitionMatrixFromPrior_SV(TMarkovStateVariable *sv)
       for (j=dw_DimA(sv->FreeDim)-1; j >= 0; j--)
 	if (!DrawDirichletVector(sv->b[j],sv->b[j]))
 	  {
-	    fprintf(stderr,"Error drawing Dirichlet vector\n");
+	    swz_fprintf_err("Error drawing Dirichlet vector\n");
 	    exit(0);
 	  }
 
@@ -1417,7 +1417,7 @@ TStateModel* CreateStateModel_new(TMarkovStateVariable *sv, ThetaRoutines *routi
 
   if (!(model=(TStateModel*)malloc(sizeof(TStateModel))))
     {
-      fprintf(stderr,"CreateStateModel():  Out of memory\n");
+      swz_fprintf_err("CreateStateModel():  Out of memory\n");
       exit(0);
     }
     
@@ -2136,7 +2136,7 @@ void ConvertQToFreeParameters(TStateModel *model, PRECISION *f)
   TVector* ba=model->sv->ba;
   if (!(model->sv->valid_transition_matrix))
     {
-      fprintf(stderr,"ConvertQToFreeParameters():  Transition matrices not valid.\n");
+      swz_fprintf_err("ConvertQToFreeParameters():  Transition matrices not valid.\n");
       exit(0);
     }
   for (i=0; i < dw_DimA(ba); f+=k, i++)
@@ -2210,7 +2210,7 @@ void ConvertQToLogFreeParameters(TStateModel *model, PRECISION *f)
 
   if (!(model->sv->valid_transition_matrix))
     {
-      fprintf(stderr,"ConvertQToFreeParameters():  Transition matrices not valid.\n");
+      swz_fprintf_err("ConvertQToFreeParameters():  Transition matrices not valid.\n");
       exit(0);
     }
 
