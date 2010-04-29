@@ -207,11 +207,12 @@ int bSubtract(PRECISION *x, PRECISION *y, PRECISION *z, int n)
 */
 int bLinearUpdateScalar(PRECISION *x, PRECISION *y, PRECISION a, int m)
 {
-  int inc=1;
+  blas_int inc = 1;
+  blas_int m2 = m;
 #if (PRECISION_SIZE == 4)
-  saxpy(&m,&a,y,&inc,x,&inc);
+  saxpy(&m2,&a,y,&inc,x,&inc);
 #else
-  daxpy(&m,&a,y,&inc,x,&inc);
+  daxpy(&m2,&a,y,&inc,x,&inc);
 #endif
   return NO_ERR;
 }
@@ -392,33 +393,38 @@ int bMultiply(PRECISION *x, PRECISION *y, PRECISION s, int n)
 int bMatrixMultiply(PRECISION *x, PRECISION *y, PRECISION *z, int m, int n, int p, int xt, int yt, int zt)
 {
   char transy, transz;
-  int dy, dz;
+  blas_int dy, dz;
   PRECISION beta=0.0, alpha=1.0;
+
+  blas_int m2 = m;
+  blas_int n2 = n;
+  blas_int p2 = p;
+
 #if PRECISION_SIZE == 4
   if (xt) 
     {
       if (yt) {transy='N'; dy=m;} else {transy='T'; dy=p;}   
       if (zt) {transz='N'; dz=p;} else {transz='T'; dz=n;}   
-      sgemm(&transy,&transz,&m,&n,&p,&alpha,y,&dy,z,&dz,&beta,x,&m); 
+      sgemm(&transy,&transz,&m2,&n2,&p2,&alpha,y,&dy,z,&dz,&beta,x,&m2); 
     }
   else
     {
       if (yt) {transy='T'; dy=m;} else {transy='N'; dy=p;}   
       if (zt) {transz='T'; dz=p;} else {transz='N'; dz=n;}   
-      sgemm(&transz,&transy,&n,&m,&p,&alpha,z,&dz,y,&dy,&beta,x,&n);  
+      sgemm(&transz,&transy,&n2,&m2,&p2,&alpha,z,&dz,y,&dy,&beta,x,&n2);  
     }
 #else
   if (xt) 
     {
       if (yt) {transy='N'; dy=m;} else {transy='T'; dy=p;}   
       if (zt) {transz='N'; dz=p;} else {transz='T'; dz=n;}   
-      dgemm(&transy,&transz,&m,&n,&p,&alpha,y,&dy,z,&dz,&beta,x,&m); 
+      dgemm(&transy,&transz,&m2,&n2,&p2,&alpha,y,&dy,z,&dz,&beta,x,&m2); 
     }
   else
     {
       if (yt) {transy='T'; dy=m;} else {transy='N'; dy=p;}   
       if (zt) {transz='T'; dz=p;} else {transz='N'; dz=n;}   
-      dgemm(&transz,&transy,&n,&m,&p,&alpha,z,&dz,y,&dy,&beta,x,&n);  
+      dgemm(&transz,&transy,&n2,&m2,&p2,&alpha,z,&dz,y,&dy,&beta,x,&n2);  
     }
 #endif
   return NO_ERR;
@@ -499,21 +505,40 @@ int bLU(int *p, PRECISION *x, int m, int n, int xt)
 #endif
 
  PRECISION *y;
- int i, info;
+ int i;
+
+ lapack_int m2 = m;
+ lapack_int n2 = n;
+ lapack_int info;
+ lapack_int *p2;
+
+ int minmn = (m < n) ? m : n;
+
+ if(!(p2 = (lapack_int *)calloc(minmn, sizeof(lapack_int))))
+   return MEM_ERR;
+
+ for(i=0; i<minmn; i++)
+   p2[i] = p[i];
+
  if (xt)
    {
-     getrf(&m,&n,x,&m,p,&info);
+     getrf(&m2,&n2,x,&m2,p2,&info);
    }
  else
    {
      if (!( y=(PRECISION*)malloc(m*n*sizeof(PRECISION)))) return MEM_ERR;
      bTranspose(y,x,m,n,0); 
 
-     getrf(&m,&n,y,&m,p,&info);
+     getrf(&m2,&n2,y,&m2,p2,&info);
 
      bTranspose(x,y,m,n,1);
      free(y);
    }
+
+ for(i=0; i<minmn; i++)
+   p[i] = p2[i];
+ free(p2);
+
  for (i=(m < n) ? m-1 : n-1; i >= 0; i--) p[i]--;
  return (info < 0) ? SING_ERR : NO_ERR;
 
@@ -930,8 +955,10 @@ int bSVD_new(PRECISION *U, PRECISION *d, PRECISION *V, PRECISION *A, int m, int 
 #endif
 
   char jobu, jobv;
-  int qu, qv, k, info, err=NO_ERR;
+  int qu, qv, err=NO_ERR;
   PRECISION  *A_, *U_, *V_, *work, opt_size;
+
+  lapack_int k, m2, n2, qv2, info;
 
   if (!(A_=(PRECISION*)malloc(m*n*sizeof(PRECISION)))) return MEM_ERR;
   if (at)
@@ -998,7 +1025,10 @@ int bSVD_new(PRECISION *U, PRECISION *d, PRECISION *V, PRECISION *A, int m, int 
 
   // compute singular value decomposition
   k=-1;
-  gesvd(&jobu,&jobv,&m,&n,A_,&m,d,U_,&m,V_,&qv,&opt_size,&k,&info);
+  m2 = m;
+  n2 = n;
+  qv2 = qv;
+  gesvd(&jobu,&jobv,&m2,&n2,A_,&m2,d,U_,&m2,V_,&qv2,&opt_size,&k,&info);
   if (info)
     err=BLAS_LAPACK_ERR;
   else
@@ -1006,7 +1036,7 @@ int bSVD_new(PRECISION *U, PRECISION *d, PRECISION *V, PRECISION *A, int m, int 
       err=MEM_ERR;
     else
       {
-	gesvd(&jobu,&jobv,&m,&n,A_,&m,d,U_,&m,V_,&qv,work,&k,&info);
+	gesvd(&jobu,&jobv,&m2,&n2,A_,&m2,d,U_,&m2,V_,&qv2,work,&k,&info);
 	free(work);
 	if (info)
 	  err=BLAS_LAPACK_ERR;
@@ -1231,8 +1261,11 @@ int bSVD(PRECISION *U, PRECISION *d, PRECISION *V, PRECISION *A, int m, int n, i
 #endif
 
   char jobz='A';
-  int k, *iwork, info;
+  int *iwork;
   PRECISION *X, *work, opt_size;
+
+  lapack_int m2, n2, k, info;
+
   if (!(X=(PRECISION*)malloc(m*n*sizeof(PRECISION)))) return MEM_ERR;
   memcpy(X,A,m*n*sizeof(PRECISION));
   if (!(iwork=(int*)malloc(8*((m < n) ? m : n)*sizeof(int))))
@@ -1241,18 +1274,20 @@ int bSVD(PRECISION *U, PRECISION *d, PRECISION *V, PRECISION *A, int m, int n, i
       return MEM_ERR;
     }
   k=-1;  
+  m2 = m;
+  n2 = n;
   if (at)
     {
       memcpy(X,A,m*n*sizeof(PRECISION));
       k=-1;
-      gesvd(&jobz,&jobz,&m,&n,X,&m,d,U,&m,V,&n,&opt_size,&k,&info);
+      gesvd(&jobz,&jobz,&m2,&n2,X,&m2,d,U,&m2,V,&n2,&opt_size,&k,&info);
       if (info || !(work=(PRECISION*)malloc((k=(int)opt_size)*sizeof(PRECISION))))
 	{
 	  free(iwork);
 	  free(X);
 	  return info ? BLAS_LAPACK_ERR : MEM_ERR;
 	}
-      gesvd(&jobz,&jobz,&m,&n,X,&m,d,U,&m,V,&n,work,&k,&info);
+      gesvd(&jobz,&jobz,&m2,&n2,X,&m2,d,U,&m2,V,&n2,work,&k,&info);
       if (info)
 	{
 	  free(work);
@@ -1269,14 +1304,14 @@ int bSVD(PRECISION *U, PRECISION *d, PRECISION *V, PRECISION *A, int m, int n, i
     {
       memcpy(X,A,m*n*sizeof(PRECISION));
       k=-1;
-      gesvd(&jobz,&jobz,&n,&m,X,&n,d,V,&n,U,&m,&opt_size,&k,&info);
+      gesvd(&jobz,&jobz,&n2,&m2,X,&n2,d,V,&n2,U,&m2,&opt_size,&k,&info);
       if (info || !(work=(PRECISION*)malloc((k=(int)opt_size)*sizeof(PRECISION))))
 	{
 	  free(iwork);
 	  free(X);
 	  return info ? BLAS_LAPACK_ERR : MEM_ERR;
 	}
-      gesvd(&jobz,&jobz,&n,&m,X,&n,d,V,&n,U,&m,work,&k,&info);
+      gesvd(&jobz,&jobz,&n2,&m2,X,&n2,d,V,&n2,U,&m2,work,&k,&info);
       if (info)
 	{
 	  free(work);
@@ -1443,14 +1478,18 @@ int bQR(PRECISION *Q, PRECISION *R, PRECISION *X, int m, int n, int q, int qt, i
   #define orglq dorglq
 #endif
 
-  int i, j, k, l, lwork, info, p=(m < n) ? m : n;
+  int i, j, k, l, p=(m < n) ? m : n;
   PRECISION *tau, *work, *ptr, opt_size;
+
+  lapack_int m2, n2, p2, q2, lwork, info;
+
   if (!(tau=(PRECISION*)malloc(p*sizeof(PRECISION)))) return MEM_ERR;
   if (xt)
     {
       lwork=-1;
-
-      geqrf(&m,&n,X,&m,tau,&opt_size,&lwork,&info);
+      m2 = m;
+      n2 = n;
+      geqrf(&m2,&n2,X,&m2,tau,&opt_size,&lwork,&info);
 
       if (!(work=(PRECISION*)malloc((lwork=(int)opt_size)*sizeof(PRECISION))))
 	{
@@ -1458,7 +1497,7 @@ int bQR(PRECISION *Q, PRECISION *R, PRECISION *X, int m, int n, int q, int qt, i
 	  return MEM_ERR;
 	}
 
-      geqrf(&m,&n,X,&m,tau,work,&lwork,&info);
+      geqrf(&m2,&n2,X,&m2,tau,work,&lwork,&info);
 
       free(work);
       if (info)
@@ -1479,7 +1518,9 @@ int bQR(PRECISION *Q, PRECISION *R, PRECISION *X, int m, int n, int q, int qt, i
 	  memcpy(ptr,X,m*p*sizeof(PRECISION));
 	  lwork=-1;
 
-	  orgqr(&m,&q,&p,ptr,&m,tau,&opt_size,&lwork,&info);
+          p2 = p;
+          q2 = q;
+	  orgqr(&m2,&q2,&p2,ptr,&m2,tau,&opt_size,&lwork,&info);
 
 	  if (!(work=(PRECISION*)malloc((lwork=(int)opt_size)*sizeof(PRECISION))))
 	    {
@@ -1488,7 +1529,7 @@ int bQR(PRECISION *Q, PRECISION *R, PRECISION *X, int m, int n, int q, int qt, i
 	      return MEM_ERR;
 	    }
 
-	  orgqr(&m,&q,&p,ptr,&m,tau,work,&lwork,&info);
+	  orgqr(&m2,&q2,&p2,ptr,&m2,tau,work,&lwork,&info);
 
 	  free(work);
 	  if (!qt)
@@ -1523,8 +1564,9 @@ int bQR(PRECISION *Q, PRECISION *R, PRECISION *X, int m, int n, int q, int qt, i
   else
     {
       lwork=-1;
-
-      gelqf(&n,&m,X,&n,tau,&opt_size,&lwork,&info);
+      m2 = m;
+      n2 = n;
+      gelqf(&n2,&m2,X,&n2,tau,&opt_size,&lwork,&info);
 
       if (!(work=(PRECISION*)malloc((lwork=(int)opt_size)*sizeof(PRECISION))))
 	{
@@ -1532,7 +1574,7 @@ int bQR(PRECISION *Q, PRECISION *R, PRECISION *X, int m, int n, int q, int qt, i
 	  return MEM_ERR;
 	}
 
-      gelqf(&n,&m,X,&n,tau,work,&lwork,&info);
+      gelqf(&n2,&m2,X,&n2,tau,work,&lwork,&info);
 
       free(work);
       if (info)
@@ -1563,7 +1605,10 @@ int bQR(PRECISION *Q, PRECISION *R, PRECISION *X, int m, int n, int q, int qt, i
 		  ptr[--k]=X[--l];
 	  lwork=-1;
 
-	  orglq(&q,&m,&p,ptr,&q,tau,&opt_size,&lwork,&info);
+          m2 = m;
+          p2 = p;
+          q2 = q;
+	  orglq(&q2,&m2,&p2,ptr,&q2,tau,&opt_size,&lwork,&info);
 
 	  if (!(work=(PRECISION*)malloc((lwork=(int)opt_size)*sizeof(PRECISION))))
 	    {
@@ -1572,7 +1617,7 @@ int bQR(PRECISION *Q, PRECISION *R, PRECISION *X, int m, int n, int q, int qt, i
 	      return MEM_ERR;
 	    }
 
-	  orglq(&q,&m,&p,ptr,&q,tau,work,&lwork,&info);
+	  orglq(&q2,&m2,&p2,ptr,&q2,tau,work,&lwork,&info);
 
 	  free(work);
 	  if (qt)
@@ -1666,8 +1711,10 @@ int bQZ_real(PRECISION *Q, PRECISION *Z, PRECISION *S, PRECISION *T, PRECISION *
 #endif
 
   char jobvsl, jobvsr, sort='N';
-  int lwork, simd, info, rtrn;
+  int rtrn;
   PRECISION *work, size, *palpha_r, *palpha_i, *pbeta;
+
+  lapack_int n2, simd, lwork, info;
 
   jobvsl=Q ? 'V' : 'N';
   jobvsr=Z ? 'V' : 'N';
@@ -1694,13 +1741,14 @@ int bQZ_real(PRECISION *Q, PRECISION *Z, PRECISION *S, PRECISION *T, PRECISION *
 	if (!bt) bTransposeInPlace(B,n);
 
       lwork=-1;
-      gges(&jobvsl,&jobvsr,&sort,(void*)NULL,&n,S,&n,T,&n,&simd,palpha_r,palpha_i,pbeta,Q,&n,Z,&n,&size,&lwork,(void*)NULL,&info);
+      n2 = n;
+      gges(&jobvsl,&jobvsr,&sort,(void*)NULL,&n2,S,&n2,T,&n2,&simd,palpha_r,palpha_i,pbeta,Q,&n2,Z,&n2,&size,&lwork,(void*)NULL,&info);
       if (!info)
 	if (!(work=malloc((lwork=(int)size)*sizeof(PRECISION)))) 
 	  rtrn=MEM_ERR;
 	else
 	  {
-	    gges(&jobvsl,&jobvsr,&sort,(void*)NULL,&n,S,&n,T,&n,&simd,palpha_r,palpha_i,pbeta,Q,&n,Z,&n,work,&lwork,(void*)NULL,&info);
+	    gges(&jobvsl,&jobvsr,&sort,(void*)NULL,&n2,S,&n2,T,&n2,&simd,palpha_r,palpha_i,pbeta,Q,&n2,Z,&n2,work,&lwork,(void*)NULL,&info);
 	    if (!info)
 	      {
 		if (Q && !qt) bTransposeInPlace(Q,n);
@@ -1784,8 +1832,18 @@ int bReorderQZ_real(int *select, PRECISION *QQ, PRECISION *ZZ, PRECISION *SS, PR
   #define tgsen dtgsen
 #endif
 
-  int ijob=0, wantq, wantz, lwork, liwork=1, m=n, info, rtrn, iwork;
+  int wantq, wantz, m=n, rtrn, i;
   PRECISION size, *palpha_r, *palpha_i, *pbeta, *work;
+
+  lapack_int ijob, wantq2, wantz2, *select2, n2, m2, lwork, iwork, liwork, info;
+  ijob = 0;
+  liwork=1;
+
+  if(!(select2 = (lapack_int *)calloc(n, sizeof(lapack_int))))
+    return MEM_ERR;
+
+  for(i=0; i<n; i++)
+    select2[i] = select[i];
 
   wantq=(QQ && Q) ? 1 : 0;
   wantz=(ZZ && Z) ? 1 : 0;
@@ -1831,15 +1889,21 @@ int bReorderQZ_real(int *select, PRECISION *QQ, PRECISION *ZZ, PRECISION *SS, PR
 	  if (!zt) bTransposeInPlace(Z,n);
 
       lwork=-1;
-      tgsen(&ijob,&wantq,&wantz,select,&n,SS,&n,TT,&n,palpha_r,palpha_i,pbeta,QQ,&n,ZZ,&n,&m,
+      wantq2 = wantq;
+      wantz2 = wantz;
+      n2 = n;
+      m2 = m;
+      tgsen(&ijob,&wantq2,&wantz2,select2,&n2,SS,&n2,TT,&n2,palpha_r,palpha_i,pbeta,QQ,&n2,ZZ,&n2,&m2,
 	    (PRECISION*)NULL,(PRECISION*)NULL,(PRECISION*)NULL,&size,&lwork,&iwork,&liwork,&info);
+      m = m2;
       if (!info)
 	if (!(work=malloc((lwork=(int)size)*sizeof(PRECISION)))) 
 	  rtrn=MEM_ERR;
 	else
 	  {
-	    tgsen(&ijob,&wantq,&wantz,select,&n,SS,&n,TT,&n,palpha_r,palpha_i,pbeta,QQ,&n,ZZ,&n,&m,
+	    tgsen(&ijob,&wantq2,&wantz2,select2,&n2,SS,&n2,TT,&n2,palpha_r,palpha_i,pbeta,QQ,&n2,ZZ,&n2,&m2,
 		  (PRECISION*)NULL,(PRECISION*)NULL,(PRECISION*)NULL,work,&lwork,&iwork,&liwork,&info);
+            m = m2;
 	    if (!info)
 	      {
 		if (wantq && !qqt) bTransposeInPlace(QQ,n);
@@ -1859,6 +1923,7 @@ int bReorderQZ_real(int *select, PRECISION *QQ, PRECISION *ZZ, PRECISION *SS, PR
   if (!alpha_r && palpha_r) free(palpha_r);
   if (!alpha_i && palpha_i) free(palpha_i);
   if (!beta && pbeta) free(pbeta);
+  free(select2);
 
   return rtrn;
 
@@ -1923,8 +1988,10 @@ int bSortQZ_real(int *select, PRECISION *QQ, PRECISION *ZZ, PRECISION *SS, PRECI
   #define tgexc dtgexc
 #endif
 
-  int wantq, wantz, lwork, info, rtrn, *pairs, i, j, ii, jj;
+  int wantq, wantz, rtrn, *pairs, i, j, ii, jj;
   PRECISION size, *work, *gev, small, x1, x2;
+
+  lapack_int wantq2, wantz2, n2, i2, j2, ii2, jj2, lwork, info;
 
   if (n == 1) return NO_ERR;
 
@@ -1973,7 +2040,14 @@ int bSortQZ_real(int *select, PRECISION *QQ, PRECISION *ZZ, PRECISION *SS, PRECI
 
       lwork=-1;
       j=2; i=1;
-      tgexc(&wantq,&wantz,&n,SS,&n,TT,&n,QQ,&n,ZZ,&n,&j,&i,&size,&lwork,&info);
+      wantq2 = wantq;
+      wantz2 = wantz;
+      n2 = n;
+      j2 = j;
+      i2 = i;
+      tgexc(&wantq2,&wantz2,&n2,SS,&n2,TT,&n2,QQ,&n2,ZZ,&n2,&j2,&i2,&size,&lwork,&info);
+      i = i2;
+      j = j2;
       if (!info)
 	if (!(work=malloc((lwork=(int)size)*sizeof(PRECISION)))) 
 	  rtrn=MEM_ERR;
@@ -2008,7 +2082,14 @@ int bSortQZ_real(int *select, PRECISION *QQ, PRECISION *ZZ, PRECISION *SS, PRECI
 		  {
 		    ii=i+1;
 		    jj=j+1;
-		    tgexc(&wantq,&wantz,&n,SS,&n,TT,&n,QQ,&n,ZZ,&n,&jj,&ii,work,&lwork,&info);
+                    wantq2 = wantq;
+                    wantz2 = wantz;
+                    n2 = n;
+                    jj2 = jj;
+                    ii2 = ii;
+		    tgexc(&wantq2,&wantz2,&n2,SS,&n2,TT,&n2,QQ,&n2,ZZ,&n2,&jj2,&ii2,work,&lwork,&info);
+                    ii = ii2;
+                    jj = jj2;
 		    if (!info)
 		      if (pairs[j])
 			{

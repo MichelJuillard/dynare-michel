@@ -22,10 +22,12 @@ int lurgen(TSdmatrix *lu_dm, TSivector *pivot_dv, TSdmatrix *x_dm) {
    //Inputs:
    //  x_dm: nrows-by-ncols general real matrix.
 
-   int nrows, ncols, mindim,
+   int nrows, ncols, mindim, i,
        errflag=2;  //errflag=0 implies a successful execution.  But we start with 2 so as to let dgetrf_ export a correct flag.
-   int *pivot_p=NULL;
    double *LU;
+
+   lapack_int nrows2, ncols2, errflag2;
+   lapack_int *pivot_p=NULL;
 
    //=== Checking dimensions and memory allocation.
    if ( !lu_dm || !x_dm )  fn_DisplayError(".../mathlib.c/lurgen(): The input arguments lu_dm and x_dm must be cretaed (memory-allocated)");
@@ -46,16 +48,21 @@ int lurgen(TSdmatrix *lu_dm, TSivector *pivot_dv, TSdmatrix *x_dm) {
    lu_dm->flag = M_UT;  //To make the lower part of lu_dm available, one must create another matrix and explicitly make it a unit lower matrix.
 
    //=== Calling the MKL function.
-   if (!pivot_dv) {
-      pivot_p = tzMalloc(mindim, int);
-      dgetrf_(&nrows, &ncols, LU, &nrows, pivot_p, &errflag);
-      free(pivot_p);   //Frees the memory belonging to this function.
-   }
+   nrows2 = nrows;
+   ncols2 = ncols;
+   errflag2 = errflag;
+   pivot_p = tzMalloc(mindim, lapack_int);
+   if (!pivot_dv)
+      dgetrf_(&nrows2, &ncols2, LU, &nrows2, pivot_p, &errflag2);
    else {
       if ( pivot_dv->n != mindim) fn_DisplayError("Make sure the dimension of the input vector pivot_dv is the minimum number of row number and column number of the input matrix x_dm");
-      dgetrf_(&nrows, &ncols, LU, &nrows, pivot_dv->v, &errflag);
-   }
 
+      dgetrf_(&nrows2, &ncols2, LU, &nrows2, pivot_p, &errflag2);
+      for(i=0; i<mindim; i++)
+        pivot_dv->v[i] = pivot_p[i];
+   }
+   free(pivot_p);   //Frees the memory belonging to this function.
+   errflag = errflag2;
 
    return( errflag );  //(1) If errflag = 0, success.  (2) If errorflag = -i, the ith parameter has an illegal value.
                        //(3) If errflag = i, u_{ii}=0.0.  The factorization is completed, but U is exactly singular.  Dividing
@@ -85,6 +92,8 @@ int eigrsym(TSdvector *eval_dv, TSdmatrix *eVec_dm, const TSdmatrix *S_dm)
    double *tmpd0_m = NULL,
           *work_p = NULL;
 
+   lapack_int n2, lwork2, errflag2;
+
    if ( !S_dm || !(S_dm->flag & (M_SU | M_SL)) )  fn_DisplayError(".../mathlib.c/eigrsym():  input matrix (1) must be created (memory-alloacted) and (2) must be symmetric (either M_SU or M_SL)");
    if ( !eval_dv )  fn_DisplayError(".../mathlib.c/eigrsym():  input eigenvalue vector must be created (memory-allocated)");
    lwork = (n1=_n=S_dm->nrows)*BLOCKSIZE_FOR_INTEL_MKL;
@@ -99,7 +108,12 @@ int eigrsym(TSdvector *eval_dv, TSdmatrix *eVec_dm, const TSdmatrix *S_dm)
    // Obtains eigenvalues and, optionally, eigenvectors.
    //---------------------------
    memcpy(tmpd0_m, S_dm->M, square(_n)*sizeof(double));
-   dsyev_( (eVec_dm) ? "V" : "N", (S_dm->flag & M_SU) ? "U" : "L", &n1, tmpd0_m, &n1, eval_dv->v, work_p, &lwork, &errflag);
+
+   n2 = n1;
+   lwork2 = lwork;
+   errflag2 = errflag;
+   dsyev_( (eVec_dm) ? "V" : "N", (S_dm->flag & M_SU) ? "U" : "L", &n2, tmpd0_m, &n2, eval_dv->v, work_p, &lwork2, &errflag2);
+   errflag = errflag2;
    if (work_p[0]>lwork) printf("Warning for /mathlib.c/eigrsym(): needs at least %d workspace for good performance "
                                  "but lwork is allocated with only %d space!\n", (int)work_p[0], lwork);
    eval_dv->flag = V_DEF;
@@ -154,6 +168,8 @@ int eigrgen(TSdzvector *vals_dzv, TSdzmatrix *rights_dzm, TSdzmatrix *lefts_dzm,
           *revecr_m=NULL, *reveci_m=NULL,    //NULL means that by default we dont' compute eigenvectors.
           *levecr_m=NULL, *leveci_m=NULL;
 
+   lapack_int n2, lwork2, errflag2;
+
    //---------------------------
    // Checking dimensions, etc.
    //---------------------------
@@ -197,8 +213,12 @@ int eigrgen(TSdzvector *vals_dzv, TSdzmatrix *rights_dzm, TSdzmatrix *lefts_dzm,
    //---------------------------
    // Obtains eigenvalues and, optionally, eigenvectors.
    //---------------------------
-   dgeev_( (levecr_m) ? "V" : "N", (revecr_m) ? "V" : "N", &n1, tmpd0_m, &n1, evalr_v, evali_v,
-                                                          levecr_m, &n1, revecr_m, &n1, work_p, &lwork, &errflag);
+   n2 = n1;
+   lwork2 = lwork;
+   errflag2 = errflag;
+   dgeev_( (levecr_m) ? "V" : "N", (revecr_m) ? "V" : "N", &n2, tmpd0_m, &n2, evalr_v, evali_v,
+                                                          levecr_m, &n2, revecr_m, &n2, work_p, &lwork2, &errflag2);
+   errflag = errflag2;
    vals_dzv->real->flag = V_DEF;
 
    //---------------------------
@@ -258,6 +278,7 @@ int chol(TSdmatrix *D_dm, TSdmatrix *S_dm, const char ul) {
    int errflag=2, loc, nrows, _m, _i, _j;  //errflat=0 implies successful decomposition.  But we start with 2 so as to let dpotrf_ export a correct flag.
    double *D, *S;
 
+   lapack_int _m2, errflag2;
 
    if ( !D_dm || !S_dm )  fn_DisplayError(".../mathlib.c/chol():  L and R input square matricies must be created (memory allocated)");
    else {
@@ -293,7 +314,10 @@ int chol(TSdmatrix *D_dm, TSdmatrix *S_dm, const char ul) {
                printf("\n ------- .../mathlib.c/chol():  R input square matrix must be symmetric!-------\n");
                return (-6);
             }
-            dpotrf_("U", &_m, D, &_m, &errflag);
+            _m2 = _m;
+            errflag2 = errflag;
+            dpotrf_("U", &_m2, D, &_m2, &errflag2);
+            errflag = errflag2;
             break;
          case 'L': case 'l':
             if (S_dm->flag & M_SL) {
@@ -320,7 +344,10 @@ int chol(TSdmatrix *D_dm, TSdmatrix *S_dm, const char ul) {
                return (-6);
             }
             //??????NOT tested yet.
-            dpotrf_("L", &_m, D, &_m, &errflag);
+            _m2 = _m;
+            errflag2 = errflag;
+            dpotrf_("L", &_m2, D, &_m2, &errflag2);
+            errflag = errflag2;
             break;
          default:
             fn_DisplayError(".../mathlib.c/chol():  Input ul must be either 'U' or 'L'");
@@ -328,12 +355,18 @@ int chol(TSdmatrix *D_dm, TSdmatrix *S_dm, const char ul) {
    }
    else {
       if ( (ul=='U' || ul=='u') && (D_dm->flag & M_SU) ) {
-         dpotrf_("U", &_m, D, &_m, &errflag);
+        _m2 = _m;
+        errflag2 = errflag;
+        dpotrf_("U", &_m2, D, &_m2, &errflag2);
+        errflag = errflag2;
          D_dm->flag = M_UT;
       }
       else if ( (ul=='L' || ul=='l') && (D_dm->flag & M_SL) ) {
          //Tested.  It works!
-         dpotrf_("L", &_m, D, &_m, &errflag);
+        _m2 = _m;
+        errflag2 = errflag;
+        dpotrf_("L", &_m2, D, &_m2, &errflag2);
+        errflag = errflag2;
          D_dm->flag = M_LT;
       }
       else {
@@ -370,6 +403,7 @@ int invrtri(TSdmatrix *X_dm, TSdmatrix *A_dm, const char un)
    int _n, errflag=2;  //errflat=0 implies successful decomposition.  But we start with 2 so as to let dgetri_ export a correct flag.
    double *X, *A;
 
+   lapack_int _n2, errflag2;
 
    if ( !X_dm || !A_dm )  fn_DisplayError(".../mathlib.c/invrtri(): Both input matrices must be created (memory-allocated)");
    else if ( !(A_dm->flag & (M_UT | M_LT)) )  fn_DisplayError(".../mathlib.c/invrtri(): (1) R input matrix A must be given legal values; (2) A must be a real triangular matrix, i.e., M_UT or M_LT");
@@ -381,14 +415,17 @@ int invrtri(TSdmatrix *X_dm, TSdmatrix *A_dm, const char un)
    if ( (_n != A_dm->ncols) || (_n != X_dm->nrows) || (_n != X_dm->ncols) )
       fn_DisplayError(".../mathlib.c/invrtri(): both input and output matrices (1) must be square and (2) must have the same dimension");
 
-
+   _n2 = _n;
+   errflag2 = errflag;
    if (X==A) {
-      dtrtri_((A_dm->flag & M_UT) ? "U" : "L", (un=='U' || un=='u') ? "U" : "N", &_n, X, &_n, &errflag);
+      dtrtri_((A_dm->flag & M_UT) ? "U" : "L", (un=='U' || un=='u') ? "U" : "N", &_n2, X, &_n2, &errflag2);
+      errflag = errflag2;
       if (errflag)  return (errflag);
    }
    else {
       memcpy(X, A, _n*_n*sizeof(double));
-      dtrtri_((A_dm->flag & M_UT) ? "U" : "L", (un=='U' || un=='u') ? "U" : "N", &_n, X, &_n, &errflag);
+      dtrtri_((A_dm->flag & M_UT) ? "U" : "L", (un=='U' || un=='u') ? "U" : "N", &_n2, X, &_n2, &errflag2);
+      errflag = errflag2;
       if (errflag)  return (errflag);
       else  X_dm->flag = A_dm->flag;
    }
@@ -419,6 +456,7 @@ int invspd(TSdmatrix *X_dm, TSdmatrix *A_dm, const char ul)
    int _n, errflag=2;  //errflat=0 implies successful decomposition.  But we start with 2 so as to let dgetri_ export a correct flag.
    double *X, *A;
 
+   lapack_int _n2, errflag2;
 
    if ( !X_dm || !A_dm )  fn_DisplayError(".../mathlib.c/invspd(): Both input matrices must be created (memory-allocated)");
    else if ( !(A_dm->flag & (M_SU | M_SL)) )  fn_DisplayError(".../mathlib.c/invspd(): (1) R input matrix A must be given legal values; (2) A must be symmetric, positive-definite, i.e., M_SU or M_SL");
@@ -433,10 +471,14 @@ int invspd(TSdmatrix *X_dm, TSdmatrix *A_dm, const char ul)
       if ( (_n != A_dm->ncols) )
          fn_DisplayError(".../mathlib.c/invspd(): input matrix (1) must be square and (2) must have the same dimension");
       //=== Choleski decomposition.
-      dpotrf_(((ul=='U') || (ul=='u')) ? "U" : "L", &_n, X, &_n, &errflag);
+      _n2 = _n;
+      errflag2 = errflag;
+      dpotrf_(((ul=='U') || (ul=='u')) ? "U" : "L", &_n2, X, &_n2, &errflag2);
+      errflag = errflag2;
       if (errflag)  return (errflag);
       //=== Takes inverse.
-      dpotri_(((ul=='U') || (ul=='u')) ? "U" : "L", &_n, X, &_n, &errflag);
+      dpotri_(((ul=='U') || (ul=='u')) ? "U" : "L", &_n2, X, &_n2, &errflag2);
+      errflag = errflag2;
       A_dm->flag = ((ul=='U') || (ul=='u')) ? M_SU : M_SL;
       return (errflag);
       //---
@@ -448,10 +490,14 @@ int invspd(TSdmatrix *X_dm, TSdmatrix *A_dm, const char ul)
          fn_DisplayError(".../mathlib.c/invspd(): both input and output matrices (1) must be square and (2) must have the same dimension");
       memcpy(X, A, _n*_n*sizeof(double));
       //=== Choleski decomposition.
-      dpotrf_(((ul=='U') || (ul=='u')) ? "U" : "L", &_n, X, &_n, &errflag);
+      _n2 = _n;
+      errflag2 = errflag;
+      dpotrf_(((ul=='U') || (ul=='u')) ? "U" : "L", &_n2, X, &_n2, &errflag2);
+      errflag = errflag2;
       if (errflag)  return (errflag);
       //=== Takes inverse.
-      dpotri_(((ul=='U') || (ul=='u')) ? "U" : "L", &_n, X, &_n, &errflag);
+      dpotri_(((ul=='U') || (ul=='u')) ? "U" : "L", &_n2, X, &_n2, &errflag2);
+      errflag = errflag2;
       X_dm->flag = ((ul=='U') || (ul=='u')) ? M_SU : M_SL;
       return (errflag);
       //---
@@ -478,17 +524,18 @@ int invrgen(TSdmatrix *X_dm, TSdmatrix *A_dm)
    //Inputs:
    //  A: _n-by-_n real general matrix.
    int _n, errflag=2,  //errflat=0 implies successful decomposition.  But we start with 2 so as to let dgetri_ export a correct flag.
-       lwork, *ipivot;  //Used when calling LAPACK.
+       lwork;  //Used when calling LAPACK.
    double *X, *A,
           *work;  //Used when calling LAPACK.
 
+   lapack_int _n2, errflag2, *ipivot, lwork2;
 
    if ( !X_dm || !A_dm )  fn_DisplayError(".../mathlib.c/invrgen(): Both input matrices must be created (memory-allocated)");
    else if ( !(A_dm->flag & M_GE) )  fn_DisplayError(".../mathlib.c/invrgen(): (1) R input matrix A must be given legal values; (2) A must be a general matrix, i.e., M_GE");
    else {
       X = X_dm->M;
       A = A_dm->M;
-      ipivot = tzMalloc((_n=A_dm->nrows), int);
+      ipivot = tzMalloc((_n=A_dm->nrows), lapack_int);
       work = tzMalloc((lwork=_n*BLOCKSIZE_FOR_INTEL_MKL), double);
    }
    if ( (_n != A_dm->ncols) || (_n != X_dm->nrows) || (_n != X_dm->ncols) )
@@ -496,14 +543,19 @@ int invrgen(TSdmatrix *X_dm, TSdmatrix *A_dm)
 
 
    if (X==A) {
-      dgetrf_(&_n, &_n, A, &_n, ipivot, &errflag);
+     _n2 = _n;
+     errflag2 = errflag;
+     dgetrf_(&_n2, &_n2, A, &_n2, ipivot, &errflag2);
+     errflag = errflag2;
       if (errflag) {
 //         A_dm->flag = M_UNDEF;
          free(ipivot);
          free(work);
          return errflag;
       }
-      dgetri_(&_n, A, &_n, ipivot, work, &lwork, &errflag);
+      lwork2 = lwork;
+      dgetri_(&_n2, A, &_n2, ipivot, work, &lwork2, &errflag2);
+      errflag = errflag2;
       if (work[0]>lwork) printf("Warning for /mathlib.c/invrgen(); when calling MKL dgetri_(), we need at least %d workspace for good performance "
                                     "but lwork is allocated with only %d space!\n", (int)work[0], lwork);
       if (errflag) {
@@ -514,14 +566,19 @@ int invrgen(TSdmatrix *X_dm, TSdmatrix *A_dm)
    }
    else {
       memcpy(X, A, _n*_n*sizeof(double));
-      dgetrf_(&_n, &_n, X, &_n, ipivot, &errflag);
+      _n2 = _n;
+      errflag2 = errflag;
+      dgetrf_(&_n2, &_n2, X, &_n2, ipivot, &errflag2);
+      errflag = errflag2;
       if (errflag) {
 //         X_dm->flag = M_UNDEF;
          free(ipivot);
          free(work);
          return errflag;
       }
-      dgetri_(&_n, X, &_n, ipivot, work, &lwork, &errflag);
+      lwork2 = lwork;
+      dgetri_(&_n2, X, &_n2, ipivot, work, &lwork2, &errflag2);
+      errflag = errflag2;
       if (work[0]>lwork) printf("Warning for /mathlib.c/invrgen(); when calling MKL dgetri_(), we need at least %d workspace for good performance "
                                     "but lwork is allocated with only %d space!\n", (int)work[0], lwork);
       if (errflag) {
@@ -565,7 +622,7 @@ int BdivA_rrect(TSdmatrix *X_dm, const TSdmatrix *B_dm, const char lr, const TSd
    //      _r-by-_m real rectangular (rrect) matrix if / (XA=B).
    //  lr:  if lr='\\', left division \ is performed; if lr='/', right division / is performed.
 
-   int _m, _n, _r,   //mn_max, mn_min,
+   int _m, _n, _r, i,  //mn_max, mn_min,
        lwork, _i, info = -2,
        *jpvt_p = NULL;
    double *A, *B, *X,
@@ -573,6 +630,9 @@ int BdivA_rrect(TSdmatrix *X_dm, const TSdmatrix *B_dm, const char lr, const TSd
           *qrb_p = NULL,   //QR decomposion for B_dm.
           *tau_p = NULL,
           *work_p = NULL;
+
+   lapack_int _m2, _n2, _r2, lwork2, info2;
+   lapack_int *jpvt_p2 = NULL;
 
    if (!A_dm || !(A_dm->flag & M_GE) || !B_dm || !(B_dm->flag &M_GE))   fn_DisplayError(".../mathlib.c/BdivA_rrect(): both input matricies A_dm and B_dm must be (a) created (allocated memory) and (b) given legal values for all elements (in other words, the flag M_GE must exist)");
    if (!X_dm)   fn_DisplayError(".../mathlib.c/BdivA_rrect(): output matrix X_dm must be created (allocated memory)");
@@ -603,6 +663,7 @@ int BdivA_rrect(TSdmatrix *X_dm, const TSdmatrix *B_dm, const char lr, const TSd
 //   qrb_p = tzMalloc((mn_max = _m>_n?_m:_n)*_r, double); //DDDDebug: seems requiring _m>_n, but this may not be the case.
    qrb_p = tzMalloc(_m*_r, double); //Note that _m>=_n.
    jpvt_p = tzMalloc(_n, int);
+   jpvt_p2 = tzMalloc(_n, lapack_int);
    tau_p = tzMalloc(_n, double);
 //   work_p = tzMalloc(lwork, double);
 
@@ -622,7 +683,16 @@ int BdivA_rrect(TSdmatrix *X_dm, const TSdmatrix *B_dm, const char lr, const TSd
 
    //=== Computes the QR factorization of a general m by n matrix with column pivoting using Level 3 BLAS.
    work_p = tzMalloc(lwork=_n*BLOCKSIZE_FOR_INTEL_MKL, double);
-   dgeqp3_(&_m,&_n,qra_p,&_m,jpvt_p,tau_p,work_p,&lwork,&info);
+   _m2 = _m;
+   _n2 = _n;
+   lwork2 = lwork;
+   info2 = info;
+   for(i=0; i<_n; i++)
+     jpvt_p2[i] = jpvt_p[i];
+   dgeqp3_(&_m2,&_n2,qra_p,&_m2,jpvt_p2,tau_p,work_p,&lwork2,&info2);
+   info = info2;
+   for(i=0; i<_n; i++)
+     jpvt_p[i] = jpvt_p2[i];
    if (work_p[0]>lwork) printf("Warning for /mathlib.c/BdivA_rrect(); when calling MKL dgeqp3_(), we need at least %d workspace for good performance "
                                  "but lwork is allocated with only %d space!\n", (int)work_p[0], lwork);
    tzDestroy(work_p);
@@ -630,7 +700,13 @@ int BdivA_rrect(TSdmatrix *X_dm, const TSdmatrix *B_dm, const char lr, const TSd
 
    //=== Multiplies a real matrix by the orthogonal matrix Q of the QR factorization formed by dgeqp3_.
    work_p = tzMalloc(lwork=_r*BLOCKSIZE_FOR_INTEL_MKL, double);
-   dormqr_("L","T",&_m,&_r,&_n,qra_p,&_m,tau_p,qrb_p,&_m,work_p,&lwork,&info);
+   _m2 = _m;
+   _n2 = _n;
+   _r2 = _r;
+   lwork2 = lwork;
+   info2 = info;
+   dormqr_("L","T",&_m2,&_r2,&_n2,qra_p,&_m2,tau_p,qrb_p,&_m2,work_p,&lwork2,&info2);
+   info = info2;
    if (work_p[0]>lwork) printf("Warning for /mathlib.c/BdivA_rrect(); when calling MKL dormqr_(), we need at least %d workspace for good performance "
                                  "but lwork is allocated with only %d space!\n", (int)work_p[0], lwork);
    //dormqr_("L","T",&_m,&_r,&mn_min,qra_p,&_m,tau_p,qrb_p,&mn_max,work_p,&lwork,&info);
@@ -653,6 +729,7 @@ int BdivA_rrect(TSdmatrix *X_dm, const TSdmatrix *B_dm, const char lr, const TSd
    tzDestroy(qra_p);
    tzDestroy(qrb_p);
    tzDestroy(jpvt_p);
+   tzDestroy(jpvt_p2);
    tzDestroy(tau_p);
 //   tzDestroy(work_p);
 
@@ -683,14 +760,17 @@ int BdivA_rgens(TSdmatrix *X_dm, const TSdmatrix *B_dm, const char lr, const TSd
    //  lr:  if lr='\\', left division \ is performed; if lr='/', right division / is performed.
 
    int _m, _r, m2,
-       _i, info = -2,
-       *ipiv_p = NULL;
+       _i, info = -2;
    double *A, *B, *X,
           *Atran_p = NULL,   //Transpose of A if right division / takes place.
           *Btran_p = NULL,    //Transpose of B if right division / takes place.
           *W = NULL;   //Duplicate copy of A when left division \ is used.  This will be replaced by LU decomposition.
 //          *tau_p = NULL,
 //          *work_p = NULL;
+
+
+   lapack_int _mlap, _rlap, info2, *ipiv_p = NULL;
+
 
    if (!A_dm || !(A_dm->flag & M_GE) || !B_dm || !(B_dm->flag & M_GE))   fn_DisplayError(".../mathlib.c/BdivA_rgens(): both input matricies A_dm and B_dm must be (a) created (allocated memory) and (b) given legal values for all elements (in other words, the flag M_GE must exist)");
    if (!X_dm)   fn_DisplayError(".../mathlib.c/BdivA_rgens(): output matrix X_dm must be created (allocated memory)");
@@ -717,7 +797,7 @@ int BdivA_rgens(TSdmatrix *X_dm, const TSdmatrix *B_dm, const char lr, const TSd
    if (lr=='/') {
       //Right divistion /.
       //=== Memory allocation for this function only.
-      ipiv_p = tzMalloc(_m, int);
+      ipiv_p = tzMalloc(_m, lapack_int);
       Atran_p = tzMalloc(square(_m), double);
       Btran_p = tzMalloc(_m*_r, double);
 
@@ -725,7 +805,11 @@ int BdivA_rgens(TSdmatrix *X_dm, const TSdmatrix *B_dm, const char lr, const TSd
          cblas_dcopy(_m, A+_i*_m, 1, Atran_p+_i, _m);   //Copying the transpose of A to Atran.
          cblas_dcopy(_r, B+_i*_r, 1, Btran_p+_i, _m);   //Copying the transpose of B (_r-by-_m) to Btran (_m-by-_r);
       }
-      dgesv_(&_m, &_r, Atran_p, &_m, ipiv_p, Btran_p, &_m, &info);
+      _mlap = _m;
+      _rlap = _r;
+      info2 = info;
+      dgesv_(&_mlap, &_rlap, Atran_p, &_mlap, ipiv_p, Btran_p, &_mlap, &info2);
+      info = info2;
       for (_i=0; _i<_r; _i++)  cblas_dcopy(_m, Btran_p+_i*_m, 1, X+_i, _r);  //Copying the transpose of Btran(_m-by-_r) to X (_r-by-_m);
       X_dm->flag = M_GE;
 
@@ -739,12 +823,16 @@ int BdivA_rgens(TSdmatrix *X_dm, const TSdmatrix *B_dm, const char lr, const TSd
    else {
       //Left division \.
       //=== Memory allocation for this function only.
-      ipiv_p = tzMalloc(_m, int);
+      ipiv_p = tzMalloc(_m, lapack_int);
       W = tzMalloc(m2=square(_m), double);
 
       memcpy(X, B, _m*_r*sizeof(double));
       memcpy(W, A, m2*sizeof(double));
-      dgesv_(&_m, &_r, W, &_m, ipiv_p, X, &_m, &info);
+      _mlap = _m;
+      _rlap = _r;
+      info2 = info;
+      dgesv_(&_mlap, &_rlap, W, &_mlap, ipiv_p, X, &_mlap, &info2);
+      info = info2;
       X_dm->flag = M_GE;
 
       //=== Destroyes memory allocated for this function only.
@@ -778,11 +866,12 @@ int bdivA_rgens(TSdvector *x_dv, const TSdvector *b_dv, const char lr, const TSd
 
    int _m, m2,
        _r = 1,
-       _i, info = -2,
-       *ipiv_p = NULL;
+       _i, info = -2;
    double *A, *b, *x,
           *Atran_p = NULL,   //Transpose of A if right division / takes place.
           *W = NULL;   //Duplicate copy of A when left division \ is used.  This will be replaced by LU decomposition.
+
+   lapack_int _mlap, _rlap, info2, *ipiv_p = NULL;
 
    if (!A_dm || !(A_dm->flag & M_GE) || !b_dv || !b_dv->flag)   fn_DisplayError("mathlib.c/bdivA_rgens(): Both A_dm and b_dv must be (a) created (allocated memory) and (b) given legal values for all elements (in other words, the flag M_GE must exist)");
    if (!x_dv)   fn_DisplayError("mathlib.c/bdivA_rgens(): output vector x_dv must be created (allocated memory)");
@@ -797,13 +886,17 @@ int bdivA_rgens(TSdvector *x_dv, const TSdvector *b_dv, const char lr, const TSd
    if (lr=='/') {
       //Right divistion /.
       //=== Memory allocation for this function only.
-      ipiv_p = tzMalloc(_m, int);
+      ipiv_p = tzMalloc(_m, lapack_int);
       Atran_p = tzMalloc(square(_m), double);
 
       for (_i=0; _i<_m; _i++)
          cblas_dcopy(_m, A+_i*_m, 1, Atran_p+_i, _m);   //Copying the transpose of A to Atran.
       if (x_dv != b_dv )  memcpy(x, b, _m*sizeof(double));
-      dgesv_(&_m, &_r, Atran_p, &_m, ipiv_p, x, &_m, &info);
+      _mlap = _m;
+      _rlap = _r;
+      info2 = info;
+      dgesv_(&_mlap, &_rlap, Atran_p, &_mlap, ipiv_p, x, &_mlap, &info2);
+      info = info2;
       x_dv->flag = V_DEF;
 
       //=== Destroyes memory allocated for this function only.
@@ -815,12 +908,16 @@ int bdivA_rgens(TSdvector *x_dv, const TSdvector *b_dv, const char lr, const TSd
    else {
       //Left division \.
       //=== Memory allocation for this function only.
-      ipiv_p = tzMalloc(_m, int);
+      ipiv_p = tzMalloc(_m, lapack_int);
       W = tzMalloc(m2=square(_m), double);
 
       if (x_dv != b_dv )  memcpy(x, b, _m*sizeof(double));
       memcpy(W, A, m2*sizeof(double));
-      dgesv_(&_m, &_r, W, &_m, ipiv_p, x, &_m, &info);
+      _mlap = _m;
+      _rlap = _r;
+      info2 = info;
+      dgesv_(&_mlap, &_rlap, W, &_mlap, ipiv_p, x, &_mlap, &info2);
+      info = info2;
       x_dv->flag = V_DEF;
 
       //=== Destroyes memory allocated for this function only.
@@ -859,6 +956,8 @@ void Aldivb_spd(TSdvector *x_dv, TSdmatrix *A_dm, TSdvector *b_dv, char an) {
    int errflag=2, nrows, nels;  //errflat=0 implies successful decomposition.  But we start with 2 so as to let dpotrf_ export a correct flag.
    double *A, *W=NULL, *x, *b;
 
+   lapack_int nrows2, errflag2;
+
    if ( !A_dm || !b_dv || !x_dv )  fn_DisplayError(".../mathlib.c/Aldivb_spd():  All input matrices or vectors must be created (memory allocated)");
    nrows = A_dm->nrows;
    nels = square(nrows);
@@ -876,7 +975,10 @@ void Aldivb_spd(TSdvector *x_dv, TSdmatrix *A_dm, TSdvector *b_dv, char an) {
 
 
    if (A_dm->flag & M_SU) {
-      dpotrf_("U", &nrows, W, &nrows, &errflag);  //Choleski.  U'*U = W where W will be replaced by upper triangular U.
+      nrows2 = nrows;
+      errflag2 = errflag;
+      dpotrf_("U", &nrows2, W, &nrows2, &errflag2);  //Choleski.  U'*U = W where W will be replaced by upper triangular U.
+      errflag = errflag2;
       if (errflag)  fn_DisplayError(".../mathlib.c/Aldivb_spd():  Error when calling Choleski dpotrf_().  Check if the L input matrix A_dm is positive definite or has legal values");
       if (x==b)  {
          //=== Solving for A*x=b.
@@ -892,7 +994,10 @@ void Aldivb_spd(TSdvector *x_dv, TSdmatrix *A_dm, TSdvector *b_dv, char an) {
       if ( (an!='N') && (an!='n') )  A_dm->flag = M_UT;
    }
    else if (A_dm->flag & M_SL) {   //?????????? Not tested yet.
-      dpotrf_("L", &nrows, W, &nrows, &errflag);  //Choleski.  L*L' = W where W will be replaced by lower triangular L.
+      nrows2 = nrows;
+      errflag2 = errflag;
+      dpotrf_("L", &nrows2, W, &nrows2, &errflag2);  //Choleski.  L*L' = W where W will be replaced by lower triangular L.
+      errflag = errflag2;
       if (errflag)  fn_DisplayError(".../mathlib.c/Aldivb_spd():  Error when calling Choleski dpotrf_().  Check if the L input matrix A_dm is positive definite or has legal values");
       if (x==b)  {
          //=== Solving for A*x=b.
@@ -1053,12 +1158,18 @@ int eigrsym_decomp(double *eval_v, double *evec_m, const double *s_m, const int 
    double *tmpd0_m=tzMalloc(square(_n), double),
           *work_p=tzMalloc(lwork, double);
 
+  lapack_int n2, lwork2, errflag2;
 
    //---------------------------
    // Obtains eigenvalues and, optionally, eigenvectors.
    //---------------------------
    memcpy(tmpd0_m, s_m, square(_n)*sizeof(double));
-   dsyev_( (evec_m) ? "V" : "N", ((ul=='u') || (ul=='U')) ? "U" : "L", &n1, tmpd0_m, &n1, eval_v, work_p, &lwork, &errflag);
+
+   n2 = n1;
+   lwork2 = lwork;
+   errflag2 = errflag;
+   dsyev_( (evec_m) ? "V" : "N", ((ul=='u') || (ul=='U')) ? "U" : "L", &n2, tmpd0_m, &n2, eval_v, work_p, &lwork2, &errflag2);
+   errflag = errflag2;
    if (evec_m) memcpy(evec_m, tmpd0_m, square(_n)*sizeof(double));
 
 
@@ -1096,6 +1207,8 @@ int eigrgen_decomp(double *evalr_v, double *evali_v, double *revecr_m, double *r
    double *tmpd0_m=tzMalloc(square(_n), double),    //@@Must be freed in this function.@@
           *work_p=tzMalloc(lwork, double);          //@@Must be freed in this function.@@
 
+   lapack_int n2, lwork2, errflag2;
+
    //---------------------------
    // Starts with x_m -- the matrix to be decomposed.
    //---------------------------
@@ -1104,8 +1217,12 @@ int eigrgen_decomp(double *evalr_v, double *evali_v, double *revecr_m, double *r
    //---------------------------
    // Obtains eigenvalues and, optionally, eigenvectors.
    //---------------------------
-   dgeev_( (levecr_m) ? "V" : "N", (revecr_m) ? "V" : "N", &n1, tmpd0_m, &n1, evalr_v, evali_v,
-                                                          levecr_m, &n1, revecr_m, &n1, work_p, &lwork, &errflag);
+   n2 = n1;
+   lwork2 = lwork;
+   errflag2 = errflag;
+   dgeev_( (levecr_m) ? "V" : "N", (revecr_m) ? "V" : "N", &n2, tmpd0_m, &n2, evalr_v, evali_v,
+                                                          levecr_m, &n2, revecr_m, &n2, work_p, &lwork2, &errflag2);
+   errflag = errflag2;
 
    //---------------------------
    // Frees the allocated memory.
@@ -1164,6 +1281,8 @@ int chol_decomp(double *D, const double *s_m, const int _n, const char ul) {
    #ifdef INTELCMATHLIBRARY   //Intel MKL Lapack dependent code.
       int errflag=2, _m=_n, _i, _j, tmpi0;  //errflat=0 implies successful decomposition.  But we start with 2 so as to let dpotrf_ export a correct flag.
 
+      lapack_int _m2, errflag2;
+
       //=== Fills the triangular part that is used for Choleski decomposition.
 
       switch (ul) {
@@ -1188,7 +1307,10 @@ int chol_decomp(double *D, const double *s_m, const int _n, const char ul) {
             return (-1);
       }
       //=== Choleski decomposition.
-      dpotrf_(((ul=='u') || (ul=='U')) ? "U" : "L", &_m, D, &_m, &errflag);
+      _m2 = _m;
+      errflag2 = errflag;
+      dpotrf_(((ul=='u') || (ul=='U')) ? "U" : "L", &_m2, D, &_m2, &errflag2);
+      errflag = errflag2;
       //---
       // if (errflag<0) fn_DisplayError("Some element has an illegal value");
       // else if (errflag>0) fn_DisplayError("The leadding minor of some order, hence the entire matrix, is not positive definite");
@@ -1227,6 +1349,8 @@ int inv_spd(double *D, const double *s_m, const int _n, const char ul) {
 
    int errflag=2, _m=_n, _i, _j, tmpi0;  //errflat=0 implies successful decomposition.  But we start with 2 so as to let dpotrf_ export a correct flag.
 
+   lapack_int _m2, errflag2;
+
    //=== Fills the triangular part that is used for Choleski decomposition.
    switch (ul) {
       case 'u': case 'U':
@@ -1251,10 +1375,14 @@ int inv_spd(double *D, const double *s_m, const int _n, const char ul) {
          return (-1);
    }
    //=== Choleski decomposition.
-   dpotrf_(((ul=='u') || (ul=='U')) ? "U" : "L", &_m, D, &_m, &errflag);
+   _m2 = _m;
+   errflag2 = errflag;
+   dpotrf_(((ul=='u') || (ul=='U')) ? "U" : "L", &_m2, D, &_m2, &errflag2);
+   errflag = errflag2;
    if (errflag) return (errflag);
    //=== Takes inverse.
-   dpotri_(((ul=='u') || (ul=='U')) ? "U" : "L", &_m, D, &_m, &errflag);
+   dpotri_(((ul=='u') || (ul=='U')) ? "U" : "L", &_m2, D, &_m2, &errflag2);
+   errflag = errflag2;
    return (errflag);
    //---
    // if (errflag<0) fn_DisplayError("Some element has an illegal value");
@@ -2891,7 +3019,7 @@ void ScalarTimesColofMatrix(TSdvector *y_dv, double _alpha, TSdmatrix *X_dm, int
          y_dv->flag = V_DEF;
       }
    #else
-      Need to be tested for the following.
+      //      Need to be tested for the following.
       //
       // M = X_dm->M + (_j+1)*(nrows=X_dm->nrows) - 1;  //Points to the end of the jth column.
       // if (!y_dv)
@@ -3896,7 +4024,7 @@ void CopySubrowmatrix(TSdmatrix *x1_dm, const int br1, const int bc1, TSdmatrix 
    else fn_DisplayError(".../mathlib.c/CopySubrowmatrix(): the submatrix of x2_dm must be within the range of itself as well as x1_dm");
 }
 #else
-   Havent got time to code up the default using Linux BLAS.
+//   Havent got time to code up the default using Linux BLAS.
 #endif
 
 
@@ -3930,7 +4058,7 @@ void CopySubmatrix2rowmatrix(TSdmatrix *x1_dm, const int br1, const int bc1, TSd
    else fn_DisplayError(".../mathlib.c/CopySubmatrix2rowmatrix(): the submatrix of x2_dm must be within the range of x2_dm and its transpose must be within the range of x1_dm");
 }
 #else
-   Havent got time to code up the default using Linux BLAS.
+//   Havent got time to code up the default using Linux BLAS.
 #endif
 
 
@@ -3965,7 +4093,7 @@ void CopySubrowmatrix2matrix(TSdmatrix *x1_dm, const int br1, const int bc1, TSd
    else fn_DisplayError(".../mathlib.c/CopySubrowmatrix2matrix(): the submatrix of x2_dm must be within the range of itself as well as x1_dm");
 }
 #else
-   Havent got time to code up the default using Linux BLAS.
+//   Havent got time to code up the default using Linux BLAS.
 #endif
 
 
@@ -4208,7 +4336,7 @@ void CopySubvector2rowmatrix(TSdmatrix *x1_dm, const int br, const int bc, const
    else fn_DisplayError(".../mathlib.c/CopySubvector2rowmatrix(): Copying (copied) elements are outside the (row) dimension of the copying vector x2_dv (the copied matrix x1_dm)");
 }
 #else
-   Havent got time to code up the default using Linux BLAS.
+//   Havent got time to code up the default using Linux BLAS.
 #endif
 
 

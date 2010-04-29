@@ -54,13 +54,21 @@ extern "C" {
   typedef const char *BLCHAR;
   typedef const blas_int *CONST_BLINT;
   typedef const double *CONST_BLDOU;
+  typedef const float *CONST_BLFLT;
   typedef double *BLDOU;
+  typedef float *BLFLT;
 
 #define dgemm FORTRAN_WRAPPER(dgemm)
   void dgemm(BLCHAR transa, BLCHAR transb, CONST_BLINT m, CONST_BLINT n,
              CONST_BLINT k, CONST_BLDOU alpha, CONST_BLDOU a, CONST_BLINT lda,
              CONST_BLDOU b, CONST_BLINT ldb, CONST_BLDOU beta,
              BLDOU c, CONST_BLINT ldc);
+
+#define sgemm FORTRAN_WRAPPER(sgemm)
+  void sgemm(BLCHAR transa, BLCHAR transb, CONST_BLINT m, CONST_BLINT n,
+             CONST_BLINT k, CONST_BLFLT alpha, CONST_BLFLT a, CONST_BLINT lda,
+             CONST_BLFLT b, CONST_BLINT ldb, CONST_BLFLT beta,
+             BLFLT c, CONST_BLINT ldc);
 
 #define dsymm FORTRAN_WRAPPER(dsymm)
   void dsymm(BLCHAR side, BLCHAR uplo, CONST_BLINT m, CONST_BLINT n,
@@ -85,6 +93,10 @@ extern "C" {
   void daxpy(CONST_BLINT n, CONST_BLDOU a, CONST_BLDOU x, CONST_BLINT incx,
              BLDOU y, CONST_BLINT incy);
 
+#define saxpy FORTRAN_WRAPPER(saxpy)
+  void saxpy(CONST_BLINT n, CONST_BLFLT a, CONST_BLFLT x, CONST_BLINT incx,
+             BLFLT y, CONST_BLINT incy);
+
 #define dcopy FORTRAN_WRAPPER(dcopy)
   void dcopy(CONST_BLINT n, CONST_BLDOU x, CONST_BLINT incx,
              BLDOU y, CONST_BLINT incy);
@@ -95,6 +107,9 @@ extern "C" {
 
 #define dscal FORTRAN_WRAPPER(dscal)
   void dscal(CONST_BLINT n, CONST_BLDOU a, BLDOU x, CONST_BLINT incx);
+
+#define sscal FORTRAN_WRAPPER(sscal)
+  void sscal(CONST_BLINT n, CONST_BLDOU a, BLFLT x, CONST_BLINT incx);
 
 #define dtrsm FORTRAN_WRAPPER(dtrsm)
   void dtrsm(BLCHAR side, BLCHAR uplo, BLCHAR transa, BLCHAR diag, CONST_BLINT m,

@@ -1,6 +1,15 @@
 
+#if defined(MATLAB_MEX_FILE) || defined(OCTAVE_MEX_FILE)
+#include <dynmex.h>
+#include <dynblas.h>
+#include <dynlapack.h>
+#else
+
 #ifndef __BLAS_LAPACK__
 #define __BLAS_LAPACK__
+
+typedef int lapack_int;
+typedef int blas_int;
 
 #ifdef __cplusplus
 extern "C"
@@ -41,6 +50,11 @@ extern "C"
 #define dgeev     dgeev_
 #define dpotrf    dpotrf_
 #define dpotri    dpotri_
+#define dtrtri    dtrtri_
+#define dgetri    dgetri_
+#define dgeqp3    dgeqp3_
+#define dormqr    dormqr_
+#define dgesv     dgesv_
 /*******************************************************************************/
 
 
@@ -81,10 +95,17 @@ void dsyev(char*,char*,int*,double*,int*,double*,double*,int*,int*);
 void dgeev(char*,char*,int*,double*,int*,double*,double*,double*,int*,double*,int*,double*,int*,int*);
 void dpotrf(char*,int*,double*,int*,int*);
 void dpotri(char*,int*,double*,int*,int*);
+void dgeqp3(int*,int*,double*,int*,int*,double*,double*,int*,int*);
+void dtrtri(char*,char*,int*,double*,int*,int*);
+void dgetri(int*,double*,int*,int*,double*,int*,int*);
+void dormqr(char*,char*,int*,int*,int*,double*,int*,double*,double*,int*,double*,int*,int*);
+void dgesv(int*,int*,double*,int*,int*,double*,int*,int*);
 /*******************************************************************************/
 
 #ifdef __cplusplus
 }
+#endif
+
 #endif
 
 #endif
