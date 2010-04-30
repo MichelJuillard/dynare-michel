@@ -18,10 +18,7 @@
 !/block_bytecode/MARK3_exo.dat
 !/bvar_a_la_sims/bvar_sample.m
 !/fs2000/fs2000a_steadystate.m
-!/fs2000/fs2000b_steadystate.m
-!/fs2000/fsdat.m
-!/fs2000/fsdat2.m
-!/fs2000/test.m
+!/fs2000/fsdat_simul.m
 !/kalman/likelihood/compare_kalman_routines.m
 !/kalman/likelihood/simul_state_space_model.m
 !/kalman/likelihood/test1.m
