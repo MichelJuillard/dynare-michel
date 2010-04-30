@@ -130,7 +130,7 @@ Section "Dynare++ (standalone executable)"
  File ..\dynare++\src\atlas.dll ..\dynare++\src\blas.dll ..\dynare++\src\cblas.dll ..\dynare++\src\lapack.dll ..\dynare++\src\libgcc_s_dw2-1.dll ..\dynare++\src\libgfortran-3.dll
 SectionEnd
 
-Section "Documentation (Dynare and Dynare++)"
+Section "Documentation and examples (Dynare and Dynare++)"
  SetOutPath $INSTDIR\doc
  File ..\doc\manual.pdf ..\doc\guide.pdf ..\doc\userguide\UserGuide.pdf ..\doc\bvar-a-la-sims.pdf ..\doc\dr.pdf ..\doc\macroprocessor\macroprocessor.pdf ..\doc\preprocessor\preprocessor.pdf
 
@@ -141,6 +141,12 @@ Section "Documentation (Dynare and Dynare++)"
  File ..\dynare++\doc\dynare++-tutorial.pdf ..\dynare++\doc\dynare++-ramsey.pdf ..\dynare++\sylv\sylvester.pdf ..\dynare++\tl\cc\tl.pdf ..\dynare++\integ\cc\integ.pdf ..\dynare++\kord\kord.pdf
 
  CreateShortcut "${SMLOC}\Documentation.lnk" "$INSTDIR\doc"
+
+ SetOutPath $INSTDIR\examples
+ File ..\examples\*
+
+ CreateShortcut "${SMLOC}\Examples.lnk" "$INSTDIR\examples"
+
 SectionEnd
 
 Section "Uninstall"
@@ -155,6 +161,7 @@ Section "Uninstall"
  Rmdir /r $INSTDIR\mex
  Rmdir /r $INSTDIR\dynare++
  Rmdir /r $INSTDIR\doc
+ Rmdir /r $INSTDIR\examples
  # We don't force deletion of installation directory (with /r), to avoid deleting important files
  Rmdir $INSTDIR
 

@@ -3995,6 +3995,31 @@ plot_conditional_forecast(periods = 10) e u;
 
 </chapter>
 
+<chapter>
+  <title>Examples</title>
+  <para>Dynare comes with a database of example <filename class="extension">.mod</filename> files, which are designed to show a broad range of Dynare features, and are taken from academic papers for most of them. You should have these files in the <filename class="directory">examples</filename> subdirectory of your distribution.</para>
+  <para>Here is a short list of the examples included. For a more complete description, please refer to the comments inside the files themselves.</para>
+  <variablelist>
+    <varlistentry>
+      <term><filename>ramst.mod</filename></term>
+      <listitem><para>An elementary real business cycle (RBC) model, simulated in a deterministic setup.</para></listitem>
+    </varlistentry>
+    <varlistentry>
+      <term><filename>example1.mod</filename></term>
+      <term><filename>example2.mod</filename></term>
+      <listitem><para>Two examples of a small RBC model in a stochastic setup, presented in <xref linkend="collard_2001"/> (see the file <filename>guide.pdf</filename> which comes with Dynare).</para></listitem>
+    </varlistentry>
+    <varlistentry>
+      <term><filename>fs2000.mod</filename></term>
+      <listitem><para>A cash in advance model, estimated by <xref linkend="schorfheide_2000"/>.</para></listitem>
+    </varlistentry>
+    <varlistentry>
+      <term><filename>bkk.mod</filename></term>
+      <listitem><para>Multi-country RBC model with time to build, presented in <xref linkend="backus-kehoe-kydland_1992"/>.</para></listitem>
+    </varlistentry>
+  </variablelist>
+</chapter>
+
 <bibliography>
 
   <biblioentry id="boucekkine_1995" xreflabel="Boucekkine (1995)">
@@ -4097,7 +4122,7 @@ plot_conditional_forecast(periods = 10) e u;
     </biblioset>
   </biblioentry>
 
-  <biblioentry>
+  <biblioentry id="fernandez-villaverde-rubio-ramirez_2004" xreflabel="Fernandez-Villaverde and Rubio-Ramirez (2004)">
     <biblioset relation="article">
       <authorgroup>
         <author>
@@ -4222,7 +4247,7 @@ plot_conditional_forecast(periods = 10) e u;
     </biblioset>
   </biblioentry>
 
-  <biblioentry> 
+  <biblioentry id="lubik-schorfheide_2007" xreflabel="Lubik and Schorfheide (2007)">
     <biblioset relation="article">
       <authorgroup>
         <author>
@@ -4289,7 +4314,8 @@ plot_conditional_forecast(periods = 10) e u;
     <biblioset relation="journal">
       <title>Journal of Applied Econometrics</title>
       <volumenum>15</volumenum>
-      <pagenums>645-70</pagenums>
+      <issuenum>6</issuenum>
+      <pagenums>645-670</pagenums>
     </biblioset>
   </biblioentry>
 
@@ -4335,6 +4361,47 @@ plot_conditional_forecast(periods = 10) e u;
       <issuenum>5</issuenum>
       <pagenums>1123-1175</pagenums>
     </biblioset>
+  </biblioentry>
+
+  <biblioentry id="collard_2001" xreflabel="Collard (2001)">
+    <biblioset relation="article">
+      <authorgroup>
+        <author>
+          <surname>Collard</surname>
+          <firstname>Fabrice</firstname>
+        </author>
+      </authorgroup>
+      <pubdate>2001</pubdate>
+      <title>Stochastic simulations with Dynare: A practical guide</title>
+    </biblioset>
+  </biblioentry>
+
+  <biblioentry id="backus-kehoe-kydland_1992" xreflabel="Backus, Kehoe and Kydland (1992)">
+    <biblioset relation="article">
+      <authorgroup>
+        <author>
+          <surname>Backus</surname>
+          <firstname>David K.</firstname>
+        </author>
+        <author>
+          <surname>Kehoe</surname>
+          <firstname>Patrick J.</firstname>
+        </author>
+        <author>
+          <surname>Kydland</surname>
+          <firstname>Finn E.</firstname>
+        </author>
+      </authorgroup>
+      <pubdate>1992</pubdate>
+      <title>International Real Business Cycles</title>
+    </biblioset>
+    <biblioset relation="journal">
+      <title>Journal of Political Economy</title>
+      <volumenum>100</volumenum>
+      <issuenum>4</issuenum>
+      <pagenums>745-775</pagenums>
+    </biblioset>
+
   </biblioentry>
 
 </bibliography>

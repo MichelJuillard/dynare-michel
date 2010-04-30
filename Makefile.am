@@ -22,9 +22,10 @@ EXTRA_DIST = \
 	license.txt \
 	windows/dynare.nsi \
 	windows/mexopts.bat \
-	windows/README.txt
+	windows/README.txt \
+	examples
 
 dist-hook:
-	rm -rf `find $(distdir)/matlab -name *~`
+	rm -rf `find $(distdir)/matlab $(distdir)/examples -name *~`
 	rm -f $(distdir)/matlab/dynare_m$(EXEEXT) $(distdir)/matlab/dynare_version.m
 	$(MKDIR_P) $(distdir)/mex/matlab $(distdir)/mex/octave
