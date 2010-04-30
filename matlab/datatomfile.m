@@ -13,7 +13,7 @@ function datatomfile (s,var_list)
 % SPECIAL REQUIREMENTS
 %    none
 
-% Copyright (C) 2001-2009 Dynare Team
+% Copyright (C) 2001-2010 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -35,7 +35,7 @@ global M_ oo_
 sm=[s,'.m'];
 fid=fopen(sm,'w') ;
 
-if size(var_list,1) == 0
+if nargin < 2 || size(var_list,1) == 0
     var_list = M_.endo_names(1:M_.orig_endo_nbr,:);
 end
 n = size(var_list,1);
