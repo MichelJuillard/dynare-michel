@@ -62,6 +62,8 @@ if isempty(flag_init)
     flag_init = 1;
 end
 
+warning off all
+
 if nargin<1
     compute_linear_solution = 0;
 else
@@ -182,3 +184,5 @@ if ~stop
     info.iterations.error = info.iterations.error(1:last_line);
     oo_.endo_simul = initial_endo_simul;
 end
+
+warning on all
