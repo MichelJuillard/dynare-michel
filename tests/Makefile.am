@@ -64,7 +64,7 @@ MODS = $(OCTAVE_MODS) \
 
 EXTRA_DIST = $(MODS) \
 	run_test_octave.m \
-	fs2000/fsdat.m \
+	fs2000/fsdat_simul.m \
 	test.m \
 	objectives \
 	ramst_initval_file_data.m \
