@@ -105,9 +105,11 @@ VDVEigDecomposition::calculate(const Mat &m) throw(VDVEigException)
   V = m;
   dsyev("V", "U", &n, V.getData(), &lda, D.getData(), &tmpwork, &tmplwork, &info);
   if (lwork < (int) tmpwork)
-    lwork = (int) tmpwork;
-  delete[] work;
-  double *work = new double[lwork];
+    {
+      lwork = (int) tmpwork;
+      delete[] work;
+      work = new double[lwork];
+    }
   dsyev("V", "U", &n, V.getData(), &lda, D.getData(), work, &lwork, &info);
 
   if (info < 0)
