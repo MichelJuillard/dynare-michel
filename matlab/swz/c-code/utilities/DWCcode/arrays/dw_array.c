@@ -146,7 +146,11 @@ int dw_PrintArray(FILE *f, void *a, char *format)
 	else
 	  for (size=dw_ElementSizeA(a), i=0; i < dw_DimA(a); i++)
 	    { if (!PrintRoutine(f,(void*)(((char*)a) + i*size),format)) return 0; }
-	fprintf(f,"\n");
+
+        if(f==stdout)
+          printf("\n");
+        else
+          fprintf(f,"\n");
 	return 1;
       }
   return 0;
@@ -154,27 +158,42 @@ int dw_PrintArray(FILE *f, void *a, char *format)
 
 static int dw_PrintInt(FILE* f, void* element, char *format)
 {
-  return (fprintf(f,format ? format : "%d ",*((int*)element)) < 0) ? 0 : 1;
+  if(f==stdout)
+    return (printf(format ? format : "%d ",*((int*)element)) < 0) ? 0 : 1;
+  else
+    return (fprintf(f,format ? format : "%d ",*((int*)element)) < 0) ? 0 : 1;
 }
 
 static int dw_PrintDouble(FILE* f, void* element, char *format)
 {
-  return (fprintf(f,format ? format : "%lf ",*((double*)element)) < 0) ? 0 : 1;
+  if(f==stdout)
+    return (printf(format ? format : "%lf ",*((double*)element)) < 0) ? 0 : 1;
+  else
+    return (fprintf(f,format ? format : "%lf ",*((double*)element)) < 0) ? 0 : 1;
 }
 
 static int dw_PrintFloat(FILE* f, void* element, char *format)
 {
-  return (fprintf(f,format ? format : "%f ",*((float*)element)) < 0) ? 0 : 1;
+  if(f==stdout)
+    return (printf(format ? format : "%f ",*((float*)element)) < 0) ? 0 : 1;
+  else
+    return (fprintf(f,format ? format : "%f ",*((float*)element)) < 0) ? 0 : 1;
 }
 
 static int dw_PrintChar(FILE* f, void* element, char *format)
 {
-  return (fprintf(f,format ? format : "%c ",*((char*)element)) < 0) ? 0 : 1;
+  if(f==stdout)
+    return (printf(format ? format : "%c ",*((char*)element)) < 0) ? 0 : 1;
+  else
+    return (fprintf(f,format ? format : "%c ",*((char*)element)) < 0) ? 0 : 1;
 }
 
 static int dw_PrintString(FILE* f, void* element, char *format)
 {
-  return (fprintf(f,format ? format : "%s\t",(char*)element) < 0) ? 0 : 1;
+  if(f==stdout)
+    return (printf(format ? format : "%s\t",(char*)element) < 0) ? 0 : 1;
+  else
+    return (fprintf(f,format ? format : "%s\t",(char*)element) < 0) ? 0 : 1;
 }
 /*******************************************************************************/
 /*******************************************************************************/

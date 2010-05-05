@@ -433,7 +433,11 @@ static int ReadError_MHMio(char *id)
 
 void PrintJumps(FILE *f, T_VAR_Parameters *p)
 {
-  fprintf(f,"Jumping counts - Total: %d\n",p->Total_A0_Metropolis_Draws);
+  if(f==stdout)
+    printf("Jumping counts - Total: %d\n",p->Total_A0_Metropolis_Draws);
+  else
+    fprintf(f,"Jumping counts - Total: %d\n",p->Total_A0_Metropolis_Draws);
+
   dw_PrintArray(f,p->A0_Metropolis_Jumps,"%7d ");
 }
 
