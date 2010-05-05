@@ -124,7 +124,7 @@ while (t<=sample_size)
             norme
             INFO
         end
-        if isnan(INFO)
+        if ~isstruct(INFO) && isnan(INFO)
             t = t-1;
             new_draw = 0;
         else

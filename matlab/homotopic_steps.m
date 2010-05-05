@@ -45,7 +45,7 @@ end
 if reduce_step
     step=step/1.5;
     [info,number_of_calls] = homotopic_steps(tdx,positive_var_indx,shocks,old_weight,step,init,number_of_calls);
-    if ~isnan(info)
+    if isstruct(info) && ~isnan(info.error)
         time = time+info.time;
         return
     else
