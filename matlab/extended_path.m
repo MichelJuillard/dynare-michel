@@ -86,6 +86,8 @@ verbose = 0;
 t = 0;
 new_draw = 1;
 
+perfect_foresight_simulation([],[],[]);
+
 while (t<=sample_size)
     t = t+1;
     if new_draw
