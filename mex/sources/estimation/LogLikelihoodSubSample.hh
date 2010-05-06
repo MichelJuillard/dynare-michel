@@ -27,26 +27,32 @@
 #define DF8B7AF5_8169_4587_9037_2CD2C82E2DDF__INCLUDED_
 
 #include "KalmanFilter.hh"
+#include "EstimatedParametersDescription.hh"
+#include "VDVEigDecomposition.hh"
 
 class LogLikelihoodSubSample {
 
 public:
-  LogLikelihoodSubSample(const std::string &modName,  size_t n_endo, size_t n_exo,
+  LogLikelihoodSubSample(const std::string &modName, EstimatedParametersDescription &estiParDesc, size_t n_endo, size_t n_exo,
                          const std::vector<size_t> &zeta_fwrd_arg, const std::vector<size_t> &zeta_back_arg, const std::vector<size_t> &zeta_mixed_arg,
                          const std::vector<size_t> &zeta_static_arg, const Matrix &ll_incidence, const double qz_criterium,  const std::vector<size_t> &order_var,
                          const std::vector<size_t> &inv_order_var, const std::vector<size_t> &varobs, const std::vector<size_t> &riv,
                          const std::vector<size_t> &ric, double riccati_tol_in, double lyapunov_tol, int &info);
 
-  double compute(Vector &steadyState, const MatrixView &dataView, const Vector &deepParams, //const estPeriod &estPeriod,
-                 VectorView &vll, int &info,  size_t start, size_t period, const Matrix &Q, const Matrix &H);
+  double compute(Vector &steadyState, const MatrixView &dataView, Vector &deepParams,
+                 Matrix &Q, Matrix &H, VectorView &vll, int &info,  size_t start, size_t period);
   virtual ~LogLikelihoodSubSample();
-
-public:
-  KalmanFilter kalmanFilter;
 
 private:
   double penalty;
-  double  logLikelihood;
+  double logLikelihood;
+  EstimatedParametersDescription &estiParDesc;
+  KalmanFilter kalmanFilter;
+  VDVEigDecomposition eigQ;
+  VDVEigDecomposition eigH;
+  // methods
+  void updateParams(const Vector &estParams, Vector &deepParams,
+                    Matrix &Q, Matrix &H, size_t period);
 
 };
 
