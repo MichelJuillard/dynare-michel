@@ -1,4 +1,4 @@
-function info = perfect_foresight_simulation(compute_linear_solution,steady_state, init_flag)
+function info = perfect_foresight_simulation(compute_linear_solution,steady_state)
 % Performs deterministic simulations with lead or lag on one period
 %
 % INPUTS
@@ -37,9 +37,9 @@ function info = perfect_foresight_simulation(compute_linear_solution,steady_stat
 
 global M_ options_ it_ oo_
 
-persistent lead_lag_incidence dynamic_model ny nyp nyf nrs nrc iyf iyp isp is isf isf1 iz icf ghx
+persistent lead_lag_incidence dynamic_model ny nyp nyf nrs nrc iyf iyp isp is isf isf1 iz icf ghx iflag
 
-if nargin==3% Initialization of the persistent variables.
+if ~nargin && isempty(iflag)% Initialization of the persistent variables.
     lead_lag_incidence = M_.lead_lag_incidence; 
     dynamic_model = [M_.fname '_dynamic'];
     ny   = size(oo_.endo_simul,1); 
@@ -54,8 +54,9 @@ if nargin==3% Initialization of the persistent variables.
     isf  = iyf+nyp; 
     isf1 = (nyp+ny+1):(nyf+nyp+ny+1);     
     iz   = 1:(ny+nyp+nyf);
-    icf  = 1:size(iyf,2); 
+    icf  = 1:size(iyf,2);
     info = [];
+    iflag = 1;
     return
 end
 
