@@ -79,7 +79,7 @@ double
 KalmanFilter::filter(const Matrix &dataView,  const Matrix &H, VectorView &vll, size_t start, int &info)
 {
   double loglik=0.0, ll, logFdet, Fdet;
-  int p = Finv.getRows();
+  size_t p = Finv.getRows();
 
   bool nonstationary = true;
   for (size_t t = 0; t < dataView.getCols(); ++t)
@@ -101,7 +101,7 @@ KalmanFilter::filter(const Matrix &dataView,  const Matrix &H, VectorView &vll, 
           blas::gemm("N", "N", 1.0, K, Finv, 0.0, KFinv);
           // deteminant of F:
           Fdet = 1;
-          for (int d = 0; d < p; ++d)
+          for (size_t d = 0; d < p; ++d)
             Fdet *= (-F(d, d));
 
           logFdet=log(fabs(Fdet));
