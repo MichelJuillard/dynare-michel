@@ -56,27 +56,6 @@ main (int argc, char** argv)
   Matrix vCov (nVCVpar, nVCVpar);
   vCov = vCovVW;
 
-  Matrix ll_incidence(3,n_endo); // leads and lags indices
-  double inllincidence[]={
-    1,   5,  0,
-    2,   6,  20,
-    0,   7,  21,
-    0,   8,   0,
-    0,   9,   0,
-    0,  10,   0,
-    3,  11,   0,
-    0,  12,   0,
-    0,  13,   0,
-    0,  14,   0,
-    0,  15,   0,
-    0,  16,   0,
-    4,  17,   0,
-    0,  18,   0,
-    0,  19,  22,
-  };
-  MatrixView llincidence(inllincidence, 3, n_endo,3); // leads and lags indices
-  ll_incidence= llincidence;
-
   double dparams[] = { 0.3300,
     0.9900,
     0.0030,
@@ -91,8 +70,6 @@ main (int argc, char** argv)
   steadyState=steadyStateVW;
   std::cout << "Vector deepParams: " << std::endl << deepParams << std::endl;
   std::cout << "Matrix vCov: " << std::endl << vCov << std::endl;
-  std::cout << "MatrixVw llincidence: " << std::endl << llincidence << std::endl;
-  std::cout << "Matrix ll_incidence: " << std::endl << ll_incidence << std::endl;
   std::cout << "Vector steadyState: " << std::endl << steadyState << std::endl;
 
   // Set zeta vectors [0:(n-1)] from Matlab indices [1:n]
@@ -114,7 +91,7 @@ main (int argc, char** argv)
   Matrix ghu(n_endo,n_exo);
 
   ModelSolution modelSolution( modName, n_endo, n_exo
-    , zeta_fwrd_arg, zeta_back_arg, zeta_mixed_arg, zeta_static_arg, ll_incidence, qz_criterium);
+    , zeta_fwrd_arg, zeta_back_arg, zeta_mixed_arg, zeta_static_arg, qz_criterium);
 
   modelSolution.compute(steadyState, deepParams, ghx,  ghu);
 

@@ -33,11 +33,11 @@ InitializeKalmanFilter::~InitializeKalmanFilter()
 InitializeKalmanFilter::InitializeKalmanFilter(const std::string &modName, size_t n_endo_arg, size_t n_exo_arg,
                                                const std::vector<size_t> &zeta_fwrd_arg, const std::vector<size_t> &zeta_back_arg,
                                                const std::vector<size_t> &zeta_mixed_arg, const std::vector<size_t> &zeta_static_arg,
-                                               const Matrix &llincidence, double qz_criterium,  const std::vector<size_t> &order_var_arg, const std::vector<size_t> &inv_order_var_arg,
+                                               double qz_criterium,  const std::vector<size_t> &order_var_arg, const std::vector<size_t> &inv_order_var_arg,
                                                const std::vector<size_t> &rivIN, const std::vector<size_t> &ricIN, double lyapunov_tolIN, int &info) :
   riv(rivIN), inv_ric(ricIN.size()), order_var(order_var_arg), lyapunov_tol(lyapunov_tolIN),
   detrendData(false), modelSolution(modName, n_endo_arg, n_exo_arg, zeta_fwrd_arg, zeta_back_arg,
-                                    zeta_mixed_arg, zeta_static_arg, llincidence, qz_criterium), discLyapFast(riv.size()),
+                                    zeta_mixed_arg, zeta_static_arg, qz_criterium), discLyapFast(riv.size()),
   ghx(n_endo_arg, zeta_back_arg.size() + zeta_mixed_arg.size()),
   ghx_raw(n_endo_arg, zeta_back_arg.size() + zeta_mixed_arg.size()),
   ghu(n_endo_arg, n_exo_arg),  ghu_raw(n_endo_arg, n_exo_arg),

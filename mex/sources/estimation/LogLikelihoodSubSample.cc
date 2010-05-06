@@ -31,10 +31,10 @@ LogLikelihoodSubSample::~LogLikelihoodSubSample()
 
 LogLikelihoodSubSample::LogLikelihoodSubSample(const std::string &modName,  size_t n_endo, size_t n_exo,
                                                const std::vector<size_t> &zeta_fwrd_arg, const std::vector<size_t> &zeta_back_arg, const std::vector<size_t> &zeta_mixed_arg,
-                                               const std::vector<size_t> &zeta_static_arg, const Matrix &ll_incidence, const double qz_criterium,  const std::vector<size_t> &order_var,
+                                               const std::vector<size_t> &zeta_static_arg, const double qz_criterium,  const std::vector<size_t> &order_var,
                                                const std::vector<size_t> &inv_order_var, const std::vector<size_t> &varobs, const std::vector<size_t> &riv,
                                                const std::vector<size_t> &ric, double riccati_tol, double lyapunov_tol, int &info) :
-  kalmanFilter(modName, n_endo, n_exo, zeta_fwrd_arg, zeta_back_arg, zeta_mixed_arg, zeta_static_arg, ll_incidence, qz_criterium,
+  kalmanFilter(modName, n_endo, n_exo, zeta_fwrd_arg, zeta_back_arg, zeta_mixed_arg, zeta_static_arg, qz_criterium,
                order_var, inv_order_var, varobs, riv, ric, riccati_tol, lyapunov_tol, info)
 {
 };
