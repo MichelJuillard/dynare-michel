@@ -47,9 +47,9 @@ public:
   LogLikelihoodMain(const Matrix &data, //GeneralParams& estimOptions,
                     const std::string &modName, EstimatedParametersDescription &estiParDesc, size_t n_endo, size_t n_exo,
                     const std::vector<size_t> &zeta_fwrd_arg, const std::vector<size_t> &zeta_back_arg, const std::vector<size_t> &zeta_mixed_arg,
-                    const std::vector<size_t> &zeta_static_arg, const double qz_criterium,  const std::vector<size_t> &order_var,
-                    const std::vector<size_t> &inv_order_var, const std::vector<size_t> &varobs, const std::vector<size_t> &riv,
-                    const std::vector<size_t> &ric, double riccati_tol_in, double lyapunov_tol, int &info);
+                    const std::vector<size_t> &zeta_static_arg, const double qz_criterium_arg,
+                    const std::vector<size_t> &varobs_arg,
+                    double riccati_tol_arg, double lyapunov_tol_arg, int &info);
 
   double compute(Matrix &steadyState, Vector &estParams, int &info); // for calls from estimation and to set Steady State
   double compute(Vector &estParams);  // for calls in loop from optimiser

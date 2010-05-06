@@ -33,34 +33,36 @@ InitializeKalmanFilter::~InitializeKalmanFilter()
 InitializeKalmanFilter::InitializeKalmanFilter(const std::string &modName, size_t n_endo_arg, size_t n_exo_arg,
                                                const std::vector<size_t> &zeta_fwrd_arg, const std::vector<size_t> &zeta_back_arg,
                                                const std::vector<size_t> &zeta_mixed_arg, const std::vector<size_t> &zeta_static_arg,
-                                               double qz_criterium,  const std::vector<size_t> &order_var_arg, const std::vector<size_t> &inv_order_var_arg,
-                                               const std::vector<size_t> &rivIN, const std::vector<size_t> &ricIN, double lyapunov_tolIN, int &info) :
-  riv(rivIN), inv_ric(ricIN.size()), order_var(order_var_arg), lyapunov_tol(lyapunov_tolIN),
+                                               const std::vector<size_t> &zeta_varobs_back_mixed_arg,
+                                               double qz_criterium_arg,
+                                               double lyapunov_tol_arg, int &info) :
+  lyapunov_tol(lyapunov_tol_arg),
+  zeta_varobs_back_mixed(zeta_varobs_back_mixed_arg),
   detrendData(false), modelSolution(modName, n_endo_arg, n_exo_arg, zeta_fwrd_arg, zeta_back_arg,
-                                    zeta_mixed_arg, zeta_static_arg, qz_criterium), discLyapFast(riv.size()),
-  ghx(n_endo_arg, zeta_back_arg.size() + zeta_mixed_arg.size()),
-  ghx_raw(n_endo_arg, zeta_back_arg.size() + zeta_mixed_arg.size()),
-  ghu(n_endo_arg, n_exo_arg),  ghu_raw(n_endo_arg, n_exo_arg),
-  Rt(n_exo_arg, riv.size()), RQ(riv.size(), n_exo_arg) 
+                                    zeta_mixed_arg, zeta_static_arg, qz_criterium_arg),
+  discLyapFast(zeta_varobs_back_mixed.size()),
+  g_x(n_endo_arg, zeta_back_arg.size() + zeta_mixed_arg.size()),
+  g_u(n_endo_arg, n_exo_arg),
+  Rt(n_exo_arg, zeta_varobs_back_mixed.size()),
+  RQ(zeta_varobs_back_mixed.size(), n_exo_arg) 
 {
-  size_t n_pred = ghx.getCols();
-  size_t n_static = zeta_static_arg.size();
-  size_t j = 0;
-  for (size_t i = 0; i < n_endo_arg; ++i)
-    if (inv_order_var_arg[i]-n_static < n_pred && inv_order_var_arg[i]-n_static >= 0)
-      inv_ric[j++] = ricIN[inv_order_var_arg[i]-n_static];
+  std::vector<size_t> zeta_back_mixed;
+  set_union(zeta_back_arg.begin(), zeta_back_arg.end(),
+            zeta_mixed_arg.begin(), zeta_mixed_arg.end(),
+            back_inserter(zeta_back_mixed));
+  for (size_t i = 0; i < zeta_back_mixed.size(); i++)
+    pi_bm_vbm.push_back(find(zeta_varobs_back_mixed.begin(), zeta_varobs_back_mixed.end(),
+                             zeta_back_mixed[i]) - zeta_varobs_back_mixed.begin());
+                                                    
 }
 // initialise parameter dependent KF matrices only but not Ps
 void
-InitializeKalmanFilter::initialize(Vector &steadyState, const Vector &deepParams, Matrix &R, const Matrix &Z,  
+InitializeKalmanFilter::initialize(Vector &steadyState, const Vector &deepParams, Matrix &R,
                                    const Matrix &Q, Matrix &RQRt, Matrix &T, 
                                    double &penalty, const MatrixView &dataView, Matrix &Y, int &info)
 {
-  modelSolution.compute(steadyState, deepParams, ghx_raw, ghu_raw);
+  modelSolution.compute(steadyState, deepParams, g_x, g_u);
   detrendData.detrend(steadyState, dataView, Y);
-
-  mat::reorderRowsByVectors(ghx, mat::nullVec, ghx_raw, order_var);
-  mat::reorderRowsByVectors(ghu, mat::nullVec, ghu_raw, order_var);
 
   setT(T, info);
   setRQR(R, Q, RQRt, info);
@@ -68,11 +70,11 @@ InitializeKalmanFilter::initialize(Vector &steadyState, const Vector &deepParams
 
 // initialise all KF matrices
 void
-InitializeKalmanFilter::initialize(Vector &steadyState, const Vector &deepParams, Matrix &R, const Matrix &Z,  
+InitializeKalmanFilter::initialize(Vector &steadyState, const Vector &deepParams, Matrix &R,
                                    const Matrix &Q, Matrix &RQRt, Matrix &T, Matrix &Pstar, Matrix &Pinf,
                                    double &penalty, const MatrixView &dataView, Matrix &Y, int &info)
 {
-  initialize(steadyState, deepParams, R, Z, Q, RQRt, T, penalty, dataView, Y, info);
+  initialize(steadyState, deepParams, R, Q, RQRt, T, penalty, dataView, Y, info);
   setPstar(Pstar, Pinf, T, RQRt, info);
 }
 
@@ -80,26 +82,19 @@ InitializeKalmanFilter::initialize(Vector &steadyState, const Vector &deepParams
 void
 InitializeKalmanFilter::setT(Matrix &T, int &info)
 {
-  // here is the content of [T R]=[A,B] = kalman_transition_matrix(oo_.dr,iv,ic,aux,M_.exo_nbr);
-
+  // Initialize the empty columns of T to zero
   T.setAll(0.0);
-
-  //T(i_n_iv,ic) = dr.ghx(iv,:);
-  mat::assignByVectors(T, mat::nullVec, inv_ric, ghx, riv, mat::nullVec);
+  mat::assignByVectors(T, mat::nullVec, pi_bm_vbm, g_x, zeta_varobs_back_mixed, mat::nullVec);
 }
 
 void
 InitializeKalmanFilter::setRQR(Matrix &R, const Matrix &Q, Matrix &RQRt, int &info)
 {
-  R.setAll(0.0);
-  //B(i_n_iv,:) = dr.ghu(iv,:); and R=B;
-  mat::assignByVectors(R, mat::nullVec, mat::nullVec, ghu, riv, mat::nullVec);
+  mat::assignByVectors(R, mat::nullVec, mat::nullVec, g_u, zeta_varobs_back_mixed, mat::nullVec);
 
   //  Matrix RQRt=R*Q*R'
-  RQ.setAll(0.0);
-  blas::gemm("N", "N", 1.0, R, Q, 1.0, RQ); // R*Q
-  RQRt.setAll(0.0);
-  blas::gemm("N", "T", 1.0, RQ, R, 1.0, RQRt); // R*Q*R'
+  blas::gemm("N", "N", 1.0, R, Q, 0.0, RQ); // R*Q
+  blas::gemm("N", "T", 1.0, RQ, R, 0.0, RQRt); // R*Q*R'
 }
 
 void

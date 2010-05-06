@@ -29,7 +29,7 @@
 #include "InitializeKalmanFilter.hh"
 
 /**
- * •vanilla Kalman filter without constant and with measurement error (use scalar
+ * Vanilla Kalman filter without constant and with measurement error (use scalar
  * 0 when no measurement error).
  * If multivariate filter is faster, do as in Matlab: start with multivariate
  * filter and switch to univariate filter only in case of singularity
@@ -50,18 +50,16 @@ public:
   virtual ~KalmanFilter();
   KalmanFilter(const std::string &modName, size_t n_endo, size_t n_exo, const std::vector<size_t> &zeta_fwrd_arg,
                const std::vector<size_t> &zeta_back_arg, const std::vector<size_t> &zeta_mixed_arg, const std::vector<size_t> &zeta_static_arg,
-               double qz_criterium,  const std::vector<size_t> &order_var_arg,  const std::vector<size_t> &inv_order_var,
-               const std::vector<size_t> &varobs_arg, const std::vector<size_t> &riv, const std::vector<size_t> &ric,
-               double riccati_tol, double lyapunov_tol, int &info);
+               double qz_criterium_arg, const std::vector<size_t> &varobs_arg,
+               double riccati_tol_arg, double lyapunov_tol_arg, int &info);
 
   double compute(const MatrixView &dataView, Vector &steadyState,
                  const Matrix &Q, const Matrix &H, const Vector &deepParams,
                  VectorView &vll, size_t start, size_t period, double &penalty, int &info);
 
-protected:
-//	static double calcStepLogLik(const PLUFact &Finv, const Vector &v);
-
 private:
+  const std::vector<size_t> zeta_varobs_back_mixed;
+  static std::vector<size_t> compute_zeta_varobs_back_mixed(const std::vector<size_t> &zeta_back_arg, const std::vector<size_t> &zeta_mixed_arg, const std::vector<size_t> &varobs_arg);
   Matrix Z;   //nob*mm matrix mapping endogeneous variables and observations
   Matrix T;   //mm*mm transition matrix of the state equation.
   Matrix R;   //mm*rr matrix, mapping structural innovations to state variables.

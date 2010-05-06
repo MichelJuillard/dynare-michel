@@ -35,9 +35,8 @@ class LogLikelihoodSubSample {
 public:
   LogLikelihoodSubSample(const std::string &modName, EstimatedParametersDescription &estiParDesc, size_t n_endo, size_t n_exo,
                          const std::vector<size_t> &zeta_fwrd_arg, const std::vector<size_t> &zeta_back_arg, const std::vector<size_t> &zeta_mixed_arg,
-                         const std::vector<size_t> &zeta_static_arg, const double qz_criterium,  const std::vector<size_t> &order_var,
-                         const std::vector<size_t> &inv_order_var, const std::vector<size_t> &varobs, const std::vector<size_t> &riv,
-                         const std::vector<size_t> &ric, double riccati_tol_in, double lyapunov_tol, int &info);
+                         const std::vector<size_t> &zeta_static_arg, const double qz_criterium, 
+                         const std::vector<size_t> &varobs_arg, double riccati_tol_in, double lyapunov_tol, int &info);
 
   double compute(Vector &steadyState, const MatrixView &dataView, Vector &deepParams,
                  Matrix &Q, Matrix &H, VectorView &vll, int &info,  size_t start, size_t period);

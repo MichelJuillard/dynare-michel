@@ -33,24 +33,41 @@ KalmanFilter::~KalmanFilter()
 KalmanFilter::KalmanFilter(const std::string &modName, size_t n_endo, size_t n_exo,
                            const std::vector<size_t> &zeta_fwrd_arg, const std::vector<size_t> &zeta_back_arg,
                            const std::vector<size_t> &zeta_mixed_arg, const std::vector<size_t> &zeta_static_arg,
-                           double qz_criterium,  const std::vector<size_t> &order_var,
-                           const std::vector<size_t> &inv_order_var, const std::vector<size_t> &varobs_arg,
-                           const std::vector<size_t> &riv, const std::vector<size_t> &ric,
-                           double riccati_tol_in, double lyapunov_tol, int &info) :
-  Z(varobs_arg.size(), riv.size()), T(riv.size()), R(riv.size(), n_exo),
-  Pstar(riv.size(), riv.size()), Pinf(riv.size(), riv.size()), RQRt(riv.size(), riv.size()),
-  Ptmp(riv.size(), riv.size()), F(varobs_arg.size(), varobs_arg.size()),
-  Finv(varobs_arg.size(), varobs_arg.size()), K(riv.size(), varobs_arg.size()), KFinv(riv.size(), varobs_arg.size()),
-  oldKFinv(riv.size(), varobs_arg.size()), Finverter(varobs_arg.size()), a_init(riv.size(), 1),
-  a_new(riv.size(), 1), vt(varobs_arg.size(), 1), vtFinv(1, varobs_arg.size()), vtFinvVt(1), riccati_tol(riccati_tol_in),
+                           double qz_criterium_arg, const std::vector<size_t> &varobs_arg,
+                           double riccati_tol_arg, double lyapunov_tol_arg, int &info) :
+  zeta_varobs_back_mixed(compute_zeta_varobs_back_mixed(zeta_back_arg, zeta_mixed_arg, varobs_arg)),
+  Z(varobs_arg.size(), zeta_varobs_back_mixed.size()), T(zeta_varobs_back_mixed.size()), R(zeta_varobs_back_mixed.size(), n_exo),
+  Pstar(zeta_varobs_back_mixed.size(), zeta_varobs_back_mixed.size()), Pinf(zeta_varobs_back_mixed.size(), zeta_varobs_back_mixed.size()), RQRt(zeta_varobs_back_mixed.size(), zeta_varobs_back_mixed.size()),
+  Ptmp(zeta_varobs_back_mixed.size(), zeta_varobs_back_mixed.size()), F(varobs_arg.size(), varobs_arg.size()),
+  Finv(varobs_arg.size(), varobs_arg.size()), K(zeta_varobs_back_mixed.size(), varobs_arg.size()), KFinv(zeta_varobs_back_mixed.size(), varobs_arg.size()),
+  oldKFinv(zeta_varobs_back_mixed.size(), varobs_arg.size()), Finverter(varobs_arg.size()), a_init(zeta_varobs_back_mixed.size(), 1),
+  a_new(zeta_varobs_back_mixed.size(), 1), vt(varobs_arg.size(), 1), vtFinv(1, varobs_arg.size()), vtFinvVt(1), riccati_tol(riccati_tol_arg),
   initKalmanFilter(modName, n_endo, n_exo, zeta_fwrd_arg, zeta_back_arg, zeta_mixed_arg,
-                   zeta_static_arg, qz_criterium, order_var, inv_order_var, riv, ric, lyapunov_tol, info)
+                   zeta_static_arg, zeta_varobs_back_mixed, qz_criterium_arg, lyapunov_tol_arg, info)
 {
   a_init.setAll(0.0);
   Z.setAll(0.0);
   for (size_t i = 0; i < varobs_arg.size(); ++i)
-    Z(i, varobs_arg[i]) = 1.0;
+    {
+      size_t j = find(zeta_varobs_back_mixed.begin(), zeta_varobs_back_mixed.end(),
+                      varobs_arg[i]) - zeta_varobs_back_mixed.begin();
+      Z(i, j) = 1.0;
+    }
+}
 
+std::vector<size_t>
+KalmanFilter::compute_zeta_varobs_back_mixed(const std::vector<size_t> &zeta_back_arg, const std::vector<size_t> &zeta_mixed_arg, const std::vector<size_t> &varobs_arg)
+{
+  std::vector<size_t> varobs_sorted = varobs_arg;
+  sort(varobs_sorted.begin(), varobs_sorted.end());
+  std::vector<size_t> zeta_back_mixed, zeta_varobs_back_mixed;
+  set_union(zeta_back_arg.begin(), zeta_back_arg.end(),
+            zeta_mixed_arg.begin(), zeta_mixed_arg.end(),
+            back_inserter(zeta_back_mixed));
+  set_union(zeta_back_mixed.begin(), zeta_back_mixed.end(),
+            varobs_arg.begin(), varobs_arg.end(),
+            back_inserter(zeta_varobs_back_mixed));
+  return zeta_varobs_back_mixed;
 }
 
 double
@@ -58,17 +75,16 @@ KalmanFilter::compute(const MatrixView &dataView, Vector &steadyState,
                       const Matrix &Q, const Matrix &H, const Vector &deepParams,
                       VectorView &vll, size_t start, size_t period, double &penalty, int &info)
 {
-  double ll;
   Matrix Y(dataView.getRows(), dataView.getCols());    // data
 
   if(period==0) // initialise all KF matrices
-    initKalmanFilter.initialize(steadyState, deepParams, R, Z, Q, RQRt, T, Pstar, Pinf,
+    initKalmanFilter.initialize(steadyState, deepParams, R, Q, RQRt, T, Pstar, Pinf,
                               penalty, dataView, Y, info);
   else  // initialise parameter dependent KF matrices only but not Ps
-    initKalmanFilter.initialize(steadyState, deepParams, R, Z, Q, RQRt, T, 
+    initKalmanFilter.initialize(steadyState, deepParams, R, Q, RQRt, T, 
                               penalty, dataView, Y, info);
 
-  return ll = filter(Y, H, vll, start, info);
+  return filter(Y, H, vll, start, info);
 
 };
 
@@ -122,7 +138,6 @@ KalmanFilter::filter(const Matrix &dataView,  const Matrix &H, VectorView &vll, 
         }
 
       // err= Yt - Za
-      //VectorView yt(dataView.getData()+t*dataView.getRows(),dataView.getRows(),1); // current observation vector
       MatrixConstView yt(dataView, 0, t, dataView.getRows(), 1); // current observation vector
       vt = yt;
       blas::gemm("N", "N", -1.0, Z, a_init, 1.0, vt);

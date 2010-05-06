@@ -40,29 +40,32 @@ class InitializeKalmanFilter
 {
 
 public:
+  /*!
+    \param[in] zeta_varobs_back_mixed_arg The union of indices of observed, backward and mixed variables
+  */
   InitializeKalmanFilter(const std::string& modName, size_t n_endo, size_t n_exo, const std::vector<size_t> &zeta_fwrd_arg,
                          const std::vector<size_t> &zeta_back_arg, const std::vector<size_t> &zeta_mixed_arg, const std::vector<size_t> &zeta_static_arg,
-                         double qz_criterium, const std::vector<size_t> &order_var_arg, const std::vector<size_t> &inv_order_var_arg,
-                         const std::vector<size_t> &riv, const std::vector<size_t> &ric, double lyapunov_tol, int &info);
+                         const std::vector<size_t> &zeta_varobs_back_mixed_arg,
+                         double qz_criterium_arg, double lyapunov_tol_arg, int &info);
   virtual ~InitializeKalmanFilter();
   // initialise all KF matrices
-  void initialize(Vector &steadyState, const Vector &deepParams, Matrix &R, const Matrix &Z, const Matrix &Q, Matrix &RQRt,
+  void initialize(Vector &steadyState, const Vector &deepParams, Matrix &R, const Matrix &Q, Matrix &RQRt,
                   Matrix &T, Matrix &Pstar, Matrix &Pinf, double &penalty, const MatrixView &dataView, Matrix &Y, int &info);
   // initialise parameter dependent KF matrices only but not Ps
-  void initialize(Vector &steadyState, const Vector &deepParams, Matrix &R, const Matrix &Z, const Matrix &Q, Matrix &RQRt,
+  void initialize(Vector &steadyState, const Vector &deepParams, Matrix &R, const Matrix &Q, Matrix &RQRt,
                   Matrix &T, double &penalty, const MatrixView &dataView, Matrix &Y, int &info);
 
 private:
-  const std::vector<size_t> riv; // restrict_var_list
-  std::vector<size_t> inv_ric; // inverse restrict_columns
-  const std::vector<size_t> order_var;
   const double lyapunov_tol;
+  const std::vector<size_t> zeta_varobs_back_mixed;
+  //! Indices of back+mixed zetas inside varobs+back+mixed zetas
+  std::vector<size_t> pi_bm_vbm;
 
   DetrendData detrendData;
   ModelSolution modelSolution;
   DiscLyapFast discLyapFast; //Lyapunov solver
-  Matrix ghx, ghx_raw;
-  Matrix ghu, ghu_raw;
+  Matrix g_x;
+  Matrix g_u;
   Matrix Rt, RQ;
   void setT(Matrix &T, int &info);
   void setRQR(Matrix &R, const Matrix &Q, Matrix &RQRt, int &info);
