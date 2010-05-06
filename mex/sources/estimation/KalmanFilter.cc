@@ -87,8 +87,7 @@ KalmanFilter::filter(const Matrix &dataView,  const Matrix &H, VectorView &vll, 
       if (nonstationary)
         {
           // K=PZ'
-          K.setAll(0.0);
-          blas::gemm("N", "T", 1.0, Pstar, Z, 1.0, K);
+          blas::gemm("N", "T", 1.0, Pstar, Z, 0.0, K);
 
           //F=ZPZ' +H = ZK+H
           F = H;
@@ -99,8 +98,7 @@ KalmanFilter::filter(const Matrix &dataView,  const Matrix &H, VectorView &vll, 
           mat::set_identity(Finv);
           Finverter.invMult("N", F, Finv); // F now contains its LU decomposition!
           // KFinv gain matrix
-          KFinv.setAll(0.0);
-          blas::gemm("N", "N", 1.0, K, Finv, 1.0, KFinv);
+          blas::gemm("N", "N", 1.0, K, Finv, 0.0, KFinv);
           // deteminant of F:
           Fdet = 1;
           for (int d = 0; d < p; ++d)
@@ -114,8 +112,7 @@ KalmanFilter::filter(const Matrix &dataView,  const Matrix &H, VectorView &vll, 
           blas::gemm("N", "T", -1.0, KFinv, K, 1.0, Ptmp);
           // 2) Ptmp= T*Ptmp
           Pstar = Ptmp;
-          Ptmp.setAll(0.0);
-          blas::gemm("N", "N", 1.0, T, Pstar, 1.0, Ptmp);
+          blas::gemm("N", "N", 1.0, T, Pstar, 0.0, Ptmp);
           // 3) Pt+1= Ptmp*T' +RQR'
           Pstar = RQRt;
           blas::gemm("N", "T", 1.0, Ptmp, T, 1.0, Pstar);
