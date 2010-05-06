@@ -32,15 +32,22 @@
 */
 ModelSolution::ModelSolution(const std::string& modName,  size_t n_endo_arg, size_t n_exo_arg, const std::vector<size_t>& zeta_fwrd_arg, 
                              const std::vector<size_t>& zeta_back_arg, const std::vector<size_t>& zeta_mixed_arg, 
-                             const std::vector<size_t>& zeta_static_arg, const Matrix& llincidence, double INqz_criterium)
+                             const std::vector<size_t>& zeta_static_arg, double INqz_criterium)
                              : n_endo(n_endo_arg), n_exo(n_exo_arg),  // n_jcols = Num of Jacobian columns = nStat+2*nPred+3*nBoth+2*nForw+nExog
                              n_jcols (n_exo+n_endo+ zeta_back_arg.size() /*nsPred*/ + zeta_fwrd_arg.size() /*nsForw*/ +2*zeta_mixed_arg.size()), 
-                             ll_incidence(llincidence), jacobian (n_endo,n_jcols), residual(n_endo), Mx(2,n_exo),
+                             jacobian (n_endo,n_jcols), residual(n_endo), Mx(2,n_exo),
                                decisionRules ( n_endo_arg, n_exo_arg, zeta_fwrd_arg, zeta_back_arg, zeta_mixed_arg, zeta_static_arg, INqz_criterium),
                                dynamicDLLp(modName, n_endo,  n_jcols,  /* nMax_lag= */ 1,  n_exo, std::string(""))
 {
   Mx.setAll(0.0);
   jacobian.setAll(0.0);
+
+  set_union(zeta_fwrd_arg.begin(), zeta_fwrd_arg.end(),
+            zeta_mixed_arg.begin(), zeta_mixed_arg.end(),
+            back_inserter(zeta_fwrd_mixed));
+  set_union(zeta_back_arg.begin(), zeta_back_arg.end(),
+            zeta_mixed_arg.begin(), zeta_mixed_arg.end(),
+            back_inserter(zeta_back_mixed));
 }
 
 void 
@@ -62,15 +69,14 @@ ModelSolution::ComputeModelSolution(Vector& steadyState, const Vector& deepParam
 
   Vector llXsteadyState(n_jcols-n_exo);
 
-  for (size_t ll_row = 0; ll_row < ll_incidence.getRows(); ll_row++)
-    {
-      // populate (non-sparse) vector with ysteady values
-      for (size_t i = 0; i < n_endo; i++)
-      {
-        if (ll_incidence(ll_row, i))
-          llXsteadyState(((size_t) ll_incidence(ll_row, i))-1) = steadyState(i);
-      }
-    }
+  for (size_t i = 0; i < zeta_back_mixed.size(); i++)
+    llXsteadyState(i) = steadyState(zeta_back_mixed[i]);
+
+  for (size_t i = 0; i < n_endo; i++)
+    llXsteadyState(zeta_back_mixed.size() + i) = steadyState(i);
+
+  for (size_t i = 0; i < zeta_fwrd_mixed.size(); i++)
+    llXsteadyState(zeta_back_mixed.size() + n_endo + i) = steadyState(zeta_fwrd_mixed[i]);
 
     //get jacobian 
     dynamicDLLp.eval(llXsteadyState, Mx, &deepParams,  1,  residual, &jacobian, NULL, NULL);

@@ -66,29 +66,6 @@ main(int argc, char **argv)
     0.0,	0.000078535044
   };
 
-  Matrix
-  ll_incidence(3, n_endo); // leads and lags indices
-  double inllincidence[] = {
-    1,   5,  0,
-    2,   6,  20,
-    0,   7,  21,
-    0,   8,   0,
-    0,   9,   0,
-    0,  10,   0,
-    3,  11,   0,
-    0,  12,   0,
-    0,  13,   0,
-    0,  14,   0,
-    0,  15,   0,
-    0,  16,   0,
-    4,  17,   0,
-    0,  18,   0,
-    0,  19,  22,
-  };
-  MatrixView
-  llincidence(inllincidence, 3, n_endo, 3); // leads and lags indices
-  ll_incidence = llincidence;
-
   double dparams[] = {
     0.3560,
     0.9930,
@@ -106,8 +83,6 @@ main(int argc, char **argv)
   steadyStateVW(dYSparams, n_endo, 1);
   steadyState = steadyStateVW;
   std::cout << "Vector deepParams: " << std::endl << deepParams << std::endl;
-  std::cout << "MatrixVw llincidence: " << std::endl << llincidence << std::endl;
-  std::cout << "Matrix ll_incidence: " << std::endl << ll_incidence << std::endl;
   std::cout << "Vector steadyState: " << std::endl << steadyState << std::endl;
 
   // Set zeta vectors [0:(n-1)] from Matlab indices [1:n] so that:
@@ -182,7 +157,7 @@ main(int argc, char **argv)
   double penalty = 1e8;
 
   KalmanFilter kalman(modName, n_endo, n_exo,
-                         zeta_fwrd_arg, zeta_back_arg, zeta_mixed_arg, zeta_static_arg, ll_incidence, qz_criterium,
+                         zeta_fwrd_arg, zeta_back_arg, zeta_mixed_arg, zeta_static_arg, qz_criterium,
                          order_var, inv_order_var, varobs, riv, ric, riccati_tol, lyapunov_tol, info);
 
   std::cout << "Initilise KF with Q: " << std::endl << Q << std::endl;

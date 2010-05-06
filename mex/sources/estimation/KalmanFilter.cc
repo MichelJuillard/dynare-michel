@@ -33,7 +33,7 @@ KalmanFilter::~KalmanFilter()
 KalmanFilter::KalmanFilter(const std::string &modName, size_t n_endo, size_t n_exo,
                            const std::vector<size_t> &zeta_fwrd_arg, const std::vector<size_t> &zeta_back_arg,
                            const std::vector<size_t> &zeta_mixed_arg, const std::vector<size_t> &zeta_static_arg,
-                           const Matrix &ll_incidence, double qz_criterium,  const std::vector<size_t> &order_var,
+                           double qz_criterium,  const std::vector<size_t> &order_var,
                            const std::vector<size_t> &inv_order_var, const std::vector<size_t> &varobs_arg,
                            const std::vector<size_t> &riv, const std::vector<size_t> &ric,
                            double riccati_tol_in, double lyapunov_tol, int &info) :
@@ -44,7 +44,7 @@ KalmanFilter::KalmanFilter(const std::string &modName, size_t n_endo, size_t n_e
   oldKFinv(riv.size(), varobs_arg.size()), Finverter(varobs_arg.size()), a_init(riv.size(), 1),
   a_new(riv.size(), 1), vt(varobs_arg.size(), 1), vtFinv(1, varobs_arg.size()), vtFinvVt(1), riccati_tol(riccati_tol_in),
   initKalmanFilter(modName, n_endo, n_exo, zeta_fwrd_arg, zeta_back_arg, zeta_mixed_arg,
-                   zeta_static_arg, ll_incidence, qz_criterium, order_var, inv_order_var, riv, ric, lyapunov_tol, info)
+                   zeta_static_arg, qz_criterium, order_var, inv_order_var, riv, ric, lyapunov_tol, info)
 {
   a_init.setAll(0.0);
   Z.setAll(0.0);

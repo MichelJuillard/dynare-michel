@@ -42,7 +42,7 @@ class InitializeKalmanFilter
 public:
   InitializeKalmanFilter(const std::string& modName, size_t n_endo, size_t n_exo, const std::vector<size_t> &zeta_fwrd_arg,
                          const std::vector<size_t> &zeta_back_arg, const std::vector<size_t> &zeta_mixed_arg, const std::vector<size_t> &zeta_static_arg,
-                         const Matrix &llincidence, double qz_criterium, const std::vector<size_t> &order_var_arg, const std::vector<size_t> &inv_order_var_arg,
+                         double qz_criterium, const std::vector<size_t> &order_var_arg, const std::vector<size_t> &inv_order_var_arg,
                          const std::vector<size_t> &riv, const std::vector<size_t> &ric, double lyapunov_tol, int &info);
   virtual ~InitializeKalmanFilter();
   // initialise all KF matrices
