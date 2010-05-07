@@ -119,7 +119,7 @@ main(int argc, char **argv)
   int info = 0;
   Matrix yView(nobs,192); // dummy
   yView.setAll(0.2);
-  const MatrixView dataView(yView, 0,  0, nobs, yView.getCols() ); // dummy
+  const MatrixConstView dataView(yView, 0,  0, nobs, yView.getCols() ); // dummy
   Vector vll(yView.getCols());
   VectorView vwll(vll,0,vll.getSize());
  
@@ -130,7 +130,7 @@ main(int argc, char **argv)
                          varobs_arg, riccati_tol, lyapunov_tol, info);
 
   size_t start=0, period=0;
-  double ll=kalman.compute(dataView, steadyState,  Q, H, deepParams,
+  double ll=kalman.compute(dataView, steadyStateVW,  Q, H, deepParams,
                                    vwll, start, period, penalty, info);
 
   std::cout << "ll: " << std::endl << ll << std::endl;
