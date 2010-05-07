@@ -27,18 +27,11 @@
 
 #include "Prior.hh"
 #include <cstdlib>
+#include <vector>
 struct EstimatedParameter
 {
 public:
-  EstimatedParameter(
-    size_t ID1, size_t ID2, size_t type, size_t startPeriod, size_t endPeriod,
-    double lower_boound, double upper_boound, Prior prior
-    );
-  virtual ~EstimatedParameter();
-
-public:
-  const size_t ID1;
-  const size_t ID2;
+  // parameter types
   enum pType
   {
     shock_SD = 1, // standard deviation of a structural shock
@@ -47,9 +40,18 @@ public:
     measureErr_Corr = 4, // correlation between two measurement errors
     deepPar = 5 // deep parameter
   };
-  const pType ptype;
-  const double lower_boound;
-  const double upper_boound;
+
+  EstimatedParameter(const EstimatedParameter::pType type,
+                     size_t ID1, size_t ID2, const std::vector<size_t> &subSampleIDs,
+                     double lower_bound, double upper_bound, Prior prior
+                     );
+  virtual ~EstimatedParameter();
+
+  const enum pType ptype;
+  const size_t ID1;
+  const size_t ID2;
+  const double lower_bound;
+  const double upper_bound;
   const Prior prior;
   const std::vector<size_t> subSampleIDs;
 };

@@ -49,11 +49,11 @@ public:
                          double qz_criterium_arg, double lyapunov_tol_arg, int &info);
   virtual ~InitializeKalmanFilter();
   // initialise all KF matrices
-  void initialize(Vector &steadyState, const Vector &deepParams, Matrix &R, const Matrix &Q, Matrix &RQRt,
-                  Matrix &T, Matrix &Pstar, Matrix &Pinf, double &penalty, const MatrixView &dataView, Matrix &Y, int &info);
+  void initialize(VectorView &steadyState, const Vector &deepParams, Matrix &R, const Matrix &Q, Matrix &RQRt,
+                  Matrix &T, Matrix &Pstar, Matrix &Pinf, double &penalty, const MatrixConstView &dataView, Matrix &Y, int &info);
   // initialise parameter dependent KF matrices only but not Ps
-  void initialize(Vector &steadyState, const Vector &deepParams, Matrix &R, const Matrix &Q, Matrix &RQRt,
-                  Matrix &T, double &penalty, const MatrixView &dataView, Matrix &Y, int &info);
+  void initialize(VectorView &steadyState, const Vector &deepParams, Matrix &R, const Matrix &Q, Matrix &RQRt,
+                  Matrix &T, double &penalty, const MatrixConstView &dataView, Matrix &Y, int &info);
 
 private:
   const double lyapunov_tol;

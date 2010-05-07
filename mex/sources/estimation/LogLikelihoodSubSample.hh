@@ -34,11 +34,11 @@ class LogLikelihoodSubSample {
 
 public:
   LogLikelihoodSubSample(const std::string &modName, EstimatedParametersDescription &estiParDesc, size_t n_endo, size_t n_exo,
-                         const std::vector<size_t> &zeta_fwrd_arg, const std::vector<size_t> &zeta_back_arg, const std::vector<size_t> &zeta_mixed_arg,
-                         const std::vector<size_t> &zeta_static_arg, const double qz_criterium, 
+                         const std::vector<size_t> &zeta_fwrd_arg, const std::vector<size_t> &zeta_back_arg,
+                         const std::vector<size_t> &zeta_mixed_arg, const std::vector<size_t> &zeta_static_arg, const double qz_criterium,
                          const std::vector<size_t> &varobs_arg, double riccati_tol_in, double lyapunov_tol, int &info);
 
-  double compute(Vector &steadyState, const MatrixView &dataView, Vector &deepParams,
+  double compute(VectorView &steadyState, const MatrixConstView &dataView, const Vector &estParams, Vector &deepParams,
                  Matrix &Q, Matrix &H, VectorView &vll, int &info,  size_t start, size_t period);
   virtual ~LogLikelihoodSubSample();
 
@@ -49,6 +49,7 @@ private:
   KalmanFilter kalmanFilter;
   VDVEigDecomposition eigQ;
   VDVEigDecomposition eigH;
+  int &info;
   // methods
   void updateParams(const Vector &estParams, Vector &deepParams,
                     Matrix &Q, Matrix &H, size_t period);

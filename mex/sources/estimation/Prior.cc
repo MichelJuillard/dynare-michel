@@ -16,29 +16,23 @@
  * You should have received a copy of the GNU General Public License
  * along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 ///////////////////////////////////////////////////////////
-//  DetrendData.h
-//  Implementation of the Class DetrendData
-//  Created on:      02-Feb-2010 13:01:15
+//  Prior.cpp
+//  Implementation of the Class Prior
+//  Created on:      02-Feb-2010 13:06:20
 ///////////////////////////////////////////////////////////
 
-#if !defined(DetrendData_312823A1_6248_4af0_B204_DB22F1237E9B__INCLUDED_)
-#define DetrendData_312823A1_6248_4af0_B204_DB22F1237E9B__INCLUDED_
+#include "Prior.hh"
 
-#include "Matrix.hh"
-
-class DetrendData
+Prior::Prior(Prior::pShape shape_arg, double mean_arg, double mode_arg, double lower_bound_arg,      double upper_bound_arg, double fhp_arg, double shp_arg) :
+  shape(shape_arg), mean(mean_arg), mode(mode_arg), lower_bound(lower_bound_arg),       upper_bound(upper_bound_arg),   fhp(fhp_arg), shp(shp_arg)
 {
 
-public:
-  virtual ~DetrendData(){};
-  DetrendData(const bool logLinear); // add later Vector& trendCoeff);
-  void detrend(const VectorView &SteadyState, const MatrixConstView &dataView, Matrix &Y);
+}
 
-private:
-  const bool logLinear;
-  //Vector trendCoeff;
+Prior::~Prior()
+{
 
-};
+}
 
-#endif // !defined(312823A1_6248_4af0_B204_DB22F1237E9B__INCLUDED_)

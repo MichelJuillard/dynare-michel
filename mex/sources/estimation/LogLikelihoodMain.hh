@@ -25,7 +25,6 @@
 #if !defined(E126AEF5_AC28_400a_821A_3BCFD1BC4C22__INCLUDED_)
 #define E126AEF5_AC28_400a_821A_3BCFD1BC4C22__INCLUDED_
 
-//#include "EstimatedParametersDescription.hh"
 #include "LogLikelihoodSubSample.hh"
 
 class LogLikelihoodMain {
@@ -33,26 +32,25 @@ private:
   double logLikelihood;
   std::vector<EstimationSubsample> &estSubsamples; // reference to member of EstimatedParametersDescription
   LogLikelihoodSubSample logLikelihoodSubSample;
-  Vector deepParams;
-  Vector &vll;  // vector of all KF step likelihoods
-  Matrix &data; // input data
-  Matrix &steadyState;
-  //GeneralParams& estimOptions;
-  int presampleStart;
-  Matrix Q;
-  Matrix H;
+  Vector vll;  // vector of all KF step likelihoods
 
 public:
   virtual ~LogLikelihoodMain();
-  LogLikelihoodMain(const Matrix &data, //GeneralParams& estimOptions,
-                    const std::string &modName, EstimatedParametersDescription &estiParDesc, size_t n_endo, size_t n_exo,
-                    const std::vector<size_t> &zeta_fwrd_arg, const std::vector<size_t> &zeta_back_arg, const std::vector<size_t> &zeta_mixed_arg,
-                    const std::vector<size_t> &zeta_static_arg, const double qz_criterium_arg,
-                    const std::vector<size_t> &varobs_arg,
-                    double riccati_tol_arg, double lyapunov_tol_arg, int &info);
+  LogLikelihoodMain( //const Matrix &data, Vector &deepParams_arg, //GeneralParams& estimOptions,
+    const std::string &modName, EstimatedParametersDescription &estiParDesc, size_t n_endo, size_t n_exo,
+    const std::vector<size_t> &zeta_fwrd_arg, const std::vector<size_t> &zeta_back_arg, const std::vector<size_t> &zeta_mixed_arg,
+    const std::vector<size_t> &zeta_static_arg, const double qz_criterium_arg, const std::vector<size_t> &varobs_arg,
+    double riccati_tol_arg, double lyapunov_tol_arg, int &info);
 
-  double compute(Matrix &steadyState, Vector &estParams, int &info); // for calls from estimation and to set Steady State
-  double compute(Vector &estParams);  // for calls in loop from optimiser
+  /**
+   * Compute method Inputs:
+   * Matrix &steadyState; Matrix of sub-sample periods column-vectors of steady states, one column vectro for each sub-sample period
+   * vectors of deep deepParams and estimated estParams
+   * Matrix &data input data reference
+   * Q and H KF matrices of shock and measurement error varinaces and covariances
+   * KF logLikelihood calculation start period.
+   */
+  double compute(Matrix &steadyState, const Vector &estParams, Vector &deepParams, const MatrixConstView &data, Matrix &Q, Matrix &H, size_t presampleStart, int &info); // for calls from estimation and to set Steady State
 
   Vector &
   getVll()

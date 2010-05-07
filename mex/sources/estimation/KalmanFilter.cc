@@ -71,7 +71,7 @@ KalmanFilter::compute_zeta_varobs_back_mixed(const std::vector<size_t> &zeta_bac
 }
 
 double
-KalmanFilter::compute(const MatrixView &dataView, Vector &steadyState,
+KalmanFilter::compute(const MatrixConstView &dataView, VectorView &steadyState,
                       const Matrix &Q, const Matrix &H, const Vector &deepParams,
                       VectorView &vll, size_t start, size_t period, double &penalty, int &info)
 {

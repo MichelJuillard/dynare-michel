@@ -53,7 +53,7 @@ public:
                double qz_criterium_arg, const std::vector<size_t> &varobs_arg,
                double riccati_tol_arg, double lyapunov_tol_arg, int &info);
 
-  double compute(const MatrixView &dataView, Vector &steadyState,
+  double compute(const MatrixConstView &dataView, VectorView &steadyState,
                  const Matrix &Q, const Matrix &H, const Vector &deepParams,
                  VectorView &vll, size_t start, size_t period, double &penalty, int &info);
 
@@ -75,7 +75,9 @@ private:
   Matrix vtFinv, vtFinvVt; // intermeiate observation error *Finv vector
   double riccati_tol;
   InitializeKalmanFilter initKalmanFilter; //Initialise KF matrices
-  double filter(const Matrix &dataView,  const Matrix &H, VectorView &vll, size_t start, int &info);
+
+  // Method
+  double filter(const Matrix &data,  const Matrix &H, VectorView &vll, size_t start, int &info);
 
 };
 

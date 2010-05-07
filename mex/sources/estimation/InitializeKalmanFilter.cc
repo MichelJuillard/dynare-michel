@@ -57,9 +57,9 @@ InitializeKalmanFilter::InitializeKalmanFilter(const std::string &modName, size_
 }
 // initialise parameter dependent KF matrices only but not Ps
 void
-InitializeKalmanFilter::initialize(Vector &steadyState, const Vector &deepParams, Matrix &R,
+InitializeKalmanFilter::initialize(VectorView &steadyState, const Vector &deepParams, Matrix &R,
                                    const Matrix &Q, Matrix &RQRt, Matrix &T, 
-                                   double &penalty, const MatrixView &dataView, Matrix &Y, int &info)
+                                   double &penalty, const MatrixConstView &dataView, Matrix &Y, int &info)
 {
   modelSolution.compute(steadyState, deepParams, g_x, g_u);
   detrendData.detrend(steadyState, dataView, Y);
@@ -70,9 +70,9 @@ InitializeKalmanFilter::initialize(Vector &steadyState, const Vector &deepParams
 
 // initialise all KF matrices
 void
-InitializeKalmanFilter::initialize(Vector &steadyState, const Vector &deepParams, Matrix &R,
+InitializeKalmanFilter::initialize(VectorView &steadyState, const Vector &deepParams, Matrix &R,
                                    const Matrix &Q, Matrix &RQRt, Matrix &T, Matrix &Pstar, Matrix &Pinf,
-                                   double &penalty, const MatrixView &dataView, Matrix &Y, int &info)
+                                   double &penalty, const MatrixConstView &dataView, Matrix &Y, int &info)
 {
   initialize(steadyState, deepParams, R, Q, RQRt, T, penalty, dataView, Y, info);
   setPstar(Pstar, Pinf, T, RQRt, info);

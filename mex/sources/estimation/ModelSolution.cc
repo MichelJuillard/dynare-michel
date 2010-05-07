@@ -51,7 +51,7 @@ ModelSolution::ModelSolution(const std::string& modName,  size_t n_endo_arg, siz
 }
 
 void 
-ModelSolution::compute(Vector& steadyState, const Vector& deepParams, Matrix& ghx, Matrix& ghu) throw (DecisionRules::BlanchardKahnException, GeneralizedSchurDecomposition::GSDException)
+ModelSolution::compute(VectorView& steadyState, const Vector& deepParams, Matrix& ghx, Matrix& ghu) throw (DecisionRules::BlanchardKahnException, GeneralizedSchurDecomposition::GSDException)
 {
   // compute Steady State
   ComputeSteadyState(steadyState, deepParams);
@@ -63,7 +63,7 @@ ModelSolution::compute(Vector& steadyState, const Vector& deepParams, Matrix& gh
 }
 
 void 
-ModelSolution::ComputeModelSolution(Vector& steadyState, const Vector& deepParams, Matrix& ghx, Matrix& ghu) throw (DecisionRules::BlanchardKahnException, GeneralizedSchurDecomposition::GSDException)
+ModelSolution::ComputeModelSolution(VectorView &steadyState, const Vector& deepParams, Matrix& ghx, Matrix& ghu) throw (DecisionRules::BlanchardKahnException, GeneralizedSchurDecomposition::GSDException)
 {
   // set extended Steady State
 
@@ -85,7 +85,7 @@ ModelSolution::ComputeModelSolution(Vector& steadyState, const Vector& deepParam
     decisionRules.compute(jacobian,ghx, ghu);
 }
 void 
-ModelSolution::ComputeSteadyState(Vector& steadyState, const Vector& deepParams)
+ModelSolution::ComputeSteadyState(VectorView& steadyState, const Vector& deepParams)
 {
   // does nothig for time being.
 }
