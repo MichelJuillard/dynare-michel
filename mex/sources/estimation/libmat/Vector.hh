@@ -98,12 +98,10 @@ private:
   const size_t size, stride;
 public:
   VectorView(double *data_arg, size_t size_arg, size_t stride_arg);
-  template<class Vec>
-  VectorView(Vec &arg, size_t offset, size_t size_arg)
-    : data(arg.getData() + offset*arg.getStride()), size(size_arg), stride(arg.getStride())
-  {
-    assert(offset < arg.getSize() && offset + size <= arg.getSize());
-  }
+  /* Can't use a template for the 2 constructors below: this would override the
+  constructor which uses a pointer, because the argument list is the same */
+  VectorView(Vector &arg, size_t offset, size_t size_arg);
+  VectorView(VectorView &arg, size_t offset, size_t size_arg);
   virtual ~VectorView(){};
   inline size_t getSize() const { return size; }
   inline size_t getStride() const { return stride; }
@@ -141,12 +139,12 @@ private:
   const size_t size, stride;
 public:
   VectorConstView(const double *data_arg, size_t size_arg, size_t stride_arg);
-  template<class Vec>
-  VectorConstView(const Vec &arg, size_t offset, size_t size_arg)
-    : data(arg.getData() + offset*arg.getStride()), size(size_arg), stride(arg.getStride())
-  {
-    assert(offset < arg.getSize() && offset + size <= arg.getSize());
-  }
+  /* Can't use a template for the 3 constructors below: this would override the
+  constructor which uses a pointer, because the argument list is the same */
+  VectorConstView(const Vector &arg, size_t offset, size_t size_arg);
+  VectorConstView(const VectorView &arg, size_t offset, size_t size_arg);
+  VectorConstView(const VectorConstView &arg, size_t offset, size_t size_arg);
+
   virtual ~VectorConstView(){};
   inline size_t getSize() const { return size; }
   inline size_t getStride() const { return stride; }

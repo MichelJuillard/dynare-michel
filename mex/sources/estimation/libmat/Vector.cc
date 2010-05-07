@@ -57,6 +57,18 @@ VectorView::VectorView(double *data_arg, size_t size_arg, size_t stride_arg)
 {
 }
 
+VectorView::VectorView(Vector &arg, size_t offset, size_t size_arg)
+  : data(arg.getData() + offset*arg.getStride()), size(size_arg), stride(arg.getStride())
+{
+  assert(offset < arg.getSize() && offset + size <= arg.getSize());
+}
+
+VectorView::VectorView(VectorView &arg, size_t offset, size_t size_arg)
+  : data(arg.getData() + offset*arg.getStride()), size(size_arg), stride(arg.getStride())
+{
+  assert(offset < arg.getSize() && offset + size <= arg.getSize());
+}
+
 VectorView &
 VectorView::operator= (const VectorView &arg)
 {
@@ -68,16 +80,34 @@ VectorView::operator= (const VectorView &arg)
   return *this;
 }
 
+VectorConstView::VectorConstView(const double *data_arg, size_t size_arg, size_t stride_arg)
+  : data(data_arg), size(size_arg), stride(stride_arg)
+{
+}
+
+VectorConstView::VectorConstView(const Vector &arg, size_t offset, size_t size_arg)
+  : data(arg.getData() + offset*arg.getStride()), size(size_arg), stride(arg.getStride())
+{
+  assert(offset < arg.getSize() && offset + size <= arg.getSize());
+}
+
+VectorConstView::VectorConstView(const VectorView &arg, size_t offset, size_t size_arg)
+  : data(arg.getData() + offset*arg.getStride()), size(size_arg), stride(arg.getStride())
+{
+  assert(offset < arg.getSize() && offset + size <= arg.getSize());
+}
+
+VectorConstView::VectorConstView(const VectorConstView &arg, size_t offset, size_t size_arg)
+  : data(arg.getData() + offset*arg.getStride()), size(size_arg), stride(arg.getStride())
+{
+  assert(offset < arg.getSize() && offset + size <= arg.getSize());
+}
+
 std::ostream &
 operator<<(std::ostream &out, const VectorView &V)
 {
   vec::print(out, V);
   return out;
-}
-
-VectorConstView::VectorConstView(const double *data_arg, size_t size_arg, size_t stride_arg)
-  : data(data_arg), size(size_arg), stride(stride_arg)
-{
 }
 
 std::ostream &
