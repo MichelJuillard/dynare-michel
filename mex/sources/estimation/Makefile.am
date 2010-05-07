@@ -9,11 +9,21 @@ endif
 EXTRA_DIST = \
 	DecisionRules.cc \
 	DecisionRules.hh \
-	dr1.cpp \
-	DsgeLikelihood.cpp \
-	DsgeLikelihood.h \
-	dynare_resolve.cpp \
-	Estimation.h \
-	ioutils.h \
-	MexUtils.cpp \
-	MexUtils.h
+	DetrendData.cc \
+	DetrendData.hh \
+	EstimatedParameter.hh \
+	EstimatedParametersDescription.hh \
+	EstimationSubsample.hh \
+	InitializeKalmanFilter.cc \
+	InitializeKalmanFilter.hh \
+	KalmanFilter.cc \
+	KalmanFilter.hh \
+	LogLikelihoodMain.hh \
+	LogLikelihoodSubSample.cc \
+	LogLikelihoodSubSample.hh \
+	ModelSolution.cc \
+	ModelSolution.hh \
+	Prior.hh \
+	utils/dynamic_dll.cc \
+	utils/dynamic_dll.hh \
+	utils/ts_exception.h
