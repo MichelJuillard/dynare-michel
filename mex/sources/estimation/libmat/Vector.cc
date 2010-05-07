@@ -52,11 +52,6 @@ operator<<(std::ostream &out, const Vector &V)
   return out;
 }
 
-VectorView::VectorView(Vector &arg, size_t offset, size_t size_arg)
-  : data(arg.getData() + offset), size(size_arg), stride(1)
-{
-}
-
 VectorView::VectorView(double *data_arg, size_t size_arg, size_t stride_arg)
   : data(data_arg), size(size_arg), stride(stride_arg)
 {
@@ -78,11 +73,6 @@ operator<<(std::ostream &out, const VectorView &V)
 {
   vec::print(out, V);
   return out;
-}
-
-VectorConstView::VectorConstView(const Vector &arg, size_t offset, size_t size_arg)
-  : data(arg.getData() + offset), size(size_arg), stride(1)
-{
 }
 
 VectorConstView::VectorConstView(const double *data_arg, size_t size_arg, size_t stride_arg)

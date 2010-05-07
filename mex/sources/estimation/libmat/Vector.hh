@@ -97,8 +97,13 @@ private:
   double *const data;
   const size_t size, stride;
 public:
-  VectorView(Vector &arg, size_t offset, size_t size_arg);
   VectorView(double *data_arg, size_t size_arg, size_t stride_arg);
+  template<class Vec>
+  VectorView(Vec &arg, size_t offset, size_t size_arg)
+    : data(arg.getData() + offset*arg.getStride()), size(size_arg), stride(arg.getStride())
+  {
+    assert(offset < arg.getSize() && offset + size <= arg.getSize());
+  }
   virtual ~VectorView(){};
   inline size_t getSize() const { return size; }
   inline size_t getStride() const { return stride; }
@@ -135,8 +140,13 @@ private:
   const double *const data;
   const size_t size, stride;
 public:
-  VectorConstView(const Vector &arg, size_t offset, size_t size_arg);
   VectorConstView(const double *data_arg, size_t size_arg, size_t stride_arg);
+  template<class Vec>
+  VectorConstView(const Vec &arg, size_t offset, size_t size_arg)
+    : data(arg.getData() + offset*arg.getStride()), size(size_arg), stride(arg.getStride())
+  {
+    assert(offset < arg.getSize() && offset + size <= arg.getSize());
+  }
   virtual ~VectorConstView(){};
   inline size_t getSize() const { return size; }
   inline size_t getStride() const { return stride; }
