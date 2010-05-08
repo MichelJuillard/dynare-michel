@@ -12,7 +12,7 @@ function dr=mult_elimination(varlist,M_, options_, oo_)
 % SPECIAL REQUIREMENTS
 %   none
 
-% Copyright (C) 2003-2008 Dynare Team
+% Copyright (C) 2003-2010 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -122,9 +122,3 @@ function dr=mult_elimination(varlist,M_, options_, oo_)
       dyntable(my_title,headers,labels,res_table,lh,10,6);
       disp(' ')
   end
-      
-      
-function x=varsol(a,b,c)
-    
-    x = (kron(a,a)-kron(b,b))\c(:);
-    x = reshape(x,size(a,1),size(a,1));
