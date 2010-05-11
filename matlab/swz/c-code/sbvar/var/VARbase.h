@@ -51,7 +51,7 @@ typedef struct
   TVector** bplus;
 
   //====== Priors ======
-  TVector  zeta_a_prior;            //         
+  TVector  zeta_a_prior;            //
   TVector  zeta_b_prior;            //
   TMatrix* A0_prior;                // A0_prior[j] = constant parameter variance of the normal prior on the jth column of A0
   TMatrix* Aplus_prior;             // Aplus_prior[j] = constant parameter variance of the normal prior on the jth column of Aplus
@@ -63,7 +63,7 @@ typedef struct
 
   //====== Sims-Zha specification parameters and workspace ======
   TVector** lambda;                               // nvars x n_coef_states[j] array of nvars-dimensional vectors
-  TVector*  constant;                             // nvars x n_coef_states[j] -- constant[j][k] == psi[j][npre - 1 + k]  
+  TVector*  constant;                             // nvars x n_coef_states[j] -- constant[j][k] == psi[j][npre - 1 + k]
   TVector*  psi;                                  // nvars x (npre - 1 + n_coef_states[j])
   PRECISION lambda_prior;                         // prior variance of each element of lambda
   PRECISION inverse_lambda_prior;
@@ -83,7 +83,7 @@ typedef struct
   TMatrix* inverse_b0_prior;                       // inverse_b0_prior = U'[j]*Inverse(A0_prior[j])*U[j]
   TMatrix* inverse_bplus_prior;                    // inverse_bplus_prior = V'[j]*Inverse(Aplus_prior[j])*V[j]
 
-  TVector log_abs_det_A0;                          // log(abs(det(A0[k]))) 
+  TVector log_abs_det_A0;                          // log(abs(det(A0[k])))
 
   PRECISION*** A0_dot_products;                    // A0_dot_products[t][j][k] = Y'[t] * A0[j][k]
   PRECISION*** Aplus_dot_products;                 // Aplus_dot_products[t][j][k] = X'[t] * Aplus[j][k]
@@ -107,10 +107,10 @@ typedef struct
   int valid_log_abs_det_A0;                        // Invalid after A0 changes
   int valid_dot_products;                          // Invalid after A0 or Aplus changes
   int valid_state_dependent_fields;                // Invalid after states change
-  int valid_state_dependent_fields_previous;       // Initially invalid. 
-  int valid_parameters;                            // Initially invalid.  Valid after successful read or draw of parameters.  
-                                                   //   Parametes are invalid if Zeta is negative or if they do not satisfy 
-                                                   //   the normalization.   
+  int valid_state_dependent_fields_previous;       // Initially invalid.
+  int valid_parameters;                            // Initially invalid.  Valid after successful read or draw of parameters.
+                                                   //   Parametes are invalid if Zeta is negative or if they do not satisfy
+                                                   //   the normalization.
 
   //=== Data ===
   TVector* Y;         // Y[t] nvar vector of time t data for 1 <= t <= T
@@ -122,14 +122,14 @@ typedef struct
 void FreeTheta_VAR(T_VAR_Parameters *p);
 ThetaRoutines* CreateRoutines_VAR(void);
 T_VAR_Parameters* CreateTheta_VAR(int flag, int nvars, int nlags, int nexg, int nstates, int nobs,    // Specification and Sizes
-				  int **coef_states, int **var_states,                                // Translation Tables
-				  TMatrix *U, TMatrix *V, TMatrix *W,                                 // Restrictions
-				  TMatrix Y, TMatrix X);                                              // Data    
+                  int **coef_states, int **var_states,                                // Translation Tables
+                  TMatrix *U, TMatrix *V, TMatrix *W,                                 // Restrictions
+                  TMatrix Y, TMatrix X);                                              // Data
 int** CreateTranslationMatrix_Flat(int **states, TMarkovStateVariable *sv);
 
 void SetPriors_VAR(T_VAR_Parameters *theta, TMatrix* A0_prior, TMatrix* Aplus_prior, TVector zeta_a_prior, TVector zeta_b_prior);
-void SetPriors_VAR_SimsZha(T_VAR_Parameters *theta, TMatrix* A0_prior, TMatrix* Aplus_prior, TVector zeta_a_prior, 
-			   TVector zeta_b_prior, PRECISION lambda_prior);
+void SetPriors_VAR_SimsZha(T_VAR_Parameters *theta, TMatrix* A0_prior, TMatrix* Aplus_prior, TVector zeta_a_prior,
+               TVector zeta_b_prior, PRECISION lambda_prior);
 
 
 TStateModel* CreateConstantModel(TStateModel *model);
@@ -244,7 +244,7 @@ The model:
 
     y(t)' * A0(s(t)) = x(t)' * Aplus(s(t)) + epsilon(t)' * Inverse(Xi(s(t)))
 
-   where 
+   where
            y(t) is nvars x 1
            x(t) is npre x 1
              x(t)=[y(t-1),...,y(t-p),z(t)], where z(t) is exogenous
@@ -253,18 +253,18 @@ The model:
            Aplus(k) is npre x nvars
            Xi(k) is an nvars x nvars diagonal matrix
            s(t) is an integer with 0 <= s(t) < nstates
- 
-   Furthermore 
+
+   Furthermore
 
            A0(j,k) = U(j) * b0(j,k)
 
            Aplus(j,k) = V(j) * bplus(j,k) - W(j) * A0(j,k)
 
-   and 
+   and
 
            Zeta(j,k) = Xi(j,k)*Xi(j,k)
    where
-     
+
            A0(j,k) is the jth column of A0(k)
            Aplus(j,k) is the jth column of A0(k)
            Xi(j,k) is the jth diagonal element of Xi(k)
@@ -277,7 +277,7 @@ The model:
 
 Sims-Zha Specification:
    This specification imposes that r(j) == npre, V(j) is the identity matrix, and
-   W(j) is equal to a npre x nvars diagonal matrix with minus ones along the 
+   W(j) is equal to a npre x nvars diagonal matrix with minus ones along the
    diagonal.  Further restrictions are imposed of the form.
 
            bplus(j,k) = f(psi(j),lambda(j,k))
@@ -292,8 +292,8 @@ Sims-Zha Specification:
            f(a,b) = diag(vec(a))
 
 Random Walk Specification:
-   This specification imposes that W(j) is equal to a npre x nvars diagonal 
-   matrix with minus ones along the diagonal.  Though it is not imposed, we 
+   This specification imposes that W(j) is equal to a npre x nvars diagonal
+   matrix with minus ones along the diagonal.  Though it is not imposed, we
    usually want Aplus(j,k) to satisfy linear restrictions implicit in the
    matrix V(j).  This means that W(j) must be in the span of V(j) and hence
    (I - V(j)*V'(j))*W(j) = 0.
@@ -318,46 +318,46 @@ Prior:
 ---------------------------------------------------------------------------------
 
 TVector** A0
-  The length of A0 is nvars.  The vector A0[j][k] is the jth column of A0 when 
-  the jth coefficient state variable is equal to k.  Note that when the Markov 
-  state variable is equal to s, the jth coefficient state variable is equal to 
+  The length of A0 is nvars.  The vector A0[j][k] is the jth column of A0 when
+  the jth coefficient state variable is equal to k.  Note that when the Markov
+  state variable is equal to s, the jth coefficient state variable is equal to
   coef_states[j][s].  The number of distinct values for the jth coefficient state
   variable is equal to the dimension of A0[j].  This field is created with
   dw_CreateArray_array() and freed with dw_FreeArray().
 
-TVector** b0 
+TVector** b0
   The length of b0 is nvars.  The vector b0[j][k] consists of the free parameters
-  in the jth column of A0 when the jth coefficient state variable is equal to k.  
-  The dimension of b0[j][k] does not vary across k.  Note that when the Markov 
-  state variable is equal to s, the jth coefficient state variable is equal to 
-  coef_states[j][s].  The dimension of b0[j] is equal to the dimension of A0[j].  
-  This field is created with dw_CreateArray_array() and freed with 
+  in the jth column of A0 when the jth coefficient state variable is equal to k.
+  The dimension of b0[j][k] does not vary across k.  Note that when the Markov
+  state variable is equal to s, the jth coefficient state variable is equal to
+  coef_states[j][s].  The dimension of b0[j] is equal to the dimension of A0[j].
+  This field is created with dw_CreateArray_array() and freed with
   dw_FreeArray().
 
 TVector** Aplus
-  The length of Aplus is nvars.  The vector Aplus[j][k] is the jth column of 
-  Aplus when the jth coefficient state variable is equal to k.  Note that when 
-  the Markov state variable is equal to s, the jth coefficient state variable is 
-  equal to coef_states[j][s].  The dimension of Aplus[j] is equal to the 
-  dimension of A0[j].  This field is created with dw_CreateArray_array() and 
+  The length of Aplus is nvars.  The vector Aplus[j][k] is the jth column of
+  Aplus when the jth coefficient state variable is equal to k.  Note that when
+  the Markov state variable is equal to s, the jth coefficient state variable is
+  equal to coef_states[j][s].  The dimension of Aplus[j] is equal to the
+  dimension of A0[j].  This field is created with dw_CreateArray_array() and
   freed with dw_FreeArray().
 
 TVector** bplus
-  The length of bplus is nvars.  The vector bplus[j][k] consists of the free 
+  The length of bplus is nvars.  The vector bplus[j][k] consists of the free
   parameters in the jth column of Aplus when the jth coefficient state variable
-  is equal to k.  The dimension of bplus[j][k] does not vary across k.  Note that 
-  when the Markov state variable is equal to s, the jth coefficient state 
-  variable is equal to coef_states[j][s].  The dimension of bplus[j] is equal to 
-  the dimension of A0[j].  This field is created with dw_CreateArray_array() and 
+  is equal to k.  The dimension of bplus[j][k] does not vary across k.  Note that
+  when the Markov state variable is equal to s, the jth coefficient state
+  variable is equal to coef_states[j][s].  The dimension of bplus[j] is equal to
+  the dimension of A0[j].  This field is created with dw_CreateArray_array() and
   freed with dw_FreeArray().
 
 PRECISION** Zeta
-  The length of Zeta is nvars.  The value of Zeta[j][k] is the square of the 
-  value of the jth diagonal element of Xi when the jth variance state variable is 
-  equal to k.  Note that the the Markov state variable is equal to s, the jth 
-  variance state variable is equal to var_states[j][s].  The number of distinct 
-  values for the jth variance state variable is equal to the dimension of 
-  Zeta[j].  This field is created with dw_CreateArray_array() and freed with 
+  The length of Zeta is nvars.  The value of Zeta[j][k] is the square of the
+  value of the jth diagonal element of Xi when the jth variance state variable is
+  equal to k.  Note that the the Markov state variable is equal to s, the jth
+  variance state variable is equal to var_states[j][s].  The number of distinct
+  values for the jth variance state variable is equal to the dimension of
+  Zeta[j].  This field is created with dw_CreateArray_array() and freed with
   dw_FreeArray().
 
 TVector** delta
@@ -373,27 +373,27 @@ TVector* psi
 
 =============================== State Translation ===============================
 
-int*  n_var_states     
-  An integer array of dimension nvars.  The value of n_var_states[j] is the 
+int*  n_var_states
+  An integer array of dimension nvars.  The value of n_var_states[j] is the
   number of variance states for column j.
 
 int** var_states
-  An integer array of dimension nvars by nstates.  The value of var_states[j][k] 
-  is the value of the variance state for column j when the overall Markov state 
-  variable is equal to k.  It is used as an index into Xi[j].  It must be the 
-  case that 
+  An integer array of dimension nvars by nstates.  The value of var_states[j][k]
+  is the value of the variance state for column j when the overall Markov state
+  variable is equal to k.  It is used as an index into Xi[j].  It must be the
+  case that
 
                        0 <= var_states[j][k] < n_var_states[j].
 
-int*  n_coef_states         
-  An integer arrary of dimension nvars.  The value of n_coef_states[j] is the 
+int*  n_coef_states
+  An integer arrary of dimension nvars.  The value of n_coef_states[j] is the
   number of coefficient states for column j.
 
 int** coef_states
-  An integer array of dimension nvar by nstates.  The value of coef_states[j][k] 
-  is the value of the coefficient state for column j when the overall Markov 
-  state variable is equal to k.  It is used as an index into A0[j], b0[j], 
-  Aplus[j] or bplus[j].  It must be the case that 
+  An integer array of dimension nvar by nstates.  The value of coef_states[j][k]
+  is the value of the coefficient state for column j when the overall Markov
+  state variable is equal to k.  It is used as an index into A0[j], b0[j],
+  Aplus[j] or bplus[j].  It must be the case that
 
                       0 <= coef_states[j][k] < n_coef_states[j].
 
@@ -401,29 +401,29 @@ int n_A0_states
   The number of distinct values for the matrix A0.
 
 int* A0_states
-  An integer array of dimension nstates.  The value of A0_states[k] is the value 
+  An integer array of dimension nstates.  The value of A0_states[k] is the value
   of the state variable controlling A0 when the value of the overall Markov state
-  variable is k.  It is used as an index into the vector log_abs_det_A0. It must 
-  be the case that 
+  variable is k.  It is used as an index into the vector log_abs_det_A0. It must
+  be the case that
 
-                          0 <= A0_states[k] < n_A0_states. 
+                          0 <= A0_states[k] < n_A0_states.
 
 int** A0_column_states
-  An integer array of dimension nvars by n_A0_states.  The value of 
-  A0_column_states[j][k] is the value of the coefficient state for column j when 
-  value of the state variable controlling the matrix A0 is k.  It is used as an 
-  index into A0[j].  It must be the case that 
+  An integer array of dimension nvars by n_A0_states.  The value of
+  A0_column_states[j][k] is the value of the coefficient state for column j when
+  value of the state variable controlling the matrix A0 is k.  It is used as an
+  index into A0[j].  It must be the case that
 
                    0 <= A0_column_states[j][k] < n_coef_states[j].
 
 
 ================================= Normalization =================================
-For 0 <= k < n_A0_states, the contemporaneous coefficient matrix A[k] is formed.  
-For 0 <= j < nvars and 0 <= k < n_A0_states, the number 
+For 0 <= k < n_A0_states, the contemporaneous coefficient matrix A[k] is formed.
+For 0 <= j < nvars and 0 <= k < n_A0_states, the number
 
                 e[j]*Inverse(A[k])*Target[j][A0_column_states[j][k]]
 
-is computed.  If this number is negative, then the sign of 
+is computed.  If this number is negative, then the sign of
 
                               A0[j][A0_column_states[j][k]]
 

@@ -25,11 +25,11 @@ extern "C"
 #define sgesvd    sgesvd_
 #define sgetrf    sgetrf_
 #define sorgqr    sorgqr_
-#define sgelqf    sgelqf_   
-#define sorglq    sorglq_  
-#define sgges     sgges_ 
-#define stgsen    stgsen_    
-#define stgexc    stgexc_    
+#define sgelqf    sgelqf_
+#define sorglq    sorglq_
+#define sgges     sgges_
+#define stgsen    stgsen_
+#define stgexc    stgexc_
 
 #define dscal     dscal_     // Blas scalar times vector
 #define daxpy     daxpy_     // Blas vector plus scalar times vector

@@ -1,6 +1,6 @@
 /********************************************************************************
  VECTORS AND MATRICES
- A TVector is an array of floating points together with the dimension of the 
+ A TVector is an array of floating points together with the dimension of the
  vector.  A TVector implementation can contain additional information.  An
  instance of TVector must be created with calls to CreateVector() and freed with
  calls to FreeVector(). The following macros must be defined.
@@ -16,9 +16,9 @@
  pElementV(x)  - x      : TVector
                  Returns: pointer to 0th element of the array storing the vector.
 
- A TMatrix is an array of floating points together with the number of rows and 
+ A TMatrix is an array of floating points together with the number of rows and
  columns in the matrix.  If the storage type (row or column major) is variable,
- then it also must be stored.  A TMatrix implementation can contain additional 
+ then it also must be stored.  A TMatrix implementation can contain additional
  information. A instance of TMatrix must be created with CreateMatrix() and freed
  with FreeMatrix().  The following macros must be defined.
 
@@ -31,14 +31,14 @@
  ElementM(x,i,j) - x      : TVector
                    i      : int
                    j      : int
-                   Returns: L-value PRECISION containing the element in the ith 
+                   Returns: L-value PRECISION containing the element in the ith
                             row and jth column.  The indexes i and j are zero
                             based.
 
  pElementM(x)    - x      : TMatrix
-                   Returns: pointer to 0th element of the array storing the 
+                   Returns: pointer to 0th element of the array storing the
                             matrix.
- 
+
  MajorForm(x)    - x      : TMatrix
                    Returns: 0 if data stored in row major format and 1 if data
                             stored in column major format.  The data is in row
@@ -46,55 +46,55 @@
 
                                ElementM(x,i,j) = pElementM(x)[i*ColM(x)+j]
 
-                            and is in column major format if 
+                            and is in column major format if
 
                                ElementM(x,i,j) = pElementM(x)[i+j*RowM(x)]
 
  SetMajorForm(x,i) - Sets the MajorForm of the TMatrix x to the int i.  The value
                      of i must be either 0 or 1.  If the implementation allows
-                     for only one type, then this can be defined to be blank.  
+                     for only one type, then this can be defined to be blank.
                      For this reason, it is important that the user be careful in
-                     using this macro since it may not have an effect in all 
-                     implementations.  It is always permissible to assign the 
-                     value of an existing TMatrix, as in 
+                     using this macro since it may not have an effect in all
+                     implementations.  It is always permissible to assign the
+                     value of an existing TMatrix, as in
 
                                    SetMajorForm(x,MajorForm(y));
 
                      but in all other cases, it is important to check, via a call
                      to MajorForm(), that the MajorForm has actually been set.
-  
 
- The precision (float or double) is controlled by the define PRECISION 
+
+ The precision (float or double) is controlled by the define PRECISION
  contained in the file prcsn.h.
 
 
  PERMUTATION MATRICES
- For 0 <= i,j <= m-1, let (i,j) denote the transposition which interchanges i 
+ For 0 <= i,j <= m-1, let (i,j) denote the transposition which interchanges i
  and j leaves the other elements fixed.  Let P(i,j) denote the m x m matrix
  obtained from the m x m identitiy matrix by interchanging the ith and jth rows,
- which for the identity matrix is equivalent to interchanging the ith and jth 
- columns.  If p is a permutation of {0,...,m-1} and is equal to the product of 
+ which for the identity matrix is equivalent to interchanging the ith and jth
+ columns.  If p is a permutation of {0,...,m-1} and is equal to the product of
  transpositions
 
                         (i1,j1)*(i2,j2)*...*(iq,jq)
- 
+
  then the permutation matrix associated with the permutation p is
 
                      P = P(i1,j1)*P(i2,j2)*...*P(iq,jq)
 
- Note that our convention is that 
-  
+ Note that our convention is that
+
                      (i1,j1)*(i2,j2)(k) = (i1,j1)((i2,j2)(k))
 
- Thus (1,2)(2,3) is the permutation that sends 1 to 2, 2 to 3, and 3 to 1.  Note 
+ Thus (1,2)(2,3) is the permutation that sends 1 to 2, 2 to 3, and 3 to 1.  Note
  that multiplication on the left by a permutation matrix P associated with the
  permutation p permutes the rows by p.  Multiplication on the right permutes the
  columns by the inverse of p.
 
- A TPermutation is an integer array together with the length of the array and 
- the number of array elements actually used.  A TPermutation implementation can 
+ A TPermutation is an integer array together with the length of the array and
+ the number of array elements actually used.  A TPermutation implementation can
  contain additional information.  A instance of TPermutation must be created
- with CreatePermutation() and freed with FreePermutation().  The following 
+ with CreatePermutation() and freed with FreePermutation().  The following
  macros must be defined.
 
  DimP(x)       - x      : TPermutation
@@ -108,16 +108,16 @@
  ElementP(x,i) - x      : TPermutation
                  i      : int
                  Returns: L-value int containing the ith element.  The index i
-                          is zero-based.  It must be case that 
+                          is zero-based.  It must be case that
                                    i <= ElementP(x,i) <= DimP(x).
-                                    
+
  pElementP(x)  - x      : TPermutation
-                 Returns: pointer to 0th element of the array storing the 
+                 Returns: pointer to 0th element of the array storing the
                           permutation.
 
 
  The representation as a product of transpositions used by TPermutation
-     
+
            (0,ElementP(x,0))*...*(UseP(x)-1,ElementP(x,UseP(x)-1)
 
 *******************************************************************************/
@@ -165,18 +165,18 @@
 
     8) Many routines will have the form Y = fnct(X, Z1, Z2, ...), where X and Y
        are pointers to the same type.  The characteristics (usually size) of X
-       depends on the Z's.  For this reason, X is allowed to be a null pointer. 
+       depends on the Z's.  For this reason, X is allowed to be a null pointer.
        This allows the routine to create and return a pointer with the proper
        characteristics.  On the other hand, errors occur in the routine, then
        a null pointer is returned.  There is a potential for memory leaks.  The
        following syntax must be avoided: X = fnct(X, Z1, Z2, ... ).  If X is null
-       or no errors occur, then no harm will result, but if X is not null and an 
-       error occurs then a memory leak will exist.  This type of construct must 
+       or no errors occur, then no harm will result, but if X is not null and an
+       error occurs then a memory leak will exist.  This type of construct must
        be avoided. Similarly, the following construct must be avoided:
-                    
+
                              X = fnct2(fnct1(...), ...)
 
-       If fnct1() returns a non-null pointer but fnct2 exists because of an 
+       If fnct1() returns a non-null pointer but fnct2 exists because of an
        error, then a memory leak will exist.  The proper construct in this case
        is
                              fnct1(X = fnct1(...), ...)
@@ -261,7 +261,7 @@ typedef TPermutationStructure* TPermutation;
 #define ElementV(y,i)    ((y)->x[(i)])
 
 #define RowM(y)          ((y)->row)
-#define ColM(y)          ((y)->col)  
+#define ColM(y)          ((y)->col)
 #define pElementM(y)     ((y)->x)
 #if defined STANDARD_COLUMN_MAJOR
 #define ElementM(y,i,j)  ((y)->x[(i)+(j)*((y)->row)])
@@ -277,7 +277,7 @@ typedef TPermutationStructure* TPermutation;
 // Major form macros
 #define SetMajorForm(x,i)
 #if defined STANDARD_COLUMN_MAJOR
-#define MajorForm(x)       COLUMN_MAJOR  
+#define MajorForm(x)       COLUMN_MAJOR
 #else
 #define MajorForm(x)       ROW_MAJOR
 #endif
@@ -318,7 +318,7 @@ typedef TPermutationStructure* TPermutation;
 #define ElementV(y,i)    ((y)->x[(i)])
 
 #define RowM(y)          ((y)->row)
-#define ColM(y)          ((y)->col)  
+#define ColM(y)          ((y)->col)
 #define pElementM(y)     ((y)->x)
 #if defined STRUCTURED_COLUMN_MAJOR
 #define ElementM(y,i,j)  ((y)->x[(i)+(j)*((y)->row)])
@@ -347,8 +347,8 @@ typedef TPermutationStructure* TPermutation;
 
 #endif
 /*----------------------------------------------------------------------------*/
-#if defined LEGACY_ROW_MAJOR 
-// Data types 
+#if defined LEGACY_ROW_MAJOR
+// Data types
 typedef PRECISION  *TVector;
 typedef PRECISION **TMatrix;
 typedef int*        TPermutation;
@@ -363,7 +363,7 @@ typedef int*        TPermutation;
 #define pElementM(y)     ((y)[0])
 #define ElementM(y,i,j)  ((y)[(i)][(j)])
 
-#define UseP(y)          (((int*)(y))[-1])  
+#define UseP(y)          (((int*)(y))[-1])
 #define DimP(y)          (((int*)(y))[-2])
 #define pElementP(y)     (y)
 #define ElementP(y,i)    ((y)[(i)])
@@ -391,7 +391,7 @@ typedef int*        TPermutation;
 //#include "tz2dw.h"
 
 
-// Data types 
+// Data types
 typedef TSdvector* TVector;
 typedef TSdmatrix* TMatrix;
 
@@ -409,7 +409,7 @@ typedef  TPermutationStructure* TPermutation;
 #define ElementV(y,i)    ((y)->v[(i)])
 
 #define RowM(y)          ((y)->nrows)
-#define ColM(y)          ((y)->ncols)  
+#define ColM(y)          ((y)->ncols)
 #define pElementM(y)     ((y)->M)
 #define ElementM(y,i,j)  ((y)->M[(i)+(j)*((y)->nrows)])
 
@@ -420,7 +420,7 @@ typedef  TPermutationStructure* TPermutation;
 
 // Major form macros
 #define SetMajorForm(x,i)
-#define MajorForm(x)       COLUMN_MAJOR  
+#define MajorForm(x)       COLUMN_MAJOR
 
 #endif
 /*----------------------------------------------------------------------------*/
@@ -505,7 +505,7 @@ int SVD(TMatrix U, TVector d, TMatrix V, TMatrix A);
 int QR(TMatrix Q, TMatrix R, TMatrix X);
 int LU(TPermutation P, TMatrix X, TMatrix A);
 
-int QZ_Real(TMatrix S, TMatrix T, TMatrix Q, TMatrix Z, TMatrix A, TMatrix B, TVector alpha_r, TVector alpha_i, TVector beta);  
+int QZ_Real(TMatrix S, TMatrix T, TMatrix Q, TMatrix Z, TMatrix A, TMatrix B, TVector alpha_r, TVector alpha_i, TVector beta);
 int ReorderQZ_Real(TMatrix SS, TMatrix TT, TMatrix QQ, TMatrix ZZ, TMatrix S, TMatrix T, TMatrix Q, TMatrix Z, int *select, TVector alpha_r, TVector alpha_i, TVector beta);
 
 TMatrix CholeskyUT(TMatrix T, TMatrix X);

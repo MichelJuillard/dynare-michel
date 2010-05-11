@@ -101,14 +101,14 @@
 /* Added by DW 9/1/08                                                          */
 /*******************************************************************************/
 #if defined(USE_MKL_LIBRARY)
-   #include "mkl.h"  
+   #include "mkl.h"
 #else
    #if defined (USE_GSL_LIBRARY)
       #include "gsl_cblas.h"
-   #endif       
-   #include "blas_lapack.h"  
+   #endif
+   #include "blas_lapack.h"
    #undef  SWITCHTOINTELCMATH
-//   #undef  INTELCMATHLIBRARY 
+//   #undef  INTELCMATHLIBRARY
 #endif
 
 #if defined(USE_GSL_LIBRARY)
@@ -235,10 +235,10 @@
       int n;
       int flag;    //flag: no legal values are assigned if 0 and legal values are assigned if 1.
    } TSivector;
-	typedef struct {
+    typedef struct {
       int *M;  //M: matrix.
       int nrows, ncols;
-		int flag;  //flag: Refers to M_GE, M_SU, M_SL, M_UT, and M_LT in tzmatlab.h.
+        int flag;  //flag: Refers to M_GE, M_SU, M_SL, M_UT, and M_LT in tzmatlab.h.
    } TSimatrix;
    typedef struct {
       TSivector **C;    //ncells-by-1 cells (C) and a ponter to vector in each cell.
@@ -248,8 +248,8 @@
       TSimatrix **C;    //ncells-by-1 cells (C) and a ponter to vector in each cell.
       int ncells;  //Number of pointers (cells) to pointer.
    } TSicell;
-	//=== Real types.
-	typedef struct {
+    //=== Real types.
+    typedef struct {
       double *v;  //v: vector.
       int n;
       int flag;   //flag: no legal values are assigned if 0 and legal values are assigned if 1.
@@ -309,8 +309,8 @@
    TSivector *DestroyVector_int(TSivector *x_iv);
    TSimatrix *CreateMatrix_int(int nrows, int ncols);
    TSimatrix *DestroyMatrix_int(TSimatrix *x_im);
-	TSicellvec *CreateCellvec_int(TSivector *n_iv);
-	TSicellvec *DestroyCellvec_int(TSicellvec *x_icv);
+    TSicellvec *CreateCellvec_int(TSivector *n_iv);
+    TSicellvec *DestroyCellvec_int(TSicellvec *x_icv);
    TSicell *CreateCell_int(TSivector *row_iv, TSivector *col_iv);
    TSicell *DestroyCell_int(TSicell *x_ic);
 
@@ -340,7 +340,7 @@
    TSimatrix *CreateConstantMatrix_int(const int nrows, const int ncols, const int _n);
    TSicellvec *CreateConstantCellvec_int(TSivector *n_iv, const int _n);
    TSicell *CreateConstantCell_int(TSivector *row_iv, TSivector *col_iv, const int _n);
-	TSdvector *CreateConstantVector_lf(const int _n, const double _alpha);
+    TSdvector *CreateConstantVector_lf(const int _n, const double _alpha);
    TSdmatrix *CreateConstantMatrix_lf(const int nrows, const int ncols, const double _alpha);
    TSdcellvec *CreateConstantCellvec_lf(TSivector *n_iv, const double _alpha);
    TSdcell *CreateConstantCell_lf(TSivector *row_iv, TSivector *col_iv, const double _alpha);

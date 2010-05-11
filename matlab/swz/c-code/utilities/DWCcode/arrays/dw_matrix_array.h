@@ -15,7 +15,7 @@ void* dw_InitializeArray_matrix(void* X, PRECISION y);
 
 #if (PRECISION_SIZE == 8)
   #define dw_CreateArray_scalar(dim)     (double*)dw_CreateArray(&dw_DoubleSpecs,dim)
-  #define dw_CreateMultidimensionalArray_scalar(depth,dim) dw_CreateMultidimensionalArray(&dw_DoubleSpecs,depth,dim) 
+  #define dw_CreateMultidimensionalArray_scalar(depth,dim) dw_CreateMultidimensionalArray(&dw_DoubleSpecs,depth,dim)
   #define dw_CreateMultidimensionalArrayList_scalar  dw_CreateMultidimensionalArrayList_double
   #define dw_CreateRectangularArray_scalar(row,col) (double**)dw_CreateMultidimensionalArrayList_double(2,row,col)
   #define dw_InitializeArray_scalar(a,x)  dw_InitializeArray_double(a,x)

@@ -24,7 +24,7 @@
 #define FIND_POSTERIOR_MODE  1
 #define FIND_LIKELIHOOD_MODE 2
 
-typedef struct 
+typedef struct
 {
   int type;
 
@@ -53,7 +53,7 @@ void FindMode_VAR_csminwel(TStateModel *model, TEstimateInfo *estimate)
   FILE *f_out;
   char *header, *fmt="Iteration %d: ";
 
-  // csminwel arguments 
+  // csminwel arguments
   int itct, fcount, retcodeh, nit;
   double *x, fh, crit;
   TMatrix H;
@@ -97,64 +97,64 @@ void FindMode_VAR_csminwel(TStateModel *model, TEstimateInfo *estimate)
   else
     objective=likelihood;
 
-  for (total_iteration=1, crit=estimate->criterion_start, nit=estimate->max_iterations_start; 
-       crit >= estimate->criterion_end; 
+  for (total_iteration=1, crit=estimate->criterion_start, nit=estimate->max_iterations_start;
+       crit >= estimate->criterion_end;
        crit*=estimate->criterion_increment, nit*=(int)estimate->max_iterations_increment)
     {
       for (iteration=1; iteration <= estimate->max_block_iterations; total_iteration++, iteration++)
-	{
-	  objective_last=objective;
+    {
+      objective_last=objective;
 
-	  fprintf(f_out,"\n\n//=== Iteration %d ===//\n",total_iteration);
-	  fprintf(f_out,"Criterion/Max Iteration:  %le  %d\n",crit,nit);
-	  fprintf(f_out,"Previous likelihood value:  %22.14le\n",likelihood);
-	  fprintf(f_out,"Previous prior value:  %22.14le\n",prior);
-	  fprintf(f_out,"Previous posterior value:  %22.14le\n\n",prior+likelihood);
-	  fflush(f_out);
+      fprintf(f_out,"\n\n//=== Iteration %d ===//\n",total_iteration);
+      fprintf(f_out,"Criterion/Max Iteration:  %le  %d\n",crit,nit);
+      fprintf(f_out,"Previous likelihood value:  %22.14le\n",likelihood);
+      fprintf(f_out,"Previous prior value:  %22.14le\n",prior);
+      fprintf(f_out,"Previous posterior value:  %22.14le\n\n",prior+likelihood);
+      fflush(f_out);
 
-	  for (i=0; i < dw_DimA(block); i++)
-	    if (block[i][0] > 0)
-	      {
-		g=CreateVector(block[i][0]);
-		H=IdentityMatrix((TMatrix)NULL,block[i][0]);
-		ProductMS(H,H,INI_H_CSMINWEL);
+      for (i=0; i < dw_DimA(block); i++)
+        if (block[i][0] > 0)
+          {
+        g=CreateVector(block[i][0]);
+        H=IdentityMatrix((TMatrix)NULL,block[i][0]);
+        ProductMS(H,H,INI_H_CSMINWEL);
 
-		SetupObjectiveFunction(model,x+block[i][1],x+pos_Q,x+pos_VAR);
+        SetupObjectiveFunction(model,x+block[i][1],x+pos_Q,x+pos_VAR);
 
-		if (estimate->type == FIND_POSTERIOR_MODE)
-		  csminwel(PosteriorObjectiveFunction_csminwel,x+block[i][1],block[i][0],pElementM(H),pElementV(g),NULL,
-			   &fh,crit,&itct,nit,&fcount,&retcodeh,NULL,NULL);
-		else
-		  csminwel(MLEObjectiveFunction_csminwel,x+block[i][1],block[i][0],pElementM(H),pElementV(g),NULL,
-			   &fh,crit,&itct,nit,&fcount,&retcodeh,NULL,NULL);
+        if (estimate->type == FIND_POSTERIOR_MODE)
+          csminwel(PosteriorObjectiveFunction_csminwel,x+block[i][1],block[i][0],pElementM(H),pElementV(g),NULL,
+               &fh,crit,&itct,nit,&fcount,&retcodeh,NULL,NULL);
+        else
+          csminwel(MLEObjectiveFunction_csminwel,x+block[i][1],block[i][0],pElementM(H),pElementV(g),NULL,
+               &fh,crit,&itct,nit,&fcount,&retcodeh,NULL,NULL);
 
-		ConvertFreeParametersToQ(model,x+pos_Q);
-		ConvertFreeParametersToTheta(model,x+pos_VAR);
+        ConvertFreeParametersToQ(model,x+pos_Q);
+        ConvertFreeParametersToTheta(model,x+pos_VAR);
 
-		FreeMatrix(H);
-		FreeVector(g);
+        FreeMatrix(H);
+        FreeVector(g);
 
-		fprintf(f_out,"Likelihood value after pass %d:  %22.14le\n",i,likelihood=LogLikelihood_StatesIntegratedOut(model));
-		fprintf(f_out,"Prior value after pass %d:  %22.14le\n",i,prior=LogPrior(model));
-		fprintf(f_out,"Posterior value after pass %d:  %22.14le\n",i,likelihood+prior);
-		fprintf(f_out,"Csminwel return code: %d\n\n",retcodeh);
-		fflush(f_out);
-	      }
+        fprintf(f_out,"Likelihood value after pass %d:  %22.14le\n",i,likelihood=LogLikelihood_StatesIntegratedOut(model));
+        fprintf(f_out,"Prior value after pass %d:  %22.14le\n",i,prior=LogPrior(model));
+        fprintf(f_out,"Posterior value after pass %d:  %22.14le\n",i,likelihood+prior);
+        fprintf(f_out,"Csminwel return code: %d\n\n",retcodeh);
+        fflush(f_out);
+          }
 
-	  for (j=10, i=1; total_iteration >= j; j*=10, i++);
-	  sprintf(header=(char*)malloc(strlen(fmt) + i - 1),fmt,total_iteration);
-	  WriteTransitionMatrices(f_out,(char*)NULL,header,model);
-	  Write_VAR_Parameters(f_out,(char*)NULL,header,model);
-	  free(header);
-	  fflush(f_out);
+      for (j=10, i=1; total_iteration >= j; j*=10, i++);
+      sprintf(header=(char*)malloc(strlen(fmt) + i - 1),fmt,total_iteration);
+      WriteTransitionMatrices(f_out,(char*)NULL,header,model);
+      Write_VAR_Parameters(f_out,(char*)NULL,header,model);
+      free(header);
+      fflush(f_out);
 
-	  if (estimate->type == FIND_POSTERIOR_MODE)
-	    objective=likelihood+prior;
-	  else
-	    objective=likelihood;
+      if (estimate->type == FIND_POSTERIOR_MODE)
+        objective=likelihood+prior;
+      else
+        objective=likelihood;
 
-	  if (fabs(objective - objective_last) <= crit) break;
-	}
+      if (fabs(objective - objective_last) <= crit) break;
+    }
 
       objective_last=objective;
 
@@ -172,11 +172,11 @@ void FindMode_VAR_csminwel(TStateModel *model, TEstimateInfo *estimate)
       SetupObjectiveFunction(model,x,x+pos_Q,x+pos_VAR);
 
       if (estimate->type == FIND_POSTERIOR_MODE)
-	csminwel(PosteriorObjectiveFunction_csminwel,x,pos_Q+pos_VAR,pElementM(H),pElementV(g),NULL,
-		      &fh,crit,&itct,nit,&fcount,&retcodeh,NULL,NULL);
+    csminwel(PosteriorObjectiveFunction_csminwel,x,pos_Q+pos_VAR,pElementM(H),pElementV(g),NULL,
+              &fh,crit,&itct,nit,&fcount,&retcodeh,NULL,NULL);
       else
-	csminwel(MLEObjectiveFunction_csminwel,x,pos_Q+pos_VAR,pElementM(H),pElementV(g),NULL,
-		      &fh,crit,&itct,nit,&fcount,&retcodeh,NULL,NULL);
+    csminwel(MLEObjectiveFunction_csminwel,x,pos_Q+pos_VAR,pElementM(H),pElementV(g),NULL,
+              &fh,crit,&itct,nit,&fcount,&retcodeh,NULL,NULL);
 
       ConvertFreeParametersToQ(model,x+pos_Q);
       ConvertFreeParametersToTheta(model,x+pos_VAR);
@@ -198,9 +198,9 @@ void FindMode_VAR_csminwel(TStateModel *model, TEstimateInfo *estimate)
       fflush(f_out);
 
       if (estimate->type == FIND_POSTERIOR_MODE)
-	objective=likelihood+prior;
+    objective=likelihood+prior;
       else
-	objective=likelihood;
+    objective=likelihood;
     }
 
   //=== Free memory ===
@@ -212,7 +212,7 @@ void FindMode_VAR_csminwel(TStateModel *model, TEstimateInfo *estimate)
 }
 
 /*
-   filename -  
+   filename -
 *
 char** ReadInputFile(char *filename)
 {
@@ -223,18 +223,18 @@ char** ReadInputFile(char *filename)
   if (X)
     {
       for (n=i=0; i < dw_DimA(X); i++)
-	if (X[i]) n+=dw_DimA(X[i]);
+    if (X[i]) n+=dw_DimA(X[i]);
       if (n > 0)
-	{
-	  args=dw_CreateArray_string(n);
-	  for (n=i=0; i < dw_DimA(X); i++)
-	    if (X[i])
-	      for (j=0; j < dw_DimA(X[i]); j++)
-		{
-		  args[n]=X[i][j];
-		  X[i][j]=(char*)NULL;
-		}
-	}
+    {
+      args=dw_CreateArray_string(n);
+      for (n=i=0; i < dw_DimA(X); i++)
+        if (X[i])
+          for (j=0; j < dw_DimA(X[i]); j++)
+        {
+          args[n]=X[i][j];
+          X[i][j]=(char*)NULL;
+        }
+    }
       dw_FreeArray(X);
     }
   return args;
@@ -254,8 +254,8 @@ int LoadParameters(FILE *f, char *filename, TStateModel *model)
   for (i=0; i < 5; i++)
     if (ReadTransitionMatrices(f_in,(char*)NULL,header[i],model) && Read_VAR_Parameters(f_in,(char*)NULL,header[i],model))
       {
-	rtrn=1;
-	break;
+    rtrn=1;
+    break;
       }
 
   dw_SetTerminalErrors(terminal_errors);
@@ -278,29 +278,29 @@ int GetLastIteration(FILE *f_in, TStateModel *model, TEstimateInfo *estimate)
       sprintf(id=(char*)malloc(strlen(fmt) + i - 1),fmt,k+1);
 
       if (!dw_SetFilePosition(f_in,id))
-	{
-	  free(id);
-	  terminal_errors=dw_SetTerminalErrors(ALL_ERRORS & (~USER_ERR));
+    {
+      free(id);
+      terminal_errors=dw_SetTerminalErrors(ALL_ERRORS & (~USER_ERR));
 
-	  fmt="Iteration %d: ";
+      fmt="Iteration %d: ";
           while (k > 0)
-	    {
-	      for (j=10, i=1; k >= j; j*=10, i++);
-	      sprintf(header=(char*)malloc(strlen(fmt) + i - 1),fmt,k);
-	      if (ReadTransitionMatrices(f_in,(char*)NULL,header,model) && Read_VAR_Parameters(f_in,(char*)NULL,header,model))
-		{
-		  printf("Using intermediate output - %s\n",header);
-		  estimate->initialization_header=header;
-		  dw_SetTerminalErrors(terminal_errors);
-		  return 1;
-		}
-	      free(header);
-	      k--;
-	    }
+        {
+          for (j=10, i=1; k >= j; j*=10, i++);
+          sprintf(header=(char*)malloc(strlen(fmt) + i - 1),fmt,k);
+          if (ReadTransitionMatrices(f_in,(char*)NULL,header,model) && Read_VAR_Parameters(f_in,(char*)NULL,header,model))
+        {
+          printf("Using intermediate output - %s\n",header);
+          estimate->initialization_header=header;
+          dw_SetTerminalErrors(terminal_errors);
+          return 1;
+        }
+          free(header);
+          k--;
+        }
 
-	  dw_SetTerminalErrors(terminal_errors);
-	  return 0;
-	}
+      dw_SetTerminalErrors(terminal_errors);
+      return 0;
+    }
 
       free(id);
       k++;
@@ -311,7 +311,7 @@ int GetLastIteration(FILE *f_in, TStateModel *model, TEstimateInfo *estimate)
    Attempt to set up model from command line.  Command line options are the following
 
    -di <directory>
-      If this argument exists, then all input files are in specified directory.  
+      If this argument exists, then all input files are in specified directory.
 
    -ft <filename tag>
       If this argument exists, then the following is attempted:
@@ -324,27 +324,27 @@ int GetLastIteration(FILE *f_in, TStateModel *model, TEstimateInfo *estimate)
 
          (not yet implemented)
          specification file name:  init_<tag>.dat
-         init/restart file name:   est_csminwel_<tag>.dat  
+         init/restart file name:   est_csminwel_<tag>.dat
 
          specification file name:  init_<tag>.dat
          init/restart file name:   init_<tag>.dat with header="Initial: "
-    
+
       Failure to load both the specification and restart/init files causes the routine to exit.
-   
+
    -fs <filename>
       If this argument exists, then the specification file name is <filename>.  The argument -ft
       takes precedence over -fs.
 
    -fr <filename>
-      If this argument exists, then the init/restart file name is <filename>.  Must be used in 
+      If this argument exists, then the init/restart file name is <filename>.  Must be used in
       conjunction with the argument -fs.  The default value is the filename associated with the
       argument -fs.
 
    -rh <header>
-      If this argument exists, then the header for the init/restart file is <header>.  Must be 
-      used in conjuction with the arguments -fr or -fs.  The default value is "". 
+      If this argument exists, then the header for the init/restart file is <header>.  Must be
+      used in conjuction with the arguments -fr or -fs.  The default value is "".
 
-   If no command line options are given, then attemps to use a default input file 
+   If no command line options are given, then attemps to use a default input file
    with the name "default.ini".  Returns one valid pointer to a TStateModel upon
    success and null upon failure.
 *
@@ -369,61 +369,61 @@ TStateModel* GetModelFromCommandLine(int nargs, char **args, TEstimateInfo *esti
       fmt="%sest_final_%s.dat";
       sprintf(filename=(char*)malloc(strlen(d1) + strlen(fmt) + strlen(tag) - 3),fmt,d1,tag);
       if (f_in=fopen(filename,"rt"))
-	{
-	  model=Read_VAR_Specification(f_in,(char*)NULL);
-	  header=dw_ParseString_String(nargs,args,"rh","Posterior mode: ");
-	  ReadTransitionMatrices(f_in,(char*)NULL,header,model);
-	  Read_VAR_Parameters(f_in,(char*)NULL,header,model);
-	  fclose(f_in);
-	  printf("Using final output\n");
-	  estimate->specification_filename=filename;
-	  estimate->initialization_filename=filename;
-	  estimate->initialization_header=header;	  
-	  if (d2) free(d2);
-	  return model;
-	}
+    {
+      model=Read_VAR_Specification(f_in,(char*)NULL);
+      header=dw_ParseString_String(nargs,args,"rh","Posterior mode: ");
+      ReadTransitionMatrices(f_in,(char*)NULL,header,model);
+      Read_VAR_Parameters(f_in,(char*)NULL,header,model);
+      fclose(f_in);
+      printf("Using final output\n");
+      estimate->specification_filename=filename;
+      estimate->initialization_filename=filename;
+      estimate->initialization_header=header;
+      if (d2) free(d2);
+      return model;
+    }
       free(filename);
 
       fmt="%sinit_%s.dat";
       sprintf(filename=(char*)malloc(strlen(d1) + strlen(fmt) + strlen(tag) - 3),fmt,d1,tag);
       if (f_in=fopen(filename,"rt"))
-	{
-	  model=Read_VAR_Specification(f_in,(char*)NULL);
-	  estimate->specification_filename=filename;
-	  fclose(f_in);
+    {
+      model=Read_VAR_Specification(f_in,(char*)NULL);
+      estimate->specification_filename=filename;
+      fclose(f_in);
 
-	  fmt="%sest_intermediate_%s.dat";
-	  sprintf(filename=(char*)malloc(strlen(d1) + strlen(fmt) + strlen(tag) - 3),fmt,d1,tag);
+      fmt="%sest_intermediate_%s.dat";
+      sprintf(filename=(char*)malloc(strlen(d1) + strlen(fmt) + strlen(tag) - 3),fmt,d1,tag);
           if (f_in=fopen(filename,"rt"))
-	    {
+        {
               if (GetLastIteration(f_in,model,estimate))
-		{		  
-		  fclose(f_in);
-		  estimate->initialization_filename=filename;
-		  if (d2) free(d2);
-		  return model;
-		}
-	      fclose(f_in);
-	    }
-	  free(filename);
+        {
+          fclose(f_in);
+          estimate->initialization_filename=filename;
+          if (d2) free(d2);
+          return model;
+        }
+          fclose(f_in);
+        }
+      free(filename);
 
-	  fmt="%sinit_%s.dat";
-	  sprintf(filename=(char*)malloc(strlen(d1) + strlen(fmt) + strlen(tag) - 3),fmt,d1,tag);
-	  if (f_in=fopen(filename,"rt"))
-	    {
-	      header=dw_ParseString_String(nargs,args,"rh","Initial: ");
-	      ReadTransitionMatrices(f_in,(char*)NULL,header,model);
-	      Read_VAR_Parameters(f_in,(char*)NULL,header,model);
-	      fclose(f_in);
-	      printf("Using initial data\n");
-	      estimate->initialization_filename=filename;
-	      estimate->initialization_header=header;
-	      if (d2) free(d2);	    
-	      return model;
-	    }
+      fmt="%sinit_%s.dat";
+      sprintf(filename=(char*)malloc(strlen(d1) + strlen(fmt) + strlen(tag) - 3),fmt,d1,tag);
+      if (f_in=fopen(filename,"rt"))
+        {
+          header=dw_ParseString_String(nargs,args,"rh","Initial: ");
+          ReadTransitionMatrices(f_in,(char*)NULL,header,model);
+          Read_VAR_Parameters(f_in,(char*)NULL,header,model);
+          fclose(f_in);
+          printf("Using initial data\n");
+          estimate->initialization_filename=filename;
+          estimate->initialization_header=header;
+          if (d2) free(d2);
+          return model;
+        }
 
-	  FreeStateModel(model);
-	}
+      FreeStateModel(model);
+    }
       free(filename);
 
       //if (d2) free(d2);
@@ -438,7 +438,7 @@ TStateModel* GetModelFromCommandLine(int nargs, char **args, TEstimateInfo *esti
       estimate->specification_filename=filename;
 
       if (!(tag=dw_ParseString_String(nargs,args,"fr",(char*)NULL)))
-	tag=dw_ParseString_String(nargs,args,"fs",(char*)NULL);
+    tag=dw_ParseString_String(nargs,args,"fs",(char*)NULL);
       sprintf(filename=(char*)malloc(strlen(d1) + strlen(tag) + 1),"%s%s",d1,tag);
       header=dw_ParseString_String(nargs,args,"rh","");
       ReadTransitionMatrices((FILE*)NULL,filename,header,model);
@@ -470,7 +470,7 @@ TStateModel* GetModelFromCommandLine(int nargs, char **args, TEstimateInfo *esti
          est_final_<tag>.dat
 
       The default value is the filename tag associated with the argument -ft if it exists.  Otherwise
-      it is "default". 
+      it is "default".
 
    //--- this is yet to be implemented
    -fa <filename>
@@ -483,7 +483,7 @@ TStateModel* GetModelFromCommandLine(int nargs, char **args, TEstimateInfo *esti
       Find the posterior mode
 
    -cb <floating point number> (default = 1.0e-3)
-      Beginning csminwel exit criterion 
+      Beginning csminwel exit criterion
 
    -ce <floating point number> (default = 1.03-6)
       Ending csminwel exit criterion
@@ -497,7 +497,7 @@ TStateModel* GetModelFromCommandLine(int nargs, char **args, TEstimateInfo *esti
    -ii <floating point number> (default = 2)
       csminwel maximum interation increment multiplier
 
-   If no command line options are given, then attemps to use a default input file 
+   If no command line options are given, then attemps to use a default input file
    with the name "default.ini".  Returns one valid pointer to a TStateModel upon
    success and null upon failure.
 *
@@ -549,12 +549,12 @@ TEstimateInfo* GetEstimateInfoFromCommandLine(int nargs, char **args) //, TState
 
 /*
    Creates TStateModel and reads parameters from command line.  Other estimate info
-   is also obtained from command line.  
+   is also obtained from command line.
 */
 static TStateModel* SetupFromCommandLine(int nargs, char **args, TEstimateInfo **p_info)
-{ 
+{
   TEstimateInfo *info;
-  
+
   if (!(*p_info)) *p_info=(TEstimateInfo*)malloc(sizeof(TEstimateInfo));
   info=*p_info;
 
@@ -661,7 +661,7 @@ int main(int nargs, char **args)
       // Write flat file
       filename=CreateFilenameFromTag("%sest_flat_header_%s.dat",estimate->cmd->out_tag,estimate->cmd->out_directory);
       if (f_out=fopen(filename,"wt"))
-        {     
+        {
           WriteBaseTransitionMatricesFlat_Headers_SV(f_out,model->sv,"");
           Write_VAR_ParametersFlat_Headers(f_out,model);
           fprintf(f_out,"\n");
@@ -670,7 +670,7 @@ int main(int nargs, char **args)
       free(filename);
       filename=CreateFilenameFromTag("%sest_flat_%s.dat",estimate->cmd->out_tag,estimate->cmd->out_directory);
       if (f_out=fopen(filename,"wt"))
-        {     
+        {
           WriteBaseTransitionMatricesFlat(f_out,model,"%lf ");
           if (dw_FindArgument_String(nargs,args,"nd1") >= 0)
             Write_VAR_ParametersFlat_A0_Diagonal_One(f_out,model,"%lf ");
@@ -698,7 +698,7 @@ int main(int nargs, char **args)
             }
 
           FreeVector(y);
-          fclose(f_out);  
+          fclose(f_out);
         }
       free(filename);
 
@@ -709,7 +709,7 @@ int main(int nargs, char **args)
   else
     {
       // unable to create model
-      if (estimate)  
+      if (estimate)
         {
           if (estimate->cmd) Free_VARCommandLine(estimate->cmd);
           free(estimate);

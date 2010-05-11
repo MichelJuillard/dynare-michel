@@ -30,7 +30,7 @@ static void PsudoInverse(TMatrix X, TMatrix Y)
     {
       tmp=(ElementV(d,j) > epsilon) ? 1.0/ElementV(d,j) : 0.0;
       for (i=k-1; i >= 0; i--)
-	ElementM(V,i,j)*=tmp;
+    ElementM(V,i,j)*=tmp;
     }
   ProductTransposeMM(X,V,U);
   FreeMatrix(U);
@@ -147,7 +147,7 @@ T_MHM* CreateMHM(void)
   mhm->n_mean_variance=200000;
   mhm->n_mhm=1000000;
   mhm->n_thin=1;
-  
+
   ResetMHM(mhm);
 
   return mhm;
@@ -163,19 +163,19 @@ void BurnIn(T_MHM *mhm, int iterations, int period)
       DrawAll(mhm->model);
 
       if (count == check)
-	{
-	  check+=period;
-	  if (mhm->f_out)
-	    {
-	      fprintf(mhm->f_out,"%d iterations completed out of %d\n",count,iterations);
-	      PrintJumps(mhm->f_out,(T_VAR_Parameters*)(mhm->model->theta));
-	      fflush(mhm->f_out);
-	    }
+    {
+      check+=period;
+      if (mhm->f_out)
+        {
+          fprintf(mhm->f_out,"%d iterations completed out of %d\n",count,iterations);
+          PrintJumps(mhm->f_out,(T_VAR_Parameters*)(mhm->model->theta));
+          fflush(mhm->f_out);
+        }
 
-	  printf("Total Elapsed Time: %d seconds\n",(int)time((time_t*)NULL) - begin_time);
-	  printf("%d iterations completed out of %d\n",count,iterations);
-	  PrintJumps(stdout,(T_VAR_Parameters*)(mhm->model->theta));
-	}
+      printf("Total Elapsed Time: %d seconds\n",(int)time((time_t*)NULL) - begin_time);
+      printf("%d iterations completed out of %d\n",count,iterations);
+      PrintJumps(stdout,(T_VAR_Parameters*)(mhm->model->theta));
+    }
     }
   ResetMetropolisInformation((T_VAR_Parameters*)(mhm->model->theta));
 }
@@ -213,24 +213,24 @@ void ComputeMeanVariance_MHM(T_MHM *mhm, int iterations, int period)
       ConvertThetaToFreeParameters(mhm->model,pElementV(mhm->free_parameters_VAR));
 
       for (i=dw_DimA(alpha)-1; i >= 0; i--)
-	{
-	  AddVV(mhm->BaseAlpha[i],mhm->BaseAlpha[i],mhm->model->sv->ba[i]);
+    {
+      AddVV(mhm->BaseAlpha[i],mhm->BaseAlpha[i],mhm->model->sv->ba[i]);
 
-	  for (j=DimV(alpha[i])-1; j >= 0; j--)
-	    ElementV(alpha[i],j)+=ElementV(mhm->model->sv->ba[i],j)*ElementV(mhm->model->sv->ba[i],j);
-	}
+      for (j=DimV(alpha[i])-1; j >= 0; j--)
+        ElementV(alpha[i],j)+=ElementV(mhm->model->sv->ba[i],j)*ElementV(mhm->model->sv->ba[i],j);
+    }
 
       AddVV(mhm->mean,mhm->mean,mhm->free_parameters_VAR);
       OuterProduct(S,mhm->free_parameters_VAR,mhm->free_parameters_VAR);
       AddMM(mhm->variance,mhm->variance,S);
 
       if (count == check)
-	{
-	  check+=period;
-	  printf("Total Elapsed Time: %d seconds\n",(int)time((time_t*)NULL) - begin_time);
-	  printf("%d iterations completed out of %d\n",count,iterations);
-	  PrintJumps(stdout,(T_VAR_Parameters*)(mhm->model->theta));
-	}
+    {
+      check+=period;
+      printf("Total Elapsed Time: %d seconds\n",(int)time((time_t*)NULL) - begin_time);
+      printf("%d iterations completed out of %d\n",count,iterations);
+      PrintJumps(stdout,(T_VAR_Parameters*)(mhm->model->theta));
+    }
     }
 
   // compute 1st and 2nd central moments for normal terms
@@ -259,14 +259,14 @@ void ComputeMeanVariance_MHM(T_MHM *mhm, int iterations, int period)
   for (i=dw_DimA(mhm->BaseAlpha)-1; i >= 0; i--)
     {
       for (max=0.0, j=DimV(mhm->BaseAlpha[i])-1; j >= 0; j--)
-	if ((tmp=ElementV(mhm->BaseAlpha[i],j)*(1.0-ElementV(mhm->BaseAlpha[i],j))/ElementV(alpha[i],j)) > max) max=tmp;
+    if ((tmp=ElementV(mhm->BaseAlpha[i],j)*(1.0-ElementV(mhm->BaseAlpha[i],j))/ElementV(alpha[i],j)) > max) max=tmp;
       max-=1.0;
 
       for (inc=0.0, j=DimV(mhm->BaseAlpha[i])-1; j >= 0; j--)
-	if ((tmp=1.1 - max*ElementV(mhm->BaseAlpha[i],j)) > inc) inc=tmp;
+    if ((tmp=1.1 - max*ElementV(mhm->BaseAlpha[i],j)) > inc) inc=tmp;
 
       for (j=DimV(mhm->BaseAlpha[i])-1; j >= 0; j--)
-	ElementV(mhm->BaseAlpha[i],j)=max*ElementV(mhm->BaseAlpha[i],j)+inc;
+    ElementV(mhm->BaseAlpha[i],j)=max*ElementV(mhm->BaseAlpha[i],j)+inc;
     }
 
   // Create Alpha's
@@ -275,7 +275,7 @@ void ComputeMeanVariance_MHM(T_MHM *mhm, int iterations, int period)
     {
       mhm->Alpha[i]=dw_CreateArray_vector(dw_DimA(mhm->BaseAlpha));
       for (j=dw_DimA(mhm->Alpha[i])-1; j >= 0; j--)
-	mhm->Alpha[i][j]=ProductVS((TVector)NULL,mhm->BaseAlpha[j],ElementV(mhm->alpha_scales,i));
+    mhm->Alpha[i][j]=ProductVS((TVector)NULL,mhm->BaseAlpha[j],ElementV(mhm->alpha_scales,i));
     }
 
   dw_FreeArray(alpha);
@@ -317,7 +317,7 @@ void ComputeMeanVariance_MHM(T_MHM *mhm, int iterations, int period)
 
 /*   // Print log posterior and quadratic form */
 /*   fprintf(mhm->f_out,"%le %le",log_posterior,quadratic_form); */
-	  
+
 /*   // Print Dirichlet PDF's */
 /*   for (j=0; j < dw_DimA(mhm->Alpha); j++) */
 /*     fprintf(mhm->f_out," %le",LogIndependentDirichlet_pdf(mhm->model->sv->ba,mhm->Alpha[j])); */
@@ -338,7 +338,7 @@ void ComputeMeanVariance_MHM(T_MHM *mhm, int iterations, int period)
 void UpdateModifiedHarmonicMean(T_MHM *mhm, int n_singular)
 {
   int j, k;
-  PRECISION quadratic_form, log_likelihood, log_likelihood_states_integrated_out, 
+  PRECISION quadratic_form, log_likelihood, log_likelihood_states_integrated_out,
     log_prior_theta, log_prior_Q, log_posterior, difference;
 
   // Increment total number of observations
@@ -359,7 +359,7 @@ void UpdateModifiedHarmonicMean(T_MHM *mhm, int n_singular)
     }
   mhm->old_log_posterior=log_posterior;
 
-  // Maximum likelihoods and priors 
+  // Maximum likelihoods and priors
   if (log_likelihood_states_integrated_out > mhm->max_log_likelihood) mhm->max_log_likelihood=log_likelihood_states_integrated_out;
   if (log_posterior > mhm->max_log_posterior) mhm->max_log_posterior=log_posterior;
 
@@ -370,7 +370,7 @@ void UpdateModifiedHarmonicMean(T_MHM *mhm, int n_singular)
 
   /*** Standard output ***/
   // Print log posterior and quadratic form
-  fprintf(mhm->f_out,"%le %le",log_posterior,quadratic_form);	  
+  fprintf(mhm->f_out,"%le %le",log_posterior,quadratic_form);
   // Print Dirichlet PDF's
   for (j=0; j < dw_DimA(mhm->Alpha); j++)
     fprintf(mhm->f_out," %le",LogIndependentDirichlet_pdf(mhm->model->sv->ba,mhm->Alpha[j]));
@@ -399,19 +399,19 @@ void ComputeModifiedHarmonicMean(T_MHM *mhm, int period)
   for (count=1; count <= mhm->n_mhm; count++)
     {
       n_singular=Get_VAR_Improper_Distribution_Counter();
-      for (i=mhm->n_thin; i > 0; i--) 
-	{
-	  DrawAll(mhm->model);
-	}
- 
+      for (i=mhm->n_thin; i > 0; i--)
+    {
+      DrawAll(mhm->model);
+    }
+
       UpdateModifiedHarmonicMean(mhm,n_singular);
       if (count == check)
-	{
-	  check+=period;
-	  printf("Total Elapsed Time: %d seconds\n",(int)time((time_t*)NULL) - begin_time);
-	  printf("%d iterations completed out of %d\n",count,mhm->n_mhm);
-	  PrintJumps(stdout,(T_VAR_Parameters*)(mhm->model->theta));
-	}
+    {
+      check+=period;
+      printf("Total Elapsed Time: %d seconds\n",(int)time((time_t*)NULL) - begin_time);
+      printf("%d iterations completed out of %d\n",count,mhm->n_mhm);
+      PrintJumps(stdout,(T_VAR_Parameters*)(mhm->model->theta));
+    }
     }
 }
 /*******************************************************************************/
@@ -470,25 +470,25 @@ T_MHM* ReadMHM_Input(FILE *f, char *filename, T_MHM *mhm)
     {
       id="//== number draws for first burn-in ==//";
       if (dw_SetFilePosition(f_in,id) && (fscanf(f_in," %d ",&(rtrn->n_burn1)) == 1))
-	{
-	  id="//== number draws for second burn-in ==//";
-	  if (dw_SetFilePosition(f_in,id) && (fscanf(f_in," %d ",&(rtrn->n_burn2)) == 1))
-	    {
-	      id="//== number draws to estimate mean and variance ==//";
-	      if (dw_SetFilePosition(f_in,id) && (fscanf(f_in," %d ",&(rtrn->n_mean_variance)) == 1))
-		{
-		  id="//== number draws for modified harmonic mean process ==//";
-		  if (dw_SetFilePosition(f_in,id) && (fscanf(f_in," %d ",&(rtrn->n_mhm)) == 1))
-		    {
-		      id="//== thinning factor for modified harmonic mean process ==//";
-		      if (!dw_SetFilePosition(f_in,id) || (fscanf(f_in," %d ",&(rtrn->n_thin)) != 1))
-			rtrn->n_thin=1;
-		      if (!f) fclose(f_in);
-		      return rtrn;
-		    }
-		}
-	    }
-	}
+    {
+      id="//== number draws for second burn-in ==//";
+      if (dw_SetFilePosition(f_in,id) && (fscanf(f_in," %d ",&(rtrn->n_burn2)) == 1))
+        {
+          id="//== number draws to estimate mean and variance ==//";
+          if (dw_SetFilePosition(f_in,id) && (fscanf(f_in," %d ",&(rtrn->n_mean_variance)) == 1))
+        {
+          id="//== number draws for modified harmonic mean process ==//";
+          if (dw_SetFilePosition(f_in,id) && (fscanf(f_in," %d ",&(rtrn->n_mhm)) == 1))
+            {
+              id="//== thinning factor for modified harmonic mean process ==//";
+              if (!dw_SetFilePosition(f_in,id) || (fscanf(f_in," %d ",&(rtrn->n_thin)) != 1))
+            rtrn->n_thin=1;
+              if (!f) fclose(f_in);
+              return rtrn;
+            }
+        }
+        }
+    }
     }
   if (!mhm) FreeMHM(rtrn);
   if (!f) fclose(f_in);
@@ -533,7 +533,7 @@ int ReadMeanVariance(FILE *f_in, T_MHM *mhm)
     {
       mhm->Alpha[i]=dw_CreateArray_vector(dw_DimA(mhm->BaseAlpha));
       for (j=dw_DimA(mhm->Alpha[i])-1; j >= 0; j--)
-	mhm->Alpha[i][j]=ProductVS((TVector)NULL,mhm->BaseAlpha[j],ElementV(mhm->alpha_scales,i));
+    mhm->Alpha[i][j]=ProductVS((TVector)NULL,mhm->BaseAlpha[j],ElementV(mhm->alpha_scales,i));
     }
 
   id="//== Variance ==//";
@@ -586,7 +586,7 @@ int ReadMeanVariance(FILE *f_in, T_MHM *mhm)
 /*   for (i=0; i < RowM(mhm->log_sum); i++) */
 /*     { */
 /*       for (j=0; j < ColM(mhm->log_sum); j++) */
-/* 	fprintf(f_out,"%le ",log(mhm->N) - ElementM(mhm->log_sum,i,j)); */
+/*     fprintf(f_out,"%le ",log(mhm->N) - ElementM(mhm->log_sum,i,j)); */
 /*       fprintf(f_out,"\n"); */
 /*     } */
 /*   fprintf(f_out,"\n"); */
@@ -628,7 +628,7 @@ int ReadMeanVariance(FILE *f_in, T_MHM *mhm)
 /*   fprintf(f_out,"%lf  %lf\n\n",mhm->max_log_likelihood,mhm->max_log_posterior); */
 
 /*   fprintf(f_out,"Mean and standard deviation of the log ratio of the posterior kernel of successive draws\n%le  %lf\n\n", */
-/* 	  mhm->sum/(double)mhm->N,sqrt((mhm->sum_square - mhm->sum*mhm->sum/(double)mhm->N)/(double)mhm->N)); */
+/*       mhm->sum/(double)mhm->N,sqrt((mhm->sum_square - mhm->sum*mhm->sum/(double)mhm->N)/(double)mhm->N)); */
 
 /*   PrintJumps(f_out,(T_VAR_Parameters*)(model->theta)); */
 

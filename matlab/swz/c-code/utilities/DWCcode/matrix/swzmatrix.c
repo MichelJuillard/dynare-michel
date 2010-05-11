@@ -15,14 +15,14 @@
 /*
    TVector CreateVector(int m)
      Allocates memory for a m-dimensional vector.  On success, returns a pointer
-     to the vector.  On failure, calls dw_Error() and returns null.  The 
-     routine will fail if m <= 0 (SIZE_ERR) or is unable to allocate required 
+     to the vector.  On failure, calls dw_Error() and returns null.  The
+     routine will fail if m <= 0 (SIZE_ERR) or is unable to allocate required
      memory (MEM_ERR).
 
    TMatrix CreateMatrix(int m, int n)
      Allocates memory for a (m x n) matrix.  On success, returns a pointer to the
-     matrix.  On failure, calls dw_Error() and returns null.  The routine will 
-     fail if m <= 0 or n <= 0 (SIZE_ERR) or is unable to allocate required memory 
+     matrix.  On failure, calls dw_Error() and returns null.  The routine will
+     fail if m <= 0 or n <= 0 (SIZE_ERR) or is unable to allocate required memory
      (MEM_ERR).
 
    void FreeVector(TVector *x)
@@ -31,7 +31,7 @@
      Results
        Deallocates memory for vector if x is not null.
      Notes
-       The vector x MUST have been previously allocated with a call to 
+       The vector x MUST have been previously allocated with a call to
        CreateVector() or be null.
 
    void FreeMatrix(TMatrix *X)
@@ -48,10 +48,10 @@
 TVector CreateVector(int m)
 {
  TVector x;
- if (m <= 0) 
+ if (m <= 0)
   {
-   dw_Error(SIZE_ERR); 
-   return (TVector)NULL; 
+   dw_Error(SIZE_ERR);
+   return (TVector)NULL;
   }
  if (x=(TVector)malloc(sizeof(TVectorStructure) + (m-1)*sizeof(PRECISION)))
    DimV(x)=m;
@@ -69,9 +69,9 @@ TMatrix CreateMatrix(int m, int n)
 {
  TMatrix X;
  if ((m <= 0) || (n <= 0))
-  { 
-   dw_Error(SIZE_ERR); 
-   return (TMatrix)NULL; 
+  {
+   dw_Error(SIZE_ERR);
+   return (TMatrix)NULL;
   }
  if (X=(TMatrix)malloc(sizeof(TMatrixStructure) + (m*n-1)*sizeof(PRECISION)))
    {
@@ -91,10 +91,10 @@ void FreeMatrix(TMatrix X)
 TPermutation CreatePermutation(int m)
 {
  TPermutation X;
- if (m <= 0) 
+ if (m <= 0)
   {
-   dw_Error(SIZE_ERR); 
-   return (TPermutation)NULL; 
+   dw_Error(SIZE_ERR);
+   return (TPermutation)NULL;
   }
  if (X=(TPermutation)malloc(sizeof(TPermutationStructure) + (m-1)*sizeof(int)))
    {
@@ -117,10 +117,10 @@ void FreePermutation(TPermutation X)
 TVector CreateVector(int m)
 {
  TVector x;
- if (m <= 0) 
+ if (m <= 0)
   {
-   dw_Error(SIZE_ERR); 
-   return (TVector)NULL; 
+   dw_Error(SIZE_ERR);
+   return (TVector)NULL;
   }
  if (x=(TVector)malloc(sizeof(TVectorStructure)))
    if (x->x=(PRECISION*)malloc(m*sizeof(PRECISION)))
@@ -138,7 +138,7 @@ TVector CreateVector(int m)
 /**/
 void FreeVector(TVector x)
 {
- if (x) 
+ if (x)
    {
      if (x->x) free(x->x);
      free(x);
@@ -149,9 +149,9 @@ TMatrix CreateMatrix(int m, int n)
 {
  TMatrix X;
  if ((m <= 0) || (n <= 0))
-  { 
-   dw_Error(SIZE_ERR); 
-   return (TMatrix)NULL; 
+  {
+   dw_Error(SIZE_ERR);
+   return (TMatrix)NULL;
   }
  if (X=(TMatrix)malloc(sizeof(TMatrixStructure)))
    if (X->x=(PRECISION*)malloc(m*n*sizeof(PRECISION)))
@@ -175,7 +175,7 @@ TMatrix CreateMatrix(int m, int n)
 /**/
 void FreeMatrix(TMatrix X)
 {
- if (X) 
+ if (X)
    {
      if (X->x) free(X->x);
      free(X);
@@ -185,10 +185,10 @@ void FreeMatrix(TMatrix X)
 TPermutation CreatePermutation(int m)
 {
  TPermutation X;
- if (m <= 0) 
+ if (m <= 0)
   {
-   dw_Error(SIZE_ERR); 
-   return (TPermutation)NULL; 
+   dw_Error(SIZE_ERR);
+   return (TPermutation)NULL;
   }
  if (X=(TPermutation)malloc(sizeof(TPermutationStructure)))
    if (X->x=(int*)malloc(m*sizeof(int)))
@@ -209,7 +209,7 @@ TPermutation CreatePermutation(int m)
 /**/
 void FreePermutation(TPermutation X)
 {
- if (X) 
+ if (X)
    {
      if (X->x) free(X->x);
      free(X);
@@ -222,10 +222,10 @@ void FreePermutation(TPermutation X)
 TVector CreateVector(int m)
 {
  TVector x;
- if (m <= 0) 
+ if (m <= 0)
   {
-   dw_Error(SIZE_ERR); 
-   return (TVector)NULL; 
+   dw_Error(SIZE_ERR);
+   return (TVector)NULL;
   }
  if (x=(TVector)((int *)malloc(m*sizeof(PRECISION)+sizeof(int))+1))
    V_DIM(x)=m;
@@ -244,9 +244,9 @@ TMatrix CreateMatrix(int m, int n)
  TMatrix X;
  int i;
  if ((m <= 0) || (n <= 0))
-  { 
-   dw_Error(SIZE_ERR); 
-   return (TMatrix)NULL; 
+  {
+   dw_Error(SIZE_ERR);
+   return (TMatrix)NULL;
   }
  if (X=(TMatrix)((int *)malloc(m*(sizeof(PRECISION *)+n*sizeof(PRECISION))+2*sizeof(int))+2))
    {
@@ -268,10 +268,10 @@ void FreeMatrix(TMatrix X)
 TPermutation CreatePermutation(int m)
 {
  TPermutation X;
- if (m <= 0) 
+ if (m <= 0)
   {
-   dw_Error(SIZE_ERR); 
-   return (TPermutation)NULL; 
+   dw_Error(SIZE_ERR);
+   return (TPermutation)NULL;
   }
  if (X=(TPermutation)malloc((m+2)*sizeof(int)))
    {
@@ -297,10 +297,10 @@ void FreePermutation(TPermutation X)
 TVector CreateVector(int m)
 {
  TVector x;
- if (m <= 0) 
+ if (m <= 0)
   {
-   dw_Error(SIZE_ERR); 
-   return (TVector)NULL; 
+   dw_Error(SIZE_ERR);
+   return (TVector)NULL;
   }
  if (x=(TVector)malloc(sizeof(TSdvector)))
    if (!(pElementV(x)=(PRECISION*)malloc(m*sizeof(PRECISION))))
@@ -321,7 +321,7 @@ TVector CreateVector(int m)
 /**/
 void FreeVector(TVector x)
 {
- if (x) 
+ if (x)
    {
      if (pElementV(x)) free(pElementV(x));
      free(x);
@@ -332,9 +332,9 @@ TMatrix CreateMatrix(int m, int n)
 {
  TMatrix X;
  if ((m <= 0) || (n <= 0))
-  { 
-   dw_Error(SIZE_ERR); 
-   return (TMatrix)NULL; 
+  {
+   dw_Error(SIZE_ERR);
+   return (TMatrix)NULL;
   }
  if (X=(TMatrix)malloc(sizeof(TSdmatrix)))
    if (!(pElementM(X)=(PRECISION*)malloc(m*n*sizeof(PRECISION))))
@@ -357,10 +357,10 @@ TMatrix CreateMatrix(int m, int n)
 TPermutation CreatePermutation(int m)
 {
  TPermutation X;
- if (m <= 0) 
+ if (m <= 0)
   {
-   dw_Error(SIZE_ERR); 
-   return (TPermutation)NULL; 
+   dw_Error(SIZE_ERR);
+   return (TPermutation)NULL;
   }
  if (X=(TPermutation)malloc(sizeof(TPermutationStructure) + (m-1)*sizeof(int)))
    {
@@ -455,24 +455,24 @@ TMatrix InitializeMatrix(TMatrix X, PRECISION c)
 */
 TVector EquateVector(TVector x, TVector y)
 {
- if (!y) 
+ if (!y)
   {
-   dw_Error(NULL_ERR); 
-   return (TVector)NULL; 
+   dw_Error(NULL_ERR);
+   return (TVector)NULL;
   }
  if (!x)
-   { 
-    if (!(x=CreateVector(DimV(y)))) 
-     return (TVector)NULL; 
+   {
+    if (!(x=CreateVector(DimV(y))))
+     return (TVector)NULL;
    }
  else
    if (x == y)
      return x;
    else
      if (DimV(x) != DimV(y))
-       { 
-	 dw_Error(SIZE_ERR); 
-	 return (TVector)NULL; 
+       {
+     dw_Error(SIZE_ERR);
+     return (TVector)NULL;
        }
  memcpy(pElementV(x),pElementV(y),DimV(y)*sizeof(PRECISION));
  return x;
@@ -492,25 +492,25 @@ TVector EquateVector(TVector x, TVector y)
 */
 TMatrix EquateMatrix(TMatrix X, TMatrix Y)
 {
-  if (!Y) 
+  if (!Y)
     {
-      dw_Error(NULL_ERR); 
-      return (TMatrix)NULL; 
+      dw_Error(NULL_ERR);
+      return (TMatrix)NULL;
     }
   if (!X)
-    { 
-      if (!(X=CreateMatrix(RowM(Y),ColM(Y)))) 
-	return (TMatrix)NULL; 
+    {
+      if (!(X=CreateMatrix(RowM(Y),ColM(Y))))
+    return (TMatrix)NULL;
     }
   else
-    if (X == Y) 
+    if (X == Y)
       return X;
     else
       if ((RowM(Y) != RowM(X)) || (ColM(Y) != ColM(X)))
-	{
-	  dw_Error(SIZE_ERR); 
-	  return (TMatrix)NULL; 
-	}
+    {
+      dw_Error(SIZE_ERR);
+      return (TMatrix)NULL;
+    }
   memcpy(pElementM(X),pElementM(Y),RowM(Y)*ColM(Y)*sizeof(PRECISION));
   SetMajorForm(X,MajorForm(Y));
   return X;
@@ -521,7 +521,7 @@ TMatrix EquateMatrix(TMatrix X, TMatrix Y)
      X : m x m matrix or null pointer
 
    Results
-     X is set to the m x m identity matrix.  If X is null pointer, X 
+     X is set to the m x m identity matrix.  If X is null pointer, X
      is created.
 
    Returns
@@ -533,15 +533,15 @@ TMatrix IdentityMatrix(TMatrix X, int m)
  int i;
  PRECISION *pX;
  if (!X)
-   { 
-    if (!(X=CreateMatrix(m,m))) 
-     return (TMatrix)NULL; 
+   {
+    if (!(X=CreateMatrix(m,m)))
+     return (TMatrix)NULL;
    }
   else
    if ((m != RowM(X)) || (m != ColM(X)))
-    { 
-     dw_Error(SIZE_ERR); 
-     return (TMatrix)NULL; 
+    {
+     dw_Error(SIZE_ERR);
+     return (TMatrix)NULL;
     }
  for (pX=pElementM(X), i=m*m-1; i >= 0; i--) pX[i]=0.0;
  for (i=m*m-1; i >= 0; i-=m+1) pX[i]=1.0;
@@ -564,21 +564,21 @@ TMatrix DiagonalMatrix(TMatrix X, TVector y)
 {
  int i, j, k;
  PRECISION *pX;
- if (!y) 
-   { 
-     dw_Error(NULL_ERR); 
-     return (TMatrix)NULL; 
+ if (!y)
+   {
+     dw_Error(NULL_ERR);
+     return (TMatrix)NULL;
    }
  if (!X)
-   { 
-     if (!(X=CreateMatrix(DimV(y),DimV(y)))) 
-       return (TMatrix)NULL; 
+   {
+     if (!(X=CreateMatrix(DimV(y),DimV(y))))
+       return (TMatrix)NULL;
    }
  else
    if (DimV(y) != ((RowM(X) < ColM(X)) ? RowM(X) : ColM(X)))
-     { 
-       dw_Error(SIZE_ERR); 
-       return (TMatrix)NULL; 
+     {
+       dw_Error(SIZE_ERR);
+       return (TMatrix)NULL;
      }
  for (pX=pElementM(X), i=RowM(X)*ColM(X)-1; i >= 0; i--) pX[i]=0.0;
  for (k=(MajorForm(X) ? RowM(X) : ColM(X))+1, j=DimV(y)-1, pX=&ElementM(X,j,j); j >= 0; pX-=k, j--) *pX=ElementV(y,j);
@@ -591,7 +591,7 @@ TMatrix DiagonalMatrix(TMatrix X, TVector y)
      y : m-vector
 
    Results
-     X is equal to the column vector y.  If X is null pointer, X is 
+     X is equal to the column vector y.  If X is null pointer, X is
      created.
 
    Returns
@@ -600,21 +600,21 @@ TMatrix DiagonalMatrix(TMatrix X, TVector y)
 */
 TMatrix ColumnMatrix(TMatrix X, TVector y)
 {
- if (!y) 
-  { 
-   dw_Error(NULL_ERR); 
-   return (TMatrix)NULL; 
+ if (!y)
+  {
+   dw_Error(NULL_ERR);
+   return (TMatrix)NULL;
   }
  if (!X)
-   { 
-    if (!(X=CreateMatrix(DimV(y),1))) 
-     return (TMatrix)NULL; 
+   {
+    if (!(X=CreateMatrix(DimV(y),1)))
+     return (TMatrix)NULL;
    }
   else
    if ((DimV(y) != RowM(X)) || (1 != ColM(X)))
-    { 
-     dw_Error(SIZE_ERR); 
-     return (TMatrix)NULL; 
+    {
+     dw_Error(SIZE_ERR);
+     return (TMatrix)NULL;
     }
  memcpy(pElementM(X),pElementV(y),DimV(y)*sizeof(PRECISION));
  return X;
@@ -626,7 +626,7 @@ TMatrix ColumnMatrix(TMatrix X, TVector y)
      y : m-vector
 
    Results
-     X is equal to the row vector y.  If X is null pointer, X is 
+     X is equal to the row vector y.  If X is null pointer, X is
      created.
 
    Returns
@@ -635,21 +635,21 @@ TMatrix ColumnMatrix(TMatrix X, TVector y)
 */
 TMatrix RowMatrix(TMatrix X, TVector y)
 {
- if (!y) 
-  { 
-   dw_Error(NULL_ERR); 
-   return (TMatrix)NULL; 
+ if (!y)
+  {
+   dw_Error(NULL_ERR);
+   return (TMatrix)NULL;
   }
  if (!X)
-   { 
-    if (!(X=CreateMatrix(1,DimV(y)))) 
-     return (TMatrix)NULL; 
+   {
+    if (!(X=CreateMatrix(1,DimV(y))))
+     return (TMatrix)NULL;
    }
   else
    if ((1 != RowM(X)) || (DimV(y) != ColM(X)))
-    { 
-     dw_Error(SIZE_ERR); 
-     return (TMatrix)NULL; 
+    {
+     dw_Error(SIZE_ERR);
+     return (TMatrix)NULL;
     }
  memcpy(pElementM(X),pElementV(y),DimV(y)*sizeof(PRECISION));
  return X;
@@ -672,21 +672,21 @@ TMatrix RowMatrix(TMatrix X, TVector y)
 */
 TVector AbsV(TVector x, TVector y)
 {
- if (!y) 
-  { 
-   dw_Error(NULL_ERR); 
-   return (TVector)NULL; 
+ if (!y)
+  {
+   dw_Error(NULL_ERR);
+   return (TVector)NULL;
   }
  if (!x)
-   { 
-    if (!(x=CreateVector(DimV(y)))) 
-     return (TVector)NULL; 
+   {
+    if (!(x=CreateVector(DimV(y))))
+     return (TVector)NULL;
    }
   else
-   if (DimV(x) != DimV(y)) 
-    { 
-     dw_Error(SIZE_ERR); 
-     return (TVector)NULL; 
+   if (DimV(x) != DimV(y))
+    {
+     dw_Error(SIZE_ERR);
+     return (TVector)NULL;
     }
  bAbs(pElementV(x),pElementV(y),DimV(y));
  return x;
@@ -709,21 +709,21 @@ TVector AbsV(TVector x, TVector y)
 */
 TMatrix AbsM(TMatrix X, TMatrix Y)
 {
- if (!Y) 
+ if (!Y)
   {
-   dw_Error(NULL_ERR); 
-   return (TMatrix)NULL; 
+   dw_Error(NULL_ERR);
+   return (TMatrix)NULL;
   }
  if (!X)
-   { 
+   {
     if (!(X=CreateMatrix(RowM(Y),ColM(Y))))
-     return (TMatrix)NULL; 
+     return (TMatrix)NULL;
    }
   else
    if ((RowM(X) != RowM(Y)) || (ColM(X) != ColM(Y)))
     {
-     dw_Error(SIZE_ERR); 
-     return (TMatrix)NULL; 
+     dw_Error(SIZE_ERR);
+     return (TMatrix)NULL;
     }
  bAbs(pElementM(X),pElementM(Y),RowM(Y)*ColM(Y));
  SetMajorForm(X,MajorForm(Y));
@@ -747,21 +747,21 @@ TMatrix AbsM(TMatrix X, TMatrix Y)
 */
 TVector MinusV(TVector x, TVector y)
 {
- if (!y) 
+ if (!y)
   {
-   dw_Error(NULL_ERR); 
-   return (TVector)NULL; 
+   dw_Error(NULL_ERR);
+   return (TVector)NULL;
   }
  if (!x)
    {
     if (!(x=CreateVector(DimV(y))))
-     return (TVector)NULL; 
+     return (TVector)NULL;
    }
   else
    if (DimV(x) != DimV(y))
     {
-     dw_Error(SIZE_ERR); 
-     return (TVector)NULL; 
+     dw_Error(SIZE_ERR);
+     return (TVector)NULL;
     }
  bNegative(pElementV(x),pElementV(y),DimV(y));
  return x;
@@ -786,19 +786,19 @@ TMatrix MinusM(TMatrix X, TMatrix Y)
 {
  if (!Y)
   {
-   dw_Error(NULL_ERR); 
-   return (TMatrix)NULL; 
+   dw_Error(NULL_ERR);
+   return (TMatrix)NULL;
   }
  if (!X)
    {
     if (!(X=CreateMatrix(RowM(Y),ColM(Y))))
-     return (TMatrix)NULL; 
+     return (TMatrix)NULL;
    }
   else
    if ((RowM(X) != RowM(Y)) || (ColM(X) != ColM(Y)))
     {
-     dw_Error(SIZE_ERR); 
-     return (TMatrix)NULL; 
+     dw_Error(SIZE_ERR);
+     return (TMatrix)NULL;
     }
  bNegative(pElementM(X),pElementM(Y),RowM(Y)*ColM(Y));
  SetMajorForm(X,MajorForm(Y));
@@ -824,8 +824,8 @@ TMatrix Transpose(TMatrix X, TMatrix Y)
 {
  if (!Y)
   {
-   dw_Error(NULL_ERR); 
-   return (TMatrix)NULL; 
+   dw_Error(NULL_ERR);
+   return (TMatrix)NULL;
   }
  if (X == Y)
    {
@@ -840,14 +840,14 @@ TMatrix Transpose(TMatrix X, TMatrix Y)
    {
     if (!X)
       {
-       if (!(X=CreateMatrix(ColM(Y),RowM(Y)))) 
+       if (!(X=CreateMatrix(ColM(Y),RowM(Y))))
         return (TMatrix)NULL;
       }
      else
       if ((RowM(X) != ColM(Y)) || (ColM(X) != RowM(Y)))
        {
-        dw_Error(SIZE_ERR); 
-        return (TMatrix)NULL; 
+        dw_Error(SIZE_ERR);
+        return (TMatrix)NULL;
        }
     bTranspose(pElementM(X),pElementM(Y),RowM(Y),ColM(Y),MajorForm(Y));
     SetMajorForm(X,MajorForm(Y));
@@ -884,32 +884,32 @@ TMatrix SubMatrix(TMatrix X, TMatrix Y, int brow, int bcol, int rows, int cols)
   if (!X)
     {
       if (!(X=CreateMatrix(rows,cols)))
-	return (TMatrix)NULL;
+    return (TMatrix)NULL;
     }
   else
     if ((rows != RowM(X)) || (cols != ColM(X)))
       {
-	dw_Error(SIZE_ERR);
-	return (TMatrix)NULL;
+    dw_Error(SIZE_ERR);
+    return (TMatrix)NULL;
       }
   if (Y != X)
     {
       if (MajorForm(Y))
-	{
-	  if (rows == RowM(Y))
-	    memcpy(pElementM(X),&ElementM(Y,0,bcol),rows*cols*sizeof(PRECISION));
-	  else
-	    for (s=rows*sizeof(PRECISION), j=cols-1; j >= 0; j--)
-	      memcpy(&ElementM(X,0,j),&ElementM(Y,brow,bcol+j),s);
-	}
+    {
+      if (rows == RowM(Y))
+        memcpy(pElementM(X),&ElementM(Y,0,bcol),rows*cols*sizeof(PRECISION));
       else
-	{
-	  if (cols == ColM(Y))
-	    memcpy(pElementM(X),&ElementM(Y,brow,0),rows*cols*sizeof(PRECISION));
-	  else
-	    for (s=cols*sizeof(PRECISION), j=rows-1; j >= 0; j--)
-	      memcpy(&ElementM(X,j,0),&ElementM(Y,brow+j,bcol),s);
-	}
+        for (s=rows*sizeof(PRECISION), j=cols-1; j >= 0; j--)
+          memcpy(&ElementM(X,0,j),&ElementM(Y,brow,bcol+j),s);
+    }
+      else
+    {
+      if (cols == ColM(Y))
+        memcpy(pElementM(X),&ElementM(Y,brow,0),rows*cols*sizeof(PRECISION));
+      else
+        for (s=cols*sizeof(PRECISION), j=rows-1; j >= 0; j--)
+          memcpy(&ElementM(X,j,0),&ElementM(Y,brow+j,bcol),s);
+    }
       SetMajorForm(X,MajorForm(Y));
     }
   return X;
@@ -921,7 +921,7 @@ TMatrix SubMatrix(TMatrix X, TMatrix Y, int brow, int bcol, int rows, int cols)
      Y : (rY x cY) matrix, where rY >= brow_Y+rows and cY >= bcol_Y+cols
 
    Results
-     X(brow_X+i,bcol_X+j) = Y(brow_Y+i,bcol_Y+j), for 0 <= i < rows and 
+     X(brow_X+i,bcol_X+j) = Y(brow_Y+i,bcol_Y+j), for 0 <= i < rows and
      0 <= j < cols.
 
    Returns
@@ -946,26 +946,26 @@ TMatrix InsertSubMatrix(TMatrix X, TMatrix Y, int brow_X, int bcol_X, int brow_Y
   if (Y != X)
     {
       if (MajorForm(Y) == MajorForm(X))
-	if (MajorForm(Y))
-	  {
-	    if ((rows == RowM(Y)) && (rows == RowM(X)))
-	      memcpy(&ElementM(X,0,bcol_X),&ElementM(Y,0,bcol_Y),rows*cols*sizeof(PRECISION));
-	    else
-	      for (s=rows*sizeof(PRECISION), j=cols-1; j >= 0; j--)
-		memcpy(&ElementM(X,brow_X,bcol_X+j),&ElementM(Y,brow_Y,bcol_Y+j),s);
-	  }
-	else
-	  {
-	    if ((cols == ColM(Y)) && (cols == ColM(X)))
-	      memcpy(&ElementM(X,brow_X,0),&ElementM(Y,brow_Y,0),rows*cols*sizeof(PRECISION));
-	    else
-	      for (s=cols*sizeof(PRECISION), i=rows-1; i >= 0; i--)
-		memcpy(&ElementM(X,brow_X+i,bcol_X),&ElementM(Y,brow_Y+i,bcol_Y),s);
-	  }
+    if (MajorForm(Y))
+      {
+        if ((rows == RowM(Y)) && (rows == RowM(X)))
+          memcpy(&ElementM(X,0,bcol_X),&ElementM(Y,0,bcol_Y),rows*cols*sizeof(PRECISION));
+        else
+          for (s=rows*sizeof(PRECISION), j=cols-1; j >= 0; j--)
+        memcpy(&ElementM(X,brow_X,bcol_X+j),&ElementM(Y,brow_Y,bcol_Y+j),s);
+      }
+    else
+      {
+        if ((cols == ColM(Y)) && (cols == ColM(X)))
+          memcpy(&ElementM(X,brow_X,0),&ElementM(Y,brow_Y,0),rows*cols*sizeof(PRECISION));
+        else
+          for (s=cols*sizeof(PRECISION), i=rows-1; i >= 0; i--)
+        memcpy(&ElementM(X,brow_X+i,bcol_X),&ElementM(Y,brow_Y+i,bcol_Y),s);
+      }
       else
-	for (i=rows-1; i >= 0; i--)
-	  for (j=cols-1; j >= 0; j--)
-	    ElementM(X,brow_X+i,bcol_X+j)=ElementM(Y,brow_Y+i,bcol_Y+j);
+    for (i=rows-1; i >= 0; i--)
+      for (j=cols-1; j >= 0; j--)
+        ElementM(X,brow_X+i,bcol_X+j)=ElementM(Y,brow_Y+i,bcol_Y+j);
     }
   return X;
 }
@@ -980,7 +980,7 @@ TMatrix InsertSubMatrix(TMatrix X, TMatrix Y, int brow_X, int bcol_X, int brow_Y
      created.
 
    Returns
-     Returns x upon success and null on failure.  Call GetError() to determine 
+     Returns x upon success and null on failure.  Call GetError() to determine
      the cause of failure.
 */
 TVector SubVector(TVector x, TVector y, int b, int d)
@@ -998,13 +998,13 @@ TVector SubVector(TVector x, TVector y, int b, int d)
   if (!x)
     {
       if (!(x=CreateVector(d)))
-	return (TVector)NULL;
+    return (TVector)NULL;
     }
   else
     if (d != DimV(x))
       {
-	dw_Error(SIZE_ERR);
-	return (TVector)NULL;
+    dw_Error(SIZE_ERR);
+    return (TVector)NULL;
       }
   if (x != y)
     memcpy(pElementV(x),pElementV(y)+b,d*sizeof(PRECISION));
@@ -1031,7 +1031,7 @@ TMatrix CopyColumnVector(TMatrix X, TVector y, int col)
   if (!X || !y)
     {
       dw_Error(NULL_ERR);
-      return (TMatrix)NULL; 
+      return (TMatrix)NULL;
     }
   if ((DimV(y) != RowM(X)) || (col < 0) || (ColM(X) <= col))
     {
@@ -1066,7 +1066,7 @@ TVector ColumnVector(TVector x, TMatrix Y, int col)
   if (!Y)
     {
       dw_Error(NULL_ERR);
-      return (TVector)NULL; 
+      return (TVector)NULL;
     }
   if ((col < 0) || (ColM(Y) <= col))
     {
@@ -1076,13 +1076,13 @@ TVector ColumnVector(TVector x, TMatrix Y, int col)
   if (!x)
     {
       if (!(x=CreateVector(RowM(Y))))
-	return (TVector)NULL;
+    return (TVector)NULL;
     }
   else
     if (DimV(x) != RowM(Y))
       {
-	dw_Error(SIZE_ERR);
-	return (TVector)NULL;
+    dw_Error(SIZE_ERR);
+    return (TVector)NULL;
       }
   if (MajorForm(Y))
     memcpy(pElementV(x),&ElementM(Y,0,col),DimV(x)*sizeof(PRECISION));
@@ -1103,7 +1103,7 @@ TVector ColumnVector(TVector x, TMatrix Y, int col)
 
    Returns
      Returns x upon success and null on failure.  Call GetError() to
-     determine the cause of failure.  
+     determine the cause of failure.
 */
 TVector RowVector(TVector x, TMatrix Y, int row)
 {
@@ -1122,13 +1122,13 @@ TVector RowVector(TVector x, TMatrix Y, int row)
   if (!x)
     {
       if (!(x=CreateVector(ColM(Y))))
-	return (TVector)NULL;
+    return (TVector)NULL;
     }
   else
     if (DimV(x) != ColM(Y))
       {
-	dw_Error(SIZE_ERR);
-	return (TVector)NULL;
+    dw_Error(SIZE_ERR);
+    return (TVector)NULL;
       }
   if (MajorForm(Y))
     for (pY=pElementM(Y)+row+(m=RowM(Y))*(j=DimV(x)-1); j >= 0; pY-=m, j--) ElementV(x,j)=*pY;
@@ -1261,13 +1261,13 @@ TMatrix AddMM(TMatrix X, TMatrix Y, TMatrix Z)
   if (!X)
     {
       if (!(X=CreateMatrix(RowM(Z),ColM(Z))))
-	return (TMatrix)NULL;
+    return (TMatrix)NULL;
     }
   else
     if ((RowM(X) != RowM(Z)) || (ColM(X) != ColM(Z)))
       {
-	dw_Error(SIZE_ERR);
-	return (TMatrix)NULL;
+    dw_Error(SIZE_ERR);
+    return (TMatrix)NULL;
       }
   bMatrixAdd(pElementM(X),pElementM(Y),pElementM(Z),RowM(Z),ColM(Z),MajorForm(X),MajorForm(Y),MajorForm(Z));
   return X;
@@ -1382,10 +1382,10 @@ TMatrix UpdateMS(TMatrix X, TMatrix Y, PRECISION a)
   else
     {
       if (!(z=(PRECISION*)malloc(RowM(Y)*ColM(Y)*sizeof(PRECISION))))
-	{
-	  dw_Error(MEM_ERR);
-	  return (TMatrix)NULL;
-	}
+    {
+      dw_Error(MEM_ERR);
+      return (TMatrix)NULL;
+    }
       bTranspose(z,pElementM(Y),RowM(Y),ColM(Y),MajorForm(Y));
       bLinearUpdateScalar(pElementM(X),z,a,RowM(Y)*ColM(Y));
       free(z);
@@ -1426,13 +1426,13 @@ TVector LinearCombinationVV(TVector x, PRECISION a, TVector y, PRECISION b, TVec
   if (!x)
     {
       if (!(x=CreateVector(DimV(z))))
-	return (TVector)NULL;
+    return (TVector)NULL;
     }
   else
     if (DimV(x) != DimV(z))
       {
-	dw_Error(SIZE_ERR);
-	return (TVector)NULL;
+    dw_Error(SIZE_ERR);
+    return (TVector)NULL;
       }
   bLinearCombination(pElementV(x),a,pElementV(y),b,pElementV(z),DimV(z));
   return x;
@@ -1459,7 +1459,7 @@ TVector LinearCombinationVV(TVector x, PRECISION a, TVector y, PRECISION b, TVec
 TMatrix LinearCombinationMM(TMatrix X, PRECISION a, TMatrix Y, PRECISION b, TMatrix Z)
 {
   PRECISION *p;
-  TMatrix W=X; 
+  TMatrix W=X;
   if (!Y || !Z)
     {
       dw_Error(NULL_ERR);
@@ -1473,13 +1473,13 @@ TMatrix LinearCombinationMM(TMatrix X, PRECISION a, TMatrix Y, PRECISION b, TMat
   if (!X)
     {
       if (!(X=CreateMatrix(RowM(Z),ColM(Z))))
-	return (TMatrix)NULL;
+    return (TMatrix)NULL;
     }
   else
     if ((RowM(X) != RowM(Z)) || (ColM(X) != ColM(Z)))
       {
-	dw_Error(SIZE_ERR);
-	return (TMatrix)NULL;
+    dw_Error(SIZE_ERR);
+    return (TMatrix)NULL;
       }
   if (MajorForm(Y) == MajorForm(Z))
     {
@@ -1489,35 +1489,35 @@ TMatrix LinearCombinationMM(TMatrix X, PRECISION a, TMatrix Y, PRECISION b, TMat
   else
     if (X == Z)
       {
-	if (!(p=(PRECISION*)malloc(RowM(Y)*ColM(Y)*sizeof(PRECISION))))
-	  {
-	    dw_Error(MEM_ERR);
-	    if (!W) FreeMatrix(X);
-	    return (TMatrix)NULL;
-	  }
-	bTranspose(p,pElementM(Y),RowM(Y),ColM(Y),MajorForm(Y));
-	bLinearCombination(pElementM(X),a,p,b,pElementM(Z),RowM(Z)*ColM(Z));
-	free(p);
+    if (!(p=(PRECISION*)malloc(RowM(Y)*ColM(Y)*sizeof(PRECISION))))
+      {
+        dw_Error(MEM_ERR);
+        if (!W) FreeMatrix(X);
+        return (TMatrix)NULL;
+      }
+    bTranspose(p,pElementM(Y),RowM(Y),ColM(Y),MajorForm(Y));
+    bLinearCombination(pElementM(X),a,p,b,pElementM(Z),RowM(Z)*ColM(Z));
+    free(p);
       }
     else
       if (X == Y)
-	{
-	  if (!(p=(PRECISION*)malloc(RowM(Z)*ColM(Z)*sizeof(PRECISION))))
-	    {
-	      dw_Error(MEM_ERR);
-	      if (!W) FreeMatrix(X);
-	      return (TMatrix)NULL;
-	    }
-	  bTranspose(p,pElementM(Z),RowM(Z),ColM(Z),MajorForm(Z));
-	  bLinearCombination(pElementM(X),a,pElementM(Y),b,p,RowM(Z)*ColM(Z));
-	  free(p);
-	}
+    {
+      if (!(p=(PRECISION*)malloc(RowM(Z)*ColM(Z)*sizeof(PRECISION))))
+        {
+          dw_Error(MEM_ERR);
+          if (!W) FreeMatrix(X);
+          return (TMatrix)NULL;
+        }
+      bTranspose(p,pElementM(Z),RowM(Z),ColM(Z),MajorForm(Z));
+      bLinearCombination(pElementM(X),a,pElementM(Y),b,p,RowM(Z)*ColM(Z));
+      free(p);
+    }
       else
-	{
-	  bTranspose(pElementM(X),pElementM(Z),RowM(Z),ColM(Z),MajorForm(Z));
-	  bLinearCombination(pElementM(X),a,pElementM(Y),b,pElementM(X),RowM(Z)*ColM(Z));
-	  SetMajorForm(X,MajorForm(Y));
-	}
+    {
+      bTranspose(pElementM(X),pElementM(Z),RowM(Z),ColM(Z),MajorForm(Z));
+      bLinearCombination(pElementM(X),a,pElementM(Y),b,pElementM(X),RowM(Z)*ColM(Z));
+      SetMajorForm(X,MajorForm(Y));
+    }
   return X;
 }
 /*******************************************************************************/
@@ -1753,22 +1753,22 @@ TMatrix ProductMM(TMatrix X, TMatrix Y, TMatrix Z)
   }
  if (!X)
    {
-    if (!(X=CreateMatrix(RowM(Y),ColM(Z)))) 
+    if (!(X=CreateMatrix(RowM(Y),ColM(Z))))
      return (TMatrix)NULL;
    }
   else
    {
     if ((RowM(X) != RowM(Y)) || (ColM(X) != ColM(Z)))
      {
-      dw_Error(SIZE_ERR); 
-      return (TMatrix)NULL; 
+      dw_Error(SIZE_ERR);
+      return (TMatrix)NULL;
      }
     if ((X == Y) || (X == Z))
       {
        if (!(ptr=(PRECISION*)malloc(RowM(X)*ColM(X)*sizeof(PRECISION))))
         {
-         dw_Error(MEM_ERR); 
-         return (TMatrix)NULL; 
+         dw_Error(MEM_ERR);
+         return (TMatrix)NULL;
         }
        bMatrixMultiply(ptr,pElementM(Y),pElementM(Z),RowM(X),ColM(X),ColM(Y),MajorForm(X),MajorForm(Y),MajorForm(Z));
        memcpy(pElementM(X),ptr,RowM(X)*ColM(X)*sizeof(PRECISION));
@@ -1809,32 +1809,32 @@ TMatrix TransposeProductMM(TMatrix X, TMatrix Y, TMatrix Z)
  PRECISION *ptr;
  if (!Y || !Z)
   {
-   dw_Error(NULL_ERR); 
-   return (TMatrix)NULL; 
+   dw_Error(NULL_ERR);
+   return (TMatrix)NULL;
   }
  if (RowM(Y) != RowM(Z))
-  { 
-   dw_Error(SIZE_ERR); 
-   return (TMatrix)NULL; 
+  {
+   dw_Error(SIZE_ERR);
+   return (TMatrix)NULL;
   }
  if (!X)
    {
-    if (!(X=CreateMatrix(ColM(Y),ColM(Z)))) 
+    if (!(X=CreateMatrix(ColM(Y),ColM(Z))))
      return (TMatrix)NULL;
    }
   else
    {
     if ((RowM(X) != ColM(Y)) || (ColM(X) != ColM(Z)))
      {
-      dw_Error(SIZE_ERR); 
-      return (TMatrix)NULL; 
+      dw_Error(SIZE_ERR);
+      return (TMatrix)NULL;
      }
     if ((X == Y) || (X == Z))
       {
        if (!(ptr=(PRECISION*)malloc(RowM(X)*ColM(X)*sizeof(PRECISION))))
         {
-         dw_Error(MEM_ERR); 
-         return (TMatrix)NULL; 
+         dw_Error(MEM_ERR);
+         return (TMatrix)NULL;
         }
        bMatrixMultiply(ptr,pElementM(Y),pElementM(Z),RowM(X),ColM(X),RowM(Y),MajorForm(X),1^MajorForm(Y),MajorForm(Z));
        memcpy(pElementM(X),ptr,RowM(X)*ColM(X)*sizeof(PRECISION));
@@ -1869,13 +1869,13 @@ TMatrix ProductTransposeMM(TMatrix X, TMatrix Y, TMatrix Z)
  PRECISION *ptr;
  if (!Y || !Z)
   {
-   dw_Error(NULL_ERR); 
-   return (TMatrix)NULL; 
+   dw_Error(NULL_ERR);
+   return (TMatrix)NULL;
   }
  if (ColM(Y) != ColM(Z))
   {
-   dw_Error(SIZE_ERR); 
-   return (TMatrix)NULL; 
+   dw_Error(SIZE_ERR);
+   return (TMatrix)NULL;
   }
  if (!X)
    {
@@ -1886,15 +1886,15 @@ TMatrix ProductTransposeMM(TMatrix X, TMatrix Y, TMatrix Z)
    {
     if ((RowM(X) != RowM(Y)) || (ColM(X) != RowM(Z)))
      {
-      dw_Error(SIZE_ERR); 
-      return (TMatrix)NULL; 
+      dw_Error(SIZE_ERR);
+      return (TMatrix)NULL;
      }
     if ((X == Y) || (X == Z))
       {
        if (!(ptr=(PRECISION*)malloc(RowM(X)*ColM(X)*sizeof(PRECISION))))
         {
-         dw_Error(MEM_ERR); 
-         return (TMatrix)NULL; 
+         dw_Error(MEM_ERR);
+         return (TMatrix)NULL;
         }
        bMatrixMultiply(ptr,pElementM(Y),pElementM(Z),RowM(X),ColM(X),ColM(Y),MajorForm(X),MajorForm(Y),1^MajorForm(Z));
        memcpy(pElementM(X),ptr,RowM(X)*ColM(X)*sizeof(PRECISION));
@@ -1925,10 +1925,10 @@ TMatrix ProductTransposeMM(TMatrix X, TMatrix Y, TMatrix Z)
      Returns x upon success, null otherwise.
 
    Notes
-     The vectors x and z do not have to be distinct. Uses Gaussian elimination 
-     with partial pivoting and back substitution.  A null return indicates 
-     that either Y or z was null, Y was singular, the matrices were not of the 
-     required size, or the routine was unable to allocate needed memory.  Call 
+     The vectors x and z do not have to be distinct. Uses Gaussian elimination
+     with partial pivoting and back substitution.  A null return indicates
+     that either Y or z was null, Y was singular, the matrices were not of the
+     required size, or the routine was unable to allocate needed memory.  Call
      GetError() to determine which of these occured.
 */
 TVector InverseProductMV(TVector x, TMatrix Y, TVector z)
@@ -2018,20 +2018,20 @@ TVector InverseProductUV(TVector x, TMatrix Y, TVector z)
      Returns x upon success, null otherwise.
 
    Notes
-     The vectors x and z do not have to be distinct. Uses back substitution.  
+     The vectors x and z do not have to be distinct. Uses back substitution.
      A null return indicates that either Y or z was null, Y was singular, or
-     the matrices were not of the required size.  Call GetError() to 
+     the matrices were not of the required size.  Call GetError() to
      determine which of these occured.
 */
 TVector InverseProductLV(TVector x, TMatrix Y, TVector z)
 {
  TVector rtrn=(TVector)NULL;
  int err;
- if (!Y || !z) 
-   dw_Error(NULL_ERR); 
+ if (!Y || !z)
+   dw_Error(NULL_ERR);
   else
    if ((RowM(Y) != ColM(Y)) || (ColM(Y) != DimV(z)))
-     dw_Error(SIZE_ERR); 
+     dw_Error(SIZE_ERR);
     else
      if (rtrn=((x == z) ? x : EquateVector(x,z)))
       if (err=bSolveTriangular(pElementM(Y),pElementV(rtrn),DimV(rtrn),1,0,MajorForm(Y),1))
@@ -2039,7 +2039,7 @@ TVector InverseProductLV(TVector x, TMatrix Y, TVector z)
         if (rtrn != x) FreeVector(rtrn);
         rtrn=(TVector)NULL;
         dw_Error(err);
-       }   
+       }
  return rtrn;
 }
 
@@ -2056,10 +2056,10 @@ TVector InverseProductLV(TVector x, TMatrix Y, TVector z)
      Returns X upon success, null otherwise.
 
    Notes
-     Size permitting, X, Y and Z do not have to be distinct. Uses Gaussian 
-     elimination with partial pivoting and back substitution.  A null return 
+     Size permitting, X, Y and Z do not have to be distinct. Uses Gaussian
+     elimination with partial pivoting and back substitution.  A null return
      indicates that either Y or Z was null, Y was singular, the matrices were
-     not of the required size, or the routine was unable to allocate needed 
+     not of the required size, or the routine was unable to allocate needed
      memory.  Call GetError() to determine which of these occured.
 */
 TMatrix InverseProductMM(TMatrix X, TMatrix Y, TMatrix Z)
@@ -2067,11 +2067,11 @@ TMatrix InverseProductMM(TMatrix X, TMatrix Y, TMatrix Z)
  PRECISION *LU;
  int *p, err, MajorFormLU, q;
  TMatrix rtrn=(TMatrix)NULL;
- if (!Y || !Z) 
-   dw_Error(NULL_ERR); 
+ if (!Y || !Z)
+   dw_Error(NULL_ERR);
   else
    if ((RowM(Y) != ColM(Y)) || (ColM(Y) != RowM(Z)))
-     dw_Error(SIZE_ERR); 
+     dw_Error(SIZE_ERR);
     else
      if (!(p=(int*)malloc((q=(RowM(Y) < ColM(Y)) ? RowM(Y) : ColM(Y))*sizeof(int))))
        dw_Error(MEM_ERR);
@@ -2080,7 +2080,7 @@ TMatrix InverseProductMM(TMatrix X, TMatrix Y, TMatrix Z)
         if (!(LU=(PRECISION*)malloc(RowM(Y)*RowM(Y)*sizeof(PRECISION))))
           dw_Error(MEM_ERR);
          else
-          {  
+          {
            memcpy(LU,pElementM(Y),RowM(Y)*RowM(Y)*sizeof(PRECISION));
            MajorFormLU=MajorForm(Y);
            if (err=bLU(p,LU,RowM(Y),RowM(Y),MajorForm(Y)))
@@ -2112,9 +2112,9 @@ TMatrix InverseProductMM(TMatrix X, TMatrix Y, TMatrix Z)
      Returns X upon success, null otherwise.
 
    Notes
-     Size permitting, X, Y and Z do not have to be distinct. Uses back 
-     substitution.  A null return indicates that either Y or Z was null, 
-     Y was singular, or the matrices were not of the required size.  Call 
+     Size permitting, X, Y and Z do not have to be distinct. Uses back
+     substitution.  A null return indicates that either Y or Z was null,
+     Y was singular, or the matrices were not of the required size.  Call
      GetError() to determine which of these occured.
 */
 TMatrix InverseProductUM(TMatrix X, TMatrix Y, TMatrix Z)
@@ -2122,11 +2122,11 @@ TMatrix InverseProductUM(TMatrix X, TMatrix Y, TMatrix Z)
  PRECISION *ptr;
  TMatrix rtrn=(TMatrix)NULL;
  int err, MajorFormY;
- if (!Y || !Z) 
-   dw_Error(NULL_ERR); 
+ if (!Y || !Z)
+   dw_Error(NULL_ERR);
   else
    if ((RowM(Y) != ColM(Y)) || (ColM(Y) != RowM(Z)))
-     dw_Error(SIZE_ERR); 
+     dw_Error(SIZE_ERR);
     else
      if (X == Y)
        if (!(ptr=(PRECISION*)malloc(RowM(Y)*RowM(Y)*sizeof(PRECISION))))
@@ -2150,7 +2150,7 @@ TMatrix InverseProductUM(TMatrix X, TMatrix Y, TMatrix Z)
           if (rtrn != X) FreeMatrix(rtrn);
           rtrn=(TMatrix)NULL;
           dw_Error(err);
-         } 
+         }
  return rtrn;
 }
 
@@ -2167,9 +2167,9 @@ TMatrix InverseProductUM(TMatrix X, TMatrix Y, TMatrix Z)
      Returns X upon success, null otherwise.
 
    Notes
-     Size permitting, X, Y and Z do not have to be distinct. Uses back 
-     substitution.  A null return indicates that either Y or Z was null, 
-     Y was singular, or the matrices were not of the required size.  Call 
+     Size permitting, X, Y and Z do not have to be distinct. Uses back
+     substitution.  A null return indicates that either Y or Z was null,
+     Y was singular, or the matrices were not of the required size.  Call
      GetError() to determine which of these occured.
 */
 TMatrix InverseProductLM(TMatrix X, TMatrix Y, TMatrix Z)
@@ -2177,11 +2177,11 @@ TMatrix InverseProductLM(TMatrix X, TMatrix Y, TMatrix Z)
  PRECISION *ptr;
  TMatrix rtrn=(TMatrix)NULL;
  int err, MajorFormY;
- if (!Y || !Z) 
-   dw_Error(NULL_ERR); 
+ if (!Y || !Z)
+   dw_Error(NULL_ERR);
   else
    if ((RowM(Y) != ColM(Y)) || (ColM(Y) != RowM(Z)))
-     dw_Error(SIZE_ERR); 
+     dw_Error(SIZE_ERR);
     else
      if (X == Y)
        if (!(ptr=(PRECISION*)malloc(RowM(Y)*RowM(Y)*sizeof(PRECISION))))
@@ -2205,7 +2205,7 @@ TMatrix InverseProductLM(TMatrix X, TMatrix Y, TMatrix Z)
           if (rtrn != X) FreeMatrix(rtrn);
           rtrn=(TMatrix)NULL;
           dw_Error(err);
-         } 
+         }
  return rtrn;
 }
 
@@ -2216,16 +2216,16 @@ TMatrix InverseProductLM(TMatrix X, TMatrix Y, TMatrix Z)
      Z : n x n invertible matrix
 
    Results
-     x = y * Inverse(Z).  
-    
+     x = y * Inverse(Z).
+
    Returns
      Returns x upon success, null otherwise.
 
    Notes
-     The vectors x and y do not have to be distinct. Uses Gaussian elimination 
-     with partial pivoting and back substitution.  A null return indicates 
-     that either y or Z was null, Z was singular, the matrices were not of the 
-     required size, or the routine was unable to allocate needed memory.  Call 
+     The vectors x and y do not have to be distinct. Uses Gaussian elimination
+     with partial pivoting and back substitution.  A null return indicates
+     that either y or Z was null, Z was singular, the matrices were not of the
+     required size, or the routine was unable to allocate needed memory.  Call
      GetError() to determine which of these occured.
 */
 TVector ProductInverseVM(TVector x, TVector y, TMatrix Z)
@@ -2233,20 +2233,20 @@ TVector ProductInverseVM(TVector x, TVector y, TMatrix Z)
  PRECISION *LU;
  int *p, err;
  TVector rtrn=(TVector)NULL;
- if (!y || !Z) 
-   dw_Error(NULL_ERR); 
+ if (!y || !Z)
+   dw_Error(NULL_ERR);
   else
    if ((RowM(Z) != ColM(Z)) || (DimV(y) != RowM(Z)))
-     dw_Error(SIZE_ERR); 
+     dw_Error(SIZE_ERR);
     else
      if (!(p=(int*)malloc(RowM(Z)*sizeof(int))))
-       dw_Error(MEM_ERR); 
+       dw_Error(MEM_ERR);
       else
        {
         if (!(LU=(PRECISION*)malloc(RowM(Z)*RowM(Z)*sizeof(PRECISION))))
           dw_Error(MEM_ERR);
          else
-          {  
+          {
            memcpy(LU,pElementM(Z),RowM(Z)*RowM(Z)*sizeof(PRECISION));
            if (err=bLU(p,LU,RowM(Z),RowM(Z),MajorForm(Z)))
              dw_Error(err);
@@ -2255,7 +2255,7 @@ TVector ProductInverseVM(TVector x, TVector y, TMatrix Z)
               {
                bSolveTriangular(LU,pElementV(rtrn),DimV(rtrn),1,0,1^MajorForm(Z),0);
                bSolveUnitTriangular(LU,pElementV(rtrn),DimV(rtrn),1,1,1^MajorForm(Z),0);
-               bPermutationMultiply(p,pElementV(rtrn),DimV(rtrn),1,RowM(Z),0,0);                            
+               bPermutationMultiply(p,pElementV(rtrn),DimV(rtrn),1,RowM(Z),0,0);
               }
            free(LU);
           }
@@ -2271,33 +2271,33 @@ TVector ProductInverseVM(TVector x, TVector y, TMatrix Z)
      Z : n x n upper triangular matrix
 
    Results
-     x = y * Inverse(Z).  
-    
+     x = y * Inverse(Z).
+
    Returns
      Returns x upon success, null otherwise.
 
    Notes
-     The vectors x and y do not have to be distinct. Uses back substitution.  
+     The vectors x and y do not have to be distinct. Uses back substitution.
      A null return indicates that either y or Z was null, Z was singular, or
-     the matrices were not of the  required size.  Call GetError() to 
+     the matrices were not of the  required size.  Call GetError() to
      determine which of these occured.
 */
 TVector ProductInverseVU(TVector x, TVector y, TMatrix Z)
 {
  TVector rtrn=(TVector)NULL;
  int err;
- if (!y || !Z) 
-   dw_Error(NULL_ERR); 
+ if (!y || !Z)
+   dw_Error(NULL_ERR);
   else
    if ((RowM(Z) != ColM(Z)) || (DimV(y) != RowM(Z)))
-     dw_Error(SIZE_ERR); 
+     dw_Error(SIZE_ERR);
     else
      if (rtrn=((x == y) ? x : EquateVector(x,y)))
       if (err=bSolveTriangular(pElementM(Z),pElementV(rtrn),DimV(rtrn),1,0,1^MajorForm(Z),1))
        {
         if (rtrn != x) FreeVector(rtrn);
         rtrn=(TVector)NULL;
-        dw_Error(err);                         
+        dw_Error(err);
        }
  return rtrn;
 }
@@ -2309,33 +2309,33 @@ TVector ProductInverseVU(TVector x, TVector y, TMatrix Z)
      Z : n x n lower triangular matrix
 
    Results
-     x = y * Inverse(Z).  
-    
+     x = y * Inverse(Z).
+
    Returns
      Returns x upon success, null otherwise.
 
    Notes
-     The vectors x and y do not have to be distinct. Uses back substitution.  
+     The vectors x and y do not have to be distinct. Uses back substitution.
      A null return indicates that either y or Z was null, Z was singular, or
-     the matrices were not of the  required size.  Call GetError() to 
+     the matrices were not of the  required size.  Call GetError() to
      determine which of these occured.
 */
 TVector ProductInverseVL(TVector x, TVector y, TMatrix Z)
 {
  TVector rtrn=(TVector)NULL;
  int err;
- if (!y || !Z) 
-   dw_Error(NULL_ERR); 
+ if (!y || !Z)
+   dw_Error(NULL_ERR);
   else
    if ((RowM(Z) != ColM(Z)) || (DimV(y) != RowM(Z)))
-     dw_Error(SIZE_ERR); 
+     dw_Error(SIZE_ERR);
     else
      if (rtrn=((x == y) ? x : EquateVector(x,y)))
       if (err=bSolveTriangular(pElementM(Z),pElementV(rtrn),DimV(rtrn),1,1,1^MajorForm(Z),1))
        {
         if (rtrn != x) FreeVector(rtrn);
         rtrn=(TVector)NULL;
-        dw_Error(err);                         
+        dw_Error(err);
        }
  return rtrn;
 }
@@ -2347,16 +2347,16 @@ TVector ProductInverseVL(TVector x, TVector y, TMatrix Z)
      Z : n x n matrix
 
    Results
-     X = Y * Inverse(Z).  
-    
+     X = Y * Inverse(Z).
+
    Returns
      Returns X upon success, null otherwise.
 
    Notes
-     Size permitting, X, Y and Z do not have to be distinct. Uses Gaussian 
-     elimination with partial pivoting and back substitution.  A null return 
+     Size permitting, X, Y and Z do not have to be distinct. Uses Gaussian
+     elimination with partial pivoting and back substitution.  A null return
      indicates that either Y or Z was null, Z was singular, the matrices were
-     not of the required size, or the routine was unable to allocate needed 
+     not of the required size, or the routine was unable to allocate needed
      memory.  Call GetError() to determine which of these occured.
 */
 TMatrix ProductInverseMM(TMatrix X, TMatrix Y, TMatrix Z)
@@ -2364,20 +2364,20 @@ TMatrix ProductInverseMM(TMatrix X, TMatrix Y, TMatrix Z)
  PRECISION *LU;
  int *p, err, MajorFormLU;
  TMatrix rtrn=(TMatrix)NULL;
- if (!Y || !Z) 
-   dw_Error(NULL_ERR); 
+ if (!Y || !Z)
+   dw_Error(NULL_ERR);
   else
    if ((RowM(Z) != ColM(Z)) || (ColM(Y) != RowM(Z)))
-     dw_Error(SIZE_ERR); 
+     dw_Error(SIZE_ERR);
     else
      if (!(p=(int*)malloc(RowM(Z)*sizeof(int))))
-       dw_Error(MEM_ERR); 
+       dw_Error(MEM_ERR);
       else
        {
         if (!(LU=(PRECISION*)malloc(RowM(Z)*RowM(Z)*sizeof(PRECISION))))
           dw_Error(MEM_ERR);
          else
-          {  
+          {
            memcpy(LU,pElementM(Z),RowM(Z)*RowM(Z)*sizeof(PRECISION));
            MajorFormLU=MajorForm(Z);
            if (err=bLU(p,LU,RowM(Z),RowM(Z),MajorForm(Z)))
@@ -2388,7 +2388,7 @@ TMatrix ProductInverseMM(TMatrix X, TMatrix Y, TMatrix Z)
                bSolveTriangular(LU,pElementM(rtrn),ColM(rtrn),RowM(rtrn),0,1^MajorFormLU,1^MajorForm(rtrn));
                bSolveUnitTriangular(LU,pElementM(rtrn),ColM(rtrn),RowM(rtrn),1,1^MajorFormLU,1^MajorForm(rtrn));
                bPermutationMultiply(p,pElementM(rtrn),ColM(rtrn),RowM(rtrn),ColM(rtrn),0,1^MajorForm(rtrn));
-              } 
+              }
            free(LU);
           }
         free(p);
@@ -2403,15 +2403,15 @@ TMatrix ProductInverseMM(TMatrix X, TMatrix Y, TMatrix Z)
      Z : n x n upper triangular matrix
 
    Results
-     X = Y * Inverse(Z).  
-    
+     X = Y * Inverse(Z).
+
    Returns
      Returns X upon success, null otherwise.
 
    Notes
-     Size permitting, X, Y and Z do not have to be distinct. Uses back 
-     substitution.  A null return indicates that either Y or Z was null, 
-     Z was singular, or the matrices were not of the required size.  Call 
+     Size permitting, X, Y and Z do not have to be distinct. Uses back
+     substitution.  A null return indicates that either Y or Z was null,
+     Z was singular, or the matrices were not of the required size.  Call
      Getdw_Error() to determine which of these occured.
 */
 TMatrix ProductInverseMU(TMatrix X, TMatrix Y, TMatrix Z)
@@ -2419,11 +2419,11 @@ TMatrix ProductInverseMU(TMatrix X, TMatrix Y, TMatrix Z)
  PRECISION *ptr;
  TMatrix rtrn=(TMatrix)NULL;
  int err;
- if (!Y || !Z) 
-   dw_Error(NULL_ERR); 
+ if (!Y || !Z)
+   dw_Error(NULL_ERR);
   else
    if ((RowM(Z) != ColM(Z)) || (ColM(Y) != RowM(Z)))
-     dw_Error(SIZE_ERR); 
+     dw_Error(SIZE_ERR);
     else
      if (X == Z)
        if (!(ptr=(PRECISION*)malloc(RowM(Z)*RowM(Z)*sizeof(PRECISION))))
@@ -2447,7 +2447,7 @@ TMatrix ProductInverseMU(TMatrix X, TMatrix Y, TMatrix Z)
           if (rtrn != X) FreeMatrix(rtrn);
           rtrn=(TMatrix)NULL;
           dw_Error(err);
-         } 
+         }
  return rtrn;
 }
 
@@ -2458,15 +2458,15 @@ TMatrix ProductInverseMU(TMatrix X, TMatrix Y, TMatrix Z)
      Z : n x n upper triangular matrix
 
    Results
-     X = Y * Inverse(Z).  
-    
+     X = Y * Inverse(Z).
+
    Returns
      Returns X upon success, null otherwise.
 
    Notes
-     Size permitting, X, Y and Z do not have to be distinct. Uses back 
-     substitution.  A null return indicates that either Y or Z was null, 
-     Z was singular, or the matrices were not of the required size.  Call 
+     Size permitting, X, Y and Z do not have to be distinct. Uses back
+     substitution.  A null return indicates that either Y or Z was null,
+     Z was singular, or the matrices were not of the required size.  Call
      GetError() to determine which of these occured.
 */
 TMatrix ProductInverseML(TMatrix X, TMatrix Y, TMatrix Z)
@@ -2474,11 +2474,11 @@ TMatrix ProductInverseML(TMatrix X, TMatrix Y, TMatrix Z)
  PRECISION *ptr;
  TMatrix rtrn=(TMatrix)NULL;
  int err;
- if (!Y || !Z) 
-   dw_Error(NULL_ERR); 
+ if (!Y || !Z)
+   dw_Error(NULL_ERR);
   else
    if ((RowM(Z) != ColM(Z)) || (ColM(Y) != RowM(Z)))
-     dw_Error(SIZE_ERR); 
+     dw_Error(SIZE_ERR);
     else
      if (X == Z)
        if (!(ptr=(PRECISION*)malloc(RowM(Z)*RowM(Z)*sizeof(PRECISION))))
@@ -2502,7 +2502,7 @@ TMatrix ProductInverseML(TMatrix X, TMatrix Y, TMatrix Z)
           if (rtrn != X) FreeMatrix(rtrn);
           rtrn=(TMatrix)NULL;
           dw_Error(err);
-         } 
+         }
  return rtrn;
 }
 /*******************************************************************************/
@@ -2534,20 +2534,20 @@ TMatrix Inverse_LU(TMatrix X, TMatrix Y)
  PRECISION *LU;
  int *p;
  TMatrix rtrn=(TMatrix)NULL;
- if (!Y) 
-   dw_Error(NULL_ERR); 
+ if (!Y)
+   dw_Error(NULL_ERR);
   else
    if (RowM(Y) != ColM(Y))
-     dw_Error(SIZE_ERR); 
+     dw_Error(SIZE_ERR);
     else
      if (!(p=(int*)malloc(RowM(Y)*sizeof(int))))
-       dw_Error(MEM_ERR); 
+       dw_Error(MEM_ERR);
       else
        {
         if (!(LU=(PRECISION*)malloc(RowM(Y)*RowM(Y)*sizeof(PRECISION))))
           dw_Error(MEM_ERR);
          else
-          {  
+          {
            memcpy(LU,pElementM(Y),RowM(Y)*RowM(Y)*sizeof(PRECISION));
            if (bLU(p,LU,RowM(Y),RowM(Y),MajorForm(Y)))
              dw_Error(SING_ERR);
@@ -2556,7 +2556,7 @@ TMatrix Inverse_LU(TMatrix X, TMatrix Y)
               {
                bPermutationMultiply(p,pElementM(rtrn),RowM(rtrn),ColM(rtrn),RowM(Y),1,MajorForm(rtrn));
                bSolveUnitTriangular(LU,pElementM(rtrn),RowM(rtrn),ColM(rtrn),0,MajorForm(Y),MajorForm(rtrn));
-               bSolveTriangular(LU,pElementM(rtrn),RowM(rtrn),ColM(rtrn),1,MajorForm(Y),MajorForm(rtrn));                        
+               bSolveTriangular(LU,pElementM(rtrn),RowM(rtrn),ColM(rtrn),1,MajorForm(Y),MajorForm(rtrn));
               }
            free(LU);
           }
@@ -2594,55 +2594,55 @@ TMatrix Inverse_SVD(TMatrix X, TMatrix Y)
       dw_Error(SIZE_ERR);
     else
       if (!(U=(PRECISION*)malloc(RowM(Y)*RowM(Y)*sizeof(PRECISION))))
-	dw_Error(MEM_ERR);
+    dw_Error(MEM_ERR);
       else
-	{
-	  if (!(V=(PRECISION*)malloc(RowM(Y)*RowM(Y)*sizeof(PRECISION))))
-	    dw_Error(MEM_ERR);
-	  else
-	    {
-	      if (!(d=(PRECISION*)malloc(RowM(Y)*sizeof(PRECISION))))
-		dw_Error(MEM_ERR);
-	      else
-		{
-		  if (err=bSVD(U,d,V,pElementM(Y),RowM(Y),RowM(Y),MajorForm(Y),1^MajorForm(Y),MajorForm(Y)))
-		    dw_Error(err);
-		  else
-		    {
-		      for (tolerance=d[0], j=RowM(Y)-1; j > 0; j--)
-			if (tolerance < d[j]) tolerance=d[j];
-		      tolerance*=MACHINE_EPSILON;
-		      for (k=RowM(Y)*RowM(Y), j=RowM(Y)-1; j >= 0; j--)
-			{
-			  if (d[j] < tolerance)
-			    {
-			      dw_Error(SING_ERR);
-			      free(U);
-			      free(V);
-			      free(d);
-			      return (TMatrix)NULL;
-			    }
-			  scale=1.0/d[j];
-			  if (MajorForm(Y))
-			    for (i=--k; i >= 0; i-=RowM(Y)) V[i]*=scale;
-			  else
-			    for (i=RowM(Y)-1; i >= 0; i--) V[--k]*=scale;
-			}
-		      if (X)
-			if ((RowM(X) != RowM(Y)) || (ColM(X) != RowM(Y)))
-			  dw_Error(SIZE_ERR);
-			else
-			  bMatrixMultiply(pElementM(rtrn=X),V,U,RowM(Y),RowM(Y),RowM(Y),MajorForm(X),1^MajorForm(Y),1^MajorForm(Y));
-		      else
-			if (rtrn=CreateMatrix(RowM(Y),RowM(Y)))
-			  bMatrixMultiply(pElementM(rtrn),V,U,RowM(Y),RowM(Y),RowM(Y),MajorForm(rtrn),1^MajorForm(Y),1^MajorForm(Y));
-		    }
-		  free(d);
-		}
-	      free(V);
-	    }
-	  free(U);
-	}
+    {
+      if (!(V=(PRECISION*)malloc(RowM(Y)*RowM(Y)*sizeof(PRECISION))))
+        dw_Error(MEM_ERR);
+      else
+        {
+          if (!(d=(PRECISION*)malloc(RowM(Y)*sizeof(PRECISION))))
+        dw_Error(MEM_ERR);
+          else
+        {
+          if (err=bSVD(U,d,V,pElementM(Y),RowM(Y),RowM(Y),MajorForm(Y),1^MajorForm(Y),MajorForm(Y)))
+            dw_Error(err);
+          else
+            {
+              for (tolerance=d[0], j=RowM(Y)-1; j > 0; j--)
+            if (tolerance < d[j]) tolerance=d[j];
+              tolerance*=MACHINE_EPSILON;
+              for (k=RowM(Y)*RowM(Y), j=RowM(Y)-1; j >= 0; j--)
+            {
+              if (d[j] < tolerance)
+                {
+                  dw_Error(SING_ERR);
+                  free(U);
+                  free(V);
+                  free(d);
+                  return (TMatrix)NULL;
+                }
+              scale=1.0/d[j];
+              if (MajorForm(Y))
+                for (i=--k; i >= 0; i-=RowM(Y)) V[i]*=scale;
+              else
+                for (i=RowM(Y)-1; i >= 0; i--) V[--k]*=scale;
+            }
+              if (X)
+            if ((RowM(X) != RowM(Y)) || (ColM(X) != RowM(Y)))
+              dw_Error(SIZE_ERR);
+            else
+              bMatrixMultiply(pElementM(rtrn=X),V,U,RowM(Y),RowM(Y),RowM(Y),MajorForm(X),1^MajorForm(Y),1^MajorForm(Y));
+              else
+            if (rtrn=CreateMatrix(RowM(Y),RowM(Y)))
+              bMatrixMultiply(pElementM(rtrn),V,U,RowM(Y),RowM(Y),RowM(Y),MajorForm(rtrn),1^MajorForm(Y),1^MajorForm(Y));
+            }
+          free(d);
+        }
+          free(V);
+        }
+      free(U);
+    }
   return rtrn;
 }
 
@@ -2718,22 +2718,22 @@ TMatrix Inverse_UT(TMatrix X, TMatrix T)
  int err;
  if (!T)
   {
-   dw_Error(NULL_ERR); 
-   return (TMatrix)NULL; 
+   dw_Error(NULL_ERR);
+   return (TMatrix)NULL;
   }
  if (RowM(T) != ColM(T))
   {
-   dw_Error(SIZE_ERR); 
-   return (TMatrix)NULL; 
+   dw_Error(SIZE_ERR);
+   return (TMatrix)NULL;
   }
  if (!X)
    {
     if (X=IdentityMatrix(X,RowM(T)))
      if (err=bSolveTriangular(pElementM(T),pElementM(X),RowM(T),RowM(T),1,MajorForm(T),MajorForm(X)))
       {
-       dw_Error(err); 
-       FreeMatrix(X); 
-       return (TMatrix)NULL; 
+       dw_Error(err);
+       FreeMatrix(X);
+       return (TMatrix)NULL;
       }
    }
   else
@@ -2741,25 +2741,25 @@ TMatrix Inverse_UT(TMatrix X, TMatrix T)
      {
       if (!(ptr=(PRECISION*)malloc(RowM(T)*RowM(T)*sizeof(PRECISION))))
        {
-        dw_Error(MEM_ERR); 
-        return (TMatrix)NULL; 
+        dw_Error(MEM_ERR);
+        return (TMatrix)NULL;
        }
       memcpy(ptr,pElementM(T),RowM(T)*RowM(T)*sizeof(PRECISION));
-      if (X=IdentityMatrix(X,RowM(T))) 
+      if (X=IdentityMatrix(X,RowM(T)))
        if (err=bSolveTriangular(ptr,pElementM(X),RowM(T),RowM(T),1,MajorForm(T),MajorForm(X)))
         {
-         dw_Error(err); 
-         free(ptr); 
-         return (TMatrix)NULL; 
-        }     
+         dw_Error(err);
+         free(ptr);
+         return (TMatrix)NULL;
+        }
       free(ptr);
      }
     else
-     if (X=IdentityMatrix(X,RowM(T))) 
+     if (X=IdentityMatrix(X,RowM(T)))
       if (err=bSolveTriangular(pElementM(T),pElementM(X),RowM(T),RowM(T),1,MajorForm(T),MajorForm(X)))
        {
-        dw_Error(err); 
-        return (TMatrix)NULL; 
+        dw_Error(err);
+        return (TMatrix)NULL;
        }
  return X;
 }
@@ -2788,21 +2788,21 @@ TMatrix Inverse_LT(TMatrix X, TMatrix T)
  if (!T)
   {
    dw_Error(NULL_ERR);
-   return (TMatrix)NULL; 
+   return (TMatrix)NULL;
   }
  if (RowM(T) != ColM(T))
   {
-   dw_Error(SIZE_ERR); 
-   return (TMatrix)NULL; 
+   dw_Error(SIZE_ERR);
+   return (TMatrix)NULL;
   }
  if (!X)
    {
     if (X=IdentityMatrix(X,RowM(T)))
      if (err=bSolveTriangular(pElementM(T),pElementM(X),RowM(T),RowM(T),0,MajorForm(T),MajorForm(X)))
       {
-       dw_Error(err); 
-       FreeMatrix(X); 
-       return (TMatrix)NULL; 
+       dw_Error(err);
+       FreeMatrix(X);
+       return (TMatrix)NULL;
       }
    }
   else
@@ -2810,25 +2810,25 @@ TMatrix Inverse_LT(TMatrix X, TMatrix T)
      {
       if (!(ptr=(PRECISION*)malloc(RowM(T)*RowM(T)*sizeof(PRECISION))))
        {
-        dw_Error(MEM_ERR); 
-        return (TMatrix)NULL; 
+        dw_Error(MEM_ERR);
+        return (TMatrix)NULL;
        }
       memcpy(ptr,pElementM(T),RowM(T)*RowM(T)*sizeof(PRECISION));
       if (X=IdentityMatrix(X,RowM(T)))
        if (err=bSolveTriangular(ptr,pElementM(X),RowM(T),RowM(T),0,MajorForm(T),MajorForm(X)))
         {
-         dw_Error(err); 
-         free(ptr); 
-         return (TMatrix)NULL; 
-        }     
+         dw_Error(err);
+         free(ptr);
+         return (TMatrix)NULL;
+        }
       free(ptr);
      }
     else
      if (X=IdentityMatrix(X,RowM(T)))
       if (err=bSolveTriangular(pElementM(T),pElementM(X),RowM(T),RowM(T),0,MajorForm(T),MajorForm(X)))
        {
-        dw_Error(err); 
-        return (TMatrix)NULL; 
+        dw_Error(err);
+        return (TMatrix)NULL;
        }
  return X;
 }
@@ -2868,7 +2868,7 @@ PRECISION Norm(TVector x)
      Returns the Euclidean norm of x.
 
    Notes
-     The Euclidean norm is the square root of the sum of the squares of the 
+     The Euclidean norm is the square root of the sum of the squares of the
      elements of X
 */
 PRECISION MatrixNormEuclidean(TMatrix X)
@@ -2931,7 +2931,7 @@ PRECISION MatrixNorm(TMatrix X)
      returns dot product of x and y.
 
    Notes
-     On error returns 0.0.  Call GetError() to 
+     On error returns 0.0.  Call GetError() to
      determine the type of error.
 */
 PRECISION DotProduct(TVector x, TVector y)
@@ -2964,7 +2964,7 @@ PRECISION DotProduct(TVector x, TVector y)
 
    Notes
      In order for S to be a inner product, S must be positive definite
-     and symmetric.  A zero return could indicate a error condition.  
+     and symmetric.  A zero return could indicate a error condition.
      Call GetError() to determine if an error has occured.
 */
 PRECISION InnerProduct(TVector x, TVector y, TMatrix S)
@@ -3012,8 +3012,8 @@ TMatrix OuterProduct(TMatrix X, TVector y, TVector z)
   else
     if ((RowM(X) != DimV(y)) || (ColM(X) != DimV(z)))
       {
-	dw_Error(SIZE_ERR);
-	return (TMatrix)NULL;
+    dw_Error(SIZE_ERR);
+    return (TMatrix)NULL;
       }
   for (i=DimV(y)-1; i >= 0; i--)
     for (j=DimV(z)-1; j >= 0; j--)
@@ -3044,17 +3044,17 @@ PRECISION Determinant_LU(TMatrix X)
      dw_Error(SIZE_ERR);
     else
      if (!(p=(int*)malloc(RowM(X)*sizeof(int))))
-       dw_Error(MEM_ERR); 
+       dw_Error(MEM_ERR);
       else
        {
         if (!(LU=(PRECISION*)malloc(RowM(X)*RowM(X)*sizeof(PRECISION))))
           dw_Error(MEM_ERR);
          else
-          {  
+          {
            memcpy(LU,pElementM(X),RowM(X)*RowM(X)*sizeof(PRECISION));
            if (!bLU(p,LU,RowM(X),RowM(X),1))
-            { 
-             for (sgn=1, i=RowM(X)-2; i >= 0; i--) 
+            {
+             for (sgn=1, i=RowM(X)-2; i >= 0; i--)
               if (p[i] != i) sgn=-sgn;
              for (rtrn=0.0, i=RowM(X)*RowM(X)-1; i >= 0; i-=RowM(X)+1)
               if (LU[i] < 0.0)
@@ -3068,10 +3068,10 @@ PRECISION Determinant_LU(TMatrix X)
                  else
                   break;
              rtrn=(i >= 0) ? 0.0 : sgn*exp(rtrn);
-            }   
-           dw_ClearError();       
+            }
+           dw_ClearError();
            free(LU);
-          } 
+          }
         free(p);
        }
  return rtrn;
@@ -3100,31 +3100,31 @@ PRECISION LogAbsDeterminant_LU(TMatrix X)
      dw_Error(SIZE_ERR);
     else
      if (!(p=(int*)malloc(RowM(X)*sizeof(int))))
-       dw_Error(MEM_ERR); 
+       dw_Error(MEM_ERR);
       else
        {
         if (!(LU=(PRECISION*)malloc(RowM(X)*RowM(X)*sizeof(PRECISION))))
           dw_Error(MEM_ERR);
          else
-          {  
+          {
            memcpy(LU,pElementM(X),RowM(X)*RowM(X)*sizeof(PRECISION));
            if (!bLU(p,LU,RowM(X),RowM(X),1))
-            { 
+            {
              for (i=RowM(X)*RowM(X)-1; i >= 0; i-=RowM(X)+1)
               if (LU[i] < 0.0)
                  rtrn+=log(-LU[i]);
                else
                 if (LU[i] > 0.0)
                   rtrn+=log(LU[i]);
-		else
-		  {
-		    rtrn=MINUS_INFINITY;
-		    break;
-		  }
-	     dw_ClearError();
-            }       
+        else
+          {
+            rtrn=MINUS_INFINITY;
+            break;
+          }
+         dw_ClearError();
+            }
            free(LU);
-          } 
+          }
         free(p);
        }
  return rtrn;
@@ -3198,7 +3198,7 @@ PRECISION Trace(TMatrix X)
  if (!X)
    dw_Error(NULL_ERR);
   else
-   if (RowM(X) != ColM(X)) 
+   if (RowM(X) != ColM(X))
      dw_Error(SIZE_ERR);
     else
      for (trace=ElementM(X,0,0), i=RowM(X)-1; i > 0; i--) trace+=ElementM(X,i,i);
@@ -3242,12 +3242,12 @@ int Rank_SVD(TMatrix X)
               dw_Error(i);
              else
               {
-               for (min=ElementV(d,0), i=DimV(d)-1; i > 0; i--) 
-                if (ElementV(d,i) > min) 
+               for (min=ElementV(d,0), i=DimV(d)-1; i > 0; i--)
+                if (ElementV(d,i) > min)
                  min=ElementV(d,i);
                /*min*=((RowM(X) < ColM(X)) ? RowM(X) : ColM(X))*MACHINE_EPSILON;*/
                min*=SQRT_MACHINE_EPSILON;
-               for (i=(rank=DimV(d))-1; i >= 0; i--) 
+               for (i=(rank=DimV(d))-1; i >= 0; i--)
                 if (ElementV(d,i) < min) rank--;
               }
             FreeVector(d);
@@ -3273,7 +3273,7 @@ int Rank_SVD(TMatrix X)
       (1) Y'x = 0
       (2) det([Y x]) >= 0
       (3) norm(x) = volume of the parallelpiped spanned by the columns of Y
-     
+
      Uses the LU decomposition to compute the cross product.
 */
 
@@ -3290,8 +3290,8 @@ TVector CrossProduct_LU(TVector x, TMatrix Y)
    return (TVector)NULL;
   }
  if (RowM(Y) != ColM(Y)+1)
-  { 
-   dw_Error(SIZE_ERR); 
+  {
+   dw_Error(SIZE_ERR);
    return (TVector)NULL;
   }
  if (!x)
@@ -3300,10 +3300,10 @@ TVector CrossProduct_LU(TVector x, TMatrix Y)
      return (TVector)NULL;
    }
   else
-   if (RowM(Y) != DimV(x)) 
-    { 
-     dw_Error(SIZE_ERR); 
-     return (TVector)NULL; 
+   if (RowM(Y) != DimV(x))
+    {
+     dw_Error(SIZE_ERR);
+     return (TVector)NULL;
     }
  if (X=CreateMatrix(RowM(Y),ColM(Y)))
   {
@@ -3316,10 +3316,10 @@ TVector CrossProduct_LU(TVector x, TMatrix Y)
          {
           ElementV(x,i)=0.0;
           for (j=RowM(Y)-1; j > i; j--)
-           ElementV(x,i)-=ElementV(x,j)*ElementM(X,j,i); 
+           ElementV(x,i)-=ElementV(x,j)*ElementM(X,j,i);
          }
         ProductTransposeVP(x,x,P);
-        for (sgn=1, i=RowM(X)-2; i >= 0; i--) 
+        for (sgn=1, i=RowM(X)-2; i >= 0; i--)
          if (ElementP(P,i) != i) sgn=-sgn;
         for (s=0.0, i=RowM(X)-2; i >= 0; i--)
          if (ElementM(X,i,i) < 0.0)
@@ -3337,12 +3337,12 @@ TVector CrossProduct_LU(TVector x, TMatrix Y)
        }
       else
        {
-        FreePermutation(P); 
-        FreeMatrix(X);         
+        FreePermutation(P);
+        FreeMatrix(X);
         if (z) FreeVector(z);
         return (TVector)NULL;
        }
-     FreePermutation(P);      
+     FreePermutation(P);
     }
    FreeMatrix(X);
   }
@@ -3363,7 +3363,7 @@ TVector CrossProduct_LU(TVector x, TMatrix Y)
       (1) Y'x = 0
       (2) det([Y x]) >= 0
       (3) norm(x) = volume of the parallelpiped spanned by the columns of Y
-     
+
      Uses the QR decomposition to compute the cross product.
 */
 
@@ -3376,24 +3376,24 @@ TVector CrossProduct_QR(TVector x, TMatrix Y)
 
  if (!Y)
   {
-   dw_Error(NULL_ERR); 
-   return (TVector)NULL; 
+   dw_Error(NULL_ERR);
+   return (TVector)NULL;
   }
  if (RowM(Y) != ColM(Y)+1)
   {
    dw_Error(SIZE_ERR);
-   return (TVector)NULL; 
+   return (TVector)NULL;
   }
- if (!x) 
+ if (!x)
    {
-    if (!(z=x=CreateVector(RowM(Y)))) 
+    if (!(z=x=CreateVector(RowM(Y))))
      return (TVector)NULL;
    }
   else
-   if (RowM(Y) != DimV(x)) 
-    { 
-     dw_Error(SIZE_ERR); 
-     return (TVector)NULL; 
+   if (RowM(Y) != DimV(x))
+    {
+     dw_Error(SIZE_ERR);
+     return (TVector)NULL;
     }
  if (Q=CreateMatrix(RowM(Y),RowM(Y)))
   {
@@ -3420,11 +3420,11 @@ TVector CrossProduct_QR(TVector x, TMatrix Y)
       else
        {
         FreeMatrix(R);
-        FreeMatrix(Q); 
+        FreeMatrix(Q);
         if (z) FreeVector(z);
         return (TVector)NULL;
        }
-     FreeMatrix(R);      
+     FreeMatrix(R);
     }
    FreeMatrix(Q);
   }
@@ -3436,20 +3436,20 @@ TVector CrossProduct_QR(TVector x, TMatrix Y)
      Y : m x n matrix
 
    Returns
-     Upon success, the columns of the returned matrix form an orthonormal basis 
+     Upon success, the columns of the returned matrix form an orthonormal basis
      for the null space of Y.  A null return either indicates the null space is
-     {0} or an error condition.  Call dw_GetError() to determine if a failure 
+     {0} or an error condition.  Call dw_GetError() to determine if a failure
      occured.
 
    Notes
-     Use the singular value decomposition to compute the null space.  
+     Use the singular value decomposition to compute the null space.
 
-     If the largest singular value of Y is less than or equal to the square root 
-     of machine epsilon, then the matrix is assumed to be the zero matrix  and 
-     the null space is all of n-dimensional Euclidean space.  For this reason, 
-     care must be taken with the scale of Y.  
+     If the largest singular value of Y is less than or equal to the square root
+     of machine epsilon, then the matrix is assumed to be the zero matrix  and
+     the null space is all of n-dimensional Euclidean space.  For this reason,
+     care must be taken with the scale of Y.
 
-     A singular value is assumed to be zero if it is smaller than the square root 
+     A singular value is assumed to be zero if it is smaller than the square root
      of the minimum of m and n times machine epsilon.
 */
 TMatrix NullSpace(TMatrix Y)
@@ -3468,21 +3468,21 @@ TMatrix NullSpace(TMatrix Y)
   if (d && v)
     {
       if (bSVD_new((PRECISION*)NULL,d,pElementM(v),pElementM(Y),RowM(Y),ColM(Y),1,MajorForm(v),MajorForm(Y),0) != NO_ERR)
-	{
-	  FreeMatrix(v);
-	  free(d);
-	  dw_Error(BLAS_LAPACK_ERR);
-	  return (TMatrix)NULL;
-	}
+    {
+      FreeMatrix(v);
+      free(d);
+      dw_Error(BLAS_LAPACK_ERR);
+      return (TMatrix)NULL;
+    }
       dw_ClearError();
       if (d[0] < SQRT_MACHINE_EPSILON)
-	{
-	  free(d);
-	  return v;
-	}
+    {
+      free(d);
+      return v;
+    }
       small=d[0]*SQRT_MACHINE_EPSILON*sqrt(q);
       for (i=q-1; i > 0; i--)
-	if (d[i] > small) break;
+    if (d[i] > small) break;
       null=(++i == ColM(Y)) ? (TMatrix)NULL : SubMatrix((TMatrix)NULL,v,0,i,ColM(Y),ColM(Y)-i);
       FreeMatrix(v);
       free(d);
@@ -3511,9 +3511,9 @@ TMatrix NullSpace(TMatrix Y)
       (c) X*Y and Y*X are symmetric
 
    Notes
-     Use the singular value decomposition to compute the null space.  
+     Use the singular value decomposition to compute the null space.
 
-     A singular value is assumed to be zero if it is smaller than the square root 
+     A singular value is assumed to be zero if it is smaller than the square root
      of the minimum of m and n times machine epsilon.
 */
 TMatrix GeneralizedInverse(TMatrix X, TMatrix Y)
@@ -3533,8 +3533,8 @@ TMatrix GeneralizedInverse(TMatrix X, TMatrix Y)
   else
     if ((RowM(X) != ColM(Y)) || (ColM(X) != RowM(Y)))
       {
-	dw_Error(SIZE_ERR);
-	return (TMatrix)NULL;
+    dw_Error(SIZE_ERR);
+    return (TMatrix)NULL;
       }
   q=(RowM(Y) < ColM(Y)) ? RowM(Y) : ColM(Y);
   d=(PRECISION*)malloc(q*sizeof(PRECISION));
@@ -3543,24 +3543,24 @@ TMatrix GeneralizedInverse(TMatrix X, TMatrix Y)
   if (d && u && v)
     {
       if (bSVD_new(pElementM(u),d,pElementM(v),pElementM(Y),RowM(Y),ColM(Y),MajorForm(u),MajorForm(v),MajorForm(Y),1) != NO_ERR)
-	{
-	  FreeMatrix(v);
-	  FreeMatrix(u);
-	  free(d);
-	  dw_Error(BLAS_LAPACK_ERR);
-	  return (TMatrix)NULL;
-	}
+    {
+      FreeMatrix(v);
+      FreeMatrix(u);
+      free(d);
+      dw_Error(BLAS_LAPACK_ERR);
+      return (TMatrix)NULL;
+    }
 
       small=d[0]*SQRT_MACHINE_EPSILON*sqrt(q);
       for (i=q-1; i > 0; i--)
-	if (d[i] > small) break;
+    if (d[i] > small) break;
       i++;
       w=CreateMatrix(RowM(Y),i);
       for (j=ColM(w)-1; j >= 0; j--)
-	for (x=1.0/d[j], i=RowM(w)-1; i >= 0; i--)
-	  ElementM(w,i,j)=x*ElementM(u,i,j);
+    for (x=1.0/d[j], i=RowM(w)-1; i >= 0; i--)
+      ElementM(w,i,j)=x*ElementM(u,i,j);
 
-      y=(ColM(w) == q) ? v : SubMatrix((TMatrix)NULL,v,0,0,RowM(Y),ColM(w)); 
+      y=(ColM(w) == q) ? v : SubMatrix((TMatrix)NULL,v,0,0,RowM(Y),ColM(w));
       ProductTransposeMM(X,y,w);
 
       if (y != v) FreeMatrix(y);
@@ -3597,13 +3597,13 @@ TVector Vec(TVector x, TMatrix Y)
   if (!x)
     {
       if (!(x=CreateVector(RowM(Y)*ColM(Y))))
-	return (TVector)NULL;
+    return (TVector)NULL;
     }
   else
     if (RowM(Y)*ColM(Y) != DimV(x))
       {
-	dw_Error(SIZE_ERR);
-	return (TVector)NULL;
+    dw_Error(SIZE_ERR);
+    return (TVector)NULL;
       }
   if (MajorForm(Y))
     memcpy(pElementV(x),pElementM(Y),RowM(Y)*ColM(Y)*sizeof(PRECISION));
@@ -3664,7 +3664,7 @@ TMatrix KroneckerProduct(TMatrix X, TMatrix Y, TMatrix Z)
      Prints x to f using format.
 
    Notes
-     If format is the NULL pointer, uses default formating.  The elements of x 
+     If format is the NULL pointer, uses default formating.  The elements of x
      are output as double independently of the setting of PRECISION.  Currently,
      the function does not check for failure.
 */
@@ -3722,9 +3722,9 @@ int dw_ReadVector(FILE *f, TVector x)
  if (!x) return 0;
  for (px=pElementV(x), i=0, m=DimV(x); i < m; i++)
 #if (PRECISION_SIZE == 8)
- if (fscanf(f," %lf ",px+i) != 1) return 0; 
+ if (fscanf(f," %lf ",px+i) != 1) return 0;
 #else
- if (fscanf(f," %f ",px+i) != 1) return 0; 
+ if (fscanf(f," %f ",px+i) != 1) return 0;
 #endif
  return 1;
 }
@@ -3747,7 +3747,7 @@ int dw_ReadMatrix(FILE *f, TMatrix X)
 #if (PRECISION_SIZE == 8)
    if (fscanf(f," %lf ",&ElementM(X,i,j)) != 1) return 0;
 #else
-  if (fscanf(f," %f ",&Element(X,i,j))) != 1) return 0; 
+  if (fscanf(f," %f ",&Element(X,i,j))) != 1) return 0;
 #endif
  return 1;
 }
@@ -3758,7 +3758,7 @@ int dw_ReadMatrix(FILE *f, TMatrix X)
      x : m matrix
 
    Results
-     Outputs x in binary format.  
+     Outputs x in binary format.
 
    Returns
      1 upon success, 0 upon failure
@@ -3784,7 +3784,7 @@ int OutVectorFloat(FILE *f, TVector x)
  if (fwrite(&format_code,sizeof(int),1,f) != 1) return 0;
  if (fwrite(&DimV(x),sizeof(int),1,f) != 1) return 0;
 #if (PRECISION_SIZE == 8)
- for (i=DimV(x)-1; i >= 0; i--) 
+ for (i=DimV(x)-1; i >= 0; i--)
   {
    y=(float)ElementV(x,i);
    if (fwrite(&y,sizeof(float),1,f) != 1) return 0;
@@ -3823,14 +3823,14 @@ int OutVectorDouble(FILE *f, TVector x)
  if (!x) return 0;
  if (fwrite(&format_code,sizeof(int),1,f) == 1) return 0;
  if (fwrite(&DimV(x),sizeof(int),1,f) != 1) return 0;
-#if (PRECISION_SIZE == 8) 
-  for (i=DimV(x)-1; i >= 0; i--) 
+#if (PRECISION_SIZE == 8)
+  for (i=DimV(x)-1; i >= 0; i--)
    {
     y=(double)ElementV(x,i);
     if (fwrite(&y,sizeof(double),1,f) != 1) return 0;
    }
 #else
- if (fwrite(pElementV(x),DimV(x)*sizeof(double),1,f) != 1) return 0; 
+ if (fwrite(pElementV(x),DimV(x)*sizeof(double),1,f) != 1) return 0;
 #endif
  return 1;
 }
@@ -3870,7 +3870,7 @@ int OutMatrixFloat(FILE *f, TMatrix X)
     {
      y=(float)ElementM(X,i,j);
      if (fwrite(&y,sizeof(float),1,f) != 1) return 0;
-    } 
+    }
 #else
  if (fwrite(pElementM(X),RowM(X)*ColM(X)*sizeof(float),1,f) != 1) return 0;
 #endif
@@ -3914,7 +3914,7 @@ int OutMatrixDouble(FILE *f, TMatrix X)
      if (fwrite(&y,sizeof(double),1,f) != 1) return 0;
     }
 #else
- if (fwrite(pElementM(X),RowM(X)*ColM(X)*sizeof(double),1,f) != 1) return 0; 
+ if (fwrite(pElementM(X),RowM(X)*ColM(X)*sizeof(double),1,f) != 1) return 0;
 #endif
  return 1;
 }
@@ -4102,18 +4102,18 @@ EXIT_ERROR:
 
 /*
    Assumes
-     U : m x qu matrix where qu is either m or min(m,n) 
+     U : m x qu matrix where qu is either m or min(m,n)
      d : min(m,n)-vector
      V : n x qv matrix where qv is either n or min(m,n)
      A : m x n matrix
 
    Returns
-     1 upon success, and 0 on failure.  
+     1 upon success, and 0 on failure.
 
    Results
-     Finds U, V and d such that A = U * diag(d) * V'.  The matrices U and V have 
-     orthonormal columns and the elemets of d are non-negative.  Here, diag(d) 
-     denotes is the qu x qv diagonal matrix with the elements of d along the 
+     Finds U, V and d such that A = U * diag(d) * V'.  The matrices U and V have
+     orthonormal columns and the elemets of d are non-negative.  Here, diag(d)
+     denotes is the qu x qv diagonal matrix with the elements of d along the
      diagonal.  The elements of d are non-negative and in descending order.
 */
 int SVD(TMatrix U, TVector d, TMatrix V, TMatrix A)
@@ -4133,48 +4133,48 @@ int SVD(TMatrix U, TVector d, TMatrix V, TMatrix A)
    {
      if (U == V)
        {
-	 dw_Error(ARG_ERR);
-	 return 0;
+     dw_Error(ARG_ERR);
+     return 0;
        }
      if (RowM(U) != RowM(A))
        {
-	 dw_Error(SIZE_ERR);
-	 return 0;
+     dw_Error(SIZE_ERR);
+     return 0;
        }
      if (ColM(U) != DimV(d))
        {
-	 compact=0;
-	 if (ColM(U) != RowM(U)) 
-	   {
-	     dw_Error(SIZE_ERR);
-	     return 0;
-	   }
+     compact=0;
+     if (ColM(U) != RowM(U))
+       {
+         dw_Error(SIZE_ERR);
+         return 0;
+       }
        }
    }
  if (V)
    {
      if (RowM(V) != ColM(A))
        {
-	 dw_Error(SIZE_ERR);
-	 return 0;
+     dw_Error(SIZE_ERR);
+     return 0;
        }
      if (ColM(V) != DimV(d))
        {
-	 compact=0;
-	 if (ColM(V) != RowM(V)) 
-	   {
-	     dw_Error(SIZE_ERR);
-	     return 0;
-	   }
+     compact=0;
+     if (ColM(V) != RowM(V))
+       {
+         dw_Error(SIZE_ERR);
+         return 0;
+       }
        }
    }
 
  if (err=bSVD_new(U ? pElementM(U) : (PRECISION*)NULL,pElementV(d),V ? pElementM(V) : (PRECISION*)NULL,
-		  pElementM(A),RowM(A),ColM(A),U ? MajorForm(U) : 1,V ? MajorForm(V) : 1,MajorForm(A),compact))
+          pElementM(A),RowM(A),ColM(A),U ? MajorForm(U) : 1,V ? MajorForm(V) : 1,MajorForm(A),compact))
   {
     dw_Error(err);
     return 0;
-  } 
+  }
  return 1;
 }
 
@@ -4191,11 +4191,11 @@ int SVD(TMatrix U, TVector d, TMatrix V, TMatrix A)
      beta    : n vector or null pointer
 
    Returns
-     1 upon success, and 0 on failure.  
+     1 upon success, and 0 on failure.
 
    Results
-     Finds orthogonal matrices Q and Z, an block upper triangular matrix S with 
-     1 x 1 or 2 x 2 blocks along the diagonal, and an upper triangular matrix T 
+     Finds orthogonal matrices Q and Z, an block upper triangular matrix S with
+     1 x 1 or 2 x 2 blocks along the diagonal, and an upper triangular matrix T
      such that
 
                         A = Q*S*Z'   and    B = Q*T*Z'
@@ -4203,18 +4203,18 @@ int SVD(TMatrix U, TVector d, TMatrix V, TMatrix A)
      the vectors alpha_r, alpha_i, and beta contain the generalized eigenvalues
      of A and B.  alpha_r contains the real part of alpha and alpha_i contains
      the imginary part.
- 
+
      If Q, Z, alpha_r, alpha_i, or beta is null, then it is not returned.
 
    Notes
-     The generalized eigenvalue is (alpha_r + i*alpha_i)/beta, but because beta 
+     The generalized eigenvalue is (alpha_r + i*alpha_i)/beta, but because beta
      can be zero, alpha and beta are returned separately.  The matrix A can be
      equal to the matrix B, but all other matrices should be distinct.
 */
 int QZ_Real(TMatrix S, TMatrix T, TMatrix Q, TMatrix Z, TMatrix A, TMatrix B, TVector alpha_r, TVector alpha_i, TVector beta)
 {
   int n, err;
-  if (!S || !T || !A || !B) 
+  if (!S || !T || !A || !B)
     {
       dw_Error(NULL_ERR);
       return 0;
@@ -4228,10 +4228,10 @@ int QZ_Real(TMatrix S, TMatrix T, TMatrix Q, TMatrix Z, TMatrix A, TMatrix B, TV
       return 0;
     }
 
-  err=bQZ_real(Q ? pElementM(Q) : (PRECISION*)NULL,Z ? pElementM(Z) : (PRECISION*)NULL,pElementM(S),pElementM(T),pElementM(A),pElementM(B),n, 
-	       Q ? MajorForm(Q) : 1,Z ? MajorForm(Z) : 1,MajorForm(S),MajorForm(T),MajorForm(A),MajorForm(B),
-	       alpha_r ? pElementV(alpha_r) : (PRECISION*)NULL,alpha_i ? pElementV(alpha_i) : (PRECISION*)NULL,beta ? pElementV(beta) : (PRECISION*)NULL);
- 
+  err=bQZ_real(Q ? pElementM(Q) : (PRECISION*)NULL,Z ? pElementM(Z) : (PRECISION*)NULL,pElementM(S),pElementM(T),pElementM(A),pElementM(B),n,
+           Q ? MajorForm(Q) : 1,Z ? MajorForm(Z) : 1,MajorForm(S),MajorForm(T),MajorForm(A),MajorForm(B),
+           alpha_r ? pElementV(alpha_r) : (PRECISION*)NULL,alpha_i ? pElementV(alpha_i) : (PRECISION*)NULL,beta ? pElementV(beta) : (PRECISION*)NULL);
+
   if (err == NO_ERR)
     return 1;
   else
@@ -4250,9 +4250,9 @@ int QZ_Real(TMatrix S, TMatrix T, TMatrix Q, TMatrix Z, TMatrix A, TMatrix B, TV
     TT      : n x n matrix
     Q       : n x n matrix or null.  Q is orthogonal if it is not null.
     Z       : n x n matrix or null.  Z is orghogonal if it is not null.
-    S       : n x n matrix.  S is block upper triangular with 1x1 or 2x2 blocks 
+    S       : n x n matrix.  S is block upper triangular with 1x1 or 2x2 blocks
               along the diagonal.
-    T       : n x n matrix.  T is block upper triangular with positive diagonal. 
+    T       : n x n matrix.  T is block upper triangular with positive diagonal.
     alpha_i : array of length n or null
     alpha_i : array of length n or null
     beta    : array of length n or null
@@ -4263,32 +4263,32 @@ int QZ_Real(TMatrix S, TMatrix T, TMatrix Q, TMatrix Z, TMatrix A, TMatrix B, TV
      BLAS_LAPACK_ERR : blas or lapack error
 
    Results
-     Finds orthogonal matrices QQ and ZZ, an block upper triangular matrix SS 
-     with 1 x 1 or 2 x 2 blocks along the diagonal, an upper triangular matrix TT 
+     Finds orthogonal matrices QQ and ZZ, an block upper triangular matrix SS
+     with 1 x 1 or 2 x 2 blocks along the diagonal, an upper triangular matrix TT
      such that
 
               Q*S*Z' = QQ*SS*ZZ'   and    Q*T*Z' = QQ*TT*ZZ'
- 
+
      If either Q or QQ are null, then QQ is not computed and if either Z or ZZ is
-     null, then ZZ is not computed.  The generalized eigenvalues of S and T 
-     corresponding to the elements of select that are equal to one are 
+     null, then ZZ is not computed.  The generalized eigenvalues of S and T
+     corresponding to the elements of select that are equal to one are
      transformed to the first block of SS and TT.
 
    Notes
-     Q, Z, S, and T should be the results of a call to QZ_Real(), SortQZ_Real(), 
+     Q, Z, S, and T should be the results of a call to QZ_Real(), SortQZ_Real(),
      or ReorderQZ_Real().
 */
 int ReorderQZ_Real(TMatrix SS, TMatrix TT, TMatrix QQ, TMatrix ZZ, TMatrix S, TMatrix T, TMatrix Q, TMatrix Z, int *select, TVector alpha_r, TVector alpha_i, TVector beta)
 {
   int n, err;
-  if (!SS || !TT || !S || !T) 
+  if (!SS || !TT || !S || !T)
     {
       dw_Error(NULL_ERR);
       return 0;
     }
   n=RowM(S);
   if ((ColM(S) != n) || (RowM(SS) != n) || (ColM(SS) != n) || (RowM(TT) != n) || (ColM(TT) != n) || (RowM(T) != n) || (ColM(T) != n)
-      || (QQ && ((RowM(QQ) != n) || (ColM(QQ) != n))) || (ZZ && ((RowM(ZZ) != n) || (ColM(ZZ) != n))) 
+      || (QQ && ((RowM(QQ) != n) || (ColM(QQ) != n))) || (ZZ && ((RowM(ZZ) != n) || (ColM(ZZ) != n)))
       || (Q && ((RowM(Q) != n) || (ColM(Q) != n))) || (Z && ((RowM(Z) != n) || (ColM(Z) != n)))
       || (alpha_r && (DimV(alpha_r) != n)) || (alpha_i && (DimV(alpha_i) != n)) || (beta && (DimV(beta) != n)))
     {
@@ -4296,11 +4296,11 @@ int ReorderQZ_Real(TMatrix SS, TMatrix TT, TMatrix QQ, TMatrix ZZ, TMatrix S, TM
       return 0;
     }
 
-  err=bReorderQZ_real(select,QQ ? pElementM(QQ) : (PRECISION*)NULL,ZZ ? pElementM(ZZ) : (PRECISION*)NULL,pElementM(SS),pElementM(TT), 
-		      Q ? pElementM(Q) : (PRECISION*)NULL,Z ? pElementM(Z) : (PRECISION*)NULL,pElementM(S),pElementM(T),n,
-		      QQ ? MajorForm(QQ) : 1,ZZ ? MajorForm(ZZ) : 1,MajorForm(SS),MajorForm(TT),Q ? MajorForm(Q) : 1,Z ? MajorForm(Z) : 1,MajorForm(S),MajorForm(T),
-		      alpha_r ? pElementV(alpha_r) : (PRECISION*)NULL,alpha_i ? pElementV(alpha_i) : (PRECISION*)NULL,beta ? pElementV(beta) : (PRECISION*)NULL);
-  
+  err=bReorderQZ_real(select,QQ ? pElementM(QQ) : (PRECISION*)NULL,ZZ ? pElementM(ZZ) : (PRECISION*)NULL,pElementM(SS),pElementM(TT),
+              Q ? pElementM(Q) : (PRECISION*)NULL,Z ? pElementM(Z) : (PRECISION*)NULL,pElementM(S),pElementM(T),n,
+              QQ ? MajorForm(QQ) : 1,ZZ ? MajorForm(ZZ) : 1,MajorForm(SS),MajorForm(TT),Q ? MajorForm(Q) : 1,Z ? MajorForm(Z) : 1,MajorForm(S),MajorForm(T),
+              alpha_r ? pElementV(alpha_r) : (PRECISION*)NULL,alpha_i ? pElementV(alpha_i) : (PRECISION*)NULL,beta ? pElementV(beta) : (PRECISION*)NULL);
+
   if (err == NO_ERR)
     return 1;
   else
@@ -4318,10 +4318,10 @@ int ReorderQZ_Real(TMatrix SS, TMatrix TT, TMatrix QQ, TMatrix ZZ, TMatrix S, TM
     TT      : n x n matrix
     Q       : n x n matrix or null.  Q is orthogonal if it is not null.
     Z       : n x n matrix or null.  Z is orghogonal if it is not null.
-    S       : n x n matrix.  S is block upper triangular with 1x1 or 2x2 blocks 
+    S       : n x n matrix.  S is block upper triangular with 1x1 or 2x2 blocks
               along the diagonal.
     T       : n x n matrix.  T is block upper triangular with positive diagonal.
-    alpha_r : array of length n 
+    alpha_r : array of length n
     alpha_i : array of length n
     beta    : array of length n
 
@@ -4331,15 +4331,15 @@ int ReorderQZ_Real(TMatrix SS, TMatrix TT, TMatrix QQ, TMatrix ZZ, TMatrix S, TM
      BLAS_LAPACK_ERR : blas or lapack error
 
    Results
-     Finds orthogonal matrices QQ and ZZ, an block upper triangular matrix SS 
-     with 1 x 1 or 2 x 2 blocks along the diagonal, an upper triangular matrix TT 
+     Finds orthogonal matrices QQ and ZZ, an block upper triangular matrix SS
+     with 1 x 1 or 2 x 2 blocks along the diagonal, an upper triangular matrix TT
      such that
 
               Q*S*Z' = QQ*SS*ZZ'   and    Q*T*Z' = QQ*TT*ZZ'
- 
+
      If either Q or QQ are null, then QQ is not computed and if either Z or ZZ is
-     null, then ZZ is not computed.  The matrices S and T are multiplied by  
-     orthogonal matrices in such a manner that their block triangular structure 
+     null, then ZZ is not computed.  The matrices S and T are multiplied by
+     orthogonal matrices in such a manner that their block triangular structure
      retained and the generalized eigenvalues corresponding to value of select
      equal to one are transformed to the upper part of SS and TT.
 
@@ -4366,10 +4366,10 @@ int ReorderQZ_Real(TMatrix SS, TMatrix TT, TMatrix QQ, TMatrix ZZ, TMatrix S, TM
 /*     } */
 
 /*   err=bSortQZ_real(select,QQ ? pElementM(QQ) : (PRECISION*)NULL,ZZ ? pElementM(ZZ) : (PRECISION*)NULL,pElementM(SS),pElementM(TT),  */
-/* 		   Q ? pElementM(Q) : (PRECISION*)NULL,Z ? pElementM(Z) : (PRECISION*)NULL,pElementM(S),pElementM(T),n, */
-/* 		   QQ ? MajorForm(QQ) : 1,ZZ ? MajorForm(ZZ) : 1,MajorForm(SS),MajorForm(TT),Q ? MajorForm(Q) : 1,Z ? MajorForm(Z) : 1,MajorForm(S),MajorForm(T), */
-/* 		   alpha_r ? pElementV(alpha_r) : (PRECISION*)NULL,alpha_i ? pElementV(alpha_i) : (PRECISION*)NULL,beta ? pElementV(beta) : (PRECISION*)NULL); */
-  
+/*            Q ? pElementM(Q) : (PRECISION*)NULL,Z ? pElementM(Z) : (PRECISION*)NULL,pElementM(S),pElementM(T),n, */
+/*            QQ ? MajorForm(QQ) : 1,ZZ ? MajorForm(ZZ) : 1,MajorForm(SS),MajorForm(TT),Q ? MajorForm(Q) : 1,Z ? MajorForm(Z) : 1,MajorForm(S),MajorForm(T), */
+/*            alpha_r ? pElementV(alpha_r) : (PRECISION*)NULL,alpha_i ? pElementV(alpha_i) : (PRECISION*)NULL,beta ? pElementV(beta) : (PRECISION*)NULL); */
+
 /*   if (err == NO_ERR) */
 /*     return 1; */
 /*   else */
@@ -4389,7 +4389,7 @@ int ReorderQZ_Real(TMatrix SS, TMatrix TT, TMatrix QQ, TMatrix ZZ, TMatrix S, TM
      X = U' * U, where U is a upper triangular matrix with positive diagonal.
 
    Returns
-     The matrix U is returned upon success and a null pointer is return upon 
+     The matrix U is returned upon success and a null pointer is return upon
      failure.  It the matrix U is null, it is created.
 
    Notes
@@ -4399,15 +4399,15 @@ int ReorderQZ_Real(TMatrix SS, TMatrix TT, TMatrix QQ, TMatrix ZZ, TMatrix S, TM
 TMatrix CholeskyUT(TMatrix U, TMatrix X)
 {
  int err;
- if (!X) 
+ if (!X)
   {
-   dw_Error(NULL_ERR); 
-   return (TMatrix)NULL; 
+   dw_Error(NULL_ERR);
+   return (TMatrix)NULL;
   }
  if (RowM(X) != ColM(X))
   {
-   dw_Error(SIZE_ERR); 
-   return (TMatrix)NULL; 
+   dw_Error(SIZE_ERR);
+   return (TMatrix)NULL;
   }
  if (!U)
    {
@@ -4416,13 +4416,13 @@ TMatrix CholeskyUT(TMatrix U, TMatrix X)
     if (err=bCholesky(pElementM(U),RowM(X),1,MajorForm(U)))
      {
       FreeMatrix(U);
-      dw_Error(err); 
-      return (TMatrix)NULL; 
+      dw_Error(err);
+      return (TMatrix)NULL;
      }
    }
   else
    {
-    if (U != X) 
+    if (U != X)
      {
       if ((RowM(X) != RowM(U)) || (RowM(X) != ColM(U)))
        {
@@ -4433,11 +4433,11 @@ TMatrix CholeskyUT(TMatrix U, TMatrix X)
      }
     if (err=bCholesky(pElementM(U),RowM(X),1,MajorForm(U)))
      {
-      dw_Error(err); 
-      return (TMatrix)NULL; 
+      dw_Error(err);
+      return (TMatrix)NULL;
      }
    }
- return U; 
+ return U;
 }
 
 /*
@@ -4459,15 +4459,15 @@ TMatrix CholeskyUT(TMatrix U, TMatrix X)
 TMatrix CholeskyLT(TMatrix L, TMatrix X)
 {
  int err;
- if (!X) 
+ if (!X)
   {
-   dw_Error(NULL_ERR); 
+   dw_Error(NULL_ERR);
    return (TMatrix)NULL;
   }
  if (RowM(X) != ColM(X))
   {
-   dw_Error(SIZE_ERR); 
-   return (TMatrix)NULL; 
+   dw_Error(SIZE_ERR);
+   return (TMatrix)NULL;
   }
  if (!L)
    {
@@ -4476,13 +4476,13 @@ TMatrix CholeskyLT(TMatrix L, TMatrix X)
     if (err=bCholesky(pElementM(L),RowM(X),0,MajorForm(L)))
      {
       FreeMatrix(L);
-      dw_Error(err); 
-      return (TMatrix)NULL; 
+      dw_Error(err);
+      return (TMatrix)NULL;
      }
    }
   else
    {
-    if (L != X) 
+    if (L != X)
      {
       if ((RowM(X) != RowM(L)) || (RowM(X) != ColM(L)))
        {
@@ -4493,11 +4493,11 @@ TMatrix CholeskyLT(TMatrix L, TMatrix X)
      }
     if (err=bCholesky(pElementM(L),RowM(X),0,MajorForm(L)))
      {
-      dw_Error(err); 
-      return (TMatrix)NULL; 
+      dw_Error(err);
+      return (TMatrix)NULL;
      }
    }
- return L; 
+ return L;
 }
 
 /*
@@ -4518,7 +4518,7 @@ TMatrix CholeskyLT(TMatrix L, TMatrix X)
      0 - Error, call GetError() to determine the type of error made.
 
    Notes
-     The integer q must be equal to either m or the minimum of m and n. The 
+     The integer q must be equal to either m or the minimum of m and n. The
      matrices R and X do not have to be distinct.  The QR decomposition is
      formed using Householder matrices without pivoting.
 */
@@ -4532,31 +4532,31 @@ int QR(TMatrix Q, TMatrix R, TMatrix X)
       return 0;
     }
   if (R != X)
-    if (ColM(R) != ColM(X)) 
+    if (ColM(R) != ColM(X))
       {
-	dw_Error(SIZE_ERR);
-	return 0;
+    dw_Error(SIZE_ERR);
+    return 0;
       }
     else
       if (RowM(R) == RowM(X))
-	{
-	  EquateMatrix(R,X);
-	  ptr=pElementM(R);
-	}
+    {
+      EquateMatrix(R,X);
+      ptr=pElementM(R);
+    }
       else
-	if ((RowM(R) == ColM(X)) && (ColM(X) < RowM(X)))
-	  if (!(ptr=(PRECISION*)malloc(RowM(X)*ColM(X)*sizeof(PRECISION))))
-	    {
-	      dw_Error(MEM_ERR);
-	      return 0;
-	    }
-	  else
-	    memcpy(ptr,pElementM(X),RowM(X)*ColM(X)*sizeof(PRECISION));
-	else
-	  {
-	    dw_Error(SIZE_ERR);
-	    return 0;
-	  }
+    if ((RowM(R) == ColM(X)) && (ColM(X) < RowM(X)))
+      if (!(ptr=(PRECISION*)malloc(RowM(X)*ColM(X)*sizeof(PRECISION))))
+        {
+          dw_Error(MEM_ERR);
+          return 0;
+        }
+      else
+        memcpy(ptr,pElementM(X),RowM(X)*ColM(X)*sizeof(PRECISION));
+    else
+      {
+        dw_Error(SIZE_ERR);
+        return 0;
+      }
   else
     ptr=pElementM(R);
   if (!Q)
@@ -4564,17 +4564,17 @@ int QR(TMatrix Q, TMatrix R, TMatrix X)
   else
     if (Q == R)
       {
-	dw_Error(ARG_ERR);
-	return 0;
+    dw_Error(ARG_ERR);
+    return 0;
       }
     else
       if ((RowM(Q) != RowM(X)) || (ColM(Q) != RowM(R)))
-	{
-	  dw_Error(SIZE_ERR);
-	  return 0;
-	}
+    {
+      dw_Error(SIZE_ERR);
+      return 0;
+    }
       else
-	err=bQR(pElementM(Q),pElementM(R),ptr,RowM(X),ColM(X),RowM(R),MajorForm(Q),MajorForm(R),MajorForm(X));
+    err=bQR(pElementM(Q),pElementM(R),ptr,RowM(X),ColM(X),RowM(R),MajorForm(Q),MajorForm(R),MajorForm(X));
   if (ptr != pElementM(R)) free(ptr);
   if (!err) return 1;
   dw_Error(err);
@@ -4588,7 +4588,7 @@ int QR(TMatrix Q, TMatrix R, TMatrix X)
      A : m x n matrix invertible matrix
 
    Results
-     Computes the LU decomposition of A with partial pivoting.  The 
+     Computes the LU decomposition of A with partial pivoting.  The
      decomposition is
 
                                 A = P * L * U
@@ -4601,10 +4601,10 @@ int QR(TMatrix Q, TMatrix R, TMatrix X)
         lower half of LU.  The diagonal of L is not stored.
 
         U is k x n, where k is the smaller of n and m, and is stored in the
-        upper half of X, including the diagonal.   
+        upper half of X, including the diagonal.
 
         P is the integer representation of a permutation matrix.  See the
-        header file matrix.h for a description of its internal 
+        header file matrix.h for a description of its internal
         reqresentation.
 
 
@@ -4617,17 +4617,17 @@ int QR(TMatrix Q, TMatrix R, TMatrix X)
 */
 int LU(TPermutation P, TMatrix X, TMatrix A)
 {
- if (!P || !X || !A) 
+ if (!P || !X || !A)
   {
-   dw_Error(NULL_ERR); 
-   return 0; 
+   dw_Error(NULL_ERR);
+   return 0;
   }
  if (DimP(P) != RowM(A))
   {
-   dw_Error(SIZE_ERR); 
-   return 0; 
+   dw_Error(SIZE_ERR);
+   return 0;
   }
- if ((X != A) && !EquateMatrix(X,A)) return 0; 
+ if ((X != A) && !EquateMatrix(X,A)) return 0;
  bLU(pElementP(P),pElementM(X),RowM(X),ColM(X),MajorForm(X));
  UseP(P)=(RowM(X) < ColM(X)) ? RowM(X) : ColM(X);
  return 1;
@@ -4664,25 +4664,25 @@ TVector LU_SolveColM(TVector x, TVector y, TMatrix LU, TPermutation P)
 
  if (!y || !LU || !P)
   {
-   dw_Error(NULL_ERR); 
-   return (TVector)NULL; 
+   dw_Error(NULL_ERR);
+   return (TVector)NULL;
   }
- if ((DimV(y) != RowM(LU)) || (DimV(y) != ColM(LU))) 
+ if ((DimV(y) != RowM(LU)) || (DimV(y) != ColM(LU)))
   {
-   dw_Error(SIZE_ERR); 
-   return (TVector)NULL; 
+   dw_Error(SIZE_ERR);
+   return (TVector)NULL;
   }
  if (!x)
    {
     if (!(x=CreateVector(DimV(y)))) return (TVector)NULL;
    }
   else
-   if (DimV(x) != DimV(y)) 
-    { 
-     dw_Error(SIZE_ERR); 
-     return (TVector)NULL; 
+   if (DimV(x) != DimV(y))
+    {
+     dw_Error(SIZE_ERR);
+     return (TVector)NULL;
     }
- 
+
  if (x != y) memcpy(x,y,DimV(y)*sizeof(int));
  if (!bPermutationMultiply(pElementP(P),pElementV(x),DimV(y),1,UseP(P),1,1) &&
        !bSolveUnitTriangular(pElementM(LU),pElementV(x),DimV(x),1,0,MajorForm(LU),1) &&
@@ -4775,13 +4775,13 @@ TPermutation TranspositionPermutation(TPermutation X, int i, int j, int m)
   if (!X)
     {
       if (!(X=CreatePermutation(m)))
-	return (TPermutation)NULL;
+    return (TPermutation)NULL;
     }
   else
     if (DimP(X) != m)
       {
-	dw_Error(SIZE_ERR);
-	return (TPermutation)NULL;
+    dw_Error(SIZE_ERR);
+    return (TPermutation)NULL;
       }
   if (j > i)
     {
@@ -4792,9 +4792,9 @@ TPermutation TranspositionPermutation(TPermutation X, int i, int j, int m)
   else
     if (i > j)
       {
-	UseP(X)=j+1;
-	ElementP(X,j)=i;
-	for (j--; j >= 0; j--) ElementP(X,j)=j;
+    UseP(X)=j+1;
+    ElementP(X,j)=i;
+    for (j--; j >= 0; j--) ElementP(X,j)=j;
       }
     else
       UseP(X)=0;
@@ -4821,13 +4821,13 @@ TPermutation InitializePermutationFromIntArray(TPermutation X, int *p, int m)
   if (!X)
     {
       if (!(X=CreatePermutation(m)))
-	return (TPermutation)NULL;
+    return (TPermutation)NULL;
     }
   else
     if (DimP(X) != m)
       {
-	dw_Error(SIZE_ERR);
-	return (TPermutation)NULL;
+    dw_Error(SIZE_ERR);
+    return (TPermutation)NULL;
       }
   for (i=m-2; (i >= 0) && (p[i] <= i); i--);
   UseP(X)=i+1;
@@ -4835,7 +4835,7 @@ TPermutation InitializePermutationFromIntArray(TPermutation X, int *p, int m)
     {
       ElementP(X,i)=i;
       for (i--; i >= 0; i--)
-	ElementP(X,i)=(p[i] > i) ? p[i] : i;
+    ElementP(X,i)=(p[i] > i) ? p[i] : i;
     }
   return X;
 }
@@ -4853,21 +4853,21 @@ TPermutation InitializePermutationFromIntArray(TPermutation X, int *p, int m)
 */
 TPermutation EquatePermutation(TPermutation X, TPermutation Y)
 {
- if (!Y) 
+ if (!Y)
   {
-   dw_Error(NULL_ERR); 
-   return (TPermutation)NULL; 
+   dw_Error(NULL_ERR);
+   return (TPermutation)NULL;
   }
  if (!X)
-   { 
-    if (!(X=CreatePermutation(DimP(Y)))) 
-     return (TPermutation)NULL; 
+   {
+    if (!(X=CreatePermutation(DimP(Y))))
+     return (TPermutation)NULL;
    }
   else
    if (DimP(X) != DimP(Y))
-    { 
-     dw_Error(SIZE_ERR); 
-     return (TPermutation)NULL; 
+    {
+     dw_Error(SIZE_ERR);
+     return (TPermutation)NULL;
     }
  UseP(X)=UseP(Y);
  memcpy(pElementP(X),pElementP(Y),UseP(Y)*sizeof(int));
@@ -4903,13 +4903,13 @@ TMatrix ProductPM(TMatrix X, TPermutation Y, TMatrix Z)
 {
  if (!Y || !Z)
   {
-   dw_Error(NULL_ERR); 
-   return (TMatrix)NULL; 
+   dw_Error(NULL_ERR);
+   return (TMatrix)NULL;
   }
  if (DimP(Y) != RowM(Z))
   {
    dw_Error(SIZE_ERR);
-   return (TMatrix)NULL; 
+   return (TMatrix)NULL;
   }
  if ((X != Z) && !(X=EquateMatrix(X,Z))) return (TMatrix)NULL;
  bPermutationMultiply(pElementP(Y),pElementM(X),RowM(X),ColM(X),UseP(Y),0,MajorForm(X));
@@ -4920,13 +4920,13 @@ TMatrix ProductMP(TMatrix X, TMatrix Y, TPermutation Z)
 {
  if (!Y || !Z)
   {
-   dw_Error(NULL_ERR); 
-   return (TMatrix)NULL; 
+   dw_Error(NULL_ERR);
+   return (TMatrix)NULL;
   }
  if (ColM(Y) != DimP(Z))
   {
    dw_Error(SIZE_ERR);
-   return (TMatrix)NULL; 
+   return (TMatrix)NULL;
   }
  if ((X != Y) && !(X=EquateMatrix(X,Y))) return (TMatrix)NULL;
  bPermutationMultiply(pElementP(Z),pElementM(X),ColM(X),RowM(X),UseP(Z),1,1^MajorForm(X));
@@ -4937,13 +4937,13 @@ TVector ProductPV(TVector x, TPermutation Y, TVector z)
 {
  if (!Y || !z)
   {
-   dw_Error(NULL_ERR); 
-   return (TVector)NULL; 
+   dw_Error(NULL_ERR);
+   return (TVector)NULL;
   }
  if (DimP(Y) != DimV(z))
   {
    dw_Error(SIZE_ERR);
-   return (TVector)NULL; 
+   return (TVector)NULL;
   }
  if ((x != z) && !(x=EquateVector(x,z))) return (TVector)NULL;
  bPermutationMultiply(pElementP(Y),pElementV(x),DimV(x),1,UseP(Y),0,1);
@@ -4954,13 +4954,13 @@ TVector ProductVP(TVector x, TVector y, TPermutation Z)
 {
  if (!y || !Z)
   {
-   dw_Error(NULL_ERR); 
-   return (TVector)NULL; 
+   dw_Error(NULL_ERR);
+   return (TVector)NULL;
   }
  if (DimV(y) != DimP(Z))
   {
    dw_Error(SIZE_ERR);
-   return (TVector)NULL; 
+   return (TVector)NULL;
   }
  if ((x != y) && !(x=EquateVector(x,y))) return (TVector)NULL;
  bPermutationMultiply(pElementP(Z),pElementV(x),DimV(x),1,UseP(Z),1,1);
@@ -4971,13 +4971,13 @@ TMatrix TransposeProductPM(TMatrix X, TPermutation Y, TMatrix Z)
 {
  if (!Y || !Z)
   {
-   dw_Error(NULL_ERR); 
-   return (TMatrix)NULL; 
+   dw_Error(NULL_ERR);
+   return (TMatrix)NULL;
   }
  if (DimP(Y) != RowM(Z))
   {
    dw_Error(SIZE_ERR);
-   return (TMatrix)NULL; 
+   return (TMatrix)NULL;
   }
  if ((X != Z) && !(X=EquateMatrix(X,Z))) return (TMatrix)NULL;
  bPermutationMultiply(pElementP(Y),pElementM(X),RowM(X),ColM(X),UseP(Y),1,MajorForm(X));
@@ -4988,13 +4988,13 @@ TMatrix ProductTransposeMP(TMatrix X, TMatrix Y, TPermutation Z)
 {
  if (!Y || !Z)
   {
-   dw_Error(NULL_ERR); 
-   return (TMatrix)NULL; 
+   dw_Error(NULL_ERR);
+   return (TMatrix)NULL;
   }
  if (ColM(Y) != DimP(Z))
   {
    dw_Error(SIZE_ERR);
-   return (TMatrix)NULL; 
+   return (TMatrix)NULL;
   }
  if ((X != Y) && !(X=EquateMatrix(X,Y))) return (TMatrix)NULL;
  bPermutationMultiply(pElementP(Z),pElementM(X),ColM(X),RowM(X),UseP(Z),0,1^MajorForm(X));
@@ -5012,17 +5012,17 @@ void PrintPermutation(FILE *f, TPermutation X)
   {
     if (i < UseP(X))
       {
-	k=ElementP(X,i);
-	j=i-1;
+    k=ElementP(X,i);
+    j=i-1;
       }
     else
       {
-	k=i;
-	j=UseP(X)-1;
+    k=i;
+    j=UseP(X)-1;
       }
    for ( ; j >= 0; j--)
     if (k == ElementP(X,j)) k=j;
-   fprintf(f,"%3d ",k); 
+   fprintf(f,"%3d ",k);
   }
  fprintf(f,"\n");
 }

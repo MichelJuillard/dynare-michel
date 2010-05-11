@@ -96,7 +96,7 @@ int main(int nargs, char **args)
   printf("Elapsed Time: %d seconds\n",end_time - begin_time);
 
   // Reset parametrers
-  if (!ReadTransitionMatrices((FILE*)NULL,cmd->parameters_filename_actual,cmd->parameters_header_actual,model) 
+  if (!ReadTransitionMatrices((FILE*)NULL,cmd->parameters_filename_actual,cmd->parameters_header_actual,model)
       || !Read_VAR_Parameters((FILE*)NULL,cmd->parameters_filename_actual,cmd->parameters_header_actual,model))
     printf("Unable to reset parameters after tuning\n");
 
@@ -107,15 +107,15 @@ int main(int nargs, char **args)
       DrawAll(model);
 
       if (count == check)
-	{
-	  check+=period;
-	  printf("%d iterations completed out of %d\n",count,burn_in);
-	}
+    {
+      check+=period;
+      printf("%d iterations completed out of %d\n",count,burn_in);
+    }
     }
   end_time=(int)time((time_t*)NULL);
   printf("Elapsed Time: %d seconds\n",end_time - begin_time);
   ResetMetropolisInformation(p);
- 
+
   // Simulation
   printf("Simulating - %d draws\n",iterations);
   for (check=period, output=thinning, count=1; count <= iterations; count++)
@@ -134,10 +134,10 @@ int main(int nargs, char **args)
         }
 
       if (count == check)
-	{
-	  check+=period;
-	  printf("%d(%d) iterations completed out of %d(%d)\n",count,thinning,iterations,thinning);
-	}
+    {
+      check+=period;
+      printf("%d(%d) iterations completed out of %d(%d)\n",count,thinning,iterations,thinning);
+    }
     }
   end_time=(int)time((time_t*)NULL);
   printf("Elapsed Time: %d seconds\n",end_time - begin_time);

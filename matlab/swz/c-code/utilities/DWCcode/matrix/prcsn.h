@@ -1,6 +1,6 @@
 
 /*
-   Defines the precision to be used 
+   Defines the precision to be used
 */
 
 #ifndef __PRECISION_H__

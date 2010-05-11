@@ -17,18 +17,18 @@
 #define M_CN     0x0020   //32:   A constant (CN) matrix (All elements are the same or no (N) change from one to another).
 #define V_UNDEF 0                   //Zero or NULL: No values have been assigned to the double vector.
 #define V_DEF   1                   //True: Values have been assigned to the double vector.
-#define square(x)  ((x)*(x))   
+#define square(x)  ((x)*(x))
 
 // matrix and vector structures
-typedef struct 
+typedef struct
 {
-  double *M;  
+  double *M;
   int nrows, ncols;
   int flag;          //flag: Refers to M_GE, M_SU, M_SL, M_UT, and M_LT in tzmatlab.h.
 } TSdmatrix;
-typedef struct 
+typedef struct
 {
-  double *v;  
+  double *v;
   int n;
   int flag;          //flag: no legal values are assigned if 0 and legal values are assigned if 1.
 } TSdvector;

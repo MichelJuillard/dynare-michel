@@ -6,9 +6,9 @@
    matrices in native ascii format.
 */
 TMarkovStateVariable* ReadMarkovSpecification_SV(FILE *f_in, char *idstring, int nobs);
-int WriteMarkovSpecification_SV(FILE *f_out, TMarkovStateVariable *sv, char *idstring);                    
-int ReadTransitionMatrices_SV(FILE *f_in, TMarkovStateVariable* sv, char *header, char *idstring);        
-int WriteTransitionMatrices_SV(FILE *f_out, TMarkovStateVariable* sv, char *header, char *idstring);      
+int WriteMarkovSpecification_SV(FILE *f_out, TMarkovStateVariable *sv, char *idstring);
+int ReadTransitionMatrices_SV(FILE *f_in, TMarkovStateVariable* sv, char *header, char *idstring);
+int WriteTransitionMatrices_SV(FILE *f_out, TMarkovStateVariable* sv, char *header, char *idstring);
 int ReadBaseTransitionMatrices_SV(FILE *f_out, TMarkovStateVariable *sv, char *header, char *idstring);
 int WriteBaseTransitionMatrices_SV(FILE *f_out, TMarkovStateVariable *sv, char *header, char *idstring);
 
@@ -16,7 +16,7 @@ int WriteBaseTransitionMatricesFlat_SV(FILE *f_out, TMarkovStateVariable *sv, ch
 void WriteBaseTransitionMatricesFlat_Headers_SV(FILE *f_out, TMarkovStateVariable* sv, char *idstring);
 
 /*
-   Routines for reading/writing Markov state variables and transition matrices 
+   Routines for reading/writing Markov state variables and transition matrices
    from TStateModel.  Calls base routines.
 */
 TMarkovStateVariable* ReadMarkovSpecification(FILE *f, char *filename);

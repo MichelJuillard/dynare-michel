@@ -42,7 +42,7 @@ static char filename_sp3vecs[STRLEN];  //Three vectors.  1st row: line search di
 #endif
 void frprmn(double p[], int n, int *iter, double *fret,
             double (*func)(double [], int), void (*dfunc)(double [], double [], int, double (*func)(double [], int), double *, double),
-			double *ftol_p, int *itmax_p, double *tol_brent_p, int *itmax_brent_p, double *grdh_p) {
+            double *ftol_p, int *itmax_p, double *tol_brent_p, int *itmax_brent_p, double *grdh_p) {
    //Outputs:
    //  p[0, ..., n-1]:  the location of the minimum if it converges, which replaces the starting value.
    //  iter:  pointer to the number of iterations that were performed.
@@ -85,9 +85,9 @@ void frprmn(double p[], int n, int *iter, double *fret,
    fp=(*func)(p, n);
    (*dfunc)(xi, p, n, func, grdh_p, fp);
    for (j=n-1;j>=0;j--) {
-		g[j] = -xi[j];
-		xi[j]=h[j]=g[j];
-	}
+        g[j] = -xi[j];
+        xi[j]=h[j]=g[j];
+    }
    memcpy(numgrad, xi, n*sizeof(double));   //Added by TZ, September 2003. Save the numerical gradient to be printed out at the right place.
    for (its=0;its<itmax;its++) {
       #ifdef PRINTON
@@ -150,9 +150,9 @@ void frprmn(double p[], int n, int *iter, double *fret,
       if (2.0*fabs(*fret-fp) <= ftol*(fabs(*fret)+fabs(fp)+EPS)) {
          //This is a normal convergence.
          printf("\n----- Normal convergence by the criterion of the objective function evaluation -----------\n");
-			FREEALL
-			return;
-		}
+            FREEALL
+            return;
+        }
       fp=(*func)(p, n);
       (*dfunc)(xi, p, n, func, grdh_p, fp);
       memcpy(numgrad, xi, n*sizeof(double));   //Added by TZ, September 2003. Save the numerical gradient to be printed out at the right place.
@@ -167,18 +167,18 @@ void frprmn(double p[], int n, int *iter, double *fret,
 //      }
       dgg=gg=0.0;
       for (j=n-1;j>=0;j--) {
-			gg += g[j]*g[j];
-			dgg += (xi[j]+g[j])*xi[j];
-		}
-		if (gg == 0.0) {
-			FREEALL
-			return;
-		}
-		gam=dgg/gg;
+            gg += g[j]*g[j];
+            dgg += (xi[j]+g[j])*xi[j];
+        }
+        if (gg == 0.0) {
+            FREEALL
+            return;
+        }
+        gam=dgg/gg;
       for (j=n-1;j>=0;j--) {
-			g[j] = -xi[j];
-			xi[j]=h[j]=g[j]+gam*h[j];
-		}
+            g[j] = -xi[j];
+            xi[j]=h[j]=g[j]+gam*h[j];
+        }
 
       #ifdef PRINTON
       time(&currentime);
@@ -186,7 +186,7 @@ void frprmn(double p[], int n, int *iter, double *fret,
       printf(" (4) Seconds to complete one iteration: %0.4f\n (5) Current time of day: %s\n", difftime(currentime, begtime), ctime(&currentime));
       fflush(stdout);                // Flush the buffer to get out this message without delay.
       #endif
-	}
+    }
    fn_DisplayError("The maximum number of iterations in frprmn() is reached before convergence");
 }
 #undef PRINTON
@@ -475,51 +475,51 @@ static double f1dim(double x) {
 static void mnbrak(double *ax, double *bx, double *cx, double *fa, double *fb, double *fc, double (*func)(double)) {
    double ulim,u,r,q,fu,dum, tmpd;
 
-	*fa=(*func)(*ax);
-	*fb=(*func)(*bx);
-	if (*fb > *fa) {
-		SHFT(dum,*ax,*bx,dum)
-		SHFT(dum,*fb,*fa,dum)
-	}
-	*cx=(*bx)+GOLD*(*bx-*ax);
-	*fc=(*func)(*cx);
-	while (*fb > *fc) {
-		r=(*bx-*ax)*(*fb-*fc);
-		q=(*bx-*cx)*(*fb-*fa);
-		u=(*bx)-((*bx-*cx)*q-(*bx-*ax)*r)/
+    *fa=(*func)(*ax);
+    *fb=(*func)(*bx);
+    if (*fb > *fa) {
+        SHFT(dum,*ax,*bx,dum)
+        SHFT(dum,*fb,*fa,dum)
+    }
+    *cx=(*bx)+GOLD*(*bx-*ax);
+    *fc=(*func)(*cx);
+    while (*fb > *fc) {
+        r=(*bx-*ax)*(*fb-*fc);
+        q=(*bx-*cx)*(*fb-*fa);
+        u=(*bx)-((*bx-*cx)*q-(*bx-*ax)*r)/
            (2.0*SIGN((tmpd=fabs(q-r))>TINY ? tmpd : TINY,q-r));   //Original: (2.0*SIGN(FMAX(fabs(q-r),TINY),q-r));
-		ulim=(*bx)+GLIMIT*(*cx-*bx);
-		if ((*bx-u)*(u-*cx) > 0.0) {
-			fu=(*func)(u);
-			if (fu < *fc) {
-				*ax=(*bx);
-				*bx=u;
-				*fa=(*fb);
-				*fb=fu;
-				return;
-			} else if (fu > *fb) {
-				*cx=u;
-				*fc=fu;
-				return;
-			}
-			u=(*cx)+GOLD*(*cx-*bx);
-			fu=(*func)(u);
-		} else if ((*cx-u)*(u-ulim) > 0.0) {
-			fu=(*func)(u);
-			if (fu < *fc) {
-				SHFT(*bx,*cx,u,*cx+GOLD*(*cx-*bx))
-				SHFT(*fb,*fc,fu,(*func)(u))
-			}
-		} else if ((u-ulim)*(ulim-*cx) >= 0.0) {
-			u=ulim;
-			fu=(*func)(u);
-		} else {
-			u=(*cx)+GOLD*(*cx-*bx);
-			fu=(*func)(u);
-		}
-		SHFT(*ax,*bx,*cx,u)
-		SHFT(*fa,*fb,*fc,fu)
-	}
+        ulim=(*bx)+GLIMIT*(*cx-*bx);
+        if ((*bx-u)*(u-*cx) > 0.0) {
+            fu=(*func)(u);
+            if (fu < *fc) {
+                *ax=(*bx);
+                *bx=u;
+                *fa=(*fb);
+                *fb=fu;
+                return;
+            } else if (fu > *fb) {
+                *cx=u;
+                *fc=fu;
+                return;
+            }
+            u=(*cx)+GOLD*(*cx-*bx);
+            fu=(*func)(u);
+        } else if ((*cx-u)*(u-ulim) > 0.0) {
+            fu=(*func)(u);
+            if (fu < *fc) {
+                SHFT(*bx,*cx,u,*cx+GOLD*(*cx-*bx))
+                SHFT(*fb,*fc,fu,(*func)(u))
+            }
+        } else if ((u-ulim)*(ulim-*cx) >= 0.0) {
+            u=ulim;
+            fu=(*func)(u);
+        } else {
+            u=(*cx)+GOLD*(*cx-*bx);
+            fu=(*func)(u);
+        }
+        SHFT(*ax,*bx,*cx,u)
+        SHFT(*fa,*fb,*fc,fu)
+    }
 }
 #undef GOLD
 #undef GLIMIT

@@ -24,8 +24,8 @@ typedef struct TMarkovStateVariable_tag
   int nobs;
   int nstates;
 
-  //=== State vector === 
-  int* S;                       
+  //=== State vector ===
+  int* S;
 
   //=== Transition matrix
   TMatrix Q;
@@ -37,29 +37,29 @@ typedef struct TMarkovStateVariable_tag
   //=== Prior information ===
   TMatrix  Prior;               // Dirichlet prior on the columns of Q.  Must be nstates x nstates with positive elements.
   TVector *Prior_b;             // Dirichlet prior on the quasi-free parameters b
-  TVector  Prior_B;             // Prior_b stacked into single vector 
+  TVector  Prior_B;             // Prior_b stacked into single vector
 
   //=== Lag information encoding ===
-  int   nlags_encoded;          // Number of lags encoded in the restrictions 
+  int   nlags_encoded;          // Number of lags encoded in the restrictions
   int   nbasestates;            // Number of base states nbasestates^(nlags_encoded) = nstates
   int** lag_index;              // nstates x (nlags_encoded + 1) lag_index[i][j] is the value of the jth lag when the overall state is k
 
   //=== Restrictions ===
-  int* FreeDim;                 // 
+  int* FreeDim;                 //
   int** NonZeroIndex;           // nstates x nstates
   TMatrix MQ;                   // nstates x nstates
 
   //=== Parent Markov state variable ===
   struct TMarkovStateVariable_tag *parent;           // either parent state variable or pointer to itself
- 
+
   //=== Multiple state variables ===
   int n_state_variables;
-  struct TMarkovStateVariable_tag **state_variable;  
-  TMatrix *QA;                                       
-  TVector *ba;                                       
-  TVector *Prior_ba;                                 
-  int** SA;                                          
-  int** Index;                                       
+  struct TMarkovStateVariable_tag **state_variable;
+  TMatrix *QA;
+  TVector *ba;
+  TVector *Prior_ba;
+  int** SA;
+  int** Index;
 
   //=== Control variables ===
   int UseErgodic;
@@ -91,7 +91,7 @@ int** CreateLagIndex(int nbasestates, int nlags, int nstates);
 TMatrix ConvertBaseTransitionMatrix(TMatrix T, TMatrix bT, int nlags);
 
 //=== Data extractions routines ===
-TMatrix GetTransitionMatrix_SV(TMatrix Q, TMarkovStateVariable *sv);       
+TMatrix GetTransitionMatrix_SV(TMatrix Q, TMarkovStateVariable *sv);
 TMatrix GetBaseTransitionMatrix_SV(TMatrix Q, TMarkovStateVariable *sv);
 #define GetTransitionProbability_SV(sv,j,i) (ElementM((sv)->Q,N_E2I[i],N_E2I[j]))
 #define DecomposeIndexInd_SV(sv,i,j)  ((sv)->state_variable[j]->N_I2E[(sv)->Index[N_E2I[i]][j]])
@@ -131,7 +131,7 @@ int** CreateTranslationMatrix_Flat(int **states, TMarkovStateVariable *sv);
 /*******************************************************************************/
 /******************************** ThetaRoutines ********************************/
 /*******************************************************************************/
-typedef struct 
+typedef struct
 {
   //=== Computes ln(P(y[t] | Y[t-1], Z[t], theta, s[t] = s)) ===
   PRECISION (*pLogConditionalLikelihood)(int s, int t, struct TStateModel_tag *model);
@@ -152,7 +152,7 @@ typedef struct
   int (*pNumberFreeParametersTheta)(struct TStateModel_tag*);
   void (*pConvertFreeParametersToTheta)(struct TStateModel_tag*, PRECISION*);
   void (*pConvertThetaToFreeParameters)(struct TStateModel_tag*, PRECISION*);
-  
+
   //=== Notification routines ===
   void (*pStatesChanged)(struct TStateModel_tag*);
   void (*pThetaChanged)(struct TStateModel_tag*);
@@ -162,10 +162,10 @@ typedef struct
   //=== Allows for initialization of data structures before forward recursion ===
   void (*pInitializeForwardRecursion)(struct TStateModel_tag*);
 
-  //=== Permutes the elements of Theta.  
+  //=== Permutes the elements of Theta.
   int (*pGetNormalization)(int*, struct TStateModel_tag*);
   int (*pPermuteTheta)(int*, struct TStateModel_tag*);
-  
+
 } ThetaRoutines;
 
 //=== Constructors ===
@@ -179,7 +179,7 @@ typedef struct TStateModel_tag
   TMarkovStateVariable *sv;
   ThetaRoutines *routines;
   void *theta;
-  
+
   //=== Control variables ===
   int ValidForwardRecursion;
   int UseLogFreeParametersQ;
@@ -190,7 +190,7 @@ typedef struct TStateModel_tag
   TVector* Z;       // Z[t][i] = P(s[t] = i | Y[t-1], Z[t-1], theta, Q)  0 < t <= T and 0 <= i < nstates
   PRECISION L;      // L = Sum(ln(Sum(P(y[t] | Y[t-1], Z[t], theta, s[t]) * P(s[t] | Y[t-1], Z[t-1], theta, Q),0 <= s[t] < nstates)),0 < t <= T)
 
-  //=== Simulation status fields 
+  //=== Simulation status fields
   int n_degenerate_draws;    // counter for number of degenerate draws
   int *states_count;         // integer array of length nstates to count the number of each of the states
 
@@ -282,7 +282,7 @@ void ConvertQToFreeParameters(TStateModel *model, PRECISION *f);                
 void ConvertFreeParametersToQ(TStateModel *model, PRECISION *f);                                                // needs to be modified
 void ConvertQToLogFreeParameters(TStateModel *model, PRECISION *f);                                             // needs to be modified
 void ConvertLogFreeParametersToQ(TStateModel *model, PRECISION *f);                                             // needs to be modified
-#define NumberFreeParametersTheta(model)  ((model)->routines->pNumberFreeParametersTheta(model))                
+#define NumberFreeParametersTheta(model)  ((model)->routines->pNumberFreeParametersTheta(model))
 void ConvertFreeParametersToTheta(TStateModel *model, PRECISION *f);
 #define ConvertThetaToFreeParameters(model,f)  ((model)->routines->pConvertThetaToFreeParameters(model,f))
 
@@ -302,7 +302,7 @@ TVector* ErgodicAll_SVD(TMatrix P);
 TVector DrawDirichletVector(TVector Q, TVector Alpha);
 TVector* DrawIndependentDirichletVector(TVector *Q, TVector *A);
 PRECISION LogDirichlet_pdf(TVector Q, TVector Alpha);
-PRECISION LogIndependentDirichlet_pdf(TVector *Q, TVector *Alpha); 
+PRECISION LogIndependentDirichlet_pdf(TVector *Q, TVector *Alpha);
 int DrawDiscrete(TVector p);
 PRECISION AddLogs(PRECISION a, PRECISION b);
 PRECISION AddScaledLogs(PRECISION x, PRECISION a, PRECISION y, PRECISION b);
@@ -332,7 +332,7 @@ typedef struct TParameters_tag
   int (*pNumberFreeParametersTheta)(struct TStateModel_tag*);
   void (*pConvertFreeParametersToTheta)(struct TStateModel_tag*, PRECISION*);
   void (*pConvertThetaToFreeParameters)(struct TStateModel_tag*, PRECISION*);
-  
+
   // Obsolete fields retained for backward compatibility
   void *p;
 
@@ -343,10 +343,10 @@ void FreeParameters(TParameters *p);
 
 TParameters* CreateParameters(PRECISION (*)(int,int,struct TStateModel_tag*),    // pLogConditionalLikelihood
                               void (*)(void*),                                   // Destructor for parameters
-			      PRECISION (*)(struct TStateModel_tag*),            // pLogPrior
-			      int (*)(struct TStateModel_tag*),                  // pNumberFreeModelSpecificParameters
-			      void (*)(struct TStateModel_tag*, PRECISION*),     // pConvertFreeParametersToModelSpecificParameters
-			      void (*)(struct TStateModel_tag*, PRECISION*),     // pConvertModelSpecificParametersToFreeParameters
+                  PRECISION (*)(struct TStateModel_tag*),            // pLogPrior
+                  int (*)(struct TStateModel_tag*),                  // pNumberFreeModelSpecificParameters
+                  void (*)(struct TStateModel_tag*, PRECISION*),     // pConvertFreeParametersToModelSpecificParameters
+                  void (*)(struct TStateModel_tag*, PRECISION*),     // pConvertModelSpecificParametersToFreeParameters
                               void (*)(struct TStateModel_tag*),                 // pDrawParameters
                               void *);                                           // pointer to user defined parameters
 
@@ -384,7 +384,7 @@ TStateModel* CreateStateModel(TMarkovStateVariable *sv, TParameters *p);
   The following set of fields are set for both types.
   ===============================================================================
     int UseErgodic
-      Uses the ergodic distribution if non-zero and use the uniform distribution 
+      Uses the ergodic distribution if non-zero and use the uniform distribution
       otherwise.
 
     int nstates
@@ -393,8 +393,8 @@ TStateModel* CreateStateModel(TMarkovStateVariable *sv, TParameters *p);
     int nobs
       Number of observations.  Always positive.
 
-    int* S 
-      S[t] is the state at time t, for 0 <= t <= nobs.  S is created via a call 
+    int* S
+      S[t] is the state at time t, for 0 <= t <= nobs.  S is created via a call
       to dw_CreateArray_int().  It is guaranteed that 0 <= S[t] < nstates.
 
     TMatrix Q
@@ -402,7 +402,7 @@ TStateModel* CreateStateModel(TMarkovStateVariable *sv, TParameters *p);
 
     struct TMarkovStateVariable_tag *parent
       Parent of the Markov state variable.  If the Markov state variable has no
-      parent, then parent is a pointer to the structure itself. 
+      parent, then parent is a pointer to the structure itself.
 
     int n_state_variables
       Number of state variables.  Will be equal to one for single Markov state
@@ -414,18 +414,18 @@ TStateModel* CreateStateModel(TMarkovStateVariable *sv, TParameters *p);
       n_state_variables is equal to one, then state_variable[0] is a pointer to
       the structure itself.  Care must be taken to ensure that infinite loops do
       not result when transversing through state variables.  When creating a
-      mulitple Markov state variable via a call to the routine 
+      mulitple Markov state variable via a call to the routine
       CreateMarkovStateVariable_Multiple(), the last argument which is a pointer
-      to a pointer to a TMarkovStateVariable must have been created with 
+      to a pointer to a TMarkovStateVariable must have been created with
 
-        dw_CreateArray_pointer(n_state_variables,(void (*)(void*))FreeMarkovStateVariable);  
+        dw_CreateArray_pointer(n_state_variables,(void (*)(void*))FreeMarkovStateVariable);
 
-      Furthermore, the structure receives ownership of this argument and is 
+      Furthermore, the structure receives ownership of this argument and is
       responsible for its freeing.
 
     int** Index
-      This is a nstates x n_state_variables rectangular array of integers.  State 
-      s corresponds to state_variable[i] being equal to Index[s][i].  
+      This is a nstates x n_state_variables rectangular array of integers.  State
+      s corresponds to state_variable[i] being equal to Index[s][i].
 
     int** SA
       An array of integer pointers of length n_state_variables.  The pointers SA[i]
@@ -442,7 +442,7 @@ TStateModel* CreateStateModel(TMarkovStateVariable *sv, TParameters *p);
         i = j + dw_DimA(state_variable[0]->ba) + ... + dw_DimA(state_variable[k-1]->ba)
 
     TVector* Prior_ba
-      For single Markov state variables, Prior_ba[i] = Prior_b[i].  For multiple 
+      For single Markov state variables, Prior_ba[i] = Prior_b[i].  For multiple
       state variables Prior_ba[i] = state_variable[k]->Prior_ba[j] where
 
         i = j + dw_DimA(state_variable[0]->Prior_ba) + ... + dw_DimA(state_variable[k-1]->Prior_ba)
@@ -460,15 +460,15 @@ TStateModel* CreateStateModel(TMarkovStateVariable *sv, TParameters *p);
 
                &(b[k][i])=&B[FreeDim[0] + ... + FreeDim[k-1] + i])
 
-      The elements of b[k] are non-negative and their sum equals one up to 
+      The elements of b[k] are non-negative and their sum equals one up to
       DimV(b[k])*MACHINE_EPSILON.
 
     TMatrix Prior
        Prior Dirichlet parameters for Q.
 
     TVector *Prior_b
-      The Dirichlet prior parametrs for b.  Array of vectors of length 
-      DimA(FreeDim).  The element Prior_b[k] is of length FreeDim[k].  
+      The Dirichlet prior parametrs for b.  Array of vectors of length
+      DimA(FreeDim).  The element Prior_b[k] is of length FreeDim[k].
       Non-standard memory management is used so that
 
             &(Prior_b[k][i])=&B[FreeDim[0] + ... + FreeDim[k-1] + i])
@@ -493,7 +493,7 @@ TStateModel* CreateStateModel(TMarkovStateVariable *sv, TParameters *p);
       Coefficients for the elements of Q in terms of the free parameters B.
 
 
-  int   nlags_encoded;          // Number of lags encoded in the restrictions 
+  int   nlags_encoded;          // Number of lags encoded in the restrictions
   int   nbasestates;            // Number of base states nbasestates^(nlags_encoded) = nstates
   int** lag_index;              // nstates x (nlags_encoded + 1) lag_index[i][j] is the value of the jth lag when the overall state is k
 
@@ -503,15 +503,15 @@ TStateModel* CreateStateModel(TMarkovStateVariable *sv, TParameters *p);
 
   ===============================================================================
   Normalization:
-   In general, a permutation of the states, together with the corresponding 
+   In general, a permutation of the states, together with the corresponding
    permutation of the rows and columns of the transition matrix and the model
-   dependent parameters theta, does not change the value of the likelihood 
+   dependent parameters theta, does not change the value of the likelihood
    function and so presents a normalization problem.  However, some permutations
    of the states are not permissible in that they may violate the restrictions
-   placed on the transition matrix or restrictions on the model dependent 
-   parameters.  Furthermore, even if a permutation did not cause a violation of 
-   any restrictions, a non-symmetric prior on the model dependent parameters 
-   could cause the value of the likelihood to change.  
+   placed on the transition matrix or restrictions on the model dependent
+   parameters.  Furthermore, even if a permutation did not cause a violation of
+   any restrictions, a non-symmetric prior on the model dependent parameters
+   could cause the value of the likelihood to change.
 
 ********************************************************************************/
 

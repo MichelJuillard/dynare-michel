@@ -92,8 +92,8 @@ void SetupSpherical_Uniform(int n)
 }
 
 /*
-   See the function PowerUnitBall() below for the description of the 
-   distribution.                  
+   See the function PowerUnitBall() below for the description of the
+   distribution.
 */
 void SetupSpherical_Power(int n, PRECISION k)
 {
@@ -132,9 +132,9 @@ void SetupSpherical_Table(int n, PRECISION *table, int m)
   for (i=1; i < SPHERICAL_TABLE_LENGTH; i++)
     if (SPHERICAL_TABLE_VALUES[i-1] >= SPHERICAL_TABLE_VALUES[i])
       {
-	printf("Inverse cumulative spherical table must be strictly increasing\n");
-	for (i=0; i <= m; i++) printf("%lf\n",table[i]);
-	exit(0);
+    printf("Inverse cumulative spherical table must be strictly increasing\n");
+    for (i=0; i <= m; i++) printf("%lf\n",table[i]);
+    exit(0);
       }
 }
 
@@ -156,10 +156,10 @@ PRECISION DrawSpherical(TVector x)
       return SphericalTable(x,SPHERICAL_TABLE_VALUES,SPHERICAL_TABLE_LENGTH);
     case SPHERICAL_TRUNCATED_GAUSSIAN:
       do
-	{
-	  dw_NormalVector(x);
-	  r=Norm(x);
-	}
+    {
+      dw_NormalVector(x);
+      r=Norm(x);
+    }
       while ((r < SPHERICAL_LOWER_TRUNCATE) || (SPHERICAL_UPPER_TRUNCATE < r));
       return r;
     default:
@@ -179,7 +179,7 @@ PRECISION LogSphericalDensity(PRECISION r)
     case SPHERICAL_POWER:
       return (r > 1.0) ? MINUS_INFINITY : SPHERICAL_CONSTANT + (SPHERICAL_POWER_EXP - SPHERICAL_DIM)*log(r);
     case SPHERICAL_TRUNCATED_POWER:
-      return ((r < SPHERICAL_LOWER_TRUNCATE) || (r > 1.0)) ? MINUS_INFINITY 
+      return ((r < SPHERICAL_LOWER_TRUNCATE) || (r > 1.0)) ? MINUS_INFINITY
                                                                : SPHERICAL_CONSTANT + (SPHERICAL_POWER_EXP - SPHERICAL_DIM)*log(r);
     case SPHERICAL_TABLE:
       return SPHERICAL_CONSTANT - (SPHERICAL_DIM - 1)*log(r) + LogSphericalTableDensity(r,SPHERICAL_TABLE_VALUES,SPHERICAL_TABLE_LENGTH);
@@ -193,7 +193,7 @@ PRECISION LogSphericalDensity(PRECISION r)
 
 /*
    The ith entry of the returned vector is the cumulative density evaluated at
-   (i + 1) * max / bins.  The integer cum_bins controls the accuracy of the 
+   (i + 1) * max / bins.  The integer cum_bins controls the accuracy of the
    estimation.  The larger the value, the more accuate the estimate.
 */
 TVector SphericalCumulativeDensity(PRECISION max, int bins, int cum_bins)
@@ -204,7 +204,7 @@ TVector SphericalCumulativeDensity(PRECISION max, int bins, int cum_bins)
   for (i=0; i < bins; i++)
     {
       for (r=(PRECISION)i*inc + 0.5*cum_inc, z=MINUS_INFINITY, j=0; j < cum_bins; r+=cum_inc, j++)
-	z=AddLogs_static(z,LogSphericalDensity(r) + (SPHERICAL_DIM - 1)*log(r));
+    z=AddLogs_static(z,LogSphericalDensity(r) + (SPHERICAL_DIM - 1)*log(r));
       ElementV(cumulative,i)=exp(z - log(0.5) + 0.5*SPHERICAL_DIM*log(PI) - dw_log_gamma(0.5*SPHERICAL_DIM) + log(cum_inc));
     }
   for (i=1; i < bins; i++)
@@ -225,7 +225,7 @@ void TestSpherical(FILE *f, char *filename, PRECISION max)
     {
       ElementM(cumulative,i,0)=(PRECISION)(i+1)*inc;
       for (r=(PRECISION)i*inc + 0.5*cum_inc, z=MINUS_INFINITY, j=0; j < cum_bins; r+=cum_inc, j++)
-	z=AddLogs_static(z,LogSphericalDensity(r) + (SPHERICAL_DIM - 1)*log(r));
+    z=AddLogs_static(z,LogSphericalDensity(r) + (SPHERICAL_DIM - 1)*log(r));
       ElementM(cumulative,i,1)=exp(z - log(0.5) + 0.5*SPHERICAL_DIM*log(PI) - dw_log_gamma(0.5*SPHERICAL_DIM) + log(cum_inc));
       ElementM(cumulative,i,2)=0.0;
     }
@@ -235,16 +235,16 @@ void TestSpherical(FILE *f, char *filename, PRECISION max)
     {
       r=DrawSpherical(x);
       if ((j=(int)floor(r/inc)) < bins)
-	ElementM(cumulative,j,2)+=s;
+    ElementM(cumulative,j,2)+=s;
     }
   FreeVector(x);
 
-  for (i=1; i < bins; i++) 
+  for (i=1; i < bins; i++)
     {
       ElementM(cumulative,i,1)+=ElementM(cumulative,i-1,1);
       ElementM(cumulative,i,2)+=ElementM(cumulative,i-1,2);
     }
- 
+
   f_out=!f ? dw_CreateTextFile(filename) : f;
   dw_PrintMatrix(f_out,cumulative,"%lf,");
   if (!f) fclose(f_out);
@@ -254,8 +254,8 @@ void TestSpherical(FILE *f, char *filename, PRECISION max)
 
 #undef SPHERICAL_GAUSSIAN
 #undef SPHERICAL_UNIFORM
-#undef SPHERICAL_POWER             
-#undef SPHERICAL_TURNCATED_POWER   
+#undef SPHERICAL_POWER
+#undef SPHERICAL_TURNCATED_POWER
 #undef SPHERICAL_TRUNCATED_GAUSSIAN
 /*******************************************************************************/
 /*******************************************************************************/
@@ -266,16 +266,16 @@ void TestSpherical(FILE *f, char *filename, PRECISION max)
      x : m-vector
 
    Results:
-     The vector x is filled with a vector drawn from the uniform distribution on 
+     The vector x is filled with a vector drawn from the uniform distribution on
      the m dimensional solid unit sphere.
 
    Returns:
      Upon success, returns the norm of x, upon failure returns negative value.
 
    Notes:
-     The vector is drawn by drawing a m-vector from the standard normal 
-     distribution and a real number u from the uniform distribution on [0,1], and 
-     normalizing the vector so its length equal to u^(1/m). 
+     The vector is drawn by drawing a m-vector from the standard normal
+     distribution and a real number u from the uniform distribution on [0,1], and
+     normalizing the vector so its length equal to u^(1/m).
 */
 PRECISION UniformUnitBall(TVector x)
 {
@@ -290,7 +290,7 @@ PRECISION UniformUnitBall(TVector x)
     dw_NormalVector(x);
   while ((s=Norm(x)) == 0.0);
 
-  ProductSV(x,(r=pow(dw_uniform_rnd(),1.0/DimV(x)))/s,x); 
+  ProductSV(x,(r=pow(dw_uniform_rnd(),1.0/DimV(x)))/s,x);
 
   return r;
 }
@@ -300,7 +300,7 @@ PRECISION UniformUnitBall(TVector x)
      x : n-vector
 
    Results:
-     The vector x is filled with a vector drawn from the distribution 
+     The vector x is filled with a vector drawn from the distribution
 
             0.5 * k * Gamma(n/2) * pi^(-n/2) * norm(x)^(k-n)
 
@@ -308,8 +308,8 @@ PRECISION UniformUnitBall(TVector x)
      norm(x) upon success and a negative value upon failure.
 
    Notes:
-     If x is obtained by drawing y from the standard n-dimensional Gaussian 
-     distribtuion and r from the distribution on [0,1] with density 
+     If x is obtained by drawing y from the standard n-dimensional Gaussian
+     distribtuion and r from the distribution on [0,1] with density
 
                                   k * r^(k-1)
 
@@ -318,7 +318,7 @@ PRECISION UniformUnitBall(TVector x)
                                       r^k
 
      a draw of r can be obtained by drawing u from the uniform on [0,1] and
-     defining r = u^(1/k).  This assumes that k > 0.                      
+     defining r = u^(1/k).  This assumes that k > 0.
 */
 PRECISION PowerUnitBall(TVector x, PRECISION k)
 {
@@ -333,7 +333,7 @@ PRECISION PowerUnitBall(TVector x, PRECISION k)
     dw_NormalVector(x);
   while ((s=Norm(x)) == 0.0);
 
-  ProductSV(x,(r=pow(dw_uniform_rnd(),1.0/k))/s,x); 
+  ProductSV(x,(r=pow(dw_uniform_rnd(),1.0/k))/s,x);
 
   return r;
 }
@@ -343,7 +343,7 @@ PRECISION PowerUnitBall(TVector x, PRECISION k)
      x : n-vector
 
    Results:
-     The vector x is filled with a vector drawn from the distribution 
+     The vector x is filled with a vector drawn from the distribution
 
          0.5 * k * Gamma(n/2) * pi^(-n/2) * norm(x)^(k-n) / (1 - a^k)
 
@@ -351,8 +351,8 @@ PRECISION PowerUnitBall(TVector x, PRECISION k)
      norm(x) upon success and a negative value upon failure.
 
    Notes:
-     If x is obtained by drawing y from the standard n-dimensional Gaussian 
-     distribtuion and r from the distribution on [a,1] with density 
+     If x is obtained by drawing y from the standard n-dimensional Gaussian
+     distribtuion and r from the distribution on [a,1] with density
 
                             k * r^(k-1) / (1 - a^k)
 
@@ -361,7 +361,7 @@ PRECISION PowerUnitBall(TVector x, PRECISION k)
                             (r^k - a^k) / (1 - a^k)
 
      a draw of r can be obtained by drawing u from the uniform on [0,1] and
-     defining r = (u(1-a^k) + a^k)^(1/k).  This assumes that k > 0.                      
+     defining r = (u(1-a^k) + a^k)^(1/k).  This assumes that k > 0.
 */
 PRECISION TruncatedPowerUnitBall(TVector x, PRECISION k, PRECISION a)
 {
@@ -377,7 +377,7 @@ PRECISION TruncatedPowerUnitBall(TVector x, PRECISION k, PRECISION a)
   while ((s=Norm(x)) == 0.0);
 
   t=pow(a,k);
-  ProductSV(x,(r=pow(dw_uniform_rnd()*(1.0 - t) + t,1.0/k))/s,x); 
+  ProductSV(x,(r=pow(dw_uniform_rnd()*(1.0 - t) + t,1.0/k))/s,x);
 
   return r;
 }
@@ -399,7 +399,7 @@ PRECISION SphericalTable(TVector x, PRECISION *table, int m)
 
   j=(int)floor(dw_uniform_rnd()*(PRECISION)m);
   r=(j < m) ? table[j] + dw_uniform_rnd()*(table[j+1] - table[j]) : table[m];
-  ProductSV(x,r/s,x); 
+  ProductSV(x,r/s,x);
 
   return r;
 }

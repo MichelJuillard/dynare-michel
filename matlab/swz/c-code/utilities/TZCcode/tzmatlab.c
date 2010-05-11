@@ -154,18 +154,18 @@ TSimatrix *DestroyMatrix_int(TSimatrix *x_im)
    if (x_im) {
       free(x_im->M);
       free(x_im);
-		return ((TSimatrix *)NULL);
+        return ((TSimatrix *)NULL);
    }
-	else  return  (x_im);
+    else  return  (x_im);
 }
 
 TSicellvec *CreateCellvec_int(TSivector *n_iv)
 {
    int _i,
        ncells;
-	TSicellvec *x_icv = tzMalloc(1, TSicellvec);
+    TSicellvec *x_icv = tzMalloc(1, TSicellvec);
 
-	if (!n_iv || !n_iv->flag)  fn_DisplayError(".../CreateCellvec_int( ): Dimension vector n_iv must (1) created and (2) assigned legal values");
+    if (!n_iv || !n_iv->flag)  fn_DisplayError(".../CreateCellvec_int( ): Dimension vector n_iv must (1) created and (2) assigned legal values");
    x_icv->ncells = ncells = n_iv->n;
    x_icv->C = tzMalloc(ncells, TSivector *);
    for (_i=ncells-1; _i>-0; _i--)   *(x_icv->C + _i) = CreateVector_int(n_iv->v[_i]);
@@ -325,7 +325,7 @@ TSdfourth *DestroyFourth_lf(TSdfourth *x_d4) {
       free(x_d4);
       return ((TSdfourth *)NULL);
    }
-	else  return (x_d4);
+    else  return (x_d4);
 }
 
 TSdfourthvec *CreateFourthvec_lf(int ndims, TSivector *n_iv)
@@ -351,7 +351,7 @@ TSdfourthvec *DestroyFourthvec_lf(TSdfourthvec *x_d4v)
       free(x_d4v);
       return ((TSdfourthvec *)NULL);
    }
-	else  return (x_d4v);
+    else  return (x_d4v);
 }
 
 TSdzvector *CreateVector_dz(int _n)
@@ -456,9 +456,9 @@ TSicellvec *CreateConstantCellvec_int(TSivector *n_iv, const int _n)
 {
    int _i,
        ncells;
-	TSicellvec *x_icv = tzMalloc(1, TSicellvec);
+    TSicellvec *x_icv = tzMalloc(1, TSicellvec);
 
-	if (!n_iv || !n_iv->flag)  fn_DisplayError(".../CreateCellvec_int( ): Dimension vector n_iv must (1) created and (2) assigned legal values");
+    if (!n_iv || !n_iv->flag)  fn_DisplayError(".../CreateCellvec_int( ): Dimension vector n_iv must (1) created and (2) assigned legal values");
    x_icv->ncells = ncells = n_iv->n;
    x_icv->C = tzMalloc(ncells, TSivector *);
    for (_i=ncells-1; _i>=0; _i--)   *(x_icv->C + _i) = CreateConstantVector_int(n_iv->v[_i], _n);

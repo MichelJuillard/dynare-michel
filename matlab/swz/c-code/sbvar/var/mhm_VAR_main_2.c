@@ -35,8 +35,8 @@ static PRECISION AddLogs_static(PRECISION a, PRECISION b)
 }
 
 /*
-   Let h(x) and f(x) be probability density functions and let c be an unknown 
-   constant.  In applications, the following will usually be true. 
+   Let h(x) and f(x) be probability density functions and let c be an unknown
+   constant.  In applications, the following will usually be true.
       x      - parameters
       y      - data
       f(x)   - posterior distribution = p(x|y)
@@ -45,7 +45,7 @@ static PRECISION AddLogs_static(PRECISION a, PRECISION b)
       c*f(x) - likelihood*prior = p(y|x)*p(x)
 
    Assumes:
-     posterior : M x 2 matrix with posterior[i][0] = ln(h(x(i))) and 
+     posterior : M x 2 matrix with posterior[i][0] = ln(h(x(i))) and
                  posterior[i][1] = ln(c*f(x(i))) where x(i) is sampled from f(x).
 
    Returns:
@@ -54,10 +54,10 @@ static PRECISION AddLogs_static(PRECISION a, PRECISION b)
    Notes:
      Uses the fact that c = 1/I(L) where I(L) is the integral over x of
 
-                        h(x)/(c*f(x)) * f(x) 
+                        h(x)/(c*f(x)) * f(x)
 
      I(L) can be computed from the posterior draws.
-    
+
 */
 PRECISION ComputeMarginalDensity_Standard(TMatrix posterior)
 {
@@ -74,8 +74,8 @@ PRECISION ComputeMarginalDensity_Standard(TMatrix posterior)
 
 
 /*
-   Let h(x) and f(x) be probability density functions and let c be an unknown 
-   constant.  In applications, the following will usually be true. 
+   Let h(x) and f(x) be probability density functions and let c be an unknown
+   constant.  In applications, the following will usually be true.
       x      - parameters
       y      - data
       f(x)   - posterior distribution = p(x|y)
@@ -84,7 +84,7 @@ PRECISION ComputeMarginalDensity_Standard(TMatrix posterior)
       c*f(x) - likelihood*prior = p(y|x)*p(x)
 
    Assumes:
-     posterior : M x 2 matrix with posterior[i][0] = ln(h(x(i))) and 
+     posterior : M x 2 matrix with posterior[i][0] = ln(h(x(i))) and
                  posterior[i][1] = ln(c*f(x(i))) where x(i) is sampled from f(x).
      L         : cutoff value in logs.
      q         : estimate of the probability that x sampled from h(x) satisfies
@@ -97,10 +97,10 @@ PRECISION ComputeMarginalDensity_Standard(TMatrix posterior)
    Notes:
      Uses the fact that c = q/I(L) where I(L) is the integral over x of
 
-                      1{c*f(x)>exp(L)}*h(x)/(c*f(x)) * f(x) 
+                      1{c*f(x)>exp(L)}*h(x)/(c*f(x)) * f(x)
 
      I(L) can be computed from the posterior draws.
-    
+
 */
 PRECISION ComputeMarginalDensity_WZ1_q(TMatrix posterior, PRECISION L, PRECISION q, int *in_posterior)
 {
@@ -110,8 +110,8 @@ PRECISION ComputeMarginalDensity_WZ1_q(TMatrix posterior, PRECISION L, PRECISION
   for (*in_posterior=0, i=RowM(posterior)-1; i >= 0; i--)
     if (ElementM(posterior,i,1) >= L)
       {
-	(*in_posterior)++;
-	I=AddLogs_static(I,ElementM(posterior,i,0) - ElementM(posterior,i,1));
+    (*in_posterior)++;
+    I=AddLogs_static(I,ElementM(posterior,i,0) - ElementM(posterior,i,1));
       }
 
   if ((*in_posterior) > 0) I-=log((PRECISION)RowM(posterior));
@@ -120,8 +120,8 @@ PRECISION ComputeMarginalDensity_WZ1_q(TMatrix posterior, PRECISION L, PRECISION
 }
 
 /*
-   Let h(x) and f(x) be probability density functions and let c be an unknown 
-   constant.  In applications, the following will usually be true. 
+   Let h(x) and f(x) be probability density functions and let c be an unknown
+   constant.  In applications, the following will usually be true.
       x      - parameters
       y      - data
       f(x)   - posterior distribution = p(x|y)
@@ -130,9 +130,9 @@ PRECISION ComputeMarginalDensity_WZ1_q(TMatrix posterior, PRECISION L, PRECISION
       c*f(x) - likelihood*prior = p(y|x)*p(x)
 
    Assumes:
-     proposal  : N x 2 matrix with proposal[i][0] = ln(h(x(i))) and 
+     proposal  : N x 2 matrix with proposal[i][0] = ln(h(x(i))) and
                  proposal[i][1] = ln(c*f(x(i))) where x(i) is sampled from h(x).
-     posterior : M x 2 matrix with posterior[i][0] = ln(h(x(i))) and 
+     posterior : M x 2 matrix with posterior[i][0] = ln(h(x(i))) and
                  posterior[i][1] = ln(c*f(x(i))) where x(i) is sampled from f(x).
      L         : cutoff value.
 
@@ -141,15 +141,15 @@ PRECISION ComputeMarginalDensity_WZ1_q(TMatrix posterior, PRECISION L, PRECISION
      restriction given by the cutoff value L.
 
    Notes:
-     Uses the fact that c = P(L)/I(L) where p(L) is the probability that x 
-     sampled from h(x) satisfies c*f(x) > exp(L) and I(L) is the integral over x 
+     Uses the fact that c = P(L)/I(L) where p(L) is the probability that x
+     sampled from h(x) satisfies c*f(x) > exp(L) and I(L) is the integral over x
      of
 
-                      1{c*f(x)>exp(L)}*h(x)/(c*f(x)) * f(x) 
+                      1{c*f(x)>exp(L)}*h(x)/(c*f(x)) * f(x)
 
-     P(L) can be computed from the proposal draws and I(L) can be computed from 
+     P(L) can be computed from the proposal draws and I(L) can be computed from
      the posterior draws.
-    
+
 */
 PRECISION ComputeMarginalDensity_WZ1(TMatrix proposal, TMatrix posterior, PRECISION L, int *in_proposal, int *in_posterior)
 {
@@ -162,8 +162,8 @@ PRECISION ComputeMarginalDensity_WZ1(TMatrix proposal, TMatrix posterior, PRECIS
   for (*in_posterior=0, i=RowM(posterior)-1; i >= 0; i--)
     if (ElementM(posterior,i,1) >= L)
       {
-	(*in_posterior)++;
-	I=AddLogs_static(I,ElementM(posterior,i,0) - ElementM(posterior,i,1));
+    (*in_posterior)++;
+    I=AddLogs_static(I,ElementM(posterior,i,0) - ElementM(posterior,i,1));
       }
 
   if ((*in_posterior) > 0) I-=log((PRECISION)RowM(posterior));
@@ -173,7 +173,7 @@ PRECISION ComputeMarginalDensity_WZ1(TMatrix proposal, TMatrix posterior, PRECIS
 
 /*
    ess - effective sample size
-    This is the sum of h(x)/(c*f(x)) divided by the max of h(x)/(c*f(x)).  See 
+    This is the sum of h(x)/(c*f(x)) divided by the max of h(x)/(c*f(x)).  See
     the header for ComputeMarginalDensity_WZ1() for the definitions of h(x) and c*f(x).
 */
 PRECISION ComputeEffectiveSampleSize_WZ1(TMatrix posterior, PRECISION L)
@@ -184,9 +184,9 @@ PRECISION ComputeEffectiveSampleSize_WZ1(TMatrix posterior, PRECISION L)
   for (i=RowM(posterior)-1; i >= 0; i--)
     if (ElementM(posterior,i,1) >= L)
       {
-	tmp=ElementM(posterior,i,0) - ElementM(posterior,i,1);
-	sum=AddLogs_static(sum,tmp);
-	if (tmp > max) max=tmp;
+    tmp=ElementM(posterior,i,0) - ElementM(posterior,i,1);
+    sum=AddLogs_static(sum,tmp);
+    if (tmp > max) max=tmp;
       }
 
   return exp(sum - max);
@@ -194,8 +194,8 @@ PRECISION ComputeEffectiveSampleSize_WZ1(TMatrix posterior, PRECISION L)
 
 
 /*
-   Let h(x) and f(x) be probability density functions and let c be an unknown 
-   constant.  In applications, the following will usually be true. 
+   Let h(x) and f(x) be probability density functions and let c be an unknown
+   constant.  In applications, the following will usually be true.
       x      - parameters
       y      - data
       f(x)   - posterior distribution = p(x|y)
@@ -204,9 +204,9 @@ PRECISION ComputeEffectiveSampleSize_WZ1(TMatrix posterior, PRECISION L)
       c*f(x) - likelihood*prior = p(y|x)*p(x)
 
    Assumes:
-     proposal  : N x 2 matrix with proposal[i][0] = ln(h(x(i))) and 
+     proposal  : N x 2 matrix with proposal[i][0] = ln(h(x(i))) and
                  proposal[i][1] = ln(c*f(x(i))) where x(i) is sampled from h(x).
-     posterior : M x 2 matrix with posterior[i][0] = ln(h(x(i))) and 
+     posterior : M x 2 matrix with posterior[i][0] = ln(h(x(i))) and
                  posterior[i][1] = ln(c*f(x(i))) where x(i) is sampled from f(x).
      L1        : cutoff value (likelihood(x)*prior(x) > L1)
      L2        : cutoff value for (proposal(x) < L2)
@@ -217,14 +217,14 @@ PRECISION ComputeEffectiveSampleSize_WZ1(TMatrix posterior, PRECISION L)
 
    Notes:
      Uses the fact that c = P(L1,L2)/I(L1,L2) where p(L1,L2) is the probability
-     that x sampled from h(x) satisfies c*f(x) > exp(L1) and h(x) < exp(L2) and 
+     that x sampled from h(x) satisfies c*f(x) > exp(L1) and h(x) < exp(L2) and
      I(L1,L2) is the integral over x of
 
-              1{c*f(x)>exp(L1) and h(x)<exp(L2)}*h(x)/(c*f(x)) * f(x) 
+              1{c*f(x)>exp(L1) and h(x)<exp(L2)}*h(x)/(c*f(x)) * f(x)
 
-     P(L) can be computed from the proposal draws and I(L) can be computed from 
-     the posterior draws.  The function 1{.} denotes the 
-    
+     P(L) can be computed from the proposal draws and I(L) can be computed from
+     the posterior draws.  The function 1{.} denotes the
+
 */
 PRECISION ComputeMarginalDensity_WZ2(TMatrix proposal, TMatrix posterior, PRECISION L1, PRECISION L2, int *in_proposal, int *in_posterior)
 {
@@ -238,8 +238,8 @@ PRECISION ComputeMarginalDensity_WZ2(TMatrix proposal, TMatrix posterior, PRECIS
   for (*in_posterior=0, i=RowM(posterior)-1; i >= 0; i--)
     if ((ElementM(posterior,i,1) >= L1) && (ElementM(posterior,i,0) <= L2))
       {
-	(*in_posterior)++;
-	I=AddLogs_static(I,ElementM(posterior,i,0) - ElementM(posterior,i,1));
+    (*in_posterior)++;
+    I=AddLogs_static(I,ElementM(posterior,i,0) - ElementM(posterior,i,1));
       }
 
   if ((*in_posterior) > 0) I-=log((PRECISION)RowM(posterior));
@@ -262,7 +262,7 @@ PRECISION ComputeMarginalDensity_WZ3(TMatrix proposal, TMatrix posterior, PRECIS
     {
       tmp=ElementM(posterior,i,0) - ElementM(posterior,i,1);
       if ((L1 < tmp) && (tmp < L2))
-	I=AddLogs_static(I,tmp);
+    I=AddLogs_static(I,tmp);
     }
 
   if (I > MINUS_INFINITY) I-=log((PRECISION)RowM(posterior));
@@ -282,14 +282,14 @@ PRECISION ComputeDifference(TMatrix proposal, TMatrix posterior, PRECISION c, in
   for (*in1=0, i=RowM(proposal)-1; i >= 0; i--)
     if (c < (tmp=ElementM(proposal,i,0)-ElementM(proposal,i,1)))
       {
-	sum1+=1-exp(c-tmp);
-	(*in1)++;
+    sum1+=1-exp(c-tmp);
+    (*in1)++;
       }
   for (*in2=0, i=RowM(posterior)-1; i >= 0; i--)
     if (c > (tmp=ElementM(posterior,i,0)-ElementM(posterior,i,1)))
       {
-	sum2+=1-exp(tmp-c);
-	(*in2)++;
+    sum2+=1-exp(tmp-c);
+    (*in2)++;
       }
   return sum1/(PRECISION)RowM(proposal) - sum2/(PRECISION)RowM(posterior);
 }
@@ -303,7 +303,7 @@ PRECISION ComputeMarginalDensity_Mueller_Check(TMatrix proposal, TMatrix posteri
 printf("%lf %le - %d %d\n",mid_c,diff,*in1,*in2);                                            //**
       max_c=mid_c;
       for (min_c=-1.0; min_c > -MAX_C; max_c=min_c, min_c*=10)
-	if ((diff=ComputeDifference(proposal,posterior,min_c,in1,in2)) > 0) break;
+    if ((diff=ComputeDifference(proposal,posterior,min_c,in1,in2)) > 0) break;
 else printf("%lf %lf %le - %d %d\n",min_c,max_c,diff,*in1,*in2);                             //**
       if (min_c <= -MAX_C) return min_c;
     }
@@ -312,7 +312,7 @@ else printf("%lf %lf %le - %d %d\n",min_c,max_c,diff,*in1,*in2);                
 printf("%lf %le - %d %d\n",mid_c,diff,*in1,*in2);                                            //**
       min_c=mid_c;
       for (max_c=1.0; max_c < MAX_C; min_c=max_c, max_c*=10)
-	if ((diff=ComputeDifference(proposal,posterior,max_c,in1,in2)) < 0) break;
+    if ((diff=ComputeDifference(proposal,posterior,max_c,in1,in2)) < 0) break;
 else printf("%lf %lf %le - %d %d\n",min_c,max_c,diff,*in1,*in2);                             //**
       if (max_c >= MAX_C) return max_c;
     }
@@ -321,9 +321,9 @@ printf("%lf %lf %le - %d %d\n",min_c,max_c,diff,*in1,*in2);                     
   for (i=0; i < 200; i++)
     {
       if (diff > 0)
-	min_c=mid_c;
+    min_c=mid_c;
       else
-	max_c=mid_c;
+    max_c=mid_c;
 printf("%lf %lf %le %d - %d %d\n",min_c,max_c,diff,i,*in1,*in2);                             //**
       if ((fabs(diff=ComputeDifference(proposal,posterior,mid_c=(min_c + max_c)/2.0,in1,in2)) < TOL) && (i > 20)) break;
     }
@@ -348,8 +348,8 @@ PRECISION ComputeLinear(TMatrix proposal, PRECISION log_c, int *intercept)
   for (*intercept=0, i=RowM(proposal)-1; i >= 0; i--)
     if (log_c < (tmp=ElementM(proposal,i,0) - ElementM(proposal,i,1)))
       {
-	(*intercept)++;
-	slope+=exp(log_c-tmp);
+    (*intercept)++;
+    slope+=exp(log_c-tmp);
       }
   return slope;
 }
@@ -360,8 +360,8 @@ PRECISION ComputeInverseLinear(TMatrix posterior, PRECISION log_c, int *intercep
   for (*intercept=0, i=RowM(posterior)-1; i >= 0; i--)
     if (log_c > (tmp=ElementM(posterior,i,0)-ElementM(posterior,i,1)))
       {
-	(*intercept)++;
-	slope+=exp(tmp-log_c);
+    (*intercept)++;
+    slope+=exp(tmp-log_c);
       }
   return slope;
 }
@@ -379,21 +379,21 @@ PRECISION ComputeMarginalDensity_Mueller(TMatrix proposal, TMatrix posterior,int
   if (diff < 0.0)
     {
       do
-	if (log_c < -MAX_C) 
-	  return log_c;
-	else
-	  {
-	    max_in1=*in1;
-	    max_in2=*in2;
-	    max_log_c=log_c;
-	    log_c=10*(log_c-1);
-	    slope1=ComputeLinear(proposal,log_c,in1);
-	    slope2=ComputeInverseLinear(posterior,log_c,in2);
-	    diff=N1*((PRECISION)(*in1) - slope1) - N2*((PRECISION)(*in2) - slope2);
+    if (log_c < -MAX_C)
+      return log_c;
+    else
+      {
+        max_in1=*in1;
+        max_in2=*in2;
+        max_log_c=log_c;
+        log_c=10*(log_c-1);
+        slope1=ComputeLinear(proposal,log_c,in1);
+        slope2=ComputeInverseLinear(posterior,log_c,in2);
+        diff=N1*((PRECISION)(*in1) - slope1) - N2*((PRECISION)(*in2) - slope2);
 #ifdef VERBOSE
-printf("%lf %lf %le - %d %d\n",log_c,max_log_c,diff,*in1,*in2);                                             
+printf("%lf %lf %le - %d %d\n",log_c,max_log_c,diff,*in1,*in2);
 #endif
-	  }
+      }
       while (diff < 0.0);
       min_in1=*in1;
       min_in2=*in2;
@@ -402,21 +402,21 @@ printf("%lf %lf %le - %d %d\n",log_c,max_log_c,diff,*in1,*in2);
   else
     {
       do
-	if (log_c > MAX_C) 
-	  return log_c;
-	else
-	  {
-	    min_in1=*in1;
-	    min_in2=*in2;
-	    min_log_c=log_c;
-	    log_c=10*(log_c+1);
-	    slope1=ComputeLinear(proposal,log_c,in1);
-	    slope2=ComputeInverseLinear(posterior,log_c,in2);
-	    diff=N1*((PRECISION)(*in1) - slope1) - N2*((PRECISION)(*in2) - slope2);
+    if (log_c > MAX_C)
+      return log_c;
+    else
+      {
+        min_in1=*in1;
+        min_in2=*in2;
+        min_log_c=log_c;
+        log_c=10*(log_c+1);
+        slope1=ComputeLinear(proposal,log_c,in1);
+        slope2=ComputeInverseLinear(posterior,log_c,in2);
+        diff=N1*((PRECISION)(*in1) - slope1) - N2*((PRECISION)(*in2) - slope2);
 #ifdef VERBOSE
-printf("%lf %lf %le - %d %d\n",min_log_c,log_c,diff,*in1,*in2);                                            
+printf("%lf %lf %le - %d %d\n",min_log_c,log_c,diff,*in1,*in2);
 #endif
-	  }
+      }
       while (diff >= 0.0);
       max_in1=*in1;
       max_in2=*in2;
@@ -431,19 +431,19 @@ printf("%lf %lf %le - %d %d\n",min_log_c,log_c,diff,*in1,*in2);
       slope2=ComputeInverseLinear(posterior,log_c,in2);
       diff=N1*((PRECISION)(*in1) - slope1) - N2*((PRECISION)(*in2) - slope2);
       if (diff > 0)
-	{
-	  min_in1=*in1;
-	  min_in2=*in2;
-	  min_log_c=log_c;
-	}
+    {
+      min_in1=*in1;
+      min_in2=*in2;
+      min_log_c=log_c;
+    }
       else
-	{
-	  max_in1=*in1;
-	  max_in2=*in2;
-	  max_log_c=log_c;
-	}
+    {
+      max_in1=*in1;
+      max_in2=*in2;
+      max_log_c=log_c;
+    }
 #ifdef VERBOSE
-printf("%lf %lf %le - %d %d\n",min_log_c,max_log_c,diff,*in1,*in2);                                        
+printf("%lf %lf %le - %d %d\n",min_log_c,max_log_c,diff,*in1,*in2);
 #endif
     }
 
@@ -457,28 +457,28 @@ printf("%lf %lf %le - %d %d\n",min_log_c,max_log_c,diff,*in1,*in2);
     {
       tmp+=sqrt(tmp*tmp + 4*slope1*slope2);
       if (tmp >= 2.0*slope1)
-	tmp=min_log_c + log(tmp) - log(2.0*slope1);
+    tmp=min_log_c + log(tmp) - log(2.0*slope1);
       else
-	return -min_log_c;
+    return -min_log_c;
     }
   else
     {
 #ifdef VERBOSE
-printf("Flat linear slope\n");                                       
+printf("Flat linear slope\n");
 #endif
     if (tmp > 0)
       if (slope2 > tmp)
-	tmp=min_log_c + log(slope2) - log(tmp);
+    tmp=min_log_c + log(slope2) - log(tmp);
       else
-	return -min_log_c;
+    return -min_log_c;
     else
       return -max_log_c;
     }
   return (tmp > max_log_c) ? -max_log_c : -tmp;
 }
 
-void ComputeDiagnostics_Mueller(TMatrix proposal, TMatrix posterior, PRECISION log_c, 
-				PRECISION *log_slope1, PRECISION *ess1, PRECISION *log_slope2, PRECISION *ess2)
+void ComputeDiagnostics_Mueller(TMatrix proposal, TMatrix posterior, PRECISION log_c,
+                PRECISION *log_slope1, PRECISION *ess1, PRECISION *log_slope2, PRECISION *ess2)
 {
   PRECISION slope, sum, max, tmp;
   int i;
@@ -488,10 +488,10 @@ void ComputeDiagnostics_Mueller(TMatrix proposal, TMatrix posterior, PRECISION l
   for (i=RowM(proposal)-1; i >= 0; i--)
     if (log_c < (tmp=ElementM(proposal,i,0) - ElementM(proposal,i,1)))
       {
-	tmp=exp(log_c-tmp);
-	slope+=tmp;
-	sum+=1.0-tmp;
-	if (1.0-tmp > max) max=1.0-tmp;
+    tmp=exp(log_c-tmp);
+    slope+=tmp;
+    sum+=1.0-tmp;
+    if (1.0-tmp > max) max=1.0-tmp;
       }
 
   *log_slope1=log(slope) - log_c - log(RowM(proposal));
@@ -502,15 +502,15 @@ void ComputeDiagnostics_Mueller(TMatrix proposal, TMatrix posterior, PRECISION l
   for (i=RowM(posterior)-1; i >= 0; i--)
     if (log_c > (tmp=ElementM(posterior,i,0)-ElementM(posterior,i,1)))
       {
-	tmp=exp(tmp-log_c);
-	slope-=tmp;
-	sum+=1.0-tmp;
-	if (1.0-tmp > max) max=1.0-tmp;
+    tmp=exp(tmp-log_c);
+    slope-=tmp;
+    sum+=1.0-tmp;
+    if (1.0-tmp > max) max=1.0-tmp;
       }
- 
+
   *log_slope2=log(slope) - log_c - log(RowM(posterior));
   *ess2=(max > 0.0) ? sum/max : 0.0;
-} 
+}
 #undef MAX_C
 #undef VERBOSE
 /*******************************************************************************/
@@ -568,10 +568,10 @@ TVector Linear_Level_Cuts(TMatrix X, int n_cuts)
     {
       tmp=ElementM(X,k,1);
       if (tmp < min)
-	min=tmp;
+    min=tmp;
       else
-	if (tmp > max)
-	  max=tmp;
+    if (tmp > max)
+      max=tmp;
     }
   min-=0.1;
   max+=0.1;
@@ -596,10 +596,10 @@ TVector Exponential_Level_Cuts(TMatrix X, int n_cuts)
     {
       tmp=ElementM(X,k,1);
       if (tmp < min)
-	min=tmp;
+    min=tmp;
       else
-	if (tmp > max)
-	  max=tmp;
+    if (tmp > max)
+      max=tmp;
     }
 
   ElementV(cuts,0)=min;
@@ -616,14 +616,14 @@ TVector Exponential_Level_Cuts(TMatrix X, int n_cuts)
      center : center point for spherical distribution
      scale  : linear transformation for spherical distribution
      model  : valid point to TStateModel structure
-     alpha  : array of parameters of independent draws from the Dirichlet 
+     alpha  : array of parameters of independent draws from the Dirichlet
               distribution
 
    Results:
-     Draws theta from affine transformation of spherical distribution and Q from 
-     independent Dirichlet distribution.  Computes the scaled log posterior 
+     Draws theta from affine transformation of spherical distribution and Q from
+     independent Dirichlet distribution.  Computes the scaled log posterior
      (likelihood times prior), with the states integerated out.  Returns the
-     vector q.  q[i] is the proportion of the draws that are greater than or 
+     vector q.  q[i] is the proportion of the draws that are greater than or
      equal to level_cuts[i].
 */
 TVector Create_q(int ndraws, TVector center, TMatrix scale, TStateModel* model, TVector* alpha, TVector level_cuts)
@@ -660,35 +660,35 @@ TVector Create_q(int ndraws, TVector center, TMatrix scale, TStateModel* model, 
 
       // VAR specific - perform checks on theta parameters to ensure they are valid
       for (j=n_zeta-1; j >= 0; j--)
-	if (zeta[j] <= 0)
-	  {
-	    // non-positive values of zeta - log posterior is minus infinity
-	    break;
-	  }
+    if (zeta[j] <= 0)
+      {
+        // non-positive values of zeta - log posterior is minus infinity
+        break;
+      }
 
       if (j < 0)
-	{
-	  // force free parameters into model
-	  ConvertFreeParametersToTheta(model,pElementV(free_parameters));
-	  Update_Q_from_B_SV(model->sv);
-	  if (!(model->sv->valid_transition_matrix)) ValidateTransitionMatrices_SV(model->sv);
-	  TransitionMatricesChanged(model);
+    {
+      // force free parameters into model
+      ConvertFreeParametersToTheta(model,pElementV(free_parameters));
+      Update_Q_from_B_SV(model->sv);
+      if (!(model->sv->valid_transition_matrix)) ValidateTransitionMatrices_SV(model->sv);
+      TransitionMatricesChanged(model);
 
-	  // Normalize
-	  if (!IsNormalized_VAR(model->theta))
-	    {
-	      // parameters changed - log posterior is minus infinity
-	      break;
-	    }
-	  else
-	    {
-	      // compute log posterior
-	      density=LogPosterior_StatesIntegratedOut(model);
-	      for (k=DimV(level_cuts)-1; k >= 0; k--)
-		if (density >= ElementV(level_cuts,k))
-		  ElementV(q,k)+=1.0;
-	    }
-	}
+      // Normalize
+      if (!IsNormalized_VAR(model->theta))
+        {
+          // parameters changed - log posterior is minus infinity
+          break;
+        }
+      else
+        {
+          // compute log posterior
+          density=LogPosterior_StatesIntegratedOut(model);
+          for (k=DimV(level_cuts)-1; k >= 0; k--)
+        if (density >= ElementV(level_cuts,k))
+          ElementV(q,k)+=1.0;
+        }
+    }
     }
 
   for (k=DimV(level_cuts)-1; k >= 0; k--)
@@ -708,15 +708,15 @@ TVector Create_q(int ndraws, TVector center, TMatrix scale, TStateModel* model, 
      center : center point for spherical distribution
      scale  : linear transformation for spherical distribution
      model  : valid pointer to TStateModel structure
-     alpha  : array of parameters of independent draws from the Dirichlet 
+     alpha  : array of parameters of independent draws from the Dirichlet
               distribution
 
    Results:
-     Draws theta from affine transformation of spherical distribution and Q from 
-     independent Dirichlet distribution.  Computes the log density, properly 
-     scaled, of the proposal distribution and stores this in the first column of 
-     proposal.  Computes the scaled log posterior (likelihood time prior), with 
-     the states integerated out, and stores this in the second column of 
+     Draws theta from affine transformation of spherical distribution and Q from
+     independent Dirichlet distribution.  Computes the log density, properly
+     scaled, of the proposal distribution and stores this in the first column of
+     proposal.  Computes the scaled log posterior (likelihood time prior), with
+     the states integerated out, and stores this in the second column of
      proposal.
 */
 TMatrix CreateProposal(int ndraws, TVector center, TMatrix scale, TStateModel* model, TVector* alpha)
@@ -758,23 +758,23 @@ TMatrix CreateProposal(int ndraws, TVector center, TMatrix scale, TStateModel* m
 
       // VAR specific - perform checks on theta parameters to ensure they are valid
       for (j=n_zeta-1; j >= 0; j--)
-	if (zeta[j] <= 0)
-	  {
-	    ElementM(proposal,i,1)=MINUS_INFINITY;
-	    break;
-	  }
+    if (zeta[j] <= 0)
+      {
+        ElementM(proposal,i,1)=MINUS_INFINITY;
+        break;
+      }
 
       if (j < 0)
-	{
-	  // force free parameters into model
-	  ConvertFreeParametersToTheta(model,pElementV(free_parameters));
-	  Update_Q_from_B_SV(model->sv);
-	  if (!(model->sv->valid_transition_matrix)) ValidateTransitionMatrices_SV(model->sv);
-	  TransitionMatricesChanged(model);
+    {
+      // force free parameters into model
+      ConvertFreeParametersToTheta(model,pElementV(free_parameters));
+      Update_Q_from_B_SV(model->sv);
+      if (!(model->sv->valid_transition_matrix)) ValidateTransitionMatrices_SV(model->sv);
+      TransitionMatricesChanged(model);
 
-	  // compute log posterior
-	  ElementM(proposal,i,1)=LogPosterior_StatesIntegratedOut(model);
-	}
+      // compute log posterior
+      ElementM(proposal,i,1)=LogPosterior_StatesIntegratedOut(model);
+    }
     }
 
   // timings
@@ -791,15 +791,15 @@ TMatrix CreateProposal(int ndraws, TVector center, TMatrix scale, TStateModel* m
      center : center point for spherical distribution
      scale  : linear transformation for spherical distribution
      model  : valid point to TStateModel structure
-     alpha  : array of parameters of independent draws from the Dirichlet 
+     alpha  : array of parameters of independent draws from the Dirichlet
               distribution
 
    Results:
-     Draws theta from affine transformation of spherical distribution and Q from 
-     independent Dirichlet distribution.  Computes the log density, properly 
-     scaled, of the proposal distribution and stores this in the first column of 
-     proposal.  Computes the scaled log posterior (likelihood time prior), with 
-     the states integerated out, and stores this in the second column of 
+     Draws theta from affine transformation of spherical distribution and Q from
+     independent Dirichlet distribution.  Computes the log density, properly
+     scaled, of the proposal distribution and stores this in the first column of
+     proposal.  Computes the scaled log posterior (likelihood time prior), with
+     the states integerated out, and stores this in the second column of
      proposal.
 */
 TMatrix CreateProposal_Radius(int ndraws, TVector center, TMatrix scale, TStateModel* model, TVector* alpha)
@@ -841,11 +841,11 @@ TMatrix CreateProposal_Radius(int ndraws, TVector center, TMatrix scale, TStateM
 
       // VAR specific - perform checks on theta parameters to ensure they are valid
       for (j=n_zeta-1; j >= 0; j--)
-	if (zeta[j] <= 0)
-	  {
-	    ElementM(proposal,i,1)=MINUS_INFINITY;
-	    continue;
-	  }
+    if (zeta[j] <= 0)
+      {
+        ElementM(proposal,i,1)=MINUS_INFINITY;
+        continue;
+      }
 
       // force free parameters into model
       ConvertFreeParametersToTheta(model,pElementV(free_parameters));
@@ -880,7 +880,7 @@ TMatrix CreateProposal_Radius(int ndraws, TVector center, TMatrix scale, TStateM
     Notes:
       The parameters are theta and Q.  The proposal density is independent across
       these with a Dirichlet distribution on Q and a spherical density on theta.
-      The scale for spherical distribution is (rescale_factor * base_scale). 
+      The scale for spherical distribution is (rescale_factor * base_scale).
 */
 TMatrix CreatePosterior(TMatrix X, PRECISION rescale_factor, TMatrix base_scale, int idx_alpha, int dim)
 {
@@ -898,8 +898,8 @@ TMatrix CreatePosterior(TMatrix X, PRECISION rescale_factor, TMatrix base_scale,
   return Y;
 }
 
-void ComputeMarginal(int ndraws_proposal, TMatrix X, TStateModel *model, T_MHM *mhm, int idx_alpha, PRECISION rescale_factor, 
-		     char *tag, char *proposal_tag)
+void ComputeMarginal(int ndraws_proposal, TMatrix X, TStateModel *model, T_MHM *mhm, int idx_alpha, PRECISION rescale_factor,
+             char *tag, char *proposal_tag)
 {
   TMatrix proposal, posterior, base_scale, scale;
   TVector *alpha=(TVector*)NULL, level_cuts;
@@ -999,7 +999,7 @@ PRECISION SetupSphericalFromPosterior_Table(TMatrix X, int n)
   for (i=1; i <= n_table; i++)
     {
       j=(int)floor(inc*(PRECISION)i);
-      p=(inc*(PRECISION)i - (PRECISION)j)/inc; 
+      p=(inc*(PRECISION)i - (PRECISION)j)/inc;
       j+=B;
       ElementV(table,i)=(j < DimV(Y) - 1) ? (1 - p)*sqrt(ElementV(Y,j)) + p*sqrt(ElementV(Y,j+1)) : sqrt(ElementV(Y,DimV(Y)-1));
     }
@@ -1096,7 +1096,7 @@ void ComputeMarginal_TruncatedPowerProposal(int ndraws_proposal, TMatrix X, TSta
 {
   TMatrix proposal, posterior, base_scale, scale;
   TVector Y, *alpha=(TVector*)NULL, level_cuts;
-  PRECISION rescale_factor, p, s=1.0/(PRECISION)RowM(X), cut_point=0.01, min_point=0.1, max_point=0.9, a, b, x, y, inc, k, truncate, 
+  PRECISION rescale_factor, p, s=1.0/(PRECISION)RowM(X), cut_point=0.01, min_point=0.1, max_point=0.9, a, b, x, y, inc, k, truncate,
     diff, marginal_density, ess, slope1, ess1, slope2, ess2;
   int idx_alpha=1, i, j, in1, in2, bins=1000, ia, ib;
   char filename[256];
@@ -1244,7 +1244,7 @@ void ComputeMarginal_PowerProposal(int ndraws_proposal, TMatrix X, TStateModel *
 {
   TMatrix proposal, posterior, base_scale, scale;
   TVector Y, *alpha=(TVector*)NULL, level_cuts;
-  PRECISION rescale_factor, p, s=1.0/RowM(X), min_point=0.1, max_point=0.9, a, b, k, 
+  PRECISION rescale_factor, p, s=1.0/RowM(X), min_point=0.1, max_point=0.9, a, b, k,
     diff, marginal_density, ess, slope1, ess1, slope2, ess2, inc;
   int idx_alpha=1, i, j, in1, in2, bins=1000;
   char filename[256];
@@ -1634,7 +1634,7 @@ void ComputeMarginal_TruncatedGaussianProposal(int ndraws_proposal, TMatrix X, T
 /* } */
 
 /*
-   Computes marginal data density using the WZ technique.  A small footprint technique is used to minimize 
+   Computes marginal data density using the WZ technique.  A small footprint technique is used to minimize
    memory and file usage.
 */
 /* void ComputeMarginal_Small(int type, int ndraws_proposal, TMatrix X, TStateModel *model, T_MHM *mhm, char *tag, PRECISION variance) */
@@ -1647,7 +1647,7 @@ void ComputeMarginal_TruncatedGaussianProposal(int ndraws_proposal, TMatrix X, T
 
 /*   // Setup spherical distribution */
 /*   rescale_factor=SetupSphericalFromPosterior(X,NumberFreeParametersTheta(model),type); */
- 
+
 /*   // compute base scale and scale */
 /*   base_scale=CholeskyUT((TMatrix)NULL,mhm->variance); */
 /*   Transpose(base_scale,base_scale); */
@@ -1699,7 +1699,7 @@ void ComputeMarginal_TruncatedGaussianProposal(int ndraws_proposal, TMatrix X, T
 /* } */
 
 /*
-   Creates a cumulative distribution of the radius from the posterior 
+   Creates a cumulative distribution of the radius from the posterior
    distribution.  The square of the radius is the second column of X.
    The larger the bin size, the finer the plot.  The first column is the
    radius and the second column is the cumulative distribution.
@@ -1732,7 +1732,7 @@ void CreateCumulativeDistributionPosteriorRadius(TMatrix X, char *filename, int 
 }
 
 /*
-   Creates a cumulative distribution of the radius from the posterior 
+   Creates a cumulative distribution of the radius from the posterior
    distribution.  The square of the radius is the second column of X.
    The larger the bin size, the finer the plot.  The first column is the
    radius and the second column is the cumulative distribution.
@@ -1761,7 +1761,7 @@ void CreateCumulativeDistributionSphericalRadius(int ndraws, int dim, char *file
       ElementM(cumulative,j,1)+=1.0;
     }
   ElementM(cumulative,0,1)*=s;
-  for (i=1; i < bins; i++) 
+  for (i=1; i < bins; i++)
     ElementM(cumulative,i,1)=s*ElementM(cumulative,i,1) + ElementM(cumulative,i-1,1);
 
   dw_PrintMatrix(fout,cumulative,"%lf,");
@@ -1771,7 +1771,7 @@ void CreateCumulativeDistributionSphericalRadius(int ndraws, int dim, char *file
 }
 
 /*
-   Outputs  
+   Outputs
 */
 void Plot_Posterior_vs_Posterior_Radius(TMatrix X, char* filename)
 {
@@ -1788,14 +1788,14 @@ void Plot_Posterior_vs_Posterior_Radius(TMatrix X, char* filename)
       ElementM(Y,i,0)=(ElementM(X,start,1) + ElementM(X,stop-1,1))/2;
       ElementM(Y,i,1)=ElementM(Y,i,2)=ElementM(Y,i,3)=ElementM(X,start,0);
       for (j=start+1; j < stop; j++)
-	{
-	  ElementM(Y,i,2)+=ElementM(X,j,0);
-	  if (ElementM(X,j,0) < ElementM(Y,i,1))
-	    ElementM(Y,i,1)=ElementM(X,j,0);
-	  else
-	    if (ElementM(X,j,0) > ElementM(Y,i,3))
-	      ElementM(Y,i,3)=ElementM(X,j,0);
-	}
+    {
+      ElementM(Y,i,2)+=ElementM(X,j,0);
+      if (ElementM(X,j,0) < ElementM(Y,i,1))
+        ElementM(Y,i,1)=ElementM(X,j,0);
+      else
+        if (ElementM(X,j,0) > ElementM(Y,i,3))
+          ElementM(Y,i,3)=ElementM(X,j,0);
+    }
       ElementM(Y,i,2)/=(PRECISION)(stop - start);
       start+=inc;
     }
@@ -1811,7 +1811,7 @@ void Plot_Posterior_vs_Proposal_Radius(int ndraws, TStateModel *model, T_MHM *mh
   int bins=1000, inc=(ndraws-1)/(bins-1), start=(ndraws - inc*(bins-1))/2, idx_alpha=1, stop, i, j;
   TMatrix Y, X, base_scale, scale;
   TVector *alpha;
-  
+
   // compute base scale and scale
   base_scale=CholeskyUT((TMatrix)NULL,mhm->variance);
   Transpose(base_scale,base_scale);
@@ -1843,14 +1843,14 @@ void Plot_Posterior_vs_Proposal_Radius(int ndraws, TStateModel *model, T_MHM *mh
       ElementM(Y,i,0)=rescale_factor*(ElementM(X,start,0) + ElementM(X,stop-1,0))/2;
       ElementM(Y,i,1)=ElementM(Y,i,2)=ElementM(Y,i,3)=ElementM(X,start,1);
       for (j=start+1; j < stop; j++)
-	{
-	  ElementM(Y,i,2)+=ElementM(X,j,1);
-	  if (ElementM(X,j,1) < ElementM(Y,i,1))
-	    ElementM(Y,i,1)=ElementM(X,j,1);
-	  else
-	    if (ElementM(X,j,1) > ElementM(Y,i,3))
-	      ElementM(Y,i,3)=ElementM(X,j,1);
-	}
+    {
+      ElementM(Y,i,2)+=ElementM(X,j,1);
+      if (ElementM(X,j,1) < ElementM(Y,i,1))
+        ElementM(Y,i,1)=ElementM(X,j,1);
+      else
+        if (ElementM(X,j,1) > ElementM(Y,i,3))
+          ElementM(Y,i,3)=ElementM(X,j,1);
+    }
       ElementM(Y,i,2)/=(PRECISION)(stop - start);
       start+=inc;
     }
@@ -1973,31 +1973,31 @@ int main(int nargs, char **args)
   if (!dw_SetFilePosition(f_in,id) || !dw_ReadMatrix(f_in,X=CreateMatrix(ndraws_posterior,n_fields)))
     {
       if (!dw_SetFilePosition(f_in,id))
-	printf("Error in parsing header\n  %s\n",id);
+    printf("Error in parsing header\n  %s\n",id);
       else
-	{
-	  char **line;
-	  int i;
-	  printf("Error in reading data matrix - checking data...\n");
-	  rewind(f_in);
-	  dw_SetFilePosition(f_in,id);
-	  for (i=0; i < ndraws_posterior; i++)
-	    {
-	      line=dw_ReadDelimitedLine(f_in,' ',REMOVE_EMPTY_FIELDS | STRIP_WHITESPACE);
-	      if (!line)
-		{
-		  printf("Not enough lines - %d\n",i+1);
-		  exit(0);
-		}
-	      if (dw_DimA(line) != n_fields)
-		{
-		  printf("Error on line %d - incorrect number of fields\n  ",i+1);
-		  dw_PrintDelimitedArray(stdout,line,' ');
-		  fgetc(stdin);
-		}
-	      dw_FreeArray(line);
-	    }
-	}
+    {
+      char **line;
+      int i;
+      printf("Error in reading data matrix - checking data...\n");
+      rewind(f_in);
+      dw_SetFilePosition(f_in,id);
+      for (i=0; i < ndraws_posterior; i++)
+        {
+          line=dw_ReadDelimitedLine(f_in,' ',REMOVE_EMPTY_FIELDS | STRIP_WHITESPACE);
+          if (!line)
+        {
+          printf("Not enough lines - %d\n",i+1);
+          exit(0);
+        }
+          if (dw_DimA(line) != n_fields)
+        {
+          printf("Error on line %d - incorrect number of fields\n  ",i+1);
+          dw_PrintDelimitedArray(stdout,line,' ');
+          fgetc(stdin);
+        }
+          dw_FreeArray(line);
+        }
+    }
       exit(0);
     }
   fclose(f_in);
@@ -2010,7 +2010,7 @@ int main(int nargs, char **args)
 
   // Initial generator from clock
   dw_initialize_generator(0);
-                    
+
   // Compute marginal using power functions
   switch (proposal_type)
     {
@@ -2041,7 +2041,7 @@ int main(int nargs, char **args)
              "\n\n");
       break;
     }
-  
+
   FreeMatrix(X);
   FreeStateModel(model);
   FreeMHM(mhm);

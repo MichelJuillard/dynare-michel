@@ -19,7 +19,7 @@
 #define dw_GetOffsetA(a)                  (dw_SpecsA(a)->offset)
 #define dw_IsSameTypeA(a1,a2)             (!memcmp(dw_SpecsA(a1),dw_SpecsA(a2),sizeof(TElementSpecification)))
 #define dw_IsPointerA(a)                  (dw_SpecsA(a)->flag & dw_ARRAY_POINTER)
-#define dw_UseMemcpyA(a)                  (dw_SpecsA(a)->flag & dw_ARRAY_USE_MEMCPY) 
+#define dw_UseMemcpyA(a)                  (dw_SpecsA(a)->flag & dw_ARRAY_USE_MEMCPY)
 #define dw_DeleteSpecsA(a)                (dw_SpecsA(a)->flag & dw_ARRAY_DELETE_SPECS)
 #define dw_GetDestructorA(a)              (dw_SpecsA(a)->destructor)
 #define dw_GetDefaultConstructorA(s)      (dw_SpecsA(a)->default_constructor)
@@ -43,12 +43,12 @@ void dw_FreeArray(void* a)
   if (a)
     {
       if (Destructor=dw_GetDestructorA(a))
-	if (dw_IsPointerA(a))
-	  for (i=dw_DimA(a)-1; i >= 0; i--)
-	    Destructor(((void**)a)[i]);
-	else
-	  for (i=(size=dw_ElementSizeA(a))*(dw_DimA(a)-1); i >= 0; i-=size)
-	    Destructor((void*)(((char*)a) + i));
+    if (dw_IsPointerA(a))
+      for (i=dw_DimA(a)-1; i >= 0; i--)
+        Destructor(((void**)a)[i]);
+    else
+      for (i=(size=dw_ElementSizeA(a))*(dw_DimA(a)-1); i >= 0; i-=size)
+        Destructor((void*)(((char*)a) + i));
       offset=dw_GetOffsetA(a);
       if (dw_DeleteSpecsA(a)) free(dw_SpecsA(a));
       free((void*)(((char*)a) - offset));
@@ -62,7 +62,7 @@ void dw_FreeArray(void* a)
 
    Returns:
      A pointer to a valid array of lenth dim upon success and a null pointer upon
-     failure.  
+     failure.
 
    Notes:
      The return value should be type cast to the appropriate pointer type.
@@ -71,19 +71,19 @@ void* dw_CreateArray(TElementSpecification *specs, int dim)
 {
   void *a=(void*)NULL;
   int i;
-  if (dim <= 0) 
+  if (dim <= 0)
     dw_Error(ARG_ERR);
   else
     if (!(a=malloc(dim*specs->size + specs->offset)))
       dw_Error(MEM_ERR);
     else
       {
-	a=(void*)(((char*)a)+specs->offset);
-	dw_DimA(a)=dim;
-	dw_SpecsA(a)=specs;
-	if (specs->default_constructor)
-	  for (i=(specs->size)*(dim-1); i >= 0; i-=specs->size)
-	    specs->default_constructor((void*)(((char*)a) + i));
+    a=(void*)(((char*)a)+specs->offset);
+    dw_DimA(a)=dim;
+    dw_SpecsA(a)=specs;
+    if (specs->default_constructor)
+      for (i=(specs->size)*(dim-1); i >= 0; i-=specs->size)
+        specs->default_constructor((void*)(((char*)a) + i));
       }
   return a;
 }
@@ -96,7 +96,7 @@ void* dw_CreateArray(TElementSpecification *specs, int dim)
 
    Returns:
      A pointer to a valid multidimensiona array.  The dimensions of the array are
-     determined by depth and dim. 
+     determined by depth and dim.
 
    Notes:
      The return value should be type cast to the appropriate pointer type.
@@ -109,10 +109,10 @@ void* dw_CreateMultidimensionalArray(TElementSpecification *specs, int depth, in
   if (a=dw_CreateArray_array(dim[0]))
     for (i=dim[0]-1; i >= 0; i--)
       if (!(((void**)a)[i]=dw_CreateMultidimensionalArray(specs,depth-1,dim+1)))
-	{
-	  dw_FreeArray(a);
-	  return (void*)NULL;
-	}
+    {
+      dw_FreeArray(a);
+      return (void*)NULL;
+    }
   return a;
 }
 /*******************************************************************************/
@@ -140,18 +140,18 @@ int dw_PrintArray(FILE *f, void *a, char *format)
   if (f && a)
     if (PrintRoutine=dw_GetPrintRoutineA(a))
       {
-	if (dw_IsPointerA(a))
-	  for (i=0; i < dw_DimA(a); i++)
-	    { if (!PrintRoutine(f,((void**)a)[i],format)) return 0; }
-	else
-	  for (size=dw_ElementSizeA(a), i=0; i < dw_DimA(a); i++)
-	    { if (!PrintRoutine(f,(void*)(((char*)a) + i*size),format)) return 0; }
+    if (dw_IsPointerA(a))
+      for (i=0; i < dw_DimA(a); i++)
+        { if (!PrintRoutine(f,((void**)a)[i],format)) return 0; }
+    else
+      for (size=dw_ElementSizeA(a), i=0; i < dw_DimA(a); i++)
+        { if (!PrintRoutine(f,(void*)(((char*)a) + i*size),format)) return 0; }
 
         if(f==stdout)
           printf("\n");
         else
           fprintf(f,"\n");
-	return 1;
+    return 1;
       }
   return 0;
 }
@@ -209,13 +209,13 @@ int dw_ReadArray(FILE *f, void *a)
   if (f && a)
     if (ReadRoutine=dw_GetReadRoutineA(a))
       {
-	if (dw_IsPointerA(a))
-	  for (i=0; i < dw_DimA(a); i++)
-	    { if (!ReadRoutine(f,((void**)a)[i])) return 0; }
-	else
-	  for (size=dw_ElementSizeA(a), i=0; i < dw_DimA(a); i++)
-	    { if (!ReadRoutine(f,(void*)(((char*)a) + i*size))) return 0; }
-	return 1;
+    if (dw_IsPointerA(a))
+      for (i=0; i < dw_DimA(a); i++)
+        { if (!ReadRoutine(f,((void**)a)[i])) return 0; }
+    else
+      for (size=dw_ElementSizeA(a), i=0; i < dw_DimA(a); i++)
+        { if (!ReadRoutine(f,(void*)(((char*)a) + i*size))) return 0; }
+    return 1;
       }
   return 0;
 }
@@ -254,21 +254,21 @@ static int FullCopyAttempt(void **d, void *s, void* (*copy)(void*, void*), void 
   if (s)
     if (*d)
       {
-	if (!copy(*d,s))
-	  {
-	    if (destructor) destructor(*d);
-	    if (!(*d=copy((void*)NULL,s))) return 0;
-	  }
+    if (!copy(*d,s))
+      {
+        if (destructor) destructor(*d);
+        if (!(*d=copy((void*)NULL,s))) return 0;
+      }
       }
     else
       {
-	if (!(*d=copy((void*)NULL,s))) return 0;
+    if (!(*d=copy((void*)NULL,s))) return 0;
       }
   else
     if (*d)
       {
-	if (destructor) destructor(*d);
-	*d=(void*)NULL;
+    if (destructor) destructor(*d);
+    *d=(void*)NULL;
       }
   return 1;
 }
@@ -283,7 +283,7 @@ static int FullCopyAttempt(void **d, void *s, void* (*copy)(void*, void*), void 
      created.  Upon failure, a null pointer is returned.
 
    Notes:
-     If d is  
+     If d is
 */
 void* dw_CopyArray(void* d, void* s)
 {
@@ -306,20 +306,20 @@ void* dw_CopyArray(void* d, void* s)
   else if (dw_GetPointerCopyConstructorA(s))
     {
       for (i=dw_DimA(s)-1; i >= 0; i--)
-	if (!FullCopyAttempt(((void**)d)+i,((void**)s)[i],dw_GetPointerCopyConstructorA(s),dw_GetDestructorA(d)))
-	  {
-	    if (!original_d) dw_FreeArray(d);
-	    return (void*)NULL;
-	  }
+    if (!FullCopyAttempt(((void**)d)+i,((void**)s)[i],dw_GetPointerCopyConstructorA(s),dw_GetDestructorA(d)))
+      {
+        if (!original_d) dw_FreeArray(d);
+        return (void*)NULL;
+      }
     }
   else if (dw_GetStaticCopyConstructorA(s))
     {
       for (i=(size=dw_ElementSizeA(s))*(dw_DimA(s)-1); i >= 0; i-=size)
-	if (!dw_GetStaticCopyConstructorA(s)((void*)(((char*)d) + i),(void*)(((char*)s) + i)))
-	  {
-	    if (!original_d) dw_FreeArray(d);
-	    return (void*)NULL;
-	  }
+    if (!dw_GetStaticCopyConstructorA(s)((void*)(((char*)d) + i),(void*)(((char*)s) + i)))
+      {
+        if (!original_d) dw_FreeArray(d);
+        return (void*)NULL;
+      }
     }
   else
     {
@@ -332,7 +332,7 @@ void* dw_CopyArray(void* d, void* s)
 
 /*
     Assumes
-      Both d and s are valid pointers and both *d and *s are either null or a 
+      Both d and s are valid pointers and both *d and *s are either null or a
       null terminated string.  If *d is a null terminated string, then it must
       have been created via a call to malloc(), calloc() or realloc().
 
@@ -340,14 +340,14 @@ void* dw_CopyArray(void* d, void* s)
       Returns one upon success and zero upon failure.
 
     Results
-      If is *s is null, then *d is freed if it is non-null and is then set to 
-      null.  If *s is null terminated string, then *d is reallocated if more 
+      If is *s is null, then *d is freed if it is non-null and is then set to
+      null.  If *s is null terminated string, then *d is reallocated if more
       memory is required and then *s is copied into *d.
 
     Notes
       It is critical that this function be called only if the destination string
       was dynamically created via a call to malloc(), calloc() or realloc().  If
-      this is not the case, then servere memory problems can result. 
+      this is not the case, then servere memory problems can result.
 */
 static int dw_CopyString(void *d, void *s)
 {
@@ -360,8 +360,8 @@ static int dw_CopyString(void *d, void *s)
   else
     if (*((char**)d))
       {
-	free(*((char**)d));
-	*((char**)d)=(char*)NULL;
+    free(*((char**)d));
+    *((char**)d)=(char*)NULL;
       }
   return 1;
 }
@@ -379,11 +379,11 @@ static int dw_CopyString(void *d, void *s)
 
    Returns:
      A pointer to a valid multidimensiona array.  The dimensions of the array are
-     determined by depth the variable list of arguments. 
+     determined by depth the variable list of arguments.
 
    Notes:
      The return value should be type cast to the appropriate pointer type.  The
-     variable list of arguments must be at least of length depth and consist of 
+     variable list of arguments must be at least of length depth and consist of
      positive integers.
 */
 void* dw_CreateMultidimensionalArrayList(TElementSpecification *specs, int depth, ...)
@@ -494,27 +494,27 @@ int dw_InitializeArray(void *a, void *x)
   if (a)
     {
       if (dw_IsArrayA(a))
-	{
-	  for (i=dw_DimA(a)-1; i >= 0; i--)
-	    if (!dw_InitializeArray(((void**)a)[i],x)) return 0;
-	}
+    {
+      for (i=dw_DimA(a)-1; i >= 0; i--)
+        if (!dw_InitializeArray(((void**)a)[i],x)) return 0;
+    }
       else if (dw_UseMemcpyA(a))
-	{
-	  for (size=dw_ElementSizeA(a), i=size*(dw_DimA(a)-1); i >= 0; i-=size)
-	    memcpy((void*)(((char*)a) + i),x,size);
-	}
+    {
+      for (size=dw_ElementSizeA(a), i=size*(dw_DimA(a)-1); i >= 0; i-=size)
+        memcpy((void*)(((char*)a) + i),x,size);
+    }
       else if (dw_GetPointerCopyConstructorA(a))
-	{
-	  for (i=dw_DimA(a)-1; i >= 0; i--)
-	    if (!FullCopyAttempt(((void**)a)+i,x,dw_GetPointerCopyConstructorA(a),dw_GetDestructorA(a))) return 0;
-	}
+    {
+      for (i=dw_DimA(a)-1; i >= 0; i--)
+        if (!FullCopyAttempt(((void**)a)+i,x,dw_GetPointerCopyConstructorA(a),dw_GetDestructorA(a))) return 0;
+    }
       else if (dw_GetStaticCopyConstructorA(a))
-	{
-	  for (i=(size=dw_ElementSizeA(a))*(dw_DimA(a)-1); i >= 0; i-=size)
-	    if (!dw_GetStaticCopyConstructorA(a)((void*)(((char*)a)+i),x)) return 0;
-	}
+    {
+      for (i=(size=dw_ElementSizeA(a))*(dw_DimA(a)-1); i >= 0; i-=size)
+        if (!dw_GetStaticCopyConstructorA(a)((void*)(((char*)a)+i),x)) return 0;
+    }
       else
-	return 0;
+    return 0;
       return 1;
     }
   return 0;
@@ -553,7 +553,7 @@ TElementSpecification* CreateArraySpecification_pointer(void (*destructor)(void 
   return specs;
 }
 
-TElementSpecification dw_IntSpecs = 
+TElementSpecification dw_IntSpecs =
   {
     dw_ARRAY_USE_MEMCPY,
     sizeof(int),
@@ -622,7 +622,7 @@ TElementSpecification dw_ArraySpecs =
   {
     dw_ARRAY_POINTER | dw_ARRAY_ARRAY,
     sizeof(void*),
-    sizeof(void*)*((sizeof(int)+sizeof(TElementSpecification*)+sizeof(void*)-1)/sizeof(void*)),			     
+    sizeof(void*)*((sizeof(int)+sizeof(TElementSpecification*)+sizeof(void*)-1)/sizeof(void*)),
     dw_FreeArray,
     DefaultPointerConstructor,
     dw_CopyArray,

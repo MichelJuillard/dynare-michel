@@ -36,7 +36,7 @@ TMatrix dw_UniformMatrix(TMatrix X)
 {
  int i;
  PRECISION *pX;
- if (!X) { dw_Error(NULL_ERR); return (TMatrix)NULL; } 
+ if (!X) { dw_Error(NULL_ERR); return (TMatrix)NULL; }
  for (pX=pElementM(X), i=RowM(X)*ColM(X)-1; i >= 0; i--) pX[i]=dw_uniform_rnd();
  return X;
 }
@@ -67,7 +67,7 @@ TMatrix dw_NormalMatrix(TMatrix X)
 {
  int i;
  PRECISION *pX;
- if (!X) { dw_Error(NULL_ERR); return (TMatrix)NULL; } 
+ if (!X) { dw_Error(NULL_ERR); return (TMatrix)NULL; }
  for (pX=pElementM(X), i=RowM(X)*ColM(X)-1; i >= 0; i--) pX[i]=dw_gaussian_rnd();
  return X;
 }
@@ -78,7 +78,7 @@ TMatrix dw_NormalMatrix(TMatrix X)
      x : m-vector
 
    Results
-     Fills x with independent log normal deviates.  The mean and standard 
+     Fills x with independent log normal deviates.  The mean and standard
      deviation of the underlying normal distribution are passed.
 */
 TVector dw_LogNormalVector(TVector x, PRECISION mean, PRECISION standard_deviation)
@@ -89,14 +89,14 @@ TVector dw_LogNormalVector(TVector x, PRECISION mean, PRECISION standard_deviati
   return x;
 }
 
-/* 
-   Computes a matrix of gamma deviates.  If x, a, and b represent X(i,j), 
+/*
+   Computes a matrix of gamma deviates.  If x, a, and b represent X(i,j),
    A(i,j), and B(i,j), then density of x is
 
                                  x^(a-1) exp(-x/b)
-                                ------------------ 
+                                ------------------
                                    gamma(a) b^a
-                       
+
 */
 TMatrix dw_GammaMatrix(TMatrix X, TMatrix A, TMatrix B)
 {
@@ -115,13 +115,13 @@ TMatrix dw_GammaMatrix(TMatrix X, TMatrix A, TMatrix B)
   if (!X)
     {
       if (!(X=CreateMatrix(RowM(A),ColM(A))))
-	return (TMatrix)NULL;
+    return (TMatrix)NULL;
     }
   else
     if ((RowM(X) != RowM(A)) || (ColM(X) != ColM(A)))
       {
-	dw_Error(SIZE_ERR);
-	return (TMatrix)NULL;
+    dw_Error(SIZE_ERR);
+    return (TMatrix)NULL;
       }
   for (pX=pElementM(X), pA=pElementM(A), pB=pElementM(B), i=RowM(X)*ColM(X)-1; i >= 0; i--)
     pX[i]=pB[i]*dw_gamma_rnd(pA[i]);
@@ -223,14 +223,14 @@ TMatrix dw_UniformOrthogonal(TMatrix Q)
      x : m-vector
 
    Results:
-     The vector x is filled with a vector drawn from the uniform distribution on 
+     The vector x is filled with a vector drawn from the uniform distribution on
      the m-1 dimensional unit sphere.
 
    Returns:
      The vector x.
 
    Notes:
-     The vector is obtained by drawing a m-vector from the standard normal 
+     The vector is obtained by drawing a m-vector from the standard normal
      distribution and then normalizing its length to one.
 */
 TVector dw_UniformUnitSphere(TVector x)
@@ -253,16 +253,16 @@ TVector dw_UniformUnitSphere(TVector x)
      x : m-vector
 
    Results:
-     The vector x is filled with a vector drawn from the uniform distribution on 
+     The vector x is filled with a vector drawn from the uniform distribution on
      the m dimensional solid unit sphere.
 
    Returns:
      Upon success, returns the norm of x, upon failure returns -1.0.
 
    Notes:
-     The vector is drawn by drawing a m-vector from the standard normal 
-     distribution and a real number u from the uniform distribution on [0,1], and 
-     normalizing the vector so its length equal to u^(1/m). 
+     The vector is drawn by drawing a m-vector from the standard normal
+     distribution and a real number u from the uniform distribution on [0,1], and
+     normalizing the vector so its length equal to u^(1/m).
 */
 TVector dw_UniformUnitBall(TVector x)
 {

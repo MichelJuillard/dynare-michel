@@ -31,7 +31,7 @@ char* CreateFilenameFromTag(char *fmt, char *tag, char *dir)
 }
 
 /*
-   Create a full path name by appending a "/" if necessary.  The 
+   Create a full path name by appending a "/" if necessary.  The
    returned pathname must be freed by he calling routine.
 */
 char* CreatePath(char *path)
@@ -202,10 +202,10 @@ void Free_VARCommandLine(TVARCommandLine *cmd)
       if (cmd->out_header) free(cmd->out_header);
       if (cmd->specification_filename) free(cmd->specification_filename);
       if (cmd->parameters_filename) free(cmd->parameters_filename);
-      if (cmd->parameters_header) free(cmd->parameters_header);   
+      if (cmd->parameters_header) free(cmd->parameters_header);
       if (cmd->specification_filename_actual) free(cmd->specification_filename_actual);
       if (cmd->parameters_filename_actual) free(cmd->parameters_filename_actual);
-      if (cmd->parameters_header_actual) free(cmd->parameters_header_actual);   
+      if (cmd->parameters_header_actual) free(cmd->parameters_header_actual);
     }
 }
 
@@ -217,20 +217,20 @@ void Free_VARCommandLine(TVARCommandLine *cmd)
       If this argument exists, then all output files are in specified directory.
 
    -fs <filename>
-      If this argument exists, then the specification file name is <filename>.  
+      If this argument exists, then the specification file name is <filename>.
       The argument -fs takes precedence over -ft.
 
    -fp <filename>
-      If this argument exists, then the parameter file name is <filename>.  The 
+      If this argument exists, then the parameter file name is <filename>.  The
       default value is the filename associated with the argument -fs or -ft.
 
    -ph <header>
-      If this argument exists, then the header for the parameters is <header>.  
-      The default value is "MLE: " if -MLE is in the command line and 
+      If this argument exists, then the header for the parameters is <header>.
+      The default value is "MLE: " if -MLE is in the command line and
       "Posterior mode: " otherwise.
 
    -pho <header>
-      If this argument exists, then the parameter header used for output is 
+      If this argument exists, then the parameter header used for output is
       <header>.  The default value is -ph <header>.
 
    -MLE
@@ -241,7 +241,7 @@ void Free_VARCommandLine(TVARCommandLine *cmd)
    -ft <tag>
       The input file tag.  Used to create input filenames if the -fs or
       -fp options are not present.
-    
+
    -fto <tag>
       The output file tag.  Used to create output filenames.  The default
       value is -ft <tag>.
@@ -255,7 +255,7 @@ TVARCommandLine* Base_VARCommandLine(int nargs, char **args, TVARCommandLine *cm
 
   // output directory
   cmd->out_directory=CreatePath(dw_ParseString_String(nargs,args,"do",""));
-  
+
   // Specification file
   cmd->specification_filename=dw_DuplicateString(dw_ParseString_String(nargs,args,"fs",(char*)NULL));
 
@@ -266,7 +266,7 @@ TVARCommandLine* Base_VARCommandLine(int nargs, char **args, TVARCommandLine *cm
   cmd->parameters_header=dw_DuplicateString((dw_FindArgument_String(nargs,args,"MLE") == -1)
      ? dw_ParseString_String(nargs,args,"ph","Posterior mode: ")
      : dw_ParseString_String(nargs,args,"ph","MLE: "));
-						 
+
   // Output parameters header
   cmd->out_header=dw_DuplicateString(dw_ParseString_String(nargs,args,"ph",cmd->parameters_header));
 
@@ -316,11 +316,11 @@ TStateModel* CreateTStateModelFromEstimateFinal(int nargs, char **args, TVARComm
   if (cmd->specification_filename_actual) free(cmd->specification_filename_actual);
   cmd->specification_filename_actual=filename;
 
-  filename=(cmd->parameters_filename) 
+  filename=(cmd->parameters_filename)
     ? CreateFilenameFromTag("%s%s",cmd->parameters_filename,cmd->in_directory)
     : dw_DuplicateString(cmd->specification_filename_actual);
 
-  if (!ReadTransitionMatrices((FILE*)NULL,filename,cmd->parameters_header,model) 
+  if (!ReadTransitionMatrices((FILE*)NULL,filename,cmd->parameters_header,model)
               || !Read_VAR_Parameters((FILE*)NULL,filename,cmd->parameters_header,model))
     {
       free(filename);
@@ -344,9 +344,9 @@ TStateModel* CreateTStateModelFromEstimateFinal(int nargs, char **args, TVARComm
 /******************************************************************************/
 /******************************************************************************/
 /*
-   Attempts to get the parameters from the last iteration in the intermediate 
-   file.  Returns one and sets cmd->parameters_file_actual, 
-   cmd->parameters_header_actual and loads parameters upon success.  Returns 
+   Attempts to get the parameters from the last iteration in the intermediate
+   file.  Returns one and sets cmd->parameters_file_actual,
+   cmd->parameters_header_actual and loads parameters upon success.  Returns
    zero upon failure.
 */
 int GetLastIteration(TStateModel *model, TVARCommandLine *cmd)
@@ -364,11 +364,11 @@ int GetLastIteration(TStateModel *model, TVARCommandLine *cmd)
 
   terminal_errors=dw_SetTerminalErrors(dw_GetTerminalErrors() & (~USER_ERR));
 
-  do    
+  do
     {
       for (j=10, i=1; k >= j; j*=10, i++);
       sprintf(header=(char*)malloc(strlen(fmt) + i - 1),fmt,k);
-      if (ReadTransitionMatrices(f_in,(char*)NULL,header,model) 
+      if (ReadTransitionMatrices(f_in,(char*)NULL,header,model)
                           && Read_VAR_Parameters(f_in,(char*)NULL,header,model))
         {
           cont=1;
@@ -415,7 +415,7 @@ int GetLastIteration(TStateModel *model, TVARCommandLine *cmd)
 }
 
 /*
-   Attempt to set up model from command line. 
+   Attempt to set up model from command line.
 
    -ft <filename tag>
       If this argument exists, then the following is attempted:
@@ -428,11 +428,11 @@ int GetLastIteration(TStateModel *model, TVARCommandLine *cmd)
 
          (not yet implemented)
          specification file name:  init_<tag>.dat
-         init/restart file name:   est_csminwel_<tag>.dat  
+         init/restart file name:   est_csminwel_<tag>.dat
 
          specification file name:  init_<tag>.dat
          init/restart file name:   init_<tag>.dat with header="Initial: "
-    
+
    Returns valid pointer to a TStateModel upon success and null upon failure.
 */
 TStateModel* CreateTStateModelForEstimate(int nargs, char **args, TVARCommandLine **p_cmd)
@@ -481,13 +481,13 @@ TStateModel* CreateTStateModelForEstimate(int nargs, char **args, TVARCommandLin
 
   if (cmd->specification_filename_actual) free(cmd->specification_filename_actual);
   cmd->specification_filename_actual=filename;
- 
+
   if (cmd->parameters_filename)
     {
       header=cmd->parameters_header;
       filename=CreateFilenameFromTag("%s%s",cmd->parameters_filename,cmd->in_directory);
-      if (!ReadTransitionMatrices((FILE*)NULL,filename,header,model) 
-		  || !Read_VAR_Parameters((FILE*)NULL,filename,header,model))
+      if (!ReadTransitionMatrices((FILE*)NULL,filename,header,model)
+          || !Read_VAR_Parameters((FILE*)NULL,filename,header,model))
         {
           free(filename);
           FreeStateModel(model);
@@ -500,8 +500,8 @@ TStateModel* CreateTStateModelForEstimate(int nargs, char **args, TVARCommandLin
       {
         header=cmd->parameters_header;
         filename=CreateFilenameFromTag("%s%s",cmd->specification_filename,cmd->in_directory);
-        if (!ReadTransitionMatrices((FILE*)NULL,filename,header,model) 
-		    || !Read_VAR_Parameters((FILE*)NULL,filename,header,model))
+        if (!ReadTransitionMatrices((FILE*)NULL,filename,header,model)
+            || !Read_VAR_Parameters((FILE*)NULL,filename,header,model))
           {
             free(filename);
             FreeStateModel(model);
@@ -524,7 +524,7 @@ TStateModel* CreateTStateModelForEstimate(int nargs, char **args, TVARCommandLin
                   return model;
                 }
               else
-                {                                   
+                {
                   header="Initial: ";
                   filename=filename=CreateFilenameFromTag("%sinit_%s.dat",cmd->in_tag,cmd->in_directory);
                   if (!ReadTransitionMatrices((FILE*)NULL,filename,header,model)

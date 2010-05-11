@@ -1,4 +1,4 @@
-  
+
 #include "bmatrix.h"
 #include "dw_error.h"
 
@@ -72,32 +72,32 @@ int bAbs(PRECISION *x, PRECISION *y, int n)
 
 
   Results:
-               x          y      
+               x          y
         t   (n x m)    (m x n)    results
        -----------------------------------------
         0  row major  row major    x = y'
         1  col major  col major    x = y'
 
    or
-               x          y      
+               x          y
         t   (m x n)    (m x n)    results
        -----------------------------------------
         0  col major  row major    x = y
         1  row major  col major    x = y
 
    or
-               x          y      
+               x          y
         t  row major  row major   results
        -----------------------------------------
         0    n x m      m x n      x = y'
         1    m x n      n x m      x = y'
    or
-               x          y      
+               x          y
         t  col major  col major   results
        -----------------------------------------
         0    m x n      n x m      x = y'
         1    n x m      m x n      x = y'
-    
+
 */
 int bTranspose(PRECISION *x, PRECISION *y, int m, int n, int t)
 {
@@ -122,7 +122,7 @@ int bTranspose(PRECISION *x, PRECISION *y, int m, int n, int t)
    x = y'
 
   Notes:
-   The major format (row or column) does not matter.  
+   The major format (row or column) does not matter.
 */
 int bTransposeInPlace(PRECISION *x, int m)
 {
@@ -245,17 +245,17 @@ int bMatrixAdd(PRECISION *x, PRECISION *y, PRECISION *z, int m, int n, int xt, i
       for (k=m*n-1; k >= 0; k--) x[k]=y[k]+z[k];
     else
       for (s=zt ? m : n, k=i=m*n-1; k >= 0; i--)
-	for (j=i; j >= 0; k--, j-=s)
-	  x[k]=y[k]+z[j];
+    for (j=i; j >= 0; k--, j-=s)
+      x[k]=y[k]+z[j];
   else
     if (yt == zt)
       for (s=yt ? m : n, k=i=m*n-1; k >= 0; i--)
-	for (j=i; j >= 0; k--, j-=s)
-	  x[k]=y[j]+z[j];
+    for (j=i; j >= 0; k--, j-=s)
+      x[k]=y[j]+z[j];
     else
       for (s=yt ? m : n, k=i=m*n-1; k >= 0; i--)
-	for (j=i; j >= 0; k--, j-=s)
-	  x[k]=y[j]+z[k];
+    for (j=i; j >= 0; k--, j-=s)
+      x[k]=y[j]+z[k];
  return NO_ERR;
 }
 
@@ -267,17 +267,17 @@ int bMatrixSubtract(PRECISION *x, PRECISION *y, PRECISION *z, int m, int n, int 
       for (k=m*n-1; k >= 0; k--) x[k]=y[k]-z[k];
     else
       for (s=zt ? m : n, k=i=m*n-1; k >= 0; i--)
-	for (j=i; j >= 0; k--, j-=s)
-	  x[k]=y[k]-z[j];
+    for (j=i; j >= 0; k--, j-=s)
+      x[k]=y[k]-z[j];
   else
     if (yt == zt)
       for (s=yt ? m : n, k=i=m*n-1; k >= 0; i--)
-	for (j=i; j >= 0; k--, j-=s)
-	  x[k]=y[j]-z[j];
+    for (j=i; j >= 0; k--, j-=s)
+      x[k]=y[j]-z[j];
     else
       for (s=yt ? m : n, k=i=m*n-1; k >= 0; i--)
-	for (j=i; j >= 0; k--, j-=s)
-	  x[k]=y[j]-z[k];
+    for (j=i; j >= 0; k--, j-=s)
+      x[k]=y[j]-z[k];
  return NO_ERR;
 }
 
@@ -373,12 +373,12 @@ int bMultiply(PRECISION *x, PRECISION *y, PRECISION s, int n)
        xt   yt   zt   col major  col major  col major    results
        -----------------------------------------------------------
         0    0    0     n x m      p x m      n x p     x'= y'* z'
-        1    0    0     m x n      p x m      n x p     x = y'* z' 
+        1    0    0     m x n      p x m      n x p     x = y'* z'
         0    1    0     n x m      m x p      n x p     x'= y * z'
         1    1    0     m x n      m x p      n x p     x = y * z'
-        0    0    1     n x m      p x m      p x n     x'= y'* z 
+        0    0    1     n x m      p x m      p x n     x'= y'* z
         1    0    1     m x n      p x m      p x n     x = y'* z
-        0    1    1     n x m      m x p      p x n     x'= y * z 
+        0    1    1     n x m      m x p      p x n     x'= y * z
         1    1    1     m x n      m x p      p x n     x = y * z
 
   Returns:
@@ -386,8 +386,8 @@ int bMultiply(PRECISION *x, PRECISION *y, PRECISION s, int n)
 
   Notes:
    An (n x m) matrix x is in row major format if x[i][j]=x[i*n+j] and is in
-   column major format if x[i][j]=x[i+j*m]. 
-    
+   column major format if x[i][j]=x[i+j*m].
+
 */
 
 int bMatrixMultiply(PRECISION *x, PRECISION *y, PRECISION *z, int m, int n, int p, int xt, int yt, int zt)
@@ -401,30 +401,30 @@ int bMatrixMultiply(PRECISION *x, PRECISION *y, PRECISION *z, int m, int n, int 
   blas_int p2 = p;
 
 #if PRECISION_SIZE == 4
-  if (xt) 
+  if (xt)
     {
-      if (yt) {transy='N'; dy=m;} else {transy='T'; dy=p;}   
-      if (zt) {transz='N'; dz=p;} else {transz='T'; dz=n;}   
-      sgemm(&transy,&transz,&m2,&n2,&p2,&alpha,y,&dy,z,&dz,&beta,x,&m2); 
+      if (yt) {transy='N'; dy=m;} else {transy='T'; dy=p;}
+      if (zt) {transz='N'; dz=p;} else {transz='T'; dz=n;}
+      sgemm(&transy,&transz,&m2,&n2,&p2,&alpha,y,&dy,z,&dz,&beta,x,&m2);
     }
   else
     {
-      if (yt) {transy='T'; dy=m;} else {transy='N'; dy=p;}   
-      if (zt) {transz='T'; dz=p;} else {transz='N'; dz=n;}   
-      sgemm(&transz,&transy,&n2,&m2,&p2,&alpha,z,&dz,y,&dy,&beta,x,&n2);  
+      if (yt) {transy='T'; dy=m;} else {transy='N'; dy=p;}
+      if (zt) {transz='T'; dz=p;} else {transz='N'; dz=n;}
+      sgemm(&transz,&transy,&n2,&m2,&p2,&alpha,z,&dz,y,&dy,&beta,x,&n2);
     }
 #else
-  if (xt) 
+  if (xt)
     {
-      if (yt) {transy='N'; dy=m;} else {transy='T'; dy=p;}   
-      if (zt) {transz='N'; dz=p;} else {transz='T'; dz=n;}   
-      dgemm(&transy,&transz,&m2,&n2,&p2,&alpha,y,&dy,z,&dz,&beta,x,&m2); 
+      if (yt) {transy='N'; dy=m;} else {transy='T'; dy=p;}
+      if (zt) {transz='N'; dz=p;} else {transz='T'; dz=n;}
+      dgemm(&transy,&transz,&m2,&n2,&p2,&alpha,y,&dy,z,&dz,&beta,x,&m2);
     }
   else
     {
-      if (yt) {transy='T'; dy=m;} else {transy='N'; dy=p;}   
-      if (zt) {transz='T'; dz=p;} else {transz='N'; dz=n;}   
-      dgemm(&transz,&transy,&n2,&m2,&p2,&alpha,z,&dz,y,&dy,&beta,x,&n2);  
+      if (yt) {transy='T'; dy=m;} else {transy='N'; dy=p;}
+      if (zt) {transz='T'; dz=p;} else {transz='N'; dz=n;}
+      dgemm(&transz,&transy,&n2,&m2,&p2,&alpha,z,&dz,y,&dy,&beta,x,&n2);
     }
 #endif
   return NO_ERR;
@@ -527,7 +527,7 @@ int bLU(int *p, PRECISION *x, int m, int n, int xt)
  else
    {
      if (!( y=(PRECISION*)malloc(m*n*sizeof(PRECISION)))) return MEM_ERR;
-     bTranspose(y,x,m,n,0); 
+     bTranspose(y,x,m,n,0);
 
      getrf(&m2,&n2,y,&m2,p2,&info);
 
@@ -616,7 +616,7 @@ int bSolveTriangular(PRECISION *x, PRECISION *b, int m, int n, int u, int xt, in
  mbi=(m-1)*bi;
  if (u)
    for (x+=(m-1)*xj, j=(n-1)*bj, b+=j; j >= 0; b-=bj, j-=bj)
-    for (pxx=x+(m-1)*xi, i=(m-1)*bi; i >= 0; pxx-=xi, i-=bi)  
+    for (pxx=x+(m-1)*xi, i=(m-1)*bi; i >= 0; pxx-=xi, i-=bi)
      {
       px=pxx;
       pb=b+i;
@@ -626,7 +626,7 @@ int bSolveTriangular(PRECISION *x, PRECISION *b, int m, int n, int u, int xt, in
   else
    {
     for (j=(n-1)*bj, b+=j; j >= 0; b-=bj, j-=bj)
-     for (pxx=x, i=0; i <= mbi; pxx+=xi, i+=bi)  
+     for (pxx=x, i=0; i <= mbi; pxx+=xi, i+=bi)
       {
        px=pxx;
        pb=b+i;
@@ -710,7 +710,7 @@ int bSolveUnitTriangular(PRECISION *x, PRECISION *b, int m, int n, int u, int xt
  mbi=(m-1)*bi;
  if (u)
    for (x+=(m-1)*xj, j=(n-1)*bj, b+=j; j >= 0; b-=bj, j-=bj)
-    for (pxx=x+(m-1)*xi, i=(m-1)*bi; i >= 0; pxx-=xi, i-=bi)  
+    for (pxx=x+(m-1)*xi, i=(m-1)*bi; i >= 0; pxx-=xi, i-=bi)
      {
       px=pxx;
       pb=b+i;
@@ -719,7 +719,7 @@ int bSolveUnitTriangular(PRECISION *x, PRECISION *b, int m, int n, int u, int xt
   else
    {
     for (j=(n-1)*bj, b+=j; j >= 0; b-=bj, j-=bj)
-     for (pxx=x, i=0; i <= mbi; pxx+=xi, i+=bi)  
+     for (pxx=x, i=0; i <= mbi; pxx+=xi, i+=bi)
       {
        px=pxx;
        pb=b+i;
@@ -766,12 +766,12 @@ int bSolveUnitTriangular(PRECISION *x, PRECISION *b, int m, int n, int u, int xt
 
                     P = P(0,p[0])*P(1,p[1])*...*P(q-1,p[q])
 
-     where P(r,s) is the (m x m) matrix obtained by permuting the rth and sth 
+     where P(r,s) is the (m x m) matrix obtained by permuting the rth and sth
      rows of the (m x m) identity matrix.
-     
+
    Notes:
      An (n x m) matrix x is in row major format if x[i][j]=x[i*n+j] and is in
-     column major format if x[i][j]=x[i+j*m]. 
+     column major format if x[i][j]=x[i+j*m].
 */
 int bPermutationMultiply(int *p, PRECISION *y, int m, int n, int q, int pt, int yt)
 {
@@ -823,7 +823,7 @@ int bPermutationMultiply(int *p, PRECISION *y, int m, int n, int q, int pt, int 
         {
          k=i*n;
          pk=p[i]*n;
-         for (j=n-1; j >= 0; j--) 
+         for (j=n-1; j >= 0; j--)
           {
            tmp=y[k+j];
            y[k+j]=y[pk+j];
@@ -846,28 +846,28 @@ int bPermutationMultiply(int *p, PRECISION *y, int m, int n, int q, int pt, int 
                     P = P(0,p[0])*P(1,p[1])*...*P(q-1,p[q-1])
 
      Then
-                      x       
-             xt   row major  
+                      x
+             xt   row major
             ----------------
              0      x = P
              1      x = P'
 
      or
-                      x       
-             xt   col major  
+                      x
+             xt   col major
             ----------------
              0      x = P'
              1      x = P
 
 
-     if where P(r,s) is the (m x m) matrix obtained by permuting the rth and sth 
+     if where P(r,s) is the (m x m) matrix obtained by permuting the rth and sth
      rows of the (m x m) identity matrix.
 
    Notes:
      Permuting the ith and jth columns of an identity matrix is equivalent to
-     permuting the ith and jth rows.  An (n x m) matrix x is in row major 
-     format if x[i][j]=x[i*n+j] and is in column major format if 
-     x[i][j]=x[i+j*m]. 
+     permuting the ith and jth rows.  An (n x m) matrix x is in row major
+     format if x[i][j]=x[i*n+j] and is in column major format if
+     x[i][j]=x[i+j*m].
 */
 int bPermutation(PRECISION *x, int *p, int m, int q, int xt)
 {
@@ -876,34 +876,34 @@ int bPermutation(PRECISION *x, int *p, int m, int q, int xt)
   if (xt)
     for (j=m-1; j >= 0; j--)
       {
-	if (j < q)
-	  {
-	    k=j-1;
-	    i=p[j];
-	  }
-	else
-	  {
-	    k=q-1;
-	    i=j;
-	  }
-	for ( ; k >= 0; k--) if (i == p[k]) i=k;
-	x[i+j*m]=1.0;
+    if (j < q)
+      {
+        k=j-1;
+        i=p[j];
+      }
+    else
+      {
+        k=q-1;
+        i=j;
+      }
+    for ( ; k >= 0; k--) if (i == p[k]) i=k;
+    x[i+j*m]=1.0;
       }
   else
     for (j=m-1; j >= 0; j--)
       {
-	if (j < q)
-	  {
-	    k=j-1;
-	    i=p[j];
-	  }
-	else
-	  {
-	    k=q-1;
-	    i=j;
-	  }
-	for ( ; k >= 0; k--) if (i == p[k]) i=k;
-	x[i*m+j]=1.0;
+    if (j < q)
+      {
+        k=j-1;
+        i=p[j];
+      }
+    else
+      {
+        k=q-1;
+        i=j;
+      }
+    for ( ; k >= 0; k--) if (i == p[k]) i=k;
+    x[i*m+j]=1.0;
       }
   return NO_ERR;
 }
@@ -917,9 +917,9 @@ int bPermutation(PRECISION *x, int *p, int m, int q, int xt)
 /******************************************************************************/
 /*
    Assumes
-    U       : array of length m*m (compact=0) or m*q (compact=1) or null 
+    U       : array of length m*m (compact=0) or m*q (compact=1) or null
     d       : array of length q=min(m,n)
-    V       : array of length n*n (compact=0) or n*q (compact=1) or null 
+    V       : array of length n*n (compact=0) or n*q (compact=1) or null
     A       : array of length m*n
     m       : positive
     n       : positive
@@ -933,22 +933,22 @@ int bPermutation(PRECISION *x, int *p, int m, int q, int xt)
      MEM_ERR    : out of memory
 
    Results
-     Finds matrices U and V with orthonormal columns and a diagonal matrix 
-     D=diag(d) with non-negative diagonal such that A = U*D*V'.  The matrix D is 
+     Finds matrices U and V with orthonormal columns and a diagonal matrix
+     D=diag(d) with non-negative diagonal such that A = U*D*V'.  The matrix D is
      m x n if compact = 0 and is q x q if compact = 1.  The elements of d are in
-     descending order.  The flags ut, vt, and at determine the format of U, V, 
-     and A.  A value of 1 indicates column major format and a value of 0 
-     indicates row major format.  If either U or V is null, then it is not 
+     descending order.  The flags ut, vt, and at determine the format of U, V,
+     and A.  A value of 1 indicates column major format and a value of 0
+     indicates row major format.  If either U or V is null, then it is not
      computed.
 
    Notes
-     If A=U, U and A must be of the same size and ut=at.  If A=V, then V and A 
+     If A=U, U and A must be of the same size and ut=at.  If A=V, then V and A
      must be of the same size and vt=at.  It cannot be the case that U=V unless
      both are null.
 */
 int bSVD_new(PRECISION *U, PRECISION *d, PRECISION *V, PRECISION *A, int m, int n, int ut, int vt, int at, int compact)
 {
-#if (PRECISION_SIZE == 4) 
+#if (PRECISION_SIZE == 4)
   #define gesvd sgesvd
 #else
   #define gesvd dgesvd
@@ -975,23 +975,23 @@ int bSVD_new(PRECISION *U, PRECISION *d, PRECISION *V, PRECISION *A, int m, int 
   else
     {
       if (compact && (m > n))
-	{
-	  jobu='S';
-	  qu=n;
-	}
+    {
+      jobu='S';
+      qu=n;
+    }
       else
-	{
-	  jobu='A';
-	  qu=m;
-	}
+    {
+      jobu='A';
+      qu=m;
+    }
       if (ut)
-	U_=U;
+    U_=U;
       else
-	if (!(U_=(PRECISION*)malloc(m*qu*sizeof(PRECISION))))
-	  {
-	    free(A_);
-	    return MEM_ERR;
-	  }
+    if (!(U_=(PRECISION*)malloc(m*qu*sizeof(PRECISION))))
+      {
+        free(A_);
+        return MEM_ERR;
+      }
     }
 
   if (!V)
@@ -1003,24 +1003,24 @@ int bSVD_new(PRECISION *U, PRECISION *d, PRECISION *V, PRECISION *A, int m, int 
   else
     {
       if (compact && (m < n))
-	{
-	  jobv='S';
-	  qv=m;
-	}
+    {
+      jobv='S';
+      qv=m;
+    }
       else
-	{
-	  jobv='A';
-	  qv=n;
-	}
+    {
+      jobv='A';
+      qv=n;
+    }
       if (!vt)
-	V_=V;
+    V_=V;
       else
-	if (!(V_=(PRECISION*)malloc(n*qv*sizeof(PRECISION))))
-	  {
-	    free(A_);
-	    if (U_ && (U_ != U)) free(U_); 
-	    return MEM_ERR;
-	  }
+    if (!(V_=(PRECISION*)malloc(n*qv*sizeof(PRECISION))))
+      {
+        free(A_);
+        if (U_ && (U_ != U)) free(U_);
+        return MEM_ERR;
+      }
     }
 
   // compute singular value decomposition
@@ -1036,16 +1036,16 @@ int bSVD_new(PRECISION *U, PRECISION *d, PRECISION *V, PRECISION *A, int m, int 
       err=MEM_ERR;
     else
       {
-	gesvd(&jobu,&jobv,&m2,&n2,A_,&m2,d,U_,&m2,V_,&qv2,work,&k,&info);
-	free(work);
-	if (info)
-	  err=BLAS_LAPACK_ERR;
-	else
-	  {
-	    if (U_ != U) bTranspose(U,U_,m,qu,1);
-	    if (V_ != V) bTranspose(V,V_,qv,n,1);
-	    err=NO_ERR;
-	  }
+    gesvd(&jobu,&jobv,&m2,&n2,A_,&m2,d,U_,&m2,V_,&qv2,work,&k,&info);
+    free(work);
+    if (info)
+      err=BLAS_LAPACK_ERR;
+    else
+      {
+        if (U_ != U) bTranspose(U,U_,m,qu,1);
+        if (V_ != V) bTranspose(V,V_,qv,n,1);
+        err=NO_ERR;
+      }
       }
 
   free(A_);
@@ -1066,26 +1066,26 @@ int bSVD_new(PRECISION *U, PRECISION *d, PRECISION *V, PRECISION *A, int m, int 
 /*     { */
 /*       jobu='N'; */
 /*       if (!V) */
-/* 	{ */
-/* 	  jobv='N'; */
-/* 	  vt=transpose=1-at; */
-/* 	} */
+/*     { */
+/*       jobv='N'; */
+/*       vt=transpose=1-at; */
+/*     } */
 /*       else */
-/* 	transpose=vt; */
+/*     transpose=vt; */
 /*       ut=1-vt; */
 /*     } */
 /*   else */
 /*     if (!V) */
 /*       { */
-/* 	jobv='N'; */
-/* 	vt=transpose=1-ut; */
+/*     jobv='N'; */
+/*     vt=transpose=1-ut; */
 /*       } */
 /*     else */
 /*       { */
-/* 	if (ut != vt) */
-/* 	  transpose=vt; */
-/* 	else */
-/* 	  transpose=1-at; */
+/*     if (ut != vt) */
+/*       transpose=vt; */
+/*     else */
+/*       transpose=1-at; */
 /*       } */
 
 /*   if (transpose) */
@@ -1094,40 +1094,40 @@ int bSVD_new(PRECISION *U, PRECISION *d, PRECISION *V, PRECISION *A, int m, int 
 /*       jobu=jobv; */
 /*       jobv=jobt; */
 /*       if (at) */
-/* 	bTranspose(A_,A,m,n,at); */
+/*     bTranspose(A_,A,m,n,at); */
 /*       else */
-/* 	memcpy(A_,A,m*n*sizeof(PRECISION)); */
+/*     memcpy(A_,A,m*n*sizeof(PRECISION)); */
 /*       if (compact) */
-/* 	{ */
-/* 	  m_=n; */
-/* 	  n_=m; */
-/* 	  qu_=qv_=(m < n) ? m : n; */
-/* 	} */
+/*     { */
+/*       m_=n; */
+/*       n_=m; */
+/*       qu_=qv_=(m < n) ? m : n; */
+/*     } */
 /*       else */
-/* 	{ */
-/* 	  qu_=m_=n; */
-/* 	  qv_=n_=m; */
-/* 	} */
+/*     { */
+/*       qu_=m_=n; */
+/*       qv_=n_=m; */
+/*     } */
 /*       U_=vt ? V : (PRECISION*)malloc(m_*qu_*sizeof(PRECISION)); */
-/*       V_=ut ? (PRECISION*)malloc(qv_*n_*sizeof(PRECISION)) : U;	       */
+/*       V_=ut ? (PRECISION*)malloc(qv_*n_*sizeof(PRECISION)) : U;           */
 /*     } */
 /*   else */
 /*     { */
 /*       if (at) */
-/* 	memcpy(A_,A,m*n*sizeof(PRECISION)); */
+/*     memcpy(A_,A,m*n*sizeof(PRECISION)); */
 /*       else */
-/* 	bTranspose(A_,A,m,n,at); */
+/*     bTranspose(A_,A,m,n,at); */
 /*       if (compact) */
-/* 	{ */
-/* 	  m_=m; */
-/* 	  n_=n; */
-/* 	  qu_=qv_=(m < n) ? m : n; */
-/* 	} */
+/*     { */
+/*       m_=m; */
+/*       n_=n; */
+/*       qu_=qv_=(m < n) ? m : n; */
+/*     } */
 /*       else */
-/* 	{ */
-/* 	  qu_=m_=m; */
-/* 	  qv_=n_=n; */
-/* 	} */
+/*     { */
+/*       qu_=m_=m; */
+/*       qv_=n_=n; */
+/*     } */
 /*       U_=ut ? U : (PRECISION*)malloc(m_*qu_*sizeof(PRECISION)); */
 /*       V_=vt ? (PRECISION*)malloc(qv_*n_*sizeof(PRECISION)) : V; */
 /*     } */
@@ -1141,27 +1141,27 @@ int bSVD_new(PRECISION *U, PRECISION *d, PRECISION *V, PRECISION *A, int m, int 
 /*       gesvd(&jobu,&jobv,&m_,&n_,A_,&m_,d,U_,&m_,V_,&qv_,work,&k,&info); */
 /*       free(work); */
 /*       if (info) */
-/* 	err=BLAS_LAPACK_ERR; */
+/*     err=BLAS_LAPACK_ERR; */
 /*       else */
-/* 	{ */
-/* 	  if (transpose) */
-/* 	    { */
-/* 	      if (U != V_) */
-/* 		bTranspose(U,V_,qv_,n_,1); */
-/* 	      else */
-/* 		if (V != U_) */
-/* 		  bTranspose(V,U_,m_,qu_,1); */
-/* 	    } */
-/* 	  else */
-/* 	    { */
-/* 	      if (U != U_) */
-/* 		bTranspose(U,U_,m_,qu_,1); */
-/* 	      else */
-/* 		if (V != V_) */
-/* 		  bTranspose(V,V_,qv_,n_,1); */
-/* 	    } */
-/* 	  err=NO_ERR; */
-/* 	} */
+/*     { */
+/*       if (transpose) */
+/*         { */
+/*           if (U != V_) */
+/*         bTranspose(U,V_,qv_,n_,1); */
+/*           else */
+/*         if (V != U_) */
+/*           bTranspose(V,U_,m_,qu_,1); */
+/*         } */
+/*       else */
+/*         { */
+/*           if (U != U_) */
+/*         bTranspose(U,U_,m_,qu_,1); */
+/*           else */
+/*         if (V != V_) */
+/*           bTranspose(V,V_,qv_,n_,1); */
+/*         } */
+/*       err=NO_ERR; */
+/*     } */
 /*     } */
 
 /*   free(A_); */
@@ -1169,18 +1169,18 @@ int bSVD_new(PRECISION *U, PRECISION *d, PRECISION *V, PRECISION *A, int m, int 
 /*   if (transpose) */
 /*     { */
 /*       if (U != V_) */
-/* 	free(V_); */
+/*     free(V_); */
 /*       else */
-/* 	if (V != U_) */
-/* 	  free(U_); */
+/*     if (V != U_) */
+/*       free(U_); */
 /*     } */
 /*   else */
 /*     { */
 /*       if (U != U_) */
-/* 	free(U_); */
+/*     free(U_); */
 /*       else */
-/* 	if (V != V_) */
-/* 	  free(V_); */
+/*     if (V != V_) */
+/*       free(V_); */
 /*     } */
 
 /*   return err; */
@@ -1243,18 +1243,18 @@ int bSVD_new(PRECISION *U, PRECISION *d, PRECISION *V, PRECISION *A, int m, int 
         1   1   1     m x n      m x m      n x n     m x n   A = U * D * V'
         0   1   1     m x n      m x m      n x n     m x n   A = U'* D * V'
 
-     
+
      U and V are orthogonal matrices and the elemets of d are non-negative.
 
    Notes
      The lapack routine is avoids unnecessary transpositions when ut == at and
      vt = 1-at.  When m=n, A can be equal to U or V.  U and V must be distinct.
-     
-     The current code uses the 
+
+     The current code uses the
 */
 int bSVD(PRECISION *U, PRECISION *d, PRECISION *V, PRECISION *A, int m, int n, int ut, int vt, int at)
 {
-#if (PRECISION_SIZE == 4) 
+#if (PRECISION_SIZE == 4)
 #define gesvd sgesvd
 #else
 #define gesvd dgesvd
@@ -1273,7 +1273,7 @@ int bSVD(PRECISION *U, PRECISION *d, PRECISION *V, PRECISION *A, int m, int n, i
       free(X);
       return MEM_ERR;
     }
-  k=-1;  
+  k=-1;
   m2 = m;
   n2 = n;
   if (at)
@@ -1282,23 +1282,23 @@ int bSVD(PRECISION *U, PRECISION *d, PRECISION *V, PRECISION *A, int m, int n, i
       k=-1;
       gesvd(&jobz,&jobz,&m2,&n2,X,&m2,d,U,&m2,V,&n2,&opt_size,&k,&info);
       if (info || !(work=(PRECISION*)malloc((k=(int)opt_size)*sizeof(PRECISION))))
-	{
-	  free(iwork);
-	  free(X);
-	  return info ? BLAS_LAPACK_ERR : MEM_ERR;
-	}
+    {
+      free(iwork);
+      free(X);
+      return info ? BLAS_LAPACK_ERR : MEM_ERR;
+    }
       gesvd(&jobz,&jobz,&m2,&n2,X,&m2,d,U,&m2,V,&n2,work,&k,&info);
       if (info)
-	{
-	  free(work);
-	  free(iwork);
-	  free(X);
-	  return BLAS_LAPACK_ERR;
-	}
-      if (!ut) 
-	bTransposeInPlace(U,m);
-      if (vt) 
-	bTransposeInPlace(V,n);
+    {
+      free(work);
+      free(iwork);
+      free(X);
+      return BLAS_LAPACK_ERR;
+    }
+      if (!ut)
+    bTransposeInPlace(U,m);
+      if (vt)
+    bTransposeInPlace(V,n);
     }
   else
     {
@@ -1306,30 +1306,30 @@ int bSVD(PRECISION *U, PRECISION *d, PRECISION *V, PRECISION *A, int m, int n, i
       k=-1;
       gesvd(&jobz,&jobz,&n2,&m2,X,&n2,d,V,&n2,U,&m2,&opt_size,&k,&info);
       if (info || !(work=(PRECISION*)malloc((k=(int)opt_size)*sizeof(PRECISION))))
-	{
-	  free(iwork);
-	  free(X);
-	  return info ? BLAS_LAPACK_ERR : MEM_ERR;
-	}
+    {
+      free(iwork);
+      free(X);
+      return info ? BLAS_LAPACK_ERR : MEM_ERR;
+    }
       gesvd(&jobz,&jobz,&n2,&m2,X,&n2,d,V,&n2,U,&m2,work,&k,&info);
       if (info)
-	{
-	  free(work);
-	  free(iwork);
-	  free(X);
-	  return BLAS_LAPACK_ERR;
-	}
-      if (!vt) 
-	bTransposeInPlace(V,n);
-      if (ut) 
-	bTransposeInPlace(U,m);
+    {
+      free(work);
+      free(iwork);
+      free(X);
+      return BLAS_LAPACK_ERR;
+    }
+      if (!vt)
+    bTransposeInPlace(V,n);
+      if (ut)
+    bTransposeInPlace(U,m);
     }
   free(work);
   free(iwork);
   free(X);
   return NO_ERR;
 
-#undef gesvd 
+#undef gesvd
 
   // The following code attempts to use the divide and conquer algorithm
 /* #if (PRECISION_SIZE == 4)  */
@@ -1351,45 +1351,45 @@ int bSVD(PRECISION *U, PRECISION *d, PRECISION *V, PRECISION *A, int m, int n, i
 /*     { */
 /*       gesdd(&jobz,&m,&n,X,&m,d,U,&m,V,&n,&opt_size,&k,iwork,&info); */
 /*       if (info || !(work=(PRECISION*)malloc((k=(int)opt_size)*sizeof(PRECISION)))) */
-/* 	{ */
-/* 	  free(iwork); */
-/* 	  free(X); */
-/* 	  return info ? BLAS_LAPACK_ERR : MEM_ERR; */
-/* 	} */
+/*     { */
+/*       free(iwork); */
+/*       free(X); */
+/*       return info ? BLAS_LAPACK_ERR : MEM_ERR; */
+/*     } */
 /*       gesdd(&jobz,&m,&n,X,&m,d,U,&m,V,&n,work,&k,iwork,&info); */
 /*       if (info) */
-/* 	{ */
-/* 	  free(work); */
-/* 	  free(iwork); */
-/* 	  free(X); */
-/* 	  return BLAS_LAPACK_ERR; */
-/* 	} */
+/*     { */
+/*       free(work); */
+/*       free(iwork); */
+/*       free(X); */
+/*       return BLAS_LAPACK_ERR; */
+/*     } */
 /*       if (!ut)  */
-/* 	bTransposeInPlace(U,m); */
+/*     bTransposeInPlace(U,m); */
 /*       if (vt)  */
-/* 	bTransposeInPlace(V,n); */
+/*     bTransposeInPlace(V,n); */
 /*     } */
 /*   else */
 /*     { */
 /*       gesdd(&jobz,&n,&m,X,&n,d,V,&n,U,&m,&opt_size,&k,iwork,&info); */
 /*       if (!(work=(PRECISION*)malloc((k=(int)opt_size)*sizeof(PRECISION)))) */
-/*       	{ */
-/*       	  free(iwork); */
-/*       	  free(X); */
-/*       	  return MEM_ERR; */
-/*       	} */
+/*           { */
+/*             free(iwork); */
+/*             free(X); */
+/*             return MEM_ERR; */
+/*           } */
 /*       gesdd(&jobz,&n,&m,X,&n,d,V,&n,U,&m,work,&k,iwork,&info); */
 /*       if (info) */
-/*       	{ */
-/*       	  free(work); */
-/* 	  free(iwork); */
-/* 	  free(X); */
-/* 	  return BLAS_LAPACK_ERR; */
-/* 	} */
+/*           { */
+/*             free(work); */
+/*       free(iwork); */
+/*       free(X); */
+/*       return BLAS_LAPACK_ERR; */
+/*     } */
 /*       if (!vt)  */
-/* 	bTransposeInPlace(V,n); */
+/*     bTransposeInPlace(V,n); */
 /*       if (ut)  */
-/* 	bTransposeInPlace(U,m); */
+/*     bTransposeInPlace(U,m); */
 /*     } */
 /*   free(work); */
 /*   free(iwork); */
@@ -1426,10 +1426,10 @@ int bSVD(PRECISION *U, PRECISION *d, PRECISION *V, PRECISION *A, int m, int n, i
      such that
 
                                 X = Q * R
-     
-     The matrix Q is computed only if it is not null.  
 
-                       X          Q          R          
+     The matrix Q is computed only if it is not null.
+
+                       X          Q          R
        qt  rt  xt   (m x n)    (m x q)    (q x n)    solves
        ------------------------------------------------------
         0   0   0  row major  row major  row major  X = Q * R
@@ -1442,7 +1442,7 @@ int bSVD(PRECISION *U, PRECISION *d, PRECISION *V, PRECISION *A, int m, int n, i
         1   1   1  col major  col major  col major  X = Q * R
 
      or
-                    R/U         Q          
+                    R/U         Q
        qt   rt   row major  row major   solves
        ------------------------------------------
         0    0     m x n      m x m    R = Q * U
@@ -1451,7 +1451,7 @@ int bSVD(PRECISION *U, PRECISION *d, PRECISION *V, PRECISION *A, int m, int n, i
         1    1     n x m      m x m    R'= Q'* U'
 
      or
-                    R/U         Q          
+                    R/U         Q
        qt   rt   col major  col major   solves
        ------------------------------------------
         0    0     n x m      m x m    R'= Q'* U'
@@ -1461,8 +1461,8 @@ int bSVD(PRECISION *U, PRECISION *d, PRECISION *V, PRECISION *A, int m, int n, i
 
    Notes
      The matrices X and R do not have to be distinct.  If X == R, then it must
-     be the case that m == q and rt == xt.  The QR decomposition is formed using 
-     Householder matrices without pivoting.  
+     be the case that m == q and rt == xt.  The QR decomposition is formed using
+     Householder matrices without pivoting.
 */
 int bQR(PRECISION *Q, PRECISION *R, PRECISION *X, int m, int n, int q, int qt, int rt, int xt)
 {
@@ -1492,74 +1492,74 @@ int bQR(PRECISION *Q, PRECISION *R, PRECISION *X, int m, int n, int q, int qt, i
       geqrf(&m2,&n2,X,&m2,tau,&opt_size,&lwork,&info);
 
       if (!(work=(PRECISION*)malloc((lwork=(int)opt_size)*sizeof(PRECISION))))
-	{
-	  free(tau);
-	  return MEM_ERR;
-	}
+    {
+      free(tau);
+      return MEM_ERR;
+    }
 
       geqrf(&m2,&n2,X,&m2,tau,work,&lwork,&info);
 
       free(work);
       if (info)
-	{
-	  free(tau);
-	  return ARG_ERR;
-	}
+    {
+      free(tau);
+      return ARG_ERR;
+    }
       if (Q)
-	{
-	  if (qt)
-	    ptr=Q;
-	  else
-	    if (!(ptr=(PRECISION*)malloc(m*q*sizeof(PRECISION))))
-	      {
-		free(tau);
-		return MEM_ERR;
-	      }
-	  memcpy(ptr,X,m*p*sizeof(PRECISION));
-	  lwork=-1;
+    {
+      if (qt)
+        ptr=Q;
+      else
+        if (!(ptr=(PRECISION*)malloc(m*q*sizeof(PRECISION))))
+          {
+        free(tau);
+        return MEM_ERR;
+          }
+      memcpy(ptr,X,m*p*sizeof(PRECISION));
+      lwork=-1;
 
           p2 = p;
           q2 = q;
-	  orgqr(&m2,&q2,&p2,ptr,&m2,tau,&opt_size,&lwork,&info);
+      orgqr(&m2,&q2,&p2,ptr,&m2,tau,&opt_size,&lwork,&info);
 
-	  if (!(work=(PRECISION*)malloc((lwork=(int)opt_size)*sizeof(PRECISION))))
-	    {
-	      if (!qt) free(ptr);
-	      free(tau);
-	      return MEM_ERR;
-	    }
+      if (!(work=(PRECISION*)malloc((lwork=(int)opt_size)*sizeof(PRECISION))))
+        {
+          if (!qt) free(ptr);
+          free(tau);
+          return MEM_ERR;
+        }
 
-	  orgqr(&m2,&q2,&p2,ptr,&m2,tau,work,&lwork,&info);
+      orgqr(&m2,&q2,&p2,ptr,&m2,tau,work,&lwork,&info);
 
-	  free(work);
-	  if (!qt)
-	    {
-	      bTranspose(Q,ptr,m,q,1);
-	      free(ptr);
-	    }
-	  free(tau);
-	  if (info) return ARG_ERR;
-	}
+      free(work);
+      if (!qt)
+        {
+          bTranspose(Q,ptr,m,q,1);
+          free(ptr);
+        }
+      free(tau);
+      if (info) return ARG_ERR;
+    }
       else
-	free(tau);
+    free(tau);
       if (R != X)
-	if (rt)
-	  for (k=q*n, j=n-1; j >= 0; j--)
-	    {
-	      for (i=q-1; i > j; i--) R[--k]=0.0;
-	      for (l=i+j*m; i >= 0; i--) R[--k]=X[l--];
-	    }
-	else
-	  for (k=q*n, i=q-1; i >= 0; i--)
-	    {
-	      for (l=i+n*m, j=n-1; j >= i; j--) R[--k]=X[l-=m];
-	      for ( ; j >= 0; j--) R[--k]=0.0; 
-	    }
+    if (rt)
+      for (k=q*n, j=n-1; j >= 0; j--)
+        {
+          for (i=q-1; i > j; i--) R[--k]=0.0;
+          for (l=i+j*m; i >= 0; i--) R[--k]=X[l--];
+        }
+    else
+      for (k=q*n, i=q-1; i >= 0; i--)
+        {
+          for (l=i+n*m, j=n-1; j >= i; j--) R[--k]=X[l-=m];
+          for ( ; j >= 0; j--) R[--k]=0.0;
+        }
       else
-	{
-	  for (j=p-1; j >= 0; j--)
-	    for (k=m*(j+1), i=m-1; i > j; i--) X[--k]=0.0;
-	}
+    {
+      for (j=p-1; j >= 0; j--)
+        for (k=m*(j+1), i=m-1; i > j; i--) X[--k]=0.0;
+    }
     }
   else
     {
@@ -1569,92 +1569,92 @@ int bQR(PRECISION *Q, PRECISION *R, PRECISION *X, int m, int n, int q, int qt, i
       gelqf(&n2,&m2,X,&n2,tau,&opt_size,&lwork,&info);
 
       if (!(work=(PRECISION*)malloc((lwork=(int)opt_size)*sizeof(PRECISION))))
-	{
-	  free(tau);
-	  return MEM_ERR;
-	}
+    {
+      free(tau);
+      return MEM_ERR;
+    }
 
       gelqf(&n2,&m2,X,&n2,tau,work,&lwork,&info);
 
       free(work);
       if (info)
-	{
-	  free(tau);
-	  return ARG_ERR;
-	}
+    {
+      free(tau);
+      return ARG_ERR;
+    }
       if (Q)
-	{
-	  if (!qt)
-	    ptr=Q;
-	  else
-	    if (!(ptr=(PRECISION*)malloc(m*q*sizeof(PRECISION))))
-	      {
-		free(tau);
-		return MEM_ERR;
-	      }
-	  if (q == n)
-	    memcpy(ptr,X,m*n*sizeof(PRECISION));
-	  else
-	    if (m < n)
-	      for (k=q*m, j=m-1; j >= 0; j--)
-		for (l=p+j*n, i=p-1; i >= 0; i--)
-		  ptr[--k]=X[--l];
-	    else
-	      for (l=n*m, j=m-1; j >= 0; j--)
-		for (k=p+j*q, i=p-1; i >= 0; i--)
-		  ptr[--k]=X[--l];
-	  lwork=-1;
+    {
+      if (!qt)
+        ptr=Q;
+      else
+        if (!(ptr=(PRECISION*)malloc(m*q*sizeof(PRECISION))))
+          {
+        free(tau);
+        return MEM_ERR;
+          }
+      if (q == n)
+        memcpy(ptr,X,m*n*sizeof(PRECISION));
+      else
+        if (m < n)
+          for (k=q*m, j=m-1; j >= 0; j--)
+        for (l=p+j*n, i=p-1; i >= 0; i--)
+          ptr[--k]=X[--l];
+        else
+          for (l=n*m, j=m-1; j >= 0; j--)
+        for (k=p+j*q, i=p-1; i >= 0; i--)
+          ptr[--k]=X[--l];
+      lwork=-1;
 
           m2 = m;
           p2 = p;
           q2 = q;
-	  orglq(&q2,&m2,&p2,ptr,&q2,tau,&opt_size,&lwork,&info);
+      orglq(&q2,&m2,&p2,ptr,&q2,tau,&opt_size,&lwork,&info);
 
-	  if (!(work=(PRECISION*)malloc((lwork=(int)opt_size)*sizeof(PRECISION))))
-	    {
-	      if (!qt) free(ptr);
-	      free(tau);
-	      return MEM_ERR;
-	    }
+      if (!(work=(PRECISION*)malloc((lwork=(int)opt_size)*sizeof(PRECISION))))
+        {
+          if (!qt) free(ptr);
+          free(tau);
+          return MEM_ERR;
+        }
 
-	  orglq(&q2,&m2,&p2,ptr,&q2,tau,work,&lwork,&info);
+      orglq(&q2,&m2,&p2,ptr,&q2,tau,work,&lwork,&info);
 
-	  free(work);
-	  if (qt)
-	    {
-	      bTranspose(Q,ptr,q,m,1);
-	      free(ptr);
-	    }
-	  free(tau);
-	  if (info) return ARG_ERR;
-	}
+      free(work);
+      if (qt)
+        {
+          bTranspose(Q,ptr,q,m,1);
+          free(ptr);
+        }
+      free(tau);
+      if (info) return ARG_ERR;
+    }
       else
-	free(tau);
+    free(tau);
       if (R != X)
-	if (rt)
-	  for (k=n*q, i=n-1; i >= 0; i--)
-	    {
-	      for (j=q-1; j > i; j--) R[--k]=0.0;
-	      for (l=i+j*n; j >= 0; l-=n, j--) R[--k]=X[l];
-	    }
-	else
+    if (rt)
+      for (k=n*q, i=n-1; i >= 0; i--)
+        {
+          for (j=q-1; j > i; j--) R[--k]=0.0;
+          for (l=i+j*n; j >= 0; l-=n, j--) R[--k]=X[l];
+        }
+    else
           for (k=n*q-1, j=q-1; j >= 0; j--)
-	    {
-	      for (i=n-1; i >= j; k--, i--) R[k]=X[k];
-	      for ( ; i >= 0; k--, i--) R[k]=0.0; 
-	    }
+        {
+          for (i=n-1; i >= j; k--, i--) R[k]=X[k];
+          for ( ; i >= 0; k--, i--) R[k]=0.0;
+        }
       else
-	{
-	  for (i=p-1; i >= 0; i--)
-	    for (k=i+m*n, j=m-1; j > i; j--) X[k-=n]=0.0;
-	}
+    {
+      for (i=p-1; i >= 0; i--)
+        for (k=i+m*n, j=m-1; j > i; j--) X[k-=n]=0.0;
+    }
     }
   return NO_ERR;
 
-#undef geqrf 
-#undef orgqr 
-#undef gelqf 
-#undef orglq 
+#undef geqrf
+#undef orgqr
+#undef gelqf
+#undef orglq
 }
 /******************************************************************************/
 /******************************************************************************/
@@ -1688,23 +1688,23 @@ int bQR(PRECISION *Q, PRECISION *R, PRECISION *X, int m, int n, int q, int qt, i
      BLAS_LAPACK_ERR : blas or lapack error
 
    Results
-     Finds orthogonal matrices Q and Z, an block upper triangular matrix S with 
+     Finds orthogonal matrices Q and Z, an block upper triangular matrix S with
      1 x 1 or 2 x 2 blocks along the diagonal, an upper triangular matrix T such
      that
 
          A = Q*S*Z'   and    B = Q*T*Z
- 
+
      If either Q or Z is null, then it is not returned.
 
    Notes
-     The flags qt, zt, st, tt, at, and bt control the format of the matrices Q, 
+     The flags qt, zt, st, tt, at, and bt control the format of the matrices Q,
      Z, S, T, A, and B.  A value of 1 indicate column major format and a value of
      0 indictes row major format.
 */
-int bQZ_real(PRECISION *Q, PRECISION *Z, PRECISION *S, PRECISION *T, PRECISION *A, PRECISION *B, int n, int qt, int zt, int st, int tt, int at, int bt, 
-	     PRECISION *alpha_r, PRECISION *alpha_i, PRECISION *beta)
+int bQZ_real(PRECISION *Q, PRECISION *Z, PRECISION *S, PRECISION *T, PRECISION *A, PRECISION *B, int n, int qt, int zt, int st, int tt, int at, int bt,
+         PRECISION *alpha_r, PRECISION *alpha_i, PRECISION *beta)
 {
-#if (PRECISION_SIZE == 4) 
+#if (PRECISION_SIZE == 4)
   #define gges sgges
 #else
   #define gges dgges
@@ -1718,51 +1718,51 @@ int bQZ_real(PRECISION *Q, PRECISION *Z, PRECISION *S, PRECISION *T, PRECISION *
 
   jobvsl=Q ? 'V' : 'N';
   jobvsr=Z ? 'V' : 'N';
-  palpha_r=alpha_r ? alpha_r : (PRECISION*)malloc(n*sizeof(PRECISION)); 
+  palpha_r=alpha_r ? alpha_r : (PRECISION*)malloc(n*sizeof(PRECISION));
   palpha_i=alpha_i ? alpha_i : (PRECISION*)malloc(n*sizeof(PRECISION));
-  pbeta=beta ? beta : (PRECISION*)malloc(n*sizeof(PRECISION)); 
+  pbeta=beta ? beta : (PRECISION*)malloc(n*sizeof(PRECISION));
 
   if (palpha_r && palpha_i && pbeta)
     {
-      if (S != A) 
-	if (at)
-	  memcpy(S,A,n*n*sizeof(PRECISION));
-	else
-	  bTranspose(S,A,n,n,0);
+      if (S != A)
+    if (at)
+      memcpy(S,A,n*n*sizeof(PRECISION));
+    else
+      bTranspose(S,A,n,n,0);
       else
-	if (!at) bTransposeInPlace(A,n);
+    if (!at) bTransposeInPlace(A,n);
 
-      if (T != B) 
-	if (bt)
-	  memcpy(T,B,n*n*sizeof(PRECISION));
-	else
-	  bTranspose(T,B,n,n,0);
+      if (T != B)
+    if (bt)
+      memcpy(T,B,n*n*sizeof(PRECISION));
+    else
+      bTranspose(T,B,n,n,0);
       else
-	if (!bt) bTransposeInPlace(B,n);
+    if (!bt) bTransposeInPlace(B,n);
 
       lwork=-1;
       n2 = n;
       gges(&jobvsl,&jobvsr,&sort,(void*)NULL,&n2,S,&n2,T,&n2,&simd,palpha_r,palpha_i,pbeta,Q,&n2,Z,&n2,&size,&lwork,(void*)NULL,&info);
       if (!info)
-	if (!(work=malloc((lwork=(int)size)*sizeof(PRECISION)))) 
-	  rtrn=MEM_ERR;
-	else
-	  {
-	    gges(&jobvsl,&jobvsr,&sort,(void*)NULL,&n2,S,&n2,T,&n2,&simd,palpha_r,palpha_i,pbeta,Q,&n2,Z,&n2,work,&lwork,(void*)NULL,&info);
-	    if (!info)
-	      {
-		if (Q && !qt) bTransposeInPlace(Q,n);
-		if (Z && !zt) bTransposeInPlace(Z,n);
-		if (!st) bTransposeInPlace(S,n);
-		if (!tt) bTransposeInPlace(T,n);
-		rtrn=NO_ERR;
-	      }
-	    else
-	      rtrn=BLAS_LAPACK_ERR;
-	    free(work);
-	  }
+    if (!(work=malloc((lwork=(int)size)*sizeof(PRECISION))))
+      rtrn=MEM_ERR;
+    else
+      {
+        gges(&jobvsl,&jobvsr,&sort,(void*)NULL,&n2,S,&n2,T,&n2,&simd,palpha_r,palpha_i,pbeta,Q,&n2,Z,&n2,work,&lwork,(void*)NULL,&info);
+        if (!info)
+          {
+        if (Q && !qt) bTransposeInPlace(Q,n);
+        if (Z && !zt) bTransposeInPlace(Z,n);
+        if (!st) bTransposeInPlace(S,n);
+        if (!tt) bTransposeInPlace(T,n);
+        rtrn=NO_ERR;
+          }
+        else
+          rtrn=BLAS_LAPACK_ERR;
+        free(work);
+      }
       else
-	rtrn=BLAS_LAPACK_ERR;
+    rtrn=BLAS_LAPACK_ERR;
     }
   else
     rtrn=MEM_ERR;
@@ -1787,7 +1787,7 @@ int bQZ_real(PRECISION *Q, PRECISION *Z, PRECISION *S, PRECISION *T, PRECISION *
     Z       : array of length n*n or null
     S       : array of length n*n
     T       : array of length n*n
-    n       : positive integer 
+    n       : positive integer
     qqt     : 0 or 1
     zzt     : 0 or 1
     sst     : 0 or 1
@@ -1806,27 +1806,27 @@ int bQZ_real(PRECISION *Q, PRECISION *Z, PRECISION *S, PRECISION *T, PRECISION *
      BLAS_LAPACK_ERR : blas or lapack error
 
    Results
-     Finds orthogonal matrices QQ and ZZ, an block upper triangular matrix SS 
-     with 1 x 1 or 2 x 2 blocks along the diagonal, an upper triangular matrix TT 
+     Finds orthogonal matrices QQ and ZZ, an block upper triangular matrix SS
+     with 1 x 1 or 2 x 2 blocks along the diagonal, an upper triangular matrix TT
      such that
 
               Q*S*Z' = QQ*SS*ZZ'   and    Q*T*Z' = QQ*TT*ZZ'
- 
+
      If either Q or QQ are null, then QQ is not computed and if either Z or ZZ is
-     null, then ZZ is not computed.  The matrices S and T are multiplied by  
-     orthogonal matrices in such a manner that their block triangular structure 
+     null, then ZZ is not computed.  The matrices S and T are multiplied by
+     orthogonal matrices in such a manner that their block triangular structure
      retained and the generalized eigenvalues corresponding to value of select
-     equal to one are transformed to the upper part of SS and TT.   
+     equal to one are transformed to the upper part of SS and TT.
 
    Notes
-     The flags qqt, zzt, sst, ttt, qt, zt, st, and tt control the format of the 
-     matrices QQ, ZZ, SS, TT, Q, Z, S, and T.  A value of 1 indicate column major 
+     The flags qqt, zzt, sst, ttt, qt, zt, st, and tt control the format of the
+     matrices QQ, ZZ, SS, TT, Q, Z, S, and T.  A value of 1 indicate column major
      format and a value of 0 indictes row major format.
 */
-int bReorderQZ_real(int *select, PRECISION *QQ, PRECISION *ZZ, PRECISION *SS, PRECISION *TT, PRECISION *Q, PRECISION *Z, PRECISION *S, PRECISION *T, int n, 
-		    int qqt, int zzt, int sst, int ttt, int qt, int zt, int st, int tt, PRECISION *alpha_r, PRECISION *alpha_i, PRECISION *beta)
+int bReorderQZ_real(int *select, PRECISION *QQ, PRECISION *ZZ, PRECISION *SS, PRECISION *TT, PRECISION *Q, PRECISION *Z, PRECISION *S, PRECISION *T, int n,
+            int qqt, int zzt, int sst, int ttt, int qt, int zt, int st, int tt, PRECISION *alpha_r, PRECISION *alpha_i, PRECISION *beta)
 {
-#if (PRECISION_SIZE == 4) 
+#if (PRECISION_SIZE == 4)
   #define tgsen stgsen
 #else
   #define tgsen dtgsen
@@ -1848,45 +1848,45 @@ int bReorderQZ_real(int *select, PRECISION *QQ, PRECISION *ZZ, PRECISION *SS, PR
   wantq=(QQ && Q) ? 1 : 0;
   wantz=(ZZ && Z) ? 1 : 0;
 
-  palpha_r=alpha_r ? alpha_r : (PRECISION*)malloc(n*sizeof(PRECISION)); 
+  palpha_r=alpha_r ? alpha_r : (PRECISION*)malloc(n*sizeof(PRECISION));
   palpha_i=alpha_i ? alpha_i : (PRECISION*)malloc(n*sizeof(PRECISION));
-  pbeta=beta ? beta : (PRECISION*)malloc(n*sizeof(PRECISION)); 
+  pbeta=beta ? beta : (PRECISION*)malloc(n*sizeof(PRECISION));
 
   if (palpha_r && palpha_i && pbeta)
     {
-      if (SS != S) 
-	if (st)
-	  memcpy(SS,S,n*n*sizeof(PRECISION));
-	else
-	  bTranspose(SS,S,n,n,0);
+      if (SS != S)
+    if (st)
+      memcpy(SS,S,n*n*sizeof(PRECISION));
+    else
+      bTranspose(SS,S,n,n,0);
       else
-	if (!st) bTransposeInPlace(S,n);
+    if (!st) bTransposeInPlace(S,n);
 
-      if (TT != T) 
-	if (tt)
-	  memcpy(TT,T,n*n*sizeof(PRECISION));
-	else
-	  bTranspose(TT,T,n,n,0);
+      if (TT != T)
+    if (tt)
+      memcpy(TT,T,n*n*sizeof(PRECISION));
+    else
+      bTranspose(TT,T,n,n,0);
       else
-	if (!tt) bTransposeInPlace(T,n);
+    if (!tt) bTransposeInPlace(T,n);
 
       if (wantq)
-	if (QQ != Q)
-	  if (qt)
-	    memcpy(QQ,Q,n*n*sizeof(PRECISION));
-	  else
-	    bTranspose(QQ,Q,n,n,0);
-	else
-	  if (!qt) bTransposeInPlace(Q,n);
+    if (QQ != Q)
+      if (qt)
+        memcpy(QQ,Q,n*n*sizeof(PRECISION));
+      else
+        bTranspose(QQ,Q,n,n,0);
+    else
+      if (!qt) bTransposeInPlace(Q,n);
 
       if (wantz)
-	if (ZZ != Z)
-	  if (zt)
-	    memcpy(ZZ,Z,n*n*sizeof(PRECISION));
-	  else
-	    bTranspose(ZZ,Z,n,n,0);
-	else
-	  if (!zt) bTransposeInPlace(Z,n);
+    if (ZZ != Z)
+      if (zt)
+        memcpy(ZZ,Z,n*n*sizeof(PRECISION));
+      else
+        bTranspose(ZZ,Z,n,n,0);
+    else
+      if (!zt) bTransposeInPlace(Z,n);
 
       lwork=-1;
       wantq2 = wantq;
@@ -1894,30 +1894,30 @@ int bReorderQZ_real(int *select, PRECISION *QQ, PRECISION *ZZ, PRECISION *SS, PR
       n2 = n;
       m2 = m;
       tgsen(&ijob,&wantq2,&wantz2,select2,&n2,SS,&n2,TT,&n2,palpha_r,palpha_i,pbeta,QQ,&n2,ZZ,&n2,&m2,
-	    (PRECISION*)NULL,(PRECISION*)NULL,(PRECISION*)NULL,&size,&lwork,&iwork,&liwork,&info);
+        (PRECISION*)NULL,(PRECISION*)NULL,(PRECISION*)NULL,&size,&lwork,&iwork,&liwork,&info);
       m = m2;
       if (!info)
-	if (!(work=malloc((lwork=(int)size)*sizeof(PRECISION)))) 
-	  rtrn=MEM_ERR;
-	else
-	  {
-	    tgsen(&ijob,&wantq2,&wantz2,select2,&n2,SS,&n2,TT,&n2,palpha_r,palpha_i,pbeta,QQ,&n2,ZZ,&n2,&m2,
-		  (PRECISION*)NULL,(PRECISION*)NULL,(PRECISION*)NULL,work,&lwork,&iwork,&liwork,&info);
+    if (!(work=malloc((lwork=(int)size)*sizeof(PRECISION))))
+      rtrn=MEM_ERR;
+    else
+      {
+        tgsen(&ijob,&wantq2,&wantz2,select2,&n2,SS,&n2,TT,&n2,palpha_r,palpha_i,pbeta,QQ,&n2,ZZ,&n2,&m2,
+          (PRECISION*)NULL,(PRECISION*)NULL,(PRECISION*)NULL,work,&lwork,&iwork,&liwork,&info);
             m = m2;
-	    if (!info)
-	      {
-		if (wantq && !qqt) bTransposeInPlace(QQ,n);
-		if (wantz && !zzt) bTransposeInPlace(ZZ,n);
-		if (!sst) bTransposeInPlace(SS,n);
-		if (!ttt) bTransposeInPlace(TT,n);
-		rtrn=NO_ERR;
-	      }
-	    else
-	      rtrn=BLAS_LAPACK_ERR;
-	    free(work);
-	  }
+        if (!info)
+          {
+        if (wantq && !qqt) bTransposeInPlace(QQ,n);
+        if (wantz && !zzt) bTransposeInPlace(ZZ,n);
+        if (!sst) bTransposeInPlace(SS,n);
+        if (!ttt) bTransposeInPlace(TT,n);
+        rtrn=NO_ERR;
+          }
+        else
+          rtrn=BLAS_LAPACK_ERR;
+        free(work);
+      }
       else
-	rtrn=BLAS_LAPACK_ERR;
+    rtrn=BLAS_LAPACK_ERR;
     }
 
   if (!alpha_r && palpha_r) free(palpha_r);
@@ -1959,30 +1959,30 @@ int bReorderQZ_real(int *select, PRECISION *QQ, PRECISION *ZZ, PRECISION *SS, PR
      BLAS_LAPACK_ERR : blas or lapack error
 
    Results
-     Finds orthogonal matrices QQ and ZZ, an block upper triangular matrix SS 
-     with 1 x 1 or 2 x 2 blocks along the diagonal, an upper triangular matrix TT 
+     Finds orthogonal matrices QQ and ZZ, an block upper triangular matrix SS
+     with 1 x 1 or 2 x 2 blocks along the diagonal, an upper triangular matrix TT
      such that
 
               Q*S*Z' = QQ*SS*ZZ'   and    Q*T*Z' = QQ*TT*ZZ'
- 
-     If either Q or QQ are null, then QQ is not computed and if either Z or ZZ is
-     null, then ZZ is not computed.  The matrices S and T are multiplied by  
-     orthogonal matrices in such a manner that their block triangular structure 
-     retained and the generalized eigenvalues are sorted in descending order.  So
-     upon exit, 
 
-           sqrt(alpha_r[i]^2 + alpha_i[i]^2)/beta[i] 
-                        >= sqrt(alpha_r[i+1]^2 + alpha_i[i+1]^2)/beta[i+1] 
+     If either Q or QQ are null, then QQ is not computed and if either Z or ZZ is
+     null, then ZZ is not computed.  The matrices S and T are multiplied by
+     orthogonal matrices in such a manner that their block triangular structure
+     retained and the generalized eigenvalues are sorted in descending order.  So
+     upon exit,
+
+           sqrt(alpha_r[i]^2 + alpha_i[i]^2)/beta[i]
+                        >= sqrt(alpha_r[i+1]^2 + alpha_i[i+1]^2)/beta[i+1]
 
    Notes
-     The flags qqt, zzt, sst, ttt, qt, zt, st, and tt control the format of the 
-     matrices QQ, ZZ, SS, TT, Q, Z, S, and T.  A value of 1 indicate column major 
-     format and a value of 0 indictes row major format.  
+     The flags qqt, zzt, sst, ttt, qt, zt, st, and tt control the format of the
+     matrices QQ, ZZ, SS, TT, Q, Z, S, and T.  A value of 1 indicate column major
+     format and a value of 0 indictes row major format.
 */
-int bSortQZ_real(int *select, PRECISION *QQ, PRECISION *ZZ, PRECISION *SS, PRECISION *TT, PRECISION *Q, PRECISION *Z, PRECISION *S, PRECISION *T, int n, 
-		 int qqt, int zzt, int sst, int ttt, int qt, int zt, int st, int tt, PRECISION *alpha_r, PRECISION *alpha_i, PRECISION *beta)
+int bSortQZ_real(int *select, PRECISION *QQ, PRECISION *ZZ, PRECISION *SS, PRECISION *TT, PRECISION *Q, PRECISION *Z, PRECISION *S, PRECISION *T, int n,
+         int qqt, int zzt, int sst, int ttt, int qt, int zt, int st, int tt, PRECISION *alpha_r, PRECISION *alpha_i, PRECISION *beta)
 {
-#if (PRECISION_SIZE == 4) 
+#if (PRECISION_SIZE == 4)
   #define tgexc stgexc
 #else
   #define tgexc dtgexc
@@ -2004,39 +2004,39 @@ int bSortQZ_real(int *select, PRECISION *QQ, PRECISION *ZZ, PRECISION *SS, PRECI
 
   if (pairs && gev)
     {
-      if (SS != S) 
-	if (st)
-	  memcpy(SS,S,n*n*sizeof(PRECISION));
-	else
-	  bTranspose(SS,S,n,n,0);
+      if (SS != S)
+    if (st)
+      memcpy(SS,S,n*n*sizeof(PRECISION));
+    else
+      bTranspose(SS,S,n,n,0);
       else
-	if (!st) bTransposeInPlace(S,n);
+    if (!st) bTransposeInPlace(S,n);
 
-      if (TT != T) 
-	if (tt)
-	  memcpy(TT,T,n*n*sizeof(PRECISION));
-	else
-	  bTranspose(TT,T,n,n,0);
+      if (TT != T)
+    if (tt)
+      memcpy(TT,T,n*n*sizeof(PRECISION));
+    else
+      bTranspose(TT,T,n,n,0);
       else
-	if (!tt) bTransposeInPlace(T,n);
+    if (!tt) bTransposeInPlace(T,n);
 
       if (wantq)
-	if (QQ != Q)
-	  if (qt)
-	    memcpy(QQ,Q,n*n*sizeof(PRECISION));
-	  else
-	    bTranspose(QQ,Q,n,n,0);
-	else
-	  if (!qt) bTransposeInPlace(Q,n);
+    if (QQ != Q)
+      if (qt)
+        memcpy(QQ,Q,n*n*sizeof(PRECISION));
+      else
+        bTranspose(QQ,Q,n,n,0);
+    else
+      if (!qt) bTransposeInPlace(Q,n);
 
       if (wantz)
-	if (ZZ != Z)
-	  if (zt)
-	    memcpy(ZZ,Z,n*n*sizeof(PRECISION));
-	  else
-	    bTranspose(ZZ,Z,n,n,0);
-	else
-	  if (!zt) bTransposeInPlace(Z,n);
+    if (ZZ != Z)
+      if (zt)
+        memcpy(ZZ,Z,n*n*sizeof(PRECISION));
+      else
+        bTranspose(ZZ,Z,n,n,0);
+    else
+      if (!zt) bTransposeInPlace(Z,n);
 
       lwork=-1;
       j=2; i=1;
@@ -2049,105 +2049,105 @@ int bSortQZ_real(int *select, PRECISION *QQ, PRECISION *ZZ, PRECISION *SS, PRECI
       i = i2;
       j = j2;
       if (!info)
-	if (!(work=malloc((lwork=(int)size)*sizeof(PRECISION)))) 
-	  rtrn=MEM_ERR;
-	else
-	  {
-	    // Setup pairs and gev
-	    for (i=n-1; i >= 0; i--)
-	      {
-		gev[i]=sqrt(alpha_r[i]*alpha_r[i] + alpha_i[i]*alpha_i[i]);
-		gev[i]=(gev[i]*small > beta[i]) ? 1.0/small : gev[i]/beta[i];
-		if ((i > 0) && (SS[n*(i-1)+i] != 0.0))
-		  {
-		    i--;
-		    gev[i]=gev[i+1];
-		    pairs[i]=1;
-		    pairs[i+1]=-1;
-		  }
-		else
-		  pairs[i]=0;
-	      }
+    if (!(work=malloc((lwork=(int)size)*sizeof(PRECISION))))
+      rtrn=MEM_ERR;
+    else
+      {
+        // Setup pairs and gev
+        for (i=n-1; i >= 0; i--)
+          {
+        gev[i]=sqrt(alpha_r[i]*alpha_r[i] + alpha_i[i]*alpha_i[i]);
+        gev[i]=(gev[i]*small > beta[i]) ? 1.0/small : gev[i]/beta[i];
+        if ((i > 0) && (SS[n*(i-1)+i] != 0.0))
+          {
+            i--;
+            gev[i]=gev[i+1];
+            pairs[i]=1;
+            pairs[i+1]=-1;
+          }
+        else
+          pairs[i]=0;
+          }
 
-	    rtrn=NO_ERR;
+        rtrn=NO_ERR;
 
-	    // Order generalized eigenvalues
-	    j=pairs[0] ? 2 : 1;
-	    while (j < n)
-	      {
-		i=j;
-		while ((i > 0) && (gev[i-1] < gev[j])) i-=pairs[i-1] ? 2 : 1;
+        // Order generalized eigenvalues
+        j=pairs[0] ? 2 : 1;
+        while (j < n)
+          {
+        i=j;
+        while ((i > 0) && (gev[i-1] < gev[j])) i-=pairs[i-1] ? 2 : 1;
 
-		if (i != j)
-		  {
-		    ii=i+1;
-		    jj=j+1;
+        if (i != j)
+          {
+            ii=i+1;
+            jj=j+1;
                     wantq2 = wantq;
                     wantz2 = wantz;
                     n2 = n;
                     jj2 = jj;
                     ii2 = ii;
-		    tgexc(&wantq2,&wantz2,&n2,SS,&n2,TT,&n2,QQ,&n2,ZZ,&n2,&jj2,&ii2,work,&lwork,&info);
+            tgexc(&wantq2,&wantz2,&n2,SS,&n2,TT,&n2,QQ,&n2,ZZ,&n2,&jj2,&ii2,work,&lwork,&info);
                     ii = ii2;
                     jj = jj2;
-		    if (!info)
-		      if (pairs[j])
-			{
-			  memmove(pairs+i+2,pairs+i,(j-i)*sizeof(int));
-			  pairs[i]=1; pairs[i+1]=-1;
-			  x1=gev[j];
-			  memmove(gev+i+2,gev+i,(j-i)*sizeof(PRECISION));
-			  gev[i]=gev[i+1]=x1;
-			  x1=alpha_r[j]; x2=alpha_r[j+1];
-			  memmove(alpha_r+i+2,alpha_r+i,(j-i)*sizeof(PRECISION));
-			  alpha_r[i]=x1; alpha_r[i+1]=x2;
-			  x1=alpha_i[j]; x2=alpha_i[j+1];
-			  memmove(alpha_i+i+2,alpha_i+i,(j-i)*sizeof(PRECISION));
-			  alpha_i[i]=x1; alpha_i[i+1]=x2;
-			  x1=beta[j]; x2=beta[j+1];
-			  memmove(beta+i+2,beta+i,(j-i)*sizeof(PRECISION));
-			  beta[i]=x1; beta[i+1]=x2;
-			  j+=2;
-			}
-		      else
-			{
-			  memmove(pairs+i+1,pairs+i,(j-i)*sizeof(int));
-			  pairs[i]=0;
-			  x1=gev[j];
-			  memmove(gev+i+1,gev+i,(j-i)*sizeof(PRECISION));
-			  gev[i]=x1;
-			  x1=alpha_r[j];
-			  memmove(alpha_r+i+1,alpha_r+i,(j-i)*sizeof(PRECISION));
-			  alpha_r[i]=x1;
-			  x1=alpha_i[j];
-			  memmove(alpha_i+i+1,alpha_i+i,(j-i)*sizeof(PRECISION));
-			  alpha_i[i]=x1;
-			  x1=beta[j];
-			  memmove(beta+i+1,beta+i,(j-i)*sizeof(PRECISION));
-			  beta[i]=x1;
-			  j+=1;
-			}
-		    else
-		      {
-			rtrn=BLAS_LAPACK_ERR;
-			break;
-		      }
-		  }
-		else
-		  j+=pairs[j] ? 2 : 1;
+            if (!info)
+              if (pairs[j])
+            {
+              memmove(pairs+i+2,pairs+i,(j-i)*sizeof(int));
+              pairs[i]=1; pairs[i+1]=-1;
+              x1=gev[j];
+              memmove(gev+i+2,gev+i,(j-i)*sizeof(PRECISION));
+              gev[i]=gev[i+1]=x1;
+              x1=alpha_r[j]; x2=alpha_r[j+1];
+              memmove(alpha_r+i+2,alpha_r+i,(j-i)*sizeof(PRECISION));
+              alpha_r[i]=x1; alpha_r[i+1]=x2;
+              x1=alpha_i[j]; x2=alpha_i[j+1];
+              memmove(alpha_i+i+2,alpha_i+i,(j-i)*sizeof(PRECISION));
+              alpha_i[i]=x1; alpha_i[i+1]=x2;
+              x1=beta[j]; x2=beta[j+1];
+              memmove(beta+i+2,beta+i,(j-i)*sizeof(PRECISION));
+              beta[i]=x1; beta[i+1]=x2;
+              j+=2;
+            }
+              else
+            {
+              memmove(pairs+i+1,pairs+i,(j-i)*sizeof(int));
+              pairs[i]=0;
+              x1=gev[j];
+              memmove(gev+i+1,gev+i,(j-i)*sizeof(PRECISION));
+              gev[i]=x1;
+              x1=alpha_r[j];
+              memmove(alpha_r+i+1,alpha_r+i,(j-i)*sizeof(PRECISION));
+              alpha_r[i]=x1;
+              x1=alpha_i[j];
+              memmove(alpha_i+i+1,alpha_i+i,(j-i)*sizeof(PRECISION));
+              alpha_i[i]=x1;
+              x1=beta[j];
+              memmove(beta+i+1,beta+i,(j-i)*sizeof(PRECISION));
+              beta[i]=x1;
+              j+=1;
+            }
+            else
+              {
+            rtrn=BLAS_LAPACK_ERR;
+            break;
+              }
+          }
+        else
+          j+=pairs[j] ? 2 : 1;
 
-	      }
+          }
 
-	    free(work);
+        free(work);
 
-	    if (rtrn == NO_ERR)
-	      {
-		if (wantq && !qqt) bTransposeInPlace(QQ,n);
-		if (wantz && !zzt) bTransposeInPlace(ZZ,n);
-		if (!sst) bTransposeInPlace(SS,n);
-		if (!ttt) bTransposeInPlace(TT,n);
-	      }
-	  }
+        if (rtrn == NO_ERR)
+          {
+        if (wantq && !qqt) bTransposeInPlace(QQ,n);
+        if (wantz && !zzt) bTransposeInPlace(ZZ,n);
+        if (!sst) bTransposeInPlace(SS,n);
+        if (!ttt) bTransposeInPlace(TT,n);
+          }
+      }
     }
 
   if (pairs) free(pairs);
@@ -2215,7 +2215,7 @@ int bSortQZ_real(int *select, PRECISION *QQ, PRECISION *ZZ, PRECISION *SS, PRECI
         0    1        L        X = L * L'
         1    1        U        X = U * U'
 
-     Upon successful exit T is upper triangular with positive diagonal and 
+     Upon successful exit T is upper triangular with positive diagonal and
      satisfies X = T' * T.  T overwrites X.
 
    Notes
@@ -2234,7 +2234,7 @@ int bCholesky(PRECISION *X, int m, int u, int t)
        for (j=m-1, pX=X+i+j*m; j > i; pX-=m, j--) *pX=0.0;
 
        for (k=i+1; k < m; k++) *pX-=pXi[k]*pXi[k];
-  
+
        if (*pX <= 0.0) return POSDEF_ERR;
        scale=1.0/(*pX=sqrt(*pX));
 
@@ -2261,8 +2261,8 @@ int bCholesky(PRECISION *X, int m, int u, int t)
        for (j++; j < m; j++)
         {
          pXj++;
-         pX++;        
-         for (k=(i-1)*m; k >= 0; k-=m) *pX-=pXi[k]*pXj[k]; 
+         pX++;
+         for (k=(i-1)*m; k >= 0; k-=m) *pX-=pXi[k]*pXj[k];
          *pX*=scale;
         }
       }
@@ -2271,7 +2271,7 @@ int bCholesky(PRECISION *X, int m, int u, int t)
     for (i=0, pXi=X; i < m; pXi+=m, i++)
       {
        for (j=0, pX=X+i; j < i; pX+=m, j++) *pX=0.0;
-       
+
        for (k=i-1; k >= 0; k--) *pX-=pXi[k]*pXi[k];
 
        if (*pX <= 0.0) return POSDEF_ERR;
@@ -2288,7 +2288,7 @@ int bCholesky(PRECISION *X, int m, int u, int t)
       }
     else
      for (b=m*m, i=m-1, pXi=X+i; i >= 0; pXi--, i--)
-      {     
+      {
        for (j=m-1, pX=X+i*m+j; j > i; pX--, j--) *pX=0.0;
 
        for (k=(i+1)*m; k < b; k+=m) *pX-=pXi[k]*pXi[k];
@@ -2320,7 +2320,7 @@ int bCholesky(PRECISION *X, int m, int u, int t)
      NO_ERR     : success
 
    Results
-                        x          y          z       
+                        x          y          z
        xt  yt  zt   (mr x ns)   (m x n)    (r x s)      computes
        ---------------------------------------------------------------------
         0   0   0   row major  row major  row major   x = y tensor z
@@ -2339,62 +2339,62 @@ int bMatrixTensor(PRECISION *x, PRECISION *y, PRECISION *z, int m, int n, int r,
   if (xt)
     if (zt)
       {
-	stride=m*r;
-	for (iy=m-1; iy >= 0; iy--)
-	  for (jy=n-1; jy >= 0; jy--)
-	    {
-	      t=y[yt ? iy+m*jy : n*iy+jy];
-	      l=(iy+1)*r-1 + ((jy+1)*s-1)*stride;
-	      z=pz;
-	      for (jz=s-1; jz >= 0; l-=stride, jz--)
-		for (iz=r-1, k=l; iz >= 0; z--, k--, iz--)
-		  x[k]=t*(*z);
-	    }
+    stride=m*r;
+    for (iy=m-1; iy >= 0; iy--)
+      for (jy=n-1; jy >= 0; jy--)
+        {
+          t=y[yt ? iy+m*jy : n*iy+jy];
+          l=(iy+1)*r-1 + ((jy+1)*s-1)*stride;
+          z=pz;
+          for (jz=s-1; jz >= 0; l-=stride, jz--)
+        for (iz=r-1, k=l; iz >= 0; z--, k--, iz--)
+          x[k]=t*(*z);
+        }
       }
     else
       {
-	stride=m*r;
-	for (iy=m-1; iy >= 0; iy--)
-	  for (jy=n-1; jy >= 0; jy--)
-	    {
-	      t=y[yt ? iy+m*jy : n*iy+jy];
-	      l=(iy+1)*r-1 + ((jy+1)*s-1)*stride;
-	      z=pz;
-	      for (iz=r-1; iz >= 0; l--, iz--)
-		for (jz=s-1, k=l; jz >= 0; z--, k-=stride, jz--)
-		  x[k]=t*(*z);
-	    }
+    stride=m*r;
+    for (iy=m-1; iy >= 0; iy--)
+      for (jy=n-1; jy >= 0; jy--)
+        {
+          t=y[yt ? iy+m*jy : n*iy+jy];
+          l=(iy+1)*r-1 + ((jy+1)*s-1)*stride;
+          z=pz;
+          for (iz=r-1; iz >= 0; l--, iz--)
+        for (jz=s-1, k=l; jz >= 0; z--, k-=stride, jz--)
+          x[k]=t*(*z);
+        }
       }
   else
     if (zt)
       {
-	stride=n*s;
-	for (iy=m-1; iy >= 0; iy--)
-	  for (jy=n-1; jy >= 0; jy--)
-	    {
-	      t=y[yt ? iy+m*jy : n*iy+jy];
-	      l=((iy+1)*r-1)*stride + (jy+1)*s-1;
-	      z=pz;
-	      for (jz=s-1; jz >= 0; l--, jz--)
-		for (iz=r-1, k=l; iz >= 0; z--, k-=stride, iz--)
-		  x[k]=t*(*z);
+    stride=n*s;
+    for (iy=m-1; iy >= 0; iy--)
+      for (jy=n-1; jy >= 0; jy--)
+        {
+          t=y[yt ? iy+m*jy : n*iy+jy];
+          l=((iy+1)*r-1)*stride + (jy+1)*s-1;
+          z=pz;
+          for (jz=s-1; jz >= 0; l--, jz--)
+        for (iz=r-1, k=l; iz >= 0; z--, k-=stride, iz--)
+          x[k]=t*(*z);
 
-	    }
+        }
       }
     else
       {
-	stride=n*s;
-	for (iy=m-1; iy >= 0; iy--)
-	  for (jy=n-1; jy >= 0; jy--)
-	    {
-	      t=y[yt ? iy+m*jy : n*iy+jy];
-	      l=((iy+1)*r-1)*stride + (jy+1)*s-1;
-	      z=pz;
-	      for (iz=r-1; iz >= 0; l-=stride, iz--)
-		for (jz=s-1, k=l; jz >= 0; z--, k--, jz--)
-		  x[k]=t*(*z);
+    stride=n*s;
+    for (iy=m-1; iy >= 0; iy--)
+      for (jy=n-1; jy >= 0; jy--)
+        {
+          t=y[yt ? iy+m*jy : n*iy+jy];
+          l=((iy+1)*r-1)*stride + (jy+1)*s-1;
+          z=pz;
+          for (iz=r-1; iz >= 0; l-=stride, iz--)
+        for (jz=s-1, k=l; jz >= 0; z--, k--, jz--)
+          x[k]=t*(*z);
 
-	    }
+        }
       }
   return NO_ERR;
 }

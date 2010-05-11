@@ -13,14 +13,14 @@
 #include "modify_for_mex.h"
 
 /*
-   Creates a standard initialization file from the matlab and specification file.  
+   Creates a standard initialization file from the matlab and specification file.
 */
 int main(int nargs, char **args)
 {
   TStateModel *model;
   FILE *f_out;
   char *filename, *fmt="init_%s.dat", *header="Initial: ";
-  
+
   dw_SetTerminalErrors(ALL_ERRORS);
   dw_SetVerboseErrors(ALL_ERRORS);
 
@@ -39,6 +39,6 @@ int main(int nargs, char **args)
   Write_VAR_Parameters(f_out,(char*)NULL,header,model);
   fclose(f_out);
   FreeStateModel(model);
-  
+
   return 0;
 }

@@ -59,20 +59,20 @@ TStateModel* Combine_matlab_standard(char *matlabfile, char *standardfile)
   IV=dw_CreateArray_int(nvars);
   id="//== npconst: nvar-by-1 ==//";
   if (!dw_SetFilePosition(f_in,id) || !dw_ReadArray(f_in,IV)) ReadError_VARio_matlab(id);
-  for (j=nvars-1; j >= 0; j--) 
-    if (IV[j] != npre) SimsZha=0; 
+  for (j=nvars-1; j >= 0; j--)
+    if (IV[j] != npre) SimsZha=0;
   V=dw_CreateArray_matrix(nvars);
   if (SimsZha)
     {
       for (j=nvars-1; j >= 0; j--)
-	V[j]=IdentityMatrix((TMatrix)NULL,npre);
+    V[j]=IdentityMatrix((TMatrix)NULL,npre);
     }
   else
     {
       id="//== Viconst: cell(nvar,1) and ncoef-by-n0const(i) for the ith cell (equation) ==//";
       if (!dw_SetFilePosition(f_in,id)) ReadError_VARio_matlab(id);
       for (j=0; j < nvars; j++)
-	if (!dw_ReadMatrix(f_in,V[j]=CreateMatrix(npre,IV[j]))) ReadError_VARio_matlab(id);
+    if (!dw_ReadMatrix(f_in,V[j]=CreateMatrix(npre,IV[j]))) ReadError_VARio_matlab(id);
     }
   dw_FreeArray(IV);
 
@@ -130,41 +130,41 @@ TStateModel* Combine_matlab_standard(char *matlabfile, char *standardfile)
 
   //=== Create Markov state variable ===//
   sv=CreateMarkovStateVariable_File(f_in,(char*)NULL,nobs);
-  
+
   //====== coefficient/variance state variables ======
   id="//== Controlling states variables for coefficients ==//";
-  if (!dw_SetFilePosition(f_in,id) || !dw_ReadArray(f_in,States=dw_CreateRectangularArray_int(nvars,sv->n_state_variables))) 
+  if (!dw_SetFilePosition(f_in,id) || !dw_ReadArray(f_in,States=dw_CreateRectangularArray_int(nvars,sv->n_state_variables)))
     ReadError_VARio_matlab(id);
   coef_sv=(TMarkovStateVariable ***)dw_CreateArray_array(nvars);
   for (j=nvars-1; j >= 0; j--)
     {
       for (n=i=0; i < sv->n_state_variables; i++)
-	if (States[j][i]) n++;
+    if (States[j][i]) n++;
       if (n > 0)
-	{
-	  coef_sv[j]=(TMarkovStateVariable **)dw_CreateArray_pointer(n,NULL);
-	  for (n=i=0; i < sv->n_state_variables; i++)
-	    if (States[j][i]) coef_sv[j][n++]=sv->state_variable[i];
-	}
+    {
+      coef_sv[j]=(TMarkovStateVariable **)dw_CreateArray_pointer(n,NULL);
+      for (n=i=0; i < sv->n_state_variables; i++)
+        if (States[j][i]) coef_sv[j][n++]=sv->state_variable[i];
+    }
     }
   coef_states=CreateTranslationMatrix(coef_sv,sv);
   dw_FreeArray(States);
   dw_FreeArray(coef_sv);
 
   id="//== Controlling states variables for variance ==//";
-  if (!dw_SetFilePosition(f_in,id) || !dw_ReadArray(f_in,States=dw_CreateRectangularArray_int(nvars,sv->n_state_variables))) 
+  if (!dw_SetFilePosition(f_in,id) || !dw_ReadArray(f_in,States=dw_CreateRectangularArray_int(nvars,sv->n_state_variables)))
     ReadError_VARio_matlab(id);
   var_sv=(TMarkovStateVariable ***)dw_CreateArray_array(nvars);
   for (j=nvars-1; j >= 0; j--)
     {
       for (n=i=0; i < sv->n_state_variables; i++)
-	if (States[j][i]) n++;
+    if (States[j][i]) n++;
       if (n > 0)
-	{
-	  var_sv[j]=(TMarkovStateVariable **)dw_CreateArray_pointer(n,NULL);
-	  for (n=i=0; i < sv->n_state_variables; i++)
-	    if (States[j][i]) var_sv[j][n++]=sv->state_variable[i];
-	}
+    {
+      var_sv[j]=(TMarkovStateVariable **)dw_CreateArray_pointer(n,NULL);
+      for (n=i=0; i < sv->n_state_variables; i++)
+        if (States[j][i]) var_sv[j][n++]=sv->state_variable[i];
+    }
     }
   var_states=CreateTranslationMatrix(var_sv,sv);
   dw_FreeArray(States);
@@ -228,7 +228,7 @@ void ReadConstantParameters(char *filename, TStateModel *model)
   for (j=p->nvars-1; j >= 0; j--)
     for (s=p->n_coef_states[j]-1; s >= 0; s--)
       for (i=p->nvars-1; i >= 0; i--)
-	ElementV(p->A0[j][s],i)=ElementM(A0,i,j);
+    ElementV(p->A0[j][s],i)=ElementM(A0,i,j);
   FreeMatrix(A0);
 
   // Aplus
@@ -237,8 +237,8 @@ void ReadConstantParameters(char *filename, TStateModel *model)
   for (j=p->nvars-1; j >= 0; j--)
     for (s=p->n_coef_states[j]-1; s >= 0; s--)
       for (i=p->npre-1; i >= 0; i--)
-	ElementV(p->Aplus[j][s],i)=ElementM(Aplus,i,j);
-  FreeMatrix(Aplus);  
+    ElementV(p->Aplus[j][s],i)=ElementM(Aplus,i,j);
+  FreeMatrix(Aplus);
 
   // Zeta
   for (j=p->nvars-1; j >= 0; j--)
@@ -269,13 +269,13 @@ TStateModel* CreateStateModel_VAR_matlab(char *filename)
   TMatrix PriorTransitionMatrix, S;
   int *IV, **IM;
   PRECISION scalar_Zeta_a_prior, scalar_Zeta_b_prior, lambda_prior;
-  int i, j, nvars, nlags, nexg, npre, nobs, nstates;                                                        
-  TMatrix *U, *V, *W;                                                 
-  TVector Zeta_a_prior, Zeta_b_prior; 
+  int i, j, nvars, nlags, nexg, npre, nobs, nstates;
+  TMatrix *U, *V, *W;
+  TVector Zeta_a_prior, Zeta_b_prior;
   TMatrix *A0_prior, *Aplus_prior;
-  TMatrix Y, X; 
-  int **coef_states, **var_states;  
-  TMarkovStateVariable *sv;                                                              
+  TMatrix Y, X;
+  int **coef_states, **var_states;
+  TMarkovStateVariable *sv;
 
   //=== Open file ===
   if (!(f_in=fopen(filename,"rt")))
@@ -308,11 +308,11 @@ TStateModel* CreateStateModel_VAR_matlab(char *filename)
   IV=dw_CreateArray_int(nvars);
   id="//== npconst: nvar-by-1 ==//";
   if (!dw_SetFilePosition(f_in,id) || !dw_ReadArray(f_in,IV)) ReadError_VARio_matlab(id);
-  for (j=nvars-1; j >= 0; j--) 
-    if (IV[j] != npre) 
+  for (j=nvars-1; j >= 0; j--)
+    if (IV[j] != npre)
       {
-	swz_fprintf_err("V[%d] not %d x %d\n",j,npre,npre);
-	exit(0);
+    swz_fprintf_err("V[%d] not %d x %d\n",j,npre,npre);
+    exit(0);
       }
   V=dw_CreateArray_matrix(nvars);
   for (j=nvars-1; j >= 0; j--)
@@ -344,29 +344,29 @@ TStateModel* CreateStateModel_VAR_matlab(char *filename)
     switch (IM[j][1])
       {
       case 1:
-	for (i=nstates-1; i >= 0; i--)
-	  coef_states[j][i]=var_states[j][i]=0;
-	break;
+    for (i=nstates-1; i >= 0; i--)
+      coef_states[j][i]=var_states[j][i]=0;
+    break;
       case 2:
         for (i=nstates-1; i >= 0; i--)
           {
-	    coef_states[j][i]=0;
-	    var_states[j][i]=i;
-	  }
-	break;
+        coef_states[j][i]=0;
+        var_states[j][i]=i;
+      }
+    break;
       case 3:
         for (i=nstates-1; i >= 0; i--)
           {
-	    coef_states[j][i]=i;
-	    var_states[j][i]=0;
-	  }
-	break;
+        coef_states[j][i]=i;
+        var_states[j][i]=0;
+      }
+    break;
       case 4:
-	swz_fprintf_err("Case %d not implimented.\n",4);
-	exit(0);
+    swz_fprintf_err("Case %d not implimented.\n",4);
+    exit(0);
       default:
-	swz_fprintf_err("Unknown type.\n");
-	exit(0);
+    swz_fprintf_err("Unknown type.\n");
+    exit(0);
       }
   dw_FreeArray(IM);
 
@@ -424,9 +424,9 @@ TStateModel* CreateStateModel_VAR_matlab(char *filename)
 /*       InitializeMatrix(Sigma,0.0); */
 /*       Inverse_LU(XX,A0_prior[j]); */
 /*       for (i=0; i < nstates; i++) */
-/* 	for (ii=0; ii < nvars; ii++) */
-/* 	  for (jj=0; jj < nvars; jj++) */
-/* 	    ElementM(Sigma,i*nvars+ii,i*nvars+jj)=ElementM(XX,ii,jj); */
+/*     for (ii=0; ii < nvars; ii++) */
+/*       for (jj=0; jj < nvars; jj++) */
+/*         ElementM(Sigma,i*nvars+ii,i*nvars+jj)=ElementM(XX,ii,jj); */
 /*       YY=TransposeProductMM((TMatrix)NULL,Ui[j],Sigma); */
 /*       ZZ=ProductMM((TMatrix)NULL,YY,Ui[j]); */
 
@@ -434,8 +434,8 @@ TStateModel* CreateStateModel_VAR_matlab(char *filename)
 /*       printf("File[%d]\n",j); dw_PrintMatrix(stdout,H0[j],"%le "); printf("\n"); */
 /*       max=0.0; */
 /*       for (ii=0; ii < RowM(ZZ); ii++) */
-/* 	  for (jj=0; jj < ColM(ZZ); jj++) */
-/* 	    if (max < fabs(ElementM(H0[j],ii,jj) - ElementM(ZZ,ii,jj))) max=fabs(ElementM(H0[j],ii,jj) - ElementM(ZZ,ii,jj)); */
+/*       for (jj=0; jj < ColM(ZZ); jj++) */
+/*         if (max < fabs(ElementM(H0[j],ii,jj) - ElementM(ZZ,ii,jj))) max=fabs(ElementM(H0[j],ii,jj) - ElementM(ZZ,ii,jj)); */
 /*       printf("H0: max[%d] = %le\n",j,max); */
 
 /*       FreeMatrix(ZZ); */
@@ -466,16 +466,16 @@ TStateModel* CreateStateModel_VAR_matlab(char *filename)
 /*       InitializeMatrix(Sigma,0.0); */
 /*       Inverse_LU(XX,Aplus_prior[j]); */
 /*       for (i=0; i < nstates; i++) */
-/* 	for (ii=0; ii < npre; ii++) */
-/* 	  for (jj=0; jj < npre; jj++) */
-/* 	    ElementM(Sigma,i*npre+ii,i*npre+jj)=ElementM(XX,ii,jj); */
+/*     for (ii=0; ii < npre; ii++) */
+/*       for (jj=0; jj < npre; jj++) */
+/*         ElementM(Sigma,i*npre+ii,i*npre+jj)=ElementM(XX,ii,jj); */
 /*       YY=TransposeProductMM((TMatrix)NULL,Ui[j],Sigma); */
 /*       ZZ=ProductMM((TMatrix)NULL,YY,Ui[j]); */
 
 /*       max=0.0; */
 /*       for (ii=0; ii < RowM(ZZ); ii++) */
-/* 	  for (jj=0; jj < ColM(ZZ); jj++) */
-/* 	    if (max < fabs(ElementM(H0[j],ii,jj) - ElementM(ZZ,ii,jj))) max=fabs(ElementM(H0[j],ii,jj) - ElementM(ZZ,ii,jj)); */
+/*       for (jj=0; jj < ColM(ZZ); jj++) */
+/*         if (max < fabs(ElementM(H0[j],ii,jj) - ElementM(ZZ,ii,jj))) max=fabs(ElementM(H0[j],ii,jj) - ElementM(ZZ,ii,jj)); */
 /*       printf("max[%d] = %le\n",j,max); */
 
 /*       FreeMatrix(ZZ); */
