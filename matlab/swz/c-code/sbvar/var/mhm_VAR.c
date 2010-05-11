@@ -14,7 +14,7 @@
 
 #include "modify_for_mex.h"
 
-  // Compute psudo-inverse of mhm->variance
+/*    // Compute psudo-inverse of mhm->variance   ansi-c*/
 static void PsudoInverse(TMatrix X, TMatrix Y)
 {
   int i, j, k;
@@ -73,7 +73,7 @@ T_MHM* AddStateModel(TStateModel *model, T_MHM *mhm)
 
   if (!mhm) mhm=CreateMHM();
 
-  // Allocate memory
+/*    // Allocate memory   ansi-c*/
   mhm->mean=CreateVector(nf_var);
   mhm->posterior_mode_VAR=CreateVector(nf_var);
   mhm->variance=CreateMatrix(nf_var,nf_var);
@@ -87,7 +87,7 @@ T_MHM* AddStateModel(TStateModel *model, T_MHM *mhm)
   for (i=dw_DimA(model->sv->ba)-1; i >= 0; i--)
     mhm->BaseAlpha[i]=CreateVector(DimV(model->sv->ba[i]));
 
-  // model information
+/*    // model information   ansi-c*/
   mhm->model=model;
   Setup_WZ_Normalization((T_VAR_Parameters*)mhm->model->theta,((T_VAR_Parameters*)mhm->model->theta)->A0);
   ConvertThetaToFreeParameters(model,pElementV(mhm->posterior_mode_VAR));
@@ -95,7 +95,7 @@ T_MHM* AddStateModel(TStateModel *model, T_MHM *mhm)
   mhm->log_prior_at_mode=LogPrior(model);
   mhm->log_posterior_at_mode=mhm->log_likelihood_at_mode + mhm->log_prior_at_mode;
 
-  // Center
+/*    // Center   ansi-c*/
   mhm->center=mhm->posterior_mode_VAR;
 
   return mhm;
@@ -115,7 +115,7 @@ T_MHM* CreateMHM(void)
   int i, j;
   T_MHM* mhm;
 
-  // Allocate structure
+/*    // Allocate structure   ansi-c*/
   mhm=(T_MHM*)malloc(sizeof(T_MHM));
 
   mhm->alpha_scales=(TVector)NULL;
@@ -141,7 +141,7 @@ T_MHM* CreateMHM(void)
   mhm->parameter_header=(char*)NULL;
   mhm->mhm_filename=(char*)NULL;
 
-  // Default values
+/*    // Default values   ansi-c*/
   mhm->n_burn1=100000;
   mhm->n_burn2=0;
   mhm->n_mean_variance=200000;
@@ -203,7 +203,7 @@ void ComputeMeanVariance_MHM(T_MHM *mhm, int iterations, int period)
   InitializeVector(mhm->mean,0.0);
   InitializeMatrix(mhm->variance,0.0);
 
-  // loop and accumulate 1st and 2nd non-central moments
+/*    // loop and accumulate 1st and 2nd non-central moments   ansi-c*/
   printf("Beginning mean and variance estimation -- %d iterations.\n",iterations);
   begin_time=time((time_t*)NULL);
   for (count=1; count <= iterations; count++)
@@ -233,23 +233,23 @@ void ComputeMeanVariance_MHM(T_MHM *mhm, int iterations, int period)
     }
     }
 
-  // compute 1st and 2nd central moments for normal terms
+/*    // compute 1st and 2nd central moments for normal terms   ansi-c*/
   ProductVS(mhm->mean,mhm->mean,1.0/(PRECISION)iterations);
   ProductMS(mhm->variance,mhm->variance,1.0/(PRECISION)iterations);
   OuterProduct(S,mhm->mean,mhm->mean);
   SubtractMM(mhm->variance,mhm->variance,S);
 
-  // Psudo variance
+/*    // Psudo variance   ansi-c*/
   SubtractVV(mhm->free_parameters_VAR,mhm->mean,mhm->posterior_mode_VAR);
   OuterProduct(S,mhm->free_parameters_VAR,mhm->free_parameters_VAR);
   AddMM(mhm->variance,mhm->variance,S);
 
-  // Compute psudo-inverse of mhm->variance
+/*    // Compute psudo-inverse of mhm->variance   ansi-c*/
   PsudoInverse(mhm->inverse_variance,mhm->variance);
 
   FreeMatrix(S);
 
-  // compute base alpha's for Dirichlet distribution
+/*    // compute base alpha's for Dirichlet distribution   ansi-c*/
   for (i=dw_DimA(mhm->BaseAlpha)-1; i >= 0; i--)
     ProductVS(mhm->BaseAlpha[i],mhm->BaseAlpha[i],1.0/(PRECISION)iterations);
   for (i=dw_DimA(mhm->BaseAlpha)-1; i >= 0; i--)
@@ -269,7 +269,7 @@ void ComputeMeanVariance_MHM(T_MHM *mhm, int iterations, int period)
     ElementV(mhm->BaseAlpha[i],j)=max*ElementV(mhm->BaseAlpha[i],j)+inc;
     }
 
-  // Create Alpha's
+/*    // Create Alpha's   ansi-c*/
   mhm->Alpha=dw_CreateArray_array(DimV(mhm->alpha_scales));
   for (i=dw_DimA(mhm->Alpha)-1; i >= 0; i--)
     {
@@ -341,17 +341,17 @@ void UpdateModifiedHarmonicMean(T_MHM *mhm, int n_singular)
   PRECISION quadratic_form, log_likelihood, log_likelihood_states_integrated_out,
     log_prior_theta, log_prior_Q, log_posterior, difference;
 
-  // Increment total number of observations
+/*    // Increment total number of observations   ansi-c*/
   mhm->N++;
 
-  // Compute likelihoods and priors
+/*    // Compute likelihoods and priors   ansi-c*/
   log_likelihood=LogLikelihood(mhm->model);
   log_likelihood_states_integrated_out=LogLikelihood_StatesIntegratedOut(mhm->model);
   log_prior_theta=LogPrior_Theta(mhm->model);
   log_prior_Q=LogPrior_Q(mhm->model);
   log_posterior=log_likelihood_states_integrated_out + log_prior_theta + log_prior_Q;
 
-  // Average change
+/*    // Average change   ansi-c*/
   if (mhm->N > 1)
     {
       mhm->sum+=(difference=log_posterior - mhm->old_log_posterior);
@@ -359,29 +359,29 @@ void UpdateModifiedHarmonicMean(T_MHM *mhm, int n_singular)
     }
   mhm->old_log_posterior=log_posterior;
 
-  // Maximum likelihoods and priors
+/*    // Maximum likelihoods and priors   ansi-c*/
   if (log_likelihood_states_integrated_out > mhm->max_log_likelihood) mhm->max_log_likelihood=log_likelihood_states_integrated_out;
   if (log_posterior > mhm->max_log_posterior) mhm->max_log_posterior=log_posterior;
 
-  // Compute quadratic form
+/*    // Compute quadratic form   ansi-c*/
   ConvertThetaToFreeParameters(mhm->model,pElementV(mhm->free_parameters_VAR));
   SubtractVV(mhm->free_parameters_VAR,mhm->free_parameters_VAR,mhm->center);
    quadratic_form=InnerProductSymmetric(mhm->free_parameters_VAR,mhm->inverse_variance);
 
   /*** Standard output ***/
-  // Print log posterior and quadratic form
+/*    // Print log posterior and quadratic form   ansi-c*/
   fprintf(mhm->f_out,"%le %le",log_posterior,quadratic_form);
-  // Print Dirichlet PDF's
+/*    // Print Dirichlet PDF's   ansi-c*/
   for (j=0; j < dw_DimA(mhm->Alpha); j++)
     fprintf(mhm->f_out," %le",LogIndependentDirichlet_pdf(mhm->model->sv->ba,mhm->Alpha[j]));
-  // Print number of singular varinances
+/*    // Print number of singular varinances   ansi-c*/
   fprintf(mhm->f_out," %d\n",Get_VAR_Improper_Distribution_Counter()-n_singular);
 
   /*** States not integrated out output ***/
-  //if (mhm->f_states_not_integrated_out)
-  //  fprintf(mhm->f_states_not_integrated_out,"%le %le %le %le %le\n",quadratic_form,log_likelihood,log_prior_theta,log_prior_Q,log_posterior);
+/*    //if (mhm->f_states_not_integrated_out)   ansi-c*/
+/*    //  fprintf(mhm->f_states_not_integrated_out,"%le %le %le %le %le\n",quadratic_form,log_likelihood,log_prior_theta,log_prior_Q,log_posterior);   ansi-c*/
 
-  // Tally states
+/*    // Tally states   ansi-c*/
   for (j=mhm->model->sv->nstates-1; j >= 0; j--) mhm->states[j]=0;
   for (j=mhm->model->sv->nobs; j > 1; j--) mhm->states[mhm->model->sv->S[j]]++;
   for (j=mhm->model->sv->nstates-1; j >= 0; j--) fprintf(mhm->f_out_regime_counts,"%d ",mhm->states[j]);
@@ -527,7 +527,7 @@ int ReadMeanVariance(FILE *f_in, T_MHM *mhm)
   if (!dw_SetFilePosition(f_in,id) || !dw_ReadArray(f_in,mhm->BaseAlpha))
     return ReadError_MHMio(id);
 
-  // Create alpha
+/*    // Create alpha   ansi-c*/
   mhm->Alpha=dw_CreateArray_array(DimV(mhm->alpha_scales));
   for (i=dw_DimA(mhm->Alpha)-1; i >= 0; i--)
     {

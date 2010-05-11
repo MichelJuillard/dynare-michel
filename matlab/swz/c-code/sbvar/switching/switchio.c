@@ -146,16 +146,16 @@ TMarkovStateVariable* ReadMarkovSpecification_SV(FILE *f_in, char *idstring, int
   int *FreeDim, **NonZeroIndex;
   TMarkovStateVariable *sv=(TMarkovStateVariable*)NULL, **sv_array;
 
-  // Get nobs if necessary
+/*    // Get nobs if necessary   ansi-c*/
   if ((nobs > 0) || !(err=ReadInteger(f_in,idformat="//== Number observations ==//",trailer,&nobs)))
     {
-      // Construct trailer
+/*        // Construct trailer   ansi-c*/
       if (idstring[0])
     sprintf(trailer=(char*)malloc(24+strlen(idstring)),"for state_variable%s ==//",idstring);
       else
     strcpy(trailer=(char*)malloc(5),"==//");
 
-      // Read number of state variables
+/*        // Read number of state variables   ansi-c*/
       if (!(err=ReadInteger(f_in,idformat="//== Number independent state variables %s",trailer,&n_state_variables)))
     {
       if (n_state_variables > 1)
@@ -176,10 +176,10 @@ TMarkovStateVariable* ReadMarkovSpecification_SV(FILE *f_in, char *idstring, int
         }
       else
         {
-          // Read number states
+/*            // Read number states   ansi-c*/
           if (!(err=ReadInteger(f_in,idformat="//== Number states %s",trailer,&nstates)))
         {
-          // Read number of lags to encode
+/*            // Read number of lags to encode   ansi-c*/
           switch (err=ReadInteger(f_in,idformat="//== Number of lags encoded %s",trailer,&nlags_encoded))
             {
             case SWITCHIO_ERROR_READING_DATA:
@@ -193,7 +193,7 @@ TMarkovStateVariable* ReadMarkovSpecification_SV(FILE *f_in, char *idstring, int
               break;
             }
 
-              // Read number of base states
+/*                // Read number of base states   ansi-c*/
               if (nlags_encoded > 0)
             {
               if (err=ReadInteger(f_in,idformat="//== Number of base states %s",trailer,&nbasestates))
@@ -206,21 +206,21 @@ TMarkovStateVariable* ReadMarkovSpecification_SV(FILE *f_in, char *idstring, int
                 }
             }
 
-              // Read prior
+/*                // Read prior   ansi-c*/
               Prior=CreateMatrix(nstates,nstates);
               if (!(err=ReadMatrix(f_in,idformat="//== Prior %s",trailer,Prior)))
             {
-              // Read free Dirichlet dimensions
+/*                // Read free Dirichlet dimensions   ansi-c*/
               if (!(err=ReadInteger(f_in,idformat="//== Number free Dirichlet variables %s",trailer,&i)))
                 {
                   FreeDim=dw_CreateArray_int(i);
                   if (!(err=ReadIntArray(f_in,idformat="//== Free Dirichlet dimensions %s",trailer,FreeDim)))
                 {
-                  // Read free Dirichlet index
+/*                    // Read free Dirichlet index   ansi-c*/
                   NonZeroIndex=dw_CreateRectangularArray_int(nstates,nstates);
                   if (!(err=ReadIntArray(f_in,idformat="//== Free Dirichlet index %s",trailer,NonZeroIndex)))
                     {
-                      // Read free Dirichlet multipliers
+/*                        // Read free Dirichlet multipliers   ansi-c*/
                       MQ=CreateMatrix(nstates,nstates);
                       if (!(err=ReadMatrix(f_in,idformat="//== Free Dirichlet multipliers %s",trailer,MQ)))
                     if (sv=CreateMarkovStateVariable_Single(nstates,nobs,Prior,FreeDim,NonZeroIndex,MQ))
@@ -258,7 +258,7 @@ int WriteMarkovSpecification_SV(FILE *f_out, TMarkovStateVariable *sv, char *ids
 
   if (idstring[0])
     {
-      // 24 characters in "for state_variable ==//" plus null character
+/*        // 24 characters in "for state_variable ==//" plus null character   ansi-c*/
       trailer=(char*)malloc(24+strlen(idstring));
       sprintf(trailer,"for state_variable%s ==//",idstring);
 
@@ -397,7 +397,7 @@ int ReadTransitionMatrices_SV(FILE *f_in, TMarkovStateVariable* sv, char *header
     }
   else
     {
-      // Read transition matrix
+/*        // Read transition matrix   ansi-c*/
       if (!header) header="";
       format="//== %sTransition matrix%s ==//";
       sprintf(idbuffer=(char*)malloc(strlen(header) + strlen(format) + strlen(idstring) - 3),format,header,idstring);
@@ -412,7 +412,7 @@ int ReadTransitionMatrices_SV(FILE *f_in, TMarkovStateVariable* sv, char *header
       free(idbuffer);
       if (!err)
     {
-      // Scale the columns of Q - loose requirement on sumation to one
+/*        // Scale the columns of Q - loose requirement on sumation to one   ansi-c*/
       for (j=sv->nstates-1; j >= 0; j--)
         {
           for (sum=0.0, i=sv->nstates-1; i >= 0; i--)
@@ -432,7 +432,7 @@ int ReadTransitionMatrices_SV(FILE *f_in, TMarkovStateVariable* sv, char *header
         ElementM(sv->Q,i,j)*=sum;
         }
 
-      // Update
+/*        // Update   ansi-c*/
       if (!Update_B_from_Q_SV(sv))
         {
           dw_UserError("Transition matrices do not satisfy restrictions");
@@ -520,7 +520,7 @@ int ReadBaseTransitionMatrices_SV(FILE *f_in, TMarkovStateVariable* sv, char *he
     }
   else
     {
-      // Read transition matrix
+/*        // Read transition matrix   ansi-c*/
       Q=CreateMatrix(sv->nbasestates,sv->nbasestates);
       if (!header) header="";
       format="//== %sBase transition matrix%s ==//";
@@ -536,7 +536,7 @@ int ReadBaseTransitionMatrices_SV(FILE *f_in, TMarkovStateVariable* sv, char *he
       free(idbuffer);
       if (!err)
     {
-      // Scale the columns of Q - loose requirement on sumation to one
+/*        // Scale the columns of Q - loose requirement on sumation to one   ansi-c*/
       for (j=sv->nbasestates-1; j >= 0; j--)
         {
           for (sum=0.0, i=sv->nbasestates-1; i >= 0; i--)
@@ -558,10 +558,10 @@ int ReadBaseTransitionMatrices_SV(FILE *f_in, TMarkovStateVariable* sv, char *he
         ElementM(Q,i,j)*=sum;
         }
 
-      // Convert base transition matrix to full transition matrix.
+/*        // Convert base transition matrix to full transition matrix.   ansi-c*/
           ConvertBaseTransitionMatrix(sv->Q,Q,sv->nlags_encoded);
 
-      // Update
+/*        // Update   ansi-c*/
       if (!Update_B_from_Q_SV(sv))
         {
           dw_UserError("Transition matrices do not satisfy restrictions");
@@ -910,7 +910,7 @@ int ReadStates(FILE *f, char *filename, char *header, TStateModel *model)
     ReadError(format,header,err);
   else
     {
-      // Check states and propagate
+/*        // Check states and propagate   ansi-c*/
       for (i=model->sv->nstates; i >= 0; i--)
     if ((model->sv->S[i] < 0) || (model->sv->S[i] >= model->sv->nstates))
       {
@@ -1016,13 +1016,13 @@ TMarkovStateVariable* CreateMarkovStateVariable_File(FILE *f, char *filename, in
   TMatrix* restrictions;
   TMarkovStateVariable **sv, *rtrn=(TMarkovStateVariable*)NULL, *tmp;
 
-  // Open file if necessary
+/*    // Open file if necessary   ansi-c*/
   if (!f)
     f_in=dw_OpenTextFile(filename);
   else
     f_in=f;
 
-  // Check for Flat Independent Markov States and Simple Restrictions
+/*    // Check for Flat Independent Markov States and Simple Restrictions   ansi-c*/
   if (dw_SetFilePosition(f_in,"//== Flat Independent Markov States and Simple Restrictions ==//"))
     {
       if (nobs <= 0)
@@ -1128,7 +1128,7 @@ TMarkovStateVariable* CreateMarkovStateVariable_File(FILE *f, char *filename, in
     rtrn=sv[0];
     }
 
-  // Close file if necessary
+/*    // Close file if necessary   ansi-c*/
   if (!f) fclose(f_in);
 
   return rtrn;

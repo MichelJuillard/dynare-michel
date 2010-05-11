@@ -10,7 +10,7 @@
 
 #include "modify_for_mex.h"
 
-//=== Static routines ===
+/*  //=== Static routines ===   ansi-c*/
 static void gser(PRECISION *gamser, PRECISION a, PRECISION x, PRECISION *gln);
 static void gcf(PRECISION *gammcf, PRECISION a, PRECISION x, PRECISION *gln);
 static PRECISION gammp(PRECISION a, PRECISION x);
@@ -21,9 +21,9 @@ static PRECISION gammp(PRECISION a, PRECISION x);
 /*
    Flag controling which uniform random number to choose
 */
-//#define USE_NR1_RNG
+/*  //#define USE_NR1_RNG   ansi-c*/
 #define USE_NR2_RNG
-//#define USE_IMSL_RNG
+/*  //#define USE_IMSL_RNG   ansi-c*/
 
 #if defined (USE_IMSL_RNG)
 #include <imsls.h>

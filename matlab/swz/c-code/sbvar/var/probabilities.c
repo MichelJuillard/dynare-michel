@@ -49,36 +49,36 @@ int main(int nargs, char **args)
   int s, t;
   FILE *f_out;
 
-  // specification filename
+/*    // specification filename   ansi-c*/
   if (buffer=dw_ParseString_String(nargs,args,"fs",(char*)NULL))
     strcpy(spec=(char*)malloc(strlen(buffer)+1),buffer);
 
-  // output filename
+/*    // output filename   ansi-c*/
   if (buffer=dw_ParseString_String(nargs,args,"fo",(char*)NULL))
     strcpy(out=(char*)malloc(strlen(buffer)+1),buffer);
 
-  // parameter filename
+/*    // parameter filename   ansi-c*/
   if (buffer=dw_ParseString_String(nargs,args,"fp",(char*)NULL))
     strcpy(parm=(char*)malloc(strlen(buffer)+1),buffer);
 
-  // header
+/*    // header   ansi-c*/
   if (buffer=dw_ParseString_String(nargs,args,"ph",(char*)NULL))
     strcpy(head=(char*)malloc(strlen(buffer)+1),buffer);
 
-  // file tag
+/*    // file tag   ansi-c*/
   if (buffer=dw_ParseString_String(nargs,args,"ft",(char*)NULL))
     {
       fmt="est_final_%s.dat";
 
-      // specification filename
+/*        // specification filename   ansi-c*/
       if (!spec)
     sprintf(spec=(char*)malloc(strlen(fmt) + strlen(buffer) - 1),fmt,buffer);
 
-      // parameter filename
+/*        // parameter filename   ansi-c*/
       if (!parm)
     sprintf(parm=(char*)malloc(strlen(fmt) + strlen(buffer) - 1),fmt,buffer);
 
-      // output filename
+/*        // output filename   ansi-c*/
       if (!out)
     {
       fmt="probabilities_%s.dat";

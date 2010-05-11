@@ -201,7 +201,7 @@ TMatrix dw_UniformOrthogonal(TMatrix Q)
     }
 
   /* Uncomment to use IMSL implementation */
-  //imsls_d_random_orthogonal_matrix(RowM(Q),IMSLS_RETURN_USER,pElementM(Q),0);
+/*    //imsls_d_random_orthogonal_matrix(RowM(Q),IMSLS_RETURN_USER,pElementM(Q),0);   ansi-c*/
   /**/
 
 

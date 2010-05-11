@@ -5,7 +5,7 @@
 
 #include <stdio.h>
 
-// Flag codes.  See ParseDelimitedString() for explanation.
+/*  // Flag codes.  See ParseDelimitedString() for explanation.   ansi-c*/
 #define REMOVE_EMPTY_FIELDS           0x00000001
 #define ALLOW_QUOTED_TEXT             0x00000002
 #define STRIP_LEADING_WHITESPACE      0x00000004
@@ -26,7 +26,7 @@ char** dw_ReadDelimitedLine(FILE *f, char delimiter, int flag);
 char*** dw_ReadDelimitedFile(FILE *f, char* filename, char delimiter, int flag);
 int dw_PrintDelimitedArray(FILE *f, void* array, char delimiter);
 
-//int dw_ReadDelimitedField(FILE *f, char **buffer, int *n);
+/*  //int dw_ReadDelimitedField(FILE *f, char **buffer, int *n);   ansi-c*/
 int dw_ReadDelimitedField(FILE *f, int delimiter, int terminal, int flag, char **buffer, int *n);
 
 char* dw_DuplicateString(char *buffer);

@@ -123,7 +123,7 @@ void SetupSpherical_Table(int n, PRECISION *table, int m)
   SPHERICAL_TABLE_LENGTH=m;
   memcpy(SPHERICAL_TABLE_VALUES,table,(m+1)*sizeof(PRECISION));
 
-  // Check
+/*    // Check   ansi-c*/
   if (SPHERICAL_TABLE_VALUES[0] != 0.0)
     {
       printf("First entry of inverse cumulative spherical table must be zero\n");

@@ -14,7 +14,7 @@
 
 #include "modify_for_mex.h"
 
-//================================== Macros ===================================//
+/*  //================================== Macros ===================================//   ansi-c*/
 #define dw_ElementSizeA(a)                (dw_SpecsA(a)->size)
 #define dw_GetOffsetA(a)                  (dw_SpecsA(a)->offset)
 #define dw_IsSameTypeA(a1,a2)             (!memcmp(dw_SpecsA(a1),dw_SpecsA(a2),sizeof(TElementSpecification)))

@@ -109,7 +109,7 @@ Read Routine
 
 #include <stdio.h>
 
-//=========================== TElementSpecification ===========================//
+/*  //=========================== TElementSpecification ===========================//   ansi-c*/
 #define dw_ARRAY_USE_MEMCPY      0x00000001
 #define dw_ARRAY_POINTER         0x00000002
 #define dw_ARRAY_ARRAY           0x00000004
@@ -140,62 +140,62 @@ extern TElementSpecification dw_CharSpecs;
 extern TElementSpecification dw_StringSpecs;
 extern TElementSpecification dw_ArraySpecs;
 extern TElementSpecification dw_PointerSpecs;
-//=============================================================================//
+/*  //=============================================================================//   ansi-c*/
 
-//=== Macros ===
+/*  //=== Macros ===   ansi-c*/
 #define dw_DimA(a) (((int*)(a))[-1])
 #define dw_SpecsA(a) (*((TElementSpecification**)(((char*)(a))-(sizeof(TElementSpecification*)+sizeof(int)))))
 #define dw_IsArrayA(a) (dw_SpecsA(a)->flag & dw_ARRAY_ARRAY)
 
-//=== Destructor ===//
+/*  //=== Destructor ===//   ansi-c*/
 void  dw_FreeArray(void* a);
 
-//=== Constructors ===//
+/*  //=== Constructors ===//   ansi-c*/
 void* dw_CreateArray(TElementSpecification *specs, int dim);
 void* dw_CreateMultidimensionalArray(TElementSpecification *specs, int depth, int *dim);
 void* dw_CreateMultidimensionalArrayList(TElementSpecification *specs, int depth, ...);
 
-//=== Routines ===//
+/*  //=== Routines ===//   ansi-c*/
 void* dw_CopyArray(void* d, void* s);
 int dw_PrintArray(FILE* f, void* a, char* format);
 int dw_ReadArray(FILE* f, void* a);
 
-// Array arrays
+/*  // Array arrays   ansi-c*/
 #define dw_CreateArray_array(dim) dw_CreateArray(&dw_ArraySpecs,dim)
 
-// Pointer arrays
+/*  // Pointer arrays   ansi-c*/
 #define dw_CreateArray_pointer(dim,destructor)  dw_CreateArray(CreateArraySpecification_pointer(destructor),dim)
 void DefaultPointerConstructor(void*);
 
-// String arrays
+/*  // String arrays   ansi-c*/
 #define dw_CreateArray_string(dim)  (char**)dw_CreateArray(&dw_StringSpecs,dim)
 #define dw_CreateMultidimensionalArray_string(depth,dim) dw_CreateMultidimensionalArray(&dw_StringSpecs,depth,dim)
 void* dw_CreateMultidimensionalArrayList_string(int depth, ...);
 #define dw_CreateRectangularArray_string(row,col) (char***)dw_CreateMultidimensionalArrayList_string(2,row,col)
 #define dw_InitializeArray_string(a,x)  dw_InitializeArray(a,x)
 
-// Integer arrays
+/*  // Integer arrays   ansi-c*/
 #define dw_CreateArray_int(dim) (int*)dw_CreateArray(&dw_IntSpecs,dim)
 #define dw_CreateMultidimensionalArray_int(depth,dim)  dw_CreateMultidimensionalArray(&dw_IntSpecs,depth,dim)
 void* dw_CreateMultidimensionalArrayList_int(int depth, ...);
 #define dw_CreateRectangularArray_int(row,col) (int**)dw_CreateMultidimensionalArrayList_int(2,row,col)
 int dw_InitializeArray_int(void *a, int x);
 
-// Double arrays
+/*  // Double arrays   ansi-c*/
 #define dw_CreateArray_double(dim) (double*)dw_CreateArray(&dw_DoubleSpecs,dim)
 #define dw_CreateMultidimensionalArray_double(depth,dim) dw_CreateMultidimensionalArray(&dw_DoubleSpecs,depth,dim)
 void* dw_CreateMultidimensionalArrayList_double(int depth, ...);
 #define dw_CreateRectangularArray_double(row,col) (double**)dw_CreateMultidimensionalArrayList_double(2,row,col)
 int dw_InitializeArray_double(void *a, double x);
 
-// Float arrays
+/*  // Float arrays   ansi-c*/
 #define dw_CreateArray_float(dim) (float*)dw_CreateArray(&dw_FloatSpecs,dim)
 #define dw_CreateMultidimensionalArray_float(depth,dim) dw_CreateMultidimensionalArray(&dw_FloatSpecs,depth,dim)
 void* dw_CreateMultidimensionalArrayList_float(int depth, ...);
 #define dw_CreateRectangularArray_float(row,col) (float**)dw_CreateMultidimensionalArrayList_float(2,row,col)
 int dw_InitializeArray_float(void *a, float x);
 
-// Character arrays
+/*  // Character arrays   ansi-c*/
 #define dw_CreateArray_char(dim) (float*)dw_CreateArray(&dw_CharSpecs,dim)
 #define dw_CreateMultidimensionalArray_char(depth,dim) dw_CreateMultidimensionalArray(&dw_CharSpecs,depth,dim)
 void* dw_CreateMultidimensionalArrayList_char(int depth, ...);

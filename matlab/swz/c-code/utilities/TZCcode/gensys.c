@@ -45,8 +45,8 @@
 
 #include "modify_for_mex.h"
 
-//----- NOTE: We can't replace MKL_Complex16 with a different name because the Intel Lapack uses MKL_Complex16.
-//-----       The only way to do this is to overhaul the code and put a wrapper function on each Intel Lapack function.
+/*  //----- NOTE: We can't replace MKL_Complex16 with a different name because the Intel Lapack uses MKL_Complex16.   ansi-c*/
+/*  //-----       The only way to do this is to overhaul the code and put a wrapper function on each Intel Lapack function.   ansi-c*/
 static int selctg(MKL_Complex16 *alpha, MKL_Complex16 *beta);
 static int qz(MKL_Complex16 *a, MKL_Complex16 *b, MKL_Complex16 *q, MKL_Complex16 *z, int n);
 static MKL_Complex16* CreateComplexMatrix5RealMatrix(TSdmatrix *X_dm);
@@ -57,13 +57,13 @@ static TSdzmatrix *SubComplexMatrix2Zmatrix(TSdzmatrix *X_dzm, MKL_Complex16 *Z,
 static void copy_eigenvalues(TSdzmatrix *Gev_dzm, MKL_Complex16 *a, MKL_Complex16 *b);
 static int compute_svd(MKL_Complex16 *a, MKL_Complex16 **u, double **d, MKL_Complex16 **v, int m, int n);
 static int compute_norm(MKL_Complex16 *a, double **d, int m, int n);
-//--- 03/01/06 TZ.  Commented out to be consistent with the CAS 3/10/04 correction.
-// static int compute_normx(MKL_Complex16 *a, MKL_Complex16 *b, MKL_Complex16 *zwt, MKL_Complex16 *ueta, double **normx, int nunstab, int psin, int n, int bigev);
+/*  //--- 03/01/06 TZ.  Commented out to be consistent with the CAS 3/10/04 correction.   ansi-c*/
+/*  // static int compute_normx(MKL_Complex16 *a, MKL_Complex16 *b, MKL_Complex16 *zwt, MKL_Complex16 *ueta, double **normx, int nunstab, int psin, int n, int bigev);   ansi-c*/
 static void cblas_zdupe(int m, int n, MKL_Complex16 *a, int lda, MKL_Complex16 *b, int ldb);
 static void cblas_zdscali(int n, double *a, int lda, MKL_Complex16 *b, int ldb);
 static void cblas_zdscale(int n, double *a, int lda, MKL_Complex16 *b, int ldb);
 static void cblas_zdpsb(int m, int n, MKL_Complex16 *a, int lda, MKL_Complex16 *b, int ldb, MKL_Complex16 *c, int ldc);
-//
+/*  //   ansi-c*/
 static void InitializeConstantMLK_Complex16(MKL_Complex16 *x_clx,  const int _n, const double c);
 static void InitializeConstantDouble(double *x_p,  const int _n, const double c);
 static void ConverteZeroSquareMatrix2RealDiagonalMLK_Complex16(MKL_Complex16 *x_pc,  const int _n, const double c);
@@ -71,59 +71,59 @@ static void ConverteZeroSquareMatrix2RealDiagonalMLK_Complex16(MKL_Complex16 *x_
 
 TSgensys *CreateTSgensys(TFlinratexp *func, const int _n, const int _m, const int _k, const double div)
 {
-   //_n is the number of stacked variables (endogenous, Lagurangian multiplier, expected multiplier, etc.).
-   //_m is the number of exogenous shocks.
-   //_k is the number of expectational errors.
-   //div is the dividing number to determine what constitutes an unstable root.  If div<1.0, a div>1.0 is calculated mechanically.
+/*     //_n is the number of stacked variables (endogenous, Lagurangian multiplier, expected multiplier, etc.).   ansi-c*/
+/*     //_m is the number of exogenous shocks.   ansi-c*/
+/*     //_k is the number of expectational errors.   ansi-c*/
+/*     //div is the dividing number to determine what constitutes an unstable root.  If div<1.0, a div>1.0 is calculated mechanically.   ansi-c*/
    TSgensys *gensys_ps = tzMalloc(1, TSgensys);
 
-   //=== Output arguments.
-   gensys_ps->Theta_dm = CreateMatrix_lf(_n, _n);  //n-by-n.
-   gensys_ps->c_dv = CreateVector_lf(_n);   //n-by-1.
-   gensys_ps->Impact_dm = CreateMatrix_lf(_n, _m);  //n-by-m.
-   gensys_ps->Fmat_dzm = (TSdzmatrix *)NULL;   //nunstab-by-nunstab z matrix.  Initialized to NULL and will be dynamically allocated whenever gensys() is called.
-   gensys_ps->Fwt_dzm = (TSdzmatrix *)NULL;    //nunstab-by-m z matrix of possible complex numbers.  Initialized to NULL and dynamically allocated.
-   gensys_ps->Ywt_dzm = (TSdzmatrix *)NULL;    //n-by-nunstab z matrix of possible complex numbers.  Initialized to NULL and dynamically allocated.
-   gensys_ps->Gev_dzm = CreateMatrix_dz(_n, 2);  //n-by-2 z matrix of possible complex numbers.
-   gensys_ps->eu_iv = CreateConstantVector_int(2, 0);   //2-by-1.
+/*     //=== Output arguments.   ansi-c*/
+   gensys_ps->Theta_dm = CreateMatrix_lf(_n, _n);   /*  n-by-n.   ansi-c*/
+   gensys_ps->c_dv = CreateVector_lf(_n);    /*  n-by-1.   ansi-c*/
+   gensys_ps->Impact_dm = CreateMatrix_lf(_n, _m);   /*  n-by-m.   ansi-c*/
+   gensys_ps->Fmat_dzm = (TSdzmatrix *)NULL;    /*  nunstab-by-nunstab z matrix.  Initialized to NULL and will be dynamically allocated whenever gensys() is called.   ansi-c*/
+   gensys_ps->Fwt_dzm = (TSdzmatrix *)NULL;     /*  nunstab-by-m z matrix of possible complex numbers.  Initialized to NULL and dynamically allocated.   ansi-c*/
+   gensys_ps->Ywt_dzm = (TSdzmatrix *)NULL;     /*  n-by-nunstab z matrix of possible complex numbers.  Initialized to NULL and dynamically allocated.   ansi-c*/
+   gensys_ps->Gev_dzm = CreateMatrix_dz(_n, 2);   /*  n-by-2 z matrix of possible complex numbers.   ansi-c*/
+   gensys_ps->eu_iv = CreateConstantVector_int(2, 0);    /*  2-by-1.   ansi-c*/
 
-   //=== Function itself.
+/*     //=== Function itself.   ansi-c*/
    gensys_ps->gensys = func;
 
-   //=== Input arguments.
-   gensys_ps->G0_dm = CreateConstantMatrix_lf(_n, _n, 0.0);  //n-by-n.
+/*     //=== Input arguments.   ansi-c*/
+   gensys_ps->G0_dm = CreateConstantMatrix_lf(_n, _n, 0.0);   /*  n-by-n.   ansi-c*/
    gensys_ps->G0_dm->flag = M_GE;
-   gensys_ps->G1_dm = CreateConstantMatrix_lf(_n, _n, 0.0);  //n-by-n.
+   gensys_ps->G1_dm = CreateConstantMatrix_lf(_n, _n, 0.0);   /*  n-by-n.   ansi-c*/
    gensys_ps->G1_dm->flag = M_GE;
-   gensys_ps->c0_dv = CreateConstantVector_lf(_n, 0.0);  //n-by-1.
-   gensys_ps->Psi_dm = CreateConstantMatrix_lf(_n, _m, 0.0); //n-by-m.
+   gensys_ps->c0_dv = CreateConstantVector_lf(_n, 0.0);   /*  n-by-1.   ansi-c*/
+   gensys_ps->Psi_dm = CreateConstantMatrix_lf(_n, _m, 0.0);  /*  n-by-m.   ansi-c*/
    gensys_ps->Psi_dm->flag = M_GE;
-   gensys_ps->Pi_dm = CreateConstantMatrix_lf(_n, _k, 0.0);  //n-by-k where k is the number of expectational errors.
+   gensys_ps->Pi_dm = CreateConstantMatrix_lf(_n, _k, 0.0);   /*  n-by-k where k is the number of expectational errors.   ansi-c*/
    gensys_ps->Pi_dm->flag = M_GE;
    gensys_ps->div = div;
 
    return (gensys_ps);
 }
-//-------
+/*  //-------   ansi-c*/
 TSgensys *DestroyTSgensys(TSgensys *gensys_ps)
 {
    if (gensys_ps) {
-      //=== Output arguments.
-      DestroyMatrix_lf(gensys_ps->Theta_dm);  //n-by-n.
-      DestroyVector_lf(gensys_ps->c_dv);   //n-by-1.
-      DestroyMatrix_lf(gensys_ps->Impact_dm);  //n-by-m.
-      DestroyMatrix_dz(gensys_ps->Fmat_dzm);   //nunstab-by-nunstab z matrix.  Initialized to NULL and will be dynamically allocated whenever gensys() is called.
-      DestroyMatrix_dz(gensys_ps->Fwt_dzm);   //nunstab-by-m z matrix of possible complex numbers.  Initialized to NULL and dynamically allocated.
-      DestroyMatrix_dz(gensys_ps->Ywt_dzm);    //n-by-nunstab z matrix of possible complex numbers.  Initialized to NULL and dynamically allocated.
-      DestroyMatrix_dz(gensys_ps->Gev_dzm);  //n-by-2 z matrix of possible complex numbers.
-      DestroyVector_int(gensys_ps->eu_iv);   //2-by-1.
+/*        //=== Output arguments.   ansi-c*/
+      DestroyMatrix_lf(gensys_ps->Theta_dm);   /*  n-by-n.   ansi-c*/
+      DestroyVector_lf(gensys_ps->c_dv);    /*  n-by-1.   ansi-c*/
+      DestroyMatrix_lf(gensys_ps->Impact_dm);   /*  n-by-m.   ansi-c*/
+      DestroyMatrix_dz(gensys_ps->Fmat_dzm);    /*  nunstab-by-nunstab z matrix.  Initialized to NULL and will be dynamically allocated whenever gensys() is called.   ansi-c*/
+      DestroyMatrix_dz(gensys_ps->Fwt_dzm);    /*  nunstab-by-m z matrix of possible complex numbers.  Initialized to NULL and dynamically allocated.   ansi-c*/
+      DestroyMatrix_dz(gensys_ps->Ywt_dzm);     /*  n-by-nunstab z matrix of possible complex numbers.  Initialized to NULL and dynamically allocated.   ansi-c*/
+      DestroyMatrix_dz(gensys_ps->Gev_dzm);   /*  n-by-2 z matrix of possible complex numbers.   ansi-c*/
+      DestroyVector_int(gensys_ps->eu_iv);    /*  2-by-1.   ansi-c*/
 
-      //=== Input arguments.
-      DestroyMatrix_lf(gensys_ps->G0_dm);  //n-by-n.
-      DestroyMatrix_lf(gensys_ps->G1_dm);  //n-by-n.
-      DestroyVector_lf(gensys_ps->c0_dv);  //n-by-1.
-      DestroyMatrix_lf(gensys_ps->Psi_dm); //n-by-m.
-      DestroyMatrix_lf(gensys_ps->Pi_dm);  //n-by-k where k is the number of expectational errors.
+/*        //=== Input arguments.   ansi-c*/
+      DestroyMatrix_lf(gensys_ps->G0_dm);   /*  n-by-n.   ansi-c*/
+      DestroyMatrix_lf(gensys_ps->G1_dm);   /*  n-by-n.   ansi-c*/
+      DestroyVector_lf(gensys_ps->c0_dv);   /*  n-by-1.   ansi-c*/
+      DestroyMatrix_lf(gensys_ps->Psi_dm);  /*  n-by-m.   ansi-c*/
+      DestroyMatrix_lf(gensys_ps->Pi_dm);   /*  n-by-k where k is the number of expectational errors.   ansi-c*/
 
       free(gensys_ps);
 
@@ -133,22 +133,22 @@ TSgensys *DestroyTSgensys(TSgensys *gensys_ps)
 }
 
 
-//--------------------------- For the function gensys_sims() ------------------------------------
+/*  //--------------------------- For the function gensys_sims() ------------------------------------   ansi-c*/
 static int fixdiv = 1, zxz = 0;
 static double stake = 1.01;
 static int nunstab = 0;
 static MKL_Complex16 one, minusone, zero;
 
 /* [G1,C,impact,fmat,fwt,ywt,gev,eu]=gensysmkl(g0,g1,c,psi,pi,stake) */
-//void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
+/*  //void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {   ansi-c*/
 int gensys_sims(TSgensys *gensys_ps, void *dummy_ps)
 {
-   //Returns 1 if successful and 0 for fatal errors (such as qz or svd fails or all roots are explosive). Added DW and TZ, 03/08/06.
+/*     //Returns 1 if successful and 0 for fatal errors (such as qz or svd fails or all roots are explosive). Added DW and TZ, 03/08/06.   ansi-c*/
    int tmpi;
-   int n, psin, pin, nsquare, md, md1, i, bigev, bigev1;  //mds, bigevs, //03/01/06 TZ.  Commented out to be consistent with the CAS 3/10/04 correction.
+   int n, psin, pin, nsquare, md, md1, i, bigev, bigev1;   /*  mds, bigevs,    ansi-c*/
    int *eu;
    int exist = 0, existx = 0, unique = 0;
-   //=== Memory will be allocated to the following.
+/*     //=== Memory will be allocated to the following.   ansi-c*/
    double *deta = NULL, *deta1 = NULL, *norm = NULL; //*normx = NULL, *dz = NULL,  //03/01/06 TZ.  Commented out to be consistent with the CAS 3/10/04 correction.
    MKL_Complex16 *a = NULL, *b = NULL, *q = NULL, *z = NULL, *pi = NULL, *psi = NULL;
    MKL_Complex16 *tmat = NULL, *g0 = NULL, *g1 = NULL, *dummy = NULL, *tmatq = NULL, *c = NULL, *impact = NULL, *ab = NULL;
@@ -312,59 +312,59 @@ int gensys_sims(TSgensys *gensys_ps, void *dummy_ps)
    //    existx = 1;
    // } else {
    //    /* uz-ueta*ueta'*uz */
-   //    MKL_Complex16 *tmp = tzMalloc(tmpi=nunstab*nunstab, MKL_Complex16);
-   //    InitializeConstantMLK_Complex16(tmp, tmpi, 0.0);    //Must be initialized to 0.0 in order to have legal values of this pointer.
-   //    cblas_zgemm(CblasColMajor, CblasNoTrans, CblasConjTrans, nunstab, nunstab,
-   //       bigev, &one, ueta, nunstab, ueta, nunstab, &zero, tmp, nunstab);
-   //    cblas_zhemm(CblasColMajor, CblasLeft, CblasUpper, nunstab,
-   //       bigevs, &minusone, tmp, nunstab, uz, nunstab, &one, uz, nunstab);
-   //    tzDestroy(tmp);
-   //    if (compute_norm(uz, &norm, nunstab, bigevs)) {
-   //       //Memory is now allocated to norm.
-   //       printf("WARNING: SVD failed.\n");
-   //       tzDestroy(norm);
-   //       tzDestroy(ueta);
-   //       tzDestroy(deta);
-   //       tzDestroy(veta);
-   //       tzDestroy(uz);
-   //       tzDestroy(zwt);
-   //       tzDestroy(a);
-   //       tzDestroy(b);
-   //       tzDestroy(q);
-   //       tzDestroy(z);
-   //       return;
-   //    }
-   //    exist = *norm < REALSMALL*n;
-   //    tzDestroy(norm);
-   //    if (compute_normx(a, b, zwt, ueta, &normx, nunstab, psin, n, bigev)) {
-   //       //If 0, memory is now allocated to normx; otherwise, normx is destroyed within the function compute_normx().
-   //       tzDestroy(ueta);
-   //       tzDestroy(deta);
-   //       tzDestroy(veta);
-   //       tzDestroy(uz);
-   //       tzDestroy(zwt);
-   //       tzDestroy(a);
-   //       tzDestroy(b);
-   //       tzDestroy(q);
-   //       tzDestroy(z);
-   //       return;
-   //    }
-   //    existx = *normx < REALSMALL*n;
-   //    tzDestroy(normx);
-   // }
-   //
-   // tzDestroy(uz);
-   // tzDestroy(zwt);
+/*     //    MKL_Complex16 *tmp = tzMalloc(tmpi=nunstab*nunstab, MKL_Complex16);   ansi-c*/
+/*     //    InitializeConstantMLK_Complex16(tmp, tmpi, 0.0);    //Must be initialized to 0.0 in order to have legal values of this pointer.   ansi-c*/
+/*     //    cblas_zgemm(CblasColMajor, CblasNoTrans, CblasConjTrans, nunstab, nunstab,   ansi-c*/
+/*     //       bigev, &one, ueta, nunstab, ueta, nunstab, &zero, tmp, nunstab);   ansi-c*/
+/*     //    cblas_zhemm(CblasColMajor, CblasLeft, CblasUpper, nunstab,   ansi-c*/
+/*     //       bigevs, &minusone, tmp, nunstab, uz, nunstab, &one, uz, nunstab);   ansi-c*/
+/*     //    tzDestroy(tmp);   ansi-c*/
+/*     //    if (compute_norm(uz, &norm, nunstab, bigevs)) {   ansi-c*/
+/*     //       //Memory is now allocated to norm.   ansi-c*/
+/*     //       printf("WARNING: SVD failed.\n");   ansi-c*/
+/*     //       tzDestroy(norm);   ansi-c*/
+/*     //       tzDestroy(ueta);   ansi-c*/
+/*     //       tzDestroy(deta);   ansi-c*/
+/*     //       tzDestroy(veta);   ansi-c*/
+/*     //       tzDestroy(uz);   ansi-c*/
+/*     //       tzDestroy(zwt);   ansi-c*/
+/*     //       tzDestroy(a);   ansi-c*/
+/*     //       tzDestroy(b);   ansi-c*/
+/*     //       tzDestroy(q);   ansi-c*/
+/*     //       tzDestroy(z);   ansi-c*/
+/*     //       return;   ansi-c*/
+/*     //    }   ansi-c*/
+/*     //    exist = *norm < REALSMALL*n;   ansi-c*/
+/*     //    tzDestroy(norm);   ansi-c*/
+/*     //    if (compute_normx(a, b, zwt, ueta, &normx, nunstab, psin, n, bigev)) {   ansi-c*/
+/*     //       //If 0, memory is now allocated to normx; otherwise, normx is destroyed within the function compute_normx().   ansi-c*/
+/*     //       tzDestroy(ueta);   ansi-c*/
+/*     //       tzDestroy(deta);   ansi-c*/
+/*     //       tzDestroy(veta);   ansi-c*/
+/*     //       tzDestroy(uz);   ansi-c*/
+/*     //       tzDestroy(zwt);   ansi-c*/
+/*     //       tzDestroy(a);   ansi-c*/
+/*     //       tzDestroy(b);   ansi-c*/
+/*     //       tzDestroy(q);   ansi-c*/
+/*     //       tzDestroy(z);   ansi-c*/
+/*     //       return;   ansi-c*/
+/*     //    }   ansi-c*/
+/*     //    existx = *normx < REALSMALL*n;   ansi-c*/
+/*     //    tzDestroy(normx);   ansi-c*/
+/*     // }   ansi-c*/
+/*     //   ansi-c*/
+/*     // tzDestroy(uz);   ansi-c*/
+/*     // tzDestroy(zwt);   ansi-c*/
 
-   //---------------------------------------------------------------------------
-   // Note that existence and uniqueness are not just matters of comparing
-   //   numbers of roots and numbers of endogenous errors.  These counts are
-   //   reported below because usually they point to the source of the problem.
-   //---------------------------------------------------------------------------
-   //=============================================
-   // Modified by DW and TZ to deal with the case
-   //   where nunstab=n (all explosive roots).  03/08/06.
-   //=============================================
+/*     //---------------------------------------------------------------------------   ansi-c*/
+/*     // Note that existence and uniqueness are not just matters of comparing   ansi-c*/
+/*     //   numbers of roots and numbers of endogenous errors.  These counts are   ansi-c*/
+/*     //   reported below because usually they point to the source of the problem.   ansi-c*/
+/*     //---------------------------------------------------------------------------   ansi-c*/
+/*     //=============================================   ansi-c*/
+/*     // Modified by DW and TZ to deal with the case   ansi-c*/
+/*     //   where nunstab=n (all explosive roots).  03/08/06.   ansi-c*/
+/*     //=============================================   ansi-c*/
    if (nunstab == n)
    {
       tzDestroy(pi);
@@ -381,14 +381,14 @@ int gensys_sims(TSgensys *gensys_ps, void *dummy_ps)
       return 0;
    }
 
-   //=======  Otherwise, returns to CAS's original code.  03/08/06. =======//
+/*     //=======  Otherwise, returns to CAS's original code.  03/08/06. =======//   ansi-c*/
    etawt1 = tzMalloc(tmpi=(n-nunstab)*pin, MKL_Complex16);
-   InitializeConstantMLK_Complex16(etawt1, tmpi, 0.0);    //Must be initialized to 0.0 in order to have legal values of this pointer.
+   InitializeConstantMLK_Complex16(etawt1, tmpi, 0.0);     /*  Must be initialized to 0.0 in order to have legal values of this pointer.   ansi-c*/
    cblas_zgemm(CblasColMajor, CblasConjTrans, CblasNoTrans, n-nunstab, pin, n,
       &one, q, n, pi, n, &zero, etawt1, n-nunstab);
    tzDestroy(pi);
    if (compute_svd(etawt1, &ueta1, &deta1, &veta1, n-nunstab, pin)) {
-      //Memory is now allocated to ueta1, deta1, and veta1.
+/*        //Memory is now allocated to ueta1, deta1, and veta1.   ansi-c*/
       printf("WARNING: SVD failed for compute_svd().\n");
       tzDestroy(ueta1);
       tzDestroy(deta1);
@@ -413,40 +413,40 @@ int gensys_sims(TSgensys *gensys_ps, void *dummy_ps)
          break;
       }
 
-   //====== 03/01/06 TZ: the following is commented out by CAS 3/10/04.
-   // if (existx || !nunstab) {
-   //    //=== Solution exists.
-   //    eu[0] = 1;
-   // } else {
-   //    if (exist) {
-   //       printf("WARNING: Solution exists for unforecastable z only\n");
-   //       eu[0] = -1;
+/*     //====== 03/01/06 TZ: the following is commented out by CAS 3/10/04.   ansi-c*/
+/*     // if (existx || !nunstab) {   ansi-c*/
+/*     //    //=== Solution exists.   ansi-c*/
+/*     //    eu[0] = 1;   ansi-c*/
+/*     // } else {   ansi-c*/
+/*     //    if (exist) {   ansi-c*/
+/*     //       printf("WARNING: Solution exists for unforecastable z only\n");   ansi-c*/
+/*     //       eu[0] = -1;   ansi-c*/
    //    } /* else
    //       mexPrintf("No solution.  %d unstable roots. %d endog errors.\n",nunstab,bigev1); */
    // /* mexPrintf("Generalized eigenvalues\n");
    //    mexCallMATLAB(0,NULL,1, &plhs[6], "disp"); */
-   // }
+/*     // }   ansi-c*/
 
 
-   //-------------------------------
-   // ueta1 = n-nunstab x bigev1
-   // deta1 = bigev1 x 1
-   // veta1 = bigev1 x pin, ldveta1 = md1
-   //-------------------------------
+/*     //-------------------------------   ansi-c*/
+/*     // ueta1 = n-nunstab x bigev1   ansi-c*/
+/*     // deta1 = bigev1 x 1   ansi-c*/
+/*     // veta1 = bigev1 x pin, ldveta1 = md1   ansi-c*/
+/*     //-------------------------------   ansi-c*/
    if (!bigev1)
       unique = 1;
    else {
-      // veta1-veta1*veta*veta'
-      // veta = bigev x pin, ldveta1 = md
-      // veta1 = bigev1 x pin, ldveta1 = md1
+/*        // veta1-veta1*veta*veta'   ansi-c*/
+/*        // veta = bigev x pin, ldveta1 = md   ansi-c*/
+/*        // veta1 = bigev1 x pin, ldveta1 = md1   ansi-c*/
       MKL_Complex16 *tmp = tzMalloc(pin*pin, MKL_Complex16);
       MKL_Complex16 *veta1_copy = tzMalloc(pin*bigev1, MKL_Complex16);
-      InitializeConstantMLK_Complex16(tmp, pin*pin, 0.0);    //Must be initialized to 0.0 in order to have legal values of this pointer.
-      InitializeConstantMLK_Complex16(veta1_copy, pin*bigev1, 0.0);    //Must be initialized to 0.0 in order to have legal values of this pointer.
+      InitializeConstantMLK_Complex16(tmp, pin*pin, 0.0);     /*  Must be initialized to 0.0 in order to have legal values of this pointer.   ansi-c*/
+      InitializeConstantMLK_Complex16(veta1_copy, pin*bigev1, 0.0);     /*  Must be initialized to 0.0 in order to have legal values of this pointer.   ansi-c*/
       if (nunstab)
       {
          cblas_zgemm(CblasColMajor, CblasConjTrans, CblasNoTrans, pin, pin,
-            bigev, &one, veta, md, veta, md, &zero, tmp, pin);   //tmp=veta'*veta;
+            bigev, &one, veta, md, veta, md, &zero, tmp, pin);    /*  tmp=veta'*veta;   ansi-c*/
          cblas_zdupe(bigev1,pin,veta1,md1,veta1_copy,bigev1);
          cblas_zhemm(CblasColMajor, CblasRight, CblasUpper, bigev1, pin,
             &minusone, tmp, pin, veta1_copy, bigev1, &one, veta1_copy, bigev1);
@@ -457,7 +457,7 @@ int gensys_sims(TSgensys *gensys_ps, void *dummy_ps)
       }
       tzDestroy(tmp);
       if (compute_norm(veta1_copy, &norm, bigev1, pin)) {
-         //Memory is now allocated to norm.
+/*           //Memory is now allocated to norm.   ansi-c*/
          printf("WARNING: SVD failed.\n");
          tzDestroy(norm);
          tzDestroy(ueta1);
@@ -479,7 +479,7 @@ int gensys_sims(TSgensys *gensys_ps, void *dummy_ps)
       tzDestroy(norm);
    }
    if (unique) {
-      //=== Unique solution.
+/*        //=== Unique solution.   ansi-c*/
       eu[1] = 1;
    } else {
       eu[1] = 0;
@@ -488,73 +488,73 @@ int gensys_sims(TSgensys *gensys_ps, void *dummy_ps)
          printf("WARNING: Indeterminacy.  %d loose endog errors with eu being [%d, %d].\n",bigev1-bigev, eu[0], eu[1]);
       else
          printf("WARNING: Indeterminacy.  %d loose endog errors with eu being [%d, %d].\n",pin, eu[0], eu[1]);
-      //printf("WARNING: Indeterminacy.  %d loose endog errors with eu being [%g, %g].\n",bigev1-bigev, gensys_ps->eu_dv->v[0], gensys_ps->eu_dv->v[1]);
-      //printf("WARNING: Indeterminacy.  %d loose endog errors.\n",bigev1-bigev);
+/*        //printf("WARNING: Indeterminacy.  %d loose endog errors with eu being [%g, %g].\n",bigev1-bigev, gensys_ps->eu_dv->v[0], gensys_ps->eu_dv->v[1]);   ansi-c*/
+/*        //printf("WARNING: Indeterminacy.  %d loose endog errors.\n",bigev1-bigev);   ansi-c*/
       #endif
    }
 
-   //---------------------------------------------------------//
-   //------------------ Obtaining the outputs. ---------------//
-   //---------------------------------------------------------//
+/*     //---------------------------------------------------------//   ansi-c*/
+/*     //------------------ Obtaining the outputs. ---------------//   ansi-c*/
+/*     //---------------------------------------------------------//   ansi-c*/
    if (nunstab)
    {
-      //=== All the following lines are used to compute only ONE object tmat, which is used subsequently. ===//
+/*        //=== All the following lines are used to compute only ONE object tmat, which is used subsequently. ===//   ansi-c*/
       cblas_zdscali(pin,deta,bigev,veta,md);      /* veta' = deta\veta' */
       tzDestroy(deta);
       cblas_zdscale(pin,deta1,bigev1,veta1,md1);  /* veta1' = deta1*veta1' */
       tzDestroy(deta1);
       etawt = tzMalloc(tmpi=nunstab*pin, MKL_Complex16);      /* etawt = ueta*veta' */
-      InitializeConstantMLK_Complex16(etawt, tmpi, 0.0);    //Must be initialized to 0.0 in order to have legal values of this pointer.
+      InitializeConstantMLK_Complex16(etawt, tmpi, 0.0);     /*  Must be initialized to 0.0 in order to have legal values of this pointer.   ansi-c*/
       cblas_zgemm(CblasColMajor, CblasNoTrans, CblasNoTrans, nunstab, pin, bigev,
          &one, ueta, nunstab, veta, md, &zero, etawt, nunstab);
       tzDestroy(ueta);
       tzDestroy(veta);
       etawt1 = tzMalloc(tmpi=(n-nunstab)*pin, MKL_Complex16); /* etawt1 = ueta1*veta1' */
-      InitializeConstantMLK_Complex16(etawt1, tmpi, 0.0);    //Must be initialized to 0.0 in order to have legal values of this pointer.
+      InitializeConstantMLK_Complex16(etawt1, tmpi, 0.0);     /*  Must be initialized to 0.0 in order to have legal values of this pointer.   ansi-c*/
       cblas_zgemm(CblasColMajor, CblasNoTrans, CblasNoTrans, n-nunstab, pin, bigev1,
          &one, ueta1, n-nunstab, veta1, md1, &zero, etawt1, n-nunstab);
       tzDestroy(ueta1);
       tzDestroy(veta1);
       tmat = tzMalloc(tmpi=(n-nunstab)*nunstab, MKL_Complex16); /* tmat = etawt1*etawt' */
-      InitializeConstantMLK_Complex16(tmat, tmpi, 0.0);    //Must be initialized to 0.0 in order to have legal values of this pointer.
+      InitializeConstantMLK_Complex16(tmat, tmpi, 0.0);     /*  Must be initialized to 0.0 in order to have legal values of this pointer.   ansi-c*/
       cblas_zgemm(CblasColMajor, CblasNoTrans, CblasConjTrans, n-nunstab, nunstab, pin,
          &one, etawt1, n-nunstab, etawt, nunstab, &zero, tmat, n-nunstab);
       tzDestroy(etawt1);
       tzDestroy(etawt);
 
-      //=== Getting the solution Theta ===//
+/*        //=== Getting the solution Theta ===//   ansi-c*/
       g0 = tzMalloc(tmpi=n*n, MKL_Complex16);
-      InitializeConstantMLK_Complex16(g0, tmpi, 0.0);    //Must be initialized to 0.0 in order to have legal values of this pointer.
+      InitializeConstantMLK_Complex16(g0, tmpi, 0.0);     /*  Must be initialized to 0.0 in order to have legal values of this pointer.   ansi-c*/
       cblas_zdupe(n-nunstab, n, a, n, g0, n);
       cblas_zgemm(CblasColMajor, CblasNoTrans, CblasNoTrans, n-nunstab, nunstab, nunstab,
          &minusone, tmat, n-nunstab, a+(n-nunstab)*(n+1), n, &one, g0+(n-nunstab)*n, n);
       cblas_zcopy(nunstab, &one, 0, g0+(n-nunstab)*(n+1), n+1);
 
       g1 = tzMalloc(tmpi=n*n, MKL_Complex16);
-      InitializeConstantMLK_Complex16(g1, tmpi, 0.0);    //Must be initialized to 0.0 in order to have legal values of this pointer.
+      InitializeConstantMLK_Complex16(g1, tmpi, 0.0);     /*  Must be initialized to 0.0 in order to have legal values of this pointer.   ansi-c*/
       cblas_zdupe(n-nunstab, n, b, n, g1, n);
       cblas_zgemm(CblasColMajor, CblasNoTrans, CblasNoTrans, n-nunstab, nunstab, nunstab,
          &minusone, tmat, n-nunstab, b+(n-nunstab)*(n+1), n, &one, g1+(n-nunstab)*n, n);
       cblas_ztrsm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit,
          n, n, &one, g0, n, g1, n);
       dummy = tzMalloc(tmpi=n*n, MKL_Complex16);
-      InitializeConstantMLK_Complex16(dummy, tmpi, 0.0);    //Must be initialized to 0.0 in order to have legal values of this pointer.
+      InitializeConstantMLK_Complex16(dummy, tmpi, 0.0);     /*  Must be initialized to 0.0 in order to have legal values of this pointer.   ansi-c*/
       cblas_zgemm(CblasColMajor, CblasNoTrans, CblasNoTrans, n, n, n, &one, z, n, g1, n, &zero, dummy, n);
       cblas_zgemm(CblasColMajor, CblasNoTrans, CblasConjTrans, n, n, n, &one, dummy, n, z, n, &zero, g1, n);
       tzDestroy(dummy);
-      ComplexMatrix2RealMatrix(gensys_ps->Theta_dm, g1);  //Output.
+      ComplexMatrix2RealMatrix(gensys_ps->Theta_dm, g1);   /*  Output.   ansi-c*/
       tzDestroy(g1);
 
-      //=== Getting the constant term c ===//
+/*        //=== Getting the constant term c ===//   ansi-c*/
       tmatq = tzMalloc(tmpi=n*n, MKL_Complex16);
-      InitializeConstantMLK_Complex16(tmatq, tmpi, 0.0);    //Must be initialized to 0.0 in order to have legal values of this pointer.
+      InitializeConstantMLK_Complex16(tmatq, tmpi, 0.0);     /*  Must be initialized to 0.0 in order to have legal values of this pointer.   ansi-c*/
       cblas_zcopy(n*n, q, 1, tmatq, 1);
       cblas_zgemm(CblasColMajor, CblasNoTrans, CblasConjTrans, n, n-nunstab, nunstab,
          &minusone, tmatq+(n-nunstab)*n, n, tmat, n-nunstab, &one, tmatq, n);
       tzDestroy(tmat);
 
       ab = tzMalloc(tmpi=nunstab*nunstab, MKL_Complex16);
-      InitializeConstantMLK_Complex16(ab, tmpi, 0.0);    //Must be initialized to 0.0 in order to have legal values of this pointer.
+      InitializeConstantMLK_Complex16(ab, tmpi, 0.0);     /*  Must be initialized to 0.0 in order to have legal values of this pointer.   ansi-c*/
       cblas_zdpsb(nunstab, nunstab, a+(n-nunstab)*(n+1), n, b+(n-nunstab)*(n+1), n, ab, nunstab);
       cblas_ztrsm(CblasColMajor, CblasRight, CblasUpper, CblasConjTrans, CblasNonUnit,
          n, nunstab, &one, ab, nunstab, tmatq+(n-nunstab)*n, n);
@@ -562,35 +562,35 @@ int gensys_sims(TSgensys *gensys_ps, void *dummy_ps)
 
       c = CreateComplexMatrix5RealVector(gensys_ps->c0_dv);
       dummy = tzMalloc(gensys_ps->c0_dv->n, MKL_Complex16);
-      //$$$$$$$ The following is Iskander's fatal code error.  One cannot use c in the two different places; otherwise, it makes c be zero completely!
-      // cblas_zgemv(CblasColMajor, CblasConjTrans, n, n, &one, tmatq, n, c, 1, &zero, c, 1);
-      // cblas_ztrsv(CblasColMajor, CblasUpper, CblasNoTrans, CblasNonUnit, n, g0, n, c, 1);
-      // cblas_zgemv(CblasColMajor, CblasNoTrans, n, n, &one, z, n, c, 1, &zero, c, 1);
+/*        //$$$$$$$ The following is Iskander's fatal code error.  One cannot use c in the two different places; otherwise, it makes c be zero completely!   ansi-c*/
+/*        // cblas_zgemv(CblasColMajor, CblasConjTrans, n, n, &one, tmatq, n, c, 1, &zero, c, 1);   ansi-c*/
+/*        // cblas_ztrsv(CblasColMajor, CblasUpper, CblasNoTrans, CblasNonUnit, n, g0, n, c, 1);   ansi-c*/
+/*        // cblas_zgemv(CblasColMajor, CblasNoTrans, n, n, &one, z, n, c, 1, &zero, c, 1);   ansi-c*/
       cblas_zgemv(CblasColMajor, CblasConjTrans, n, n, &one, tmatq, n, c, 1, &zero, dummy, 1);
       cblas_ztrsv(CblasColMajor, CblasUpper, CblasNoTrans, CblasNonUnit, n, g0, n, dummy, 1);
       cblas_zgemv(CblasColMajor, CblasNoTrans, n, n, &one, z, n, dummy, 1, &zero, c, 1);
-      ComplexMatrix2RealVector(gensys_ps->c_dv, c);   //Output.
+      ComplexMatrix2RealVector(gensys_ps->c_dv, c);    /*  Output.   ansi-c*/
       tzDestroy(c);
       tzDestroy(dummy);
 
-      //=== Getting the term Impact ===//
+/*        //=== Getting the term Impact ===//   ansi-c*/
       impact = tzMalloc(tmpi=n*psin, MKL_Complex16);
-      InitializeConstantMLK_Complex16(impact, tmpi, 0.0);    //Must be initialized to 0.0 in order to have legal values of this pointer.
-      psi = CreateComplexMatrix5RealMatrix(gensys_ps->Psi_dm); //03/01/06 TZ.  Added to be consistent with the CAS 3/10/04 correction.
+      InitializeConstantMLK_Complex16(impact, tmpi, 0.0);     /*  Must be initialized to 0.0 in order to have legal values of this pointer.   ansi-c*/
+      psi = CreateComplexMatrix5RealMatrix(gensys_ps->Psi_dm);  /*  03/01/06 TZ.  Added to be consistent with the CAS 3/10/04 correction.   ansi-c*/
       cblas_zgemm(CblasColMajor, CblasConjTrans, CblasNoTrans, n-nunstab, psin, n,
          &one, tmatq, n, psi, n, &zero, impact, n);
       tzDestroy(tmatq);
       cblas_ztrsm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit,
          n, psin, &one, g0, n, impact, n);
       dummy = tzMalloc(tmpi=n*psin, MKL_Complex16);
-      InitializeConstantMLK_Complex16(dummy, tmpi, 0.0);    //Must be initialized to 0.0 in order to have legal values of this pointer.
+      InitializeConstantMLK_Complex16(dummy, tmpi, 0.0);     /*  Must be initialized to 0.0 in order to have legal values of this pointer.   ansi-c*/
       cblas_zgemm(CblasColMajor, CblasNoTrans, CblasNoTrans, n, psin, n,
          &one, z, n, impact, n, &zero, dummy, n);
       tzDestroy(impact);
-      ComplexMatrix2RealMatrix(gensys_ps->Impact_dm, dummy);   //Output.
+      ComplexMatrix2RealMatrix(gensys_ps->Impact_dm, dummy);    /*  Output.   ansi-c*/
       tzDestroy(dummy);
 
-      //=== Finishing up the other terms such as Fmat, Fwt, and Ywt. ===//
+/*        //=== Finishing up the other terms such as Fmat, Fwt, and Ywt. ===//   ansi-c*/
       fmat = a+(n-nunstab)*(n+1);
       cblas_ztrsm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit,
          nunstab, nunstab, &one, b+(n-nunstab)*(n+1), n, fmat, n);
@@ -598,7 +598,7 @@ int gensys_sims(TSgensys *gensys_ps, void *dummy_ps)
       tzDestroy(a);
 
       fwt = tzMalloc(tmpi=nunstab*psin, MKL_Complex16);
-      InitializeConstantMLK_Complex16(fwt, tmpi, 0.0);    //Must be initialized to 0.0 in order to have legal values of this pointer.
+      InitializeConstantMLK_Complex16(fwt, tmpi, 0.0);     /*  Must be initialized to 0.0 in order to have legal values of this pointer.   ansi-c*/
       cblas_ztrsm(CblasColMajor, CblasRight, CblasUpper, CblasConjTrans, CblasNonUnit,
          n, nunstab, &one, b+(n-nunstab)*(n+1), n, q+(n-nunstab)*n, n);
       tzDestroy(b);
@@ -616,7 +616,7 @@ int gensys_sims(TSgensys *gensys_ps, void *dummy_ps)
          n, nunstab, &one, g0, n, ywt, n);
       tzDestroy(g0);
       dummy = tzMalloc(tmpi=n*nunstab, MKL_Complex16);
-      InitializeConstantMLK_Complex16(dummy, tmpi, 0.0);    //Must be initialized to 0.0 in order to have legal values of this pointer.
+      InitializeConstantMLK_Complex16(dummy, tmpi, 0.0);     /*  Must be initialized to 0.0 in order to have legal values of this pointer.   ansi-c*/
       cblas_zgemm(CblasColMajor, CblasNoTrans, CblasNoTrans, n, nunstab, n,
          &one, z, n, ywt, n, &zero, dummy, n);
       tzDestroy(z);
@@ -626,94 +626,94 @@ int gensys_sims(TSgensys *gensys_ps, void *dummy_ps)
    }
    else  //This part is added by DW and TZ, 03/08/06.
    {
-      //======= Getting Theta = real(z*(G0\G1)*z') =======//
+/*        //======= Getting Theta = real(z*(G0\G1)*z') =======//   ansi-c*/
       cblas_ztrsm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit,
-         n, n, &one, a, n, b, n);  //Note that a is triangular and b = a\b (overwritten).
+         n, n, &one, a, n, b, n);   /*  Note that a is triangular and b = a\b (overwritten).   ansi-c*/
       dummy = tzMalloc(tmpi=n*n, MKL_Complex16);
-      InitializeConstantMLK_Complex16(dummy, tmpi, 0.0);    //Must be initialized to 0.0 in order to have legal values of this pointer.
-      //--- Getting Theta = real(z*b*z');
-      cblas_zgemm(CblasColMajor, CblasNoTrans, CblasNoTrans, n, n, n, &one, z, n, b, n, &zero, dummy, n); //dummy=z*b;
-      cblas_zgemm(CblasColMajor, CblasNoTrans, CblasConjTrans, n, n, n, &one, dummy, n, z, n, &zero, b, n); //dummy=dummy*z';
-      ComplexMatrix2RealMatrix(gensys_ps->Theta_dm, b);  //Output.
+      InitializeConstantMLK_Complex16(dummy, tmpi, 0.0);     /*  Must be initialized to 0.0 in order to have legal values of this pointer.   ansi-c*/
+/*        //--- Getting Theta = real(z*b*z');   ansi-c*/
+      cblas_zgemm(CblasColMajor, CblasNoTrans, CblasNoTrans, n, n, n, &one, z, n, b, n, &zero, dummy, n);  /*  dummy=z*b;   ansi-c*/
+      cblas_zgemm(CblasColMajor, CblasNoTrans, CblasConjTrans, n, n, n, &one, dummy, n, z, n, &zero, b, n);  /*  dummy=dummy*z';   ansi-c*/
+      ComplexMatrix2RealMatrix(gensys_ps->Theta_dm, b);   /*  Output.   ansi-c*/
       tzDestroy(dummy);
 
-      //======= Getting c = real(z*G0\q*c0) =======//
+/*        //======= Getting c = real(z*G0\q*c0) =======//   ansi-c*/
       c = CreateComplexMatrix5RealVector(gensys_ps->c0_dv);
       dummy = tzMalloc(gensys_ps->c0_dv->n, MKL_Complex16);
-      cblas_zgemv(CblasColMajor, CblasConjTrans, n, n, &one, q, n, c, 1, &zero, dummy, 1); //dummy = q*c;
-      cblas_ztrsv(CblasColMajor, CblasUpper, CblasNoTrans, CblasNonUnit, n, a, n, dummy, 1);  //dummy=a\dummy where a is triangular.
-      cblas_zgemv(CblasColMajor, CblasNoTrans, n, n, &one, z, n, dummy, 1, &zero, c, 1);  //dummy=z*dummy;
-      ComplexMatrix2RealVector(gensys_ps->c_dv, c);   //Output.
+      cblas_zgemv(CblasColMajor, CblasConjTrans, n, n, &one, q, n, c, 1, &zero, dummy, 1);  /*  dummy = q*c;   ansi-c*/
+      cblas_ztrsv(CblasColMajor, CblasUpper, CblasNoTrans, CblasNonUnit, n, a, n, dummy, 1);   /*  dummy=a\dummy where a is triangular.   ansi-c*/
+      cblas_zgemv(CblasColMajor, CblasNoTrans, n, n, &one, z, n, dummy, 1, &zero, c, 1);   /*  dummy=z*dummy;   ansi-c*/
+      ComplexMatrix2RealVector(gensys_ps->c_dv, c);    /*  Output.   ansi-c*/
       tzDestroy(dummy);
 
-      //======= Getting Impact = real(z*G0\q*psi) =======//
+/*        //======= Getting Impact = real(z*G0\q*psi) =======//   ansi-c*/
       impact = tzMalloc(tmpi=n*psin, MKL_Complex16);
-      InitializeConstantMLK_Complex16(impact, tmpi, 0.0);    //Must be initialized to 0.0 in order to have legal values of this pointer.
-      psi = CreateComplexMatrix5RealMatrix(gensys_ps->Psi_dm); //03/01/06 TZ.  Added to be consistent with the CAS 3/10/04 correction.
+      InitializeConstantMLK_Complex16(impact, tmpi, 0.0);     /*  Must be initialized to 0.0 in order to have legal values of this pointer.   ansi-c*/
+      psi = CreateComplexMatrix5RealMatrix(gensys_ps->Psi_dm);  /*  03/01/06 TZ.  Added to be consistent with the CAS 3/10/04 correction.   ansi-c*/
       dummy = tzMalloc(tmpi=n*psin, MKL_Complex16);
       cblas_zgemm(CblasColMajor, CblasConjTrans, CblasNoTrans, n, psin, n,
-         &one, q, n, psi, n, &zero, impact, n);   //impact = q*psi;
+         &one, q, n, psi, n, &zero, impact, n);    /*  impact = q*psi;   ansi-c*/
       cblas_ztrsm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit,
-         n, psin, &one, a, n, impact, n);  //impact = a\impact;
-      InitializeConstantMLK_Complex16(dummy, tmpi, 0.0);    //Must be initialized to 0.0 in order to have legal values of this pointer.
+         n, psin, &one, a, n, impact, n);   /*  impact = a\impact;   ansi-c*/
+      InitializeConstantMLK_Complex16(dummy, tmpi, 0.0);     /*  Must be initialized to 0.0 in order to have legal values of this pointer.   ansi-c*/
       cblas_zgemm(CblasColMajor, CblasNoTrans, CblasNoTrans, n, psin, n,
-         &one, z, n, impact, n, &zero, dummy, n);   //dummy = z*impact;
-      ComplexMatrix2RealMatrix(gensys_ps->Impact_dm, dummy);   //Output.
+         &one, z, n, impact, n, &zero, dummy, n);    /*  dummy = z*impact;   ansi-c*/
+      ComplexMatrix2RealMatrix(gensys_ps->Impact_dm, dummy);    /*  Output.   ansi-c*/
       tzDestroy(dummy);
 
 
-      //=== Some of destructions may have been done, but it is better to be safe.
+/*        //=== Some of destructions may have been done, but it is better to be safe.   ansi-c*/
       tzDestroy(ueta1);
       tzDestroy(deta1);
       tzDestroy(veta1);
       tzDestroy(etawt);
       tzDestroy(etawt1);
-      //+
+/*        //+   ansi-c*/
       tzDestroy(a);
       tzDestroy(b);
       tzDestroy(q);
       tzDestroy(z);
-      //+
+/*        //+   ansi-c*/
       tzDestroy(c);
       tzDestroy(impact);
       tzDestroy(psi);
    }
 
-   //=== Save this debugging format -- DDDDDebugging.
-   // if (!nunstab)
-   // {
-   //    fprintf(FPTR_DEBUG, "Aind=[\n");
-   //    WriteMatrix(FPTR_DEBUG, gensys_ps->G0_dm, " %.16e ");
-   //    fprintf(FPTR_DEBUG, "];\n");
-   //    fprintf(FPTR_DEBUG, "Bind=[\n");
-   //    WriteMatrix(FPTR_DEBUG, gensys_ps->G1_dm, " %.16e ");
-   //    fprintf(FPTR_DEBUG, "];\n");
-   //    fprintf(FPTR_DEBUG, "Consterm=[\n");
-   //    WriteVector(FPTR_DEBUG, gensys_ps->c0_dv, " %.16e ");
-   //    fprintf(FPTR_DEBUG, "]';\n");
-   //    fprintf(FPTR_DEBUG, "gUpsiloneind=[\n");
-   //    WriteMatrix(FPTR_DEBUG, gensys_ps->Psi_dm, " %.16e ");
-   //    fprintf(FPTR_DEBUG, "];\n");
-   //    fprintf(FPTR_DEBUG, "gUpsilonxind=[\n");
-   //    WriteMatrix(FPTR_DEBUG, gensys_ps->Pi_dm, " %.16e ");
-   //    fprintf(FPTR_DEBUG, "];\n");
-   //    fflush(FPTR_DEBUG);
-   //
-   //    fprintf(FPTR_DEBUG, "\n********** Output ******************\n");
-   //    fprintf(FPTR_DEBUG, "Theta=[\n");
-   //    WriteMatrix(FPTR_DEBUG, gensys_ps->Theta_dm, " %.16e ");
-   //    fprintf(FPTR_DEBUG, "];\n");
-   //    fprintf(FPTR_DEBUG, "Impact=[\n");
-   //    WriteMatrix(FPTR_DEBUG, gensys_ps->Impact_dm, " %.16e ");
-   //    fprintf(FPTR_DEBUG, "];\n");
-   //    fprintf(FPTR_DEBUG, "Consterm=[\n");
-   //    WriteVector(FPTR_DEBUG, gensys_ps->c_dv, " %.16e ");
-   //    fprintf(FPTR_DEBUG, "]';\n");
-   //    fprintf(FPTR_DEBUG, "eu=[\n");
-   //    WriteVector_int(FPTR_DEBUG, gensys_ps->eu_iv);
-   //    fprintf(FPTR_DEBUG, "]';\n");
-   //    fflush(FPTR_DEBUG);
-   // }
+/*     //=== Save this debugging format -- DDDDDebugging.   ansi-c*/
+/*     // if (!nunstab)   ansi-c*/
+/*     // {   ansi-c*/
+/*     //    fprintf(FPTR_DEBUG, "Aind=[\n");   ansi-c*/
+/*     //    WriteMatrix(FPTR_DEBUG, gensys_ps->G0_dm, " %.16e ");   ansi-c*/
+/*     //    fprintf(FPTR_DEBUG, "];\n");   ansi-c*/
+/*     //    fprintf(FPTR_DEBUG, "Bind=[\n");   ansi-c*/
+/*     //    WriteMatrix(FPTR_DEBUG, gensys_ps->G1_dm, " %.16e ");   ansi-c*/
+/*     //    fprintf(FPTR_DEBUG, "];\n");   ansi-c*/
+/*     //    fprintf(FPTR_DEBUG, "Consterm=[\n");   ansi-c*/
+/*     //    WriteVector(FPTR_DEBUG, gensys_ps->c0_dv, " %.16e ");   ansi-c*/
+/*     //    fprintf(FPTR_DEBUG, "]';\n");   ansi-c*/
+/*     //    fprintf(FPTR_DEBUG, "gUpsiloneind=[\n");   ansi-c*/
+/*     //    WriteMatrix(FPTR_DEBUG, gensys_ps->Psi_dm, " %.16e ");   ansi-c*/
+/*     //    fprintf(FPTR_DEBUG, "];\n");   ansi-c*/
+/*     //    fprintf(FPTR_DEBUG, "gUpsilonxind=[\n");   ansi-c*/
+/*     //    WriteMatrix(FPTR_DEBUG, gensys_ps->Pi_dm, " %.16e ");   ansi-c*/
+/*     //    fprintf(FPTR_DEBUG, "];\n");   ansi-c*/
+/*     //    fflush(FPTR_DEBUG);   ansi-c*/
+/*     //   ansi-c*/
+/*     //    fprintf(FPTR_DEBUG, "\n********** Output ******************\n");   ansi-c*/
+/*     //    fprintf(FPTR_DEBUG, "Theta=[\n");   ansi-c*/
+/*     //    WriteMatrix(FPTR_DEBUG, gensys_ps->Theta_dm, " %.16e ");   ansi-c*/
+/*     //    fprintf(FPTR_DEBUG, "];\n");   ansi-c*/
+/*     //    fprintf(FPTR_DEBUG, "Impact=[\n");   ansi-c*/
+/*     //    WriteMatrix(FPTR_DEBUG, gensys_ps->Impact_dm, " %.16e ");   ansi-c*/
+/*     //    fprintf(FPTR_DEBUG, "];\n");   ansi-c*/
+/*     //    fprintf(FPTR_DEBUG, "Consterm=[\n");   ansi-c*/
+/*     //    WriteVector(FPTR_DEBUG, gensys_ps->c_dv, " %.16e ");   ansi-c*/
+/*     //    fprintf(FPTR_DEBUG, "]';\n");   ansi-c*/
+/*     //    fprintf(FPTR_DEBUG, "eu=[\n");   ansi-c*/
+/*     //    WriteVector_int(FPTR_DEBUG, gensys_ps->eu_iv);   ansi-c*/
+/*     //    fprintf(FPTR_DEBUG, "]';\n");   ansi-c*/
+/*     //    fflush(FPTR_DEBUG);   ansi-c*/
+/*     // }   ansi-c*/
 
    return 1;
 }
@@ -731,9 +731,9 @@ static int selctg(MKL_Complex16 *alpha, MKL_Complex16 *beta)
           absB = fabs(beta->real);
    if (absA) {
       double divhat = absB/absA;
-      //bug detected by Vasco Curdia and Daria Finocchiaro, 2/25/2004 CAS. A root of
-      //exactly 1.01 and no root between 1 and 1.02, led to div being stuck at 1.01
-      //and the 1.01 root being misclassified as stable.  Changing < to <= below fixes this.
+/*        //bug detected by Vasco Curdia and Daria Finocchiaro, 2/25/2004 CAS. A root of   ansi-c*/
+/*        //exactly 1.01 and no root between 1 and 1.02, led to div being stuck at 1.01   ansi-c*/
+/*        //and the 1.01 root being misclassified as stable.  Changing < to <= below fixes this.   ansi-c*/
       if (fixdiv && 1+REALSMALL<divhat && divhat<=stake)
          stake = (1+divhat)/2;
    }
@@ -754,7 +754,7 @@ static int selctg(MKL_Complex16 *alpha, MKL_Complex16 *beta)
 
 static int qz(MKL_Complex16 *a, MKL_Complex16 *b, MKL_Complex16 *q, MKL_Complex16 *z, int n)
 {
-//   unsigned char msg[101];
+/*  //   unsigned char msg[101];   ansi-c*/
    int sdim, lwork = -1, info = 0;
    MKL_Complex16 *alpha = tzMalloc(n,MKL_Complex16),
                  *beta = tzMalloc(n,MKL_Complex16),
@@ -842,37 +842,37 @@ static int qz(MKL_Complex16 *a, MKL_Complex16 *b, MKL_Complex16 *q, MKL_Complex1
  * while mxGetM(X) and mxGetN(X) determine the amount of data copied.
  */
 
-//MKL_Complex16* mat2mkl(const mxArray *X, int ldz, int ndz) {
-//   MKL_Complex16 *Z, *zp;
-//   int m, n, incz, cmplxflag;
-//   register int i, j;
-//   double *xr, *xi;
+/*  //MKL_Complex16* mat2mkl(const mxArray *X, int ldz, int ndz) {   ansi-c*/
+/*  //   MKL_Complex16 *Z, *zp;   ansi-c*/
+/*  //   int m, n, incz, cmplxflag;   ansi-c*/
+/*  //   register int i, j;   ansi-c*/
+/*  //   double *xr, *xi;   ansi-c*/
 
-//   Z = mxCalloc(ldz*ndz, sizeof(MKL_Complex16));
-//   xr = mxGetPr(X);
-//   xi = mxGetPi(X);
-//   m =  mxGetM(X);
-//   n =  mxGetN(X);
-//   zp = Z;
-//   incz = ldz-m;
-//   cmplxflag = (xi != NULL);
-//   for (j = 0; j < n; j++) {
-//      if (cmplxflag) {
-//         for (i = 0; i < m; i++) {
-//            zp->real = *xr++;
-//            zp->imag = *xi++;
-//            zp++;
-//         }
-//      } else {
-//         for (i = 0; i < m; i++) {
-//            zp->real = *xr++;
-//            zp++;
-//         }
-//      }
-//      zp += incz;
-//   }
-//   return(Z);
-//}
+/*  //   Z = mxCalloc(ldz*ndz, sizeof(MKL_Complex16));   ansi-c*/
+/*  //   xr = mxGetPr(X);   ansi-c*/
+/*  //   xi = mxGetPi(X);   ansi-c*/
+/*  //   m =  mxGetM(X);   ansi-c*/
+/*  //   n =  mxGetN(X);   ansi-c*/
+/*  //   zp = Z;   ansi-c*/
+/*  //   incz = ldz-m;   ansi-c*/
+/*  //   cmplxflag = (xi != NULL);   ansi-c*/
+/*  //   for (j = 0; j < n; j++) {   ansi-c*/
+/*  //      if (cmplxflag) {   ansi-c*/
+/*  //         for (i = 0; i < m; i++) {   ansi-c*/
+/*  //            zp->real = *xr++;   ansi-c*/
+/*  //            zp->imag = *xi++;   ansi-c*/
+/*  //            zp++;   ansi-c*/
+/*  //         }   ansi-c*/
+/*  //      } else {   ansi-c*/
+/*  //         for (i = 0; i < m; i++) {   ansi-c*/
+/*  //            zp->real = *xr++;   ansi-c*/
+/*  //            zp++;   ansi-c*/
+/*  //         }   ansi-c*/
+/*  //      }   ansi-c*/
+/*  //      zp += incz;   ansi-c*/
+/*  //   }   ansi-c*/
+/*  //   return(Z);   ansi-c*/
+/*  //}   ansi-c*/
 
 
 /*
@@ -884,29 +884,29 @@ static int qz(MKL_Complex16 *a, MKL_Complex16 *b, MKL_Complex16 *q, MKL_Complex1
  * with mxGetM(X) = m and mxGetN(X) = n.
  */
 
-//mxArray* mkl2mat(MKL_Complex16 *Z, int ldz, int m, int n) {
-//   int i, j, incz;
-//   double *xr, *xi;
-//   MKL_Complex16 *zp;
-//   mxArray *X;
+/*  //mxArray* mkl2mat(MKL_Complex16 *Z, int ldz, int m, int n) {   ansi-c*/
+/*  //   int i, j, incz;   ansi-c*/
+/*  //   double *xr, *xi;   ansi-c*/
+/*  //   MKL_Complex16 *zp;   ansi-c*/
+/*  //   mxArray *X;   ansi-c*/
 
-//   X = mxCreateDoubleMatrix(m,n,mxCOMPLEX);
-//   xr = mxGetPr(X);
-//   xi = mxGetPi(X);
-//   zp = Z;
-//   incz = ldz-m;
-//   for (j = 0; j < n; j++) {
-//      for (i = 0; i < m; i++) {
-//         *xr++ = zp->real;
-//         *xi++ = zp->imag;
-//         zp++;
-//      }
-//      zp += incz;
-//   }
-//   return(X);
-//}
+/*  //   X = mxCreateDoubleMatrix(m,n,mxCOMPLEX);   ansi-c*/
+/*  //   xr = mxGetPr(X);   ansi-c*/
+/*  //   xi = mxGetPi(X);   ansi-c*/
+/*  //   zp = Z;   ansi-c*/
+/*  //   incz = ldz-m;   ansi-c*/
+/*  //   for (j = 0; j < n; j++) {   ansi-c*/
+/*  //      for (i = 0; i < m; i++) {   ansi-c*/
+/*  //         *xr++ = zp->real;   ansi-c*/
+/*  //         *xi++ = zp->imag;   ansi-c*/
+/*  //         zp++;   ansi-c*/
+/*  //      }   ansi-c*/
+/*  //      zp += incz;   ansi-c*/
+/*  //   }   ansi-c*/
+/*  //   return(X);   ansi-c*/
+/*  //}   ansi-c*/
 
-//plhs[3] = mkl2mat(fmat, n, nunstab, nunstab)
+/*  //plhs[3] = mkl2mat(fmat, n, nunstab, nunstab)   ansi-c*/
 
 /*
  * Convert MKL complex storage to MATLAB real matrix ignoring imaginary part.
@@ -917,41 +917,41 @@ static int qz(MKL_Complex16 *a, MKL_Complex16 *b, MKL_Complex16 *q, MKL_Complex1
  * with mxGetM(X) = m and mxGetN(X) = n.
  */
 
-//mxArray* mkl2mat_real(MKL_Complex16 *Z, int ldz, int m, int n) {
-//   int i, j, incz;
-//   double *xr;
-//   MKL_Complex16 *zp;
-//   mxArray *X;
+/*  //mxArray* mkl2mat_real(MKL_Complex16 *Z, int ldz, int m, int n) {   ansi-c*/
+/*  //   int i, j, incz;   ansi-c*/
+/*  //   double *xr;   ansi-c*/
+/*  //   MKL_Complex16 *zp;   ansi-c*/
+/*  //   mxArray *X;   ansi-c*/
 
-//   X = mxCreateDoubleMatrix(m,n,mxREAL);
-//   xr = mxGetPr(X);
-//   zp = Z;
-//   incz = ldz-m;
-//   for (j = 0; j < n; j++) {
-//      for (i = 0; i < m; i++) {
-//         *xr++ = zp->real;
-//         zp++;
-//      }
-//      zp += incz;
-//   }
-//   return(X);
-//}
+/*  //   X = mxCreateDoubleMatrix(m,n,mxREAL);   ansi-c*/
+/*  //   xr = mxGetPr(X);   ansi-c*/
+/*  //   zp = Z;   ansi-c*/
+/*  //   incz = ldz-m;   ansi-c*/
+/*  //   for (j = 0; j < n; j++) {   ansi-c*/
+/*  //      for (i = 0; i < m; i++) {   ansi-c*/
+/*  //         *xr++ = zp->real;   ansi-c*/
+/*  //         zp++;   ansi-c*/
+/*  //      }   ansi-c*/
+/*  //      zp += incz;   ansi-c*/
+/*  //   }   ansi-c*/
+/*  //   return(X);   ansi-c*/
+/*  //}   ansi-c*/
 
-//void copy_eigenvalues(mxArray *gev, MKL_Complex16 *a, MKL_Complex16 *b, int n) {
-//   double *gevr = mxGetPr(gev),
-//          *gevi = mxGetPi(gev);
-//   int i;
+/*  //void copy_eigenvalues(mxArray *gev, MKL_Complex16 *a, MKL_Complex16 *b, int n) {   ansi-c*/
+/*  //   double *gevr = mxGetPr(gev),   ansi-c*/
+/*  //          *gevi = mxGetPi(gev);   ansi-c*/
+/*  //   int i;   ansi-c*/
 
-//   for (i=0; i<n; i++, gevr++, gevi++, a+=n+1) {
-//      *gevr = a->real;
-//      *gevi = a->imag;
-//   }
+/*  //   for (i=0; i<n; i++, gevr++, gevi++, a+=n+1) {   ansi-c*/
+/*  //      *gevr = a->real;   ansi-c*/
+/*  //      *gevi = a->imag;   ansi-c*/
+/*  //   }   ansi-c*/
 
-//   for (i=0; i<n; i++, gevr++, gevi++, b+=n+1) {
-//      *gevr = b->real;
-//      *gevi = b->imag;
-//   }
-//}
+/*  //   for (i=0; i<n; i++, gevr++, gevi++, b+=n+1) {   ansi-c*/
+/*  //      *gevr = b->real;   ansi-c*/
+/*  //      *gevi = b->imag;   ansi-c*/
+/*  //   }   ansi-c*/
+/*  //}   ansi-c*/
 
 static void copy_eigenvalues(TSdzmatrix *Gev_dzm, MKL_Complex16 *a, MKL_Complex16 *b)
 {
@@ -974,7 +974,7 @@ static void copy_eigenvalues(TSdzmatrix *Gev_dzm, MKL_Complex16 *a, MKL_Complex1
 
 static int compute_svd(MKL_Complex16 *x, MKL_Complex16 **u, double **d, MKL_Complex16 **v, int m, int n)
 {
-   //$$$Memory allocated to u, d, and v will be destroyed outside this function.$$$
+/*     //$$$Memory allocated to u, d, and v will be destroyed outside this function.$$$   ansi-c*/
    int tmpi;
    int md = m<n?m:n, lwork = -1, info = 0;
    MKL_Complex16 *a, *work, work1;
@@ -1018,7 +1018,7 @@ static int compute_svd(MKL_Complex16 *x, MKL_Complex16 **u, double **d, MKL_Comp
 
 static int compute_norm(MKL_Complex16 *a, double **d, int m, int n)
 {
-   //Memory will be allocated to d, which will be destroyed outside this function.
+/*     //Memory will be allocated to d, which will be destroyed outside this function.   ansi-c*/
    int md = m<n?m:n, lwork = -1, info = 0;
    MKL_Complex16 *work = NULL, work1;
    double *rwork = tzMalloc(5*md>1?5*md:1, double);
@@ -1052,72 +1052,72 @@ static int compute_norm(MKL_Complex16 *a, double **d, int m, int n)
 }
 
 
-//======= 03/01/06 TZ.  Commented out to be consistent with the CAS 3/10/04 correction. =======//
-//static int compute_normx(MKL_Complex16 *a, MKL_Complex16 *b, MKL_Complex16 *zwt, MKL_Complex16 *ueta, double **normx, int nunstab, int psin, int n, int bigev)
-//{
-//   //Memory is allocated to normx, which will be freed outside this function.
-//   int tmpi;
-//   int info = 0, i, bigevs;
-//   //
-//   MKL_Complex16 *M = NULL, *zwtx = NULL, *ux = NULL, *vx = NULL, *tmp = NULL;
-//   double *dx = NULL;
+/*  //======= 03/01/06 TZ.  Commented out to be consistent with the CAS 3/10/04 correction. =======//   ansi-c*/
+/*  //static int compute_normx(MKL_Complex16 *a, MKL_Complex16 *b, MKL_Complex16 *zwt, MKL_Complex16 *ueta, double **normx, int nunstab, int psin, int n, int bigev)   ansi-c*/
+/*  //{   ansi-c*/
+/*  //   //Memory is allocated to normx, which will be freed outside this function.   ansi-c*/
+/*  //   int tmpi;   ansi-c*/
+/*  //   int info = 0, i, bigevs;   ansi-c*/
+/*  //   //   ansi-c*/
+/*  //   MKL_Complex16 *M = NULL, *zwtx = NULL, *ux = NULL, *vx = NULL, *tmp = NULL;   ansi-c*/
+/*  //   double *dx = NULL;   ansi-c*/
 
 
-//   a += (n+1)*(n-nunstab);
-//   b += (n+1)*(n-nunstab);
-//   cblas_ztrsm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit,
-//      nunstab, psin, &one, b, n, zwt, nunstab);
-//   M = tzMalloc(nunstab*nunstab, MKL_Complex16);
-//   cblas_zdupe(nunstab, nunstab, a, n, M, nunstab);
-//   cblas_ztrsm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit,
-//      nunstab, nunstab, &one, b, n, M, nunstab);
+/*  //   a += (n+1)*(n-nunstab);   ansi-c*/
+/*  //   b += (n+1)*(n-nunstab);   ansi-c*/
+/*  //   cblas_ztrsm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit,   ansi-c*/
+/*  //      nunstab, psin, &one, b, n, zwt, nunstab);   ansi-c*/
+/*  //   M = tzMalloc(nunstab*nunstab, MKL_Complex16);   ansi-c*/
+/*  //   cblas_zdupe(nunstab, nunstab, a, n, M, nunstab);   ansi-c*/
+/*  //   cblas_ztrsm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit,   ansi-c*/
+/*  //      nunstab, nunstab, &one, b, n, M, nunstab);   ansi-c*/
 
-//   zwtx = tzMalloc(nunstab*nunstab*psin, MKL_Complex16);
-//   cblas_zcopy(nunstab*psin, zwt, 1, zwtx, 1);
-//   for (i=1; i<nunstab; i++) {
-//      cblas_ztrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, nunstab, psin*i, &one, M, nunstab, zwtx, nunstab);
-//      cblas_zcopy(nunstab*psin, zwt, 1, zwtx+nunstab*psin*i, 1);
-//   }
-//   tzDestroy(M);
-//   cblas_ztrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, nunstab, nunstab*psin, &one, b, n, zwtx, nunstab);
-//   info = compute_svd(zwtx, &ux, &dx, &vx, nunstab, nunstab*psin);  //Memory is allocated to ux, dx, and vx.
-//   tzDestroy(vx);
-//   tzDestroy(zwtx);
-//   if (info) {
-//      printf("WARNING: SVD failed.\n");
-//      tzDestroy(ux);
-//      tzDestroy(dx);
-//      return(info);
-//   }
-//   bigevs = nunstab;
-//   for (i=0; i<nunstab; i++)
-//      if (dx[i]<=REALSMALL) {
-//         bigevs = i;
-//         break;
-//      }
-//   tzDestroy(dx);
+/*  //   zwtx = tzMalloc(nunstab*nunstab*psin, MKL_Complex16);   ansi-c*/
+/*  //   cblas_zcopy(nunstab*psin, zwt, 1, zwtx, 1);   ansi-c*/
+/*  //   for (i=1; i<nunstab; i++) {   ansi-c*/
+/*  //      cblas_ztrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, nunstab, psin*i, &one, M, nunstab, zwtx, nunstab);   ansi-c*/
+/*  //      cblas_zcopy(nunstab*psin, zwt, 1, zwtx+nunstab*psin*i, 1);   ansi-c*/
+/*  //   }   ansi-c*/
+/*  //   tzDestroy(M);   ansi-c*/
+/*  //   cblas_ztrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, nunstab, nunstab*psin, &one, b, n, zwtx, nunstab);   ansi-c*/
+/*  //   info = compute_svd(zwtx, &ux, &dx, &vx, nunstab, nunstab*psin);  //Memory is allocated to ux, dx, and vx.   ansi-c*/
+/*  //   tzDestroy(vx);   ansi-c*/
+/*  //   tzDestroy(zwtx);   ansi-c*/
+/*  //   if (info) {   ansi-c*/
+/*  //      printf("WARNING: SVD failed.\n");   ansi-c*/
+/*  //      tzDestroy(ux);   ansi-c*/
+/*  //      tzDestroy(dx);   ansi-c*/
+/*  //      return(info);   ansi-c*/
+/*  //   }   ansi-c*/
+/*  //   bigevs = nunstab;   ansi-c*/
+/*  //   for (i=0; i<nunstab; i++)   ansi-c*/
+/*  //      if (dx[i]<=REALSMALL) {   ansi-c*/
+/*  //         bigevs = i;   ansi-c*/
+/*  //         break;   ansi-c*/
+/*  //      }   ansi-c*/
+/*  //   tzDestroy(dx);   ansi-c*/
 //   /* ux-ueta*ueta'*ux */
-//   tmp = tzMalloc(tmpi=nunstab*nunstab, MKL_Complex16);
-//   InitializeConstantMLK_Complex16(tmp, tmpi, 0.0);    //Must be initialized to 0.0 in order to have legal values of this pointer.
-//   cblas_zgemm(CblasColMajor, CblasNoTrans, CblasConjTrans, nunstab, nunstab,
-//      bigev, &one, ueta, nunstab, ueta, nunstab, &zero, tmp, nunstab);
-//   cblas_zhemm(CblasColMajor, CblasLeft, CblasUpper, nunstab,
-//      bigevs, &minusone, tmp, nunstab, ux, nunstab, &one, ux, nunstab);
-//   tzDestroy(tmp);
-//   info = compute_norm(ux, normx, nunstab, bigevs);  //Memory is allocated to normx.
-//   if (info) {
-//      printf("WARNING: SVD failed.\n");
-//      tzDestroy(normx);
-//      tzDestroy(ux);
-//      return(info);
-//   }
-//   tzDestroy(ux);
-//   return(info);
-//}
+/*  //   tmp = tzMalloc(tmpi=nunstab*nunstab, MKL_Complex16);   ansi-c*/
+/*  //   InitializeConstantMLK_Complex16(tmp, tmpi, 0.0);    //Must be initialized to 0.0 in order to have legal values of this pointer.   ansi-c*/
+/*  //   cblas_zgemm(CblasColMajor, CblasNoTrans, CblasConjTrans, nunstab, nunstab,   ansi-c*/
+/*  //      bigev, &one, ueta, nunstab, ueta, nunstab, &zero, tmp, nunstab);   ansi-c*/
+/*  //   cblas_zhemm(CblasColMajor, CblasLeft, CblasUpper, nunstab,   ansi-c*/
+/*  //      bigevs, &minusone, tmp, nunstab, ux, nunstab, &one, ux, nunstab);   ansi-c*/
+/*  //   tzDestroy(tmp);   ansi-c*/
+/*  //   info = compute_norm(ux, normx, nunstab, bigevs);  //Memory is allocated to normx.   ansi-c*/
+/*  //   if (info) {   ansi-c*/
+/*  //      printf("WARNING: SVD failed.\n");   ansi-c*/
+/*  //      tzDestroy(normx);   ansi-c*/
+/*  //      tzDestroy(ux);   ansi-c*/
+/*  //      return(info);   ansi-c*/
+/*  //   }   ansi-c*/
+/*  //   tzDestroy(ux);   ansi-c*/
+/*  //   return(info);   ansi-c*/
+/*  //}   ansi-c*/
 
 static void cblas_zdupe(int m, int n, MKL_Complex16 *a, int lda, MKL_Complex16 *b, int ldb)
 {
-   //Copying from a to b.
+/*     //Copying from a to b.   ansi-c*/
    int i;
    for (i=0; i<m; i++, a++, b++)
       cblas_zcopy(n, a, lda, b, ldb);
@@ -1150,7 +1150,7 @@ static MKL_Complex16* CreateComplexMatrix5RealMatrix(TSdmatrix *X_dm)
 {
    int mn, k;
    double *M;
-   //
+/*     //   ansi-c*/
    MKL_Complex16 *Z = NULL;
 
    if (!X_dm)  fn_DisplayError("CreateComplexMatrix5RealMatrix():  Input matrix X_dm must be allocated memory");
@@ -1168,7 +1168,7 @@ static MKL_Complex16* CreateComplexMatrix5RealVector(TSdvector *x_dv)
 {
    int n, k;
    double *v;
-   //
+/*     //   ansi-c*/
    MKL_Complex16 *Z = NULL;
 
    if (!x_dv)  fn_DisplayError("CreateComplexMatrix5RealVector():  Input vector x_dv must be allocated memory");
@@ -1211,15 +1211,15 @@ static void ComplexMatrix2RealVector(TSdvector *y_dv, MKL_Complex16 *Z)
 
 static TSdzmatrix *SubComplexMatrix2Zmatrix(TSdzmatrix *X_dzm, MKL_Complex16 *Z, const int nrowsforZ, const int _m, const int _n)
 {
-   //X_dzm is _m-by_n comlex types where nrowsforZ <= _m and Z is nrowsforZ-by-_n.
+/*     //X_dzm is _m-by_n comlex types where nrowsforZ <= _m and Z is nrowsforZ-by-_n.   ansi-c*/
    int _i, _j, incz;
    double *Mreal, *Mimag;
    MKL_Complex16 *zp;
-   //
+/*     //   ansi-c*/
    TSdzmatrix *Y_dzm = NULL;
 
    if (!X_dzm || X_dzm->real->nrows != _m || X_dzm->real->ncols != _n) {
-      DestroyMatrix_dz(X_dzm);  //Destroys Y_dzm if already allocated memory to accommodate a possbible change of its dimension.
+      DestroyMatrix_dz(X_dzm);   /*  Destroys Y_dzm if already allocated memory to accommodate a possbible change of its dimension.   ansi-c*/
       Y_dzm = CreateMatrix_dz(_m, _n);
    }
    else  Y_dzm = X_dzm;
@@ -1258,12 +1258,12 @@ static void InitializeConstantDouble(double *x_p,  const int _n, const double c)
 
 static void ConverteZeroSquareMatrix2RealDiagonalMLK_Complex16(MKL_Complex16 *x_pc,  const int _n, const double c)
 {
-   //Written by TZ, 03/08/06.
-   //Output:
-   //  x_pc: _n-by-_n, with the diagonal
-   //Inputs:
-   //  _n: dimension of x_pc so that x_pc is _n-by-_n.
-   //  x_pc: _n-by-_n, all initialized to zeros.
+/*     //Written by TZ, 03/08/06.   ansi-c*/
+/*     //Output:   ansi-c*/
+/*     //  x_pc: _n-by-_n, with the diagonal   ansi-c*/
+/*     //Inputs:   ansi-c*/
+/*     //  _n: dimension of x_pc so that x_pc is _n-by-_n.   ansi-c*/
+/*     //  x_pc: _n-by-_n, all initialized to zeros.   ansi-c*/
    int _i;
    int np1 = _n+1;
 

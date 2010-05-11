@@ -1,4 +1,4 @@
-// Created: August 4,2009
+/*  // Created: August 4,2009   ansi-c*/
 
 #ifndef __LAPACKCOMPAT__
 #define __LAPACKCOMPAT__

@@ -295,9 +295,9 @@ int dw_PrintDelimitedArray(FILE *f, void* array, char delimiter)
 
 
 */
-//#define INCREMENT 1024
-//int dw_ReadDelimitedField(FILE *f, int delimiter, int terminal, int flag, char **buffer, int *n)
-//{
+/*  //#define INCREMENT 1024   ansi-c*/
+/*  //int dw_ReadDelimitedField(FILE *f, int delimiter, int terminal, int flag, char **buffer, int *n)   ansi-c*/
+/*  //{   ansi-c*/
 /*   int ch;        // next character read */
 /*   int k=0;       // position to store next char, always less than *n */
 /*   int quoted=0; */
@@ -362,8 +362,8 @@ int dw_PrintDelimitedArray(FILE *f, void* array, char delimiter)
 /*   buffer[k]='\0'; */
 
 /*   return (ch == EOF) ? 3 : (ch == terminal) ? 2 : 1;  */
-//}
-//#undef INCREMENT
+/*  //}   ansi-c*/
+/*  //#undef INCREMENT   ansi-c*/
 
 /*
    Returns 1 if the null terminated string id is found at the beginning of a line

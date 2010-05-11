@@ -1,16 +1,16 @@
 #include "cstz.h"
 
 #include <float.h>
-#include <string.h>   //For memmove, etc.
+#include <string.h>    /*  For memmove, etc.   ansi-c*/
 #include "mathlib.h"
 
 #include "modify_for_mex.h"
 
-//????????
-//------- For computing inverse Hessian only. -------
-//static struct TStateModel_tag *SetModelGlobalForCovariance(struct TStateModel_tag *smodel_ps);
-//static double ObjFuncForSmodel(double *x0_p, int d_x0);
-//static double opt_logOverallPosteriorKernal(struct TStateModel_tag *smodel_ps, TSdvector *xchange_dv);
+/*  //????????   ansi-c*/
+/*  //------- For computing inverse Hessian only. -------   ansi-c*/
+/*  //static struct TStateModel_tag *SetModelGlobalForCovariance(struct TStateModel_tag *smodel_ps);   ansi-c*/
+/*  //static double ObjFuncForSmodel(double *x0_p, int d_x0);   ansi-c*/
+/*  //static double opt_logOverallPosteriorKernal(struct TStateModel_tag *smodel_ps, TSdvector *xchange_dv);   ansi-c*/
 
 static double logCondPostKernTimet(double *xchange_p, int t, struct TStateModel_tag *smodel_ps);
 static double neglogPostKern_hess(double *xchange_pd, struct TStateModel_tag *smodel_ps);
@@ -29,22 +29,22 @@ TSdp2m5 *CreateP2m5(const double p, const double bound)
    x_dp2m5->q = tzMalloc(5, double);
    x_dp2m5->m = tzMalloc(5, int);
 
-   //=== 5 markers.
+/*     //=== 5 markers.   ansi-c*/
    x_dp2m5->p[0] = 0.00;
    x_dp2m5->p[1] = 0.5*p;
    x_dp2m5->p[2] = p;
    x_dp2m5->p[3] = 0.5*(1.0+p);
    x_dp2m5->p[4] = 1.00;
-   //=== Now 9 markers.
-   // x_dp2m5->p[0] = 0.00;
-   // x_dp2m5->p[1] = 0.25*p
-   // x_dp2m5->p[2] = 0.5*p;
-   // x_dp2m5->p[3] = 0.75*p;
-   // x_dp2m5->p[4] = p;
-   // x_dp2m5->p[5] = 0.25 + 0.75*p;
-   // x_dp2m5->p[6] = 0.5*(1.0+p);
-   // x_dp2m5->p[7] = 0.75 + 0.25*p;
-   // x_dp2m5->p[8] = 1.00;
+/*     //=== Now 9 markers.   ansi-c*/
+/*     // x_dp2m5->p[0] = 0.00;   ansi-c*/
+/*     // x_dp2m5->p[1] = 0.25*p   ansi-c*/
+/*     // x_dp2m5->p[2] = 0.5*p;   ansi-c*/
+/*     // x_dp2m5->p[3] = 0.75*p;   ansi-c*/
+/*     // x_dp2m5->p[4] = p;   ansi-c*/
+/*     // x_dp2m5->p[5] = 0.25 + 0.75*p;   ansi-c*/
+/*     // x_dp2m5->p[6] = 0.5*(1.0+p);   ansi-c*/
+/*     // x_dp2m5->p[7] = 0.75 + 0.25*p;   ansi-c*/
+/*     // x_dp2m5->p[8] = 1.00;   ansi-c*/
 
    return (x_dp2m5);
 }
@@ -63,7 +63,7 @@ TSdp2m5 *DestroyP2m5(TSdp2m5 *x_dp2m5)
 TSdvectorp2m5 *CreateVectorP2m5(const int n, const double p, const double bound)
 {
    int _i;
-   //
+/*     //   ansi-c*/
    TSdvectorp2m5 *x_dvp2m5 = tzMalloc(1, TSdvectorp2m5);
 
    x_dvp2m5->n = n;
@@ -90,7 +90,7 @@ TSdvectorp2m5 *DestroyVectorP2m5(TSdvectorp2m5 *x_dvp2m5)
 TSdmatrixp2m5 *CreateMatrixP2m5(const int nrows, const int ncols, const double p, const double bound)
 {
    int _i;
-   //
+/*     //   ansi-c*/
    TSdmatrixp2m5 *X_dmp2m5 = tzMalloc(1, TSdmatrixp2m5);
 
    X_dmp2m5->nrows = nrows;
@@ -119,7 +119,7 @@ TSdcellp2m5 *CreateCellP2m5(const TSivector *rows_iv, const TSivector *cols_iv, 
 {
    int _i;
    int ncells;
-   //
+/*     //   ansi-c*/
    TSdcellp2m5 *X_dcp2m5 = tzMalloc(1, TSdcellp2m5);
 
 
@@ -151,7 +151,7 @@ TSdcellp2m5 *DestroyCellP2m5(TSdcellp2m5 *X_dcp2m5)
 TSdfourthp2m5 *CreateFourthP2m5(const int ndims, const TSivector *rows_iv, const TSivector *cols_iv, const double p, const double bound)
 {
    int _i;
-   //
+/*     //   ansi-c*/
    TSdfourthp2m5 *X_d4p2m5 = tzMalloc(1, TSdfourthp2m5);
 
 
@@ -185,14 +185,14 @@ TSdfourthp2m5 *DestroyFourthP2m5(TSdfourthp2m5 *X_d4p2m5)
 
 int P2m5Update(TSdp2m5 *x_dp2m5, const double newval)
 {
-   //5-marker P2 algorithm.
-   //quantiles q[0] to q[4] correspond to 5-marker probabilities {0.0, p/5, p, (1+p)/5, 1.0}.
-   //Outputs:
-   //  x_dp2m5->q, the markers x_dp2m5->m, is updated and only x_dp2m5->q[2] is used.
-   //Inputs:
-   //  newval: new random number.
-   //
-   // January 2003.
+/*     //5-marker P2 algorithm.   ansi-c*/
+/*     //quantiles q[0] to q[4] correspond to 5-marker probabilities {0.0, p/5, p, (1+p)/5, 1.0}.   ansi-c*/
+/*     //Outputs:   ansi-c*/
+/*     //  x_dp2m5->q, the markers x_dp2m5->m, is updated and only x_dp2m5->q[2] is used.   ansi-c*/
+/*     //Inputs:   ansi-c*/
+/*     //  newval: new random number.   ansi-c*/
+/*     //   ansi-c*/
+/*     // January 2003.   ansi-c*/
    int k, j;
    double a;
    double qm, dq;
@@ -201,10 +201,10 @@ int P2m5Update(TSdp2m5 *x_dp2m5, const double newval)
 
    if (!x_dp2m5)  fn_DisplayError(".../cstz.c/P2m5Update(): x_dp2m5 must be created");
 
-   //if (isgreater(newval, -P2REALBOUND) && isless(newval, P2REALBOUND)) {
+/*     //if (isgreater(newval, -P2REALBOUND) && isless(newval, P2REALBOUND)) {   ansi-c*/
    if (isfinite(newval) && newval > -x_dp2m5->bound && newval < x_dp2m5->bound) {
       if (++x_dp2m5->cnt > 5) {
-         //Updating the quantiles and markers.
+/*           //Updating the quantiles and markers.   ansi-c*/
          for (i=0; x_dp2m5->q[i]<=newval && i<5; i++) ;
          if (i==0) { x_dp2m5->q[0]=newval; i++; }
          if (i==5) { x_dp2m5->q[4]=newval; i--; }
@@ -230,15 +230,15 @@ int P2m5Update(TSdp2m5 *x_dp2m5, const double newval)
          }
       }
       else if (x_dp2m5->cnt < 5) {
-         //Fills the initial values.
+/*           //Fills the initial values.   ansi-c*/
          x_dp2m5->q[x_dp2m5->cnt-1] = newval;
          x_dp2m5->m[x_dp2m5->cnt-1] = x_dp2m5->cnt-1;
       }
       else {
-         //=== Last filling of initial values.
+/*           //=== Last filling of initial values.   ansi-c*/
          x_dp2m5->q[4] = newval;
          x_dp2m5->m[4] = 4;
-         //=== P2 algorithm begins with reshuffling quantiles and makers.
+/*           //=== P2 algorithm begins with reshuffling quantiles and makers.   ansi-c*/
          for (j=1; j<5; j++) {
             a = x_dp2m5->q[j];
             for (k=j-1; k>=0 && x_dp2m5->q[k]>a; k--)
@@ -247,7 +247,7 @@ int P2m5Update(TSdp2m5 *x_dp2m5, const double newval)
          }
       }
    }
-   else  ++x_dp2m5->ndeg;  //Throwing away the draws to treat exceptions.
+   else  ++x_dp2m5->ndeg;   /*  Throwing away the draws to treat exceptions.   ansi-c*/
 
    return (x_dp2m5->cnt);
 }
@@ -306,18 +306,18 @@ void P2m5FourthUpdate(TSdfourthp2m5 *X_d4p2m5, const TSdfourth *newval_d4)
 
 
 
-//---------------------------------------------------------------------
-//---------------------------------------------------------------------
+/*  //---------------------------------------------------------------------   ansi-c*/
+/*  //---------------------------------------------------------------------   ansi-c*/
 #if defined( CSMINWEL_OPTIMIZATION )
    #define STPS 6.0554544523933391e-6    /* step size = pow(DBL_EPSILON,1.0/3) */
    void fn_gradcd(double *g, double *x, int n, double grdh,
                   double (*fcn)(double *x, int n, double **args, int *dims),
                   double **args, int *dims) {
-      //Outputs:
-      //  g: the gradient n-by-1 g (no need to be initialized).
-      //Inputs:
-      //  grdh: step size.  If ==0.0, then dh is set automatically; otherwise, grdh is taken as a step size, often set as 1.0e-004.
-      //  x:  no change in the end although will be added or substracted by dh during the function (but in the end the original value will be put back).
+/*        //Outputs:   ansi-c*/
+/*        //  g: the gradient n-by-1 g (no need to be initialized).   ansi-c*/
+/*        //Inputs:   ansi-c*/
+/*        //  grdh: step size.  If ==0.0, then dh is set automatically; otherwise, grdh is taken as a step size, often set as 1.0e-004.   ansi-c*/
+/*        //  x:  no change in the end although will be added or substracted by dh during the function (but in the end the original value will be put back).   ansi-c*/
 
       double dh, fp, fm, tmp, *xp;
       int i;
@@ -325,12 +325,12 @@ void P2m5FourthUpdate(TSdfourthp2m5 *X_d4p2m5, const TSdfourth *newval_d4)
          dh = grdh?grdh:(fabs(*xp)<1?STPS:STPS*(*xp));
          tmp = *xp;
          *xp += dh;
-         dh = *xp - tmp;                   // This increases the precision slightly.
+         dh = *xp - tmp;                    /*   This increases the precision slightly.   ansi-c*/
          fp = fcn(x,n,args,dims);
          *xp = tmp - dh;
          fm = fcn(x,n,args,dims);
          *g = (fp-fm)/(2*dh);
-         *xp = tmp;                        // Put the original value of x[i] back to x[i] so that the content x[i] is still unaltered.
+         *xp = tmp;                         /*   Put the original value of x[i] back to x[i] so that the content x[i] is still unaltered.   ansi-c*/
       }
    }
    #undef STPS
@@ -398,14 +398,14 @@ void P2m5FourthUpdate(TSdfourthp2m5 *X_d4p2m5, const TSdfourth *newval_d4)
 #elif defined( IMSL_OPTIMIZATION )
    #define STPS 6.0554544523933391e-6    /* step size = pow(DBL_EPSILON,1.0/3) */
    void fn_gradcd(double *g, double *x, int n, double grdh,
-                  double fcn(int n, double *x) // IMSL
-                  //void NAG_CALL fcn(Integer n,double x[],double *f,double g[],Nag_Comm *comm)
+                  double fcn(int n, double *x)  /*   IMSL   ansi-c*/
+/*                    //void NAG_CALL fcn(Integer n,double x[],double *f,double g[],Nag_Comm *comm)   ansi-c*/
                   ) {
-      //Outputs:
-      //  g: the gradient n-by-1 g (no need to be initialized).
-      //Inputs:
-      //  grdh: step size.  If ==0.0, then dh is set automatically; otherwise, grdh is taken as a step size, often set as 1.0e-004.
-      //  x:  no change in the end although will be added or substracted by dh during the function (but in the end the original value will be put back).
+/*        //Outputs:   ansi-c*/
+/*        //  g: the gradient n-by-1 g (no need to be initialized).   ansi-c*/
+/*        //Inputs:   ansi-c*/
+/*        //  grdh: step size.  If ==0.0, then dh is set automatically; otherwise, grdh is taken as a step size, often set as 1.0e-004.   ansi-c*/
+/*        //  x:  no change in the end although will be added or substracted by dh during the function (but in the end the original value will be put back).   ansi-c*/
 
       double dh, fp, fm, tmp, *xp;
       int i;
@@ -413,22 +413,22 @@ void P2m5FourthUpdate(TSdfourthp2m5 *X_d4p2m5, const TSdfourth *newval_d4)
          dh = grdh?grdh:(fabs(*xp)<1?STPS:STPS*(*xp));
          tmp = *xp;
          *xp += dh;
-         dh = *xp - tmp;                   // This increases the precision slightly.
-         fp = fcn(n,x); // IMSL
+         dh = *xp - tmp;                    /*   This increases the precision slightly.   ansi-c*/
+         fp = fcn(n,x);  /*   IMSL   ansi-c*/
          //fcn(n,x,&fp,NULL,NULL); /* NAG */
          *xp = tmp - dh;
-         fm = fcn(n,x); // IMSL
-         //fcn(n,x,&fm,NULL,NULL);
+         fm = fcn(n,x);  /*   IMSL   ansi-c*/
+/*           //fcn(n,x,&fm,NULL,NULL);   ansi-c*/
          *g = (fp-fm)/(2*dh);
-         *xp = tmp;                        // Put the original value of x[i] back to x[i] so that the content x[i] is still unaltered.
+         *xp = tmp;                         /*   Put the original value of x[i] back to x[i] so that the content x[i] is still unaltered.   ansi-c*/
       }
    }
    #undef STPS
 
    #define STPS 6.0554544523933391e-6    /* step size = pow(DBL_EPSILON,1.0/3) */
    void fn_hesscd(double *H, double *x, int n, double grdh,
-                  double fcn(int n, double *x) // IMSL
-                  //void NAG_CALL fcn(Integer n,double x[],double *f,double g[],Nag_Comm *comm)
+                  double fcn(int n, double *x)  /*   IMSL   ansi-c*/
+/*                    //void NAG_CALL fcn(Integer n,double x[],double *f,double g[],Nag_Comm *comm)   ansi-c*/
                   ) {
       double dhi, dhj, f1, f2, f3, f4, tmpi, tmpj, *xpi, *xpj;
       int i, j;
@@ -438,8 +438,8 @@ void P2m5FourthUpdate(TSdfourthp2m5 *X_d4p2m5, const TSdfourth *newval_d4)
          for (j=i, xpj=x+i; j<n; j++, xpj++)
             if (i==j) {
                /* f2 = f3 when i = j */
-               f2 = fcn(n,x); // IMSL
-               //fcn(n,x,&f2,NULL,NULL);
+               f2 = fcn(n,x);  /*   IMSL   ansi-c*/
+/*                 //fcn(n,x,&f2,NULL,NULL);   ansi-c*/
 
                /* this increases precision slightly */
                *xpi += dhi;
@@ -447,11 +447,11 @@ void P2m5FourthUpdate(TSdfourthp2m5 *X_d4p2m5, const TSdfourth *newval_d4)
 
                /* calculate f1 and f4 */
                *xpi = tmpi + 2*dhi;
-               f1 = fcn(n,x); // IMSL
-               //fcn(n,x,&f1,NULL,NULL);
+               f1 = fcn(n,x);  /*   IMSL   ansi-c*/
+/*                 //fcn(n,x,&f1,NULL,NULL);   ansi-c*/
                *xpi = tmpi - 2*dhi;
                f4 = fcn(n,x); /* IMSL */
-               //fcn(n,x,&f4,NULL,NULL);
+/*                 //fcn(n,x,&f4,NULL,NULL);   ansi-c*/
 
                /* diagonal element */
                H[i*(n+1)] = (f1-2*f2+f4)/(4*dhi*dhi);
@@ -470,18 +470,18 @@ void P2m5FourthUpdate(TSdfourthp2m5 *X_d4p2m5, const TSdfourth *newval_d4)
 
                /* calculate f1, f2, f3 and f4 */
                *xpj = tmpj + dhj;
-               f1 = fcn(n,x); // IMSL
-               //fcn(n,x,&f1,NULL,NULL);
+               f1 = fcn(n,x);  /*   IMSL   ansi-c*/
+/*                 //fcn(n,x,&f1,NULL,NULL);   ansi-c*/
                *xpi = tmpi - dhi;
-               f2 = fcn(n,x); // IMSL
-               //fcn(n,x,&f2,NULL,NULL);
+               f2 = fcn(n,x);  /*   IMSL   ansi-c*/
+/*                 //fcn(n,x,&f2,NULL,NULL);   ansi-c*/
                *xpi = tmpi + dhi;
                *xpj = tmpj - dhj;
-               f3 = fcn(n,x); // IMSL
-               //fcn(n,x,&f3,NULL,NULL);
+               f3 = fcn(n,x);  /*   IMSL   ansi-c*/
+/*                 //fcn(n,x,&f3,NULL,NULL);   ansi-c*/
                *xpi = tmpi - dhi;
-               f4 = fcn(n,x); // IMSL
-               //fcn(n,x,&f4,NULL,NULL);
+               f4 = fcn(n,x);  /*   IMSL   ansi-c*/
+/*                 //fcn(n,x,&f4,NULL,NULL);   ansi-c*/
 
                /* symmetric elements */
                H[i+j*n] = H[j+i*n] = (f1-f2-f3+f4)/(4*dhi*dhj);
@@ -497,88 +497,88 @@ void P2m5FourthUpdate(TSdfourthp2m5 *X_d4p2m5, const TSdfourth *newval_d4)
 
 
 
-//-------------------------------
-//Modified from fn_gradcd() in cstz.c for the conjugate gradient method I or II
-//-------------------------------
-#define STPS 1.0e-04    // 6.0554544523933391e-6 step size = pow(DBL_EPSILON,1.0/3)
-#define GRADMANUAL  1.0e+01   //Arbitrarily (manually) set gradient.
+/*  //-------------------------------   ansi-c*/
+/*  //Modified from fn_gradcd() in cstz.c for the conjugate gradient method I or II   ansi-c*/
+/*  //-------------------------------   ansi-c*/
+#define STPS 1.0e-04     /*   6.0554544523933391e-6 step size = pow(DBL_EPSILON,1.0/3)   ansi-c*/
+#define GRADMANUAL  1.0e+01    /*  Arbitrarily (manually) set gradient.   ansi-c*/
 void gradcd_gen(double *g, double *x, int n, double (*fcn)(double *x, int n), double *grdh, double f0) {
-   //Outputs:
-   //  g: the gradient n-by-1 g (no need to be initialized).
-   //Inputs:
-   //  x: the vector point at which the gradient is evaluated.  No change in the end although will be added or substracted by dh during the function (but in the end the original value will be put back).
-   //  n: the dimension of g or x.
-   //  fcn(): the function for which the gradient is evaluated
-   //  grdh: step size.  If NULL, then dh is set automatically; otherwise, grdh is taken as a step size, often set as 1.0e-004.
-   //  f0: the value of (*fcn)(x).   NOT used in this function except dealing with the boundary (NEARINFINITY) for the
-   //    minimization problem, but to be compatible with a genral function call where, say, gradfw_gen() and cubic
-   //    interpolation of central difference method will use f0.
+/*     //Outputs:   ansi-c*/
+/*     //  g: the gradient n-by-1 g (no need to be initialized).   ansi-c*/
+/*     //Inputs:   ansi-c*/
+/*     //  x: the vector point at which the gradient is evaluated.  No change in the end although will be added or substracted by dh during the function (but in the end the original value will be put back).   ansi-c*/
+/*     //  n: the dimension of g or x.   ansi-c*/
+/*     //  fcn(): the function for which the gradient is evaluated   ansi-c*/
+/*     //  grdh: step size.  If NULL, then dh is set automatically; otherwise, grdh is taken as a step size, often set as 1.0e-004.   ansi-c*/
+/*     //  f0: the value of (*fcn)(x).   NOT used in this function except dealing with the boundary (NEARINFINITY) for the   ansi-c*/
+/*     //    minimization problem, but to be compatible with a genral function call where, say, gradfw_gen() and cubic   ansi-c*/
+/*     //    interpolation of central difference method will use f0.   ansi-c*/
 
    double dh, dhi, dh2i, fp, fm, tmp, *xp;
    int i;
 
    if (grdh) {
-      //=== If f0 >= NEARINFINITY, we're in a bad region and so we assume it's flat in this bad region. This assumption may or may not work for a third-party optimimization routine.
+/*        //=== If f0 >= NEARINFINITY, we're in a bad region and so we assume it's flat in this bad region. This assumption may or may not work for a third-party optimimization routine.   ansi-c*/
       if (f0 >= NEARINFINITY)
       {
          for (i=n-1; i>=0; i--)
             g[i] = GRADMANUAL;
-         return;;   //Early exit.
+         return;;    /*  Early exit.   ansi-c*/
       }
 
       dh2i = (dhi=1.0/(dh=*grdh))/2.0;
       for (i=0, xp=x; i<n; i++, xp++, g++) {
          tmp = *xp;
          *xp += dh;
-         //The following statement is bad because dh does not get reset at the beginning of the loop and thus may get changed continually within the loop.
-         //  dh = *xp - tmp;                   // This increases the precision slightly.
-         fp = fcn(x, n); //For frprmn() CGI_OPTIMIZATION
-         //fp = fcn(n,x); // IMSL
-         //fcn(n,x,&fp,NULL,NULL); /* NAG */
+/*           //The following statement is bad because dh does not get reset at the beginning of the loop and thus may get changed continually within the loop.   ansi-c*/
+/*           //  dh = *xp - tmp;                   // This increases the precision slightly.   ansi-c*/
+         fp = fcn(x, n);  /*  For frprmn() CGI_OPTIMIZATION   ansi-c*/
+/*           //fp = fcn(n,x); // IMSL   ansi-c*/
+/*         //fcn(n,x,&fp,NULL,NULL); /* NAG */
          *xp = tmp - dh;
-         fm = fcn(x, n); //For frprmn() CGI_OPTIMIZATION
-         //fm = fcn(n,x); // IMSL
-         //fcn(n,x,&fm,NULL,NULL);
+         fm = fcn(x, n);  /*  For frprmn() CGI_OPTIMIZATION   ansi-c*/
+/*           //fm = fcn(n,x); // IMSL   ansi-c*/
+/*           //fcn(n,x,&fm,NULL,NULL);   ansi-c*/
 
-         //=== Checking the boundary condition for the minimization problem.
+/*           //=== Checking the boundary condition for the minimization problem.   ansi-c*/
          if ((fp < NEARINFINITY) && (fm < NEARINFINITY))  *g = (fp-fm)*dh2i;
          else if (fp < NEARINFINITY)  *g = (fp-f0)*dhi;
          else if (fm < NEARINFINITY)  *g = (f0-fm)*dhi;
          else  *g = GRADMANUAL;
 
-         *xp = tmp;                        // Put the original value of x[i] back to x[i] so that the content x[i] is still unaltered.
+         *xp = tmp;                         /*   Put the original value of x[i] back to x[i] so that the content x[i] is still unaltered.   ansi-c*/
       }
 
    }
    else {
-      //=== If f0 >= NEARINFINITY, we're in a bad region and so we assume it's flat in this bad region. This assumption may or may not work for a third-party optimimization routine.
+/*        //=== If f0 >= NEARINFINITY, we're in a bad region and so we assume it's flat in this bad region. This assumption may or may not work for a third-party optimimization routine.   ansi-c*/
       if (f0 >= NEARINFINITY)
       {
          for (i=n-1; i>=0; i--)
             g[i] = GRADMANUAL;
-         return;;   //Early exit.
+         return;;    /*  Early exit.   ansi-c*/
       }
 
       for (i=0, xp=x; i<n; i++, xp++, g++) {
          dh = fabs(*xp)<=1 ? STPS : STPS*(*xp);
          tmp = *xp;
          *xp += dh;
-         dh = *xp - tmp;                   // This increases the precision slightly.
-         fp = fcn(x, n);   //For frprmn() CGI_OPTIMIZATION
-         //fp = fcn(n,x); // IMSL
-         //fcn(n,x,&fp,NULL,NULL); /* NAG */
+         dh = *xp - tmp;                    /*   This increases the precision slightly.   ansi-c*/
+         fp = fcn(x, n);    /*  For frprmn() CGI_OPTIMIZATION   ansi-c*/
+/*           //fp = fcn(n,x); // IMSL   ansi-c*/
+/*         //fcn(n,x,&fp,NULL,NULL); /* NAG */
          *xp = tmp - dh;
-         fm = fcn(x, n); //For frprmn() CGI_OPTIMIZATION
-         //fm = fcn(n,x); // IMSL
-         //fcn(n,x,&fm,NULL,NULL);
+         fm = fcn(x, n);  /*  For frprmn() CGI_OPTIMIZATION   ansi-c*/
+/*           //fm = fcn(n,x); // IMSL   ansi-c*/
+/*           //fcn(n,x,&fm,NULL,NULL);   ansi-c*/
 
-         //=== Checking the boundary condition for the minimization problem.
+/*           //=== Checking the boundary condition for the minimization problem.   ansi-c*/
          if ((fp < 0.5*NEARINFINITY) && (fm < 0.5*NEARINFINITY))  *g = (fp-fm)/(2.0*dh);
          else if (fp < 0.5*NEARINFINITY)  *g = (fp-f0)/dh;
          else if (fm < 0.5*NEARINFINITY)  *g = (f0-fm)/dh;
          else  *g = GRADMANUAL;
 
-         *xp = tmp;                        // Put the original value of x[i] back to x[i] so that the content x[i] is still unaltered.
+         *xp = tmp;                         /*   Put the original value of x[i] back to x[i] so that the content x[i] is still unaltered.   ansi-c*/
       }
    }
 }
@@ -586,21 +586,21 @@ void gradcd_gen(double *g, double *x, int n, double (*fcn)(double *x, int n), do
 #undef GRADMANUAL
 
 
-//-------------------------------
-//Forward difference gradient: much faster than gradcd_gen() when the objective function is very expensive to evaluate.
-//-------------------------------
-#define STPS 1.0e-04    // 6.0554544523933391e-6 step size = pow(DBL_EPSILON,1.0/3)
+/*  //-------------------------------   ansi-c*/
+/*  //Forward difference gradient: much faster than gradcd_gen() when the objective function is very expensive to evaluate.   ansi-c*/
+/*  //-------------------------------   ansi-c*/
+#define STPS 1.0e-04     /*   6.0554544523933391e-6 step size = pow(DBL_EPSILON,1.0/3)   ansi-c*/
 void gradfd_gen(double *g, double *x, int n, double (*fcn)(double *x, int n), double *grdh, double f0) {
-   //Outputs:
-   //  g: the gradient n-by-1 g (no need to be initialized).
-   //Inputs:
-   //  x: the vector point at which the gradient is evaluated.  No change in the end although will be added or substracted by dh during the function (but in the end the original value will be put back).
-   //  n: the dimension of g or x.
-   //  fcn(): the function for which the gradient is evaluated
-   //  grdh: step size.  If NULL, then dh is set automatically; otherwise, grdh is taken as a step size, often set as 1.0e-004.
-   //  f0: the value of (*fcn)(x).   NOT used in this function except dealing with the boundary (NEARINFINITY) for the
-   //    minimization problem, but to be compatible with a genral function call where, say, gradfw_gen() and cubic
-   //    interpolation of central difference method will use f0.
+/*     //Outputs:   ansi-c*/
+/*     //  g: the gradient n-by-1 g (no need to be initialized).   ansi-c*/
+/*     //Inputs:   ansi-c*/
+/*     //  x: the vector point at which the gradient is evaluated.  No change in the end although will be added or substracted by dh during the function (but in the end the original value will be put back).   ansi-c*/
+/*     //  n: the dimension of g or x.   ansi-c*/
+/*     //  fcn(): the function for which the gradient is evaluated   ansi-c*/
+/*     //  grdh: step size.  If NULL, then dh is set automatically; otherwise, grdh is taken as a step size, often set as 1.0e-004.   ansi-c*/
+/*     //  f0: the value of (*fcn)(x).   NOT used in this function except dealing with the boundary (NEARINFINITY) for the   ansi-c*/
+/*     //    minimization problem, but to be compatible with a genral function call where, say, gradfw_gen() and cubic   ansi-c*/
+/*     //    interpolation of central difference method will use f0.   ansi-c*/
 
    double dh, dhi, fp, tmp, *xp;
    int i;
@@ -610,13 +610,13 @@ void gradfd_gen(double *g, double *x, int n, double (*fcn)(double *x, int n), do
          dh = fabs(*xp)<=1 ? STPS : STPS*(*xp);
          tmp = *xp;
          *xp += dh;
-         if ( (fp=fcn(x, n)) < NEARINFINITY )  *g = (fp-f0)*dhi;   //For frprmn() CGI_OPTIMIZATION
+         if ( (fp=fcn(x, n)) < NEARINFINITY )  *g = (fp-f0)*dhi;    /*  For frprmn() CGI_OPTIMIZATION   ansi-c*/
          else {
-            //Switches to the other side of the boundary.
+/*              //Switches to the other side of the boundary.   ansi-c*/
             *xp = tmp - dh;
             *g = (f0-fcn(x,n))*dhi;
          }
-         *xp = tmp;                        // Put the original value of x[i] back to x[i] so that the content x[i] is still unaltered.
+         *xp = tmp;                         /*   Put the original value of x[i] back to x[i] so that the content x[i] is still unaltered.   ansi-c*/
       }
 
    }
@@ -625,15 +625,15 @@ void gradfd_gen(double *g, double *x, int n, double (*fcn)(double *x, int n), do
          dh = fabs(*xp)<=1 ? STPS : STPS*(*xp);
          tmp = *xp;
          *xp += dh;
-         dh = *xp - tmp;                   // This increases the precision slightly.
-         if ( (fp=fcn(x, n)) < NEARINFINITY )  *g = (fp-f0)/dh;   //For frprmn() CGI_OPTIMIZATION
+         dh = *xp - tmp;                    /*   This increases the precision slightly.   ansi-c*/
+         if ( (fp=fcn(x, n)) < NEARINFINITY )  *g = (fp-f0)/dh;    /*  For frprmn() CGI_OPTIMIZATION   ansi-c*/
          else {
-            //Switches to the other side of the boundary.
+/*              //Switches to the other side of the boundary.   ansi-c*/
             *xp = tmp - dh;
             *g = (f0-fcn(x,n))/dh;
          }
 
-         *xp = tmp;                        // Put the original value of x[i] back to x[i] so that the content x[i] is still unaltered.
+         *xp = tmp;                         /*   Put the original value of x[i] back to x[i] so that the content x[i] is still unaltered.   ansi-c*/
       }
    }
 }
@@ -641,26 +641,26 @@ void gradfd_gen(double *g, double *x, int n, double (*fcn)(double *x, int n), do
 
 
 
-//====================================================================================================
-//= Central difference gradient for logLH at time t, using DW's smodel.
-//====================================================================================================
-#define STPS 1.0e-04    // 6.0554544523933391e-6 step size = pow(DBL_EPSILON,1.0/3)
-#define GRADMANUAL  1.0e+01   //Arbitrarily (manually) set gradient.
+/*  //====================================================================================================   ansi-c*/
+/*  //= Central difference gradient for logLH at time t, using DW's smodel.   ansi-c*/
+/*  //====================================================================================================   ansi-c*/
+#define STPS 1.0e-04     /*   6.0554544523933391e-6 step size = pow(DBL_EPSILON,1.0/3)   ansi-c*/
+#define GRADMANUAL  1.0e+01    /*  Arbitrarily (manually) set gradient.   ansi-c*/
 void gradcd_timet(TSdvector *g_dv, TSdvector *x_dv, int t, struct TStateModel_tag *smodel_ps, double (*fcn)(double *x, int t, struct TStateModel_tag *smodel_ps), double grdh, double f0)
 {
-   //Outputs:
-   //  g_dv: the gradient n-by-1 g (no need to be initialized).
-   //Inputs:
-   //  x_dv: the vector point at which the gradient is evaluated.  No change in the end although will be added or substracted by dh during the function (but in the end the original value will be put back).
-   //  fcn(): the log LH or posterior function for which the gradient is evaluated
-   //  grdh: step size.  If 0.0, then dh is set automatically; otherwise, grdh is taken as a step size, often set as 1.0e-004.
-   //  f0: the value of (*fcn)(x).   NOT used in this function except dealing with the boundary (NEARINFINITY) for the
-   //    minimization problem, but to be compatible with a genral function call where, say, gradfw_gen() and cubic
-   //    interpolation of central difference method will use f0.
+/*     //Outputs:   ansi-c*/
+/*     //  g_dv: the gradient n-by-1 g (no need to be initialized).   ansi-c*/
+/*     //Inputs:   ansi-c*/
+/*     //  x_dv: the vector point at which the gradient is evaluated.  No change in the end although will be added or substracted by dh during the function (but in the end the original value will be put back).   ansi-c*/
+/*     //  fcn(): the log LH or posterior function for which the gradient is evaluated   ansi-c*/
+/*     //  grdh: step size.  If 0.0, then dh is set automatically; otherwise, grdh is taken as a step size, often set as 1.0e-004.   ansi-c*/
+/*     //  f0: the value of (*fcn)(x).   NOT used in this function except dealing with the boundary (NEARINFINITY) for the   ansi-c*/
+/*     //    minimization problem, but to be compatible with a genral function call where, say, gradfw_gen() and cubic   ansi-c*/
+/*     //    interpolation of central difference method will use f0.   ansi-c*/
 
    double dh, dhi, dh2i, fp, fm, tmp, *xp;
    int i;
-   //--- Accessible variables.
+/*     //--- Accessible variables.   ansi-c*/
    int n;
    double *g, *x;
 
@@ -674,116 +674,116 @@ void gradcd_timet(TSdvector *g_dv, TSdvector *x_dv, int t, struct TStateModel_ta
 
    if (grdh>0.0)
    {
-      //=== If f0 <= -0.5*NEARINFINITY, we're in a bad region and so we assume it's GRADMANUAL in this bad region. This assumption may or may not work for a third-party optimimization routine.
+/*        //=== If f0 <= -0.5*NEARINFINITY, we're in a bad region and so we assume it's GRADMANUAL in this bad region. This assumption may or may not work for a third-party optimimization routine.   ansi-c*/
       if (f0 < -0.5*NEARINFINITY)
       {
          for (i=n-1; i>=0; i--)
             g[i] = GRADMANUAL;
-         return;;   //Early exit.
+         return;;    /*  Early exit.   ansi-c*/
       }
 
       dh2i = (dhi=1.0/(dh=grdh))/2.0;
       for (i=0, xp=x; i<n; i++, xp++, g++) {
          tmp = *xp;
          *xp += dh;
-         //The following statement is bad because dh does not get reset at the beginning of the loop and thus may get changed continually within the loop.
-         //  dh = *xp - tmp;                   // This increases the precision slightly.
+/*           //The following statement is bad because dh does not get reset at the beginning of the loop and thus may get changed continually within the loop.   ansi-c*/
+/*           //  dh = *xp - tmp;                   // This increases the precision slightly.   ansi-c*/
          fp = fcn(x, t, smodel_ps);
          *xp = tmp - dh;
          fm = fcn(x, t, smodel_ps);
 
-         //=== Checking the boundary condition for the minimization problem.
+/*           //=== Checking the boundary condition for the minimization problem.   ansi-c*/
          if ((fp > -0.5*NEARINFINITY) && (fm > -0.5*NEARINFINITY))  *g = (fp-fm)*dh2i;
          else if (fp > -0.5*NEARINFINITY)  *g = (fp-f0)*dhi;
          else if (fm > -0.5*NEARINFINITY)  *g = (f0-fm)*dhi;
          else  *g = GRADMANUAL;
 
-         *xp = tmp;                        // Put the original value of x[i] back to x[i] so that the content x[i] is still unaltered.
+         *xp = tmp;                         /*   Put the original value of x[i] back to x[i] so that the content x[i] is still unaltered.   ansi-c*/
       }
 
    }
    else {
-      //=== If f0 <= -0.5*NEARINFINITY, we're in a bad region and so we assume it's GRADMANUAL in this bad region. This assumption may or may not work for a third-party optimimization routine.
+/*        //=== If f0 <= -0.5*NEARINFINITY, we're in a bad region and so we assume it's GRADMANUAL in this bad region. This assumption may or may not work for a third-party optimimization routine.   ansi-c*/
       if (f0 <= -0.5*NEARINFINITY)
       {
          for (i=n-1; i>=0; i--)
             g[i] = GRADMANUAL;
-         return;;   //Early exit.
+         return;;    /*  Early exit.   ansi-c*/
       }
 
       for (i=0, xp=x; i<n; i++, xp++, g++) {
          dh = fabs(*xp)<=1 ? STPS : STPS*(*xp);
          tmp = *xp;
          *xp += dh;
-         dh = *xp - tmp;                   // This increases the precision slightly.
+         dh = *xp - tmp;                    /*   This increases the precision slightly.   ansi-c*/
          fp = fcn(x, t, smodel_ps);
          *xp = tmp - dh;
          fm = fcn(x, t, smodel_ps);
 
-         //=== Checking the boundary condition for the minimization problem.
+/*           //=== Checking the boundary condition for the minimization problem.   ansi-c*/
          if ((fp > -0.5*NEARINFINITY) && (fm > -0.5*NEARINFINITY))  *g = (fp-fm)/(2.0*dh);
          else if (fp > -0.5*NEARINFINITY)  *g = (fp-f0)/dh;
          else if (fm > -0.5*NEARINFINITY)  *g = (f0-fm)/dh;
          else  *g = GRADMANUAL;
 
-         *xp = tmp;                        // Put the original value of x[i] back to x[i] so that the content x[i] is still unaltered.
+         *xp = tmp;                         /*   Put the original value of x[i] back to x[i] so that the content x[i] is still unaltered.   ansi-c*/
       }
    }
    g_dv->flag = V_DEF;
 }
 #undef STPS
 #undef GRADMANUAL
-//---
+/*  //---   ansi-c*/
 #if defined (__SWITCHING_VER_200__)
 static double logCondPostKernTimet(double *xchange_pd, int t, struct TStateModel_tag *smodel_ps)
 {
-   //Evaluating log conditional posterior kernel at time t -- p(y_t | Y_{t-1}, theta, q).
+/*     //Evaluating log conditional posterior kernel at time t -- p(y_t | Y_{t-1}, theta, q).   ansi-c*/
    int fss = smodel_ps->nobs - smodel_ps->fobs + 1;
    double *x1_pd, *x2_pd;
 
 
    x1_pd = xchange_pd;
    x2_pd = xchange_pd + NumberFreeParametersTheta(smodel_ps);
-        //Note that NumberFreeParametersTheta() is DW's function, which points to TZ's function.
-        //In the constant parameter model, this will point to an invalid place,
-        //  but will be taken care of automatically by DW's function ConvertFreeParametersToQ().
+/*          //Note that NumberFreeParametersTheta() is DW's function, which points to TZ's function.   ansi-c*/
+/*          //In the constant parameter model, this will point to an invalid place,   ansi-c*/
+/*          //  but will be taken care of automatically by DW's function ConvertFreeParametersToQ().   ansi-c*/
 
-   //======= This is a must step to refresh the value at the new point. =======
-   ConvertFreeParametersToTheta(smodel_ps, x1_pd);   //Waggoner's function, which calls TZ's Convertphi2*().
-   ConvertFreeParametersToQ(smodel_ps, x2_pd);   //Waggoner's function, which automatically takes care of the constant-parameter situition
-   ThetaChanged(smodel_ps); //DW's function, which will also call my function to set a flag for refreshing everything under these new parameters.
+/*     //======= This is a must step to refresh the value at the new point. =======   ansi-c*/
+   ConvertFreeParametersToTheta(smodel_ps, x1_pd);    /*  Waggoner's function, which calls TZ's Convertphi2*().   ansi-c*/
+   ConvertFreeParametersToQ(smodel_ps, x2_pd);    /*  Waggoner's function, which automatically takes care of the constant-parameter situition   ansi-c*/
+   ThetaChanged(smodel_ps);  /*  DW's function, which will also call my function to set a flag for refreshing everything under these new parameters.   ansi-c*/
 
 
-   if (1)  //Posterior function.
-      return ( LogConditionalLikelihood_StatesIntegratedOut(t, smodel_ps) + LogPrior(smodel_ps)/((double)fss) ); //DW's function.
+   if (1)   /*  Posterior function.   ansi-c*/
+      return ( LogConditionalLikelihood_StatesIntegratedOut(t, smodel_ps) + LogPrior(smodel_ps)/((double)fss) );  /*  DW's function.   ansi-c*/
    else //Likelihood (with no prior)
-      return ( LogConditionalLikelihood_StatesIntegratedOut(t, smodel_ps) ); //DW's function.
+      return ( LogConditionalLikelihood_StatesIntegratedOut(t, smodel_ps) );  /*  DW's function.   ansi-c*/
 }
 #endif
 
-//------------------------
-// Computing the Hessian at the log posterior or log likelihood peak, using the outer-product Hessian.
-//------------------------
+/*  //------------------------   ansi-c*/
+/*  // Computing the Hessian at the log posterior or log likelihood peak, using the outer-product Hessian.   ansi-c*/
+/*  //------------------------   ansi-c*/
 #if defined (__SWITCHING_VER_200__)
 TSdmatrix *ComputeHessianFromOuterProduct(TSdmatrix *Hessian_dm, struct TStateModel_tag *smodel_ps, TSdvector *xhat_dv)
 {
-   //Output:
-   //  Hessian_dm: its inverse equals to Omega (covariance matrix) produced by ComputeCovarianceFromOuterProduct().
-   //Inputs:
-   //  xhat_dv: Hessian at this point.
+/*     //Output:   ansi-c*/
+/*     //  Hessian_dm: its inverse equals to Omega (covariance matrix) produced by ComputeCovarianceFromOuterProduct().   ansi-c*/
+/*     //Inputs:   ansi-c*/
+/*     //  xhat_dv: Hessian at this point.   ansi-c*/
 
    int ti;
    double f0;
    int nData = smodel_ps->nobs;
-   //===
+/*     //===   ansi-c*/
    TSdvector *grad_dv;
 
 
    grad_dv = CreateVector_lf(xhat_dv->n);
    if (!Hessian_dm)  Hessian_dm = CreateConstantMatrix_lf(xhat_dv->n, xhat_dv->n, 0.0);
 
-   //=== Computing the outer-product Hessian.
-   for (ti=smodel_ps->fobs; ti<=nData; ti++)  //Base-1 set-up, thus <=nData, NOT <nData.
+/*     //=== Computing the outer-product Hessian.   ansi-c*/
+   for (ti=smodel_ps->fobs; ti<=nData; ti++)   /*  Base-1 set-up, thus <=nData, NOT <nData.   ansi-c*/
    {
       f0 = logCondPostKernTimet(xhat_dv->v, ti, smodel_ps);
       gradcd_timet(grad_dv, xhat_dv, ti, smodel_ps, logCondPostKernTimet, 0.0, f0);
@@ -791,72 +791,72 @@ TSdmatrix *ComputeHessianFromOuterProduct(TSdmatrix *Hessian_dm, struct TStateMo
    }
 
 
-   SUtoGE(Hessian_dm); //Making upper symmetric matarix to a full matrix.
-   Hessian_dm->flag = M_GE; //Reset this flag, so
-   ScalarTimesMatrixSquare(Hessian_dm, 0.5, Hessian_dm, 'T', 0.5);  //Making it symmetric against some rounding errors.
-                      //This making-symmetric is very IMPORTANT; otherwise, we will get the matrix being singular message
-                      //    and eigenvalues being negative for the SPD matrix, etc.  Then the likelihood becomes either
-                      //    a bad number or a complex number.
+   SUtoGE(Hessian_dm);  /*  Making upper symmetric matarix to a full matrix.   ansi-c*/
+   Hessian_dm->flag = M_GE;  /*  Reset this flag, so   ansi-c*/
+   ScalarTimesMatrixSquare(Hessian_dm, 0.5, Hessian_dm, 'T', 0.5);   /*  Making it symmetric against some rounding errors.   ansi-c*/
+/*                        //This making-symmetric is very IMPORTANT; otherwise, we will get the matrix being singular message   ansi-c*/
+/*                        //    and eigenvalues being negative for the SPD matrix, etc.  Then the likelihood becomes either   ansi-c*/
+/*                        //    a bad number or a complex number.   ansi-c*/
    Hessian_dm->flag |= M_SU | M_SL;
 
 
-   //===
+/*     //===   ansi-c*/
    DestroyVector_lf(grad_dv);
 
    return (Hessian_dm);
 }
-//------------------------
-// Computing the covariance matrix for standard errors at the log posterior or likelihood peak, using the outer-product Hessian.
-//------------------------
+/*  //------------------------   ansi-c*/
+/*  // Computing the covariance matrix for standard errors at the log posterior or likelihood peak, using the outer-product Hessian.   ansi-c*/
+/*  //------------------------   ansi-c*/
 TSdmatrix *ComputeCovarianceFromOuterProduct(TSdmatrix *Omega_dm, struct TStateModel_tag *smodel_ps, TSdvector *xhat_dv)
 {
-   //Output:
-   //  Omega_dm: covariance matrix, which equals to the inverse of the Hessian produced by ComputeHessianFromOuterProduct().
-   //Inputs:
-   //  xhat_dv: Hessian at this point.
+/*     //Output:   ansi-c*/
+/*     //  Omega_dm: covariance matrix, which equals to the inverse of the Hessian produced by ComputeHessianFromOuterProduct().   ansi-c*/
+/*     //Inputs:   ansi-c*/
+/*     //  xhat_dv: Hessian at this point.   ansi-c*/
 
    int ti;
    double f0;
    int nData = smodel_ps->nobs;
-   //===
+/*     //===   ansi-c*/
    TSdvector *grad_dv;
 
 
    grad_dv = CreateVector_lf(xhat_dv->n);
    if (!Omega_dm)  Omega_dm = CreateConstantMatrix_lf(xhat_dv->n, xhat_dv->n, 0.0);
 
-   //=== Computing the outer-product Hessian.
-   for (ti=smodel_ps->fobs; ti<=nData; ti++)  //Base-1 set-up, thus <=nData, NOT <nData.
+/*     //=== Computing the outer-product Hessian.   ansi-c*/
+   for (ti=smodel_ps->fobs; ti<=nData; ti++)   /*  Base-1 set-up, thus <=nData, NOT <nData.   ansi-c*/
    {
       f0 = logCondPostKernTimet(xhat_dv->v, ti, smodel_ps);
       gradcd_timet(grad_dv, xhat_dv, ti, smodel_ps, logCondPostKernTimet, 0.0, f0);
       VectorTimesSelf(Omega_dm, grad_dv, 1.0, 1.0, 'U');
    }
-   SUtoGE(Omega_dm); //Making upper symmetric matarix to a full matrix.
-   ScalarTimesMatrixSquare(Omega_dm, 0.5, Omega_dm, 'T', 0.5);  //Making it symmetric against some rounding errors.
-                      //This making-symmetric is very IMPORTANT; otherwise, we will get the matrix being singular message
-                      //    and eigenvalues being negative for the SPD matrix, etc.  Then the likelihood becomes either
-                      //    a bad number or a complex number.
+   SUtoGE(Omega_dm);  /*  Making upper symmetric matarix to a full matrix.   ansi-c*/
+   ScalarTimesMatrixSquare(Omega_dm, 0.5, Omega_dm, 'T', 0.5);   /*  Making it symmetric against some rounding errors.   ansi-c*/
+/*                        //This making-symmetric is very IMPORTANT; otherwise, we will get the matrix being singular message   ansi-c*/
+/*                        //    and eigenvalues being negative for the SPD matrix, etc.  Then the likelihood becomes either   ansi-c*/
+/*                        //    a bad number or a complex number.   ansi-c*/
    Omega_dm->flag |= M_SU | M_SL;
 
 
-   //--- Converting or inverting the Hessian to covariance.
+/*     //--- Converting or inverting the Hessian to covariance.   ansi-c*/
    if (invspd(Omega_dm, Omega_dm, 'U'))
       fn_DisplayError(".../cstz.c/ComputeCovarianceFromOuterProduct(): Hessian must be invertible");
 
 
-   //-- Doubly safe to force it to be symmetric.
-   SUtoGE(Omega_dm); //Making upper symmetric matarix to a full matrix.
-   ScalarTimesMatrixSquare(Omega_dm, 0.5, Omega_dm, 'T', 0.5);  //Making it symmetric against some rounding errors.
-                      //This making-symmetric is very IMPORTANT; otherwise, we will get the matrix being singular message
-                      //    and eigenvalues being negative for the SPD matrix, etc.  Then the likelihood becomes either
-                      //    a bad number or a complex number.
+/*     //-- Doubly safe to force it to be symmetric.   ansi-c*/
+   SUtoGE(Omega_dm);  /*  Making upper symmetric matarix to a full matrix.   ansi-c*/
+   ScalarTimesMatrixSquare(Omega_dm, 0.5, Omega_dm, 'T', 0.5);   /*  Making it symmetric against some rounding errors.   ansi-c*/
+/*                        //This making-symmetric is very IMPORTANT; otherwise, we will get the matrix being singular message   ansi-c*/
+/*                        //    and eigenvalues being negative for the SPD matrix, etc.  Then the likelihood becomes either   ansi-c*/
+/*                        //    a bad number or a complex number.   ansi-c*/
    Omega_dm->flag |= M_SU | M_SL;
 
-   //--- Checking if it's symmetric, positive definite.
+/*     //--- Checking if it's symmetric, positive definite.   ansi-c*/
 
 
-   //===
+/*     //===   ansi-c*/
    DestroyVector_lf(grad_dv);
 
    return (Omega_dm);
@@ -864,16 +864,16 @@ TSdmatrix *ComputeCovarianceFromOuterProduct(TSdmatrix *Omega_dm, struct TStateM
 
 
 
-//------------------------
-// Computing the Hessian at the log posterior or log likelihood peak, using second derivatives.
-//------------------------
+/*  //------------------------   ansi-c*/
+/*  // Computing the Hessian at the log posterior or log likelihood peak, using second derivatives.   ansi-c*/
+/*  //------------------------   ansi-c*/
 TSdmatrix *ComputeHessianFrom2ndDerivative(TSdmatrix *Hessian_dm, struct TStateModel_tag *smodel_ps, TSdvector *xhat_dv)
 {
-   //Output:
-   //  Hessian_dm: its inverse equals to Omega (covariance matrix).
-   //    The flag is set to  M_GE | M_SU | M_SL by hesscd_smodel().
-   //Inputs:
-   //  xhat_dv: Hessian at this point.
+/*     //Output:   ansi-c*/
+/*     //  Hessian_dm: its inverse equals to Omega (covariance matrix).   ansi-c*/
+/*     //    The flag is set to  M_GE | M_SU | M_SL by hesscd_smodel().   ansi-c*/
+/*     //Inputs:   ansi-c*/
+/*     //  xhat_dv: Hessian at this point.   ansi-c*/
 
    double f0;
    int nData = smodel_ps->nobs;
@@ -881,29 +881,29 @@ TSdmatrix *ComputeHessianFrom2ndDerivative(TSdmatrix *Hessian_dm, struct TStateM
 
    if (!Hessian_dm)  Hessian_dm = CreateConstantMatrix_lf(xhat_dv->n, xhat_dv->n, 0.0);
 
-   //=== Computing the inner-product Hessian.
+/*     //=== Computing the inner-product Hessian.   ansi-c*/
    f0 = neglogPostKern_hess(xhat_dv->v, smodel_ps);
    hesscd_smodel(Hessian_dm, xhat_dv, smodel_ps, neglogPostKern_hess, 0.0, f0);
 
    return (Hessian_dm);
 }
-//---
+/*  //---   ansi-c*/
 #define STPS 1.0e-4 //6.0554544523933391e-6    /* step size = pow(DBL_EPSILON,1.0/3) */
 static void hesscd_smodel(TSdmatrix *H_dm, TSdvector *x_dv, struct TStateModel_tag *smodel_ps, double (*fcn)(double *, struct TStateModel_tag *), double grdh, double f0)
 {
-   //Outputs:
-   //  H_dm: the Hessian n-by-n (no need to be initialized).
-   //Inputs:
-   //  x_dv: the vector point at which the gradient is evaluated.  No change in the end although will be added or substracted by dh during the function (but in the end the original value will be put back).
-   //  fcn(): the negative (-) log LH or posterior function for which the gradient is evaluated
-   //  grdh: step size.  If 0.0, then dh is set automatically; otherwise, grdh is taken as a step size, often set as 1.0e-004.
-   //  f0: the value of (*fcn)(x).   NOT used in this function except dealing with the boundary (NEARINFINITY) for the
-   //    minimization problem, but to be compatible with a genral function call where, say, gradfw_gen() and cubic
-   //    interpolation of central difference method will use f0.
+/*     //Outputs:   ansi-c*/
+/*     //  H_dm: the Hessian n-by-n (no need to be initialized).   ansi-c*/
+/*     //Inputs:   ansi-c*/
+/*     //  x_dv: the vector point at which the gradient is evaluated.  No change in the end although will be added or substracted by dh during the function (but in the end the original value will be put back).   ansi-c*/
+/*     //  fcn(): the negative (-) log LH or posterior function for which the gradient is evaluated   ansi-c*/
+/*     //  grdh: step size.  If 0.0, then dh is set automatically; otherwise, grdh is taken as a step size, often set as 1.0e-004.   ansi-c*/
+/*     //  f0: the value of (*fcn)(x).   NOT used in this function except dealing with the boundary (NEARINFINITY) for the   ansi-c*/
+/*     //    minimization problem, but to be compatible with a genral function call where, say, gradfw_gen() and cubic   ansi-c*/
+/*     //    interpolation of central difference method will use f0.   ansi-c*/
 
    double dhi, dhj, f1, f2, f3, f4, tmpi, tmpj, *xpi, *xpj;
    int i, j;
-   //--- Accessible variables.
+/*     //--- Accessible variables.   ansi-c*/
    int n;
    double *H, *x;
 
@@ -972,42 +972,42 @@ static void hesscd_smodel(TSdmatrix *H_dm, TSdvector *x_dv, struct TStateModel_t
          }
    }
 
-   //--- To be safe.
+/*     //--- To be safe.   ansi-c*/
    H_dm->flag = M_SU;
-   SUtoGE(H_dm); //Making upper symmetric matarix to a full matrix.
-   H_dm->flag = M_GE; //Reset this flag, so
+   SUtoGE(H_dm);  /*  Making upper symmetric matarix to a full matrix.   ansi-c*/
+   H_dm->flag = M_GE;  /*  Reset this flag, so   ansi-c*/
 
-   ScalarTimesMatrixSquare(H_dm, 0.5, H_dm, 'T', 0.5);  //Making it symmetric against some rounding errors.
-                      //This making-symmetric is very IMPORTANT; otherwise, we will get the matrix being singular message
-                      //    and eigenvalues being negative for the SPD matrix, etc.  Then the likelihood becomes either
-                      //    a bad number or a complex number.
+   ScalarTimesMatrixSquare(H_dm, 0.5, H_dm, 'T', 0.5);   /*  Making it symmetric against some rounding errors.   ansi-c*/
+/*                        //This making-symmetric is very IMPORTANT; otherwise, we will get the matrix being singular message   ansi-c*/
+/*                        //    and eigenvalues being negative for the SPD matrix, etc.  Then the likelihood becomes either   ansi-c*/
+/*                        //    a bad number or a complex number.   ansi-c*/
    H_dm->flag |= M_SU | M_SL;
 }
 #undef STPS
-//---
+/*  //---   ansi-c*/
 static double neglogPostKern_hess(double *xchange_pd, struct TStateModel_tag *smodel_ps)
 {
-   //Evaluating negative log posterior kernel p(y_T | theta, q).
+/*     //Evaluating negative log posterior kernel p(y_T | theta, q).   ansi-c*/
    int fss = smodel_ps->nobs - smodel_ps->fobs + 1;
    double *x1_pd, *x2_pd;
 
 
    x1_pd = xchange_pd;
    x2_pd = xchange_pd + NumberFreeParametersTheta(smodel_ps);
-        //Note that NumberFreeParametersTheta() is DW's function, which points to TZ's function.
-        //In the constant parameter model, this will point to an invalid place,
-        //  but will be taken care of automatically by DW's function ConvertFreeParametersToQ().
+/*          //Note that NumberFreeParametersTheta() is DW's function, which points to TZ's function.   ansi-c*/
+/*          //In the constant parameter model, this will point to an invalid place,   ansi-c*/
+/*          //  but will be taken care of automatically by DW's function ConvertFreeParametersToQ().   ansi-c*/
 
-   //======= This is a must step to refresh the value at the new point. =======
-   ConvertFreeParametersToTheta(smodel_ps, x1_pd);   //Waggoner's function, which calls TZ's Convertphi2*().
-   ConvertFreeParametersToQ(smodel_ps, x2_pd);   //Waggoner's function, which automatically takes care of the constant-parameter situition
-   ThetaChanged(smodel_ps); //DW's function, which will also call my function to set a flag for refreshing everything under these new parameters.
+/*     //======= This is a must step to refresh the value at the new point. =======   ansi-c*/
+   ConvertFreeParametersToTheta(smodel_ps, x1_pd);    /*  Waggoner's function, which calls TZ's Convertphi2*().   ansi-c*/
+   ConvertFreeParametersToQ(smodel_ps, x2_pd);    /*  Waggoner's function, which automatically takes care of the constant-parameter situition   ansi-c*/
+   ThetaChanged(smodel_ps);  /*  DW's function, which will also call my function to set a flag for refreshing everything under these new parameters.   ansi-c*/
 
 
-   if (1)  //Posterior function.
-      return ( -LogLikelihood_StatesIntegratedOut(smodel_ps) - LogPrior(smodel_ps) ); //DW's function.
+   if (1)   /*  Posterior function.   ansi-c*/
+      return ( -LogLikelihood_StatesIntegratedOut(smodel_ps) - LogPrior(smodel_ps) );  /*  DW's function.   ansi-c*/
    else //Likelihood (with no prior)
-      return ( -LogLikelihood_StatesIntegratedOut(smodel_ps) ); //DW's function.
+      return ( -LogLikelihood_StatesIntegratedOut(smodel_ps) );  /*  DW's function.   ansi-c*/
 }
 #endif
 
@@ -1020,7 +1020,7 @@ static double neglogPostKern_hess(double *xchange_pd, struct TStateModel_tag *sm
 
 
 
-//????????????????
+/*  //????????????????   ansi-c*/
 /**
 //===
 static struct TStateModel_tag *SMODEL_PS = NULL;    //Minimization to find the MLE or posterior peak.
@@ -1073,13 +1073,13 @@ static double opt_logOverallPosteriorKernal(struct TStateModel_tag *smodel_ps, T
 
 int next_permutation(int *first, int *last)
 {
-   // Given the permulation, say, [3 2 1 0], the ouput is the next permulation [0 1 2 3], and so on.
-   // Note that last is simply a pointer.  Because it is not allocated to a memory, it cannot be accessed.
-   //   So last is used for (1) gauging the dimension size of the array first;
-   //                       (2) being accssed but with --last (which points to a valid memory place), NOT last.
-   //
-   // first: n-by-1 vector of integers filled with 0, 1, 2, ..., n.
-   // last:  simply a pointer to the address after the last element of first.  Note that no memory is allocated.
+/*     // Given the permulation, say, [3 2 1 0], the ouput is the next permulation [0 1 2 3], and so on.   ansi-c*/
+/*     // Note that last is simply a pointer.  Because it is not allocated to a memory, it cannot be accessed.   ansi-c*/
+/*     //   So last is used for (1) gauging the dimension size of the array first;   ansi-c*/
+/*     //                       (2) being accssed but with --last (which points to a valid memory place), NOT last.   ansi-c*/
+/*     //   ansi-c*/
+/*     // first: n-by-1 vector of integers filled with 0, 1, 2, ..., n.   ansi-c*/
+/*     // last:  simply a pointer to the address after the last element of first.  Note that no memory is allocated.   ansi-c*/
 
    int *i = last, *ii, *j, tmp;
    if (first == last || first == --i)
@@ -1132,14 +1132,14 @@ int main() {
 
 
 int fn_cumsum_int(int *x_v, const int d_x_v) {
-   //Outputs:
-   //  x_v: an int vector of cumulative sums over an input int vector.
-   //  return: the sum of an input int vector.
-   //Inputs:
-   //  x_v: a vector of ints.
-   //  d_x_v: dimension of x_v.
-   //
-   // Compute cumulative sums of a vector of ints.
+/*     //Outputs:   ansi-c*/
+/*     //  x_v: an int vector of cumulative sums over an input int vector.   ansi-c*/
+/*     //  return: the sum of an input int vector.   ansi-c*/
+/*     //Inputs:   ansi-c*/
+/*     //  x_v: a vector of ints.   ansi-c*/
+/*     //  d_x_v: dimension of x_v.   ansi-c*/
+/*     //   ansi-c*/
+/*     // Compute cumulative sums of a vector of ints.   ansi-c*/
    int _i;
 
    if (x_v==NULL) fn_DisplayError(".../cstz/fn_cumsum_lf:  x_v must be allocated with memory");
@@ -1153,14 +1153,14 @@ int fn_cumsum_int(int *x_v, const int d_x_v) {
 
 
 double fn_cumsum_lf(double *x_v, const int d_x_v) {
-   //Outputs:
-   //  x_v: a double vector of cumulative sums over an input double vector.
-   //  return: the sum of an input double vector.
-   //Inputs:
-   //  x_v: a vector of doubles.
-   //  d_x_v: dimension of x_v.
-   //
-   // Compute cumulative sums of a vector of doubles.
+/*     //Outputs:   ansi-c*/
+/*     //  x_v: a double vector of cumulative sums over an input double vector.   ansi-c*/
+/*     //  return: the sum of an input double vector.   ansi-c*/
+/*     //Inputs:   ansi-c*/
+/*     //  x_v: a vector of doubles.   ansi-c*/
+/*     //  d_x_v: dimension of x_v.   ansi-c*/
+/*     //   ansi-c*/
+/*     // Compute cumulative sums of a vector of doubles.   ansi-c*/
    int _i;
 
    if (!x_v) fn_DisplayError(".../cstz/fn_cumsum_lf:  x_v must be allocated with memory");
@@ -1183,8 +1183,8 @@ double fn_mean(const double *a_v, const int _n) {
    return x;
 }
 
-//<<---------------
-static double *tz_BaseForComp;          // This base variable is to be sorted and thus made global for this source file.
+/*  //<<---------------   ansi-c*/
+static double *tz_BaseForComp;           /*   This base variable is to be sorted and thus made global for this source file.   ansi-c*/
 void fn_SetBaseArrayForComp(TSdvector *x_dv)
 {
    if ( !x_dv->flag )   fn_DisplayError(".../cstz.c/ftd_SetBaseArrayForComp(): input vector used for comparison must be given legal values");
@@ -1192,44 +1192,44 @@ void fn_SetBaseArrayForComp(TSdvector *x_dv)
 }
 int fn_compare(const void *i1, const void *i2)
 {
-   // Ascending order according to tz_BaseForComp.
+/*     // Ascending order according to tz_BaseForComp.   ansi-c*/
    return ( (tz_BaseForComp[*((int*)i1)]<tz_BaseForComp[*((int*)i2)]) ? -1 : (tz_BaseForComp[*((int*)i1)]>tz_BaseForComp[*((int*)i2)]) ? 1 : 0 );
 }
 int fn_compare2(const void *i1, const void *i2)
 {
-   // Descending order according to tz_BaseForComp.
+/*     // Descending order according to tz_BaseForComp.   ansi-c*/
    return ( (tz_BaseForComp[*((int*)i1)]<tz_BaseForComp[*((int*)i2)]) ? 1 : (tz_BaseForComp[*((int*)i1)]>tz_BaseForComp[*((int*)i2)]) ? -1 : 0);
 }
-//======= Quick sort. =======
+/*  //======= Quick sort. =======   ansi-c*/
 static int ftd_CompareDouble(const void *a, const void *b)
 {
-   // Ascending order for the series that contains a and b.
+/*     // Ascending order for the series that contains a and b.   ansi-c*/
    return (*(double *)a < *(double *)b ? -1 : *(double *)a > *(double *)b ? 1 : 0);
 }
 static int ftd_CompareDouble2(const void *a, const void *b)
 {
-   // Dscending order for the series that contains a and b.
+/*     // Dscending order for the series that contains a and b.   ansi-c*/
    return (*(double *)a < *(double *)b ? 1 : *(double *)a > *(double *)b ? -1 : 0);
 }
-//---
+/*  //---   ansi-c*/
 void tz_sort(TSdvector *x_dv, char ad)
 {
-   //x_dv will be replaced by the sorted value.
-   //Sort x_dv according to the descending or ascending order indicated by ad.
-   //ad == "A' or 'a': acending order.
-   //ad == 'D' or 'd': descending order.
+/*     //x_dv will be replaced by the sorted value.   ansi-c*/
+/*     //Sort x_dv according to the descending or ascending order indicated by ad.   ansi-c*/
+/*     //ad == "A' or 'a': acending order.   ansi-c*/
+/*     //ad == 'D' or 'd': descending order.   ansi-c*/
    if (!x_dv || !x_dv->flag)  fn_DisplayError("cstz.c/tz_sort(): input vector x_dv must be (1) created and (2) assigned values");
 
    qsort( (void *)x_dv->v, (size_t)x_dv->n, sizeof(double), ((ad=='A') || (ad=='a')) ? ftd_CompareDouble : ftd_CompareDouble2);
 }
 void tz_sortindex_lf(TSivector *x_iv, TSdvector *base_dv, char ad)
 {
-   //???????NOT fully tested yet.
-   //x_iv will be replaced by the sorted integer vector.
-   //base_dv will not be affected.
-   //Sort x_iv according to the descending or ascending order of base_dv.
-   //ad == "A' or 'a': acending order.
-   //ad == 'D' or 'd': descending order.
+/*     //???????NOT fully tested yet.   ansi-c*/
+/*     //x_iv will be replaced by the sorted integer vector.   ansi-c*/
+/*     //base_dv will not be affected.   ansi-c*/
+/*     //Sort x_iv according to the descending or ascending order of base_dv.   ansi-c*/
+/*     //ad == "A' or 'a': acending order.   ansi-c*/
+/*     //ad == 'D' or 'd': descending order.   ansi-c*/
    if (!x_iv || !base_dv || !x_iv->flag || !base_dv->flag)  fn_DisplayError("cstz.c/tz_sortindex(): input vectors x_iv and base_dv must be (1) created and (2) assigned values");
    if (x_iv->n != base_dv->n)  fn_DisplayError("cstz.c/tz_sortindex(): lengths of the two input vectors must be the same");
 
@@ -1238,32 +1238,32 @@ void tz_sortindex_lf(TSivector *x_iv, TSdvector *base_dv, char ad)
 }
 void tz_sortindex(TSivector *x_iv, TSvoidvector *base_voidv, char ad)
 {
-   //???????NOT fully tested yet.
-   //Allowing x_iv = base_voidv or sets base_voidv=NULL
-   //Sort x_iv according to the descending or ascending order of base_voidv.
-   //ad == "A' or 'a': acending order.
-   //ad == 'D' or 'd': descending order.
+/*     //???????NOT fully tested yet.   ansi-c*/
+/*     //Allowing x_iv = base_voidv or sets base_voidv=NULL   ansi-c*/
+/*     //Sort x_iv according to the descending or ascending order of base_voidv.   ansi-c*/
+/*     //ad == "A' or 'a': acending order.   ansi-c*/
+/*     //ad == 'D' or 'd': descending order.   ansi-c*/
    if (!x_iv || !base_voidv || !x_iv->flag || !base_voidv->flag)  fn_DisplayError("cstz.c/tz_sort_int(): input vectors x_iv and base_voidv must be (1) created and (2) assigned values");
    if (x_iv->n != base_voidv->n)  fn_DisplayError("cstz.c/tz_sort_int(): lengths of the two input vectors must be the same");
 
    fn_SetBaseArrayForComp((TSdvector *)base_voidv);
    qsort( (void *)x_iv->v, (size_t)x_iv->n, sizeof(int), ((ad=='A') || (ad=='a')) ? fn_compare : fn_compare2);
 }
-//---
+/*  //---   ansi-c*/
 void tz_sort_matrix(TSdmatrix *X_dm, char ad, char rc)
 {
-   //Fast method: rc = 'C' (sort each column).
-   //Output: X_dm will be replaced by the sorted value.
-   //  Sort X_dm (1) by columns or rows indicated by rc and (2) according to the descending or ascending order indicated by ad.
-   //Inputs:
-   //  ad == 'A' or 'a': acending order.
-   //  ad == 'D' or 'd': descending order.
-   //  rc == 'C' or 'c': sort each column.
-   //  rc == 'R' or 'r': sort each row.
+/*     //Fast method: rc = 'C' (sort each column).   ansi-c*/
+/*     //Output: X_dm will be replaced by the sorted value.   ansi-c*/
+/*     //  Sort X_dm (1) by columns or rows indicated by rc and (2) according to the descending or ascending order indicated by ad.   ansi-c*/
+/*     //Inputs:   ansi-c*/
+/*     //  ad == 'A' or 'a': acending order.   ansi-c*/
+/*     //  ad == 'D' or 'd': descending order.   ansi-c*/
+/*     //  rc == 'C' or 'c': sort each column.   ansi-c*/
+/*     //  rc == 'R' or 'r': sort each row.   ansi-c*/
    int nrows, ncols, _j, begloc;
    TSdvector x_sdv;
    double *X;
-   //===
+/*     //===   ansi-c*/
    TSdmatrix *Xtran_dm = NULL;
 
    if (!X_dm || !(X_dm->flag & M_GE))  fn_DisplayError("cstz.c/tz_sort_matrix(): input matrix X_dm must be (1) created and (2) assigned values and (3) regular (M_GE)");
@@ -1292,26 +1292,26 @@ void tz_sort_matrix(TSdmatrix *X_dm, char ad, char rc)
    if (rc=='R' || rc=='r')
    {
       tz_TransposeRegular(X_dm, Xtran_dm);
-      //===
+/*        //===   ansi-c*/
       DestroyMatrix_lf(Xtran_dm);
    }
 }
-//---
+/*  //---   ansi-c*/
 TSdvector *tz_prctile_matrix(TSdvector *z_dv, const double prc, TSdmatrix *Z_dm, const char rc)
 {
-   //Fast method: rc = 'C' (sort each column).
-   //Output:  %prc percentile (i.e., containing 0% to %prc).
-   //  z_dv: an n-by-1 vector if rc=='C' or an m-by-1 vector if rc=='R'.
-   //  If z_dv==NULL, it will be created and has to be destroyed outside this function.
-   //Inputs:
-   //  prc: percent (must be between 0.0 and 1.0 inclusive).
-   //  X_dm: an m-by-n general matrix.
-   //  rc == 'C' or 'c': sort each column.
-   //  rc == 'R' or 'r': sort each row.
+/*     //Fast method: rc = 'C' (sort each column).   ansi-c*/
+/*     //Output:  %prc percentile (i.e., containing 0% to %prc).   ansi-c*/
+/*     //  z_dv: an n-by-1 vector if rc=='C' or an m-by-1 vector if rc=='R'.   ansi-c*/
+/*     //  If z_dv==NULL, it will be created and has to be destroyed outside this function.   ansi-c*/
+/*     //Inputs:   ansi-c*/
+/*     //  prc: percent (must be between 0.0 and 1.0 inclusive).   ansi-c*/
+/*     //  X_dm: an m-by-n general matrix.   ansi-c*/
+/*     //  rc == 'C' or 'c': sort each column.   ansi-c*/
+/*     //  rc == 'R' or 'r': sort each row.   ansi-c*/
    int nrows, ncols, _j, begloc;
    TSdvector x_sdv;
    double *X;
-   //===
+/*     //===   ansi-c*/
    TSdmatrix *X_dm = NULL;
    TSdmatrix *Xtran_dm = NULL;
 
@@ -1363,26 +1363,26 @@ TSdvector *tz_prctile_matrix(TSdvector *z_dv, const double prc, TSdmatrix *Z_dm,
    z_dv->flag = V_DEF;
    if (rc=='R' || rc=='r')  DestroyMatrix_lf(Xtran_dm);
 
-   //===
+/*     //===   ansi-c*/
    DestroyMatrix_lf(X_dm);
 
    return (z_dv);
 }
-//---
+/*  //---   ansi-c*/
 TSdvector *tz_mean_matrix(TSdvector *z_dv, TSdmatrix *Z_dm, const char rc)
 {
-   //Fast method: rc = 'C' (mean for each column).
-   //Output:  %prc percentile (i.e., containing 0% to %prc).
-   //  z_dv: an n-by-1 vector if rc=='C' or an m-by-1 vector if rc=='R'.
-   //  If z_dv==NULL, it will be created and has to be destroyed outside this function.
-   //Inputs:
-   //  X_dm: an m-by-n general matrix.
-   //  rc == 'C' or 'c': mean for each column.
-   //  rc == 'R' or 'r': mean for each row.
+/*     //Fast method: rc = 'C' (mean for each column).   ansi-c*/
+/*     //Output:  %prc percentile (i.e., containing 0% to %prc).   ansi-c*/
+/*     //  z_dv: an n-by-1 vector if rc=='C' or an m-by-1 vector if rc=='R'.   ansi-c*/
+/*     //  If z_dv==NULL, it will be created and has to be destroyed outside this function.   ansi-c*/
+/*     //Inputs:   ansi-c*/
+/*     //  X_dm: an m-by-n general matrix.   ansi-c*/
+/*     //  rc == 'C' or 'c': mean for each column.   ansi-c*/
+/*     //  rc == 'R' or 'r': mean for each row.   ansi-c*/
    int nrows, ncols, _j, begloc;
    TSdvector x_sdv;
    double *X;
-   //===
+/*     //===   ansi-c*/
    TSdmatrix *X_dm = NULL;
    TSdmatrix *Xtran_dm = NULL;
 
@@ -1432,28 +1432,28 @@ TSdvector *tz_mean_matrix(TSdvector *z_dv, TSdmatrix *Z_dm, const char rc)
    z_dv->flag = V_DEF;
    if (rc=='R' || rc=='r')  DestroyMatrix_lf(Xtran_dm);
 
-   //===
+/*     //===   ansi-c*/
    DestroyMatrix_lf(X_dm);
 
    return (z_dv);
 }
-//--------------->>
+/*  //--------------->>   ansi-c*/
 
 
 
-//<<---------------
-// WZ normalization on VARs.
-//--------------->>
+/*  //<<---------------   ansi-c*/
+/*  // WZ normalization on VARs.   ansi-c*/
+/*  //--------------->>   ansi-c*/
 void fn_wznormalization(TSdvector *wznmlz_dv, TSdmatrix *A0draw_dm, TSdmatrix *A0peak_dm)
 {
-   //Outputs:
-   //  wznmlz_dv (n-by-1):  If negative, the sign of the equation must switch; if positive: no action needs be taken.
-   //    If NULL as an input, remains NULL.
-   //  A0draw_dm (n-by-n):  replaced by wz-normalized draw.
-   //Inputs:
-   //  wznmlz_dv (n-by-1):  if NULL, no output for wznmlz_dv; otherwise, a memory allocated vector.
-   //  A0draw_dm (n-by-n):  a draw of A0.
-   //  A0peak_dm (n-by-n):  reference point to which normalized A0draw_dm is closest.
+/*     //Outputs:   ansi-c*/
+/*     //  wznmlz_dv (n-by-1):  If negative, the sign of the equation must switch; if positive: no action needs be taken.   ansi-c*/
+/*     //    If NULL as an input, remains NULL.   ansi-c*/
+/*     //  A0draw_dm (n-by-n):  replaced by wz-normalized draw.   ansi-c*/
+/*     //Inputs:   ansi-c*/
+/*     //  wznmlz_dv (n-by-1):  if NULL, no output for wznmlz_dv; otherwise, a memory allocated vector.   ansi-c*/
+/*     //  A0draw_dm (n-by-n):  a draw of A0.   ansi-c*/
+/*     //  A0peak_dm (n-by-n):  reference point to which normalized A0draw_dm is closest.   ansi-c*/
    int _j, _n,
        errflag = -2;
    double *v;
@@ -1461,7 +1461,7 @@ void fn_wznormalization(TSdvector *wznmlz_dv, TSdmatrix *A0draw_dm, TSdmatrix *A
    TSdvector *diagX_dv = NULL;
 
    if ( !A0peak_dm )  fn_DisplayError(".../cstz.c/fn_wznormalization():  input matrix for ML estimates must be created (memory allocated) and have legal values");
-        //This is a minimum check to prevent crash without error messages.  More robust checks are done in BdivA_rgens().
+/*          //This is a minimum check to prevent crash without error messages.  More robust checks are done in BdivA_rgens().   ansi-c*/
 
    _n = A0peak_dm->nrows;
    X_dm = CreateMatrix_lf(_n, _n);
@@ -1485,7 +1485,7 @@ void fn_wznormalization(TSdvector *wznmlz_dv, TSdmatrix *A0draw_dm, TSdmatrix *A
    for (_j=_n-1; _j>=0; _j--)
       if (v[_j]<0)  ScalarTimesColofMatrix((TSdvector *)NULL, -1.0, A0draw_dm, _j);
 
-   //=== Destroys memory allocated for this function only.
+/*     //=== Destroys memory allocated for this function only.   ansi-c*/
    DestroyMatrix_lf(X_dm);
    DestroyVector_lf(diagX_dv);
 }
@@ -1493,22 +1493,22 @@ void fn_wznormalization(TSdvector *wznmlz_dv, TSdmatrix *A0draw_dm, TSdmatrix *A
 
 
 
-//---------------<<
-// Handling under or over flows with log values.
-//--------------->>
+/*  //---------------<<   ansi-c*/
+/*  // Handling under or over flows with log values.   ansi-c*/
+/*  //--------------->>   ansi-c*/
 struct TSveclogsum_tag *CreateVeclogsum(int n)
 {
    struct TSveclogsum_tag *veclogsum_ps = tzMalloc(1, struct TSveclogsum_tag);
 
-   //=== Memory allocation and initialization.
-   veclogsum_ps->n = n;  //Number of sums or the dimension of logofsum.
-   veclogsum_ps->N_iv = CreateConstantVector_int(n, 0);     //Cumulative.  (N_1, ..., N_n).
-   veclogsum_ps->logsum_dv = CreateConstantVector_lf(n, -MACHINEINFINITY);   //Cumulative.  (logofsum_1, ..., logofsum_n).
-   veclogsum_ps->logmax_dv = CreateConstantVector_lf(n, -MACHINEINFINITY);   //(logmax_1, ..., logmax_n).
+/*     //=== Memory allocation and initialization.   ansi-c*/
+   veclogsum_ps->n = n;   /*  Number of sums or the dimension of logofsum.   ansi-c*/
+   veclogsum_ps->N_iv = CreateConstantVector_int(n, 0);      /*  Cumulative.  (N_1, ..., N_n).   ansi-c*/
+   veclogsum_ps->logsum_dv = CreateConstantVector_lf(n, -MACHINEINFINITY);    /*  Cumulative.  (logofsum_1, ..., logofsum_n).   ansi-c*/
+   veclogsum_ps->logmax_dv = CreateConstantVector_lf(n, -MACHINEINFINITY);    /*  (logmax_1, ..., logmax_n).   ansi-c*/
 
    return (veclogsum_ps);
 }
-//---
+/*  //---   ansi-c*/
 struct TSveclogsum_tag *DestroyVeclogsum(struct TSveclogsum_tag *veclogsum_ps)
 {
 
@@ -1517,22 +1517,22 @@ struct TSveclogsum_tag *DestroyVeclogsum(struct TSveclogsum_tag *veclogsum_ps)
       DestroyVector_lf(veclogsum_ps->logsum_dv);
       DestroyVector_lf(veclogsum_ps->logmax_dv);
 
-      //===
+/*        //===   ansi-c*/
       free(veclogsum_ps);
       return ((struct TSveclogsum_tag *)NULL);
    }
    else  return (veclogsum_ps);
 }
-//===
-//------------------
-//Updating the sum (not divided by n) for the mean and the second moment.
-//------------------
+/*  //===   ansi-c*/
+/*  //------------------   ansi-c*/
+/*  //Updating the sum (not divided by n) for the mean and the second moment.   ansi-c*/
+/*  //------------------   ansi-c*/
 void UpdateSumFor1st2ndMoments(TSdvector *x1stsum_dv, TSdmatrix *X2ndsum_dm, const TSdvector *xdraw_dv)
 {
    static int ini_indicator = 0;
 
    if (!ini_indicator) {
-      //Pass this loop once and no more.
+/*        //Pass this loop once and no more.   ansi-c*/
       CopyVector0(x1stsum_dv, xdraw_dv);
       VectorTimesSelf(X2ndsum_dm, xdraw_dv, 1.0, 0.0, 'U');
       ini_indicator = 1;
@@ -1542,14 +1542,14 @@ void UpdateSumFor1st2ndMoments(TSdvector *x1stsum_dv, TSdmatrix *X2ndsum_dm, con
       VectorTimesSelf(X2ndsum_dm, xdraw_dv, 1.0, 1.0, 'U');
    }
 }
-//---
+/*  //---   ansi-c*/
 int tz_update_logofsum(double *Y_N_dp, double *y_Nmax_dp, double ynew, int N)
 {
-   //Recursive algorithm to update Y_N (=log(sum of x_i)) for i=1, ..., N with the new value ynew = log(x_{N+1}).
-   //Returns (1) the updated value Y_{N+1} = log(sum of x_i)) for i=1, ..., N+1;
-   //        (2) the updated value y_(N+1)max_dp;
-   //        (3) the integer N+1.
-   //See TVBVAR Notes p.81a.
+/*     //Recursive algorithm to update Y_N (=log(sum of x_i)) for i=1, ..., N with the new value ynew = log(x_{N+1}).   ansi-c*/
+/*     //Returns (1) the updated value Y_{N+1} = log(sum of x_i)) for i=1, ..., N+1;   ansi-c*/
+/*     //        (2) the updated value y_(N+1)max_dp;   ansi-c*/
+/*     //        (3) the integer N+1.   ansi-c*/
+/*     //See TVBVAR Notes p.81a.   ansi-c*/
 
    if (*y_Nmax_dp>=ynew)  *Y_N_dp = log( exp(*Y_N_dp - *y_Nmax_dp) + exp(ynew - *y_Nmax_dp) ) + *y_Nmax_dp;
    else {
@@ -1561,39 +1561,39 @@ int tz_update_logofsum(double *Y_N_dp, double *y_Nmax_dp, double ynew, int N)
 }
 int fn_update_logofsum(int N, double ynew, double *Y_N_dp, double *y_Nmax_dp)
 {
-   //Recursive algorithm to update Y_N (=log(sum of x_i)) for i=1, ..., N with the new value ynew = log(x_{N+1}).
-   //Returns (1) the updated value Y_{N+1} = log(sum of x_i)) for i=1, ..., N+1;
-   //        (2) the updated value y_(N+1)max_dp;
-   //        (3) the integer N+1.
-   //See TVBVAR Notes p.81a.
-   //If N=0, then ynew = -infty (no value yet) and thus no value is added to *Y_N_dp.
+/*     //Recursive algorithm to update Y_N (=log(sum of x_i)) for i=1, ..., N with the new value ynew = log(x_{N+1}).   ansi-c*/
+/*     //Returns (1) the updated value Y_{N+1} = log(sum of x_i)) for i=1, ..., N+1;   ansi-c*/
+/*     //        (2) the updated value y_(N+1)max_dp;   ansi-c*/
+/*     //        (3) the integer N+1.   ansi-c*/
+/*     //See TVBVAR Notes p.81a.   ansi-c*/
+/*     //If N=0, then ynew = -infty (no value yet) and thus no value is added to *Y_N_dp.   ansi-c*/
 
-//   if (N>0)
-//   {
+/*  //   if (N>0)   ansi-c*/
+/*  //   {   ansi-c*/
       if (*y_Nmax_dp>=ynew)  *Y_N_dp = log( exp(*Y_N_dp - *y_Nmax_dp) + exp(ynew - *y_Nmax_dp) ) + *y_Nmax_dp;
       else {
          *y_Nmax_dp = ynew;
          *Y_N_dp = log( exp(*Y_N_dp - ynew) + 1.0 ) + ynew;
       }
-//   }
+/*  //   }   ansi-c*/
 
    return (N+1);
 }
 double fn_replace_logofsumsbt(double *yold, double _a, double ynew, double _b)
 {
-   //Outputs:
-   //  *yold is replaced by log abs(a*xold + b*xnew).
-   //  1.0 or -1.0: sign of a*xold + b*xnew.
-   //
-   //Given yold=log(xold) and ynew=log(xnew), it updates and returns yold = log abs(a*xold + b*xnew).
-   //sbt: subtraction or subtract.
-   //See TVBVAR Notes p.81a.
+/*     //Outputs:   ansi-c*/
+/*     //  *yold is replaced by log abs(a*xold + b*xnew).   ansi-c*/
+/*     //  1.0 or -1.0: sign of a*xold + b*xnew.   ansi-c*/
+/*     //   ansi-c*/
+/*     //Given yold=log(xold) and ynew=log(xnew), it updates and returns yold = log abs(a*xold + b*xnew).   ansi-c*/
+/*     //sbt: subtraction or subtract.   ansi-c*/
+/*     //See TVBVAR Notes p.81a.   ansi-c*/
    double tmpd;
-   //*yold = (*yold > ynew) ? (log( _a + _b*exp(ynew - *yold)) + *yold) : (log( _a*exp(*yold - ynew) + _b) + ynew);
+/*     // *yold = (*yold > ynew) ? (log( _a + _b*exp(ynew - *yold)) + *yold) : (log( _a*exp(*yold - ynew) + _b) + ynew);   ansi-c*/
 
    if (*yold > ynew) {
       if ((tmpd=_a + _b*exp(ynew - *yold) ) < 0.0) {
-         // printf("WARNING! .../cstz.c/fn_replace_logofsumsbt(): Expression inside log is negative and the function returns the negative sign!\n");
+/*           // printf("WARNING! .../cstz.c/fn_replace_logofsumsbt(): Expression inside log is negative and the function returns the negative sign!\n");   ansi-c*/
          *yold += log(fabs(tmpd));
          return (-1.0);
       }
@@ -1604,7 +1604,7 @@ double fn_replace_logofsumsbt(double *yold, double _a, double ynew, double _b)
    }
    else {
       if ((tmpd=_a*exp(*yold - ynew) + _b) < 0.0 ) {
-         // printf("WARNING! .../cstz.c/fn_replace_logofsumsbt(): Expression inside log is negative and the function returns the negative sign!\n");
+/*           // printf("WARNING! .../cstz.c/fn_replace_logofsumsbt(): Expression inside log is negative and the function returns the negative sign!\n");   ansi-c*/
          *yold = log(fabs(tmpd)) + ynew;
          return (-1.0);
       }
@@ -1616,13 +1616,13 @@ double fn_replace_logofsumsbt(double *yold, double _a, double ynew, double _b)
 }
 
 
-//<<---------------
-// Evaluating the inverse of the chi-square cumulative distribution function.
-//--------------->>
+/*  //<<---------------   ansi-c*/
+/*  // Evaluating the inverse of the chi-square cumulative distribution function.   ansi-c*/
+/*  //--------------->>   ansi-c*/
 double fn_chi2inv(double p, double df)
 {
 #if defined( IMSL_STATISTICSTOOLBOX )
-   //Returns x where p = int_{0}^{x} chi2pdf(t, df) dt
+/*     //Returns x where p = int_{0}^{x} chi2pdf(t, df) dt   ansi-c*/
    if (df<=0.0)  fn_DisplayError("cstz.c/fn_chi2inv(): degrees of freedom df must be greater than 0.0");
 
    if (p<=0.0)  return (0.0);
@@ -1641,9 +1641,9 @@ double fn_chi2inv(double p, double df)
 }
 
 
-//<<---------------
-// Evaluating the standard normal cumulative distribution function.
-//--------------->>
+/*  //<<---------------   ansi-c*/
+/*  // Evaluating the standard normal cumulative distribution function.   ansi-c*/
+/*  //--------------->>   ansi-c*/
 double fn_normalcdf(double x)
 {
 #if defined( IMSL_STATISTICSTOOLBOX )
@@ -1656,9 +1656,9 @@ double fn_normalcdf(double x)
 }
 
 
-//<<---------------
-// Evaluating the inverse of the standard normal cumulative distribution function.
-//--------------->>
+/*  //<<---------------   ansi-c*/
+/*  // Evaluating the inverse of the standard normal cumulative distribution function.   ansi-c*/
+/*  //--------------->>   ansi-c*/
 double fn_normalinv(double p)
 {
 #if defined( IMSL_STATISTICSTOOLBOX )
@@ -1671,13 +1671,13 @@ double fn_normalinv(double p)
 }
 
 
-//<<---------------
-// Evaluating the inverse of the beta cumulative distribution function.
-//--------------->>
+/*  //<<---------------   ansi-c*/
+/*  // Evaluating the inverse of the beta cumulative distribution function.   ansi-c*/
+/*  //--------------->>   ansi-c*/
 double fn_betainv(double p, double _alpha, double _beta)
 {
 #if defined( IMSL_STATISTICSTOOLBOX )
-   //p = int_{0}^{\infty} betapdf(t, _alpha, _beta) dt where betapdf(t,_alpha,_beta) \propt t^{_alpha-1}*(1-t)^(_beta-1}.
+/*     //p = int_{0}^{\infty} betapdf(t, _alpha, _beta) dt where betapdf(t,_alpha,_beta) \propt t^{_alpha-1}*(1-t)^(_beta-1}.   ansi-c*/
    return (imsls_d_beta_inverse_cdf(p, _alpha, _beta));
 #elif defined( USE_GSL_LIBRARY)
    return gsl_cdf_beta_Pinv(p,_alpha,_beta);
@@ -1687,9 +1687,9 @@ double fn_betainv(double p, double _alpha, double _beta)
 }
 
 
-//<<---------------
-// Computes log gamma (x) where gamma(n+1) = n! and gamma(x) = int_0^{\infty} e^{-t} t^{x-1} dt.
-//--------------->>
+/*  //<<---------------   ansi-c*/
+/*  // Computes log gamma (x) where gamma(n+1) = n! and gamma(x) = int_0^{\infty} e^{-t} t^{x-1} dt.   ansi-c*/
+/*  //--------------->>   ansi-c*/
 double fn_gammalog(double x)
 {
 #if defined( IMSL_STATISTICSTOOLBOX )
@@ -1702,9 +1702,9 @@ double fn_gammalog(double x)
 }
 
 
-//<<---------------
-// Computes log beta(x, y) where beta(x, y) = gamma(x)*gamm(y)/gamma(x+y).
-//--------------->>
+/*  //<<---------------   ansi-c*/
+/*  // Computes log beta(x, y) where beta(x, y) = gamma(x)*gamm(y)/gamma(x+y).   ansi-c*/
+/*  //--------------->>   ansi-c*/
 double fn_betalog(double x, double y)
 {
 #if defined( IMSL_STATISTICSTOOLBOX )
@@ -1718,9 +1718,9 @@ double fn_betalog(double x, double y)
 
 
 
-//<<---------------
-// Computes log gamma (x) where gamma(n+1) = n! and gamma(x) = int_0^{\infty} e^{-t} t^{x-1} dt.
-//--------------->>
+/*  //<<---------------   ansi-c*/
+/*  // Computes log gamma (x) where gamma(n+1) = n! and gamma(x) = int_0^{\infty} e^{-t} t^{x-1} dt.   ansi-c*/
+/*  //--------------->>   ansi-c*/
 double gammalog(double x)
 {
 #if defined( IMSL_STATISTICSTOOLBOX )
@@ -1733,77 +1733,77 @@ double gammalog(double x)
 }
 
 
-//-----------------------------------------------------------------------------------
-//------------------------------ Normal distribution ------------------------------//
-//--- p(x) = (1.0/sqrt(2*pi)*sigma) exp( -(1.0/(2.0*sigma^2.0)) (x-mu)^2.0 )
-//---         for sigma>0.
-//-----------------------------------------------------------------------------------
+/*  //-----------------------------------------------------------------------------------   ansi-c*/
+/*  //------------------------------ Normal distribution ------------------------------//   ansi-c*/
+/*  //--- p(x) = (1.0/sqrt(2*pi)*sigma) exp( -(1.0/(2.0*sigma^2.0)) (x-mu)^2.0 )   ansi-c*/
+/*  //---         for sigma>0.   ansi-c*/
+/*  //-----------------------------------------------------------------------------------   ansi-c*/
 #define LOGSQRTOF2PI  9.189385332046727e-001
 double tz_lognormalpdf(double _x, double _m, double _s)
 {
    double xmm = _x-_m;
    if (_s <= 0.0)  return (-NEARINFINITY);
-      //fn_DisplayError("cstz.c/tz_lognormalpdf(): standard deviation must be positive");
+/*        //fn_DisplayError("cstz.c/tz_lognormalpdf(): standard deviation must be positive");   ansi-c*/
 
    return ( -LOGSQRTOF2PI - log(_s) - (1.0/(2.0*square(_s))) * square(xmm) );
 }
 #undef LOGSQRTOF2PI
 
-//-----------------------------------------------------------------------------------
-//----------------------------- Beta density function -----------------------------//
-//--- p(x) = ( Gamma(a+b)/(Gamma(a)*Gamma(b)) ) x^(a-1) (1-x)^(b-1) for a>0 and b>0.
-//--- E(x) = a/(a+b);  var(x) = a*b/( (a+b)^2*(a+b+1) );
-//--- The density is finite if a,b>=1.
-//--- Noninformative density: (1) a=b=1; (2) a=b=0.5; or (3) a=b=0.
-//-----------------------------------------------------------------------------------
+/*  //-----------------------------------------------------------------------------------   ansi-c*/
+/*  //----------------------------- Beta density function -----------------------------//   ansi-c*/
+/*  //--- p(x) = ( Gamma(a+b)/(Gamma(a)*Gamma(b)) ) x^(a-1) (1-x)^(b-1) for a>0 and b>0.   ansi-c*/
+/*  //--- E(x) = a/(a+b);  var(x) = a*b/( (a+b)^2*(a+b+1) );   ansi-c*/
+/*  //--- The density is finite if a,b>=1.   ansi-c*/
+/*  //--- Noninformative density: (1) a=b=1; (2) a=b=0.5; or (3) a=b=0.   ansi-c*/
+/*  //-----------------------------------------------------------------------------------   ansi-c*/
 double tz_logbetapdf(double _x, double _a, double _b)
 {
    if ((_x < 0.0) || (_x > 1.0) || (_a <=0.0) || (_b <= 0.0))   return (-NEARINFINITY);
    if ((_x <= 0.0) && (_a != 1.0))  return (-NEARINFINITY);
-      //Note that it should be +infinity for a < 1.0.  We return -infinity anyway for the purpose of giving zero LH.
+/*        //Note that it should be +infinity for a < 1.0.  We return -infinity anyway for the purpose of giving zero LH.   ansi-c*/
    if ((_x >= 1.0) && (_b != 1.0))  return (-NEARINFINITY);
-      //Note that it should be +infinity for b < 1.0.  We return -infinity anyway for the purpose of giving zero LH.
-      //fn_DisplayError("cstz.c/tz_logbetapdf(): x must be (0,1) and a, b must be positive");
+/*        //Note that it should be +infinity for b < 1.0.  We return -infinity anyway for the purpose of giving zero LH.   ansi-c*/
+/*        //fn_DisplayError("cstz.c/tz_logbetapdf(): x must be (0,1) and a, b must be positive");   ansi-c*/
 
    if ((_x == 0.0 && _a == 1.0) || (_x == 1.0 && _b == 1.0))  return (-fn_betalog(_a, _b));
    else  return ( -fn_betalog(_a, _b) + (_a-1.0)*log(_x) + (_b-1.0)*log(1.0-_x) );
 }
-//-----------------------------------------------------------------------------------
-//---------------------------- Gamma distribution ----------------------------------//
-//--- p(x) = ( b^a/Gamma(a) ) x^(a-1) exp(-bx) for a>0 and b>0.
-//---    where a is shape and b is inverse scale (rate) parameter.
-//--- E(x) = a/b;  var(x) = a/b^2;
-//--- Noninformative distribution: a,b -> 0.
-//--- The density function is finite if a >= 1.
-//-----------------------------------------------------------------------------------
+/*  //-----------------------------------------------------------------------------------   ansi-c*/
+/*  //---------------------------- Gamma distribution ----------------------------------//   ansi-c*/
+/*  //--- p(x) = ( b^a/Gamma(a) ) x^(a-1) exp(-bx) for a>0 and b>0.   ansi-c*/
+/*  //---    where a is shape and b is inverse scale (rate) parameter.   ansi-c*/
+/*  //--- E(x) = a/b;  var(x) = a/b^2;   ansi-c*/
+/*  //--- Noninformative distribution: a,b -> 0.   ansi-c*/
+/*  //--- The density function is finite if a >= 1.   ansi-c*/
+/*  //-----------------------------------------------------------------------------------   ansi-c*/
 double tz_loggammapdf(double _x, double _a, double _b)
 {
    if (_x < 0.0 || _a <= 0.0 || _b <= 0.0)  return (-NEARINFINITY);
    if (_x <= 0.0 && _a != 1.0)  return (-NEARINFINITY);
-      //Note that it should be +infinity for a < 1.0.  We return -infinity anyway for the purpose of giving zero LH.
-      //fn_DisplayError("cstz.c/tz_loggammapdf(): x, a, and b must be positive");
+/*        //Note that it should be +infinity for a < 1.0.  We return -infinity anyway for the purpose of giving zero LH.   ansi-c*/
+/*        //fn_DisplayError("cstz.c/tz_loggammapdf(): x, a, and b must be positive");   ansi-c*/
 
    if (_x == 0.0 && _a == 1.0)  return ( _a*log(_b) - fn_gammalog(_a) );
    else  return ( _a*log(_b) - fn_gammalog(_a) + (_a-1.0)*log(_x) - _b*_x );
 }
-//-----------------------------------------------------------------------------------
-//------------------------ Inverse-Gamma distribution ------------------------------//
-//--- p(x) = ( b^a/Gamma(a) ) x^(-a-1) exp(-b/x) for a>0 and b>0.
-//---    where a is shape and b is scale parameter.
-//--- E(x) = b/(a-1) for a>1;  var(x) = b^2/( (a-1)^2*(a-2) ) for a>2;
-//--- Noninformative distribution: a,b -> 0.
-//--- How to draw: (1) draw z from Gamma(a,b); (2) let x=1/z.
-//-----------------------------------------------------------------------------------
+/*  //-----------------------------------------------------------------------------------   ansi-c*/
+/*  //------------------------ Inverse-Gamma distribution ------------------------------//   ansi-c*/
+/*  //--- p(x) = ( b^a/Gamma(a) ) x^(-a-1) exp(-b/x) for a>0 and b>0.   ansi-c*/
+/*  //---    where a is shape and b is scale parameter.   ansi-c*/
+/*  //--- E(x) = b/(a-1) for a>1;  var(x) = b^2/( (a-1)^2*(a-2) ) for a>2;   ansi-c*/
+/*  //--- Noninformative distribution: a,b -> 0.   ansi-c*/
+/*  //--- How to draw: (1) draw z from Gamma(a,b); (2) let x=1/z.   ansi-c*/
+/*  //-----------------------------------------------------------------------------------   ansi-c*/
 double tz_loginversegammapdf(double _x, double _a, double _b)
 {
-   //This denisity is always finite.
-   //If a < 1.0, 1st moment does not exist,
-   //   a < 2.0, 2nd moment does not exist,
-   //   a < 3.0, 3rd moment does not exist,
-   //   a < 4.0, 4th moment does not exist.
+/*     //This denisity is always finite.   ansi-c*/
+/*     //If a < 1.0, 1st moment does not exist,   ansi-c*/
+/*     //   a < 2.0, 2nd moment does not exist,   ansi-c*/
+/*     //   a < 3.0, 3rd moment does not exist,   ansi-c*/
+/*     //   a < 4.0, 4th moment does not exist.   ansi-c*/
 
    if (_x < 0.0 || _a <= 0.0 || _b <= 0.0)  return (-NEARINFINITY);
-      //fn_DisplayError("cstz.c/tz_loginversegammapdf(): x, a, and b must be positive");
+/*        //fn_DisplayError("cstz.c/tz_loginversegammapdf(): x, a, and b must be positive");   ansi-c*/
 
    return ( _a*log(_b) - fn_gammalog(_a) - (_a+1.0)*log(_x) - _b /_x );
 }
@@ -1814,18 +1814,18 @@ double tz_loginversegammapdf(double _x, double _a, double _b)
 
 
 
-//<<---------------
-// P2 algorithm ???????
-//--------------->>
+/*  //<<---------------   ansi-c*/
+/*  // P2 algorithm ???????   ansi-c*/
+/*  //--------------->>   ansi-c*/
 void psqr(double *q, int *m, double x, const double *p, int n)
 {
-   //Outputs:
-   //  q: n-by-1 vector of
-   //  m: n-by-1 vector of
-   //  x: a random draw.
-   //------
-   //Inputs:
-   //  p:  n-by-1 vector of cumulative cut-off probabilties for the error bands.
+/*     //Outputs:   ansi-c*/
+/*     //  q: n-by-1 vector of   ansi-c*/
+/*     //  m: n-by-1 vector of   ansi-c*/
+/*     //  x: a random draw.   ansi-c*/
+/*     //------   ansi-c*/
+/*     //Inputs:   ansi-c*/
+/*     //  p:  n-by-1 vector of cumulative cut-off probabilties for the error bands.   ansi-c*/
    static double qm, dq;
    static int i, dm, dn;
 
@@ -1855,10 +1855,10 @@ void psqr(double *q, int *m, double x, const double *p, int n)
 }
 void piksrt(double *arr, int n)
 {
-   //Outputs:
-   //  arr: replaced by new values.
-   //Inputs:
-   //  arr: n-by-1 vector ??????
+/*     //Outputs:   ansi-c*/
+/*     //  arr: replaced by new values.   ansi-c*/
+/*     //Inputs:   ansi-c*/
+/*     //  arr: n-by-1 vector ??????   ansi-c*/
    int i, j;
    double a;
 
@@ -1872,23 +1872,23 @@ void piksrt(double *arr, int n)
 
 
 
-//---------------------------- Some high-level VAR functions ---------------------
+/*  //---------------------------- Some high-level VAR functions ---------------------   ansi-c*/
 void fn_lev2growthanual(TSdmatrix *levgro_dm, const TSdmatrix *levgrominus1_dm, const TSivector *indxlogper_iv)
 {
-   //******* It is the user's responsibility to check memory allocations and dimensions of inputs. *******
-   //Outputs:
-   //  levgro_dm: nfores-by-nvar matrix of annual growth rates (percent) except interest rates and unemployment rate in level.
-   //Inputs:
-   //  levgro_dm: nfores-by-nvar matrix of log levels and, say, interest rates already divided by 100.
-   //  levgrominus1_dm:  qm-by-nvar matrix in the previous year (not necessarily a calendar year).
-   //  indxlogper_iv: nvar-by-1 array of 1, 2, or 4 for the list of endogenous variables.  1: decimal point with annual rate like the interest rate; 2: decimal point (NOT at annual rate) like the unemployment rate; 4: log level value.
+/*     // ******* It is the user's responsibility to check memory allocations and dimensions of inputs. *******   ansi-c*/
+/*     //Outputs:   ansi-c*/
+/*     //  levgro_dm: nfores-by-nvar matrix of annual growth rates (percent) except interest rates and unemployment rate in level.   ansi-c*/
+/*     //Inputs:   ansi-c*/
+/*     //  levgro_dm: nfores-by-nvar matrix of log levels and, say, interest rates already divided by 100.   ansi-c*/
+/*     //  levgrominus1_dm:  qm-by-nvar matrix in the previous year (not necessarily a calendar year).   ansi-c*/
+/*     //  indxlogper_iv: nvar-by-1 array of 1, 2, or 4 for the list of endogenous variables.  1: decimal point with annual rate like the interest rate; 2: decimal point (NOT at annual rate) like the unemployment rate; 4: log level value.   ansi-c*/
    int ti, vj, qm, nvar, nfores, totrows;
    TSdmatrix *tf_levgroplus_dm = NULL;
 
    if ((qm=levgrominus1_dm->nrows) != 12 && qm != 4)  fn_DisplayError("fn_lev2growthanual(): the second input must have 12 or 4 rows for monthly or quarterly data");
    if ((nvar=levgrominus1_dm->ncols) != indxlogper_iv->n || nvar != levgro_dm->ncols)  fn_DisplayError("fn_lev2growthanual(): column dimensions and vector dimension of all inputs must be same");
 
-   //=== Memory allocation for this function.
+/*     //=== Memory allocation for this function.   ansi-c*/
    tf_levgroplus_dm = CreateMatrix_lf(qm+(nfores=levgro_dm->nrows), nvar=levgrominus1_dm->ncols);
 
 
@@ -1913,76 +1913,76 @@ void fn_lev2growthanual(TSdmatrix *levgro_dm, const TSdmatrix *levgrominus1_dm, 
 
 
 
-   //=== Destroys memory allocated for this function.
+/*     //=== Destroys memory allocated for this function.   ansi-c*/
    tf_levgroplus_dm = DestroyMatrix_lf(tf_levgroplus_dm);
 }
 
 
 
-//-------------------
-// Generating a counterfactual paths conditional on S_T and specified shocks_t(s_t) for _sm (a switching model).
-//-------------------
+/*  //-------------------   ansi-c*/
+/*  // Generating a counterfactual paths conditional on S_T and specified shocks_t(s_t) for _sm (a switching model).   ansi-c*/
+/*  //-------------------   ansi-c*/
 void fn_ctfals_givenshocks_sm(TSdmatrix *ctfalstran_dm, TSdvector *xprimeminus1_dv, const int bloc, const int eloc, const TSdmatrix *strshockstran_dm,
      const TSivector *S_Tdraw_iv, const TSdcell *Bsdraw_dc, const TSdcell *A0sdrawinv_dc, const TSivector *noshocks_iv)
 {
-   //******* It is the user's responsibility to check memory allocations and dimensions of inputs. *******
-   //Outputs:  ctflasdrawtran = xprimeminus1*Bsdraw{s} + shocks'*A0sdrawinv{s}.
-   //  ctfalstran_dm: nvar-by-nfores where nfores (=eloc-bloc+1) is the forecast horizon.  Conterfactual paths of nvar variables.
-   //  xprimeminus1_dv:  updated 1-by-ncoef right-hand-side variables at the end of the forecast horizon, ready for the forecasts at the step nfores+1.
-   //    In the order of [nvar for 1st lag, ..., nvar for last lag, other exogenous terms, const term].
-   //Inputs:
-   //  xprimeminus1_dv: 1-by-ncoef vector of right-hand-side variables at the beginning of the forecast horizon.
-   //  bloc: beginning location for the forecast horizon.
-   //  eloc: end location for the forecast horizon.
-   //  strshockstran_dm: nvar-by-T.  Matrix transpose of unit-variance (time-invariant) structural shocks.
-   //  S_Tdraw_iv: fss-by-1 or SampleSize-by-1 vector of (s_t|I_T,theta).
-   //  Bsdraw_dc:  nStates cells.  For each cell, ncoef-by-nvar reduced-form coefficient matrix.
-   //  A0sdrawinv_dc:  nStates cells.  For each cell, nvar-by-nvar inverse of contemporaneous coefficient matrix.
-   //  noshocks_iv: a (no greater than nvar) vector of base-0 integers indicating the corresponding equations whose shocks are set
-   //               to zero.  Each element of this integer vector must be less than nvar.
+/*     // ******* It is the user's responsibility to check memory allocations and dimensions of inputs. *******   ansi-c*/
+/*     //Outputs:  ctflasdrawtran = xprimeminus1*Bsdraw{s} + shocks'*A0sdrawinv{s}.   ansi-c*/
+/*     //  ctfalstran_dm: nvar-by-nfores where nfores (=eloc-bloc+1) is the forecast horizon.  Conterfactual paths of nvar variables.   ansi-c*/
+/*     //  xprimeminus1_dv:  updated 1-by-ncoef right-hand-side variables at the end of the forecast horizon, ready for the forecasts at the step nfores+1.   ansi-c*/
+/*     //    In the order of [nvar for 1st lag, ..., nvar for last lag, other exogenous terms, const term].   ansi-c*/
+/*     //Inputs:   ansi-c*/
+/*     //  xprimeminus1_dv: 1-by-ncoef vector of right-hand-side variables at the beginning of the forecast horizon.   ansi-c*/
+/*     //  bloc: beginning location for the forecast horizon.   ansi-c*/
+/*     //  eloc: end location for the forecast horizon.   ansi-c*/
+/*     //  strshockstran_dm: nvar-by-T.  Matrix transpose of unit-variance (time-invariant) structural shocks.   ansi-c*/
+/*     //  S_Tdraw_iv: fss-by-1 or SampleSize-by-1 vector of (s_t|I_T,theta).   ansi-c*/
+/*     //  Bsdraw_dc:  nStates cells.  For each cell, ncoef-by-nvar reduced-form coefficient matrix.   ansi-c*/
+/*     //  A0sdrawinv_dc:  nStates cells.  For each cell, nvar-by-nvar inverse of contemporaneous coefficient matrix.   ansi-c*/
+/*     //  noshocks_iv: a (no greater than nvar) vector of base-0 integers indicating the corresponding equations whose shocks are set   ansi-c*/
+/*     //               to zero.  Each element of this integer vector must be less than nvar.   ansi-c*/
    int ti, si, vi;
    int nfores = eloc - bloc + 1,
        nvar = ctfalstran_dm->nrows,
        ncoefminusnvar7const = Bsdraw_dc->C[0]->nrows - nvar - 1;
    TSdvector ctfals_sdv, strshocks_sdv;
-   TSivector STnfores_siv;  //nfores-by-1 vector of s_t's.
+   TSivector STnfores_siv;   /*  nfores-by-1 vector of s_t's.   ansi-c*/
 
    if (nfores < 1)  fn_DisplayError("cstz.c/fn_ctfals_givenshocks_sm(): Number of forecast steps must be greater than 0");
    if (eloc > strshockstran_dm->ncols-1)  fn_DisplayError("cstz.c/fn_ctfals_givenshocks_sm(): End location in the forecast horizon must be no greater than the sample size");
    if (nvar != strshockstran_dm->nrows)  fn_DisplayError("cstz.c/fn_ctfals_givenshocks_sm(): the number of rows of strshockstran_dm must be equal to nvar");
 
 
-   //******* WARNING: The operation involves ctfals_sdv.v, strshocks_sdv.v, STnfores_siv.v  *******
-   //*******          throughout this function is dangerous because of pointer movements.   *******
-   //*******          But it gives us efficiency.                                           *******
+/*     // ******* WARNING: The operation involves ctfals_sdv.v, strshocks_sdv.v, STnfores_siv.v  *******   ansi-c*/
+/*     // *******          throughout this function is dangerous because of pointer movements.   *******   ansi-c*/
+/*     // *******          But it gives us efficiency.                                           *******   ansi-c*/
    ctfals_sdv.n = nvar;
-   ctfals_sdv.v = ctfalstran_dm->M;  //Points to the beginning of the 1st column of ctfalstran_dm.
-   //+
+   ctfals_sdv.v = ctfalstran_dm->M;   /*  Points to the beginning of the 1st column of ctfalstran_dm.   ansi-c*/
+/*     //+   ansi-c*/
    strshocks_sdv.n = nvar;
    strshocks_sdv.flag = V_DEF;
-   strshocks_sdv.v = strshockstran_dm->M + strshockstran_dm->nrows*bloc;  //Points to the beginning of the bloc_th column of strshockstran_dm.
+   strshocks_sdv.v = strshockstran_dm->M + strshockstran_dm->nrows*bloc;   /*  Points to the beginning of the bloc_th column of strshockstran_dm.   ansi-c*/
    for (vi=noshocks_iv->n-1; vi>=0; vi--)
-      strshocks_sdv.v[noshocks_iv->v[vi]] = 0.0;   //Set shocks in those equations to be zero.
-   //+
+      strshocks_sdv.v[noshocks_iv->v[vi]] = 0.0;    /*  Set shocks in those equations to be zero.   ansi-c*/
+/*     //+   ansi-c*/
    STnfores_siv.n = nfores;
    STnfores_siv.flag = V_DEF;
-   STnfores_siv.v = S_Tdraw_iv->v + bloc;  //Points to the bloc_th position of S_Tdraw_iv.
+   STnfores_siv.v = S_Tdraw_iv->v + bloc;   /*  Points to the bloc_th position of S_Tdraw_iv.   ansi-c*/
 
 
    for (ti=0; ti<nfores; ti++) {
-      //Must have a forward recursion.
+/*        //Must have a forward recursion.   ansi-c*/
       VectorTimesMatrix(&ctfals_sdv, xprimeminus1_dv, Bsdraw_dc->C[si=STnfores_siv.v[ti]], 1.0, 0.0, 'N');
       VectorTimesMatrix(&ctfals_sdv, &strshocks_sdv, A0sdrawinv_dc->C[si], 1.0, 1.0, 'N');
-      //=== Updates the recursion.  The order matters.
+/*        //=== Updates the recursion.  The order matters.   ansi-c*/
       memmove(xprimeminus1_dv->v+nvar, xprimeminus1_dv->v, ncoefminusnvar7const*sizeof(double));
       memcpy(xprimeminus1_dv->v, ctfals_sdv.v, nvar*sizeof(double));
-      //+
-      if (ti < nfores-1)  //This is needed to prevent memory leak at the end when we have strshocks_sdv.v[noshocks_iv->v[vi]] = 0.0.
+/*        //+   ansi-c*/
+      if (ti < nfores-1)   /*  This is needed to prevent memory leak at the end when we have strshocks_sdv.v[noshocks_iv->v[vi]] = 0.0.   ansi-c*/
       {
-         ctfals_sdv.v += nvar;  //Points to the beginning of the next column of ctfalstran_dm.
-         strshocks_sdv.v += nvar;  //Points to the beginning of the next column of strshockstran_dm.
+         ctfals_sdv.v += nvar;   /*  Points to the beginning of the next column of ctfalstran_dm.   ansi-c*/
+         strshocks_sdv.v += nvar;   /*  Points to the beginning of the next column of strshockstran_dm.   ansi-c*/
          for (vi=noshocks_iv->n-1; vi>=0; vi--)
-            strshocks_sdv.v[noshocks_iv->v[vi]] = 0.0;   //Set shocks in those equations to be zero.
+            strshocks_sdv.v[noshocks_iv->v[vi]] = 0.0;    /*  Set shocks in those equations to be zero.   ansi-c*/
       }
    }
 
@@ -1990,24 +1990,24 @@ void fn_ctfals_givenshocks_sm(TSdmatrix *ctfalstran_dm, TSdvector *xprimeminus1_
 }
 
 
-//-------------------
-// Generating a random sequence of counterfactual (ctfal) paths for _sm (a switching model).
-//-------------------
+/*  //-------------------   ansi-c*/
+/*  // Generating a random sequence of counterfactual (ctfal) paths for _sm (a switching model).   ansi-c*/
+/*  //-------------------   ansi-c*/
 void fn_ctfals_sm(TSdmatrix *ctfalstran_dm, TSdvector *xprimeminus1_dv, const int bloc, const int eloc, const TSdmatrix *strshockstran_dm, const TSivector *Snfores_iv, const TSdcell *Bsdraw_dc, const TSdcell *A0sdrawinv_dc)
 {
-   //******* It is the user's responsibility to check memory allocations and dimensions of inputs. *******
-   //Outputs:  ctflasdrawtran = xprimeminus1*Bsdraw{s} + shocks'*A0sdrawinv{s}.
-   //  ctfalstran_dm: nvar-by-nfores where nfores (=eloc-bloc+1) is the forecast horizon.  Conterfactual paths of nvar variables.
-   //  xprimeminus1_dv:  updated 1-by-ncoef right-hand-side variables at the end of the forecast horizon, ready for the forecasts at the step nfores+1.
-   //    In the order of [nvar for 1st lag, ..., nvar for last lag, other exogenous terms, const term].
-   //Inputs:
-   //  xprimeminus1_dv: 1-by-ncoef vector of right-hand-side variables at the beginning of the forecast horizon.
-   //  bloc: beginning location for the forecast horizon.
-   //  eloc: end location for the forecast horizon.
-   //  strshockstran_dm: nvar-by-T.  Matrix transpose of unit-variance (time-invariant) structural shocks.
-   //  Snfores_iv:  nfores-by-1 vector of states where each element is less than nStates.
-   //  Bsdraw_dc:  nStates cells.  For each cell, ncoef-by-nvar reduced-form coefficient matrix.
-   //  A0sdrawinv_dc:  nStates cells.  For each cell, nvar-by-nvar inverse of contemporaneous coefficient matrix.
+/*     // ******* It is the user's responsibility to check memory allocations and dimensions of inputs. *******   ansi-c*/
+/*     //Outputs:  ctflasdrawtran = xprimeminus1*Bsdraw{s} + shocks'*A0sdrawinv{s}.   ansi-c*/
+/*     //  ctfalstran_dm: nvar-by-nfores where nfores (=eloc-bloc+1) is the forecast horizon.  Conterfactual paths of nvar variables.   ansi-c*/
+/*     //  xprimeminus1_dv:  updated 1-by-ncoef right-hand-side variables at the end of the forecast horizon, ready for the forecasts at the step nfores+1.   ansi-c*/
+/*     //    In the order of [nvar for 1st lag, ..., nvar for last lag, other exogenous terms, const term].   ansi-c*/
+/*     //Inputs:   ansi-c*/
+/*     //  xprimeminus1_dv: 1-by-ncoef vector of right-hand-side variables at the beginning of the forecast horizon.   ansi-c*/
+/*     //  bloc: beginning location for the forecast horizon.   ansi-c*/
+/*     //  eloc: end location for the forecast horizon.   ansi-c*/
+/*     //  strshockstran_dm: nvar-by-T.  Matrix transpose of unit-variance (time-invariant) structural shocks.   ansi-c*/
+/*     //  Snfores_iv:  nfores-by-1 vector of states where each element is less than nStates.   ansi-c*/
+/*     //  Bsdraw_dc:  nStates cells.  For each cell, ncoef-by-nvar reduced-form coefficient matrix.   ansi-c*/
+/*     //  A0sdrawinv_dc:  nStates cells.  For each cell, nvar-by-nvar inverse of contemporaneous coefficient matrix.   ansi-c*/
    int ti, si;
    int nfores = eloc - bloc + 1,
        nvar = ctfalstran_dm->nrows,
@@ -2019,52 +2019,52 @@ void fn_ctfals_sm(TSdmatrix *ctfalstran_dm, TSdvector *xprimeminus1_dv, const in
    if (nvar != strshockstran_dm->nrows)  fn_DisplayError("cstz.c/fn_ctfals_sm(): the number of rows of strshockstran_dm must be equal to nvar");
 
 
-   //******* WARNING: The operation involves ctfals_sdv.v and strshocks_sdv.v throughout this function *******
-   //*******          is dangerous because of pointer movements.  But it gives us efficiency.          *******
+/*     // ******* WARNING: The operation involves ctfals_sdv.v and strshocks_sdv.v throughout this function *******   ansi-c*/
+/*     // *******          is dangerous because of pointer movements.  But it gives us efficiency.          *******   ansi-c*/
    ctfals_sdv.n = nvar;
-   ctfals_sdv.v = ctfalstran_dm->M;  //Points to the beginning of the 1st column of ctfalstran_dm.
+   ctfals_sdv.v = ctfalstran_dm->M;   /*  Points to the beginning of the 1st column of ctfalstran_dm.   ansi-c*/
    strshocks_sdv.n = nvar;
    strshocks_sdv.flag = V_DEF;
-   strshocks_sdv.v = strshockstran_dm->M + strshockstran_dm->nrows*bloc;  //Points to the beginning of the bloc_th column of strshockstran_dm.
+   strshocks_sdv.v = strshockstran_dm->M + strshockstran_dm->nrows*bloc;   /*  Points to the beginning of the bloc_th column of strshockstran_dm.   ansi-c*/
 
 
    for (ti=0; ti<nfores; ti++) {
-      //Must have a forward recursion.
+/*        //Must have a forward recursion.   ansi-c*/
       VectorTimesMatrix(&ctfals_sdv, xprimeminus1_dv, Bsdraw_dc->C[si=Snfores_iv->v[ti]], 1.0, 0.0, 'N');
       VectorTimesMatrix(&ctfals_sdv, &strshocks_sdv, A0sdrawinv_dc->C[si], 1.0, 1.0, 'N');
-      //=== Updates the recursion.  The order matters.
+/*        //=== Updates the recursion.  The order matters.   ansi-c*/
       memmove(xprimeminus1_dv->v+nvar, xprimeminus1_dv->v, ncoefminusnvar7const*sizeof(double));
       memcpy(xprimeminus1_dv->v, ctfals_sdv.v, nvar*sizeof(double));
-      //+
-      ctfals_sdv.v += nvar;  //Points to the beginning of the next column of ctfalstran_dm.
-      strshocks_sdv.v += nvar;  //Points to the beginning of the next column of strshockstran_dm.
+/*        //+   ansi-c*/
+      ctfals_sdv.v += nvar;   /*  Points to the beginning of the next column of ctfalstran_dm.   ansi-c*/
+      strshocks_sdv.v += nvar;   /*  Points to the beginning of the next column of strshockstran_dm.   ansi-c*/
    }
 
    ctfalstran_dm->flag = M_GE;
 }
 
-//-------------------
-// Generating a random sequence of counterfactual (ctfal) paths with only monetary policy equation changing to a specified regime while holding other equations' regimes the same as historical ones.
-//-------------------
+/*  //-------------------   ansi-c*/
+/*  // Generating a random sequence of counterfactual (ctfal) paths with only monetary policy equation changing to a specified regime while holding other equations' regimes the same as historical ones.   ansi-c*/
+/*  //-------------------   ansi-c*/
 void fn_ctfals_policyonly(TSdmatrix *ctfalstran_dm, TSdvector *xprimeminus1_dv, const int bloc, const int eloc, const TSdmatrix *strshockstran_dm, const TSivector *S_Tdraw_iv, const int statecon, const int selej, const TSdcell *A0sdraw_dc, const TSdcell *Apsdraw_dc)
 {
-   //******* It is the user's responsibility to check memory allocations and dimensions of inputs. *******
-   //Outputs:  ctflasdrawtran = xprimeminus1*Bsdraw{s} + shocks'*A0sdrawinv{s}.
-   //  ctfalstran_dm: nvar-by-nfores where nfores (=eloc-bloc+1) is the forecast horizon.  Conterfactual paths of nvar variables.
-   //  xprimeminus1_dv:  updated 1-by-ncoef right-hand-side variables at the end of the forecast horizon, ready for the forecasts at the step nfores+1.
-   //    In the order of [nvar for 1st lag, ..., nvar for last lag, other exogenous terms, const term].
-   //Inputs:
-   //  xprimeminus1_dv: 1-by-ncoef vector of right-hand-side variables at the beginning of the forecast horizon.
-   //  bloc: beginning location for the forecast horizon.
-   //  eloc: end location for the forecast horizon.
-   //  strshockstran_dm: nvar-by-T.  Matrix transpose of unit-variance (time-invariant) structural shocks.
-   //  S_Tdraw_iv;  fss-by-1 or SampleSize-by-1.  Stores (s_t|I_T,theta).
-   //  statecon: the ith state conditioned for counterfactuals (base 0).  Must be < nStates.
-   //  selej:  location (base 0) of the selected structural equation (e.g., the monetary policy equation).  Only for (1) long-run and short-run responses and (2) counterfactuals with only policy equation at specific state imposed.
-   //  A0sdraw_dc:  nStates cells.  For each cell, nvar-by-nvar contemporaneous coefficient matrix.
-   //  Apsdraw_dc:  nStates cells.  For each cell, ncoef-by-nvar lagged structural coefficient matrix.
+/*     // ******* It is the user's responsibility to check memory allocations and dimensions of inputs. *******   ansi-c*/
+/*     //Outputs:  ctflasdrawtran = xprimeminus1*Bsdraw{s} + shocks'*A0sdrawinv{s}.   ansi-c*/
+/*     //  ctfalstran_dm: nvar-by-nfores where nfores (=eloc-bloc+1) is the forecast horizon.  Conterfactual paths of nvar variables.   ansi-c*/
+/*     //  xprimeminus1_dv:  updated 1-by-ncoef right-hand-side variables at the end of the forecast horizon, ready for the forecasts at the step nfores+1.   ansi-c*/
+/*     //    In the order of [nvar for 1st lag, ..., nvar for last lag, other exogenous terms, const term].   ansi-c*/
+/*     //Inputs:   ansi-c*/
+/*     //  xprimeminus1_dv: 1-by-ncoef vector of right-hand-side variables at the beginning of the forecast horizon.   ansi-c*/
+/*     //  bloc: beginning location for the forecast horizon.   ansi-c*/
+/*     //  eloc: end location for the forecast horizon.   ansi-c*/
+/*     //  strshockstran_dm: nvar-by-T.  Matrix transpose of unit-variance (time-invariant) structural shocks.   ansi-c*/
+/*     //  S_Tdraw_iv;  fss-by-1 or SampleSize-by-1.  Stores (s_t|I_T,theta).   ansi-c*/
+/*     //  statecon: the ith state conditioned for counterfactuals (base 0).  Must be < nStates.   ansi-c*/
+/*     //  selej:  location (base 0) of the selected structural equation (e.g., the monetary policy equation).  Only for (1) long-run and short-run responses and (2) counterfactuals with only policy equation at specific state imposed.   ansi-c*/
+/*     //  A0sdraw_dc:  nStates cells.  For each cell, nvar-by-nvar contemporaneous coefficient matrix.   ansi-c*/
+/*     //  Apsdraw_dc:  nStates cells.  For each cell, ncoef-by-nvar lagged structural coefficient matrix.   ansi-c*/
    int ti, si;
-   int errflag = -2,   //Initialized to be unsuccessful.  When 0, successful.
+   int errflag = -2,    /*  Initialized to be unsuccessful.  When 0, successful.   ansi-c*/
        nfores = eloc - bloc + 1,
        nvar = ctfalstran_dm->nrows,
        ncoef = Apsdraw_dc->C[0]->nrows,
@@ -2072,9 +2072,9 @@ void fn_ctfals_policyonly(TSdmatrix *ctfalstran_dm, TSdvector *xprimeminus1_dv, 
        ncoefminusnvar7const =  ncoef - nvar - 1;
    TSdvector ctfals_sdv, strshocks_sdv;
    TSivector sact_nfores_siv;
-   //
-   TSivector *tf_rnstates_iv = CreateConstantVector_int(nStates, nvar),   //nStates-by-1: ncoef for each element for *p*_dc or nvar for each elment for *0*_dc.
-             *tf_cnstates_iv = CreateConstantVector_int(nStates, nvar);   //nStates-by-1: nvar for each element for both *p*_dc and *0*_dc.
+/*     //   ansi-c*/
+   TSivector *tf_rnstates_iv = CreateConstantVector_int(nStates, nvar),    /*  nStates-by-1: ncoef for each element for *p*_dc or nvar for each elment for *0*_dc.   ansi-c*/
+             *tf_cnstates_iv = CreateConstantVector_int(nStates, nvar);    /*  nStates-by-1: nvar for each element for both *p*_dc and *0*_dc.   ansi-c*/
    TSdcell *tf_A0sinv_dc = NULL;
    TSdcell *tf_Aps_dc = NULL,
            *tf_Bs_dc = NULL;
@@ -2086,36 +2086,36 @@ void fn_ctfals_policyonly(TSdmatrix *ctfalstran_dm, TSdvector *xprimeminus1_dv, 
    if (nvar != strshockstran_dm->nrows)  fn_DisplayError("cstz.c/fn_ctfals_policyonly(): the number of rows of strshockstran_dm must be equal to nvar");
 
 
-   //=== Memory allocation.
-   tf_A0sinv_dc = CreateCell_lf(tf_rnstates_iv, tf_cnstates_iv);   //Note rnstates_iv and cnstates_iv are already assigned right values.
-   //+
-   for (si=nStates-1; si>=0; si--)  tf_rnstates_iv->v[si] = ncoef;  //Note rnstates_iv is already assigned right values.
+/*     //=== Memory allocation.   ansi-c*/
+   tf_A0sinv_dc = CreateCell_lf(tf_rnstates_iv, tf_cnstates_iv);    /*  Note rnstates_iv and cnstates_iv are already assigned right values.   ansi-c*/
+/*     //+   ansi-c*/
+   for (si=nStates-1; si>=0; si--)  tf_rnstates_iv->v[si] = ncoef;   /*  Note rnstates_iv is already assigned right values.   ansi-c*/
    tf_Aps_dc = CreateCell_lf(tf_rnstates_iv, tf_cnstates_iv);
    tf_Bs_dc = CreateCell_lf(tf_rnstates_iv, tf_cnstates_iv);
 
 
-   //******* WARNING: The operation involves ctfals_sdv.v and strshocks_sdv.v throughout this function *******
-   //*******          is dangerous because of pointer movements.  But it gives us efficiency.          *******
+/*     // ******* WARNING: The operation involves ctfals_sdv.v and strshocks_sdv.v throughout this function *******   ansi-c*/
+/*     // *******          is dangerous because of pointer movements.  But it gives us efficiency.          *******   ansi-c*/
    ctfals_sdv.n = nvar;
-   ctfals_sdv.v = ctfalstran_dm->M;  //Points to the beginning of the 1st column of ctfalstran_dm.
+   ctfals_sdv.v = ctfalstran_dm->M;   /*  Points to the beginning of the 1st column of ctfalstran_dm.   ansi-c*/
    strshocks_sdv.n = nvar;
    strshocks_sdv.flag = V_DEF;
-   strshocks_sdv.v = strshockstran_dm->M + strshockstran_dm->nrows*bloc;  //Points to the beginning of the bloc_th column of strshockstran_dm.
-   //+
+   strshocks_sdv.v = strshockstran_dm->M + strshockstran_dm->nrows*bloc;   /*  Points to the beginning of the bloc_th column of strshockstran_dm.   ansi-c*/
+/*     //+   ansi-c*/
    sact_nfores_siv.n = nfores;
    sact_nfores_siv.flag = V_DEF;
-   sact_nfores_siv.v = S_Tdraw_iv->v + bloc;  //Points to the beginning of the bloc_th element of S_Tdraw_iv.
+   sact_nfores_siv.v = S_Tdraw_iv->v + bloc;   /*  Points to the beginning of the bloc_th element of S_Tdraw_iv.   ansi-c*/
 
-   //=== Sticks the policy equation at the statecon_th state to A0s and A0p.
+/*     //=== Sticks the policy equation at the statecon_th state to A0s and A0p.   ansi-c*/
    for (si=nStates-1; si>=0; si--) {
-      CopyMatrix0(tf_A0sinv_dc->C[si], A0sdraw_dc->C[si]);  //tf_A0sinv_dc is A0s for a moment.
+      CopyMatrix0(tf_A0sinv_dc->C[si], A0sdraw_dc->C[si]);   /*  tf_A0sinv_dc is A0s for a moment.   ansi-c*/
       CopyMatrix0(tf_Aps_dc->C[si], Apsdraw_dc->C[si]);
-      //=== Sticks the specified regime statecon in the counterfactual period.
+/*        //=== Sticks the specified regime statecon in the counterfactual period.   ansi-c*/
       CopySubmatrix(tf_A0sinv_dc->C[si], 0, selej, A0sdraw_dc->C[statecon], 0, selej, nvar, 1);
       CopySubmatrix(tf_Aps_dc->C[si], 0, selej, Apsdraw_dc->C[statecon], 0, selej, ncoef, 1);
 
       if ( errflag=BdivA_rgens(tf_Bs_dc->C[si], tf_Aps_dc->C[si], '/', tf_A0sinv_dc->C[si]) ) {
-         //tf_A0sinv_dc is at this moment tf_A0s_dc.
+/*           //tf_A0sinv_dc is at this moment tf_A0s_dc.   ansi-c*/
          printf(".../cstz.c/fn_ctfals_policyonly(): tf_Bs_dc->C[si] -- errors when calling BdivA_rgens() with error flag %d", errflag);
          exit(EXIT_FAILURE);
       }
@@ -2126,20 +2126,20 @@ void fn_ctfals_policyonly(TSdmatrix *ctfalstran_dm, TSdvector *xprimeminus1_dv, 
    }
 
    for (ti=0; ti<nfores; ti++) {
-      //Must have a forward recursion.
+/*        //Must have a forward recursion.   ansi-c*/
       VectorTimesMatrix(&ctfals_sdv, xprimeminus1_dv, tf_Bs_dc->C[si=sact_nfores_siv.v[ti]], 1.0, 0.0, 'N');
       VectorTimesMatrix(&ctfals_sdv, &strshocks_sdv, tf_A0sinv_dc->C[si], 1.0, 1.0, 'N');
-      //=== Updates the recursion.  The order matters.
+/*        //=== Updates the recursion.  The order matters.   ansi-c*/
       memmove(xprimeminus1_dv->v+nvar, xprimeminus1_dv->v, ncoefminusnvar7const*sizeof(double));
       memcpy(xprimeminus1_dv->v, ctfals_sdv.v, nvar*sizeof(double));
-      //+
-      ctfals_sdv.v += nvar;  //Points to the beginning of the next column of ctfalstran_dm.
-      strshocks_sdv.v += nvar;  //Points to the beginning of the next column of strshockstran_dm.
+/*        //+   ansi-c*/
+      ctfals_sdv.v += nvar;   /*  Points to the beginning of the next column of ctfalstran_dm.   ansi-c*/
+      strshocks_sdv.v += nvar;   /*  Points to the beginning of the next column of strshockstran_dm.   ansi-c*/
    }
 
    ctfalstran_dm->flag = M_GE;
 
-   //=== Destroys memory allocated for this function.
+/*     //=== Destroys memory allocated for this function.   ansi-c*/
    tf_rnstates_iv = DestroyVector_int(tf_rnstates_iv);
    tf_cnstates_iv = DestroyVector_int(tf_cnstates_iv);
    tf_A0sinv_dc = DestroyCell_lf(tf_A0sinv_dc);
@@ -2151,17 +2151,17 @@ void fn_ctfals_policyonly(TSdmatrix *ctfalstran_dm, TSdvector *xprimeminus1_dv, 
 #if defined (INTELCMATHLIBRARY)
 void fn_impulse(TSdmatrix *imftran_dm, const TSdmatrix *Bh_dm, const TSdmatrix *swishtran_dm, const int nlags, const int imsteps)
 {
-   //Outputs (memory allocated already):
-   //  imftran_dm:  nvar^2-by-imsteps where imf_dm (imsteps-by-nvar^2) is in the same format as in RATS.
-   //             Rows:  nvar responses to the 1st shock, ..., nvar responses to the last shock.
-   //             Columns: steps of impulse responses.
-   //Inputs:
-   //  Bh_dm: ldbh-by-nvar reduced-form coefficient matrix (where ldbh is the leading dimension of Bh_dm and must be at least nvar*nlags) of the form:
-   //           Y(T*nvar) = X*Bh_dm + U, X: T*ldbh(ldbh may include all exogenous terms). Note that columns corresponding equations.
-   //           Columns of Bh_dm: nvar variables for the 1st lag, ..., nvariables for the last lag + (possible exogenous terms) + const = ldbh.
-   //  swishtran_dm: transponse of nvar-by-nvar inv(A0) in the structural model y(t)A0 = e(t).
-   //  nlags:  lag length (number of lags);
-   //  imsteps:  steps for impulse responses.
+/*     //Outputs (memory allocated already):   ansi-c*/
+/*     //  imftran_dm:  nvar^2-by-imsteps where imf_dm (imsteps-by-nvar^2) is in the same format as in RATS.   ansi-c*/
+/*     //             Rows:  nvar responses to the 1st shock, ..., nvar responses to the last shock.   ansi-c*/
+/*     //             Columns: steps of impulse responses.   ansi-c*/
+/*     //Inputs:   ansi-c*/
+/*     //  Bh_dm: ldbh-by-nvar reduced-form coefficient matrix (where ldbh is the leading dimension of Bh_dm and must be at least nvar*nlags) of the form:   ansi-c*/
+/*     //           Y(T*nvar) = X*Bh_dm + U, X: T*ldbh(ldbh may include all exogenous terms). Note that columns corresponding equations.   ansi-c*/
+/*     //           Columns of Bh_dm: nvar variables for the 1st lag, ..., nvariables for the last lag + (possible exogenous terms) + const = ldbh.   ansi-c*/
+/*     //  swishtran_dm: transponse of nvar-by-nvar inv(A0) in the structural model y(t)A0 = e(t).   ansi-c*/
+/*     //  nlags:  lag length (number of lags);   ansi-c*/
+/*     //  imsteps:  steps for impulse responses.   ansi-c*/
 
    int i, j,
        nvar, nvar2, ldbh, jmax;
@@ -2176,8 +2176,8 @@ void fn_impulse(TSdmatrix *imftran_dm, const TSdmatrix *Bh_dm, const TSdmatrix *
    else if (nvar != Bh_dm->ncols)  fn_DisplayError(".../fn_impulse():  the number of columns in Bh_dm must equal to the number of equations or endogenous variables");
    else if (square(nvar) != imftran_dm->nrows || imsteps != imftran_dm->ncols)  fn_DisplayError(".../fn_impulse():  Dimension of impulse matrix input matrix imftran_dm is incompatible with other input matrices or with the number of steps");
 
-   //if ( !(imftran_dm->flag & M_CN) && imftran_dm[0] !=0.0 )  InitializeConstantMatrix_lf(imftran_dm, 0.0);
-   InitializeConstantMatrix_lf(imftran_dm, 0.0);  //Cumulative. Always initialize it to zero.
+/*     //if ( !(imftran_dm->flag & M_CN) && imftran_dm[0] !=0.0 )  InitializeConstantMatrix_lf(imftran_dm, 0.0);   ansi-c*/
+   InitializeConstantMatrix_lf(imftran_dm, 0.0);   /*  Cumulative. Always initialize it to zero.   ansi-c*/
 
 
    nvar2 = square(nvar);
@@ -2200,21 +2200,21 @@ void fn_impulse(TSdmatrix *imftran_dm, const TSdmatrix *Bh_dm, const TSdmatrix *
    imftran_dm->flag = M_GE;
 }
 #else
-//No default routine yet.  7 Oct 2003
+/*  //No default routine yet.  7 Oct 2003   ansi-c*/
 #endif
 
 
 TSdmatrix *tz_impulse2levels(TSdmatrix *imflev_dm, TSdmatrix *imf_dm, TSivector *vlist2levels_iv)
 {
-   //Converting imf_dm to the level impulse responses imflev_dm according to vlist2levels_iv.
-   //If imflev_dm = imf_dm, then the value of imf_dm will be replaced by the new value.
-   //
-   //imf_dm; nsteps-by-nvar^2 where
-   //          rows: steps of impulse responses;
-   //          columns:  nvar responses to the 1st shock, ..., nvar responses to the last shock.
-   //vlist2levels_iv;  must be in ascending order.  A list of base-0 variables to be converted to levels.  Example: [0 1 3]
+/*     //Converting imf_dm to the level impulse responses imflev_dm according to vlist2levels_iv.   ansi-c*/
+/*     //If imflev_dm = imf_dm, then the value of imf_dm will be replaced by the new value.   ansi-c*/
+/*     //   ansi-c*/
+/*     //imf_dm; nsteps-by-nvar^2 where   ansi-c*/
+/*     //          rows: steps of impulse responses;   ansi-c*/
+/*     //          columns:  nvar responses to the 1st shock, ..., nvar responses to the last shock.   ansi-c*/
+/*     //vlist2levels_iv;  must be in ascending order.  A list of base-0 variables to be converted to levels.  Example: [0 1 3]   ansi-c*/
    int _i, _j, _t;
-   int largestvar;   //last variable corresponding to the largest number.
+   int largestvar;    /*  last variable corresponding to the largest number.   ansi-c*/
    int _n, nsq, imsteps;
    TSdvector imf_sdv;
    TSdvector imflev_sdv;
@@ -2224,12 +2224,12 @@ TSdmatrix *tz_impulse2levels(TSdmatrix *imflev_dm, TSdmatrix *imf_dm, TSivector 
 
    if (!imflev_dm) {
       imflev_dm = CreateMatrix_lf(imf_dm->nrows, imf_dm->ncols);
-      imflev_dm->flag = M_GE;   //Legal values will be given below.
+      imflev_dm->flag = M_GE;    /*  Legal values will be given below.   ansi-c*/
    }
    else if (imflev_dm != imf_dm )
       if ( (imflev_dm->nrows != imf_dm->nrows) || (imflev_dm->ncols != imf_dm->ncols))
          fn_DisplayError(".../cstz.c/tz_impulse2levels(): dimensions of the input matrix imf_dm and the output matrix imflev_dm must match exactly");
-      else  imflev_dm->flag = M_GE;   //Legal values will be given below.
+      else  imflev_dm->flag = M_GE;    /*  Legal values will be given below.   ansi-c*/
 
    largestvar = vlist2levels_iv->v[vlist2levels_iv->n-1]+1;
    _n = (int)floor(sqrt(imf_dm->ncols)+0.5);
@@ -2239,7 +2239,7 @@ TSdmatrix *tz_impulse2levels(TSdmatrix *imflev_dm, TSdmatrix *imf_dm, TSivector 
 
 
    imflev_sdv.n = imf_sdv.n = imf_dm->nrows;
-   imflev_sdv.flag = imf_sdv.flag = V_DEF;  //Legal values will be given below.
+   imflev_sdv.flag = imf_sdv.flag = V_DEF;   /*  Legal values will be given below.   ansi-c*/
    imsteps = imf_dm->nrows;
    for (_i=vlist2levels_iv->n-1; _i>=0; _i--)
       for (_j=vlist2levels_iv->v[_i]; _j<nsq; _j += _n) {
@@ -2256,50 +2256,50 @@ TSdmatrix *tz_impulse2levels(TSdmatrix *imflev_dm, TSdmatrix *imf_dm, TSivector 
 
 void DynamicResponsesForStructuralEquation(TSdmatrix *Resps_dm, const int loclv, const int nlags, const TSdvector *a0p_dv)
 {
-   //Outputs:
-   //  Resps_dm: k-by-nvar where k responses of the loclv_th variable to the _ith variable for _i=1:nvar.
-   //    The loclv_th column of Resps_dm is meaningless but as a debug check should be close to -1 for the kth responses as k->\infty.
-   //Inputs:
-   //  loclv:  loction of the left-hand variable either in difference (growth) or level.
-   //  nlags:  number of lags.
-   //  a0p_dv: m-by-1 vector of [a0 a+] either in difference (growth) or level for the strctural equation considered where m>= (nlags+1)*nvar because m may
-   //    include the constant term.  Note a0 is on the left hand side of the equation and a+ is on the right hand side of the equation.
+/*     //Outputs:   ansi-c*/
+/*     //  Resps_dm: k-by-nvar where k responses of the loclv_th variable to the _ith variable for _i=1:nvar.   ansi-c*/
+/*     //    The loclv_th column of Resps_dm is meaningless but as a debug check should be close to -1 for the kth responses as k->\infty.   ansi-c*/
+/*     //Inputs:   ansi-c*/
+/*     //  loclv:  loction of the left-hand variable either in difference (growth) or level.   ansi-c*/
+/*     //  nlags:  number of lags.   ansi-c*/
+/*     //  a0p_dv: m-by-1 vector of [a0 a+] either in difference (growth) or level for the strctural equation considered where m>= (nlags+1)*nvar because m may   ansi-c*/
+/*     //    include the constant term.  Note a0 is on the left hand side of the equation and a+ is on the right hand side of the equation.   ansi-c*/
    int vi, li;
    int nvar, K;
    double tmpdsum, c0, a0inv;
-   TSdvector resps_sdv;  //k-by-1.
-   //----
-   TSdvector *a1_dv = NULL;     //nlags-by-1.
+   TSdvector resps_sdv;   /*  k-by-1.   ansi-c*/
+/*     //----   ansi-c*/
+   TSdvector *a1_dv = NULL;      /*  nlags-by-1.   ansi-c*/
 
    if (!Resps_dm || !a0p_dv || !a0p_dv->flag)    fn_DisplayError(".../cstz/DynamicResponsesForStructuralEquation():  (1) both input vector and output matrix must be allocated memory; (2) the input vector must have legal values");
    if (a0p_dv->n < (nlags+1)*(nvar=Resps_dm->ncols))  fn_DisplayError(".../cstz/DynamicResponsesForStructuralEquation(): the length of the input vector must be at least (nvar+1)*nlags");
    if (loclv >= nvar || loclv < 0)  fn_DisplayError(".../cstz/DynamicResponsesForStructuralEquation():  the location for the left-hand-side variable must be between 0 and number of variables-1, inclusive");
    a1_dv = CreateVector_lf(nlags);
-   a1_dv->flag = V_DEF;  //which will be given legal values below.
+   a1_dv->flag = V_DEF;   /*  which will be given legal values below.   ansi-c*/
 
    resps_sdv.n = K = Resps_dm->nrows;
    resps_sdv.flag = V_UNDEF;
 
    a0inv = 1.0/a0p_dv->v[loclv];
-   for (li=nlags; li>=1; li--)      //Note li=1; li<=nlags, NOT li=0; li<nlags.
+   for (li=nlags; li>=1; li--)       /*  Note li=1; li<=nlags, NOT li=0; li<nlags.   ansi-c*/
       a1_dv->v[li-1] = a0p_dv->v[loclv+nvar*li]*a0inv;
-            //Constructing the lagged coefficients for the loclv_th variable.
+/*              //Constructing the lagged coefficients for the loclv_th variable.   ansi-c*/
    for (vi=nvar-1; vi>=0; vi--) {
-      //=== Constructing the constant term.
-      tmpdsum = - a0p_dv->v[vi];  //Assigned to -a_0.
-      for (li=nlags; li>=1; li--)       //Note li=1; li<=nlags, NOT li=0; li<nlags.
+/*        //=== Constructing the constant term.   ansi-c*/
+      tmpdsum = - a0p_dv->v[vi];   /*  Assigned to -a_0.   ansi-c*/
+      for (li=nlags; li>=1; li--)        /*  Note li=1; li<=nlags, NOT li=0; li<nlags.   ansi-c*/
                   tmpdsum += a0p_dv->v[vi+nvar*li];
       c0 = tmpdsum*a0inv;
-             //Done with t* array.
+/*               //Done with t* array.   ansi-c*/
 
-      //=== Getting dynamic responses to the vi_th variable.
+/*        //=== Getting dynamic responses to the vi_th variable.   ansi-c*/
       resps_sdv.v = Resps_dm->M + vi*K;
       DynamicResponsesAR(&resps_sdv, c0, a1_dv);
    }
    Resps_dm->flag = M_GE;
 
 
-   //=== Destroys memory allocated for this function only.
+/*     //=== Destroys memory allocated for this function only.   ansi-c*/
    a1_dv = DestroyVector_lf(a1_dv);
 }
 
@@ -2307,11 +2307,11 @@ void DynamicResponsesForStructuralEquation(TSdmatrix *Resps_dm, const int loclv,
 
 void DynamicResponsesAR(TSdvector *resps_dv, const double c0, const TSdvector *a1_dv)
 {
-   //Outputs:
-   //  resps_dv: k-by-1 where k responses r_{t+1} to r_{t+k} are computed from r_{t+1} = c0 + a1'*[r_t; ...; r_{t-nlags+1}].
-   //Inputs:
-   //  c0:  constant term.
-   //  a1_dv: nlags-by-1 vector of coefficients in the AR process.
+/*     //Outputs:   ansi-c*/
+/*     //  resps_dv: k-by-1 where k responses r_{t+1} to r_{t+k} are computed from r_{t+1} = c0 + a1'*[r_t; ...; r_{t-nlags+1}].   ansi-c*/
+/*     //Inputs:   ansi-c*/
+/*     //  c0:  constant term.   ansi-c*/
+/*     //  a1_dv: nlags-by-1 vector of coefficients in the AR process.   ansi-c*/
    int ti;
    int k, nlags;
    double *rv;
@@ -2327,15 +2327,15 @@ void DynamicResponsesAR(TSdvector *resps_dv, const double c0, const TSdvector *a
 
 
    for (ti=1; ti<k; ti++) {
-      //Note ti=1, NOT ti=0.
+/*        //Note ti=1, NOT ti=0.   ansi-c*/
       rv[ti] = c0 + VectorDotVector((TSdvector *)a1_dv, rlags_dv);
-      //=== Updating rlags_dv.
+/*        //=== Updating rlags_dv.   ansi-c*/
       memmove(rlags_dv->v+1, rlags_dv->v, (nlags-1)*sizeof(double));
       *(rlags_dv->v) = rv[ti];
    }
    resps_dv->flag = V_DEF;
 
-   //=== Destroys memory allocated for this function only.
+/*     //=== Destroys memory allocated for this function only.   ansi-c*/
    rlags_dv = DestroyVector_lf(rlags_dv);
 }
 
@@ -2343,9 +2343,9 @@ void DynamicResponsesAR(TSdvector *resps_dv, const double c0, const TSdvector *a
 
 
 
-//---------------------------- Some regular vector or matrix operations ---------------------
+/*  //---------------------------- Some regular vector or matrix operations ---------------------   ansi-c*/
 double MinVector_lf(TSdvector *x_dv) {
-   //Input: no change for x_dv in this function.
+/*     //Input: no change for x_dv in this function.   ansi-c*/
    int _i, n;
    double minvalue;
    double *v;
@@ -2363,8 +2363,8 @@ double MinVector_lf(TSdvector *x_dv) {
 
 TSdvector *ConvertVector2exp(TSdvector *y_dv, TSdvector *x_dv)
 {
-   //y=exp(x): output vector.  If NULL, y will be created and memory-allocated.
-   //x: input vector.
+/*     //y=exp(x): output vector.  If NULL, y will be created and memory-allocated.   ansi-c*/
+/*     //x: input vector.   ansi-c*/
    TSdvector *z_dv=NULL;
    #if defined (INTELCMATHLIBRARY)
    int _i;
@@ -2408,11 +2408,11 @@ TSdvector *ConvertVector2exp(TSdvector *y_dv, TSdvector *x_dv)
 
    #endif
 }
-//---
+/*  //---   ansi-c*/
 TSdvector *ConvertVector2log(TSdvector *y_dv, TSdvector *x_dv)
 {
-   //y=log(x): output vector.  If NULL, y will be created and memory-allocated.
-   //x: input vector.
+/*     //y=log(x): output vector.  If NULL, y will be created and memory-allocated.   ansi-c*/
+/*     //x: input vector.   ansi-c*/
    TSdvector *z_dv=NULL;
    #if defined (INTELCMATHLIBRARY)
    int _i;
@@ -2475,7 +2475,7 @@ double tz_normofvector(TSdvector *x_dv, double p)
    }
    else
    {
-      printf("\n/cstz.c/tz_normofvector(): HELLO I TRICK YOU and YOU MUST DO fabs(p-2.0)<MICHINEZERO!!!!!!\n"); //????
+      printf("\n/cstz.c/tz_normofvector(): HELLO I TRICK YOU and YOU MUST DO fabs(p-2.0)<MICHINEZERO!!!!!!\n");  /*  ????   ansi-c*/
       if (p==1.0)
          for (ki=_n-1; ki>=0; ki--)  norm += fabs(v[ki]);
       else
@@ -2490,22 +2490,22 @@ double tz_normofvector(TSdvector *x_dv, double p)
 
 
 
-//---------------------------- Not used often ---------------------
+/*  //---------------------------- Not used often ---------------------   ansi-c*/
 void fn_cumsum(double **aos_v, int *aods_v, double *v, int d_v) {
-   // Compute a cumulative sum of a vector.
-   //
-   // v: an n-by-1 vector.
-   // d_v: n -- size of the vector v to be used for a cumulative sum.
-   // aos_v: address of the pointer to the n-by-1 vector s_v.
-   // aods_v: address of the size of the dimension of s_v.
-   //----------
-   // *aos_v: An n-by-1 vector of cumulative sum s_v.
-   // *aods_v: n -- size of the dimension for s_v.
+/*     // Compute a cumulative sum of a vector.   ansi-c*/
+/*     //   ansi-c*/
+/*     // v: an n-by-1 vector.   ansi-c*/
+/*     // d_v: n -- size of the vector v to be used for a cumulative sum.   ansi-c*/
+/*     // aos_v: address of the pointer to the n-by-1 vector s_v.   ansi-c*/
+/*     // aods_v: address of the size of the dimension of s_v.   ansi-c*/
+/*     //----------   ansi-c*/
+/*     // *aos_v: An n-by-1 vector of cumulative sum s_v.   ansi-c*/
+/*     // *aods_v: n -- size of the dimension for s_v.   ansi-c*/
 
    int ki;
 
    *aos_v = tzMalloc(d_v, double);
-   (*aods_v) = d_v;                               // n for the n-by-1 vector s_v.
+   (*aods_v) = d_v;                                /*   n for the n-by-1 vector s_v.   ansi-c*/
    *(*aos_v) = *v;
    if (d_v>1) {
       for (ki=1; ki<d_v; ki++) (*aos_v)[ki] = (*aos_v)[ki-1] + v[ki];
@@ -2569,7 +2569,7 @@ void fn_ergodp(double **aop, int *aod, mxArray *cp) {
 
 
 
-//---------- Must keep the following code forever. ---------------
+/*  //---------- Must keep the following code forever. ---------------   ansi-c*/
 /**
 TSdp2m5 *CreateP2m5(const double p)
 {

@@ -13,16 +13,16 @@
 
 #include "modify_for_mex.h"
 
-FILE *FPTR_DEBUG = (FILE *)NULL;  //Debug output file, to be opened by main.c.
-FILE *FPTR_OPT = (FILE *)NULL;  //Optimization output file, to be opened by main.c.
+FILE *FPTR_DEBUG = (FILE *)NULL;   /*  Debug output file, to be opened by main.c.   ansi-c*/
+FILE *FPTR_OPT = (FILE *)NULL;   /*  Optimization output file, to be opened by main.c.   ansi-c*/
 
-//-----------------
-// Some high-level functions.
-//-----------------
+/*  //-----------------   ansi-c*/
+/*  // Some high-level functions.   ansi-c*/
+/*  //-----------------   ansi-c*/
 int fn_locofyearqm(int q_m, int yrstart, int qmstart, int yrend, int qmend)
 {
-   //Returns the (base 0) location of a specified year and month (quarter) for the time series.
-   //All the other inputs take the usual (base-1) numbers, I guess 01/17/05.  For example, yrstart = 1960 means the year 1960.
+/*     //Returns the (base 0) location of a specified year and month (quarter) for the time series.   ansi-c*/
+/*     //All the other inputs take the usual (base-1) numbers, I guess 01/17/05.  For example, yrstart = 1960 means the year 1960.   ansi-c*/
    int tmpi, loc;
 
    if ( q_m != 12 )
@@ -38,9 +38,9 @@ int fn_locofyearqm(int q_m, int yrstart, int qmstart, int yrend, int qmend)
 
 
 
-//-----------------
-// Function to display errors.
-//-----------------
+/*  //-----------------   ansi-c*/
+/*  // Function to display errors.   ansi-c*/
+/*  //-----------------   ansi-c*/
 void fn_DisplayError(char *msg_s)
 {
    #if defined (USE_DEBUG_FILE)
@@ -56,21 +56,21 @@ void fn_DisplayError(char *msg_s)
    #ifdef WIN_MATLABAPI
       mexErrMsgTxt(".");
    #else
-      //getchar();
-      exit( EXIT_FAILURE );                          // This exits the entire C program.
+/*        //getchar();   ansi-c*/
+      exit( EXIT_FAILURE );                           /*   This exits the entire C program.   ansi-c*/
    #endif
 }
 
 
-//-----------------
-// Error-checking memory allocators
-//-----------------
+/*  //-----------------   ansi-c*/
+/*  // Error-checking memory allocators   ansi-c*/
+/*  //-----------------   ansi-c*/
 void *m_alloc(size_t size) {
    void *new_mem;
    if ( (new_mem = malloc(size)) == NULL )  fn_DisplayError("Out of Memory!");
    return(new_mem);
 }
-//+
+/*  //+   ansi-c*/
 void *c_alloc(size_t elt_count, size_t elt_size) {
    void *new_mem;
    if ( (new_mem = calloc(elt_count, elt_size)) == NULL )  fn_DisplayError("Out of Memory!");
@@ -78,9 +78,9 @@ void *c_alloc(size_t elt_count, size_t elt_size) {
 }
 
 
-//-----------------
-// Creat and destroy vectors, matrices, and cells.
-//-----------------
+/*  //-----------------   ansi-c*/
+/*  // Creat and destroy vectors, matrices, and cells.   ansi-c*/
+/*  //-----------------   ansi-c*/
 /**
 TSvoidvector *CreateVector_void(int _n)
 {
@@ -257,9 +257,9 @@ TSdcell *CreateCell_lf(TSivector *row_iv, TSivector *col_iv)
    int _i,
        ncells;
    TSdcell *x_dc=NULL;
-   //-------------- The following line must be enacted when we produce new code in the future.   ---------------------
-   //-------------- In old code I forgot to set the flags for row_iv and col_iv but change them in all places are too time-consuming at this point.  ---------------------
-   //if (!row_iv || !col_iv || !row_iv->flag || !col_iv->flag)  fn_DisplayError(".../CreateCell_lf( ): Dimension vectors row_iv and col_iv must (1) created and (2) assigned legal values");
+/*     //-------------- The following line must be enacted when we produce new code in the future.   ---------------------   ansi-c*/
+/*     //-------------- In old code I forgot to set the flags for row_iv and col_iv but change them in all places are too time-consuming at this point.  ---------------------   ansi-c*/
+/*     //if (!row_iv || !col_iv || !row_iv->flag || !col_iv->flag)  fn_DisplayError(".../CreateCell_lf( ): Dimension vectors row_iv and col_iv must (1) created and (2) assigned legal values");   ansi-c*/
    if ((ncells = row_iv->n) != col_iv->n)  fn_DisplayError(".../CreateCell_lf( ): the lengths of row_iv and col_iv (i.e., numbers of cells) must be the same");
    x_dc = tzMalloc(1, TSdcell);
    x_dc->ncells = ncells;
@@ -285,9 +285,9 @@ TSdcellvec *CreateCellvec_lf(TSivector *n_iv) {
    TSdcellvec *x_dcv = tzMalloc(1, TSdcellvec);
    int _i,
        ncells;
-   //-------------- The following line must be enacted when we produce new code in the future.   ---------------------
-   //-------------- In old code I forgot to set the flag for n_iv but change it in all places are too time-consuming at this point.  ---------------------
-   //if (!n_iv || !n_iv->flag)  fn_DisplayError(".../CreateCellvec_lf( ): Dimension vector n_iv must (1) created and (2) assigned legal values");
+/*     //-------------- The following line must be enacted when we produce new code in the future.   ---------------------   ansi-c*/
+/*     //-------------- In old code I forgot to set the flag for n_iv but change it in all places are too time-consuming at this point.  ---------------------   ansi-c*/
+/*     //if (!n_iv || !n_iv->flag)  fn_DisplayError(".../CreateCellvec_lf( ): Dimension vector n_iv must (1) created and (2) assigned legal values");   ansi-c*/
    x_dcv->ncells = ncells = n_iv->n;
    x_dcv->C = tzMalloc(ncells, TSdvector *);
    for (_i=0; _i<ncells; _i++)   *(x_dcv->C + _i) = CreateVector_lf(n_iv->v[_i]);
@@ -307,7 +307,7 @@ TSdcellvec *DestroyCellvec_lf(TSdcellvec *x_dcv) {
 TSdfourth *CreateFourth_lf(int ndims, TSivector *row_iv, TSivector *col_iv) {
    int _i;
    TSdfourth *x_d4 = NULL;
-   //if (row_iv->n != col_iv->n) fn_DisplayError(".../CreateFourth_lf( ): the lengths of row_iv and col_iv (i.e., sizes of dimensions) must be the same");
+/*     //if (row_iv->n != col_iv->n) fn_DisplayError(".../CreateFourth_lf( ): the lengths of row_iv and col_iv (i.e., sizes of dimensions) must be the same");   ansi-c*/
 
    x_d4 = tzMalloc(1, TSdfourth);
    x_d4->ndims = ndims;
@@ -332,7 +332,7 @@ TSdfourthvec *CreateFourthvec_lf(int ndims, TSivector *n_iv)
 {
    int _i;
    TSdfourthvec *x_d4v = NULL;
-   //if (n_iv->n != col_iv->n) fn_DisplayError(".../CreateFourth_lf( ): the lengths of n_iv and col_iv (i.e., sizes of dimensions) must be the same");
+/*     //if (n_iv->n != col_iv->n) fn_DisplayError(".../CreateFourth_lf( ): the lengths of n_iv and col_iv (i.e., sizes of dimensions) must be the same");   ansi-c*/
 
    x_d4v = tzMalloc(1, TSdfourthvec);
    x_d4v->ndims = ndims;
@@ -391,14 +391,14 @@ TSdzmatrix *DestroyMatrix_dz(TSdzmatrix *x_dzm)
 
 
 
-//-----------------
-// Creates special vectors, matrices, and cells but uses the same destroy utilities as above.
-//-----------------
-//=== Creates two special matrices: zeros and identity.  Use DestroyMatrix_lf to free the memory allocated to these functions.
+/*  //-----------------   ansi-c*/
+/*  // Creates special vectors, matrices, and cells but uses the same destroy utilities as above.   ansi-c*/
+/*  //-----------------   ansi-c*/
+/*  //=== Creates two special matrices: zeros and identity.  Use DestroyMatrix_lf to free the memory allocated to these functions.   ansi-c*/
 TSdmatrix *CreateZeroMatrix_lf(const int nrows, const int ncols) {
    int _i;
    TSdmatrix *x_dm=CreateMatrix_lf(nrows, ncols);
-   //x_dm->flag = M_GE | M_SU | M_SL | M_UT | M_LT;
+/*     //x_dm->flag = M_GE | M_SU | M_SL | M_UT | M_LT;   ansi-c*/
    x_dm->flag = M_GE;
    for (_i=nrows*ncols-1; _i>=0; _i--)
       x_dm->M[_i] = 0.0;
@@ -408,31 +408,31 @@ TSdmatrix *CreateIdentityMatrix_lf(const int nrows, const int ncols) {
    int _i;
    TSdmatrix *x_dm=CreateZeroMatrix_lf(nrows, ncols);
    if (nrows==ncols) {
-      //x_dm->flag = M_GE | M_SU | M_SL | M_UT | M_LT;
-      //x_dm->flag = M_GE;
+/*        //x_dm->flag = M_GE | M_SU | M_SL | M_UT | M_LT;   ansi-c*/
+/*        //x_dm->flag = M_GE;   ansi-c*/
       for (_i=square(nrows)-1; _i>=0; _i -= nrows+1)  x_dm->M[_i] = 1.0;
       x_dm->flag = M_GE | M_SU | M_SL | M_UT | M_LT;
    }
    else if (nrows<ncols) {
-      //x_dm->flag = M_GE | M_SU | M_UT;
-      //x_dm->flag = M_GE;
+/*        //x_dm->flag = M_GE | M_SU | M_UT;   ansi-c*/
+/*        //x_dm->flag = M_GE;   ansi-c*/
       for (_i=square(nrows)-1; _i>=0; _i -= nrows+1)  x_dm->M[_i] = 1.0;
       x_dm->flag = M_GE | M_UT | M_LT;
    }
    else {
-      //x_dm->flag = M_GE | M_SL | M_LT;
-      //x_dm->flag = M_GE;
+/*        //x_dm->flag = M_GE | M_SL | M_LT;   ansi-c*/
+/*        //x_dm->flag = M_GE;   ansi-c*/
       for (_i=(ncols-1)*(nrows+1); _i>=0; _i -= nrows+1)  x_dm->M[_i] = 1.0;
       x_dm->flag = M_GE | M_UT | M_LT;
    }
    return(x_dm);
 }
 
-//=== Other speicial matrices.
+/*  //=== Other speicial matrices.   ansi-c*/
 TSivector *CreateConstantVector_int(const int _n, const int _k) {
-   //Inputs:
-   //  _k:  Integer constant;
-   //  _n: Dimension of the vector.
+/*     //Inputs:   ansi-c*/
+/*     //  _k:  Integer constant;   ansi-c*/
+/*     //  _n: Dimension of the vector.   ansi-c*/
    int _i;
    TSivector *x_iv=CreateVector_int(_n);
    for (_i=_n-1; _i>=0; _i--)
@@ -490,9 +490,9 @@ TSdvector *CreateConstantVector_lf(const int _n, const double _alpha) {
 }
 
 TSdmatrix *CreateConstantMatrix_lf(const int nrows, const int ncols, const double _alpha) {
-   //Inputs:
-   //  _alpha:  Double constant;
-   //  nrows and ncols: Dimensions of the matrix.
+/*     //Inputs:   ansi-c*/
+/*     //  _alpha:  Double constant;   ansi-c*/
+/*     //  nrows and ncols: Dimensions of the matrix.   ansi-c*/
    int _i;
    TSdmatrix *x_dm=CreateMatrix_lf(nrows, ncols);
 
@@ -503,15 +503,15 @@ TSdmatrix *CreateConstantMatrix_lf(const int nrows, const int ncols, const doubl
 }
 
 TSdcellvec *CreateConstantCellvec_lf(TSivector *n_iv, const double _alpha) {
-   //Inputs:
-   //  _alpha:  Double constant;
-   //  _n: Length (dimension) of the vector.
+/*     //Inputs:   ansi-c*/
+/*     //  _alpha:  Double constant;   ansi-c*/
+/*     //  _n: Length (dimension) of the vector.   ansi-c*/
    int _i,
        ncells;
    TSdcellvec *x_dcv = tzMalloc(1, TSdcellvec);
-   //-------------- The following line must be enacted when we produce new code in the future.   ---------------------
-   //-------------- In old code I forgot to set the flag for n_iv but change it in all places are too time-consuming at this point.  ---------------------
-   //if (!n_iv || !n_iv->flag)  fn_DisplayError(".../CreateConstantCellvec_lf( ): Dimension vector n_iv must (1) created and (2) assigned legal values");
+/*     //-------------- The following line must be enacted when we produce new code in the future.   ---------------------   ansi-c*/
+/*     //-------------- In old code I forgot to set the flag for n_iv but change it in all places are too time-consuming at this point.  ---------------------   ansi-c*/
+/*     //if (!n_iv || !n_iv->flag)  fn_DisplayError(".../CreateConstantCellvec_lf( ): Dimension vector n_iv must (1) created and (2) assigned legal values");   ansi-c*/
    x_dcv->ncells = ncells = n_iv->n;
    x_dcv->C = tzMalloc(ncells, TSdvector *);
    for (_i=ncells-1; _i>=0; _i--)   *(x_dcv->C + _i) = CreateConstantVector_lf(n_iv->v[_i], _alpha);
@@ -519,16 +519,16 @@ TSdcellvec *CreateConstantCellvec_lf(TSivector *n_iv, const double _alpha) {
 }
 
 TSdcell *CreateConstantCell_lf(TSivector *row_iv, TSivector *col_iv, const double _alpha) {
-   //Inputs:
-   //  _alpha:  Double constant;
-   //  nrows: Number of rows;
-   //  ncols: Number of columns.
+/*     //Inputs:   ansi-c*/
+/*     //  _alpha:  Double constant;   ansi-c*/
+/*     //  nrows: Number of rows;   ansi-c*/
+/*     //  ncols: Number of columns.   ansi-c*/
    int _i,
        ncells;
    TSdcell *x_dc=NULL;
-   //-------------- The following line must be enacted when we produce new code in the future.   ---------------------
-   //-------------- In old code I forgot to set the flags for row_iv and col_iv but change them in all places are too time-consuming at this point.  ---------------------
-   //if (!row_iv || !col_iv || !row_iv->flag || !col_iv->flag)  fn_DisplayError(".../CreateConstantCell_lf( ): Dimension vectors row_iv and col_iv must (1) created and (2) assigned legal values");
+/*     //-------------- The following line must be enacted when we produce new code in the future.   ---------------------   ansi-c*/
+/*     //-------------- In old code I forgot to set the flags for row_iv and col_iv but change them in all places are too time-consuming at this point.  ---------------------   ansi-c*/
+/*     //if (!row_iv || !col_iv || !row_iv->flag || !col_iv->flag)  fn_DisplayError(".../CreateConstantCell_lf( ): Dimension vectors row_iv and col_iv must (1) created and (2) assigned legal values");   ansi-c*/
    if ((ncells = row_iv->n) != col_iv->n)  fn_DisplayError(".../CreateCell_lf( ): the lengths of row_iv and col_iv (i.e., numbers of cells) must be the same");
 
    x_dc = tzMalloc(1, TSdcell);
@@ -541,11 +541,11 @@ TSdcell *CreateConstantCell_lf(TSivector *row_iv, TSivector *col_iv, const doubl
 
 TSdvector *CreateDatesVector_lf(int nq_m, int yrstart, int qmstart, int yrend, int qmend)
 {
-   //If nq_m==4, quarterly data; nq_m==12, monthly data.
-   //All the other inputs take the usual (base-1) numbers, I guess 01/17/05.  For example, yrstart = 1960 means the year 1960.
+/*     //If nq_m==4, quarterly data; nq_m==12, monthly data.   ansi-c*/
+/*     //All the other inputs take the usual (base-1) numbers, I guess 01/17/05.  For example, yrstart = 1960 means the year 1960.   ansi-c*/
    int _t;
-   int samplesize = 1+fn_locofyearqm(nq_m, yrstart, qmstart, yrend, qmend);  //1+ because fn_locofyearqm() returns a 0-based integer.
-   //
+   int samplesize = 1+fn_locofyearqm(nq_m, yrstart, qmstart, yrend, qmend);   /*  1+ because fn_locofyearqm() returns a 0-based integer.   ansi-c*/
+/*     //   ansi-c*/
    TSdvector *dates_dv = tzMalloc(1, TSdvector);
    dates_dv->n = samplesize;
    dates_dv->v = tzMalloc(samplesize, double);
@@ -562,16 +562,16 @@ TSdvector *CreateDatesVector_lf(int nq_m, int yrstart, int qmstart, int yrend, i
 
 
 
-//-----------------
-// Initializes already-created special vectors, matrices, and cells.
-//-----------------
+/*  //-----------------   ansi-c*/
+/*  // Initializes already-created special vectors, matrices, and cells.   ansi-c*/
+/*  //-----------------   ansi-c*/
 void InitializeConstantVector_lf(TSdvector *x_dv, const double _alpha)
 {
-   //Ouputs:
-   //  x_dv: Initialized to a constant value _alpha for all elements.
-   //Inputs:
-   //  x_dv:  Memory allocated already.
-   //  _alpha:  Double constant;
+/*     //Ouputs:   ansi-c*/
+/*     //  x_dv: Initialized to a constant value _alpha for all elements.   ansi-c*/
+/*     //Inputs:   ansi-c*/
+/*     //  x_dv:  Memory allocated already.   ansi-c*/
+/*     //  _alpha:  Double constant;   ansi-c*/
    int _i, _n;
 
    if (!x_dv)  fn_DisplayError(".../tzmatlab.c/InitializeConstantVector_lf():  Input vector must be created (memory-allocated)");
@@ -584,11 +584,11 @@ void InitializeConstantVector_lf(TSdvector *x_dv, const double _alpha)
 
 void InitializeConstantVector_int(TSivector *x_iv, const int _k)
 {
-   //Ouputs:
-   //  x_iv: Initialized to a constant value _alpha for all elements.
-   //Inputs:
-   //  x_iv:  Memory allocated already.
-   //  _alpha:  Integer constant;
+/*     //Ouputs:   ansi-c*/
+/*     //  x_iv: Initialized to a constant value _alpha for all elements.   ansi-c*/
+/*     //Inputs:   ansi-c*/
+/*     //  x_iv:  Memory allocated already.   ansi-c*/
+/*     //  _alpha:  Integer constant;   ansi-c*/
    int _i, _n;
 
    if (!x_iv)  fn_DisplayError(".../tzmatlab.c/InitializeConstantVector_int():  Input vector must be created (memory-allocated)");
@@ -601,29 +601,29 @@ void InitializeConstantVector_int(TSivector *x_iv, const int _k)
 
 void InitializeConstantMatrix_lf(TSdmatrix *x_dm, const double _alpha)
 {
-   //Ouputs:
-   //  x_dm: Initialized to a constant value _alpha for all elements.
-   //Inputs:
-   //  x_dm:  Memory allocated already.
-   //  _alpha:  Double constant;
-   //See Kenneth Reek, pp.202-212.
+/*     //Ouputs:   ansi-c*/
+/*     //  x_dm: Initialized to a constant value _alpha for all elements.   ansi-c*/
+/*     //Inputs:   ansi-c*/
+/*     //  x_dm:  Memory allocated already.   ansi-c*/
+/*     //  _alpha:  Double constant;   ansi-c*/
+/*     //See Kenneth Reek, pp.202-212.   ansi-c*/
 
-//   int _i;
-//   for (_i=x_dm->nrows*x_dm->ncols-1; _i>=0; _i--)
-//      x_dm->M[_i] = _alpha;
-//   int nrows, ncols;
+/*  //   int _i;   ansi-c*/
+/*  //   for (_i=x_dm->nrows*x_dm->ncols-1; _i>=0; _i--)   ansi-c*/
+/*  //      x_dm->M[_i] = _alpha;   ansi-c*/
+/*  //   int nrows, ncols;   ansi-c*/
    double *ptrcnt, *lastptr;
 
    if ( !x_dm) fn_DisplayError(".../tzmathlab.c/InitializeConstantMatrix_int(): Input matrix must be created (memory-allocated)");
    else {
-//      nrows = x_dm->nrows;
-//      ncols = x_dm->ncols;
+/*  //      nrows = x_dm->nrows;   ansi-c*/
+/*  //      ncols = x_dm->ncols;   ansi-c*/
       lastptr = (ptrcnt = x_dm->M) + x_dm->nrows * x_dm->ncols;
    }
 
-//   if (nrows==ncols)  x_dm->flag = M_GE | M_SU | M_SL;
-//   else if (nrows<ncols)  x_dm->flag = M_GE | M_SU;
-//   else  x_dm->flag = M_GE | M_SL;
+/*  //   if (nrows==ncols)  x_dm->flag = M_GE | M_SU | M_SL;   ansi-c*/
+/*  //   else if (nrows<ncols)  x_dm->flag = M_GE | M_SU;   ansi-c*/
+/*  //   else  x_dm->flag = M_GE | M_SL;   ansi-c*/
    x_dm->flag = M_GE | M_CN;
    for ( ; ptrcnt<lastptr; ptrcnt++ )  *ptrcnt = _alpha;
 }
@@ -657,18 +657,18 @@ void InitializeDiagonalMatrix_lf(TSdmatrix *x_dm, const double _alpha) {
 }
 
 void InitializeConstantMatrix_int(TSimatrix *x_im, const int _alpha) {
-   //Ouputs:
-   //  x_im: Initialized to a constant value _alpha for all elements.
-   //Inputs:
-   //  x_im:  Memory allocated already.
-   //  _alpha:  Integer constant;
-   //
-   //See Kenneth Reek, pp.202-212.
+/*     //Ouputs:   ansi-c*/
+/*     //  x_im: Initialized to a constant value _alpha for all elements.   ansi-c*/
+/*     //Inputs:   ansi-c*/
+/*     //  x_im:  Memory allocated already.   ansi-c*/
+/*     //  _alpha:  Integer constant;   ansi-c*/
+/*     //   ansi-c*/
+/*     //See Kenneth Reek, pp.202-212.   ansi-c*/
 
 
-//   int _i;
-//   for (_i=x_im->nrows*x_im->ncols-1; _i>=0; _i--)
-//      x_im->M[_i] = _alpha;
+/*  //   int _i;   ansi-c*/
+/*  //   for (_i=x_im->nrows*x_im->ncols-1; _i>=0; _i--)   ansi-c*/
+/*  //      x_im->M[_i] = _alpha;   ansi-c*/
 
    int *ptrcnt, *lastptr;
 
@@ -679,11 +679,11 @@ void InitializeConstantMatrix_int(TSimatrix *x_im, const int _alpha) {
 }
 
 void InitializeConstantCellvec_lf(TSdcellvec *x_dcv, const double _alpha) {
-   //Ouputs:
-   //  x_dcv: Initialized to a constant value _alpha for all elements.
-   //Inputs:
-   //  x_dcv:  Memory allocated already.
-   //  _alpha:  Double constant;
+/*     //Ouputs:   ansi-c*/
+/*     //  x_dcv: Initialized to a constant value _alpha for all elements.   ansi-c*/
+/*     //Inputs:   ansi-c*/
+/*     //  x_dcv:  Memory allocated already.   ansi-c*/
+/*     //  _alpha:  Double constant;   ansi-c*/
    int _i, _k, _n;
    double *v;
 
@@ -700,11 +700,11 @@ void InitializeConstantCellvec_lf(TSdcellvec *x_dcv, const double _alpha) {
 
 void InitializeConstantCell_lf(TSdcell *x_dc, const double _alpha)
 {
-   //Ouputs:
-   //  x_dc: Initialized to a constant value _alpha for all elements.
-   //Inputs:
-   //  x_dc:  Memory allocated already.
-   //  _alpha:  Double constant;
+/*     //Ouputs:   ansi-c*/
+/*     //  x_dc: Initialized to a constant value _alpha for all elements.   ansi-c*/
+/*     //Inputs:   ansi-c*/
+/*     //  x_dc:  Memory allocated already.   ansi-c*/
+/*     //  _alpha:  Double constant;   ansi-c*/
    int _i, _k, nrows, ncols;
    double *M;
 
@@ -715,9 +715,9 @@ void InitializeConstantCell_lf(TSdcell *x_dc, const double _alpha)
       M = x_dc->C[_i]->M;
       nrows = x_dc->C[_i]->nrows;
       ncols = x_dc->C[_i]->ncols;
-//      if (nrows==ncols)  x_dc->C[_i]->flag = M_GE | M_SU | M_SL;
-//      else if (nrows<ncols)  x_dc->C[_i]->flag = M_GE | M_SU;
-//      else  x_dc->C[_i]->flag = M_GE | M_SL;
+/*  //      if (nrows==ncols)  x_dc->C[_i]->flag = M_GE | M_SU | M_SL;   ansi-c*/
+/*  //      else if (nrows<ncols)  x_dc->C[_i]->flag = M_GE | M_SU;   ansi-c*/
+/*  //      else  x_dc->C[_i]->flag = M_GE | M_SL;   ansi-c*/
       for (_k=nrows*ncols-1; _k>=0; _k--) M[_k] = _alpha;
       x_dc->C[_i]->flag = M_GE | M_CN;
    }
@@ -726,11 +726,11 @@ void InitializeConstantCell_lf(TSdcell *x_dc, const double _alpha)
 
 
 void InitializeConstantFourthvec_lf(TSdfourthvec *x_d4v, const double _alpha) {
-   //Ouputs:
-   //  x_d4v: Initialized to a constant value _alpha for all elements.
-   //Inputs:
-   //  x_d4v:  Memory allocated already.
-   //  _alpha:  Double constant;
+/*     //Ouputs:   ansi-c*/
+/*     //  x_d4v: Initialized to a constant value _alpha for all elements.   ansi-c*/
+/*     //Inputs:   ansi-c*/
+/*     //  x_d4v:  Memory allocated already.   ansi-c*/
+/*     //  _alpha:  Double constant;   ansi-c*/
    int _j, _i, _k;
    double *v;
 
@@ -745,11 +745,11 @@ void InitializeConstantFourthvec_lf(TSdfourthvec *x_d4v, const double _alpha) {
    }
 }
 void InitializeConstantFourth_lf(TSdfourth *x_d4, const double _alpha) {
-   //Ouputs:
-   //  x_d4: Initialized to a constant value _alpha for all elements.
-   //Inputs:
-   //  x_d4:  Memory allocated already.
-   //  _alpha:  Double constant;
+/*     //Ouputs:   ansi-c*/
+/*     //  x_d4: Initialized to a constant value _alpha for all elements.   ansi-c*/
+/*     //Inputs:   ansi-c*/
+/*     //  x_d4:  Memory allocated already.   ansi-c*/
+/*     //  _alpha:  Double constant;   ansi-c*/
    int _j, _i, _k, nrows, ncols;
    double *M;
 
@@ -768,12 +768,12 @@ void InitializeConstantFourth_lf(TSdfourth *x_d4, const double _alpha) {
 
 
 void NegateColofMatrix_lf(TSdvector *y_dv, TSdmatrix *X_dm, int jx) {
-   //Ouputs:
-   //  If y_dv!=NULL, y_dv is the negative of the jx_th column of X_dm (i.e., multiplied by -1.0).
-   //  If !y_dv, the jx_th column of X_dm is replaced by its negated value (i.e., multiplied by -1.0).
-   //Inputs:
-   //  X_dm:  Memory allocated and legal values given already.
-   //  jx: The jx_th column of X_dm.
+/*     //Ouputs:   ansi-c*/
+/*     //  If y_dv!=NULL, y_dv is the negative of the jx_th column of X_dm (i.e., multiplied by -1.0).   ansi-c*/
+/*     //  If !y_dv, the jx_th column of X_dm is replaced by its negated value (i.e., multiplied by -1.0).   ansi-c*/
+/*     //Inputs:   ansi-c*/
+/*     //  X_dm:  Memory allocated and legal values given already.   ansi-c*/
+/*     //  jx: The jx_th column of X_dm.   ansi-c*/
 
    int _i, nrows_x;
    double *M, *v;
@@ -781,7 +781,7 @@ void NegateColofMatrix_lf(TSdvector *y_dv, TSdmatrix *X_dm, int jx) {
    if ( !X_dm || !X_dm->flag )  fn_DisplayError(".../tzmathlab.c/NegateColumnofMatrix_lf(): (1) input matrix must be created (memory-allocated); (2) legal values must be given");
    if (jx >= X_dm->ncols)  fn_DisplayError(".../tzmathlab.c/NegateColumnofMatrix_lf(): The jx_th column specified exceeds the column dimension of the input matrix");
 
-   M = X_dm->M + (jx+1)*(nrows_x=X_dm->nrows) - 1;  //Points to the end of the jx_th column.
+   M = X_dm->M + (jx+1)*(nrows_x=X_dm->nrows) - 1;   /*  Points to the end of the jx_th column.   ansi-c*/
    if ( !y_dv )
       for (_i=nrows_x-1; _i>=0; _i--, M--)  *M = -(*M);
    else {
@@ -792,12 +792,12 @@ void NegateColofMatrix_lf(TSdvector *y_dv, TSdmatrix *X_dm, int jx) {
 
 
 void InitializeConstantColofMatrix_lf(TSdmatrix *X_dm, int jx, double _alpha) {
-   //Ouputs:
-   //  The jx_th column of X_dm is replaced by its original value multiplied by _alpha.
-   //Inputs:
-   //  X_dm:  Memory allocated and legal values given already.
-   //  jx: The jx_th column of X_dm.
-   //  _alpha: A double constant.
+/*     //Ouputs:   ansi-c*/
+/*     //  The jx_th column of X_dm is replaced by its original value multiplied by _alpha.   ansi-c*/
+/*     //Inputs:   ansi-c*/
+/*     //  X_dm:  Memory allocated and legal values given already.   ansi-c*/
+/*     //  jx: The jx_th column of X_dm.   ansi-c*/
+/*     //  _alpha: A double constant.   ansi-c*/
 
    int _i, nrows_x;
    double *M;
@@ -805,16 +805,16 @@ void InitializeConstantColofMatrix_lf(TSdmatrix *X_dm, int jx, double _alpha) {
    if ( !X_dm || !X_dm->flag )  fn_DisplayError(".../tzmathlab.c/NegateColumnofMatrix_lf(): (1) input matrix must be created (memory-allocated); (2) legal values must be given");
    if (jx >= X_dm->ncols)  fn_DisplayError(".../tzmathlab.c/NegateColumnofMatrix_lf(): The jx_th column specified exceeds the column dimension of the input matrix");
 
-   M = X_dm->M + (jx+1)*(nrows_x=X_dm->nrows) - 1;  //Points to the end of the jx_th column.
+   M = X_dm->M + (jx+1)*(nrows_x=X_dm->nrows) - 1;   /*  Points to the end of the jx_th column.   ansi-c*/
    for (_i=nrows_x-1; _i>=0; _i--, M--)  *M = _alpha;
 }
 
 
 
 
-//-----------------
-// Open files.
-//-----------------
+/*  //-----------------   ansi-c*/
+/*  // Open files.   ansi-c*/
+/*  //-----------------   ansi-c*/
 FILE *tzFopen(char *filename, char *mode) {
    FILE *fptr_dummy;
 
@@ -822,7 +822,7 @@ FILE *tzFopen(char *filename, char *mode) {
    {
       if ( !(fptr_dummy = fopen(filename,mode)) ) {
          printf("\n\n...tzmatlab.c/tzFopen(): Fatal Error -- unable to write, read, or append the file %s!\n", filename);
-         //getchar();
+/*           //getchar();   ansi-c*/
          exit(EXIT_FAILURE);
       }
    }

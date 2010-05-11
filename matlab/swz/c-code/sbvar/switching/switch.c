@@ -34,27 +34,27 @@ void FreeMarkovStateVariable(TMarkovStateVariable *sv)
 
       FreeVector(sv->B);
 
-      //====== Non-standard memory managment ======
+/*        //====== Non-standard memory managment ======   ansi-c*/
       if (sv->b)
     {
       for (i=dw_DimA(sv->b)-1; i >= 0; i--)
         if (sv->b[i]) pElementV(sv->b[i])=(PRECISION*)NULL;
       dw_FreeArray(sv->b);
     }
-      //===========================================
+/*        //===========================================   ansi-c*/
 
       FreeMatrix(sv->Prior);
 
       FreeVector(sv->Prior_B);
 
-      //====== Non-standard memory managment ======
+/*        //====== Non-standard memory managment ======   ansi-c*/
       if (sv->Prior_b)
     {
       for (i=dw_DimA(sv->Prior_b)-1; i >= 0; i--)
         if (sv->Prior_b[i]) pElementV(sv->Prior_b[i])=(PRECISION*)NULL;
       dw_FreeArray(sv->Prior_b);
     }
-      //===========================================
+/*        //===========================================   ansi-c*/
 
       dw_FreeArray(sv->FreeDim);
 
@@ -132,7 +132,7 @@ TMarkovStateVariable* CreateMarkovStateVariable_Single(int nstates, int nobs, TM
       exit(0);
     }
 
-  //=== Compute total number of free transition matrix parameters
+/*    //=== Compute total number of free transition matrix parameters   ansi-c*/
   for (k=dw_DimA(FreeDim)-1; k >= 0; k--) total_free+=FreeDim[k];
 
   if ((nstates <= 0) || (nobs <= 0))
@@ -147,41 +147,41 @@ TMarkovStateVariable* CreateMarkovStateVariable_Single(int nstates, int nobs, TM
       exit(0);
     }
 
-  //=== Set flags ===
+/*    //=== Set flags ===   ansi-c*/
   sv->valid_transition_matrix=0;
 
-  //=== Set to terminate on memory error ===
+/*    //=== Set to terminate on memory error ===   ansi-c*/
   terminal_errors=dw_SetTerminalErrors(MEM_ERR);
 
-  //=== Sizes ===
+/*    //=== Sizes ===   ansi-c*/
   sv->nstates=nstates;
   sv->nobs=nobs;
 
-  //== State vector ===
+/*    //== State vector ===   ansi-c*/
   dw_InitializeArray_int(sv->S=dw_CreateArray_int(nobs+1),0);
 
-  //=== Number of lagged values of base state variable to encode ===
+/*    //=== Number of lagged values of base state variable to encode ===   ansi-c*/
   sv->nlags_encoded=0;
   sv->nbasestates=nstates;
   sv->lag_index=CreateLagIndex(sv->nbasestates,sv->nlags_encoded,sv->nstates);
 
-  //=== Transition matrix ===
+/*    //=== Transition matrix ===   ansi-c*/
   sv->Q=CreateMatrix(nstates,nstates);
 
-  //=== Free transition matrix parameters ===
+/*    //=== Free transition matrix parameters ===   ansi-c*/
   sv->B=CreateVector(total_free);
 
   sv->b=dw_CreateArray_vector(dw_DimA(FreeDim));
   for (q=k=0; k < dw_DimA(FreeDim); k++)
     {
       sv->b[k]=CreateVector(FreeDim[k]);
-      // seting up non-standard memory management
+/*        // seting up non-standard memory management   ansi-c*/
       free(pElementV(sv->b[k]));
       pElementV(sv->b[k])=pElementV(sv->B)+q;
       q+=FreeDim[k];
     }
 
-  //=== Prior information ===
+/*    //=== Prior information ===   ansi-c*/
   sv->Prior=EquateMatrix((TMatrix)NULL,Prior);
 
   sv->Prior_B=CreateVector(total_free);
@@ -195,18 +195,18 @@ TMarkovStateVariable* CreateMarkovStateVariable_Single(int nstates, int nobs, TM
   for (q=k=0; k < dw_DimA(FreeDim); k++)
     {
       sv->Prior_b[k]=CreateVector(FreeDim[k]);
-      // seting up non-standard memory management
+/*        // seting up non-standard memory management   ansi-c*/
       free(pElementV(sv->Prior_b[k]));
       pElementV(sv->Prior_b[k])=pElementV(sv->Prior_B)+q;
       q+=FreeDim[k];
     }
 
-  //=== Restrictions ===
+/*    //=== Restrictions ===   ansi-c*/
   sv->FreeDim=(int*)dw_CopyArray(NULL,FreeDim);
   sv->NonZeroIndex=(int**)dw_CopyArray(NULL,NonZeroIndex);
   sv->MQ=EquateMatrix((TMatrix)NULL,MQ);
 
-  //=== Multiple state variables ===
+/*    //=== Multiple state variables ===   ansi-c*/
   sv->parent=sv;
   sv->n_state_variables=1;
   sv->state_variable=(TMarkovStateVariable**)dw_CreateArray_array(1);
@@ -219,7 +219,7 @@ TMarkovStateVariable* CreateMarkovStateVariable_Single(int nstates, int nobs, TM
   sv->Prior_ba=dw_CreateArray_vector(dw_DimA(sv->Prior_b));
   for (k=dw_DimA(sv->Prior_ba)-1; k >= 0; k--) sv->Prior_ba[k]=sv->Prior_b[k];
 
-  //=== Initialize Index ===
+/*    //=== Initialize Index ===   ansi-c*/
   sv->Index[i=sv->nstates-1]=dw_CreateArray_int(sv->n_state_variables);
   for (k=sv->n_state_variables-1; k >= 0; k--)
     sv->Index[i][k]=sv->state_variable[k]->nstates-1;
@@ -233,23 +233,23 @@ TMarkovStateVariable* CreateMarkovStateVariable_Single(int nstates, int nobs, TM
       sv->Index[i][k]=sv->state_variable[k]->nstates-1;
     }
 
-  //=== Initialize SA and QA ===
+/*    //=== Initialize SA and QA ===   ansi-c*/
   for (k=sv->n_state_variables-1; k >= 0; k--)
     {
       sv->SA[k]=sv->state_variable[k]->S;
       sv->QA[k]=sv->state_variable[k]->Q;
     }
 
-  //=== Control variables ===
+/*    //=== Control variables ===   ansi-c*/
   sv->UseErgodic=0;
 
-  //=== Set Constants ===
+/*    //=== Set Constants ===   ansi-c*/
   SetLogPriorConstant_SV(sv);
 
-  //=== Set transition matrix to mean of prior ===
+/*    //=== Set transition matrix to mean of prior ===   ansi-c*/
   SetTransitionMatrixToPriorMean_SV(sv);
 
-  //=== Reset terminal errors ===
+/*    //=== Reset terminal errors ===   ansi-c*/
   dw_SetTerminalErrors(terminal_errors);
 
   return sv;
@@ -272,48 +272,48 @@ TMarkovStateVariable* CreateMarkovStateVariable_Multiple(int nobs, int n_state_v
       exit(0);
     }
 
-  //=== Set to terminate on memory error ===
+/*    //=== Set to terminate on memory error ===   ansi-c*/
   terminal_errors=dw_SetTerminalErrors(MEM_ERR);
 
-  //=== Flags ===
+/*    //=== Flags ===   ansi-c*/
   sv->valid_transition_matrix=0;
 
-  //=== Sizes ===
+/*    //=== Sizes ===   ansi-c*/
   for (sv->nstates=1, k=n_state_variables-1; k >= 0; k--) sv->nstates*=state_variable[k]->nstates;
   sv->nobs=nobs;
 
-  //== State vector ===
+/*    //== State vector ===   ansi-c*/
   dw_InitializeArray_int(sv->S=dw_CreateArray_int(nobs+1),0);
 
-  //=== Transition matrix ===
+/*    //=== Transition matrix ===   ansi-c*/
   sv->Q=CreateMatrix(sv->nstates,sv->nstates);
 
- //=== Free transition matrix parameters ===
+/*   //=== Free transition matrix parameters ===   ansi-c*/
   sv->B=(TVector)NULL;
   sv->b=(TVector*)NULL;
 
-  //=== Number of lagged values of base state variable to encode ===
+/*    //=== Number of lagged values of base state variable to encode ===   ansi-c*/
   sv->nlags_encoded=0;
   sv->nbasestates=sv->nstates;
   sv->lag_index=CreateLagIndex(sv->nbasestates,sv->nlags_encoded,sv->nstates);
 
-  //=== Prior information ===
+/*    //=== Prior information ===   ansi-c*/
   sv->Prior=(TMatrix)NULL;
   sv->Prior_B=(TVector)NULL;
   sv->Prior_b=(TVector*)NULL;
 
-  //=== Restrictions ===
+/*    //=== Restrictions ===   ansi-c*/
   sv->FreeDim=(int*)NULL;
   sv->NonZeroIndex=(int**)NULL;
   sv->MQ=(TMatrix)NULL;
 
-  //=== Multiple state variables ===
+/*    //=== Multiple state variables ===   ansi-c*/
   sv->parent=sv;
   sv->n_state_variables=n_state_variables;
   sv->state_variable=state_variable;
   for (k=n_state_variables-1; k >= 0; k--) state_variable[k]->parent=sv;
 
-  //=== Initialize Index ===
+/*    //=== Initialize Index ===   ansi-c*/
   sv->Index=(int**)dw_CreateArray_array(sv->nstates);
   sv->Index[i=sv->nstates-1]=dw_CreateArray_int(n_state_variables);
   for (k=n_state_variables-1; k >= 0; k--)
@@ -328,7 +328,7 @@ TMarkovStateVariable* CreateMarkovStateVariable_Multiple(int nobs, int n_state_v
       sv->Index[i][k]=state_variable[k]->nstates-1;
     }
 
-  //=== Initialize SA and QA ===
+/*    //=== Initialize SA and QA ===   ansi-c*/
   sv->SA=(int**)dw_CreateArray_array(n_state_variables);
   sv->QA=dw_CreateArray_matrix(n_state_variables);
   for (k=0; k < n_state_variables; k++)
@@ -337,7 +337,7 @@ TMarkovStateVariable* CreateMarkovStateVariable_Multiple(int nobs, int n_state_v
       sv->QA[k]=state_variable[k]->Q;
     }
 
-  //=== Initialize ba and Prior_ba ===
+/*    //=== Initialize ba and Prior_ba ===   ansi-c*/
   for (i=k=0; k < n_state_variables; k++) i+=dw_DimA(state_variable[k]->ba);
   sv->ba=dw_CreateArray_vector(i);
   for (i=k=0; k < n_state_variables; k++)
@@ -350,16 +350,16 @@ TMarkovStateVariable* CreateMarkovStateVariable_Multiple(int nobs, int n_state_v
     for (j=0; j < dw_DimA(state_variable[k]->Prior_ba); i++, j++)
       sv->Prior_ba[i]=state_variable[k]->Prior_ba[j];
 
-  //=== Control variables ===
+/*    //=== Control variables ===   ansi-c*/
   sv->UseErgodic=0;
 
-  //=== Set Constants ===
+/*    //=== Set Constants ===   ansi-c*/
   SetLogPriorConstant_SV(sv);
 
-  //=== Set transition matrix to mean of prior ===
+/*    //=== Set transition matrix to mean of prior ===   ansi-c*/
   SetTransitionMatrixToPriorMean_SV(sv);
 
-  //=== Reset terminal errors ===
+/*    //=== Reset terminal errors ===   ansi-c*/
   dw_SetTerminalErrors(terminal_errors);
 
   return sv;
@@ -529,18 +529,18 @@ TMarkovStateVariable* RestrictMarkovStateVariable(TMarkovStateVariable *sv, int 
 
   free_translation=(int*)malloc(DimV(sv->B)*sizeof(int));
 
-  // free_translation[i] = 1 if B[i] is accessed
+/*    // free_translation[i] = 1 if B[i] is accessed   ansi-c*/
   for (i=DimV(sv->B)-1; i >= 0; i--) free_translation[i]=0;
   for (i=nstates-1; i >= 0; i--)
     for (j=nstates-1; j >= 0; j--)
       if (sv->NonZeroIndex[i][j] >= 0)
     free_translation[sv->NonZeroIndex[i][j]]=1;
 
-  // free_translation[i] will be index into new quasi-free Dirichlet vector B
+/*    // free_translation[i] will be index into new quasi-free Dirichlet vector B   ansi-c*/
   for (i=j=0; j < DimV(sv->B); j++)
     free_translation[j]=free_translation[j] ? i++ : -1;
 
-  // Get number of new quasi-free variables
+/*    // Get number of new quasi-free variables   ansi-c*/
   for (k=m=n=0; k < dw_DimA(sv->FreeDim); k++)
     for (q=n, n+=sv->FreeDim[k]; q < n; q++)
       if (free_translation[q] != -1)
@@ -550,7 +550,7 @@ TMarkovStateVariable* RestrictMarkovStateVariable(TMarkovStateVariable *sv, int 
     }
   dw_InitializeArray_int(FreeDim=dw_CreateArray_int(m),0);
 
-  // Compute size of new quasi-free variables
+/*    // Compute size of new quasi-free variables   ansi-c*/
   for (k=m=n=0; k < dw_DimA(sv->FreeDim); k++)
     for (q=n, n+=sv->FreeDim[k]; q < n; q++)
       if (free_translation[q] != -1)
@@ -561,13 +561,13 @@ TMarkovStateVariable* RestrictMarkovStateVariable(TMarkovStateVariable *sv, int 
       break;
     }
 
-  // Create new NonZeroIndex
+/*    // Create new NonZeroIndex   ansi-c*/
   NonZeroIndex=dw_CreateRectangularArray_int(nstates,nstates);
   for (i=nstates-1; i >= 0; i--)
     for (j=nstates-1; j >= 0; j--)
       NonZeroIndex[i][j]=free_translation[sv->NonZeroIndex[i][j]];
 
-  // Create new MQ
+/*    // Create new MQ   ansi-c*/
   InitializeMatrix(MQ=CreateMatrix(nstates,nstates),0.0);
   for (j=0; j < nstates; j++)
     for (q=DimV(sv->B)-1; q >= 0; q--)
@@ -583,22 +583,22 @@ TMarkovStateVariable* RestrictMarkovStateVariable(TMarkovStateVariable *sv, int 
         if (sv->NonZeroIndex[i][j] == q) ElementM(MQ,i,j)=scale*ElementM(sv->MQ,i,j);
     }
 
-  // Prior
-  // The new prior is chosen so that Prior[i][j] = scale*sv->Prior[i][j] where
-  // scale = 1 if sv->Prior[i][j] <= 1 and scale = (nstates-1)/(sv->nstates-1)
-  // otherwise.  This tends to keep the old and new prior mean roughly equal for
-  // those elements with larger prior means and scales the prior mean equally
-  // for those with smaller prior means.  This ie exactly true if sv->Prior[i][j]
-  // were equal to one for all j except one.
+/*    // Prior   ansi-c*/
+/*    // The new prior is chosen so that Prior[i][j] = scale*sv->Prior[i][j] where   ansi-c*/
+/*    // scale = 1 if sv->Prior[i][j] <= 1 and scale = (nstates-1)/(sv->nstates-1)   ansi-c*/
+/*    // otherwise.  This tends to keep the old and new prior mean roughly equal for   ansi-c*/
+/*    // those elements with larger prior means and scales the prior mean equally   ansi-c*/
+/*    // for those with smaller prior means.  This ie exactly true if sv->Prior[i][j]   ansi-c*/
+/*    // were equal to one for all j except one.   ansi-c*/
   Prior=CreateMatrix(nstates,nstates);
   for (i=nstates-1; i >= 0; i--)
     for (j=nstates-1; j >= 0; j--)
       ElementM(Prior,i,j)=(ElementM(sv->Prior,i,j) > 1) ? (nstates-1)*ElementM(sv->Prior,i,j)/(sv->nstates-1) : ElementM(sv->Prior,i,j);
 
-  // Attempt to make new Markov state variable.  MQ/NonZeroIndex may not be valid
+/*    // Attempt to make new Markov state variable.  MQ/NonZeroIndex may not be valid   ansi-c*/
   rsv=CreateMarkovStateVariable_Single(nstates,sv->nobs,Prior,FreeDim,NonZeroIndex,MQ);
 
-  // Clean up
+/*    // Clean up   ansi-c*/
   FreeMatrix(Prior);
   FreeMatrix(MQ);
   dw_FreeArray(NonZeroIndex);
@@ -892,18 +892,18 @@ void DrawTransitionMatrix_SV(TMarkovStateVariable *sv)
     DrawTransitionMatrix_SV(sv->state_variable[k]);
       MatrixTensor(sv->Q,sv->QA);
 
-      // Flags
+/*        // Flags   ansi-c*/
       sv->valid_transition_matrix=1;
     }
   else
     {
-      // Set Dirichlet parameters
+/*        // Set Dirichlet parameters   ansi-c*/
       EquateVector(sv->B,sv->Prior_B);
       for (t=sv->nobs; t > 0; t--)
     if ((k=sv->NonZeroIndex[sv->S[t]][sv->S[t-1]]) >= 0)
       ElementV(sv->B,k)+=1.0;
 
-      // Generate b[j]
+/*        // Generate b[j]   ansi-c*/
       for (k=dw_DimA(sv->FreeDim)-1; k >= 0; k--)
     if (!DrawDirichletVector(sv->b[k],sv->b[k]))
       {
@@ -911,12 +911,12 @@ void DrawTransitionMatrix_SV(TMarkovStateVariable *sv)
         exit(0);
       }
 
-      // Compute Q
+/*        // Compute Q   ansi-c*/
       for (j=sv->nstates-1; j >= 0; j--)
     for (i=sv->nstates-1; i >= 0; i--)
       ElementM(sv->Q,i,j)=((k=sv->NonZeroIndex[i][j]) >= 0) ? ElementM(sv->MQ,i,j)*ElementV(sv->B,k) : 0.0;
 
-      // Flags
+/*        // Flags   ansi-c*/
       sv->valid_transition_matrix=1;
     }
 }
@@ -938,15 +938,15 @@ void DrawTransitionMatrixFromPrior_SV(TMarkovStateVariable *sv)
     DrawTransitionMatrixFromPrior_SV(sv->state_variable[k]);
       MatrixTensor(sv->Q,sv->QA);
 
-      // Flags
+/*        // Flags   ansi-c*/
       sv->valid_transition_matrix=1;
     }
   else
     {
-      // Set Dirichlet parameters
+/*        // Set Dirichlet parameters   ansi-c*/
       EquateVector(sv->B,sv->Prior_B);
 
-      // Generate b[j]
+/*        // Generate b[j]   ansi-c*/
       for (j=dw_DimA(sv->FreeDim)-1; j >= 0; j--)
     if (!DrawDirichletVector(sv->b[j],sv->b[j]))
       {
@@ -954,12 +954,12 @@ void DrawTransitionMatrixFromPrior_SV(TMarkovStateVariable *sv)
         exit(0);
       }
 
-      // Compute P
+/*        // Compute P   ansi-c*/
       for (j=sv->nstates-1; j >= 0; j--)
     for (i=sv->nstates-1; i >= 0; i--)
       ElementM(sv->Q,i,j)=((k=sv->NonZeroIndex[i][j]) >= 0) ? ElementM(sv->MQ,i,j)*ElementV(sv->B,k) : 0.0;
 
-      // Flags
+/*        // Flags   ansi-c*/
       sv->valid_transition_matrix=1;
     }
 }
@@ -1013,7 +1013,7 @@ void DrawStatesFromTransitionMatrix_SV(TMarkovStateVariable *sv)
       exit(0);
     }
 
-  //=== Draw initial state from ergodic or uniform distribution ===
+/*    //=== Draw initial state from ergodic or uniform distribution ===   ansi-c*/
   if (sv->UseErgodic)
     {
       TVector v;
@@ -1031,7 +1031,7 @@ void DrawStatesFromTransitionMatrix_SV(TMarkovStateVariable *sv)
     if ((i=(int)floor(dw_uniform_rnd()*sv->nstates)) >= sv->nstates) i=sv->nstates-1;
   sv->S[0]=j=i;
 
-  //=== Draw subsequent states from transition matrix ===
+/*    //=== Draw subsequent states from transition matrix ===   ansi-c*/
   for (t=1; t <= sv->nobs; t++)
     {
       if ((u=dw_uniform_rnd()) >= (s=ElementM(sv->Q,i=sv->nstates-1,j)))
@@ -1040,7 +1040,7 @@ void DrawStatesFromTransitionMatrix_SV(TMarkovStateVariable *sv)
       sv->S[t]=j=i;
     }
 
-  //====== Propagate states ======
+/*    //====== Propagate states ======   ansi-c*/
   PropagateStates_SV(sv);
 }
 /******************************************************************************/
@@ -1139,7 +1139,7 @@ int Update_B_from_Q_SV(TMarkovStateVariable *sv)
   if (sv->n_state_variables > 1)
     return 0;
 
-  // Compute B
+/*    // Compute B   ansi-c*/
   InitializeVector(scale=CreateVector(DimV(sv->B)),0.0);
   InitializeVector(sv->B,0.0);
   for (i=sv->nstates-1; i >= 0; i--)
@@ -1153,7 +1153,7 @@ int Update_B_from_Q_SV(TMarkovStateVariable *sv)
   for (i=DimV(scale)-1; i >= 0; i--) ElementV(sv->B,i)/=ElementV(scale,i);
   FreeVector(scale);
 
-  // Check computed B
+/*    // Check computed B   ansi-c*/
   for (i=dw_DimA(sv->b)-1; i >= 0; i--)
     {
       for (sum=0.0, j=DimV(sv->b[i])-1; j >= 0; j--)
@@ -1165,7 +1165,7 @@ int Update_B_from_Q_SV(TMarkovStateVariable *sv)
     return 0;
     }
 
-  // Check computed Q
+/*    // Check computed Q   ansi-c*/
   for (i=sv->nstates-1; i >= 0; i--)
     for (j=sv->nstates-1; j >= 0; j--)
       {
@@ -1178,7 +1178,7 @@ int Update_B_from_Q_SV(TMarkovStateVariable *sv)
       ElementM(sv->Q,i,j)=(k >= 0) ? ElementM(sv->MQ,i,j)*ElementV(sv->B,k) : 0.0;
       }
 
-  // Success
+/*    // Success   ansi-c*/
   return 1;
 }
 
@@ -1425,7 +1425,7 @@ TStateModel* CreateStateModel_new(TMarkovStateVariable *sv, ThetaRoutines *routi
   model->theta=theta;
   model->routines=routines;
 
-  //=== Common work space ===
+/*    //=== Common work space ===   ansi-c*/
   model->Z=dw_CreateArray_vector(sv->nobs+1);
   model->V=dw_CreateArray_vector(sv->nobs+1);
   for (t=sv->nobs; t >= 0; t--)
@@ -1438,11 +1438,11 @@ TStateModel* CreateStateModel_new(TMarkovStateVariable *sv, ThetaRoutines *routi
   model->n_degenerate_draws=0;
   model->states_count=dw_CreateArray_int(sv->nstates);
 
-  //== Set control variables
+/*    //== Set control variables   ansi-c*/
   model->ValidForwardRecursion=0;
   model->UseLogFreeParametersQ=0;
 
-  //=== Obsolete fields ===
+/*    //=== Obsolete fields ===   ansi-c*/
   model->parameters=theta;
   model->p=(TParameters*)malloc(sizeof(TParameters));
   model->p->pLogConditionalLikelihood=model->routines->pLogConditionalLikelihood;
@@ -1454,7 +1454,7 @@ TStateModel* CreateStateModel_new(TMarkovStateVariable *sv, ThetaRoutines *routi
   model->p->pDrawParameters=model->routines->pDrawParameters;
   model->p->p=theta;
 
-  //=== Set Transition matrix to prior mean ===
+/*    //=== Set Transition matrix to prior mean ===   ansi-c*/
   SetTransitionMatrixToPriorMean(model);
 
   return model;
@@ -1497,14 +1497,14 @@ void ForwardRecursion(TStateModel *model)
   PRECISION scale, u;
   TMarkovStateVariable *sv=model->sv;
 
-  //====== Initializes prior to forward recursion if necessary ======
+/*    //====== Initializes prior to forward recursion if necessary ======   ansi-c*/
   if (model->routines->pInitializeForwardRecursion)
     model->routines->pInitializeForwardRecursion(model);
 
-  //====== Initialize L ======
+/*    //====== Initialize L ======   ansi-c*/
   model->L=0;
 
-  //====== Get ergodic distribution if necessary ======
+/*    //====== Get ergodic distribution if necessary ======   ansi-c*/
   if (sv->UseErgodic)
     if (!Ergodic(model->V[0],sv->Q))
       {
@@ -1512,13 +1512,13 @@ void ForwardRecursion(TStateModel *model)
     exit(0);
       }
 
-  //====== forward recursion ======
+/*    //====== forward recursion ======   ansi-c*/
   for (t=1; t <= sv->nobs; t++)
     {
-      //------ compute Z[t] ------
+/*        //------ compute Z[t] ------   ansi-c*/
       ProductMV(model->Z[t],sv->Q,model->V[t-1]);
 
-      //------ compute log conditional probabilities and scale ------
+/*        //------ compute log conditional probabilities and scale ------   ansi-c*/
       scale=MINUS_INFINITY;
       for (s=sv->nstates-1; s >= 0; s--)
     {
@@ -1532,10 +1532,10 @@ void ForwardRecursion(TStateModel *model)
         ElementV(model->V[t],s)=MINUS_INFINITY;
     }
 
-      //------ update L ------
+/*        //------ update L ------   ansi-c*/
       model->L+=scale;
 
-      //------ scale V[t] ------
+/*        //------ scale V[t] ------   ansi-c*/
       for (s=sv->nstates-1; s >= 0; s--)
     if (ElementV(model->V[t],s) != MINUS_INFINITY)
       ElementV(model->V[t],s)=exp(ElementV(model->V[t],s) - scale);
@@ -1564,10 +1564,10 @@ void DrawStates(TStateModel *model)
   TMarkovStateVariable *sv=model->sv;
   int *states_count=model->states_count;
 
-  //====== Check if ForwardRecursion() has been called ======
+/*    //====== Check if ForwardRecursion() has been called ======   ansi-c*/
   if (!model->ValidForwardRecursion) ForwardRecursion(model);
 
-  //====== Backward recursion ======
+/*    //====== Backward recursion ======   ansi-c*/
   if ((u=dw_uniform_rnd()) >= (s=ElementV(model->V[t=sv->nobs],i=sv->nstates-1)))
     while (--i > 0)
       if (u < (s+=ElementV(model->V[t],i))) break;
@@ -1583,7 +1583,7 @@ void DrawStates(TStateModel *model)
     }
 
 
-  //====== Backward recursion ======
+/*    //====== Backward recursion ======   ansi-c*/
 /*   for (iteration=10000; iteration > 0; iteration--) */
 /*     { */
 /*       for (i=sv->nstates-1; i >= 0; i--) states_count[i]=0; */
@@ -1609,10 +1609,10 @@ void DrawStates(TStateModel *model)
 /*       model->n_degenerate_draws++; */
 /*     } */
 
-  //====== Propagate states ======
+/*    //====== Propagate states ======   ansi-c*/
   PropagateStates_SV(model->sv);
 
-  //====== State change notification ======
+/*    //====== State change notification ======   ansi-c*/
   StatesChanged(model);
 }
 
@@ -1632,10 +1632,10 @@ void DrawStates(TStateModel *model)
 */
 void DrawStatesFromTransitionMatrix(TStateModel *model)
 {
-  //====== Draw states ======
+/*    //====== Draw states ======   ansi-c*/
   DrawStatesFromTransitionMatrix_SV(model->sv);
 
-  //====== State change notification ======
+/*    //====== State change notification ======   ansi-c*/
   StatesChanged(model);
 }
 
@@ -1649,10 +1649,10 @@ void DrawStatesFromTransitionMatrix(TStateModel *model)
 */
 void DrawTransitionMatrix(TStateModel *model)
 {
-  //== Draw transition matrix using recursive call ===
+/*    //== Draw transition matrix using recursive call ===   ansi-c*/
   DrawTransitionMatrix_SV(model->sv);
 
-  //====== Transition Matrix Change change notification ======
+/*    //====== Transition Matrix Change change notification ======   ansi-c*/
   TransitionMatricesChanged(model);
 }
 
@@ -1665,28 +1665,28 @@ void DrawTransitionMatrix(TStateModel *model)
 */
 void DrawTransitionMatrixFromPrior(TStateModel *model)
 {
-  //====== Draw transition matrix using recursive call ======
+/*    //====== Draw transition matrix using recursive call ======   ansi-c*/
   DrawTransitionMatrixFromPrior_SV(model->sv);
 
-  //====== Transition matrix change notification ======
+/*    //====== Transition matrix change notification ======   ansi-c*/
   TransitionMatricesChanged(model);
 }
 
 void SetTransitionMatrixToPriorMean(TStateModel *model)
 {
-  //====== Set transition matrix using recursive call ======
+/*    //====== Set transition matrix using recursive call ======   ansi-c*/
   SetTransitionMatrixToPriorMean_SV(model->sv);
 
-  //====== Transition matrix change notification ======
+/*    //====== Transition matrix change notification ======   ansi-c*/
   TransitionMatricesChanged(model);
 }
 
 void DrawTheta(TStateModel *model)
 {
-  //====== Draw theta ======
+/*    //====== Draw theta ======   ansi-c*/
   model->routines->pDrawParameters(model);
 
-  //====== Theta change notification ======
+/*    //====== Theta change notification ======   ansi-c*/
   ThetaChanged(model);
 }
 
@@ -1772,10 +1772,10 @@ PRECISION LogConditionalLikelihood_StatesIntegratedOut(int t, TStateModel *model
   int s;
   PRECISION x;
 
-  //====== Check if transition matrix is valid ======
+/*    //====== Check if transition matrix is valid ======   ansi-c*/
   if (!(model->sv->valid_transition_matrix)) return MINUS_INFINITY;
 
-  //====== Check if ForwardRecursion() has been called ======
+/*    //====== Check if ForwardRecursion() has been called ======   ansi-c*/
   if (!model->ValidForwardRecursion) ForwardRecursion(model);
 
   x=LogConditionalLikelihood(0,t,model) + log(ProbabilityStateConditionalPrevious(0,t,model));
@@ -1814,10 +1814,10 @@ TVector ExpectationSingleStep_StatesIntegratedOut(TVector y, int t, TStateModel 
   int s;
   TVector y_tmp;
 
-  //====== Check if transition matrix is valid ======
+/*    //====== Check if transition matrix is valid ======   ansi-c*/
   if (!(model->sv->valid_transition_matrix)) (TVector)NULL;
 
-  //====== Check if ForwardRecursion() has been called ======
+/*    //====== Check if ForwardRecursion() has been called ======   ansi-c*/
   if (!model->ValidForwardRecursion) ForwardRecursion(model);
 
   y=ExpectationSingleStep(y,0,t,model);
@@ -1852,10 +1852,10 @@ TVector ExpectationSingleStep_StatesIntegratedOut(TVector y, int t, TStateModel 
 */
 PRECISION ProbabilityStateConditionalCurrent(int s, int t, TStateModel *model)
 {
-  //====== Check if transition matrix is valid ======
+/*    //====== Check if transition matrix is valid ======   ansi-c*/
   if (!(model->sv->valid_transition_matrix)) return -1.0;
 
-  //====== Check if ForwardRecursion() has been called ======
+/*    //====== Check if ForwardRecursion() has been called ======   ansi-c*/
   if (!model->ValidForwardRecursion) ForwardRecursion(model);
 
   return ElementV(model->V[t],s);
@@ -1877,10 +1877,10 @@ PRECISION ProbabilityStateConditionalCurrent(int s, int t, TStateModel *model)
 */
 PRECISION ProbabilityStateConditionalPrevious(int s, int t, TStateModel *model)
 {
-  //====== Check if transition matrix is valid ======
+/*    //====== Check if transition matrix is valid ======   ansi-c*/
   if (!(model->sv->valid_transition_matrix)) return -1.0;
 
-  //====== Check if ForwardRecursion() has been called ======
+/*    //====== Check if ForwardRecursion() has been called ======   ansi-c*/
   if (!model->ValidForwardRecursion) ForwardRecursion(model);
 
   return ElementV(model->Z[t],s);
@@ -1932,10 +1932,10 @@ TVector ProbabilitiesState(TVector P, int s, TStateModel *model)
   int i, k, t;
   TVector p1, p2, p3;
 
-  //====== Check if transition matrix is valid ======
+/*    //====== Check if transition matrix is valid ======   ansi-c*/
   if (!(model->sv->valid_transition_matrix)) return (TVector)NULL;
 
-  //====== Check if ForwardRecursion() has been called ======
+/*    //====== Check if ForwardRecursion() has been called ======   ansi-c*/
   if (!model->ValidForwardRecursion) ForwardRecursion(model);
 
   if (!P)
@@ -1946,13 +1946,13 @@ TVector ProbabilitiesState(TVector P, int s, TStateModel *model)
   p1=CreateVector(nstates);
   p2=CreateVector(nstates);
 
-  // set p1 and the S[nobs]
+/*    // set p1 and the S[nobs]   ansi-c*/
   EquateVector(p1,model->V[nobs]);
   ElementV(P,nobs)=ElementV(p1,s);
 
   for (t=nobs-1; t >= 0; t--)
     {
-      // s[t] = k and s[t+1] = i
+/*        // s[t] = k and s[t+1] = i   ansi-c*/
       for (k=nstates-1; k >= 0; k--)
     {
       for (ElementV(p2,k)=0.0, i=nstates-1; i >= 0; i--)
@@ -1961,7 +1961,7 @@ TVector ProbabilitiesState(TVector P, int s, TStateModel *model)
       ElementV(p2,k)*=ElementV(model->V[t],k);
     }
 
-      // interchange p1 and p2
+/*        // interchange p1 and p2   ansi-c*/
       p3=p1;
       p1=p2;
       p2=p3;
@@ -2008,13 +2008,13 @@ PRECISION LogConditionalProbabilityStates(int *S, TStateModel *model)
   TMatrix Q=sv->Q;
   int t=sv->nobs;
 
-  //====== Check if transition matrix is valid ======
+/*    //====== Check if transition matrix is valid ======   ansi-c*/
   if (!(model->sv->valid_transition_matrix)) return MINUS_INFINITY;
 
-  //====== Check if ForwardRecursion() has been called ======
+/*    //====== Check if ForwardRecursion() has been called ======   ansi-c*/
   if (!model->ValidForwardRecursion) ForwardRecursion(model);
 
-  //====== Log probability ======
+/*    //====== Log probability ======   ansi-c*/
   rtrn=log(ElementV(model->V[t],S[t]));
   while (--t >= 0)
     if (ElementV(model->Z[t+1],S[t+1]) > 0.0)
@@ -2022,7 +2022,7 @@ PRECISION LogConditionalProbabilityStates(int *S, TStateModel *model)
     else
       return MINUS_INFINITY;
 
-  //====== Probability ======
+/*    //====== Probability ======   ansi-c*/
 /*   rtrn=ElementV(model->V[t],S[t]); */
 /*   while (--t >= 0) */
 /*     rtrn*=ElementM(Q,S[t+1],S[t])*ElementV(model->V[t],S[t])/ElementV(model->Z[t+1],S[t+1]); */
@@ -2086,10 +2086,10 @@ PRECISION LogLikelihood(TStateModel *model)
 */
 PRECISION LogLikelihood_StatesIntegratedOut(TStateModel *model)
 {
-  //====== Check if transition matrix is valid ======
+/*    //====== Check if transition matrix is valid ======   ansi-c*/
   if (!(model->sv->valid_transition_matrix)) return MINUS_INFINITY;
 
-  //====== Check if ForwardRecursion() has been called ======
+/*    //====== Check if ForwardRecursion() has been called ======   ansi-c*/
   if (!model->ValidForwardRecursion) ForwardRecursion(model);
 
   return model->L;
@@ -2279,7 +2279,7 @@ int CheckRestrictions(int* FreeDim, int** NonZeroIndex, TMatrix MQ, int nstates)
   int i, j, k, q, r, total_free;
   PRECISION sum, common_sum, total_sum;
 
-  //====== Check for null pointer and sizes ======
+/*    //====== Check for null pointer and sizes ======   ansi-c*/
   if (!FreeDim || !MQ || (RowM(MQ) != nstates) || (ColM(MQ) != nstates))
     return 0;
   if (!NonZeroIndex || (dw_DimA(NonZeroIndex) != nstates))
@@ -2288,17 +2288,17 @@ int CheckRestrictions(int* FreeDim, int** NonZeroIndex, TMatrix MQ, int nstates)
     for (i=nstates-1; i >= 0; i--)
       if (dw_DimA(NonZeroIndex[i]) != nstates) return 0;
 
-  // Checks FreeDim[i] > 0
-  // Computes total_free = FreeDim[0] + ... + FreeDim[dw_DimA(FreeDim)-1]
+/*    // Checks FreeDim[i] > 0   ansi-c*/
+/*    // Computes total_free = FreeDim[0] + ... + FreeDim[dw_DimA(FreeDim)-1]   ansi-c*/
   for (total_free=0, i=dw_DimA(FreeDim)-1; i >= 0; i--)
     if (FreeDim[i] <= 0)
       return 0;
     else
       total_free+=FreeDim[i];
 
-  // Checks -1 <= NonZeroIndex[i][j] < total_free.
-  // Checks NonZeroIndex[i][j] >= 0, ==> MQ[i][j] > 0.
-  // Checks NonZeroIndex[i][j] = -1, ==> MQ[i][j] = 0.
+/*    // Checks -1 <= NonZeroIndex[i][j] < total_free.   ansi-c*/
+/*    // Checks NonZeroIndex[i][j] >= 0, ==> MQ[i][j] > 0.   ansi-c*/
+/*    // Checks NonZeroIndex[i][j] = -1, ==> MQ[i][j] = 0.   ansi-c*/
   for (j=0; j < nstates; j++)
     for (i=0; i < nstates; i++)
       if ((NonZeroIndex[i][j] < -1) || (total_free <= NonZeroIndex[i][j]))
@@ -2313,7 +2313,7 @@ int CheckRestrictions(int* FreeDim, int** NonZeroIndex, TMatrix MQ, int nstates)
             if (ElementM(MQ,i,j) != 0.0) return 0;
           }
 
-  //====== Check that column sums are correct ======
+/*    //====== Check that column sums are correct ======   ansi-c*/
   for (j=0; j < nstates; j++)
     {
       total_sum=0.0;
@@ -2364,7 +2364,7 @@ int CheckPriorOnFreeParameters(TMatrix Prior, int** NonZeroIndex, int nstates)
   int i, j, q=0;
   PRECISION alpha;
 
-  // non-null pointers and matrices of correct size
+/*    // non-null pointers and matrices of correct size   ansi-c*/
   if (!Prior || (RowM(Prior) != nstates) || (ColM(Prior) != nstates))
     return 0;
   if (!NonZeroIndex || (dw_DimA(NonZeroIndex) != nstates))

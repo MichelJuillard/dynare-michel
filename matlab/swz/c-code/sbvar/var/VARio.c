@@ -101,14 +101,14 @@ TStateModel* Read_VAR_Specification(FILE *f, char *filename)
   int **coef_states, **var_states;
   PRECISION** A0_Metropolis_Scale=(PRECISION**)NULL;
 
-  // Valid file
+/*    // Valid file   ansi-c*/
    FILE *f_in=OpenFile_VARio(f,filename);
   if (!f_in) return (TStateModel*)NULL;
 
-  // Read Markov specifications
+/*    // Read Markov specifications   ansi-c*/
   sv=ReadMarkovSpecification(f_in,(char*)NULL);
 
-  //=== Sizes ===//
+/*    //=== Sizes ===//   ansi-c*/
   nvars=ReadInteger_VARio(f_in,"//== Number Variables ==//");
   nlags=ReadInteger_VARio(f_in,"//== Number Lags ==//");
   nexg=ReadInteger_VARio(f_in,"//== Exogenous Variables ==//");
@@ -121,7 +121,7 @@ TStateModel* Read_VAR_Specification(FILE *f, char *filename)
       return (TStateModel*)NULL;
     }
 
-  //=== Restrictions - U[j] ===//
+/*    //=== Restrictions - U[j] ===//   ansi-c*/
   ReadArray_VARio(f_in,"//== Number of free parameters in each column of A0 ==//",IV=dw_CreateArray_int(nvars));
   U=dw_CreateArray_matrix(nvars);
   for (j=0; j < nvars; j++)
@@ -133,7 +133,7 @@ TStateModel* Read_VAR_Specification(FILE *f, char *filename)
     }
   dw_FreeArray(IV);
 
-  //=== Restrictions - V[j] ===//
+/*    //=== Restrictions - V[j] ===//   ansi-c*/
   ReadArray_VARio(f_in,"//== Number of free parameters in each column of Aplus ==//",IV=dw_CreateArray_int(nvars));
   V=dw_CreateArray_matrix(nvars);
   for (j=0; j < nvars; j++)
@@ -146,7 +146,7 @@ TStateModel* Read_VAR_Specification(FILE *f, char *filename)
       }
   dw_FreeArray(IV);
 
-  //=== Restrictions - W[j] ===//
+/*    //=== Restrictions - W[j] ===//   ansi-c*/
   ReadArray_VARio(f_in,"//== Non-zero W[j] ==//",IV=dw_CreateArray_int(nvars));
   W=dw_CreateArray_matrix(nvars);
   for (j=0; j < nvars; j++)
@@ -159,7 +159,7 @@ TStateModel* Read_VAR_Specification(FILE *f, char *filename)
       }
   dw_FreeArray(IV);
 
-  //====== Priors ======
+/*    //====== Priors ======   ansi-c*/
   ReadVector_VARio(f_in,"//== Gamma prior on zeta - a ==//",zeta_a_prior=CreateVector(nvars));
   ReadVector_VARio(f_in,"//== Gamma prior on zeta - b ==//",zeta_b_prior=CreateVector(nvars));
 
@@ -181,7 +181,7 @@ TStateModel* Read_VAR_Specification(FILE *f, char *filename)
       free(id);
     }
 
-  //=== Specification ===//
+/*    //=== Specification ===//   ansi-c*/
   spec=ReadInteger_VARio(f_in,"//== Specification (0=default  1=Sims-Zha  2=Random Walk) ==//");
   switch (spec)
     {
@@ -193,11 +193,11 @@ TStateModel* Read_VAR_Specification(FILE *f, char *filename)
   if (spec & SPEC_SIMS_ZHA)
     lambda_prior=ReadScalar_VARio(f_in,"//== Variance of Gaussian prior on lambda ==//");
 
-  //====== coefficient and variance state variables ======
+/*    //====== coefficient and variance state variables ======   ansi-c*/
   ReadArray_VARio(f_in,"//== Translation table for coefficient states ==//",coef_states=dw_CreateRectangularArray_int(nvars,nstates));
   ReadArray_VARio(f_in,"//== Translation table for variance states ==//",var_states=dw_CreateRectangularArray_int(nvars,nstates));
 
-  //====== Metropolis jumping kernel info for A0 ======
+/*    //====== Metropolis jumping kernel info for A0 ======   ansi-c*/
   if (dw_SetFilePosition(f_in,"//== Metropolis kernel scales for A0 ==//"))
     {
       A0_Metropolis_Scale=dw_CreateArray_array(nvars);
@@ -206,11 +206,11 @@ TStateModel* Read_VAR_Specification(FILE *f, char *filename)
       if (!dw_ReadArray(f_in,A0_Metropolis_Scale)) ReadError_VARio(id);
     }
 
-  //=== Data  ===
+/*    //=== Data  ===   ansi-c*/
   ReadMatrix_VARio(f_in,"//== Data Y (nobs x nvars) ==//",Y=CreateMatrix(nobs,nvars));
   ReadMatrix_VARio(f_in,"//== Data X (nobs x npre) ==//",X=CreateMatrix(nobs,npre));
 
-  //=== Create T_VAR_Parameters structure ===
+/*    //=== Create T_VAR_Parameters structure ===   ansi-c*/
   p=CreateTheta_VAR(spec,nvars,nlags,nexg,nstates,nobs,coef_states,var_states,U,V,W,Y,X);
   if (spec & SPEC_SIMS_ZHA)
     SetPriors_VAR_SimsZha(p,A0_prior,Aplus_prior,zeta_a_prior,zeta_b_prior,lambda_prior);
@@ -219,10 +219,10 @@ TStateModel* Read_VAR_Specification(FILE *f, char *filename)
 
   if (A0_Metropolis_Scale) SetupMetropolisInformation(A0_Metropolis_Scale,p);
 
-  //=== Close output file ===
+/*    //=== Close output file ===   ansi-c*/
   if (!f) fclose(f_in);
 
-  //=== Free memory ===
+/*    //=== Free memory ===   ansi-c*/
   dw_FreeArray(U);
   dw_FreeArray(V);
   dw_FreeArray(W);
@@ -236,7 +236,7 @@ TStateModel* Read_VAR_Specification(FILE *f, char *filename)
   dw_FreeArray(var_states);
   dw_FreeArray(A0_Metropolis_Scale);
 
-  //=== return TStateModel structure ===
+/*    //=== return TStateModel structure ===   ansi-c*/
   return CreateStateModel_new(sv,CreateRoutines_VAR(),p);
 }
 
@@ -249,17 +249,17 @@ void Write_VAR_Specification(FILE *f, char *filename, TStateModel *model)
   FILE *f_out=f ? f : dw_CreateTextFile(filename);
   T_VAR_Parameters *p=(T_VAR_Parameters*)(model->theta);
 
-  // Write Markov specifications
+/*    // Write Markov specifications   ansi-c*/
   WriteMarkovSpecification(f_out,(char*)NULL,model);
 
-  //=== Sizes ===//
+/*    //=== Sizes ===//   ansi-c*/
   fprintf(f_out,"//== Number Variables ==//\n%d\n\n",p->nvars);
   fprintf(f_out,"//== Number Lags ==//\n%d\n\n",p->nlags);
   fprintf(f_out,"//== Exogenous Variables ==//\n%d\n\n",p->npre - p->nvars * p->nlags);
   fprintf(f_out,"//== Number States ==//\n%d\n\n",p->nstates);
   fprintf(f_out,"//== Number Observations ==//\n%d\n\n",p->nobs);
 
-  //=== Restrictions - U[j] ===//
+/*    //=== Restrictions - U[j] ===//   ansi-c*/
   fprintf(f_out,"//== Number of free parameters in each column of A0 ==//\n");
   for (j=0; j < p->nvars; j++)
     fprintf(f_out,"%d ",ColM(p->U[j]));
@@ -271,7 +271,7 @@ void Write_VAR_Specification(FILE *f, char *filename, TStateModel *model)
       fprintf(f_out,"\n");
     }
 
-  //=== Restrictions - V[j] ===//
+/*    //=== Restrictions - V[j] ===//   ansi-c*/
   fprintf(f_out,"//== Number of free parameters in each column of Aplus ==//\n");
   for (j=0; j < p->nvars; j++)
     fprintf(f_out,"%d ",p->V[j] ? ColM(p->V[j]) : 0);
@@ -284,7 +284,7 @@ void Write_VAR_Specification(FILE *f, char *filename, TStateModel *model)
     fprintf(f_out,"\n");
       }
 
-  //=== Restrictions - W[j] ===//
+/*    //=== Restrictions - W[j] ===//   ansi-c*/
   fprintf(f_out,"//== Non-zero W[j] ==//\n");
   for (j=0; j < p->nvars; j++)
     fprintf(f_out,"%d ",p->W[j] ? 1 : 0);
@@ -297,7 +297,7 @@ void Write_VAR_Specification(FILE *f, char *filename, TStateModel *model)
     fprintf(f_out,"\n");
       }
 
-  //====== Priors ======
+/*    //====== Priors ======   ansi-c*/
   fprintf(f_out,"//== Gamma prior on zeta - a ==//\n");
   dw_PrintVector(f_out,p->zeta_a_prior,"%22.14le ");
   fprintf(f_out,"\n");
@@ -319,7 +319,7 @@ void Write_VAR_Specification(FILE *f, char *filename, TStateModel *model)
       fprintf(f_out,"\n");
     }
 
-  //=== Model specification ===//
+/*    //=== Model specification ===//   ansi-c*/
   fprintf(f_out,"//== Specification (0=default  1=Sims-Zha  2=Random Walk) ==//\n");
   if (p->Specification & SPEC_SIMS_ZHA)
     fprintf(f_out,"1\n\n");
@@ -331,18 +331,18 @@ void Write_VAR_Specification(FILE *f, char *filename, TStateModel *model)
   if ((p->Specification & SPEC_SIMS_ZHA) == SPEC_SIMS_ZHA)
     fprintf(f_out,"//== Variance of Gaussian prior on lambda ==//\n%22.14le\n\n",p->lambda_prior);
 
-  //====== coefficient and variance state variables ======
+/*    //====== coefficient and variance state variables ======   ansi-c*/
   fprintf(f_out,"//== Translation table for coefficient states ==//\n");
   dw_PrintArray(f_out,p->coef_states,"%4d ");
 
   fprintf(f_out,"//== Translation table for variance states ==//\n");
   dw_PrintArray(f_out,p->var_states,"%4d ");
 
-  //====== Metropolis jumping kernel info for A0 ======
+/*    //====== Metropolis jumping kernel info for A0 ======   ansi-c*/
   fprintf(f_out,"//== Metropolis kernel scales for A0 ==//\n");
   dw_PrintArray(f_out,p->A0_Metropolis_Scale,"%22.14le ");
 
-  //=== Data  ===
+/*    //=== Data  ===   ansi-c*/
   fprintf(f_out,"//== Data Y (nobs x nvars) ==//\n");
   for (t=1; t <= p->nobs; t++)
     dw_PrintVector(f_out,p->Y[t],"%22.14le ");
@@ -353,7 +353,7 @@ void Write_VAR_Specification(FILE *f, char *filename, TStateModel *model)
     dw_PrintVector(f_out,p->X[t],"%22.14le ");
   fprintf(f_out,"\n");
 
-  //=== Close output file ===
+/*    //=== Close output file ===   ansi-c*/
   if (!f) fclose(f_out);
 }
 
@@ -404,18 +404,18 @@ int Read_VAR_Parameters(FILE *f, char *filename, char *header, TStateModel *mode
   int i, j, s;
   T_VAR_Parameters *p=(T_VAR_Parameters*)(model->theta);
 
-  // Valid file
+/*    // Valid file   ansi-c*/
   f_in=OpenFile_VARio(f,filename);
   if (!f_in) return 0;
 
   if (!header) header="";
 
-  // Allocate memory
+/*    // Allocate memory   ansi-c*/
   A0=dw_CreateArray_matrix(p->nstates);
   Aplus=dw_CreateArray_matrix(p->nstates);
   Zeta=dw_CreateArray_matrix(p->nstates);
 
-  // Read File
+/*    // Read File   ansi-c*/
   for (s=0; s < p->nstates; s++)
     {
       fmt="//== %sA0[%d] ==//";
@@ -449,7 +449,7 @@ int Read_VAR_Parameters(FILE *f, char *filename, char *header, TStateModel *mode
       free(idbuffer);
     }
 
-  // Set A0, Aplus, and Zeta
+/*    // Set A0, Aplus, and Zeta   ansi-c*/
   for (j=0; j < p->nvars; j++)
     for (s=0; s < p->nstates; s++)
       {
@@ -462,12 +462,12 @@ int Read_VAR_Parameters(FILE *f, char *filename, char *header, TStateModel *mode
     p->Zeta[j][p->var_states[j][s]]=ElementM(Zeta[s],j,j);
       }
 
-  // Free memory
+/*    // Free memory   ansi-c*/
   dw_FreeArray(A0);
   dw_FreeArray(Aplus);
   dw_FreeArray(Zeta);
 
-  // Check Zeta non-negative
+/*    // Check Zeta non-negative   ansi-c*/
   for (j=p->nvars-1; j >= 0; j--)
     for (s=p->n_var_states[j]-1; s >= 0; s--)
       if (p->Zeta[j][s] < 0.0)
@@ -478,11 +478,11 @@ int Read_VAR_Parameters(FILE *f, char *filename, char *header, TStateModel *mode
       return 0;
     }
 
-  // Update b0, bplus, lambda, psi
+/*    // Update b0, bplus, lambda, psi   ansi-c*/
   Update_b0_bplus_from_A0_Aplus(p);
   if ((p->Specification & SPEC_SIMS_ZHA) == SPEC_SIMS_ZHA) Update_lambda_psi_from_bplus(p);
 
-  // Flags and notification that the VAR parameters have changed
+/*    // Flags and notification that the VAR parameters have changed   ansi-c*/
   p->valid_parameters=1;
   ThetaChanged(model);
 
@@ -726,10 +726,10 @@ void Write_ReducedFormVAR_Parameters(FILE *f, char *filename, T_VAR_Parameters *
       MakeAplus(Aplus,k,p);
       MakeZeta(Zeta,k,p);
 
-      //ProductInverseMM(C,Aplus,A0);
-      //ProductMM(A0,A0,Xi);
-      //ProductTransposeMM(Sigma,A0,A0);
-      //Inverse_LU(Sigma,Sigma);
+/*        //ProductInverseMM(C,Aplus,A0);   ansi-c*/
+/*        //ProductMM(A0,A0,Xi);   ansi-c*/
+/*        //ProductTransposeMM(Sigma,A0,A0);   ansi-c*/
+/*        //Inverse_LU(Sigma,Sigma);   ansi-c*/
 
       fprintf(f_out,"//== Reduced Form[%d] ==//\n",k+1);
       dw_PrintMatrix(f_out,C,"%lf ");
@@ -763,13 +763,13 @@ void Write_VAR_Info(FILE *f, char *filename, T_VAR_Parameters *p)
   else
     f_out=f;
 
-  //=== Write sizes ===//
+/*    //=== Write sizes ===//   ansi-c*/
   fprintf(f_out,"//== Number Observations ==//\n%d\n\n",p->nobs);
   fprintf(f_out,"//== Number Variables ==//\n%d\n\n",p->nvars);
   fprintf(f_out,"//== Number Lags ==//\n%d\n\n",p->nlags);
   fprintf(f_out,"//== Exogenous Variables ==//\n%d\n\n",p->npre - p->nvars * p->nlags);
 
-  //=== Restrictions - U[j] ===//
+/*    //=== Restrictions - U[j] ===//   ansi-c*/
   fprintf(f_out,"//== Number of free parameters in jth column of A0 ==//\n");
   for (j=0; j < p->nvars; j++)
     fprintf(f_out,"%d ",ColM(p->U[j]));
@@ -781,7 +781,7 @@ void Write_VAR_Info(FILE *f, char *filename, T_VAR_Parameters *p)
       fprintf(f_out,"\n");
     }
 
-  //=== Restrictions - V[j] ===//
+/*    //=== Restrictions - V[j] ===//   ansi-c*/
   fprintf(f_out,"//== Number of free parameters in jth column of Aplus ==//\n");
   for (j=0; j < p->nvars; j++)
     fprintf(f_out,"%d ",p->V[j] ? ColM(p->V[j]) : 0);
@@ -794,7 +794,7 @@ void Write_VAR_Info(FILE *f, char *filename, T_VAR_Parameters *p)
     fprintf(f_out,"\n");
       }
 
-  //=== Restrictions - W[j] ===//
+/*    //=== Restrictions - W[j] ===//   ansi-c*/
   fprintf(f_out,"//== Non-zero W[j] ==//\n");
   for (j=0; j < p->nvars; j++)
     fprintf(f_out,"%d ",p->W[j] ? 1 : 0);
@@ -807,7 +807,7 @@ void Write_VAR_Info(FILE *f, char *filename, T_VAR_Parameters *p)
     fprintf(f_out,"\n");
       }
 
-  //====== Priors ======
+/*    //====== Priors ======   ansi-c*/
   fprintf(f_out,"//== Gamma prior on Xi ==//\n");
   for (j=0; j < p->nvars; j++)
     fprintf(f_out,"%lf %lf\n",ElementV(p->zeta_a_prior,j),ElementV(p->zeta_b_prior,j));
@@ -858,7 +858,7 @@ void Write_VAR_Info(FILE *f, char *filename, T_VAR_Parameters *p)
 /*       dw_Error(PARSE_ERR); */
 /*     } */
 
-  //=== Close output file ===
+/*    //=== Close output file ===   ansi-c*/
   if (!f) fclose(f_out);
 }
 /*******************************************************************************/

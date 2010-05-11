@@ -1023,7 +1023,7 @@ int bSVD_new(PRECISION *U, PRECISION *d, PRECISION *V, PRECISION *A, int m, int 
       }
     }
 
-  // compute singular value decomposition
+/*    // compute singular value decomposition   ansi-c*/
   k=-1;
   m2 = m;
   n2 = n;
@@ -1331,7 +1331,7 @@ int bSVD(PRECISION *U, PRECISION *d, PRECISION *V, PRECISION *A, int m, int n, i
 
 #undef gesvd
 
-  // The following code attempts to use the divide and conquer algorithm
+/*    // The following code attempts to use the divide and conquer algorithm   ansi-c*/
 /* #if (PRECISION_SIZE == 4)  */
 /*   #define gesvd sgesdd */
 /* #else */
@@ -2053,7 +2053,7 @@ int bSortQZ_real(int *select, PRECISION *QQ, PRECISION *ZZ, PRECISION *SS, PRECI
       rtrn=MEM_ERR;
     else
       {
-        // Setup pairs and gev
+/*          // Setup pairs and gev   ansi-c*/
         for (i=n-1; i >= 0; i--)
           {
         gev[i]=sqrt(alpha_r[i]*alpha_r[i] + alpha_i[i]*alpha_i[i]);
@@ -2071,7 +2071,7 @@ int bSortQZ_real(int *select, PRECISION *QQ, PRECISION *ZZ, PRECISION *SS, PRECI
 
         rtrn=NO_ERR;
 
-        // Order generalized eigenvalues
+/*          // Order generalized eigenvalues   ansi-c*/
         j=pairs[0] ? 2 : 1;
         while (j < n)
           {

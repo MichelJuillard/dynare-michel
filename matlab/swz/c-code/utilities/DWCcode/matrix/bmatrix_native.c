@@ -1210,7 +1210,7 @@ int bSolveUnitTriangular(PRECISION *x, PRECISION *b, int m, int n, int u, int xt
  if (u)
    for (x+=(m-1)*xj, j=(n-1)*bj, b+=j; j >= 0; b-=bj, j-=bj)
     for (pxx=x+(m-1)*xi, i=(m-1)*bi; i >= 0; pxx-=xi, i-=bi)
-     __asm {                                                   //                       eax    ebx    ecx    edx    esi    edi     st(0)     st(1)
+     __asm {                                                    /*                         eax    ebx    ecx    edx    esi    edi     st(0)     st(1)   ansi-c*/
             mov  eax,i                                         // k=i                    k
             mov  edi,eax                                       // pb=i                   k                                  pb
             sub  eax,mbi                                       // k=i-mbi                k                                  pb
@@ -1903,7 +1903,7 @@ int bSVD_new(PRECISION *U, PRECISION *d, PRECISION *V, PRECISION *A, int m, int 
       V_=vt ? (PRECISION*)malloc(qv_*n_*sizeof(PRECISION)) : V;
     }
 
-  // compute singular value decomposition
+/*    // compute singular value decomposition   ansi-c*/
   gesvd(&jobu,&jobv,&m_,&n_,A_,&m_,d,U_,&m_,V_,&qv_,&opt_size,&k,&info);
   if (info || !(work=(PRECISION*)malloc((k=(int)opt_size)*sizeof(PRECISION))))
     err=info ? BLAS_LAPACK_ERR : MEM_ERR;
@@ -2190,7 +2190,7 @@ int bSVD(PRECISION *U, PRECISION *d, PRECISION *V, PRECISION *A, int m, int n, i
 #undef gesdd
 #undef gesvd
 #else
-  // bSVD
+/*    // bSVD   ansi-c*/
   PRECISION *NU;
   int i, j, rtrn;
 
@@ -2659,7 +2659,7 @@ int bQR(PRECISION *Q, PRECISION *R, PRECISION *X, int m, int n, int q, int qt, i
     }
   return NO_ERR;
 #else
-  // bQR
+/*    // bQR   ansi-c*/
   PRECISION *NQ, *NR, *pQ;
   int i, j;
 
@@ -2794,19 +2794,19 @@ int bCholesky(PRECISION *X, int m, int u, int t)
 {
 #if defined USE_INLINE
  int i, b, rtrn=NO_ERR;
- __asm{                                                       //    eax        ebx      ecx        edx        esi        edi          st(0)          st(1)          st(2)
+ __asm{                                                        /*      eax        ebx      ecx        edx        esi        edi          st(0)          st(1)          st(2)   ansi-c*/
         fninit
         mov    edx,m                                          //     ?          ?        ?          m          ?          ?
 
         cmp    u,0
-        //je     short c0                                       //     ?          ?        ?          m          ?          ?
+/*          //je     short c0                                       //     ?          ?        ?          m          ?          ?   ansi-c*/
         je     c0
 
         cmp    t,0
-        //je     short b0                                       //     ?          ?        ?          m          ?          ?
+/*          //je     short b0                                       //     ?          ?        ?          m          ?          ?   ansi-c*/
         je     b0
  /********************************************************************************************************************************/
-                                                              //     ?         ?         ?          m          ?          ?
+/*                                                                //     ?         ?         ?          m          ?          ?   ansi-c*/
         mov    eax,edx
         dec    eax                                            //     i         ?         ?          m          ?          ?
 
@@ -2852,7 +2852,7 @@ a4:                                                           //     k         j
         jle    short a5
 
         fld    PRECISION_WORD ptr[edi+PRECISION_SIZE*eax]     //     k         j         ?          m       X+i+j*m     X+i*m        X[i*m+k]      X[i+j*m]
-        fld    st(0)                                          //     k         j         ?          m       X+i+j*m     X+i*m        X[i*m+k]      X[i*m+k]       X[i+j*m]
+        fld    st(0)                                           /*       k         j         ?          m       X+i+j*m     X+i*m        X[i*m+k]      X[i*m+k]       X[i+j*m]   ansi-c*/
         fmul                                                  //     k         j         ?          m       X+i+j*m     X+i*m       X[i*m+k]^2     X[i+j*m]
         fsub                                                  //     k         j         ?          m       X+i+j*m     X+i*m        X[i+j*m]
 
@@ -2862,7 +2862,7 @@ a5:                                                           //     ?         j
         ftst
         fnstsw  ax
         sahf
-        //jbe     short e1                                      //     ?         j         ?          m       X+i+j*m     X+i*m        X[i+j*m]
+/*          //jbe     short e1                                      //     ?         j         ?          m       X+i+j*m     X+i*m        X[i+j*m]   ansi-c*/
         jbe     e1
 
         fsqrt                                                 //     ?         j         ?          m       X+i+j*m     X+i*m        X[i+j*m]
@@ -2898,11 +2898,11 @@ a7:                                                           //     k         j
         jmp    short a7                                       //     k         j       X+j*m        m       X+i+j*m     X+i*m        X[i+j*m]        scale
 
 a8:
-        fmul   st,st(1)                                       //     k         j       X+j*m        m       X+i+j*m     X+i*m        X[i+j*m]        scale
+        fmul   st,st(1)                                        /*       k         j       X+j*m        m       X+i+j*m     X+i*m        X[i+j*m]        scale   ansi-c*/
         fstp   PRECISION_WORD ptr[esi]                        //     k         j       X+j*m        m       X+i+j*m     X+i*m         scale
         jmp    short a6                                       //     k         j       X+j*m        m       X+i+j*m     X+i*m         scale
 
-a9:     ffree  st(0)                                          //     ?         ?         ?          m       X+i+j*m     X+i*m
+a9:     ffree  st(0)                                           /*       ?         ?         ?          m       X+i+j*m     X+i*m   ansi-c*/
 
         mov    eax,edx
         shl    eax,PRECISION_SHIFT
@@ -2910,10 +2910,10 @@ a9:     ffree  st(0)                                          //     ?         ?
 
         mov    eax,i                                          //     i         ?         ?          m       X+i+j*m     X+i*m
         dec    eax                                            //     i         ?         ?          m       X+i+j*m     X+i*m
-        //jge    short a1                                       //     i         ?         ?          m       X+i+j*m     X+i*m
+/*          //jge    short a1                                       //     i         ?         ?          m       X+i+j*m     X+i*m   ansi-c*/
         jge    a1
 
-        //jmp    short e2                                       //     ?         ?         ?          ?          ?          ?
+/*          //jmp    short e2                                       //     ?         ?         ?          ?          ?          ?   ansi-c*/
         jmp    e2
 /********************************************************************************************************************************/
 b0:                                                           //     ?          ?        ?          m          ?          ?
@@ -2966,7 +2966,7 @@ b5:
         ftst
         fnstsw  ax
         sahf
-        //jbe     short e1
+/*          //jbe     short e1   ansi-c*/
         jbe     e1
 
         fsqrt
@@ -3015,16 +3015,16 @@ b9:     ffree   st(0)
         mov     eax,i
         inc     eax
         cmp     edx,eax
-        //jg      short b1
+/*          //jg      short b1   ansi-c*/
         jg      b1
 
-        //jmp     short e2
+/*          //jmp     short e2   ansi-c*/
         jmp     e2
 /********************************************************************************************************************************/
 c0:
         mov    eax,t
         cmp    eax,0
-        //je     short d0
+/*          //je     short d0   ansi-c*/
         je     d0
 /********************************************************************************************************************************/
         mov    eax,0                                          //     i                              m                   X+i*m
@@ -3073,7 +3073,7 @@ c5:
         ftst
         fnstsw  ax
         sahf
-        //jbe     short e1
+/*          //jbe     short e1   ansi-c*/
         jbe     e1
 
         fsqrt
@@ -3121,10 +3121,10 @@ c9:     ffree   st(0)
         mov    eax,i
         inc    eax
         cmp    edx,eax
-        //jg     short c1
+/*          //jg     short c1   ansi-c*/
         jg     c1
 
-        //jmp    short e2
+/*          //jmp    short e2   ansi-c*/
         jmp    e2
 /********************************************************************************************************************************/
 d0:                                                           //     ?          ?        ?          m          ?          ?
@@ -3177,7 +3177,7 @@ d4:                                                           //     k         j
         jle    short d5
 
         fld    PRECISION_WORD ptr[edi+PRECISION_SIZE*eax]     //     k         j         ?          m       X+i*m+j      X+i         X[i*m+k]      X[i+j*m]
-        fld    st(0)                                          //     k         j         ?          m       X+i*m+j      X+i         X[i*m+k]      X[i*m+k]       X[i+j*m]
+        fld    st(0)                                           /*       k         j         ?          m       X+i*m+j      X+i         X[i*m+k]      X[i*m+k]       X[i+j*m]   ansi-c*/
         fmul                                                  //     k         j         ?          m       X+i*m+j      X+i        X[i*m+k]^2     X[i+j*m]
         fsub                                                  //     k         j         ?          m       X+i*m+j      X+i         X[i+j*m]
 
@@ -3221,11 +3221,11 @@ d7:                                                           //     k         j
         jmp    short d7                                       //     k         j        X+j         m       X+i*m+j      X+i         X[i+j*m]        scale
 
 d8:
-        fmul   st,st(1)                                       //     k         j        X+j         m       X+i*m+j      X+i         X[i+j*m]        scale
+        fmul   st,st(1)                                        /*       k         j        X+j         m       X+i*m+j      X+i         X[i+j*m]        scale   ansi-c*/
         fstp   PRECISION_WORD ptr[esi]                        //     k         j        X+j         m       X+i*m+j      X+i          scale
         jmp    short d6                                       //     k         j        X+j         m       X+i*m+j      X+i          scale
 
-d9:     ffree  st(0)                                          //     ?         ?         ?          m       X+i*m+j      X+i
+d9:     ffree  st(0)                                           /*       ?         ?         ?          m       X+i*m+j      X+i   ansi-c*/
 
         sub    edi,PRECISION_SIZE
 

@@ -318,7 +318,7 @@ T_MHM* CreateMHM_CommandLine(int nargs, char **args)
       exit(0);
     }
 
-  // Output filenames
+/*    // Output filenames   ansi-c*/
   if (!(tag=dw_ParseString_String(nargs,args,"fo",(char*)NULL)))
     tag=dw_ParseString_String(nargs,args,"ft","default");
   fmt="%smhm_intermediate_%s.dat";
@@ -331,8 +331,8 @@ T_MHM* CreateMHM_CommandLine(int nargs, char **args)
   sprintf(mhm->draws_output_filename=(char*)malloc(strlen(d_out) + strlen(fmt) + strlen(tag) - 3),fmt,d_out,tag);
   fmt="%smhm_regime_counts_%s.dat";
   sprintf(mhm->regime_counts_filename=(char*)malloc(strlen(d_out) + strlen(fmt) + strlen(tag) - 3),fmt,d_out,tag);
-  //fmt="%smhm_draws_states_not_integrated_%s.dat";
-  //sprintf(mhm->states_not_integrated_out_filename=(char*)malloc(strlen(d_out) + strlen(fmt) + strlen(tag) - 3),fmt,d_out,tag);
+/*    //fmt="%smhm_draws_states_not_integrated_%s.dat";   ansi-c*/
+/*    //sprintf(mhm->states_not_integrated_out_filename=(char*)malloc(strlen(d_out) + strlen(fmt) + strlen(tag) - 3),fmt,d_out,tag);   ansi-c*/
 
   free(d_in);
   free(d_out);
@@ -349,10 +349,10 @@ int main(int nargs, char **args)
 
   if (mhm=CreateMHM_CommandLine(nargs,args))
     {
-      //=== Random seed ===//
+/*        //=== Random seed ===//   ansi-c*/
       dw_initialize_generator(0);
 
-      //=== Test new normalization code ===//
+/*        //=== Test new normalization code ===//   ansi-c*/
       /**
       TVector** A0;
       PRECISION x1, x2, x3, x4;
@@ -386,12 +386,12 @@ int main(int nargs, char **args)
       getchar();
     }
       /**/
-      //=== End test new normalization code ===//
+/*        //=== End test new normalization code ===//   ansi-c*/
 
-      // Use WZ normalization
+/*        // Use WZ normalization   ansi-c*/
       Setup_WZ_Normalization((T_VAR_Parameters*)mhm->model->theta,((T_VAR_Parameters*)mhm->model->theta)->A0);
 
-      // Posterior mode - Initial specification
+/*        // Posterior mode - Initial specification   ansi-c*/
       f_out_intermediate=dw_AppendTextFile(mhm->intermediate_output_filename);
       fprintf(f_out_intermediate,"//== Initial Specification ==//\n\n");
       Write_VAR_Specification(f_out_intermediate,(char*)NULL,mhm->model);
@@ -410,7 +410,7 @@ int main(int nargs, char **args)
 
       f_out_intermediate_draws=dw_CreateTextFile(mhm->intermediate_draws_output_filename);
 
-      // First burn-in
+/*        // First burn-in   ansi-c*/
       if (mhm->n_burn1 > 0)
     {
       mhm->f_out=f_out_intermediate_draws;
@@ -420,7 +420,7 @@ int main(int nargs, char **args)
       printf("Elapsed Time: %d seconds\n",end_time - begin_time);
     }
 
-      // After first burn-in
+/*        // After first burn-in   ansi-c*/
       f_out_intermediate=dw_AppendTextFile(mhm->intermediate_output_filename);
       fprintf(f_out_intermediate,"//== Specification after first burn-in ==//\n");
       fprintf(f_out_intermediate,"Number inconsistent normalizations: %d\n",((T_VAR_Parameters*)mhm->model->theta)->WZ_inconsistancies);
@@ -431,7 +431,7 @@ int main(int nargs, char **args)
       Write_VAR_Parameters(f_out_intermediate,(char*)NULL,header,mhm->model);
       fclose(f_out_intermediate);
 
-      // Second burn-in
+/*        // Second burn-in   ansi-c*/
       if (mhm->n_burn2 > 0)
     {
       mhm->f_out=f_out_intermediate_draws;
@@ -446,7 +446,7 @@ int main(int nargs, char **args)
 
       fclose(f_out_intermediate_draws);
 
-      // After second burn-in
+/*        // After second burn-in   ansi-c*/
       f_out_intermediate=dw_AppendTextFile(mhm->intermediate_output_filename);
       fprintf(f_out_intermediate,"//== Specification after second burn-in ==//\n");
       fprintf(f_out_intermediate,"Number inconsistent normalizations: %d\n",((T_VAR_Parameters*)mhm->model->theta)->WZ_inconsistancies);
@@ -457,7 +457,7 @@ int main(int nargs, char **args)
       Write_VAR_Parameters(f_out_intermediate,(char*)NULL,header,mhm->model);
       fclose(f_out_intermediate);
 
-      // Mean-variance estimation
+/*        // Mean-variance estimation   ansi-c*/
       if (mhm->n_mean_variance > 0)
     {
       begin_time=time((time_t*)NULL);
@@ -469,7 +469,7 @@ int main(int nargs, char **args)
       printf("Number singular inverse variances: %d\n\n",Get_VAR_Improper_Distribution_Counter());
     }
 
-      // Set center to mean if necessary
+/*        // Set center to mean if necessary   ansi-c*/
       if (dw_FindArgument_String(nargs,args,"cm") >= 0)
     {
       printf("Using mean for center\n");
@@ -479,7 +479,7 @@ int main(int nargs, char **args)
     printf("Using posterior mode for center\n");
 
 
-      // After mean-variance estimation
+/*        // After mean-variance estimation   ansi-c*/
       f_out_intermediate=dw_AppendTextFile(mhm->intermediate_output_filename);
       fprintf(f_out_intermediate,"//== Specification after mean-variance estimation ==//\n");
       fprintf(f_out_intermediate,"Number inconsistent normalizations: %d\n",((T_VAR_Parameters*)mhm->model->theta)->WZ_inconsistancies);
@@ -491,18 +491,18 @@ int main(int nargs, char **args)
       WriteMeanVariance(f_out_intermediate,mhm);
       fclose(f_out_intermediate);
 
-      // Open draw file and states file
+/*        // Open draw file and states file   ansi-c*/
       mhm->f_out=dw_CreateTextFile(mhm->draws_output_filename);
       WriteMHM_Input(mhm->f_out,mhm);
       WriteMeanVariance(mhm->f_out,mhm);
-      //mhm->f_states_not_integrated_out=dw_CreateTextFile(mhm->states_not_integrated_out_filename);
-      //WriteMHM_Input(mhm->f_states_not_integrated_out,mhm);
-      //WriteMeanVariance(mhm->f_states_not_integrated_out,mhm);
+/*        //mhm->f_states_not_integrated_out=dw_CreateTextFile(mhm->states_not_integrated_out_filename);   ansi-c*/
+/*        //WriteMHM_Input(mhm->f_states_not_integrated_out,mhm);   ansi-c*/
+/*        //WriteMeanVariance(mhm->f_states_not_integrated_out,mhm);   ansi-c*/
       mhm->f_out_regime_counts=dw_CreateTextFile(mhm->regime_counts_filename);
 
-      // Modified harmonic mean draws
+/*        // Modified harmonic mean draws   ansi-c*/
       fprintf(mhm->f_out,"\n//== Draws ==//\n");
-      //fprintf(mhm->f_states_not_integrated_out,"\n//== Draws ==//\n");
+/*        //fprintf(mhm->f_states_not_integrated_out,"\n//== Draws ==//\n");   ansi-c*/
 
       begin_time=time((time_t*)NULL);
       ComputeModifiedHarmonicMean(mhm,10000);
@@ -513,7 +513,7 @@ int main(int nargs, char **args)
 
       fclose(mhm->f_out);
 
-      // After modified harmonic mean draws
+/*        // After modified harmonic mean draws   ansi-c*/
       f_out_intermediate=dw_AppendTextFile(mhm->intermediate_output_filename);
       fprintf(f_out_intermediate,"//== Specification after mhm draws ==//\n");
       fprintf(f_out_intermediate,"Number inconsistent normalizations: %d\n",((T_VAR_Parameters*)mhm->model->theta)->WZ_inconsistancies);

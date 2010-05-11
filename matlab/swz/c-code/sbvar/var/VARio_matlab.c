@@ -33,18 +33,18 @@ TStateModel* Combine_matlab_standard(char *matlabfile, char *standardfile)
   TMatrix *U, *V, *W, *A0_prior, *Aplus_prior, X, Y, S;
   TVector zeta_a_prior, zeta_b_prior;
 
-  //=== Open matlab input file
+/*    //=== Open matlab input file   ansi-c*/
   f_in=dw_OpenTextFile(matlabfile);
 
-  //=== Read sizes ===//
+/*    //=== Read sizes ===//   ansi-c*/
   id="//== lags, nvar, nStates, T ==//";
   if (!dw_SetFilePosition(f_in,id) || (fscanf(f_in," %d %d %d %d ",&nlags,&nvars,&nstates,&nobs) != 4)) ReadError_VARio_matlab(id);
 
-  //=== A single constant term ===//
+/*    //=== A single constant term ===//   ansi-c*/
   nexg=1;
   npre=nvars * nlags + nexg;
 
-  //=== Restrictions - U[j] ===//
+/*    //=== Restrictions - U[j] ===//   ansi-c*/
   IV=dw_CreateArray_int(nvars);
   id="//== n0const: nvar-by-1 ==//";
   if (!dw_SetFilePosition(f_in,id) || !dw_ReadArray(f_in,IV)) ReadError_VARio_matlab(id);
@@ -55,7 +55,7 @@ TStateModel* Combine_matlab_standard(char *matlabfile, char *standardfile)
     if (!dw_ReadMatrix(f_in,U[j]=CreateMatrix(nvars,IV[j]))) ReadError_VARio_matlab(id);
   dw_FreeArray(IV);
 
-  //=== Restrictions - V[j] (V[j] should be an npre x npre identity matrix) ===//
+/*    //=== Restrictions - V[j] (V[j] should be an npre x npre identity matrix) ===//   ansi-c*/
   IV=dw_CreateArray_int(nvars);
   id="//== npconst: nvar-by-1 ==//";
   if (!dw_SetFilePosition(f_in,id) || !dw_ReadArray(f_in,IV)) ReadError_VARio_matlab(id);
@@ -76,7 +76,7 @@ TStateModel* Combine_matlab_standard(char *matlabfile, char *standardfile)
     }
   dw_FreeArray(IV);
 
-  //=== Restrictions - W[j] (Random walk specification) ===//
+/*    //=== Restrictions - W[j] (Random walk specification) ===//   ansi-c*/
   InitializeMatrix(S=CreateMatrix(npre,nvars),0.0);
   for (j=nvars-1; j >= 0; j--) ElementM(S,j,j)=-1.0;
   W=dw_CreateArray_matrix(nvars);
@@ -84,7 +84,7 @@ TStateModel* Combine_matlab_standard(char *matlabfile, char *standardfile)
     W[j]=EquateMatrix((TMatrix)NULL,S);
   FreeMatrix(S);
 
-  //====== Priors ======
+/*    //====== Priors ======   ansi-c*/
   id="//== gxia: alpha parameter for gamma prior of xi ==//";
   if (!dw_SetFilePosition(f_in,id) || (fscanf(f_in," %lf ",&scalar_zeta_a_prior) != 1)) ReadError_VARio_matlab(id);
   id="//== gxib: beta parameter for gamma prior of xi ==//";
@@ -109,29 +109,29 @@ TStateModel* Combine_matlab_standard(char *matlabfile, char *standardfile)
   for (j=0; j < nvars; j++)
     if (!dw_ReadMatrix(f_in,Aplus_prior[j]=CreateMatrix(npre,npre))) ReadError_VARio_matlab(id);
 
-  // Initialize Y
+/*    // Initialize Y   ansi-c*/
   id="//== Yleft -- Y: T-by-nvar ==//";
   if (!dw_SetFilePosition(f_in,id) || !dw_ReadMatrix(f_in,Y=CreateMatrix(nobs,nvars))) ReadError_VARio_matlab(id);
 
-  // Initialize X
+/*    // Initialize X   ansi-c*/
   id="//== Xright -- X: T-by-ncoef ==//";
   if (!dw_SetFilePosition(f_in,id) || !dw_ReadMatrix(f_in,X=CreateMatrix(nobs,npre))) ReadError_VARio_matlab(id);
 
-  //=== Sims-Zha specification ===
+/*    //=== Sims-Zha specification ===   ansi-c*/
   id="//== glamdasig: sigma parameter for normal prior of lamda ==//";
   if (!dw_SetFilePosition(f_in,id) || (fscanf(f_in," %lf ",&lambda_prior) != 1)) ReadError_VARio_matlab(id);
   lambda_prior*=lambda_prior;
 
-  //=== Close matlab input file ===
+/*    //=== Close matlab input file ===   ansi-c*/
   fclose(f_in);
 
-  //=== Open standard input file
+/*    //=== Open standard input file   ansi-c*/
   f_in=dw_OpenTextFile(standardfile);
 
-  //=== Create Markov state variable ===//
+/*    //=== Create Markov state variable ===//   ansi-c*/
   sv=CreateMarkovStateVariable_File(f_in,(char*)NULL,nobs);
 
-  //====== coefficient/variance state variables ======
+/*    //====== coefficient/variance state variables ======   ansi-c*/
   id="//== Controlling states variables for coefficients ==//";
   if (!dw_SetFilePosition(f_in,id) || !dw_ReadArray(f_in,States=dw_CreateRectangularArray_int(nvars,sv->n_state_variables)))
     ReadError_VARio_matlab(id);
@@ -170,10 +170,10 @@ TStateModel* Combine_matlab_standard(char *matlabfile, char *standardfile)
   dw_FreeArray(States);
   dw_FreeArray(var_sv);
 
-  //=== Close standard input file ===
+/*    //=== Close standard input file ===   ansi-c*/
   fclose(f_in);
 
-  //=== Create T_VAR_Parameters structure ===
+/*    //=== Create T_VAR_Parameters structure ===   ansi-c*/
   flag=SimsZha ? SPEC_SIMS_ZHA : 0;
   flag|=RandomWalk ? SPEC_RANDOM_WALK : 0;
   p=CreateTheta_VAR(flag,nvars,nlags,nexg,sv->nstates,sv->nobs,coef_states,var_states,U,V,W,Y,X);
@@ -182,15 +182,15 @@ TStateModel* Combine_matlab_standard(char *matlabfile, char *standardfile)
   else
     SetPriors_VAR(p,A0_prior,Aplus_prior,zeta_a_prior,zeta_b_prior);
 
-  //p=Create_VAR_Parameters(nvars,nlags,nexg,sv->nstates,sv->nobs,U,V,W,Zeta_a_prior,Zeta_b_prior,A0_prior,Aplus_prior,Y,X,coef_states,var_states);
-  //SetupSimsZhaSpecification(p,delta_prior*delta_prior);
+/*    //p=Create_VAR_Parameters(nvars,nlags,nexg,sv->nstates,sv->nobs,U,V,W,Zeta_a_prior,Zeta_b_prior,A0_prior,Aplus_prior,Y,X,coef_states,var_states);   ansi-c*/
+/*    //SetupSimsZhaSpecification(p,delta_prior*delta_prior);   ansi-c*/
 
-  //=== Create TStateModel ===
+/*    //=== Create TStateModel ===   ansi-c*/
   model=CreateStateModel_new(sv,CreateRoutines_VAR(),p);
 
-  //=== Print Model specifications to file ===
+/*    //=== Print Model specifications to file ===   ansi-c*/
 
-  //=== Free memory ===
+/*    //=== Free memory ===   ansi-c*/
   FreeMatrix(X);
   FreeMatrix(Y);
   dw_FreeArray(Aplus_prior);
@@ -222,7 +222,7 @@ void ReadConstantParameters(char *filename, TStateModel *model)
       exit(0);
     }
 
-  // A0
+/*    // A0   ansi-c*/
   id="//== A0hat: nvar-by-nvar ==//";
   if (!dw_SetFilePosition(f_in,id) || !dw_ReadMatrix(f_in,A0=CreateMatrix(p->nvars,p->nvars))) ReadError_VARio_matlab(id);
   for (j=p->nvars-1; j >= 0; j--)
@@ -231,7 +231,7 @@ void ReadConstantParameters(char *filename, TStateModel *model)
     ElementV(p->A0[j][s],i)=ElementM(A0,i,j);
   FreeMatrix(A0);
 
-  // Aplus
+/*    // Aplus   ansi-c*/
   id="//== Aphat: ncoef(lags*nvar+1)-by-nvar ==//";
   if (!dw_SetFilePosition(f_in,id) || !dw_ReadMatrix(f_in,Aplus=CreateMatrix(p->npre,p->nvars))) ReadError_VARio_matlab(id);
   for (j=p->nvars-1; j >= 0; j--)
@@ -240,19 +240,19 @@ void ReadConstantParameters(char *filename, TStateModel *model)
     ElementV(p->Aplus[j][s],i)=ElementM(Aplus,i,j);
   FreeMatrix(Aplus);
 
-  // Zeta
+/*    // Zeta   ansi-c*/
   for (j=p->nvars-1; j >= 0; j--)
     for (s=p->n_var_states[j]-1; s >= 0; s--)
       p->Zeta[j][s]=1.0;
 
-  // b0, bplus, lambda, and psi
+/*    // b0, bplus, lambda, and psi   ansi-c*/
   Update_b0_bplus_from_A0_Aplus(p);
   if (p->Specification & SPEC_SIMS_ZHA) Update_lambda_psi_from_bplus(p);
 
-  // Flags
+/*    // Flags   ansi-c*/
   p->valid_parameters=1;
 
-  // Transition matrix
+/*    // Transition matrix   ansi-c*/
   SetTransitionMatrixToPriorMean(model);
 
   ThetaChanged(model);
@@ -277,23 +277,23 @@ TStateModel* CreateStateModel_VAR_matlab(char *filename)
   int **coef_states, **var_states;
   TMarkovStateVariable *sv;
 
-  //=== Open file ===
+/*    //=== Open file ===   ansi-c*/
   if (!(f_in=fopen(filename,"rt")))
     {
       printf("Unable to read the input data file: %s\n", filename);
       exit(0);
     }
 
-  //=== Read sizes ===//
+/*    //=== Read sizes ===//   ansi-c*/
   id="//== lags, nvar, nStates, T ==//";
   if (!dw_SetFilePosition(f_in,id)
       || (fscanf(f_in," %d %d %d %d ",&nlags,&nvars,&nstates,&nobs) != 4)) ReadError_VARio_matlab(id);
 
-  //=== A single constant term ===//
+/*    //=== A single constant term ===//   ansi-c*/
   nexg=1;
   npre=nvars * nlags + nexg;
 
-  //=== Restrictions - U[j] ===//
+/*    //=== Restrictions - U[j] ===//   ansi-c*/
   IV=dw_CreateArray_int(nvars);
   id="//== n0const: nvar-by-1 ==//";
   if (!dw_SetFilePosition(f_in,id) || !dw_ReadArray(f_in,IV)) ReadError_VARio_matlab(id);
@@ -304,7 +304,7 @@ TStateModel* CreateStateModel_VAR_matlab(char *filename)
     if (!dw_ReadMatrix(f_in,U[j]=CreateMatrix(nvars,IV[j]))) ReadError_VARio_matlab(id);
   dw_FreeArray(IV);
 
-  //=== Restrictions - V[j] (V[j] should be an npre x npre identity matrix) ===//
+/*    //=== Restrictions - V[j] (V[j] should be an npre x npre identity matrix) ===//   ansi-c*/
   IV=dw_CreateArray_int(nvars);
   id="//== npconst: nvar-by-1 ==//";
   if (!dw_SetFilePosition(f_in,id) || !dw_ReadArray(f_in,IV)) ReadError_VARio_matlab(id);
@@ -319,7 +319,7 @@ TStateModel* CreateStateModel_VAR_matlab(char *filename)
     V[j]=IdentityMatrix((TMatrix)NULL,npre);
   dw_FreeArray(IV);
 
-  //=== Restrictions - W[j] (Random walk specification) ===//
+/*    //=== Restrictions - W[j] (Random walk specification) ===//   ansi-c*/
   InitializeMatrix(S=CreateMatrix(npre,nvars),0.0);
   for (j=nvars-1; j >= 0; j--) ElementM(S,j,j)=-1.0;
   W=dw_CreateArray_matrix(nvars);
@@ -327,14 +327,14 @@ TStateModel* CreateStateModel_VAR_matlab(char *filename)
     W[j]=EquateMatrix((TMatrix)NULL,S);
   FreeMatrix(S);
 
-  //=== Create TMarkovStateVariable  ===//
+/*    //=== Create TMarkovStateVariable  ===//   ansi-c*/
   PriorTransitionMatrix=CreateMatrix(nstates,nstates);
   id="//== Galpha: nStates-by-nStates ==//";
   if (!dw_SetFilePosition(f_in,id) || !dw_ReadMatrix(f_in,PriorTransitionMatrix)) ReadError_VARio_matlab(id);
   sv=CreateMarkovStateVariable_NoRestrictions(nstates,nobs,PriorTransitionMatrix);
   FreeMatrix(PriorTransitionMatrix);
 
-  //====== regime/shock state variables ======
+/*    //====== regime/shock state variables ======   ansi-c*/
   coef_states=dw_CreateRectangularArray_int(nvars,nstates);
   var_states=dw_CreateRectangularArray_int(nvars,nstates);
   IM=dw_CreateRectangularArray_int(nvars,2);
@@ -370,7 +370,7 @@ TStateModel* CreateStateModel_VAR_matlab(char *filename)
       }
   dw_FreeArray(IM);
 
-  //====== Priors ======
+/*    //====== Priors ======   ansi-c*/
   id="//== gxia: alpha parameter for gamma prior of xi ==//";
   if (!dw_SetFilePosition(f_in,id) || (fscanf(f_in," %lf ",&scalar_Zeta_a_prior) != 1)) ReadError_VARio_matlab(id);
   id="//== gxib: beta parameter for gamma prior of xi ==//";
@@ -485,26 +485,26 @@ TStateModel* CreateStateModel_VAR_matlab(char *filename)
 /*   exit(0); */
 /*   //=========================== Checks */
 
-  // Initialize Y
+/*    // Initialize Y   ansi-c*/
   id="//== Yleft -- Y: T-by-nvar ==//";
   if (!dw_SetFilePosition(f_in,id) || !dw_ReadMatrix(f_in,Y=CreateMatrix(nobs,nvars))) ReadError_VARio_matlab(id);
 
-  // Initialize X
+/*    // Initialize X   ansi-c*/
   id="//== Xright -- X: T-by-ncoef ==//";
   if (!dw_SetFilePosition(f_in,id) || !dw_ReadMatrix(f_in,X=CreateMatrix(nobs,npre))) ReadError_VARio_matlab(id);
 
-  //=== Create T_VAR_Parameters structure ===
+/*    //=== Create T_VAR_Parameters structure ===   ansi-c*/
   p=CreateTheta_VAR(SPEC_SIMS_ZHA | SPEC_RANDOM_WALK,nvars,nlags,nexg,nstates,nobs,coef_states,var_states,U,V,W,Y,X);
 
-  //=== Sims-Zha specification ===
+/*    //=== Sims-Zha specification ===   ansi-c*/
   id="//== glamdasig: sigma parameter for normal prior of lamda ==//";
   if (!dw_SetFilePosition(f_in,id) || (fscanf(f_in," %lf ",&lambda_prior) != 1)) ReadError_VARio_matlab(id);
   SetPriors_VAR_SimsZha(p,A0_prior,Aplus_prior,Zeta_a_prior,Zeta_b_prior,lambda_prior*lambda_prior);
 
-  //=== Close input file ===
+/*    //=== Close input file ===   ansi-c*/
   fclose(f_in);
 
-  //=== Create TStateModel ===
+/*    //=== Create TStateModel ===   ansi-c*/
   return CreateStateModel_new(sv,CreateRoutines_VAR(),p);
 }
 /*******************************************************************************/

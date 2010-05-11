@@ -223,7 +223,7 @@ static void b_qsort_array_ascending_real(PRECISION *x, int m)
   int j, k;
   if (m > 10)
     {
-      // quick sort
+/*        // quick sort   ansi-c*/
       m--;
 
       if (x[0] == x[m])
@@ -250,7 +250,7 @@ static void b_qsort_array_ascending_real(PRECISION *x, int m)
     }
   else
     {
-      // insertion sort
+/*        // insertion sort   ansi-c*/
       for (j=1; j < m; j++)
     {
       y=x[j];
@@ -281,7 +281,7 @@ static void b_qsort_array_descending_real(PRECISION *x, int m)
   int j, k;
   if (m > 10)
     {
-      // quick sort
+/*        // quick sort   ansi-c*/
       m--;
 
       if (x[0] == x[m])
@@ -308,7 +308,7 @@ static void b_qsort_array_descending_real(PRECISION *x, int m)
     }
   else
     {
-      // insertion sort
+/*        // insertion sort   ansi-c*/
       for (j=1; j < m; j++)
     {
       y=x[j];
@@ -345,7 +345,7 @@ static void b_qsort_matrix_columns_ascending_real(PRECISION *x, int m, int n, in
   y=(PRECISION*)malloc(s=m*sizeof(PRECISION));
   if (n > 10)
     {
-      // quick sort
+/*        // quick sort   ansi-c*/
       p=(n-1)*m;
       k=p+idx;
 
@@ -373,7 +373,7 @@ static void b_qsort_matrix_columns_ascending_real(PRECISION *x, int m, int n, in
     }
   else
     {
-      // insertion sort
+/*        // insertion sort   ansi-c*/
       p=n*m;
       for (j=m+idx; j < p; j+=m)
     if (x[j-m] > x[j])
@@ -413,7 +413,7 @@ static void b_qsort_matrix_columns_descending_real(PRECISION *x, int m, int n, i
   y=(PRECISION*)malloc(s=m*sizeof(PRECISION));
   if (n > 10)
     {
-      // quick sort
+/*        // quick sort   ansi-c*/
       p=(n-1)*m;
       k=p+idx;
 
@@ -441,7 +441,7 @@ static void b_qsort_matrix_columns_descending_real(PRECISION *x, int m, int n, i
     }
   else
     {
-      // insertion sort
+/*        // insertion sort   ansi-c*/
       p=n*m;
       for (j=m+idx; j < p; j+=m)
     if (x[j-m] < x[j])
@@ -483,7 +483,7 @@ static void b_qsort_matrix_rows_ascending_real(PRECISION *x, int m, int n, int b
   int i, j, k;
   if (er-br+1 > 10)
     {
-      // quick sort
+/*        // quick sort   ansi-c*/
       if (x[idx+br] == x[idx+er])
     c=x[idx+br];
       else
@@ -510,7 +510,7 @@ static void b_qsort_matrix_rows_ascending_real(PRECISION *x, int m, int n, int b
     }
   else
     {
-      // insertion sort
+/*        // insertion sort   ansi-c*/
       int r;
       for (j=br+1; j <= er; j++)
     {
@@ -551,7 +551,7 @@ static void b_qsort_matrix_rows_descending_real(PRECISION *x, int m, int n, int 
   int i, j, k;
   if (er-br+1 > 10)
     {
-      // quick sort
+/*        // quick sort   ansi-c*/
       if (x[idx+br] == x[idx+er])
     c=x[idx+br];
       else
@@ -578,7 +578,7 @@ static void b_qsort_matrix_rows_descending_real(PRECISION *x, int m, int n, int 
     }
   else
     {
-      // insertion sort
+/*        // insertion sort   ansi-c*/
       int r;
       for (j=br+1; j <= er; j++)
     {
@@ -611,7 +611,7 @@ static void b_median_qsort_array_ascending(PRECISION *x, int m)
   int j, k;
   if (m > 10)
     {
-      // Quick sort
+/*        // Quick sort   ansi-c*/
       j=(m--)/2;
 
       y=x[j]; x[j]=x[1]; x[1]=y;
@@ -650,7 +650,7 @@ static void b_median_qsort_array_ascending(PRECISION *x, int m)
     }
   else
     {
-      // Insertion sort
+/*        // Insertion sort   ansi-c*/
       for (j=1; j < m; j++)
     {
       for (k=j-1; k >= 0; k--)

@@ -1,10 +1,10 @@
 #ifndef __FN_FILESETUP_H__
 #define __FN_FILESETUP_H__
    #include <string.h>
-   //#include <malloc.h>                  // For malloc, calloc, etc.
+/*     //#include <malloc.h>                  // For malloc, calloc, etc.   ansi-c*/
 
    #include "tzmatlab.h"
-   #include "mathlib.h" //Used for tz_TransposeRegular().
+   #include "mathlib.h"  /*  Used for tz_TransposeRegular().   ansi-c*/
 
    int fn_ParseCommandLine(int n_arg, char **args, char ch);
    char *fn_ParseCommandLine_String(int n_arg, char **args, char ch, char *default_return);

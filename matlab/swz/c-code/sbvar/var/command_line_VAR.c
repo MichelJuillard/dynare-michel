@@ -250,30 +250,30 @@ TVARCommandLine* Base_VARCommandLine(int nargs, char **args, TVARCommandLine *cm
 {
   if (!cmd && !(cmd=Create_VARCommandLine())) return (TVARCommandLine*)NULL;
 
-  // input directory
+/*    // input directory   ansi-c*/
   cmd->in_directory=CreatePath(dw_ParseString_String(nargs,args,"di",""));
 
-  // output directory
+/*    // output directory   ansi-c*/
   cmd->out_directory=CreatePath(dw_ParseString_String(nargs,args,"do",""));
 
-  // Specification file
+/*    // Specification file   ansi-c*/
   cmd->specification_filename=dw_DuplicateString(dw_ParseString_String(nargs,args,"fs",(char*)NULL));
 
-  // Parameters file
+/*    // Parameters file   ansi-c*/
   cmd->parameters_filename=dw_DuplicateString(dw_ParseString_String(nargs,args,"fp",(char*)NULL));
 
-  // Parameter header
+/*    // Parameter header   ansi-c*/
   cmd->parameters_header=dw_DuplicateString((dw_FindArgument_String(nargs,args,"MLE") == -1)
      ? dw_ParseString_String(nargs,args,"ph","Posterior mode: ")
      : dw_ParseString_String(nargs,args,"ph","MLE: "));
 
-  // Output parameters header
+/*    // Output parameters header   ansi-c*/
   cmd->out_header=dw_DuplicateString(dw_ParseString_String(nargs,args,"ph",cmd->parameters_header));
 
-  // Input file tag
+/*    // Input file tag   ansi-c*/
   cmd->in_tag=dw_DuplicateString(dw_ParseString_String(nargs,args,"ft",(char*)NULL));
 
-  // Output file tag
+/*    // Output file tag   ansi-c*/
   cmd->out_tag=dw_DuplicateString(dw_ParseString_String(nargs,args,"fto",cmd->in_tag));
 
   return cmd;

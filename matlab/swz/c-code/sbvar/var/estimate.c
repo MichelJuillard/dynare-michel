@@ -11,8 +11,8 @@
 #include "command_line_VAR.h"
 
 #include "optpackage.h"
-//#include "csminwel.h"
-//#include "dw_csminwel.h"
+/*  //#include "csminwel.h"   ansi-c*/
+/*  //#include "dw_csminwel.h"   ansi-c*/
 
 #include <time.h>
 #include <string.h>
@@ -53,7 +53,7 @@ void FindMode_VAR_csminwel(TStateModel *model, TEstimateInfo *estimate)
   FILE *f_out;
   char *header, *fmt="Iteration %d: ";
 
-  // csminwel arguments
+/*    // csminwel arguments   ansi-c*/
   int itct, fcount, retcodeh, nit;
   double *x, fh, crit;
   TMatrix H;
@@ -61,21 +61,21 @@ void FindMode_VAR_csminwel(TStateModel *model, TEstimateInfo *estimate)
 
   f_out=dw_CreateTextFile(estimate->intermediate_output_filename);
 
-  //==== Allocate memory  ===
+/*    //==== Allocate memory  ===   ansi-c*/
   size_VAR=NumberFreeParametersTheta(model);
   size_Q=NumberFreeParametersQ(model);
   pos_VAR=0;
   pos_Q=size_VAR;
   x=(double*)malloc((size_VAR + size_Q)*sizeof(double));
 
-  //=== Set starting value ===
+/*    //=== Set starting value ===   ansi-c*/
   ConvertQToFreeParameters(model,x+pos_Q);
   ConvertThetaToFreeParameters(model,x+pos_VAR);
 
-  //=== Set csminwel output file ===
+/*    //=== Set csminwel output file ===   ansi-c*/
   csminwel_SetPrintFile(estimate->csminwel_output_filename);
 
-  //=== Print Initial Values ===
+/*    //=== Print Initial Values ===   ansi-c*/
   fprintf(f_out,"\n//=== Initial Values ===//\n");
   fprintf(f_out,"Likelihood value:  %22.14le\n",objective=likelihood=LogLikelihood_StatesIntegratedOut(model));
   fprintf(f_out,"Prior value:  %22.14le\n",prior=LogPrior(model));
@@ -86,12 +86,12 @@ void FindMode_VAR_csminwel(TStateModel *model, TEstimateInfo *estimate)
   Write_VAR_Parameters(f_out,(char*)NULL,header,model);
   fflush(f_out);
 
-  //=== Create blocking structure ===
+/*    //=== Create blocking structure ===   ansi-c*/
   block=dw_CreateRectangularArray_int(2,2);
   block[0][0]=size_VAR;         block[0][1]=pos_VAR;
   block[1][0]=size_Q;           block[1][1]=pos_Q;
 
-  //=== Objective ===
+/*    //=== Objective ===   ansi-c*/
   if (estimate->type == FIND_POSTERIOR_MODE)
     objective=likelihood+prior;
   else
@@ -203,11 +203,11 @@ void FindMode_VAR_csminwel(TStateModel *model, TEstimateInfo *estimate)
     objective=likelihood;
     }
 
-  //=== Free memory ===
+/*    //=== Free memory ===   ansi-c*/
   free(x);
   dw_FreeArray(block);
 
-  //=== Close File ===
+/*    //=== Close File ===   ansi-c*/
   fclose(f_out);
 }
 
@@ -560,10 +560,10 @@ static TStateModel* SetupFromCommandLine(int nargs, char **args, TEstimateInfo *
 
   info->cmd=Base_VARCommandLine(nargs,args,(TVARCommandLine*)NULL);
 
-  // Posterior mode or MLE
+/*    // Posterior mode or MLE   ansi-c*/
   info->type=(dw_FindArgument_String(nargs,args,"MLE") >= 0) ? FIND_LIKELIHOOD_MODE : FIND_POSTERIOR_MODE;
 
-  // Default values
+/*    // Default values   ansi-c*/
   info->criterion_start=dw_ParseFloating_String(nargs,args,"cb",1.0e-3);
   info->criterion_end=dw_ParseFloating_String(nargs,args,"ce",1.0e-6);
   info->criterion_increment=dw_ParseFloating_String(nargs,args,"ci",0.1);
@@ -572,7 +572,7 @@ static TStateModel* SetupFromCommandLine(int nargs, char **args, TEstimateInfo *
 
   info->max_block_iterations=100;
 
-   // Output filenames
+/*     // Output filenames   ansi-c*/
   info->csminwel_output_filename=CreateFilenameFromTag("%sest_csminwel_%s.dat",info->cmd->out_tag,info->cmd->out_directory);
   info->intermediate_output_filename=CreateFilenameFromTag("%sest_intermediate_%s.dat",info->cmd->out_tag,info->cmd->out_directory);
 
@@ -611,7 +611,7 @@ int main(int nargs, char **args)
     (char*)NULL,
     (char*)NULL};
 
-  //=== Help Screen ===
+/*    //=== Help Screen ===   ansi-c*/
   if (dw_FindArgument_String(nargs,args,"h") != -1)
     {
       printf("print_draws <options>\n");
@@ -619,20 +619,20 @@ int main(int nargs, char **args)
       return 0;
     }
 
-  // Generator seed
+/*    // Generator seed   ansi-c*/
   seed=dw_ParseInteger_String(nargs,args,"gs",0);
   dw_initialize_generator(seed);
 
   printf("Reading initial data...\n");
   if (model=SetupFromCommandLine(nargs,args,&estimate))
     {
-      // Estimation
+/*        // Estimation   ansi-c*/
       printf("Beginning estimation...\n");
       begin_time=time((time_t*)NULL);
       FindMode_VAR_csminwel(model,estimate);
       end_time=time((time_t*)NULL);
 
-      // Write final output
+/*        // Write final output   ansi-c*/
       filename=CreateFilenameFromTag("%sest_final_%s.dat",estimate->cmd->out_tag,estimate->cmd->out_directory);
       if (f_out=fopen(filename,"wt"))
         {
@@ -658,7 +658,7 @@ int main(int nargs, char **args)
         }
       free(filename);
 
-      // Write flat file
+/*        // Write flat file   ansi-c*/
       filename=CreateFilenameFromTag("%sest_flat_header_%s.dat",estimate->cmd->out_tag,estimate->cmd->out_directory);
       if (f_out=fopen(filename,"wt"))
         {
@@ -681,7 +681,7 @@ int main(int nargs, char **args)
         }
        free(filename);
 
-      // Write aux output
+/*        // Write aux output   ansi-c*/
       filename=CreateFilenameFromTag("%sest_aux_%s.dat",estimate->cmd->out_tag,estimate->cmd->out_directory);
       if (f_out=fopen(filename,"wt"))
         {
@@ -702,13 +702,13 @@ int main(int nargs, char **args)
         }
       free(filename);
 
-      // Free memory
+/*        // Free memory   ansi-c*/
       FreeStateModel(model);
       Free_VARCommandLine(estimate->cmd);
     }
   else
     {
-      // unable to create model
+/*        // unable to create model   ansi-c*/
       if (estimate)
         {
           if (estimate->cmd) Free_VARCommandLine(estimate->cmd);

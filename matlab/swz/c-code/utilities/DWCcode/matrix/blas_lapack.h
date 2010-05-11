@@ -31,20 +31,20 @@ extern "C"
 #define stgsen    stgsen_
 #define stgexc    stgexc_
 
-#define dscal     dscal_     // Blas scalar times vector
-#define daxpy     daxpy_     // Blas vector plus scalar times vector
-#define dgemm     dgemm_     // Blas matrix multiplication
+#define dscal     dscal_      /*   Blas scalar times vector   ansi-c*/
+#define daxpy     daxpy_      /*   Blas vector plus scalar times vector   ansi-c*/
+#define dgemm     dgemm_      /*   Blas matrix multiplication   ansi-c*/
 #define dgetrf    dgetrf_
-#define dgesdd    dgesdd_    // SVD decomposition (divide and conquer)
-#define dgesvd    dgesvd_    // SVD decomposition (QR)
-#define dgetrf    dgetrf_    // LU decomposition
-#define dgeqrf    dgeqrf_    // QR decomposition
-#define dorgqr    dorgqr_    // Forms orthogonal matrix from Housholder matrices created by dgeqrf
-#define dgelqf    dgelqf_    // LQ decompostion
-#define dorglq    dorglq_    // Forms orthogonal matrix from Housholder matrices created by dgeqrf
-#define dgges     dgges_     // Generalized Schur decomposition
-#define dtgsen    dtgsen_    // Reorders generalized Schur decomposition
-#define dtgexc    dtgexc_    // Reorders generalized Schur decomposition
+#define dgesdd    dgesdd_     /*   SVD decomposition (divide and conquer)   ansi-c*/
+#define dgesvd    dgesvd_     /*   SVD decomposition (QR)   ansi-c*/
+#define dgetrf    dgetrf_     /*   LU decomposition   ansi-c*/
+#define dgeqrf    dgeqrf_     /*   QR decomposition   ansi-c*/
+#define dorgqr    dorgqr_     /*   Forms orthogonal matrix from Housholder matrices created by dgeqrf   ansi-c*/
+#define dgelqf    dgelqf_     /*   LQ decompostion   ansi-c*/
+#define dorglq    dorglq_     /*   Forms orthogonal matrix from Housholder matrices created by dgeqrf   ansi-c*/
+#define dgges     dgges_      /*   Generalized Schur decomposition   ansi-c*/
+#define dtgsen    dtgsen_     /*   Reorders generalized Schur decomposition   ansi-c*/
+#define dtgexc    dtgexc_     /*   Reorders generalized Schur decomposition   ansi-c*/
 
 #define dsyev     dsyev_
 #define dgeev     dgeev_

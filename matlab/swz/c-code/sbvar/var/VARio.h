@@ -17,10 +17,10 @@ int Write_VAR_ParametersFlat_A0_Diagonal_One(FILE *f, TStateModel *model, char *
 void ReadAllParameters(FILE *f, char *filename, char *id, TStateModel *model);
 void WriteAllParameters(FILE *f, char *filename, char *id, TStateModel *model);
 
-//T_VAR_Parameters* Create_VAR_Parameters_File(FILE *f, char *filename, TMarkovStateVariable *sv);
-//TStateModel* CreateStateModel_VAR_File(FILE *f, char *filename);
+/*  //T_VAR_Parameters* Create_VAR_Parameters_File(FILE *f, char *filename, TMarkovStateVariable *sv);   ansi-c*/
+/*  //TStateModel* CreateStateModel_VAR_File(FILE *f, char *filename);   ansi-c*/
 
-//void PrintParametersVAR(FILE *f_out, TStateModel *model);
-//void Write_VAR_Info(FILE *f, char *filename, T_VAR_Parameters *p);
+/*  //void PrintParametersVAR(FILE *f_out, TStateModel *model);   ansi-c*/
+/*  //void Write_VAR_Info(FILE *f, char *filename, T_VAR_Parameters *p);   ansi-c*/
 
 #endif

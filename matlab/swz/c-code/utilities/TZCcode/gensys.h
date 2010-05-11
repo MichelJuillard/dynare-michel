@@ -32,33 +32,33 @@
    #define __GENSYS_H__
 
    #include "tzmatlab.h"
-   //#include "fn_filesetup.h"      //For DDDDebugging purpose.
+/*     //#include "fn_filesetup.h"      //For DDDDebugging purpose.   ansi-c*/
 
    #define REALSMALL 1e-7
-   //#define PRINTWARNINGofSUNSPOT
+/*     //#define PRINTWARNINGofSUNSPOT   ansi-c*/
 
    typedef struct TSgensys_tag {
-           //=== Output arguments.
-           TSdmatrix *Theta_dm;  //n-by-n.
-           TSdvector *c_dv;   //n-by-1.
-           TSdmatrix *Impact_dm;  //n-by-m.
-           TSdzmatrix *Fmat_dzm;   //nunstab-by-nunstab z matrix.  Initialized to NULL and will be dynamically allocated whenever gensys() is called.
-           TSdzmatrix *Fwt_dzm;    //nunstab-by-m z matrix of possible complex numbers.  Initialized to NULL and dynamically allocated.
-           TSdzmatrix *Ywt_dzm;    //n-by-nunstab z matrix of possible complex numbers.  Initialized to NULL and dynamically allocated.
-           TSdzmatrix *Gev_dzm;  //n-by-2 z matrix of possible complex numbers.
-           TSivector *eu_iv;   //2-by-1.
-           //=== Function itself.
+/*             //=== Output arguments.   ansi-c*/
+           TSdmatrix *Theta_dm;   /*  n-by-n.   ansi-c*/
+           TSdvector *c_dv;    /*  n-by-1.   ansi-c*/
+           TSdmatrix *Impact_dm;   /*  n-by-m.   ansi-c*/
+           TSdzmatrix *Fmat_dzm;    /*  nunstab-by-nunstab z matrix.  Initialized to NULL and will be dynamically allocated whenever gensys() is called.   ansi-c*/
+           TSdzmatrix *Fwt_dzm;     /*  nunstab-by-m z matrix of possible complex numbers.  Initialized to NULL and dynamically allocated.   ansi-c*/
+           TSdzmatrix *Ywt_dzm;     /*  n-by-nunstab z matrix of possible complex numbers.  Initialized to NULL and dynamically allocated.   ansi-c*/
+           TSdzmatrix *Gev_dzm;   /*  n-by-2 z matrix of possible complex numbers.   ansi-c*/
+           TSivector *eu_iv;    /*  2-by-1.   ansi-c*/
+/*             //=== Function itself.   ansi-c*/
            int (*gensys)(struct TSgensys_tag *, void *);
-           //=== Input arguments, which are all intialized to 0.0 and whose flags are set to M_GE.
-           TSdmatrix *G0_dm;  //n-by-n.
-           TSdmatrix *G1_dm;  //n-by-n.
-           TSdvector *c0_dv;  //n-by-1.
-           TSdmatrix *Psi_dm; //n-by-m.
-           TSdmatrix *Pi_dm;  //n-by-k whtere k is the number of expectational errors.
-           double div;  //Real number dividing stable and unstable roots..  If < 1.0, a div>1.0 is calculated mechanically.
+/*             //=== Input arguments, which are all intialized to 0.0 and whose flags are set to M_GE.   ansi-c*/
+           TSdmatrix *G0_dm;   /*  n-by-n.   ansi-c*/
+           TSdmatrix *G1_dm;   /*  n-by-n.   ansi-c*/
+           TSdvector *c0_dv;   /*  n-by-1.   ansi-c*/
+           TSdmatrix *Psi_dm;  /*  n-by-m.   ansi-c*/
+           TSdmatrix *Pi_dm;   /*  n-by-k whtere k is the number of expectational errors.   ansi-c*/
+           double div;   /*  Real number dividing stable and unstable roots..  If < 1.0, a div>1.0 is calculated mechanically.   ansi-c*/
    } TSgensys;
-   //
-   typedef int TFlinratexp(struct TSgensys_tag *, void *);  //For linear rational expectations models.
+/*     //   ansi-c*/
+   typedef int TFlinratexp(struct TSgensys_tag *, void *);   /*  For linear rational expectations models.   ansi-c*/
 
    struct TSgensys_tag *CreateTSgensys(TFlinratexp *func, const int _n, const int _m, const int _k, const double div);
    struct TSgensys_tag *DestroyTSgensys(struct TSgensys_tag *gensys_ps);

@@ -55,8 +55,8 @@ int bPermutation(PRECISION *x, int *p, int m, int q, int t);
 int bMatrixTensor(PRECISION *x, PRECISION *y, PRECISION *z, int m, int n, int r, int s, int xt, int yt, int zt);
 int bVectorTensor(PRECISION *x, PRECISION *y, PRECISION *z, int m, int n);
 
-//int bQRPivot_R(PRECISION *R, int *p, int m, int n);
-//int bQRPivot_QR(PRECISION *Q, PRECISION *R, int *p, int m, int n);
+/*  //int bQRPivot_R(PRECISION *R, int *p, int m, int n);   ansi-c*/
+/*  //int bQRPivot_QR(PRECISION *Q, PRECISION *R, int *p, int m, int n);   ansi-c*/
 
 #ifdef __cplusplus
 }

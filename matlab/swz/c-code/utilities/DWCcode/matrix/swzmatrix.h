@@ -197,14 +197,14 @@ extern "C"
 /******************************************************************************/
 /********************************* Data Types *********************************/
 /******************************************************************************/
-//#define STANDARD_COLUMN_MAJOR
-//#define STANDARD_ROW_MAJOR
-//#define STRUCTURED_COLUMN_MAJOR
-//#define STRUCTURED_ROW_MAJOR
-//#define STRUCTURED_MAJOR_FORM
-//#define LEGACY_ROW_MAJOR
+/*  //#define STANDARD_COLUMN_MAJOR   ansi-c*/
+/*  //#define STANDARD_ROW_MAJOR   ansi-c*/
+/*  //#define STRUCTURED_COLUMN_MAJOR   ansi-c*/
+/*  //#define STRUCTURED_ROW_MAJOR   ansi-c*/
+/*  //#define STRUCTURED_MAJOR_FORM   ansi-c*/
+/*  //#define LEGACY_ROW_MAJOR   ansi-c*/
 #define TZ_COLUMN_MAJOR
-//#define CHECK_MACRO_CALLS
+/*  //#define CHECK_MACRO_CALLS   ansi-c*/
 
 #define COLUMN_MAJOR   1
 #define ROW_MAJOR      0
@@ -231,7 +231,7 @@ int* pElementP(TPermutation y);
 #endif
 /*----------------------------------------------------------------------------*/
 #if (defined(STANDARD_COLUMN_MAJOR) || defined(STANDARD_ROW_MAJOR))
-// Data types
+/*  // Data types   ansi-c*/
 typedef struct
 {
   int dim;
@@ -255,7 +255,7 @@ typedef struct
 } TPermutationStructure;
 typedef TPermutationStructure* TPermutation;
 
-// Element access macros
+/*  // Element access macros   ansi-c*/
 #define DimV(y)          ((y)->dim)
 #define pElementV(y)     ((y)->x)
 #define ElementV(y,i)    ((y)->x[(i)])
@@ -274,7 +274,7 @@ typedef TPermutationStructure* TPermutation;
 #define pElementP(y)     ((y)->x)
 #define ElementP(y,i)    ((y)->x[(i)])
 
-// Major form macros
+/*  // Major form macros   ansi-c*/
 #define SetMajorForm(x,i)
 #if defined STANDARD_COLUMN_MAJOR
 #define MajorForm(x)       COLUMN_MAJOR
@@ -285,7 +285,7 @@ typedef TPermutationStructure* TPermutation;
 #endif
 /*----------------------------------------------------------------------------*/
 #if (defined(STRUCTURED_COLUMN_MAJOR) || defined(STRUCTURED_ROW_MAJOR) || defined(STRUCTURED_MAJOR_FORM))
-// Data types
+/*  // Data types   ansi-c*/
 typedef struct
 {
   int dim;
@@ -312,7 +312,7 @@ typedef struct
 } TPermutationStructure;
 typedef TPermutationStructure* TPermutation;
 
-// Element access macros
+/*  // Element access macros   ansi-c*/
 #define DimV(y)          ((y)->dim)
 #define pElementV(y)     ((y)->x)
 #define ElementV(y,i)    ((y)->x[(i)])
@@ -333,7 +333,7 @@ typedef TPermutationStructure* TPermutation;
 #define pElementP(y)     ((y)->x)
 #define ElementP(y,i)    ((y)->x[(i)])
 
-// Major form macros
+/*  // Major form macros   ansi-c*/
 #if defined STRUCTURED_COLUMN_MAJOR
 #define MajorForm(x)       COLUMN_MAJOR
 #define SetMajorForm(x,i)
@@ -348,12 +348,12 @@ typedef TPermutationStructure* TPermutation;
 #endif
 /*----------------------------------------------------------------------------*/
 #if defined LEGACY_ROW_MAJOR
-// Data types
+/*  // Data types   ansi-c*/
 typedef PRECISION  *TVector;
 typedef PRECISION **TMatrix;
 typedef int*        TPermutation;
 
-// Element access macros
+/*  // Element access macros   ansi-c*/
 #define DimV(y)          (((int*)(y))[-1])
 #define pElementV(y)     (y)
 #define ElementV(y,i)    ((y)[(i)])
@@ -368,14 +368,14 @@ typedef int*        TPermutation;
 #define pElementP(y)     (y)
 #define ElementP(y,i)    ((y)[(i)])
 
-// Legacy element access
+/*  // Legacy element access   ansi-c*/
 #define V_DIM(x) (((int*)(x))[-1])
 #define M_ROW(x) (((int*)(x))[-2])
 #define M_COL(x) (((int*)(x))[-1])
 #define P_USE(x) (((int*)(x))[-1])
 #define P_DIM(x) (((int*)(x))[-2])
 
-// Major form macros
+/*  // Major form macros   ansi-c*/
 #define SetMajorForm(x,i)
 #define MajorForm(x)       0
 
@@ -383,15 +383,15 @@ typedef int*        TPermutation;
 /*----------------------------------------------------------------------------*/
 #if defined TZ_COLUMN_MAJOR
 /* In prcsn.h, PRECISION must be defined to be double */
-//#define PRECISION double
+/*  //#define PRECISION double   ansi-c*/
 
-// Use Tao's implimentation
+/*  // Use Tao's implimentation   ansi-c*/
 #include "tzmatlab.h"
-// Use DW's implimentation - not all functionality supported
-//#include "tz2dw.h"
+/*  // Use DW's implimentation - not all functionality supported   ansi-c*/
+/*  //#include "tz2dw.h"   ansi-c*/
 
 
-// Data types
+/*  // Data types   ansi-c*/
 typedef TSdvector* TVector;
 typedef TSdmatrix* TMatrix;
 
@@ -403,7 +403,7 @@ typedef struct
 } TPermutationStructure;
 typedef  TPermutationStructure* TPermutation;
 
-// Element access macros
+/*  // Element access macros   ansi-c*/
 #define DimV(y)          ((y)->n)
 #define pElementV(y)     ((y)->v)
 #define ElementV(y,i)    ((y)->v[(i)])
@@ -418,7 +418,7 @@ typedef  TPermutationStructure* TPermutation;
 #define pElementP(y)     ((y)->x)
 #define ElementP(y,i)    ((y)->x[(i)])
 
-// Major form macros
+/*  // Major form macros   ansi-c*/
 #define SetMajorForm(x,i)
 #define MajorForm(x)       COLUMN_MAJOR
 
@@ -456,13 +456,13 @@ TVector RowVector(TVector x, TMatrix Y, int row);
 TMatrix ColumnMatrix(TMatrix X, TVector y);
 TMatrix RowMatrix(TMatrix X, TVector y);
 
-//=== Addition Routines ===
+/*  //=== Addition Routines ===   ansi-c*/
 TVector AddVV(TVector x, TVector y, TVector z);
 TMatrix AddMM(TMatrix X, TMatrix Y, TMatrix Z);
 TVector SubtractVV(TVector x, TVector y, TVector z);
 TMatrix SubtractMM(TMatrix X, TMatrix Y, TMatrix Z);
 
-//=== Multiplication Routines ===
+/*  //=== Multiplication Routines ===   ansi-c*/
 TVector ProductSV(TVector x, PRECISION s, TVector y);
 #define ProductVS(x,y,s) ProductSV(x,s,y)
 TMatrix ProductSM(TMatrix X, PRECISION s, TMatrix Y);
@@ -487,7 +487,7 @@ TMatrix TransposeProductMM(TMatrix X, TMatrix Y, TMatrix Z);
 TMatrix ProductTransposeMM(TMatrix X, TMatrix Y, TMatrix Z);
 #define ProductTransposeVM(x,y,Z) ProductMV(x,Z,y)
 
-//=== Linear Combination with Updating ===
+/*  //=== Linear Combination with Updating ===   ansi-c*/
 TVector UpdateVS(TVector x, TVector y, PRECISION a);
 TMatrix UpdateMS(TMatrix X, TMatrix Y, PRECISION a);
 TVector LinearCombinationVV(TVector x, PRECISION a, TVector y, PRECISION b, TVector z);

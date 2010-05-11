@@ -300,23 +300,23 @@ PRECISION ComputeMarginalDensity_Mueller_Check(TMatrix proposal, TMatrix posteri
 
   if ((diff=ComputeDifference(proposal,posterior,mid_c=0.0,in1,in2)) < 0.0)
     {
-printf("%lf %le - %d %d\n",mid_c,diff,*in1,*in2);                                            //**
+      printf("%lf %le - %d %d\n",mid_c,diff,*in1,*in2);                                            /**/
       max_c=mid_c;
       for (min_c=-1.0; min_c > -MAX_C; max_c=min_c, min_c*=10)
     if ((diff=ComputeDifference(proposal,posterior,min_c,in1,in2)) > 0) break;
-else printf("%lf %lf %le - %d %d\n",min_c,max_c,diff,*in1,*in2);                             //**
+    else printf("%lf %lf %le - %d %d\n",min_c,max_c,diff,*in1,*in2);                             /**/
       if (min_c <= -MAX_C) return min_c;
     }
   else
     {
-printf("%lf %le - %d %d\n",mid_c,diff,*in1,*in2);                                            //**
+      printf("%lf %le - %d %d\n",mid_c,diff,*in1,*in2);                                            /**/
       min_c=mid_c;
       for (max_c=1.0; max_c < MAX_C; min_c=max_c, max_c*=10)
     if ((diff=ComputeDifference(proposal,posterior,max_c,in1,in2)) < 0) break;
-else printf("%lf %lf %le - %d %d\n",min_c,max_c,diff,*in1,*in2);                             //**
+    else printf("%lf %lf %le - %d %d\n",min_c,max_c,diff,*in1,*in2);                             /**/
       if (max_c >= MAX_C) return max_c;
     }
-printf("%lf %lf %le - %d %d\n",min_c,max_c,diff,*in1,*in2);                                  //**
+  printf("%lf %lf %le - %d %d\n",min_c,max_c,diff,*in1,*in2);                                  /**/
   diff=ComputeDifference(proposal,posterior,mid_c=(min_c + max_c)/2.0,in1,in2);
   for (i=0; i < 200; i++)
     {
@@ -324,10 +324,10 @@ printf("%lf %lf %le - %d %d\n",min_c,max_c,diff,*in1,*in2);                     
     min_c=mid_c;
       else
     max_c=mid_c;
-printf("%lf %lf %le %d - %d %d\n",min_c,max_c,diff,i,*in1,*in2);                             //**
+      printf("%lf %lf %le %d - %d %d\n",min_c,max_c,diff,i,*in1,*in2);                             /**/
       if ((fabs(diff=ComputeDifference(proposal,posterior,mid_c=(min_c + max_c)/2.0,in1,in2)) < TOL) && (i > 20)) break;
     }
-printf("%lf %le - %d %d\n",mid_c,diff,*in1,*in2);                                            //**
+  printf("%lf %le - %d %d\n",mid_c,diff,*in1,*in2);                                            /**/
   return -mid_c;
 }
 #undef MAX_C
@@ -340,7 +340,7 @@ printf("%lf %le - %d %d\n",mid_c,diff,*in1,*in2);                               
 /****************************** Mueller's Method *******************************/
 /*******************************************************************************/
 #define MAX_C 1E50
-//#define VERBOSE
+/*  //#define VERBOSE   ansi-c*/
 PRECISION ComputeLinear(TMatrix proposal, PRECISION log_c, int *intercept)
 {
   int i;
@@ -375,7 +375,7 @@ PRECISION ComputeMarginalDensity_Mueller(TMatrix proposal, TMatrix posterior,int
   slope2=ComputeInverseLinear(posterior,log_c,in2);
   diff=N1*((PRECISION)(*in1) - slope1) - N2*((PRECISION)(*in2) - slope2);
 
-  // Bracket the intersection
+/*    // Bracket the intersection   ansi-c*/
   if (diff < 0.0)
     {
       do
@@ -423,7 +423,7 @@ printf("%lf %lf %le - %d %d\n",min_log_c,log_c,diff,*in1,*in2);
       max_log_c=log_c;
     }
 
-  // At this point diff(min_log_c) >= 0 and diff(max_log_c) < 0.
+/*    // At this point diff(min_log_c) >= 0 and diff(max_log_c) < 0.   ansi-c*/
   while ((min_in1 != max_in1) || (min_in2 != max_in2))
     {
       log_c=(min_log_c + max_log_c)/2.0;
@@ -483,7 +483,7 @@ void ComputeDiagnostics_Mueller(TMatrix proposal, TMatrix posterior, PRECISION l
   PRECISION slope, sum, max, tmp;
   int i;
 
-  // proposal - piecewise linear
+/*    // proposal - piecewise linear   ansi-c*/
   sum=max=slope=0.0;
   for (i=RowM(proposal)-1; i >= 0; i--)
     if (log_c < (tmp=ElementM(proposal,i,0) - ElementM(proposal,i,1)))
@@ -497,7 +497,7 @@ void ComputeDiagnostics_Mueller(TMatrix proposal, TMatrix posterior, PRECISION l
   *log_slope1=log(slope) - log_c - log(RowM(proposal));
   *ess1=(max > 0.0) ? sum/max : 0.0;
 
-  // posterior - piecewise hyperbolic
+/*    // posterior - piecewise hyperbolic   ansi-c*/
   sum=max=slope=0.0;
   for (i=RowM(posterior)-1; i >= 0; i--)
     if (log_c > (tmp=ElementM(posterior,i,0)-ElementM(posterior,i,1)))
@@ -632,57 +632,57 @@ TVector Create_q(int ndraws, TVector center, TMatrix scale, TStateModel* model, 
   PRECISION density;
   int i, j, k, begin_time, end_time;
 
-  // VAR specific
+/*    // VAR specific   ansi-c*/
   PRECISION *zeta;
   int n_zeta;
 
   InitializeVector(q=CreateVector(DimV(level_cuts)),0.0);
   free_parameters=CreateVector(NumberFreeParametersTheta(model));
 
-  // VAR specific
+/*    // VAR specific   ansi-c*/
   zeta=pElementV(free_parameters) + ZetaIndex((T_VAR_Parameters*)(model->theta));
   n_zeta=ZetaLength((T_VAR_Parameters*)(model->theta));
 
-  // timings
+/*    // timings   ansi-c*/
   begin_time=time((time_t*)NULL);
 
   for (i=ndraws-1; i >= 0; i--)
     {
-      // draw uniform on sphere
+/*        // draw uniform on sphere   ansi-c*/
       DrawSpherical(free_parameters);
 
-      // scale and center to get draw for theta
+/*        // scale and center to get draw for theta   ansi-c*/
       ProductMV(free_parameters,scale,free_parameters);
       AddVV(free_parameters,free_parameters,center);
 
-      // draw Q from Dirichet
+/*        // draw Q from Dirichet   ansi-c*/
       DrawIndependentDirichletVector(model->sv->ba,alpha);
 
-      // VAR specific - perform checks on theta parameters to ensure they are valid
+/*        // VAR specific - perform checks on theta parameters to ensure they are valid   ansi-c*/
       for (j=n_zeta-1; j >= 0; j--)
     if (zeta[j] <= 0)
       {
-        // non-positive values of zeta - log posterior is minus infinity
+/*          // non-positive values of zeta - log posterior is minus infinity   ansi-c*/
         break;
       }
 
       if (j < 0)
     {
-      // force free parameters into model
+/*        // force free parameters into model   ansi-c*/
       ConvertFreeParametersToTheta(model,pElementV(free_parameters));
       Update_Q_from_B_SV(model->sv);
       if (!(model->sv->valid_transition_matrix)) ValidateTransitionMatrices_SV(model->sv);
       TransitionMatricesChanged(model);
 
-      // Normalize
+/*        // Normalize   ansi-c*/
       if (!IsNormalized_VAR(model->theta))
         {
-          // parameters changed - log posterior is minus infinity
+/*            // parameters changed - log posterior is minus infinity   ansi-c*/
           break;
         }
       else
         {
-          // compute log posterior
+/*            // compute log posterior   ansi-c*/
           density=LogPosterior_StatesIntegratedOut(model);
           for (k=DimV(level_cuts)-1; k >= 0; k--)
         if (density >= ElementV(level_cuts,k))
@@ -694,7 +694,7 @@ TVector Create_q(int ndraws, TVector center, TMatrix scale, TStateModel* model, 
   for (k=DimV(level_cuts)-1; k >= 0; k--)
     ElementV(q,k)/=(PRECISION)ndraws;
 
-  // timings
+/*    // timings   ansi-c*/
   end_time=time((time_t*)NULL);
   printf("Elapsed Time: %d seconds\n",end_time - begin_time);
 
@@ -726,7 +726,7 @@ TMatrix CreateProposal(int ndraws, TVector center, TMatrix scale, TStateModel* m
   PRECISION r, Jacobian;
   int i, j, begin_time, end_time;
 
-  // VAR specific
+/*    // VAR specific   ansi-c*/
   PRECISION *zeta;
   int n_zeta;
 
@@ -734,29 +734,29 @@ TMatrix CreateProposal(int ndraws, TVector center, TMatrix scale, TStateModel* m
   free_parameters=CreateVector(NumberFreeParametersTheta(model));
   Jacobian=-LogAbsDeterminant_LU(scale);
 
-  // VAR specific
+/*    // VAR specific   ansi-c*/
   zeta=pElementV(free_parameters) + ZetaIndex((T_VAR_Parameters*)(model->theta));
   n_zeta=ZetaLength((T_VAR_Parameters*)(model->theta));
 
-  // timings
+/*    // timings   ansi-c*/
   begin_time=time((time_t*)NULL);
 
   for (i=ndraws-1; i >= 0; i--)
     {
-      // draw uniform on sphere
+/*        // draw uniform on sphere   ansi-c*/
       r=DrawSpherical(free_parameters);
 
-      // scale and center to get draw for theta
+/*        // scale and center to get draw for theta   ansi-c*/
       ProductMV(free_parameters,scale,free_parameters);
       AddVV(free_parameters,free_parameters,center);
 
-      // draw Q from Dirichet
+/*        // draw Q from Dirichet   ansi-c*/
       DrawIndependentDirichletVector(model->sv->ba,alpha);
 
-      // compute log proposal density
+/*        // compute log proposal density   ansi-c*/
       ElementM(proposal,i,0)=LogSphericalDensity(r) + Jacobian + LogIndependentDirichlet_pdf(model->sv->ba,alpha);
 
-      // VAR specific - perform checks on theta parameters to ensure they are valid
+/*        // VAR specific - perform checks on theta parameters to ensure they are valid   ansi-c*/
       for (j=n_zeta-1; j >= 0; j--)
     if (zeta[j] <= 0)
       {
@@ -766,18 +766,18 @@ TMatrix CreateProposal(int ndraws, TVector center, TMatrix scale, TStateModel* m
 
       if (j < 0)
     {
-      // force free parameters into model
+/*        // force free parameters into model   ansi-c*/
       ConvertFreeParametersToTheta(model,pElementV(free_parameters));
       Update_Q_from_B_SV(model->sv);
       if (!(model->sv->valid_transition_matrix)) ValidateTransitionMatrices_SV(model->sv);
       TransitionMatricesChanged(model);
 
-      // compute log posterior
+/*        // compute log posterior   ansi-c*/
       ElementM(proposal,i,1)=LogPosterior_StatesIntegratedOut(model);
     }
     }
 
-  // timings
+/*    // timings   ansi-c*/
   end_time=time((time_t*)NULL);
   printf("Elapsed Time: %d seconds\n",end_time - begin_time);
 
@@ -809,7 +809,7 @@ TMatrix CreateProposal_Radius(int ndraws, TVector center, TMatrix scale, TStateM
   PRECISION r, Jacobian;
   int i, j, begin_time, end_time;
 
-  // VAR specific
+/*    // VAR specific   ansi-c*/
   PRECISION *zeta;
   int n_zeta;
 
@@ -817,29 +817,29 @@ TMatrix CreateProposal_Radius(int ndraws, TVector center, TMatrix scale, TStateM
   free_parameters=CreateVector(NumberFreeParametersTheta(model));
   Jacobian=-LogAbsDeterminant_LU(scale);
 
-  // VAR specific
+/*    // VAR specific   ansi-c*/
   zeta=pElementV(free_parameters) + ZetaIndex((T_VAR_Parameters*)(model->theta));
   n_zeta=ZetaLength((T_VAR_Parameters*)(model->theta));
 
-  // timings
+/*    // timings   ansi-c*/
   begin_time=time((time_t*)NULL);
 
   for (i=ndraws-1; i >= 0; i--)
     {
-      // draw uniform on sphere
+/*        // draw uniform on sphere   ansi-c*/
       r=DrawSpherical(free_parameters);
 
-      // scale and center to get draw for theta
+/*        // scale and center to get draw for theta   ansi-c*/
       ProductMV(free_parameters,scale,free_parameters);
       AddVV(free_parameters,free_parameters,center);
 
-      // draw Q from Dirichet
+/*        // draw Q from Dirichet   ansi-c*/
       DrawIndependentDirichletVector(model->sv->ba,alpha);
 
-      // save radius
+/*        // save radius   ansi-c*/
       ElementM(proposal,i,0)=r;
 
-      // VAR specific - perform checks on theta parameters to ensure they are valid
+/*        // VAR specific - perform checks on theta parameters to ensure they are valid   ansi-c*/
       for (j=n_zeta-1; j >= 0; j--)
     if (zeta[j] <= 0)
       {
@@ -847,17 +847,17 @@ TMatrix CreateProposal_Radius(int ndraws, TVector center, TMatrix scale, TStateM
         continue;
       }
 
-      // force free parameters into model
+/*        // force free parameters into model   ansi-c*/
       ConvertFreeParametersToTheta(model,pElementV(free_parameters));
       Update_Q_from_B_SV(model->sv);
       if (!(model->sv->valid_transition_matrix)) ValidateTransitionMatrices_SV(model->sv);
       TransitionMatricesChanged(model);
 
-      // compute log posterior
+/*        // compute log posterior   ansi-c*/
       ElementM(proposal,i,1)=LogPosterior_StatesIntegratedOut(model);
     }
 
-  // timings
+/*    // timings   ansi-c*/
   end_time=time((time_t*)NULL);
   printf("Elapsed Time: %d seconds\n",end_time - begin_time);
 
@@ -908,38 +908,38 @@ void ComputeMarginal(int ndraws_proposal, TMatrix X, TStateModel *model, T_MHM *
   char filename[256];
   FILE *f_out;
 
-  // compute base scale and scale for proposal
+/*    // compute base scale and scale for proposal   ansi-c*/
   base_scale=CholeskyUT((TMatrix)NULL,mhm->variance);
   Transpose(base_scale,base_scale);
   scale=ProductSM((TMatrix)NULL,rescale_factor,base_scale);
 
-  // allocate alpha
+/*    // allocate alpha   ansi-c*/
   alpha=dw_CreateArray_vector(dw_DimA(mhm->BaseAlpha));
   for (i=dw_DimA(alpha)-1; i >= 0; i--)
     alpha[i]=CreateVector(DimV(mhm->BaseAlpha[i]));
 
-  // Dirichlet index
+/*    // Dirichlet index   ansi-c*/
   idx_alpha=1;
   for (i=dw_DimA(alpha)-1; i >= 0; i--)
     ProductVS(alpha[i],mhm->BaseAlpha[i],ElementV(mhm->alpha_scales,idx_alpha));
 
-  // Create posterior matrix
+/*    // Create posterior matrix   ansi-c*/
   printf("Creating posterior (%d draws)\n",RowM(X));
   posterior=CreatePosterior(X,rescale_factor,base_scale,idx_alpha,NumberFreeParametersTheta(model));
 
-  // Create proposal matrix
+/*    // Create proposal matrix   ansi-c*/
   printf("Creating proposal (%d draws)\n",ndraws_proposal);
   proposal=CreateProposal(ndraws_proposal,mhm->center,scale,model,alpha);
 
-  // Create output file
+/*    // Create output file   ansi-c*/
   sprintf(filename,"%s_md_%s.dat",proposal_tag,tag);
   f_out=dw_AppendTextFile(filename);
 
-  // Compute marginal density using standard technique
+/*    // Compute marginal density using standard technique   ansi-c*/
   marginal_density=ComputeMarginalDensity_Standard(posterior);
   fprintf(f_out,"Standard MHM method: %0.14lg\n",marginal_density);
 
-  // Compute marginal density using WZ1
+/*    // Compute marginal density using WZ1   ansi-c*/
   level_cuts=Sorted_Level_Cuts(posterior,10);
   fprintf(f_out,"WZ method - no center cut\nmarginal density,level,number proposal draws,number posterior draws,effective sample size\n");
   for (i=0; i < DimV(level_cuts); i++)
@@ -951,7 +951,7 @@ void ComputeMarginal(int ndraws_proposal, TMatrix X, TStateModel *model, T_MHM *
     }
   FreeVector(level_cuts);
 
-  // Compute marginal density Mueller
+/*    // Compute marginal density Mueller   ansi-c*/
   fprintf(f_out,"\nMueller method\nmarginal density,difference,# proposal draws,proposal log slope,proposal ess,# posterior draws,posterior log slope,posterior ess\n");
   marginal_density=ComputeMarginalDensity_Mueller(proposal,posterior,&in1,&in2);
   ComputeDiagnostics_Mueller(proposal,posterior,-marginal_density,&slope1,&ess1,&slope2,&ess2);
@@ -967,7 +967,7 @@ void ComputeMarginal(int ndraws_proposal, TMatrix X, TStateModel *model, T_MHM *
 
   sprintf(filename,"%s_md_posterior_%s.dat",proposal_tag,tag);
   f_out=dw_CreateTextFile(filename);
-  //dw_PrintMatrix(f_out,posterior,"%le,");
+/*    //dw_PrintMatrix(f_out,posterior,"%le,");   ansi-c*/
   fclose(f_out);
 
   FreeMatrix(posterior);
@@ -1021,7 +1021,7 @@ void ComputeMarginal_Table(int ndraws_proposal, TMatrix X, TStateModel *model, T
 
   SetupSphericalFromPosterior_Table(X,NumberFreeParametersTheta(model));
 
-  // Create output file amd write headers
+/*    // Create output file amd write headers   ansi-c*/
   sprintf(filename,"%s_md_%s.dat",proposal_tag,tag);
   f_out=dw_CreateTextFile(filename);
 
@@ -1137,30 +1137,30 @@ void ComputeMarginal_TruncatedPowerProposal(int ndraws_proposal, TMatrix X, TSta
 /*   fclose(f_out); */
 /*   return; */
 
-  // compute base scale and scale
+/*    // compute base scale and scale   ansi-c*/
   base_scale=CholeskyUT((TMatrix)NULL,mhm->variance);
   Transpose(base_scale,base_scale);
 
-  // allocate alpha
+/*    // allocate alpha   ansi-c*/
   alpha=dw_CreateArray_vector(dw_DimA(mhm->BaseAlpha));
   for (i=dw_DimA(alpha)-1; i >= 0; i--)
     alpha[i]=CreateVector(DimV(mhm->BaseAlpha[i]));
 
-  // Dirichlet index
+/*    // Dirichlet index   ansi-c*/
   idx_alpha=1;
   for (i=dw_DimA(alpha)-1; i >= 0; i--)
     ProductVS(alpha[i],mhm->BaseAlpha[i],ElementV(mhm->alpha_scales,idx_alpha));
 
-  // Create posterior matrix
+/*    // Create posterior matrix   ansi-c*/
   printf("Creating posterior (%d draws)\n",RowM(X));
   posterior=CreatePosterior(X,rescale_factor,base_scale,idx_alpha,NumberFreeParametersTheta(model));
 
-  // Create proposal matrix
+/*    // Create proposal matrix   ansi-c*/
   printf("Creating proposal (%d draws)\n",ndraws_proposal);
   scale=ProductSM((TMatrix)NULL,rescale_factor,base_scale);
   proposal=CreateProposal(ndraws_proposal,mhm->center,scale,model,alpha);
 
-  // Create output file
+/*    // Create output file   ansi-c*/
   sprintf(filename,"truncatedpower_md_%s.dat",tag);
   f_out=dw_CreateTextFile(filename);
 
@@ -1175,11 +1175,11 @@ void ComputeMarginal_TruncatedPowerProposal(int ndraws_proposal, TMatrix X, TSta
   fprintf(f_out,"total posterior draws: %d\n",RowM(X) * mhm->n_thin);
   fprintf(f_out,"number draws proposal: %d\n",ndraws_proposal);
 
-  // Compute marginal density using standard technique
+/*    // Compute marginal density using standard technique   ansi-c*/
   marginal_density=ComputeMarginalDensity_Standard(posterior);
   fprintf(f_out,"Standard MHM method: %0.14lg\n",marginal_density);
 
-  // Compute marginal density using WZ1
+/*    // Compute marginal density using WZ1   ansi-c*/
   level_cuts=Sorted_Level_Cuts(posterior,10);
   fprintf(f_out,"WZ method - no center cut\nmarginal density,level,number proposal draws,number posterior draws,effective sample size\n");
   for (i=0; i < DimV(level_cuts); i++)
@@ -1191,7 +1191,7 @@ void ComputeMarginal_TruncatedPowerProposal(int ndraws_proposal, TMatrix X, TSta
     }
   FreeVector(level_cuts);
 
-  // Compute marginal density Mueller
+/*    // Compute marginal density Mueller   ansi-c*/
   fprintf(f_out,"\nMueller method\nmarginal density,difference,# proposal draws,proposal log slope,proposal ess,# posterior draws,posterior log slope,posterior ess\n");
   marginal_density=ComputeMarginalDensity_Mueller(proposal,posterior,&in1,&in2);
   ComputeDiagnostics_Mueller(proposal,posterior,-marginal_density,&slope1,&ess1,&slope2,&ess2);
@@ -1280,30 +1280,30 @@ void ComputeMarginal_PowerProposal(int ndraws_proposal, TMatrix X, TStateModel *
 /*   fclose(f_out); */
 /*   return; */
 
-  // compute base scale and scale
+/*    // compute base scale and scale   ansi-c*/
   base_scale=CholeskyUT((TMatrix)NULL,mhm->variance);
   Transpose(base_scale,base_scale);
 
-  // allocate alpha
+/*    // allocate alpha   ansi-c*/
   alpha=dw_CreateArray_vector(dw_DimA(mhm->BaseAlpha));
   for (i=dw_DimA(alpha)-1; i >= 0; i--)
     alpha[i]=CreateVector(DimV(mhm->BaseAlpha[i]));
 
-  // Dirichlet index
+/*    // Dirichlet index   ansi-c*/
   idx_alpha=1;
   for (i=dw_DimA(alpha)-1; i >= 0; i--)
     ProductVS(alpha[i],mhm->BaseAlpha[i],ElementV(mhm->alpha_scales,idx_alpha));
 
-  // Create posterior matrix
+/*    // Create posterior matrix   ansi-c*/
   printf("Creating posterior (%d draws)\n",RowM(X));
   posterior=CreatePosterior(X,rescale_factor,base_scale,idx_alpha,NumberFreeParametersTheta(model));
 
-  // Create proposal matrix
+/*    // Create proposal matrix   ansi-c*/
   printf("Creating proposal (%d draws)\n",ndraws_proposal);
   scale=ProductSM((TMatrix)NULL,rescale_factor,base_scale);
   proposal=CreateProposal(ndraws_proposal,mhm->center,scale,model,alpha);
 
-  // Create output file
+/*    // Create output file   ansi-c*/
   sprintf(filename,"power_md_%s.dat",tag);
   f_out=dw_CreateTextFile(filename);
 
@@ -1317,11 +1317,11 @@ void ComputeMarginal_PowerProposal(int ndraws_proposal, TMatrix X, TStateModel *
   fprintf(f_out,"total posterior draws: %d\n",RowM(X) * mhm->n_thin);
   fprintf(f_out,"number draws proposal: %d\n",ndraws_proposal);
 
-  // Compute marginal density using standard technique
+/*    // Compute marginal density using standard technique   ansi-c*/
   marginal_density=ComputeMarginalDensity_Standard(posterior);
   fprintf(f_out,"Standard MHM method: %0.14lg\n",marginal_density);
 
-  // Compute marginal density using WZ1
+/*    // Compute marginal density using WZ1   ansi-c*/
   level_cuts=Sorted_Level_Cuts(posterior,10);
   fprintf(f_out,"WZ method - no center cut\nmarginal density,level,number proposal draws,number posterior draws,effective sample size\n");
   for (i=0; i < DimV(level_cuts); i++)
@@ -1333,7 +1333,7 @@ void ComputeMarginal_PowerProposal(int ndraws_proposal, TMatrix X, TStateModel *
     }
   FreeVector(level_cuts);
 
-  // Compute marginal density Mueller
+/*    // Compute marginal density Mueller   ansi-c*/
   fprintf(f_out,"\nMueller method\nmarginal density,difference,# proposal draws,proposal log slope,proposal ess,# posterior draws,posterior log slope,posterior ess\n");
   marginal_density=ComputeMarginalDensity_Mueller(proposal,posterior,&in1,&in2);
   ComputeDiagnostics_Mueller(proposal,posterior,-marginal_density,&slope1,&ess1,&slope2,&ess2);
@@ -1369,36 +1369,36 @@ void ComputeMarginal_GaussianProposal(int ndraws_proposal, TMatrix X, TStateMode
   char filename[256];
   FILE *f_out;
 
-  // set spherical type
+/*    // set spherical type   ansi-c*/
   SetupSpherical_Gaussian(NumberFreeParametersTheta(model));
 
-  // compute base scale
+/*    // compute base scale   ansi-c*/
   base_scale=CholeskyUT((TMatrix)NULL,mhm->variance);
   Transpose(base_scale,base_scale);
 
-  // allocate alpha
+/*    // allocate alpha   ansi-c*/
   alpha=dw_CreateArray_vector(dw_DimA(mhm->BaseAlpha));
   for (i=dw_DimA(alpha)-1; i >= 0; i--)
     alpha[i]=CreateVector(DimV(mhm->BaseAlpha[i]));
 
-  // Dirichlet index
+/*    // Dirichlet index   ansi-c*/
   idx_alpha=1;
   for (i=dw_DimA(alpha)-1; i >= 0; i--)
     ProductVS(alpha[i],mhm->BaseAlpha[i],ElementV(mhm->alpha_scales,idx_alpha));
 
-  // rescale factor
+/*    // rescale factor   ansi-c*/
   rescale_factor=sqrt(variance);
 
-  // Create posterior matrix
+/*    // Create posterior matrix   ansi-c*/
   printf("Creating posterior (%d draws)\n",RowM(X));
   posterior=CreatePosterior(X,rescale_factor,base_scale,idx_alpha,NumberFreeParametersTheta(model));
 
-  // Create proposal matrix
+/*    // Create proposal matrix   ansi-c*/
   printf("Creating proposal (%d draws)\n",ndraws_proposal);
   scale=ProductSM((TMatrix)NULL,rescale_factor,base_scale);
   proposal=CreateProposal(ndraws_proposal,mhm->center,scale,model,alpha);
 
-  // Create output file
+/*    // Create output file   ansi-c*/
   sprintf(filename,"gaussian_md_%s.dat",tag);
   f_out=dw_CreateTextFile(filename);
 
@@ -1411,11 +1411,11 @@ void ComputeMarginal_GaussianProposal(int ndraws_proposal, TMatrix X, TStateMode
   fprintf(f_out,"total posterior draws: %d\n",RowM(X) * mhm->n_thin);
   fprintf(f_out,"number draws proposal: %d\n",ndraws_proposal);
 
-  // Compute marginal density using standard technique
+/*    // Compute marginal density using standard technique   ansi-c*/
   marginal_density=ComputeMarginalDensity_Standard(posterior);
   fprintf(f_out,"Standard MHM method: %0.14lg\n",marginal_density);
 
-  // Compute marginal density using WZ1
+/*    // Compute marginal density using WZ1   ansi-c*/
   level_cuts=Sorted_Level_Cuts(posterior,10);
   fprintf(f_out,"WZ method - no center cut\nmarginal density,level,number proposal draws,number posterior draws,effective sample size\n");
   for (i=0; i < DimV(level_cuts); i++)
@@ -1427,7 +1427,7 @@ void ComputeMarginal_GaussianProposal(int ndraws_proposal, TMatrix X, TStateMode
     }
   FreeVector(level_cuts);
 
-  // Compute marginal density Mueller
+/*    // Compute marginal density Mueller   ansi-c*/
   fprintf(f_out,"\nMueller method\nmarginal density,difference,# proposal draws,proposal log slope,proposal ess,# posterior draws,posterior log slope,posterior ess\n");
   marginal_density=ComputeMarginalDensity_Mueller(proposal,posterior,&in1,&in2);
   ComputeDiagnostics_Mueller(proposal,posterior,-marginal_density,&slope1,&ess1,&slope2,&ess2);
@@ -1463,7 +1463,7 @@ void ComputeMarginal_TruncatedGaussianProposal(int ndraws_proposal, TMatrix X, T
   char filename[256];
   FILE *f_out;
 
-  // set spherical type
+/*    // set spherical type   ansi-c*/
 
 /*   Y=ColumnVector((TVector)NULL,X,1); */
 /*   SortVectorAscending(Y,Y); */
@@ -1478,7 +1478,7 @@ void ComputeMarginal_TruncatedGaussianProposal(int ndraws_proposal, TMatrix X, T
   r1=sqrt(dw_chi_square_invcdf(p1,NumberFreeParametersTheta(model)));
   r2=sqrt(dw_chi_square_invcdf(1.0 - p2,NumberFreeParametersTheta(model)));
 
-  // rescale factor
+/*    // rescale factor   ansi-c*/
   rescale_factor=1;
 
   SetupSpherical_TruncatedGaussian(NumberFreeParametersTheta(model),r1,r2);
@@ -1502,30 +1502,30 @@ void ComputeMarginal_TruncatedGaussianProposal(int ndraws_proposal, TMatrix X, T
 /*   fclose(f_out); */
 /*   return; */
 
-  // compute base scale
+/*    // compute base scale   ansi-c*/
   base_scale=CholeskyUT((TMatrix)NULL,mhm->variance);
   Transpose(base_scale,base_scale);
 
-  // allocate alpha
+/*    // allocate alpha   ansi-c*/
   alpha=dw_CreateArray_vector(dw_DimA(mhm->BaseAlpha));
   for (i=dw_DimA(alpha)-1; i >= 0; i--)
     alpha[i]=CreateVector(DimV(mhm->BaseAlpha[i]));
 
-  // Dirichlet index
+/*    // Dirichlet index   ansi-c*/
   idx_alpha=1;
   for (i=dw_DimA(alpha)-1; i >= 0; i--)
     ProductVS(alpha[i],mhm->BaseAlpha[i],ElementV(mhm->alpha_scales,idx_alpha));
 
-  // Create posterior matrix
+/*    // Create posterior matrix   ansi-c*/
   printf("Creating posterior (%d draws)\n",RowM(X));
   posterior=CreatePosterior(X,rescale_factor,base_scale,idx_alpha,NumberFreeParametersTheta(model));
 
-  // Create proposal matrix
+/*    // Create proposal matrix   ansi-c*/
   printf("Creating proposal (%d draws)\n",ndraws_proposal);
   scale=ProductSM((TMatrix)NULL,rescale_factor,base_scale);
   proposal=CreateProposal(ndraws_proposal,mhm->center,scale,model,alpha);
 
-  // Create output file
+/*    // Create output file   ansi-c*/
   sprintf(filename,"truncatedgaussian_%.2lf_%.2lf_md_%s.dat",p1,p2,tag);
   f_out=dw_CreateTextFile(filename);
 
@@ -1539,11 +1539,11 @@ void ComputeMarginal_TruncatedGaussianProposal(int ndraws_proposal, TMatrix X, T
   fprintf(f_out,"total posterior draws: %d\n",RowM(X) * mhm->n_thin);
   fprintf(f_out,"number draws proposal: %d\n",ndraws_proposal);
 
-  // Compute marginal density using standard technique
+/*    // Compute marginal density using standard technique   ansi-c*/
   marginal_density=ComputeMarginalDensity_Standard(posterior);
   fprintf(f_out,"Standard MHM method: %0.14lg\n",marginal_density);
 
-  // Compute marginal density using WZ1
+/*    // Compute marginal density using WZ1   ansi-c*/
   level_cuts=Sorted_Level_Cuts(posterior,10);
   fprintf(f_out,"WZ method - no center cut\nmarginal density,level,number proposal draws,number posterior draws,effective sample size\n");
   for (i=0; i < DimV(level_cuts); i++)
@@ -1555,7 +1555,7 @@ void ComputeMarginal_TruncatedGaussianProposal(int ndraws_proposal, TMatrix X, T
     }
   FreeVector(level_cuts);
 
-  // Compute marginal density Mueller
+/*    // Compute marginal density Mueller   ansi-c*/
   fprintf(f_out,"\nMueller method\nmarginal density,difference,# proposal draws,proposal log slope,proposal ess,# posterior draws,posterior log slope,posterior ess\n");
   marginal_density=ComputeMarginalDensity_Mueller(proposal,posterior,&in1,&in2);
   ComputeDiagnostics_Mueller(proposal,posterior,-marginal_density,&slope1,&ess1,&slope2,&ess2);
@@ -1812,21 +1812,21 @@ void Plot_Posterior_vs_Proposal_Radius(int ndraws, TStateModel *model, T_MHM *mh
   TMatrix Y, X, base_scale, scale;
   TVector *alpha;
 
-  // compute base scale and scale
+/*    // compute base scale and scale   ansi-c*/
   base_scale=CholeskyUT((TMatrix)NULL,mhm->variance);
   Transpose(base_scale,base_scale);
 
-  // allocate scale and alpha
+/*    // allocate scale and alpha   ansi-c*/
   alpha=dw_CreateArray_vector(dw_DimA(mhm->BaseAlpha));
   for (i=dw_DimA(alpha)-1; i >= 0; i--)
     alpha[i]=CreateVector(DimV(mhm->BaseAlpha[i]));
 
-  // Dirichlet index
+/*    // Dirichlet index   ansi-c*/
   idx_alpha=1;
   for (i=dw_DimA(alpha)-1; i >= 0; i--)
     ProductVS(alpha[i],mhm->BaseAlpha[i],ElementV(mhm->alpha_scales,idx_alpha));
 
-  // Create proposal matrix
+/*    // Create proposal matrix   ansi-c*/
   printf("Creating proposal (%d draws)\n",ndraws);
   scale=ProductSM((TMatrix)NULL,rescale_factor,base_scale);
   X=CreateProposal_Radius(ndraws,mhm->center,scale,model,alpha);
@@ -1919,7 +1919,7 @@ int main(int nargs, char **args)
   /*****************************************************************************/
   /* Read command line and input files                                         */
   /*****************************************************************************/
-  // help
+/*    // help   ansi-c*/
   if (dw_FindArgument(nargs,args,'h') >= 0)
     {
       printf("\nSyntax: marginal_VAR -d <number posterior draws>"
@@ -1936,7 +1936,7 @@ int main(int nargs, char **args)
       exit(0);
     }
 
-  // setup filenames
+/*    // setup filenames   ansi-c*/
   if (!(tag=dw_ParseString_String(nargs,args,"ft",(char*)NULL)))
     {
       printf("Tag not specified.  Usage: -ft <file tag name>\n\n");
@@ -1948,24 +1948,24 @@ int main(int nargs, char **args)
   fmt="est_final_%s.dat";
   sprintf(spec_filename=(char*)malloc(strlen(tag)+strlen(fmt)-1),fmt,tag);
 
-  // get number of proposal draws - default 100000
+/*    // get number of proposal draws - default 100000   ansi-c*/
   ndraws_proposal=dw_ParseInteger_String(nargs,args,"d",100000);
 
-  // Read and create TStateModel strucure and setup normalization
+/*    // Read and create TStateModel strucure and setup normalization   ansi-c*/
   printf("Creating TStateModel\n");
   model=Read_VAR_Specification((FILE*)NULL,spec_filename);
   ReadTransitionMatrices((FILE*)NULL,spec_filename,"Posterior mode: ",model);
   Read_VAR_Parameters((FILE*)NULL,spec_filename,"Posterior mode: ",model);
   Setup_WZ_Normalization(model->theta,((T_VAR_Parameters*)(model->theta))->A0);
 
-  // Read and create T_MHM structure
+/*    // Read and create T_MHM structure   ansi-c*/
   printf("Creating T_MHM structure\n");
   f_in=dw_OpenTextFile(mhm_filename);
   mhm=ReadMHM_Input(f_in,(char*)NULL,(T_MHM*)NULL);
   AddStateModel(model,mhm);
   ReadMeanVariance(f_in,mhm);
 
-  // Read draws
+/*    // Read draws   ansi-c*/
   printf("Reading draws\n");
   ndraws_posterior=mhm->n_mhm;
   n_fields=DimV(mhm->alpha_scales)+3;
@@ -2002,16 +2002,16 @@ int main(int nargs, char **args)
     }
   fclose(f_in);
 
-  // set proposal type - default power
+/*    // set proposal type - default power   ansi-c*/
   proposal_type=dw_ParseInteger_String(nargs,args,"t",2);
 
   /*****************************************************************************/
   /*****************************************************************************/
 
-  // Initial generator from clock
+/*    // Initial generator from clock   ansi-c*/
   dw_initialize_generator(0);
 
-  // Compute marginal using power functions
+/*    // Compute marginal using power functions   ansi-c*/
   switch (proposal_type)
     {
     case 1:

@@ -9,16 +9,16 @@
 #define STRLEN 256
 static char filename_sp_vec_minproj[STRLEN];
 
-static struct TSetc_csminwel_tag *CreateTSetc_csminwel(FILE *fptr_input1, const int n,  const int q, const int k);  //Used by CreateTSminpack() only.
-static struct TSetc_csminwel_tag *DestroyTSetc_csminwel(struct TSetc_csminwel_tag *etc_csminwel_ps);  //Used by DestroyTSminpack() only.
-//------- For csminwel only. -------
+static struct TSetc_csminwel_tag *CreateTSetc_csminwel(FILE *fptr_input1, const int n,  const int q, const int k);   /*  Used by CreateTSminpack() only.   ansi-c*/
+static struct TSetc_csminwel_tag *DestroyTSetc_csminwel(struct TSetc_csminwel_tag *etc_csminwel_ps);   /*  Used by DestroyTSminpack() only.   ansi-c*/
+/*  //------- For csminwel only. -------   ansi-c*/
 static TSminpack *SetMincsminwelGlobal(TSminpack *minpack_csminwel_ps);
 static double minobj_csminwelwrap(double *x, int n, double **dummy1, int *dummy2);
 static int mingrad_csminwelwrap(double *x, int n, double *g, double **dummy1, int *dummy2);
-//------- For IMSL linearly constrainted optimization only. -------
-static double GLB_FVALMIN = NEARINFINITY;  //Must be initialized to ba a very big number.
-static int GLB_DISPLAY = 1;     //Print out intermediate results on screen.
-static TSdvector *XIMSL_DV = NULL;  //To save the minimized value in case the IMSL quits with a higher value.
+/*  //------- For IMSL linearly constrainted optimization only. -------   ansi-c*/
+static double GLB_FVALMIN = NEARINFINITY;   /*  Must be initialized to ba a very big number.   ansi-c*/
+static int GLB_DISPLAY = 1;      /*  Print out intermediate results on screen.   ansi-c*/
+static TSdvector *XIMSL_DV = NULL;   /*  To save the minimized value in case the IMSL quits with a higher value.   ansi-c*/
 static struct TStateModel_tag *SetModelGlobalForIMSLconlin(struct TStateModel_tag *smodel_ps);
 static void ObjFuncForModel_imslconlin(int d_x0, double *x0_p, double *fret_p);
 static void imslconlin_SetPrintFile(char *filename);
@@ -28,63 +28,63 @@ static double ObjFuncForModel_congrad(double *x0_p, int d_x0);
 
 
 
-////TSminpack *CreateTSminpack(TFminpackage *minfinder_func, TFminobj *minobj_func, TFmingrad *mingrad_func, TFSetPrintFile *printinterresults_func, const int n, const int package)  //, const int indxAnag)
-////TSminpack *CreateTSminpack(TFminfinder *minfinder_func, TFminobj *minobj_func, TFmingrad *mingrad_func, char *filename_printout, const int n, const int package)  //, const int indxAnag)
+/*  ////TSminpack *CreateTSminpack(TFminpackage *minfinder_func, TFminobj *minobj_func, TFmingrad *mingrad_func, TFSetPrintFile *printinterresults_func, const int n, const int package)  //, const int indxAnag)   ansi-c*/
+/*  ////TSminpack *CreateTSminpack(TFminfinder *minfinder_func, TFminobj *minobj_func, TFmingrad *mingrad_func, char *filename_printout, const int n, const int package)  //, const int indxAnag)   ansi-c*/
 TSminpack *CreateTSminpack(TFminobj *minobj_func, void **etc_project_pps, TFmindestroy_etcproject *etcproject_func, TFmingrad *mingrad_func, char *filename_printout, const int n, const int package)
 {
    TSminpack *minpack_ps = tzMalloc(1, TSminpack);
 
-   //$$$$WARNING: Note the vector xtemp_dv->v or gtemp_dv-v itself is not allocated memory, but only the POINTER.
-   //$$$$           Within the minimization routine like csminwel(), the temporary array x enters as the argument in
-   //$$$$           the objective function to compare with other values.  If we use minpack_ps->x_dv->v = x
-   //$$$$           in a wrapper function like minobj_csminwelwrap() where x is a temporay array in csminwel(),
-   //$$$$           this tempoary array (e.g., x[0] in csminwel()) within the csminwel minimization routine
-   //$$$$           will be freed after the csminwel minimization is done.  Consequently, minpack_ps->x_dv-v, which
-   //$$$$           which was re-pointed to this tempoary array, will freed as well.  Thus, no minimization results
-   //$$$$           would be stored and trying to access to minpack_ps->x_dv would cause memory leak.
-   //$$$$           We don't need, however, to create another temporary pointer within the objective function itself,
-   //$$$$           but we must use minpack_ps->xtemp_dv for a *wrapper* function instead and at the end of
-   //$$$$           minimization, minpack_ps->x_dv will have the value of minpack_ps->xtemp_dv, which is automatically
-   //$$$$           taken care of by csminwel with the lines such as
-   //$$$$                 memcpy(xh,x[3],n*sizeof(double));
-   //$$$$           where xh and minpack_ps->x_dv->v point to the same memory space.
+/*     //$$$$WARNING: Note the vector xtemp_dv->v or gtemp_dv-v itself is not allocated memory, but only the POINTER.   ansi-c*/
+/*     //$$$$           Within the minimization routine like csminwel(), the temporary array x enters as the argument in   ansi-c*/
+/*     //$$$$           the objective function to compare with other values.  If we use minpack_ps->x_dv->v = x   ansi-c*/
+/*     //$$$$           in a wrapper function like minobj_csminwelwrap() where x is a temporay array in csminwel(),   ansi-c*/
+/*     //$$$$           this tempoary array (e.g., x[0] in csminwel()) within the csminwel minimization routine   ansi-c*/
+/*     //$$$$           will be freed after the csminwel minimization is done.  Consequently, minpack_ps->x_dv-v, which   ansi-c*/
+/*     //$$$$           which was re-pointed to this tempoary array, will freed as well.  Thus, no minimization results   ansi-c*/
+/*     //$$$$           would be stored and trying to access to minpack_ps->x_dv would cause memory leak.   ansi-c*/
+/*     //$$$$           We don't need, however, to create another temporary pointer within the objective function itself,   ansi-c*/
+/*     //$$$$           but we must use minpack_ps->xtemp_dv for a *wrapper* function instead and at the end of   ansi-c*/
+/*     //$$$$           minimization, minpack_ps->x_dv will have the value of minpack_ps->xtemp_dv, which is automatically   ansi-c*/
+/*     //$$$$           taken care of by csminwel with the lines such as   ansi-c*/
+/*     //$$$$                 memcpy(xh,x[3],n*sizeof(double));   ansi-c*/
+/*     //$$$$           where xh and minpack_ps->x_dv->v point to the same memory space.   ansi-c*/
 
 
    minpack_ps->xtemp_dv = tzMalloc(1, TSdvector);
    minpack_ps->gtemp_dv = tzMalloc(1, TSdvector);
-   minpack_ps->xtemp_dv->flag = minpack_ps->gtemp_dv->flag = V_DEF;  //Set the flag first but will be assigned legal values in minobj_csminwelwrap().
+   minpack_ps->xtemp_dv->flag = minpack_ps->gtemp_dv->flag = V_DEF;   /*  Set the flag first but will be assigned legal values in minobj_csminwelwrap().   ansi-c*/
    minpack_ps->xtemp_dv->n = minpack_ps->gtemp_dv->n = n;
 
 
    minpack_ps->x_dv = CreateVector_lf(n);
    minpack_ps->g_dv = CreateVector_lf(n);
    minpack_ps->x0_dv = CreateVector_lf(n);
-   //
+/*     //   ansi-c*/
    minpack_ps->etc_project_ps  = (void *)*etc_project_pps;
    minpack_ps->DestroyTSetc_project = etcproject_func;
-   if (etcproject_func) *etc_project_pps = NULL;   //If destroy function makes this structure responsible to free memory of the passing pointer, reset this passing pointer to NULL to avoid double destroying actions and cause memory problem.
-   //
+   if (etcproject_func) *etc_project_pps = NULL;    /*  If destroy function makes this structure responsible to free memory of the passing pointer, reset this passing pointer to NULL to avoid double destroying actions and cause memory problem.   ansi-c*/
+/*     //   ansi-c*/
    minpack_ps->etc_package_ps = NULL;
    minpack_ps->minobj = minobj_func;
    minpack_ps->mingrad = mingrad_func;
    minpack_ps->filename_printout = filename_printout;
-//   minpack_ps->SetPrintFile = printinterresults_func;
+/*  //   minpack_ps->SetPrintFile = printinterresults_func;   ansi-c*/
 
    if ( (minpack_ps->package=package) & MIN_CSMINWEL ) {
       minpack_ps->etc_package_ps = (void *)CreateTSetc_csminwel(((struct TSetc_minproj_tag *)minpack_ps->etc_project_ps)->args_blockcsminwel_ps->fptr_input1, n, 0, 0);
-//      if (minpack_ps->mingrad)  fn_DisplayError(".../optpackage.c/CreateTSminpack():  Have not got time to deal with analytical gradient situation");
-//      if (minpack_ps->indxAnag=indxAnag)  fn_DisplayError(".../optpackage.c/CreateTSminpack():  Have not got time to deal with analytical gradient situation");
+/*  //      if (minpack_ps->mingrad)  fn_DisplayError(".../optpackage.c/CreateTSminpack():  Have not got time to deal with analytical gradient situation");   ansi-c*/
+/*  //      if (minpack_ps->indxAnag=indxAnag)  fn_DisplayError(".../optpackage.c/CreateTSminpack():  Have not got time to deal with analytical gradient situation");   ansi-c*/
    }
    else  fn_DisplayError(".../optpackage.c/CreateTSminpack():  Have not got time to specify other minimization packages than csminwel");
 
    return (minpack_ps);
 }
-//---
+/*  //---   ansi-c*/
 TSminpack *DestroyTSminpack(TSminpack *minpack_ps)
 {
    if (minpack_ps) {
-      //$$$$WARNING: Note the following vectors themselves are NOT allocated memory, but only the POINTERs.  Used within the minimization problem.
-      //$$$$         See minobj_csminwelwrap() as an example.
+/*        //$$$$WARNING: Note the following vectors themselves are NOT allocated memory, but only the POINTERs.  Used within the minimization problem.   ansi-c*/
+/*        //$$$$         See minobj_csminwelwrap() as an example.   ansi-c*/
       free(minpack_ps->xtemp_dv);
       free(minpack_ps->gtemp_dv);
 
@@ -92,10 +92,10 @@ TSminpack *DestroyTSminpack(TSminpack *minpack_ps)
       DestroyVector_lf(minpack_ps->x_dv);
       DestroyVector_lf(minpack_ps->g_dv);
       DestroyVector_lf(minpack_ps->x0_dv);
-      if (minpack_ps->DestroyTSetc_project)  minpack_ps->DestroyTSetc_project(minpack_ps->etc_project_ps);   //If destroy function is active, destroy it here; ohterwise, it will be destroyed somewhere else.
+      if (minpack_ps->DestroyTSetc_project)  minpack_ps->DestroyTSetc_project(minpack_ps->etc_project_ps);    /*  If destroy function is active, destroy it here; ohterwise, it will be destroyed somewhere else.   ansi-c*/
       if ( minpack_ps->package & MIN_CSMINWEL )  DestroyTSetc_csminwel((TSetc_csminwel *)minpack_ps->etc_package_ps);
 
-      //===
+/*        //===   ansi-c*/
       free(minpack_ps);
       return ((TSminpack *)NULL);
    }
@@ -104,15 +104,15 @@ TSminpack *DestroyTSminpack(TSminpack *minpack_ps)
 
 
 
-//-----------------------------------------------------------------------
-// Unconstrained BFGS csminwel package.
-//-----------------------------------------------------------------------
+/*  //-----------------------------------------------------------------------   ansi-c*/
+/*  // Unconstrained BFGS csminwel package.   ansi-c*/
+/*  //-----------------------------------------------------------------------   ansi-c*/
 static TSetc_csminwel *CreateTSetc_csminwel(FILE *fptr_input1, const int n, const int q, const int k)
 {
-   //If fptr_input1==NULL or no no values supplied when fptr_input1 != NULL, default values are taken.
+/*     //If fptr_input1==NULL or no no values supplied when fptr_input1 != NULL, default values are taken.   ansi-c*/
 
    int _i;
-   //===
+/*     //===   ansi-c*/
    TSetc_csminwel *etc_csminwel_ps = tzMalloc(1, TSetc_csminwel);
 
    etc_csminwel_ps->_k = k;
@@ -126,30 +126,30 @@ static TSetc_csminwel *CreateTSetc_csminwel(FILE *fptr_input1, const int n, cons
       for (_i=k-1; _i>=0; _i--) *(etc_csminwel_ps->args + _i) = tzMalloc(q, double);
    }
 
-   //=== Default values of input arguments.
-   etc_csminwel_ps->Hx_dm = CreateMatrix_lf(n, n);  //n-by-n inverse Hessian.
-   //+
-   etc_csminwel_ps->badg = 1;   //1: numerical gradient will be used.
-   etc_csminwel_ps->indxnumgrad_csminwel = INDXNUMGRAD_CSMINWEL;  //Method of the numerical gradient.
+/*     //=== Default values of input arguments.   ansi-c*/
+   etc_csminwel_ps->Hx_dm = CreateMatrix_lf(n, n);   /*  n-by-n inverse Hessian.   ansi-c*/
+/*     //+   ansi-c*/
+   etc_csminwel_ps->badg = 1;    /*  1: numerical gradient will be used.   ansi-c*/
+   etc_csminwel_ps->indxnumgrad_csminwel = INDXNUMGRAD_CSMINWEL;   /*  Method of the numerical gradient.   ansi-c*/
 
-   //=== Reads doubles.
+/*     //=== Reads doubles.   ansi-c*/
    if ( !fptr_input1 || !fn_SetFilePosition(fptr_input1, "//== crit ==//") || fscanf(fptr_input1, " %lf ", &etc_csminwel_ps->crit) != 1 )
-      etc_csminwel_ps->crit = CRIT_CSMINWEL;   //Defaut for overall convergence criterion for the function value.
+      etc_csminwel_ps->crit = CRIT_CSMINWEL;    /*  Defaut for overall convergence criterion for the function value.   ansi-c*/
    if ( !fptr_input1 || !fn_SetFilePosition(fptr_input1, "//== ini_h_csminwel ==//") || fscanf(fptr_input1, " %lf ", &etc_csminwel_ps->ini_h_csminwel) != 1 )
-      etc_csminwel_ps->ini_h_csminwel = INI_H_CSMINWEL;   //Defaut
+      etc_csminwel_ps->ini_h_csminwel = INI_H_CSMINWEL;    /*  Defaut   ansi-c*/
    if ( !fptr_input1 || !fn_SetFilePosition(fptr_input1, "//== gradstps_csminwel ==//") || fscanf(fptr_input1, " %lf ", &etc_csminwel_ps->gradstps_csminwel) != 1 )
-      etc_csminwel_ps->gradstps_csminwel = GRADSTPS_CSMINWEL;  //Default for step size of the numerical gradient.
+      etc_csminwel_ps->gradstps_csminwel = GRADSTPS_CSMINWEL;   /*  Default for step size of the numerical gradient.   ansi-c*/
 
-   //=== Reads integers.
+/*     //=== Reads integers.   ansi-c*/
    if ( !fptr_input1 || !fn_SetFilePosition(fptr_input1, "//== itmax ==//") || fscanf(fptr_input1, " %d ", &etc_csminwel_ps->itmax) != 1 )
-      etc_csminwel_ps->itmax = ITMAX_CSMINWEL;  //Default for maximum number of iterations.
+      etc_csminwel_ps->itmax = ITMAX_CSMINWEL;   /*  Default for maximum number of iterations.   ansi-c*/
 
 
    return (etc_csminwel_ps);
 }
-//#undef CRIT_CSMINWEL
-//#undef ITMAX_CSMINWEL
-//---
+/*  //#undef CRIT_CSMINWEL   ansi-c*/
+/*  //#undef ITMAX_CSMINWEL   ansi-c*/
+/*  //---   ansi-c*/
 static TSetc_csminwel *DestroyTSetc_csminwel(TSetc_csminwel *etc_csminwel_ps)
 {
    int _i;
@@ -158,10 +158,10 @@ static TSetc_csminwel *DestroyTSetc_csminwel(TSetc_csminwel *etc_csminwel_ps)
       for (_i=etc_csminwel_ps->_k-1; _i>=0; _i--)  tzDestroy(etc_csminwel_ps->args[_i]);
       tzDestroy(etc_csminwel_ps->args);
       tzDestroy(etc_csminwel_ps->dims);
-      //---
+/*        //---   ansi-c*/
       DestroyMatrix_lf(etc_csminwel_ps->Hx_dm);
 
-      //===
+/*        //===   ansi-c*/
       free(etc_csminwel_ps);
       return ((TSetc_csminwel *)NULL);
    }
@@ -176,13 +176,13 @@ static TSetc_csminwel *DestroyTSetc_csminwel(TSetc_csminwel *etc_csminwel_ps)
  *           (2) these global structures make the existing functions reusable;
  *           (3) modifying the exisiting functions to keep global variables at minimum is NOT really worth the time.
 *********************************************/
-//---------------------------------
-// Begin: This wrapper function makes it conformable to the call of the csminwel package.
-//---------------------------------
-static struct TSminpack_tag *MINPACK_CSMINWEL_PS = NULL;    //Minimization to find the MLE or posterior peak.
+/*  //---------------------------------   ansi-c*/
+/*  // Begin: This wrapper function makes it conformable to the call of the csminwel package.   ansi-c*/
+/*  //---------------------------------   ansi-c*/
+static struct TSminpack_tag *MINPACK_CSMINWEL_PS = NULL;     /*  Minimization to find the MLE or posterior peak.   ansi-c*/
 static TSminpack *SetMincsminwelGlobal(TSminpack *minpack_csminwel_ps)
 {
-   //Returns the old pointer in order to preserve the previous value.
+/*     //Returns the old pointer in order to preserve the previous value.   ansi-c*/
    TSminpack *tmp_ps = MINPACK_CSMINWEL_PS;
    MINPACK_CSMINWEL_PS = minpack_csminwel_ps;
    return (tmp_ps);
@@ -190,63 +190,63 @@ static TSminpack *SetMincsminwelGlobal(TSminpack *minpack_csminwel_ps)
 static double minobj_csminwelwrap(double *x, int n, double **dummy1, int *dummy2)
 {
    if (!MINPACK_CSMINWEL_PS || !MINPACK_CSMINWEL_PS->minobj)  fn_DisplayError(".../optpackage.c/minobj_csminwelwrap(): (1) MINPACK_CSMINWEL_PS must be created and (2) there exists an objective function assigned to MINPACK_CSMINWEL_PS->minobj");
-   //  if (MINPACK_CSMINWEL_PS->x_dv->n != n)  fn_DisplayError(".../optpackage.c/minobj_csminwelwrap(): Length of passing vector must match minpack_ps->x_dv");
+/*     //  if (MINPACK_CSMINWEL_PS->x_dv->n != n)  fn_DisplayError(".../optpackage.c/minobj_csminwelwrap(): Length of passing vector must match minpack_ps->x_dv");   ansi-c*/
    MINPACK_CSMINWEL_PS->xtemp_dv->v = x;
-   return (MINPACK_CSMINWEL_PS->minobj(MINPACK_CSMINWEL_PS));    //This function is specified in the main program.
+   return (MINPACK_CSMINWEL_PS->minobj(MINPACK_CSMINWEL_PS));     /*  This function is specified in the main program.   ansi-c*/
 }
-//---
+/*  //---   ansi-c*/
 static int mingrad_csminwelwrap(double *x, int n, double *g, double **dummy1, int *dummy2)
 {
    if (!MINPACK_CSMINWEL_PS || !MINPACK_CSMINWEL_PS->mingrad)  fn_DisplayError(".../optpackage.c/mingrad_csminwelwrap(): (1) MINPACK_CSMINWEL_PS must be created and (2) there exists an objective function assigned to MINPACK_CSMINWEL_PS->minobj");
-   //  if (MINPACK_CSMINWEL_PS->x_dv->n != n)  fn_DisplayError(".../optpackage.c/mingrad_csminwelwrap(): Length of passing vector must match minpack_ps->x_dv");
+/*     //  if (MINPACK_CSMINWEL_PS->x_dv->n != n)  fn_DisplayError(".../optpackage.c/mingrad_csminwelwrap(): Length of passing vector must match minpack_ps->x_dv");   ansi-c*/
    MINPACK_CSMINWEL_PS->xtemp_dv->v = x;
    MINPACK_CSMINWEL_PS->gtemp_dv->v = g;
-   //>>>>>>>> Inside the following function, make sure to set MINPACK_CSMINWEL_PS->etc_csminwel_ps->badg = 0;   //1: numerical gradient will be used.
+/*     //>>>>>>>> Inside the following function, make sure to set MINPACK_CSMINWEL_PS->etc_csminwel_ps->badg = 0;   //1: numerical gradient will be used.   ansi-c*/
    MINPACK_CSMINWEL_PS->mingrad(MINPACK_CSMINWEL_PS);
-   //<<<<<<<<
+/*     //<<<<<<<<   ansi-c*/
 
    return (0);
 }
-//---------------------------------
-// End: This wrapper function makes it conformable to the call of the csminwel package.
-//---------------------------------
+/*  //---------------------------------   ansi-c*/
+/*  // End: This wrapper function makes it conformable to the call of the csminwel package.   ansi-c*/
+/*  //---------------------------------   ansi-c*/
 
 
-//---------------------------------------------------------------//
-//--- New ways to set up the minimization problems. 03/10/06. ---//
-//---------------------------------------------------------------//
-//------- Step 1. -------
-//===
-//=== Using blockwise csminwel minimization package.
+/*  //---------------------------------------------------------------//   ansi-c*/
+/*  //--- New ways to set up the minimization problems. 03/10/06. ---//   ansi-c*/
+/*  //---------------------------------------------------------------//   ansi-c*/
+/*  //------- Step 1. -------   ansi-c*/
+/*  //===   ansi-c*/
+/*  //=== Using blockwise csminwel minimization package.   ansi-c*/
 struct TSargs_blockcsminwel_tag *CreateTSargs_blockcsminwel(FILE *fptr_input1)
 {
-   //If fptr_input1==NULL or no no values supplied when fptr_input1 != NULL, default values are taken.
+/*     //If fptr_input1==NULL or no no values supplied when fptr_input1 != NULL, default values are taken.   ansi-c*/
 
    int nvec;
    struct TSargs_blockcsminwel_tag *args_blockcsminwel_ps = tzMalloc(1, struct TSargs_blockcsminwel_tag);
 
 
-   //=== Reads doubles.
+/*     //=== Reads doubles.   ansi-c*/
    if ( !fptr_input1 || !fn_SetFilePosition(fptr_input1, "//== criterion_start ==//") || fscanf(fptr_input1, " %lf ", &args_blockcsminwel_ps->criterion_start) != 1 )
-      args_blockcsminwel_ps->criterion_start = 1.0e-3; //Default.
+      args_blockcsminwel_ps->criterion_start = 1.0e-3;  /*  Default.   ansi-c*/
    if ( !fptr_input1 || !fn_SetFilePosition(fptr_input1, "//== criterion_end ==//") || fscanf(fptr_input1, " %lf ", &args_blockcsminwel_ps->criterion_end) != 1 )
-      args_blockcsminwel_ps->criterion_end = 1.0e-6; //Default.
+      args_blockcsminwel_ps->criterion_end = 1.0e-6;  /*  Default.   ansi-c*/
    if ( !fptr_input1 || !fn_SetFilePosition(fptr_input1, "//== criterion_increment ==//") || fscanf(fptr_input1, " %lf ", &args_blockcsminwel_ps->criterion_increment) != 1 )
-      args_blockcsminwel_ps->criterion_increment = 0.1; //Default.
+      args_blockcsminwel_ps->criterion_increment = 0.1;  /*  Default.   ansi-c*/
    if ( !fptr_input1 || !fn_SetFilePosition(fptr_input1, "//== max_iterations_increment ==//") || fscanf(fptr_input1, " %lf ", &args_blockcsminwel_ps->max_iterations_increment) != 1 )
-      args_blockcsminwel_ps->max_iterations_increment = 1.5; //Default.
+      args_blockcsminwel_ps->max_iterations_increment = 1.5;  /*  Default.   ansi-c*/
    if ( !fptr_input1 || !fn_SetFilePosition(fptr_input1, "//== ini_h_scale ==//") || fscanf(fptr_input1, " %lf ", &args_blockcsminwel_ps->ini_h_scale) != 1 )
-      args_blockcsminwel_ps->ini_h_scale = 5.0e-4; //Default.
+      args_blockcsminwel_ps->ini_h_scale = 5.0e-4;  /*  Default.   ansi-c*/
    if ( !fptr_input1 || !fn_SetFilePosition(fptr_input1, "//== gradstps_csminwel_const ==//") || fscanf(fptr_input1, " %lf ", &args_blockcsminwel_ps->gradstps_csminwel_const) != 1 )
-      args_blockcsminwel_ps->gradstps_csminwel_const = 1.0e-4; //Default.
+      args_blockcsminwel_ps->gradstps_csminwel_const = 1.0e-4;  /*  Default.   ansi-c*/
 
-   //=== Reads integers.
+/*     //=== Reads integers.   ansi-c*/
    if ( !fptr_input1 || !fn_SetFilePosition(fptr_input1, "//== max_iterations_start ==//") || fscanf(fptr_input1, " %d ", &args_blockcsminwel_ps->max_iterations_start) != 1 )
-      args_blockcsminwel_ps->max_iterations_start = 50; //Default.
+      args_blockcsminwel_ps->max_iterations_start = 50;  /*  Default.   ansi-c*/
    if ( !fptr_input1 || !fn_SetFilePosition(fptr_input1, "//== max_block_iterations ==//") || fscanf(fptr_input1, " %d ", &args_blockcsminwel_ps->max_block_iterations) != 1 )
-      args_blockcsminwel_ps->max_block_iterations = 70; //Default.
+      args_blockcsminwel_ps->max_block_iterations = 70;  /*  Default.   ansi-c*/
 
-   //=== Reads vectors.
+/*     //=== Reads vectors.   ansi-c*/
    if (fptr_input1 && fn_SetFilePosition(fptr_input1, "//== gradstps_csminwel_dv ==//"))
    {
       if ( fscanf(fptr_input1, " %d ", &nvec) != 1)
@@ -270,63 +270,63 @@ struct TSargs_blockcsminwel_tag *CreateTSargs_blockcsminwel(FILE *fptr_input1)
 
    return (args_blockcsminwel_ps);
 }
-//---
+/*  //---   ansi-c*/
 struct TSargs_blockcsminwel_tag *DestroyTSargs_blockcsminwel(struct TSargs_blockcsminwel_tag *args_blockcsminwel)
 {
    if (args_blockcsminwel)
    {
-      //===
+/*        //===   ansi-c*/
       free(args_blockcsminwel);
       return ((struct TSargs_blockcsminwel_tag *)NULL);
    }
    else
       return (args_blockcsminwel);
 }
-//===
-//=== Sets up a project-specific structure.
+/*  //===   ansi-c*/
+/*  //=== Sets up a project-specific structure.   ansi-c*/
 struct TSetc_minproj_tag *CreateTSetc_minproj(struct TStateModel_tag **smodel_pps, TFDestroyTStateModel *DestroyTStateModel_func,
                struct TSargs_blockcsminwel_tag **args_blockcsminwel_pps, struct TSargs_blockcsminwel_tag *(*DestroyTSargs_blockcsminwel)(struct TSargs_blockcsminwel_tag *))
 {
    struct TSetc_minproj_tag *etc_minproj_ps = tzMalloc(1, struct TSetc_minproj_tag);
 
-   //=== Initialization.
+/*     //=== Initialization.   ansi-c*/
    etc_minproj_ps->smodel_ps = *smodel_pps;
    etc_minproj_ps->DestroyTStateModel = DestroyTStateModel_func;
    if (DestroyTStateModel_func)  *smodel_pps = (struct TStateModel_tag *)NULL;
-        //If destroy function makes this structure responsible to free memory of the passing pointer, reset this passing pointer to NULL to avoid double destroying actions and cause memory problem.
-        //  In this case, the original pointer *smodel_pps or smodel_ps is no longer valid, while etc_minproj_ps->smodel_ps.
-        //  Note that we pass **smodel_pps only when we want to use DestroyTStateModel_func and let this structure take over smodel_ps.
-        //  In many other cases, we do not need to pass **smodel_pps, but only *smodel_ps will do.
-   //+
+/*          //If destroy function makes this structure responsible to free memory of the passing pointer, reset this passing pointer to NULL to avoid double destroying actions and cause memory problem.   ansi-c*/
+/*          //  In this case, the original pointer *smodel_pps or smodel_ps is no longer valid, while etc_minproj_ps->smodel_ps.   ansi-c*/
+/*          //  Note that we pass **smodel_pps only when we want to use DestroyTStateModel_func and let this structure take over smodel_ps.   ansi-c*/
+/*          //  In many other cases, we do not need to pass **smodel_pps, but only *smodel_ps will do.   ansi-c*/
+/*     //+   ansi-c*/
    etc_minproj_ps->args_blockcsminwel_ps = *args_blockcsminwel_pps;
    etc_minproj_ps->DestroyTSargs_blockcsminwel = DestroyTSargs_blockcsminwel;
    if (DestroyTSargs_blockcsminwel)  *args_blockcsminwel_pps = (struct TSargs_blockcsminwel_tag *)NULL;
-        //If destroy function makes this structure responsible to free memory of the passing pointer, reset this passing pointer to NULL to avoid double destroying actions and cause memory problem.
+/*          //If destroy function makes this structure responsible to free memory of the passing pointer, reset this passing pointer to NULL to avoid double destroying actions and cause memory problem.   ansi-c*/
 
    return (etc_minproj_ps);
 }
-//---
+/*  //---   ansi-c*/
 struct TSetc_minproj_tag *DestroyTSetc_minproj(struct TSetc_minproj_tag *etc_minproj_ps)
 {
    if (etc_minproj_ps)
    {
       if (etc_minproj_ps->DestroyTStateModel)  etc_minproj_ps->DestroyTStateModel(etc_minproj_ps->smodel_ps);
-             //If destroy function is active, destroy it here; ohterwise, it will be destroyed somewhere else.
+/*               //If destroy function is active, destroy it here; ohterwise, it will be destroyed somewhere else.   ansi-c*/
       if (etc_minproj_ps->DestroyTSargs_blockcsminwel)  etc_minproj_ps->DestroyTSargs_blockcsminwel(etc_minproj_ps->args_blockcsminwel_ps);
-             //If destroy function is active, destroy it here; ohterwise, it will be destroyed somewhere else.
+/*               //If destroy function is active, destroy it here; ohterwise, it will be destroyed somewhere else.   ansi-c*/
 
-      //===
+/*        //===   ansi-c*/
       free(etc_minproj_ps);
       return ((struct TSetc_minproj_tag *)NULL);
    }
    else  return (etc_minproj_ps);
 }
-//------- Step 2. -------
-//$$$$$$ 28/Oct/2007: I commented them out because it'd better left to be the user's function because of
-//$$$$$$                (1) constant-parameter case without using DW's functions;
-//$$$$$$                (2) allowing us to generate parameters randomly, which depends on the specific model.
-//$$$$$$ See lwz_est.c in D:\ZhaData\WorkDisk\LiuWZ\Project2_empirical\EstimationOct07
-//$$$$$$  or ExamplesForC.prn in D:\ZhaData\CommonFiles\C_Examples_DebugTips.
+/*  //------- Step 2. -------   ansi-c*/
+/*  //$$$$$$ 28/Oct/2007: I commented them out because it'd better left to be the user's function because of   ansi-c*/
+/*  //$$$$$$                (1) constant-parameter case without using DW's functions;   ansi-c*/
+/*  //$$$$$$                (2) allowing us to generate parameters randomly, which depends on the specific model.   ansi-c*/
+/*  //$$$$$$ See lwz_est.c in D:\ZhaData\WorkDisk\LiuWZ\Project2_empirical\EstimationOct07   ansi-c*/
+/*  //$$$$$$  or ExamplesForC.prn in D:\ZhaData\CommonFiles\C_Examples_DebugTips.   ansi-c*/
 /**
 void InitializeForMinproblem(struct TSminpack_tag *minpack_ps, char *filename_sp, TSdvector *gphi_dv, int indxStartValuesForMin)
 {
@@ -403,30 +403,30 @@ void InitializeForMinproblem(struct TSminpack_tag *minpack_ps, char *filename_sp
    }
 }
 /**/
-//------- Step 3. -------
+/*  //------- Step 3. -------   ansi-c*/
 void minfinder_blockcsminwel(struct TSminpack_tag *minpack_ps, int indx_findMLE)
 {
-   //Better version (November 2007)
-   //Inputs:
-   //  indx_findMLE: 1: find MLE without a prior, 0: find posterior (with a prior).
+/*     //Better version (November 2007)   ansi-c*/
+/*     //Inputs:   ansi-c*/
+/*     //  indx_findMLE: 1: find MLE without a prior, 0: find posterior (with a prior).   ansi-c*/
 
-   //--- Block-csminwel arguments.
+/*     //--- Block-csminwel arguments.   ansi-c*/
    struct TSargs_blockcsminwel_tag *args_blockcsminwel_ps = ((struct TSetc_minproj_tag *)minpack_ps->etc_project_ps)->args_blockcsminwel_ps;
-   //--- DW's Markov-switching structure.
+/*     //--- DW's Markov-switching structure.   ansi-c*/
    struct TStateModel_tag *smodel_ps = ((struct TSetc_minproj_tag *)minpack_ps->etc_project_ps)->smodel_ps;
-   //--- TSminpack arguments.
+/*     //--- TSminpack arguments.   ansi-c*/
    TSdvector *x_dv = minpack_ps->x_dv;
    TSdvector *g_dv = minpack_ps->g_dv;
-   char *filename_printout = minpack_ps->filename_printout;  //Printing out the intermediate results of x_dv and g_dv.
-   double fret = minpack_ps->fret; //Returned value of the objective function.
+   char *filename_printout = minpack_ps->filename_printout;   /*  Printing out the intermediate results of x_dv and g_dv.   ansi-c*/
+   double fret = minpack_ps->fret;  /*  Returned value of the objective function.   ansi-c*/
    struct TSetc_csminwel_tag *etc_csminwel_ps = (TSetc_csminwel *)minpack_ps->etc_package_ps;
-   //--- Blockwise arguments.
+/*     //--- Blockwise arguments.   ansi-c*/
    int n1, n2;
    int _n = x_dv->n;
    double *x1_pd, *x2_pd, *g1_pd, *g2_pd;
    double fret_last, logvalue;
    TSdvector *gradstps_csminwel_dv = args_blockcsminwel_ps->gradstps_csminwel_dv;
-   //--- Blockwise csminwel intput arguments.
+/*     //--- Blockwise csminwel intput arguments.   ansi-c*/
    double criterion_start = args_blockcsminwel_ps->criterion_start;
    double criterion_end =  args_blockcsminwel_ps->criterion_end;
    double criterion_increment =  args_blockcsminwel_ps->criterion_increment;
@@ -434,44 +434,44 @@ void minfinder_blockcsminwel(struct TSminpack_tag *minpack_ps, int indx_findMLE)
    double max_iterations_increment = args_blockcsminwel_ps->max_iterations_increment;
    int max_block_iterations = args_blockcsminwel_ps->max_block_iterations;
    double ini_h_csminwel = args_blockcsminwel_ps->ini_h_scale;
-   //+ Other csminwel arguments
+/*     //+ Other csminwel arguments   ansi-c*/
    int iteration, total_iteration;
    int niters, fcount, retcodeh, max_niters;
    double crit;
-   //=== Blockwise and overall memory creations.
+/*     //=== Blockwise and overall memory creations.   ansi-c*/
    TSdmatrix *H1_dm = NULL;
    TSdmatrix *H2_dm = NULL;
    TSdmatrix *H_dm = NULL;
-   //
-   FILE *fptr_interesults = (FILE *)NULL;   //Printing intermediate results to a file.
+/*     //   ansi-c*/
+   FILE *fptr_interesults = (FILE *)NULL;    /*  Printing intermediate results to a file.   ansi-c*/
 
 
 
    if (!x_dv || !x_dv->flag)  fn_DisplayError("swz2_comfuns.c/ minfinder_blockcsminwel(): free parameters x_dv must be initialized");
 
-   n1 = NumberFreeParametersTheta(smodel_ps);       //Number of free model parameters.
-   n2 = NumberFreeParametersQ(smodel_ps);   //Number of free transition matrix elements.
+   n1 = NumberFreeParametersTheta(smodel_ps);        /*  Number of free model parameters.   ansi-c*/
+   n2 = NumberFreeParametersQ(smodel_ps);    /*  Number of free transition matrix elements.   ansi-c*/
    if (_n != (n1 + n2))  fn_DisplayError("optpackage.c/minfinder_blockcsminwel(): total number of free parameters"
               "  must be equal to number of free model parameters + number of free q's");
    H1_dm = CreateMatrix_lf(n1, n1);
    H2_dm = CreateMatrix_lf(n2, n2);
    H_dm = CreateMatrix_lf(_n, _n);
-   //
+/*     //   ansi-c*/
    x1_pd = x_dv->v;
    x2_pd = x_dv->v+n1;
    g1_pd = g_dv->v;
    g2_pd = g_dv->v+n1;
 
-   //---- Refreshing the parameters outside this function.  TZ October 2007.
+/*     //---- Refreshing the parameters outside this function.  TZ October 2007.   ansi-c*/
    SetupObjectiveFunction(smodel_ps, x1_pd, x2_pd, x_dv->v);
-   logvalue = -( minpack_ps->fret0 = minpack_ps->fret = PosteriorObjectiveFunction(x_dv->v, x_dv->n) );  //Refreshing. logPosterirPdf.  DW function.
+   logvalue = -( minpack_ps->fret0 = minpack_ps->fret = PosteriorObjectiveFunction(x_dv->v, x_dv->n) );   /*  Refreshing. logPosterirPdf.  DW function.   ansi-c*/
    fprintf(FPTR_OPT, "\n=========== Beginning Blockwise and Overall csminwel Minimizations =======================\nLog Peak Value: %.16e\n", logvalue);
    fflush(FPTR_OPT);
 
 
-   //======= Minimizing using csminwel =======
-   //--- Set up a printout file to record x_dv and g_dv.
-   csminwel_SetPrintFile(filename_printout);  //Set the print-out file outputsp_mle_tag.prn.
+/*     //======= Minimizing using csminwel =======   ansi-c*/
+/*     //--- Set up a printout file to record x_dv and g_dv.   ansi-c*/
+   csminwel_SetPrintFile(filename_printout);   /*  Set the print-out file outputsp_mle_tag.prn.   ansi-c*/
    for (total_iteration=1, crit=criterion_start, max_niters=max_iterations_start;
         crit >= criterion_end;
         crit*=criterion_increment, max_niters=(int)(max_niters*max_iterations_increment))
@@ -479,11 +479,11 @@ void minfinder_blockcsminwel(struct TSminpack_tag *minpack_ps, int indx_findMLE)
       for (iteration=1; iteration <= max_block_iterations; total_iteration++, iteration++)
       {
          fret_last = fret;
-         //=== Minimizing the objective function w.r.t. the 1st block of parameters (model parameters).
+/*           //=== Minimizing the objective function w.r.t. the 1st block of parameters (model parameters).   ansi-c*/
          printf("\nMinimizing user's specific model parameters at iteration %d\n",iteration);
          InitializeDiagonalMatrix_lf(H1_dm, ini_h_csminwel);
-         H1_dm->flag = M_GE | M_SU | M_SL;       //Hessian is symmetric.
-         //+
+         H1_dm->flag = M_GE | M_SU | M_SL;        /*  Hessian is symmetric.   ansi-c*/
+/*           //+   ansi-c*/
          SetupObjectiveFunction(smodel_ps, x1_pd, x2_pd, x_dv->v);
          GRADSTPS_CSMINWEL = gradstps_csminwel_dv->v[0];
          if (indx_findMLE)
@@ -498,18 +498,18 @@ void minfinder_blockcsminwel(struct TSminpack_tag *minpack_ps, int indx_findMLE)
          ConvertFreeParametersToQ(smodel_ps,x2_pd);
          ConvertFreeParametersToTheta(smodel_ps,x1_pd);
 
-         //+
+/*           //+   ansi-c*/
          logvalue = -fret;
          fprintf(FPTR_OPT, "\n=========== Block iteration %d for block 1 at total iteration %d =======================\nLog Peak Value: %.16e\n", iteration, total_iteration, logvalue);
          fflush(FPTR_OPT);
 
 
 
-         //=== Minimizing the objective function w.r.t. the 2nd block of parameters (transition matrix).
+/*           //=== Minimizing the objective function w.r.t. the 2nd block of parameters (transition matrix).   ansi-c*/
          printf("\nMinimizing transitiona matrix Q at iteration %d\n",iteration);
          InitializeDiagonalMatrix_lf(H2_dm, ini_h_csminwel);
-         H2_dm->flag = M_GE | M_SU | M_SL;       //Hessian is symmetric.
-         //+
+         H2_dm->flag = M_GE | M_SU | M_SL;        /*  Hessian is symmetric.   ansi-c*/
+/*           //+   ansi-c*/
          SetupObjectiveFunction(smodel_ps, x2_pd, x2_pd, x_dv->v);
          GRADSTPS_CSMINWEL = gradstps_csminwel_dv->v[1];
          if (indx_findMLE)
@@ -524,7 +524,7 @@ void minfinder_blockcsminwel(struct TSminpack_tag *minpack_ps, int indx_findMLE)
          ConvertFreeParametersToQ(smodel_ps,x2_pd);
          ConvertFreeParametersToTheta(smodel_ps,x1_pd);
 
-         //+
+/*           //+   ansi-c*/
          logvalue = -fret;
          fprintf(FPTR_OPT, "\n=========== Block iteration %d for block 2 at total iteration %d =======================\nLog Peak Value: %.16e\n", iteration, total_iteration, logvalue);
          fprintf(FPTR_OPT, "--------Numerical gradient---------\n");
@@ -537,16 +537,16 @@ void minfinder_blockcsminwel(struct TSminpack_tag *minpack_ps, int indx_findMLE)
          if (fabs(fret - fret_last) <= crit)  break;
       }
 
-      //=== Minimizing the overall likelihood or posterior kernel.
+/*        //=== Minimizing the overall likelihood or posterior kernel.   ansi-c*/
       logvalue = -fret;
       fprintf(FPTR_OPT,"\n\n=========== Total iteration %d ===========\n",++total_iteration);
       fprintf(FPTR_OPT,"Criterion/Max_Numer_Iterations:  %le  %d\n",crit,max_niters);
       fprintf(FPTR_OPT,"Log peak value before overall minimization:  %.16e\n", logvalue);
       fflush(FPTR_OPT);
-      //---
+/*        //---   ansi-c*/
       InitializeDiagonalMatrix_lf(H_dm, ini_h_csminwel);
-      H_dm->flag = M_GE | M_SU | M_SL;       //Hessian is symmetric.
-      //+
+      H_dm->flag = M_GE | M_SU | M_SL;        /*  Hessian is symmetric.   ansi-c*/
+/*        //+   ansi-c*/
       SetupObjectiveFunction(smodel_ps, x_dv->v, x2_pd, x_dv->v);
       GRADSTPS_CSMINWEL = gradstps_csminwel_dv->v[2];
       if (indx_findMLE)
@@ -559,7 +559,7 @@ void minfinder_blockcsminwel(struct TSminpack_tag *minpack_ps, int indx_findMLE)
                   (double **)NULL, (int *)NULL);
 
 
-      //---
+/*        //---   ansi-c*/
       logvalue = -fret;
       fprintf(FPTR_OPT,"Log peak value after overall minimization:  %.16e\n", logvalue);
       fprintf(FPTR_OPT, "--------Numerical gradient---------\n");
@@ -568,7 +568,7 @@ void minfinder_blockcsminwel(struct TSminpack_tag *minpack_ps, int indx_findMLE)
       WriteVector(FPTR_OPT, x_dv, " %0.16e ");
       fflush(FPTR_OPT);
 
-      //--- Write to the intermediate results file.
+/*        //--- Write to the intermediate results file.   ansi-c*/
       if ( !(fptr_interesults = fopen(filename_printout,"w")) ) {
          printf("\n\nUnable to open the starting point data file %s in minfinder_blockcsminwel() in optpackage.c!\n", filename_printout);
          getchar();
@@ -587,13 +587,13 @@ void minfinder_blockcsminwel(struct TSminpack_tag *minpack_ps, int indx_findMLE)
       ConvertFreeParametersToTheta(smodel_ps,x1_pd);
    }
 
-   etc_csminwel_ps->niter = niters;   //Number of iterations taken by csminwel.
-   etc_csminwel_ps->fcount = fcount;   //Number of function evaluations used by csminwel.
-   etc_csminwel_ps->retcode = retcodeh;  //Return code for the terminating condition.
-                // 0, normal step (converged). 1, zero gradient (converged).
-                // 4,2, back and forth adjustment of stepsize didn't finish.
-                // 3, smallest stepsize still improves too slow. 5, largest step still improves too fast.
-                // 6, no improvement found.
+   etc_csminwel_ps->niter = niters;    /*  Number of iterations taken by csminwel.   ansi-c*/
+   etc_csminwel_ps->fcount = fcount;    /*  Number of function evaluations used by csminwel.   ansi-c*/
+   etc_csminwel_ps->retcode = retcodeh;   /*  Return code for the terminating condition.   ansi-c*/
+/*                  // 0, normal step (converged). 1, zero gradient (converged).   ansi-c*/
+/*                  // 4,2, back and forth adjustment of stepsize didn't finish.   ansi-c*/
+/*                  // 3, smallest stepsize still improves too slow. 5, largest step still improves too fast.   ansi-c*/
+/*                  // 6, no improvement found.   ansi-c*/
 
    DestroyMatrix_lf(H1_dm);
    DestroyMatrix_lf(H2_dm);
@@ -601,13 +601,13 @@ void minfinder_blockcsminwel(struct TSminpack_tag *minpack_ps, int indx_findMLE)
 }
 
 
-//-----------------------------------------------------
-// Minimization csminwel for the constant parameter model only.  5/24/04.
-//-----------------------------------------------------
-//------- Step 2. -------
-//--- 28/Oct/07: This function has NOT been used even for the constant-parameter model.
-//--- For examples, see lwz_est.c in D:\ZhaData\WorkDisk\LiuWZ\Project2_empirical\EstimationOct07
-//---                or ExamplesForC.prn under D:\ZhaData\CommonFiles\C_Examples_DebugTips.
+/*  //-----------------------------------------------------   ansi-c*/
+/*  // Minimization csminwel for the constant parameter model only.  5/24/04.   ansi-c*/
+/*  //-----------------------------------------------------   ansi-c*/
+/*  //------- Step 2. -------   ansi-c*/
+/*  //--- 28/Oct/07: This function has NOT been used even for the constant-parameter model.   ansi-c*/
+/*  //--- For examples, see lwz_est.c in D:\ZhaData\WorkDisk\LiuWZ\Project2_empirical\EstimationOct07   ansi-c*/
+/*  //---                or ExamplesForC.prn under D:\ZhaData\CommonFiles\C_Examples_DebugTips.   ansi-c*/
 /**
 void InitializeForMinproblem_const(struct TSminpack_tag *minpack_ps, char *filename_sp, TSdvector *gphi_dv, int indxStartValuesForMin)
 {
@@ -668,26 +668,26 @@ void InitializeForMinproblem_const(struct TSminpack_tag *minpack_ps, char *filen
 }
 /**/
 
-//------- Step 3. -------
+/*  //------- Step 3. -------   ansi-c*/
 void minfinder(TSminpack *minpack_ps)
 {
    TSdvector *x_dv = minpack_ps->x_dv;
-   //--- For MIN_CSMINWEL only.
+/*     //--- For MIN_CSMINWEL only.   ansi-c*/
    TSdmatrix *Hx_dm;
    TSetc_csminwel *etc_csminwel_ps;
 
    if (minpack_ps->package & MIN_CSMINWEL) {
       if (!x_dv->flag)  fn_DisplayError("optpackage.c/ minfinder(): Parameter x_dv must be initialized");
       else {
-         //=== BFGS (csminwel) method.
+/*           //=== BFGS (csminwel) method.   ansi-c*/
          etc_csminwel_ps = (TSetc_csminwel *)minpack_ps->etc_package_ps;
          Hx_dm = etc_csminwel_ps->Hx_dm;
-         //Alternative: Hx_dm = ((TSetc_csminwel *)minpack_ps->etc_package_ps)->Hx_dm;
+/*           //Alternative: Hx_dm = ((TSetc_csminwel *)minpack_ps->etc_package_ps)->Hx_dm;   ansi-c*/
          if (!Hx_dm->flag) {
             InitializeDiagonalMatrix_lf(Hx_dm, INI_H_CSMINWEL);
-            Hx_dm->flag = M_GE | M_SU | M_SL;       //Hessian is symmetric.
+            Hx_dm->flag = M_GE | M_SU | M_SL;        /*  Hessian is symmetric.   ansi-c*/
          }
-         //if (minpack_ps->filename_printout)  csminwel_SetPrintFile(minpack_ps->filename_printout);
+/*           //if (minpack_ps->filename_printout)  csminwel_SetPrintFile(minpack_ps->filename_printout);   ansi-c*/
          csminwel_SetPrintFile(minpack_ps->filename_printout);
          SetMincsminwelGlobal(minpack_ps);
          GRADSTPS_CSMINWEL = etc_csminwel_ps->gradstps_csminwel;
@@ -701,19 +701,19 @@ void minfinder(TSminpack *minpack_ps)
 
 
 
-//-----------------------------------------------------------------------
-// Linearly-constrained IMSL minimization package.
-//-----------------------------------------------------------------------
+/*  //-----------------------------------------------------------------------   ansi-c*/
+/*  // Linearly-constrained IMSL minimization package.   ansi-c*/
+/*  //-----------------------------------------------------------------------   ansi-c*/
 struct TSpackage_imslconlin_tag *CreateTSpackagae_imslconlin(const int npars_tot, const int neqs, const int ncons)
 {
-   //npars_tot: total number of variables (e.g., all the model variables plus free parameters in transition matrix).
-   //ncons: total number of constraints (excluding simple bounds) which include the linear equality constraints.
-   //neqs:  number of linear equality constrains.  Thus, ncons >= neqs.
-   //lh_coefs_dv: ncons*npars_tot-by-1 left-hand-side constraint cofficients with the first neqs rows dealing with equality constraints.
-   //rh_constraints_dv: ncons-by-1 right-hand-side the values for all the constraints.
-   //lowbounds_dv: npars_tot-by-1 simple lower bounds.
-   //upperbounds_dv: npars_tot-by-1 simple upper bounds.
-   //===
+/*     //npars_tot: total number of variables (e.g., all the model variables plus free parameters in transition matrix).   ansi-c*/
+/*     //ncons: total number of constraints (excluding simple bounds) which include the linear equality constraints.   ansi-c*/
+/*     //neqs:  number of linear equality constrains.  Thus, ncons >= neqs.   ansi-c*/
+/*     //lh_coefs_dv: ncons*npars_tot-by-1 left-hand-side constraint cofficients with the first neqs rows dealing with equality constraints.   ansi-c*/
+/*     //rh_constraints_dv: ncons-by-1 right-hand-side the values for all the constraints.   ansi-c*/
+/*     //lowbounds_dv: npars_tot-by-1 simple lower bounds.   ansi-c*/
+/*     //upperbounds_dv: npars_tot-by-1 simple upper bounds.   ansi-c*/
+/*     //===   ansi-c*/
    struct TSpackage_imslconlin_tag *package_imslconlin_ps = tzMalloc(1, struct TSpackage_imslconlin_tag);
 
    if (neqs > ncons || npars_tot<=0)
@@ -736,9 +736,9 @@ struct TSpackage_imslconlin_tag *CreateTSpackagae_imslconlin(const int npars_tot
    }
    package_imslconlin_ps->lowbounds_dv = CreateConstantVector_lf(npars_tot, -BIGREALNUMBER);
    package_imslconlin_ps->upperbounds_dv = CreateConstantVector_lf(npars_tot, BIGREALNUMBER);
-   //-
+/*     //-   ansi-c*/
    package_imslconlin_ps->xsaved_dv = CreateVector_lf(package_imslconlin_ps->npars_tot);
-   XIMSL_DV = CreateVector_lf(package_imslconlin_ps->npars_tot);  //Used in ObjFuncForModel_imslconlin() to save the minimized value in case the IMSL quits with a higher value.
+   XIMSL_DV = CreateVector_lf(package_imslconlin_ps->npars_tot);   /*  Used in ObjFuncForModel_imslconlin() to save the minimized value in case the IMSL quits with a higher value.   ansi-c*/
 
    package_imslconlin_ps->crit = CRIT_IMSLCONLIN;
    package_imslconlin_ps->itmax = ITMAX_IMSLCONLIN;
@@ -746,7 +746,7 @@ struct TSpackage_imslconlin_tag *CreateTSpackagae_imslconlin(const int npars_tot
 
    return (package_imslconlin_ps);
 }
-//---
+/*  //---   ansi-c*/
 struct TSpackage_imslconlin_tag *DestroyTSpackagae_imslconlin(struct TSpackage_imslconlin_tag *package_imslconlin_ps)
 {
    if (package_imslconlin_ps)
@@ -755,52 +755,52 @@ struct TSpackage_imslconlin_tag *DestroyTSpackagae_imslconlin(struct TSpackage_i
       DestroyVector_lf(package_imslconlin_ps->rh_constraints_dv);
       DestroyVector_lf(package_imslconlin_ps->lowbounds_dv);
       DestroyVector_lf(package_imslconlin_ps->upperbounds_dv);
-      //
+/*        //   ansi-c*/
       DestroyVector_lf(package_imslconlin_ps->xsaved_dv);
       DestroyVector_lf(XIMSL_DV);
 
-      //===
+/*        //===   ansi-c*/
       free(package_imslconlin_ps);
       return ((struct TSpackage_imslconlin_tag *)NULL);
    }
    else  return (package_imslconlin_ps);
 }
-//-----------------------------------------------------------------------
-// Using Linearly-constrained IMSL minimization package.
-//-----------------------------------------------------------------------
+/*  //-----------------------------------------------------------------------   ansi-c*/
+/*  // Using Linearly-constrained IMSL minimization package.   ansi-c*/
+/*  //-----------------------------------------------------------------------   ansi-c*/
 void minfinder_noblockimslconlin(struct TSpackage_imslconlin_tag *package_imslconlin_ps, struct TSminpack_tag *minpack_ps, char *filename_printout, int ntheta)
 {
-   //ntheta: number of free model parameters (NOT including free transition matrix Q parameters).
-   //filename_printout: the file that stores the intermediate results.
+/*     //ntheta: number of free model parameters (NOT including free transition matrix Q parameters).   ansi-c*/
+/*     //filename_printout: the file that stores the intermediate results.   ansi-c*/
 
-   //--- Model or project specific structure.
+/*     //--- Model or project specific structure.   ansi-c*/
    struct TStateModel_tag *smodel_ps = ((struct TSetc_minproj_tag *)minpack_ps->etc_project_ps)->smodel_ps;
-   //---
+/*     //---   ansi-c*/
    TSdvector *x_dv = minpack_ps->x_dv;
    TSdvector *g_dv = minpack_ps->g_dv;
    double *x1_pd, *x2_pd;
-   //===
+/*     //===   ansi-c*/
    TSdvector *xguess_dv = CreateVector_lf(x_dv->n);
 
    x1_pd = x_dv->v;
-   x2_pd = x_dv->v + ntheta;  //In the constant parameter model, this will point to invalid,
-                              //  but will be taken care of automatically by DW's function ConvertFreeParametersToQ().
+   x2_pd = x_dv->v + ntheta;   /*  In the constant parameter model, this will point to invalid,   ansi-c*/
+/*                                //  but will be taken care of automatically by DW's function ConvertFreeParametersToQ().   ansi-c*/
 
    CopyVector0(xguess_dv, x_dv);
 
 
-   //======= IMSL linearly-constrained optimization, which makes sure that the boundary condition is met.
-   imslconlin_SetPrintFile(filename_printout);  //Set the print-out file outputsp_min_tag.prn.
+/*     //======= IMSL linearly-constrained optimization, which makes sure that the boundary condition is met.   ansi-c*/
+   imslconlin_SetPrintFile(filename_printout);   /*  Set the print-out file outputsp_min_tag.prn.   ansi-c*/
    printf("\n\n======= Starting the IMSL constrained optimization======= \n\n");
    fflush(stdout);
-   //====== The following linearly-constrained minimization works well for this kind of model but has a bugger of returning a higher value of the objective function.
-   CopyVector0(XIMSL_DV, x_dv); //This is absolutely necessary because once imsl_d_min_con_gen_lin() is called, x_dv will be
-                                //  changed before ObjFuncForModel_imslconlin() is evaluated.  It is possible that x_dv is changed
-                                //  so much that bad objective is returned and thus XIMSL_DV would be bad from the start, thus
-                                //  giving 1.eE+3000 from beginning to end.
+/*     //====== The following linearly-constrained minimization works well for this kind of model but has a bugger of returning a higher value of the objective function.   ansi-c*/
+   CopyVector0(XIMSL_DV, x_dv);  /*  This is absolutely necessary because once imsl_d_min_con_gen_lin() is called, x_dv will be   ansi-c*/
+/*                                  //  changed before ObjFuncForModel_imslconlin() is evaluated.  It is possible that x_dv is changed   ansi-c*/
+/*                                  //  so much that bad objective is returned and thus XIMSL_DV would be bad from the start, thus   ansi-c*/
+/*                                  //  giving 1.eE+3000 from beginning to end.   ansi-c*/
    GLB_FVALMIN = -LogPosterior_StatesIntegratedOut(smodel_ps);
    CopyVector0(package_imslconlin_ps->xsaved_dv, XIMSL_DV);
-   //+
+/*     //+   ansi-c*/
    SetModelGlobalForIMSLconlin(smodel_ps);
    if (imsl_d_min_con_gen_lin(ObjFuncForModel_imslconlin, x_dv->n, package_imslconlin_ps->ncons, package_imslconlin_ps->neqs,
                               package_imslconlin_ps->lh_coefs_dv->v,
@@ -815,10 +815,10 @@ void minfinder_noblockimslconlin(struct TSpackage_imslconlin_tag *package_imslco
    else  printf("\nWarning: IMSL linearly-constrained optimization fails, so the results from csminwel and congramin are used.\n");
    printf("\n===Ending the IMSL constrained optimization===\n");
 
-   //=== Printing out messages indicating that IMSL has bugs.
+/*     //=== Printing out messages indicating that IMSL has bugs.   ansi-c*/
    if (minpack_ps->fret > GLB_FVALMIN)
    {
-      //IMSL linearly-constrained optimization returns a higher obj. func.  (a bug).
+/*        //IMSL linearly-constrained optimization returns a higher obj. func.  (a bug).   ansi-c*/
       printf("\n----------IMSL linearly-constrained minimization finished but with a higher objective function value!----------\n");
       printf("The improperly-returned value is %.10f while the lowest value of the objective function is %.16e.\n\n", minpack_ps->fret, GLB_FVALMIN);
       fflush(stdout);
@@ -828,22 +828,22 @@ void minfinder_noblockimslconlin(struct TSpackage_imslconlin_tag *package_imslco
    }
 
    ConvertFreeParametersToQ(smodel_ps,x2_pd);
-         //DW's function, which takes care of the degenerate case where x2_pd points to an
-         //  invalid place as in the constant parameter case.
-   ConvertFreeParametersToTheta(smodel_ps,x1_pd); //DW's function, which calls TZ's function.  So essentially it's TZ's function.
+/*           //DW's function, which takes care of the degenerate case where x2_pd points to an   ansi-c*/
+/*           //  invalid place as in the constant parameter case.   ansi-c*/
+   ConvertFreeParametersToTheta(smodel_ps,x1_pd);  /*  DW's function, which calls TZ's function.  So essentially it's TZ's function.   ansi-c*/
 
-   //Saved the last best results in case the IMSL quits with a bug.
+/*     //Saved the last best results in case the IMSL quits with a bug.   ansi-c*/
    CopyVector0(package_imslconlin_ps->xsaved_dv, XIMSL_DV);
 
 
-   //===
+/*     //===   ansi-c*/
    DestroyVector_lf(xguess_dv);
 }
-//===
-static struct TStateModel_tag *SMODEL_PS = NULL;    //Minimization to find the MLE or posterior peak.
+/*  //===   ansi-c*/
+static struct TStateModel_tag *SMODEL_PS = NULL;     /*  Minimization to find the MLE or posterior peak.   ansi-c*/
 static struct TStateModel_tag *SetModelGlobalForIMSLconlin(struct TStateModel_tag *smodel_ps)
 {
-   //Returns the old pointer in order to preserve the previous value.
+/*     //Returns the old pointer in order to preserve the previous value.   ansi-c*/
    struct TStateModel_tag *tmp_ps = SMODEL_PS;
    SMODEL_PS = smodel_ps;
    return (tmp_ps);
@@ -851,12 +851,12 @@ static struct TStateModel_tag *SetModelGlobalForIMSLconlin(struct TStateModel_ta
 static void ObjFuncForModel_imslconlin(int d_x0, double *x0_p, double *fret_p)
 {
    TSdvector x0_sdv;
-   //
+/*     //   ansi-c*/
    FILE *fptr_startingpoint_vec = NULL;
    static int ncnt_fevals = -1;
 
-   // printf("\n----- Entering the objective function. ------");
-   // fflush(stdout);
+/*     // printf("\n----- Entering the objective function. ------");   ansi-c*/
+/*     // fflush(stdout);   ansi-c*/
    x0_sdv.v = x0_p;
    x0_sdv.n = d_x0;
    x0_sdv.flag = V_DEF;
@@ -867,81 +867,81 @@ static void ObjFuncForModel_imslconlin(int d_x0, double *x0_p, double *fret_p)
       fflush(stdout);
    }
    if (*fret_p < GLB_FVALMIN) {
-      //=== Resets GLB_FVALMIN at *fret_p and then prints the intermediate point to a file.
+/*        //=== Resets GLB_FVALMIN at *fret_p and then prints the intermediate point to a file.   ansi-c*/
       fptr_startingpoint_vec = tzFopen(filename_sp_vec_minproj,"w");
       fprintf(fptr_startingpoint_vec, "================= Output from IMSC linear constrained optimization ====================\n");
       fprintf(fptr_startingpoint_vec, "IMSL: Value of objective miminization function at the %dth iteration: %.15f\n", ncnt_fevals, GLB_FVALMIN=*fret_p);
       fprintf(fptr_startingpoint_vec, "--------Restarting point---------\n");
       WriteVector(fptr_startingpoint_vec, &x0_sdv, " %0.16e ");
-      CopyVector0(XIMSL_DV, &x0_sdv);  //Saved in case the IMSL quits with a bug.
-      //=== Must print this results because imsl_d_min_con_gen_lin() has a bug and quits with a higher value. The printed-out results in the debug file may be used for imsl_d_min_con_nonlin() to continue.
+      CopyVector0(XIMSL_DV, &x0_sdv);   /*  Saved in case the IMSL quits with a bug.   ansi-c*/
+/*        //=== Must print this results because imsl_d_min_con_gen_lin() has a bug and quits with a higher value. The printed-out results in the debug file may be used for imsl_d_min_con_nonlin() to continue.   ansi-c*/
       fprintf(FPTR_DEBUG, "\nIMSL: Value of objective miminization function at the %dth iteration: %.15f\n", ncnt_fevals, GLB_FVALMIN=*fret_p);
       fprintf(FPTR_DEBUG, "--------Restarting point---------\n");
       WriteVector(FPTR_DEBUG, &x0_sdv, " %0.16e ");
       fflush(FPTR_DEBUG);
    }
 
-   //  printf("\n----- Leaving the objective function. ------\n");
-   //  fflush(stdout);
+/*     //  printf("\n----- Leaving the objective function. ------\n");   ansi-c*/
+/*     //  fflush(stdout);   ansi-c*/
 
    tzFclose(fptr_startingpoint_vec);
 }
-//------------------------
-// Overall posterior kernal for calling Waggoner's regime-switching procedure.
-//------------------------
+/*  //------------------------   ansi-c*/
+/*  // Overall posterior kernal for calling Waggoner's regime-switching procedure.   ansi-c*/
+/*  //------------------------   ansi-c*/
 static double opt_logOverallPosteriorKernal(struct TStateModel_tag *smodel_ps, TSdvector *xchange_dv)
 {
    double *x1_pd, *x2_pd;
 
    x1_pd = xchange_dv->v;
    x2_pd = xchange_dv->v + NumberFreeParametersTheta(smodel_ps);
-        //Note that NumberFreeParametersTheta() is DW's function, which points to TZ's function.
-        //In the constant parameter model, this will point to invalid,
-        //  but will be taken care of automatically by DW's function ConvertFreeParametersToQ().
+/*          //Note that NumberFreeParametersTheta() is DW's function, which points to TZ's function.   ansi-c*/
+/*          //In the constant parameter model, this will point to invalid,   ansi-c*/
+/*          //  but will be taken care of automatically by DW's function ConvertFreeParametersToQ().   ansi-c*/
 
-   //======= This is a must step to refresh the value at the new point. =======
-   ConvertFreeParametersToTheta(smodel_ps, x1_pd);   //Waggoner's function, which calls TZ's Convertphi2*().
-   ConvertFreeParametersToQ(smodel_ps, x2_pd);   //Waggoner's function, which automatically takes care of the constant-parameter situition
-   ThetaChanged(smodel_ps); //DW's function, which will also call my function to set a flag for refreshing everything under these new parameters.
-   if (1)  //Posterior function.
-      return ( LogPosterior_StatesIntegratedOut(smodel_ps) ); //DW's function.
+/*     //======= This is a must step to refresh the value at the new point. =======   ansi-c*/
+   ConvertFreeParametersToTheta(smodel_ps, x1_pd);    /*  Waggoner's function, which calls TZ's Convertphi2*().   ansi-c*/
+   ConvertFreeParametersToQ(smodel_ps, x2_pd);    /*  Waggoner's function, which automatically takes care of the constant-parameter situition   ansi-c*/
+   ThetaChanged(smodel_ps);  /*  DW's function, which will also call my function to set a flag for refreshing everything under these new parameters.   ansi-c*/
+   if (1)   /*  Posterior function.   ansi-c*/
+      return ( LogPosterior_StatesIntegratedOut(smodel_ps) );  /*  DW's function.   ansi-c*/
    else //Likelihood (with no prior)
-      return ( LogLikelihood_StatesIntegratedOut(smodel_ps) ); //DW's function.
+      return ( LogLikelihood_StatesIntegratedOut(smodel_ps) );  /*  DW's function.   ansi-c*/
 }
-//---
+/*  //---   ansi-c*/
 static void imslconlin_SetPrintFile(char *filename) {
-   if (!filename)   sprintf(filename_sp_vec_minproj, "outdata5imslconlin.prn");  //Default filename.
+   if (!filename)   sprintf(filename_sp_vec_minproj, "outdata5imslconlin.prn");   /*  Default filename.   ansi-c*/
    else if (STRLEN-1 < strlen(filename))  fn_DisplayError(".../optpackage.c:  the allocated length STRLEN for filename_sp_vec_minproj is too short.  Must increase the string length");
    else  strcpy(filename_sp_vec_minproj, filename);
 }
-//---
+/*  //---   ansi-c*/
 static void gradcd_imslconlin(int n, double *x, double *g)
 {
-   //Outputs:
-   //  g: the gradient n-by-1 g (no need to be initialized).
-   //Inputs:
-   //  x: the vector point at which the gradient is evaluated.  No change in the end although will be added or
-   //       substracted by dh during the function (but in the end the original value will be put back).
-   //  n: the dimension of g or x.
-   //int _i;
+/*     //Outputs:   ansi-c*/
+/*     //  g: the gradient n-by-1 g (no need to be initialized).   ansi-c*/
+/*     //Inputs:   ansi-c*/
+/*     //  x: the vector point at which the gradient is evaluated.  No change in the end although will be added or   ansi-c*/
+/*     //       substracted by dh during the function (but in the end the original value will be put back).   ansi-c*/
+/*     //  n: the dimension of g or x.   ansi-c*/
+/*     //int _i;   ansi-c*/
    FILE *fptr_startingpoint_vec = NULL;
 
-   // printf("\n=== Entering the gradient function. ===\n");
-   // fflush(stdout);
-   GLB_DISPLAY = 0;   //This guarantees that the objective function printouts will not show when the gradient is computed.
+/*     // printf("\n=== Entering the gradient function. ===\n");   ansi-c*/
+/*     // fflush(stdout);   ansi-c*/
+   GLB_DISPLAY = 0;    /*  This guarantees that the objective function printouts will not show when the gradient is computed.   ansi-c*/
    gradcd_gen(g, x, n, ObjFuncForModel_congrad, (double *)NULL, ObjFuncForModel_congrad(x, n));
 
-   //=== Prints the intermediate gradient to a file.
-   // fptr_startingpoint_vec = tzFopen(filename_sp_vec_minproj,"r");
-   // fprintf(fptr_startingpoint_vec, "--------Numerical gradient---------\n");
-   // for (_i=0; _i<n; _i++)  fprintf(fptr_startingpoint_vec, " %0.16e ", g[_i]);
-   // tzFclose(fptr_startingpoint_vec);
+/*     //=== Prints the intermediate gradient to a file.   ansi-c*/
+/*     // fptr_startingpoint_vec = tzFopen(filename_sp_vec_minproj,"r");   ansi-c*/
+/*     // fprintf(fptr_startingpoint_vec, "--------Numerical gradient---------\n");   ansi-c*/
+/*     // for (_i=0; _i<n; _i++)  fprintf(fptr_startingpoint_vec, " %0.16e ", g[_i]);   ansi-c*/
+/*     // tzFclose(fptr_startingpoint_vec);   ansi-c*/
 
    GLB_DISPLAY = 1;
-   // printf("\n=== Leaving the gradient function. ===\n");
-   // fflush(stdout);
+/*     // printf("\n=== Leaving the gradient function. ===\n");   ansi-c*/
+/*     // fflush(stdout);   ansi-c*/
 }
-//--- For conjugate gradient minimization as well.
+/*  //--- For conjugate gradient minimization as well.   ansi-c*/
 static double ObjFuncForModel_congrad(double *x0_p, int d_x0)
 {
    TSdvector x0_sdv;
@@ -958,12 +958,12 @@ static double ObjFuncForModel_congrad(double *x0_p, int d_x0)
 
 
 
-//-----------------------------------------------------------------------
-// Conjugate gradient method I minimization package.
-//-----------------------------------------------------------------------
+/*  //-----------------------------------------------------------------------   ansi-c*/
+/*  // Conjugate gradient method I minimization package.   ansi-c*/
+/*  //-----------------------------------------------------------------------   ansi-c*/
 struct TSpackage_congrad1_tag *CreateTSpackage_congrad1(void)
 {
-   //===
+/*     //===   ansi-c*/
    struct TSpackage_congrad1_tag *package_congrad1_ps = tzMalloc(1, struct TSpackage_congrad1_tag);
 
    package_congrad1_ps->crit = CRIT_CONGRAD1;
@@ -971,12 +971,12 @@ struct TSpackage_congrad1_tag *CreateTSpackage_congrad1(void)
 
    return (package_congrad1_ps);
 }
-//---
+/*  //---   ansi-c*/
 struct TSpackage_congrad1_tag *DestroyTSpackage_congrad1(struct TSpackage_congrad1_tag *package_congrad1_ps)
 {
    if (package_congrad1_ps)
    {
-      //===
+/*        //===   ansi-c*/
       free(package_congrad1_ps);
       return ((struct TSpackage_congrad1_tag *)NULL);
    }
