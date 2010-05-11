@@ -97,8 +97,11 @@ private:
   double *const data;
   const size_t size, stride;
 public:
-  VectorView(Vector &arg, size_t offset, size_t size_arg);
   VectorView(double *data_arg, size_t size_arg, size_t stride_arg);
+  /* Can't use a template for the 2 constructors below: this would override the
+  constructor which uses a pointer, because the argument list is the same */
+  VectorView(Vector &arg, size_t offset, size_t size_arg);
+  VectorView(VectorView &arg, size_t offset, size_t size_arg);
   virtual ~VectorView(){};
   inline size_t getSize() const { return size; }
   inline size_t getStride() const { return stride; }
@@ -135,8 +138,13 @@ private:
   const double *const data;
   const size_t size, stride;
 public:
-  VectorConstView(const Vector &arg, size_t offset, size_t size_arg);
   VectorConstView(const double *data_arg, size_t size_arg, size_t stride_arg);
+  /* Can't use a template for the 3 constructors below: this would override the
+  constructor which uses a pointer, because the argument list is the same */
+  VectorConstView(const Vector &arg, size_t offset, size_t size_arg);
+  VectorConstView(const VectorView &arg, size_t offset, size_t size_arg);
+  VectorConstView(const VectorConstView &arg, size_t offset, size_t size_arg);
+
   virtual ~VectorConstView(){};
   inline size_t getSize() const { return size; }
   inline size_t getStride() const { return stride; }

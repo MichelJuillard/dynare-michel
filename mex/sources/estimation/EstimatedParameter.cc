@@ -16,29 +16,25 @@
  * You should have received a copy of the GNU General Public License
  * along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 ///////////////////////////////////////////////////////////
-//  DetrendData.h
-//  Implementation of the Class DetrendData
-//  Created on:      02-Feb-2010 13:01:15
+//  EstimatedParameter.cpp
+//  Implementation of the Class EstimatedParameter
+//  Created on:      02-Feb-2010 13:06:35
 ///////////////////////////////////////////////////////////
 
-#if !defined(DetrendData_312823A1_6248_4af0_B204_DB22F1237E9B__INCLUDED_)
-#define DetrendData_312823A1_6248_4af0_B204_DB22F1237E9B__INCLUDED_
+#include "EstimatedParameter.hh"
 
-#include "Matrix.hh"
-
-class DetrendData
+EstimatedParameter::EstimatedParameter(const EstimatedParameter::pType type_arg,
+                                       size_t ID1_arg, size_t ID2_arg, const std::vector<size_t> &subSampleIDs_arg,
+                                       double lower_bound_arg, double upper_bound_arg, Prior prior_arg) :
+  ptype(type_arg), ID1(ID1_arg), ID2(ID2_arg),
+  lower_bound(lower_bound_arg), upper_bound(upper_bound_arg), prior(prior_arg),
+  subSampleIDs(subSampleIDs_arg)
 {
+}
 
-public:
-  virtual ~DetrendData(){};
-  DetrendData(const bool logLinear); // add later Vector& trendCoeff);
-  void detrend(const VectorView &SteadyState, const MatrixConstView &dataView, Matrix &Y);
+EstimatedParameter::~EstimatedParameter()
+{
+}
 
-private:
-  const bool logLinear;
-  //Vector trendCoeff;
-
-};
-
-#endif // !defined(312823A1_6248_4af0_B204_DB22F1237E9B__INCLUDED_)

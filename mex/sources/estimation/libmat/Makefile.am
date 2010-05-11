@@ -5,7 +5,8 @@ endif
 endif
 
 EXTRA_DIST = \
-	BlasBindings.hh
+	BlasBindings.hh \
+	DiscLyapFast.hh \
 	GeneralizedSchurDecomposition.cc \
 	GeneralizedSchurDecomposition.hh \
 	LUSolver.cc \

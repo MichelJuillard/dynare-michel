@@ -102,8 +102,16 @@ class MatrixView
   const size_t rows, cols, ld;
  public:
   MatrixView(double *data_arg, size_t rows_arg, size_t cols_arg, size_t ld_arg);
-  MatrixView(Matrix &arg, size_t row_offset, size_t col_offset,
-             size_t rows_arg, size_t cols_arg);
+  template<class Mat>
+  MatrixView(Mat &arg, size_t row_offset, size_t col_offset,
+             size_t rows_arg, size_t cols_arg) :
+    data(arg.getData() + row_offset + col_offset*arg.getLd()), rows(rows_arg), cols(cols_arg), ld(arg.getLd())
+  {
+    assert(row_offset < arg.getRows()
+           && row_offset + rows_arg <= arg.getRows()
+           && col_offset < arg.getCols()
+           && col_offset + cols_arg <= arg.getCols());
+  }
   virtual ~MatrixView(){};
   inline size_t getRows() const { return rows; }
   inline size_t getCols() const { return cols; }
@@ -140,8 +148,16 @@ class MatrixConstView
   const size_t rows, cols, ld;
  public:
   MatrixConstView(const double *data_arg, size_t rows_arg, size_t cols_arg, size_t ld_arg);
-  MatrixConstView(const Matrix &arg, size_t row_offset, size_t col_offset,
-                  size_t rows_arg, size_t cols_arg);
+  template<class Mat>
+  MatrixConstView(const Mat &arg, size_t row_offset, size_t col_offset,
+                  size_t rows_arg, size_t cols_arg) :
+    data(arg.getData() + row_offset + col_offset*arg.getLd()), rows(rows_arg), cols(cols_arg), ld(arg.getLd())
+  {
+    assert(row_offset < arg.getRows()
+           && row_offset + rows_arg <= arg.getRows()
+           && col_offset < arg.getCols()
+           && col_offset + cols_arg <= arg.getCols());
+  }
   virtual ~MatrixConstView(){};
   inline size_t getRows() const { return rows; }
   inline size_t getCols() const { return cols; }

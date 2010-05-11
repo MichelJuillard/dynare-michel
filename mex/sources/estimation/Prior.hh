@@ -30,9 +30,6 @@ struct Prior
 {
 
 public:
-  Prior(int shape, double mean, double mode, double lower_boound,       double upper_boound,    double fhp,     double shp);
-  virtual ~Prior();
-
   //! probablity density functions
   enum pShape
   {
@@ -43,11 +40,15 @@ public:
     Uniform = 5,
     Inv_gamma_2 = 6 //Inverse gamma (type 2) density
   };
+
+  Prior(Prior::pShape shape, double mean, double mode, double lower_bound, double upper_bound,  double fhp,     double shp);
+  virtual ~Prior();
+
   const pShape shape;
   const double mean;
   const double mode;
-  const double lower_boound;
-  const double upper_boound;
+  const double lower_bound;
+  const double upper_bound;
   /**
    * first  shape parameter
    */

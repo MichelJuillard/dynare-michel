@@ -33,7 +33,7 @@
 class VDVEigDecomposition
 {
   lapack_int lda, n;
-  int lwork, info;
+  lapack_int lwork, info;
   double tmpwork;
   double *work;
   bool converged;
@@ -45,9 +45,9 @@ public:
   class VDVEigException
   {
   public:
-    const int info;
+    const lapack_int info;
     std::string message;
-    VDVEigException(int info_arg, std::string message_arg) :
+    VDVEigException(lapack_int info_arg, std::string message_arg) :
       info(info_arg), message(message_arg) {
     };
   };
@@ -101,12 +101,12 @@ VDVEigDecomposition::calculate(const Mat &m) throw(VDVEigException)
 
   if (m.getCols() != (size_t) n  || m.getLd() != (size_t) lda)
     throw(VDVEigException(info, "Matrix not matching VDVEigDecomposition class"));
-  int tmplwork = -1;
+  lapack_int tmplwork = -1;
   V = m;
   dsyev("V", "U", &n, V.getData(), &lda, D.getData(), &tmpwork, &tmplwork, &info);
-  if (lwork < (int) tmpwork)
+  if (lwork < tmpwork)
     {
-      lwork = (int) tmpwork;
+      lwork = tmpwork;
       delete[] work;
       work = new double[lwork];
     }

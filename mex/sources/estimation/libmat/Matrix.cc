@@ -63,16 +63,6 @@ MatrixView::MatrixView(double *data_arg, size_t rows_arg, size_t cols_arg, size_
 {
 }
 
-MatrixView::MatrixView(Matrix &arg, size_t row_offset, size_t col_offset,
-                       size_t rows_arg, size_t cols_arg) :
-  data(arg.getData() + row_offset + col_offset*arg.getLd()), rows(rows_arg), cols(cols_arg), ld(arg.getLd())
-{
-  assert(row_offset < arg.getRows()
-         && row_offset + rows_arg <= arg.getRows()
-         && col_offset < arg.getCols()
-         && col_offset + cols_arg <= arg.getCols());
-}
-
 std::ostream &
 operator<<(std::ostream &out, const MatrixView &M)
 {
@@ -92,16 +82,6 @@ MatrixView::operator= (const MatrixView &arg)
 MatrixConstView::MatrixConstView(const double *data_arg, size_t rows_arg, size_t cols_arg, size_t ld_arg)
   : data(data_arg), rows(rows_arg), cols(cols_arg), ld(ld_arg)
 {
-}
-
-MatrixConstView::MatrixConstView(const Matrix &arg, size_t row_offset, size_t col_offset,
-                                 size_t rows_arg, size_t cols_arg) :
-  data(arg.getData() + row_offset + col_offset*arg.getLd()), rows(rows_arg), cols(cols_arg), ld(arg.getLd())
-{
-  assert(row_offset < arg.getRows()
-         && row_offset + rows_arg <= arg.getRows()
-         && col_offset < arg.getCols()
-         && col_offset + cols_arg <= arg.getCols());
 }
 
 std::ostream &

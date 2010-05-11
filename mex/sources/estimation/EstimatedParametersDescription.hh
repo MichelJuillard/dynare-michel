@@ -46,21 +46,9 @@ class EstimatedParametersDescription
 {
 public:
   virtual ~EstimatedParametersDescription();
-
-public:
-  EstimatedParametersDescription(size_t ncx, size_t ncn, size_t nvx, size_t nvn, size_t np,
-                                 std::vector<EstimationSubsample> &estSubsamples, std::vector<EstimatedParameter> &estParams);
-//Vector getAllParams(int period);
-//int getNumPeriods();
-  EstimationSubsample&getSubsample(int period);
-  std::vector<EstimationSubsample>&getAllSubsamples();
-//EstimatedParameter& getParameter(size_t ID);
-
-//private:
-
+  EstimatedParametersDescription(std::vector<EstimationSubsample> &estSubsamples, std::vector<EstimatedParameter> &estParams);
   std::vector<EstimationSubsample> estSubsamples;
   std::vector<EstimatedParameter> estParams;
-//vector<Prior> prior;
 };
 
 #endif // !defined(E8F2C096_A301_42e8_80FF_A643291BF995__INCLUDED_)

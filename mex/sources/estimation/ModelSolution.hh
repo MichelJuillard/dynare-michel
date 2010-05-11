@@ -42,7 +42,7 @@ public:
     const std::vector<size_t>& zeta_back_arg, const std::vector<size_t>& zeta_mixed_arg, 
     const std::vector<size_t>& zeta_static_arg, double qz_criterium);
   virtual ~ModelSolution(){};
-  void compute( Vector& steadyState, const Vector& deepParams, 	Matrix& ghx, Matrix& ghu ) throw (DecisionRules::BlanchardKahnException, GeneralizedSchurDecomposition::GSDException);
+  void compute( VectorView& steadyState, const Vector& deepParams, 	Matrix& ghx, Matrix& ghu ) throw (DecisionRules::BlanchardKahnException, GeneralizedSchurDecomposition::GSDException);
 
 private:
   const size_t n_endo;
@@ -55,8 +55,8 @@ private:
   DecisionRules decisionRules;
   DynamicModelDLL dynamicDLLp;
   //Matrix jacobian;
-  void ComputeModelSolution( Vector& steadyState, const Vector& deepParams, 	Matrix& ghx, Matrix& ghu ) throw (DecisionRules::BlanchardKahnException, GeneralizedSchurDecomposition::GSDException);
-  void ComputeSteadyState( Vector& steadyState, const Vector& deepParams);
+  void ComputeModelSolution( VectorView& steadyState, const Vector& deepParams, 	Matrix& ghx, Matrix& ghu ) throw (DecisionRules::BlanchardKahnException, GeneralizedSchurDecomposition::GSDException);
+  void ComputeSteadyState( VectorView& steadyState, const Vector& deepParams);
 
 };
 

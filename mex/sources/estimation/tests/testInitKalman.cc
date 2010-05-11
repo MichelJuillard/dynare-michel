@@ -100,46 +100,31 @@ main(int argc, char **argv)
   for (int i = 0; i < 2; ++i)
     zeta_fwrd_arg.push_back(fwd[i]-1);
 
-  size_t nriv = 6, nric = 4;
-  size_t sriv[] = {7,     8,    10,    11,    12,    13};
-  size_t sric[] = {3, 4, 5, 6};
+  size_t varobs[] = {12, 11};
+  std::vector<size_t> varobs_arg;
+  for (size_t i = 0; i < 2; ++i)
+    varobs_arg.push_back(varobs[i]-1);
 
-  std::vector<size_t> riv;
-  for (size_t i = 0; i < nriv; ++i)
-    riv.push_back(sriv[i]-1);
-  std::vector<size_t> ric;
-  for (size_t i = 0; i < nric; ++i)
-    ric.push_back(sric[i]-1);
+  // Compute zeta_varobs_back_mixed
+  sort(varobs_arg.begin(), varobs_arg.end());
+  std::vector<size_t> zeta_back_mixed, zeta_varobs_back_mixed;
+  set_union(zeta_back_arg.begin(), zeta_back_arg.end(),
+            zeta_mixed_arg.begin(), zeta_mixed_arg.end(),
+            back_inserter(zeta_back_mixed));
+  set_union(zeta_back_mixed.begin(), zeta_back_mixed.end(),
+            varobs_arg.begin(), varobs_arg.end(),
+            back_inserter(zeta_varobs_back_mixed));
 
-  size_t nobs = 2;
-  size_t svarobs[] = {2, 1};
-  std::vector<size_t> varobs;
-  for (size_t i = 0; i < nobs; ++i)
-    varobs.push_back(svarobs[i]-1);
+  size_t n_vbm = zeta_varobs_back_mixed.size();
 
   Matrix
-  T(riv.size(), riv.size()), R(riv.size(), n_exo), 
-  RQRt(riv.size(), riv.size()), Pstar(riv.size(), riv.size()),
-  Pinf(riv.size(), riv.size()), Z(varobs.size(), riv.size()), Q(n_exo);
-  Z.setAll(0.0);
-  for (size_t i = 0; i < varobs.size(); ++i)
-    Z(i, varobs[i]) = 1.0;
+  T(n_vbm, n_vbm), R(n_vbm, n_exo), 
+  RQRt(n_vbm, n_vbm), Pstar(n_vbm, n_vbm),
+  Pinf(n_vbm, n_vbm), Q(n_exo);
 
   MatrixView
   vCovVW(vcov, n_exo, n_exo, n_exo);
   Q = vCovVW;
-
-  size_t sorder_var[] =
-  {  4,  5,  6,  8,  9, 10, 11, 12, 14,  1,  7, 13,  2,  3, 15};
-  std::vector<size_t> order_var;
-  for (size_t ii = 0; ii < n_endo; ++ii)
-    order_var.push_back(sorder_var[ii]-1);                                                                                          //= (1:endo_nbr)';
-
-  size_t sinv_order_var[] =
-  { 10, 13, 14,  1,  2,  3, 11,  4,  5,  6,  7,  8, 12,  9,  15};
-  std::vector<size_t> inv_order_var;
-  for (size_t ii = 0; ii < n_endo; ++ii)
-    inv_order_var.push_back(sinv_order_var[ii]-1);                                                                                                          //= (1:endo_nbr)';
 
   double lyapunov_tol = 1e-16;
   int info = 0;
@@ -153,13 +138,13 @@ main(int argc, char **argv)
 
   InitializeKalmanFilter
   initializeKalmanFilter(modName, n_endo, n_exo,
-                         zeta_fwrd_arg, zeta_back_arg, zeta_mixed_arg, zeta_static_arg, qz_criterium,
-                         order_var, inv_order_var, riv, ric, lyapunov_tol, info);
+                         zeta_fwrd_arg, zeta_back_arg, zeta_mixed_arg, zeta_static_arg,
+                         zeta_varobs_back_mixed, qz_criterium,
+                         lyapunov_tol, info);
 
-  std::cout << "Initilise KF with Q: " << std::endl << Q << std::endl;
-  std::cout << "and Z" << std::endl << Z << std::endl;
+  std::cout << "Initialize KF with Q: " << std::endl << Q << std::endl;
 
-  initializeKalmanFilter.initialize(steadyState, deepParams, R, Z, Q, RQRt, T, Pstar, Pinf,
+  initializeKalmanFilter.initialize(steadyState, deepParams, R, Q, RQRt, T, Pstar, Pinf,
                                     penalty, dataView, yView, info);
 
   std::cout << "Matrix T: " << std::endl << T << std::endl;

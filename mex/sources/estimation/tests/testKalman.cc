@@ -100,50 +100,19 @@ main(int argc, char **argv)
   for (int i = 0; i < 2; ++i)
     zeta_fwrd_arg.push_back(fwd[i]-1);
 
-  size_t nriv = 6, nric = 4;
-  size_t sriv[] = {7,     8,    10,    11,    12,    13};
-  size_t sric[] = {3, 4, 5, 6};
-
-  std::vector<size_t> riv;
-  for (size_t i = 0; i < nriv; ++i)
-    riv.push_back(sriv[i]-1);
-  std::vector<size_t> ric;
-  for (size_t i = 0; i < nric; ++i)
-    ric.push_back(sric[i]-1);
-
   size_t nobs = 2;
-  size_t svarobs[] = {2, 1};
-  std::vector<size_t> varobs;
+  size_t varobs[] = {12, 11};
+  std::vector<size_t> varobs_arg;
   for (size_t i = 0; i < nobs; ++i)
-    varobs.push_back(svarobs[i]-1);
+    varobs_arg.push_back(varobs[i]-1);
 
   Matrix Q(n_exo), H(nobs);
-/*
-  T(riv.size(), riv.size()), R(riv.size(), n_exo), 
-  RQRt(riv.size(), riv.size()), Pstar(riv.size(), riv.size()),
-  Pinf(riv.size(), riv.size()), Z(varobs.size(), riv.size()), 
-  */
-  
   H.setAll(0.0);
-/*  for (size_t i = 0; i < varobs.size(); ++i)
-    Z(i, varobs[i]) = 1.0;
-*/
+
   MatrixView
   vCovVW(vcov, n_exo, n_exo, n_exo);
   Q = vCovVW;
   std::cout << "Matrix Q: " << std::endl << Q << std::endl;
-
-  size_t sorder_var[] =
-  {  4,  5,  6,  8,  9, 10, 11, 12, 14,  1,  7, 13,  2,  3, 15};
-  std::vector<size_t> order_var;
-  for (size_t ii = 0; ii < n_endo; ++ii)
-    order_var.push_back(sorder_var[ii]-1);                                                                                          //= (1:endo_nbr)';
-
-  size_t sinv_order_var[] =
-  { 10, 13, 14,  1,  2,  3, 11,  4,  5,  6,  7,  8, 12,  9,  15};
-  std::vector<size_t> inv_order_var;
-  for (size_t ii = 0; ii < n_endo; ++ii)
-    inv_order_var.push_back(sinv_order_var[ii]-1);                                                                                                          //= (1:endo_nbr)';
 
   double lyapunov_tol = 1e-16;
   double riccati_tol = 1e-16;
@@ -158,10 +127,8 @@ main(int argc, char **argv)
 
   KalmanFilter kalman(modName, n_endo, n_exo,
                          zeta_fwrd_arg, zeta_back_arg, zeta_mixed_arg, zeta_static_arg, qz_criterium,
-                         order_var, inv_order_var, varobs, riv, ric, riccati_tol, lyapunov_tol, info);
+                         varobs_arg, riccati_tol, lyapunov_tol, info);
 
-  std::cout << "Initilise KF with Q: " << std::endl << Q << std::endl;
-  // std::cout << "and Z" << std::endl << Z << std::endl;
   size_t start=0, period=0;
   double ll=kalman.compute(dataView, steadyState,  Q, H, deepParams,
                                    vwll, start, period, penalty, info);

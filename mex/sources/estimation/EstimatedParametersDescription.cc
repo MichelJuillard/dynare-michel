@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009-2010 Dynare Team
+ * Copyright (C) 2010 Dynare Team
  *
  * This file is part of Dynare.
  *
@@ -16,29 +16,21 @@
  * You should have received a copy of the GNU General Public License
  * along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 ///////////////////////////////////////////////////////////
-//  DetrendData.h
-//  Implementation of the Class DetrendData
-//  Created on:      02-Feb-2010 13:01:15
+//  EstimatedParametersDescription.cpp
+//  Implementation of the Class EstimatedParametersDescription
+//  Created on:      02-Feb-2010 13:06:47
 ///////////////////////////////////////////////////////////
 
-#if !defined(DetrendData_312823A1_6248_4af0_B204_DB22F1237E9B__INCLUDED_)
-#define DetrendData_312823A1_6248_4af0_B204_DB22F1237E9B__INCLUDED_
+#include "EstimatedParametersDescription.hh"
 
-#include "Matrix.hh"
-
-class DetrendData
+EstimatedParametersDescription::~EstimatedParametersDescription()
 {
+}
 
-public:
-  virtual ~DetrendData(){};
-  DetrendData(const bool logLinear); // add later Vector& trendCoeff);
-  void detrend(const VectorView &SteadyState, const MatrixConstView &dataView, Matrix &Y);
+EstimatedParametersDescription::EstimatedParametersDescription(std::vector<EstimationSubsample> &INestSubsamples, std::vector<EstimatedParameter> &INestParams) :
+  estSubsamples(INestSubsamples), estParams(INestParams)
+{
+}
 
-private:
-  const bool logLinear;
-  //Vector trendCoeff;
-
-};
-
-#endif // !defined(312823A1_6248_4af0_B204_DB22F1237E9B__INCLUDED_)
