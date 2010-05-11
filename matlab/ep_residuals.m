@@ -1,4 +1,4 @@
-function r = ep_residuals(x, y, ix, iy, s)
+function r = ep_residuals(x, y, ix, iy)
 % Inversion of the extended path simulation approach. This routine computes the innovations needed to
 % reproduce the time path of a subset of endogenous variables.    
 %    

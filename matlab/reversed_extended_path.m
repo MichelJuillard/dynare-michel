@@ -5,11 +5,11 @@ function innovation_paths = reversed_extended_path(controlled_time_series, contr
 %    
 % INPUTS
 %  o controlled_time_series           [double]  n*T matrix.    
-%  o controlled_variable_names   [string]    n*1 matlab's cell. 
-% o control_innovation_names     [string]    n*1 matlab's cell.  
+%  o controlled_variable_names        [string]    n*1 matlab's cell. 
+%  o control_innovation_names         [string]    n*1 matlab's cell.  
 %
 % OUTPUTS
-%  o innovations                        [double]  n*T matrix.
+%  o innovations                      [double]  n*T matrix.
 %    
 % ALGORITHM
 %  
@@ -40,10 +40,9 @@ global M_ oo_ options_
 steady_;
 
 %  Compute the first order perturbation reduced form.
-oldopt = options_;
-options_.order = 1;
-[dr,info]=resol(oo_.steady_state,0);
-oo_.dr = dr; options_ = oldopt;
+old_options_order = options_.order; options_.order = 1;
+[oo_.dr,info]  = resol(oo_.steady_state,0);
+options_.order = old_options_order;
 
 % Set-up oo_.exo_simul.
 make_ex_; 
@@ -55,7 +54,7 @@ make_y_;
 n  = length(controlled_variable_names);
 iy = NaN(n,1);
 for k=1:n
-    iy(k) = strmatch(controlled_variable_names{k},M_.endo_names,'exact');
+    iy(k) = strmatch(conrolled_variable_names{k},M_.endo_names,'exact');
 end
 
 % Get indices of the control innovations.
@@ -73,3 +72,11 @@ innovation_paths = zeros(n,T);
 % Initialization of the perfect foresight model solver.
 perfect_foresight_simulation();
 
+% Call fsolve recursively
+for t=1:T
+    [tmp,fval,exitflag] = fsolve(ep_residuals,x0,[],y,ix,iy);
+    if exitflag==1
+        innovation_paths(:,t) = tmp;
+    end
+    % Update
+end
