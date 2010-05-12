@@ -71,7 +71,6 @@ else
     k3 = find(k3(:));
     k4 = dr.kstate(find(dr.kstate(:,2) < M_.maximum_lag+1),[1 2]);
     k4 = k4(:,1)+(M_.maximum_lag+1-k4(:,2))*M_.endo_nbr;
-    
     if iorder == 1    
         if ~isempty(dr.ghu)
             for i = M_.maximum_lag+1: iter+M_.maximum_lag

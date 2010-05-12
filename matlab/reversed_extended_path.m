@@ -1,13 +1,12 @@
-function innovation_paths = reversed_extended_path(controlled_time_series, controlled_variable_names, control_innovation_names)
+function innovation_paths = reversed_extended_path(controlled_variable_names, control_innovation_names, dataset)
 % Inversion of the extended path simulation approach. This routine computes the innovations needed to
 % reproduce the time path of a subset of endogenous variables. The initial condition is teh deterministic
 % steady state.   
 %    
-% INPUTS
-%  o controlled_time_series           [double]  n*T matrix.    
+% INPUTS    
 %  o controlled_variable_names        [string]    n*1 matlab's cell. 
 %  o control_innovation_names         [string]    n*1 matlab's cell.  
-%
+%  o dataset                          [structure]
 % OUTPUTS
 %  o innovations                      [double]  n*T matrix.
 %    
@@ -36,6 +35,14 @@ global M_ oo_ options_
 
 %% Initialization
 
+% Load data.
+eval(dataset.name);
+dataset.data = [];
+for v = 1:dataset.number_of_observed_variables
+    eval(['dataset.data = [ dataset.data , ' dataset.variables(v,:) ' ];'])
+end
+data = dataset.data(dataset.first_observation:dataset.first_observation+dataset.number_of_observations,:);
+
 % Compute the deterministic steady state.
 steady_;
 
@@ -44,27 +51,37 @@ old_options_order = options_.order; options_.order = 1;
 [oo_.dr,info]  = resol(oo_.steady_state,0);
 options_.order = old_options_order;
 
+% Set various options.
+options_.periods = 100;
+
 % Set-up oo_.exo_simul.
 make_ex_; 
 
 % Set-up oo_.endo_simul.
 make_y_;
 
-% Get indices of the controlled endogenous variables
+% Get indices of the controlled endogenous variables in endo_simul.
 n  = length(controlled_variable_names);
 iy = NaN(n,1);
 for k=1:n
-    iy(k) = strmatch(conrolled_variable_names{k},M_.endo_names,'exact');
+    iy(k) = strmatch(controlled_variable_names{k},M_.endo_names,'exact');
 end
 
-% Get indices of the control innovations.
+% Get indices of the controlled endogenous variables in dataset.
+iy_ = NaN(n,1);
+for k=1:n
+    iy_(k) = strmatch(controlled_variable_names{k},dataset.variables,'exact');
+end
+
+
+% Get indices of the control innovations in exo_simul.
 ix = NaN(n,1);
 for k=1:n
     ix(k) = strmatch(control_innovation_names{k},M_.exo_names,'exact');
 end
 
 % Get the length of the sample.
-T = size(controlled_time_series,2);
+T = size(data,1);
 
 % Output initialization.
 innovation_paths = zeros(n,T);
@@ -72,11 +89,16 @@ innovation_paths = zeros(n,T);
 % Initialization of the perfect foresight model solver.
 perfect_foresight_simulation();
 
-% Call fsolve recursively
+
+%% Call fsolve recursively
 for t=1:T
-    [tmp,fval,exitflag] = fsolve(ep_residuals,x0,[],y,ix,iy);
+    x0 = zeros(n,1);
+    y  = transpose(data(t,iy_));
+    [tmp,fval,exitflag] = fsolve('ep_residuals', x0, [], y, ix, iy, oo_.steady_state, oo_.dr, M_.maximum_lag, M_.endo_nbr);
     if exitflag==1
         innovation_paths(:,t) = tmp;
     end
-    % Update
+    % Update endo_simul.
+    oo_.endo_simul(:,1:end-1) = oo_.endo_simul(:,2:end); 
+    oo_.endo_simul(:,end) = oo_.steady_state;
 end

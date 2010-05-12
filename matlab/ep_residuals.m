@@ -1,4 +1,4 @@
-function r = ep_residuals(x, y, ix, iy)
+function r = ep_residuals(x, y, ix, iy, steadystate, dr, maximum_lag, endo_nbr)
 % Inversion of the extended path simulation approach. This routine computes the innovations needed to
 % reproduce the time path of a subset of endogenous variables.    
 %    
@@ -36,16 +36,32 @@ function r = ep_residuals(x, y, ix, iy)
 
 global oo_
 
-weight = 1.0;
-tdx = M_.maximum_lag+1;
+persistent k1 k2 weight
 
-x = exp(transpose(x));
+if isempty(k1)
+    k1 = [maximum_lag:-1:1];
+    k2 = dr.kstate(find(dr.kstate(:,2) <= maximum_lag+1),[1 2]);
+    k2 = k2(:,1)+(maximum_lag+1-k2(:,2))*endo_nbr;
+    weight = 0.99;
+end
 
-oo_.exo_simul(tdx,ix) = x;
-exogenous_variables = zeros(size(oo_.exo_simul));
-exogenous_variables(tdx,ix) = x;
-initial_path = simult_(oo_.steady_state,dr,exogenous_variables,1);
-oo_.endo_simul = weight*initial_path(:,1:end-1) + (1-weight)*oo_.endo_simul;
+% Copy the shocks in exo_simul.
+oo_.exo_simul(maximum_lag+1,ix) = exp(transpose(x));
+exo_simul = log(oo_.exo_simul);
 
-    
-    
+% Compute the initial solution path for the endogenous variables using a first order approximation.
+initial_path = oo_.endo_simul;
+for i = maximum_lag+1:size(oo_.exo_simul)
+    tempx1 = oo_.endo_simul(dr.order_var,k1);
+    tempx2 = bsxfun(@minus,tempx1,dr.ys(dr.order_var));
+    tempx = tempx2(k2);
+    initial_path(dr.order_var,i) = dr.ys(dr.order_var)+dr.ghx*tempx2(k2)+dr.ghu*transpose(exo_simul(i,:));
+    k1 = k1+1;
+end
+oo_.endo_simul = weight*initial_path + (1-weight)*oo_.endo_simul;
+
+info = perfect_foresight_simulation(dr,steadystate);
+r = y-transpose(oo_.endo_simul(maximum_lag+1,iy));
+
+%(re)Set k1 (indices for the initial conditions)
+k1 = [maximum_lag:-1:1];
