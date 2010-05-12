@@ -42,14 +42,19 @@ if isempty(k1)
     k1 = [maximum_lag:-1:1];
     k2 = dr.kstate(find(dr.kstate(:,2) <= maximum_lag+1),[1 2]);
     k2 = k2(:,1)+(maximum_lag+1-k2(:,2))*endo_nbr;
-    weight = 0.99;
+    weight = 0.0;
 end
+
+verbose = 0;
 
 % Copy the shocks in exo_simul.
 oo_.exo_simul(maximum_lag+1,ix) = exp(transpose(x));
 exo_simul = log(oo_.exo_simul);
 
 % Compute the initial solution path for the endogenous variables using a first order approximation.
+if verbose
+    disp('ep_residuals:: Set initial condition for endogenous variable paths.')
+end
 initial_path = oo_.endo_simul;
 for i = maximum_lag+1:size(oo_.exo_simul)
     tempx1 = oo_.endo_simul(dr.order_var,k1);
@@ -61,6 +66,11 @@ end
 oo_.endo_simul = weight*initial_path + (1-weight)*oo_.endo_simul;
 
 info = perfect_foresight_simulation(dr,steadystate);
+if verbose>1
+    info
+    info.iterations.errors
+end
+
 r = y-transpose(oo_.endo_simul(maximum_lag+1,iy));
 
 %(re)Set k1 (indices for the initial conditions)

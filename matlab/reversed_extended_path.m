@@ -73,7 +73,6 @@ for k=1:n
     iy_(k) = strmatch(controlled_variable_names{k},dataset.variables,'exact');
 end
 
-
 % Get indices of the control innovations in exo_simul.
 ix = NaN(n,1);
 for k=1:n
@@ -89,12 +88,19 @@ innovation_paths = zeros(n,T);
 % Initialization of the perfect foresight model solver.
 perfect_foresight_simulation();
 
+% Set options for fsolve.
+options = optimset('MaxIter',10000,'Display','Iter');
 
 %% Call fsolve recursively
 for t=1:T
     x0 = zeros(n,1);
-    y  = transpose(data(t,iy_));
-    [tmp,fval,exitflag] = fsolve('ep_residuals', x0, [], y, ix, iy, oo_.steady_state, oo_.dr, M_.maximum_lag, M_.endo_nbr);
+    y_target  = transpose(data(t,iy_));
+    total_variation = y_target-transpose(oo_.endo_simul(t+M_.maximum_lag,iy));
+    for i=1:100
+        [t,i]
+        y = transpose(oo_.endo_simul(t+M_.maximum_lag,iy)) + (i/100)*y_target 
+        [tmp,fval,exitflag] = fsolve('ep_residuals', x0, options, y, ix, iy, oo_.steady_state, oo_.dr, M_.maximum_lag, M_.endo_nbr);
+    end
     if exitflag==1
         innovation_paths(:,t) = tmp;
     end
