@@ -39,7 +39,7 @@ main (int argc, char** argv)
   std::vector<size_t> zeta_mixed_arg;
   std::vector<size_t> zeta_static_arg;
   double qz_criterium=1.0+1.0e-9;  
-  Vector steadyState(n_endo), deepParams(npar);
+  Vector deepParams(npar);
 
   double dYSparams [] = {
     1.0110,  2.2582,  0.4477,  1.0000,
@@ -66,8 +66,7 @@ main (int argc, char** argv)
 
   VectorView modParamsVW (dparams, npar,1);
   deepParams=modParamsVW;
-  VectorView steadyStateVW(dYSparams,n_endo,1);
-  steadyState=steadyStateVW;
+  VectorView steadyState(dYSparams,n_endo,1);
   std::cout << "Vector deepParams: " << std::endl << deepParams << std::endl;
   std::cout << "Matrix vCov: " << std::endl << vCov << std::endl;
   std::cout << "Vector steadyState: " << std::endl << steadyState << std::endl;
