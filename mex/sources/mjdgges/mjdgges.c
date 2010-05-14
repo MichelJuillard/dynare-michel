@@ -61,7 +61,10 @@ mjdgges(double *a, double *b, double *z, double *n, double *sdim, double *eval_r
   for (per = eval_r; per <= &eval_r[i_n-1]; ++per)
     {
       *per = *par / *pb;
-      *pei = *pai / *pb;
+      if (*pai == 0.0 && *pb == 0.0)
+	*pei = 0.0;
+      else
+	*pei = *pai / *pb;
       ++par;
       ++pai;
       ++pb;
