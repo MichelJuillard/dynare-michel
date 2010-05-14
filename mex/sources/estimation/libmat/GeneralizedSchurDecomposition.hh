@@ -102,8 +102,14 @@ GeneralizedSchurDecomposition::getGeneralizedEigenvalues(Vec1 &eig_real, Vec2 &e
     *per = eig_real.getData(), *pei = eig_cmplx.getData();
   while (par < alphar + n)
     {
-      *per = *par++ / *pb;
-      *pei = *pai++ / *pb++;
+      *per = *par / *pb;
+      if (*pai == 0.0 && *pb == 0.0)
+        *pei = 0.0;
+      else
+        *pei = *pai / *pb;
+      par++;
+      pai++;
+      pb++;
       per += eig_real.getStride();
       pei += eig_cmplx.getStride();
     }
