@@ -1,0 +1,41 @@
+WORKING_DIR = ../../../..
+
+SWZ_SRC_DIRS = $(WORKING_DIR)/matlab/swz/c-code/utilities/TZCcode $(WORKING_DIR)/matlab/swz/c-code/utilities/DWCcode/matrix $(WORKING_DIR)/matlab/swz/c-code/utilities/DWCcode/error $(WORKING_DIR)/matlab/swz/c-code/utilities/DWCcode/arrays $(WORKING_DIR)/matlab/swz/c-code/utilities/DWCcode/ascii $(WORKING_DIR)/matlab/swz/c-code/utilities/DWCcode/stat $(WORKING_DIR)/matlab/swz/c-code/utilities/DWCcode/spherical $(WORKING_DIR)/matlab/swz/c-code/utilities/DWCcode/sort $(WORKING_DIR)/matlab/swz/c-code/sbvar/switching $(WORKING_DIR)/matlab/swz/c-code/sbvar/var $(WORKING_DIR)/matlab/swz/c-code/mex
+
+vpath %.c $(SWZ_SRC_DIRS)
+
+####
+# 64
+BIT = /usr/local64
+# 32
+#BIT = /usr/local
+###
+
+###
+# TO BE REMOVED
+#MAC
+MAC_FLAG = -DMACOSX
+#GSL
+GSL_INCLUDE_DIR = -I$(BIT)/include/gsl -I/usr/local/include
+LIBS += -lgsl -lgslcblas
+#
+###
+
+DEBUG = -g
+
+CPPFLAGS += $(DEBUG) -DINTELCMATHLIBRARY $(MAC_FLAG) $(GSL_INCLUDE_DIR) -I$(WORKING_DIR)/matlab/swz/c-code/utilities/TZCcode -I$(WORKING_DIR)/matlab/swz/c-code/utilities/DWCcode/matrix -I$(WORKING_DIR)/matlab/swz/c-code/utilities/DWCcode/error -I$(WORKING_DIR)/matlab/swz/c-code/utilities/DWCcode/arrays -I$(WORKING_DIR)/matlab/swz/c-code/utilities/DWCcode/ascii -I$(WORKING_DIR)/matlab/swz/c-code/utilities/DWCcode/stat -I$(WORKING_DIR)/matlab/swz/c-code/utilities/DWCcode/spherical -I$(WORKING_DIR)/matlab/swz/c-code/utilities/DWCcode/sort -I$(WORKING_DIR)/matlab/swz/c-code/sbvar/switching -I$(WORKING_DIR)/matlab/swz/c-code/sbvar/var -I$(WORKING_DIR)/matlab/swz/c-code/mex
+
+LDFLAGS += -L$(BIT)/lib
+
+noinst_PROGRAMS = mex_sbvar_init_file mex_sbvar_estimation mex_sbvar_mhm_1 mex_sbvar_mhm_2 mex_sbvar_probabilities mex_sbvar_draws
+
+common_mex = mex_top_level.c modify_for_mex.c
+swz_common = bmatrix.c swzmatrix.c dw_error.c dw_rand.c dw_matrix_rand.c dw_array.c dw_matrix_array.c dw_matrix_sort.c dw_ascii.c dw_parse_cmd.c
+swz_tao    = tzmatlab.c mathlib.c cstz_dw.c
+
+nodist_mex_sbvar_init_file_SOURCES     = $(common_mex) $(swz_common) create_init_file.c switch.c switchio.c VARbase.c VARio.c VARio_matlab.c
+nodist_mex_sbvar_estimation_SOURCES    = $(common_mex) $(swz_common) $(swz_tao) estimate.c VARbase.c VARio.c command_line_VAR.c switch.c switchio.c switch_opt.c csminwel.c
+nodist_mex_sbvar_mhm_1_SOURCES         = $(common_mex) $(swz_common) mhm_VAR_main_1.c mhm_VAR.c VARbase.c VARio.c command_line_VAR.c switch.c switchio.c
+nodist_mex_sbvar_mhm_2_SOURCES         = $(common_mex) $(swz_common) mhm_VAR_main_2.c spherical.c VARbase.c VARio.c switch.c switchio.c mhm_VAR.c
+nodist_mex_sbvar_probabilities_SOURCES = $(common_mex) $(swz_common) probabilities.c switch.c switchio.c VARbase.c VARio.c command_line_VAR.c
+nodist_mex_sbvar_draws_SOURCES         = $(common_mex) $(swz_common) PrintDraws.c switch.c switchio.c VARbase.c VARio.c command_line_VAR.c

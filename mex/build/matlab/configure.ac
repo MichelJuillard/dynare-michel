@@ -69,7 +69,8 @@ AC_CONFIG_FILES([Makefile
                  libdynare++/Makefile
                  bytecode/Makefile
                  k_order_perturbation/Makefile
-                 dynare_simul_/Makefile])
+                 dynare_simul_/Makefile
+                 swz/Makefile])
 
 if test "x$ax_enable_matlab" = "xyes" -a "x$ax_matlab_version_ok" = "xyes" -a "x$ax_mexopts_ok" = "xyes"; then
   if test x"$ax_pthread_ok" = "xyes"; then
