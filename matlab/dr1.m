@@ -92,7 +92,7 @@ if options_.ramsey_policy
                                        M_.endo_names,'exact')];
         end
         ys = oo_.steady_state;
-        inst_val = dynare_solve('dyn_ramsey_static_', ...
+        [inst_val,info1] = dynare_solve('dyn_ramsey_static_', ...
                                 oo_.steady_state(k_inst),0, ...
                                 M_,options_,oo_,it_);
         ys(k_inst) = inst_val;
@@ -113,17 +113,19 @@ if options_.ramsey_policy
         oo_.steady_state = x;
         [junk,junk,multbar] = dyn_ramsey_static_(oo_.steady_state(k_inst),M_,options_,oo_,it_);
     else
-        oo_.steady_state = dynare_solve('dyn_ramsey_static_', ...
+        [oo_.steady_state,info1] = dynare_solve('dyn_ramsey_static_', ...
                                         oo_.steady_state,0,M_,options_,oo_,it_);
         [junk,junk,multbar] = dyn_ramsey_static_(oo_.steady_state,M_,options_,oo_,it_);
     end
+        
     check1 = max(abs(feval([M_.fname '_static'],...
                            oo_.steady_state,...
                            [oo_.exo_steady_state; ...
                         oo_.exo_det_steady_state], M_.params))) > options_.dynatol ;
     if check1
-        error(['The steadystate values returned by ' M_.fname ...
-               '_steadystate.m don''t solve the static model!' ])
+        info(1) = 20;
+        info(2) = check1'*check1;
+        return
     end
 
     [jacobia_,M_] = dyn_ramsey_dynamic_(oo_.steady_state,multbar,M_,options_,oo_,it_);
