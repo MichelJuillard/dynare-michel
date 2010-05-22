@@ -1,6 +1,6 @@
 /* Used to check that Dynare++ and Dynare with k_order_solver=1 give the same result */
 
-var m m_1 P P_1 c e W R k d n l gy_obs gp_obs y dA P2 c2;
+var m m_1 P P_1 c e W R k d n l gy_obs gp_obs y dA;
 varexo e_a e_m;
 
 parameters alp bet gam mst rho psi del;
@@ -16,7 +16,7 @@ del = 0.02;
 model;
 dA = exp(gam+e_a);
 log(m) = (1-rho)*log(mst) + rho*log(m_1(-1))+e_m;
--P/(c(+1)*P(+1)*m)+bet*P(+1)*(alp*exp(-alp*(gam+log(e(+1))))*k^(alp-1)*n(+1)^(1-alp)+(1-del)*exp(-(gam+log(e(+1)))))/(c2(+1)*P2(+1)*m(+1))=0;
+-P/(c(+1)*P(+1)*m)+bet*P(+1)*(alp*exp(-alp*(gam+log(e(+1))))*k^(alp-1)*n(+1)^(1-alp)+(1-del)*exp(-(gam+log(e(+1)))))/(c(+2)*P(+2)*m(+1))=0;
 W = l/n;
 -(psi/(1-psi))*(c*P/(1-n))+l/n = 0;
 R = P*(1-alp)*exp(-alp*(gam+e_a))*k(-1)^alp*n^(-alp)/W;
@@ -28,8 +28,6 @@ e = exp(e_a);
 y = k(-1)^alp*n^(1-alp)*exp(-alp*(gam+e_a));
 gy_obs = dA*y/y(-1);
 gp_obs = (P/P_1(-1))*m_1(-1)/dA;
-P2 = P(+1);
-c2 = c(+1);
 m_1 = m;
 P_1 = P;
 end;
@@ -51,8 +49,6 @@ y = 0.6;
 gy_obs = exp(gam);
 gp_obs = exp(-gam); 
 dA = exp(gam);
-  P2=P;
-  c2=c;
 end;
 
 vcov = [0.014, 0;0, 0.005];
