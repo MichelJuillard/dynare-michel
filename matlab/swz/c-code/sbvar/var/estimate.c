@@ -619,6 +619,8 @@ int main(int nargs, char **args)
       return 0;
     }
 
+  constant_seed=dw_ParseInteger_String(nargs,args,"cseed",0);
+
 /*    // Generator seed   ansi-c*/
   seed=dw_ParseInteger_String(nargs,args,"gs",0);
   dw_initialize_generator(seed);

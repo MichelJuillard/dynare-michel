@@ -3,6 +3,7 @@
 void swz_exit(int status);
 void swz_fprintf_err(const char * str, ...);
 int swz_fprintf_stdout(char *msg, ...);
+extern int constant_seed;
 #endif
 
 

@@ -347,6 +347,8 @@ int main(int nargs, char **args)
   int initial_time, begin_time, end_time;
   FILE *f_out_intermediate, *f_out_final, *f_out_intermediate_draws;
 
+  constant_seed=dw_ParseInteger_String(nargs,args,"cseed",0);
+
   if (mhm=CreateMHM_CommandLine(nargs,args))
     {
 /*        //=== Random seed ===//   ansi-c*/

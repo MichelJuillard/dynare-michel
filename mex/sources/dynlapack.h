@@ -60,7 +60,7 @@ extern "C" {
   typedef lapack_int (*SGGESCRIT)(const float *, const float *, const float *);
   typedef float *LAFLT;
   typedef const float *CONST_LAFLT;
-  typedef lapack_int *CONST_LALOG; //logical
+  typedef lapack_int *CONST_LALOG; /*logical*/
 
 #define dgetrs FORTRAN_WRAPPER(dgetrs)
   void dgetrs(LACHAR trans, CONST_LAINT n, CONST_LAINT nrhs, CONST_LADOU a, CONST_LAINT lda, CONST_LAINT ipiv,

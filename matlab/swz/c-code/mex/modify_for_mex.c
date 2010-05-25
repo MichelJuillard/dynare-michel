@@ -9,6 +9,7 @@
 #include <dynmex.h>
 #endif
 
+int constant_seed;
 int
 swz_fprintf_stdout(char *msg, ...)
 {

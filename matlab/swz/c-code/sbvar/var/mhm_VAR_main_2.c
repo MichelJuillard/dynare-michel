@@ -1920,6 +1920,9 @@ int main(int nargs, char **args)
   /* Read command line and input files                                         */
   /*****************************************************************************/
 /*    // help   ansi-c*/
+
+  constant_seed=dw_ParseInteger_String(nargs,args,"cseed",0);
+
   if (dw_FindArgument(nargs,args,'h') >= 0)
     {
       printf("\nSyntax: marginal_VAR -d <number posterior draws>"

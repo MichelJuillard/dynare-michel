@@ -134,9 +134,14 @@ void csminwel(double (*fcn)(double *x, int n, double **args, int *dims),
 
 /*     //=== Seed for random number generator in stdlib.h.   Added by T.Zha; 03/10/2006.   ansi-c*/
    if (!RANDOMSEED_CSMINWEL)
-      randomseed = (unsigned int)time((time_t *)NULL);
-/*                                   //Note that (unsigned int)time(0) uses the time of day for random seed.   ansi-c*/
-/*                                   //Added by T.Zha; 03/10/2006.  time() is in time.h.   ansi-c*/
+     {
+       if(constant_seed==0)
+         randomseed = (unsigned int)time((time_t *)NULL);
+       /*                                   //Note that (unsigned int)time(0) uses the time of day for random seed.   ansi-c*/
+       /*                                   //Added by T.Zha; 03/10/2006.  time() is in time.h.   ansi-c*/
+       else
+         randomseed = constant_seed;
+     }
    else
       randomseed = (unsigned int)RANDOMSEED_CSMINWEL;
 

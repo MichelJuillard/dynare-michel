@@ -216,12 +216,18 @@ PRECISION dw_uniform_rnd(void)
   if (idum <= 0)
     {
       if (idum == 0)
-    {
-      idum=abs((int)time((time_t *)NULL));
-      if (idum == 0) idum=1;
-    }
+        {
+          if(constant_seed==0)
+            idum=abs((int)time((time_t *)NULL));
+          else
+            {
+              srand(constant_seed);
+              idum=rand();
+            }
+          if (idum == 0) idum=1;
+        }
       else
-    idum=-idum;
+        idum=-idum;
 
       for (j=NTAB+7; j >= 0; j--)
     {
@@ -274,12 +280,18 @@ PRECISION dw_uniform_rnd(void)
   if (idum <= 0)
     {
       if (idum == 0)
-    {
-      idum=abs((int)time((time_t *)NULL));
-      if (idum == 0) idum=1;
-    }
+        {
+          if(constant_seed==0)
+            idum=abs((int)time((time_t *)NULL));
+          else
+            {
+              srand(constant_seed);
+              idum=rand();
+            }
+          if (idum == 0) idum=1;
+        }
       else
-    idum=-idum;
+        idum=-idum;
 
       idum2=idum;
       for (j=NTAB+7; j>=0; j--)

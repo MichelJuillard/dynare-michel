@@ -55,6 +55,7 @@ int main(int nargs, char **args)
     }
 
 /*    //=== Get seed, tuning peroid, burn-in period, number of iterations, and thinning factor   ansi-c*/
+  constant_seed=dw_ParseInteger_String(nargs,args,"cseed",0);
   seed=dw_ParseInteger_String(nargs,args,"gs",0);
   tuning=dw_ParseInteger_String(nargs,args,"mh",30000);
   iterations=dw_ParseInteger_String(nargs,args,"i",1000);
