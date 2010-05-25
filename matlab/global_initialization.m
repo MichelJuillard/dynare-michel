@@ -112,6 +112,7 @@ options_.minimal_solving_periods = 1;
 
 % Solution
 options_.order = 2;
+options_.pruning = 0;
 options_.solve_algo = 2;
 options_.linear = 0;
 options_.replic = 50;

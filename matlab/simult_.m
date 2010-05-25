@@ -1,23 +1,21 @@
 function y_=simult_(y0,dr,ex_,iorder)
-% function y_=simult_(y0,dr,ex_,iorder)
-%
-% Simulates the model, given the path of exogenous variables and the
+% Simulates the model using a perturbation approach, given the path for the exogenous variables and the
 % decision rules.
 %
 % INPUTS
-%    y0:       starting values
-%    dr:       structure of decisions rules for stochastic simulations
-%    ex_:      matrix of shocks
-%    iorder=0: first-order approximation
-%    iorder=1: second-order approximation
+%    y0       [double]   n*1 vector, initial value (n is the number of declared endogenous variables plus the number 
+%                        of auxilliary variables for lags and leads)
+%    dr       [struct]   matlab's structure where the reduced form solution of the model is stored.
+%    ex_      [double]   T*q matrix of innovations.
+%    iorder   [integer]  order of the taylor approximation.
 %
 % OUTPUTS
-%    y_:       stochastic simulations results
+%    y_       [double]   n*(T+1) time series for the endogenous variables.
 %
 % SPECIAL REQUIREMENTS
 %    none
 
-% Copyright (C) 2001-2007 Dynare Team
+% Copyright (C) 2001-2010 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -34,16 +32,15 @@ function y_=simult_(y0,dr,ex_,iorder)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-global M_ options_ it_
+global M_ options_
+
 iter = size(ex_,1);
-if ~isempty(dr.ghu)
-    nx = size(dr.ghu,2);
-end
+
 y_ = zeros(size(y0,1),iter+M_.maximum_lag);
 
-y_(:,1:M_.maximum_lag) = y0;
+y_(:,1) = y0;
 
-if options_.k_order_solver
+if options_.k_order_solver% Call dynare++ routines.
     options_.seed = 77;
     ex_ = [zeros(1,M_.exo_nbr); ex_];
     switch options_.order
@@ -64,46 +61,44 @@ if options_.k_order_solver
     end
     y_(dr.order_var,:) = y_;
 else
-    k1 = [M_.maximum_lag:-1:1];
     k2 = dr.kstate(find(dr.kstate(:,2) <= M_.maximum_lag+1),[1 2]);
     k2 = k2(:,1)+(M_.maximum_lag+1-k2(:,2))*M_.endo_nbr;
-    k3 = M_.lead_lag_incidence(1:M_.maximum_lag,:)';
-    k3 = find(k3(:));
-    k4 = dr.kstate(find(dr.kstate(:,2) < M_.maximum_lag+1),[1 2]);
-    k4 = k4(:,1)+(M_.maximum_lag+1-k4(:,2))*M_.endo_nbr;
-    if iorder == 1    
-        if ~isempty(dr.ghu)
-            for i = M_.maximum_lag+1: iter+M_.maximum_lag
-                tempx1 = y_(dr.order_var,k1);
-                tempx2 = tempx1-repmat(dr.ys(dr.order_var),1,M_.maximum_lag);
-                tempx = tempx2(k2);
-                y_(dr.order_var,i) = dr.ys(dr.order_var)+dr.ghx*tempx+dr.ghu* ...
-                    ex_(i-M_.maximum_lag,:)';
-                k1 = k1+1;
+    switch iorder
+      case 1
+        if isempty(dr.ghu)
+            for i = 2:iter+M_.maximum_lag
+                yhat = y_(dr.order_var(k2),i-1)-dr.ys(dr.order_var(k2));
+                y_(dr.order_var,i) = dr.ys(dr.order_var)+dr.ghx*yhat;
             end
         else
-            for i = M_.maximum_lag+1: iter+M_.maximum_lag
-                tempx1 = y_(dr.order_var,k1);
-                tempx2 = tempx1-repmat(dr.ys(dr.order_var),1,M_.maximum_lag);
-                tempx = tempx2(k2);
-                y_(dr.order_var,i) = dr.ys(dr.order_var)+dr.ghx*tempx;
-                k1 = k1+1;
+            for i = 2:iter+M_.maximum_lag
+                yhat = y_(dr.order_var(k2),i-1)-dr.ys(dr.order_var(k2));
+                y_(dr.order_var,i) = dr.ys(dr.order_var) + dr.ghx*yhat + dr.ghu*ex_(i-1,:)';
             end
         end
-    elseif iorder == 2
-        for i = M_.maximum_lag+1: iter+M_.maximum_lag
-            tempx1 = y_(dr.order_var,k1);
-            tempx2 = tempx1-repmat(dr.ys(dr.order_var),1,M_.maximum_lag);
-            tempx = tempx2(k2);
-            tempu = ex_(i-M_.maximum_lag,:)';
-            tempuu = kron(tempu,tempu);
-            tempxx = kron(tempx,tempx);
-            tempxu = kron(tempx,tempu);
-            y_(dr.order_var,i) = dr.ys(dr.order_var)+dr.ghs2/2+dr.ghx*tempx+ ...
-                dr.ghu*tempu+0.5*(dr.ghxx*tempxx+dr.ghuu*tempuu)+dr.ghxu*tempxu;
-            k1 = k1+1;
+      case 2
+        constant = dr.ys(dr.order_var)+.5*dr.ghs2;
+        if options_.pruning
+            y__ = y0;
+            for i = 2:iter+M_.maximum_lag
+                yhat1 = y__(dr.order_var(k2))-dr.ys(dr.order_var(k2));
+                yhat2 = y_(dr.order_var(k2),i-1)-dr.ys(dr.order_var(k2));
+                epsilon = ex_(i-1,:)';
+                y_(dr.order_var,i) = constant + dr.ghx*yhat2 + dr.ghu*epsilon ...
+                    + A_times_B_kronecker_C(.5*dr.ghxx,yhat1) ...
+                    + A_times_B_kronecker_C(.5*dr.ghuu,epsilon) ...
+                    + A_times_B_kronecker_C(dr.ghxu,yhat1,epsilon);
+                y__(dr.order_var) = dr.ys(dr.order_var) + dr.ghx*yhat1 + dr.ghu*epsilon;
+            end
+        else
+            for i = 2:iter+M_.maximum_lag
+                yhat = y_(dr.order_var(k2),i-1)-dr.ys(dr.order_var(k2));
+                epsilon = ex_(i-1,:)';
+                y_(dr.order_var,i) = constant + dr.ghx*yhat + dr.ghu*epsilon ...
+                    + A_times_B_kronecker_C(.5*dr.ghxx,yhat) ...
+                    + A_times_B_kronecker_C(.5*dr.ghuu,epsilon) ...
+                    + A_times_B_kronecker_C(dr.ghxu,yhat,epsilon);
+            end
         end
     end
 end
-
-% MJ 08/30/02 corrected bug at order 2
