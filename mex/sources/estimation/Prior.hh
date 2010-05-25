@@ -41,12 +41,13 @@ public:
     Inv_gamma_2 = 6 //Inverse gamma (type 2) density
   };
 
-  Prior(Prior::pShape shape, double mean, double mode, double lower_bound, double upper_bound,  double fhp,     double shp);
+  Prior(Prior::pShape shape, double mean, double mode, double standard, double lower_bound, double upper_bound,  double fhp,     double shp);
   virtual ~Prior();
 
   const pShape shape;
   const double mean;
   const double mode;
+  const double standard;
   const double lower_bound;
   const double upper_bound;
   /**

@@ -25,8 +25,8 @@
 
 #include "Prior.hh"
 
-Prior::Prior(Prior::pShape shape_arg, double mean_arg, double mode_arg, double lower_bound_arg,      double upper_bound_arg, double fhp_arg, double shp_arg) :
-  shape(shape_arg), mean(mean_arg), mode(mode_arg), lower_bound(lower_bound_arg),       upper_bound(upper_bound_arg),   fhp(fhp_arg), shp(shp_arg)
+Prior::Prior(Prior::pShape shape_arg, double mean_arg, double mode_arg, double standard_arg, double lower_bound_arg,      double upper_bound_arg, double fhp_arg, double shp_arg) :
+  shape(shape_arg), mean(mean_arg), mode(mode_arg), standard(standard_arg), lower_bound(lower_bound_arg),       upper_bound(upper_bound_arg),   fhp(fhp_arg), shp(shp_arg)
 {
 
 }
