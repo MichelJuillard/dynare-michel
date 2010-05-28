@@ -10,8 +10,10 @@
 #endif
 
 int constant_seed;
+
+/*
 int
-swz_fprintf_stdout(char *msg, ...)
+swz_printf(char *msg, ...)
 {
   int ret;
   va_list ap;
@@ -30,6 +32,28 @@ swz_fprintf_stdout(char *msg, ...)
   return ret;
 }
 
+int
+swz_fprintf_stdout(char *msg, ...)
+{
+  int ret;
+  va_list ap;
+  va_start(ap, msg);
+
+#if defined(MATLAB_MEX_FILE)
+  ret = mexPrintf(msg, ap);
+  mexEvalString("pause(.001);");
+  //  mexEvalString("drawnow;");
+#elif defined(OCTAVE_MEX_FILE)
+  mexPrintf(msg, ap);
+  ret = 1;
+#else
+  ret = vprintf(msg, ap);
+#endif
+
+  va_end(ap);
+  return ret;
+}
+*/
 void
 swz_fprintf_err(char *str, ...)
 {
@@ -42,6 +66,7 @@ swz_fprintf_err(char *str, ...)
 
 #if defined(MATLAB_MEX_FILE) || defined(OCTAVE_MEX_FILE)
   mexPrintf(str, ap);
+  /*  mexEvalString("drawnow;");*/
 #else
   vfprintf(stderr, str, ap);
 #endif

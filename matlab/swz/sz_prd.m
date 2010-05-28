@@ -22,7 +22,7 @@ mhm_spec_path=[swz_root '/mhm_specification'];
 %== Processing control
 %==========================================================================
 % 1 to use standalone, 0 to use mex
-options_.ms.standalone = 0;
+options_.ms.standalone = 1;
 
 %==========================================================================
 %== Output control
@@ -507,14 +507,14 @@ end
 if options_.ms.estimate_msmodel == 1
     if options_.ms.standalone == 1
         if use_linux == 1
-            perform_estimation=[c_path,'/sbvar_estimation -ft ',options_.ms.output_file_tag];
+            perform_estimation=[c_path,'/sbvar_estimation -cseed 5 -ft ',options_.ms.output_file_tag];
             system(perform_estimation);
         else
-            perform_estimation=[c_path,'\sbvar_estimation.exe -ft ',options_.ms.output_file_tag];
+            perform_estimation=[c_path,'\sbvar_estimation.exe -cseed 5 -ft ',options_.ms.output_file_tag];
             dos(perform_estimation)            
         end
     else
-        perform_estimation=['-ft ',options_.ms.output_file_tag];
+        perform_estimation=['-cseed 5 -ft ',options_.ms.output_file_tag];
         mex_sbvar_estimation(perform_estimation);
     end
 end
@@ -528,20 +528,20 @@ if options_.ms.compute_mdd == 1
     swz_write_mhm_input(mhm_file,options_.ms);
     if options_.ms.standalone == 1
         if use_linux == 1
-            compute_mdd1=[c_path,'/sbvar_mhm_1 -ft ',options_.ms.output_file_tag,' -fi ',mhm_file];
+            compute_mdd1=[c_path,'/sbvar_mhm_1 -cseed 5 -ft ',options_.ms.output_file_tag,' -fi ',mhm_file];
             system(compute_mdd1);
-            compute_mdd2=[c_path,'/sbvar_mhm_2 -ft ',options_.ms.output_file_tag,' -d ',int2str(options_.ms.proposal_draws),' -t 3'];
+            compute_mdd2=[c_path,'/sbvar_mhm_2 -cseed 5 -ft ',options_.ms.output_file_tag,' -d ',int2str(options_.ms.proposal_draws),' -t 3'];
             system(compute_mdd2);
         else
-            compute_mdd1=[c_path,'\sbvar_mhm_1.exe -ft ',options_.ms.output_file_tag,' -fi ',mhm_file];
+            compute_mdd1=[c_path,'\sbvar_mhm_1.exe -cseed 5 -ft ',options_.ms.output_file_tag,' -fi ',mhm_file];
             system(compute_mdd1);
-            compute_mdd2=[c_path,'\sbvar_mhm_2.exe -ft ',options_.ms.output_file_tag,' -d ',int2str(options_.ms.proposal_draws),' -t 3'];
+            compute_mdd2=[c_path,'\sbvar_mhm_2.exe -cseed 5 -ft ',options_.ms.output_file_tag,' -d ',int2str(options_.ms.proposal_draws),' -t 3'];
             system(compute_mdd2);            
         end
     else
-        compute_mdd1=['-ft ',options_.ms.output_file_tag,' -fi ',mhm_file];
+        compute_mdd1=['-cseed 5 -ft ',options_.ms.output_file_tag,' -fi ',mhm_file];
         mex_sbvar_mhm_1(compute_mdd1);
-        compute_mdd2=['-ft ',options_.ms.output_file_tag,' -d ',int2str(options_.ms.proposal_draws),' -t 3'];
+        compute_mdd2=['-cseed 5 -ft ',options_.ms.output_file_tag,' -d ',int2str(options_.ms.proposal_draws),' -t 3'];
         mex_sbvar_mhm_2(compute_mdd2);
     end
 end
@@ -571,14 +571,14 @@ end
 if options_.ms.print_draws == 1 %error here as well
     if options_.ms.standalone == 1
         if use_linux == 1
-            print_draws=[c_path,'/sbvar_draws -ft ',options_.ms.output_file_tag,' -i ',int2str(options_.ms.n_draws),' -t ',int2str(options_.ms.thinning_factor)];
+            print_draws=[c_path,'/sbvar_draws -cseed 5 -ft ',options_.ms.output_file_tag,' -i ',int2str(options_.ms.n_draws),' -t ',int2str(options_.ms.thinning_factor)];
             system(print_draws);
         else
-            print_draws=[c_path,'\sbvar_draws -ft ',options_.ms.output_file_tag,' -i ',int2str(options_.ms.n_draws),' -t ',int2str(options_.ms.thinning_factor)];
+            print_draws=[c_path,'\sbvar_draws -cseed 5 -ft ',options_.ms.output_file_tag,' -i ',int2str(options_.ms.n_draws),' -t ',int2str(options_.ms.thinning_factor)];
             system(print_draws);            
         end
     else
-        print_draws=['-ft ',options_.ms.output_file_tag,' -i ',int2str(options_.ms.n_draws),' -t ',int2str(options_.ms.thinning_factor)];
+        print_draws=['-cseed 5 -ft ',options_.ms.output_file_tag,' -i ',int2str(options_.ms.n_draws),' -t ',int2str(options_.ms.thinning_factor)];
         mex_sbvar_draws(print_draws);
     end
 end
