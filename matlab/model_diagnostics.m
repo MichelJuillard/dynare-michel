@@ -78,6 +78,7 @@ fh = str2func([M_.fname '_static']);
 if options_.steadystate_flag
     [ys,check1] = feval([M_.fname '_steadystate'],dr.ys,...
                         [oo_.exo_steady_state; oo_.exo_det_steady_state]);
+    M_.params = evalin('base','M_.params;');
     if size(ys,1) < M_.endo_nbr 
         if length(M_.aux_vars) > 0
             ys = add_auxiliary_variables_to_steadystate(ys,M_.aux_vars,...

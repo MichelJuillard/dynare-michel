@@ -95,6 +95,7 @@ if options_.ramsey_policy
         [inst_val,info1] = dynare_solve('dyn_ramsey_static_', ...
                                 oo_.steady_state(k_inst),0, ...
                                 M_,options_,oo_,it_);
+        M_.params = evalin('base','M_.params;');
         ys(k_inst) = inst_val;
         [x,check] = feval([M_.fname '_steadystate'],...
                           ys,[oo_.exo_steady_state; ...
@@ -126,6 +127,16 @@ if options_.ramsey_policy
         info(1) = 20;
         info(2) = check1'*check1;
         return
+    end
+    
+    if options_.noprint == 0
+        disp_steady_state(M_,oo_)
+        for i=M_.orig_endo_nbr:M_.endo_nbr
+            if strmatch('mult_',M_.endo_names(i,:))
+                disp(sprintf('%s \t\t %g',M_.endo_names(i,:), ...
+                             oo_.steady_state(i)));
+            end
+        end
     end
 
     [jacobia_,M_] = dyn_ramsey_dynamic_(oo_.steady_state,multbar,M_,options_,oo_,it_);
