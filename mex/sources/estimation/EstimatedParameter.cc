@@ -27,7 +27,7 @@
 
 EstimatedParameter::EstimatedParameter(const EstimatedParameter::pType type_arg,
                                        size_t ID1_arg, size_t ID2_arg, const std::vector<size_t> &subSampleIDs_arg,
-                                       double lower_bound_arg, double upper_bound_arg, Prior prior_arg) :
+                                       double lower_bound_arg, double upper_bound_arg, Prior* prior_arg) :
   ptype(type_arg), ID1(ID1_arg), ID2(ID2_arg),
   lower_bound(lower_bound_arg), upper_bound(upper_bound_arg), prior(prior_arg),
   subSampleIDs(subSampleIDs_arg)

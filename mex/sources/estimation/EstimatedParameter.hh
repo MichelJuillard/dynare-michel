@@ -43,7 +43,7 @@ public:
 
   EstimatedParameter(const EstimatedParameter::pType type,
                      size_t ID1, size_t ID2, const std::vector<size_t> &subSampleIDs,
-                     double lower_bound, double upper_bound, Prior prior
+                     double lower_bound, double upper_bound, Prior* prior
                      );
   virtual ~EstimatedParameter();
 
@@ -52,7 +52,7 @@ public:
   const size_t ID2;
   const double lower_bound;
   const double upper_bound;
-  const Prior prior;
+  Prior* prior;
   const std::vector<size_t> subSampleIDs;
 };
 

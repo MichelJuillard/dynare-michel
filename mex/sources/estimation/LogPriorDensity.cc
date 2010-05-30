@@ -18,21 +18,41 @@
  */
 
 ///////////////////////////////////////////////////////////
-//  Prior.cpp
-//  Implementation of the Class Prior
-//  Created on:      02-Feb-2010 13:06:20
+//  LogPriorDensity.cpp
+//  Implementation of the Class LogPriorDensity
+//  Created on:      10-Feb-2010 20:56:08
 ///////////////////////////////////////////////////////////
 
-#include "Prior.hh"
+#include "LogPriorDensity.hh"
 
-Prior::Prior(double mean_arg, double mode_arg, double standard_arg, double lower_bound_arg,      double upper_bound_arg, double fhp_arg, double shp_arg) :
-  mean(mean_arg), mode(mode_arg), standard(standard_arg), lower_bound(lower_bound_arg),       upper_bound(upper_bound_arg),   fhp(fhp_arg), shp(shp_arg)
+LogPriorDensity::~LogPriorDensity()
+{
+};
+
+LogPriorDensity::LogPriorDensity(EstimatedParametersDescription &estParsDesc_arg) :
+  estParsDesc(estParsDesc_arg)
+{
+};
+
+double
+LogPriorDensity::compute(const Vector &ep)
+{
+  assert(estParsDesc.estParams.size() == ep.getSize());
+
+  for (size_t i = 0; i <  ep.getSize(); ++i)
+    {
+      logPriorDensity += ((*(estParsDesc.estParams[i]).prior)).pdf(ep(i));
+      if (std::isinf(abs(logPriorDensity)))
+        return logPriorDensity;
+    }
+  return logPriorDensity;
+};
+
+/**
+ * Return random number for prior fromits distribution
+ */
+void
+LogPriorDensity::computeNewParams(Vector &ep)
 {
 
 }
-
-Prior::~Prior()
-{
-
-}
-

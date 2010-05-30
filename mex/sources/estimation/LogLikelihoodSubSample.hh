@@ -26,8 +26,8 @@
 #if !defined(DF8B7AF5_8169_4587_9037_2CD2C82E2DDF__INCLUDED_)
 #define DF8B7AF5_8169_4587_9037_2CD2C82E2DDF__INCLUDED_
 
-#include "KalmanFilter.hh"
 #include "EstimatedParametersDescription.hh"
+#include "KalmanFilter.hh"
 #include "VDVEigDecomposition.hh"
 
 class LogLikelihoodSubSample {
