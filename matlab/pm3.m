@@ -1,5 +1,9 @@
 function pm3(n1,n2,ifil,B,tit1,tit2,tit3,tit_tex,names1,names2,name3,DirectoryName,var_type)
 
+% PARALLEL CONTEXT
+% See also the comment in random_walk_metropolis_hastings.m funtion.
+
+
 % Copyright (C) 2007-2010 Dynare Team
 %
 % This file is part of Dynare.
@@ -80,6 +84,9 @@ end
 %% 	Finally I build the plots.
 %%
 
+% Block of code executed in parallel, with the exception of file
+% .tex generation always run sequentially. This portion of code is execute in parallel by
+% pm3_core1.m function.
 
 % %%%%%%%%%   PARALLEL BLOCK % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
@@ -134,10 +141,13 @@ localVars.MaxNumberOfPlotsPerFigure=MaxNumberOfPlotsPerFigure;
 localVars.name3=name3;
 localVars.tit3=tit3;
 localVars.Mean=Mean;
+% Like sequential execution!
 
- if isnumeric(options_.parallel) || ceil(size(varlist,1)/MaxNumberOfPlotsPerFigure)<4,
-    fout = pm3_core(localVars,1,nvar,0);
+                                 % Commenting for testing!
+ if isnumeric(options_.parallel) % || ceil(size(varlist,1)/MaxNumberOfPlotsPerFigure)<4,
+      fout = pm3_core(localVars,1,nvar,0);
  
+ % Parallel execution!
  else
     globalVars = struct('M_',M_, ...
       'options_', options_, ...
@@ -145,7 +155,6 @@ localVars.Mean=Mean;
      [fout, nBlockPerCPU, totCPU] = masterParallel(options_.parallel, 1, nvar, [],'pm3_core', localVars,globalVars, options_.parallel_info);
  end
 
-%%%%%%%%%  END PARALLEL BLOCK %% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 fprintf(['MH: ' tit1 ', done!\n']);
 
