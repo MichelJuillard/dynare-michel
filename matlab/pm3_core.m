@@ -1,5 +1,21 @@
 function myoutput=pm3_core(myinputs,fpar,nvar,whoiam, ThisMatlab)
 
+% PARALLEL CONTEXT
+% Core functionality for pm3.m function, which can be parallelized.
+ 
+% INPUTS 
+%   See See the comment in random_walk_metropolis_hastings_core.m funtion.
+
+% OUTPUTS
+% o myoutput  [struc]
+%
+%
+% ALGORITHM 
+%   Portion of McMCDiagnostics.m function.       
+%
+% SPECIAL REQUIREMENTS.
+%   None.
+
 % Copyright (C) 2007-2010 Dynare Team
 %
 % This file is part of Dynare.
@@ -20,7 +36,25 @@ function myoutput=pm3_core(myinputs,fpar,nvar,whoiam, ThisMatlab)
 if nargin<4,
     whoiam=0;
 end
-struct2local(myinputs);
+
+% Reshape 'myinputs' for local computation.
+% In order to avoid confusion in the name space, the instruction struct2local(myinputs) is replaced by:
+
+tit1=myinputs.tit1;
+nn=myinputs.nn;
+n2=myinputs.n2;
+Distrib=myinputs.Distrib;
+varlist=myinputs.varlist;
+MaxNumberOfPlotsPerFigure=myinputs.MaxNumberOfPlotsPerFigure;
+name3=myinputs.name3;
+tit3=myinputs.tit3;
+Mean=myinputs.Mean;
+
+if whoiam
+    Parallel=myinputs.Parallel;
+    MasterName=myinputs.MasterName;
+    DyMo=myinputs.DyMo;
+end
 
 
 global options_ M_ oo_
@@ -68,6 +102,13 @@ for i=fpar:nvar
         NAMES = strvcat(NAMES,name);
         title(name,'Interpreter','none')
     end
+    
+    if isstruct(options_.parallel)
+        if options_.parallel.Local==0
+             DirectoryName = CheckPath('Output');
+        end
+    end
+ 
     if subplotnum == MaxNumberOfPlotsPerFigure | i == nvar
         eval(['print -depsc2 ' M_.dname '/Output/'  M_.fname '_' name3 '_' deblank(tit3(i,:)) '.eps' ]);
         if ~exist('OCTAVE_VERSION')
