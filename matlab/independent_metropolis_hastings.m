@@ -19,6 +19,10 @@ function independent_metropolis_hastings(TargetFun,ProposalFun,xparam1,vv,mh_bou
 % SPECIAL REQUIREMENTS
 %   None.
 
+% PARALLEL CONTEXT
+% See the comment in random_walk_metropolis_hastings.m funtion.
+
+
 % Copyright (C) 2006-2008,2010 Dynare Team
 %
 % This file is part of Dynare.
@@ -48,6 +52,7 @@ InitSizeArray = min([repmat(MAX_nruns,nblck,1) fline+nruns-1],[],2);
 
 load([MhDirectoryName '/' ModelName '_mh_history.mat'],'record');
 
+%The mandatory variables for local/remote parallel computing are stored in localVars struct.
 
 localVars =   struct('TargetFun', TargetFun, ...
                      'ProposalFun', ProposalFun, ...
@@ -67,13 +72,11 @@ localVars.InitSizeArray=InitSizeArray;
 localVars.record=record;
 localVars.varargin=varargin;
 
-% tic,
-
-
+% Like a sequential execution!
 if isnumeric(options_.parallel),
     fout = independent_metropolis_hastings_core(localVars, fblck, nblck, 0);
     record = fout.record;
-    
+% Parallel execution.    
 else
     % global variables for parallel routines
     globalVars = struct('M_',M_, ...
@@ -108,9 +111,6 @@ end
 
 irun = fout(1).irun;
 NewFile = fout(1).NewFile;
-
-
-% ComptationalTime=toc,
 
 % record.Seeds.Normal = randn('state');
 % record.Seeds.Unifor = rand('state');
