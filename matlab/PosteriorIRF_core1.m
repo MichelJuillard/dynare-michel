@@ -1,17 +1,27 @@
 function myoutput=PosteriorIRF_core1(myinputs,fpar,npar,whoiam, ThisMatlab)
-
-% Perfome in parallel a portion of  PosteriorIRF
-% 
-% INPUTS 
-%  
-%    ...
-%  
-% OUTPUTS 
-%   ...
+%   PARALLEL CONTEXT
+%   This function perfom in parallel a portion of  PosteriorIRF.m code.
+%   This is a special kind of parallel function. Unlike of other parallel functions,
+%   that running in parallel a 'for' cycle, this function run in parallel a
+%   'while' loop! The parallelization of 'while' loop (when possible) is a more
+%   sophisticated procedure.
+%   
+%   See also the comment in random_walk_metropolis_hastings_core.m funtion.
 %
-% SPECIAL REQUIREMENTS
-%   None
-
+% INPUTS 
+%   See the comment in random_walk_metropolis_hastings_core.m funtion.
+%
+% OUTPUTS
+% o myoutput  [struc]
+%  Contained:
+%  OutputFileName_dsge, OutputFileName_param and OutputFileName_bvardsge.
+%
+% ALGORITHM 
+%   Portion of PosteriorIRF.m function. Specifically the 'while' cycle.       
+%
+% SPECIAL REQUIREMENTS.
+%   None.
+%
 % Copyright (C) 2006-2008,2010 Dynare Team
 %
 % This file is part of Dynare.
@@ -37,7 +47,37 @@ global options_ estim_params_ oo_ M_ bayestopt_
 if nargin<4,
     whoiam=0;
 end
-struct2local(myinputs);
+
+% Reshape 'myinputs' for local computation.
+% In order to avoid confusion in the name space, the instruction struct2local(myinputs) is replaced by:
+
+% Da CONTROLLARE con MARCO!
+IRUN = myinputs.IRUN;
+irun =myinputs.irun;
+irun2=myinputs.irun2;
+nosaddle=myinputs.nosaddle;
+type=myinputs.type;
+if ~strcmpi(type,'prior'),
+    x=myinputs.x;
+end
+
+nvar=myinputs.nvar;
+IndxVariables=myinputs.IndxVariables;
+MAX_nirfs_dsgevar=myinputs.MAX_nirfs_dsgevar;
+MAX_nirfs_dsge=myinputs.MAX_nirfs_dsge;
+MAX_nruns=myinputs.MAX_nruns;
+
+NumberOfIRFfiles_dsge=myinputs.NumberOfIRFfiles_dsge;
+NumberOfIRFfiles_dsgevar=myinputs.NumberOfIRFfiles_dsgevar;
+ifil2=myinputs.ifil2;
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+if whoiam
+    Parallel=myinputs.Parallel;
+    MasterName=myinputs.MasterName;
+    DyMo=myinputs.DyMo;
+end
+
 
 MhDirectoryName = CheckPath('metropolis');
 
@@ -57,10 +97,10 @@ else
         diary off;
         printf('\n')
     else
-        if strcmpi(typee,'posterior')
+        if strcmpi(type,'posterior')
             h = waitbar(0,'Bayesian (posterior) IRFs...');
             set(h,'Name','Bayesian (posterior) IRFs.');
-        elseif strcmpi(typee,'gsa')
+        elseif strcmpi(type,'gsa')
             h = waitbar(0,'GSA (prior) IRFs...');
         else
             h = waitbar(0,'Bayesian (prior) IRFs...');
@@ -82,14 +122,15 @@ if whoiam
    NumberOfIRFfiles_dsge=NumberOfIRFfiles_dsge(whoiam);
    NumberOfIRFfiles_dsgevar=NumberOfIRFfiles_dsgevar(whoiam);
 end
- while fpar<=npar 
+
+ while fpar<npar % Parallel 'while'!!!
    
     fpar = fpar + 1;
     irun = irun+1;
     irun2 = irun2+1;
-    if strcmpi(typee,'prior')
+    if strcmpi(type,'prior')
        
-         deep = GetOneDraw(typee);
+         deep = GetOneDraw(type);
        
     else
         deep = x(fpar,:);
@@ -267,13 +308,12 @@ end
 
 
 % Copy the rusults of computation on the call machine (specifically in the
-% dyrectory on call machine that contain the model).
+% directory on call machine that contain the model).
 
 myoutput.OutputFileName = [OutputFileName_dsge;
     OutputFileName_param;
     OutputFileName_bvardsge];
 
-% MhDirectoryName=TempPath;   
 
 
 
