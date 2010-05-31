@@ -1,5 +1,22 @@
 function myoutput=PosteriorIRF_core2(myinputs,fpar,npar,whoiam, ThisMatlab)
-
+% PARALLEL CONTEXT
+% Perfome in parallel a portion of  PosteriorIRF.m code.
+% See also the comment in random_walk_metropolis_hastings_core.m funtion.
+%
+% INPUTS 
+%   See the comment in random_walk_metropolis_hastings_core.m funtion.
+%
+% OUTPUTS
+% o myoutput  [struc]
+%  Contained:
+%  OutputFileName (i.e. the figures without the file .txt).
+%
+% ALGORITHM 
+%   Portion of PosteriorIRF.m function code. Specifically the last 'for' cycle.       
+%
+% SPECIAL REQUIREMENTS.
+%   None.
+%
 % Copyright (C) 2006-2008,2010 Dynare Team
 %
 % This file is part of Dynare.
@@ -22,7 +39,30 @@ global options_  M_
 if nargin<4,
     whoiam=0;
 end
-struct2local(myinputs);
+
+% Reshape 'myinputs' for local computation.
+% In order to avoid confusion in the name space, the instruction struct2local(myinputs) is replaced by:
+
+Check=options_.TeX
+ if (Check)
+   varlist_TeX=myinputs.varlist_TeX;
+ end
+ 
+nvar=myinputs.nvar;
+MeanIRF=myinputs.MeanIRF;
+tit=myinputs.tit;
+nn=myinputs.nn;
+MAX_nirfs_dsgevar=myinputs.MAX_nirfs_dsgevar;
+HPDIRF=myinputs.HPDIRF;
+varlist=myinputs.varlist;
+MaxNumberOfPlotPerFigure=myinputs.MaxNumberOfPlotPerFigure;
+
+% Necessary only for remote computing!
+if whoiam
+ Parallel=myinputs.Parallel;
+ MasterName=myinputs.MasterName;
+ DyMo=myinputs.DyMo;
+end
 
 % To save the figures where the function is computed!
 
@@ -102,12 +142,6 @@ for i=fpar:npar,
       title(name,'Interpreter','none')
     end
     
-    
-%      TempPath=DirectoryName;
-%      DirectoryNamePar='C:\dynare_calcs\ModelTest\ls2003\metropolis';
-%      DirectoryName=DirectoryNamePar;
-
-    
     if subplotnum == MaxNumberOfPlotPerFigure | (j == nvar  & subplotnum> 0)
       figunumber = figunumber+1;
       set(hh,'visible','on')
@@ -132,7 +166,6 @@ for i=fpar:npar,
 end% loop over exo_var  
  
 
-% DirectoryName=TempPath;
  
 myoutput.OutputFileName = OutputFileName;
 
