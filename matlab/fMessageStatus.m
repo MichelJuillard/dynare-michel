@@ -1,16 +1,22 @@
 function fMessageStatus(prtfrc, njob, waitbarString, waitbarTitle, Parallel, MasterName, DyMo)
-% In a parallelization context, this function is launched on slave
+% PARALLEL CONTEXT
+% In parallel context, this function is launched on slave
 % machines, and acts as a message passing device for the master machine.
-% prtfrc [double], fraction of iteration performed
-% njob [int], index number of this CPU among all CPUs in the
-%                       cluster
-% waitbarString [char], running message string to be displayed in the monitor window on master machine 
-% waitbarTitle [char], title to be displayed in the monitor window on master machine
-% Parallel [struct], options_.parallel(ThisMatlab), i.e. the paralle settings for this slave machine in the cluster 
-% MasterName [char], IP address or PC name of the master 
-% DyMo [char], working directory of the master machine
 
-% Copyright (C) 2009 Dynare Team
+% INPUTS 
+% o prtfrc          [double]     fraction of iteration performed
+% o njob            [int]        index number of this CPU among all CPUs in the
+%                                cluster
+% o waitbarString   [char]       running message string to be displayed in the monitor window on master machine 
+% o waitbarTitle    [char]       title to be displayed in the monitor window on master machine
+% o Parallel        [struct]     options_.parallel(ThisMatlab), i.e. the paralle settings for this slave machine in the cluster 
+% o MasterName      [char]       IP address or PC name of the master 
+% o DyMo [char]                  working directory of the master machine
+%
+% OUTPUTS 
+% o None 
+
+% Copyright (C) 2006-2008,2010 Dynare Team
 %
 % This file is part of Dynare.
 %
