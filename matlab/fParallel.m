@@ -1,20 +1,24 @@
 function fParallel(fblck,nblck,whoiam,ThisMatlab,fname)
-% In a parallelization context, this function is launched on slave
+% PARALLEL CONTEXT
+% In a parallel context, this function is launched on slave
 % machines, and acts as a wrapper around the function containing the
 % computing task itself.
 %
 % INPUTS
-%  fblck [int]          index number of the first thread to run in this
+%  o fblck [int]          index number of the first thread to run in this
 %                       MATLAB instance
-%  nblck [int]          number of threads to run in this
+%  o nblck [int]          number of threads to run in this
 %                       MATLAB instance
-%  whoiam [int]         index number of this CPU among all CPUs in the
+%  o whoiam [int]         index number of this CPU among all CPUs in the
 %                       cluster
-%  ThisMatlab [int]     index number of this slave machine in the cluster
+%  o ThisMatlab [int]     index number of this slave machine in the cluster
 %                       (entry in options_.parallel)
-%  fname [string]       function to be run, containing the computing task
-
-% Copyright (C) 2009 Dynare Team
+%  o fname [string]       function to be run, containing the computing task
+%
+% OUTPUTS 
+%   None 
+%
+% Copyright (C) 2006-2008,2010 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -49,7 +53,7 @@ dynareroot = dynare_config();
 % Load input data
 load( [fname,'_input']) 
 
-if exist('fGlobalVar'),
+if exist('fGlobalVar') && ~isempty (fGlobalVar)
     globalVars = fieldnames(fGlobalVar);
     for j=1:length(globalVars),
         eval(['global ',globalVars{j},';'])
