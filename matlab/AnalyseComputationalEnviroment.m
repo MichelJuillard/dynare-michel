@@ -1,11 +1,9 @@
 function [ErrorCode] = AnalyseComputationalEnviroment(DataInput)
 
-% DESCRIPTION
-
-% This function is used to check the user computational request.
+% PARALLEL CONTEXT
+% In a parallel context, this function is used to check the user computational request.
 % If no error happen the function return 0.
-
-
+%
 % INPUT/OUTPUT description:
 %
 % DataInput is the strcture option_.parallel, with the follow fields:
