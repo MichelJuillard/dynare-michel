@@ -19,6 +19,22 @@ function random_walk_metropolis_hastings(TargetFun,ProposalFun,xparam1,vv,mh_bou
 % SPECIAL REQUIREMENTS
 %   None.
 
+% PARALLEL CONTEXT
+% The most computationally intensive part of this function may be executed
+% in parallel. The code sutable to be executed in
+% parallel on multi core or cluster machine (in general a 'for' cycle),
+% is removed from this function and placed in random_walk_metropolis_hastings_core.m funtion.
+% Then the DYNARE parallel package contain a set of pairs matlab functions that can be executed in
+% parallel and called name_function.m and name_function_core.m. 
+% In addition in parallel package we have second set of functions used
+% to manage the parallel computation.
+%
+% This function was the first function to be parallelized, later other
+% functions have been parallelized using the same methodology.
+% Then the comments write here can be used for all the other pairs of
+% parallel functions and also for management funtions.
+
+
 % Copyright (C) 2006-2008,2010 Dynare Team
 %
 % This file is part of Dynare.
@@ -47,6 +63,10 @@ InitSizeArray = min([repmat(MAX_nruns,nblck,1) fline+nruns-1],[],2);
 
 load([MhDirectoryName '/' ModelName '_mh_history.mat'],'record');
 
+% Snapshot of the current state of computing. It necessary for the parallel
+% execution (i.e. to execute in a corretct way portion of code remotely or
+% on many core). The mandatory variables for local/remote parallel
+% computing are stored in localVars struct.
 
 localVars =   struct('TargetFun', TargetFun, ...
                      'ProposalFun', ProposalFun, ...
@@ -66,15 +86,18 @@ localVars.InitSizeArray=InitSizeArray;
 localVars.record=record;
 localVars.varargin=varargin;
 
-% tic,
 
+% The user don't want to use parallel computing, or want to compute a
+% single chain. In this cases Random walk Metropolis-Hastings algorithm is
+% computed sequentially.
 
 if isnumeric(options_.parallel) || (nblck-fblck)==0,
     fout = random_walk_metropolis_hastings_core(localVars, fblck, nblck, 0);
     record = fout.record;
-    
-else
-    % global variables for parallel routines
+
+% Parallel in Local or remote machine.   
+else 
+    % Global variables for parallel routines.
     globalVars = struct('M_',M_, ...
                         'options_', options_, ...
                         'bayestopt_', bayestopt_, ...
@@ -108,8 +131,6 @@ end
 irun = fout(1).irun;
 NewFile = fout(1).NewFile;
 
-
-% ComptationalTime=toc,
 
 % record.Seeds.Normal = randn('state');
 % record.Seeds.Unifor = rand('state');
