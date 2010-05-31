@@ -11,6 +11,11 @@ function PosteriorIRF(type)
 % SPECIAL REQUIREMENTS
 %   None
 
+% PARALLEL CONTEXT
+% This funtion has been parallelized in two different points. Then we have two core
+% functions associated with it(the _core1 and _core2).
+% See also the comments random_walk_metropolis_hastings.m funtion.
+
 % Copyright (C) 2006-2008,2010 Dynare Team
 %
 % This file is part of Dynare.
@@ -137,10 +142,8 @@ if MAX_nirfs_dsgevar
     Companion_matrix = diag(ones(nvobs*(NumberOfLags-1),1),-nvobs);
 end
 
-%%%%%%%%% START the FIRST BLOCK of CODE EXECUTED in PARALLEL! %%%%%%%%%
-%
-%   This portion of code is execute in parallel by PosteriorIRF_core1.m
-%   function.
+% First block of code executed in parallel. The function devoted to do it is  PosteriorIRF_core1.m
+% function.
 
 b = 0;
 nosaddle = 0;
@@ -154,13 +157,9 @@ localVars.irun = irun;
 localVars.irun2=irun2;
 localVars.nosaddle=nosaddle;
 
-% It is necessary to rename 'type' to avoid conflict with
-%  a native matlab funtion.
-
-localVars.typee=type;
-
+localVars.type=type;
 if strcmpi(type,'posterior'),
-while b<=B 
+while b<B 
     b = b + 1;
     x(b,:) = GetOneDraw(type);
 end
@@ -183,11 +182,11 @@ localVars.NumberOfIRFfiles_dsgevar=NumberOfIRFfiles_dsgevar;
 localVars.ifil2=ifil2;
 
 
-
-if isnumeric(options_.parallel),% | isunix, % for the moment exclude unix platform from parallel implementation
+% Like sequential execution!
+if isnumeric(options_.parallel),% | isunix, % For the moment exclude unix platform from parallel implementation.
     [fout] = PosteriorIRF_core1(localVars,1,B,0);
 else
-   
+   % Parallel execution!
     [nCPU, totCPU, nBlockPerCPU] = distributeJobs(options_.parallel, 1, B);
     for j=1:totCPU-1,
         nfiles = ceil(nBlockPerCPU(j)/MAX_nirfs_dsge);
@@ -217,18 +216,13 @@ else
     
 end
 
+% END first parallel section!
 
-% END parallel code!
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
 if nosaddle
    disp(['PosteriorIRF :: Percentage of discarded posterior draws = ' num2str(nosaddle/(B+nosaddle))]) 
 end
-
-% if isnumeric(options_.parallel)
-%    close(h);
-% end
 
 ReshapeMatFiles('irf_dsge')
 if MAX_nirfs_dsgevar
@@ -335,11 +329,10 @@ end
 %%
 
 
+% Second block of code executed in parallel, with the exception of file
+% .tex generation always run in sequentially. This portion of code is execute in parallel by
+% PosteriorIRF_core2.m function.
 
-%%%%%%%%% START the SECOND BLOCK of CODE EXECUTED in PARALLEL! %%%%%%%%%
-%
-%   This portion of code is execute in parallel by PosteriorIRF_core2.m
-%   function.
 
 % Save the local variables.
 localVars=[];
@@ -360,7 +353,7 @@ localVars.varlist=varlist;
 localVars.MaxNumberOfPlotPerFigure=MaxNumberOfPlotPerFigure;
 
 
-%%% The files .TeX are genereted in sequential way!
+%%% The files .TeX are genereted in sequential way always!
 
 if options_.TeX
   fidTeX = fopen([DirectoryName filesep M_.fname '_BayesianIRF.TeX'],'w');
@@ -405,10 +398,10 @@ if options_.TeX
   
 end
 
-% The others format in parallel by PosteriorIRF_core2!
+% The others file format are generated in parallel by PosteriorIRF_core2!
 
-
-if isnumeric(options_.parallel) || (M_.exo_nbr*ceil(size(varlist,1)/MaxNumberOfPlotPerFigure))<8,% | isunix, % for the moment exclude unix platform from parallel implementation
+                                % Comment for testing!
+if isnumeric(options_.parallel) % || (M_.exo_nbr*ceil(size(varlist,1)/MaxNumberOfPlotPerFigure))<8,% | isunix, % for the moment exclude unix platform from parallel implementation
     [fout] = PosteriorIRF_core2(localVars,1,M_.exo_nbr,0);
 else
     globalVars = struct('M_',M_, ...
@@ -419,13 +412,10 @@ else
 end
 
 % END parallel code!
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
 fprintf('MH: Posterior IRFs, done!\n');
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-  
 
 
 
