@@ -9,7 +9,8 @@ OCTAVE_MODS = \
 	example1_use_dll.mod \
 	t_sgu_ex1.mod \
 	osr_example.mod \
-	ramsey.mod \
+	optimal_policy/ramsey.mod \
+	optimal_policy/mult_elimination_test.mod \
 	ramst_initval_file.mod \
 	ramst_normcdf_and_friends.mod \
 	ramst_steady_state.mod \
