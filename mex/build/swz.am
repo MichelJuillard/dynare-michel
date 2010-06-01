@@ -4,26 +4,23 @@ SWZ_SRC_DIRS = $(WORKING_DIR)/matlab/swz/c-code/utilities/TZCcode $(WORKING_DIR)
 
 vpath %.c $(SWZ_SRC_DIRS)
 
+###
+# TO BE REMOVED
 ####
 # 64
 BIT = /usr/local64
 # 32
 #BIT = /usr/local
 ###
-
-###
-# TO BE REMOVED
-#MAC
-MAC_FLAG = -DMACOSX
 #GSL
 GSL_INCLUDE_DIR = -I$(BIT)/include/gsl -I/usr/local/include
-LIBS += -lgsl -lgslcblas
+LIBS += -lgsl
 #
 ###
 
 DEBUG = -g
 
-CPPFLAGS += $(DEBUG) -DINTELCMATHLIBRARY $(MAC_FLAG) $(GSL_INCLUDE_DIR) -I$(WORKING_DIR)/matlab/swz/c-code/utilities/TZCcode -I$(WORKING_DIR)/matlab/swz/c-code/utilities/DWCcode/matrix -I$(WORKING_DIR)/matlab/swz/c-code/utilities/DWCcode/error -I$(WORKING_DIR)/matlab/swz/c-code/utilities/DWCcode/arrays -I$(WORKING_DIR)/matlab/swz/c-code/utilities/DWCcode/ascii -I$(WORKING_DIR)/matlab/swz/c-code/utilities/DWCcode/stat -I$(WORKING_DIR)/matlab/swz/c-code/utilities/DWCcode/spherical -I$(WORKING_DIR)/matlab/swz/c-code/utilities/DWCcode/sort -I$(WORKING_DIR)/matlab/swz/c-code/sbvar/switching -I$(WORKING_DIR)/matlab/swz/c-code/sbvar/var -I$(WORKING_DIR)/matlab/swz/c-code/mex
+CPPFLAGS += $(DEBUG) -DINTELCMATHLIBRARY $(GSL_INCLUDE_DIR) -I$(WORKING_DIR)/matlab/swz/c-code/utilities/TZCcode -I$(WORKING_DIR)/matlab/swz/c-code/utilities/DWCcode/matrix -I$(WORKING_DIR)/matlab/swz/c-code/utilities/DWCcode/error -I$(WORKING_DIR)/matlab/swz/c-code/utilities/DWCcode/arrays -I$(WORKING_DIR)/matlab/swz/c-code/utilities/DWCcode/ascii -I$(WORKING_DIR)/matlab/swz/c-code/utilities/DWCcode/stat -I$(WORKING_DIR)/matlab/swz/c-code/utilities/DWCcode/spherical -I$(WORKING_DIR)/matlab/swz/c-code/utilities/DWCcode/sort -I$(WORKING_DIR)/matlab/swz/c-code/sbvar/switching -I$(WORKING_DIR)/matlab/swz/c-code/sbvar/var -I$(WORKING_DIR)/matlab/swz/c-code/mex
 
 LDFLAGS += -L$(BIT)/lib
 

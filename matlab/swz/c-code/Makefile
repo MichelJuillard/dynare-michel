@@ -6,7 +6,7 @@
 
 # MACHINE
 STANDALONE_HB = STANDALONE_HB
-MACOSX = MACOSX
+#MACOSX = MACOSX
 
 # LIBRARIES
 USE_TAO = USE_TAO
@@ -22,7 +22,7 @@ USE_GSL = USE_GSL
 WORK_DIR = .
 OUT_DIR = ../bin
 
-CFLAGS = -g -DINTELCMATHLIBRARY
+CFLAGS = -g -DINTELCMATHLIBRARY -ansi
 
 # MACHINE DEPENDENT DIRECTORIES 
 
@@ -75,21 +75,21 @@ ifdef STANDALONE_HB
 CC = gcc
 FC = gfortran
 
-GSL_INCLUDE_DIR = /usr/local/include/gsl
-GSL_LIBS_DIR = /usr/local/lib
+GSL_INCLUDE_DIR = /usr/local64/include/gsl
+GSL_LIBS_DIR = /usr/local64/lib
 
 TAO_DIR = $(WORK_DIR)/utilities/TZCcode
 endif
 
-ifdef MACOSX
-MAC_LIBS = -framework Accelerate
-CFLAGS := $(CFLAGS) -DMACOSX
-endif
+#ifdef MACOSX
+#MAC_LIBS = #-framework Accelerate #-lmx -lmex -lmat -lstdc++ -L/Applications/MATLAB_R2009b.app/bin/maci64/ -lmwblas -lmwlapack 
+#CFLAGS := $(CFLAGS) -DMACOSX
+#endif
 
 
 #################################################################################
 VPATH = 
-INCLUDE_DIR = -I/Applications/MatlabR2010a/MATLAB_R2010a.app/extern/include/
+INCLUDE_DIR = -I/Applications/MATLAB_R2009b.app/extern/include
 LIBS_DIR = 
 LIBS = $(MAC_LIBS)
 OBJS =

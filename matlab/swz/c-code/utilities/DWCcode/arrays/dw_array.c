@@ -5,7 +5,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#if defined(MACOSX)
+#ifdef __APPLE__
 #include <sys/malloc.h>
 #else
 #include <malloc.h>
