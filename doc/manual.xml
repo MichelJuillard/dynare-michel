@@ -2199,7 +2199,7 @@ steady;
 <refsect1>
   <title>Auxiliary variables for leads and lags</title>
   <para>For a stochastic model, Dynare will perform a transformation of the model so that there is only one lead and one lag on endogenous, and no lead/lag on exogenous.</para>
-  <para>This transformation is achieved by the creation of auxiliary variables, and corresponding equations. For example, if <literal>x(+2)</literal> exists in the model, Dynare will create one auxiliary variable <literal>AUX_ENDO_LEAD = x(+1)</literal>, and replace <literal>x(+1)</literal> by <literal>AUX_ENDO_LEAD(+1)</literal>.</para>
+  <para>This transformation is achieved by the creation of auxiliary variables, and corresponding equations. For example, if <literal>x(+2)</literal> exists in the model, Dynare will create one auxiliary variable <literal>AUX_ENDO_LEAD = x(+1)</literal>, and replace <literal>x(+2)</literal> by <literal>AUX_ENDO_LEAD(+1)</literal>.</para>
   <para>A similar transformation is done for lags greater than 2 on endogenous (auxiliary variables will have a name beginning with <literal>AUX_ENDO_LAG</literal>), and for exogenous with leads and lags (auxiliary variables will have a name beginning with <literal>AUX_EXO_LEAG</literal> or <literal>AUX_EXO_LAG</literal> respectively).</para>
   <para>Once created, all auxiliary variables are included in the set of endogenous variables. The output of decision rules (see below) is such that auxiliary variable names are replaced by the original variables they refer to.</para>
 </refsect1>
