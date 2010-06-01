@@ -104,7 +104,7 @@
    #include "mkl.h"
 #else
    #if defined (USE_GSL_LIBRARY)
-      #include "gsl_cblas.h"
+      #include <gsl/gsl_cblas.h>
    #endif
    #include "blas_lapack.h"
    #undef  SWITCHTOINTELCMATH
@@ -112,8 +112,8 @@
 #endif
 
 #if defined(USE_GSL_LIBRARY)
-   #include "gsl_sf_gamma.h"
-   #include "gsl_cdf.h"
+   #include <gsl/gsl_sf_gamma.h>
+   #include <gsl/gsl_cdf.h>
 #endif
 
 #if defined(USE_IMSL_MATH_LIBRARY)

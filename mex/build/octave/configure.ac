@@ -40,6 +40,9 @@ AX_PTHREAD
 # Check for dlopen(), needed by k_order_perturbation DLL
 AC_CHECK_LIB([dl], [dlopen], [LIBADD_DLOPEN="-ldl"], [])
 AC_SUBST([LIBADD_DLOPEN])
+# Check for GSL, needed by SWZ
+AX_PATH_GSL
+AM_CONDITIONAL([HAVE_GSL], [test "x$no_gsl" = "x"])
 
 AM_CONDITIONAL([DO_SOMETHING], [test "x$MKOCTFILE" != "x"])
 
@@ -53,12 +56,20 @@ else
   BUILD_MEX_OCTAVE="no (missing mkoctfile)"
 fi
 
+if test "x$MKOCTFILE" != "x" -a "x$no_gsl" = "x"; then
+   BUILD_SWZ_MEX_OCTAVE="yes"
+else
+   BUILD_SWZ_MEX_OCTAVE="no (missing GSL)"
+fi
+
+
 AC_MSG_NOTICE([
 
 Dynare is now configured for building the following components...
 
 Binaries (with "make"):
- MEX files for Octave:                  $BUILD_MEX_OCTAVE
+ MEX files for Octave (except SWZ):     $BUILD_MEX_OCTAVE
+ SWZ MEX files for Octave:              $BUILD_SWZ_MEX_OCTAVE
 
 ])
 
@@ -69,6 +80,7 @@ AC_CONFIG_FILES([Makefile
                  libdynare++/Makefile
                  gensylv/Makefile
                  k_order_perturbation/Makefile
-                 dynare_simul_/Makefile])
+                 dynare_simul_/Makefile
+                 swz/Makefile])
 
 AC_OUTPUT

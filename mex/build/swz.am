@@ -1,28 +1,12 @@
-WORKING_DIR = ../../../..
+SWZ_SRC_BASEDIR = ../../../../matlab/swz/c-code
 
-SWZ_SRC_DIRS = $(WORKING_DIR)/matlab/swz/c-code/utilities/TZCcode $(WORKING_DIR)/matlab/swz/c-code/utilities/DWCcode/matrix $(WORKING_DIR)/matlab/swz/c-code/utilities/DWCcode/error $(WORKING_DIR)/matlab/swz/c-code/utilities/DWCcode/arrays $(WORKING_DIR)/matlab/swz/c-code/utilities/DWCcode/ascii $(WORKING_DIR)/matlab/swz/c-code/utilities/DWCcode/stat $(WORKING_DIR)/matlab/swz/c-code/utilities/DWCcode/spherical $(WORKING_DIR)/matlab/swz/c-code/utilities/DWCcode/sort $(WORKING_DIR)/matlab/swz/c-code/sbvar/switching $(WORKING_DIR)/matlab/swz/c-code/sbvar/var $(WORKING_DIR)/matlab/swz/c-code/mex
+SWZ_SRC_DIRS = $(SWZ_SRC_BASEDIR)/utilities/TZCcode $(SWZ_SRC_BASEDIR)/utilities/DWCcode/matrix $(SWZ_SRC_BASEDIR)/utilities/DWCcode/error $(SWZ_SRC_BASEDIR)/utilities/DWCcode/arrays $(SWZ_SRC_BASEDIR)/utilities/DWCcode/ascii $(SWZ_SRC_BASEDIR)/utilities/DWCcode/stat $(SWZ_SRC_BASEDIR)/utilities/DWCcode/spherical $(SWZ_SRC_BASEDIR)/utilities/DWCcode/sort $(SWZ_SRC_BASEDIR)/sbvar/switching $(SWZ_SRC_BASEDIR)/sbvar/var $(SWZ_SRC_BASEDIR)/mex
 
 vpath %.c $(SWZ_SRC_DIRS)
 
-###
-# TO BE REMOVED
-####
-# 64
-BIT = /usr/local64
-# 32
-#BIT = /usr/local
-###
-#GSL
-GSL_INCLUDE_DIR = -I$(BIT)/include/gsl -I/usr/local/include
-LIBS += -lgsl
-#
-###
+CPPFLAGS += -DINTELCMATHLIBRARY $(GSL_CFLAGS) -I$(SWZ_SRC_BASEDIR)/utilities/TZCcode -I$(SWZ_SRC_BASEDIR)/utilities/DWCcode/matrix -I$(SWZ_SRC_BASEDIR)/utilities/DWCcode/error -I$(SWZ_SRC_BASEDIR)/utilities/DWCcode/arrays -I$(SWZ_SRC_BASEDIR)/utilities/DWCcode/ascii -I$(SWZ_SRC_BASEDIR)/utilities/DWCcode/stat -I$(SWZ_SRC_BASEDIR)/utilities/DWCcode/spherical -I$(SWZ_SRC_BASEDIR)/utilities/DWCcode/sort -I$(SWZ_SRC_BASEDIR)/sbvar/switching -I$(SWZ_SRC_BASEDIR)/sbvar/var -I$(SWZ_SRC_BASEDIR)/mex
 
-DEBUG = -g
-
-CPPFLAGS += $(DEBUG) -DINTELCMATHLIBRARY $(GSL_INCLUDE_DIR) -I$(WORKING_DIR)/matlab/swz/c-code/utilities/TZCcode -I$(WORKING_DIR)/matlab/swz/c-code/utilities/DWCcode/matrix -I$(WORKING_DIR)/matlab/swz/c-code/utilities/DWCcode/error -I$(WORKING_DIR)/matlab/swz/c-code/utilities/DWCcode/arrays -I$(WORKING_DIR)/matlab/swz/c-code/utilities/DWCcode/ascii -I$(WORKING_DIR)/matlab/swz/c-code/utilities/DWCcode/stat -I$(WORKING_DIR)/matlab/swz/c-code/utilities/DWCcode/spherical -I$(WORKING_DIR)/matlab/swz/c-code/utilities/DWCcode/sort -I$(WORKING_DIR)/matlab/swz/c-code/sbvar/switching -I$(WORKING_DIR)/matlab/swz/c-code/sbvar/var -I$(WORKING_DIR)/matlab/swz/c-code/mex
-
-LDFLAGS += -L$(BIT)/lib
+LIBS += $(GSL_LIBS)
 
 noinst_PROGRAMS = mex_sbvar_init_file mex_sbvar_estimation mex_sbvar_mhm_1 mex_sbvar_mhm_2 mex_sbvar_probabilities mex_sbvar_draws
 
