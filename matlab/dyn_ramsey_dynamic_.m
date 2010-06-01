@@ -223,6 +223,17 @@ i_leadlag1 = zeros(size(i_leadlag1))';
 i_leadlag1(nonzeros(m)) = 1:nnz(m);
 i_leadlag1 = i_leadlag1';
 
+%eliminating lags in t-2 and leads in t+2, if possible
+if all(i_leadlag1(5,:)==0)
+    i_leadlag1 = i_leadlag1(1:4,:);
+    max_lead1 = 1;
+end
+
+if all(i_leadlag1(1,:)==0)
+    i_leadlag1 = i_leadlag1(2:4,:);
+    max_lag1 = 1;
+end
+
 % setting expanded model parameters
 % storing original values
 M_.endo_nbr = endo_nbr1;
