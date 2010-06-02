@@ -44,7 +44,7 @@ if(isfield(M_,'block_structure'))
     fprintf('\n');
     for k=1:M_.maximum_endo_lag+M_.maximum_endo_lead+1
         if(k==M_.maximum_endo_lag+1)
-            fprintf('%-30s %s','the variable','is used in equations ontemporaneously');
+            fprintf('%-30s %s','the variable','is used in equations Contemporaneously');
         elseif(k<M_.maximum_endo_lag+1)
             fprintf('%-30s %s %d','the variable','is used in equations with lag ',M_.maximum_endo_lag+1-k);
         else
@@ -56,7 +56,7 @@ if(isfield(M_,'block_structure'))
             IM=[];
         end;
         size_IM=size(IM,1);
-        last=0;
+        last=99999999;
         for i=1:size_IM
             if(last~=IM(i,2))
                 fprintf('\n%-30s',M_.endo_names(IM(i,2),:));
