@@ -1842,7 +1842,7 @@ steady(homotopy_mode = 1, homotopy_steps = 50);
     When the analytical solution of the model is known, this command can be used to help Dynare find the steady state in a more efficient and reliable way, especially during estimation where the steady state has to be recomputed for every point in the parameter space.
   </para>
   <para>
-    Each line of this block consists of a variable (either an endogenous or a temporary variable) which is assigned an expression (which can contain parameters, exogenous at the steady state, or any endogenous or temporary variable already declared above).
+    Each line of this block consists of a variable (either an endogenous, a temporary variable or a parameter) which is assigned an expression (which can contain parameters, exogenous at the steady state, or any endogenous or temporary variable already declared above).
   </para>
   <para>
     Internally, Dynare will create a steady state file called <filename><replaceable>FILENAME</replaceable>_steadystate.m</filename>, using the information provided in this block.
