@@ -56,11 +56,10 @@ public:
     Inv_gamma_2 = 6 //Inverse gamma (type 2) density
   };
 
-  Prior(double mean, double mode, double standard, double lower_bound, double upper_bound, double fhp, double shp);
+  Prior(double mean, double standard, double lower_bound, double upper_bound, double fhp, double shp);
   virtual ~Prior();
 
   const double mean;
-  const double mode;
   const double standard;
   const double lower_bound;
   const double upper_bound;
@@ -95,8 +94,8 @@ struct BetaPrior : public Prior
 public:
   boost::math::beta_distribution<double> distribution;
 
-  BetaPrior(double mean, double mode, double standard, double lower_bound, double upper_bound, double fhp, double shp) :
-    Prior(mean, mode, standard, lower_bound, upper_bound, fhp, shp),
+  BetaPrior(double mean, double standard, double lower_bound, double upper_bound, double fhp, double shp) :
+    Prior(mean, standard, lower_bound, upper_bound, fhp, shp),
     distribution(fhp, shp)
   {
   };
@@ -128,9 +127,9 @@ struct GammaPrior : public Prior
 public:
   boost::math::gamma_distribution<double> distribution;
 
-  GammaPrior(double mean, double mode, double standard,
+  GammaPrior(double mean, double standard,
              double lower_bound, double upper_bound, double fhp, double shp) :
-    Prior(mean, mode, standard, lower_bound, upper_bound, fhp, shp),
+    Prior(mean, standard, lower_bound, upper_bound, fhp, shp),
     distribution(fhp, shp)
   {
   };
@@ -158,9 +157,9 @@ struct InvGamma1_Prior : public Prior
 {
 public:
   boost::math::gamma_distribution<double> distribution;
-  InvGamma1_Prior(double mean, double mode, double standard,
+  InvGamma1_Prior(double mean, double standard,
                   double lower_bound, double upper_bound, double fhp, double shp) :
-    Prior(mean, mode, standard, lower_bound, upper_bound, fhp, shp),
+    Prior(mean, standard, lower_bound, upper_bound, fhp, shp),
     distribution(shp/2, 2/fhp)
   {
   };
@@ -192,9 +191,9 @@ struct InvGamma2_Prior : public Prior
 public:
   boost::math::gamma_distribution<double> distribution;
 
-  InvGamma2_Prior(double mean, double mode, double standard,
+  InvGamma2_Prior(double mean, double standard,
                   double lower_bound, double upper_bound, double fhp, double shp) :
-    Prior(mean, mode, standard, lower_bound, upper_bound, fhp, shp),
+    Prior(mean, standard, lower_bound, upper_bound, fhp, shp),
     distribution(shp/2, 2/fhp)
   {
   };
@@ -231,8 +230,8 @@ private:
 public:
   boost::math::normal_distribution<double> distribution;
 
-  GaussianPrior(double mean, double mode, double standard, double lower_bound, double upper_bound, double fhp, double shp) :
-    Prior(mean, mode, standard, lower_bound, upper_bound, fhp, shp),
+  GaussianPrior(double mean, double standard, double lower_bound, double upper_bound, double fhp, double shp) :
+    Prior(mean, standard, lower_bound, upper_bound, fhp, shp),
     rng_type(fhp, shp), // random number generator distribution type (mean, standard)
     vrng(base_rng_type, rng_type), // random variate_generator
     distribution(fhp, shp) //pdf distribution(mean, standard)
@@ -269,8 +268,8 @@ private:
 public:
   boost::math::uniform_distribution<double> distribution;
 
-  UniformPrior(double mean, double mode, double standard, double lower_bound, double upper_bound, double fhp, double shp) :
-    Prior(mean, mode, standard, lower_bound, upper_bound, fhp, shp),
+  UniformPrior(double mean, double standard, double lower_bound, double upper_bound, double fhp, double shp) :
+    Prior(mean, standard, lower_bound, upper_bound, fhp, shp),
     rng_type(fhp, shp), // random number generator distribution type
     vrng(base_rng_type, rng_type), // random variate_generator
     distribution(fhp, shp) //pdf distribution(lower_bound, upper_bound)
