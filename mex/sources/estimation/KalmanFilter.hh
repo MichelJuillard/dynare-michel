@@ -48,7 +48,7 @@ class KalmanFilter {
 
 public:
   virtual ~KalmanFilter();
-  KalmanFilter(const std::string &modName, size_t n_endo, size_t n_exo, const std::vector<size_t> &zeta_fwrd_arg,
+  KalmanFilter(const std::string &dynamicDllFile, size_t n_endo, size_t n_exo, const std::vector<size_t> &zeta_fwrd_arg,
                const std::vector<size_t> &zeta_back_arg, const std::vector<size_t> &zeta_mixed_arg, const std::vector<size_t> &zeta_static_arg,
                double qz_criterium_arg, const std::vector<size_t> &varobs_arg,
                double riccati_tol_arg, double lyapunov_tol_arg, int &info);

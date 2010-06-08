@@ -64,8 +64,8 @@ private:
 
 public:
   // construct and load Dynamic model DLL
-  DynamicModelDLL(const std::string &modName, const size_t length, const size_t jcols,
-    const int nMax_lag, const size_t nExog, const std::string &sExt) throw (TSException);
+  DynamicModelDLL(const std::string &dynamicDllFile, const size_t length, const size_t jcols,
+    const int nMax_lag, const size_t nExog) throw (TSException);
   virtual ~DynamicModelDLL();
 
   // evaluate Dynamic model DLL

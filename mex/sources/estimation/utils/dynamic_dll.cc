@@ -28,20 +28,16 @@ using namespace std;
 * Members of DynamicModelDLL for handling loading and calling
 * <model>_dynamic () function
 **************************************/
-DynamicModelDLL::DynamicModelDLL(const std::string &modName, const size_t y_length, const size_t j_cols,
-                                 const int n_max_lag, const size_t n_exog, const std::string &sExt) throw (TSException) :
+DynamicModelDLL::DynamicModelDLL(const std::string &dynamicDllFile, const size_t y_length, const size_t j_cols,
+                                 const int n_max_lag, const size_t n_exog) throw (TSException) :
 length(y_length), jcols(j_cols), nMax_lag(n_max_lag), nExog(n_exog)
 {
   std::string fName;
 #if !defined(__CYGWIN32__) && !defined(_WIN32)
-  if (modName[0] != '/')
+  if (dynamicDllFile[0] != '/')
     fName = "./";
 #endif
-  if (sExt.size()>0) //construct modelNmae_dynamic file name with the given extension
-    fName += modName + "_dynamic" + sExt;
-  else // i.e. an already pre-constructed modelNmae_dynamic file name together with the appropriate extension
-    fName += modName;
-  // end if
+  fName += dynamicDllFile;
 
   try
   {

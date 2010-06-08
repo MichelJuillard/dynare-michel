@@ -32,12 +32,12 @@ LogLikelihoodSubSample::~LogLikelihoodSubSample()
 {
 };
 
-LogLikelihoodSubSample::LogLikelihoodSubSample(const std::string &modName, EstimatedParametersDescription &INestiParDesc, size_t n_endo, size_t n_exo,
+LogLikelihoodSubSample::LogLikelihoodSubSample(const std::string &dynamicDllFile, EstimatedParametersDescription &INestiParDesc, size_t n_endo, size_t n_exo,
                                                const std::vector<size_t> &zeta_fwrd_arg, const std::vector<size_t> &zeta_back_arg,
                                                const std::vector<size_t> &zeta_mixed_arg, const std::vector<size_t> &zeta_static_arg, const double qz_criterium,
                                                const std::vector<size_t> &varobs, double riccati_tol, double lyapunov_tol, int &INinfo) :
   estiParDesc(INestiParDesc),
-  kalmanFilter(modName, n_endo, n_exo, zeta_fwrd_arg, zeta_back_arg, zeta_mixed_arg, zeta_static_arg, qz_criterium,
+  kalmanFilter(dynamicDllFile, n_endo, n_exo, zeta_fwrd_arg, zeta_back_arg, zeta_mixed_arg, zeta_static_arg, qz_criterium,
                varobs, riccati_tol, lyapunov_tol, INinfo), eigQ(n_exo), eigH(varobs.size()), info(INinfo)
 {
 };

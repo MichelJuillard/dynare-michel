@@ -26,13 +26,13 @@
 #include "LogLikelihoodMain.hh"
 
 LogLikelihoodMain::LogLikelihoodMain( //const Matrix &data_arg, Vector &deepParams_arg,
-  const std::string &modName, EstimatedParametersDescription &estiParDesc, size_t n_endo, size_t n_exo,
+  const std::string &dynamicDllFile, EstimatedParametersDescription &estiParDesc, size_t n_endo, size_t n_exo,
   const std::vector<size_t> &zeta_fwrd_arg, const std::vector<size_t> &zeta_back_arg,
   const std::vector<size_t> &zeta_mixed_arg, const std::vector<size_t> &zeta_static_arg, const double qz_criterium,
   const std::vector<size_t> &varobs, double riccati_tol, double lyapunov_tol, int &info_arg)
 
   : estSubsamples(estiParDesc.estSubsamples),
-  logLikelihoodSubSample(modName, estiParDesc, n_endo, n_exo, zeta_fwrd_arg, zeta_back_arg, zeta_mixed_arg, zeta_static_arg, qz_criterium,
+  logLikelihoodSubSample(dynamicDllFile, estiParDesc, n_endo, n_exo, zeta_fwrd_arg, zeta_back_arg, zeta_mixed_arg, zeta_static_arg, qz_criterium,
                          varobs, riccati_tol, lyapunov_tol, info_arg),
   //deepParams(deepParams_arg),
   vll(estSubsamples[estSubsamples.size()-1].endPeriod) // time dimension size of data
