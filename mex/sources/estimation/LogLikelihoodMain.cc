@@ -54,7 +54,7 @@ LogLikelihoodMain::compute(Matrix &steadyState, const Vector &estParams, Vector 
       VectorView vSteadyState = mat::get_col(steadyState, i);
 
       MatrixConstView dataView(data, 0, estSubsamples[i].startPeriod,
-                               dataView.getRows(), estSubsamples[i].endPeriod-estSubsamples[i].startPeriod+1);
+                               data.getRows(), estSubsamples[i].endPeriod-estSubsamples[i].startPeriod+1);
       VectorView vllView(vll, estSubsamples[i].startPeriod, estSubsamples[i].endPeriod-estSubsamples[i].startPeriod+1);
       logLikelihood += logLikelihoodSubSample.compute(vSteadyState, dataView, estParams, deepParams,
                                                       Q, H, vllView, info, start, i);
