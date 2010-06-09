@@ -1025,7 +1025,7 @@ Interpreter::print_expression(it_code_type it_code, bool evaluate)
               Stack.push(tmp_out.str());
               break;
             case oErf:
-              Stackf.push(sqrt(v1f));
+              Stackf.push(erf(v1f));
               tmp_out.str("");
               tmp_out << "erf(" << v1 << ")";
               Stack.push(tmp_out.str());
