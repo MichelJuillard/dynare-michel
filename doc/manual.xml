@@ -2833,7 +2833,7 @@ end;
         <listitem><para><literal>1</literal>: uses <trademark class="registered">MATLAB</trademark>'s <command>fmincon</command></para></listitem>
         <listitem><para><literal>2</literal>: value no longer used</para></listitem>
         <listitem><para><literal>3</literal>: uses <trademark class="registered">MATLAB</trademark>'s <command>fminunc</command></para></listitem>
-        <listitem><para><literal>4</literal>: uses Chris Sims' <command>csminwel</command></para></listitem>
+        <listitem><para><literal>4</literal>: uses Chris Sims's <command>csminwel</command></para></listitem>
         <listitem><para><literal>5</literal>: uses Marco Ratto's <command>newrat</command></para></listitem> 
         <listitem><para><literal>6</literal>: uses a Monte-Carlo based optimization routine (see <ulink url="http://www.dynare.org/DynareWiki/MonteCarloOptimization">Dynare wiki</ulink> for more details)</para></listitem>
         <listitem><para><literal>7</literal>: uses <trademark class="registered">MATLAB</trademark>'s <command>fminsearch</command> (a simplex based routine)</para></listitem>
