@@ -103,7 +103,7 @@ if F_singular
 end
 
 if t < smpl
-    t0 = t;
+    t0 = t+1;
     while t < smpl
         t = t+1;
         v = Y(:,t)-a(mf);

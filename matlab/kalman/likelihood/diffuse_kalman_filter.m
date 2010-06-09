@@ -133,7 +133,7 @@ if F_singular == 1
 end
 
 if t < smpl
-    t0 = t;
+    t0 = t+1;
     while t<smpl
         t = t+1;
         v = Y(:,t)-Z*a;
