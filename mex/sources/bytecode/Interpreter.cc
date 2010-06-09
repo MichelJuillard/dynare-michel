@@ -16,6 +16,13 @@
  * You should have received a copy of the GNU General Public License
  * along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
  */
+
+#ifdef _MSC_VER
+/* In order to get M_PI, M_SQRT2 with Microsoft Visual C++, the following
+   must be defined before including <cmath> */
+# define _USE_MATH_DEFINES
+#endif
+
 #include <cstring>
 #include <sstream>
 #include "Interpreter.hh"
@@ -1025,10 +1032,15 @@ Interpreter::print_expression(it_code_type it_code, bool evaluate)
               Stack.push(tmp_out.str());
               break;
             case oErf:
+#ifndef _MSC_VER
               Stackf.push(erf(v1f));
               tmp_out.str("");
               tmp_out << "erf(" << v1 << ")";
               Stack.push(tmp_out.str());
+#else
+              // erf() does not exist in Microsoft Visual C++
+              mexErrMsgTxt("bytecode: erf() not supported on your platform");
+#endif
               break;
             default:
               ;
@@ -1051,10 +1063,15 @@ Interpreter::print_expression(it_code_type it_code, bool evaluate)
           switch (op)
             {
               case oNormcdf:
+#ifndef _MSC_VER
                 Stackf.push(0.5*(1+erf((v1f-v2f)/v3f/M_SQRT2)));
                 tmp_out.str("");
                 tmp_out << "normcdf(" << v1 << ", " << v2 << ", " << v3 << ")";
                 Stack.push(tmp_out.str());
+#else
+                // erf() does not exist in Microsoft Visual C++
+                mexErrMsgTxt("bytecode: normcdf() not supported on your platform");
+#endif
                 break;
               case oNormpdf:
                 Stackf.push(1/(v3f*sqrt(2*M_PI)*exp(pow((v1f-v2f)/v3f,2)/2)));
@@ -1766,9 +1783,14 @@ Interpreter::compute_block_time(int Per_u_, bool evaluate, int block_num)
 #endif
               break;
             case oErf:
+#ifndef _MSC_VER
               Stack.push(erf(v1));
-#ifdef DEBUG
+# ifdef DEBUG
               tmp_out << " |erf(" << v1 << ")|";
+# endif
+#else
+              // erf() does not exist in Microsoft Visual C++
+              mexErrMsgTxt("bytecode: erf() not supported on your platform");
 #endif
               break;
             default:
@@ -1786,10 +1808,15 @@ Interpreter::compute_block_time(int Per_u_, bool evaluate, int block_num)
           switch (op)
             {
               case oNormcdf:
+#ifndef _MSC_VER
                 //mexPrintf("normcdf(v1=%f, v2=%f, v3=%f)=%f\n", v1, v2, v3, 0.5*(1+erf((v1-v2)/v3/M_SQRT2)));
                 Stack.push(0.5*(1+erf((v1-v2)/v3/M_SQRT2)));
-#ifdef DEBUG
+# ifdef DEBUG
                 tmp_out << " |normcdf(" << v1 << ", " << v2 << ", " << v3 << ")|";
+# endif
+#else
+                // erf() does not exist in Microsoft Visual C++
+                mexErrMsgTxt("bytecode: normcdf() not supported on your platform");
 #endif
                 break;
               case oNormpdf:
