@@ -5,12 +5,13 @@
 
 #include "fn_filesetup.h"
 
+#include "modify_for_mex.h"
 
-//-----------------
-// For command line.
-// Finds /ch in the command line.  If found, returns the args location
-//   indexed by int and zero otherwise.
-//-----------------
+/*  //-----------------   ansi-c*/
+/*  // For command line.   ansi-c*/
+/*  // Finds /ch in the command line.  If found, returns the args location   ansi-c*/
+/*  //   indexed by int and zero otherwise.   ansi-c*/
+/*  //-----------------   ansi-c*/
 int fn_ParseCommandLine(int n_arg, char **args, char ch) {
    int i;
    for (i=1; i<n_arg; i++)
@@ -19,102 +20,102 @@ int fn_ParseCommandLine(int n_arg, char **args, char ch) {
 }
 
 
-//-----------------
-// For command line.
-// Finds /ch in the command line.  If found returns a pointer
-//   to the string trailing /ch.  If /ch is not found or there is
-//   no trailing string or the trailing string is another argument,
-//   then default_return is returned.  No memory is allocated and
-//   the calling routine should not free the returned pointer.
-//-----------------
+/*  //-----------------   ansi-c*/
+/*  // For command line.   ansi-c*/
+/*  // Finds /ch in the command line.  If found returns a pointer   ansi-c*/
+/*  //   to the string trailing /ch.  If /ch is not found or there is   ansi-c*/
+/*  //   no trailing string or the trailing string is another argument,   ansi-c*/
+/*  //   then default_return is returned.  No memory is allocated and   ansi-c*/
+/*  //   the calling routine should not free the returned pointer.   ansi-c*/
+/*  //-----------------   ansi-c*/
 char *fn_ParseCommandLine_String(int n_arg, char **args, char ch, char *default_return) {
    int i=fn_ParseCommandLine(n_arg,args,ch);
    if (i > 0)
       if (strlen(args[i]) > 2) return args[i]+2;
-           // In case the user forgot typing a space between /ch and string following it, still returns a pointer to the string folloing /ch.
+/*             // In case the user forgot typing a space between /ch and string following it, still returns a pointer to the string folloing /ch.   ansi-c*/
       else if ((i+1 < n_arg) && (args[i+1][0] != '/')) return args[i+1];
-           // Returns a pointer to the string that does NOT begin with / and there is a whitespace between /ch and the string.
+/*             // Returns a pointer to the string that does NOT begin with / and there is a whitespace between /ch and the string.   ansi-c*/
    return default_return;
 }
 
 
-//-----------------
-// For command line.
-// Finds /ch in the command line.  If found returns the integer
-//   value of the string trailing /ch (e.g, the integer value is
-//   sample size or normalization index.  If /ch is not found or there
-//   is no trailing string or the trailing string is another argument,
-//   then the default_return value is returned.
-//-----------------
+/*  //-----------------   ansi-c*/
+/*  // For command line.   ansi-c*/
+/*  // Finds /ch in the command line.  If found returns the integer   ansi-c*/
+/*  //   value of the string trailing /ch (e.g, the integer value is   ansi-c*/
+/*  //   sample size or normalization index.  If /ch is not found or there   ansi-c*/
+/*  //   is no trailing string or the trailing string is another argument,   ansi-c*/
+/*  //   then the default_return value is returned.   ansi-c*/
+/*  //-----------------   ansi-c*/
 int fn_ParseCommandLine_Integer(int n_arg, char **args, char ch, int default_return) {
    char *str=fn_ParseCommandLine_String(n_arg,args,ch,(char*)NULL);
    return str ? atoi(str) : default_return;
 }
 
 
-//-----------------
-// Finds proper location in the input data file.
-// Returns 1 if the NUL-terminated string id is found
-//   in the file and 0 otherwise.  The file pointer is set
-//   to the line immediately after the line containing id.
-//   If the string id has a length (including the new line
-//   character \n) more than 1023, it will be cut off at 1023.
-//-----------------
+/*  //-----------------   ansi-c*/
+/*  // Finds proper location in the input data file.   ansi-c*/
+/*  // Returns 1 if the NUL-terminated string id is found   ansi-c*/
+/*  //   in the file and 0 otherwise.  The file pointer is set   ansi-c*/
+/*  //   to the line immediately after the line containing id.   ansi-c*/
+/*  //   If the string id has a length (including the new line   ansi-c*/
+/*  //   character \n) more than 1023, it will be cut off at 1023.   ansi-c*/
+/*  //-----------------   ansi-c*/
 int fn_SetFilePosition(FILE *f, const char *id) {
-   // As an output, the file pointer f will be reset to the beginning of the line next to the line headed by the string id.
+/*     // As an output, the file pointer f will be reset to the beginning of the line next to the line headed by the string id.   ansi-c*/
    char buffer[1024];
    size_t n=strlen(id);
    int ch;
 
    if ( !f )  fn_DisplayError(".../fn_filesetup.c/fn_SetFilePosition():  the file, *f, must be created (opened)");
    if (n>1023)  n=1023;
-   rewind(f);                             // Reset a file poiniter to the beginning of the file.  There may be more efficient ways but this is good enough as long as the file is not too long.
-   while (fgets(buffer,1024,f)) {        // Reads a line at a time in the file f (including \n and a NUL byte) until it matches id.  fgets returns the pointer to the buffer and is often only used to check for EOF.
-      if (buffer[strlen(buffer)-1] != '\n')  // -1 because the first element of the buffer is indexed by buffer[0].
-         // If the end of the buffer (excluding the NUL byte) encounters no new line, f points to the next character after
-         //   the end of the buffer on the SAME line (i.e., f does not point to the begining of the new line at this point).
-         //   The following do loop will take f to point to the beginning of the new line.
-         do ch=fgetc(f);  // Gets one character at a time until it reachs the end of the current '\n' or the end of the file EOF.
+   rewind(f);                              /*   Reset a file poiniter to the beginning of the file.  There may be more efficient ways but this is good enough as long as the file is not too long.   ansi-c*/
+   while (fgets(buffer,1024,f)) {         /*   Reads a line at a time in the file f (including \n and a NUL byte) until it matches id.  fgets returns the pointer to the buffer and is often only used to check for EOF.   ansi-c*/
+      if (buffer[strlen(buffer)-1] != '\n')   /*   -1 because the first element of the buffer is indexed by buffer[0].   ansi-c*/
+/*           // If the end of the buffer (excluding the NUL byte) encounters no new line, f points to the next character after   ansi-c*/
+/*           //   the end of the buffer on the SAME line (i.e., f does not point to the begining of the new line at this point).   ansi-c*/
+/*           //   The following do loop will take f to point to the beginning of the new line.   ansi-c*/
+         do ch=fgetc(f);   /*   Gets one character at a time until it reachs the end of the current '\n' or the end of the file EOF.   ansi-c*/
          while ( (ch != '\n') && (ch != EOF) );
-      if (!memcmp(buffer,id,n)) return 1;  // The match is found.
+      if (!memcmp(buffer,id,n)) return 1;   /*   The match is found.   ansi-c*/
    }
-   return 0;                            // No match is found.
+   return 0;                             /*   No match is found.   ansi-c*/
 }
 
 
-//-----------------
-// Reads a string from the input data file with the NULL-terminated
-//   character but without the new line character.
-// Returns 1 if the vector of characters is all read without
-//   errors and 0 otherwise.  The file pointer is then moved
-//   to point to the next non-whitespace character after these
-//   characters.
-//-----------------
+/*  //-----------------   ansi-c*/
+/*  // Reads a string from the input data file with the NULL-terminated   ansi-c*/
+/*  //   character but without the new line character.   ansi-c*/
+/*  // Returns 1 if the vector of characters is all read without   ansi-c*/
+/*  //   errors and 0 otherwise.  The file pointer is then moved   ansi-c*/
+/*  //   to point to the next non-whitespace character after these   ansi-c*/
+/*  //   characters.   ansi-c*/
+/*  //-----------------   ansi-c*/
 int ReadNullTerminatedString(FILE *fptr, TScvector *x_cv)
 {
-   //x_cv will have a string without the new line character and with the NULL character.
-   //It is the user's responsiblity to ensure the string x_cv has an enough length to use fgets().
-   //  If not, it stops after x_cv->n-1 characters have been stored in x_cv->v and a NULL byte is appended to make it a string.
-   //  If yet, reading stops after a newline character is read and stored in x_cv->v and a NULL byte is then appended.
+/*     //x_cv will have a string without the new line character and with the NULL character.   ansi-c*/
+/*     //It is the user's responsiblity to ensure the string x_cv has an enough length to use fgets().   ansi-c*/
+/*     //  If not, it stops after x_cv->n-1 characters have been stored in x_cv->v and a NULL byte is appended to make it a string.   ansi-c*/
+/*     //  If yet, reading stops after a newline character is read and stored in x_cv->v and a NULL byte is then appended.   ansi-c*/
    int _n;
    char *cv;
    if (!fptr || !x_cv)  fn_DisplayError(".../fn_filesetup.c/ReadNullTerminatedString(): File or input string must be created (memory-allocated)");
    _n = x_cv->n;
    cv = x_cv->v;
    if ( !fgets(cv, _n, fptr) ) return 0;
-   cv[strlen(cv)-1] = '\0';  //Removes the new line character and replaces it with the NULL character.
-      //The string length (size_t type) strlen(cv) does NOT count the NULL byte at the end, but it counts the new line character.
+   cv[strlen(cv)-1] = '\0';   /*  Removes the new line character and replaces it with the NULL character.   ansi-c*/
+/*        //The string length (size_t type) strlen(cv) does NOT count the NULL byte at the end, but it counts the new line character.   ansi-c*/
    return 1;
 }
 
 
-//-----------------
-// Reads a vector of integers from the input data file.
-// Returns 1 if the vector of integers is all read without
-//   errors and 0 otherwise.  The file pointer is then moved
-//   to point to the next non-whitespace character after these
-//   integers.
-//-----------------
+/*  //-----------------   ansi-c*/
+/*  // Reads a vector of integers from the input data file.   ansi-c*/
+/*  // Returns 1 if the vector of integers is all read without   ansi-c*/
+/*  //   errors and 0 otherwise.  The file pointer is then moved   ansi-c*/
+/*  //   to point to the next non-whitespace character after these   ansi-c*/
+/*  //   integers.   ansi-c*/
+/*  //-----------------   ansi-c*/
 int fn_ReadVector_int(FILE *fptr, int *x_v, const int d_x_v) {
    int ki;
    for (ki=0; ki<d_x_v; ki++)
@@ -133,13 +134,13 @@ int ReadVector_int(FILE *fptr, TSivector *x_iv) {
 }
 
 
-//-----------------
-// Reads a vector of doubles from the input data file.
-// Returns 1 if the vector of doubles is all read without
-//   errors and 0 otherwise.  The file pointer is then moved
-//   to point to the next non-whitespace character after these
-//   doubles.
-//-----------------
+/*  //-----------------   ansi-c*/
+/*  // Reads a vector of doubles from the input data file.   ansi-c*/
+/*  // Returns 1 if the vector of doubles is all read without   ansi-c*/
+/*  //   errors and 0 otherwise.  The file pointer is then moved   ansi-c*/
+/*  //   to point to the next non-whitespace character after these   ansi-c*/
+/*  //   doubles.   ansi-c*/
+/*  //-----------------   ansi-c*/
 int fn_ReadVector_lf(FILE *fptr, double *x_v, const int d_x_v) {
    int ki;
    for (ki=0; ki<d_x_v; ki++)
@@ -160,13 +161,13 @@ int ReadVector_lf(FILE *fptr, TSdvector *x_dv) {
 }
 
 
-//-----------------
-// Reads a column-major matrix of integers from the input data file.
-// Returns 1 if the matrix of integers is all read without
-//   errors and 0 otherwise.  The file pointer is then moved
-//   to point to the next non-whitespace character after these
-//   integers.
-//-----------------
+/*  //-----------------   ansi-c*/
+/*  // Reads a column-major matrix of integers from the input data file.   ansi-c*/
+/*  // Returns 1 if the matrix of integers is all read without   ansi-c*/
+/*  //   errors and 0 otherwise.  The file pointer is then moved   ansi-c*/
+/*  //   to point to the next non-whitespace character after these   ansi-c*/
+/*  //   integers.   ansi-c*/
+/*  //-----------------   ansi-c*/
 int fn_ReadMatrix_int(FILE *fptr, int *x_m, const int r_x_m, const int c_x_m) {
    int ki, kj;
 
@@ -190,13 +191,13 @@ int ReadMatrix_int(FILE *fptr, TSimatrix *X_im)
 }
 
 
-//-----------------
-// Reads a column-major matrix of doubles from the input data file.
-// Returns 1 if the matrix of doubles is all read without
-//   errors and 0 otherwise.  The file pointer is then moved
-//   to point to the next non-whitespace character after these
-//   doubles.
-//-----------------
+/*  //-----------------   ansi-c*/
+/*  // Reads a column-major matrix of doubles from the input data file.   ansi-c*/
+/*  // Returns 1 if the matrix of doubles is all read without   ansi-c*/
+/*  //   errors and 0 otherwise.  The file pointer is then moved   ansi-c*/
+/*  //   to point to the next non-whitespace character after these   ansi-c*/
+/*  //   doubles.   ansi-c*/
+/*  //-----------------   ansi-c*/
 int fn_ReadMatrix_lf(FILE *fptr, double *x_m, const int r_x_m, const int c_x_m) {
    int ki, kj;
    for (ki=0; ki<r_x_m; ki++)
@@ -205,8 +206,8 @@ int fn_ReadMatrix_lf(FILE *fptr, double *x_m, const int r_x_m, const int c_x_m) 
    return 1;
 }
 int ReadMatrix_lf(FILE *fptr, TSdmatrix *x_dm) {
-   //Outputs:
-   //  x_dm (whose memory is already allocated): To be filled with the numbers from the file fptr.
+/*     //Outputs:   ansi-c*/
+/*     //  x_dm (whose memory is already allocated): To be filled with the numbers from the file fptr.   ansi-c*/
    int ki, kj, nrows, ncols;
    double *M;
    if (!fptr || !x_dm) fn_DisplayError(".../fn_filesetup.c/ReadMatrix_lf(): File or input matrix must be created (memory-allocated)");
@@ -223,15 +224,15 @@ int ReadMatrix_lf(FILE *fptr, TSdmatrix *x_dm) {
 
 
 
-//-----------------
-// Reads a column-major cell of double vectors from the input data file.
-// Returns 1 if all data are read without errors and 0 otherwise.
-// The file pointer is then moved to point to the next non-whitespace character
-//   after these doubles.
-//-----------------
+/*  //-----------------   ansi-c*/
+/*  // Reads a column-major cell of double vectors from the input data file.   ansi-c*/
+/*  // Returns 1 if all data are read without errors and 0 otherwise.   ansi-c*/
+/*  // The file pointer is then moved to point to the next non-whitespace character   ansi-c*/
+/*  //   after these doubles.   ansi-c*/
+/*  //-----------------   ansi-c*/
 int ReadCellvec_lf(FILE *fptr, TSdcellvec *x_dcv) {
-   //Outputs:
-   //  x_dcv (whose memory is already allocated): To be filled with the numbers from the file fptr.
+/*     //Outputs:   ansi-c*/
+/*     //  x_dcv (whose memory is already allocated): To be filled with the numbers from the file fptr.   ansi-c*/
    int ci, kj, _n, ncells;
    double *v;
    if (!fptr || !x_dcv) fn_DisplayError(".../fn_filesetup.c/ReadCellvec_lf(): File or input cell must be created (memory-allocated)");
@@ -248,15 +249,15 @@ int ReadCellvec_lf(FILE *fptr, TSdcellvec *x_dcv) {
 
 
 
-//-----------------
-// Reads a column-major cell of double matrices from the input data file.
-// Returns 1 if all data are  read without errors and 0 otherwise.
-// The file pointer is then moved to point to the next non-whitespace character
-//   after these doubles.
-//-----------------
+/*  //-----------------   ansi-c*/
+/*  // Reads a column-major cell of double matrices from the input data file.   ansi-c*/
+/*  // Returns 1 if all data are  read without errors and 0 otherwise.   ansi-c*/
+/*  // The file pointer is then moved to point to the next non-whitespace character   ansi-c*/
+/*  //   after these doubles.   ansi-c*/
+/*  //-----------------   ansi-c*/
 int ReadCell_lf(FILE *fptr, TSdcell *x_dc) {
-   //Outputs:
-   //  x_dc (whose memory is already allocated): To be filled with the numbers from the file fptr.
+/*     //Outputs:   ansi-c*/
+/*     //  x_dc (whose memory is already allocated): To be filled with the numbers from the file fptr.   ansi-c*/
    int ci, ki, kj, nrows, ncols, ncells;
    double *M;
    if (!fptr || !x_dc) fn_DisplayError(".../fn_filesetup.c/ReadCell_lf(): File or input cell must be created (memory-allocated)");
@@ -274,11 +275,11 @@ int ReadCell_lf(FILE *fptr, TSdcell *x_dc) {
 
 
 
-//-----------------
-// Write a column-major matrix of floats to the output file.
-// The file pointer is then moved to point to the next
-//   non-whitespace character after these doubles.
-//-----------------
+/*  //-----------------   ansi-c*/
+/*  // Write a column-major matrix of floats to the output file.   ansi-c*/
+/*  // The file pointer is then moved to point to the next   ansi-c*/
+/*  //   non-whitespace character after these doubles.   ansi-c*/
+/*  //-----------------   ansi-c*/
 void fn_WriteMatrix_f(FILE *fptr_debug, const double *x_m, const int r_x_m, const int c_x_m) {
    int _i, _j;
 
@@ -303,11 +304,11 @@ void WriteMatrix_f(FILE *fptr_debug, const TSdmatrix *x_dm) {
 }
 
 
-//-----------------
-// Write a column-major matrix of doubles to the output file.
-// The file pointer is then moved to point to the next
-//   non-whitespace character after these doubles.
-//-----------------
+/*  //-----------------   ansi-c*/
+/*  // Write a column-major matrix of doubles to the output file.   ansi-c*/
+/*  // The file pointer is then moved to point to the next   ansi-c*/
+/*  //   non-whitespace character after these doubles.   ansi-c*/
+/*  //-----------------   ansi-c*/
 void fn_WriteMatrix_lf(FILE *fptr_debug, const double *x_m, const int r_x_m, const int c_x_m) {
    int _i, _j;
    for (_i=0; _i<r_x_m; _i++) {
@@ -336,20 +337,20 @@ void WriteMatrix(FILE *fptr_debug, const TSdmatrix *x_dm, const char *format) {
    nrows = x_dm->nrows;
    ncols = x_dm->ncols;
    M = x_dm->M;
-   if (!format)   format=" %10.5f ";   //Default format.
+   if (!format)   format=" %10.5f ";    /*  Default format.   ansi-c*/
    for (_i=0; _i<nrows; _i++)
       for (_j=0; _j<ncols; _j++) {
          fprintf(fptr_debug, format, M[_j*x_dm->nrows + _i]);
          if (_j==ncols-1) fprintf(fptr_debug, "\n");
       }
-   //fprintf(fptr_debug, "\n");
+/*     //fprintf(fptr_debug, "\n");   ansi-c*/
 }
-//+
+/*  //+   ansi-c*/
 void WriteMatrixTranspose(FILE *fptr_debug, const TSdmatrix *x_dm, const char *format)
 {
    int _i, _j, nrows, ncols;
    double *M;
-   //===
+/*     //===   ansi-c*/
    TSdmatrix *Xtran_dm = NULL;
 
    if (!fptr_debug || !x_dm) fn_DisplayError(".../fn_filesetup.c/WriteMatrixTranspose(): File or input matrix cannot be NULL (must be created)");
@@ -359,24 +360,24 @@ void WriteMatrixTranspose(FILE *fptr_debug, const TSdmatrix *x_dm, const char *f
    nrows = Xtran_dm->nrows;
    ncols = Xtran_dm->ncols;
    M = Xtran_dm->M;
-   if (!format)   format=" %10.5f ";   //Default format.
+   if (!format)   format=" %10.5f ";    /*  Default format.   ansi-c*/
    for (_i=0; _i<nrows; _i++)
       for (_j=0; _j<ncols; _j++) {
          fprintf(fptr_debug, format, M[_j*Xtran_dm->nrows + _i]);
          if (_j==ncols-1) fprintf(fptr_debug, "\n");
       }
-   //fprintf(fptr_debug, "\n");
+/*     //fprintf(fptr_debug, "\n");   ansi-c*/
 
-   //===
+/*     //===   ansi-c*/
    DestroyMatrix_lf(Xtran_dm);
 }
 
 
-//-----------------
-// Write cells of column-major double matrices to the output file.
-// The file pointer is then moved to point to the next
-//   non-whitespace character after these doubles.
-//-----------------
+/*  //-----------------   ansi-c*/
+/*  // Write cells of column-major double matrices to the output file.   ansi-c*/
+/*  // The file pointer is then moved to point to the next   ansi-c*/
+/*  //   non-whitespace character after these doubles.   ansi-c*/
+/*  //-----------------   ansi-c*/
 void WriteCell_lf(FILE *fptr_debug, const TSdcell *x_dc) {
    int _i, _n;
    if (!fptr_debug || !x_dc) fn_DisplayError(".../fn_filesetup.c/WriteCell_lf(): File or input cell cannot be NULL (must be created)");
@@ -405,7 +406,7 @@ void WriteCell(FILE *fptr_debug, const TSdcell *x_dc, const char *format) {
       fprintf(fptr_debug, "\n");
    }
 }
-//+
+/*  //+   ansi-c*/
 void WriteCellTranspose(FILE *fptr_debug, const TSdcell *x_dc, const char *format)
 {
    int _i, _n;
@@ -419,11 +420,11 @@ void WriteCellTranspose(FILE *fptr_debug, const TSdcell *x_dc, const char *forma
 }
 
 
-//-----------------
-// Write cells of vectors to the output file.
-// The file pointer is then moved to point to the next
-//   non-whitespace character after these doubles.
-//-----------------
+/*  //-----------------   ansi-c*/
+/*  // Write cells of vectors to the output file.   ansi-c*/
+/*  // The file pointer is then moved to point to the next   ansi-c*/
+/*  //   non-whitespace character after these doubles.   ansi-c*/
+/*  //-----------------   ansi-c*/
 void WriteCellvec_lf(FILE *fptr_debug, const TSdcellvec *x_dcv) {
    int _i;
    if (!fptr_debug || !x_dcv) fn_DisplayError(".../fn_filesetup.c/WriteCellvec_lf(): File or input cell cannot be NULL (must be created)");
@@ -456,11 +457,11 @@ void WriteCellvec_int(FILE *fptr_debug, const TSicellvec *x_icv)
 
 
 
-//-----------------
-// Write fourths of column-major double matrices to an output file.
-// The file pointer is then moved to point to the next
-//   non-whitespace character after these doubles.
-//-----------------
+/*  //-----------------   ansi-c*/
+/*  // Write fourths of column-major double matrices to an output file.   ansi-c*/
+/*  // The file pointer is then moved to point to the next   ansi-c*/
+/*  //   non-whitespace character after these doubles.   ansi-c*/
+/*  //-----------------   ansi-c*/
 void WriteFourth_f(FILE *fptr_debug, const TSdfourth *x_d4) {
    int _j, _i, _m, _n;
    if (!fptr_debug || !x_d4) fn_DisplayError(".../fn_filesetup.c/WriteFourth_f(): File or input fourth cannot be NULL (must be created)");
@@ -487,11 +488,11 @@ void WriteFourth(FILE *fptr_debug, const TSdfourth *x_d4, const char *format) {
 }
 
 
-//-----------------
-// Write a column-major matrix of ints to the output file.
-// The file pointer is then moved to point to the next
-//   non-whitespace character after these doubles.
-//-----------------
+/*  //-----------------   ansi-c*/
+/*  // Write a column-major matrix of ints to the output file.   ansi-c*/
+/*  // The file pointer is then moved to point to the next   ansi-c*/
+/*  //   non-whitespace character after these doubles.   ansi-c*/
+/*  //-----------------   ansi-c*/
 void fn_WriteMatrix_int(FILE *fptr_debug, const int *x_m, const int r_x_m, const int c_x_m) {
    int _i, _j;
    for (_i=0; _i<r_x_m; _i++) {
@@ -515,11 +516,11 @@ void WriteMatrix_int(FILE *fptr_debug, const TSimatrix *x_im) {
 }
 
 
-//-----------------
-// Write a vector of doubles to the output file.
-// The file pointer is then moved to point to the next
-//   non-whitespace character after these doubles.
-//-----------------
+/*  //-----------------   ansi-c*/
+/*  // Write a vector of doubles to the output file.   ansi-c*/
+/*  // The file pointer is then moved to point to the next   ansi-c*/
+/*  //   non-whitespace character after these doubles.   ansi-c*/
+/*  //-----------------   ansi-c*/
 void fn_WriteVector_lf(FILE *fptr_debug, const double *x_v, const int d_x_v) {
    int _i;
    for (_i=0; _i<d_x_v; _i++) {
@@ -540,7 +541,7 @@ void WriteVector(FILE *fptr_debug, const TSdvector *x_dv, const char *format) {
    if ( !fptr_debug || !x_dv ) fn_DisplayError(".../fn_filesetup.c/WriteVector(): File or input vector cannot be NULL (must be created)");
    _n = x_dv->n;
    v = x_dv->v;
-   if (!format)  format=" %10.5f ";   //Default format.
+   if (!format)  format=" %10.5f ";    /*  Default format.   ansi-c*/
    for (_i=0; _i<_n; _i++)  fprintf(fptr_debug, format, v[_i]);
    fprintf(fptr_debug, "\n");
 }
@@ -551,7 +552,7 @@ void WriteVector_column(FILE *fptr_debug, const TSdvector *x_dv, const char *for
    if ( !fptr_debug || !x_dv ) fn_DisplayError(".../fn_filesetup.c/WriteVector_column(): File or input vector cannot be NULL (must be created)");
    _n = x_dv->n;
    v = x_dv->v;
-   if (!format)  format=" %10.5f ";   //Default format.
+   if (!format)  format=" %10.5f ";    /*  Default format.   ansi-c*/
    for (_i=0; _i<_n; _i++)
    {
       fprintf(fptr_debug, format, v[_i]);
@@ -560,11 +561,11 @@ void WriteVector_column(FILE *fptr_debug, const TSdvector *x_dv, const char *for
 }
 
 
-//-----------------
-// Write a vector of floats to the output file.
-// The file pointer is then moved to point to the next
-//   non-whitespace character after these doubles.
-//-----------------
+/*  //-----------------   ansi-c*/
+/*  // Write a vector of floats to the output file.   ansi-c*/
+/*  // The file pointer is then moved to point to the next   ansi-c*/
+/*  //   non-whitespace character after these doubles.   ansi-c*/
+/*  //-----------------   ansi-c*/
 void fn_WriteVector_f(FILE *fptr_debug, const double *x_v, const int d_x_v) {
    int _i;
    for (_i=0; _i<d_x_v; _i++)  fprintf(fptr_debug, " %f ", x_v[_i]);
@@ -579,11 +580,11 @@ void WriteVector_f(FILE *fptr_debug, const TSdvector *x_dv) {
 
 
 
-//-----------------
-// Write a vector of integers to the output file.
-// The file pointer is then moved to point to the next
-//   non-whitespace character after these doubles.
-//-----------------
+/*  //-----------------   ansi-c*/
+/*  // Write a vector of integers to the output file.   ansi-c*/
+/*  // The file pointer is then moved to point to the next   ansi-c*/
+/*  //   non-whitespace character after these doubles.   ansi-c*/
+/*  //-----------------   ansi-c*/
 void WriteVector_int(FILE *fptr_debug, const TSivector *x_iv)
 {
    int _i;
@@ -602,34 +603,34 @@ void PrintVector_int(const TSivector *x_iv)
 
    if (!x_iv) fn_DisplayError(".../fn_filesetup.c/PrintVector_int(): Input vector must be created (memory-allocated)");
    _n = x_iv->n;
-   // printf("\nVector:\n");
+/*     // printf("\nVector:\n");   ansi-c*/
    for (_i=0; _i<_n; _i++) {
       printf("v[%d]=%d\n", _i, x_iv->v[_i]);
    }
 }
 
-//-----------------
-// Print a vector of doubles to the screen.
-//-----------------
+/*  //-----------------   ansi-c*/
+/*  // Print a vector of doubles to the screen.   ansi-c*/
+/*  //-----------------   ansi-c*/
 void PrintVector(const TSdvector *x_dv, const char *format)
 {
    int _i, _n;
 
    if (!x_dv) fn_DisplayError(".../fn_filesetup.c/PrintVector(): Input vector must be created (memory-allocated)");
    _n = x_dv->n;
-   // printf("\n\nVector:\n");
+/*     // printf("\n\nVector:\n");   ansi-c*/
    for (_i=0; _i<_n; _i++) {
       printf(format, x_dv->v[_i]);
    }
 }
-//+
+/*  //+   ansi-c*/
 void PrintVector_f(const TSdvector *x_dv)
 {
    int _i, _n;
 
    if (!x_dv) fn_DisplayError(".../fn_filesetup.c/PrintVector_f(): Input vector must be created (memory-allocated)");
    _n = x_dv->n;
-   // printf("\n\nVector:\n");
+/*     // printf("\n\nVector:\n");   ansi-c*/
    for (_i=0; _i<_n; _i++) {
       printf("v[%d]=%6.4f\n", _i, x_dv->v[_i]);
    }
@@ -705,7 +706,7 @@ void PrintMatrix(const TSdmatrix *x_dm, const char *format)
    }
 
    printf("\n\nMatrix:\n");
-   if (!format)  format=" %10.5f ";   //Default format.
+   if (!format)  format=" %10.5f ";    /*  Default format.   ansi-c*/
    for (_i=0; _i<nrows; _i++) {
       for (_j=0; _j<ncols; _j++) {
          printf(format, M[_j*nrows + _i]);
@@ -795,7 +796,7 @@ void PrintCell(const TSdcell *x_dc, const char *format)
       M = x_dc->C[ci]->M;
 
       printf("\nCell %d:\n", ci);
-      if (!format)  format=" %10.5f ";   //Default format.
+      if (!format)  format=" %10.5f ";    /*  Default format.   ansi-c*/
       for (_i=0; _i<nrows; _i++) {
          for (_j=0; _j<ncols; _j++) {
             printf(format, M[_j*nrows + _i]);
@@ -826,19 +827,19 @@ void PrintFourthvec_f(TSdfourthvec *x_d4v) {
 
 
 
-//-------------------
-// Prints entire input data (fptr_in) to the output file (fptr_out)
-//   for the user to know what has produced the output.
-//   The maximum number of characters in each line of the input file
-//   is 4095 (excluding the NUL byte), but the rest of the line will
-//   continue to be printed in new lines in the output file.
-//-------------------
+/*  //-------------------   ansi-c*/
+/*  // Prints entire input data (fptr_in) to the output file (fptr_out)   ansi-c*/
+/*  //   for the user to know what has produced the output.   ansi-c*/
+/*  //   The maximum number of characters in each line of the input file   ansi-c*/
+/*  //   is 4095 (excluding the NUL byte), but the rest of the line will   ansi-c*/
+/*  //   continue to be printed in new lines in the output file.   ansi-c*/
+/*  //-------------------   ansi-c*/
 #define BUFFERLEN 4096
 void ReprintInputData(FILE *fptr_in, FILE *fptr_out)
 {
    char *inpbuffer;
 
-   inpbuffer = tzMalloc(BUFFERLEN, char);   //@ Allocate memory to the string (including the NUL byte).
+   inpbuffer = tzMalloc(BUFFERLEN, char);    /*  @ Allocate memory to the string (including the NUL byte).   ansi-c*/
    rewind(fptr_in);
    while (fgets(inpbuffer,BUFFERLEN,fptr_in))
       fprintf(fptr_out, "%s", inpbuffer);

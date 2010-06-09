@@ -31,7 +31,6 @@ function y_=simult(ys, dr)
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
 global M_ options_ oo_
-global  it_ means_
 
 order = options_.order;
 replic = options_.replic;
@@ -39,8 +38,6 @@ if replic == 0
     replic = 1;
 end
 seed = options_.simul_seed;
-
-it_ = M_.maximum_lag + 1 ;
 
 if replic > 1
     fname = [M_.fname,'_simul'];

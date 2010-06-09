@@ -18,267 +18,267 @@
 #include "tzmatlab.h"
 #include "csminwel.h"
 #include "congradmin.h"
-#include "fn_filesetup.h"  //fn_SetFilePosition(), etc.
-#include "mathlib.h"      //CopyVector0(), etc.
-#include "switch_opt.h"    //DW's optimization routines for Markov-switching models.
-#include "cstz.h" //Used for gradcd_gen() only in the IMSL linear constrainted problem.
+#include "fn_filesetup.h"   /*  fn_SetFilePosition(), etc.   ansi-c*/
+#include "mathlib.h"       /*  CopyVector0(), etc.   ansi-c*/
+#include "switch_opt.h"     /*  DW's optimization routines for Markov-switching models.   ansi-c*/
+#include "cstz.h"  /*  Used for gradcd_gen() only in the IMSL linear constrainted problem.   ansi-c*/
 
-//-------------- Attributes for selecting optimization packages. --------------
-#define MIN_DEFAULT   0        //0 or NULL: default or no minimization package.
-#define MIN_CSMINWEL  0x0001   //1: csminwel unconstrained minimization package.
-#define MIN_IMSL      0x0002   //2: IMSL unconstrained minimization package.
-#define MIN_IMSL_LNCONS   0x0004   //4: IMSL linearly constrained minimization package.
-#define MIN_IMSL_NLNCONS   0x0008   //8: IMSL nonlinearly constrained minimization package.
-#define MIN_CONGRADI    0x0010   //16: unconstrained conjugate gradient minimization method 1.  Polak-Ribiere conjugate gradient method without using derivative information in performing the line minimization.
-#define MIN_CONGRADII   0x0020  //2*16=32: unconstrained conjugate gradient minimization method 2.  NOT available yet! Pletcher-Reeves conjugate gradient method using derivative information in performing the line minimization.
-//#define MIN_CONGRADII   0x0040  //4*16=2^6: unconstrained conjugate gradient minimization method 2.
-//#define MIN_CONGRADII   0x0080  //8*16=2^7: unconstrained conjugate gradient minimization method 2.
-//#define MIN_CONGRADII   0x0100  //16^2=2^8: unconstrained conjugate gradient minimization method 2.
-
-
-//-------------- Minimization package: unconstrained BFGS csminwel. --------------
-//--- The following three macros will be void if the input data file specifies the values of these macros.
-//--- The following three are used for the constant-parameter model only.
-#define CRIT_CSMINWEL   1.0e-09     //1.5e-08 (for monthly TVBVAR)    //Overall convergence criterion for the function value.
-#define ITMAX_CSMINWEL  100000       //Maximum number of iterations.
-#define INI_H_CSMINWEL   1.0e-005  //Initial value for the diagonal of inverse Hessian in the quasi-Newton search.
-                                  //1.0e-05 (sometimes used for SargentWZ USinflation project I)
-                                  //5.0e-04 (for monthly TVBAR)
-//--- The following macros are used in csminwel.c.  Have not got time to make them void by input values.
-#define INDXNUMGRAD_CSMINWEL 2         //Index for choosing the numerical gradient.  1, forward difference; 2, central difference.
-                             //central difference method is twice as slower as forward difference.
+/*  //-------------- Attributes for selecting optimization packages. --------------   ansi-c*/
+#define MIN_DEFAULT   0         /*  0 or NULL: default or no minimization package.   ansi-c*/
+#define MIN_CSMINWEL  0x0001    /*  1: csminwel unconstrained minimization package.   ansi-c*/
+#define MIN_IMSL      0x0002    /*  2: IMSL unconstrained minimization package.   ansi-c*/
+#define MIN_IMSL_LNCONS   0x0004    /*  4: IMSL linearly constrained minimization package.   ansi-c*/
+#define MIN_IMSL_NLNCONS   0x0008    /*  8: IMSL nonlinearly constrained minimization package.   ansi-c*/
+#define MIN_CONGRADI    0x0010    /*  16: unconstrained conjugate gradient minimization method 1.  Polak-Ribiere conjugate gradient method without using derivative information in performing the line minimization.   ansi-c*/
+#define MIN_CONGRADII   0x0020   /*  2*16=32: unconstrained conjugate gradient minimization method 2.  NOT available yet! Pletcher-Reeves conjugate gradient method using derivative information in performing the line minimization.   ansi-c*/
+/*  //#define MIN_CONGRADII   0x0040  //4*16=2^6: unconstrained conjugate gradient minimization method 2.   ansi-c*/
+/*  //#define MIN_CONGRADII   0x0080  //8*16=2^7: unconstrained conjugate gradient minimization method 2.   ansi-c*/
+/*  //#define MIN_CONGRADII   0x0100  //16^2=2^8: unconstrained conjugate gradient minimization method 2.   ansi-c*/
 
 
-//-------------- Minimization package: linearly-nconstrained IMSL. --------------
-#define CRIT_IMSLCONLIN   1.0e-09      //Overall convergence criterion on the first-order conditions.
-#define ITMAX_IMSLCONLIN  100000       //Maximum number of iterations.
+/*  //-------------- Minimization package: unconstrained BFGS csminwel. --------------   ansi-c*/
+/*  //--- The following three macros will be void if the input data file specifies the values of these macros.   ansi-c*/
+/*  //--- The following three are used for the constant-parameter model only.   ansi-c*/
+#define CRIT_CSMINWEL   1.0e-09      /*  1.5e-08 (for monthly TVBVAR)       ansi-c*/
+#define ITMAX_CSMINWEL  100000        /*  Maximum number of iterations.   ansi-c*/
+#define INI_H_CSMINWEL   1.0e-005   /*  Initial value for the diagonal of inverse Hessian in the quasi-Newton search.   ansi-c*/
+/*                                    //1.0e-05 (sometimes used for SargentWZ USinflation project I)   ansi-c*/
+/*                                    //5.0e-04 (for monthly TVBAR)   ansi-c*/
+/*  //--- The following macros are used in csminwel.c.  Have not got time to make them void by input values.   ansi-c*/
+#define INDXNUMGRAD_CSMINWEL 2          /*  Index for choosing the numerical gradient.  1, forward difference; 2, central difference.   ansi-c*/
+/*                               //central difference method is twice as slower as forward difference.   ansi-c*/
 
-//-------------- Minimization package: conjugate gradient method I. --------------
-#define CRIT_CONGRAD1   1.0e-09      //Overall convergence criterion on the first-order conditions.
-#define ITMAX_CONGRAD1  100000       //Maximum number of iterations.
+
+/*  //-------------- Minimization package: linearly-nconstrained IMSL. --------------   ansi-c*/
+#define CRIT_IMSLCONLIN   1.0e-09       /*  Overall convergence criterion on the first-order conditions.   ansi-c*/
+#define ITMAX_IMSLCONLIN  100000        /*  Maximum number of iterations.   ansi-c*/
+
+/*  //-------------- Minimization package: conjugate gradient method I. --------------   ansi-c*/
+#define CRIT_CONGRAD1   1.0e-09       /*  Overall convergence criterion on the first-order conditions.   ansi-c*/
+#define ITMAX_CONGRAD1  100000        /*  Maximum number of iterations.   ansi-c*/
 
 
-//struct TSminpack_tag;
+/*  //struct TSminpack_tag;   ansi-c*/
 
-// extern struct TSminpack_tag *MINPACK_PS;
+/*  // extern struct TSminpack_tag *MINPACK_PS;   ansi-c*/
 
 
-//typedef void TFminfinder(struct TSminpack_tag *, const int ipackage);  //If ipackage = MIN_CWMINWEL, uses csminwel; etc.
-//int n, double *x_ptr, double g_ptr);  //, void *mingrad_etc_ptr);
-//typedef void TFmingrad_imsl(struct TSminpack_tag *);  //NOT used yet.
-//typedef void TFmingrad(void);   //int n, double *x_ptr, double g_ptr);  //, void *mingrad_etc_ptr);
+/*  //typedef void TFminfinder(struct TSminpack_tag *, const int ipackage);  //If ipackage = MIN_CWMINWEL, uses csminwel; etc.   ansi-c*/
+/*  //int n, double *x_ptr, double g_ptr);  //, void *mingrad_etc_ptr);   ansi-c*/
+/*  //typedef void TFmingrad_imsl(struct TSminpack_tag *);  //NOT used yet.   ansi-c*/
+/*  //typedef void TFmingrad(void);   //int n, double *x_ptr, double g_ptr);  //, void *mingrad_etc_ptr);   ansi-c*/
 
-//======================================================
-// Old way of using cwminwel.  No longer used in my new code. 11/01/05.
-//======================================================
-//------- For unconstrained BFGS csminwel only. -------
+/*  //======================================================   ansi-c*/
+/*  // Old way of using cwminwel.  No longer used in my new code. 11/01/05.   ansi-c*/
+/*  //======================================================   ansi-c*/
+/*  //------- For unconstrained BFGS csminwel only. -------   ansi-c*/
 typedef struct TSetc_csminwel_tag {
-   //=== Optional input arguments (originally set up by Iskander), often or no longer NOT used, so we set to NULL at this point.
-   double **args; //k-by-q.
-   int *dims;   //k-by-1;
+/*     //=== Optional input arguments (originally set up by Iskander), often or no longer NOT used, so we set to NULL at this point.   ansi-c*/
+   double **args;  /*  k-by-q.   ansi-c*/
+   int *dims;    /*  k-by-1;   ansi-c*/
    int _k;
 
-   //=== Mandatory input arguments.
-   TSdmatrix *Hx_dm;  //n-by-n inverse Hessian.  Output as well, when csminwel is done.
-   double crit;   //Overall convergence criterion for the function value.
-   int itmax;  //Maximum number of iterations.
+/*     //=== Mandatory input arguments.   ansi-c*/
+   TSdmatrix *Hx_dm;   /*  n-by-n inverse Hessian.  Output as well, when csminwel is done.   ansi-c*/
+   double crit;    /*  Overall convergence criterion for the function value.   ansi-c*/
+   int itmax;   /*  Maximum number of iterations.   ansi-c*/
 
-   //=== Some reported input arguments.
+/*     //=== Some reported input arguments.   ansi-c*/
    double ini_h_csminwel;
    int indxnumgrad_csminwel;
-   double gradstps_csminwel;  //Step size for the numerical gradient if no analytical gradient is available.
+   double gradstps_csminwel;   /*  Step size for the numerical gradient if no analytical gradient is available.   ansi-c*/
 
 
-   //=== Output arguments.
-   int badg;    //If (badg==0), analytical gradient is used; otherwise, numerical gradient will be produced.
-   int niter;   //Number of iterations taken by csminwel.
-   int fcount;   //Number of function evaluations used by csminwel.
-   int retcode;  //Return code for the terminating condition.
-                // 0, normal step (converged). 1, zero gradient (converged).
-                // 4,2, back and forth adjustment of stepsize didn't finish.
-                // 3, smallest stepsize still improves too slow. 5, largest step still improves too fast.
-                // 6, no improvement found.
+/*     //=== Output arguments.   ansi-c*/
+   int badg;     /*  If (badg==0), analytical gradient is used; otherwise, numerical gradient will be produced.   ansi-c*/
+   int niter;    /*  Number of iterations taken by csminwel.   ansi-c*/
+   int fcount;    /*  Number of function evaluations used by csminwel.   ansi-c*/
+   int retcode;   /*  Return code for the terminating condition.   ansi-c*/
+/*                  // 0, normal step (converged). 1, zero gradient (converged).   ansi-c*/
+/*                  // 4,2, back and forth adjustment of stepsize didn't finish.   ansi-c*/
+/*                  // 3, smallest stepsize still improves too slow. 5, largest step still improves too fast.   ansi-c*/
+/*                  // 6, no improvement found.   ansi-c*/
 } TSetc_csminwel;
 
 
-//=============================================================
-// New ways of making optimization packages.
-//=============================================================
+/*  //=============================================================   ansi-c*/
+/*  // New ways of making optimization packages.   ansi-c*/
+/*  //=============================================================   ansi-c*/
 typedef struct TSminpack_tag {
-   //=== Input arguments.
-   int package;  //Minimization package or routine.
-   TSdvector *x_dv;   //n-by-1 of estimated parameters.
-   TSdvector *g_dv;   //n-by-1 of gradient. When no analytical gradient is provided, it returns the numerical one.
-   //$$$$ The x_dv and g_dv are only used minfinder().  In the wrapper function like minobj_csminwelwrap(), we must
-   //$$$$   use xtemp_dv and gtemp_dv to be repointed to the temporary array created in csminwel() itself.  See below.
+/*     //=== Input arguments.   ansi-c*/
+   int package;   /*  Minimization package or routine.   ansi-c*/
+   TSdvector *x_dv;    /*  n-by-1 of estimated parameters.   ansi-c*/
+   TSdvector *g_dv;    /*  n-by-1 of gradient. When no analytical gradient is provided, it returns the numerical one.   ansi-c*/
+/*     //$$$$ The x_dv and g_dv are only used minfinder().  In the wrapper function like minobj_csminwelwrap(), we must   ansi-c*/
+/*     //$$$$   use xtemp_dv and gtemp_dv to be repointed to the temporary array created in csminwel() itself.  See below.   ansi-c*/
 
-   TSdvector *xtemp_dv;  //$$$$Used within the minimization problem.
-   TSdvector *gtemp_dv;  //$$$$Used within the minimization problem.
-   //$$$$WARNING: Note the vector xtemp_dv->v or gtemp_dv-v itself is not allocated memory, but only the POINTER.
-   //$$$$           Within the minimization routine like csminwel(), the temporary array x enters as the argument in
-   //$$$$           the objective function to compare with other values.  If we use minpack_ps->x_dv->v = x
-   //$$$$           in a wrapper function like minobj_csminwelwrap() where x is a temporay array in csminwel(),
-   //$$$$           this tempoary array (e.g., x[0] in csminwel()) within the csminwel minimization routine
-   //$$$$           will be freed after the csminwel minimization is done.  Consequently, minpack_ps->x_dv-v, which
-   //$$$$           which was re-pointed to this tempoary array, will freed as well.  Thus, no minimization results
-   //$$$$           would be stored and trying to access to minpack_ps->x_dv would cause memory leak.
-   //$$$$           We don't need, however, to create another temporary pointer within the objective function itself,
-   //$$$$           but we must use minpack_ps->xtemp_dv for a *wrapper* function instead and at the end of
-   //$$$$           minimization, minpack_ps->x_dv will have the value of minpack_ps->xtemp_dv, which is automatically
-   //$$$$           taken care of by csminwel with the lines such as
-   //$$$$                 memcpy(xh,x[3],n*sizeof(double));
-   //$$$$           where xh and minpack_ps->x_dv->v point to the same memory space.
+   TSdvector *xtemp_dv;   /*  $$$$Used within the minimization problem.   ansi-c*/
+   TSdvector *gtemp_dv;   /*  $$$$Used within the minimization problem.   ansi-c*/
+/*     //$$$$WARNING: Note the vector xtemp_dv->v or gtemp_dv-v itself is not allocated memory, but only the POINTER.   ansi-c*/
+/*     //$$$$           Within the minimization routine like csminwel(), the temporary array x enters as the argument in   ansi-c*/
+/*     //$$$$           the objective function to compare with other values.  If we use minpack_ps->x_dv->v = x   ansi-c*/
+/*     //$$$$           in a wrapper function like minobj_csminwelwrap() where x is a temporay array in csminwel(),   ansi-c*/
+/*     //$$$$           this tempoary array (e.g., x[0] in csminwel()) within the csminwel minimization routine   ansi-c*/
+/*     //$$$$           will be freed after the csminwel minimization is done.  Consequently, minpack_ps->x_dv-v, which   ansi-c*/
+/*     //$$$$           which was re-pointed to this tempoary array, will freed as well.  Thus, no minimization results   ansi-c*/
+/*     //$$$$           would be stored and trying to access to minpack_ps->x_dv would cause memory leak.   ansi-c*/
+/*     //$$$$           We don't need, however, to create another temporary pointer within the objective function itself,   ansi-c*/
+/*     //$$$$           but we must use minpack_ps->xtemp_dv for a *wrapper* function instead and at the end of   ansi-c*/
+/*     //$$$$           minimization, minpack_ps->x_dv will have the value of minpack_ps->xtemp_dv, which is automatically   ansi-c*/
+/*     //$$$$           taken care of by csminwel with the lines such as   ansi-c*/
+/*     //$$$$                 memcpy(xh,x[3],n*sizeof(double));   ansi-c*/
+/*     //$$$$           where xh and minpack_ps->x_dv->v point to the same memory space.   ansi-c*/
 
-   TSdvector *x0_dv;  //n-by-1 of initial or starting values of the estimated parameters.
+   TSdvector *x0_dv;   /*  n-by-1 of initial or starting values of the estimated parameters.   ansi-c*/
 
 
-   //--- Created here.  Contains csminwel arguments iter, retcodeh, etc. or those that are essential to minimization package.
+/*     //--- Created here.  Contains csminwel arguments iter, retcodeh, etc. or those that are essential to minimization package.   ansi-c*/
    void *etc_package_ps;
 
-   //--- Created outside of this structure.  Including, say, csminwel input arguments such as convergence criteria
-   //---   or block-wise csminwel input arguments.
+/*     //--- Created outside of this structure.  Including, say, csminwel input arguments such as convergence criteria   ansi-c*/
+/*     //---   or block-wise csminwel input arguments.   ansi-c*/
    void *etc_project_ps;
    void *(*DestroyTSetc_project)(void *);
-   //--- Optional.
+/*     //--- Optional.   ansi-c*/
    char *filename_printout;
 
-   //--- Minimization function for objective function.
-   //--- May *NOT* be needed for swithcing model because DW's switch_opt.c takes care of things.
-   double (*minobj)(struct TSminpack_tag *);    ////From the input argument of CreateTSminpack().
+/*     //--- Minimization function for objective function.   ansi-c*/
+/*     //--- May *NOT* be needed for swithcing model because DW's switch_opt.c takes care of things.   ansi-c*/
+   double (*minobj)(struct TSminpack_tag *);     /*     ansi-c*/
           /*** This function is used only for the constant-parameter case, NOT for DW's Markov-swtiching case. ***/
-   //--- Optional: Minimization function for analytical gradient. Often NOT available.
-   void (*mingrad)(struct TSminpack_tag *);   //From the input argument of CreateTSminpack().
+/*     //--- Optional: Minimization function for analytical gradient. Often NOT available.   ansi-c*/
+   void (*mingrad)(struct TSminpack_tag *);    /*  From the input argument of CreateTSminpack().   ansi-c*/
 
-   //=== Output arguments.
-   double fret;   //Returned value of the objective function.
-   double fret0;  //Returned value of the objective function at the initial or starting values x0.
+/*     //=== Output arguments.   ansi-c*/
+   double fret;    /*  Returned value of the objective function.   ansi-c*/
+   double fret0;   /*  Returned value of the objective function at the initial or starting values x0.   ansi-c*/
 
 } TSminpack;
 
-typedef double TFminobj(struct TSminpack_tag *);  //int n, double *x_ptr);  //, void *minobj_etc_ptr);
+typedef double TFminobj(struct TSminpack_tag *);   /*  int n, double *x_ptr);     ansi-c*/
 typedef void TFmingrad(struct TSminpack_tag *);
 typedef void *TFmindestroy_etcproject(void *);
 typedef void TFSetPrintFile(char *);
 
-//======= Function prototypes. =======//
+/*  //======= Function prototypes. =======//   ansi-c*/
 TSminpack *CreateTSminpack(TFminobj *minobj_func, void **etc_project_pps, TFmindestroy_etcproject *etcproject_func, TFmingrad *mingrad_func, char *filename_printout, const int n, const int package);
 TSminpack *DestroyTSminpack(TSminpack *);
 
 
-//=== Used for the constant-parameter model.
-//--- 28/Oct/07: The function InitializeForMinproblem_const() has not been used even for the constant-parameter model.
-//---   For examples, see lwz_est.c in D:\ZhaData\WorkDisk\LiuWZ\Project2_empirical\EstimationOct07
-//---                  or ExamplesForC.prn under D:\ZhaData\CommonFiles\C_Examples_DebugTips.
-//NOT used:  void InitializeForMinproblem_const(struct TSminpack_tag *minpack_ps, char *filename_sp, TSdvector *gphi_dv, int indxStartValuesForMin);
-//---
+/*  //=== Used for the constant-parameter model.   ansi-c*/
+/*  //--- 28/Oct/07: The function InitializeForMinproblem_const() has not been used even for the constant-parameter model.   ansi-c*/
+/*  //---   For examples, see lwz_est.c in D:\ZhaData\WorkDisk\LiuWZ\Project2_empirical\EstimationOct07   ansi-c*/
+/*  //---                  or ExamplesForC.prn under D:\ZhaData\CommonFiles\C_Examples_DebugTips.   ansi-c*/
+/*  //NOT used:  void InitializeForMinproblem_const(struct TSminpack_tag *minpack_ps, char *filename_sp, TSdvector *gphi_dv, int indxStartValuesForMin);   ansi-c*/
+/*  //---   ansi-c*/
 void minfinder(TSminpack *minpack_ps);
 
 
-//------------------------------------------------------------------------------//
-//----------    New ways of making optimization packages. 03/10/06.      -------//
-//------------------------------------------------------------------------------//
-//================ For the csminwel minimization problem. ================//
-//=== Step 1.
+/*  //------------------------------------------------------------------------------//   ansi-c*/
+/*  //----------    New ways of making optimization packages. 03/10/06.      -------//   ansi-c*/
+/*  //------------------------------------------------------------------------------//   ansi-c*/
+/*  //================ For the csminwel minimization problem. ================//   ansi-c*/
+/*  //=== Step 1.   ansi-c*/
 typedef struct TSargs_blockcsminwel_tag
 {
-   //Arguments for blockwise minimization.
+/*     //Arguments for blockwise minimization.   ansi-c*/
 
-   //=== Within the block: sequence of convergence criteria.
-   double criterion_start; //Default: 1.0e-3;
-   double criterion_end;  //Default: 1.0e-6;
-   double criterion_increment; //Default: 0.1;
-   int max_iterations_start;  //Default: 50;  Max # of iterations for csminwel.  The starting value is small because criterion_start
-                              //  is coarse at the start.  As the convergence criterion is getting tighter, the max # of
-                              //  iteration increases as it is multiplied by max_iterations_increment.
-   double max_iterations_increment; //Default: 2.0; Used to multiply the max # of iterations in csminwel as the convergence
-                                    //  criterion tightens.
-   double ini_h_scale;  //Default: 5.0e-4;  1.0e-05 (sometimes used for SargentWZ USinflation project I)
-                        //                  5.0e-04 (for monthly TVBAR)
-   //=== Outside the blocks.
-   int max_block_iterations;  //Default: 100;
+/*     //=== Within the block: sequence of convergence criteria.   ansi-c*/
+   double criterion_start;  /*  Default: 1.0e-3;   ansi-c*/
+   double criterion_end;   /*  Default: 1.0e-6;   ansi-c*/
+   double criterion_increment;  /*  Default: 0.1;   ansi-c*/
+   int max_iterations_start;   /*  Default: 50;  Max # of iterations for csminwel.  The starting value is small because criterion_start   ansi-c*/
+/*                                //  is coarse at the start.  As the convergence criterion is getting tighter, the max # of   ansi-c*/
+/*                                //  iteration increases as it is multiplied by max_iterations_increment.   ansi-c*/
+   double max_iterations_increment;  /*  Default: 2.0; Used to multiply the max # of iterations in csminwel as the convergence   ansi-c*/
+/*                                      //  criterion tightens.   ansi-c*/
+   double ini_h_scale;   /*  Default: 5.0e-4;  1.0e-05 (sometimes used for SargentWZ USinflation project I)   ansi-c*/
+/*                          //                  5.0e-04 (for monthly TVBAR)   ansi-c*/
+/*     //=== Outside the blocks.   ansi-c*/
+   int max_block_iterations;   /*  Default: 100;   ansi-c*/
 
-   //------------------------------------------------------------
-   //Step size for numerical gradient only when the value of x is less than 1.0 in absolute value.
-   //If abs(x)>1.0, the step size is  GRADSTPS_CSMINWEL*x.
-   //
-   //For the time-varying-parameter model, GRADSTPS_CSMINWEL takes the values of gradstps_csminwel_dv:
-   // 1st element: gradient step for the model parameters (tends to be large; the default value is 1.0e-02).
-   // 2nd element: gradient step for the transition probability matrix (tends to be smaller; the default value is 1.0e-03)
-   // 3rd element: gradient step for all the parameters (tends to be smaller; the default value is 1.0e-03 or 1.0e-04).
-   //For the constant-parameter model:
-   // GRADSTPS_CSMINWEL takes the value of gradstps_csminwel_const.  The default value is 1.0e-04 (for monthly TBVAR)
-   //------------------------------------------------------------
-   TSdvector *gradstps_csminwel_dv;  //3-by-1.  For the time-varying-parameter model only.
-   double gradstps_csminwel_const;  //For the constant-parameter model.
+/*     //------------------------------------------------------------   ansi-c*/
+/*     //Step size for numerical gradient only when the value of x is less than 1.0 in absolute value.   ansi-c*/
+/*     //If abs(x)>1.0, the step size is  GRADSTPS_CSMINWEL*x.   ansi-c*/
+/*     //   ansi-c*/
+/*     //For the time-varying-parameter model, GRADSTPS_CSMINWEL takes the values of gradstps_csminwel_dv:   ansi-c*/
+/*     // 1st element: gradient step for the model parameters (tends to be large; the default value is 1.0e-02).   ansi-c*/
+/*     // 2nd element: gradient step for the transition probability matrix (tends to be smaller; the default value is 1.0e-03)   ansi-c*/
+/*     // 3rd element: gradient step for all the parameters (tends to be smaller; the default value is 1.0e-03 or 1.0e-04).   ansi-c*/
+/*     //For the constant-parameter model:   ansi-c*/
+/*     // GRADSTPS_CSMINWEL takes the value of gradstps_csminwel_const.  The default value is 1.0e-04 (for monthly TBVAR)   ansi-c*/
+/*     //------------------------------------------------------------   ansi-c*/
+   TSdvector *gradstps_csminwel_dv;   /*  3-by-1.  For the time-varying-parameter model only.   ansi-c*/
+   double gradstps_csminwel_const;   /*  For the constant-parameter model.   ansi-c*/
 
-   //--- pointer to the input data file that contains all the data on convergence, max iterations, etc.
+/*     //--- pointer to the input data file that contains all the data on convergence, max iterations, etc.   ansi-c*/
    FILE *fptr_input1;
 } TSargs_blockcsminwel;
 struct TSargs_blockcsminwel_tag *CreateTSargs_blockcsminwel(FILE *fptr_input1);
-             //If fptr_input1==NULL or no no values supplied when fptr_input1 != NULL, default values are taken.
+/*               //If fptr_input1==NULL or no no values supplied when fptr_input1 != NULL, default values are taken.   ansi-c*/
 struct TSargs_blockcsminwel_tag *DestroyTSargs_blockcsminwel(struct TSargs_blockcsminwel_tag *args_blockcsminwel_ps);
-//+
+/*  //+   ansi-c*/
 typedef struct TStateModel_tag *TFDestroyTStateModel(struct TStateModel_tag *);
 typedef struct TSetc_minproj_tag
 {
-   //For optimization of the posterior or likelihood function.
+/*     //For optimization of the posterior or likelihood function.   ansi-c*/
    struct TStateModel_tag *smodel_ps;
    struct TStateModel_tag *(*DestroyTStateModel)(struct TStateModel_tag *);
-   //
+/*     //   ansi-c*/
    struct TSargs_blockcsminwel_tag *args_blockcsminwel_ps;
    struct TSargs_blockcsminwel_tag *(*DestroyTSargs_blockcsminwel)(struct TSargs_blockcsminwel_tag *);
 } TSetc_minproj;
-//
+/*  //   ansi-c*/
 struct TSetc_minproj_tag *CreateTSetc_minproj(struct TStateModel_tag **smodel_pps, TFDestroyTStateModel *DestroyTStateModel_func,
                   struct TSargs_blockcsminwel_tag **args_blockcsminwel_pps, struct TSargs_blockcsminwel_tag *(*DestroyTSargs_blockcsminwel)(struct TSargs_blockcsminwel_tag *));
 struct TSetc_minproj_tag *DestroyTSetc_minproj(struct TSetc_minproj_tag *);
-//And creates the following user's function.
-//static double minneglogpost(struct TSminpack_tag *minpack_ps);  //For the constant-parameter only.
-//=== Step 2. Belongs to the user's responsibility because this function must be able to deal with
-//               (1) constant-parameter case without using DW's functions;
-//               (2) allowing us to generate parameters randomly, which depends on the specific model.
-//           See lwz_est.c in D:\ZhaData\WorkDisk\LiuWZ\Project2_empirical\EstimationOct07
-//            or ExamplesForC.prn in D:\ZhaData\CommonFiles\C_Examples_DebugTips.
-//---
-//void InitializeForMinproblem(struct TSminpack_tag *minpack_ps, char *filename_sp, TSdvector *gphi_dv, int indxStartValuesForMin);
-//=== Step 3.
-void minfinder_blockcsminwel(struct TSminpack_tag *minpack_ps, int indx_findMLE); //Blockwise minimization.
-                                 //indx_findMLE: 1: find MLE without a prior, 0: find posterior (with a prior).
+/*  //And creates the following user's function.   ansi-c*/
+/*  //static double minneglogpost(struct TSminpack_tag *minpack_ps);  //For the constant-parameter only.   ansi-c*/
+/*  //=== Step 2. Belongs to the user's responsibility because this function must be able to deal with   ansi-c*/
+/*  //               (1) constant-parameter case without using DW's functions;   ansi-c*/
+/*  //               (2) allowing us to generate parameters randomly, which depends on the specific model.   ansi-c*/
+/*  //           See lwz_est.c in D:\ZhaData\WorkDisk\LiuWZ\Project2_empirical\EstimationOct07   ansi-c*/
+/*  //            or ExamplesForC.prn in D:\ZhaData\CommonFiles\C_Examples_DebugTips.   ansi-c*/
+/*  //---   ansi-c*/
+/*  //void InitializeForMinproblem(struct TSminpack_tag *minpack_ps, char *filename_sp, TSdvector *gphi_dv, int indxStartValuesForMin);   ansi-c*/
+/*  //=== Step 3.   ansi-c*/
+void minfinder_blockcsminwel(struct TSminpack_tag *minpack_ps, int indx_findMLE);  /*  Blockwise minimization.   ansi-c*/
+/*                                   //indx_findMLE: 1: find MLE without a prior, 0: find posterior (with a prior).   ansi-c*/
 
 
 
 
-//================ For IMSL multivariate linearly-constrained minimizaiton package only. ================//
+/*  //================ For IMSL multivariate linearly-constrained minimizaiton package only. ================//   ansi-c*/
 typedef struct TSpackage_imslconlin_tag
 {
-   //=== Non-simple constraints.
-   int npars_tot; //Total number of free parameters for the optimaization.
-                  //For example, model free parameters + free transition matrix parameters in the regime-switching case.
-   int neqs;  //Number of equality constraints, excluding simple bound constraints. Must be no greater than ncons.
-              //IMSL dictates that equality constraints come always BEFORE inequality constrains.
-   int ncons; //Total number of constrains, including equality and inequality constraints, but excluding simple bounds.
-   TSdvector *lh_coefs_dv;  //ncons*npars_tot-by-1. ALWAYS initialized to be 0.0.
-                            //Left-hand coefficients in the linear constrains (excluding simple bounds).
-                            //IMSL rule: lh_coefs_dv stacks the neqs rows of equality constraints first, followed by the inequality constraints.
-                            //Set to NULL if ncons=0;
-   TSdvector *rh_constraints_dv;  //ncons-by-1.  Set to NULL if ncons=0.
-                                  //Right-hand constraints in the equality and non-equality constrains (excluding simple bounds).
+/*     //=== Non-simple constraints.   ansi-c*/
+   int npars_tot;  /*  Total number of free parameters for the optimaization.   ansi-c*/
+/*                    //For example, model free parameters + free transition matrix parameters in the regime-switching case.   ansi-c*/
+   int neqs;   /*  Number of equality constraints, excluding simple bound constraints. Must be no greater than ncons.   ansi-c*/
+/*                //IMSL dictates that equality constraints come always BEFORE inequality constrains.   ansi-c*/
+   int ncons;  /*  Total number of constrains, including equality and inequality constraints, but excluding simple bounds.   ansi-c*/
+   TSdvector *lh_coefs_dv;   /*  ncons*npars_tot-by-1. ALWAYS initialized to be 0.0.   ansi-c*/
+/*                              //Left-hand coefficients in the linear constrains (excluding simple bounds).   ansi-c*/
+/*                              //IMSL rule: lh_coefs_dv stacks the neqs rows of equality constraints first, followed by the inequality constraints.   ansi-c*/
+/*                              //Set to NULL if ncons=0;   ansi-c*/
+   TSdvector *rh_constraints_dv;   /*  ncons-by-1.  Set to NULL if ncons=0.   ansi-c*/
+/*                                    //Right-hand constraints in the equality and non-equality constrains (excluding simple bounds).   ansi-c*/
 
 
-   //=== Simple bounds.
-   TSdvector *lowbounds_dv; //npars_tot-by-1.  ALWAYS initialized to -BIGREALNUMBER for thes simple lower bounds.
-                            //If a component is unbounded, choose a very negative large value (e.g., -BIGREALNUMBER).
-   TSdvector *upperbounds_dv; //npars_tot-by-1.  ALWAYS initialized to +BIGREALNUMBER for thes simple lower bounds.
-                              //If a component is unbounded, choose a very positive large value (e.g., BIGREALNUMBER).
+/*     //=== Simple bounds.   ansi-c*/
+   TSdvector *lowbounds_dv;  /*  npars_tot-by-1.  ALWAYS initialized to -BIGREALNUMBER for thes simple lower bounds.   ansi-c*/
+/*                              //If a component is unbounded, choose a very negative large value (e.g., -BIGREALNUMBER).   ansi-c*/
+   TSdvector *upperbounds_dv;  /*  npars_tot-by-1.  ALWAYS initialized to +BIGREALNUMBER for thes simple lower bounds.   ansi-c*/
+/*                                //If a component is unbounded, choose a very positive large value (e.g., BIGREALNUMBER).   ansi-c*/
 
-   //=== Other output.
-   TSdvector *xsaved_dv; //npars_tot-by-1. Saved the parameters that give the minimal value of the objective function.
+/*     //=== Other output.   ansi-c*/
+   TSdvector *xsaved_dv;  /*  npars_tot-by-1. Saved the parameters that give the minimal value of the objective function.   ansi-c*/
 
-   //=== Other inputs.
-   double crit;   //Overall convergence criterion on the first-order conditions.
-   int itmax;     //Maximum number of iterations.
+/*     //=== Other inputs.   ansi-c*/
+   double crit;    /*  Overall convergence criterion on the first-order conditions.   ansi-c*/
+   int itmax;      /*  Maximum number of iterations.   ansi-c*/
 } TSpackage_imslconlin;
-//+
+/*  //+   ansi-c*/
 struct TSpackage_imslconlin_tag *CreateTSpackagae_imslconlin(const int npars_tot, const int neqs, const int ncons);
 struct TSpackage_imslconlin_tag *DestroyTSpackagae_imslconlin(struct TSpackage_imslconlin_tag *package_imslconlin_ps);
 void minfinder_noblockimslconlin(struct TSpackage_imslconlin_tag *package_imslconlin_ps, struct TSminpack_tag *minpack_ps, char *filename_printout, int ntheta);
@@ -287,17 +287,17 @@ void minfinder_noblockimslconlin(struct TSpackage_imslconlin_tag *package_imslco
 
 
 
-//================ For conjugate gradient method I only. ================//
+/*  //================ For conjugate gradient method I only. ================//   ansi-c*/
 typedef struct TSpackage_congrad1_tag
 {
-   //=== Input arguments.
-   double crit;   //Overall convergence criterion on the function value.
-   int itmax;     //Maximum number of iterations.
+/*     //=== Input arguments.   ansi-c*/
+   double crit;    /*  Overall convergence criterion on the function value.   ansi-c*/
+   int itmax;      /*  Maximum number of iterations.   ansi-c*/
 
-   //=== Output arguments.
-   int niters;   //Number of iterations.
+/*     //=== Output arguments.   ansi-c*/
+   int niters;    /*  Number of iterations.   ansi-c*/
 } TSpackage_congrad1;
-//+
+/*  //+   ansi-c*/
 struct TSpackage_congrad1_tag *CreateTSpackage_congrad1(void);
 struct TSpackage_congrad1_tag *DestroyTSpackage_congrad1(struct TSpackage_congrad1_tag *package_congrad1_ps);
 

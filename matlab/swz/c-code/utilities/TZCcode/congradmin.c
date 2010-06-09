@@ -8,73 +8,75 @@
 
 #include "congradmin.h"
 
+#include "modify_for_mex.h"
+
 static void linmin(double p[], double xi[], int n, double *fret, double tol_brent, int itmax_brent, double (*func)(double [], int));
 static double brent(double ax, double bx, double cx, double (*f)(double), double tol_brent, double itmax_brent, double *xmin);
-//
+/*  //   ansi-c*/
 static void dlinmin(double p[], double xi[], int n, double *fret, double tol_dbrent, double itmax_dbrent, double *grdh_p, double (*func)(double [], int), void (*dfunc)(double [], double [], int, double (*func)(double [], int), double *, double));
 static double dbrent(double ax, double bx, double cx, double (*f)(double), double (*df)(double, double *), double *grdh_p, double tol_dbrent, double itmax_dbrent, double *xmin);
 static double df1dim(double x, double *grdh_p);
-//
+/*  //   ansi-c*/
 static void mnbrak(double *ax, double *bx, double *cx, double *fa, double *fb, double *fc, double (*func)(double));
 static double f1dim(double x);
-//
+/*  //   ansi-c*/
 static double ftd_norm2(double *vnew_p, double *vold_p, int _n);
 static double ftd_innerproduct(double *x, double *y, int _n);
 
 
-#define ANGLE 0.001  //.0   implies 90.00 degress (acrcos(ANGLE)*180/pi).
-                     //.005 implies 89.71 degrees (acrcos(ANGLE)*180/pi).
-                     //.01  implies 89.43 degrees (acrcos(ANGLE)*180/pi).
-                     //.05  implies 87.13 degrees (acrcos(ANGLE)*180/pi).
-                     //.1   implies 84.26 degrees (acrcos(ANGLE)*180/pi).
+#define ANGLE 0.001   /*  .0   implies 90.00 degress (acrcos(ANGLE)*180/pi).   ansi-c*/
+/*                       //.005 implies 89.71 degrees (acrcos(ANGLE)*180/pi).   ansi-c*/
+/*                       //.01  implies 89.43 degrees (acrcos(ANGLE)*180/pi).   ansi-c*/
+/*                       //.05  implies 87.13 degrees (acrcos(ANGLE)*180/pi).   ansi-c*/
+/*                       //.1   implies 84.26 degrees (acrcos(ANGLE)*180/pi).   ansi-c*/
 #define STRLEN 192
-static FILE *fptr_interesults = (FILE *)NULL;   //Printing intermediate results to a file.
-static char filename_sp3vecs[STRLEN];  //Three vectors.  1st row: line search direction; 2nd row: numerical gradient; 3rd row: vectorized parameters.
-//static FILE *fptr_interesults_db = (FILE *)NULL;   //Printing intermediate results to a file for debugging (db).
-#define PRINTON    //Added by TZ, September 2003.
-#define EPS 1.0e-10        //Small number to rectify special case of converging to exactly zero function value.
-#ifdef PRINTON      //Added by TZ, September 2003.
+static FILE *fptr_interesults = (FILE *)NULL;    /*  Printing intermediate results to a file.   ansi-c*/
+static char filename_sp3vecs[STRLEN];   /*  Three vectors.  1st row: line search direction; 2nd row: numerical gradient; 3rd row: vectorized parameters.   ansi-c*/
+/*  //static FILE *fptr_interesults_db = (FILE *)NULL;   //Printing intermediate results to a file for debugging (db).   ansi-c*/
+#define PRINTON     /*  Added by TZ, September 2003.   ansi-c*/
+#define EPS 1.0e-10         /*  Small number to rectify special case of converging to exactly zero function value.   ansi-c*/
+#ifdef PRINTON       /*  Added by TZ, September 2003.   ansi-c*/
    #define FREEALL {tzDestroy(xi); tzDestroy(h); tzDestroy(g); tzDestroy(pold); tzDestroy(numgrad)}
 #else
    #define FREEALL {tzDestroy(xi); tzDestroy(h); tzDestroy(g);}
 #endif
 void frprmn(double p[], int n, int *iter, double *fret,
             double (*func)(double [], int), void (*dfunc)(double [], double [], int, double (*func)(double [], int), double *, double),
-			double *ftol_p, int *itmax_p, double *tol_brent_p, int *itmax_brent_p, double *grdh_p) {
-   //Outputs:
-   //  p[0, ..., n-1]:  the location of the minimum if it converges, which replaces the starting value.
-   //  iter:  pointer to the number of iterations that were performed.
-   //  fret:  pointer to the minimum value of the function.
-   //Inputs:
-   //  p[0, ..., n-1]:  a starting point for the minimization.
-   //  n:  the dimension of p.
-   //  ftol_p:  pointer to the convergence tolerance on the objective function value. Default: 1.0e-4 if NULL.
-   //  itmax_p:    pointer to the maximum number of iterations in the main minimization program frprmn().  Default: 2000 if NULL.
-   //  tol_brent_p:  pointer to the convergence tolerance for the line minimization in brent().  Default: 2.0e-4 if NULL.
-   //  itmax_brent_p:  pointer to the maximum number of iterations for the line minimization in brent().  Default: 100 if NULL.
-   //  grdh:  pointer to the user's specified step size for a numerical gradient.  If NULL, dfunc() (i.e., gradcd_gen()) will select grdh automatically.
-   //  func():  the objective function.
-   //  dfunc(): the gradient function computing the numerical gradient.  In the form of gradcd_gen() in cstz.c.
+            double *ftol_p, int *itmax_p, double *tol_brent_p, int *itmax_brent_p, double *grdh_p) {
+/*     //Outputs:   ansi-c*/
+/*     //  p[0, ..., n-1]:  the location of the minimum if it converges, which replaces the starting value.   ansi-c*/
+/*     //  iter:  pointer to the number of iterations that were performed.   ansi-c*/
+/*     //  fret:  pointer to the minimum value of the function.   ansi-c*/
+/*     //Inputs:   ansi-c*/
+/*     //  p[0, ..., n-1]:  a starting point for the minimization.   ansi-c*/
+/*     //  n:  the dimension of p.   ansi-c*/
+/*     //  ftol_p:  pointer to the convergence tolerance on the objective function value. Default: 1.0e-4 if NULL.   ansi-c*/
+/*     //  itmax_p:    pointer to the maximum number of iterations in the main minimization program frprmn().  Default: 2000 if NULL.   ansi-c*/
+/*     //  tol_brent_p:  pointer to the convergence tolerance for the line minimization in brent().  Default: 2.0e-4 if NULL.   ansi-c*/
+/*     //  itmax_brent_p:  pointer to the maximum number of iterations for the line minimization in brent().  Default: 100 if NULL.   ansi-c*/
+/*     //  grdh:  pointer to the user's specified step size for a numerical gradient.  If NULL, dfunc() (i.e., gradcd_gen()) will select grdh automatically.   ansi-c*/
+/*     //  func():  the objective function.   ansi-c*/
+/*     //  dfunc(): the gradient function computing the numerical gradient.  In the form of gradcd_gen() in cstz.c.   ansi-c*/
    int j, its, itmax, itmax_brent;
    double gg, gam, fp, dgg, ftol, tol_brent;
    double *g=NULL, *h=NULL, *xi=NULL;
-   #ifdef PRINTON      //Added by TZ, September 2003.
+   #ifdef PRINTON       /*  Added by TZ, September 2003.   ansi-c*/
    time_t begtime, currentime;
    double normforp, *pold = NULL, *numgrad = NULL;
-   int cnt_wrong_dirs = -1;  //Counts the number of times that a numerical direction in the line search has a wrong sign.
+   int cnt_wrong_dirs = -1;   /*  Counts the number of times that a numerical direction in the line search has a wrong sign.   ansi-c*/
    #endif
 
-   //=== Memory allocation.
+/*     //=== Memory allocation.   ansi-c*/
    g=tzMalloc(n, double);
    h=tzMalloc(n, double);
    xi=tzMalloc(n, double);
-   //
-   numgrad = tzMalloc(n, double);   //Added by TZ, September 2003.
-   #ifdef PRINTON      //Added by TZ, September 2003.
+/*     //   ansi-c*/
+   numgrad = tzMalloc(n, double);    /*  Added by TZ, September 2003.   ansi-c*/
+   #ifdef PRINTON       /*  Added by TZ, September 2003.   ansi-c*/
       pold = tzMalloc(n, double);
    #endif
 
-   //=== Default values.
+/*     //=== Default values.   ansi-c*/
    if (!ftol_p)  ftol = 1.0e-4;  else  ftol = *ftol_p;
    if (!itmax_p)  itmax = 200;  else  itmax = *itmax_p;
    if (!tol_brent_p)  tol_brent = 2.0e-4;  else  tol_brent = *tol_brent_p;
@@ -83,28 +85,28 @@ void frprmn(double p[], int n, int *iter, double *fret,
    fp=(*func)(p, n);
    (*dfunc)(xi, p, n, func, grdh_p, fp);
    for (j=n-1;j>=0;j--) {
-		g[j] = -xi[j];
-		xi[j]=h[j]=g[j];
-	}
-   memcpy(numgrad, xi, n*sizeof(double));   //Added by TZ, September 2003. Save the numerical gradient to be printed out at the right place.
+        g[j] = -xi[j];
+        xi[j]=h[j]=g[j];
+    }
+   memcpy(numgrad, xi, n*sizeof(double));    /*  Added by TZ, September 2003. Save the numerical gradient to be printed out at the right place.   ansi-c*/
    for (its=0;its<itmax;its++) {
       #ifdef PRINTON
-      time(&begtime);    //Added by TZ, September 2003.
-      memcpy(pold, p, n*sizeof(double));   //Added by TZ, September 2003.
+      time(&begtime);     /*  Added by TZ, September 2003.   ansi-c*/
+      memcpy(pold, p, n*sizeof(double));    /*  Added by TZ, September 2003.   ansi-c*/
       #endif
-      //====== Added by TZ, September 2003 ======
+/*        //====== Added by TZ, September 2003 ======   ansi-c*/
       if ( !(fptr_interesults = fopen(filename_sp3vecs,"w")) ) {
          printf("\n\nUnable to create the starting point data file %s in congradmin.c!\n", filename_sp3vecs);
          getchar();
          exit(EXIT_FAILURE);
       }
-      // rewind(fptr_interesults);   //Must put the pointer at the beginning of the file.
-      //=== Prints out the line search direction.
+/*        // rewind(fptr_interesults);   //Must put the pointer at the beginning of the file.   ansi-c*/
+/*        //=== Prints out the line search direction.   ansi-c*/
       fprintf(fptr_interesults, "--------Line search direction---------\n");
       for (j=0; j<n; j++)  fprintf(fptr_interesults, " %0.16e ", xi[j]);
       fprintf(fptr_interesults, "\n");
-      // fflush( fptr_interesults );
-      //=== Prints out the message about a wrong numerical direction in the line search for the miminziation.
+/*        // fflush( fptr_interesults );   ansi-c*/
+/*        //=== Prints out the message about a wrong numerical direction in the line search for the miminziation.   ansi-c*/
       if ( ftd_innerproduct(xi, numgrad, n)/(ftd_norm2(xi, xi, n)*ftd_norm2(numgrad, numgrad, n)) > - ANGLE ) {
          #ifdef PRINTON
          printf("\n----------------\n"
@@ -124,67 +126,67 @@ void frprmn(double p[], int n, int *iter, double *fret,
       #endif
       #ifdef PRINTON
          normforp = ftd_norm2(p, pold, n);
-         //=== Prints out intermediate results.
+/*           //=== Prints out intermediate results.   ansi-c*/
          printf("\n========================================\n");
          printf("Intermediate results for the conjugate gradient algorithm.");
          printf("\n (1) Number of iterations so far (maximum number): %d (%d)\n (2) New value of objective function (old value, improvement): %0.9f (%0.9f, %0.9f)\n"
                 " (3) Norm-2 of dx: %0.9f\n",
                 its, itmax, *fret, fp, fp-(*fret), normforp);
-         fflush(stdout);                // Flush the buffer to get out this message without delay.
+         fflush(stdout);                 /*   Flush the buffer to get out this message without delay.   ansi-c*/
       #endif
-      //====== The following statements print out intermediate results.  Added by TZ, September 2003 ======
-      //=== Prints out the gradient.
+/*        //====== The following statements print out intermediate results.  Added by TZ, September 2003 ======   ansi-c*/
+/*        //=== Prints out the gradient.   ansi-c*/
       fprintf(fptr_interesults, "--------Numerical graident---------\n");
       for (j=0; j<n; j++)  fprintf(fptr_interesults, " %0.16e ", numgrad[j]);
       fprintf(fptr_interesults, "\n");
-      //
+/*        //   ansi-c*/
       fprintf(fptr_interesults, "--------Restarting point---------\n");
       for (j=0; j<n; j++)  fprintf(fptr_interesults, " %0.16e ", p[j]);
       fprintf(fptr_interesults, "\n\n");
-//      fflush( fptr_interesults );
+/*  //      fflush( fptr_interesults );   ansi-c*/
       tzFclose(fptr_interesults);
 
 
       if (2.0*fabs(*fret-fp) <= ftol*(fabs(*fret)+fabs(fp)+EPS)) {
-         //This is a normal convergence.
+/*           //This is a normal convergence.   ansi-c*/
          printf("\n----- Normal convergence by the criterion of the objective function evaluation -----------\n");
-			FREEALL
-			return;
-		}
+            FREEALL
+            return;
+        }
       fp=(*func)(p, n);
       (*dfunc)(xi, p, n, func, grdh_p, fp);
-      memcpy(numgrad, xi, n*sizeof(double));   //Added by TZ, September 2003. Save the numerical gradient to be printed out at the right place.
-//      if (filename_sp3vecs) {
-//         //=== Prints out the gradient.
-//         fprintf(fptr_interesults, "--------Numerical graident---------\n");
-//         for (j=0; j<n; j++)  fprintf(fptr_interesults, " %0.16e ", xi[j]);
-//         fprintf(fptr_interesults, "\n\n");
-////         fflush( fptr_interesults );
+      memcpy(numgrad, xi, n*sizeof(double));    /*  Added by TZ, September 2003. Save the numerical gradient to be printed out at the right place.   ansi-c*/
+/*  //      if (filename_sp3vecs) {   ansi-c*/
+/*  //         //=== Prints out the gradient.   ansi-c*/
+/*  //         fprintf(fptr_interesults, "--------Numerical graident---------\n");   ansi-c*/
+/*  //         for (j=0; j<n; j++)  fprintf(fptr_interesults, " %0.16e ", xi[j]);   ansi-c*/
+/*  //         fprintf(fptr_interesults, "\n\n");   ansi-c*/
+/*  ////         fflush( fptr_interesults );   ansi-c*/
 
-//         tzFclose(fptr_interesults);
-//      }
+/*  //         tzFclose(fptr_interesults);   ansi-c*/
+/*  //      }   ansi-c*/
       dgg=gg=0.0;
       for (j=n-1;j>=0;j--) {
-			gg += g[j]*g[j];
-			dgg += (xi[j]+g[j])*xi[j];
-		}
-		if (gg == 0.0) {
-			FREEALL
-			return;
-		}
-		gam=dgg/gg;
+            gg += g[j]*g[j];
+            dgg += (xi[j]+g[j])*xi[j];
+        }
+        if (gg == 0.0) {
+            FREEALL
+            return;
+        }
+        gam=dgg/gg;
       for (j=n-1;j>=0;j--) {
-			g[j] = -xi[j];
-			xi[j]=h[j]=g[j]+gam*h[j];
-		}
+            g[j] = -xi[j];
+            xi[j]=h[j]=g[j]+gam*h[j];
+        }
 
       #ifdef PRINTON
       time(&currentime);
-      //=== Times the iterative progress.
+/*        //=== Times the iterative progress.   ansi-c*/
       printf(" (4) Seconds to complete one iteration: %0.4f\n (5) Current time of day: %s\n", difftime(currentime, begtime), ctime(&currentime));
-      fflush(stdout);                // Flush the buffer to get out this message without delay.
+      fflush(stdout);                 /*   Flush the buffer to get out this message without delay.   ansi-c*/
       #endif
-	}
+    }
    fn_DisplayError("The maximum number of iterations in frprmn() is reached before convergence");
 }
 #undef PRINTON
@@ -194,17 +196,17 @@ void frprmn(double p[], int n, int *iter, double *fret,
 
 #if defined (CGI_OPTIMIZATION)
    static int ncom;
-   static double *pcom=NULL, *xicom=NULL, (*nrfunc)(double [], int);   //nrfunc(), pcom, ncom, and xicom will be used by f1dim().
+   static double *pcom=NULL, *xicom=NULL, (*nrfunc)(double [], int);    /*  nrfunc(), pcom, ncom, and xicom will be used by f1dim().   ansi-c*/
    static void linmin(double p[], double xi[], int n, double *fret, double tol_brent, int itmax_brent, double (*func)(double [], int)) {
-      //Outputs:
-      //  p[0, ..., n-1]:  a returned and reset value.
-      //  xi[0, ..., n-1]:  a value repaced by the actual vector displacement that p was moved.
-      //  fret:  the value of func at the returned location p.
-      //Inputs:
-      //  p[0, ..., n-1]:  a given point.
-      //  xi[0, ..., n-1]:  a given multidimensional direction.
-      //  n:  the dimension of p and xi.
-      //  func():  the objective function.
+/*        //Outputs:   ansi-c*/
+/*        //  p[0, ..., n-1]:  a returned and reset value.   ansi-c*/
+/*        //  xi[0, ..., n-1]:  a value repaced by the actual vector displacement that p was moved.   ansi-c*/
+/*        //  fret:  the value of func at the returned location p.   ansi-c*/
+/*        //Inputs:   ansi-c*/
+/*        //  p[0, ..., n-1]:  a given point.   ansi-c*/
+/*        //  xi[0, ..., n-1]:  a given multidimensional direction.   ansi-c*/
+/*        //  n:  the dimension of p and xi.   ansi-c*/
+/*        //  func():  the objective function.   ansi-c*/
       int j;
       double xx,xmin,fx,fb,fa,bx,ax;
 
@@ -229,7 +231,7 @@ void frprmn(double p[], int n, int *iter, double *fret,
    }
 
 
-   //=== Used by linmin() only;
+/*     //=== Used by linmin() only;   ansi-c*/
    #define CGOLD 0.3819660
    #define ZEPS 1.0e-10
    #define SHFT(a,b,c,d)  {(a)=(b);(b)=(c);(c)=(d);}
@@ -298,22 +300,22 @@ void frprmn(double p[], int n, int *iter, double *fret,
    #undef SHFT
    #undef SIGN
 
-#else  //Default to CGII_OPTIMIZATION
+#else   /*  Default to CGII_OPTIMIZATION   ansi-c*/
 
    static int ncom;
-   static double *pcom=NULL, *xicom=NULL, (*nrfunc)(double [], int); //nrfunc(), pcom, ncom, and xicom will be used by f1dim() and df1dim().
+   static double *pcom=NULL, *xicom=NULL, (*nrfunc)(double [], int);  /*  nrfunc(), pcom, ncom, and xicom will be used by f1dim() and df1dim().   ansi-c*/
    static void (*nrdfun)(double [], double [], int, double (*func)(double [], int), double *, double);
    static void dlinmin(double p[], double xi[], int n, double *fret, double tol_dbrent, double itmax_dbrent, double *grdh_p, double (*func)(double [], int), void (*dfunc)(double [], double [], int, double (*func)(double [], int), double *, double)) {
-      //Outputs:
-      //  p[0, ..., n-1]:  a returned and reset value.
-      //  xi[0, ..., n-1]:  a value repaced by the actual vector displacement that p was moved.
-      //  fret:  the value of func at the returned location p.
-      //Inputs:
-      //  p[0, ..., n-1]:  a given point.
-      //  xi[0, ..., n-1]:  a given multidimensional direction.
-      //  n:  the dimension of p and xi.
-      //  func():  the objective function.
-      //  dfunc(): the gradient function computing the numerical gradient.  In the form of gradcd_gen() in cstz.c.
+/*        //Outputs:   ansi-c*/
+/*        //  p[0, ..., n-1]:  a returned and reset value.   ansi-c*/
+/*        //  xi[0, ..., n-1]:  a value repaced by the actual vector displacement that p was moved.   ansi-c*/
+/*        //  fret:  the value of func at the returned location p.   ansi-c*/
+/*        //Inputs:   ansi-c*/
+/*        //  p[0, ..., n-1]:  a given point.   ansi-c*/
+/*        //  xi[0, ..., n-1]:  a given multidimensional direction.   ansi-c*/
+/*        //  n:  the dimension of p and xi.   ansi-c*/
+/*        //  func():  the objective function.   ansi-c*/
+/*        //  dfunc(): the gradient function computing the numerical gradient.  In the form of gradcd_gen() in cstz.c.   ansi-c*/
 
       int j;
       double xx,xmin,fx,fb,fa,bx,ax;
@@ -340,7 +342,7 @@ void frprmn(double p[], int n, int *iter, double *fret,
    }
 
 
-   //=== Used by dlinmin() only;
+/*     //=== Used by dlinmin() only;   ansi-c*/
    #define ZEPS 1.0e-10
    #define MOV3(a,b,c, d,e,f)   {(a)=(d);(b)=(e);(c)=(f);}
    #define SIGN(a,b) ((b) >= 0.0 ? fabs(a) : -fabs(a))
@@ -427,7 +429,7 @@ void frprmn(double p[], int n, int *iter, double *fret,
    #undef MOV3
    #undef SIGN
 
-   //=== Used by dlinmin() and dbrent() only;
+/*     //=== Used by dlinmin() and dbrent() only;   ansi-c*/
    static double df1dim(double x, double *grdh_p) {
       int j;
       double df1=0.0;
@@ -437,11 +439,11 @@ void frprmn(double p[], int n, int *iter, double *fret,
       df = tzMalloc(ncom, double);
       for (j=ncom-1;j>=0;j--) xt[j]=pcom[j]+x*xicom[j];
       (*nrdfun)(df, xt, ncom, nrfunc, grdh_p, nrfunc(xt, ncom));
-      //===================  WARNING ======================
-      //We use 0.0 because the current gradient function gradcd_gen() in cstz.c do not use this function value.  A more
-      //  sophisticated central gradient method would require this function value, and therefore we must pass
-      //  nrfunc(xt, ncom) instead of 0.0.  TZ, September 2003.
-      //===================  WARNING ======================
+/*        //===================  WARNING ======================   ansi-c*/
+/*        //We use 0.0 because the current gradient function gradcd_gen() in cstz.c do not use this function value.  A more   ansi-c*/
+/*        //  sophisticated central gradient method would require this function value, and therefore we must pass   ansi-c*/
+/*        //  nrfunc(xt, ncom) instead of 0.0.  TZ, September 2003.   ansi-c*/
+/*        //===================  WARNING ======================   ansi-c*/
       for (j=ncom-1;j>=0;j--) df1 += df[j]*xicom[j];
       tzDestroy(df);
       tzDestroy(xt);
@@ -453,7 +455,7 @@ void frprmn(double p[], int n, int *iter, double *fret,
 
 
 static double f1dim(double x) {
-   //Collapsing to one dimension line search, used by limin() or dlimin().
+/*     //Collapsing to one dimension line search, used by limin() or dlimin().   ansi-c*/
    int j;
    double f,*xt=NULL;
 
@@ -473,51 +475,51 @@ static double f1dim(double x) {
 static void mnbrak(double *ax, double *bx, double *cx, double *fa, double *fb, double *fc, double (*func)(double)) {
    double ulim,u,r,q,fu,dum, tmpd;
 
-	*fa=(*func)(*ax);
-	*fb=(*func)(*bx);
-	if (*fb > *fa) {
-		SHFT(dum,*ax,*bx,dum)
-		SHFT(dum,*fb,*fa,dum)
-	}
-	*cx=(*bx)+GOLD*(*bx-*ax);
-	*fc=(*func)(*cx);
-	while (*fb > *fc) {
-		r=(*bx-*ax)*(*fb-*fc);
-		q=(*bx-*cx)*(*fb-*fa);
-		u=(*bx)-((*bx-*cx)*q-(*bx-*ax)*r)/
-           (2.0*SIGN((tmpd=fabs(q-r))>TINY ? tmpd : TINY,q-r));   //Original: (2.0*SIGN(FMAX(fabs(q-r),TINY),q-r));
-		ulim=(*bx)+GLIMIT*(*cx-*bx);
-		if ((*bx-u)*(u-*cx) > 0.0) {
-			fu=(*func)(u);
-			if (fu < *fc) {
-				*ax=(*bx);
-				*bx=u;
-				*fa=(*fb);
-				*fb=fu;
-				return;
-			} else if (fu > *fb) {
-				*cx=u;
-				*fc=fu;
-				return;
-			}
-			u=(*cx)+GOLD*(*cx-*bx);
-			fu=(*func)(u);
-		} else if ((*cx-u)*(u-ulim) > 0.0) {
-			fu=(*func)(u);
-			if (fu < *fc) {
-				SHFT(*bx,*cx,u,*cx+GOLD*(*cx-*bx))
-				SHFT(*fb,*fc,fu,(*func)(u))
-			}
-		} else if ((u-ulim)*(ulim-*cx) >= 0.0) {
-			u=ulim;
-			fu=(*func)(u);
-		} else {
-			u=(*cx)+GOLD*(*cx-*bx);
-			fu=(*func)(u);
-		}
-		SHFT(*ax,*bx,*cx,u)
-		SHFT(*fa,*fb,*fc,fu)
-	}
+    *fa=(*func)(*ax);
+    *fb=(*func)(*bx);
+    if (*fb > *fa) {
+        SHFT(dum,*ax,*bx,dum)
+        SHFT(dum,*fb,*fa,dum)
+    }
+    *cx=(*bx)+GOLD*(*bx-*ax);
+    *fc=(*func)(*cx);
+    while (*fb > *fc) {
+        r=(*bx-*ax)*(*fb-*fc);
+        q=(*bx-*cx)*(*fb-*fa);
+        u=(*bx)-((*bx-*cx)*q-(*bx-*ax)*r)/
+           (2.0*SIGN((tmpd=fabs(q-r))>TINY ? tmpd : TINY,q-r));    /*  Original: (2.0*SIGN(FMAX(fabs(q-r),TINY),q-r));   ansi-c*/
+        ulim=(*bx)+GLIMIT*(*cx-*bx);
+        if ((*bx-u)*(u-*cx) > 0.0) {
+            fu=(*func)(u);
+            if (fu < *fc) {
+                *ax=(*bx);
+                *bx=u;
+                *fa=(*fb);
+                *fb=fu;
+                return;
+            } else if (fu > *fb) {
+                *cx=u;
+                *fc=fu;
+                return;
+            }
+            u=(*cx)+GOLD*(*cx-*bx);
+            fu=(*func)(u);
+        } else if ((*cx-u)*(u-ulim) > 0.0) {
+            fu=(*func)(u);
+            if (fu < *fc) {
+                SHFT(*bx,*cx,u,*cx+GOLD*(*cx-*bx))
+                SHFT(*fb,*fc,fu,(*func)(u))
+            }
+        } else if ((u-ulim)*(ulim-*cx) >= 0.0) {
+            u=ulim;
+            fu=(*func)(u);
+        } else {
+            u=(*cx)+GOLD*(*cx-*bx);
+            fu=(*func)(u);
+        }
+        SHFT(*ax,*bx,*cx,u)
+        SHFT(*fa,*fb,*fc,fu)
+    }
 }
 #undef GOLD
 #undef GLIMIT
@@ -529,13 +531,13 @@ static void mnbrak(double *ax, double *bx, double *cx, double *fa, double *fb, d
 
 
 
-//-------------------
-// My own functions.
-//-------------------
-//=== Computing Norm2 of dv.
+/*  //-------------------   ansi-c*/
+/*  // My own functions.   ansi-c*/
+/*  //-------------------   ansi-c*/
+/*  //=== Computing Norm2 of dv.   ansi-c*/
 static double ftd_norm2(double *vnew_p, double *vold_p, int _n) {
    int _i;
-   double dtheta=0.0,  //Cumulative.
+   double dtheta=0.0,   /*  Cumulative.   ansi-c*/
           tmpd;
 
    for (_i=_n-1; _i>=0; _i--) {
@@ -546,35 +548,35 @@ static double ftd_norm2(double *vnew_p, double *vold_p, int _n) {
    return ( sqrt(dtheta) );
 }
 
-//=== Computing the inner product of x and y.
+/*  //=== Computing the inner product of x and y.   ansi-c*/
 static double ftd_innerproduct(double *x, double *y, int _n) {
    int _i;
-   double a = 0.0;   //Cumulative.
-   for (_i=_n-1; _i>=0; _i--)  a += x[_i] * y[_i];    //a += (*x++) * (*y++);  Be aware that this alternative maybe too fancy.
+   double a = 0.0;    /*  Cumulative.   ansi-c*/
+   for (_i=_n-1; _i>=0; _i--)  a += x[_i] * y[_i];     /*  a += (*x++) * (*y++);  Be aware that this alternative maybe too fancy.   ansi-c*/
    return (a);
 }
 
 
 
 
-//=== Extern function to be accessed by other C files.
+/*  //=== Extern function to be accessed by other C files.   ansi-c*/
 void congradmin_SetPrintFile(char *filename) {
-   if (!filename)   sprintf(filename_sp3vecs, "outdata5congradmin.prn");  //Default filename.
+   if (!filename)   sprintf(filename_sp3vecs, "outdata5congradmin.prn");   /*  Default filename.   ansi-c*/
    else {
       strcpy(filename_sp3vecs, filename);
-      //filename_sp3vecs[STRLEN-1] = '\0';  //The end of the string is set to NUL to prevent it from be a non-string.
+/*        //filename_sp3vecs[STRLEN-1] = '\0';  //The end of the string is set to NUL to prevent it from be a non-string.   ansi-c*/
    }
 }
 
 
 
-//void congradmin_SetPrintFile(FILE *fptr_sp) {
-//   fptr_interesults = fptr_sp;
-//}
+/*  //void congradmin_SetPrintFile(FILE *fptr_sp) {   ansi-c*/
+/*  //   fptr_interesults = fptr_sp;   ansi-c*/
+/*  //}   ansi-c*/
 
-//void congradmin_SetPrintFile_db(FILE *fptr_sp) {
-//   fptr_interesults_db = fptr_sp;
-//}
+/*  //void congradmin_SetPrintFile_db(FILE *fptr_sp) {   ansi-c*/
+/*  //   fptr_interesults_db = fptr_sp;   ansi-c*/
+/*  //}   ansi-c*/
 
 
 #undef STRLEN

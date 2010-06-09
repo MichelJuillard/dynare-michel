@@ -1842,7 +1842,7 @@ steady(homotopy_mode = 1, homotopy_steps = 50);
     When the analytical solution of the model is known, this command can be used to help Dynare find the steady state in a more efficient and reliable way, especially during estimation where the steady state has to be recomputed for every point in the parameter space.
   </para>
   <para>
-    Each line of this block consists of a variable (either an endogenous or a temporary variable) which is assigned an expression (which can contain parameters, exogenous at the steady state, or any endogenous or temporary variable already declared above).
+    Each line of this block consists of a variable (either an endogenous, a temporary variable or a parameter) which is assigned an expression (which can contain parameters, exogenous at the steady state, or any endogenous or temporary variable already declared above).
   </para>
   <para>
     Internally, Dynare will create a steady state file called <filename><replaceable>FILENAME</replaceable>_steadystate.m</filename>, using the information provided in this block.
@@ -2158,7 +2158,11 @@ steady;
     <varlistentry>
       <term><option>conditional_variance_decomposition</option> = [<replaceable>INTEGER1</replaceable> <replaceable>INTEGER2</replaceable> ...]</term>
       <listitem><para>Computes a conditional variance decomposition for the specified period(s). Conditional variances are given by var(y<subscript>t+k</subscript>|t). For period 1, the conditional variance decomposition provides the decomposition of the effects of shocks upon impact.</para></listitem>
-    </varlistentry>    
+    </varlistentry>
+    <varlistentry>
+      <term><option>pruning</option></term>
+      <listitem><para>Discard higher order terms when iteratively computing simulations of the solution, as in <xref linkend="kim-kim-schaumburg-sims_2008"/>.</para></listitem>
+    </varlistentry>
   </variablelist>
 
 </refsect1>
@@ -2195,7 +2199,7 @@ steady;
 <refsect1>
   <title>Auxiliary variables for leads and lags</title>
   <para>For a stochastic model, Dynare will perform a transformation of the model so that there is only one lead and one lag on endogenous, and no lead/lag on exogenous.</para>
-  <para>This transformation is achieved by the creation of auxiliary variables, and corresponding equations. For example, if <literal>x(+2)</literal> exists in the model, Dynare will create one auxiliary variable <literal>AUX_ENDO_LEAD = x(+1)</literal>, and replace <literal>x(+1)</literal> by <literal>AUX_ENDO_LEAD(+1)</literal>.</para>
+  <para>This transformation is achieved by the creation of auxiliary variables, and corresponding equations. For example, if <literal>x(+2)</literal> exists in the model, Dynare will create one auxiliary variable <literal>AUX_ENDO_LEAD = x(+1)</literal>, and replace <literal>x(+2)</literal> by <literal>AUX_ENDO_LEAD(+1)</literal>.</para>
   <para>A similar transformation is done for lags greater than 2 on endogenous (auxiliary variables will have a name beginning with <literal>AUX_ENDO_LAG</literal>), and for exogenous with leads and lags (auxiliary variables will have a name beginning with <literal>AUX_EXO_LEAG</literal> or <literal>AUX_EXO_LAG</literal> respectively).</para>
   <para>Once created, all auxiliary variables are included in the set of endogenous variables. The output of decision rules (see below) is such that auxiliary variable names are replaced by the original variables they refer to.</para>
 </refsect1>
@@ -4400,6 +4404,38 @@ plot_conditional_forecast(periods = 10) e u;
       <volumenum>100</volumenum>
       <issuenum>4</issuenum>
       <pagenums>745-775</pagenums>
+    </biblioset>
+
+  </biblioentry>
+
+  <biblioentry id="kim-kim-schaumburg-sims_2008" xreflabel="Kim, Kim, Schaumburg and Sims (2008)">
+    <biblioset relation="article">
+      <authorgroup>
+        <author>
+          <surname>Kim</surname>
+          <firstname>Jinill</firstname>
+        </author>
+        <author>
+          <surname>Kim</surname>
+          <firstname>Sunghyun</firstname>
+        </author>
+        <author>
+          <surname>Schaumburg</surname>
+          <firstname>Ernst</firstname>
+        </author>
+        <author>
+          <surname>Sims</surname>
+          <firstname>Christopher A.</firstname>
+        </author>
+      </authorgroup>
+      <pubdate>2008</pubdate>
+      <title>Calculating and using second-order accurate solutions of discrete time dynamic equilibrium models</title>
+    </biblioset>
+    <biblioset relation="journal">
+      <title>Journal of Economic Dynamics and Control</title>
+      <volumenum>32</volumenum>
+      <issuenum>11</issuenum>
+      <pagenums>3397-3414</pagenums>
     </biblioset>
 
   </biblioentry>

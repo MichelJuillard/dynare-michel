@@ -41,8 +41,8 @@ int bSVD(PRECISION *U, PRECISION *d, PRECISION *V, PRECISION *A, int m, int n, i
 int bSVD_new(PRECISION *U, PRECISION *d, PRECISION *V, PRECISION *A, int m, int n, int ut, int vt, int at, int compact);
 
 /* Generalize Schur Decomposition */
-int bQZ_real(PRECISION *Q, PRECISION *Z, PRECISION *S, PRECISION *T, PRECISION *A, PRECISION *B, int n, int qt, int zt, int st, int tt, int at, int bt, 
-	     PRECISION *alpha_r, PRECISION *alpha_i, PRECISION *beta);
+int bQZ_real(PRECISION *Q, PRECISION *Z, PRECISION *S, PRECISION *T, PRECISION *A, PRECISION *B, int n, int qt, int zt, int st, int tt, int at, int bt,
+         PRECISION *alpha_r, PRECISION *alpha_i, PRECISION *beta);
 
 /* Cholesky Decompositions */
 int bCholesky(PRECISION *X, int m, int u, int t);
@@ -55,13 +55,13 @@ int bPermutation(PRECISION *x, int *p, int m, int q, int t);
 int bMatrixTensor(PRECISION *x, PRECISION *y, PRECISION *z, int m, int n, int r, int s, int xt, int yt, int zt);
 int bVectorTensor(PRECISION *x, PRECISION *y, PRECISION *z, int m, int n);
 
-//int bQRPivot_R(PRECISION *R, int *p, int m, int n);
-//int bQRPivot_QR(PRECISION *Q, PRECISION *R, int *p, int m, int n);
+/*  //int bQRPivot_R(PRECISION *R, int *p, int m, int n);   ansi-c*/
+/*  //int bQRPivot_QR(PRECISION *Q, PRECISION *R, int *p, int m, int n);   ansi-c*/
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif 
+#endif
 
 

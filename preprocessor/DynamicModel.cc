@@ -1224,6 +1224,7 @@ DynamicModel::writeDynamicCFile(const string &dynamic_basename) const
                     << "     v2 = mxGetPr(plhs[2]);" << endl
                     << "  }" << endl
                     << endl
+                    << "  v3 = NULL;" << endl
                     << " if (nlhs >= 4)" << endl
                     << "  {" << endl
                     << "     /* Set the output pointer to the output matrix v3. */" << endl
@@ -2738,7 +2739,7 @@ DynamicModel::writeParamsDerivativesFile(const string &basename) const
       cerr << "ERROR: Can't open file " << filename << " for writing" << endl;
       exit(EXIT_FAILURE);
     }
-  paramsDerivsFile << "function [rp, rpp, gp, gpp, hp] = " << basename << "_params_derivs(y, x, params, it_)" << endl
+  paramsDerivsFile << "function [rp, gp, rpp, gpp, hp] = " << basename << "_params_derivs(y, x, params, it_)" << endl
                    << "%" << endl
                    << "% Warning : this file is generated automatically by Dynare" << endl
                    << "%           from model file (.mod)" << endl << endl;
@@ -2763,26 +2764,6 @@ DynamicModel::writeParamsDerivativesFile(const string &basename) const
       paramsDerivsFile << ";" << endl;
     }
 
-  // Write parameter second derivatives
-  paramsDerivsFile << "rpp = zeros(" << equation_number() << ", " << symbol_table.param_nbr() << ", "
-                   << symbol_table.param_nbr() << ");" << endl;
-
-  for (second_derivatives_type::const_iterator it = residuals_params_second_derivatives.begin();
-       it != residuals_params_second_derivatives.end(); it++)
-    {
-      int eq = it->first.first;
-      int param1 = it->first.second.first;
-      int param2 = it->first.second.second;
-      NodeID d2 = it->second;
-
-      int param1_col = symbol_table.getTypeSpecificID(getSymbIDByDerivID(param1)) + 1;
-      int param2_col = symbol_table.getTypeSpecificID(getSymbIDByDerivID(param2)) + 1;
-
-      paramsDerivsFile << "rpp(" << eq+1 << ", " << param1_col << ", " << param2_col << ") = ";
-      d2->writeOutput(paramsDerivsFile, oMatlabDynamicModel, params_derivs_temporary_terms);
-      paramsDerivsFile << ";" << endl;
-    }
-
   // Write jacobian derivatives
   paramsDerivsFile << "gp = zeros(" << equation_number() << ", " << dynJacobianColsNbr << ", "
                    << symbol_table.param_nbr() << ");" << endl;
@@ -2803,12 +2784,40 @@ DynamicModel::writeParamsDerivativesFile(const string &basename) const
       paramsDerivsFile << ";" << endl;
     }
 
-  // Write jacobian second derivatives
-  paramsDerivsFile << "gpp = zeros(" << equation_number() << ", " << dynJacobianColsNbr << ", "
-                   << symbol_table.param_nbr() << ", " << symbol_table.param_nbr() << ");" << endl;
+  // If nargout >= 3...
+  paramsDerivsFile << "if nargout >= 3" << endl;
 
+  // Write parameter second derivatives (only if nargout >= 3)
+  paramsDerivsFile << "rpp = zeros(" << residuals_params_second_derivatives.size()
+                   << ",4);" << endl;
+
+  int i = 1;
+  for (second_derivatives_type::const_iterator it = residuals_params_second_derivatives.begin();
+       it != residuals_params_second_derivatives.end(); ++it, i++)
+    {
+      int eq = it->first.first;
+      int param1 = it->first.second.first;
+      int param2 = it->first.second.second;
+      NodeID d2 = it->second;
+
+      int param1_col = symbol_table.getTypeSpecificID(getSymbIDByDerivID(param1)) + 1;
+      int param2_col = symbol_table.getTypeSpecificID(getSymbIDByDerivID(param2)) + 1;
+
+      paramsDerivsFile << "rpp(" << i << ",1)=" << eq+1 << ";" << endl
+                       << "rpp(" << i << ",2)=" << param1_col << ";" << endl
+                       << "rpp(" << i << ",3)=" << param2_col << ";" << endl
+                       << "rpp(" << i << ",4)=";
+      d2->writeOutput(paramsDerivsFile, oMatlabDynamicModel, params_derivs_temporary_terms);
+      paramsDerivsFile << ";" << endl;
+    }
+
+  // Write jacobian second derivatives  (only if nargout >= 3)
+  paramsDerivsFile << "gpp = zeros(" << jacobian_params_second_derivatives.size()
+                   << ",5);" << endl;
+
+  i = 1;
   for (third_derivatives_type::const_iterator it = jacobian_params_second_derivatives.begin();
-       it != jacobian_params_second_derivatives.end(); it++)
+       it != jacobian_params_second_derivatives.end(); ++it, i++)
     {
       int eq = it->first.first;
       int var = it->first.second.first;
@@ -2820,17 +2829,25 @@ DynamicModel::writeParamsDerivativesFile(const string &basename) const
       int param1_col = symbol_table.getTypeSpecificID(getSymbIDByDerivID(param1)) + 1;
       int param2_col = symbol_table.getTypeSpecificID(getSymbIDByDerivID(param2)) + 1;
 
-      paramsDerivsFile << "gpp(" << eq+1 << ", " << var_col << ", " << param1_col << ", " << param2_col << ") = ";
+      paramsDerivsFile << "gpp(" << i << ",1)=" << eq+1 << ";" << endl
+                       << "gpp(" << i << ",2)=" << var_col << ";" << endl
+                       << "gpp(" << i << ",3)=" << param1_col << ";" << endl
+                       << "gpp(" << i << ",4)=" << param2_col << ";" << endl
+                       << "gpp(" << i << ",5)=";
       d2->writeOutput(paramsDerivsFile, oMatlabDynamicModel, params_derivs_temporary_terms);
       paramsDerivsFile << ";" << endl;
     }
 
-  // Write hessian derivatives
-  paramsDerivsFile << "hp = zeros(" << equation_number() << ", " << dynJacobianColsNbr << ", "
-                   << dynJacobianColsNbr << ", " << symbol_table.param_nbr() << ");" << endl;
+  // If nargout >= 5...
+  paramsDerivsFile << "end" << endl
+                   << "if nargout >= 5" << endl;
 
+  // Write hessian derivatives (only if nargout >= 5)
+  paramsDerivsFile << "hp = zeros(" << hessian_params_derivatives.size() << ",5);" << endl;
+
+  i = 1;
   for (third_derivatives_type::const_iterator it = hessian_params_derivatives.begin();
-       it != hessian_params_derivatives.end(); it++)
+       it != hessian_params_derivatives.end(); ++it, i++)
     {
       int eq = it->first.first;
       int var1 = it->first.second.first;
@@ -2842,10 +2859,16 @@ DynamicModel::writeParamsDerivativesFile(const string &basename) const
       int var2_col = getDynJacobianCol(var2) + 1;
       int param_col = symbol_table.getTypeSpecificID(getSymbIDByDerivID(param)) + 1;
 
-      paramsDerivsFile << "hp(" << eq+1 << ", " << var1_col << ", " << var2_col << ", " << param_col << ") = ";
+      paramsDerivsFile << "hp(" << i << ",1)=" << eq+1 << ";" << endl
+                       << "hp(" << i << ",2)=" << var1_col << ";" << endl
+                       << "hp(" << i << ",3)=" << var2_col << ";" << endl
+                       << "hp(" << i << ",4)=" << param_col << ";" << endl
+                       << "hp(" << i << ",5)=";
       d2->writeOutput(paramsDerivsFile, oMatlabDynamicModel, params_derivs_temporary_terms);
       paramsDerivsFile << ";" << endl;
     }
+
+  paramsDerivsFile << "end" << endl;
 
   paramsDerivsFile.close();
 }

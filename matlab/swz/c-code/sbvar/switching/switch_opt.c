@@ -5,7 +5,9 @@
 #include <string.h>
 #include <math.h>
 
-//====== Static Global Variables ======
+#include "modify_for_mex.h"
+
+/*  //====== Static Global Variables ======   ansi-c*/
 static TStateModel *Model=(TStateModel*)NULL;
 static PRECISION *buffer=(PRECISION*)NULL;
 static PRECISION *ModifiedFreeParameters=(PRECISION*)NULL;
@@ -46,25 +48,25 @@ PRECISION PosteriorObjectiveFunction(PRECISION *x, int n)
   ConvertFreeParametersToTheta(Model,FreeParameters_Theta);
   return -LogPosterior_StatesIntegratedOut(Model);
 
-  //PRECISION lp_Q, lp_Theta, li;
-  //FILE *f_out;
-  //lp_Q=LogPrior_Q(Model);
-  //lp_Theta=LogPrior_Theta(Model);
-  //li=LogLikelihood_StatesIntegratedOut(Model);
-  //if (isnan(lp_Q) || isnan(lp_Theta) || isnan(li))
-  //  {
-  //    f_out=fopen("tmp.tmp","wt");
-  //    Write_VAR_Specification(f_out,(char*)NULL,Model);
-  //    WriteTransitionMatrices(f_out,(char*)NULL,"Error: ",Model);
-  //    Write_VAR_Parameters(f_out,(char*)NULL,"Error: ",Model);
-  //    fprintf(f_out,"LogPrior_Theta(): %le\n",lp_Theta);
-  //    fprintf(f_out,"LogPrior_Q(): %le\n",lp_Q);
-  //    fprintf(f_out,"LogLikelihood_StatesIntegratedOut(): %le\n",li);
-  //    fprintf(f_out,"Posterior: %le\n\n",lp_Q+lp_Theta+li);
-  //    fclose(f_out);
-  //    exit(0);
-  //  }
-  //return -(lp_Q+lp_Theta+li);
+/*    //PRECISION lp_Q, lp_Theta, li;   ansi-c*/
+/*    //FILE *f_out;   ansi-c*/
+/*    //lp_Q=LogPrior_Q(Model);   ansi-c*/
+/*    //lp_Theta=LogPrior_Theta(Model);   ansi-c*/
+/*    //li=LogLikelihood_StatesIntegratedOut(Model);   ansi-c*/
+/*    //if (isnan(lp_Q) || isnan(lp_Theta) || isnan(li))   ansi-c*/
+/*    //  {   ansi-c*/
+/*    //    f_out=fopen("tmp.tmp","wt");   ansi-c*/
+/*    //    Write_VAR_Specification(f_out,(char*)NULL,Model);   ansi-c*/
+/*    //    WriteTransitionMatrices(f_out,(char*)NULL,"Error: ",Model);   ansi-c*/
+/*    //    Write_VAR_Parameters(f_out,(char*)NULL,"Error: ",Model);   ansi-c*/
+/*    //    fprintf(f_out,"LogPrior_Theta(): %le\n",lp_Theta);   ansi-c*/
+/*    //    fprintf(f_out,"LogPrior_Q(): %le\n",lp_Q);   ansi-c*/
+/*    //    fprintf(f_out,"LogLikelihood_StatesIntegratedOut(): %le\n",li);   ansi-c*/
+/*    //    fprintf(f_out,"Posterior: %le\n\n",lp_Q+lp_Theta+li);   ansi-c*/
+/*    //    fclose(f_out);   ansi-c*/
+/*    //    exit(0);   ansi-c*/
+/*    //  }   ansi-c*/
+/*    //return -(lp_Q+lp_Theta+li);   ansi-c*/
 }
 
 PRECISION PosteriorObjectiveFunction_csminwel(double *x, int n, double **args, int *dims)

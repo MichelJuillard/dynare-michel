@@ -18,6 +18,10 @@ function prior_posterior_statistics(type,Y,gend,data_index,missing_value)
 % SPECIAL REQUIREMENTS
 %    none
 
+% PARALLEL CONTEXT
+% See the comments random_walk_metropolis_hastings.m funtion.
+
+
 % Copyright (C) 2005-2010 Dynare Team
 %
 % This file is part of Dynare.
@@ -142,7 +146,7 @@ end
 
 % Store the variable mandatory for local/remote parallel computing.
 
-localVars.typee=type;
+localVars.type=type;
 localVars.run_smoother=run_smoother;
 localVars.gend=gend;
 localVars.Y=Y;
@@ -158,6 +162,8 @@ localVars.iendo=iendo;
 if horizon
     localVars.i_last_obs=i_last_obs;
     localVars.IdObs=IdObs;
+    localVars.MAX_nforc1=MAX_nforc1;
+    localVars.MAX_nforc2=MAX_nforc2;
 end
 localVars.exo_nbr=exo_nbr;
 localVars.maxlag=maxlag;
@@ -168,10 +174,6 @@ if naK
     localVars.MAX_naK=MAX_naK;
 end
 localVars.MAX_nruns=MAX_nruns;
-if horizon
-    localVars.MAX_nforc1=MAX_nforc1;
-    localVars.MAX_nforc2=MAX_nforc2;
-end
 localVars.MAX_momentsno = MAX_momentsno;
 localVars.ifil=ifil;
 
@@ -191,10 +193,10 @@ end
 
 b=0;
 
-
-
-if isnumeric(options_.parallel),% | isunix, % for the moment exclude unix platform from parallel implementation
+% Like sequential execution!
+if isnumeric(options_.parallel),% | isunix, % For the moment exclude unix platform from parallel implementation!
     [fout] = prior_posterior_statistics_core(localVars,1,B,0);
+% Parallel execution!
 else
     [nCPU, totCPU, nBlockPerCPU] = distributeJobs(options_.parallel, 1, B);
     for j=1:totCPU-1,
@@ -252,7 +254,8 @@ save([DirectoryName '/' M_.fname '_data.mat'],'stock_gend','stock_data');
 if ~isnumeric(options_.parallel),
     leaveSlaveOpen = options_.parallel_info.leaveSlaveOpen;
     if options_.parallel_info.leaveSlaveOpen == 0,
-        options_.parallel_info.leaveSlaveOpen = 1; % force locally to leave open remote matlab sessions (repeated pm3 calls)
+     % Commenting for testing!
+     % options_.parallel_info.leaveSlaveOpen = 1; % Force locally to leave open remote matlab sessions (repeated pm3 calls)
     end
 end
 

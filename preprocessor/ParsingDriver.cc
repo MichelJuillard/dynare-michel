@@ -1866,21 +1866,10 @@ ParsingDriver::add_steady_state_model_equal(string *varname, NodeID expr)
     }
 
   SymbolType type = mod_file->symbol_table.getType(id);
-  if (type != eEndogenous && type != eModFileLocalVariable)
+  if (type != eEndogenous && type != eModFileLocalVariable && type != eParameter)
     error(*varname + " has incorrect type");
 
-  try
-    {
-      mod_file->steady_state_model.addDefinition(id, expr);
-    }
-  catch(SteadyStateModel::AlreadyDefinedException &e)
-    {
-      error(*varname + " has already been defined in the steady state block");
-    }
-  catch(SteadyStateModel::UndefinedVariableException &e)
-    {
-      error(e.varname + " is not yet initialized at this point");
-    }
+  mod_file->steady_state_model.addDefinition(id, expr);
 
   delete varname;
 }

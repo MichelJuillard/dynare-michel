@@ -1,6 +1,6 @@
 
 /*
-   Defines the precision to be used 
+   Defines the precision to be used
 */
 
 #ifndef __PRECISION_H__
@@ -17,8 +17,8 @@
 #define PRECISION_WORD         qword
 #define MINUS_INFINITY        -1.0E300
 #define PLUS_INFINITY          1.0E300
-//#define MINUS_INFINITY       -DBL_MAX
-//#define PLUS_INFINITY         DBL_MAX
+/*  //#define MINUS_INFINITY       -DBL_MAX   ansi-c*/
+/*  //#define PLUS_INFINITY         DBL_MAX   ansi-c*/
 /**************************************/
 
 /********** single precision **********

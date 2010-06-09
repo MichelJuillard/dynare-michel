@@ -1,4 +1,4 @@
-function [resids, rJ,mult] = dyn_ramsey_static_(x,M_,options_,oo_,it_)
+function [resids, rJ,mult] = dyn_ramsey_static_(x,M,options_,oo,it_)
 
 % function [resids, rJ,mult] = dyn_ramsey_static_(x)
 % Computes the static first order conditions for optimal policy
@@ -30,52 +30,53 @@ function [resids, rJ,mult] = dyn_ramsey_static_(x,M_,options_,oo_,it_)
 %
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
-
+global oo_ M_
 
 % recovering usefull fields
-endo_nbr = M_.endo_nbr;
-exo_nbr = M_.exo_nbr;
-fname = M_.fname;
-% inst_nbr = M_.inst_nbr;
-% i_endo_no_inst = M_.endogenous_variables_without_instruments;
-max_lead = M_.maximum_lead;
-max_lag = M_.maximum_lag;
+endo_nbr = M.endo_nbr;
+exo_nbr = M.exo_nbr;
+fname = M.fname;
+% inst_nbr = M.inst_nbr;
+% i_endo_no_inst = M.endogenous_variables_without_instruments;
+max_lead = M.maximum_lead;
+max_lag = M.maximum_lag;
 beta =  options_.planner_discount;
 
 % indices of all endogenous variables
 i_endo = [1:endo_nbr]';
 % indices of endogenous variable except instruments
-% i_inst = M_.instruments;
+% i_inst = M.instruments;
 % lead_lag incidence matrix for endogenous variables
-i_lag = M_.lead_lag_incidence;
+i_lag = M.lead_lag_incidence;
 
 if options_.steadystate_flag
     k_inst = [];
     instruments = options_.instruments;
     for i = 1:size(instruments,1)
         k_inst = [k_inst; strmatch(options_.instruments(i,:), ...
-                                   M_.endo_names,'exact')];
+                                   M.endo_names,'exact')];
     end
-    oo_.steady_state(k_inst) = x;
-    [x,check] = feval([M_.fname '_steadystate'],...
-                      oo_.steady_state,...
-                      [oo_.exo_steady_state; ...
-                       oo_.exo_det_steady_state]);
-    if size(x,1) < M_.endo_nbr 
-        if length(M_.aux_vars) > 0
-            x = add_auxiliary_variables_to_steadystate(x,M_.aux_vars,...
-                                                       M_.fname,...
-                                                       oo_.exo_steady_state,...
-                                                       oo_.exo_det_steady_state,...
+    oo.steady_state(k_inst) = x;
+    [x,check] = feval([M.fname '_steadystate'],...
+                      oo.steady_state,...
+                      [oo.exo_steady_state; ...
+                       oo.exo_det_steady_state]);
+    if size(x,1) < M.endo_nbr 
+        if length(M.aux_vars) > 0
+            x = add_auxiliary_variables_to_steadystate(x,M.aux_vars,...
+                                                       M.fname,...
+                                                       oo.exo_steady_state,...
+                                                       oo.exo_det_steady_state,...
                                                        M_.params);
         else
-            error([M_.fname '_steadystate.m doesn''t match the model']);
+            error([M.fname '_steadystate.m doesn''t match the model']);
         end
     end
 end
 
+oo_.steady_state = x;
 % value and Jacobian of objective function
-ex = zeros(1,M_.exo_nbr);
+ex = zeros(1,M.exo_nbr);
 [U,Uy,Uyy] = feval([fname '_objective_static'],x(i_endo),ex, M_.params);
 Uy = Uy';
 Uyy = reshape(Uyy,endo_nbr,endo_nbr);
@@ -85,7 +86,7 @@ y = repmat(x(i_endo),1,max_lag+max_lead+1);
 k = find(i_lag');
 it_ = 1;
 %  [f,fJ,fH] = feval([fname '_dynamic'],y(k),ex);
-[f,fJ] = feval([fname '_dynamic'],y(k),[oo_.exo_simul oo_.exo_det_simul], M_.params, it_);
+[f,fJ] = feval([fname '_dynamic'],y(k),[oo.exo_simul oo.exo_det_simul], M_.params, it_);
 % indices of Lagrange multipliers
 inst_nbr = endo_nbr - size(f,1);
 i_mult = [endo_nbr+1:2*endo_nbr-inst_nbr]';
@@ -110,6 +111,7 @@ resids1 = Uy+A*mult;
 [q,r,e] = qr([A Uy]');
 if options_.steadystate_flag
     resids = [r(end,(endo_nbr-inst_nbr+1:end))'];
+    resids = resids1'*resids1;
 else
     resids = [f; r(end,(endo_nbr-inst_nbr+1:end))'];
 end

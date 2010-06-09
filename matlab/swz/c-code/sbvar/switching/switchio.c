@@ -9,6 +9,8 @@
 #include <stdlib.h>
 #include <math.h>
 
+#include "modify_for_mex.h"
+
 static void ReadError(char *idformat, char *trailer, int error);
 static int SetFilePosition(FILE *f_in, char *format, char *str);
 static int ReadInteger(FILE *f_in, char *idformat, char *trailer, int *i);
@@ -50,14 +52,14 @@ static void ReadError(char *idformat, char *trailer, int error)
 
 /*
    Assumes
-     format : "*%s*" or "*" 
-     str    : "*" 
+     format : "*%s*" or "*"
+     str    : "*"
 
      where * is any string that does not contain format specifiers.
 
    Results
      finds given string in file
-   
+
 */
 static int SetFilePosition(FILE *f_in, char *format, char *str)
 {
@@ -118,22 +120,22 @@ static int ReadIntArray(FILE *f_in, char *format, char *str, void *X)
     idstring:  pointer to null terminated string
 
    Returns:
-    Valid pointer to a TMarkovStateVariable structure upon success and null 
+    Valid pointer to a TMarkovStateVariable structure upon success and null
     pointer upon failure.
 
    Results:
-    Reads Markov specification from file and creates TMarkovStateVariable 
-    structure. 
+    Reads Markov specification from file and creates TMarkovStateVariable
+    structure.
 
    Notes:
-    The null terminated string idstring is of the form "" or "[i][j]...[k]".  
-    Usually, this function will be called with idstring equal to "".  The routine 
-    is called recursively with the more general form for idstring.  For each path 
+    The null terminated string idstring is of the form "" or "[i][j]...[k]".
+    Usually, this function will be called with idstring equal to "".  The routine
+    is called recursively with the more general form for idstring.  For each path
     of Markov state variables of the form
 
         sv->state_variable[i]->state_variable[j]-> ... ->state_variable[k]
 
-    which corresponds to a single Markov state variable, there must be an entries 
+    which corresponds to a single Markov state variable, there must be an entries
     in the file of the form:
 */
 TMarkovStateVariable* ReadMarkovSpecification_SV(FILE *f_in, char *idstring, int nobs)
@@ -144,105 +146,105 @@ TMarkovStateVariable* ReadMarkovSpecification_SV(FILE *f_in, char *idstring, int
   int *FreeDim, **NonZeroIndex;
   TMarkovStateVariable *sv=(TMarkovStateVariable*)NULL, **sv_array;
 
-  // Get nobs if necessary
+/*    // Get nobs if necessary   ansi-c*/
   if ((nobs > 0) || !(err=ReadInteger(f_in,idformat="//== Number observations ==//",trailer,&nobs)))
     {
-      // Construct trailer
+/*        // Construct trailer   ansi-c*/
       if (idstring[0])
-	sprintf(trailer=(char*)malloc(24+strlen(idstring)),"for state_variable%s ==//",idstring);
+    sprintf(trailer=(char*)malloc(24+strlen(idstring)),"for state_variable%s ==//",idstring);
       else
-	strcpy(trailer=(char*)malloc(5),"==//");
+    strcpy(trailer=(char*)malloc(5),"==//");
 
-      // Read number of state variables
+/*        // Read number of state variables   ansi-c*/
       if (!(err=ReadInteger(f_in,idformat="//== Number independent state variables %s",trailer,&n_state_variables)))
-	{
-	  if (n_state_variables > 1)
-	    {
-	      sv_array=(TMarkovStateVariable**)dw_CreateArray_pointer(n_state_variables,(void (*)(void*))FreeMarkovStateVariable);
-	      for (j=10, i=1; n_state_variables/j > 0; j*=10, i++);
-	      strcpy(idstring_new=(char*)malloc((j=(int)strlen(idstring))+i+3),idstring); 
-	      for (i=0; i < n_state_variables; i++)
-		{
-		  sprintf(idstring_new+j,"[%d]",i+1);
-		  if (!(sv_array[i]=ReadMarkovSpecification_SV(f_in,idstring_new,nobs))) break;
-		}
-	      free(idstring_new);
-	      if (i == n_state_variables)
-		sv=CreateMarkovStateVariable_Multiple(nobs,n_state_variables,sv_array);
-	      else
-		dw_FreeArray(sv_array);
-	    }
-	  else
-	    {
-	      // Read number states
-	      if (!(err=ReadInteger(f_in,idformat="//== Number states %s",trailer,&nstates)))
-		{
-		  // Read number of lags to encode
-		  switch (err=ReadInteger(f_in,idformat="//== Number of lags encoded %s",trailer,&nlags_encoded))
-		    {
-		    case SWITCHIO_ERROR_READING_DATA:
-		      break;
-		    case SWITCHIO_LINE_ID_NOT_FOUND:
-		      nlags_encoded=0;
-		    case 0:
-		      if (nlags_encoded < 0)
-			{
-			  err=SWITCHIO_ERROR_READING_DATA;
-			  break;
-			}
+    {
+      if (n_state_variables > 1)
+        {
+          sv_array=(TMarkovStateVariable**)dw_CreateArray_pointer(n_state_variables,(void (*)(void*))FreeMarkovStateVariable);
+          for (j=10, i=1; n_state_variables/j > 0; j*=10, i++);
+          strcpy(idstring_new=(char*)malloc((j=(int)strlen(idstring))+i+3),idstring);
+          for (i=0; i < n_state_variables; i++)
+        {
+          sprintf(idstring_new+j,"[%d]",i+1);
+          if (!(sv_array[i]=ReadMarkovSpecification_SV(f_in,idstring_new,nobs))) break;
+        }
+          free(idstring_new);
+          if (i == n_state_variables)
+        sv=CreateMarkovStateVariable_Multiple(nobs,n_state_variables,sv_array);
+          else
+        dw_FreeArray(sv_array);
+        }
+      else
+        {
+/*            // Read number states   ansi-c*/
+          if (!(err=ReadInteger(f_in,idformat="//== Number states %s",trailer,&nstates)))
+        {
+/*            // Read number of lags to encode   ansi-c*/
+          switch (err=ReadInteger(f_in,idformat="//== Number of lags encoded %s",trailer,&nlags_encoded))
+            {
+            case SWITCHIO_ERROR_READING_DATA:
+              break;
+            case SWITCHIO_LINE_ID_NOT_FOUND:
+              nlags_encoded=0;
+            case 0:
+              if (nlags_encoded < 0)
+            {
+              err=SWITCHIO_ERROR_READING_DATA;
+              break;
+            }
 
-		      // Read number of base states
-		      if (nlags_encoded > 0)
-			{
-			  if (err=ReadInteger(f_in,idformat="//== Number of base states %s",trailer,&nbasestates))
-			    break;
-			  for (j=nbasestates, i=nlags_encoded; i > 0; i--) j*=nbasestates;
-			  if (j != nstates)
-			    {
-			      err=SWITCHIO_ERROR_READING_DATA;
-			      break;
-			    }
-			}
+/*                // Read number of base states   ansi-c*/
+              if (nlags_encoded > 0)
+            {
+              if (err=ReadInteger(f_in,idformat="//== Number of base states %s",trailer,&nbasestates))
+                break;
+              for (j=nbasestates, i=nlags_encoded; i > 0; i--) j*=nbasestates;
+              if (j != nstates)
+                {
+                  err=SWITCHIO_ERROR_READING_DATA;
+                  break;
+                }
+            }
 
-		      // Read prior
-		      Prior=CreateMatrix(nstates,nstates);
-		      if (!(err=ReadMatrix(f_in,idformat="//== Prior %s",trailer,Prior)))
-			{
-			  // Read free Dirichlet dimensions
-			  if (!(err=ReadInteger(f_in,idformat="//== Number free Dirichlet variables %s",trailer,&i)))
-			    {
-			      FreeDim=dw_CreateArray_int(i);
-			      if (!(err=ReadIntArray(f_in,idformat="//== Free Dirichlet dimensions %s",trailer,FreeDim)))
-				{
-				  // Read free Dirichlet index
-				  NonZeroIndex=dw_CreateRectangularArray_int(nstates,nstates);
-				  if (!(err=ReadIntArray(f_in,idformat="//== Free Dirichlet index %s",trailer,NonZeroIndex)))
-				    {
-				      // Read free Dirichlet multipliers
-				      MQ=CreateMatrix(nstates,nstates);
-				      if (!(err=ReadMatrix(f_in,idformat="//== Free Dirichlet multipliers %s",trailer,MQ)))
-					if (sv=CreateMarkovStateVariable_Single(nstates,nobs,Prior,FreeDim,NonZeroIndex,MQ))
-					  if (nlags_encoded > 0)
-					    {
-					      dw_FreeArray(sv->lag_index);
-					      sv->nlags_encoded=nlags_encoded;
-					      sv->nbasestates=nbasestates;
-					      sv->lag_index=CreateLagIndex(sv->nbasestates,sv->nlags_encoded,sv->nstates);
-					    }
-				      FreeMatrix(MQ);
-				    }
-				  dw_FreeArray(NonZeroIndex);
-				}
-			      dw_FreeArray(FreeDim);
-			    }
-			}
-		      FreeMatrix(Prior);
+/*                // Read prior   ansi-c*/
+              Prior=CreateMatrix(nstates,nstates);
+              if (!(err=ReadMatrix(f_in,idformat="//== Prior %s",trailer,Prior)))
+            {
+/*                // Read free Dirichlet dimensions   ansi-c*/
+              if (!(err=ReadInteger(f_in,idformat="//== Number free Dirichlet variables %s",trailer,&i)))
+                {
+                  FreeDim=dw_CreateArray_int(i);
+                  if (!(err=ReadIntArray(f_in,idformat="//== Free Dirichlet dimensions %s",trailer,FreeDim)))
+                {
+/*                    // Read free Dirichlet index   ansi-c*/
+                  NonZeroIndex=dw_CreateRectangularArray_int(nstates,nstates);
+                  if (!(err=ReadIntArray(f_in,idformat="//== Free Dirichlet index %s",trailer,NonZeroIndex)))
+                    {
+/*                        // Read free Dirichlet multipliers   ansi-c*/
+                      MQ=CreateMatrix(nstates,nstates);
+                      if (!(err=ReadMatrix(f_in,idformat="//== Free Dirichlet multipliers %s",trailer,MQ)))
+                    if (sv=CreateMarkovStateVariable_Single(nstates,nobs,Prior,FreeDim,NonZeroIndex,MQ))
+                      if (nlags_encoded > 0)
+                        {
+                          dw_FreeArray(sv->lag_index);
+                          sv->nlags_encoded=nlags_encoded;
+                          sv->nbasestates=nbasestates;
+                          sv->lag_index=CreateLagIndex(sv->nbasestates,sv->nlags_encoded,sv->nstates);
+                        }
+                      FreeMatrix(MQ);
+                    }
+                  dw_FreeArray(NonZeroIndex);
+                }
+                  dw_FreeArray(FreeDim);
+                }
+            }
+              FreeMatrix(Prior);
 
-		      break;
-		    }
-		}
-	    }
-	}
+              break;
+            }
+        }
+        }
+    }
     }
   if (err) ReadError(idformat,trailer,err);
   if (trailer) free(trailer);
@@ -256,7 +258,7 @@ int WriteMarkovSpecification_SV(FILE *f_out, TMarkovStateVariable *sv, char *ids
 
   if (idstring[0])
     {
-      // 24 characters in "for state_variable ==//" plus null character
+/*        // 24 characters in "for state_variable ==//" plus null character   ansi-c*/
       trailer=(char*)malloc(24+strlen(idstring));
       sprintf(trailer,"for state_variable%s ==//",idstring);
 
@@ -277,16 +279,16 @@ int WriteMarkovSpecification_SV(FILE *f_out, TMarkovStateVariable *sv, char *ids
     {
       fprintf(f_out,"//******************************************//\n\n");
       for (j=10, i=1; sv->n_state_variables >= j; j*=10, i++);
-      strcpy(idbuffer=(char*)malloc((j=(int)strlen(idstring))+i+3),idstring); 
+      strcpy(idbuffer=(char*)malloc((j=(int)strlen(idstring))+i+3),idstring);
       for (i=0; i < sv->n_state_variables; i++)
-	{
-	  sprintf(idbuffer+j,"[%d]",i+1);
-	  if (!WriteMarkovSpecification_SV(f_out,sv->state_variable[i],idbuffer)) 
+    {
+      sprintf(idbuffer+j,"[%d]",i+1);
+      if (!WriteMarkovSpecification_SV(f_out,sv->state_variable[i],idbuffer))
             {
-	      free(idbuffer);
-	      return 0;
-	    }
-	}
+          free(idbuffer);
+          return 0;
+        }
+    }
       free(idbuffer);
     }
   else
@@ -294,10 +296,10 @@ int WriteMarkovSpecification_SV(FILE *f_out, TMarkovStateVariable *sv, char *ids
       fprintf(f_out,"\n//== Number states %s\n%d\n\n",trailer,sv->nstates);
 
       if (sv->nlags_encoded > 0)
-	{
-	  fprintf(f_out,"//== Number of lags encoded %s\n%d\n\n",trailer,sv->nlags_encoded);
-	  fprintf(f_out,"//== Number of base states %s\n%d\n\n",trailer,sv->nbasestates);
-	}
+    {
+      fprintf(f_out,"//== Number of lags encoded %s\n%d\n\n",trailer,sv->nlags_encoded);
+      fprintf(f_out,"//== Number of base states %s\n%d\n\n",trailer,sv->nbasestates);
+    }
 
       fprintf(f_out,"//== Prior %s\n",trailer);
       dw_PrintMatrix(f_out,sv->Prior,"%22.14le ");
@@ -332,17 +334,17 @@ int WriteMarkovSpecification_SV(FILE *f_out, TMarkovStateVariable *sv, char *ids
 
    Results:
     Reads transition matrices from file into sv.  All transition matrices and the
-    associated free parameters are set.  
+    associated free parameters are set.
 
    Notes:
-    The null terminated string idstring is of the form "" or "[i][j]...[k]".  
-    Usually, this function will be called with idstring equal to "".  The routine 
-    is called recursively with the more general form for idstring.  For each path 
+    The null terminated string idstring is of the form "" or "[i][j]...[k]".
+    Usually, this function will be called with idstring equal to "".  The routine
+    is called recursively with the more general form for idstring.  For each path
     of Markov state variables of the form
 
         sv->state_variable[i]->state_variable[j]-> ... ->state_variable[k]
 
-    which corresponds to a single Markov state variable, there must be an entry 
+    which corresponds to a single Markov state variable, there must be an entry
     in the file of the form:
 
     //== <header>Transition matrix[i][j]...[k] ==//
@@ -351,7 +353,7 @@ int WriteMarkovSpecification_SV(FILE *f_out, TMarkovStateVariable *sv, char *ids
     . .     .
     x x ... x
 
-    If sv itself is a single Markov state variable, then the format can be 
+    If sv itself is a single Markov state variable, then the format can be
 
     //== <header>Transition matrix[1] ==//
     x x ... x
@@ -379,66 +381,66 @@ int ReadTransitionMatrices_SV(FILE *f_in, TMarkovStateVariable* sv, char *header
   if (sv->n_state_variables > 1)
     {
       for (j=10, i=1; sv->n_state_variables >= j; j*=10, i++);
-      strcpy(idbuffer=(char*)malloc((j=(int)strlen(idstring))+i+3),idstring); 
+      strcpy(idbuffer=(char*)malloc((j=(int)strlen(idstring))+i+3),idstring);
       for (i=sv->n_state_variables-1; i >= 0; i--)
-	{
-	  sprintf(idbuffer+j,"[%d]",i+1);
-	  if (!ReadTransitionMatrices_SV(f_in,sv->state_variable[i],header,idbuffer)) 
+    {
+      sprintf(idbuffer+j,"[%d]",i+1);
+      if (!ReadTransitionMatrices_SV(f_in,sv->state_variable[i],header,idbuffer))
             {
-	      free(idbuffer);
-	      return sv->valid_transition_matrix=0;
-	    }
-	}
+          free(idbuffer);
+          return sv->valid_transition_matrix=0;
+        }
+    }
       free(idbuffer);
       MatrixTensor(sv->Q,sv->QA);
       return sv->valid_transition_matrix=1;
     }
   else
     {
-      // Read transition matrix
+/*        // Read transition matrix   ansi-c*/
       if (!header) header="";
       format="//== %sTransition matrix%s ==//";
       sprintf(idbuffer=(char*)malloc(strlen(header) + strlen(format) + strlen(idstring) - 3),format,header,idstring);
       if (err=ReadMatrix(f_in,idbuffer,(char*)NULL,sv->Q))
-	if (!idstring[0])
-	  {
-	    free(idbuffer);
-	    idstring="[1]";
-	    sprintf(idbuffer=(char*)malloc(strlen(header) + strlen(format) + strlen(idstring) - 3),format,header,idstring);
-	    err=ReadMatrix(f_in,idbuffer,(char*)NULL,sv->Q);
-	  }
+    if (!idstring[0])
+      {
+        free(idbuffer);
+        idstring="[1]";
+        sprintf(idbuffer=(char*)malloc(strlen(header) + strlen(format) + strlen(idstring) - 3),format,header,idstring);
+        err=ReadMatrix(f_in,idbuffer,(char*)NULL,sv->Q);
+      }
       free(idbuffer);
       if (!err)
-	{      
-	  // Scale the columns of Q - loose requirement on sumation to one
-	  for (j=sv->nstates-1; j >= 0; j--)
-	    {
-	      for (sum=0.0, i=sv->nstates-1; i >= 0; i--) 
-		if (ElementM(sv->Q,i,j) < 0.0)
-		  {
-		    dw_UserError("Transition matrix can not have negative elements.");
-		    return sv->valid_transition_matrix=0;
-		  }
-		else
-		  sum+=ElementM(sv->Q,i,j);
-	      if (fabs(sum-1.0) > 1.0e-4)
-		{
-		  dw_UserError("Transition matrix columns must sum to one.");
-		  return sv->valid_transition_matrix=0;
-		}
-	      for (sum=1.0/sum, i=sv->nstates-1; i >= 0; i--) 
-		ElementM(sv->Q,i,j)*=sum;
-	    }
+    {
+/*        // Scale the columns of Q - loose requirement on sumation to one   ansi-c*/
+      for (j=sv->nstates-1; j >= 0; j--)
+        {
+          for (sum=0.0, i=sv->nstates-1; i >= 0; i--)
+        if (ElementM(sv->Q,i,j) < 0.0)
+          {
+            dw_UserError("Transition matrix can not have negative elements.");
+            return sv->valid_transition_matrix=0;
+          }
+        else
+          sum+=ElementM(sv->Q,i,j);
+          if (fabs(sum-1.0) > 1.0e-4)
+        {
+          dw_UserError("Transition matrix columns must sum to one.");
+          return sv->valid_transition_matrix=0;
+        }
+          for (sum=1.0/sum, i=sv->nstates-1; i >= 0; i--)
+        ElementM(sv->Q,i,j)*=sum;
+        }
 
-	  // Update
-	  if (!Update_B_from_Q_SV(sv))
-	    {
-	      dw_UserError("Transition matrices do not satisfy restrictions");
-	      return sv->valid_transition_matrix=0;
-	    }
+/*        // Update   ansi-c*/
+      if (!Update_B_from_Q_SV(sv))
+        {
+          dw_UserError("Transition matrices do not satisfy restrictions");
+          return sv->valid_transition_matrix=0;
+        }
 
-	  return sv->valid_transition_matrix=1;
-	}
+      return sv->valid_transition_matrix=1;
+    }
       return sv->valid_transition_matrix=0;
     }
 }
@@ -454,17 +456,17 @@ int ReadTransitionMatrices_SV(FILE *f_in, TMarkovStateVariable* sv, char *header
 
    Results:
     Reads transition matrices from file into sv.  All transition matrices and the
-    associated free parameters are set.  
+    associated free parameters are set.
 
    Notes:
-    The null terminated string idstring is of the form "" or "[i][j]...[k]".  
-    Usually, this function will be called with idstring equal to "".  The routine 
-    is called recursively with the more general form for idstring.  For each path 
+    The null terminated string idstring is of the form "" or "[i][j]...[k]".
+    Usually, this function will be called with idstring equal to "".  The routine
+    is called recursively with the more general form for idstring.  For each path
     of Markov state variables of the form
 
         sv->state_variable[i]->state_variable[j]-> ... ->state_variable[k]
 
-    which corresponds to a single Markov state variable, there must be an entry 
+    which corresponds to a single Markov state variable, there must be an entry
     in the file of the form:
 
     //== <header>Transition matrix[i][j]...[k] ==//
@@ -473,7 +475,7 @@ int ReadTransitionMatrices_SV(FILE *f_in, TMarkovStateVariable* sv, char *header
     . .     .
     x x ... x
 
-    If sv itself is a single Markov state variable, then the format can be 
+    If sv itself is a single Markov state variable, then the format can be
 
     //== <header>Transition matrix[1] ==//
     x x ... x
@@ -502,72 +504,72 @@ int ReadBaseTransitionMatrices_SV(FILE *f_in, TMarkovStateVariable* sv, char *he
   if (sv->n_state_variables > 1)
     {
       for (j=10, i=1; sv->n_state_variables >= j; j*=10, i++);
-      strcpy(idbuffer=(char*)malloc((j=(int)strlen(idstring))+i+3),idstring); 
+      strcpy(idbuffer=(char*)malloc((j=(int)strlen(idstring))+i+3),idstring);
       for (i=sv->n_state_variables-1; i >= 0; i--)
-	{
-	  sprintf(idbuffer+j,"[%d]",i+1);
-	  if (!ReadBaseTransitionMatrices_SV(f_in,sv->state_variable[i],header,idbuffer)) 
+    {
+      sprintf(idbuffer+j,"[%d]",i+1);
+      if (!ReadBaseTransitionMatrices_SV(f_in,sv->state_variable[i],header,idbuffer))
             {
-	      free(idbuffer);
-	      return 0;
-	    }
-	}
+          free(idbuffer);
+          return 0;
+        }
+    }
       free(idbuffer);
       MatrixTensor(sv->Q,sv->QA);
       return 1;
     }
   else
     {
-      // Read transition matrix
+/*        // Read transition matrix   ansi-c*/
       Q=CreateMatrix(sv->nbasestates,sv->nbasestates);
       if (!header) header="";
       format="//== %sBase transition matrix%s ==//";
       sprintf(idbuffer=(char*)malloc(strlen(header) + strlen(format) + strlen(idstring) - 3),format,header,idstring);
       if (err=ReadMatrix(f_in,idbuffer,(char*)NULL,Q))
-	if (!idstring[0])
-	  {
-	    free(idbuffer);
-	    idstring="[1]";
-	    sprintf(idbuffer=(char*)malloc(strlen(header) + strlen(format) + strlen(idstring) - 3),format,header,idstring);
-	    err=ReadMatrix(f_in,idbuffer,(char*)NULL,Q);
-	  }
+    if (!idstring[0])
+      {
+        free(idbuffer);
+        idstring="[1]";
+        sprintf(idbuffer=(char*)malloc(strlen(header) + strlen(format) + strlen(idstring) - 3),format,header,idstring);
+        err=ReadMatrix(f_in,idbuffer,(char*)NULL,Q);
+      }
       free(idbuffer);
       if (!err)
-	{      
-	  // Scale the columns of Q - loose requirement on sumation to one
-	  for (j=sv->nbasestates-1; j >= 0; j--)
-	    {
-	      for (sum=0.0, i=sv->nbasestates-1; i >= 0; i--) 
-		if (ElementM(Q,i,j) < 0.0)
-		  {
-		    FreeMatrix(Q);
-		    dw_UserError("Transition matrix can not have negative elements.");
-		    return 0;
-		  }
-		else
-		  sum+=ElementM(Q,i,j);
-	      if (fabs(sum-1.0) > 1.0e-4)
-		{
-		  FreeMatrix(Q);
-		  dw_UserError("Transition matrix columns must sum to one.");
-		  return 0;
-		}
-	      for (sum=1.0/sum, i=sv->nbasestates-1; i >= 0; i--) 
-		ElementM(Q,i,j)*=sum;
-	    }
+    {
+/*        // Scale the columns of Q - loose requirement on sumation to one   ansi-c*/
+      for (j=sv->nbasestates-1; j >= 0; j--)
+        {
+          for (sum=0.0, i=sv->nbasestates-1; i >= 0; i--)
+        if (ElementM(Q,i,j) < 0.0)
+          {
+            FreeMatrix(Q);
+            dw_UserError("Transition matrix can not have negative elements.");
+            return 0;
+          }
+        else
+          sum+=ElementM(Q,i,j);
+          if (fabs(sum-1.0) > 1.0e-4)
+        {
+          FreeMatrix(Q);
+          dw_UserError("Transition matrix columns must sum to one.");
+          return 0;
+        }
+          for (sum=1.0/sum, i=sv->nbasestates-1; i >= 0; i--)
+        ElementM(Q,i,j)*=sum;
+        }
 
-	  // Convert base transition matrix to full transition matrix.
+/*        // Convert base transition matrix to full transition matrix.   ansi-c*/
           ConvertBaseTransitionMatrix(sv->Q,Q,sv->nlags_encoded);
 
-	  // Update
-	  if (!Update_B_from_Q_SV(sv))
-	    {
-	      dw_UserError("Transition matrices do not satisfy restrictions");
-	      return 0;
-	    }
+/*        // Update   ansi-c*/
+      if (!Update_B_from_Q_SV(sv))
+        {
+          dw_UserError("Transition matrices do not satisfy restrictions");
+          return 0;
+        }
 
-	  return 1;
-	}
+      return 1;
+    }
       return 0;
     }
 }
@@ -588,9 +590,9 @@ int ReadBaseTransitionMatrices_SV(FILE *f_in, TMarkovStateVariable* sv, char *he
     for the format.
 
    Notes:
-    The null terminated string idstring is of the form  "" or "[i][j]...[k]".  
-    Usually, this routine will be called with idstring equal to "".  The routine 
-    is called recursively with the more general form for idstring. 
+    The null terminated string idstring is of the form  "" or "[i][j]...[k]".
+    Usually, this routine will be called with idstring equal to "".  The routine
+    is called recursively with the more general form for idstring.
 */
 int WriteTransitionMatrices_SV(FILE *f_out, TMarkovStateVariable* sv, char *header, char *idstring)
 {
@@ -606,13 +608,13 @@ int WriteTransitionMatrices_SV(FILE *f_out, TMarkovStateVariable* sv, char *head
       for (j=10, i=1; sv->n_state_variables >= j; j*=10, i++);
       strcpy(idbuffer=(char*)malloc((j=(int)strlen(idstring))+i+3),idstring);
       for (i=0; i < sv->n_state_variables; i++)
-	{
-	  sprintf(idbuffer+j,"[%d]",i+1);
-	  WriteTransitionMatrices_SV(f_out,sv->state_variable[i],header,idbuffer);
-	}
+    {
+      sprintf(idbuffer+j,"[%d]",i+1);
+      WriteTransitionMatrices_SV(f_out,sv->state_variable[i],header,idbuffer);
+    }
       free(idbuffer);
     }
-  
+
   return 1;
 }
 
@@ -631,9 +633,9 @@ int WriteTransitionMatrices_SV(FILE *f_out, TMarkovStateVariable* sv, char *head
     for the format.
 
    Notes:
-    The null terminated string idstring is of the form  "" or "[i][j]...[k]".  
-    Usually, this routine will be called with idstring equal to "".  The routine 
-    is called recursively with the more general form for idstring. 
+    The null terminated string idstring is of the form  "" or "[i][j]...[k]".
+    Usually, this routine will be called with idstring equal to "".  The routine
+    is called recursively with the more general form for idstring.
 */
 int WriteBaseTransitionMatrices_SV(FILE *f_out, TMarkovStateVariable* sv, char *header, char *idstring)
 {
@@ -657,13 +659,13 @@ int WriteBaseTransitionMatrices_SV(FILE *f_out, TMarkovStateVariable* sv, char *
       for (j=10, i=1; sv->n_state_variables >= j; j*=10, i++);
       strcpy(idbuffer=(char*)malloc((j=(int)strlen(idstring))+i+3),idstring);
       for (i=0; i < sv->n_state_variables; i++)
-	{
-	  sprintf(idbuffer+j,"[%d]",i+1);
-	  WriteBaseTransitionMatrices_SV(f_out,sv->state_variable[i],header,idbuffer);
-	}
+    {
+      sprintf(idbuffer+j,"[%d]",i+1);
+      WriteBaseTransitionMatrices_SV(f_out,sv->state_variable[i],header,idbuffer);
+    }
       free(idbuffer);
     }
-  
+
   return 1;
 }
 
@@ -682,9 +684,9 @@ int WriteBaseTransitionMatrices_SV(FILE *f_out, TMarkovStateVariable* sv, char *
     for the format.
 
    Notes:
-    The null terminated string idstring is of the form  "" or "[i][j]...[k]".  
-    Usually, this routine will be called with idstring equal to "".  The routine 
-    is called recursively with the more general form for idstring. 
+    The null terminated string idstring is of the form  "" or "[i][j]...[k]".
+    Usually, this routine will be called with idstring equal to "".  The routine
+    is called recursively with the more general form for idstring.
 */
 void WriteBaseTransitionMatricesFlat_Headers_SV(FILE *f_out, TMarkovStateVariable* sv, char *idstring)
 {
@@ -696,17 +698,17 @@ void WriteBaseTransitionMatricesFlat_Headers_SV(FILE *f_out, TMarkovStateVariabl
       for (j=10, i=1; sv->n_state_variables >= j; j*=10, i++);
       strcpy(idbuffer=(char*)malloc((j=(int)strlen(idstring))+i+3),idstring);
       for (i=0; i < sv->n_state_variables; i++)
-	{
-	  sprintf(idbuffer+j,"[%d]",i+1);
-	  WriteBaseTransitionMatricesFlat_Headers_SV(f_out,sv->state_variable[i],idbuffer);
-	}
+    {
+      sprintf(idbuffer+j,"[%d]",i+1);
+      WriteBaseTransitionMatricesFlat_Headers_SV(f_out,sv->state_variable[i],idbuffer);
+    }
       free(idbuffer);
     }
   else
     {
       for (j=0; j < sv->nbasestates; j++)
-	for (i=0; i < sv->nbasestates; i++)
-	  fprintf(f_out,"Q%s(%d,%d) ",idstring,i+1,j+1);
+    for (i=0; i < sv->nbasestates; i++)
+      fprintf(f_out,"Q%s(%d,%d) ",idstring,i+1,j+1);
     }
 }
 
@@ -722,26 +724,26 @@ int WriteBaseTransitionMatricesFlat_SV(FILE *f_out, TMarkovStateVariable *sv, ch
   if (sv->n_state_variables > 1)
     {
       for (i=0; i < sv->n_state_variables; i++)
-	if (!WriteBaseTransitionMatricesFlat_SV(f_out,sv->state_variable[i],fmt))
-	  return 0;
+    if (!WriteBaseTransitionMatricesFlat_SV(f_out,sv->state_variable[i],fmt))
+      return 0;
     }
   else
     {
       if (!fmt) fmt="%lf ";
       if (Q=GetBaseTransitionMatrix_SV((TMatrix)NULL,sv))
-	{
-	  for (j=0; j < ColM(Q); j++)
-	    for (i=0; i < RowM(Q); i++)
-	      fprintf(f_out,fmt,ElementM(Q,i,j));
-	  FreeMatrix(Q);
-	}
+    {
+      for (j=0; j < ColM(Q); j++)
+        for (i=0; i < RowM(Q); i++)
+          fprintf(f_out,fmt,ElementM(Q,i,j));
+      FreeMatrix(Q);
+    }
       else
-	return 0;
+    return 0;
     }
 
   return 1;
 }
-#undef SWITCHIO_LINE_ID_NOT_FOUND 
+#undef SWITCHIO_LINE_ID_NOT_FOUND
 #undef SWITCHIO_ERROR_READING_DATA
 /******************************************************************************/
 /******************************************************************************/
@@ -756,12 +758,12 @@ int WriteBaseTransitionMatricesFlat_SV(FILE *f_out, TMarkovStateVariable *sv, ch
     filename:  pointer to null terminated string or null
 
    Returns:
-    Valid pointer to a TMarkovStateVariable structure upon success and null 
+    Valid pointer to a TMarkovStateVariable structure upon success and null
     pointer upon failure.
 
    Results:
-    Reads Markov specification from file and creates TMarkovStateVariable 
-    structure. 
+    Reads Markov specification from file and creates TMarkovStateVariable
+    structure.
 
    Notes:
     One of f or filename should be non-null.
@@ -785,7 +787,7 @@ TMarkovStateVariable* ReadMarkovSpecification(FILE *f, char *filename)
     one upon upon success and zero upon failure.
 
    Results:
-    Writes Markov specification to file. 
+    Writes Markov specification to file.
 
    Notes:
     One of f or filename should be non-null.
@@ -835,7 +837,7 @@ int ReadTransitionMatrices(FILE *f, char *filename, char *header, TStateModel *m
     Writes transition matrix.
 
    Notes:
-    One of f or filename should be non-null. 
+    One of f or filename should be non-null.
 */
 int WriteTransitionMatrices(FILE *f, char *filename, char *header, TStateModel *model)
 {
@@ -882,7 +884,7 @@ int ReadBaseTransitionMatrices(FILE *f, char *filename, char *header, TStateMode
     Writes base transition matrices.
 
    Notes:
-    One of f or filename should be non-null. 
+    One of f or filename should be non-null.
 */
 int WriteBaseTransitionMatrices(FILE *f, char *filename, char *header, TStateModel *model)
 {
@@ -908,15 +910,15 @@ int ReadStates(FILE *f, char *filename, char *header, TStateModel *model)
     ReadError(format,header,err);
   else
     {
-      // Check states and propagate
+/*        // Check states and propagate   ansi-c*/
       for (i=model->sv->nstates; i >= 0; i--)
-	if ((model->sv->S[i] < 0) || (model->sv->S[i] >= model->sv->nstates))
-	  {
-	    for ( ; i >= 0; i--) model->sv->S[i]=0;
-	    dw_UserError("ReadStates(): Invalid state value.");
-	    err=1;
-	    break;
-	  }
+    if ((model->sv->S[i] < 0) || (model->sv->S[i] >= model->sv->nstates))
+      {
+        for ( ; i >= 0; i--) model->sv->S[i]=0;
+        dw_UserError("ReadStates(): Invalid state value.");
+        err=1;
+        break;
+      }
       PropagateStates_SV(model->sv);
     }
 
@@ -929,7 +931,7 @@ int WriteStates(FILE *f, char *filename, char *header, TStateModel *model)
 {
   FILE *f_out=f ? f : dw_CreateTextFile(filename);
 
-  fprintf(f_out,"//== %sStates ==//\n",header); 
+  fprintf(f_out,"//== %sStates ==//\n",header);
   dw_PrintArray(f_out,model->sv->S,"%d ");
   fprintf(f_out,"\n");
 
@@ -1014,119 +1016,119 @@ TMarkovStateVariable* CreateMarkovStateVariable_File(FILE *f, char *filename, in
   TMatrix* restrictions;
   TMarkovStateVariable **sv, *rtrn=(TMarkovStateVariable*)NULL, *tmp;
 
-  // Open file if necessary
+/*    // Open file if necessary   ansi-c*/
   if (!f)
     f_in=dw_OpenTextFile(filename);
   else
     f_in=f;
 
-  // Check for Flat Independent Markov States and Simple Restrictions
+/*    // Check for Flat Independent Markov States and Simple Restrictions   ansi-c*/
   if (dw_SetFilePosition(f_in,"//== Flat Independent Markov States and Simple Restrictions ==//"))
     {
       if (nobs <= 0)
-	{
-	  id="//== Number Observations ==//";
-	  if (!dw_SetFilePosition(f_in,id))
-	    {
-	      fprintf(stderr,"Line identifier ""%s"" not found.\n",id);
-	      exit(0);
-	    }
-	  fscanf(f_in," %d ",&nobs);
-	  if (nobs <= 0)
-	    {
-	      fprintf(stderr,"Number Observations must be positive\n");
-	      exit(0);
-	    }
-	}
+    {
+      id="//== Number Observations ==//";
+      if (!dw_SetFilePosition(f_in,id))
+        {
+          swz_fprintf_err("Line identifier ""%s"" not found.\n",id);
+          exit(0);
+        }
+      fscanf(f_in," %d ",&nobs);
+      if (nobs <= 0)
+        {
+          swz_fprintf_err("Number Observations must be positive\n");
+          exit(0);
+        }
+    }
 
       id="//== Number Independent State Variables ==//";
       if (!dw_SetFilePosition(f_in,id))
         {
-          fprintf(stderr,"Line identifier ""%s"" not found.\n",id);
+          swz_fprintf_err("Line identifier ""%s"" not found.\n",id);
           exit(0);
         }
       fscanf(f_in," %d ",&n_state_variables);
       if (n_state_variables <= 0)
-	{
-	  fprintf(stderr,"Number Independent State Variables must be positive\n");
-	  exit(0);
-	}
+    {
+      swz_fprintf_err("Number Independent State Variables must be positive\n");
+      exit(0);
+    }
 
       sv=(TMarkovStateVariable**)dw_CreateArray_pointer(n_state_variables,(void (*)(void*))FreeMarkovStateVariable);
       for (i=0; i < n_state_variables; i++)
         {
-	  sprintf(id_buffer,"//== Number of states for state_variable[%d] ==//",i+1);
-	  if (!dw_SetFilePosition(f_in,id_buffer))
-	    {
-	      fprintf(stderr,"Line identifier ""%s"" not found.\n",id_buffer);
-	      exit(0);
-	    }
-	  fscanf(f_in," %d ",&nstates);
-	  if (nstates <= 0)
-	    {
-	      fprintf(stderr,"Number of states for state_variable[%d] must be positive\n",i+1);
-	      exit(0);
-	    }
+      sprintf(id_buffer,"//== Number of states for state_variable[%d] ==//",i+1);
+      if (!dw_SetFilePosition(f_in,id_buffer))
+        {
+          swz_fprintf_err("Line identifier ""%s"" not found.\n",id_buffer);
+          exit(0);
+        }
+      fscanf(f_in," %d ",&nstates);
+      if (nstates <= 0)
+        {
+          swz_fprintf_err("Number of states for state_variable[%d] must be positive\n",i+1);
+          exit(0);
+        }
 
-	  sprintf(id_buffer,"//== Transition matrix prior for state_variable[%d]. (n_states x n_states) ==//",i+1);
-	  if (!dw_SetFilePosition(f_in,id_buffer))
-	    {
-	      fprintf(stderr,"Line identifier ""%s"" not found.\n",id_buffer);
-	      exit(0);
-	    }
-	  dw_ReadMatrix(f_in,prior=CreateMatrix(nstates,nstates));
+      sprintf(id_buffer,"//== Transition matrix prior for state_variable[%d]. (n_states x n_states) ==//",i+1);
+      if (!dw_SetFilePosition(f_in,id_buffer))
+        {
+          swz_fprintf_err("Line identifier ""%s"" not found.\n",id_buffer);
+          exit(0);
+        }
+      dw_ReadMatrix(f_in,prior=CreateMatrix(nstates,nstates));
 
-	  sprintf(id_buffer,"//== Free Dirichet dimensions for state_variable[%d]  ==//",i+1);
-	  if (!dw_SetFilePosition(f_in,id_buffer))
-	    sv[i]=CreateMarkovStateVariable_NoRestrictions(nstates,nobs,prior);
-	  else
-	    {
-	      dw_ReadArray(f_in,dims=dw_CreateArray_int(nstates));
+      sprintf(id_buffer,"//== Free Dirichet dimensions for state_variable[%d]  ==//",i+1);
+      if (!dw_SetFilePosition(f_in,id_buffer))
+        sv[i]=CreateMarkovStateVariable_NoRestrictions(nstates,nobs,prior);
+      else
+        {
+          dw_ReadArray(f_in,dims=dw_CreateArray_int(nstates));
 
-	      sprintf(id_buffer,"//== Column restrictions for state_variable[%d] ==//",i+1);
-	      if (!dw_SetFilePosition(f_in,id_buffer))
-		{
-		  fprintf(stderr,"Line identifier ""%s"" not found.\n",id_buffer);
-		  exit(0);
-		}
-	      restrictions=dw_CreateArray_matrix(nstates);
-	      for (j=0; j < nstates; j++)
-		if (dims[j] > 0)
-		  dw_ReadMatrix(f_in,restrictions[j]=CreateMatrix(nstates,dims[j]));
-		else
-		  {
-		    fprintf(stderr,"Free Dirichet dimensions for column %d of state_variable[%d] must be positive\n",j+1,i+1);
-		    exit(0);
-		  }
+          sprintf(id_buffer,"//== Column restrictions for state_variable[%d] ==//",i+1);
+          if (!dw_SetFilePosition(f_in,id_buffer))
+        {
+          swz_fprintf_err("Line identifier ""%s"" not found.\n",id_buffer);
+          exit(0);
+        }
+          restrictions=dw_CreateArray_matrix(nstates);
+          for (j=0; j < nstates; j++)
+        if (dims[j] > 0)
+          dw_ReadMatrix(f_in,restrictions[j]=CreateMatrix(nstates,dims[j]));
+        else
+          {
+            swz_fprintf_err("Free Dirichet dimensions for column %d of state_variable[%d] must be positive\n",j+1,i+1);
+            exit(0);
+          }
 
-	      sv[i]=CreateMarkovStateVariable_SimpleRestrictions(nstates,nobs,prior,restrictions);
+          sv[i]=CreateMarkovStateVariable_SimpleRestrictions(nstates,nobs,prior,restrictions);
 
-	      dw_FreeArray(restrictions);
-	      dw_FreeArray(dims);
+          dw_FreeArray(restrictions);
+          dw_FreeArray(dims);
 
               sprintf(id_buffer,"//== Number of lags encoded for state_variable[%d] ==//",i+1);
-	      if (dw_SetFilePosition(f_in,id_buffer))
-		{
-		  fscanf(f_in," %d ",&nlags);
-		  if (nlags > 0)
-		    {
-		      tmp=CreateMarkovStateVariable_Lags(nlags,sv[i]);
-		      FreeMarkovStateVariable(sv[i]);
-		      sv[i]=tmp;
-		    }
-		}
-	    }
+          if (dw_SetFilePosition(f_in,id_buffer))
+        {
+          fscanf(f_in," %d ",&nlags);
+          if (nlags > 0)
+            {
+              tmp=CreateMarkovStateVariable_Lags(nlags,sv[i]);
+              FreeMarkovStateVariable(sv[i]);
+              sv[i]=tmp;
+            }
+        }
+        }
 
-	  FreeMatrix(prior);
-	}
-
-      if (n_state_variables > 1)
-	rtrn=CreateMarkovStateVariable_Multiple(nobs,n_state_variables,sv);
-      else
-	rtrn=sv[0];
+      FreeMatrix(prior);
     }
 
-  // Close file if necessary
+      if (n_state_variables > 1)
+    rtrn=CreateMarkovStateVariable_Multiple(nobs,n_state_variables,sv);
+      else
+    rtrn=sv[0];
+    }
+
+/*    // Close file if necessary   ansi-c*/
   if (!f) fclose(f_in);
 
   return rtrn;

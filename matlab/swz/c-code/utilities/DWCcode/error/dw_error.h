@@ -7,7 +7,7 @@
 #define NO_ERR                0x00000000
 #define ALL_ERRORS            0x000F03FF
 
-//=== General Errors ===
+/*  //=== General Errors ===   ansi-c*/
 #define MEM_ERR               0x00000001
 #define FILE_ERR              0x00000002
 #define PARSE_ERR             0x00000004
@@ -20,13 +20,13 @@
 #define UNKNOWN_ERR           0x00000200
 
 
-//=== Matrix Errors ===
+/*  //=== Matrix Errors ===   ansi-c*/
 #define SIZE_ERR              0x00010000
 #define SING_ERR              0x00020000
 #define POSDEF_ERR            0x00040000
 #define BLAS_LAPACK_ERR       0x00080000
 
-//=== Error Routines ===
+/*  //=== Error Routines ===   ansi-c*/
 int dw_GetError(void);
 char* dw_GetErrorMessage(void);
 int dw_ClearError(void);

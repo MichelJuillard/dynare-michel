@@ -57,6 +57,10 @@ extern "C" {
   typedef const double *CONST_LADOU;
   typedef double *LADOU;
   typedef lapack_int (*DGGESCRIT)(const double *, const double *, const double *);
+  typedef lapack_int (*SGGESCRIT)(const float *, const float *, const float *);
+  typedef float *LAFLT;
+  typedef const float *CONST_LAFLT;
+  typedef lapack_int *CONST_LALOG; /*logical*/
 
 #define dgetrs FORTRAN_WRAPPER(dgetrs)
   void dgetrs(LACHAR trans, CONST_LAINT n, CONST_LAINT nrhs, CONST_LADOU a, CONST_LAINT lda, CONST_LAINT ipiv,
@@ -64,6 +68,14 @@ extern "C" {
 
 #define dgetrf FORTRAN_WRAPPER(dgetrf)
   void dgetrf(CONST_LAINT m, CONST_LAINT n, LADOU a,
+              CONST_LAINT lda, LAINT ipiv, LAINT info);
+
+#define dgetri FORTRAN_WRAPPER(dgetri)
+  void dgetri(CONST_LAINT n, LADOU a, CONST_LAINT lda, CONST_LAINT ipiv, LADOU work,
+              CONST_LAINT lwork, LAINT info);
+
+#define sgetrf FORTRAN_WRAPPER(sgetrf)
+  void sgetrf(CONST_LAINT m, CONST_LAINT n, LAFLT a,
               CONST_LAINT lda, LAINT ipiv, LAINT info);
 
 #define dgees FORTRAN_WRAPPER(dgees)
@@ -92,12 +104,27 @@ extern "C" {
   void dpotrf(LACHAR uplo, CONST_LAINT n, LADOU a, CONST_LAINT lda,
               LAINT info);
 
+#define dpotri FORTRAN_WRAPPER(dpotri)
+  void dpotri(LACHAR uplo, CONST_LAINT n, LADOU a, CONST_LAINT lda,
+              LAINT info);
+
+#define dtrtri FORTRAN_WRAPPER(dtrtri)
+  void dtrtri(LACHAR uplo, LACHAR diag, CONST_LAINT n, LADOU a, CONST_LAINT lda,
+              LAINT info);
+
 #define dgges FORTRAN_WRAPPER(dgges)
   void dgges(LACHAR jobvsl, LACHAR jobvsr, LACHAR sort, DGGESCRIT delztg,
              CONST_LAINT n, LADOU a, CONST_LAINT lda, LADOU b, CONST_LAINT ldb,
              LAINT sdim, LADOU alphar, LADOU alphai, LADOU beta,
              LADOU vsl, CONST_LAINT ldvsl, LADOU vsr, CONST_LAINT ldvsr,
              LADOU work, CONST_LAINT lwork, LAINT bwork, LAINT info);
+
+#define sgges FORTRAN_WRAPPER(sgges)
+  void sgges(LACHAR jobvsl, LACHAR jobvsr, LACHAR sort, SGGESCRIT delztg,
+             CONST_LAINT n, LAFLT a, CONST_LAINT lda, LAFLT b, CONST_LAINT ldb,
+             LAINT sdim, LAFLT alphar, LAFLT alphai, LAFLT beta,
+             LAFLT vsl, CONST_LAINT ldvsl, LAFLT vsr, CONST_LAINT ldvsr,
+             LAFLT work, CONST_LAINT lwork, LAINT bwork, LAINT info);
 
 #define dsyev FORTRAN_WRAPPER(dsyev)
   void dsyev(LACHAR jobz, LACHAR uplo, CONST_LAINT n, LADOU a, CONST_LAINT lda,
@@ -114,9 +141,94 @@ extern "C" {
   void dgeqrf(CONST_LAINT m, CONST_LAINT n, LADOU a, CONST_LAINT lda,
               LADOU tau, LADOU work, CONST_LAINT lwork, LAINT info);
 
+#define sgeqrf FORTRAN_WRAPPER(sgeqrf)
+  void sgeqrf(CONST_LAINT m, CONST_LAINT n, LAFLT a, CONST_LAINT lda,
+              LAFLT tau, LAFLT work, CONST_LAINT lwork, LAINT info);
+
 #define dormqr FORTRAN_WRAPPER(dormqr)
   void dormqr(LACHAR side, LACHAR trans, CONST_LAINT m, CONST_LAINT n, CONST_LAINT k,
               CONST_LADOU a, CONST_LAINT lda, CONST_LADOU tau, LADOU c, CONST_LAINT ldc,
+              LADOU work, CONST_LAINT lwork, LAINT info);
+
+#define dorgqr FORTRAN_WRAPPER(dorgqr)
+  void dorgqr(CONST_LAINT m, CONST_LAINT n, CONST_LAINT k, LADOU a, CONST_LAINT lda,
+              CONST_LADOU tau, LADOU work, CONST_LAINT lwork, LAINT info);
+
+#define sorgqr FORTRAN_WRAPPER(sorgqr)
+  void sorgqr(CONST_LAINT m, CONST_LAINT n, CONST_LAINT k, LAFLT a, CONST_LAINT lda,
+              CONST_LAFLT tau, LAFLT work, CONST_LAINT lwork, LAINT info);
+
+#define dgelqf FORTRAN_WRAPPER(dgelqf)
+  void dgelqf(CONST_LAINT m, CONST_LAINT n, LADOU a, CONST_LAINT lda, LADOU tau,
+              LADOU work, CONST_LAINT lwork, LAINT info);
+
+#define sgelqf FORTRAN_WRAPPER(sgelqf)
+  void sgelqf(CONST_LAINT m, CONST_LAINT n, LAFLT a, CONST_LAINT lda, LAFLT tau,
+              LAFLT work, CONST_LAINT lwork, LAINT info);
+
+#define dorglq FORTRAN_WRAPPER(dorglq)
+  void dorglq(CONST_LAINT m, CONST_LAINT n, CONST_LAINT k, LADOU a, CONST_LAINT lda,
+              CONST_LADOU tau, LADOU work, CONST_LAINT lwork, LAINT info);
+
+#define sorglq FORTRAN_WRAPPER(sorglq)
+  void sorglq(CONST_LAINT m, CONST_LAINT n, CONST_LAINT k, LAFLT a, CONST_LAINT lda,
+              CONST_LAFLT tau, LAFLT work, CONST_LAINT lwork, LAINT info);
+
+#define dgesv FORTRAN_WRAPPER(dgesv)
+  void dgesv(CONST_LAINT n, CONST_LAINT nrhs, LADOU a, CONST_LAINT lda, LAINT ipiv,
+             LADOU b, CONST_LAINT ldb, LAINT info);
+
+#define dgesvd FORTRAN_WRAPPER(dgesvd)
+  void dgesvd(LACHAR jobu, LACHAR jobvt, CONST_LAINT m, CONST_LAINT n, LADOU a, CONST_LAINT lda,
+              LADOU s, LADOU u, CONST_LAINT ldu, LADOU vt, CONST_LAINT ldvt, LADOU work,
+              CONST_LAINT lwork, LAINT info);
+
+#define sgesvd FORTRAN_WRAPPER(sgesvd)
+  void sgesvd(LACHAR jobu, LACHAR jobvt, CONST_LAINT m, CONST_LAINT n, LAFLT a, CONST_LAINT lda,
+              LAFLT s, LAFLT u, CONST_LAINT ldu, LAFLT vt, CONST_LAINT ldvt, LAFLT work,
+              CONST_LAINT lwork, LAINT info);
+
+#define dtgsen FORTRAN_WRAPPER(dtgsen)
+  void dtgsen(CONST_LAINT ijob, CONST_LALOG wantq, CONST_LALOG wantz, CONST_LALOG select,
+              CONST_LAINT n, LADOU a, CONST_LAINT lda, LADOU b, CONST_LAINT ldb,
+              LADOU alphar, LADOU alphai, LADOU beta, LADOU q, CONST_LAINT ldq,
+              LADOU z, CONST_LAINT ldz, LAINT m, LADOU pl, LADOU pr, LADOU dif, LADOU work,
+              CONST_LAINT lwork, LAINT iwork, CONST_LAINT liwork, LAINT info);
+
+#define stgsen FORTRAN_WRAPPER(stgsen)
+  void stgsen(CONST_LAINT ijob, CONST_LALOG wantq, CONST_LALOG wantz, CONST_LALOG select,
+              CONST_LAINT n, LAFLT a, CONST_LAINT lda, LAFLT b, CONST_LAINT ldb,
+              LAFLT alphar, LAFLT alphai, LAFLT beta, LAFLT q, CONST_LAINT ldq,
+              LAFLT z, CONST_LAINT ldz, LAINT m, LAFLT pl, LAFLT pr, LAFLT dif, LAFLT work,
+              CONST_LAINT lwork, LAINT iwork, CONST_LAINT liwork, LAINT info);
+
+#define dtgexc FORTRAN_WRAPPER(dtgexc)
+  void dtgexc(CONST_LALOG wantq, CONST_LALOG wantz, CONST_LAINT n, LADOU a, CONST_LAINT lda,
+              LADOU b, CONST_LAINT ldb, LADOU q, CONST_LAINT ldq, LADOU z, CONST_LAINT ldz,
+              LAINT ifst, LAINT ilst, LADOU work, CONST_LAINT lwork, LAINT info);
+
+#define stgexc FORTRAN_WRAPPER(stgexc)
+  void stgexc(CONST_LALOG wantq, CONST_LALOG wantz, CONST_LAINT n, LAFLT a, CONST_LAINT lda,
+              LAFLT b, CONST_LAINT ldb, LAFLT q, CONST_LAINT ldq, LAFLT z, CONST_LAINT ldz,
+              LAINT ifst, LAINT ilst, LAFLT work, CONST_LAINT lwork, LAINT info);
+
+#define dgesdd FORTRAN_WRAPPER(dgesdd)
+  void dgesdd(LACHAR jobz, CONST_LAINT m, CONST_LAINT n, LADOU a, CONST_LAINT lda,
+              LADOU s, LADOU u, CONST_LAINT ldu, LADOU vt, CONST_LAINT ldvt, LADOU work,
+              CONST_LAINT lwork, LAINT iwork, LAINT info);
+
+#define sgesdd FORTRAN_WRAPPER(sgesdd)
+  void sgesdd(LACHAR jobz, CONST_LAINT m, CONST_LAINT n, LAFLT a, CONST_LAINT lda,
+              LAFLT s, LAFLT u, CONST_LAINT ldu, LAFLT vt, CONST_LAINT ldvt, LAFLT work,
+              CONST_LAINT lwork, LAINT iwork, LAINT info);
+
+#define dgeev FORTRAN_WRAPPER(dgeev)
+  void dgeev(LACHAR jobvl, LACHAR jobvr, CONST_LAINT n, LADOU a, CONST_LAINT lda,
+             LADOU wr, LADOU wi, LADOU vl, CONST_LAINT ldvl, LADOU vr, CONST_LAINT ldvr,
+             LADOU work, CONST_LAINT lwork, LAINT info);
+
+#define dgeqp3 FORTRAN_WRAPPER(dgeqp3)
+  void dgeqp3(CONST_LAINT m, CONST_LAINT n, LADOU a, CONST_LAINT lda, LAINT jpvt, LADOU tau,
               LADOU work, CONST_LAINT lwork, LAINT info);
 
 #ifdef __cplusplus

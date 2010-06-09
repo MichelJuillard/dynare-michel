@@ -1,14 +1,21 @@
 function slaveParallel(whoiam,ThisMatlab)
+% PARALLEL CONTEXT
 % In a parallelization context, this function is launched on slave
 % machines, to initialize MATLAB and DYNARE environment and waits for
-% instructions sent by the Master.
+% instructions sent by the Master. 
+% This function is invoked by masterParallel only when the strategy (1),
+% i.e. always open, is actived.
+%
 %
 % INPUTS
-%  whoiam [int]         index number of this CPU among all CPUs in the
-%                       cluster
-%  ThisMatlab [int]     index number of this slave machine in the cluster
+%  o whoiam [int]         index number of this CPU among all CPUs in the
+%                       cluster.
+%  o ThisMatlab [int]     index number of this slave machine in the cluster.
+%
+% OUTPUTS 
+%   None  
 
-% Copyright (C) 2009 Dynare Team
+% Copyright (C) 2006-2008,2010 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -38,9 +45,10 @@ diary( ['slaveParallel_',int2str(whoiam),'.log']);
 % configure dynare environment
 dynareroot = dynare_config();
 
-% Load input data
-load( ['slaveParallel_input',int2str(whoiam)]) 
-%loads fGlobalVar Parallel 
+% Load input data.
+load( ['slaveParallel_input',int2str(whoiam)])
+
+%Loads fGlobalVar Parallel.
 if exist('fGlobalVar'),
     globalVars = fieldnames(fGlobalVar);
     for j=1:length(globalVars),
@@ -60,23 +68,49 @@ while (etime(clock,t0)<1200 && ~isempty(fslave)) || ~isempty(dir(['stayalive',in
     end
     % I wait for 20 min or while mater asks to exit (i.e. it cancels fslave file)
     pause(1);
+    
+    % -> Da Sistemare!!!!!!!!!!!!!!!!
+    % Con testing su reti vere e con core reali!!!!
+    
     fjob = dir(['slaveJob',int2str(whoiam),'.mat']);
+    
     if ~isempty(fjob),
         clear fGlobalVar fInputVar fblck nblck fname
-        load(['slaveJob',int2str(whoiam),'.mat']);
-        funcName=fname;  % update global job name
-        % loads values for fblck nblck fname fGlobalVar fInputVar
+        
+        while(1)
+           Go=0;
+           
+           Go=fopen(['slaveJob',int2str(whoiam),'.mat']);
+          
+           if Go>0    
+               fclose(Go);
+               pause(1);
+               load(['slaveJob',int2str(whoiam),'.mat']);
+               break
+           else
+               % Only for testing, will be remouved!
+               
+               if isunx
+                 E1=fopen('/home/ivano/Works/Errore-slaveParallel.txt','w+');
+                 fclose(E1);
+               else            
+                 E1=fopen('c:\dynare_calcs\Errore-slaveParallel.txt','w+');
+                 fclose(E1);
+               end
+                       
+           end
+         end
+               
+        funcName=fname;  % Update global job name.
         delete(['slaveJob',int2str(whoiam),'.mat']);
 
         if exist('fGlobalVar') && ~isempty (fGlobalVar)
             globalVars = fieldnames(fGlobalVar);
-            %         for j=1:length(globalVars),
-            %             eval(['global ',globalVars{j},';'])
-            %         end
             struct2local(fGlobalVar);
         end
         fInputVar.Parallel = Parallel;
-        % Launch the routine to be run in parallel
+        
+        % Launch the routine to be run in parallel.
         tic,
         fOutputVar = feval(fname, fInputVar ,fblck, nblck, whoiam, ThisMatlab);
         toc,
@@ -88,7 +122,7 @@ while (etime(clock,t0)<1200 && ~isempty(fslave)) || ~isempty(dir(['stayalive',in
 
         if(whoiam)
 
-            % Save the output result
+            % Save the output result.
             save([ fname,'_output_',int2str(whoiam),'.mat'],'fOutputVar' )
 
             % Inform the master that the job is finished, and transfer the output data

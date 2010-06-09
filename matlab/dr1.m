@@ -92,9 +92,10 @@ if options_.ramsey_policy
                                        M_.endo_names,'exact')];
         end
         ys = oo_.steady_state;
-        inst_val = dynare_solve('dyn_ramsey_static_', ...
+        [inst_val,info1] = dynare_solve('dyn_ramsey_static_', ...
                                 oo_.steady_state(k_inst),0, ...
                                 M_,options_,oo_,it_);
+        M_.params = evalin('base','M_.params;');
         ys(k_inst) = inst_val;
         [x,check] = feval([M_.fname '_steadystate'],...
                           ys,[oo_.exo_steady_state; ...
@@ -113,22 +114,36 @@ if options_.ramsey_policy
         oo_.steady_state = x;
         [junk,junk,multbar] = dyn_ramsey_static_(oo_.steady_state(k_inst),M_,options_,oo_,it_);
     else
-        oo_.steady_state = dynare_solve('dyn_ramsey_static_', ...
+        [oo_.steady_state,info1] = dynare_solve('dyn_ramsey_static_', ...
                                         oo_.steady_state,0,M_,options_,oo_,it_);
         [junk,junk,multbar] = dyn_ramsey_static_(oo_.steady_state,M_,options_,oo_,it_);
     end
+        
     check1 = max(abs(feval([M_.fname '_static'],...
                            oo_.steady_state,...
                            [oo_.exo_steady_state; ...
                         oo_.exo_det_steady_state], M_.params))) > options_.dynatol ;
     if check1
-        error(['The steadystate values returned by ' M_.fname ...
-               '_steadystate.m don''t solve the static model!' ])
+        info(1) = 20;
+        info(2) = check1'*check1;
+        return
     end
-
+    
     [jacobia_,M_] = dyn_ramsey_dynamic_(oo_.steady_state,multbar,M_,options_,oo_,it_);
     klen = M_.maximum_lag + M_.maximum_lead + 1;
     dr.ys = [oo_.steady_state;zeros(M_.exo_nbr,1);multbar];
+    oo_.steady_state = dr.ys;
+    
+    if options_.noprint == 0
+        disp_steady_state(M_,oo_)
+        for i=M_.orig_endo_nbr:M_.endo_nbr
+            if strmatch('mult_',M_.endo_names(i,:))
+                disp(sprintf('%s \t\t %g',M_.endo_names(i,:), ...
+                             dr.ys(i)));
+            end
+        end
+    end
+
 else
     klen = M_.maximum_lag + M_.maximum_lead + 1;
     iyv = M_.lead_lag_incidence';

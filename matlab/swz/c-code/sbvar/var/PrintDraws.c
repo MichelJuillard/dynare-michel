@@ -1,5 +1,5 @@
 
-#include "matrix.h"
+#include "swzmatrix.h"
 #include "dw_rand.h"
 #include "dw_parse_cmd.h"
 #include "dw_ascii.h"
@@ -13,6 +13,8 @@
 #include <string.h>
 #include <math.h>
 #include <time.h>
+
+#include "modify_for_mex.h"
 
 int main(int nargs, char **args)
 {
@@ -44,15 +46,16 @@ int main(int nargs, char **args)
     (char*)NULL,
     (char*)NULL};
 
-  //=== Help Screen ===
+/*    //=== Help Screen ===   ansi-c*/
   if (dw_FindArgument_String(nargs,args,"h") != -1)
     {
-      fprintf(stdout,"print_draws <options>\n");
+      printf("print_draws <options>\n");
       PrintHelpMessages(stdout,include_help,additional_help);
       return 0;
     }
 
-  //=== Get seed, tuning peroid, burn-in period, number of iterations, and thinning factor
+/*    //=== Get seed, tuning peroid, burn-in period, number of iterations, and thinning factor   ansi-c*/
+  constant_seed=dw_ParseInteger_String(nargs,args,"cseed",0);
   seed=dw_ParseInteger_String(nargs,args,"gs",0);
   tuning=dw_ParseInteger_String(nargs,args,"mh",30000);
   iterations=dw_ParseInteger_String(nargs,args,"i",1000);
@@ -60,19 +63,19 @@ int main(int nargs, char **args)
   thinning=dw_ParseInteger_String(nargs,args,"t",1);
   nd1=(dw_FindArgument_String(nargs,args,"nd1") >= 0) ? 1 : 0;
 
-  //=== Initialize random number generator
+/*    //=== Initialize random number generator   ansi-c*/
   dw_initialize_generator(seed);
 
-  //=== Setup model and initial parameters
-  fprintf(stdout,"Reading data...\n");
+/*    //=== Setup model and initial parameters   ansi-c*/
+  printf("Reading data...\n");
   if (!(model=CreateTStateModelFromEstimateFinal(nargs,args,&cmd)))
     {
-      fprintf(stderr,"Unable to read model or parameters\n");
+      swz_fprintf_err("Unable to read model or parameters\n");
       exit(1);
     }
   p=(T_VAR_Parameters*)(model->theta);
 
-  //=== Open header file and print headers
+/*    //=== Open header file and print headers   ansi-c*/
   filename=CreateFilenameFromTag("%sheader_%s.dat",cmd->out_tag,cmd->out_directory);
   f_out=fopen(filename,"wt");
   free(filename);
@@ -81,41 +84,41 @@ int main(int nargs, char **args)
   fprintf(f_out,"\n");
   fclose(f_out);
 
-  //=== Open output file
+/*    //=== Open output file   ansi-c*/
   filename=CreateFilenameFromTag("%sdraws_%s.dat",cmd->out_tag,cmd->out_directory);
   f_out=fopen(filename,"wt");
   free(filename);
 
-  // Burn-in period with calibration of jumping parameters
-  fprintf(stdout,"Calibrating jumping parameters - %d draws\n",tuning);
+/*    // Burn-in period with calibration of jumping parameters   ansi-c*/
+  printf("Calibrating jumping parameters - %d draws\n",tuning);
   begin_time=(int)time((time_t*)NULL);
-  AdaptiveMetropolisScale(model,tuning,1000,1,(FILE*)NULL);      // tuning iterations - 1000 iterations before updating - verbose
+  AdaptiveMetropolisScale(model,tuning,1000,1,(FILE*)NULL);       /*   tuning iterations - 1000 iterations before updating - verbose   ansi-c*/
   end_time=(int)time((time_t*)NULL);
-  fprintf(stdout,"Elapsed Time: %d seconds\n",end_time - begin_time);
+  printf("Elapsed Time: %d seconds\n",end_time - begin_time);
 
-  // Reset parametrers
-  if (!ReadTransitionMatrices((FILE*)NULL,cmd->parameters_filename_actual,cmd->parameters_header_actual,model) 
+/*    // Reset parametrers   ansi-c*/
+  if (!ReadTransitionMatrices((FILE*)NULL,cmd->parameters_filename_actual,cmd->parameters_header_actual,model)
       || !Read_VAR_Parameters((FILE*)NULL,cmd->parameters_filename_actual,cmd->parameters_header_actual,model))
-    fprintf(stdout,"Unable to reset parameters after tuning\n");
+    printf("Unable to reset parameters after tuning\n");
 
-  // Burn-in period
-  fprintf(stdout,"Burn-in period - %d draws\n",burn_in);
+/*    // Burn-in period   ansi-c*/
+  printf("Burn-in period - %d draws\n",burn_in);
   for (check=period, count=1; count <= burn_in; count++)
     {
       DrawAll(model);
 
       if (count == check)
-	{
-	  check+=period;
-	  fprintf(stdout,"%d iterations completed out of %d\n",count,burn_in);
-	}
+    {
+      check+=period;
+      printf("%d iterations completed out of %d\n",count,burn_in);
+    }
     }
   end_time=(int)time((time_t*)NULL);
-  fprintf(stdout,"Elapsed Time: %d seconds\n",end_time - begin_time);
+  printf("Elapsed Time: %d seconds\n",end_time - begin_time);
   ResetMetropolisInformation(p);
- 
-  // Simulation
-  fprintf(stdout,"Simulating - %d draws\n",iterations);
+
+/*    // Simulation   ansi-c*/
+  printf("Simulating - %d draws\n",iterations);
   for (check=period, output=thinning, count=1; count <= iterations; count++)
     {
       DrawAll(model);
@@ -132,15 +135,15 @@ int main(int nargs, char **args)
         }
 
       if (count == check)
-	{
-	  check+=period;
-	  fprintf(stdout,"%d(%d) iterations completed out of %d(%d)\n",count,thinning,iterations,thinning);
-	}
+    {
+      check+=period;
+      printf("%d(%d) iterations completed out of %d(%d)\n",count,thinning,iterations,thinning);
+    }
     }
   end_time=(int)time((time_t*)NULL);
-  fprintf(stdout,"Elapsed Time: %d seconds\n",end_time - begin_time);
+  printf("Elapsed Time: %d seconds\n",end_time - begin_time);
 
-  // clean up
+/*    // clean up   ansi-c*/
   fclose(f_out);
   FreeStateModel(model);
   Free_VARCommandLine(cmd);

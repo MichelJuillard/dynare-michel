@@ -1,6 +1,22 @@
 function myoutput = independent_metropolis_hastings_core(myinputs,fblck,nblck,whoiam, ThisMatlab)
+% PARALLEL CONTEXT
+% The most computationally intensive portion of code in
+% independent_metropolis_hastings (the 'for xxx = fblck:nblck' cycle).
+% See the comment in random_walk_metropolis_hastings_core.m funtion.
+% 
+% INPUTS 
+%   See See the comment in random_walk_metropolis_hastings_core.m funtion.
 
-% Copyright (C) 2006-2008 Dynare Team
+% OUTPUTS
+%   See See the comment in random_walk_metropolis_hastings_core.m funtion.
+%
+% ALGORITHM 
+%   Portion of Independing Metropolis-Hastings.       
+%
+% SPECIAL REQUIREMENTS.
+%   None.
+%
+% Copyright (C) 2006-2008,2010 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -24,9 +40,34 @@ end
 
 global bayestopt_ estim_params_ options_  M_ oo_
 
-struct2local(myinputs);
+% Reshape 'myinputs' for local computation.
+% In order to avoid confusion in the name space, the instruction struct2local(myinputs) is replaced by:
 
-% (re)Set the penalty
+TargetFun=myinputs.TargetFun;
+ProposalFun=myinputs.ProposalFun;
+xparam1=myinputs.xparam1;
+vv=myinputs.vv;
+mh_bounds=myinputs.mh_bounds;
+ix2=myinputs.ix2;
+ilogpo2=myinputs.ilogpo2;
+ModelName=myinputs.ModelName;
+fline=myinputs.fline;
+npar=myinputs.npar;
+nruns=myinputs.nruns;
+NewFile=myinputs.NewFile;
+MAX_nruns=myinputs.MAX_nruns;
+d=myinputs.d;
+InitSizeArray=myinputs.InitSizeArray;                    
+record=myinputs.record;
+varargin=myinputs.varargin;
+
+if whoiam
+    Parallel=myinputs.Parallel;
+    MasterName=myinputs.MasterName;
+    DyMo=myinputs.DyMo;
+end
+
+% (re)Set the penalty.
 bayestopt_.penalty = Inf;
 
 MhDirectoryName = CheckPath('metropolis');

@@ -59,17 +59,11 @@ AX_PTHREAD
 # Check for dlopen(), needed by k_order_perturbation DLL
 AC_CHECK_LIB([dl], [dlopen], [LIBADD_DLOPEN="-ldl"], [])
 AC_SUBST([LIBADD_DLOPEN])
+# Check for GSL, needed by SWZ
+AX_PATH_GSL
+AM_CONDITIONAL([HAVE_GSL], [test "x$no_gsl" = "x"])
 
 AM_CONDITIONAL([DO_SOMETHING], [test "x$ax_enable_matlab" = "xyes" -a "x$ax_matlab_version_ok" = "xyes" -a "x$ax_mexopts_ok" = "xyes"])
-
-AC_CONFIG_FILES([Makefile
-                 mjdgges/Makefile
-                 kronecker/Makefile
-                 gensylv/Makefile
-                 libdynare++/Makefile
-                 bytecode/Makefile
-                 k_order_perturbation/Makefile
-                 dynare_simul_/Makefile])
 
 if test "x$ax_enable_matlab" = "xyes" -a "x$ax_matlab_version_ok" = "xyes" -a "x$ax_mexopts_ok" = "xyes"; then
   if test x"$ax_pthread_ok" = "xyes"; then
@@ -81,13 +75,30 @@ else
   BUILD_MEX_MATLAB="no (missing MATLAB, or unknown version, or unknown architecture)"
 fi
 
+if test "x$ax_enable_matlab" = "xyes" -a "x$ax_matlab_version_ok" = "xyes" -a "x$ax_mexopts_ok" = "xyes" -a "x$no_gsl" = "x"; then
+   BUILD_SWZ_MEX_MATLAB="yes"
+else
+   BUILD_SWZ_MEX_MATLAB="no (missing GSL)"
+fi
+
 AC_MSG_NOTICE([
 
 Dynare is now configured for building the following components...
 
 Binaries (with "make"):
- MEX files for MATLAB:                  $BUILD_MEX_MATLAB
+ MEX files for MATLAB (except SWZ):     $BUILD_MEX_MATLAB
+ SWZ MEX files for MATLAB:              $BUILD_SWZ_MEX_MATLAB
 
 ])
+
+AC_CONFIG_FILES([Makefile
+                 mjdgges/Makefile
+                 kronecker/Makefile
+                 gensylv/Makefile
+                 libdynare++/Makefile
+                 bytecode/Makefile
+                 k_order_perturbation/Makefile
+                 dynare_simul_/Makefile
+                 swz/Makefile])
 
 AC_OUTPUT

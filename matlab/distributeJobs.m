@@ -1,5 +1,21 @@
 function [nCPU, totCPU, nBlockPerCPU] = distributeJobs(Parallel, fBlock, nBlock)
-% Determine the total number of available CPUs, and the number of threads to run on each CPU
+% PARALLEL CONTEXT
+% In parallel context this function is used to determine the total number of available CPUs,
+% and the number of threads to run on each CPU.
+%
+% INPUTS
+%  o Parallel [struct vector]   copy of options_.parallel
+%  o fBlock [int]               index number of the first thread
+%                               (between 1 and nBlock)
+%  o nBlock [int]               index number of the last thread.
+%
+% OUTPUT
+%  o nBlockPerCPU [int vector]  for each CPU used, indicates the number of
+%                               threads run on that CPU
+%  o totCPU [int]               total number of CPU used (can be lower than
+%                               the number of CPU declared in "Parallel", if
+%                               the number of required threads is lower)
+%  o nCPU                       he number of CPU in user format.
 
 % Copyright (C) 2010 Dynare Team
 %

@@ -1,9 +1,28 @@
 function myoutput=prior_posterior_statistics_core(myinputs,fpar,B,whoiam, ThisMatlab)
-
-% Copyright (C) 2005-2010 Dynare Team
+% PARALLEL CONTEXT
+% Core functionality for prior_posterior.m function, which can be parallelized.
+% See also the comment in random_walk_metropolis_hastings_core.m funtion.
 %
+% INPUTS 
+%   See See the comment in random_walk_metropolis_hastings_core.m funtion.
+
+% OUTPUTS
+% o myoutput  [struc]
+%  Contained OutputFileName_smooth; 
+%                          _update; 
+%                          _inno; 
+%                          _error; 
+%                          _filter_step_ahead; 
+%                          _param;
+%                          _forc_mean;
+%                          _forc_point
+%
+% ALGORITHM 
+%   Portion of prior_posterior.m function.       
 % This file is part of Dynare.
 %
+% SPECIAL REQUIREMENTS.
+%   None.
 % Dynare is free software: you can redistribute it and/or modify
 % it under the terms of the GNU General Public License as published by
 % the Free Software Foundation, either version 3 of the License, or
@@ -23,7 +42,14 @@ if nargin<4,
     whoiam=0;
 end
 
-typee=myinputs.typee;
+global options_ oo_ M_ bayestopt_ estim_params_
+
+
+% Reshape 'myinputs' for local computation.
+% In order to avoid confusion in the name space, the instruction struct2local(myinputs) is replaced by:
+
+% Da CONTROLLARE con MARCO!
+type=myinputs.type;
 run_smoother=myinputs.run_smoother;
 gend=myinputs.gend;
 Y=myinputs.Y;
@@ -39,26 +65,30 @@ iendo=myinputs.iendo;
 if horizon
     i_last_obs=myinputs.i_last_obs;
     IdObs=myinputs.IdObs;
+    MAX_nforc1=myinputs.MAX_nforc1;
+    MAX_nforc2=myinputs.MAX_nforc2;
 end
+if naK
+    MAX_naK=myinputs.MAX_naK;
+end
+
 exo_nbr=myinputs.exo_nbr;
 maxlag=myinputs.maxlag;
 MAX_nsmoo=myinputs.MAX_nsmoo;
 MAX_ninno=myinputs.MAX_ninno;
-MAX_nerro =myinputs. MAX_nerro;
-if naK
-    MAX_naK=myinputs.MAX_naK;
-end
+MAX_nerro = myinputs.MAX_nerro;
 MAX_nruns=myinputs.MAX_nruns;
-if horizon
-    MAX_nforc1=myinputs.MAX_nforc1;
-    MAX_nforc2=myinputs.MAX_nforc2;
-end
-MAX_momentsno =myinputs. MAX_momentsno;
+MAX_momentsno = myinputs.MAX_momentsno;
 ifil=myinputs.ifil;
 
-if ~strcmpi(typee,'prior'),
+if ~strcmpi(type,'prior'),
     x=myinputs.x;
     logpost=myinputs.logpost;
+end
+if whoiam
+    Parallel=myinputs.Parallel;
+    MasterName=myinputs.MasterName;
+    DyMo=myinputs.DyMo;
 end
 
 DirectoryName = CheckPath('metropolis');
@@ -97,12 +127,12 @@ end
 
 for b=fpar:B
     
-    %    [deep, logpo] = GetOneDraw(typee);
+    %    [deep, logpo] = GetOneDraw(type);
     %    set_all_parameters(deep);
     %    dr = resol(oo_.steady_state,0);
-    if strcmpi(typee,'prior')
+    if strcmpi(type,'prior')
         
-        [deep, logpo] = GetOneDraw(typee);
+        [deep, logpo] = GetOneDraw(type);
         
     else
         deep = x(b,:);
@@ -170,12 +200,6 @@ for b=fpar:B
     stock_ys(irun(5),:) = SteadyState';
     
     irun = irun +  ones(7,1);
-    
-%     
-%      TempPath=DirectoryName;
-%      DirectoryNamePar='C:\dynare_calcs\ModelTest\ls2003\metropolis'
-%      DirectoryName=DirectoryNamePar;
-   
     
     
     if irun(1) > MAX_nsmoo || b == B

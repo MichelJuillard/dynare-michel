@@ -4,7 +4,7 @@
 #include "switch.h"
 #include "switchio.h"
 #include "dw_error.h"
-#include "matrix.h"
+#include "swzmatrix.h"
 #include "bmatrix.h"
 #include "dw_array.h"
 #include "dw_matrix_array.h"
@@ -17,7 +17,9 @@
 #include <stdlib.h>
 #include <string.h>
 
-//=== Private counter for improper normal distribution ===
+#include "modify_for_mex.h"
+
+/*  //=== Private counter for improper normal distribution ===   ansi-c*/
 static int _VAR_IMPROPER_DISTRIBUTION_COUNTER = 0;
 int Reset_VAR_Improper_Distribution_Counter(void)
 {
@@ -57,12 +59,12 @@ int Get_VAR_Sigular_Error(void)
 
 TVector DrawNormal_InverseVariance_SVD(TVector x, TVector b, TMatrix S);
 TVector SingularInverseVariance_RecoveryAttempt(TVector x, TVector b, TMatrix S, TMatrix InversePrior, TStateModel *model, int code);
-//=========================================================
+/*  //=========================================================   ansi-c*/
 
 
-//=== Private Utility Functions ===
+/*  //=== Private Utility Functions ===   ansi-c*/
 static int NumberStates(TMarkovStateVariable** sv, int n);
-//static int* CreateStateIndex(TMarkovStateVariable* top, TMarkovStateVariable** sv, int n);
+/*  //static int* CreateStateIndex(TMarkovStateVariable* top, TMarkovStateVariable** sv, int n);   ansi-c*/
 
 extern FILE *fptr_debug;
 
@@ -74,12 +76,12 @@ void FreeTheta_VAR(T_VAR_Parameters *p)
   int j;
   if (p)
     {
-      // Free parameters
+/*        // Free parameters   ansi-c*/
       dw_FreeArray(p->A0);
       dw_FreeArray(p->Aplus);
       dw_FreeArray(p->Zeta);
 
-      // Free state variable translation
+/*        // Free state variable translation   ansi-c*/
       dw_FreeArray(p->n_var_states);
       dw_FreeArray(p->var_states);
       dw_FreeArray(p->n_coef_states);
@@ -87,51 +89,51 @@ void FreeTheta_VAR(T_VAR_Parameters *p)
       dw_FreeArray(p->A0_states);
       dw_FreeArray(p->A0_column_states);
 
-      // Free free parameters
+/*        // Free free parameters   ansi-c*/
       dw_FreeArray(p->dim_b0);
       dw_FreeArray(p->b0);
       dw_FreeArray(p->dim_bplus);
       dw_FreeArray(p->bplus);
 
-      // Free Sims-Zha specification parameters and workspace
+/*        // Free Sims-Zha specification parameters and workspace   ansi-c*/
       dw_FreeArray(p->lambda);
 
-      //--- Non-standard memory management ---
+/*        //--- Non-standard memory management ---   ansi-c*/
       if (p->constant)
-	for (j=dw_DimA(p->constant)-1; j >= 0; j--)
-	  if (p->constant[j])
-	    pElementV(p->constant[j])=(PRECISION*)NULL;
+    for (j=dw_DimA(p->constant)-1; j >= 0; j--)
+      if (p->constant[j])
+        pElementV(p->constant[j])=(PRECISION*)NULL;
       dw_FreeArray(p->constant);
-      //--------------------------------------
+/*        //--------------------------------------   ansi-c*/
 
       dw_FreeArray(p->psi);
       dw_FreeArray(p->inverse_psi_prior);
 
-      // Free Priors
+/*        // Free Priors   ansi-c*/
       FreeVector(p->zeta_a_prior);
       FreeVector(p->zeta_b_prior);
       dw_FreeArray(p->A0_prior);
       dw_FreeArray(p->Aplus_prior);
 
-      // Free identifiying restrictions
+/*        // Free identifiying restrictions   ansi-c*/
       dw_FreeArray(p->U);
       dw_FreeArray(p->V);
       dw_FreeArray(p->W);
       dw_FreeArray(p->IsIdentity_V);
 
-      // Free normalization
+/*        // Free normalization   ansi-c*/
       dw_FreeArray(p->flipped);
       dw_FreeArray(p->Target);
 
-      // Free workspace
+/*        // Free workspace   ansi-c*/
       FreeVector(p->inverse_zeta_b_prior);
       dw_FreeArray(p->inverse_b0_prior);
       dw_FreeArray(p->inverse_bplus_prior);
       FreeVector(p->log_abs_det_A0);
       dw_FreeArray(p->A0_dot_products);
       dw_FreeArray(p->Aplus_dot_products);
-      
-      // Free state dependent fields
+
+/*        // Free state dependent fields   ansi-c*/
       dw_FreeArray(p->YY);
       dw_FreeArray(p->XY);
       dw_FreeArray(p->XX);
@@ -141,15 +143,15 @@ void FreeTheta_VAR(T_VAR_Parameters *p)
       dw_FreeArray(p->S);
       dw_FreeArray(p->T);
 
-      // A0 Metropolis Info
+/*        // A0 Metropolis Info   ansi-c*/
       dw_FreeArray(p->A0_Metropolis_Scale);
       dw_FreeArray(p->A0_Metropolis_Jumps);
 
-      // Free Data
+/*        // Free Data   ansi-c*/
       dw_FreeArray(p->Y);
       dw_FreeArray(p->X);
 
-      // Free pointer
+/*        // Free pointer   ansi-c*/
       free(p);
     }
 }
@@ -157,7 +159,7 @@ void FreeTheta_VAR(T_VAR_Parameters *p)
 ThetaRoutines* CreateRoutines_VAR(void)
 {
   ThetaRoutines *rtns=CreateThetaRoutines_empty();
-  
+
   rtns->pLogConditionalLikelihood=LogConditionalProbability_VAR;
   rtns->pExpectationSingleStep=ExpectationSingleStep_VAR;
   rtns->pDestructor=(void (*)(void*))FreeTheta_VAR;
@@ -173,10 +175,10 @@ ThetaRoutines* CreateRoutines_VAR(void)
   return rtns;
 }
 
-T_VAR_Parameters* CreateTheta_VAR(int flag, int nvars, int nlags, int nexg, int nstates, int nobs,    // Specification and Sizes
-				  int **coef_states, int **var_states,                                // Translation Tables
-				  TMatrix *U, TMatrix *V, TMatrix *W,                                 // Restrictions
-				  TMatrix Y, TMatrix X)                                               // Data                                 
+T_VAR_Parameters* CreateTheta_VAR(int flag, int nvars, int nlags, int nexg, int nstates, int nobs,     /*   Specification and Sizes   ansi-c*/
+                  int **coef_states, int **var_states,                                 /*   Translation Tables   ansi-c*/
+                  TMatrix *U, TMatrix *V, TMatrix *W,                                  /*   Restrictions   ansi-c*/
+                  TMatrix Y, TMatrix X)                                                /*   Data   ansi-c*/
 {
   T_VAR_Parameters *p;
   int i, j, k, t, npre;
@@ -184,62 +186,62 @@ T_VAR_Parameters* CreateTheta_VAR(int flag, int nvars, int nlags, int nexg, int 
 
   if ((nvars <= 0) || (nlags < 0) || (nexg < 0))
     {
-      fprintf(stderr,"CreateTheta_VAR():  Invalid arguments passed.\n");
+      swz_fprintf_err("CreateTheta_VAR():  Invalid arguments passed.\n");
       exit(0);
     }
 
-  //=== Allocate memory for T_VAR_Parameters ===
+/*    //=== Allocate memory for T_VAR_Parameters ===   ansi-c*/
   if (!(p=(T_VAR_Parameters*)malloc(sizeof(T_VAR_Parameters))))
     {
-      fprintf(stderr,"Out of memory\n");
+      swz_fprintf_err("Out of memory\n");
       exit(0);
     }
 
-  //=== Model Specification ===
+/*    //=== Model Specification ===   ansi-c*/
   if (flag & SPEC_SIMS_ZHA) flag|=SPEC_RANDOM_WALK;
   p->Specification=flag;
 
-  //====== Flags ======
+/*    //====== Flags ======   ansi-c*/
   p->valid_state_dependent_fields=0;
   p->valid_state_dependent_fields_previous=0;
   p->valid_log_abs_det_A0=0;
   p->valid_dot_products=0;
   p->valid_parameters=0;
 
-  //=== Sizes ===//
+/*    //=== Sizes ===//   ansi-c*/
   p->nobs=nobs;
   p->nstates=nstates;
   p->nvars=nvars;
   p->nlags=nlags;
   p->npre=npre=nvars*nlags+nexg;
 
-  //====== Create n_coef_states, n_var_states ======
+/*    //====== Create n_coef_states, n_var_states ======   ansi-c*/
   p->n_coef_states=(int*)dw_CreateArray_int(nvars);
   p->n_var_states=(int*)dw_CreateArray_int(nvars);
   for (j=nvars-1; j >= 0; j--)
     {
       for (p->n_coef_states[j]=0, i=p->nstates-1; i >= 0; i--)
-	if (coef_states[j][i] > p->n_coef_states[j]) 
-	  p->n_coef_states[j]=coef_states[j][i];
+    if (coef_states[j][i] > p->n_coef_states[j])
+      p->n_coef_states[j]=coef_states[j][i];
       p->n_coef_states[j]++;
 
       for (p->n_var_states[j]=0, i=nstates-1; i >= 0; i--)
-	if (var_states[j][i] > p->n_var_states[j]) 
-	  p->n_var_states[j]=var_states[j][i];
+    if (var_states[j][i] > p->n_var_states[j])
+      p->n_var_states[j]=var_states[j][i];
       p->n_var_states[j]++;
     }
 
-  //====== Create coef_states, var_states ======
+/*    //====== Create coef_states, var_states ======   ansi-c*/
   p->coef_states=(int**)dw_CopyArray((void*)NULL,coef_states);
   p->var_states=(int**)dw_CopyArray((void*)NULL,var_states);
 
-  //====== Create A0, Aplus, Zeta ======
+/*    //====== Create A0, Aplus, Zeta ======   ansi-c*/
   p->A0=(TVector**)dw_CreateArray_array(nvars);
   p->Aplus=(TVector**)dw_CreateArray_array(nvars);
   p->Zeta=(PRECISION**)dw_CreateArray_array(nvars);
   for (j=nvars-1; j >= 0; j--)
     {
-      p->A0[j]=dw_CreateArray_vector(p->n_coef_states[j]);      
+      p->A0[j]=dw_CreateArray_vector(p->n_coef_states[j]);
       for (k=p->n_coef_states[j]-1; k >= 0; k--)
         p->A0[j][k]=CreateVector(nvars);
 
@@ -250,7 +252,7 @@ T_VAR_Parameters* CreateTheta_VAR(int flag, int nvars, int nlags, int nexg, int 
       p->Zeta[j]=(PRECISION*)dw_CreateArray_scalar(p->n_var_states[j]);
     }
 
-  //====== A0 Metropolis Info ======
+/*    //====== A0 Metropolis Info ======   ansi-c*/
   p->A0_Metropolis_Scale=dw_CreateArray_array(nvars);
   for (j=nvars-1; j >= 0; j--)
     p->A0_Metropolis_Scale[j]=dw_CreateArray_scalar(p->n_coef_states[j]);
@@ -261,49 +263,49 @@ T_VAR_Parameters* CreateTheta_VAR(int flag, int nvars, int nlags, int nexg, int 
     p->A0_Metropolis_Jumps[j]=dw_CreateArray_int(p->n_coef_states[j]);
   dw_InitializeArray_int(p->A0_Metropolis_Jumps,0);
 
-  //====== Create A0_states, A0_column_states, and log_det_abs_A0 ======
+/*    //====== Create A0_states, A0_column_states, and log_det_abs_A0 ======   ansi-c*/
   p->A0_states=dw_CreateArray_int(nstates);
   for (p->n_A0_states=0, i=0; i < nstates; i++)
     {
       for (k=i-1; k >= 0; k--)
-	{
-	  for (j=nvars-1; j >= 0; j--)
-	    if (coef_states[j][i] != coef_states[j][k]) break;
-	  if (j < 0) break;
-	}
+    {
+      for (j=nvars-1; j >= 0; j--)
+        if (coef_states[j][i] != coef_states[j][k]) break;
+      if (j < 0) break;
+    }
       p->A0_states[i]=(k < 0) ? p->n_A0_states++ : p->A0_states[k];
     }
 
   p->A0_column_states=dw_CreateRectangularArray_int(nvars,p->n_A0_states);
   for (i=0; i < p->n_A0_states; i++)
     for (k=0; k < nstates; k++)
-      if (p->A0_states[k] == i) 
-	{
-	  for (j=nvars-1; j >= 0; j--)
-	    p->A0_column_states[j][i]=coef_states[j][k];
-	  break;
-	}
+      if (p->A0_states[k] == i)
+    {
+      for (j=nvars-1; j >= 0; j--)
+        p->A0_column_states[j][i]=coef_states[j][k];
+      break;
+    }
 
   InitializeVector(p->log_abs_det_A0=CreateVector(p->n_A0_states),-1.0);
 
-  //=== Set Restrictions ===
+/*    //=== Set Restrictions ===   ansi-c*/
   p->U=dw_CopyArray(NULL,U);
   p->b0=(TVector**)dw_CreateArray_array(nvars);
   p->dim_b0=dw_CreateArray_int(nvars);
   for (j=nvars-1; j >= 0; j--)
     {
-      p->b0[j]=(TVector*)dw_CreateArray_vector(p->n_coef_states[j]);      
+      p->b0[j]=(TVector*)dw_CreateArray_vector(p->n_coef_states[j]);
       for (k=p->n_coef_states[j]-1; k >= 0; k--)
-	p->b0[j][k]=CreateVector(p->dim_b0[j]=ColM(U[j]));
+    p->b0[j][k]=CreateVector(p->dim_b0[j]=ColM(U[j]));
     }
 
-  //=== Normalization ===
+/*    //=== Normalization ===   ansi-c*/
   p->normalization_type=VAR_NORMALIZATION_NONE;
   p->Target=(TVector**)NULL;
-  p->flipped=(int**)NULL; 
+  p->flipped=(int**)NULL;
   p->WZ_inconsistancies=0;
 
-  //=== Specification ===
+/*    //=== Specification ===   ansi-c*/
   if (flag & SPEC_RANDOM_WALK)
     {
       p->W=dw_CreateArray_matrix(nvars);
@@ -321,59 +323,59 @@ T_VAR_Parameters* CreateTheta_VAR(int flag, int nvars, int nlags, int nexg, int 
       p->V=dw_CreateArray_matrix(nvars);
       for (j=p->nvars-1; j >= 0; j--) p->V[j]=IdentityMatrix((TMatrix)NULL,npre);
 
-      // Setup psi and lambda parameters
+/*        // Setup psi and lambda parameters   ansi-c*/
       p->lambda=(TVector**)dw_CreateArray_array(nvars);
       p->psi=dw_CreateArray_vector(nvars);
       for (j=nvars-1; j >= 0; j--)
-	{
-	  p->lambda[j]=dw_CreateArray_vector(p->n_coef_states[j]);
-	  for (k=dw_DimA(p->lambda[j])-1; k >= 0; k--)
-	    p->lambda[j][k]=CreateVector(nvars);
+    {
+      p->lambda[j]=dw_CreateArray_vector(p->n_coef_states[j]);
+      for (k=dw_DimA(p->lambda[j])-1; k >= 0; k--)
+        p->lambda[j][k]=CreateVector(nvars);
 
-	  p->psi[j]=CreateVector(npre - 1 + p->n_coef_states[j]);
-	}
+      p->psi[j]=CreateVector(npre - 1 + p->n_coef_states[j]);
+    }
 
-      //--- non-standard memory management ---
+/*        //--- non-standard memory management ---   ansi-c*/
       p->constant=(TVector*)dw_CreateArray_vector(nvars);
       for (j=nvars-1; j >= 0; j--)
-	{
-	  p->constant[j]=CreateVector(p->n_coef_states[j]);
-	  free(pElementV(p->constant[j]));
-	  pElementV(p->constant[j])=pElementV(p->psi[j]) + npre - 1;
-	}
-      //--------------------------------------
+    {
+      p->constant[j]=CreateVector(p->n_coef_states[j]);
+      free(pElementV(p->constant[j]));
+      pElementV(p->constant[j])=pElementV(p->psi[j]) + npre - 1;
+    }
+/*        //--------------------------------------   ansi-c*/
     }
   else
     {
-      //====== Sims-Zha Specification ======
+/*        //====== Sims-Zha Specification ======   ansi-c*/
       p->lambda=(TVector**)NULL;
       p->psi=(TVector*)NULL;
       p->constant=(TVector*)NULL;
 
-      //====== If the number of columns in V[j] == npre then we may assume that V[j] is the identity. ======
+/*        //====== If the number of columns in V[j] == npre then we may assume that V[j] is the identity. ======   ansi-c*/
       dw_InitializeArray_int(p->IsIdentity_V=dw_CreateArray_int(nvars),0);
       p->V=dw_CreateArray_matrix(nvars);
-      for (j=nvars-1; j >= 0; j--) 
-	if (V[j])
-	  if (ColM(V[j]) < npre)
-	    p->V[j]=EquateMatrix((TMatrix)NULL,V[j]);
-	  else
-	    {
-	      p->V[j]=IdentityMatrix((TMatrix)NULL,npre);
-	      p->IsIdentity_V[j]=1;
-	    }
+      for (j=nvars-1; j >= 0; j--)
+    if (V[j])
+      if (ColM(V[j]) < npre)
+        p->V[j]=EquateMatrix((TMatrix)NULL,V[j]);
+      else
+        {
+          p->V[j]=IdentityMatrix((TMatrix)NULL,npre);
+          p->IsIdentity_V[j]=1;
+        }
     }
   p->bplus=(TVector**)dw_CreateArray_array(nvars);
   p->dim_bplus=dw_CreateArray_int(nvars);
   for (j=nvars-1; j >= 0; j--)
     if (V[j])
       {
-	p->bplus[j]=(TVector*)dw_CreateArray_vector(p->n_coef_states[j]);
-	for (k=p->n_coef_states[j]-1; k >= 0; k--)
-	  p->bplus[j][k]=CreateVector(p->dim_bplus[j]=ColM(V[j]));
+    p->bplus[j]=(TVector*)dw_CreateArray_vector(p->n_coef_states[j]);
+    for (k=p->n_coef_states[j]-1; k >= 0; k--)
+      p->bplus[j][k]=CreateVector(p->dim_bplus[j]=ColM(V[j]));
       }
 
-  //====== Data ======
+/*    //====== Data ======   ansi-c*/
   p->Y=dw_CreateArray_vector(nobs+1);
   p->X=dw_CreateArray_vector(nobs+1);
   for (t=nobs; t > 0; t--)
@@ -385,16 +387,16 @@ T_VAR_Parameters* CreateTheta_VAR(int flag, int nvars, int nlags, int nexg, int 
       for (i=p->npre-1; i >= 0; i--) ElementV(p->X[t],i)=ElementM(X,t-1,i);
     }
 
-  //====== Workspace  ======
+/*    //====== Workspace  ======   ansi-c*/
   p->minus_half_nvars_times_log2pi=-0.5*(double)nvars*log(2.0*3.141592653589793);
 
-  // Dot products
+/*    // Dot products   ansi-c*/
   p->A0_dot_products=(PRECISION***)dw_CreateArray_array(nobs+1);
   for (t=0; t <= nobs; t++)
     {
       p->A0_dot_products[t]=(PRECISION**)dw_CreateArray_array(nvars);
       for (j=0; j < nvars; j++)
-	p->A0_dot_products[t][j]=dw_CreateArray_scalar(p->n_coef_states[j]);
+    p->A0_dot_products[t][j]=dw_CreateArray_scalar(p->n_coef_states[j]);
     }
 
   p->Aplus_dot_products=(PRECISION***)dw_CreateArray_array(nobs+1);
@@ -402,10 +404,10 @@ T_VAR_Parameters* CreateTheta_VAR(int flag, int nvars, int nlags, int nexg, int 
     {
       p->Aplus_dot_products[t]=(PRECISION**)dw_CreateArray_array(nvars);
       for (j=0; j < nvars; j++)
-	p->Aplus_dot_products[t][j]=dw_CreateArray_scalar(p->n_coef_states[j]);
+    p->Aplus_dot_products[t][j]=dw_CreateArray_scalar(p->n_coef_states[j]);
     }
 
-  // State dependent data 
+/*    // State dependent data   ansi-c*/
   p->T=dw_CreateArray_int(nstates);
   p->YY=dw_CreateArray_matrix(nstates);
   p->XY=dw_CreateArray_matrix(nstates);
@@ -421,13 +423,13 @@ T_VAR_Parameters* CreateTheta_VAR(int flag, int nvars, int nlags, int nexg, int 
   p->xx=dw_CreateArray_matrix(nobs+1);
   p->S=dw_CreateArray_int(nobs+1);
   for (t=nobs; t > 0; t--)
-    {  
+    {
       p->yy[t]=OuterProduct((TMatrix)NULL,p->Y[t],p->Y[t]);
       p->xy[t]=OuterProduct((TMatrix)NULL,p->X[t],p->Y[t]);
       p->xx[t]=OuterProduct((TMatrix)NULL,p->X[t],p->X[t]);
     }
 
-  //====== Set Priors to null ======
+/*    //====== Set Priors to null ======   ansi-c*/
   p->A0_prior=(TMatrix*)NULL;
   p->Aplus_prior=(TMatrix*)NULL;
   p->zeta_a_prior=(TVector)NULL;
@@ -440,7 +442,7 @@ T_VAR_Parameters* CreateTheta_VAR(int flag, int nvars, int nlags, int nexg, int 
   p->inverse_lambda_prior=0.0;
   p->inverse_psi_prior=(TMatrix*)NULL;
 
-  //====== Return ======
+/*    //====== Return ======   ansi-c*/
   return p;
 }
 
@@ -449,13 +451,13 @@ void SetPriors_VAR(T_VAR_Parameters *theta, TMatrix* A0_prior, TMatrix* Aplus_pr
   int j;
   TMatrix S;
 
-  //====== Priors ======
+/*    //====== Priors ======   ansi-c*/
   theta->A0_prior=dw_CopyArray(NULL,A0_prior);
   theta->Aplus_prior=dw_CopyArray(NULL,Aplus_prior);
   theta->zeta_a_prior=EquateVector((TVector)NULL,zeta_a_prior);
   theta->zeta_b_prior=EquateVector((TVector)NULL,zeta_b_prior);
 
-  //====== Prior workspace ======
+/*    //====== Prior workspace ======   ansi-c*/
   theta->inverse_zeta_b_prior=CreateVector(theta->nvars);
   for (j=theta->nvars-1; j >= 0; j--)
     ElementV(theta->inverse_zeta_b_prior,j)=1.0/ElementV(zeta_b_prior,j);
@@ -473,18 +475,18 @@ void SetPriors_VAR(T_VAR_Parameters *theta, TMatrix* A0_prior, TMatrix* Aplus_pr
   for (j=theta->nvars-1; j >= 0; j--)
     if (theta->V[j])
       {
-	S=Inverse_LU((TMatrix)NULL,Aplus_prior[j]);
-	theta->inverse_bplus_prior[j]=MatrixInnerProductSymmetric((TMatrix)NULL,theta->V[j],S);
-	ProductMS(theta->inverse_bplus_prior[j],theta->inverse_bplus_prior[j],theta->n_A0_states/theta->n_coef_states[j]);
-	FreeMatrix(S);
+    S=Inverse_LU((TMatrix)NULL,Aplus_prior[j]);
+    theta->inverse_bplus_prior[j]=MatrixInnerProductSymmetric((TMatrix)NULL,theta->V[j],S);
+    ProductMS(theta->inverse_bplus_prior[j],theta->inverse_bplus_prior[j],theta->n_A0_states/theta->n_coef_states[j]);
+    FreeMatrix(S);
       }
 
-  //====== Set prior constant ======
+/*    //====== Set prior constant ======   ansi-c*/
   SetLogPriorConstant_VAR(theta);
 }
 
-void SetPriors_VAR_SimsZha(T_VAR_Parameters *theta, TMatrix* A0_prior, TMatrix* Aplus_prior, TVector zeta_a_prior, 
-			   TVector zeta_b_prior, PRECISION lambda_prior)
+void SetPriors_VAR_SimsZha(T_VAR_Parameters *theta, TMatrix* A0_prior, TMatrix* Aplus_prior, TVector zeta_a_prior,
+               TVector zeta_b_prior, PRECISION lambda_prior)
 {
   int j, k, n, m;
   TMatrix V, S, I, inverse_Aplus_prior;
@@ -496,27 +498,27 @@ void SetPriors_VAR_SimsZha(T_VAR_Parameters *theta, TMatrix* A0_prior, TMatrix* 
 
       theta->inverse_psi_prior=dw_CreateArray_matrix(theta->nvars);
       for (j=theta->nvars-1; j >= 0; j--)
-	{
-	  inverse_Aplus_prior=Inverse_LU((TMatrix)NULL,Aplus_prior[j]);
-	  I=IdentityMatrix((TMatrix)NULL,theta->n_A0_states);
-	  S=KroneckerProduct((TMatrix)NULL,I,inverse_Aplus_prior);
-	  InitializeMatrix(V=CreateMatrix(theta->npre * theta->n_A0_states,theta->npre-1 + theta->n_coef_states[j]),0.0);
-	  for (k=theta->n_A0_states-1; k >= 0; k--)
-	    {
-	      for (n=theta->npre-2; n >= 0; n--)
-		for (m=theta->npre-1; m >= 0; m--)
-		  ElementM(V,k*theta->npre + m,n)=ElementM(theta->V[j],m,n);
+    {
+      inverse_Aplus_prior=Inverse_LU((TMatrix)NULL,Aplus_prior[j]);
+      I=IdentityMatrix((TMatrix)NULL,theta->n_A0_states);
+      S=KroneckerProduct((TMatrix)NULL,I,inverse_Aplus_prior);
+      InitializeMatrix(V=CreateMatrix(theta->npre * theta->n_A0_states,theta->npre-1 + theta->n_coef_states[j]),0.0);
+      for (k=theta->n_A0_states-1; k >= 0; k--)
+        {
+          for (n=theta->npre-2; n >= 0; n--)
+        for (m=theta->npre-1; m >= 0; m--)
+          ElementM(V,k*theta->npre + m,n)=ElementM(theta->V[j],m,n);
 
-	      n=theta->npre - 1 + theta->A0_column_states[j][k];
-	      for (m=theta->npre-1; m >= 0; m--)
-		ElementM(V,k * theta->npre + m,n)=ElementM(theta->V[j],m,theta->npre - 1);
-	    }
-	  theta->inverse_psi_prior[j]=MatrixInnerProductSymmetric((TMatrix)NULL,V,S);
-	  FreeMatrix(V);
-	  FreeMatrix(S);
-	  FreeMatrix(I);
-	  FreeMatrix(inverse_Aplus_prior);
-	}
+          n=theta->npre - 1 + theta->A0_column_states[j][k];
+          for (m=theta->npre-1; m >= 0; m--)
+        ElementM(V,k * theta->npre + m,n)=ElementM(theta->V[j],m,theta->npre - 1);
+        }
+      theta->inverse_psi_prior[j]=MatrixInnerProductSymmetric((TMatrix)NULL,V,S);
+      FreeMatrix(V);
+      FreeMatrix(S);
+      FreeMatrix(I);
+      FreeMatrix(inverse_Aplus_prior);
+    }
 
       SetPriors_VAR(theta,A0_prior,Aplus_prior,zeta_a_prior,zeta_b_prior);
     }
@@ -525,14 +527,14 @@ void SetPriors_VAR_SimsZha(T_VAR_Parameters *theta, TMatrix* A0_prior, TMatrix* 
       printf("Error SetPriors_VAR_SimsZha(): specification flag not set to SPEC_SIM_ZHA\n");
       exit(0);
     }
-}     
+}
 
 /*
    Assumes
     model: a properly initialized TStateModel structure.
 
    Returns
-    A properly initialized TStateModel structure with the same number of first 
+    A properly initialized TStateModel structure with the same number of first
     level state variables, but only one overall state.
 */
 TStateModel* CreateConstantModel(TStateModel *model)
@@ -549,7 +551,7 @@ TStateModel* CreateConstantModel(TStateModel *model)
     {
       sv_array=dw_CreateArray_pointer(model->sv->n_state_variables,(void (*)(void*))FreeMarkovStateVariable);
       for (i=model->sv->n_state_variables-1; i >= 0; i--)
-	sv_array[i]=CreateMarkovStateVariable_ConstantState(model->sv->nobs);
+    sv_array[i]=CreateMarkovStateVariable_ConstantState(model->sv->nobs);
       sv=CreateMarkovStateVariable_Multiple(model->sv->nobs,model->sv->n_state_variables,sv_array);
     }
 
@@ -574,7 +576,7 @@ TStateModel* CreateConstantModel(TStateModel *model)
   FreeMatrix(Y);
   dw_FreeArray(translation_table);
 
-  // Initialize parameters
+/*    // Initialize parameters   ansi-c*/
   for (j=0; j < p->nvars; j++)
     {
       theta->Zeta[j][0]=p->Zeta[j][0];
@@ -586,7 +588,7 @@ TStateModel* CreateConstantModel(TStateModel *model)
     Update_lambda_psi_from_bplus(theta);
   theta->valid_parameters=1;
 
-  //InitializeParameters_VAR(theta);
+/*    //InitializeParameters_VAR(theta);   ansi-c*/
 
   return CreateStateModel_new(sv,routines,theta);
 }
@@ -594,78 +596,78 @@ TStateModel* CreateConstantModel(TStateModel *model)
 /*
    Assumes
      table:  Properly initialized translation table.
-     restricted table:  Properly initialize translation table.  
+     restricted table:  Properly initialize translation table.
 */
 int **ExpandTranslationTable(int **table, TMarkovStateVariable *sv, TMarkovStateVariable *rsv, int s)
 {
   int i, j, k, nstates;
   int **rtable, *idx, *master;
 
-  // Compute size of new table.
+/*    // Compute size of new table.   ansi-c*/
   for (nstates=1, k=sv->n_state_variables-1; k >= 0; k--)
     nstates*=(k == s) ? rsv->state_variable[k]->nstates + 1 : rsv->state_variable[k]->nstates;
 
-  // Create new table
+/*    // Create new table   ansi-c*/
   dw_InitializeArray_int(rtable=dw_CreateRectangularArray_int(dw_DimA(table),nstates),0);
 
-  // Fill table
+/*    // Fill table   ansi-c*/
   idx=(int*)malloc(sv->nstates*sizeof(int));
   master=(int*)malloc(nstates*sizeof(int));
-  for (k=i=0; k < sv->nstates; k++) 
+  for (k=i=0; k < sv->nstates; k++)
     {
       for (j=sv->n_state_variables-1; j >= 0; j--)
-	if (sv->Index[k][j] > rsv->state_variable[j]->nstates) 
-	  break;
-	else
-	  if ((j != s) && (sv->Index[k][j] == rsv->state_variable[j]->nstates))
-	    break; 
+    if (sv->Index[k][j] > rsv->state_variable[j]->nstates)
+      break;
+    else
+      if ((j != s) && (sv->Index[k][j] == rsv->state_variable[j]->nstates))
+        break;
       if (j == -1) master[i++]=k;
     }
   for (j=dw_DimA(table)-1; j >= 0; j--)
     {
       for (k=sv->nstates-1; k >= 0; k--) idx[k]=0;
-      for (k=nstates-1; k >= 0; k--) 
-	idx[table[j][master[k]]]=1;
+      for (k=nstates-1; k >= 0; k--)
+    idx[table[j][master[k]]]=1;
       for (k=i=0; k < sv->nstates; k++) idx[k]=idx[k] ? i++ : -1;
       for (k=nstates-1; k >= 0; k--)
-	rtable[j][k]=idx[table[j][master[k]]];
+    rtable[j][k]=idx[table[j][master[k]]];
     }
   free(master);
   free(idx);
 
-  // verbose
-  //dw_PrintArray(stdout,rtable,(char*)NULL); fprintf(stdout,"\n"); dw_PrintArray(stdout,table,(char*)NULL); getchar();
-  //dw_PrintArray(stdout,sv->Index,(char*)NULL); getchar();
+/*    // verbose   ansi-c*/
+/*    //dw_PrintArray(stdout,rtable,(char*)NULL); printf("\n"); dw_PrintArray(stdout,table,(char*)NULL); getchar();   ansi-c*/
+/*    //dw_PrintArray(stdout,sv->Index,(char*)NULL); getchar();   ansi-c*/
 
   return rtable;
 }
 
 /*
    Assumes
-     model: 
-       Properly intialized TStateModel structure.  The Markov state variable 
-       structure must be flat with the same number state variables as 
-       restricted_model.  Each state variable must have as least as many states 
+     model:
+       Properly intialized TStateModel structure.  The Markov state variable
+       structure must be flat with the same number state variables as
+       restricted_model.  Each state variable must have as least as many states
        as the corresponding state variable in restricted_model.
 
      restricted_model:
-       Properly intialized TStateModel structure.  The Markov state variable 
-       structure must be flat with the same number state variables as model. Each 
-       state variable must have no more states as the corresponding state 
-       variable in model. 
+       Properly intialized TStateModel structure.  The Markov state variable
+       structure must be flat with the same number state variables as model. Each
+       state variable must have no more states as the corresponding state
+       variable in model.
 
      s:
        The state variable to expand.  It must be the case that s is between 0 and
-       model->n_state_variables - 1, inclusive, and that the number of states in 
-       the sth state variable of model is strictly larger than the number of 
+       model->n_state_variables - 1, inclusive, and that the number of states in
+       the sth state variable of model is strictly larger than the number of
        states in the sth state variable of restricted_model.
 
    Returns
-     Properly initialized TStateModel structure with in which the sth state 
+     Properly initialized TStateModel structure with in which the sth state
      variable has one more state.
 
    Notes
-     A Markov state variable structure is flat if state_variable[i] is a single 
+     A Markov state variable structure is flat if state_variable[i] is a single
      Markov state variable for 0 <= i < n_state_variables.
 */
 TStateModel* ExpandModel_VAR(TStateModel *model, TStateModel *restricted_model, int s)
@@ -677,8 +679,8 @@ TStateModel* ExpandModel_VAR(TStateModel *model, TStateModel *restricted_model, 
   TMatrix X, Y;
   int **coef_table, **var_table;
 
-  // Check sizes
-  if ((p->nvars != restricted_p->nvars) || (p->nlags != restricted_p->nlags) 
+/*    // Check sizes   ansi-c*/
+  if ((p->nvars != restricted_p->nvars) || (p->nlags != restricted_p->nlags)
       || (p->npre != restricted_p->npre) || (p->nobs != restricted_p->nobs)
       || (sv->n_state_variables != restricted_sv->n_state_variables)
       || (s < 0) || (s > sv->n_state_variables))
@@ -689,11 +691,11 @@ TStateModel* ExpandModel_VAR(TStateModel *model, TStateModel *restricted_model, 
 
   if (sv->state_variable[s]->nstates == restricted_sv->state_variable[s]->nstates) return (TStateModel*)NULL;
 
-  // Check VAR Restrictions
+/*    // Check VAR Restrictions   ansi-c*/
 
-  // Check VAR Priors
+/*    // Check VAR Priors   ansi-c*/
 
-  // Setup new Markov state variable
+/*    // Setup new Markov state variable   ansi-c*/
   sv_array=dw_CreateArray_pointer(sv->n_state_variables,(void (*)(void*))FreeMarkovStateVariable);
   for (k=model->sv->n_state_variables-1; k >= 0; k--)
     if (k != s)
@@ -701,7 +703,7 @@ TStateModel* ExpandModel_VAR(TStateModel *model, TStateModel *restricted_model, 
     else
       sv_array[s]=RestrictMarkovStateVariable(sv->state_variable[k],restricted_sv->state_variable[k]->nstates+1);
 
-  // Create multiple Markov state variable
+/*    // Create multiple Markov state variable   ansi-c*/
   if (sv->n_state_variables == 1)
     {
       expanded_sv=sv_array[0];
@@ -711,7 +713,7 @@ TStateModel* ExpandModel_VAR(TStateModel *model, TStateModel *restricted_model, 
   else
     expanded_sv=CreateMarkovStateVariable_Multiple(sv->nobs,sv->n_state_variables,sv_array);
 
-  // Data
+/*    // Data   ansi-c*/
   Y=CreateMatrix(p->nobs,p->nvars);
   X=CreateMatrix(p->nobs,p->npre);
   for (t=p->nobs; t > 0; t--)
@@ -720,60 +722,60 @@ TStateModel* ExpandModel_VAR(TStateModel *model, TStateModel *restricted_model, 
       for (i=p->npre-1; i >= 0; i--) ElementM(X,t-1,i)=ElementV(p->X[t],i);
     }
 
-  // Setup new translation tables
+/*    // Setup new translation tables   ansi-c*/
   coef_table=ExpandTranslationTable(p->coef_states,model->sv,restricted_model->sv,s);
   var_table=ExpandTranslationTable(p->var_states,model->sv,restricted_model->sv,s);
 
-  // Setup new VAR
+/*    // Setup new VAR   ansi-c*/
   expanded_p=CreateTheta_VAR(p->Specification,p->nvars,p->nlags,p->npre - p->nlags*p->nvars,expanded_sv->nstates,p->nobs,coef_table,var_table,p->U,p->V,p->W,Y,X);
   if (p->Specification & SPEC_SIMS_ZHA)
     SetPriors_VAR_SimsZha(expanded_p,p->A0_prior,p->Aplus_prior,p->zeta_a_prior,p->zeta_b_prior,p->lambda_prior);
   else
     SetPriors_VAR(expanded_p,p->A0_prior,p->Aplus_prior,p->zeta_a_prior,p->zeta_b_prior);
 
-  // Create expanded model
+/*    // Create expanded model   ansi-c*/
   expanded_model=CreateStateModel_new(expanded_sv,CreateRoutines_VAR(),expanded_p);
 
-  // Clean up
+/*    // Clean up   ansi-c*/
   FreeMatrix(X);
   FreeMatrix(Y);
   dw_FreeArray(coef_table);
   dw_FreeArray(var_table);
 
-  // Set VAR parameters
+/*    // Set VAR parameters   ansi-c*/
   for (j=0; j < p->nvars; j++)
     {
       for (k=expanded_p->n_var_states[j]-1; k >= 0; k--)
-	{
-	  for (i=expanded_p->nstates-1; i >= 0; i--) 
-	    if (expanded_p->var_states[j][i] == k) break;
+    {
+      for (i=expanded_p->nstates-1; i >= 0; i--)
+        if (expanded_p->var_states[j][i] == k) break;
 
-	  for (q=m=0; q <= s; q++) m=m*expanded_sv->state_variable[q]->nstates + expanded_sv->Index[i][q];
-	  if (expanded_sv->Index[i][s] == expanded_sv->state_variable[s]->nstates - 1) m--;
-	  for ( ; q < expanded_sv->n_state_variables; q++) m=m*expanded_sv->state_variable[q]->nstates + expanded_sv->Index[i][q];
+      for (q=m=0; q <= s; q++) m=m*expanded_sv->state_variable[q]->nstates + expanded_sv->Index[i][q];
+      if (expanded_sv->Index[i][s] == expanded_sv->state_variable[s]->nstates - 1) m--;
+      for ( ; q < expanded_sv->n_state_variables; q++) m=m*expanded_sv->state_variable[q]->nstates + expanded_sv->Index[i][q];
 
-	  expanded_p->Zeta[j][k]=restricted_p->Zeta[j][restricted_p->var_states[j][m]];
-	}
+      expanded_p->Zeta[j][k]=restricted_p->Zeta[j][restricted_p->var_states[j][m]];
+    }
 
       for (k=expanded_p->n_coef_states[j]-1; k >= 0; k--)
-	{
-	  for (i=expanded_p->nstates-1; i >= 0; i--) 
-	    if (expanded_p->coef_states[j][i] == k) break;
+    {
+      for (i=expanded_p->nstates-1; i >= 0; i--)
+        if (expanded_p->coef_states[j][i] == k) break;
 
-	  for (q=m=0; q <= s; q++) m=m*expanded_sv->state_variable[q]->nstates + expanded_sv->Index[i][q];
-	  if (expanded_sv->Index[i][s] == expanded_sv->state_variable[s]->nstates - 1) m--;
-	  for ( ; q < expanded_sv->n_state_variables; q++) m=m*expanded_sv->state_variable[q]->nstates + expanded_sv->Index[i][q];
+      for (q=m=0; q <= s; q++) m=m*expanded_sv->state_variable[q]->nstates + expanded_sv->Index[i][q];
+      if (expanded_sv->Index[i][s] == expanded_sv->state_variable[s]->nstates - 1) m--;
+      for ( ; q < expanded_sv->n_state_variables; q++) m=m*expanded_sv->state_variable[q]->nstates + expanded_sv->Index[i][q];
 
-	  EquateVector(expanded_p->A0[j][k],restricted_p->A0[j][restricted_p->coef_states[j][m]]);
-	  EquateVector(expanded_p->Aplus[j][k],restricted_p->Aplus[j][restricted_p->coef_states[j][m]]);
-	}
+      EquateVector(expanded_p->A0[j][k],restricted_p->A0[j][restricted_p->coef_states[j][m]]);
+      EquateVector(expanded_p->Aplus[j][k],restricted_p->Aplus[j][restricted_p->coef_states[j][m]]);
+    }
     }
   Update_b0_bplus_from_A0_Aplus(expanded_p);
   if ((expanded_p->Specification & SPEC_SIMS_ZHA) == SPEC_SIMS_ZHA)
     Update_lambda_psi_from_bplus(expanded_p);
   expanded_p->valid_parameters=1;
 
-  // Set transition matrices
+/*    // Set transition matrices   ansi-c*/
   if (!restricted_model->sv->valid_transition_matrix)
     {
       FreeStateModel(expanded_model);
@@ -782,62 +784,62 @@ TStateModel* ExpandModel_VAR(TStateModel *model, TStateModel *restricted_model, 
   for (k=expanded_sv->n_state_variables-1; k >= 0; k--)
     {
       if (k != s)
-	{
-	  //EquateMatrix(expanded_sv->state_variable[k]->Q,restricted_sv->state_variable[k]->Q);
-	  //Update_B_from_Q_SV(expanded_sv->state_variable[k]);
+    {
+/*        //EquateMatrix(expanded_sv->state_variable[k]->Q,restricted_sv->state_variable[k]->Q);   ansi-c*/
+/*        //Update_B_from_Q_SV(expanded_sv->state_variable[k]);   ansi-c*/
 
-	  EquateMatrix(expanded_sv->state_variable[k]->Q,restricted_sv->state_variable[k]->Q);
-	  EquateVector(expanded_sv->state_variable[k]->B,restricted_sv->state_variable[k]->B);
-	}
+      EquateMatrix(expanded_sv->state_variable[k]->Q,restricted_sv->state_variable[k]->Q);
+      EquateVector(expanded_sv->state_variable[k]->B,restricted_sv->state_variable[k]->B);
+    }
       else
-	{
-/* 	  j=restricted_sv->state_variable[k]->nstates; */
-/* 	  for (i=0; i <= restricted_sv->state_variable[k]->nstates; i++) */
-/* 	    for (j=0; j <= restricted_sv->state_variable[k]->nstates; j++) */
-/* 	      ElementM(expanded_sv->state_variable[k]->Q,i,j)=0.5; */
-//=====================================================================================================================
-/*  	  j=restricted_sv->state_variable[k]->nstates;  */
-/* 	  InsertSubMatrix(expanded_sv->state_variable[k]->Q,restricted_sv->state_variable[k]->Q,0,0,0,0,j,j); */
-/* 	  for (i=j; i >= 0; i--) */
-/* 	    { */
-/* 	      ElementM(expanded_sv->state_variable[k]->Q,i,j)=0.0; */
-/* 	      ElementM(expanded_sv->state_variable[k]->Q,j,i)=0.0; */
-/* 	    } */
-/* 	  ElementM(expanded_sv->state_variable[k]->Q,j,j)= 0.5*ElementM(expanded_sv->state_variable[k]->Q,j-1,j-1); */
-/* 	  ElementM(expanded_sv->state_variable[k]->Q,j-1,j)=0.5*ElementM(expanded_sv->state_variable[k]->Q,j-1,j-1); */
-/* 	  for (i=0; i < j-1; i++) */
-/* 	    ElementM(expanded_sv->state_variable[k]->Q,i,j)= ElementM(expanded_sv->state_variable[k]->Q,i,j-1); */
-/* 	  Update_B_from_Q_SV(expanded_sv->state_variable[k]); */
-//=====================================================================================================================
-	  // Draw states for restricted model
-	  DrawStates(restricted_model);
+    {
+/*       j=restricted_sv->state_variable[k]->nstates; */
+/*       for (i=0; i <= restricted_sv->state_variable[k]->nstates; i++) */
+/*         for (j=0; j <= restricted_sv->state_variable[k]->nstates; j++) */
+/*           ElementM(expanded_sv->state_variable[k]->Q,i,j)=0.5; */
+/*  //=====================================================================================================================   ansi-c*/
+/*        j=restricted_sv->state_variable[k]->nstates;  */
+/*       InsertSubMatrix(expanded_sv->state_variable[k]->Q,restricted_sv->state_variable[k]->Q,0,0,0,0,j,j); */
+/*       for (i=j; i >= 0; i--) */
+/*         { */
+/*           ElementM(expanded_sv->state_variable[k]->Q,i,j)=0.0; */
+/*           ElementM(expanded_sv->state_variable[k]->Q,j,i)=0.0; */
+/*         } */
+/*       ElementM(expanded_sv->state_variable[k]->Q,j,j)= 0.5*ElementM(expanded_sv->state_variable[k]->Q,j-1,j-1); */
+/*       ElementM(expanded_sv->state_variable[k]->Q,j-1,j)=0.5*ElementM(expanded_sv->state_variable[k]->Q,j-1,j-1); */
+/*       for (i=0; i < j-1; i++) */
+/*         ElementM(expanded_sv->state_variable[k]->Q,i,j)= ElementM(expanded_sv->state_variable[k]->Q,i,j-1); */
+/*       Update_B_from_Q_SV(expanded_sv->state_variable[k]); */
+/*  //=====================================================================================================================   ansi-c*/
+/*        // Draw states for restricted model   ansi-c*/
+      DrawStates(restricted_model);
 
-	  // Copy states for kth state variable
-	  dw_CopyArray(expanded_sv->state_variable[k]->S,restricted_sv->state_variable[k]->S);
+/*        // Copy states for kth state variable   ansi-c*/
+      dw_CopyArray(expanded_sv->state_variable[k]->S,restricted_sv->state_variable[k]->S);
 
-	  //dw_PrintArray(stdout,expanded_sv->state_variable[k]->S,(char*)NULL); getchar();
+/*        //dw_PrintArray(stdout,expanded_sv->state_variable[k]->S,(char*)NULL); getchar();   ansi-c*/
 
-	  // Draw transition matrix for kth state variable
-	  DrawTransitionMatrix_SV(expanded_sv->state_variable[k]);
-//=====================================================================================================================
-	  // Then new state for the sth state variable is made to be reflecting
-/* 	  j=restricted_sv->state_variable[k]->nstates; */
-/* 	  InsertSubMatrix(expanded_sv->state_variable[k]->Q,restricted_sv->state_variable[k]->Q,0,0,0,0,j,j); */
-/* 	  for (i=j; i >= 0; i--) */
-/* 	    { */
-/* 	      ElementM(expanded_sv->state_variable[k]->Q,i,j)=0.0; */
-/* 	      ElementM(expanded_sv->state_variable[k]->Q,j,i)=0.0; */
-/* 	    } */
-/* 	  ElementM(expanded_sv->state_variable[k]->Q,j-1,j)=1.0; */
-/* 	  Update_B_from_Q_SV(expanded_sv->state_variable[k]); */
-	}
+/*        // Draw transition matrix for kth state variable   ansi-c*/
+      DrawTransitionMatrix_SV(expanded_sv->state_variable[k]);
+/*  //=====================================================================================================================   ansi-c*/
+/*        // Then new state for the sth state variable is made to be reflecting   ansi-c*/
+/*       j=restricted_sv->state_variable[k]->nstates; */
+/*       InsertSubMatrix(expanded_sv->state_variable[k]->Q,restricted_sv->state_variable[k]->Q,0,0,0,0,j,j); */
+/*       for (i=j; i >= 0; i--) */
+/*         { */
+/*           ElementM(expanded_sv->state_variable[k]->Q,i,j)=0.0; */
+/*           ElementM(expanded_sv->state_variable[k]->Q,j,i)=0.0; */
+/*         } */
+/*       ElementM(expanded_sv->state_variable[k]->Q,j-1,j)=1.0; */
+/*       Update_B_from_Q_SV(expanded_sv->state_variable[k]); */
+    }
     }
   PropagateTransitionMatrices_SV(expanded_sv);
-  //  expanded_model->ValidTransitionMatrix=1;
+/*    //  expanded_model->ValidTransitionMatrix=1;   ansi-c*/
   ValidateTransitionMatrices_SV(expanded_sv);
-  // return 
+/*    // return   ansi-c*/
   return expanded_model;
-}                                     
+}
 
 
 
@@ -852,14 +854,14 @@ void FlatTransitionMatrix(TMarkovStateVariable *sv)
   if (sv->n_state_variables == 1)
     {
       for (i=dw_DimA(sv->b)-1; i >= 0; i--)
-	for (p=1.0/(PRECISION)DimV(sv->b[i]), j=DimV(sv->b[i])-1; j >= 0; j--)
-	  ElementV(sv->b[i],j)=p;
+    for (p=1.0/(PRECISION)DimV(sv->b[i]), j=DimV(sv->b[i])-1; j >= 0; j--)
+      ElementV(sv->b[i],j)=p;
       Update_Q_from_B_SV(sv);
     }
   else
     {
       for (i=sv->n_state_variables-1; i >= 0; i--)
-	FlatTransitionMatrix(sv->state_variable[i]);
+    FlatTransitionMatrix(sv->state_variable[i]);
       MatrixTensor(sv->Q,sv->QA);
     }
 }
@@ -877,44 +879,44 @@ int NestTransitionMatrices_SV(TMarkovStateVariable *sv, TMarkovStateVariable *re
       return 0;
     else
       {
-	for (i=0; i < restricted_sv->nstates-1; i++)
-	  {
-	    for (j=0; j < restricted_sv->nstates; j++)
-	      ElementM(sv->Q,i,j)=ElementM(restricted_sv->Q,i,j);
-	    for (tmp=ElementM(restricted_sv->Q,i,j-1); j < sv->nstates; j++)
-	      ElementM(sv->Q,i,j)=tmp;
-	  }
+    for (i=0; i < restricted_sv->nstates-1; i++)
+      {
+        for (j=0; j < restricted_sv->nstates; j++)
+          ElementM(sv->Q,i,j)=ElementM(restricted_sv->Q,i,j);
+        for (tmp=ElementM(restricted_sv->Q,i,j-1); j < sv->nstates; j++)
+          ElementM(sv->Q,i,j)=tmp;
+      }
 
         for (j=0; j < restricted_sv->nstates; j++)
-	  {
-	    tmp=ElementM(restricted_sv->Q,restricted_sv->nstates-1,j)/(double)(sv->nstates - restricted_sv->nstates + 1);
-	    // tmp=0.0;
-	    for (i=restricted_sv->nstates-1; i < sv->nstates; i++)
-	      ElementM(sv->Q,i,j)=tmp;
-	  }
-	for ( ; j < sv->nstates; j++)
-	  for (i=restricted_sv->nstates-1; i < sv->nstates; i++)
-	    ElementM(sv->Q,i,j)=tmp;
+      {
+        tmp=ElementM(restricted_sv->Q,restricted_sv->nstates-1,j)/(double)(sv->nstates - restricted_sv->nstates + 1);
+/*          // tmp=0.0;   ansi-c*/
+        for (i=restricted_sv->nstates-1; i < sv->nstates; i++)
+          ElementM(sv->Q,i,j)=tmp;
+      }
+    for ( ; j < sv->nstates; j++)
+      for (i=restricted_sv->nstates-1; i < sv->nstates; i++)
+        ElementM(sv->Q,i,j)=tmp;
 
-	return Update_B_from_Q_SV(sv);
+    return Update_B_from_Q_SV(sv);
       }
   else
     {
       for (i=sv->n_state_variables-1; i >= restricted_sv->n_state_variables; i--)
-	FlatTransitionMatrix(sv->state_variable[i]);
+    FlatTransitionMatrix(sv->state_variable[i]);
       for ( ; i >= 0; i--)
-	if (!NestTransitionMatrices_SV(sv->state_variable[i],restricted_sv->state_variable[i]))
-	  return 0;
+    if (!NestTransitionMatrices_SV(sv->state_variable[i],restricted_sv->state_variable[i]))
+      return 0;
       MatrixTensor(sv->Q,sv->QA);
     }
   return 1;
 }
 
 /*
-   Sets the parameters of model so that it is equivalent to the parameters of 
-   restricted_model.  Currently, the routine only checks that the sizes of the 
-   two models are the same.  It should be the case that the restrictions are 
-   also identical.  
+   Sets the parameters of model so that it is equivalent to the parameters of
+   restricted_model.  Currently, the routine only checks that the sizes of the
+   two models are the same.  It should be the case that the restrictions are
+   also identical.
 *
 int NestModel_VAR(TStateModel *model, TStateModel *restricted_model)
 {
@@ -922,13 +924,13 @@ int NestModel_VAR(TStateModel *model, TStateModel *restricted_model)
   T_VAR_Parameters *p=model->theta, *restricted_p=restricted_model->theta;
 
   // Set transition matrices
-  if (!restricted_model->ValidTransitionMatrix || !NestTransitionMatrices_SV(model->sv,restricted_model->sv)) 
+  if (!restricted_model->ValidTransitionMatrix || !NestTransitionMatrices_SV(model->sv,restricted_model->sv))
     return 0;
   else
     model->ValidTransitionMatrix=1;
 
   // Check VAR sizes
-  if ((p->nvars != restricted_p->nvars) || (p->nlags != restricted_p->nlags) 
+  if ((p->nvars != restricted_p->nvars) || (p->nlags != restricted_p->nlags)
       || (p->npre != restricted_p->npre) || (p->nobs != restricted_p->nobs))
     return 0;
 
@@ -937,25 +939,25 @@ int NestModel_VAR(TStateModel *model, TStateModel *restricted_model)
     {
       if (p->n_var_states[j] < restricted_p->n_var_states[j]) return 0;
       for (k=0; k < restricted_p->n_var_states[j]; k++)
-	p->Zeta[j][k]=restricted_p->Zeta[j][k];
+    p->Zeta[j][k]=restricted_p->Zeta[j][k];
       for ( ; k < p->n_var_states[j]; k++)
-	p->Zeta[j][k]=restricted_p->Zeta[j][restricted_p->n_var_states[j]-1];
+    p->Zeta[j][k]=restricted_p->Zeta[j][restricted_p->n_var_states[j]-1];
 
       if (p->n_coef_states[j] < restricted_p->n_coef_states[j]) return 0;
       for (k=0; k < restricted_p->n_coef_states[j]; k++)
-	{
-	  EquateVector(p->A0[j][k],restricted_p->A0[j][k]);
-	  EquateVector(p->Aplus[j][k],restricted_p->Aplus[j][k]);
-	}
+    {
+      EquateVector(p->A0[j][k],restricted_p->A0[j][k]);
+      EquateVector(p->Aplus[j][k],restricted_p->Aplus[j][k]);
+    }
       for ( ; k < p->n_coef_states[j]; k++)
-	{
-	  EquateVector(p->A0[j][k],restricted_p->A0[j][restricted_p->n_coef_states[j]-1]);
-	  EquateVector(p->Aplus[j][k],restricted_p->Aplus[j][restricted_p->n_coef_states[j]-1]);
-	}
+    {
+      EquateVector(p->A0[j][k],restricted_p->A0[j][restricted_p->n_coef_states[j]-1]);
+      EquateVector(p->Aplus[j][k],restricted_p->Aplus[j][restricted_p->n_coef_states[j]-1]);
+    }
     }
   Update_b0_bplus_from_A0_Aplus(model->theta);
   return 1;
-}                                     
+}
 /*******************************************************************************/
 /*******************************************************************************/
 /*******************************************************************************/
@@ -972,10 +974,10 @@ void ComputeDotProducts_All(T_VAR_Parameters *p)
   for (t=p->nobs; t > 0; t--)
     for (j=p->nvars-1; j >= 0; j--)
       for (k=p->n_coef_states[j]-1; k >= 0; k--)
-	{
-	  p->A0_dot_products[t][j][k]=DotProduct(Y[t],p->A0[j][k]);
-	  p->Aplus_dot_products[t][j][k]=DotProduct(X[t],p->Aplus[j][k]);
-	}
+    {
+      p->A0_dot_products[t][j][k]=DotProduct(Y[t],p->A0[j][k]);
+      p->Aplus_dot_products[t][j][k]=DotProduct(X[t],p->Aplus[j][k]);
+    }
 
   p->valid_dot_products=1;
 
@@ -996,7 +998,7 @@ void ComputeLogAbsDetA0_All(T_VAR_Parameters *p)
 
   A0=CreateMatrix(p->nvars,p->nvars);
 
-  //=== Set initial A0 ===
+/*    //=== Set initial A0 ===   ansi-c*/
   for (j=p->nvars-1; j >= 0; j--)
     memcpy(&ElementM(A0,0,j),pElementV(p->A0[j][p->A0_column_states[j][k]]),p->nvars*sizeof(PRECISION));
 
@@ -1004,10 +1006,10 @@ void ComputeLogAbsDetA0_All(T_VAR_Parameters *p)
 
   while (--k >= 0)
     {
-      //=== Reset A0 ===
+/*        //=== Reset A0 ===   ansi-c*/
       for (j=p->nvars-1; j >= 0; j--)
-	if (p->A0_column_states[j][k] != p->A0_column_states[j][k+1])
-	  memcpy(&ElementM(A0,0,j),pElementV(p->A0[j][p->A0_column_states[j][k]]),p->nvars*sizeof(PRECISION));
+    if (p->A0_column_states[j][k] != p->A0_column_states[j][k+1])
+      memcpy(&ElementM(A0,0,j),pElementV(p->A0[j][p->A0_column_states[j][k]]),p->nvars*sizeof(PRECISION));
 
       ElementV(p->log_abs_det_A0,k)=LogAbsDeterminant_LU(A0);
     }
@@ -1031,10 +1033,10 @@ void ComputeLogAbsDetA0(int j, int k, T_VAR_Parameters *p)
   for (s=DimV(p->log_abs_det_A0)-1; s >= 0; s--)
     if (p->A0_column_states[j][s] == k)
       {
-	for (i=p->nvars-1; i >= 0; i--)
-	  memcpy(&ElementM(A0,0,i),pElementV(p->A0[i][p->A0_column_states[i][s]]),p->nvars*sizeof(PRECISION));
+    for (i=p->nvars-1; i >= 0; i--)
+      memcpy(&ElementM(A0,0,i),pElementV(p->A0[i][p->A0_column_states[i][s]]),p->nvars*sizeof(PRECISION));
 
-	ElementV(p->log_abs_det_A0,s)=LogAbsDeterminant_LU(A0);
+    ElementV(p->log_abs_det_A0,s)=LogAbsDeterminant_LU(A0);
       }
 
   FreeMatrix(A0);
@@ -1059,15 +1061,15 @@ PRECISION LogConditionalProbability_VAR(int s, int t, TStateModel *model)
 
   if (!(p->valid_parameters)) return MINUS_INFINITY;
 
-  //====== Computes log(abs(det(A0[i]))) and log(abs(det(Xi))) ======
+/*    //====== Computes log(abs(det(A0[i]))) and log(abs(det(Xi))) ======   ansi-c*/
   if (!p->valid_log_abs_det_A0) ComputeLogAbsDetA0_All(p);
 
-  //====== Compute quadratic form ======
+/*    //====== Compute quadratic form ======   ansi-c*/
   if (p->valid_dot_products)
     for (j=p->nvars-1; j >= 0; j--)
       {
         y=p->Zeta[j][p->var_states[j][s]];
-        x=p->A0_dot_products[t][j][p->coef_states[j][s]] 
+        x=p->A0_dot_products[t][j][p->coef_states[j][s]]
                        - p->Aplus_dot_products[t][j][p->coef_states[j][s]];
         if (y <= 0)
           return MINUS_INFINITY;
@@ -1079,7 +1081,7 @@ PRECISION LogConditionalProbability_VAR(int s, int t, TStateModel *model)
      for (j=p->nvars-1; j >= 0; j--)
       {
         y=p->Zeta[j][p->var_states[j][s]];
-        x=DotProduct(p->Y[t],p->A0[j][p->coef_states[j][s]]) 
+        x=DotProduct(p->Y[t],p->A0[j][p->coef_states[j][s]])
                            - DotProduct(p->X[t],p->Aplus[j][p->coef_states[j][s]]);
         if (y <= 0)
           return MINUS_INFINITY;
@@ -1088,7 +1090,7 @@ PRECISION LogConditionalProbability_VAR(int s, int t, TStateModel *model)
         sum+=y*x*x;
       }
 
-  //====== Get log(det(A0)) ======
+/*    //====== Get log(det(A0)) ======   ansi-c*/
   logdet=0.5*logdet + ElementV(p->log_abs_det_A0,p->A0_states[s]);
 
   return p->minus_half_nvars_times_log2pi + logdet - 0.5*sum;
@@ -1108,7 +1110,7 @@ TVector ExpectationSingleStep_VAR(TVector y, int s, int t, TStateModel *model)
   T_VAR_Parameters *p=(T_VAR_Parameters*)(model->theta);
   TMatrix A0, Aplus;
 
-  if ((t < 1) || (p->nobs < t)) 
+  if ((t < 1) || (p->nobs < t))
     {
       dw_Error(SIZE_ERR);
       return (TVector)NULL;
@@ -1131,7 +1133,7 @@ TVector ExpectationSingleStep_VAR(TVector y, int s, int t, TStateModel *model)
 /*******************************************************************************/
 /*******************************************************************************/
 /*******************************************************************************/
- 
+
 /******************************** Notification *********************************/
 void StatesChanged_VAR(TStateModel *model)
 {
@@ -1146,7 +1148,7 @@ void ThetaChanged_VAR(TStateModel *model)
 
 void InitializeForwardRecursion_VAR(TStateModel *model)
 {
-  if (!((T_VAR_Parameters*)(model->theta))->valid_dot_products) 
+  if (!((T_VAR_Parameters*)(model->theta))->valid_dot_products)
     ComputeDotProducts_All((T_VAR_Parameters*)(model->theta));
 }
 
@@ -1155,15 +1157,15 @@ void InitializeForwardRecursion_VAR(TStateModel *model)
 /*******************************************************************************/
 void DrawParameters_VAR(TStateModel *model)
 {
-  // Draw unnormalized theta
+/*    // Draw unnormalized theta   ansi-c*/
   DrawZeta_DotProducts(model);
   DrawA0_Metropolis(model);
   DrawAplus(model);
 
-  // Normalize
+/*    // Normalize   ansi-c*/
   Normalize_VAR((T_VAR_Parameters*)(model->theta));
 
-  // Flags and notification that the VAR parameters have changed 
+/*    // Flags and notification that the VAR parameters have changed   ansi-c*/
   ((T_VAR_Parameters*)(model->theta))->valid_parameters=1;
   ThetaChanged(model);
 }
@@ -1173,16 +1175,16 @@ void DrawParameters_VAR(TStateModel *model)
    ThetaChanged() cannot be called.
 */
 void InitializeParameters_VAR(T_VAR_Parameters *p)
-{ 
+{
   int j, s;
   TMatrix X;
 
-  // Initialize Zeta to one
+/*    // Initialize Zeta to one   ansi-c*/
   for (j=p->nvars-1; j >= 0; j--)
     for (s=p->n_var_states[j]-1; s >= 0; s--)
       p->Zeta[j][s]=1;
 
-  // Draw b0 from prior - identical across states A0[j][s] = U[j]*b0[j][s].
+/*    // Draw b0 from prior - identical across states A0[j][s] = U[j]*b0[j][s].   ansi-c*/
   for (j=p->nvars-1; j >= 0; j--)
     {
       X=CholeskyUT((TMatrix)NULL,p->inverse_b0_prior[j]);
@@ -1191,32 +1193,32 @@ void InitializeParameters_VAR(T_VAR_Parameters *p)
       ProductMV(p->b0[j][0],X,p->b0[j][0]);
       ProductMV(p->A0[j][0],p->U[j],p->b0[j][0]);
       for (s=p->n_coef_states[j]-1; s > 0; s--)
-	EquateVector(p->A0[j][s],p->A0[j][0]);
+    EquateVector(p->A0[j][s],p->A0[j][0]);
       FreeMatrix(X);
     }
 
-  // Set Aplus[j][s] = W[j]*A0[j][s].
+/*    // Set Aplus[j][s] = W[j]*A0[j][s].   ansi-c*/
   for (j=p->nvars-1; j >= 0; j--)
     {
       if (!p->W[j])
-	InitializeVector(p->Aplus[j][0],0.0);
+    InitializeVector(p->Aplus[j][0],0.0);
       else
-	ProductMV(p->Aplus[j][0],p->W[j],p->A0[j][0]);
+    ProductMV(p->Aplus[j][0],p->W[j],p->A0[j][0]);
       for (s=p->n_coef_states[j]-1; s > 0; s--)
-	EquateVector(p->Aplus[j][s],p->Aplus[j][0]);
+    EquateVector(p->Aplus[j][s],p->Aplus[j][0]);
     }
 
-  // Update b0, bplus, lambda, psi
+/*    // Update b0, bplus, lambda, psi   ansi-c*/
   Update_b0_bplus_from_A0_Aplus(p);
   if ((p->Specification & SPEC_SIMS_ZHA) == SPEC_SIMS_ZHA) Update_lambda_psi_from_bplus(p);
 
-  // Flags and notification that the VAR parameters have changed 
+/*    // Flags and notification that the VAR parameters have changed   ansi-c*/
   p->valid_parameters=1;
 }
 
-//-----------------------------------------------------------------------------//
-//--------------------------------- Draw Zeta ---------------------------------//
-//-----------------------------------------------------------------------------//
+/*  //-----------------------------------------------------------------------------//   ansi-c*/
+/*  //--------------------------------- Draw Zeta ---------------------------------//   ansi-c*/
+/*  //-----------------------------------------------------------------------------//   ansi-c*/
 void DrawZeta_Aplus(TStateModel *model)
 {
   int j, k, s, T;
@@ -1228,23 +1230,23 @@ void DrawZeta_Aplus(TStateModel *model)
   for (j=p->nvars-1; j >= 0; j--)
     {
       for (s=p->n_var_states[j]-1; s > 0; s--)
-	{
-	  v=0.0;
-	  T=0;
-	  for (k=p->nstates-1; k >= 0; k--)
-	    {
-	      if (p->var_states[j][k] == s)
-		{
-		  v+=InnerProductSymmetric(p->A0[j][p->coef_states[j][k]],p->YY[k])
-		    - 2.0 * InnerProductNonSymmetric(p->Aplus[j][p->coef_states[j][k]],p->A0[j][p->coef_states[j][k]],p->XY[k])
-		    + InnerProductSymmetric(p->Aplus[j][p->coef_states[j][k]],p->XX[k]);
-		  T+=p->T[k];
-		}
-	    }
-	  p->Zeta[j][s]=dw_gamma_rnd(0.5*(PRECISION)T + ElementV(p->zeta_a_prior,j))/(0.5*v + ElementV(p->inverse_zeta_b_prior,j));
-	}
+    {
+      v=0.0;
+      T=0;
+      for (k=p->nstates-1; k >= 0; k--)
+        {
+          if (p->var_states[j][k] == s)
+        {
+          v+=InnerProductSymmetric(p->A0[j][p->coef_states[j][k]],p->YY[k])
+            - 2.0 * InnerProductNonSymmetric(p->Aplus[j][p->coef_states[j][k]],p->A0[j][p->coef_states[j][k]],p->XY[k])
+            + InnerProductSymmetric(p->Aplus[j][p->coef_states[j][k]],p->XX[k]);
+          T+=p->T[k];
+        }
+        }
+      p->Zeta[j][s]=dw_gamma_rnd(0.5*(PRECISION)T + ElementV(p->zeta_a_prior,j))/(0.5*v + ElementV(p->inverse_zeta_b_prior,j));
+    }
 
-      //=== State 0 is normalized to one
+/*        //=== State 0 is normalized to one   ansi-c*/
       p->Zeta[j][0]=1.0;
     }
 }
@@ -1264,26 +1266,26 @@ void DrawZeta_DotProducts(TStateModel *model)
       v=InitializeVector(CreateVector(p->n_var_states[j]),0.0);
       T=InitializeVector(CreateVector(p->n_var_states[j]),0.0);
       for (t=p->nobs; t > 0; t--)
-	{
-	  s=p->coef_states[j][S[t]];
-	  x=p->A0_dot_products[t][j][s] - p->Aplus_dot_products[t][j][s];
-	  s=p->var_states[j][S[t]];
-	  ElementV(v,s)+=x*x;
-	  ElementV(T,s)+=1.0;
-	}
+    {
+      s=p->coef_states[j][S[t]];
+      x=p->A0_dot_products[t][j][s] - p->Aplus_dot_products[t][j][s];
+      s=p->var_states[j][S[t]];
+      ElementV(v,s)+=x*x;
+      ElementV(T,s)+=1.0;
+    }
       for (s=p->n_var_states[j]-1; s > 0; s--)
         p->Zeta[j][s]=dw_gamma_rnd(0.5*ElementV(T,s) + ElementV(p->zeta_a_prior,j))/(0.5*ElementV(v,s) + ElementV(p->inverse_zeta_b_prior,j));
       FreeVector(v);
       FreeVector(T);
 
-      //=== State 0 is normalized to one
+/*        //=== State 0 is normalized to one   ansi-c*/
       p->Zeta[j][0]=1.0;
     }
 }
 
-//-----------------------------------------------------------------------------//
-//-------------------------- Metropolis Draws of A0 ---------------------------//
-//-----------------------------------------------------------------------------//
+/*  //-----------------------------------------------------------------------------//   ansi-c*/
+/*  //-------------------------- Metropolis Draws of A0 ---------------------------//   ansi-c*/
+/*  //-----------------------------------------------------------------------------//   ansi-c*/
 #define MID          0.35
 #define LOG_MID     -1.0498221244987
 #define LOWER_BOUND  0.0052521875
@@ -1311,14 +1313,14 @@ void AdaptiveMetropolisScale(TStateModel *model, int iterations, int period, int
     {
       Adaptive[j]=(struct TAdaptive**)dw_CreateArray_pointer(p->n_coef_states[j],free);
       for (k=p->n_coef_states[j]-1; k >= 0; k--)
-	{
-	  Adaptive[j][k]=((struct TAdaptive*)malloc(sizeof(struct TAdaptive)));
-	  Adaptive[j][k]->begin_jump_ratio=p->A0_Metropolis_Jumps[j][k];
-	  Adaptive[j][k]->iterations=period;
-	  Adaptive[j][k]->end_iteration_count=period;
-	  Adaptive[j][k]->low_scale=Adaptive[j][k]->low_jump_ratio=Adaptive[j][k]->high_scale=Adaptive[j][k]->high_jump_ratio=-1.0;
-	  Adaptive[j][k]->best_scale=p->A0_Metropolis_Scale[j][k];
-	}
+    {
+      Adaptive[j][k]=((struct TAdaptive*)malloc(sizeof(struct TAdaptive)));
+      Adaptive[j][k]->begin_jump_ratio=p->A0_Metropolis_Jumps[j][k];
+      Adaptive[j][k]->iterations=period;
+      Adaptive[j][k]->end_iteration_count=period;
+      Adaptive[j][k]->low_scale=Adaptive[j][k]->low_jump_ratio=Adaptive[j][k]->high_scale=Adaptive[j][k]->high_jump_ratio=-1.0;
+      Adaptive[j][k]->best_scale=p->A0_Metropolis_Scale[j][k];
+    }
     }
 
   ResetMetropolisInformation(p);
@@ -1333,90 +1335,90 @@ void AdaptiveMetropolisScale(TStateModel *model, int iterations, int period, int
     {
       DrawAll(model);
       if (count == check)
-	{
-	  if (f_posterior) fprintf(f_posterior,"%le\n",LogPosterior_StatesIntegratedOut(model));
-	    
+    {
+      if (f_posterior) fprintf(f_posterior,"%le\n",LogPosterior_StatesIntegratedOut(model));
+
           if (verbose)
-	    printf("%d iterations completed out of %d - elapsed time: %d seconds\n",count,iterations,(int)time((time_t*)NULL) - begin_time);
+        printf("%d iterations completed out of %d - elapsed time: %d seconds\n",count,iterations,(int)time((time_t*)NULL) - begin_time);
 
-	  for (j=p->nvars-1; j >= 0; j--)
-	    {
-	      for (k=p->n_coef_states[j]-1; k >= 0; k--)
-		if (Adaptive[j][k]->end_iteration_count == count)
-		  {
-		    // Compute new jump ratio and get scale
-		    new_jump_ratio=(PRECISION)(p->A0_Metropolis_Jumps[j][k] - Adaptive[j][k]->begin_jump_ratio)
-		                                                                         /(PRECISION)(Adaptive[j][k]->iterations);
+      for (j=p->nvars-1; j >= 0; j--)
+        {
+          for (k=p->n_coef_states[j]-1; k >= 0; k--)
+        if (Adaptive[j][k]->end_iteration_count == count)
+          {
+/*              // Compute new jump ratio and get scale   ansi-c*/
+            new_jump_ratio=(PRECISION)(p->A0_Metropolis_Jumps[j][k] - Adaptive[j][k]->begin_jump_ratio)
+                                                                                 /(PRECISION)(Adaptive[j][k]->iterations);
 
-		    // Set new low or high bounds
-		    if (new_jump_ratio < MID)
-		      {
-			Adaptive[j][k]->low_scale=p->A0_Metropolis_Scale[j][k];
-			Adaptive[j][k]->low_jump_ratio=new_jump_ratio;
-		      }
-		    else
-		      {
-			Adaptive[j][k]->high_scale=p->A0_Metropolis_Scale[j][k];
-			Adaptive[j][k]->high_jump_ratio=new_jump_ratio;
-		      }
+/*              // Set new low or high bounds   ansi-c*/
+            if (new_jump_ratio < MID)
+              {
+            Adaptive[j][k]->low_scale=p->A0_Metropolis_Scale[j][k];
+            Adaptive[j][k]->low_jump_ratio=new_jump_ratio;
+              }
+            else
+              {
+            Adaptive[j][k]->high_scale=p->A0_Metropolis_Scale[j][k];
+            Adaptive[j][k]->high_jump_ratio=new_jump_ratio;
+              }
 
-		    // Compute new scale and best scale
-		    if (Adaptive[j][k]->low_jump_ratio < 0.0)
-		      {
-			Adaptive[j][k]->best_scale=Adaptive[j][k]->high_scale;
-			if (Adaptive[j][k]->low_scale < 0.0)
-			  new_scale=((new_jump_ratio > UPPER_BOUND) ? 5.0 : LOG_MID/log(new_jump_ratio))*Adaptive[j][k]->high_scale;
-			else
-			  {
-			    new_scale=Adaptive[j][k]->low_scale;
-			    Adaptive[j][k]->low_scale=-1;
-			  }
-		      }
-		    else 
-		      if (Adaptive[j][k]->high_jump_ratio < 0.0)
-			{
-			  Adaptive[j][k]->best_scale=Adaptive[j][k]->low_scale;
-			  if (Adaptive[j][k]->high_scale < 0.0)
-			    new_scale=((new_jump_ratio < LOWER_BOUND) ? 0.2 : LOG_MID/log(new_jump_ratio))*Adaptive[j][k]->low_scale;
-			  else
-			    {
-			      new_scale=Adaptive[j][k]->high_scale;
-			      Adaptive[j][k]->high_scale=-1.0;
-			    }
-			}
-		      else
-			{
-			  new_scale=Adaptive[j][k]->best_scale=0.5*(Adaptive[j][k]->low_scale + Adaptive[j][k]->high_scale);
-			  //Adaptive[j][k]->iterations+=period;
-			  Adaptive[j][k]->iterations*=2;
-			  Adaptive[j][k]->low_jump_ratio=Adaptive[j][k]->high_jump_ratio=-1.0;
-			}
+/*              // Compute new scale and best scale   ansi-c*/
+            if (Adaptive[j][k]->low_jump_ratio < 0.0)
+              {
+            Adaptive[j][k]->best_scale=Adaptive[j][k]->high_scale;
+            if (Adaptive[j][k]->low_scale < 0.0)
+              new_scale=((new_jump_ratio > UPPER_BOUND) ? 5.0 : LOG_MID/log(new_jump_ratio))*Adaptive[j][k]->high_scale;
+            else
+              {
+                new_scale=Adaptive[j][k]->low_scale;
+                Adaptive[j][k]->low_scale=-1;
+              }
+              }
+            else
+              if (Adaptive[j][k]->high_jump_ratio < 0.0)
+            {
+              Adaptive[j][k]->best_scale=Adaptive[j][k]->low_scale;
+              if (Adaptive[j][k]->high_scale < 0.0)
+                new_scale=((new_jump_ratio < LOWER_BOUND) ? 0.2 : LOG_MID/log(new_jump_ratio))*Adaptive[j][k]->low_scale;
+              else
+                {
+                  new_scale=Adaptive[j][k]->high_scale;
+                  Adaptive[j][k]->high_scale=-1.0;
+                }
+            }
+              else
+            {
+              new_scale=Adaptive[j][k]->best_scale=0.5*(Adaptive[j][k]->low_scale + Adaptive[j][k]->high_scale);
+/*                //Adaptive[j][k]->iterations+=period;   ansi-c*/
+              Adaptive[j][k]->iterations*=2;
+              Adaptive[j][k]->low_jump_ratio=Adaptive[j][k]->high_jump_ratio=-1.0;
+            }
 
-		    // Print data
-		    if (verbose)
-		      printf("col: %d  state: %d  (%d %lf %lf %lf)\n",j+1,k+1,p->A0_Metropolis_Jumps[j][k],
+/*              // Print data   ansi-c*/
+            if (verbose)
+              printf("col: %d  state: %d  (%d %lf %lf %lf)\n",j+1,k+1,p->A0_Metropolis_Jumps[j][k],
                                                                    new_jump_ratio,p->A0_Metropolis_Scale[j][k],new_scale);
 
-		    // Reset adaptive counts and A0_Metropolis_Scale
-		    Adaptive[j][k]->begin_jump_ratio=p->A0_Metropolis_Jumps[j][k];
-		    Adaptive[j][k]->end_iteration_count+=Adaptive[j][k]->iterations;
-		    p->A0_Metropolis_Scale[j][k]=new_scale;
-		  }
-		else
-		  if (verbose)
-		    {
-		      new_jump_ratio=(PRECISION)(p->A0_Metropolis_Jumps[j][k] - Adaptive[j][k]->begin_jump_ratio)
-		                                     /(PRECISION)(Adaptive[j][k]->iterations - (Adaptive[j][k]->end_iteration_count - count));
+/*              // Reset adaptive counts and A0_Metropolis_Scale   ansi-c*/
+            Adaptive[j][k]->begin_jump_ratio=p->A0_Metropolis_Jumps[j][k];
+            Adaptive[j][k]->end_iteration_count+=Adaptive[j][k]->iterations;
+            p->A0_Metropolis_Scale[j][k]=new_scale;
+          }
+        else
+          if (verbose)
+            {
+              new_jump_ratio=(PRECISION)(p->A0_Metropolis_Jumps[j][k] - Adaptive[j][k]->begin_jump_ratio)
+                                             /(PRECISION)(Adaptive[j][k]->iterations - (Adaptive[j][k]->end_iteration_count - count));
 
-		      printf("col: %d  state: %d  (%d %lf %lf -)\n",j+1,k+1,p->A0_Metropolis_Jumps[j][k],
+              printf("col: %d  state: %d  (%d %lf %lf -)\n",j+1,k+1,p->A0_Metropolis_Jumps[j][k],
                                                                             new_jump_ratio,p->A0_Metropolis_Scale[j][k]);
-		    }
-	    }
+            }
+        }
 
-	  if (verbose) printf("\n");
+      if (verbose) printf("\n");
 
-	  check+=period;
-	}
+      check+=period;
+    }
     }
 
   for (j=p->nvars-1; j >= 0; j--)
@@ -1427,9 +1429,9 @@ void AdaptiveMetropolisScale(TStateModel *model, int iterations, int period, int
 
   dw_FreeArray(Adaptive);
 }
-#undef MID   
-#undef UPPER 
-#undef LOWER 
+#undef MID
+#undef UPPER
+#undef LOWER
 
 void SetupMetropolisInformation(PRECISION **Scale, T_VAR_Parameters *p)
 {
@@ -1450,23 +1452,23 @@ static void GetProposedJump_A0(TVector b, int j, int k, T_VAR_Parameters *p)
   PRECISION x;
   int terminal_errors;
 
-  // Accumulate XX, XY, and YY
+/*    // Accumulate XX, XY, and YY   ansi-c*/
   InitializeMatrix(XX=CreateMatrix(p->npre,p->npre),0.0);
   InitializeMatrix(XY=CreateMatrix(p->npre,p->nvars),0.0);
   InitializeMatrix(YY=CreateMatrix(p->nvars,p->nvars),0.0);
   for (s=p->nstates-1; s >= 0; s--)
     if (p->coef_states[j][s] == k)
       {
-	x=p->Zeta[j][p->var_states[j][s]];
-	UpdateMS(XX,p->XX[s],x);
-	UpdateMS(XY,p->XY[s],x);
-	UpdateMS(YY,p->YY[s],x);
+    x=p->Zeta[j][p->var_states[j][s]];
+    UpdateMS(XX,p->XX[s],x);
+    UpdateMS(XY,p->XY[s],x);
+    UpdateMS(YY,p->YY[s],x);
       }
 
-  // S = inverse_b0_prior + U[j]'*(YY + W[j]'*XY + XY'*W[j] + W[j]'*XX*W[j])*U[j]
+/*    // S = inverse_b0_prior + U[j]'*(YY + W[j]'*XY + XY'*W[j] + W[j]'*XX*W[j])*U[j]   ansi-c*/
   if (p->W[j])
     {
-      // M0 = W[j]'*(XX*W[j] + XY) + (XY'*W[j])
+/*        // M0 = W[j]'*(XX*W[j] + XY) + (XY'*W[j])   ansi-c*/
       M0=ProductMM((TMatrix)NULL,XX,p->W[j]);
       AddMM(M0,M0,XY);
       M1=TransposeProductMM((TMatrix)NULL,p->W[j],M0);
@@ -1477,38 +1479,38 @@ static void GetProposedJump_A0(TVector b, int j, int k, T_VAR_Parameters *p)
       FreeMatrix(M0);
     }
   S=MatrixInnerProductSymmetric((TMatrix)NULL,p->U[j],YY);
-  //dw_PrintMatrix(stdout,S,"%.17le "); fprintf(stdout,"\n");
+/*    //dw_PrintMatrix(stdout,S,"%.17le "); printf("\n");   ansi-c*/
   AddMM(S,S,p->inverse_b0_prior[j]);
 
-  //dw_PrintMatrix(stdout,S,"%.17le "); fgetc(stdin);
+/*    //dw_PrintMatrix(stdout,S,"%.17le "); fgetc(stdin);   ansi-c*/
 
-  // Simulate draw
+/*    // Simulate draw   ansi-c*/
   terminal_errors=dw_SetTerminalErrors(NO_ERR);
   dw_NormalVector(b);
   if (!InverseProductUV(b,CholeskyUT(S,S),b))
     {
-      fprintf(stdout,"Error in GetProposedJump_A0()\n");
-      fprintf(stdout,"j = %d, k = %d\n,Prior =\n",j,k);
+      printf("Error in GetProposedJump_A0()\n");
+      printf("j = %d, k = %d\n,Prior =\n",j,k);
       dw_PrintMatrix(stdout,p->inverse_b0_prior[j],"%lg ");
-      fprintf(stdout,"S =\n");
+      printf("S =\n");
       dw_PrintMatrix(stdout,S,"%lg ");
       exit(1);
     }
   dw_SetTerminalErrors(terminal_errors);
 /*   else */
 /*     { */
-/*       fprintf(stdout,"GetProposedJump_A0()\n"); */
-/*       fprintf(stdout,"j = %d, k = %d\n,Prior =\n",j,k); */
+/*       printf("GetProposedJump_A0()\n"); */
+/*       printf("j = %d, k = %d\n,Prior =\n",j,k); */
 /*       dw_PrintMatrix(stdout,p->inverse_b0_prior[j],"%lg "); */
-/*       fprintf(stdout,"S =\n"); */
+/*       printf("S =\n"); */
 /*       dw_PrintMatrix(stdout,S,"%lg "); */
 /*       getchar(); */
 /*     } */
 
-  // Scale factor
+/*    // Scale factor   ansi-c*/
   ProductVS(b,b,p->A0_Metropolis_Scale[j][k]);
 
-  // Free memory
+/*    // Free memory   ansi-c*/
   FreeMatrix(S);
   FreeMatrix(YY);
   FreeMatrix(XY);
@@ -1540,15 +1542,15 @@ PRECISION LogKernel_A0(int j, int k, TStateModel *model)
   PRECISION rtrn;
   T_VAR_Parameters *p=(T_VAR_Parameters*)(model->p->p);
 
-  //====== Prior ======
+/*    //====== Prior ======   ansi-c*/
   rtrn=-0.5*InnerProductSymmetric(p->b0[j][k],p->inverse_b0_prior[j]);
 
   for (s=p->nstates-1; s >= 0; s--)
     if (p->coef_states[j][s] == k)
-      rtrn+=ElementV(p->log_abs_det_A0,p->A0_states[s]) * p->T[s]   
+      rtrn+=ElementV(p->log_abs_det_A0,p->A0_states[s]) * p->T[s]
                    - 0.5 * p->Zeta[j][p->var_states[j][s]] * (InnerProductSymmetric(p->A0[j][k],p->YY[s])
                              - 2.0*InnerProductNonSymmetric(p->Aplus[j][k],p->A0[j][k],p->XY[s])
-			              + InnerProductSymmetric(p->Aplus[j][k],p->XX[s]));
+                          + InnerProductSymmetric(p->Aplus[j][k],p->XX[s]));
   return rtrn;
 }
 
@@ -1559,14 +1561,14 @@ PRECISION LogKernel_A0_DotProduct(int j, int k, TStateModel *model)
   T_VAR_Parameters *p=(T_VAR_Parameters*)(model->theta);
   PRECISION  x, rtrn;
 
-  //====== Prior ======
+/*    //====== Prior ======   ansi-c*/
   rtrn=-0.5*InnerProductSymmetric(p->b0[j][k],p->inverse_b0_prior[j]);
 
   for (t=model->sv->nobs; t > 0; t--)
     if (p->coef_states[j][s=S[t]] == k)
       {
-	x=DotProduct(p->Y[t],p->A0[j][k]) - DotProduct(p->X[t],p->Aplus[j][k]);
-	rtrn+=ElementV(p->log_abs_det_A0,p->A0_states[s]) - 0.5*p->Zeta[j][p->var_states[j][s]]*x*x;
+    x=DotProduct(p->Y[t],p->A0[j][k]) - DotProduct(p->X[t],p->Aplus[j][k]);
+    rtrn+=ElementV(p->log_abs_det_A0,p->A0_states[s]) - 0.5*p->Zeta[j][p->var_states[j][s]]*x*x;
       }
 
   return rtrn;
@@ -1596,7 +1598,7 @@ void DrawA0_Metropolis(TStateModel *model)
   TVector old_b0, old_a0, old_aplus, old_log_abs_det_A0;
   T_VAR_Parameters *p=(T_VAR_Parameters*)(model->theta);
 
-  if (!p->valid_state_dependent_fields) UpdateStateDependentFields(p,model->sv->S); 
+  if (!p->valid_state_dependent_fields) UpdateStateDependentFields(p,model->sv->S);
 
   old_a0=CreateVector(p->nvars);
   old_aplus=CreateVector(p->npre);
@@ -1607,38 +1609,38 @@ void DrawA0_Metropolis(TStateModel *model)
       old_b0=CreateVector(DimV(p->b0[j][0]));
 
       for (k=dw_DimA(p->A0[j])-1; k >= 0; k--)
-	{
-	  //=== Save old values ===
-	  EquateVector(old_b0,p->b0[j][k]);
-	  EquateVector(old_a0,p->A0[j][k]);
-	  EquateVector(old_aplus,p->Aplus[j][k]);
-	  EquateVector(old_log_abs_det_A0,p->log_abs_det_A0);
-	  old_log_kernel=LogKernel_A0(j,k,model);
-	  //old_log_kernel=LogKernel_A0_DotProduct(j,k,model);
+    {
+/*        //=== Save old values ===   ansi-c*/
+      EquateVector(old_b0,p->b0[j][k]);
+      EquateVector(old_a0,p->A0[j][k]);
+      EquateVector(old_aplus,p->Aplus[j][k]);
+      EquateVector(old_log_abs_det_A0,p->log_abs_det_A0);
+      old_log_kernel=LogKernel_A0(j,k,model);
+/*        //old_log_kernel=LogKernel_A0_DotProduct(j,k,model);   ansi-c*/
 
-	  //=== Jump ===
-	  GetProposedJump_A0(p->b0[j][k],j,k,p);
-	  AddVV(p->b0[j][k],p->b0[j][k],old_b0);
-	  ProductMV(p->A0[j][k],p->U[j],p->b0[j][k]);
-	  Update_aplus_from_bplus_a0(j,k,p);
-	  ComputeLogAbsDetA0(j,k,p);
+/*        //=== Jump ===   ansi-c*/
+      GetProposedJump_A0(p->b0[j][k],j,k,p);
+      AddVV(p->b0[j][k],p->b0[j][k],old_b0);
+      ProductMV(p->A0[j][k],p->U[j],p->b0[j][k]);
+      Update_aplus_from_bplus_a0(j,k,p);
+      ComputeLogAbsDetA0(j,k,p);
 
-	  //=== Accept Jump ===
-	  log_difference=LogKernel_A0(j,k,model) - old_log_kernel;
-	  //log_difference=LogKernel_A0_DotProduct(j,k,model) - old_log_kernel;
-	  if ((log_difference >= 0.0) || (dw_uniform_rnd() < exp(log_difference)))
-	    { 
-	      p->A0_Metropolis_Jumps[j][k]++;
-	      p->valid_dot_products=0;
-	    }
-	  else
-	    {
-	      EquateVector(p->b0[j][k],old_b0);
-	      EquateVector(p->A0[j][k],old_a0);
-	      EquateVector(p->Aplus[j][k],old_aplus);
-	      EquateVector(p->log_abs_det_A0,old_log_abs_det_A0);
-	    }
-	}
+/*        //=== Accept Jump ===   ansi-c*/
+      log_difference=LogKernel_A0(j,k,model) - old_log_kernel;
+/*        //log_difference=LogKernel_A0_DotProduct(j,k,model) - old_log_kernel;   ansi-c*/
+      if ((log_difference >= 0.0) || (dw_uniform_rnd() < exp(log_difference)))
+        {
+          p->A0_Metropolis_Jumps[j][k]++;
+          p->valid_dot_products=0;
+        }
+      else
+        {
+          EquateVector(p->b0[j][k],old_b0);
+          EquateVector(p->A0[j][k],old_a0);
+          EquateVector(p->Aplus[j][k],old_aplus);
+          EquateVector(p->log_abs_det_A0,old_log_abs_det_A0);
+        }
+    }
 
       FreeVector(old_b0);
     }
@@ -1650,9 +1652,9 @@ void DrawA0_Metropolis(TStateModel *model)
   p->Total_A0_Metropolis_Draws++;
 }
 
-//-----------------------------------------------------------------------------//
-//-------------------------------- Draw Aplus ---------------------------------//
-//-----------------------------------------------------------------------------//
+/*  //-----------------------------------------------------------------------------//   ansi-c*/
+/*  //-------------------------------- Draw Aplus ---------------------------------//   ansi-c*/
+/*  //-----------------------------------------------------------------------------//   ansi-c*/
 /*
    The following matrices must be updated before calling this routine:
 
@@ -1664,7 +1666,7 @@ void DrawA0_Metropolis(TStateModel *model)
 
    The following matrices are modified in this routine
 
-     p->bplus  p->Aplus 
+     p->bplus  p->Aplus
 */
 void DrawAplus(TStateModel *model)
 {
@@ -1690,61 +1692,61 @@ void DrawAplus(TStateModel *model)
       v=CreateVector(p->npre);
 
       for (j=p->nvars-1; j >= 0; j--)
-	if (p->bplus[j])
-	  {
-	    S=CreateMatrix(p->dim_bplus[j],p->dim_bplus[j]);
+    if (p->bplus[j])
+      {
+        S=CreateMatrix(p->dim_bplus[j],p->dim_bplus[j]);
 
-	    for (k=p->n_coef_states[j]-1; k >= 0; k--)
-	      {
-		InitializeMatrix(XX,0.0);
-		InitializeMatrix(XY,0.0);
-		for (s=p->nstates-1; s >= 0; s--)
-		  if (p->coef_states[j][s] == k)
-		    {
-		      x=p->Zeta[j][p->var_states[j][s]];
-		      UpdateMS(XX,p->XX[s],x);
-		      UpdateMS(XY,p->XY[s],x);
-		    }
+        for (k=p->n_coef_states[j]-1; k >= 0; k--)
+          {
+        InitializeMatrix(XX,0.0);
+        InitializeMatrix(XY,0.0);
+        for (s=p->nstates-1; s >= 0; s--)
+          if (p->coef_states[j][s] == k)
+            {
+              x=p->Zeta[j][p->var_states[j][s]];
+              UpdateMS(XX,p->XX[s],x);
+              UpdateMS(XY,p->XY[s],x);
+            }
 
-		//=== Compute inverse variance ===
-		if (!p->IsIdentity_V[j]) 
-		  MatrixInnerProductSymmetric(S,p->V[j],XX);
-		else
-		  EquateMatrix(S,XX);
-		AddMM(S,S,p->inverse_bplus_prior[j]);
+/*          //=== Compute inverse variance ===   ansi-c*/
+        if (!p->IsIdentity_V[j])
+          MatrixInnerProductSymmetric(S,p->V[j],XX);
+        else
+          EquateMatrix(S,XX);
+        AddMM(S,S,p->inverse_bplus_prior[j]);
 
-		//=== Compute b ===
-		if (p->W[j])
-		  if (p->Specification & SPEC_RANDOM_WALK)
-		    if (MajorForm(XY) && MajorForm(XX))
-		      bSubtract(pElementM(XY),pElementM(XY),pElementM(XX),RowM(XX)*p->nvars);
-		    else
-		      {
-			M=SubMatrix((TMatrix)NULL,XX,0,0,RowM(XX),p->nvars);
-			SubtractMM(XY,XY,M);
-			FreeMatrix(M);
-		      }
-		  else
-		    {
-		      M=ProductMM((TMatrix)NULL,XX,p->W[j]);
-		      AddMM(XY,XY,M);
-		      FreeMatrix(M);
-		    }
-		if (!p->IsIdentity_V[j]) 
-		  {
-		    ProductMV(v,XY,p->A0[j][k]);
-		    TransposeProductMV(p->bplus[j][k],p->V[j],v);
-		  }
-		else
-		  ProductMV(p->bplus[j][k],XY,p->A0[j][k]);
+/*          //=== Compute b ===   ansi-c*/
+        if (p->W[j])
+          if (p->Specification & SPEC_RANDOM_WALK)
+            if (MajorForm(XY) && MajorForm(XX))
+              bSubtract(pElementM(XY),pElementM(XY),pElementM(XX),RowM(XX)*p->nvars);
+            else
+              {
+            M=SubMatrix((TMatrix)NULL,XX,0,0,RowM(XX),p->nvars);
+            SubtractMM(XY,XY,M);
+            FreeMatrix(M);
+              }
+          else
+            {
+              M=ProductMM((TMatrix)NULL,XX,p->W[j]);
+              AddMM(XY,XY,M);
+              FreeMatrix(M);
+            }
+        if (!p->IsIdentity_V[j])
+          {
+            ProductMV(v,XY,p->A0[j][k]);
+            TransposeProductMV(p->bplus[j][k],p->V[j],v);
+          }
+        else
+          ProductMV(p->bplus[j][k],XY,p->A0[j][k]);
 
-		//=== Draw bplus ===
-		if (!DrawNormal_InverseVariance(p->bplus[j][k],p->bplus[j][k],S))
-		  SingularInverseVariance_RecoveryAttempt(p->bplus[j][k],p->bplus[j][k],S,p->inverse_bplus_prior[j],model,BPLUS_ERR);
-	      }
+/*          //=== Draw bplus ===   ansi-c*/
+        if (!DrawNormal_InverseVariance(p->bplus[j][k],p->bplus[j][k],S))
+          SingularInverseVariance_RecoveryAttempt(p->bplus[j][k],p->bplus[j][k],S,p->inverse_bplus_prior[j],model,BPLUS_ERR);
+          }
 
-	    FreeMatrix(S);
-	  }
+        FreeMatrix(S);
+      }
 
       FreeMatrix(XX);
       FreeMatrix(XY);
@@ -1755,17 +1757,17 @@ void DrawAplus(TStateModel *model)
   ThetaChanged(model);
 }
 
-//-----------------------------------------------------------------------------//
-//--------------------------------- Draw psi ----------------------------------//
-//-----------------------------------------------------------------------------//
+/*  //-----------------------------------------------------------------------------//   ansi-c*/
+/*  //--------------------------------- Draw psi ----------------------------------//   ansi-c*/
+/*  //-----------------------------------------------------------------------------//   ansi-c*/
 /*
    Assumes:
      S:  (n*b + j) x (n*b + j) matrix with j > k.  S must be column major.
      XX:  (n*b + 1) x (n*b + 1) matrix.  XX must be column major.
      lambda:  n dimensional vector.
- 
+
    Results:
-     Adds 
+     Adds
 
          PSI[k]'*diag(LAMBDA*lambda + e)*XX*diag(LAMBDA*lambda + e)*PSI[k]
 
@@ -1776,12 +1778,12 @@ void DrawAplus(TStateModel *model)
                        |   .    |                  -                  -
                        |   .    |                 |  I(n*b)   0(n*b,j) |
               LAMBDA = |   .    |        PSI[k] = |                    |
-                       |        |                 | 0(1,n*b)  e(j,k+1)'| 
+                       |        |                 | 0(1,n*b)  e(j,k+1)'|
                        |  I(n)  |                  -                  -
                        | 0(1,n) |
-                        -      -           
+                        -      -
 
-     where I(r) is the r x r identity matrix, 0(r,s) is the r x s zero matrix, 
+     where I(r) is the r x r identity matrix, 0(r,s) is the r x s zero matrix,
      and e(r,s) is the sth column of I(r).  e is the vector e(n*b+1,n*b+1).
 
    Notes:
@@ -1806,8 +1808,8 @@ void update_psi_quadratic_form(TMatrix S, int n, int m, int k, TVector lambda, T
       x=pElementM(XX)+j*RowM(XX)+u;
       s[k+1]=x[1]*w;
       for (v=m-1; v >= 0; v--)
-	for (i=n-1; i >= 0; s--, x--, i--)
-	  (*s)+=z[i]*(*x)*w;
+    for (i=n-1; i >= 0; s--, x--, i--)
+      (*s)+=z[i]*(*x)*w;
     }
 }
 
@@ -1816,8 +1818,8 @@ void update_psi_quadratic_form(TMatrix S, int n, int m, int k, TVector lambda, T
      model:  point to a valid TStateModel structure
 
    Results:
-     A draw of psi conditional on A0,   
- 
+     A draw of psi conditional on A0,
+
    Notes:
      The matrices MUST be in column major format.  Basic matrix routines from
      bmatrix.c are called in this routine.
@@ -1829,11 +1831,11 @@ void Draw_psi(TStateModel *model)
   TMatrix S, XX, XY;
   T_VAR_Parameters *p=(T_VAR_Parameters*)(model->p->p);
 
-  // Update state dependent matrices if necessary
+/*    // Update state dependent matrices if necessary   ansi-c*/
   if (!p->valid_state_dependent_fields)
     UpdateStateDependentFields(p,model->sv->S);
 
-  // Allocate memory
+/*    // Allocate memory   ansi-c*/
   XX=CreateMatrix(p->npre,p->npre);
   XY=CreateMatrix(p->npre,p->nvars);
   v=CreateVector(p->npre);
@@ -1847,47 +1849,47 @@ void Draw_psi(TStateModel *model)
       InitializeMatrix(S=CreateMatrix(DimV(p->psi[j]),DimV(p->psi[j])),0.0);
 
       for (k=p->n_coef_states[j]-1; k >= 0; k--)
-	{
-          // Accumulate XX and YY
-	  InitializeMatrix(XX,0.0);
-	  InitializeMatrix(XY,0.0);
-	  for (s=p->nstates-1; s >= 0; s--)
-	    if (p->coef_states[j][s] == k)
-	      {
-		UpdateMS(XX,p->XX[s],p->Zeta[j][p->var_states[j][s]]);
-		UpdateMS(XY,p->XY[s],p->Zeta[j][p->var_states[j][s]]);
-	      }
+    {
+/*            // Accumulate XX and YY   ansi-c*/
+      InitializeMatrix(XX,0.0);
+      InitializeMatrix(XY,0.0);
+      for (s=p->nstates-1; s >= 0; s--)
+        if (p->coef_states[j][s] == k)
+          {
+        UpdateMS(XX,p->XX[s],p->Zeta[j][p->var_states[j][s]]);
+        UpdateMS(XY,p->XY[s],p->Zeta[j][p->var_states[j][s]]);
+          }
 
-	  // XY + XX*W[j]
-	  bSubtract(pElementM(XY),pElementM(XY),pElementM(XX),p->npre*p->nvars);
+/*        // XY + XX*W[j]   ansi-c*/
+      bSubtract(pElementM(XY),pElementM(XY),pElementM(XX),p->npre*p->nvars);
 
-          // (XY + XX*W[j])*a0[j][k]
-	  ProductMV(v,XY,p->A0[j][k]);
+/*            // (XY + XX*W[j])*a0[j][k]   ansi-c*/
+      ProductMV(v,XY,p->A0[j][k]);
 
-	  // b += PSI[k]'*diag(LAMBDA*lambda[j][k]+e)*(XY + XX*W[j])*a0[j][k]
-	  ElementV(b,p->npre-1+k)+=ElementV(v,i=p->npre-1);
-	  for (i--; i >= 0; )
-	    for (m=p->nvars-1; m >= 0; i--, m--)
-	      ElementV(b,i)+=ElementV(p->lambda[j][k],m)*ElementV(v,i);
-	  
-	  // S += PSI[k]'*diag(LAMBDA*lambda[j][k]+e)*XX*diag(LAMBDA*lambda[j][k]+e)*PSI[k]
-	  update_psi_quadratic_form(S,p->nvars,p->nlags,k,p->lambda[j][k],XX); 
+/*        // b += PSI[k]'*diag(LAMBDA*lambda[j][k]+e)*(XY + XX*W[j])*a0[j][k]   ansi-c*/
+      ElementV(b,p->npre-1+k)+=ElementV(v,i=p->npre-1);
+      for (i--; i >= 0; )
+        for (m=p->nvars-1; m >= 0; i--, m--)
+          ElementV(b,i)+=ElementV(p->lambda[j][k],m)*ElementV(v,i);
 
-	  if (_VERBOSE_COUNT)
-	    {
-	      fprintf(V_FILE,"//=== (j = %d   k = %d) ===//\n",j,k);
-	      fprintf(V_FILE,"XX =\n");
-	      dw_PrintMatrix(V_FILE,XX,"%lg ");
+/*        // S += PSI[k]'*diag(LAMBDA*lambda[j][k]+e)*XX*diag(LAMBDA*lambda[j][k]+e)*PSI[k]   ansi-c*/
+      update_psi_quadratic_form(S,p->nvars,p->nlags,k,p->lambda[j][k],XX);
 
-	      fprintf(V_FILE,"lambda[%d][%d] =\n",j,k);
-	      dw_PrintVector(V_FILE,p->lambda[j][k],"%lg ");
+      if (_VERBOSE_COUNT)
+        {
+          fprintf(V_FILE,"//=== (j = %d   k = %d) ===//\n",j,k);
+          fprintf(V_FILE,"XX =\n");
+          dw_PrintMatrix(V_FILE,XX,"%lg ");
 
-	      fprintf(V_FILE,"S =\n");
-	      dw_PrintMatrix(V_FILE,S,"%lg ");
-	    }
-	}
+          fprintf(V_FILE,"lambda[%d][%d] =\n",j,k);
+          dw_PrintVector(V_FILE,p->lambda[j][k],"%lg ");
 
-      // Add inverse prior
+          fprintf(V_FILE,"S =\n");
+          dw_PrintMatrix(V_FILE,S,"%lg ");
+        }
+    }
+
+/*        // Add inverse prior   ansi-c*/
       AddMM(S,S,p->inverse_psi_prior[j]);
 
 /*       TMatrix U,V; */
@@ -1899,19 +1901,19 @@ void Draw_psi(TStateModel *model)
 /*       FreeMatrix(U); FreeMatrix(V); FreeVector(d); */
 /*       getchar(); */
       if (_VERBOSE_COUNT)
-	{
-	  fprintf(V_FILE,"inverse prior=\n");
-	  dw_PrintMatrix(V_FILE,p->inverse_psi_prior[j],"%lg ");
+    {
+      fprintf(V_FILE,"inverse prior=\n");
+      dw_PrintMatrix(V_FILE,p->inverse_psi_prior[j],"%lg ");
 
-	  fprintf(V_FILE,"S =\n");
-	  dw_PrintMatrix(V_FILE,S,"%lg ");
-	  fprintf(V_FILE,"//=====================================================================//\n");
-	}
+      fprintf(V_FILE,"S =\n");
+      dw_PrintMatrix(V_FILE,S,"%lg ");
+      fprintf(V_FILE,"//=====================================================================//\n");
+    }
 
-      // Draw psi[j]
+/*        // Draw psi[j]   ansi-c*/
       if (!DrawNormal_InverseVariance(p->psi[j],b,S))
-	SingularInverseVariance_RecoveryAttempt(p->psi[j],b,S,p->inverse_psi_prior[j],model,PSI_ERR);
-	   
+    SingularInverseVariance_RecoveryAttempt(p->psi[j],b,S,p->inverse_psi_prior[j],model,PSI_ERR);
+
       FreeMatrix(S);
       FreeVector(b);
     }
@@ -1921,17 +1923,17 @@ void Draw_psi(TStateModel *model)
   FreeMatrix(XX);
 }
 
-//-----------------------------------------------------------------------------//
-//-------------------------------- Draw lambda --------------------------------//
-//-----------------------------------------------------------------------------//
+/*  //-----------------------------------------------------------------------------//   ansi-c*/
+/*  //-------------------------------- Draw lambda --------------------------------//   ansi-c*/
+/*  //-----------------------------------------------------------------------------//   ansi-c*/
 /*
    Assumes:
      S:  n x n matrix.
      XX: (n*b + 1) x (n*b + 1) symmetric matrix.  XX must be column major.
      psi:  (n*b+j) dimensional vector with j > 0.
- 
+
    Results:
-     Set S to 
+     Set S to
 
                LAMBDA'*diag(PSI[k]*psi)*XX*diag(PSI[k]*psi)*LAMBDA
 
@@ -1942,12 +1944,12 @@ void Draw_psi(TStateModel *model)
                        |   .    |                  -                  -
                        |   .    |                 |  I(n*b)   0(n*b,j) |
               LAMBDA = |   .    |        PSI[k] = |                    |
-                       |        |                 | 0(1,n*b)   e(j,k)' | 
+                       |        |                 | 0(1,n*b)   e(j,k)' |
                        |  I(n)  |                  -                  -
                        | 0(1,n) |
-                        -      -        
+                        -      -
 
-     where I(r) is the r x r identity matrix, 0(r,s) is the r x s zero matrix, 
+     where I(r) is the r x r identity matrix, 0(r,s) is the r x s zero matrix,
      and e(r,s) is the sth column of I(r).
 
    Notes:
@@ -1962,10 +1964,10 @@ void lambda_quadratic_form(TMatrix S, int b, TVector psi, TMatrix XX)
   for (bj=b-1; bj >= 0; bj--)
     for (y=pElementM(S)+(n-1)*n, j=n-1; j >= 0; x-=RowM(XX), y-=n, j--)
       {
-	w=z[bj*n+j];
-	for (r=b*n-1; r >= 0; )
-	  for (i=n-1; i >= 0; r--, i--)
-	    y[i]+=z[r]*x[r]*w;
+    w=z[bj*n+j];
+    for (r=b*n-1; r >= 0; )
+      for (i=n-1; i >= 0; r--, i--)
+        y[i]+=z[r]*x[r]*w;
       }
 }
 
@@ -1982,11 +1984,11 @@ void Draw_lambda(TStateModel *model)
   TMatrix S, XX, XY;
   T_VAR_Parameters *p=(T_VAR_Parameters*)(model->p->p);
 
-  // Update state dependent matrices if necessary
+/*    // Update state dependent matrices if necessary   ansi-c*/
   if (!p->valid_state_dependent_fields)
     UpdateStateDependentFields(p,model->sv->S);
 
-  // Allocate memory
+/*    // Allocate memory   ansi-c*/
   XX=CreateMatrix(p->npre,p->npre);
   XY=CreateMatrix(p->npre,p->nvars);
   v=CreateVector(p->npre);
@@ -1999,72 +2001,72 @@ void Draw_lambda(TStateModel *model)
   for (j=p->nvars-1; j >= 0; j--)
     {
       for (k=p->n_coef_states[j]-1; k > 0; k--)
-	{
-	  // Accumulate XX and XY
-	  InitializeMatrix(XX,0.0);
-	  InitializeMatrix(XY,0.0);
-	  for (s=p->nstates-1; s >= 0; s--)
-	    if (p->coef_states[j][s] == k)
-	      {
-		UpdateMS(XX,p->XX[s],p->Zeta[j][p->var_states[j][s]]);
-		UpdateMS(XY,p->XY[s],p->Zeta[j][p->var_states[j][s]]);
-	      }
+    {
+/*        // Accumulate XX and XY   ansi-c*/
+      InitializeMatrix(XX,0.0);
+      InitializeMatrix(XY,0.0);
+      for (s=p->nstates-1; s >= 0; s--)
+        if (p->coef_states[j][s] == k)
+          {
+        UpdateMS(XX,p->XX[s],p->Zeta[j][p->var_states[j][s]]);
+        UpdateMS(XY,p->XY[s],p->Zeta[j][p->var_states[j][s]]);
+          }
 
-	  // Compute mean
-	  // XY + XX*W[j]
-	  bSubtract(pElementM(XY),pElementM(XY),pElementM(XX),p->npre*p->nvars);
+/*        // Compute mean   ansi-c*/
+/*        // XY + XX*W[j]   ansi-c*/
+      bSubtract(pElementM(XY),pElementM(XY),pElementM(XX),p->npre*p->nvars);
 
-          // (XY + XX*W[j])*a0[j][k]
-	  ProductMV(v,XY,p->A0[j][k]);
+/*            // (XY + XX*W[j])*a0[j][k]   ansi-c*/
+      ProductMV(v,XY,p->A0[j][k]);
 
-	  // (XY + XX*W[j])*a0[j][k] - XX*diag(PSI[k]*psi[j])*e
-	  bLinearUpdateScalar(pElementV(v),pElementM(XX)+p->npre*(p->npre-1),-ElementV(p->constant[j],k),p->npre);
+/*        // (XY + XX*W[j])*a0[j][k] - XX*diag(PSI[k]*psi[j])*e   ansi-c*/
+      bLinearUpdateScalar(pElementV(v),pElementM(XX)+p->npre*(p->npre-1),-ElementV(p->constant[j],k),p->npre);
 
-	  // b = LAMBDA'*diag(PSI[j][k]*psi[j])*((XY + XX*W[j])*a0[j][k] - XX*diag(PSI[k]*psi[j])*lambda_hat)
-	  InitializeVector(b,0.0);
-	  for (i=p->npre-2; i >= 0; )
-	    for (m=p->nvars-1; m >= 0; i--, m--)
-	      ElementV(b,m)+=ElementV(p->psi[j],i)*ElementV(v,i);
- 
-	  // Compute inverse variance matrix
-	  // S = LAMBDA'*diag(PSI[j][k]*psi[j])*XX*diag(PSI[j][k]*psi[j])*LAMBDA
-	  lambda_quadratic_form(S,p->nlags,p->psi[j],XX);
+/*        // b = LAMBDA'*diag(PSI[j][k]*psi[j])*((XY + XX*W[j])*a0[j][k] - XX*diag(PSI[k]*psi[j])*lambda_hat)   ansi-c*/
+      InitializeVector(b,0.0);
+      for (i=p->npre-2; i >= 0; )
+        for (m=p->nvars-1; m >= 0; i--, m--)
+          ElementV(b,m)+=ElementV(p->psi[j],i)*ElementV(v,i);
 
-	  for (i=p->nvars-1; i >= 0; i--) ElementM(S,i,i)+=p->inverse_lambda_prior;
+/*        // Compute inverse variance matrix   ansi-c*/
+/*        // S = LAMBDA'*diag(PSI[j][k]*psi[j])*XX*diag(PSI[j][k]*psi[j])*LAMBDA   ansi-c*/
+      lambda_quadratic_form(S,p->nlags,p->psi[j],XX);
 
-	  if (_VERBOSE_COUNT)
-	    {
-	      fprintf(V_FILE,"//=== (j = %d   k = %d) ===//\n",j,k);
-	      fprintf(V_FILE,"XX =\n");
-	      dw_PrintMatrix(V_FILE,XX,"%lg ");
+      for (i=p->nvars-1; i >= 0; i--) ElementM(S,i,i)+=p->inverse_lambda_prior;
 
-	      fprintf(V_FILE,"psi[%d][%d] =\n",j,k);
-	      dw_PrintVector(V_FILE,p->psi[j],"%lg ");
+      if (_VERBOSE_COUNT)
+        {
+          fprintf(V_FILE,"//=== (j = %d   k = %d) ===//\n",j,k);
+          fprintf(V_FILE,"XX =\n");
+          dw_PrintMatrix(V_FILE,XX,"%lg ");
 
-	      fprintf(V_FILE,"S =\n");
-	      dw_PrintMatrix(V_FILE,S,"%lg ");
+          fprintf(V_FILE,"psi[%d][%d] =\n",j,k);
+          dw_PrintVector(V_FILE,p->psi[j],"%lg ");
 
-	      fprintf(V_FILE,"inverse prior = %lg\n",p->inverse_lambda_prior);
-	    }
+          fprintf(V_FILE,"S =\n");
+          dw_PrintMatrix(V_FILE,S,"%lg ");
 
-	  // Draw lambda[j][k]
-	  if (!DrawNormal_InverseVariance(p->lambda[j][k],b,S))
-	    {
-	      TMatrix InversePrior=IdentityMatrix((TMatrix)NULL,p->nvars);
-	      ProductMS(InversePrior,InversePrior,p->inverse_lambda_prior);
-	      SingularInverseVariance_RecoveryAttempt(p->lambda[j][k],b,S,InversePrior,model,LAMBDA_ERR);
-	      FreeMatrix(InversePrior);
-	    }
-	}
+          fprintf(V_FILE,"inverse prior = %lg\n",p->inverse_lambda_prior);
+        }
 
-      // State 0 normalized to one
+/*        // Draw lambda[j][k]   ansi-c*/
+      if (!DrawNormal_InverseVariance(p->lambda[j][k],b,S))
+        {
+          TMatrix InversePrior=IdentityMatrix((TMatrix)NULL,p->nvars);
+          ProductMS(InversePrior,InversePrior,p->inverse_lambda_prior);
+          SingularInverseVariance_RecoveryAttempt(p->lambda[j][k],b,S,InversePrior,model,LAMBDA_ERR);
+          FreeMatrix(InversePrior);
+        }
+    }
+
+/*        // State 0 normalized to one   ansi-c*/
       InitializeVector(p->lambda[j][k],1.0);
     }
 
   if (_VERBOSE_COUNT)
     fprintf(V_FILE,"//====================================================//\n");
 
-  // Free memory
+/*    // Free memory   ansi-c*/
   FreeMatrix(S);
   FreeVector(b);
   FreeVector(v);
@@ -2081,12 +2083,12 @@ void Draw_lambda(TStateModel *model)
 void UpdateStateDependentFields(T_VAR_Parameters *p, int *S)
 {
   int i, s_prev, s_curr, t;
-  
+
   dw_InitializeArray_int(p->T,0);
 
   if (!p->valid_state_dependent_fields_previous)
     {
-      //=== Update Y'Y, X'Y, and X'X  ===
+/*        //=== Update Y'Y, X'Y, and X'X  ===   ansi-c*/
       for (i=dw_DimA(p->YY)-1; i >= 0; i--)
         {
           InitializeMatrix(p->YY[i],0.0);
@@ -2101,8 +2103,8 @@ void UpdateStateDependentFields(T_VAR_Parameters *p, int *S)
           AddMM(p->XX[s_curr],p->XX[s_curr],p->xx[t]);
           p->T[s_curr]++;
         }
-      //p->valid_state_dependent_fields_previous=1;
-    } 
+/*        //p->valid_state_dependent_fields_previous=1;   ansi-c*/
+    }
   else
     {
       for (t=p->nobs; t > 0; t--)
@@ -2119,10 +2121,10 @@ void UpdateStateDependentFields(T_VAR_Parameters *p, int *S)
           p->T[s_curr]++;
         }
     }
-    
-  //memcpy(p->S,S,(p->nobs+1)*sizeof(int));
 
-  p->valid_state_dependent_fields=1;  
+/*    //memcpy(p->S,S,(p->nobs+1)*sizeof(int));   ansi-c*/
+
+  p->valid_state_dependent_fields=1;
 }
 
 /*
@@ -2148,14 +2150,14 @@ void Update_A0_from_B0(T_VAR_Parameters *p)
 }
 
 /*
-    Sets 
+    Sets
 
              Aplus[j][k] = V[j]*b0[j][k] - W[j]*A0[j][k]
 
     where 0 <= j < p->nvars and 0 <= k < p->n_coef_states[j].
 
-    If (p->Specification & SPEC_RANDOMWALK) is set, uses the fact that 
-    W'[j] = [-I 0].  In this case a call to the base matrix function bAdd() is 
+    If (p->Specification & SPEC_RANDOMWALK) is set, uses the fact that
+    W'[j] = [-I 0].  In this case a call to the base matrix function bAdd() is
     made.
 
     If p->IsIdentity_V[j] is set, uses the fact that V[j] = I.
@@ -2167,45 +2169,45 @@ void Update_aplus_from_bplus_a0(int j, int k, T_VAR_Parameters *p)
   if (p->IsIdentity_V[j])
     if (p->W[j])
       if (p->Specification & SPEC_RANDOM_WALK)
-	{
-	  bAdd(pElementV(p->Aplus[j][k]),pElementV(p->bplus[j][k]),pElementV(p->A0[j][k]),p->nvars);
-	  memcpy(pElementV(p->Aplus[j][k]) + p->nvars,pElementV(p->bplus[j][k]) + p->nvars,(p->npre - p->nvars)*sizeof(PRECISION));
-	}
+    {
+      bAdd(pElementV(p->Aplus[j][k]),pElementV(p->bplus[j][k]),pElementV(p->A0[j][k]),p->nvars);
+      memcpy(pElementV(p->Aplus[j][k]) + p->nvars,pElementV(p->bplus[j][k]) + p->nvars,(p->npre - p->nvars)*sizeof(PRECISION));
+    }
       else
-	{
-	  ProductMV(p->Aplus[j][k],p->W[j],p->A0[j][k]);
-	  SubtractVV(p->Aplus[j][k],p->bplus[j][k],p->Aplus[j][k]);
-	}
+    {
+      ProductMV(p->Aplus[j][k],p->W[j],p->A0[j][k]);
+      SubtractVV(p->Aplus[j][k],p->bplus[j][k],p->Aplus[j][k]);
+    }
     else
       EquateVector(p->Aplus[j][k],p->bplus[j][k]);
   else
     if (p->V[j])
       {
-	ProductMV(p->Aplus[j][k],p->V[j],p->bplus[j][k]);
-	if (p->W[j])
-	  if (p->Specification & SPEC_RANDOM_WALK)
-	    bAdd(pElementV(p->Aplus[j][k]),pElementV(p->Aplus[j][k]),pElementV(p->A0[j][k]),p->nvars);
-	  else
-	    {
-	      v=ProductMV((TVector)NULL,p->W[j],p->A0[j][k]);
-	      SubtractVV(p->Aplus[j][k],p->Aplus[j][k],v);
-	      FreeVector(v);
-	    }
+    ProductMV(p->Aplus[j][k],p->V[j],p->bplus[j][k]);
+    if (p->W[j])
+      if (p->Specification & SPEC_RANDOM_WALK)
+        bAdd(pElementV(p->Aplus[j][k]),pElementV(p->Aplus[j][k]),pElementV(p->A0[j][k]),p->nvars);
+      else
+        {
+          v=ProductMV((TVector)NULL,p->W[j],p->A0[j][k]);
+          SubtractVV(p->Aplus[j][k],p->Aplus[j][k],v);
+          FreeVector(v);
+        }
       }
     else
       if (p->W[j])
-	if (p->Specification & SPEC_RANDOM_WALK)
-	  {
-	    InitializeVector(p->Aplus[j][k],0.0);
-	    memcpy(pElementV(p->Aplus[j][k]),pElementV(p->A0[j][k]),p->nvars*sizeof(PRECISION));
-	  }
-	else
-	  {
-	    ProductMV(p->Aplus[j][k],p->W[j],p->A0[j][k]);
-	    MinusV(p->Aplus[j][k],p->Aplus[j][k]);
-	  }
+    if (p->Specification & SPEC_RANDOM_WALK)
+      {
+        InitializeVector(p->Aplus[j][k],0.0);
+        memcpy(pElementV(p->Aplus[j][k]),pElementV(p->A0[j][k]),p->nvars*sizeof(PRECISION));
+      }
+    else
+      {
+        ProductMV(p->Aplus[j][k],p->W[j],p->A0[j][k]);
+        MinusV(p->Aplus[j][k],p->Aplus[j][k]);
+      }
       else
-	InitializeVector(p->Aplus[j][k],0.0);
+    InitializeVector(p->Aplus[j][k],0.0);
 }
 
 /*
@@ -2257,21 +2259,21 @@ void Update_bplus_from_lambda_psi(T_VAR_Parameters *p)
   PRECISION *p_bplus, *p_lambda, *p_psi;
   if (!(p->Specification & SPEC_SIMS_ZHA))
     {
-      fprintf(stderr,"Update_bplus_from_lambda_psi() called without Sims-Zha specification\n");
+      swz_fprintf_err("Update_bplus_from_lambda_psi() called without Sims-Zha specification\n");
       exit(0);
     }
   for (j=p->nvars-1; j >= 0; j--)
     {
       p_psi=pElementV(p->psi[j]);
       for (k=dw_DimA(p->bplus[j])-1; k >= 0; k--)
-	{
-	  p_bplus=pElementV(p->bplus[j][k]);
-	  p_lambda=pElementV(p->lambda[j][k]);
+    {
+      p_bplus=pElementV(p->bplus[j][k]);
+      p_lambda=pElementV(p->lambda[j][k]);
           p_bplus[i=p->nlags * p->nvars]=ElementV(p->constant[j],k);
-	  for (i--; i >= 0; )
-	    for (m=p->nvars-1; m >= 0; i--, m--)
-	      p_bplus[i]=p_lambda[m]*p_psi[i];
-	}
+      for (i--; i >= 0; )
+        for (m=p->nvars-1; m >= 0; i--, m--)
+          p_bplus[i]=p_lambda[m]*p_psi[i];
+    }
     }
 }
 
@@ -2299,39 +2301,39 @@ void Update_b0_bplus_from_A0_Aplus(T_VAR_Parameters *p)
   TVector v;
   PRECISION *p_Aplus, *p_bplus, *p_A0;
 
-  // A0
+/*    // A0   ansi-c*/
   for (j=p->nvars-1; j >= 0; j--)
     for (k=dw_DimA(p->A0[j])-1; k >= 0; k--)
       TransposeProductMV(p->b0[j][k],p->U[j],p->A0[j][k]);
 
-  // Aplus
+/*    // Aplus   ansi-c*/
   if (p->Specification & SPEC_SIMS_ZHA)
     {
       for (j=p->nvars-1; j >= 0; j--)
-	for (k=dw_DimA(p->Aplus[j])-1; k >= 0; k--)
-	  {
-	    p_A0=pElementV(p->A0[j][k]);
-	    p_Aplus=pElementV(p->Aplus[j][k]);
-	    p_bplus=pElementV(p->bplus[j][k]);
-	    i=p->nvars;
-	    memcpy(p_bplus+i,p_Aplus+i,(p->npre - p->nvars)*sizeof(PRECISION));
-	    for (i--; i >= 0; i--) p_bplus[i]=p_Aplus[i]-p_A0[i];
-	  }
+    for (k=dw_DimA(p->Aplus[j])-1; k >= 0; k--)
+      {
+        p_A0=pElementV(p->A0[j][k]);
+        p_Aplus=pElementV(p->Aplus[j][k]);
+        p_bplus=pElementV(p->bplus[j][k]);
+        i=p->nvars;
+        memcpy(p_bplus+i,p_Aplus+i,(p->npre - p->nvars)*sizeof(PRECISION));
+        for (i--; i >= 0; i--) p_bplus[i]=p_Aplus[i]-p_A0[i];
+      }
     }
   else
     {
       v=CreateVector(p->npre);
       for (j=p->nvars-1; j >= 0; j--)
-	if (p->V[j])
-	  for (k=dw_DimA(p->A0[j])-1; k >= 0; k--)
-	    if (p->W[j])
-	      {
-		ProductMV(v,p->W[j],p->A0[j][k]);
-		AddVV(v,v,p->Aplus[j][k]);
-		TransposeProductMV(p->bplus[j][k],p->V[j],v);
-	      }
-	    else
-	      TransposeProductMV(p->bplus[j][k],p->V[j],p->Aplus[j][k]);
+    if (p->V[j])
+      for (k=dw_DimA(p->A0[j])-1; k >= 0; k--)
+        if (p->W[j])
+          {
+        ProductMV(v,p->W[j],p->A0[j][k]);
+        AddVV(v,v,p->Aplus[j][k]);
+        TransposeProductMV(p->bplus[j][k],p->V[j],v);
+          }
+        else
+          TransposeProductMV(p->bplus[j][k],p->V[j],p->Aplus[j][k]);
       FreeVector(v);
     }
 }
@@ -2368,17 +2370,17 @@ void Update_lambda_psi_from_bplus(T_VAR_Parameters *p)
       InitializeVector(p->lambda[j][0],1.0);
 
       for (k=dw_DimA(p->bplus[j])-1; k > 0; k--)
-	{
-	  p_bplus=pElementV(p->bplus[j][k]);
-	  p_lambda=pElementV(p->lambda[j][k]);
-	  ElementV(p->constant[j],k)=p_bplus[dim];
-	  for (m=p->nvars-1; m >= 0; m--)
-	    {
-	      for (n=dim+m, i=n-p->nvars; i >= 0; i-=p->nvars)
-		if (fabs(p_psi[i]) > fabs(p_psi[n])) n=i;
-	      p_lambda[m]=(p_psi[n] != 0) ? p_bplus[n]/p_psi[n] : 0;
-	    }
-	}
+    {
+      p_bplus=pElementV(p->bplus[j][k]);
+      p_lambda=pElementV(p->lambda[j][k]);
+      ElementV(p->constant[j],k)=p_bplus[dim];
+      for (m=p->nvars-1; m >= 0; m--)
+        {
+          for (n=dim+m, i=n-p->nvars; i >= 0; i-=p->nvars)
+        if (fabs(p_psi[i]) > fabs(p_psi[n])) n=i;
+          p_lambda[m]=(p_psi[n] != 0) ? p_bplus[n]/p_psi[n] : 0;
+        }
+    }
     }
 }
 
@@ -2401,8 +2403,8 @@ void Update_lambda_psi_from_bplus(T_VAR_Parameters *p)
 
              Inverse(A0*Xi) * J * S^(h-1) * J'
 
-   where 
-                
+   where
+
                     B(1)   I ... 0
                      .     . .   .
                S =   .     .  .  .
@@ -2411,7 +2413,7 @@ void Update_lambda_psi_from_bplus(T_VAR_Parameters *p)
                     B(p)   0 ... 0
 
                J = [I 0 ... 0]
-   
+
                B'= [B'(1) ... B'(p) C']
 */
 TMatrix ComputeImpulseResponseReducedForm(TMatrix R, int h, TMatrix A0_Xi_inv, TMatrix B, int nlags)
@@ -2434,8 +2436,8 @@ TMatrix ComputeImpulseResponseReducedForm(TMatrix R, int h, TMatrix A0_Xi_inv, T
   else
     if ((RowM(X) != h) || (ColM(X) != n*n))
       {
-	dw_Error(SIZE_ERR);
-	return (TMatrix)NULL;
+    dw_Error(SIZE_ERR);
+    return (TMatrix)NULL;
       }
 
   for (m=n*n-1, i=n-1; i >= 0; i--)
@@ -2447,30 +2449,30 @@ TMatrix ComputeImpulseResponseReducedForm(TMatrix R, int h, TMatrix A0_Xi_inv, T
       InitializeMatrix(S=CreateMatrix(n*nlags,n*nlags),0.0);
       for (i=n*(nlags - 1) - 1; i >= 0; i--) ElementM(S,i,i+n)=1.0;
       InsertSubMatrix(S,B,0,0,0,0,n*nlags,n);
-     
-      
+
+
       W=SubMatrix((TMatrix)NULL,S,0,0,n,n);
       ProductMM(W,A0_Xi_inv,W);
       for (m=n*n-1, i=n-1; i >= 0; i--)
-	for (j=n-1; j >= 0; m--, j--)
-	  ElementM(X,1,m)=ElementM(W,i,j);
+    for (j=n-1; j >= 0; m--, j--)
+      ElementM(X,1,m)=ElementM(W,i,j);
 
       if (h > 2)
-	{
-	  T=EquateMatrix((TMatrix)NULL,S);
+    {
+      T=EquateMatrix((TMatrix)NULL,S);
 
-	  for (t=2; t < h; t++)
-	    {
-	      ProductMM(T,T,S);
-	      SubMatrix(W,T,0,0,n,n);
-	      ProductMM(W,A0_Xi_inv,W);
-	      for (m=n*n-1, i=n-1; i >= 0; i--)
-		for (j=n-1; j >= 0; m--, j--)
-		  ElementM(X,t,m)=ElementM(W,i,j);
-	    }
+      for (t=2; t < h; t++)
+        {
+          ProductMM(T,T,S);
+          SubMatrix(W,T,0,0,n,n);
+          ProductMM(W,A0_Xi_inv,W);
+          for (m=n*n-1, i=n-1; i >= 0; i--)
+        for (j=n-1; j >= 0; m--, j--)
+          ElementM(X,t,m)=ElementM(W,i,j);
+        }
 
-	  FreeMatrix(T);
-	}
+      FreeMatrix(T);
+    }
 
       FreeMatrix(W);
       FreeMatrix(S);
@@ -2496,8 +2498,8 @@ TMatrix ComputeImpulseResponseReducedForm(TMatrix R, int h, TMatrix A0_Xi_inv, T
 
              Inverse(A0*Xi) * J * S^(h-1) * J'
 
-   where 
-                
+   where
+
                     B(1)   I ... 0
                      .     . .   .
                S =   .     .  .  .
@@ -2506,7 +2508,7 @@ TMatrix ComputeImpulseResponseReducedForm(TMatrix R, int h, TMatrix A0_Xi_inv, T
                     B(p)   0 ... 0
 
                J = [I 0 ... 0]
-   
+
                B = Aplus * Inverse(A0)
 
                B'= [B'(1) ... B'(p) C']
@@ -2520,7 +2522,7 @@ TMatrix ComputeImpulseResponseStructural(TMatrix R, int h, TMatrix A0, TMatrix A
   TMatrix X, B;
   int n=RowM(A0), i, j;
   PRECISION xi_inv;
- 
+
   X=Inverse_LU((TMatrix)NULL,A0);
 
   B=(h > 1) ? ProductMM((TMatrix)NULL,Aplus,X) : (TMatrix)NULL;
@@ -2535,12 +2537,12 @@ TMatrix ComputeImpulseResponseStructural(TMatrix R, int h, TMatrix A0, TMatrix A
   FreeMatrix(B);
 
   return R;
-}  
+}
 
 /*
    Consider the model
 
-     y(t)' * A(0)(s(t)) = Sum[y(t-i)' * A(i)(s(t)),i=1,...,p] + 
+     y(t)' * A(0)(s(t)) = Sum[y(t-i)' * A(i)(s(t)),i=1,...,p] +
                              + z(t)' * C + epsilon(t)' * Inverse(Xi(s(t)))
 
 
@@ -2549,8 +2551,8 @@ TMatrix ComputeImpulseResponseStructural(TMatrix R, int h, TMatrix A0, TMatrix A
 
              Inverse(Xi(k)) * Inverse(A(0)(k)) * J * S^(h-1) * J'
 
-   where 
-                
+   where
+
                S =  A(1)(k)*Inverse(A(0)(k))   I ... 0
                              .                 . .   .
                              .                 .  .  .
@@ -2617,22 +2619,22 @@ TMatrix ComputeVarianceDecomposition(TMatrix X, TMatrix IR, int nvars)
   else
     if (ColM(IR) != nvars*nvars)
       {
-	dw_Error(SIZE_ERR);
-	return (TMatrix)NULL;
+    dw_Error(SIZE_ERR);
+    return (TMatrix)NULL;
       }
     else
       if (!Y)
-	{
-	  if (!(Y=CreateMatrix(RowM(IR),ColM(IR)))) return (TMatrix)NULL;
-	}
+    {
+      if (!(Y=CreateMatrix(RowM(IR),ColM(IR)))) return (TMatrix)NULL;
+    }
       else
-	if ((RowM(Y) != RowM(IR)) || (ColM(Y) != ColM(IR)))
-	  {
-	    dw_Error(SIZE_ERR);
-	    return (TMatrix)NULL;
-	  }
+    if ((RowM(Y) != RowM(IR)) || (ColM(Y) != ColM(IR)))
+      {
+        dw_Error(SIZE_ERR);
+        return (TMatrix)NULL;
+      }
 
-  // Compute cummulative variation
+/*    // Compute cummulative variation   ansi-c*/
   for (j=nvars*nvars-1; j >= 0; j--)
     {
       tmp=ElementM(IR,0,j);
@@ -2641,17 +2643,17 @@ TMatrix ComputeVarianceDecomposition(TMatrix X, TMatrix IR, int nvars)
   for (t=1; t < RowM(IR); t++)
     for (j=nvars*nvars-1; j >= 0; j--)
       {
-	tmp=ElementM(IR,t,j);
-	ElementM(Y,t,j)=tmp*tmp + ElementM(Y,t-1,j);
+    tmp=ElementM(IR,t,j);
+    ElementM(Y,t,j)=tmp*tmp + ElementM(Y,t-1,j);
       }
 
-  // Compute cummulative variance decomposition
+/*    // Compute cummulative variance decomposition   ansi-c*/
   for (t=0; t < RowM(IR); t++)
     for (j=nvars-1; j >= 0; j--)
       {
-	for (sum=0.0, i=nvars*(nvars-1)+j; i >= 0; i-=nvars) sum+=ElementM(Y,t,i);
-	if (sum > 0)
-	  for (sum=1.0/sum, i=nvars*(nvars-1)+j; i >= 0; i-=nvars) ElementM(Y,t,i)*=sum;
+    for (sum=0.0, i=nvars*(nvars-1)+j; i >= 0; i-=nvars) sum+=ElementM(Y,t,i);
+    if (sum > 0)
+      for (sum=1.0/sum, i=nvars*(nvars-1)+j; i >= 0; i-=nvars) ElementM(Y,t,i)*=sum;
       }
 
   return Y;
@@ -2677,15 +2679,15 @@ TMatrix ComputeVarianceDecomposition(TMatrix X, TMatrix IR, int nvars)
 
 /*       // bplus or psi and constant */
 /*       if (p->bplus[j]) */
-/* 	if (p->Specification & SPEC_SIMS_ZHA) */
-/* 	  constant+=0.5*((p->npre-1)*log(p->n_A0_states) + p->n_coef_states[j]*log(p->n_A0_states/p->n_coef_states[j])); */
-/* 	else */
-/* 	  constant+=0.5*p->n_coef_states[j]*DimV(p->bplus[j][0])*log(p->n_A0_states/p->n_coef_states[j]); */
+/*     if (p->Specification & SPEC_SIMS_ZHA) */
+/*       constant+=0.5*((p->npre-1)*log(p->n_A0_states) + p->n_coef_states[j]*log(p->n_A0_states/p->n_coef_states[j])); */
+/*     else */
+/*       constant+=0.5*p->n_coef_states[j]*DimV(p->bplus[j][0])*log(p->n_A0_states/p->n_coef_states[j]); */
 /*     } */
 /*   return constant; */
 /* } */
 
-#define LN_TWO_PI 1.837877066409345 
+#define LN_TWO_PI 1.837877066409345
 #define LN_TWO    0.6931471805599453
 void SetLogPriorConstant_VAR(T_VAR_Parameters *p)
 {
@@ -2695,31 +2697,31 @@ void SetLogPriorConstant_VAR(T_VAR_Parameters *p)
 
   for (j=p->nvars-1; j >= 0; j--)
     {
-      // Gamma prior on Zeta
+/*        // Gamma prior on Zeta   ansi-c*/
       if (p->n_var_states[j] > 1)
-	 p->log_prior_constant+=(p->n_var_states[j] - 1)*(ElementV(p->zeta_a_prior,j)*log(ElementV(p->zeta_b_prior,j)) 
-							- dw_log_gamma(ElementV(p->zeta_a_prior,j)));
+     p->log_prior_constant+=(p->n_var_states[j] - 1)*(ElementV(p->zeta_a_prior,j)*log(ElementV(p->zeta_b_prior,j))
+                            - dw_log_gamma(ElementV(p->zeta_a_prior,j)));
 
-      // Normal prior on b0 (A0) 
+/*        // Normal prior on b0 (A0)   ansi-c*/
       p->log_prior_constant+=0.5*p->n_coef_states[j]*(-DimV(p->b0[j][0])*LN_TWO_PI + LogAbsDeterminant_LU(p->inverse_b0_prior[j]));
 
       if (p->Specification & SPEC_SIMS_ZHA)
-	{
-	  // Independent normal prior each element of delta with variance equal to delta_prior
-	   p->log_prior_constant-=0.5 * (dw_DimA(p->lambda[j])-1) * p->nvars * (LN_TWO_PI + log(p->lambda_prior));
+    {
+/*        // Independent normal prior each element of delta with variance equal to delta_prior   ansi-c*/
+       p->log_prior_constant-=0.5 * (dw_DimA(p->lambda[j])-1) * p->nvars * (LN_TWO_PI + log(p->lambda_prior));
 
-	  // Normal prior on psi and constant
-	   p->log_prior_constant+=0.5*(-(p->npre-1+p->n_coef_states[j])*LN_TWO_PI + LogAbsDeterminant_LU(p->inverse_psi_prior[j]));
-	}
+/*        // Normal prior on psi and constant   ansi-c*/
+       p->log_prior_constant+=0.5*(-(p->npre-1+p->n_coef_states[j])*LN_TWO_PI + LogAbsDeterminant_LU(p->inverse_psi_prior[j]));
+    }
       else
-	{
-	  // Normal prior on bplus (Aplus)
-	  if (p->bplus[j])
-	    p->log_prior_constant+=0.5*p->n_coef_states[j]*(-DimV(p->bplus[j][0])*LN_TWO_PI + LogAbsDeterminant_LU(p->inverse_bplus_prior[j]));
-	}
+    {
+/*        // Normal prior on bplus (Aplus)   ansi-c*/
+      if (p->bplus[j])
+        p->log_prior_constant+=0.5*p->n_coef_states[j]*(-DimV(p->bplus[j][0])*LN_TWO_PI + LogAbsDeterminant_LU(p->inverse_bplus_prior[j]));
+    }
     }
 
-  // Scale for normalization
+/*    // Scale for normalization   ansi-c*/
   switch (p->normalization_type)
     {
     case VAR_NORMALIZATION_NONE:
@@ -2728,7 +2730,7 @@ void SetLogPriorConstant_VAR(T_VAR_Parameters *p)
       p->log_prior_constant+=p->nvars*log(2);
       break;
     default:
-      fprintf(stdout,"Unknown normalization type\n");
+      printf("Unknown normalization type\n");
       exit(1);
     }
 }
@@ -2745,38 +2747,38 @@ PRECISION LogPrior_VAR(TStateModel *model)
 
   for (j=p->nvars-1; j >= 0; j--)
     {
-      // Gamma prior on Zeta
+/*        // Gamma prior on Zeta   ansi-c*/
       if (p->n_var_states[j] > 1)
-	{
-	  x=ElementV(p->zeta_b_prior,j);
-	  y=2*(ElementV(p->zeta_a_prior,j)-1);
-	  for (k=p->n_var_states[j]-1; k > 0; k--)
-	    log_prior+=y*sqrt(p->Zeta[j][k]) - x*p->Zeta[j][k];
-	}
+    {
+      x=ElementV(p->zeta_b_prior,j);
+      y=2*(ElementV(p->zeta_a_prior,j)-1);
+      for (k=p->n_var_states[j]-1; k > 0; k--)
+        log_prior+=y*sqrt(p->Zeta[j][k]) - x*p->Zeta[j][k];
+    }
 
-      // Normal prior on b0 (A0)
+/*        // Normal prior on b0 (A0)   ansi-c*/
       for (k=p->n_coef_states[j]-1; k >= 0; k--)
- 	log_prior-=0.5*InnerProductSymmetric(p->b0[j][k],p->inverse_b0_prior[j]);
+     log_prior-=0.5*InnerProductSymmetric(p->b0[j][k],p->inverse_b0_prior[j]);
 
       if (p->Specification & SPEC_SIMS_ZHA)
-	{
-	  // Independent normal prior each element of lambda with variance equal to lambda_prior
-	  if (dw_DimA(p->lambda[j]) > 1)
-	    {
-	      for (x=0.0, k=p->n_coef_states[j]-1; k > 0; k--)
-		x+=DotProduct(p->lambda[j][k],p->lambda[j][k]);
-	      log_prior-=0.5 * x * p->inverse_lambda_prior;
-	    }
+    {
+/*        // Independent normal prior each element of lambda with variance equal to lambda_prior   ansi-c*/
+      if (dw_DimA(p->lambda[j]) > 1)
+        {
+          for (x=0.0, k=p->n_coef_states[j]-1; k > 0; k--)
+        x+=DotProduct(p->lambda[j][k],p->lambda[j][k]);
+          log_prior-=0.5 * x * p->inverse_lambda_prior;
+        }
 
-	  // Normal prior on psi and constant
-	  log_prior-=0.5*InnerProductSymmetric(p->psi[j],p->inverse_psi_prior[j]);
-	}
+/*        // Normal prior on psi and constant   ansi-c*/
+      log_prior-=0.5*InnerProductSymmetric(p->psi[j],p->inverse_psi_prior[j]);
+    }
       else
-	{
-	  // Normal prior on bplus (Aplus)
-	  for (k=p->n_coef_states[j]-1; k >= 0; k--)
-	    log_prior-=0.5*InnerProductSymmetric(p->bplus[j][k],p->inverse_bplus_prior[j]);
-	}
+    {
+/*        // Normal prior on bplus (Aplus)   ansi-c*/
+      for (k=p->n_coef_states[j]-1; k >= 0; k--)
+        log_prior-=0.5*InnerProductSymmetric(p->bplus[j][k],p->inverse_bplus_prior[j]);
+    }
     }
 
   return log_prior + p->log_prior_constant;
@@ -2787,32 +2789,32 @@ int NumberFreeParametersVAR(TStateModel *model)
   T_VAR_Parameters *p=(T_VAR_Parameters*)(model->p->p);
   int j,  k, size=0;
 
-  // b0
+/*    // b0   ansi-c*/
   for (j=0; j < p->nvars; j++)
     for (k=0; k < dw_DimA(p->b0[j]); k++)
       size+=DimV(p->b0[j][k]);
 
   if (p->Specification & SPEC_SIMS_ZHA)
     {
-      // lambda
+/*        // lambda   ansi-c*/
       for (j=0; j < p->nvars; j++)
-	for (k=1; k < dw_DimA(p->lambda[j]); k++)
-	  size+=DimV(p->lambda[j][k]);
+    for (k=1; k < dw_DimA(p->lambda[j]); k++)
+      size+=DimV(p->lambda[j][k]);
 
-      // psi
+/*        // psi   ansi-c*/
       for (j=0; j < p->nvars; j++)
-	size+=DimV(p->psi[j]);
+    size+=DimV(p->psi[j]);
     }
   else
     {
-      // bplus
+/*        // bplus   ansi-c*/
       for (j=0; j < p->nvars; j++)
-	if (p->bplus[j])
-	  for (k=0; k < dw_DimA(p->bplus[j]); k++)
-	    size+=DimV(p->bplus[j][k]);
+    if (p->bplus[j])
+      for (k=0; k < dw_DimA(p->bplus[j]); k++)
+        size+=DimV(p->bplus[j][k]);
     }
 
-  // Zeta
+/*    // Zeta   ansi-c*/
   for (j=0; j < p->nvars; j++)
     size+=dw_DimA(p->Zeta[j])-1;
 
@@ -2824,71 +2826,71 @@ void FreeParametersToVAR(TStateModel *model, PRECISION *f)
   T_VAR_Parameters *p=(T_VAR_Parameters*)(model->p->p);
   int k, j;
 
-  // b0
+/*    // b0   ansi-c*/
   for (j=0; j < p->nvars; j++)
     for (k=0; k < dw_DimA(p->b0[j]); k++)
       {
-	memcpy(pElementV(p->b0[j][k]),f,DimV(p->b0[j][k])*sizeof(PRECISION));
-	f+=DimV(p->b0[j][k]);
+    memcpy(pElementV(p->b0[j][k]),f,DimV(p->b0[j][k])*sizeof(PRECISION));
+    f+=DimV(p->b0[j][k]);
       }
 
   if (p->Specification & SPEC_SIMS_ZHA)
     {
-      // lambda
+/*        // lambda   ansi-c*/
       for (j=0; j < p->nvars; j++)
-	{
-	  InitializeVector(p->lambda[j][0],1.0);
-	  for (k=1; k < dw_DimA(p->lambda[j]); k++)
-	    {
-	      memcpy(pElementV(p->lambda[j][k]),f,DimV(p->lambda[j][k])*sizeof(PRECISION));
-	      f+=DimV(p->lambda[j][k]);
-	    }
-	}
+    {
+      InitializeVector(p->lambda[j][0],1.0);
+      for (k=1; k < dw_DimA(p->lambda[j]); k++)
+        {
+          memcpy(pElementV(p->lambda[j][k]),f,DimV(p->lambda[j][k])*sizeof(PRECISION));
+          f+=DimV(p->lambda[j][k]);
+        }
+    }
 
-      // psi
+/*        // psi   ansi-c*/
       for (j=0; j < p->nvars; j++)
-	{
-	  memcpy(pElementV(p->psi[j]),f,DimV(p->psi[j])*sizeof(PRECISION));
-	  f+=DimV(p->psi[j]);
-	}
+    {
+      memcpy(pElementV(p->psi[j]),f,DimV(p->psi[j])*sizeof(PRECISION));
+      f+=DimV(p->psi[j]);
+    }
     }
   else
     {
-      // bplus
+/*        // bplus   ansi-c*/
       for (j=0; j < p->nvars; j++)
-	if (p->bplus[j])
-	  for (k=0; k < dw_DimA(p->bplus[j]); k++)
-	    {
-	      memcpy(pElementV(p->bplus[j][k]),f,DimV(p->bplus[j][k])*sizeof(PRECISION));
-	      f+=DimV(p->bplus[j][k]);
-	    }
+    if (p->bplus[j])
+      for (k=0; k < dw_DimA(p->bplus[j]); k++)
+        {
+          memcpy(pElementV(p->bplus[j][k]),f,DimV(p->bplus[j][k])*sizeof(PRECISION));
+          f+=DimV(p->bplus[j][k]);
+        }
     }
 
-  // Zeta
+/*    // Zeta   ansi-c*/
   for (j=0; j < p->nvars; j++)
     {
-      // Zeta non-negative
+/*        // Zeta non-negative   ansi-c*/
       for (k=dw_DimA(p->Zeta[j])-2; k >= 0; k--)
-	if (f[k] < 0.0)
-	  {
-	    p->valid_parameters=0;
-	    return;
-	  }
+    if (f[k] < 0.0)
+      {
+        p->valid_parameters=0;
+        return;
+      }
 
       p->Zeta[j][0]=1.0;
       memcpy(p->Zeta[j]+1,f,(dw_DimA(p->Zeta[j])-1)*sizeof(PRECISION));
       f+=dw_DimA(p->Zeta[j])-1;
     }
 
-  // Valid normalization
-  
+/*    // Valid normalization   ansi-c*/
 
-  // Update A0 and Aplus
+
+/*    // Update A0 and Aplus   ansi-c*/
   if (p->Specification & SPEC_SIMS_ZHA) Update_bplus_from_lambda_psi(p);
   Update_A0_from_B0(p);
   Update_Aplus_from_bplus_A0(p);
 
-  // Set flags
+/*    // Set flags   ansi-c*/
   p->valid_parameters=1;
   ThetaChanged(model);
 }
@@ -2898,44 +2900,44 @@ void VARToFreeParameters(TStateModel *model, PRECISION *f)
   T_VAR_Parameters *p=(T_VAR_Parameters*)(model->p->p);
   int k, j;
 
-  // b0
+/*    // b0   ansi-c*/
   for (j=0; j < p->nvars; j++)
     for (k=0; k < dw_DimA(p->b0[j]); k++)
       {
-	memcpy(f,pElementV(p->b0[j][k]),DimV(p->b0[j][k])*sizeof(PRECISION));
-	f+=DimV(p->b0[j][k]);
+    memcpy(f,pElementV(p->b0[j][k]),DimV(p->b0[j][k])*sizeof(PRECISION));
+    f+=DimV(p->b0[j][k]);
       }
 
   if (p->Specification & SPEC_SIMS_ZHA)
     {
-      // lambda
+/*        // lambda   ansi-c*/
       for (j=0; j < p->nvars; j++)
-	for (k=1; k < dw_DimA(p->lambda[j]); k++)
-	  {
-	    memcpy(f,pElementV(p->lambda[j][k]),DimV(p->lambda[j][k])*sizeof(PRECISION));
-	    f+=DimV(p->lambda[j][k]);
-	  }
+    for (k=1; k < dw_DimA(p->lambda[j]); k++)
+      {
+        memcpy(f,pElementV(p->lambda[j][k]),DimV(p->lambda[j][k])*sizeof(PRECISION));
+        f+=DimV(p->lambda[j][k]);
+      }
 
-      // psi
+/*        // psi   ansi-c*/
       for (j=0; j < p->nvars; j++)
-	{
-	  memcpy(f,pElementV(p->psi[j]),DimV(p->psi[j])*sizeof(PRECISION));
-	  f+=DimV(p->psi[j]);
-	}
+    {
+      memcpy(f,pElementV(p->psi[j]),DimV(p->psi[j])*sizeof(PRECISION));
+      f+=DimV(p->psi[j]);
+    }
     }
   else
     {
-      //bplus
+/*        //bplus   ansi-c*/
       for (j=0; j < p->nvars; j++)
-	if (p->bplus[j])
-	  for (k=0; k < dw_DimA(p->bplus[j]); k++)
-	    {
-	      memcpy(f,pElementV(p->bplus[j][k]),DimV(p->bplus[j][k])*sizeof(PRECISION));
-	      f+=DimV(p->bplus[j][k]);
-	    }
+    if (p->bplus[j])
+      for (k=0; k < dw_DimA(p->bplus[j]); k++)
+        {
+          memcpy(f,pElementV(p->bplus[j][k]),DimV(p->bplus[j][k])*sizeof(PRECISION));
+          f+=DimV(p->bplus[j][k]);
+        }
     }
 
-  // Zeta
+/*    // Zeta   ansi-c*/
   for (j=0; j < p->nvars; j++)
     {
       memcpy(f,p->Zeta[j]+1,(dw_DimA(p->Zeta[j])-1)*sizeof(PRECISION));
@@ -2948,38 +2950,38 @@ void VARToFreeParameters(TStateModel *model, PRECISION *f)
      p:  pointer to valid T_VAR_Parameters structure
 
    Returns:
-     The starting position of the Zeta parameters in the array of free 
+     The starting position of the Zeta parameters in the array of free
      parameters.
 */
 int ZetaIndex(T_VAR_Parameters *p)
 {
   int j, k, index=0;
 
-  // b0
+/*    // b0   ansi-c*/
   for (j=0; j < p->nvars; j++)
     for (k=0; k < dw_DimA(p->b0[j]); k++)
       index+=DimV(p->b0[j][k]);
 
   if (p->Specification & SPEC_SIMS_ZHA)
     {
-      // lambda
+/*        // lambda   ansi-c*/
       for (j=0; j < p->nvars; j++)
-	for (k=1; k < dw_DimA(p->lambda[j]); k++)
-	  index+=DimV(p->lambda[j][k]);
+    for (k=1; k < dw_DimA(p->lambda[j]); k++)
+      index+=DimV(p->lambda[j][k]);
 
-      // psi
+/*        // psi   ansi-c*/
       for (j=0; j < p->nvars; j++)
-	index+=DimV(p->psi[j]);
+    index+=DimV(p->psi[j]);
     }
   else
     {
-      // bplus
+/*        // bplus   ansi-c*/
       for (j=0; j < p->nvars; j++)
-	if (p->bplus[j])
-	  for (k=0; k < dw_DimA(p->bplus[j]); k++)
-	    index+=DimV(p->bplus[j][k]);
+    if (p->bplus[j])
+      for (k=0; k < dw_DimA(p->bplus[j]); k++)
+        index+=DimV(p->bplus[j][k]);
     }
- 
+
   return index;
 }
 
@@ -3026,7 +3028,7 @@ int IsNormalized_VAR(T_VAR_Parameters *p)
      1 : successful normalization/at least one column changed
      0 : successful normalization/no column changed
     -1 : unsuccessful normalization (should not be returned)
-   
+
 */
 int Normalize_VAR(T_VAR_Parameters *p)
 {
@@ -3035,7 +3037,7 @@ int Normalize_VAR(T_VAR_Parameters *p)
     case VAR_NORMALIZATION_WZ: return WZ_Normalize(p);
     case VAR_NORMALIZATION_NONE: return 0;
     default:
-      fprintf(stdout,"Unknown normalization type\n");
+      printf("Unknown normalization type\n");
       exit(1);
     }
 }
@@ -3047,24 +3049,24 @@ int Normalize_VAR(T_VAR_Parameters *p)
 */
 void ChangeSign(int j, int k, T_VAR_Parameters *p)
 {
-  // Change sign of A0[j][k]
+/*    // Change sign of A0[j][k]   ansi-c*/
   MinusV(p->A0[j][k],p->A0[j][k]);
 
-  // Change sign of Aplus[j][k]
+/*    // Change sign of Aplus[j][k]   ansi-c*/
   MinusV(p->Aplus[j][k],p->Aplus[j][k]);
 
-  // Change sign of b0[j][k]
+/*    // Change sign of b0[j][k]   ansi-c*/
   MinusV(p->b0[j][k],p->b0[j][k]);
 
-  // Change sign of bplus[j][k]
+/*    // Change sign of bplus[j][k]   ansi-c*/
   if (p->bplus[j]) MinusV(p->bplus[j][k],p->bplus[j][k]);
 
   if (p->Specification & SPEC_SIMS_ZHA)
     {
-      // Change sign of constant
+/*        // Change sign of constant   ansi-c*/
       ElementV(p->constant[j],k)=-ElementV(p->constant[j],k);
 
-      // Change sign of lambda[j][p->A0_column_states[j][k]]
+/*        // Change sign of lambda[j][p->A0_column_states[j][k]]   ansi-c*/
       MinusV(p->lambda[j][k],p->lambda[j][k]);
     }
 }
@@ -3114,63 +3116,63 @@ void Setup_WZ_Normalization(T_VAR_Parameters *p, TVector **A0)
    Returns
      1 : successful normalization/at least one column changed
      0 : successful normalization/no column changed
-   
+
 */
 int WZ_Normalize(T_VAR_Parameters *p)
 {
   int j, k, changed=0, inconsistent=0;
   TMatrix A0, M, Target;
 
-  // zero flipped
+/*    // zero flipped   ansi-c*/
   for (j=p->nvars-1; j >= 0; j--)
     for (k=p->n_coef_states[j]-1; k >= 0; k--)
       p->flipped[j][k]=0;
 
-  // determine which columns to flip
+/*    // determine which columns to flip   ansi-c*/
   A0=CreateMatrix(p->nvars,p->nvars);
   Target=CreateMatrix(p->nvars,p->nvars);
   M=CreateMatrix(p->nvars,p->nvars);
   for (k=p->n_A0_states-1; k >= 0; k--)
     {
       for (j=p->nvars-1; j >= 0; j--)
-	{
-	  memcpy(&ElementM(A0,0,j),pElementV(p->A0[j][p->A0_column_states[j][k]]),p->nvars*sizeof(PRECISION));
-	  memcpy(&ElementM(Target,0,j),pElementV(p->Target[j][p->A0_column_states[j][k]]),p->nvars*sizeof(PRECISION));
-	}
+    {
+      memcpy(&ElementM(A0,0,j),pElementV(p->A0[j][p->A0_column_states[j][k]]),p->nvars*sizeof(PRECISION));
+      memcpy(&ElementM(Target,0,j),pElementV(p->Target[j][p->A0_column_states[j][k]]),p->nvars*sizeof(PRECISION));
+    }
       InverseProductMM(M,A0,Target);
       for (j=p->nvars-1; j >= 0; j--)
-	if (ElementM(M,j,j) < 0.0)
-	  p->flipped[j][p->A0_column_states[j][k]]--;
-	else
-	  p->flipped[j][p->A0_column_states[j][k]]++;
+    if (ElementM(M,j,j) < 0.0)
+      p->flipped[j][p->A0_column_states[j][k]]--;
+    else
+      p->flipped[j][p->A0_column_states[j][k]]++;
     }
   FreeMatrix(M);
   FreeMatrix(Target);
   FreeMatrix(A0);
 
-  // flip columns and record inconsistencies
+/*    // flip columns and record inconsistencies   ansi-c*/
   for (j=p->nvars-1; j >= 0; j--)
     for (k=p->n_coef_states[j]-1; k >= 0; k--)
       if (p->flipped[j][k]*p->n_coef_states[j] == -p->n_A0_states)
-	{
-	  changed=1;
-	  ChangeSign(j,k,p);
-	}
+    {
+      changed=1;
+      ChangeSign(j,k,p);
+    }
       else
-	if (p->flipped[j][k]*p->n_coef_states[j] != p->n_A0_states)
-	  {
-	    inconsistent=1;
-	    if ((p->flipped[j][k] < 0) || ((p->flipped[j][k] == 0) && (ElementV(p->A0[j][p->A0_column_states[j][k]],j) < 0.0)))
-	      {
-		changed=1;
-		ChangeSign(j,k,p);
-	      }
-	  }
+    if (p->flipped[j][k]*p->n_coef_states[j] != p->n_A0_states)
+      {
+        inconsistent=1;
+        if ((p->flipped[j][k] < 0) || ((p->flipped[j][k] == 0) && (ElementV(p->A0[j][p->A0_column_states[j][k]],j) < 0.0)))
+          {
+        changed=1;
+        ChangeSign(j,k,p);
+          }
+      }
 
   if (inconsistent) p->WZ_inconsistancies++;
 
   p->normalized=VAR_NORMALIZATION_WZ;
-       
+
   return changed;
 }
 
@@ -3184,7 +3186,7 @@ int WZ_Normalize(T_VAR_Parameters *p)
 /*      A0 is initialized to state k. */
 
 /*        A0 = [A0[A0_column_state[0][k]], ..., A0[A0_column_state[nvars-1][k]]] */
-         
+
 /* *\/ */
 /* void CreateA0_from_determinant_state(TMatrix A0, int k, T_VAR_Parameters *p) */
 /* { */
@@ -3217,14 +3219,14 @@ int WZ_Normalize(T_VAR_Parameters *p)
 /*       CreateA0_from_determinant_state(A,k,p); */
 
 /*       if (!InverseProductMM(A,A,Ref)) */
-/* 	{ */
-/* 	  printf("\nNormalize_WZ():  A0 not invertible\n"); */
-/* 	  exit(0); */
-/* 	} */
+/*     { */
+/*       printf("\nNormalize_WZ():  A0 not invertible\n"); */
+/*       exit(0); */
+/*     } */
 
 /*       for (j=p->nvars-1; j >= 0; j--) */
-/* 	if (ElementM(A,j,j) < 0) */
-/* 	  ChangeSign(j,k,p); */
+/*     if (ElementM(A,j,j) < 0) */
+/*       ChangeSign(j,k,p); */
 /*     } */
 
 /*   FreeMatrix(A); */
@@ -3251,19 +3253,19 @@ int WZ_Normalize(T_VAR_Parameters *p)
 /*   for (j=p->nvars-1; j >= 0; j--) */
 /*     for (k=p->n_coef_states[j]-1; k >= 0; k--) */
 /*       if (DotProduct(p->A0[j][k],Ref[j]) < 0) */
-/* 	{ */
-/* 	  // Change sign of A0[j][k] */
-/* 	  MinusV(p->A0[j][k],p->A0[j][k]); */
+/*     { */
+/*       // Change sign of A0[j][k] */
+/*       MinusV(p->A0[j][k],p->A0[j][k]); */
 
-/* 	  // Change sign of Aplus[j][k] */
-/* 	  MinusV(p->Aplus[j][k],p->Aplus[j][k]); */
+/*       // Change sign of Aplus[j][k] */
+/*       MinusV(p->Aplus[j][k],p->Aplus[j][k]); */
 
-/* 	  // Change sign of b0[j][k] */
-/* 	  MinusV(p->b0[j][k],p->b0[j][k]); */
+/*       // Change sign of b0[j][k] */
+/*       MinusV(p->b0[j][k],p->b0[j][k]); */
 
-/* 	  // Change sign of bplus[j][k] */
-/* 	  if (p->bplus[j]) MinusV(p->bplus[j][k],p->bplus[j][k]); */
-/* 	} */
+/*       // Change sign of bplus[j][k] */
+/*       if (p->bplus[j]) MinusV(p->bplus[j][k],p->bplus[j][k]); */
+/*     } */
 /* } */
 
 /* /\* */
@@ -3281,19 +3283,19 @@ int WZ_Normalize(T_VAR_Parameters *p)
 /*   for (j=p->nvars-1; j >= 0; j--) */
 /*     for (k=p->n_coef_states[j]-1; k >= 0; k--) */
 /*       if (ElementV(p->A0[j][k],j) < 0) */
-/* 	{ */
-/* 	  // Change sign of A0[j][k] */
-/* 	  MinusV(p->A0[j][k],p->A0[j][k]); */
+/*     { */
+/*       // Change sign of A0[j][k] */
+/*       MinusV(p->A0[j][k],p->A0[j][k]); */
 
-/* 	  // Change sign of Aplus[j][k] */
-/* 	  MinusV(p->Aplus[j][k],p->Aplus[j][k]); */
+/*       // Change sign of Aplus[j][k] */
+/*       MinusV(p->Aplus[j][k],p->Aplus[j][k]); */
 
-/* 	  // Change sign of b0[j][k] */
-/* 	  MinusV(p->b0[j][k],p->b0[j][k]); */
+/*       // Change sign of b0[j][k] */
+/*       MinusV(p->b0[j][k],p->b0[j][k]); */
 
-/* 	  // Change sign of bplus[j][k] */
-/* 	  if (p->bplus[j]) MinusV(p->bplus[j][k],p->bplus[j][k]); */
-/* 	} */
+/*       // Change sign of bplus[j][k] */
+/*       if (p->bplus[j]) MinusV(p->bplus[j][k],p->bplus[j][k]); */
+/*     } */
 /* } */
 /*******************************************************************************/
 /*******************************************************************************/
@@ -3335,13 +3337,13 @@ TMatrix ConstructMatrixFromColumns(TMatrix X, TVector **Y, int k)
   if (!X)
     {
       if (!(X=CreateMatrix(DimV(Y[0][0]),dw_DimA(Y))))
-	return (TMatrix)NULL;
+    return (TMatrix)NULL;
     }
   else
     if ((RowM(X) != DimV(Y[0][0])) || (ColM(X) != dw_DimA(Y)))
       {
-	dw_Error(SIZE_ERR);
-	return (TMatrix)NULL;
+    dw_Error(SIZE_ERR);
+    return (TMatrix)NULL;
       }
   if (MajorForm(X))
     for (i=RowM(X)*sizeof(PRECISION), j=ColM(X)-1; j >= 0; j--)
@@ -3349,8 +3351,8 @@ TMatrix ConstructMatrixFromColumns(TMatrix X, TVector **Y, int k)
   else
     for (j=ColM(X)-1; j >= 0; j--)
       {
-	s=(k < dw_DimA(Y[j])) ? k : 0;
-	for (i=RowM(X)-1; i >= 0; i--) ElementM(X,i,j)=ElementV(Y[j][s],i);
+    s=(k < dw_DimA(Y[j])) ? k : 0;
+    for (i=RowM(X)-1; i >= 0; i--) ElementM(X,i,j)=ElementV(Y[j][s],i);
       }
   return X;
 }
@@ -3366,13 +3368,13 @@ TMatrix MakeA0(TMatrix A0, int s, T_VAR_Parameters *p)
   if (!A0)
     {
       if (!(A0=CreateMatrix(p->nvars,p->nvars)))
-	return (TMatrix)NULL;
+    return (TMatrix)NULL;
     }
   else
     if ((RowM(A0) != p->nvars) || (ColM(A0) != p->nvars))
       {
-	dw_Error(SIZE_ERR);
-	return (TMatrix)NULL;
+    dw_Error(SIZE_ERR);
+    return (TMatrix)NULL;
       }
   for (j=0; j < p->nvars; j++)
     memcpy(&ElementM(A0,0,j),pElementV(p->A0[j][p->coef_states[j][s]]),p->nvars*sizeof(PRECISION));
@@ -3390,13 +3392,13 @@ TMatrix MakeAplus(TMatrix Aplus, int k, T_VAR_Parameters *p)
   if (!Aplus)
     {
       if (!(Aplus=CreateMatrix(p->npre,p->nvars)))
-	return (TMatrix)NULL;
+    return (TMatrix)NULL;
     }
   else
     if ((RowM(Aplus) != p->npre) || (ColM(Aplus) != p->nvars))
       {
-	dw_Error(SIZE_ERR);
-	return (TMatrix)NULL;
+    dw_Error(SIZE_ERR);
+    return (TMatrix)NULL;
       }
   for (j=0; j < p->nvars; j++)
     memcpy(&ElementM(Aplus,0,j),pElementV(p->Aplus[j][p->coef_states[j][k]]),p->npre*sizeof(PRECISION));
@@ -3409,13 +3411,13 @@ TMatrix MakeZeta(TMatrix Zeta, int k, T_VAR_Parameters *p)
   if (!Zeta)
     {
       if (!(Zeta=CreateMatrix(p->nvars,p->nvars)))
-	return (TMatrix)NULL;
+    return (TMatrix)NULL;
     }
   else
     if ((RowM(Zeta) != p->nvars) || (ColM(Zeta) != p->nvars))
       {
-	dw_Error(SIZE_ERR);
-	return (TMatrix)NULL;
+    dw_Error(SIZE_ERR);
+    return (TMatrix)NULL;
       }
   InitializeMatrix(Zeta,0.0);
   for (j=0; j < p->nvars; j++)
@@ -3451,8 +3453,8 @@ TMatrix MatrixInnerProductSymmetric(TMatrix X, TMatrix Y, TMatrix S)
   else
     if ((RowM(S) != RowM(Y)) || (ColM(S) != RowM(Y)) || (RowM(X) != ColM(Y)) || (ColM(X) != ColM(Y)))
       {
-	dw_Error(SIZE_ERR);
-	return (TMatrix)NULL;
+    dw_Error(SIZE_ERR);
+    return (TMatrix)NULL;
       }
 
   InitializeMatrix(X,0.0);
@@ -3460,13 +3462,13 @@ TMatrix MatrixInnerProductSymmetric(TMatrix X, TMatrix Y, TMatrix S)
   for (i=n-1, x=pElementM(X)+i, y=pElementM(Y)+i*m; i >= 0; x--, y-=m, i--)
     {
       for (s=pElementM(S)+(sj=m-1)*m; sj >= 0; z--, s-=m, sj--)
-	{
-	  for (w=0.0, k=m-1; k >= 0; k--)
-	    w+=y[k]*s[k];
-	  z=pElementM(Y)+(n-1)*m+sj;
-	  for (j=n*(n-1); j >= 0; z-=m, j-=n)
-	    x[j]+=w*(*z); 
-	}
+    {
+      for (w=0.0, k=m-1; k >= 0; k--)
+        w+=y[k]*s[k];
+      z=pElementM(Y)+(n-1)*m+sj;
+      for (j=n*(n-1); j >= 0; z-=m, j-=n)
+        x[j]+=w*(*z);
+    }
     }
   return X;
 }
@@ -3536,7 +3538,7 @@ PRECISION InnerProductNonSymmetric(TVector x, TVector y, TMatrix S)
                          variance = Inverse(S)
      and
                              mean = Inverse(S)*b
-    
+
      If x is null, it is created.  The matrix S is modified.
 
    Returns
@@ -3559,7 +3561,7 @@ TVector DrawNormal_InverseVariance(TVector x, TVector b, TMatrix S)
     }
   else
     return (TVector)NULL;
-    //return DrawNormal_InverseVariance_SVD(x,b,S);
+/*      //return DrawNormal_InverseVariance_SVD(x,b,S);   ansi-c*/
 }
 
 /*
@@ -3574,7 +3576,7 @@ TVector DrawNormal_InverseVariance(TVector x, TVector b, TMatrix S)
                          variance = Inverse(S)
      and
                              mean = Inverse(S)*b
-    
+
      If x is null, it is created.  The matrix S is modified.
 
    Returns
@@ -3582,8 +3584,8 @@ TVector DrawNormal_InverseVariance(TVector x, TVector b, TMatrix S)
 
    Notes
      Uses the Singular value decomposition of S to compute the square root of the
-     inverse of S.  If S = A'*A, and c is drawn from a standard normal 
-     distribution, then 
+     inverse of S.  If S = A'*A, and c is drawn from a standard normal
+     distribution, then
 
                           Inverse(A)*(c + Inverse(A')*b)
 
@@ -3601,13 +3603,13 @@ TVector DrawNormal_InverseVariance_SVD(TVector x, TVector b, TMatrix S)
   SVD(U=CreateMatrix(n,n),d=CreateVector(n),V=CreateMatrix(n,n),S);
   for (tol=ElementV(d,0), i=n-1; i > 0; i--)
     if (tol < ElementV(d,i)) tol=ElementV(d,i);
-  //tol*=n*MACHINE_EPSILON;
+/*    //tol*=n*MACHINE_EPSILON;   ansi-c*/
   tol*=SQRT_MACHINE_EPSILON;
-  for (j=n-1; j >= 0; j--) 
+  for (j=n-1; j >= 0; j--)
     {
       scale=(ElementV(d,j) < tol) ? 1.0/sqrt(tol) : 1.0/sqrt(ElementV(d,j));
       for (i=n-1; i >= 0; i--)
-	ElementM(V,i,j)*=scale;
+    ElementM(V,i,j)*=scale;
     }
   rtrn=ProductTransposeVM(x,b,V);
   for (i=n-1; i >= 0; i--) ElementV(rtrn,i)+=dw_gaussian_rnd();
@@ -3625,11 +3627,11 @@ TVector DrawNormal_InverseVariance_SVD(TVector x, TVector b, TMatrix S)
      U : n x n upper triangular matrix with non-zero diagonal
 
    Results
-     The vector x is drawn from a multivariate normal distribution with 
+     The vector x is drawn from a multivariate normal distribution with
 
                          variance = Inverse(U'*U)
      and
-                             mean = Inverse(U'*U)*b 
+                             mean = Inverse(U'*U)*b
 
     If x is null, it is created.
 
@@ -3653,10 +3655,10 @@ TVector DrawNormal_InverseUpperTriangular(TVector x, TVector b, TMatrix U)
     {
       for (i=DimV(rtrn)-1; i >= 0; i--) ElementV(rtrn,i)+=dw_gaussian_rnd();
       if (!InverseProductUV(rtrn,U,rtrn))
-	{
-	  if (!x) FreeVector(rtrn);
-	  return (TVector)NULL;
-	}
+    {
+      if (!x) FreeVector(rtrn);
+      return (TVector)NULL;
+    }
     }
   return rtrn;
 }
@@ -3671,10 +3673,10 @@ TVector SingularInverseVariance_RecoveryAttempt(TVector x, TVector b, TMatrix S,
   char *header;
   char filename[256];
 
-  // print warning
+/*    // print warning   ansi-c*/
   printf("Singular error\n");
 
-  // Construct file name and open file
+/*    // Construct file name and open file   ansi-c*/
   if (!V_FILE)
     {
       sprintf(filename,"singular_error_%03d_test.dat",_VAR_IMPROPER_DISTRIBUTION_COUNTER);
@@ -3685,7 +3687,7 @@ TVector SingularInverseVariance_RecoveryAttempt(TVector x, TVector b, TMatrix S,
 
   fprintf(f_out,"//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//\n");
 
-  // Print error message, inverse variance matrix, and inverse prior
+/*    // Print error message, inverse variance matrix, and inverse prior   ansi-c*/
   switch (code)
     {
     case BPLUS_ERR:
@@ -3707,23 +3709,23 @@ TVector SingularInverseVariance_RecoveryAttempt(TVector x, TVector b, TMatrix S,
   dw_PrintMatrix(f_out,InversePrior,"%lg ");
   fprintf(f_out,"\n");
 
-  // Print generator state
+/*    // Print generator state   ansi-c*/
   fprintf(f_out,"\\== Generator State ==\\\n");
   dw_print_generator_state(f_out);
   fprintf(f_out,"\n");
 
-  // Attempt recovery
-  x=DrawNormal_InverseVariance_SVD(x,b,S);	   
+/*    // Attempt recovery   ansi-c*/
+  x=DrawNormal_InverseVariance_SVD(x,b,S);
 
-  // Print parameters
+/*    // Print parameters   ansi-c*/
   header="Error draw: ";
   WriteStates(f_out,(char*)NULL,header,model);
   WriteTransitionMatrices(f_out,(char*)NULL,header,model);
   Write_VAR_Parameters(f_out,(char*)NULL,header,model);
-  
+
   fprintf(f_out,"//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//\n");
 
-  // Close file
+/*    // Close file   ansi-c*/
   if (f_out != V_FILE) fclose(f_out);
 
   _SINGULAR_ERROR=1;

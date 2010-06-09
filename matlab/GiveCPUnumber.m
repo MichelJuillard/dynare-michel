@@ -1,6 +1,6 @@
 function [nCPU]= GiveCPUnumber (ComputerInformations)
-% DESCRIPTION
-% This function return the CPUs or cores numer avaiable
+% PARALLEL CONTEXT
+% In a parallel context this function return the CPUs or cores numer avaiable
 % on the computer used for run parallel code.
 %
 % INPUTS

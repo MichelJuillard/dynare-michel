@@ -8,7 +8,9 @@
 #include "dw_rand.h"
 #include "dw_error.h"
 
-//=== Static routines ===
+#include "modify_for_mex.h"
+
+/*  //=== Static routines ===   ansi-c*/
 static void gser(PRECISION *gamser, PRECISION a, PRECISION x, PRECISION *gln);
 static void gcf(PRECISION *gammcf, PRECISION a, PRECISION x, PRECISION *gln);
 static PRECISION gammp(PRECISION a, PRECISION x);
@@ -16,12 +18,12 @@ static PRECISION gammp(PRECISION a, PRECISION x);
 /*******************************************************************************/
 /*************************** Uniform Random Numbers ****************************/
 /*******************************************************************************/
-/* 
+/*
    Flag controling which uniform random number to choose
 */
-//#define USE_NR1_RNG
+/*  //#define USE_NR1_RNG   ansi-c*/
 #define USE_NR2_RNG
-//#define USE_IMSL_RNG
+/*  //#define USE_IMSL_RNG   ansi-c*/
 
 #if defined (USE_IMSL_RNG)
 #include <imsls.h>
@@ -39,9 +41,9 @@ static int iv[NTAB];
 #endif
 
 /*
-   Initializes seed value for uniform random number generator.  The seed value 
+   Initializes seed value for uniform random number generator.  The seed value
    can be any integer.  A value of 0 will initialize the seed from the system
-   clock for the Numerical Recipies algorithms. 
+   clock for the Numerical Recipies algorithms.
 */
 void dw_initialize_generator(int init)
 {
@@ -96,7 +98,7 @@ void* dw_get_generator_state(void)
 }
 
 /*
-   Returns the size in bytes of the void pointer returned by 
+   Returns the size in bytes of the void pointer returned by
    dw_get_generator_state().
 */
 int dw_get_generator_state_size(void)
@@ -138,27 +140,27 @@ void dw_print_generator_state(FILE *f)
 #if defined(USE_IMSL_RNG)
       int i, *state;
       if (state=dw_get_generator_state())
-	{
-	  for (i=0; i < 1566; i++) fprintf(f,"%d ",state[i]);
-	  fprintf(f,"\n");
-	  free(state);
-	}
+    {
+      for (i=0; i < 1566; i++) fprintf(f,"%d ",state[i]);
+      fprintf(f,"\n");
+      free(state);
+    }
 #elif defined (USE_NR1_RNG)
       int i, *state;
       if (state=dw_get_generator_state())
-	{
-	  for (i=0; i < NTAB+2; i++) fprintf(f,"%d ",state[i]);
-	  fprintf(f,"\n");
-	  free(state);
-	}
+    {
+      for (i=0; i < NTAB+2; i++) fprintf(f,"%d ",state[i]);
+      fprintf(f,"\n");
+      free(state);
+    }
 #elif defined (USE_NR2_RNG)
       int i, *state;
       if (state=dw_get_generator_state())
-	{
-	  for (i=0; i < NTAB+3; i++) fprintf(f,"%d ",state[i]);
-	  fprintf(f,"\n");
-	  free(state);
-	}
+    {
+      for (i=0; i < NTAB+3; i++) fprintf(f,"%d ",state[i]);
+      fprintf(f,"\n");
+      free(state);
+    }
 #endif
   }
 }
@@ -214,20 +216,26 @@ PRECISION dw_uniform_rnd(void)
   if (idum <= 0)
     {
       if (idum == 0)
-	{
-	  idum=abs((int)time((time_t *)NULL));
-	  if (idum == 0) idum=1;
-	}
+        {
+          if(constant_seed==0)
+            idum=abs((int)time((time_t *)NULL));
+          else
+            {
+              srand(constant_seed);
+              idum=rand();
+            }
+          if (idum == 0) idum=1;
+        }
       else
-	idum=-idum;
+        idum=-idum;
 
       for (j=NTAB+7; j >= 0; j--)
-	{
-	  k=idum/IQ;
-	  idum=IA*(idum-k*IQ)-IR*k;
-	  if (idum < 0) idum+=IM;
-	  if (j < NTAB) iv[j]=idum;
-	}
+    {
+      k=idum/IQ;
+      idum=IA*(idum-k*IQ)-IR*k;
+      if (idum < 0) idum+=IM;
+      if (j < NTAB) iv[j]=idum;
+    }
       iy=iv[0];
     }
   k=idum/IQ;
@@ -269,24 +277,30 @@ PRECISION dw_uniform_rnd(void)
   int j, k;
   PRECISION temp;
 
-  if (idum <= 0) 
+  if (idum <= 0)
     {
       if (idum == 0)
-	{
-	  idum=abs((int)time((time_t *)NULL));
-	  if (idum == 0) idum=1;
-	}
+        {
+          if(constant_seed==0)
+            idum=abs((int)time((time_t *)NULL));
+          else
+            {
+              srand(constant_seed);
+              idum=rand();
+            }
+          if (idum == 0) idum=1;
+        }
       else
-	idum=-idum;
+        idum=-idum;
 
       idum2=idum;
-      for (j=NTAB+7; j>=0; j--) 
-	{
-	  k=idum/IQ1;
-	  idum=IA1*(idum-k*IQ1)-k*IR1;
-	  if (idum < 0) idum += IM1;
-	  if (j < NTAB) iv[j] = idum;
-	}
+      for (j=NTAB+7; j>=0; j--)
+    {
+      k=idum/IQ1;
+      idum=IA1*(idum-k*IQ1)-k*IR1;
+      if (idum < 0) idum += IM1;
+      if (j < NTAB) iv[j] = idum;
+    }
       iy=iv[0];
     }
   k=idum/IQ1;
@@ -360,11 +374,11 @@ PRECISION dw_gaussian_rnd(void)
   if  (iset == 0)
     {
       do
-	{
-	  v1=2.0*dw_uniform_rnd()-1.0;
-	  v2=2.0*dw_uniform_rnd()-1.0;
-	  r=v1*v1+v2*v2;
-	}
+    {
+      v1=2.0*dw_uniform_rnd()-1.0;
+      v2=2.0*dw_uniform_rnd()-1.0;
+      r=v1*v1+v2*v2;
+    }
       while (r >= 1.0);
       fac=sqrt(-2.0*log(r)/r);
       gset=v1*fac;
@@ -387,7 +401,7 @@ PRECISION dw_gaussian_rnd(void)
                    gamma_density(x;a) =   ----------------
                                               gamma(a)
 
-   for a > 0.  The function gamma(a) is the integral with from 0 to infinity of 
+   for a > 0.  The function gamma(a) is the integral with from 0 to infinity of
    exp(-t)*t^(a-1).
 
    When a = 1.0, then gamma is exponential. (Devroye, page 405).
@@ -411,18 +425,18 @@ PRECISION dw_gaussian_rnd(void)
 PRECISION dw_gamma_rnd(PRECISION a)
 {
   PRECISION b, u, v, w, x, y, z;
-          
+
    if (a == 1.0) return -log(dw_uniform_rnd());
 
-   if (a < 1.0) 
+   if (a < 1.0)
      {
        u=1.0/a;
        v=1.0/(1.0-a);
        do
-	 {
-	   x=pow(dw_uniform_rnd(),u);
-	   y=pow(dw_uniform_rnd(),v);
-	 }
+     {
+       x=pow(dw_uniform_rnd(),u);
+       y=pow(dw_uniform_rnd(),v);
+     }
        while (x+y > 1.0);
        return -log(dw_uniform_rnd())*x/(x+y);
      }
@@ -435,17 +449,17 @@ PRECISION dw_gamma_rnd(PRECISION a)
        y=sqrt((3.0*a - 0.75)/w)*(u - 0.5);
        x=b + y;
        if (x > 0.0)
-	 {
-	   v=dw_uniform_rnd();
-	   z=64.0*w*w*w*v*v;
-	   if ((z <= 1.0 - 2.0*y*y/x) || (log(z) <= 2.0*(b*log(x/b) - y)))
-	     return x;
-	 }
+     {
+       v=dw_uniform_rnd();
+       z=64.0*w*w*w*v*v;
+       if ((z <= 1.0 - 2.0*y*y/x) || (log(z) <= 2.0*(b*log(x/b) - y)))
+         return x;
+     }
      }
 }
 
 /*
-   Returns a lognormal deviate.  The mean and standard deviations of the 
+   Returns a lognormal deviate.  The mean and standard deviations of the
    underlying normal distributions are passed.
 */
 PRECISION dw_lognormal_rnd(PRECISION mean, PRECISION standard_deviation)
@@ -517,7 +531,7 @@ PRECISION dw_chi_square_invcdf(PRECISION p, int df)
 #undef MAXITER
 
 /*
-   Returns the natural logrithm of the gamma function applied to x.  The gamma 
+   Returns the natural logrithm of the gamma function applied to x.  The gamma
    function of x is the integral from 0 to infinity of t^(x-1)*exp(-t)dt.
 
    Routine adapted from the gammln routine from Numerical Recipes in C.
@@ -525,8 +539,8 @@ PRECISION dw_chi_square_invcdf(PRECISION p, int df)
 PRECISION dw_log_gamma(PRECISION x)
 {
   static PRECISION cof[6]={ 76.18009172947146,  -86.50532032941677,
-			    24.01409824083091,  -1.231739572450155,
-			    0.1208650973866179e-2, -0.5395239384953e-5};
+                24.01409824083091,  -1.231739572450155,
+                0.1208650973866179e-2, -0.5395239384953e-5};
   PRECISION y, z, ser;
   int j;
   z=x+5.5;
@@ -548,28 +562,28 @@ static void gser(PRECISION *gamser, PRECISION a, PRECISION x, PRECISION *gln)
 
   dw_ClearError();
   *gln=dw_log_gamma(a);
-  if (x <= 0.0) 
+  if (x <= 0.0)
     {
-      if (x < 0.0) 
+      if (x < 0.0)
         dw_Error(ARG_ERR);
       else
         *gamser=0.0;
     }
-  else 
+  else
     {
       ap=a;
       del=sum=1.0/a;
-      for (n=1; n <= ITMAX; n++) 
+      for (n=1; n <= ITMAX; n++)
         {
           ++ap;
-	  del *= x/ap;
-	  sum += del;
-	  if (fabs(del) < fabs(sum)*EPS) 
-	    {
-	      *gamser=sum*exp(-x+a*log(x)-(*gln));
-	      return;
-	    }
-	}
+      del *= x/ap;
+      sum += del;
+      if (fabs(del) < fabs(sum)*EPS)
+        {
+          *gamser=sum*exp(-x+a*log(x)-(*gln));
+          return;
+        }
+    }
       dw_Error(ITERATION_ERR);
     }
 }
@@ -590,7 +604,7 @@ static void gcf(PRECISION *gammcf, PRECISION a, PRECISION x, PRECISION *gln)
   c=1.0/FPMIN;
   d=1.0/b;
   h=d;
-  for (i=1; i <= ITMAX; i++) 
+  for (i=1; i <= ITMAX; i++)
     {
       an = -i*(i-a);
       b += 2.0;
@@ -620,18 +634,18 @@ static PRECISION gammp(PRECISION a, PRECISION x)
 {
   PRECISION gamser,gammcf,gln;
 
-  if (x < 0.0 || a <= 0.0) 
+  if (x < 0.0 || a <= 0.0)
     {
       dw_Error(ARG_ERR);
       return 0.0;
     }
   dw_ClearError();
-  if (x < (a+1.0)) 
+  if (x < (a+1.0))
     {
       gser(&gamser,a,x,&gln);
       return gamser;
-    } 
-   else 
+    }
+   else
     {
       gcf(&gammcf,a,x,&gln);
       return 1.0-gammcf;

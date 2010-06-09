@@ -50,7 +50,8 @@ public:
    * Q and H KF matrices of shock and measurement error varinaces and covariances
    * KF logLikelihood calculation start period.
    */
-  double compute(Matrix &steadyState, const Vector &estParams, Vector &deepParams, const MatrixConstView &data, Matrix &Q, Matrix &H, size_t presampleStart, int &info); // for calls from estimation and to set Steady State
+  double compute(Matrix &steadyState, const Vector &estParams, Vector &deepParams, const MatrixConstView &data, 
+    Matrix &Q, Matrix &H, size_t presampleStart, int &info); // for calls from estimation and to set Steady State
 
   Vector &
   getVll()

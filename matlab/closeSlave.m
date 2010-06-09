@@ -1,7 +1,15 @@
 function closeSlave(Parallel),
-% In a parallelc context, this utility closes all remote matlab instances
-% called by masteParallelMan (which leaves open remote matlab instances)
-
+% PARALLEL CONTEXT
+% In parallel context, this utility closes all remote matlab instances
+% called by masterParallel with strategy (1) i.e. always open (which leaves
+% open remote matlab instances).
+%
+% INPUTS
+%  o Parallel [struct vector]   copy of options_.parallel.
+%
+% OUTPUTS 
+%   None 
+%
 % Copyright (C) 2010 Dynare Team
 %
 % This file is part of Dynare.
@@ -41,6 +49,7 @@ try
         end
     end
 catch
+  % Only for testing, will be remouved!
     E1=fopen('Errore1-closeSlave.txt','w+');
     fclose(E1);
 end

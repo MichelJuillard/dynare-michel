@@ -41,18 +41,19 @@ if (1)
 
 #include "kalman.h"
 
+#include "modify_for_mex.h"
 
 static int Update_et_Dt_1stapp(int t_1, struct TSkalfilmsinputs_1stapp_tag *kalfilmsinputs_1stapp_ps);
 static int Updatekalfilms_1stapp(int inpt, struct TSkalfilmsinputs_1stapp_tag *kalfilmsinputs_1stapp_ps, struct TStateModel_tag *smodel_ps);
 
 
-TSkalcvfurw *CreateTSkalcvfurw(TFlearninguni *func, int T, int k, int tv)  //, int storeZ, int storeV)
+TSkalcvfurw *CreateTSkalcvfurw(TFlearninguni *func, int T, int k, int tv)   /*  , int storeZ, int storeV)   ansi-c*/
 {
    int _i;
-   //===
+/*     //===   ansi-c*/
    TSivector *rows_iv = NULL;
    TSivector *cols_iv = NULL;
-   //---
+/*     //---   ansi-c*/
    TSkalcvfurw *kalcvfurw_ps = tzMalloc(1, TSkalcvfurw);
 
 
@@ -60,7 +61,7 @@ TSkalcvfurw *CreateTSkalcvfurw(TFlearninguni *func, int T, int k, int tv)  //, i
    kalcvfurw_ps->fss = T;
    kalcvfurw_ps->kx = k;
 
-   //===
+/*     //===   ansi-c*/
    kalcvfurw_ps->V_dm = CreateMatrix_lf(k, k);
    kalcvfurw_ps->ylhtran_dv = CreateVector_lf(T);
    kalcvfurw_ps->Xrhtran_dm = CreateMatrix_lf(k, T);
@@ -70,20 +71,20 @@ TSkalcvfurw *CreateTSkalcvfurw(TFlearninguni *func, int T, int k, int tv)  //, i
    kalcvfurw_ps->zupdate_dv = CreateVector_lf(k);
    kalcvfurw_ps->Zpredtran_dm = CreateMatrix_lf(k, T);
    kalcvfurw_ps->ylhtranpred_dv = CreateVector_lf(T);
-   //
+/*     //   ansi-c*/
    rows_iv = CreateVector_int(T);
    cols_iv = CreateVector_int(T);
    for (_i=T-1; _i>=0; _i--)  rows_iv->v[_i] = cols_iv->v[_i] = k;
    kalcvfurw_ps->Ppred_dc = CreateCell_lf(rows_iv, cols_iv);
-   //   if (!storeZ)  kalcvfurw_ps->Zpredtran_dm = (TSdmatrix *)NULL;
-   //   else  kalcvfurw_ps->Zpredtran_dm = CreateMatrix_lf(k, T);
-   //   if (!storeV)  kalcvfurw_ps->Ppred_dc = (TSdcell *)NULL;
-   //   else {
-   //      rows_iv = CreateVector_int(T);
-   //      cols_iv = CreateVector_int(T);
-   //      for (_i=T; _i>=0; _i--)  rows_iv->v[_i] = cols_iv->v[_i] = k;
-   //      kalcvfurw_ps->Ppred_dc = CreateCell_lf(rows_iv, cols_iv);
-   //   }
+/*     //   if (!storeZ)  kalcvfurw_ps->Zpredtran_dm = (TSdmatrix *)NULL;   ansi-c*/
+/*     //   else  kalcvfurw_ps->Zpredtran_dm = CreateMatrix_lf(k, T);   ansi-c*/
+/*     //   if (!storeV)  kalcvfurw_ps->Ppred_dc = (TSdcell *)NULL;   ansi-c*/
+/*     //   else {   ansi-c*/
+/*     //      rows_iv = CreateVector_int(T);   ansi-c*/
+/*     //      cols_iv = CreateVector_int(T);   ansi-c*/
+/*     //      for (_i=T; _i>=0; _i--)  rows_iv->v[_i] = cols_iv->v[_i] = k;   ansi-c*/
+/*     //      kalcvfurw_ps->Ppred_dc = CreateCell_lf(rows_iv, cols_iv);   ansi-c*/
+/*     //   }   ansi-c*/
 
    DestroyVector_int(rows_iv);
    DestroyVector_int(cols_iv);
@@ -113,28 +114,28 @@ TSkalcvfurw *DestroyTSkalcvfurw(TSkalcvfurw *kalcvfurw_ps)
 
 void kalcvf_urw(TSkalcvfurw *kalcvfurw_ps, void *dummy_ps)
 {
-   //See the notes of SWZ regarding the government's updating of the parameters in their Phillips-curve equation.
-   //NOTE: make sure that the value of kalcvfurw_ps->sigmasq and other input values are given.
+/*     //See the notes of SWZ regarding the government's updating of the parameters in their Phillips-curve equation.   ansi-c*/
+/*     //NOTE: make sure that the value of kalcvfurw_ps->sigmasq and other input values are given.   ansi-c*/
    int ti;
    double workd, workdenominv;
-   //---
+/*     //---   ansi-c*/
    int fss, kx;
    double sigmasq_fix = kalcvfurw_ps->sigmasq;
-//   double sigmasq;
+/*  //   double sigmasq;   ansi-c*/
    TSdmatrix *V_dm;
    TSdmatrix *Zpredtran_dm;
    TSdcell *Ppred_dc;
    TSdvector *ylhtran_dv;
    TSdmatrix *Xrhtran_dm;
-   //===
-   TSdvector *workkxby1_dv = NULL;  //kx-by-1.
-//   TSdvector *work1kxby1_dv = NULL;  //kx-by-1.
-   TSdmatrix *workkxbykx_dm = NULL;  //kx-by-kx symmetric and positive positive.
-//   //===
-//   TSdvector *zbefore_dv = CreateVector_lf(kalcvfurw_ps->kx);
-//   TSdmatrix *Vbefore_dm = CreateMatrix_lf(kalcvfurw_ps->kx, kalcvfurw_ps->kx);
-//   TSdvector *zafter_dv = CreateVector_lf(kalcvfurw_ps->kx);
-//   TSdmatrix *Vafter_dm = CreateMatrix_lf(kalcvfurw_ps->kx, kalcvfurw_ps->kx);
+/*     //===   ansi-c*/
+   TSdvector *workkxby1_dv = NULL;   /*  kx-by-1.   ansi-c*/
+/*  //   TSdvector *work1kxby1_dv = NULL;  //kx-by-1.   ansi-c*/
+   TSdmatrix *workkxbykx_dm = NULL;   /*  kx-by-kx symmetric and positive positive.   ansi-c*/
+/*  //   //===   ansi-c*/
+/*  //   TSdvector *zbefore_dv = CreateVector_lf(kalcvfurw_ps->kx);   ansi-c*/
+/*  //   TSdmatrix *Vbefore_dm = CreateMatrix_lf(kalcvfurw_ps->kx, kalcvfurw_ps->kx);   ansi-c*/
+/*  //   TSdvector *zafter_dv = CreateVector_lf(kalcvfurw_ps->kx);   ansi-c*/
+/*  //   TSdmatrix *Vafter_dm = CreateMatrix_lf(kalcvfurw_ps->kx, kalcvfurw_ps->kx);   ansi-c*/
    //******* WARNING: Some dangerous pointer movement to gain efficiency *******
 //   double *yt_p;
 //   double *Vbefore_p;
@@ -776,7 +777,7 @@ double tz_kalfiltv(struct TSkalfiltv_tag *kalfiltv_ps)
       }
       else
       {
-         fprintf(stdout, "Fatal error: tz_kalfiltv() in kalman.c: the system is non-stationary solutions\n"
+         printf("Fatal error: tz_kalfiltv() in kalman.c: the system is non-stationary solutions\n"
                          "    and the initial conditions must be supplied by, say, input arguments");
          fflush(stdout);
          exit( EXIT_FAILURE );
@@ -887,77 +888,77 @@ double tz_kalfiltv(struct TSkalfiltv_tag *kalfiltv_ps)
    return (loglh);
 }
 /**/
-//-----------------------------------------------------
-//-- Updating Kalman filter at time t for constant-parameters (or known-time-varying) Kalman filter.
-//-----------------------------------------------------
+/*  //-----------------------------------------------------   ansi-c*/
+/*  //-- Updating Kalman filter at time t for constant-parameters (or known-time-varying) Kalman filter.   ansi-c*/
+/*  //-----------------------------------------------------   ansi-c*/
 double tz_logTimetCondLH_kalfiltv(int st, int inpt, struct TSkalfiltv_tag *kalfiltv_ps)
 {
-   //st: base-0 grand regime at time t, which is just a dummy for this constant-parameter function in order to use
-   //       Waggoner's automatic functions.
-   //inpt: base-1 in the sense that inpt>=1 to deal with the time series situation where S_T is (T+1)-by-1 and Y_T is T+nlags_max-by-1.
-   //      The 1st element for S_T is S_T[1] while S_T[0] is s_0 (initial condition).
-   //      The 1st element for Y_T, however, is Y_T[nlags_max+1-1].
-   //See (42.3) on p.42 in the SWZII NOTES.
-   //
-   //log LH at time t for constant (known-time-varying) Kalman-filter DSGE models (conditional on all the parameters).
-   //  It computes a sequence of one-step predictions and their covariance matrices, and the log likelihood at time t.
-   //  The function uses a forward recursion algorithm.  See also the Matlab function fn_kalfil_tv.m
-   //
-   //   State space model is defined as follows:
-   //       y(t) = a(t) + H(t)*z(t) + eps(t)     (observation or measurement equation)
-   //       z(t) = b(t) + F(t)*z(t) + eta(t)     (state or transition equation)
-   //     where a(t), H(t), b(t), and F(t) depend on s_t that follows a Markov-chain process and are taken as given.
-   //
-   //   Inputs are as follows:
-   //      Y_T is a n_y-by-T matrix containing data [y(1), ... , y(T)].
-   //        a is an n_y-by-T matrix of time-varying input vectors in the measurement equation.
-   //        H is an n_y-by-n_z-by-T 3-D of time-varying matrices in the measurement equation.
-   //        R is an n_y-by-n_y-by-T 3-D of time-varying covariance matrices for the error in the measurement equation.
-   //        G is an n_z-by-n_y-by-T 3-D of time-varying E(eta_t * eps_t').
-   //        ------
-   //        b is an n_z-by-T matrix of time-varying input vectors in the state equation with b(:,1) as an initial condition.
-   //        F is an n_z-by-n_z-by-T 3-D of time-varying transition matrices in the state equation with F(:,:,1) as an initial condition.
-   //        V is an n_z-by-n_z-by-T 3-D of time-varying covariance matrices for the error in the state equation with V(:,:,1) as an initial condition.
-   //        ------
-   //        indxIni: 1: using the initial condition with zt_tm1(:,1)=z0 and Pt_tm1(:,:,1)=P0;
-   //                 0: using the unconditional mean for any given regime at time 0.
-   //        z0 is an n_z-by-1 vector of initial condition when indxIni=1. (Value to be assigned if indxIni=0.)
-   //        P0 is an n_z-by-n_z matrix of initial condition when indxIni=1. (Value to be assigned if indxIni=0.)
-   //
-   //   Outputs are as follows:
-   //      loglh is a value of the log likelihood function of the state-space model
-   //                                under the assumption that errors are multivariate Gaussian.
-   //      zt_tm1 is an n_z-by-T matrices of one-step predicted state vectors with z0_0m1 as an initial condition (base-0 first element)
-   //                         and with z_{T|T-1} as the last element.  Thus, we can use it as a base-1 vector.
-   //      Pt_tm1 is an n_z-by-n_z-by-T 3-D of covariance matrices of zt_tm1 with P0_0m1 as though it were a initial condition
-   //                         and with P_{T|T-1} as the last element.  Thus, we can use it as though it were a base-1 cell.
-   //
-   //   The initial state vector and its covariance matrix are computed under the bounded (stationary) condition:
-   //             z0_0m1 = (I-F(:,:,1))\b(:,1)
-   //        vec(P0_0m1) = (I-kron(F(:,:,1),F(:,:,1)))\vec(V(:,:,1))
-   //   Note that all eigenvalues of the matrix F(:,:,1) are inside the unit circle when the state-space model is bounded (stationary).
-   //
-   //   April 2008, written by Tao Zha
-   //   See Hamilton's book ([13.2.13] -- [13.2.22]), Harvey (pp.100-106), and LiuWZ Model I NOTES pp.001-003.
+/*     //st: base-0 grand regime at time t, which is just a dummy for this constant-parameter function in order to use   ansi-c*/
+/*     //       Waggoner's automatic functions.   ansi-c*/
+/*     //inpt: base-1 in the sense that inpt>=1 to deal with the time series situation where S_T is (T+1)-by-1 and Y_T is T+nlags_max-by-1.   ansi-c*/
+/*     //      The 1st element for S_T is S_T[1] while S_T[0] is s_0 (initial condition).   ansi-c*/
+/*     //      The 1st element for Y_T, however, is Y_T[nlags_max+1-1].   ansi-c*/
+/*     //See (42.3) on p.42 in the SWZII NOTES.   ansi-c*/
+/*     //   ansi-c*/
+/*     //log LH at time t for constant (known-time-varying) Kalman-filter DSGE models (conditional on all the parameters).   ansi-c*/
+/*     //  It computes a sequence of one-step predictions and their covariance matrices, and the log likelihood at time t.   ansi-c*/
+/*     //  The function uses a forward recursion algorithm.  See also the Matlab function fn_kalfil_tv.m   ansi-c*/
+/*     //   ansi-c*/
+/*     //   State space model is defined as follows:   ansi-c*/
+/*     //       y(t) = a(t) + H(t)*z(t) + eps(t)     (observation or measurement equation)   ansi-c*/
+/*     //       z(t) = b(t) + F(t)*z(t) + eta(t)     (state or transition equation)   ansi-c*/
+/*     //     where a(t), H(t), b(t), and F(t) depend on s_t that follows a Markov-chain process and are taken as given.   ansi-c*/
+/*     //   ansi-c*/
+/*     //   Inputs are as follows:   ansi-c*/
+/*     //      Y_T is a n_y-by-T matrix containing data [y(1), ... , y(T)].   ansi-c*/
+/*     //        a is an n_y-by-T matrix of time-varying input vectors in the measurement equation.   ansi-c*/
+/*     //        H is an n_y-by-n_z-by-T 3-D of time-varying matrices in the measurement equation.   ansi-c*/
+/*     //        R is an n_y-by-n_y-by-T 3-D of time-varying covariance matrices for the error in the measurement equation.   ansi-c*/
+/*     //        G is an n_z-by-n_y-by-T 3-D of time-varying E(eta_t * eps_t').   ansi-c*/
+/*     //        ------   ansi-c*/
+/*     //        b is an n_z-by-T matrix of time-varying input vectors in the state equation with b(:,1) as an initial condition.   ansi-c*/
+/*     //        F is an n_z-by-n_z-by-T 3-D of time-varying transition matrices in the state equation with F(:,:,1) as an initial condition.   ansi-c*/
+/*     //        V is an n_z-by-n_z-by-T 3-D of time-varying covariance matrices for the error in the state equation with V(:,:,1) as an initial condition.   ansi-c*/
+/*     //        ------   ansi-c*/
+/*     //        indxIni: 1: using the initial condition with zt_tm1(:,1)=z0 and Pt_tm1(:,:,1)=P0;   ansi-c*/
+/*     //                 0: using the unconditional mean for any given regime at time 0.   ansi-c*/
+/*     //        z0 is an n_z-by-1 vector of initial condition when indxIni=1. (Value to be assigned if indxIni=0.)   ansi-c*/
+/*     //        P0 is an n_z-by-n_z matrix of initial condition when indxIni=1. (Value to be assigned if indxIni=0.)   ansi-c*/
+/*     //   ansi-c*/
+/*     //   Outputs are as follows:   ansi-c*/
+/*     //      loglh is a value of the log likelihood function of the state-space model   ansi-c*/
+/*     //                                under the assumption that errors are multivariate Gaussian.   ansi-c*/
+/*     //      zt_tm1 is an n_z-by-T matrices of one-step predicted state vectors with z0_0m1 as an initial condition (base-0 first element)   ansi-c*/
+/*     //                         and with z_{T|T-1} as the last element.  Thus, we can use it as a base-1 vector.   ansi-c*/
+/*     //      Pt_tm1 is an n_z-by-n_z-by-T 3-D of covariance matrices of zt_tm1 with P0_0m1 as though it were a initial condition   ansi-c*/
+/*     //                         and with P_{T|T-1} as the last element.  Thus, we can use it as though it were a base-1 cell.   ansi-c*/
+/*     //   ansi-c*/
+/*     //   The initial state vector and its covariance matrix are computed under the bounded (stationary) condition:   ansi-c*/
+/*     //             z0_0m1 = (I-F(:,:,1))\b(:,1)   ansi-c*/
+/*     //        vec(P0_0m1) = (I-kron(F(:,:,1),F(:,:,1)))\vec(V(:,:,1))   ansi-c*/
+/*     //   Note that all eigenvalues of the matrix F(:,:,1) are inside the unit circle when the state-space model is bounded (stationary).   ansi-c*/
+/*     //   ansi-c*/
+/*     //   April 2008, written by Tao Zha   ansi-c*/
+/*     //   See Hamilton's book ([13.2.13] -- [13.2.22]), Harvey (pp.100-106), and LiuWZ Model I NOTES pp.001-003.   ansi-c*/
 
-   //--- Output arguments.
-   double loglh_timet;  //log likelihood at time t.
-   TSdmatrix *zt_tm1_dm = kalfiltv_ps->zt_tm1_dm;  //nz-by-T.
-   TSdcell *Pt_tm1_dc = kalfiltv_ps->Pt_tm1_dc;   //nz-by-nz-T.
-   //--- Input arguments.
+/*     //--- Output arguments.   ansi-c*/
+   double loglh_timet;   /*  log likelihood at time t.   ansi-c*/
+   TSdmatrix *zt_tm1_dm = kalfiltv_ps->zt_tm1_dm;   /*  nz-by-T.   ansi-c*/
+   TSdcell *Pt_tm1_dc = kalfiltv_ps->Pt_tm1_dc;    /*  nz-by-nz-T.   ansi-c*/
+/*     //--- Input arguments.   ansi-c*/
    int tdata, tp1;
-   TSdvector *z0_dv = kalfiltv_ps->z0_dv;  //nz-by-1;
-   TSdmatrix *P0_dm = kalfiltv_ps->P0_dm;   //nz-by-nz.
+   TSdvector *z0_dv = kalfiltv_ps->z0_dv;   /*  nz-by-1;   ansi-c*/
+   TSdmatrix *P0_dm = kalfiltv_ps->P0_dm;    /*  nz-by-nz.   ansi-c*/
    int T = kalfiltv_ps->T;
    int ny = kalfiltv_ps->ny;
    int nz = kalfiltv_ps->nz;
-   //--- Work arguments.
+/*     //--- Work arguments.   ansi-c*/
    int nz2 = square(nz);
    TSdmatrix *Wnzbynz_dm = CreateMatrix_lf(nz,nz);
    TSdmatrix *Wnz2bynz2_dm = CreateMatrix_lf(nz2,nz2);
    TSdmatrix *W2nz2bynz2_dm = CreateMatrix_lf(nz2,nz2);
    TSdvector *wP0_dv = CreateVector_lf(nz2);
-   //+
+/*     //+   ansi-c*/
    TSdvector yt_sdv, at_sdv, zt_tm1_sdv, ztp1_t_sdv, btp1_sdv;
    TSdvector *wny_dv = CreateVector_lf(ny);
    TSdmatrix *Wnzbyny_dm = CreateMatrix_lf(nz,ny);
@@ -967,37 +968,37 @@ double tz_logTimetCondLH_kalfiltv(int st, int inpt, struct TSkalfiltv_tag *kalfi
    TSdmatrix *Dtdata_dm = CreateMatrix_lf(ny,ny);
    TSdmatrix *Kt_tdata0_dm = CreateMatrix_lf(nz,ny);
    TSdmatrix *Kt_tdata_dm = CreateMatrix_lf(nz,ny);
-   //--- For eigenvalue decompositions
+/*     //--- For eigenvalue decompositions   ansi-c*/
    int ki;
    int errflag;
    double eigmax, logdet_Dtdata;
    TSdzvector *evals_dzv = NULL;
-   TSdvector *evals_abs_dv = NULL;  //Absolute eigenvalues.
-   //--- Input arguments.
-   TSdmatrix *yt_dm = kalfiltv_ps->yt_dm;   //ny-by-T.
-   TSdmatrix *at_dm = kalfiltv_ps->at_dm;   //ny-by-T.
-   TSdcell *Ht_dc = kalfiltv_ps->Ht_dc;   //ny-by-nz-by-T.
-   TSdcell *Rt_dc = kalfiltv_ps->Rt_dc;   //ny-by-ny-by-T.  Covariance matrix for the measurement equation.
-   TSdcell *Gt_dc = kalfiltv_ps->Gt_dc;   //nz-by-ny-by-T.  Cross-covariance.
-   //
-   TSdmatrix *bt_dm = kalfiltv_ps->bt_dm;   //nz-by-T.
-   TSdcell *Ft_dc = kalfiltv_ps->Ft_dc;   //nz-by-nz-by-T.
-   TSdcell *Vt_dc = kalfiltv_ps->Vt_dc;   //nz-by-nz-by-T.  Covariance matrix for the state equation.
-   //
+   TSdvector *evals_abs_dv = NULL;   /*  Absolute eigenvalues.   ansi-c*/
+/*     //--- Input arguments.   ansi-c*/
+   TSdmatrix *yt_dm = kalfiltv_ps->yt_dm;    /*  ny-by-T.   ansi-c*/
+   TSdmatrix *at_dm = kalfiltv_ps->at_dm;    /*  ny-by-T.   ansi-c*/
+   TSdcell *Ht_dc = kalfiltv_ps->Ht_dc;    /*  ny-by-nz-by-T.   ansi-c*/
+   TSdcell *Rt_dc = kalfiltv_ps->Rt_dc;    /*  ny-by-ny-by-T.  Covariance matrix for the measurement equation.   ansi-c*/
+   TSdcell *Gt_dc = kalfiltv_ps->Gt_dc;    /*  nz-by-ny-by-T.  Cross-covariance.   ansi-c*/
+/*     //   ansi-c*/
+   TSdmatrix *bt_dm = kalfiltv_ps->bt_dm;    /*  nz-by-T.   ansi-c*/
+   TSdcell *Ft_dc = kalfiltv_ps->Ft_dc;    /*  nz-by-nz-by-T.   ansi-c*/
+   TSdcell *Vt_dc = kalfiltv_ps->Vt_dc;    /*  nz-by-nz-by-T.  Covariance matrix for the state equation.   ansi-c*/
+/*     //   ansi-c*/
 
 
-   tdata = (tp1=inpt) - 1; //Base-0 time.
+   tdata = (tp1=inpt) - 1;  /*  Base-0 time.   ansi-c*/
 
-   //======= Initial condition. =======
+/*     //======= Initial condition. =======   ansi-c*/
    if (tdata==0)
    {
-      //=== Initializing.
+/*        //=== Initializing.   ansi-c*/
       if (!kalfiltv_ps->indxIni)
       {
-         InitializeDiagonalMatrix_lf(Wnzbynz_dm, 1.0);  //To be used for I(nz) -
-         InitializeDiagonalMatrix_lf(Wnz2bynz2_dm, 1.0);  //To be used for I(nz2) -
+         InitializeDiagonalMatrix_lf(Wnzbynz_dm, 1.0);   /*  To be used for I(nz) -   ansi-c*/
+         InitializeDiagonalMatrix_lf(Wnz2bynz2_dm, 1.0);   /*  To be used for I(nz2) -   ansi-c*/
 
-         //=== Eigenanalysis to determine the roots to ensure boundedness.
+/*           //=== Eigenanalysis to determine the roots to ensure boundedness.   ansi-c*/
          evals_dzv = CreateVector_dz(nz);
          evals_abs_dv = CreateVector_lf(nz);
          errflag = eigrgen(evals_dzv, (TSdzmatrix *)NULL, (TSdzmatrix *)NULL, Ft_dc->C[0]);
@@ -1007,18 +1008,18 @@ double tz_logTimetCondLH_kalfiltv(int st, int inpt, struct TSkalfiltv_tag *kalfi
          eigmax = MaxVector(evals_abs_dv);
          if (eigmax < (1.0+1.0e-14))
          {
-            //--- Getting z0_dv: zt_tm1(:,1) = (eye(n_z)-F(:,:,1))\b(:,1);
+/*              //--- Getting z0_dv: zt_tm1(:,1) = (eye(n_z)-F(:,:,1))\b(:,1);   ansi-c*/
             MatrixMinusMatrix(Wnzbynz_dm, Wnzbynz_dm, Ft_dc->C[0]);
             CopySubmatrix2vector(z0_dv, 0, bt_dm, 0, 0, bt_dm->nrows);
             bdivA_rgens(z0_dv, z0_dv, '\\', Wnzbynz_dm);
-                      //Done with Wnzbynz_dm.
-            //--- Getting P0_dm: Pt_tm1(:,:,1) = reshape((eye(n_z^2)-kron(F(:,:,1),F(:,:,1)))\V1(:),n_z,n_z);
+/*                        //Done with Wnzbynz_dm.   ansi-c*/
+/*              //--- Getting P0_dm: Pt_tm1(:,:,1) = reshape((eye(n_z^2)-kron(F(:,:,1),F(:,:,1)))\V1(:),n_z,n_z);   ansi-c*/
             tz_kron(W2nz2bynz2_dm, Ft_dc->C[0], Ft_dc->C[0]);
             MatrixMinusMatrix(Wnz2bynz2_dm, Wnz2bynz2_dm, W2nz2bynz2_dm);
             CopySubmatrix2vector(wP0_dv, 0, Vt_dc->C[0], 0, 0, nz2);
             bdivA_rgens(wP0_dv, wP0_dv, '\\', Wnz2bynz2_dm);
             CopySubvector2matrix_unr(P0_dm, 0, 0, wP0_dv, 0, nz2);
-                       //Done with all w*_dv and W*_dm.
+/*                         //Done with all w*_dv and W*_dm.   ansi-c*/
          }
          else
          {
@@ -1033,7 +1034,7 @@ double tz_logTimetCondLH_kalfiltv(int st, int inpt, struct TSkalfiltv_tag *kalfi
    }
 
 
-   //======= Liklihood at time t (see p.002 in LiuWZ). =======
+/*     //======= Liklihood at time t (see p.002 in LiuWZ). =======   ansi-c*/
    at_sdv.n = yt_sdv.n = yt_dm->nrows;
    at_sdv.flag = yt_sdv.flag = V_DEF;
    zt_tm1_sdv.n = ztp1_t_sdv.n = zt_tm1_dm->nrows;
@@ -1041,69 +1042,69 @@ double tz_logTimetCondLH_kalfiltv(int st, int inpt, struct TSkalfiltv_tag *kalfi
    btp1_sdv.n = bt_dm->nrows;
    btp1_sdv.flag = V_DEF;
 
-   //--- Setup.
+/*     //--- Setup.   ansi-c*/
    MatrixTimesMatrix(PHtran_tdata_dm, Pt_tm1_dc->C[tdata], Ht_dc->C[tdata], 1.0, 0.0, 'N', 'T');
 
-   //--- Data.
-   //- etdata = Y_T(:,tdata) - a(:,tdata) - Htdata*ztdata;
+/*     //--- Data.   ansi-c*/
+/*     //- etdata = Y_T(:,tdata) - a(:,tdata) - Htdata*ztdata;   ansi-c*/
    yt_sdv.v = yt_dm->M + tdata*yt_dm->nrows;
    at_sdv.v = at_dm->M + tdata*at_dm->nrows;
    zt_tm1_sdv.v = zt_tm1_dm->M + tdata*zt_tm1_dm->nrows;
    VectorMinusVector(etdata_dv, &yt_sdv, &at_sdv);
    MatrixTimesVector(etdata_dv, Ht_dc->C[tdata], &zt_tm1_sdv, -1.0, 1.0, 'N');
-   //+   Dtdata = Htdata*PHtran_tdata + R(:,:,tdata);
+/*     //+   Dtdata = Htdata*PHtran_tdata + R(:,:,tdata);   ansi-c*/
    CopyMatrix0(Dtdata_dm, Rt_dc->C[tdata]);
    MatrixTimesMatrix(Dtdata_dm, Ht_dc->C[tdata], PHtran_tdata_dm, 1.0, 1.0, 'N', 'N');
-   ScalarTimesMatrixSquare(Dtdata_dm, 0.5, Dtdata_dm, 'T', 0.5);  //Making it symmetric against some rounding errors.
-                      //This making-symmetric is very IMPORTANT; otherwise, we will get the matrix being singular message
-                      //    and eigenvalues being negative for the SPD matrix, etc.  Then the likelihood becomes either
-                      //    a bad number or a complex number.
+   ScalarTimesMatrixSquare(Dtdata_dm, 0.5, Dtdata_dm, 'T', 0.5);   /*  Making it symmetric against some rounding errors.   ansi-c*/
+/*                        //This making-symmetric is very IMPORTANT; otherwise, we will get the matrix being singular message   ansi-c*/
+/*                        //    and eigenvalues being negative for the SPD matrix, etc.  Then the likelihood becomes either   ansi-c*/
+/*                        //    a bad number or a complex number.   ansi-c*/
    Dtdata_dm->flag = Dtdata_dm->flag | M_SU | M_SL;
 
-   //--- Forming the log likelihood.
+/*     //--- Forming the log likelihood.   ansi-c*/
    if (!isfinite(logdet_Dtdata=logdetspd(Dtdata_dm)))  return (loglh_timet = -NEARINFINITY);
    bdivA_rgens(wny_dv, etdata_dv, '/', Dtdata_dm);
    loglh_timet = -(0.5*ny)*LOG2PI - 0.5*logdet_Dtdata - 0.5*VectorDotVector(wny_dv, etdata_dv);
-                         //Done with all w*_dv.
+/*                           //Done with all w*_dv.   ansi-c*/
 
 
-   //======= Updating for the next period. =======
-   //--- Updating zt_tm1_dm and Pt_tm1_dc by ztp1_t_sdv and Pt_tm1_dc->C[ti].
+/*     //======= Updating for the next period. =======   ansi-c*/
+/*     //--- Updating zt_tm1_dm and Pt_tm1_dc by ztp1_t_sdv and Pt_tm1_dc->C[ti].   ansi-c*/
    if (tp1<T)
    {
-      //Updating only up to tdata=T-2, because the values at tp1=T or tdata=T-1 will NOT be used in the likelihood function.
+/*        //Updating only up to tdata=T-2, because the values at tp1=T or tdata=T-1 will NOT be used in the likelihood function.   ansi-c*/
 
-      //- Kt_tdata = (Ft*PHtran_tdata+G(:,:,tdata))/Dtdata;
+/*        //- Kt_tdata = (Ft*PHtran_tdata+G(:,:,tdata))/Dtdata;   ansi-c*/
       CopyMatrix0(Kt_tdata0_dm, Gt_dc->C[tdata]);
       MatrixTimesMatrix(Kt_tdata0_dm, Ft_dc->C[tp1], PHtran_tdata_dm, 1.0, 1.0, 'N', 'N');
       BdivA_rrect(Kt_tdata_dm, Kt_tdata0_dm, '/', Dtdata_dm);
-      //+ zt_tm1(:,t) = b(:,t) + Ft*zt_tm1(:,tdata) + Kt_tdata*etdata;
+/*        //+ zt_tm1(:,t) = b(:,t) + Ft*zt_tm1(:,tdata) + Kt_tdata*etdata;   ansi-c*/
       ztp1_t_sdv.v = zt_tm1_dm->M + tp1*zt_tm1_dm->nrows;
       MatrixTimesVector(&ztp1_t_sdv, Ft_dc->C[tp1], &zt_tm1_sdv, 1.0, 0.0, 'N');
       MatrixTimesVector(&ztp1_t_sdv, Kt_tdata_dm, etdata_dv, 1.0, 1.0, 'N');
       btp1_sdv.v = bt_dm->M + tp1*btp1_sdv.n;
       VectorPlusMinusVectorUpdate(&ztp1_t_sdv, &btp1_sdv, 1.0);
-      //+ Pt_tm1(:,:,t) = Ft*Ptdata*Fttran - Kt_tdata*Dtdata*Kt_tdatatran + V(:,:,t);
+/*        //+ Pt_tm1(:,:,t) = Ft*Ptdata*Fttran - Kt_tdata*Dtdata*Kt_tdatatran + V(:,:,t);   ansi-c*/
       CopyMatrix0(Pt_tm1_dc->C[tp1], Vt_dc->C[tp1]);
       MatrixTimesMatrix(Wnzbyny_dm, Kt_tdata_dm, Dtdata_dm, 1.0, 0.0, 'N', 'N');
       MatrixTimesMatrix(Wnzbynz_dm, Wnzbyny_dm, Kt_tdata_dm, 1.0, 0.0, 'N', 'T');
       MatrixPlusMinusMatrixUpdate(Pt_tm1_dc->C[tp1], Wnzbynz_dm, -1.0);
-                            //Done with all W*_dm.
+/*                              //Done with all W*_dm.   ansi-c*/
       MatrixTimesMatrix(Wnzbynz_dm, Ft_dc->C[tp1], Pt_tm1_dc->C[tdata], 1.0, 0.0, 'N', 'N');
       MatrixTimesMatrix(W2nzbynz_dm, Wnzbynz_dm, Ft_dc->C[tp1], 1.0, 0.0, 'N', 'T');
       MatrixPlusMatrixUpdate(Pt_tm1_dc->C[tp1], W2nzbynz_dm);
-                            //Done with all W*_dm.
+/*                              //Done with all W*_dm.   ansi-c*/
    }
    zt_tm1_dm->flag = M_GE;
 
-   //===
+/*     //===   ansi-c*/
    DestroyVector_dz(evals_dzv);
    DestroyVector_lf(evals_abs_dv);
    DestroyMatrix_lf(Wnzbynz_dm);
    DestroyMatrix_lf(Wnz2bynz2_dm);
    DestroyMatrix_lf(W2nz2bynz2_dm);
    DestroyVector_lf(wP0_dv);
-   //
+/*     //   ansi-c*/
    DestroyVector_lf(wny_dv);
    DestroyMatrix_lf(Wnzbyny_dm);
    DestroyMatrix_lf(W2nzbynz_dm);
@@ -1119,41 +1120,41 @@ double tz_logTimetCondLH_kalfiltv(int st, int inpt, struct TSkalfiltv_tag *kalfi
 
 
 
-//-----------------------------------------------------
-//- WARNING: bedore using this function, make sure to call the following functions
-//      Only once in creating lwzmodel_ps: Refresh_kalfilms_*(lwzmodel_ps);
-//      Everytime when parameters are changed: RefreshEverything(); RefreRunningGensys_allcases(lwzmodel_ps) in particular.
-//-----------------------------------------------------
+/*  //-----------------------------------------------------   ansi-c*/
+/*  //- WARNING: bedore using this function, make sure to call the following functions   ansi-c*/
+/*  //      Only once in creating lwzmodel_ps: Refresh_kalfilms_*(lwzmodel_ps);   ansi-c*/
+/*  //      Everytime when parameters are changed: RefreshEverything(); RefreRunningGensys_allcases(lwzmodel_ps) in particular.   ansi-c*/
+/*  //-----------------------------------------------------   ansi-c*/
 double logTimetCondLH_kalfilms_1stapp(int st, int inpt, struct TSkalfilmsinputs_1stapp_tag *kalfilmsinputs_1stapp_ps, struct TStateModel_tag *smodel_ps)
 {
-   //st: base-0 grand regime -- deals with the cross-section values at time t.
-   //inpt: base-1 in the sense that inpt>=1 to deal with the time series situation where S_T is (T+1)-by-1 and Y_T is T+nlags_max-by-1.
-   //      The 1st element for S_T is S_T[1] while S_T[0] is s_0 (initial condition).
-   //      The 1st element for Y_T, however, is Y_T[nlags_max+1-1].
-   //See (42.3) on p.42 in the SWZII NOTES.
+/*     //st: base-0 grand regime -- deals with the cross-section values at time t.   ansi-c*/
+/*     //inpt: base-1 in the sense that inpt>=1 to deal with the time series situation where S_T is (T+1)-by-1 and Y_T is T+nlags_max-by-1.   ansi-c*/
+/*     //      The 1st element for S_T is S_T[1] while S_T[0] is s_0 (initial condition).   ansi-c*/
+/*     //      The 1st element for Y_T, however, is Y_T[nlags_max+1-1].   ansi-c*/
+/*     //See (42.3) on p.42 in the SWZII NOTES.   ansi-c*/
 
-   //-- Output arguments
+/*     //-- Output arguments   ansi-c*/
    double loglh_timet;
-   //--- Input arguments
-   TSdcell *etdata_dc = kalfilmsinputs_1stapp_ps->etdata_dc; //ny-by-nst-by-T, save for computing the likelihood.
-   TSdfourth *Dtdata_d4 = kalfilmsinputs_1stapp_ps->Dtdata_d4; //ny-by-ny-nst-by-T, save for computing the likelihood and updating Kalman filter Updatekalfilms_1stapp().
-   //--- Local variables
+/*     //--- Input arguments   ansi-c*/
+   TSdcell *etdata_dc = kalfilmsinputs_1stapp_ps->etdata_dc;  /*  ny-by-nst-by-T, save for computing the likelihood.   ansi-c*/
+   TSdfourth *Dtdata_d4 = kalfilmsinputs_1stapp_ps->Dtdata_d4;  /*  ny-by-ny-nst-by-T, save for computing the likelihood and updating Kalman filter Updatekalfilms_1stapp().   ansi-c*/
+/*     //--- Local variables   ansi-c*/
    int tbase0;
    double logdet_Dtdata;
-   //--- Accessible variables
+/*     //--- Accessible variables   ansi-c*/
    int ny = kalfilmsinputs_1stapp_ps->ny;
    TSdvector etdata_sdv;
-   //=== Work arguments.
+/*     //=== Work arguments.   ansi-c*/
    TSdvector *wny_dv = CreateVector_lf(ny);
 
 
 
-   //--- Critical checking.
+/*     //--- Critical checking.   ansi-c*/
    if (inpt > kalfilmsinputs_1stapp_ps->T)
       fn_DisplayError(".../kalman.c/logTimetCondLH_kalfilms_1stapp(): The time exceeds the\n"
                       "     data sample size allocated the structure TSkalfilmsinputs_1stapp_tag");
 
-   //--- The following is for safe guard.  InitializeKalman_z10_P10() should be called in, say, RefreshEverything().
+/*     //--- The following is for safe guard.  InitializeKalman_z10_P10() should be called in, say, RefreshEverything().   ansi-c*/
    if (kalfilmsinputs_1stapp_ps->ztm1_track < 0)
       if (!InitializeKalman_z10_P10(kalfilmsinputs_1stapp_ps, (TSdmatrix *)NULL, (TSdcell *)NULL))
          fn_DisplayError(".../kalman.c/logTimetCondLH_kalfilms_1stapp(): the system is non-stationary when calling"
@@ -1162,83 +1163,83 @@ double logTimetCondLH_kalfilms_1stapp(int st, int inpt, struct TSkalfilmsinputs_
 
    tbase0=inpt-1;
 
-   //-------------------  The order matters. Updatekalfilms_1stapp() must be called before Update_et_Dt_1stapp(). -----------------
-   //--- $$$ Critical updating where we MUSt have inpt-1.  If inpt, Updatekalfilms_1stapp() will call this function again
-   //--- $$$   because DW function ProbabilityStateConditionalCurrent() need to access this function at time inpt,
-   //--- $$$   which has not computed before Updatekalfilms_1stapp().  Thus, we'll have an infinite loop.
+/*     //-------------------  The order matters. Updatekalfilms_1stapp() must be called before Update_et_Dt_1stapp(). -----------------   ansi-c*/
+/*     //--- $$$ Critical updating where we MUSt have inpt-1.  If inpt, Updatekalfilms_1stapp() will call this function again   ansi-c*/
+/*     //--- $$$   because DW function ProbabilityStateConditionalCurrent() need to access this function at time inpt,   ansi-c*/
+/*     //--- $$$   which has not computed before Updatekalfilms_1stapp().  Thus, we'll have an infinite loop.   ansi-c*/
    Updatekalfilms_1stapp(tbase0, kalfilmsinputs_1stapp_ps, smodel_ps);
-//   //--- $$$ Critical updating.
-//   Update_et_Dt_1stapp(tbase0, kalfilmsinputs_1stapp_ps);
-//             //This function will give Dtdata_d4->F[tbase0], etdata_dc->C[tbase0], and PHtran_tdata_d4->F[tbase0].
+/*  //   //--- $$$ Critical updating.   ansi-c*/
+/*  //   Update_et_Dt_1stapp(tbase0, kalfilmsinputs_1stapp_ps);   ansi-c*/
+/*  //             //This function will give Dtdata_d4->F[tbase0], etdata_dc->C[tbase0], and PHtran_tdata_d4->F[tbase0].   ansi-c*/
 
 
 
-   //======================================================
-   //= Getting the logLH at time tbase0 or time inpt.
-   //======================================================
-   //--- Forming the log conditional likelihood at t.
+/*     //======================================================   ansi-c*/
+/*     //= Getting the logLH at time tbase0 or time inpt.   ansi-c*/
+/*     //======================================================   ansi-c*/
+/*     //--- Forming the log conditional likelihood at t.   ansi-c*/
    etdata_sdv.n = ny;
    etdata_sdv.v = etdata_dc->C[tbase0]->M + ny*st;
    etdata_sdv.flag = V_DEF;
    if (!isfinite(logdet_Dtdata=logdetspd(Dtdata_d4->F[tbase0]->C[st])))  return (loglh_timet = -NEARINFINITY);
    bdivA_rgens(wny_dv, &etdata_sdv, '/', Dtdata_d4->F[tbase0]->C[st]);
    loglh_timet = -(0.5*ny)*LOG2PI - 0.5*logdet_Dtdata - 0.5*VectorDotVector(wny_dv, &etdata_sdv);
-                         //Done with all w*_dv.
+/*                           //Done with all w*_dv.   ansi-c*/
 
-   //===
+/*     //===   ansi-c*/
    DestroyVector_lf(wny_dv);
 
    return (loglh_timet);
 }
-//======================================================
-//= Computing z_{1|0} and P_{1|0} for each new parameter values.
-//======================================================
+/*  //======================================================   ansi-c*/
+/*  //= Computing z_{1|0} and P_{1|0} for each new parameter values.   ansi-c*/
+/*  //======================================================   ansi-c*/
 int InitializeKalman_z10_P10(struct TSkalfilmsinputs_1stapp_tag *kalfilmsinputs_1stapp_ps, TSdmatrix *z10_dm, TSdcell *P10_dc)
 {
-   //See p.001 and p.004 in LWZ Model II.
-   //Outputs:
-   //   return 1: success in initializing; 0: initializing fails, so the likelihood must be set to -infty outside this function.
-   //   ztm1_track to track the time up to which Kalman filter have been updated.
-   //   z0_dm, zt_tm1_dc->C[0]
-   //   P0_dc, Pt_tm1_d4->F[0]
+/*     //See p.001 and p.004 in LWZ Model II.   ansi-c*/
+/*     //Outputs:   ansi-c*/
+/*     //   return 1: success in initializing; 0: initializing fails, so the likelihood must be set to -infty outside this function.   ansi-c*/
+/*     //   ztm1_track to track the time up to which Kalman filter have been updated.   ansi-c*/
+/*     //   z0_dm, zt_tm1_dc->C[0]   ansi-c*/
+/*     //   P0_dc, Pt_tm1_d4->F[0]   ansi-c*/
 
-   //--- Output arguments
-   TSdmatrix *z0_0_dm = kalfilmsinputs_1stapp_ps->z0_dm;        //nz-by-nst.
-   TSdmatrix *z0_dm = kalfilmsinputs_1stapp_ps->z0_dm;        //nz-by-nst.
-   TSdcell *P0_dc = kalfilmsinputs_1stapp_ps->P0_dc;          //nz-by-nz-by-nst.
-   //+ Used to get zt_tm1_dc->C[0] and Pt_tm1_d4->F[0] only.
-   TSdcell *zt_tm1_dc = kalfilmsinputs_1stapp_ps->zt_tm1_dc; //nz-by-nst-by-(T+1).
-   TSdfourth *Pt_tm1_d4 = kalfilmsinputs_1stapp_ps->Pt_tm1_d4;     //nz-by-nz-by-nst-by-(T+1).
-   //--- Input arguments
-   TSdmatrix *yt_dm = kalfilmsinputs_1stapp_ps->yt_dm;         //ny-by-T.
-   TSdmatrix *at_dm = kalfilmsinputs_1stapp_ps->at_dm;         //ny-by-nst.
-   TSdcell *Ht_dc = kalfilmsinputs_1stapp_ps->Ht_dc;           //ny-by-nz-by-nst.
-   TSdcell *Rt_dc = kalfilmsinputs_1stapp_ps->Rt_dc;           //ny-by-ny-by-nst.  Covariance matrix for the measurement equation.
-   //+
-   TSdmatrix *bt_dm = kalfilmsinputs_1stapp_ps->bt_dm;         //nz-by-nst.
-   TSdcell *Ft_dc = kalfilmsinputs_1stapp_ps->Ft_dc;           //nz-by-nz-by-nst.
-   TSdcell *Vt_dc = kalfilmsinputs_1stapp_ps->Vt_dc;           //nz-by-nz-by-nst.  Covariance matrix for the state equation.
-   //--- Local variables
+/*     //--- Output arguments   ansi-c*/
+   TSdmatrix *z0_0_dm = kalfilmsinputs_1stapp_ps->z0_dm;         /*  nz-by-nst.   ansi-c*/
+   TSdmatrix *z0_dm = kalfilmsinputs_1stapp_ps->z0_dm;         /*  nz-by-nst.   ansi-c*/
+   TSdcell *P0_dc = kalfilmsinputs_1stapp_ps->P0_dc;           /*  nz-by-nz-by-nst.   ansi-c*/
+/*     //+ Used to get zt_tm1_dc->C[0] and Pt_tm1_d4->F[0] only.   ansi-c*/
+   TSdcell *zt_tm1_dc = kalfilmsinputs_1stapp_ps->zt_tm1_dc;  /*  nz-by-nst-by-(T+1).   ansi-c*/
+   TSdfourth *Pt_tm1_d4 = kalfilmsinputs_1stapp_ps->Pt_tm1_d4;      /*  nz-by-nz-by-nst-by-(T+1).   ansi-c*/
+/*     //--- Input arguments   ansi-c*/
+   TSdmatrix *yt_dm = kalfilmsinputs_1stapp_ps->yt_dm;          /*  ny-by-T.   ansi-c*/
+   TSdmatrix *at_dm = kalfilmsinputs_1stapp_ps->at_dm;          /*  ny-by-nst.   ansi-c*/
+   TSdcell *Ht_dc = kalfilmsinputs_1stapp_ps->Ht_dc;            /*  ny-by-nz-by-nst.   ansi-c*/
+   TSdcell *Rt_dc = kalfilmsinputs_1stapp_ps->Rt_dc;            /*  ny-by-ny-by-nst.  Covariance matrix for the measurement equation.   ansi-c*/
+/*     //+   ansi-c*/
+   TSdmatrix *bt_dm = kalfilmsinputs_1stapp_ps->bt_dm;          /*  nz-by-nst.   ansi-c*/
+   TSdcell *Ft_dc = kalfilmsinputs_1stapp_ps->Ft_dc;            /*  nz-by-nz-by-nst.   ansi-c*/
+   TSdcell *Vt_dc = kalfilmsinputs_1stapp_ps->Vt_dc;            /*  nz-by-nz-by-nst.  Covariance matrix for the state equation.   ansi-c*/
+/*     //--- Local variables   ansi-c*/
    int sti;
-   //--- Accessible variables
+/*     //--- Accessible variables   ansi-c*/
    int ny = kalfilmsinputs_1stapp_ps->ny;
    int nz = kalfilmsinputs_1stapp_ps->nz;
    int nst = kalfilmsinputs_1stapp_ps->nst;
    TSdvector z0_sdv, z0_0_sdv, bt_sdv;
    TSdvector yt_sdv, at_sdv;
-   //--- For the initial conditions: eigenvalue decompositions
+/*     //--- For the initial conditions: eigenvalue decompositions   ansi-c*/
    int ki;
    int errflag;
    double eigmax;
-   //===
+/*     //===   ansi-c*/
    int nz2 = square(nz);
    TSdmatrix *Wnzbynz_dm = CreateMatrix_lf(nz,nz);
    TSdmatrix *Wnz2bynz2_dm = CreateMatrix_lf(nz2,nz2);
    TSdmatrix *W2nz2bynz2_dm = CreateMatrix_lf(nz2,nz2);
    TSdvector *wP0_dv = CreateVector_lf(nz2);
-   //
+/*     //   ansi-c*/
    TSdzvector *evals_dzv = evals_dzv = CreateVector_dz(nz);
-   TSdvector *evals_abs_dv = CreateVector_lf(nz); //Absolute eigenvalues.
+   TSdvector *evals_abs_dv = CreateVector_lf(nz);  /*  Absolute eigenvalues.   ansi-c*/
 
 
    if (kalfilmsinputs_1stapp_ps->ztm1_track < 0)
@@ -1249,60 +1250,60 @@ int InitializeKalman_z10_P10(struct TSkalfilmsinputs_1stapp_tag *kalfilmsinputs_
       at_sdv.flag = yt_sdv.flag = V_DEF;
 
 
-      //======= Initial condition. =======
+/*        //======= Initial condition. =======   ansi-c*/
       if (!kalfilmsinputs_1stapp_ps->indxIni)
       {
          z0_0_dm->flag = z0_dm->flag = M_GE;
          for (sti=nst-1; sti>=0;  sti--)
          {
-            if (kalfilmsinputs_1stapp_ps->DiffuseScale) //Diffuse initial conditions are used.
+            if (kalfilmsinputs_1stapp_ps->DiffuseScale)  /*  Diffuse initial conditions are used.   ansi-c*/
             {
-               //--- Diffuse condition for z0_dv.
+/*                 //--- Diffuse condition for z0_dv.   ansi-c*/
                z0_sdv.v = z0_dm->M + z0_sdv.n*sti;
                z0_0_sdv.v = z0_0_dm->M + z0_0_sdv.n*sti;
                bt_sdv.v = bt_dm->M + bt_sdv.n*sti;
                InitializeConstantVector_lf(&z0_0_sdv, 0.0);
                MatrixTimesVector(&z0_sdv, Ft_dc->C[sti], &z0_0_sdv, 1.0, 0.0, 'N');
                VectorPlusVector(&z0_sdv, &z0_sdv, &bt_sdv);
-               //--- Diffuse condition for P0_dm.
-               InitializeDiagonalMatrix_lf(Wnzbynz_dm, kalfilmsinputs_1stapp_ps->DiffuseScale);  //To be used for DiffuseScale*I(nz)
+/*                 //--- Diffuse condition for P0_dm.   ansi-c*/
+               InitializeDiagonalMatrix_lf(Wnzbynz_dm, kalfilmsinputs_1stapp_ps->DiffuseScale);   /*  To be used for DiffuseScale*I(nz)   ansi-c*/
                CopyMatrix0(P0_dc->C[sti], Wnzbynz_dm);
-                           //Done with W*_dm.
+/*                             //Done with W*_dm.   ansi-c*/
             }
             else //Unconditional moments for initial conditions are used.
             {
-               InitializeDiagonalMatrix_lf(Wnzbynz_dm, 1.0);  //To be used for I(nz) -
-               InitializeDiagonalMatrix_lf(Wnz2bynz2_dm, 1.0);  //To be used for I(nz2) -
+               InitializeDiagonalMatrix_lf(Wnzbynz_dm, 1.0);   /*  To be used for I(nz) -   ansi-c*/
+               InitializeDiagonalMatrix_lf(Wnz2bynz2_dm, 1.0);   /*  To be used for I(nz2) -   ansi-c*/
 
-               //=== Eigenanalysis to determine the roots to ensure boundedness.
+/*                 //=== Eigenanalysis to determine the roots to ensure boundedness.   ansi-c*/
                errflag = eigrgen(evals_dzv, (TSdzmatrix *)NULL, (TSdzmatrix *)NULL, Ft_dc->C[sti]);
                if (errflag)  fn_DisplayError("kalman.c/InitializeKalman_z10_P10(): eigen decomposition failed");
                for (ki=nz-1; ki>=0; ki--)  evals_abs_dv->v[ki] = sqrt(square(evals_dzv->real->v[ki]) + square(evals_dzv->imag->v[ki]));
                evals_abs_dv->flag = V_DEF;
                eigmax = MaxVector(evals_abs_dv);
-               if (eigmax < (1.0-SQRTEPSILON)) //(1.0+EPSILON))
+               if (eigmax < (1.0-SQRTEPSILON))  /*  (1.0+EPSILON))   ansi-c*/
                {
-                  //--- Getting z0_dv: zt_tm1(:,1) = (eye(n_z)-F(:,:,sti))\b(:,sti);
+/*                    //--- Getting z0_dv: zt_tm1(:,1) = (eye(n_z)-F(:,:,sti))\b(:,sti);   ansi-c*/
                   z0_0_sdv.v = z0_0_dm->M + z0_0_sdv.n*sti;
                   z0_sdv.v = z0_dm->M + z0_sdv.n*sti;
                   MatrixMinusMatrix(Wnzbynz_dm, Wnzbynz_dm, Ft_dc->C[sti]);
                   CopySubmatrix2vector(&z0_0_sdv, 0, bt_dm, 0, sti, bt_dm->nrows);
                   bdivA_rgens(&z0_0_sdv, &z0_0_sdv, '\\', Wnzbynz_dm);
-                  //- Under the assumption s_0 = s_1 (this is a short-cut).
+/*                    //- Under the assumption s_0 = s_1 (this is a short-cut).   ansi-c*/
                   MatrixTimesVector(&z0_sdv, Ft_dc->C[sti], &z0_0_sdv, 1.0, 0.0, 'N');
                   VectorPlusVector(&z0_sdv, &z0_sdv, &bt_sdv);
-                            //Done with Wnzbynz_dm.
-                  //--- Getting P0_dm: Pt_tm1(:,:,1) = reshape((eye(n_z^2)-kron(F(:,:,sti),F(:,:,sti)))\V1(:),n_z,n_z);
+/*                              //Done with Wnzbynz_dm.   ansi-c*/
+/*                    //--- Getting P0_dm: Pt_tm1(:,:,1) = reshape((eye(n_z^2)-kron(F(:,:,sti),F(:,:,sti)))\V1(:),n_z,n_z);   ansi-c*/
                   tz_kron(W2nz2bynz2_dm, Ft_dc->C[sti], Ft_dc->C[sti]);
                   MatrixMinusMatrix(Wnz2bynz2_dm, Wnz2bynz2_dm, W2nz2bynz2_dm);
                   CopySubmatrix2vector(wP0_dv, 0, Vt_dc->C[sti], 0, 0, nz2);
                   bdivA_rgens(wP0_dv, wP0_dv, '\\', Wnz2bynz2_dm);
                   CopySubvector2matrix_unr(P0_dc->C[sti], 0, 0, wP0_dv, 0, nz2);
-                             //Done with all w*_dv and W*_dm.
+/*                               //Done with all w*_dv and W*_dm.   ansi-c*/
                }
                else
                {
-                  if (0) //0: no printing.
+                  if (0)  /*  0: no printing.   ansi-c*/
                   {
                      #if defined (USE_DEBUG_FILE)
                      fprintf(FPTR_DEBUG, "\n-------WARNING: ----------\n");
@@ -1310,23 +1311,23 @@ int InitializeKalman_z10_P10(struct TSkalfilmsinputs_1stapp_tag *kalfilmsinputs_
                      fprintf(FPTR_DEBUG, ".../kalman.c/InitializeKalman_z10_P10(): the system is non-stationary solutions\n"
                                          "    and see p.003 in LWZ Model II");
                      #else
-                     fprintf(stdout, "\n-----------------\n");
-                     fprintf(stdout, "\nIn grand regime sti=%d\n", sti);
-                     fprintf(stdout, ".../kalman.c/InitializeKalman_z10_P10(): the system is non-stationary solutions\n"
+                     printf("\n-----------------\n");
+                     printf("\nIn grand regime sti=%d\n", sti);
+                     printf(".../kalman.c/InitializeKalman_z10_P10(): the system is non-stationary solutions\n"
                                      "    and see p.003 in LWZ Model II");
                      #endif
                   }
-                  //=== See p.000.3 in LWZ Model II.
-                  //=== Do NOT use the following option.  It turns out that this will often generate explosive conditional liklihood
-                  //===   at the end of the sample, because Pt_tm1 shrinks to zero overtime due to the sigularity of
-                  //===   the initila condition P_{1|0}.
-                  //--- Letting z0_dv = 0.0
-                  // z0_sdv.v = z0_dm->M + z0_sdv.n*sti;
-                  // InitializeConstantVector_lf(&z0_sdv, 0.0);
-                  // //--- Letting P0_dm = V
-                  // CopyMatrix0(P0_dc->C[sti], Vt_dc->C[sti]);
+/*                    //=== See p.000.3 in LWZ Model II.   ansi-c*/
+/*                    //=== Do NOT use the following option.  It turns out that this will often generate explosive conditional liklihood   ansi-c*/
+/*                    //===   at the end of the sample, because Pt_tm1 shrinks to zero overtime due to the sigularity of   ansi-c*/
+/*                    //===   the initila condition P_{1|0}.   ansi-c*/
+/*                    //--- Letting z0_dv = 0.0   ansi-c*/
+/*                    // z0_sdv.v = z0_dm->M + z0_sdv.n*sti;   ansi-c*/
+/*                    // InitializeConstantVector_lf(&z0_sdv, 0.0);   ansi-c*/
+/*                    // //--- Letting P0_dm = V   ansi-c*/
+/*                    // CopyMatrix0(P0_dc->C[sti], Vt_dc->C[sti]);   ansi-c*/
 
-                  //===
+/*                    //===   ansi-c*/
                   DestroyVector_dz(evals_dzv);
                   DestroyVector_lf(evals_abs_dv);
                   DestroyMatrix_lf(Wnzbynz_dm);
@@ -1334,7 +1335,7 @@ int InitializeKalman_z10_P10(struct TSkalfilmsinputs_1stapp_tag *kalfilmsinputs_
                   DestroyMatrix_lf(W2nz2bynz2_dm);
                   DestroyVector_lf(wP0_dv);
 
-                  return (0);  //Early exit with kalfilmsinputs_1stapp_ps->ztm1_track continues to be -1.
+                  return (0);   /*  Early exit with kalfilmsinputs_1stapp_ps->ztm1_track continues to be -1.   ansi-c*/
                }
             }
          }
@@ -1351,15 +1352,15 @@ int InitializeKalman_z10_P10(struct TSkalfilmsinputs_1stapp_tag *kalfilmsinputs_
          else
             CopyCell0(P0_dc, P10_dc);
       }
-      CopyMatrix0(zt_tm1_dc->C[0], z0_dm); //At time t-1 = 1.
-      CopyCell0(Pt_tm1_d4->F[0], P0_dc); //At time t-1 = 1.
+      CopyMatrix0(zt_tm1_dc->C[0], z0_dm);  /*  At time t-1 = 1.   ansi-c*/
+      CopyCell0(Pt_tm1_d4->F[0], P0_dc);  /*  At time t-1 = 1.   ansi-c*/
 
 
-      kalfilmsinputs_1stapp_ps->ztm1_track = 0;  //Must reset to 0, meaning initial setting is done and ready for computing LH at t = 1.
+      kalfilmsinputs_1stapp_ps->ztm1_track = 0;   /*  Must reset to 0, meaning initial setting is done and ready for computing LH at t = 1.   ansi-c*/
 
       Update_et_Dt_1stapp(0, kalfilmsinputs_1stapp_ps);
 
-      //===
+/*        //===   ansi-c*/
       DestroyVector_dz(evals_dzv);
       DestroyVector_lf(evals_abs_dv);
       DestroyMatrix_lf(Wnzbynz_dm);
@@ -1374,7 +1375,7 @@ int InitializeKalman_z10_P10(struct TSkalfilmsinputs_1stapp_tag *kalfilmsinputs_
       fn_DisplayError(".../kalman.c/InitializeKalman_z10_P10(): calling this function makes sense only if"
                          "     kalfilmsinputs_1stapp_ps->ztm1_track is -1.  Please check this value.");
 
-      //===
+/*        //===   ansi-c*/
       DestroyVector_dz(evals_dzv);
       DestroyVector_lf(evals_abs_dv);
       DestroyMatrix_lf(Wnzbynz_dm);
@@ -1385,40 +1386,40 @@ int InitializeKalman_z10_P10(struct TSkalfilmsinputs_1stapp_tag *kalfilmsinputs_
       return (0);
    }
 }
-//======================================================
-//= Integrating out the lagged regimes in order to
-//=   updating zt_tm1 and Pt_tm1 for next perid tp1 through Kim-Nelson filter.
-//= tdata representing base-0 t timing, while inpt represents base-1 t timing.
-//
-//= Purpose: for each inpt, we integrate out grand regimes st
-//=   only ONCE to prevent the dimension of updated zt_tm1 and Pt_tm1 through Kim-Nelson filter.
-//======================================================
+/*  //======================================================   ansi-c*/
+/*  //= Integrating out the lagged regimes in order to   ansi-c*/
+/*  //=   updating zt_tm1 and Pt_tm1 for next perid tp1 through Kim-Nelson filter.   ansi-c*/
+/*  //= tdata representing base-0 t timing, while inpt represents base-1 t timing.   ansi-c*/
+/*  //   ansi-c*/
+/*  //= Purpose: for each inpt, we integrate out grand regimes st   ansi-c*/
+/*  //=   only ONCE to prevent the dimension of updated zt_tm1 and Pt_tm1 through Kim-Nelson filter.   ansi-c*/
+/*  //======================================================   ansi-c*/
 static int Updatekalfilms_1stapp(int t_1, struct TSkalfilmsinputs_1stapp_tag *kalfilmsinputs_1stapp_ps, struct TStateModel_tag *smodel_ps)
 {
-   //Output:
-   //  tm1update
-   //  z_{t_1+1|t_1}
-   //  P_{t_1+1|t_1}
-   //Input:
-   //  t-1: base-1 t timing.  Thus t-1=inpt-1.
+/*     //Output:   ansi-c*/
+/*     //  tm1update   ansi-c*/
+/*     //  z_{t_1+1|t_1}   ansi-c*/
+/*     //  P_{t_1+1|t_1}   ansi-c*/
+/*     //Input:   ansi-c*/
+/*     //  t-1: base-1 t timing.  Thus t-1=inpt-1.   ansi-c*/
 
-   //--- Local variables
+/*     //--- Local variables   ansi-c*/
    int stp1i, sti, t_2, t_2p1;
    double prob_previous_regimes;
-   //-- Output arguments
-   TSdcell *zt_tm1_dc = kalfilmsinputs_1stapp_ps->zt_tm1_dc; //nz-by-nst-by-(T+1).
-   TSdfourth *Pt_tm1_d4 = kalfilmsinputs_1stapp_ps->Pt_tm1_d4;     //nz-by-nz-by-nst-by-(T+1).
-   //--- Input arguments
-   TSdcell *Gt_dc = kalfilmsinputs_1stapp_ps->Gt_dc;           //nz-by-ny-by-nst.  Cross-covariance.
-   //+
-   TSdmatrix *bt_dm = kalfilmsinputs_1stapp_ps->bt_dm;         //nz-by-nst.
-   TSdcell *Ft_dc = kalfilmsinputs_1stapp_ps->Ft_dc;           //nz-by-nz-by-nst.
-   TSdcell *Vt_dc = kalfilmsinputs_1stapp_ps->Vt_dc;           //nz-by-nz-by-nst.  Covariance matrix for the state equation.
-   //+
-   TSdfourth *PHtran_tdata_d4 = kalfilmsinputs_1stapp_ps->PHtran_tdata_d4;  //nz-by-ny-by-nst-T, saved only for updating Kalman filter Updatekalfilms_1stapp().
-   TSdcell *etdata_dc = kalfilmsinputs_1stapp_ps->etdata_dc; //ny-by-nst-by-T, save for computing the likelihood.
-   TSdfourth *Dtdata_d4 = kalfilmsinputs_1stapp_ps->Dtdata_d4; //ny-by-ny-nst-by-T, save for computing the likelihood and updating Kalman filter Updatekalfilms_1stapp().
-   //--- Accessible variables
+/*     //-- Output arguments   ansi-c*/
+   TSdcell *zt_tm1_dc = kalfilmsinputs_1stapp_ps->zt_tm1_dc;  /*  nz-by-nst-by-(T+1).   ansi-c*/
+   TSdfourth *Pt_tm1_d4 = kalfilmsinputs_1stapp_ps->Pt_tm1_d4;      /*  nz-by-nz-by-nst-by-(T+1).   ansi-c*/
+/*     //--- Input arguments   ansi-c*/
+   TSdcell *Gt_dc = kalfilmsinputs_1stapp_ps->Gt_dc;            /*  nz-by-ny-by-nst.  Cross-covariance.   ansi-c*/
+/*     //+   ansi-c*/
+   TSdmatrix *bt_dm = kalfilmsinputs_1stapp_ps->bt_dm;          /*  nz-by-nst.   ansi-c*/
+   TSdcell *Ft_dc = kalfilmsinputs_1stapp_ps->Ft_dc;            /*  nz-by-nz-by-nst.   ansi-c*/
+   TSdcell *Vt_dc = kalfilmsinputs_1stapp_ps->Vt_dc;            /*  nz-by-nz-by-nst.  Covariance matrix for the state equation.   ansi-c*/
+/*     //+   ansi-c*/
+   TSdfourth *PHtran_tdata_d4 = kalfilmsinputs_1stapp_ps->PHtran_tdata_d4;   /*  nz-by-ny-by-nst-T, saved only for updating Kalman filter Updatekalfilms_1stapp().   ansi-c*/
+   TSdcell *etdata_dc = kalfilmsinputs_1stapp_ps->etdata_dc;  /*  ny-by-nst-by-T, save for computing the likelihood.   ansi-c*/
+   TSdfourth *Dtdata_d4 = kalfilmsinputs_1stapp_ps->Dtdata_d4;  /*  ny-by-ny-nst-by-T, save for computing the likelihood and updating Kalman filter Updatekalfilms_1stapp().   ansi-c*/
+/*     //--- Accessible variables   ansi-c*/
    int ny = kalfilmsinputs_1stapp_ps->ny;
    int nz = kalfilmsinputs_1stapp_ps->nz;
    int nst = kalfilmsinputs_1stapp_ps->nst;
@@ -1426,21 +1427,21 @@ static int Updatekalfilms_1stapp(int t_1, struct TSkalfilmsinputs_1stapp_tag *ka
    TSdvector z0_sdv;
    TSdvector btp1_sdv;
    TSdvector etdata_sdv;
-   //=== Work arguments.
+/*     //=== Work arguments.   ansi-c*/
    TSdmatrix *Wnzbynz_dm = CreateMatrix_lf(nz,nz);
-   //+
+/*     //+   ansi-c*/
    TSdmatrix *Wnzbyny_dm = CreateMatrix_lf(nz,ny);
    TSdmatrix *W2nzbynz_dm = CreateMatrix_lf(nz,nz);
    TSdmatrix *Kt_tdata0_dm = CreateMatrix_lf(nz,ny);
    TSdmatrix *Kt_tdata_dm = CreateMatrix_lf(nz,ny);
-   //=== For updating zt_tm1_dm and Pt_tm1.
+/*     //=== For updating zt_tm1_dm and Pt_tm1.   ansi-c*/
    TSdvector *ztp1_t_dv = CreateVector_lf(nz);
    TSdmatrix *Ptp1_t_dm = CreateMatrix_lf(nz, nz);
    TSdvector *ztp1_dv = CreateVector_lf(nz);
    TSdmatrix *Ptp1_dm = CreateMatrix_lf(nz, nz);
 
 
-   //--- Critical checking.
+/*     //--- Critical checking.   ansi-c*/
    if (kalfilmsinputs_1stapp_ps->ztm1_track < 0)
       fn_DisplayError(".../kalman.c/Updatekalfilms_1stapp(): Make sure InitializeKalman_z10_P10() is called in the function RefreshEverthing()");
 
@@ -1449,83 +1450,83 @@ static int Updatekalfilms_1stapp(int t_1, struct TSkalfilmsinputs_1stapp_tag *ka
    z0_sdv.flag = V_DEF;
    btp1_sdv.n = nz;
    btp1_sdv.flag = V_DEF;
-   //+
+/*     //+   ansi-c*/
    etdata_sdv.n = ny;
    etdata_sdv.flag = V_DEF;
 
    for (t_2=kalfilmsinputs_1stapp_ps->ztm1_track; t_2<t_1; t_2++)
    {
-      //If t_1 <= ztm1_track, no updating.
-      //If t_1 > ztm1_track, updating z_{t|t-1} and P_{t|t-1} up to t-1 = t_1.
+/*        //If t_1 <= ztm1_track, no updating.   ansi-c*/
+/*        //If t_1 > ztm1_track, updating z_{t|t-1} and P_{t|t-1} up to t-1 = t_1.   ansi-c*/
 
       zt_tm1_dc->C[t_2p1=t_2+1]->flag = M_GE;
       for (stp1i=nst-1; stp1i>=0;  stp1i--)
       {
-         InitializeConstantVector_lf(ztp1_dv, 0.0);  //To be summed over sti.
-         InitializeConstantMatrix_lf(Ptp1_dm, 0.0);  //To be summed over sti.
+         InitializeConstantVector_lf(ztp1_dv, 0.0);   /*  To be summed over sti.   ansi-c*/
+         InitializeConstantMatrix_lf(Ptp1_dm, 0.0);   /*  To be summed over sti.   ansi-c*/
 
          for (sti=nst-1; sti>=0;  sti--)
          {
-            //=== Updating for next period by integrating out sti..
-            //--- Ktp1_t = (F_tp1*PHtran_t+G(:,:,t))/Dt;
-            //--- Kt_tdata = (Ft*PHtran_tdata+G(:,:,tdata))/Dtdata where t=tp1 and tdata=t.
+/*              //=== Updating for next period by integrating out sti..   ansi-c*/
+/*              //--- Ktp1_t = (F_tp1*PHtran_t+G(:,:,t))/Dt;   ansi-c*/
+/*              //--- Kt_tdata = (Ft*PHtran_tdata+G(:,:,tdata))/Dtdata where t=tp1 and tdata=t.   ansi-c*/
             CopyMatrix0(Kt_tdata0_dm, Gt_dc->C[sti]);
             MatrixTimesMatrix(Kt_tdata0_dm, Ft_dc->C[stp1i], PHtran_tdata_d4->F[t_2]->C[sti], 1.0, 1.0, 'N', 'N');
             BdivA_rrect(Kt_tdata_dm, Kt_tdata0_dm, '/', Dtdata_d4->F[t_2]->C[sti]);
-            //+ zt_tm1(:,t) = b(:,t) + Ft*zt_tm1(:,tdata) + Kt_tdata*etdata where t=tp1 and tm1=t.
+/*              //+ zt_tm1(:,t) = b(:,t) + Ft*zt_tm1(:,tdata) + Kt_tdata*etdata where t=tp1 and tm1=t.   ansi-c*/
             etdata_sdv.v = etdata_dc->C[t_2]->M + ny*sti;
-            z0_sdv.v = zt_tm1_dc->C[t_2]->M + nz*sti;  //sti: regime at time t_2.
+            z0_sdv.v = zt_tm1_dc->C[t_2]->M + nz*sti;   /*  sti: regime at time t_2.   ansi-c*/
             MatrixTimesVector(ztp1_t_dv, Ft_dc->C[stp1i], &z0_sdv, 1.0, 0.0, 'N');
             MatrixTimesVector(ztp1_t_dv, Kt_tdata_dm, &etdata_sdv, 1.0, 1.0, 'N');
             btp1_sdv.v = bt_dm->M + stp1i*btp1_sdv.n;
             VectorPlusMinusVectorUpdate(ztp1_t_dv, &btp1_sdv, 1.0);
-            //+ Pt_tm1(:,:,t) = Ft*Ptdata*Fttran - Kt_tdata*Dtdata*Kt_tdatatran + V(:,:,t);
+/*              //+ Pt_tm1(:,:,t) = Ft*Ptdata*Fttran - Kt_tdata*Dtdata*Kt_tdatatran + V(:,:,t);   ansi-c*/
             CopyMatrix0(Ptp1_t_dm, Vt_dc->C[stp1i]);
             MatrixTimesMatrix(Wnzbyny_dm, Kt_tdata_dm, Dtdata_d4->F[t_2]->C[sti], 1.0, 0.0, 'N', 'N');
             MatrixTimesMatrix(Wnzbynz_dm, Wnzbyny_dm, Kt_tdata_dm, 1.0, 0.0, 'N', 'T');
             MatrixPlusMinusMatrixUpdate(Ptp1_t_dm, Wnzbynz_dm, -1.0);
-                                  //Done with all W*_dm.
+/*                                    //Done with all W*_dm.   ansi-c*/
             MatrixTimesMatrix(Wnzbynz_dm, Ft_dc->C[stp1i], Pt_tm1_d4->F[t_2]->C[sti], 1.0, 0.0, 'N', 'N');
             MatrixTimesMatrix(W2nzbynz_dm, Wnzbynz_dm, Ft_dc->C[stp1i], 1.0, 0.0, 'N', 'T');
             MatrixPlusMatrixUpdate(Ptp1_t_dm, W2nzbynz_dm);
-                                  //Done with all W*_dm.
+/*                                    //Done with all W*_dm.   ansi-c*/
 
 
-            //--- Integrating out the state at t_2 using
-            //---    P(s_t_2|Y_{t_2}, theta) = ProbabilityStateConditionalCurrent(sti, t_2, smodel_ps);
-            //--- One can also access to P(s_t_2|Y_{t_2}, theta) by using ElementV(smodel_ps->V[t_2],s_{t_2}i),
-            //---    but this access will not call my function logTimetCondLH(), thus no updating for
-            //---    P(s_t_2|Y_{t_2}, and thus leading to incorrect results.
+/*              //--- Integrating out the state at t_2 using   ansi-c*/
+/*              //---    P(s_t_2|Y_{t_2}, theta) = ProbabilityStateConditionalCurrent(sti, t_2, smodel_ps);   ansi-c*/
+/*              //--- One can also access to P(s_t_2|Y_{t_2}, theta) by using ElementV(smodel_ps->V[t_2],s_{t_2}i),   ansi-c*/
+/*              //---    but this access will not call my function logTimetCondLH(), thus no updating for   ansi-c*/
+/*              //---    P(s_t_2|Y_{t_2}, and thus leading to incorrect results.   ansi-c*/
             prob_previous_regimes = ProbabilityStateConditionalCurrent(sti, t_2, smodel_ps);
             ScalarTimesVectorUpdate(ztp1_dv, prob_previous_regimes, ztp1_t_dv);
             ScalarTimesMatrix(Ptp1_dm, prob_previous_regimes, Ptp1_t_dm, 1.0);
             Ptp1_dm->flag = M_GE | M_SU | M_SL;
-                                      //Done with ztp1_t_dv and Ptp1_t_dm.
+/*                                        //Done with ztp1_t_dv and Ptp1_t_dm.   ansi-c*/
          }
-         //--- Filling zt_tm1 and Pt_tm1 for next period.
-         z0_sdv.v = zt_tm1_dc->C[t_2p1]->M + z0_sdv.n*stp1i;  //stp1i: regime at time tp1.
+/*           //--- Filling zt_tm1 and Pt_tm1 for next period.   ansi-c*/
+         z0_sdv.v = zt_tm1_dc->C[t_2p1]->M + z0_sdv.n*stp1i;   /*  stp1i: regime at time tp1.   ansi-c*/
          CopyVector0(&z0_sdv, ztp1_dv);
-         CopyMatrix0(Pt_tm1_d4->F[t_2p1]->C[stp1i], Ptp1_dm);  //stp1i: regime at time tp1.
-                                           //Done with ztp1_dv, z0_sdv, Ptp1_dm.
+         CopyMatrix0(Pt_tm1_d4->F[t_2p1]->C[stp1i], Ptp1_dm);   /*  stp1i: regime at time tp1.   ansi-c*/
+/*                                             //Done with ztp1_dv, z0_sdv, Ptp1_dm.   ansi-c*/
       }
-      //--- $$$ The following is important because it tells ProbabilityStateConditionalCurrent(), which calls
-      //--- $$$   logTimetCondLH_kalfilms_1stapp(), which calls recursively this function again, that there is no
-      //--- $$$   need to update Kalman filter for the period before kalfilmsinputs_1stapp_ps->ztm1_track.
-      kalfilmsinputs_1stapp_ps->ztm1_track = t_2p1; //Means that z_{t_2p1+1|t_2p1} and P_{t_2p1+1|t_2p1} are done.
+/*        //--- $$$ The following is important because it tells ProbabilityStateConditionalCurrent(), which calls   ansi-c*/
+/*        //--- $$$   logTimetCondLH_kalfilms_1stapp(), which calls recursively this function again, that there is no   ansi-c*/
+/*        //--- $$$   need to update Kalman filter for the period before kalfilmsinputs_1stapp_ps->ztm1_track.   ansi-c*/
+      kalfilmsinputs_1stapp_ps->ztm1_track = t_2p1;  /*  Means that z_{t_2p1+1|t_2p1} and P_{t_2p1+1|t_2p1} are done.   ansi-c*/
 
-      //--- $$$ This function must be called after all the above computations are done.
+/*        //--- $$$ This function must be called after all the above computations are done.   ansi-c*/
       Update_et_Dt_1stapp(t_2p1, kalfilmsinputs_1stapp_ps);
    }
 
 
-   //===
+/*     //===   ansi-c*/
    DestroyMatrix_lf(Wnzbynz_dm);
-   //
+/*     //   ansi-c*/
    DestroyMatrix_lf(Wnzbyny_dm);
    DestroyMatrix_lf(W2nzbynz_dm);
    DestroyMatrix_lf(Kt_tdata0_dm);
    DestroyMatrix_lf(Kt_tdata_dm);
-   //
+/*     //   ansi-c*/
    DestroyVector_lf(ztp1_t_dv);
    DestroyMatrix_lf(Ptp1_t_dm);
    DestroyVector_lf(ztp1_dv);
@@ -1533,43 +1534,43 @@ static int Updatekalfilms_1stapp(int t_1, struct TSkalfilmsinputs_1stapp_tag *ka
 
    return (kalfilmsinputs_1stapp_ps->ztm1_track);
 }
-//======================================================
-//= Computes etdata and Dtdata for all grand regimes st at tbase0=inpt-1 or dtm1_track
-//=   to prevent recomputing this object for different st at given tbase0.
-//======================================================
+/*  //======================================================   ansi-c*/
+/*  //= Computes etdata and Dtdata for all grand regimes st at tbase0=inpt-1 or dtm1_track   ansi-c*/
+/*  //=   to prevent recomputing this object for different st at given tbase0.   ansi-c*/
+/*  //======================================================   ansi-c*/
 static int Update_et_Dt_1stapp(int t_1, struct TSkalfilmsinputs_1stapp_tag *kalfilmsinputs_1stapp_ps)
 {
-   //Output:
-   //  dtm1_track is updated in this function.
-   //  PHtran_tdata_d4->F[t-1]
-   //  etdata_dc->C[t-1]
-   //  Dtdata_d4->F[t-1]
-   //Input:
-   //  t_1=inpt-1: base-0 timing for et and Dt before the likelihood at time inpt is computed.
+/*     //Output:   ansi-c*/
+/*     //  dtm1_track is updated in this function.   ansi-c*/
+/*     //  PHtran_tdata_d4->F[t-1]   ansi-c*/
+/*     //  etdata_dc->C[t-1]   ansi-c*/
+/*     //  Dtdata_d4->F[t-1]   ansi-c*/
+/*     //Input:   ansi-c*/
+/*     //  t_1=inpt-1: base-0 timing for et and Dt before the likelihood at time inpt is computed.   ansi-c*/
 
-   //--- Local variables
+/*     //--- Local variables   ansi-c*/
    int sti, tbase0;
-   //-- Output arguments
-   TSdfourth *PHtran_tdata_d4 = kalfilmsinputs_1stapp_ps->PHtran_tdata_d4;  //nz-by-ny-by-nst-T, saved only for updating Kalman filter Updatekalfilms_1stapp().
-   TSdcell *etdata_dc = kalfilmsinputs_1stapp_ps->etdata_dc; //ny-by-nst-by-T, save for computing the likelihood.
-   TSdcell *yt_tm1_dc = kalfilmsinputs_1stapp_ps->yt_tm1_dc; //ny-by-nst-by-T, one-step forecast y_{t|t-1} for t=0 to T-1 (base-0).
-   TSdfourth *Dtdata_d4 = kalfilmsinputs_1stapp_ps->Dtdata_d4; //ny-by-ny-nst-by-T, save for computing the likelihood and updating Kalman filter Updatekalfilms_1stapp().
-   //--- input arguments
-   TSdcell *zt_tm1_dc = kalfilmsinputs_1stapp_ps->zt_tm1_dc; //nz-by-nst-by-T.
-   TSdfourth *Pt_tm1_d4 = kalfilmsinputs_1stapp_ps->Pt_tm1_d4;     //nz-by-nz-by-nst-by-T.
-   //+
-   TSdmatrix *yt_dm = kalfilmsinputs_1stapp_ps->yt_dm;         //ny-by-T.
-   TSdmatrix *at_dm = kalfilmsinputs_1stapp_ps->at_dm;         //ny-by-nst.
-   TSdcell *Ht_dc = kalfilmsinputs_1stapp_ps->Ht_dc;           //ny-by-nz-by-nst.
-   TSdcell *Rt_dc = kalfilmsinputs_1stapp_ps->Rt_dc;           //ny-by-ny-by-nst.  Covariance matrix for the measurement equation.
-   //--- Accessible variables
+/*     //-- Output arguments   ansi-c*/
+   TSdfourth *PHtran_tdata_d4 = kalfilmsinputs_1stapp_ps->PHtran_tdata_d4;   /*  nz-by-ny-by-nst-T, saved only for updating Kalman filter Updatekalfilms_1stapp().   ansi-c*/
+   TSdcell *etdata_dc = kalfilmsinputs_1stapp_ps->etdata_dc;  /*  ny-by-nst-by-T, save for computing the likelihood.   ansi-c*/
+   TSdcell *yt_tm1_dc = kalfilmsinputs_1stapp_ps->yt_tm1_dc;  /*  ny-by-nst-by-T, one-step forecast y_{t|t-1} for t=0 to T-1 (base-0).   ansi-c*/
+   TSdfourth *Dtdata_d4 = kalfilmsinputs_1stapp_ps->Dtdata_d4;  /*  ny-by-ny-nst-by-T, save for computing the likelihood and updating Kalman filter Updatekalfilms_1stapp().   ansi-c*/
+/*     //--- input arguments   ansi-c*/
+   TSdcell *zt_tm1_dc = kalfilmsinputs_1stapp_ps->zt_tm1_dc;  /*  nz-by-nst-by-T.   ansi-c*/
+   TSdfourth *Pt_tm1_d4 = kalfilmsinputs_1stapp_ps->Pt_tm1_d4;      /*  nz-by-nz-by-nst-by-T.   ansi-c*/
+/*     //+   ansi-c*/
+   TSdmatrix *yt_dm = kalfilmsinputs_1stapp_ps->yt_dm;          /*  ny-by-T.   ansi-c*/
+   TSdmatrix *at_dm = kalfilmsinputs_1stapp_ps->at_dm;          /*  ny-by-nst.   ansi-c*/
+   TSdcell *Ht_dc = kalfilmsinputs_1stapp_ps->Ht_dc;            /*  ny-by-nz-by-nst.   ansi-c*/
+   TSdcell *Rt_dc = kalfilmsinputs_1stapp_ps->Rt_dc;            /*  ny-by-ny-by-nst.  Covariance matrix for the measurement equation.   ansi-c*/
+/*     //--- Accessible variables   ansi-c*/
    int ny = kalfilmsinputs_1stapp_ps->ny;
    int nz = kalfilmsinputs_1stapp_ps->nz;
    int nst = kalfilmsinputs_1stapp_ps->nst;
    TSdvector z0_sdv;
    TSdvector yt_sdv, at_sdv;
    TSdvector etdata_sdv, yt_tm1_sdv;
-   //=== Work arguments.
+/*     //=== Work arguments.   ansi-c*/
    TSdmatrix *PHtran_tdata_dm = CreateMatrix_lf(nz,ny);
    TSdmatrix *Dtdata_dm = CreateMatrix_lf(ny,ny);
 
@@ -1583,44 +1584,44 @@ static int Update_et_Dt_1stapp(int t_1, struct TSkalfilmsinputs_1stapp_tag *kalf
 
    for (tbase0=(kalfilmsinputs_1stapp_ps->dtm1_track+1); tbase0<=t_1; tbase0++)
    {
-      //Note tbase0<=t_1, NOT tbase0<t_1.
-      //If t_1 < (dtm1_track+1), no updating.
-      //If t_1 >= (dtm1_track+1), updating etdata_dc->C[t-1] and Dtdata_d4->F[t-1] up to t-1=t_1.
+/*        //Note tbase0<=t_1, NOT tbase0<t_1.   ansi-c*/
+/*        //If t_1 < (dtm1_track+1), no updating.   ansi-c*/
+/*        //If t_1 >= (dtm1_track+1), updating etdata_dc->C[t-1] and Dtdata_d4->F[t-1] up to t-1=t_1.   ansi-c*/
 
       for (sti=nst-1; sti>=0;  sti--)
       {
-         //--- Setup.
+/*           //--- Setup.   ansi-c*/
          MatrixTimesMatrix(PHtran_tdata_dm, Pt_tm1_d4->F[tbase0]->C[sti], Ht_dc->C[sti], 1.0, 0.0, 'N', 'T');
          CopyMatrix0(kalfilmsinputs_1stapp_ps->PHtran_tdata_d4->F[tbase0]->C[sti], PHtran_tdata_dm);
 
 
-         //--- Data.
-         //- etdata = Y_T(:,tdata) - a(:,tdata) - Htdata*ztdata where tdata = tbase0 = inpt-1.
+/*           //--- Data.   ansi-c*/
+/*           //- etdata = Y_T(:,tdata) - a(:,tdata) - Htdata*ztdata where tdata = tbase0 = inpt-1.   ansi-c*/
          yt_sdv.v = yt_dm->M + tbase0*yt_dm->nrows;
-         at_sdv.v = at_dm->M + sti*at_dm->nrows;  //grand regime at time tbase0.
-         z0_sdv.v = zt_tm1_dc->C[tbase0]->M + z0_sdv.n*sti;  //sti: regime at time tbase0.
+         at_sdv.v = at_dm->M + sti*at_dm->nrows;   /*  grand regime at time tbase0.   ansi-c*/
+         z0_sdv.v = zt_tm1_dc->C[tbase0]->M + z0_sdv.n*sti;   /*  sti: regime at time tbase0.   ansi-c*/
          etdata_sdv.v = etdata_dc->C[tbase0]->M + etdata_sdv.n*sti;
          yt_tm1_sdv.v = etdata_dc->C[tbase0]->M + yt_tm1_sdv.n*sti;
          CopyVector0(&yt_tm1_sdv, &at_sdv);
-         MatrixTimesVector(&yt_tm1_sdv, Ht_dc->C[sti], &z0_sdv, 1.0, 1.0, 'N'); //a + H*z_{t|t-1}.
-         VectorMinusVector(&etdata_sdv, &yt_sdv, &yt_tm1_sdv); //y_t - a - H*z_{t|t-1}.
-         //+   Dtdata = Htdata*PHtran_tdata + R(:,:,tbase0);
+         MatrixTimesVector(&yt_tm1_sdv, Ht_dc->C[sti], &z0_sdv, 1.0, 1.0, 'N');  /*  a + H*z_{t|t-1}.   ansi-c*/
+         VectorMinusVector(&etdata_sdv, &yt_sdv, &yt_tm1_sdv);  /*  y_t - a - H*z_{t|t-1}.   ansi-c*/
+/*           //+   Dtdata = Htdata*PHtran_tdata + R(:,:,tbase0);   ansi-c*/
          CopyMatrix0(Dtdata_dm, Rt_dc->C[sti]);
          MatrixTimesMatrix(Dtdata_dm, Ht_dc->C[sti], PHtran_tdata_dm, 1.0, 1.0, 'N', 'N');
-                                     //Done with z0_sdv.v.
-         ScalarTimesMatrixSquare(Dtdata_dm, 0.5, Dtdata_dm, 'T', 0.5);  //Making it symmetric against some rounding errors.
-                            //This making-symmetric is very IMPORTANT; otherwise, we will get the matrix being singular message
-                            //    and eigenvalues being negative for the SPD matrix, etc.  Then the likelihood becomes either
-                            //    a bad number or a complex number.
+/*                                       //Done with z0_sdv.v.   ansi-c*/
+         ScalarTimesMatrixSquare(Dtdata_dm, 0.5, Dtdata_dm, 'T', 0.5);   /*  Making it symmetric against some rounding errors.   ansi-c*/
+/*                              //This making-symmetric is very IMPORTANT; otherwise, we will get the matrix being singular message   ansi-c*/
+/*                              //    and eigenvalues being negative for the SPD matrix, etc.  Then the likelihood becomes either   ansi-c*/
+/*                              //    a bad number or a complex number.   ansi-c*/
          Dtdata_dm->flag = Dtdata_dm->flag | M_SU | M_SL;
-         CopyMatrix0(Dtdata_d4->F[tbase0]->C[sti], Dtdata_dm); //Saved to be used for logTimetCondLH_kalfilms_1stapp().
+         CopyMatrix0(Dtdata_d4->F[tbase0]->C[sti], Dtdata_dm);  /*  Saved to be used for logTimetCondLH_kalfilms_1stapp().   ansi-c*/
       }
 
-      //--- $$$ This tracker functions the same way as kalfilmsinputs_1stapp_ps->ztm1_track.
+/*        //--- $$$ This tracker functions the same way as kalfilmsinputs_1stapp_ps->ztm1_track.   ansi-c*/
       kalfilmsinputs_1stapp_ps->dtm1_track = tbase0;
    }
 
-   //===
+/*     //===   ansi-c*/
    DestroyMatrix_lf(PHtran_tdata_dm);
    DestroyMatrix_lf(Dtdata_dm);
 
@@ -1632,42 +1633,42 @@ static int Update_et_Dt_1stapp(int t_1, struct TSkalfilmsinputs_1stapp_tag *kalf
 
 
 
-//-----------------------------------------------------
-//------------ OLD Code --------------------------
-//- Updating or refreshing all Kalman filter at time t for Markov-switching DSGE model.
-//- WARNING: make sure to call the following functions
-//      RunningGensys_const7varionly(lwzmodel_ps);
-//      Refresh_kalfilms_*(lwzmodel_ps);   //Creates or refreshes kalfilmsinputs_ps at new parameter values.
-//- before using tz_Refresh_z_T7P_T_in_kalfilms_1st_approx().
-//
-//- IMPORTANT NOTE: in the Markov-switching input file datainp_markov*.prn, it MUST be that
-//-                                 the coefficient regime is the 1st state variable, and
-//-                                 the volatility regime is the 2nd state variable.
-//-----------------------------------------------------
+/*  //-----------------------------------------------------   ansi-c*/
+/*  //------------ OLD Code --------------------------   ansi-c*/
+/*  //- Updating or refreshing all Kalman filter at time t for Markov-switching DSGE model.   ansi-c*/
+/*  //- WARNING: make sure to call the following functions   ansi-c*/
+/*  //      RunningGensys_const7varionly(lwzmodel_ps);   ansi-c*/
+/*  //      Refresh_kalfilms_*(lwzmodel_ps);   //Creates or refreshes kalfilmsinputs_ps at new parameter values.   ansi-c*/
+/*  //- before using tz_Refresh_z_T7P_T_in_kalfilms_1st_approx().   ansi-c*/
+/*  //   ansi-c*/
+/*  //- IMPORTANT NOTE: in the Markov-switching input file datainp_markov*.prn, it MUST be that   ansi-c*/
+/*  //-                                 the coefficient regime is the 1st state variable, and   ansi-c*/
+/*  //-                                 the volatility regime is the 2nd state variable.   ansi-c*/
+/*  //-----------------------------------------------------   ansi-c*/
 #if defined (NEWVERSIONofDW_SWITCH)
 double tz_logTimetCondLH_kalfilms_1st_approx(int st, int inpt, struct TSkalfilmsinputs_tag *kalfilmsinputs_ps, struct TStateModel_tag *smodel_ps)
 {
-   //st, st_c, and st_v: base-0: deals with the cross-section values at time t where
-   //      st is a grand regime, st_c is an encoded coefficient regime, and st_c is an encoded volatility regime.
-   //inpt: base-1 in the sense that inpt>=1 to deal with the time series situation where S_T is (T+1)-by-1 and Y_T is T+nlags_max-by-1.
-   //      The 1st element for S_T is S_T[1] while S_T[0] is s_0 (initial condition).
-   //      The 1st element for Y_T, however, is Y_T[nlags_max+1-1].
-   //See (42.3) on p.42 in the SWZII NOTES.
+/*     //st, st_c, and st_v: base-0: deals with the cross-section values at time t where   ansi-c*/
+/*     //      st is a grand regime, st_c is an encoded coefficient regime, and st_c is an encoded volatility regime.   ansi-c*/
+/*     //inpt: base-1 in the sense that inpt>=1 to deal with the time series situation where S_T is (T+1)-by-1 and Y_T is T+nlags_max-by-1.   ansi-c*/
+/*     //      The 1st element for S_T is S_T[1] while S_T[0] is s_0 (initial condition).   ansi-c*/
+/*     //      The 1st element for Y_T, however, is Y_T[nlags_max+1-1].   ansi-c*/
+/*     //See (42.3) on p.42 in the SWZII NOTES.   ansi-c*/
 
 
-   //--- Local variables
-   int comst_c;  //composite (s_tc, s_{t-1}c)
+/*     //--- Local variables   ansi-c*/
+   int comst_c;   /*  composite (s_tc, s_{t-1}c)   ansi-c*/
    int st_c, stm1_c, st_v;
-   int comsti_c;  //composite (s_tc, s_{t-1}c)
+   int comsti_c;   /*  composite (s_tc, s_{t-1}c)   ansi-c*/
    int sti, sti_c, stm1i_c, sti_v;
-   int comstp1i_c;  //composite (s_{t+1}c, s_tc)
+   int comstp1i_c;   /*  composite (s_{t+1}c, s_tc)   ansi-c*/
    int stp1i, stp1i_c, stp1i_v;
    int tbase0, tp1;
    double logdet_Dtdata, loglh_timet;
    static int record_tbase1_or_inpt_or_tp1 = 0;
    static int passonce;
    double prob_previous_regimes;
-   //=== Accessible variables
+/*     //=== Accessible variables   ansi-c*/
    int ny = kalfilmsinputs_ps->ny;
    int nz = kalfilmsinputs_ps->nz;
    int nRc = kalfilmsinputs_ps->nRc;
@@ -1675,34 +1676,34 @@ double tz_logTimetCondLH_kalfilms_1st_approx(int st, int inpt, struct TSkalfilms
    int nRv = kalfilmsinputs_ps->nRv;
    int T = kalfilmsinputs_ps->T;
    int indxIndRegimes = kalfilmsinputs_ps->indxIndRegimes;
-   int **Index = smodel_ps->sv->index;  //Regime-switching states.
-          //smodel_ps->sv->index is for our new code.
-          //  For old code (before 9 April 08 and before dsge_switch is created), use smodel_ps->sv->Index;
+   int **Index = smodel_ps->sv->index;   /*  Regime-switching states.   ansi-c*/
+/*            //smodel_ps->sv->index is for our new code.   ansi-c*/
+/*            //  For old code (before 9 April 08 and before dsge_switch is created), use smodel_ps->sv->Index;   ansi-c*/
    TSdvector z0_sdv;
-   //+ input arguments.
-   TSdmatrix *yt_dm = kalfilmsinputs_ps->yt_dm;         //ny-by-T.
-   TSdmatrix *at_dm = kalfilmsinputs_ps->at_dm;         //ny-by-nRc.
-   TSdcell *Ht_dc = kalfilmsinputs_ps->Ht_dc;           //ny-by-nz-by-nRc.
-   TSdcell *Rt_dc = kalfilmsinputs_ps->Rt_dc;           //ny-by-ny-by-nRv.  Covariance matrix for the measurement equation.
-   TSdcell *Gt_dc = kalfilmsinputs_ps->Gt_dc;           //nz-by-ny-by-nRv.  Cross-covariance.
-   //
-   TSdmatrix *bt_dm = kalfilmsinputs_ps->bt_dm;         //nz-by-nRc.
-   TSdcell *Ft_dc = kalfilmsinputs_ps->Ft_dc;           //nz-by-nz-by-nRc.
-   TSdcell *Vt_dc = kalfilmsinputs_ps->Vt_dc;           //nz-by-nz-by-nRv.  Covariance matrix for the state equation.
-   //
-   TSdmatrix *z0_dm = kalfilmsinputs_ps->z0_dm;        //nz-by-nRc*nRv or nz-by-nRv, depending on indxIndRegimes.
-   TSdcell *P0_dc = kalfilmsinputs_ps->P0_dc;          //nz-by-nz-by-nRc*nRv or nz-by-nRv, depending on indxIndRegimes.
-   //+ Output arguments.
-   TSdcell *zt_tm1_dc = kalfilmsinputs_ps->zt_tm1_dc; //nz-by-nRc*nRv-by-T if indxIndRegimes==1, nz-by-nRv-by-T if indxIndRegimes==0 where nRc=nRv.
-   TSdfourth *Pt_tm1_d4 = kalfilmsinputs_ps->Pt_tm1_d4;     //nz-by-nz-by-nRc*nRv-T if indxIndRegimes==1, nz-by-nz-by-nRv-by-T if indxIndRegimes==0 where nRc=nRv.
-   //=== Work arguments.
+/*     //+ input arguments.   ansi-c*/
+   TSdmatrix *yt_dm = kalfilmsinputs_ps->yt_dm;          /*  ny-by-T.   ansi-c*/
+   TSdmatrix *at_dm = kalfilmsinputs_ps->at_dm;          /*  ny-by-nRc.   ansi-c*/
+   TSdcell *Ht_dc = kalfilmsinputs_ps->Ht_dc;            /*  ny-by-nz-by-nRc.   ansi-c*/
+   TSdcell *Rt_dc = kalfilmsinputs_ps->Rt_dc;            /*  ny-by-ny-by-nRv.  Covariance matrix for the measurement equation.   ansi-c*/
+   TSdcell *Gt_dc = kalfilmsinputs_ps->Gt_dc;            /*  nz-by-ny-by-nRv.  Cross-covariance.   ansi-c*/
+/*     //   ansi-c*/
+   TSdmatrix *bt_dm = kalfilmsinputs_ps->bt_dm;          /*  nz-by-nRc.   ansi-c*/
+   TSdcell *Ft_dc = kalfilmsinputs_ps->Ft_dc;            /*  nz-by-nz-by-nRc.   ansi-c*/
+   TSdcell *Vt_dc = kalfilmsinputs_ps->Vt_dc;            /*  nz-by-nz-by-nRv.  Covariance matrix for the state equation.   ansi-c*/
+/*     //   ansi-c*/
+   TSdmatrix *z0_dm = kalfilmsinputs_ps->z0_dm;         /*  nz-by-nRc*nRv or nz-by-nRv, depending on indxIndRegimes.   ansi-c*/
+   TSdcell *P0_dc = kalfilmsinputs_ps->P0_dc;           /*  nz-by-nz-by-nRc*nRv or nz-by-nRv, depending on indxIndRegimes.   ansi-c*/
+/*     //+ Output arguments.   ansi-c*/
+   TSdcell *zt_tm1_dc = kalfilmsinputs_ps->zt_tm1_dc;  /*  nz-by-nRc*nRv-by-T if indxIndRegimes==1, nz-by-nRv-by-T if indxIndRegimes==0 where nRc=nRv.   ansi-c*/
+   TSdfourth *Pt_tm1_d4 = kalfilmsinputs_ps->Pt_tm1_d4;      /*  nz-by-nz-by-nRc*nRv-T if indxIndRegimes==1, nz-by-nz-by-nRv-by-T if indxIndRegimes==0 where nRc=nRv.   ansi-c*/
+/*     //=== Work arguments.   ansi-c*/
    int nz2 = square(nz);
    TSdmatrix *Wnzbynz_dm = CreateMatrix_lf(nz,nz);
    TSdmatrix *Wnz2bynz2_dm = CreateMatrix_lf(nz2,nz2);
    TSdmatrix *W2nz2bynz2_dm = CreateMatrix_lf(nz2,nz2);
    TSdvector *wP0_dv = CreateVector_lf(nz2);
-   //+
-   TSdvector yt_sdv, at_sdv, btp1_sdv;  //zt_tm1_sdv, ztp1_t_sdv,
+/*     //+   ansi-c*/
+   TSdvector yt_sdv, at_sdv, btp1_sdv;   /*  zt_tm1_sdv, ztp1_t_sdv,   ansi-c*/
    TSdvector *wny_dv = CreateVector_lf(ny);
    TSdmatrix *Wnzbyny_dm = CreateMatrix_lf(nz,ny);
    TSdmatrix *W2nzbynz_dm = CreateMatrix_lf(nz,nz);
@@ -1711,13 +1712,13 @@ double tz_logTimetCondLH_kalfilms_1st_approx(int st, int inpt, struct TSkalfilms
    TSdmatrix *Dtdata_dm = CreateMatrix_lf(ny,ny);
    TSdmatrix *Kt_tdata0_dm = CreateMatrix_lf(nz,ny);
    TSdmatrix *Kt_tdata_dm = CreateMatrix_lf(nz,ny);
-   //--- For eigenvalue decompositions
+/*     //--- For eigenvalue decompositions   ansi-c*/
    int ki;
    int errflag;
    double eigmax;
    TSdzvector *evals_dzv = evals_dzv = CreateVector_dz(nz);
-   TSdvector *evals_abs_dv = CreateVector_lf(nz); //Absolute eigenvalues.
-   //--- For updating zt_tm1_dm and Pt_tm1.
+   TSdvector *evals_abs_dv = CreateVector_lf(nz);  /*  Absolute eigenvalues.   ansi-c*/
+/*     //--- For updating zt_tm1_dm and Pt_tm1.   ansi-c*/
    TSdvector *ztp1_t_dv = CreateVector_lf(z0_dm->nrows);
    TSdmatrix *Ptp1_t_dm = CreateMatrix_lf(nz, nz);
    TSdvector *ztp1_dv = CreateVector_lf(z0_dm->nrows);
@@ -1735,37 +1736,37 @@ double tz_logTimetCondLH_kalfilms_1st_approx(int st, int inpt, struct TSkalfilms
 
    z0_sdv.n = z0_dm->nrows;
    z0_sdv.flag = V_DEF;
-   //
+/*     //   ansi-c*/
    at_sdv.n = yt_sdv.n = yt_dm->nrows;
    at_sdv.flag = yt_sdv.flag = V_DEF;
    btp1_sdv.n = bt_dm->nrows;
    btp1_sdv.flag = V_DEF;
 
 
-   //======= Initial condition. =======
+/*     //======= Initial condition. =======   ansi-c*/
    if (tbase0==0)
    {
       for (sti=smodel_ps->sv->nstates-1; sti>=0;  sti--)
       {
          if (indxIndRegimes)
          {
-            if (nRc==1)       //Volatility.
+            if (nRc==1)        /*  Volatility.   ansi-c*/
             {
                comsti_c = sti_c = 0;
                sti_v = sti;
             }
-            else if ((nRv>1) && (nRc>nRstc))  //Trend inflation, both sc_t and sc_{t-1} enters coefficient regime.
+            else if ((nRv>1) && (nRc>nRstc))   /*  Trend inflation, both sc_t and sc_{t-1} enters coefficient regime.   ansi-c*/
             {
-               comsti_c = Index[sti][0];  //composite (s_tc, s_{t-1}c)
-               sti_v = Index[sti][1];  //volatility state s_tv
-               sti_c = smodel_ps->sv->state_variable[0]->lag_index[comsti_c][0];  //coefficient regime at t.
-               stm1i_c = smodel_ps->sv->state_variable[0]->lag_index[comsti_c][1];  //coefficient regime at t-1: tm1: t-1;
+               comsti_c = Index[sti][0];   /*  composite (s_tc, s_{t-1}c)   ansi-c*/
+               sti_v = Index[sti][1];   /*  volatility state s_tv   ansi-c*/
+               sti_c = smodel_ps->sv->state_variable[0]->lag_index[comsti_c][0];   /*  coefficient regime at t.   ansi-c*/
+               stm1i_c = smodel_ps->sv->state_variable[0]->lag_index[comsti_c][1];   /*  coefficient regime at t-1: tm1: t-1;   ansi-c*/
             }
             else if ((nRv==1) && (nRc>nRstc))
             {
-               comsti_c = Index[sti][0];  //composite (s_tc, s_{t-1}c)
-               sti_c = smodel_ps->sv->state_variable[0]->lag_index[comsti_c][0];  //coefficient regime at t.
-               stm1i_c = smodel_ps->sv->state_variable[0]->lag_index[comsti_c][1];  //coefficient regime at t-1: tm1: t-1;
+               comsti_c = Index[sti][0];   /*  composite (s_tc, s_{t-1}c)   ansi-c*/
+               sti_c = smodel_ps->sv->state_variable[0]->lag_index[comsti_c][0];   /*  coefficient regime at t.   ansi-c*/
+               stm1i_c = smodel_ps->sv->state_variable[0]->lag_index[comsti_c][1];   /*  coefficient regime at t-1: tm1: t-1;   ansi-c*/
                sti_v = 0;
             }
             else if ((nRv==1) && (nRc==nRstc))
@@ -1773,7 +1774,7 @@ double tz_logTimetCondLH_kalfilms_1st_approx(int st, int inpt, struct TSkalfilms
                comsti_c  = sti_c = sti;
                sti_v = 0;
             }
-            else if ((nRv>1) && (nRc==nRstc))  //only sc_t enters coefficient regime.
+            else if ((nRv>1) && (nRc==nRstc))   /*  only sc_t enters coefficient regime.   ansi-c*/
             {
                comsti_c = sti_c = Index[sti][0];
                sti_v = Index[sti][1];
@@ -1783,9 +1784,9 @@ double tz_logTimetCondLH_kalfilms_1st_approx(int st, int inpt, struct TSkalfilms
          {
             if (nRc>nRstc)
             {
-               comsti_c = Index[sti][0];  //composite (s_tc, s_{t-1}c)
-               sti_c = smodel_ps->sv->state_variable[0]->lag_index[comsti_c][0];  //coefficient regime at t.
-               stm1i_c = smodel_ps->sv->state_variable[0]->lag_index[comsti_c][1];  //coefficient regime at t-1: tm1: t-1;
+               comsti_c = Index[sti][0];   /*  composite (s_tc, s_{t-1}c)   ansi-c*/
+               sti_c = smodel_ps->sv->state_variable[0]->lag_index[comsti_c][0];   /*  coefficient regime at t.   ansi-c*/
+               stm1i_c = smodel_ps->sv->state_variable[0]->lag_index[comsti_c][1];   /*  coefficient regime at t-1: tm1: t-1;   ansi-c*/
                sti_v = sti_c;
             }
             else
@@ -1795,10 +1796,10 @@ double tz_logTimetCondLH_kalfilms_1st_approx(int st, int inpt, struct TSkalfilms
 
          if (!kalfilmsinputs_ps->indxIni)
          {
-            InitializeDiagonalMatrix_lf(Wnzbynz_dm, 1.0);  //To be used for I(nz) -
-            InitializeDiagonalMatrix_lf(Wnz2bynz2_dm, 1.0);  //To be used for I(nz2) -
+            InitializeDiagonalMatrix_lf(Wnzbynz_dm, 1.0);   /*  To be used for I(nz) -   ansi-c*/
+            InitializeDiagonalMatrix_lf(Wnz2bynz2_dm, 1.0);   /*  To be used for I(nz2) -   ansi-c*/
 
-            //=== Eigenanalysis to determine the roots to ensure boundedness.
+/*              //=== Eigenanalysis to determine the roots to ensure boundedness.   ansi-c*/
             errflag = eigrgen(evals_dzv, (TSdzmatrix *)NULL, (TSdzmatrix *)NULL, Ft_dc->C[comsti_c]);
             if (errflag)  fn_DisplayError("kalman.c/tz_Refresh_z_T7P_T_in_kalfilms_1st_approx(): eigen decomposition failed");
             for (ki=nz-1; ki>=0; ki--)  evals_abs_dv->v[ki] = sqrt(square(evals_dzv->real->v[ki]) + square(evals_dzv->imag->v[ki]));
@@ -1806,37 +1807,37 @@ double tz_logTimetCondLH_kalfilms_1st_approx(int st, int inpt, struct TSkalfilms
             eigmax = MaxVector(evals_abs_dv);
             if (eigmax < (1.0+1.0e-14))
             {
-               //--- Getting z0_dv: zt_tm1(:,1) = (eye(n_z)-F(:,:,1))\b(:,1);
+/*                 //--- Getting z0_dv: zt_tm1(:,1) = (eye(n_z)-F(:,:,1))\b(:,1);   ansi-c*/
                MatrixMinusMatrix(Wnzbynz_dm, Wnzbynz_dm, Ft_dc->C[comsti_c]);
                z0_sdv.v = z0_dm->M + z0_sdv.n*sti;
                CopySubmatrix2vector(&z0_sdv, 0, bt_dm, 0, comsti_c, bt_dm->nrows);
                bdivA_rgens(&z0_sdv, &z0_sdv, '\\', Wnzbynz_dm);
-                         //Done with Wnzbynz_dm.
-               //--- Getting P0_dm: Pt_tm1(:,:,1) = reshape((eye(n_z^2)-kron(F(:,:,1),F(:,:,1)))\V1(:),n_z,n_z);
+/*                           //Done with Wnzbynz_dm.   ansi-c*/
+/*                 //--- Getting P0_dm: Pt_tm1(:,:,1) = reshape((eye(n_z^2)-kron(F(:,:,1),F(:,:,1)))\V1(:),n_z,n_z);   ansi-c*/
                tz_kron(W2nz2bynz2_dm, Ft_dc->C[comsti_c], Ft_dc->C[comsti_c]);
                MatrixMinusMatrix(Wnz2bynz2_dm, Wnz2bynz2_dm, W2nz2bynz2_dm);
                CopySubmatrix2vector(wP0_dv, 0, Vt_dc->C[sti_v], 0, 0, nz2);
-//=== ???????? For debugging purpose.
-//if ((inpt<2) && (st==0))
-//{
-//   fprintf(FPTR_DEBUG, "%%st=%d, inpt=%d, and sti=%d\n", st, inpt, sti);
+/*  //=== ???????? For debugging purpose.   ansi-c*/
+/*  //if ((inpt<2) && (st==0))   ansi-c*/
+/*  //{   ansi-c*/
+/*  //   fprintf(FPTR_DEBUG, "%%st=%d, inpt=%d, and sti=%d\n", st, inpt, sti);   ansi-c*/
 
-//   fprintf(FPTR_DEBUG, "wP0_dv:\n");
-//   WriteVector(FPTR_DEBUG, wP0_dv, " %10.5f ");
-//   fprintf(FPTR_DEBUG, "Vt_dc->C[sti_v=%d]:\n", sti_v);
-//   WriteMatrix(FPTR_DEBUG, Vt_dc->C[sti_v], " %10.5f ");
+/*  //   fprintf(FPTR_DEBUG, "wP0_dv:\n");   ansi-c*/
+/*  //   WriteVector(FPTR_DEBUG, wP0_dv, " %10.5f ");   ansi-c*/
+/*  //   fprintf(FPTR_DEBUG, "Vt_dc->C[sti_v=%d]:\n", sti_v);   ansi-c*/
+/*  //   WriteMatrix(FPTR_DEBUG, Vt_dc->C[sti_v], " %10.5f ");   ansi-c*/
 
-//   fflush(FPTR_DEBUG);
+/*  //   fflush(FPTR_DEBUG);   ansi-c*/
 
-//}
+/*  //}   ansi-c*/
                bdivA_rgens(wP0_dv, wP0_dv, '\\', Wnz2bynz2_dm);
                CopySubvector2matrix_unr(P0_dc->C[sti], 0, 0, wP0_dv, 0, nz2);
-                          //Done with all w*_dv and W*_dm.
+/*                            //Done with all w*_dv and W*_dm.   ansi-c*/
             }
             else
             {
-               fprintf(stdout, "\n-----------------\n");
-               fprintf(stdout, "\nIn regime comsti_c=%d and sti_v=%d and at time=%d\n", comsti_c, sti_v, 0);
+               printf("\n-----------------\n");
+               printf("\nIn regime comsti_c=%d and sti_v=%d and at time=%d\n", comsti_c, sti_v, 0);
                fn_DisplayError("kalman.c/tz_Refresh_z_T7P_T_in_kalfilms_1st_approx(): the system is non-stationary solutions\n"
                              "    and the initial conditions must be supplied by, say, input arguments");
                fflush(stdout);
@@ -1844,36 +1845,36 @@ double tz_logTimetCondLH_kalfilms_1st_approx(int st, int inpt, struct TSkalfilms
          }
       }
       z0_dm->flag = M_GE;
-      CopyMatrix0(zt_tm1_dc->C[0], z0_dm);  //At time t=0.
-      CopyCell0(Pt_tm1_d4->F[0], P0_dc);                              //At time t=0.
+      CopyMatrix0(zt_tm1_dc->C[0], z0_dm);   /*  At time t=0.   ansi-c*/
+      CopyCell0(Pt_tm1_d4->F[0], P0_dc);                               /*  At time t=0.   ansi-c*/
    }
 
 
-   //======================================================
-   //= Getting the logLH at time tbase0 or time inpt.
-   //======================================================
+/*     //======================================================   ansi-c*/
+/*     //= Getting the logLH at time tbase0 or time inpt.   ansi-c*/
+/*     //======================================================   ansi-c*/
    if (indxIndRegimes )
    {
-      if (nRc==1)       //Volatility.
+      if (nRc==1)        /*  Volatility.   ansi-c*/
       {
          comst_c = st_c = 0;
          st_v = st;
       }
-      else if ((nRv>1) && (nRc>nRstc))  //Trend inflation, both sc_t and sc_{t-1} enters coefficient regime.
+      else if ((nRv>1) && (nRc>nRstc))   /*  Trend inflation, both sc_t and sc_{t-1} enters coefficient regime.   ansi-c*/
       {
          if (smodel_ps->sv->n_state_variables != 2)  fn_DisplayError("kalman.c/kalfilms_timet_1st_approx():\n"
                          "  Number of state variables must be coincide with indxIndRegimes");
 
-         comst_c = Index[st][0];  //composite (s_tc, s_{t-1}c)
-         st_v = Index[st][1];  //volatility state s_tv
-         st_c = smodel_ps->sv->state_variable[0]->lag_index[comst_c][0];  //coefficient regime at t.
-         stm1_c = smodel_ps->sv->state_variable[0]->lag_index[comst_c][1];  //coefficient regime at t-1: tm1: t-1;
+         comst_c = Index[st][0];   /*  composite (s_tc, s_{t-1}c)   ansi-c*/
+         st_v = Index[st][1];   /*  volatility state s_tv   ansi-c*/
+         st_c = smodel_ps->sv->state_variable[0]->lag_index[comst_c][0];   /*  coefficient regime at t.   ansi-c*/
+         stm1_c = smodel_ps->sv->state_variable[0]->lag_index[comst_c][1];   /*  coefficient regime at t-1: tm1: t-1;   ansi-c*/
       }
       else if ((nRv==1) && (nRc>nRstc))
       {
-         comst_c = Index[st][0];  //composite (s_tc, s_{t-1}c)
-         st_c = smodel_ps->sv->state_variable[0]->lag_index[comst_c][0];  //coefficient regime at t.
-         stm1_c = smodel_ps->sv->state_variable[0]->lag_index[comst_c][1];  //coefficient regime at t-1: tm1: t-1;
+         comst_c = Index[st][0];   /*  composite (s_tc, s_{t-1}c)   ansi-c*/
+         st_c = smodel_ps->sv->state_variable[0]->lag_index[comst_c][0];   /*  coefficient regime at t.   ansi-c*/
+         stm1_c = smodel_ps->sv->state_variable[0]->lag_index[comst_c][1];   /*  coefficient regime at t-1: tm1: t-1;   ansi-c*/
          st_v = 0;
       }
       else if ((nRv==1) && (nRc==nRstc))
@@ -1881,7 +1882,7 @@ double tz_logTimetCondLH_kalfilms_1st_approx(int st, int inpt, struct TSkalfilms
          comst_c  = st_c = st;
          st_v = 0;
       }
-      else if ((nRv>1) && (nRc==nRstc))  //only sc_t enters coefficient regime.
+      else if ((nRv>1) && (nRc==nRstc))   /*  only sc_t enters coefficient regime.   ansi-c*/
       {
          if (smodel_ps->sv->n_state_variables != 2)  fn_DisplayError("kalman.c/kalfilms_timet_1st_approx():\n"
                          "  Number of state variables must be coincide with indxIndRegimes");
@@ -1894,9 +1895,9 @@ double tz_logTimetCondLH_kalfilms_1st_approx(int st, int inpt, struct TSkalfilms
    {
        if (nRc>nRstc)
        {
-          comst_c = Index[st][0];  //composite (s_tc, s_{t-1}c)
-          st_c = smodel_ps->sv->state_variable[0]->lag_index[comst_c][0];  //coefficient regime at t.
-          stm1_c = smodel_ps->sv->state_variable[0]->lag_index[comst_c][1];  //coefficient regime at t-1: tm1: t-1;
+          comst_c = Index[st][0];   /*  composite (s_tc, s_{t-1}c)   ansi-c*/
+          st_c = smodel_ps->sv->state_variable[0]->lag_index[comst_c][0];   /*  coefficient regime at t.   ansi-c*/
+          stm1_c = smodel_ps->sv->state_variable[0]->lag_index[comst_c][1];   /*  coefficient regime at t-1: tm1: t-1;   ansi-c*/
           st_v = st_c;
        }
        else
@@ -1906,62 +1907,62 @@ double tz_logTimetCondLH_kalfilms_1st_approx(int st, int inpt, struct TSkalfilms
 
    z0_sdv.n = zt_tm1_dc->C[0]->nrows;
    z0_sdv.flag = V_DEF;
-   //
+/*     //   ansi-c*/
    at_sdv.n = yt_sdv.n = yt_dm->nrows;
    at_sdv.flag = yt_sdv.flag = V_DEF;
 
-   //====== Computing the conditional LH at time t. ======
-   //--- Setup.
+/*     //====== Computing the conditional LH at time t. ======   ansi-c*/
+/*     //--- Setup.   ansi-c*/
    MatrixTimesMatrix(PHtran_tdata_dm, Pt_tm1_d4->F[tbase0]->C[st], Ht_dc->C[comst_c], 1.0, 0.0, 'N', 'T');
 
-   //--- Data.
-   //- etdata = Y_T(:,tdata) - a(:,tdata) - Htdata*ztdata where tdata = tbase0 = inpt-1.
+/*     //--- Data.   ansi-c*/
+/*     //- etdata = Y_T(:,tdata) - a(:,tdata) - Htdata*ztdata where tdata = tbase0 = inpt-1.   ansi-c*/
    yt_sdv.v = yt_dm->M + tbase0*yt_dm->nrows;
-   at_sdv.v = at_dm->M + comst_c*at_dm->nrows;    //comst_c: coefficient regime at time tbase0.
-   z0_sdv.v = zt_tm1_dc->C[tbase0]->M + z0_sdv.n*st;  //st: regime at time tbase0 for zt_tm1.
+   at_sdv.v = at_dm->M + comst_c*at_dm->nrows;     /*  comst_c: coefficient regime at time tbase0.   ansi-c*/
+   z0_sdv.v = zt_tm1_dc->C[tbase0]->M + z0_sdv.n*st;   /*  st: regime at time tbase0 for zt_tm1.   ansi-c*/
    VectorMinusVector(etdata_dv, &yt_sdv, &at_sdv);
    MatrixTimesVector(etdata_dv, Ht_dc->C[comst_c], &z0_sdv, -1.0, 1.0, 'N');
-   //+   Dtdata = Htdata*PHtran_tdata + R(:,:,tbase0);
+/*     //+   Dtdata = Htdata*PHtran_tdata + R(:,:,tbase0);   ansi-c*/
    CopyMatrix0(Dtdata_dm, Rt_dc->C[st_v]);
    MatrixTimesMatrix(Dtdata_dm, Ht_dc->C[comst_c], PHtran_tdata_dm, 1.0, 1.0, 'N', 'N');
-   ScalarTimesMatrixSquare(Dtdata_dm, 0.5, Dtdata_dm, 'T', 0.5);  //Making it symmetric against some rounding errors.
-                      //This making-symmetric is very IMPORTANT; otherwise, we will get the matrix being singular message
-                      //    and eigenvalues being negative for the SPD matrix, etc.  Then the likelihood becomes either
-                      //    a bad number or a complex number.
+   ScalarTimesMatrixSquare(Dtdata_dm, 0.5, Dtdata_dm, 'T', 0.5);   /*  Making it symmetric against some rounding errors.   ansi-c*/
+/*                        //This making-symmetric is very IMPORTANT; otherwise, we will get the matrix being singular message   ansi-c*/
+/*                        //    and eigenvalues being negative for the SPD matrix, etc.  Then the likelihood becomes either   ansi-c*/
+/*                        //    a bad number or a complex number.   ansi-c*/
    Dtdata_dm->flag = Dtdata_dm->flag | M_SU | M_SL;
 
 
-   //--- Forming the log conditional likelihood at t.
+/*     //--- Forming the log conditional likelihood at t.   ansi-c*/
    if (!isfinite(logdet_Dtdata=logdetspd(Dtdata_dm)))  return (loglh_timet = -NEARINFINITY);
    bdivA_rgens(wny_dv, etdata_dv, '/', Dtdata_dm);
-//if ((inpt>82) && (inpt<86) )
-//{
-//   //Must be declared at the top of this "if" block.
-//   int kip1;
-//   double tmp_Dtdata;
-//   double tmp_expterm;
+/*  //if ((inpt>82) && (inpt<86) )   ansi-c*/
+/*  //{   ansi-c*/
+/*  //   //Must be declared at the top of this "if" block.   ansi-c*/
+/*  //   int kip1;   ansi-c*/
+/*  //   double tmp_Dtdata;   ansi-c*/
+/*  //   double tmp_expterm;   ansi-c*/
 
-//   fprintf(FPTR_DEBUG, "%%------------------------\n");
-//   fprintf(FPTR_DEBUG, "%%st=%d and inpt=%d\n", st, inpt);
-//   fprintf(FPTR_DEBUG, "loglh_timet = %10.5f;\n", loglh_timet);
+/*  //   fprintf(FPTR_DEBUG, "%%------------------------\n");   ansi-c*/
+/*  //   fprintf(FPTR_DEBUG, "%%st=%d and inpt=%d\n", st, inpt);   ansi-c*/
+/*  //   fprintf(FPTR_DEBUG, "loglh_timet = %10.5f;\n", loglh_timet);   ansi-c*/
 
 
-//   fprintf(FPTR_DEBUG, "wny_dv:\n");
-//   WriteVector(FPTR_DEBUG, wny_dv, " %10.5f ");
-//   fprintf(FPTR_DEBUG, "etdata_dv:\n");
-//   WriteVector(FPTR_DEBUG, etdata_dv, " %10.5f ");
-//   fprintf(FPTR_DEBUG, "Dtdata_dm:\n");
-//   WriteMatrix(FPTR_DEBUG, Dtdata_dm, " %.16e ");
+/*  //   fprintf(FPTR_DEBUG, "wny_dv:\n");   ansi-c*/
+/*  //   WriteVector(FPTR_DEBUG, wny_dv, " %10.5f ");   ansi-c*/
+/*  //   fprintf(FPTR_DEBUG, "etdata_dv:\n");   ansi-c*/
+/*  //   WriteVector(FPTR_DEBUG, etdata_dv, " %10.5f ");   ansi-c*/
+/*  //   fprintf(FPTR_DEBUG, "Dtdata_dm:\n");   ansi-c*/
+/*  //   WriteMatrix(FPTR_DEBUG, Dtdata_dm, " %.16e ");   ansi-c*/
 
-//   fflush(FPTR_DEBUG);
-//}
+/*  //   fflush(FPTR_DEBUG);   ansi-c*/
+/*  //}   ansi-c*/
    loglh_timet = -(0.5*ny)*LOG2PI - 0.5*logdet_Dtdata - 0.5*VectorDotVector(wny_dv, etdata_dv);
-                         //Done with all w*_dv.
+/*                           //Done with all w*_dv.   ansi-c*/
 
 
 
 
-//=== ???????? For debugging purpose.
+/*  //=== ???????? For debugging purpose.   ansi-c*/
 if (inpt==1)
 {
    double wk1, wk2;
@@ -1984,113 +1985,113 @@ if (inpt==1)
    fprintf(FPTR_DEBUG, "\n\n");
 
 }
-//
+/*  //   ansi-c*/
 fprintf(FPTR_DEBUG, " %10.5f\n", loglh_timet);
 fflush(FPTR_DEBUG);
 
 
-//=== ???????? For debugging purpose.
-//fprintf(FPTR_DEBUG, "------------------------\n");
-//fprintf(FPTR_DEBUG, "st=%d and inpt=%d\n", st, inpt);
-//fprintf(FPTR_DEBUG, "loglh_timet = %10.5f\n", loglh_timet);
-//fprintf(FPTR_DEBUG, "&yt_sdv:\n");
-//WriteVector(FPTR_DEBUG, &yt_sdv, " %10.5f ");
-////WriteVector(FPTR_DEBUG, etdata_dv, " %10.5f ");
-////fprintf(FPTR_DEBUG, "\n");
-////WriteMatrix(FPTR_DEBUG, Dtdata_dm, " %10.5f ");
-//fflush(FPTR_DEBUG);
+/*  //=== ???????? For debugging purpose.   ansi-c*/
+/*  //fprintf(FPTR_DEBUG, "------------------------\n");   ansi-c*/
+/*  //fprintf(FPTR_DEBUG, "st=%d and inpt=%d\n", st, inpt);   ansi-c*/
+/*  //fprintf(FPTR_DEBUG, "loglh_timet = %10.5f\n", loglh_timet);   ansi-c*/
+/*  //fprintf(FPTR_DEBUG, "&yt_sdv:\n");   ansi-c*/
+/*  //WriteVector(FPTR_DEBUG, &yt_sdv, " %10.5f ");   ansi-c*/
+/*  ////WriteVector(FPTR_DEBUG, etdata_dv, " %10.5f ");   ansi-c*/
+/*  ////fprintf(FPTR_DEBUG, "\n");   ansi-c*/
+/*  ////WriteMatrix(FPTR_DEBUG, Dtdata_dm, " %10.5f ");   ansi-c*/
+/*  //fflush(FPTR_DEBUG);   ansi-c*/
 
 
-//=== ???????? For debugging purpose.
-//if ((inpt>82) && (inpt<86) )
-//if (inpt<2)
-//{
-//   //Must be declared at the top of this "if" block.
-//   int kip1;
-//   double tmp_Dtdata;
-//   double tmp_expterm;
+/*  //=== ???????? For debugging purpose.   ansi-c*/
+/*  //if ((inpt>82) && (inpt<86) )   ansi-c*/
+/*  //if (inpt<2)   ansi-c*/
+/*  //{   ansi-c*/
+/*  //   //Must be declared at the top of this "if" block.   ansi-c*/
+/*  //   int kip1;   ansi-c*/
+/*  //   double tmp_Dtdata;   ansi-c*/
+/*  //   double tmp_expterm;   ansi-c*/
 
-//   fprintf(FPTR_DEBUG, "%%------------------------\n");
-//   fprintf(FPTR_DEBUG, "%%st=%d and inpt=%d\n", st, inpt);
-//   fprintf(FPTR_DEBUG, "loglh_timet = %10.5f;\n", loglh_timet);
-
-
-//   tmp_Dtdata = logdeterminant(Dtdata_dm);
-//   tmp_expterm = VectorDotVector(wny_dv, etdata_dv);
-//   fprintf(FPTR_DEBUG, "logdeterminant(Dtdata_dm) = %10.5f;\n", tmp_Dtdata);
-//   fprintf(FPTR_DEBUG, "VectorDotVector(wny_dv, etdata_dv) = %10.5f;\n", tmp_expterm);
-//   fprintf(FPTR_DEBUG, "wny_dv:\n");
-//   WriteVector(FPTR_DEBUG, wny_dv, " %10.5f ");
-//   fprintf(FPTR_DEBUG, "etdata_dv:\n");
-//   WriteVector(FPTR_DEBUG, etdata_dv, " %10.5f ");
-//   fprintf(FPTR_DEBUG, "&yt_sdv:\n");
-//   WriteVector(FPTR_DEBUG, &yt_sdv, " %10.5f ");
-//   fprintf(FPTR_DEBUG, "&at_sdv:\n");
-//   WriteVector(FPTR_DEBUG, &at_sdv, " %10.5f ");
-//   fprintf(FPTR_DEBUG, "&z0_sdv:\n");
-//   WriteVector(FPTR_DEBUG, &z0_sdv, " %10.5f ");
-//   fprintf(FPTR_DEBUG, "Ht_dc->C[comst_c=%d]:\n",comst_c);
-//   WriteMatrix(FPTR_DEBUG, Ht_dc->C[comst_c], " %10.5f ");
-//   fprintf(FPTR_DEBUG, "Rt_dc->C[st_v=%d]:\n", st_v);
-//   WriteMatrix(FPTR_DEBUG, Rt_dc->C[st_v], " %10.5f ");
-//   fprintf(FPTR_DEBUG, "Pt_tm1_d4->F[tbase0]->C[st = %d]:\n",st);
-//   WriteMatrix(FPTR_DEBUG, Pt_tm1_d4->F[tbase0]->C[st], " %10.5f ");
-//   fprintf(FPTR_DEBUG, "Dtdata_dm:\n");
-//   WriteMatrix(FPTR_DEBUG, Dtdata_dm, " %10.5f ");
+/*  //   fprintf(FPTR_DEBUG, "%%------------------------\n");   ansi-c*/
+/*  //   fprintf(FPTR_DEBUG, "%%st=%d and inpt=%d\n", st, inpt);   ansi-c*/
+/*  //   fprintf(FPTR_DEBUG, "loglh_timet = %10.5f;\n", loglh_timet);   ansi-c*/
 
 
+/*  //   tmp_Dtdata = logdeterminant(Dtdata_dm);   ansi-c*/
+/*  //   tmp_expterm = VectorDotVector(wny_dv, etdata_dv);   ansi-c*/
+/*  //   fprintf(FPTR_DEBUG, "logdeterminant(Dtdata_dm) = %10.5f;\n", tmp_Dtdata);   ansi-c*/
+/*  //   fprintf(FPTR_DEBUG, "VectorDotVector(wny_dv, etdata_dv) = %10.5f;\n", tmp_expterm);   ansi-c*/
+/*  //   fprintf(FPTR_DEBUG, "wny_dv:\n");   ansi-c*/
+/*  //   WriteVector(FPTR_DEBUG, wny_dv, " %10.5f ");   ansi-c*/
+/*  //   fprintf(FPTR_DEBUG, "etdata_dv:\n");   ansi-c*/
+/*  //   WriteVector(FPTR_DEBUG, etdata_dv, " %10.5f ");   ansi-c*/
+/*  //   fprintf(FPTR_DEBUG, "&yt_sdv:\n");   ansi-c*/
+/*  //   WriteVector(FPTR_DEBUG, &yt_sdv, " %10.5f ");   ansi-c*/
+/*  //   fprintf(FPTR_DEBUG, "&at_sdv:\n");   ansi-c*/
+/*  //   WriteVector(FPTR_DEBUG, &at_sdv, " %10.5f ");   ansi-c*/
+/*  //   fprintf(FPTR_DEBUG, "&z0_sdv:\n");   ansi-c*/
+/*  //   WriteVector(FPTR_DEBUG, &z0_sdv, " %10.5f ");   ansi-c*/
+/*  //   fprintf(FPTR_DEBUG, "Ht_dc->C[comst_c=%d]:\n",comst_c);   ansi-c*/
+/*  //   WriteMatrix(FPTR_DEBUG, Ht_dc->C[comst_c], " %10.5f ");   ansi-c*/
+/*  //   fprintf(FPTR_DEBUG, "Rt_dc->C[st_v=%d]:\n", st_v);   ansi-c*/
+/*  //   WriteMatrix(FPTR_DEBUG, Rt_dc->C[st_v], " %10.5f ");   ansi-c*/
+/*  //   fprintf(FPTR_DEBUG, "Pt_tm1_d4->F[tbase0]->C[st = %d]:\n",st);   ansi-c*/
+/*  //   WriteMatrix(FPTR_DEBUG, Pt_tm1_d4->F[tbase0]->C[st], " %10.5f ");   ansi-c*/
+/*  //   fprintf(FPTR_DEBUG, "Dtdata_dm:\n");   ansi-c*/
+/*  //   WriteMatrix(FPTR_DEBUG, Dtdata_dm, " %10.5f ");   ansi-c*/
 
 
-////   WriteMatrix(FPTR_DEBUG, Dtdata_dm, " %10.5f ");
-////   fprintf(FPTR_DEBUG, "zt_tm1_dc->C[tbase0]:\n");
-////   WriteMatrix(FPTR_DEBUG, zt_tm1_dc->C[tbase0], " %10.5f ");
-////   //WriteVector(FPTR_DEBUG, &z0_sdv, " %10.5f ");
-////   //fprintf(FPTR_DEBUG, "\n");
-////   fprintf(FPTR_DEBUG, "bt_dm = [\n");
-////   WriteMatrix(FPTR_DEBUG, bt_dm, " %10.5f ");
-////   fprintf(FPTR_DEBUG, "];\n");
-
-////   fprintf(FPTR_DEBUG, "et:\n");
-////   WriteVector(FPTR_DEBUG, etdata_dv, " %10.5f ");
-////   fprintf(FPTR_DEBUG, "yt_dv=[\n");
-////   WriteVector(FPTR_DEBUG, &yt_sdv, " %10.5f ");
-////   fprintf(FPTR_DEBUG, "]';\n");
-
-////   fprintf(FPTR_DEBUG, "at_dv=[\n");
-////   WriteVector(FPTR_DEBUG, &at_sdv, " %10.5f ");
-////   fprintf(FPTR_DEBUG, "]';\n");
 
 
-////   for (ki=0; ki<Ht_dc->ncells; ki++)
-////   {
-////      kip1 = ki+1;
-////      fprintf(FPTR_DEBUG, "Ht_dc(:,:,%d)=[\n", kip1);
-////      WriteMatrix(FPTR_DEBUG, Ht_dc->C[ki], " %10.5f ");
-////      fprintf(FPTR_DEBUG, "];\n");
-////   }
-////   for (ki=0; ki<Ft_dc->ncells; ki++)
-////   {
-////      kip1 = ki+1;
-////      fprintf(FPTR_DEBUG, "Ft_dc(:,:,%d)=[\n", kip1);
-////      WriteMatrix(FPTR_DEBUG, Ft_dc->C[ki], " %10.5f ");
-////      fprintf(FPTR_DEBUG, "];\n");
-////   }
-////   for (ki=0; ki<Vt_dc->ncells; ki++)
-////   {
-////      kip1 = ki+1;
-////      fprintf(FPTR_DEBUG, "Vt_dc(:,:,%d)=[\n", kip1);
-////      WriteMatrix(FPTR_DEBUG, Vt_dc->C[ki], " %10.5f ");
-////      fprintf(FPTR_DEBUG, "];\n");
-////   }
-//   fflush(FPTR_DEBUG);
-//}
+/*  ////   WriteMatrix(FPTR_DEBUG, Dtdata_dm, " %10.5f ");   ansi-c*/
+/*  ////   fprintf(FPTR_DEBUG, "zt_tm1_dc->C[tbase0]:\n");   ansi-c*/
+/*  ////   WriteMatrix(FPTR_DEBUG, zt_tm1_dc->C[tbase0], " %10.5f ");   ansi-c*/
+/*  ////   //WriteVector(FPTR_DEBUG, &z0_sdv, " %10.5f ");   ansi-c*/
+/*  ////   //fprintf(FPTR_DEBUG, "\n");   ansi-c*/
+/*  ////   fprintf(FPTR_DEBUG, "bt_dm = [\n");   ansi-c*/
+/*  ////   WriteMatrix(FPTR_DEBUG, bt_dm, " %10.5f ");   ansi-c*/
+/*  ////   fprintf(FPTR_DEBUG, "];\n");   ansi-c*/
+
+/*  ////   fprintf(FPTR_DEBUG, "et:\n");   ansi-c*/
+/*  ////   WriteVector(FPTR_DEBUG, etdata_dv, " %10.5f ");   ansi-c*/
+/*  ////   fprintf(FPTR_DEBUG, "yt_dv=[\n");   ansi-c*/
+/*  ////   WriteVector(FPTR_DEBUG, &yt_sdv, " %10.5f ");   ansi-c*/
+/*  ////   fprintf(FPTR_DEBUG, "]';\n");   ansi-c*/
+
+/*  ////   fprintf(FPTR_DEBUG, "at_dv=[\n");   ansi-c*/
+/*  ////   WriteVector(FPTR_DEBUG, &at_sdv, " %10.5f ");   ansi-c*/
+/*  ////   fprintf(FPTR_DEBUG, "]';\n");   ansi-c*/
 
 
-   //======================================================
-   //= Updating zt_tm1 and Pt_tm1 for next perid tp1.
-   //= tdata = tbase0 is base-0 timing.
-   //======================================================
-   if (inpt > record_tbase1_or_inpt_or_tp1)  //This condition always satisfies at the 1st period (which is inpt=1).
+/*  ////   for (ki=0; ki<Ht_dc->ncells; ki++)   ansi-c*/
+/*  ////   {   ansi-c*/
+/*  ////      kip1 = ki+1;   ansi-c*/
+/*  ////      fprintf(FPTR_DEBUG, "Ht_dc(:,:,%d)=[\n", kip1);   ansi-c*/
+/*  ////      WriteMatrix(FPTR_DEBUG, Ht_dc->C[ki], " %10.5f ");   ansi-c*/
+/*  ////      fprintf(FPTR_DEBUG, "];\n");   ansi-c*/
+/*  ////   }   ansi-c*/
+/*  ////   for (ki=0; ki<Ft_dc->ncells; ki++)   ansi-c*/
+/*  ////   {   ansi-c*/
+/*  ////      kip1 = ki+1;   ansi-c*/
+/*  ////      fprintf(FPTR_DEBUG, "Ft_dc(:,:,%d)=[\n", kip1);   ansi-c*/
+/*  ////      WriteMatrix(FPTR_DEBUG, Ft_dc->C[ki], " %10.5f ");   ansi-c*/
+/*  ////      fprintf(FPTR_DEBUG, "];\n");   ansi-c*/
+/*  ////   }   ansi-c*/
+/*  ////   for (ki=0; ki<Vt_dc->ncells; ki++)   ansi-c*/
+/*  ////   {   ansi-c*/
+/*  ////      kip1 = ki+1;   ansi-c*/
+/*  ////      fprintf(FPTR_DEBUG, "Vt_dc(:,:,%d)=[\n", kip1);   ansi-c*/
+/*  ////      WriteMatrix(FPTR_DEBUG, Vt_dc->C[ki], " %10.5f ");   ansi-c*/
+/*  ////      fprintf(FPTR_DEBUG, "];\n");   ansi-c*/
+/*  ////   }   ansi-c*/
+/*  //   fflush(FPTR_DEBUG);   ansi-c*/
+/*  //}   ansi-c*/
+
+
+/*     //======================================================   ansi-c*/
+/*     //= Updating zt_tm1 and Pt_tm1 for next perid tp1.   ansi-c*/
+/*     //= tdata = tbase0 is base-0 timing.   ansi-c*/
+/*     //======================================================   ansi-c*/
+   if (inpt > record_tbase1_or_inpt_or_tp1)   /*  This condition always satisfies at the 1st period (which is inpt=1).   ansi-c*/
    {
       passonce = 0;
       record_tbase1_or_inpt_or_tp1 = inpt;
@@ -2101,23 +2102,23 @@ fflush(FPTR_DEBUG);
       {
          if (indxIndRegimes)
          {
-            if (nRc==1)       //Volatility.
+            if (nRc==1)        /*  Volatility.   ansi-c*/
             {
                comstp1i_c = stp1i_c = 0;
                stp1i_v = stp1i;
             }
-            else if ((nRv>1) && (nRc>nRstc))  //Trend inflation, both sc_t and sc_{t-1} enters coefficient regime.
+            else if ((nRv>1) && (nRc>nRstc))   /*  Trend inflation, both sc_t and sc_{t-1} enters coefficient regime.   ansi-c*/
             {
-               comstp1i_c = Index[stp1i][0];  //composite (s_tc, s_{t-1}c)
-               stp1i_v = Index[stp1i][1];  //volatility state s_tv
-               stp1i_c = smodel_ps->sv->state_variable[0]->lag_index[comstp1i_c][0];  //coefficient regime at t.
-               //sti_c = smodel_ps->sv->state_variable[0]->lag_index[comstp1i_c][1];  //coefficient regime at t-1: tm1: t-1;
+               comstp1i_c = Index[stp1i][0];   /*  composite (s_tc, s_{t-1}c)   ansi-c*/
+               stp1i_v = Index[stp1i][1];   /*  volatility state s_tv   ansi-c*/
+               stp1i_c = smodel_ps->sv->state_variable[0]->lag_index[comstp1i_c][0];   /*  coefficient regime at t.   ansi-c*/
+/*                 //sti_c = smodel_ps->sv->state_variable[0]->lag_index[comstp1i_c][1];  //coefficient regime at t-1: tm1: t-1;   ansi-c*/
             }
             else if ((nRv==1) && (nRc>nRstc))
             {
-               comstp1i_c = Index[stp1i][0];  //composite (s_tc, s_{t-1}c)
-               stp1i_c = smodel_ps->sv->state_variable[0]->lag_index[comstp1i_c][0];  //coefficient regime at t.
-               //sti_c = smodel_ps->sv->state_variable[0]->lag_index[comstp1i_c][1];  //coefficient regime at t-1: tm1: t-1;
+               comstp1i_c = Index[stp1i][0];   /*  composite (s_tc, s_{t-1}c)   ansi-c*/
+               stp1i_c = smodel_ps->sv->state_variable[0]->lag_index[comstp1i_c][0];   /*  coefficient regime at t.   ansi-c*/
+/*                 //sti_c = smodel_ps->sv->state_variable[0]->lag_index[comstp1i_c][1];  //coefficient regime at t-1: tm1: t-1;   ansi-c*/
                stp1i_v = 0;
             }
             else if ((nRv==1) && (nRc==nRstc))
@@ -2125,7 +2126,7 @@ fflush(FPTR_DEBUG);
                comstp1i_c  = stp1i_c = stp1i;
                stp1i_v = 0;
             }
-            else if ((nRv>1) && (nRc==nRstc))  //only sc_t enters coefficient regime.
+            else if ((nRv>1) && (nRc==nRstc))   /*  only sc_t enters coefficient regime.   ansi-c*/
             {
                comstp1i_c = stp1i_c = Index[stp1i][0];
                stp1i_v = Index[stp1i][1];
@@ -2135,9 +2136,9 @@ fflush(FPTR_DEBUG);
          {
             if (nRc>nRstc)
             {
-               comstp1i_c = Index[stp1i][0];  //composite (s_tc, s_{t-1}c)
-               stp1i_c = smodel_ps->sv->state_variable[0]->lag_index[comstp1i_c][0];  //coefficient regime at t.
-               //sti_c = smodel_ps->sv->state_variable[0]->lag_index[comstp1i_c][1];  //coefficient regime at t-1: tm1: t-1;
+               comstp1i_c = Index[stp1i][0];   /*  composite (s_tc, s_{t-1}c)   ansi-c*/
+               stp1i_c = smodel_ps->sv->state_variable[0]->lag_index[comstp1i_c][0];   /*  coefficient regime at t.   ansi-c*/
+/*                 //sti_c = smodel_ps->sv->state_variable[0]->lag_index[comstp1i_c][1];  //coefficient regime at t-1: tm1: t-1;   ansi-c*/
                stp1i_v = stp1i_c;
             }
             else
@@ -2145,30 +2146,30 @@ fflush(FPTR_DEBUG);
          }
 
 
-         InitializeConstantVector_lf(ztp1_dv, 0.0);  //To be summed over sti.
-         InitializeConstantMatrix_lf(Ptp1_dm, 0.0);  //To be summed over sti.
+         InitializeConstantVector_lf(ztp1_dv, 0.0);   /*  To be summed over sti.   ansi-c*/
+         InitializeConstantMatrix_lf(Ptp1_dm, 0.0);   /*  To be summed over sti.   ansi-c*/
 
          for (sti=smodel_ps->sv->nstates-1; sti>=0;  sti--)
          {
             if (indxIndRegimes)
             {
-               if (nRc==1)       //Volatility.
+               if (nRc==1)        /*  Volatility.   ansi-c*/
                {
                   comsti_c = sti_c = 0;
                   sti_v = sti;
                }
-               else if ((nRv>1) && (nRc>nRstc))  //Trend inflation, both sc_t and sc_{t-1} enters coefficient regime.
+               else if ((nRv>1) && (nRc>nRstc))   /*  Trend inflation, both sc_t and sc_{t-1} enters coefficient regime.   ansi-c*/
                {
-                  comsti_c = Index[sti][0];  //composite (s_tc, s_{t-1}c)
-                  sti_v = Index[sti][1];  //volatility state s_tv
-                  sti_c = smodel_ps->sv->state_variable[0]->lag_index[comsti_c][0];  //coefficient regime at t.
-                  stm1i_c = smodel_ps->sv->state_variable[0]->lag_index[comsti_c][1];  //coefficient regime at t-1: tm1: t-1;
+                  comsti_c = Index[sti][0];   /*  composite (s_tc, s_{t-1}c)   ansi-c*/
+                  sti_v = Index[sti][1];   /*  volatility state s_tv   ansi-c*/
+                  sti_c = smodel_ps->sv->state_variable[0]->lag_index[comsti_c][0];   /*  coefficient regime at t.   ansi-c*/
+                  stm1i_c = smodel_ps->sv->state_variable[0]->lag_index[comsti_c][1];   /*  coefficient regime at t-1: tm1: t-1;   ansi-c*/
                }
                else if ((nRv==1) && (nRc>nRstc))
                {
-                  comsti_c = Index[sti][0];  //composite (s_tc, s_{t-1}c)
-                  sti_c = smodel_ps->sv->state_variable[0]->lag_index[comsti_c][0];  //coefficient regime at t.
-                  stm1i_c = smodel_ps->sv->state_variable[0]->lag_index[comsti_c][1];  //coefficient regime at t-1: tm1: t-1;
+                  comsti_c = Index[sti][0];   /*  composite (s_tc, s_{t-1}c)   ansi-c*/
+                  sti_c = smodel_ps->sv->state_variable[0]->lag_index[comsti_c][0];   /*  coefficient regime at t.   ansi-c*/
+                  stm1i_c = smodel_ps->sv->state_variable[0]->lag_index[comsti_c][1];   /*  coefficient regime at t-1: tm1: t-1;   ansi-c*/
                   sti_v = 0;
                }
                else if ((nRv==1) && (nRc==nRstc))
@@ -2176,7 +2177,7 @@ fflush(FPTR_DEBUG);
                   comsti_c  = sti_c = sti;
                   sti_v = 0;
                }
-               else if ((nRv>1) && (nRc==nRstc))  //only sc_t enters coefficient regime.
+               else if ((nRv>1) && (nRc==nRstc))   /*  only sc_t enters coefficient regime.   ansi-c*/
                {
                   comsti_c = sti_c = Index[sti][0];
                   sti_v = Index[sti][1];
@@ -2186,9 +2187,9 @@ fflush(FPTR_DEBUG);
             {
                if (nRc>nRstc)
                {
-                  comsti_c = Index[sti][0];  //composite (s_tc, s_{t-1}c)
-                  sti_c = smodel_ps->sv->state_variable[0]->lag_index[comsti_c][0];  //coefficient regime at t.
-                  stm1i_c = smodel_ps->sv->state_variable[0]->lag_index[comsti_c][1];  //coefficient regime at t-1: tm1: t-1;
+                  comsti_c = Index[sti][0];   /*  composite (s_tc, s_{t-1}c)   ansi-c*/
+                  sti_c = smodel_ps->sv->state_variable[0]->lag_index[comsti_c][0];   /*  coefficient regime at t.   ansi-c*/
+                  stm1i_c = smodel_ps->sv->state_variable[0]->lag_index[comsti_c][1];   /*  coefficient regime at t-1: tm1: t-1;   ansi-c*/
                   sti_v = sti_c;
                }
                else
@@ -2196,71 +2197,71 @@ fflush(FPTR_DEBUG);
             }
 
 
-            //--- Setup.
+/*              //--- Setup.   ansi-c*/
             MatrixTimesMatrix(PHtran_tdata_dm, Pt_tm1_d4->F[tbase0]->C[sti], Ht_dc->C[comsti_c], 1.0, 0.0, 'N', 'T');
 
-            //--- Data.
-            //- etdata = Y_T(:,tdata) - a(:,tdata) - Htdata*ztdata where tdata = tbase0 = inpt-1.
+/*              //--- Data.   ansi-c*/
+/*              //- etdata = Y_T(:,tdata) - a(:,tdata) - Htdata*ztdata where tdata = tbase0 = inpt-1.   ansi-c*/
             yt_sdv.v = yt_dm->M + tbase0*yt_dm->nrows;
-            at_sdv.v = at_dm->M + comsti_c*at_dm->nrows;  //comsti_c: coefficient regime at time tbase0.
-            z0_sdv.v = zt_tm1_dc->C[tbase0]->M + z0_sdv.n*sti;  //sti: regime at time tbase0.
+            at_sdv.v = at_dm->M + comsti_c*at_dm->nrows;   /*  comsti_c: coefficient regime at time tbase0.   ansi-c*/
+            z0_sdv.v = zt_tm1_dc->C[tbase0]->M + z0_sdv.n*sti;   /*  sti: regime at time tbase0.   ansi-c*/
             VectorMinusVector(etdata_dv, &yt_sdv, &at_sdv);
             MatrixTimesVector(etdata_dv, Ht_dc->C[comsti_c], &z0_sdv, -1.0, 1.0, 'N');
-            //+   Dtdata = Htdata*PHtran_tdata + R(:,:,tbase0);
+/*              //+   Dtdata = Htdata*PHtran_tdata + R(:,:,tbase0);   ansi-c*/
             CopyMatrix0(Dtdata_dm, Rt_dc->C[sti_v]);
             MatrixTimesMatrix(Dtdata_dm, Ht_dc->C[comsti_c], PHtran_tdata_dm, 1.0, 1.0, 'N', 'N');
-                                        //Done with z0_sdv.v.
-            ScalarTimesMatrixSquare(Dtdata_dm, 0.5, Dtdata_dm, 'T', 0.5);  //Making it symmetric against some rounding errors.
-                               //This making-symmetric is very IMPORTANT; otherwise, we will get the matrix being singular message
-                               //    and eigenvalues being negative for the SPD matrix, etc.  Then the likelihood becomes either
-                               //    a bad number or a complex number.
+/*                                          //Done with z0_sdv.v.   ansi-c*/
+            ScalarTimesMatrixSquare(Dtdata_dm, 0.5, Dtdata_dm, 'T', 0.5);   /*  Making it symmetric against some rounding errors.   ansi-c*/
+/*                                 //This making-symmetric is very IMPORTANT; otherwise, we will get the matrix being singular message   ansi-c*/
+/*                                 //    and eigenvalues being negative for the SPD matrix, etc.  Then the likelihood becomes either   ansi-c*/
+/*                                 //    a bad number or a complex number.   ansi-c*/
             Dtdata_dm->flag = Dtdata_dm->flag | M_SU | M_SL;
 
 
-            //=== Updating for next period by integrating out sti..
+/*              //=== Updating for next period by integrating out sti..   ansi-c*/
             if (tp1<T)
             {
-               //Updating only up to tbase0=T-2.  The values at tp1=T or tbase0=T-1 will not be used in the likelihood function.
+/*                 //Updating only up to tbase0=T-2.  The values at tp1=T or tbase0=T-1 will not be used in the likelihood function.   ansi-c*/
 
-               //--- Ktp1_t = (F_tp1*PHtran_t+G(:,:,t))/Dt;
-               //--- Kt_tdata = (Ft*PHtran_tdata+G(:,:,tdata))/Dtdata where t=tp1 and tdata=t.
+/*                 //--- Ktp1_t = (F_tp1*PHtran_t+G(:,:,t))/Dt;   ansi-c*/
+/*                 //--- Kt_tdata = (Ft*PHtran_tdata+G(:,:,tdata))/Dtdata where t=tp1 and tdata=t.   ansi-c*/
                CopyMatrix0(Kt_tdata0_dm, Gt_dc->C[sti_v]);
                MatrixTimesMatrix(Kt_tdata0_dm, Ft_dc->C[stp1i_c], PHtran_tdata_dm, 1.0, 1.0, 'N', 'N');
                BdivA_rrect(Kt_tdata_dm, Kt_tdata0_dm, '/', Dtdata_dm);
-               //+ zt_tm1(:,t) = b(:,t) + Ft*zt_tm1(:,tdata) + Kt_tdata*etdata where t=tp1 and tm1=t.
+/*                 //+ zt_tm1(:,t) = b(:,t) + Ft*zt_tm1(:,tdata) + Kt_tdata*etdata where t=tp1 and tm1=t.   ansi-c*/
                MatrixTimesVector(ztp1_t_dv, Ft_dc->C[stp1i_c], &z0_sdv, 1.0, 0.0, 'N');
                MatrixTimesVector(ztp1_t_dv, Kt_tdata_dm, etdata_dv, 1.0, 1.0, 'N');
                btp1_sdv.v = bt_dm->M + stp1i_c*btp1_sdv.n;
                VectorPlusMinusVectorUpdate(ztp1_t_dv, &btp1_sdv, 1.0);
-               //+ Pt_tm1(:,:,t) = Ft*Ptdata*Fttran - Kt_tdata*Dtdata*Kt_tdatatran + V(:,:,t);
+/*                 //+ Pt_tm1(:,:,t) = Ft*Ptdata*Fttran - Kt_tdata*Dtdata*Kt_tdatatran + V(:,:,t);   ansi-c*/
                CopyMatrix0(Ptp1_t_dm, Vt_dc->C[stp1i_v]);
                MatrixTimesMatrix(Wnzbyny_dm, Kt_tdata_dm, Dtdata_dm, 1.0, 0.0, 'N', 'N');
                MatrixTimesMatrix(Wnzbynz_dm, Wnzbyny_dm, Kt_tdata_dm, 1.0, 0.0, 'N', 'T');
                MatrixPlusMinusMatrixUpdate(Ptp1_t_dm, Wnzbynz_dm, -1.0);
-                                     //Done with all W*_dm.
+/*                                       //Done with all W*_dm.   ansi-c*/
                MatrixTimesMatrix(Wnzbynz_dm, Ft_dc->C[stp1i_c], Pt_tm1_d4->F[tbase0]->C[sti], 1.0, 0.0, 'N', 'N');
                MatrixTimesMatrix(W2nzbynz_dm, Wnzbynz_dm, Ft_dc->C[stp1i_c], 1.0, 0.0, 'N', 'T');
                MatrixPlusMatrixUpdate(Ptp1_t_dm, W2nzbynz_dm);
-                                     //Done with all W*_dm.
+/*                                       //Done with all W*_dm.   ansi-c*/
 
-               //--- Integrating out the state at tbase0 using P(s_t|Y_{t-1}, theta) = ElementV(smodel_ps->Z[inpt],s_{inpt}_i).
-               //---   Note tbase0 = inpt-1 because the data in DW code (ElementV) is base-1.
-               //---   Note at this point, we cannot access to P(s_t|Y_t, theta) = ElementV(smodel_ps->V[inpt],s_{inpt}_i)
-               //---      through DW's code.  But we can modify my own code to do this later.
+/*                 //--- Integrating out the state at tbase0 using P(s_t|Y_{t-1}, theta) = ElementV(smodel_ps->Z[inpt],s_{inpt}_i).   ansi-c*/
+/*                 //---   Note tbase0 = inpt-1 because the data in DW code (ElementV) is base-1.   ansi-c*/
+/*                 //---   Note at this point, we cannot access to P(s_t|Y_t, theta) = ElementV(smodel_ps->V[inpt],s_{inpt}_i)   ansi-c*/
+/*                 //---      through DW's code.  But we can modify my own code to do this later.   ansi-c*/
                prob_previous_regimes = ElementV(smodel_ps->Z[inpt],sti);
                ScalarTimesVectorUpdate(ztp1_dv, prob_previous_regimes, ztp1_t_dv);
                ScalarTimesMatrix(Ptp1_dm, prob_previous_regimes, Ptp1_t_dm, 1.0);
                Ptp1_dm->flag = M_GE | M_SU | M_SL;
-                                         //Done with ztp1_t_dv and Ptp1_t_dm.
+/*                                           //Done with ztp1_t_dv and Ptp1_t_dm.   ansi-c*/
             }
          }
-         //--- Filling zt_tm1 and Pt_tm1 for next period
+/*           //--- Filling zt_tm1 and Pt_tm1 for next period   ansi-c*/
          if (tp1<T)
          {
-            z0_sdv.v = zt_tm1_dc->C[tp1]->M + z0_sdv.n*stp1i;  //stp1i: regime at time tp1.
+            z0_sdv.v = zt_tm1_dc->C[tp1]->M + z0_sdv.n*stp1i;   /*  stp1i: regime at time tp1.   ansi-c*/
             CopyVector0(&z0_sdv, ztp1_dv);
-            CopyMatrix0(Pt_tm1_d4->F[tp1]->C[stp1i], Ptp1_dm);  //stp1i: regime at time tp1.
-                                           //Done with ztp1_dv, z0_sdv, Ptp1_dm.
+            CopyMatrix0(Pt_tm1_d4->F[tp1]->C[stp1i], Ptp1_dm);   /*  stp1i: regime at time tp1.   ansi-c*/
+/*                                             //Done with ztp1_dv, z0_sdv, Ptp1_dm.   ansi-c*/
          }
       }
       if (tp1<T)
@@ -2268,40 +2269,40 @@ fflush(FPTR_DEBUG);
    }
 
 
-//=== ???????? For debugging purpose.
-//if ((inpt>60) && (inpt<65) )  //if (inpt<5)
-//{
-//   int kip1;  //Must be declared at the top of this "if" block.
+/*  //=== ???????? For debugging purpose.   ansi-c*/
+/*  //if ((inpt>60) && (inpt<65) )  //if (inpt<5)   ansi-c*/
+/*  //{   ansi-c*/
+/*  //   int kip1;  //Must be declared at the top of this "if" block.   ansi-c*/
 
-//   fprintf(FPTR_DEBUG, "zt_tm1t=[\n");
-//   WriteMatrix(FPTR_DEBUG, zt_tm1_dc->C[tbase0], " %10.5f ");
-//   fprintf(FPTR_DEBUG, "];\n");
+/*  //   fprintf(FPTR_DEBUG, "zt_tm1t=[\n");   ansi-c*/
+/*  //   WriteMatrix(FPTR_DEBUG, zt_tm1_dc->C[tbase0], " %10.5f ");   ansi-c*/
+/*  //   fprintf(FPTR_DEBUG, "];\n");   ansi-c*/
 
-//   for (ki=0; ki<Pt_tm1_d4->F[tbase0]->ncells; ki++)
-//   {
-//      kip1 = ki+1;
-//      fprintf(FPTR_DEBUG, "Pt_tm1_d4t(:,:,%d)=[\n", kip1);
-//      WriteMatrix(FPTR_DEBUG, Pt_tm1_d4->F[tbase0]->C[ki], " %10.5f ");
-//      fprintf(FPTR_DEBUG, "];\n");
-//   }
+/*  //   for (ki=0; ki<Pt_tm1_d4->F[tbase0]->ncells; ki++)   ansi-c*/
+/*  //   {   ansi-c*/
+/*  //      kip1 = ki+1;   ansi-c*/
+/*  //      fprintf(FPTR_DEBUG, "Pt_tm1_d4t(:,:,%d)=[\n", kip1);   ansi-c*/
+/*  //      WriteMatrix(FPTR_DEBUG, Pt_tm1_d4->F[tbase0]->C[ki], " %10.5f ");   ansi-c*/
+/*  //      fprintf(FPTR_DEBUG, "];\n");   ansi-c*/
+/*  //   }   ansi-c*/
 
-//   fflush(FPTR_DEBUG);
-//}
+/*  //   fflush(FPTR_DEBUG);   ansi-c*/
+/*  //}   ansi-c*/
 
 
-//=== ???????? For debugging purpose.
+/*  //=== ???????? For debugging purpose.   ansi-c*/
 fprintf(FPTR_DEBUG, " loglh_timet = %10.5f\n", loglh_timet);
 fflush(FPTR_DEBUG);
 
 
-   //===
+/*     //===   ansi-c*/
    DestroyVector_dz(evals_dzv);
    DestroyVector_lf(evals_abs_dv);
    DestroyMatrix_lf(Wnzbynz_dm);
    DestroyMatrix_lf(Wnz2bynz2_dm);
    DestroyMatrix_lf(W2nz2bynz2_dm);
    DestroyVector_lf(wP0_dv);
-   //
+/*     //   ansi-c*/
    DestroyVector_lf(wny_dv);
    DestroyMatrix_lf(Wnzbyny_dm);
    DestroyMatrix_lf(W2nzbynz_dm);
@@ -2310,7 +2311,7 @@ fflush(FPTR_DEBUG);
    DestroyMatrix_lf(Dtdata_dm);
    DestroyMatrix_lf(Kt_tdata0_dm);
    DestroyMatrix_lf(Kt_tdata_dm);
-   //
+/*     //   ansi-c*/
    DestroyVector_lf(ztp1_t_dv);
    DestroyMatrix_lf(Ptp1_t_dm);
    DestroyVector_lf(ztp1_dv);
@@ -2463,8 +2464,8 @@ void tz_Refresh_z_T7P_T_in_kalfilms_1st_approx(struct TSkalfilmsinputs_tag *kalf
          }
          else
          {
-            fprintf(stdout, "\n-----------------\n");
-            fprintf(stdout, "\nIn regime sti_c=%d and sti_v=%d and at time=%d\n", sti_c, sti_v, 0);
+            printf("\n-----------------\n");
+            printf("\nIn regime sti_c=%d and sti_v=%d and at time=%d\n", sti_c, sti_v, 0);
             fn_DisplayError("kalman.c/tz_Refresh_z_T7P_T_in_kalfilms_1st_approx(): the system is non-stationary solutions\n"
                           "    and the initial conditions must be supplied by, say, input arguments");
             fflush(stdout);

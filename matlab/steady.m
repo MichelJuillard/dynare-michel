@@ -11,7 +11,7 @@ function steady()
 % SPECIAL REQUIREMENTS
 %   none
 
-% Copyright (C) 2001-2009 Dynare Team
+% Copyright (C) 2001-2010 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -51,15 +51,7 @@ end
 
 steady_;
 
-disp(' ')
-disp('STEADY-STATE RESULTS:')
-disp(' ')
-endo_names = M_.endo_names;
-steady_state = oo_.steady_state;
-for i=1:M_.orig_endo_nbr
-    disp(sprintf('%s \t\t %g',endo_names(i,:),steady_state(i)));
-end
-
+disp_steady_state(M_,oo_);
 
 if isempty(ys0_)
     oo_.endo_simul(:,1:M_.maximum_lag) = oo_.steady_state * ones(1, M_.maximum_lag);

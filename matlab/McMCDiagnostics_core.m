@@ -1,7 +1,23 @@
 function myoutput = McMCDiagnostics_core(myinputs,fpar,npar,whoiam, ThisMatlab)
-% Core functionality for MCMC Diagnostics, which can be parallelized
+% PARALLEL CONTEXT
+% Core functionality for MCMC Diagnostics, which can be parallelized.
+% See also the comment in random_walk_metropolis_hastings_core.m funtion.
+ 
 
-% Copyright (C) 2005-2009 Dynare Team
+% INPUTS 
+%   See See the comment in random_walk_metropolis_hastings_core.m funtion.
+
+% OUTPUTS
+% o myoutput  [struc]
+%  Contained UDIAG.
+%
+% ALGORITHM 
+%   Portion of McMCDiagnostics.m function.       
+%
+% SPECIAL REQUIREMENTS.
+%   None.
+
+% Copyright (C) 2006-2008,2010 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -21,8 +37,26 @@ function myoutput = McMCDiagnostics_core(myinputs,fpar,npar,whoiam, ThisMatlab)
 if nargin<4,
     whoiam=0;
 end
-struct2local(myinputs);
 
+% Reshape 'myinputs' for local computation.
+% In order to avoid confusion in the name space, the instruction struct2local(myinputs) is replaced by:
+
+MhDirectoryName=myinputs.MhDirectoryName;
+nblck=myinputs.nblck;
+NumberOfMcFilesPerBlock=myinputs.NumberOfMcFilesPerBlock;
+Origin=myinputs.Origin;
+StepSize=myinputs.StepSize;
+mh_drop=myinputs.mh_drop;
+NumberOfDraws=myinputs.NumberOfDraws;
+NumberOfLines=myinputs.NumberOfLines;
+time=myinputs.time;
+M_=myinputs.M_;
+
+if whoiam
+    Parallel=myinputs.Parallel;
+    MasterName=myinputs.MasterName;
+    DyMo=myinputs.DyMo;
+end
 if ~exist('MhDirectoryName'),
     MhDirectoryName = CheckPath('metropolis');
 end

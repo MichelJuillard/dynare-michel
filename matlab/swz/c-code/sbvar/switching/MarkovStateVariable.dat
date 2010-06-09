@@ -92,7 +92,7 @@
 //-- must equal to one, the actual number of free dimensions is one less.    --//
 //-----------------------------------------------------------------------------//
 //== Free Dirichet dimensions for state_variable[2]  ==//
-2 2 
+2 2
 
 //-----------------------------------------------------------------------------//
 //-- The jth restriction matrix is n_states x free[j].  Each row of the      --//

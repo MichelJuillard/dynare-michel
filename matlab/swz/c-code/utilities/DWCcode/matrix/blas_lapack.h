@@ -1,6 +1,15 @@
 
+#if defined(MATLAB_MEX_FILE) || defined(OCTAVE_MEX_FILE)
+#include <dynmex.h>
+#include <dynblas.h>
+#include <dynlapack.h>
+#else
+
 #ifndef __BLAS_LAPACK__
 #define __BLAS_LAPACK__
+
+typedef int lapack_int;
+typedef int blas_int;
 
 #ifdef __cplusplus
 extern "C"
@@ -16,31 +25,36 @@ extern "C"
 #define sgesvd    sgesvd_
 #define sgetrf    sgetrf_
 #define sorgqr    sorgqr_
-#define sgelqf    sgelqf_   
-#define sorglq    sorglq_  
-#define sgges     sgges_ 
-#define stgsen    stgsen_    
-#define stgexc    stgexc_    
+#define sgelqf    sgelqf_
+#define sorglq    sorglq_
+#define sgges     sgges_
+#define stgsen    stgsen_
+#define stgexc    stgexc_
 
-#define dscal     dscal_     // Blas scalar times vector
-#define daxpy     daxpy_     // Blas vector plus scalar times vector
-#define dgemm     dgemm_     // Blas matrix multiplication
+#define dscal     dscal_      /*   Blas scalar times vector   ansi-c*/
+#define daxpy     daxpy_      /*   Blas vector plus scalar times vector   ansi-c*/
+#define dgemm     dgemm_      /*   Blas matrix multiplication   ansi-c*/
 #define dgetrf    dgetrf_
-#define dgesdd    dgesdd_    // SVD decomposition (divide and conquer)
-#define dgesvd    dgesvd_    // SVD decomposition (QR)
-#define dgetrf    dgetrf_    // LU decomposition
-#define dgeqrf    dgeqrf_    // QR decomposition
-#define dorgqr    dorgqr_    // Forms orthogonal matrix from Housholder matrices created by dgeqrf
-#define dgelqf    dgelqf_    // LQ decompostion
-#define dorglq    dorglq_    // Forms orthogonal matrix from Housholder matrices created by dgeqrf
-#define dgges     dgges_     // Generalized Schur decomposition
-#define dtgsen    dtgsen_    // Reorders generalized Schur decomposition
-#define dtgexc    dtgexc_    // Reorders generalized Schur decomposition
+#define dgesdd    dgesdd_     /*   SVD decomposition (divide and conquer)   ansi-c*/
+#define dgesvd    dgesvd_     /*   SVD decomposition (QR)   ansi-c*/
+#define dgetrf    dgetrf_     /*   LU decomposition   ansi-c*/
+#define dgeqrf    dgeqrf_     /*   QR decomposition   ansi-c*/
+#define dorgqr    dorgqr_     /*   Forms orthogonal matrix from Housholder matrices created by dgeqrf   ansi-c*/
+#define dgelqf    dgelqf_     /*   LQ decompostion   ansi-c*/
+#define dorglq    dorglq_     /*   Forms orthogonal matrix from Housholder matrices created by dgeqrf   ansi-c*/
+#define dgges     dgges_      /*   Generalized Schur decomposition   ansi-c*/
+#define dtgsen    dtgsen_     /*   Reorders generalized Schur decomposition   ansi-c*/
+#define dtgexc    dtgexc_     /*   Reorders generalized Schur decomposition   ansi-c*/
 
 #define dsyev     dsyev_
 #define dgeev     dgeev_
 #define dpotrf    dpotrf_
 #define dpotri    dpotri_
+#define dtrtri    dtrtri_
+#define dgetri    dgetri_
+#define dgeqp3    dgeqp3_
+#define dormqr    dormqr_
+#define dgesv     dgesv_
 /*******************************************************************************/
 
 
@@ -81,10 +95,17 @@ void dsyev(char*,char*,int*,double*,int*,double*,double*,int*,int*);
 void dgeev(char*,char*,int*,double*,int*,double*,double*,double*,int*,double*,int*,double*,int*,int*);
 void dpotrf(char*,int*,double*,int*,int*);
 void dpotri(char*,int*,double*,int*,int*);
+void dgeqp3(int*,int*,double*,int*,int*,double*,double*,int*,int*);
+void dtrtri(char*,char*,int*,double*,int*,int*);
+void dgetri(int*,double*,int*,int*,double*,int*,int*);
+void dormqr(char*,char*,int*,int*,int*,double*,int*,double*,double*,int*,double*,int*,int*);
+void dgesv(int*,int*,double*,int*,int*,double*,int*,int*);
 /*******************************************************************************/
 
 #ifdef __cplusplus
 }
+#endif
+
 #endif
 
 #endif

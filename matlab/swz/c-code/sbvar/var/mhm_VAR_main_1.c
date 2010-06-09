@@ -14,6 +14,8 @@
 #include <ctype.h>
 #include <stdlib.h>
 
+#include "modify_for_mex.h"
+
 static void ReadError_MHMio(char *id)
 {
   char *errmsg, *fmt="Error after line identifier ""%s""";
@@ -52,29 +54,29 @@ T_MHM* RestartFromFinalFile(char *filename, T_MHM *mhm)
     {
       id="//== Specification after mhm draws ==//";
       if (dw_SetFilePosition(f_in,id))
-	{
-	  if (!mhm)
-	    {
-	      mhm=ReadMHM_Input(f_in,(char*)NULL,(T_MHM*)NULL);
-	      mhm->mhm_filename=filename;
-	    }
-	  mhm->spec_filename=mhm->parameter_filename=filename;
+    {
+      if (!mhm)
+        {
+          mhm=ReadMHM_Input(f_in,(char*)NULL,(T_MHM*)NULL);
+          mhm->mhm_filename=filename;
+        }
+      mhm->spec_filename=mhm->parameter_filename=filename;
 
-	  model=Read_VAR_Specification(f_in,(char*)NULL);
-	  mhm->parameter_header="Posterior mode: ";
-	  ReadTransitionMatrices(f_in,(char*)NULL,mhm->parameter_header,model);
-	  Read_VAR_Parameters(f_in,(char*)NULL,mhm->parameter_header,model);
-	  AddStateModel(model,mhm);
-	  mhm->parameter_header="Final draw: ";
-	  ReadTransitionMatrices(f_in,(char*)NULL,mhm->parameter_header,model);
-	  Read_VAR_Parameters(f_in,(char*)NULL,mhm->parameter_header,model);
+      model=Read_VAR_Specification(f_in,(char*)NULL);
+      mhm->parameter_header="Posterior mode: ";
+      ReadTransitionMatrices(f_in,(char*)NULL,mhm->parameter_header,model);
+      Read_VAR_Parameters(f_in,(char*)NULL,mhm->parameter_header,model);
+      AddStateModel(model,mhm);
+      mhm->parameter_header="Final draw: ";
+      ReadTransitionMatrices(f_in,(char*)NULL,mhm->parameter_header,model);
+      Read_VAR_Parameters(f_in,(char*)NULL,mhm->parameter_header,model);
 
-	  mhm->n_burn1=-mhm->n_burn1;
+      mhm->n_burn1=-mhm->n_burn1;
           mhm->n_burn2=-mhm->n_burn2;
           mhm->n_mean_variance=-mhm->n_mean_variance;
-	  ReadMeanVariance(f_in,mhm);
-	  return mhm;
-	}
+      ReadMeanVariance(f_in,mhm);
+      return mhm;
+    }
     }
   return (T_MHM*)NULL;
 }
@@ -90,91 +92,91 @@ T_MHM* RestartFromIntermediateFile(char *filename, T_MHM *mhm)
   if (f_in=fopen(filename,"rt"))
     {
       if (!mhm)
-	{
-	  mhm=ReadMHM_Input(f_in,(char*)NULL,(T_MHM*)NULL);
-	  mhm->mhm_filename=filename;
-	}
+    {
+      mhm=ReadMHM_Input(f_in,(char*)NULL,(T_MHM*)NULL);
+      mhm->mhm_filename=filename;
+    }
       mhm->spec_filename=mhm->parameter_filename=filename;
       id="//== Specification after mhm draws ==//";
       if (dw_SetFilePosition(f_in,id))
-	{
-	  model=Read_VAR_Specification(f_in,(char*)NULL);
-	  mhm->parameter_header="Posterior mode: ";
-	  ReadTransitionMatrices(f_in,(char*)NULL,mhm->parameter_header,model);
-	  Read_VAR_Parameters(f_in,(char*)NULL,mhm->parameter_header,model);
-	  AddStateModel(model,mhm);
-	  mhm->parameter_header="Final draw: ";
-	  ReadTransitionMatrices(f_in,(char*)NULL,mhm->parameter_header,model);
-	  Read_VAR_Parameters(f_in,(char*)NULL,mhm->parameter_header,model);
+    {
+      model=Read_VAR_Specification(f_in,(char*)NULL);
+      mhm->parameter_header="Posterior mode: ";
+      ReadTransitionMatrices(f_in,(char*)NULL,mhm->parameter_header,model);
+      Read_VAR_Parameters(f_in,(char*)NULL,mhm->parameter_header,model);
+      AddStateModel(model,mhm);
+      mhm->parameter_header="Final draw: ";
+      ReadTransitionMatrices(f_in,(char*)NULL,mhm->parameter_header,model);
+      Read_VAR_Parameters(f_in,(char*)NULL,mhm->parameter_header,model);
 
-	  mhm->n_burn1=-mhm->n_burn1;
+      mhm->n_burn1=-mhm->n_burn1;
           mhm->n_burn2=-mhm->n_burn2;
           mhm->n_mean_variance=-mhm->n_mean_variance;
-	  ReadMeanVariance(f_in,mhm);
-	}
+      ReadMeanVariance(f_in,mhm);
+    }
       else
-	{
-	  id="//== Specification after mean-variance estimation ==//";
-	  if (dw_SetFilePosition(f_in,id))
-	    {
-	      model=Read_VAR_Specification(f_in,(char*)NULL);
-	      mhm->parameter_header="Posterior mode: ";
-	      ReadTransitionMatrices(f_in,(char*)NULL,mhm->parameter_header,model);
-	      Read_VAR_Parameters(f_in,(char*)NULL,mhm->parameter_header,model);
-	      AddStateModel(model,mhm);
-	      mhm->parameter_header="Mean-variance: ";
-	      ReadTransitionMatrices(f_in,(char*)NULL,mhm->parameter_header,model);
-	      Read_VAR_Parameters(f_in,(char*)NULL,mhm->parameter_header,model);
+    {
+      id="//== Specification after mean-variance estimation ==//";
+      if (dw_SetFilePosition(f_in,id))
+        {
+          model=Read_VAR_Specification(f_in,(char*)NULL);
+          mhm->parameter_header="Posterior mode: ";
+          ReadTransitionMatrices(f_in,(char*)NULL,mhm->parameter_header,model);
+          Read_VAR_Parameters(f_in,(char*)NULL,mhm->parameter_header,model);
+          AddStateModel(model,mhm);
+          mhm->parameter_header="Mean-variance: ";
+          ReadTransitionMatrices(f_in,(char*)NULL,mhm->parameter_header,model);
+          Read_VAR_Parameters(f_in,(char*)NULL,mhm->parameter_header,model);
 
-	      mhm->n_burn1=-mhm->n_burn1;
-	      mhm->n_burn2=-mhm->n_burn2;
-	      mhm->n_mean_variance=-mhm->n_mean_variance;
-	      ReadMeanVariance(f_in,mhm);
-	    }
-	  else
-	    {
-	      id="//== Specification after second burn-in ==//";
-	      if (dw_SetFilePosition(f_in,id))
-		{
-		  model=Read_VAR_Specification(f_in,(char*)NULL);
-		  mhm->parameter_header="Posterior mode: ";
-		  ReadTransitionMatrices(f_in,(char*)NULL,mhm->parameter_header,model);
-		  Read_VAR_Parameters(f_in,(char*)NULL,mhm->parameter_header,model);
-		  AddStateModel(model,mhm);
-		  mhm->parameter_header="Second burn-in: ";
-		  ReadTransitionMatrices(f_in,(char*)NULL,mhm->parameter_header,model);
-		  Read_VAR_Parameters(f_in,(char*)NULL,mhm->parameter_header,model);
+          mhm->n_burn1=-mhm->n_burn1;
+          mhm->n_burn2=-mhm->n_burn2;
+          mhm->n_mean_variance=-mhm->n_mean_variance;
+          ReadMeanVariance(f_in,mhm);
+        }
+      else
+        {
+          id="//== Specification after second burn-in ==//";
+          if (dw_SetFilePosition(f_in,id))
+        {
+          model=Read_VAR_Specification(f_in,(char*)NULL);
+          mhm->parameter_header="Posterior mode: ";
+          ReadTransitionMatrices(f_in,(char*)NULL,mhm->parameter_header,model);
+          Read_VAR_Parameters(f_in,(char*)NULL,mhm->parameter_header,model);
+          AddStateModel(model,mhm);
+          mhm->parameter_header="Second burn-in: ";
+          ReadTransitionMatrices(f_in,(char*)NULL,mhm->parameter_header,model);
+          Read_VAR_Parameters(f_in,(char*)NULL,mhm->parameter_header,model);
 
-		  mhm->n_burn1=-mhm->n_burn1;
-		  mhm->n_burn2=-mhm->n_burn2;
-		}
-	      else
-		{
-		  id="//== Specification after first burn-in ==//";
-		  if (dw_SetFilePosition(f_in,id))
-		    {
-		      model=Read_VAR_Specification(f_in,(char*)NULL);
-		      mhm->parameter_header="Posterior mode: ";
-		      ReadTransitionMatrices(f_in,(char*)NULL,mhm->parameter_header,model);
-		      Read_VAR_Parameters(f_in,(char*)NULL,mhm->parameter_header,model);
-		      AddStateModel(model,mhm);
-		      mhm->parameter_header="First burn-in: ";
-		      ReadTransitionMatrices(f_in,(char*)NULL,mhm->parameter_header,model);
-		      Read_VAR_Parameters(f_in,(char*)NULL,mhm->parameter_header,model);
+          mhm->n_burn1=-mhm->n_burn1;
+          mhm->n_burn2=-mhm->n_burn2;
+        }
+          else
+        {
+          id="//== Specification after first burn-in ==//";
+          if (dw_SetFilePosition(f_in,id))
+            {
+              model=Read_VAR_Specification(f_in,(char*)NULL);
+              mhm->parameter_header="Posterior mode: ";
+              ReadTransitionMatrices(f_in,(char*)NULL,mhm->parameter_header,model);
+              Read_VAR_Parameters(f_in,(char*)NULL,mhm->parameter_header,model);
+              AddStateModel(model,mhm);
+              mhm->parameter_header="First burn-in: ";
+              ReadTransitionMatrices(f_in,(char*)NULL,mhm->parameter_header,model);
+              Read_VAR_Parameters(f_in,(char*)NULL,mhm->parameter_header,model);
 
-		      mhm->n_burn1=-mhm->n_burn1;
-		    }
-		  else
-		    {
-		      model=Read_VAR_Specification(f_in,(char*)NULL);
-		      mhm->parameter_header="Posterior mode: ";
-		      ReadTransitionMatrices(f_in,(char*)NULL,mhm->parameter_header,model);
-		      Read_VAR_Parameters(f_in,(char*)NULL,mhm->parameter_header,model);
-		      AddStateModel(model,mhm);
-		    }
-		}
-	    }
-	}
+              mhm->n_burn1=-mhm->n_burn1;
+            }
+          else
+            {
+              model=Read_VAR_Specification(f_in,(char*)NULL);
+              mhm->parameter_header="Posterior mode: ";
+              ReadTransitionMatrices(f_in,(char*)NULL,mhm->parameter_header,model);
+              Read_VAR_Parameters(f_in,(char*)NULL,mhm->parameter_header,model);
+              AddStateModel(model,mhm);
+            }
+        }
+        }
+    }
       fclose(f_in);
       return (mhm);
     }
@@ -182,11 +184,11 @@ T_MHM* RestartFromIntermediateFile(char *filename, T_MHM *mhm)
 }
 
 /*
-   Attempt to set up model from command line.  Command line options are the 
+   Attempt to set up model from command line.  Command line options are the
    following
 
    -di <directory>
-      If this argument exists, then all input files are in specified directory.  
+      If this argument exists, then all input files are in specified directory.
 
    -do <directory>
       If this argument exists, then all output files are in specified directory.
@@ -199,33 +201,33 @@ T_MHM* RestartFromIntermediateFile(char *filename, T_MHM *mhm)
 
          2) specification file name:  mhm_intermediate_<tag>.dat
             mhm arguments file name:  mhm_intermediate_<tag>.dat
-         
+
          3) specification file name:  est_final_<tag>.dat
             mhm arguments file name:  -fi <filename>
 
    -fi <filename>
-      If this argument exists, then additional mhm arguments are read from the 
+      If this argument exists, then additional mhm arguments are read from the
       input file with the given filename.
-   
+
    -fs <filename>
-      If this argument exists, then the specification file name is <filename>.  
+      If this argument exists, then the specification file name is <filename>.
       The argument -ft takes precedence over -fs.
 
    -fp <filename>
-      If this argument exists, then the posterior is read from <filename>.  Must 
-      be used in conjunction with the argument -fs.  The default value is the 
+      If this argument exists, then the posterior is read from <filename>.  Must
+      be used in conjunction with the argument -fs.  The default value is the
       filename associated with the argument -fs.
 
    -ph <header>
-      If this argument exists, then the header for the posterior file is 
-      <header>.  Must be used in conjuction with the arguments -fp or -fs.  The 
+      If this argument exists, then the header for the posterior file is
+      <header>.  Must be used in conjuction with the arguments -fp or -fs.  The
       default value is "Posterior mode: ".
 
    -cm
       If this argument exists, then the mean of the posterior draws are used to
-      center the quadratic form. 
+      center the quadratic form.
 
-   If no command line options are given, then attemps to use a default input file 
+   If no command line options are given, then attemps to use a default input file
    with the name "default.ini".  Returns one valid pointer to a TStateModel upon
    success and null upon failure.
 */
@@ -254,69 +256,69 @@ T_MHM* CreateMHM_CommandLine(int nargs, char **args)
       fmt="%smhm_final_%s.dat";
       sprintf(spec_filename=(char*)malloc(strlen(d_in) + strlen(fmt) + strlen(tag) - 3),fmt,d_in,tag);
       if (rtrn=RestartFromFinalFile(spec_filename,mhm))
-	mhm=rtrn;
+    mhm=rtrn;
       else
-	{
-	  free(spec_filename);
-	  fmt="%smhm_intermediate_%s.dat";
-	  sprintf(spec_filename=(char*)malloc(strlen(d_in) + strlen(fmt) + strlen(tag) - 3),fmt,d_in,tag);
-	  if (rtrn=RestartFromIntermediateFile(spec_filename,mhm))
-	    mhm=rtrn;
-	  else
-	    {
-	      free(spec_filename);
-	      fmt="%sest_final_%s.dat";
-	      sprintf(spec_filename=(char*)malloc(strlen(d_in) + strlen(fmt) + strlen(tag) - 3),fmt,d_in,tag);
-	      if (!(f_in=fopen(spec_filename,"rt")))
-		{
-		  fprintf(stderr,"CreateMHM_CommandLine:  Unable to create model from %s tag.\n",tag);
-		  if (mhm) FreeMHM(mhm);
-		}
-	      else
-		if (mhm)
-		  {		      
-		    mhm->parameter_filename=mhm->spec_filename=spec_filename;		      
-		    model=Read_VAR_Specification(f_in,(char*)NULL);		  
-		    mhm->parameter_header="Posterior mode: ";
-		    ReadTransitionMatrices(f_in,(char*)NULL,mhm->parameter_header,model);
-		    Read_VAR_Parameters(f_in,(char*)NULL,mhm->parameter_header,model);
-		    AddStateModel(model,mhm);
-		    fclose(f_in);
-		  }		  
-	    }
-	}
+    {
+      free(spec_filename);
+      fmt="%smhm_intermediate_%s.dat";
+      sprintf(spec_filename=(char*)malloc(strlen(d_in) + strlen(fmt) + strlen(tag) - 3),fmt,d_in,tag);
+      if (rtrn=RestartFromIntermediateFile(spec_filename,mhm))
+        mhm=rtrn;
+      else
+        {
+          free(spec_filename);
+          fmt="%sest_final_%s.dat";
+          sprintf(spec_filename=(char*)malloc(strlen(d_in) + strlen(fmt) + strlen(tag) - 3),fmt,d_in,tag);
+          if (!(f_in=fopen(spec_filename,"rt")))
+        {
+          swz_fprintf_err("CreateMHM_CommandLine:  Unable to create model from %s tag.\n",tag);
+          if (mhm) FreeMHM(mhm);
+        }
+          else
+        if (mhm)
+          {
+            mhm->parameter_filename=mhm->spec_filename=spec_filename;
+            model=Read_VAR_Specification(f_in,(char*)NULL);
+            mhm->parameter_header="Posterior mode: ";
+            ReadTransitionMatrices(f_in,(char*)NULL,mhm->parameter_header,model);
+            Read_VAR_Parameters(f_in,(char*)NULL,mhm->parameter_header,model);
+            AddStateModel(model,mhm);
+            fclose(f_in);
+          }
+        }
     }
-  else 
+    }
+  else
     if (filename=dw_ParseString_String(nargs,args,"fs",(char*)NULL))
       {
-	if (mhm)
-	  {
-	    fmt="%s%s";
-	    sprintf(mhm->spec_filename=(char*)malloc(strlen(d_in) + strlen(fmt) + strlen(filename) - 3),fmt,d_in,filename);
-	    model=Read_VAR_Specification((FILE*)NULL,mhm->spec_filename);
-	    if (!(filename=dw_ParseString_String(nargs,args,"fp",(char*)NULL)))
-	      filename=dw_ParseString_String(nargs,args,"fs",(char*)NULL);
-	    sprintf(mhm->parameter_filename=(char*)malloc(strlen(d_in) + strlen(fmt) + strlen(filename) - 3),fmt,d_in,filename);
-	    mhm->parameter_header=dw_ParseString_String(nargs,args,"ph","Posterior mode: ");
-	    ReadTransitionMatrices((FILE*)NULL,mhm->parameter_filename,mhm->parameter_header,model);
-	    Read_VAR_Parameters((FILE*)NULL,mhm->parameter_filename,mhm->parameter_header,model);
-	    AddStateModel(model,mhm);
-	  }
+    if (mhm)
+      {
+        fmt="%s%s";
+        sprintf(mhm->spec_filename=(char*)malloc(strlen(d_in) + strlen(fmt) + strlen(filename) - 3),fmt,d_in,filename);
+        model=Read_VAR_Specification((FILE*)NULL,mhm->spec_filename);
+        if (!(filename=dw_ParseString_String(nargs,args,"fp",(char*)NULL)))
+          filename=dw_ParseString_String(nargs,args,"fs",(char*)NULL);
+        sprintf(mhm->parameter_filename=(char*)malloc(strlen(d_in) + strlen(fmt) + strlen(filename) - 3),fmt,d_in,filename);
+        mhm->parameter_header=dw_ParseString_String(nargs,args,"ph","Posterior mode: ");
+        ReadTransitionMatrices((FILE*)NULL,mhm->parameter_filename,mhm->parameter_header,model);
+        Read_VAR_Parameters((FILE*)NULL,mhm->parameter_filename,mhm->parameter_header,model);
+        AddStateModel(model,mhm);
+      }
       }
     else
       {
-	fprintf(stderr,"CreateMHM_CommandLine():  No specification file given.\n");
-	if (mhm) FreeMHM(mhm);
-	exit(0);
+    swz_fprintf_err("CreateMHM_CommandLine():  No specification file given.\n");
+    if (mhm) FreeMHM(mhm);
+    exit(0);
       }
 
   if (!mhm)
     {
-      fprintf(stderr,"CreateMHM_CommandLine:  No mhm input data file specified.\n");
+      swz_fprintf_err("CreateMHM_CommandLine:  No mhm input data file specified.\n");
       exit(0);
     }
 
-  // Output filenames
+/*    // Output filenames   ansi-c*/
   if (!(tag=dw_ParseString_String(nargs,args,"fo",(char*)NULL)))
     tag=dw_ParseString_String(nargs,args,"ft","default");
   fmt="%smhm_intermediate_%s.dat";
@@ -329,8 +331,8 @@ T_MHM* CreateMHM_CommandLine(int nargs, char **args)
   sprintf(mhm->draws_output_filename=(char*)malloc(strlen(d_out) + strlen(fmt) + strlen(tag) - 3),fmt,d_out,tag);
   fmt="%smhm_regime_counts_%s.dat";
   sprintf(mhm->regime_counts_filename=(char*)malloc(strlen(d_out) + strlen(fmt) + strlen(tag) - 3),fmt,d_out,tag);
-  //fmt="%smhm_draws_states_not_integrated_%s.dat";
-  //sprintf(mhm->states_not_integrated_out_filename=(char*)malloc(strlen(d_out) + strlen(fmt) + strlen(tag) - 3),fmt,d_out,tag);
+/*    //fmt="%smhm_draws_states_not_integrated_%s.dat";   ansi-c*/
+/*    //sprintf(mhm->states_not_integrated_out_filename=(char*)malloc(strlen(d_out) + strlen(fmt) + strlen(tag) - 3),fmt,d_out,tag);   ansi-c*/
 
   free(d_in);
   free(d_out);
@@ -345,12 +347,14 @@ int main(int nargs, char **args)
   int initial_time, begin_time, end_time;
   FILE *f_out_intermediate, *f_out_final, *f_out_intermediate_draws;
 
+  constant_seed=dw_ParseInteger_String(nargs,args,"cseed",0);
+
   if (mhm=CreateMHM_CommandLine(nargs,args))
     {
-      //=== Random seed ===//
+/*        //=== Random seed ===//   ansi-c*/
       dw_initialize_generator(0);
 
-      //=== Test new normalization code ===//
+/*        //=== Test new normalization code ===//   ansi-c*/
       /**
       TVector** A0;
       PRECISION x1, x2, x3, x4;
@@ -365,31 +369,31 @@ int main(int nargs, char **args)
 
       // test
       while (1)
-	{
-	  Setup_WZ_Normalization((T_VAR_Parameters*)mhm->model->theta,A0);
-	  printf("Likelihood = %lg (WZ normalization)\n",LogLikelihood_StatesIntegratedOut(mhm->model));
-	  printf("Prior      = %lg (WZ normalization)\n",x2=LogPrior(mhm->model));
-	  printf("Posterior  = %lg (WZ normalization)\n",x4=LogPosterior_StatesIntegratedOut(mhm->model));
+    {
+      Setup_WZ_Normalization((T_VAR_Parameters*)mhm->model->theta,A0);
+      printf("Likelihood = %lg (WZ normalization)\n",LogLikelihood_StatesIntegratedOut(mhm->model));
+      printf("Prior      = %lg (WZ normalization)\n",x2=LogPrior(mhm->model));
+      printf("Posterior  = %lg (WZ normalization)\n",x4=LogPosterior_StatesIntegratedOut(mhm->model));
 
-	  Setup_No_Normalization((T_VAR_Parameters*)mhm->model->theta);
-	  printf("Likelihood = %lg (no normalization)\n",LogLikelihood_StatesIntegratedOut(mhm->model));
-	  printf("Prior      = %lg (no normalization)\n",x1=LogPrior(mhm->model));
-	  printf("Posterior  = %lg (no normalization)\n",x3=LogPosterior_StatesIntegratedOut(mhm->model));
+      Setup_No_Normalization((T_VAR_Parameters*)mhm->model->theta);
+      printf("Likelihood = %lg (no normalization)\n",LogLikelihood_StatesIntegratedOut(mhm->model));
+      printf("Prior      = %lg (no normalization)\n",x1=LogPrior(mhm->model));
+      printf("Posterior  = %lg (no normalization)\n",x3=LogPosterior_StatesIntegratedOut(mhm->model));
 
-	  printf("Difference %lg %lg %lg\n\n",x2-x1,x4-x3,((T_VAR_Parameters*)mhm->model->theta)->nvars*log(2));
+      printf("Difference %lg %lg %lg\n\n",x2-x1,x4-x3,((T_VAR_Parameters*)mhm->model->theta)->nvars*log(2));
 
-	  //Setup_WZ_Normalization((T_VAR_Parameters*)mhm->model->theta,A0);
-	  DrawAll(mhm->model);
+      //Setup_WZ_Normalization((T_VAR_Parameters*)mhm->model->theta,A0);
+      DrawAll(mhm->model);
 
-	  getchar();
-	}
+      getchar();
+    }
       /**/
-      //=== End test new normalization code ===//
+/*        //=== End test new normalization code ===//   ansi-c*/
 
-      // Use WZ normalization
+/*        // Use WZ normalization   ansi-c*/
       Setup_WZ_Normalization((T_VAR_Parameters*)mhm->model->theta,((T_VAR_Parameters*)mhm->model->theta)->A0);
 
-      // Posterior mode - Initial specification
+/*        // Posterior mode - Initial specification   ansi-c*/
       f_out_intermediate=dw_AppendTextFile(mhm->intermediate_output_filename);
       fprintf(f_out_intermediate,"//== Initial Specification ==//\n\n");
       Write_VAR_Specification(f_out_intermediate,(char*)NULL,mhm->model);
@@ -408,17 +412,17 @@ int main(int nargs, char **args)
 
       f_out_intermediate_draws=dw_CreateTextFile(mhm->intermediate_draws_output_filename);
 
-      // First burn-in
+/*        // First burn-in   ansi-c*/
       if (mhm->n_burn1 > 0)
-	{
-	  mhm->f_out=f_out_intermediate_draws;
-	  initial_time=begin_time=time((time_t*)NULL);
-	  BurnIn_AdaptiveMetropolisScale(mhm,mhm->n_burn1,1000);
-	  end_time=time((time_t*)NULL);
-	  fprintf(stdout,"Elapsed Time: %d seconds\n",end_time - begin_time);
-	}
+    {
+      mhm->f_out=f_out_intermediate_draws;
+      initial_time=begin_time=time((time_t*)NULL);
+      BurnIn_AdaptiveMetropolisScale(mhm,mhm->n_burn1,1000);
+      end_time=time((time_t*)NULL);
+      printf("Elapsed Time: %d seconds\n",end_time - begin_time);
+    }
 
-      // After first burn-in
+/*        // After first burn-in   ansi-c*/
       f_out_intermediate=dw_AppendTextFile(mhm->intermediate_output_filename);
       fprintf(f_out_intermediate,"//== Specification after first burn-in ==//\n");
       fprintf(f_out_intermediate,"Number inconsistent normalizations: %d\n",((T_VAR_Parameters*)mhm->model->theta)->WZ_inconsistancies);
@@ -429,22 +433,22 @@ int main(int nargs, char **args)
       Write_VAR_Parameters(f_out_intermediate,(char*)NULL,header,mhm->model);
       fclose(f_out_intermediate);
 
-      // Second burn-in
+/*        // Second burn-in   ansi-c*/
       if (mhm->n_burn2 > 0)
-	{
-	  mhm->f_out=f_out_intermediate_draws;
-	  initial_time=begin_time=time((time_t*)NULL);
-	  BurnIn(mhm,mhm->n_burn2,1000);
-	  end_time=time((time_t*)NULL);
-	  fprintf(stdout,"Elapsed Time: %d seconds\n",end_time - begin_time);
+    {
+      mhm->f_out=f_out_intermediate_draws;
+      initial_time=begin_time=time((time_t*)NULL);
+      BurnIn(mhm,mhm->n_burn2,1000);
+      end_time=time((time_t*)NULL);
+      printf("Elapsed Time: %d seconds\n",end_time - begin_time);
 
-	  fprintf(stdout,"Number inconsistent normalizations: %d\n",((T_VAR_Parameters*)mhm->model->theta)->WZ_inconsistancies);
-	  fprintf(stdout,"Number singular inverse variances: %d\n\n",Get_VAR_Improper_Distribution_Counter());
-	}
+      printf("Number inconsistent normalizations: %d\n",((T_VAR_Parameters*)mhm->model->theta)->WZ_inconsistancies);
+      printf("Number singular inverse variances: %d\n\n",Get_VAR_Improper_Distribution_Counter());
+    }
 
       fclose(f_out_intermediate_draws);
 
-      // After second burn-in
+/*        // After second burn-in   ansi-c*/
       f_out_intermediate=dw_AppendTextFile(mhm->intermediate_output_filename);
       fprintf(f_out_intermediate,"//== Specification after second burn-in ==//\n");
       fprintf(f_out_intermediate,"Number inconsistent normalizations: %d\n",((T_VAR_Parameters*)mhm->model->theta)->WZ_inconsistancies);
@@ -454,30 +458,30 @@ int main(int nargs, char **args)
       WriteTransitionMatrices(f_out_intermediate,(char*)NULL,header,mhm->model);
       Write_VAR_Parameters(f_out_intermediate,(char*)NULL,header,mhm->model);
       fclose(f_out_intermediate);
-  
-      // Mean-variance estimation
+
+/*        // Mean-variance estimation   ansi-c*/
       if (mhm->n_mean_variance > 0)
-	{
-	  begin_time=time((time_t*)NULL);
-	  ComputeMeanVariance_MHM(mhm,mhm->n_mean_variance,10000);
-	  end_time=time((time_t*)NULL);
-	  fprintf(stdout,"Elapsed Time: %d seconds\n",end_time - begin_time);
+    {
+      begin_time=time((time_t*)NULL);
+      ComputeMeanVariance_MHM(mhm,mhm->n_mean_variance,10000);
+      end_time=time((time_t*)NULL);
+      printf("Elapsed Time: %d seconds\n",end_time - begin_time);
 
-	  fprintf(stdout,"Number inconsistent normalizations: %d\n",((T_VAR_Parameters*)mhm->model->theta)->WZ_inconsistancies);
-	  fprintf(stdout,"Number singular inverse variances: %d\n\n",Get_VAR_Improper_Distribution_Counter());
-	}
+      printf("Number inconsistent normalizations: %d\n",((T_VAR_Parameters*)mhm->model->theta)->WZ_inconsistancies);
+      printf("Number singular inverse variances: %d\n\n",Get_VAR_Improper_Distribution_Counter());
+    }
 
-      // Set center to mean if necessary
+/*        // Set center to mean if necessary   ansi-c*/
       if (dw_FindArgument_String(nargs,args,"cm") >= 0)
-	{
-	  fprintf(stdout,"Using mean for center\n");
-	  mhm->center=mhm->mean;
-	}
+    {
+      printf("Using mean for center\n");
+      mhm->center=mhm->mean;
+    }
       else
-	fprintf(stdout,"Using posterior mode for center\n");
+    printf("Using posterior mode for center\n");
 
 
-      // After mean-variance estimation
+/*        // After mean-variance estimation   ansi-c*/
       f_out_intermediate=dw_AppendTextFile(mhm->intermediate_output_filename);
       fprintf(f_out_intermediate,"//== Specification after mean-variance estimation ==//\n");
       fprintf(f_out_intermediate,"Number inconsistent normalizations: %d\n",((T_VAR_Parameters*)mhm->model->theta)->WZ_inconsistancies);
@@ -489,29 +493,29 @@ int main(int nargs, char **args)
       WriteMeanVariance(f_out_intermediate,mhm);
       fclose(f_out_intermediate);
 
-      // Open draw file and states file
+/*        // Open draw file and states file   ansi-c*/
       mhm->f_out=dw_CreateTextFile(mhm->draws_output_filename);
       WriteMHM_Input(mhm->f_out,mhm);
       WriteMeanVariance(mhm->f_out,mhm);
-      //mhm->f_states_not_integrated_out=dw_CreateTextFile(mhm->states_not_integrated_out_filename);
-      //WriteMHM_Input(mhm->f_states_not_integrated_out,mhm);
-      //WriteMeanVariance(mhm->f_states_not_integrated_out,mhm);
+/*        //mhm->f_states_not_integrated_out=dw_CreateTextFile(mhm->states_not_integrated_out_filename);   ansi-c*/
+/*        //WriteMHM_Input(mhm->f_states_not_integrated_out,mhm);   ansi-c*/
+/*        //WriteMeanVariance(mhm->f_states_not_integrated_out,mhm);   ansi-c*/
       mhm->f_out_regime_counts=dw_CreateTextFile(mhm->regime_counts_filename);
 
-      // Modified harmonic mean draws 
+/*        // Modified harmonic mean draws   ansi-c*/
       fprintf(mhm->f_out,"\n//== Draws ==//\n");
-      //fprintf(mhm->f_states_not_integrated_out,"\n//== Draws ==//\n");
+/*        //fprintf(mhm->f_states_not_integrated_out,"\n//== Draws ==//\n");   ansi-c*/
 
       begin_time=time((time_t*)NULL);
       ComputeModifiedHarmonicMean(mhm,10000);
       end_time=time((time_t*)NULL);
-      fprintf(stdout,"Elapsed Time: %d seconds\n",end_time - begin_time);
-      fprintf(stdout,"Number inconsistent normalizations: %d\n",((T_VAR_Parameters*)mhm->model->theta)->WZ_inconsistancies);
-      fprintf(stdout,"Number singular inverse variances: %d\n\n",Get_VAR_Improper_Distribution_Counter());
+      printf("Elapsed Time: %d seconds\n",end_time - begin_time);
+      printf("Number inconsistent normalizations: %d\n",((T_VAR_Parameters*)mhm->model->theta)->WZ_inconsistancies);
+      printf("Number singular inverse variances: %d\n\n",Get_VAR_Improper_Distribution_Counter());
 
       fclose(mhm->f_out);
 
-      // After modified harmonic mean draws
+/*        // After modified harmonic mean draws   ansi-c*/
       f_out_intermediate=dw_AppendTextFile(mhm->intermediate_output_filename);
       fprintf(f_out_intermediate,"//== Specification after mhm draws ==//\n");
       fprintf(f_out_intermediate,"Number inconsistent normalizations: %d\n",((T_VAR_Parameters*)mhm->model->theta)->WZ_inconsistancies);

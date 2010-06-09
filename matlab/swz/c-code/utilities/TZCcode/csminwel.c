@@ -1,5 +1,5 @@
-//======= Revisions by T. Zha.
-//======= Fixing bugs: convering all if-else loop.  02/24/05
+/*  //======= Revisions by T. Zha.   ansi-c*/
+/*  //======= Fixing bugs: convering all if-else loop.  02/24/05   ansi-c*/
 /*=========================================================
  * csminwel.c
  *
@@ -68,19 +68,21 @@
  *
 ========================================================*/
 
-//#include "csminwel.h"
+/*  //#include "csminwel.h"   ansi-c*/
 #include "optpackage.h"
 
-#define VERBOSE_WARNINGS    //Display warnings.
-#define VERBOSE_DETOUTPUT   //Display detailed output.
-#define STRLEN 192
-//#define INDXNUMGRAD_CSMINWEL 2         //Index for choosing the numerical gradient.  1, forward difference; 2, central difference.
+#include "modify_for_mex.h"
 
-double GRADSTPS_CSMINWEL = 1.0e-04;  //Default value.  Will be overwritten by the data in the input file if it exists.
-                                     //1.0e-04 (for monthly TBVAR)
-                                     //Step size for numerical gradient only when the value of x is less than 1.0 in absolute value.
-                                     //If abs(x)>1.0, the step size is  GRADSTPS_CSMINWEL*x.
-static int RANDOMSEED_CSMINWEL = 0;  //Default value: no fixed seed.  Will be initialized somewhere else through csminwel_randomseedChanged().
+#define VERBOSE_WARNINGS     /*  Display warnings.   ansi-c*/
+#define VERBOSE_DETOUTPUT    /*  Display detailed output.   ansi-c*/
+#define STRLEN 192
+/*  //#define INDXNUMGRAD_CSMINWEL 2         //Index for choosing the numerical gradient.  1, forward difference; 2, central difference.   ansi-c*/
+
+double GRADSTPS_CSMINWEL = 1.0e-04;   /*  Default value.  Will be overwritten by the data in the input file if it exists.   ansi-c*/
+/*                                       //1.0e-04 (for monthly TBVAR)   ansi-c*/
+/*                                       //Step size for numerical gradient only when the value of x is less than 1.0 in absolute value.   ansi-c*/
+/*                                       //If abs(x)>1.0, the step size is  GRADSTPS_CSMINWEL*x.   ansi-c*/
+static int RANDOMSEED_CSMINWEL = 0;   /*  Default value: no fixed seed.  Will be initialized somewhere else through csminwel_randomseedChanged().   ansi-c*/
 
 
 static double GLB_sclForHess;
@@ -101,40 +103,45 @@ static double *mtimes(double *x, double *y, int n, int nn);
 static double *mminus(double *x, double *y, int n);
 
 
-static FILE *fptr_interesults = (FILE *)NULL;   //Printing intermediate results to a file.
-static char filename_sp2vecs[STRLEN];  //Two vectors.  1st row: numerical gradient; 2nd row: vectorized parameters.
+static FILE *fptr_interesults = (FILE *)NULL;    /*  Printing intermediate results to a file.   ansi-c*/
+static char filename_sp2vecs[STRLEN];   /*  Two vectors.  1st row: numerical gradient; 2nd row: vectorized parameters.   ansi-c*/
 
 
 
 #define MAX_NUM_BADCASES 3
-#define EPS (1.0e-10)        //Small number to rectify special case of converging to exactly zero function value.
-#define TERMINATEVALUE  (1.0e+300)    //If the value of the objective function at the intial value is greater than this, terminates the program.
+#define EPS (1.0e-10)         /*  Small number to rectify special case of converging to exactly zero function value.   ansi-c*/
+#define TERMINATEVALUE  (1.0e+300)     /*  If the value of the objective function at the intial value is greater than this, terminates the program.   ansi-c*/
 void csminwel(double (*fcn)(double *x, int n, double **args, int *dims),
               double *xh, int n, double *H, double *gh,
               int (*gfcn)(double *x, int n, double *g, double **args, int *dims),
               double *fh, double crit, int *itct, int nit,
               int *fcount, int *retcodeh, double **args, int *dims)
 {
-   //If gfcn is passed as NULL, numerical gradient is automatically computed.
-   //unsigned int randomseed = (unsigned int)time((time_t)RANDOMSEED_CSMINWEL);  //793;
+/*     //If gfcn is passed as NULL, numerical gradient is automatically computed.   ansi-c*/
+/*     //unsigned int randomseed = (unsigned int)time((time_t)RANDOMSEED_CSMINWEL);  //793;   ansi-c*/
 
    unsigned int randomseed;
-   static int first_time = TZ_TRUE;  //Added by T.Zha; 03/10/2006.
+   static int first_time = TZ_TRUE;   /*  Added by T.Zha; 03/10/2006.   ansi-c*/
 
    int done=0, badg[4], badgh, nogh=1, stuck=0;
    double *x[4], *g[4], f[4], *dg, *dx;
    int retcode[3], fc=0, ih, nn, i;
-   int cnt_n_badcases = 0;   //Must set to 0.  Counts the number of bad cases before restarting with the initial diagonal (inverse of) Hessian.  Added by TZ.
-   TSdmatrix *H_dm = tzMalloc(1, TSdmatrix);    //H_dm wil point to the same location as H.
+   int cnt_n_badcases = 0;    /*  Must set to 0.  Counts the number of bad cases before restarting with the initial diagonal (inverse of) Hessian.  Added by TZ.   ansi-c*/
+   TSdmatrix *H_dm = tzMalloc(1, TSdmatrix);     /*  H_dm wil point to the same location as H.   ansi-c*/
    #ifdef VERBOSE_DETOUTPUT
    time_t begtime, currentime;
    #endif
 
-   //=== Seed for random number generator in stdlib.h.   Added by T.Zha; 03/10/2006.
+/*     //=== Seed for random number generator in stdlib.h.   Added by T.Zha; 03/10/2006.   ansi-c*/
    if (!RANDOMSEED_CSMINWEL)
-      randomseed = (unsigned int)time((time_t *)NULL);
-                                 //Note that (unsigned int)time(0) uses the time of day for random seed.
-                                 //Added by T.Zha; 03/10/2006.  time() is in time.h.
+     {
+       if(constant_seed==0)
+         randomseed = (unsigned int)time((time_t *)NULL);
+       /*                                   //Note that (unsigned int)time(0) uses the time of day for random seed.   ansi-c*/
+       /*                                   //Added by T.Zha; 03/10/2006.  time() is in time.h.   ansi-c*/
+       else
+         randomseed = constant_seed;
+     }
    else
       randomseed = (unsigned int)RANDOMSEED_CSMINWEL;
 
@@ -145,18 +152,18 @@ void csminwel(double (*fcn)(double *x, int n, double **args, int *dims),
    }
 
 
-   GLB_sclForHess = H[0];   //The scale factor for the initial (inverse of) Hessian, which was supposed to be **diagonal**.  Added by TZ.
+   GLB_sclForHess = H[0];    /*  The scale factor for the initial (inverse of) Hessian, which was supposed to be **diagonal**.  Added by TZ.   ansi-c*/
 
    nn = n*n;     /* n: dimension size of x or xh */
    *itct = -1;    /* itct: number of actual iterations */
    *fcount = -1;  /* fcount: number of evaluations of the function */
 
    for (i=0; i<4; i++)
-      x[i] = tzMalloc(n, double);  //x[i] = calloc(n, sizeof(double)); Commented out by TZ.
+      x[i] = tzMalloc(n, double);   /*  x[i] = calloc(n, sizeof(double)); Commented out by TZ.   ansi-c*/
    memcpy(x[0],xh,n*sizeof(double));
 
    for (i=0; i<4; i++)
-      g[i] = tzMalloc(n, double);    //calloc(n, sizeof(double));  Commented out by TZ.
+      g[i] = tzMalloc(n, double);     /*  calloc(n, sizeof(double));  Commented out by TZ.   ansi-c*/
 
    f[0] = fcn(x[0],n,args,dims);
 
@@ -181,15 +188,15 @@ void csminwel(double (*fcn)(double *x, int n, double **args, int *dims),
       for (i=0; i<n; i++)
          g[1][i] = g[2][i] = g[3][i] = 0;
 
-//         #ifdef VERBOSE_DETOUTPUT
-//         printf("-----------------\n-----------------\n");
-//         printf("f at the beginning of new iteration, %.10f\nx = ",f[0]);
-//         for (i=0; i<n; i++) {
-//            printf("%15.8g ",x[0][i]);
-//            if (i%4==3) printf("\n");
-//         }
-//         if (i%4>0) printf("\n");
-//         #endif
+/*  //         #ifdef VERBOSE_DETOUTPUT   ansi-c*/
+/*  //         printf("-----------------\n-----------------\n");   ansi-c*/
+/*  //         printf("f at the beginning of new iteration, %.10f\nx = ",f[0]);   ansi-c*/
+/*  //         for (i=0; i<n; i++) {   ansi-c*/
+/*  //            printf("%15.8g ",x[0][i]);   ansi-c*/
+/*  //            if (i%4==3) printf("\n");   ansi-c*/
+/*  //         }   ansi-c*/
+/*  //         if (i%4>0) printf("\n");   ansi-c*/
+/*  //         #endif   ansi-c*/
 
       (*itct)++;
       csminit(&f[1],x[1],&fc,&retcode[0],x[0],f[0],g[0],badg[0],H,n,fcn,args,dims);
@@ -200,12 +207,12 @@ void csminwel(double (*fcn)(double *x, int n, double **args, int *dims),
          /* Bad gradient or back and forth on step length.
             Possibly at cliff edge. Try perturbing search direction. */
          if (badg[1]) {
-            double *Hcliff = tzMalloc(nn, double);   //calloc(nn,sizeof(double));  Commented out by TZ.
-            double randmax=1.0/(double)RAND_MAX;    //03/10/2006, changed from 1/ to 1.0/ to make randmax a legal double.
+            double *Hcliff = tzMalloc(nn, double);    /*  calloc(nn,sizeof(double));  Commented out by TZ.   ansi-c*/
+            double randmax=1.0/(double)RAND_MAX;     /*  03/10/2006, changed from 1/ to 1.0/ to make randmax a legal double.   ansi-c*/
             /* if stuck, give it another try by perturbing Hessian */
             memcpy(Hcliff,H,nn*sizeof(double));
             for (i=0; i<nn; i+=n+1)
-               Hcliff[i] *= 1+rand()*randmax;    //DDDDebugging.  Hcliff[i] *= 1+0.5;
+               Hcliff[i] *= 1+rand()*randmax;     /*  DDDDebugging.  Hcliff[i] *= 1+0.5;   ansi-c*/
 
             #ifdef VERBOSE_WARNINGS
             printf("======= Random search takes place now. =======\n");
@@ -217,7 +224,7 @@ void csminwel(double (*fcn)(double *x, int n, double **args, int *dims),
             if (f[2] < f[0]) {
                badg[2] = peakwall(g[2],retcode[1],x[2],n,gfcn,fcn,args,dims);
                if (badg[2]) {
-                  double *xx = tzMalloc(n, double), nx;   //calloc(n,sizeof(double)), nx;  Commented out by TZ.
+                  double *xx = tzMalloc(n, double), nx;    /*  calloc(n,sizeof(double)), nx;  Commented out by TZ.   ansi-c*/
 
                   #ifdef VERBOSE_WARNINGS
                   printf("Cliff again.  Try traversing.\n");
@@ -232,8 +239,8 @@ void csminwel(double (*fcn)(double *x, int n, double **args, int *dims),
                      badg[3] = 1;
                      retcode[2] = 101;
                   } else {
-                     double *gcliff = tzMalloc(n, double),  //calloc(n,sizeof(double)),  Commented out by TZ.
-                            *eye = tzMalloc(nn, double);  //calloc(n,sizeof(double));  Bugs of Iskander.  Changed from n to nn. 03/10/06.
+                     double *gcliff = tzMalloc(n, double),   /*  calloc(n,sizeof(double)),  Commented out by TZ.   ansi-c*/
+                            *eye = tzMalloc(nn, double);   /*  calloc(n,sizeof(double));  Bugs of Iskander.  Changed from n to nn. 03/10/06.   ansi-c*/
                      double dfnx = (f[2]-f[1])/nx;
                      for (i=0; i<n; i++) {
                         gcliff[i] = dfnx*xx[i];
@@ -269,7 +276,7 @@ void csminwel(double (*fcn)(double *x, int n, double **args, int *dims),
             retcode[2] = 101;
          }
       }
-      else   //Bugs fixed by T. Zha -- 02/24/05.
+      else   /*Bugs fixed by T. Zha -- 02/24/05.*/
       {
          f[1] = f[0];
          f[2] = f[0];
@@ -277,9 +284,9 @@ void csminwel(double (*fcn)(double *x, int n, double **args, int *dims),
          retcode[1] = retcode[0];
          retcode[2] = retcode[0];
       }
-//         % normal iteration, no walls, or else we're finished here.
-//         f2=f; f3=f; badg2=1; badg3=1; retcode2=101; retcode3=101;
-//      f1=f; f2=f; f3=f; retcode2=retcode1; retcode3=retcode1;
+/*  //         % normal iteration, no walls, or else we're finished here.   ansi-c*/
+/*  //         f2=f; f3=f; badg2=1; badg3=1; retcode2=101; retcode3=101;   ansi-c*/
+/*  //      f1=f; f2=f; f3=f; retcode2=retcode1; retcode3=retcode1;   ansi-c*/
 
       /* how to pick gh and xh */
       if (f[3]<f[0] && badg[3]==0) {
@@ -330,8 +337,8 @@ void csminwel(double (*fcn)(double *x, int n, double **args, int *dims),
          badgh = 1;
       }
       /* end of picking */
-      stuck = fabs(*fh-f[0]) < crit;  // Used if fh>0.  TZ, 9/03.
-      //stuck = (2.0*fabs(*fh-f[0]) <= crit*(fabs(*fh)+fabs(f[0])+EPS));  //Used if fh<0.  Added by TZ, 9/03.
+      stuck = fabs(*fh-f[0]) < crit;   /*   Used if fh>0.  TZ, 9/03.   ansi-c*/
+/*        //stuck = (2.0*fabs(*fh-f[0]) <= crit*(fabs(*fh)+fabs(f[0])+EPS));  //Used if fh<0.  Added by TZ, 9/03.   ansi-c*/
       /* if nothing REALLY worked, too bad, you're stuck */
       if (!badg[0] && !badgh && !stuck) {
          /* if you are not stuck, update H0 matrix */
@@ -343,18 +350,18 @@ void csminwel(double (*fcn)(double *x, int n, double **args, int *dims),
       }
 
       #ifdef VERBOSE_DETOUTPUT
-      //=== Prints out intermediate results.
+/*        //=== Prints out intermediate results.   ansi-c*/
       printf("========================================\n");
       printf(" (1) New value of the obj. func. on iteration %d: %.9f\n (2) Old value: %.9f\n (3) Downhill improvement: %.9f\n",
             (int)*itct, *fh, f[0], f[0]-(*fh));
 
       time(&currentime);
-      //=== Times the iterative progress.
+/*        //=== Times the iterative progress.   ansi-c*/
       printf(" (4) Seconds to complete one iteration: %0.4f\n (5) Current time of day: %s\n\n", difftime(currentime, begtime), ctime(&currentime));
-      fflush(stdout);                // Flush the buffer to get out this message without delay.
+      fflush(stdout);                 /*   Flush the buffer to get out this message without delay.   ansi-c*/
       #endif
 
-      //--------- Prints outputs to a file. ---------
+/*        //--------- Prints outputs to a file. ---------   ansi-c*/
       if ( !(fptr_interesults = fopen(filename_sp2vecs,"w")) ) {
          printf("\n\nUnable to create the starting point data file %s in csminwel.c!\n", filename_sp2vecs);
          getchar();
@@ -404,14 +411,14 @@ void csminwel(double (*fcn)(double *x, int n, double **args, int *dims),
       }
       #endif
 
-      //=== Restarts from the initial (inverse of) Hessian when stuck for a while in bad cases.  Added by TZ.
+/*        //=== Restarts from the initial (inverse of) Hessian when stuck for a while in bad cases.  Added by TZ.   ansi-c*/
       if (*retcodeh && *retcodeh != 1)
          if (++cnt_n_badcases >= MAX_NUM_BADCASES) {
             H_dm->M = H;
             H_dm->nrows = H_dm->ncols = n;
             InitializeDiagonalMatrix_lf(H_dm, GLB_sclForHess);
-            //H_dm->flag = M_GE | M_SU | M_SL;       //Hessian is symmetric.
-            cnt_n_badcases = 0;  //Reset after we restart wtih the initial Hessian.
+/*              //H_dm->flag = M_GE | M_SU | M_SL;       //Hessian is symmetric.   ansi-c*/
+            cnt_n_badcases = 0;   /*  Reset after we restart wtih the initial Hessian.   ansi-c*/
             #ifdef VERBOSE_WARNINGS
             printf("Hessian is reset to the initial value because the maximum number of bad cases, %d, is reached!\n", MAX_NUM_BADCASES);
             #endif
@@ -424,7 +431,7 @@ void csminwel(double (*fcn)(double *x, int n, double **args, int *dims),
    }
 
 
-   //--------- Prints outputs to a file. ---------
+/*     //--------- Prints outputs to a file. ---------   ansi-c*/
    if ( !(fptr_interesults = fopen(filename_sp2vecs,"w")) ) {
       printf("\n\nUnable to create the starting point data file %s in csminwel.c!\n", filename_sp2vecs);
       getchar();
@@ -441,7 +448,7 @@ void csminwel(double (*fcn)(double *x, int n, double **args, int *dims),
    tzFclose(fptr_interesults);
 
 
-   //=== Frees memory.
+/*     //=== Frees memory.   ansi-c*/
    for (i=0; i<4; i++) {
       tzDestroy(g[i]);
       tzDestroy(x[i]);
@@ -458,7 +465,7 @@ void csminwel(double (*fcn)(double *x, int n, double **args, int *dims),
    static int numgrad(double *g, double *x, int n,
                      double (*fcn)(double *x, int n, double **args, int *dims),
                      double **args, int *dims) {
-      //Forward difference gradient method.
+/*        //Forward difference gradient method.   ansi-c*/
       double delta, deltai;
       double f0, g0, ff, tmp, *xp;
       int i;
@@ -466,19 +473,19 @@ void csminwel(double (*fcn)(double *x, int n, double **args, int *dims),
       f0 = fcn(x,n,args,dims);
       badg = 0;
       for (i=0, xp=x; i<n; i++, xp++, g++) {
-         delta=SCALE*GRADSTPS_CSMINWEL, deltai=1.0/delta;  //e+5/SCALE;
+         delta=SCALE*GRADSTPS_CSMINWEL, deltai=1.0/delta;   /*  e+5/SCALE;   ansi-c*/
 
          tmp = *xp;
          *xp += delta;
-         delta = *xp - tmp;                   // This increases the precision slightly.  Added by TZ.
-         if ( (ff=fcn(x,n,args,dims)) < NEARINFINITY )   g0 = (ff-f0)*deltai;   //Not over the boundary.
+         delta = *xp - tmp;                    /*   This increases the precision slightly.  Added by TZ.   ansi-c*/
+         if ( (ff=fcn(x,n,args,dims)) < NEARINFINITY )   g0 = (ff-f0)*deltai;    /*  Not over the boundary.   ansi-c*/
          else {
-            //Switches to the other side of the boundary.
+/*              //Switches to the other side of the boundary.   ansi-c*/
             *xp = tmp - delta;
             g0 = (f0-fcn(x,n,args,dims))*deltai;
          }
 
-         *xp = tmp;       //Puts back to the original place.  TZ, 9/03.
+         *xp = tmp;        /*  Puts back to the original place.  TZ, 9/03.   ansi-c*/
          if (fabs(g0)<1.0e+15)
             *g = g0;
          else {
@@ -492,13 +499,13 @@ void csminwel(double (*fcn)(double *x, int n, double **args, int *dims),
       }
       return badg;
    }
-   //#elif  INDXNUMGRAD_CSMINWEL == 2
+/*     //#elif  INDXNUMGRAD_CSMINWEL == 2   ansi-c*/
 #else
-   //#define STPS 1.0e-04    // 6.0554544523933391e-6 step size = pow(DBL_EPSILON,1.0/3)
+/*     //#define STPS 1.0e-04    // 6.0554544523933391e-6 step size = pow(DBL_EPSILON,1.0/3)   ansi-c*/
    static int numgrad(double *g, double *x, int n,
                      double (*fcn)(double *x, int n, double **args, int *dims),
                      double **args, int *dims) {
-      //Central difference gradient method.  Added by TZ.
+/*        //Central difference gradient method.  Added by TZ.   ansi-c*/
       double dh;
       double f0, fp, fm, tmp, *xp;
       int i;
@@ -510,26 +517,26 @@ void csminwel(double (*fcn)(double *x, int n, double **args, int *dims),
 
          tmp = *xp;
          *xp += dh;
-         dh = *xp - tmp;                   // This increases the precision slightly.
+         dh = *xp - tmp;                    /*   This increases the precision slightly.   ansi-c*/
          fp = fcn(x,n,args,dims);
          *xp = tmp - dh;
          fm = fcn(x,n,args,dims);
 
-         //=== Checking the boundary condition for the minimization problem.
+/*           //=== Checking the boundary condition for the minimization problem.   ansi-c*/
          if (fp >= NEARINFINITY) {
-            *xp = tmp;       //Puts back to the original place.  TZ, 9/03.
+            *xp = tmp;        /*  Puts back to the original place.  TZ, 9/03.   ansi-c*/
             f0 = fcn(x,n,args,dims);
             *g = (f0-fm)/dh;
          }
          else if (fm >= NEARINFINITY) {
-            //Switches to the other side of the boundary.
-            *xp = tmp;       //Puts back to the original place.  TZ, 9/03.
+/*              //Switches to the other side of the boundary.   ansi-c*/
+            *xp = tmp;        /*  Puts back to the original place.  TZ, 9/03.   ansi-c*/
             f0 = fcn(x,n,args,dims);
             *g = (fp-f0)/dh;
          }
          else {
             *g = (fp-fm)/(2.0*dh);
-            *xp = tmp;       //Puts back to the original place.  TZ, 9/03.
+            *xp = tmp;        /*  Puts back to the original place.  TZ, 9/03.   ansi-c*/
          }
 
          if (fabs(*g)>1.0e+15) {
@@ -543,21 +550,21 @@ void csminwel(double (*fcn)(double *x, int n, double **args, int *dims),
       return badg;
    }
 #endif
-////#undef INDXNUMGRAD_CSMINWEL
-////#undef GRADSTPS_CSMINWEL
+/*  ////#undef INDXNUMGRAD_CSMINWEL   ansi-c*/
+/*  ////#undef GRADSTPS_CSMINWEL   ansi-c*/
 
 
 
 
-#define ANGLE 0.01  //When output of this variable becomes negative, we have a wrong analytical graident.
-                    //.005 works for identified VARs and OLS.
-                    //.005 implies 89.71 degrees (acrcos(ANGLE)*180/pi).
-                    //.01  implies 89.43 degrees (acrcos(ANGLE)*180/pi).
-                    //.05  implies 87.13 degrees (acrcos(ANGLE)*180/pi).
-                    //.1   implies 84.26 degrees (acrcos(ANGLE)*180/pi).
-#define THETA .4    //(0<THETA<.5) THETA near .5 makes long line searches, possibly fewer iterations.
-                    //.1 works for OLS or other nonlinear functions.
-                    //.3 works for identified VARs.
+#define ANGLE 0.01   /*  When output of this variable becomes negative, we have a wrong analytical graident.   ansi-c*/
+/*                      //.005 works for identified VARs and OLS.   ansi-c*/
+/*                      //.005 implies 89.71 degrees (acrcos(ANGLE)*180/pi).   ansi-c*/
+/*                      //.01  implies 89.43 degrees (acrcos(ANGLE)*180/pi).   ansi-c*/
+/*                      //.05  implies 87.13 degrees (acrcos(ANGLE)*180/pi).   ansi-c*/
+/*                      //.1   implies 84.26 degrees (acrcos(ANGLE)*180/pi).   ansi-c*/
+#define THETA .4     /*  (0<THETA<.5) THETA near .5 makes long line searches, possibly fewer iterations.   ansi-c*/
+/*                      //.1 works for OLS or other nonlinear functions.   ansi-c*/
+/*                      //.3 works for identified VARs.   ansi-c*/
 #define FCHANGE 1000
 #define MINLAMB 1e-9
 #define MINDFAC .01
@@ -571,7 +578,7 @@ static void csminit(double *fhat, double *xhat, int *fcount, int *retcode,
    int done=0, shrink=1, shrinkSignal, growSignal;
    int i;
 
-   memcpy(xhat, x0, n*sizeof(double));    //Iskander's original code does not have this line, which is a major bug. Corrected by TZ.
+   memcpy(xhat, x0, n*sizeof(double));     /*  Iskander's original code does not have this line, which is a major bug. Corrected by TZ.   ansi-c*/
    *fhat = f0;
    *fcount = 0;
    *retcode = 0;
@@ -581,8 +588,8 @@ static void csminit(double *fhat, double *xhat, int *fcount, int *retcode,
    else {
       /* with badg 1, we don't try to match rate of improvement to directional
          derivative.  We're satisfied just to get some improvement in f. */
-      dx = tzMalloc(n, double);   //dx = calloc(n, sizeof(double));  Commented out by TZ.
-      //if (!dx) printf("Dynamic memory allocation error.\n");  Commnted out by TZ.
+      dx = tzMalloc(n, double);    /*  dx = calloc(n, sizeof(double));  Commented out by TZ.   ansi-c*/
+/*        //if (!dx) printf("Dynamic memory allocation error.\n");  Commnted out by TZ.   ansi-c*/
       for (i=0; i<n; i++)
          dx[i] = -times(&H0[i*n],g,n);
       dxnorm = sqrt(times(dx,dx,n));
@@ -615,7 +622,7 @@ static void csminit(double *fhat, double *xhat, int *fcount, int *retcode,
       printf("Predicted improvement: %18.9f, Norm of gradient: %18.9f\n", -dfhat*0.5, gnorm);
       #endif
 
-      dxtest = tzMalloc(n, double);  //calloc(n, sizeof(double));  Commented out by TZ.
+      dxtest = tzMalloc(n, double);   /*  calloc(n, sizeof(double));  Commented out by TZ.   ansi-c*/
       while (!done) {
          for (i=0; i<n; i++)
             dxtest[i] = x0[i]+dx[i]*lambda;
@@ -765,8 +772,8 @@ static void bfgsi(double *H, double *dg, double *dx, int n, int nn) {
    int i;
    TSdmatrix *H_dm = NULL;
 
-   Hdg = tzMalloc(n, double);  //calloc(n, sizeof(double));  Commented out by TZ.
-   //if (!Hdg) printf("Dynamic memory allocation error.\n");  Commented out by TZ.
+   Hdg = tzMalloc(n, double);   /*  calloc(n, sizeof(double));  Commented out by TZ.   ansi-c*/
+/*     //if (!Hdg) printf("Dynamic memory allocation error.\n");  Commented out by TZ.   ansi-c*/
 
    /* Hdg = H0*dg; */
    for (i=0; i<n; i++)
@@ -781,19 +788,19 @@ static void bfgsi(double *H, double *dg, double *dx, int n, int nn) {
       for (i=0; i<nn; i++, H++, dxdx++, dxHdg++, Hdgdx++)
          *H += (m*(*dxdx)-(*dxHdg)-(*Hdgdx))*dgdx;
       free(Hdgdx-nn);
-      Hdgdx=NULL;      //DDDDDebugging.
+      Hdgdx=NULL;       /*  DDDDDebugging.   ansi-c*/
       free(dxHdg-nn);
       dxHdg = NULL;
       free(dxdx-nn);
       dxdx = NULL;
    }
    else {
-      //=== Restarting the inverse of Hessian at its initial value.  Added by TZ.
-      H_dm = tzMalloc(1, TSdmatrix);    //H_dm wil point to the same location as H.
+/*        //=== Restarting the inverse of Hessian at its initial value.  Added by TZ.   ansi-c*/
+      H_dm = tzMalloc(1, TSdmatrix);     /*  H_dm wil point to the same location as H.   ansi-c*/
       H_dm->M = H;
       H_dm->nrows = H_dm->ncols = n;
       InitializeDiagonalMatrix_lf(H_dm, GLB_sclForHess);
-      //H_dm->flag = M_GE | M_SU | M_SL;       //Hessian is symmetric.
+/*        //H_dm->flag = M_GE | M_SU | M_SL;       //Hessian is symmetric.   ansi-c*/
       tzDestroy(H_dm);
 
       #ifdef VERBOSE_WARNINGS
@@ -810,7 +817,7 @@ static double *mtimes(double *x, double *y, int n, int nn) {
    double *x0;
    double *z;
    int i, j;
-   z = tzMalloc(nn, double);  //calloc(nn, sizeof(double));  Commented out by TZ.
+   z = tzMalloc(nn, double);   /*  calloc(nn, sizeof(double));  Commented out by TZ.   ansi-c*/
    for (i=0, x0=x; i<n; i++, y++)
       for (j=0, x=x0; j<n; j++, x++, z++)
          *z = (*x)*(*y);
@@ -820,16 +827,16 @@ static double *mtimes(double *x, double *y, int n, int nn) {
 static double *mminus(double *x, double *y, int n) {
    double *z;
    int i;
-   z = tzMalloc(n, double);  //calloc(n, sizeof(double));  Commented out by TZ.
+   z = tzMalloc(n, double);   /*  calloc(n, sizeof(double));  Commented out by TZ.   ansi-c*/
    for (i=0; i<n; i++, x++, y++, z++)
       *z = (*x)-(*y);
    return z-n;
 }
 
 
-//=== The following two extern functions to be accessed by other C files.
+/*  //=== The following two extern functions to be accessed by other C files.   ansi-c*/
 void csminwel_SetPrintFile(char *filename) {
-   if (!filename)   sprintf(filename_sp2vecs, "outdata5csminwel.prn");  //Default filename.
+   if (!filename)   sprintf(filename_sp2vecs, "outdata5csminwel.prn");   /*  Default filename.   ansi-c*/
    else if (STRLEN-1 < strlen(filename))  fn_DisplayError(".../csminwel.c:  the allocated length STRLEN for filename_sp2vecs is too short.  Must increase the string length");
    else  strcpy(filename_sp2vecs, filename);
 }

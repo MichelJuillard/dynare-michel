@@ -1,5 +1,5 @@
 
-#include "matrix.h"
+#include "swzmatrix.h"
 
 char* SphericalType(void);
 void SetupSpherical_Gaussian(int n);

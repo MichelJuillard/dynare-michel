@@ -1,12 +1,12 @@
-// Created: August 4,2009
+/*  // Created: August 4,2009   ansi-c*/
 
 #ifndef __LAPACKCOMPAT__
 #define __LAPACKCOMPAT__
 
-#define USE_LAPACK 
+#define USE_LAPACK
 
 #if defined(USE_LAPACK)
-   #include "blas_lapack.h"  
+   #include "blas_lapack.h"
 #endif
 
 #define dgetrf dgetrf_
@@ -19,6 +19,6 @@
 #define vdInv vdInv_
 #define vdSqrt vdSqrt_
 #define vdLn vdLn_
-#define vdExp vdExp_ 
+#define vdExp vdExp_
 #endif
 

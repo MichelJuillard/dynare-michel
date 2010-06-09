@@ -1,0 +1,22 @@
+SWZ_SRC_BASEDIR = ../../../../matlab/swz/c-code
+
+SWZ_SRC_DIRS = $(SWZ_SRC_BASEDIR)/utilities/TZCcode $(SWZ_SRC_BASEDIR)/utilities/DWCcode/matrix $(SWZ_SRC_BASEDIR)/utilities/DWCcode/error $(SWZ_SRC_BASEDIR)/utilities/DWCcode/arrays $(SWZ_SRC_BASEDIR)/utilities/DWCcode/ascii $(SWZ_SRC_BASEDIR)/utilities/DWCcode/stat $(SWZ_SRC_BASEDIR)/utilities/DWCcode/spherical $(SWZ_SRC_BASEDIR)/utilities/DWCcode/sort $(SWZ_SRC_BASEDIR)/sbvar/switching $(SWZ_SRC_BASEDIR)/sbvar/var $(SWZ_SRC_BASEDIR)/mex
+
+vpath %.c $(SWZ_SRC_DIRS)
+
+CPPFLAGS += -DINTELCMATHLIBRARY $(GSL_CFLAGS) -I$(SWZ_SRC_BASEDIR)/utilities/TZCcode -I$(SWZ_SRC_BASEDIR)/utilities/DWCcode/matrix -I$(SWZ_SRC_BASEDIR)/utilities/DWCcode/error -I$(SWZ_SRC_BASEDIR)/utilities/DWCcode/arrays -I$(SWZ_SRC_BASEDIR)/utilities/DWCcode/ascii -I$(SWZ_SRC_BASEDIR)/utilities/DWCcode/stat -I$(SWZ_SRC_BASEDIR)/utilities/DWCcode/spherical -I$(SWZ_SRC_BASEDIR)/utilities/DWCcode/sort -I$(SWZ_SRC_BASEDIR)/sbvar/switching -I$(SWZ_SRC_BASEDIR)/sbvar/var -I$(SWZ_SRC_BASEDIR)/mex
+
+LIBS += $(GSL_LIBS)
+
+noinst_PROGRAMS = mex_sbvar_init_file mex_sbvar_estimation mex_sbvar_mhm_1 mex_sbvar_mhm_2 mex_sbvar_probabilities mex_sbvar_draws
+
+common_mex = mex_top_level.c modify_for_mex.c
+swz_common = bmatrix.c swzmatrix.c dw_error.c dw_rand.c dw_matrix_rand.c dw_array.c dw_matrix_array.c dw_matrix_sort.c dw_ascii.c dw_parse_cmd.c
+swz_tao    = tzmatlab.c mathlib.c cstz_dw.c
+
+nodist_mex_sbvar_init_file_SOURCES     = $(common_mex) $(swz_common) create_init_file.c switch.c switchio.c VARbase.c VARio.c VARio_matlab.c
+nodist_mex_sbvar_estimation_SOURCES    = $(common_mex) $(swz_common) $(swz_tao) estimate.c VARbase.c VARio.c command_line_VAR.c switch.c switchio.c switch_opt.c csminwel.c
+nodist_mex_sbvar_mhm_1_SOURCES         = $(common_mex) $(swz_common) mhm_VAR_main_1.c mhm_VAR.c VARbase.c VARio.c command_line_VAR.c switch.c switchio.c
+nodist_mex_sbvar_mhm_2_SOURCES         = $(common_mex) $(swz_common) mhm_VAR_main_2.c spherical.c VARbase.c VARio.c switch.c switchio.c mhm_VAR.c
+nodist_mex_sbvar_probabilities_SOURCES = $(common_mex) $(swz_common) probabilities.c switch.c switchio.c VARbase.c VARio.c command_line_VAR.c
+nodist_mex_sbvar_draws_SOURCES         = $(common_mex) $(swz_common) PrintDraws.c switch.c switchio.c VARbase.c VARio.c command_line_VAR.c

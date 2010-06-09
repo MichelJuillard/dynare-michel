@@ -13,6 +13,10 @@ function McMCDiagnostics(options_, estim_params_, M_)
 % SPECIAL REQUIREMENTS
 %   none
 
+% PARALLEL CONTEXT
+% See the comment in random_walk_metropolis_hastings.m funtion.
+
+
 % Copyright (C) 2005-2008,2010 Dynare Team
 %
 % This file is part of Dynare.
@@ -86,6 +90,9 @@ end
 
 disp('MCMC Diagnostics: Univariate convergence diagnostic, Brooks and Gelman (1998):')
 
+% The mandatory variables for local/remote parallel
+% computing are stored in localVars struct.
+
 localVars.MhDirectoryName = MhDirectoryName;
 localVars.nblck = nblck;
 localVars.NumberOfMcFilesPerBlock = NumberOfMcFilesPerBlock;
@@ -97,10 +104,13 @@ localVars.NumberOfLines = NumberOfLines;
 localVars.time = time;
 localVars.M_ = M_;
 
+
+% Like sequential execution!
 if isnumeric(options_.parallel),
     fout = McMCDiagnostics_core(localVars,1,npar,0);
     UDIAG = fout.UDIAG;
     clear fout
+% Parallel execution!
 else
     ModelName = M_.fname;
     if ~isempty(M_.bvar)

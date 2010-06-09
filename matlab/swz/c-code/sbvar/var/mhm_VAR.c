@@ -12,7 +12,9 @@
 #include <time.h>
 #include <string.h>
 
-  // Compute psudo-inverse of mhm->variance
+#include "modify_for_mex.h"
+
+/*    // Compute psudo-inverse of mhm->variance   ansi-c*/
 static void PsudoInverse(TMatrix X, TMatrix Y)
 {
   int i, j, k;
@@ -28,7 +30,7 @@ static void PsudoInverse(TMatrix X, TMatrix Y)
     {
       tmp=(ElementV(d,j) > epsilon) ? 1.0/ElementV(d,j) : 0.0;
       for (i=k-1; i >= 0; i--)
-	ElementM(V,i,j)*=tmp;
+    ElementM(V,i,j)*=tmp;
     }
   ProductTransposeMM(X,V,U);
   FreeMatrix(U);
@@ -71,7 +73,7 @@ T_MHM* AddStateModel(TStateModel *model, T_MHM *mhm)
 
   if (!mhm) mhm=CreateMHM();
 
-  // Allocate memory
+/*    // Allocate memory   ansi-c*/
   mhm->mean=CreateVector(nf_var);
   mhm->posterior_mode_VAR=CreateVector(nf_var);
   mhm->variance=CreateMatrix(nf_var,nf_var);
@@ -85,7 +87,7 @@ T_MHM* AddStateModel(TStateModel *model, T_MHM *mhm)
   for (i=dw_DimA(model->sv->ba)-1; i >= 0; i--)
     mhm->BaseAlpha[i]=CreateVector(DimV(model->sv->ba[i]));
 
-  // model information
+/*    // model information   ansi-c*/
   mhm->model=model;
   Setup_WZ_Normalization((T_VAR_Parameters*)mhm->model->theta,((T_VAR_Parameters*)mhm->model->theta)->A0);
   ConvertThetaToFreeParameters(model,pElementV(mhm->posterior_mode_VAR));
@@ -93,7 +95,7 @@ T_MHM* AddStateModel(TStateModel *model, T_MHM *mhm)
   mhm->log_prior_at_mode=LogPrior(model);
   mhm->log_posterior_at_mode=mhm->log_likelihood_at_mode + mhm->log_prior_at_mode;
 
-  // Center
+/*    // Center   ansi-c*/
   mhm->center=mhm->posterior_mode_VAR;
 
   return mhm;
@@ -113,7 +115,7 @@ T_MHM* CreateMHM(void)
   int i, j;
   T_MHM* mhm;
 
-  // Allocate structure
+/*    // Allocate structure   ansi-c*/
   mhm=(T_MHM*)malloc(sizeof(T_MHM));
 
   mhm->alpha_scales=(TVector)NULL;
@@ -139,13 +141,13 @@ T_MHM* CreateMHM(void)
   mhm->parameter_header=(char*)NULL;
   mhm->mhm_filename=(char*)NULL;
 
-  // Default values
+/*    // Default values   ansi-c*/
   mhm->n_burn1=100000;
   mhm->n_burn2=0;
   mhm->n_mean_variance=200000;
   mhm->n_mhm=1000000;
   mhm->n_thin=1;
-  
+
   ResetMHM(mhm);
 
   return mhm;
@@ -161,19 +163,19 @@ void BurnIn(T_MHM *mhm, int iterations, int period)
       DrawAll(mhm->model);
 
       if (count == check)
-	{
-	  check+=period;
-	  if (mhm->f_out)
-	    {
-	      fprintf(mhm->f_out,"%d iterations completed out of %d\n",count,iterations);
-	      PrintJumps(mhm->f_out,(T_VAR_Parameters*)(mhm->model->theta));
-	      fflush(mhm->f_out);
-	    }
+    {
+      check+=period;
+      if (mhm->f_out)
+        {
+          fprintf(mhm->f_out,"%d iterations completed out of %d\n",count,iterations);
+          PrintJumps(mhm->f_out,(T_VAR_Parameters*)(mhm->model->theta));
+          fflush(mhm->f_out);
+        }
 
-	  printf("Total Elapsed Time: %d seconds\n",(int)time((time_t*)NULL) - begin_time);
-	  fprintf(stdout,"%d iterations completed out of %d\n",count,iterations);
-	  PrintJumps(stdout,(T_VAR_Parameters*)(mhm->model->theta));
-	}
+      printf("Total Elapsed Time: %d seconds\n",(int)time((time_t*)NULL) - begin_time);
+      printf("%d iterations completed out of %d\n",count,iterations);
+      PrintJumps(stdout,(T_VAR_Parameters*)(mhm->model->theta));
+    }
     }
   ResetMetropolisInformation((T_VAR_Parameters*)(mhm->model->theta));
 }
@@ -201,8 +203,8 @@ void ComputeMeanVariance_MHM(T_MHM *mhm, int iterations, int period)
   InitializeVector(mhm->mean,0.0);
   InitializeMatrix(mhm->variance,0.0);
 
-  // loop and accumulate 1st and 2nd non-central moments
-  fprintf(stdout,"Beginning mean and variance estimation -- %d iterations.\n",iterations);
+/*    // loop and accumulate 1st and 2nd non-central moments   ansi-c*/
+  printf("Beginning mean and variance estimation -- %d iterations.\n",iterations);
   begin_time=time((time_t*)NULL);
   for (count=1; count <= iterations; count++)
     {
@@ -211,43 +213,43 @@ void ComputeMeanVariance_MHM(T_MHM *mhm, int iterations, int period)
       ConvertThetaToFreeParameters(mhm->model,pElementV(mhm->free_parameters_VAR));
 
       for (i=dw_DimA(alpha)-1; i >= 0; i--)
-	{
-	  AddVV(mhm->BaseAlpha[i],mhm->BaseAlpha[i],mhm->model->sv->ba[i]);
+    {
+      AddVV(mhm->BaseAlpha[i],mhm->BaseAlpha[i],mhm->model->sv->ba[i]);
 
-	  for (j=DimV(alpha[i])-1; j >= 0; j--)
-	    ElementV(alpha[i],j)+=ElementV(mhm->model->sv->ba[i],j)*ElementV(mhm->model->sv->ba[i],j);
-	}
+      for (j=DimV(alpha[i])-1; j >= 0; j--)
+        ElementV(alpha[i],j)+=ElementV(mhm->model->sv->ba[i],j)*ElementV(mhm->model->sv->ba[i],j);
+    }
 
       AddVV(mhm->mean,mhm->mean,mhm->free_parameters_VAR);
       OuterProduct(S,mhm->free_parameters_VAR,mhm->free_parameters_VAR);
       AddMM(mhm->variance,mhm->variance,S);
 
       if (count == check)
-	{
-	  check+=period;
-	  fprintf(stdout,"Total Elapsed Time: %d seconds\n",(int)time((time_t*)NULL) - begin_time);
-	  fprintf(stdout,"%d iterations completed out of %d\n",count,iterations);
-	  PrintJumps(stdout,(T_VAR_Parameters*)(mhm->model->theta));
-	}
+    {
+      check+=period;
+      printf("Total Elapsed Time: %d seconds\n",(int)time((time_t*)NULL) - begin_time);
+      printf("%d iterations completed out of %d\n",count,iterations);
+      PrintJumps(stdout,(T_VAR_Parameters*)(mhm->model->theta));
+    }
     }
 
-  // compute 1st and 2nd central moments for normal terms
+/*    // compute 1st and 2nd central moments for normal terms   ansi-c*/
   ProductVS(mhm->mean,mhm->mean,1.0/(PRECISION)iterations);
   ProductMS(mhm->variance,mhm->variance,1.0/(PRECISION)iterations);
   OuterProduct(S,mhm->mean,mhm->mean);
   SubtractMM(mhm->variance,mhm->variance,S);
 
-  // Psudo variance
+/*    // Psudo variance   ansi-c*/
   SubtractVV(mhm->free_parameters_VAR,mhm->mean,mhm->posterior_mode_VAR);
   OuterProduct(S,mhm->free_parameters_VAR,mhm->free_parameters_VAR);
   AddMM(mhm->variance,mhm->variance,S);
 
-  // Compute psudo-inverse of mhm->variance
+/*    // Compute psudo-inverse of mhm->variance   ansi-c*/
   PsudoInverse(mhm->inverse_variance,mhm->variance);
 
   FreeMatrix(S);
 
-  // compute base alpha's for Dirichlet distribution
+/*    // compute base alpha's for Dirichlet distribution   ansi-c*/
   for (i=dw_DimA(mhm->BaseAlpha)-1; i >= 0; i--)
     ProductVS(mhm->BaseAlpha[i],mhm->BaseAlpha[i],1.0/(PRECISION)iterations);
   for (i=dw_DimA(mhm->BaseAlpha)-1; i >= 0; i--)
@@ -257,23 +259,23 @@ void ComputeMeanVariance_MHM(T_MHM *mhm, int iterations, int period)
   for (i=dw_DimA(mhm->BaseAlpha)-1; i >= 0; i--)
     {
       for (max=0.0, j=DimV(mhm->BaseAlpha[i])-1; j >= 0; j--)
-	if ((tmp=ElementV(mhm->BaseAlpha[i],j)*(1.0-ElementV(mhm->BaseAlpha[i],j))/ElementV(alpha[i],j)) > max) max=tmp;
+    if ((tmp=ElementV(mhm->BaseAlpha[i],j)*(1.0-ElementV(mhm->BaseAlpha[i],j))/ElementV(alpha[i],j)) > max) max=tmp;
       max-=1.0;
 
       for (inc=0.0, j=DimV(mhm->BaseAlpha[i])-1; j >= 0; j--)
-	if ((tmp=1.1 - max*ElementV(mhm->BaseAlpha[i],j)) > inc) inc=tmp;
+    if ((tmp=1.1 - max*ElementV(mhm->BaseAlpha[i],j)) > inc) inc=tmp;
 
       for (j=DimV(mhm->BaseAlpha[i])-1; j >= 0; j--)
-	ElementV(mhm->BaseAlpha[i],j)=max*ElementV(mhm->BaseAlpha[i],j)+inc;
+    ElementV(mhm->BaseAlpha[i],j)=max*ElementV(mhm->BaseAlpha[i],j)+inc;
     }
 
-  // Create Alpha's
+/*    // Create Alpha's   ansi-c*/
   mhm->Alpha=dw_CreateArray_array(DimV(mhm->alpha_scales));
   for (i=dw_DimA(mhm->Alpha)-1; i >= 0; i--)
     {
       mhm->Alpha[i]=dw_CreateArray_vector(dw_DimA(mhm->BaseAlpha));
       for (j=dw_DimA(mhm->Alpha[i])-1; j >= 0; j--)
-	mhm->Alpha[i][j]=ProductVS((TVector)NULL,mhm->BaseAlpha[j],ElementV(mhm->alpha_scales,i));
+    mhm->Alpha[i][j]=ProductVS((TVector)NULL,mhm->BaseAlpha[j],ElementV(mhm->alpha_scales,i));
     }
 
   dw_FreeArray(alpha);
@@ -315,7 +317,7 @@ void ComputeMeanVariance_MHM(T_MHM *mhm, int iterations, int period)
 
 /*   // Print log posterior and quadratic form */
 /*   fprintf(mhm->f_out,"%le %le",log_posterior,quadratic_form); */
-	  
+
 /*   // Print Dirichlet PDF's */
 /*   for (j=0; j < dw_DimA(mhm->Alpha); j++) */
 /*     fprintf(mhm->f_out," %le",LogIndependentDirichlet_pdf(mhm->model->sv->ba,mhm->Alpha[j])); */
@@ -336,20 +338,20 @@ void ComputeMeanVariance_MHM(T_MHM *mhm, int iterations, int period)
 void UpdateModifiedHarmonicMean(T_MHM *mhm, int n_singular)
 {
   int j, k;
-  PRECISION quadratic_form, log_likelihood, log_likelihood_states_integrated_out, 
+  PRECISION quadratic_form, log_likelihood, log_likelihood_states_integrated_out,
     log_prior_theta, log_prior_Q, log_posterior, difference;
 
-  // Increment total number of observations
+/*    // Increment total number of observations   ansi-c*/
   mhm->N++;
 
-  // Compute likelihoods and priors
+/*    // Compute likelihoods and priors   ansi-c*/
   log_likelihood=LogLikelihood(mhm->model);
   log_likelihood_states_integrated_out=LogLikelihood_StatesIntegratedOut(mhm->model);
   log_prior_theta=LogPrior_Theta(mhm->model);
   log_prior_Q=LogPrior_Q(mhm->model);
   log_posterior=log_likelihood_states_integrated_out + log_prior_theta + log_prior_Q;
 
-  // Average change
+/*    // Average change   ansi-c*/
   if (mhm->N > 1)
     {
       mhm->sum+=(difference=log_posterior - mhm->old_log_posterior);
@@ -357,29 +359,29 @@ void UpdateModifiedHarmonicMean(T_MHM *mhm, int n_singular)
     }
   mhm->old_log_posterior=log_posterior;
 
-  // Maximum likelihoods and priors 
+/*    // Maximum likelihoods and priors   ansi-c*/
   if (log_likelihood_states_integrated_out > mhm->max_log_likelihood) mhm->max_log_likelihood=log_likelihood_states_integrated_out;
   if (log_posterior > mhm->max_log_posterior) mhm->max_log_posterior=log_posterior;
 
-  // Compute quadratic form
+/*    // Compute quadratic form   ansi-c*/
   ConvertThetaToFreeParameters(mhm->model,pElementV(mhm->free_parameters_VAR));
   SubtractVV(mhm->free_parameters_VAR,mhm->free_parameters_VAR,mhm->center);
    quadratic_form=InnerProductSymmetric(mhm->free_parameters_VAR,mhm->inverse_variance);
 
   /*** Standard output ***/
-  // Print log posterior and quadratic form
-  fprintf(mhm->f_out,"%le %le",log_posterior,quadratic_form);	  
-  // Print Dirichlet PDF's
+/*    // Print log posterior and quadratic form   ansi-c*/
+  fprintf(mhm->f_out,"%le %le",log_posterior,quadratic_form);
+/*    // Print Dirichlet PDF's   ansi-c*/
   for (j=0; j < dw_DimA(mhm->Alpha); j++)
     fprintf(mhm->f_out," %le",LogIndependentDirichlet_pdf(mhm->model->sv->ba,mhm->Alpha[j]));
-  // Print number of singular varinances
+/*    // Print number of singular varinances   ansi-c*/
   fprintf(mhm->f_out," %d\n",Get_VAR_Improper_Distribution_Counter()-n_singular);
 
   /*** States not integrated out output ***/
-  //if (mhm->f_states_not_integrated_out)
-  //  fprintf(mhm->f_states_not_integrated_out,"%le %le %le %le %le\n",quadratic_form,log_likelihood,log_prior_theta,log_prior_Q,log_posterior);
+/*    //if (mhm->f_states_not_integrated_out)   ansi-c*/
+/*    //  fprintf(mhm->f_states_not_integrated_out,"%le %le %le %le %le\n",quadratic_form,log_likelihood,log_prior_theta,log_prior_Q,log_posterior);   ansi-c*/
 
-  // Tally states
+/*    // Tally states   ansi-c*/
   for (j=mhm->model->sv->nstates-1; j >= 0; j--) mhm->states[j]=0;
   for (j=mhm->model->sv->nobs; j > 1; j--) mhm->states[mhm->model->sv->S[j]]++;
   for (j=mhm->model->sv->nstates-1; j >= 0; j--) fprintf(mhm->f_out_regime_counts,"%d ",mhm->states[j]);
@@ -397,19 +399,19 @@ void ComputeModifiedHarmonicMean(T_MHM *mhm, int period)
   for (count=1; count <= mhm->n_mhm; count++)
     {
       n_singular=Get_VAR_Improper_Distribution_Counter();
-      for (i=mhm->n_thin; i > 0; i--) 
-	{
-	  DrawAll(mhm->model);
-	}
- 
+      for (i=mhm->n_thin; i > 0; i--)
+    {
+      DrawAll(mhm->model);
+    }
+
       UpdateModifiedHarmonicMean(mhm,n_singular);
       if (count == check)
-	{
-	  check+=period;
-	  printf("Total Elapsed Time: %d seconds\n",(int)time((time_t*)NULL) - begin_time);
-	  printf("%d iterations completed out of %d\n",count,mhm->n_mhm);
-	  PrintJumps(stdout,(T_VAR_Parameters*)(mhm->model->theta));
-	}
+    {
+      check+=period;
+      printf("Total Elapsed Time: %d seconds\n",(int)time((time_t*)NULL) - begin_time);
+      printf("%d iterations completed out of %d\n",count,mhm->n_mhm);
+      PrintJumps(stdout,(T_VAR_Parameters*)(mhm->model->theta));
+    }
     }
 }
 /*******************************************************************************/
@@ -431,7 +433,11 @@ static int ReadError_MHMio(char *id)
 
 void PrintJumps(FILE *f, T_VAR_Parameters *p)
 {
-  fprintf(f,"Jumping counts - Total: %d\n",p->Total_A0_Metropolis_Draws);
+  if(f==stdout)
+    printf("Jumping counts - Total: %d\n",p->Total_A0_Metropolis_Draws);
+  else
+    fprintf(f,"Jumping counts - Total: %d\n",p->Total_A0_Metropolis_Draws);
+
   dw_PrintArray(f,p->A0_Metropolis_Jumps,"%7d ");
 }
 
@@ -464,25 +470,25 @@ T_MHM* ReadMHM_Input(FILE *f, char *filename, T_MHM *mhm)
     {
       id="//== number draws for first burn-in ==//";
       if (dw_SetFilePosition(f_in,id) && (fscanf(f_in," %d ",&(rtrn->n_burn1)) == 1))
-	{
-	  id="//== number draws for second burn-in ==//";
-	  if (dw_SetFilePosition(f_in,id) && (fscanf(f_in," %d ",&(rtrn->n_burn2)) == 1))
-	    {
-	      id="//== number draws to estimate mean and variance ==//";
-	      if (dw_SetFilePosition(f_in,id) && (fscanf(f_in," %d ",&(rtrn->n_mean_variance)) == 1))
-		{
-		  id="//== number draws for modified harmonic mean process ==//";
-		  if (dw_SetFilePosition(f_in,id) && (fscanf(f_in," %d ",&(rtrn->n_mhm)) == 1))
-		    {
-		      id="//== thinning factor for modified harmonic mean process ==//";
-		      if (!dw_SetFilePosition(f_in,id) || (fscanf(f_in," %d ",&(rtrn->n_thin)) != 1))
-			rtrn->n_thin=1;
-		      if (!f) fclose(f_in);
-		      return rtrn;
-		    }
-		}
-	    }
-	}
+    {
+      id="//== number draws for second burn-in ==//";
+      if (dw_SetFilePosition(f_in,id) && (fscanf(f_in," %d ",&(rtrn->n_burn2)) == 1))
+        {
+          id="//== number draws to estimate mean and variance ==//";
+          if (dw_SetFilePosition(f_in,id) && (fscanf(f_in," %d ",&(rtrn->n_mean_variance)) == 1))
+        {
+          id="//== number draws for modified harmonic mean process ==//";
+          if (dw_SetFilePosition(f_in,id) && (fscanf(f_in," %d ",&(rtrn->n_mhm)) == 1))
+            {
+              id="//== thinning factor for modified harmonic mean process ==//";
+              if (!dw_SetFilePosition(f_in,id) || (fscanf(f_in," %d ",&(rtrn->n_thin)) != 1))
+            rtrn->n_thin=1;
+              if (!f) fclose(f_in);
+              return rtrn;
+            }
+        }
+        }
+    }
     }
   if (!mhm) FreeMHM(rtrn);
   if (!f) fclose(f_in);
@@ -521,13 +527,13 @@ int ReadMeanVariance(FILE *f_in, T_MHM *mhm)
   if (!dw_SetFilePosition(f_in,id) || !dw_ReadArray(f_in,mhm->BaseAlpha))
     return ReadError_MHMio(id);
 
-  // Create alpha
+/*    // Create alpha   ansi-c*/
   mhm->Alpha=dw_CreateArray_array(DimV(mhm->alpha_scales));
   for (i=dw_DimA(mhm->Alpha)-1; i >= 0; i--)
     {
       mhm->Alpha[i]=dw_CreateArray_vector(dw_DimA(mhm->BaseAlpha));
       for (j=dw_DimA(mhm->Alpha[i])-1; j >= 0; j--)
-	mhm->Alpha[i][j]=ProductVS((TVector)NULL,mhm->BaseAlpha[j],ElementV(mhm->alpha_scales,i));
+    mhm->Alpha[i][j]=ProductVS((TVector)NULL,mhm->BaseAlpha[j],ElementV(mhm->alpha_scales,i));
     }
 
   id="//== Variance ==//";
@@ -580,7 +586,7 @@ int ReadMeanVariance(FILE *f_in, T_MHM *mhm)
 /*   for (i=0; i < RowM(mhm->log_sum); i++) */
 /*     { */
 /*       for (j=0; j < ColM(mhm->log_sum); j++) */
-/* 	fprintf(f_out,"%le ",log(mhm->N) - ElementM(mhm->log_sum,i,j)); */
+/*     fprintf(f_out,"%le ",log(mhm->N) - ElementM(mhm->log_sum,i,j)); */
 /*       fprintf(f_out,"\n"); */
 /*     } */
 /*   fprintf(f_out,"\n"); */
@@ -622,7 +628,7 @@ int ReadMeanVariance(FILE *f_in, T_MHM *mhm)
 /*   fprintf(f_out,"%lf  %lf\n\n",mhm->max_log_likelihood,mhm->max_log_posterior); */
 
 /*   fprintf(f_out,"Mean and standard deviation of the log ratio of the posterior kernel of successive draws\n%le  %lf\n\n", */
-/* 	  mhm->sum/(double)mhm->N,sqrt((mhm->sum_square - mhm->sum*mhm->sum/(double)mhm->N)/(double)mhm->N)); */
+/*       mhm->sum/(double)mhm->N,sqrt((mhm->sum_square - mhm->sum*mhm->sum/(double)mhm->N)/(double)mhm->N)); */
 
 /*   PrintJumps(f_out,(T_VAR_Parameters*)(model->theta)); */
 

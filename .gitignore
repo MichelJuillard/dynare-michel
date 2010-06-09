@@ -153,3 +153,4 @@ ylwrap
 !/mex/sources/kalman/qt/test/Makefile
 !/mex/sources/kalman/sylv/cc/Makefile
 !/mex/sources/kalman/testing/Makefile
+.DS_Store

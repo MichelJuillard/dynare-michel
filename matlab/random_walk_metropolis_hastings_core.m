@@ -1,6 +1,53 @@
 function myoutput = random_walk_metropolis_hastings_core(myinputs,fblck,nblck,whoiam, ThisMatlab)
+% PARALLEL CONTEXT
+% This function contain the most computationally intensive portion of code in
+% random_walk_metropolis_hastings (the 'for xxx = fblck:nblck' loop). The branches in 'for'
+% cycle and are completely independent than suitable to be executed in parallel way.
+% 
+% INPUTS 
+%   o myimput            [struc]     The mandatory variables for local/remote
+%                                    parallel computing obtained from random_walk_metropolis_hastings.m
+%                                    function.
+%   o fblck and nblck    [integer]   The Metropolis-Hastings chains.
+%   o whoiam             [integer]   In concurrent programming a modality to refer to the differents thread running in parallel is needed.
+%                                    The integer whoaim is the integer that
+%                                    allows us to distinguish between them. Then it is the index number of this CPU among all CPUs in the
+%                                    cluster.
+%   o ThisMatlab         [integer]   Allows us to distinguish between the
+%                                    'main' matlab, the slave matlab worker, local matlab, remote matlab,
+%                                     ... Then it is the index number of this slave machine in the cluster.
+% OUTPUTS
+%   o myoutput  [struc]
+%               If executed without parallel is the original output of 'for b =
+%               fblck:nblck' otherwise a portion of it computed on a specific core or
+%               remote machine. In this case:
+%                               record;
+%                               irun;
+%                               NewFile;
+%                               OutputFileName
+%
+% ALGORITHM 
+%   Portion of Metropolis-Hastings.       
+%
+% SPECIAL REQUIREMENTS.
+%   None.
 
-% Copyright (C) 2006-2008 Dynare Team
+% PARALLEL CONTEXT
+% The most computationally intensive part of this function may be executed
+% in parallel. The code sutable to be executed in parallel on multi core or cluster machine,
+% is removed from this function and placed in random_walk_metropolis_hastings_core.m funtion.
+% Then the DYNARE parallel package contain a set of pairs matlab functios that can be executed in
+% parallel and called name_function.m and name_function_core.m.
+% In addition in the parallel package we have second set of functions used
+% to manage the parallel computation.
+%
+% This function was the first function to be parallelized, later other
+% functions have been parallelized using the same methodology.
+% Then the comments write here can be used for all the other pairs of
+% parallel functions and also for management funtions.
+
+
+% Copyright (C) 2006-2008,2010 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -24,7 +71,33 @@ end
 
 global bayestopt_ estim_params_ options_  M_ oo_
 
-struct2local(myinputs);
+% reshape 'myinputs' for local computation.
+% In order to avoid confusion in the name space, the instruction struct2local(myinputs) is replaced by:
+
+TargetFun=myinputs.TargetFun;
+ProposalFun=myinputs.ProposalFun;
+xparam1=myinputs.xparam1;
+vv=myinputs.vv;
+mh_bounds=myinputs.mh_bounds;
+ix2=myinputs.ix2;
+ilogpo2=myinputs.ilogpo2;
+ModelName=myinputs.ModelName;
+fline=myinputs.fline;
+npar=myinputs.npar;
+nruns=myinputs.nruns;
+NewFile=myinputs.NewFile;
+MAX_nruns=myinputs.MAX_nruns;
+d=myinputs.d;
+InitSizeArray=myinputs.InitSizeArray;                    
+record=myinputs.record;
+varargin=myinputs.varargin;
+
+% Necessary only for remote computing!
+if whoiam
+ Parallel=myinputs.Parallel;
+ MasterName=myinputs.MasterName;
+ DyMo=myinputs.DyMo;
+end
 
 % (re)Set the penalty
 bayestopt_.penalty = Inf;
