@@ -25,7 +25,7 @@ function [LIK, lik] = kalman_filter(T,R,Q,H,P,Y,start,mf,kalman_tol,riccati_tol)
 % NOTES
 %   The vector "lik" is used to evaluate the jacobian of the likelihood.
 
-% Copyright (C) 2004-2008 Dynare Team
+% Copyright (C) 2004-2010 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -49,7 +49,7 @@ a    = zeros(mm,1);                             % State vector.
 dF   = 1;                                       % det(F).
 QQ   = R*Q*transpose(R);                        % Variance of R times the vector of structural innovations.
 t    = 0;                                       % Initialization of the time index.
-lik  = zeros(smpl,1);                         % Initialization of the vector gathering the densities.
+lik  = zeros(smpl,1);                           % Initialization of the vector gathering the densities.
 LIK  = Inf;                                     % Default value of the log likelihood.
 oldK = Inf;
 notsteady   = 1;                                % Steady state flag.
@@ -74,9 +74,9 @@ while notsteady & t<smpl
         K      = P(:,mf)*iF;
         a      = T*(a+K*v);
         P      = T*(P-K*P(mf,:))*transpose(T)+QQ;
+        notsteady = max(max(abs(K-oldK))) > riccati_tol;
+        oldK = K;
     end
-    notsteady = max(max(abs(K-oldK))) > riccati_tol;
-    oldK = K;
 end
 
 if F_singular
