@@ -136,6 +136,8 @@ ylwrap
 /mex/sources/estimation/tests/testInitKalman.exe
 /mex/sources/estimation/tests/testKalman
 /mex/sources/estimation/tests/testKalman.exe
+/mex/sources/estimation/tests/testPDF
+/mex/sources/estimation/tests/testPDF.exe
 /mex/sources/estimation/libmat/tests/test-qr
 /mex/sources/estimation/libmat/tests/test-qr.exe
 /mex/sources/estimation/libmat/tests/test-gsd
@@ -153,4 +155,6 @@ ylwrap
 !/mex/sources/kalman/qt/test/Makefile
 !/mex/sources/kalman/sylv/cc/Makefile
 !/mex/sources/kalman/testing/Makefile
+
+# MacOS stuff
 .DS_Store

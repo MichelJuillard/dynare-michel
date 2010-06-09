@@ -1,4 +1,4 @@
-check_PROGRAMS = test-dr testModelSolution testInitKalman testKalman
+check_PROGRAMS = test-dr testModelSolution testInitKalman testKalman testPDF
 
 test_dr_SOURCES = ../libmat/Matrix.cc ../libmat/Vector.cc ../libmat/QRDecomposition.cc ../libmat/GeneralizedSchurDecomposition.cc ../libmat/LUSolver.cc ../DecisionRules.cc test-dr.cc
 test_dr_LDADD = $(LAPACK_LIBS) $(BLAS_LIBS) $(LIBS) $(FLIBS)
@@ -16,5 +16,9 @@ testKalman_SOURCES = ../libmat/Matrix.cc ../libmat/Vector.cc ../libmat/QRDecompo
 testKalman_LDADD = $(LAPACK_LIBS) $(BLAS_LIBS) $(LIBS) $(FLIBS) $(LIBADD_DLOPEN)
 testKalman_CPPFLAGS = -I.. -I../libmat -I../../ -I../utils
 
+testPDF_SOURCES = ../Prior.cc ../Prior.hh testPDF.cc
+testPDF_CPPFLAGS = -I..
+
 check-local:
 	./test-dr
+	./testPDF
