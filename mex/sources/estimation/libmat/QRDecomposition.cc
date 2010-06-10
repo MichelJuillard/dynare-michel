@@ -34,5 +34,6 @@ QRDecomposition::QRDecomposition(size_t rows_arg, size_t cols_arg, size_t cols2_
 QRDecomposition::~QRDecomposition()
 {
   delete[] work;
+  delete[] work2;
   delete[] tau;
 }
