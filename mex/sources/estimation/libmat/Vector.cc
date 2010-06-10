@@ -29,6 +29,7 @@ Vector::Vector(size_t size_arg) : size(size_arg)
 
 Vector::Vector(const Vector &arg) : size(arg.size)
 {
+  data = new double[size];
   memcpy(data, arg.data, size*sizeof(double));
 }
 
