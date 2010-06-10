@@ -25,23 +25,23 @@ int
 main(int argc, char **argv)
 {
 //BetaPrior bp( Prior::Beta, 0.1, 0.1, 0.1, 0.0, 1.0, 5.0, 1.0);
-  BetaPrior bp(0.1, 0.1, 0.1, 0.0, 1.0, 5.0, 1.0);
+  BetaPrior bp(0.1, 0.1, 0.0, 1.0, 5.0, 1.0);
   double pdf = bp.pdf(0.5);
   std::cout << "beta pdf of 5,1, 0.5: "  << std::setw(13) << pdf << std::endl;
   BetaPrior *bpp = new BetaPrior( //Prior::Beta,
-    0.1, 0.1, 0.1, 0.0, 1.0, 1.0, 5.0);
+    0.1, 0.1, 0.0, 1.0, 1.0, 5.0);
   Prior *pp = bpp;
   pdf = (*pp).pdf(0.1);
   std::cout << "Parent (Beta) pdf of 1,5, 0.1: "  << std::setw(13) << pdf << std::endl;
 
   GammaPrior *gpp = new GammaPrior( //Prior::Beta,
-    0.1, 0.1, 0.1, 0.0, 1.0, 1.0, 5.0);
+    0.1, 0.1, 0.0, 1.0, 1.0, 5.0);
   pp = gpp;
   pdf = (*pp).pdf(0.1);
   std::cout << "Parent (Gamma) pdf of 1,5, 0.1: "  << std::setw(13) << pdf << std::endl;
 
-  UniformPrior up(5, 5, 2, 1, 10, 20, 100);
-  std::cout << std::endl << "Uniform prior (5,5,2, 1,10,20,100): "  << std::endl;
+  UniformPrior up(5, 2, 1, 10, 20, 100);
+  std::cout << std::endl << "Uniform prior (5,2, 1,10,20,100): "  << std::endl;
   double ur, updf;
   for (int i = 0; i < 10; i++)
     {
@@ -50,8 +50,8 @@ main(int argc, char **argv)
       std::cout << "Uniform pdf of : "  << ur << " = " << updf << std::endl;
     }
 
-  GaussianPrior gp(5, 5, 2, 1, 10, 20, 100);
-  std::cout << std::endl << "Gaussian prior (5,5,2, 1,10,20,100): "  << std::endl;
+  GaussianPrior gp(5, 2, 1, 10, 20, 100);
+  std::cout << std::endl << "Gaussian prior (5,2, 1,10,20,100): "  << std::endl;
   for (int i = 0; i < 10; i++)
     {
       ur = gp.drand();
@@ -59,8 +59,8 @@ main(int argc, char **argv)
       std::cout << "Gaussian pdf of : "  << ur << " = " << updf << std::endl;
     }
 
-  UniformPrior up2(5, 5, 2, 1, 100, 20, 100);
-  std::cout << std::endl << "Uniform prior (5,5,2, 1,100,20,100): "  << std::endl;
+  UniformPrior up2(5, 2, 1, 100, 20, 100);
+  std::cout << std::endl << "Uniform prior (5,2, 1,100,20,100): "  << std::endl;
   for (int i = 0; i < 10; i++)
     {
       ur = up2.drand();
@@ -68,8 +68,8 @@ main(int argc, char **argv)
       std::cout << "Uniform pdf of : "  << ur << " = " << updf << std::endl;
     }
 
-  GaussianPrior gp2(5, 5, 2, 1, 100, 5, 2);
-  std::cout << std::endl << "Gaussian prior (5,5,2, 1,100,5,2): "  << std::endl;
+  GaussianPrior gp2(5, 2, 1, 100, 5, 2);
+  std::cout << std::endl << "Gaussian prior (5,2, 1,100,5,2): "  << std::endl;
   for (int i = 0; i < 10; i++)
     {
       ur = gp2.drand();
