@@ -66,8 +66,7 @@ public:
 
   virtual ~VDVEigDecomposition()
   {
-    if (work)
-      delete[] work;
+    delete[] work;
   };
   template <class Mat>
   void calculate(const Mat &H) throw(VDVEigException);
