@@ -47,13 +47,13 @@ public:
                      );
   virtual ~EstimatedParameter();
 
-  const enum pType ptype;
-  const size_t ID1;
-  const size_t ID2;
-  const double lower_bound;
-  const double upper_bound;
+  enum pType ptype;
+  size_t ID1;
+  size_t ID2;
+  double lower_bound;
+  double upper_bound;
   Prior* prior;
-  const std::vector<size_t> subSampleIDs;
+  std::vector<size_t> subSampleIDs;
 };
 
 #endif // !defined(D879C8AE_5B69_4fc3_83BD_FA5A99030ECF__INCLUDED_)

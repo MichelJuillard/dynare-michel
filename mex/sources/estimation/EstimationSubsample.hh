@@ -60,8 +60,8 @@ public:
   EstimationSubsample(size_t startPeriod, size_t endPeriod);
   virtual ~EstimationSubsample();
 
-  const size_t startPeriod;
-  const size_t endPeriod;
+  size_t startPeriod;
+  size_t endPeriod;
   /**
    * indices of all estimated xparam1 parameters valid for this period in the larger,
    * extended xparam1x vector passed  in.  from the gradient function will be added at a later stage of development
