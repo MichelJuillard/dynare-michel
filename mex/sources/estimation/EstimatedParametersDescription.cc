@@ -34,3 +34,14 @@ EstimatedParametersDescription::EstimatedParametersDescription(std::vector<Estim
 {
 }
 
+size_t
+EstimatedParametersDescription::getNumberOfPeriods() const
+{
+  size_t r = 0;
+  for (size_t i = 0; i < estSubsamples.size(); i++)
+    {
+      size_t r2 = estSubsamples[i].endPeriod + 1;
+      if (r2 > r)
+        r = r2;
+    }
+}

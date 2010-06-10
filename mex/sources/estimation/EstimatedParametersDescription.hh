@@ -49,6 +49,7 @@ public:
   EstimatedParametersDescription(std::vector<EstimationSubsample> &estSubsamples, std::vector<EstimatedParameter> &estParams);
   std::vector<EstimationSubsample> estSubsamples;
   std::vector<EstimatedParameter> estParams;
+  size_t getNumberOfPeriods() const;
 };
 
 #endif // !defined(E8F2C096_A301_42e8_80FF_A643291BF995__INCLUDED_)

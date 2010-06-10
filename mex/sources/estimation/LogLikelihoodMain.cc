@@ -34,8 +34,7 @@ LogLikelihoodMain::LogLikelihoodMain( //const Matrix &data_arg, Vector &deepPara
   : estSubsamples(estiParDesc.estSubsamples),
   logLikelihoodSubSample(dynamicDllFile, estiParDesc, n_endo, n_exo, zeta_fwrd_arg, zeta_back_arg, zeta_mixed_arg, zeta_static_arg, qz_criterium,
                          varobs, riccati_tol, lyapunov_tol, info_arg),
-  //deepParams(deepParams_arg),
-  vll(estSubsamples[estSubsamples.size()-1].endPeriod) // time dimension size of data
+    vll(estiParDesc.getNumberOfPeriods()) // time dimension size of data
 
 {
 
@@ -49,7 +48,7 @@ LogLikelihoodMain::~LogLikelihoodMain()
 double
 LogLikelihoodMain::compute(Matrix &steadyState, const Vector &estParams, Vector &deepParams, const MatrixConstView &data, Matrix &Q, Matrix &H, size_t start, int &info)
 {
-  for (size_t i = 1; i <= (size_t) estSubsamples.size(); ++i)
+  for (size_t i = 0; i < estSubsamples.size(); ++i)
     {
       VectorView vSteadyState = mat::get_col(steadyState, i);
 

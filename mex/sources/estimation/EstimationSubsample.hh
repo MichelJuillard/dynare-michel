@@ -53,7 +53,7 @@
  * class LogPosteriorDensity on as needed basis and updates all parameters (inc. H
  * and Q) when time slot xparam1 is supplied.
  *
- *
+ * Time indices follow C convention: first period has index 0.
  */
 class EstimationSubsample {
 public:
