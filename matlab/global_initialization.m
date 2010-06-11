@@ -63,8 +63,8 @@ options_.steadystate_partial = [];
 options_.ParamSubSet = 'None';
 
 % bvar-dsge
-options_.bvar_dsge = 0;
-options_.varlag = 4;
+options_.dsge_var = 0;
+options_.dsge_varlag = 4;
 
 % Optimization algorithm [6] gmhmaxlik
 options_.Opt6Iter = 2;
