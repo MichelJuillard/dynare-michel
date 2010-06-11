@@ -29,7 +29,6 @@
 
 class LogLikelihoodMain {
 private:
-  double logLikelihood;
   std::vector<EstimationSubsample> &estSubsamples; // reference to member of EstimatedParametersDescription
   LogLikelihoodSubSample logLikelihoodSubSample;
   Vector vll;  // vector of all KF step likelihoods
@@ -58,12 +57,6 @@ public:
   {
     return vll;
   };
-  double
-  getLogLikelihood()
-  {
-    return logLikelihood;
-  };
-
 };
 
 #endif // !defined(E126AEF5_AC28_400a_821A_3BCFD1BC4C22__INCLUDED_)

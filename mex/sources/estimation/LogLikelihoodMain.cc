@@ -48,6 +48,7 @@ LogLikelihoodMain::~LogLikelihoodMain()
 double
 LogLikelihoodMain::compute(Matrix &steadyState, const Vector &estParams, Vector &deepParams, const MatrixConstView &data, Matrix &Q, Matrix &H, size_t start, int &info)
 {
+  double logLikelihood = 0;
   for (size_t i = 0; i < estSubsamples.size(); ++i)
     {
       VectorView vSteadyState = mat::get_col(steadyState, i);
