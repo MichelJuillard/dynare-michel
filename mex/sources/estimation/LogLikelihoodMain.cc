@@ -34,8 +34,8 @@ LogLikelihoodMain::LogLikelihoodMain( //const Matrix &data_arg, Vector &deepPara
   : estSubsamples(estiParDesc.estSubsamples),
   logLikelihoodSubSample(dynamicDllFile, estiParDesc, n_endo, n_exo, zeta_fwrd_arg, zeta_back_arg, zeta_mixed_arg, zeta_static_arg, qz_criterium,
                          varobs, riccati_tol, lyapunov_tol, info_arg),
-    vll(estiParDesc.getNumberOfPeriods()) // time dimension size of data
-
+    vll(estiParDesc.getNumberOfPeriods()), // time dimension size of data
+    detrendedData(varobs.size(), estiParDesc.getNumberOfPeriods())
 {
 
 }
@@ -55,9 +55,12 @@ LogLikelihoodMain::compute(Matrix &steadyState, const Vector &estParams, Vector 
 
       MatrixConstView dataView(data, 0, estSubsamples[i].startPeriod,
                                data.getRows(), estSubsamples[i].endPeriod-estSubsamples[i].startPeriod+1);
+      MatrixView detrendedDataView(detrendedData, 0, estSubsamples[i].startPeriod,
+                                   data.getRows(), estSubsamples[i].endPeriod-estSubsamples[i].startPeriod+1);
+
       VectorView vllView(vll, estSubsamples[i].startPeriod, estSubsamples[i].endPeriod-estSubsamples[i].startPeriod+1);
       logLikelihood += logLikelihoodSubSample.compute(vSteadyState, dataView, estParams, deepParams,
-                                                      Q, H, vllView, info, start, i);
+                                                      Q, H, vllView, detrendedDataView, info, start, i);
     }
   return logLikelihood;
 };

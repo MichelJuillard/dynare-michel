@@ -39,7 +39,7 @@ public:
                          const std::vector<size_t> &varobs_arg, double riccati_tol_in, double lyapunov_tol, int &info);
 
   double compute(VectorView &steadyState, const MatrixConstView &dataView, const Vector &estParams, Vector &deepParams,
-                 Matrix &Q, Matrix &H, VectorView &vll, int &info,  size_t start, size_t period);
+                 Matrix &Q, Matrix &H, VectorView &vll, MatrixView &detrendedDataView, int &info,  size_t start, size_t period);
   virtual ~LogLikelihoodSubSample();
 
 private:

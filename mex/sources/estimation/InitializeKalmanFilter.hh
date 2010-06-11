@@ -50,10 +50,10 @@ public:
   virtual ~InitializeKalmanFilter();
   // initialise all KF matrices
   void initialize(VectorView &steadyState, const Vector &deepParams, Matrix &R, const Matrix &Q, Matrix &RQRt,
-                  Matrix &T, Matrix &Pstar, Matrix &Pinf, double &penalty, const MatrixConstView &dataView, Matrix &Y, int &info);
+                  Matrix &T, Matrix &Pstar, Matrix &Pinf, double &penalty, const MatrixConstView &dataView, MatrixView &detrendedDataView, int &info);
   // initialise parameter dependent KF matrices only but not Ps
   void initialize(VectorView &steadyState, const Vector &deepParams, Matrix &R, const Matrix &Q, Matrix &RQRt,
-                  Matrix &T, double &penalty, const MatrixConstView &dataView, Matrix &Y, int &info);
+                  Matrix &T, double &penalty, const MatrixConstView &dataView, MatrixView &detrendedDataView, int &info);
 
 private:
   const double lyapunov_tol;

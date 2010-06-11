@@ -44,12 +44,12 @@ LogLikelihoodSubSample::LogLikelihoodSubSample(const std::string &dynamicDllFile
 
 double
 LogLikelihoodSubSample::compute(VectorView &steadyState, const MatrixConstView &dataView, const Vector &estParams, Vector &deepParams,
-                                Matrix &Q, Matrix &H, VectorView &vll, int &info, size_t start, size_t period)
+                                Matrix &Q, Matrix &H, VectorView &vll, MatrixView &detrendedDataView, int &info, size_t start, size_t period)
 {
 
   updateParams(estParams, deepParams, Q, H, period);
   if (info == 0)
-    logLikelihood = kalmanFilter.compute(dataView, steadyState,  Q, H, deepParams, vll, start, period, penalty,  info);
+    logLikelihood = kalmanFilter.compute(dataView, steadyState,  Q, H, deepParams, vll, detrendedDataView, start, period, penalty,  info);
   //  else
   //    logLikelihood+=penalty;
 

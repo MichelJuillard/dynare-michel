@@ -73,18 +73,17 @@ KalmanFilter::compute_zeta_varobs_back_mixed(const std::vector<size_t> &zeta_bac
 double
 KalmanFilter::compute(const MatrixConstView &dataView, VectorView &steadyState,
                       const Matrix &Q, const Matrix &H, const Vector &deepParams,
-                      VectorView &vll, size_t start, size_t period, double &penalty, int &info)
+                      VectorView &vll, MatrixView &detrendedDataView,
+                      size_t start, size_t period, double &penalty, int &info)
 {
-  Matrix Y(dataView.getRows(), dataView.getCols());    // data
-
   if(period==0) // initialise all KF matrices
     initKalmanFilter.initialize(steadyState, deepParams, R, Q, RQRt, T, Pstar, Pinf,
-                              penalty, dataView, Y, info);
+                              penalty, dataView, detrendedDataView, info);
   else  // initialise parameter dependent KF matrices only but not Ps
     initKalmanFilter.initialize(steadyState, deepParams, R, Q, RQRt, T, 
-                              penalty, dataView, Y, info);
+                              penalty, dataView, detrendedDataView, info);
 
-  return filter(Y, H, vll, start, info);
+  return filter(detrendedDataView, H, vll, start, info);
 
 };
 
@@ -92,13 +91,13 @@ KalmanFilter::compute(const MatrixConstView &dataView, VectorView &steadyState,
  * 30:*
  */
 double
-KalmanFilter::filter(const Matrix &dataView,  const Matrix &H, VectorView &vll, size_t start, int &info)
+KalmanFilter::filter(const MatrixView &detrendedDataView,  const Matrix &H, VectorView &vll, size_t start, int &info)
 {
   double loglik=0.0, ll, logFdet, Fdet;
   size_t p = Finv.getRows();
 
   bool nonstationary = true;
-  for (size_t t = 0; t < dataView.getCols(); ++t)
+  for (size_t t = 0; t < detrendedDataView.getCols(); ++t)
     {
       if (nonstationary)
         {
@@ -138,7 +137,7 @@ KalmanFilter::filter(const Matrix &dataView,  const Matrix &H, VectorView &vll, 
         }
 
       // err= Yt - Za
-      MatrixConstView yt(dataView, 0, t, dataView.getRows(), 1); // current observation vector
+      MatrixConstView yt(detrendedDataView, 0, t, detrendedDataView.getRows(), 1); // current observation vector
       vt = yt;
       blas::gemm("N", "N", -1.0, Z, a_init, 1.0, vt);
       // at+1= T(at+ KFinv *err)

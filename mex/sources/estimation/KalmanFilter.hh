@@ -55,7 +55,8 @@ public:
 
   double compute(const MatrixConstView &dataView, VectorView &steadyState,
                  const Matrix &Q, const Matrix &H, const Vector &deepParams,
-                 VectorView &vll, size_t start, size_t period, double &penalty, int &info);
+                 VectorView &vll, MatrixView &detrendedDataView, size_t start, size_t period,
+                 double &penalty, int &info);
 
 private:
   const std::vector<size_t> zeta_varobs_back_mixed;
@@ -77,7 +78,7 @@ private:
   InitializeKalmanFilter initKalmanFilter; //Initialise KF matrices
 
   // Method
-  double filter(const Matrix &data,  const Matrix &H, VectorView &vll, size_t start, int &info);
+  double filter(const MatrixView &detrendedDataView,  const Matrix &H, VectorView &vll, size_t start, int &info);
 
 };
 

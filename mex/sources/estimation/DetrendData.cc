@@ -31,9 +31,9 @@ DetrendData::DetrendData(const bool INlogLinear) //, Vector& INtrendCoeff)
 };
 
 void
-DetrendData::detrend(const VectorView &SteadyState, const MatrixConstView &dataView, Matrix &Y)
+DetrendData::detrend(const VectorView &SteadyState, const MatrixConstView &dataView,
+                     MatrixView &detrendedDataView)
 {
-// dummy
-Y=dataView;
+  detrendedDataView = dataView;
 };
 

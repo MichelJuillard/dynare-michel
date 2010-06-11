@@ -32,6 +32,7 @@ private:
   std::vector<EstimationSubsample> &estSubsamples; // reference to member of EstimatedParametersDescription
   LogLikelihoodSubSample logLikelihoodSubSample;
   Vector vll;  // vector of all KF step likelihoods
+  Matrix detrendedData;
 
 public:
   virtual ~LogLikelihoodMain();

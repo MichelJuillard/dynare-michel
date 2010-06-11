@@ -59,10 +59,11 @@ InitializeKalmanFilter::InitializeKalmanFilter(const std::string &dynamicDllFile
 void
 InitializeKalmanFilter::initialize(VectorView &steadyState, const Vector &deepParams, Matrix &R,
                                    const Matrix &Q, Matrix &RQRt, Matrix &T, 
-                                   double &penalty, const MatrixConstView &dataView, Matrix &Y, int &info)
+                                   double &penalty, const MatrixConstView &dataView,
+                                   MatrixView &detrendedDataView, int &info)
 {
   modelSolution.compute(steadyState, deepParams, g_x, g_u);
-  detrendData.detrend(steadyState, dataView, Y);
+  detrendData.detrend(steadyState, dataView, detrendedDataView);
 
   setT(T, info);
   setRQR(R, Q, RQRt, info);
@@ -72,9 +73,10 @@ InitializeKalmanFilter::initialize(VectorView &steadyState, const Vector &deepPa
 void
 InitializeKalmanFilter::initialize(VectorView &steadyState, const Vector &deepParams, Matrix &R,
                                    const Matrix &Q, Matrix &RQRt, Matrix &T, Matrix &Pstar, Matrix &Pinf,
-                                   double &penalty, const MatrixConstView &dataView, Matrix &Y, int &info)
+                                   double &penalty, const MatrixConstView &dataView,
+                                   MatrixView &detrendedDataView, int &info)
 {
-  initialize(steadyState, deepParams, R, Q, RQRt, T, penalty, dataView, Y, info);
+  initialize(steadyState, deepParams, R, Q, RQRt, T, penalty, dataView, detrendedDataView, info);
   setPstar(Pstar, Pinf, T, RQRt, info);
 }
 
