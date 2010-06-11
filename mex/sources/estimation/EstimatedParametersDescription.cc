@@ -44,4 +44,5 @@ EstimatedParametersDescription::getNumberOfPeriods() const
       if (r2 > r)
         r = r2;
     }
+  return r;
 }
