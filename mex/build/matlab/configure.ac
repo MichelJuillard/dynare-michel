@@ -50,6 +50,9 @@ case ${host_os} in
     ;;
 esac
 
+CFLAGS="$CFLAGS -Wall"
+CXXFLAGS="$CXXFLAGS -Wall"
+
 AC_PROG_CC
 AC_PROG_CXX
 AC_PROG_RANLIB
