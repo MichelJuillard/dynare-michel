@@ -26,8 +26,9 @@ VDVEigDecomposition::VDVEigDecomposition(const Matrix &m) throw(VDVEigException)
   if (m.getRows() != m.getCols())
     throw(VDVEigException(info, "Matrix is not square in VDVEigDecomposition constructor"));
 
+  double tmpwork;
   dsyev("V", "U", &n, V.getData(), &lda, D.getData(), &tmpwork, &lwork, &info);
-  lwork = (int) tmpwork;
+  lwork = (lapack_int) tmpwork;
   work = new double[lwork];
   if (info < 0)
     throw(VDVEigException(info, "Internal error in VDVEigDecomposition constructor"));

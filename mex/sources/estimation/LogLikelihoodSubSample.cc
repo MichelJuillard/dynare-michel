@@ -61,7 +61,7 @@ void
 LogLikelihoodSubSample::updateParams(const Vector &estParams, Vector &deepParams,
                                      Matrix &Q, Matrix &H, size_t period)
 {
-  size_t i, j, k, k1, k2;
+  size_t i, k, k1, k2;
   int test;
   bool found;
   std::vector<size_t>::const_iterator it;
@@ -79,7 +79,7 @@ LogLikelihoodSubSample::updateParams(const Vector &estParams, Vector &deepParams
           switch (estiParDesc.estParams[i].ptype)
             {
             case EstimatedParameter::shock_SD:
-              k = (int) estiParDesc.estParams[i].ID1;
+              k = estiParDesc.estParams[i].ID1;
               Q(k, k) = estParams(i)*estParams(i);
               break;
 
@@ -87,7 +87,7 @@ LogLikelihoodSubSample::updateParams(const Vector &estParams, Vector &deepParams
 #ifdef DEBUG
               mexPrintf("Setting of H var_endo\n");
 #endif
-              k = (int) estiParDesc.estParams[i].ID1;
+              k = estiParDesc.estParams[i].ID1;
               H(k, k) = estParams(i)*estParams(i);
               break;
 
@@ -95,8 +95,8 @@ LogLikelihoodSubSample::updateParams(const Vector &estParams, Vector &deepParams
 #ifdef DEBUG
               mexPrintf("Setting of Q corrx\n");
 #endif
-              k1 = (int) estiParDesc.estParams[i].ID1;
-              k2 = (int) estiParDesc.estParams[i].ID2;
+              k1 = estiParDesc.estParams[i].ID1;
+              k2 = estiParDesc.estParams[i].ID2;
               Q(k1, k2) = estParams(i)*sqrt(Q(k1, k1)*Q(k2, k2));
               Q(k2, k1) = Q(k1, k2);
               //   [CholQ,testQ] = chol(Q);
@@ -131,8 +131,8 @@ LogLikelihoodSubSample::updateParams(const Vector &estParams, Vector &deepParams
 #ifdef DEBUG
               mexPrintf("Setting of H corrn\n");
 #endif
-              k1 = (int) estiParDesc.estParams[i].ID1;
-              k2 = (int) estiParDesc.estParams[i].ID2;
+              k1 = estiParDesc.estParams[i].ID1;
+              k2 = estiParDesc.estParams[i].ID2;
               //      H(k1,k2) = xparam1(i)*sqrt(H(k1,k1)*H(k2,k2));
               //      H(k2,k1) = H(k1,k2);
               H(k1, k2) = estParams(i)*sqrt(H(k1, k1)*H(k2, k2));
@@ -168,7 +168,7 @@ LogLikelihoodSubSample::updateParams(const Vector &estParams, Vector &deepParams
 
             //if estim_params_.np > 0  // i.e. num of deep parameters >0
             case EstimatedParameter::deepPar:
-              k = (int) estiParDesc.estParams[i].ID1;
+              k = estiParDesc.estParams[i].ID1;
               deepParams(k) = estParams(i);
               break;
             default:

@@ -34,7 +34,6 @@ class VDVEigDecomposition
 {
   lapack_int lda, n;
   lapack_int lwork, info;
-  double tmpwork;
   double *work;
   bool converged;
   Matrix V;
@@ -100,12 +99,14 @@ VDVEigDecomposition::calculate(const Mat &m) throw(VDVEigException)
 
   if (m.getCols() != (size_t) n  || m.getLd() != (size_t) lda)
     throw(VDVEigException(info, "Matrix not matching VDVEigDecomposition class"));
+
+  double tmpwork;
   lapack_int tmplwork = -1;
   V = m;
   dsyev("V", "U", &n, V.getData(), &lda, D.getData(), &tmpwork, &tmplwork, &info);
-  if (lwork < tmpwork)
+  if (lwork < (lapack_int) tmpwork)
     {
-      lwork = tmpwork;
+      lwork = (lapack_int) tmpwork;
       delete[] work;
       work = new double[lwork];
     }
