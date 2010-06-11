@@ -5,15 +5,18 @@ endif
 endif
 
 EXTRA_DIST = \
+	Matrix.hh \
+	Matrix.cc \
+	Vector.hh \
+	Vector.cc \
 	BlasBindings.hh \
 	DiscLyapFast.hh \
 	GeneralizedSchurDecomposition.cc \
 	GeneralizedSchurDecomposition.hh \
+	LapackBindings.hh \
 	LUSolver.cc \
 	LUSolver.hh \
-	Matrix.cc \
-	Matrix.hh \
 	QRDecomposition.cc \
 	QRDecomposition.hh \
-	Vector.cc \
-	Vector.hh
+	VDVEigDecomposition.cc \
+	VDVEigDecomposition.hh

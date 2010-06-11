@@ -11,19 +11,25 @@ EXTRA_DIST = \
 	DecisionRules.hh \
 	DetrendData.cc \
 	DetrendData.hh \
+	EstimatedParameter.cc \
 	EstimatedParameter.hh \
+	EstimatedParametersDescription.cc \
 	EstimatedParametersDescription.hh \
+	EstimationSubsample.cc \
 	EstimationSubsample.hh \
 	InitializeKalmanFilter.cc \
 	InitializeKalmanFilter.hh \
 	KalmanFilter.cc \
 	KalmanFilter.hh \
-	LogLikelihoodMain.hh \
 	LogLikelihoodSubSample.cc \
 	LogLikelihoodSubSample.hh \
+	LogLikelihoodMain.hh \
+	LogLikelihoodMain.cc \
 	ModelSolution.cc \
 	ModelSolution.hh \
+	Prior.cc \
 	Prior.hh \
+	loglikelihood.cc \
 	utils/dynamic_dll.cc \
 	utils/dynamic_dll.hh \
 	utils/ts_exception.h

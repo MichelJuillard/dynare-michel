@@ -36,3 +36,22 @@ Prior::~Prior()
 
 }
 
+Prior *
+Prior::constructPrior(pShape shape, double mean, double standard, double lower_bound, double upper_bound, double fhp, double shp)
+{
+  switch (shape)
+    {
+    case Beta:
+      return new BetaPrior(mean, standard, lower_bound, upper_bound, fhp, shp);
+    case Gamma:
+      return new GammaPrior(mean, standard, lower_bound, upper_bound, fhp, shp);
+    case Gaussian:
+      return new GaussianPrior(mean, standard, lower_bound, upper_bound, fhp, shp);
+    case Inv_gamma_1:
+      return new InvGamma1_Prior(mean, standard, lower_bound, upper_bound, fhp, shp);
+    case Uniform:
+      return new UniformPrior(mean, standard, lower_bound, upper_bound, fhp, shp);
+    case Inv_gamma_2:
+      return new InvGamma2_Prior(mean, standard, lower_bound, upper_bound, fhp, shp);
+    }
+}

@@ -87,6 +87,7 @@ public:
     return 0.0;
   };
 
+  static Prior *constructPrior(pShape shape, double mean, double standard, double lower_bound, double upper_bound, double fhp, double shp);
 };
 
 struct BetaPrior : public Prior

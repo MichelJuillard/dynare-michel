@@ -1,0 +1,53 @@
+vpath %.cc $(top_srcdir)/../../sources/estimation $(top_srcdir)/../../sources/estimation/libmat $(top_srcdir)/../../sources/estimation/utils
+vpath %.hh $(top_srcdir)/../../sources/estimation $(top_srcdir)/../../sources/estimation/libmat
+
+CPPFLAGS += -I$(top_srcdir)/../../sources/estimation/libmat -I$(top_srcdir)/../../sources/estimation/utils
+
+noinst_PROGRAMS = loglikelihood
+
+loglikelihood_LDADD = $(LIBADD_DLOPEN)
+
+MAT_SRCS = \
+	Matrix.hh \
+	Matrix.cc \
+	Vector.hh \
+	Vector.cc \
+	BlasBindings.hh \
+	DiscLyapFast.hh \
+	GeneralizedSchurDecomposition.cc \
+	GeneralizedSchurDecomposition.hh \
+	LapackBindings.hh \
+	LUSolver.cc \
+	LUSolver.hh \
+	QRDecomposition.cc \
+	QRDecomposition.hh \
+	VDVEigDecomposition.cc \
+	VDVEigDecomposition.hh
+
+nodist_loglikelihood_SOURCES = \
+	$(MAT_SRCS) \
+	DecisionRules.cc \
+	DecisionRules.hh \
+	DetrendData.cc \
+	DetrendData.hh \
+	EstimatedParameter.cc \
+	EstimatedParameter.hh \
+	EstimatedParametersDescription.cc \
+	EstimatedParametersDescription.hh \
+	EstimationSubsample.cc \
+	EstimationSubsample.hh \
+	InitializeKalmanFilter.cc \
+	InitializeKalmanFilter.hh \
+	KalmanFilter.cc \
+	KalmanFilter.hh \
+	LogLikelihoodSubSample.cc \
+	LogLikelihoodSubSample.hh \
+	LogLikelihoodMain.hh \
+	LogLikelihoodMain.cc \
+	ModelSolution.cc \
+	ModelSolution.hh \
+	Prior.cc \
+	Prior.hh \
+	dynamic_dll.cc \
+	dynamic_dll.hh \
+	loglikelihood.cc

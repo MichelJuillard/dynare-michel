@@ -102,6 +102,7 @@ AC_CONFIG_FILES([Makefile
                  bytecode/Makefile
                  k_order_perturbation/Makefile
                  dynare_simul_/Makefile
-                 swz/Makefile])
+                 swz/Makefile
+                 loglikelihood/Makefile])
 
 AC_OUTPUT
