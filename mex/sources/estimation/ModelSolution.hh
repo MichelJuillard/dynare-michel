@@ -54,6 +54,7 @@ private:
   Matrix Mx;
   DecisionRules decisionRules;
   DynamicModelDLL dynamicDLLp;
+  Vector llXsteadyState;
   //Matrix jacobian;
   void ComputeModelSolution( VectorView& steadyState, const Vector& deepParams, 	Matrix& ghx, Matrix& ghu ) throw (DecisionRules::BlanchardKahnException, GeneralizedSchurDecomposition::GSDException);
   void ComputeSteadyState( VectorView& steadyState, const Vector& deepParams);

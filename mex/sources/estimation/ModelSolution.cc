@@ -37,7 +37,8 @@ ModelSolution::ModelSolution(const std::string& dynamicDllFile,  size_t n_endo_a
                              n_jcols (n_exo+n_endo+ zeta_back_arg.size() /*nsPred*/ + zeta_fwrd_arg.size() /*nsForw*/ +2*zeta_mixed_arg.size()), 
                              jacobian (n_endo,n_jcols), residual(n_endo), Mx(2,n_exo),
                                decisionRules ( n_endo_arg, n_exo_arg, zeta_fwrd_arg, zeta_back_arg, zeta_mixed_arg, zeta_static_arg, INqz_criterium),
-                               dynamicDLLp(dynamicDllFile, n_endo,  n_jcols,  /* nMax_lag= */ 1,  n_exo)
+                               dynamicDLLp(dynamicDllFile, n_endo,  n_jcols,  /* nMax_lag= */ 1,  n_exo),
+                               llXsteadyState(n_jcols-n_exo)
 {
   Mx.setAll(0.0);
   jacobian.setAll(0.0);
@@ -66,8 +67,6 @@ void
 ModelSolution::ComputeModelSolution(VectorView &steadyState, const Vector& deepParams, Matrix& ghx, Matrix& ghu) throw (DecisionRules::BlanchardKahnException, GeneralizedSchurDecomposition::GSDException)
 {
   // set extended Steady State
-
-  Vector llXsteadyState(n_jcols-n_exo);
 
   for (size_t i = 0; i < zeta_back_mixed.size(); i++)
     llXsteadyState(i) = steadyState(zeta_back_mixed[i]);
