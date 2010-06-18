@@ -17,6 +17,7 @@ OCTAVE_MODS = \
 	example1_varexo_det.mod \
 	predetermined_variables.mod \
 	fs2000_ssfile.mod \
+	comments.mod \
 	block_bytecode/fs2000_simk.mod \
 	block_bytecode/fs2000_lu.mod \
 	block_bytecode/fs2000_bicgstab.mod \
