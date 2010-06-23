@@ -1,17 +1,17 @@
-// This file replicates the estimation of the CIA model from 
-// Frank Schorfheide (2000) "Loss function-based evaluation of DSGE models" 
+// This file replicates the estimation of the CIA model from
+// Frank Schorfheide (2000) "Loss function-based evaluation of DSGE models"
 // Journal of  Applied Econometrics, 15, 645-670.
 // the data are the ones provided on Schorfheide's web site with the programs.
 // http://www.econ.upenn.edu/~schorf/programs/dsgesel.ZIP
 // You need to have fsdat.m in the same directory as this file.
-// This file replicates: 
+// This file replicates:
 // -the posterior mode as computed by Frank's Gauss programs
 // -the parameter mean posterior estimates reported in the paper
 // -the model probability (harmonic mean) reported in the paper
 // This file was tested with dyn_mat_test_0218.zip
 // the smooth shocks are probably stil buggy
 //
-// The equations are taken from J. Nason and T. Cogley (1994) 
+// The equations are taken from J. Nason and T. Cogley (1994)
 // "Testing the implications of long-run neutrality for monetary business
 // cycle models" Journal of Applied Econometrics, 9, S37-S70.
 // Note that there is an initial minus sign missing in equation (A1), p. S63.
@@ -20,10 +20,7 @@
 
 var m P c e W R k d n l Y_obs P_obs y dA;
 varexo e_a e_m;
-
 parameters alp bet gam mst rho psi del;
-
-
 
 model;
 dA = exp(gam+e_a);
@@ -68,9 +65,8 @@ end;
 
 steady;
 
-
 estimated_params;
-alp, beta_pdf, 0.356, 0.02; 
+alp, beta_pdf, 0.356, 0.02;
 bet, beta_pdf, 0.993, 0.002;
 gam, normal_pdf, 0.0085, 0.003;
 mst, normal_pdf, 1.0002, 0.007;
@@ -80,7 +76,6 @@ del, beta_pdf, 0.01, 0.005;
 stderr e_a, inv_gamma_pdf, 0.035449, inf;
 stderr e_m, inv_gamma_pdf, 0.008862, inf;
 end;
-
 
 estimation(datafile=fsdat,nobs=192,loglinear,mh_replic=2000,
 	mode_compute=4,mh_nblocks=2,mh_drop=0.45,mh_jscale=0.65);
