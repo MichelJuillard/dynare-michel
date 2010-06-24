@@ -228,8 +228,6 @@ end
 
 % END first parallel section!
 
-
-
 if nosaddle
    disp(['PosteriorIRF :: Percentage of discarded posterior draws = ' num2str(nosaddle/(B+nosaddle))]) 
 end
@@ -248,8 +246,6 @@ NumberOfIRFfiles_dsge = length(IRF_DSGEs);
 
 IRF_BVARDSGEs = dir([MhDirectoryName filesep M_.fname '_IRF_BVARDSGEs*.mat']);
 NumberOfIRFfiles_dsgevar = length(IRF_BVARDSGEs);
-
-
 
 MeanIRF = zeros(options_.irf,nvar,M_.exo_nbr);
 MedianIRF = zeros(options_.irf,nvar,M_.exo_nbr);
