@@ -225,7 +225,7 @@ end;}\\
 We add the following commands to ask Dynare to run a basic estimation of our model:\\
 \\
 \texttt{estimation(datafile=fsdat,nobs=192,loglinear,mh\_replic=2000,\\
-mode\_compute=4,mh\_nblocks=2,mh\_drop=0.45,mh\_jscale=0.65);}\\
+mode\_compute=6,mh\_nblocks=2,mh\_drop=0.45,mh\_jscale=0.65);}\\
 
 \textsf{\textbf{NOTE!}} As mentioned earlier, we need to instruct Dynare to log-linearize our model, since it contains non-linear equations in non-stationary variables. A simple linearization would fail as these variables do not have a steady state. Fortunately, taking the log of the equations involving non-stationary variables does the job of linearizing them.\\
 
@@ -234,19 +234,19 @@ We have seen each part of the .mod separately; it's now time to get a picture of
 \\
 \texttt{var m P c e W R k d n l Y\_obs P\_obs y dA; \\
 varexo e\_a e\_m;\\
-\\
-parameters alp, bet, gam, mst, rho, psi, del;
+parameters alp, bet, gam, mst, rho, psi, del;\\
 \\
 model;\\
 dA = exp(gam+e\_a);\\
 log(m) = (1-rho)*log(mst) + rho*log(m(-1))+e\_m;\\
--P/(c(+1)*P(+1)*m)+bet*P(+1)*(alp*exp(-alp*(gam+log(e(+1))))*k\textasciicircum (alp-1)\\
-*n(+1)\textasciicircum (1-alp)+(1-del)*exp(-(gam+log(e(+1)))))/(c(+2)*P(+2)*m(+1))=0;\\
+-P/(c(+1)*P(+1)*m)+bet*P(+1)*(alp*exp(-alp*(gam+log(e(+1))))\\
+*k\textasciicircum (alp-1)*n(+1)\textasciicircum (1-alp)+(1-del)\\
+*exp(-(gam+log(e(+1)))))/(c(+2)*P(+2)*m(+1))=0;\\
 W = l/n;\\
 -(psi/(1-psi))*(c*P/(1-n))+l/n = 0;\\
 R = P*(1-alp)*exp(-alp*(gam+e\_a))*k(-1)\textasciicircum alp*n\textasciicircum (-alp)/W;\\
-1/(c*P)-bet*P*(1-alp)*exp(-alp*(gam+e\_a))*k(-1)\textasciicircum alp*n\textasciicircum (1-alp)/(m*l*c(+1)*P(+1)) = 0;\\
-c+k = exp(-alp*(gam+e\_a))*k(-1)\textasciicircum alp*n\textasciicircum (1-alp)+(1-del)*exp(-(gam+e\_a))*k(-1);\\
+1/(c*P)-bet*P*(1-alp)*exp(-alp*(gam+e\_a))*k(-1)\textasciicircum alp*n\textasciicircum (1-alp)/\\(m*l*c(+1)*P(+1)) = 0;\\
+c+k = exp(-alp*(gam+e\_a))*k(-1)\textasciicircum alp*n\textasciicircum (1-alp)+(1-del)\\*exp(-(gam+e\_a))*k(-1);\\
 P*c = m;\\
 m-1+d = l;\\
 e = exp(e\_a);\\
@@ -262,7 +262,7 @@ P\_obs (log(mst)-gam);\\
 Y\_obs (gam);\\
 end;\\
 \\
-unit\_root\_vars = P\_obs Y\_obs;\\
+unit\_root\_vars P\_obs Y\_obs;\\
 \\
 initval;\\
 k = 6;\\
@@ -298,7 +298,7 @@ stderr e\_m, inv\_gamma\_pdf, 0.008862, inf;\\
 end;\\
 \\
 estimation(datafile=fsdat,nobs=192,loglinear,mh\_replic=2000,\\
-mode\_compute=4,mh\_nblocks=2,mh\_drop=0.45,mh\_jscale=0.65);}\\
+mode\_compute=6,mh\_nblocks=2,mh\_drop=0.45,mh\_jscale=0.65);}\\
 \\
 
 \subsection{Summing it up}

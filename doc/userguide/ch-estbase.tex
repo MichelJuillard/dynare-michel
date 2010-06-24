@@ -35,7 +35,7 @@ end;}\\
 \section{Declaring observable variables}
 This should not come as a surprise. Dynare must know which variables are observable for the estimation procedure. \textsf{\textbf{NOTE!}} These variables must be available in the data file, as explained in section \ref{sec:estimate} below. For the moment, we write:\\
 \\
-\texttt{varobs Y;}\\
+\texttt{varobs y;}\\
 
 \section{Specifying the steady state} \label{sec:ssest}
 Before Dynare estimates a model, it first linearizes it around a steady state. Thus, a steady state must exist for the model and although Dynare can calculate it, we must give it a hand by declaring approximate values for the steady state. This is just as explained in details and according to the same syntax outlined in chapter \ref{ch:solbase}, covering the \texttt{initval}, \texttt{steady} and \texttt{check} commands. In fact, as this chapter uses the same model as that outlined in chapter \ref{ch:solbase}, the steady state block will look exactly the same.\\
@@ -138,7 +138,8 @@ displayed). Actually seeing if the various blocks of Metropolis-Hastings runs co
 Finally, coming back to our example, we could choose a standard option:\\
 \\
 \texttt{estimation(datafile=simuldataRBC,nobs=200,first\_obs=500,\\
-mh\_replic=2000,mh\_nblocks=2,mh\_drop=0.45,mh\_jscale=0.8); }\\
+mh\_replic=2000,mh\_nblocks=2,mh\_drop=0.45,mh\_jscale=0.8,\\
+mode\_compute=6); }\\
 
 This ends our description of the .mod file.
 
@@ -147,7 +148,6 @@ To summarize and to get a complete perspective on our work so far, here is the c
 \\
 \texttt{var y c k i l y\_l w r  z;\\
 varexo e;\\
-\\
 parameters beta psi delta alpha rho epsilon;\\
 \\
 model;\\
@@ -162,7 +162,7 @@ model;\\
   z = rho*z(-1)+e;\\
 end;\\
 \\
-varobs Y;\\
+varobs y;\\
 \\
 initval;\\
   k = 9;\\
@@ -175,7 +175,6 @@ initval;\\
 end;\\
 \\
 steady;\\
-\\
 check;\\
 \\
 estimated\_params;\\
@@ -189,7 +188,8 @@ stderr e, inv\_gamma\_pdf, 0.01, inf;\\
 end;\\
 \\
 estimation(datafile=simuldataRBC,nobs=200,first\_obs=500,\\
-mh\_replic=2000,mh\_nblocks=2,mh\_drop=0.45,mh\_jscale=0.8); }
+mh\_replic=2000,mh\_nblocks=2,mh\_drop=0.45,mh\_jscale=0.8,\\
+mode\_compute=6); }
 \\
 
 

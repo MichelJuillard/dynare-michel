@@ -452,13 +452,14 @@ For completion's sake, and for the pleasure of seeing our work bear its fruits, 
 
 \texttt{var y c k i l y\_l w r  z;\\
 varexo e;\\
-parameters beta psi delta alpha rho sigma epsilon;\\
+parameters beta psi delta alpha rho gamma sigma epsilon;\\
+\\
 alpha   = 0.33;\\
 beta    = 0.99;\\
 delta   = 0.023;\\
 psi     = 1.75;\\
-rho     = 0.95; \\ 
-sigma   = (0.007\/(1-alpha));\\
+rho     = 0.95;\\
+sigma   = (0.007/(1-alpha));\\
 epsilon = 10;\\
 \\
 model;\\
@@ -475,23 +476,22 @@ end;\\
 \\
 initval;\\
   k = 9;\\
-  c = 0.7;\\
+  c = 0.76;\\
   l = 0.3;\\
-  w = 2.0;\\
-  r = 0;\\
-  z = 0; \\
+  w = 2.07;\\
+  r = 0.03;\\
+  z = 0;\\
   e = 0;\\
 end;\\
 \\
 steady;\\
-\\
 check;\\
 \\
 shocks;\\
 var e = sigma\textasciicircum 2;\\
 end;\\
 \\
-stoch\_simul(periods=2100);}\\
+stoch\_simul(periods=2100);}
 
 \subsection{The deterministic model (case of temporary shock)}
 
@@ -502,7 +502,7 @@ alpha   = 0.33;\\
 beta    = 0.99;\\
 delta   = 0.023;\\
 psi     = 1.75;\\
-sigma   = (0.007\/(1-alpha));\\
+sigma   = (0.007/(1-alpha));\\
 epsilon = 10;\\
 \\
 model;\\
@@ -530,7 +530,7 @@ steady;\\
 check;\\
 \\
 shocks;\\
-var z;
+var z;\\
 periods 1:9;\\
 values 0.1;\\
 end;\\
