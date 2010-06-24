@@ -1,13 +1,6 @@
-{\rtf1\mac\ansicpg10000\cocoartf824\cocoasubrtf420
-{\fonttbl\f0\fswiss\fcharset77 Helvetica;}
-{\colortbl;\red255\green255\blue255;}
-\paperw11900\paperh16840\margl1440\margr1440\vieww9000\viewh8400\viewkind0
-\pard\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803\ql\qnatural\pardirnatural
-
-\f0\fs24 \cf0 // example 1 from Collard's guide to Dynare
+// example 1 from Collard's guide to Dynare
 var y, c, k, a, h, b;
-varexo e,u;
-
+varexo e, u;
 parameters beta, rho, alpha, delta, theta, psi, tau;
 
 alpha = 0.36;
@@ -48,4 +41,3 @@ var e, u = phi*0.009*0.009;
 end;
 
 stoch_simul(periods=2100);
-}

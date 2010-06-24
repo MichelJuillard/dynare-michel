@@ -40,6 +40,4 @@ shocks;
 var e = sigma^2;
 end;
 
-steady;
-
 stoch_simul(periods=2100);
