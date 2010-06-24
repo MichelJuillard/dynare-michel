@@ -148,10 +148,10 @@ while notsteady && (t<smpl)
             K      = Pstar*ZZ'*iF;
             a      = T*(a+K*v); 
             Pstar  = T*(Pstar-K*ZZ*Pstar)*T'+QQ;
-        end
-        if t>no_more_missing_observations
-            notsteady = max(max(abs(K-oldK)))>riccati_tol;
-            oldK = K;
+            if t>no_more_missing_observations
+                notsteady = max(abs(K(:)-oldK))>riccati_tol;
+                oldK = K(:);
+            end        
         end
     end
 end

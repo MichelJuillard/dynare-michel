@@ -90,10 +90,10 @@ while notsteady & t<smpl
             K      = P(:,MF)*iF;
             a      = T*(a+K*v);
             P      = T*(P-K*P(MF,:))*transpose(T)+QQ;
-        end
-        if t>no_more_missing_observations
-            notsteady = max(max(abs(K-oldK)))>riccati_tol;
-            oldK = K;
+            if t>no_more_missing_observations
+                notsteady = max(abs(K(:)-oldK))>riccati_tol;
+                oldK = K(:);
+            end
         end
     end
 end

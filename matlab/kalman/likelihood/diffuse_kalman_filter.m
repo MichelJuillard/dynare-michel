@@ -105,7 +105,6 @@ while notsteady && (t<smpl)
     t = t+1;
     v = Y(:,t)-Z*a;
     F = Z*Pstar*Z' + H;
-    oldPstar  = Pstar;
     dF = det(F);
     if rcond(F) < kalman_tol
         if ~all(abs(F(:))<kalman_tol)
@@ -121,9 +120,9 @@ while notsteady && (t<smpl)
         K      = Pstar*Z'*iF;
         a      = T*(a+K*v);
         Pstar  = T*(Pstar-K*Z*Pstar)*T'+QQ;
+        notsteady = max(abs(K(:)-oldK))>riccati_tol;
+        oldK = K(:);
     end
-    notsteady = ~(max(max(abs(K-oldK)))<riccati_tol);
-    oldK = K;
 end
 
 if F_singular == 1

@@ -74,8 +74,8 @@ while notsteady & t<smpl
         K      = P(:,mf)*iF;
         a      = T*(a+K*v);
         P      = T*(P-K*P(mf,:))*transpose(T)+QQ;
-        notsteady = max(max(abs(K-oldK))) > riccati_tol;
-        oldK = K;
+        notsteady = max(abs(K(:)-oldK)) > riccati_tol;
+        oldK = K(:);
     end
 end
 
