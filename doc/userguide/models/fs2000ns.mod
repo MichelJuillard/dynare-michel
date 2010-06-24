@@ -63,6 +63,10 @@ y = 0.6;
 dA = exp(gam);
 end;
 
+// the above is really only useful if you want to do a stoch_simul
+// of your model, since the estimation will use the Matlab
+// steady state file also provided and discussed above.
+
 steady;
 
 estimated_params;
