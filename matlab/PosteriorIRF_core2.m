@@ -54,6 +54,9 @@ tit=myinputs.tit;
 nn=myinputs.nn;
 MAX_nirfs_dsgevar=myinputs.MAX_nirfs_dsgevar;
 HPDIRF=myinputs.HPDIRF;
+HPDIRFdsgevar=myinputs.HPDIRFdsgevar;
+MeanIRFdsgevar=myinputs.MeanIRFdsgevar;
+
 varlist=myinputs.varlist;
 MaxNumberOfPlotPerFigure=myinputs.MaxNumberOfPlotPerFigure;
 

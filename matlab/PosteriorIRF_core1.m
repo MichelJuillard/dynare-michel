@@ -42,8 +42,6 @@ function myoutput=PosteriorIRF_core1(myinputs,fpar,npar,whoiam, ThisMatlab)
 
 global options_ estim_params_ oo_ M_ bayestopt_
 
-
-
 if nargin<4,
     whoiam=0;
 end
@@ -59,6 +57,15 @@ nosaddle=myinputs.nosaddle;
 type=myinputs.type;
 if ~strcmpi(type,'prior'),
     x=myinputs.x;
+end
+
+if options_.dsge_var
+    gend=myinputs.gend;
+    nvobs=myinputs.nvobs;
+    NumberOfParametersPerEquation = myinputs.NumberOfParametersPerEquation;
+    NumberOfLags = myinputs.NumberOfLags;
+    NumberOfLagsTimesNvobs = myinputs.NumberOfLagsTimesNvobs;
+    Companion_matrix = myinputs.Companion_matrix;
 end
 
 nvar=myinputs.nvar;
@@ -123,23 +130,18 @@ if whoiam
    NumberOfIRFfiles_dsgevar=NumberOfIRFfiles_dsgevar(whoiam);
 end
 
- while fpar<npar % Parallel 'while'!!!
-   
+while fpar<npar % Parallel 'while'!!!
     fpar = fpar + 1;
     irun = irun+1;
     irun2 = irun2+1;
-    if strcmpi(type,'prior')
-       
-         deep = GetOneDraw(type);
-       
+    if strcmpi(type,'prior')   
+        deep = GetOneDraw(type);
     else
         deep = x(fpar,:);
     end
     stock_param(irun2,:) = deep;  
     set_parameters(deep);
-    [dr,info] = resol(oo_.steady_state,0);
- 
-    
+    [dr,info] = resol(oo_.steady_state,0); 
     if info(1)
         nosaddle = nosaddle + 1;
         fpar = fpar - 1;
@@ -176,8 +178,7 @@ end
     end
     if MAX_nirfs_dsgevar
         IRUN = IRUN+1;
-        %tmp_dsgevar = zeros(options_.irf,nvobs*M_.exo_nbr);
-        [fval,cost_flag,info,PHI,SIGMAu,iXX] =  DsgeVarLikelihood(deep(fpar,:)',gend);
+        [fval,cost_flag,info,PHI,SIGMAu,iXX] =  DsgeVarLikelihood(deep',gend);
         dsge_prior_weight = M_.params(strmatch('dsge_prior_weight',M_.param_names));
         DSGE_PRIOR_WEIGHT = floor(gend*(1+dsge_prior_weight));
         SIGMA_inv_upper_chol = chol(inv(SIGMAu*gend*(dsge_prior_weight+1))); 
@@ -194,15 +195,7 @@ end
             explosive_var = any(abs(eig(Companion_matrix))>1.000000001);
         end
         % Get the mean 
-% $$$         if options_.noconstant
-            mu = zeros(1,nvobs); 
-% $$$         else
-% $$$             AA = eye(nvobs);
-% $$$             for lag=1:NumberOfLags
-% $$$                 AA = AA-PHI_draw((lag-1)*nvobs+1:lag*nvobs,:);
-% $$$             end
-% $$$             mu = transpose(AA\transpose(PHI_draw(end,:)));
-% $$$         end
+        mu = zeros(1,nvobs); 
         % Get rotation
         if dsge_prior_weight > 0
             Atheta(oo_.dr.order_var,M_.exo_names_orig_ord) = oo_.dr.ghu*sqrt(M_.Sigma_e);
@@ -234,7 +227,7 @@ end
                      int2str(NumberOfIRFfiles_dsgevar) '.mat stock_irf_bvardsge;'];,
             eval(['save ' instr]);
             if RemoteFlag==1,
-            OutputFileName_bvardsge = [OutputFileName_bvardsge; {[MhDirectoryName filesep], [M_.fname '_irf_bvardsge' int2str(NumberOfIRFfiles_dsgevar) '.mat']}];
+                OutputFileName_bvardsge = [OutputFileName_bvardsge; {[MhDirectoryName filesep], [M_.fname '_irf_bvardsge' int2str(NumberOfIRFfiles_dsgevar) '.mat']}];
             end
             NumberOfIRFfiles_dsgevar = NumberOfIRFfiles_dsgevar+1; 
             IRUN =0;
@@ -251,14 +244,14 @@ end
                 eval(['save ' instr]);
                 NumberOfIRFfiles_dsgevar = NumberOfIRFfiles_dsgevar+1;
                 if RemoteFlag==1,
-                OutputFileName_bvardsge = [OutputFileName_bvardsge; {[MhDirectoryName filesep], [M_.fname '_irf_bvardsge' int2str(NumberOfIRFfiles_dsgevar) '.mat']}];
+                    OutputFileName_bvardsge = [OutputFileName_bvardsge; {[MhDirectoryName filesep], [M_.fname '_irf_bvardsge' int2str(NumberOfIRFfiles_dsgevar) '.mat']}];
                 end
                 irun = 0;
             end
         end
         save([MhDirectoryName '/' M_.fname '_irf_dsge' int2str(NumberOfIRFfiles_dsge) '.mat'],'stock_irf_dsge');
         if RemoteFlag==1,
-        OutputFileName_dsge = [OutputFileName_dsge; {[MhDirectoryName filesep], [M_.fname '_irf_dsge' int2str(NumberOfIRFfiles_dsge) '.mat']}];
+            OutputFileName_dsge = [OutputFileName_dsge; {[MhDirectoryName filesep], [M_.fname '_irf_dsge' int2str(NumberOfIRFfiles_dsge) '.mat']}];
         end        
         NumberOfIRFfiles_dsge = NumberOfIRFfiles_dsge+1;
         irun = 0;
@@ -270,9 +263,8 @@ end
         stock = stock_param;
         save([MhDirectoryName '/' M_.fname '_param_irf' int2str(ifil2) '.mat'],'stock');
         if RemoteFlag==1,
-        OutputFileName_param = [OutputFileName_param; {[MhDirectoryName filesep], [M_.fname '_param_irf' int2str(ifil2) '.mat']}];
+            OutputFileName_param = [OutputFileName_param; {[MhDirectoryName filesep], [M_.fname '_param_irf' int2str(ifil2) '.mat']}];
         end
-        
         ifil2 = ifil2 + 1;
         irun2 = 0;
     end
@@ -283,12 +275,11 @@ end
     end
    % if mod(fpar,10)==0 & whoiam,
    if whoiam,
-        fprintf('Done! \n');
-        waitbarString = [ 'Subdraw ' int2str(fpar) '/' int2str(npar) ' done.'];
-        fMessageStatus((fpar-fpar0)/(npar-fpar0),whoiam,waitbarString, waitbarTitle, Parallel(ThisMatlab), MasterName, DyMo)
-    end
-  
- end
+       fprintf('Done! \n');
+       waitbarString = [ 'Subdraw ' int2str(fpar) '/' int2str(npar) ' done.'];
+       fMessageStatus((fpar-fpar0)/(npar-fpar0),whoiam,waitbarString, waitbarTitle, Parallel(ThisMatlab), MasterName, DyMo)
+   end
+end
 
 if whoiam==0
     if nosaddle
@@ -302,10 +293,6 @@ if whoiam==0
         diary on;
     end
 end
-
-
-
-
 
 % Copy the rusults of computation on the call machine (specifically in the
 % directory on call machine that contain the model).

@@ -62,48 +62,53 @@ ncx  = estim_params_.ncx;
 ncn  = estim_params_.ncn;
 np   = estim_params_.np ;
 npar = nvx+nvn+ncx+ncn+np;
-offset = npar-np;
-clear('nvx','nvn','ncx','ncn','np');
+offset = npar-np; clear('nvx','nvn','ncx','ncn','np');
+
 nvobs = size(options_.varobs,1);
 gend = options_.nobs;
 MaxNumberOfPlotPerFigure = 9;
 nn = sqrt(MaxNumberOfPlotPerFigure);
 MAX_nirfs_dsge = ceil(options_.MaxNumberOfBytes/(options_.irf*nvar*M_.exo_nbr)/8);
 MAX_nruns = ceil(options_.MaxNumberOfBytes/(npar+2)/8);
-if ~isempty(strmatch('dsge_prior_weight',M_.param_names))
+if options_.dsge_var
     MAX_nirfs_dsgevar = ceil(options_.MaxNumberOfBytes/(options_.irf*nvobs*M_.exo_nbr)/8);
 else
     MAX_nirfs_dsgevar = 0;
 end
+
 DirectoryName = CheckPath('Output');
 if strcmpi(type,'posterior')
-  MhDirectoryName = CheckPath('metropolis');
+    MhDirectoryName = CheckPath('metropolis');
 elseif strcmpi(type,'gsa')
-  MhDirectoryName = CheckPath('GSA');
+    MhDirectoryName = CheckPath('GSA');
 else
-  MhDirectoryName = CheckPath('prior');
+    MhDirectoryName = CheckPath('prior');
 end
 if strcmpi(type,'posterior')
-  load([ MhDirectoryName filesep  M_.fname '_mh_history.mat'])
-  TotalNumberOfMhDraws = sum(record.MhDraws(:,1));
-  NumberOfDraws = TotalNumberOfMhDraws-floor(options_.mh_drop*TotalNumberOfMhDraws);
+    load([ MhDirectoryName filesep  M_.fname '_mh_history.mat'])
+    TotalNumberOfMhDraws = sum(record.MhDraws(:,1));
+    NumberOfDraws = TotalNumberOfMhDraws-floor(options_.mh_drop*TotalNumberOfMhDraws);
 elseif strcmpi(type,'gsa')
-  load([ MhDirectoryName filesep  M_.fname '_prior.mat'],'lpmat0','lpmat','istable')
-  x=[lpmat0(istable,:) lpmat(istable,:)];
-  clear lpmat istable
-  NumberOfDraws=size(x,1);
-  B=NumberOfDraws; options_.B = B;
+    load([ MhDirectoryName filesep  M_.fname '_prior.mat'],'lpmat0','lpmat','istable')
+    x=[lpmat0(istable,:) lpmat(istable,:)];
+    clear lpmat istable
+    NumberOfDraws=size(x,1);
+    B=NumberOfDraws; options_.B = B;
 else% type = 'prior'
-  NumberOfDraws = 500;
+    NumberOfDraws = 500;
 end
 if ~strcmpi(type,'gsa')
   B = min([round(.5*NumberOfDraws),500]); options_.B = B;
 end
-try delete([MhDirectoryName filesep M_.fname '_irf_dsge*.mat'])
-catch disp('No _IRFs (dsge) files to be deleted!')
+try 
+    delete([MhDirectoryName filesep M_.fname '_irf_dsge*.mat'])
+catch 
+    disp('No _IRFs (dsge) files to be deleted!')
 end
-try delete([MhDirectoryName filesep M_.fname '_irf_bvardsge*.mat'])
-catch disp('No _IRFs (bvar-dsge) files to be deleted!')
+try 
+    delete([MhDirectoryName filesep M_.fname '_irf_bvardsge*.mat'])
+catch 
+    disp('No _IRFs (bvar-dsge) files to be deleted!')
 end
 irun = 0;
 IRUN = 0;
@@ -113,14 +118,14 @@ NumberOfIRFfiles_dsgevar = 1;
 ifil2 = 1;
 % Create arrays
 if B <= MAX_nruns
-  stock_param = zeros(B, npar);
+    stock_param = zeros(B, npar);
 else
-  stock_param = zeros(MAX_nruns, npar);
+    stock_param = zeros(MAX_nruns, npar);
 end
 if B >= MAX_nirfs_dsge
-  stock_irf_dsge = zeros(options_.irf,nvar,M_.exo_nbr,MAX_nirfs_dsge);
+    stock_irf_dsge = zeros(options_.irf,nvar,M_.exo_nbr,MAX_nirfs_dsge);
 else
-  stock_irf_dsge = zeros(options_.irf,nvar,M_.exo_nbr,B);
+    stock_irf_dsge = zeros(options_.irf,nvar,M_.exo_nbr,B);
 end
 if MAX_nirfs_dsgevar
     if B >= MAX_nirfs_dsgevar
@@ -130,9 +135,9 @@ if MAX_nirfs_dsgevar
     end
     [mYY,mXY,mYX,mXX,Ydata,Xdata] = ...
         var_sample_moments(options_.first_obs,options_.first_obs+options_.nobs-1,...
-                           options_.varlag,-1,options_.datafile,options_.varobs,...
+                           options_.dsge_varlag,-1,options_.datafile,options_.varobs,...
                            options_.xls_sheet,options_.xls_range);
-    NumberOfLags = options_.varlag;
+    NumberOfLags = options_.dsge_varlag;
     NumberOfLagsTimesNvobs = NumberOfLags*nvobs;
     if options_.noconstant
         NumberOfParametersPerEquation = NumberOfLagsTimesNvobs;
@@ -158,29 +163,34 @@ localVars.irun2=irun2;
 localVars.nosaddle=nosaddle;
 
 localVars.type=type;
-if strcmpi(type,'posterior'),
-while b<B 
-    b = b + 1;
-    x(b,:) = GetOneDraw(type);
-end
+if strcmpi(type,'posterior')
+    while b<B 
+        b = b + 1;
+        x(b,:) = GetOneDraw(type);
+    end
 end
 
 if ~strcmpi(type,'prior'),
-   localVars.x=x;
+    localVars.x=x;
 end
 
 b=0;
-
+if options_.dsge_var
+    localVars.gend = gend;
+    localVars.nvobs = nvobs;
+    localVars.NumberOfParametersPerEquation = NumberOfParametersPerEquation;
+    localVars.NumberOfLags = options_.dsge_varlag;
+    localVars.NumberOfLagsTimesNvobs = NumberOfLags*nvobs;
+    localVars.Companion_matrix = diag(ones(nvobs*(NumberOfLags-1),1),-nvobs);
+end 
 localVars.nvar=nvar;
 localVars.IndxVariables=IndxVariables;
 localVars.MAX_nirfs_dsgevar=MAX_nirfs_dsgevar;
 localVars.MAX_nirfs_dsge=MAX_nirfs_dsge;
 localVars.MAX_nruns=MAX_nruns;
-
 localVars.NumberOfIRFfiles_dsge=NumberOfIRFfiles_dsge;
 localVars.NumberOfIRFfiles_dsgevar=NumberOfIRFfiles_dsgevar;
 localVars.ifil2=ifil2;
-
 
 % Like sequential execution!
 if isnumeric(options_.parallel),% | isunix, % For the moment exclude unix platform from parallel implementation.
@@ -349,9 +359,10 @@ localVars.tit=tit;
 localVars.nn=nn;
 localVars.MAX_nirfs_dsgevar=MAX_nirfs_dsgevar;
 localVars.HPDIRF=HPDIRF;
+localVars.HPDIRFdsgevar=HPDIRFdsgevar;
+localVars.MeanIRFdsgevar = MeanIRFdsgevar;
 localVars.varlist=varlist;
 localVars.MaxNumberOfPlotPerFigure=MaxNumberOfPlotPerFigure;
-
 
 %%% The files .TeX are genereted in sequential way always!
 
@@ -415,7 +426,3 @@ end
 
 
 fprintf('MH: Posterior IRFs, done!\n');
-
-
-
-
