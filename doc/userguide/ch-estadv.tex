@@ -115,7 +115,7 @@ where we go from the second to the third line by taking the exponential of both 
 
 The above is the equation we retain for the .mod file of Dynare into which we enter:\\
 \\
-\texttt{y=k(-1) $\widehat{}$ alp*n $\widehat{}$ (1-alp)*exp(-alp*(gam+e\_a))}\\
+\texttt{y=k(-1)\textasciicircum alp*n\textasciicircum (1-alp)*exp(-alp*(gam+e\_a))}\\
 \\
 
 The other equations are entered into the .mod file after transforming them in exactly the same way as the one above. A final transformation to consider, that turns out to be useful since we often deal with the growth rate of technology, is to define \\
@@ -142,19 +142,19 @@ We of course do the same for prices, our other observable variable, except that 
 \texttt{model;\\
 dA = exp(gam+e\_a);\\
 log(m) = (1-rho)*log(mst) + rho*log(m(-1))+e\_m;\\
--P/(c(+1)*P(+1)*m)+bet*P(+1)*(alp*exp(-alp*(gam+log(e(+1))))*k$\hat{}$(alp-1)\\
-*n(+1)$\hat{}$(1-alp)+(1-del)*exp(-(gam+log(e(+1)))))/(c(+2)*P(+2)*m(+1))=0;\\
+-P/(c(+1)*P(+1)*m)+bet*P(+1)*(alp*exp(-alp*(gam+log(e(+1))))*k\textasciicircum (alp-1)\\
+*n(+1)\textasciicircum (1-alp)+(1-del)*exp(-(gam+log(e(+1)))))/(c(+2)*P(+2)*m(+1))=0;\\
 W = l/n;\\
 -(psi/(1-psi))*(c*P/(1-n))+l/n = 0;\\
-R = P*(1-alp)*exp(-alp*(gam+e\_a))*k(-1)$\hat{}$alp*n$\hat{}$(-alp)/W;\\
-1/(c*P)-bet*P*(1-alp)*exp(-alp*(gam+e\_a))*k(-1)$\hat{}$alp*n$\hat{}$(1-alp)/\\
+R = P*(1-alp)*exp(-alp*(gam+e\_a))*k(-1)\textasciicircum alp*n\textasciicircum (-alp)/W;\\
+1/(c*P)-bet*P*(1-alp)*exp(-alp*(gam+e\_a))*k(-1)\textasciicircum alp*n\textasciicircum (1-alp)/\\
 (m*l*c(+1)*P(+1)) = 0;\\
-c+k = exp(-alp*(gam+e\_a))*k(-1)$\hat{}$alp*n$\hat{}$(1-alp)+(1-del)\\
+c+k = exp(-alp*(gam+e\_a))*k(-1)\textasciicircum alp*n\textasciicircum (1-alp)+(1-del)\\
 *exp(-(gam+e\_a))*k(-1);\\
 P*c = m;\\
 m-1+d = l;\\
 e = exp(e\_a);\\
-y = k(-1)$\hat{}$alp*n$\hat{}$(1-alp)*exp(-alp*(gam+e\_a));\\
+y = k(-1)\textasciicircum alp*n\textasciicircum (1-alp)*exp(-alp*(gam+e\_a));\\
 Y\_obs/Y\_obs(-1) = dA*y/y(-1);\\
 P\_obs/P\_obs(-1) = (p/p(-1))*m(-1)/dA;\\
 end;}\\
@@ -240,17 +240,17 @@ parameters alp, bet, gam, mst, rho, psi, del;
 model;\\
 dA = exp(gam+e\_a);\\
 log(m) = (1-rho)*log(mst) + rho*log(m(-1))+e\_m;\\
--P/(c(+1)*P(+1)*m)+bet*P(+1)*(alp*exp(-alp*(gam+log(e(+1))))*k$\hat{}$(alp-1)\\
-*n(+1)$\hat{}$(1-alp)+(1-del)*exp(-(gam+log(e(+1)))))/(c(+2)*P(+2)*m(+1))=0;\\
+-P/(c(+1)*P(+1)*m)+bet*P(+1)*(alp*exp(-alp*(gam+log(e(+1))))*k\textasciicircum (alp-1)\\
+*n(+1)\textasciicircum (1-alp)+(1-del)*exp(-(gam+log(e(+1)))))/(c(+2)*P(+2)*m(+1))=0;\\
 W = l/n;\\
 -(psi/(1-psi))*(c*P/(1-n))+l/n = 0;\\
-R = P*(1-alp)*exp(-alp*(gam+e\_a))*k(-1)$\hat{}$alp*n$\hat{}$(-alp)/W;\\
-1/(c*P)-bet*P*(1-alp)*exp(-alp*(gam+e\_a))*k(-1)$\hat{}$alp*n$\hat{}$(1-alp)/(m*l*c(+1)*P(+1)) = 0;\\
-c+k = exp(-alp*(gam+e\_a))*k(-1)$\hat{}$alp*n$\hat{}$(1-alp)+(1-del)*exp(-(gam+e\_a))*k(-1);\\
+R = P*(1-alp)*exp(-alp*(gam+e\_a))*k(-1)\textasciicircum alp*n\textasciicircum (-alp)/W;\\
+1/(c*P)-bet*P*(1-alp)*exp(-alp*(gam+e\_a))*k(-1)\textasciicircum alp*n\textasciicircum (1-alp)/(m*l*c(+1)*P(+1)) = 0;\\
+c+k = exp(-alp*(gam+e\_a))*k(-1)\textasciicircum alp*n\textasciicircum (1-alp)+(1-del)*exp(-(gam+e\_a))*k(-1);\\
 P*c = m;\\
 m-1+d = l;\\
 e = exp(e\_a);\\
-y = k(-1)$\hat{}$alp*n$\hat{}$(1-alp)*exp(-alp*(gam+e\_a));\\
+y = k(-1)\textasciicircum alp*n\textasciicircum (1-alp)*exp(-alp*(gam+e\_a));\\
 Y\_obs/Y\_obs(-1) = dA*y/y(-1);\\
 P\_obs/P\_obs(-1) = (p/p(-1))*m(-1)/dA;\\
 end;\\

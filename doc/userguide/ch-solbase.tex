@@ -200,7 +200,7 @@ One of the beauties of Dynare is that you can \textbf{input your model's equatio
   (1/c) = beta*(1/c(+1))*(1+r(+1)-delta);\\
   psi*c/(1-l) = w;\\
   c+i = y;\\
-  y = (k(-1)$\hat{}$alpha)*(exp(z)*l)$\hat{}$(1-alpha);\\
+  y = (k(-1)\textasciicircum alpha)*(exp(z)*l)\textasciicircum (1-alpha);\\
   w = y*((epsilon-1)/epsilon)*(1-alpha)/l;\\
   r = y*((epsilon-1)/epsilon)*alpha/k(-1);\\
   i = k-(1-delta)*k(-1);\\
@@ -392,7 +392,7 @@ end;}\\
 Recall from our earlier description of stochastic models that shocks are only allowed to be temporary. A permanent shock cannot be accommodated due to the need to stationarize the model around a steady state. Furthermore, shocks can only hit the system today, as the expectation of future shocks must be zero. With that in mind, we can however make the effect of the shock propagate slowly throughout the economy by introducing a ``latent shock variable'' such as $e_t$ in our example, that affects the model's true exogenous variable, $z_t$ in our example, which is itself an $AR(1)$, exactly as in the model we introduced from the outset. In that case, though, we would declare $z_t$ as an endogenous variable and $e_t$ as an exogenous variable, as we did in the preamble of the .mod file in section \ref{sec:preamble}. Supposing we wanted to add a shock with variance $\sigma^2$, where $\sigma$ is determined in the preamble block, we would write: \\
 \\
 \texttt{shocks;\\
-var e = sigma $\widehat{}$ 2;\\
+var e = sigma\textasciicircum 2;\\
 end;}\\
 \\
 
@@ -465,7 +465,7 @@ model;\\
   (1/c) = beta*(1/c(+1))*(1+r(+1)-delta);\\
   psi*c/(1-l) = w;\\
   c+i = y;\\
-  y = (k(-1)$\hat{}$alpha)*(exp(z)*l)$\hat{}$(1-alpha);\\
+  y = (k(-1)\textasciicircum alpha)*(exp(z)*l)\textasciicircum (1-alpha);\\
   w = y*((epsilon-1)/epsilon)*(1-alpha)/l;\\
   r = y*((epsilon-1)/epsilon)*alpha/k(-1);\\
   i = k-(1-delta)*k(-1);\\
@@ -488,7 +488,7 @@ steady;\\
 check;\\
 \\
 shocks;\\
-var e = sigma $\widehat{}$ 2;\\
+var e = sigma\textasciicircum 2;\\
 end;\\
 \\
 stoch\_simul(periods=2100);}\\
@@ -509,7 +509,7 @@ model;\\
   (1/c) = beta*(1/c(+1))*(1+r(+1)-delta);\\
   psi*c/(1-l) = w;\\
   c+i = y;\\
-  y = (k(-1)$\hat{}$alpha)*(exp(z)*l)$\hat{}$(1-alpha);\\
+  y = (k(-1)\textasciicircum alpha)*(exp(z)*l)\textasciicircum (1-alpha);\\
   w = y*((epsilon-1)/epsilon)*(1-alpha)/l;\\
   r = y*((epsilon-1)/epsilon)*alpha/k(-1);\\
   i = k-(1-delta)*k(-1);\\

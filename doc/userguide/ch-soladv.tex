@@ -78,8 +78,8 @@ where the last line specifies the contemporaneous correlation between our two ex
 Alternatively, you can also write: \\
 \\
 \texttt{shocks;\\
-var e = 0.009 $\hat{}$ 2;\\
-var u = 0.009 $\hat{}$ 2;\\
+var e = 0.009\textasciicircum 2;\\
+var u = 0.009\textasciicircum 2;\\
 var e, u = phi*0.009*0.009;\\
 end;}\\
 
@@ -99,10 +99,10 @@ theta = 2.95;\\
 phi   = 0.1;\\
 \\
 model;\\
-c*theta*h$\hat{ }$(1+psi)=(1-alpha)*y;\\
+c*theta*h\textasciicircum (1+psi)=(1-alpha)*y;\\
 k = beta*(((exp(b)*c)/(exp(b(+1))*c(+1)))\\
     *(exp(b(+1))*alpha*y(+1)+(1-delta)*k));\\
-y = exp(a)*(k(-1)$\hat{ }$alpha)*(h$\hat{ }$(1-alpha));\\
+y = exp(a)*(k(-1)\textasciicircum alpha)*(h\textasciicircum (1-alpha));\\
 k = exp(b)*(y-c)+(1-delta)*k(-1);\\
 a = rho*a(-1)+tau*b(-1) + e;\\
 b = tau*a(-1)+rho*b(-1) + u;\\
