@@ -47,8 +47,11 @@ OCTAVE_MODS = \
 	AIM/fs2000x10L9_L_AIM.mod \
 	AIM/fs2000x10_L9_L.mod \
 	AIM/fs2000x10_L9_L_AIM.mod \
-	conditional_variance_decomposition/example1.mod
-
+	conditional_variance_decomposition/example1.mod \
+	dsge-var/simul_hybrid.mod \
+	dsge-var/dsgevar_forward_calibrated_lambda.mod \
+	dsge-var/dsgevar_forward_estimated_lambda.mod
+ 
 MODS = $(OCTAVE_MODS) \
 	arima/mod1b.mod \
 	arima/mod1c.mod \
@@ -129,3 +132,5 @@ clean-local:
 	rm -f fs2000_ssfile_steadystate.m
 
 	rm -f $(shell find -name '*~')
+
+	rm -f dsge-var/datarabanal_hybrid.mat
