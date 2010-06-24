@@ -1,4 +1,4 @@
-1function [g, badg, f0, f1, f2] = numgrad3(fcn,f0,x,epsilon,varargin)
+function [g, badg, f0, f1, f2] = numgrad3(fcn,f0,x,epsilon,varargin)
 % Computes the gradient of the objective function fcn using a three points
 % formula if possible.
 %
