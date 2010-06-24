@@ -407,17 +407,19 @@ end
 
 % The others file format are generated in parallel by PosteriorIRF_core2!
 
-                                % Comment for testing!
-if isnumeric(options_.parallel) % || (M_.exo_nbr*ceil(size(varlist,1)/MaxNumberOfPlotPerFigure))<8,% | isunix, % for the moment exclude unix platform from parallel implementation
-    [fout] = PosteriorIRF_core2(localVars,1,M_.exo_nbr,0);
-else
-    globalVars = struct('M_',M_, ...
-      'options_', options_);
-    
-   [fout] = masterParallel(options_.parallel, 1, M_.exo_nbr,NamFileInput,'PosteriorIRF_core2', localVars, globalVars, options_.parallel_info);
-    
-end
 
+                                % Comment for testing!
+if ~exist('OCTAVE_VERSION')
+    if isnumeric(options_.parallel) % || (M_.exo_nbr*ceil(size(varlist,1)/MaxNumberOfPlotPerFigure))<8,% | isunix, % for the moment exclude unix platform from parallel implementation
+        [fout] = PosteriorIRF_core2(localVars,1,M_.exo_nbr,0);
+    else
+        globalVars = struct('M_',M_, ...
+                            'options_', options_);
+        
+        [fout] = masterParallel(options_.parallel, 1, M_.exo_nbr,NamFileInput,'PosteriorIRF_core2', localVars, globalVars, options_.parallel_info);
+        
+    end
+end
 % END parallel code!
 
 
