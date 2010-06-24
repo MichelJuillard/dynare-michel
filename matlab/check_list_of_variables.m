@@ -32,7 +32,7 @@ function varlist = check_list_of_variables(options_, M_, varlist)
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
 msg = 0;
-if options_.bvar_dsge && options_.bayesian_irf
+if options_.dsge_var && options_.bayesian_irf
     if ~isempty(varlist)
         for i=1:size(varlist,1)
             idx = strmatch(deblank(varlist(i,:)),options_.varobs,'exact');

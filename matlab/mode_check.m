@@ -39,7 +39,7 @@ global bayestopt_ M_ options_
 
 TeX = options_.TeX;
 [ s_min, k ] = min(diag(hessian)) ;
-if options_.bvar_dsge
+if options_.dsge_var
     fval = DsgeVarLikelihood(x,gend);
 else
     fval = DsgeLikelihood(x,gend,data,data_index,number_of_observations,no_more_missing_observations);    
@@ -87,7 +87,7 @@ for plt = 1:nbplt,
         end
         for i=1:length(z)
             xx(kk) = z(i);
-            if options_.bvar_dsge
+            if options_.dsge_var
                 [fval,cost_flag] = DsgeVarLikelihood(xx,gend);
                 if cost_flag
                     y(i,1) = fval;

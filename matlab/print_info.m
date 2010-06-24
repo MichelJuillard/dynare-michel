@@ -56,6 +56,8 @@ if ~noprint
         error('The steady state is complex.')
       case 30 
         error('Variance can''t be computed')
+      case 51
+        error('You are estimating a DSGE-VAR model, but the value of the dsge prior weight is too low!')
       otherwise
         error('This case shouldn''t happen. Contact the authors of Dynare')
     end

@@ -1,5 +1,4 @@
 function [fval,cost_flag,info,PHI,SIGMAu,iXX,prior] = DsgeVarLikelihood(xparam1,gend)
-% function [fval,cost_flag,info,PHI,SIGMAu,iXX] = DsgeVarLikelihood(xparam1,gend)
 % Evaluates the posterior kernel of the bvar-dsge model. 
 % 
 % INPUTS 
@@ -46,7 +45,7 @@ nx = nvx+nvn+ncx+ncn+np;
 ns = nvx+nvn+ncx+ncn;
 
 NumberOfObservedVariables = size(options_.varobs,1);
-NumberOfLags = options_.varlag;
+NumberOfLags = options_.dsge_varlag;
 NumberOfParameters = NumberOfObservedVariables*NumberOfLags ;
 if ~options_.noconstant
     NumberOfParameters = NumberOfParameters + 1;
@@ -83,7 +82,7 @@ for i=1:estim_params_.nvx
 end
 offset = estim_params_.nvx;
 if estim_params_.nvn
-    disp('DsgeVarLikelihood :: Measurement errors are implemented!')
+    disp('DsgeVarLikelihood :: Measurement errors are not implemented!')
     return
 end 
 if estim_params_.ncx
@@ -103,7 +102,6 @@ if dsge_prior_weight<(NumberOfParameters+NumberOfObservedVariables)/gend;
     info = 51;
     return;
 end
-
 
 %------------------------------------------------------------------------------
 % 2. call model setup & reduction program

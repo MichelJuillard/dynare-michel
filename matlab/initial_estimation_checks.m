@@ -54,7 +54,7 @@ if (number_of_observations==gend*nv)% No missing observations...
     end
 end
 
-if ~isempty(strmatch('dsge_prior_weight',M_.param_names))
+if options_.dsge_var
     [fval,cost_flag,info] = DsgeVarLikelihood(xparam1,gend);
 else
     [fval,cost_flag,ys,trend_coeff,info] = DsgeLikelihood(xparam1,gend,data,data_index,number_of_observations,no_more_missing_observations);

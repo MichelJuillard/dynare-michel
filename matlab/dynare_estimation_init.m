@@ -48,7 +48,7 @@ for i = 1:size(M_.endo_names,1)
 end
 
 if ~isempty(strmatch('dsge_prior_weight',M_.param_names))
-    options_.bvar_dsge = 1;
+    options_.dsge_var = 1;
 end
 
 if options_.order > 1

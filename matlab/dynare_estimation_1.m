@@ -331,7 +331,7 @@ end
 
 
 %% compute sample moments if needed (bvar-dsge)
-if options_.bvar_dsge
+if options_.dsge_var
     if options_.missing_data
         error('I cannot estimate a DSGE-VAR model with missing observations!')
     end
@@ -339,12 +339,12 @@ if options_.bvar_dsge
         evalin('base',...
                ['[mYY,mXY,mYX,mXX,Ydata,Xdata] = ' ...
                 'var_sample_moments(options_.first_obs,' ... 
-                'options_.first_obs+options_.nobs-1,options_.varlag,-1,' ...
+                'options_.first_obs+options_.nobs-1,options_.dsge_varlag,-1,' ...
                 'options_.datafile, options_.varobs,options_.xls_sheet,options_.xls_range);'])
     else% The steady state is non zero ==> a constant in the VAR is needed!
         evalin('base',['[mYY,mXY,mYX,mXX,Ydata,Xdata] = ' ...
                        'var_sample_moments(options_.first_obs,' ...
-                       'options_.first_obs+options_.nobs-1,options_.varlag,0,' ...
+                       'options_.first_obs+options_.nobs-1,options_.dsge_varlag,0,' ...
                        'options_.datafile, options_.varobs,options_.xls_sheet,options_.xls_range);'])
     end
 end
@@ -391,7 +391,7 @@ end
 
 %% Estimation of the posterior mode or likelihood mode
 if options_.mode_compute > 0 & options_.posterior_mode_estimation
-    if ~options_.bvar_dsge
+    if ~options_.dsge_var
         fh=str2func('DsgeLikelihood');
     else
         fh=str2func('DsgeVarLikelihood');
@@ -403,7 +403,7 @@ if options_.mode_compute > 0 & options_.posterior_mode_estimation
         if isfield(options_,'optim_opt')
             eval(['optim_options = optimset(optim_options,' options_.optim_opt ');']);
         end
-        if ~options_.bvar_dsge
+        if ~options_.dsge_var
             [xparam1,fval,exitflag,output,lamdba,grad,hessian_fmincon] = ...
                 fmincon(fh,xparam1,[],[],[],[],lb,ub,[],optim_options,gend,data,data_index,number_of_observations,no_more_missing_observations);
         else
@@ -417,7 +417,7 @@ if options_.mode_compute > 0 & options_.posterior_mode_estimation
         if isfield(options_,'optim_opt')
             eval(['optim_options = optimset(optim_options,' options_.optim_opt ');']);
         end
-        if ~options_.bvar_dsge
+        if ~options_.dsge_var
             [xparam1,fval,exitflag] = fminunc(fh,xparam1,optim_options,gend,data,data_index,number_of_observations,no_more_missing_observations);
         else
             [xparam1,fval,exitflag] = fminunc(fh,xparam1,optim_options,gend);
@@ -427,7 +427,7 @@ if options_.mode_compute > 0 & options_.posterior_mode_estimation
         crit = 1e-7;
         nit = 1000;
         verbose = 2;
-        if ~options_.bvar_dsge
+        if ~options_.dsge_var
             [fval,xparam1,grad,hessian_csminwel,itct,fcount,retcodehat] = ...
                 csminwel('DsgeLikelihood',xparam1,H0,[],crit,nit,options_.gradient_method,options_.gradient_epsilon,gend,data,data_index,number_of_observations,no_more_missing_observations);
             disp(sprintf('Objective function at mode: %f',fval))
@@ -459,7 +459,7 @@ if options_.mode_compute > 0 & options_.posterior_mode_estimation
         else
             nit=1000;
         end
-        if ~options_.bvar_dsge
+        if ~options_.dsge_var
             [xparam1,hh,gg,fval,invhess] = newrat('DsgeLikelihood',xparam1,hh,gg,igg,crit,nit,flag,gend,data,data_index,number_of_observations,no_more_missing_observations);
         else
             [xparam1,hh,gg,fval,invhess] = newrat('DsgeVarLikelihood',xparam1,hh,gg,igg,crit,nit,flag,gend);
@@ -467,7 +467,7 @@ if options_.mode_compute > 0 & options_.posterior_mode_estimation
         parameter_names = bayestopt_.name;
         save([M_.fname '_mode.mat'],'xparam1','hh','gg','fval','invhess','parameter_names');
       case 6
-        if ~options_.bvar_dsge
+        if ~options_.dsge_var
             fval = DsgeLikelihood(xparam1,gend,data,data_index,number_of_observations,no_more_missing_observations);
         else
             fval = DsgeVarLikelihood(xparam1,gend);
@@ -504,7 +504,7 @@ if options_.mode_compute > 0 & options_.posterior_mode_estimation
                 else
                     flag = 'LastCall';
                 end
-                if ~options_.bvar_dsge
+                if ~options_.dsge_var
                     [xparam1,PostVar,Scale,PostMean] = ...
                         gmhmaxlik('DsgeLikelihood',xparam1,bounds,options_.Opt6Numb,Scale,flag,MeanPar,CovJump,gend,data,...
                                   data_index,number_of_observations,no_more_missing_observations);
@@ -526,7 +526,7 @@ if options_.mode_compute > 0 & options_.posterior_mode_estimation
                 else
                     flag = 'LastCall';
                 end
-                if ~options_.bvar_dsge
+                if ~options_.dsge_var
                     [xparam1,PostVar,Scale,PostMean] = ...
                         gmhmaxlik('DsgeLikelihood',xparam1,bounds,...
                                   options_.Opt6Numb,Scale,flag,PostMean,PostVar,gend,data,data_index,number_of_observations,no_more_missing_observations);
@@ -553,7 +553,7 @@ if options_.mode_compute > 0 & options_.posterior_mode_estimation
         if isfield(options_,'optim_opt')
             eval(['optim_options = optimset(optim_options,' options_.optim_opt ');']);
         end
-        if ~options_.bvar_dsge
+        if ~options_.dsge_var
             [xparam1,fval,exitflag] = fminsearch(fh,xparam1,optim_options,gend,data,data_index,number_of_observations,no_more_missing_observations);
         else
             [xparam1,fval,exitflag] = fminsearch(fh,xparam1,optim_options,gend);
@@ -602,7 +602,7 @@ if options_.mode_compute > 0 & options_.posterior_mode_estimation
         disp(['c vector   ' num2str(c')]);
         
         %  keyboard 
-        if ~options_.bvar_dsge
+        if ~options_.dsge_var
             [xparam1, fval, nacc, nfcnev, nobds, ier, t, vm] = sa(fh,xparam1,maxy,rt_,eps,ns,nt ...
                                                               ,neps,maxevl,LB,UB,c,idisp ,t,vm,gend,data,data_index,number_of_observations,no_more_missing_observations);
         else
@@ -611,7 +611,7 @@ if options_.mode_compute > 0 & options_.posterior_mode_estimation
         end
       otherwise
         if ischar(options_.mode_compute)
-            if options_.bvar_dsge
+            if options_.dsge_var
                 [xparam1, fval, retcode ] = feval(options_.mode_compute,fh,xparam1,gend,data);
             else
                 [xparam1, fval, retcode ] = feval(options_.mode_compute, ...
@@ -625,7 +625,7 @@ if options_.mode_compute > 0 & options_.posterior_mode_estimation
 %     if options_.mode_compute ~= 5
         if options_.mode_compute ~= 6
             if options_.cova_compute == 1
-                if ~options_.bvar_dsge
+                if ~options_.dsge_var
                     hh = reshape(hessian('DsgeLikelihood',xparam1, ...
                                          options_.gstep,gend,data,data_index,number_of_observations,...
                                          no_more_missing_observations),nx,nx);
@@ -777,7 +777,7 @@ if any(bayestopt_.pshape > 0) & options_.posterior_mode_estimation
     estim_params_nbr = size(xparam1,1);
     scale_factor = -sum(log10(diag(invhess)));
     log_det_invhess = -estim_params_nbr*log(scale_factor)+log(det(scale_factor*invhess));
-    if ~options_.bvar_dsge
+    if ~options_.dsge_var
         md_Laplace = .5*estim_params_nbr*log(2*pi) + .5*log_det_invhess ...
             - DsgeLikelihood(xparam1,gend,data,data_index,number_of_observations,no_more_missing_observations);
     else
@@ -1073,7 +1073,7 @@ if (any(bayestopt_.pshape  >0 ) & options_.mh_replic) | ...
         if options_.load_mh_file & options_.use_mh_covariance_matrix
             invhess = compute_mh_covariance_matrix;
         end
-        if options_.bvar_dsge
+        if options_.dsge_var
             feval(options_.posterior_sampling_method,'DsgeVarLikelihood',options_.proposal_distribution,xparam1,invhess,bounds,gend);
         else
             feval(options_.posterior_sampling_method,'DsgeLikelihood',options_.proposal_distribution,xparam1,invhess,bounds,gend,data,...
