@@ -1,7 +1,8 @@
 vpath %.cc $(top_srcdir)/../../sources/estimation $(top_srcdir)/../../sources/estimation/libmat $(top_srcdir)/../../sources/estimation/utils
 vpath %.hh $(top_srcdir)/../../sources/estimation $(top_srcdir)/../../sources/estimation/libmat
 
-CPPFLAGS += -I$(top_srcdir)/../../sources/estimation/libmat -I$(top_srcdir)/../../sources/estimation/utils
+CPPFLAGS += -I$(top_srcdir)/../../sources/estimation/libmat -I$(top_srcdir)/../../sources/estimation/utils $(BOOST_CPPFLAGS)
+LDFLAGS += $(BOOST_LDFLAGS)
 
 noinst_PROGRAMS = loglikelihood
 
