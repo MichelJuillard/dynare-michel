@@ -102,8 +102,9 @@ for b = fblck:nblck,
         x2 = zeros(InitSizeArray(b),npar);
         logpo2 = zeros(InitSizeArray(b),1);
     end
-    if exist('OCTAVE_VERSION')
-        diary off;
+    if exist('OCTAVE_VERSION') || options_.console_mode
+        diary off
+        disp(' ')
     elseif whoiam
         %       keyboard;
         waitbarString = ['Please wait... Metropolis-Hastings (' int2str(b) '/' int2str(options_.mh_nblck) ')...'];
@@ -149,9 +150,13 @@ for b = fblck:nblck,
             logpo2(irun) = ilogpo2(b);
         end
         prtfrc = j/nruns(b);
-        if exist('OCTAVE_VERSION')
-            if mod(j, 10) == 0,
-                printf('MH: Computing Metropolis-Hastings (chain %d/%d): %3.f%% done, acception rate: %3.f%%\r', b, nblck, 100 * prtfrc, 100 * isux / j);
+        if exist('OCTAVE_VERSION') || options_.console_mode
+            if mod(j, 10) == 0
+                if exist('OCTAVE_VERSION')
+                    printf('MH: Computing Metropolis-Hastings (chain %d/%d): %3.f%% done, acception rate: %3.f%%\r', b, nblck, 100 * prtfrc, 100 * isux / j);
+                else
+                    fprintf('   MH: Computing Metropolis-Hastings (chain %d/%d): %3.f \b%% done, acception rate: %3.f \b%%\r', b, nblck, 100 * prtfrc, 100 * isux / j);
+                end
             end
             if mod(j,50)==0 & whoiam,  
                 %             keyboard;
@@ -212,9 +217,9 @@ for b = fblck:nblck,
         irun = irun + 1;
     end% End of the simulations for one mh-block.
     record.AcceptationRates(b) = isux/j;
-    if exist('OCTAVE_VERSION')
+    if exist('OCTAVE_VERSION') || options_.console_mode
         printf('\n');
-        diary on;
+        diary on
     elseif ~whoiam
         close(hh);
     end

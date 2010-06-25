@@ -516,8 +516,12 @@ if options_.mode_compute > 0 & options_.posterior_mode_estimation
                 end
                 options_.mh_jscale = Scale;
                 mouvement = max(max(abs(PostVar-OldPostVar)));
-                disp(['Change in the covariance matrix = ' num2str(mouvement) '.'])
-                disp(['Mode improvement = ' num2str(abs(OldMode-fval))])
+                disp(' ')
+                disp('========================================================== ')
+                disp(['   Change in the covariance matrix = ' num2str(mouvement) '.'])
+                disp(['   Mode improvement = ' num2str(abs(OldMode-fval))])
+                disp(['   New value of jscale = ' num2str(Scale)])
+                disp('========================================================== ')
                 OldMode = fval;
             else
                 OldPostVar = PostVar;
