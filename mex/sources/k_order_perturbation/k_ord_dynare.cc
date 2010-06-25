@@ -42,9 +42,9 @@ KordpDynare::KordpDynare(const vector<string> &endo, int num_endo,
                          const vector<int> &var_order, const TwoDMatrix &llincidence, double criterium) throw (TLException) :
   nStat(nstat), nBoth(nboth), nPred(npred), nForw(nforw), nExog(nexog), nPar(npar),
   nYs(npred + nboth), nYss(nboth + nforw), nY(num_endo), nJcols(jcols), NNZD(nnzd), nSteps(nsteps),
-  nOrder(norder), journal(jr),  dynamicDLL(dynamicDLL), ySteady(ysteady), vCov(vcov), params(inParams),
+  nOrder(norder), journal(jr), ySteady(ysteady), params(inParams), vCov(vcov),
   md(1), dnl(*this, endo), denl(*this, exo), dsnl(*this, dnl, denl), ss_tol(sstol), varOrder(var_order),
-  ll_Incidence(llincidence), qz_criterium(criterium)
+  ll_Incidence(llincidence), qz_criterium(criterium), dynamicDLL(dynamicDLL)
 {
   ReorderDynareJacobianIndices();
 
