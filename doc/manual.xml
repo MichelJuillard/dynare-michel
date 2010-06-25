@@ -2867,6 +2867,18 @@ end;
       <term><option>bayesian_irf</option></term>
       <listitem><para>Triggers the computation of the posterior distribution of IRFs. The length of the IRFs are controlled by the <option>irf</option> option</para></listitem>
     </varlistentry>
+    <varlistentry>
+      <term><option>dsge_var</option></term>
+      <listitem><para>Triggers the estimation of a DSGE-VAR model, where the prior density will be estimated. The prior density, <varname>dsge_prior_weight</varname>, must be defined in the <command>estimated_params</command> section. NB: The previous method of declaring <varname>dsge_prior_weight</varname> as a parameter and then placing it in <command>estimated_params</command> is now deprecated and will be removed in a future release of Dynare.</para></listitem>
+    </varlistentry>
+    <varlistentry>
+      <term><option>dsge_var</option> = <replaceable>DOUBLE</replaceable></term>
+      <listitem><para>Triggers the estimation of a DSGE-VAR model, where the prior density is calibrated to the value passed. NB: The previous method of declaring <varname>dsge_prior_weight</varname> as a parameter and then calibrating it is now deprecated and will be removed in a future release of Dynare.</para></listitem>
+    </varlistentry>
+    <varlistentry id="dsge_varlag" xreflabel="dsge_varlag">
+      <term><option>dsge_varlag</option> = <replaceable>INTEGER</replaceable></term>
+      <listitem><para>The number of lags used to estimate a DSGE-VAR model. Default: <literal>4</literal>.</para></listitem>
+    </varlistentry>
     <varlistentry id="moments_varendo" xreflabel="moments_varendo">
       <term><option>moments_varendo</option></term>
       <listitem><para>Triggers the computation of the posterior distribution of the theoretical moments of the endogenous variables</para></listitem>
