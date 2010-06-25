@@ -17,6 +17,9 @@
 !/block_bytecode/MARK3_endo.dat
 !/block_bytecode/MARK3_exo.dat
 !/bvar_a_la_sims/bvar_sample.m
+!/external_function/extFunDeriv.m
+!/external_function/extFunNoDerivs.m
+!/external_function/extFunWithFirstAndSecondDerivs.m
 !/fs2000/fs2000a_steadystate.m
 !/fs2000/fsdat_simul.m
 !/kalman/likelihood/compare_kalman_routines.m
@@ -26,8 +29,10 @@
 !/kalman/likelihood/test3.m
 !/kalman_filter_smoother/test.mat
 !/kalman_filter_smoother/testsmoother.m
+!/k_order_perturbation/run_fs2000kplusplus.m
 !/ls2003/data_ca1.m
 !/objectives/sgu_ex1.mat
+!/missing/simulate_data_with_missing_observations.m
 !/parallel/data_ca1.m
 !/pi2004/idata.m
 !/pi2004/ych.dat
