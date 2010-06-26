@@ -95,13 +95,17 @@ if ~options_.load_mh_file & ~options_.mh_recover
                 if all(candidate(:) > mh_bounds(:,1)) & all(candidate(:) < mh_bounds(:,2)) 
                     ix2(j,:) = candidate;
                     ilogpo2(j) = - feval(TargetFun,ix2(j,:)',varargin{:});
-                    fprintf(fidlog,['    Blck ' int2str(j) ':\n']);
-                    for i=1:length(ix2(1,:))
-                        fprintf(fidlog,['      params:' int2str(i) ': ' num2str(ix2(j,i)) '\n']);
+                    if ilogpo2(j) <= - bayestopt_.penalty+1e-6
+                        validate = 0;
+                    else
+                        fprintf(fidlog,['    Blck ' int2str(j) ':\n']);
+                        for i=1:length(ix2(1,:))
+                            fprintf(fidlog,['      params:' int2str(i) ': ' num2str(ix2(j,i)) '\n']);
+                        end
+                        fprintf(fidlog,['      logpo2: ' num2str(ilogpo2(j)) '\n']);
+                        j = j+1;
+                        validate = 1;
                     end
-                    fprintf(fidlog,['      logpo2: ' num2str(ilogpo2(j)) '\n']);
-                    j = j+1;
-                    validate = 1;
                 end
                 init_iter = init_iter + 1;
                 if init_iter > 100 & validate == 0
