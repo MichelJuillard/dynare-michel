@@ -66,6 +66,7 @@ QQ              = R*Q*R';
 QRt             = Q*R';
 alphahat        = zeros(mm,smpl);
 etahat          = zeros(rr,smpl);
+epsilonhat      = zeros(rr,smpl);
 r               = zeros(mm,smpl+1);
 oldK            = 0;
 
