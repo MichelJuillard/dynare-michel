@@ -55,7 +55,11 @@ NumberOfEndogenousVariables = rows(var_list_);
 NumberOfExogenousVariables = M_.exo_nbr;
 list_of_exogenous_variables = M_.exo_names;
 NumberOfLags = options_.ar;
-Steps = options_.conditional_variance_decomposition;
+if isfield(options_,'conditional_variance_decomposition')
+    Steps = options_.conditional_variance_decomposition;
+else
+    Steps = 0;
+end
 
 % COVARIANCE MATRIX.
 if posterior
@@ -104,16 +108,18 @@ else
     end        
 end
 % CONDITIONAL VARIANCE DECOMPOSITION.
-if posterior
-    for i=1:NumberOfEndogenousVariables
-        for j=1:NumberOfExogenousVariables
-            oo_ = posterior_analysis('conditional decomposition',var_list_(i,:),M_.exo_names(j,:),Steps,options_,M_,oo_);
+if Steps
+    if posterior
+        for i=1:NumberOfEndogenousVariables
+            for j=1:NumberOfExogenousVariables
+                oo_ = posterior_analysis('conditional decomposition',var_list_(i,:),M_.exo_names(j,:),Steps,options_,M_,oo_);
+            end
         end
-    end
-else
-    for i=1:NumberOfEndogenousVariables
-        for j=1:NumberOfExogenousVariables
-            oo_ = prior_analysis('conditional decomposition',var_list_(i,:),M_.exo_names(j,:),Steps,options_,M_,oo_);
+    else
+        for i=1:NumberOfEndogenousVariables
+            for j=1:NumberOfExogenousVariables
+                oo_ = prior_analysis('conditional decomposition',var_list_(i,:),M_.exo_names(j,:),Steps,options_,M_,oo_);
+            end
         end
     end
 end
