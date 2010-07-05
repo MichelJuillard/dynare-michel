@@ -2869,11 +2869,19 @@ end;
     </varlistentry>
     <varlistentry>
       <term><option>dsge_var</option></term>
-      <listitem><para>Triggers the estimation of a DSGE-VAR model, where the prior density will be estimated. The prior density, <varname>dsge_prior_weight</varname>, must be defined in the <command>estimated_params</command> section. NB: The previous method of declaring <varname>dsge_prior_weight</varname> as a parameter and then placing it in <command>estimated_params</command> is now deprecated and will be removed in a future release of Dynare.</para></listitem>
+      <listitem><para>Triggers the estimation of a DSGE-VAR model, where the  weight of  the DSGE  prior of the  VAR model  will be
+      estimated.   The    prior   on   the   weight    of   the   DSGE
+      prior, <varname>dsge_prior_weight</varname>,  must be defined in
+      the <command>estimated_params</command> section. 
+      NB:           The          previous           method          of
+      declaring  <varname>dsge_prior_weight</varname>  as a  parameter
+      and then placing it in 
+<command>estimated_params</command> is now deprecated and will be removed in a future release of Dynare.</para></listitem>
     </varlistentry>
     <varlistentry>
       <term><option>dsge_var</option> = <replaceable>DOUBLE</replaceable></term>
-      <listitem><para>Triggers the estimation of a DSGE-VAR model, where the prior density is calibrated to the value passed. NB: The previous method of declaring <varname>dsge_prior_weight</varname> as a parameter and then calibrating it is now deprecated and will be removed in a future release of Dynare.</para></listitem>
+      <listitem><para>Triggers  the estimation  of  a DSGE-VAR  model,
+      where the weight of the DSGE prior of the VAR model is calibrated to the value passed. NB: The previous method of declaring <varname>dsge_prior_weight</varname> as a parameter and then calibrating it is now deprecated and will be removed in a future release of Dynare.</para></listitem>
     </varlistentry>
     <varlistentry id="dsge_varlag" xreflabel="dsge_varlag">
       <term><option>dsge_varlag</option> = <replaceable>INTEGER</replaceable></term>
